@@ -1,0 +1,26 @@
+Revision history of ETHERNET Powerlink Protocol Stack
+
+Article no.:      SO-1067
+
+Project start:    13.02.2006
+
+Project manager:  R. Sieber (-rs)
+
+Fellow worker:    Daniel Krüger (d.k.)
+
+=============================================================================
+
+07.11.2006 V1.0     First release, import into CVS
+                    (d.k.)
+
+18.01.2007 V1.1     MN support implemented
+                    (d.k.)
+
+04.02.2008 V1.1     Code cleanup based on PClint output
+                    (d.k.)
+
+14.04.2008 V1.1     - New driver and demo application for X86 with Realtek
+		      RTL8139 network controller under Linux.
+		    - several bug fixes in SDO module and NMT MN module.
+                    (d.k., m.u.)
+
