@@ -117,7 +117,7 @@
 #endif
 
 #ifndef DBG_TRACE_VALUES
-#define DBG_TRACE_VALUES    128 // # of supported debug trace values (size of circular buffer)
+#define DBG_TRACE_VALUES    24 // # of supported debug trace values (size of circular buffer)
 #endif
 
 //---------------------------------------------------------------------------
