@@ -2876,7 +2876,7 @@ unsigned int  nLoop;
 
 #endif
 
-    // in this line Index was not fount
+    // in this line Index was not found
 
 Exit:
 
