@@ -896,8 +896,8 @@ tEplKernel      Ret = kEplSuccessful;
         // normal work state
         case kEplNmtMsOperational:
         {
-            // $$$ send StartNode to CNs
-            // $$$ wait for NMT state change of CNs
+            // send StartNode to CNs
+            // wait for NMT state change of CNs
             Ret = EplNmtMnuStartNodes();
             break;
         }

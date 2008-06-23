@@ -270,8 +270,6 @@ tEplKernel PUBLIC EplSdoAsySeqInit(tEplSdoComReceiveCb fpSdoComCb_p,
 {
 tEplKernel  Ret;
 
-    // TODO: Init instance table
-
 
     Ret = EplSdoAsySeqAddInstance(fpSdoComCb_p, fpSdoComConCb_p);
 
@@ -1609,7 +1607,7 @@ tEplSdoSeqConHdl    SdoSeqConHdl;
             Ret = EplSdoAsySeqSetTimer(pAsySdoSeqCon,
                                         EPL_SEQ_DEFAULT_TIMEOUT);
 
-            //TODO: retry of acknowlage
+            //TODO: retry of acknowledge
             if(Event_p == kAsySdoSeqEventFrameRec)
             {
                 // check rcon

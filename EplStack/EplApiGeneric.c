@@ -1248,6 +1248,10 @@ tEplApiEventArg     EventArg;
             Ret = EplObdAccessOdPart(
                 kEplObdPartApp,
                 kEplObdDirLoad);
+            if (Ret != kEplSuccessful)
+            {
+                goto Exit;
+            }
 
             break;
         }
@@ -1260,8 +1264,17 @@ tEplApiEventArg     EventArg;
                 kEplObdPartGen,
                 kEplObdDirLoad);
 
+            if (Ret != kEplSuccessful)
+            {
+                goto Exit;
+            }
+
             // $$$ d.k.: update OD only if OD was not loaded from non-volatile memory
             Ret = EplApiUpdateObd();
+            if (Ret != kEplSuccessful)
+            {
+                goto Exit;
+            }
 
             break;
         }
@@ -1271,6 +1284,10 @@ tEplApiEventArg     EventArg;
         {
 
             Ret = EplApiUpdateDllConfig(TRUE);
+            if (Ret != kEplSuccessful)
+            {
+                goto Exit;
+            }
 
             break;
         }
@@ -1284,7 +1301,7 @@ tEplApiEventArg     EventArg;
             // indicate completion of reset in NMT_ResetCmd_U8
             bNmtState = (BYTE) kEplNmtCmdInvalidService;
             Ret = EplObdWriteEntry(0x1F9E, 0, &bNmtState, 1);
-            if(Ret != kEplSuccessful)
+            if (Ret != kEplSuccessful)
             {
                 goto Exit;
             }
@@ -1558,9 +1575,6 @@ BYTE                bTemp;
         {
             goto Exit;
         }
-
-        // $$$ workaround for SND EPL MN
-        DllIdentParam.m_dwDeviceType = 0;
 
         ObdSize = 4;
         Ret = EplObdReadEntry(0x1018, 1, &DllIdentParam.m_dwVendorId, &ObdSize);

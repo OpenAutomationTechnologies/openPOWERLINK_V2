@@ -1066,7 +1066,7 @@ tEplEventNmtStateChange NmtStateChange;
                 }
 
                 // error occured
-                // $$$ d.k.: how does this error occur?
+                // d.k.: how does this error occur? on CRC errors
 /*                case kEplNmtEventNmtCycleError:
                 {
                     EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtCsPreOperational1;
@@ -1260,12 +1260,14 @@ tEplEventNmtStateChange NmtStateChange;
                 }
 
                 // error occured
-                // $$$ d.k. MSPreOp1->CSPreOp1: nonsense!
+                // d.k. MSPreOp1->CSPreOp1: nonsense -> keep state
+                /*
                 case kEplNmtEventNmtCycleError:
                 {
                     EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtCsPreOperational1;
                     break;
                 }
+                */
 
                 case kEplNmtEventAllMandatoryCNIdent:
                 {   // all mandatory CN identified
@@ -1580,7 +1582,7 @@ tEplEventNmtStateChange NmtStateChange;
                 }
 
                 // error occured
-                // $$$ d.k. BE->PreOp1 on cycle error???
+                // d.k. BE->PreOp1 on cycle error? No
 /*                case kEplNmtEventNmtCycleError:
                 {
                     EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtCsPreOperational1;

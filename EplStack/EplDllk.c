@@ -231,6 +231,7 @@ typedef struct
 
 } tEplDllkInstance;
 
+
 //---------------------------------------------------------------------------
 // local vars
 //---------------------------------------------------------------------------
@@ -238,8 +239,9 @@ typedef struct
 // if no dynamic memory allocation shall be used
 // define structures statically
 static tEplDllkInstance     EplDllkInstance_g;
-// $$$ d.k.: replace fixed constants with defines from EplDef.h/EplCfg.h
-static tEdrvTxBuffer          aEplDllkTxBuffer_l[EPL_DLLK_TXFRAME_COUNT];
+
+static tEdrvTxBuffer        aEplDllkTxBuffer_l[EPL_DLLK_TXFRAME_COUNT];
+
 
 //---------------------------------------------------------------------------
 // local function prototypes
@@ -2386,10 +2388,28 @@ BYTE            bFlag1;
                         // reset RD flag and all other flags, but that does not matter, because they were processed above
                         AmiSetByteToLe(&pFrame->m_Data.m_Preq.m_le_bFlag1, 0);
                     }
-                    // $$$ who compares real frame size and PDO size?
+
+                    // compares real frame size and PDO size
+                    if ((unsigned int) (AmiGetWordFromLe(&pFrame->m_Data.m_Preq.m_le_wSize) + 24)
+                        > FrameInfo.m_uiFrameSize)
+                    {   // format error
+                    tEplErrorHandlerkEvent  DllEvent;
+
+                        DllEvent.m_ulDllErrorEvents = EPL_DLL_ERR_INVALID_FORMAT;
+                        DllEvent.m_uiNodeId = uiNodeId;
+                        DllEvent.m_NmtState = NmtState;
+                        Event.m_EventSink = kEplEventSinkErrk;
+                        Event.m_EventType = kEplEventTypeDllError;
+                        Event.m_NetTime = FrameInfo.m_NetTime;
+                        Event.m_uiSize = sizeof (DllEvent);
+                        Event.m_pArg = &DllEvent;
+                        Ret = EplEventkPost(&Event);
+                        break;
+                    }
+
+                    // forward PReq frame as RPDO to PDO module
                     Ret = EplPdokCbPdoReceived(&FrameInfo);
 
-                    // $$$ forward PRes frame as RPDO to PDO module
                 }
 #if (EPL_DLL_PRES_READY_AFTER_SOC != FALSE)
                 if (pTxBuffer->m_pbBuffer != NULL)
@@ -2956,7 +2976,8 @@ tEplFrameInfo   FrameInfo;
 #if ((EPL_MODULE_INTEGRATION & EPL_MODULE_NMT_MN) != 0)
     else if (pTxBuffer_p->m_EplMsgType == kEplMsgTypeSoa)
     {   // SoA frame sent
-        // $$$ d.k. forward event to ErrorHandler and PDO module
+    tEplNmtEvent NmtEvent = kEplNmtEventDllMeSoaSent;
+
         // check if we are invited
         if (EplDllkInstance_g.m_uiLastTargetNodeId == EplDllkInstance_g.m_DllConfigParam.m_uiNodeId)
         {
@@ -3057,12 +3078,23 @@ tEplFrameInfo   FrameInfo;
             // ASnd frame was sent, remove the request
             EplDllkInstance_g.m_LastReqServiceId = kEplDllReqServiceNo;
         }
+
+        // forward event to ErrorHandler and PDO module
+        Event.m_EventSink = kEplEventSinkNmtk;
+        Event.m_EventType = kEplEventTypeNmtEvent;
+        Event.m_uiSize = sizeof (NmtEvent);
+        Event.m_pArg = &NmtEvent;
+        Ret = EplEventkPost(&Event);
+        if (Ret != kEplSuccessful)
+        {
+            goto Exit;
+        }
     }
 #endif
 
 #if EPL_DLL_PRES_READY_AFTER_SOA != FALSE
     else
-    {   // $$$ d.k.: Why that else? on CN it is entered on IdentRes and StatusRes
+    {   // d.k.: Why that else? on CN it is entered on IdentRes and StatusRes
         goto Exit;
     }
 
@@ -3573,18 +3605,8 @@ BYTE            bFlag1 = 0;
 
     if (EplDllkInstance_g.m_pCurNodeInfo == NULL)
     {   // last isochronous CN reached
-        /*
-        // $$$ send own PRes if available or SoA
-        pTxBuffer = &EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_PRES];
-        if (pTxBuffer->m_pbBuffer != NULL)
-        {   // MN has PRes
-            *pDllStateProposed_p = kEplDllMsWaitSoaTrig;
-        }
-        else
-        {*/
-            Ret = EplDllkMnSendSoa(NmtState_p, pDllStateProposed_p, TRUE);
-            goto Exit;
-//        }
+        Ret = EplDllkMnSendSoa(NmtState_p, pDllStateProposed_p, TRUE);
+        goto Exit;
     }
     else
     {

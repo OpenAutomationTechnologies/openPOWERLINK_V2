@@ -184,7 +184,6 @@ tEplKernel PUBLIC EplErrorHandlerkInit(void)
 {
 tEplKernel Ret;
 
-    // TODO: init instance table
 
     Ret = EplErrorHandlerkAddInstance();
 
@@ -303,7 +302,6 @@ tEplKernel PUBLIC EplErrorHandlerkDelInstance()
 {
 tEplKernel      Ret;
 
-    // TODO: delete instance
     Ret = kEplSuccessful;
 
 
@@ -513,12 +511,33 @@ tEplNmtEvent            NmtEvent;
         case kEplEventTypeNmtEvent:
         {
             if ((*(tEplNmtEvent*)pEvent_p->m_pArg) == kEplNmtEventDllCeSoa)
-            {   // SoA event -> decrement threshold counters
+            {   // SoA event of CN -> decrement threshold counters
+
+                if ((EplErrorHandlerkInstance_g.m_ulDllErrorEvents & EPL_DLL_ERR_CN_LOSS_SOC) == 0)
+                {   // decrement loss of SoC threshold counter, because it didn't occur last cycle
+                    if (EplErrorHandlerkInstance_g.m_CnLossSoc.m_dwThresholdCnt > 0)
+                    {
+                        EplErrorHandlerkInstance_g.m_CnLossSoc.m_dwThresholdCnt--;
+                    }
+                }
+
+                if ((EplErrorHandlerkInstance_g.m_ulDllErrorEvents & EPL_DLL_ERR_CN_CRC) == 0)
+                {   // decrement CRC threshold counter, because it didn't occur last cycle
+                    if (EplErrorHandlerkInstance_g.m_CnCrcErr.m_dwThresholdCnt > 0)
+                    {
+                        EplErrorHandlerkInstance_g.m_CnCrcErr.m_dwThresholdCnt--;
+                    }
+                }
+
+                // reset error events
+                EplErrorHandlerkInstance_g.m_ulDllErrorEvents = 0L;
+            }
+
 #if ((EPL_MODULE_INTEGRATION & EPL_MODULE_NMT_MN) != 0)
+            else if ((*(tEplNmtEvent*)pEvent_p->m_pArg) == kEplNmtEventDllMeSoaSent)
+            {   // SoA event of MN -> decrement threshold counters
             tEplDllkNodeInfo*   pIntNodeInfo;
             unsigned int        uiNodeId;
-
-                // $$$ d.k.: decide on NMT state (MN / CN) which counters are decremented
 
                 Ret = EplDllkGetFirstNodeInfo(&pIntNodeInfo);
                 if (Ret != kEplSuccessful)
@@ -561,27 +580,12 @@ tEplNmtEvent            NmtEvent;
                         EplErrorHandlerkInstance_g.m_MnCycTimeExceed.m_dwThresholdCnt--;
                     }
                 }
-#endif
-
-                if ((EplErrorHandlerkInstance_g.m_ulDllErrorEvents & EPL_DLL_ERR_CN_LOSS_SOC) == 0)
-                {   // decrement loss of SoC threshold counter, because it didn't occur last cycle
-                    if (EplErrorHandlerkInstance_g.m_CnLossSoc.m_dwThresholdCnt > 0)
-                    {
-                        EplErrorHandlerkInstance_g.m_CnLossSoc.m_dwThresholdCnt--;
-                    }
-                }
-
-                if ((EplErrorHandlerkInstance_g.m_ulDllErrorEvents & EPL_DLL_ERR_CN_CRC) == 0)
-                {   // decrement CRC threshold counter, because it didn't occur last cycle
-                    if (EplErrorHandlerkInstance_g.m_CnCrcErr.m_dwThresholdCnt > 0)
-                    {
-                        EplErrorHandlerkInstance_g.m_CnCrcErr.m_dwThresholdCnt--;
-                    }
-                }
 
                 // reset error events
                 EplErrorHandlerkInstance_g.m_ulDllErrorEvents = 0L;
             }
+#endif
+
             break;
         }
 

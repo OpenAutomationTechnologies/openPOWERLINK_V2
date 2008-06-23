@@ -73,9 +73,11 @@
 
 #include "EplDllCal.h"
 
-// $$$ d.k. include only if direct call between user- and kernelspace is enabled
-//#include "kernel/EplDllk.h"
+// include only if direct call between user- and kernelspace is enabled
+#if((EPL_MODULE_INTEGRATION & EPL_MODULE_DLLK) != 0)
 #include "kernel/EplDllkCal.h"
+#endif
+
 
 #if((EPL_MODULE_INTEGRATION & EPL_MODULE_DLLU) != 0)
 
@@ -241,7 +243,7 @@ tEplFrameInfo   FrameInfo;
         MsgType = (tEplMsgType)AmiGetByteFromLe(&FrameInfo.m_pFrame->m_le_bMessageType);
         if (MsgType != kEplMsgTypeAsnd)
         {
-            Ret = kEplInvalidOperation; // $$$ kEplDllInvalidFrame
+            Ret = kEplInvalidOperation;
             goto Exit;
         }
 

@@ -142,7 +142,6 @@ EPLDLLEXPORT tEplKernel PUBLIC EplNmtCnuInit(unsigned int uiNodeId_p)
 {
 tEplKernel Ret;
 
-    // TODO: init instance table
     Ret = EplNmtCnuAddInstance(uiNodeId_p);
 
     return Ret;

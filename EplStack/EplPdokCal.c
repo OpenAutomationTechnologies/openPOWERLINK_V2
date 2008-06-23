@@ -128,11 +128,7 @@
 
 typedef struct
 {
-//#ifndef EPL_NO_FIFO
-    // $$$ memorize pointer to shared memory
-//#else
     BOOL            m_fTpdosValid;
-//#endif
 
 } tEplPdokCalInstance;
 

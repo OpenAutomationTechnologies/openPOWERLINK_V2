@@ -158,8 +158,6 @@ tEplKernel PUBLIC EplSdoAsnduInit(tEplSequLayerReceiveCb fpReceiveCb_p)
 tEplKernel  Ret;
 
 
-    //TODO: init instance table
-
     Ret = EplSdoAsnduAddInstance(fpReceiveCb_p);
 
 return Ret;

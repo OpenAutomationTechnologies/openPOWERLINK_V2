@@ -77,8 +77,6 @@
 // const defines
 //---------------------------------------------------------------------------
 
-// TODO: find another place
-#define EPL_MAX_ASY_SDO_PAYLOAD 256
 
 // defines for EplFrame.m_wFlag
 #define EPL_FRAME_FLAG1_RD          0x01    // ready                                    (PReq, PRes)
@@ -270,12 +268,12 @@ typedef struct
     BYTE                    m_le_bCommandId;
     WORD                    m_le_wSegmentSize;
     WORD                    m_le_wReserved;
-    BYTE                    m_le_abCommandData[EPL_MAX_ASY_SDO_PAYLOAD];
+    BYTE                    m_le_abCommandData[8];  // just reserve a minimum number of bytes as a placeholder
 
 }PACK_STRUCT tEplAsySdoCom;
 
 
-// asynchronus SDO Serquence Header
+// asynchronous SDO Sequence Header
 typedef struct
 {
     BYTE           m_le_bRecSeqNumCon;

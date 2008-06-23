@@ -96,7 +96,6 @@ tEplKernel EplPdokProcess(tEplEvent * pEvent_p);
 // copies RPDO to event queue for processing
 // is called by DLL in NMT_CS_READY_TO_OPERATE and NMT_CS_OPERATIONAL
 // PDO needs not to be valid
-// TODO: check if valid mapping exists for this PDO before event posting
 tEplKernel EplPdokCbPdoReceived(tEplFrameInfo * pFrameInfo_p);
 
 // posts pointer and size of TPDO to event queue

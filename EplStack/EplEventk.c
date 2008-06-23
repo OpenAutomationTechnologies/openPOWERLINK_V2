@@ -428,7 +428,11 @@ tEplEventSource         EventSource;
 #endif
 #if((EPL_MODULE_INTEGRATION & EPL_MODULE_DLLK) != 0)
             if ((pEvent_p->m_EventType == kEplEventTypeNmtEvent)
-                && (*((tEplNmtEvent*)pEvent_p->m_pArg) == kEplNmtEventDllCeSoa))
+                && ((*((tEplNmtEvent*)pEvent_p->m_pArg) == kEplNmtEventDllCeSoa)
+#if ((EPL_MODULE_INTEGRATION & EPL_MODULE_NMT_MN) != 0)
+                || (*((tEplNmtEvent*)pEvent_p->m_pArg) == kEplNmtEventDllMeSoaSent)
+#endif
+                ))
             {   // forward SoA event to error handler
                 Ret = EplErrorHandlerkProcess(pEvent_p);
                 if ((Ret != kEplSuccessful) && (Ret != kEplShutdown))

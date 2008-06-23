@@ -443,7 +443,7 @@ unsigned long   ulFrameCount;
     ShbError = ShbCirGetReadBlockCount (EplDllkCalInstance_g.m_ShbInstanceTxNmt, &ulFrameCount);
     // returns kShbOk, kShbInvalidArg
 
-    // $$$ error handling
+    // error handling
     if (ShbError != kShbOk)
     {
         Ret = kEplNoResource;
@@ -466,7 +466,7 @@ unsigned long   ulFrameCount;
     ShbError = ShbCirGetReadBlockCount (EplDllkCalInstance_g.m_ShbInstanceTxGen, &ulFrameCount);
     // returns kShbOk, kShbInvalidArg
 
-    // $$$ error handling
+    // error handling
     if (ShbError != kShbOk)
     {
         Ret = kEplNoResource;
@@ -542,7 +542,7 @@ unsigned long   ulFrameSize;
 
     }
 
-    // $$$ error handling
+    // error handling
     if (ShbError != kShbOk)
     {
         if (ShbError == kShbNoReadableData)
@@ -660,7 +660,7 @@ tShbError   ShbError;
 
     }
 
-    // $$$ error handling
+    // error handling
     switch (ShbError)
     {
         case kShbOk:

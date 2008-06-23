@@ -563,8 +563,6 @@ tEplKernel  Ret;
                     // node processes isochronous and asynchronous frames
                     case kEplNmtMsPreOperational2:
                     {
-                        // $$$ this shall be triggered by NmtMnu
-                        //Ret = EplNmtuNmtEvent(kEplNmtEventEnterReadyToOperate);
                         break;
                     }
 

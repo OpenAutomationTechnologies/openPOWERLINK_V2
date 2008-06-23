@@ -177,7 +177,6 @@ tEplKernel PUBLIC EplEventuInit(tEplProcessEventCb pfnApiProcessEventCb_p)
 {
 tEplKernel Ret;
 
-    // TODO: init instance table
 
     Ret = EplEventuAddInstance(pfnApiProcessEventCb_p);
 
@@ -287,7 +286,6 @@ tEplKernel      Ret;
 tShbError       ShbError;
 #endif
 
-    // TODO: delete instance
     Ret = kEplSuccessful;
 
 #ifndef EPL_NO_FIFO
@@ -457,7 +455,6 @@ tEplEventSource         EventSource;
         case kEplEventSinkErru:
         {
             /*
-            // TODO: add eventprocessfunction for eplapi layer
             Ret = EplErruProcess(pEvent_p);
             if ((Ret != kEplSuccessful) && (Ret != kEplShutdown))
             {

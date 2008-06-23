@@ -1201,7 +1201,7 @@ int           fCallAgain;
                     do
                     {
                         fCallAgain = pShbMemInst->m_pfnSigHndlrNewData (pShbInstance);
-                        // $$$ d.k.: try to run any shared buffer which has higher priority.
+                        // d.k.: try to run any shared buffer which has higher priority.
                         //           under Windows this is not really necessary because the Windows scheduler
                         //           already preempts tasks with lower priority.
                     } while (fCallAgain != FALSE);

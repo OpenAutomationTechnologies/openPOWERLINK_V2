@@ -139,6 +139,7 @@ typedef enum
     kEplNmtEventDllMePresTimeout    =   0x02,
 //    kEplNmtEventDllMeAsnd           =   0x03,
 //    kEplNmtEventDllMeAsndTimeout    =   0x04,
+    kEplNmtEventDllMeSoaSent        =   0x04,
     kEplNmtEventDllMeSocTrig        =   0x05,
     kEplNmtEventDllMeSoaTrig        =   0x06,
     kEplNmtEventDllCeSoc            =   0x07,
@@ -207,7 +208,7 @@ typedef enum
     kEplNmtNodeEventReadyToStart= 0x05, // issued if EPL_NMTST_NO_STARTNODE set
                                         // application must call EplNmtMnuSendNmtCommand(kEplNmtCmdStartNode) manually
     kEplNmtNodeEventNmtState    = 0x06,
-    kEplNmtNodeEventError       = 0x07, // $$$ maybe split error codes
+    kEplNmtNodeEventError       = 0x07, // NMT error of CN
 
 } tEplNmtNodeEvent;
 

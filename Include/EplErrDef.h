@@ -175,7 +175,7 @@ typedef enum
     // area for SDO Command Layer Module 0x0070 - 0x007F
     kEplSdoComUnsupportedProt   = 0x0070,       // unsupported Protocol selected
     kEplSdoComNoFreeHandle      = 0x0071,       // no free handle for connection
-//    kEplSdoComUnknownHandle     = 0x0072,       // handle not known by Command Layer
+    kEplSdoComInvalidServiceType= 0x0072,       // invalid SDO service type specified
     kEplSdoComInvalidHandle     = 0x0073,       // handle invalid
     kEplSdoComInvalidSendType   = 0x0074,       // the stated to of frame to send is
                                                 // not possible

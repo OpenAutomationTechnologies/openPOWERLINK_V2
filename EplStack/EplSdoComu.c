@@ -307,7 +307,6 @@ tEplKernel PUBLIC EplSdoComInit(void)
 {
 tEplKernel  Ret;
 
-    // TODO: Init Instance tabel
 
     Ret = EplSdoComAddInstance();
 
@@ -362,7 +361,7 @@ Exit:
 //
 // Function:    EplSdoComDelInstance
 //
-// Description: delte instance of the module
+// Description: delete instance of the module
 //
 //
 //
@@ -382,10 +381,8 @@ tEplKernel  Ret;
     Ret = kEplSuccessful;
 
 
-    // TODO: delte instance
-
 #if defined(WIN32) || defined(_WIN32)
-    // delte critical section for process function
+    // delete critical section for process function
     DeleteCriticalSection(SdoComInstance_g.m_pCriticalSection);
 #endif
 
@@ -2454,7 +2451,7 @@ BYTE*           pbPayload;
     AmiSetByteToLe( &pCommandFrame->m_le_bCommandId, pSdoComCon_p->m_SdoServiceType);
     AmiSetByteToLe( &pCommandFrame->m_le_bTransactionId, pSdoComCon_p->m_bTransactionId);
 
-    // set siez constant part of header
+    // set size constant part of header
     uiSizeOfFrame = 8;
 
     // check if first frame to send -> command header needed
@@ -2545,8 +2542,8 @@ BYTE*           pbPayload;
                 case kEplSdoServiceNIL:
                 default:
                     // invalid service requested
-                    // $$$ d.k. What should we do?
-                    break;
+                    Ret = kEplSdoComInvalidServiceType;
+                    goto Exit;
             } // end of switch(pSdoComCon_p->m_SdoServiceType)
         }
         else // (pSdoComCon_p->m_uiTransferredByte > 0)
