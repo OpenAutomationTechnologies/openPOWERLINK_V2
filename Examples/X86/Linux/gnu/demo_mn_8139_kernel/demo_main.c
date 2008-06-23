@@ -130,7 +130,7 @@ MODULE_LICENSE("Dual BSD/GPL");
     #define TGT_DBG_SIGNAL_TRACE_POINT(p)
 #endif
 
-#define NODEID      0x1 //0x6E//0xF0 //=> MN
+#define NODEID      0xF0 //=> MN
 #define IP_ADDR     0xc0a86401  // 192.168.100.1
 #define SUBNET_MASK 0xFFFFFF00  // 255.255.255.0
 #define HOSTNAME    "SYS TEC electronic EPL Stack    "
