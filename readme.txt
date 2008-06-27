@@ -52,6 +52,16 @@
   -------------------------------------------------------------------------
 
 
+Documentation
+-------------
+
+The documentation of the openPOWERLINK protocol stack can be downloaded from
+
+    http://www.systec-electronic.com/html/index.pl/en_download_OpenPOWERLINK
+
+    It contains an introduction and a reference manual. A registration is
+    required for downloading.
+
 
 Generic Requirements for all demo applications
 -----------------------------------------------
@@ -79,6 +89,8 @@ Requirements for X86 Demo
 
 - Linux kernel version 2.6.23 or later
   with CONFIG_HIGH_RES_TIMERS enabled
+  (this needs ACPI support, maybe you need to append "acpi=force" to
+  kernel command line for older BIOSes)
 - Network controller card with Realtek RTL8139 Rev D chip onboard
 
 
