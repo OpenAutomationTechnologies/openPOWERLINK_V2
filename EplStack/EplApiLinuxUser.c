@@ -79,7 +79,6 @@
 #include "kernel/EplDllkCal.h"
 #include "kernel/EplPdokCal.h"
 #include "user/EplDlluCal.h"
-#include "user/EplDllu.h"
 #include "user/EplNmtCnu.h"
 #include "user/EplSdoComu.h"
 
@@ -600,6 +599,45 @@ int             iRet;
 }
 
 
+// ----------------------------------------------------------------------------
+//
+// Function:    EplApiMnTriggerStateChange()
+//
+// Description: triggers the specified node command for the specified node.
+//
+// Parameters:  uiNodeId_p              = node ID for which the node command will be executed
+//              NodeCommand_p           = node command
+//
+// Return:      tEplKernel              = error code
+//
+// ----------------------------------------------------------------------------
+
+tEplKernel PUBLIC EplApiMnTriggerStateChange(unsigned int uiNodeId_p,
+                                             tEplNmtNodeCommand NodeCommand_p)
+{
+tEplKernel            Ret = kEplSuccessful;
+tEplLinNodeCmdObject  NodeCmdObject;
+int                   iRet;
+
+    NodeCmdObject.m_uiNodeId    = uiNodeId_p;
+    NodeCmdObject.m_NodeCommand = NodeCommand_p;
+
+    // forward node command to Linux kernel module
+    iRet = ioctl (EplApiInstance_g.m_hDrvInst,
+                  EPLLIN_CMD_MN_TRIGGER_STATE_CHANGE, (unsigned long)&NodeCmdObject);
+    if (iRet < 0)
+    {
+        Ret = kEplNoResource;
+    }
+    else
+    {
+        Ret = (tEplKernel)iRet;
+    }
+
+    return Ret;
+}
+
+
 //----------------------------------------------------------------------------
 // Function:    EplApiProcess()
 //
@@ -639,6 +677,34 @@ Exit:
     return Ret;
 }
 
+
+//---------------------------------------------------------------------------
+//
+// Function:    EplApiProcessImageSetup()
+//
+// Description: sets up a static process image
+//              i.e. maps the process image to static OD entries
+//              at 0x2000, 0x2001, 0x2010, 0x2011, 0x2020, 0x2021,
+//                 0x2030, 0x2031, 0x2040, 0x2041, 0x2050, 0x2051.
+//
+// Parameters:  (none)
+//
+// Returns:     tEplKernel              = error code
+//
+// State:
+//
+//---------------------------------------------------------------------------
+
+tEplKernel PUBLIC EplApiProcessImageSetup(void)
+{
+tEplKernel      Ret = kEplSuccessful;
+int             iRet;
+
+    iRet = ioctl (EplApiInstance_g.m_hDrvInst, EPLLIN_CMD_PI_SETUP, 0);
+    Ret = (tEplKernel)iRet;
+
+    return Ret;
+}
 
 //----------------------------------------------------------------------------
 // Function:    EplApiProcessImageExchangeIn()

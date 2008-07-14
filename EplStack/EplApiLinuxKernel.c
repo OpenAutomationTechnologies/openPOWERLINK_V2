@@ -66,28 +66,37 @@
   Revision History:
 
   2006/10/11 d.k.:  Initial Version
+  2008/04/10 m.u.:  Changed to new char driver init
 
 ****************************************************************************/
 
 
-#include <linux/version.h>
-#include <linux/config.h>
-#include <linux/module.h>
-#include <linux/kernel.h>
-#include <linux/init.h>
-#include <linux/errno.h>
-#include <linux/major.h>
-#include <linux/devfs_fs_kernel.h>
+// kernel modul and driver
 
-#include <asm/io.h>
-#include <asm/segment.h>
-#include <asm/system.h>
-#include <asm/irq.h>
+//#include <linux/version.h>
+//#include <linux/config.h>
+
+#include <linux/module.h>
+#include <linux/fs.h>
+#include <linux/cdev.h>
+#include <linux/types.h>
+
+//#include <linux/module.h>
+//#include <linux/kernel.h>
+//#include <linux/init.h>
+//#include <linux/errno.h>
+
+// scheduling
+#include <linux/sched.h>
+
+// memory access
 #include <asm/uaccess.h>
 #include <linux/vmalloc.h>
 
-#include <linux/mm.h>
-#include <linux/signal.h>
+#ifdef CONFIG_DEVFS_FS
+#include <linux/major.h>
+#include <linux/devfs_fs_kernel.h>
+#endif
 
 #include "Epl.h"
 #include "EplApiLinux.h"
@@ -116,7 +125,7 @@
 /***************************************************************************/
 
 // Metainformation
-/* MODULE_LICENSE("Proprietary"); */        // $$$$$$$$$$ ????????????????
+MODULE_LICENSE("Dual BSD/GPL");
 #ifdef MODULE_AUTHOR
     MODULE_AUTHOR("Daniel.Krueger@SYSTEC-electronic.com");
     MODULE_DESCRIPTION("EPL API driver");
@@ -128,9 +137,8 @@
 //---------------------------------------------------------------------------
 
 
-#define EPLLIN_DRV_NAME     "SYSTEC_EPL"       // used for <register_chrdev>
+#define EPLLIN_DRV_NAME     "systec_epl"       // used for <register_chrdev>
 
-//#define EPLLIN_DRV_MAJOR   124
 
 
 //---------------------------------------------------------------------------
@@ -158,8 +166,19 @@
 //  Global variables
 //---------------------------------------------------------------------------
 
-// driver major number
-static int  nDrvMajorNumber_g;
+#ifdef CONFIG_DEVFS_FS
+
+    // driver major number
+    static int  nDrvMajorNumber_g;
+
+#else
+
+    // device number (major and minor)
+    static dev_t        nDevNum_g;
+    static struct cdev *pEpl_cdev_g;
+
+#endif
+
 
 static volatile unsigned int uiEplState_g;
 
@@ -234,13 +253,12 @@ module_exit(EplLinExit);
 
 static struct file_operations  EplLinFileOps_g =
 {
-
-    owner:      THIS_MODULE,
-    open:       EplLinOpen,
-    release:    EplLinRelease,
-    read:       EplLinRead,
-    write:      EplLinWrite,
-    ioctl:      EplLinIoctl,
+    .owner =     THIS_MODULE,
+    .open =      EplLinOpen,
+    .release =   EplLinRelease,
+    .read =      EplLinRead,
+    .write =     EplLinWrite,
+    .ioctl =     EplLinIoctl,
 
 };
 
@@ -264,8 +282,9 @@ static  int  __init  EplLinInit (void)
 tEplKernel          EplRet;
 int  iErr;
 int  iRet;
+#ifdef CONFIG_DEVFS_FS
 int  nMinorNumber;
-
+#endif
 
     TRACE0("EPL: + EplLinInit...\n");
     TRACE2("EPL:   Driver build: %s / %s\n", __DATE__, __TIME__);
@@ -278,6 +297,10 @@ int  nMinorNumber;
     init_waitqueue_head(&WaitQueueCbEvent_g);
     init_waitqueue_head(&WaitQueueProcess_g);
     init_waitqueue_head(&WaitQueueRelease_g);
+
+
+
+#ifdef CONFIG_DEVFS_FS
 
     // register character device handler
     TRACE2("EPL:   Installing Driver '%s', Version %s...\n", EPLLIN_DRV_NAME, EPL_PRODUCT_VERSION);
@@ -310,6 +333,36 @@ int  nMinorNumber;
         goto Exit;
     }
 
+#else
+
+    // register character device handler
+    // only one Minor required
+    TRACE2("EPL:   Installing Driver '%s', Version %s...\n", EPLLIN_DRV_NAME, EPL_PRODUCT_VERSION);
+    iRet = alloc_chrdev_region (&nDevNum_g, 0, 1, EPLLIN_DRV_NAME);
+    if (iRet == 0)
+    {
+        TRACE2("EPL:   Driver '%s' installed successful, assigned MajorNumber=%d\n", EPLLIN_DRV_NAME, MAJOR(nDevNum_g));
+    }
+    else
+    {
+        TRACE1("EPL:   ERROR: Driver '%s' is unable to get a free MajorNumber!\n", EPLLIN_DRV_NAME);
+        iRet = -EIO;
+        goto Exit;
+    }
+
+    // register cdev structure
+    pEpl_cdev_g = cdev_alloc();
+    pEpl_cdev_g->ops = &EplLinFileOps_g;
+    pEpl_cdev_g->owner = THIS_MODULE;
+    iErr = cdev_add (pEpl_cdev_g, nDevNum_g, 1);
+    if (iErr)
+    {
+        TRACE2("EPL:   ERROR %d: Driver '%s' could not be added!\n", iErr, EPLLIN_DRV_NAME);
+        iRet = -EIO;
+        goto Exit;
+    }
+
+#endif
 
     // create device node in PROCFS
     EplRet = EplLinProcInit();
@@ -317,8 +370,6 @@ int  nMinorNumber;
     {
         goto Exit;
     }
-
-
 
 
 Exit:
@@ -353,14 +404,25 @@ tEplKernel          EplRet;
     TRACE0("EPL: + EplLinExit...\n");
 
 
+#ifdef CONFIG_DEVFS_FS
 
     // remove device node from DEVFS
     devfs_remove (EPLLIN_DEV_NAME);
     TRACE1("EPL:   Device node '/dev/%s' removed.\n", EPLLIN_DEV_NAME);
 
-
     // unregister character device handler
     unregister_chrdev (nDrvMajorNumber_g, EPLLIN_DRV_NAME);
+
+#else
+
+    // remove cdev structure
+    cdev_del(pEpl_cdev_g);
+
+    // unregister character device handler
+    unregister_chrdev_region (nDevNum_g, 1);
+
+#endif
+
     TRACE1("EPL:   Driver '%s' removed.\n", EPLLIN_DRV_NAME);
 
 
@@ -387,8 +449,6 @@ int  iRet;
     TRACE0("EPL: + EplLinOpen...\n");
 
     MOD_INC_USE_COUNT;
-//$$$$    printk(KERN_INFO "new module reference counter = %d\n", &(&__this_module)->uc.usecount);
-//$$$$    printk(KERN_INFO "new module reference counter = %d\n", (int)((&__this_module)->uc.usecount));
 
     uiEplState_g = EPL_STATE_NOTINIT;
     atomic_set(&AtomicEventState_g, EVENT_STATE_INIT);
@@ -467,8 +527,6 @@ int  iRet;
 
 
     MOD_DEC_USE_COUNT;
-//$$$$    printk(KERN_INFO "new module reference counter = %d\n", &(&__this_module)->uc.usecount);
-//$$$$    printk(KERN_INFO "new module reference counter = %d\n", (int)__this_module.uc.usecount);
 
 
     TRACE1("EPL: - EplLinRelease (iRet=%d)\n", iRet);
@@ -581,10 +639,6 @@ int  iRet;
             EplRet = EplApiInitialize(&EplApiInitParam);
 
             uiEplState_g = EPL_STATE_RUNNING;
-            if (EplRet == kEplSuccessful)
-            {
-                EplRet = EplApiProcessImageSetup();
-            }
 
             iRet = (int) EplRet;
             break;
@@ -861,7 +915,25 @@ int  iRet;
             EplRet = EplApiFreeSdoChannel((tEplSdoComConHdl)ulArg_p);
 
             iRet = (int) EplRet;
+            break;
+        }
 
+
+        // ----------------------------------------------------------
+        case EPLLIN_CMD_MN_TRIGGER_STATE_CHANGE:
+        {
+        tEplLinNodeCmdObject        NodeCmdObject;
+
+            iErr = copy_from_user(&NodeCmdObject, (const void*)ulArg_p, sizeof (NodeCmdObject));
+            if (iErr != 0)
+            {
+                iRet = -EIO;
+                goto Exit;
+            }
+
+            EplRet = EplApiMnTriggerStateChange(NodeCmdObject.m_uiNodeId,
+                                                NodeCmdObject.m_NodeCommand);
+            iRet = (int) EplRet;
             break;
         }
 
@@ -958,6 +1030,16 @@ int  iRet;
 
             // return to EplApiProcess(), which will call the application's event callback function
             iRet = 0;
+
+            break;
+        }
+
+
+        // ----------------------------------------------------------
+        case EPLLIN_CMD_PI_SETUP:
+        {
+            EplRet = EplApiProcessImageSetup();
+            iRet = (int) EplRet;
 
             break;
         }
