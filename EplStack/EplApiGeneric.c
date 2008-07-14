@@ -999,13 +999,19 @@ tEplKernel      Ret = kEplSuccessful;
 tEplKernel PUBLIC EplApiCbObdAccess(tEplObdCbParam MEM* pParam_p)
 {
 tEplKernel          Ret = kEplSuccessful;
+
+#if (EPL_API_OBD_FORWARD_EVENT != FALSE)
 tEplApiEventArg     EventArg;
 
     // call user callback
+    // must be disabled for EplApiLinuxKernel.c, because of reentrancy problem
+    // for local OD access. This is not so bad as user callback function in
+    // application does not use OD callbacks at the moment.
     EventArg.m_ObdCbParam = *pParam_p;
     Ret = EplApiInstance_g.m_InitParam.m_pfnCbEvent(kEplApiEventObdAccess,
                                                     &EventArg,
                                                     EplApiInstance_g.m_InitParam.m_pEventUserArg);
+#endif
 
     switch (pParam_p->m_uiIndex)
     {

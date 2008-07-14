@@ -368,7 +368,7 @@ MCD_bufDescFec *pTxBufDescr;
 
         TxBufTable_l[i].m_pBufDescr->statCtrl = MCD_FEC_INTERRUPT;
 #if TARGET_SYSTEM == _LINUX_
-        TxBufTable_l[i].m_pBufDescr->dataPointer = (unsigned int) virt_to_phys(ulTxBufPointer);
+        TxBufTable_l[i].m_pBufDescr->dataPointer = (unsigned int) virt_to_phys((void*)ulTxBufPointer);
 #else
         TxBufTable_l[i].m_pBufDescr->dataPointer  = ulTxBufPointer;
 #endif
@@ -794,7 +794,7 @@ unsigned int uiBufferNumber;
     pBufferDesc->length = pBuffer_p->m_uiTxMsgLen;
 
     // flush data cache before initializing the descriptor and starting DMA
-    DcacheFlushInvalidateCacheBlock((void*)pBufferDesc->dataPointer, pBufferDesc->length);
+//    DcacheFlushInvalidateCacheBlock((void*)pBufferDesc->dataPointer, pBufferDesc->length);
 
     pBufferDesc->statCtrl = (MCD_FEC_WRAP | MCD_FEC_INTERRUPT | MCD_FEC_END_FRAME | MCD_FEC_BUF_READY);
 
@@ -814,7 +814,8 @@ unsigned int uiBufferNumber;
     MCD_startDma(fp->fecpriv_fec_tx_channel, (s8*) pBufferDesc, 0,
              (s8*) &(FEC_FECTFDR(base_addr)), 0,
              FEC_MAX_FRM_SIZE, 0, fp->fecpriv_initiator_tx,
-             FEC_TX_DMA_PRI, MCD_FECTX_DMA | MCD_INTERRUPT,
+             FEC_TX_DMA_PRI,
+             MCD_FECTX_DMA | MCD_INTERRUPT | MCD_TT_FLAGS_DEF | MCD_TT_FLAGS_SP,
              MCD_NO_CSUM | MCD_NO_BYTE_SWAP);
 
 //    printf("A: LR=0x%03lX R=0x%03lX LW=0x%03lX W=0x%03lX\n", FEC_FECTLRFP(base_addr), FEC_FECTFRP(base_addr), FEC_FECTLWFP(base_addr), FEC_FECTFWP(base_addr));
@@ -919,7 +920,8 @@ unsigned int uiBufferNumber;
     MCD_startDma(fp->fecpriv_fec_tx_channel, (s8*) pBufferDesc, 0,
              (s8*) &(FEC_FECTFDR(base_addr)), 0,
              FEC_MAX_FRM_SIZE, 0, fp->fecpriv_initiator_tx,
-             FEC_TX_DMA_PRI, MCD_FECTX_DMA | MCD_INTERRUPT,
+             FEC_TX_DMA_PRI,
+             MCD_FECTX_DMA | MCD_INTERRUPT | MCD_TT_FLAGS_DEF | MCD_TT_FLAGS_SP,
              MCD_NO_CSUM | MCD_NO_BYTE_SWAP);
 
 //    printf("D: LR=0x%03lX R=0x%03lX LW=0x%03lX W=0x%03lX\n", FEC_FECTLRFP(base_addr), FEC_FECTFRP(base_addr), FEC_FECTLWFP(base_addr), FEC_FECTFWP(base_addr));
@@ -1383,7 +1385,8 @@ int fec_reset_controller (struct eth_if *nd)
              (s8*) &(FEC_FECRFDR(base_addr)), 0,
 //             16, 0, fp->fecpriv_initiator_rx,
              FEC_MAX_FRM_SIZE, 0, fp->fecpriv_initiator_rx,
-             FEC_RX_DMA_PRI, MCD_FECRX_DMA | MCD_INTERRUPT,
+             FEC_RX_DMA_PRI,
+             MCD_FECRX_DMA | MCD_INTERRUPT | MCD_TT_FLAGS_DEF,
              MCD_NO_CSUM | MCD_NO_BYTE_SWAP);
 
     return OK;
@@ -1741,7 +1744,8 @@ tEdrvRxBuffer RxBuffer;
         MCD_startDma(fp->fecpriv_fec_rx_channel, (s8*) fp->fecpriv_rxdesc, 0,
                  (s8*) &(FEC_FECRFDR(base_addr)), 0,
                  FEC_MAX_FRM_SIZE, 0, fp->fecpriv_initiator_rx,
-                 FEC_RX_DMA_PRI, MCD_FECRX_DMA | MCD_INTERRUPT,
+                 FEC_RX_DMA_PRI,
+                 MCD_FECRX_DMA | MCD_INTERRUPT | MCD_TT_FLAGS_DEF,
                  MCD_NO_CSUM | MCD_NO_BYTE_SWAP);
 
         // Enable FEC

@@ -152,6 +152,15 @@
 #define EPL_API_PROCESS_IMAGE_SIZE_OUT  0
 #endif
 
+// configure whether OD access events shall be forwarded
+// to user callback function.
+// Because of reentrancy for local OD accesses, this has to be disabled
+// when application resides in other address space as the stack (e.g. if
+// EplApiLinuxUser.c and EplApiLinuxKernel.c are used)
+#ifndef EPL_API_OBD_FORWARD_EVENT
+#define EPL_API_OBD_FORWARD_EVENT       TRUE
+#endif
+
 #ifndef EPL_OBD_MAX_STRING_SIZE
 #define EPL_OBD_MAX_STRING_SIZE        32          // is used for objects 0x1008/0x1009/0x100A
 #endif

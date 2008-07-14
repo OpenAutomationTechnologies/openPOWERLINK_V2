@@ -2396,7 +2396,7 @@ BYTE            bFlag1;
                     tEplErrorHandlerkEvent  DllEvent;
 
                         DllEvent.m_ulDllErrorEvents = EPL_DLL_ERR_INVALID_FORMAT;
-                        DllEvent.m_uiNodeId = uiNodeId;
+                        DllEvent.m_uiNodeId = AmiGetByteFromLe(&pFrame->m_le_bSrcNodeId);
                         DllEvent.m_NmtState = NmtState;
                         Event.m_EventSink = kEplEventSinkErrk;
                         Event.m_EventType = kEplEventTypeDllError;
