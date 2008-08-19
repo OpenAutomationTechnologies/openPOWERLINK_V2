@@ -81,9 +81,9 @@
 //             min        = minor version (will be set to 0 if major version will be incremented)
 //                 build  = current build (will be set to 0 if minor version will be incremented)
 //
-#define DEFINED_STACK_VERSION       EPL_STACK_VERSION   (1, 1, 0)
-#define DEFINED_OBJ1018_VERSION     EPL_OBJ1018_VERSION (1, 1, 0)
-#define DEFINED_STRING_VERSION      EPL_STRING_VERSION  (1, 1, 0)
+#define DEFINED_STACK_VERSION       EPL_STACK_VERSION   (1, 2, 0)
+#define DEFINED_OBJ1018_VERSION     EPL_OBJ1018_VERSION (1, 2, 0)
+#define DEFINED_STRING_VERSION      EPL_STRING_VERSION  (1, 2, 0)
 
 
 // -----------------------------------------------------------------------------
@@ -91,8 +91,8 @@
 #define EPL_PRODUCT_VERSION         DEFINED_STRING_VERSION
 #define EPL_PRODUCT_MANUFACTURER    "SYS TEC electronic GmbH"
 
-    #define EPL_PRODUCT_KEY         "SO-1067"
-    #define EPL_PRODUCT_DESCRIPTION "EPL V2 Stack in Source"
+    #define EPL_PRODUCT_KEY         "SO-1083"
+    #define EPL_PRODUCT_DESCRIPTION "openPOWERLINK Protocol Stack Source"
 
 #endif // _EPL_VERSION_H_
 

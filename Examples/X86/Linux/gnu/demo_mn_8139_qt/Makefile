@@ -13,7 +13,7 @@ INCLUDES	= -I$(MAINPATH)/Include \
 			  -I$(MAINPATH)/Target/PLCcore-CF54/Linux/gnu/generic \
 			  -I$(MAINPATH)/Target/PLCcore-CF54/Linux/gnu/driver \
 			  -I$(MAINPATH)/SharedBuff \
-			  -I$(MAINPATH)/ObjDicts/Messe_MN
+			  -I$(MAINPATH)/ObjDicts/Qt_MN
 
 MODULEOBJS	= Edrv8139.o \
 			  EplDllk.o EplDllkCal.o \

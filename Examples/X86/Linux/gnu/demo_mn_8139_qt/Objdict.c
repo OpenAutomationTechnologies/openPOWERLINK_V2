@@ -4,4 +4,4 @@
 // fulfill this condition a wrapper file for each necessary source file
 // is located in this directory.
 
-#include "../../../../../ObjDicts/Messe_MN/Objdict.c"
+#include "../../../../../ObjDicts/Qt_MN/Objdict.c"

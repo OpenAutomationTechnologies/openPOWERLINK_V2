@@ -1,12 +1,13 @@
-Revision history of ETHERNET Powerlink Protocol Stack
+Revision history of openPOWERLINK Protocol Stack
 
-Article no.:      SO-1067
+Article no.:      SO-1083
 
 Project start:    13.02.2006
 
 Project manager:  R. Sieber (-rs)
 
 Fellow worker:    Daniel Krüger (d.k.)
+                  Michael Ulbricht (m.u.)
 
 =============================================================================
 
@@ -23,4 +24,29 @@ Fellow worker:    Daniel Krüger (d.k.)
 		      RTL8139 network controller under Linux.
 		    - several bug fixes in SDO module and NMT MN module.
                     (d.k., m.u.)
+
+18.04.2008 V1.2     - new functions in EplApiLinuxUser interface
+                    (m.u.)
+
+17.06.2008 V1.2     - added support for RTL8139C, but refuse RTL8139C+
+                    (d.k.)
+
+14.07.2008 V1.2     - updates to EplApiLinux*.c for coming Qt demo
+                    (d.k.)
+
+23.06.2008 V1.2     - changed default node-ID to MN for RTL8139 MN demo application
+                    - added SoA processing for ErrorHandler and PDO module on MN
+                    - removed and fixed some TODOs and $$$
+                    (d.k.)
+
+19.08.2008 V1.2     - added Qt demo for X86 with RTL8139
+                    - added handling of SDO errors on MN to demo projects.
+                      These may occur if the CN drops and the SDO connection was not closed yet.
+		    - decreased minimum size of StatusResponse frame to 60 bytes,
+                      because Hilscher CN does not send the required 72 bytes
+                      according to the spec.
+		    - added .cvsignore files to project directories
+		    - added manufacturer specific EPL error codes (EPL_E_*) for
+                      missing IdentResponse and StatusResponse
+                    (d.k.)
 
