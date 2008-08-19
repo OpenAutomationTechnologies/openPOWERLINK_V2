@@ -91,7 +91,12 @@ Requirements for X86 Demo
   with CONFIG_HIGH_RES_TIMERS enabled
   (this needs ACPI support, maybe you need to append "acpi=force" to
   kernel command line for older BIOSes)
-- Network controller card with Realtek RTL8139 Rev D chip onboard
+- Network controller card with Realtek RTL8139 Rev C or D chip onboard
+  These are for example
+  * Zyxel FN312
+  * Netgear FA311 v2 Rev-D1
+  * D-Link DFE-528TX
+  
 
 
 Requirements for ColdFire MCF5484 demo
