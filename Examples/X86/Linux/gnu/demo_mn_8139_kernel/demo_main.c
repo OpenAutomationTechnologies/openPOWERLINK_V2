@@ -667,7 +667,20 @@ tEplKernel          EplRet = kEplSuccessful;
                     }
                     else
                     {   // error occured
-                        printk("AppCbEvent(Node): EplApiWriteObject() returned 0x%02X\n", EplRet);
+                        TGT_DBG_SIGNAL_TRACE_POINT(1);
+
+                        EplRet = EplApiFreeSdoChannel(SdoComConHdl);
+                        SdoComConHdl = 0;
+
+                        EplRet = EplApiWriteObject(&SdoComConHdl, pEventArg_p->m_Node.m_uiNodeId, 0x1006, 0x00, &dw_le_CycleLen_g, 4, kEplSdoTypeAsnd, NULL);
+                        if (EplRet == kEplApiTaskDeferred)
+                        {   // SDO transfer started
+                            EplRet = kEplReject;
+                        }
+                        else
+                        {
+                            printk("AppCbEvent(Node): EplApiWriteObject() returned 0x%02X\n", EplRet);
+                        }
                     }
 
                     break;

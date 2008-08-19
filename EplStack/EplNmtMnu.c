@@ -1346,7 +1346,7 @@ tEplKernel      Ret = kEplSuccessful;
     {   // node did not answer
         Ret = EplNmtMnuProcessInternalEvent(uiNodeId_p,
                                             kEplNmtCsNotActive,
-                                            EPL_E_NO_ERROR,
+                                            EPL_E_NMT_NO_IDENT_RES, // was EPL_E_NO_ERROR
                                             kEplNmtMnuIntNodeEventNoIdentResponse);
     }
     else
@@ -1411,7 +1411,7 @@ tEplKernel      Ret = kEplSuccessful;
     {   // node did not answer
         Ret = EplNmtMnuProcessInternalEvent(uiNodeId_p,
                                             kEplNmtCsNotActive,
-                                            EPL_E_NO_ERROR,
+                                            EPL_E_NMT_NO_STATUS_RES, // was EPL_E_NO_ERROR
                                             kEplNmtMnuIntNodeEventNoStatusResponse);
     }
     else

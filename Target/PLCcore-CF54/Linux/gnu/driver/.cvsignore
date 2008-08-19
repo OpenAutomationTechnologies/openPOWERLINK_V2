@@ -1,0 +1,4 @@
+*.cmd
+.tmp_versions
+*.mod.c
+cf54drv.ko

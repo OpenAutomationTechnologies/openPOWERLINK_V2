@@ -109,7 +109,7 @@
 #define EPL_C_DLL_MINSIZE_PRES      60   // minimum size of PRes without CRC
 #define EPL_C_DLL_MINSIZE_SOA       24   // minimum size of SoA without padding and CRC
 #define EPL_C_DLL_MINSIZE_IDENTRES  176  // minimum size of IdentResponse without CRC
-#define EPL_C_DLL_MINSIZE_STATUSRES 72   // minimum size of StatusResponse without CRC
+#define EPL_C_DLL_MINSIZE_STATUSRES 60//72   // minimum size of StatusResponse without CRC
 #define EPL_C_DLL_MINSIZE_NMTCMD    20   // minimum size of NmtCommand without CommandData, padding and CRC
 #define EPL_C_DLL_MINSIZE_NMTCMDEXT 52   // minimum size of NmtCommand without padding and CRC
 #define EPL_C_DLL_MINSIZE_NMTREQ    20   // minimum size of NmtRequest without CommandData, padding and CRC
@@ -260,6 +260,10 @@
 // Emergency error codes
 // ======================
 #define EPL_E_NO_ERROR                  0x0000
+// 0xFxxx manufacturer specific error codes
+#define EPL_E_NMT_NO_IDENT_RES          0xF001
+#define EPL_E_NMT_NO_STATUS_RES         0xF002
+
 // 0x816x HW errors
 #define EPL_E_DLL_BAD_PHYS_MODE         0x8161
 #define EPL_E_DLL_COLLISION             0x8162

@@ -73,7 +73,8 @@ call_driver_build:
 
 .PHONY:     install
 install:    call_driver_build
-			cp $(MODULENAME).ko $(INSTALLDIR)
+#			cp $(MODULENAME).ko $(INSTALLDIR)
+			${M68K_CC_PREFIX}strip --strip-unneeded -o $(INSTALLDIR)/$(MODULENAME).ko $(MODULENAME).ko
 
 endif
 
