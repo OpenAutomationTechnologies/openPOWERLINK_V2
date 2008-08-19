@@ -1,0 +1,17 @@
+#!/bin/sh
+module="epl"
+device="epl_api"
+
+# invoke rmmod with all arguments we got
+/sbin/rmmod $module $* || exit 1
+
+# Remove stale nodes
+rm -f /dev/$device
+
+# rebinding network card to ethernet driver
+pciid=$(lspci | grep RTL-8139 | awk "{printf \"0000:\"\$1}")
+echo "rebinding pci device $pciid to network driver"
+echo -n $pciid > /sys/bus/pci/drivers/8139too/bind
+
+
+

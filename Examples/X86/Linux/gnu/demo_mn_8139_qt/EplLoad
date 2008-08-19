@@ -1,0 +1,37 @@
+#!/bin/sh
+
+echo "load EPL module: initializing..."
+
+module="epl"
+device="epl"
+driver="systec_epl"
+net_device="epl"
+ip_addr="192.168.100.240"
+
+mode="664"
+group="systec"
+
+# unbind network card from ethernet driver
+pciid=$(lspci | grep RTL-8139 | awk "{printf \"0000:\"\$1}")
+echo "unbinding pci device $pciid"
+echo -n $pciid > /sys/bus/pci/drivers/8139too/unbind
+
+# invoke insmod with all arguments we got
+# and use a pathname, as insmod doesn't look in . by default
+/sbin/insmod ./$module.ko $* || exit 1
+
+# retrieve major number
+major=$(awk "\$2==\"$driver\" {print \$1}" /proc/devices)
+echo "major number: $major"
+
+# Remove stale nodes and replace them, then give gid and perms
+rm -f /dev/$device
+mknod /dev/$device c $major 0
+chgrp $group /dev/$device 
+chmod $mode  /dev/$device
+
+exit 1
+
+/sbin/ifconfig $net_device $ip_addr
+
+
