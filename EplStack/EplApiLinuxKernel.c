@@ -489,17 +489,17 @@ int  iRet;
 
     if (uiEplState_g != EPL_STATE_NOTINIT)
     {
+        // pass control to sync kernel thread, but signal termination
+        atomic_set(&AtomicSyncState_g, EVENT_STATE_TERM);
+        wake_up_interruptible(&WaitQueueCbSync_g);
+
+        // pass control to event queue kernel thread
+        atomic_set(&AtomicEventState_g, EVENT_STATE_TERM);
+        wake_up_interruptible(&WaitQueueCbEvent_g);
+
         if (uiEplState_g == EPL_STATE_RUNNING)
         {   // post NmtEventSwitchOff
             EplRet = EplApiExecNmtCommand(kEplNmtEventSwitchOff);
-
-            // pass control to sync kernel thread, but signal termination
-            atomic_set(&AtomicSyncState_g, EVENT_STATE_TERM);
-            wake_up_interruptible(&WaitQueueCbSync_g);
-
-            // pass control to event queue kernel thread
-            atomic_set(&AtomicEventState_g, EVENT_STATE_TERM);
-            wake_up_interruptible(&WaitQueueCbEvent_g);
 
 //            iRet = wait_event_interruptible(WaitQueueProcess_g,
             if (EplRet == kEplSuccessful)

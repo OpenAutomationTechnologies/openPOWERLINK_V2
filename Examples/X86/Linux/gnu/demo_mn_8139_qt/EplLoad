@@ -1,5 +1,21 @@
 #!/bin/sh
 
+echo "check if high resolution timer support is available..."
+
+cat /proc/timer_list | grep 'hres_active.*1' > /dev/null
+if [ "$?" -ne "0" ] ; then
+  echo
+  echo "  High resolution timer support is NOT active."
+  echo "  Maybe you need to add 'acpi=force' to kernel command line"
+  echo "  or try it on a more recent X86 processor."
+  echo
+  echo "The EPL module is and will not be loaded!"
+  echo
+  
+  exit
+fi
+
+
 echo "load EPL module: initializing..."
 
 module="epl"

@@ -72,7 +72,8 @@ PWD				:= $(shell pwd)
 
 .PHONY:     call_driver_build
 call_driver_build:
-			$(MAKE)	-C $(KDIR)	SUBDIRS=$(PWD) modules
+			$(MAKE)	-C $(KDIR)	SUBDIRS=$(PWD) modules 
+			chmod +x EplLoad EplUnload
 
 .PHONY:     scp
 scp: call_driver_build

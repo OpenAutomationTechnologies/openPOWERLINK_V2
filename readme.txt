@@ -89,13 +89,16 @@ Requirements for X86 Demo
 
 - Linux kernel version 2.6.23 or later
   with CONFIG_HIGH_RES_TIMERS enabled
-  (this needs ACPI support, maybe you need to append "acpi=force" to
-  kernel command line for older BIOSes)
+    * this needs ACPI support, maybe you need to append "highres=on" or
+      "acpi=force" to kernel command line for older BIOSes)
+    * check /proc/timer_list if .hres_active is 1
+      $ cat /proc/timer_list | grep 'hres_active'
+
 - Network controller card with Realtek RTL8139 Rev C or D chip onboard
   These are for example
-  * Zyxel FN312
-  * Netgear FA311 v2 Rev-D1
-  * D-Link DFE-528TX
+    * Zyxel FN312
+    * Netgear FA311 v2 Rev-D1
+    * D-Link DFE-528TX
   
 
 
