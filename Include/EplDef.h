@@ -109,7 +109,7 @@
 #define EPL_C_DLL_MINSIZE_PRES      60   // minimum size of PRes without CRC
 #define EPL_C_DLL_MINSIZE_SOA       24   // minimum size of SoA without padding and CRC
 #define EPL_C_DLL_MINSIZE_IDENTRES  176  // minimum size of IdentResponse without CRC
-#define EPL_C_DLL_MINSIZE_STATUSRES 60//72   // minimum size of StatusResponse without CRC
+#define EPL_C_DLL_MINSIZE_STATUSRES 72   // minimum size of StatusResponse without CRC
 #define EPL_C_DLL_MINSIZE_NMTCMD    20   // minimum size of NmtCommand without CommandData, padding and CRC
 #define EPL_C_DLL_MINSIZE_NMTCMDEXT 52   // minimum size of NmtCommand without padding and CRC
 #define EPL_C_DLL_MINSIZE_NMTREQ    20   // minimum size of NmtRequest without CommandData, padding and CRC

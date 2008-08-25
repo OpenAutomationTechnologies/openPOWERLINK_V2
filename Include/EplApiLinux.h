@@ -96,6 +96,8 @@
 #define EPLLIN_CMD_GET_EVENT                9   // ulArg_p ~ tEplLinEvent*
 #define EPLLIN_CMD_MN_TRIGGER_STATE_CHANGE 10   // ulArg_p ~ tEplLinNodeCmdObject*
 #define EPLLIN_CMD_PI_SETUP                11   // ulArg_p ~ 0
+#define EPLLIN_CMD_SHUTDOWN                12   // ulArg_p ~ 0
+
 
 //---------------------------------------------------------------------------
 // typedef

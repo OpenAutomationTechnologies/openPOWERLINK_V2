@@ -229,7 +229,6 @@ int          iRet;
         goto Exit;
     }
 
-
     // initialize hardware
     iRet = ioctl (EplApiInstance_g.m_hDrvInst, EPLLIN_CMD_INITIALIZE, (unsigned long)&EplApiInstance_g.m_InitParam);
     if (iRet < 0)
@@ -271,14 +270,33 @@ Exit:
 tEplKernel PUBLIC EplApiShutdown(void)
 {
 tEplKernel      Ret = kEplSuccessful;
+int             iRet = 0;
 
     // delete instance for all modules
 
     // close driver
     if (EplApiInstance_g.m_hDrvInst >= 0)
     {
-        close (EplApiInstance_g.m_hDrvInst);
+        // shutdown the threads
+        iRet = ioctl (EplApiInstance_g.m_hDrvInst, EPLLIN_CMD_SHUTDOWN, 0);
+        if (iRet < 0)
+        {
+            Ret = kEplNoResource;
+        }
+
+        printf("EplApiShutdown(): calling close(%d) ...\n", EplApiInstance_g.m_hDrvInst);
+        iRet = close (EplApiInstance_g.m_hDrvInst);
         EplApiInstance_g.m_hDrvInst = -1;
+        if (iRet != 0)
+        {
+            iRet = errno;
+            printf("EplApiShutdown(): close() -> %d\n", iRet);
+            Ret = kEplNoResource;
+        }
+    }
+    else
+    {
+        Ret = kEplIllegalInstance;
     }
 
     return Ret;

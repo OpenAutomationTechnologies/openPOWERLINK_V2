@@ -158,9 +158,11 @@ MODULE_LICENSE("Dual BSD/GPL");
 #define EVENT_STATE_READY       2   // EPL event can be forwarded to user application
 #define EVENT_STATE_TERM        3   // terminate processing
 
-#define EPL_STATE_NOTINIT       0
-#define EPL_STATE_RUNNING       1
-#define EPL_STATE_SHUTDOWN      2
+#define EPL_STATE_NOTOPEN       0
+#define EPL_STATE_NOTINIT       1
+#define EPL_STATE_RUNNING       2
+#define EPL_STATE_SHUTDOWN      3
+
 
 //---------------------------------------------------------------------------
 //  Global variables
@@ -180,7 +182,7 @@ MODULE_LICENSE("Dual BSD/GPL");
 #endif
 
 
-static volatile unsigned int uiEplState_g;
+static volatile unsigned int uiEplState_g = EPL_STATE_NOTOPEN;
 
 static struct semaphore     SemaphoreCbEvent_g; // semaphore for EplLinCbEvent
 static wait_queue_head_t    WaitQueueCbEvent_g; // wait queue EplLinCbEvent
@@ -450,18 +452,24 @@ int  iRet;
 
     MOD_INC_USE_COUNT;
 
-    uiEplState_g = EPL_STATE_NOTINIT;
-    atomic_set(&AtomicEventState_g, EVENT_STATE_INIT);
-    sema_init(&SemaphoreCbEvent_g, 1);
-    init_waitqueue_head(&WaitQueueCbEvent_g);
-    init_waitqueue_head(&WaitQueueProcess_g);
-    init_waitqueue_head(&WaitQueueRelease_g);
-    atomic_set(&AtomicSyncState_g, EVENT_STATE_INIT);
-    init_waitqueue_head(&WaitQueueCbSync_g);
-    init_waitqueue_head(&WaitQueuePI_In_g);
+    if (uiEplState_g != EPL_STATE_NOTOPEN)
+    {   // stack already initialized
+        iRet = -EALREADY;
+    }
+    else
+    {
+        atomic_set(&AtomicEventState_g, EVENT_STATE_INIT);
+        sema_init(&SemaphoreCbEvent_g, 1);
+        init_waitqueue_head(&WaitQueueCbEvent_g);
+        init_waitqueue_head(&WaitQueueProcess_g);
+        init_waitqueue_head(&WaitQueueRelease_g);
+        atomic_set(&AtomicSyncState_g, EVENT_STATE_INIT);
+        init_waitqueue_head(&WaitQueueCbSync_g);
+        init_waitqueue_head(&WaitQueuePI_In_g);
 
-    iRet = 0;
-
+        uiEplState_g = EPL_STATE_NOTINIT;
+        iRet = 0;
+    }
 
     TRACE1("EPL: - EplLinOpen (iRet=%d)\n", iRet);
     return (iRet);
@@ -481,7 +489,7 @@ static int  EplLinRelease (
     struct file* pInstance_p)       // information about driver instance
 {
 
-tEplKernel          EplRet;
+tEplKernel          EplRet = kEplSuccessful;
 int  iRet;
 
 
@@ -492,6 +500,7 @@ int  iRet;
         // pass control to sync kernel thread, but signal termination
         atomic_set(&AtomicSyncState_g, EVENT_STATE_TERM);
         wake_up_interruptible(&WaitQueueCbSync_g);
+        wake_up_interruptible(&WaitQueuePI_In_g);
 
         // pass control to event queue kernel thread
         atomic_set(&AtomicEventState_g, EVENT_STATE_TERM);
@@ -501,28 +510,29 @@ int  iRet;
         {   // post NmtEventSwitchOff
             EplRet = EplApiExecNmtCommand(kEplNmtEventSwitchOff);
 
-//            iRet = wait_event_interruptible(WaitQueueProcess_g,
-            if (EplRet == kEplSuccessful)
-            {
-                TRACE0("EPL:   waiting for NMT_GS_OFF\n");
-                wait_event(WaitQueueRelease_g,
-                                            (uiEplState_g == EPL_STATE_SHUTDOWN));
-            }
-            else
-            {   // post NmtEventSwitchOff failed
-                TRACE0("EPL:   event post failed\n");
-            }
-//            TRACE2("EPL:   ready: iRet=%d uiEplState_g=%u\n", iRet, uiEplState_g);
-            // $$$ d.k.: What if waiting was interrupted by signal?
         }
+
+        if (EplRet == kEplSuccessful)
+        {
+            TRACE0("EPL:   waiting for NMT_GS_OFF\n");
+            wait_event_interruptible(WaitQueueRelease_g,
+                                        (uiEplState_g == EPL_STATE_SHUTDOWN));
+        }
+        else
+        {   // post NmtEventSwitchOff failed
+            TRACE0("EPL:   event post failed\n");
+        }
+
+        // $$$ d.k.: What if waiting was interrupted by signal?
 
         TRACE0("EPL:   call EplApiShutdown()\n");
         // EPL stack can be safely shut down
         // delete instance for all EPL modules
         EplRet = EplApiShutdown();
-    //    printk("EplApiShutdown():  0x%X\n", EplRet);
+        printk("EplApiShutdown():  0x%X\n", EplRet);
     }
 
+    uiEplState_g = EPL_STATE_NOTOPEN;
     iRet = 0;
 
 
@@ -641,6 +651,30 @@ int  iRet;
             uiEplState_g = EPL_STATE_RUNNING;
 
             iRet = (int) EplRet;
+            break;
+        }
+
+
+        // ----------------------------------------------------------
+        case EPLLIN_CMD_SHUTDOWN:
+        {   // shutdown the threads
+
+            // pass control to sync kernel thread, but signal termination
+            atomic_set(&AtomicSyncState_g, EVENT_STATE_TERM);
+            wake_up_interruptible(&WaitQueueCbSync_g);
+            wake_up_interruptible(&WaitQueuePI_In_g);
+
+            // pass control to event queue kernel thread
+            atomic_set(&AtomicEventState_g, EVENT_STATE_TERM);
+            wake_up_interruptible(&WaitQueueCbEvent_g);
+
+            if (uiEplState_g == EPL_STATE_RUNNING)
+            {   // post NmtEventSwitchOff
+                EplRet = EplApiExecNmtCommand(kEplNmtEventSwitchOff);
+
+            }
+
+            iRet = 0;
             break;
         }
 

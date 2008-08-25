@@ -87,8 +87,8 @@ EplApi::EplApi(MainWindow *pMainWindow_p, unsigned int uiNodeId_p)
 {
 char*               sHostname = HOSTNAME;
 tEplKernel          EplRet;
-tEplObdSize         ObdSize;
-unsigned int        uiVarEntries;
+//tEplObdSize         ObdSize;
+//unsigned int        uiVarEntries;
 EplState*           pEplState;
 Slides*             pSlides;
 
@@ -97,17 +97,17 @@ Slides*             pSlides;
 
     pEplProcessThread = new EplProcessThread;
     QObject::connect(pEplProcessThread, SIGNAL(eplStatusChanged(int)),
-                     pEplState, SLOT(setEplStatusLed(int))); 
+                     pEplState, SLOT(setEplStatusLed(int)));
     QObject::connect(pEplProcessThread, SIGNAL(nmtStateChanged(const QString&)),
-                     pEplState, SLOT(setNmtStateText(const QString &))); 
+                     pEplState, SLOT(setNmtStateText(const QString &)));
     QObject::connect(pEplProcessThread, SIGNAL(nodeAppeared(int)),
-                     pEplState, SLOT(addNode(int))); 
+                     pEplState, SLOT(addNode(int)));
     QObject::connect(pEplProcessThread, SIGNAL(nodeDisappeared(int)),
-                     pEplState, SLOT(removeNode(int))); 
+                     pEplState, SLOT(removeNode(int)));
     QObject::connect(pEplProcessThread, SIGNAL(nodeStatusChanged(int, int)),
-                     pEplState, SLOT(setNodeStatus(int, int))); 
+                     pEplState, SLOT(setNodeStatus(int, int)));
     QObject::connect(pEplProcessThread, SIGNAL(allNodesRemoved()),
-                     pEplState, SLOT(removeAllNodes())); 
+                     pEplState, SLOT(removeAllNodes()));
 
     pEplDataInOutThread = new EplDataInOutThread;
     QObject::connect(pEplDataInOutThread, SIGNAL(processImageChanged(unsigned int)),
