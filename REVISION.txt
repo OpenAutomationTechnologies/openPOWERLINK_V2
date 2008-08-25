@@ -42,11 +42,13 @@ Fellow worker:    Daniel Krüger (d.k.)
 19.08.2008 V1.2     - added Qt demo for X86 with RTL8139
                     - added handling of SDO errors on MN to demo projects.
                       These may occur if the CN drops and the SDO connection was not closed yet.
-		    - decreased minimum size of StatusResponse frame to 60 bytes,
-                      because Hilscher CN does not send the required 72 bytes
-                      according to the spec.
 		    - added .cvsignore files to project directories
 		    - added manufacturer specific EPL error codes (EPL_E_*) for
                       missing IdentResponse and StatusResponse
+                    (d.k.)
+
+25.08.2008 V1.2     - fixed bug in EplApiLinux*.c when EplApiShutdown() was called.
+                      The process image thread still hung within Ioctl and therefore
+                      the file release function was not called until SIGTERM.
                     (d.k.)
 
