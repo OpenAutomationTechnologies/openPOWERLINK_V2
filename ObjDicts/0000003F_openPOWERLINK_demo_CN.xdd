@@ -335,7 +335,7 @@
             <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" PDOmapping="no" defaultValue="8"/>
             <SubObject subIndex="01" name="IsochrTxMaxPayload_U16" objectType="7" dataType="0006" accessType="const" PDOmapping="no" defaultValue="1490"/>
             <SubObject subIndex="02" name="IsochrRxMaxPayload_U16" objectType="7" dataType="0006" accessType="const" PDOmapping="no" defaultValue="1490"/>
-            <SubObject subIndex="03" name="PResMaxLatency_U32" objectType="7" dataType="0007" accessType="const" PDOmapping="no" defaultValue="2000"/>
+            <SubObject subIndex="03" name="PResMaxLatency_U32" objectType="7" dataType="0007" accessType="const" PDOmapping="no" defaultValue="50000"/>
             <SubObject subIndex="04" name="PReqActPayload_U16" objectType="7" dataType="0006" accessType="rw" PDOmapping="no" defaultValue="256"/>
             <SubObject subIndex="05" name="PResActPayload_U16" objectType="7" dataType="0006" accessType="rw" PDOmapping="no" defaultValue="256"/>
             <SubObject subIndex="06" name="ASndMaxLatency_U32" objectType="7" dataType="0007" accessType="const" PDOmapping="no" defaultValue="2000"/>
@@ -373,10 +373,10 @@
         -->
         <GeneralFeatures
           DLLFeatureMN="false"
-          NMTBootTimeNotActive="4000"
+          NMTBootTimeNotActive="3000000"
           NMTCycleTimeMax="60000"
           NMTCycleTimeMin="1000"
-          NMTErrorEntries="0"
+          NMTErrorEntries="2"
           NWLIPSupport="true"
           SDOServer="true"
           SDOMaxConnections="1"
@@ -385,7 +385,7 @@
 
         <CNFeatures
           DLLCNFeatureMultiplex="false"
-          NMTCNSoC2PReq="40"
+          NMTCNSoC2PReq="40000"
         />
 
         <Diagnostic>
