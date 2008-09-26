@@ -1,0 +1,96 @@
+#!/bin/sh
+
+#***************************************************************************#
+#                                                                           #
+#  SYSTEC electronic GmbH, D-07973 Greiz, August-Bebel-Str. 29              #
+#  www.systec-electronic.com                                                #
+#                                                                           #
+#  File:         rc.usr                                                     #
+#  Description:  user defined startup script for ECUcore-5484               #
+#                                                                           #
+#  -----------------------------------------------------------------------  #
+#                                                                           #
+#  Revision History:                                                        #
+#                                                                           #
+#  2006/06/09 -rs:   Initaial version for ECUcore-5484                      #
+#                                                                           #
+#****************************************************************************
+
+
+echo
+echo "[usr: rc.usr]"
+echo
+
+exit
+
+GBRDCFG=/usr/bin/gbrdcfg
+PINGCOUNT=1
+REMOTEDIR=/tftpboot
+
+
+if [ -f $GBRDCFG ]; then
+    $GBRDCFG -c
+    if [ "$?" = "0" ]; then
+
+        # further use of the CoLilo configuration
+        SERVER=$($GBRDCFG -e server)
+        # echo "using CoLilo configuration: SERVER=$SERVER"
+
+    fi
+fi
+
+if [ -z "$SERVER" ]; then
+
+    # fallback default configuration
+    SERVER=192.168.10.11
+    # echo "using default configuration: SERVER=$SERVER"
+
+fi
+
+
+echo -n "Check reachability of nfs server '$SERVER'... "
+ping -c $PINGCOUNT $SERVER > /dev/null
+if [ $? -eq 0 ]; then
+    echo "server is online"
+    echo -n "mount /mnt/nfs... "
+    mount -t nfs -o nolock $SERVER:$REMOTEDIR /mnt/nfs 
+    echo "done."
+fi
+
+exit
+#--------------------------------------------------------
+echo
+echo -e "Set Internet Configuration:"
+echo -e "1 - Configuration for office network"
+echo -e "2 - Configuration for home network"
+echo -e -n "Selection: "
+read CHOICE
+case "$CHOICE" in
+
+    "1")
+	echo
+	echo
+	echo -n "Set configuration for office network..."
+	cp -f ./resolv.conf.office  /var/etc/resolv.conf
+	route add default gateway 192.168.10.1 metric 1
+	;;
+
+    "2")
+	echo
+	echo
+	echo -n "Set configuration for home network..."
+	cp -f ./resolv.conf.home  /var/etc/resolv.conf
+	route add default gateway 192.168.10.250 metric 1
+	;;
+
+    *)
+	echo
+	echo
+	echo -n "Invalid selection -> no internet configuration set"
+	;;
+
+esac
+#--------------------------------------------------------
+
+echo
+
