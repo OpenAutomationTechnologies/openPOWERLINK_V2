@@ -99,6 +99,8 @@
 
 #define EPL_SEQ_RETRY_COUNT         5       // => max. Timeout 30 sec
 
+#define EPL_SEQ_NUM_THRESHOLD       100     // threshold which distinguishes between old and new sequence numbers
+
 // define frame with size of Asnd-Header-, SDO Sequenze Header size, SDO Command header
 // and Ethernet-Header size
 #define EPL_SEQ_FRAME_SIZE          24
@@ -1506,7 +1508,7 @@ unsigned int        uiFreeEntries;
                                         kAsySdoConStateAckReceived);
                                 }
                             }
-                            else if (((bSendSeqNumCon - pAsySdoSeqCon->m_bSendSeqNum - 4) & EPL_SEQ_NUM_MASK) < 100)
+                            else if (((bSendSeqNumCon - pAsySdoSeqCon->m_bSendSeqNum - 4) & EPL_SEQ_NUM_MASK) < EPL_SEQ_NUM_THRESHOLD)
                             {   // frame of sequence was lost,
                                 // because difference of received and old value
                                 // is less then halve of the values range.
@@ -2212,7 +2214,8 @@ BYTE                    bCurrentSeqNum;
         do
         {
             bCurrentSeqNum = (((tEplFrame*)pHistory->m_aabHistoryFrame[bAckIndex])->m_Data.m_Asnd.m_Payload.m_SdoSequenceFrame.m_le_bSendSeqNumCon & EPL_SEQ_NUM_MASK);
-            if (bRecSeqNumber_p >= bCurrentSeqNum)
+            if (((bRecSeqNumber_p - bCurrentSeqNum) & EPL_SEQ_NUM_MASK)
+                    < EPL_SEQ_NUM_THRESHOLD)
             {
                 pHistory->m_auiFrameSize[bAckIndex] = 0;
                 bAckIndex++;
@@ -2229,7 +2232,8 @@ BYTE                    bCurrentSeqNum;
                 goto Exit;
             }
         }
-        while ((bRecSeqNumber_p > bCurrentSeqNum)
+        while ((((bRecSeqNumber_p - 1 - bCurrentSeqNum) & EPL_SEQ_NUM_MASK)
+                    < EPL_SEQ_NUM_THRESHOLD)
                && (pHistory->m_bWrite != bAckIndex));
 
         // store local read-index to global var
