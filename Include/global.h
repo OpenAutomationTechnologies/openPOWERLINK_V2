@@ -93,7 +93,7 @@
 #define _DEV_LINUX_             (_DEV_BIT32_ | _DEV_LINUX_GCC_                | _DEV_64BIT_SUPPORT_ | _DEV_COMMA_EXT_)
 #define _DEV_GNU_C16X_          (_DEV_BIT16_ | _DEV_GNUC_C16X_               ) //| _DEV_COMMA_EXT_)
 #define _DEV_MCW_MPC5X5_        (_DEV_BIT32_ | _DEV_METROWERKS_CW_           ) //| _DEV_64BIT_SUPPORT_ | _DEV_COMMA_EXT_)
-#define _DEV_GNU_ARM7_          (_DEV_BIT32_ | _DEV_GNUC_ARM7_               ) //| _DEV_64BIT_SUPPORT_ | _DEV_COMMA_EXT_)
+#define _DEV_GNU_ARM7_          (_DEV_BIT32_ | _DEV_GNUC_ARM7_                | _DEV_64BIT_SUPPORT_ | _DEV_COMMA_EXT_)
 #define _DEV_WIN32_RTX_         (_DEV_BIT32_ | _DEV_MSVC_RTX_                ) //| _DEV_64BIT_SUPPORT_ | _DEV_COMMA_EXT_)
 #define _DEV_HIGHTEC_X86_       (_DEV_BIT32_ | _DEV_HIGHTEC_GNUC_X86_        ) //| _DEV_64BIT_SUPPORT_ | _DEV_COMMA_EXT_)
 #define _DEV_WIN_CE_            (_DEV_BIT32_ | _DEV_MSEVC_                   ) //| _DEV_64BIT_SUPPORT_ | _DEV_COMMA_EXT_)
