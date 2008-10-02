@@ -1015,9 +1015,9 @@ tEplApiEventArg     EventArg;
 
     switch (pParam_p->m_uiIndex)
     {
-        case 0x1006:    // NMT_CycleLen_U32
+        //case 0x1006:    // NMT_CycleLen_U32 (valid on reset)
         case 0x1C14:    // DLL_LossOfFrameTolerance_U32
-        case 0x1F98:    // NMT_CycleTiming_REC
+        //case 0x1F98:    // NMT_CycleTiming_REC (valid on reset)
         {
             if (pParam_p->m_ObdEvent == kEplObdEvPostWrite)
             {

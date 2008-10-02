@@ -2330,6 +2330,20 @@ BYTE*           pbSrcData;
                 goto Abort;
             }
 
+            case kEplObdValueTooHigh:
+            {
+                pSdoComCon_p->m_dwLastAbortCode = EPL_SDOAC_VALUE_RANGE_TOO_HIGH;
+                // send abort
+                goto Abort;
+            }
+
+            case kEplObdValueTooLow:
+            {
+                pSdoComCon_p->m_dwLastAbortCode = EPL_SDOAC_VALUE_RANGE_TOO_LOW;
+                // send abort
+                goto Abort;
+            }
+
             default:
             {
                 pSdoComCon_p->m_dwLastAbortCode = EPL_SDOAC_GENERAL_ERROR;

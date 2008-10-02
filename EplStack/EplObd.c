@@ -371,7 +371,6 @@ tEplKernel              Ret;
 tEplObdEntryPtr         pObdEntry;
 tEplObdSubEntryPtr      pSubEntry;
 tEplObdCbParam MEM      CbParam;
-tEplObdAccess           Access;
 void MEM*               pDstData;
 tEplObdSize             ObdSize;
 
@@ -1317,7 +1316,6 @@ tEplKernel              Ret;
 tEplObdEntryPtr         pObdEntry;
 tEplObdSubEntryPtr      pSubEntry;
 tEplObdCbParam MEM      CbParam;
-tEplObdAccess           Access;
 void MEM*               pDstData;
 tEplObdSize             ObdSize;
 QWORD                   qwBuffer;
@@ -2271,14 +2269,14 @@ tEplKernel              Ret;
     pCbParam_p->m_pArg     = pSrcData_p;
     pCbParam_p->m_ObdEvent = kEplObdEvPreWrite;
     Ret = EplObdCallObjectCallback (EPL_MCO_INSTANCE_PTR_
-        pObdEntry->m_fpCallback, pCbParam_p);
+        pObdEntry_p->m_fpCallback, pCbParam_p);
     if (Ret != kEplSuccessful)
     {
         goto Exit;
     }
 
     // copy object data to OBD
-    EPL_MEMCPY (pDstData_p, pSrcData_p, ObdSize);
+    EPL_MEMCPY (pDstData_p, pSrcData_p, ObdSize_p);
 
     // terminate string with 0
     if (pSubEntry_p->m_Type == kEplObdTypVString)
@@ -3403,7 +3401,7 @@ tEplObdSize StrSize = 0;
 static tEplKernel EplObdIsNumericalIntern(tEplObdSubEntryPtr pObdSubEntry_p,
                                         BOOL*         pfEntryNumerical_p)
 {
-tEplKernel          Ret;
+tEplKernel          Ret = kEplSuccessful;
 
 
     // get Type
@@ -3418,8 +3416,6 @@ tEplKernel          Ret;
         *pfEntryNumerical_p = TRUE;
     }
 
-
-Exit:
     return Ret;
 
 }

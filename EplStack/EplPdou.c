@@ -10,13 +10,13 @@
   -------------------------------------------------------------------------
 
                 $RCSfile$
-                
+
                 $Author$
-                
+
                 $Revision$  $Date$
-                
+
                 $State$
-                
+
                 Build Environment:
                     GCC V3.4
 
@@ -34,7 +34,7 @@
 
 #if ((EPL_MODULE_INTEGRATION & EPL_MODULE_PDOK) != 0)
 
-/*#if ((EPL_MODULE_INTEGRATION & EPL_MODULE_OBDU) == 0) 
+/*#if ((EPL_MODULE_INTEGRATION & EPL_MODULE_OBDU) == 0)
 
     #error 'ERROR: Missing OBDu-Modul!'
 
@@ -123,11 +123,11 @@
 // Description: add and initialize new instance of EPL stack
 //
 // Parameters:  none
-// 
+//
 // Returns:     tEplKernel              = error code
 //
 //
-// State:        
+// State:
 //
 //---------------------------------------------------------------------------
 
@@ -144,11 +144,11 @@ tEplKernel EplPdouAddInstance(void)
 // Description: deletes an instance of EPL stack
 //
 // Parameters:  none
-// 
+//
 // Returns:     tEplKernel              = error code
 //
 //
-// State:        
+// State:
 //
 //---------------------------------------------------------------------------
 
@@ -198,7 +198,7 @@ unsigned int        uiBitSize;
 
     // check index
     if ((pParam_p->m_uiIndex & EPL_PDOU_OBD_IDX_MASK) == EPL_PDOK_OBD_IDX_RX_COMM_PARAM)
-    {
+    {   // communication parameter accessed
         if (pParam_p->m_ObdEvent == kEplObdEvPreWrite)
         {
             Ret = EplPdouCheckPdoValidity(pParam_p, (EPL_PDOK_OBD_IDX_RX_MAPP_PARAM | uiPdoId));
@@ -209,9 +209,10 @@ unsigned int        uiBitSize;
         }
     }
     else if ((pParam_p->m_uiIndex & EPL_PDOU_OBD_IDX_MASK) == EPL_PDOK_OBD_IDX_RX_MAPP_PARAM)
-    {
+    {   // mapping parameter accessed
         if (pParam_p->m_uiSubIndex == 0)
         {
+            // PDO is enabled or disabled
         }
         else
         {   // ObjectMapping
@@ -222,6 +223,7 @@ unsigned int        uiBitSize;
                 {   // other fatal error occured
                     goto Exit;
                 }
+
                 // check existence of object and validity of object length
                 // decode object mapping -> move to separate function
                 qwObjectMapping = *((QWORD*) pParam_p->m_pArg);
@@ -265,11 +267,11 @@ Exit:
 //              EplPdouCbFrameReceived() or EplPdouCbFrameTransmitted()).
 //
 // Parameters:  pEvent_p                = pointer to event structure
-// 
+//
 // Returns:     tEplKernel              = error code
 //
 //
-// State:        
+// State:
 //
 //---------------------------------------------------------------------------
 
@@ -633,19 +635,19 @@ Exit:
 
 //---------------------------------------------------------------------------
 //
-// Function:     
+// Function:
 //
-// Description:  
-//               
-//
-//
-// Parameters:   
-//
-// 
-// Returns:      
+// Description:
 //
 //
-// State:        
+//
+// Parameters:
+//
+//
+// Returns:
+//
+//
+// State:
 //
 //---------------------------------------------------------------------------
 
