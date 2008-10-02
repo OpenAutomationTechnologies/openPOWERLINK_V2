@@ -159,10 +159,10 @@ EPLDLLEXPORT tEplKernel PUBLIC EplObdSetNodeId(EPL_MCO_DECL_INSTANCE_PTR_
                                          tEplObdNodeIdType NodeIdType_p);
 
 // ---------------------------------------------------------------------
-EPLDLLEXPORT tEplKernel EplObdIsNumeric(EPL_MCO_DECL_INSTANCE_PTR_
+EPLDLLEXPORT tEplKernel EplObdIsNumerical(EPL_MCO_DECL_INSTANCE_PTR_
                                         unsigned int  uiIndex_p,
                                         unsigned int  uiSubIndex_p,
-                                        BOOL*   pfEntryNumeric);
+                                        BOOL*   pfEntryNumerical);
 // ---------------------------------------------------------------------
 EPLDLLEXPORT tEplKernel PUBLIC EplObdWriteEntryFromLe (EPL_MCO_DECL_INSTANCE_PTR_
                                         unsigned int  uiIndex_p,

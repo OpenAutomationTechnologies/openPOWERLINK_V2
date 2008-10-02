@@ -2297,45 +2297,45 @@ BYTE*           pbSrcData;
     // save service
     pSdoComCon_p->m_SdoServiceType = kEplSdoServiceWriteByIndex;
 
-    // get size of object to if fit
-//#if((EPL_MODULE_INTEGRATION & EPL_MODULE_OBDU) != 0)
-    EntrySize = EplObduGetDataSize(uiIndex, uiSubindex);
-/*#else
-    EntrySize = 0;
-#endif*/
-    if(EntrySize < pSdoComCon_p->m_uiTransSize)
-    {   // parameter too big
-        pSdoComCon_p->m_dwLastAbortCode = EPL_SDOAC_DATA_TYPE_LENGTH_TOO_HIGH;
-        // send abort
-        // d.k. This is wrong: k.t. not needed send abort on end of write
-        /*pSdoComCon_p->m_pData = (BYTE*)&dwAbortCode;
-        Ret = EplSdoComServerSendFrameIntern(pSdoComCon_p,
-                                    uiIndex,
-                                    uiSubindex,
-                                    kEplSdoComSendTypeAbort);*/
-        goto Abort;
-    }
-
     pSdoComCon_p->m_uiTransferredByte = 0;
 
     // write data to OD
     if(pSdoComCon_p->m_SdoTransType == kEplSdoTransExpedited)
     {   // expedited transfer
+        // size checking is done by EplObduWriteEntryFromLe()
+
 //#if((EPL_MODULE_INTEGRATION & EPL_MODULE_OBDU) != 0)
         Ret = EplObduWriteEntryFromLe(uiIndex,
                                     uiSubindex,
                                     pbSrcData,
                                     pSdoComCon_p->m_uiTransSize);
-        if(Ret != kEplSuccessful)
+        switch (Ret)
         {
-            pSdoComCon_p->m_dwLastAbortCode = EPL_SDOAC_GENERAL_ERROR;
-            // send abort
-/*            pSdoComCon_p->m_pData = (BYTE*)&pSdoComCon_p->m_dwLastAbortCode;
-            Ret = EplSdoComServerSendFrameIntern(pSdoComCon_p,
-                                        uiIndex,
-                                        uiSubindex,
-                                        kEplSdoComSendTypeAbort);*/
-            goto Abort;
+            case kEplSuccessful:
+            {
+                break;
+            }
+
+            case kEplObdAccessViolation:
+            {
+                pSdoComCon_p->m_dwLastAbortCode = EPL_SDOAC_UNSUPPORTED_ACCESS;
+                // send abort
+                goto Abort;
+            }
+
+            case kEplObdValueLengthError:
+            {
+                pSdoComCon_p->m_dwLastAbortCode = EPL_SDOAC_DATA_TYPE_LENGTH_NOT_MATCH;
+                // send abort
+                goto Abort;
+            }
+
+            default:
+            {
+                pSdoComCon_p->m_dwLastAbortCode = EPL_SDOAC_GENERAL_ERROR;
+                // send abort
+                goto Abort;
+            }
         }
 //#endif
         // send command acknowledge
@@ -2349,6 +2349,28 @@ BYTE*           pbSrcData;
     }
     else
     {
+        // get size of the object to check if it fits
+        // because we directly write to the destination memory
+        // d.k. no one calls the user OD callback function
+
+    //#if((EPL_MODULE_INTEGRATION & EPL_MODULE_OBDU) != 0)
+        EntrySize = EplObduGetDataSize(uiIndex, uiSubindex);
+    /*#else
+        EntrySize = 0;
+    #endif*/
+        if(EntrySize < pSdoComCon_p->m_uiTransSize)
+        {   // parameter too big
+            pSdoComCon_p->m_dwLastAbortCode = EPL_SDOAC_DATA_TYPE_LENGTH_TOO_HIGH;
+            // send abort
+            // d.k. This is wrong: k.t. not needed send abort on end of write
+            /*pSdoComCon_p->m_pData = (BYTE*)&dwAbortCode;
+            Ret = EplSdoComServerSendFrameIntern(pSdoComCon_p,
+                                        uiIndex,
+                                        uiSubindex,
+                                        kEplSdoComSendTypeAbort);*/
+            goto Abort;
+        }
+
         uiBytesToTransfer = AmiGetWordFromLe(&pAsySdoCom_p->m_le_wSegmentSize);
         // eleminate header (Command header (8) + variable part (4) + Command header (4))
         uiBytesToTransfer -= 16;
@@ -2371,19 +2393,15 @@ BYTE*           pbSrcData;
         }
 
         // copy data
-//        if(pSdoComCon_p->m_dwLastAbortCode == 0)
-        {
-            EPL_MEMCPY(pSdoComCon_p->m_pData, pbSrcData, uiBytesToTransfer);
-        }
-        // update intern counter
+        EPL_MEMCPY(pSdoComCon_p->m_pData, pbSrcData, uiBytesToTransfer);
+
+        // update internal counter
         pSdoComCon_p->m_uiTransferredByte = uiBytesToTransfer;
         pSdoComCon_p->m_uiTransSize -= uiBytesToTransfer;
 
         // update target pointer
-//        if(pSdoComCon_p->m_dwLastAbortCode == 0)
-        {
-            (/*(BYTE*)*/pSdoComCon_p->m_pData) += uiBytesToTransfer;
-        }
+        (/*(BYTE*)*/pSdoComCon_p->m_pData) += uiBytesToTransfer;
+
         // send acknowledge without any Command layer data
         Ret = EplSdoAsySeqSendData(pSdoComCon_p->m_SdoSeqConHdl,
                                                 0,
