@@ -104,8 +104,8 @@
                                | EPL_MODULE_NMTK \
                                | EPL_MODULE_DLLK \
                                | EPL_MODULE_DLLU \
-                               | EPL_MODULE_OBDU \
                                | EPL_MODULE_VETH
+//                               | EPL_MODULE_OBDU \
 
 // =========================================================================
 // EPL ethernet driver (Edrv) specific defines

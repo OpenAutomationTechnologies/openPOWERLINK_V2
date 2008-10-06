@@ -91,6 +91,10 @@
 
 #if ((EPL_MODULE_INTEGRATION & EPL_MODULE_OBDU) != 0)
 
+#if EPL_OBD_USE_KERNEL != FALSE
+#error "EPL OBDu module enabled, but OBD_USE_KERNEL == TRUE"
+#endif
+
 EPLDLLEXPORT tEplKernel PUBLIC EplObduWriteEntry (unsigned int  uiIndex_p,
                                 unsigned int  uiSubIndex_p,
                                 void * pSrcData_p,
@@ -182,6 +186,8 @@ EPLDLLEXPORT tEplKernel PUBLIC EplObduSearchVarEntry (EPL_MCO_DECL_INSTANCE_PTR_
 #define EplObduWriteEntryFromLe EplObdWriteEntryFromLe
 
 #define EplObduSearchVarEntry   EplObdSearchVarEntry
+
+#define EplObduIsNumerical      EplObdIsNumerical
 
 #endif // #if((EPL_MODULE_INTEGRATION & EPL_MODULE_OBDU) != 0)
 

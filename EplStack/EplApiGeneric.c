@@ -1760,10 +1760,8 @@ BYTE                bTemp;
     {
         wTemp = (WORD) EplApiInstance_g.m_InitParam.m_uiPrescaler;
         Ret = EplObdWriteEntry(0x1F98, 9, &wTemp, 2);
-/*    if(Ret != kEplSuccessful)
-    {
-        goto Exit;
-    }*/
+        // ignore return code
+        Ret = kEplSuccessful;
     }
 
 #if((EPL_MODULE_INTEGRATION & EPL_MODULE_NMT_MN) != 0)

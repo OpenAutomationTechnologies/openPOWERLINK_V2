@@ -116,7 +116,7 @@
 
 // EPL_MODULE_INTEGRATION defines all modules which are included in
 // EPL application. Please add or delete modules for your application.
-#define EPL_MODULE_INTEGRATION          (0x000BF7FL)//(0x00000050L)
+#define EPL_MODULE_INTEGRATION          (0x0009F7FL)//(0x00000050L)
 //#define EPL_MODULE_INTEGRATION          (0x000BF7DL)//(0x00000050L)
 //#define EPL_MODULE_INTEGRATION          (0x0003F07L)//(0x00000050L)
 // EPL_MODULE_OBDK        0x00000001L // OBD kernelspace module

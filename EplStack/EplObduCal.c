@@ -72,7 +72,8 @@
 #include "user/EplObduCal.h"
 #include "kernel/EplObdk.h"
 
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_OBDU) != 0)
+#if ((EPL_MODULE_INTEGRATION & EPL_MODULE_OBDU) != 0) && (EPL_OBD_USE_KERNEL != FALSE)
+
 
 /***************************************************************************/
 /*                                                                         */

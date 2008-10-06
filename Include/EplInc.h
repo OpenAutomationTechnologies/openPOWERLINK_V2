@@ -106,8 +106,8 @@
 // possible other include file needed
 // These constants defines modules which can be included in the Epl application.
 // Use this constants for define EPL_MODULE_INTEGRATION in file EplCfg.h.
-#define EPL_MODULE_OBDK        0x00000001L // OBD kernelspace module
-#define EPL_MODULE_PDOK        0x00000002L // PDO kernelspace module
+#define EPL_MODULE_OBDK        0x00000001L // OBD kernel part module
+#define EPL_MODULE_PDOK        0x00000002L // PDO kernel part module
 #define EPL_MODULE_NMT_MN      0x00000004L // NMT MN module
 #define EPL_MODULE_SDOS        0x00000008L // SDO Server module
 #define EPL_MODULE_SDOC        0x00000010L // SDO Client module
@@ -115,13 +115,14 @@
 #define EPL_MODULE_SDO_UDP     0x00000040L // SDO over UDP module
 #define EPL_MODULE_SDO_PDO     0x00000080L // SDO in PDO module
 #define EPL_MODULE_NMT_CN      0x00000100L // NMT CN module
-#define EPL_MODULE_NMTU        0x00000200L // NMT userspace module
-#define EPL_MODULE_NMTK        0x00000400L // NMT kernelspace module
-#define EPL_MODULE_DLLK        0x00000800L // DLL kernelspace module
-#define EPL_MODULE_DLLU        0x00001000L // DLL userspace module
-#define EPL_MODULE_OBDU        0x00002000L // OBD userspace module
+#define EPL_MODULE_NMTU        0x00000200L // NMT user part module
+#define EPL_MODULE_NMTK        0x00000400L // NMT kernel part module
+#define EPL_MODULE_DLLK        0x00000800L // DLL kernel part module
+#define EPL_MODULE_DLLU        0x00001000L // DLL user part module
+#define EPL_MODULE_OBDU        0x00002000L // OBD user part module
 #define EPL_MODULE_CFGMA       0x00004000L // Configuartioan Manager module
 #define EPL_MODULE_VETH        0x00008000L // virtual ethernet driver module
+#define EPL_MODULE_PDOU        0x00010000L // PDO user part module
 
 #include "EplCfg.h"     // EPL configuration file (configuration from application)
 

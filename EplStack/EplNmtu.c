@@ -349,7 +349,7 @@ tEplKernel  Ret;
                     unsigned int uiNodeId;
 
                         // get node ID from OD
-#if ((EPL_MODULE_INTEGRATION & EPL_MODULE_OBDK) != 0) || (EPL_OBD_USE_KERNEL != FALSE)
+#if ((EPL_MODULE_INTEGRATION & EPL_MODULE_OBDU) != 0) || (EPL_OBD_USE_KERNEL != FALSE)
                         uiNodeId = EplObduGetNodeId(EPL_MCO_PTR_INSTANCE_PTR);
 #else
                         uiNodeId = 0;
@@ -380,7 +380,7 @@ tEplKernel  Ret;
 
                         // read NMT_CNBasicEthernetTimerout_U32 from OD
                         ObdSize = sizeof(dwBuffer);
-#if ((EPL_MODULE_INTEGRATION & EPL_MODULE_OBDK) != 0) || (EPL_OBD_USE_KERNEL != FALSE)
+#if ((EPL_MODULE_INTEGRATION & EPL_MODULE_OBDU) != 0) || (EPL_OBD_USE_KERNEL != FALSE)
                         Ret = EplObduReadEntry(EPL_MCO_PTR_INSTANCE_PTR_
                                                 0x1F99,
                                                 0x00,
@@ -452,6 +452,7 @@ tEplKernel  Ret;
                     //-----------------------------------------------------------
                     // MN part of the state machine
 
+#if ((EPL_MODULE_INTEGRATION & EPL_MODULE_NMT_MN) != 0)
                     // node listens for EPL-Frames and check timeout
                     case kEplNmtMsNotActive:
                     {
@@ -464,7 +465,7 @@ tEplKernel  Ret;
                         // check NMT_StartUp_U32.Bit13
                         // read NMT_StartUp_U32 from OD
                         ObdSize = sizeof(dwBuffer);
-#if ((EPL_MODULE_INTEGRATION & EPL_MODULE_OBDK) != 0) || (EPL_OBD_USE_KERNEL != FALSE)
+#if ((EPL_MODULE_INTEGRATION & EPL_MODULE_OBDU) != 0) || (EPL_OBD_USE_KERNEL != FALSE)
                         Ret = EplObduReadEntry(EPL_MCO_PTR_INSTANCE_PTR_
                                                 0x1F80,
                                                 0x00,
@@ -475,7 +476,7 @@ tEplKernel  Ret;
 #endif
                         if(Ret != kEplSuccessful)
                         {
-                            goto Exit;
+                            break;
                         }
 
                         if((dwBuffer & EPL_NMTST_BASICETHERNET) == 0)
@@ -491,7 +492,7 @@ tEplKernel  Ret;
 
                         // read NMT_BootTime_REC.MNWaitNotAct_U32 from OD
                         ObdSize = sizeof(dwBuffer);
-#if ((EPL_MODULE_INTEGRATION & EPL_MODULE_OBDK) != 0) || (EPL_OBD_USE_KERNEL != FALSE)
+#if ((EPL_MODULE_INTEGRATION & EPL_MODULE_OBDU) != 0) || (EPL_OBD_USE_KERNEL != FALSE)
                         Ret = EplObduReadEntry(EPL_MCO_PTR_INSTANCE_PTR_
                                                 0x1F89,
                                                 0x01,
@@ -528,7 +529,7 @@ tEplKernel  Ret;
 
                         // read NMT_BootTime_REC.MNWaitPreOp1_U32 from OD
                         ObdSize = sizeof(dwBuffer);
-#if ((EPL_MODULE_INTEGRATION & EPL_MODULE_OBDK) != 0) || (EPL_OBD_USE_KERNEL != FALSE)
+#if ((EPL_MODULE_INTEGRATION & EPL_MODULE_OBDU) != 0) || (EPL_OBD_USE_KERNEL != FALSE)
                         Ret = EplObduReadEntry(EPL_MCO_PTR_INSTANCE_PTR_
                                                 0x1F89,
                                                 0x03,
@@ -584,6 +585,7 @@ tEplKernel  Ret;
                     {
                         break;
                     }
+#endif // ((EPL_MODULE_INTEGRATION & EPL_MODULE_NMT_MN) != 0)
 
                     default:
                     {
@@ -600,6 +602,7 @@ tEplKernel  Ret;
             EPL_DBGLVL_NMTU_TRACE0("EplNmtuProcessEvent(): NMT-State-Maschine announce change of NMT State\n");
             break;
         }
+
         default:
         {
             Ret = kEplNmtInvalidEvent;
@@ -607,7 +610,7 @@ tEplKernel  Ret;
 
     }
 
-Exit:
+//Exit:
     return Ret;
 }
 

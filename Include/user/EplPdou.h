@@ -58,7 +58,6 @@
                 $State$
 
                 Build Environment:
-                KEIL uVision 2
 
   -------------------------------------------------------------------------
 
@@ -72,7 +71,8 @@
 #ifndef _EPL_PDOU_H_
 #define _EPL_PDOU_H_
 
-#include <Pdo.h>
+#include "EplPdo.h"
+
 
 //---------------------------------------------------------------------------
 // const defines
@@ -88,11 +88,14 @@
 // function prototypes
 //---------------------------------------------------------------------------
 
-tEplKernel EplPdouAddInstance();
+tEplKernel EplPdouAddInstance(void);
 
-tEplKernel EplPdouDelInstance();
+tEplKernel EplPdouDelInstance(void);
+
+tEplKernel PUBLIC EplPdouCbObdAccess(tEplObdCbParam MEM* pParam_p);
 
 // returns error if bPdoId_p is already valid
+/*
 tEplKernel EplPdouSetMapping(
     BYTE bPdoId_p, BOOL fTxRx_p, BYTE bNodeId, BYTE bMappingVersion,
     tEplPdoMapping * pMapping_p, BYTE bMaxEntries_p);
@@ -100,6 +103,7 @@ tEplKernel EplPdouSetMapping(
 tEplKernel EplPdouGetMapping(
     BYTE bPdoId_p, BOOL fTxRx_p, BYTE * pbNodeId, BYTE * pbMappingVersion,
     tEplPdoMapping * pMapping_p, BYTE * pbMaxEntries_p);
+*/
 
 #endif  // #ifndef _EPL_PDOU_H_
 

@@ -1055,7 +1055,7 @@ Exit:
 // State:
 //
 //---------------------------------------------------------------------------
-EPLDLLEXPORT tEplKernel EplObdIsNumerical(EPL_MCO_DECL_INSTANCE_PTR_
+EPLDLLEXPORT tEplKernel PUBLIC EplObdIsNumerical(EPL_MCO_DECL_INSTANCE_PTR_
                                         unsigned int  uiIndex_p,
                                         unsigned int  uiSubIndex_p,
                                         BOOL*         pfEntryNumerical_p)

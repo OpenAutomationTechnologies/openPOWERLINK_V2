@@ -116,7 +116,7 @@
 
 // EPL_MODULE_INTEGRATION defines all modules which are included in
 // EPL application. Please add or delete modules for your application.
-#define EPL_MODULE_INTEGRATION          (0x000BF7BL)//(0x00000050L)
+#define EPL_MODULE_INTEGRATION          (0x00019F7BL)//(0x00000050L)
 //#define EPL_MODULE_INTEGRATION          (0x000BF7DL)//(0x00000050L)
 //#define EPL_MODULE_INTEGRATION          (0x0003F07L)//(0x00000050L)
 // EPL_MODULE_OBDK        0x00000001L // OBD kernelspace module
@@ -135,6 +135,7 @@
 // EPL_MODULE_OBDU        0x00002000L // OBD userspace module
 // EPL_MODULE_CFGMA       0x00004000L // Configuration Manager module
 // EPL_MODULE_VETH        0x00008000L // virtual ethernet driver module
+// EPL_MODULE_PDOU        0x00010000L // PDO user module
 
 // =========================================================================
 // EPL ethernet driver (Edrv) specific defines
