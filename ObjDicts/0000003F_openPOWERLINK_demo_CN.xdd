@@ -263,7 +263,7 @@
 
         <Object index="6000" name="Digital Input 8 Bit" objectType="8">
           <SubObject subIndex="00" name="Number of elements" objectType="7" dataType="0005" accessType="ro" defaultValue="1" PDOmapping="no" />
-          <SubObject subIndex="01" name="DI00_to_DI07" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="TPDO" />
+          <SubObject subIndex="01" name="DI00_to_DI07" objectType="7" dataType="0005" accessType="ro" PDOmapping="TPDO" />
         </Object>
         <Object index="6200" name="Digital Ouput 8 Bit" objectType="8">
           <SubObject subIndex="00" name="Number of elements" objectType="7" dataType="0005" accessType="ro" defaultValue="1" PDOmapping="no" />
@@ -347,7 +347,7 @@
           <Object index="1C14" name="DLL_LossOfSocTolerance_U32" objectType="7" dataType="0007" accessType="rw" defaultValue="500000"/>
           <Object index="1F82" name="NMT_FeatureFlags_U32" objectType="7" dataType="0007" accessType="const" PDOmapping="no" defaultValue="0x07"/>
           <Object index="1F83" name="NMT_EPLVersion_U8" objectType="7" dataType="0005" accessType="const" PDOmapping="no" defaultValue="0x20"/>
-          <Object index="1F8C" name="NMT_CurrNMTState_U8" objectType="7" dataType="0005" PDOmapping="optional" accessType="ro"/>
+          <Object index="1F8C" name="NMT_CurrNMTState_U8" objectType="7" dataType="0005" PDOmapping="TPDO" accessType="ro"/>
           <Object index="1F93" name="NMT_EPLNodeID_REC" objectType="9">
             <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" PDOmapping="no" defaultValue="2"/>
             <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="ro" PDOmapping="no"/>
