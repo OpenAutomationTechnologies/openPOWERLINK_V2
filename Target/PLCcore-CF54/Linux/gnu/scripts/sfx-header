@@ -1,0 +1,35 @@
+#!/bin/sh
+
+echo ""
+echo " --- openPOWERLINK demo-CN ---"
+echo " Running installation... please wait"
+echo ""
+
+INSTALLDIR=/mnt/mtd3
+
+# compute line number where the TGZ starts
+SKIP=`awk '/^__ARCHIVE_FOLLOWS__/ { print NR + 1; exit 0; }' $0`
+
+
+# Take the TGZ portion of this file and pipe it to tar
+tail +$SKIP $0 | tar xzv -C $INSTALLDIR
+
+# check return code
+RC=$?
+if [ $RC -ne 0 ]; then
+    echo "Unable to untar the archive (return code: " $RC ")"
+    exit $RC
+fi
+
+# execute the installation script (if exist)
+if [ -e $INSTALLDIR/install.sh ]; then
+    PREV=`pwd`
+    cd $INSTALLDIR
+    ./install.sh
+    cd $PREV 
+fi
+
+
+exit 0
+
+__ARCHIVE_FOLLOWS__

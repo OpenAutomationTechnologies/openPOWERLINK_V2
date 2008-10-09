@@ -1,4 +1,7 @@
 
+MODULENAME  = cf54drv
+INSTALLDIR  = /home/tftpboot/daniel
+
 
 # ------------------------- Secundary Call ----------------------------------
 ifneq ($(KERNELRELEASE),) 
@@ -73,6 +76,13 @@ call_driver_build:
 
 				$(CC) $(CFLAGS) -c cf54drv.c -o cf54drv_lib.o
 				$(AR) r cf54drv.a cf54drv_lib.o
+
+
+.PHONY:     install
+install:    call_driver_build
+#			cp $(MODULENAME).ko $(INSTALLDIR)
+			${M68K_CC_PREFIX}strip --strip-unneeded -o $(INSTALLDIR)/$(MODULENAME).ko $(MODULENAME).ko
+
 
 endif
 

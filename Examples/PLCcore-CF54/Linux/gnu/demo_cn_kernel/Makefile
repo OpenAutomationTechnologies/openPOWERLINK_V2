@@ -65,7 +65,11 @@ LD_LIBRARY_PATH	:= $(M68K_LD_LIBRARY_PATH)
 
 
 PWD				:= $(shell pwd)
-
+MAINPATH	= ../../../../..
+# directory with scripts
+SCRIPTDIR	= $(MAINPATH)/Target/PLCcore-CF54/Linux/gnu/scripts/
+# directory with board driver for ECUcore-5484
+DRIVERDIR	= $(PWD)/$(MAINPATH)/Target/PLCcore-CF54/Linux/gnu/driver/
 
 .PHONY:     call_driver_build
 call_driver_build:
@@ -75,6 +79,15 @@ call_driver_build:
 install:    call_driver_build
 #			cp $(MODULENAME).ko $(INSTALLDIR)
 			${M68K_CC_PREFIX}strip --strip-unneeded -o $(INSTALLDIR)/$(MODULENAME).ko $(MODULENAME).ko
+
+# build the installer
+.PHONY:     installer
+installer:	call_driver_build
+# build board driver
+			$(MAKE) -C $(DRIVERDIR) INSTALLDIR=$(PWD) install
+# build installer
+	                dos2unix $(SCRIPTDIR)build-install.sh && chmod +x $(SCRIPTDIR)build-install.sh && $(SCRIPTDIR)build-install.sh
+
 
 endif
 
