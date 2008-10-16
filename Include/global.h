@@ -37,6 +37,8 @@
 #define _DEV_BIT32_             0x00000300L     //                  32 bit
 #define _DEV_BIT16_             0x00000200L     //                  16 bit
 #define _DEV_BIT8_              0x00000100L     //                  8 bit
+#define _DEV_RVCT_ARM_          0x0000001CL     //                  RealView ARM
+#define _DEV_RENESASM32C        0x0000001BL     // compiler from:   Renesas
 #define _DEV_GNUC_MIPS2_        0x0000001AL     //                  GNU for MIPS2
 #define _DEV_MPLAB_C30_         0x00000019L     //                  MPLAB C30 for Microchip dsPIC33F series
 #define _DEV_GNUC_TC_           0x00000018L     //                  GNU for Infineon TriCore
@@ -93,12 +95,13 @@
 #define _DEV_LINUX_             (_DEV_BIT32_ | _DEV_LINUX_GCC_                | _DEV_64BIT_SUPPORT_ | _DEV_COMMA_EXT_)
 #define _DEV_GNU_C16X_          (_DEV_BIT16_ | _DEV_GNUC_C16X_               ) //| _DEV_COMMA_EXT_)
 #define _DEV_MCW_MPC5X5_        (_DEV_BIT32_ | _DEV_METROWERKS_CW_           ) //| _DEV_64BIT_SUPPORT_ | _DEV_COMMA_EXT_)
-#define _DEV_GNU_ARM7_          (_DEV_BIT32_ | _DEV_GNUC_ARM7_                | _DEV_64BIT_SUPPORT_ | _DEV_COMMA_EXT_)
+#define _DEV_GNU_ARM7_          (_DEV_BIT32_ | _DEV_GNUC_ARM7_                | _DEV_64BIT_SUPPORT_ | _DEV_COMMA_EXT_ | _DEV_ONLY_INT_MAIN_)
 #define _DEV_WIN32_RTX_         (_DEV_BIT32_ | _DEV_MSVC_RTX_                ) //| _DEV_64BIT_SUPPORT_ | _DEV_COMMA_EXT_)
 #define _DEV_HIGHTEC_X86_       (_DEV_BIT32_ | _DEV_HIGHTEC_GNUC_X86_        ) //| _DEV_64BIT_SUPPORT_ | _DEV_COMMA_EXT_)
 #define _DEV_WIN_CE_            (_DEV_BIT32_ | _DEV_MSEVC_                   ) //| _DEV_64BIT_SUPPORT_ | _DEV_COMMA_EXT_)
 #define _DEV_KEIL_CARM_         (_DEV_BIT32_ | _DEV_KEIL_ARM_                 | _DEV_64BIT_SUPPORT_ | _DEV_COMMA_EXT_)
 #define _DEV_IAR_CARM_          (_DEV_BIT32_ | _DEV_IAR_ARM_                  | _DEV_64BIT_SUPPORT_ | _DEV_COMMA_EXT_)
+#define _DEV_RVCT_CARM_         (_DEV_BIT32_ | _DEV_RVCT_ARM_                 | _DEV_64BIT_SUPPORT_ | _DEV_COMMA_EXT_ | _DEV_ONLY_INT_MAIN_)
 #define _DEV_MCW_MCF5XXX_       (_DEV_BIT32_ | _DEV_METROWERKS_CW_           ) //| _DEV_64BIT_SUPPORT_ | _DEV_COMMA_EXT_)
 #define _DEV_GNU_CF5282_        (_DEV_BIT32_ | _DEV_GNUC_CF_   | _DEV_BIGEND_)
 #define _DEV_PAR_BECK1X3_       (_DEV_BIT16_ | _DEV_PARADGM_X86)
@@ -108,6 +111,7 @@
 #define _DEV_MPLAB_DSPIC33F_    (_DEV_BIT16_ | _DEV_MPLAB_C30_               ) //| _DEV_COMMA_EXT_)
 #define _DEV_GNU_MIPSEL_        (_DEV_BIT32_ | _DEV_GNUC_MIPS2_     | _DEV_BIGEND_ | _DEV_64BIT_SUPPORT_ | _DEV_COMMA_EXT_ | _DEV_ONLY_INT_MAIN_)
 
+#define _DEV_RENESAS_M32C_      (_DEV_BIT32_ | _DEV_RENESASM32C)
 
 //---------------------------------------------------------------------------
 //  usefull macros
@@ -338,6 +342,49 @@
     #endif
 
 //---------------------------------------------------------------------------
+//  definitions for RealView ARM compilation tools (provided by recent Keil Microcontroller Development Kits)
+//---------------------------------------------------------------------------
+#elif  defined (__ARMCC_VERSION)
+
+    #define TARGET_SYSTEM   _NO_OS_
+    #define DEV_SYSTEM      _DEV_RVCT_CARM_
+
+    #define NEAR                        // variables mapped to internal data storage location
+    #define FAR                         // variables mapped to external data storage location
+    #define CONST        const          // variables mapped to ROM (i.e. flash)
+    #define ROM                         // code or variables mapped to ROM (i.e. flash)
+                                        // usage: CONST BYTE ROM foo = 0x00;
+    #define HWACC                       // hardware access through external memory (i.e. CAN)
+    #define LARGE                       // functions set parameters to external data storage location
+
+    // These types can be adjusted by users to match application requirements. The goal is to
+    // minimize code memory and maximize speed.
+    #define GENERIC                     // generic pointer to point to application data
+                                        // Variables with this attribute can be located in external
+                                        // or internal data memory.
+    #define MEM                         // Memory attribute to optimize speed and code of pointer access.
+
+    #define REENTRANT
+    #define PUBLIC
+
+    #ifndef QWORD
+        #define QWORD long long
+    #endif
+
+    #ifndef NDEBUG
+        #define ASSERT(expr)    if (!(expr)) {\
+                                   TRACE0 ("Assertion failed: " #expr );\
+                                   while (1);}
+    #else
+        #define ASSERT(expr)
+    #endif
+
+    #ifndef NDEBUG
+        #include <stdio.h>              // prototype printf() (for TRACE)
+        #define TRACE  printf
+    #endif
+
+//---------------------------------------------------------------------------
 //  definitions for ARM IAR C Compiler
 //---------------------------------------------------------------------------
 #elif  defined (__ICCARM__)
@@ -460,7 +507,8 @@
 //  definitions for FUJITSU FFMC-16LX MB90590
 //---------------------------------------------------------------------------
 
-#elif (defined (F590) || defined (F543) || defined (F598) || defined (F495) || defined (F350))
+//#elif (defined (F590) || defined (F543) || defined (F598) || defined (F495) || defined (F350))
+#elif defined(__COMPILER_FCC907__)
 
     #define TARGET_SYSTEM   _NO_OS_
     #define DEV_SYSTEM      _DEV_FUJITSU_F590_
@@ -561,6 +609,38 @@
     #endif
 
 //---------------------------------------------------------------------------
+//  definitions for Renesas M32C family for Renesas Compiler
+//---------------------------------------------------------------------------
+#elif defined (NC308)
+
+    #define TARGET_SYSTEM   _NO_OS_
+    #define DEV_SYSTEM      _DEV_RENESAS_M32C_
+
+    #define NEAR             near       // variables mapped to internal data storage location
+    #define FAR              far        // variables mapped to external data storage location
+    #define CONST            const      // variables mapped to ROM (i.e. flash)
+    #define ROM                         // code or variables mapped to ROM (i.e. flash)
+    #define HWACC                       // hardware access through external memory (i.e. CAN)
+    #define LARGE                       // functions set parameters to external data storage location
+
+    // These types can be adjusted by users to match application requirements. The goal is to
+    // minimize code memory and maximize speed.
+    #define GENERIC                     // generic pointer to point to application data
+                                        // Variables with this attribute can be located in external
+                                        // or internal data memory.
+    #define MEM              far        // Memory attribute to optimize speed and code of pointer access.
+
+    #define REENTRANT
+    #define PUBLIC
+
+    #ifndef NDEBUG
+        #include <stdio.h>                  // prototype printf() (for TRACE)
+        #define TRACE  printf
+    #endif
+
+//    #error ("RENESAS o.k.")
+
+//---------------------------------------------------------------------------
 //  definitions for ARM7 family with GNU compiler
 //---------------------------------------------------------------------------
 
@@ -587,6 +667,10 @@
 
     #define REENTRANT
     #define PUBLIC
+
+    #ifndef QWORD
+        #define QWORD long long    // i.A. durch Herr Kuschel
+    #endif
 
     #ifndef NDEBUG
         #include <stdio.h>                  // prototype printf() (for TRACE)
