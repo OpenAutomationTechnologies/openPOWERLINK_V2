@@ -75,7 +75,7 @@
 #include "kernel/EplErrorHandlerk.h"
 #include "Benchmark.h"
 
-#if ((EPL_MODULE_INTEGRATION & EPL_MODULE_PDOK) != 0)
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOK)) != 0)
 #include "kernel/EplPdok.h"
 #include "kernel/EplPdokCal.h"
 #endif
@@ -348,7 +348,7 @@ tEplEventSource         EventSource;
     // error handling if event queue is full
     if (EplEventkInstance_g.m_uiUserToKernelFullCount > 0)
     {   // UserToKernel event queue has run out of space -> kEplNmtEventInternComError
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_NMTK) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMTK)) != 0)
         tEplEvent   Event;
         tEplNmtEvent NmtEvent;
 #endif
@@ -357,7 +357,7 @@ tEplEventSource         EventSource;
 #endif
 
         // directly call NMTk process function, because event queue is full
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_NMTK) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMTK)) != 0)
         NmtEvent = kEplNmtEventInternComError;
         Event.m_EventSink = kEplEventSinkNmtk;
         Event.m_NetTime.m_dwNanoSec = 0;
@@ -391,7 +391,7 @@ tEplEventSource         EventSource;
                 Ret = EplEventkInstance_g.m_pfnCbSync();
                 if (Ret == kEplSuccessful)
                 {
-#if ((EPL_MODULE_INTEGRATION & EPL_MODULE_PDOK) != 0)
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOK)) != 0)
                     // mark TPDOs as valid
                     Ret = EplPdokCalSetTpdosValid(TRUE);
 #endif
@@ -413,7 +413,7 @@ tEplEventSource         EventSource;
         // NMT-Kernel-Modul
         case kEplEventSinkNmtk:
         {
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_NMTK) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMTK)) != 0)
             Ret = EplNmtkProcess(pEvent_p);
             if ((Ret != kEplSuccessful) && (Ret != kEplShutdown))
             {
@@ -426,10 +426,10 @@ tEplEventSource         EventSource;
                                 &EventSource);
             }
 #endif
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_DLLK) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLK)) != 0)
             if ((pEvent_p->m_EventType == kEplEventTypeNmtEvent)
                 && ((*((tEplNmtEvent*)pEvent_p->m_pArg) == kEplNmtEventDllCeSoa)
-#if ((EPL_MODULE_INTEGRATION & EPL_MODULE_NMT_MN) != 0)
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
                 || (*((tEplNmtEvent*)pEvent_p->m_pArg) == kEplNmtEventDllMeSoaSent)
 #endif
                 ))
@@ -446,7 +446,7 @@ tEplEventSource         EventSource;
                                     &EventSource);
                 }
 
-#if ((EPL_MODULE_INTEGRATION & EPL_MODULE_PDOK) != 0)
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOK)) != 0)
                 // forward SoA event to PDO module
                 pEvent_p->m_EventType = kEplEventTypePdoSoa;
                 Ret = EplPdokProcess(pEvent_p);
@@ -470,7 +470,7 @@ tEplEventSource         EventSource;
         // events for Dllk module
         case kEplEventSinkDllk:
         {
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_DLLK) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLK)) != 0)
             Ret = EplDllkProcess(pEvent_p);
             if ((Ret != kEplSuccessful) && (Ret != kEplShutdown))
             {
@@ -489,7 +489,7 @@ tEplEventSource         EventSource;
         // events for DllkCal module
         case kEplEventSinkDllkCal:
         {
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_DLLK) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLK)) != 0)
             Ret = EplDllkCalProcess(pEvent_p);
             if ((Ret != kEplSuccessful) && (Ret != kEplShutdown))
             {
@@ -509,7 +509,7 @@ tEplEventSource         EventSource;
         case kEplEventSinkPdok:
         {
             // PDO-Module
-#if ((EPL_MODULE_INTEGRATION & EPL_MODULE_PDOK) != 0)
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOK)) != 0)
             Ret = EplPdokProcess(pEvent_p);
             if ((Ret != kEplSuccessful) && (Ret != kEplShutdown))
             {
@@ -529,7 +529,7 @@ tEplEventSource         EventSource;
         case kEplEventSinkErrk:
         {
             // only call error handler if DLL is present
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_DLLK) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLK)) != 0)
             Ret = EplErrorHandlerkProcess(pEvent_p);
             if ((Ret != kEplSuccessful) && (Ret != kEplShutdown))
             {

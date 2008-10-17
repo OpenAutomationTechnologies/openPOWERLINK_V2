@@ -73,7 +73,7 @@
 
 #include "kernel/EplDllk.h"     // for EplDllkProcess()
 
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_NMTK) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMTK)) != 0)
 /***************************************************************************/
 /*                                                                         */
 /*                                                                         */
@@ -1099,7 +1099,7 @@ tEplEventNmtStateChange NmtStateChange;
         // -> if no EPL traffic go to next state
         case kEplNmtMsNotActive:
         {
-            #if((EPL_MODULE_INTEGRATION & EPL_MODULE_NMT_MN) == 0)
+            #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) == 0)
                 // no MN functionality
                 // TODO: -create error E_NMT_BA1_NO_MN_SUPPORT
                 EPL_MCO_GLB_VAR(m_fFrozen) = FALSE;
@@ -1185,7 +1185,7 @@ tEplEventNmtStateChange NmtStateChange;
                             //       2. it is the same as without event queues (i.e. well tested),
                             //       3. DLLk will get those necessary events even if event queue is full
                             //       4. event queue is very inefficient
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_DLLK) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLK)) != 0)
                             Ret = EplDllkProcess(&Event);
 #else
                             Ret = EplEventkPost(&Event);
@@ -1201,11 +1201,11 @@ tEplEventNmtStateChange NmtStateChange;
 
                 }// end of switch(NmtEvent)
 
-            #endif // (EPL_MODULE_INTEGRATION & EPL_MODULE_NMT_MN) == 0)
+            #endif // ((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) == 0)
 
             break;
         }
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_NMT_MN) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
         // MN process reduces epl cycle
         case kEplNmtMsPreOperational1:
         {
@@ -1597,7 +1597,7 @@ tEplEventNmtStateChange NmtStateChange;
             }// end of switch(NmtEvent)
             break;
         }
-#endif //#if((EPL_MODULE_INTEGRATION & EPL_MODULE_NMT_MN) != 0)
+#endif //#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
 
         default:
         {
@@ -1632,7 +1632,7 @@ tEplEventNmtStateChange NmtStateChange;
             //       2. it is the same as without event queues (i.e. well tested),
             //       3. DLLk will get those necessary events even if event queue is full,
             //       4. event queue is very inefficient
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_DLLK) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLK)) != 0)
             Ret = EplDllkProcess(&Event);
 #else
             Ret = EplEventkPost(&Event);
@@ -1652,7 +1652,7 @@ tEplEventNmtStateChange NmtStateChange;
             //       2. it is the same as without event queues (i.e. well tested),
             //       3. DLLk will get those necessary events even if event queue is full
             //       4. event queue is very inefficient
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_DLLK) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLK)) != 0)
             Ret = EplDllkProcess(&Event);
 #else
             Ret = EplEventkPost(&Event);
@@ -1675,7 +1675,7 @@ tEplEventNmtStateChange NmtStateChange;
             //       2. it is the same as without event queues (i.e. well tested),
             //       3. DLLk will get those necessary events even if event queue is full
             //       4. event queue is very inefficient
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_DLLK) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLK)) != 0)
             Ret = EplDllkProcess(&Event);
 #else
             Ret = EplEventkPost(&Event);
@@ -1753,7 +1753,7 @@ EPL_MCO_DECL_INSTANCE_FCT ()
 //---------------------------------------------------------------------------
 
 
-#endif // #if((EPL_MODULE_INTEGRATION & EPL_MODULE_NMTK) != 0)
+#endif // #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMTK)) != 0)
 
 // EOF
 

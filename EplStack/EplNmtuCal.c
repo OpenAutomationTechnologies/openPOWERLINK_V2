@@ -126,7 +126,7 @@ EPLDLLEXPORT tEplNmtState PUBLIC EplNmtkCalGetNmtState()
 {
 tEplNmtState NmtState;
     // for test direkt call for EplNmtkGetNmtState()
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_NMTK) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMTK)) != 0)
     NmtState = EplNmtkGetNmtState();
 #else
     NmtState = 0;

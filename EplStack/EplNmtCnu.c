@@ -72,7 +72,7 @@
 #include "user/EplNmtCnu.h"
 #include "user/EplDlluCal.h"
 
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_NMT_CN) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_CN)) != 0)
 
 /***************************************************************************/
 /*                                                                         */
@@ -177,7 +177,7 @@ tEplKernel Ret;
     EplNmtCnuInstance_g.m_uiNodeId = uiNodeId_p;
 
     // register callback-function for NMT-commands
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_DLLU) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLU)) != 0)
     Ret = EplDlluCalRegAsndService(kEplDllAsndNmtCommand,
                                    EplNmtCnuCommandCb,
                                    kEplDllAsndFilterLocal);
@@ -211,7 +211,7 @@ tEplKernel Ret;
 
     Ret = kEplSuccessful;
 
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_DLLU) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLU)) != 0)
     // deregister callback function from DLL
     Ret = EplDlluCalRegAsndService(kEplDllAsndNmtCommand,
                                    NULL,
@@ -272,7 +272,7 @@ tEplFrame       NmtRequestFrame;
     NmtRequestFrameInfo.m_uiFrameSize = EPL_C_DLL_MINSIZE_NMTREQ; // sizeof(NmtRequestFrame);
 
     // send NMT-Request
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_DLLU) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLU)) != 0)
     Ret = EplDlluCalAsyncSend(&NmtRequestFrameInfo,    // pointer to frameinfo
                            kEplDllAsyncReqPrioNmt); // priority
 #endif
@@ -601,7 +601,7 @@ tEplNmtEvent    NmtEvent = kEplNmtEventNoEvent;
                 goto Exit;
             }
         }
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_NMTU) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMTU)) != 0)
         Ret = EplNmtuNmtEvent(NmtEvent);
 #endif
     }
@@ -685,7 +685,7 @@ BYTE            bNodeListByte;
 return  fNodeIdInList;
 }
 
-#endif // #if((EPL_MODULE_INTEGRATION & EPL_MODULE_NMT_CN) != 0)
+#endif // #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_CN)) != 0)
 
 // EOF
 

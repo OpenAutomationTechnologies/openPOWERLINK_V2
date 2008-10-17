@@ -116,7 +116,7 @@ typedef struct _tEplDllkNodeInfo tEplDllkNodeInfo;
 // function prototypes
 //---------------------------------------------------------------------------
 
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_DLLK) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLK)) != 0)
 
 tEplKernel EplDllkAddInstance(tEplDllkInitParam * pInitParam_p);
 
@@ -150,7 +150,7 @@ tEplKernel EplDllkCreateTxFrame(unsigned int * puiHandle_p,
 tEplKernel EplDllkDeleteTxFrame(unsigned int uiHandle_p);
 
 
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_NMT_MN) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
 
 tEplKernel EplDllkAddNode(tEplDllNodeInfo * pNodeInfo_p);
 
@@ -162,9 +162,9 @@ tEplKernel EplDllkSetFlag1OfNode(unsigned int uiNodeId_p, BYTE bSoaFlag1_p);
 
 tEplKernel EplDllkGetFirstNodeInfo(tEplDllkNodeInfo** ppNodeInfo_p);
 
-#endif //((EPL_MODULE_INTEGRATION & EPL_MODULE_NMT_MN) != 0)
+#endif //(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
 
-#endif // #if((EPL_MODULE_INTEGRATION & EPL_MODULE_DLLK) != 0)
+#endif // #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLK)) != 0)
 
 #endif  // #ifndef _EPL_DLLK_H_
 

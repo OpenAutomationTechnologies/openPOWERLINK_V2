@@ -268,7 +268,7 @@ tEplKernel PUBLIC EplApiExecNmtCommand(tEplNmtEvent NmtEvent_p);
 tEplKernel PUBLIC EplApiProcess(void);
 
 
-#if ((EPL_MODULE_INTEGRATION & EPL_MODULE_NMT_MN) != 0)
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
 tEplKernel PUBLIC EplApiMnTriggerStateChange(unsigned int uiNodeId_p,
                                              tEplNmtNodeCommand  NodeCommand_p);
 #endif

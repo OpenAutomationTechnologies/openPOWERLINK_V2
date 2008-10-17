@@ -88,7 +88,7 @@ typedef tEplKernel (PUBLIC * tEplDlluCbAsnd) (tEplFrameInfo * pFrameInfo_p);
 // function prototypes
 //---------------------------------------------------------------------------
 
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_DLLU) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLU)) != 0)
 
 tEplKernel EplDlluAddInstance(void);
 
@@ -101,7 +101,7 @@ tEplKernel EplDlluAsyncSend(tEplFrameInfo * pFrameInfo_p, tEplDllAsyncReqPriorit
 // processes asynch frames
 tEplKernel EplDlluProcess(tEplFrameInfo * pFrameInfo_p);
 
-#endif // #if((EPL_MODULE_INTEGRATION & EPL_MODULE_DLLU) != 0)
+#endif // #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLU)) != 0)
 
 #endif  // #ifndef _EPL_DLLU_H_
 

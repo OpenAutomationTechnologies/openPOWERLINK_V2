@@ -71,7 +71,7 @@
 #include "user/EplDllu.h"
 #include "user/EplDlluCal.h"
 
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_DLLU) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLU)) != 0)
 /***************************************************************************/
 /*                                                                         */
 /*                                                                         */
@@ -319,7 +319,7 @@ tEplKernel  Ret = kEplSuccessful;
 //                                                                         //
 //=========================================================================//
 
-#endif // #if((EPL_MODULE_INTEGRATION & EPL_MODULE_DLLU) != 0)
+#endif // #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLU)) != 0)
 
 // EOF
 

@@ -88,7 +88,7 @@
 //---------------------------------------------------------------------------
 // function prototypes
 //---------------------------------------------------------------------------
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_SDO_UDP) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDO_UDP)) != 0)
 
 tEplKernel PUBLIC EplSdoUdpuInit(tEplSequLayerReceiveCb fpReceiveCb_p);
 
@@ -107,7 +107,7 @@ tEplKernel PUBLIC EplSdoUdpuSendData(tEplSdoConHdl       SdoConHandle_p,
 
 tEplKernel PUBLIC EplSdoUdpuDelCon(tEplSdoConHdl SdoConHandle_p);
 
-#endif // end of #if((EPL_MODULE_INTEGRATION & EPL_MODULE_SDO_UDP) != 0)
+#endif // end of #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDO_UDP)) != 0)
 
 #endif  // #ifndef _EPLSDOUDPU_H_
 

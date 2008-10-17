@@ -89,7 +89,7 @@
 //---------------------------------------------------------------------------
 // function prototypes
 //---------------------------------------------------------------------------
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_SDO_ASND) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDO_ASND)) != 0)
 
 tEplKernel PUBLIC EplSdoAsnduInit(tEplSequLayerReceiveCb fpReceiveCb_p);
 
@@ -106,7 +106,7 @@ tEplKernel PUBLIC EplSdoAsnduSendData(tEplSdoConHdl       SdoConHandle_p,
 
 tEplKernel PUBLIC EplSdoAsnduDelCon(tEplSdoConHdl SdoConHandle_p);
 
-#endif // end of #if((EPL_MODULE_INTEGRATION & EPL_MODULE_SDO_ASND) != 0)
+#endif // end of #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDO_ASND)) != 0)
 
 #endif  // #ifndef _EPLSDOASNDU_H_
 

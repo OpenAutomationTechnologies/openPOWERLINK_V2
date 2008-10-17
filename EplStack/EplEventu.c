@@ -359,7 +359,7 @@ tEplEventSource         EventSource;
         // NMT-User-Module
         case kEplEventSinkNmtu:
         {
-#if ((EPL_MODULE_INTEGRATION & EPL_MODULE_NMTU) != 0)
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMTU)) != 0)
             Ret = EplNmtuProcessEvent(pEvent_p);
             if ((Ret != kEplSuccessful) && (Ret != kEplShutdown))
             {
@@ -375,7 +375,7 @@ tEplEventSource         EventSource;
             break;
         }
 
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_NMT_MN) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
         // NMT-MN-User-Module
         case kEplEventSinkNmtMnu:
         {
@@ -394,8 +394,8 @@ tEplEventSource         EventSource;
         }
 #endif
 
-#if (((EPL_MODULE_INTEGRATION & EPL_MODULE_SDOC) != 0)   \
-     || ((EPL_MODULE_INTEGRATION & EPL_MODULE_SDOS) != 0))
+#if ((((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOC)) != 0)   \
+     || (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOS)) != 0))
         // events for asynchronus SDO Sequence Layer
         case kEplEventSinkSdoAsySeq:
         {

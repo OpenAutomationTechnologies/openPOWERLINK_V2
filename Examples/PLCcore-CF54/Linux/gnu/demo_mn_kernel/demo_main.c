@@ -741,7 +741,7 @@ tEplKernel          EplRet = kEplSuccessful;
             {
                 break;
             }
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_NMT_MN) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
             if (pEventArg_p->m_Sdo.m_SdoComConState == kEplSdoComTransferFinished)
             {   // continue boot-up of CN with NMT command Reset Configuration
                 EplRet = EplApiMnTriggerStateChange(pEventArg_p->m_Sdo.m_uiNodeId, kEplNmtNodeCommandConfReset);

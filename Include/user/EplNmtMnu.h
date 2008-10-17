@@ -102,7 +102,7 @@ typedef tEplKernel (PUBLIC * tEplNmtMnuCbBootEvent) (
 // function prototypes
 //---------------------------------------------------------------------------
 
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_NMT_MN) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
 
 tEplKernel EplNmtMnuInit(tEplNmtMnuCbNodeEvent pfnCbNodeEvent_p,
                          tEplNmtMnuCbBootEvent pfnCbBootEvent_p);

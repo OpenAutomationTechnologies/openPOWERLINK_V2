@@ -89,7 +89,7 @@
 // function prototypes
 //---------------------------------------------------------------------------
 
-#if ((EPL_MODULE_INTEGRATION & EPL_MODULE_OBDU) != 0)
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_OBDU)) != 0)
 
 #if EPL_OBD_USE_KERNEL != FALSE
 #error "EPL OBDu module enabled, but OBD_USE_KERNEL == TRUE"
@@ -189,7 +189,7 @@ EPLDLLEXPORT tEplKernel PUBLIC EplObduSearchVarEntry (EPL_MCO_DECL_INSTANCE_PTR_
 
 #define EplObduIsNumerical      EplObdIsNumerical
 
-#endif // #if((EPL_MODULE_INTEGRATION & EPL_MODULE_OBDU) != 0)
+#endif // #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_OBDU)) != 0)
 
 #endif  // #ifndef _EPLOBDU_H_
 

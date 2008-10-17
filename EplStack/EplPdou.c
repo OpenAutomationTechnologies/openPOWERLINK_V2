@@ -76,9 +76,9 @@
 #include "user/EplPdou.h"
 #include "EplSdoAc.h"
 
-#if ((EPL_MODULE_INTEGRATION & EPL_MODULE_PDOU) != 0)
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOU)) != 0)
 
-#if ((EPL_MODULE_INTEGRATION & EPL_MODULE_OBDU) == 0) && (EPL_OBD_USE_KERNEL == FALSE)
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_OBDU)) == 0) && (EPL_OBD_USE_KERNEL == FALSE)
 #error "EPL PDOu module needs EPL module OBDU or OBDK!"
 #endif
 
@@ -602,7 +602,7 @@ Exit:
 }
 
 
-#endif // #if ((EPL_MODULE_INTEGRATION & EPL_MODULE_PDOU) != 0)
+#endif // #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOU)) != 0)
 
 // EOF
 

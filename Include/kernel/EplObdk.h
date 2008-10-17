@@ -93,7 +93,7 @@ extern BYTE MEM abEplObdTrashObject_g[8];
 //---------------------------------------------------------------------------
 // function prototypes
 //---------------------------------------------------------------------------
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_OBDK) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_OBDK)) != 0)
 // ---------------------------------------------------------------------
 EPLDLLEXPORT tEplKernel PUBLIC EplObdInit (EPL_MCO_DECL_PTR_INSTANCE_PTR_
     tEplObdInitParam MEM*      pInitParam_p);
@@ -189,7 +189,7 @@ EPLDLLEXPORT tEplKernel PUBLIC EplObdSearchVarEntry (EPL_MCO_DECL_INSTANCE_PTR_
     unsigned int            uiSubindex_p,
     tEplObdVarEntry MEM**   ppVarEntry_p);
 
-#endif // end of #if((EPL_MODULE_INTEGRATION & EPL_MODULE_OBDK) != 0)
+#endif // end of #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_OBDK)) != 0)
 
 #endif  // #ifndef _EPLOBDK_H_
 

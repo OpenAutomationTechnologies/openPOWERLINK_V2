@@ -21,8 +21,8 @@ Fellow worker:    Daniel Krüger (d.k.)
                     (d.k.)
 
 14.04.2008 V1.1     - New driver and demo application for X86 with Realtek
-		      RTL8139 network controller under Linux.
-		    - several bug fixes in SDO module and NMT MN module.
+                      RTL8139 network controller under Linux.
+                    - several bug fixes in SDO module and NMT MN module.
                     (d.k., m.u.)
 
 18.04.2008 V1.2     - new functions in EplApiLinuxUser interface
@@ -42,13 +42,47 @@ Fellow worker:    Daniel Krüger (d.k.)
 19.08.2008 V1.2     - added Qt demo for X86 with RTL8139
                     - added handling of SDO errors on MN to demo projects.
                       These may occur if the CN drops and the SDO connection was not closed yet.
-		    - added .cvsignore files to project directories
-		    - added manufacturer specific EPL error codes (EPL_E_*) for
+                    - added .cvsignore files to project directories
+                    - added manufacturer specific EPL error codes (EPL_E_*) for
                       missing IdentResponse and StatusResponse
                     (d.k.)
 
 25.08.2008 V1.2     - fixed bug in EplApiLinux*.c when EplApiShutdown() was called.
                       The process image thread still hung within Ioctl and therefore
                       the file release function was not called until SIGTERM.
+                    (d.k.)
+
+01.10.2008 V1.3     - SDO sequence layer: fixed error behaviour (reaction on retransmission request,
+                      overrun of sequence number). tested against conformance test
+                    - global.h: fixed 64-bit awarness of ARM GCC
+                    (d.k.)
+
+02.10.2008 V1.3     - updated XDD of Demo CN
+                    - fixed size check when writing to OD (e.g. via SDO)
+                    - made handling of some objects compliant to the spec (valid on reset, access rights)
+                      (e.g. object 0x1006, 0x1F98/5)
+                    (d.k.)
+
+06.10.2008 V1.3     - added new module "PDO user part", which validates the PDO communication
+                      and mapping parameters while changing them in the OD
+                    - made object 0x1F8C NMT_CurrNmtState PDO-mappable (according to the spec)
+                    - removed NMT MN state machine parts in Nmtu module, when MN is disabled
+                    - disabled OBDu module in EplCfg.h of most projects, because EPL_OBD_USE_KERNEL
+                      is used (by default in EplDef.h)
+                    (d.k.)
+
+16.10.2008 V1.3     - updated global.h with changes from CANopen
+                    (d.k.)
+
+17.10.2008 V1.3     - NMT MN module: delete timers while executing NMT reset communication
+                    - DLL CN: ignore frame timeout of SoC in PreOp2, because otherwise we
+                      would switch back and forth between PreOp2 and PreOp1
+                    - ErrorHandlerk: added handling for LossOfPReq. Therefor object 0x1C0D was
+                      added to objdict.h
+                    - SDO communication layer: acknowledge NIL command on sequence layer
+                    - adopt changes in objdict.h for XDD
+                    - CN runs successfully through conformance test 0.9 on 2008/10/15
+                    - added parentheses to all occurrences of EPL_MODULE_INTEGRATION,
+                      hence using of EPL_MODULE_* defines to build it in EplCfg.h works.
                     (d.k.)
 

@@ -83,7 +83,7 @@ EPL_OBD_BEGIN ()
 
         // Object 1400h: PDO_RxCommParam_00h_REC
         EPL_OBD_BEGIN_INDEX_RAM(0x1400, 0x03,
-#if ((EPL_MODULE_INTEGRATION & EPL_MODULE_PDOU) != 0)
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOU)) != 0)
                 EplPdouCbObdAccess
 #else
                 NULL
@@ -96,7 +96,7 @@ EPL_OBD_BEGIN ()
 
         // Object 1401h: PDO_RxCommParam_01h_REC
         EPL_OBD_BEGIN_INDEX_RAM(0x1401, 0x03,
-#if ((EPL_MODULE_INTEGRATION & EPL_MODULE_PDOU) != 0)
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOU)) != 0)
                 EplPdouCbObdAccess
 #else
                 NULL
@@ -107,12 +107,12 @@ EPL_OBD_BEGIN ()
             EPL_OBD_SUBINDEX_RAM_VAR(0x1401, 0x02, 0x05, 0x03, tEplObdUnsigned8, MappingVersion_U8, 0x00)
         EPL_OBD_END_INDEX(0x1401)
 
-#if ((EPL_MODULE_INTEGRATION & EPL_MODULE_NMT_MN) != 0)
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
         // additional RxPDOs if master is enabled
 
         // Object 1402h: PDO_RxCommParam_02h_REC
         EPL_OBD_BEGIN_INDEX_RAM(0x1402, 0x03,
-#if ((EPL_MODULE_INTEGRATION & EPL_MODULE_PDOU) != 0)
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOU)) != 0)
                 EplPdouCbObdAccess
 #else
                 NULL
@@ -125,7 +125,7 @@ EPL_OBD_BEGIN ()
 
         // Object 1403h: PDO_RxCommParam_03h_REC
         EPL_OBD_BEGIN_INDEX_RAM(0x1403, 0x03,
-#if ((EPL_MODULE_INTEGRATION & EPL_MODULE_PDOU) != 0)
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOU)) != 0)
                 EplPdouCbObdAccess
 #else
                 NULL
@@ -140,7 +140,7 @@ EPL_OBD_BEGIN ()
 
         // Object 1600h: PDO_RxMappParam_00h_AU64
         EPL_OBD_BEGIN_INDEX_RAM(0x1600, 0x03,
-#if ((EPL_MODULE_INTEGRATION & EPL_MODULE_PDOU) != 0)
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOU)) != 0)
                 EplPdouCbObdAccess
 #else
                 NULL
@@ -157,13 +157,13 @@ EPL_OBD_BEGIN ()
 
         // Object 1601h: PDO_RxMappParam_01h_AU64
         EPL_OBD_BEGIN_INDEX_RAM(0x1601, 0x03,
-#if ((EPL_MODULE_INTEGRATION & EPL_MODULE_PDOU) != 0)
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOU)) != 0)
                 EplPdouCbObdAccess
 #else
                 NULL
 #endif
                 )
-#if ((EPL_MODULE_INTEGRATION & EPL_MODULE_NMT_MN) != 0)
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
             // enable this RxPDO if master is enabled
             EPL_OBD_SUBINDEX_RAM_VAR(0x1601, 0x00, 0x05, 0x03, tEplObdUnsigned8, NumberOfEntries, 0x01)
 #else
@@ -174,12 +174,12 @@ EPL_OBD_BEGIN ()
             EPL_OBD_SUBINDEX_RAM_VAR(0x1601, 0x02, 0x1B, 0x03, tEplObdUnsigned64, ObjectMapping, 0x00)
         EPL_OBD_END_INDEX(0x1601)
 
-#if ((EPL_MODULE_INTEGRATION & EPL_MODULE_NMT_MN) != 0)
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
         // additional RxPDOs if master is enabled
 
         // Object 1602h: PDO_RxMappParam_02h_AU64
         EPL_OBD_BEGIN_INDEX_RAM(0x1602, 0x02,
-#if ((EPL_MODULE_INTEGRATION & EPL_MODULE_PDOU) != 0)
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOU)) != 0)
                 EplPdouCbObdAccess
 #else
                 NULL
@@ -191,7 +191,7 @@ EPL_OBD_BEGIN ()
 
         // Object 1603h: PDO_RxMappParam_03h_AU64
         EPL_OBD_BEGIN_INDEX_RAM(0x1603, 0x02,
-#if ((EPL_MODULE_INTEGRATION & EPL_MODULE_PDOU) != 0)
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOU)) != 0)
                 EplPdouCbObdAccess
 #else
                 NULL
@@ -205,7 +205,7 @@ EPL_OBD_BEGIN ()
 
         // Object 1800h: PDO_TxCommParam_00h_REC
         EPL_OBD_BEGIN_INDEX_RAM(0x1800, 0x03,
-#if ((EPL_MODULE_INTEGRATION & EPL_MODULE_PDOU) != 0)
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOU)) != 0)
                 EplPdouCbObdAccess
 #else
                 NULL
@@ -216,12 +216,12 @@ EPL_OBD_BEGIN ()
             EPL_OBD_SUBINDEX_RAM_VAR(0x1800, 0x02, 0x05, 0x03, tEplObdUnsigned8, MappingVersion_U8, 0x00)
         EPL_OBD_END_INDEX(0x1800)
 
-#if ((EPL_MODULE_INTEGRATION & EPL_MODULE_NMT_MN) != 0)
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
         // additional TxPDOs if master is enabled
 
         // Object 1801h: PDO_TxCommParam_01h_REC
         EPL_OBD_BEGIN_INDEX_RAM(0x1801, 0x03,
-#if ((EPL_MODULE_INTEGRATION & EPL_MODULE_PDOU) != 0)
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOU)) != 0)
                 EplPdouCbObdAccess
 #else
                 NULL
@@ -234,7 +234,7 @@ EPL_OBD_BEGIN ()
 
         // Object 1802h: PDO_TxCommParam_02h_REC
         EPL_OBD_BEGIN_INDEX_RAM(0x1802, 0x03,
-#if ((EPL_MODULE_INTEGRATION & EPL_MODULE_PDOU) != 0)
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOU)) != 0)
                 EplPdouCbObdAccess
 #else
                 NULL
@@ -247,7 +247,7 @@ EPL_OBD_BEGIN ()
 
         // Object 1803h: PDO_TxCommParam_03h_REC
         EPL_OBD_BEGIN_INDEX_RAM(0x1803, 0x03,
-#if ((EPL_MODULE_INTEGRATION & EPL_MODULE_PDOU) != 0)
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOU)) != 0)
                 EplPdouCbObdAccess
 #else
                 NULL
@@ -262,7 +262,7 @@ EPL_OBD_BEGIN ()
 
         // Object 1A00h: PDO_TxMappParam_00h_AU64
         EPL_OBD_BEGIN_INDEX_RAM(0x1A00, 0x03,
-#if ((EPL_MODULE_INTEGRATION & EPL_MODULE_PDOU) != 0)
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOU)) != 0)
                 EplPdouCbObdAccess
 #else
                 NULL
@@ -277,12 +277,12 @@ EPL_OBD_BEGIN ()
             EPL_OBD_SUBINDEX_RAM_VAR(0x1A00, 0x02, 0x1B, 0x03, tEplObdUnsigned64, ObjectMapping, 0x00)
         EPL_OBD_END_INDEX(0x1A00)
 
-#if ((EPL_MODULE_INTEGRATION & EPL_MODULE_NMT_MN) != 0)
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
         // additional TxPDOs if master is enabled
 
         // Object 1A01h: PDO_TxMappParam_01h_AU64
         EPL_OBD_BEGIN_INDEX_RAM(0x1A01, 0x02,
-#if ((EPL_MODULE_INTEGRATION & EPL_MODULE_PDOU) != 0)
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOU)) != 0)
                 EplPdouCbObdAccess
 #else
                 NULL
@@ -294,7 +294,7 @@ EPL_OBD_BEGIN ()
 
         // Object 1A02h: PDO_TxMappParam_02h_AU64
         EPL_OBD_BEGIN_INDEX_RAM(0x1A02, 0x02,
-#if ((EPL_MODULE_INTEGRATION & EPL_MODULE_PDOU) != 0)
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOU)) != 0)
                 EplPdouCbObdAccess
 #else
                 NULL
@@ -306,7 +306,7 @@ EPL_OBD_BEGIN ()
 
         // Object 1A03h: PDO_TxMappParam_03h_AU64
         EPL_OBD_BEGIN_INDEX_RAM(0x1A03, 0x02,
-#if ((EPL_MODULE_INTEGRATION & EPL_MODULE_PDOU) != 0)
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOU)) != 0)
                 EplPdouCbObdAccess
 #else
                 NULL
@@ -318,7 +318,7 @@ EPL_OBD_BEGIN ()
 
 #endif
 
-#if ((EPL_MODULE_INTEGRATION & EPL_MODULE_NMT_MN) != 0)
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
         // Object 1C00h: DLL_MNCRCError_REC
         EPL_OBD_BEGIN_INDEX_RAM(0x1C00, 0x04, NULL)
             EPL_OBD_SUBINDEX_RAM_VAR(0x1C00, 0x00, 0x05, 0x01, tEplObdUnsigned8, NumberOfEntries, 0x03)
@@ -374,7 +374,7 @@ EPL_OBD_BEGIN ()
             EPL_OBD_SUBINDEX_RAM_VAR(0x1C14, 0x00, 0x07, 0x03, tEplObdUnsigned32, LossOfFrameTolerance, 300000)
         EPL_OBD_END_INDEX(0x1C14)
 
-#if ((EPL_MODULE_INTEGRATION & EPL_MODULE_NMT_MN) != 0)
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
         // Object 1F80h: NMT_StartUp_U32
         EPL_OBD_BEGIN_INDEX_RAM(0x1F80, 0x01, NULL)
             EPL_OBD_SUBINDEX_RAM_VAR(0x1F80, 0x00, 0x07, 0x03, tEplObdUnsigned32, NMT_StartUp_U32, 0x00)
@@ -394,7 +394,7 @@ EPL_OBD_BEGIN ()
             EPL_OBD_SUBINDEX_RAM_VAR(0x1F83, 0x00, 0x05, 0x04, tEplObdUnsigned8, NMT_EPLVersion_U8, 0x20)
         EPL_OBD_END_INDEX(0x1F83)
 
-#if ((EPL_MODULE_INTEGRATION & EPL_MODULE_NMT_MN) != 0)
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
         // Object 1F84h: NMT_MNDeviceTypeIdList_AU32
         EPL_OBD_RAM_INDEX_RAM_ARRAY(0x1F84, 254, NULL, 0x07, 0x03, tEplObdUnsigned32, NMT_MNDeviceTypeIdList_AU32, 0)
 
@@ -424,7 +424,7 @@ EPL_OBD_BEGIN ()
             EPL_OBD_SUBINDEX_RAM_VAR(0x1F8C, 0x00, 0x05, 0x09, tEplObdUnsigned8, NMT_CurrNMTState_U8, 0x00)
         EPL_OBD_END_INDEX(0x1F8C)
 
-#if ((EPL_MODULE_INTEGRATION & EPL_MODULE_NMT_MN) != 0)
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
         // Object 1F8Dh: NMT_PResPayloadLimitList_AU16
         EPL_OBD_RAM_INDEX_RAM_ARRAY(0x1F8D, 254, NULL, 0x06, 0x03, tEplObdUnsigned16, NMT_PResPayloadLimitList_AU16, 36)
 
@@ -469,7 +469,7 @@ EPL_OBD_BEGIN ()
             EPL_OBD_SUBINDEX_RAM_VAR(0x1F9E, 0x00, 0x05, 0x03, tEplObdUnsigned8, NMT_ResetCmd_U8, 0xFF)
         EPL_OBD_END_INDEX(0x1F9E)
 
-#if ((EPL_MODULE_INTEGRATION & EPL_MODULE_NMT_MN) != 0)
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
         // Object 1F9Fh: NMT_RequestCmd_REC
         EPL_OBD_BEGIN_INDEX_RAM(0x1F9F, 0x04, EplApiCbObdAccess)
             EPL_OBD_SUBINDEX_RAM_VAR(0x1F9F, 0x00, 0x05, 0x01, tEplObdUnsigned8, NumberOfEntries, 0x03)
@@ -504,7 +504,7 @@ EPL_OBD_BEGIN ()
 #endif
 
 #if (!((EPL_API_PROCESS_IMAGE_SIZE_IN > 0) || (EPL_API_PROCESS_IMAGE_SIZE_OUT > 0))) \
-    && ((EPL_MODULE_INTEGRATION & EPL_MODULE_NMT_MN) != 0)
+    && (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
         // process image is not enabled but master is enabled
 
         // output variables of master

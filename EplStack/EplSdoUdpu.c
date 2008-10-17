@@ -71,7 +71,7 @@
 
 #include "user/EplSdoUdpu.h"
 
-#if ((EPL_MODULE_INTEGRATION & EPL_MODULE_SDO_UDP) != 0)
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDO_UDP)) != 0)
 
 #if (TARGET_SYSTEM == _LINUX_) && defined(__KERNEL__)
 #include "SocketLinuxKernel.h"
@@ -813,7 +813,7 @@ tEplSdoConHdl       SdoConHdl;
     return 0;
 }
 
-#endif // end of #if((EPL_MODULE_INTEGRATION & EPL_MODULE_SDO_UDP) != 0)
+#endif // end of #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDO_UDP)) != 0)
 
 // EOF
 

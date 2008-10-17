@@ -74,7 +74,7 @@
 #ifndef _EPLCFGMA_H_
 #define _EPLCFGMA_H_
 
-#if ((EPL_MODULE_INTEGRATION & EPL_MODULE_CFGMA) != 0)
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_CFGMA)) != 0)
 
 #include "user/EplObdu.h"
 #include "user/EplSdoComu.h"
@@ -292,7 +292,7 @@ tEplKernel PUBLIC EplCfgMaCheckDcf(unsigned int      uiNodeId_p,
 
 
 
-#endif // #if ((EPL_MODULE_INTEGRATION & EPL_MODULE_CFGMA) != 0)
+#endif // #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_CFGMA)) != 0)
 
 #endif // _EPLCFGMA_H_
 

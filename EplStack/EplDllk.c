@@ -75,11 +75,11 @@
 #include "edrv.h"
 #include "Benchmark.h"
 
-#if ((EPL_MODULE_INTEGRATION & EPL_MODULE_PDOK) != 0)
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOK)) != 0)
 #include "kernel/EplPdok.h"
 #endif
 
-#if ((EPL_MODULE_INTEGRATION & EPL_MODULE_VETH) != 0)
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_VETH)) != 0)
 #include "kernel/VirtualEthernet.h"
 #endif
 
@@ -87,9 +87,9 @@
 #include "kernel/EplTimerHighResk.h"
 //#endif
 
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_DLLK) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLK)) != 0)
 
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_NMTK) == 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMTK)) == 0)
 #error "EPL module DLLK needs EPL module NMTK!"
 #endif
 
@@ -98,7 +98,7 @@
 #endif
 
 #if ((EPL_DLL_PRES_READY_AFTER_SOA != FALSE) || (EPL_DLL_PRES_READY_AFTER_SOC != FALSE)) \
-    && ((EPL_MODULE_INTEGRATION & EPL_MODULE_NMT_MN) == 0)
+    && (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) == 0)
 #error "EPL module DLLK: currently, EPL_DLL_PRES_READY_AFTER_* is not supported if EPL_MODULE_NMT_MN is enabled."
 #endif
 
@@ -167,7 +167,7 @@
 #define EPL_DLLK_TXFRAME_SOC        5   // SoC on MN
 #define EPL_DLLK_TXFRAME_SOA        6   // SoA on MN
 #define EPL_DLLK_TXFRAME_PREQ       7   // PReq on MN
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_NMT_MN) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
 #define EPL_DLLK_TXFRAME_COUNT      (7 + EPL_D_NMT_MaxCNNumber_U8 + 2)   // on MN: 7 + MaxPReq of regular CNs + 1 Diag + 1 Router
 #else
 #define EPL_DLLK_TXFRAME_COUNT      5   // on CN: 5
@@ -211,7 +211,7 @@ typedef struct
     tEplDllkCbAsync     m_pfnCbAsync;
     tEplDllAsndFilter   m_aAsndFilter[EPL_DLL_MAX_ASND_SERVICE_ID];
 
-#if ((EPL_MODULE_INTEGRATION & EPL_MODULE_NMT_MN) != 0)
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
     tEplDllkNodeInfo*   m_pFirstNodeInfo;
     tEplDllkNodeInfo*   m_pCurNodeInfo;
     tEplDllkNodeInfo    m_aNodeInfo[EPL_NMT_MAX_NODE_ID];
@@ -221,9 +221,9 @@ typedef struct
 
 #if EPL_TIMER_USE_HIGHRES != FALSE
     tEplTimerHdl        m_TimerHdlCycle;    // used for EPL cycle monitoring on CN and generation on MN
-#if ((EPL_MODULE_INTEGRATION & EPL_MODULE_NMT_MN) != 0)
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
     tEplTimerHdl        m_TimerHdlResponse; // used for CN response monitoring
-#endif //((EPL_MODULE_INTEGRATION & EPL_MODULE_NMT_MN) != 0)
+#endif //(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
 #endif
 
     unsigned int        m_uiCycleCount;     // cycle counter (needed for multiplexed cycle support)
@@ -264,7 +264,7 @@ static tEplKernel EplDllkCheckFrame(tEplFrame * pFrame_p, unsigned int uiFrameSi
 static tEplKernel PUBLIC EplDllkCbCnTimer(tEplTimerEventArg* pEventArg_p);
 #endif
 
-#if ((EPL_MODULE_INTEGRATION & EPL_MODULE_NMT_MN) != 0)
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
 // MN: returns internal node info structure
 static tEplDllkNodeInfo* EplDllkGetNodeInfo(unsigned int uiNodeId_p);
 
@@ -335,7 +335,7 @@ tEdrvInitParam  EdrvInitParam;
     // initialize state
     EplDllkInstance_g.m_DllState = kEplDllGsInit;
 
-#if ((EPL_MODULE_INTEGRATION & EPL_MODULE_NMT_MN) != 0)
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
     // set up node info structure
     for (uiIndex = 0; uiIndex < tabentries (EplDllkInstance_g.m_aNodeInfo); uiIndex++)
     {
@@ -365,7 +365,7 @@ tEdrvInitParam  EdrvInitParam;
         EplDllkInstance_g.m_pTxBuffer[uiIndex].m_pbBuffer = NULL;
     }
 
-#if ((EPL_MODULE_INTEGRATION & EPL_MODULE_VETH) != 0)
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_VETH)) != 0)
     Ret = VEthAddInstance(pInitParam_p);
 #endif
 
@@ -399,7 +399,7 @@ tEplKernel      Ret = kEplSuccessful;
     Ret = EplTimerHighReskDelInstance();
 #endif
 
-#if ((EPL_MODULE_INTEGRATION & EPL_MODULE_VETH) != 0)
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_VETH)) != 0)
     Ret = VEthDelInstance();
 #endif
 
@@ -690,7 +690,7 @@ BYTE            abMulticastMac[6];
 tEplDllAsyncReqPriority AsyncReqPriority;
 unsigned int    uiFrameCount;
 tEplNmtState    NmtState;
-#if ((EPL_MODULE_INTEGRATION & EPL_MODULE_PDOK) != 0)
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOK)) != 0)
 tEplFrameInfo   FrameInfo;
 #endif
 
@@ -708,7 +708,7 @@ tEplFrameInfo   FrameInfo;
             EplDllkInstance_g.m_bMnFlag1 = 0;
             EplDllkInstance_g.m_bFlag2 = 0;
 
-#if ((EPL_MODULE_INTEGRATION & EPL_MODULE_NMT_MN) != 0)
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
             // initialize linked node list
             EplDllkInstance_g.m_pFirstNodeInfo = NULL;
 #endif
@@ -809,7 +809,7 @@ tEplFrameInfo   FrameInfo;
                     goto Exit;
                 }
 
-#if ((EPL_MODULE_INTEGRATION & EPL_MODULE_PDOK) != 0)
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOK)) != 0)
                 // initially encode TPDO -> inform PDO module
                 FrameInfo.m_pFrame = pTxFrame;
                 FrameInfo.m_uiFrameSize = uiFrameSize;
@@ -854,7 +854,7 @@ tEplFrameInfo   FrameInfo;
             AmiSetQword48ToBe(&abMulticastMac[0], EPL_C_DLL_MULTICAST_ASND);
             Ret = EdrvDefineRxMacAddrEntry(abMulticastMac);
 
-#if ((EPL_MODULE_INTEGRATION & EPL_MODULE_NMT_MN) != 0)
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
             if (NmtState >= kEplNmtMsNotActive)
             {   // local node is MN
             unsigned int    uiIndex;
@@ -885,7 +885,7 @@ tEplFrameInfo   FrameInfo;
                 EplDllkInstance_g.m_ullFrameTimeout = 1000LL
                     * ((unsigned long long) EplDllkInstance_g.m_DllConfigParam.m_dwCycleLen);
             }
-#endif //((EPL_MODULE_INTEGRATION & EPL_MODULE_NMT_MN) != 0)
+#endif //(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
 
             Ret = EplDllkCalAsyncClearBuffer();
 
@@ -929,7 +929,7 @@ tEplFrameInfo   FrameInfo;
                 goto Exit;
             }
 
-#if ((EPL_MODULE_INTEGRATION & EPL_MODULE_NMT_MN) != 0)
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
             if (NmtState >= kEplNmtMsNotActive)
             {   // local node was MN
             unsigned int    uiIndex;
@@ -962,7 +962,7 @@ tEplFrameInfo   FrameInfo;
                     EplDllkInstance_g.m_aNodeInfo[uiIndex].m_wPresPayloadLimit = 0xFFFF;
                 }
             }
-#endif //((EPL_MODULE_INTEGRATION & EPL_MODULE_NMT_MN) != 0)
+#endif //(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
 
             // deregister multicast MACs in ethernet driver
             AmiSetQword48ToBe(&abMulticastMac[0], EPL_C_DLL_MULTICAST_SOC);
@@ -1138,7 +1138,7 @@ tEplFrameInfo   FrameInfo;
             break;
         }
 
-#if ((EPL_MODULE_INTEGRATION & EPL_MODULE_NMT_MN) != 0)
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
         case kEplEventTypeDllkStartReducedCycle:
         {
             // start the reduced cycle by programming the cycle timer
@@ -1387,7 +1387,7 @@ tEplKernel  Ret = kEplSuccessful;
 }
 
 
-#if ((EPL_MODULE_INTEGRATION & EPL_MODULE_NMT_MN) != 0)
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
 
 //---------------------------------------------------------------------------
 //
@@ -1548,7 +1548,7 @@ unsigned int        uiFrameSize;
         // set up destination MAC address
         EPL_MEMCPY(pFrame->m_be_abDstMac, pIntNodeInfo->m_be_abMacAddr, 6);
 
-        #if ((EPL_MODULE_INTEGRATION & EPL_MODULE_PDOK) != 0)
+        #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOK)) != 0)
         {
         tEplFrameInfo       FrameInfo;
 
@@ -1674,7 +1674,7 @@ Exit:
 }
 
 
-#endif //((EPL_MODULE_INTEGRATION & EPL_MODULE_NMT_MN) != 0)
+#endif //(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
 
 
 //=========================================================================//
@@ -2000,7 +2000,7 @@ tEplErrorHandlerkEvent  DllEvent;
             }
             break;
 
-#if ((EPL_MODULE_INTEGRATION & EPL_MODULE_NMT_MN) != 0)
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
         case kEplNmtMsNotActive:
         case kEplNmtMsBasicEthernet:
             break;
@@ -2228,7 +2228,7 @@ tEplErrorHandlerkEvent  DllEvent;
                     break;
             }
             break;
-#endif //((EPL_MODULE_INTEGRATION & EPL_MODULE_NMT_MN) != 0)
+#endif //(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
 
         default:
             break;
@@ -2415,7 +2415,7 @@ BYTE            bFlag1;
                 }
 #endif
                 // inform PDO module
-#if ((EPL_MODULE_INTEGRATION & EPL_MODULE_PDOK) != 0)
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOK)) != 0)
                 if (NmtState >= kEplNmtCsReadyToOperate)
                 {   // inform PDO module only in ReadyToOp and Op
                     if (NmtState != kEplNmtCsOperational)
@@ -2470,7 +2470,7 @@ BYTE            bFlag1;
 
         case kEplMsgTypePres:
         {
-#if ((EPL_MODULE_INTEGRATION & EPL_MODULE_NMT_MN) != 0)
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
         tEplDllkNodeInfo*   pIntNodeInfo;
         tEplHeartbeatEvent  HeartbeatEvent;
 #endif
@@ -2484,7 +2484,7 @@ BYTE            bFlag1;
                 && (NmtState <= kEplNmtCsOperational))
             {   // process PRes frames only in PreOp2, ReadyToOp and Op of CN
 
-#if ((EPL_MODULE_INTEGRATION & EPL_MODULE_NMT_MN) != 0)
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
                 pIntNodeInfo = EplDllkGetNodeInfo(uiNodeId);
                 if (pIntNodeInfo == NULL)
                 {   // no node info structure available
@@ -2516,7 +2516,7 @@ BYTE            bFlag1;
                 break;
             }
 
-#if ((EPL_MODULE_INTEGRATION & EPL_MODULE_NMT_MN) != 0)
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
             {   // check NMT state of CN
                 HeartbeatEvent.m_wErrorCode = EPL_E_NO_ERROR;
                 HeartbeatEvent.m_NmtState =
@@ -2548,14 +2548,14 @@ BYTE            bFlag1;
 #endif
 
             // inform PDO module
-#if ((EPL_MODULE_INTEGRATION & EPL_MODULE_PDOK) != 0)
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOK)) != 0)
             if ((NmtState != kEplNmtCsPreOperational2)
                 && (NmtState != kEplNmtMsPreOperational2))
             {   // inform PDO module only in ReadyToOp and Op
                 // compare real frame size and PDO size?
                 if (((unsigned int) (AmiGetWordFromLe(&pFrame->m_Data.m_Pres.m_le_wSize) + 24)
                     > FrameInfo.m_uiFrameSize)
-#if ((EPL_MODULE_INTEGRATION & EPL_MODULE_NMT_MN) != 0)
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
                     || (AmiGetWordFromLe(&pFrame->m_Data.m_Pres.m_le_wSize) > pIntNodeInfo->m_wPresPayloadLimit)
 #endif
                     )
@@ -2793,7 +2793,7 @@ BYTE            bFlag1;
 #endif
 
             // inform PDO module
-#if ((EPL_MODULE_INTEGRATION & EPL_MODULE_PDOK) != 0)
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOK)) != 0)
 //            Ret = EplPdokCbSoa(&FrameInfo);
 #endif
 
@@ -2811,7 +2811,7 @@ BYTE            bFlag1;
             // ASnd service registered?
             uiAsndServiceId = (unsigned int) AmiGetByteFromLe(&pFrame->m_Data.m_Asnd.m_le_bServiceId);
 
-#if ((EPL_MODULE_INTEGRATION & EPL_MODULE_NMT_MN) != 0)
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
             if ((EplDllkInstance_g.m_DllState >= kEplDllMsNonCyclic)
                 && ((((tEplDllAsndServiceId) uiAsndServiceId) == kEplDllAsndStatusResponse)
                 || (((tEplDllAsndServiceId) uiAsndServiceId) == kEplDllAsndIdentResponse)))
@@ -2935,7 +2935,7 @@ tEplEvent       Event;
 tEplDllAsyncReqPriority Priority;
 tEplNmtState    NmtState;
 
-#if ((EPL_MODULE_INTEGRATION & EPL_MODULE_PDOK) != 0) \
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOK)) != 0) \
     && (EPL_DLL_PRES_READY_AFTER_SOC == FALSE)
 tEplFrameInfo   FrameInfo;
 #endif
@@ -2975,14 +2975,14 @@ tEplFrameInfo   FrameInfo;
         Event.m_uiSize = sizeof(Priority);
         Ret = EplEventkPost(&Event);
     }
-#if (((EPL_MODULE_INTEGRATION & EPL_MODULE_PDOK) != 0) \
+#if ((((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOK)) != 0) \
     && (EPL_DLL_PRES_READY_AFTER_SOC == FALSE)) \
-    || ((EPL_MODULE_INTEGRATION & EPL_MODULE_NMT_MN) != 0)
+    || (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
     else if ((pTxBuffer_p->m_EplMsgType == kEplMsgTypePreq)
         || (pTxBuffer_p->m_EplMsgType == kEplMsgTypePres))
     {   // PRes resp. PReq frame sent
 
-        #if (((EPL_MODULE_INTEGRATION & EPL_MODULE_PDOK) != 0) \
+        #if ((((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOK)) != 0) \
             && (EPL_DLL_PRES_READY_AFTER_SOC == FALSE))
         {
             // inform PDO module
@@ -2992,7 +2992,7 @@ tEplFrameInfo   FrameInfo;
         }
         #endif
 
-        #if ((EPL_MODULE_INTEGRATION & EPL_MODULE_NMT_MN) != 0)
+        #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
         {
             // if own Pres on MN, trigger SoA
             if ((NmtState >= kEplNmtMsPreOperational2)
@@ -3008,7 +3008,7 @@ tEplFrameInfo   FrameInfo;
     #endif
     }
 #endif
-#if ((EPL_MODULE_INTEGRATION & EPL_MODULE_NMT_MN) != 0)
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
     else if (pTxBuffer_p->m_EplMsgType == kEplMsgTypeSoa)
     {   // SoA frame sent
     tEplNmtEvent NmtEvent = kEplNmtEventDllMeSoaSent;
@@ -3301,7 +3301,7 @@ Exit:
 }
 #endif
 
-#if ((EPL_MODULE_INTEGRATION & EPL_MODULE_NMT_MN) != 0)
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
 
 //---------------------------------------------------------------------------
 //
@@ -3759,9 +3759,9 @@ tEplFrameInfo   FrameInfo;
 }
 
 
-#endif //((EPL_MODULE_INTEGRATION & EPL_MODULE_NMT_MN) != 0)
+#endif //(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
 
 
-#endif // #if((EPL_MODULE_INTEGRATION & EPL_MODULE_DLLK) != 0)
+#endif // #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLK)) != 0)
 // EOF
 

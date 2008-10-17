@@ -85,14 +85,14 @@
 #include "user/EplIdentu.h"
 #include "user/EplStatusu.h"
 
-#if ((EPL_MODULE_INTEGRATION & EPL_MODULE_PDOK) != 0)
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOK)) != 0)
 #include "kernel/EplPdok.h"
 #endif
 
 #include "SharedBuff.h"
 
 
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_OBDK) == 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_OBDK)) == 0)
 #error "EPL API layer needs EPL module OBDK!"
 #endif
 
@@ -182,7 +182,7 @@ static tEplKernel PUBLIC EplApiProcessEvent(tEplEvent* pEplEvent_p);
 // callback function of SDO module
 static tEplKernel PUBLIC  EplApiCbSdoCon(tEplSdoComFinished* pSdoComFinished_p);
 
-#if ((EPL_MODULE_INTEGRATION & EPL_MODULE_NMT_MN) != 0)
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
 // callback functions of NmtMnu module
 static tEplKernel PUBLIC  EplApiCbNodeEvent(unsigned int uiNodeId_p,
                                             tEplNmtNodeEvent NodeEvent_p,
@@ -243,7 +243,7 @@ tShbError           ShbError;
         goto Exit;
     }
 
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_OBDK) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_OBDK)) != 0)
     // init OD
     Ret = EplObdInitRam(&ObdInitParam);
     if (Ret != kEplSuccessful)
@@ -288,7 +288,7 @@ tShbError           ShbError;
     }
 
     // initialize EplNmtk module before DLL
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_NMTK) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMTK)) != 0)
     Ret = EplNmtkInit();
     if (Ret != kEplSuccessful)
     {
@@ -297,7 +297,7 @@ tShbError           ShbError;
 #endif
 
     // initialize EplDllk module
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_DLLK) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLK)) != 0)
     EPL_MEMCPY(DllkInitParam.m_be_abSrcMac, EplApiInstance_g.m_InitParam.m_abMacAddress, 6);
     Ret = EplDllkAddInstance(&DllkInitParam);
     if (Ret != kEplSuccessful)
@@ -321,7 +321,7 @@ tShbError           ShbError;
 #endif
 
     // initialize EplDlluCal module
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_DLLU) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLU)) != 0)
     Ret = EplDlluCalAddInstance();
     if (Ret != kEplSuccessful)
     {
@@ -331,7 +331,7 @@ tShbError           ShbError;
 #endif
 
     // initialize EplPdok module
-#if ((EPL_MODULE_INTEGRATION & EPL_MODULE_PDOK) != 0)
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOK)) != 0)
     Ret = EplPdokAddInstance();
     if (Ret != kEplSuccessful)
     {
@@ -347,7 +347,7 @@ tShbError           ShbError;
 #endif
 
     // initialize EplNmtCnu module
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_NMT_CN) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_CN)) != 0)
     Ret = EplNmtCnuAddInstance(EplApiInstance_g.m_InitParam.m_uiNodeId);
     if (Ret != kEplSuccessful)
     {
@@ -356,7 +356,7 @@ tShbError           ShbError;
 #endif
 
     // initialize EplNmtu module
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_NMTU) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMTU)) != 0)
     Ret = EplNmtuInit();
     if (Ret != kEplSuccessful)
     {
@@ -371,7 +371,7 @@ tShbError           ShbError;
     }
 #endif
 
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_NMT_MN) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
     // initialize EplNmtMnu module
     Ret = EplNmtMnuInit(EplApiCbNodeEvent, EplApiCbBootEvent);
     if (Ret != kEplSuccessful)
@@ -395,8 +395,8 @@ tShbError           ShbError;
 #endif
 
     // init SDO module
-#if (((EPL_MODULE_INTEGRATION & EPL_MODULE_SDOC) != 0) || \
-     ((EPL_MODULE_INTEGRATION & EPL_MODULE_SDOC) != 0))
+#if ((((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOC)) != 0) || \
+     (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOC)) != 0))
     // init sdo command layer
     Ret = EplSdoComInit();
     if (Ret != kEplSuccessful)
@@ -441,12 +441,12 @@ tEplKernel      Ret = kEplSuccessful;
     // delete instance for all modules
 
     // deinitialize EplSdoCom module
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_SDOC) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOC)) != 0)
     Ret = EplSdoComDelInstance();
 //    PRINTF1("EplSdoComDelInstance():  0x%X\n", Ret);
 #endif
 
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_NMT_MN) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
     // deinitialize EplNmtMnu module
     Ret = EplNmtMnuDelInstance();
 //    PRINTF1("EplNmtMnuDelInstance():  0x%X\n", Ret);
@@ -461,19 +461,19 @@ tEplKernel      Ret = kEplSuccessful;
 #endif
 
     // deinitialize EplNmtCnu module
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_NMT_CN) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_CN)) != 0)
     Ret = EplNmtCnuDelInstance();
 //    PRINTF1("EplNmtCnuDelInstance():  0x%X\n", Ret);
 #endif
 
     // deinitialize EplNmtu module
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_NMTU) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMTU)) != 0)
     Ret = EplNmtuDelInstance();
 //    PRINTF1("EplNmtuDelInstance():    0x%X\n", Ret);
 #endif
 
     // deinitialize EplDlluCal module
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_DLLU) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLU)) != 0)
     Ret = EplDlluCalDelInstance();
 //    PRINTF1("EplDlluCalDelInstance(): 0x%X\n", Ret);
 
@@ -484,13 +484,13 @@ tEplKernel      Ret = kEplSuccessful;
 //    PRINTF1("EplEventuDelInstance():  0x%X\n", Ret);
 
     // deinitialize EplNmtk module
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_NMTK) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMTK)) != 0)
     Ret = EplNmtkDelInstance();
 //    PRINTF1("EplNmtkDelInstance():    0x%X\n", Ret);
 #endif
 
     // deinitialize EplDllk module
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_DLLK) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLK)) != 0)
     Ret = EplDllkDelInstance();
 //    PRINTF1("EplDllkDelInstance():    0x%X\n", Ret);
 
@@ -532,7 +532,7 @@ tEplKernel PUBLIC EplApiExecNmtCommand(tEplNmtEvent NmtEvent_p)
 {
 tEplKernel      Ret = kEplSuccessful;
 
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_NMTU) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMTU)) != 0)
     Ret = EplNmtuNmtEvent(NmtEvent_p);
 #endif
 
@@ -955,7 +955,7 @@ tEplKernel      Ret = kEplSuccessful;
 }
 
 
-#if ((EPL_MODULE_INTEGRATION & EPL_MODULE_NMT_MN) != 0)
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
 // ----------------------------------------------------------------------------
 //
 // Function:    EplApiMnTriggerStateChange()
@@ -979,7 +979,7 @@ tEplKernel      Ret = kEplSuccessful;
     return Ret;
 }
 
-#endif // ((EPL_MODULE_INTEGRATION & EPL_MODULE_NMT_MN) != 0)
+#endif // (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
 
 //---------------------------------------------------------------------------
 //
@@ -1075,25 +1075,25 @@ tEplApiEventArg     EventArg;
                 switch ((tEplNmtCommand)bNmtCommand)
                 {
                     case kEplNmtCmdResetNode:
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_NMTU) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMTU)) != 0)
                         Ret = EplNmtuNmtEvent(kEplNmtEventResetNode);
 #endif
                         break;
 
                     case kEplNmtCmdResetCommunication:
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_NMTU) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMTU)) != 0)
                         Ret = EplNmtuNmtEvent(kEplNmtEventResetCom);
 #endif
                         break;
 
                     case kEplNmtCmdResetConfiguration:
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_NMTU) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMTU)) != 0)
                         Ret = EplNmtuNmtEvent(kEplNmtEventResetConfig);
 #endif
                         break;
 
                     case kEplNmtCmdSwReset:
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_NMTU) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMTU)) != 0)
                         Ret = EplNmtuNmtEvent(kEplNmtEventSwReset);
 #endif
                         break;
@@ -1234,7 +1234,7 @@ tEplApiEventArg     EventArg;
         // first init of the hardware
         case kEplNmtGsInitialising:
 #if 0
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_SDO_UDP) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDO_UDP)) != 0)
             // configure SDO via UDP (i.e. bind it to the EPL ethernet interface)
             Ret = EplSdoUdpuConfig(EplApiInstance_g.m_InitParam.m_dwIpAddress, EPL_C_SDO_EPL_PORT);
             if (Ret != kEplSuccessful)
@@ -1399,7 +1399,7 @@ tEplApiEventArg     EventArg;
         }
     }
 
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_NMT_MN) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
     // forward event to NmtMn module
     Ret = EplNmtMnuCbNmtStateChange(NmtStateChange_p);
     if (Ret != kEplSuccessful)
@@ -1546,7 +1546,7 @@ BYTE                bTemp;
 
     // $$$ Prescaler
 
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_NMT_MN) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
     // 0x1F8A.1: WaitSoCPReq_U32 in [ns]
     ObdSize = 4;
     Ret = EplObdReadEntry(0x1F8A, 1, &DllConfigParam.m_dwWaitSocPreq, &ObdSize);
@@ -1764,7 +1764,7 @@ BYTE                bTemp;
         Ret = kEplSuccessful;
     }
 
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_NMT_MN) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
     if (EplApiInstance_g.m_InitParam.m_dwWaitSocPreq != -1)
     {
         Ret = EplObdWriteEntry(0x1F8A, 1, &EplApiInstance_g.m_InitParam.m_dwWaitSocPreq, 4);
@@ -1901,7 +1901,7 @@ tEplApiEventArg EventArg;
 }
 
 
-#if ((EPL_MODULE_INTEGRATION & EPL_MODULE_NMT_MN) != 0)
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
 
 //---------------------------------------------------------------------------
 //
@@ -1988,7 +1988,7 @@ tEplApiEventArg EventArg;
 
 }
 
-#endif // ((EPL_MODULE_INTEGRATION & EPL_MODULE_NMT_MN) != 0)
+#endif // (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
 
 // EOF
 

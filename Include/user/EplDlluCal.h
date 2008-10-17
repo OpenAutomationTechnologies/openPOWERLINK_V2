@@ -102,7 +102,7 @@ tEplKernel EplDlluCalAsyncSend(tEplFrameInfo * pFrameInfo, tEplDllAsyncReqPriori
 tEplKernel EplDlluCalProcess(tEplEvent * pEvent_p);
 
 
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_NMT_MN) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
 
 tEplKernel EplDlluCalAddNode(tEplDllNodeInfo * pNodeInfo_p);
 

@@ -300,7 +300,7 @@ tEplKernel  Ret;
     uiNodeId_p--;
     if (uiNodeId_p < tabentries (EplStatusuInstance_g.m_apfnCbResponse))
     {
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_NMT_MN) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
         if (EplStatusuInstance_g.m_apfnCbResponse[uiNodeId_p] != NULL)
         {   // request already issued (maybe by someone else)
             Ret = kEplInvalidOperation;

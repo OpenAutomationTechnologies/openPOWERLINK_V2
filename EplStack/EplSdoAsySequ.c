@@ -71,8 +71,8 @@
 #include "user/EplSdoAsySequ.h"
 
 
-#if (((EPL_MODULE_INTEGRATION & EPL_MODULE_SDO_UDP) == 0) &&\
-     ((EPL_MODULE_INTEGRATION & EPL_MODULE_SDO_ASND) == 0)   )
+#if ((((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDO_UDP)) == 0) &&\
+     (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDO_ASND)) == 0)   )
 
     #error 'ERROR: At least UDP or Asnd module needed!'
 
@@ -354,7 +354,7 @@ tEplKernel  Ret;
 #endif
 
 
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_SDO_UDP) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDO_UDP)) != 0)
     // init lower layer
     Ret = EplSdoUdpuAddInstance(EplSdoAsyReceiveCb);
     if(Ret != kEplSuccessful)
@@ -363,7 +363,7 @@ tEplKernel  Ret;
     }
 #endif
 
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_SDO_ASND) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDO_ASND)) != 0)
     // init lower layer
     Ret = EplSdoAsnduAddInstance(EplSdoAsyReceiveCb);
     if(Ret != kEplSuccessful)
@@ -426,12 +426,12 @@ tEplAsySdoSeqCon*   pAsySdoSeqCon;
     // set instance-table to 0
     EPL_MEMSET(&AsySdoSequInstance_g, 0x00, sizeof(AsySdoSequInstance_g));
 
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_SDO_UDP) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDO_UDP)) != 0)
     // delete lower layer
     Ret = EplSdoUdpuDelInstance();
 #endif
 
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_SDO_ASND) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDO_ASND)) != 0)
     // delete lower layer
     Ret = EplSdoAsnduDelInstance();
 #endif
@@ -477,7 +477,7 @@ tEplAsySdoSeqCon*   pAsySdoSeqCon;
         // SDO over UDP
         case kEplSdoTypeUdp:
         {
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_SDO_UDP) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDO_UDP)) != 0)
             Ret = EplSdoUdpuInitCon(&ConHandle,
                                     uiNodeId_p);
             if(Ret != kEplSuccessful)
@@ -493,7 +493,7 @@ tEplAsySdoSeqCon*   pAsySdoSeqCon;
         // SDO over Asnd
         case kEplSdoTypeAsnd:
         {
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_SDO_ASND) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDO_ASND)) != 0)
             Ret = EplSdoAsnduInitCon(&ConHandle,
                                     uiNodeId_p);
             if(Ret != kEplSuccessful)
@@ -547,7 +547,7 @@ tEplAsySdoSeqCon*   pAsySdoSeqCon;
                 // SDO over UDP
                 case kEplSdoTypeUdp:
                 {
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_SDO_UDP) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDO_UDP)) != 0)
                     Ret = EplSdoUdpuDelCon(ConHandle);
                     if(Ret != kEplSuccessful)
                     {
@@ -560,7 +560,7 @@ tEplAsySdoSeqCon*   pAsySdoSeqCon;
                 // SDO over Asnd
                 case kEplSdoTypeAsnd:
                 {
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_SDO_ASND) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDO_ASND)) != 0)
                     Ret = EplSdoAsnduDelCon(ConHandle);
                     if(Ret != kEplSuccessful)
                     {
@@ -803,17 +803,17 @@ tEplAsySdoSeqCon*   pAsySdoSeqCon;
         //check protocol
         if((pAsySdoSeqCon->m_ConHandle & EPL_SDO_ASY_HANDLE_MASK) == EPL_SDO_UDP_HANDLE)
         {
-        #if((EPL_MODULE_INTEGRATION & EPL_MODULE_SDO_UDP) != 0)
+        #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDO_UDP)) != 0)
             // call close function of lower layer
             EplSdoUdpuDelCon(pAsySdoSeqCon->m_ConHandle);
-        #endif// end of #if((EPL_MODULE_INTEGRATION & EPL_MODULE_SDO_UDP) != 0)
+        #endif// end of #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDO_UDP)) != 0)
         }
         else
         {
-        #if((EPL_MODULE_INTEGRATION & EPL_MODULE_SDO_ASND) != 0)
+        #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDO_ASND)) != 0)
             // call close function of lower layer
             EplSdoAsnduDelCon(pAsySdoSeqCon->m_ConHandle);
-        #endif// end of #if((EPL_MODULE_INTEGRATION & EPL_MODULE_SDO_ASND) != 0)
+        #endif// end of #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDO_ASND)) != 0)
         }
 
         // delete timer
@@ -1942,7 +1942,7 @@ tEplKernel      Ret;
     // check handle for UDP or Asnd
     if ((pAsySdoSeqCon_p->m_ConHandle & EPL_SDO_ASY_HANDLE_MASK) == EPL_SDO_UDP_HANDLE)
     {   // send over UDP
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_SDO_UDP) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDO_UDP)) != 0)
         Ret = EplSdoUdpuSendData(pAsySdoSeqCon_p->m_ConHandle,
                                     pEplFrame_p,      // pointer to frame
                                     uiDataSize_p);
@@ -1953,7 +1953,7 @@ tEplKernel      Ret;
     }
     else if ((pAsySdoSeqCon_p->m_ConHandle & EPL_SDO_ASY_HANDLE_MASK) == EPL_SDO_ASND_HANDLE)
     {   // ASND
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_SDO_ASND) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDO_ASND)) != 0)
         Ret = EplSdoAsnduSendData(pAsySdoSeqCon_p->m_ConHandle,
                                     pEplFrame_p,      // pointer to frame
                                     uiDataSize_p);

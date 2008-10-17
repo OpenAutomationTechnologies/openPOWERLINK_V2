@@ -78,15 +78,15 @@
 #define PDO_LED 0x08
 #endif
 
-#if ((EPL_MODULE_INTEGRATION & EPL_MODULE_PDOK) != 0)
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOK)) != 0)
 
-#if ((EPL_MODULE_INTEGRATION & EPL_MODULE_DLLK) == 0)
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLK)) == 0)
 
     #error 'ERROR: Missing DLLk-Modul!'
 
 #endif
 
-#if ((EPL_MODULE_INTEGRATION & EPL_MODULE_OBDK) == 0)
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_OBDK)) == 0)
 
     #error 'ERROR: Missing OBDk-Modul!'
 
@@ -686,7 +686,7 @@ Exit:
 //
 //---------------------------------------------------------------------------
 
-#endif // #if ((EPL_MODULE_INTEGRATION & EPL_MODULE_PDOK) != 0)
+#endif // #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOK)) != 0)
 
 // EOF
 

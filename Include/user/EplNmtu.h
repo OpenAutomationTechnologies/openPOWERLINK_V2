@@ -136,7 +136,7 @@ typedef tEplKernel (PUBLIC * tEplNmtuCheckEventCallback) (
 // function prototypes
 //---------------------------------------------------------------------------
 
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_NMTU) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMTU)) != 0)
 
 EPLDLLEXPORT tEplKernel PUBLIC EplNmtuInit(void);
 
@@ -154,7 +154,7 @@ EPLDLLEXPORT tEplKernel PUBLIC EplNmtuProcessEvent(
 EPLDLLEXPORT tEplKernel PUBLIC EplNmtuRegisterStateChangeCb(
                 tEplNmtuStateChangeCallback pfnEplNmtStateChangeCb_p);
 
-#endif // #if((EPL_MODULE_INTEGRATION & EPL_MODULE_NMTU) != 0)
+#endif // #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMTU)) != 0)
 
 #endif  // #ifndef _EPLNMTU_H_
 

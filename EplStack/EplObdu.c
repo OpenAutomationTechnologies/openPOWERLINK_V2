@@ -72,7 +72,7 @@
 #include "user/EplObdu.h"
 #include "user/EplObduCal.h"
 
-#if ((EPL_MODULE_INTEGRATION & EPL_MODULE_OBDU) != 0)
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_OBDU)) != 0)
 /***************************************************************************/
 /*                                                                         */
 /*                                                                         */
@@ -506,7 +506,7 @@ return Ret;
 //
 //---------------------------------------------------------------------------
 
-#endif // #if((EPL_MODULE_INTEGRATION & EPL_MODULE_OBDU) != 0)
+#endif // #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_OBDU)) != 0)
 
 // EOF
 

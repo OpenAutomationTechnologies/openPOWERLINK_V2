@@ -244,7 +244,7 @@ int          iRet;
     // the application must start NMT state machine
     // via EplApiExecNmtCommand(kEplNmtEventSwReset)
     // and thereby the whole EPL stack :-)
-/*#if((EPL_MODULE_INTEGRATION & EPL_MODULE_NMTU) != 0)
+/*#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMTU)) != 0)
     Ret = EplNmtuNmtEvent(kEplNmtEventSwReset);
 #endif*/
 

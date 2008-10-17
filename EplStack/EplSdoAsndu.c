@@ -71,7 +71,7 @@
 #include "user/EplSdoAsndu.h"
 #include "user/EplDlluCal.h"
 
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_SDO_ASND) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDO_ASND)) != 0)
 
 /***************************************************************************/
 /*                                                                         */
@@ -201,7 +201,7 @@ tEplKernel  Ret;
         Ret = kEplSdoUdpMissCb;
     }
 
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_DLLU) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLU)) != 0)
     Ret = EplDlluCalRegAsndService(kEplDllAsndSdo,
                                    EplSdoAsnduCb,
                                    kEplDllAsndFilterLocal);
@@ -234,7 +234,7 @@ tEplKernel  Ret;
 
     Ret = kEplSuccessful;
 
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_DLLU) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLU)) != 0)
     // deregister callback function from DLL
     Ret = EplDlluCalRegAsndService(kEplDllAsndSdo,
                                    NULL,
@@ -374,7 +374,7 @@ tEplFrameInfo   FrameInfo;
     FrameInfo.m_uiFrameSize = dwDataSize_p;
     FrameInfo.m_pFrame = pSrcData_p;
     EPL_MEMSET(&FrameInfo.m_NetTime , 0x00, sizeof(tEplNetTime));
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_DLLU) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLU)) != 0)
     Ret = EplDlluCalAsyncSend(&FrameInfo,kEplDllAsyncReqPrioGeneric);
 #endif
 
@@ -504,6 +504,6 @@ Exit:
 }
 
 
-#endif // end of #if((EPL_MODULE_INTEGRATION & EPL_MODULE_SDO_ASND) != 0)
+#endif // end of #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDO_ASND)) != 0)
 // EOF
 

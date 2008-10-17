@@ -359,7 +359,7 @@ tEplKernel      Ret = kEplSuccessful;
     #endif
 #endif
 
-#if ((EPL_MODULE_INTEGRATION & EPL_MODULE_PDOK) != 0)
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOK)) != 0)
     // mark TPDO as valid
     Ret = EplPdokCalSetTpdosValid(TRUE);
 #endif

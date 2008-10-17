@@ -74,12 +74,12 @@
 #include "EplDllCal.h"
 
 // include only if direct call between user- and kernelspace is enabled
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_DLLK) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLK)) != 0)
 #include "kernel/EplDllkCal.h"
 #endif
 
 
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_DLLU) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLU)) != 0)
 
 /***************************************************************************/
 /*                                                                         */
@@ -323,7 +323,7 @@ tEplKernel EplDlluCalAsyncSend(tEplFrameInfo * pFrameInfo_p, tEplDllAsyncReqPrio
 {
 tEplKernel  Ret = kEplSuccessful;
 
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_DLLK) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLK)) != 0)
     pFrameInfo_p->m_uiFrameSize += 14;  // add size of ethernet header
     Ret = EplDllkCalAsyncSend(pFrameInfo_p, Priority_p);
 #else
@@ -334,7 +334,7 @@ tEplKernel  Ret = kEplSuccessful;
 }
 
 
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_NMT_MN) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
 
 //---------------------------------------------------------------------------
 //
@@ -484,7 +484,7 @@ tEplEvent   Event;
 }
 
 
-#endif // ((EPL_MODULE_INTEGRATION & EPL_MODULE_NMT_MN) != 0)
+#endif // (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
 
 
 //=========================================================================//
@@ -528,7 +528,7 @@ tEplDllCalAsndServiceIdFilter   ServFilter;
 }
 
 
-#endif // ((EPL_MODULE_INTEGRATION & EPL_MODULE_DLLU) != 0)
+#endif // (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLU)) != 0)
 
 // EOF
 

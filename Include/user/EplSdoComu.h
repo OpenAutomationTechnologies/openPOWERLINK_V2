@@ -98,7 +98,7 @@ tEplKernel PUBLIC EplSdoComAddInstance(void);
 
 tEplKernel PUBLIC EplSdoComDelInstance(void);
 
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_SDOC) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOC)) != 0)
 
 tEplKernel PUBLIC EplSdoComDefineCon(tEplSdoComConHdl*  pSdoComConHdl_p,
                                       unsigned int      uiTargetNodeId_p,

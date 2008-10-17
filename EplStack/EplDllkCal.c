@@ -77,7 +77,7 @@
 #include "SharedBuff.h"
 #endif
 
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_DLLK) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLK)) != 0)
 /***************************************************************************/
 /*                                                                         */
 /*                                                                         */
@@ -152,7 +152,7 @@ typedef struct
 
     tEplDllkCalStatistics   m_Statistics;
 
-#if ((EPL_MODULE_INTEGRATION & EPL_MODULE_NMT_MN) != 0)
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
     // IdentRequest queue with CN node IDs
     unsigned int    m_auiQueueIdentReq[EPL_D_NMT_MaxCNNumber_U8 + 1];   // 1 entry is reserved to distinguish between full and empty
     unsigned int    m_uiWriteIdentReq;
@@ -344,7 +344,7 @@ tEplKernel      Ret = kEplSuccessful;
             break;
         }
 
-#if ((EPL_MODULE_INTEGRATION & EPL_MODULE_NMT_MN) != 0)
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
         case kEplEventTypeDllkIssueReq:
         {
         tEplDllCalIssueRequest*  pIssueReq;
@@ -758,7 +758,7 @@ tShbError   ShbError;
     EplDllkCalInstance_g.m_uiFrameSizeGen = 0;
 #endif
 
-#if ((EPL_MODULE_INTEGRATION & EPL_MODULE_NMT_MN) != 0)
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
     // clear MN asynchronous queues
     EplDllkCalInstance_g.m_uiNextQueueCnRequest = 0;
     EplDllkCalInstance_g.m_uiNextRequestQueue = 0;
@@ -821,7 +821,7 @@ tShbError   ShbError;
 }
 
 
-#if ((EPL_MODULE_INTEGRATION & EPL_MODULE_NMT_MN) != 0)
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
 
 //---------------------------------------------------------------------------
 //
@@ -1085,7 +1085,7 @@ tEplKernel  Ret = kEplSuccessful;
 Exit:
     return Ret;
 }
-#endif //((EPL_MODULE_INTEGRATION & EPL_MODULE_NMT_MN) != 0)
+#endif //(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
 
 //=========================================================================//
 //                                                                         //
@@ -1163,7 +1163,7 @@ unsigned long   ulBlockCount;
 #endif
 
 
-#endif // #if((EPL_MODULE_INTEGRATION & EPL_MODULE_DLLK) != 0)
+#endif // #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLK)) != 0)
 
 // EOF
 

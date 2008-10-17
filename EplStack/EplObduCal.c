@@ -72,7 +72,7 @@
 #include "user/EplObduCal.h"
 #include "kernel/EplObdk.h"
 
-#if ((EPL_MODULE_INTEGRATION & EPL_MODULE_OBDU) != 0) && (EPL_OBD_USE_KERNEL != FALSE)
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_OBDU)) != 0) && (EPL_OBD_USE_KERNEL != FALSE)
 
 
 /***************************************************************************/
@@ -132,7 +132,7 @@ EPLDLLEXPORT tEplKernel PUBLIC EplObduCalWriteEntry (
 {
 tEplKernel  Ret;
 
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_OBDK) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_OBDK)) != 0)
     Ret = EplObdWriteEntry(uiIndex_p,uiSubIndex_p,pSrcData_p,Size_p);
 #else
     Ret = kEplSuccessful;
@@ -168,7 +168,7 @@ EPLDLLEXPORT tEplKernel PUBLIC EplObduCalReadEntry (
 {
 tEplKernel  Ret;
 
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_OBDK) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_OBDK)) != 0)
     Ret = EplObdReadEntry(uiIndex_p, uiSubIndex_p, pDstData_p, pSize_p);
 #else
     Ret = kEplSuccessful;
@@ -198,7 +198,7 @@ EPLDLLEXPORT tEplKernel PUBLIC EplObduCalAccessOdPart (
 {
 tEplKernel  Ret;
 
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_OBDK) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_OBDK)) != 0)
     Ret = EplObdAccessOdPart(ObdPart_p, Direction_p);
 #else
     Ret = kEplSuccessful;
@@ -224,7 +224,7 @@ EPLDLLEXPORT tEplKernel PUBLIC EplObduCalDefineVar (tEplVarParam MEM* pVarParam_
 {
 tEplKernel  Ret;
 
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_OBDK) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_OBDK)) != 0)
     Ret = EplObdDefineVar(pVarParam_p);
 #else
     Ret = kEplSuccessful;
@@ -252,7 +252,7 @@ EPLDLLEXPORT void* PUBLIC EplObduCalGetObjectDataPtr ( unsigned int uiIndex_p,
 {
 void*   pData;
 
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_OBDK) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_OBDK)) != 0)
     pData = EplObdGetObjectDataPtr(uiIndex_p, uiSubIndex_p);
 #else
     pData = NULL;
@@ -279,7 +279,7 @@ EPLDLLEXPORT tEplKernel PUBLIC EplObduCalRegisterUserOd (tEplObdEntryPtr pUserOd
 {
 tEplKernel  Ret;
 
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_OBDK) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_OBDK)) != 0)
     Ret = EplObdRegisterUserOd(pUserOd_p);
 #else
     Ret = kEplSuccessful;
@@ -307,7 +307,7 @@ tEplKernel  Ret;
 EPLDLLEXPORT void PUBLIC EplObduCalInitVarEntry (tEplObdVarEntry MEM* pVarEntry_p,
                                         BYTE bType_p, tEplObdSize ObdSize_p)
 {
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_OBDK) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_OBDK)) != 0)
     EplObdInitVarEntry(pVarEntry_p, bType_p, ObdSize_p);
 #endif
 }
@@ -335,7 +335,7 @@ EPLDLLEXPORT tEplObdSize PUBLIC EplObduCalGetDataSize(unsigned int uiIndex_p,
 {
 tEplObdSize Size;
 
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_OBDK) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_OBDK)) != 0)
     Size = EplObdGetDataSize(uiIndex_p, uiSubIndex_p);
 #else
     Size = 0;
@@ -362,7 +362,7 @@ EPLDLLEXPORT unsigned int PUBLIC EplObduCalGetNodeId()
 {
 unsigned int uiNodeId;
 
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_OBDK) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_OBDK)) != 0)
     uiNodeId = EplObdGetNodeId();
 #else
     uiNodeId = 0;
@@ -391,7 +391,7 @@ EPLDLLEXPORT tEplKernel PUBLIC EplObduCalSetNodeId(unsigned int uiNodeId_p,
 {
 tEplKernel  Ret;
 
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_OBDK) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_OBDK)) != 0)
     Ret = EplObdSetNodeId(uiNodeId_p, NodeIdType_p);
 #else
     Ret = kEplSuccessful;
@@ -423,7 +423,7 @@ EPLDLLEXPORT tEplKernel PUBLIC EplObduCalGetAccessType(unsigned int uiIndex_p,
 {
 tEplObdAccess AccesType;
 
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_OBDK) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_OBDK)) != 0)
     AccesType = EplObdGetAccessType(uiIndex_p, uiSubIndex_p, pAccessTyp_p);
 #else
     AccesType = 0;
@@ -458,7 +458,7 @@ EPLDLLEXPORT tEplKernel PUBLIC EplObduCalReadEntryToLe (unsigned int        uiIn
 {
 tEplKernel  Ret;
 
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_OBDK) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_OBDK)) != 0)
     Ret = EplObdReadEntryToLe(uiIndex_p, uiSubIndex_p, pDstData_p, pSize_p);
 #else
     Ret = kEplSuccessful;
@@ -491,7 +491,7 @@ EPLDLLEXPORT tEplKernel PUBLIC EplObduCalWriteEntryFromLe (unsigned int  uiIndex
 {
 tEplKernel  Ret;
 
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_OBDK) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_OBDK)) != 0)
     Ret = EplObdWriteEntryFromLe(uiIndex_p, uiSubIndex_p, pSrcData_p, Size_p);
 #else
     Ret = kEplSuccessful;
@@ -521,7 +521,7 @@ EPLDLLEXPORT tEplKernel PUBLIC EplObduCalSearchVarEntry (EPL_MCO_DECL_INSTANCE_P
 {
 tEplKernel  Ret;
 
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_OBDK) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_OBDK)) != 0)
     Ret = EplObdSearchVarEntry(uiIndex_p, uiSubindex_p, ppVarEntry_p);
 #else
     Ret = kEplSuccessful;
@@ -555,7 +555,7 @@ tEplKernel  Ret;
 //
 //---------------------------------------------------------------------------
 
-#endif //((EPL_MODULE_INTEGRATION & EPL_MODULE_OBDU) != 0)
+#endif //(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_OBDU)) != 0)
 
 
 // EOF

@@ -71,7 +71,7 @@
 #include "kernel/EplNmtk.h"
 #include "user/EplNmtu.h"
 
-#if ((EPL_MODULE_INTEGRATION & EPL_MODULE_NMT_MN) != 0)
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
 #include "user/EplNmtMnu.h"
 #endif
 
@@ -281,7 +281,7 @@ tEplDllkCalStatistics* pDllkCalStats;
     nSize += snprintf (pcBuffer_p + nSize, nBufferSize_p - nSize,
                        "CurAsyncTxGen=%lu CurAsyncTxNmt=%lu CurAsyncRx=%lu\nMaxAsyncTxGen=%lu MaxAsyncTxNmt=%lu MaxAsyncRx=%lu\n", pDllkCalStats->m_ulCurTxFrameCountGen, pDllkCalStats->m_ulCurTxFrameCountNmt, pDllkCalStats->m_ulCurRxFrameCount, pDllkCalStats->m_ulMaxTxFrameCountGen, pDllkCalStats->m_ulMaxTxFrameCountNmt, pDllkCalStats->m_ulMaxRxFrameCount);
 
-#if ((EPL_MODULE_INTEGRATION & EPL_MODULE_NMT_MN) != 0)
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
     // fetch running IdentRequests
     nSize += snprintf (pcBuffer_p + nSize, nBufferSize_p - nSize,
                        "running IdentRequests:      0x%08lX\n",

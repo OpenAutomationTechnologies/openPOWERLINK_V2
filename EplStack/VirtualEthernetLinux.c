@@ -100,7 +100,7 @@
 #include "kernel/EplDllk.h"
 
 
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_VETH) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_VETH)) != 0)
 
 /***************************************************************************/
 /*                                                                         */
@@ -352,4 +352,4 @@ tEplKernel  Ret = kEplSuccessful;
     return Ret;
 }
 
-#endif // ((EPL_MODULE_INTEGRATION & EPL_MODULE_VETH) != 0)
+#endif // (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_VETH)) != 0)

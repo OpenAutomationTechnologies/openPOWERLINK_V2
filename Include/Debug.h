@@ -167,7 +167,7 @@
     #define DEF_DEBUG_LVL                   (DEBUG_LVL_ALWAYS | DEBUG_LVL_ERROR)
 #endif
 #ifndef DEBUG_GLB_LVL
-    #define DEBUG_GLB_LVL()                 DEF_DEBUG_LVL
+    #define DEBUG_GLB_LVL()                 (DEF_DEBUG_LVL)
 #endif
 
 

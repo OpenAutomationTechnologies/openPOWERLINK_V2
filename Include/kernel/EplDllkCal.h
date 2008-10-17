@@ -98,7 +98,7 @@ typedef struct
 // function prototypes
 //---------------------------------------------------------------------------
 
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_DLLK) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLK)) != 0)
 
 tEplKernel EplDllkCalAddInstance(void);
 
@@ -117,7 +117,7 @@ tEplKernel EplDllkCalGetStatistics(tEplDllkCalStatistics ** ppStatistics);
 
 tEplKernel EplDllkCalProcess(tEplEvent * pEvent_p);
 
-#if ((EPL_MODULE_INTEGRATION & EPL_MODULE_NMT_MN) != 0)
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
 
 tEplKernel EplDllkCalIssueRequest(tEplDllReqServiceId Service_p, unsigned int uiNodeId_p, BYTE bSoaFlag1_p);
 
@@ -125,9 +125,9 @@ tEplKernel EplDllkCalAsyncGetSoaRequest(tEplDllReqServiceId* pReqServiceId_p, un
 
 tEplKernel EplDllkCalAsyncSetPendingRequests(unsigned int uiNodeId_p, tEplDllAsyncReqPriority AsyncReqPrio_p, unsigned int uiCount_p);
 
-#endif //((EPL_MODULE_INTEGRATION & EPL_MODULE_NMT_MN) != 0)
+#endif //(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
 
-#endif // #if((EPL_MODULE_INTEGRATION & EPL_MODULE_DLLK) != 0)
+#endif // #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLK)) != 0)
 
 #endif  // #ifndef _EPL_DLLKCAL_H_
 

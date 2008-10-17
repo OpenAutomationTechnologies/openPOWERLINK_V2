@@ -70,15 +70,15 @@
 
 #include "user/EplSdoComu.h"
 
-#if (((EPL_MODULE_INTEGRATION & EPL_MODULE_SDOS) == 0) &&\
-     ((EPL_MODULE_INTEGRATION & EPL_MODULE_SDOC) == 0)   )
+#if ((((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOS)) == 0) &&\
+     (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOC)) == 0)   )
 
     #error 'ERROR: At least SDO Server or SDO Client should be activate!'
 
 #endif
 
-#if ((EPL_MODULE_INTEGRATION & EPL_MODULE_SDOS) != 0)
-    #if ((EPL_MODULE_INTEGRATION & EPL_MODULE_OBDU) == 0) && (EPL_OBD_USE_KERNEL == FALSE)
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOS)) != 0)
+    #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_OBDU)) == 0) && (EPL_OBD_USE_KERNEL == FALSE)
 
     #error 'ERROR: SDO Server needs OBDu module!'
 
@@ -120,7 +120,7 @@ typedef enum
     kEplSdoComConEventInitError     = 0x06, // error duringinitialisiation
                                             // of the connection
     kEplSdoComConEventTimeout       = 0x07 // timeout in lower layer
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_SDOC) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOC)) != 0)
 
     ,
 
@@ -146,13 +146,13 @@ typedef enum
     // General State
     kEplSdoComStateIdle             = 0x00, // idle state
 
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_SDOS) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOS)) != 0)
     // Server States
     kEplSdoComStateServerSegmTrans  = 0x01, // send following frames
 #endif
 
 
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_SDOC) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOC)) != 0)
     // Client States
     kEplSdoComStateClientWaitInit   = 0x10, // wait for init connection
                                             // on lower layer
@@ -189,7 +189,7 @@ typedef struct
     void*               m_pUserArg;         // user definable argument pointer
 
     DWORD               m_dwLastAbortCode;  // save the last abort code
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_SDOC) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOC)) != 0)
     // only for client
     unsigned int        m_uiTargetIndex;    // index to access
     unsigned int        m_uiTargetSubIndex; // subiondex to access
@@ -240,7 +240,7 @@ static tEplKernel EplSdoComTransferFinished(tEplSdoComConHdl   SdoComCon_p,
                                             tEplSdoComCon*     pSdoComCon_p,
                                             tEplSdoComConState SdoComConState_p);
 
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_SDOS) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOS)) != 0)
 static tEplKernel EplSdoComServerInitReadByIndex(tEplSdoComCon*     pSdoComCon_p,
                                          tEplAsySdoCom*     pAsySdoCom_p);
 
@@ -254,7 +254,7 @@ static tEplKernel EplSdoComServerInitWriteByIndex(tEplSdoComCon*     pSdoComCon_
 #endif
 
 
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_SDOC) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOC)) != 0)
 
 static tEplKernel EplSdoComClientSend(tEplSdoComCon* pSdoComCon_p);
 
@@ -420,7 +420,7 @@ Exit:
 // State:
 //
 //---------------------------------------------------------------------------
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_SDOC) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOC)) != 0)
 tEplKernel PUBLIC EplSdoComDefineCon(tEplSdoComConHdl*  pSdoComConHdl_p,
                                       unsigned int      uiTargetNodeId_p,
                                       tEplSdoType       ProtType_p)
@@ -544,7 +544,7 @@ Exit:
 // State:
 //
 //---------------------------------------------------------------------------
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_SDOC) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOC)) != 0)
 tEplKernel PUBLIC EplSdoComInitTransferByIndex(tEplSdoComTransParamByIndex* pSdoComTransParam_p)
 {
 tEplKernel      Ret;
@@ -644,7 +644,7 @@ Exit:
 // State:
 //
 //---------------------------------------------------------------------------
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_SDOC) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOC)) != 0)
 tEplKernel PUBLIC EplSdoComUndefineCon(tEplSdoComConHdl  SdoComConHdl_p)
 {
 tEplKernel          Ret;
@@ -712,7 +712,7 @@ Exit:
 // State:
 //
 //---------------------------------------------------------------------------
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_SDOC) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOC)) != 0)
 tEplKernel PUBLIC EplSdoComGetState(tEplSdoComConHdl    SdoComConHdl_p,
                                     tEplSdoComFinished* pSdoComFinished_p)
 {
@@ -798,7 +798,7 @@ Exit:
 // State:
 //
 //---------------------------------------------------------------------------
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_SDOC) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOC)) != 0)
 tEplKernel PUBLIC EplSdoComSdoAbort(tEplSdoComConHdl SdoComConHdl_p,
                                     DWORD            dwAbortCode_p)
 {
@@ -1067,7 +1067,7 @@ tEplKernel          Ret;
 tEplSdoComCon*      pSdoComCon;
 BYTE                bFlag;
 
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_SDOS) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOS)) != 0)
 DWORD               dwAbortCode;
 unsigned int        uiSize;
 #endif
@@ -1092,7 +1092,7 @@ unsigned int        uiSize;
             // check events
             switch(SdoComConEvent_p)
             {
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_SDOC) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOC)) != 0)
                 // init con for client
                 case kEplSdoComConEventInitCon:
                 {
@@ -1109,7 +1109,7 @@ unsigned int        uiSize;
                 // int con for server
                 case kEplSdoComConEventRec:
                 {
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_SDOS) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOS)) != 0)
                     // check if init of an transfer and no SDO abort
                     if ((pAsySdoCom_p->m_le_bFlags & 0x80) == 0)
                     {   // SDO request
@@ -1196,7 +1196,7 @@ unsigned int        uiSize;
                         Ret = kEplSdoComNotResponsible;
                         goto Exit;
                     }
-#endif // end of #if((EPL_MODULE_INTEGRATION & EPL_MODULE_SDOS) != 0)
+#endif // end of #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOS)) != 0)
 
                     break;
                 }
@@ -1219,7 +1219,7 @@ unsigned int        uiSize;
             break;
         }
 
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_SDOS) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOS)) != 0)
         //-------------------------------------------------------------------------
         // SDO Server part
         // segmented transfer
@@ -1363,10 +1363,10 @@ unsigned int        uiSize;
 
             break;
         }
-#endif // endif of #if((EPL_MODULE_INTEGRATION & EPL_MODULE_SDOS) != 0)
+#endif // endif of #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOS)) != 0)
 
 
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_SDOC) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOC)) != 0)
         //-------------------------------------------------------------------------
         // SDO Client part
         // wait for finish of establishing connection
@@ -1779,13 +1779,13 @@ unsigned int        uiSize;
 
             break;
         }
-#endif // endo of #if((EPL_MODULE_INTEGRATION & EPL_MODULE_SDOC) != 0)
+#endif // endo of #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOC)) != 0)
 
     }// end of switch(pSdoComCon->m_SdoComState)
 
 
 
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_SDOC) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOC)) != 0)
 Exit:
 #endif
 
@@ -1818,7 +1818,7 @@ Exit:
 // State:
 //
 //---------------------------------------------------------------------------
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_SDOS) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOS)) != 0)
 static tEplKernel EplSdoComServerInitReadByIndex(tEplSdoComCon*     pSdoComCon_p,
                                          tEplAsySdoCom*     pAsySdoCom_p)
 {
@@ -1840,7 +1840,7 @@ DWORD           dwAbortCode;
 
     // check accesstype of entry
     // existens of entry
-//#if((EPL_MODULE_INTEGRATION & EPL_MODULE_OBDU) != 0)
+//#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_OBDU)) != 0)
     Ret = EplObduGetAccessType(uiIndex, uiSubindex, &AccessType);
 /*#else
     Ret = kEplObdSubindexNotExist;
@@ -1896,7 +1896,7 @@ DWORD           dwAbortCode;
     pSdoComCon_p->m_SdoServiceType = kEplSdoServiceReadByIndex;
 
     // get size of object to see iof segmented or expedited transfer
-//#if((EPL_MODULE_INTEGRATION & EPL_MODULE_OBDU) != 0)
+//#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_OBDU)) != 0)
     EntrySize = EplObduGetDataSize(uiIndex, uiSubindex);
 /*#else
     EntrySize = 0;
@@ -1905,7 +1905,7 @@ DWORD           dwAbortCode;
     {   // segmented transfer
         pSdoComCon_p->m_SdoTransType = kEplSdoTransSegmented;
         // get pointer to object-entry data
-//#if((EPL_MODULE_INTEGRATION & EPL_MODULE_OBDU) != 0)
+//#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_OBDU)) != 0)
         pSdoComCon_p->m_pData = EplObduGetObjectDataPtr(uiIndex, uiSubindex);
 //#endif
     }
@@ -1958,7 +1958,7 @@ Exit:
 // State:
 //
 //---------------------------------------------------------------------------
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_SDOS) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOS)) != 0)
 static tEplKernel EplSdoComServerSendFrameIntern(tEplSdoComCon*     pSdoComCon_p,
                                            unsigned int       uiIndex_p,
                                            unsigned int       uiSubIndex_p,
@@ -2024,7 +2024,7 @@ BYTE            bFlag;
             if(pSdoComCon_p->m_SdoTransType == kEplSdoTransExpedited)
             {   // Expedited transfer
                 // copy data in frame
-//#if((EPL_MODULE_INTEGRATION & EPL_MODULE_OBDU) != 0)
+//#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_OBDU)) != 0)
                 Ret = EplObduReadEntryToLe(uiIndex_p,
                                         uiSubIndex_p,
                                         &pCommandFrame->m_le_abCommandData[0],
@@ -2191,7 +2191,7 @@ Exit:
 // State:
 //
 //---------------------------------------------------------------------------
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_SDOS) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOS)) != 0)
 static tEplKernel EplSdoComServerInitWriteByIndex(tEplSdoComCon*     pSdoComCon_p,
                                          tEplAsySdoCom*     pAsySdoCom_p)
 {
@@ -2244,7 +2244,7 @@ BYTE*           pbSrcData;
 
     // check accesstype of entry
     // existens of entry
-//#if((EPL_MODULE_INTEGRATION & EPL_MODULE_OBDU) != 0)
+//#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_OBDU)) != 0)
     Ret = EplObduGetAccessType(uiIndex, uiSubindex, &AccessType);
 /*#else
     Ret = kEplObdSubindexNotExist;
@@ -2309,7 +2309,7 @@ BYTE*           pbSrcData;
     {   // expedited transfer
         // size checking is done by EplObduWriteEntryFromLe()
 
-//#if((EPL_MODULE_INTEGRATION & EPL_MODULE_OBDU) != 0)
+//#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_OBDU)) != 0)
         Ret = EplObduWriteEntryFromLe(uiIndex,
                                     uiSubindex,
                                     pbSrcData,
@@ -2372,7 +2372,7 @@ BYTE*           pbSrcData;
         // because we directly write to the destination memory
         // d.k. no one calls the user OD callback function
 
-    //#if((EPL_MODULE_INTEGRATION & EPL_MODULE_OBDU) != 0)
+    //#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_OBDU)) != 0)
         EntrySize = EplObduGetDataSize(uiIndex, uiSubindex);
     /*#else
         EntrySize = 0;
@@ -2394,7 +2394,7 @@ BYTE*           pbSrcData;
         // eleminate header (Command header (8) + variable part (4) + Command header (4))
         uiBytesToTransfer -= 16;
         // get pointer to object entry
-//#if((EPL_MODULE_INTEGRATION & EPL_MODULE_OBDU) != 0)
+//#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_OBDU)) != 0)
         pSdoComCon_p->m_pData = EplObduGetObjectDataPtr(uiIndex,
                                                         uiSubindex);
 //#endif
@@ -2465,7 +2465,7 @@ Exit:
 // State:
 //
 //---------------------------------------------------------------------------
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_SDOC) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOC)) != 0)
 static tEplKernel EplSdoComClientSend(tEplSdoComCon* pSdoComCon_p)
 {
 tEplKernel      Ret;
@@ -2690,7 +2690,7 @@ Exit:
 // State:
 //
 //---------------------------------------------------------------------------
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_SDOC) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOC)) != 0)
 static tEplKernel EplSdoComClientProcessFrame(tEplSdoComConHdl   SdoComCon_p,
                                               tEplAsySdoCom*     pAsySdoCom_p)
 {
@@ -2897,7 +2897,7 @@ Exit:
 // State:
 //
 //---------------------------------------------------------------------------
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_SDOC) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOC)) != 0)
 static tEplKernel EplSdoComClientSendAbort(tEplSdoComCon* pSdoComCon_p,
                                            DWORD          dwAbortCode_p)
 {

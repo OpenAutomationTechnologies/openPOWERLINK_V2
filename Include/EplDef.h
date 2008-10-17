@@ -182,7 +182,7 @@
 #endif
 
 #ifndef EPL_OBD_USE_KERNEL
-#if ((EPL_MODULE_INTEGRATION & EPL_MODULE_OBDU) == 0)
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_OBDU)) == 0)
 #define EPL_OBD_USE_KERNEL                  TRUE
 #else
 #define EPL_OBD_USE_KERNEL                  FALSE

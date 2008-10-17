@@ -91,7 +91,7 @@
 // function prototypes
 //---------------------------------------------------------------------------
 
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_NMT_CN) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_CN)) != 0)
 
 EPLDLLEXPORT tEplKernel PUBLIC EplNmtCnuInit(unsigned int uiNodeId_p);
 
@@ -105,7 +105,7 @@ EPLDLLEXPORT tEplKernel PUBLIC EplNmtCnuSendNmtRequest (unsigned int uiNodeId_p,
 EPLDLLEXPORT tEplKernel PUBLIC EplNmtCnuRegisterCheckEventCb(
             tEplNmtuCheckEventCallback pfnEplNmtCheckEventCb_p);
 
-#endif // #if((EPL_MODULE_INTEGRATION & EPL_MODULE_NMT_CN) != 0)
+#endif // #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_CN)) != 0)
 
 #endif  // #ifndef _EPLNMTCNU_H_
 

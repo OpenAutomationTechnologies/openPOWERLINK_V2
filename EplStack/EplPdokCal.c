@@ -70,7 +70,7 @@
 
 #include "kernel/EplPdokCal.h"
 
-#if ((EPL_MODULE_INTEGRATION & EPL_MODULE_PDOK) != 0)
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOK)) != 0)
 
 
 /***************************************************************************/

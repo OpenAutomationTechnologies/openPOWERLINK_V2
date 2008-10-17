@@ -181,7 +181,7 @@ typedef struct
 
 // generate EPL NMT_FeatureFlags_U32
 #ifndef EPL_DEF_FEATURE_ISOCHR
-    #if ((EPL_MODULE_INTEGRATION & EPL_MODULE_DLLK) != 0)
+    #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLK)) != 0)
         #define EPL_DEF_FEATURE_ISOCHR          (EPL_FEATURE_ISOCHR)
     #else
         #define EPL_DEF_FEATURE_ISOCHR          0
@@ -189,7 +189,7 @@ typedef struct
 #endif
 
 #ifndef EPL_DEF_FEATURE_SDO_ASND
-    #if ((EPL_MODULE_INTEGRATION & EPL_MODULE_SDO_ASND) != 0)
+    #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDO_ASND)) != 0)
         #define EPL_DEF_FEATURE_SDO_ASND        (EPL_FEATURE_SDO_ASND)
     #else
         #define EPL_DEF_FEATURE_SDO_ASND        0
@@ -197,7 +197,7 @@ typedef struct
 #endif
 
 #ifndef EPL_DEF_FEATURE_SDO_UDP
-    #if ((EPL_MODULE_INTEGRATION & EPL_MODULE_SDO_UDP) != 0)
+    #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDO_UDP)) != 0)
         #define EPL_DEF_FEATURE_SDO_UDP         (EPL_FEATURE_SDO_UDP)
     #else
         #define EPL_DEF_FEATURE_SDO_UDP         0
@@ -205,7 +205,7 @@ typedef struct
 #endif
 
 #ifndef EPL_DEF_FEATURE_SDO_PDO
-    #if ((EPL_MODULE_INTEGRATION & EPL_MODULE_SDO_PDO) != 0)
+    #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDO_PDO)) != 0)
         #define EPL_DEF_FEATURE_SDO_PDO         (EPL_FEATURE_SDO_PDO)
     #else
         #define EPL_DEF_FEATURE_SDO_PDO         0
@@ -213,7 +213,7 @@ typedef struct
 #endif
 
 #ifndef EPL_DEF_FEATURE_PDO_DYN
-    #if ((EPL_MODULE_INTEGRATION & EPL_MODULE_PDOK) != 0)
+    #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOK)) != 0)
         #define EPL_DEF_FEATURE_PDO_DYN         (EPL_FEATURE_PDO_DYN)
     #else
         #define EPL_DEF_FEATURE_PDO_DYN         0
@@ -221,7 +221,7 @@ typedef struct
 #endif
 
 #ifndef EPL_DEF_FEATURE_CFGMA
-    #if ((EPL_MODULE_INTEGRATION & EPL_MODULE_CFGMA) != 0)
+    #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_CFGMA)) != 0)
         #define EPL_DEF_FEATURE_CFGMA           (EPL_FEATURE_CFGMA)
     #else
         #define EPL_DEF_FEATURE_CFGMA           0

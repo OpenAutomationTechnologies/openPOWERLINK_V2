@@ -89,7 +89,7 @@
 //---------------------------------------------------------------------------
 // function prototypes
 //---------------------------------------------------------------------------
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_NMTK) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMTK)) != 0)
 EPLDLLEXPORT tEplKernel PUBLIC EplNmtkInit(EPL_MCO_DECL_PTR_INSTANCE_PTR);
 
 EPLDLLEXPORT tEplKernel PUBLIC EplNmtkAddInstance(EPL_MCO_DECL_PTR_INSTANCE_PTR);
@@ -101,7 +101,7 @@ EPLDLLEXPORT tEplKernel PUBLIC EplNmtkProcess(EPL_MCO_DECL_PTR_INSTANCE_PTR_
 
 EPLDLLEXPORT tEplNmtState PUBLIC EplNmtkGetNmtState(EPL_MCO_DECL_PTR_INSTANCE_PTR);
 
-#endif // #if((EPL_MODULE_INTEGRATION & EPL_MODULE_NMTK) != 0)
+#endif // #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMTK)) != 0)
 
 
 

@@ -113,22 +113,6 @@
 // * EPL_DBGLVL_ERROR       =   0x40000000L
 // * EPL_DBGLVL_ALWAYS      =   0x80000000L
 
-#define EPL_MODULE_OBDK        0x00000001L // OBD kernelspace module
-#define EPL_MODULE_PDOK        0x00000002L // PDO kernelspace module
-#define EPL_MODULE_NMT_MN      0x00000004L // NMT MN module
-#define EPL_MODULE_SDOS        0x00000008L // SDO Server module
-#define EPL_MODULE_SDOC        0x00000010L // SDO Client module
-#define EPL_MODULE_SDO_ASND    0x00000020L // SDO over Asnd module
-#define EPL_MODULE_SDO_UDP     0x00000040L // SDO over UDP module
-#define EPL_MODULE_SDO_PDO     0x00000080L // SDO in PDO module
-#define EPL_MODULE_NMT_CN      0x00000100L // NMT CN module
-#define EPL_MODULE_NMTU        0x00000200L // NMT userspace module
-#define EPL_MODULE_NMTK        0x00000400L // NMT kernelspace module
-#define EPL_MODULE_DLLK        0x00000800L // DLL kernelspace module
-#define EPL_MODULE_DLLU        0x00001000L // DLL userspace module
-#define EPL_MODULE_OBDU        0x00002000L // OBD userspace module
-#define EPL_MODULE_CFGMA       0x00004000L // Configuration Manager module
-#define EPL_MODULE_VETH        0x00008000L // virtual ethernet driver module
 
 // EPL_MODULE_INTEGRATION defines all modules which are included in
 // EPL application. Please add or delete modules for your application.
@@ -145,7 +129,7 @@
                                | EPL_MODULE_DLLK \
                                | EPL_MODULE_DLLU \
                                | EPL_MODULE_VETH
-//                               | EPL_MODULE_OBDU \
+//                               | EPL_MODULE_OBDU
 
 // =========================================================================
 // EPL ethernet driver (Edrv) specific defines

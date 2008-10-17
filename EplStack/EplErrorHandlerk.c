@@ -74,9 +74,9 @@
 #include "kernel/EplObdk.h"         // function prototyps of the EplOBD-Modul
 #include "kernel/EplDllk.h"
 
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_DLLK) != 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLK)) != 0)
 
-#if((EPL_MODULE_INTEGRATION & EPL_MODULE_OBDK) == 0)
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_OBDK)) == 0)
 #error "EPL ErrorHandler module needs EPL module OBDK!"
 #endif
 
@@ -113,7 +113,7 @@ typedef struct
     tEplErrorHandlerkErrorCounter   m_CnCrcErr;     // object 0x1C0F
     unsigned long                   m_ulDllErrorEvents;
 
-#if ((EPL_MODULE_INTEGRATION & EPL_MODULE_NMT_MN) != 0)
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
     tEplErrorHandlerkErrorCounter   m_MnCrcErr;                     // object 0x1C00
     tEplErrorHandlerkErrorCounter   m_MnCycTimeExceed;              // object 0x1C02
     DWORD                           m_adwMnCnLossPresCumCnt[254];   // object 0x1C07
@@ -138,7 +138,7 @@ static tEplKernel EplErrorHandlerkLinkErrorCounter(
                                 tEplErrorHandlerkErrorCounter* pErrorCounter_p,
                                 unsigned int uiIndex_p);
 
-#if ((EPL_MODULE_INTEGRATION & EPL_MODULE_NMT_MN) != 0)
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
 static tEplKernel EplErrorHandlerkLinkArray(
                                 DWORD*      pdwValue_p,
                                 unsigned int uiValueCount_p,
@@ -249,7 +249,7 @@ tEplKernel      Ret;
         goto Exit;
     }
 
-#if ((EPL_MODULE_INTEGRATION & EPL_MODULE_NMT_MN) != 0)
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
     Ret = EplErrorHandlerkLinkErrorCounter(
             &EplErrorHandlerkInstance_g.m_MnCrcErr,
             0x1C00);
@@ -444,7 +444,7 @@ tEplNmtEvent            NmtEvent;
             if ((ulDllErrorEvents & EPL_DLL_ERR_INVALID_FORMAT) != 0)
             {   // invalid format error occured (only direct reaction)
                 // $$$ d.k.: generate error history entry E_DLL_INVALID_FORMAT
-#if ((EPL_MODULE_INTEGRATION & EPL_MODULE_NMT_MN) != 0)
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
                 if (pErrHandlerEvent->m_NmtState >= kEplNmtMsNotActive)
                 {   // MN is active
                     if (pErrHandlerEvent->m_uiNodeId != 0)
@@ -479,7 +479,7 @@ tEplNmtEvent            NmtEvent;
                 }
             }
 
-#if ((EPL_MODULE_INTEGRATION & EPL_MODULE_NMT_MN) != 0)
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
             if ((EplErrorHandlerkInstance_g.m_MnCrcErr.m_dwThreshold > 0)
                 && ((ulDllErrorEvents & EPL_DLL_ERR_MN_CRC) != 0))
             {   // CRC error event occured
@@ -592,7 +592,7 @@ tEplNmtEvent            NmtEvent;
                 }
             }
 
-#if ((EPL_MODULE_INTEGRATION & EPL_MODULE_NMT_MN) != 0)
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
             else if ((*(tEplNmtEvent*)pEvent_p->m_pArg) == kEplNmtEventDllMeSoaSent)
             {   // SoA event of MN -> decrement threshold counters
             tEplDllkNodeInfo*   pIntNodeInfo;
@@ -743,7 +743,7 @@ Exit:
 //
 //---------------------------------------------------------------------------
 
-#if ((EPL_MODULE_INTEGRATION & EPL_MODULE_NMT_MN) != 0)
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
 static tEplKernel EplErrorHandlerkLinkArray(
                                 DWORD*      pdwValue_p,
                                 unsigned int uiValueCount_p,
@@ -791,10 +791,10 @@ BYTE            bIndexEntries;
 Exit:
     return Ret;
 }
-#endif //((EPL_MODULE_INTEGRATION & EPL_MODULE_NMT_MN) != 0)
+#endif //(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
 
 
-#endif //((EPL_MODULE_INTEGRATION & EPL_MODULE_DLLK) != 0)
+#endif //(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLK)) != 0)
 
 // EOF
 
