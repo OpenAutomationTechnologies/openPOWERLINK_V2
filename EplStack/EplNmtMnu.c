@@ -287,6 +287,9 @@ static tEplKernel EplNmtMnuProcessInternalEvent(
                                     WORD                wErrorCode_p,
                                     tEplNmtMnuIntNodeEvent NodeEvent_p);
 
+static tEplKernel EplNmtMnuReset(void);
+
+
 
 //=========================================================================//
 //                                                                         //
@@ -392,21 +395,13 @@ Exit:
 tEplKernel EplNmtMnuDelInstance()
 {
 tEplKernel  Ret;
-int         iIndex;
 
     Ret = kEplSuccessful;
 
     // deregister NmtMnResponse callback function
     Ret = EplDlluCalRegAsndService(kEplDllAsndNmtRequest, NULL, kEplDllAsndFilterNone);
 
-    Ret = EplTimeruDeleteTimer(&EplNmtMnuInstance_g.m_TimerHdlNmtState);
-
-    for (iIndex = 1; iIndex <= tabentries (EplNmtMnuInstance_g.m_aNodeInfo); iIndex++)
-    {
-        // delete timer handles
-        Ret = EplTimeruDeleteTimer(&EPL_NMTMNU_GET_NODEINFO(iIndex)->m_TimerHdlStatReq);
-        Ret = EplTimeruDeleteTimer(&EPL_NMTMNU_GET_NODEINFO(iIndex)->m_TimerHdlLonger);
-    }
+    Ret = EplNmtMnuReset();
 
     return Ret;
 
@@ -707,6 +702,9 @@ tEplKernel      Ret = kEplSuccessful;
             // reset IdentResponses and running IdentRequests and StatusRequests
             Ret = EplIdentuReset();
             Ret = EplStatusuReset();
+
+            // reset timers
+            Ret = EplNmtMnuReset();
 
             // read object 0x1F80 NMT_StartUp_U32
             ObdSize = 4;
@@ -2740,6 +2738,38 @@ tEplNmtState    ExpNmtState;
 Exit:
     return Ret;
 }
+
+//---------------------------------------------------------------------------
+//
+// Function:    EplNmtMnuReset
+//
+// Description: reset internal structures, e.g. timers
+//
+// Parameters:  void
+//
+// Returns:     tEplKernel              = error code
+//
+// State:
+//
+//---------------------------------------------------------------------------
+
+static tEplKernel EplNmtMnuReset(void)
+{
+tEplKernel  Ret;
+int         iIndex;
+
+    Ret = EplTimeruDeleteTimer(&EplNmtMnuInstance_g.m_TimerHdlNmtState);
+
+    for (iIndex = 1; iIndex <= tabentries (EplNmtMnuInstance_g.m_aNodeInfo); iIndex++)
+    {
+        // delete timer handles
+        Ret = EplTimeruDeleteTimer(&EPL_NMTMNU_GET_NODEINFO(iIndex)->m_TimerHdlStatReq);
+        Ret = EplTimeruDeleteTimer(&EPL_NMTMNU_GET_NODEINFO(iIndex)->m_TimerHdlLonger);
+    }
+
+    return Ret;
+}
+
 
 #endif // #if((EPL_MODULE_INTEGRATION & EPL_MODULE_NMT_MN) != 0)
 
