@@ -9,8 +9,8 @@
 
 *******************************************************************************
 
- File:        12345678_MyName.XDD
- Version:     01.00
+ File:        0000003F_openPOWERLINK_demo_CN.xdd
+ Version:     00.02
 
 
 *******************************************************************************
@@ -76,10 +76,10 @@
       fileCreator="SYSTEC electronic GmbH"
       fileCreationDate="2008-06-12"
       fileCreationTime="12:00:00+01:00"
-      fileModificationDate="2008-06-12"
+      fileModificationDate="2008-10-15"
       fileModificationTime="12:20:00+01:00"
       fileModifiedBy="Daniel Krueger"
-      fileVersion="00.01"
+      fileVersion="00.02"
       supportedLanguages="en">
 
       <DeviceIdentity>
