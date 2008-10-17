@@ -212,6 +212,14 @@ typedef struct
     #endif
 #endif
 
+#ifndef EPL_DEF_FEATURE_PDO_DYN
+    #if ((EPL_MODULE_INTEGRATION & EPL_MODULE_PDOK) != 0)
+        #define EPL_DEF_FEATURE_PDO_DYN         (EPL_FEATURE_PDO_DYN)
+    #else
+        #define EPL_DEF_FEATURE_PDO_DYN         0
+    #endif
+#endif
+
 #ifndef EPL_DEF_FEATURE_CFGMA
     #if ((EPL_MODULE_INTEGRATION & EPL_MODULE_CFGMA) != 0)
         #define EPL_DEF_FEATURE_CFGMA           (EPL_FEATURE_CFGMA)
@@ -224,6 +232,7 @@ typedef struct
                                                 | EPL_DEF_FEATURE_SDO_ASND \
                                                 | EPL_DEF_FEATURE_SDO_UDP \
                                                 | EPL_DEF_FEATURE_SDO_PDO \
+                                                | EPL_DEF_FEATURE_PDO_DYN \
                                                 | EPL_DEF_FEATURE_CFGMA)
 
 

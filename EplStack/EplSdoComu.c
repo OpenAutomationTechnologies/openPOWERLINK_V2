@@ -1121,7 +1121,12 @@ unsigned int        uiSize;
                             switch(pAsySdoCom_p->m_le_bCommandId)
                             {
                                 case kEplSdoServiceNIL:
-                                {   // do nothing
+                                {   // simply acknowlegde NIL command on sequence layer
+
+                                    Ret = EplSdoAsySeqSendData(pSdoComCon->m_SdoSeqConHdl,
+                                                                            0,
+                                                                            (tEplFrame*)NULL);
+
                                     break;
                                 }
 

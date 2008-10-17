@@ -1749,11 +1749,22 @@ tEplErrorHandlerkEvent  DllEvent;
                             // DLL_CT2
                         case kEplNmtEventDllCePreq:
                             // enter DLL_CS_WAIT_SOA
+                            DllEvent.m_ulDllErrorEvents |= EPL_DLL_ERR_CN_RECVD_PREQ;
                             EplDllkInstance_g.m_DllState = kEplDllCsWaitSoa;
                             break;
 
                             // DLL_CT8
                         case kEplNmtEventDllCeFrameTimeout:
+                            if (NmtState_p == kEplNmtCsPreOperational2)
+                            {   // ignore frame timeout in PreOp2,
+                                // because the previously configured cycle len
+                                // may be wrong.
+                                // 2008/10/15 d.k. If it would not be ignored,
+                                // we would go cyclically to PreOp1 and on next
+                                // SoC back to PreOp2.
+                                break;
+                            }
+
                             // report DLL_CEV_LOSS_SOC and DLL_CEV_LOSS_SOA
                             DllEvent.m_ulDllErrorEvents |= EPL_DLL_ERR_CN_LOSS_SOA | EPL_DLL_ERR_CN_LOSS_SOC;
 
@@ -1799,9 +1810,21 @@ tEplErrorHandlerkEvent  DllEvent;
 
                             // DLL_CT4
 //                        case kEplNmtEventDllCePres:
+                        case kEplNmtEventDllCeFrameTimeout:
+                            if (NmtState_p == kEplNmtCsPreOperational2)
+                            {   // ignore frame timeout in PreOp2,
+                                // because the previously configured cycle len
+                                // may be wrong.
+                                // 2008/10/15 d.k. If it would not be ignored,
+                                // we would go cyclically to PreOp1 and on next
+                                // SoC back to PreOp2.
+                                break;
+                            }
+
+                            // fall through
+
                         case kEplNmtEventDllCePreq:
                         case kEplNmtEventDllCeSoa:
-                        case kEplNmtEventDllCeFrameTimeout:
                             // report DLL_CEV_LOSS_SOC
                             DllEvent.m_ulDllErrorEvents |= EPL_DLL_ERR_CN_LOSS_SOC;
 
@@ -1815,9 +1838,21 @@ tEplErrorHandlerkEvent  DllEvent;
                 case kEplDllCsWaitSoa:
                     switch (NmtEvent_p)
                     {
-                            // DLL_CT3
-                        case kEplNmtEventDllCePreq:
                         case kEplNmtEventDllCeFrameTimeout:
+                            // DLL_CT3
+                            if (NmtState_p == kEplNmtCsPreOperational2)
+                            {   // ignore frame timeout in PreOp2,
+                                // because the previously configured cycle len
+                                // may be wrong.
+                                // 2008/10/15 d.k. If it would not be ignored,
+                                // we would go cyclically to PreOp1 and on next
+                                // SoC back to PreOp2.
+                                break;
+                            }
+
+                            // fall through
+
+                        case kEplNmtEventDllCePreq:
                             // report DLL_CEV_LOSS_SOC and DLL_CEV_LOSS_SOA
                             DllEvent.m_ulDllErrorEvents |= EPL_DLL_ERR_CN_LOSS_SOA | EPL_DLL_ERR_CN_LOSS_SOC;
 
@@ -3233,6 +3268,9 @@ tEplNmtState    NmtState;
         goto Exit;
     }
 
+    // 2008/10/15 d.k. reprogramming of timer not necessary,
+    // because it will be programmed, when SoC is received.
+/*
     // reprogram timer
 #if EPL_TIMER_USE_HIGHRES != FALSE
     if ((NmtState > kEplNmtCsPreOperational1)
@@ -3241,6 +3279,7 @@ tEplNmtState    NmtState;
         Ret = EplTimerHighReskModifyTimerNs(&EplDllkInstance_g.m_TimerHdlCycle, EplDllkInstance_g.m_ullFrameTimeout, EplDllkCbCnTimer, 0L, FALSE);
     }
 #endif
+*/
 
 Exit:
     if (Ret != kEplSuccessful)

@@ -109,6 +109,7 @@ typedef struct
 typedef struct
 {
     tEplErrorHandlerkErrorCounter   m_CnLossSoc;    // object 0x1C0B
+    tEplErrorHandlerkErrorCounter   m_CnLossPreq;   // object 0x1C0D
     tEplErrorHandlerkErrorCounter   m_CnCrcErr;     // object 0x1C0F
     unsigned long                   m_ulDllErrorEvents;
 
@@ -224,51 +225,69 @@ tEplKernel      Ret;
     // link counters to OD
     // $$$ d.k. if OD resides in userspace, fetch pointer to shared memory,
     //          which shall have the same structure as the instance (needs to be declared globally).
+    //          Other idea: error counter shall belong to the process image
+    //          (reset of counters by SDO write are a little bit tricky).
 
-    Ret = EplErrorHandlerkLinkErrorCounter(&EplErrorHandlerkInstance_g.m_CnLossSoc, 0x1C0B);
+    Ret = EplErrorHandlerkLinkErrorCounter(
+            &EplErrorHandlerkInstance_g.m_CnLossSoc,
+            0x1C0B);
     if (Ret != kEplSuccessful)
     {
         goto Exit;
     }
 
-    Ret = EplErrorHandlerkLinkErrorCounter(&EplErrorHandlerkInstance_g.m_CnCrcErr, 0x1C0F);
+    Ret = EplErrorHandlerkLinkErrorCounter(
+            &EplErrorHandlerkInstance_g.m_CnLossPreq,
+            0x1C0D);
+    // ignore return code, because object 0x1C0D is conditional
+
+    Ret = EplErrorHandlerkLinkErrorCounter(
+            &EplErrorHandlerkInstance_g.m_CnCrcErr,
+            0x1C0F);
     if (Ret != kEplSuccessful)
     {
         goto Exit;
     }
 
 #if ((EPL_MODULE_INTEGRATION & EPL_MODULE_NMT_MN) != 0)
-    Ret = EplErrorHandlerkLinkErrorCounter(&EplErrorHandlerkInstance_g.m_MnCrcErr, 0x1C00);
+    Ret = EplErrorHandlerkLinkErrorCounter(
+            &EplErrorHandlerkInstance_g.m_MnCrcErr,
+            0x1C00);
     if (Ret != kEplSuccessful)
     {
         goto Exit;
     }
 
-    Ret = EplErrorHandlerkLinkErrorCounter(&EplErrorHandlerkInstance_g.m_MnCycTimeExceed, 0x1C02);
+    Ret = EplErrorHandlerkLinkErrorCounter(
+            &EplErrorHandlerkInstance_g.m_MnCycTimeExceed,
+            0x1C02);
     if (Ret != kEplSuccessful)
     {
         goto Exit;
     }
 
-    Ret = EplErrorHandlerkLinkArray(EplErrorHandlerkInstance_g.m_adwMnCnLossPresCumCnt,
-                                    tabentries(EplErrorHandlerkInstance_g.m_adwMnCnLossPresCumCnt),
-                                    0x1C07);
+    Ret = EplErrorHandlerkLinkArray(
+            EplErrorHandlerkInstance_g.m_adwMnCnLossPresCumCnt,
+            tabentries(EplErrorHandlerkInstance_g.m_adwMnCnLossPresCumCnt),
+            0x1C07);
     if (Ret != kEplSuccessful)
     {
         goto Exit;
     }
 
-    Ret = EplErrorHandlerkLinkArray(EplErrorHandlerkInstance_g.m_adwMnCnLossPresThrCnt,
-                                    tabentries(EplErrorHandlerkInstance_g.m_adwMnCnLossPresThrCnt),
-                                    0x1C08);
+    Ret = EplErrorHandlerkLinkArray(
+            EplErrorHandlerkInstance_g.m_adwMnCnLossPresThrCnt,
+            tabentries(EplErrorHandlerkInstance_g.m_adwMnCnLossPresThrCnt),
+            0x1C08);
     if (Ret != kEplSuccessful)
     {
         goto Exit;
     }
 
-    Ret = EplErrorHandlerkLinkArray(EplErrorHandlerkInstance_g.m_adwMnCnLossPresThreshold,
-                                    tabentries(EplErrorHandlerkInstance_g.m_adwMnCnLossPresThreshold),
-                                    0x1C09);
+    Ret = EplErrorHandlerkLinkArray(
+            EplErrorHandlerkInstance_g.m_adwMnCnLossPresThreshold,
+            tabentries(EplErrorHandlerkInstance_g.m_adwMnCnLossPresThreshold),
+            0x1C09);
     if (Ret != kEplSuccessful)
     {
         goto Exit;
@@ -345,13 +364,15 @@ tEplNmtEvent            NmtEvent;
             ulDllErrorEvents = pErrHandlerEvent->m_ulDllErrorEvents;
 
             // check the several error events
-            if ((ulDllErrorEvents & EPL_DLL_ERR_CN_LOSS_SOC) != 0)
+            if ((EplErrorHandlerkInstance_g.m_CnLossSoc.m_dwThreshold > 0)
+                && ((ulDllErrorEvents & EPL_DLL_ERR_CN_LOSS_SOC) != 0))
             {   // loss of SoC event occured
                 // increment cumulative counter by 1
                 EplErrorHandlerkInstance_g.m_CnLossSoc.m_dwCumulativeCnt++;
                 // increment threshold counter by 8
                 EplErrorHandlerkInstance_g.m_CnLossSoc.m_dwThresholdCnt += 8;
-                if (EplErrorHandlerkInstance_g.m_CnLossSoc.m_dwThresholdCnt >= EplErrorHandlerkInstance_g.m_CnLossSoc.m_dwThreshold)
+                if (EplErrorHandlerkInstance_g.m_CnLossSoc.m_dwThresholdCnt
+                    >= EplErrorHandlerkInstance_g.m_CnLossSoc.m_dwThreshold)
                 {   // threshold is reached
                     // $$$ d.k.: generate error history entry E_DLL_LOSS_SOC_TH
 
@@ -363,16 +384,48 @@ tEplNmtEvent            NmtEvent;
                     Event.m_uiSize = sizeof (NmtEvent);
                     Ret = EplEventkPost(&Event);
                 }
-                EplErrorHandlerkInstance_g.m_ulDllErrorEvents |= EPL_DLL_ERR_CN_LOSS_SOC;
+                EplErrorHandlerkInstance_g.m_ulDllErrorEvents |=
+                    EPL_DLL_ERR_CN_LOSS_SOC;
             }
 
-            if ((ulDllErrorEvents & EPL_DLL_ERR_CN_CRC) != 0)
+            if ((EplErrorHandlerkInstance_g.m_CnLossPreq.m_dwThreshold > 0)
+                && ((ulDllErrorEvents & EPL_DLL_ERR_CN_LOSS_PREQ) != 0))
+            {   // loss of PReq event occured
+                // increment cumulative counter by 1
+                EplErrorHandlerkInstance_g.m_CnLossPreq.m_dwCumulativeCnt++;
+                // increment threshold counter by 8
+                EplErrorHandlerkInstance_g.m_CnLossPreq.m_dwThresholdCnt += 8;
+                if (EplErrorHandlerkInstance_g.m_CnLossPreq.m_dwThresholdCnt
+                    >= EplErrorHandlerkInstance_g.m_CnLossPreq.m_dwThreshold)
+                {   // threshold is reached
+                    // $$$ d.k.: generate error history entry E_DLL_LOSS_PREQ_TH
+
+                    // post event to NMT state machine
+                    NmtEvent = kEplNmtEventNmtCycleError;
+                    Event.m_EventSink = kEplEventSinkNmtk;
+                    Event.m_EventType = kEplEventTypeNmtEvent;
+                    Event.m_pArg = &NmtEvent;
+                    Event.m_uiSize = sizeof (NmtEvent);
+                    Ret = EplEventkPost(&Event);
+                }
+            }
+
+            if ((EplErrorHandlerkInstance_g.m_CnLossPreq.m_dwThresholdCnt > 0)
+                && ((ulDllErrorEvents & EPL_DLL_ERR_CN_RECVD_PREQ) != 0))
+            {   // PReq correctly received
+                // decrement threshold counter by 1
+                EplErrorHandlerkInstance_g.m_CnLossPreq.m_dwThresholdCnt--;
+            }
+
+            if ((EplErrorHandlerkInstance_g.m_CnCrcErr.m_dwThreshold > 0)
+                && ((ulDllErrorEvents & EPL_DLL_ERR_CN_CRC) != 0))
             {   // CRC error event occured
                 // increment cumulative counter by 1
                 EplErrorHandlerkInstance_g.m_CnCrcErr.m_dwCumulativeCnt++;
                 // increment threshold counter by 8
                 EplErrorHandlerkInstance_g.m_CnCrcErr.m_dwThresholdCnt += 8;
-                if (EplErrorHandlerkInstance_g.m_CnCrcErr.m_dwThresholdCnt >= EplErrorHandlerkInstance_g.m_CnCrcErr.m_dwThreshold)
+                if (EplErrorHandlerkInstance_g.m_CnCrcErr.m_dwThresholdCnt
+                    >= EplErrorHandlerkInstance_g.m_CnCrcErr.m_dwThreshold)
                 {   // threshold is reached
                     // $$$ d.k.: generate error history entry E_DLL_CRC_TH
 
@@ -384,7 +437,8 @@ tEplNmtEvent            NmtEvent;
                     Event.m_uiSize = sizeof (NmtEvent);
                     Ret = EplEventkPost(&Event);
                 }
-                EplErrorHandlerkInstance_g.m_ulDllErrorEvents |= EPL_DLL_ERR_CN_CRC;
+                EplErrorHandlerkInstance_g.m_ulDllErrorEvents |=
+                    EPL_DLL_ERR_CN_CRC;
             }
 
             if ((ulDllErrorEvents & EPL_DLL_ERR_INVALID_FORMAT) != 0)
@@ -426,13 +480,15 @@ tEplNmtEvent            NmtEvent;
             }
 
 #if ((EPL_MODULE_INTEGRATION & EPL_MODULE_NMT_MN) != 0)
-            if ((ulDllErrorEvents & EPL_DLL_ERR_MN_CRC) != 0)
+            if ((EplErrorHandlerkInstance_g.m_MnCrcErr.m_dwThreshold > 0)
+                && ((ulDllErrorEvents & EPL_DLL_ERR_MN_CRC) != 0))
             {   // CRC error event occured
                 // increment cumulative counter by 1
                 EplErrorHandlerkInstance_g.m_MnCrcErr.m_dwCumulativeCnt++;
                 // increment threshold counter by 8
                 EplErrorHandlerkInstance_g.m_MnCrcErr.m_dwThresholdCnt += 8;
-                if (EplErrorHandlerkInstance_g.m_MnCrcErr.m_dwThresholdCnt >= EplErrorHandlerkInstance_g.m_MnCrcErr.m_dwThreshold)
+                if (EplErrorHandlerkInstance_g.m_MnCrcErr.m_dwThresholdCnt
+                    >= EplErrorHandlerkInstance_g.m_MnCrcErr.m_dwThreshold)
                 {   // threshold is reached
                     // $$$ d.k.: generate error history entry E_DLL_CRC_TH
 
@@ -444,16 +500,19 @@ tEplNmtEvent            NmtEvent;
                     Event.m_uiSize = sizeof (NmtEvent);
                     Ret = EplEventkPost(&Event);
                 }
-                EplErrorHandlerkInstance_g.m_ulDllErrorEvents |= EPL_DLL_ERR_MN_CRC;
+                EplErrorHandlerkInstance_g.m_ulDllErrorEvents |=
+                    EPL_DLL_ERR_MN_CRC;
             }
 
-            if ((ulDllErrorEvents & EPL_DLL_ERR_MN_CYCTIMEEXCEED) != 0)
+            if ((EplErrorHandlerkInstance_g.m_MnCycTimeExceed.m_dwThreshold > 0)
+                && ((ulDllErrorEvents & EPL_DLL_ERR_MN_CYCTIMEEXCEED) != 0))
             {   // cycle time exceeded event occured
                 // increment cumulative counter by 1
                 EplErrorHandlerkInstance_g.m_MnCycTimeExceed.m_dwCumulativeCnt++;
                 // increment threshold counter by 8
                 EplErrorHandlerkInstance_g.m_MnCycTimeExceed.m_dwThresholdCnt += 8;
-                if (EplErrorHandlerkInstance_g.m_MnCycTimeExceed.m_dwThresholdCnt >= EplErrorHandlerkInstance_g.m_MnCycTimeExceed.m_dwThreshold)
+                if (EplErrorHandlerkInstance_g.m_MnCycTimeExceed.m_dwThresholdCnt
+                    >= EplErrorHandlerkInstance_g.m_MnCycTimeExceed.m_dwThreshold)
                 {   // threshold is reached
                     // $$$ d.k.: generate error history entry E_DLL_CYCLE_EXCEED_TH
 
@@ -466,7 +525,8 @@ tEplNmtEvent            NmtEvent;
                     Ret = EplEventkPost(&Event);
                 }
                 // $$$ d.k.: else generate error history entry E_DLL_CYCLE_EXCEED
-                EplErrorHandlerkInstance_g.m_ulDllErrorEvents |= EPL_DLL_ERR_MN_CYCTIMEEXCEED;
+                EplErrorHandlerkInstance_g.m_ulDllErrorEvents |=
+                    EPL_DLL_ERR_MN_CYCTIMEEXCEED;
             }
 
             if ((ulDllErrorEvents & EPL_DLL_ERR_MN_CN_LOSS_PRES) != 0)
@@ -474,13 +534,15 @@ tEplNmtEvent            NmtEvent;
             unsigned int uiNodeId;
 
                 uiNodeId = pErrHandlerEvent->m_uiNodeId - 1;
-                if (uiNodeId < tabentries(EplErrorHandlerkInstance_g.m_adwMnCnLossPresCumCnt))
+                if ((uiNodeId < tabentries(EplErrorHandlerkInstance_g.m_adwMnCnLossPresCumCnt))
+                    && (EplErrorHandlerkInstance_g.m_adwMnCnLossPresThreshold[uiNodeId] > 0))
                 {
                     // increment cumulative counter by 1
                     EplErrorHandlerkInstance_g.m_adwMnCnLossPresCumCnt[uiNodeId]++;
                     // increment threshold counter by 8
                     EplErrorHandlerkInstance_g.m_adwMnCnLossPresThrCnt[uiNodeId] += 8;
-                    if (EplErrorHandlerkInstance_g.m_adwMnCnLossPresThrCnt[uiNodeId] >= EplErrorHandlerkInstance_g.m_adwMnCnLossPresThreshold[uiNodeId])
+                    if (EplErrorHandlerkInstance_g.m_adwMnCnLossPresThrCnt[uiNodeId]
+                        >= EplErrorHandlerkInstance_g.m_adwMnCnLossPresThreshold[uiNodeId])
                     {   // threshold is reached
                     tEplHeartbeatEvent  HeartbeatEvent;
 
@@ -528,9 +590,6 @@ tEplNmtEvent            NmtEvent;
                         EplErrorHandlerkInstance_g.m_CnCrcErr.m_dwThresholdCnt--;
                     }
                 }
-
-                // reset error events
-                EplErrorHandlerkInstance_g.m_ulDllErrorEvents = 0L;
             }
 
 #if ((EPL_MODULE_INTEGRATION & EPL_MODULE_NMT_MN) != 0)
@@ -580,11 +639,11 @@ tEplNmtEvent            NmtEvent;
                         EplErrorHandlerkInstance_g.m_MnCycTimeExceed.m_dwThresholdCnt--;
                     }
                 }
-
-                // reset error events
-                EplErrorHandlerkInstance_g.m_ulDllErrorEvents = 0L;
             }
 #endif
+
+            // reset error events
+            EplErrorHandlerkInstance_g.m_ulDllErrorEvents = 0L;
 
             break;
         }

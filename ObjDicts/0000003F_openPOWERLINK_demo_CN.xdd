@@ -281,7 +281,7 @@
             <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" PDOmapping="no" defaultValue="4"/>
             <SubObject subIndex="01" name="VendorId_U32" objectType="7" dataType="0007" accessType="const" PDOmapping="no" defaultValue="0x3F"/>
             <SubObject subIndex="02" name="ProductCode_U32" objectType="7" dataType="0007" accessType="const" PDOmapping="no" defaultValue="0x1067"/>
-            <SubObject subIndex="03" name="RevisionNo_U32" objectType="7" dataType="0007" accessType="const" PDOmapping="no" defaultValue="0x00010001"/>
+            <SubObject subIndex="03" name="RevisionNo_U32" objectType="7" dataType="0007" accessType="const" PDOmapping="no" defaultValue="0x00010002"/>
             <SubObject subIndex="04" name="SerialNo_U32" objectType="7" dataType="0007" accessType="const"/>
         </Object>
         <Object index="1020" name="CFM_VerifyConfiguration_REC" objectType="9">
@@ -336,7 +336,13 @@
             <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="ro" PDOmapping="no" defaultValue="3"/>
             <SubObject subIndex="01" name="CumulativeCnt_U32" objectType="7" dataType="0007" accessType="rw" PDOmapping="no" />
             <SubObject subIndex="02" name="ThresholdCnt_U32" objectType="7" dataType="0007" accessType="ro" PDOmapping="no" />
-            <SubObject subIndex="03" name="Threshold_U32" objectType="7" dataType="0007" accessType="rw" PDOmapping="no" defaultValue="15"/>
+            <SubObject subIndex="03" name="Threshold_U32" objectType="7" dataType="0007" accessType="rw" PDOmapping="no" defaultValue="1"/>
+          </Object>
+          <Object index="1C0D" name="DLL_CNLossPReq_REC" objectType="9">
+            <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="ro" PDOmapping="no" defaultValue="3"/>
+            <SubObject subIndex="01" name="CumulativeCnt_U32" objectType="7" dataType="0007" accessType="rw" PDOmapping="no" />
+            <SubObject subIndex="02" name="ThresholdCnt_U32" objectType="7" dataType="0007" accessType="ro" PDOmapping="no" />
+            <SubObject subIndex="03" name="Threshold_U32" objectType="7" dataType="0007" accessType="rw" PDOmapping="no" defaultValue="1"/>
           </Object>
           <Object index="1C0F" name="DLL_CNCRCError_REC" objectType="9">
             <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="ro" PDOmapping="no" defaultValue="3"/>
@@ -345,7 +351,7 @@
             <SubObject subIndex="03" name="Threshold_U32" objectType="7" dataType="0007" accessType="rw" PDOmapping="no" defaultValue="15"/>
           </Object>
           <Object index="1C14" name="DLL_LossOfSocTolerance_U32" objectType="7" dataType="0007" accessType="rw" defaultValue="500000"/>
-          <Object index="1F82" name="NMT_FeatureFlags_U32" objectType="7" dataType="0007" accessType="const" PDOmapping="no" defaultValue="0x07"/>
+          <Object index="1F82" name="NMT_FeatureFlags_U32" objectType="7" dataType="0007" accessType="const" PDOmapping="no" defaultValue="0x47"/>
           <Object index="1F83" name="NMT_EPLVersion_U8" objectType="7" dataType="0005" accessType="const" PDOmapping="no" defaultValue="0x20"/>
           <Object index="1F8C" name="NMT_CurrNMTState_U8" objectType="7" dataType="0005" PDOmapping="TPDO" accessType="ro"/>
           <Object index="1F93" name="NMT_EPLNodeID_REC" objectType="9">

@@ -1009,7 +1009,7 @@ unsigned int        uiFreeEntries;
         // and rcon = 1
         case kEplAsySdoStateInit1:
         {
-            PRINTF0("EplSdoAsySequ: StateInit1\n");
+//            PRINTF0("EplSdoAsySequ: StateInit1\n");
 
             // check event
             switch(Event_p)
@@ -1125,7 +1125,7 @@ unsigned int        uiFreeEntries;
         // init connection step 2
         case kEplAsySdoStateInit2:
         {
-            PRINTF0("EplSdoAsySequ: StateInit2\n");
+//            PRINTF0("EplSdoAsySequ: StateInit2\n");
 
             // check event
             switch(Event_p)
@@ -1443,7 +1443,7 @@ unsigned int        uiFreeEntries;
                         {
                             if ((AmiGetByteFromLe(&pRecFrame_p->m_le_bRecSeqNumCon) & EPL_ASY_SDO_CON_MASK) == 3)
                             {
-                                PRINTF0("EplSdoAsySequ: error response received\n");
+//                                PRINTF0("EplSdoAsySequ: error response received\n");
 
                                 // error response (retransmission request)
                                 // resend frames from history
@@ -2290,8 +2290,8 @@ tEplAsySdoConHistory*   pHistory;
     if ((pHistory->m_bFreeEntries < EPL_SDO_HISTORY_SIZE)
         && (pHistory->m_bWrite != pHistory->m_bRead))
     {
-        PRINTF4("EplSdoAsyReadFromHistory(): init = %d, read = %u, write = %u, ack = %u", (int) fInitRead_p, (WORD)pHistory->m_bRead, (WORD)pHistory->m_bWrite, (WORD)pHistory->m_bAck);
-        PRINTF2(", free entries = %u, next frame size = %u\n", (WORD)pHistory->m_bFreeEntries, pHistory->m_auiFrameSize[pHistory->m_bRead]);
+//        PRINTF4("EplSdoAsyReadFromHistory(): init = %d, read = %u, write = %u, ack = %u", (int) fInitRead_p, (WORD)pHistory->m_bRead, (WORD)pHistory->m_bWrite, (WORD)pHistory->m_bAck);
+//        PRINTF2(", free entries = %u, next frame size = %u\n", (WORD)pHistory->m_bFreeEntries, pHistory->m_auiFrameSize[pHistory->m_bRead]);
 
         // return pointer to stored frame
         *ppFrame_p = (tEplFrame*)pHistory->m_aabHistoryFrame[pHistory->m_bRead];
@@ -2308,7 +2308,7 @@ tEplAsySdoConHistory*   pHistory;
     }
     else
     {
-        PRINTF3("EplSdoAsyReadFromHistory(): read = %u, ack = %u, free entries = %u, no frame\n", (WORD)pHistory->m_bRead, (WORD)pHistory->m_bAck, (WORD)pHistory->m_bFreeEntries);
+//        PRINTF3("EplSdoAsyReadFromHistory(): read = %u, ack = %u, free entries = %u, no frame\n", (WORD)pHistory->m_bRead, (WORD)pHistory->m_bAck, (WORD)pHistory->m_bFreeEntries);
 
         // no more frames to send
         // return null pointer

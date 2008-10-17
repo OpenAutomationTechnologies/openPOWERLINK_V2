@@ -353,6 +353,14 @@ EPL_OBD_BEGIN ()
             EPL_OBD_SUBINDEX_RAM_USERDEF(0x1C0B, 0x03, 0x07, 0x03, tEplObdUnsigned32, Threshold_U32, 0x1)
         EPL_OBD_END_INDEX(0x1C0B)
 
+        // Object 1C0Dh: DLL_CNLossPReq_REC
+        EPL_OBD_BEGIN_INDEX_RAM(0x1C0D, 0x04, NULL)
+            EPL_OBD_SUBINDEX_RAM_VAR(0x1C0D, 0x00, 0x05, 0x01, tEplObdUnsigned8, NumberOfEntries, 0x03)
+            EPL_OBD_SUBINDEX_RAM_USERDEF_NOINIT(0x1C0D, 0x01, 0x07, 0x03, tEplObdUnsigned32, CumulativeCnt_U32)
+            EPL_OBD_SUBINDEX_RAM_USERDEF(0x1C0D, 0x02, 0x07, 0x01, tEplObdUnsigned32, ThresholdCnt_U32, 0x0)
+            EPL_OBD_SUBINDEX_RAM_USERDEF(0x1C0D, 0x03, 0x07, 0x03, tEplObdUnsigned32, Threshold_U32, 0x1)
+        EPL_OBD_END_INDEX(0x1C0D)
+
         // Object 1C0Fh: DLL_CNCRCError_REC
         EPL_OBD_BEGIN_INDEX_RAM(0x1C0F, 0x04, NULL)
             EPL_OBD_SUBINDEX_RAM_VAR(0x1C0F, 0x00, 0x05, 0x01, tEplObdUnsigned8, NumberOfEntries, 0x03)
