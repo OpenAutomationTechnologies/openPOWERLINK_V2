@@ -409,7 +409,7 @@
           SDOServer="true"
           SDOMaxConnections="2"
           SDOMaxParallelConnections="2"
-		  NMTCmdReactionTime="500"
+	  NMTCmdReactionTime="500"
           BootTimeFromPreop2ToReadytoOperate="2000"
           DLLCNFeatureIsochr="true"
           SDOCmdWriteAllByIndex="false"
@@ -424,7 +424,7 @@
         />
 
         <CNFeatures
-          DLLCNFeatureMultiplex="false"
+          DLLCNFeatureMultiplex="true"
           NMTCNSoC2PReq="40000"
         />
 
