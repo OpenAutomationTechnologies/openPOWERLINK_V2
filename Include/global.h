@@ -644,7 +644,7 @@
 //  definitions for ARM7 family with GNU compiler
 //---------------------------------------------------------------------------
 
-#elif defined(__GNUC__) && defined(__arm__)
+#elif defined(__GNUC__) && defined(__arm__) && !defined(__LINUX_ARM_ARCH__)
 
     #define TARGET_SYSTEM   _NO_OS_
     #define DEV_SYSTEM      _DEV_GNU_ARM7_

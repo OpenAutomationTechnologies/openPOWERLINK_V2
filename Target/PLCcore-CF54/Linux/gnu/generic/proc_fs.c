@@ -92,9 +92,9 @@
 
 #ifdef CONFIG_COLDFIRE
     #include <asm/coldfire.h>
+    #include "fec.h"
 #endif
 
-#include "fec.h"
 
 /***************************************************************************/
 /*                                                                         */
