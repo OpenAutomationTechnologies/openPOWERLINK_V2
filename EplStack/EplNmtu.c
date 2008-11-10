@@ -357,7 +357,11 @@ tEplKernel  Ret;
                         //check node ID if not should be master or slave
                         if (uiNodeId == EPL_C_ADR_MN_DEF_NODE_ID)
                         {   // node shall be MN
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
                             Ret = EplNmtuNmtEvent(kEplNmtEventEnterMsNotActive);
+#else
+                            TRACE0("EplNmtuProcess(): no MN functionality implemented\n");
+#endif
                         }
                         else
                         {   // node shall be CN
@@ -589,7 +593,7 @@ tEplKernel  Ret;
 
                     default:
                     {
-                        TRACE0("EplNmtuProcess(): unhandled NMT state\n");
+                        TRACE1("EplNmtuProcess(): unhandled NMT state 0x%X\n", pNmtStateChange->m_NewNmtState);
                     }
                 }
             }

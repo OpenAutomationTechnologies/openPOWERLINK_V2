@@ -532,7 +532,14 @@ tEplEventNmtStateChange NmtStateChange;
 
                 case kEplNmtEventEnterMsNotActive:
                 {   // Node should be CN
-                    EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtMsNotActive;
+                    #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) == 0)
+                        // no MN functionality
+                        // TODO: -create error E_NMT_BA1_NO_MN_SUPPORT
+                        EPL_MCO_GLB_VAR(m_fFrozen) = TRUE;
+                    #else
+
+                        EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtMsNotActive;
+                    #endif
                     break;
 
                 }
@@ -1102,7 +1109,7 @@ tEplEventNmtStateChange NmtStateChange;
             #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) == 0)
                 // no MN functionality
                 // TODO: -create error E_NMT_BA1_NO_MN_SUPPORT
-                EPL_MCO_GLB_VAR(m_fFrozen) = FALSE;
+                EPL_MCO_GLB_VAR(m_fFrozen) = TRUE;
             #else
 
                 // check events

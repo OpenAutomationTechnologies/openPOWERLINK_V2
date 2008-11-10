@@ -21,6 +21,11 @@ Requirements:
     * netx-eth driver disabled or compiled as module
     * firmware support
 - udev with firmware support in Linux-BSP
+  therefor start 'ptxdist menuconfig' and activate the following items
+        PTXdist Base Configuration         --->
+            Shell & Console Tools           --->
+                [*] udev                  --->
+                    [*]   firmware helper
 
 
 How to build kernel module:
@@ -38,7 +43,11 @@ How to run the demo:
 copy the following files to the target (e.g. via CompactFlash card):
 - epl.ko
 - EplLoad
-- xc0.bin, xc1.bin
+- xc0.bin, xc1.bin -> copied to /usr/local/lib/firmware
+
+
+install the firmware handler from udev package
+$ echo /sbin/firmware.sh > /proc/sys/kernel/hotplug
 
 
 load the kernel driver with the Bash script EplLoad

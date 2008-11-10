@@ -113,6 +113,9 @@
 #define EDRV_MIN_FIFO_EMPTY_ENTRIES     3   // the minimum number of entries for
                                             // frame reception in empty FIFO
 
+#define EDRV_FIFO_OVERFLOW_MASK         ((1 << ETHERNET_FIFO_IND_LO) \
+                                        | (1 << ETHERNET_FIFO_IND_HI))
+
 
 // defines from hal_eth_2port_hub.c
 
@@ -334,6 +337,7 @@ tEplKernel EdrvInit(tEdrvInitParam * pEdrvInitParam_p)
 {
 tEplKernel  Ret;
 int         iResult;
+unsigned int uiCount;
 
     Ret = kEplSuccessful;
 
@@ -355,6 +359,8 @@ int         iResult;
     if ((EdrvInstance_l.m_apDev[0] == NULL)
         || (EdrvInstance_l.m_apDev[1] == NULL))
     {
+        printk("%s: the necessary two platform devices were not found\n",
+                __FUNCTION__);
         Ret = kEplNoResource;
         goto Exit;
     }
@@ -365,8 +371,8 @@ int         iResult;
     // copy xPEC base address of unit 0 to instance structure
     EdrvInstance_l.m_pXpecBase = EdrvInstance_l.m_apXc[0]->xpec_base;
 
-    // disable monitoring mode
-    EDRV_XPECRAM_WRITE(REL_Adr_ETHHUB_MONITORING_MODE, 0);
+    // enable monitoring mode
+    EDRV_XPECRAM_WRITE(REL_Adr_ETHHUB_MONITORING_MODE, MSK_ETHHUB_MONITORING_MODE_EN);
 
     // set default traffic class arrangement
     EDRV_XPECRAM_WRITE(REL_Adr_ETHHUB_TRAFFIC_CLASS_ARRANGEMENT, 4);
@@ -384,9 +390,17 @@ int         iResult;
     writel(0xffff, NETX_PFIFO_XPEC_ISR(1));
 
     // install IRQ handler
-    if (request_irq
-        (EdrvInstance_l.m_apXc[0]->irq, &TgtEthIsr, IRQF_SHARED, DRV_NAME, NULL))
+    iResult = request_irq(EdrvInstance_l.m_apXc[0]->irq,
+                          &TgtEthIsr,
+                          IRQF_SHARED,
+                          DRV_NAME,
+                          &EdrvInstance_l);
+    if (iResult != 0)
     {
+        printk("%s: request_irq(%d) failed with %d\n",
+                __FUNCTION__,
+                EdrvInstance_l.m_apXc[0]->irq,
+                iResult);
         Ret = kEplNoResource;
         goto Exit;
     }
@@ -396,15 +410,30 @@ int         iResult;
 
     // wait for PHYs to be initialized
     writel(0x00030000, NETX_PFIFO_XPEC_ISR(1));
+    uiCount = 100;
+
     while (readl(NETX_PFIFO_XPEC_ISR(1)) == 0x00030000)
     {   // do nothing
+        msleep(300);
+        uiCount--;
+        if (uiCount == 0)
+        {
+            break;
+        }
     }
+
+
+    printk("%s: XPEC_ISR1 = 0x%X\n",
+            __FUNCTION__,
+            readl(NETX_PFIFO_XPEC_ISR(1)));
 
     // check success
     if (readl(NETX_PFIFO_XPEC_ISR(1)) != 0)
     {
-        Ret = kEplNoResource;
-        goto Exit;
+        printk("%s: PHY init failed\n",
+                __FUNCTION__);
+//        Ret = kEplNoResource;
+//        goto Exit;
     }
 
 
@@ -430,6 +459,8 @@ int         iResult;
             MSK_ETHHUB_INTERRUPTS_ENABLE_CON_LO_VAL);
     EDRV_XPECRAM_WRITE(REL_Adr_ETHHUB_INTERRUPTS_ENABLE_LINK_CHANGED,
             MSK_ETHHUB_INTERRUPTS_ENABLE_LINK_CHANGED_VAL);
+    EDRV_XPECRAM_WRITE(REL_Adr_ETHHUB_INTERRUPTS_ENABLE_RX_ERR,
+            MSK_ETHHUB_XPEC2ARM_INTERRUPTS_RX_ERR);
 
 
 Exit:
@@ -463,9 +494,10 @@ tEplKernel EdrvShutdown(void)
         EDRV_XPECRAM_WRITE(REL_Adr_ETHHUB_INTERRUPTS_ENABLE_CON_HI, 0);
         EDRV_XPECRAM_WRITE(REL_Adr_ETHHUB_INTERRUPTS_ENABLE_CON_LO, 0);
         EDRV_XPECRAM_WRITE(REL_Adr_ETHHUB_INTERRUPTS_ENABLE_LINK_CHANGED, 0);
+        EDRV_XPECRAM_WRITE(REL_Adr_ETHHUB_INTERRUPTS_ENABLE_RX_ERR, 0);
 
         // free IRQ
-        free_irq(EdrvInstance_l.m_apXc[0]->irq, NULL);
+        free_irq(EdrvInstance_l.m_apXc[0]->irq, &EdrvInstance_l);
     }
 
     // unregister platform driver
@@ -491,10 +523,10 @@ tEplKernel EdrvShutdown(void)
 tEplKernel EdrvDefineRxMacAddrEntry (BYTE * pbMacAddr_p)
 {
 tEplKernel  Ret = kEplSuccessful;
+/*
 DWORD       dwData;
 BYTE        bHash;
 
-/*
     bHash = EdrvCalcHash (pbMacAddr_p);
 
     if (bHash > 31)
@@ -530,9 +562,10 @@ BYTE        bHash;
 tEplKernel EdrvUndefineRxMacAddrEntry (BYTE * pbMacAddr_p)
 {
 tEplKernel  Ret = kEplSuccessful;
+/*
 DWORD       dwData;
 BYTE        bHash;
-/*
+
     bHash = EdrvCalcHash (pbMacAddr_p);
 
     if (bHash > 31)
@@ -827,6 +860,9 @@ DWORD           dwStatus;
 int             iHandled = IRQ_HANDLED;
 ETHHUB_FIFO_ELEMENT_T tFifoPtr;
 int             iFillLevel;
+ETHHUB_STATUS_AREA_BASE_T* ptCounters;
+DWORD           dwFifoOverflow;
+//DWORD           dwFifoReset;
 
 //    printk("¤");
 
@@ -835,6 +871,8 @@ int             iFillLevel;
 
     // acknowledge the interrupts
     writel(dwStatus, NETX_PFIFO_XPEC_ISR(0));
+
+//    printk("%s status = 0x%lX\n", __FUNCTION__, dwStatus);
 
     if (dwStatus == 0)
     {
@@ -895,6 +933,32 @@ int             iFillLevel;
 
     if ((dwStatus & (MSK_ETHHUB_INTERRUPTS_ENABLE_RX_ERR_VAL)) != 0)
     {   // receive error interrupt
+
+        printk("%s PFIFO underrun = 0x%X\n", __FUNCTION__, readl(NETX_PFIFO_UNDERRUN));
+
+        dwFifoOverflow = readl(NETX_PFIFO_OVEFLOW);
+        printk("%s PFIFO overflow = 0x%lX\n", __FUNCTION__, dwFifoOverflow);
+/*
+        if ((dwFifoOverflow & EDRV_FIFO_OVERFLOW_MASK) != 0)
+        {
+            dwFifoReset = readl(NETX_PFIFO_RESET);
+            writel(dwFifoReset | EDRV_FIFO_OVERFLOW_MASK, NETX_PFIFO_RESET);
+            writel(dwFifoReset, NETX_PFIFO_RESET);
+        }
+*/
+        ptCounters = (ETHHUB_STATUS_AREA_BASE_T*) (EdrvInstance_l.m_pXpecBase + NETX_XPEC_RAM_START_OFS + REL_Adr_AREA_ETHHUB_STATUS_AREA_BASE);
+        printk("%s frames received OK = %lu\n", __FUNCTION__, ptCounters->ulETHHUB_FRAMES_RECEIVED_OK);
+        printk("%s CRC errors = %lu\n", __FUNCTION__, ptCounters->ulETHHUB_FRAME_CHECK_SEQUENCE_ERRORS);
+        printk("%s align errors = %lu\n", __FUNCTION__, ptCounters->ulETHHUB_ALIGNMENT_ERRORS);
+        printk("%s frame too long = %lu\n", __FUNCTION__, ptCounters->ulETHHUB_FRAME_TOO_LONG_ERRORS);
+        printk("%s collision frags = %lu\n", __FUNCTION__, ptCounters->ulETHHUB_COLLISION_FRAGMENTS_RECEIVED);
+        printk("%s frames dropped = %lu\n", __FUNCTION__, ptCounters->ulETHHUB_FRAMES_DROPPED_DUE_LOW_RESOURCE);
+        printk("%s NIB len P0 = %lu\n", __FUNCTION__, ptCounters->ulETHHUB_FRAME_PREAMBLE_NIB_LEN_NOT_16_P0);
+        printk("%s NIB len P1 = %lu\n", __FUNCTION__, ptCounters->ulETHHUB_FRAME_PREAMBLE_NIB_LEN_NOT_16_P1);
+        printk("%s FIN set P0 = %lu\n", __FUNCTION__, ptCounters->ulETHHUB_RX_FRAME_FIN_SET_OUTSIDE_RX_FLOW_P0);
+        printk("%s FIN set P1 = %lu\n", __FUNCTION__, ptCounters->ulETHHUB_RX_FRAME_FIN_SET_OUTSIDE_RX_FLOW_P1);
+        printk("%s Rx fatal = %lu\n", __FUNCTION__, ptCounters->ulETHHUB_RX_FATAL_ERROR);
+
 /*
         if ((wStatus & EDRV_REGW_INT_FOVW) != 0)
         {
@@ -998,9 +1062,6 @@ unsigned int            uiFrame;
         goto Exit;
     }
 
-    // save pointer to device structure in corresponding element in instance structure
-    EdrvInstance_l.m_apDev[iXcNo] = pPlatformDev_p;
-
     // request the pointer FIFOs
     iResult = pfifo_request(PFIFO_MASK(iXcNo));
     if (iResult != 0) {
@@ -1012,6 +1073,7 @@ unsigned int            uiFrame;
     // $$$ d.k. configure pointer FIFO sizes (i.e. border_base)
 
     // fill the empty pointer FIFO
+    tFifoPtr.val = 0;
     tFifoPtr.bf.INT_RAM_SEGMENT_NUM = iXcNo;
 
     // first DWORD in segment 0 is hardwired + IRQ vectors, so it cannot be used
@@ -1028,17 +1090,35 @@ unsigned int            uiFrame;
     if (EdrvInstance_l.m_apXc[iXcNo] == NULL) {
         dev_err(&pPlatformDev_p->dev, "unable to request xc unit\n");
         iResult = -ENODEV;
-        goto Exit;
+        goto ExitFreePfifo;
     }
+
+    dev_info(&pPlatformDev_p->dev, "loading firmware for xc unit\n");
+
+    // stop xC unit before loading the new firmware
+    xc_reset(EdrvInstance_l.m_apXc[iXcNo]);
+    xc_stop(EdrvInstance_l.m_apXc[iXcNo]);
 
     // load the Ethernet Hub firmware to the xC unit
     if (xc_request_firmware(EdrvInstance_l.m_apXc[iXcNo])) {
         dev_err(&pPlatformDev_p->dev, "unable to load firmware for xc unit\n");
         iResult = -ENODEV;
-        goto Exit;
+        goto ExitFreeXc;
     }
     xc_reset(EdrvInstance_l.m_apXc[iXcNo]);
     xc_start(EdrvInstance_l.m_apXc[iXcNo]);
+
+    // check if xC unit is running now
+    iResult = xc_running(EdrvInstance_l.m_apXc[iXcNo]);
+    if (iResult)
+    {
+        dev_info(&pPlatformDev_p->dev, "xc unit is running now\n");
+    }
+    else
+    {
+        dev_info(&pPlatformDev_p->dev, "xc unit is not running\n");
+    }
+    iResult = 0;
 
     // copy pointer to SRAM to instance structure
     EdrvInstance_l.m_apSramBase[iXcNo] = EdrvInstance_l.m_apXc[iXcNo]->sram_base;
@@ -1063,8 +1143,23 @@ unsigned int            uiFrame;
     }
 */
 
+    // initialization finished successfully
+
+    // save pointer to device structure in corresponding element in instance structure
+    EdrvInstance_l.m_apDev[iXcNo] = pPlatformDev_p;
+
+    goto Exit;
+
+ExitFreeXc:
+    // release xC unit
+    xc_stop(EdrvInstance_l.m_apXc[iXcNo]);
+    free_xc(EdrvInstance_l.m_apXc[iXcNo]);
+
+ExitFreePfifo:
+    pfifo_free(PFIFO_MASK(iXcNo));
+
 Exit:
-    printk("%s finished with %d\n", __FUNCTION__, iResult);
+    printk("%s(%d) finished with %d\n", __FUNCTION__, iXcNo, iResult);
     return iResult;
 }
 

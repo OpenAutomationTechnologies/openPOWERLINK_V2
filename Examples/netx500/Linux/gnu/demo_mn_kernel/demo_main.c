@@ -159,7 +159,7 @@ MODULE_LICENSE("Dual BSD/GPL");
 // modul globale vars
 //---------------------------------------------------------------------------
 
-CONST BYTE abMacAddr[] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+CONST BYTE abMacAddr[] = {0x00, 0x03, 0xc0, 0xa8, 0x64, 0xf1};
 
 BYTE    bVarIn1_l;
 BYTE    bVarOut1_l;
@@ -271,7 +271,7 @@ tEplObdSize         ObdSize;
 
     EplApiInitParam.m_uiSizeOfStruct = sizeof (EplApiInitParam);
     EPL_MEMCPY(EplApiInitParam.m_abMacAddress, abMacAddr, sizeof (EplApiInitParam.m_abMacAddress));
-//    EplApiInitParam.m_abMacAddress[5] = (BYTE) EplApiInitParam.m_uiNodeId;
+    EplApiInitParam.m_abMacAddress[5] = (BYTE) EplApiInitParam.m_uiNodeId;
     EplApiInitParam.m_dwFeatureFlags = -1;
     EplApiInitParam.m_dwCycleLen = 50000;     // required for error detection
     EplApiInitParam.m_uiIsochrTxMaxPayload = 100; // const
@@ -348,6 +348,7 @@ tEplObdSize         ObdSize;
     }
 
     // link process variables used by MN to object dictionary
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
     ObdSize = sizeof(bLedsRow1_l);
     uiVarEntries = 1;
     EplRet = EplApiLinkObject(0x2000, &bLedsRow1_l, &uiVarEntries, &ObdSize, 0x01);
@@ -371,6 +372,7 @@ tEplObdSize         ObdSize;
     {
         goto Exit;
     }
+#endif
 
     // link a DOMAIN to object 0x6100, but do not exit, if it is missing
     ObdSize = sizeof(abDomain_l);
@@ -413,7 +415,7 @@ tEplObdSize         ObdSize;
     atomic_set(&AtomicShutdown_g, FALSE);
 
 Exit:
-    printk("epl.init(): returns 0x%X\n", EplRet);
+    printk("EplLinInit(): returns 0x%X\n", EplRet);
     return EplRet;
 }
 
