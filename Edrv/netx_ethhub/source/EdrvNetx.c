@@ -861,7 +861,7 @@ int             iHandled = IRQ_HANDLED;
 ETHHUB_FIFO_ELEMENT_T tFifoPtr;
 int             iFillLevel;
 ETHHUB_STATUS_AREA_BASE_T* ptCounters;
-DWORD           dwFifoOverflow;
+DWORD           dwValue;
 //DWORD           dwFifoReset;
 
 //    printk("¤");
@@ -934,10 +934,17 @@ DWORD           dwFifoOverflow;
     if ((dwStatus & (MSK_ETHHUB_INTERRUPTS_ENABLE_RX_ERR_VAL)) != 0)
     {   // receive error interrupt
 
-        printk("%s PFIFO underrun = 0x%X\n", __FUNCTION__, readl(NETX_PFIFO_UNDERRUN));
+        dwValue = readl(NETX_PFIFO_UNDERRUN);
+        if (dwValue != 0)
+        {
+            printk("%s PFIFO underrun = 0x%X\n", __FUNCTION__, dwValue);
+        }
 
-        dwFifoOverflow = readl(NETX_PFIFO_OVEFLOW);
-        printk("%s PFIFO overflow = 0x%lX\n", __FUNCTION__, dwFifoOverflow);
+        dwValue = readl(NETX_PFIFO_OVEFLOW);
+        if (dwValue != 0)
+        {
+            printk("%s PFIFO overflow = 0x%lX\n", __FUNCTION__, dwValue);
+        }
 /*
         if ((dwFifoOverflow & EDRV_FIFO_OVERFLOW_MASK) != 0)
         {
@@ -947,17 +954,72 @@ DWORD           dwFifoOverflow;
         }
 */
         ptCounters = (ETHHUB_STATUS_AREA_BASE_T*) (EdrvInstance_l.m_pXpecBase + NETX_XPEC_RAM_START_OFS + REL_Adr_AREA_ETHHUB_STATUS_AREA_BASE);
-        printk("%s frames received OK = %lu\n", __FUNCTION__, ptCounters->ulETHHUB_FRAMES_RECEIVED_OK);
-        printk("%s CRC errors = %lu\n", __FUNCTION__, ptCounters->ulETHHUB_FRAME_CHECK_SEQUENCE_ERRORS);
-        printk("%s align errors = %lu\n", __FUNCTION__, ptCounters->ulETHHUB_ALIGNMENT_ERRORS);
-        printk("%s frame too long = %lu\n", __FUNCTION__, ptCounters->ulETHHUB_FRAME_TOO_LONG_ERRORS);
-        printk("%s collision frags = %lu\n", __FUNCTION__, ptCounters->ulETHHUB_COLLISION_FRAGMENTS_RECEIVED);
-        printk("%s frames dropped = %lu\n", __FUNCTION__, ptCounters->ulETHHUB_FRAMES_DROPPED_DUE_LOW_RESOURCE);
-        printk("%s NIB len P0 = %lu\n", __FUNCTION__, ptCounters->ulETHHUB_FRAME_PREAMBLE_NIB_LEN_NOT_16_P0);
-        printk("%s NIB len P1 = %lu\n", __FUNCTION__, ptCounters->ulETHHUB_FRAME_PREAMBLE_NIB_LEN_NOT_16_P1);
-        printk("%s FIN set P0 = %lu\n", __FUNCTION__, ptCounters->ulETHHUB_RX_FRAME_FIN_SET_OUTSIDE_RX_FLOW_P0);
-        printk("%s FIN set P1 = %lu\n", __FUNCTION__, ptCounters->ulETHHUB_RX_FRAME_FIN_SET_OUTSIDE_RX_FLOW_P1);
-        printk("%s Rx fatal = %lu\n", __FUNCTION__, ptCounters->ulETHHUB_RX_FATAL_ERROR);
+
+        dwValue = ptCounters->ulETHHUB_FRAMES_RECEIVED_OK;
+        if (dwValue != 0)
+        {
+            printk("%s frames received OK = %lu\n", __FUNCTION__, dwValue);
+        }
+
+        dwValue = ptCounters->ulETHHUB_FRAME_CHECK_SEQUENCE_ERRORS;
+        if (dwValue != 0)
+        {
+            printk("%s CRC errors = %lu\n", __FUNCTION__, dwValue);
+        }
+
+        dwValue = ptCounters->ulETHHUB_ALIGNMENT_ERRORS;
+        if (dwValue != 0)
+        {
+            printk("%s align errors = %lu\n", __FUNCTION__, dwValue);
+        }
+
+        dwValue = ptCounters->ulETHHUB_FRAME_TOO_LONG_ERRORS;
+        if (dwValue != 0)
+        {
+            printk("%s frame too long = %lu\n", __FUNCTION__, dwValue);
+        }
+
+        dwValue = ptCounters->ulETHHUB_COLLISION_FRAGMENTS_RECEIVED;
+        if (dwValue != 0)
+        {
+            printk("%s collision frags = %lu\n", __FUNCTION__, dwValue);
+        }
+
+        dwValue = ptCounters->ulETHHUB_FRAMES_DROPPED_DUE_LOW_RESOURCE;
+        if (dwValue != 0)
+        {
+            printk("%s frames dropped = %lu\n", __FUNCTION__, dwValue);
+        }
+
+        dwValue = ptCounters->ulETHHUB_FRAME_PREAMBLE_NIB_LEN_NOT_16_P0;
+        if (dwValue != 0)
+        {
+            printk("%s NIB len P0 = %lu\n", __FUNCTION__, dwValue);
+        }
+
+        dwValue = ptCounters->ulETHHUB_FRAME_PREAMBLE_NIB_LEN_NOT_16_P1;
+        if (dwValue != 0)
+        {
+            printk("%s NIB len P1 = %lu\n", __FUNCTION__, dwValue);
+        }
+
+        dwValue = ptCounters->ulETHHUB_RX_FRAME_FIN_SET_OUTSIDE_RX_FLOW_P0;
+        if (dwValue != 0)
+        {
+            printk("%s FIN set P0 = %lu\n", __FUNCTION__, dwValue);
+        }
+
+        dwValue = ptCounters->ulETHHUB_RX_FRAME_FIN_SET_OUTSIDE_RX_FLOW_P1;
+        if (dwValue != 0)
+        {
+            printk("%s FIN set P1 = %lu\n", __FUNCTION__, dwValue);
+        }
+
+        dwValue = ptCounters->ulETHHUB_RX_FATAL_ERROR;
+        if (dwValue != 0)
+        {
+            printk("%s Rx fatal = %lu\n", __FUNCTION__, dwValue);
+        }
 
 /*
         if ((wStatus & EDRV_REGW_INT_FOVW) != 0)

@@ -1,0 +1,5 @@
+#! /bin/sh
+
+echo /sbin/firmware.sh > /proc/sys/kernel/hotplug
+insmod epl.ko nodeid=1
+

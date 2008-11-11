@@ -42,15 +42,11 @@ How to run the demo:
 
 copy the following files to the target (e.g. via CompactFlash card):
 - epl.ko
-- EplLoad
+- EplStart
 - xc0.bin, xc1.bin -> copied to /usr/local/lib/firmware
 
 
-install the firmware handler from udev package
-$ echo /sbin/firmware.sh > /proc/sys/kernel/hotplug
+load the kernel driver with the Bash script EplStart
 
-
-load the kernel driver with the Bash script EplLoad
-
-$ ./EplLoad
+$ ./EplStart
 

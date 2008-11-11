@@ -17,15 +17,17 @@
 #                                                                           #
 #****************************************************************************
 
-
+if [ -z "${INST_FILE}" ] ; then
+  INST_FILE=openPOWERLINK_demo_CN.sh
+fi
 
 TOPDIR=`pwd`
 INSTALLDIR=./
 TARGETDIR=${INSTALLDIR}target/
 SCRIPTDIR=`dirname $0`
-INST_FILE=${INSTALLDIR}openPOWERLINK_demo_CN.sh
+INST_FILE=${INSTALLDIR}${INST_FILE}
 SFX_HEADER=${SCRIPTDIR}/sfx-header
-TMP_TAR_BALL=openPOWERLINK_demo_CN.tar.gz
+TMP_TAR_BALL=openPOWERLINK_demo.tar.gz
 
 ETCDIR=${TARGETDIR}etc/
 BINDIR=${TARGETDIR}bin/

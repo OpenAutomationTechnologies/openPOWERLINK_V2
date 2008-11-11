@@ -21,7 +21,7 @@
 echo
 echo "[usr: autostart]"
 echo
-KODIR=/mnt/mtd3/bin
+KODIR=../bin
 
 if [ -d $KODIR ]; then
   echo "Loading modules for EPL"

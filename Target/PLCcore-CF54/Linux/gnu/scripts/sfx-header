@@ -5,7 +5,7 @@ echo " --- openPOWERLINK demo-CN ---"
 echo " Running installation... please wait"
 echo ""
 
-INSTALLDIR=/mnt/mtd3
+INSTALLDIR=`awk '$1 ~ /mtdblock\/*3/ { print $2 }' < /proc/mounts`
 
 # compute line number where the TGZ starts
 SKIP=`awk '/^__ARCHIVE_FOLLOWS__/ { print NR + 1; exit 0; }' $0`
