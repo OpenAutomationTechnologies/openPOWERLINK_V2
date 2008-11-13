@@ -131,6 +131,7 @@ MODULE_LICENSE("Dual BSD/GPL");
 #endif
 
 #define NODEID      0xF0 //=> MN
+#define CYCLE_LEN   5000 // [us]
 #define IP_ADDR     0xc0a86401  // 192.168.100.1
 #define SUBNET_MASK 0xFFFFFF00  // 255.255.255.0
 #define HOSTNAME    "SYS TEC electronic EPL Stack    "
@@ -184,8 +185,11 @@ static atomic_t             AtomicShutdown_g = ATOMIC_INIT(FALSE);
 
 static DWORD    dw_le_CycleLen_g;
 
-static uint uiNodeId_g;
-module_param_named(nodeid, uiNodeId_g, uint, EPL_C_ADR_INVALID);
+static uint uiNodeId_g = EPL_C_ADR_INVALID;
+module_param_named(nodeid, uiNodeId_g, uint, 0);
+
+static uint uiCycleLen_g = CYCLE_LEN;
+module_param_named(cyclelen, uiCycleLen_g, uint, 0);
 
 //---------------------------------------------------------------------------
 // local function prototypes
@@ -264,6 +268,8 @@ tEplObdSize         ObdSize;
         EplApiInitParam.m_uiNodeId = NODEID;
     }
 
+    uiNodeId_g = EplApiInitParam.m_uiNodeId;
+
     // calculate IP address
     EplApiInitParam.m_dwIpAddress = (0xFFFFFF00 & IP_ADDR) | EplApiInitParam.m_uiNodeId;
 
@@ -273,7 +279,7 @@ tEplObdSize         ObdSize;
     EPL_MEMCPY(EplApiInitParam.m_abMacAddress, abMacAddr, sizeof (EplApiInitParam.m_abMacAddress));
     EplApiInitParam.m_abMacAddress[5] = (BYTE) EplApiInitParam.m_uiNodeId;
     EplApiInitParam.m_dwFeatureFlags = -1;
-    EplApiInitParam.m_dwCycleLen = 50000;     // required for error detection
+    EplApiInitParam.m_dwCycleLen = uiCycleLen_g;     // required for error detection
     EplApiInitParam.m_uiIsochrTxMaxPayload = 100; // const
     EplApiInitParam.m_uiIsochrRxMaxPayload = 100; // const
     EplApiInitParam.m_dwPresMaxLatency = 50000;  // const; only required for IdentRes
