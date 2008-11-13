@@ -1142,11 +1142,24 @@ tEplFrameInfo   FrameInfo;
         case kEplEventTypeDllkStartReducedCycle:
         {
             // start the reduced cycle by programming the cycle timer
-            // it is issued by NMT state machine (Nmtk module), when PreOp1 is entered for the very first time
+            // it is issued by NMT MN module, when PreOp1 is entered
+
+            // clear the asynchronous queues
+            Ret = EplDllkCalAsyncClearQueues();
 
             // reset cycle counter (everytime a SoA is triggerd in PreOp1 the counter is incremented
             // and when it reaches EPL_C_DLL_PREOP1_START_CYCLES the SoA may contain invitations)
             EplDllkInstance_g.m_uiCycleCount = 0;
+
+            // remove any CN from isochronous phase
+            while (EplDllkInstance_g.m_pFirstNodeInfo != NULL)
+            {
+                EplDllkDeleteNode(EplDllkInstance_g.m_pFirstNodeInfo->m_uiNodeId);
+            }
+
+            // change state to NonCyclic,
+            // hence EplDllkChangeState() will not ignore the next call
+            EplDllkInstance_g.m_DllState = kEplDllMsNonCyclic;
 
 #if EPL_TIMER_USE_HIGHRES != FALSE
             if (EplDllkInstance_g.m_DllConfigParam.m_dwAsyncSlotTimeout != 0)
@@ -2013,6 +2026,10 @@ tEplErrorHandlerkEvent  DllEvent;
                 Ret = EplTimerHighReskDeleteTimer(&EplDllkInstance_g.m_TimerHdlCycle);
 #endif
                 EplDllkInstance_g.m_DllState = kEplDllMsNonCyclic;
+
+                // stop further processing,
+                // because it will be restarted by NMT MN module
+                break;
             }
 
             switch (NmtEvent_p)
@@ -3631,7 +3648,6 @@ tEdrvTxBuffer  *pTxBuffer = NULL;
 tEplFrame      *pTxFrame;
 BYTE            bFlag1 = 0;
 
-//    *pDllStateProposed_p = kEplDllMsNonCyclic;
 
     if (EplDllkInstance_g.m_pCurNodeInfo == NULL)
     {   // start with first isochronous CN

@@ -943,7 +943,12 @@ unsigned int        uiFreeEntries;
                 // -> send answer
                 case kAsySdoSeqEventFrameRec:
                 {
-
+/*
+                    PRINTF3("%s scon=%u rcon=%u\n",
+                            __FUNCTION__,
+                            pRecFrame_p->m_le_bSendSeqNumCon,
+                            pRecFrame_p->m_le_bRecSeqNumCon);
+*/
                     // check if scon == 1 and rcon == 0
                     if(((pRecFrame_p->m_le_bRecSeqNumCon & EPL_ASY_SDO_CON_MASK) == 0x00)
                         &&((pRecFrame_p->m_le_bSendSeqNumCon & EPL_ASY_SDO_CON_MASK) == 0x01))

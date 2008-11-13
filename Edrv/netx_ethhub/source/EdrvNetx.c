@@ -97,16 +97,14 @@
 // const defines
 //---------------------------------------------------------------------------
 
+/*
 #ifndef EDRV_MAX_TX_BUFFERS
 #define EDRV_MAX_TX_BUFFERS     20
 #endif
+*/
 
-#define EDRV_MAX_FRAME_SIZE     0x600
+#define EDRV_MAX_FRAME_SIZE     (ETH_FRAME_BUF_SIZE)
 
-//#define EDRV_RX_BUFFER_SIZE     0x8610  // 32 kB + 16 Byte + 1,5 kB (WRAP is enabled)
-//#define EDRV_RX_BUFFER_LENGTH   (EDRV_RX_BUFFER_SIZE & 0xF800)  // buffer size cut down to 2 kB alignment
-
-#define EDRV_TX_BUFFER_SIZE     (EDRV_MAX_TX_BUFFERS * EDRV_MAX_FRAME_SIZE) // n * (MTU + 14 + 4)
 
 #define DRV_NAME                "netx-eth"
 
@@ -153,7 +151,7 @@
 
 
 // defines from netx-eth.c of Linux
-#define PFIFO_MASK(xcno)        (0x7f << (xcno*8))
+#define PFIFO_MASK(xcno)        (0xff << (xcno*8))
 
 
 // defines for register accesses
@@ -191,9 +189,9 @@
 #define EDRV_COUNT_RX_CRC               TGT_DBG_SIGNAL_TRACE_POINT(14)
 #define EDRV_COUNT_RX_ERR               TGT_DBG_SIGNAL_TRACE_POINT(15)
 #define EDRV_COUNT_RX_FOVW              TGT_DBG_SIGNAL_TRACE_POINT(16)
-#define EDRV_COUNT_RX_PUN               TGT_DBG_SIGNAL_TRACE_POINT(17)
-#define EDRV_COUNT_RX_FAE               TGT_DBG_SIGNAL_TRACE_POINT(18)
-#define EDRV_COUNT_RX_OVW               TGT_DBG_SIGNAL_TRACE_POINT(19)
+#define EDRV_COUNT_RX_NIB               TGT_DBG_SIGNAL_TRACE_POINT(17)
+#define EDRV_COUNT_RX_FIN               TGT_DBG_SIGNAL_TRACE_POINT(18)
+#define EDRV_COUNT_RX_FATAL             TGT_DBG_SIGNAL_TRACE_POINT(19)
 
 #define EDRV_TRACE_CAPR(x)              TGT_DBG_POST_TRACE_VALUE(((x) & 0xFFFF) | 0x06000000)
 #define EDRV_TRACE_RX_CRC(x)            TGT_DBG_POST_TRACE_VALUE(((x) & 0xFFFF) | 0x0E000000)
@@ -205,15 +203,6 @@
 //---------------------------------------------------------------------------
 // local types
 //---------------------------------------------------------------------------
-/*
-typedef struct
-{
-    BOOL            m_fUsed;
-    unsigned int    m_uiSize;
-    MCD_bufDescFec *m_pBufDescr;
-
-} tEdrvTxBufferIntern;
-*/
 
 // Private structure
 typedef struct
@@ -223,15 +212,6 @@ typedef struct
 
     void __iomem*           m_pXpecBase;// pointer to register space of xPEC unit
     void __iomem*           m_apSramBase[2];// pointer to SRAM of xPEC unit
-
-
-    BYTE*               m_pbRxBuf;      // pointer to Rx buffer
-    dma_addr_t          m_pRxBufDma;
-    BYTE*               m_pbTxBuf;      // pointer to Tx buffer
-    dma_addr_t          m_pTxBufDma;
-
-    BOOL                m_afTxBufUsed[EDRV_MAX_TX_BUFFERS];
-    unsigned int        m_uiCurTxDesc;
 
     tEdrvInitParam      m_InitParam;
     tEdrvTxBuffer*      m_pLastTransmittedTxBuffer;
@@ -366,13 +346,35 @@ unsigned int uiCount;
     }
 
     // both xCs have been initialized
+    printk("%s loading firmware for xc units\n", __FUNCTION__);
+
+    // stop both xC units before loading the new firmware
+    xc_reset(EdrvInstance_l.m_apXc[0]);
+    xc_reset(EdrvInstance_l.m_apXc[1]);
+
+    // load the Ethernet Hub firmware to the xC unit 0
+    if (xc_request_firmware(EdrvInstance_l.m_apXc[0])) {
+        printk("%s unable to load firmware for xc unit 0\n", __FUNCTION__);
+        Ret = kEplNoResource;
+        goto Exit;
+    }
+
+    // load the Ethernet Hub firmware to the xC unit 1
+    if (xc_request_firmware(EdrvInstance_l.m_apXc[1])) {
+        printk("%s unable to load firmware for xc unit 1\n", __FUNCTION__);
+        Ret = kEplNoResource;
+        goto Exit;
+    }
+
+    iResult = 0;
+
     // now, configure global things
 
     // copy xPEC base address of unit 0 to instance structure
     EdrvInstance_l.m_pXpecBase = EdrvInstance_l.m_apXc[0]->xpec_base;
 
-    // enable monitoring mode
-    EDRV_XPECRAM_WRITE(REL_Adr_ETHHUB_MONITORING_MODE, MSK_ETHHUB_MONITORING_MODE_EN);
+    // disable monitoring mode
+    EDRV_XPECRAM_WRITE(REL_Adr_ETHHUB_MONITORING_MODE, 0 /*MSK_ETHHUB_MONITORING_MODE_EN*/);
 
     // set default traffic class arrangement
     EDRV_XPECRAM_WRITE(REL_Adr_ETHHUB_TRAFFIC_CLASS_ARRANGEMENT, 4);
@@ -389,10 +391,54 @@ unsigned int uiCount;
     writel(0xffff, NETX_PFIFO_XPEC_ISR(0));
     writel(0xffff, NETX_PFIFO_XPEC_ISR(1));
 
+    // start the Ethernet Hub
+    // start both xC units
+    xc_start(EdrvInstance_l.m_apXc[0]);
+    xc_start(EdrvInstance_l.m_apXc[1]);
+
+    // check if both xC units are running now
+    iResult = xc_running(EdrvInstance_l.m_apXc[0])
+              && xc_running(EdrvInstance_l.m_apXc[1]);
+    if (iResult)
+    {
+        printk("%s xc units are running now\n", __FUNCTION__);
+    }
+    else
+    {
+        printk("%s xc units are not running\n", __FUNCTION__);
+    }
+
+    // wait for PHYs to be initialized
+    writel(0x00030000, NETX_PFIFO_XPEC_ISR(1));
+    uiCount = 100;
+
+    while (readl(NETX_PFIFO_XPEC_ISR(1)) == 0x00030000)
+    {   // do nothing
+        printk("%s: XPEC_ISR1 = 0x%X\n",
+                __FUNCTION__,
+                readl(NETX_PFIFO_XPEC_ISR(1)));
+        msleep(300);
+        uiCount--;
+        if (uiCount == 0)
+        {
+            break;
+        }
+    }
+
+    // check success
+    if (readl(NETX_PFIFO_XPEC_ISR(1)) != 0)
+    {
+        printk("%s: PHY init failed\n",
+                __FUNCTION__);
+        Ret = kEplNoResource;
+        goto Exit;
+    }
+
+
     // install IRQ handler
     iResult = request_irq(EdrvInstance_l.m_apXc[0]->irq,
                           &TgtEthIsr,
-                          IRQF_SHARED,
+                          IRQF_NODELAY, //IRQF_SHARED,
                           DRV_NAME,
                           &EdrvInstance_l);
     if (iResult != 0)
@@ -404,38 +450,6 @@ unsigned int uiCount;
         Ret = kEplNoResource;
         goto Exit;
     }
-
-
-    // start the Ethernet Hub
-
-    // wait for PHYs to be initialized
-    writel(0x00030000, NETX_PFIFO_XPEC_ISR(1));
-    uiCount = 100;
-
-    while (readl(NETX_PFIFO_XPEC_ISR(1)) == 0x00030000)
-    {   // do nothing
-        msleep(300);
-        uiCount--;
-        if (uiCount == 0)
-        {
-            break;
-        }
-    }
-
-
-    printk("%s: XPEC_ISR1 = 0x%X\n",
-            __FUNCTION__,
-            readl(NETX_PFIFO_XPEC_ISR(1)));
-
-    // check success
-    if (readl(NETX_PFIFO_XPEC_ISR(1)) != 0)
-    {
-        printk("%s: PHY init failed\n",
-                __FUNCTION__);
-//        Ret = kEplNoResource;
-//        goto Exit;
-    }
-
 
     // set my mac addresses
     EDRV_XPECRAM_WRITE(REL_Adr_ETHHUB_LOCAL_MAC_ADDRESS_HI,
@@ -462,6 +476,9 @@ unsigned int uiCount;
     EDRV_XPECRAM_WRITE(REL_Adr_ETHHUB_INTERRUPTS_ENABLE_RX_ERR,
             MSK_ETHHUB_XPEC2ARM_INTERRUPTS_RX_ERR);
 
+    printk("%s: leave %d\n",
+            __FUNCTION__,
+            iResult);
 
 Exit:
     return Ret;
@@ -522,26 +539,29 @@ tEplKernel EdrvShutdown(void)
 //---------------------------------------------------------------------------
 tEplKernel EdrvDefineRxMacAddrEntry (BYTE * pbMacAddr_p)
 {
-tEplKernel  Ret = kEplSuccessful;
-/*
-DWORD       dwData;
-BYTE        bHash;
+tEplKernel      Ret = kEplSuccessful;
+unsigned int    uiHash;
+unsigned int    uiAddress;
+DWORD           dwValue;
 
-    bHash = EdrvCalcHash (pbMacAddr_p);
+    // calculate hash value from MAC address
+    uiHash = pbMacAddr_p[0] ^ pbMacAddr_p[1] ^ pbMacAddr_p[2]
+             ^ pbMacAddr_p[3] ^ pbMacAddr_p[4] ^ pbMacAddr_p[5];
 
-    if (bHash > 31)
-    {
-        dwData = EDRV_REGDW_READ(EDRV_REGDW_MAR4);
-        dwData |= 1 << (bHash - 32);
-        EDRV_REGDW_WRITE(EDRV_REGDW_MAR4, dwData);
-    }
-    else
-    {
-        dwData = EDRV_REGDW_READ(EDRV_REGDW_MAR0);
-        dwData |= 1 << bHash;
-        EDRV_REGDW_WRITE(EDRV_REGDW_MAR0, dwData);
-    }
-*/
+    uiHash &= 0xff;
+
+    // the hash value contains the number of the dword in the upper 3 bits (5-7),
+    // and the bit position in the lower 5 bits
+    uiAddress = REL_Adr_AREA_ETHHUB_MULTICAST_HASH_TABLE
+                + (sizeof(unsigned long) * (uiHash >> 5));
+
+    dwValue = EDRV_XPECRAM_READ(uiAddress);
+//    printk("%s %u = 0x%lX", __FUNCTION__, uiAddress, dwValue);
+    dwValue |= (1 << (uiHash & 0x1f));
+//    printk(" new = 0x%lX\n", dwValue);
+
+    EDRV_XPECRAM_WRITE(uiAddress, dwValue);
+
     return Ret;
 }
 
@@ -562,27 +582,30 @@ BYTE        bHash;
 tEplKernel EdrvUndefineRxMacAddrEntry (BYTE * pbMacAddr_p)
 {
 tEplKernel  Ret = kEplSuccessful;
-/*
-DWORD       dwData;
-BYTE        bHash;
+unsigned int    uiHash;
+unsigned int    uiAddress;
+DWORD           dwValue;
 
-    bHash = EdrvCalcHash (pbMacAddr_p);
+    // calculate hash value from MAC address
+    uiHash = pbMacAddr_p[0] ^ pbMacAddr_p[1] ^ pbMacAddr_p[2]
+             ^ pbMacAddr_p[3] ^ pbMacAddr_p[4] ^ pbMacAddr_p[5];
 
-    if (bHash > 31)
-    {
-        dwData = EDRV_REGDW_READ(EDRV_REGDW_MAR4);
-        dwData &= ~(1 << (bHash - 32));
-        EDRV_REGDW_WRITE(EDRV_REGDW_MAR4, dwData);
-    }
-    else
-    {
-        dwData = EDRV_REGDW_READ(EDRV_REGDW_MAR0);
-        dwData &= ~(1 << bHash);
-        EDRV_REGDW_WRITE(EDRV_REGDW_MAR0, dwData);
-    }
-*/
+    uiHash &= 0xff;
+
+    // the hash value contains the number of the dword in the upper 3 bits (5-7),
+    // and the bit position in the lower 5 bits
+    uiAddress = REL_Adr_AREA_ETHHUB_MULTICAST_HASH_TABLE
+                + (sizeof(unsigned long) * (uiHash >> 5));
+
+    dwValue = EDRV_XPECRAM_READ(uiAddress);
+//    printk("%s %u = 0x%lX", __FUNCTION__, uiAddress, dwValue);
+    dwValue &= ~(1 << (uiHash & 0x1f));
+//    printk(" new = 0x%lX\n", dwValue);
+    EDRV_XPECRAM_WRITE(uiAddress, dwValue);
+
     return Ret;
 }
+
 
 //---------------------------------------------------------------------------
 //
@@ -616,21 +639,33 @@ unsigned int uiFrameNr;
     if (pfifo_fill_level(ETHERNET_FIFO_EMPTY)
         <= EDRV_MIN_FIFO_EMPTY_ENTRIES)
     {   // not enough free elements
-        Ret = kEplEdrvNoFreeBufEntry;
-        goto Exit;
+        // allocate buffer with malloc (in this case it is kmalloc)
+        pBuffer_p->m_pbBuffer = EPL_MALLOC(pBuffer_p->m_uiMaxBufferLen);
+        if (pBuffer_p->m_pbBuffer == NULL)
+        {
+            Ret = kEplEdrvNoFreeBufEntry;
+            goto Exit;
+        }
+        tFifoPtr.val = 0;
+        tFifoPtr.bf.RES1 = 1;   // mark TxBuffer as kmalloced
+    }
+    else
+    {
+
+        // retrieve the fifo element from the empty pointer FIFO
+        tFifoPtr.val = pfifo_pop(ETHERNET_FIFO_EMPTY);
+
+        // extract ram bank and frame number
+        uiRamSegment = tFifoPtr.bf.INT_RAM_SEGMENT_NUM;
+        uiFrameNr = tFifoPtr.bf.FRAME_BUF_NUM;
+        tFifoPtr.bf.RES1 = 0;   // mark TxBuffer as FIFO element
+
+        // set result
+        pBuffer_p->m_pbBuffer = EdrvInstance_l.m_apSramBase[uiRamSegment]
+                                + (ETH_FRAME_BUF_SIZE * uiFrameNr);
+        pBuffer_p->m_uiMaxBufferLen = EDRV_MAX_FRAME_SIZE;
     }
 
-    // retrieve the fifo element from the empty pointer FIFO
-    tFifoPtr.val = pfifo_pop(ETHERNET_FIFO_EMPTY);
-
-    // extract ram bank and frame number
-    uiRamSegment = tFifoPtr.bf.INT_RAM_SEGMENT_NUM;
-    uiFrameNr = tFifoPtr.bf.FRAME_BUF_NUM;
-
-    // set result
-    pBuffer_p->m_pbBuffer = EdrvInstance_l.m_apSramBase[uiRamSegment]
-                            + (ETH_FRAME_BUF_SIZE * uiFrameNr);
-    pBuffer_p->m_uiMaxBufferLen = EDRV_MAX_FRAME_SIZE;
     pBuffer_p->m_uiBufferNumber = tFifoPtr.val;
 
 /*
@@ -675,14 +710,33 @@ Exit:
 //---------------------------------------------------------------------------
 tEplKernel EdrvReleaseTxMsgBuffer     (tEdrvTxBuffer * pBuffer_p)
 {
-unsigned int uiBufferNumber;
+ETHHUB_FIFO_ELEMENT_T tFifoPtr;
 
-    uiBufferNumber = pBuffer_p->m_uiBufferNumber;
+    tFifoPtr.val = pBuffer_p->m_uiBufferNumber;
 
-    if (uiBufferNumber != 0)
+    if (tFifoPtr.val != 0)
     {
-        // put the FIFO element back to the empty pointer FIFO
-        pfifo_push(ETHERNET_FIFO_EMPTY, uiBufferNumber);
+        if (pBuffer_p == EdrvInstance_l.m_pLastTransmittedTxBuffer)
+        {   // transmission of buffer is still active
+            EdrvInstance_l.m_pLastTransmittedTxBuffer = NULL;
+
+            if (tFifoPtr.bf.RES1 != 0)
+            {   // buffer was malloced
+                // free buffer
+                EPL_FREE(pBuffer_p->m_pbBuffer);
+            }
+            // if buffer was not malloced do not put it back to empty pointer FIFO
+            // because this will be done on Tx interrupt
+        }
+        else if (tFifoPtr.bf.RES1 == 0)
+        {   // transmission of buffer is not active
+            // put the FIFO element back to the empty pointer FIFO
+            pfifo_push(ETHERNET_FIFO_EMPTY, tFifoPtr.val);
+        }
+        else
+        {   // free buffer
+            EPL_FREE(pBuffer_p->m_pbBuffer);
+        }
     }
 
     return kEplSuccessful;
@@ -736,9 +790,24 @@ ETHHUB_FIFO_ELEMENT_T tFifoPtr;
         pBuffer_p->m_uiTxMsgLen = MIN_ETH_SIZE;
     }
 
-    // create fifo element
-    tFifoPtr.val = (uiBufferNumber) & ( MSK_ETHHUB_FIFO_ELEMENT_FRAME_BUF_NUM |
-                    MSK_ETHHUB_FIFO_ELEMENT_INT_RAM_SEGMENT_NUM );
+    if ((uiBufferNumber & MSK_ETHHUB_FIFO_ELEMENT_RES1) == 0)
+    {
+        // create fifo element from preallocated SRAM buffer
+        tFifoPtr.val = (uiBufferNumber) & ( MSK_ETHHUB_FIFO_ELEMENT_FRAME_BUF_NUM
+                        | MSK_ETHHUB_FIFO_ELEMENT_INT_RAM_SEGMENT_NUM );
+    }
+    else
+    {
+        // retrieve the fifo element from the empty pointer FIFO
+        tFifoPtr.val = pfifo_pop(ETHERNET_FIFO_EMPTY);
+
+        // copy malloced buffer to SRAM
+        memcpy_toio(EdrvInstance_l.m_apSramBase[tFifoPtr.bf.INT_RAM_SEGMENT_NUM]
+                        + (ETH_FRAME_BUF_SIZE * tFifoPtr.bf.FRAME_BUF_NUM),
+                    pBuffer_p->m_pbBuffer,
+                    pBuffer_p->m_uiTxMsgLen);
+    }
+
     tFifoPtr.bf.SUPPRESS_CON = 0;
     tFifoPtr.bf.FRAME_LEN = pBuffer_p->m_uiTxMsgLen;
 
@@ -901,6 +970,11 @@ DWORD           dwValue;
             }
 
             case CONF_ERRCODE_TX_FAILED_LATE_COLLISION:
+            {
+                EDRV_COUNT_LATECOLLISION;
+                break;
+            }
+
             case CONF_ERRCODE_TX_FAILED_EXCESSIVE_COLLISION:
             {
                 EDRV_COUNT_TX_COL_RL;
@@ -925,8 +999,28 @@ DWORD           dwValue;
 
         if (pTxBuffer != NULL)
         {
+
+            if ((tFifoPtr.val
+                    & (MSK_ETHHUB_FIFO_ELEMENT_FRAME_BUF_NUM
+                      | MSK_ETHHUB_FIFO_ELEMENT_INT_RAM_SEGMENT_NUM))
+                != (pTxBuffer->m_uiBufferNumber
+                    & (MSK_ETHHUB_FIFO_ELEMENT_FRAME_BUF_NUM
+                      | MSK_ETHHUB_FIFO_ELEMENT_INT_RAM_SEGMENT_NUM)))
+            {   // current FIFO element does not equal the Tx buffer number
+                // assume it is a malloced one
+                // release FIFO element to empty pointer FIFO
+                pfifo_push(ETHERNET_FIFO_EMPTY, tFifoPtr.val);
+            }
+
             // call Tx handler of Data link layer
             EdrvInstance_l.m_InitParam.m_pfnTxHandler(pTxBuffer);
+        }
+        else
+        {   // unknown Tx buffer
+            // assume it was already released
+
+            // put FIFO element back to empty pointer FIFO
+            pfifo_push(ETHERNET_FIFO_EMPTY, tFifoPtr.val);
         }
 
     }
@@ -937,7 +1031,7 @@ DWORD           dwValue;
         dwValue = readl(NETX_PFIFO_UNDERRUN);
         if (dwValue != 0)
         {
-            printk("%s PFIFO underrun = 0x%X\n", __FUNCTION__, dwValue);
+            printk("%s PFIFO underrun = 0x%lX\n", __FUNCTION__, dwValue);
         }
 
         dwValue = readl(NETX_PFIFO_OVEFLOW);
@@ -955,27 +1049,31 @@ DWORD           dwValue;
 */
         ptCounters = (ETHHUB_STATUS_AREA_BASE_T*) (EdrvInstance_l.m_pXpecBase + NETX_XPEC_RAM_START_OFS + REL_Adr_AREA_ETHHUB_STATUS_AREA_BASE);
 
+/*
         dwValue = ptCounters->ulETHHUB_FRAMES_RECEIVED_OK;
         if (dwValue != 0)
         {
             printk("%s frames received OK = %lu\n", __FUNCTION__, dwValue);
         }
-
+*/
         dwValue = ptCounters->ulETHHUB_FRAME_CHECK_SEQUENCE_ERRORS;
         if (dwValue != 0)
         {
+            EDRV_COUNT_RX_CRC;
             printk("%s CRC errors = %lu\n", __FUNCTION__, dwValue);
         }
 
         dwValue = ptCounters->ulETHHUB_ALIGNMENT_ERRORS;
         if (dwValue != 0)
         {
+            EDRV_COUNT_RX_ERR;
             printk("%s align errors = %lu\n", __FUNCTION__, dwValue);
         }
 
         dwValue = ptCounters->ulETHHUB_FRAME_TOO_LONG_ERRORS;
         if (dwValue != 0)
         {
+            EDRV_COUNT_RX_ERR;
             printk("%s frame too long = %lu\n", __FUNCTION__, dwValue);
         }
 
@@ -988,62 +1086,45 @@ DWORD           dwValue;
         dwValue = ptCounters->ulETHHUB_FRAMES_DROPPED_DUE_LOW_RESOURCE;
         if (dwValue != 0)
         {
+            EDRV_COUNT_RX_FOVW;
             printk("%s frames dropped = %lu\n", __FUNCTION__, dwValue);
         }
 
         dwValue = ptCounters->ulETHHUB_FRAME_PREAMBLE_NIB_LEN_NOT_16_P0;
         if (dwValue != 0)
         {
+            EDRV_COUNT_RX_NIB;
             printk("%s NIB len P0 = %lu\n", __FUNCTION__, dwValue);
         }
 
         dwValue = ptCounters->ulETHHUB_FRAME_PREAMBLE_NIB_LEN_NOT_16_P1;
         if (dwValue != 0)
         {
+            EDRV_COUNT_RX_NIB;
             printk("%s NIB len P1 = %lu\n", __FUNCTION__, dwValue);
         }
 
         dwValue = ptCounters->ulETHHUB_RX_FRAME_FIN_SET_OUTSIDE_RX_FLOW_P0;
         if (dwValue != 0)
         {
+            EDRV_COUNT_RX_FIN;
             printk("%s FIN set P0 = %lu\n", __FUNCTION__, dwValue);
         }
 
         dwValue = ptCounters->ulETHHUB_RX_FRAME_FIN_SET_OUTSIDE_RX_FLOW_P1;
         if (dwValue != 0)
         {
+            EDRV_COUNT_RX_FIN;
             printk("%s FIN set P1 = %lu\n", __FUNCTION__, dwValue);
         }
 
         dwValue = ptCounters->ulETHHUB_RX_FATAL_ERROR;
         if (dwValue != 0)
         {
+            EDRV_COUNT_RX_FATAL;
             printk("%s Rx fatal = %lu\n", __FUNCTION__, dwValue);
         }
 
-/*
-        if ((wStatus & EDRV_REGW_INT_FOVW) != 0)
-        {
-            EDRV_COUNT_RX_FOVW;
-        }
-        else if ((wStatus & EDRV_REGW_INT_RXOVW) != 0)
-        {
-            EDRV_COUNT_RX_OVW;
-        }
-        else if ((wStatus & EDRV_REGW_INT_PUN) != 0)
-        {   // Packet underrun
-            EDRV_TRACE_RX_PUN(wStatus);
-            EDRV_COUNT_RX_PUN;
-        }
-        else
-        {
-            EDRV_TRACE_RX_ERR(wStatus);
-            EDRV_COUNT_RX_ERR;
-        }
-
-        // reinitialize Rx process
-        EdrvReinitRx();
-*/
     }
 
     if ((dwStatus & (MSK_ETHHUB_INTERRUPTS_ENABLE_IND_LO_VAL)) != 0)
@@ -1058,8 +1139,9 @@ DWORD           dwValue;
 
             RxBuffer.m_BufferInFrame = kEdrvBufferLastInFrame;
             RxBuffer.m_uiRxMsgLen = tFifoPtr.bf.FRAME_LEN;
-            RxBuffer.m_pbBuffer = EdrvInstance_l.m_apSramBase[tFifoPtr.bf.INT_RAM_SEGMENT_NUM]
-                            + (ETH_FRAME_BUF_SIZE * tFifoPtr.bf.FRAME_BUF_NUM);
+            RxBuffer.m_pbBuffer =
+                    EdrvInstance_l.m_apSramBase[tFifoPtr.bf.INT_RAM_SEGMENT_NUM]
+                    + (ETH_FRAME_BUF_SIZE * tFifoPtr.bf.FRAME_BUF_NUM);
 
 //                printk("R");
             EDRV_COUNT_RX;
@@ -1155,33 +1237,6 @@ unsigned int            uiFrame;
         goto ExitFreePfifo;
     }
 
-    dev_info(&pPlatformDev_p->dev, "loading firmware for xc unit\n");
-
-    // stop xC unit before loading the new firmware
-    xc_reset(EdrvInstance_l.m_apXc[iXcNo]);
-    xc_stop(EdrvInstance_l.m_apXc[iXcNo]);
-
-    // load the Ethernet Hub firmware to the xC unit
-    if (xc_request_firmware(EdrvInstance_l.m_apXc[iXcNo])) {
-        dev_err(&pPlatformDev_p->dev, "unable to load firmware for xc unit\n");
-        iResult = -ENODEV;
-        goto ExitFreeXc;
-    }
-    xc_reset(EdrvInstance_l.m_apXc[iXcNo]);
-    xc_start(EdrvInstance_l.m_apXc[iXcNo]);
-
-    // check if xC unit is running now
-    iResult = xc_running(EdrvInstance_l.m_apXc[iXcNo]);
-    if (iResult)
-    {
-        dev_info(&pPlatformDev_p->dev, "xc unit is running now\n");
-    }
-    else
-    {
-        dev_info(&pPlatformDev_p->dev, "xc unit is not running\n");
-    }
-    iResult = 0;
-
     // copy pointer to SRAM to instance structure
     EdrvInstance_l.m_apSramBase[iXcNo] = EdrvInstance_l.m_apXc[iXcNo]->sram_base;
 
@@ -1211,11 +1266,6 @@ unsigned int            uiFrame;
     EdrvInstance_l.m_apDev[iXcNo] = pPlatformDev_p;
 
     goto Exit;
-
-ExitFreeXc:
-    // release xC unit
-    xc_stop(EdrvInstance_l.m_apXc[iXcNo]);
-    free_xc(EdrvInstance_l.m_apXc[iXcNo]);
 
 ExitFreePfifo:
     pfifo_free(PFIFO_MASK(iXcNo));
@@ -1294,60 +1344,3 @@ Exit:
 }
 
 
-//---------------------------------------------------------------------------
-//
-// Function:    EdrvCalcHash
-//
-// Description: function calculates the entry for the hash-table from MAC
-//              address
-//
-// Parameters:  pbMAC_p - pointer to MAC address
-//
-// Returns:     hash value
-//
-// State:
-//
-//---------------------------------------------------------------------------
-#define HASH_BITS              6  // used bits in hash
-#define CRC32_POLY    0x04C11DB6  //
-//#define CRC32_POLY    0xEDB88320  //
-// G(x) = x32 + x26 + x23 + x22 + x16 + x12 + x11 + x10 + x8 + x7 + x5 + x4 + x2 + x + 1
-/*
-static BYTE EdrvCalcHash (BYTE * pbMAC_p)
-{
-DWORD dwByteCounter;
-DWORD dwBitCounter;
-DWORD dwData;
-DWORD dwCrc;
-DWORD dwCarry;
-BYTE * pbData;
-BYTE bHash;
-
-    pbData = pbMAC_p;
-
-    // calculate crc32 value of mac address
-    dwCrc = 0xFFFFFFFF;
-
-    for (dwByteCounter = 0; dwByteCounter < 6; dwByteCounter++)
-    {
-        dwData = *pbData;
-        pbData++;
-        for (dwBitCounter = 0; dwBitCounter < 8; dwBitCounter++, dwData >>= 1)
-        {
-            dwCarry = (((dwCrc >> 31) ^ dwData) & 1);
-            dwCrc = dwCrc << 1;
-            if (dwCarry != 0)
-            {
-                dwCrc = (dwCrc ^ CRC32_POLY) | dwCarry;
-            }
-        }
-    }
-
-//    printk("MyCRC = 0x%08lX\n", dwCrc);
-    // only upper 6 bits (HASH_BITS) are used
-    // which point to specific bit in the hash registers
-    bHash = (BYTE)((dwCrc >> (32 - HASH_BITS)) & 0x3f);
-
-    return bHash;
-}
-*/

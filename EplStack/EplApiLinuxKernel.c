@@ -100,7 +100,7 @@
 
 #include "Epl.h"
 #include "EplApiLinux.h"
-#include "kernel/EplPdokCal.h"
+//#include "kernel/EplPdokCal.h"
 #include "proc_fs.h"
 
 
@@ -1301,8 +1301,7 @@ int  iErr;
     else
     {   // application is currently not waiting for sync
         // continue without interruption
-        // mark TPDO as valid
-        EplRet = EplPdokCalSetTpdosValid(TRUE);
+        // TPDO are set valid by caller (i.e. EplEventkProcess())
     }
 
     TGT_DBG_SIGNAL_TRACE_POINT(1);

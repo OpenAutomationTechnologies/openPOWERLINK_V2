@@ -122,13 +122,13 @@
                                | EPL_MODULE_SDOC \
                                | EPL_MODULE_SDO_ASND \
                                | EPL_MODULE_SDO_UDP \
+                               | EPL_MODULE_NMT_MN \
                                | EPL_MODULE_NMT_CN \
                                | EPL_MODULE_NMTU \
                                | EPL_MODULE_NMTK \
                                | EPL_MODULE_DLLK \
                                | EPL_MODULE_DLLU \
                                | EPL_MODULE_VETH)
-//                               | EPL_MODULE_NMT_MN
 //                               | EPL_MODULE_OBDU
 
 // =========================================================================

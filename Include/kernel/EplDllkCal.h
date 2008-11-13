@@ -119,6 +119,8 @@ tEplKernel EplDllkCalProcess(tEplEvent * pEvent_p);
 
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
 
+tEplKernel EplDllkCalAsyncClearQueues(void);
+
 tEplKernel EplDllkCalIssueRequest(tEplDllReqServiceId Service_p, unsigned int uiNodeId_p, BYTE bSoaFlag1_p);
 
 tEplKernel EplDllkCalAsyncGetSoaRequest(tEplDllReqServiceId* pReqServiceId_p, unsigned int* puiNodeId_p);

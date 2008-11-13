@@ -191,6 +191,7 @@ module_param_named(nodeid, uiNodeId_g, uint, 0);
 static uint uiCycleLen_g = CYCLE_LEN;
 module_param_named(cyclelen, uiCycleLen_g, uint, 0);
 
+
 //---------------------------------------------------------------------------
 // local function prototypes
 //---------------------------------------------------------------------------

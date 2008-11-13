@@ -20,6 +20,7 @@ Requirements:
   with the following configuration:
     * netx-eth driver disabled or compiled as module
     * firmware support
+    * CONFIG_PREEMPT_RT disabled
 - udev with firmware support in Linux-BSP
   therefor start 'ptxdist menuconfig' and activate the following items
         PTXdist Base Configuration         --->

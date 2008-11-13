@@ -69,7 +69,7 @@
 ****************************************************************************/
 
 #include "Epl.h"
-#include "kernel/EplPdokCal.h"
+//#include "kernel/EplPdokCal.h"
 
 #if (TARGET_SYSTEM == _LINUX_) && defined(__KERNEL__)
 #include <asm/uaccess.h>
@@ -333,8 +333,7 @@ tEplKernel      Ret = kEplSuccessful;
 //----------------------------------------------------------------------------
 // Function:    EplApiProcessImageExchangeOut()
 //
-// Description: copies passed output process image to EPL stack and marks
-//              TPDOs as valid.
+// Description: copies passed output process image to EPL stack.
 //
 // Parameters:  pPI_p                   = output process image
 //
@@ -357,11 +356,6 @@ tEplKernel      Ret = kEplSuccessful;
             pPI_p->m_pImage,
             min(pPI_p->m_uiSize, sizeof (EplApiProcessImageInstance_g.m_abProcessImageOutput)));
     #endif
-#endif
-
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOK)) != 0)
-    // mark TPDO as valid
-    Ret = EplPdokCalSetTpdosValid(TRUE);
 #endif
 
     return Ret;

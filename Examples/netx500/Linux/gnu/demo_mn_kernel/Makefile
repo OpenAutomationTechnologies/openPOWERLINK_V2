@@ -35,8 +35,8 @@ MODULEOBJS	= demo_main.o \
 			  SharedBuff.o ShbIpc-LinuxKernel.o \
 			  SocketLinuxKernel.o \
 			  TimerHighReskX86.o \
-			  proc_fs.o
-#			  EplNmtMnu.o EplIdentu.o EplStatusu.o
+			  proc_fs.o \
+			  EplNmtMnu.o EplIdentu.o EplStatusu.o
 #			  EplObdu.o EplObdkCal.o EplObduCal.o
 
 #           Select here between debug and release settings

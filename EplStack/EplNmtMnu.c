@@ -699,13 +699,6 @@ tEplKernel      Ret = kEplSuccessful;
         DWORD           dwTimeout;
         tEplObdSize     ObdSize;
 
-            // reset IdentResponses and running IdentRequests and StatusRequests
-            Ret = EplIdentuReset();
-            Ret = EplStatusuReset();
-
-            // reset timers
-            Ret = EplNmtMnuReset();
-
             // read object 0x1F80 NMT_StartUp_U32
             ObdSize = 4;
             Ret = EplObduReadEntry(0x1F80, 0, &EplNmtMnuInstance_g.m_dwNmtStartup, &ObdSize);
@@ -823,12 +816,35 @@ tEplKernel      Ret = kEplSuccessful;
         DWORD           dwTimeout;
         tEplTimerArg    TimerArg;
         tEplObdSize     ObdSize;
+        tEplEvent       Event;
 
             // clear global flags, e.g. reenable boot process
             EplNmtMnuInstance_g.m_wFlags = 0;
 
+            // reset IdentResponses and running IdentRequests and StatusRequests
+            Ret = EplIdentuReset();
+            Ret = EplStatusuReset();
+
+            // reset timers
+            Ret = EplNmtMnuReset();
+
             // reset internal node info
-            EPL_MEMSET(EplNmtMnuInstance_g.m_aNodeInfo, 0, sizeof (EplNmtMnuInstance_g.m_aNodeInfo));
+            EPL_MEMSET(EplNmtMnuInstance_g.m_aNodeInfo,
+                       0,
+                       sizeof (EplNmtMnuInstance_g.m_aNodeInfo));
+
+            // inform DLL about NMT state change,
+            // so that it can clear the asynchonous queues and start the reduced cycle
+            Event.m_EventSink = kEplEventSinkDllk;
+            Event.m_EventType = kEplEventTypeDllkStartReducedCycle;
+            EPL_MEMSET(&Event.m_NetTime, 0x00, sizeof(Event.m_NetTime));
+            Event.m_pArg = NULL;
+            Event.m_uiSize = 0;
+            Ret = EplEventuPost(&Event);
+            if (Ret != kEplSuccessful)
+            {
+                break;
+            }
 
             // reset all nodes
             // d.k.: skip this step if was just done before, e.g. because of a ResetNode command from a diagnostic node

@@ -89,6 +89,7 @@
   2006/10/01 -rs:   Support for I/O board PCB 4160.0
   2006/10/03 -rs:   Support for I/O board PCB 4158.1
   2007/02/19 -rs:   Support for I/O board PCB 4158.1 with PLD
+  2008/09/10 -rs:   V3.00 Adaption to I/O board PCB 4158.5 and CPU PLD V3
 
 ****************************************************************************/
 
@@ -154,6 +155,8 @@
 //#define PCB_VER                     4160-0
 
 #define PCB_VER                     4158-1
+#define CPU_PCB_VER     4152                // PCB number CPU board
+#define IO_PCB_VER      4158                // PCB number base board
 
     // JP300 = open   (DI1-DI4 via CS3/Periphery)
     // JP300 = closed (DI1-DI4 via PCI_IO5, PCI_IO6, TIN1 and /IRQ7)
@@ -185,8 +188,10 @@
 #endif
 
 
+#define PLC_CORE_PLD_TYPE_ID    0x01        // PLD type ID for PLCcore functionality (B0-B3 of PLD Version Register)
+
 #define CS1_IO_BASE_ADDR    0xE4000000  // base address for periphery at CS1
-#define CS1_IO_MEM_SIZE     0x00000004  // memory size for periphery at CS1
+#define CS1_IO_MEM_SIZE     0x00000100  // memory size for periphery at CS1 (PLD)
 
 #define CS3_IO_BASE_ADDR    0xE4010000  // base address for periphery at CS3
 #define CS3_IO_MEM_SIZE     0x00000004  // memory size for periphery at CS3
@@ -196,7 +201,7 @@
 /* MODULE_LICENSE("GPL"); */
 #ifdef MODULE_AUTHOR
     MODULE_AUTHOR("Ronald.Sieber@systec-electronic.com");
-    MODULE_DESCRIPTION("SYSTEC template for generic loadable module");
+    MODULE_DESCRIPTION("I/O driver module for SYSTEC PLCcore-5484");
 #endif
 
 
@@ -204,6 +209,26 @@
 //---------------------------------------------------------------------------
 //  Constant definitions
 //---------------------------------------------------------------------------
+
+// PLD register offsets of new PLD-firmware
+#define PLD_REG_VERSION         0x00000000
+#define PLD_REG_AUX             0x00000004
+#define PLD_REG_INT_STATUS      0x00000008
+#define PLD_REG_INT_ENABLE      0x00000060
+#define PLD_REG_DO_FUNC         0x0000000C
+#define PLD_REG_DO_STATE        0x00000010
+#define PLD_REG_DO_ENABLE       0x00000014
+#define PLD_REG_DI_FUNC         0x00000018
+#define PLD_REG_DI_STATE        0x0000001C
+#define PLD_REG_CNT_MODE        0x00000024
+#define PLD_REG_CNT_OV          0x00000028
+#define PLD_REG_CNT_PREL0       0x0000002C
+#define PLD_REG_CNT_VAL0        0x0000003C
+#define PLD_REG_PWM_CONFIG      0x0000004C
+#define PLD_REG_PWM_PERIOD0     0x00000050
+#define PLD_REG_PWM_LENGTH0     0x00000054
+#define PLD_REG_PWM_DELTA0      0x00000058
+#define PLD_REG_PWM_COUNT0      0x0000005C
 
 #define CF54_DRV_DEFAULT_HEX_NUM    0x20
 
@@ -225,10 +250,12 @@
 // driver major number
 static int  nDrvMajorNumber_g;
 
+// PLD
 static char              szCS1ResName_g[64];
 static struct resource*  pCS1Ressource_g;
 static BYTE*             pCS1BaseAddr_g;
 
+// Memory mapped I/O
 static char              szCS3ResName_g[64];
 static struct resource*  pCS3Ressource_g;
 static BYTE*             pCS3BaseAddr_g;
@@ -248,7 +275,7 @@ static BYTE*             pCS3BaseAddr_g;
 static BYTE   bLastRSMSwitch_l      = 0xFF;
 static DWORD  dwDebounceInterval_l  = 0;
 static DWORD  dwDebounceStartTime_l = 0;
-
+static BOOL   fOldPld_l = FALSE;
 
 
 //---------------------------------------------------------------------------
@@ -295,6 +322,24 @@ EXPORT_SYMBOL(PLCcoreCF54DrvCmdSetDigiOut);
 #ifdef _CFG_PROCFS_
     static  int  PLCcoreCF54DrvProcRead (char* pcBuffer_p, char** ppcStart_p, off_t Offset_p, int nBufferSize_p, int* pEof_p, void* pData_p);
 #endif
+
+
+
+//---------------------------------------------------------------------------
+//  Inline functions
+//---------------------------------------------------------------------------
+
+// Write data to PLD
+static  inline  void  PLD_Write (DWORD dwRegAddr_p, DWORD dwIoData_p)
+{
+    *(volatile DWORD*)(pCS1BaseAddr_g + dwRegAddr_p) = dwIoData_p;
+}
+
+// Read data from PLD
+static  inline  DWORD  PLD_Read (DWORD dwRegAddr_p)
+{
+    return ( *(volatile DWORD*)(pCS1BaseAddr_g + dwRegAddr_p) );
+}
 
 
 
@@ -588,6 +633,11 @@ int  iRet;
 
     // initialize hardware
     iRet = PLCcoreCF54DrvInitHardware();
+    if (iRet != CF54DRV_RES_OK)
+    {
+        // unregister device
+        PLCcoreCF54DrvExit();
+    }
 
 
 Exit:
@@ -638,7 +688,7 @@ static void  __exit  PLCcoreCF54DrvExit (void)
     #endif
 
 
-    // create device nodes for all supported driver instances in PROCFS
+    // delete device nodes for all supported driver instances in PROCFS
     #ifdef _CFG_PROCFS_
     {
         char  szDevName[32];
@@ -679,8 +729,6 @@ int  iRet;
     TRACE0("IODRV: + cf54basio#PLCcoreCF54DrvOpen...\n");
 
     MOD_INC_USE_COUNT;
-//$$$$    printk(KERN_INFO "new module reference counter = %d\n", &(&__this_module)->uc.usecount);
-//$$$$    printk(KERN_INFO "new module reference counter = %d\n", (int)((&__this_module)->uc.usecount));
 
 
     iRet = 0;
@@ -715,8 +763,6 @@ int  iRet;
 
 
     MOD_DEC_USE_COUNT;
-//$$$$    printk(KERN_INFO "new module reference counter = %d\n", &(&__this_module)->uc.usecount);
-//$$$$    printk(KERN_INFO "new module reference counter = %d\n", (int)__this_module.uc.usecount);
 
     return 0;
 
@@ -1009,8 +1055,10 @@ Exit:
 static  int  PLCcoreCF54DrvInitHardware (void)
 {
 
+volatile DWORD  dwIoData;
 DWORD  dwIoBase;
 DWORD  dwIoSize;
+BYTE   bCpuPldType;
 int    iRet;
 
 
@@ -1019,18 +1067,131 @@ int    iRet;
     iRet = CF54DRV_RES_OK;
 
 
-    // initialize variables for RSM-Switch debouncing
-    bLastRSMSwitch_l      = 0xFF;
+    // initialize variable for RSM-Switch debouncing
+    bLastRSMSwitch_l = SWITCH_MRES;
     dwDebounceInterval_l  = 0;
     dwDebounceStartTime_l = 0;
 
 
     //-------------------------------------------------------------------
-    // Step (1): Configure port pin based I/O periphery
+    // Step (1): Allocate resources for memory maped I/O periphery
+    //-------------------------------------------------------------------
+
+    // -------- PLD --------
+    // configure CS1 for PLD access
+    dwIoBase = CS1_IO_BASE_ADDR;
+    dwIoSize = CS1_IO_MEM_SIZE;
+    strcpy (szCS1ResName_g, DRV_NAME);
+    strcat (szCS1ResName_g, "_CS1_PLD");
+
+    MCF_CSARn(1) = dwIoBase;
+    MCF_CSCRn(1) = 0x00100100;
+    MCF_CSMRn(1) = 1;
+
+    // allocate hardware ressource for CS1 (PLD)
+    TRACE2("IODRV:   CS1: request_mem_region(dwIoBase=0x%08lX, dwIoSize=%lu)...\n", dwIoBase, dwIoSize);
+    pCS1Ressource_g = request_mem_region (dwIoBase, dwIoSize, szCS1ResName_g);
+    TRACE1("IODRV:   pCS1Ressource = 0x%08lX\n", (DWORD)pCS1Ressource_g);
+    if (pCS1Ressource_g == NULL)
+    {
+        TRACE0("IODRV:   ERROR: Can't request memory region\n");
+        iRet = -EIO;
+        goto Exit;
+    }
+
+    TRACE1("IODRV:       Name  = '%s'\n",           pCS1Ressource_g->name);
+    TRACE1("IODRV:       Start = 0x%08lX\n", (DWORD)pCS1Ressource_g->start);
+    TRACE1("IODRV:       End   = 0x%08lX\n", (DWORD)pCS1Ressource_g->end);
+    TRACE1("IODRV:       Flags = 0x%08lX\n", (DWORD)pCS1Ressource_g->flags);
+
+    // get virtual pointer for access to this hardware ressource
+    TRACE2("IODRV:   ioremap(dwIoBase=0x%08lX, dwIoSize=%lu)...\n", pCS1Ressource_g->start, pCS1Ressource_g->end - pCS1Ressource_g->start + 1);
+    pCS1BaseAddr_g = ioremap_nocache (pCS1Ressource_g->start, pCS1Ressource_g->end - pCS1Ressource_g->start);
+    TRACE1("IODRV:   pCS1BaseAddr = 0x%08lX\n", (DWORD)pCS1BaseAddr_g);
+    if (pCS1BaseAddr_g == NULL)
+    {
+        TRACE0("IODRV:   ERROR: Can't request virtual pointer for hardware access\n");
+        iRet = -EIO;
+        goto Exit;
+    }
+
+
+
+    // check PLD Type ID
+    dwIoData = PLD_Read (PLD_REG_VERSION);
+    bCpuPldType = (BYTE) ((dwIoData & 0x0000000F) >>  0);
+    if (bCpuPldType != PLC_CORE_PLD_TYPE_ID)
+    {
+        printk("\n\npc5484drv - ERROR: Wrong PLD Type ID (expected=0x%02X, found=0x%02X)\n\n", PLC_CORE_PLD_TYPE_ID, (WORD)bCpuPldType);
+        TRACE2("IODRV:   ERROR: Wrong PLD Type ID (expected=0x%02X, found=0x%02X)\n", PLC_CORE_PLD_TYPE_ID, (WORD)bCpuPldType);
+
+        // old PLD firmware present
+        fOldPld_l = TRUE;
+//        iRet = -EIO;
+//        goto Exit;
+    }
+    else
+    {   // new PLD firmware present
+        fOldPld_l = FALSE;
+    }
+
+
+    // -------- I/O mapped periphery --------
+    // configure CS3 for memory mapped I/O periphery access
+    dwIoBase = CS3_IO_BASE_ADDR;
+    dwIoSize = CS3_IO_MEM_SIZE;
+    strcpy (szCS3ResName_g, DRV_NAME);
+    strcat (szCS3ResName_g, "_CS3_IO");
+
+    MCF_CSARn(3) = dwIoBase;
+    MCF_CSCRn(3) = 0x00100100;
+    MCF_CSMRn(3) = 1;       // dwIoSize;
+
+    // allocate hardware ressource for CS3 (memory mapped I/O periphery)
+    TRACE2("IODRV:   CS3: request_mem_region(dwIoBase=0x%08lX, dwIoSize=%lu)...\n", dwIoBase, dwIoSize);
+    pCS3Ressource_g = request_mem_region (dwIoBase, dwIoSize, szCS3ResName_g);
+    TRACE1("IODRV:   pCS3Ressource = 0x%08lX\n", (DWORD)pCS3Ressource_g);
+    if (pCS3Ressource_g == NULL)
+    {
+        TRACE0("IODRV:   ERROR: Can't request memory region\n");
+        iRet = -EIO;
+        goto Exit;
+    }
+
+    TRACE1("IODRV:       Name  = '%s'\n",           pCS3Ressource_g->name);
+    TRACE1("IODRV:       Start = 0x%08lX\n", (DWORD)pCS3Ressource_g->start);
+    TRACE1("IODRV:       End   = 0x%08lX\n", (DWORD)pCS3Ressource_g->end);
+    TRACE1("IODRV:       Flags = 0x%08lX\n", (DWORD)pCS3Ressource_g->flags);
+
+    // get virtual pointer for access to this hardware ressource
+    TRACE2("IODRV:   ioremap(dwIoBase=0x%08lX, dwIoSize=%lu)...\n", pCS3Ressource_g->start, pCS3Ressource_g->end - pCS3Ressource_g->start + 1);
+    pCS3BaseAddr_g = ioremap_nocache (pCS3Ressource_g->start, pCS3Ressource_g->end - pCS3Ressource_g->start);
+    TRACE1("IODRV:   pCS1BaseAddr = 0x%08lX\n", (DWORD)pCS3BaseAddr_g);
+    if (pCS3BaseAddr_g == NULL)
+    {
+        TRACE0("IODRV:   ERROR: Can't request virtual pointer for hardware access\n");
+        iRet = -EIO;
+        goto Exit;
+    }
+
+
+    //-------------------------------------------------------------------
+    // Step (2): Configure I/O periphery
     //-------------------------------------------------------------------
 
     // -------- Inputs --------
-    // (DI0 [Btn S0]):  PLD -> nothing to do here
+    TRACE0("IODRV:   Configure inputs...\n");
+    // (DI0 [Btn S0]):  PLD -> select DI function in PLC configuration register
+    // (DI8):           PLD -> select DI function in PLC configuration register
+    // (DI9):           PLD -> select DI function in PLC configuration register
+    // (DI10):          PLD -> select DI function in PLC configuration register
+    // ...
+    // (DI19):          PLD -> select DI function in PLC configuration register
+    // (DI20):          PLD -> select DI function in PLC configuration register
+    // (DI21):          PLD -> select DI function in PLC configuration register
+    // (DI23):          PLD -> select DI function in PLC configuration register
+    dwIoData = 0x00000000;              // select DI function for all inputs
+    PLD_Write (PLD_REG_DI_FUNC, dwIoData);
 
     #ifndef PCB_4158_DI1_4_VIA_CS3      // JP300 must be closed
     {
@@ -1039,23 +1200,42 @@ int    iRet;
         MCF_GPIO_PDDR_PCIBR &= 0xFC;    // set PCI_BR0/1 direction bits to input
         MCF_GPIO_PAR_PCIBR  &= 0xFFF0;  // set PCI_BR0/1 to general purpose I/O
 
-        //  DI3 [Btn S3]:   TIN1 = GPIO = I -> nothing to do, I-values in Reg. GSR
+        //  DI3 [Btn S3]:   TIN1 = GPIO = I -> nothing to do, is always GPIO
 
-        //  DI4 [Btn S4]:   /IRQ7 = EPDD7 = I
-        MCF_EPIER       &= 0x7F;        // disable interrupts from IRQ7
-        MCF_EPPAR       &= 0x3FFF;      // set EPPA7 resp. IRQ7 to level-sensitive
-        MCF_EPORT_EPDDR &= 0x7F;        // set EPDD7 resp. IRQ7 direction bits to input
+        if (fOldPld_l != FALSE)
+        {
+        //  DI4 [Btn S4]:   /IRQ7 = EPDD7 = I (until 4158.4)
+            MCF_EPIER       &= 0x7F;        // disable interrupts from IRQ7
+            MCF_EPPAR       &= 0x3FFF;      // set EPPA7 resp. IRQ7 to level-sensitive
+            MCF_EPORT_EPDDR &= 0x7F;        // set EPDD7 resp. IRQ7 direction bits to input
+        }
+        else
+        {
+
+            //  DI4 [Btn S4]:   TIN3 = GPIO = I (since 4158.5)
+            MCF_GPIO_PAR_TIMER |= 0x30;     // set Timer3 to simple GPIO
+        }
+
+
     }
     #endif  // #ifndef PCB_4158_DI1_4_VIA_CS3
 
     //  DI5:            /IRQ6 = EPDD6 = I
-    //  DI6:            /IRQ5 = EPDD5 = I
-    MCF_EPIER              &= 0x9F;     // disable interrupts from IRQ6/5
+    //  DI6:            /IRQ5 = EPDD5 = I (until 4158.4)
+    //  DI7:            /IRQ7 = EPDD7 = I (since 4158.5)
+    MCF_EPIER              &= 0x1F;     // disable interrupts from IRQ6/5
     MCF_GPIO_PAR_FECI2CIRQ |= 0x0003;   // configure IRQ6/5 pins for GPIO
-    MCF_EPPAR              &= 0xC3FF;   // set EPPA6/5 resp. IRQ6/5 to level-sensitive
-    MCF_EPORT_EPDDR        &= 0x9F;     // set EPDD6/5 resp. IRQ6/5 direction bits to input
+    MCF_EPPAR              &= 0x03FF;   // set EPPA6/5 resp. IRQ6/5 to level-sensitive
+    MCF_EPORT_EPDDR &= 0x1F;            // set EPDD7/6/5 resp. IRQ7/6/5 direction bits to input
 
-    //  DI7:            TIN0 = GPIO = I -> nothing to do, I-values in Reg. GSR
+    //  DI7:            TIN0 = GPIO = I -> nothing to do, I-values in Reg. GSR (until 4158.4)
+
+    if (fOldPld_l != FALSE)
+    {
+        //  DI6:            /PSC3_RTS = PSC_IO6 = I
+        MCF_GPIO_PDDR_PSC3PSC2 &= (!MCF_GPIO_PDDR_PSC3PSC2_PDDRPSC3PSC26); // set PPSC1PSC26 direction bits to input
+        MCF_GPIO_PAR_PSC3 &= 0xCF; // PSC3_RTS defined as GPIO
+    }
 
     // (DI8):           PLD -> nothing to do here
     // (DI9):           PLD -> nothing to do here
@@ -1069,9 +1249,28 @@ int    iRet;
     MCF_GPIO_PDDR_PSC1PSC0 &= 0xBD;     // set PPSC1PSC06 direction bits to input
     MCF_GPIO_PAR_PSC1      &= 0xCF;     // set PSC1RTS to general purpose I/O (PPSC1PSC06)
 
+    // (DI23):          PLD -> nothing to do here
+
 
     // -------- Outputs --------
+    TRACE0("IODRV:   Configure outputs...\n");
     // (DO0 [Btn S0]):  PLD -> nothing to do here
+    // (DO8):           PLD -> nothing to do here
+    // (DO9):           PLD -> nothing to do here
+    // (DO10):          PLD -> nothing to do here
+    // ...
+    // (DO19):          PLD -> nothing to do here
+    // (DO20):          PLD -> nothing to do here
+    // (DO21):          PLD -> nothing to do here
+    dwIoData = 0x00000000;              // set data bits to off
+    TRACE1("IODRV:   [PLD_REG_DO_STATE]   = 0x%08lX\n", dwIoData);
+    PLD_Write (PLD_REG_DO_STATE, dwIoData);
+
+    PLD_Write (PLD_REG_DO_FUNC, 0x00000000);
+
+    dwIoData = 0x003FFF01;              // enable outputs
+    TRACE1("IODRV:   [PLD_REG_DO_ENABLE]  = 0x%08lX\n", dwIoData);
+    PLD_Write (PLD_REG_DO_ENABLE, dwIoData);
 
     #ifndef PCB_4158_DO1_4_VIA_CS3      // Jumper 302 must be set to 2-3
     {
@@ -1108,9 +1307,9 @@ int    iRet;
     // (DO9):           PLD -> nothing to do here
     // (DO10):          PLD -> nothing to do here
     // ...
+    // (DO19):          PLD -> nothing to do here
+    // (DO20):          PLD -> nothing to do here
     // (DO21):          PLD -> nothing to do here
-    // (DO22):          PLD -> nothing to do here
-    // (DO23):          PLD -> nothing to do here
 
 
     // -------- Run-/Error-LED --------
@@ -1120,7 +1319,7 @@ int    iRet;
     MCF_GPIO_PDDR_PCIBR |= 0x0C;        // set PCI_BR2/3 direction bits to output
     MCF_GPIO_PAR_PCIBR  &= 0xFF0F;      // set PCI_BR2/3 to general purpose I/O
 
-
+/*
     //-------------------------------------------------------------------
     // Step (2): Configure memory maped based I/O periphery
     //-------------------------------------------------------------------
@@ -1202,7 +1401,7 @@ int    iRet;
         iRet = -EIO;
         goto Exit;
     }
-
+*/
 
 Exit:
 
@@ -1359,25 +1558,18 @@ int  PLCcoreCF54DrvCmdGetHardwareInfo (
     tCF54HwInfo* pCF54HwInfo_p)
 {
 
-DWORD  dwIoData;
+volatile DWORD  dwIoData;
 WORD   wCpuPldVersion;
 BYTE   bCpuPldRevision;
 BYTE   bCpuPldType;
-BYTE   bIoHwId;
+BYTE  bCpuPcbRevision;
+BYTE  bCpuPcbHwId;
+BYTE  bIoPcbHwId;
 WORD   wCfgDriver;
 int    iRet;
 
 
     TRACE0("IODRV: + cf54basio#PLCcoreCF54DrvCmdGetHardwareInfo...\n");
-
-
-    dwIoData        = *(DWORD*)(pCS1BaseAddr_g+0x04);
-    wCpuPldVersion  =  (WORD) ((dwIoData & 0x000000F0) >> 4);
-    bCpuPldRevision =  (BYTE) ((dwIoData & 0x0000000F) >> 0);
-    bCpuPldType     =  (BYTE) ((dwIoData & 0x0000000F) >> 8);
-
-    dwIoData = *(DWORD*)pCS3BaseAddr_g;
-    bIoHwId  =  (BYTE) ((dwIoData & 0x000F0000) >> 16);
 
 
     //---------------------------------------------------------------
@@ -1405,32 +1597,85 @@ int    iRet;
     //---------------------------------------------------------------
     #elif (PCB_VER == 4158-1)
     {
-        wCfgDriver = 0;
+        if (fOldPld_l != FALSE)
+        {
+            wCfgDriver = 0;
 
-        #ifdef PCB_4158_DI1_4_VIA_CS3
-            wCfgDriver |= CFG_4158_DI1_4_VIA_CS3;   // JP300 can be opend
-        #endif
+            #ifdef PCB_4158_DI1_4_VIA_CS3
+                wCfgDriver |= CFG_4158_DI1_4_VIA_CS3;   // JP300 can be opend
+            #endif
 
-        #ifdef PCB_4158_DO1_4_VIA_CS3
-            wCfgDriver |= CFG_4158_DO1_4_VIA_CS3;   // JP302 must be set to 1-2
-        #endif
+            #ifdef PCB_4158_DO1_4_VIA_CS3
+                wCfgDriver |= CFG_4158_DO1_4_VIA_CS3;   // JP302 must be set to 1-2
+            #endif
+
+            dwIoData        = *(DWORD*)(pCS1BaseAddr_g+0x04);
+            wCpuPldVersion  =  (WORD) ((dwIoData & 0x000000F0) >> 4);
+            bCpuPldRevision =  (BYTE) ((dwIoData & 0x0000000F) >> 0);
+            bCpuPldType     =  (BYTE) ((dwIoData & 0x0000000F) >> 8);
+
+            dwIoData = *(DWORD*)pCS3BaseAddr_g;
+            bIoPcbHwId  =  (BYTE) ((dwIoData & 0x000F0000) >> 16);
 
 
-        pCF54HwInfo_p->m_wCpuPcbVersion  = 4152;
-        pCF54HwInfo_p->m_bCpuPcbRevision = 0;
-        pCF54HwInfo_p->m_bCpuHwId        = 0x00;
-        pCF54HwInfo_p->m_wCpuPldVersion  = wCpuPldVersion;
-        pCF54HwInfo_p->m_bCpuPldRevision = bCpuPldRevision;
-        pCF54HwInfo_p->m_bCpuPldType     = bCpuPldType;
-        pCF54HwInfo_p->m_wIoPcbVersion   = 4158;
-        pCF54HwInfo_p->m_bIoPcbRevision  = bIoHwId;
-        pCF54HwInfo_p->m_bIoHwId         = bIoHwId;
-        pCF54HwInfo_p->m_wCfgDriver      = wCfgDriver;
+            pCF54HwInfo_p->m_wCpuPcbVersion  = 4152;
+            pCF54HwInfo_p->m_bCpuPcbRevision = 0;
+            pCF54HwInfo_p->m_bCpuHwId        = 0x00;
+            pCF54HwInfo_p->m_wCpuPldVersion  = wCpuPldVersion;
+            pCF54HwInfo_p->m_bCpuPldRevision = bCpuPldRevision;
+            pCF54HwInfo_p->m_bCpuPldType     = bCpuPldType;
+            pCF54HwInfo_p->m_wIoPcbVersion   = 4158;
+            pCF54HwInfo_p->m_bIoPcbRevision  = bIoPcbHwId;
+            pCF54HwInfo_p->m_bIoHwId         = bIoPcbHwId;
+            pCF54HwInfo_p->m_wCfgDriver      = wCfgDriver;
 
-        iRet = CF54DRV_RES_OK;
+            iRet = CF54DRV_RES_OK;
+        }
+        else
+        {
+            // since 4158.5
+            dwIoData        = PLD_Read (PLD_REG_VERSION);
+            bCpuPldType     =  (BYTE) ((dwIoData & 0x0000000F) >>  0);
+            bCpuPldRevision =  (BYTE) ((dwIoData & 0x000000F0) >>  4);
+            wCpuPldVersion  =  (WORD) ((dwIoData & 0x00000F00) >>  8);
+            bCpuPcbRevision =  (BYTE) ((dwIoData & 0x000F0000) >> 16);
+            bCpuPcbHwId     =  (BYTE) ((dwIoData & 0x00F00000) >> 20);
+
+            TRACE1("IODRV:   [PLD_REG_VERSION] = 0x%08lX\n", dwIoData);
+
+
+            dwIoData   = *(volatile DWORD*)pCS3BaseAddr_g;
+            bIoPcbHwId =  (BYTE) ((dwIoData & 0x000F0000) >> 16);
+
+
+            wCfgDriver = 0;
+
+            #ifdef PCB_4158_DI1_4_VIA_CS3
+                wCfgDriver |= CFG_4158_DI1_4_VIA_CS3;   // JP300 can be opend
+            #endif
+
+            #ifdef PCB_4158_DO1_4_VIA_CS3
+                wCfgDriver |= CFG_4158_DO1_4_VIA_CS3;   // JP302 must be set to 1-2
+            #endif
+
+
+            pCF54HwInfo_p->m_wCpuPcbVersion  = CPU_PCB_VER;
+            pCF54HwInfo_p->m_bCpuPcbRevision = bCpuPcbRevision;
+//            pCF54HwInfo_p->m_bCpuPcbHwId     = bCpuPcbHwId;
+            pCF54HwInfo_p->m_wCpuPldVersion  = wCpuPldVersion;
+            pCF54HwInfo_p->m_bCpuPldRevision = bCpuPldRevision;
+            pCF54HwInfo_p->m_bCpuPldType     = bCpuPldType;
+            pCF54HwInfo_p->m_wIoPcbVersion   = IO_PCB_VER;
+            pCF54HwInfo_p->m_bIoPcbRevision  = bIoPcbHwId;
+//            pCF54HwInfo_p->m_bIoPcbHwId      = bIoPcbHwId;
+            pCF54HwInfo_p->m_wCfgDriver      = wCfgDriver;
+
+            iRet = CF54DRV_RES_OK;
+        }
     }
     #endif
     //---------------------------------------------------------------
+
 
 
     TRACE1("IODRV: - cf54basio#PLCcoreCF54DrvCmdGetHardwareInfo (iRet=%d)\n", iRet);
@@ -1439,6 +1684,14 @@ int    iRet;
 }
 
 
+
+
+
+//-------------------------------------------------------------------------//
+//                                                                         //
+//          U N I T:    O P E R A T O R   C O N T R O L S                  //
+//                                                                         //
+//-------------------------------------------------------------------------//
 
 //---------------------------------------------------------------------------
 //  Handler for command "CF54DRV_CMD_SET_RUN_LED"
@@ -1514,7 +1767,8 @@ int  PLCcoreCF54DrvCmdGetRSMSwitch (
     BYTE* pbRSMSwitch_p)
 {
 
-BYTE   bCurrRSMSwitch;
+volatile DWORD  dwIoData;
+BYTE   bRSMSwitch;
 DWORD  dwTmp;
 int    iRet;
 
@@ -1522,127 +1776,159 @@ int    iRet;
     TRACE0("IODRV: + cf54basio#PLCcoreCF54DrvCmdGetRSMSwitch...\n");
 
 
-    // read switch
-    dwTmp = *(DWORD*)pCS1BaseAddr_g;
-    dwTmp = (dwTmp & 0xC0000000) >> 30;
-    switch (dwTmp)
+    // read switch (until 4158.4)
+    if (fOldPld_l != FALSE)
     {
-        case 1:     bCurrRSMSwitch = SWITCH_STOP;   break;
-        case 2:     bCurrRSMSwitch = SWITCH_MRES;   break;
-        default:    bCurrRSMSwitch = SWITCH_RUN;    break;
-    }
-
-    // initialize <bLastRSMSwitch_l> in first cycle with real value
-    if (bLastRSMSwitch_l == 0xFF)
-    {
-        bLastRSMSwitch_l = bCurrRSMSwitch;
-    }
-
-
-    //-----------------------------------------------------------
-    //  debouncing mode
-    //-----------------------------------------------------------
-    if (dwDebounceInterval_l > 0)
-    {
-        // debounce time elapsed?
-        if ((PLCcoreCF54DrvGetTickCount() - dwDebounceStartTime_l) >= dwDebounceInterval_l)
+        dwTmp = *(volatile DWORD*)pCS1BaseAddr_g;
+        dwTmp = (dwTmp & 0xC0000000) >> 30;
+        switch (dwTmp)
         {
-            // debounce time elapsed -> return new stable value
-            bLastRSMSwitch_l = bCurrRSMSwitch;
+            case 1:     bRSMSwitch = SWITCH_STOP;   break;
+            case 2:     bRSMSwitch = SWITCH_MRES;   break;
+            default:    bRSMSwitch = SWITCH_RUN;    break;
+        }
 
-            // stop debounce state
-            dwDebounceInterval_l  = 0;
-            dwDebounceStartTime_l = 0;
+        // initialize <bLastRSMSwitch_l> in first cycle with real value
+        if (bLastRSMSwitch_l == 0xFF)
+        {
+            bLastRSMSwitch_l = bRSMSwitch;
+        }
+
+
+        //-----------------------------------------------------------
+        //  debouncing mode
+        //-----------------------------------------------------------
+        if (dwDebounceInterval_l > 0)
+        {
+            // debounce time elapsed?
+            if ((PLCcoreCF54DrvGetTickCount() - dwDebounceStartTime_l) >= dwDebounceInterval_l)
+            {
+                // debounce time elapsed -> return new stable value
+                bLastRSMSwitch_l = bRSMSwitch;
+
+                // stop debounce state
+                dwDebounceInterval_l  = 0;
+                dwDebounceStartTime_l = 0;
+            }
+            else
+            {
+                // debounce interval still running -> return last stable state
+                bRSMSwitch = bLastRSMSwitch_l;
+            }
+
+            goto Exit;
+        }
+
+
+        //-----------------------------------------------------------
+        //  normal operation mode
+        //-----------------------------------------------------------
+        // is switch position always the same since last call?
+        if (bRSMSwitch == bLastRSMSwitch_l)
+        {
+            // return current = last stable state
+            goto Exit;
+        }
+
+
+        // evaluate last stable state to process current state in correct way
+        switch (bLastRSMSwitch_l)
+        {
+            //-------------------------------------------------------
+            // last state was RUN, current state can be STOP or MRES
+            case SWITCH_RUN:
+            {
+                // set current state valid (must be STOP or MRES)
+                bLastRSMSwitch_l = bRSMSwitch;
+                break;
+            }
+
+
+            //-------------------------------------------------------
+            // last state was STOP, current state can be RUN or MRES
+            case SWITCH_STOP:
+            {
+                // state change STOP -> RUN ?
+                if (bRSMSwitch == SWITCH_RUN)
+                {
+                    // start debounce state
+                    dwDebounceInterval_l  = RSM_SWITCH_DEBOUNCE_TIME1;
+                    dwDebounceStartTime_l = PLCcoreCF54DrvGetTickCount();
+
+                    // return meanwhile last stable state
+                    bRSMSwitch = bLastRSMSwitch_l;
+                }
+                else
+                {
+                    // set current state valid (must be MRES)
+                    bLastRSMSwitch_l = bRSMSwitch;
+                }
+                break;
+            }
+
+
+            //-------------------------------------------------------
+            // last state was MRES, current state can be STOP or RUN
+            case SWITCH_MRES:
+            {
+                // state change STOP -> RUN ?
+                if (bRSMSwitch == SWITCH_RUN)
+                {
+                    // normally the direct change from MRES to RUN
+                    // is impossible for the used 3-state-switch type,
+                    // however, detecting the STOP state in polling
+                    // mode is also unsave
+                    // -> start a long debounce time in the hope to
+                    //    supress temorary sates
+                    dwDebounceInterval_l  = RSM_SWITCH_DEBOUNCE_TIME2;
+                    dwDebounceStartTime_l = PLCcoreCF54DrvGetTickCount();
+
+                    // return meanwhile last stable state
+                    bRSMSwitch = bLastRSMSwitch_l;
+                }
+                else
+                {
+                    // set current state valid (must be STOP)
+                    bLastRSMSwitch_l = bRSMSwitch;
+                }
+                break;
+            }
+        }
+    }
+    else
+    {
+        // read switch (since 4158.5)
+        dwIoData = PLD_Read (PLD_REG_AUX);
+        TRACE1("IODRV:   [PLD_REG_AUX] = 0x%08lX\n", dwIoData);
+
+
+        // decode switch position
+        if (dwIoData & 0x80000000)
+        {
+            bRSMSwitch = SWITCH_RUN;
+        }
+        else if (dwIoData & 0x40000000)
+        {
+            bRSMSwitch = SWITCH_STOP;
+        }
+        else if (dwIoData & 0x20000000)
+        {
+            bRSMSwitch = SWITCH_MRES;
         }
         else
         {
-            // debounce interval still running -> return last stable state
-            bCurrRSMSwitch = bLastRSMSwitch_l;
+            bRSMSwitch = bLastRSMSwitch_l;
         }
 
-        goto Exit;
-    }
+        // save last valid switsch position
+        bLastRSMSwitch_l = bRSMSwitch;
 
-
-    //-----------------------------------------------------------
-    //  normal operation mode
-    //-----------------------------------------------------------
-    // is switch position always the same since last call?
-    if (bCurrRSMSwitch == bLastRSMSwitch_l)
-    {
-        // return current = last stable state
-        goto Exit;
-    }
-
-
-    // evaluate last stable state to process current state in correct way
-    switch (bLastRSMSwitch_l)
-    {
-        //-------------------------------------------------------
-        // last state was RUN, current state can be STOP or MRES
-        case SWITCH_RUN:
-        {
-            // set current state valid (must be STOP or MRES)
-            bLastRSMSwitch_l = bCurrRSMSwitch;
-            break;
-        }
-
-
-        //-------------------------------------------------------
-        // last state was STOP, current state can be RUN or MRES
-        case SWITCH_STOP:
-        {
-            // state change STOP -> RUN ?
-            if (bCurrRSMSwitch == SWITCH_RUN)
-            {
-                // start debounce state
-                dwDebounceInterval_l  = RSM_SWITCH_DEBOUNCE_TIME1;
-                dwDebounceStartTime_l = PLCcoreCF54DrvGetTickCount();
-
-                // return meanwhile last stable state
-                bCurrRSMSwitch = bLastRSMSwitch_l;
-            }
-            else
-            {
-                // set current state valid (must be MRES)
-                bLastRSMSwitch_l = bCurrRSMSwitch;
-            }
-            break;
-        }
-
-
-        //-------------------------------------------------------
-        // last state was MRES, current state can be STOP or RUN
-        case SWITCH_MRES:
-        {
-            // state change STOP -> RUN ?
-            if (bCurrRSMSwitch == SWITCH_RUN)
-            {
-                // normally the direct change from MRES to RUN
-                // is impossible for the used 3-state-switch type,
-                // however, detecting the STOP state in polling
-                // mode is also unsave
-                // -> start a long debounce time in the hope to
-                //    supress temorary sates
-                dwDebounceInterval_l  = RSM_SWITCH_DEBOUNCE_TIME2;
-                dwDebounceStartTime_l = PLCcoreCF54DrvGetTickCount();
-
-                // return meanwhile last stable state
-                bCurrRSMSwitch = bLastRSMSwitch_l;
-            }
-            else
-            {
-                // set current state valid (must be STOP)
-                bLastRSMSwitch_l = bCurrRSMSwitch;
-            }
-            break;
-        }
     }
 
 
 Exit:
 
-    *pbRSMSwitch_p = bCurrRSMSwitch;
+    *pbRSMSwitch_p = bRSMSwitch;
     iRet = CF54DRV_RES_OK;
 
 
@@ -1683,7 +1969,7 @@ int    iRet;
         DWORD  dwTmp;
 
         // HexNumber (S307/S306)
-        dwTmp = *(DWORD*)pCS3BaseAddr_g;
+        dwTmp = *(volatile DWORD*)pCS3BaseAddr_g;
         bHexSwitch = (dwTmp & 0x000000FF);
         iRet = CF54DRV_RES_OK;
     }
@@ -1721,7 +2007,7 @@ int    iRet;
     #if (PCB_VER == 4160-0)
     {
         // DIP-Switch 1-8
-        dwTmp = *(DWORD*)pCS1BaseAddr_g;
+        dwTmp = *(volatile DWORD*)pCS1BaseAddr_g;
         dwTmp = (dwTmp & 0x3fc00000) >> 22;
         bDipSwitch = (BYTE)dwTmp;
     }
@@ -1730,7 +2016,7 @@ int    iRet;
     #elif (PCB_VER == 4158-1)
     {
         // DIP-Switch 1-8
-        dwTmp = *(DWORD*)pCS3BaseAddr_g;
+        dwTmp = *(volatile DWORD*)pCS3BaseAddr_g;
         dwTmp = (dwTmp & 0x0000FF00) >> 8;
         bDipSwitch = (BYTE)dwTmp;
     }
@@ -1748,6 +2034,14 @@ int    iRet;
 }
 
 
+
+
+
+//-------------------------------------------------------------------------//
+//                                                                         //
+//          U N I T:    D I G I T A L   I N / O U T                        //
+//                                                                         //
+//-------------------------------------------------------------------------//
 
 //---------------------------------------------------------------------------
 //  Handler for command "CF54DRV_CMD_GET_DIGI_IN"
@@ -1798,9 +2092,16 @@ int    iRet;
         DWORD  dwIoData;
         BYTE   bTmp;
 
-        // DI0 (Btn S0), DI8...DI21
-        dwIoData = *(DWORD*)(pCS1BaseAddr_g+0x08);
-
+        if (fOldPld_l != FALSE)
+        {
+            // DI0 (Btn S0), DI8...DI21 (until 4158.4)
+            dwIoData = *(volatile DWORD*)(pCS1BaseAddr_g+0x08);
+        }
+        else
+        {
+            // DI0 (Btn S0), DI8...DI21, DI23 (since 4158.5)
+            dwIoData = PLD_Read (PLD_REG_DI_STATE);
+        }
 
         #ifndef PCB_4158_DI1_4_VIA_CS3          // Jumper 300 must be closed
         {
@@ -1813,19 +2114,31 @@ int    iRet;
                 dwIoData |= 0x00000008;
             }
 
-            // DI4 (Btn S4)
-            bTmp = MCF_EPORT_EPPDR;
-            if ( !(bTmp & 0x80) )               // DI4 = /IRQ7 = EPDD7
+            if (fOldPld_l != FALSE)
             {
-                dwIoData |= 0x00000010;
+                // DI4 (Btn S4) (until 4158.5)
+                bTmp = MCF_EPORT_EPPDR;
+                if ( !(bTmp & 0x80) )               // DI4 = /IRQ7 = EPDD7
+                {
+                    dwIoData |= 0x00000010;
+                }
             }
+            else
+            {
+                // DI4 (Btn S4) (since 4158.5)
+                if (MCF_GPT_GSR3 & MCF_GPT_GSR_PIN)     // DI4 = TIN3
+                {
+                    dwIoData |= 0x00000010;
+                }
+            }
+
         }
         #else                                   // Jumper 300 can be opend
         {
             DWORD  dwCS3Data;
 
             // DI1-DI4 (Btn S1-S4)
-            dwCS3Data  = *(DWORD*)pCS3BaseAddr_g;
+            dwCS3Data  = *(volatile DWORD*)pCS3BaseAddr_g;
             dwCS3Data  = (dwCS3Data & 0x00F00000) >> 19;
             dwIoData  |= dwCS3Data;
         }
@@ -1838,9 +2151,21 @@ int    iRet;
         {
             dwIoData |= 0x00000020;
         }
-        if ( !(bTmp & 0x20) )                   // DI6 = /IRQ5 = EPDD5
+        if (fOldPld_l != FALSE)
         {
-            dwIoData |= 0x00000040;
+            if ( !(bTmp & 0x20) )                   // DI6 = /IRQ5 = EPDD5 (until 4158.4)
+            {
+                dwIoData |= 0x00000040;
+            }
+        }
+        else
+        {
+            // DI6 (since 4158.5)
+            bTmp = MCF_GPIO_PPDSDR_PSC3PSC2;
+            if (bTmp & MCF_GPIO_PPDSDR_PSC3PSC2_PPDSDRPSC3PSC26)    // DI6 = PSC_RTS3
+            {
+                dwIoData |= 0x00000040;
+            }
         }
 
         // DI7
@@ -1908,7 +2233,7 @@ int  iRet;
         dwIoData  = (DWORD) (pDoData_p->m_bDoByte0 <<  0);
         dwIoData |= (DWORD) (pDoData_p->m_bDoByte1 <<  8);
         dwIoData |= (DWORD) (pDoData_p->m_bDoByte2 << 16);
-        //dwIoData |= (DWORD) (pDoData_p->m_bDoByte3 << 24);
+        dwIoData |= (DWORD) (pDoData_p->m_bDoByte3 << 24);
 
 
         #ifndef PCB_4158_DO1_4_VIA_CS3      // Jumper 302 must be set to 2-3
@@ -1921,10 +2246,10 @@ int  iRet;
             DWORD  dwCS3Data;
 
             // DO1-DO4 (LED D1-D4)
-            dwCS3Data  = *(DWORD*)pCS3BaseAddr_g;
+            dwCS3Data  = *(volatile DWORD*)pCS3BaseAddr_g;
             dwCS3Data &= 0xF0FFFFFF;
             dwCS3Data |= ((DWORD)(pDoData_p->m_bDoByte0 & 0x1E)) << 23;
-            *(DWORD*)pCS3BaseAddr_g = dwCS3Data;
+            *(volatile DWORD*)pCS3BaseAddr_g = dwCS3Data;
         }
         #endif  // #ifndef PCB_4158_DO1_4_VIA_CS3
 
@@ -1942,25 +2267,36 @@ int  iRet;
         // DO6
         if (dwIoData & 0x00000040)
         {
-    	    MCF_GPT_GMS3 |= 0x00000010;
+            MCF_GPT_GMS3 |= 0x00000010;
         }
         else
         {
-    	    MCF_GPT_GMS3 &= 0xFFFFFFEF;
+            MCF_GPT_GMS3 &= 0xFFFFFFEF;
         }
 
-    	// DO8
+        // DO8
         if (dwIoData & 0x00000080)
         {
-    	    MCF_GPT_GMS0 |= 0x00000010;
-		}
-		else
+            MCF_GPT_GMS0 |= 0x00000010;
+        }
+        else
         {
-    	    MCF_GPT_GMS0 &= 0xFFFFFFEF;
-		}
+            MCF_GPT_GMS0 &= 0xFFFFFFEF;
+        }
 
-        // DO0 (LED D0), DO8...DO23
-        *(DWORD*)(pCS1BaseAddr_g+0x0C) = dwIoData;
+        if (fOldPld_l != FALSE)
+        {
+            // DO0 (LED D0), DO8...DO23 (until 4158.4)
+            *(DWORD*)(pCS1BaseAddr_g+0x0C) = dwIoData;
+        }
+        else
+        {
+            // DO0 (LED D0), DO8...DO21 (since 4158.5)
+            dwIoData &= 0x003FFF01;
+            PLD_Write (PLD_REG_DO_STATE, dwIoData);
+        }
+
+
     }
     #endif
     //---------------------------------------------------------------

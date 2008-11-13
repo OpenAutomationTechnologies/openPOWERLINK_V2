@@ -1181,22 +1181,6 @@ tEplEventNmtStateChange NmtStateChange;
                             EPL_MCO_GLB_VAR(m_fTimerMsPreOp2) = FALSE;
                             EPL_MCO_GLB_VAR(m_fAllMandatoryCNIdent) = FALSE;
 
-                            // inform DLL about NMT state change, so that it can start the reduced cycle
-                            Event.m_EventSink = kEplEventSinkDllk;
-                            Event.m_EventType = kEplEventTypeDllkStartReducedCycle;
-                            EPL_MEMSET(&Event.m_NetTime, 0x00, sizeof(Event.m_NetTime));
-                            Event.m_pArg = NULL;
-                            Event.m_uiSize = 0;
-                            // d.k.: directly call DLLk process function, because
-                            //       1. execution of process function is still synchonized and serialized,
-                            //       2. it is the same as without event queues (i.e. well tested),
-                            //       3. DLLk will get those necessary events even if event queue is full
-                            //       4. event queue is very inefficient
-#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLK)) != 0)
-                            Ret = EplDllkProcess(&Event);
-#else
-                            Ret = EplEventkPost(&Event);
-#endif
                         }
                         break;
                     }

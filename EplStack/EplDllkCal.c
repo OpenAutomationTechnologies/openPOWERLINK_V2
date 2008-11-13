@@ -744,7 +744,7 @@ Exit:
 //
 //---------------------------------------------------------------------------
 
-tEplKernel EplDllkCalAsyncClearBuffer()
+tEplKernel EplDllkCalAsyncClearBuffer(void)
 {
 tEplKernel  Ret = kEplSuccessful;
 #ifndef EPL_NO_FIFO
@@ -758,7 +758,31 @@ tShbError   ShbError;
     EplDllkCalInstance_g.m_uiFrameSizeGen = 0;
 #endif
 
+//    EPL_MEMSET(&EplDllkCalInstance_g.m_Statistics, 0, sizeof (tEplDllkCalStatistics));
+    return Ret;
+}
+
+
+//---------------------------------------------------------------------------
+//
+// Function:    EplDllkCalAsyncClearQueues()
+//
+// Description: clears the transmit buffer
+//
+// Parameters:  (none)
+//
+// Returns:     tEplKernel              = error code
+//
+//
+// State:
+//
+//---------------------------------------------------------------------------
+
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
+tEplKernel EplDllkCalAsyncClearQueues(void)
+{
+tEplKernel  Ret = kEplSuccessful;
+
     // clear MN asynchronous queues
     EplDllkCalInstance_g.m_uiNextQueueCnRequest = 0;
     EplDllkCalInstance_g.m_uiNextRequestQueue = 0;
@@ -766,11 +790,11 @@ tShbError   ShbError;
     EplDllkCalInstance_g.m_uiWriteIdentReq = 0;
     EplDllkCalInstance_g.m_uiReadStatusReq = 0;
     EplDllkCalInstance_g.m_uiWriteStatusReq = 0;
-#endif
 
-//    EPL_MEMSET(&EplDllkCalInstance_g.m_Statistics, 0, sizeof (tEplDllkCalStatistics));
     return Ret;
 }
+#endif
+
 
 //---------------------------------------------------------------------------
 //
