@@ -508,10 +508,12 @@ EPL_OBD_BEGIN ()
         // process image is not enabled but master is enabled
 
         // output variables of master
-        EPL_OBD_BEGIN_INDEX_RAM(0x2000, 0x03, NULL)
-            EPL_OBD_SUBINDEX_RAM_VAR(0x2000, 0x00, 0x05, 0x01, tEplObdUnsigned8, number_of_entries, 0x2)
+        EPL_OBD_BEGIN_INDEX_RAM(0x2000, 0x05, NULL)
+            EPL_OBD_SUBINDEX_RAM_VAR(0x2000, 0x00, 0x05, 0x01, tEplObdUnsigned8, number_of_entries, 0x4)
             EPL_OBD_SUBINDEX_RAM_USERDEF(0x2000, 0x01, 0x05, 0x0B, tEplObdUnsigned8, Sendb1, 0x0)
             EPL_OBD_SUBINDEX_RAM_USERDEF(0x2000, 0x02, 0x05, 0x0B, tEplObdUnsigned8, Sendb2, 0x0)
+            EPL_OBD_SUBINDEX_RAM_USERDEF(0x2000, 0x03, 0x05, 0x0B, tEplObdUnsigned8, Sendb3, 0x0)
+            EPL_OBD_SUBINDEX_RAM_USERDEF(0x2000, 0x04, 0x05, 0x0B, tEplObdUnsigned8, Sendb4, 0x0)
         EPL_OBD_END_INDEX(0x2000)
 
         // input variables of master

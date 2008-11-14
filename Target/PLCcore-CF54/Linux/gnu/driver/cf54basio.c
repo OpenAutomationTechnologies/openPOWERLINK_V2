@@ -275,7 +275,7 @@ static BYTE*             pCS3BaseAddr_g;
 static BYTE   bLastRSMSwitch_l      = 0xFF;
 static DWORD  dwDebounceInterval_l  = 0;
 static DWORD  dwDebounceStartTime_l = 0;
-static BOOL   fOldPld_l = FALSE;
+static unsigned int uiPldVer_l = 0;
 
 
 //---------------------------------------------------------------------------
@@ -321,6 +321,7 @@ EXPORT_SYMBOL(PLCcoreCF54DrvCmdSetDigiOut);
 
 #ifdef _CFG_PROCFS_
     static  int  PLCcoreCF54DrvProcRead (char* pcBuffer_p, char** ppcStart_p, off_t Offset_p, int nBufferSize_p, int* pEof_p, void* pData_p);
+    static int PLCcoreCF54DrvProcWrite(struct file *file, const char __user *buffer, unsigned long count, void *data);
 #endif
 
 
@@ -616,7 +617,7 @@ int  iRet;
         if (pProcDirEntry != NULL)
         {
             pProcDirEntry->read_proc  = PLCcoreCF54DrvProcRead;
-            pProcDirEntry->write_proc = NULL;
+            pProcDirEntry->write_proc = PLCcoreCF54DrvProcWrite;
             pProcDirEntry->data       = (void*) (DWORD)nMinorNumber;
 
             TRACE1("IODRV:   Device node '/proc/%s' created successful.\n", DEV_NAME);
@@ -1126,13 +1127,13 @@ int    iRet;
         TRACE2("IODRV:   ERROR: Wrong PLD Type ID (expected=0x%02X, found=0x%02X)\n", PLC_CORE_PLD_TYPE_ID, (WORD)bCpuPldType);
 
         // old PLD firmware present
-        fOldPld_l = TRUE;
+        uiPldVer_l = 0;
 //        iRet = -EIO;
 //        goto Exit;
     }
     else
     {   // new PLD firmware present
-        fOldPld_l = FALSE;
+        uiPldVer_l = ((dwIoData & 0x00000F00) >>  8);
     }
 
 
@@ -1202,7 +1203,7 @@ int    iRet;
 
         //  DI3 [Btn S3]:   TIN1 = GPIO = I -> nothing to do, is always GPIO
 
-        if (fOldPld_l != FALSE)
+        if (uiPldVer_l <= 2)
         {
         //  DI4 [Btn S4]:   /IRQ7 = EPDD7 = I (until 4158.4)
             MCF_EPIER       &= 0x7F;        // disable interrupts from IRQ7
@@ -1230,7 +1231,7 @@ int    iRet;
 
     //  DI7:            TIN0 = GPIO = I -> nothing to do, I-values in Reg. GSR (until 4158.4)
 
-    if (fOldPld_l != FALSE)
+    if (uiPldVer_l == 0)
     {
         //  DI6:            /PSC3_RTS = PSC_IO6 = I
         MCF_GPIO_PDDR_PSC3PSC2 &= (!MCF_GPIO_PDDR_PSC3PSC2_PDDRPSC3PSC26); // set PPSC1PSC26 direction bits to input
@@ -1597,7 +1598,7 @@ int    iRet;
     //---------------------------------------------------------------
     #elif (PCB_VER == 4158-1)
     {
-        if (fOldPld_l != FALSE)
+        if (uiPldVer_l == 0)
         {
             wCfgDriver = 0;
 
@@ -1661,13 +1662,13 @@ int    iRet;
 
             pCF54HwInfo_p->m_wCpuPcbVersion  = CPU_PCB_VER;
             pCF54HwInfo_p->m_bCpuPcbRevision = bCpuPcbRevision;
-//            pCF54HwInfo_p->m_bCpuPcbHwId     = bCpuPcbHwId;
+            pCF54HwInfo_p->m_bCpuHwId        = bCpuPcbHwId;
             pCF54HwInfo_p->m_wCpuPldVersion  = wCpuPldVersion;
             pCF54HwInfo_p->m_bCpuPldRevision = bCpuPldRevision;
             pCF54HwInfo_p->m_bCpuPldType     = bCpuPldType;
             pCF54HwInfo_p->m_wIoPcbVersion   = IO_PCB_VER;
             pCF54HwInfo_p->m_bIoPcbRevision  = bIoPcbHwId;
-//            pCF54HwInfo_p->m_bIoPcbHwId      = bIoPcbHwId;
+            pCF54HwInfo_p->m_bIoHwId         = bIoPcbHwId;
             pCF54HwInfo_p->m_wCfgDriver      = wCfgDriver;
 
             iRet = CF54DRV_RES_OK;
@@ -1776,8 +1777,8 @@ int    iRet;
     TRACE0("IODRV: + cf54basio#PLCcoreCF54DrvCmdGetRSMSwitch...\n");
 
 
-    // read switch (until 4158.4)
-    if (fOldPld_l != FALSE)
+    // read switch (until 4158.2/3)
+    if (uiPldVer_l == 0)
     {
         dwTmp = *(volatile DWORD*)pCS1BaseAddr_g;
         dwTmp = (dwTmp & 0xC0000000) >> 30;
@@ -2092,14 +2093,14 @@ int    iRet;
         DWORD  dwIoData;
         BYTE   bTmp;
 
-        if (fOldPld_l != FALSE)
+        if (uiPldVer_l == 0)
         {
-            // DI0 (Btn S0), DI8...DI21 (until 4158.4)
+            // DI0 (Btn S0), DI8...DI21 (until 4158.2)
             dwIoData = *(volatile DWORD*)(pCS1BaseAddr_g+0x08);
         }
         else
         {
-            // DI0 (Btn S0), DI8...DI21, DI23 (since 4158.5)
+            // DI0 (Btn S0), DI8...DI21, DI23 (since 4158.4)
             dwIoData = PLD_Read (PLD_REG_DI_STATE);
         }
 
@@ -2114,9 +2115,9 @@ int    iRet;
                 dwIoData |= 0x00000008;
             }
 
-            if (fOldPld_l != FALSE)
+            if (uiPldVer_l <= 2)
             {
-                // DI4 (Btn S4) (until 4158.5)
+                // DI4 (Btn S4) (until 4158.4 / PLD-Ver 2)
                 bTmp = MCF_EPORT_EPPDR;
                 if ( !(bTmp & 0x80) )               // DI4 = /IRQ7 = EPDD7
                 {
@@ -2151,7 +2152,7 @@ int    iRet;
         {
             dwIoData |= 0x00000020;
         }
-        if (fOldPld_l != FALSE)
+        if (uiPldVer_l == 0)
         {
             if ( !(bTmp & 0x20) )                   // DI6 = /IRQ5 = EPDD5 (until 4158.4)
             {
@@ -2284,14 +2285,14 @@ int  iRet;
             MCF_GPT_GMS0 &= 0xFFFFFFEF;
         }
 
-        if (fOldPld_l != FALSE)
+        if (uiPldVer_l == 0)
         {
-            // DO0 (LED D0), DO8...DO23 (until 4158.4)
+            // DO0 (LED D0), DO8...DO23 (until 4158.2)
             *(DWORD*)(pCS1BaseAddr_g+0x0C) = dwIoData;
         }
         else
         {
-            // DO0 (LED D0), DO8...DO21 (since 4158.5)
+            // DO0 (LED D0), DO8...DO21 (since 4158.4)
             dwIoData &= 0x003FFF01;
             PLD_Write (PLD_REG_DO_STATE, dwIoData);
         }
@@ -2348,9 +2349,14 @@ static  int  PLCcoreCF54DrvProcRead (
     void* pData_p)
 {
 
-tCF54HwInfo  CF54HwInfo;
-int          nSize;
-int          Eof;
+tCF54HwInfo CF54HwInfo;
+int         nSize;
+int         Eof;
+int         iRet;
+BYTE        bValue;
+tCF54DigiIn CF54DigiIn;
+DWORD       dwReg0;
+DWORD       dwReg1;
 
 
     TRACE2("IODRV: + cf54basio#PLCcoreCF54DrvProcRead (Offset_p=%d, nBufferSize_p=%d)...\n", (int)Offset_p, nBufferSize_p);
@@ -2381,11 +2387,17 @@ int          Eof;
                        (WORD)CF54HwInfo.m_wCpuPcbVersion,
                        (WORD)CF54HwInfo.m_bCpuPcbRevision,
                        (WORD)CF54HwInfo.m_bCpuHwId);
+
+    dwReg0 = PLD_Read (PLD_REG_VERSION);
+    dwReg1 = PLD_Read (0x04);
     nSize += snprintf (pcBuffer_p + nSize, nBufferSize_p - nSize,
-                       "           CPU PLD:     %u.%02u    (#%02XH)\n",
+                       "           CPU PLD:     %u.%02u    (#%02XH)"
+                       "    (Reg0=%lXH, Reg1=%lXH)\n",
                        (WORD)CF54HwInfo.m_wCpuPldVersion,
                        (WORD)CF54HwInfo.m_bCpuPldRevision,
-                       (WORD)CF54HwInfo.m_bCpuPldType);
+                       (WORD)CF54HwInfo.m_bCpuPldType,
+                       dwReg0,
+                       dwReg1);
     nSize += snprintf (pcBuffer_p + nSize, nBufferSize_p - nSize,
                        "           IO Board:    %u.%02u (#%02XH)\n",
                        (WORD)CF54HwInfo.m_wIoPcbVersion,
@@ -2400,6 +2412,33 @@ int          Eof;
     // generate process information
     //---------------------------------------------------------------
 
+    iRet = PLCcoreCF54DrvCmdGetDipSwitch(&bValue);
+
+    nSize += snprintf (pcBuffer_p + nSize, nBufferSize_p - nSize,
+                       "DipSwitch:              %02XH\n",
+                       (WORD)bValue);
+
+    iRet = PLCcoreCF54DrvCmdGetHexSwitch(&bValue);
+
+    nSize += snprintf (pcBuffer_p + nSize, nBufferSize_p - nSize,
+                       "HexSwitch:              %02X\n",
+                       (WORD)bValue);
+
+    iRet = PLCcoreCF54DrvCmdGetRSMSwitch(&bValue);
+
+    nSize += snprintf (pcBuffer_p + nSize, nBufferSize_p - nSize,
+                       "RSMSwitch:              %XH\n",
+                       (WORD)bValue);
+
+    iRet = PLCcoreCF54DrvCmdGetDigiIn(&CF54DigiIn);
+
+    nSize += snprintf (pcBuffer_p + nSize, nBufferSize_p - nSize,
+                       "DigiIn:                 %02X%02X%02X%02XH\n",
+                       (WORD) CF54DigiIn.m_bDiByte3,
+                       (WORD) CF54DigiIn.m_bDiByte2,
+                       (WORD) CF54DigiIn.m_bDiByte1,
+                       (WORD) CF54DigiIn.m_bDiByte0);
+
     // ...
     Eof = 1;
 
@@ -2411,6 +2450,56 @@ int          Eof;
     return (nSize);
 
 }
+
+
+//---------------------------------------------------------------------------
+//  Write function for PROC-FS write access
+//---------------------------------------------------------------------------
+
+static int PLCcoreCF54DrvProcWrite(struct file *file, const char __user *buffer, unsigned long count, void *data)
+{
+char            abBuffer[count + 1];
+int             iErr;
+tCF54DigiOut    CF54DigiOut;
+int             iVal = 0;
+DWORD           dwVal;
+
+    if (count > 0)
+    {
+        iErr = copy_from_user(abBuffer, buffer, count);
+        if (iErr != 0)
+        {
+            return count;
+        }
+        abBuffer[count] = '\0';
+
+        iErr = sscanf(abBuffer, "%i", &iVal);
+
+        if (iErr > 0)
+        {   // at least one number was parsed from the string
+
+            dwVal = (DWORD) iVal;
+
+            CF54DigiOut.m_bDoByte0 = dwVal & 0xFF;
+            dwVal >>= 8;
+            CF54DigiOut.m_bDoByte1 = dwVal & 0xFF;
+            dwVal >>= 8;
+            CF54DigiOut.m_bDoByte2 = dwVal & 0xFF;
+            dwVal >>= 8;
+            CF54DigiOut.m_bDoByte3 = dwVal & 0xFF;
+
+            iErr = PLCcoreCF54DrvCmdSetDigiOut(&CF54DigiOut);
+        }
+        else
+        {   // no valid number supplied
+        }
+
+    }
+
+    return count;
+}
+
+
 #endif
 
 
