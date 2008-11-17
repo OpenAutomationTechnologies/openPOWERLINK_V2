@@ -75,6 +75,7 @@
 #include "EplInc.h"
 #include "EplSdo.h"
 #include "EplObd.h"
+#include "EplLed.h"
 #include "EplEvent.h"
 
 //---------------------------------------------------------------------------
@@ -86,6 +87,7 @@
 // typedef
 //---------------------------------------------------------------------------
 
+
 typedef struct
 {
     unsigned int        m_uiNodeId;
@@ -96,6 +98,7 @@ typedef struct
 
 } tEplApiEventNode;
 
+
 typedef struct
 {
     tEplNmtState        m_NmtState;     // local NMT state
@@ -103,6 +106,15 @@ typedef struct
     WORD                m_wErrorCode;   // EPL error code if m_BootEvent == kEplNmtBootEventError
 
 } tEplApiEventBoot;
+
+
+typedef struct
+{
+    tEplLedType         m_LedType;      // type of the LED (e.g. Status or Error)
+    BOOL                m_fOn;          // state of the LED (e.g. on or off)
+
+} tEplApiEventLed;
+
 
 typedef enum
 {
@@ -114,6 +126,7 @@ typedef enum
     kEplApiEventBoot           = 0x21,    // m_Boot
     kEplApiEventSdo            = 0x62,    // m_Sdo
     kEplApiEventObdAccess      = 0x69,    // m_ObdCbParam
+    kEplApiEventLed            = 0x70,    // m_Led
 
 } tEplApiEventType;
 
@@ -126,6 +139,7 @@ typedef union
     tEplObdCbParam          m_ObdCbParam;
     tEplApiEventNode        m_Node;
     tEplApiEventBoot        m_Boot;
+    tEplApiEventLed         m_Led;
 
 } tEplApiEventArg;
 
@@ -211,6 +225,7 @@ typedef struct
     unsigned int   m_uiSize;
 
 } tEplApiProcessImage;
+
 
 //---------------------------------------------------------------------------
 // function prototypes

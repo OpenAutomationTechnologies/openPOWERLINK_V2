@@ -73,6 +73,7 @@
 #include "user/EplNmtMnu.h"
 #include "user/EplSdoAsySequ.h"
 #include "user/EplDlluCal.h"
+#include "user/EplLedu.h"
 #include "Benchmark.h"
 
 #ifdef EPL_NO_FIFO
@@ -414,6 +415,25 @@ tEplEventSource         EventSource;
         }
 #endif
 
+        // LED user part module
+        case kEplEventSinkLedu:
+        {
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_LEDU)) != 0)
+            Ret = EplLeduProcessEvent(pEvent_p);
+            if ((Ret != kEplSuccessful) && (Ret != kEplShutdown))
+            {
+                EventSource = kEplEventSourceLedu;
+
+                // Error event for API layer
+                EplEventuPostError(kEplEventSourceEventu,
+                                Ret,
+                                sizeof(EventSource),
+                                &EventSource);
+            }
+#endif
+            break;
+        }
+
         // event for EPL api
         case kEplEventSinkApi:
         {
@@ -579,6 +599,7 @@ unsigned int    fBufferCompleted;
         case kEplEventSinkApi:
         case kEplEventSinkDlluCal:
         case kEplEventSinkErru:
+        case kEplEventSinkLedu:
         {
 #ifndef EPL_NO_FIFO
             // post message

@@ -22,6 +22,7 @@ MODULEOBJS	= demo_main.o \
 			  fec.o ks8721.o ksz8893.o \
 			  EplDllk.o EplDllkCal.o \
 			  EplDlluCal.o \
+			  EplLedu.o \
 			  EplEventk.o EplEventu.o \
 			  EplNmtk.o EplNmtkCal.o \
 			  EplNmtu.o EplNmtuCal.o EplNmtCnu.o \

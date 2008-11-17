@@ -150,25 +150,25 @@ typedef enum
     kEplNmtEventDllCeFrameTimeout   =   0x0C,
 
     // Events triggered by NMT-Commands
-    kEplNmtEventSwReset             =   0x10,
+    kEplNmtEventSwReset             =   0x10, // NMT_GT1, NMT_GT2, NMT_GT8
     kEplNmtEventResetNode           =   0x11,
     kEplNmtEventResetCom            =   0x12,
     kEplNmtEventResetConfig         =   0x13,
     kEplNmtEventEnterPreOperational2=   0x14,
     kEplNmtEventEnableReadyToOperate=   0x15,
-    kEplNmtEventStartNode           =   0x16,
+    kEplNmtEventStartNode           =   0x16, // NMT_CT7
     kEplNmtEventStopNode            =   0x17,
 
     // Events triggered by higher layer
     kEplNmtEventEnterResetApp       =   0x20,
     kEplNmtEventEnterResetCom       =   0x21,
-    kEplNmtEventInternComError      =   0x22, // internal communication error -> enter ResetCommunication
+    kEplNmtEventInternComError      =   0x22, // NMT_GT6, internal communication error -> enter ResetCommunication
     kEplNmtEventEnterResetConfig    =   0x23,
     kEplNmtEventEnterCsNotActive    =   0x24,
     kEplNmtEventEnterMsNotActive    =   0x25,
-    kEplNmtEventTimerBasicEthernet  =   0x26, // timer triggered state change (NotActive -> BasicEth)
+    kEplNmtEventTimerBasicEthernet  =   0x26, // NMT_CT3; timer triggered state change (NotActive -> BasicEth)
     kEplNmtEventTimerMsPreOp1       =   0x27, // enter PreOp1 on MN (NotActive -> MsPreOp1)
-    kEplNmtEventNmtCycleError       =   0x28, // error during cycle -> enter PreOp1
+    kEplNmtEventNmtCycleError       =   0x28, // NMT_CT11, NMT_MT6; error during cycle -> enter PreOp1
     kEplNmtEventTimerMsPreOp2       =   0x29, // enter PreOp2 on MN (MsPreOp1 -> MsPreOp2 if kEplNmtEventAllMandatoryCNIdent)
     kEplNmtEventAllMandatoryCNIdent =   0x2A, // enter PreOp2 on MN if kEplNmtEventTimerMsPreOp2
     kEplNmtEventEnterReadyToOperate =   0x2B, // application ready for the state ReadyToOp

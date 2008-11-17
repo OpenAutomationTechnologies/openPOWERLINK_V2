@@ -90,11 +90,14 @@
     #include <asm/coldfire.h>
     #include <asm/mcfsim.h>
     #include <asm/m5485gpio.h>
-    #include "cf54drv.h"
 #endif
 
 #include "Epl.h"
 #include "proc_fs.h"
+
+#ifdef CONFIG_COLDFIRE
+    #include "cf54drv.h"
+#endif
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,0)
     // remove ("make invisible") obsolete symbols for kernel versions 2.6
@@ -575,11 +578,6 @@ tEplKernel          EplRet = kEplSuccessful;
                     EplRet = kEplShutdown;
 
                     printk("AppCbEvent(kEplNmtGsOff) originating event = 0x%X\n", pEventArg_p->m_NmtStateChange.m_NmtEvent);
-#ifdef CF54DRV
-                    // set run and error LED
-                    PLCcoreCF54DrvCmdSetRunLED(0);
-                    PLCcoreCF54DrvCmdSetErrLED(0);
-#endif
 
                     // wake up EplLinExit()
                     atomic_set(&AtomicShutdown_g, TRUE);
@@ -645,32 +643,17 @@ tEplKernel          EplRet = kEplSuccessful;
                 case kEplNmtCsNotActive:
                 case kEplNmtCsPreOperational1:
                 {
-#ifdef CF54DRV
-                    // set run and error LED
-                    PLCcoreCF54DrvCmdSetRunLED(0);
-                    PLCcoreCF54DrvCmdSetErrLED(1);
-#endif
                     break;
                 }
 
                 case kEplNmtCsOperational:
                 case kEplNmtMsOperational:
                 {
-#ifdef CF54DRV
-                    // set run and error LED
-                    PLCcoreCF54DrvCmdSetRunLED(1);
-                    PLCcoreCF54DrvCmdSetErrLED(0);
-#endif
                     break;
                 }
 
                 default:
                 {
-#ifdef CF54DRV
-                    // set run and error LED
-                    PLCcoreCF54DrvCmdSetRunLED(1);
-                    PLCcoreCF54DrvCmdSetErrLED(1);
-#endif
                     break;
                 }
             }
@@ -779,6 +762,29 @@ tEplKernel          EplRet = kEplSuccessful;
 
             break;
         }
+
+#ifdef CF54DRV
+        case kEplApiEventLed:
+        {   // status or error LED shall be changed
+
+            switch (pEventArg_p->m_Led.m_LedType)
+            {
+                case kEplLedTypeStatus:
+                {
+                    PLCcoreCF54DrvCmdSetRunLED(pEventArg_p->m_Led.m_fOn);
+                    break;
+                }
+
+                case kEplLedTypeError:
+                {
+                    PLCcoreCF54DrvCmdSetErrLED(pEventArg_p->m_Led.m_fOn);
+                    break;
+                }
+            }
+
+            break;
+        }
+#endif
 
         default:
             break;

@@ -78,7 +78,7 @@
 #include "kernel/EplDllkCal.h"
 #include "kernel/EplPdokCal.h"
 #include "user/EplDlluCal.h"
-//#include "user/EplDllu.h"
+#include "user/EplLedu.h"
 #include "user/EplNmtCnu.h"
 #include "user/EplNmtMnu.h"
 #include "user/EplSdoComu.h"
@@ -193,6 +193,12 @@ static tEplKernel PUBLIC  EplApiCbNodeEvent(unsigned int uiNodeId_p,
 static tEplKernel PUBLIC  EplApiCbBootEvent(tEplNmtBootEvent BootEvent_p,
                                             tEplNmtState NmtState_p,
                                             WORD wErrorCode_p);
+#endif
+
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_LEDU)) != 0)
+// callback function of Ledu module
+static tEplKernel PUBLIC  EplApiCbLedStateChange(tEplLedType LedType_p,
+                                                 BOOL fOn_p);
 #endif
 
 // OD initialization function (implemented in Objdict.c)
@@ -394,6 +400,15 @@ tShbError           ShbError;
     }
 #endif
 
+    // initialize EplLedu module
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_LEDU)) != 0)
+    Ret = EplLeduInit(EplApiCbLedStateChange);
+    if (Ret != kEplSuccessful)
+    {
+        goto Exit;
+    }
+#endif
+
     // init SDO module
 #if ((((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOC)) != 0) || \
      (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOC)) != 0))
@@ -444,6 +459,12 @@ tEplKernel      Ret = kEplSuccessful;
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOC)) != 0)
     Ret = EplSdoComDelInstance();
 //    PRINTF1("EplSdoComDelInstance():  0x%X\n", Ret);
+#endif
+
+    // deinitialize EplLedu module
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_LEDU)) != 0)
+    Ret = EplLeduDelInstance();
+//    PRINTF1("EplLeduDelInstance():    0x%X\n", Ret);
 #endif
 
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
@@ -1399,6 +1420,15 @@ tEplApiEventArg     EventArg;
         }
     }
 
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_LEDU)) != 0)
+    // forward event to Led module
+    Ret = EplLeduCbNmtStateChange(NmtStateChange_p);
+    if (Ret != kEplSuccessful)
+    {
+        goto Exit;
+    }
+#endif
+
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
     // forward event to NmtMn module
     Ret = EplNmtMnuCbNmtStateChange(NmtStateChange_p);
@@ -1989,6 +2019,47 @@ tEplApiEventArg EventArg;
 }
 
 #endif // (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
+
+
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_LEDU)) != 0)
+
+//---------------------------------------------------------------------------
+//
+// Function:    EplApiCbLedStateChange
+//
+// Description: callback function for LED change events.
+//
+// Parameters:  LedType_p       = type of LED
+//              fOn_p           = state of LED
+//
+// Returns:     tEplKernel      = errorcode
+//
+// State:
+//
+//---------------------------------------------------------------------------
+
+static tEplKernel PUBLIC  EplApiCbLedStateChange(tEplLedType LedType_p,
+                                                 BOOL fOn_p)
+{
+tEplKernel Ret;
+tEplApiEventArg EventArg;
+
+    Ret = kEplSuccessful;
+
+    // call user callback
+    EventArg.m_Led.m_LedType = LedType_p;
+    EventArg.m_Led.m_fOn = fOn_p;
+
+    Ret = EplApiInstance_g.m_InitParam.m_pfnCbEvent(kEplApiEventLed,
+                                                    &EventArg,
+                                                    EplApiInstance_g.m_InitParam.m_pEventUserArg);
+
+    return Ret;
+
+}
+
+#endif
+
 
 // EOF
 

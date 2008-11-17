@@ -190,6 +190,7 @@ typedef enum
     kEplEventSinkErru           = 0x08, // events for Error signaling module
     kEplEventSinkSdoAsySeq      = 0x09, // events for asyncronous SDO Sequence Layer module
     kEplEventSinkNmtMnu         = 0x0A, // events for NmtMnu module
+    kEplEventSinkLedu           = 0x0B, // events for Ledu module
     kEplEventSinkApi            = 0x0F, // events for API module
 
 } tEplEventSink;
@@ -221,7 +222,8 @@ typedef enum
     kEplEventSourceTimeru       = 0x19, // Timeru module
     kEplEventSourceCfgMau       = 0x1A, // CfgMau module
     kEplEventSourceEventu       = 0x1B, // Eventu module
-    kEplEventSourceEplApi       = 0x1C  // Api module
+    kEplEventSourceEplApi       = 0x1C, // Api module
+    kEplEventSourceLedu         = 0x1D, // Ledu module
 
 } tEplEventSource;
 
