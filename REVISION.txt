@@ -86,3 +86,23 @@ Fellow worker:    Daniel Krüger (d.k.)
                       hence using of EPL_MODULE_* defines to build it in EplCfg.h works.
                     (d.k.)
 
+07.11.2008 V1.3     - added ARM support to global.h
+                    - added Abstract Memory Interface for ARM processors (EplStack/amiarm.c)
+                    (d.k.)
+
+13.11.2008 V1.3     - fixed handling of NMT_MT6 (kEplNmtEventNmtCycleError) in NMT MN, NMTk and
+                      DLLk module. The asynchronous queues are cleared now correctly, on change
+                      from Op to PreOp1.
+                    (d.k.)
+
+14.11.2008 V1.3     - cf54drv for ECUcore-5484 now works on devboards with PCB 4158.4 and 4158.5
+                    (d.k.)
+
+17.11.2008 V1.3     - bug-fixes to demo-main.c of all targets:
+                      * added prefix APP_ to local defines to avoid name collision with Linux for example
+                      * added some objects to object dictionary for debugging purposes
+                      * fixed speed selection (ignore upper bits now)
+                      * global node-ID variable really reflects now the current node-ID
+                      * added cyclelen parameter to kernel module
+                    - added new Ethernet driver and demo project for Hilscher netX to special GPL-Addon
+                    (d.k.)
