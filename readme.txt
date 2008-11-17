@@ -70,7 +70,7 @@ Generic Requirements for all demo applications
     * one or more POWERLINK I/O devices according CiA-401
       (i.e. Controlled Nodes) with the following PDO mapping:
 
-        RPDO (PollRequest from MN): 1 Byte length
+    RPDO (PollRequest from MN): 1 Byte length
 	                            containing the values for the digital outputs
 	TPDO (PollResponse): 1 Byte length
 	                     containing the values from the digital inputs
@@ -99,7 +99,7 @@ Requirements for X86 Demo
     * Zyxel FN312
     * Netgear FA311 v2 Rev-D1
     * D-Link DFE-528TX
-  
+
 
 
 Requirements for ColdFire MCF5484 demo
@@ -123,23 +123,23 @@ Steps to build and execute the demo application
             $ make
 
     for X86 with RTL8139 network controller try the following
-	    $ cd Examples/X86/Linux/gnu/demo_mn_8139_kernel
-	    $ make
+	        $ cd Examples/X86/Linux/gnu/demo_mn_8139_kernel
+	        $ make
 
-3.  Copy the built sample application (i.e. the Linux kernel object epl.ko) to
+3.  Unload an existing 8139 driver under Linux (if necessary):
+	        $ rmmod 8139too.ko
+
+    Unload the running application before:
+            $ rmmod epl.ko
+
+4.  Copy the built sample application (i.e. the Linux kernel object epl.ko) to
     the target (e.g. via FTP or NFS) and run it.
             $ insmod epl.ko
     With an additional parameter 'nodeid' the node-ID can be set manually.
     It overwrites any hardware settings.
             $ insmod epl.ko nodeid=240
 
-    It may be necessary to unload the running application before:
-            $ rmmod epl.ko
-
-    And to unload an existing 8139 driver under Linux:
-	    $ rmmod 8139too.ko
-
-4.  Now you may modify the sources to your needs and restart from 2.
+5.  Now you may modify the sources to your needs and restart from 2.
     (e.g. change the cycle length and the network configuration in demo_main.c)
 
 

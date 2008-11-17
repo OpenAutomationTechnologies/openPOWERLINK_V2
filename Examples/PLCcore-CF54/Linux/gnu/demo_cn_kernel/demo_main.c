@@ -90,11 +90,11 @@
     #include <asm/coldfire.h>
     #include <asm/mcfsim.h>
     #include <asm/m5485gpio.h>
+    #include "cf54drv.h"
 #endif
 
 #include "Epl.h"
 #include "proc_fs.h"
-#include "cf54drv.h"
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,0)
     // remove ("make invisible") obsolete symbols for kernel versions 2.6
@@ -116,7 +116,7 @@
 /***************************************************************************/
 
 // Metainformation
-/* MODULE_LICENSE("Proprietary"); */        // $$$$$$$$$$ ????????????????
+MODULE_LICENSE("Dual BSD/GPL");
 #ifdef MODULE_AUTHOR
     MODULE_AUTHOR("Daniel.Krueger@SYSTEC-electronic.com");
     MODULE_DESCRIPTION("EPL CN demo");
@@ -137,13 +137,13 @@
     #define TGT_DBG_SIGNAL_TRACE_POINT(p)
 #endif
 
-#define NODEID      0x1 //0x6E//0xF0 //=> MN
+#define NODEID      0x1 //0x6E
+#define CYCLE_LEN   3000 // [us]
 #define IP_ADDR     0xc0a86401  // 192.168.100.1
 #define SUBNET_MASK 0xFFFFFF00  // 255.255.255.0
 #define HOSTNAME    "SYS TEC electronic EPL Stack    "
 #define IF_ETH      EPL_VETH_NAME
 
-//#define PRINT_NMT_EVENTS
 
 
 
@@ -168,9 +168,14 @@ BYTE    abDomain_l[3000];
 static wait_queue_head_t    WaitQueueShutdown_g; // wait queue for tEplNmtEventSwitchOff
 static atomic_t             AtomicShutdown_g = ATOMIC_INIT(FALSE);
 
+static DWORD    dw_le_CycleLen_g;
 
-static uint uiNodeId_g;
-module_param_named(nodeid, uiNodeId_g, uint, EPL_C_ADR_INVALID);
+static uint uiNodeId_g = EPL_C_ADR_INVALID;
+module_param_named(nodeid, uiNodeId_g, uint, 0);
+
+static uint uiCycleLen_g = CYCLE_LEN;
+module_param_named(cyclelen, uiCycleLen_g, uint, 0);
+
 
 //---------------------------------------------------------------------------
 // local function prototypes
@@ -307,7 +312,7 @@ tEplObdSize         ObdSize;
     EPL_MEMCPY(EplApiInitParam.m_abMacAddress, abMacAddr, sizeof (EplApiInitParam.m_abMacAddress));
     EplApiInitParam.m_abMacAddress[5] = (BYTE) EplApiInitParam.m_uiNodeId;
     EplApiInitParam.m_dwFeatureFlags = -1;  // determined by stack itself
-    EplApiInitParam.m_dwCycleLen = 3000;     // in [ns]; required for error detection
+    EplApiInitParam.m_dwCycleLen = uiCycleLen_g;     // required for error detection
     EplApiInitParam.m_uiIsochrTxMaxPayload = 100; // const
     EplApiInitParam.m_uiIsochrRxMaxPayload = 100; // const
     EplApiInitParam.m_dwPresMaxLatency = 50000;  // const; only required for IdentRes
@@ -426,7 +431,9 @@ Exit:
 static  void  __exit  EplLinExit (void)
 {
 tEplKernel          EplRet;
+#ifdef CF54DRV
 int                 iRet;
+#endif
 
     // halt the NMT state machine
     // so the processing of POWERLINK frames stops

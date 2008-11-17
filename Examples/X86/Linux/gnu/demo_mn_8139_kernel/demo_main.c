@@ -70,7 +70,6 @@
 ****************************************************************************/
 
 
-//#include <linux/config.h>
 #include <linux/module.h>
 #include <linux/kernel.h>
 #include <linux/init.h>
@@ -131,6 +130,7 @@ MODULE_LICENSE("Dual BSD/GPL");
 #endif
 
 #define NODEID      0xF0 //=> MN
+#define CYCLE_LEN   5000 // [us]
 #define IP_ADDR     0xc0a86401  // 192.168.100.1
 #define SUBNET_MASK 0xFFFFFF00  // 255.255.255.0
 #define HOSTNAME    "SYS TEC electronic EPL Stack    "
@@ -139,15 +139,13 @@ MODULE_LICENSE("Dual BSD/GPL");
 
 // LIGHT EFFECT
 #define DEFAULT_MAX_CYCLE_COUNT 20  // 6 is very fast
-#define DEFAULT_MODE            0x01
-#define LED_COUNT               5       // number of LEDs in one row
-#define LED_MASK                ((1 << LED_COUNT) - 1)
-#define DOUBLE_LED_MASK         ((1 << (LED_COUNT * 2)) - 1)
-#define MODE_COUNT              4
-#define MODE_MASK               ((1 << MODE_COUNT) - 1)
+#define APP_DEFAULT_MODE        0x01
+#define APP_LED_COUNT           5       // number of LEDs in one row
+#define APP_LED_MASK            ((1 << APP_LED_COUNT) - 1)
+#define APP_DOUBLE_LED_MASK     ((1 << (APP_LED_COUNT * 2)) - 1)
+#define APP_MODE_COUNT          4
+#define APP_MODE_MASK           ((1 << APP_MODE_COUNT) - 1)
 
-
-//#define PRINT_NMT_EVENTS
 
 //---------------------------------------------------------------------------
 // local types
@@ -184,8 +182,12 @@ static atomic_t             AtomicShutdown_g = ATOMIC_INIT(FALSE);
 
 static DWORD    dw_le_CycleLen_g;
 
-static uint uiNodeId_g;
-module_param_named(nodeid, uiNodeId_g, uint, EPL_C_ADR_INVALID);
+static uint uiNodeId_g = EPL_C_ADR_INVALID;
+module_param_named(nodeid, uiNodeId_g, uint, 0);
+
+static uint uiCycleLen_g = CYCLE_LEN;
+module_param_named(cyclelen, uiCycleLen_g, uint, 0);
+
 
 //---------------------------------------------------------------------------
 // local function prototypes
@@ -264,6 +266,8 @@ tEplObdSize         ObdSize;
         EplApiInitParam.m_uiNodeId = NODEID;
     }
 
+    uiNodeId_g = EplApiInitParam.m_uiNodeId;
+
     // calculate IP address
     EplApiInitParam.m_dwIpAddress = (0xFFFFFF00 & IP_ADDR) | EplApiInitParam.m_uiNodeId;
 
@@ -273,7 +277,7 @@ tEplObdSize         ObdSize;
     EPL_MEMCPY(EplApiInitParam.m_abMacAddress, abMacAddr, sizeof (EplApiInitParam.m_abMacAddress));
 //    EplApiInitParam.m_abMacAddress[5] = (BYTE) EplApiInitParam.m_uiNodeId;
     EplApiInitParam.m_dwFeatureFlags = -1;
-    EplApiInitParam.m_dwCycleLen = 50000;     // required for error detection
+    EplApiInitParam.m_dwCycleLen = uiCycleLen_g;     // required for error detection
     EplApiInitParam.m_uiIsochrTxMaxPayload = 100; // const
     EplApiInitParam.m_uiIsochrRxMaxPayload = 100; // const
     EplApiInitParam.m_dwPresMaxLatency = 50000;  // const; only required for IdentRes
@@ -348,6 +352,7 @@ tEplObdSize         ObdSize;
     }
 
     // link process variables used by MN to object dictionary
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
     ObdSize = sizeof(bLedsRow1_l);
     uiVarEntries = 1;
     EplRet = EplApiLinkObject(0x2000, &bLedsRow1_l, &uiVarEntries, &ObdSize, 0x01);
@@ -364,6 +369,22 @@ tEplObdSize         ObdSize;
         goto Exit;
     }
 
+    ObdSize = sizeof(bSpeedSelect_l);
+    uiVarEntries = 1;
+    EplRet = EplApiLinkObject(0x2000, &bSpeedSelect_l, &uiVarEntries, &ObdSize, 0x03);
+    if (EplRet != kEplSuccessful)
+    {
+        goto Exit;
+    }
+
+    ObdSize = sizeof(bSpeedSelectOld_l);
+    uiVarEntries = 1;
+    EplRet = EplApiLinkObject(0x2000, &bSpeedSelectOld_l, &uiVarEntries, &ObdSize, 0x04);
+    if (EplRet != kEplSuccessful)
+    {
+        goto Exit;
+    }
+
     ObdSize = sizeof(abSelect_l[0]);
     uiVarEntries = sizeof(abSelect_l);
     EplRet = EplApiLinkObject(0x2200, &abSelect_l[0], &uiVarEntries, &ObdSize, 0x01);
@@ -371,6 +392,7 @@ tEplObdSize         ObdSize;
     {
         goto Exit;
     }
+#endif
 
     // link a DOMAIN to object 0x6100, but do not exit, if it is missing
     ObdSize = sizeof(abDomain_l);
@@ -526,6 +548,7 @@ tEplKernel          EplRet = kEplSuccessful;
 //                    EplRet = EplApiWriteLocalObject(0x1F81, 0x6E, &dwBuffer, 4);
                     dwBuffer = (EPL_NODEASSIGN_MN_PRES | EPL_NODEASSIGN_NODE_EXISTS);       // 0x00010001L
                     EplRet = EplApiWriteLocalObject(0x1F81, 0xF0, &dwBuffer, 4);
+
                     // continue
                 }
 
@@ -567,6 +590,7 @@ tEplKernel          EplRet = kEplSuccessful;
 #endif
                     break;
                 }
+
                 case kEplNmtCsOperational:
                 case kEplNmtMsOperational:
                 {
@@ -577,6 +601,7 @@ tEplKernel          EplRet = kEplSuccessful;
 #endif
                     break;
                 }
+
                 default:
                 {
 #ifdef CF54DRV
@@ -762,13 +787,13 @@ tEplKernel          EplRet = kEplSuccessful;
     {   // we are the master and must run the control loop
 
         // collect inputs from CNs and own input
-        bSpeedSelect_l = bVarIn1_l | abSelect_l[0];
+        bSpeedSelect_l = (bVarIn1_l | abSelect_l[0]) & 0x07;
 
         bModeSelect_l = abSelect_l[1] | abSelect_l[2];
 
-        if ((bModeSelect_l & MODE_MASK) != 0)
+        if ((bModeSelect_l & APP_MODE_MASK) != 0)
         {
-            dwMode_l = bModeSelect_l & MODE_MASK;
+            dwMode_l = bModeSelect_l & APP_MODE_MASK;
         }
 
         iCurCycleCount_l--;
@@ -779,7 +804,7 @@ tEplKernel          EplRet = kEplSuccessful;
             {   // fill-up
                 if (iToggle)
                 {
-                    if ((dwLeds_l & DOUBLE_LED_MASK) == 0x00)
+                    if ((dwLeds_l & APP_DOUBLE_LED_MASK) == 0x00)
                     {
                         dwLeds_l = 0x01;
                     }
@@ -787,7 +812,7 @@ tEplKernel          EplRet = kEplSuccessful;
                     {
                         dwLeds_l <<= 1;
                         dwLeds_l++;
-                        if (dwLeds_l >= DOUBLE_LED_MASK)
+                        if (dwLeds_l >= APP_DOUBLE_LED_MASK)
                         {
                             iToggle = 0;
                         }
@@ -796,35 +821,35 @@ tEplKernel          EplRet = kEplSuccessful;
                 else
                 {
                     dwLeds_l <<= 1;
-                    if ((dwLeds_l & DOUBLE_LED_MASK) == 0x00)
+                    if ((dwLeds_l & APP_DOUBLE_LED_MASK) == 0x00)
                     {
                         iToggle = 1;
                     }
                 }
-                bLedsRow1_l = (unsigned char) (dwLeds_l & LED_MASK);
-                bLedsRow2_l = (unsigned char) ((dwLeds_l >> LED_COUNT) & LED_MASK);
+                bLedsRow1_l = (unsigned char) (dwLeds_l & APP_LED_MASK);
+                bLedsRow2_l = (unsigned char) ((dwLeds_l >> APP_LED_COUNT) & APP_LED_MASK);
             }
 
             else if ((dwMode_l & 0x02) != 0)
             {   // running light forward
                 dwLeds_l <<= 1;
-                if ((dwLeds_l > DOUBLE_LED_MASK) || (dwLeds_l == 0x00000000L))
+                if ((dwLeds_l > APP_DOUBLE_LED_MASK) || (dwLeds_l == 0x00000000L))
                 {
                     dwLeds_l = 0x01;
                 }
-                bLedsRow1_l = (unsigned char) (dwLeds_l & LED_MASK);
-                bLedsRow2_l = (unsigned char) ((dwLeds_l >> LED_COUNT) & LED_MASK);
+                bLedsRow1_l = (unsigned char) (dwLeds_l & APP_LED_MASK);
+                bLedsRow2_l = (unsigned char) ((dwLeds_l >> APP_LED_COUNT) & APP_LED_MASK);
             }
 
             else if ((dwMode_l & 0x04) != 0)
             {   // running light backward
                 dwLeds_l >>= 1;
-                if ((dwLeds_l > DOUBLE_LED_MASK) || (dwLeds_l == 0x00000000L))
+                if ((dwLeds_l > APP_DOUBLE_LED_MASK) || (dwLeds_l == 0x00000000L))
                 {
-                    dwLeds_l = 1 << (LED_COUNT * 2);
+                    dwLeds_l = 1 << (APP_LED_COUNT * 2);
                 }
-                bLedsRow1_l = (unsigned char) (dwLeds_l & LED_MASK);
-                bLedsRow2_l = (unsigned char) ((dwLeds_l >> LED_COUNT) & LED_MASK);
+                bLedsRow1_l = (unsigned char) (dwLeds_l & APP_LED_MASK);
+                bLedsRow2_l = (unsigned char) ((dwLeds_l >> APP_LED_COUNT) & APP_LED_MASK);
             }
 
             else if ((dwMode_l & 0x08) != 0)

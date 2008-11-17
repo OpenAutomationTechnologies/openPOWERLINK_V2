@@ -148,8 +148,6 @@ MODULE_LICENSE("Dual BSD/GPL");
 #define APP_MODE_MASK           ((1 << APP_MODE_COUNT) - 1)
 
 
-//#define PRINT_NMT_EVENTS
-
 //---------------------------------------------------------------------------
 // local types
 //---------------------------------------------------------------------------
@@ -367,6 +365,23 @@ tEplObdSize         ObdSize;
     ObdSize = sizeof(bLedsRow2_l);
     uiVarEntries = 1;
     EplRet = EplApiLinkObject(0x2000, &bLedsRow2_l, &uiVarEntries, &ObdSize, 0x02);
+    if (EplRet != kEplSuccessful)
+    {
+        goto Exit;
+    }
+
+    // map internal values just for debugging purposes
+    ObdSize = sizeof(bSpeedSelect_l);
+    uiVarEntries = 1;
+    EplRet = EplApiLinkObject(0x2000, &bSpeedSelect_l, &uiVarEntries, &ObdSize, 0x03);
+    if (EplRet != kEplSuccessful)
+    {
+        goto Exit;
+    }
+
+    ObdSize = sizeof(bSpeedSelectOld_l);
+    uiVarEntries = 1;
+    EplRet = EplApiLinkObject(0x2000, &bSpeedSelectOld_l, &uiVarEntries, &ObdSize, 0x04);
     if (EplRet != kEplSuccessful)
     {
         goto Exit;
@@ -771,7 +786,7 @@ tEplKernel          EplRet = kEplSuccessful;
     {   // we are the master and must run the control loop
 
         // collect inputs from CNs and own input
-        bSpeedSelect_l = bVarIn1_l | abSelect_l[0];
+        bSpeedSelect_l = (bVarIn1_l | abSelect_l[0]) & 0x07;
 
         bModeSelect_l = abSelect_l[1] | abSelect_l[2];
 

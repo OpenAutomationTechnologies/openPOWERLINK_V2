@@ -90,11 +90,11 @@
     #include <asm/coldfire.h>
     #include <asm/mcfsim.h>
     #include <asm/m5485gpio.h>
+    #include "cf54drv.h"
 #endif
 
 #include "Epl.h"
 #include "proc_fs.h"
-#include "cf54drv.h"
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,0)
     // remove ("make invisible") obsolete symbols for kernel versions 2.6
@@ -137,22 +137,22 @@ MODULE_LICENSE("Dual BSD/GPL");
     #define TGT_DBG_SIGNAL_TRACE_POINT(p)
 #endif
 
-#define NODEID      0x1 //0x6E//0xF0 //=> MN
+#define NODEID      0xF0 //=> MN
+#define CYCLE_LEN   5000 // [us]
 #define IP_ADDR     0xc0a86401  // 192.168.100.1
 #define SUBNET_MASK 0xFFFFFF00  // 255.255.255.0
 #define HOSTNAME    "SYS TEC electronic EPL Stack    "
 #define IF_ETH      EPL_VETH_NAME
 
-//#define PRINT_NMT_EVENTS
 
 // LIGHT EFFECT
 #define DEFAULT_MAX_CYCLE_COUNT 20  // 6 is very fast
-#define DEFAULT_MODE            0x01
-#define LED_COUNT               5       // number of LEDs in one row
-#define LED_MASK                ((1 << LED_COUNT) - 1)
-#define DOUBLE_LED_MASK         ((1 << (LED_COUNT * 2)) - 1)
-#define MODE_COUNT              4
-#define MODE_MASK               ((1 << MODE_COUNT) - 1)
+#define APP_DEFAULT_MODE        0x01
+#define APP_LED_COUNT           5       // number of LEDs in one row
+#define APP_LED_MASK            ((1 << APP_LED_COUNT) - 1)
+#define APP_DOUBLE_LED_MASK     ((1 << (APP_LED_COUNT * 2)) - 1)
+#define APP_MODE_COUNT          4
+#define APP_MODE_MASK           ((1 << APP_MODE_COUNT) - 1)
 
 
 //---------------------------------------------------------------------------
@@ -190,8 +190,12 @@ static atomic_t             AtomicShutdown_g = ATOMIC_INIT(FALSE);
 
 static DWORD    dw_le_CycleLen_g;
 
-static uint uiNodeId_g;
-module_param_named(nodeid, uiNodeId_g, uint, EPL_C_ADR_INVALID);
+static uint uiNodeId_g = EPL_C_ADR_INVALID;
+module_param_named(nodeid, uiNodeId_g, uint, 0);
+
+static uint uiCycleLen_g = CYCLE_LEN;
+module_param_named(cyclelen, uiCycleLen_g, uint, 0);
+
 
 //---------------------------------------------------------------------------
 // local function prototypes
@@ -328,7 +332,7 @@ tEplObdSize         ObdSize;
     EPL_MEMCPY(EplApiInitParam.m_abMacAddress, abMacAddr, sizeof (EplApiInitParam.m_abMacAddress));
     EplApiInitParam.m_abMacAddress[5] = (BYTE) EplApiInitParam.m_uiNodeId;
     EplApiInitParam.m_dwFeatureFlags = -1;  // determined by stack itself
-    EplApiInitParam.m_dwCycleLen = 3000;     // in [ns]; required for error detection
+    EplApiInitParam.m_dwCycleLen = uiCycleLen_g;     // required for error detection
     EplApiInitParam.m_uiIsochrTxMaxPayload = 100; // const
     EplApiInitParam.m_uiIsochrRxMaxPayload = 100; // const
     EplApiInitParam.m_dwPresMaxLatency = 50000;  // const; only required for IdentRes
@@ -403,6 +407,7 @@ tEplObdSize         ObdSize;
     }
 
     // link process variables used by MN to object dictionary
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
     ObdSize = sizeof(bLedsRow1_l);
     uiVarEntries = 1;
     EplRet = EplApiLinkObject(0x2000, &bLedsRow1_l, &uiVarEntries, &ObdSize, 0x01);
@@ -443,6 +448,7 @@ tEplObdSize         ObdSize;
     {
         goto Exit;
     }
+#endif
 
     // link a DOMAIN to object 0x6100, but do not exit, if it is missing
     ObdSize = sizeof(abDomain_l);
@@ -492,7 +498,9 @@ Exit:
 static  void  __exit  EplLinExit (void)
 {
 tEplKernel          EplRet;
+#ifdef CF54DRV
 int                 iRet;
+#endif
 
     // halt the NMT state machine
     // so the processing of POWERLINK frames stops
@@ -844,9 +852,9 @@ tCF54DigiOut        CF54DigiOut;
 
         bModeSelect_l = abSelect_l[1] | abSelect_l[2];
 
-        if ((bModeSelect_l & MODE_MASK) != 0)
+        if ((bModeSelect_l & APP_MODE_MASK) != 0)
         {
-            dwMode_l = bModeSelect_l & MODE_MASK;
+            dwMode_l = bModeSelect_l & APP_MODE_MASK;
         }
 
         iCurCycleCount_l--;
@@ -857,7 +865,7 @@ tCF54DigiOut        CF54DigiOut;
             {   // fill-up
                 if (iToggle)
                 {
-                    if ((dwLeds_l & DOUBLE_LED_MASK) == 0x00)
+                    if ((dwLeds_l & APP_DOUBLE_LED_MASK) == 0x00)
                     {
                         dwLeds_l = 0x01;
                     }
@@ -865,7 +873,7 @@ tCF54DigiOut        CF54DigiOut;
                     {
                         dwLeds_l <<= 1;
                         dwLeds_l++;
-                        if (dwLeds_l >= DOUBLE_LED_MASK)
+                        if (dwLeds_l >= APP_DOUBLE_LED_MASK)
                         {
                             iToggle = 0;
                         }
@@ -874,35 +882,35 @@ tCF54DigiOut        CF54DigiOut;
                 else
                 {
                     dwLeds_l <<= 1;
-                    if ((dwLeds_l & DOUBLE_LED_MASK) == 0x00)
+                    if ((dwLeds_l & APP_DOUBLE_LED_MASK) == 0x00)
                     {
                         iToggle = 1;
                     }
                 }
-                bLedsRow1_l = (unsigned char) (dwLeds_l & LED_MASK);
-                bLedsRow2_l = (unsigned char) ((dwLeds_l >> LED_COUNT) & LED_MASK);
+                bLedsRow1_l = (unsigned char) (dwLeds_l & APP_LED_MASK);
+                bLedsRow2_l = (unsigned char) ((dwLeds_l >> APP_LED_COUNT) & APP_LED_MASK);
             }
 
             else if ((dwMode_l & 0x02) != 0)
             {   // running light forward
                 dwLeds_l <<= 1;
-                if ((dwLeds_l > DOUBLE_LED_MASK) || (dwLeds_l == 0x00000000L))
+                if ((dwLeds_l > APP_DOUBLE_LED_MASK) || (dwLeds_l == 0x00000000L))
                 {
                     dwLeds_l = 0x01;
                 }
-                bLedsRow1_l = (unsigned char) (dwLeds_l & LED_MASK);
-                bLedsRow2_l = (unsigned char) ((dwLeds_l >> LED_COUNT) & LED_MASK);
+                bLedsRow1_l = (unsigned char) (dwLeds_l & APP_LED_MASK);
+                bLedsRow2_l = (unsigned char) ((dwLeds_l >> APP_LED_COUNT) & APP_LED_MASK);
             }
 
             else if ((dwMode_l & 0x04) != 0)
             {   // running light backward
                 dwLeds_l >>= 1;
-                if ((dwLeds_l > DOUBLE_LED_MASK) || (dwLeds_l == 0x00000000L))
+                if ((dwLeds_l > APP_DOUBLE_LED_MASK) || (dwLeds_l == 0x00000000L))
                 {
-                    dwLeds_l = 1 << (LED_COUNT * 2);
+                    dwLeds_l = 1 << (APP_LED_COUNT * 2);
                 }
-                bLedsRow1_l = (unsigned char) (dwLeds_l & LED_MASK);
-                bLedsRow2_l = (unsigned char) ((dwLeds_l >> LED_COUNT) & LED_MASK);
+                bLedsRow1_l = (unsigned char) (dwLeds_l & APP_LED_MASK);
+                bLedsRow2_l = (unsigned char) ((dwLeds_l >> APP_LED_COUNT) & APP_LED_MASK);
             }
 
             else if ((dwMode_l & 0x08) != 0)
