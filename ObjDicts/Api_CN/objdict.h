@@ -281,39 +281,42 @@ EPL_OBD_BEGIN ()
         // additional TxPDOs if master is enabled
 
         // Object 1A01h: PDO_TxMappParam_01h_AU64
-        EPL_OBD_BEGIN_INDEX_RAM(0x1A01, 0x02,
+        EPL_OBD_BEGIN_INDEX_RAM(0x1A01, 0x03,
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOU)) != 0)
                 EplPdouCbObdAccess
 #else
                 NULL
 #endif
                 )
-            EPL_OBD_SUBINDEX_RAM_VAR(0x1A01, 0x00, 0x05, 0x03, tEplObdUnsigned8, NumberOfEntries, 0x01)
+            EPL_OBD_SUBINDEX_RAM_VAR(0x1A01, 0x00, 0x05, 0x03, tEplObdUnsigned8, NumberOfEntries, 0x02)
             EPL_OBD_SUBINDEX_RAM_VAR(0x1A01, 0x01, 0x1B, 0x03, tEplObdUnsigned64, ObjectMapping, 0x0008000000022000LL)
+            EPL_OBD_SUBINDEX_RAM_VAR(0x1A01, 0x02, 0x1B, 0x03, tEplObdUnsigned64, ObjectMapping, 0x0008000800012000LL)
         EPL_OBD_END_INDEX(0x1A01)
 
         // Object 1A02h: PDO_TxMappParam_02h_AU64
-        EPL_OBD_BEGIN_INDEX_RAM(0x1A02, 0x02,
+        EPL_OBD_BEGIN_INDEX_RAM(0x1A02, 0x03,
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOU)) != 0)
                 EplPdouCbObdAccess
 #else
                 NULL
 #endif
                 )
-            EPL_OBD_SUBINDEX_RAM_VAR(0x1A02, 0x00, 0x05, 0x03, tEplObdUnsigned8, NumberOfEntries, 0x01)
+            EPL_OBD_SUBINDEX_RAM_VAR(0x1A02, 0x00, 0x05, 0x03, tEplObdUnsigned8, NumberOfEntries, 0x02)
             EPL_OBD_SUBINDEX_RAM_VAR(0x1A02, 0x01, 0x1B, 0x03, tEplObdUnsigned64, ObjectMapping, 0x0008000000022000LL)
+            EPL_OBD_SUBINDEX_RAM_VAR(0x1A02, 0x02, 0x1B, 0x03, tEplObdUnsigned64, ObjectMapping, 0x0008000800012000LL)
         EPL_OBD_END_INDEX(0x1A02)
 
         // Object 1A03h: PDO_TxMappParam_03h_AU64
-        EPL_OBD_BEGIN_INDEX_RAM(0x1A03, 0x02,
+        EPL_OBD_BEGIN_INDEX_RAM(0x1A03, 0x03,
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOU)) != 0)
                 EplPdouCbObdAccess
 #else
                 NULL
 #endif
                 )
-            EPL_OBD_SUBINDEX_RAM_VAR(0x1A03, 0x00, 0x05, 0x03, tEplObdUnsigned8, NumberOfEntries, 0x01)
+            EPL_OBD_SUBINDEX_RAM_VAR(0x1A03, 0x00, 0x05, 0x03, tEplObdUnsigned8, NumberOfEntries, 0x02)
             EPL_OBD_SUBINDEX_RAM_VAR(0x1A03, 0x01, 0x1B, 0x03, tEplObdUnsigned64, ObjectMapping, 0x0008000000012000LL)
+            EPL_OBD_SUBINDEX_RAM_VAR(0x1A03, 0x02, 0x1B, 0x03, tEplObdUnsigned64, ObjectMapping, 0x0008000800022000LL)
         EPL_OBD_END_INDEX(0x1A03)
 
 #endif

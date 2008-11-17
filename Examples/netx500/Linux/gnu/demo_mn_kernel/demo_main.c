@@ -144,7 +144,7 @@ MODULE_LICENSE("Dual BSD/GPL");
 #define APP_LED_COUNT           5       // number of LEDs in one row
 #define APP_LED_MASK            ((1 << APP_LED_COUNT) - 1)
 #define APP_DOUBLE_LED_MASK     ((1 << (APP_LED_COUNT * 2)) - 1)
-#define APP_MODE_COUNT          4
+#define APP_MODE_COUNT          5
 #define APP_MODE_MASK           ((1 << APP_MODE_COUNT) - 1)
 
 
@@ -852,15 +852,16 @@ tEplKernel          EplRet = kEplSuccessful;
             }
 
             else if ((dwMode_l & 0x08) != 0)
-            {   // Knightrider
+            {   // Knightrider for swapped boards
                 if (bLedsRow1_l == 0x00)
                 {
                     bLedsRow1_l = 0x01;
+                    iToggle = 1;
                 }
                 else if (iToggle)
                 {
                     bLedsRow1_l <<= 1;
-                    if( bLedsRow1_l >= 0x10 )
+                    if ( bLedsRow1_l >= (1 << (APP_LED_COUNT - 1)) )
                     {
                         iToggle = 0;
                     }
@@ -868,12 +869,42 @@ tEplKernel          EplRet = kEplSuccessful;
                 else
                 {
                     bLedsRow1_l >>= 1;
-                    if( bLedsRow1_l <= 0x01 )
+                    if ( bLedsRow1_l <= 0x01 )
                     {
                         iToggle = 1;
                     }
                 }
                 bLedsRow2_l = bLedsRow1_l;
+            }
+
+            else if ((dwMode_l & 0x10) != 0)
+            {   // Knightrider
+                if ((bLedsRow1_l == 0x00)
+                    || (bLedsRow2_l == 0x00)
+                    || ((bLedsRow2_l & ~APP_LED_MASK) != 0))
+                {
+                    bLedsRow1_l = 0x01;
+                    bLedsRow2_l = (1 << (APP_LED_COUNT - 1));
+                    iToggle = 1;
+                }
+                else if (iToggle)
+                {
+                    bLedsRow1_l <<= 1;
+                    bLedsRow2_l >>= 1;
+                    if ( bLedsRow1_l >= (1 << (APP_LED_COUNT - 1)) )
+                    {
+                        iToggle = 0;
+                    }
+                }
+                else
+                {
+                    bLedsRow1_l >>= 1;
+                    bLedsRow2_l <<= 1;
+                    if ( bLedsRow1_l <= 0x01 )
+                    {
+                        iToggle = 1;
+                    }
+                }
             }
 
             // set own output
