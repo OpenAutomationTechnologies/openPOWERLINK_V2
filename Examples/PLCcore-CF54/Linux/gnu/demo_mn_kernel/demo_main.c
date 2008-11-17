@@ -151,7 +151,7 @@ MODULE_LICENSE("Dual BSD/GPL");
 #define APP_LED_COUNT           5       // number of LEDs in one row
 #define APP_LED_MASK            ((1 << APP_LED_COUNT) - 1)
 #define APP_DOUBLE_LED_MASK     ((1 << (APP_LED_COUNT * 2)) - 1)
-#define APP_MODE_COUNT          4
+#define APP_MODE_COUNT          5
 #define APP_MODE_MASK           ((1 << APP_MODE_COUNT) - 1)
 
 
@@ -462,7 +462,7 @@ tEplObdSize         ObdSize;
     // reset old process variables
     bVarOut1Old_l = 0;
     bSpeedSelectOld_l = 0;
-    dwMode_l = DEFAULT_MODE;
+    dwMode_l = APP_DEFAULT_MODE;
     iMaxCycleCount_l = DEFAULT_MAX_CYCLE_COUNT;
 
 
@@ -491,7 +491,7 @@ tEplObdSize         ObdSize;
     atomic_set(&AtomicShutdown_g, FALSE);
 
 Exit:
-    printk("epl.init(): returns 0x%X\n", EplRet);
+    printk("EplLinInit(): returns 0x%X\n", EplRet);
     return EplRet;
 }
 
@@ -918,11 +918,12 @@ tCF54DigiOut        CF54DigiOut;
                 if (bLedsRow1_l == 0x00)
                 {
                     bLedsRow1_l = 0x01;
+                    iToggle = 1;
                 }
                 else if (iToggle)
                 {
                     bLedsRow1_l <<= 1;
-                    if( bLedsRow1_l >= 0x10 )
+                    if ( bLedsRow1_l >= (1 << (APP_LED_COUNT - 1)) )
                     {
                         iToggle = 0;
                     }
@@ -936,6 +937,36 @@ tCF54DigiOut        CF54DigiOut;
                     }
                 }
                 bLedsRow2_l = bLedsRow1_l;
+            }
+
+            else if ((dwMode_l & 0x10) != 0)
+            {   // Knightrider
+                if ((bLedsRow1_l == 0x00)
+                    || (bLedsRow2_l == 0x00)
+                    || ((bLedsRow2_l & ~APP_LED_MASK) != 0))
+                {
+                    bLedsRow1_l = 0x01;
+                    bLedsRow2_l = (1 << (APP_LED_COUNT - 1));
+                    iToggle = 1;
+                }
+                else if (iToggle)
+                {
+                    bLedsRow1_l <<= 1;
+                    bLedsRow2_l >>= 1;
+                    if ( bLedsRow1_l >= (1 << (APP_LED_COUNT - 1)) )
+                    {
+                        iToggle = 0;
+                    }
+                }
+                else
+                {
+                    bLedsRow1_l >>= 1;
+                    bLedsRow2_l <<= 1;
+                    if ( bLedsRow1_l <= 0x01 )
+                    {
+                        iToggle = 1;
+                    }
+                }
             }
 
             // set own output

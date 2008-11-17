@@ -31,6 +31,8 @@ Requirements
                 [*] udev                  --->
                     [*]   firmware helper
 
+- POWERLINK network as described in main readme.txt
+
 
 How to build the kernel module
 -------------------------------
