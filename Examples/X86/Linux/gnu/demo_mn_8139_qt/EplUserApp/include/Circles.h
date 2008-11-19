@@ -5,7 +5,7 @@
 
   Project:      openPOWERLINK
 
-  Description:  source file for Qt LEDs widget
+  Description:  header file for Qt circles widget
 
   License:
 
@@ -64,69 +64,47 @@
 
   Revision History:
 
-  2008/04/11 m.u.:   start of the implementation
+  2008/11/19 d.k.:   start of the implementation
 
 ****************************************************************************/
 
-#include <QVBoxLayout>
-#include <QHBoxLayout>
-#include <QToolButton>
-#include <QPalette>
-#include <QColor>
-#include <QLabel>
 
-#include "Leds.h"
+#ifndef CIRCLES_H
+#define CIRCLES_H
+
+#include <QWidget>
+#include <QPen>
 
 
+class QToolButton;
+class QPalette;
+class QHBoxLayout;
 
-
-Leds::Leds(int iCount_p, int iWidth_p, const QPalette & palette_p,
-           QWidget *parent)
-    : QWidget(parent)
+class Circles : public QWidget
 {
-    int nIdx;
+    Q_OBJECT
 
-    m_iCount = iCount_p;
+public:
+    Circles(int iCount_p, const QPen & pen_p,
+         QWidget *parent = 0);
 
-    // ---------------------------------------------------------------------
-    // Layout
-    // ---------------------------------------------------------------------
+//    void resizeContents(int iWidth_p);
 
-    QHBoxLayout *pLedsLayout = new QHBoxLayout;
-    setLayout(pLedsLayout);
+public slots:
+    void setValue(unsigned int uiDataIn_p);
 
-    setContentsMargins(0, 0, 0, 0);
+protected:
+    void paintEvent(QPaintEvent *event);
 
-    // create array for pointers to LedButtons
-    m_ppLedButtons = new QToolButton*[iCount_p];
+private:
 
-    for (nIdx = iCount_p - 1; nIdx >= 0; nIdx--)
-    {
-        m_ppLedButtons[nIdx] = new QToolButton;
-        m_ppLedButtons[nIdx]->setPalette(palette_p);
-        m_ppLedButtons[nIdx]->setFixedSize(iWidth_p, iWidth_p);
-        m_ppLedButtons[nIdx]->setDisabled(true);
-        pLedsLayout->addWidget(m_ppLedButtons[nIdx]);
-    }
+    QPen            m_Pen;
 
-    pLedsLayout->update();
-}
+    int             m_iCount;
+    unsigned int    m_uiValue;
 
-void Leds::setLeds(unsigned int uiDataIn_p)
-{
-    int nIdx;
 
-    for (nIdx=0; nIdx < m_iCount; nIdx++)
-    {
-        if (uiDataIn_p & (1 << nIdx))
-        {
-            m_ppLedButtons[nIdx]->setDisabled(false);
-        }
-        else
-        {
-            m_ppLedButtons[nIdx]->setDisabled(true);
-        }
-    }
-}
+};
 
+#endif
 

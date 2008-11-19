@@ -76,6 +76,7 @@
 
 #include "Slides.h"
 #include "Leds.h"
+#include "Circles.h"
 
 
 Slides::Slides(QWidget *parent)
@@ -101,6 +102,11 @@ Slides::Slides(QWidget *parent)
     m_pDigiOutLeds = new Leds(10, 30, PalLeds);
     pSlideLayout->addWidget(m_pDigiOutLeds);
 
+
+    m_pCircles = new Circles(10, QPen(Qt::red, 3));
+    pSlideLayout->addWidget(m_pCircles, 4);
+
+/*
     pLcd1 = new QLCDNumber(2);
     pLcd1->display(0);
     pLcd1->setSegmentStyle(QLCDNumber::Filled);
@@ -115,13 +121,16 @@ Slides::Slides(QWidget *parent)
     pSlideLayout->addStretch(1);
     pSlideLayout->addWidget(pLcd1, 4);
     //pSlideLayout->addWidget(pLcd2, 4);
+*/
+
     pSlideLayout->addStretch(1);
 
 }
 
 void Slides::setValue(unsigned int uiDataIn_p)
 {
-    pLcd1->display((int)(uiDataIn_p & 0xFF));
+//    pLcd1->display((int)(uiDataIn_p & 0xFF));
+    m_pCircles->setValue(uiDataIn_p);
     m_pDigiOutLeds->setLeds(uiDataIn_p);
     //pLcd2->display((int)(uiDataIn_p & 0x0F));
 }

@@ -6,6 +6,7 @@
 
 class QLCDNumber;
 class Leds;
+class Circles;
 
 class Slides : public QWidget
 {
@@ -20,7 +21,8 @@ public slots:
 signals:
 
 private:
-    QLCDNumber *pLcd1;
+//    QLCDNumber *pLcd1;
+    Circles*    m_pCircles;
     Leds*       m_pDigiOutLeds;
 //    QLCDNumber *pLcd2;
 

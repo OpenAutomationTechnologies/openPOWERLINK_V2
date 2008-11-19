@@ -5,7 +5,7 @@
 
   Project:      openPOWERLINK
 
-  Description:  source file for Qt LEDs widget
+  Description:  source file for Qt circles widget
 
   License:
 
@@ -64,56 +64,41 @@
 
   Revision History:
 
-  2008/04/11 m.u.:   start of the implementation
+  2008/11/19 d.k.:   start of the implementation
 
 ****************************************************************************/
 
-#include <QVBoxLayout>
-#include <QHBoxLayout>
-#include <QToolButton>
-#include <QPalette>
+#include <QPen>
+#include <QPainter>
 #include <QColor>
-#include <QLabel>
 
-#include "Leds.h"
-
+#include "Circles.h"
 
 
 
-Leds::Leds(int iCount_p, int iWidth_p, const QPalette & palette_p,
+
+Circles::Circles(int iCount_p, const QPen & pen_p,
            QWidget *parent)
     : QWidget(parent)
 {
-    int nIdx;
 
     m_iCount = iCount_p;
 
-    // ---------------------------------------------------------------------
-    // Layout
-    // ---------------------------------------------------------------------
+    m_Pen = pen_p;
 
-    QHBoxLayout *pLedsLayout = new QHBoxLayout;
-    setLayout(pLedsLayout);
+    m_uiValue = 0xA5A5;
 
-    setContentsMargins(0, 0, 0, 0);
+    setBackgroundRole(QPalette::Base);
+    setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
-    // create array for pointers to LedButtons
-    m_ppLedButtons = new QToolButton*[iCount_p];
-
-    for (nIdx = iCount_p - 1; nIdx >= 0; nIdx--)
-    {
-        m_ppLedButtons[nIdx] = new QToolButton;
-        m_ppLedButtons[nIdx]->setPalette(palette_p);
-        m_ppLedButtons[nIdx]->setFixedSize(iWidth_p, iWidth_p);
-        m_ppLedButtons[nIdx]->setDisabled(true);
-        pLedsLayout->addWidget(m_ppLedButtons[nIdx]);
-    }
-
-    pLedsLayout->update();
 }
 
-void Leds::setLeds(unsigned int uiDataIn_p)
+void Circles::setValue(unsigned int uiDataIn_p)
 {
+    m_uiValue = uiDataIn_p;
+    update();
+
+/*
     int nIdx;
 
     for (nIdx=0; nIdx < m_iCount; nIdx++)
@@ -125,6 +110,35 @@ void Leds::setLeds(unsigned int uiDataIn_p)
         else
         {
             m_ppLedButtons[nIdx]->setDisabled(true);
+        }
+    }
+*/
+}
+
+
+
+void Circles::paintEvent(QPaintEvent *)
+{
+int iDiameter;
+
+    QPainter painter(this);
+
+    // disable antialiasing
+    painter.setRenderHint(QPainter::Antialiasing, false);
+
+    // move local coordinate system to center of widget
+    painter.translate(width() / 2, height() / 2);
+
+    painter.setPen(m_Pen);
+
+    // paint circles
+    for (int nIdx=0; nIdx < m_iCount; nIdx++)
+    {
+        if (m_uiValue & (1 << nIdx))
+        {
+            iDiameter = (nIdx + 1) * 10;
+            painter.drawEllipse(QRect(-iDiameter / 2, -iDiameter / 2,
+                                      iDiameter, iDiameter));
         }
     }
 }

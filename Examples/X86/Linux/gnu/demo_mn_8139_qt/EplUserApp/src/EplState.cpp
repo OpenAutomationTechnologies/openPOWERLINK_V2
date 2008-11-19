@@ -10,6 +10,10 @@
 #include "Leds.h"
 
 
+#define LED_SIZE    30
+#define NODE_WIDTH  (LED_SIZE * 3 / 2)
+#define NODE_HEIGHT (LED_SIZE)
+
 
 EplState::EplState(QWidget *parent)
     : QWidget(parent)
@@ -57,7 +61,7 @@ EplState::EplState(QWidget *parent)
     pDigiInLabel->setFont(LabelFont);
     pEplStateLayout->addWidget(pDigiInLabel);
 
-    m_pLeds = new Leds(LED_NUM, 30, PalLeds);
+    m_pLeds = new Leds(LED_NUM, LED_SIZE, PalLeds);
     pEplStateLayout->addWidget(m_pLeds);
 /*
     QHBoxLayout *pLedsLayout = new QHBoxLayout;
@@ -72,11 +76,12 @@ EplState::EplState(QWidget *parent)
         pLedsLayout->addWidget(apLeds[nIdx]);
     }
 */
-    pEplStateLayout->addStretch(0);
+    pEplStateLayout->addStretch(1);
     QFrame *pFrameUpper = new QFrame;
     pFrameUpper->setFrameStyle(QFrame::HLine);
     pEplStateLayout->addWidget(pFrameUpper);
-    pEplStateLayout->addSpacing(20);
+//    pEplStateLayout->addSpacing(20);
+    pEplStateLayout->addStretch(1);
 
     // MN State in the middle
 
@@ -88,6 +93,7 @@ EplState::EplState(QWidget *parent)
     pNmtStateLayout = new QHBoxLayout;
     pEplStateLayout->addLayout(pNmtStateLayout);
     pEplStatusLed = new QToolButton;
+    pEplStatusLed->setFixedSize(LED_SIZE, LED_SIZE);
     //pEplStatusLed->setVisible(false);
     pNmtStateLayout->addSpacing(10);
     pNmtStateLayout->addWidget(pEplStatusLed);
@@ -104,8 +110,10 @@ EplState::EplState(QWidget *parent)
     pEplStateLayout->addStretch(0);
     QFrame *pFrameLower = new QFrame;
     pFrameLower->setFrameStyle(QFrame::HLine);
+    pEplStateLayout->addStretch(1);
     pEplStateLayout->addWidget(pFrameLower);
-    pEplStateLayout->addSpacing(20);
+    pEplStateLayout->addStretch(1);
+//    pEplStateLayout->addSpacing(20);
 
     // CN states at lower half
     pNodesSectionLabel = new QLabel("Controlled Nodes (CNs):");
@@ -127,7 +135,7 @@ EplState::EplState(QWidget *parent)
         apNodes[nIdx]->hide();
     }
 
-    pEplStateLayout->addStretch(0);
+    pEplStateLayout->addStretch(1);
 
 }
 
@@ -156,7 +164,7 @@ void EplState::addNode(int iNodeId_p)
     if ((iNodeId_p >= 0) && (iNodeId_p <= NODE_ID_MAX))
     {
         apNodes[iNodeId_p]->show();
-        apNodes[iNodeId_p]->setFixedSize(iNodeWidth, iNodeHeight);
+        apNodes[iNodeId_p]->setFixedSize(NODE_WIDTH, NODE_HEIGHT);
         pNodesLayout->update();
     }
 
@@ -262,7 +270,7 @@ int nIdx;
         apLeds[nIdx]->update();
     }
 */
-
+/*
     pEplStatusLed->setFixedSize(iWidth, iHeight);
     //pEplStatusLed->update();
     pNmtStateLayout->update();
@@ -278,7 +286,7 @@ int nIdx;
         }
     }
     pNodesLayout->update();
-
+*/
 }
 
 

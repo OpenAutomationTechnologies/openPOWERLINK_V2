@@ -1208,6 +1208,7 @@ static void EdrvRemoveOne(struct pci_dev *pPciDev)
 
     if (EdrvInstance_l.m_pPciDev != pPciDev)
     {   // trying to remove unknown device
+        BUG_ON(EdrvInstance_l.m_pPciDev != pPciDev);
         goto Exit;
     }
 
