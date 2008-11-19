@@ -92,7 +92,11 @@ tEplKernel EplPdouAddInstance(void);
 
 tEplKernel EplPdouDelInstance(void);
 
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOU)) != 0)
 tEplKernel PUBLIC EplPdouCbObdAccess(tEplObdCbParam MEM* pParam_p);
+#else
+#define EplPdouCbObdAccess		NULL
+#endif
 
 // returns error if bPdoId_p is already valid
 /*
