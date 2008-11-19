@@ -828,10 +828,14 @@ tEplKernel      Ret = kEplSuccessful;
             // reset timers
             Ret = EplNmtMnuReset();
 
-            // reset internal node info
+            // 2008/11/18 d.k. reset internal node info is not necessary,
+            //                 because timer flags are important and other
+            //                 things are reset by EplNmtMnuStartBootStep1().
+/*
             EPL_MEMSET(EplNmtMnuInstance_g.m_aNodeInfo,
                        0,
                        sizeof (EplNmtMnuInstance_g.m_aNodeInfo));
+*/
 
             // inform DLL about NMT state change,
             // so that it can clear the asynchonous queues and start the reduced cycle
@@ -1491,10 +1495,11 @@ tEplObdSize     ObdSize;
 
             // save node config in local node info structure
             EPL_NMTMNU_GET_NODEINFO(uiSubIndex)->m_dwNodeCfg = dwNodeCfg;
+            EPL_NMTMNU_GET_NODEINFO(uiSubIndex)->m_NodeState = kEplNmtMnuNodeStateUnknown;
+
             if ((dwNodeCfg & (EPL_NODEASSIGN_NODE_IS_CN | EPL_NODEASSIGN_NODE_EXISTS)) != 0)
             {   // node is configured as CN
                 // identify the node
-                EPL_NMTMNU_GET_NODEINFO(uiSubIndex)->m_NodeState = kEplNmtMnuNodeStateUnknown;
                 Ret = EplIdentuRequestIdentResponse(uiSubIndex, EplNmtMnuCbIdentResponse);
                 if (Ret != kEplSuccessful)
                 {
