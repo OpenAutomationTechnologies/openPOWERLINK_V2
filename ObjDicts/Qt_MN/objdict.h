@@ -19,11 +19,13 @@ EPL_OBD_BEGIN ()
             EPL_OBD_SUBINDEX_RAM_VAR(0x1001, 0x00, 0x05, 0x01, tEplObdUnsigned8, ERR_ErrorRegister_U8, 0x00)
         EPL_OBD_END_INDEX(0x1001)
 
+/*
         // Object 1003h: ERR_History_ADOM
         EPL_OBD_RAM_INDEX_RAM_VARARRAY_NOINIT(0x1003, 10, NULL, 0x0F, 0x01, tEplObdDomain, ERR_History_ADOM)
+*/
 
         // Object 1006h: NMT_CycleLen_U32 in [us]
-        EPL_OBD_BEGIN_INDEX_RAM(0x1006, 0x01, EplApiCbObdAccess)
+        EPL_OBD_BEGIN_INDEX_RAM(0x1006, 0x01, NULL)
             EPL_OBD_SUBINDEX_RAM_VAR(0x1006, 0x00, 0x07, 0x03, tEplObdUnsigned32, NMT_CycleLen_U32, 0x00)   // in [us]
         EPL_OBD_END_INDEX(0x1006)
 
@@ -52,12 +54,12 @@ EPL_OBD_BEGIN ()
         EPL_OBD_END_INDEX(0x1018)
 
         // Object 1020h: CFM_VerifyConfiguration_REC
-        EPL_OBD_BEGIN_INDEX_RAM(0x1020, 0x05, EplApiCbObdAccess)
+        EPL_OBD_BEGIN_INDEX_RAM(0x1020, 0x03, EplApiCbObdAccess)
             EPL_OBD_SUBINDEX_RAM_VAR(0x1020, 0x00, 0x05, 0x04, tEplObdUnsigned8, NumberOfEntries, 0x04)
             EPL_OBD_SUBINDEX_RAM_VAR(0x1020, 0x01, 0x07, 0x03, tEplObdUnsigned32, ConfDate_U32, 0)
             EPL_OBD_SUBINDEX_RAM_VAR(0x1020, 0x02, 0x07, 0x03, tEplObdUnsigned32, ConfTime_U32, 0)
-            EPL_OBD_SUBINDEX_RAM_VAR(0x1020, 0x03, 0x07, 0x03, tEplObdUnsigned32, ConfId_U32, 0)
-            EPL_OBD_SUBINDEX_RAM_VAR(0x1020, 0x04, 0x07, 0x03, tEplObdUnsigned32, VerifyConfInvalid_U32, 1)
+//            EPL_OBD_SUBINDEX_RAM_VAR(0x1020, 0x03, 0x07, 0x03, tEplObdUnsigned32, ConfId_U32, 0)
+//            EPL_OBD_SUBINDEX_RAM_VAR(0x1020, 0x04, 0x07, 0x03, tEplObdUnsigned32, VerifyConfInvalid_U32, 1)
         EPL_OBD_END_INDEX(0x1020)
 
         // Object 1030h: NMT_InterfaceGroup_Xh_REC
@@ -66,17 +68,17 @@ EPL_OBD_BEGIN ()
             EPL_OBD_SUBINDEX_RAM_VAR(0x1030, 0x01, 0x06, 0x01, tEplObdUnsigned16, InterfaceIndex_U16, 0x01)
             EPL_OBD_SUBINDEX_RAM_VSTRING(0x1030, 0x02, 0x04, InterfaceDescription_VSTR ,0x20, "Interface 1")
             EPL_OBD_SUBINDEX_RAM_VAR(0x1030, 0x03, 0x05, 0x04, tEplObdUnsigned8, InterfaceType_U8, 0x06)
-            EPL_OBD_SUBINDEX_RAM_VAR(0x1030, 0x04, 0x06, 0x04, tEplObdUnsigned16, InterfaceMtu_U16, 0x0)
+            EPL_OBD_SUBINDEX_RAM_VAR(0x1030, 0x04, 0x06, 0x04, tEplObdUnsigned16, InterfaceMtu_U16, 1500)
             EPL_OBD_SUBINDEX_RAM_OSTRING(0x1030, 0x05, 0x04,  InterfacePhysAddress_OSTR, 0x06)
             EPL_OBD_SUBINDEX_RAM_VSTRING(0x1030, 0x06, 0x04,  InterfaceName_VSTR, 0x20 ,"Interface 1")
             EPL_OBD_SUBINDEX_RAM_VAR(0x1030, 0x07, 0x05, 0x01, tEplObdUnsigned8, InterfaceOperStatus_U8, 0x0)
             EPL_OBD_SUBINDEX_RAM_VAR(0x1030, 0x08, 0x05, 0x03, tEplObdUnsigned8, InterfaceAdminState_U8, 0x1)
-            EPL_OBD_SUBINDEX_RAM_VAR(0x1030, 0x09, 0x01, 0x03, tEplObdBoolean, Valid_BOOL, 0x0)
+            EPL_OBD_SUBINDEX_RAM_VAR(0x1030, 0x09, 0x01, 0x03, tEplObdBoolean, Valid_BOOL, 0x1)
         EPL_OBD_END_INDEX(0x1030)
 
         // Object 1300h: SDO_SequLayerTimeout_U32
         EPL_OBD_BEGIN_INDEX_RAM(0x1300, 0x01, NULL)
-            EPL_OBD_SUBINDEX_RAM_VAR(0x1300, 0x00, 0x07, 0x03, tEplObdUnsigned32, SDO_SequLayerTimeout_U32, 0x00)
+            EPL_OBD_SUBINDEX_RAM_VAR(0x1300, 0x00, 0x07, 0x03, tEplObdUnsigned32, SDO_SequLayerTimeout_U32, 5000)
         EPL_OBD_END_INDEX(0x1300)
 
         // Object 1400h: PDO_RxCommParam_00h_REC
@@ -201,21 +203,24 @@ EPL_OBD_BEGIN ()
         // additional TxPDOs if master is enabled
 
         // Object 1A01h: PDO_TxMappParam_01h_AU64
-        EPL_OBD_BEGIN_INDEX_RAM(0x1A01, 0x02, NULL)
-            EPL_OBD_SUBINDEX_RAM_VAR(0x1A01, 0x00, 0x05, 0x03, tEplObdUnsigned8, NumberOfEntries, 0x01)
+        EPL_OBD_BEGIN_INDEX_RAM(0x1A01, 0x03, NULL)
+            EPL_OBD_SUBINDEX_RAM_VAR(0x1A01, 0x00, 0x05, 0x03, tEplObdUnsigned8, NumberOfEntries, 0x02)
             EPL_OBD_SUBINDEX_RAM_VAR(0x1A01, 0x01, 0x1B, 0x03, tEplObdUnsigned64, ObjectMapping, 0x0008000000022000LL)
+            EPL_OBD_SUBINDEX_RAM_VAR(0x1A01, 0x02, 0x1B, 0x03, tEplObdUnsigned64, ObjectMapping, 0x0008000800012000LL)
         EPL_OBD_END_INDEX(0x1A01)
 
         // Object 1A02h: PDO_TxMappParam_02h_AU64
-        EPL_OBD_BEGIN_INDEX_RAM(0x1A02, 0x02, NULL)
-            EPL_OBD_SUBINDEX_RAM_VAR(0x1A02, 0x00, 0x05, 0x03, tEplObdUnsigned8, NumberOfEntries, 0x01)
+        EPL_OBD_BEGIN_INDEX_RAM(0x1A02, 0x03, NULL)
+            EPL_OBD_SUBINDEX_RAM_VAR(0x1A02, 0x00, 0x05, 0x03, tEplObdUnsigned8, NumberOfEntries, 0x02)
             EPL_OBD_SUBINDEX_RAM_VAR(0x1A02, 0x01, 0x1B, 0x03, tEplObdUnsigned64, ObjectMapping, 0x0008000000022000LL)
+            EPL_OBD_SUBINDEX_RAM_VAR(0x1A02, 0x02, 0x1B, 0x03, tEplObdUnsigned64, ObjectMapping, 0x0008000800012000LL)
         EPL_OBD_END_INDEX(0x1A02)
 
         // Object 1A03h: PDO_TxMappParam_03h_AU64
-        EPL_OBD_BEGIN_INDEX_RAM(0x1A03, 0x02, NULL)
-            EPL_OBD_SUBINDEX_RAM_VAR(0x1A03, 0x00, 0x05, 0x03, tEplObdUnsigned8, NumberOfEntries, 0x01)
+        EPL_OBD_BEGIN_INDEX_RAM(0x1A03, 0x03, NULL)
+            EPL_OBD_SUBINDEX_RAM_VAR(0x1A03, 0x00, 0x05, 0x03, tEplObdUnsigned8, NumberOfEntries, 0x02)
             EPL_OBD_SUBINDEX_RAM_VAR(0x1A03, 0x01, 0x1B, 0x03, tEplObdUnsigned64, ObjectMapping, 0x0008000000012000LL)
+            EPL_OBD_SUBINDEX_RAM_VAR(0x1A03, 0x02, 0x1B, 0x03, tEplObdUnsigned64, ObjectMapping, 0x0008000800022000LL)
         EPL_OBD_END_INDEX(0x1A03)
 
 #endif
@@ -254,6 +259,14 @@ EPL_OBD_BEGIN ()
             EPL_OBD_SUBINDEX_RAM_USERDEF(0x1C0B, 0x02, 0x07, 0x01, tEplObdUnsigned32, ThresholdCnt_U32, 0x0)
             EPL_OBD_SUBINDEX_RAM_USERDEF(0x1C0B, 0x03, 0x07, 0x03, tEplObdUnsigned32, Threshold_U32, 0x1)
         EPL_OBD_END_INDEX(0x1C0B)
+
+        // Object 1C0Dh: DLL_CNLossPReq_REC
+        EPL_OBD_BEGIN_INDEX_RAM(0x1C0D, 0x04, NULL)
+            EPL_OBD_SUBINDEX_RAM_VAR(0x1C0D, 0x00, 0x05, 0x01, tEplObdUnsigned8, NumberOfEntries, 0x03)
+            EPL_OBD_SUBINDEX_RAM_USERDEF_NOINIT(0x1C0D, 0x01, 0x07, 0x03, tEplObdUnsigned32, CumulativeCnt_U32)
+            EPL_OBD_SUBINDEX_RAM_USERDEF(0x1C0D, 0x02, 0x07, 0x01, tEplObdUnsigned32, ThresholdCnt_U32, 0x0)
+            EPL_OBD_SUBINDEX_RAM_USERDEF(0x1C0D, 0x03, 0x07, 0x03, tEplObdUnsigned32, Threshold_U32, 0x1)
+        EPL_OBD_END_INDEX(0x1C0D)
 
         // Object 1C0Fh: DLL_CNCRCError_REC
         EPL_OBD_BEGIN_INDEX_RAM(0x1C0F, 0x04, NULL)
@@ -315,13 +328,13 @@ EPL_OBD_BEGIN ()
 
         // Object 1F8Ch: NMT_CurrNMTState_U8
         EPL_OBD_BEGIN_INDEX_RAM(0x1F8C, 0x01, NULL)
-            EPL_OBD_SUBINDEX_RAM_VAR(0x1F8C, 0x00, 0x05, 0x01, tEplObdUnsigned8, NMT_CurrNMTState_U8, 0x00)
+            EPL_OBD_SUBINDEX_RAM_VAR(0x1F8C, 0x00, 0x05, 0x09, tEplObdUnsigned8, NMT_CurrNMTState_U8, 0x00)
         EPL_OBD_END_INDEX(0x1F8C)
 
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
         // Object 1F8Dh: NMT_PResPayloadLimitList_AU16
         EPL_OBD_RAM_INDEX_RAM_ARRAY(0x1F8D, 254, NULL, 0x06, 0x03, tEplObdUnsigned16, NMT_PResPayloadLimitList_AU16, 36)
 
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
         // Object 1F8Eh: NMT_MNNodeCurrState_AU8
         EPL_OBD_RAM_INDEX_RAM_ARRAY(0x1F8E, 254, NULL, 0x05, 0x01, tEplObdUnsigned8, NMT_MNNodeCurrState_AU8, 0x1C)
 
@@ -340,17 +353,17 @@ EPL_OBD_BEGIN ()
         EPL_OBD_END_INDEX(0x1F93)
 
         // Object 1F98h: NMT_CycleTiming_REC
-        EPL_OBD_BEGIN_INDEX_RAM(0x1F98, 0x0A, EplApiCbObdAccess)
-            EPL_OBD_SUBINDEX_RAM_VAR(0x1F98, 0x00, 0x05, 0x01, tEplObdUnsigned8, NumberOfEntries, 0x09)
+        EPL_OBD_BEGIN_INDEX_RAM(0x1F98, 0x09, NULL)
+            EPL_OBD_SUBINDEX_RAM_VAR(0x1F98, 0x00, 0x05, 0x01, tEplObdUnsigned8, NumberOfEntries, 0x08)
             EPL_OBD_SUBINDEX_RAM_VAR(0x1F98, 0x01, 0x06, 0x01, tEplObdUnsigned16, IsochrTxMaxPayload_U16, 0x00)
             EPL_OBD_SUBINDEX_RAM_VAR(0x1F98, 0x02, 0x06, 0x01, tEplObdUnsigned16, IsochrRxMaxPayload_U16, 0x00)
             EPL_OBD_SUBINDEX_RAM_VAR(0x1F98, 0x03, 0x07, 0x01, tEplObdUnsigned32, PResMaxLatency_U32, 0x00)     // in [ns]
             EPL_OBD_SUBINDEX_RAM_VAR(0x1F98, 0x04, 0x06, 0x03, tEplObdUnsigned16, PReqActPayloadLimit_U16, 36)
-            EPL_OBD_SUBINDEX_RAM_VAR(0x1F98, 0x05, 0x06, 0x01, tEplObdUnsigned16, PResActPayloadLimit_U16, 36)
+            EPL_OBD_SUBINDEX_RAM_VAR(0x1F98, 0x05, 0x06, 0x03, tEplObdUnsigned16, PResActPayloadLimit_U16, 36)
             EPL_OBD_SUBINDEX_RAM_VAR(0x1F98, 0x06, 0x07, 0x01, tEplObdUnsigned32, ASndMaxLatency_U32, 0x00)     // in [ns]
             EPL_OBD_SUBINDEX_RAM_VAR(0x1F98, 0x07, 0x05, 0x03, tEplObdUnsigned8, MultiplCycleCnt_U8, 0x00)
             EPL_OBD_SUBINDEX_RAM_VAR(0x1F98, 0x08, 0x06, 0x03, tEplObdUnsigned16, AsyncMTU_U16, EPL_C_DLL_MIN_ASYNC_MTU)
-            EPL_OBD_SUBINDEX_RAM_VAR(0x1F98, 0x09, 0x06, 0x03, tEplObdUnsigned16, Prescaler_U16, 0x02)
+//            EPL_OBD_SUBINDEX_RAM_VAR(0x1F98, 0x09, 0x06, 0x03, tEplObdUnsigned16, Prescaler_U16, 0x02)
         EPL_OBD_END_INDEX(0x1F98)
 
         // Object 1F99h: NMT_CNBasicEthernetTimeout_U32 in [us]

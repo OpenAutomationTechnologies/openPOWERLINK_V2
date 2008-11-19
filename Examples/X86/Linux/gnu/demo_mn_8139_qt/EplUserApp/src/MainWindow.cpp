@@ -146,7 +146,7 @@ MainWindow::MainWindow(QWidget *parent)
 
 void MainWindow::setLcd(unsigned int uiDataIn_p)
 {
-    pSlides->setLcd(uiDataIn_p);
+    pSlides->setValue(uiDataIn_p);
 }
 
 

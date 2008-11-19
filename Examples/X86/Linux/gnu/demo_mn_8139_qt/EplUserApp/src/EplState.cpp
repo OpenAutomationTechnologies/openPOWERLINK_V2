@@ -7,7 +7,7 @@
 #include <QLabel>
 
 #include "EplState.h"
-
+#include "Leds.h"
 
 
 
@@ -15,6 +15,16 @@ EplState::EplState(QWidget *parent)
     : QWidget(parent)
 {
     int nIdx;
+
+    QFont LabelFont;
+    LabelFont.setBold(true);
+    LabelFont.setPointSize(18);
+
+    QPalette PalLeds;
+    PalLeds.setColor(QPalette::Active, QPalette::Window, Qt::blue);
+    PalLeds.setColor(QPalette::Active, QPalette::Button, Qt::blue);
+    PalLeds.setColor(QPalette::Inactive, QPalette::Window, Qt::blue);
+    PalLeds.setColor(QPalette::Inactive, QPalette::Button, Qt::blue);
 
     // ---------------------------------------------------------------------
     // Color init
@@ -43,6 +53,13 @@ EplState::EplState(QWidget *parent)
     pEplStateLayout->addStretch(0);
 
     // process value LEDs at upper half
+    QLabel* pDigiInLabel = new QLabel("Digital Inputs:");
+    pDigiInLabel->setFont(LabelFont);
+    pEplStateLayout->addWidget(pDigiInLabel);
+
+    m_pLeds = new Leds(LED_NUM, 30, PalLeds);
+    pEplStateLayout->addWidget(m_pLeds);
+/*
     QHBoxLayout *pLedsLayout = new QHBoxLayout;
     pEplStateLayout->addLayout(pLedsLayout);
 
@@ -54,6 +71,7 @@ EplState::EplState(QWidget *parent)
         //pLedsLayout->addWidget(apLeds[nIdx], 0, Qt::AlignLeft);
         pLedsLayout->addWidget(apLeds[nIdx]);
     }
+*/
     pEplStateLayout->addStretch(0);
     QFrame *pFrameUpper = new QFrame;
     pFrameUpper->setFrameStyle(QFrame::HLine);
@@ -63,10 +81,7 @@ EplState::EplState(QWidget *parent)
     // MN State in the middle
 
     pNmtSectionLabel = new QLabel("NMT State:");
-    QFont tmpFont3;
-    tmpFont3.setBold(true);
-    tmpFont3.setPointSize(18);
-    pNmtSectionLabel->setFont(tmpFont3);
+    pNmtSectionLabel->setFont(LabelFont);
     pEplStateLayout->addWidget(pNmtSectionLabel);
     pEplStateLayout->addSpacing(20);
 
@@ -79,13 +94,13 @@ EplState::EplState(QWidget *parent)
 
     pNmtStateLabel = new QLabel("Off");
     //pNmtStateLabel->setVisible(false);
-    QFont tmpFont2(pNmtStateLabel->font());
-    tmpFont2.setBold(true);
-    tmpFont2.setPointSize(18);
-    pNmtStateLabel->setFont(tmpFont2);
+//    QFont LabelFont(pNmtStateLabel->font());
+//    LabelFont.setBold(true);
+//    LabelFont.setPointSize(18);
+    pNmtStateLabel->setFont(LabelFont);
     pNmtStateLayout->addSpacing(10);
     pNmtStateLayout->addWidget(pNmtStateLabel);
-    
+
     pEplStateLayout->addStretch(0);
     QFrame *pFrameLower = new QFrame;
     pFrameLower->setFrameStyle(QFrame::HLine);
@@ -94,7 +109,7 @@ EplState::EplState(QWidget *parent)
 
     // CN states at lower half
     pNodesSectionLabel = new QLabel("Controlled Nodes (CNs):");
-    pNodesSectionLabel->setFont(tmpFont3);
+    pNodesSectionLabel->setFont(LabelFont);
     pEplStateLayout->addWidget(pNodesSectionLabel);
     pEplStateLayout->addSpacing(20);
 
@@ -103,10 +118,10 @@ EplState::EplState(QWidget *parent)
     for(nIdx=0; nIdx <= NODE_ID_MAX; nIdx++)
     {
         apNodes[nIdx] = new QToolButton;
-        QFont tmpFont4(apNodes[nIdx]->font());
-	tmpFont4.setBold(true);
-	tmpFont4.setPointSize(18);
-        apNodes[nIdx]->setFont(tmpFont4);
+//        QFont LabelFont(apNodes[nIdx]->font());
+//	LabelFont.setBold(true);
+//	LabelFont.setPointSize(18);
+        apNodes[nIdx]->setFont(LabelFont);
         apNodes[nIdx]->setText(QString::number(nIdx));
         pNodesLayout->addWidget(apNodes[nIdx]);
         apNodes[nIdx]->hide();
@@ -114,27 +129,12 @@ EplState::EplState(QWidget *parent)
 
     pEplStateLayout->addStretch(0);
 
-    // ---------------------------------------------------------------------
-    // other init
-    // ---------------------------------------------------------------------
-
-    PalGreenButton.setColor(QPalette::Active, QPalette::Window, Qt::green);
-    PalGreenButton.setColor(QPalette::Active, QPalette::Button, Qt::green);
-    PalGreenButton.setColor(QPalette::Inactive, QPalette::Window, Qt::green);
-    PalGreenButton.setColor(QPalette::Inactive, QPalette::Button, Qt::green);
-    PalYellowButton.setColor(QPalette::Active, QPalette::Window, Qt::yellow);
-    PalYellowButton.setColor(QPalette::Active, QPalette::Button, Qt::yellow);
-    PalYellowButton.setColor(QPalette::Inactive, QPalette::Window, Qt::yellow);
-    PalYellowButton.setColor(QPalette::Inactive, QPalette::Button, Qt::yellow);
-    PalRedButton.setColor(QPalette::Active, QPalette::Window, Qt::red);
-    PalRedButton.setColor(QPalette::Active, QPalette::Button, Qt::red);
-    PalRedButton.setColor(QPalette::Inactive, QPalette::Window, Qt::red);
-    PalRedButton.setColor(QPalette::Inactive, QPalette::Button, Qt::red);
-
 }
 
 void EplState::setLeds(unsigned int uiDataIn_p)
 {
+    m_pLeds->setLeds(uiDataIn_p);
+/*
     int nIdx;
 
     for(nIdx=0; nIdx < LED_NUM; nIdx++)
@@ -148,6 +148,7 @@ void EplState::setLeds(unsigned int uiDataIn_p)
             apLeds[nIdx]->setDisabled(true);
         }
     }
+*/
 }
 
 void EplState::addNode(int iNodeId_p)
@@ -254,17 +255,19 @@ int nIdx;
 
     iWidth = iWidth_p/30;
     iHeight = iWidth;
+/*
     for (nIdx=0; nIdx<LED_NUM; nIdx++)
     {
         apLeds[nIdx]->setFixedSize(iWidth, iHeight);
         apLeds[nIdx]->update();
     }
+*/
 
     pEplStatusLed->setFixedSize(iWidth, iHeight);
     //pEplStatusLed->update();
     pNmtStateLayout->update();
 
-    iWidth *= 1.5;
+    iWidth = iWidth * 3 / 2;
     iNodeWidth = iWidth;
     iNodeHeight = iHeight;
     for (nIdx=0; nIdx <= NODE_ID_MAX; nIdx++)

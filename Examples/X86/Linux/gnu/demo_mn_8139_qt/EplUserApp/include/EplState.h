@@ -12,7 +12,7 @@ class QToolButton;
 class QPalette;
 class QHBoxLayout;
 class QLabel;
-
+class Leds;
 
 class EplState : public QWidget
 {
@@ -43,15 +43,16 @@ private:
     QLabel      *pNmtStateLabel;
     QHBoxLayout *pNmtStateLayout;
 
-    QToolButton* apLeds[LED_NUM];
     QToolButton* apNodes[NODE_ID_MAX+1];
+
+    Leds*       m_pLeds;
 
     QLabel      *pNmtSectionLabel;
     QLabel      *pNodesSectionLabel;
 
     int   iNodeWidth;
     int   iNodeHeight;
-    
+
 };
 
 #endif

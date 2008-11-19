@@ -48,13 +48,13 @@
 // const defines
 //---------------------------------------------------------------------------
 
-#define NODEID       240 //0x6E//0xF0 //=> MN
-#define IP_ADDR      0xc0a86401  // 192.168.100.1
-#define SUBNET_MASK  0xFFFFFF00  // 255.255.255.0
-#define HOSTNAME     "SYS TEC electronic EPL Stack    "
-#define IF_ETH       EPL_VETH_NAME
+#define NODEID      0xF0    // MN
+#define IP_ADDR     0xc0a86401  // 192.168.100.1
+#define SUBNET_MASK 0xFFFFFF00  // 255.255.255.0
+#define HOSTNAME    "SYS TEC electronic EPL Stack    "
+#define IF_ETH      EPL_VETH_NAME
 
-#define CYCLE_LEN    5000 /* org val 5000 */
+#define CYCLE_LEN   5000 /* org val 5000 */
 
 //---------------------------------------------------------------------------
 // local types
@@ -66,16 +66,11 @@
 
 CONST BYTE abMacAddr[] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 
-BYTE     bVarIn_l;
-BYTE     bVarOut_l;
-BYTE     bVarInOld_l;
-BYTE     bVarOutOld_l;
-
-BYTE     abDomain_l[3000];
 
 //---------------------------------------------------------------------------
 // local function prototypes
 //---------------------------------------------------------------------------
+
 
 //=========================================================================//
 //                                                                         //
@@ -110,9 +105,9 @@ Slides*             pSlides;
                      pEplState, SLOT(removeAllNodes()));
 
     pEplDataInOutThread = new EplDataInOutThread;
-    QObject::connect(pEplDataInOutThread, SIGNAL(processImageChanged(unsigned int)),
+    QObject::connect(pEplDataInOutThread, SIGNAL(processImageOutChanged(unsigned int)),
                      pMainWindow_p, SLOT(setLcd(unsigned int)));
-    QObject::connect(pEplDataInOutThread, SIGNAL(processImageChanged(unsigned int)),
+    QObject::connect(pEplDataInOutThread, SIGNAL(processImageInChanged(unsigned int)),
                      pEplState, SLOT(setLeds(unsigned int)));
 
     EPL_MEMSET(&EplApiInitParam, 0, sizeof (EplApiInitParam));

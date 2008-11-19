@@ -5,6 +5,7 @@
 #include <QWidget>
 
 class QLCDNumber;
+class Leds;
 
 class Slides : public QWidget
 {
@@ -14,13 +15,14 @@ public:
     Slides(QWidget *parent = 0);
 
 public slots:
-    void setLcd(unsigned int uiDataIn_p);
+    void setValue(unsigned int uiDataIn_p);
 
 signals:
 
 private:
     QLCDNumber *pLcd1;
-    QLCDNumber *pLcd2;
+    Leds*       m_pDigiOutLeds;
+//    QLCDNumber *pLcd2;
 
 };
 

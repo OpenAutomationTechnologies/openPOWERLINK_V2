@@ -14,6 +14,22 @@ class QWidget;
 class QString;
 
 
+typedef struct
+{
+    BYTE    m_bVarIn1;
+    BYTE    m_abSelect[3];  // pushbuttons from CNs
+
+} __attribute__((packed)) tAppProcessImageIn;
+
+typedef struct
+{
+    BYTE    m_bVarOut1;
+    BYTE    m_bLedsRow1;    // current state of the LEDs in row 1
+    BYTE    m_bLedsRow2;    // current state of the LEDs in row 2
+
+} __attribute__((packed)) tAppProcessImageOut;
+
+
 class EplDataInOutThread : public QThread
 {
     Q_OBJECT
@@ -23,14 +39,18 @@ public:
 
     void run();
 
+    void acknowledge();
+
 signals:
-    void processImageChanged(unsigned int iDataIn);
+    void processImageInChanged(unsigned int uiData_p);
+    void processImageOutChanged(unsigned int uiData_p);
 
 private:
-    tEplApiProcessImage EplPiIn;
-    tEplApiProcessImage EplPiOut;
+    tEplApiProcessImage m_EplPiIn;
+    tEplApiProcessImage m_EplPiOut;
 
-    unsigned int        uiLedsOld;
+    volatile unsigned int   m_uiAckCount;
+    unsigned int            m_uiCount;
 };
 
 #endif
