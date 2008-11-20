@@ -240,13 +240,7 @@ int         iIndex;
     // deregister IdentResponse callback function
     Ret = EplDlluCalRegAsndService(kEplDllAsndIdentResponse, NULL, kEplDllAsndFilterNone);
 
-    for (iIndex = 0; iIndex < tabentries (EplIdentuInstance_g.m_apIdentResponse); iIndex++)
-    {
-        if (EplIdentuInstance_g.m_apIdentResponse[iIndex] != NULL)
-        {   // free memory
-            EPL_FREE(EplIdentuInstance_g.m_apIdentResponse[iIndex]);
-        }
-    }
+    Ret = EplIdentuReset();
 
     return Ret;
 

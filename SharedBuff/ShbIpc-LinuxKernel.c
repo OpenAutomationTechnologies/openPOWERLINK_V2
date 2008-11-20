@@ -346,6 +346,7 @@ struct sShbMemTable     *psMemTableElement;
         psMemTableElement = kmalloc(sizeof(struct sShbMemTable),GFP_KERNEL);
         psMemTableElement->m_iBufferId = iBufferId;
         psMemTableElement->m_pBuffer = pSharedMem;
+        psMemTableElement->m_psNextMemTableElement = NULL;
         ShbIpcAppendListElement (psMemTableElement);
     }
 
@@ -441,12 +442,12 @@ tShbError       ShbError2;
     // d.k.: Whats up with JobReady thread?
     //       Just wake it up, but without setting the semaphore variable
     wake_up_interruptible(&pShbMemHeader->m_WaitQueueJobReady);
-    // delete mem table element
-    ShbIpcDeleteListElement(pShbMemHeader->m_iBufferId);
 
     if ( !--pShbMemHeader->m_ulRefCount )
     {
         ShbError = kShbOk;
+        // delete mem table element
+        ShbIpcDeleteListElement(pShbMemHeader->m_iBufferId);
         // delete shared mem
         kfree(pShbMemInst->m_pShbMemHeader);
     }

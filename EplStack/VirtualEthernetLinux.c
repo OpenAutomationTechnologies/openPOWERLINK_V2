@@ -347,8 +347,8 @@ tEplKernel  Ret = kEplSuccessful;
     {
         //unregister VEth from the network subsystem
         unregister_netdev(pVEthNetDevice_g);
-	    free_netdev(pVEthNetDevice_g);
-	    pVEthNetDevice_g = NULL;
+	free_netdev(pVEthNetDevice_g);
+	pVEthNetDevice_g = NULL;
     }
 
     return Ret;
