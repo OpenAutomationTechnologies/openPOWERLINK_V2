@@ -81,10 +81,20 @@ Circles::Circles(int iCount_p, const QPen & pen_p,
            QWidget *parent)
     : QWidget(parent)
 {
+QColor color;
 
     m_iCount = iCount_p;
 
-    m_Pen = pen_p;
+    m_aPen = new QPen[iCount_p];
+
+    for (int nIdx=0; nIdx < m_iCount; nIdx++)
+    {
+        // initialize the pen
+        m_aPen[nIdx] = pen_p;
+        // but change its color
+        color.setHsv(((m_iCount - nIdx - 1) * 359 / m_iCount), 255, 255);
+        m_aPen[nIdx].setColor(color);
+    }
 
     m_uiValue = 0xA5A5;
 
@@ -120,25 +130,27 @@ void Circles::setValue(unsigned int uiDataIn_p)
 void Circles::paintEvent(QPaintEvent *)
 {
 int iDiameter;
+int iWidth = width();
 
     QPainter painter(this);
 
     // disable antialiasing
     painter.setRenderHint(QPainter::Antialiasing, false);
 
-    // move local coordinate system to center of widget
-    painter.translate(width() / 2, height() / 2);
+    iWidth /= 2;
 
-    painter.setPen(m_Pen);
+    // move local coordinate system to center of widget
+    painter.translate(iWidth, height() /*/ 2*/);
 
     // paint circles
     for (int nIdx=0; nIdx < m_iCount; nIdx++)
     {
         if (m_uiValue & (1 << nIdx))
         {
-            iDiameter = (nIdx + 1) * 10;
-            painter.drawEllipse(QRect(-iDiameter / 2, -iDiameter / 2,
-                                      iDiameter, iDiameter));
+            painter.setPen(m_aPen[nIdx]);
+            iDiameter = nIdx * (iWidth / m_iCount) + iWidth;
+            painter.drawArc(QRect(-iDiameter / 2, -iDiameter / 2,
+                                      iDiameter, iDiameter), 0, 16 * 180);
         }
     }
 }

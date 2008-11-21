@@ -103,7 +103,7 @@ Slides::Slides(QWidget *parent)
     pSlideLayout->addWidget(m_pDigiOutLeds);
 
 
-    m_pCircles = new Circles(10, QPen(Qt::red, 3));
+    m_pCircles = new Circles(10, QPen(Qt::red, 10));
     pSlideLayout->addWidget(m_pCircles, 4);
 
 /*

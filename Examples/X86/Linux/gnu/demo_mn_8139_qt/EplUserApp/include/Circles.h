@@ -98,7 +98,7 @@ protected:
 
 private:
 
-    QPen            m_Pen;
+    QPen*           m_aPen;
 
     int             m_iCount;
     unsigned int    m_uiValue;
