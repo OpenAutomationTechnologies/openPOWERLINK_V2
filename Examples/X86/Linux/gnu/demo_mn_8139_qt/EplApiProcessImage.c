@@ -69,7 +69,6 @@
 ****************************************************************************/
 
 #include "Epl.h"
-#include "kernel/EplPdokCal.h"
 
 #if (TARGET_SYSTEM == _LINUX_) && defined(__KERNEL__)
 #include <asm/uaccess.h>
@@ -455,11 +454,6 @@ tEplKernel      Ret = kEplSuccessful;
             pPI_p->m_pImage,
             min(pPI_p->m_uiSize, sizeof (EplApiProcessImageInstance_g.m_abProcessImageOutput)));
     #endif
-#endif
-
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOK)) != 0)
-    // mark TPDO as valid
-    Ret = EplPdokCalSetTpdosValid(TRUE);
 #endif
 
     return Ret;

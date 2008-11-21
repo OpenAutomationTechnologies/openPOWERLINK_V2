@@ -411,12 +411,14 @@ int         iResult;
     iResult = pci_register_driver (&EdrvDriver);
     if (iResult != 0)
     {
+        printk("%s pci_register_driver failed with %d\n", __FUNCTION__, iResult);
         Ret = kEplNoResource;
         goto Exit;
     }
 
     if (EdrvInstance_l.m_pPciDev == NULL)
     {
+        printk("%s m_pPciDev=NULL\n", __FUNCTION__);
         Ret = kEplNoResource;
         goto Exit;
     }
@@ -453,6 +455,7 @@ tEplKernel EdrvShutdown(void)
 {
 
     // unregister PCI driver
+    printk("%s calling pci_unregister_driver()\n", __FUNCTION__);
     pci_unregister_driver (&EdrvDriver);
 
     return kEplSuccessful;

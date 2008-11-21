@@ -953,6 +953,7 @@ int  iRet;
         }
 
 
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
         // ----------------------------------------------------------
         case EPLLIN_CMD_MN_TRIGGER_STATE_CHANGE:
         {
@@ -970,6 +971,7 @@ int  iRet;
             iRet = (int) EplRet;
             break;
         }
+#endif
 
 
         // ----------------------------------------------------------

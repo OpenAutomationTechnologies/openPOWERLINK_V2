@@ -159,12 +159,14 @@ Slides*             pSlides;
     EplRet = EplApiInitialize(&EplApiInitParam);
     if(EplRet != kEplSuccessful)
     {
+        printf("%s: EplApiInitialize() failed\n", __FUNCTION__);
         goto Exit;
     }
 
     EplRet = EplApiProcessImageSetup();
     if (EplRet != kEplSuccessful)
     {
+        printf("%s: EplApiProcessImageSetup() failed\n", __FUNCTION__);
         goto Exit;
     }
     printf("Setup Process Image Successfull\n");
@@ -211,7 +213,7 @@ Slides*             pSlides;
 
 
 Exit:
-    printf("epl.init(): returns 0x%X\n", EplRet);
+    printf("%s: returns 0x%X\n", __FUNCTION__, EplRet);
 
 }
 

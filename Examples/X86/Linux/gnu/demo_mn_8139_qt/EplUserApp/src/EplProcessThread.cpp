@@ -58,7 +58,7 @@ static DWORD        dw_le_CycleLen_g;
 tEplKernel PUBLIC AppCbEvent(
     tEplApiEventType        EventType_p,   // IN: event type (enum)
     tEplApiEventArg*        pEventArg_p,   // IN: event argument (union)
-    void GENERIC*           pUserArg_p)
+    void GENERIC*           /*pUserArg_p*/)
 {
 tEplKernel  EplRet = kEplSuccessful;
 
@@ -90,11 +90,14 @@ tEplKernel  EplRet = kEplSuccessful;
 
                 case kEplNmtGsResetCommunication:
                 {
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
                 DWORD   dwBuffer;
+#endif
 
                     printf("ResetCommunication\n");
                     pEplProcessThread_g->sigEplStatus(1);
 
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
                     // configure OD for MN in state ResetComm after reseting the OD
                     // TODO: setup your own network configuration here
                     dwBuffer = (EPL_NODEASSIGN_NODE_IS_CN |
@@ -116,6 +119,7 @@ tEplKernel  EplRet = kEplSuccessful;
                     dwBuffer = (EPL_NODEASSIGN_MN_PRES |
                                 EPL_NODEASSIGN_NODE_EXISTS);    // 0x00010001L
                     EplRet = EplApiWriteLocalObject(0x1F81, 0xF0, &dwBuffer, 4);
+#endif
 
                     // continue
                     break;
@@ -218,6 +222,7 @@ tEplKernel  EplRet = kEplSuccessful;
             break;
         }
 
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
         case kEplApiEventNode:
         {
             // printf("AppCbEvent(Node): NodeId=%u Event=0x%02X\n",
@@ -227,7 +232,7 @@ tEplKernel  EplRet = kEplSuccessful;
             {
                 case kEplNmtNodeEventFound:
                 {
-                DWORD   dwBuffer;
+//                DWORD   dwBuffer;
 
                     pEplProcessThread_g->sigNodeStatus(pEventArg_p->m_Node.m_uiNodeId, 0);
                     pEplProcessThread_g->sigNodeAppeared(pEventArg_p->m_Node.m_uiNodeId);
@@ -338,6 +343,7 @@ tEplKernel  EplRet = kEplSuccessful;
 
             break;
         }
+#endif
 
         default:
             break;

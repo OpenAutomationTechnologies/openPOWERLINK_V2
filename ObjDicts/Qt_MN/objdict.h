@@ -412,7 +412,7 @@ EPL_OBD_BEGIN ()
 
 //#if (!((EPL_API_PROCESS_IMAGE_SIZE_IN > 0) || (EPL_API_PROCESS_IMAGE_SIZE_OUT > 0)))
 //    && (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
+//#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
         // process image is not enabled but master is enabled
 
         // output variables of master
@@ -424,7 +424,7 @@ EPL_OBD_BEGIN ()
 
         // input variables of master
         EPL_OBD_RAM_INDEX_RAM_VARARRAY (0x2200, 3, NULL, kEplObdTypUInt8, kEplObdAccVPRW, tEplObdUnsigned8, Receivebx, 0x00)
-#endif
+//#endif
 
     EPL_OBD_END_PART ()
 

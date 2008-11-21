@@ -233,7 +233,6 @@ tEplKernel Ret;
 EPLDLLEXPORT tEplKernel PUBLIC EplIdentuDelInstance()
 {
 tEplKernel  Ret;
-int         iIndex;
 
     Ret = kEplSuccessful;
 

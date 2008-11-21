@@ -179,8 +179,10 @@ static tEplKernel PUBLIC EplApiUpdateObd(void);
 // process events from user event queue
 static tEplKernel PUBLIC EplApiProcessEvent(tEplEvent* pEplEvent_p);
 
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOC)) != 0)
 // callback function of SDO module
 static tEplKernel PUBLIC  EplApiCbSdoCon(tEplSdoComFinished* pSdoComFinished_p);
+#endif
 
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
 // callback functions of NmtMnu module
@@ -235,7 +237,9 @@ tEplKernel PUBLIC EplApiInitialize(tEplApiInitParam * pInitParam_p)
 tEplKernel          Ret = kEplSuccessful;
 tEplObdInitParam    ObdInitParam;
 tEplDllkInitParam   DllkInitParam;
-tShbError           ShbError;
+#ifndef EPL_NO_FIFO
+    tShbError           ShbError;
+#endif
 
     // reset instance structure
     EPL_MEMSET(&EplApiInstance_g, 0, sizeof (EplApiInstance_g));
@@ -265,12 +269,14 @@ tShbError           ShbError;
     }
 #endif
 
+#ifndef EPL_NO_FIFO
     ShbError = ShbInit();
     if (ShbError != kShbOk)
     {
         Ret = kEplNoResource;
         goto Exit;
     }
+#endif
 
     // initialize EplEventk module
     Ret = EplEventkInit(EplApiInstance_g.m_InitParam.m_pfnCbSync);
@@ -410,7 +416,7 @@ tShbError           ShbError;
 #endif
 
     // init SDO module
-#if ((((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOC)) != 0) || \
+#if ((((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOS)) != 0) || \
      (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOC)) != 0))
     // init sdo command layer
     Ret = EplSdoComInit();
@@ -456,7 +462,8 @@ tEplKernel      Ret = kEplSuccessful;
     // delete instance for all modules
 
     // deinitialize EplSdoCom module
-#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOC)) != 0)
+#if ((((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOS)) != 0) || \
+     (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOC)) != 0))
     Ret = EplSdoComDelInstance();
 //    PRINTF1("EplSdoComDelInstance():  0x%X\n", Ret);
 #endif
@@ -528,7 +535,9 @@ tEplKernel      Ret = kEplSuccessful;
     Ret = EplTimerkDelInstance();
 //    PRINTF1("EplTimerkDelInstance():  0x%X\n", Ret);
 
+#ifndef EPL_NO_FIFO
     ShbExit();
+#endif
 
     return Ret;
 }
@@ -748,6 +757,7 @@ tEplKernel      Ret = kEplSuccessful;
     }
     else
     {   // perform SDO transfer
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOC)) != 0)
     tEplSdoComTransParamByIndex TransParamByIndex;
 //    tEplSdoComConHdl            SdoComConHdl;
 
@@ -782,6 +792,10 @@ tEplKernel      Ret = kEplSuccessful;
             goto Exit;
         }
         Ret = kEplApiTaskDeferred;
+
+#else
+        Ret = kEplApiInvalidParam;
+#endif
     }
 
 Exit:
@@ -838,6 +852,7 @@ tEplKernel      Ret = kEplSuccessful;
     }
     else
     {   // perform SDO transfer
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOC)) != 0)
     tEplSdoComTransParamByIndex TransParamByIndex;
 //    tEplSdoComConHdl            SdoComConHdl;
 
@@ -881,6 +896,10 @@ tEplKernel      Ret = kEplSuccessful;
             goto Exit;
         }
         Ret = kEplApiTaskDeferred;
+
+#else
+        Ret = kEplApiInvalidParam;
+#endif
     }
 
 Exit:
@@ -908,8 +927,14 @@ tEplKernel PUBLIC EplApiFreeSdoChannel(
 {
 tEplKernel      Ret = kEplSuccessful;
 
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOC)) != 0)
+
     // init command layer connection
     Ret = EplSdoComUndefineCon(SdoComConHdl_p);
+
+#else
+    Ret = kEplApiInvalidParam;
+#endif
 
     return Ret;
 }
@@ -1913,6 +1938,7 @@ Exit:
 //
 //---------------------------------------------------------------------------
 
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOC)) != 0)
 static tEplKernel PUBLIC  EplApiCbSdoCon(tEplSdoComFinished* pSdoComFinished_p)
 {
 tEplKernel Ret;
@@ -1929,6 +1955,7 @@ tEplApiEventArg EventArg;
     return Ret;
 
 }
+#endif
 
 
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
