@@ -406,6 +406,15 @@ int         iResult;
     // save the init data
     EdrvInstance_l.m_InitParam = *pEdrvInitParam_p;
 
+    // clear driver structure
+    // 2008-11-24 d.k. because pci_unregister_driver() doesn't do it correctly;
+    //      one example: kobject_set_name() frees EdrvDriver.driver.kobj.name,
+    //      but does not set this pointer to NULL.
+    EPL_MEMSET(&EdrvDriver, 0, sizeof (EdrvDriver));
+    EdrvDriver.name         = DRV_NAME,
+    EdrvDriver.id_table     = aEdrvPciTbl,
+    EdrvDriver.probe        = EdrvInitOne,
+    EdrvDriver.remove       = EdrvRemoveOne,
 
     // register PCI driver
     iResult = pci_register_driver (&EdrvDriver);
