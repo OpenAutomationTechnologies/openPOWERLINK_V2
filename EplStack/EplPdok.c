@@ -492,7 +492,13 @@ tEplMsgType     MsgType;
                     // copy object from RPDO to process/OD variable
                     ObdSize = wBitSize >> 3;
                     Ret = EplObdWriteEntryFromLe(wObdCommIndex, bObdSubindex, &pFrame->m_Data.m_Pres.m_le_abPayload[(wBitOffset >> 3)], ObdSize);
-                    if (Ret != kEplSuccessful)
+                    if ((Ret == kEplObdIndexNotExist)
+                        || (Ret == kEplObdSubindexNotExist)
+                        || (Ret == kEplObdIllegalPart))
+                    {   // object does not exist; ignore this mapping
+                        Ret = kEplSuccessful;
+                    }
+                    else if (Ret != kEplSuccessful)
                     {   // other fatal error occured
                         goto Exit;
                     }
