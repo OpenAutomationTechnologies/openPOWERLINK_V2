@@ -93,10 +93,7 @@
 #include <asm/uaccess.h>
 #include <linux/vmalloc.h>
 
-#ifdef CONFIG_DEVFS_FS
-#include <linux/major.h>
-#include <linux/devfs_fs_kernel.h>
-#endif
+#include <linux/miscdevice.h>
 
 #include "Epl.h"
 #include "EplApiLinux.h"
@@ -167,19 +164,6 @@ MODULE_LICENSE("Dual BSD/GPL");
 //---------------------------------------------------------------------------
 //  Global variables
 //---------------------------------------------------------------------------
-
-#ifdef CONFIG_DEVFS_FS
-
-    // driver major number
-    static int  nDrvMajorNumber_g;
-
-#else
-
-    // device number (major and minor)
-    static dev_t        nDevNum_g;
-    static struct cdev *pEpl_cdev_g;
-
-#endif
 
 
 static volatile unsigned int uiEplState_g = EPL_STATE_NOTOPEN;
@@ -265,6 +249,20 @@ static struct file_operations  EplLinFileOps_g =
 };
 
 
+// miscdevice structure
+static struct miscdevice EplLinMiscDevice_g =
+{
+    minor:      MISC_DYNAMIC_MINOR,
+    name:       EPLLIN_DRV_NAME,
+    fops:       &EplLinFileOps_g,
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 0)) && \
+    (LINUX_VERSION_CODE <= KERNEL_VERSION(2, 6, 17))
+    devfs_name: EPLLIN_DRV_NAME,
+#endif
+};
+
+
+
 
 //=========================================================================//
 //                                                                         //
@@ -301,70 +299,19 @@ int  nMinorNumber;
     init_waitqueue_head(&WaitQueueRelease_g);
 
 
-
-#ifdef CONFIG_DEVFS_FS
-
-    // register character device handler
-    TRACE2("EPL:   Installing Driver '%s', Version %s...\n", EPLLIN_DRV_NAME, EPL_PRODUCT_VERSION);
-    TRACE0("EPL:   (using dynamic major number assignment)\n");
-    nDrvMajorNumber_g = register_chrdev (0, EPLLIN_DRV_NAME, &EplLinFileOps_g);
-    if (nDrvMajorNumber_g != 0)
-    {
-        TRACE2("EPL:   Driver '%s' installed successful, assigned MajorNumber=%d\n", EPLLIN_DRV_NAME, nDrvMajorNumber_g);
-    }
-    else
-    {
-        TRACE1("EPL:   ERROR: Driver '%s' is unable to get a free MajorNumber!\n", EPLLIN_DRV_NAME);
-        iRet = -EIO;
-        goto Exit;
-    }
-
-
-    // create device node in DEVFS
-    nMinorNumber = 0;
-    TRACE1("EPL:   Creating device node '/dev/%s'...\n", EPLLIN_DEV_NAME);
-    iErr = devfs_mk_cdev (MKDEV(nDrvMajorNumber_g, nMinorNumber), S_IFCHR | S_IRUGO | S_IWUGO, EPLLIN_DEV_NAME);
+    // register misc device
+    iErr = misc_register(&EplLinMiscDevice_g);
     if (iErr == 0)
     {
-        TRACE1("EPL:   Device node '/dev/%s' created successful.\n", EPLLIN_DEV_NAME);
+        TRACE1("EPL:   Misc device '%s' created successfully.\n", EPLLIN_DEV_NAME);
     }
     else
     {
-        TRACE1("EPL:   ERROR: unable to create device node '/dev/%s'\n", EPLLIN_DEV_NAME);
+        printk("EPL:   ERROR: unable to create misc device '%s'\n", EPLLIN_DEV_NAME);
         iRet = -EIO;
         goto Exit;
     }
 
-#else
-
-    // register character device handler
-    // only one Minor required
-    TRACE2("EPL:   Installing Driver '%s', Version %s...\n", EPLLIN_DRV_NAME, EPL_PRODUCT_VERSION);
-    iRet = alloc_chrdev_region (&nDevNum_g, 0, 1, EPLLIN_DRV_NAME);
-    if (iRet == 0)
-    {
-        TRACE2("EPL:   Driver '%s' installed successful, assigned MajorNumber=%d\n", EPLLIN_DRV_NAME, MAJOR(nDevNum_g));
-    }
-    else
-    {
-        TRACE1("EPL:   ERROR: Driver '%s' is unable to get a free MajorNumber!\n", EPLLIN_DRV_NAME);
-        iRet = -EIO;
-        goto Exit;
-    }
-
-    // register cdev structure
-    pEpl_cdev_g = cdev_alloc();
-    pEpl_cdev_g->ops = &EplLinFileOps_g;
-    pEpl_cdev_g->owner = THIS_MODULE;
-    iErr = cdev_add (pEpl_cdev_g, nDevNum_g, 1);
-    if (iErr)
-    {
-        TRACE2("EPL:   ERROR %d: Driver '%s' could not be added!\n", iErr, EPLLIN_DRV_NAME);
-        iRet = -EIO;
-        goto Exit;
-    }
-
-#endif
 
     // create device node in PROCFS
     EplRet = EplLinProcInit();
@@ -394,36 +341,15 @@ static void  __exit  EplLinExit (void)
 
 tEplKernel          EplRet;
 
-    // delete instance for all modules
-//    EplRet = EplApiShutdown();
-//    printk("EplApiShutdown():  0x%X\n", EplRet);
+    TRACE0("EPL: + EplLinExit...\n");
 
     // deinitialize proc fs
     EplRet = EplLinProcFree();
-    printk("EplLinProcFree():        0x%X\n", EplRet);
+    TRACE1("EplLinProcFree():        0x%X\n", EplRet);
 
+    // deregister misc device
+    misc_deregister(&EplLinMiscDevice_g);
 
-    TRACE0("EPL: + EplLinExit...\n");
-
-
-#ifdef CONFIG_DEVFS_FS
-
-    // remove device node from DEVFS
-    devfs_remove (EPLLIN_DEV_NAME);
-    TRACE1("EPL:   Device node '/dev/%s' removed.\n", EPLLIN_DEV_NAME);
-
-    // unregister character device handler
-    unregister_chrdev (nDrvMajorNumber_g, EPLLIN_DRV_NAME);
-
-#else
-
-    // remove cdev structure
-    cdev_del(pEpl_cdev_g);
-
-    // unregister character device handler
-    unregister_chrdev_region (nDevNum_g, 1);
-
-#endif
 
     TRACE1("EPL:   Driver '%s' removed.\n", EPLLIN_DRV_NAME);
 

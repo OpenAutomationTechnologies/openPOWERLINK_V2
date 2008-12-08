@@ -137,14 +137,14 @@ MODULE_LICENSE("Dual BSD/GPL");
     #define TGT_DBG_SIGNAL_TRACE_POINT(p)
 #endif
 
+
+// POWERLINK default parameters
 #define NODEID      0x1 //0x6E
 #define CYCLE_LEN   3000 // [us]
 #define IP_ADDR     0xc0a86401  // 192.168.100.1
 #define SUBNET_MASK 0xFFFFFF00  // 255.255.255.0
-#define HOSTNAME    "SYS TEC electronic EPL Stack    "
+#define HOSTNAME    "SYS TEC electronic openPOWERLINK"
 #define IF_ETH      EPL_VETH_NAME
-
-
 
 
 //---------------------------------------------------------------------------
@@ -159,17 +159,21 @@ MODULE_LICENSE("Dual BSD/GPL");
 
 CONST BYTE abMacAddr[] = {0x00, 0x03, 0xc0, 0xa8, 0x64, 0xf1};
 
+
+// process variables
 BYTE    bVarIn1_l;
 BYTE    bVarOut1_l;
 BYTE    bVarOut1Old_l;
 
 BYTE    abDomain_l[3000];
 
+
+// Linux wait queue for shutdown
 static wait_queue_head_t    WaitQueueShutdown_g; // wait queue for tEplNmtEventSwitchOff
 static atomic_t             AtomicShutdown_g = ATOMIC_INIT(FALSE);
 
-static DWORD    dw_le_CycleLen_g;
 
+// module parameters like node-ID and cycle length
 static uint uiNodeId_g = EPL_C_ADR_INVALID;
 module_param_named(nodeid, uiNodeId_g, uint, 0);
 
@@ -193,9 +197,7 @@ extern int      PLCcoreCF54DrvCmdSetErrLED       (BYTE bState_p);
 extern int      PLCcoreCF54DrvCmdGetRSMSwitch    (BYTE* pbRSMSwitch_p);
 extern int      PLCcoreCF54DrvCmdGetHexSwitch    (BYTE* pbHexSwitch_p);
 extern int      PLCcoreCF54DrvCmdGetDipSwitch    (BYTE* pbDipSwitch_p);
-//extern int      PLCcoreCF54DrvCmdGetDigiIn       (BYTE* pbInValue_p);
 extern int      PLCcoreCF54DrvCmdGetDigiIn       (tCF54DigiIn* pDiData_p);
-//extern int      PLCcoreCF54DrvCmdSetDigiOut      (BYTE bOutValue_p);
 extern int      PLCcoreCF54DrvCmdSetDigiOut      (tCF54DigiOut* pDoData_p);
 #endif
 
@@ -235,21 +237,18 @@ module_exit(EplLinExit);
 
 //---------------------------------------------------------------------------
 //
-// Function:
+// Function:    EplLinInit
 //
-// Description:
+// Description: initialization of EPL module
 //
+// Parameters:  void
 //
-//
-// Parameters:
-//
-//
-// Returns:
-//
+// Returns:     int                 = error code
 //
 // State:
 //
 //---------------------------------------------------------------------------
+
 static  int  __init  EplLinInit (void)
 {
 tEplKernel          EplRet;
@@ -428,6 +427,21 @@ Exit:
     return EplRet;
 }
 
+
+//---------------------------------------------------------------------------
+//
+// Function:    EplLinExit
+//
+// Description: shutdown of EPL module
+//
+// Parameters:  void
+//
+// Returns:     void
+//
+// State:
+//
+//---------------------------------------------------------------------------
+
 static  void  __exit  EplLinExit (void)
 {
 tEplKernel          EplRet;
@@ -442,10 +456,7 @@ int                 iRet;
     // wait until NMT state machine is shut down
     wait_event_interruptible(WaitQueueShutdown_g,
                                     (atomic_read(&AtomicShutdown_g) == TRUE));
-/*    if ((iErr != 0) || (atomic_read(&AtomicShutdown_g) == EVENT_STATE_IOCTL))
-    {   // waiting was interrupted by signal or application called wrong function
-        EplRet = kEplShutdown;
-    }*/
+
     // delete instance for all modules
     EplRet = EplApiShutdown();
     printk("EplApiShutdown():  0x%X\n", EplRet);
@@ -508,11 +519,6 @@ tEplKernel          EplRet = kEplSuccessful;
                     EplRet = kEplShutdown;
 
                     printk("AppCbEvent(kEplNmtGsOff) originating event = 0x%X\n", pEventArg_p->m_NmtStateChange.m_NmtEvent);
-#ifdef CF54DRV
-                    // set run and error LED
-                    PLCcoreCF54DrvCmdSetRunLED(0);
-                    PLCcoreCF54DrvCmdSetErrLED(0);
-#endif
 
                     // wake up EplLinExit()
                     atomic_set(&AtomicShutdown_g, TRUE);
@@ -536,33 +542,14 @@ tEplKernel          EplRet = kEplSuccessful;
                 case kEplNmtMsNotActive:
                 case kEplNmtCsNotActive:
                 case kEplNmtCsPreOperational1:
-                {
-#ifdef CF54DRV
-                    // set run and error LED
-                    PLCcoreCF54DrvCmdSetRunLED(0);
-                    PLCcoreCF54DrvCmdSetErrLED(1);
-#endif
-                    break;
-                }
-
                 case kEplNmtCsOperational:
                 case kEplNmtMsOperational:
                 {
-#ifdef CF54DRV
-                    // set run and error LED
-                    PLCcoreCF54DrvCmdSetRunLED(1);
-                    PLCcoreCF54DrvCmdSetErrLED(0);
-#endif
                     break;
                 }
 
                 default:
                 {
-#ifdef CF54DRV
-                    // set run and error LED
-                    PLCcoreCF54DrvCmdSetRunLED(1);
-                    PLCcoreCF54DrvCmdSetErrLED(1);
-#endif
                     break;
                 }
             }
@@ -602,6 +589,29 @@ tEplKernel          EplRet = kEplSuccessful;
             }
             break;
         }
+
+#ifdef CF54DRV
+        case kEplApiEventLed:
+        {   // status or error LED shall be changed
+
+            switch (pEventArg_p->m_Led.m_LedType)
+            {
+                case kEplLedTypeStatus:
+                {
+                    PLCcoreCF54DrvCmdSetRunLED(pEventArg_p->m_Led.m_fOn);
+                    break;
+                }
+
+                case kEplLedTypeError:
+                {
+                    PLCcoreCF54DrvCmdSetErrLED(pEventArg_p->m_Led.m_fOn);
+                    break;
+                }
+            }
+
+            break;
+        }
+#endif
 
         default:
             break;
