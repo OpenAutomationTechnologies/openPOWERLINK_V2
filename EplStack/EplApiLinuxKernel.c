@@ -134,7 +134,7 @@ MODULE_LICENSE("Dual BSD/GPL");
 //---------------------------------------------------------------------------
 
 
-#define EPLLIN_DRV_NAME     "systec_epl"       // used for <register_chrdev>
+#define EPLLIN_DRV_NAME     "epl"       // used for misc_register()
 
 
 

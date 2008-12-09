@@ -59,13 +59,9 @@ obj-m := $(MODULENAME).o
 else
 
 .EXPORT_ALL_VARIABLES:
-#KDIR			:= /lib/modules/2.6.22.17-0.1-xen/build
 
 # using the currently installed kernel (reconfigured in my case)
-KDIR			:= /usr/src/linux
-# using one of the standard configurations
-#KDIR			:= /usr/src/linux-obj/i386/xen
-#KDIR			:= /usr/src/linux-obj/i386/default
+KDIR			:= /lib/modules/$(shell uname -r)/build
 
 PWD				:= $(shell pwd)
 

@@ -1,12 +1,11 @@
 #!/bin/sh
 module="epl"
-device="epl_api"
 
 # invoke rmmod with all arguments we got
 /sbin/rmmod $module $* || exit 1
 
-# Remove stale nodes
-rm -f /dev/$device
+# Remove udev rule
+rm -f /etc/udev/rules.d/50-openPOWERLINK.rules
 
 # rebinding network card to ethernet driver
 pciid=$(lspci | grep RTL-8139 | awk "{printf \"0000:\"\$1}")
