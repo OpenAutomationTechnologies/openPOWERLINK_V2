@@ -69,7 +69,7 @@ PWD				:= $(shell pwd)
 .PHONY:     call_driver_build
 call_driver_build:
 			$(MAKE)	-C $(KDIR)	SUBDIRS=$(PWD) modules
-			ln -f -s ../../../../../../../Include EplUserApp/include/epl
+			if [ ! -L EplUserApp/include/epl ] ; then ln -s ../../../../../../../Include EplUserApp/include/epl ; fi
 			dos2unix EplLoad
 			dos2unix EplUnload
 			chmod +x EplLoad EplUnload
