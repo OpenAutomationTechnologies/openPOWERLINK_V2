@@ -68,12 +68,12 @@ PWD				:= $(shell pwd)
 
 .PHONY:     call_driver_build
 call_driver_build:
-			$(MAKE)	-C $(KDIR)	SUBDIRS=$(PWD) modules 
+			$(MAKE)	-C $(KDIR)	SUBDIRS=$(PWD) modules
+			ln -f -s ../../../../../../../Include EplUserApp/include/epl
+			dos2unix EplLoad
+			dos2unix EplUnload
 			chmod +x EplLoad EplUnload
 
-.PHONY:     scp
-scp: call_driver_build
-			scp epl.ko scpuser@ws-ulbricht-1-cn1:/home/scpuser
 
 #.PHONY:     install
 #install:    call_driver_build
