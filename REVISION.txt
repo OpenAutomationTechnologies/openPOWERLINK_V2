@@ -111,16 +111,21 @@ Fellow worker:    Daniel Krüger (d.k.)
                     (d.k.)
 
 24.11.2008 V1.3.1   - Edrv8139.c: workaround for bug in Linux kernel added (clearing driver structure
-		              before calling pci_register_driver, because not all pointers inside the
-		              structure are reset correctly, so some are freed twice which is very bad).
+                      before calling pci_register_driver, because not all pointers inside the
+                      structure are reset correctly, so some are freed twice which is very bad).
                     (d.k.)
 
 05.12.2008 V1.3.1   - PDO module: ignore mapped object that does not exist.
                     (d.k.)
 
 08.12.2008 V1.3.1   - EplApiLinuxKernel: using misc device instead of pure character device now,
-		              because it automatically handles the sysfs entries
-		            - added udev rule to X86 Qt demo
-		            - updated demo_cn_kernel for ECUcore-5484 regarding the status and error LEDs
+                      because it automatically handles the sysfs entries
+                    - added udev rule to X86 Qt demo
+                    - updated demo_cn_kernel for ECUcore-5484 regarding the status and error LEDs
+                    (d.k.)
+
+03.02.2009 V1.3.1   - X86 Qt demo: added message box to show errors when initialization of the stack failed
+                    - EplApiLinuxKernel.c: fixed hang in EplLinRelease(), when stack was not properly
+                      initialized before (e.g. because of missing Ethernet controller)
                     (d.k.)
 

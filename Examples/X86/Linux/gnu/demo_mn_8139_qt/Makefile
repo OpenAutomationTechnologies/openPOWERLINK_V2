@@ -70,8 +70,8 @@ PWD				:= $(shell pwd)
 call_driver_build:
 			$(MAKE)	-C $(KDIR)	SUBDIRS=$(PWD) modules
 			if [ ! -L EplUserApp/include/epl ] ; then ln -s ../../../../../../../Include EplUserApp/include/epl ; fi
-			dos2unix EplLoad
-			dos2unix EplUnload
+			dos2unix -p EplLoad
+			dos2unix -p EplUnload
 			chmod +x EplLoad EplUnload
 
 

@@ -31,6 +31,7 @@
 #include <QWidget>
 #include <QThread>
 #include <QString>
+#include <QMessageBox>
 
 #include "EplApi.h"
 #include "EplState.h"
@@ -160,6 +161,12 @@ Slides*             pSlides;
     if(EplRet != kEplSuccessful)
     {
         printf("%s: EplApiInitialize() failed\n", __FUNCTION__);
+
+        QMessageBox::critical(0, "POWERLINK demo",
+                              QString("Initialization of openPOWERLINK Stack failed.\n") +
+                              "Error code: 0x"+ QString::number(EplRet, 16) +
+                              "\nThe most common error source are an unsupported Ethernet controller or the kernel module is not loaded."
+                              "\nFor further information please consult the manual.");
         goto Exit;
     }
 

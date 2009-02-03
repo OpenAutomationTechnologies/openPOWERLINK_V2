@@ -157,8 +157,9 @@ MODULE_LICENSE("Dual BSD/GPL");
 
 #define EPL_STATE_NOTOPEN       0
 #define EPL_STATE_NOTINIT       1
-#define EPL_STATE_RUNNING       2
-#define EPL_STATE_SHUTDOWN      3
+#define EPL_STATE_INITED        2
+#define EPL_STATE_RUNNING       3
+#define EPL_STATE_SHUTDOWN      4
 
 
 //---------------------------------------------------------------------------
@@ -436,20 +437,20 @@ int  iRet;
         {   // post NmtEventSwitchOff
             EplRet = EplApiExecNmtCommand(kEplNmtEventSwitchOff);
 
-        }
+            if (EplRet == kEplSuccessful)
+            {
+                TRACE0("EPL:   waiting for NMT_GS_OFF\n");
+                wait_event_interruptible(WaitQueueRelease_g,
+                                            (uiEplState_g == EPL_STATE_SHUTDOWN));
+                // $$$ d.k.: What if waiting was interrupted by signal?
 
-        if (EplRet == kEplSuccessful)
-        {
-            TRACE0("EPL:   waiting for NMT_GS_OFF\n");
-            wait_event_interruptible(WaitQueueRelease_g,
-                                        (uiEplState_g == EPL_STATE_SHUTDOWN));
-        }
-        else
-        {   // post NmtEventSwitchOff failed
-            TRACE0("EPL:   event post failed\n");
-        }
+            }
+            else
+            {   // post NmtEventSwitchOff failed
+                TRACE0("EPL:   event post failed\n");
+            }
 
-        // $$$ d.k.: What if waiting was interrupted by signal?
+        }
 
         TRACE0("EPL:   call EplApiShutdown()\n");
         // EPL stack can be safely shut down
@@ -574,7 +575,7 @@ int  iRet;
 
             EplRet = EplApiInitialize(&EplApiInitParam);
 
-            uiEplState_g = EPL_STATE_RUNNING;
+            uiEplState_g = EPL_STATE_INITED;
 
             iRet = (int) EplRet;
             break;
