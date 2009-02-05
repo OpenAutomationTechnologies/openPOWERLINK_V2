@@ -129,3 +129,6 @@ Fellow worker:    Daniel Krüger (d.k.)
                       initialized before (e.g. because of missing Ethernet controller)
                     (d.k.)
 
+05.02.2009 V1.3.1   - added missing file EplLedu.c to public release
+                    (d.k.)
+
