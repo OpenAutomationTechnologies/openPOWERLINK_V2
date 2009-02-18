@@ -258,17 +258,13 @@ module_exit(EplLinExit);
 
 //---------------------------------------------------------------------------
 //
-// Function:
+// Function:    EplLinInit
 //
-// Description:
+// Description: initialization of EPL module
 //
+// Parameters:  void
 //
-//
-// Parameters:
-//
-//
-// Returns:
-//
+// Returns:     int                 = error code
 //
 // State:
 //
@@ -497,6 +493,21 @@ Exit:
     printk("EplLinInit(): returns 0x%X\n", EplRet);
     return EplRet;
 }
+
+
+//---------------------------------------------------------------------------
+//
+// Function:    EplLinExit
+//
+// Description: shutdown of EPL module
+//
+// Parameters:  void
+//
+// Returns:     void
+//
+// State:
+//
+//---------------------------------------------------------------------------
 
 static  void  __exit  EplLinExit (void)
 {

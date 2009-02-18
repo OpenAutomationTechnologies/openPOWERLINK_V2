@@ -237,7 +237,7 @@ EPL_OBD_BEGIN ()
         // Object 1C02h: DLL_MNCycTimeExceed_REC
         EPL_OBD_BEGIN_INDEX_RAM(0x1C02, 0x04, NULL)
             EPL_OBD_SUBINDEX_RAM_VAR(0x1C02, 0x00, 0x05, 0x01, tEplObdUnsigned8, NumberOfEntries, 0x03)
-            EPL_OBD_SUBINDEX_RAM_USERDEF_NOINIT(0x1C0F, 0x01, 0x07, 0x03, tEplObdUnsigned32, CumulativeCnt_U32)
+            EPL_OBD_SUBINDEX_RAM_USERDEF_NOINIT(0x1C02, 0x01, 0x07, 0x03, tEplObdUnsigned32, CumulativeCnt_U32)
             EPL_OBD_SUBINDEX_RAM_USERDEF(0x1C02, 0x02, 0x07, 0x01, tEplObdUnsigned32, ThresholdCnt_U32, 0x0)
             EPL_OBD_SUBINDEX_RAM_USERDEF(0x1C02, 0x03, 0x07, 0x03, tEplObdUnsigned32, Threshold_U32, 0x1)
         EPL_OBD_END_INDEX(0x1C0F)

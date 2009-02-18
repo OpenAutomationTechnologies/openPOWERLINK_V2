@@ -90,11 +90,13 @@
     #include <asm/coldfire.h>
     #include <asm/mcfsim.h>
     #include <asm/m5485gpio.h>
-    #include "cf54drv.h"
 #endif
 
 #include "Epl.h"
 #include "proc_fs.h"
+#ifdef CONFIG_COLDFIRE
+    #include "cf54drv.h"
+#endif
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,0)
     // remove ("make invisible") obsolete symbols for kernel versions 2.6
@@ -423,7 +425,7 @@ tEplObdSize         ObdSize;
     atomic_set(&AtomicShutdown_g, FALSE);
 
 Exit:
-    printk("epl.init(): returns 0x%X\n", EplRet);
+    printk("EplLinInit(): returns 0x%X\n", EplRet);
     return EplRet;
 }
 
