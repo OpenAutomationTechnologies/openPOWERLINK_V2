@@ -2461,7 +2461,8 @@ static int PLCcoreCF54DrvProcWrite(struct file *file, const char __user *buffer,
 char            abBuffer[count + 1];
 int             iErr;
 tCF54DigiOut    CF54DigiOut;
-int             iVal = 0;
+int             iVal = 0;   // digital outputs
+int             iVal2 = 0;  // run/error LEDs
 DWORD           dwVal;
 
     if (count > 0)
@@ -2473,7 +2474,7 @@ DWORD           dwVal;
         }
         abBuffer[count] = '\0';
 
-        iErr = sscanf(abBuffer, "%i", &iVal);
+        iErr = sscanf(abBuffer, "%i %i", &iVal, &iVal2);
 
         if (iErr > 0)
         {   // at least one number was parsed from the string
@@ -2487,6 +2488,13 @@ DWORD           dwVal;
             CF54DigiOut.m_bDoByte2 = dwVal & 0xFF;
             dwVal >>= 8;
             CF54DigiOut.m_bDoByte3 = dwVal & 0xFF;
+
+            if (iErr > 1)
+            {   // value for run/error LED was specified
+                PLCcoreCF54DrvCmdSetRunLED(iVal2);
+                iVal2 >>= 1;
+                PLCcoreCF54DrvCmdSetErrLED(iVal2);
+            }
 
             iErr = PLCcoreCF54DrvCmdSetDigiOut(&CF54DigiOut);
         }
