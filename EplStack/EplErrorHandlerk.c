@@ -364,49 +364,55 @@ tEplNmtEvent            NmtEvent;
             ulDllErrorEvents = pErrHandlerEvent->m_ulDllErrorEvents;
 
             // check the several error events
-            if ((EplErrorHandlerkInstance_g.m_CnLossSoc.m_dwThreshold > 0)
-                && ((ulDllErrorEvents & EPL_DLL_ERR_CN_LOSS_SOC) != 0))
+            if ((ulDllErrorEvents & EPL_DLL_ERR_CN_LOSS_SOC) != 0)
             {   // loss of SoC event occured
                 // increment cumulative counter by 1
                 EplErrorHandlerkInstance_g.m_CnLossSoc.m_dwCumulativeCnt++;
-                // increment threshold counter by 8
-                EplErrorHandlerkInstance_g.m_CnLossSoc.m_dwThresholdCnt += 8;
-                if (EplErrorHandlerkInstance_g.m_CnLossSoc.m_dwThresholdCnt
-                    >= EplErrorHandlerkInstance_g.m_CnLossSoc.m_dwThreshold)
-                {   // threshold is reached
-                    // $$$ d.k.: generate error history entry E_DLL_LOSS_SOC_TH
 
-                    // post event to NMT state machine
-                    NmtEvent = kEplNmtEventNmtCycleError;
-                    Event.m_EventSink = kEplEventSinkNmtk;
-                    Event.m_EventType = kEplEventTypeNmtEvent;
-                    Event.m_pArg = &NmtEvent;
-                    Event.m_uiSize = sizeof (NmtEvent);
-                    Ret = EplEventkPost(&Event);
+                if (EplErrorHandlerkInstance_g.m_CnLossSoc.m_dwThreshold > 0)
+                {
+                    // increment threshold counter by 8
+                    EplErrorHandlerkInstance_g.m_CnLossSoc.m_dwThresholdCnt += 8;
+                    if (EplErrorHandlerkInstance_g.m_CnLossSoc.m_dwThresholdCnt
+                        >= EplErrorHandlerkInstance_g.m_CnLossSoc.m_dwThreshold)
+                    {   // threshold is reached
+                        // $$$ d.k.: generate error history entry E_DLL_LOSS_SOC_TH
+
+                        // post event to NMT state machine
+                        NmtEvent = kEplNmtEventNmtCycleError;
+                        Event.m_EventSink = kEplEventSinkNmtk;
+                        Event.m_EventType = kEplEventTypeNmtEvent;
+                        Event.m_pArg = &NmtEvent;
+                        Event.m_uiSize = sizeof (NmtEvent);
+                        Ret = EplEventkPost(&Event);
+                    }
+                    EplErrorHandlerkInstance_g.m_ulDllErrorEvents |=
+                        EPL_DLL_ERR_CN_LOSS_SOC;
                 }
-                EplErrorHandlerkInstance_g.m_ulDllErrorEvents |=
-                    EPL_DLL_ERR_CN_LOSS_SOC;
             }
 
-            if ((EplErrorHandlerkInstance_g.m_CnLossPreq.m_dwThreshold > 0)
-                && ((ulDllErrorEvents & EPL_DLL_ERR_CN_LOSS_PREQ) != 0))
+            if ((ulDllErrorEvents & EPL_DLL_ERR_CN_LOSS_PREQ) != 0)
             {   // loss of PReq event occured
                 // increment cumulative counter by 1
                 EplErrorHandlerkInstance_g.m_CnLossPreq.m_dwCumulativeCnt++;
-                // increment threshold counter by 8
-                EplErrorHandlerkInstance_g.m_CnLossPreq.m_dwThresholdCnt += 8;
-                if (EplErrorHandlerkInstance_g.m_CnLossPreq.m_dwThresholdCnt
-                    >= EplErrorHandlerkInstance_g.m_CnLossPreq.m_dwThreshold)
-                {   // threshold is reached
-                    // $$$ d.k.: generate error history entry E_DLL_LOSS_PREQ_TH
 
-                    // post event to NMT state machine
-                    NmtEvent = kEplNmtEventNmtCycleError;
-                    Event.m_EventSink = kEplEventSinkNmtk;
-                    Event.m_EventType = kEplEventTypeNmtEvent;
-                    Event.m_pArg = &NmtEvent;
-                    Event.m_uiSize = sizeof (NmtEvent);
-                    Ret = EplEventkPost(&Event);
+                if (EplErrorHandlerkInstance_g.m_CnLossPreq.m_dwThreshold > 0)
+                {
+                    // increment threshold counter by 8
+                    EplErrorHandlerkInstance_g.m_CnLossPreq.m_dwThresholdCnt += 8;
+                    if (EplErrorHandlerkInstance_g.m_CnLossPreq.m_dwThresholdCnt
+                        >= EplErrorHandlerkInstance_g.m_CnLossPreq.m_dwThreshold)
+                    {   // threshold is reached
+                        // $$$ d.k.: generate error history entry E_DLL_LOSS_PREQ_TH
+
+                        // post event to NMT state machine
+                        NmtEvent = kEplNmtEventNmtCycleError;
+                        Event.m_EventSink = kEplEventSinkNmtk;
+                        Event.m_EventType = kEplEventTypeNmtEvent;
+                        Event.m_pArg = &NmtEvent;
+                        Event.m_uiSize = sizeof (NmtEvent);
+                        Ret = EplEventkPost(&Event);
+                    }
                 }
             }
 
@@ -417,28 +423,31 @@ tEplNmtEvent            NmtEvent;
                 EplErrorHandlerkInstance_g.m_CnLossPreq.m_dwThresholdCnt--;
             }
 
-            if ((EplErrorHandlerkInstance_g.m_CnCrcErr.m_dwThreshold > 0)
-                && ((ulDllErrorEvents & EPL_DLL_ERR_CN_CRC) != 0))
+            if ((ulDllErrorEvents & EPL_DLL_ERR_CN_CRC) != 0)
             {   // CRC error event occured
                 // increment cumulative counter by 1
                 EplErrorHandlerkInstance_g.m_CnCrcErr.m_dwCumulativeCnt++;
-                // increment threshold counter by 8
-                EplErrorHandlerkInstance_g.m_CnCrcErr.m_dwThresholdCnt += 8;
-                if (EplErrorHandlerkInstance_g.m_CnCrcErr.m_dwThresholdCnt
-                    >= EplErrorHandlerkInstance_g.m_CnCrcErr.m_dwThreshold)
-                {   // threshold is reached
-                    // $$$ d.k.: generate error history entry E_DLL_CRC_TH
 
-                    // post event to NMT state machine
-                    NmtEvent = kEplNmtEventNmtCycleError;
-                    Event.m_EventSink = kEplEventSinkNmtk;
-                    Event.m_EventType = kEplEventTypeNmtEvent;
-                    Event.m_pArg = &NmtEvent;
-                    Event.m_uiSize = sizeof (NmtEvent);
-                    Ret = EplEventkPost(&Event);
+                if (EplErrorHandlerkInstance_g.m_CnCrcErr.m_dwThreshold > 0)
+                {
+                    // increment threshold counter by 8
+                    EplErrorHandlerkInstance_g.m_CnCrcErr.m_dwThresholdCnt += 8;
+                    if (EplErrorHandlerkInstance_g.m_CnCrcErr.m_dwThresholdCnt
+                        >= EplErrorHandlerkInstance_g.m_CnCrcErr.m_dwThreshold)
+                    {   // threshold is reached
+                        // $$$ d.k.: generate error history entry E_DLL_CRC_TH
+
+                        // post event to NMT state machine
+                        NmtEvent = kEplNmtEventNmtCycleError;
+                        Event.m_EventSink = kEplEventSinkNmtk;
+                        Event.m_EventType = kEplEventTypeNmtEvent;
+                        Event.m_pArg = &NmtEvent;
+                        Event.m_uiSize = sizeof (NmtEvent);
+                        Ret = EplEventkPost(&Event);
+                    }
+                    EplErrorHandlerkInstance_g.m_ulDllErrorEvents |=
+                        EPL_DLL_ERR_CN_CRC;
                 }
-                EplErrorHandlerkInstance_g.m_ulDllErrorEvents |=
-                    EPL_DLL_ERR_CN_CRC;
             }
 
             if ((ulDllErrorEvents & EPL_DLL_ERR_INVALID_FORMAT) != 0)
@@ -480,53 +489,59 @@ tEplNmtEvent            NmtEvent;
             }
 
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
-            if ((EplErrorHandlerkInstance_g.m_MnCrcErr.m_dwThreshold > 0)
-                && ((ulDllErrorEvents & EPL_DLL_ERR_MN_CRC) != 0))
+            if ((ulDllErrorEvents & EPL_DLL_ERR_MN_CRC) != 0)
             {   // CRC error event occured
                 // increment cumulative counter by 1
                 EplErrorHandlerkInstance_g.m_MnCrcErr.m_dwCumulativeCnt++;
-                // increment threshold counter by 8
-                EplErrorHandlerkInstance_g.m_MnCrcErr.m_dwThresholdCnt += 8;
-                if (EplErrorHandlerkInstance_g.m_MnCrcErr.m_dwThresholdCnt
-                    >= EplErrorHandlerkInstance_g.m_MnCrcErr.m_dwThreshold)
-                {   // threshold is reached
-                    // $$$ d.k.: generate error history entry E_DLL_CRC_TH
 
-                    // post event to NMT state machine
-                    NmtEvent = kEplNmtEventNmtCycleError;
-                    Event.m_EventSink = kEplEventSinkNmtk;
-                    Event.m_EventType = kEplEventTypeNmtEvent;
-                    Event.m_pArg = &NmtEvent;
-                    Event.m_uiSize = sizeof (NmtEvent);
-                    Ret = EplEventkPost(&Event);
+                if (EplErrorHandlerkInstance_g.m_MnCrcErr.m_dwThreshold > 0)
+                {
+                    // increment threshold counter by 8
+                    EplErrorHandlerkInstance_g.m_MnCrcErr.m_dwThresholdCnt += 8;
+                    if (EplErrorHandlerkInstance_g.m_MnCrcErr.m_dwThresholdCnt
+                        >= EplErrorHandlerkInstance_g.m_MnCrcErr.m_dwThreshold)
+                    {   // threshold is reached
+                        // $$$ d.k.: generate error history entry E_DLL_CRC_TH
+
+                        // post event to NMT state machine
+                        NmtEvent = kEplNmtEventNmtCycleError;
+                        Event.m_EventSink = kEplEventSinkNmtk;
+                        Event.m_EventType = kEplEventTypeNmtEvent;
+                        Event.m_pArg = &NmtEvent;
+                        Event.m_uiSize = sizeof (NmtEvent);
+                        Ret = EplEventkPost(&Event);
+                    }
+                    EplErrorHandlerkInstance_g.m_ulDllErrorEvents |=
+                        EPL_DLL_ERR_MN_CRC;
                 }
-                EplErrorHandlerkInstance_g.m_ulDllErrorEvents |=
-                    EPL_DLL_ERR_MN_CRC;
             }
 
-            if ((EplErrorHandlerkInstance_g.m_MnCycTimeExceed.m_dwThreshold > 0)
-                && ((ulDllErrorEvents & EPL_DLL_ERR_MN_CYCTIMEEXCEED) != 0))
+            if ((ulDllErrorEvents & EPL_DLL_ERR_MN_CYCTIMEEXCEED) != 0)
             {   // cycle time exceeded event occured
                 // increment cumulative counter by 1
                 EplErrorHandlerkInstance_g.m_MnCycTimeExceed.m_dwCumulativeCnt++;
-                // increment threshold counter by 8
-                EplErrorHandlerkInstance_g.m_MnCycTimeExceed.m_dwThresholdCnt += 8;
-                if (EplErrorHandlerkInstance_g.m_MnCycTimeExceed.m_dwThresholdCnt
-                    >= EplErrorHandlerkInstance_g.m_MnCycTimeExceed.m_dwThreshold)
-                {   // threshold is reached
-                    // $$$ d.k.: generate error history entry E_DLL_CYCLE_EXCEED_TH
 
-                    // post event to NMT state machine
-                    NmtEvent = kEplNmtEventNmtCycleError;
-                    Event.m_EventSink = kEplEventSinkNmtk;
-                    Event.m_EventType = kEplEventTypeNmtEvent;
-                    Event.m_pArg = &NmtEvent;
-                    Event.m_uiSize = sizeof (NmtEvent);
-                    Ret = EplEventkPost(&Event);
+                if (EplErrorHandlerkInstance_g.m_MnCycTimeExceed.m_dwThreshold > 0)
+                {
+                    // increment threshold counter by 8
+                    EplErrorHandlerkInstance_g.m_MnCycTimeExceed.m_dwThresholdCnt += 8;
+                    if (EplErrorHandlerkInstance_g.m_MnCycTimeExceed.m_dwThresholdCnt
+                        >= EplErrorHandlerkInstance_g.m_MnCycTimeExceed.m_dwThreshold)
+                    {   // threshold is reached
+                        // $$$ d.k.: generate error history entry E_DLL_CYCLE_EXCEED_TH
+
+                        // post event to NMT state machine
+                        NmtEvent = kEplNmtEventNmtCycleError;
+                        Event.m_EventSink = kEplEventSinkNmtk;
+                        Event.m_EventType = kEplEventTypeNmtEvent;
+                        Event.m_pArg = &NmtEvent;
+                        Event.m_uiSize = sizeof (NmtEvent);
+                        Ret = EplEventkPost(&Event);
+                    }
+                    // $$$ d.k.: else generate error history entry E_DLL_CYCLE_EXCEED
+                    EplErrorHandlerkInstance_g.m_ulDllErrorEvents |=
+                        EPL_DLL_ERR_MN_CYCTIMEEXCEED;
                 }
-                // $$$ d.k.: else generate error history entry E_DLL_CYCLE_EXCEED
-                EplErrorHandlerkInstance_g.m_ulDllErrorEvents |=
-                    EPL_DLL_ERR_MN_CYCTIMEEXCEED;
             }
 
             if ((ulDllErrorEvents & EPL_DLL_ERR_MN_CN_LOSS_PRES) != 0)
@@ -534,34 +549,37 @@ tEplNmtEvent            NmtEvent;
             unsigned int uiNodeId;
 
                 uiNodeId = pErrHandlerEvent->m_uiNodeId - 1;
-                if ((uiNodeId < tabentries(EplErrorHandlerkInstance_g.m_adwMnCnLossPresCumCnt))
-                    && (EplErrorHandlerkInstance_g.m_adwMnCnLossPresThreshold[uiNodeId] > 0))
+                if (uiNodeId < tabentries(EplErrorHandlerkInstance_g.m_adwMnCnLossPresCumCnt))
                 {
                     // increment cumulative counter by 1
                     EplErrorHandlerkInstance_g.m_adwMnCnLossPresCumCnt[uiNodeId]++;
-                    // increment threshold counter by 8
-                    EplErrorHandlerkInstance_g.m_adwMnCnLossPresThrCnt[uiNodeId] += 8;
-                    if (EplErrorHandlerkInstance_g.m_adwMnCnLossPresThrCnt[uiNodeId]
-                        >= EplErrorHandlerkInstance_g.m_adwMnCnLossPresThreshold[uiNodeId])
-                    {   // threshold is reached
-                    tEplHeartbeatEvent  HeartbeatEvent;
 
-                        // $$$ d.k.: generate error history entry E_DLL_LOSS_PRES_TH
+                    if (EplErrorHandlerkInstance_g.m_adwMnCnLossPresThreshold[uiNodeId] > 0)
+                    {
+                        // increment threshold counter by 8
+                        EplErrorHandlerkInstance_g.m_adwMnCnLossPresThrCnt[uiNodeId] += 8;
+                        if (EplErrorHandlerkInstance_g.m_adwMnCnLossPresThrCnt[uiNodeId]
+                            >= EplErrorHandlerkInstance_g.m_adwMnCnLossPresThreshold[uiNodeId])
+                        {   // threshold is reached
+                        tEplHeartbeatEvent  HeartbeatEvent;
 
-                        // remove node from isochronous phase
-                        Ret = EplDllkDeleteNode(pErrHandlerEvent->m_uiNodeId);
+                            // $$$ d.k.: generate error history entry E_DLL_LOSS_PRES_TH
 
-                        // inform NmtMnu module about state change, which shall send NMT command ResetNode to this CN
-                        HeartbeatEvent.m_uiNodeId = pErrHandlerEvent->m_uiNodeId;
-                        HeartbeatEvent.m_NmtState = kEplNmtCsNotActive;
-                        HeartbeatEvent.m_wErrorCode = EPL_E_DLL_LOSS_PRES_TH;
-                        Event.m_EventSink = kEplEventSinkNmtMnu;
-                        Event.m_EventType = kEplEventTypeHeartbeat;
-                        Event.m_uiSize = sizeof (HeartbeatEvent);
-                        Event.m_pArg = &HeartbeatEvent;
-                        Ret = EplEventkPost(&Event);
+                            // remove node from isochronous phase
+                            Ret = EplDllkDeleteNode(pErrHandlerEvent->m_uiNodeId);
+
+                            // inform NmtMnu module about state change, which shall send NMT command ResetNode to this CN
+                            HeartbeatEvent.m_uiNodeId = pErrHandlerEvent->m_uiNodeId;
+                            HeartbeatEvent.m_NmtState = kEplNmtCsNotActive;
+                            HeartbeatEvent.m_wErrorCode = EPL_E_DLL_LOSS_PRES_TH;
+                            Event.m_EventSink = kEplEventSinkNmtMnu;
+                            Event.m_EventType = kEplEventTypeHeartbeat;
+                            Event.m_uiSize = sizeof (HeartbeatEvent);
+                            Event.m_pArg = &HeartbeatEvent;
+                            Ret = EplEventkPost(&Event);
+                        }
+                        EplErrorHandlerkInstance_g.m_afMnCnLossPresEvent[uiNodeId] = TRUE;
                     }
-                    EplErrorHandlerkInstance_g.m_afMnCnLossPresEvent[uiNodeId] = TRUE;
                 }
             }
 #endif
