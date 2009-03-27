@@ -5,9 +5,7 @@
 
   Project:      openPOWERLINK
 
-  Description:  Ethernet driver for Realtek RTL8139 chips
-                except the RTL8139C+, because it has a different
-                Tx descriptor handling.
+  Description:  Ethernet driver for Realtek RTL8139 chips (revision C, C+, D)
 
   License:
 
@@ -181,6 +179,7 @@
 #define EDRV_REGDW_TCR          0x40    // Tx configuration register
 #define EDRV_REGDW_TCR_VER_MASK 0x7CC00000  // mask for hardware version
 #define EDRV_REGDW_TCR_VER_C    0x74000000  // RTL8139C
+#define EDRV_REGDW_TCR_VER_CP   0x74800000  // RTL8139C+
 #define EDRV_REGDW_TCR_VER_D    0x74400000  // RTL8139D
 #define EDRV_REGDW_TCR_IFG96    0x03000000  // default interframe gap (960 ns)
 #define EDRV_REGDW_TCR_CRC      0x00010000  // disable appending of CRC by the controller
@@ -809,7 +808,7 @@ BYTE*           pbRxBuf;
 unsigned int    uiLength;
 int             iHandled = IRQ_HANDLED;
 
-//    printk("¤");
+//    printk("ï¿½");
 
     // read the interrupt status
     wStatus = EDRV_REGW_READ(EDRV_REGW_INT_STATUS);
@@ -1012,13 +1011,6 @@ DWORD   dwTemp;
         goto Exit;
     }
 
-    if (pPciDev->revision >= 0x20)
-    {
-        printk("%s device %s is an enhanced 8139C+ version, which is not supported\n", __FUNCTION__, pci_name(pPciDev));
-        iResult = -ENODEV;
-        goto Exit;
-    }
-
     EdrvInstance_l.m_pPciDev = pPciDev;
 
     // enable device
@@ -1072,7 +1064,8 @@ DWORD   dwTemp;
     // check hardware version, i.e. chip ID
     dwTemp = EDRV_REGDW_READ(EDRV_REGDW_TCR);
     if (((dwTemp & EDRV_REGDW_TCR_VER_MASK) != EDRV_REGDW_TCR_VER_C)
-        && ((dwTemp & EDRV_REGDW_TCR_VER_MASK) != EDRV_REGDW_TCR_VER_D))
+        && ((dwTemp & EDRV_REGDW_TCR_VER_MASK) != EDRV_REGDW_TCR_VER_D)
+        && ((dwTemp & EDRV_REGDW_TCR_VER_MASK) != EDRV_REGDW_TCR_VER_CP))
     {   // unsupported chip
         printk("%s Unsupported chip! TCR = 0x%08lX\n", __FUNCTION__, dwTemp);
         iResult = -ENODEV;

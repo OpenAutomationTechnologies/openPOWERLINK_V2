@@ -586,6 +586,7 @@ int  iRet;
         case EPLLIN_CMD_SHUTDOWN:
         {   // shutdown the threads
 
+            TRACE0("EPL: + EPLLIN_CMD_SHUTDOWN\n");
             // pass control to sync kernel thread, but signal termination
             atomic_set(&AtomicSyncState_g, EVENT_STATE_TERM);
             wake_up_interruptible(&WaitQueueCbSync_g);
@@ -594,6 +595,7 @@ int  iRet;
             // pass control to event queue kernel thread
             atomic_set(&AtomicEventState_g, EVENT_STATE_TERM);
             wake_up_interruptible(&WaitQueueCbEvent_g);
+            wake_up_interruptible(&WaitQueueProcess_g);
 
             if (uiEplState_g == EPL_STATE_RUNNING)
             {   // post NmtEventSwitchOff
@@ -601,6 +603,7 @@ int  iRet;
 
             }
 
+            TRACE0("EPL: - EPLLIN_CMD_SHUTDOWN\n");
             iRet = 0;
             break;
         }
@@ -923,6 +926,7 @@ int  iRet;
                 atomic_set(&AtomicEventState_g, EVENT_STATE_TERM);
                 wake_up_interruptible(&WaitQueueCbEvent_g);
                 // exit with error -> EplApiProcess() will leave the infinite loop
+                TRACE0("EPL:   EPLLIN_CMD_GET_EVENT set term\n");
                 iRet = 1;
                 goto Exit;
             }
@@ -941,6 +945,7 @@ int  iRet;
                 atomic_set(&AtomicEventState_g, EVENT_STATE_TERM);
                 wake_up_interruptible(&WaitQueueCbEvent_g);
                 // exit with this error -> EplApiProcess() will leave the infinite loop
+                TRACE1("EPL:   EPLLIN_CMD_GET_EVENT iErr=%d\n",iErr);
                 iRet = iErr;
                 goto Exit;
             }
@@ -949,6 +954,7 @@ int  iRet;
                 // pass control to event queue kernel thread, but signal termination
                 wake_up_interruptible(&WaitQueueCbEvent_g);
                 // exit with this error -> EplApiProcess() will leave the infinite loop
+                TRACE0("EPL:   EPLLIN_CMD_GET_EVENT term is set\n");
                 iRet = 1;
                 goto Exit;
             }
@@ -1034,6 +1040,7 @@ int  iRet;
                 atomic_set(&AtomicSyncState_g, EVENT_STATE_TERM);
                 wake_up_interruptible(&WaitQueueCbSync_g);
                 // exit with this error -> application will leave the infinite loop
+                TRACE1("EPL:   EPLLIN_CMD_PI_IN iErr=%d\n", iErr);
                 iRet = iErr;
                 goto Exit;
             }
@@ -1042,6 +1049,7 @@ int  iRet;
                 // pass control to sync kernel thread, but signal termination
                 wake_up_interruptible(&WaitQueueCbSync_g);
                 // exit with this error -> application will leave the infinite loop
+                TRACE0("EPL:   EPLLIN_CMD_PI_IN TERM is set\n");
                 iRet = 1;
                 goto Exit;
             }
@@ -1152,6 +1160,7 @@ int  iErr;
     if ((iErr != 0) || (atomic_read(&AtomicEventState_g) == EVENT_STATE_TERM))
     {   // waiting was interrupted by signal
         EplRet = kEplShutdown;
+        TRACE0("EPL:   EplLinCbEvent() TERM is set while waiting for ioctl\n");
         goto LeaveCriticalSection;
     }
 
@@ -1172,6 +1181,7 @@ int  iErr;
     if ((iErr != 0) || (atomic_read(&AtomicEventState_g) == EVENT_STATE_TERM))
     {   // waiting was interrupted by signal
         EplRet = kEplShutdown;
+        TRACE0("EPL:   EplLinCbEvent() TERM is set while waiting for completion\n");
         goto LeaveCriticalSection;
     }
 
@@ -1190,7 +1200,8 @@ Exit:
         {   // NMT state machine was shut down
             TRACE0("EPL:   EplLinCbEvent(NMT_GS_OFF)\n");
             uiEplState_g = EPL_STATE_SHUTDOWN;
-            atomic_set(&AtomicEventState_g, EVENT_STATE_TERM);
+//            atomic_set(&AtomicEventState_g, EVENT_STATE_TERM);
+//            wake_up_interruptible(&WaitQueueProcess_g);
             wake_up(&WaitQueueRelease_g);
         }
         else

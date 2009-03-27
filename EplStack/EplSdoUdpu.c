@@ -75,8 +75,9 @@
 
 #if (TARGET_SYSTEM == _LINUX_) && defined(__KERNEL__)
 #include "SocketLinuxKernel.h"
-#include <linux/completion.h>
+//#include <linux/completion.h>
 #include <linux/sched.h>
+#include <linux/kthread.h>
 #endif
 
 
@@ -120,9 +121,10 @@ typedef struct
     CRITICAL_SECTION        m_CriticalSection;
 
 #elif (TARGET_SYSTEM == _LINUX_) && defined(__KERNEL__)
-    struct completion       m_CompletionUdpThread;
-    int                     m_ThreadHandle;
-    int                     m_iTerminateThread;
+//    struct completion       m_CompletionUdpThread;
+    struct task_struct*     m_ThreadHandle;
+//    int                     m_ThreadHandle;
+//    int                     m_iTerminateThread;
 #endif
 
 } tEplSdoUdpInstance;
@@ -253,8 +255,8 @@ WSADATA             Wsa;
     InitializeCriticalSection(SdoUdpInstance_g.m_pCriticalSection);
 
 #elif (TARGET_SYSTEM == _LINUX_) && defined(__KERNEL__)
-    init_completion(&SdoUdpInstance_g.m_CompletionUdpThread);
-    SdoUdpInstance_g.m_iTerminateThread = 0;
+//    init_completion(&SdoUdpInstance_g.m_CompletionUdpThread);
+//    SdoUdpInstance_g.m_iTerminateThread = 0;
 #endif
 
     SdoUdpInstance_g.m_ThreadHandle = 0;
@@ -307,9 +309,8 @@ BOOL                fTermError;
         }
 
 #elif (TARGET_SYSTEM == _LINUX_) && defined(__KERNEL__)
-        SdoUdpInstance_g.m_iTerminateThread = 1;
-        kill_proc(SdoUdpInstance_g.m_ThreadHandle, SIGTERM, 1 );
-        wait_for_completion(&SdoUdpInstance_g.m_CompletionUdpThread);
+        send_sig(SIGTERM, SdoUdpInstance_g.m_ThreadHandle, 1);
+        kthread_stop(SdoUdpInstance_g.m_ThreadHandle);
 #endif
 
         SdoUdpInstance_g.m_ThreadHandle = 0;
@@ -391,10 +392,12 @@ unsigned long       ulThreadId;
         }
 
 #elif (TARGET_SYSTEM == _LINUX_) && defined(__KERNEL__)
-        SdoUdpInstance_g.m_iTerminateThread = 1;
-        kill_proc(SdoUdpInstance_g.m_ThreadHandle, SIGTERM, 1 );
-        wait_for_completion(&SdoUdpInstance_g.m_CompletionUdpThread);
-        SdoUdpInstance_g.m_iTerminateThread = 0;
+        send_sig(SIGTERM, SdoUdpInstance_g.m_ThreadHandle, 1);
+        kthread_stop(SdoUdpInstance_g.m_ThreadHandle);
+//        SdoUdpInstance_g.m_iTerminateThread = 1;
+//        kill_proc(SdoUdpInstance_g.m_ThreadHandle, SIGTERM, 1 );
+//        wait_for_completion(&SdoUdpInstance_g.m_CompletionUdpThread);
+//        SdoUdpInstance_g.m_iTerminateThread = 0;
 #endif
 
         SdoUdpInstance_g.m_ThreadHandle = 0;
@@ -445,7 +448,7 @@ unsigned long       ulThreadId;
                                                     &SdoUdpInstance_g,
                                                     0,
                                                     &ulThreadId);
-    if(SdoUdpInstance_g.m_ThreadHandle == NULL)
+    if (SdoUdpInstance_g.m_ThreadHandle == NULL)
     {
         Ret = kEplSdoUdpThreadError;
         goto Exit;
@@ -453,8 +456,9 @@ unsigned long       ulThreadId;
 
 #elif (TARGET_SYSTEM == _LINUX_) && defined(__KERNEL__)
 
-    SdoUdpInstance_g.m_ThreadHandle = kernel_thread(EplSdoUdpThread, &SdoUdpInstance_g, CLONE_KERNEL);
-    if(SdoUdpInstance_g.m_ThreadHandle == 0)
+    SdoUdpInstance_g.m_ThreadHandle = kthread_run(EplSdoUdpThread, &SdoUdpInstance_g, "EplSdoUdpThread");
+//    SdoUdpInstance_g.m_ThreadHandle = kernel_thread(EplSdoUdpThread, &SdoUdpInstance_g, CLONE_KERNEL);
+    if (IS_ERR(SdoUdpInstance_g.m_ThreadHandle))
     {
         Ret = kEplSdoUdpThreadError;
         goto Exit;
@@ -709,10 +713,11 @@ tEplSdoConHdl       SdoConHdl;
 
 #elif (TARGET_SYSTEM == _LINUX_) && defined(__KERNEL__)
     pInstance = (tEplSdoUdpInstance*)pArg_p;
-    daemonize("EplSdoUdpThread");
+    //daemonize("EplSdoUdpThread");
     allow_signal( SIGTERM );
 
-    for (;pInstance->m_iTerminateThread == 0;)
+    while (!kthread_should_stop())
+    //for (;pInstance->m_iTerminateThread == 0;)
 #endif
 
     {
@@ -807,7 +812,14 @@ tEplSdoConHdl       SdoConHdl;
     }// end of for(;;)
 
 #if (TARGET_SYSTEM == _LINUX_) && defined(__KERNEL__)
-    complete_and_exit(&SdoUdpInstance_g.m_CompletionUdpThread, 0);
+    //complete_and_exit(&SdoUdpInstance_g.m_CompletionUdpThread, 0);
+
+    /* Hmm, linux becomes *very* unhappy without this ... */
+    while (!kthread_should_stop()) {
+        printk("%s: waiting for kthread_stop()\n", __FUNCTION__);
+        set_current_state(TASK_INTERRUPTIBLE);
+        schedule();
+    }
 #endif
 
     return 0;

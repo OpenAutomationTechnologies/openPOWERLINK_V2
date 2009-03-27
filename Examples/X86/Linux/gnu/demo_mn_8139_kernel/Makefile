@@ -74,16 +74,17 @@ call_driver_build:
 #install:    call_driver_build
 #			cp $(MODULENAME).ko $(INSTALLDIR)
 
-endif
-
-
 .PHONY:     clean
 clean:
-			rm -f *.bak
-			rm -f *.tmp
-			rm -f *~ *.o *.ko
-			rm -f .built_in.o.cmd built_in.o Module.symvers
-			rm -f .*.cmd *.ko *.mod.c
-			rm -fr .tmp_versions/
+			$(MAKE)	-C $(KDIR)	SUBDIRS=$(PWD) clean
+#			rm -f *.bak
+#			rm -f *.tmp
+#			rm -f *~ *.o *.ko
+#			rm -f .built_in.o.cmd built_in.o Module.symvers
+#			rm -f .*.cmd *.ko *.mod.c
+#			rm -fr .tmp_versions/
+
+
+endif
 
 

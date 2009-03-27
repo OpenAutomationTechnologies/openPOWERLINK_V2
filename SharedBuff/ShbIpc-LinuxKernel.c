@@ -65,12 +65,12 @@
 #include <linux/string.h>
 #include <linux/module.h>
 #include <asm/processor.h>
-//#include <linux/vmalloc.h>
+#include <linux/crc32.h>
 #include <linux/sched.h>
 #include <linux/param.h>
 #include <linux/spinlock.h>
 #include <linux/wait.h>
-#include <linux/completion.h>
+#include <linux/kthread.h>
 
 
 
@@ -103,7 +103,7 @@
 #define SBI_MAGIC_ID            0x5342492B  // magic ID ("SBI+")
 #define SBH_MAGIC_ID            0x5342482A  // magic ID ("SBH*")
 
-#define INVALID_ID              -1
+#define INVALID_ID              NULL
 
 #define TABLE_SIZE              10
 
@@ -152,23 +152,19 @@ typedef struct
 {
     unsigned long       m_SbiMagicID;           // magic ID ("SBI+")
 //    void*               m_pSharedMem;
-    int                 m_tThreadNewDataId;
+//    int                 m_tThreadNewDataId;
+    struct task_struct* m_tThreadNewDataId;
     long                m_lThreadNewDataNice;   // nice value of the new data thread
-    int                 m_tThreadJobReadyId;
+//    int                 m_tThreadJobReadyId;
+    struct task_struct* m_tThreadJobReadyId;
     unsigned long       m_ulFlagsBuffAccess;    // d.k. moved from tShbMemHeader, because each
                                                 // process needs to store the interrupt flags separately
     tSigHndlrNewData    m_pfnSigHndlrNewData;
     unsigned long       m_ulTimeOutJobReady;
     tSigHndlrJobReady   m_pfnSigHndlrJobReady;
     tShbMemHeader*      m_pShbMemHeader;
-    int                 m_iThreadTermFlag;
-    struct completion   m_CompletionNewData;
-/*
-    struct semaphore    *m_pSemBuffAccess;
-    struct semaphore    *m_pSemNewData;
-    struct semaphore    *m_pSemStopSignalingNewData;
-    struct semaphore    *m_pSemJobReady;
-*/
+//    int                 m_iThreadTermFlag;
+//    struct completion   m_CompletionNewData;
     #ifndef NDEBUG
         unsigned long   m_ulThreadIDNewData;
         unsigned long   m_ulThreadIDJobReady;
@@ -242,8 +238,11 @@ static void*            ShbIpcAllocPrivateMem       (unsigned long ulMemSize_p);
 static int              ShbIpcFindListElement       (int iBufferId, struct sShbMemTable **ppsReturnMemTableElement);
 static void             ShbIpcAppendListElement     (struct sShbMemTable *sNewMemTableElement);
 static void             ShbIpcDeleteListElement     (int iBufferId);
+
+#ifndef CONFIG_CRC32
 static void             ShbIpcCrc32GenTable         (unsigned long aulCrcTable[256]);
 static unsigned long    ShbIpcCrc32GetCrc           (const char *pcString, unsigned long aulCrcTable[256]);
+#endif
 
 #endif
 
@@ -303,7 +302,6 @@ tShbMemInst*            pShbMemInst=NULL;
 tShbInstance            pShbInstance;
 unsigned int            fShMemNewCreated=FALSE;
 void                    *pSharedMem=NULL;
-unsigned long           aulCrcTable[256];
 struct sShbMemTable     *psMemTableElement;
 
 
@@ -311,8 +309,16 @@ struct sShbMemTable     *psMemTableElement;
     ulShMemSize      = ulBufferSize_p + sizeof(tShbMemHeader);
 
     //create Buffer ID
-    ShbIpcCrc32GenTable(aulCrcTable);
-    ulCrc32=ShbIpcCrc32GetCrc(pszBufferID_p,aulCrcTable);
+#ifndef CONFIG_CRC32
+    {
+        unsigned long           aulCrcTable[256];
+        ShbIpcCrc32GenTable(aulCrcTable);
+        ulCrc32 = ShbIpcCrc32GetCrc(pszBufferID_p, aulCrcTable);
+    }
+#else
+    ulCrc32 = crc32(0xFFFFFFFF, pszBufferID_p, strlen(pszBufferID_p));
+#endif
+
     iBufferId=ulCrc32;
     DEBUG_LVL_29_TRACE2("ShbIpcAllocBuffer BufferSize:%d sizeof(tShb..):%d\n",ulBufferSize_p,sizeof(tShbMemHeader));
     DEBUG_LVL_29_TRACE2("ShbIpcAllocBuffer BufferId:%d MemSize:%d\n",iBufferId,ulShMemSize);
@@ -373,10 +379,10 @@ struct sShbMemTable     *psMemTableElement;
     pShbMemInst->m_ulTimeOutJobReady                        = 0;
     pShbMemInst->m_pfnSigHndlrJobReady                      = NULL;
     pShbMemInst->m_pShbMemHeader                            = pShbMemHeader;
-    pShbMemInst->m_iThreadTermFlag                          = 0;
+ //   pShbMemInst->m_iThreadTermFlag                          = 0;
 
     // initialize completion etc.
-    init_completion(&pShbMemInst->m_CompletionNewData);
+//    init_completion(&pShbMemInst->m_CompletionNewData);
 
     ShbError         = kShbOk;
     if ( fShMemNewCreated )
@@ -559,7 +565,7 @@ tShbError       ShbError;
     DEBUG_LVL_26_TRACE2("ShbIpcStartSignalingNewData(%p) m_pfnSigHndlrNewData = %p\n", pShbInstance_p, pfnSignalHandlerNewData_p);
     pShbMemInst->m_pfnSigHndlrNewData = pfnSignalHandlerNewData_p;
     pShbMemHeader->m_fNewData = FALSE;
-    pShbMemInst->m_iThreadTermFlag = 0;
+//    pShbMemInst->m_iThreadTermFlag = 0;
 
     switch (ShbPriority_p)
     {
@@ -578,7 +584,10 @@ tShbError       ShbError;
     }
 
     //create thread for signalling new data
-    pShbMemInst->m_tThreadNewDataId = kernel_thread(ShbIpcThreadSignalNewData,pShbInstance_p,CLONE_KERNEL);
+//    pShbMemInst->m_tThreadNewDataId = kernel_thread(ShbIpcThreadSignalNewData,pShbInstance_p,CLONE_KERNEL);
+    pShbMemInst->m_tThreadNewDataId = kthread_run(ShbIpcThreadSignalNewData,
+                                                  pShbInstance_p,
+                                                  "ShbND%p", pShbInstance_p);
 
 Exit:
     return ShbError;
@@ -610,6 +619,8 @@ tShbError       ShbError;
     DEBUG_LVL_26_TRACE2("ShbIpcStopSignalingNewData(%p) pfnSignHndlrNewData=%p\n", pShbInstance_p, pShbMemInst->m_pfnSigHndlrNewData);
     if (pShbMemInst->m_pfnSigHndlrNewData != NULL)
     {   // signal handler was set before
+        kthread_stop(pShbMemInst->m_tThreadNewDataId);
+/*
         int iErr;
         //set termination flag in mem header
         pShbMemInst->m_iThreadTermFlag = 1;
@@ -624,7 +635,7 @@ tShbError       ShbError;
             //wait for termination of thread
             wait_for_completion(&pShbMemInst->m_CompletionNewData);
         }
-
+*/
         pShbMemInst->m_pfnSigHndlrNewData = NULL;
         pShbMemInst->m_tThreadNewDataId = INVALID_ID;
     }
@@ -680,7 +691,8 @@ tShbError       ShbError;
     pShbMemHeader = ShbIpcGetShbMemHeader (pShbMemInst);
 
     ShbError = kShbOk;
-    if ((pShbMemInst->m_tThreadJobReadyId != INVALID_ID)||(pShbMemInst->m_pfnSigHndlrJobReady!= NULL))
+    if ((pShbMemInst->m_tThreadJobReadyId != INVALID_ID)
+        || (pShbMemInst->m_pfnSigHndlrJobReady != NULL))
     {
         ShbError = kShbAlreadySignaling;
         goto Exit;
@@ -689,8 +701,11 @@ tShbError       ShbError;
     pShbMemInst->m_pfnSigHndlrJobReady = pfnSignalHandlerJobReady_p;
     pShbMemHeader->m_fJobReady = FALSE;
     //create thread for signalling new data
-    pShbMemInst->m_tThreadJobReadyId=kernel_thread(ShbIpcThreadSignalJobReady,pShbInstance_p,CLONE_KERNEL);
-    Exit:
+//    pShbMemInst->m_tThreadJobReadyId=kernel_thread(ShbIpcThreadSignalJobReady,pShbInstance_p,CLONE_KERNEL);
+    pShbMemInst->m_tThreadJobReadyId = kthread_run(ShbIpcThreadSignalJobReady,
+                                                   pShbInstance_p,
+                                                   "ShbJR%p", pShbInstance_p);
+Exit:
     return ShbError;
 }
 
@@ -834,7 +849,7 @@ tShbMemHeader*  pShbMemHeader;
 int             iRetVal=-1;
 int             fCallAgain;
 
-    daemonize("ShbND%p", pvThreadParam_p);
+//    daemonize("ShbND%p", pvThreadParam_p);
     allow_signal(SIGTERM);
     pShbInstance = (tShbMemInst*)pvThreadParam_p;
     pShbMemInst  = ShbIpcGetShbMemInst (pShbInstance);
@@ -845,10 +860,12 @@ int             fCallAgain;
     set_user_nice(current, pShbMemInst->m_lThreadNewDataNice);
 
 //            DEBUG_LVL_29_TRACE1("ShbIpcThreadSignalNewData wait for New Data Sem %p\n",pShbMemInst->m_pSemNewData);
-    do
+    while (!kthread_should_stop())
     {
         iRetVal = wait_event_interruptible(pShbMemHeader->m_WaitQueueNewData,
-            (pShbMemInst->m_iThreadTermFlag != 0) || (pShbMemHeader->m_fNewData != FALSE));
+//            (pShbMemInst->m_iThreadTermFlag != 0)
+            kthread_should_stop()
+            || (pShbMemHeader->m_fNewData != FALSE));
 
         if (iRetVal != 0)
         {   // signal pending
@@ -865,10 +882,19 @@ int             fCallAgain;
                 schedule();
             } while (fCallAgain != FALSE);
         }
-    } while (pShbMemInst->m_iThreadTermFlag==0);
+    }
+//    while (pShbMemInst->m_iThreadTermFlag==0);
     DEBUG_LVL_29_TRACE0("ShbIpcThreadSignalNewData terminated \n");
     //set thread completed
-    complete_and_exit(&pShbMemInst->m_CompletionNewData, 0);
+//    complete_and_exit(&pShbMemInst->m_CompletionNewData, 0);
+
+    /* Hmm, linux becomes *very* unhappy without this ... */
+    while (!kthread_should_stop()) {
+        printk("%s: waiting for kthread_stop()\n", __FUNCTION__);
+        set_current_state(TASK_INTERRUPTIBLE);
+        schedule();
+    }
+
     return 0;
 }
 
@@ -886,7 +912,7 @@ tShbMemHeader*  pShbMemHeader;
 long            lTimeOut;
 int             iRetVal=-1;
 
-    daemonize("ShbJR%p", pvThreadParam_p);
+//    daemonize("ShbJR%p", pvThreadParam_p);
     allow_signal(SIGTERM);
     pShbInstance = (tShbMemInst*)pvThreadParam_p;
     pShbMemInst  = ShbIpcGetShbMemInst (pShbInstance);
@@ -913,12 +939,13 @@ int             iRetVal=-1;
         pShbMemInst->m_pfnSigHndlrJobReady(pShbInstance, !pShbMemHeader->m_fJobReady);
     }
 
-    pShbMemInst->m_pfnSigHndlrJobReady=NULL;
+    pShbMemInst->m_pfnSigHndlrJobReady = NULL;
     return 0;
 }
 
 
 
+#ifndef CONFIG_CRC32
 //Build the crc table
 static void ShbIpcCrc32GenTable(unsigned long aulCrcTable[256])
 {
@@ -958,6 +985,7 @@ static unsigned long ShbIpcCrc32GetCrc(const char *pcString,unsigned long aulCrc
     return( ulCrc^0xFFFFFFFF );
 
 }
+#endif
 
 static void ShbIpcAppendListElement (struct sShbMemTable *psNewMemTableElement)
 {
