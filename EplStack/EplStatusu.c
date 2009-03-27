@@ -296,11 +296,19 @@ tEplKernel  Ret;
 
     Ret = kEplSuccessful;
 
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
+    if (uiNodeId_p == 0)
+    {   // issue request for local node
+        Ret = EplDlluCalIssueRequest(kEplDllReqServiceStatus, 0x00, 0xFF);
+        goto Exit;
+    }
+#endif
+
     // decrement node ID, because array is zero based
     uiNodeId_p--;
     if (uiNodeId_p < tabentries (EplStatusuInstance_g.m_apfnCbResponse))
     {
-#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
         if (EplStatusuInstance_g.m_apfnCbResponse[uiNodeId_p] != NULL)
         {   // request already issued (maybe by someone else)
             Ret = kEplInvalidOperation;
@@ -319,6 +327,7 @@ tEplKernel  Ret;
         Ret = kEplInvalidNodeId;
     }
 
+Exit:
     return Ret;
 
 }

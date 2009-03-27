@@ -171,6 +171,7 @@
 // defines for global flags
 #define EPL_NMTMNU_FLAG_HALTED          0x0001  // boot process is halted
 #define EPL_NMTMNU_FLAG_APP_INFORMED    0x0002  // application was informed about possible NMT state change
+#define EPL_NMTMNU_FLAG_USER_RESET      0x0004  // NMT reset issued by user / diagnostic node
 
 // return pointer to node info structure for specified node ID
 // d.k. may be replaced by special (hash) function if node ID array is smaller than 254
@@ -508,6 +509,11 @@ BOOL            fSoftDeleteNode = FALSE;
             goto Exit;
     }
 
+    // The expected node state will be updated when the NMT command
+    // was actually sent.
+    // See functions EplNmtMnuProcessInternalEvent(kEplNmtMnuIntNodeEventNmtCmdSent),
+    // EplNmtMnuProcessEvent(kEplEventTypeNmtMnuNmtCmdSent).
+
     // remove CN from isochronous phase;
     // This must be done here and not when NMT command is actually sent
     // because it will be too late and may cause unwanted errors
@@ -567,6 +573,164 @@ tEplKernel      Ret = kEplSuccessful;
     Ret = EplNmtMnuSendNmtCommandEx(uiNodeId_p, NmtCommand_p, NULL, 0);
 
 //Exit:
+    return Ret;
+}
+
+//---------------------------------------------------------------------------
+//
+// Function:    EplNmtMnuRequestNmtCommand
+//
+// Description: requests the specified NMT command for the specified node.
+//              It may also be applied to the local node.
+//
+// Parameters:  uiNodeId_p              = node ID to which the NMT command will be sent
+//              NmtCommand_p            = NMT command
+//
+// Returns:     tEplKernel              = error code
+//
+// State:
+//
+//---------------------------------------------------------------------------
+
+tEplKernel EplNmtMnuRequestNmtCommand(unsigned int uiNodeId_p,
+                                    tEplNmtCommand  NmtCommand_p)
+{
+tEplKernel      Ret = kEplSuccessful;
+tEplNmtState    NmtState;
+
+    NmtState = EplNmtuGetNmtState();
+
+    if (NmtState <= kEplNmtMsNotActive)
+    {
+        Ret = kEplInvalidOperation;
+        goto Exit;
+    }
+
+    if (uiNodeId_p > EPL_C_ADR_BROADCAST)
+    {
+        Ret = kEplInvalidNodeId;
+        goto Exit;
+    }
+
+    if (uiNodeId_p == 0x00)
+    {
+        uiNodeId_p = EPL_C_ADR_MN_DEF_NODE_ID;
+    }
+
+    if (uiNodeId_p == EPL_C_ADR_MN_DEF_NODE_ID)
+    {   // apply command to local node-ID
+
+        switch (NmtCommand_p)
+        {
+            case kEplNmtCmdIdentResponse:
+            {   // issue request for local node
+                Ret = EplIdentuRequestIdentResponse(0x00, NULL);
+                goto Exit;
+            }
+
+            case kEplNmtCmdStatusResponse:
+            {   // issue request for local node
+                Ret = EplStatusuRequestStatusResponse(0x00, NULL);
+                goto Exit;
+            }
+
+            case kEplNmtCmdResetNode:
+            case kEplNmtCmdResetCommunication:
+            case kEplNmtCmdResetConfiguration:
+            case kEplNmtCmdSwReset:
+            {
+                uiNodeId_p = EPL_C_ADR_BROADCAST;
+                break;
+            }
+
+            case kEplNmtCmdInvalidService:
+            default:
+            {
+                Ret = kEplObdAccessViolation;
+                goto Exit;
+            }
+        }
+    }
+
+    if (uiNodeId_p != EPL_C_ADR_BROADCAST)
+    {   // apply command to remote node-ID, but not broadcast
+    tEplNmtMnuNodeInfo* pNodeInfo;
+
+        pNodeInfo = EPL_NMTMNU_GET_NODEINFO(uiNodeId_p);
+
+        switch (NmtCommand_p)
+        {
+            case kEplNmtCmdIdentResponse:
+            {   // issue request for remote node
+                // if it is a non-existing node or no identrequest is running
+                if (((pNodeInfo->m_dwNodeCfg
+                     & (EPL_NODEASSIGN_NODE_IS_CN | EPL_NODEASSIGN_NODE_EXISTS))
+                        != (EPL_NODEASSIGN_NODE_IS_CN | EPL_NODEASSIGN_NODE_EXISTS))
+                    || ((pNodeInfo->m_NodeState != kEplNmtMnuNodeStateResetConf)
+                        && (pNodeInfo->m_NodeState != kEplNmtMnuNodeStateUnknown)))
+                {
+                    Ret = EplIdentuRequestIdentResponse(uiNodeId_p, NULL);
+                }
+                goto Exit;
+            }
+
+            case kEplNmtCmdStatusResponse:
+            {   // issue request for remote node
+                // if it is a non-existing node or operational and not async-only
+                if (((pNodeInfo->m_dwNodeCfg
+                     & (EPL_NODEASSIGN_NODE_IS_CN | EPL_NODEASSIGN_NODE_EXISTS))
+                        != (EPL_NODEASSIGN_NODE_IS_CN | EPL_NODEASSIGN_NODE_EXISTS))
+                    || (((pNodeInfo->m_dwNodeCfg & EPL_NODEASSIGN_ASYNCONLY_NODE) == 0)
+                        && (pNodeInfo->m_NodeState == kEplNmtMnuNodeStateOperational)))
+                {
+                    Ret = EplStatusuRequestStatusResponse(uiNodeId_p, NULL);
+                }
+                goto Exit;
+            }
+
+            default:
+            {
+                break;
+            }
+        }
+    }
+
+    switch (NmtCommand_p)
+    {
+        case kEplNmtCmdResetNode:
+        case kEplNmtCmdResetCommunication:
+        case kEplNmtCmdResetConfiguration:
+        case kEplNmtCmdSwReset:
+        {
+            if (uiNodeId_p == EPL_C_ADR_BROADCAST)
+            {   // memorize that this is a user requested reset
+                EplNmtMnuInstance_g.m_wFlags |= EPL_NMTMNU_FLAG_USER_RESET;
+            }
+            break;
+        }
+
+        case kEplNmtCmdStartNode:
+        case kEplNmtCmdStopNode:
+        case kEplNmtCmdEnterPreOperational2:
+        case kEplNmtCmdEnableReadyToOperate:
+        default:
+        {
+            break;
+        }
+/*
+        case kEplNmtCmdInvalidService:
+        default:
+        {
+            Ret = kEplObdAccessViolation;
+            goto Exit;
+        }
+*/
+    }
+
+    // send command to remote node
+    Ret = EplNmtMnuSendNmtCommand(uiNodeId_p, NmtCommand_p);
+
+Exit:
     return Ret;
 }
 
@@ -818,9 +982,6 @@ tEplKernel      Ret = kEplSuccessful;
         tEplObdSize     ObdSize;
         tEplEvent       Event;
 
-            // clear global flags, e.g. reenable boot process
-            EplNmtMnuInstance_g.m_wFlags = 0;
-
             // reset IdentResponses and running IdentRequests and StatusRequests
             Ret = EplIdentuReset();
             Ret = EplStatusuReset();
@@ -851,8 +1012,11 @@ tEplKernel      Ret = kEplSuccessful;
             }
 
             // reset all nodes
-            // d.k.: skip this step if was just done before, e.g. because of a ResetNode command from a diagnostic node
-            if (NmtStateChange_p.m_NmtEvent == kEplNmtEventTimerMsPreOp1)
+            // skip this step if we come directly from OPERATIONAL
+            // or it was just done before, e.g. because of a ResetNode command
+            // from a diagnostic node
+            if ((NmtStateChange_p.m_NmtEvent == kEplNmtEventTimerMsPreOp1)
+                || ((EplNmtMnuInstance_g.m_wFlags & EPL_NMTMNU_FLAG_USER_RESET) == 0))
             {
                 BENCHMARK_MOD_07_TOGGLE(9);
 
@@ -866,6 +1030,10 @@ tEplKernel      Ret = kEplSuccessful;
                     break;
                 }
             }
+
+            // clear global flags, e.g. reenable boot process
+            EplNmtMnuInstance_g.m_wFlags = 0;
+
             // start network scan
             Ret = EplNmtMnuStartBootStep1();
 
@@ -1208,6 +1376,50 @@ tEplKernel      Ret;
                         }
                     }
                 }
+
+                if ((EplNmtMnuInstance_g.m_wFlags & EPL_NMTMNU_FLAG_USER_RESET) != 0)
+                {   // user or diagnostic nodes requests a reset of the MN
+                tEplNmtEvent    NmtEvent;
+
+                    switch (NmtCommand)
+                    {
+                        case kEplNmtCmdResetNode:
+                        {
+                            NmtEvent = kEplNmtEventResetNode;
+                            break;
+                        }
+
+                        case kEplNmtCmdResetCommunication:
+                        {
+                            NmtEvent = kEplNmtEventResetCom;
+                            break;
+                        }
+
+                        case kEplNmtCmdResetConfiguration:
+                        {
+                            NmtEvent = kEplNmtEventResetConfig;
+                            break;
+                        }
+
+                        case kEplNmtCmdSwReset:
+                        {
+                            NmtEvent = kEplNmtEventSwReset;
+                            break;
+                        }
+
+                        case kEplNmtCmdInvalidService:
+                        default:
+                        {   // actually no reset was requested
+                            goto Exit;
+                        }
+                    }
+
+                    Ret = EplNmtuNmtEvent(NmtEvent);
+                    if (Ret != kEplSuccessful)
+                    {
+                        goto Exit;
+                    }
+                }
             }
 
             break;
@@ -1324,7 +1536,6 @@ Exit:
 //
 // Returns:     tEplKernel              = error code
 //
-//
 // State:
 //
 //---------------------------------------------------------------------------
@@ -1332,8 +1543,37 @@ Exit:
 static tEplKernel PUBLIC EplNmtMnuCbNmtRequest(tEplFrameInfo * pFrameInfo_p)
 {
 tEplKernel      Ret = kEplSuccessful;
+unsigned int    uiTargetNodeId;
+tEplNmtCommand  NmtCommand;
+tEplNmtRequestService*  pNmtRequestService;
 
-    // $$$ perform NMTRequest
+    if ((pFrameInfo_p == NULL)
+        || (pFrameInfo_p->m_pFrame == NULL))
+    {
+        Ret = kEplNmtInvalidFramePointer;
+        goto Exit;
+    }
+
+    pNmtRequestService = &pFrameInfo_p->m_pFrame->m_Data.m_Asnd.m_Payload.m_NmtRequestService;
+
+    NmtCommand = (tEplNmtCommand)AmiGetByteFromLe(
+            &pNmtRequestService->m_le_bNmtCommandId);
+
+    uiTargetNodeId = AmiGetByteFromLe(
+            &pNmtRequestService->m_le_bTargetNodeId);
+
+    Ret = EplNmtMnuRequestNmtCommand(uiTargetNodeId,
+                                     NmtCommand);
+    if (Ret != kEplSuccessful)
+    {   // error -> reply with kEplNmtCmdInvalidService
+    unsigned int uiSourceNodeId;
+
+        uiSourceNodeId = AmiGetByteFromLe(
+                &pFrameInfo_p->m_pFrame->m_le_bSrcNodeId);
+        Ret = EplNmtMnuSendNmtCommand(uiSourceNodeId, kEplNmtCmdInvalidService);
+    }
+
+Exit:
     return Ret;
 }
 

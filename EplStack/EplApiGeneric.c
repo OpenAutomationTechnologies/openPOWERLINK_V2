@@ -1057,6 +1057,16 @@ tEplApiEventArg     EventArg;
     Ret = EplApiInstance_g.m_InitParam.m_pfnCbEvent(kEplApiEventObdAccess,
                                                     &EventArg,
                                                     EplApiInstance_g.m_InitParam.m_pEventUserArg);
+
+    if (Ret != kEplSuccessful)
+    {   // do not do any further processing on this object
+        if (Ret == kEplReject)
+        {
+            Ret = kEplSuccessful;
+        }
+
+        goto Exit;
+    }
 #endif
 
     switch (pParam_p->m_uiIndex)
@@ -1120,29 +1130,23 @@ tEplApiEventArg     EventArg;
                 // check value range
                 switch ((tEplNmtCommand)bNmtCommand)
                 {
-                    case kEplNmtCmdResetNode:
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMTU)) != 0)
+                    case kEplNmtCmdResetNode:
                         Ret = EplNmtuNmtEvent(kEplNmtEventResetNode);
-#endif
                         break;
 
                     case kEplNmtCmdResetCommunication:
-#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMTU)) != 0)
                         Ret = EplNmtuNmtEvent(kEplNmtEventResetCom);
-#endif
                         break;
 
                     case kEplNmtCmdResetConfiguration:
-#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMTU)) != 0)
                         Ret = EplNmtuNmtEvent(kEplNmtEventResetConfig);
-#endif
                         break;
 
                     case kEplNmtCmdSwReset:
-#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMTU)) != 0)
                         Ret = EplNmtuNmtEvent(kEplNmtEventSwReset);
-#endif
                         break;
+#endif
 
                     case kEplNmtCmdInvalidService:
                         break;
@@ -1156,11 +1160,66 @@ tEplApiEventArg     EventArg;
             break;
         }
 
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
+        case 0x1F9F:    // NMT_RequestCmd_REC
+        {
+            if ((pParam_p->m_ObdEvent == kEplObdEvPostWrite)
+                && (pParam_p->m_uiSubIndex == 1)
+                && (*((BYTE*)pParam_p->m_pArg) != 0))
+            {
+            BYTE        bCmdId;
+            BYTE        bCmdTarget;
+            tEplObdSize ObdSize;
+            tEplNmtState    NmtState;
+
+                ObdSize = sizeof (bCmdId);
+                Ret = EplObdReadEntry(0x1F9F, 2, &bCmdId, &ObdSize);
+                if (Ret != kEplSuccessful)
+                {
+                    pParam_p->m_dwAbortCode = EPL_SDOAC_GENERAL_ERROR;
+                    goto Exit;
+                }
+
+                ObdSize = sizeof (bCmdTarget);
+                Ret = EplObdReadEntry(0x1F9F, 2, &bCmdTarget, &ObdSize);
+                if (Ret != kEplSuccessful)
+                {
+                    pParam_p->m_dwAbortCode = EPL_SDOAC_GENERAL_ERROR;
+                    goto Exit;
+                }
+
+                NmtState = EplNmtuGetNmtState();
+
+                if (NmtState < kEplNmtMsNotActive)
+                {   // local node is CN
+                    // forward the command to the MN
+                    // d.k. this is a manufacturer specific feature
+                    Ret = EplNmtCnuSendNmtRequest(bCmdTarget,
+                                                  (tEplNmtCommand) bCmdId);
+                }
+                else
+                {   // local node is MN
+                    // directly execute the requested NMT command
+                    Ret = EplNmtMnuRequestNmtCommand(bCmdTarget,
+                                                     (tEplNmtCommand) bCmdId);
+                }
+                if (Ret != kEplSuccessful)
+                {
+                    pParam_p->m_dwAbortCode = EPL_SDOAC_GENERAL_ERROR;
+                }
+
+                // reset request flag
+                *((BYTE*)pParam_p->m_pArg) = 0;
+            }
+            break;
+        }
+#endif // (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
+
         default:
             break;
     }
 
-//Exit:
+Exit:
     return Ret;
 }
 
@@ -1720,122 +1779,68 @@ BYTE                bTemp;
     if (EplApiInstance_g.m_InitParam.m_dwCycleLen != -1)
     {
         Ret = EplObdWriteEntry(0x1006, 0, &EplApiInstance_g.m_InitParam.m_dwCycleLen, 4);
-/*    if(Ret != kEplSuccessful)
-    {
-        goto Exit;
-    }*/
     }
 
     if (EplApiInstance_g.m_InitParam.m_dwLossOfFrameTolerance != -1)
     {
         Ret = EplObdWriteEntry(0x1C14, 0, &EplApiInstance_g.m_InitParam.m_dwLossOfFrameTolerance, 4);
-    /*        if(Ret != kEplSuccessful)
-        {
-            goto Exit;
-        }*/
     }
 
     // d.k. There is no dependance between FeatureFlags and async-only CN.
     if (EplApiInstance_g.m_InitParam.m_dwFeatureFlags != -1)
     {
         Ret = EplObdWriteEntry(0x1F82, 0, &EplApiInstance_g.m_InitParam.m_dwFeatureFlags, 4);
-    /*    if(Ret != kEplSuccessful)
-        {
-            goto Exit;
-        }*/
     }
 
     wTemp = (WORD) EplApiInstance_g.m_InitParam.m_uiIsochrTxMaxPayload;
     Ret = EplObdWriteEntry(0x1F98, 1, &wTemp, 2);
-/*    if(Ret != kEplSuccessful)
-    {
-        goto Exit;
-    }*/
 
     wTemp = (WORD) EplApiInstance_g.m_InitParam.m_uiIsochrRxMaxPayload;
     Ret = EplObdWriteEntry(0x1F98, 2, &wTemp, 2);
-/*    if(Ret != kEplSuccessful)
-    {
-        goto Exit;
-    }*/
 
     Ret = EplObdWriteEntry(0x1F98, 3, &EplApiInstance_g.m_InitParam.m_dwPresMaxLatency, 4);
-/*    if(Ret != kEplSuccessful)
-    {
-        goto Exit;
-    }*/
 
     if (EplApiInstance_g.m_InitParam.m_uiPreqActPayloadLimit <= EPL_C_DLL_ISOCHR_MAX_PAYL)
     {
         wTemp = (WORD) EplApiInstance_g.m_InitParam.m_uiPreqActPayloadLimit;
         Ret = EplObdWriteEntry(0x1F98, 4, &wTemp, 2);
-/*    if(Ret != kEplSuccessful)
-    {
-        goto Exit;
-    }*/
     }
 
     if (EplApiInstance_g.m_InitParam.m_uiPresActPayloadLimit <= EPL_C_DLL_ISOCHR_MAX_PAYL)
     {
         wTemp = (WORD) EplApiInstance_g.m_InitParam.m_uiPresActPayloadLimit;
         Ret = EplObdWriteEntry(0x1F98, 5, &wTemp, 2);
-/*    if(Ret != kEplSuccessful)
-    {
-        goto Exit;
-    }*/
     }
 
     Ret = EplObdWriteEntry(0x1F98, 6, &EplApiInstance_g.m_InitParam.m_dwAsndMaxLatency, 4);
-/*    if(Ret != kEplSuccessful)
-    {
-        goto Exit;
-    }*/
 
     if (EplApiInstance_g.m_InitParam.m_uiMultiplCycleCnt <= 0xFF)
     {
         bTemp = (BYTE) EplApiInstance_g.m_InitParam.m_uiMultiplCycleCnt;
         Ret = EplObdWriteEntry(0x1F98, 7, &bTemp, 1);
-/*    if(Ret != kEplSuccessful)
-    {
-        goto Exit;
-    }*/
     }
 
     if (EplApiInstance_g.m_InitParam.m_uiAsyncMtu <= EPL_C_DLL_MAX_ASYNC_MTU)
     {
         wTemp = (WORD) EplApiInstance_g.m_InitParam.m_uiAsyncMtu;
         Ret = EplObdWriteEntry(0x1F98, 8, &wTemp, 2);
-/*    if(Ret != kEplSuccessful)
-    {
-        goto Exit;
-    }*/
     }
 
     if (EplApiInstance_g.m_InitParam.m_uiPrescaler <= 1000)
     {
         wTemp = (WORD) EplApiInstance_g.m_InitParam.m_uiPrescaler;
         Ret = EplObdWriteEntry(0x1F98, 9, &wTemp, 2);
-        // ignore return code
-        Ret = kEplSuccessful;
     }
 
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
     if (EplApiInstance_g.m_InitParam.m_dwWaitSocPreq != -1)
     {
         Ret = EplObdWriteEntry(0x1F8A, 1, &EplApiInstance_g.m_InitParam.m_dwWaitSocPreq, 4);
-    /*        if(Ret != kEplSuccessful)
-        {
-            goto Exit;
-        }*/
     }
 
     if ((EplApiInstance_g.m_InitParam.m_dwAsyncSlotTimeout != 0) && (EplApiInstance_g.m_InitParam.m_dwAsyncSlotTimeout != -1))
     {
         Ret = EplObdWriteEntry(0x1F8A, 2, &EplApiInstance_g.m_InitParam.m_dwAsyncSlotTimeout, 4);
-    /*        if(Ret != kEplSuccessful)
-        {
-            goto Exit;
-        }*/
     }
 #endif
 
@@ -1843,46 +1848,26 @@ BYTE                bTemp;
     if (EplApiInstance_g.m_InitParam.m_dwDeviceType != -1)
     {
         Ret = EplObdWriteEntry(0x1000, 0, &EplApiInstance_g.m_InitParam.m_dwDeviceType, 4);
-/*        if(Ret != kEplSuccessful)
-        {
-            goto Exit;
-        }*/
     }
 
     if (EplApiInstance_g.m_InitParam.m_dwVendorId != -1)
     {
         Ret = EplObdWriteEntry(0x1018, 1, &EplApiInstance_g.m_InitParam.m_dwVendorId, 4);
-/*        if(Ret != kEplSuccessful)
-        {
-            goto Exit;
-        }*/
     }
 
     if (EplApiInstance_g.m_InitParam.m_dwProductCode != -1)
     {
         Ret = EplObdWriteEntry(0x1018, 2, &EplApiInstance_g.m_InitParam.m_dwProductCode, 4);
-/*        if(Ret != kEplSuccessful)
-        {
-            goto Exit;
-        }*/
     }
 
     if (EplApiInstance_g.m_InitParam.m_dwRevisionNumber != -1)
     {
         Ret = EplObdWriteEntry(0x1018, 3, &EplApiInstance_g.m_InitParam.m_dwRevisionNumber, 4);
-/*        if(Ret != kEplSuccessful)
-        {
-            goto Exit;
-        }*/
     }
 
     if (EplApiInstance_g.m_InitParam.m_dwSerialNumber != -1)
     {
         Ret = EplObdWriteEntry(0x1018, 4, &EplApiInstance_g.m_InitParam.m_dwSerialNumber, 4);
-/*        if(Ret != kEplSuccessful)
-        {
-            goto Exit;
-        }*/
     }
 
     if (EplApiInstance_g.m_InitParam.m_pszDevName != NULL)
@@ -1890,10 +1875,6 @@ BYTE                bTemp;
         // write Device Name (0x1008)
         Ret = EplObdWriteEntry (
             0x1008, 0, (void GENERIC*) EplApiInstance_g.m_InitParam.m_pszDevName, (tEplObdSize) strlen(EplApiInstance_g.m_InitParam.m_pszDevName));
-/*        if (Ret != kEplSuccessful)
-        {
-            goto Exit;
-        }*/
     }
 
     if (EplApiInstance_g.m_InitParam.m_pszHwVersion != NULL)
@@ -1901,10 +1882,6 @@ BYTE                bTemp;
         // write Hardware version (0x1009)
         Ret = EplObdWriteEntry (
             0x1009, 0, (void GENERIC*) EplApiInstance_g.m_InitParam.m_pszHwVersion, (tEplObdSize) strlen(EplApiInstance_g.m_InitParam.m_pszHwVersion));
-/*        if (Ret != kEplSuccessful)
-        {
-            goto Exit;
-        }*/
     }
 
     if (EplApiInstance_g.m_InitParam.m_pszSwVersion != NULL)
@@ -1912,11 +1889,10 @@ BYTE                bTemp;
         // write Software version (0x100A)
         Ret = EplObdWriteEntry (
             0x100A, 0, (void GENERIC*) EplApiInstance_g.m_InitParam.m_pszSwVersion, (tEplObdSize) strlen(EplApiInstance_g.m_InitParam.m_pszSwVersion));
-/*        if (Ret != kEplSuccessful)
-        {
-            goto Exit;
-        }*/
     }
+
+    // ignore return code
+    Ret = kEplSuccessful;
 
 Exit:
     return Ret;

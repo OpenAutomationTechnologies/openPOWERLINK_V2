@@ -118,6 +118,9 @@ EPLDLLEXPORT tEplKernel PUBLIC EplNmtMnuProcessEvent(
 tEplKernel EplNmtMnuSendNmtCommand(unsigned int uiNodeId_p,
                                    tEplNmtCommand  NmtCommand_p);
 
+tEplKernel EplNmtMnuRequestNmtCommand(unsigned int uiNodeId_p,
+                                    tEplNmtCommand  NmtCommand_p);
+
 tEplKernel EplNmtMnuTriggerStateChange(unsigned int uiNodeId_p,
                                        tEplNmtNodeCommand  NodeCommand_p);
 

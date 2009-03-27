@@ -351,6 +351,14 @@ tEplKernel  Ret;
 
     Ret = kEplSuccessful;
 
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
+    if (uiNodeId_p == 0)
+    {   // issue request for local node
+        Ret = EplDlluCalIssueRequest(kEplDllReqServiceIdent, 0x00, 0xFF);
+        goto Exit;
+    }
+#endif
+
     // decrement node ID, because array is zero based
     uiNodeId_p--;
     if (uiNodeId_p < tabentries (EplIdentuInstance_g.m_apfnCbResponse))
@@ -374,6 +382,7 @@ tEplKernel  Ret;
         Ret = kEplInvalidNodeId;
     }
 
+Exit:
     return Ret;
 
 }
