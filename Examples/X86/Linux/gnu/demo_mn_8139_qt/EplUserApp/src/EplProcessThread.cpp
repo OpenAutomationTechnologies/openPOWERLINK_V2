@@ -179,6 +179,14 @@ tEplKernel  EplRet = kEplSuccessful;
                     break;
                 }
 
+                case kEplNmtCsBasicEthernet:
+                case kEplNmtMsBasicEthernet:
+                {
+                    printf("BasicEthernet\n");
+                    pEplProcessThread_g->sigEplStatus(1);
+                    break;
+                }
+
                 default:
                 {
                     printf("Others\n");
