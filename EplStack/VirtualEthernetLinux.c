@@ -174,7 +174,6 @@ static int VEthOpen(struct net_device *pNetDevice_p)
 tEplKernel  Ret = kEplSuccessful;
 
     //open the device
-//    struct net_device_stats* pStats = (struct net_device_stats*)pNetDevice_p->priv;
 
     //start the interface queue for the network subsystem
     netif_start_queue(pNetDevice_p);
@@ -207,7 +206,7 @@ tEplKernel      Ret = kEplSuccessful;
 tEplFrameInfo   FrameInfo;
 
     //transmit function
-    struct net_device_stats* pStats = (struct net_device_stats*)pNetDevice_p->priv;
+    struct net_device_stats* pStats = netdev_priv(pNetDevice_p);
 
     //save timestemp
     pNetDevice_p->trans_start = jiffies;
@@ -243,7 +242,7 @@ static struct net_device_stats* VEthGetStats(struct net_device *pNetDevice_p)
 {
     EPL_DBGLVL_VETH_TRACE0("VEthGetStats\n");
 
-    return (struct net_device_stats *)pNetDevice_p->priv;
+	return netdev_priv(pNetDevice_p);
 }
 
 
@@ -265,7 +264,7 @@ static tEplKernel VEthRecvFrame(tEplFrameInfo * pFrameInfo_p)
 {
 tEplKernel  Ret = kEplSuccessful;
     struct net_device* pNetDevice = pVEthNetDevice_g;
-    struct net_device_stats* pStats = (struct net_device_stats*)pNetDevice->priv;
+    struct net_device_stats* pStats = netdev_priv(pNetDevice);
     struct sk_buff *pSkb;
 
     EPL_DBGLVL_VETH_TRACE1("VEthRecvFrame: FrameSize=%u\n", pFrameInfo_p->m_uiFrameSize);
