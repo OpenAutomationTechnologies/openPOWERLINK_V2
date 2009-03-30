@@ -69,11 +69,11 @@
 
 ****************************************************************************/
 
-#include "EplInc.h"
-#include "EplEvent.h"
-
 #ifndef _EPLTIMER_H_
 #define _EPLTIMER_H_
+
+#include "EplInc.h"
+#include "EplEvent.h"
 
 
 //---------------------------------------------------------------------------

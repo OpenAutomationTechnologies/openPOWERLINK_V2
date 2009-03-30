@@ -69,12 +69,12 @@
 
 ****************************************************************************/
 
+#ifndef _EPLLEDU_H_
+#define _EPLLEDU_H_
+
 #include "EplLed.h"
 #include "EplNmt.h"
 #include "user/EplEventu.h"
-
-#ifndef _EPLLEDU_H_
-#define _EPLLEDU_H_
 
 
 //---------------------------------------------------------------------------

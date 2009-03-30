@@ -69,12 +69,12 @@
 
 ****************************************************************************/
 
+#ifndef _EPLNMTCNU_H_
+#define _EPLNMTCNU_H_
+
 #include "user/EplNmtu.h"
 #include "EplDll.h"
 #include "EplFrame.h"
-
-#ifndef _EPLNMTCNU_H_
-#define _EPLNMTCNU_H_
 
 
 //---------------------------------------------------------------------------

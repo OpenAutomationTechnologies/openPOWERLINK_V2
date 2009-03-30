@@ -69,14 +69,14 @@
 
 ****************************************************************************/
 
+#ifndef _EPLSDOASYSEQU_H_
+#define _EPLSDOASYSEQU_H_
+
 #include "EplSdo.h"
 #include "user/EplSdoUdpu.h"
 #include "user/EplSdoAsndu.h"
 #include "EplEvent.h"
 #include "user/EplTimeru.h"
-
-#ifndef _EPLSDOASYSEQU_H_
-#define _EPLSDOASYSEQU_H_
 
 
 //---------------------------------------------------------------------------

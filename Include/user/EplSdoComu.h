@@ -69,14 +69,14 @@
 
 ****************************************************************************/
 
+#ifndef _EPLSDOCOMU_H_
+#define _EPLSDOCOMU_H_
+
 #include "EplSdo.h"
 #include "EplObd.h"
 #include "EplSdoAc.h"
 #include "user/EplObdu.h"
 #include "user/EplSdoAsySequ.h"
-
-#ifndef _EPLSDOCOMU_H_
-#define _EPLSDOCOMU_H_
 
 
 //---------------------------------------------------------------------------

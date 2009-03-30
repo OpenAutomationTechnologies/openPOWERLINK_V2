@@ -69,10 +69,10 @@
 
 ****************************************************************************/
 
-#include "EplTimer.h"
-
 #ifndef _EPLTIMERHIGHRESK_H_
 #define _EPLTIMERHIGHRESK_H_
+
+#include "EplTimer.h"
 
 //---------------------------------------------------------------------------
 // const defines

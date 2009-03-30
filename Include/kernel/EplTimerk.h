@@ -69,11 +69,11 @@
 
 ****************************************************************************/
 
-#include "EplTimer.h"
-#include "user/EplEventu.h"
-
 #ifndef _EPLTIMERK_H_
 #define _EPLTIMERK_H_
+
+#include "EplTimer.h"
+#include "user/EplEventu.h"
 
 #if EPL_TIMER_USE_USER != FALSE
 #include "user/EplTimeru.h"

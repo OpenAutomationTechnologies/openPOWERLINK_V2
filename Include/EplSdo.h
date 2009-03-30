@@ -69,12 +69,12 @@
 
 ****************************************************************************/
 
+#ifndef _EPLSDO_H_
+#define _EPLSDO_H_
+
 #include "EplInc.h"
 #include "EplFrame.h"
 #include "EplSdoAc.h"
-
-#ifndef _EPLSDO_H_
-#define _EPLSDO_H_
 
 
 //---------------------------------------------------------------------------

@@ -69,11 +69,11 @@
 
 ****************************************************************************/
 
-#include "EplSdo.h"
-#include "EplDll.h"
-
 #ifndef _EPLSDOASNDU_H_
 #define _EPLSDOASNDU_H_
+
+#include "EplSdo.h"
+#include "EplDll.h"
 
 
 //---------------------------------------------------------------------------
