@@ -393,7 +393,7 @@ Exit:
 //
 //---------------------------------------------------------------------------
 
-tEplKernel EplNmtMnuDelInstance()
+tEplKernel EplNmtMnuDelInstance(void)
 {
 tEplKernel  Ret;
 
