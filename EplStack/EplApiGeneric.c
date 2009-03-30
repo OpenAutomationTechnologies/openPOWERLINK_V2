@@ -1181,7 +1181,7 @@ tEplApiEventArg     EventArg;
                 }
 
                 ObdSize = sizeof (bCmdTarget);
-                Ret = EplObdReadEntry(0x1F9F, 2, &bCmdTarget, &ObdSize);
+                Ret = EplObdReadEntry(0x1F9F, 3, &bCmdTarget, &ObdSize);
                 if (Ret != kEplSuccessful)
                 {
                     pParam_p->m_dwAbortCode = EPL_SDOAC_GENERAL_ERROR;
