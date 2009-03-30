@@ -1123,9 +1123,14 @@ int    iRet;
     bCpuPldType = (BYTE) ((dwIoData & 0x0000000F) >>  0);
     if (bCpuPldType != PLC_CORE_PLD_TYPE_ID)
     {
-        printk("\n\npc5484drv - ERROR: Wrong PLD Type ID (expected=0x%02X, found=0x%02X)\n\n", PLC_CORE_PLD_TYPE_ID, (WORD)bCpuPldType);
-        TRACE2("IODRV:   ERROR: Wrong PLD Type ID (expected=0x%02X, found=0x%02X)\n", PLC_CORE_PLD_TYPE_ID, (WORD)bCpuPldType);
+        printk("\n\npc5484drv - ERROR: Wrong PLD Type ID (expected=0x%02X, found=0x%02X)\n", PLC_CORE_PLD_TYPE_ID, (WORD)bCpuPldType);
+//        TRACE2("IODRV:   ERROR: Wrong PLD Type ID (expected=0x%02X, found=0x%02X)\n", PLC_CORE_PLD_TYPE_ID, (WORD)bCpuPldType);
 
+        printk("pc5484drv Reg0 = 0x%lX, Reg1 = 0x%lX, Reg2 = 0x%lX, Reg3 = 0x%lX\n",
+                PLD_Read(0x0),
+                PLD_Read(0x4),
+                PLD_Read(0x8),
+                PLD_Read(0xC));
         // old PLD firmware present
         uiPldVer_l = 0;
 //        iRet = -EIO;
@@ -1180,19 +1185,22 @@ int    iRet;
     // Step (2): Configure I/O periphery
     //-------------------------------------------------------------------
 
-    // -------- Inputs --------
-    TRACE0("IODRV:   Configure inputs...\n");
-    // (DI0 [Btn S0]):  PLD -> select DI function in PLC configuration register
-    // (DI8):           PLD -> select DI function in PLC configuration register
-    // (DI9):           PLD -> select DI function in PLC configuration register
-    // (DI10):          PLD -> select DI function in PLC configuration register
-    // ...
-    // (DI19):          PLD -> select DI function in PLC configuration register
-    // (DI20):          PLD -> select DI function in PLC configuration register
-    // (DI21):          PLD -> select DI function in PLC configuration register
-    // (DI23):          PLD -> select DI function in PLC configuration register
-    dwIoData = 0x00000000;              // select DI function for all inputs
-    PLD_Write (PLD_REG_DI_FUNC, dwIoData);
+    if (uiPldVer_l > 0)
+    {
+        // -------- Inputs --------
+        TRACE0("IODRV:   Configure inputs...\n");
+        // (DI0 [Btn S0]):  PLD -> select DI function in PLC configuration register
+        // (DI8):           PLD -> select DI function in PLC configuration register
+        // (DI9):           PLD -> select DI function in PLC configuration register
+        // (DI10):          PLD -> select DI function in PLC configuration register
+        // ...
+        // (DI19):          PLD -> select DI function in PLC configuration register
+        // (DI20):          PLD -> select DI function in PLC configuration register
+        // (DI21):          PLD -> select DI function in PLC configuration register
+        // (DI23):          PLD -> select DI function in PLC configuration register
+        dwIoData = 0x00000000;              // select DI function for all inputs
+        PLD_Write (PLD_REG_DI_FUNC, dwIoData);
+    }
 
     #ifndef PCB_4158_DI1_4_VIA_CS3      // JP300 must be closed
     {
@@ -1253,25 +1261,28 @@ int    iRet;
     // (DI23):          PLD -> nothing to do here
 
 
-    // -------- Outputs --------
-    TRACE0("IODRV:   Configure outputs...\n");
-    // (DO0 [Btn S0]):  PLD -> nothing to do here
-    // (DO8):           PLD -> nothing to do here
-    // (DO9):           PLD -> nothing to do here
-    // (DO10):          PLD -> nothing to do here
-    // ...
-    // (DO19):          PLD -> nothing to do here
-    // (DO20):          PLD -> nothing to do here
-    // (DO21):          PLD -> nothing to do here
-    dwIoData = 0x00000000;              // set data bits to off
-    TRACE1("IODRV:   [PLD_REG_DO_STATE]   = 0x%08lX\n", dwIoData);
-    PLD_Write (PLD_REG_DO_STATE, dwIoData);
+    if (uiPldVer_l > 0)
+    {
+        // -------- Outputs --------
+        TRACE0("IODRV:   Configure outputs...\n");
+        // (DO0 [Btn S0]):  PLD -> nothing to do here
+        // (DO8):           PLD -> nothing to do here
+        // (DO9):           PLD -> nothing to do here
+        // (DO10):          PLD -> nothing to do here
+        // ...
+        // (DO19):          PLD -> nothing to do here
+        // (DO20):          PLD -> nothing to do here
+        // (DO21):          PLD -> nothing to do here
+        dwIoData = 0x00000000;              // set data bits to off
+        TRACE1("IODRV:   [PLD_REG_DO_STATE]   = 0x%08lX\n", dwIoData);
+        PLD_Write (PLD_REG_DO_STATE, dwIoData);
 
-    PLD_Write (PLD_REG_DO_FUNC, 0x00000000);
+        PLD_Write (PLD_REG_DO_FUNC, 0x00000000);
 
-    dwIoData = 0x003FFF01;              // enable outputs
-    TRACE1("IODRV:   [PLD_REG_DO_ENABLE]  = 0x%08lX\n", dwIoData);
-    PLD_Write (PLD_REG_DO_ENABLE, dwIoData);
+        dwIoData = 0x003FFF01;              // enable outputs
+        TRACE1("IODRV:   [PLD_REG_DO_ENABLE]  = 0x%08lX\n", dwIoData);
+        PLD_Write (PLD_REG_DO_ENABLE, dwIoData);
+    }
 
     #ifndef PCB_4158_DO1_4_VIA_CS3      // Jumper 302 must be set to 2-3
     {
@@ -2399,10 +2410,13 @@ DWORD       dwReg1;
                        dwReg0,
                        dwReg1);
     nSize += snprintf (pcBuffer_p + nSize, nBufferSize_p - nSize,
-                       "           IO Board:    %u.%02u (#%02XH)\n",
+                       "           IO Board:    %u.%02u (#%02XH)"
+                       "    (Reg2=%lXH, Reg3=%lXH)\n",
                        (WORD)CF54HwInfo.m_wIoPcbVersion,
                        (WORD)CF54HwInfo.m_bIoPcbRevision,
-                       (WORD)CF54HwInfo.m_bIoHwId);
+                       (WORD)CF54HwInfo.m_bIoHwId,
+                       PLD_Read (0x08),
+                       PLD_Read (0x0C));
     nSize += snprintf (pcBuffer_p + nSize, nBufferSize_p - nSize,
                        "Driver:    Config:      %04XH\n",
                        (WORD)CF54HwInfo.m_wCfgDriver);
