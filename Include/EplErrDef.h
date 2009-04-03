@@ -89,6 +89,7 @@ typedef enum
     kEplNoResource              = 0x0008,       // resource could not be created (Windows, PxROS, ...)
     kEplShutdown                = 0x0009,       // stack is shutting down
     kEplReject                  = 0x000A,       // reject the subsequent command
+    kEplRetry                   = 0x000B,       // retry this command
 
     // area for EDRV module 0x0010 - 0x001F
 //    kEplEdrvNoFrame             = 0x0010,       // no CAN message was received

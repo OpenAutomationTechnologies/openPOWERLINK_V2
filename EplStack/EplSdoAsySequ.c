@@ -1437,6 +1437,10 @@ unsigned int        uiFreeEntries;
                             AsySdoSequInstance_g.m_fpSdoComConCb(SdoSeqConHdl,
                                                     kAsySdoConStateConClosed);
 
+                            if ((bSendSeqNumCon & EPL_ASY_SDO_CON_MASK) == 1)
+                            {   // restart immediately with initialization request
+                                Ret = kEplRetry;
+                            }
                             break;
                         }
 
@@ -1670,10 +1674,11 @@ unsigned int        uiFreeEntries;
             if(Event_p == kAsySdoSeqEventFrameRec)
             {
                 // check rcon
-                switch(pRecFrame_p->m_le_bRecSeqNumCon & EPL_ASY_SDO_CON_MASK)
+                switch (pRecFrame_p->m_le_bRecSeqNumCon & EPL_ASY_SDO_CON_MASK)
                 {
                     // close-frome other node
                     case 0:
+                    case 1:
                     {
                         // return to idle
                         pAsySdoSeqCon->m_SdoState = kEplAsySdoStateIdle;
@@ -1683,6 +1688,10 @@ unsigned int        uiFreeEntries;
                         AsySdoSequInstance_g.m_fpSdoComConCb(SdoSeqConHdl,
                                                 kAsySdoConStateConClosed);
 
+                        if ((pRecFrame_p->m_le_bSendSeqNumCon & EPL_ASY_SDO_CON_MASK) == 1)
+                        {   // restart immediately with initialization request
+                            Ret = kEplRetry;
+                        }
                         break;
                     }
 
@@ -1999,73 +2008,86 @@ tEplKernel PUBLIC EplSdoAsyReceiveCb (
                 unsigned int        uiDataSize_p)
 {
 tEplKernel          Ret;
-unsigned int        uiCount = 0;
-unsigned int        uiFreeEntry = EPL_MAX_SDO_SEQ_CON;
+unsigned int        uiCount;
+unsigned int        uiFreeEntry;
 tEplAsySdoSeqCon*   pAsySdoSeqCon;
 
+    do
+    {
+        uiCount = 0;
+        uiFreeEntry = EPL_MAX_SDO_SEQ_CON;
+
 #if defined(WIN32) || defined(_WIN32)
-    // enter  critical section
-    EnterCriticalSection(AsySdoSequInstance_g.m_pCriticalSectionReceive);
+        // enter  critical section
+        EnterCriticalSection(AsySdoSequInstance_g.m_pCriticalSectionReceive);
 #endif
 
-    EPL_DBGLVL_SDO_TRACE2("Handle: 0x%x , First Databyte 0x%x\n", ConHdl_p,((BYTE*)pSdoSeqData_p)[0]);
+        EPL_DBGLVL_SDO_TRACE2("Handle: 0x%x , First Databyte 0x%x\n", ConHdl_p,((BYTE*)pSdoSeqData_p)[0]);
 
-    // search controll structure for this connection
-    pAsySdoSeqCon = &AsySdoSequInstance_g.m_AsySdoConnection[uiCount];
-    while (uiCount < EPL_MAX_SDO_SEQ_CON)
-    {
-        if (pAsySdoSeqCon->m_ConHandle == ConHdl_p)
+        // search controll structure for this connection
+        pAsySdoSeqCon = &AsySdoSequInstance_g.m_AsySdoConnection[uiCount];
+        while (uiCount < EPL_MAX_SDO_SEQ_CON)
         {
-            break;
+            if (pAsySdoSeqCon->m_ConHandle == ConHdl_p)
+            {
+                break;
+            }
+            else if ((pAsySdoSeqCon->m_ConHandle == 0)
+                && (uiFreeEntry == EPL_MAX_SDO_SEQ_CON))
+            {
+                // free entry
+                uiFreeEntry = uiCount;
+            }
+            uiCount++;
+            pAsySdoSeqCon++;
         }
-        else if ((pAsySdoSeqCon->m_ConHandle == 0)
-            && (uiFreeEntry == EPL_MAX_SDO_SEQ_CON))
-        {
-            // free entry
-            uiFreeEntry = uiCount;
-        }
-        uiCount++;
-        pAsySdoSeqCon++;
-    }
 
-    if (uiCount == EPL_MAX_SDO_SEQ_CON)
-    {   // new connection
-        if (uiFreeEntry == EPL_MAX_SDO_SEQ_CON)
+        if (uiCount == EPL_MAX_SDO_SEQ_CON)
+        {   // new connection
+            if (uiFreeEntry == EPL_MAX_SDO_SEQ_CON)
+            {
+                Ret = kEplSdoSeqNoFreeHandle;
+
+#if defined(WIN32) || defined(_WIN32)
+                // leave critical section
+                LeaveCriticalSection(AsySdoSequInstance_g.m_pCriticalSectionReceive);
+#endif
+
+                goto Exit;
+            }
+            else
+            {
+                pAsySdoSeqCon = &AsySdoSequInstance_g.m_AsySdoConnection[uiFreeEntry];
+                // save handle from lower layer
+                pAsySdoSeqCon->m_ConHandle = ConHdl_p;
+                // increment use counter
+                pAsySdoSeqCon->m_uiUseCount++;
+                uiCount = uiFreeEntry ;
+            }
+        }
+
+        // call history ack function
+        Ret = EplSdoAsyAckFrameToHistory(pAsySdoSeqCon,
+            (AmiGetByteFromLe(&pSdoSeqData_p->m_le_bRecSeqNumCon)& EPL_SEQ_NUM_MASK));
+
+#if defined(WIN32) || defined(_WIN32)
+        // leave critical section
+        LeaveCriticalSection(AsySdoSequInstance_g.m_pCriticalSectionReceive);
+#endif
+
+        if (Ret != kEplSuccessful)
         {
-            Ret = kEplSdoSeqNoFreeHandle;
             goto Exit;
         }
-        else
-        {
-            pAsySdoSeqCon = &AsySdoSequInstance_g.m_AsySdoConnection[uiFreeEntry];
-            // save handle from lower layer
-            pAsySdoSeqCon->m_ConHandle = ConHdl_p;
-            // increment use counter
-            pAsySdoSeqCon->m_uiUseCount++;
-            uiCount = uiFreeEntry ;
-        }
-    }
 
-    // call history ack function
-    Ret = EplSdoAsyAckFrameToHistory(pAsySdoSeqCon,
-        (AmiGetByteFromLe(&pSdoSeqData_p->m_le_bRecSeqNumCon)& EPL_SEQ_NUM_MASK));
-    if (Ret != kEplSuccessful)
-    {
-        goto Exit;
-    }
+        // call process function with pointer of frame and event kAsySdoSeqEventFrameRec
+        Ret = EplSdoAsySeqProcess(uiCount,
+                                    uiDataSize_p,
+                                    NULL,
+                                    pSdoSeqData_p,
+                                    kAsySdoSeqEventFrameRec);
 
-#if defined(WIN32) || defined(_WIN32)
-    // leave critical section
-    LeaveCriticalSection(AsySdoSequInstance_g.m_pCriticalSectionReceive);
-#endif
-
-    // call process function with pointer of frame and event kAsySdoSeqEventFrameRec
-    Ret = EplSdoAsySeqProcess(uiCount,
-                                uiDataSize_p,
-                                NULL,
-                                pSdoSeqData_p,
-                                kAsySdoSeqEventFrameRec);
-
+    } while (Ret == kEplRetry);
 
 Exit:
     return Ret;
