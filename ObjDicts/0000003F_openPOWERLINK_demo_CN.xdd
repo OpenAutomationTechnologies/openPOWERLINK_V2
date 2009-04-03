@@ -416,10 +416,10 @@
           SDOCmdWriteMultParam="false"
           NMTFlushArpEntry="false"
           NMTNetHostNameSet="false"
+          PDORPDOChannels="2"
         />
 <!--    Valid attributes, but rejected by current version of XDD-Checker (2009-03-18)
           PDOTPDOChannels="1"
-          PDORPDOChannels="2"
 -->
 <!--    Needed by previous versions of Conformance test
           NMTCmdReactionTime="500"
