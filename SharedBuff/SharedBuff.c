@@ -1840,7 +1840,7 @@ int                   nCol;
 
     if (pszInfoText_p != NULL)
     {
-        TRACE0("%s", pszInfoText_p);
+        TRACE1("%s", pszInfoText_p);
     }
 
     // dump buffer contents
