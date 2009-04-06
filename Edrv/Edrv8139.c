@@ -174,6 +174,7 @@
                                  | EDRV_REGDW_RCR_NOWRAP \
                                  | EDRV_REGDW_RCR_AB \
                                  | EDRV_REGDW_RCR_AM \
+                                 | EDRV_REGDW_RCR_AAP /* promiscuous mode */ \
                                  | EDRV_REGDW_RCR_APM)  // default value
 
 #define EDRV_REGDW_TCR          0x40    // Tx configuration register

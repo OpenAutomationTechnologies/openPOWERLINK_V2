@@ -141,7 +141,8 @@ typedef enum
     kAsySdoConStateConClosed    = 0x02,
     kAsySdoConStateAckReceived  = 0x03,
     kAsySdoConStateFrameSended  = 0x04,
-    kAsySdoConStateTimeout      = 0x05
+    kAsySdoConStateTimeout      = 0x05,
+    kAsySdoConStateTransferAbort= 0x06,
 
 }tEplAsySdoConState;
 

@@ -943,12 +943,12 @@ unsigned int        uiFreeEntries;
                 // -> send answer
                 case kAsySdoSeqEventFrameRec:
                 {
-/*
+
                     PRINTF3("%s scon=%u rcon=%u\n",
-                            __FUNCTION__,
+                            __func__,
                             pRecFrame_p->m_le_bSendSeqNumCon,
                             pRecFrame_p->m_le_bRecSeqNumCon);
-*/
+
                     // check if scon == 1 and rcon == 0
                     if(((pRecFrame_p->m_le_bRecSeqNumCon & EPL_ASY_SDO_CON_MASK) == 0x00)
                         &&((pRecFrame_p->m_le_bSendSeqNumCon & EPL_ASY_SDO_CON_MASK) == 0x01))
@@ -1427,7 +1427,6 @@ unsigned int        uiFreeEntries;
                     {
                         // close from other node
                         case 0:
-                        case 1:
                         {
                             // return to idle
                             pAsySdoSeqCon->m_SdoState = kEplAsySdoStateIdle;
@@ -1437,10 +1436,22 @@ unsigned int        uiFreeEntries;
                             AsySdoSequInstance_g.m_fpSdoComConCb(SdoSeqConHdl,
                                                     kAsySdoConStateConClosed);
 
-                            if ((bSendSeqNumCon & EPL_ASY_SDO_CON_MASK) == 1)
-                            {   // restart immediately with initialization request
-                                Ret = kEplRetry;
-                            }
+                            break;
+                        }
+
+                        case 1:
+                        {
+                            // return to idle
+                            pAsySdoSeqCon->m_SdoState = kEplAsySdoStateIdle;
+                            // delete timer
+                            EplTimeruDeleteTimer(&pAsySdoSeqCon->m_EplTimerHdl);
+                            // call Command Layer Cb
+                            AsySdoSequInstance_g.m_fpSdoComConCb(SdoSeqConHdl,
+                                                    kAsySdoConStateTransferAbort);
+
+                            // restart immediately with initialization request
+                            PRINTF0("EplSdoAsySequ: Reinit immediately\n");
+                            Ret = kEplRetry;
                             break;
                         }
 
@@ -1676,9 +1687,8 @@ unsigned int        uiFreeEntries;
                 // check rcon
                 switch (pRecFrame_p->m_le_bRecSeqNumCon & EPL_ASY_SDO_CON_MASK)
                 {
-                    // close-frome other node
+                    // close from other node
                     case 0:
-                    case 1:
                     {
                         // return to idle
                         pAsySdoSeqCon->m_SdoState = kEplAsySdoStateIdle;
@@ -1688,10 +1698,22 @@ unsigned int        uiFreeEntries;
                         AsySdoSequInstance_g.m_fpSdoComConCb(SdoSeqConHdl,
                                                 kAsySdoConStateConClosed);
 
-                        if ((pRecFrame_p->m_le_bSendSeqNumCon & EPL_ASY_SDO_CON_MASK) == 1)
-                        {   // restart immediately with initialization request
-                            Ret = kEplRetry;
-                        }
+                        break;
+                    }
+
+                    // reinit from other node
+                    case 1:
+                    {
+                        // return to idle
+                        pAsySdoSeqCon->m_SdoState = kEplAsySdoStateIdle;
+                        // delete timer
+                        EplTimeruDeleteTimer(&pAsySdoSeqCon->m_EplTimerHdl);
+                        // call Command Layer Cb
+                        AsySdoSequInstance_g.m_fpSdoComConCb(SdoSeqConHdl,
+                                                kAsySdoConStateTransferAbort);
+
+                        // restart immediately with initialization request
+                        Ret = kEplRetry;
                         break;
                     }
 

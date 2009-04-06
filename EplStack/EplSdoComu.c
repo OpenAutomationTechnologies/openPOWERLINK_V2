@@ -119,13 +119,12 @@ typedef enum
     kEplSdoComConEventFrameSended   = 0x05, // lower has send a frame
     kEplSdoComConEventInitError     = 0x06, // error duringinitialisiation
                                             // of the connection
-    kEplSdoComConEventTimeout       = 0x07 // timeout in lower layer
+    kEplSdoComConEventTimeout       = 0x07, // timeout in lower layer
+    kEplSdoComConEventTransferAbort = 0x08, // transfer abort by lower layer
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOC)) != 0)
 
-    ,
-
-    kEplSdoComConEventInitCon       = 0x08, // init connection (only client)
-    kEplSdoComConEventAbort         = 0x09 // abort sdo transfer (only client)
+    kEplSdoComConEventInitCon       = 0x09, // init connection (only client)
+    kEplSdoComConEventAbort         = 0x0A, // abort sdo transfer (only client)
 #endif
 
 
@@ -956,6 +955,16 @@ tEplSdoComConEvent  SdoComConEvent = kEplSdoComConEventSendFirst;
             break;
 
         }
+
+        case kAsySdoConStateTransferAbort:
+        {
+            EPL_DBGLVL_SDO_TRACE0("Transfer aborted\n");
+            SdoComConEvent = kEplSdoComConEventTransferAbort;
+            // inform higher layer if necessary,
+            // but do not close sequence layer handle
+            break;
+        }
+
     }// end of switch(AsySdoConState_p)
 
     Ret = EplSdoComSearchConIntern(SdoSeqConHdl_p,
@@ -1220,7 +1229,7 @@ unsigned int        uiSize;
         }
 
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOS)) != 0)
-        //-------------------------------------------------------------------------
+        //----------------------------------------------------------------------
         // SDO Server part
         // segmented transfer
         case kEplSdoComStateServerSegmTrans:
@@ -1257,22 +1266,24 @@ unsigned int        uiSize;
                 {
                     // check if the frame is a SDO response and has the right transaction ID
                     bFlag = AmiGetByteFromLe(&pAsySdoCom_p->m_le_bFlags);
-                    if (((bFlag & 0x80) != 0) && (AmiGetByteFromLe(&pAsySdoCom_p->m_le_bTransactionId) == pSdoComCon->m_bTransactionId))
-                    {
-                        // check if it is a abort
-                        if((bFlag & 0x40) != 0)
-                        {   // SDO abort
-                            // clear control structure
-                            pSdoComCon->m_uiTransSize = 0;
-                            pSdoComCon->m_uiTransferredByte = 0;
-                            // change state
-                            pSdoComCon->m_SdoComState = kEplSdoComStateIdle;
-                            // reset abort code
-                            pSdoComCon->m_dwLastAbortCode = 0;
-                            // d.k.: do not execute anything further on this command
-                            break;
-                        }
 
+                    // check if it is a abort
+                    if ((bFlag & 0x40) != 0)
+                    {   // SDO abort
+                        // clear control structure
+                        pSdoComCon->m_uiTransSize = 0;
+                        pSdoComCon->m_uiTransferredByte = 0;
+                        // change state
+                        pSdoComCon->m_SdoComState = kEplSdoComStateIdle;
+                        // reset abort code
+                        pSdoComCon->m_dwLastAbortCode = 0;
+                        // d.k.: do not execute anything further on this command
+                        break;
+                    }
+
+                    if (((bFlag & 0x80) != 0)
+                        && (AmiGetByteFromLe(&pAsySdoCom_p->m_le_bTransactionId) == pSdoComCon->m_bTransactionId))
+                    {
                         // check if it is a write
                         if(pSdoComCon->m_SdoServiceType == kEplSdoServiceWriteByIndex)
                         {
@@ -1367,7 +1378,7 @@ unsigned int        uiSize;
 
 
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOC)) != 0)
-        //-------------------------------------------------------------------------
+        //----------------------------------------------------------------------
         // SDO Client part
         // wait for finish of establishing connection
         case kEplSdoComStateClientWaitInit:
@@ -1459,6 +1470,7 @@ unsigned int        uiSize;
                 case kEplSdoComConEventConClosed:
                 case kEplSdoComConEventInitError:
                 case kEplSdoComConEventTimeout:
+                case kEplSdoComConEventTransferAbort:
                 {
                     // close sequence layer handle
                     Ret = EplSdoAsySeqDelCon(pSdoComCon->m_SdoSeqConHdl);
@@ -1627,6 +1639,16 @@ unsigned int        uiSize;
 
                 }
 
+                case kEplSdoComConEventTransferAbort:
+                {
+                    // change state
+                    pSdoComCon->m_SdoComState = kEplSdoComStateClientWaitInit;
+                    // call callback of application
+                    pSdoComCon->m_dwLastAbortCode = EPL_SDOAC_TIME_OUT;
+                    Ret = EplSdoComTransferFinished(SdoComCon_p, pSdoComCon, kEplSdoComTransferLowerLayerAbort);
+
+                }
+
                 default:
                     // d.k. do nothing
                     break;
@@ -1763,6 +1785,16 @@ unsigned int        uiSize;
                     // close sequence layer handle
                     Ret = EplSdoAsySeqDelCon(pSdoComCon->m_SdoSeqConHdl);
                     pSdoComCon->m_SdoSeqConHdl |= EPL_SDO_SEQ_INVALID_HDL;
+                    // change state
+                    pSdoComCon->m_SdoComState = kEplSdoComStateClientWaitInit;
+                    // call callback of application
+                    pSdoComCon->m_dwLastAbortCode = EPL_SDOAC_TIME_OUT;
+                    Ret = EplSdoComTransferFinished(SdoComCon_p, pSdoComCon, kEplSdoComTransferLowerLayerAbort);
+
+                }
+
+                case kEplSdoComConEventTransferAbort:
+                {
                     // change state
                     pSdoComCon->m_SdoComState = kEplSdoComStateClientWaitInit;
                     // call callback of application

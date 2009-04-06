@@ -696,7 +696,7 @@ static DWORD PUBLIC EplSdoUdpThread(LPVOID lpParameter)
 static int EplSdoUdpThread(void * pArg_p)
 #endif
 {
-
+tEplKernel          Ret;
 tEplSdoUdpInstance* pInstance;
 struct sockaddr_in  RemoteAddr;
 int                 iError;
@@ -783,7 +783,18 @@ tEplSdoConHdl       SdoConHdl;
                     SdoConHdl = iFreeEntry;
                     SdoConHdl |= EPL_SDO_UDP_HANDLE;
                     // offset 4 -> start of SDO Sequence header
-                    pInstance->m_fpSdoAsySeqCb(SdoConHdl, (tEplAsySdoSeq*)&abBuffer[4], (iError - 4));
+                    Ret = pInstance->m_fpSdoAsySeqCb(
+                            SdoConHdl,
+                            (tEplAsySdoSeq*)&abBuffer[4],
+                            (iError - 4));
+                    if (Ret != kEplSuccessful)
+                    {
+                        PRINTF4("%s new con: ip=%X, port=%u, Ret=0x%X\n",
+                                __func__,
+                                ntohl(pInstance->m_aSdoAbsUdpConnection[iFreeEntry].m_ulIpAddr),
+                                ntohs(pInstance->m_aSdoAbsUdpConnection[iFreeEntry].m_uiPort),
+                                Ret);
+                    }
                 }
                 else
                 {
@@ -806,7 +817,18 @@ tEplSdoConHdl       SdoConHdl;
     LeaveCriticalSection(SdoUdpInstance_g.m_pCriticalSection);
 #endif
                 // offset 4 -> start of SDO Sequence header
-                pInstance->m_fpSdoAsySeqCb(SdoConHdl, (tEplAsySdoSeq*)&abBuffer[4], (iError - 4));
+                Ret = pInstance->m_fpSdoAsySeqCb(
+                        SdoConHdl,
+                        (tEplAsySdoSeq*)&abBuffer[4],
+                        (iError - 4));
+                if (Ret != kEplSuccessful)
+                {
+                    PRINTF4("%s known con: ip=%X, port=%u, Ret=0x%X\n",
+                            __func__,
+                            ntohl(pInstance->m_aSdoAbsUdpConnection[iCount].m_ulIpAddr),
+                            ntohs(pInstance->m_aSdoAbsUdpConnection[iCount].m_uiPort),
+                            Ret);
+                }
             }
         } // end of  if(iError!=SOCKET_ERROR)
     }// end of for(;;)
