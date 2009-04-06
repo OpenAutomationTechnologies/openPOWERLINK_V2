@@ -2296,6 +2296,7 @@ int  iRet;
             MCF_GPT_GMS0 &= 0xFFFFFFEF;
         }
 
+        dwIoData &= 0x003FFF01;
         if (uiPldVer_l == 0)
         {
             // DO0 (LED D0), DO8...DO23 (until 4158.2)
@@ -2304,7 +2305,6 @@ int  iRet;
         else
         {
             // DO0 (LED D0), DO8...DO21 (since 4158.4)
-            dwIoData &= 0x003FFF01;
             PLD_Write (PLD_REG_DO_STATE, dwIoData);
         }
 
@@ -2384,8 +2384,8 @@ DWORD       dwReg1;
 
     // ---- Driver information ----
     nSize += snprintf (pcBuffer_p + nSize, nBufferSize_p - nSize,
-                       "Driver version:         %u.%02u\n",
-                       DRV_VER_MAIN, DRV_VER_REL);
+                       "Driver version:         %u.%02u  Type: %u\n",
+                       DRV_VER_MAIN, DRV_VER_REL, uiPldVer_l);
 
     nSize += snprintf (pcBuffer_p + nSize, nBufferSize_p - nSize,
                        "Assigned major number:  %d\n",
