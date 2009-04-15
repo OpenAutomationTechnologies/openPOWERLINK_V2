@@ -455,6 +455,7 @@ tEplEventSource         EventSource;
 
         }
 
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLU)) != 0)
         case kEplEventSinkDlluCal:
         {
             Ret = EplDlluCalProcess(pEvent_p);
@@ -471,6 +472,7 @@ tEplEventSource         EventSource;
             break;
 
         }
+#endif
 
         case kEplEventSinkErru:
         {
