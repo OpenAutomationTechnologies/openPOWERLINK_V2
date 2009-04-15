@@ -132,3 +132,52 @@ Fellow worker:    Daniel Krüger (d.k.)
 05.02.2009 V1.3.1   - added missing file EplLedu.c to public release
                     (d.k.)
 
+18.02.2009 V1.3.1   - fixed bug in objdict.h: invalid declaration of MNCycTimeExceed cumulative
+                      counter
+                    - fixed project demo_cn_kernel for ECUcore-5484 + some clean-up
+                    - clean-ups to project demo_mn_kernel for ECUcore-5484
+                    (d.k.)
+
+03.03.2009 V1.3.2   - ErrorHandlerk: increment cumulative counters even if threshold
+                      counters are disabled
+                    (d.k.)
+
+18.03.2009 V1.3.2   - updated XDD to work with recent conformance test
+                    (d.k.)
+
+27.03.2009 V1.3.2   - EplSdoUdpu.c, ShbIpc-LinuxKernel.c: switch to kthread API, which works
+                      in any 2.6 version of the Linux kernel.
+                    - Edrv8139: added support for RTL8139C+ which is used in Qemu for example.
+                      BTW, there is actually no difference in Tx buffer handling.
+                    - added support for NMT requests (via object 0x1F9F and NMT
+                      request frames)
+                    - changed Makefile of MN demo for ECUcore-5484: removed dummy C files
+                      that just contain includes of real C files. So this directory looks much cleaner.
+                      Disadvantage: generated .o files are spawned over whole source tree.
+                      There may be collisions with other projects working with the same files.
+                    - changed Makefile of Qt demo project for X86: removed dummy C files that
+                      just contain includes of real C files.
+                    - Qt demo project for X86: added support for Basic Ethernet for state display.
+                      Before this, it was handled as error state.
+                    (d.k.)
+
+30.03.2009 V1.3.2   - applied staging-epl-remove-compiler-warning-from-sharedbuff.c patch from Greg
+                    - only include a file if it is needed
+                    - applied staging-epl-fix-netdev-priv-b0rkage.patch from Greg:
+                      netdev->priv is now gone, use netdev_priv() instead.
+                    - applied staging-epl-fix-sparse-warning-in-proc_fs.c.patch from Greg:
+                      proc_fs.c needs to include proc_fs.h
+                    - applied staging-epl-fix-up-some-non-ansi-functions.patch from Greg:
+                      () isn't valid, you need to put (void).
+                    - EplApiGeneric: used wrong subindex for object 0x1F9F NMTRequest
+                    (d.k.)
+
+06.04.2009 V1.3.2   - Edrv8139: enabled promiscuous mode, so it is possible to brigde other
+                      adapters like virtual machines on the epl network device
+                    - SDO sequence layer: fixed reinit when connection is still alive (tested)
+                    - SDO command layer: tried to fix abort handling on SDO server while segmented
+                      transfer is active, but it seems not to work as expected
+                    (d.k.)
+
+06.04.2009 V1.4     - labeled V1.3.2 as V1.4
+                    (d.k.)
