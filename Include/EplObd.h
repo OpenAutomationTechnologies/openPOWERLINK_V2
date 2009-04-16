@@ -427,7 +427,7 @@ typedef tEplObdEntry * tEplObdEntryPtr;
 // structur to initialize OBD module
 // -------------------------------------------------------------------------
 
-typedef struct
+struct _tEplObdInitParam
 {
     tEplObdEntryPtr        m_pPart;
     tEplObdEntryPtr        m_pManufacturerPart;
@@ -439,7 +439,9 @@ typedef struct
 
     #endif
 
-} tEplObdInitParam;
+};
+
+typedef struct _tEplObdInitParam tEplObdInitParam;
 
 
 // -------------------------------------------------------------------------
@@ -456,9 +458,15 @@ typedef struct
 } tEplObdCbStoreParam;
 
 
+typedef tEplKernel (PUBLIC ROM* tEplObdInitRam) (tEplObdInitParam MEM* pInitParam_p);
+
+typedef tEplKernel (PUBLIC ROM* tEplObdDeinitRam) (tEplObdInitParam MEM* pInitParam_p);
+
+/*
 typedef tEplKernel (PUBLIC ROM* tInitTabEntryCallback) (
     void MEM* pTabEntry_p,
     unsigned int uiObjIndex_p);
+*/
 
 typedef tEplKernel (PUBLIC ROM* tEplObdStoreLoadObjCallback) (CCM_DECL_INSTANCE_HDL_
     tEplObdCbStoreParam MEM* pCbStoreParam_p);
