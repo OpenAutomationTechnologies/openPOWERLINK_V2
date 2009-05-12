@@ -197,7 +197,7 @@ static void EplObdCopyObjectData (
                         tEplObdSize     ObjSize_p,
                         tEplObdType     ObjType_p);
 
-void * EplObdGetObjectDataPtrIntern (tEplObdSubEntryPtr pSubindexEntry_p);
+static void * EplObdGetObjectDataPtrIntern (tEplObdSubEntryPtr pSubindexEntry_p);
 
 static tEplKernel EplObdIsNumericalIntern(tEplObdSubEntryPtr pObdSubEntry_p,
                                         BOOL*         pfEntryNumerical_p);
@@ -485,6 +485,7 @@ tEplObdSize                     ObdSize;
 
     // get size of data and check if application has reserved enough memory
     ObdSize = EplObdGetDataSizeIntern (pSubEntry);
+
     // check if offset given and calc correct number of bytes to read
     if (*pSize_p < ObdSize)
     {
@@ -494,6 +495,15 @@ tEplObdSize                     ObdSize;
 
     // read value from object
     EPL_MEMCPY (pDstData_p, pSrcData, ObdSize);
+
+    if (pSubEntry->m_Type == kEplObdTypVString)
+    {
+        if (*pSize_p > ObdSize)
+        {   // space left to set the terminating null-character
+            ((char MEM*) pDstData_p)[ObdSize] = '\0';
+            ObdSize++;
+        }
+    }
     *pSize_p = ObdSize;
 
     // write address of destination data to structure of callback parameters
@@ -859,10 +869,9 @@ EPLDLLEXPORT void PUBLIC EplObdInitVarEntry (EPL_MCO_DECL_INSTANCE_PTR_
 //
 // Function:    EplObdGetDataSize()
 //
-// Description: function to initialize VarEntry dependened on object type
-//
-//              gets the data size of an object
+// Description: gets the data size of an object,
 //              for string objects it returnes the string length
+//              without terminating null-character
 //
 // Parameters:  EPL_MCO_DECL_INSTANCE_PTR_ = Instancepointer
 //              uiIndex_p   =   Index
@@ -1168,6 +1177,7 @@ tEplObdSize                     ObdSize;
 
     // get size of data and check if application has reserved enough memory
     ObdSize = EplObdGetDataSizeIntern (pSubEntry);
+
     // check if offset given and calc correct number of bytes to read
     if (*pSize_p < ObdSize)
     {
@@ -1187,6 +1197,15 @@ tEplObdSize                     ObdSize;
         {
             // read value from object
             EPL_MEMCPY (pDstData_p, pSrcData, ObdSize);
+
+            if (pSubEntry->m_Type == kEplObdTypVString)
+            {
+                if (*pSize_p > ObdSize)
+                {   // space left to set the terminating null-character
+                    ((char MEM*) pDstData_p)[ObdSize] = '\0';
+                    ObdSize++;
+                }
+            }
             break;
         }
 
@@ -1597,8 +1616,9 @@ tEplObdCallback MEM  fpCallback;
 //
 // Function:    EplObdGetDataSizeIntern()
 //
-// Description: gets the data size of an object
+// Description: gets the data size of an object.
 //              for string objects it returnes the string length
+//              without terminating null-character
 //
 // Parameters:  pSubIndexEntry_p
 //
@@ -1640,13 +1660,13 @@ void MEM*   pData;
 // Function:    EplObdGetStrLen()
 //
 // Description: The function calculates the length of string. The '\0'
-//              character is included!!
+//              character is NOT included!!
 //
 // Parameters:  pObjData_p          = pointer to string
-//              ObjLen_p            = max. length of objectr entry
+//              ObjLen_p            = max. length of object entry
 //              bObjType_p          = object type (VSTRING, ...)
 //
-// Returns:     string length + 1
+// Returns:     string length
 //
 // State:
 //
@@ -1675,7 +1695,7 @@ BYTE *  pbString;
         {
             if (*pbString == '\0')
             {
-                StrLen++;
+//                StrLen++;
                 break;
             }
 
@@ -3352,8 +3372,8 @@ tEplObdSize StrSize = 0;
         {
             // The function calculates the really number of characters of string. The
             // object entry size can be bigger as string size of default string.
-            // The '\0'-termination is included. A string with no characters has a
-            // size of 1.
+            // The '\0'-termination is NOT included. A string with no characters has a
+            // size of 0.
             StrSize = EplObdGetStrLen ((void *) pSrcData_p, ObjSize_p, kEplObdTypVString);
 
             // If the string length is greater than or equal to the entry size in OD then only copy
@@ -3472,7 +3492,7 @@ tEplKernel Ret = kEplSuccessful;
 //
 //---------------------------------------------------------------------------
 
-void * EplObdGetObjectDataPtrIntern (tEplObdSubEntryPtr pSubindexEntry_p)
+static void * EplObdGetObjectDataPtrIntern (tEplObdSubEntryPtr pSubindexEntry_p)
 {
 
 void * pData;
