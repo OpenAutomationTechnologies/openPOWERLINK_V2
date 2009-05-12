@@ -343,7 +343,7 @@ typedef struct
 typedef struct
 {
     tEplObdSize      m_Size;
-    char *    m_pDefString;         // $$$ d.k. it is unused, so we could delete it
+    char *    m_pDefString;         // must be same offset as m_pString in tEplObdVString
     char *    m_pString;
 
 } tEplObdVStringDef;
@@ -351,7 +351,7 @@ typedef struct
 typedef struct
 {
    tEplObdSize      m_Size;
-   BYTE *           m_pDefString;   // $$$ d.k. it is unused, so we could delete it
+   BYTE *           m_pDefString;   // must be same offset as m_pString in tEplObdVString
    BYTE *           m_pString;
 
 } tEplObdOStringDef;
@@ -462,11 +462,11 @@ typedef tEplKernel (PUBLIC ROM* tEplObdInitRam) (tEplObdInitParam MEM* pInitPara
 
 typedef tEplKernel (PUBLIC ROM* tEplObdDeinitRam) (tEplObdInitParam MEM* pInitParam_p);
 
-/*
-typedef tEplKernel (PUBLIC ROM* tInitTabEntryCallback) (
+
+typedef tEplKernel (PUBLIC ROM* tEplInitTabEntryCallback) (
     void MEM* pTabEntry_p,
     unsigned int uiObjIndex_p);
-*/
+
 
 typedef tEplKernel (PUBLIC ROM* tEplObdStoreLoadObjCallback) (CCM_DECL_INSTANCE_HDL_
     tEplObdCbStoreParam MEM* pCbStoreParam_p);
@@ -476,12 +476,12 @@ typedef tEplKernel (PUBLIC ROM* tEplObdStoreLoadObjCallback) (CCM_DECL_INSTANCE_
 // -------------------------------------------------------------------------
 typedef struct
 {
-    unsigned int            m_uiLowerObjIndex;  // lower limit of ObjIndex
-    unsigned int            m_uiUpperObjIndex;  // upper limit of ObjIndex
-    tInitTabEntryCallback   m_fpInitTabEntry;   // will be called if ObjIndex was found
-    void MEM*               m_pTabBase;         // base address of table
-    unsigned int            m_uiEntrySize;      // size of table entry      // 25-feb-2005 r.d.: expansion from BYTE to WORD necessary for PDO bit mapping
-    unsigned int            m_uiMaxEntries;     // max. tabel entries
+    unsigned int                m_uiLowerObjIndex;  // lower limit of ObjIndex
+    unsigned int                m_uiUpperObjIndex;  // upper limit of ObjIndex
+    tEplInitTabEntryCallback    m_fpInitTabEntry;   // will be called if ObjIndex was found
+    void MEM*                   m_pTabBase;         // base address of table
+    unsigned int                m_uiEntrySize;      // size of table entry      // 25-feb-2005 r.d.: expansion from BYTE to WORD necessary for PDO bit mapping
+    unsigned int                m_uiMaxEntries;     // max. tabel entries
 
 } tEplObdModulTabParam;
 
