@@ -297,7 +297,7 @@ Exit:
     return Ret;
 }
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 28)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 29)
 
 static const struct net_device_ops epl_netdev_ops = {
     .ndo_open               = VEthOpen,
@@ -327,7 +327,7 @@ tEplKernel  Ret = kEplSuccessful;
         goto Exit;
     }
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 28)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 29)
     pVEthNetDevice_g->netdev_ops        = &epl_netdev_ops;
 #else
     pVEthNetDevice_g->open              = VEthOpen;
