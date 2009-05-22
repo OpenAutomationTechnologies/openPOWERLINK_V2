@@ -29,6 +29,7 @@
 
 // these defines are necessary to check some of characteristics of the development system
 #define _DEV_BIGEND_            0x80000000L     // big endian (motorolla format)
+#define _DEV_DSP_               0x40000000L     // DSP which implements sizeof(BYTE)=1 and sizeof(WORD)=1 with 16bit and sizeof(DWORD)=2 with 32bit
 #define _DEV_ALIGNMENT_4_       0x00400000L     //                  the CPU needs alignment of 4 bytes
 #define _DEV_ONLY_INT_MAIN_     0x00004000L     //                  the compiler needs "int main(int)" instead of "void main(void)"
 #define _DEV_COMMA_EXT_         0x00002000L     //                  support of last comma in struct predefinition
@@ -37,7 +38,9 @@
 #define _DEV_BIT32_             0x00000300L     //                  32 bit
 #define _DEV_BIT16_             0x00000200L     //                  16 bit
 #define _DEV_BIT8_              0x00000100L     //                  8 bit
-#define _DEV_RVCT_ARM_          0x0000001CL     //                  RealView ARM
+#define _DEV_TI_CCS_            0x0000001EL     //                  TI's Code Composer
+#define _DEV_GNUC_AVR_          0x0000001DL     //                  WinAVR and AVRStudio4
+#define _DEV_RVCT_ARM_          0x0000001CL     //                  Keil RealView ARM
 #define _DEV_RENESASM32C        0x0000001BL     // compiler from:   Renesas
 #define _DEV_GNUC_MIPS2_        0x0000001AL     //                  GNU for MIPS2
 #define _DEV_MPLAB_C30_         0x00000019L     //                  MPLAB C30 for Microchip dsPIC33F series
@@ -108,17 +111,22 @@
 #define _DEV_GNU_CF548X_        (_DEV_BIT32_ | _DEV_GNUC_CF_   | _DEV_BIGEND_ | _DEV_64BIT_SUPPORT_ | _DEV_COMMA_EXT_)
 #define _DEV_GNU_I386_          (_DEV_BIT32_ | _DEV_GNUC_X86_                 | _DEV_64BIT_SUPPORT_ | _DEV_COMMA_EXT_ | _DEV_ONLY_INT_MAIN_)
 #define _DEV_GNU_TRICORE_       (_DEV_BIT32_ | _DEV_GNUC_TC_                  | _DEV_64BIT_SUPPORT_ | _DEV_COMMA_EXT_ | _DEV_ONLY_INT_MAIN_ | _DEV_ALIGNMENT_4_)
-#define _DEV_MPLAB_DSPIC33F_    (_DEV_BIT16_ | _DEV_MPLAB_C30_               ) //| _DEV_COMMA_EXT_)
+#define _DEV_MPLAB_DSPIC33F_    (_DEV_BIT16_ | _DEV_MPLAB_C30_                | _DEV_64BIT_SUPPORT_ | _DEV_COMMA_EXT_ | _DEV_ONLY_INT_MAIN_)
 #define _DEV_GNU_MIPSEL_        (_DEV_BIT32_ | _DEV_GNUC_MIPS2_     | _DEV_BIGEND_ | _DEV_64BIT_SUPPORT_ | _DEV_COMMA_EXT_ | _DEV_ONLY_INT_MAIN_)
+#define _DEV_GNU_WINAVR8_       (_DEV_BIT8_  | _DEV_GNUC_AVR_                 |                       _DEV_COMMA_EXT_ | _DEV_ONLY_INT_MAIN_)
+// note: WinAVR is supports 64 bit variables but it needs to much memory resources!
 
 #define _DEV_RENESAS_M32C_      (_DEV_BIT32_ | _DEV_RENESASM32C)
+#define _DEV_CCS_TMS_           (_DEV_BIT16_ | _DEV_TI_CCS_  | _DEV_COMMA_EXT_ | _DEV_DSP_)
+
 
 //---------------------------------------------------------------------------
 //  usefull macros
 //---------------------------------------------------------------------------
 
-#define CHECK_IF_ONLY_INT_MAIN()    (DEV_SYSTEM & _DEV_ONLY_INT_MAIN_)
-#define CHECK_MEMORY_ALINMENT()     (DEV_SYSTEM & _DEV_MASK_ALIGNMENT)
+#define CHECK_IF_ONLY_INT_MAIN()    ((DEV_SYSTEM & _DEV_ONLY_INT_MAIN_) != 0)
+#define CHECK_MEMORY_ALINMENT()     ((DEV_SYSTEM & _DEV_MASK_ALIGNMENT) != 0)
+#define CHECK_IF_BIG_ENDIAN()       ((DEV_SYSTEM & _DEV_BIGEND_) != 0)
 
 
 //---------------------------------------------------------------------------
@@ -158,6 +166,7 @@
     #define NEAR            idata       // variables mapped to internal data storage location
     #define FAR             xdata       // variables mapped to external data storage location
     #define CONST           const       // variables mapped to ROM (i.e. flash)
+    #define ROM_INIT                    // variables will be initialized directly in ROM (means no copy from RAM in startup)
     #define ROM             code        // code or variables mapped to ROM (i.e. flash)
                                         // usage: CONST BYTE ROM foo = 0x00;
     #define HWACC           xdata       // hardware access through external memory (i.e. CAN)
@@ -178,6 +187,8 @@
         #define TRACE  printf
     #endif
 
+    #define UNUSED_PARAMETER(par)   par = par
+
 
 //---------------------------------------------------------------------------
 //  definitions for GNU Compiler for Infineon C16x
@@ -188,20 +199,17 @@
     #define TARGET_SYSTEM   _NO_OS_
     #define DEV_SYSTEM      _DEV_GNU_C16X_
 
-//    #define NEAR            idata       // variables mapped to internal data storage location
     #define NEAR            near       // variables mapped to internal data storage location
-//    #define FAR             xhuge       // variables mapped to external data storage location
     #define FAR             huge       // variables mapped to external data storage location
     #define CONST           const       // variables mapped to ROM (i.e. flash)
+    #define ROM_INIT                    // variables will be initialized directly in ROM (means no copy from RAM in startup)
     #define ROM                         // code or variables mapped to ROM (i.e. flash)
                                         // usage: CONST BYTE ROM foo = 0x00;
-//    #define HWACC           sdata       // hardware access through external memory (i.e. CAN)
     #define HWACC           huge       // hardware access through external memory (i.e. CAN)
     #define LARGE                       // functions set parameters to external data storage location
 
     // These types can be adjusted by users to match application requirements. The goal is to
     // minimize code memory and maximize speed.
-//    #define GENERIC         xhuge       // generic pointer to point to application data
     #define GENERIC         huge       // generic pointer to point to application data
                                         // Variables with this attribute can be located in external
                                         // or internal data memory.
@@ -228,6 +236,8 @@
         #define ASSERT(p)
     #endif
 
+    #define UNUSED_PARAMETER(par)
+
 //---------------------------------------------------------------------------
 //  definitions for Keil C166
 //---------------------------------------------------------------------------
@@ -250,6 +260,7 @@
     #define NEAR            idata       // variables mapped to internal data storage location
     #define FAR             xhuge       // variables mapped to external data storage location
     #define CONST           const       // variables mapped to ROM (i.e. flash)
+    #define ROM_INIT                    // variables will be initialized directly in ROM (means no copy from RAM in startup)
     #define ROM                         // code or variables mapped to ROM (i.e. flash)
                                         // usage: CONST BYTE ROM foo = 0x00;
 //    #define HWACC           sdata       // hardware access through external memory (i.e. CAN)
@@ -271,6 +282,8 @@
         #define TRACE  printf
     #endif
 
+    #define UNUSED_PARAMETER(par)
+
 //---------------------------------------------------------------------------
 //  definitions for MPLAB C30 for dsPIC33F series
 //---------------------------------------------------------------------------
@@ -282,6 +295,7 @@
     #define NEAR                        // variables mapped to internal data storage location
     #define FAR                         // variables mapped to external data storage location
     #define CONST        const          // variables mapped to ROM (i.e. flash)
+    #define ROM_INIT                    // variables will be initialized directly in ROM (means no copy from RAM in startup)
     #define ROM                         // code or variables mapped to ROM (i.e. flash)
                                         // usage: CONST BYTE ROM foo = 0x00;
     #define HWACC                       // hardware access through external memory (i.e. CAN)
@@ -297,14 +311,19 @@
     #define REENTRANT
     #define PUBLIC
 
-//    #ifndef QWORD
-//        #define QWORD long long
-//    #endif
+    #ifndef NO_QWORD
+    #ifndef QWORD
+        #define QWORD long long
+    #endif
+    #endif
+
 
     #ifndef NDEBUG
         #include <stdio.h>              // prototype printf() (for TRACE)
         #define TRACE  printf
     #endif
+
+    #define UNUSED_PARAMETER(par)
 
 //---------------------------------------------------------------------------
 //  definitions for Keil ARM
@@ -317,6 +336,7 @@
     #define NEAR                        // variables mapped to internal data storage location
     #define FAR                         // variables mapped to external data storage location
     #define CONST        const          // variables mapped to ROM (i.e. flash)
+    #define ROM_INIT                    // variables will be initialized directly in ROM (means no copy from RAM in startup)
     #define ROM                         // code or variables mapped to ROM (i.e. flash)
                                         // usage: CONST BYTE ROM foo = 0x00;
     #define HWACC                       // hardware access through external memory (i.e. CAN)
@@ -332,14 +352,18 @@
     #define REENTRANT
     #define PUBLIC
 
+    #ifndef NO_QWORD
     #ifndef QWORD
         #define QWORD long long
+    #endif
     #endif
 
     #ifndef NDEBUG
         #include <stdio.h>              // prototype printf() (for TRACE)
         #define TRACE  printf
     #endif
+
+    #define UNUSED_PARAMETER(par)       par
 
 //---------------------------------------------------------------------------
 //  definitions for RealView ARM compilation tools (provided by recent Keil Microcontroller Development Kits)
@@ -352,6 +376,7 @@
     #define NEAR                        // variables mapped to internal data storage location
     #define FAR                         // variables mapped to external data storage location
     #define CONST        const          // variables mapped to ROM (i.e. flash)
+    #define ROM_INIT                    // variables will be initialized directly in ROM (means no copy from RAM in startup)
     #define ROM                         // code or variables mapped to ROM (i.e. flash)
                                         // usage: CONST BYTE ROM foo = 0x00;
     #define HWACC                       // hardware access through external memory (i.e. CAN)
@@ -367,8 +392,10 @@
     #define REENTRANT
     #define PUBLIC
 
+    #ifndef NO_QWORD
     #ifndef QWORD
         #define QWORD long long
+    #endif
     #endif
 
     #ifndef NDEBUG
@@ -384,6 +411,8 @@
         #define TRACE  printf
     #endif
 
+    #define UNUSED_PARAMETER(par)
+
 //---------------------------------------------------------------------------
 //  definitions for ARM IAR C Compiler
 //---------------------------------------------------------------------------
@@ -395,6 +424,7 @@
     #define NEAR                        // variables mapped to internal data storage location
     #define FAR                         // variables mapped to external data storage location
     #define CONST        const          // variables mapped to ROM (i.e. flash)
+    #define ROM_INIT                    // variables will be initialized directly in ROM (means no copy from RAM in startup)
     #define ROM                         // code or variables mapped to ROM (i.e. flash)
                                         // usage: CONST BYTE ROM foo = 0x00;
     #define HWACC                       // hardware access through external memory (i.e. CAN)
@@ -410,8 +440,10 @@
     #define REENTRANT
     #define PUBLIC
 
+    #ifndef NO_QWORD
     #ifndef QWORD
         #define QWORD long long
+    #endif
     #endif
 
     // Workaround:
@@ -432,6 +464,77 @@
 //        #define TRACE  PRINTF4
     #endif
 
+    #define UNUSED_PARAMETER(par)
+
+//---------------------------------------------------------------------------
+//  definitions for TI DSP using COde Composer Studio
+//---------------------------------------------------------------------------
+#elif  defined (__TMS320C2000__)
+
+    #define TARGET_SYSTEM   _NO_OS_
+    #define DEV_SYSTEM      _DEV_CCS_TMS_
+
+    #define NEAR         near           // variables mapped to internal data storage location
+    #define FAR                         // variables mapped to external data storage location
+    #define CONST        const          // variables mapped to ROM (i.e. flash)
+    #define ROM_INIT                    // variables will be initialized directly in ROM (means no copy from RAM in startup)
+    #define ROM                         // code or variables mapped to ROM (i.e. flash)
+                                        // usage: CONST BYTE ROM foo = 0x00;
+    #define HWACC                       // hardware access through external memory (i.e. CAN)
+    #define LARGE                       // functions set parameters to external data storage location
+
+    // These types can be adjusted by users to match application requirements. The goal is to
+    // minimize code memory and maximize speed.
+    #define GENERIC                     // generic pointer to point to application data
+                                        // Variables with this attribute can be located in external
+                                        // or internal data memory.
+    #define MEM          near           // Memory attribute to optimize speed and code of pointer access.
+
+    #define REENTRANT
+    #define PUBLIC       //near
+
+    #ifndef BYTE
+        #define BYTE unsigned char
+    #endif
+
+    #ifndef WORD
+        #define WORD unsigned short int
+    #endif
+
+    #ifndef DWORD
+        //#define DWORD unsigned int      // THIS IS IMPORTANT HERE: "unsigned long int" is a 64-bit variable for Code Composer !!!
+    #endif
+
+    #ifndef BOOL
+        #define BOOL unsigned char
+    #endif
+
+    #ifndef NO_QWORD
+    #ifndef QWORD
+        #define QWORD long long
+    #endif
+    #endif
+
+    // Workaround:
+    // If we use IAR and want to debug but don't want to use C-Spy Debugger
+    // assert() doesn't work in debug mode because it needs support for FILE descriptors
+    // (_DLIB_FILE_DESCRIPTOR == 1).
+    #ifndef NDEBUG
+        #define ASSERT(expr)    if (!(expr)) {\
+                                   TRACE0 ("Assertion failed: " #expr );\
+                                   while (1);}
+    #else
+        #define ASSERT(expr)
+    #endif
+
+    #ifndef NDEBUG
+        //#include <stdio.h>              // prototype printf() (for TRACE)
+        int TgtPrintf (const char *format, ...);
+        #define TRACE  TgtPrintf
+    #endif
+
+    #define UNUSED_PARAMETER(par)
+
 //---------------------------------------------------------------------------
 //  definitions for Tasking 8051
 //---------------------------------------------------------------------------
@@ -446,6 +549,7 @@
     #define NEAR            _data       // variables mapped to internal data storage location
     #define FAR             _xdat       // variables mapped to external data storage location
     #define CONST           const       // variables mapped to ROM (i.e. flash)
+    #define ROM_INIT                    // variables will be initialized directly in ROM (means no copy from RAM in startup)
     #define ROM                         // code or variables mapped to ROM (i.e. flash)
                                         // usage: CONST BYTE ROM foo = 0x00;
     #define HWACC           _xdat       // hardware access through external memory (i.e. CAN)
@@ -466,6 +570,7 @@
         #define TRACE  printf
     #endif
 
+    #define UNUSED_PARAMETER(par)
 
 //---------------------------------------------------------------------------
 //  definitions for Tasking C167CR and C164CI
@@ -479,6 +584,7 @@
     #define NEAR            near        // variables mapped to internal data storage location
     #define FAR             far         // variables mapped to external data storage location
     #define CONST           const       // variables mapped to ROM (i.e. flash)
+    #define ROM_INIT                    // variables will be initialized directly in ROM (means no copy from RAM in startup)
     #define ROM                         // code or variables mapped to ROM (i.e. flash)
                                         // usage: CONST BYTE ROM foo = 0x00;
     #define HWACC   /* to be defined */ // hardware access through external memory (i.e. CAN)
@@ -502,6 +608,7 @@
         #define TRACE  printf
     #endif
 
+    #define UNUSED_PARAMETER(par)
 
 //---------------------------------------------------------------------------
 //  definitions for FUJITSU FFMC-16LX MB90590
@@ -516,6 +623,7 @@
     #define NEAR    /* to be defined */ // variables mapped to internal data storage location
     #define FAR     /* to be defined */ // variables mapped to external data storage location
     #define CONST           const       // variables mapped to ROM (i.e. flash)
+    #define ROM_INIT                    // variables will be initialized directly in ROM (means no copy from RAM in startup)
     #define ROM     /* to be defined */ // code or variables mapped to ROM (i.e. flash)
                                         // usage: CONST BYTE ROM foo = 0x00;
     #define HWACC   /* to be defined */ // hardware access through external memory (i.e. CAN)
@@ -538,6 +646,7 @@
         #define TRACE  printf
     #endif
 
+    #define UNUSED_PARAMETER(par)
 
 //---------------------------------------------------------------------------
 //  definitions for Mitsubishi M16C family for TASKING Compiler CM16
@@ -551,6 +660,7 @@
     #define NEAR            _near       // variables mapped to internal data storage location
     #define FAR             _far        // variables mapped to external data storage location
     #define CONST           _farrom       // variables mapped to ROM (i.e. flash)
+    #define ROM_INIT                    // variables will be initialized directly in ROM (means no copy from RAM in startup)
     #define ROM                         // code or variables mapped to ROM (i.e. flash)
                                         // usage: CONST BYTE ROM foo = 0x00;
     #define HWACC           _near       // hardware access through external memory (i.e. CAN)
@@ -575,6 +685,7 @@
         #define TRACE  printf
     #endif
 
+    #define UNUSED_PARAMETER(par)
 
 //---------------------------------------------------------------------------
 //  definitions for Mitsubishi M16C family for Mitsubishi Compiler NC30
@@ -588,6 +699,7 @@
     #define NEAR            near        // variables mapped to internal data storage location
     #define FAR             far         // variables mapped to external data storage location
     #define CONST           const       // variables mapped to ROM (i.e. flash)
+    #define ROM_INIT                    // variables will be initialized directly in ROM (means no copy from RAM in startup)
     #define ROM                      // code or variables mapped to ROM (i.e. flash)
                                         // usage: CONST BYTE ROM foo = 0x00;
     #define HWACC           near        // hardware access through external memory (i.e. CAN)
@@ -608,6 +720,7 @@
         #define TRACE  printf
     #endif
 
+    #define UNUSED_PARAMETER(par)
 //---------------------------------------------------------------------------
 //  definitions for Renesas M32C family for Renesas Compiler
 //---------------------------------------------------------------------------
@@ -619,6 +732,7 @@
     #define NEAR             near       // variables mapped to internal data storage location
     #define FAR              far        // variables mapped to external data storage location
     #define CONST            const      // variables mapped to ROM (i.e. flash)
+    #define ROM_INIT                    // variables will be initialized directly in ROM (means no copy from RAM in startup)
     #define ROM                         // code or variables mapped to ROM (i.e. flash)
     #define HWACC                       // hardware access through external memory (i.e. CAN)
     #define LARGE                       // functions set parameters to external data storage location
@@ -638,20 +752,26 @@
         #define TRACE  printf
     #endif
 
-//    #error ("RENESAS o.k.")
+    #define UNUSED_PARAMETER(par)
 
 //---------------------------------------------------------------------------
 //  definitions for ARM7 family with GNU compiler
 //---------------------------------------------------------------------------
 
-#elif defined(__GNUC__) && defined(__arm__) && !defined(__LINUX_ARM_ARCH__)
+#elif defined(__GNUC__) && (defined(__arm__) || defined(__thumb__)) && !defined(__LINUX_ARM_ARCH__)
 
+#ifdef __ECOS__
+    #define TARGET_SYSTEM   _ECOSPRO_
+    #define DEV_SYSTEM      _DEV_GNU_ARM7_
+#else
     #define TARGET_SYSTEM   _NO_OS_
     #define DEV_SYSTEM      _DEV_GNU_ARM7_
+#endif
 
     #define NEAR                        // variables mapped to internal data storage location
     #define FAR                         // variables mapped to external data storage location
     #define CONST           const       // variables mapped to ROM (i.e. flash)
+    #define ROM_INIT                    // variables will be initialized directly in ROM (means no copy from RAM in startup)
     #define ROM                         // code or variables mapped to ROM (i.e. flash)
                                         // usage: CONST BYTE ROM foo = 0x00;
     #define HWACC                       // hardware access through external memory (i.e. CAN)
@@ -668,14 +788,73 @@
     #define REENTRANT
     #define PUBLIC
 
+    #ifndef NO_QWORD
     #ifndef QWORD
         #define QWORD long long    // i.A. durch Herr Kuschel
     #endif
+    #endif
 
     #ifndef NDEBUG
+        #ifdef __ECOS__
+            //#include <cyg/infra/diag.h>
+            //#define TRACE  printf
+            //#define TRACE  diag_printf
+             extern int TgtPrintf (const char *format, ...);
+             #define TRACE  TgtPrintf
+       #else
         #include <stdio.h>                  // prototype printf() (for TRACE)
         #define TRACE  printf
+        #endif
     #endif
+
+    #define UNUSED_PARAMETER(par)
+
+
+//---------------------------------------------------------------------------
+//  definitions for WinAVR compiler e.g. for Atmel's AT90CAN128
+//---------------------------------------------------------------------------
+
+#elif defined(__GNUC__) && defined (__AVR__) // NOTE: has to be defined before __GNUC__ section!
+
+    #define TARGET_SYSTEM           _NO_OS_
+    #define DEV_SYSTEM              _DEV_GNU_WINAVR8_
+
+    //#include <avr/pgmspace.h>
+    #define ROM_INIT __attribute__((__progmem__))   // variables will be initialized directly in ROM (means no copy from RAM in startup)
+    //#define ROM_INIT                // variables will be initialized directly in ROM (means no copy from RAM in startup)
+    #define ROM                     // code or variables mapped to ROM (i.e. flash)
+    #define HWACC                   // hardware access through external memory (i.e. CAN)
+    #define MEM                     // Memory attribute to optimize speed and code of pointer access.
+    #define NEAR                    // variables mapped to internal data storage location
+    #define FAR                     // variables mapped to external data storage location
+    #define CONST const             // variables mapped to ROM (i.e. flash)
+    #define LARGE
+
+    // These types can be adjusted by users to match application requirements. The goal is to
+    // minimize code memory and maximize speed.
+    #define GENERIC                 // generic pointer to point to application data
+                                    // Variables with this attribute can be located in external
+                                    // or internal data memory.
+
+    #define REENTRANT
+    #define PUBLIC
+
+    // note: WinAVR is supports 64 bit variables but it needs to much memory resources!
+    // Thats why NO_QWORD should be set in project settings!
+    #ifndef NO_QWORD
+    #ifndef QWORD
+        #define QWORD unsigned long long int
+    #endif
+    #endif
+
+    #ifndef NDEBUG
+        #include <stdio.h>              // prototype printf() (for TRACE)
+        //#define TRACE  printf
+        #define TRACE(arg, ...)         do { static char __s[] ROM_INIT = (arg); \
+                                        printf_P(__s, ## __VA_ARGS__); } while (0)
+    #endif
+
+    #define UNUSED_PARAMETER(par)
 
 
 //---------------------------------------------------------------------------
@@ -730,9 +909,10 @@
         #error 'ERROR: DEV_SYSTEM not found!'
     #endif
 
-
+    #ifndef NO_QWORD
     #ifndef QWORD
         #define QWORD long long int
+    #endif
     #endif
 
     #if (TARGET_SYSTEM == _PXROS_)
@@ -745,6 +925,7 @@
         #define NEAR                        // variables mapped to internal data storage location
         #define FAR                         // variables mapped to external data storage location
         #define CONST           const       // variables mapped to ROM (i.e. flash)
+        #define ROM_INIT                    // variables will be initialized directly in ROM (means no copy from RAM in startup)
         #define ROM     /* to be defined */ // code or variables mapped to ROM (i.e. flash)
                                             // usage: CONST BYTE ROM foo = 0x00;
         #define LARGE                       // functions set parameters to external data storage location
@@ -761,14 +942,18 @@
         #define REENTRANT
         #define PUBLIC
 
+        #ifndef NO_QWORD
         #ifndef QWORD
             #define QWORD long long int
+        #endif
         #endif
 
         #ifndef NDEBUG
             #include <stdio.h>              // prototype printf() (for TRACE)
             #define TRACE  printf
         #endif
+
+        #define UNUSED_PARAMETER(par)
 
     #endif
 
@@ -780,6 +965,7 @@
             #include <string.h>
         #endif
 
+        #define ROM_INIT                // variables will be initialized directly in ROM (means no copy from RAM in startup)
         #define ROM                     // code or variables mapped to ROM (i.e. flash)
                                         // usage: CONST BYTE ROM foo = 0x00;
         #define HWACC                   // hardware access through external memory (i.e. CAN)
@@ -816,12 +1002,16 @@
                 #define TRACE  printk
             #endif
         #endif
+
+        #define UNUSED_PARAMETER(par)
+
     #endif
 
     // ------------------ GNU without OS ---------------------------------------------
 
     #if (TARGET_SYSTEM == _NO_OS_)
 
+        #define ROM_INIT                // variables will be initialized directly in ROM (means no copy from RAM in startup)
         #define ROM                     // code or variables mapped to ROM (i.e. flash)
                                         // usage: CONST BYTE ROM foo = 0x00;
         #define HWACC                   // hardware access through external memory (i.e. CAN)
@@ -852,7 +1042,7 @@
 
         #ifndef NDEBUG
 //            #include "xuartdrv.h"
-//            #include <stdio.h>              // prototype printf() (for TRACE)
+            #include <stdio.h>              // prototype printf() (for TRACE)
             #define TRACE  printf
 //            #define TRACE  mprintf
 //            #ifndef TRACE
@@ -861,13 +1051,14 @@
 //            #endif
         #endif
 
+        #define UNUSED_PARAMETER(par)
+
     #endif
 
 //---------------------------------------------------------------------------
 //  definitions for MPC565
 //---------------------------------------------------------------------------
 #elif __MWERKS__
-
 
 #ifdef __MC68K__
 
@@ -882,6 +1073,7 @@
     #define NEAR                        // variables mapped to internal data storage location
     #define FAR                         // variables mapped to external data storage location
     #define CONST           const       // variables mapped to ROM (i.e. flash)
+    #define ROM_INIT                    // variables will be initialized directly in ROM (means no copy from RAM in startup)
     #define ROM                         // code or variables mapped to ROM (i.e. flash)
                                         // usage: CONST BYTE ROM foo = 0x00;
     #define LARGE                       // functions set parameters to external data storage location
@@ -903,42 +1095,46 @@
         #define TRACE  printf
     #endif
 
+    #define UNUSED_PARAMETER(par)
+
 //---------------------------------------------------------------------------
 //  definitions for BECK 1x3
 //---------------------------------------------------------------------------
 #elif defined (__BORLANDC__) && defined (__PARADIGM__)
 
 
-     #define TARGET_SYSTEM      _NO_OS_
-     #define DEV_SYSTEM         _DEV_PAR_BECK1X3_
+    #define TARGET_SYSTEM      _NO_OS_
+    #define DEV_SYSTEM         _DEV_PAR_BECK1X3_
 
 
 
-     #define ROM                     // code or variables mapped to ROM (i.e. flash)
-                                     // usage: CONST BYTE ROM foo = 0x00;
-     #define HWACC                   // hardware access through external memory (i.e. CAN)
+    #define ROM_INIT                    // variables will be initialized directly in ROM (means no copy from RAM in startup)
+    #define ROM                         // code or variables mapped to ROM (i.e. flash)
+                                        // usage: CONST BYTE ROM foo = 0x00;
+    #define HWACC                       // hardware access through external memory (i.e. CAN)
 
-     // These types can be adjusted by users to match application requirements. The goal is to
-     // minimize code memory and maximize speed.
-     #define GENERIC                 // generic pointer to point to application data
-                                     // Variables with this attribute can be located in external
-                                     // or internal data memory.
-     #define MEM                     // Memory attribute to optimize speed and code of pointer access.
-     #define NEAR __near             // variables mapped to internal data storage location
-     #define FAR  __far              // variables mapped to external data storage location
-     #define CONST const             // variables mapped to ROM (i.e. flash)
-     #define LARGE
+    // These types can be adjusted by users to match application requirements. The goal is to
+    // minimize code memory and maximize speed.
+    #define GENERIC                     // generic pointer to point to application data
+                                        // Variables with this attribute can be located in external
+                                        // or internal data memory.
+    #define MEM                         // Memory attribute to optimize speed and code of pointer access.
+    #define NEAR __near                 // variables mapped to internal data storage location
+    #define FAR  __far                  // variables mapped to external data storage location
+    #define CONST const                 // variables mapped to ROM (i.e. flash)
+    #define LARGE
 
-     #define REENTRANT
-     #define PUBLIC
+    #define REENTRANT
+    #define PUBLIC
 
-     #ifndef NDEBUG
-         #ifndef TRACE
-             #include <stdio.h>
-             #define TRACE printf
-         #endif
-     #endif
+    #ifndef NDEBUG
+        #ifndef TRACE
+            #include <stdio.h>
+            #define TRACE printf
+        #endif
+    #endif
 
+    #define UNUSED_PARAMETER(par)
 
 
 //---------------------------------------------------------------------------
@@ -962,6 +1158,7 @@
 
     #if (TARGET_SYSTEM == _WIN32_)
 
+        #define ROM_INIT                // variables will be initialized directly in ROM (means no copy from RAM in startup)
         #define ROM                     // code or variables mapped to ROM (i.e. flash)
                                         // usage: CONST BYTE ROM foo = 0x00;
         #define HWACC                   // hardware access through external memory (i.e. CAN)
@@ -997,8 +1194,11 @@
             #endif
         #endif
 
+        #define UNUSED_PARAMETER(par)
+
     #elif (TARGET_SYSTEM == _DOS_)
 
+        #define ROM_INIT                // variables will be initialized directly in ROM (means no copy from RAM in startup)
         #define ROM                     // code or variables mapped to ROM (i.e. flash)
                                         // usage: CONST BYTE ROM foo = 0x00;
         #define HWACC                   // hardware access through external memory (i.e. CAN)
@@ -1024,6 +1224,8 @@
             #endif
         #endif
 
+        #define UNUSED_PARAMETER(par)
+
     #endif
 
 #elif (_MSC_VER == 800) // PC MS Visual C/C++ for DOS applications
@@ -1031,6 +1233,7 @@
     #define TARGET_SYSTEM   _DOS_
     #define DEV_SYSTEM      _DEV_MSVC_DOS_
 
+    #define ROM_INIT                // variables will be initialized directly in ROM (means no copy from RAM in startup)
     #define ROM                     // code or variables mapped to ROM (i.e. flash)
                                     // usage: CONST BYTE ROM foo = 0x00;
     #define HWACC near              // hardware access through external memory (i.e. CAN)
@@ -1056,6 +1259,7 @@
         #endif
     #endif
 
+    #define UNUSED_PARAMETER(par)
 
 //---------------------------------------------------------------------------
 // definitions for RTX under WIN32
@@ -1066,6 +1270,7 @@
     #define TARGET_SYSTEM   _WIN32_RTX_
     #define DEV_SYSTEM      _DEV_WIN32_RTX_
 
+    #define ROM_INIT                // variables will be initialized directly in ROM (means no copy from RAM in startup)
     #define ROM                     // code or variables mapped to ROM (i.e. flash)
                                     // usage: CONST BYTE ROM foo = 0x00;
     #define HWACC                   // hardware access through external memory (i.e. CAN)
@@ -1100,6 +1305,8 @@
         #endif
     #endif
 
+    #define UNUSED_PARAMETER(par)
+
 //---------------------------------------------------------------------------
 // definitions for WinCE
 //---------------------------------------------------------------------------
@@ -1109,6 +1316,7 @@
     #define TARGET_SYSTEM           _WINCE_
     #define DEV_SYSTEM              _DEV_WIN_CE_
 
+    #define ROM_INIT                // variables will be initialized directly in ROM (means no copy from RAM in startup)
     #define ROM                     // code or variables mapped to ROM (i.e. flash)
                                     // usage: CONST BYTE ROM foo = 0x00;
     #define HWACC                   // hardware access through external memory (i.e. CAN)
@@ -1134,9 +1342,11 @@
 
     #define LARGE
 
+    #ifndef NO_QWORD
     #ifndef QWORD
       //#define QWORD long long int // MSVC .NET can use "long long int" too (like GNU)
         #define QWORD __int64
+    #endif
     #endif
 
     #define REENTRANT
@@ -1152,6 +1362,8 @@
 //            void trace (char *fmt, ...);
         #endif
     #endif
+
+    #define UNUSED_PARAMETER(par)
 
 #else   // ===> PC MS Visual C/C++
 
@@ -1170,6 +1382,7 @@
 
     #if (TARGET_SYSTEM == _WIN16_)
 
+        #define ROM_INIT                // variables will be initialized directly in ROM (means no copy from RAM in startup)
         #define ROM                     // code or variables mapped to ROM (i.e. flash)
                                         // usage: CONST BYTE ROM foo = 0x00;
         #define HWACC                   // hardware access through external memory (i.e. CAN)
@@ -1212,6 +1425,8 @@
             #endif
         #endif
 
+        #define UNUSED_PARAMETER(par)
+
     #endif
 
 
@@ -1219,6 +1434,7 @@
 
    #if (TARGET_SYSTEM == _WIN32_)
 
+        #define ROM_INIT                // variables will be initialized directly in ROM (means no copy from RAM in startup)
         #define ROM                     // code or variables mapped to ROM (i.e. flash)
                                         // usage: CONST BYTE ROM foo = 0x00;
         #define HWACC                   // hardware access through external memory (i.e. CAN)
@@ -1247,9 +1463,11 @@
         #define REENTRANT
         #define PUBLIC __stdcall
 
+        #ifndef NO_QWORD
         #ifndef QWORD
           //#define QWORD long long int // MSVC .NET can use "long long int" too (like GNU)
             #define QWORD __int64
+        #endif
         #endif
 
         #ifndef NDEBUG
@@ -1265,6 +1483,8 @@
                 #endif
             #endif
         #endif
+
+        #define UNUSED_PARAMETER(par)
 
         // MS Visual C++ compiler supports function inlining
         #define INLINE_FUNCTION_DEF __forceinline
@@ -1320,7 +1540,11 @@
     #endif
 
     #ifndef DWORD
-        #define DWORD unsigned long int
+        #if defined (__LP64__) || defined (_LP64)
+            #define DWORD unsigned int
+        #else
+            #define DWORD unsigned long int
+        #endif
     #endif
 
     #ifndef BOOL
@@ -1364,6 +1588,10 @@
 
 #ifndef NDEBUG
 
+    #ifndef TRACE
+        #define TRACE
+    #endif
+
     #ifndef TRACE0
         #define TRACE0(p0)                      TRACE(p0)
     #endif
@@ -1393,6 +1621,10 @@
     #endif
 
 #else
+
+    #ifndef TRACE
+        #define TRACE
+    #endif
 
     #ifndef TRACE0
         #define TRACE0(p0)
@@ -1448,15 +1680,33 @@
 
 // This macro doesn't print out C-file and line number of the failed assertion
 // but a string, which exactly names the mistake.
-#ifndef NDEBUG
+#ifndef ASSERTMSG
+    #ifndef NDEBUG
 
-    #define ASSERTMSG(expr,string)  if (!(expr)) {\
-                                        PRINTF0 ("Assertion failed: " string );\
-                                        while (1);}
-#else
-    #define ASSERTMSG(expr,string)
+            #define ASSERTMSG(expr,string)  if (!(expr)) { \
+                                                PRINTF0 ("Assertion failed: " string);\
+                                                while (1);}
+    #else
+        #define ASSERTMSG(expr,string)
+    #endif
 #endif
 
+
+
+//---------------------------------------------------------------------------
+//  Definition von __func__
+//---------------------------------------------------------------------------
+
+#ifndef __func__
+    #ifndef __FUNCTION__
+        // compiler does neither support __func__ or __FUNCTION,
+        // define __func__ to __FILE__ as a minimum information for localisation of debug outputs
+        #define __func__ __FILE__
+    #else
+        // compiler does not support __func__ but __FUNCTION__ (like MS Visual C)
+        #define __func__ __FUNCTION__
+    #endif
+#endif
 
 
 
@@ -1464,5 +1714,5 @@
 
 #endif  // #ifndef _GLOBAL_H_
 
-// Please keep an empty line at the end of this file.
+// EOF
 
