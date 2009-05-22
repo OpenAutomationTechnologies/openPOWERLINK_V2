@@ -297,6 +297,21 @@ Exit:
     return Ret;
 }
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 28)
+
+static const struct net_device_ops epl_netdev_ops = {
+    .ndo_open               = VEthOpen,
+    .ndo_stop               = VEthClose,
+    .ndo_get_stats          = VEthGetStats,
+    .ndo_start_xmit         = VEthXmit,
+    .ndo_tx_timeout         = VEthTimeout,
+    .ndo_change_mtu         = eth_change_mtu,
+    .ndo_set_mac_address    = eth_mac_addr,
+    .ndo_validate_addr      = eth_validate_addr,
+};
+
+#endif
+
 
 tEplKernel PUBLIC VEthAddInstance(tEplDllkInitParam * pInitParam_p)
 {
@@ -312,13 +327,17 @@ tEplKernel  Ret = kEplSuccessful;
         goto Exit;
     }
 
-    pVEthNetDevice_g->open               = VEthOpen;
-    pVEthNetDevice_g->stop               = VEthClose;
-    pVEthNetDevice_g->get_stats          = VEthGetStats;
-    pVEthNetDevice_g->hard_start_xmit    = VEthXmit;
-    pVEthNetDevice_g->tx_timeout         = VEthTimeout;
-    pVEthNetDevice_g->watchdog_timeo     = EPL_VETH_TX_TIMEOUT;
-    pVEthNetDevice_g->destructor         = free_netdev;
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 28)
+    pVEthNetDevice_g->netdev_ops        = &epl_netdev_ops;
+#else
+    pVEthNetDevice_g->open              = VEthOpen;
+    pVEthNetDevice_g->stop              = VEthClose;
+    pVEthNetDevice_g->get_stats         = VEthGetStats;
+    pVEthNetDevice_g->hard_start_xmit   = VEthXmit;
+    pVEthNetDevice_g->tx_timeout        = VEthTimeout;
+#endif
+    pVEthNetDevice_g->watchdog_timeo    = EPL_VETH_TX_TIMEOUT;
+    pVEthNetDevice_g->destructor        = free_netdev;
 
     // copy own MAC address to net device structure
     memcpy(pVEthNetDevice_g->dev_addr, pInitParam_p->m_be_abSrcMac, 6);
