@@ -1365,6 +1365,8 @@
 
     #define UNUSED_PARAMETER(par)
 
+    #define __func__ __FUNCTION__
+
 #else   // ===> PC MS Visual C/C++
 
     // ------------------ definition target system --------------------------
@@ -1377,6 +1379,9 @@
         #define DEV_SYSTEM      _DEV_WIN16_
     #endif
 
+
+
+    #define __func__ __FUNCTION__
 
     // ------------------ WIN16 ---------------------------------------------
 
@@ -1691,22 +1696,6 @@
     #endif
 #endif
 
-
-
-//---------------------------------------------------------------------------
-//  Definition von __func__
-//---------------------------------------------------------------------------
-
-#ifndef __func__
-    #ifndef __FUNCTION__
-        // compiler does neither support __func__ or __FUNCTION,
-        // define __func__ to __FILE__ as a minimum information for localisation of debug outputs
-        #define __func__ __FILE__
-    #else
-        // compiler does not support __func__ but __FUNCTION__ (like MS Visual C)
-        #define __func__ __FUNCTION__
-    #endif
-#endif
 
 
 

@@ -258,14 +258,27 @@ typedef enum
 typedef unsigned char       tEplObdBoolean;      // 0001
 typedef signed char         tEplObdInteger8;     // 0002
 typedef signed short int    tEplObdInteger16;    // 0003
+#if defined (__LP64__) || defined (_LP64)
+typedef signed int          tEplObdInteger32;    // 0004
+#else
 typedef signed long         tEplObdInteger32;    // 0004
+#endif
 typedef unsigned char       tEplObdUnsigned8;    // 0005
 typedef unsigned short int  tEplObdUnsigned16;   // 0006
+#if defined (__LP64__) || defined (_LP64)
+typedef unsigned int        tEplObdUnsigned32;   // 0007
+#else
 typedef unsigned long       tEplObdUnsigned32;   // 0007
+#endif
 typedef float               tEplObdReal32;       // 0008
 typedef unsigned char       tEplObdDomain;       // 000F
+#if defined (__LP64__) || defined (_LP64)
+typedef signed   int        tEplObdInteger24;    // 0010
+typedef unsigned int        tEplObdUnsigned24;   // 0016
+#else
 typedef signed   long       tEplObdInteger24;    // 0010
 typedef unsigned long       tEplObdUnsigned24;   // 0016
+#endif
 
 typedef signed QWORD        tEplObdInteger40;    // 0012
 typedef signed QWORD        tEplObdInteger48;    // 0013
