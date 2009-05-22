@@ -89,7 +89,7 @@ Generic Requirements for all demo applications
 Requirements for X86 Demo
 --------------------------
 
-- Linux kernel version 2.6.23 or later
+- Linux kernel version 2.6.23 or later (last tested version 2.6.27)
   with CONFIG_HIGH_RES_TIMERS enabled
     * this needs ACPI support, maybe you need to append "highres=on" or
       "acpi=force" to kernel command line for older BIOSes)
@@ -97,10 +97,16 @@ Requirements for X86 Demo
       $ cat /proc/timer_list | grep 'hres_active'
 
 - Network controller card with Realtek RTL8139 Rev C or D chip onboard
-  These are for example
-    * Zyxel FN312
-    * Netgear FA311 v2 Rev-D1
+  PCI network cards:
+    * Zyxel FN312 (tested)
+    * Netgear FA311 v2 Rev-D1 (tested)
     * D-Link DFE-528TX
+    * LevelOne FNC-0109TX
+    * Typhoon Speednet Card 10/100 PCI (P/N 70035)
+  Cardbus network cards (PCMCIA):
+    * Longshine LCS-8539TXR
+    * Micronet SP160T V3
+    * Micronet SP160TA V3
 
 
 
