@@ -125,8 +125,8 @@
                                | EPL_MODULE_NMTU \
                                | EPL_MODULE_NMTK \
                                | EPL_MODULE_DLLK \
-                               | EPL_MODULE_DLLU)
-//                               | EPL_MODULE_NMT_MN
+                               | EPL_MODULE_DLLU \
+                               | EPL_MODULE_NMT_MN)
 //                               | EPL_MODULE_SDO_UDP
 //                               | EPL_MODULE_VETH
 //                               | EPL_MODULE_OBDU
@@ -197,8 +197,8 @@
 #define EPL_TIMER_USE_USER              TRUE
 
 // if TRUE the high resolution timer module will be used
-//#define EPL_TIMER_USE_HIGHRES              TRUE
-#define EPL_TIMER_USE_HIGHRES              FALSE
+#define EPL_TIMER_USE_HIGHRES              TRUE
+//#define EPL_TIMER_USE_HIGHRES              FALSE
 
 
 #endif //_EPLCFG_H_

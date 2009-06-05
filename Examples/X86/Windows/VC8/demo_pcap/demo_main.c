@@ -209,6 +209,11 @@ unsigned int        uiVarEntries;
 tEplObdSize         ObdSize;
 char                cKey = 0;
 
+    // activate realtime priority class
+    SetPriorityClass(GetCurrentProcess(), REALTIME_PRIORITY_CLASS);
+    // lower the priority of this thread
+    SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_IDLE);
+
 
 	uiNodeId_g = 240;
 
@@ -229,7 +234,7 @@ char                cKey = 0;
     EplApiInitParam.m_uiSizeOfStruct = sizeof (EplApiInitParam);
     EPL_MEMCPY(EplApiInitParam.m_abMacAddress, abMacAddr, sizeof (EplApiInitParam.m_abMacAddress));
     EplApiInitParam.m_dwFeatureFlags = -1;
-    EplApiInitParam.m_dwCycleLen = 50000;     // required for error detection
+    EplApiInitParam.m_dwCycleLen = 25000;     // required for error detection
     EplApiInitParam.m_uiIsochrTxMaxPayload = 100; // const
     EplApiInitParam.m_uiIsochrRxMaxPayload = 100; // const
     EplApiInitParam.m_dwPresMaxLatency = 50000;  // const; only required for IdentRes
@@ -240,7 +245,7 @@ char                cKey = 0;
     EplApiInitParam.m_uiAsyncMtu = 1500;         // required to set up max frame size
     EplApiInitParam.m_uiPrescaler = 2;         // required for sync
     EplApiInitParam.m_dwLossOfFrameTolerance = 5000000;
-    EplApiInitParam.m_dwAsyncSlotTimeout = 3000000;
+    EplApiInitParam.m_dwAsyncSlotTimeout = 10000000;
     EplApiInitParam.m_dwWaitSocPreq = 150000;
     EplApiInitParam.m_dwDeviceType = -1;              // NMT_DeviceType_U32
     EplApiInitParam.m_dwVendorId = -1;                // NMT_IdentityObject_REC.VendorId_U32
@@ -333,7 +338,7 @@ char                cKey = 0;
     dwMode_l = DEFAULT_MODE;
     iMaxCycleCount_l = DEFAULT_MAX_CYCLE_COUNT;
 
-
+    // start processing
     EplRet = EplApiExecNmtCommand(kEplNmtEventSwReset);
 
     printf("Press Esc to leave the programm\n");
@@ -344,7 +349,7 @@ char                cKey = 0;
         {
             cKey = (BYTE)_getch() ;
         }
-        Sleep(15);
+        Sleep(1500);
 
     }
 
