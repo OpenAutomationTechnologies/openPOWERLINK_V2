@@ -55,7 +55,7 @@
 
 ****************************************************************************/
 
-#define WINVER       0x0400             // #defines necessary for usage of
+//#define WINVER       0x0400             // #defines necessary for usage of
 #define _WIN32_WINNT 0x0400             // function <SignalObjectAndWait>
 
 #include <windows.h>
