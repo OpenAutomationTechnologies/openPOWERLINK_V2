@@ -148,6 +148,15 @@ typedef struct
 } tEplNetTime;
 
 
+// Hardware parameter structure
+typedef struct
+{
+    unsigned int    m_uiDevNumber;  // device number for selecting Ethernet controller
+    char*           m_pszDevName;   // device name (valid if non-null)
+
+} tEplHwParam;
+
+
 #include "EplTarget.h"  // target specific functions and definitions
 
 #include "EplAmi.h"
