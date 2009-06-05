@@ -99,26 +99,14 @@ EPL_OBD_BEGIN ()
         // additional RxPDOs if master is enabled
 
         // Object 1402h: PDO_RxCommParam_02h_REC
-        EPL_OBD_BEGIN_INDEX_RAM(0x1402, 0x03,
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOU)) != 0)
-                EplPdouCbObdAccess
-#else
-                NULL
-#endif
-                )
+        EPL_OBD_BEGIN_INDEX_RAM(0x1402, 0x03, EplPdouCbObdAccess)
             EPL_OBD_SUBINDEX_RAM_VAR(0x1402, 0x00, 0x05, 0x04, tEplObdUnsigned8, NumberOfEntries, 0x02)
             EPL_OBD_SUBINDEX_RAM_VAR(0x1402, 0x01, 0x05, 0x03, tEplObdUnsigned8, NodeID_U8, 0x01)
             EPL_OBD_SUBINDEX_RAM_VAR(0x1402, 0x02, 0x05, 0x03, tEplObdUnsigned8, MappingVersion_U8, 0x00)
         EPL_OBD_END_INDEX(0x1402)
 
         // Object 1403h: PDO_RxCommParam_03h_REC
-        EPL_OBD_BEGIN_INDEX_RAM(0x1403, 0x03,
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOU)) != 0)
-                EplPdouCbObdAccess
-#else
-                NULL
-#endif
-                )
+        EPL_OBD_BEGIN_INDEX_RAM(0x1403, 0x03, EplPdouCbObdAccess)
             EPL_OBD_SUBINDEX_RAM_VAR(0x1403, 0x00, 0x05, 0x04, tEplObdUnsigned8, NumberOfEntries, 0x02)
             EPL_OBD_SUBINDEX_RAM_VAR(0x1403, 0x01, 0x05, 0x03, tEplObdUnsigned8, NodeID_U8, 0x20)
             EPL_OBD_SUBINDEX_RAM_VAR(0x1403, 0x02, 0x05, 0x03, tEplObdUnsigned8, MappingVersion_U8, 0x00)
@@ -154,25 +142,13 @@ EPL_OBD_BEGIN ()
         // additional RxPDOs if master is enabled
 
         // Object 1602h: PDO_RxMappParam_02h_AU64
-        EPL_OBD_BEGIN_INDEX_RAM(0x1602, 0x02,
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOU)) != 0)
-                EplPdouCbObdAccess
-#else
-                NULL
-#endif
-                )
+        EPL_OBD_BEGIN_INDEX_RAM(0x1602, 0x02, EplPdouCbObdAccess)
             EPL_OBD_SUBINDEX_RAM_VAR(0x1602, 0x00, 0x05, 0x03, tEplObdUnsigned8, NumberOfEntries, 0x01)
             EPL_OBD_SUBINDEX_RAM_VAR(0x1602, 0x01, 0x1B, 0x03, tEplObdUnsigned64, ObjectMapping, 0x0008000000022200LL)
         EPL_OBD_END_INDEX(0x1602)
 
         // Object 1603h: PDO_RxMappParam_03h_AU64
-        EPL_OBD_BEGIN_INDEX_RAM(0x1603, 0x02,
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOU)) != 0)
-                EplPdouCbObdAccess
-#else
-                NULL
-#endif
-                )
+        EPL_OBD_BEGIN_INDEX_RAM(0x1603, 0x02, EplPdouCbObdAccess)
             EPL_OBD_SUBINDEX_RAM_VAR(0x1603, 0x00, 0x05, 0x03, tEplObdUnsigned8, NumberOfEntries, 0x01)
             EPL_OBD_SUBINDEX_RAM_VAR(0x1603, 0x01, 0x1B, 0x03, tEplObdUnsigned64, ObjectMapping, 0x0008000000032200LL)
         EPL_OBD_END_INDEX(0x1603)
@@ -190,39 +166,21 @@ EPL_OBD_BEGIN ()
         // additional TxPDOs if master is enabled
 
         // Object 1801h: PDO_TxCommParam_01h_REC
-        EPL_OBD_BEGIN_INDEX_RAM(0x1801, 0x03,
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOU)) != 0)
-                EplPdouCbObdAccess
-#else
-                NULL
-#endif
-                )
+        EPL_OBD_BEGIN_INDEX_RAM(0x1801, 0x03, EplPdouCbObdAccess)
             EPL_OBD_SUBINDEX_RAM_VAR(0x1801, 0x00, 0x05, 0x04, tEplObdUnsigned8, NumberOfEntries, 0x02)
             EPL_OBD_SUBINDEX_RAM_VAR(0x1801, 0x01, 0x05, 0x03, tEplObdUnsigned8, NodeID_U8, 0x01)
             EPL_OBD_SUBINDEX_RAM_VAR(0x1801, 0x02, 0x05, 0x03, tEplObdUnsigned8, MappingVersion_U8, 0x00)
         EPL_OBD_END_INDEX(0x1801)
 
         // Object 1802h: PDO_TxCommParam_02h_REC
-        EPL_OBD_BEGIN_INDEX_RAM(0x1802, 0x03,
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOU)) != 0)
-                EplPdouCbObdAccess
-#else
-                NULL
-#endif
-                )
+        EPL_OBD_BEGIN_INDEX_RAM(0x1802, 0x03, EplPdouCbObdAccess)
             EPL_OBD_SUBINDEX_RAM_VAR(0x1802, 0x00, 0x05, 0x04, tEplObdUnsigned8, NumberOfEntries, 0x02)
             EPL_OBD_SUBINDEX_RAM_VAR(0x1802, 0x01, 0x05, 0x03, tEplObdUnsigned8, NodeID_U8, 0x20)
             EPL_OBD_SUBINDEX_RAM_VAR(0x1802, 0x02, 0x05, 0x03, tEplObdUnsigned8, MappingVersion_U8, 0x00)
         EPL_OBD_END_INDEX(0x1802)
 
         // Object 1803h: PDO_TxCommParam_03h_REC
-        EPL_OBD_BEGIN_INDEX_RAM(0x1803, 0x03,
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOU)) != 0)
-                EplPdouCbObdAccess
-#else
-                NULL
-#endif
-                )
+        EPL_OBD_BEGIN_INDEX_RAM(0x1803, 0x03, EplPdouCbObdAccess)
             EPL_OBD_SUBINDEX_RAM_VAR(0x1803, 0x00, 0x05, 0x04, tEplObdUnsigned8, NumberOfEntries, 0x02)
             EPL_OBD_SUBINDEX_RAM_VAR(0x1803, 0x01, 0x05, 0x03, tEplObdUnsigned8, NodeID_U8, 0x6E)
             EPL_OBD_SUBINDEX_RAM_VAR(0x1803, 0x02, 0x05, 0x03, tEplObdUnsigned8, MappingVersion_U8, 0x00)
@@ -245,39 +203,21 @@ EPL_OBD_BEGIN ()
         // additional TxPDOs if master is enabled
 
         // Object 1A01h: PDO_TxMappParam_01h_AU64
-        EPL_OBD_BEGIN_INDEX_RAM(0x1A01, 0x03,
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOU)) != 0)
-                EplPdouCbObdAccess
-#else
-                NULL
-#endif
-                )
+        EPL_OBD_BEGIN_INDEX_RAM(0x1A01, 0x03, EplPdouCbObdAccess)
             EPL_OBD_SUBINDEX_RAM_VAR(0x1A01, 0x00, 0x05, 0x03, tEplObdUnsigned8, NumberOfEntries, 0x02)
             EPL_OBD_SUBINDEX_RAM_VAR(0x1A01, 0x01, 0x1B, 0x03, tEplObdUnsigned64, ObjectMapping, 0x0008000000022000LL)
             EPL_OBD_SUBINDEX_RAM_VAR(0x1A01, 0x02, 0x1B, 0x03, tEplObdUnsigned64, ObjectMapping, 0x0008000800012000LL)
         EPL_OBD_END_INDEX(0x1A01)
 
         // Object 1A02h: PDO_TxMappParam_02h_AU64
-        EPL_OBD_BEGIN_INDEX_RAM(0x1A02, 0x03,
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOU)) != 0)
-                EplPdouCbObdAccess
-#else
-                NULL
-#endif
-                )
+        EPL_OBD_BEGIN_INDEX_RAM(0x1A02, 0x03, EplPdouCbObdAccess)
             EPL_OBD_SUBINDEX_RAM_VAR(0x1A02, 0x00, 0x05, 0x03, tEplObdUnsigned8, NumberOfEntries, 0x02)
             EPL_OBD_SUBINDEX_RAM_VAR(0x1A02, 0x01, 0x1B, 0x03, tEplObdUnsigned64, ObjectMapping, 0x0008000000022000LL)
             EPL_OBD_SUBINDEX_RAM_VAR(0x1A02, 0x02, 0x1B, 0x03, tEplObdUnsigned64, ObjectMapping, 0x0008000800012000LL)
         EPL_OBD_END_INDEX(0x1A02)
 
         // Object 1A03h: PDO_TxMappParam_03h_AU64
-        EPL_OBD_BEGIN_INDEX_RAM(0x1A03, 0x03,
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOU)) != 0)
-                EplPdouCbObdAccess
-#else
-                NULL
-#endif
-                )
+        EPL_OBD_BEGIN_INDEX_RAM(0x1A03, 0x03, EplPdouCbObdAccess)
             EPL_OBD_SUBINDEX_RAM_VAR(0x1A03, 0x00, 0x05, 0x03, tEplObdUnsigned8, NumberOfEntries, 0x02)
             EPL_OBD_SUBINDEX_RAM_VAR(0x1A03, 0x01, 0x1B, 0x03, tEplObdUnsigned64, ObjectMapping, 0x0008000000012000LL)
             EPL_OBD_SUBINDEX_RAM_VAR(0x1A03, 0x02, 0x1B, 0x03, tEplObdUnsigned64, ObjectMapping, 0x0008000800022000LL)
