@@ -10,7 +10,7 @@
 *******************************************************************************
 
  File:        0000003F_openPOWERLINK_demo_CN.xdd
- Version:     00.02
+ Version:     00.03
 
 
 *******************************************************************************
@@ -76,7 +76,7 @@
       fileCreator="SYSTEC electronic GmbH"
       fileCreationDate="2008-06-12"
       fileCreationTime="12:00:00+01:00"
-      fileModificationDate="2009-04-15"
+      fileModificationDate="2009-06-11"
       fileModificationTime="16:10:00+01:00"
       fileModifiedBy="Daniel Krueger"
       fileVersion="00.04"
@@ -172,7 +172,7 @@
       fileCreator="SYSTEC electronic GmbH"
       fileCreationDate="2008-06-12"
       fileCreationTime="12:00:00+01:00"
-      fileModificationDate="2008-06-12"
+      fileModificationDate="2009-06-11"
       fileModificationTime="12:20:00+01:00"
       fileModifiedBy="Daniel Krueger"
       fileVersion="00.01"
@@ -281,7 +281,7 @@
             <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" PDOmapping="no" defaultValue="4"/>
             <SubObject subIndex="01" name="VendorId_U32" objectType="7" dataType="0007" accessType="const" PDOmapping="no" defaultValue="0x3F"/>
             <SubObject subIndex="02" name="ProductCode_U32" objectType="7" dataType="0007" accessType="const" PDOmapping="no" defaultValue="0x1067"/>
-            <SubObject subIndex="03" name="RevisionNo_U32" objectType="7" dataType="0007" accessType="const" PDOmapping="no" defaultValue="0x00010004"/>
+            <SubObject subIndex="03" name="RevisionNo_U32" objectType="7" dataType="0007" accessType="const" PDOmapping="no" defaultValue="0x00010005"/>
             <SubObject subIndex="04" name="SerialNo_U32" objectType="7" dataType="0007" accessType="const"/>
         </Object>
         <Object index="1020" name="CFM_VerifyConfiguration_REC" objectType="9">
