@@ -240,12 +240,9 @@ tEplKernel  EplRet = kEplSuccessful;
             {
                 case kEplNmtNodeEventFound:
                 {
-//                DWORD   dwBuffer;
 
                     pEplProcessThread_g->sigNodeStatus(pEventArg_p->m_Node.m_uiNodeId, 0);
                     pEplProcessThread_g->sigNodeAppeared(pEventArg_p->m_Node.m_uiNodeId);
-//                    dwBuffer = (pEventArg_p->m_Node.m_uiNodeId << 16) | 1000;
-//                    EplRet   = EplApiWriteLocalObject(0x1016, pEventArg_p->m_Node.m_uiNodeId, &dwBuffer, 4);
 
                     break;
                 }
@@ -258,19 +255,34 @@ tEplKernel  EplRet = kEplSuccessful;
 
                     // update object 0x1006 on CN
                     EplRet = EplApiWriteObject(&SdoComConHdl, pEventArg_p->m_Node.m_uiNodeId,
-                                               0x1006, 0x00, &dw_le_CycleLen_g,
-                                               4, kEplSdoTypeAsnd, NULL);
+                                               0x1006, 0x00, &dw_le_CycleLen_g, 4,
+                                               kEplSdoTypeAsnd, NULL);
                     if (EplRet == kEplApiTaskDeferred)
                     {   // SDO transfer started
                         EplRet = kEplReject;
                     }
                     else if (EplRet == kEplSuccessful)
                     {   // local OD access (should not occur)
-                        printf("AppCbEvent(Node) write to local OD\n");
+                        printk("AppCbEvent(Node) write to local OD\n");
                     }
                     else
                     {   // error occured
-                        printf("AppCbEvent(Node): EplApiWriteObject() returned 0x%03X\n", EplRet);
+                        TGT_DBG_SIGNAL_TRACE_POINT(1);
+
+                        EplRet = EplApiFreeSdoChannel(SdoComConHdl);
+                        SdoComConHdl = 0;
+
+                        EplRet = EplApiWriteObject(&SdoComConHdl, pEventArg_p->m_Node.m_uiNodeId,
+                                                   0x1006, 0x00, &dw_le_CycleLen_g, 4,
+                                                   kEplSdoTypeAsnd, NULL);
+                        if (EplRet == kEplApiTaskDeferred)
+                        {   // SDO transfer started
+                            EplRet = kEplReject;
+                        }
+                        else
+                        {
+                            printk("AppCbEvent(Node): EplApiWriteObject() returned 0x%03X\n", EplRet);
+                        }
                     }
 
                     break;
