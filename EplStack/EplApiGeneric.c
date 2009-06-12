@@ -89,7 +89,9 @@
 #include "kernel/EplPdok.h"
 #endif
 
+#ifndef EPL_NO_FIFO
 #include "SharedBuff.h"
+#endif
 
 
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_OBDK)) == 0)
@@ -311,6 +313,7 @@ tEplDllkInitParam   DllkInitParam;
     // initialize EplDllk module
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLK)) != 0)
     EPL_MEMCPY(DllkInitParam.m_be_abSrcMac, EplApiInstance_g.m_InitParam.m_abMacAddress, 6);
+    DllkInitParam.m_HwParam = EplApiInstance_g.m_InitParam.m_HwParam;
     Ret = EplDllkAddInstance(&DllkInitParam);
     if (Ret != kEplSuccessful)
     {
@@ -1001,6 +1004,38 @@ tEplKernel      Ret = kEplSuccessful;
 }
 
 
+// ----------------------------------------------------------------------------
+//
+// Function:    EplApiPostUserEvent()
+//
+// Description: post user-defined event to event processing thread,
+//              i.e. calls user event callback function with event kEplApiEventUserDef.
+//              This function is thread safe and is meant for synchronization.
+//
+// Parameters:  pUserArg_p              = IN: user-defined pointer
+//
+// Return:      tEplKernel              = error code
+//
+// ----------------------------------------------------------------------------
+
+tEplKernel PUBLIC EplApiPostUserEvent(void* pUserArg_p)
+{
+tEplKernel  Ret;
+tEplEvent   Event;
+
+    Event.m_EventSink = kEplEventSinkApi;
+    Event.m_NetTime.m_dwNanoSec = 0;
+    Event.m_NetTime.m_dwSec = 0;
+    Event.m_EventType = kEplEventTypeApiUserDef;
+    Event.m_pArg = pUserArg_p;
+    Event.m_uiSize = 0;
+
+    Ret = EplEventuPost(&Event);
+
+    return Ret;
+}
+
+
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
 // ----------------------------------------------------------------------------
 //
@@ -1288,6 +1323,19 @@ tEplApiEventType    EventType;
             Ret = EplApiInstance_g.m_InitParam.m_pfnCbEvent(EventType, (tEplApiEventArg*) pEventError, EplApiInstance_g.m_InitParam.m_pEventUserArg);
             // discard error from callback function, because this could generate an endless loop
             Ret = kEplSuccessful;
+            break;
+        }
+
+        // user-defined event
+        case kEplEventTypeApiUserDef:
+        {
+        tEplApiEventArg ApiEventArg;
+
+            EventType = kEplApiEventUserDef;
+            ApiEventArg.m_pUserArg = pEplEvent_p->m_pArg;
+
+            // call user callback
+            Ret = EplApiInstance_g.m_InitParam.m_pfnCbEvent(EventType, &ApiEventArg, EplApiInstance_g.m_InitParam.m_pEventUserArg);
             break;
         }
 

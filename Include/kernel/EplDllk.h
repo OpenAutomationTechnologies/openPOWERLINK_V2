@@ -89,6 +89,7 @@ typedef tEplKernel (* tEplDllkCbAsync) (tEplFrameInfo * pFrameInfo_p);
 typedef struct
 {
     BYTE                m_be_abSrcMac[6];
+    tEplHwParam         m_HwParam;
 
 } tEplDllkInitParam;
 

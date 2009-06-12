@@ -118,6 +118,7 @@ typedef struct
 
 typedef enum
 {
+    kEplApiEventUserDef        = 0x00,    // m_pUserArg
     kEplApiEventNmtStateChange = 0x10,    // m_NmtStateChange
 //    kEplApiEventRequestNmt     = 0x11,    // m_bNmtCmd
     kEplApiEventCriticalError  = 0x12,    // m_InternalError, Stack halted
@@ -133,6 +134,7 @@ typedef enum
 
 typedef union
 {
+    void*                   m_pUserArg;
     tEplEventNmtStateChange m_NmtStateChange;
     tEplEventError          m_InternalError;
     tEplSdoComFinished      m_Sdo;
@@ -216,6 +218,8 @@ typedef struct
     void*               m_pEventUserArg;
     tEplSyncCb          m_pfnCbSync;
 
+    tEplHwParam         m_HwParam;
+
 } tEplApiInitParam;
 
 
@@ -281,6 +285,8 @@ tEplKernel PUBLIC EplApiLinkObject( unsigned int    uiObjIndex_p,
 tEplKernel PUBLIC EplApiExecNmtCommand(tEplNmtEvent NmtEvent_p);
 
 tEplKernel PUBLIC EplApiProcess(void);
+
+tEplKernel PUBLIC EplApiPostUserEvent(void* pUserArg_p);
 
 
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)

@@ -346,6 +346,7 @@ tEdrvInitParam  EdrvInitParam;
 
     // initialize Edrv
     EPL_MEMCPY(EdrvInitParam.m_abMyMacAddr, pInitParam_p->m_be_abSrcMac, 6);
+    EdrvInitParam.m_HwParam = pInitParam_p->m_HwParam;
     EdrvInitParam.m_pfnRxHandler = EplDllkCbFrameReceived;
     EdrvInitParam.m_pfnTxHandler = EplDllkCbFrameTransmitted;
     Ret = EdrvInit(&EdrvInitParam);

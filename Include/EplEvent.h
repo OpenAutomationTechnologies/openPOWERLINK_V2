@@ -172,6 +172,8 @@ typedef enum
                                         // arg is pointer to nothing
     kEplEventTypeNmtMnuNmtCmdSent      = 0x18, // NMT command was actually sent
                                         // arg is pointer to tEplFrame
+    kEplEventTypeApiUserDef     = 0x19, // user-defined event
+                                        // arg is user-defined pointer
 
 } tEplEventType;
 

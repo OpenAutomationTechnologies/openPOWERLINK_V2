@@ -175,11 +175,7 @@ tEplKernel EdrvInit(tEdrvInitParam *pEdrvInitParam_p)
 {
 tEplKernel Ret;
 DWORD dwThreadId;
-int i=0;
 char sErr_Msg[ PCAP_ERRBUF_SIZE ];
-pcap_if_t *alldevs;
-pcap_if_t *seldev;
-int inum;
 // variables for IPHLPAPI
 ULONG ulOutBufLen;
 PIP_ADAPTER_INFO pAdapterInfo;
@@ -192,55 +188,10 @@ DWORD dwRetVal = 0;
     // clear instance structure
     EPL_MEMSET(&EdrvInstance_l, 0, sizeof (EdrvInstance_l));
 
-    /* Retrieve the device list on the local machine */
-
-    if (pcap_findalldevs(&alldevs, sErr_Msg) == -1)
+    if (pEdrvInitParam_p->m_HwParam.m_pszDevName == NULL)
     {
-        fprintf(stderr,"Error in pcap_findalldevs: %s\n", sErr_Msg);
-        Ret = kEplNoResource;
+        Ret = kEplEdrvInitError;
         goto Exit;
-    }
-
-    printf("--------------------------------------------------\n");
-    printf("List of Ethernet Cards Found in this System: \n");
-    printf("--------------------------------------------------\n");
-    /* Print the list */
-    for (seldev=alldevs; seldev; seldev=seldev->next)
-    {
-        printf("%d. %s", ++i, seldev->name);
-
-        if (seldev->description)
-        {
-            printf(" (%s)\n", seldev->description);
-        }
-        else
-        {
-            printf(" (No description available)\n");
-        }
-    }
-
-    if (i==0)
-    {
-        printf("\nNo interfaces found! Make sure WinPcap is installed.\n");
-        Ret = kEplNoResource;
-        goto Exit;
-    }
-    printf("--------------------------------------------------\n");
-    printf("Enter the interface number (1-%d):",i);
-    scanf("%d", &inum);
-    printf("--------------------------------------------------\n");
-    if(inum < 1 || inum > i)
-    {
-        printf("\nInterface number out of range.\n");
-        /* Free the device list */
-        pcap_freealldevs(alldevs);
-        Ret = kEplNoResource;
-        goto Exit;
-    }
-
-    /* Jump to the selected adapter */
-    for (seldev=alldevs, i=0; i< inum-1 ;seldev=seldev->next, i++)
-    {   // do nothing
     }
 
     // search for the corresponding MAC address via IPHLPAPI
@@ -276,7 +227,7 @@ DWORD dwRetVal = 0;
         {
             if (pAdapter->Type == MIB_IF_TYPE_ETHERNET)
             {
-                if (strstr(seldev->name, pAdapter->AdapterName) != NULL)
+                if (strstr(pEdrvInitParam_p->m_HwParam.m_pszDevName, pAdapter->AdapterName) != NULL)
                 {   // corresponding adapter found
                     EPL_MEMCPY(pEdrvInitParam_p->m_abMyMacAddr, pAdapter->Address,
                         min(pAdapter->AddressLength, sizeof (pEdrvInitParam_p->m_abMyMacAddr)));
@@ -301,15 +252,12 @@ DWORD dwRetVal = 0;
 
 
     EdrvInstance_l.m_pPcap = pcap_open_live (
-                        seldev->name,
+                        pEdrvInitParam_p->m_HwParam.m_pszDevName,
                         65535,  // snaplen
                         1,      // promiscuous mode
                         1,      // milli seconds read timeout
                         sErr_Msg
                     );
-
-    /* At this point, we don't need any more the device list. Free it */
-    pcap_freealldevs(alldevs);
 
     if ( EdrvInstance_l.m_pPcap == NULL )
     {
@@ -445,10 +393,6 @@ tEplKernel Ret = kEplSuccessful;
     if  (pcap_sendpacket(EdrvInstance_l.m_pPcap, pBuffer_p->m_pbBuffer, (int) pBuffer_p->m_uiTxMsgLen) != 0)
     {
         Ret = kEplInvalidOperation;
-    }
-    else
-    {
-        Ret = kEplSuccessful;
     }
 
 Exit:
@@ -592,7 +536,7 @@ tEdrvRxBuffer   RxBuffer;
         RxBuffer.m_uiRxMsgLen       = header->caplen;
         RxBuffer.m_pbBuffer         = (BYTE*) pkt_data;
 
-        pInstance.>m_InitParam.m_pfnRxHandler(&RxBuffer);
+        pInstance->m_InitParam.m_pfnRxHandler(&RxBuffer);
     }
     else
     {   // self generated traffic
@@ -647,6 +591,18 @@ DWORD           dwRet;
                     pInstance->m_ahHandle,
                     FALSE,
                     INFINITE);
+
+        // workaround
+        if (pInstance->m_pLastTransmittedTxBuffer != NULL)
+        {
+        tEdrvTxBuffer* pTxBuffer = pInstance->m_pLastTransmittedTxBuffer;
+
+            pInstance->m_pLastTransmittedTxBuffer = NULL;
+            if (pInstance->m_InitParam.m_pfnTxHandler != NULL)
+            {
+                pInstance->m_InitParam.m_pfnTxHandler(pTxBuffer);
+            }
+        }
 
         switch (dwRet)
         {

@@ -127,8 +127,6 @@ typedef struct _tEdrvRxBuffer
 
 
 
-//typedef void (*tEdrvRxHandler) (BYTE bBufferInFrame_p, tBufferDescr * pbBuffer_p);
-//typedef void (*tEdrvRxHandler) (BYTE bBufferInFrame_p, BYTE * pbEthernetData_p, WORD wDataLen_p);
 typedef void (*tEdrvRxHandler) (tEdrvRxBuffer * pRxBuffer_p);
 typedef void (*tEdrvTxHandler) (tEdrvTxBuffer * pTxBuffer_p);
 
@@ -144,6 +142,8 @@ typedef struct
 
     tEdrvRxHandler  m_pfnRxHandler;
     tEdrvTxHandler  m_pfnTxHandler;
+
+    tEplHwParam     m_HwParam;
 
 } tEdrvInitParam;
 

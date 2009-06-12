@@ -69,8 +69,10 @@
 
 ****************************************************************************/
 
+#define _WINSOCKAPI_ // prevent windows.h from including winsock.h
 #include <conio.h>
 #include "Epl.h"
+#include "pcap.h"
 
 /***************************************************************************/
 /*                                                                         */
@@ -143,7 +145,7 @@ BYTE    abDomain_l[3000];
 
 static DWORD    dw_le_CycleLen_g;
 
-static DWORD uiNodeId_g;
+static DWORD uiNodeId_g = EPL_C_ADR_INVALID;
 
 //---------------------------------------------------------------------------
 // local function prototypes
@@ -208,6 +210,12 @@ char*               sHostname = HOSTNAME;
 unsigned int        uiVarEntries;
 tEplObdSize         ObdSize;
 char                cKey = 0;
+// variables for Pcap
+char sErr_Msg[ PCAP_ERRBUF_SIZE ];
+pcap_if_t *alldevs;
+pcap_if_t *seldev;
+int i = 0;
+int inum;
 
     // activate realtime priority class
     SetPriorityClass(GetCurrentProcess(), REALTIME_PRIORITY_CLASS);
@@ -215,7 +223,62 @@ char                cKey = 0;
     SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_IDLE);
 
 
-	uiNodeId_g = 240;
+    /* Retrieve the device list on the local machine */
+
+    if (pcap_findalldevs(&alldevs, sErr_Msg) == -1)
+    {
+        fprintf(stderr,"Error in pcap_findalldevs: %s\n", sErr_Msg);
+        EplRet = kEplNoResource;
+        goto Exit;
+    }
+
+    printf("--------------------------------------------------\n");
+    printf("List of Ethernet Cards Found in this System: \n");
+    printf("--------------------------------------------------\n");
+    /* Print the list */
+    for (seldev = alldevs; seldev != NULL; seldev = seldev->next)
+    {
+        printf("%d. %s", ++i, seldev->name);
+
+        if (seldev->description)
+        {
+            printf(" (%s)\n", seldev->description);
+        }
+        else
+        {
+            printf(" (No description available)\n");
+        }
+    }
+
+    if (i == 0)
+    {
+        printf("\nNo interfaces found! Make sure WinPcap is installed.\n");
+        EplRet = kEplNoResource;
+        goto Exit;
+    }
+
+    printf("--------------------------------------------------\n");
+    printf("Enter the interface number (1-%d):",i);
+    scanf("%d", &inum);
+    printf("--------------------------------------------------\n");
+    if ((inum < 1) || (inum > i))
+    {
+        printf("\nInterface number out of range.\n");
+        /* Free the device list */
+        pcap_freealldevs(alldevs);
+        EplRet = kEplNoResource;
+        goto Exit;
+    }
+
+    /* Jump to the selected adapter */
+    for (seldev = alldevs, i = 0;
+         i < (inum - 1);
+         seldev = seldev->next, i++)
+    {   // do nothing
+    }
+
+    // pass selected device name to Edrv
+    EplApiInitParam.m_HwParam.m_pszDevName = seldev->name;
 
     // get node ID from insmod command line
     EplApiInitParam.m_uiNodeId = uiNodeId_g;
@@ -225,6 +288,8 @@ char                cKey = 0;
         // set default node ID
         EplApiInitParam.m_uiNodeId = NODEID;
     }
+
+    uiNodeId_g = EplApiInitParam.m_uiNodeId;
 
     // calculate IP address
     EplApiInitParam.m_dwIpAddress = (0xFFFFFF00 & IP_ADDR) | EplApiInitParam.m_uiNodeId;
@@ -276,6 +341,10 @@ char                cKey = 0;
 
     // initialize POWERLINK stack
     EplRet = EplApiInitialize(&EplApiInitParam);
+
+    /* At this point, we don't need any more the device list. Free it */
+    pcap_freealldevs(alldevs);
+
     if(EplRet != kEplSuccessful)
     {
         goto Exit;

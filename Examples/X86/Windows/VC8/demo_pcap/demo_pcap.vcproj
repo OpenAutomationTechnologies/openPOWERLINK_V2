@@ -363,20 +363,6 @@
 			<File
 				RelativePath="..\..\..\..\..\EplStack\EplIdentu.c"
 				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\..\..\..\..\EplStack\EplNmtCnu.c"
@@ -445,13 +431,6 @@
 			<File
 				RelativePath="..\..\..\..\..\EplStack\EplStatusu.c"
 				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\..\..\..\..\EplStack\EplTimeruWin32.c"
