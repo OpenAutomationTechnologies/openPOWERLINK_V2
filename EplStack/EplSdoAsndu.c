@@ -376,6 +376,10 @@ tEplFrameInfo   FrameInfo;
     EPL_MEMSET(&FrameInfo.m_NetTime , 0x00, sizeof(tEplNetTime));
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLU)) != 0)
     Ret = EplDlluCalAsyncSend(&FrameInfo,kEplDllAsyncReqPrioGeneric);
+    if (Ret == kEplDllAsyncTxBufferFull)
+    {   // ignore TxBufferFull errors
+        Ret = kEplSuccessful;
+    }
 #endif
 
 Exit:
