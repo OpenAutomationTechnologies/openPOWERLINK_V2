@@ -5,8 +5,8 @@
 
   Project:      openPOWERLINK
 
-  Description:  demoapplication for EPL MN (with SDO over UDP)
-                under Linux on X86 with RTL8139 Ethernet controller
+  Description:  demoapplication for EPL MN (with SDO over ASnd)
+                under Windows with WinPcap driver
 
   License:
 
@@ -59,7 +59,7 @@
                 $State$
 
                 Build Environment:
-                GCC
+                MS Visual C 8.0 / 9.0
 
   -------------------------------------------------------------------------
 
@@ -334,7 +334,7 @@ int inum;
     EplApiInitParam.m_pfnCbSync = AppCbSync;
 
 
-    printf("\n\n Powerlink %s running. Porting of openPOWERLINK under Windows done by Kalycito (www.kalycito.com) !\n  (build: %s / %s)\n\n",
+    printf("\n\n Powerlink %s running.!\n  (build: %s / %s)\n\n",
             (uiNodeId_g == EPL_C_ADR_MN_DEF_NODE_ID ?
                 "Managing Node" : "Controlled Node"),
             __DATE__, __TIME__);

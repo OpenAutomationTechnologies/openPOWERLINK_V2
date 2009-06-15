@@ -592,18 +592,6 @@ DWORD           dwRet;
                     FALSE,
                     INFINITE);
 
-        // workaround
-        if (pInstance->m_pLastTransmittedTxBuffer != NULL)
-        {
-        tEdrvTxBuffer* pTxBuffer = pInstance->m_pLastTransmittedTxBuffer;
-
-            pInstance->m_pLastTransmittedTxBuffer = NULL;
-            if (pInstance->m_InitParam.m_pfnTxHandler != NULL)
-            {
-                pInstance->m_InitParam.m_pfnTxHandler(pTxBuffer);
-            }
-        }
-
         switch (dwRet)
         {
             case WAIT_OBJECT_0 + EDRV_HANDLE_EVENT:
@@ -642,6 +630,18 @@ DWORD           dwRet;
             {
                 printf("WaitForMultipleObjects failed (%d)\n", GetLastError());
                 break;
+            }
+        }
+
+        // workaround
+        if (pInstance->m_pLastTransmittedTxBuffer != NULL)
+        {
+        tEdrvTxBuffer* pTxBuffer = pInstance->m_pLastTransmittedTxBuffer;
+
+            pInstance->m_pLastTransmittedTxBuffer = NULL;
+            if (pInstance->m_InitParam.m_pfnTxHandler != NULL)
+            {
+                pInstance->m_InitParam.m_pfnTxHandler(pTxBuffer);
             }
         }
 
