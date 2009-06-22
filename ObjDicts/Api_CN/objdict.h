@@ -281,6 +281,18 @@ EPL_OBD_BEGIN ()
             EPL_OBD_SUBINDEX_RAM_VAR(0x1C14, 0x00, 0x07, 0x03, tEplObdUnsigned32, LossOfFrameTolerance, 300000)
         EPL_OBD_END_INDEX(0x1C14)
 
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_VETH)) != 0)
+        // Object 1E40h: NWL_IpAddrTable_0h_REC
+        EPL_OBD_BEGIN_INDEX_RAM(0x1E40, 0x06, EplApiCbObdAccess)
+            EPL_OBD_SUBINDEX_RAM_VAR(0x1E40, 0x00, 0x05, 0x01, tEplObdUnsigned8, NumberOfEntries, 0x05)
+            EPL_OBD_SUBINDEX_RAM_VAR(0x1E40, 0x01, 0x06, 0x01, tEplObdUnsigned16, IfIndex_U16, 0x01)
+            EPL_OBD_SUBINDEX_RAM_VAR(0x1E40, 0x02, 0x07, 0x01, tEplObdUnsigned32, Addr_IPAD, 0xC0A86401)
+            EPL_OBD_SUBINDEX_RAM_VAR(0x1E40, 0x03, 0x07, 0x01, tEplObdUnsigned32, NetMask_IPAD, 0xFFFFFF00)
+            EPL_OBD_SUBINDEX_RAM_VAR(0x1E40, 0x04, 0x06, 0x01, tEplObdUnsigned16, ReasmMaxSize_U16, 50000)
+            EPL_OBD_SUBINDEX_RAM_VAR(0x1E40, 0x05, 0x07, 0x03, tEplObdUnsigned32, DefaultGateway_IPAD, 0xC0A864FE)
+        EPL_OBD_END_INDEX(0x1E40)
+#endif
+
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
         // Object 1F80h: NMT_StartUp_U32
         EPL_OBD_BEGIN_INDEX_RAM(0x1F80, 0x01, NULL)
@@ -370,6 +382,11 @@ EPL_OBD_BEGIN ()
         EPL_OBD_BEGIN_INDEX_RAM(0x1F99, 0x01, NULL)
             EPL_OBD_SUBINDEX_RAM_VAR(0x1F99, 0x00, 0x07, 0x03, tEplObdUnsigned32, NMT_CNBasicEthernetTimeout_U32, 5000000)  // in [us]
         EPL_OBD_END_INDEX(0x1F99)
+
+        // Object 1F9Ah: NMT_HostName_VS
+        EPL_OBD_BEGIN_INDEX_RAM(0x1F9A, 0x01, NULL)
+           EPL_OBD_SUBINDEX_RAM_VSTRING(0x1F9A, 0x00, 0x01, host_name, 33, "")
+        EPL_OBD_END_INDEX(0x1F9A)
 
         // Object 1F9Eh: NMT_ResetCmd_U8
         EPL_OBD_BEGIN_INDEX_RAM(0x1F9E, 0x01, EplApiCbObdAccess)

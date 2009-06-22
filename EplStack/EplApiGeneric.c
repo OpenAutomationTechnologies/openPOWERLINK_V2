@@ -1737,6 +1737,7 @@ BYTE                bTemp;
     {
         // configure Identity
         EPL_MEMSET(&DllIdentParam, 0, sizeof (DllIdentParam));
+
         ObdSize = 4;
         Ret = EplObdReadEntry(0x1000, 0, &DllIdentParam.m_dwDeviceType, &ObdSize);
         if(Ret != kEplSuccessful)
@@ -1771,7 +1772,14 @@ BYTE                bTemp;
 
         DllIdentParam.m_dwIpAddress = EplApiInstance_g.m_InitParam.m_dwIpAddress;
         DllIdentParam.m_dwSubnetMask = EplApiInstance_g.m_InitParam.m_dwSubnetMask;
-        EPL_MEMCPY(DllIdentParam.m_sHostname, EplApiInstance_g.m_InitParam.m_sHostname, sizeof (DllIdentParam.m_sHostname));
+
+        ObdSize = sizeof (DllIdentParam.m_sHostname);
+        Ret = EplObdReadEntry(0x1F9A, 0, &DllIdentParam.m_sHostname[0], &ObdSize);
+        if (Ret != kEplSuccessful)
+        {   // NMT_HostName_VSTR seams to not exist,
+            // so use the one supplied in the init parameter
+            EPL_MEMCPY(DllIdentParam.m_sHostname, EplApiInstance_g.m_InitParam.m_sHostname, sizeof (DllIdentParam.m_sHostname));
+        }
 
         ObdSize = 4;
         Ret = EplObdReadEntry(0x1020, 1, &DllIdentParam.m_dwVerifyConfigurationDate, &ObdSize);
@@ -1826,18 +1834,24 @@ BYTE                bTemp;
 
     if (EplApiInstance_g.m_InitParam.m_dwCycleLen != -1)
     {
-        Ret = EplObdWriteEntry(0x1006, 0, &EplApiInstance_g.m_InitParam.m_dwCycleLen, 4);
+        Ret = EplObdWriteEntry(0x1006, 0,
+                        &EplApiInstance_g.m_InitParam.m_dwCycleLen,
+                        4);
     }
 
     if (EplApiInstance_g.m_InitParam.m_dwLossOfFrameTolerance != -1)
     {
-        Ret = EplObdWriteEntry(0x1C14, 0, &EplApiInstance_g.m_InitParam.m_dwLossOfFrameTolerance, 4);
+        Ret = EplObdWriteEntry(0x1C14, 0,
+                        &EplApiInstance_g.m_InitParam.m_dwLossOfFrameTolerance,
+                        4);
     }
 
     // d.k. There is no dependance between FeatureFlags and async-only CN.
     if (EplApiInstance_g.m_InitParam.m_dwFeatureFlags != -1)
     {
-        Ret = EplObdWriteEntry(0x1F82, 0, &EplApiInstance_g.m_InitParam.m_dwFeatureFlags, 4);
+        Ret = EplObdWriteEntry(0x1F82, 0,
+                               &EplApiInstance_g.m_InitParam.m_dwFeatureFlags,
+                               4);
     }
 
     wTemp = (WORD) EplApiInstance_g.m_InitParam.m_uiIsochrTxMaxPayload;
@@ -1846,7 +1860,9 @@ BYTE                bTemp;
     wTemp = (WORD) EplApiInstance_g.m_InitParam.m_uiIsochrRxMaxPayload;
     Ret = EplObdWriteEntry(0x1F98, 2, &wTemp, 2);
 
-    Ret = EplObdWriteEntry(0x1F98, 3, &EplApiInstance_g.m_InitParam.m_dwPresMaxLatency, 4);
+    Ret = EplObdWriteEntry(0x1F98, 3,
+                           &EplApiInstance_g.m_InitParam.m_dwPresMaxLatency,
+                           4);
 
     if (EplApiInstance_g.m_InitParam.m_uiPreqActPayloadLimit <= EPL_C_DLL_ISOCHR_MAX_PAYL)
     {
@@ -1860,7 +1876,9 @@ BYTE                bTemp;
         Ret = EplObdWriteEntry(0x1F98, 5, &wTemp, 2);
     }
 
-    Ret = EplObdWriteEntry(0x1F98, 6, &EplApiInstance_g.m_InitParam.m_dwAsndMaxLatency, 4);
+    Ret = EplObdWriteEntry(0x1F98, 6,
+                           &EplApiInstance_g.m_InitParam.m_dwAsndMaxLatency,
+                           4);
 
     if (EplApiInstance_g.m_InitParam.m_uiMultiplCycleCnt <= 0xFF)
     {
@@ -1883,62 +1901,89 @@ BYTE                bTemp;
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
     if (EplApiInstance_g.m_InitParam.m_dwWaitSocPreq != -1)
     {
-        Ret = EplObdWriteEntry(0x1F8A, 1, &EplApiInstance_g.m_InitParam.m_dwWaitSocPreq, 4);
+        Ret = EplObdWriteEntry(0x1F8A, 1,
+                               &EplApiInstance_g.m_InitParam.m_dwWaitSocPreq,
+                               4);
     }
 
     if ((EplApiInstance_g.m_InitParam.m_dwAsyncSlotTimeout != 0) && (EplApiInstance_g.m_InitParam.m_dwAsyncSlotTimeout != -1))
     {
-        Ret = EplObdWriteEntry(0x1F8A, 2, &EplApiInstance_g.m_InitParam.m_dwAsyncSlotTimeout, 4);
+        Ret = EplObdWriteEntry(0x1F8A, 2,
+                            &EplApiInstance_g.m_InitParam.m_dwAsyncSlotTimeout,
+                            4);
     }
 #endif
 
     // configure Identity
     if (EplApiInstance_g.m_InitParam.m_dwDeviceType != -1)
     {
-        Ret = EplObdWriteEntry(0x1000, 0, &EplApiInstance_g.m_InitParam.m_dwDeviceType, 4);
+        Ret = EplObdWriteEntry(0x1000, 0,
+                               &EplApiInstance_g.m_InitParam.m_dwDeviceType,
+                               4);
     }
 
     if (EplApiInstance_g.m_InitParam.m_dwVendorId != -1)
     {
-        Ret = EplObdWriteEntry(0x1018, 1, &EplApiInstance_g.m_InitParam.m_dwVendorId, 4);
+        Ret = EplObdWriteEntry(0x1018, 1,
+                               &EplApiInstance_g.m_InitParam.m_dwVendorId,
+                               4);
     }
 
     if (EplApiInstance_g.m_InitParam.m_dwProductCode != -1)
     {
-        Ret = EplObdWriteEntry(0x1018, 2, &EplApiInstance_g.m_InitParam.m_dwProductCode, 4);
+        Ret = EplObdWriteEntry(0x1018, 2,
+                               &EplApiInstance_g.m_InitParam.m_dwProductCode,
+                               4);
     }
 
     if (EplApiInstance_g.m_InitParam.m_dwRevisionNumber != -1)
     {
-        Ret = EplObdWriteEntry(0x1018, 3, &EplApiInstance_g.m_InitParam.m_dwRevisionNumber, 4);
+        Ret = EplObdWriteEntry(0x1018, 3,
+                               &EplApiInstance_g.m_InitParam.m_dwRevisionNumber,
+                               4);
     }
 
     if (EplApiInstance_g.m_InitParam.m_dwSerialNumber != -1)
     {
-        Ret = EplObdWriteEntry(0x1018, 4, &EplApiInstance_g.m_InitParam.m_dwSerialNumber, 4);
+        Ret = EplObdWriteEntry(0x1018, 4,
+                               &EplApiInstance_g.m_InitParam.m_dwSerialNumber,
+                               4);
     }
 
     if (EplApiInstance_g.m_InitParam.m_pszDevName != NULL)
     {
         // write Device Name (0x1008)
         Ret = EplObdWriteEntry (
-            0x1008, 0, (void GENERIC*) EplApiInstance_g.m_InitParam.m_pszDevName, (tEplObdSize) strlen(EplApiInstance_g.m_InitParam.m_pszDevName));
+            0x1008, 0,
+            (void GENERIC*) EplApiInstance_g.m_InitParam.m_pszDevName,
+            (tEplObdSize) strlen(EplApiInstance_g.m_InitParam.m_pszDevName));
     }
 
     if (EplApiInstance_g.m_InitParam.m_pszHwVersion != NULL)
     {
         // write Hardware version (0x1009)
         Ret = EplObdWriteEntry (
-            0x1009, 0, (void GENERIC*) EplApiInstance_g.m_InitParam.m_pszHwVersion, (tEplObdSize) strlen(EplApiInstance_g.m_InitParam.m_pszHwVersion));
+            0x1009, 0,
+            (void GENERIC*) EplApiInstance_g.m_InitParam.m_pszHwVersion,
+            (tEplObdSize) strlen(EplApiInstance_g.m_InitParam.m_pszHwVersion));
     }
 
     if (EplApiInstance_g.m_InitParam.m_pszSwVersion != NULL)
     {
         // write Software version (0x100A)
         Ret = EplObdWriteEntry (
-            0x100A, 0, (void GENERIC*) EplApiInstance_g.m_InitParam.m_pszSwVersion, (tEplObdSize) strlen(EplApiInstance_g.m_InitParam.m_pszSwVersion));
+            0x100A, 0,
+            (void GENERIC*) EplApiInstance_g.m_InitParam.m_pszSwVersion,
+            (tEplObdSize) strlen(EplApiInstance_g.m_InitParam.m_pszSwVersion));
     }
 
+    // write NMT_HostName_VSTR (0x1F9A)
+    Ret = EplObdWriteEntry (
+        0x1F9A, 0,
+        (void GENERIC*) EplApiInstance_g.m_InitParam.m_sHostname,
+        sizeof (EplApiInstance_g.m_InitParam.m_sHostname));
+
+    PRINTF("%s: write NMT_HostName_VSTR %d\n", __func__, Ret);
     // ignore return code
     Ret = kEplSuccessful;
 

@@ -263,11 +263,10 @@ tEplKernel  EplRet = kEplSuccessful;
                     }
                     else if (EplRet == kEplSuccessful)
                     {   // local OD access (should not occur)
-                        printk("AppCbEvent(Node) write to local OD\n");
+                        PRINTF0("AppCbEvent(Node) write to local OD\n");
                     }
                     else
                     {   // error occured
-                        TGT_DBG_SIGNAL_TRACE_POINT(1);
 
                         EplRet = EplApiFreeSdoChannel(SdoComConHdl);
                         SdoComConHdl = 0;
@@ -281,7 +280,7 @@ tEplKernel  EplRet = kEplSuccessful;
                         }
                         else
                         {
-                            printk("AppCbEvent(Node): EplApiWriteObject() returned 0x%03X\n", EplRet);
+                            PRINTF1("AppCbEvent(Node): EplApiWriteObject() returned 0x%03X\n", EplRet);
                         }
                     }
 
@@ -329,7 +328,7 @@ tEplKernel  EplRet = kEplSuccessful;
                 {
                     pEplProcessThread_g->sigNodeStatus(pEventArg_p->m_Node.m_uiNodeId, -1);
                     pEplProcessThread_g->sigNodeDisappeared(pEventArg_p->m_Node.m_uiNodeId);
-                    printf("AppCbEvent(Node): ErrorCode: 0x%04hX\n",
+                    PRINTF1("AppCbEvent(Node): ErrorCode: 0x%04hX\n",
                            pEventArg_p->m_Node.m_wErrorCode);
                     break;
                 }
