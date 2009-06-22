@@ -181,3 +181,37 @@ Fellow worker:    Daniel Krüger (d.k.)
 
 06.04.2009 V1.4     - labeled V1.3.2 as V1.4
                     (d.k.)
+
+12.05.2009 V1.5     - XDD: fixed wrong access types of some NumberOfEntries objects (should be const instead of ro);
+                      changed name of object 0x1C14 to DLL_CNLossOfSocTolerance_U32;
+                      fixed some default values (e.g. object 0x1f98/0x2, 0x1c0f/0x3, 0x1030/0x1)
+                    - Api_CN objdict.h: changed default of object 0x1030/0x7 to 1.
+                    - EplObd.c: changed EplObdGetDataSize internals to return string sizes without terminating null-character.
+                      This fixes a bug in the SDO module which transmitted strings with terminating null-character.
+                      But this is not allowed according to the spec.
+                    (d.k.)
+
+22.05.2009 V1.5     - made VirtualEthernetLinux.c compatible to Linux kernel V2.6.28 and higher
+                      (new net_device_ops structure)
+                    - synchronized global.h with the one from SYS TEC CANopen stack
+                    - added some support for 64 bit processors
+                    - added define for __func__ if it is missing (like MSVC)
+                    (d.k.)
+
+05.06.2009 V1.5     - added definition of hardware parameter structure for future
+                      extension of init parameter structures
+                    - Api_CN objdict.h: removed all #ifdef within parenthesis
+                    (d.k.)
+
+11.06.2009 V1.5     - added workaround for SdoBusy errors while configuring the cycle length
+                      on the CN in X86 Qt demo
+                    (d.k.)
+
+15.06.2009 V1.5     - fixed bug 2392067: kEplDllAsyncTxBufferFull leads to kEplShutdown in SDO ASnd layer
+                    (d.k.)
+
+22.06.2009 V1.5     - added support for object 0x1F9A NMT_HostName_VSTR in EPL API layer
+                    - added object 0x1E40 NWL_IpAddrTable_0h_REC to objdict.h
+                    - bug fix in XDD: same subindex was mentioned twice
+                    - X86 Qt demo: added workaround for SdoBusy errors while configuring the cycle length
+                    (d.k.)
