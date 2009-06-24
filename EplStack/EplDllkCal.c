@@ -155,13 +155,13 @@ typedef struct
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
     // IdentRequest queue with CN node IDs
     unsigned int    m_auiQueueIdentReq[EPL_D_NMT_MaxCNNumber_U8 + 1];   // 1 entry is reserved to distinguish between full and empty
-    unsigned int    m_uiWriteIdentReq;
-    unsigned int    m_uiReadIdentReq;
+    volatile unsigned int    m_uiWriteIdentReq;
+    volatile unsigned int    m_uiReadIdentReq;
 
     // StatusRequest queue with CN node IDs
     unsigned int    m_auiQueueStatusReq[EPL_D_NMT_MaxCNNumber_U8 + 1];  // 1 entry is reserved to distinguish between full and empty
-    unsigned int    m_uiWriteStatusReq;
-    unsigned int    m_uiReadStatusReq;
+    volatile unsigned int    m_uiWriteStatusReq;
+    volatile unsigned int    m_uiReadStatusReq;
 
     unsigned int    m_auiQueueCnRequests[254 * 2];
         // first 254 entries represent the generic requests of the corresponding node
