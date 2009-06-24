@@ -113,6 +113,9 @@
 #define TIMERHDL_MASK               0x0FFFFFFF
 #define TIMERHDL_SHIFT              28
 
+#define PRESCALER                   5000    // = 50 us
+
+
 //---------------------------------------------------------------------------
 // module global types
 //---------------------------------------------------------------------------
@@ -342,6 +345,7 @@ tEplKernel PUBLIC EplTimerHighReskModifyTimerNs(tEplTimerHdl*     pTimerHdl_p,
 tEplKernel                  Ret = kEplSuccessful;
 unsigned int                uiIndex;
 tEplTimerHighReskTimerInfo* pTimerInfo;
+DWORD                       dwTime;
 
     // check pointer to handle
     if(pTimerHdl_p == NULL)
@@ -397,13 +401,16 @@ tEplTimerHighReskTimerInfo* pTimerInfo;
 
         // calculate counter
     //<    ullTimeNs_p = (ullTimeNs_p / (unsigned long)(1000000000L / MCF_BUSCLK));
-        ullTimeNs_p = ((unsigned long) ullTimeNs_p / (1000000000L / MCF_BUSCLK));
-        if ((ullTimeNs_p < 255) || (ullTimeNs_p > 0xFFFFFFFF))
-        {
-            Ret = kEplTimerNoTimerCreated;
-            goto Exit;
+        dwTime = (DWORD) ((unsigned long) ullTimeNs_p / (1000000000L / MCF_BUSCLK));
+        if (dwTime < 255)
+        {   // time is too less, so increase it to the minimum time
+            dwTime = 255;
         }
-        MCF_SLTCNT(SLT) = (DWORD)ullTimeNs_p;
+        else if (ullTimeNs_p > 0xFFFFFFFF)
+        {   // time is too large, so decrease it to the maximum time
+            dwTime = 0xFFFFFFFF;
+        }
+        MCF_SLTCNT(SLT) = dwTime;
 
         pTimerInfo->m_EventArg.m_ulArg = ulArgument_p;
         pTimerInfo->m_pfnCallback = pfnCallback_p;
@@ -427,14 +434,28 @@ tEplTimerHighReskTimerInfo* pTimerInfo;
 
         // calculate counter
     //<    ullTimeNs_p = (ullTimeNs_p / (unsigned long)(1000000000L / MCF_BUSCLK));
-        ullTimeNs_p = ((unsigned long) ullTimeNs_p / (1000000000L / MCF_BUSCLK));
-        if ((ullTimeNs_p < 255) || (ullTimeNs_p > 0xFFFEFFFF))
-        {
-            Ret = kEplTimerNoTimerCreated;
-            goto Exit;
+        dwTime = ((unsigned long) ullTimeNs_p / (1000000000L / MCF_BUSCLK));
+        // unit of time is [10ns]
+        if (dwTime < 255)
+        {   // time is too less, so increase it to the minimum time
+            dwTime = 255;
         }
-        ullTimeNs_p += 0x00010000;  // increment prescaler
-        MCF_GPT_GCIR(uiIndex) = (DWORD)ullTimeNs_p;
+        else if (dwTime <= 0xFFFF)
+        {   // time fits into the counter value
+            dwTime |= 0x00010000;  // set prescaler
+        }
+        else if (dwTime > (0xFFFF * PRESCALER))
+        {   // time is too large, so decrease it to the maximum time
+            dwTime = 0xFFFF | (PRESCALER << 16);
+        }
+        else
+        {
+            dwTime /= PRESCALER;
+            // unit of time is [50us]
+            dwTime |= (PRESCALER << 16); // set prescaler
+        }
+
+        MCF_GPT_GCIR(uiIndex) = dwTime;
 
         pTimerInfo->m_EventArg.m_ulArg = ulArgument_p;
         pTimerInfo->m_pfnCallback = pfnCallback_p;
