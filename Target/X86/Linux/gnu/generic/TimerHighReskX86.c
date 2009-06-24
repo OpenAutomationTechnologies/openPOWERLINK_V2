@@ -373,12 +373,20 @@ ktime_t                      RelTime;
     pTimerInfo->m_EventArg.m_TimerHdl = HDL_INC(pTimerInfo->m_EventArg.m_TimerHdl);
     *pTimerHdl_p = pTimerInfo->m_EventArg.m_TimerHdl;
 
-    // reject too small time values
-    if (    (fContinuously_p  && (ullTimeNs_p < TIMER_MIN_VAL_CYCLE))
-         || (!fContinuously_p && (ullTimeNs_p < TIMER_MIN_VAL_SINGLE)) )
+    // increase too small time values
+    if (fContinuously_p != FALSE)
     {
-        Ret = kEplTimerNoTimerCreated;
-        goto Exit;
+        if (ullTimeNs_p < TIMER_MIN_VAL_CYCLE)
+        {
+            ullTimeNs_p = TIMER_MIN_VAL_CYCLE;
+        }
+    }
+    else
+    {
+        if (ullTimeNs_p < TIMER_MIN_VAL_SINGLE)
+        {
+            ullTimeNs_p = TIMER_MIN_VAL_SINGLE;
+        }
     }
 
     pTimerInfo->m_EventArg.m_ulArg = ulArgument_p;
