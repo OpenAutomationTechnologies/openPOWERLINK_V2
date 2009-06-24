@@ -2050,17 +2050,7 @@ tEplErrorHandlerkEvent  DllEvent;
                     // increment cycle counter to detect if EPL_C_DLL_PREOP1_START_CYCLES empty cycles are elapsed
                     EplDllkInstance_g.m_uiCycleCount++;
 
-                    // reprogram timer
-#if EPL_TIMER_USE_HIGHRES != FALSE
-                    if (EplDllkInstance_g.m_DllConfigParam.m_dwAsyncSlotTimeout != 0)
-                    {
-                        Ret = EplTimerHighReskModifyTimerNs(&EplDllkInstance_g.m_TimerHdlCycle,
-                            EplDllkInstance_g.m_DllConfigParam.m_dwAsyncSlotTimeout,
-                            EplDllkCbMnTimerCycle,
-                            0L,
-                            FALSE);
-                    }
-#endif
+                    // reprogramming of timer will be done in CbFrameTransmitted()
                     break;
                 }
 
@@ -2119,14 +2109,7 @@ tEplErrorHandlerkEvent  DllEvent;
                             // new DLL state
                             EplDllkInstance_g.m_DllState = kEplDllMsWaitPreqTrig;
 
-                            // start WaitSoCPReq Timer
-#if EPL_TIMER_USE_HIGHRES != FALSE
-                            Ret = EplTimerHighReskModifyTimerNs(&EplDllkInstance_g.m_TimerHdlResponse,
-                                EplDllkInstance_g.m_DllConfigParam.m_dwWaitSocPreq,
-                                EplDllkCbMnTimerResponse,
-                                0L,
-                                FALSE);
-#endif
+                            // start WaitSoCPReq Timer in CbFrameTransmitted()
                             break;
                         }
 
@@ -2965,7 +2948,7 @@ tEplFrameInfo   FrameInfo;
         goto Exit;
     }
 
-    if ((pTxBuffer_p - EplDllkInstance_g.m_pTxBuffer) == EPL_DLLK_TXFRAME_NMTREQ)
+    if (pTxBuffer_p == &EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_NMTREQ])
     {   // frame from NMT request FIFO sent
         // mark Tx-buffer as empty
         pTxBuffer_p->m_uiTxMsgLen = EPL_DLLK_BUFLEN_EMPTY;
@@ -2979,7 +2962,7 @@ tEplFrameInfo   FrameInfo;
         Event.m_uiSize = sizeof(Priority);
         Ret = EplEventkPost(&Event);
     }
-    else if ((pTxBuffer_p - EplDllkInstance_g.m_pTxBuffer) == EPL_DLLK_TXFRAME_NONEPL)
+    else if (pTxBuffer_p == &EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_NONEPL])
     {   // frame from generic priority FIFO sent
         // mark Tx-buffer as empty
         pTxBuffer_p->m_uiTxMsgLen = EPL_DLLK_BUFLEN_EMPTY;
@@ -3012,11 +2995,23 @@ tEplFrameInfo   FrameInfo;
 
         #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
         {
-            // if own Pres on MN, trigger SoA
-            if ((NmtState >= kEplNmtMsPreOperational2)
-                && (pTxBuffer_p == &EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_PRES]))
-            {
-                Ret = EplDllkChangeState(kEplNmtEventDllMeSoaTrig, NmtState);
+            if (NmtState >= kEplNmtMsPreOperational2)
+            {   // local node runs as MN in PREOP2
+                if (pTxBuffer_p == &EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_PRES])
+                {   // own Pres on MN, trigger SoA
+                    Ret = EplDllkChangeState(kEplNmtEventDllMeSoaTrig, NmtState);
+                }
+                else if (pTxBuffer_p->m_EplMsgType == kEplMsgTypePreq)
+                {
+                    // start PRes Timer
+#if EPL_TIMER_USE_HIGHRES != FALSE
+                    Ret = EplTimerHighReskModifyTimerNs(&EplDllkInstance_g.m_TimerHdlResponse,
+                        EplDllkInstance_g.m_pCurNodeInfo->m_dwPresTimeout,
+                        EplDllkCbMnTimerResponse,
+                        0L,
+                        FALSE);
+#endif
+                }
             }
         }
         #endif
@@ -3132,6 +3127,19 @@ tEplFrameInfo   FrameInfo;
             EplDllkInstance_g.m_LastReqServiceId = kEplDllReqServiceNo;
         }
 
+        // reprogram timer in PREOP1
+#if EPL_TIMER_USE_HIGHRES != FALSE
+        if ((EplDllkInstance_g.m_DllState == kEplDllMsNonCyclic)
+            && (EplDllkInstance_g.m_DllConfigParam.m_dwAsyncSlotTimeout != 0))
+        {
+            Ret = EplTimerHighReskModifyTimerNs(&EplDllkInstance_g.m_TimerHdlCycle,
+                EplDllkInstance_g.m_DllConfigParam.m_dwAsyncSlotTimeout,
+                EplDllkCbMnTimerCycle,
+                0L,
+                FALSE);
+        }
+#endif
+
         // forward event to ErrorHandler and PDO module
         Event.m_EventSink = kEplEventSinkNmtk;
         Event.m_EventType = kEplEventTypeNmtEvent;
@@ -3141,6 +3149,27 @@ tEplFrameInfo   FrameInfo;
         if (Ret != kEplSuccessful)
         {
             goto Exit;
+        }
+    }
+    else if (pTxBuffer_p->m_EplMsgType == kEplMsgTypeSoc)
+    {   // SoC frame sent
+        if (EplDllkInstance_g.m_DllState == kEplDllMsWaitPreqTrig)
+        {
+
+#if EPL_TIMER_USE_HIGHRES != FALSE
+            if (EplDllkInstance_g.m_DllConfigParam.m_dwWaitSocPreq != 0)
+            {   // start WaitSoCPReq Timer
+                Ret = EplTimerHighReskModifyTimerNs(&EplDllkInstance_g.m_TimerHdlResponse,
+                    EplDllkInstance_g.m_DllConfigParam.m_dwWaitSocPreq,
+                    EplDllkCbMnTimerResponse,
+                    0L,
+                    FALSE);
+            }
+            else
+#endif
+            {   // immediately send first PReq
+                Ret = EplDllkChangeState(kEplNmtEventDllMePresTimeout, NmtState);
+            }
         }
     }
 #endif
@@ -3288,16 +3317,6 @@ tEplNmtState    NmtState;
 
     // 2008/10/15 d.k. reprogramming of timer not necessary,
     // because it will be programmed, when SoC is received.
-/*
-    // reprogram timer
-#if EPL_TIMER_USE_HIGHRES != FALSE
-    if ((NmtState > kEplNmtCsPreOperational1)
-        && (EplDllkInstance_g.m_ullFrameTimeout != 0))
-    {
-        Ret = EplTimerHighReskModifyTimerNs(&EplDllkInstance_g.m_TimerHdlCycle, EplDllkInstance_g.m_ullFrameTimeout, EplDllkCbCnTimer, 0L, FALSE);
-    }
-#endif
-*/
 
 Exit:
     if (Ret != kEplSuccessful)
@@ -3670,15 +3689,7 @@ BYTE            bFlag1 = 0;
         bFlag1 = EplDllkInstance_g.m_pCurNodeInfo->m_bSoaFlag1 & EPL_FRAME_FLAG1_EA;
         *pDllStateProposed_p = kEplDllMsWaitPres;
 
-        // start PRes Timer
-        // $$$ d.k.: maybe move this call to CbFrameTransmitted(), because the time should run from there
-#if EPL_TIMER_USE_HIGHRES != FALSE
-        Ret = EplTimerHighReskModifyTimerNs(&EplDllkInstance_g.m_TimerHdlResponse,
-            EplDllkInstance_g.m_pCurNodeInfo->m_dwPresTimeout,
-            EplDllkCbMnTimerResponse,
-            0L,
-            FALSE);
-#endif
+        // start PRes Timer in CbFrameTransmitted()
     }
 
     if (pTxBuffer == NULL)
