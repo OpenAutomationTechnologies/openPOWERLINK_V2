@@ -143,7 +143,8 @@ int     iToggle;            // indicates the light movement direction
 
 BYTE    abDomain_l[3000];
 
-static DWORD    dw_le_CycleLen_g;
+static DWORD    dw_le_CycleLen_g;           // object 0x1006
+static DWORD    dw_le_LossOfSocTolerance_g; // object 0x1C14
 
 static DWORD uiNodeId_g = EPL_C_ADR_INVALID;
 
@@ -299,7 +300,7 @@ int inum;
     EplApiInitParam.m_uiSizeOfStruct = sizeof (EplApiInitParam);
     EPL_MEMCPY(EplApiInitParam.m_abMacAddress, abMacAddr, sizeof (EplApiInitParam.m_abMacAddress));
     EplApiInitParam.m_dwFeatureFlags = -1;
-    EplApiInitParam.m_dwCycleLen = 25000;     // required for error detection
+    EplApiInitParam.m_dwCycleLen = 20000;     // required for error detection
     EplApiInitParam.m_uiIsochrTxMaxPayload = 100; // const
     EplApiInitParam.m_uiIsochrRxMaxPayload = 100; // const
     EplApiInitParam.m_dwPresMaxLatency = 50000;  // const; only required for IdentRes
@@ -309,9 +310,9 @@ int inum;
     EplApiInitParam.m_uiMultiplCycleCnt = 0;  // required for error detection
     EplApiInitParam.m_uiAsyncMtu = 1500;         // required to set up max frame size
     EplApiInitParam.m_uiPrescaler = 2;         // required for sync
-    EplApiInitParam.m_dwLossOfFrameTolerance = 5000000;
+    EplApiInitParam.m_dwLossOfFrameTolerance = 90000000;
     EplApiInitParam.m_dwAsyncSlotTimeout = 10000000;
-    EplApiInitParam.m_dwWaitSocPreq = 150000;
+    EplApiInitParam.m_dwWaitSocPreq = 0;
     EplApiInitParam.m_dwDeviceType = -1;              // NMT_DeviceType_U32
     EplApiInitParam.m_dwVendorId = -1;                // NMT_IdentityObject_REC.VendorId_U32
     EplApiInitParam.m_dwProductCode = -1;             // NMT_IdentityObject_REC.ProductCode_U32
@@ -522,6 +523,13 @@ tEplKernel          EplRet = kEplSuccessful;
                         break;
                     }
 
+                    uiSize = 4;
+                    EplRet = EplApiReadObject(NULL, 0, 0x1C14, 0x00, &dw_le_LossOfSocTolerance_g, &uiSize, kEplSdoTypeAsnd, NULL);
+                    if (EplRet != kEplSuccessful)
+                    {   // local OD access failed
+                        break;
+                    }
+
                     // continue
                 }
 
@@ -604,6 +612,7 @@ tEplKernel          EplRet = kEplSuccessful;
             break;
         }
 
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
         case kEplApiEventNode:
         {
             // check additional argument
@@ -612,6 +621,7 @@ tEplKernel          EplRet = kEplSuccessful;
                 case kEplNmtNodeEventCheckConf:
                 {
                 tEplSdoComConHdl SdoComConHdl;
+
                     // update object 0x1006 on CN
                     EplRet = EplApiWriteObject(&SdoComConHdl, pEventArg_p->m_Node.m_uiNodeId, 0x1006, 0x00, &dw_le_CycleLen_g, 4, kEplSdoTypeAsnd, NULL);
                     if (EplRet == kEplApiTaskDeferred)
@@ -653,24 +663,54 @@ tEplKernel          EplRet = kEplSuccessful;
 
         case kEplApiEventSdo:
         {   // SDO transfer finished
-            EplRet = EplApiFreeSdoChannel(pEventArg_p->m_Sdo.m_SdoComConHdl);
-            if (EplRet != kEplSuccessful)
-            {
-                break;
-            }
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
-            if (pEventArg_p->m_Sdo.m_SdoComConState == kEplSdoComTransferFinished)
-            {   // continue boot-up of CN with NMT command Reset Configuration
-                EplRet = EplApiMnTriggerStateChange(pEventArg_p->m_Sdo.m_uiNodeId, kEplNmtNodeCommandConfReset);
+            if (pEventArg_p->m_Sdo.m_pUserArg == NULL)
+            {   // object 0x1006 written
+                if (pEventArg_p->m_Sdo.m_SdoComConState == kEplSdoComTransferFinished)
+                {   // ... successfully
+                tEplSdoComConHdl SdoComConHdl;
+
+                    // update object 0x1C14 on CN
+                    EplRet = EplApiWriteObject(&SdoComConHdl, pEventArg_p->m_Sdo.m_uiNodeId, 0x1C14, 0x00, &dw_le_LossOfSocTolerance_g, 4, kEplSdoTypeAsnd, (void*)1);
+                    if (EplRet == kEplApiTaskDeferred)
+                    {   // SDO transfer started
+                        EplRet = kEplSuccessful;
+                        break;
+                    }
+                    else if (EplRet == kEplSuccessful)
+                    {   // local OD access (should not occur)
+                        printf("AppCbEvent(Node) write to local OD\n");
+                    }
+                    else
+                    {   // error occured
+                        printf("AppCbEvent(Node): EplApiWriteObject() returned 0x%02X\n", EplRet);
+                    }
+                }
+                else
+                {   // indicate configuration error CN
+                    EplRet = EplApiMnTriggerStateChange(pEventArg_p->m_Sdo.m_uiNodeId, kEplNmtNodeCommandConfErr);
+                }
             }
             else
-            {   // indicate configuration error CN
-                EplRet = EplApiMnTriggerStateChange(pEventArg_p->m_Sdo.m_uiNodeId, kEplNmtNodeCommandConfErr);
+            {   // object 0x1C14 written
+                EplRet = EplApiFreeSdoChannel(pEventArg_p->m_Sdo.m_SdoComConHdl);
+                if (EplRet != kEplSuccessful)
+                {
+                    break;
+                }
+
+                if (pEventArg_p->m_Sdo.m_SdoComConState == kEplSdoComTransferFinished)
+                {   // continue boot-up of CN with NMT command Reset Configuration
+                    EplRet = EplApiMnTriggerStateChange(pEventArg_p->m_Sdo.m_uiNodeId, kEplNmtNodeCommandConfReset);
+                }
+                else
+                {   // indicate configuration error CN
+                    EplRet = EplApiMnTriggerStateChange(pEventArg_p->m_Sdo.m_uiNodeId, kEplNmtNodeCommandConfErr);
+                }
             }
-#endif
 
             break;
         }
+#endif
 
         default:
             break;

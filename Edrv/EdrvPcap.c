@@ -526,7 +526,6 @@ static void EdrvPacketHandler(u_char *pUser_p,
                               const struct pcap_pkthdr *header,
                               const u_char *pkt_data)
 {
-//static CONST BYTE abMacBroadCast[]= { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF };
 tEdrvInstance*  pInstance = (tEdrvInstance*) pUser_p;
 tEdrvRxBuffer   RxBuffer;
 
@@ -632,19 +631,6 @@ DWORD           dwRet;
                 break;
             }
         }
-
-        // workaround
-        if (pInstance->m_pLastTransmittedTxBuffer != NULL)
-        {
-        tEdrvTxBuffer* pTxBuffer = pInstance->m_pLastTransmittedTxBuffer;
-
-            pInstance->m_pLastTransmittedTxBuffer = NULL;
-            if (pInstance->m_InitParam.m_pfnTxHandler != NULL)
-            {
-                pInstance->m_InitParam.m_pfnTxHandler(pTxBuffer);
-            }
-        }
-
     }
 
 Exit:
@@ -654,12 +640,21 @@ Exit:
 
 static HANDLE EdrvGetTimerHandle(unsigned int uiIndex_p)
 {
-    uiIndex_p += EDRV_HANDLE_TIMER0;
 
+    uiIndex_p += EDRV_HANDLE_TIMER0;
     if (uiIndex_p > EDRV_HANDLE_COUNT)
     {
         return NULL;
     }
+
+/*
+    uiIndex_p = (EDRV_HANDLE_COUNT - 1) - uiIndex_p;
+
+    if (uiIndex_p < EDRV_HANDLE_TIMER0)
+    {
+        return NULL;
+    }
+*/
     else
     {
         return EdrvInstance_l.m_ahHandle[uiIndex_p];
@@ -705,6 +700,7 @@ typedef struct
 {
     tEplTimerEventArg   m_EventArg;
     tEplTimerkCallback  m_pfnCallback;
+    LARGE_INTEGER       m_liDueTime;    // for continuous timers, otherwise 0
 
 } tEplTimerHighReskTimerInfo;
 
@@ -924,7 +920,7 @@ unsigned int                uiIndex;
 tEplTimerHighReskTimerInfo* pTimerInfo;
 HANDLE                      hTimer;
 LARGE_INTEGER               liDueTime;
-LONG                        lPeriodMs;
+//LONG                        lPeriodMs;
 
     // check pointer to handle
     if(pTimerHdl_p == NULL)
@@ -984,11 +980,13 @@ LONG                        lPeriodMs;
 
     if (fContinuously_p != FALSE)
     {   // continuous timer
-        lPeriodMs = (LONG) (liDueTime.QuadPart / -10000LL);
+        pTimerInfo->m_liDueTime = liDueTime;
+//        lPeriodMs = (LONG) (liDueTime.QuadPart / -10000LL);
     }
     else
     {   // one-shot timer
-        lPeriodMs = 0;
+        pTimerInfo->m_liDueTime.QuadPart = 0LL;
+//        lPeriodMs = 0;
     }
 
     pTimerInfo->m_EventArg.m_ulArg = ulArgument_p;
@@ -999,7 +997,7 @@ LONG                        lPeriodMs;
     // configure timer
     hTimer = EdrvGetTimerHandle(uiIndex);
 
-    fRet = SetWaitableTimer(hTimer, &liDueTime, lPeriodMs, NULL, NULL, 0);
+    fRet = SetWaitableTimer(hTimer, &liDueTime, 0L /*lPeriodMs*/, NULL, NULL, 0);
     if (!fRet)
     {
         printf("SetWaitableTimer failed (%d)\n", GetLastError());
@@ -1099,6 +1097,22 @@ tEplTimerHighReskTimerInfo* pTimerInfo;
     }
 
     pTimerInfo = &EplTimerHighReskInstance_l.m_aTimerInfo[uiIndex_p];
+
+    if (pTimerInfo->m_liDueTime.QuadPart != 0)
+    {   // periodic timer
+    HANDLE  hTimer;
+    BOOL    fRet;
+
+        // configure timer
+        hTimer = EdrvGetTimerHandle(uiIndex_p);
+
+        fRet = SetWaitableTimer(hTimer, &pTimerInfo->m_liDueTime, 0L /*lPeriodMs*/, NULL, NULL, 0);
+        if (!fRet)
+        {
+            printf("SetWaitableTimer failed (%d)\n", GetLastError());
+            goto Exit;
+        }
+    }
 
     if (pTimerInfo->m_pfnCallback != NULL)
     {
