@@ -87,7 +87,11 @@
 #include "kernel/EplTimerHighResk.h"
 //#endif
 
+
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLK)) != 0)
+
+#include "kernel/EplDllkTgt.h"
+
 
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMTK)) == 0)
 #error "EPL module DLLK needs EPL module NMTK!"
@@ -241,6 +245,8 @@ typedef struct
 static tEplDllkInstance     EplDllkInstance_g;
 
 static tEdrvTxBuffer        aEplDllkTxBuffer_l[EPL_DLLK_TXFRAME_COUNT];
+
+TGT_DLLK_DECLARE_CRITICAL_SECTION;
 
 
 //---------------------------------------------------------------------------
@@ -2279,6 +2285,10 @@ unsigned int    uiAsndServiceId;
 unsigned int    uiNodeId;
 BYTE            bFlag1;
 
+TGT_DLLK_DECLARE_FLAGS
+
+    TGT_DLLK_ENTER_CRITICAL_SECTION();
+
     BENCHMARK_MOD_02_SET(3);
     NmtState = EplNmtkGetNmtState();
 
@@ -2910,6 +2920,9 @@ Exit:
                         &dwArg);
     }
     BENCHMARK_MOD_02_RESET(3);
+
+    TGT_DLLK_LEAVE_CRITICAL_SECTION();
+
     return;
 }
 
@@ -2940,6 +2953,10 @@ tEplNmtState    NmtState;
     && (EPL_DLL_PRES_READY_AFTER_SOC == FALSE)
 tEplFrameInfo   FrameInfo;
 #endif
+
+TGT_DLLK_DECLARE_FLAGS
+
+    TGT_DLLK_ENTER_CRITICAL_SECTION();
 
     NmtState = EplNmtkGetNmtState();
 
@@ -3205,6 +3222,8 @@ Exit:
                         &dwArg);
     }
 
+    TGT_DLLK_LEAVE_CRITICAL_SECTION();
+
     return;
 }
 
@@ -3294,6 +3313,10 @@ static tEplKernel PUBLIC EplDllkCbCnTimer(tEplTimerEventArg* pEventArg_p)
 tEplKernel      Ret = kEplSuccessful;
 tEplNmtState    NmtState;
 
+TGT_DLLK_DECLARE_FLAGS
+
+    TGT_DLLK_ENTER_CRITICAL_SECTION();
+
 #if EPL_TIMER_USE_HIGHRES != FALSE
     if (pEventArg_p->m_TimerHdl != EplDllkInstance_g.m_TimerHdlCycle)
     {   // zombie callback
@@ -3334,6 +3357,8 @@ Exit:
                         &dwArg);
     }
 
+    TGT_DLLK_LEAVE_CRITICAL_SECTION();
+
     return Ret;
 }
 #endif
@@ -3359,6 +3384,10 @@ static tEplKernel PUBLIC EplDllkCbMnTimerCycle(tEplTimerEventArg* pEventArg_p)
 {
 tEplKernel      Ret = kEplSuccessful;
 tEplNmtState    NmtState;
+
+TGT_DLLK_DECLARE_FLAGS
+
+    TGT_DLLK_ENTER_CRITICAL_SECTION();
 
 #if EPL_TIMER_USE_HIGHRES != FALSE
     if (pEventArg_p->m_TimerHdl != EplDllkInstance_g.m_TimerHdlCycle)
@@ -3393,6 +3422,8 @@ Exit:
                         &dwArg);
     }
 
+    TGT_DLLK_LEAVE_CRITICAL_SECTION();
+
     return Ret;
 }
 
@@ -3416,6 +3447,10 @@ static tEplKernel PUBLIC EplDllkCbMnTimerResponse(tEplTimerEventArg* pEventArg_p
 {
 tEplKernel      Ret = kEplSuccessful;
 tEplNmtState    NmtState;
+
+TGT_DLLK_DECLARE_FLAGS
+
+    TGT_DLLK_ENTER_CRITICAL_SECTION();
 
 #if EPL_TIMER_USE_HIGHRES != FALSE
     if (pEventArg_p->m_TimerHdl != EplDllkInstance_g.m_TimerHdlResponse)
@@ -3449,6 +3484,8 @@ Exit:
                         sizeof(dwArg),
                         &dwArg);
     }
+
+    TGT_DLLK_LEAVE_CRITICAL_SECTION();
 
     return Ret;
 }

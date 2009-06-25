@@ -81,7 +81,7 @@ CONST BYTE abMacAddr[] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 
 EplApi::EplApi(MainWindow *pMainWindow_p, unsigned int uiNodeId_p)
 {
-char*               sHostname = HOSTNAME;
+const char*         sHostname = HOSTNAME;
 tEplKernel          EplRet;
 //tEplObdSize         ObdSize;
 //unsigned int        uiVarEntries;

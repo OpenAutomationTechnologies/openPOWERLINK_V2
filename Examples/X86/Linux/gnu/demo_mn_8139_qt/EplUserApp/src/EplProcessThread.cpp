@@ -61,6 +61,7 @@ tEplKernel PUBLIC AppCbEvent(
     void GENERIC*           /*pUserArg_p*/)
 {
 tEplKernel  EplRet = kEplSuccessful;
+const char* pszNmtState = NULL;
 
     switch (EventType_p)
     {
@@ -73,7 +74,7 @@ tEplKernel  EplRet = kEplSuccessful;
             {
                 case kEplNmtGsOff:
                 {
-                    printf("Off\n");
+                    pszNmtState = "Off";
                     pEplProcessThread_g->sigEplStatus(0);
 
                     // NMT state machine was shut down,
@@ -94,7 +95,7 @@ tEplKernel  EplRet = kEplSuccessful;
                 DWORD   dwBuffer;
 #endif
 
-                    printf("ResetCommunication\n");
+                    pszNmtState = "ResetCommunication";
                     pEplProcessThread_g->sigEplStatus(1);
 
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
@@ -129,7 +130,7 @@ tEplKernel  EplRet = kEplSuccessful;
                 {
                 unsigned int uiSize;
 
-                    printf("ResetConfiguration\n");
+                    pszNmtState = "ResetConfiguration";
                     pEplProcessThread_g->sigEplStatus(1);
 
                     // fetch object 0x1006 NMT_CycleLen_U32 from local OD
@@ -143,30 +144,54 @@ tEplKernel  EplRet = kEplSuccessful;
                         break;
                     }
 
-                    // continue
                     break;
                 }
 
                 case kEplNmtCsPreOperational1:
                 case kEplNmtMsPreOperational1:
                 {
-                    printf("PreOp1\n");
+                    pszNmtState = "PreOp1";
                     pEplProcessThread_g->sigEplStatus(1);
 
-                    //printf("AppCbEvent(0x%X) originating event = 0x%X\n",
-                    //       pEventArg_p->m_NmtStateChange.m_NewNmtState,
-                    //       pEventArg_p->m_NmtStateChange.m_NmtEvent);
+                    break;
+                }
 
-                    // continue
+                case kEplNmtCsPreOperational2:
+                case kEplNmtMsPreOperational2:
+                {
+                    pszNmtState = "PreOp2";
+                    pEplProcessThread_g->sigEplStatus(1);
+
+                    break;
+                }
+
+                case kEplNmtCsReadyToOperate:
+                case kEplNmtMsReadyToOperate:
+                {
+                    pszNmtState = "ReadyToOp";
+                    pEplProcessThread_g->sigEplStatus(1);
+
                     break;
                 }
 
                 case kEplNmtGsInitialising:
+                {
+                    pszNmtState = "Init";
+                    pEplProcessThread_g->sigEplStatus(1);
+                    break;
+                }
+
                 case kEplNmtGsResetApplication:
+                {
+                    pszNmtState = "ResetApp";
+                    pEplProcessThread_g->sigEplStatus(1);
+                    break;
+                }
+
                 case kEplNmtCsNotActive:
                 case kEplNmtMsNotActive:
                 {
-                    printf("Init/ResetApp/NotActive\n");
+                    pszNmtState = "NotActive";
                     pEplProcessThread_g->sigEplStatus(1);
                     break;
                 }
@@ -174,7 +199,7 @@ tEplKernel  EplRet = kEplSuccessful;
                 case kEplNmtCsOperational:
                 case kEplNmtMsOperational:
                 {
-                    printf("Operational\n");
+                    pszNmtState = "Operational";
                     pEplProcessThread_g->sigEplStatus(2);
                     break;
                 }
@@ -182,17 +207,22 @@ tEplKernel  EplRet = kEplSuccessful;
                 case kEplNmtCsBasicEthernet:
                 case kEplNmtMsBasicEthernet:
                 {
-                    printf("BasicEthernet\n");
+                    pszNmtState = "BasicEthernet";
                     pEplProcessThread_g->sigEplStatus(1);
                     break;
                 }
 
                 default:
                 {
-                    printf("Others\n");
+                    pszNmtState = "Others";
                     pEplProcessThread_g->sigEplStatus(-1);
                 }
             }
+            printf("AppCbEvent(NMT) event 0x%X -> %s (0x%X)\n",
+                   pEventArg_p->m_NmtStateChange.m_NmtEvent,
+                   pszNmtState,
+                   pEventArg_p->m_NmtStateChange.m_NewNmtState);
+
             break;
         }
 
@@ -328,8 +358,9 @@ tEplKernel  EplRet = kEplSuccessful;
                 {
                     pEplProcessThread_g->sigNodeStatus(pEventArg_p->m_Node.m_uiNodeId, -1);
                     pEplProcessThread_g->sigNodeDisappeared(pEventArg_p->m_Node.m_uiNodeId);
-                    PRINTF1("AppCbEvent(Node): ErrorCode: 0x%04hX\n",
-                           pEventArg_p->m_Node.m_wErrorCode);
+                    PRINTF1("AppCbEvent(Node 0x%X): ErrorCode: 0x%04hX\n",
+                            pEventArg_p->m_Node.m_uiNodeId,
+                            pEventArg_p->m_Node.m_wErrorCode);
                     break;
                 }
 
