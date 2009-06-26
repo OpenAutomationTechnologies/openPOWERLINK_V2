@@ -207,6 +207,9 @@ Fellow worker:    Daniel Krüger (d.k.)
                       on the CN in X86 Qt demo
                     (d.k.)
 
+12.06.2009 V1.5     - added tEplHwParam to init structures of API layer, DLLk and Edrv
+                    (d.k.)
+
 15.06.2009 V1.5     - fixed bug 2392067: kEplDllAsyncTxBufferFull leads to kEplShutdown in SDO ASnd layer
                     (d.k.)
 
@@ -214,4 +217,34 @@ Fellow worker:    Daniel Krüger (d.k.)
                     - added object 0x1E40 NWL_IpAddrTable_0h_REC to objdict.h
                     - bug fix in XDD: same subindex was mentioned twice
                     - X86 Qt demo: added workaround for SdoBusy errors while configuring the cycle length
+                    (d.k.)
+
+24.06.2009 V1.5.1   - Highres timer on Linux: do not reject too smal time values, but increase them
+                    - asynchronous send queues for StatusRequests and IdentRequests on MN:
+                      made read and write index of queues volatile.
+                    - DLLk module: moved timer creation to CbFrameTransmitted.
+                      This prevents that the timeout elapses before the frame is actually transmitted
+                      over the wire. This should solve the bug 2000711.
+                    - fixed bug 2810782: prescaler of general purpose timer of
+                      MCF548x was not properly calculated
+                    - Windows port: It works now, except some bugs in EplTimeruWin32.c,
+                      which lead to lost IdentReqs on MN.
+                    (d.k.)
+
+25.06.2009 V1.5.1   - included WinPcap 4.0.2 Developer's Pack in CVS (except docs
+                      and examples)
+                    - DLL: added critical section for callback functions from Edrv and highres
+                      timer module. This is only necessary for platforms where Edrv and the
+                      highres timer module are not able to ensure that the callback functions
+                      are called mutual exclusive, e.g. Linux kernel except the Coldfire.
+                    - X86 Qt demo: cleaned up the console output (e.g. NMT states),
+                      removed some warnings.
+                    (d.k.)
+
+26.06.2009 V1.5.1   - OBD: renamed first part of OBD to GenericPart like in CANopen.
+                    - EplObd.h: some clean-up
+                    - API layer: added ObdInitRam function pointer to init parameters.
+                      Now, the application with the OBD (objdict.*) can be easily separated
+                      from the stack, i.e. the stack can be moved into a library.
+                    - API wrapper for Linux kernel-user: added new function EplApiPostUserEvent()
                     (d.k.)
