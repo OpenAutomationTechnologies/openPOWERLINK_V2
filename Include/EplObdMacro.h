@@ -198,7 +198,7 @@
         #define EPL_OBD_END()
 
         //---------------------------------------------------------------------------------------
-        #define EPL_OBD_BEGIN_PART_GENERIC()                                                   static  tEplObdEntry  aObdTab_g[]      = {
+        #define EPL_OBD_BEGIN_PART_GENERIC()                                            static  tEplObdEntry  aObdTabGeneric_g[]      = {
         #define EPL_OBD_BEGIN_PART_MANUFACTURER()                                       static  tEplObdEntry  aObdTabManufacturer_g[] = {
         #define EPL_OBD_BEGIN_PART_DEVICE()                                             static  tEplObdEntry  aObdTabDevice_g[]       = {
         #define EPL_OBD_END_PART()                                                      {EPL_OBD_TABLE_INDEX_END,(tEplObdSubEntryPtr)&dwObd_OBK_g,0,NULL}};
@@ -230,7 +230,7 @@
         #define EPL_OBD_END()
 
         //---------------------------------------------------------------------------------------
-        #define EPL_OBD_BEGIN_PART_GENERIC()                                                   pInitParam->m_pPart      = (tEplObdEntryPtr) &aObdTab_g[0];
+        #define EPL_OBD_BEGIN_PART_GENERIC()                                            pInitParam->m_pGenericPart      = (tEplObdEntryPtr) &aObdTabGeneric_g[0];
         #define EPL_OBD_BEGIN_PART_MANUFACTURER()                                       pInitParam->m_pManufacturerPart = (tEplObdEntryPtr) &aObdTabManufacturer_g[0];
         #define EPL_OBD_BEGIN_PART_DEVICE()                                             pInitParam->m_pDevicePart       = (tEplObdEntryPtr) &aObdTabDevice_g[0];
         #define EPL_OBD_END_PART()

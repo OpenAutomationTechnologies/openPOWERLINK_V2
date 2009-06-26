@@ -97,6 +97,7 @@
 #define EPLLIN_CMD_MN_TRIGGER_STATE_CHANGE 10   // ulArg_p ~ tEplLinNodeCmdObject*
 #define EPLLIN_CMD_PI_SETUP                11   // ulArg_p ~ 0
 #define EPLLIN_CMD_SHUTDOWN                12   // ulArg_p ~ 0
+#define EPLLIN_CMD_POST_USER_EVENT         13   // ulArg_p ~ void* = pUserArg_p
 
 
 //---------------------------------------------------------------------------

@@ -346,6 +346,7 @@ tEplObdSize         ObdSize;
     // set callback functions
     EplApiInitParam.m_pfnCbEvent = AppCbEvent;
     EplApiInitParam.m_pfnCbSync = AppCbSync;
+    EplApiInitParam.m_pfnObdInitRam = EplObdInitRam;
 
 
     printk("\n\n Hello, I'm a simple POWERLINK node running as %s!\n  (build: %s / %s)\n\n",

@@ -204,6 +204,14 @@ typedef struct
 //  Prototypes of internal functions
 //---------------------------------------------------------------------------
 
+// This function is the entry point for your object dictionary. It is defined
+// in OBJDICT.C by define EPL_OBD_INIT_RAM_NAME. Use this function name to define
+// this function prototype here. If you want to use more than one Epl
+// instances then the function name of each object dictionary has to differ.
+
+tEplKernel PUBLIC  EplObdInitRam (tEplObdInitParam MEM* pInitParam_p);
+
+
 tEplKernel PUBLIC EplLinCbEvent(
     tEplApiEventType        EventType_p,   // IN: event type (enum)
     tEplApiEventArg*        pEventArg_p,   // IN: event argument (union)
@@ -572,6 +580,7 @@ int  iRet;
 
             EplApiInitParam.m_pfnCbEvent = EplLinCbEvent;
             EplApiInitParam.m_pfnCbSync = EplLinCbSync;
+            EplApiInitParam.m_pfnObdInitRam = EplObdInitRam;
 
             EplRet = EplApiInitialize(&EplApiInitParam);
 
@@ -1102,6 +1111,19 @@ int  iRet;
         {
             // forward NMT command to EPL stack
             EplRet = EplApiExecNmtCommand((tEplNmtEvent)ulArg_p);
+
+            iRet = (int) EplRet;
+
+            break;
+        }
+
+
+
+        // ----------------------------------------------------------
+        case EPLLIN_CMD_POST_USER_EVENT:
+        {
+            // post user event
+            EplRet = EplApiPostUserEvent((void*)ulArg_p);
 
             iRet = (int) EplRet;
 

@@ -547,7 +547,7 @@ tEplObdEntryPtr pObdEntry;
     EPL_MCO_CHECK_INSTANCE_STATE ();
 
     //  part always has to be unequal to NULL
-    pObdEntry = EPL_MCO_GLB_VAR (m_ObdInitParam.m_pPart);
+    pObdEntry = EPL_MCO_GLB_VAR (m_ObdInitParam.m_pGenericPart);
     ASSERTMSG (pObdEntry != NULL, "EplObdAccessOdPart(): no  OD part is defined!\n");
 
     // if ObdPart_p is not valid fPartFound keeps FALSE and function returns kEplObdIllegalPart
@@ -2791,7 +2791,7 @@ unsigned int  nLoop;
     // object dictionary is divided in 3 parts
     if ((uiIndex_p >= 0x1000) && (uiIndex_p < 0x2000))
     {
-        pObdEntry = pInitParam_p->m_pPart;
+        pObdEntry = pInitParam_p->m_pGenericPart;
     }
     else if ((uiIndex_p >= 0x2000) && (uiIndex_p < 0x6000))
     {

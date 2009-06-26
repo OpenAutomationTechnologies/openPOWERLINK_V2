@@ -157,6 +157,15 @@ typedef struct
 } tEplHwParam;
 
 
+// user argument union
+typedef union
+{
+    unsigned int    m_uiValue;
+    void*           m_pValue;
+
+} tEplUserArg;
+
+
 #include "EplTarget.h"  // target specific functions and definitions
 
 #include "EplAmi.h"

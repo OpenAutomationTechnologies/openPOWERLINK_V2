@@ -333,6 +333,7 @@ int inum;
     // set callback functions
     EplApiInitParam.m_pfnCbEvent = AppCbEvent;
     EplApiInitParam.m_pfnCbSync = AppCbSync;
+    EplApiInitParam.m_pfnObdInitRam = EplObdInitRam;
 
 
     printf("\n\n Powerlink %s running.!\n  (build: %s / %s)\n\n",

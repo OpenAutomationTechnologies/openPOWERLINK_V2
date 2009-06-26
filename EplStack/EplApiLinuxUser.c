@@ -619,6 +619,40 @@ int             iRet;
 
 // ----------------------------------------------------------------------------
 //
+// Function:    EplApiPostUserEvent()
+//
+// Description: post user-defined event to event processing thread,
+//              i.e. calls user event callback function with event kEplApiEventUserDef.
+//              This function is thread safe and is meant for synchronization.
+//
+// Parameters:  pUserArg_p              = IN: user-defined pointer
+//
+// Return:      tEplKernel              = error code
+//
+// ----------------------------------------------------------------------------
+
+tEplKernel PUBLIC EplApiPostUserEvent(void* pUserArg_p)
+{
+tEplKernel      Ret = kEplSuccessful;
+int             iRet;
+
+    // forward user argument to Linux kernel module
+    iRet = ioctl (EplApiInstance_g.m_hDrvInst, EPLLIN_CMD_POST_USER_EVENT, (unsigned long)pUserArg_p);
+    if (iRet < 0)
+    {
+        Ret = kEplNoResource;
+    }
+    else
+    {
+        Ret = (tEplKernel)iRet;
+    }
+
+    return Ret;
+}
+
+
+// ----------------------------------------------------------------------------
+//
 // Function:    EplApiMnTriggerStateChange()
 //
 // Description: triggers the specified node command for the specified node.

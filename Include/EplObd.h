@@ -312,8 +312,8 @@ typedef enum
 }tEplVarParamValid;
 
 
-typedef tEplKernel (PUBLIC ROM* tEplVarCallback) (CCM_DECL_INSTANCE_HDL_
-    void * pParam_p);
+//typedef tEplKernel (PUBLIC ROM* tEplVarCallback) (CCM_DECL_INSTANCE_HDL_
+//    void * pParam_p);
 
 typedef struct
 {
@@ -392,16 +392,16 @@ typedef struct
     unsigned int    m_uiSubIndex;
     tEplObdType     m_Type;
     tEplObdAccess   m_Access;
-    void  *  m_pDefault;
+    void  *         m_pDefault;
     void  MEM*      m_pCurrent;     // points always to RAM
 
 } tEplObdSubEntry;
 
-// r.d.: has always to be  because new OBD-Macros for arrays
+// r.d.: has always to be, because of new OBD-Macros for arrays
 typedef tEplObdSubEntry * tEplObdSubEntryPtr;
 
 // -------------------------------------------------------------------------
-// callback function for objdictionary modul
+// callback function for object dictionary module
 // -------------------------------------------------------------------------
 
 // parameters for callback function
@@ -410,7 +410,7 @@ typedef struct
     tEplObdEvent    m_ObdEvent;
     unsigned int    m_uiIndex;
     unsigned int    m_uiSubIndex;
-    void *   m_pArg;
+    void *          m_pArg;
     DWORD           m_dwAbortCode;
 
 } tEplObdCbParam;
@@ -442,7 +442,7 @@ typedef tEplObdEntry * tEplObdEntryPtr;
 
 struct _tEplObdInitParam
 {
-    tEplObdEntryPtr        m_pPart;
+    tEplObdEntryPtr        m_pGenericPart;
     tEplObdEntryPtr        m_pManufacturerPart;
     tEplObdEntryPtr        m_pDevicePart;
 

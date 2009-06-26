@@ -206,7 +206,7 @@ static tEplKernel PUBLIC  EplApiCbLedStateChange(tEplLedType LedType_p,
 #endif
 
 // OD initialization function (implemented in Objdict.c)
-tEplKernel PUBLIC  EplObdInitRam (tEplObdInitParam MEM* pInitParam_p);
+//tEplKernel PUBLIC  EplObdInitRam (tEplObdInitParam MEM* pInitParam_p);
 
 
 //=========================================================================//
@@ -257,7 +257,14 @@ tEplDllkInitParam   DllkInitParam;
 
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_OBDK)) != 0)
     // init OD
-    Ret = EplObdInitRam(&ObdInitParam);
+    //Ret = EplObdInitRam(&ObdInitParam);
+    if (EplApiInstance_g.m_InitParam.m_pfnObdInitRam == NULL)
+    {
+        Ret = kEplApiNoObdInitRam;
+        goto Exit;
+    }
+
+    Ret = EplApiInstance_g.m_InitParam.m_pfnObdInitRam(&ObdInitParam);
     if (Ret != kEplSuccessful)
     {
         goto Exit;
