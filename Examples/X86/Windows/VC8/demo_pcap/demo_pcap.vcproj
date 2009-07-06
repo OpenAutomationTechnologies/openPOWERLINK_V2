@@ -187,10 +187,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\..\..\Include\EdrvFec.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\..\..\..\Include\Epl.h"
 				>
 			</File>
@@ -283,15 +279,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\remote-ext.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\..\..\..\Include\SocketLinuxKernel.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Win32-Extensions.h"
 				>
 			</File>
 		</Filter>
