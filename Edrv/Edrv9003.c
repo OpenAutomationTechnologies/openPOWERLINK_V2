@@ -97,15 +97,8 @@
 /*                                                                         */
 /***************************************************************************/
 
-// Buffer handling:
-// All buffers are created statically (i.e. at compile time resp. at
-// initialisation via kmalloc() ) and not dynamically on request (i.e. via
-// EdrvAllocTxMsgBuffer().
-// EdrvAllocTxMsgBuffer() searches for an unused buffer which is large enough.
-// EdrvInit() may allocate some buffers with sizes less than maximum frame
-// size (i.e. 1514 bytes), e.g. for SoC, SoA, StatusResponse, IdentResponse,
-// NMT requests / commands. The less the size of the buffer the less the
-// number of the buffer.
+// Chipselect CS2
+// Address 0x30000000
 
 
 //---------------------------------------------------------------------------
@@ -114,7 +107,8 @@
 
 #define EDRV_MAX_FRAME_SIZE     0x600
 
-#define DRV_NAME                "epl"
+#define DRV_NAME                "dm9sw_st"  // name of platform device
+
 
 // register addresses
 #define EDRV_REGB_NCR           0x00    // network control register
@@ -247,12 +241,12 @@
 // Private structure
 typedef struct
 {
-    struct pci_dev*     m_pPciDev;      // pointer to PCI device structure
-    void*               m_pIoAddr;      // pointer to register space of Ethernet controller
-    BYTE*               m_pbRxBuf;      // pointer to Rx buffer
+    struct platform_device* m_pDev;         // pointer to platform device structure
+    void*                   m_pIoAddr;      // pointer to register space of Ethernet controller
+    BYTE*                   m_pbRxBuf;      // pointer to Rx buffer
 
-    tEdrvInitParam      m_InitParam;
-    tEdrvTxBuffer*      m_pLastTransmittedTxBuffer;
+    tEdrvInitParam          m_InitParam;
+    tEdrvTxBuffer*          m_pLastTransmittedTxBuffer;
 
 } tEdrvInstance;
 
@@ -262,10 +256,9 @@ typedef struct
 // local function prototypes
 //---------------------------------------------------------------------------
 
-static int EdrvInitOne(struct pci_dev *pPciDev,
-                       const struct pci_device_id *pId);
+static int EdrvInitOne(struct platform_device *pPlatformDev_p);
 
-static void EdrvRemoveOne(struct pci_dev *pPciDev);
+static void EdrvRemoveOne(struct platform_device *pPlatformDev_p);
 
 
 static inline BYTE EdrvRegbRead(BYTE bReg_p)
@@ -316,11 +309,13 @@ WORD*           pwSrc;
 static tEdrvInstance EdrvInstance_l;
 
 
-static struct pci_driver EdrvDriver = {
-    .name         = DRV_NAME,
-    .id_table     = aEdrvPciTbl,
-    .probe        = EdrvInitOne,
-    .remove       = EdrvRemoveOne,
+static struct platform_driver EdrvDriver = {
+	.probe		= EdrvInitOne,
+	.remove		= EdrvRemoveOne,
+	.driver		= {
+		.name	= DRV_NAME,
+		.owner	= THIS_MODULE,
+	},
 };
 
 
@@ -392,42 +387,42 @@ int         iResult;
 
     // save the init data
     EdrvInstance_l.m_InitParam = *pEdrvInitParam_p;
-
+/*
     // clear driver structure
     // 2008-11-24 d.k. because pci_unregister_driver() doesn't do it correctly;
     //      one example: kobject_set_name() frees EdrvDriver.driver.kobj.name,
     //      but does not set this pointer to NULL.
     EPL_MEMSET(&EdrvDriver, 0, sizeof (EdrvDriver));
-    EdrvDriver.name         = DRV_NAME,
+    EdrvDriver.driver.name  = DRV_NAME,
     EdrvDriver.id_table     = aEdrvPciTbl,
     EdrvDriver.probe        = EdrvInitOne,
     EdrvDriver.remove       = EdrvRemoveOne,
-
-    // register PCI driver
-    iResult = pci_register_driver (&EdrvDriver);
+*/
+    // register platform driver
+    iResult = platform_driver_register(&EdrvDriver);
     if (iResult != 0)
     {
-        printk("%s pci_register_driver failed with %d\n", __FUNCTION__, iResult);
+        PRINTF2("%s pci_register_driver failed with %d\n", __FUNCTION__, iResult);
         Ret = kEplNoResource;
         goto Exit;
     }
 
-    if (EdrvInstance_l.m_pPciDev == NULL)
+    if (EdrvInstance_l.m_pDev == NULL)
     {
-        printk("%s m_pPciDev=NULL\n", __FUNCTION__);
+        PRINTF1("%s m_pDev=NULL\n", __FUNCTION__);
         Ret = kEplNoResource;
         goto Exit;
     }
 
 /*
     // read MAC address from controller
-    printk("%s local MAC = ", __FUNCTION__);
+    PRINTF1("%s local MAC = ", __FUNCTION__);
     for (iResult = 0; iResult < 6; iResult++)
     {
         pEdrvInitParam_p->m_abMyMacAddr[iResult] = EDRV_REGB_READ((EDRV_REGDW_IDR0 + iResult));
-        printk("%02X ", (unsigned int)pEdrvInitParam_p->m_abMyMacAddr[iResult]);
+        PRINTF1("%02X ", (unsigned int)pEdrvInitParam_p->m_abMyMacAddr[iResult]);
     }
-    printk("\n");
+    PRINTF0("\n");
 */
 
 Exit:
@@ -453,8 +448,8 @@ tEplKernel EdrvShutdown(void)
 {
 
     // unregister PCI driver
-    printk("%s calling pci_unregister_driver()\n", __FUNCTION__);
-    pci_unregister_driver (&EdrvDriver);
+    PRINTF1("%s calling platform_driver_unregister()\n", __FUNCTION__);
+    platform_driver_unregister (&EdrvDriver);
 
     return kEplSuccessful;
 }
@@ -484,7 +479,7 @@ BYTE        bOffset;
 /*
     dwData = ether_crc(6, pbMacAddr_p);
 
-    printk("EdrvDefineRxMacAddrEntry('%02X:%02X:%02X:%02X:%02X:%02X') hash = %u / %u  ether_crc = 0x%08lX\n",
+    PRINTF("EdrvDefineRxMacAddrEntry('%02X:%02X:%02X:%02X:%02X:%02X') hash = %u / %u  ether_crc = 0x%08lX\n",
         (WORD) pbMacAddr_p[0], (WORD) pbMacAddr_p[1], (WORD) pbMacAddr_p[2],
         (WORD) pbMacAddr_p[3], (WORD) pbMacAddr_p[4], (WORD) pbMacAddr_p[5],
         (WORD) bHash, (WORD) (dwData >> 26), dwData);
@@ -815,7 +810,7 @@ int             iHandled = IRQ_HANDLED;
 
         if (EdrvInstance_l.m_pbRxBuf == NULL)
         {
-            printk("%s Rx buffers currently not allocated\n", __FUNCTION__);
+            PRINTF1("%s Rx buffers currently not allocated\n", __FUNCTION__);
             goto Exit;
         }
 
@@ -872,7 +867,7 @@ int             iHandled = IRQ_HANDLED;
                 RxBuffer.m_uiRxMsgLen = uiLength - ETH_CRC_SIZE;
                 RxBuffer.m_pbBuffer = pbRxBuf;
 
-//                printk("R");
+//                PRINTF0("R");
                 EDRV_COUNT_RX;
 
                 // call Rx handler of Data link layer
@@ -903,8 +898,8 @@ Exit:
 //
 // Description: initializes one PCI device
 //
-// Parameters:  pPciDev             = pointer to corresponding PCI device structure
-//              pId                 = PCI device ID
+// Parameters:  pPlatformDev_p      = pointer to corresponding platform device
+//                                    structure
 //
 // Returns:     (int)               = error code
 //
@@ -912,23 +907,22 @@ Exit:
 //
 //---------------------------------------------------------------------------
 
-static int EdrvInitOne(struct pci_dev *pPciDev,
-                       const struct pci_device_id *pId)
+static int EdrvInitOne(struct platform_device *pPlatformDev_p)
 {
 int     iResult = 0;
 DWORD   dwTemp;
 
-    if (EdrvInstance_l.m_pPciDev != NULL)
+    if (EdrvInstance_l.m_pDev != NULL)
     {   // Edrv is already connected to a PCI device
-        printk("%s device %s discarded\n", __FUNCTION__, pci_name(pPciDev));
+        PRINTF2("%s device %s discarded\n", __FUNCTION__, pPlatformDev_p->name);
         iResult = -ENODEV;
         goto Exit;
     }
 
-    EdrvInstance_l.m_pPciDev = pPciDev;
+    EdrvInstance_l.m_pDev = pPlatformDev_p;
 
-    printk("%s ioremap\n", __FUNCTION__);
-    EdrvInstance_l.m_pIoAddr = ioremap (pci_resource_start(pPciDev, 1), pci_resource_len(pPciDev, 1));
+    PRINTF1("%s ioremap\n", __FUNCTION__);
+    EdrvInstance_l.m_pIoAddr = ioremap (pdev->resource[0].start, 0x08);
     if (EdrvInstance_l.m_pIoAddr == NULL)
     {   // remap of controller's register space failed
         iResult = -EIO;
@@ -943,13 +937,13 @@ DWORD   dwTemp;
 
     if (dwTemp != EDRV_REGB_ID_DM9003)
     {   // device is not supported by this driver
-        printk("%s device ID %lX not supported\n", __FUNCTION__, dwTemp);
+        PRINTF2("%s device ID %lX not supported\n", __FUNCTION__, dwTemp);
         iResult = -ENODEV;
         goto Exit;
     }
 
     // reset switch
-    printk("%s reset switch\n", __FUNCTION__);
+    PRINTF1("%s reset switch\n", __FUNCTION__);
     EDRV_REGB_WRITE(EDRV_REGB_SWITCHCR, EDRV_REGB_SWITCHCR_RST_SW);
 
     // wait until reset has finished
@@ -965,7 +959,7 @@ DWORD   dwTemp;
 
 
     // reset controller
-    printk("%s reset controller\n", __FUNCTION__);
+    PRINTF1("%s reset controller\n", __FUNCTION__);
     EDRV_REGB_WRITE(EDRV_REGB_NCR, EDRV_REGB_NCR_RST);
 
     // wait until reset has finished
@@ -980,21 +974,21 @@ DWORD   dwTemp;
     }
 
     // disable interrupts
-    printk("%s disable interrupts\n", __FUNCTION__);
+    PRINTF1("%s disable interrupts\n", __FUNCTION__);
     EDRV_REGB_WRITE(EDRV_REGB_IMR, 0);
     // acknowledge all pending interrupts
     EDRV_REGB_WRITE(EDRV_REGB_ISR, (EDRV_REGB_READ(EDRV_REGB_ISR) & ~EDRV_REGB_INT_IO_8BIT));
 
     // install interrupt handler
-    printk("%s install interrupt handler\n", __FUNCTION__);
-    iResult = request_irq(pPciDev->irq, TgtEthIsr, IRQF_SHARED, DRV_NAME /*pPciDev->dev.name*/, pPciDev);
+    PRINTF1("%s install interrupt handler\n", __FUNCTION__);
+    iResult = request_irq(pdev->resource[1].start, TgtEthIsr, IRQF_SHARED, DRV_NAME, pPlatformDev_p);
     if (iResult != 0)
     {
         goto Exit;
     }
 
     // allocate Rx buffer
-    printk("%s allocate Rx buffer\n", __FUNCTION__);
+    PRINTF1("%s allocate Rx buffer\n", __FUNCTION__);
     EdrvInstance_l.m_pbRxBuf = EPL_MALLOC(EDRV_MAX_FRAME_SIZE);
     if (EdrvInstance_l.m_pbRxBuf == NULL)
     {
@@ -1005,7 +999,7 @@ DWORD   dwTemp;
     // $$$ (re)set PHY mode
 
     // enable Rx flow control
-    printk("%s enable Rx flow control", __FUNCTION__);
+    PRINTF1("%s enable Rx flow control", __FUNCTION__);
     EDRV_REGB_WRITE(EDRV_REGB_FCR, EDRV_REGB_FCR_FLOW_EN);
 
     // set MAC address
@@ -1022,16 +1016,16 @@ DWORD   dwTemp;
     EDRV_REGB_WRITE((EDRV_REGB_MAR + iResult), 0x80);
 
     // enable receiver
-    printk("%s enable Rx", __FUNCTION__);
+    PRINTF1("%s enable Rx", __FUNCTION__);
     EDRV_REGB_WRITE(EDRV_REGB_RCR, EDRV_REGB_RCR_DEF);
 
     // enable interrupts
-    printk("%s enable interrupts\n", __FUNCTION__);
+    PRINTF1("%s enable interrupts\n", __FUNCTION__);
     EDRV_REGB_WRITE(EDRV_REGB_IMR, EDRV_REGB_INT_MASK_DEF);
 
 
 Exit:
-    printk("%s finished with %d\n", __FUNCTION__, iResult);
+    PRINTF2("%s finished with %d\n", __FUNCTION__, iResult);
     return iResult;
 }
 
@@ -1042,7 +1036,8 @@ Exit:
 //
 // Description: shuts down one PCI device
 //
-// Parameters:  pPciDev             = pointer to corresponding PCI device structure
+// Parameters:  pPlatformDev_p      = pointer to corresponding platform device
+//                                    structure
 //
 // Returns:     (void)
 //
@@ -1050,12 +1045,12 @@ Exit:
 //
 //---------------------------------------------------------------------------
 
-static void EdrvRemoveOne(struct pci_dev *pPciDev)
+static void EdrvRemoveOne(struct platform_device *pPlatformDev_p)
 {
 
-    if (EdrvInstance_l.m_pPciDev != pPciDev)
+    if (EdrvInstance_l.m_pDev != pPlatformDev_p)
     {   // trying to remove unknown device
-        BUG_ON(EdrvInstance_l.m_pPciDev != pPciDev);
+        BUG_ON(EdrvInstance_l.m_pDev != pPlatformDev_p);
         goto Exit;
     }
 
@@ -1066,7 +1061,7 @@ static void EdrvRemoveOne(struct pci_dev *pPciDev)
     EDRV_REGB_WRITE(EDRV_REGB_IMR, 0);
 
     // remove interrupt handler
-    free_irq(pPciDev->irq, pPciDev);
+    free_irq(pdev->resource[1].start, pPlatformDev_p);
 
 
     // free buffers
@@ -1082,10 +1077,7 @@ static void EdrvRemoveOne(struct pci_dev *pPciDev)
         iounmap(EdrvInstance_l.m_pIoAddr);
     }
 
-    // release memory regions
-//    pci_release_regions(pPciDev);
-
-    EdrvInstance_l.m_pPciDev = NULL;
+    EdrvInstance_l.m_pDev = NULL;
 
 Exit:;
 }
@@ -1139,7 +1131,7 @@ BYTE bHash;
         }
     }
 
-//    printk("MyCRC = 0x%08lX\n", dwCrc);
+//    PRINTF1("MyCRC = 0x%08lX\n", dwCrc);
     bHash = (BYTE)(dwCrc & 0x3f);
 
     return bHash;
