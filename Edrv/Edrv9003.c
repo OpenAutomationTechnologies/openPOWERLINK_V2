@@ -910,6 +910,7 @@ static int EdrvInitOne(struct platform_device *pPlatformDev_p)
 {
 int     iResult = 0;
 DWORD   dwTemp;
+struct resource* pResource;
 
     if (EdrvInstance_l.m_pDev != NULL)
     {   // Edrv is already connected to a PCI device
@@ -920,12 +921,30 @@ DWORD   dwTemp;
 
     EdrvInstance_l.m_pDev = pPlatformDev_p;
 
-    PRINTF1("%s ioremap\n", __FUNCTION__);
-    EdrvInstance_l.m_pIoAddr = ioremap (pPlatformDev_p->resource[0].start, 0x08);
+    PRINTF1("%s get resource IOMEM... ", __FUNCTION__);
+    pResource = platform_get_resource(pPlatformDev_p, IORESOURCE_MEM, 0);
+    if (pResource == NULL)
+    {
+        PRINTF0("FAILED\n");
+        iResult = -ENODEV;
+        goto Exit;
+    }
+    else
+    {
+        PRINTF0("OK\n");
+    }
+
+    PRINTF1("%s ioremap... ", __FUNCTION__);
+    EdrvInstance_l.m_pIoAddr = ioremap (pResource->start, 0x08);
     if (EdrvInstance_l.m_pIoAddr == NULL)
     {   // remap of controller's register space failed
+        PRINTF0("FAILED\n");
         iResult = -EIO;
         goto Exit;
+    }
+    else
+    {
+        PRINTF0("OK\n");
     }
 
     // check Vendor and Product ID
@@ -934,15 +953,21 @@ DWORD   dwTemp;
     dwTemp |= EDRV_REGB_READ(EDRV_REGB_PIDL) << 16;
     dwTemp |= EDRV_REGB_READ(EDRV_REGB_PIDH) << 24;
 
+    PRINTF2("%s check device ID (%X)... ", __FUNCTION__, EDRV_REGB_ID_DM9003);
     if (dwTemp != EDRV_REGB_ID_DM9003)
     {   // device is not supported by this driver
+        PRINTF0("FAILED\n");
         PRINTF2("%s device ID %lX not supported\n", __FUNCTION__, dwTemp);
         iResult = -ENODEV;
         goto Exit;
     }
+    else
+    {
+        PRINTF0("OK\n");
+    }
 
     // reset switch
-    PRINTF1("%s reset switch\n", __FUNCTION__);
+    PRINTF1("%s reset switch... ", __FUNCTION__);
     EDRV_REGB_WRITE(EDRV_REGB_SWITCHCR, EDRV_REGB_SWITCHCR_RST_SW);
 
     // wait until reset has finished
@@ -955,10 +980,11 @@ DWORD   dwTemp;
 
         schedule_timeout(10);
     }
+    PRINTF0("Done\n");
 
 
     // reset controller
-    PRINTF1("%s reset controller\n", __FUNCTION__);
+    PRINTF1("%s reset controller... ", __FUNCTION__);
     EDRV_REGB_WRITE(EDRV_REGB_NCR, EDRV_REGB_NCR_RST);
 
     // wait until reset has finished
@@ -971,6 +997,7 @@ DWORD   dwTemp;
 
         schedule_timeout(10);
     }
+    PRINTF0("Done\n");
 
     // disable interrupts
     PRINTF1("%s disable interrupts\n", __FUNCTION__);
@@ -979,30 +1006,40 @@ DWORD   dwTemp;
     EDRV_REGB_WRITE(EDRV_REGB_ISR, (EDRV_REGB_READ(EDRV_REGB_ISR) & ~EDRV_REGB_INT_IO_8BIT));
 
     // install interrupt handler
-    PRINTF1("%s install interrupt handler\n", __FUNCTION__);
-    iResult = request_irq(pPlatformDev_p->resource[1].start,
+    PRINTF1("%s install interrupt handler... ", __FUNCTION__);
+    iResult = request_irq(platform_get_irq(pPlatformDev_p, 0),
                           TgtEthIsr,
                           IRQF_SHARED, //IRQF_NODELAY,
                           DRV_NAME,
                           pPlatformDev_p);
     if (iResult != 0)
     {
+        PRINTF0("FAILED\n");
         goto Exit;
+    }
+    else
+    {
+        PRINTF0("OK\n");
     }
 
     // allocate Rx buffer
-    PRINTF1("%s allocate Rx buffer\n", __FUNCTION__);
+    PRINTF1("%s allocate Rx buffer... ", __FUNCTION__);
     EdrvInstance_l.m_pbRxBuf = EPL_MALLOC(EDRV_MAX_FRAME_SIZE);
     if (EdrvInstance_l.m_pbRxBuf == NULL)
     {
+        PRINTF0("FAILED\n");
         iResult = -ENOMEM;
         goto Exit;
+    }
+    else
+    {
+        PRINTF0("OK\n");
     }
 
     // $$$ (re)set PHY mode
 
     // enable Rx flow control
-    PRINTF1("%s enable Rx flow control", __FUNCTION__);
+    PRINTF1("%s enable Rx flow control\n", __FUNCTION__);
     EDRV_REGB_WRITE(EDRV_REGB_FCR, EDRV_REGB_FCR_FLOW_EN);
 
     // set MAC address
@@ -1017,9 +1054,10 @@ DWORD   dwTemp;
         EDRV_REGB_WRITE((EDRV_REGB_MAR + iResult), 0x00);
     }
     EDRV_REGB_WRITE((EDRV_REGB_MAR + iResult), 0x80);
+    iResult = 0;
 
     // enable receiver
-    PRINTF1("%s enable Rx", __FUNCTION__);
+    PRINTF1("%s enable Rx\n", __FUNCTION__);
     EDRV_REGB_WRITE(EDRV_REGB_RCR, EDRV_REGB_RCR_DEF);
 
     // enable interrupts
@@ -1064,7 +1102,7 @@ static int EdrvRemoveOne(struct platform_device *pPlatformDev_p)
     EDRV_REGB_WRITE(EDRV_REGB_IMR, 0);
 
     // remove interrupt handler
-    free_irq(pPlatformDev_p->resource[1].start, pPlatformDev_p);
+    free_irq(platform_get_irq(pPlatformDev_p, 0), pPlatformDev_p);
 
 
     // free buffers
