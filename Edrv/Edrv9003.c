@@ -258,45 +258,7 @@ typedef struct
 
 static int EdrvInitOne(struct platform_device *pPlatformDev_p);
 
-static void EdrvRemoveOne(struct platform_device *pPlatformDev_p);
-
-
-static inline BYTE EdrvRegbRead(BYTE bReg_p)
-{
-BYTE bVal;
-
-    writeb(bReg_p, EdrvInstance_l.m_pIoAddr);
-    bVal = readb(EdrvInstance_l.m_pIoAddr + 4);
-    return bVal;
-}
-
-
-static inline void EdrvRegCopyTo(void* pDst_p, unsigned int uiCount_p)
-{
-unsigned int    uiIndex;
-WORD*           pwDst;
-
-    pwDst = (WORD*) pDst_p;
-
-    for (uiIndex = (uiCount_p + 1) >> 1; uiIndex > 0; uiIndex--, pwDst++)
-    {
-        *pwDst = readw(EdrvInstance_l.m_pIoAddr + 4);
-    }
-}
-
-
-static inline void EdrvRegCopyFrom(void* pSrc_p, unsigned int uiCount_p)
-{
-unsigned int    uiIndex;
-WORD*           pwSrc;
-
-    pwSrc = (WORD*) pSrc_p;
-
-    for (uiIndex = (uiCount_p + 1) >> 1; uiIndex > 0; uiIndex--, pwSrc++)
-    {
-        writew(*pwSrc, EdrvInstance_l.m_pIoAddr + 4);
-    }
-}
+static int EdrvRemoveOne(struct platform_device *pPlatformDev_p);
 
 
 
@@ -358,6 +320,45 @@ static struct platform_driver EdrvDriver = {
 //---------------------------------------------------------------------------
 
 static BYTE EdrvCalcHash (BYTE * pbMAC_p);
+
+
+static inline BYTE EdrvRegbRead(BYTE bReg_p)
+{
+BYTE bVal;
+
+    writeb(bReg_p, EdrvInstance_l.m_pIoAddr);
+    bVal = readb(EdrvInstance_l.m_pIoAddr + 4);
+    return bVal;
+}
+
+
+static inline void EdrvRegCopyTo(void* pDst_p, unsigned int uiCount_p)
+{
+unsigned int    uiIndex;
+WORD*           pwDst;
+
+    pwDst = (WORD*) pDst_p;
+
+    for (uiIndex = (uiCount_p + 1) >> 1; uiIndex > 0; uiIndex--, pwDst++)
+    {
+        *pwDst = readw(EdrvInstance_l.m_pIoAddr + 4);
+    }
+}
+
+
+static inline void EdrvRegCopyFrom(void* pSrc_p, unsigned int uiCount_p)
+{
+unsigned int    uiIndex;
+WORD*           pwSrc;
+
+    pwSrc = (WORD*) pSrc_p;
+
+    for (uiIndex = (uiCount_p + 1) >> 1; uiIndex > 0; uiIndex--, pwSrc++)
+    {
+        writew(*pwSrc, EdrvInstance_l.m_pIoAddr + 4);
+    }
+}
+
 
 
 
@@ -607,8 +608,6 @@ tEplKernel EdrvReleaseTxMsgBuffer     (tEdrvTxBuffer * pBuffer_p)
 tEplKernel EdrvSendTxMsg              (tEdrvTxBuffer * pBuffer_p)
 {
 tEplKernel Ret = kEplSuccessful;
-unsigned int uiBufferNumber;
-DWORD       dwTemp;
 
     if (EdrvInstance_l.m_pLastTransmittedTxBuffer != NULL)
     {   // transmission is already active
@@ -922,7 +921,7 @@ DWORD   dwTemp;
     EdrvInstance_l.m_pDev = pPlatformDev_p;
 
     PRINTF1("%s ioremap\n", __FUNCTION__);
-    EdrvInstance_l.m_pIoAddr = ioremap (pdev->resource[0].start, 0x08);
+    EdrvInstance_l.m_pIoAddr = ioremap (pPlatformDev_p->resource[0].start, 0x08);
     if (EdrvInstance_l.m_pIoAddr == NULL)
     {   // remap of controller's register space failed
         iResult = -EIO;
@@ -981,7 +980,11 @@ DWORD   dwTemp;
 
     // install interrupt handler
     PRINTF1("%s install interrupt handler\n", __FUNCTION__);
-    iResult = request_irq(pdev->resource[1].start, TgtEthIsr, IRQF_SHARED, DRV_NAME, pPlatformDev_p);
+    iResult = request_irq(pPlatformDev_p->resource[1].start,
+                          TgtEthIsr,
+                          IRQF_SHARED, //IRQF_NODELAY,
+                          DRV_NAME,
+                          pPlatformDev_p);
     if (iResult != 0)
     {
         goto Exit;
@@ -1045,7 +1048,7 @@ Exit:
 //
 //---------------------------------------------------------------------------
 
-static void EdrvRemoveOne(struct platform_device *pPlatformDev_p)
+static int EdrvRemoveOne(struct platform_device *pPlatformDev_p)
 {
 
     if (EdrvInstance_l.m_pDev != pPlatformDev_p)
@@ -1061,7 +1064,7 @@ static void EdrvRemoveOne(struct platform_device *pPlatformDev_p)
     EDRV_REGB_WRITE(EDRV_REGB_IMR, 0);
 
     // remove interrupt handler
-    free_irq(pdev->resource[1].start, pPlatformDev_p);
+    free_irq(pPlatformDev_p->resource[1].start, pPlatformDev_p);
 
 
     // free buffers
@@ -1079,7 +1082,8 @@ static void EdrvRemoveOne(struct platform_device *pPlatformDev_p)
 
     EdrvInstance_l.m_pDev = NULL;
 
-Exit:;
+Exit:
+    return 0;
 }
 
 

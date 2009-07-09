@@ -84,7 +84,7 @@
 // Linux kernel except MCF5484 needs spinlock
 // for DLL's callback functions
 
-#include <asm/spinlock.h>
+#include <linux/spinlock.h>
 
 #define TGT_DLLK_DECLARE_CRITICAL_SECTION \
         static spinlock_t TgtDllkCriticalSection_l = SPIN_LOCK_UNLOCKED;

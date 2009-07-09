@@ -2,6 +2,6 @@
 .tmp_versions
 *.mod.c
 epl.ko
-cf54drv.ko
 target
 openPOWERLINK_demo*
+Module.symvers
