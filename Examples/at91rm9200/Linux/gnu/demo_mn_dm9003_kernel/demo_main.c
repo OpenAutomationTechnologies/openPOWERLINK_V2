@@ -247,8 +247,6 @@ tEplKernel          EplRet;
 int                 iRet;
 static tEplApiInitParam EplApiInitParam = {0};
 char*               sHostname = HOSTNAME;
-WORD                wDrvVersion;
-BYTE                bDipSwitch;
 char*               argv[4], *envp[3];
 char                sBuffer[16];
 unsigned int        uiVarEntries;
