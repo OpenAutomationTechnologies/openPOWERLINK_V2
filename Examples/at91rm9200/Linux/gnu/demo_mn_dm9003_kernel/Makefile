@@ -37,8 +37,8 @@ MODULEOBJS	= demo_main.o \
 			  $(MAINPATH)/EplStack/VirtualEthernetLinux.o \
 			  $(MAINPATH)/SharedBuff/SharedBuff.o $(MAINPATH)/SharedBuff/ShbIpc-LinuxKernel.o \
 			  $(MAINPATH)/EplStack/SocketLinuxKernel.o \
-			  $(MAINPATH)/Target/PLCcore-CF54/Linux/gnu/generic/proc_fs.o
-#			  $(MAINPATH)/Target/PLCcore-CF54/Linux/gnu/generic/TimerHighReskMcf54xx.o
+			  $(MAINPATH)/Target/PLCcore-CF54/Linux/gnu/generic/proc_fs.o \
+			  $(MAINPATH)/Target/at91/Linux/gnu/generic/TimerHighReskAT91.o
 
 #           Select here between debug and release settings
 #DBG_MODE = NDEBUG

@@ -114,9 +114,9 @@
 #define TIMERHDL_SHIFT              28
 
 
-#define AT91_TC_REG(nTc_p, sReg_p)  (EplTimerHighReskInstance_l.m_pIoAddr +
-                                     ((nTc_p + ((FIRST_USED_TC_UNIT < 3) ? FIRST_USED_TC_UNIT : FIRST_USED_TC_UNIT - 3))
-                                      << 6)
+#define AT91_TC_REG(nTc_p, sReg_p)  (EplTimerHighReskInstance_l.m_pIoAddr + \
+                                     ((nTc_p + ((FIRST_USED_TC_UNIT < 3) ? FIRST_USED_TC_UNIT : FIRST_USED_TC_UNIT - 3)) \
+                                      << 6) \
                                      + AT91_TC_ ## sReg_p)
 
 
@@ -156,7 +156,7 @@ static const unsigned int auiEpltimerHighReskPrescaler_l[PRESCALER_COUNT] =
 // local function prototypes
 //---------------------------------------------------------------------------
 
-static irqreturn_t TgtTimerCounterIsr (int nIrqNum_p, void* ppDevInstData_p);
+static irqreturn_t TgtTimerCounterIsr (int nIrqNum_p, void* pDevInstData_p);
 
 
 //=========================================================================//
@@ -211,7 +211,7 @@ tEplKernel      Ret = kEplSuccessful;
 int             iResult = 0;
 int             iIrq;
 unsigned int    uiIndex;
-char[8]         szClkName;
+char            szClkName[8];
 tEplTimerHighReskTimerInfo* pTimerInfo;
 unsigned long   ulMck;  // master clock rate
 
@@ -242,16 +242,16 @@ unsigned long   ulMck;  // master clock rate
         clk_enable(pTimerInfo->m_pClk);
 
         // disable the clock counter
-        __rawwritel(AT91_TC_CLKDIS, AT91_TC_REG(uiIndex, CCR));
+        __raw_writel(AT91_TC_CLKDIS, AT91_TC_REG(uiIndex, CCR));
 
         // disable all interrupts from the timer/counter unit
-        __rawwritel(0xFFFFFFFF, AT91_TC_REG(uiIndex, IDR));
+        __raw_writel(0xFFFFFFFF, AT91_TC_REG(uiIndex, IDR));
 
         // acknowledge any pending interrupt
-        iResult = __rawreadl(AT91_TC_REG(uiIndex, SR));
+        iResult = __raw_readl(AT91_TC_REG(uiIndex, SR));
 
         // enable the RC compare interrupt
-        __rawwritel(AT91_TC_CPCS, AT91_TC_REG(uiIndex, IER));
+        __raw_writel(AT91_TC_CPCS, AT91_TC_REG(uiIndex, IER));
 
         iIrq = AT91RM9200_ID_TC0 + FIRST_USED_TC_UNIT + uiIndex;
         iResult = request_irq(iIrq, TgtTimerCounterIsr, IRQF_SHARED,
@@ -309,13 +309,13 @@ tEplTimerHighReskTimerInfo* pTimerInfo;
     for (uiIndex = 0; uiIndex < TIMER_COUNT; uiIndex++, pTimerInfo++)
     {
         // disable the clock counter
-        __rawwritel(AT91_TC_CLKDIS, AT91_TC_REG(uiIndex, CCR));
+        __raw_writel(AT91_TC_CLKDIS, AT91_TC_REG(uiIndex, CCR));
 
         // disable all interrupts from the timer/counter unit
-        __rawwritel(0xFFFFFFFF, AT91_TC_REG(uiIndex, IDR));
+        __raw_writel(0xFFFFFFFF, AT91_TC_REG(uiIndex, IDR));
 
         // acknowledge any pending interrupt
-        __rawreadl(AT91_TC_REG(uiIndex, SR));
+        __raw_readl(AT91_TC_REG(uiIndex, SR));
 
         clk_disable(pTimerInfo->m_pClk);
         clk_put(pTimerInfo->m_pClk);
@@ -369,7 +369,6 @@ tEplKernel                  Ret = kEplSuccessful;
 unsigned int                uiIndex;
 unsigned int                uiPrescaler;
 tEplTimerHighReskTimerInfo* pTimerInfo;
-DWORD                       dwTime;
 WORD                        wCounter;
 
     // check pointer to handle
@@ -416,7 +415,7 @@ WORD                        wCounter;
     }
 
     // disable the timer
-    __rawwritel(AT91_TC_CLKDIS, AT91_TC_REG(uiIndex, CCR));
+    __raw_writel(AT91_TC_CLKDIS, AT91_TC_REG(uiIndex, CCR));
 
     // increment timer handle (if timer expires right after this statement,
     // the user would detect an unknown timer handle and discard it)
@@ -439,16 +438,19 @@ WORD                        wCounter;
     }
 
     // calculate counter
-    wCounter = (WORD) ((ullTimeNs_p * EplTimerHighReskInstance_l.m_auiFreq[uiPrescaler] + 500000000ULL)
-               / 1000000000ULL);
+    ullTimeNs_p = ullTimeNs_p
+                  * EplTimerHighReskInstance_l.m_auiFreq[uiPrescaler]
+                  + 500000000ULL;
+    do_div(ullTimeNs_p, 1000000000UL);
+    wCounter = (WORD) ullTimeNs_p;
 
     // configure the timer unit
-    __rawwritel(uiPrescaler | AT91_TC_WAVE | AT91_TC_WAVESEL_UP_AUTO
+    __raw_writel(uiPrescaler | AT91_TC_WAVE | AT91_TC_WAVESEL_UP_AUTO
                 | ((fContinuously_p != FALSE) ? 0 : AT91_TC_CPCSTOP),
                 AT91_TC_REG(uiIndex, CMR));
 
     // configure the counter
-    __rawwritel(wCounter, AT91_TC_REG(uiIndex, RC));
+    __raw_writel(wCounter, AT91_TC_REG(uiIndex, RC));
 
     pTimerInfo->m_EventArg.m_ulArg = ulArgument_p;
     pTimerInfo->m_pfnCallback = pfnCallback_p;
@@ -456,7 +458,7 @@ WORD                        wCounter;
     *pTimerHdl_p = pTimerInfo->m_EventArg.m_TimerHdl;
 
     // start timer
-    __rawwritel(AT91_TC_SWTRG, AT91_TC_REG(uiIndex, CCR));
+    __raw_writel(AT91_TC_SWTRG, AT91_TC_REG(uiIndex, CCR));
 
 Exit:
     return Ret;
@@ -516,7 +518,7 @@ tEplTimerHighReskTimerInfo* pTimerInfo;
     *pTimerHdl_p = 0;
 
     // disable the timer
-    __rawwritel(AT91_TC_CLKDIS, AT91_TC_REG(uiIndex, CCR));
+    __raw_writel(AT91_TC_CLKDIS, AT91_TC_REG(uiIndex, CCR));
 
     // increment timer handle (if timer expires right after this statement,
     // the user would detect an unknown timer handle and discard it)
@@ -546,7 +548,7 @@ Exit:
 //
 //---------------------------------------------------------------------------
 
-static irqreturn_t TgtTimerCounterIsr (int nIrqNum_p, void* ppDevInstData_p)
+static irqreturn_t TgtTimerCounterIsr (int nIrqNum_p, void* pDevInstData_p)
 {
 unsigned int                uiIndex;
 tEplTimerHighReskTimerInfo* pTimerInfo = (tEplTimerHighReskTimerInfo*)pDevInstData_p;
@@ -560,7 +562,7 @@ tEplTimerHighReskTimerInfo* pTimerInfo = (tEplTimerHighReskTimerInfo*)pDevInstDa
     }
 
     // acknowledge the pending interrupt
-    __rawreadl(AT91_TC_REG(uiIndex, SR));
+    __raw_readl(AT91_TC_REG(uiIndex, SR));
 
     if (pTimerInfo->m_pfnCallback != NULL)
     {

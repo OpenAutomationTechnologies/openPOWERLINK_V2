@@ -203,8 +203,8 @@
 #define EPL_TIMER_USE_USER              TRUE
 
 // if TRUE the high resolution timer module will be used
-//#define EPL_TIMER_USE_HIGHRES              TRUE
-#define EPL_TIMER_USE_HIGHRES              FALSE
+#define EPL_TIMER_USE_HIGHRES              TRUE
+//#define EPL_TIMER_USE_HIGHRES              FALSE
 
 
 
