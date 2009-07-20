@@ -128,8 +128,8 @@
                                | EPL_MODULE_DLLK \
                                | EPL_MODULE_DLLU \
                                | EPL_MODULE_LEDU \
+                               | EPL_MODULE_NMT_MN \
                                | EPL_MODULE_VETH)
-//                               | EPL_MODULE_NMT_MN
 
 
 // =========================================================================

@@ -87,6 +87,7 @@
 #include <asm/irq.h>
 #include <linux/sched.h>
 #include <linux/delay.h>
+#include <linux/crc32.h>
 
 
 /***************************************************************************/
@@ -121,10 +122,11 @@
 #define EDRV_REGB_RCR           0x05    // RX control register
 #define EDRV_REGB_RCR_RXEN          0x01    // RX enable
 #define EDRV_REGB_RCR_PRMSC         0x02    // promiscuous mode
-#define EDRV_REGB_RCR_ALL_MC        0x04    // all multicast packets
+#define EDRV_REGB_RCR_ALL_MC        0x08    // pass all multicast packets
 #define EDRV_REGB_RCR_HASHALL       0x80    // filter all address in hash table
 #define EDRV_REGB_RCR_DEF           (EDRV_REGB_RCR_RXEN \
-                                    | EDRV_REGB_RCR_HASHALL)
+                                    | EDRV_REGB_RCR_ALL_MC)
+//                                    | EDRV_REGB_RCR_PRMSC)
 
 #define EDRV_REGB_RSR           0x06    // RX status register
 #define EDRV_REGB_RSR_CE            0x02    // CRC error
@@ -477,19 +479,31 @@ BYTE        bData;
 BYTE        bOffset;
 
     bHash = EdrvCalcHash (pbMacAddr_p);
-/*
+
+    {
+        DWORD dwData;
     dwData = ether_crc(6, pbMacAddr_p);
 
     PRINTF("EdrvDefineRxMacAddrEntry('%02X:%02X:%02X:%02X:%02X:%02X') hash = %u / %u  ether_crc = 0x%08lX\n",
         (WORD) pbMacAddr_p[0], (WORD) pbMacAddr_p[1], (WORD) pbMacAddr_p[2],
         (WORD) pbMacAddr_p[3], (WORD) pbMacAddr_p[4], (WORD) pbMacAddr_p[5],
-        (WORD) bHash, (WORD) (dwData >> 26), dwData);
-*/
+        (WORD) bHash, (WORD) (dwData & 0x3F), dwData);
+    }
 
     bOffset = (bHash >> 3);
     bData = EDRV_REGB_READ(EDRV_REGB_MAR + bOffset);
+
+    PRINTF4("%s MAR[%u] %02X | %02X\n", __func__, (WORD) bOffset, (WORD) bData,1 << (bHash & 0x07));
+
     bData |= 1 << (bHash & 0x07);
     EDRV_REGB_WRITE(EDRV_REGB_MAR + bOffset, bData);
+
+    PRINTF1("%s", __func__);
+    for (bOffset = 0; bOffset < 8; bOffset++)
+    {
+        PRINTF1(" %02X", EDRV_REGB_READ(EDRV_REGB_MAR + bOffset));
+    }
+    PRINTF0("\n");
 
     return Ret;
 }
@@ -1056,6 +1070,13 @@ struct resource* pResource;
     EDRV_REGB_WRITE((EDRV_REGB_MAR + iResult), 0x80);
     iResult = 0;
 
+/*
+    {
+        BYTE abBroadcast[] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
+        PRINTF2("%s broadcast hash: %02X\n", __func__, (WORD) EdrvCalcHash(abBroadcast));
+    }
+*/
+
     // enable receiver
     PRINTF1("%s enable Rx\n", __FUNCTION__);
     EDRV_REGB_WRITE(EDRV_REGB_RCR, EDRV_REGB_RCR_DEF);
@@ -1139,7 +1160,7 @@ Exit:
 // State:
 //
 //---------------------------------------------------------------------------
-#define CRC32_POLY    0x04C11DB6  //
+#define CRC32_POLY    0x04C11DB7  // 6
 //#define CRC32_POLY    0xEDB88320  //
 // G(x) = x32 + x26 + x23 + x22 + x16 + x12 + x11 + x10 + x8 + x7 + x5 + x4 + x2 + x + 1
 

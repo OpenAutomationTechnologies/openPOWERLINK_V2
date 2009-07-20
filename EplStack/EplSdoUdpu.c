@@ -837,11 +837,13 @@ tEplSdoConHdl       SdoConHdl;
     //complete_and_exit(&SdoUdpInstance_g.m_CompletionUdpThread, 0);
 
     /* Hmm, linux becomes *very* unhappy without this ... */
+    flush_signals(current);
     while (!kthread_should_stop()) {
         printk("%s: waiting for kthread_stop()\n", __FUNCTION__);
         set_current_state(TASK_INTERRUPTIBLE);
         schedule();
     }
+
 #endif
 
     return 0;

@@ -85,6 +85,7 @@
 //#include <asm/atomic.h>
 #include <linux/interrupt.h>
 #include <linux/clk.h>
+#include <linux/err.h>
 
 #include <asm/arch/at91rm9200.h>
 #include <asm/arch/at91_tc.h>
@@ -220,6 +221,8 @@ unsigned long   ulMck;  // master clock rate
     // fetch the IO address of the timer/counter block
     EplTimerHighReskInstance_l.m_pIoAddr = ioremap(((FIRST_USED_TC_UNIT < 3) ? AT91RM9200_BASE_TCB0 : AT91RM9200_BASE_TCB1),
                                                    256);
+
+    PRINTF2("%s: IoAddr=%p\n", __func__, EplTimerHighReskInstance_l.m_pIoAddr);
     if (EplTimerHighReskInstance_l.m_pIoAddr == NULL)
     {
         Ret = kEplNoResource;
@@ -230,19 +233,22 @@ unsigned long   ulMck;  // master clock rate
 
     for (uiIndex = 0; uiIndex < TIMER_COUNT; uiIndex++, pTimerInfo++)
     {
-        iResult = snprintf(szClkName, sizeof (szClkName), "t%u_clk", (FIRST_USED_TC_UNIT + uiIndex));
+        iResult = snprintf(szClkName, sizeof (szClkName), "tc%u_clk", (FIRST_USED_TC_UNIT + uiIndex));
 
         pTimerInfo->m_pClk = clk_get(NULL, szClkName);
-        if (pTimerInfo->m_pClk == NULL)
+        PRINTF3("%s: Clk '%s'=%p\n", __func__, szClkName, pTimerInfo->m_pClk);
+        if (IS_ERR(pTimerInfo->m_pClk))
         {
             Ret = kEplNoResource;
             goto Exit;
         }
 
         clk_enable(pTimerInfo->m_pClk);
+        PRINTF2("%s: Clk '%s' enabled\n", __func__, szClkName);
 
         // disable the clock counter
         __raw_writel(AT91_TC_CLKDIS, AT91_TC_REG(uiIndex, CCR));
+        PRINTF2("%s: clock counter disabled (reg=%p)\n", __func__, AT91_TC_REG(uiIndex, CCR));
 
         // disable all interrupts from the timer/counter unit
         __raw_writel(0xFFFFFFFF, AT91_TC_REG(uiIndex, IDR));
@@ -252,11 +258,13 @@ unsigned long   ulMck;  // master clock rate
 
         // enable the RC compare interrupt
         __raw_writel(AT91_TC_CPCS, AT91_TC_REG(uiIndex, IER));
+        PRINTF2("%s: RC compare interrupt enabled (reg=%p)\n", __func__, AT91_TC_REG(uiIndex, IER));
 
         iIrq = AT91RM9200_ID_TC0 + FIRST_USED_TC_UNIT + uiIndex;
         iResult = request_irq(iIrq, TgtTimerCounterIsr, IRQF_SHARED,
                               "Timer/Counter",
                               pTimerInfo);
+        PRINTF2("%s: interrupt registered (return=%d)\n", __func__, iResult);
         if (iResult != 0)
         {
             Ret = kEplNoResource;
@@ -267,13 +275,18 @@ unsigned long   ulMck;  // master clock rate
 
     // fetch frequency of MCK (master clock)
     ulMck = clk_get_rate(EplTimerHighReskInstance_l.m_aTimerInfo[0].m_pClk);
+    PRINTF2("%s: master clock rate = %lu Hz\n", __func__, ulMck);
 
     // calculate t_max for each prescaler
     for (uiIndex = 0; uiIndex < PRESCALER_COUNT; uiIndex++)
     {
         EplTimerHighReskInstance_l.m_aullMaxTimeoutNs[uiIndex] = 65535000000000LL;
         EplTimerHighReskInstance_l.m_auiFreq[uiIndex] = ulMck / auiEpltimerHighReskPrescaler_l[uiIndex];
+        PRINTF3("%s: prescaler[%u]=%u Hz)\n", __func__, uiIndex, EplTimerHighReskInstance_l.m_auiFreq[uiIndex]);
+
         do_div(EplTimerHighReskInstance_l.m_aullMaxTimeoutNs[uiIndex], EplTimerHighReskInstance_l.m_auiFreq[uiIndex]);
+
+        PRINTF3("%s: t_max[%u]=%Lu ns)\n", __func__, uiIndex, EplTimerHighReskInstance_l.m_aullMaxTimeoutNs[uiIndex]);
     }
 
 
@@ -443,6 +456,8 @@ WORD                        wCounter;
                   + 500000000ULL;
     do_div(ullTimeNs_p, 1000000000UL);
     wCounter = (WORD) ullTimeNs_p;
+
+    PRINTF4("%s: [%u] wCounter=%u presc=%u)\n", __func__, uiIndex, wCounter, uiPrescaler);
 
     // configure the timer unit
     __raw_writel(uiPrescaler | AT91_TC_WAVE | AT91_TC_WAVESEL_UP_AUTO
