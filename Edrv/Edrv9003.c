@@ -87,7 +87,7 @@
 #include <asm/irq.h>
 #include <linux/sched.h>
 #include <linux/delay.h>
-#include <linux/crc32.h>
+//#include <linux/crc32.h>
 
 
 /***************************************************************************/
@@ -405,21 +405,21 @@ int         iResult;
     iResult = platform_driver_register(&EdrvDriver);
     if (iResult != 0)
     {
-        PRINTF2("%s pci_register_driver failed with %d\n", __FUNCTION__, iResult);
+        PRINTF2("%s pci_register_driver failed with %d\n", __func__, iResult);
         Ret = kEplNoResource;
         goto Exit;
     }
 
     if (EdrvInstance_l.m_pDev == NULL)
     {
-        PRINTF1("%s m_pDev=NULL\n", __FUNCTION__);
+        PRINTF1("%s m_pDev=NULL\n", __func__);
         Ret = kEplNoResource;
         goto Exit;
     }
 
 /*
     // read MAC address from controller
-    PRINTF1("%s local MAC = ", __FUNCTION__);
+    PRINTF1("%s local MAC = ", __func__);
     for (iResult = 0; iResult < 6; iResult++)
     {
         pEdrvInitParam_p->m_abMyMacAddr[iResult] = EDRV_REGB_READ((EDRV_REGDW_IDR0 + iResult));
@@ -451,7 +451,7 @@ tEplKernel EdrvShutdown(void)
 {
 
     // unregister PCI driver
-    PRINTF1("%s calling platform_driver_unregister()\n", __FUNCTION__);
+    PRINTF1("%s calling platform_driver_unregister()\n", __func__);
     platform_driver_unregister (&EdrvDriver);
 
     return kEplSuccessful;
@@ -479,7 +479,7 @@ BYTE        bData;
 BYTE        bOffset;
 
     bHash = EdrvCalcHash (pbMacAddr_p);
-
+/*
     {
         DWORD dwData;
     dwData = ether_crc(6, pbMacAddr_p);
@@ -489,6 +489,7 @@ BYTE        bOffset;
         (WORD) pbMacAddr_p[3], (WORD) pbMacAddr_p[4], (WORD) pbMacAddr_p[5],
         (WORD) bHash, (WORD) (dwData & 0x3F), dwData);
     }
+*/
 
     bOffset = (bHash >> 3);
     bData = EDRV_REGB_READ(EDRV_REGB_MAR + bOffset);
@@ -498,13 +499,14 @@ BYTE        bOffset;
     bData |= 1 << (bHash & 0x07);
     EDRV_REGB_WRITE(EDRV_REGB_MAR + bOffset, bData);
 
+/*
     PRINTF1("%s", __func__);
     for (bOffset = 0; bOffset < 8; bOffset++)
     {
         PRINTF1(" %02X", EDRV_REGB_READ(EDRV_REGB_MAR + bOffset));
     }
     PRINTF0("\n");
-
+*/
     return Ret;
 }
 
@@ -823,7 +825,7 @@ int             iHandled = IRQ_HANDLED;
 
         if (EdrvInstance_l.m_pbRxBuf == NULL)
         {
-            PRINTF1("%s Rx buffers currently not allocated\n", __FUNCTION__);
+            PRINTF1("%s Rx buffers currently not allocated\n", __func__);
             goto Exit;
         }
 
@@ -928,14 +930,14 @@ struct resource* pResource;
 
     if (EdrvInstance_l.m_pDev != NULL)
     {   // Edrv is already connected to a PCI device
-        PRINTF2("%s device %s discarded\n", __FUNCTION__, pPlatformDev_p->name);
+        PRINTF2("%s device %s discarded\n", __func__, pPlatformDev_p->name);
         iResult = -ENODEV;
         goto Exit;
     }
 
     EdrvInstance_l.m_pDev = pPlatformDev_p;
 
-    PRINTF1("%s get resource IOMEM... ", __FUNCTION__);
+    PRINTF1("%s get resource IOMEM... ", __func__);
     pResource = platform_get_resource(pPlatformDev_p, IORESOURCE_MEM, 0);
     if (pResource == NULL)
     {
@@ -948,7 +950,7 @@ struct resource* pResource;
         PRINTF0("OK\n");
     }
 
-    PRINTF1("%s ioremap... ", __FUNCTION__);
+    PRINTF1("%s ioremap... ", __func__);
     EdrvInstance_l.m_pIoAddr = ioremap (pResource->start, 0x08);
     if (EdrvInstance_l.m_pIoAddr == NULL)
     {   // remap of controller's register space failed
@@ -967,11 +969,11 @@ struct resource* pResource;
     dwTemp |= EDRV_REGB_READ(EDRV_REGB_PIDL) << 16;
     dwTemp |= EDRV_REGB_READ(EDRV_REGB_PIDH) << 24;
 
-    PRINTF2("%s check device ID (%X)... ", __FUNCTION__, EDRV_REGB_ID_DM9003);
+    PRINTF2("%s check device ID (%X)... ", __func__, EDRV_REGB_ID_DM9003);
     if (dwTemp != EDRV_REGB_ID_DM9003)
     {   // device is not supported by this driver
         PRINTF0("FAILED\n");
-        PRINTF2("%s device ID %lX not supported\n", __FUNCTION__, dwTemp);
+        PRINTF2("%s device ID %lX not supported\n", __func__, dwTemp);
         iResult = -ENODEV;
         goto Exit;
     }
@@ -981,7 +983,7 @@ struct resource* pResource;
     }
 
     // reset switch
-    PRINTF1("%s reset switch... ", __FUNCTION__);
+    PRINTF1("%s reset switch... ", __func__);
     EDRV_REGB_WRITE(EDRV_REGB_SWITCHCR, EDRV_REGB_SWITCHCR_RST_SW);
 
     // wait until reset has finished
@@ -998,7 +1000,7 @@ struct resource* pResource;
 
 
     // reset controller
-    PRINTF1("%s reset controller... ", __FUNCTION__);
+    PRINTF1("%s reset controller... ", __func__);
     EDRV_REGB_WRITE(EDRV_REGB_NCR, EDRV_REGB_NCR_RST);
 
     // wait until reset has finished
@@ -1014,13 +1016,13 @@ struct resource* pResource;
     PRINTF0("Done\n");
 
     // disable interrupts
-    PRINTF1("%s disable interrupts\n", __FUNCTION__);
+    PRINTF1("%s disable interrupts\n", __func__);
     EDRV_REGB_WRITE(EDRV_REGB_IMR, 0);
     // acknowledge all pending interrupts
     EDRV_REGB_WRITE(EDRV_REGB_ISR, (EDRV_REGB_READ(EDRV_REGB_ISR) & ~EDRV_REGB_INT_IO_8BIT));
 
     // install interrupt handler
-    PRINTF1("%s install interrupt handler... ", __FUNCTION__);
+    PRINTF1("%s install interrupt handler... ", __func__);
     iResult = request_irq(platform_get_irq(pPlatformDev_p, 0),
                           TgtEthIsr,
                           IRQF_SHARED, //IRQF_NODELAY,
@@ -1037,7 +1039,7 @@ struct resource* pResource;
     }
 
     // allocate Rx buffer
-    PRINTF1("%s allocate Rx buffer... ", __FUNCTION__);
+    PRINTF1("%s allocate Rx buffer... ", __func__);
     EdrvInstance_l.m_pbRxBuf = EPL_MALLOC(EDRV_MAX_FRAME_SIZE);
     if (EdrvInstance_l.m_pbRxBuf == NULL)
     {
@@ -1053,7 +1055,7 @@ struct resource* pResource;
     // $$$ (re)set PHY mode
 
     // enable Rx flow control
-    PRINTF1("%s enable Rx flow control\n", __FUNCTION__);
+    PRINTF1("%s enable Rx flow control\n", __func__);
     EDRV_REGB_WRITE(EDRV_REGB_FCR, EDRV_REGB_FCR_FLOW_EN);
 
     // set MAC address
@@ -1078,16 +1080,16 @@ struct resource* pResource;
 */
 
     // enable receiver
-    PRINTF1("%s enable Rx\n", __FUNCTION__);
+    PRINTF1("%s enable Rx\n", __func__);
     EDRV_REGB_WRITE(EDRV_REGB_RCR, EDRV_REGB_RCR_DEF);
 
     // enable interrupts
-    PRINTF1("%s enable interrupts\n", __FUNCTION__);
+    PRINTF1("%s enable interrupts\n", __func__);
     EDRV_REGB_WRITE(EDRV_REGB_IMR, EDRV_REGB_INT_MASK_DEF);
 
 
 Exit:
-    PRINTF2("%s finished with %d\n", __FUNCTION__, iResult);
+    PRINTF2("%s finished with %d\n", __func__, iResult);
     return iResult;
 }
 

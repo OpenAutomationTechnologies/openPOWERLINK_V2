@@ -457,7 +457,7 @@ WORD                        wCounter;
     do_div(ullTimeNs_p, 1000000000UL);
     wCounter = (WORD) ullTimeNs_p;
 
-    PRINTF4("%s: [%u] wCounter=%u presc=%u)\n", __func__, uiIndex, wCounter, uiPrescaler);
+//    PRINTF4("%s: [%u] wCounter=%u presc=%u)\n", __func__, uiIndex, wCounter, uiPrescaler);
 
     // configure the timer unit
     __raw_writel(uiPrescaler | AT91_TC_WAVE | AT91_TC_WAVESEL_UP_AUTO
@@ -473,7 +473,7 @@ WORD                        wCounter;
     *pTimerHdl_p = pTimerInfo->m_EventArg.m_TimerHdl;
 
     // start timer
-    __raw_writel(AT91_TC_SWTRG, AT91_TC_REG(uiIndex, CCR));
+    __raw_writel((AT91_TC_SWTRG | AT91_TC_CLKEN), AT91_TC_REG(uiIndex, CCR));
 
 Exit:
     return Ret;
@@ -586,6 +586,6 @@ tEplTimerHighReskTimerInfo* pTimerInfo = (tEplTimerHighReskTimerInfo*)pDevInstDa
 
 Exit:
     BENCHMARK_MOD_24_RESET(4);
-    return 0;
+    return IRQ_HANDLED;
 }
 
