@@ -248,3 +248,19 @@ Fellow worker:    Daniel Krüger (d.k.)
                       from the stack, i.e. the stack can be moved into a library.
                     - API wrapper for Linux kernel-user: added new function EplApiPostUserEvent()
                     (d.k.)
+
+06.07.2009 V1.5.2   - removed some inexistent or unnecessary header files in Windows
+                      project demo_pcap
+                    (d.k.)
+
+09.07.2009 V1.5.2   - EplDllkTgt.h: includes now linux/spinlock.h instead of asm/spinlock.h,
+                      because this is the right way to do it
+                    (d.k.)
+
+20.07.2009 V1.5.2   - EplSdoUdpu.c: flush signals when receive thread finishes.
+                    (d.k.)
+
+28.07.2009 V1.5.2   - added support for Davicom DM9003 Ethernet controller connected to Atmel AT91RM9200
+                      under Linux 2.6.22.
+                    (d.k.)
+
