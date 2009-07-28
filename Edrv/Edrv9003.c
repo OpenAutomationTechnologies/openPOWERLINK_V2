@@ -107,7 +107,7 @@
 //---------------------------------------------------------------------------
 
 #define EDRV_MAX_FRAME_SIZE     0x600
-
+#define EDRV_PHY_PORT_COUNT     2
 #define DRV_NAME                "dm9sw_st"  // name of platform device
 
 
@@ -362,6 +362,50 @@ WORD*           pwSrc;
 }
 
 
+static inline WORD EdrvPhyRead(BYTE bPhyPort_p, BYTE bPhyReg_p)
+{
+WORD wRegVal;
+
+    EDRV_REGB_WRITE(EDRV_REGB_EPAR, ((bPhyPort_p << 6) | bPhyReg_p));
+    EDRV_REGB_WRITE(EDRV_REGB_EPCR, 0x08); // clear command
+    EDRV_REGB_WRITE(EDRV_REGB_EPCR, 0x0C); // issue read command
+    EDRV_REGB_WRITE(EDRV_REGB_EPCR, 0x08); // clear command
+    do
+    {
+        if ((EDRV_REGB_READ(EDRV_REGB_EPCR) & 0x01) == 0x00)
+        {
+            break;
+        }
+    }
+    while (TRUE);
+
+    wRegVal = (EDRV_REGB_READ(EDRV_REGB_EPDRH) << 8)
+              | EDRV_REGB_READ(EDRV_REGB_EPDRL);
+    return wRegVal;
+}
+
+
+static inline void EdrvPhyWrite(BYTE bPhyPort_p, BYTE bPhyReg_p, WORD wVal_p)
+{
+
+    EDRV_REGB_WRITE(EDRV_REGB_EPAR, ((bPhyPort_p << 6) | bPhyReg_p));
+
+    EDRV_REGB_WRITE(EDRV_REGB_EPDRH, (wVal_p >> 8));
+    EDRV_REGB_WRITE(EDRV_REGB_EPDRL, (wVal_p & 0xFF));
+
+    EDRV_REGB_WRITE(EDRV_REGB_EPCR, 0x08); // clear command
+    EDRV_REGB_WRITE(EDRV_REGB_EPCR, 0x0A); // issue write command
+    EDRV_REGB_WRITE(EDRV_REGB_EPCR, 0x08); // clear command
+    do
+    {
+        if ((EDRV_REGB_READ(EDRV_REGB_EPCR) & 0x01) == 0x00)
+        {
+            break;
+        }
+    }
+    while (TRUE);
+
+}
 
 
 //---------------------------------------------------------------------------
@@ -925,6 +969,7 @@ Exit:
 static int EdrvInitOne(struct platform_device *pPlatformDev_p)
 {
 int     iResult = 0;
+int     iIndex = 0;
 DWORD   dwTemp;
 struct resource* pResource;
 
@@ -1052,7 +1097,26 @@ struct resource* pResource;
         PRINTF0("OK\n");
     }
 
-    // $$$ (re)set PHY mode
+    // reset PHYs
+    PRINTF1("%s reset PHYs... ", __func__);
+    for (iIndex = 0; iIndex < EDRV_PHY_PORT_COUNT; iIndex++)
+    {
+        EdrvPhyWrite(iIndex, 0x00, 0x8000);
+    }
+
+    for (iIndex = 0; iIndex < EDRV_PHY_PORT_COUNT; iIndex++)
+    {
+        for (iResult = 50; iResult > 0; iResult--)
+        {
+            if ((EdrvPhyRead(iIndex, 0x00) & 0x8000) == 0)
+            {
+                break;
+            }
+
+            schedule_timeout(10);
+        }
+    }
+    PRINTF0("Done\n");
 
     // enable Rx flow control
     PRINTF1("%s enable Rx flow control\n", __func__);
