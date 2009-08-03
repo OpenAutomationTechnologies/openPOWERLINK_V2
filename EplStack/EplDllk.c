@@ -1246,32 +1246,38 @@ Exit:
 tEplKernel EplDllkConfig(tEplDllConfigParam * pDllConfigParam_p)
 {
 tEplKernel      Ret = kEplSuccessful;
-
-// d.k. check of NMT state disabled, because CycleLen is programmed at run time by MN without reset of CN
-/*tEplNmtState    NmtState;
+tEplNmtState    NmtState;
 
     NmtState = EplNmtkGetNmtState();
 
     if (NmtState > kEplNmtGsResetConfiguration)
-    {   // only allowed in state DLL_GS_INIT
-        Ret = kEplInvalidOperation;
-        goto Exit;
-    }
-*/
-    EPL_MEMCPY (&EplDllkInstance_g.m_DllConfigParam, pDllConfigParam_p,
-        (pDllConfigParam_p->m_uiSizeOfStruct < sizeof (tEplDllConfigParam) ?
-        pDllConfigParam_p->m_uiSizeOfStruct : sizeof (tEplDllConfigParam)));
-
-    if ((EplDllkInstance_g.m_DllConfigParam.m_dwCycleLen != 0)
-        && (EplDllkInstance_g.m_DllConfigParam.m_dwLossOfFrameTolerance != 0))
-    {   // monitor EPL cycle, calculate frame timeout
-        EplDllkInstance_g.m_ullFrameTimeout = (1000LL
-            * ((unsigned long long) EplDllkInstance_g.m_DllConfigParam.m_dwCycleLen))
-            + ((unsigned long long) EplDllkInstance_g.m_DllConfigParam.m_dwLossOfFrameTolerance);
+    {   // configuration updates are only allowed in state DLL_GS_INIT, except LossOfFrameTolerance,
+        // because all other parameters are "valid on reset".
+        EplDllkInstance_g.m_DllConfigParam.m_dwLossOfFrameTolerance = pDllConfigParam_p->m_dwLossOfFrameTolerance;
     }
     else
-    {
-        EplDllkInstance_g.m_ullFrameTimeout = 0LL;
+    {   // copy entire configuration to local storage,
+        // because we are in state DLL_GS_INIT
+        EPL_MEMCPY (&EplDllkInstance_g.m_DllConfigParam, pDllConfigParam_p,
+            (pDllConfigParam_p->m_uiSizeOfStruct < sizeof (tEplDllConfigParam) ?
+            pDllConfigParam_p->m_uiSizeOfStruct : sizeof (tEplDllConfigParam)));
+    }
+
+    if (NmtState < kEplNmtMsNotActive)
+    {   // CN or NMT reset states are active,
+        // so we can calculate the frame timeout.
+        // MN calculates on kEplEventTypeDllkCreate, its own frame timeout.
+        if ((EplDllkInstance_g.m_DllConfigParam.m_dwCycleLen != 0)
+            && (EplDllkInstance_g.m_DllConfigParam.m_dwLossOfFrameTolerance != 0))
+        {   // monitor EPL cycle, calculate frame timeout
+            EplDllkInstance_g.m_ullFrameTimeout = (1000LL
+                * ((unsigned long long) EplDllkInstance_g.m_DllConfigParam.m_dwCycleLen))
+                + ((unsigned long long) EplDllkInstance_g.m_DllConfigParam.m_dwLossOfFrameTolerance);
+        }
+        else
+        {
+            EplDllkInstance_g.m_ullFrameTimeout = 0LL;
+        }
     }
 
     if (EplDllkInstance_g.m_DllConfigParam.m_fAsyncOnly != FALSE)
