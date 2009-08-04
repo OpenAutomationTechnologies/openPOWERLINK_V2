@@ -69,7 +69,7 @@
 ****************************************************************************/
 
 #include "kernel/EplNmtk.h"
-#include "kernel/EplTimerk.h"
+#include "EplTimer.h"           // for tEplTimerEventArg
 
 #include "kernel/EplDllk.h"     // for EplDllkProcess()
 

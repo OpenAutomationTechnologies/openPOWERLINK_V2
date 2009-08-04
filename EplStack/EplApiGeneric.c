@@ -74,7 +74,6 @@
 #include "kernel/EplEventk.h"
 #include "kernel/EplNmtk.h"
 #include "kernel/EplObdk.h"
-#include "kernel/EplTimerk.h"
 #include "kernel/EplDllkCal.h"
 #include "kernel/EplPdokCal.h"
 #include "user/EplDlluCal.h"
@@ -84,6 +83,7 @@
 #include "user/EplSdoComu.h"
 #include "user/EplIdentu.h"
 #include "user/EplStatusu.h"
+#include "user/EplTimeru.h"
 
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOK)) != 0)
 #include "kernel/EplPdok.h"
@@ -301,13 +301,6 @@ tEplDllkInitParam   DllkInitParam;
         goto Exit;
     }
 
-    // init EplTimerk module
-    Ret = EplTimerkInit();
-    if (Ret != kEplSuccessful)
-    {
-        goto Exit;
-    }
-
     // initialize EplNmtk module before DLL
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMTK)) != 0)
     Ret = EplNmtkInit();
@@ -341,6 +334,13 @@ tEplDllkInitParam   DllkInitParam;
         goto Exit;
     }
 #endif
+
+    // init EplTimeru module
+    Ret = EplTimeruInit();
+    if (Ret != kEplSuccessful)
+    {
+        goto Exit;
+    }
 
     // initialize EplDlluCal module
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLU)) != 0)
@@ -517,6 +517,10 @@ tEplKernel      Ret = kEplSuccessful;
 
 #endif
 
+    // deinitialize EplTimeru module
+    Ret = EplTimeruDelInstance();
+//    PRINTF1("EplTimeruDelInstance():  0x%X\n", Ret);
+
     // deinitialize EplEventu module
     Ret = EplEventuDelInstance();
 //    PRINTF1("EplEventuDelInstance():  0x%X\n", Ret);
@@ -540,10 +544,6 @@ tEplKernel      Ret = kEplSuccessful;
     // deinitialize EplEventk module
     Ret = EplEventkDelInstance();
 //    PRINTF1("EplEventkDelInstance():  0x%X\n", Ret);
-
-    // deinitialize EplTimerk module
-    Ret = EplTimerkDelInstance();
-//    PRINTF1("EplTimerkDelInstance():  0x%X\n", Ret);
 
 #ifndef EPL_NO_FIFO
     ShbExit();

@@ -71,16 +71,15 @@
 
 #include "Epl.h"
 #include "EplApiLinux.h"
-#include "kernel/EplDllk.h"
-#include "kernel/EplEventk.h"
-#include "kernel/EplNmtk.h"
-#include "kernel/EplObdk.h"
-#include "kernel/EplTimerk.h"
-#include "kernel/EplDllkCal.h"
-#include "kernel/EplPdokCal.h"
-#include "user/EplDlluCal.h"
-#include "user/EplNmtCnu.h"
-#include "user/EplSdoComu.h"
+//#include "kernel/EplDllk.h"
+//#include "kernel/EplEventk.h"
+//#include "kernel/EplNmtk.h"
+//#include "kernel/EplObdk.h"
+//#include "kernel/EplDllkCal.h"
+//#include "kernel/EplPdokCal.h"
+//#include "user/EplDlluCal.h"
+//#include "user/EplNmtCnu.h"
+//#include "user/EplSdoComu.h"
 
 #include <stdio.h>
 #include <stdlib.h>

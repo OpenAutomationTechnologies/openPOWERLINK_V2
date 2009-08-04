@@ -1323,9 +1323,11 @@ tEplKernel      Ret = kEplSuccessful;
 //
 // Function:    EplDllkRegAsyncHandler
 //
-// Description: registers handler for non-EPL frames
+// Description: registers handler for non-EPL frames (used by virtual Ethernet driver)
 //
-// Parameters:  pfnDllkCbAsync_p        = pointer to callback function
+// Parameters:  pfnDllkCbAsync_p        = pointer to callback function,
+//                                        which will be called in interrupt context
+//                                        normally.
 //
 // Returns:     tEplKernel              = error code
 //

@@ -308,7 +308,7 @@ tEplKernel  Ret = kEplSuccessful;
 // Description: sends the frame with the specified priority.
 //
 // Parameters:  pFrameInfo_p            = frame
-//                                        m_uiFrameSize does not include the
+//                                        m_uiFrameSize includes the
 //                                        ethernet header (14 bytes)
 //              Priority_p              = priority
 //
@@ -324,7 +324,6 @@ tEplKernel EplDlluCalAsyncSend(tEplFrameInfo * pFrameInfo_p, tEplDllAsyncReqPrio
 tEplKernel  Ret = kEplSuccessful;
 
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLK)) != 0)
-    pFrameInfo_p->m_uiFrameSize += 14;  // add size of ethernet header
     Ret = EplDllkCalAsyncSend(pFrameInfo_p, Priority_p);
 #else
     Ret = kEplSuccessful;

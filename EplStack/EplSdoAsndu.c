@@ -367,8 +367,8 @@ tEplFrameInfo   FrameInfo;
     // set source-nodeid (filled by DLL 0)
     AmiSetByteToLe(&pSrcData_p->m_le_bSrcNodeId, 0x00);
 
-    // calc size
-    dwDataSize_p += EPL_ASND_HEADER_SIZE;
+    // calc size (add Ethernet and ASnd header size)
+    dwDataSize_p += (DWORD) ((BYTE*) &pSrcData_p->m_Data.m_Asnd.m_Payload.m_SdoSequenceFrame - (BYTE*) pSrcData_p);
 
     // send function of DLL
     FrameInfo.m_uiFrameSize = dwDataSize_p;
