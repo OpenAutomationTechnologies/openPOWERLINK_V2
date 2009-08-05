@@ -351,7 +351,7 @@ EPL_OBD_BEGIN ()
         EPL_OBD_RAM_INDEX_RAM_ARRAY(0x1F8E, 254, NULL, 0x05, 0x01, tEplObdUnsigned8, NMT_MNNodeCurrState_AU8, 0x1C)
 
         // Object 1F8Fh: NMT_MNNodeExpState_AU8
-        EPL_OBD_RAM_INDEX_RAM_ARRAY(0x1F8F, 254, NULL, 0x05, 0x03, tEplObdUnsigned8, NMT_MNNodeExpState_AU8, 0x1C)
+        EPL_OBD_RAM_INDEX_RAM_ARRAY(0x1F8F, 254, NULL, 0x05, 0x01, tEplObdUnsigned8, NMT_MNNodeExpState_AU8, 0x1C)
 
         // Object 1F92h: NMT_MNCNPResTimeout_AU32 in [ns]
         EPL_OBD_RAM_INDEX_RAM_ARRAY(0x1F92, 254, NULL, 0x07, 0x03, tEplObdUnsigned32, NMT_MNCNPResTimeout_AU32, 140000) // in [ns]
