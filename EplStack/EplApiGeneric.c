@@ -85,6 +85,10 @@
 #include "user/EplStatusu.h"
 #include "user/EplTimeru.h"
 
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_VETH)) != 0)
+#include "kernel/VirtualEthernet.h"
+#endif
+
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOK)) != 0)
 #include "kernel/EplPdok.h"
 #endif
@@ -319,6 +323,8 @@ tEplDllkInitParam   DllkInitParam;
     {
         goto Exit;
     }
+    // copy MAC address back to instance structure
+    EPL_MEMCPY(EplApiInstance_g.m_InitParam.m_abMacAddress, DllkInitParam.m_be_abSrcMac, 6);
 
     // initialize EplErrorHandlerk module
     Ret = EplErrorHandlerkInit();
@@ -350,6 +356,15 @@ tEplDllkInitParam   DllkInitParam;
         goto Exit;
     }
 
+#endif
+
+    // initialize Virtual Ethernet Driver
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_VETH)) != 0)
+    Ret = VEthAddInstance(EplApiInstance_g.m_InitParam.m_abMacAddress);
+    if (Ret != kEplSuccessful)
+    {
+        goto Exit;
+    }
 #endif
 
     // initialize EplPdok module
@@ -508,6 +523,11 @@ tEplKernel      Ret = kEplSuccessful;
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMTU)) != 0)
     Ret = EplNmtuDelInstance();
 //    PRINTF1("EplNmtuDelInstance():    0x%X\n", Ret);
+#endif
+
+    // deinitialize Virtual Ethernet Driver
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_VETH)) != 0)
+    Ret = VEthDelInstance();
 #endif
 
     // deinitialize EplDlluCal module
@@ -1780,6 +1800,29 @@ BYTE                bTemp;
         DllIdentParam.m_dwIpAddress = EplApiInstance_g.m_InitParam.m_dwIpAddress;
         DllIdentParam.m_dwSubnetMask = EplApiInstance_g.m_InitParam.m_dwSubnetMask;
 
+        ObdSize = sizeof (DllIdentParam.m_dwDefaultGateway);
+        Ret = EplObdReadEntry(0x1E40, 5, &DllIdentParam.m_dwDefaultGateway, &ObdSize);
+        if (Ret != kEplSuccessful)
+        {   // NWL_IpAddrTable_Xh_REC.DefaultGateway_IPAD seams to not exist,
+            // so use the one supplied in the init parameter
+            DllIdentParam.m_dwDefaultGateway = EplApiInstance_g.m_InitParam.m_dwDefaultGateway;
+        }
+
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_VETH)) != 0)
+        // configure Virtual Ethernet Driver
+        Ret = VEthSetIpAddress(DllIdentParam.m_dwIpAddress, DllIdentParam.m_dwSubnetMask);
+        if(Ret != kEplSuccessful)
+        {
+            goto Exit;
+        }
+
+        Ret = VEthSetDefaultGateway(DllIdentParam.m_dwDefaultGateway);
+        if(Ret != kEplSuccessful)
+        {
+            goto Exit;
+        }
+#endif
+
         ObdSize = sizeof (DllIdentParam.m_sHostname);
         Ret = EplObdReadEntry(0x1F9A, 0, &DllIdentParam.m_sHostname[0], &ObdSize);
         if (Ret != kEplSuccessful)
@@ -1984,13 +2027,35 @@ BYTE                bTemp;
             (tEplObdSize) strlen(EplApiInstance_g.m_InitParam.m_pszSwVersion));
     }
 
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_VETH)) != 0)
     // write NMT_HostName_VSTR (0x1F9A)
     Ret = EplObdWriteEntry (
         0x1F9A, 0,
-        (void GENERIC*) EplApiInstance_g.m_InitParam.m_sHostname,
+        (void GENERIC*) &EplApiInstance_g.m_InitParam.m_sHostname[0],
         sizeof (EplApiInstance_g.m_InitParam.m_sHostname));
 
-    PRINTF("%s: write NMT_HostName_VSTR %d\n", __func__, Ret);
+//    PRINTF("%s: write NMT_HostName_VSTR %d\n", __func__, Ret);
+
+    // write NWL_IpAddrTable_Xh_REC.Addr_IPAD (0x1E40/2)
+    Ret = EplObdWriteEntry (
+        0x1E40, 2,
+        (void GENERIC*) &EplApiInstance_g.m_InitParam.m_dwIpAddress,
+        sizeof (EplApiInstance_g.m_InitParam.m_dwIpAddress));
+
+    // write NWL_IpAddrTable_Xh_REC.NetMask_IPAD (0x1E40/3)
+    Ret = EplObdWriteEntry (
+        0x1E40, 3,
+        (void GENERIC*) &EplApiInstance_g.m_InitParam.m_dwSubnetMask,
+        sizeof (EplApiInstance_g.m_InitParam.m_dwSubnetMask));
+
+    // write NWL_IpAddrTable_Xh_REC.DefaultGateway_IPAD (0x1E40/5)
+    Ret = EplObdWriteEntry (
+        0x1E40, 5,
+        (void GENERIC*) &EplApiInstance_g.m_InitParam.m_dwDefaultGateway,
+        sizeof (EplApiInstance_g.m_InitParam.m_dwDefaultGateway));
+
+#endif // (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_VETH)) != 0)
+
     // ignore return code
     Ret = kEplSuccessful;
 

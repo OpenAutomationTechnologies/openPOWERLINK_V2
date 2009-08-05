@@ -72,7 +72,8 @@
 #ifndef _EPL_VETH_H_
 #define _EPL_VETH_H_
 
-#include "EplDllk.h"
+#include "EplInc.h"
+//#include "EplDllk.h"
 
 //---------------------------------------------------------------------------
 // const defines
@@ -90,9 +91,13 @@
 
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_VETH)) != 0)
 
-tEplKernel PUBLIC VEthAddInstance(tEplDllkInitParam * pInitParam_p);
+tEplKernel PUBLIC VEthAddInstance(const BYTE abSrcMac_p[6]);
 
 tEplKernel PUBLIC VEthDelInstance(void);
+
+tEplKernel PUBLIC VEthSetIpAddress(DWORD dwIpAddress_p, DWORD dwSubnetMask_p);
+
+tEplKernel PUBLIC VEthSetDefaultGateway(DWORD dwDefaultGateway_p);
 
 #endif // #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_VETH)) != 0)
 

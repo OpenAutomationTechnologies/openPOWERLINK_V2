@@ -313,7 +313,7 @@ static const struct net_device_ops epl_netdev_ops = {
 #endif
 
 
-tEplKernel PUBLIC VEthAddInstance(tEplDllkInitParam * pInitParam_p)
+tEplKernel PUBLIC VEthAddInstance(const BYTE abSrcMac_p[6])
 {
 tEplKernel  Ret = kEplSuccessful;
 
@@ -340,7 +340,7 @@ tEplKernel  Ret = kEplSuccessful;
     pVEthNetDevice_g->destructor        = free_netdev;
 
     // copy own MAC address to net device structure
-    memcpy(pVEthNetDevice_g->dev_addr, pInitParam_p->m_be_abSrcMac, 6);
+    memcpy(pVEthNetDevice_g->dev_addr, abSrcMac_p, 6);
 
     //register VEth to the network subsystem
     if (register_netdev(pVEthNetDevice_g))
@@ -372,5 +372,96 @@ tEplKernel  Ret = kEplSuccessful;
 
     return Ret;
 }
+
+tEplKernel PUBLIC VEthSetIpAddress(DWORD dwIpAddress_p, DWORD dwSubnetMask_p)
+{
+tEplKernel  Ret = kEplSuccessful;
+int         iRet;
+char*       argv[6];
+char*       envp[3];
+char        sBufferIp[16];
+char        sBufferMask[16];
+
+    // configure IP address of virtual network interface
+    // for TCP/IP communication over the POWERLINK network
+    snprintf(sBufferIp, sizeof (sBufferIp),
+             "%lu.%lu.%lu.%lu",
+             (dwIpAddress_p >> 24),
+             ((dwIpAddress_p >> 16) & 0xFF),
+             ((dwIpAddress_p >> 8) & 0xFF),
+             (dwIpAddress_p & 0xFF));
+
+    snprintf(sBufferMask, sizeof (sBufferMask),
+             "%lu.%lu.%lu.%lu",
+             (dwSubnetMask_p >> 24),
+             ((dwSubnetMask_p >> 16) & 0xFF),
+             ((dwSubnetMask_p >> 8) & 0xFF),
+             (dwSubnetMask_p & 0xFF));
+
+    /* set up a minimal environment */
+    iRet = 0;
+    envp[iRet++] = "HOME=/";
+    envp[iRet++] = "PATH=/sbin:/bin:/usr/sbin:/usr/bin";
+    envp[iRet] = NULL;
+
+    /* set up the argument list */
+    iRet = 0;
+    argv[iRet++] = "/sbin/ifconfig";
+    argv[iRet++] = EPL_VETH_NAME;
+    argv[iRet++] = sBufferIp;
+    argv[iRet++] = "netmask";
+    argv[iRet++] = sBufferMask;
+    argv[iRet] = NULL;
+
+    /* call ifconfig to configure the virtual network interface */
+    iRet = call_usermodehelper(argv[0], argv, envp, 1);
+    printk("ifconfig %s %s returned %d\n", argv[1], argv[2], iRet);
+
+    return Ret;
+}
+
+
+tEplKernel PUBLIC VEthSetDefaultGateway(DWORD dwDefaultGateway_p)
+{
+tEplKernel  Ret = kEplSuccessful;
+int         iRet;
+char*       argv[6];
+char*       envp[3];
+char        sBuffer[16];
+
+    if (dwDefaultGateway_p != 0)
+    {
+        // configure default gateway of virtual network interface
+        // for TCP/IP communication over the POWERLINK network
+        snprintf(sBuffer, sizeof (sBuffer),
+                 "%lu.%lu.%lu.%lu",
+                 (dwDefaultGateway_p >> 24),
+                 ((dwDefaultGateway_p >> 16) & 0xFF),
+                 ((dwDefaultGateway_p >> 8) & 0xFF),
+                 (dwDefaultGateway_p & 0xFF));
+
+        /* set up a minimal environment */
+        iRet = 0;
+        envp[iRet++] = "HOME=/";
+        envp[iRet++] = "PATH=/sbin:/bin:/usr/sbin:/usr/bin";
+        envp[iRet] = NULL;
+
+        /* set up the argument list */
+        iRet = 0;
+        argv[iRet++] = "route";
+        argv[iRet++] = "add";
+        argv[iRet++] = "default";
+        argv[iRet++] = "gw";
+        argv[iRet++] = sBuffer;
+        argv[iRet] = NULL;
+
+        /* call route to configure the default gateway */
+        iRet = call_usermodehelper(argv[0], argv, envp, 1);
+        printk("route add default gw %s returned %d\n", argv[4], iRet);
+    }
+
+    return Ret;
+}
+
 
 #endif // (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_VETH)) != 0)

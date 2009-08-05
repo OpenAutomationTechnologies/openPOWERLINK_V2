@@ -79,10 +79,6 @@
 #include "kernel/EplPdok.h"
 #endif
 
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_VETH)) != 0)
-#include "kernel/VirtualEthernet.h"
-#endif
-
 //#if EPL_TIMER_USE_HIGHRES != FALSE
 #include "kernel/EplTimerHighResk.h"
 //#endif
@@ -372,10 +368,6 @@ tEdrvInitParam  EdrvInitParam;
         EplDllkInstance_g.m_pTxBuffer[uiIndex].m_pbBuffer = NULL;
     }
 
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_VETH)) != 0)
-    Ret = VEthAddInstance(pInitParam_p);
-#endif
-
 Exit:
     return Ret;
 }
@@ -404,10 +396,6 @@ tEplKernel      Ret = kEplSuccessful;
 
 #if EPL_TIMER_USE_HIGHRES != FALSE
     Ret = EplTimerHighReskDelInstance();
-#endif
-
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_VETH)) != 0)
-    Ret = VEthDelInstance();
 #endif
 
     Ret = EdrvShutdown();

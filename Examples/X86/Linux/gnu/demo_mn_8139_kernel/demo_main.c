@@ -134,7 +134,7 @@ MODULE_LICENSE("Dual BSD/GPL");
 #define IP_ADDR     0xc0a86401  // 192.168.100.1
 #define SUBNET_MASK 0xFFFFFF00  // 255.255.255.0
 #define HOSTNAME    "SYS TEC electronic EPL Stack    "
-#define IF_ETH      EPL_VETH_NAME
+//#define IF_ETH      EPL_VETH_NAME
 
 
 // LIGHT EFFECT
@@ -247,11 +247,11 @@ module_exit(EplLinExit);
 static  int  __init  EplLinInit (void)
 {
 tEplKernel          EplRet;
-int                 iRet;
+//int                 iRet;
 static tEplApiInitParam EplApiInitParam = {0};
 char*               sHostname = HOSTNAME;
-char*               argv[4], *envp[3];
-char                sBuffer[16];
+//char*               argv[4], *envp[3];
+//char                sBuffer[16];
 unsigned int        uiVarEntries;
 tEplObdSize         ObdSize;
 
@@ -410,7 +410,7 @@ tEplObdSize         ObdSize;
     dwMode_l = APP_DEFAULT_MODE;
     iMaxCycleCount_l = DEFAULT_MAX_CYCLE_COUNT;
 
-
+#if 0
     // configure IP address of virtual network interface
     // for TCP/IP communication over the POWERLINK network
     sprintf(sBuffer, "%lu.%lu.%lu.%lu", (EplApiInitParam.m_dwIpAddress >> 24), ((EplApiInitParam.m_dwIpAddress >> 16) & 0xFF), ((EplApiInitParam.m_dwIpAddress >> 8) & 0xFF), (EplApiInitParam.m_dwIpAddress & 0xFF));
@@ -430,7 +430,7 @@ tEplObdSize         ObdSize;
     /* call ifconfig to configure the virtual network interface */
     iRet = call_usermodehelper(argv[0], argv, envp, 1);
     printk("ifconfig %s %s returned %d\n", argv[1], argv[2], iRet);
-
+#endif
     // start the NMT state machine
     EplRet = EplApiExecNmtCommand(kEplNmtEventSwReset);
     atomic_set(&AtomicShutdown_g, FALSE);
