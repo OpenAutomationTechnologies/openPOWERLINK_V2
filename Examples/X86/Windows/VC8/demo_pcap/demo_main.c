@@ -332,7 +332,7 @@ int inum;
 
     // set callback functions
     EplApiInitParam.m_pfnCbEvent = AppCbEvent;
-    EplApiInitParam.m_pfnCbSync = AppCbSync;
+    EplApiInitParam.m_pfnCbSyncProcess = AppCbSync;
     EplApiInitParam.m_pfnObdInitRam = EplObdInitRam;
 
 

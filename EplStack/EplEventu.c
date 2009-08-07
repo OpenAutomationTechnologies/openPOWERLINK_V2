@@ -497,6 +497,12 @@ tEplEventSource         EventSource;
         default:
         {
             Ret = kEplEventUnknownSink;
+
+            // Error event for API layer
+            EplEventuPostError(kEplEventSourceEventu,
+                            Ret,
+                            sizeof(pEvent_p->m_EventSink),
+                            &pEvent_p->m_EventSink);
         }
 
     } // end of switch(pEvent_p->m_EventSink)

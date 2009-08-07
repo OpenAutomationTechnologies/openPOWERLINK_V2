@@ -579,7 +579,7 @@ int  iRet;
             }
 
             EplApiInitParam.m_pfnCbEvent = EplLinCbEvent;
-            EplApiInitParam.m_pfnCbSync = EplLinCbSync;
+            EplApiInitParam.m_pfnCbSyncProcess = EplLinCbSync;
             EplApiInitParam.m_pfnObdInitRam = EplObdInitRam;
 
             EplRet = EplApiInitialize(&EplApiInitParam);

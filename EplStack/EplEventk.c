@@ -121,7 +121,8 @@ typedef struct
 #else
 
 #endif
-    tEplSyncCb      m_pfnCbSync;
+    tEplSyncCb      m_pfnCbSyncProcess;
+    tEplSyncCb      m_pfnCbSyncSoc;
     unsigned int    m_uiUserToKernelFullCount;
 
 } tEplEventkInstance;
@@ -166,19 +167,20 @@ static void  EplEventkRxSignalHandlerCb (
 //
 // Description: function initializes the first instance
 //
-// Parameters:  pfnCbSync_p = callback-function for sync event
+// Parameters:  pfnCbSyncProcess_p  = callback-function for process sync event
+//              pfnCbSyncSoc_p      = callback-function for SoC sync event
 //
-// Returns:     tEpKernel   = errorcode
+// Returns:     tEpKernel           = errorcode
 //
 // State:
 //
 //---------------------------------------------------------------------------
 
-tEplKernel PUBLIC EplEventkInit(tEplSyncCb pfnCbSync_p)
+tEplKernel PUBLIC EplEventkInit(tEplSyncCb pfnCbSyncProcess_p, tEplSyncCb pfnCbSyncSoc_p)
 {
 tEplKernel Ret;
 
-    Ret = EplEventkAddInstance(pfnCbSync_p);
+    Ret = EplEventkAddInstance(pfnCbSyncProcess_p, pfnCbSyncSoc_p);
 
     return Ret;
 
@@ -191,15 +193,16 @@ tEplKernel Ret;
 //
 // Description: function adds one more instance
 //
-// Parameters:  pfnCbSync_p = callback-function for sync event
+// Parameters:  pfnCbSyncProcess_p  = callback-function for process sync event
+//              pfnCbSyncSoc_p      = callback-function for SoC sync event
 //
-// Returns:     tEpKernel   = errorcode
+// Returns:     tEpKernel           = errorcode
 //
 // State:
 //
 //---------------------------------------------------------------------------
 
-tEplKernel PUBLIC EplEventkAddInstance(tEplSyncCb pfnCbSync_p)
+tEplKernel PUBLIC EplEventkAddInstance(tEplSyncCb pfnCbSyncProcess_p, tEplSyncCb pfnCbSyncSoc_p)
 {
 tEplKernel      Ret;
 #ifndef EPL_NO_FIFO
@@ -212,8 +215,9 @@ unsigned int    fShbNewCreated;
     // init instance structure
     EplEventkInstance_g.m_uiUserToKernelFullCount = 0;
 
-    // save cb-function
-    EplEventkInstance_g.m_pfnCbSync = pfnCbSync_p;
+    // save callback-functions
+    EplEventkInstance_g.m_pfnCbSyncProcess = pfnCbSyncProcess_p;
+    EplEventkInstance_g.m_pfnCbSyncSoc = pfnCbSyncSoc_p;
 
 #ifndef EPL_NO_FIFO
     // init shared loop buffer
@@ -386,9 +390,9 @@ tEplEventSource         EventSource;
     {
         case kEplEventSinkSync:
         {
-            if (EplEventkInstance_g.m_pfnCbSync != NULL)
+            if (EplEventkInstance_g.m_pfnCbSyncSoc != NULL)
             {
-                Ret = EplEventkInstance_g.m_pfnCbSync();
+                Ret = EplEventkInstance_g.m_pfnCbSyncSoc();
                 if (Ret == kEplSuccessful)
                 {
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOK)) != 0)
@@ -445,6 +449,44 @@ tEplEventSource         EventSource;
                                     sizeof(EventSource),
                                     &EventSource);
                 }
+
+                // call process sync callback to allow the application to access the process variables
+                if (EplEventkInstance_g.m_pfnCbSyncProcess != NULL)
+                {
+                    Ret = EplEventkInstance_g.m_pfnCbSyncProcess();
+                    if (Ret == kEplSuccessful)
+                    {
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOK)) != 0)
+                        // mark TPDOs as valid
+                        Ret = EplPdokCalSetTpdosValid(TRUE);
+#endif
+                    }
+                    else if ((Ret != kEplReject) && (Ret != kEplShutdown))
+                    {
+                        EventSource = kEplEventSourceSyncCb;
+
+                        // Error event for API layer
+                        EplEventkPostError(kEplEventSourceEventk,
+                                        Ret,
+                                        sizeof(EventSource),
+                                        &EventSource);
+                    }
+                }
+
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLK)) != 0)
+                // forward SoA event to DLLk module for cycle preprocessing
+                Ret = EplDllkProcess(pEvent_p);
+                if ((Ret != kEplSuccessful) && (Ret != kEplShutdown))
+                {
+                    EventSource = kEplEventSourceDllk;
+
+                    // Error event for API layer
+                    EplEventkPostError(kEplEventSourceEventk,
+                                    Ret,
+                                    sizeof(EventSource),
+                                    &EventSource);
+                }
+#endif
 
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOK)) != 0)
                 // forward SoA event to PDO module
@@ -549,6 +591,12 @@ tEplEventSource         EventSource;
         default:
         {
             Ret = kEplEventUnknownSink;
+
+            // Error event for API layer
+            EplEventkPostError(kEplEventSourceEventk,
+                            Ret,
+                            sizeof(pEvent_p->m_EventSink),
+                            &pEvent_p->m_EventSink);
         }
 
     } // end of switch(pEvent_p->m_EventSink)

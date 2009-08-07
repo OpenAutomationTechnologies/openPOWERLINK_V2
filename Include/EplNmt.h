@@ -183,6 +183,7 @@ typedef enum
 typedef struct
 {
     tEplNmtState    m_NewNmtState;
+    tEplNmtState    m_OldNmtState;
     tEplNmtEvent    m_NmtEvent;
 
 } tEplEventNmtStateChange;

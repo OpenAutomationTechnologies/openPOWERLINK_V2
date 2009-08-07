@@ -409,7 +409,10 @@ tEplKernel      Ret = kEplSuccessful;
         }
 
         default:
+        {
+            Ret = kEplInvalidEvent;
             break;
+        }
     }
 
 //Exit:

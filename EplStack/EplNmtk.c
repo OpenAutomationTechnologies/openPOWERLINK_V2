@@ -356,8 +356,9 @@ tEplEventNmtStateChange NmtStateChange;
         case kEplNmtGsOff:
         {
             // leave this state only if higher layer says so
-            if(NmtEvent == kEplNmtEventSwReset)
-            {   // new state kEplNmtGsInitialising
+            if (NmtEvent == kEplNmtEventSwReset)
+            {   // NMT_GT8, NMT_GT1
+                // new state kEplNmtGsInitialising
                 EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtGsInitialising;
             }
             break;
@@ -375,14 +376,14 @@ tEplEventNmtStateChange NmtStateChange;
                 // NMT Command SwitchOff
                 case kEplNmtEventCriticalError:
                 case kEplNmtEventSwitchOff:
-                {
+                {   // NMT_GT3
                     EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtGsOff;
                     break;
                 }
 
                 // new state kEplNmtGsResetApplication
                 case kEplNmtEventEnterResetApp:
-                {
+                {   // NMT_GT10
                     EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtGsResetApplication;
                     break;
                 }
@@ -406,14 +407,14 @@ tEplEventNmtStateChange NmtStateChange;
                 // NMT Command SwitchOff
                 case kEplNmtEventCriticalError:
                 case kEplNmtEventSwitchOff:
-                {
+                {   // NMT_GT3
                     EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtGsOff;
                     break;
                 }
 
                 // NMT Command SwReset
                 case kEplNmtEventSwReset:
-                {
+                {   // NMT_GT8
                     EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtGsInitialising;
                     break;
                 }
@@ -421,7 +422,7 @@ tEplEventNmtStateChange NmtStateChange;
                 // leave this state only if higher layer
                 // say so
                 case kEplNmtEventEnterResetCom:
-                {
+                {   // NMT_GT11
                     // new state kEplNmtGsResetCommunication
                     EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtGsResetCommunication;
                     break;
@@ -445,21 +446,21 @@ tEplEventNmtStateChange NmtStateChange;
                 // NMT Command SwitchOff
                 case kEplNmtEventCriticalError:
                 case kEplNmtEventSwitchOff:
-                {
+                {   // NMT_GT3
                     EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtGsOff;
                     break;
                 }
 
                 // NMT Command SwReset
                 case kEplNmtEventSwReset:
-                {
+                {   // NMT_GT8
                     EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtGsInitialising;
                     break;
                 }
 
                 // NMT Command ResetNode
                 case kEplNmtEventResetNode:
-                {
+                {   // NMT_GT4
                     EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtGsResetApplication;
                     break;
                 }
@@ -467,7 +468,7 @@ tEplEventNmtStateChange NmtStateChange;
                 // leave this state only if higher layer
                 // say so
                 case kEplNmtEventEnterResetConfig:
-                {
+                {   // NMT_GT12
                     // new state kEplNmtGsResetCommunication
                     EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtGsResetConfiguration;
                     break;
@@ -496,42 +497,42 @@ tEplEventNmtStateChange NmtStateChange;
                 // NMT Command SwitchOff
                 case kEplNmtEventCriticalError:
                 case kEplNmtEventSwitchOff:
-                {
+                {   // NMT_GT3
                     EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtGsOff;
                     break;
                 }
 
                 // NMT Command SwReset
                 case kEplNmtEventSwReset:
-                {
+                {   // NMT_GT8
                     EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtGsInitialising;
                     break;
                 }
 
                 // NMT Command ResetNode
                 case kEplNmtEventResetNode:
-                {
+                {   // NMT_GT4
                     EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtGsResetApplication;
                     break;
                 }
 
                 // NMT Command ResetCommunication
                 case kEplNmtEventResetCom:
-                {
+                {   // NMT_GT5
                     EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtGsResetCommunication;
                     break;
                 }
 
                 // leave this state only if higher layer says so
                 case kEplNmtEventEnterCsNotActive:
-                {   // Node should be CN
+                {   // Node should be CN (NMT_CT1)
                     EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtCsNotActive;
                     break;
 
                 }
 
                 case kEplNmtEventEnterMsNotActive:
-                {   // Node should be CN
+                {   // Node should be MN (NMT_MT1)
                     #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) == 0)
                         // no MN functionality
                         // TODO: -create error E_NMT_BA1_NO_MN_SUPPORT
@@ -566,58 +567,53 @@ tEplEventNmtStateChange NmtStateChange;
                 // NMT Command SwitchOff
                 case kEplNmtEventCriticalError:
                 case kEplNmtEventSwitchOff:
-                {
+                {   // NMT_GT3
                     EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtGsOff;
                     break;
                 }
 
                 // NMT Command SwReset
                 case kEplNmtEventSwReset:
-                {
+                {   // NMT_GT8
                     EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtGsInitialising;
-//                    Ret = EplTimerkDeleteTimer(&EPL_MCO_GLB_VAR(m_TimerHdl));
                     break;
                 }
 
                 // NMT Command ResetNode
                 case kEplNmtEventResetNode:
-                {
+                {   // NMT_GT4
                     EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtGsResetApplication;
-//                    Ret = EplTimerkDeleteTimer(&EPL_MCO_GLB_VAR(m_TimerHdl));
                     break;
                 }
 
                 // NMT Command ResetCommunication
                 // or internal Communication error
-                case kEplNmtEventResetCom:
-                case kEplNmtEventInternComError:
+                case kEplNmtEventResetCom:          // NMT_GT5
+                case kEplNmtEventInternComError:    // NMT_GT6
                 {
                     EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtGsResetCommunication;
-//                    Ret = EplTimerkDeleteTimer(&EPL_MCO_GLB_VAR(m_TimerHdl));
                     break;
                 }
 
                 // NMT Command Reset Configuration
                 case kEplNmtEventResetConfig:
-                {
+                {   // NMT_GT7
                     EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtGsResetConfiguration;
-//                    Ret = EplTimerkDeleteTimer(&EPL_MCO_GLB_VAR(m_TimerHdl));
                     break;
                 }
 
                 // see if SoA or SoC received
-                // k.t. 20.07.2006: only SoA forces change of state
-                // see EPL V2 DS 1.0.0 p.267
-                // case kEplNmtEventDllCeSoc:
+                case kEplNmtEventDllCeSoc:
                 case kEplNmtEventDllCeSoa:
-                {   // new state PRE_OPERATIONAL1
+                {   // NMT_CT2
+                    // new state PRE_OPERATIONAL1
                     EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtCsPreOperational1;
-//                    Ret = EplTimerkDeleteTimer(&EPL_MCO_GLB_VAR(m_TimerHdl));
                     break;
                 }
+
                 // timeout for SoA and Soc
                 case kEplNmtEventTimerBasicEthernet:
-                {
+                {   // NMT_CT3
                     // new state BASIC_ETHERNET
                     EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtCsBasicEthernet;
                     break;
@@ -642,29 +638,29 @@ tEplEventNmtStateChange NmtStateChange;
                 // NMT Command SwitchOff
                 case kEplNmtEventCriticalError:
                 case kEplNmtEventSwitchOff:
-                {
+                {   // NMT_GT3
                     EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtGsOff;
                     break;
                 }
 
                 // NMT Command SwReset
                 case kEplNmtEventSwReset:
-                {
+                {   // NMT_GT8
                     EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtGsInitialising;
                     break;
                 }
 
                 // NMT Command ResetNode
                 case kEplNmtEventResetNode:
-                {
+                {   // NMT_GT4
                     EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtGsResetApplication;
                     break;
                 }
 
                 // NMT Command ResetCommunication
                 // or internal Communication error
-                case kEplNmtEventResetCom:
-                case kEplNmtEventInternComError:
+                case kEplNmtEventResetCom:          // NMT_GT5
+                case kEplNmtEventInternComError:    // NMT_GT6
                 {
                     EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtGsResetCommunication;
                     break;
@@ -672,21 +668,14 @@ tEplEventNmtStateChange NmtStateChange;
 
                 // NMT Command Reset Configuration
                 case kEplNmtEventResetConfig:
-                {
+                {   // NMT_GT7
                     EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtGsResetConfiguration;
-                    break;
-                }
-
-                // NMT Command StopNode
-                case kEplNmtEventStopNode:
-                {
-                    EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtCsStopped;
                     break;
                 }
 
                 // check if SoC received
                 case kEplNmtEventDllCeSoc:
-                {
+                {   // NMT_CT4
                     EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtCsPreOperational2;
                     break;
                 }
@@ -710,29 +699,29 @@ tEplEventNmtStateChange NmtStateChange;
                 // NMT Command SwitchOff
                 case kEplNmtEventCriticalError:
                 case kEplNmtEventSwitchOff:
-                {
+                {   // NMT_GT3
                     EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtGsOff;
                     break;
                 }
 
                 // NMT Command SwReset
                 case kEplNmtEventSwReset:
-                {
+                {   // NMT_GT8
                     EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtGsInitialising;
                     break;
                 }
 
                 // NMT Command ResetNode
                 case kEplNmtEventResetNode:
-                {
+                {   // NMT_GT4
                     EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtGsResetApplication;
                     break;
                 }
 
                 // NMT Command ResetCommunication
                 // or internal Communication error
-                case kEplNmtEventResetCom:
-                case kEplNmtEventInternComError:
+                case kEplNmtEventResetCom:          // NMT_GT5
+                case kEplNmtEventInternComError:    // NMT_GT6
                 {
                     EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtGsResetCommunication;
                     break;
@@ -740,14 +729,14 @@ tEplEventNmtStateChange NmtStateChange;
 
                 // NMT Command Reset Configuration
                 case kEplNmtEventResetConfig:
-                {
+                {   // NMT_GT7
                     EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtGsResetConfiguration;
                     break;
                 }
 
                 // NMT Command StopNode
                 case kEplNmtEventStopNode:
-                {
+                {   // NMT_CT8
                     // reset flags
                     EPL_MCO_GLB_VAR(m_fEnableReadyToOperate) = FALSE;
                     EPL_MCO_GLB_VAR(m_fAppReadyToOperate) = FALSE;
@@ -757,7 +746,7 @@ tEplEventNmtStateChange NmtStateChange;
 
                 // error occured
                 case kEplNmtEventNmtCycleError:
-                {
+                {   // NMT_CT11
                     // reset flags
                     EPL_MCO_GLB_VAR(m_fEnableReadyToOperate) = FALSE;
                     EPL_MCO_GLB_VAR(m_fAppReadyToOperate) = FALSE;
@@ -773,11 +762,11 @@ tEplEventNmtStateChange NmtStateChange;
                     {   // reset flags
                         EPL_MCO_GLB_VAR(m_fEnableReadyToOperate) = FALSE;
                         EPL_MCO_GLB_VAR(m_fAppReadyToOperate) = FALSE;
-                        // change state
+                        // change state (NMT_CT6)
                         EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtCsReadyToOperate;
                     }
                     else
-                    {   // set Flag
+                    {   // set Flag (NMT_CT5)
                         EPL_MCO_GLB_VAR(m_fAppReadyToOperate) = TRUE;
                     }
                     break;
@@ -791,11 +780,11 @@ tEplEventNmtStateChange NmtStateChange;
                     {   // reset flags
                         EPL_MCO_GLB_VAR(m_fEnableReadyToOperate) = FALSE;
                         EPL_MCO_GLB_VAR(m_fAppReadyToOperate) = FALSE;
-                        // change state
+                        // change state (NMT_CT6)
                         EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtCsReadyToOperate;
                     }
                     else
-                    {   // set Flag
+                    {   // set Flag (NMT_CT5)
                         EPL_MCO_GLB_VAR(m_fEnableReadyToOperate) = TRUE;
                     }
                     break;
@@ -819,29 +808,29 @@ tEplEventNmtStateChange NmtStateChange;
                 // NMT Command SwitchOff
                 case kEplNmtEventCriticalError:
                 case kEplNmtEventSwitchOff:
-                {
+                {   // NMT_GT3
                     EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtGsOff;
                     break;
                 }
 
                 // NMT Command SwReset
                 case kEplNmtEventSwReset:
-                {
+                {   // NMT_GT8
                     EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtGsInitialising;
                     break;
                 }
 
                 // NMT Command ResetNode
                 case kEplNmtEventResetNode:
-                {
+                {   // NMT_GT4
                     EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtGsResetApplication;
                     break;
                 }
 
                 // NMT Command ResetCommunication
                 // or internal Communication error
-                case kEplNmtEventResetCom:
-                case kEplNmtEventInternComError:
+                case kEplNmtEventResetCom:          // NMT_GT5
+                case kEplNmtEventInternComError:    // NMT_GT6
                 {
                     EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtGsResetCommunication;
                     break;
@@ -849,28 +838,28 @@ tEplEventNmtStateChange NmtStateChange;
 
                 // NMT Command ResetConfiguration
                 case kEplNmtEventResetConfig:
-                {
+                {   // NMT_GT7
                     EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtGsResetConfiguration;
                     break;
                 }
 
                 // NMT Command StopNode
                 case kEplNmtEventStopNode:
-                {
+                {   // NMT_CT8
                     EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtCsStopped;
                     break;
                 }
 
                 // error occured
                 case kEplNmtEventNmtCycleError:
-                {
+                {   // NMT_CT11
                     EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtCsPreOperational1;
                     break;
                 }
 
                 // NMT Command StartNode
                 case kEplNmtEventStartNode:
-                {
+                {   // NMT_CT7
                     EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtCsOperational;
                     break;
                 }
@@ -894,29 +883,29 @@ tEplEventNmtStateChange NmtStateChange;
                 // NMT Command SwitchOff
                 case kEplNmtEventCriticalError:
                 case kEplNmtEventSwitchOff:
-                {
+                {   // NMT_GT3
                     EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtGsOff;
                     break;
                 }
 
                 // NMT Command SwReset
                 case kEplNmtEventSwReset:
-                {
+                {   // NMT_GT8
                     EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtGsInitialising;
                     break;
                 }
 
                 // NMT Command ResetNode
                 case kEplNmtEventResetNode:
-                {
+                {   // NMT_GT4
                     EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtGsResetApplication;
                     break;
                 }
 
                 // NMT Command ResetCommunication
                 // or internal Communication error
-                case kEplNmtEventResetCom:
-                case kEplNmtEventInternComError:
+                case kEplNmtEventResetCom:          // NMT_GT5
+                case kEplNmtEventInternComError:    // NMT_GT6
                 {
                     EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtGsResetCommunication;
                     break;
@@ -924,28 +913,28 @@ tEplEventNmtStateChange NmtStateChange;
 
                 // NMT Command ResetConfiguration
                 case kEplNmtEventResetConfig:
-                {
+                {   // NMT_GT7
                     EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtGsResetConfiguration;
                     break;
                 }
 
                 // NMT Command StopNode
                 case kEplNmtEventStopNode:
-                {
+                {   // NMT_CT8
                     EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtCsStopped;
                     break;
                 }
 
                 // NMT Command EnterPreOperational2
                 case kEplNmtEventEnterPreOperational2:
-                {
+                {   // NMT_CT9
                     EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtCsPreOperational2;
                     break;
                 }
 
                 // error occured
                 case kEplNmtEventNmtCycleError:
-                {
+                {   // NMT_CT11
                     EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtCsPreOperational1;
                     break;
                 }
@@ -969,29 +958,29 @@ tEplEventNmtStateChange NmtStateChange;
                 // NMT Command SwitchOff
                 case kEplNmtEventCriticalError:
                 case kEplNmtEventSwitchOff:
-                {
+                {   // NMT_GT3
                     EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtGsOff;
                     break;
                 }
 
                 // NMT Command SwReset
                 case kEplNmtEventSwReset:
-                {
+                {   // NMT_GT8
                     EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtGsInitialising;
                     break;
                 }
 
                 // NMT Command ResetNode
                 case kEplNmtEventResetNode:
-                {
+                {   // NMT_GT4
                     EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtGsResetApplication;
                     break;
                 }
 
                 // NMT Command ResetCommunication
                 // or internal Communication error
-                case kEplNmtEventResetCom:
-                case kEplNmtEventInternComError:
+                case kEplNmtEventResetCom:          // NMT_GT5
+                case kEplNmtEventInternComError:    // NMT_GT6
                 {
                     EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtGsResetCommunication;
                     break;
@@ -999,21 +988,21 @@ tEplEventNmtStateChange NmtStateChange;
 
                 // NMT Command ResetConfiguration
                 case kEplNmtEventResetConfig:
-                {
+                {   // NMT_GT7
                     EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtGsResetConfiguration;
                     break;
                 }
 
                 // NMT Command EnterPreOperational2
                 case kEplNmtEventEnterPreOperational2:
-                {
+                {   // NMT_CT10
                     EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtCsPreOperational2;
                     break;
                 }
 
                 // error occured
                 case kEplNmtEventNmtCycleError:
-                {
+                {   // NMT_CT11
                     EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtCsPreOperational1;
                     break;
                 }
@@ -1037,29 +1026,29 @@ tEplEventNmtStateChange NmtStateChange;
                 // NMT Command SwitchOff
                 case kEplNmtEventCriticalError:
                 case kEplNmtEventSwitchOff:
-                {
+                {   // NMT_GT3
                     EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtGsOff;
                     break;
                 }
 
                 // NMT Command SwReset
                 case kEplNmtEventSwReset:
-                {
+                {   // NMT_GT8
                     EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtGsInitialising;
                     break;
                 }
 
                 // NMT Command ResetNode
                 case kEplNmtEventResetNode:
-                {
+                {   // NMT_GT4
                     EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtGsResetApplication;
                     break;
                 }
 
                 // NMT Command ResetCommunication
                 // or internal Communication error
-                case kEplNmtEventResetCom:
-                case kEplNmtEventInternComError:
+                case kEplNmtEventResetCom:          // NMT_GT5
+                case kEplNmtEventInternComError:    // NMT_GT6
                 {
                     EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtGsResetCommunication;
                     break;
@@ -1067,7 +1056,7 @@ tEplEventNmtStateChange NmtStateChange;
 
                 // NMT Command ResetConfiguration
                 case kEplNmtEventResetConfig:
-                {
+                {   // NMT_GT7
                     EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtGsResetConfiguration;
                     break;
                 }
@@ -1084,7 +1073,8 @@ tEplEventNmtStateChange NmtStateChange;
                 case kEplNmtEventDllCePreq:
                 case kEplNmtEventDllCePres:
                 case kEplNmtEventDllCeSoa:
-                {   // Epl-Frame on net -> stop any communication
+                {   // NMT_CT12
+                    // EPL frame on net -> stop any communication
                     EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtCsPreOperational1;
                     break;
                 }
@@ -1118,29 +1108,29 @@ tEplEventNmtStateChange NmtStateChange;
                     // NMT Command SwitchOff
                     case kEplNmtEventCriticalError:
                     case kEplNmtEventSwitchOff:
-                    {
+                    {   // NMT_GT3
                         EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtGsOff;
                         break;
                     }
 
                     // NMT Command SwReset
                     case kEplNmtEventSwReset:
-                    {
+                    {   // NMT_GT8
                         EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtGsInitialising;
                         break;
                     }
 
                     // NMT Command ResetNode
                     case kEplNmtEventResetNode:
-                    {
+                    {   // NMT_GT4
                         EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtGsResetApplication;
                         break;
                     }
 
                     // NMT Command ResetCommunication
                     // or internal Communication error
-                    case kEplNmtEventResetCom:
-                    case kEplNmtEventInternComError:
+                    case kEplNmtEventResetCom:          // NMT_GT5
+                    case kEplNmtEventInternComError:    // NMT_GT6
                     {
                         EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtGsResetCommunication;
                         break;
@@ -1148,7 +1138,7 @@ tEplEventNmtStateChange NmtStateChange;
 
                     // NMT Command ResetConfiguration
                     case kEplNmtEventResetConfig:
-                    {
+                    {   // NMT_GT7
                         EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtGsResetConfiguration;
                         break;
                     }
@@ -1164,7 +1154,7 @@ tEplEventNmtStateChange NmtStateChange;
 
                     // timeout event
                     case kEplNmtEventTimerBasicEthernet:
-                    {
+                    {   // NMT_MT7
                         if (EPL_MCO_GLB_VAR(m_fFrozen) == FALSE)
                         {   // new state BasicEthernet
                             EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtMsBasicEthernet;
@@ -1174,7 +1164,7 @@ tEplEventNmtStateChange NmtStateChange;
 
                     // timeout event
                     case kEplNmtEventTimerMsPreOp1:
-                    {
+                    {   // NMT_MT2
                         if (EPL_MCO_GLB_VAR(m_fFrozen) == FALSE)
                         {   // new state PreOp1
                             EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtMsPreOperational1;
@@ -1206,29 +1196,29 @@ tEplEventNmtStateChange NmtStateChange;
                 // NMT Command SwitchOff
                 case kEplNmtEventCriticalError:
                 case kEplNmtEventSwitchOff:
-                {
+                {   // NMT_GT3
                     EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtGsOff;
                     break;
                 }
 
                 // NMT Command SwReset
                 case kEplNmtEventSwReset:
-                {
+                {   // NMT_GT8
                     EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtGsInitialising;
                     break;
                 }
 
                 // NMT Command ResetNode
                 case kEplNmtEventResetNode:
-                {
+                {   // NMT_GT4
                     EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtGsResetApplication;
                     break;
                 }
 
                 // NMT Command ResetCommunication
                 // or internal Communication error
-                case kEplNmtEventResetCom:
-                case kEplNmtEventInternComError:
+                case kEplNmtEventResetCom:          // NMT_GT5
+                case kEplNmtEventInternComError:    // NMT_GT6
                 {
                     EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtGsResetCommunication;
                     break;
@@ -1236,7 +1226,7 @@ tEplEventNmtStateChange NmtStateChange;
 
                 // NMT Command ResetConfiguration
                 case kEplNmtEventResetConfig:
-                {
+                {   // NMT_GT7
                     EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtGsResetConfiguration;
                     break;
                 }
@@ -1263,7 +1253,7 @@ tEplEventNmtStateChange NmtStateChange;
                 case kEplNmtEventAllMandatoryCNIdent:
                 {   // all mandatory CN identified
                     if (EPL_MCO_GLB_VAR(m_fTimerMsPreOp2) != FALSE)
-                    {
+                    {   // NMT_MT3
                         EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtMsPreOperational2;
                     }
                     else
@@ -1276,7 +1266,7 @@ tEplEventNmtStateChange NmtStateChange;
                 case kEplNmtEventTimerMsPreOp2:
                 {   // residence time for PreOp1 is elapsed
                     if (EPL_MCO_GLB_VAR(m_fAllMandatoryCNIdent) != FALSE)
-                    {
+                    {   // NMT_MT3
                         EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtMsPreOperational2;
                     }
                     else
@@ -1304,29 +1294,29 @@ tEplEventNmtStateChange NmtStateChange;
                 // NMT Command SwitchOff
                 case kEplNmtEventCriticalError:
                 case kEplNmtEventSwitchOff:
-                {
+                {   // NMT_GT3
                     EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtGsOff;
                     break;
                 }
 
                 // NMT Command SwReset
                 case kEplNmtEventSwReset:
-                {
+                {   // NMT_GT8
                     EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtGsInitialising;
                     break;
                 }
 
                 // NMT Command ResetNode
                 case kEplNmtEventResetNode:
-                {
+                {   // NMT_GT4
                     EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtGsResetApplication;
                     break;
                 }
 
                 // NMT Command ResetCommunication
                 // or internal Communication error
-                case kEplNmtEventResetCom:
-                case kEplNmtEventInternComError:
+                case kEplNmtEventResetCom:          // NMT_GT5
+                case kEplNmtEventInternComError:    // NMT_GT6
                 {
                     EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtGsResetCommunication;
                     break;
@@ -1334,7 +1324,7 @@ tEplEventNmtStateChange NmtStateChange;
 
                 // NMT Command ResetConfiguration
                 case kEplNmtEventResetConfig:
-                {
+                {   // NMT_GT7
                     EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtGsResetConfiguration;
                     break;
                 }
@@ -1350,13 +1340,13 @@ tEplEventNmtStateChange NmtStateChange;
 
                 // error occured
                 case kEplNmtEventNmtCycleError:
-                {
+                {   // NMT_MT6
                     EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtMsPreOperational1;
                     break;
                 }
 
                 case kEplNmtEventEnterReadyToOperate:
-                {
+                {   // NMT_MT4
                     EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtMsReadyToOperate;
                     break;
                 }
@@ -1382,29 +1372,29 @@ tEplEventNmtStateChange NmtStateChange;
                 // NMT Command SwitchOff
                 case kEplNmtEventCriticalError:
                 case kEplNmtEventSwitchOff:
-                {
+                {   // NMT_GT3
                     EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtGsOff;
                     break;
                 }
 
                 // NMT Command SwReset
                 case kEplNmtEventSwReset:
-                {
+                {   // NMT_GT8
                     EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtGsInitialising;
                     break;
                 }
 
                 // NMT Command ResetNode
                 case kEplNmtEventResetNode:
-                {
+                {   // NMT_GT4
                     EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtGsResetApplication;
                     break;
                 }
 
                 // NMT Command ResetCommunication
                 // or internal Communication error
-                case kEplNmtEventResetCom:
-                case kEplNmtEventInternComError:
+                case kEplNmtEventResetCom:          // NMT_GT5
+                case kEplNmtEventInternComError:    // NMT_GT6
                 {
                     EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtGsResetCommunication;
                     break;
@@ -1412,7 +1402,7 @@ tEplEventNmtStateChange NmtStateChange;
 
                 // NMT Command ResetConfiguration
                 case kEplNmtEventResetConfig:
-                {
+                {   // NMT_GT7
                     EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtGsResetConfiguration;
                     break;
                 }
@@ -1428,13 +1418,13 @@ tEplEventNmtStateChange NmtStateChange;
 
                 // error occured
                 case kEplNmtEventNmtCycleError:
-                {
+                {   // NMT_MT6
                     EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtMsPreOperational1;
                     break;
                 }
 
                 case kEplNmtEventEnterMsOperational:
-                {
+                {   // NMT_MT5
                     EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtMsOperational;
                     break;
                 }
@@ -1458,29 +1448,29 @@ tEplEventNmtStateChange NmtStateChange;
                 // NMT Command SwitchOff
                 case kEplNmtEventCriticalError:
                 case kEplNmtEventSwitchOff:
-                {
+                {   // NMT_GT3
                     EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtGsOff;
                     break;
                 }
 
                 // NMT Command SwReset
                 case kEplNmtEventSwReset:
-                {
+                {   // NMT_GT8
                     EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtGsInitialising;
                     break;
                 }
 
                 // NMT Command ResetNode
                 case kEplNmtEventResetNode:
-                {
+                {   // NMT_GT4
                     EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtGsResetApplication;
                     break;
                 }
 
                 // NMT Command ResetCommunication
                 // or internal Communication error
-                case kEplNmtEventResetCom:
-                case kEplNmtEventInternComError:
+                case kEplNmtEventResetCom:          // NMT_GT5
+                case kEplNmtEventInternComError:    // NMT_GT6
                 {
                     EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtGsResetCommunication;
                     break;
@@ -1488,7 +1478,7 @@ tEplEventNmtStateChange NmtStateChange;
 
                 // NMT Command ResetConfiguration
                 case kEplNmtEventResetConfig:
-                {
+                {   // NMT_GT7
                     EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtGsResetConfiguration;
                     break;
                 }
@@ -1504,7 +1494,7 @@ tEplEventNmtStateChange NmtStateChange;
 
                 // error occured
                 case kEplNmtEventNmtCycleError:
-                {
+                {   // NMT_MT6
                     EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtMsPreOperational1;
                     break;
                 }
@@ -1528,29 +1518,29 @@ tEplEventNmtStateChange NmtStateChange;
                 // NMT Command SwitchOff
                 case kEplNmtEventCriticalError:
                 case kEplNmtEventSwitchOff:
-                {
+                {   // NMT_GT3
                     EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtGsOff;
                     break;
                 }
 
                 // NMT Command SwReset
                 case kEplNmtEventSwReset:
-                {
+                {   // NMT_GT8
                     EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtGsInitialising;
                     break;
                 }
 
                 // NMT Command ResetNode
                 case kEplNmtEventResetNode:
-                {
+                {   // NMT_GT4
                     EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtGsResetApplication;
                     break;
                 }
 
                 // NMT Command ResetCommunication
                 // or internal Communication error
-                case kEplNmtEventResetCom:
-                case kEplNmtEventInternComError:
+                case kEplNmtEventResetCom:          // NMT_GT5
+                case kEplNmtEventInternComError:    // NMT_GT6
                 {
                     EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtGsResetCommunication;
                     break;
@@ -1558,7 +1548,7 @@ tEplEventNmtStateChange NmtStateChange;
 
                 // NMT Command ResetConfiguration
                 case kEplNmtEventResetConfig:
-                {
+                {   // NMT_GT7
                     EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtGsResetConfiguration;
                     break;
                 }
@@ -1605,9 +1595,7 @@ tEplEventNmtStateChange NmtStateChange;
     {
         EPL_NMTK_DBG_POST_TRACE_VALUE(NmtEvent, OldNmtState, EPL_MCO_GLB_VAR(m_NmtState));
 
-        // d.k.: memorize NMT state before posting any events
-        NmtStateChange.m_NewNmtState = EPL_MCO_GLB_VAR(m_NmtState);
-
+/*
         // inform DLL
         if ((OldNmtState > kEplNmtGsResetConfiguration)
             && (EPL_MCO_GLB_VAR(m_NmtState) <= kEplNmtGsResetConfiguration))
@@ -1672,18 +1660,34 @@ tEplEventNmtStateChange NmtStateChange;
             Ret = EplEventkPost(&Event);
 #endif
         }
+*/
 
-        // inform higher layer about state change
+        EPL_DBGLVL_NMTK_TRACE2("EplNmtkProcess(NMT-Event = 0x%04X): New NMT-State = 0x%03X\n", NmtEvent, NmtStateChange.m_NewNmtState);
+
+        NmtStateChange.m_NewNmtState = EPL_MCO_GLB_VAR(m_NmtState);
+        NmtStateChange.m_OldNmtState = OldNmtState;
         NmtStateChange.m_NmtEvent = NmtEvent;
-        Event.m_EventSink = kEplEventSinkNmtu;
         Event.m_EventType = kEplEventTypeNmtStateChange;
         EPL_MEMSET(&Event.m_NetTime, 0x00, sizeof(Event.m_NetTime));
         Event.m_pArg = &NmtStateChange;
         Event.m_uiSize = sizeof(NmtStateChange);
+
+        // inform DLLk module about state change
+        Event.m_EventSink = kEplEventSinkDllk;
+        // d.k.: directly call DLLk process function, because
+        //       1. execution of process function is still synchonized and serialized,
+        //       2. it is the same as without event queues (i.e. well tested),
+        //       3. DLLk will get those necessary events even if event queue is full
+        //       4. event queue is very inefficient
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLK)) != 0)
+        Ret = EplDllkProcess(&Event);
+#else
         Ret = EplEventkPost(&Event);
-        EPL_DBGLVL_NMTK_TRACE2("EplNmtkProcess(NMT-Event = 0x%04X): New NMT-State = 0x%03X\n", NmtEvent, NmtStateChange.m_NewNmtState);
+#endif
 
-
+        // inform higher layer about state change
+        Event.m_EventSink = kEplEventSinkNmtu;
+        Ret = EplEventkPost(&Event);
     }
 
 Exit:

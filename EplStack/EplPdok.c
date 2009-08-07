@@ -661,6 +661,8 @@ tEplMsgType     MsgType;
         default:
         {
             ASSERTMSG(FALSE, "EplPdokProcess(): unhandled event type!\n");
+            Ret = kEplInvalidEvent;
+            break;
         }
     }
 

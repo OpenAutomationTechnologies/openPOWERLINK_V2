@@ -593,6 +593,7 @@ tEplKernel  Ret;
 
                     default:
                     {
+                        Ret = kEplNmtInvalidState;
                         TRACE1("EplNmtuProcess(): unhandled NMT state 0x%X\n", pNmtStateChange->m_NewNmtState);
                     }
                 }
@@ -610,6 +611,7 @@ tEplKernel  Ret;
         default:
         {
             Ret = kEplNmtInvalidEvent;
+            break;
         }
 
     }

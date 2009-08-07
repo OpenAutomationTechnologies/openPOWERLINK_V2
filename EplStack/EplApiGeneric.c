@@ -292,7 +292,7 @@ tEplDllkInitParam   DllkInitParam;
 #endif
 
     // initialize EplEventk module
-    Ret = EplEventkInit(EplApiInstance_g.m_InitParam.m_pfnCbSync);
+    Ret = EplEventkInit(EplApiInstance_g.m_InitParam.m_pfnCbSyncProcess, EplApiInstance_g.m_InitParam.m_pfnCbSyncSoc);
     if (Ret != kEplSuccessful)
     {
         goto Exit;
@@ -1368,7 +1368,10 @@ tEplApiEventType    EventType;
 
         // at present, there are no other events for this module
         default:
+        {
+            Ret = kEplInvalidEvent;
             break;
+        }
     }
 
     return Ret;

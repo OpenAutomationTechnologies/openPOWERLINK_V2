@@ -138,9 +138,9 @@ typedef enum
                                         // arg is pointer to tEplTimerEventArg
     kEplEventTypeHeartbeat      = 0x07, // Heartbeat event
                                         // arg is pointer to tEplHeartbeatEvent
-    kEplEventTypeDllkCreate     = 0x08, // DLL kernel create event
+//    kEplEventTypeDllkCreate     = 0x08, // DLL kernel create event
                                         // arg is pointer to the new tEplNmtState
-    kEplEventTypeDllkDestroy    = 0x09, // DLL kernel destroy event
+//    kEplEventTypeDllkDestroy    = 0x09, // DLL kernel destroy event
                                         // arg is pointer to the old tEplNmtState
     kEplEventTypeDllkFillTx     = 0x0A, // DLL kernel fill TxBuffer event
                                         // arg is pointer to tEplDllAsyncReqPriority
@@ -271,6 +271,7 @@ typedef struct
         DWORD                   m_dwArg;
         tEplEventSource         m_EventSource;  // from Eventk/u module (originating error source)
         tEplEventObdError       m_ObdError;     // from Obd module
+        tEplEventSink           m_EventSink;    // from Eventk/u module on m_EplError == kEplEventUnknownSink
 //        tEplErrHistoryEntry     m_HistoryEntry; // from Nmtk/u module
 
     } m_Arg;

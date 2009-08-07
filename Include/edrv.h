@@ -105,7 +105,7 @@ typedef enum
 // format of a tx-buffer
 typedef struct _tEdrvTxBuffer
 {
-    tEplMsgType     m_EplMsgType;           // IN: type of EPL message, set by calling function
+//    tEplMsgType     m_EplMsgType;           // IN: type of EPL message, set by calling function
     unsigned int    m_uiTxMsgLen;           // IN: length of message to be send (set for each transmit call)
     // ----------------------
     unsigned int    m_uiBufferNumber;       // OUT: number of the buffer, set by ethernetdriver

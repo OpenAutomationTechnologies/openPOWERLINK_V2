@@ -666,10 +666,11 @@ tEplNmtEvent            NmtEvent;
             break;
         }
 
-
         // unknown type
         default:
         {
+            Ret = kEplInvalidEvent;
+            break;
         }
 
     } // end of switch(pEvent_p->m_EventType)

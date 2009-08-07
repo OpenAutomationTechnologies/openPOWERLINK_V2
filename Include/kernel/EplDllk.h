@@ -153,6 +153,8 @@ tEplKernel EplDllkDeleteTxFrame(unsigned int uiHandle_p);
 
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
 
+tEplKernel EplDllkConfigNode(tEplDllNodeInfo * pNodeInfo_p);
+
 tEplKernel EplDllkAddNode(tEplDllNodeInfo * pNodeInfo_p);
 
 tEplKernel EplDllkDeleteNode(unsigned int uiNodeId_p);

@@ -256,6 +256,10 @@ tEplFrameInfo   FrameInfo;
             }
         }
     }
+    else
+    {
+        Ret = kEplInvalidEvent;
+    }
 
 Exit:
     return Ret;

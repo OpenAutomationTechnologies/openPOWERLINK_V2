@@ -90,6 +90,7 @@ typedef enum
     kEplShutdown                = 0x0009,       // stack is shutting down
     kEplReject                  = 0x000A,       // reject the subsequent command
     kEplRetry                   = 0x000B,       // retry this command
+    kEplInvalidEvent            = 0x000C,       // invalid event was posted to process function
 
     // area for EDRV module 0x0010 - 0x001F
 //    kEplEdrvNoFrame             = 0x0010,       // no CAN message was received
