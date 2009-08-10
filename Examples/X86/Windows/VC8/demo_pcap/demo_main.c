@@ -487,11 +487,6 @@ tEplKernel          EplRet = kEplSuccessful;
                     EplRet = kEplShutdown;
 
                     printf("AppCbEvent(kEplNmtGsOff) originating event = 0x%X\n", pEventArg_p->m_NmtStateChange.m_NmtEvent);
-#ifdef CF54DRV
-                    // set run and error LED
-                    PLCcoreCF54DrvCmdSetRunLED(0);
-                    PLCcoreCF54DrvCmdSetErrLED(0);
-#endif
 
                     break;
                 }
@@ -549,30 +544,15 @@ tEplKernel          EplRet = kEplSuccessful;
                 case kEplNmtCsNotActive:
                 case kEplNmtCsPreOperational1:
                 {
-#ifdef CF54DRV
-                    // set run and error LED
-                    PLCcoreCF54DrvCmdSetRunLED(0);
-                    PLCcoreCF54DrvCmdSetErrLED(1);
-#endif
                     break;
                 }
                 case kEplNmtCsOperational:
                 case kEplNmtMsOperational:
                 {
-#ifdef CF54DRV
-                    // set run and error LED
-                    PLCcoreCF54DrvCmdSetRunLED(1);
-                    PLCcoreCF54DrvCmdSetErrLED(0);
-#endif
                     break;
                 }
                 default:
                 {
-#ifdef CF54DRV
-                    // set run and error LED
-                    PLCcoreCF54DrvCmdSetRunLED(1);
-                    PLCcoreCF54DrvCmdSetErrLED(1);
-#endif
                     break;
                 }
             }
