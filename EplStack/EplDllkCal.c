@@ -354,24 +354,33 @@ tEplKernel      Ret = kEplSuccessful;
             break;
         }
 
-        case kEplEventTypeDllkAddNode:
+        case kEplEventTypeDllkConfigNode:
         {
         tEplDllNodeInfo*    pNodeInfo;
 
             pNodeInfo = (tEplDllNodeInfo*) pEvent_p->m_pArg;
-            Ret = EplDllkAddNode(pNodeInfo);
+            Ret = EplDllkConfigNode(pNodeInfo);
+            break;
+        }
+
+        case kEplEventTypeDllkAddNode:
+        {
+        tEplDllNodeOpParam*    pNodeOpParam;
+
+            pNodeOpParam = (tEplDllNodeOpParam*) pEvent_p->m_pArg;
+            Ret = EplDllkAddNode(pNodeOpParam);
             break;
         }
 
         case kEplEventTypeDllkDelNode:
         {
-        unsigned int*   puiNodeId;
+        tEplDllNodeOpParam*    pNodeOpParam;
 
-            puiNodeId = (unsigned int*) pEvent_p->m_pArg;
-            Ret = EplDllkDeleteNode(*puiNodeId);
+            pNodeOpParam = (tEplDllNodeOpParam*) pEvent_p->m_pArg;
+            Ret = EplDllkDeleteNode(pNodeOpParam);
             break;
         }
-
+/*
         case kEplEventTypeDllkSoftDelNode:
         {
         unsigned int*   puiNodeId;
@@ -380,6 +389,7 @@ tEplKernel      Ret = kEplSuccessful;
             Ret = EplDllkSoftDeleteNode(*puiNodeId);
             break;
         }
+*/
 #endif
 
         case kEplEventTypeDllkIdentity:

@@ -203,11 +203,30 @@ typedef struct
 typedef struct
 {
     unsigned int                m_uiNodeId;
-    WORD                        m_wPreqPayloadLimit;    // object 0x1F8B: NMT_MNPReqPayloadLimitList_AU16
     WORD                        m_wPresPayloadLimit;    // object 0x1F8D: NMT_PResPayloadLimitList_AU16
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
+    WORD                        m_wPreqPayloadLimit;    // object 0x1F8B: NMT_MNPReqPayloadLimitList_AU16
     DWORD                       m_dwPresTimeout;        // object 0x1F92: NMT_MNCNPResTimeout_AU32
+#endif // (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
 
 } tEplDllNodeInfo;
+
+typedef enum
+{
+    kEplDllNodeOpTypeIsochronous        = 0x00,
+    kEplDllNodeOpTypeFilterPdo          = 0x01,
+    kEplDllNodeOpTypeFilterHeartbeat    = 0x02,
+    kEplDllNodeOpTypeSoftDelete         = 0x03,
+
+} tEplDllNodeOpType;
+
+typedef struct
+{
+    unsigned int        m_uiNodeId;
+    tEplDllNodeOpType   m_OpNodeType;
+
+} tEplDllNodeOpParam;
+
 
 //---------------------------------------------------------------------------
 // function prototypes

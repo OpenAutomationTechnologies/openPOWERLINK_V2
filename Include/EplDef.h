@@ -135,8 +135,17 @@
 #define EPL_D_PDO_Granularity_U8    8    // minimum size of objects to be mapped in bits UNSIGNED8 O O 1 1
 #endif
 
+#ifndef EPL_DLL_PRES_FILTER_COUNT
+#define EPL_DLL_PRES_FILTER_COUNT   0    // maximum count of Rx filter entries for PRes frames
+#endif
+
 #ifndef EPL_NMT_MAX_NODE_ID
-#define EPL_NMT_MAX_NODE_ID         254  // maximum node-ID
+#if ((((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0) \
+     || (EPL_DLL_PRES_FILTER_COUNT != 0))
+#define EPL_NMT_MAX_NODE_ID         254  // maximum node-ID with MN cross-traffic or support
+#else
+#define EPL_NMT_MAX_NODE_ID         0    // maximum node-ID without MN and cross-traffic support
+#endif
 #endif
 
 #ifndef EPL_D_NMT_MaxCNNumber_U8

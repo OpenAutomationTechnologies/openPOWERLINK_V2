@@ -163,10 +163,12 @@ typedef enum
     kEplEventTypeDllkIssueReq   = 0x13, // issue Ident/Status request
                                         // arg is pointer to tEplDllCalIssueRequest
     kEplEventTypeDllkAddNode    = 0x14, // add node to isochronous phase
-                                        // arg is pointer to tEplDllNodeInfo
+                                        // arg is pointer to tEplDllNodeOpParam
     kEplEventTypeDllkDelNode    = 0x15, // remove node from isochronous phase
-                                        // arg is pointer to unsigned int
-    kEplEventTypeDllkSoftDelNode= 0x16, // remove node softly from isochronous phase
+                                        // arg is pointer to tEplDllNodeOpParam
+    kEplEventTypeDllkConfigNode = 0x16, // configures parameters of node
+                                        // arg is pointer to tEplDllNodeInfo
+//    kEplEventTypeDllkSoftDelNode= 0x16, // remove node softly from isochronous phase
                                         // arg is pointer to unsigned int
     kEplEventTypeDllkStartReducedCycle = 0x17, // start reduced EPL cycle on MN
                                         // arg is pointer to nothing

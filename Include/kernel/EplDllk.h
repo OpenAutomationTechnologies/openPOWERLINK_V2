@@ -98,16 +98,19 @@ struct _tEdrvTxBuffer;
 
 struct _tEplDllkNodeInfo
 {
-    struct _tEplDllkNodeInfo*   m_pNextNodeInfo;
-    struct _tEdrvTxBuffer*      m_pPreqTxBuffer;
     unsigned int                m_uiNodeId;
-    DWORD                       m_dwPresTimeout;
-    unsigned long               m_ulDllErrorEvents;
     tEplNmtState                m_NmtState;
-    WORD                        m_wPresPayloadLimit;
+    WORD                        m_wPresPayloadLimit;    // object 0x1F8D: NMT_PResPayloadLimitList_AU16
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
+    WORD                        m_wPreqPayloadLimit;    // object 0x1F8B: NMT_MNPReqPayloadLimitList_AU16
     BYTE                        m_be_abMacAddr[6];
     BYTE                        m_bSoaFlag1;
-    BOOL                        m_fSoftDelete;      // delete node after error and ignore error
+    BOOL                        m_fSoftDelete;          // delete node after error and ignore error
+    unsigned long               m_ulDllErrorEvents;
+    DWORD                       m_dwPresTimeout;        // object 0x1F92: NMT_MNCNPResTimeout_AU32
+    struct _tEdrvTxBuffer*      m_pPreqTxBuffer;
+    struct _tEplDllkNodeInfo*   m_pNextNodeInfo;
+#endif
 
 };
 
@@ -151,23 +154,23 @@ tEplKernel EplDllkCreateTxFrame(unsigned int * puiHandle_p,
 tEplKernel EplDllkDeleteTxFrame(unsigned int uiHandle_p);
 
 
-#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
 
-tEplKernel EplDllkConfigNode(tEplDllNodeInfo * pNodeInfo_p);
+tEplKernel EplDllkConfigNode(tEplDllNodeInfo* pNodeInfo_p);
 
-tEplKernel EplDllkAddNode(tEplDllNodeInfo * pNodeInfo_p);
+tEplKernel EplDllkAddNode(tEplDllNodeOpParam* pNodeOpParam_p);
 
-tEplKernel EplDllkDeleteNode(unsigned int uiNodeId_p);
+tEplKernel EplDllkDeleteNode(tEplDllNodeOpParam* pNodeOpParam_p);
 
-tEplKernel EplDllkSoftDeleteNode(unsigned int uiNodeId_p);
+//tEplKernel EplDllkSoftDeleteNode(unsigned int uiNodeId_p);
 
 tEplKernel EplDllkSetFlag1OfNode(unsigned int uiNodeId_p, BYTE bSoaFlag1_p);
 
 tEplKernel EplDllkGetFirstNodeInfo(tEplDllkNodeInfo** ppNodeInfo_p);
 
-#endif //(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
+#endif // (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
 
-#endif // #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLK)) != 0)
+#endif // (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLK)) != 0)
 
 #endif  // #ifndef _EPL_DLLK_H_
 

@@ -433,7 +433,7 @@ tEplKernel      Ret = kEplSuccessful;
 tEplFrameInfo   FrameInfo;
 BYTE            abBuffer[EPL_C_DLL_MINSIZE_NMTCMDEXT];
 tEplFrame*      pFrame = (tEplFrame*) abBuffer;
-BOOL            fSoftDeleteNode = FALSE;
+tEplDllNodeOpParam  NodeOpParam;
 
     if ((uiNodeId_p == 0) || (uiNodeId_p > EPL_C_ADR_BROADCAST))
     {   // invalid node ID specified
@@ -493,7 +493,8 @@ BOOL            fSoftDeleteNode = FALSE;
 
         case kEplNmtCmdStopNode:
         {
-            fSoftDeleteNode = TRUE;
+            // remove CN from isochronous phase softly
+            NodeOpParam.m_OpNodeType = kEplDllNodeOpTypeSoftDelete;
             break;
         }
 
@@ -502,6 +503,8 @@ BOOL            fSoftDeleteNode = FALSE;
         case kEplNmtCmdResetConfiguration:
         case kEplNmtCmdSwReset:
         {
+            // remove CN immediately from isochronous phase
+            NodeOpParam.m_OpNodeType = kEplDllNodeOpTypeIsochronous;
             break;
         }
 
@@ -519,14 +522,8 @@ BOOL            fSoftDeleteNode = FALSE;
     // because it will be too late and may cause unwanted errors
     if (uiNodeId_p != EPL_C_ADR_BROADCAST)
     {
-        if (fSoftDeleteNode == FALSE)
-        {   // remove CN immediately from isochronous phase
-            Ret = EplDlluCalDeleteNode(uiNodeId_p);
-        }
-        else
-        {   // remove CN from isochronous phase softly
-            Ret = EplDlluCalSoftDeleteNode(uiNodeId_p);
-        }
+        NodeOpParam.m_uiNodeId = uiNodeId_p;
+        Ret = EplDlluCalDeleteNode(&NodeOpParam);
     }
     else
     {   // do it for all active CNs
@@ -534,14 +531,8 @@ BOOL            fSoftDeleteNode = FALSE;
         {
             if ((EPL_NMTMNU_GET_NODEINFO(uiNodeId_p)->m_dwNodeCfg & (EPL_NODEASSIGN_NODE_IS_CN | EPL_NODEASSIGN_NODE_EXISTS)) != 0)
             {
-                if (fSoftDeleteNode == FALSE)
-                {   // remove CN immediately from isochronous phase
-                    Ret = EplDlluCalDeleteNode(uiNodeId_p);
-                }
-                else
-                {   // remove CN from isochronous phase softly
-                    Ret = EplDlluCalSoftDeleteNode(uiNodeId_p);
-                }
+                NodeOpParam.m_uiNodeId = uiNodeId_p;
+                Ret = EplDlluCalDeleteNode(&NodeOpParam);
             }
         }
     }
@@ -1762,12 +1753,12 @@ tEplObdSize     ObdSize;
         {   // subindex of MN
             if ((dwNodeCfg & (EPL_NODEASSIGN_MN_PRES | EPL_NODEASSIGN_NODE_EXISTS)) != 0)
             {   // MN shall send PRes
-            tEplDllNodeInfo DllNodeInfo;
+            tEplDllNodeOpParam  NodeOpParam;
 
-                EPL_MEMSET(&DllNodeInfo, 0, sizeof (DllNodeInfo));
-                DllNodeInfo.m_uiNodeId = uiLocalNodeId;
+                NodeOpParam.m_OpNodeType = kEplDllNodeOpTypeIsochronous;
+                NodeOpParam.m_uiNodeId = uiLocalNodeId;
 
-                Ret = EplDlluCalAddNode(&DllNodeInfo);
+                Ret = EplDlluCalAddNode(&NodeOpParam);
             }
         }
     }
@@ -1865,15 +1856,17 @@ Exit:
 static tEplKernel EplNmtMnuNodeBootStep2(unsigned int uiNodeId_p, tEplNmtMnuNodeInfo* pNodeInfo_p)
 {
 tEplKernel      Ret = kEplSuccessful;
-tEplDllNodeInfo DllNodeInfo;
+tEplDllNodeOpParam  NodeOpParam;
 DWORD           dwNodeCfg;
-tEplObdSize     ObdSize;
+//tEplObdSize     ObdSize;
 tEplTimerArg    TimerArg;
 
     dwNodeCfg = pNodeInfo_p->m_dwNodeCfg;
     if ((dwNodeCfg & EPL_NODEASSIGN_ASYNCONLY_NODE) == 0)
     {   // add node to isochronous phase
-        DllNodeInfo.m_uiNodeId = uiNodeId_p;
+        NodeOpParam.m_OpNodeType = kEplDllNodeOpTypeIsochronous;
+        NodeOpParam.m_uiNodeId = uiNodeId_p;
+/*
         ObdSize = 4;
         Ret = EplObduReadEntry(0x1F92, uiNodeId_p, &DllNodeInfo.m_dwPresTimeout, &ObdSize);
         if (Ret != kEplSuccessful)
@@ -1894,10 +1887,10 @@ tEplTimerArg    TimerArg;
         {
             goto Exit;
         }
-
+*/
         pNodeInfo_p->m_wFlags |= EPL_NMTMNU_NODE_FLAG_ISOCHRON;
 
-        Ret = EplDlluCalAddNode(&DllNodeInfo);
+        Ret = EplDlluCalAddNode(&NodeOpParam);
         if (Ret != kEplSuccessful)
         {
             goto Exit;

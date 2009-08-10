@@ -396,6 +396,37 @@ Exit:
 
 //---------------------------------------------------------------------------
 //
+// Function:    EplDlluCalConfigNode()
+//
+// Description: configures the specified node.
+//
+// Parameters:  pNodeInfo_p             = pointer of node info structure
+//
+// Returns:     tEplKernel              = error code
+//
+//
+// State:
+//
+//---------------------------------------------------------------------------
+
+tEplKernel EplDlluCalConfigNode(tEplDllNodeInfo* pNodeInfo_p)
+{
+tEplKernel  Ret = kEplSuccessful;
+tEplEvent   Event;
+
+    Event.m_EventSink = kEplEventSinkDllkCal;
+    Event.m_EventType = kEplEventTypeDllkAddNode;
+    Event.m_pArg = pNodeInfo_p;
+    Event.m_uiSize = sizeof (*pNodeInfo_p);
+
+    Ret = EplEventuPost(&Event);
+
+    return Ret;
+}
+
+
+//---------------------------------------------------------------------------
+//
 // Function:    EplDlluCalAddNode()
 //
 // Description: adds the specified node to the isochronous phase.
@@ -409,15 +440,15 @@ Exit:
 //
 //---------------------------------------------------------------------------
 
-tEplKernel EplDlluCalAddNode(tEplDllNodeInfo * pNodeInfo_p)
+tEplKernel EplDlluCalAddNode(tEplDllNodeOpParam* pNodeOpParam_p)
 {
 tEplKernel  Ret = kEplSuccessful;
 tEplEvent   Event;
 
     Event.m_EventSink = kEplEventSinkDllkCal;
     Event.m_EventType = kEplEventTypeDllkAddNode;
-    Event.m_pArg = pNodeInfo_p;
-    Event.m_uiSize = sizeof (tEplDllNodeInfo);
+    Event.m_pArg = pNodeOpParam_p;
+    Event.m_uiSize = sizeof (*pNodeOpParam_p);
 
     Ret = EplEventuPost(&Event);
 
@@ -440,22 +471,22 @@ tEplEvent   Event;
 //
 //---------------------------------------------------------------------------
 
-tEplKernel EplDlluCalDeleteNode(unsigned int uiNodeId_p)
+tEplKernel EplDlluCalDeleteNode(tEplDllNodeOpParam* pNodeOpParam_p)
 {
 tEplKernel  Ret = kEplSuccessful;
 tEplEvent   Event;
 
     Event.m_EventSink = kEplEventSinkDllkCal;
     Event.m_EventType = kEplEventTypeDllkDelNode;
-    Event.m_pArg = &uiNodeId_p;
-    Event.m_uiSize = sizeof (uiNodeId_p);
+    Event.m_pArg = pNodeOpParam_p;
+    Event.m_uiSize = sizeof (*pNodeOpParam_p);
 
     Ret = EplEventuPost(&Event);
 
     return Ret;
 }
 
-
+/*
 //---------------------------------------------------------------------------
 //
 // Function:    EplDlluCalSoftDeleteNode()
@@ -485,7 +516,7 @@ tEplEvent   Event;
 
     return Ret;
 }
-
+*/
 
 #endif // (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
 

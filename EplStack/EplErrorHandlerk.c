@@ -459,9 +459,13 @@ tEplNmtEvent            NmtEvent;
                     if (pErrHandlerEvent->m_uiNodeId != 0)
                     {
                     tEplHeartbeatEvent  HeartbeatEvent;
+                    tEplDllNodeOpParam  NodeOpParam;
+
+                        NodeOpParam.m_OpNodeType = kEplDllNodeOpTypeIsochronous;
+                        NodeOpParam.m_uiNodeId = pErrHandlerEvent->m_uiNodeId;
 
                         // remove node from isochronous phase
-                        Ret = EplDllkDeleteNode(pErrHandlerEvent->m_uiNodeId);
+                        Ret = EplDllkDeleteNode(&NodeOpParam);
 
                         // inform NmtMnu module about state change, which shall send NMT command ResetNode to this CN
                         HeartbeatEvent.m_uiNodeId = pErrHandlerEvent->m_uiNodeId;
@@ -562,11 +566,15 @@ tEplNmtEvent            NmtEvent;
                             >= EplErrorHandlerkInstance_g.m_adwMnCnLossPresThreshold[uiNodeId])
                         {   // threshold is reached
                         tEplHeartbeatEvent  HeartbeatEvent;
+                        tEplDllNodeOpParam  NodeOpParam;
+
+                            NodeOpParam.m_OpNodeType = kEplDllNodeOpTypeIsochronous;
+                            NodeOpParam.m_uiNodeId = pErrHandlerEvent->m_uiNodeId;
 
                             // $$$ d.k.: generate error history entry E_DLL_LOSS_PRES_TH
 
                             // remove node from isochronous phase
-                            Ret = EplDllkDeleteNode(pErrHandlerEvent->m_uiNodeId);
+                            Ret = EplDllkDeleteNode(&NodeOpParam);
 
                             // inform NmtMnu module about state change, which shall send NMT command ResetNode to this CN
                             HeartbeatEvent.m_uiNodeId = pErrHandlerEvent->m_uiNodeId;

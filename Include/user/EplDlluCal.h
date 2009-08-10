@@ -104,11 +104,13 @@ tEplKernel EplDlluCalProcess(tEplEvent * pEvent_p);
 
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
 
-tEplKernel EplDlluCalAddNode(tEplDllNodeInfo * pNodeInfo_p);
+tEplKernel EplDlluCalConfigNode(tEplDllNodeInfo* pNodeInfo_p);
 
-tEplKernel EplDlluCalDeleteNode(unsigned int uiNodeId_p);
+tEplKernel EplDlluCalAddNode(tEplDllNodeOpParam* pNodeOpParam_p);
 
-tEplKernel EplDlluCalSoftDeleteNode(unsigned int uiNodeId_p);
+tEplKernel EplDlluCalDeleteNode(tEplDllNodeOpParam* pNodeOpParam_p);
+
+//tEplKernel EplDlluCalSoftDeleteNode(unsigned int uiNodeId_p);
 
 tEplKernel EplDlluCalIssueRequest(tEplDllReqServiceId Service_p, unsigned int uiNodeId_p, BYTE bSoaFlag1_p);
 
