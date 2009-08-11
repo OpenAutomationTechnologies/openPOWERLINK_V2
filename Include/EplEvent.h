@@ -132,7 +132,7 @@ typedef enum
                                         // arg is pointer to tEplFrameInfo
     kEplEventTypePdoSoa         = 0x04, // SoA frame received event (isochronous phase completed)
                                         // arg is pointer to nothing
-    kEplEventTypeSync           = 0x05, // Sync event (e.g. SoC or anticipated SoC)
+    kEplEventTypeSyncSoc        = 0x05, // Sync event (e.g. SoC or anticipated SoC)
                                         // arg is pointer to nothing
     kEplEventTypeTimer          = 0x06, // Timer event
                                         // arg is pointer to tEplTimerEventArg
@@ -142,6 +142,8 @@ typedef enum
                                         // arg is pointer to the new tEplNmtState
 //    kEplEventTypeDllkDestroy    = 0x09, // DLL kernel destroy event
                                         // arg is pointer to the old tEplNmtState
+    kEplEventTypeDllkFlag1      = 0x09, // DLL kernel Flag 1 changed event
+                                        // arg is pointer to nothing
     kEplEventTypeDllkFillTx     = 0x0A, // DLL kernel fill TxBuffer event
                                         // arg is pointer to tEplDllAsyncReqPriority
     kEplEventTypeDllkPresReady  = 0x0B, // DLL kernel PRes ready event

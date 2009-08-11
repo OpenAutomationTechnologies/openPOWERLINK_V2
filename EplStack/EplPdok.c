@@ -283,7 +283,10 @@ tEplEvent       Event;
     Event.m_EventType = kEplEventTypePdoTx;
     Event.m_uiSize = sizeof (tEplFrameInfo);
     Event.m_pArg = pFrameInfo_p;
-    Ret = EplEventkPost(&Event);
+    // directly call process function, because the DLL expects this
+    Ret = EplPdokProcess(&Event);
+
+//    Ret = EplEventkPost(&Event);
 
 #if (DEV_SYSTEM == _DEV_GNU_CF548X_)
     // set LED

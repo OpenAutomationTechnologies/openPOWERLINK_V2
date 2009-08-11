@@ -1757,7 +1757,7 @@ BYTE                bTemp;
 #endif
 
     DllConfigParam.m_uiSizeOfStruct = sizeof (DllConfigParam);
-    Ret = EplDllkConfig(&DllConfigParam);
+    Ret = EplDlluCalConfig(&DllConfigParam);
     if(Ret != kEplSuccessful)
     {
         goto Exit;
@@ -1845,7 +1845,7 @@ BYTE                bTemp;
         // $$$ d.k.: fill rest of ident structure
 
         DllIdentParam.m_uiSizeOfStruct = sizeof (DllIdentParam);
-        Ret = EplDllkSetIdentity(&DllIdentParam);
+        Ret = EplDlluCalSetIdentity(&DllIdentParam);
         if(Ret != kEplSuccessful)
         {
             goto Exit;

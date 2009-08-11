@@ -265,6 +265,68 @@ Exit:
     return Ret;
 }
 
+
+//---------------------------------------------------------------------------
+//
+// Function:    EplDlluCalConfig
+//
+// Description: configure parameters of DLL
+//
+// Parameters:  pDllConfigParam_p       = configuration parameters
+//
+// Returns:     tEplKernel              = error code
+//
+//
+// State:
+//
+//---------------------------------------------------------------------------
+
+tEplKernel EplDlluCalConfig(tEplDllConfigParam * pDllConfigParam_p)
+{
+tEplKernel  Ret = kEplSuccessful;
+tEplEvent   Event;
+
+    Event.m_EventSink = kEplEventSinkDllkCal;
+    Event.m_EventType = kEplEventTypeDllkConfig;
+    Event.m_pArg = pDllConfigParam_p;
+    Event.m_uiSize = sizeof (*pDllConfigParam_p);
+
+    Ret = EplEventuPost(&Event);
+
+    return Ret;
+}
+
+//---------------------------------------------------------------------------
+//
+// Function:    EplDlluCalSetIdentity
+//
+// Description: configure identity of local node for IdentResponse
+//
+// Parameters:  pDllIdentParam_p        = identity
+//
+// Returns:     tEplKernel              = error code
+//
+//
+// State:
+//
+//---------------------------------------------------------------------------
+
+tEplKernel EplDlluCalSetIdentity(tEplDllIdentParam * pDllIdentParam_p)
+{
+tEplKernel  Ret = kEplSuccessful;
+tEplEvent   Event;
+
+    Event.m_EventSink = kEplEventSinkDllkCal;
+    Event.m_EventType = kEplEventTypeDllkIdentity;
+    Event.m_pArg = pDllIdentParam_p;
+    Event.m_uiSize = sizeof (*pDllIdentParam_p);
+
+    Ret = EplEventuPost(&Event);
+
+    return Ret;
+}
+
+
 //---------------------------------------------------------------------------
 //
 // Function:    EplDlluCalRegAsndService()
@@ -393,6 +455,10 @@ Exit:
     return Ret;
 }
 
+#endif
+
+
+#if EPL_NMT_MAX_NODE_ID > 0
 
 //---------------------------------------------------------------------------
 //
@@ -415,7 +481,7 @@ tEplKernel  Ret = kEplSuccessful;
 tEplEvent   Event;
 
     Event.m_EventSink = kEplEventSinkDllkCal;
-    Event.m_EventType = kEplEventTypeDllkAddNode;
+    Event.m_EventType = kEplEventTypeDllkConfigNode;
     Event.m_pArg = pNodeInfo_p;
     Event.m_uiSize = sizeof (*pNodeInfo_p);
 
@@ -486,6 +552,8 @@ tEplEvent   Event;
     return Ret;
 }
 
+#endif
+
 /*
 //---------------------------------------------------------------------------
 //
@@ -518,7 +586,6 @@ tEplEvent   Event;
 }
 */
 
-#endif // (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
 
 
 //=========================================================================//

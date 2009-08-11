@@ -1858,7 +1858,6 @@ static tEplKernel EplNmtMnuNodeBootStep2(unsigned int uiNodeId_p, tEplNmtMnuNode
 tEplKernel      Ret = kEplSuccessful;
 tEplDllNodeOpParam  NodeOpParam;
 DWORD           dwNodeCfg;
-//tEplObdSize     ObdSize;
 tEplTimerArg    TimerArg;
 
     dwNodeCfg = pNodeInfo_p->m_dwNodeCfg;
@@ -1866,28 +1865,7 @@ tEplTimerArg    TimerArg;
     {   // add node to isochronous phase
         NodeOpParam.m_OpNodeType = kEplDllNodeOpTypeIsochronous;
         NodeOpParam.m_uiNodeId = uiNodeId_p;
-/*
-        ObdSize = 4;
-        Ret = EplObduReadEntry(0x1F92, uiNodeId_p, &DllNodeInfo.m_dwPresTimeout, &ObdSize);
-        if (Ret != kEplSuccessful)
-        {
-            goto Exit;
-        }
 
-        ObdSize = 2;
-        Ret = EplObduReadEntry(0x1F8B, uiNodeId_p, &DllNodeInfo.m_wPreqPayloadLimit, &ObdSize);
-        if (Ret != kEplSuccessful)
-        {
-            goto Exit;
-        }
-
-        ObdSize = 2;
-        Ret = EplObduReadEntry(0x1F8D, uiNodeId_p, &DllNodeInfo.m_wPresPayloadLimit, &ObdSize);
-        if (Ret != kEplSuccessful)
-        {
-            goto Exit;
-        }
-*/
         pNodeInfo_p->m_wFlags |= EPL_NMTMNU_NODE_FLAG_ISOCHRON;
 
         Ret = EplDlluCalAddNode(&NodeOpParam);

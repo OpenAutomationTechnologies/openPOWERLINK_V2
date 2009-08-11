@@ -93,6 +93,10 @@ tEplKernel EplDlluCalAddInstance(void);
 
 tEplKernel EplDlluCalDelInstance(void);
 
+tEplKernel EplDlluCalConfig(tEplDllConfigParam * pDllConfigParam_p);
+
+tEplKernel EplDlluCalSetIdentity(tEplDllIdentParam * pDllIdentParam_p);
+
 tEplKernel EplDlluCalRegAsndService(tEplDllAsndServiceId ServiceId_p,
                                     tEplDlluCbAsnd pfnDlluCbAsnd_p,
                                     tEplDllAsndFilter Filter_p);
@@ -102,7 +106,7 @@ tEplKernel EplDlluCalAsyncSend(tEplFrameInfo * pFrameInfo, tEplDllAsyncReqPriori
 tEplKernel EplDlluCalProcess(tEplEvent * pEvent_p);
 
 
-#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
+#if EPL_NMT_MAX_NODE_ID > 0
 
 tEplKernel EplDlluCalConfigNode(tEplDllNodeInfo* pNodeInfo_p);
 
@@ -110,7 +114,9 @@ tEplKernel EplDlluCalAddNode(tEplDllNodeOpParam* pNodeOpParam_p);
 
 tEplKernel EplDlluCalDeleteNode(tEplDllNodeOpParam* pNodeOpParam_p);
 
-//tEplKernel EplDlluCalSoftDeleteNode(unsigned int uiNodeId_p);
+#endif
+
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
 
 tEplKernel EplDlluCalIssueRequest(tEplDllReqServiceId Service_p, unsigned int uiNodeId_p, BYTE bSoaFlag1_p);
 

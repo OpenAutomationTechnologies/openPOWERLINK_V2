@@ -73,6 +73,7 @@
 #include "user/EplNmtu.h"
 #include "user/EplObdu.h"
 #include "user/EplTimeru.h"
+#include "user/EplDlluCal.h"
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMTK)) != 0)
 #include "kernel/EplNmtk.h"
 #endif
@@ -110,6 +111,9 @@ static tEplNmtuInstance EplNmtuInstance_g;
 //---------------------------------------------------------------------------
 // local function prototypes
 //---------------------------------------------------------------------------
+
+static tEplKernel EplNmtuConfigureDll(void);
+
 
 //=========================================================================//
 //                                                                         //
@@ -348,6 +352,13 @@ tEplKernel  Ret;
                     {
                     unsigned int uiNodeId;
 
+                        // configure the DLL (PReq/PRes payload limits and PRes timeout)
+                        Ret = EplNmtuConfigureDll();
+                        if (Ret != kEplSuccessful)
+                        {
+                            break;
+                        }
+
                         // get node ID from OD
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_OBDU)) != 0) || (EPL_OBD_USE_KERNEL != FALSE)
                         uiNodeId = EplObduGetNodeId(EPL_MCO_PTR_INSTANCE_PTR);
@@ -393,7 +404,7 @@ tEplKernel  Ret;
 #else
                         Ret = kEplObdIndexNotExist;
 #endif
-                        if(Ret != kEplSuccessful)
+                        if (Ret != kEplSuccessful)
                         {
                             break;
                         }
@@ -660,21 +671,103 @@ tEplKernel Ret;
 
 //---------------------------------------------------------------------------
 //
-// Function:
+// Function:    EplNmtuConfigureDll
 //
-// Description:
+// Description: configures PReq/PRes payload limits and PRes timeouts in DLL
+//              for each active node in object 0x1F81.
 //
+// Parameters:  void
 //
-//
-// Parameters:
-//
-//
-// Returns:
-//
+// Returns:     tEplKernel      = error code
 //
 // State:
 //
 //---------------------------------------------------------------------------
+
+static tEplKernel EplNmtuConfigureDll(void)
+{
+tEplKernel      Ret = kEplSuccessful;
+DWORD           dwNodeCfg;
+tEplObdSize     ObdSize;
+tEplDllNodeInfo DllNodeInfo;
+unsigned int    uiIndex;
+BYTE            bCount;
+
+    // read number of nodes from object 0x1F81/0
+    ObdSize = sizeof (bCount);
+    Ret = EplObduReadEntry(0x1F81, 0, &bCount, &ObdSize);
+    if ((Ret == kEplObdIndexNotExist) || (Ret == kEplObdSubindexNotExist))
+    {
+        Ret = kEplSuccessful;
+    }
+    else if (Ret != kEplSuccessful)
+    {
+        goto Exit;
+    }
+
+    for (uiIndex = 1; uiIndex <= bCount; uiIndex++)
+    {
+        ObdSize = sizeof (dwNodeCfg);
+        Ret = EplObduReadEntry(0x1F81, uiIndex, &dwNodeCfg, &ObdSize);
+        if (Ret == kEplObdSubindexNotExist)
+        {   // not all subindexes of object 0x1F81 have to exist
+            continue;
+        }
+        else if (Ret != kEplSuccessful)
+        {
+            goto Exit;
+        }
+
+        if ((dwNodeCfg & (EPL_NODEASSIGN_NODE_EXISTS | EPL_NODEASSIGN_ASYNCONLY_NODE)) == EPL_NODEASSIGN_NODE_EXISTS)
+        {   // node exists and runs in isochronous phase
+            DllNodeInfo.m_uiNodeId = uiIndex;
+
+            ObdSize = sizeof (DllNodeInfo.m_wPresPayloadLimit);
+            Ret = EplObduReadEntry(0x1F8D, uiIndex, &DllNodeInfo.m_wPresPayloadLimit, &ObdSize);
+            if ((Ret == kEplObdIndexNotExist) || (Ret == kEplObdSubindexNotExist))
+            {
+                DllNodeInfo.m_wPresPayloadLimit = 0;
+            }
+            else if (Ret != kEplSuccessful)
+            {
+                goto Exit;
+            }
+
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
+            if ((dwNodeCfg & EPL_NODEASSIGN_NODE_IS_CN) != 0)
+            {   // node is CN
+                ObdSize = sizeof (DllNodeInfo.m_wPreqPayloadLimit);
+                Ret = EplObduReadEntry(0x1F8B, uiIndex, &DllNodeInfo.m_wPreqPayloadLimit, &ObdSize);
+                if (Ret != kEplSuccessful)
+                {
+                    goto Exit;
+                }
+
+                ObdSize = sizeof (DllNodeInfo.m_dwPresTimeout);
+                Ret = EplObduReadEntry(0x1F92, uiIndex, &DllNodeInfo.m_dwPresTimeout, &ObdSize);
+                if (Ret != kEplSuccessful)
+                {
+                    goto Exit;
+                }
+            }
+            else
+            {
+                DllNodeInfo.m_dwPresTimeout = 0;
+                DllNodeInfo.m_wPreqPayloadLimit = 0;
+            }
+#endif // (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
+
+            Ret = EplDlluCalConfigNode(&DllNodeInfo);
+            if (Ret != kEplSuccessful)
+            {
+                goto Exit;
+            }
+        }
+    }
+
+Exit:
+    return Ret;
+}
 
 #endif // #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMTU)) != 0)
 

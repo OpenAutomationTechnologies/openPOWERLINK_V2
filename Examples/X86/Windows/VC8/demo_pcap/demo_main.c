@@ -310,7 +310,7 @@ int inum;
     EplApiInitParam.m_uiMultiplCycleCnt = 0;  // required for error detection
     EplApiInitParam.m_uiAsyncMtu = 1500;         // required to set up max frame size
     EplApiInitParam.m_uiPrescaler = 2;         // required for sync
-    EplApiInitParam.m_dwLossOfFrameTolerance = 90000000;
+    EplApiInitParam.m_dwLossOfFrameTolerance = 900000000;
     EplApiInitParam.m_dwAsyncSlotTimeout = 10000000;
     EplApiInitParam.m_dwWaitSocPreq = 0;
     EplApiInitParam.m_dwDeviceType = -1;              // NMT_DeviceType_U32
@@ -501,6 +501,7 @@ tEplKernel          EplRet = kEplSuccessful;
                     EplRet = EplApiWriteLocalObject(0x1F81, 0x01, &dwBuffer, 4);
                     EplRet = EplApiWriteLocalObject(0x1F81, 0x02, &dwBuffer, 4);
                     EplRet = EplApiWriteLocalObject(0x1F81, 0x03, &dwBuffer, 4);
+                    EplRet = EplApiWriteLocalObject(0x1F81, 0x20, &dwBuffer, 4);
                     dwBuffer = (EPL_NODEASSIGN_MN_PRES | EPL_NODEASSIGN_NODE_EXISTS);       // 0x00010001L
                     EplRet = EplApiWriteLocalObject(0x1F81, 0xF0, &dwBuffer, 4);
                     // continue

@@ -353,7 +353,9 @@ tEplKernel      Ret = kEplSuccessful;
             Ret = EplDllkCalIssueRequest(pIssueReq->m_Service, pIssueReq->m_uiNodeId, pIssueReq->m_bSoaFlag1);
             break;
         }
+#endif
 
+#if EPL_NMT_MAX_NODE_ID > 0
         case kEplEventTypeDllkConfigNode:
         {
         tEplDllNodeInfo*    pNodeInfo;
@@ -380,6 +382,7 @@ tEplKernel      Ret = kEplSuccessful;
             Ret = EplDllkDeleteNode(pNodeOpParam);
             break;
         }
+#endif // EPL_NMT_MAX_NODE_ID > 0
 /*
         case kEplEventTypeDllkSoftDelNode:
         {
@@ -390,7 +393,6 @@ tEplKernel      Ret = kEplSuccessful;
             break;
         }
 */
-#endif
 
         case kEplEventTypeDllkIdentity:
         {
