@@ -111,7 +111,7 @@ typedef enum
 typedef struct
 {
     tEplTimerHdl                m_TimerHdlLedBlink; // timer for LED blinking
-    unsigned long               m_ulTimerArg;
+    DWORD                       m_dwTimerArg;
     tEplLeduStateChangeCallback m_pfnCbStateChange;
     tEplLeduMode                m_StatusLedMode;
     unsigned int                m_uiStatusLedState;
@@ -395,7 +395,7 @@ BOOL            fLedOn = FALSE;
         {
         tEplTimerEventArg*  pTimerEventArg = (tEplTimerEventArg*)pEvent_p->m_pArg;
 
-            if (pTimerEventArg->m_ulArg != EplLeduInstance_g.m_ulTimerArg)
+            if (pTimerEventArg->m_Arg.m_dwVal != EplLeduInstance_g.m_dwTimerArg)
             {   // zombie timer
                 // ignore it
                 break;
@@ -502,8 +502,8 @@ BOOL            fLedOn = FALSE;
 
             // create new timer
             TimerArg.m_EventSink = kEplEventSinkLedu;
-            EplLeduInstance_g.m_ulTimerArg++;
-            TimerArg.m_ulArg = EplLeduInstance_g.m_ulTimerArg;
+            EplLeduInstance_g.m_dwTimerArg++;
+            TimerArg.m_Arg.m_dwVal = EplLeduInstance_g.m_dwTimerArg;
             Ret = EplTimeruModifyTimerMs(&EplLeduInstance_g.m_TimerHdlLedBlink,
                                          dwTimeout,
                                          TimerArg);
@@ -658,8 +658,8 @@ BOOL            fLedOn;
 
         // create new timer
         TimerArg.m_EventSink = kEplEventSinkLedu;
-        EplLeduInstance_g.m_ulTimerArg++;
-        TimerArg.m_ulArg = EplLeduInstance_g.m_ulTimerArg;
+        EplLeduInstance_g.m_dwTimerArg++;
+        TimerArg.m_Arg.m_dwVal = EplLeduInstance_g.m_dwTimerArg;
         Ret = EplTimeruModifyTimerMs(&EplLeduInstance_g.m_TimerHdlLedBlink,
                                      dwTimeout,
                                      TimerArg);
