@@ -162,26 +162,26 @@ typedef struct
     // 0x1F82: NMT_FeatureFlags_U32
     DWORD               m_dwFeatureFlags;
     // Cycle Length (0x1006: NMT_CycleLen_U32) in [us]
-    DWORD               m_dwCycleLen;     // required for error detection
+    DWORD               m_dwCycleLen;           // required for error detection
     // 0x1F98: NMT_CycleTiming_REC
     // 0x1F98.1: IsochrTxMaxPayload_U16
     unsigned int        m_uiIsochrTxMaxPayload; // const
     // 0x1F98.2: IsochrRxMaxPayload_U16
     unsigned int        m_uiIsochrRxMaxPayload; // const
     // 0x1F98.3: PResMaxLatency_U32
-    DWORD               m_dwPresMaxLatency;  // const in [ns], only required for IdentRes
+    DWORD               m_dwPresMaxLatency;     // const in [ns], only required for IdentRes
     // 0x1F98.4: PReqActPayloadLimit_U16
-    unsigned int        m_uiPreqActPayloadLimit; // required for initialisation (+28 bytes)
+    unsigned int        m_uiPreqActPayloadLimit;// required for initialisation (+28 bytes)
     // 0x1F98.5: PResActPayloadLimit_U16
-    unsigned int        m_uiPresActPayloadLimit; // required for initialisation of Pres frame (+28 bytes)
+    unsigned int        m_uiPresActPayloadLimit;// required for initialisation of Pres frame (+28 bytes)
     // 0x1F98.6: ASndMaxLatency_U32
-    DWORD               m_dwAsndMaxLatency;   // const in [ns], only required for IdentRes
+    DWORD               m_dwAsndMaxLatency;     // const in [ns], only required for IdentRes
     // 0x1F98.7: MultiplCycleCnt_U8
-    unsigned int        m_uiMultiplCycleCnt;  // required for error detection
+    unsigned int        m_uiMultiplCycleCnt;    // required for error detection
     // 0x1F98.8: AsyncMTU_U16
-    unsigned int        m_uiAsyncMtu;         // required to set up max frame size
+    unsigned int        m_uiAsyncMtu;           // required to set up max frame size
     // 0x1F98.9: Prescaler_U16
-    unsigned int        m_uiPrescaler;         // required for sync
+    unsigned int        m_uiPrescaler;          // required for sync
     // $$$ Multiplexed Slot
 
     // 0x1C14: DLL_LossOfFrameTolerance_U32 in [ns]
@@ -189,10 +189,10 @@ typedef struct
 
     // 0x1F8A: NMT_MNCycleTiming_REC
     // 0x1F8A.1: WaitSoCPReq_U32 in [ns]
-    DWORD               m_dwWaitSocPreq;
+    DWORD               m_dwWaitSocPreq;        // required on MN
 
     // 0x1F8A.2: AsyncSlotTimeout_U32 in [ns]
-    DWORD               m_dwAsyncSlotTimeout;
+    DWORD               m_dwAsyncSlotTimeout;   // required on MN
 
     DWORD               m_dwDeviceType;              // NMT_DeviceType_U32
     DWORD               m_dwVendorId;                // NMT_IdentityObject_REC.VendorId_U32

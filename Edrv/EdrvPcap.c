@@ -379,7 +379,8 @@ tEplKernel EdrvShutdown( void )
 
 tEplKernel EdrvSendTxMsg(tEdrvTxBuffer *pBuffer_p)
 {
-tEplKernel Ret = kEplSuccessful;
+tEplKernel  Ret = kEplSuccessful;
+int         iRet;
 
     if (EdrvInstance_l.m_pLastTransmittedTxBuffer != NULL)
     {   // transmission is already active
@@ -390,8 +391,10 @@ tEplKernel Ret = kEplSuccessful;
     // save pointer to buffer structure for TxHandler
     EdrvInstance_l.m_pLastTransmittedTxBuffer = pBuffer_p;
 
-    if  (pcap_sendpacket(EdrvInstance_l.m_pPcap, pBuffer_p->m_pbBuffer, (int) pBuffer_p->m_uiTxMsgLen) != 0)
+    iRet = pcap_sendpacket(EdrvInstance_l.m_pPcap, pBuffer_p->m_pbBuffer, (int) pBuffer_p->m_uiTxMsgLen);
+    if  (iRet != 0)
     {
+        PRINTF2("%s pcap_sendpacket returned %d\n", __func__, iRet);
         Ret = kEplInvalidOperation;
     }
 
