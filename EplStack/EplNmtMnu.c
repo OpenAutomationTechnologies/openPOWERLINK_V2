@@ -136,7 +136,7 @@
         ((pNodeInfo_p->m_wFlags + EPL_NMTMNU_NODE_FLAG_INC_STATREQ) \
          & EPL_NMTMNU_NODE_FLAG_COUNT_STATREQ) \
         | (pNodeInfo_p->m_wFlags & ~EPL_NMTMNU_NODE_FLAG_COUNT_STATREQ); \
-    TimerArg_p.m_ulArg = EPL_NMTMNU_TIMERARG_STATREQ | uiNodeId_p | \
+    TimerArg_p.m_Arg.m_dwVal = EPL_NMTMNU_TIMERARG_STATREQ | uiNodeId_p | \
         (pNodeInfo_p->m_wFlags & EPL_NMTMNU_NODE_FLAG_COUNT_STATREQ); \
     TimerArg_p.m_EventSink = kEplEventSinkNmtMnu;
 
@@ -145,7 +145,7 @@
         ((pNodeInfo_p->m_wFlags + EPL_NMTMNU_NODE_FLAG_INC_STATREQ) \
          & EPL_NMTMNU_NODE_FLAG_COUNT_STATREQ) \
         | (pNodeInfo_p->m_wFlags & ~EPL_NMTMNU_NODE_FLAG_COUNT_STATREQ); \
-    TimerArg_p.m_ulArg = EPL_NMTMNU_TIMERARG_IDENTREQ | uiNodeId_p | \
+    TimerArg_p.m_Arg.m_dwVal = EPL_NMTMNU_TIMERARG_IDENTREQ | uiNodeId_p | \
         (pNodeInfo_p->m_wFlags & EPL_NMTMNU_NODE_FLAG_COUNT_STATREQ); \
     TimerArg_p.m_EventSink = kEplEventSinkNmtMnu;
 
@@ -154,7 +154,7 @@
         ((pNodeInfo_p->m_wFlags + EPL_NMTMNU_NODE_FLAG_INC_LONGER) \
          & EPL_NMTMNU_NODE_FLAG_COUNT_LONGER) \
         | (pNodeInfo_p->m_wFlags & ~EPL_NMTMNU_NODE_FLAG_COUNT_LONGER); \
-    TimerArg_p.m_ulArg = EPL_NMTMNU_TIMERARG_LONGER | uiNodeId_p | \
+    TimerArg_p.m_Arg.m_dwVal = EPL_NMTMNU_TIMERARG_LONGER | uiNodeId_p | \
         (pNodeInfo_p->m_wFlags & EPL_NMTMNU_NODE_FLAG_COUNT_LONGER); \
     TimerArg_p.m_EventSink = kEplEventSinkNmtMnu;
 
@@ -163,7 +163,7 @@
         ((pNodeInfo_p->m_wFlags + EPL_NMTMNU_NODE_FLAG_INC_STATREQ) \
          & EPL_NMTMNU_NODE_FLAG_COUNT_STATREQ) \
         | (pNodeInfo_p->m_wFlags & ~EPL_NMTMNU_NODE_FLAG_COUNT_STATREQ); \
-    TimerArg_p.m_ulArg = EPL_NMTMNU_TIMERARG_STATE_MON | uiNodeId_p | \
+    TimerArg_p.m_Arg.m_dwVal = EPL_NMTMNU_TIMERARG_STATE_MON | uiNodeId_p | \
         (pNodeInfo_p->m_wFlags & EPL_NMTMNU_NODE_FLAG_COUNT_STATREQ); \
     TimerArg_p.m_EventSink = kEplEventSinkNmtMnu;
 
@@ -1043,7 +1043,7 @@ tEplKernel      Ret = kEplSuccessful;
                     dwTimeout = 1L; // at least 1 ms
                 }
                 TimerArg.m_EventSink = kEplEventSinkNmtMnu;
-                TimerArg.m_ulArg = 0;
+                TimerArg.m_Arg.m_dwVal = 0;
                 Ret = EplTimeruModifyTimerMs(&EplNmtMnuInstance_g.m_TimerHdlNmtState, dwTimeout, TimerArg);
             }
             break;
@@ -1151,7 +1151,7 @@ tEplKernel      Ret;
         tEplTimerEventArg*  pTimerEventArg = (tEplTimerEventArg*)pEvent_p->m_pArg;
         unsigned int        uiNodeId;
 
-            uiNodeId = (unsigned int) (pTimerEventArg->m_ulArg & EPL_NMTMNU_TIMERARG_NODE_MASK);
+            uiNodeId = (unsigned int) (pTimerEventArg->m_Arg.m_dwVal & EPL_NMTMNU_TIMERARG_NODE_MASK);
             if (uiNodeId != 0)
             {
             tEplObdSize         ObdSize;
@@ -1167,10 +1167,10 @@ tEplKernel      Ret;
                     break;
                 }
 
-                if ((pTimerEventArg->m_ulArg & EPL_NMTMNU_TIMERARG_IDENTREQ) != 0L)
+                if ((pTimerEventArg->m_Arg.m_dwVal & EPL_NMTMNU_TIMERARG_IDENTREQ) != 0L)
                 {
                     if ((pNodeInfo->m_wFlags & EPL_NMTMNU_NODE_FLAG_COUNT_STATREQ)
-                        != (pTimerEventArg->m_ulArg & EPL_NMTMNU_TIMERARG_COUNT_SR))
+                        != (pTimerEventArg->m_Arg.m_dwVal & EPL_NMTMNU_TIMERARG_COUNT_SR))
                     {   // this is an old (already deleted or modified) timer
                         // but not the current timer
                         // so discard it
@@ -1187,7 +1187,7 @@ tEplKernel      Ret;
                                                     ((pNodeInfo->m_NodeState << 8)
                                                      | 0x80
                                                      | ((pNodeInfo->m_wFlags & EPL_NMTMNU_NODE_FLAG_COUNT_STATREQ) >> 6)
-                                                     | ((pTimerEventArg->m_ulArg & EPL_NMTMNU_TIMERARG_COUNT_SR) >> 8)));
+                                                     | ((pTimerEventArg->m_Arg.m_dwVal & EPL_NMTMNU_TIMERARG_COUNT_SR) >> 8)));
 */
                     Ret = EplNmtMnuProcessInternalEvent(uiNodeId,
                                                         (tEplNmtState) (bNmtState | EPL_NMT_TYPE_CS),
@@ -1195,10 +1195,10 @@ tEplKernel      Ret;
                                                         kEplNmtMnuIntNodeEventTimerIdentReq);
                 }
 
-                else if ((pTimerEventArg->m_ulArg & EPL_NMTMNU_TIMERARG_STATREQ) != 0L)
+                else if ((pTimerEventArg->m_Arg.m_dwVal & EPL_NMTMNU_TIMERARG_STATREQ) != 0L)
                 {
                     if ((pNodeInfo->m_wFlags & EPL_NMTMNU_NODE_FLAG_COUNT_STATREQ)
-                        != (pTimerEventArg->m_ulArg & EPL_NMTMNU_TIMERARG_COUNT_SR))
+                        != (pTimerEventArg->m_Arg.m_dwVal & EPL_NMTMNU_TIMERARG_COUNT_SR))
                     {   // this is an old (already deleted or modified) timer
                         // but not the current timer
                         // so discard it
@@ -1215,7 +1215,7 @@ tEplKernel      Ret;
                                                     ((pNodeInfo->m_NodeState << 8)
                                                      | 0x80
                                                      | ((pNodeInfo->m_wFlags & EPL_NMTMNU_NODE_FLAG_COUNT_STATREQ) >> 6)
-                                                     | ((pTimerEventArg->m_ulArg & EPL_NMTMNU_TIMERARG_COUNT_SR) >> 8)));
+                                                     | ((pTimerEventArg->m_Arg.m_dwVal & EPL_NMTMNU_TIMERARG_COUNT_SR) >> 8)));
 */
                     Ret = EplNmtMnuProcessInternalEvent(uiNodeId,
                                                         (tEplNmtState) (bNmtState | EPL_NMT_TYPE_CS),
@@ -1223,10 +1223,10 @@ tEplKernel      Ret;
                                                         kEplNmtMnuIntNodeEventTimerStatReq);
                 }
 
-                else if ((pTimerEventArg->m_ulArg & EPL_NMTMNU_TIMERARG_STATE_MON) != 0L)
+                else if ((pTimerEventArg->m_Arg.m_dwVal & EPL_NMTMNU_TIMERARG_STATE_MON) != 0L)
                 {
                     if ((pNodeInfo->m_wFlags & EPL_NMTMNU_NODE_FLAG_COUNT_STATREQ)
-                        != (pTimerEventArg->m_ulArg & EPL_NMTMNU_TIMERARG_COUNT_SR))
+                        != (pTimerEventArg->m_Arg.m_dwVal & EPL_NMTMNU_TIMERARG_COUNT_SR))
                     {   // this is an old (already deleted or modified) timer
                         // but not the current timer
                         // so discard it
@@ -1243,7 +1243,7 @@ tEplKernel      Ret;
                                                     ((pNodeInfo->m_NodeState << 8)
                                                      | 0x80
                                                      | ((pNodeInfo->m_wFlags & EPL_NMTMNU_NODE_FLAG_COUNT_STATREQ) >> 6)
-                                                     | ((pTimerEventArg->m_ulArg & EPL_NMTMNU_TIMERARG_COUNT_SR) >> 8)));
+                                                     | ((pTimerEventArg->m_Arg.m_dwVal & EPL_NMTMNU_TIMERARG_COUNT_SR) >> 8)));
 */
                     Ret = EplNmtMnuProcessInternalEvent(uiNodeId,
                                                         (tEplNmtState) (bNmtState | EPL_NMT_TYPE_CS),
@@ -1251,10 +1251,10 @@ tEplKernel      Ret;
                                                         kEplNmtMnuIntNodeEventTimerStateMon);
                 }
 
-                else if ((pTimerEventArg->m_ulArg & EPL_NMTMNU_TIMERARG_LONGER) != 0L)
+                else if ((pTimerEventArg->m_Arg.m_dwVal & EPL_NMTMNU_TIMERARG_LONGER) != 0L)
                 {
                     if ((pNodeInfo->m_wFlags & EPL_NMTMNU_NODE_FLAG_COUNT_LONGER)
-                        != (pTimerEventArg->m_ulArg & EPL_NMTMNU_TIMERARG_COUNT_LO))
+                        != (pTimerEventArg->m_Arg.m_dwVal & EPL_NMTMNU_TIMERARG_COUNT_LO))
                     {   // this is an old (already deleted or modified) timer
                         // but not the current timer
                         // so discard it
@@ -1271,7 +1271,7 @@ tEplKernel      Ret;
                                                     ((pNodeInfo->m_NodeState << 8)
                                                      | 0x80
                                                      | ((pNodeInfo->m_wFlags & EPL_NMTMNU_NODE_FLAG_COUNT_LONGER) >> 6)
-                                                     | ((pTimerEventArg->m_ulArg & EPL_NMTMNU_TIMERARG_COUNT_LO) >> 8)));
+                                                     | ((pTimerEventArg->m_Arg.m_dwVal & EPL_NMTMNU_TIMERARG_COUNT_LO) >> 8)));
 */
                     Ret = EplNmtMnuProcessInternalEvent(uiNodeId,
                                                         (tEplNmtState) (bNmtState | EPL_NMT_TYPE_CS),
@@ -1892,7 +1892,7 @@ tEplTimerArg    TimerArg;
         EPL_NMTMNU_SET_FLAGS_TIMERARG_LONGER(
                 pNodeInfo_p, uiNodeId_p, TimerArg);
 //        TimerArg.m_EventSink = kEplEventSinkNmtMnu;
-//        TimerArg.m_ulArg = EPL_NMTMNU_TIMERARG_LONGER | uiNodeId_p;
+//        TimerArg.m_Arg.m_dwVal = EPL_NMTMNU_TIMERARG_LONGER | uiNodeId_p;
         Ret = EplTimeruModifyTimerMs(&pNodeInfo_p->m_TimerHdlLonger, EplNmtMnuInstance_g.m_ulTimeoutReadyToOp, TimerArg);
     }
 
@@ -2001,7 +2001,7 @@ tEplTimerArg    TimerArg;
         EPL_NMTMNU_SET_FLAGS_TIMERARG_LONGER(
                 pNodeInfo_p, uiNodeId_p, TimerArg);
 //        TimerArg.m_EventSink = kEplEventSinkNmtMnu;
-//        TimerArg.m_ulArg = EPL_NMTMNU_TIMERARG_LONGER | uiNodeId_p;
+//        TimerArg.m_Arg.m_dwVal = EPL_NMTMNU_TIMERARG_LONGER | uiNodeId_p;
         Ret = EplTimeruModifyTimerMs(&pNodeInfo_p->m_TimerHdlLonger, EplNmtMnuInstance_g.m_ulTimeoutCheckCom, TimerArg);
 
         // update mandatory slave counter, because timer was started
@@ -2331,14 +2331,14 @@ tEplTimerArg        TimerArg;
                 EPL_NMTMNU_SET_FLAGS_TIMERARG_IDENTREQ(
                         pNodeInfo, uiNodeId_p, TimerArg);
 //                TimerArg.m_EventSink = kEplEventSinkNmtMnu;
-//                TimerArg.m_ulArg = EPL_NMTMNU_TIMERARG_IDENTREQ | uiNodeId_p;
+//                TimerArg.m_Arg.m_dwVal = EPL_NMTMNU_TIMERARG_IDENTREQ | uiNodeId_p;
 /*
                 EPL_NMTMNU_DBG_POST_TRACE_VALUE(kEplNmtMnuIntNodeEventNoIdentResponse,
                                                 uiNodeId_p,
                                                 ((pNodeInfo->m_NodeState << 8)
                                                  | 0x80
                                                  | ((pNodeInfo->m_wFlags & EPL_NMTMNU_NODE_FLAG_COUNT_STATREQ) >> 6)
-                                                 | ((TimerArg.m_ulArg & EPL_NMTMNU_TIMERARG_COUNT_SR) >> 8)));
+                                                 | ((TimerArg.m_Arg.m_dwVal & EPL_NMTMNU_TIMERARG_COUNT_SR) >> 8)));
 */
                 Ret = EplTimeruModifyTimerMs(&pNodeInfo->m_TimerHdlStatReq, EplNmtMnuInstance_g.m_ulStatusRequestDelay, TimerArg);
             }
@@ -2388,14 +2388,14 @@ tEplTimerArg        TimerArg;
                 EPL_NMTMNU_SET_FLAGS_TIMERARG_STATREQ(
                         pNodeInfo, uiNodeId_p, TimerArg);
 //                TimerArg.m_EventSink = kEplEventSinkNmtMnu;
-//                TimerArg.m_ulArg = EPL_NMTMNU_TIMERARG_STATREQ | uiNodeId_p;
+//                TimerArg.m_Arg.m_dwVal = EPL_NMTMNU_TIMERARG_STATREQ | uiNodeId_p;
 /*
                 EPL_NMTMNU_DBG_POST_TRACE_VALUE(kEplNmtMnuIntNodeEventStatusResponse,
                                                 uiNodeId_p,
                                                 ((pNodeInfo->m_NodeState << 8)
                                                  | 0x80
                                                  | ((pNodeInfo->m_wFlags & EPL_NMTMNU_NODE_FLAG_COUNT_STATREQ) >> 6)
-                                                 | ((TimerArg.m_ulArg & EPL_NMTMNU_TIMERARG_COUNT_SR) >> 8)));
+                                                 | ((TimerArg.m_Arg.m_dwVal & EPL_NMTMNU_TIMERARG_COUNT_SR) >> 8)));
 */
                 Ret = EplTimeruModifyTimerMs(&pNodeInfo->m_TimerHdlStatReq, EplNmtMnuInstance_g.m_ulStatusRequestDelay, TimerArg);
             }

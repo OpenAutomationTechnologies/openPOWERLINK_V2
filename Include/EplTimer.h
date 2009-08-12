@@ -86,12 +86,23 @@
 //---------------------------------------------------------------------------
 
 // type for timer handle
+#if (TARGET_SYSTEM == _WIN32_)
+typedef ULONG_PTR tEplTimerHdl;
+
+#else
+
 typedef unsigned long tEplTimerHdl;
+#endif
 
 typedef struct
 {
     tEplEventSink   m_EventSink;
-    unsigned long   m_ulArg;    // d.k.: converted to unsigned long because
+    union
+    {
+        DWORD           m_dwVal;
+        void*           m_pVal;
+    } m_Arg;
+//    unsigned long   m_ulArg;    // d.k.: converted to unsigned long because
                                 // it is never accessed as a pointer by the
                                 // timer module and the data the
                                 // pointer points to is not saved in any way.
@@ -104,7 +115,12 @@ typedef struct
 typedef struct
 {
     tEplTimerHdl    m_TimerHdl;
-    unsigned long   m_ulArg;    // d.k.: converted to unsigned long because
+    union
+    {
+        DWORD           m_dwVal;
+        void*           m_pVal;
+    } m_Arg;
+//    unsigned long   m_ulArg;    // d.k.: converted to unsigned long because
                                 // it is never accessed as a pointer by the
                                 // timer module and the data the
                                 // pointer points to is not saved in any way.

@@ -951,8 +951,8 @@ LARGE_INTEGER               liDueTime;
     }
     else
     {
-        uiIndex = (*pTimerHdl_p >> TIMERHDL_SHIFT) - 1;
-        if (uiIndex > TIMER_COUNT)
+        uiIndex = (unsigned int)(*pTimerHdl_p >> TIMERHDL_SHIFT) - 1;
+        if (uiIndex >= TIMER_COUNT)
         {   // invalid handle
             Ret = kEplTimerInvalidHandle;
             goto Exit;
@@ -992,7 +992,7 @@ LARGE_INTEGER               liDueTime;
 //        lPeriodMs = 0;
     }
 
-    pTimerInfo->m_EventArg.m_ulArg = ulArgument_p;
+    pTimerInfo->m_EventArg.m_Arg.m_dwVal = ulArgument_p;
     pTimerInfo->m_pfnCallback = pfnCallback_p;
 
     *pTimerHdl_p = pTimerInfo->m_EventArg.m_TimerHdl;
@@ -1049,8 +1049,8 @@ HANDLE                      hTimer;
     }
     else
     {
-        uiIndex = (*pTimerHdl_p >> TIMERHDL_SHIFT) - 1;
-        if (uiIndex > TIMER_COUNT)
+        uiIndex = (unsigned int)(*pTimerHdl_p >> TIMERHDL_SHIFT) - 1;
+        if (uiIndex >= TIMER_COUNT)
         {   // invalid handle
             Ret = kEplTimerInvalidHandle;
             goto Exit;

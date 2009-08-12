@@ -712,11 +712,11 @@ unsigned int        uiCount;
     EplTimerHdl = pTimerEventArg->m_TimerHdl;
 
     // get pointer to intern control structure of connection
-    if(pTimerEventArg->m_ulArg == 0)
+    if (pTimerEventArg->m_Arg.m_pVal == NULL)
     {
         goto Exit;
     }
-    pAsySdoSeqCon = (tEplAsySdoSeqCon*)pTimerEventArg->m_ulArg;
+    pAsySdoSeqCon = (tEplAsySdoSeqCon*)pTimerEventArg->m_Arg.m_pVal;
 
     // check if time is current
     if(EplTimerHdl != pAsySdoSeqCon->m_EplTimerHdl)
@@ -2421,7 +2421,7 @@ tEplKernel      Ret;
 tEplTimerArg    TimerArg;
 
     TimerArg.m_EventSink = kEplEventSinkSdoAsySeq;
-    TimerArg.m_ulArg = (unsigned long)pAsySdoSeqCon_p;
+    TimerArg.m_Arg.m_pVal = pAsySdoSeqCon_p;
 
     if(pAsySdoSeqCon_p->m_EplTimerHdl == 0)
     {   // create new timer

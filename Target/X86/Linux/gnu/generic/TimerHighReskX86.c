@@ -389,7 +389,7 @@ ktime_t                      RelTime;
         }
     }
 
-    pTimerInfo->m_EventArg.m_ulArg = ulArgument_p;
+    pTimerInfo->m_EventArg.m_Arg.m_dwVal = ulArgument_p;
     pTimerInfo->m_pfnCallback      = pfnCallback_p;
     pTimerInfo->m_fContinuously    = fContinuously_p;
     pTimerInfo->m_ullPeriod        = ullTimeNs_p;

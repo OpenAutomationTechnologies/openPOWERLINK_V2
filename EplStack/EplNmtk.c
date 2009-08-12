@@ -331,7 +331,7 @@ tEplEventNmtStateChange NmtStateChange;
 
         case kEplEventTypeTimer:
         {
-            NmtEvent = (tEplNmtEvent)((tEplTimerEventArg*)pEvent_p->m_pArg)->m_ulArg;
+            NmtEvent = (tEplNmtEvent)((tEplTimerEventArg*)pEvent_p->m_pArg)->m_Arg.m_dwVal;
             break;
         }
         default:

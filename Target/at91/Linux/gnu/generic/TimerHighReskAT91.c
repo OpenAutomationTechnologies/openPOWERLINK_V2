@@ -467,7 +467,7 @@ WORD                        wCounter;
     // configure the counter
     __raw_writel(wCounter, AT91_TC_REG(uiIndex, RC));
 
-    pTimerInfo->m_EventArg.m_ulArg = ulArgument_p;
+    pTimerInfo->m_EventArg.m_Arg.m_dwVal = ulArgument_p;
     pTimerInfo->m_pfnCallback = pfnCallback_p;
 
     *pTimerHdl_p = pTimerInfo->m_EventArg.m_TimerHdl;

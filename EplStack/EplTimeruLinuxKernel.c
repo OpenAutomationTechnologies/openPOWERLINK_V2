@@ -452,7 +452,7 @@ tEplTimerEventArg   TimerEventArg;
 
     // call event function
     TimerEventArg.m_TimerHdl = (tEplTimerHdl)pData;
-    TimerEventArg.m_ulArg = pData->TimerArgument.m_ulArg;
+    EPL_MEMCPY(&TimerEventArg.m_Arg, &pData->TimerArgument.m_Arg, sizeof (TimerEventArg.m_Arg));
 
     EplEvent.m_EventSink = pData->TimerArgument.m_EventSink;
     EplEvent.m_EventType = kEplEventTypeTimer;

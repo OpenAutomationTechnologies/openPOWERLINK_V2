@@ -418,7 +418,7 @@ tEplKernel  Ret;
                                 dwBuffer = 1;
                             }
                             TimerArg.m_EventSink = kEplEventSinkNmtk;
-                            TimerArg.m_ulArg = (unsigned long) kEplNmtEventTimerBasicEthernet;
+                            TimerArg.m_Arg.m_dwVal = (DWORD) kEplNmtEventTimerBasicEthernet;
                             Ret = EplTimeruModifyTimerMs(&EplNmtuInstance_g.m_TimerHdl, (unsigned long) dwBuffer, TimerArg);
                             // potential error is forwarded to event queue which generates error event
                         }
@@ -497,12 +497,12 @@ tEplKernel  Ret;
                         if((dwBuffer & EPL_NMTST_BASICETHERNET) == 0)
                         {   // NMT_StartUp_U32.Bit13 == 0
                             // new state PreOperational1
-                            TimerArg.m_ulArg = (unsigned long) kEplNmtEventTimerMsPreOp1;
+                            TimerArg.m_Arg.m_dwVal = (DWORD) kEplNmtEventTimerMsPreOp1;
                         }
                         else
                         {   // NMT_StartUp_U32.Bit13 == 1
                             // new state BasicEthernet
-                            TimerArg.m_ulArg = (unsigned long) kEplNmtEventTimerBasicEthernet;
+                            TimerArg.m_Arg.m_dwVal = (DWORD) kEplNmtEventTimerBasicEthernet;
                         }
 
                         // read NMT_BootTime_REC.MNWaitNotAct_U32 from OD
@@ -570,7 +570,7 @@ tEplKernel  Ret;
                             dwBuffer = 1;
                         }
                         TimerArg.m_EventSink = kEplEventSinkNmtk;
-                        TimerArg.m_ulArg = (unsigned long) kEplNmtEventTimerMsPreOp2;
+                        TimerArg.m_Arg.m_dwVal = (DWORD) kEplNmtEventTimerMsPreOp2;
                         Ret = EplTimeruModifyTimerMs(&EplNmtuInstance_g.m_TimerHdl, (unsigned long) dwBuffer, TimerArg);
                         // potential error is forwarded to event queue which generates error event
                         break;

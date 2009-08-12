@@ -412,7 +412,7 @@ DWORD                       dwTime;
         }
         MCF_SLTCNT(SLT) = dwTime;
 
-        pTimerInfo->m_EventArg.m_ulArg = ulArgument_p;
+        pTimerInfo->m_EventArg.m_Arg.m_dwVal = ulArgument_p;
         pTimerInfo->m_pfnCallback = pfnCallback_p;
 
         *pTimerHdl_p = pTimerInfo->m_EventArg.m_TimerHdl;
@@ -457,7 +457,7 @@ DWORD                       dwTime;
 
         MCF_GPT_GCIR(uiIndex) = dwTime;
 
-        pTimerInfo->m_EventArg.m_ulArg = ulArgument_p;
+        pTimerInfo->m_EventArg.m_Arg.m_dwVal = ulArgument_p;
         pTimerInfo->m_pfnCallback = pfnCallback_p;
 
         *pTimerHdl_p = pTimerInfo->m_EventArg.m_TimerHdl;
