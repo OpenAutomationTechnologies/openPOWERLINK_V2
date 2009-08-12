@@ -3195,6 +3195,7 @@ TGT_DLLK_DECLARE_FLAGS
                     Ret = kEplDllNoNodeInfo;
                     goto Exit;
                 }
+#endif
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
             }
             else if (EplDllkInstance_g.m_DllState == kEplDllMsWaitPres)
@@ -3276,7 +3277,7 @@ TGT_DLLK_DECLARE_FLAGS
                 if (((unsigned int) (AmiGetWordFromLe(&pFrame->m_Data.m_Pres.m_le_wSize) + 24)
                     > FrameInfo.m_uiFrameSize)
 #if EPL_NMT_MAX_NODE_ID > 0
-                    || (FrameInfo.m_uiFrameSize > (pIntNodeInfo->m_wPresPayloadLimit + 24))
+                    || (FrameInfo.m_uiFrameSize > (unsigned int) (pIntNodeInfo->m_wPresPayloadLimit + 24))
 #endif
                     )
                 {   // format error
