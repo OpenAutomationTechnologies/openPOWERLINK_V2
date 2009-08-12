@@ -228,43 +228,43 @@ int inum;
 
     if (pcap_findalldevs(&alldevs, sErr_Msg) == -1)
     {
-        fprintf(stderr,"Error in pcap_findalldevs: %s\n", sErr_Msg);
+        fprintf(stderr, "Error in pcap_findalldevs: %s\n", sErr_Msg);
         EplRet = kEplNoResource;
         goto Exit;
     }
 
-    printf("--------------------------------------------------\n");
-    printf("List of Ethernet Cards Found in this System: \n");
-    printf("--------------------------------------------------\n");
+    PRINTF0("--------------------------------------------------\n");
+    PRINTF0("List of Ethernet Cards Found in this System: \n");
+    PRINTF0("--------------------------------------------------\n");
     /* Print the list */
     for (seldev = alldevs; seldev != NULL; seldev = seldev->next)
     {
-        printf("%d. %s", ++i, seldev->name);
+        PRINTF1("%d. ", ++i);
 
         if (seldev->description)
         {
-            printf(" (%s)\n", seldev->description);
+            PRINTF2("%s\n      %s\n", seldev->description, seldev->name);
         }
         else
         {
-            printf(" (No description available)\n");
+            PRINTF1("%s\n", seldev->name);
         }
     }
 
     if (i == 0)
     {
-        printf("\nNo interfaces found! Make sure WinPcap is installed.\n");
+        PRINTF0("\nNo interfaces found! Make sure WinPcap is installed.\n");
         EplRet = kEplNoResource;
         goto Exit;
     }
 
-    printf("--------------------------------------------------\n");
-    printf("Enter the interface number (1-%d):",i);
-    scanf("%d", &inum);
-    printf("--------------------------------------------------\n");
+    PRINTF0("--------------------------------------------------\n");
+    PRINTF1("Enter the interface number (1-%d):",i);
+    scanf_s("%d", &inum);
+    PRINTF0("--------------------------------------------------\n");
     if ((inum < 1) || (inum > i))
     {
-        printf("\nInterface number out of range.\n");
+        PRINTF0("\nInterface number out of range.\n");
         /* Free the device list */
         pcap_freealldevs(alldevs);
         EplRet = kEplNoResource;
@@ -336,7 +336,7 @@ int inum;
     EplApiInitParam.m_pfnObdInitRam = EplObdInitRam;
 
 
-    printf("\n\n Powerlink %s running.!\n  (build: %s / %s)\n\n",
+    PRINTF3("\n\n Powerlink %s running.!\n  (build: %s / %s)\n\n",
             (uiNodeId_g == EPL_C_ADR_MN_DEF_NODE_ID ?
                 "Managing Node" : "Controlled Node"),
             __DATE__, __TIME__);
@@ -400,7 +400,7 @@ int inum;
     EplRet = EplApiLinkObject(0x6100, &abDomain_l, &uiVarEntries, &ObdSize, 0x00);
     if (EplRet != kEplSuccessful)
     {
-        printf("EplApiLinkObject(0x6100): returns 0x%X\n", EplRet);
+        PRINTF1("EplApiLinkObject(0x6100): returns 0x%X\n", EplRet);
     }
 
     // reset old process variables
@@ -412,7 +412,7 @@ int inum;
     // start processing
     EplRet = EplApiExecNmtCommand(kEplNmtEventSwReset);
 
-    printf("Press Esc to leave the programm\n");
+    PRINTF0("Press Esc to leave the programm\n");
     // wait for key hit
     while (cKey != 0x1B)
     {
@@ -430,10 +430,10 @@ int inum;
 
     // delete instance for all modules
     EplRet = EplApiShutdown();
-    printf("EplApiShutdown():  0x%X\n", EplRet);
+    PRINTF1("EplApiShutdown():  0x%X\n", EplRet);
 
 Exit:
-    printf("main(): returns 0x%X\n", EplRet);
+    PRINTF1("main(): returns 0x%X\n", EplRet);
     return EplRet;
 }
 
@@ -486,7 +486,7 @@ tEplKernel          EplRet = kEplSuccessful;
                     // -> also shut down EplApiProcess() and main()
                     EplRet = kEplShutdown;
 
-                    printf("AppCbEvent(kEplNmtGsOff) originating event = 0x%X\n", pEventArg_p->m_NmtStateChange.m_NmtEvent);
+                    PRINTF2("%s(kEplNmtGsOff) originating event = 0x%X\n", __func__, pEventArg_p->m_NmtStateChange.m_NmtEvent);
 
                     break;
                 }
@@ -532,9 +532,10 @@ tEplKernel          EplRet = kEplSuccessful;
 
                 case kEplNmtMsPreOperational1:
                 {
-                    printf("App1CbEvent(0x%X) originating event = 0x%X\n",
-                           pEventArg_p->m_NmtStateChange.m_NewNmtState,
-                           pEventArg_p->m_NmtStateChange.m_NmtEvent);
+                    PRINTF3("%s(0x%X) originating event = 0x%X\n",
+                            __func__,
+                            pEventArg_p->m_NmtStateChange.m_NewNmtState,
+                            pEventArg_p->m_NmtStateChange.m_NmtEvent);
 
                     // continue
                 }
@@ -566,7 +567,10 @@ tEplKernel          EplRet = kEplSuccessful;
         {   // error or warning occured within the stack or the application
             // on error the API layer stops the NMT state machine
 
-            printf("AppCbEvent(Err/Warn): Source=%02X EplError=0x%03X", pEventArg_p->m_InternalError.m_EventSource, pEventArg_p->m_InternalError.m_EplError);
+            PRINTF3("%s(Err/Warn): Source=%02X EplError=0x%03X",
+                    __func__,
+                    pEventArg_p->m_InternalError.m_EventSource,
+                    pEventArg_p->m_InternalError.m_EplError);
             // check additional argument
             switch (pEventArg_p->m_InternalError.m_EventSource)
             {
@@ -574,20 +578,20 @@ tEplKernel          EplRet = kEplSuccessful;
                 case kEplEventSourceEventu:
                 {   // error occured within event processing
                     // either in kernel or in user part
-                    printf(" OrgSource=%02X\n", pEventArg_p->m_InternalError.m_Arg.m_EventSource);
+                    PRINTF1(" OrgSource=%02X\n", pEventArg_p->m_InternalError.m_Arg.m_EventSource);
                     break;
                 }
 
                 case kEplEventSourceDllk:
                 {   // error occured within the data link layer (e.g. interrupt processing)
                     // the DWORD argument contains the DLL state and the NMT event
-                    printf(" val=%lX\n", pEventArg_p->m_InternalError.m_Arg.m_dwArg);
+                    PRINTF1(" val=%lX\n", pEventArg_p->m_InternalError.m_Arg.m_dwArg);
                     break;
                 }
 
                 default:
                 {
-                    printf("\n");
+                    PRINTF0("\n");
                     break;
                 }
             }
@@ -604,6 +608,8 @@ tEplKernel          EplRet = kEplSuccessful;
                 {
                 tEplSdoComConHdl SdoComConHdl;
 
+                    PRINTF2("%s(Node=0x%X, CheckConf)\n", __func__, pEventArg_p->m_Node.m_uiNodeId);
+
                     // update object 0x1006 on CN
                     EplRet = EplApiWriteObject(&SdoComConHdl, pEventArg_p->m_Node.m_uiNodeId, 0x1006, 0x00, &dw_le_CycleLen_g, 4, kEplSdoTypeAsnd, NULL);
                     if (EplRet == kEplApiTaskDeferred)
@@ -612,7 +618,7 @@ tEplKernel          EplRet = kEplSuccessful;
                     }
                     else if (EplRet == kEplSuccessful)
                     {   // local OD access (should not occur)
-                        printf("AppCbEvent(Node) write to local OD\n");
+                        PRINTF1("%s(Node) write to local OD\n", __func__);
                     }
                     else
                     {   // error occured
@@ -628,9 +634,30 @@ tEplKernel          EplRet = kEplSuccessful;
                         }
                         else
                         {
-                        printf("AppCbEvent(Node): EplApiWriteObject() returned 0x%02X\n", EplRet);
+                            PRINTF2("%s(Node): EplApiWriteObject() returned 0x%02X\n", __func__, EplRet);
                         }
                     }
+
+                    break;
+                }
+
+                case kEplNmtNodeEventNmtState:
+                {
+                    PRINTF3("%s(Node=0x%X, NmtState=0x%X)\n", __func__, pEventArg_p->m_Node.m_uiNodeId, pEventArg_p->m_Node.m_NmtState);
+
+                    break;
+                }
+
+                case kEplNmtNodeEventError:
+                {
+                    PRINTF3("%s(Node=0x%X, Error=0x%X)\n", __func__, pEventArg_p->m_Node.m_uiNodeId, pEventArg_p->m_Node.m_wErrorCode);
+
+                    break;
+                }
+
+                case kEplNmtNodeEventFound:
+                {
+                    PRINTF2("%s(Node=0x%X, Found)\n", __func__, pEventArg_p->m_Node.m_uiNodeId);
 
                     break;
                 }
@@ -651,6 +678,8 @@ tEplKernel          EplRet = kEplSuccessful;
                 {   // ... successfully
                 tEplSdoComConHdl SdoComConHdl;
 
+                    PRINTF2("%s(Node=0x%X) first SDO finished\n", __func__, pEventArg_p->m_Sdo.m_uiNodeId);
+
                     // update object 0x1C14 on CN
                     EplRet = EplApiWriteObject(&SdoComConHdl, pEventArg_p->m_Sdo.m_uiNodeId, 0x1C14, 0x00, &dw_le_LossOfSocTolerance_g, 4, kEplSdoTypeAsnd, (void*)1);
                     if (EplRet == kEplApiTaskDeferred)
@@ -660,15 +689,16 @@ tEplKernel          EplRet = kEplSuccessful;
                     }
                     else if (EplRet == kEplSuccessful)
                     {   // local OD access (should not occur)
-                        printf("AppCbEvent(Node) write to local OD\n");
+                        PRINTF1("%s(Node) write to local OD\n", __func__);
                     }
                     else
                     {   // error occured
-                        printf("AppCbEvent(Node): EplApiWriteObject() returned 0x%02X\n", EplRet);
+                        PRINTF2("%s(Node): EplApiWriteObject() returned 0x%02X\n", __func__, EplRet);
                     }
                 }
                 else
                 {   // indicate configuration error CN
+                    PRINTF3("%s(Node=0x%X) first SDO failed with abort code 0x%lX\n", __func__, pEventArg_p->m_Sdo.m_uiNodeId, pEventArg_p->m_Sdo.m_dwAbortCode);
                     EplRet = EplApiMnTriggerStateChange(pEventArg_p->m_Sdo.m_uiNodeId, kEplNmtNodeCommandConfErr);
                 }
             }
@@ -682,10 +712,12 @@ tEplKernel          EplRet = kEplSuccessful;
 
                 if (pEventArg_p->m_Sdo.m_SdoComConState == kEplSdoComTransferFinished)
                 {   // continue boot-up of CN with NMT command Reset Configuration
+                    PRINTF2("%s(Node=0x%X) second SDO finished -> ConfReset\n", __func__, pEventArg_p->m_Sdo.m_uiNodeId);
                     EplRet = EplApiMnTriggerStateChange(pEventArg_p->m_Sdo.m_uiNodeId, kEplNmtNodeCommandConfReset);
                 }
                 else
                 {   // indicate configuration error CN
+                    PRINTF3("%s(Node=0x%X) second SDO failed with abort code 0x%lX\n", __func__, pEventArg_p->m_Sdo.m_uiNodeId, pEventArg_p->m_Sdo.m_dwAbortCode);
                     EplRet = EplApiMnTriggerStateChange(pEventArg_p->m_Sdo.m_uiNodeId, kEplNmtNodeCommandConfErr);
                 }
             }

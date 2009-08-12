@@ -109,12 +109,16 @@
 
     #ifndef PRINTF0
         void trace (const char* fmt, ...);
-        #define PRINTF                      TRACE
-        #define PRINTF0(arg)                TRACE0(arg)
-        #define PRINTF1(arg,p1)             TRACE1(arg,p1)
-        #define PRINTF2(arg,p1,p2)          TRACE2(arg,p1,p2)
-        #define PRINTF3(arg,p1,p2,p3)       TRACE3(arg,p1,p2,p3)
-        #define PRINTF4(arg,p1,p2,p3,p4)    TRACE4(arg,p1,p2,p3,p4)
+        #ifdef _CONSOLE // use standard printf in console applications
+            #define PRINTF                      printf
+        #else           // use trace for output in debug window in Windows applications
+            #define PRINTF                      TRACE
+        #endif
+        #define PRINTF0(arg)                PRINTF(arg)
+        #define PRINTF1(arg,p1)             PRINTF(arg,p1)
+        #define PRINTF2(arg,p1,p2)          PRINTF(arg,p1,p2)
+        #define PRINTF3(arg,p1,p2,p3)       PRINTF(arg,p1,p2,p3)
+        #define PRINTF4(arg,p1,p2,p3,p4)    PRINTF(arg,p1,p2,p3,p4)
         //#define PRINTF                      printf
         //#define PRINTF0(arg)                PRINTF(arg)
         //#define PRINTF1(arg,p1)             PRINTF(arg,p1)

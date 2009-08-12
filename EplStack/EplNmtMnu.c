@@ -2938,7 +2938,8 @@ tEplNmtState    ExpNmtState;
             Ret = kEplReject;
         }
 
-        goto Exit;
+        // d.k. continue with updating the current NMT state of the CN
+//        goto Exit;
     }
 
     // check if NMT_MNNodeCurrState_AU8 has to be changed
