@@ -277,8 +277,6 @@ static tEplApiInitParam EplApiInitParam = {0};
 char*               sHostname = HOSTNAME;
 WORD                wDrvVersion;
 BYTE                bDipSwitch;
-char*               argv[4], *envp[3];
-char                sBuffer[16];
 unsigned int        uiVarEntries;
 tEplObdSize         ObdSize;
 
@@ -465,26 +463,6 @@ tEplObdSize         ObdSize;
     dwMode_l = APP_DEFAULT_MODE;
     iMaxCycleCount_l = DEFAULT_MAX_CYCLE_COUNT;
 
-
-    // configure IP address of virtual network interface
-    // for TCP/IP communication over the POWERLINK network
-    sprintf(sBuffer, "%lu.%lu.%lu.%lu", (EplApiInitParam.m_dwIpAddress >> 24), ((EplApiInitParam.m_dwIpAddress >> 16) & 0xFF), ((EplApiInitParam.m_dwIpAddress >> 8) & 0xFF), (EplApiInitParam.m_dwIpAddress & 0xFF));
-    /* set up a minimal environment */
-    iRet = 0;
-    envp[iRet++] = "HOME=/";
-    envp[iRet++] = "PATH=/sbin:/bin:/usr/sbin:/usr/bin";
-    envp[iRet] = NULL;
-
-    /* set up the argument list */
-    iRet = 0;
-    argv[iRet++] = "/sbin/ifconfig";
-    argv[iRet++] = IF_ETH;
-    argv[iRet++] = sBuffer;
-    argv[iRet] = NULL;
-
-    /* call ifconfig to configure the virtual network interface */
-    iRet = call_usermodehelper(argv[0], argv, envp, 1);
-    printk("ifconfig %s %s returned %d\n", argv[1], argv[2], iRet);
 
     // start the NMT state machine
     EplRet = EplApiExecNmtCommand(kEplNmtEventSwReset);

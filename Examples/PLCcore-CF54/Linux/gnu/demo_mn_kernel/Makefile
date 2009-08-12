@@ -1,5 +1,5 @@
 
-INSTALLDIR  = /home/tftpboot/daniel
+INSTALLDIR  = /tftpboot
 
 MODULENAME = epl
 

@@ -449,6 +449,17 @@ char        sBuffer[16];
         /* set up the argument list */
         iRet = 0;
         argv[iRet++] = "route";
+        argv[iRet++] = "del";
+        argv[iRet++] = "default";
+        argv[iRet] = NULL;
+
+        /* call route to delete the default gateway */
+        iRet = call_usermodehelper(argv[0], argv, envp, 1);
+        printk("route del default returned %d\n", iRet);
+
+        /* set up the argument list */
+        iRet = 0;
+        argv[iRet++] = "route";
         argv[iRet++] = "add";
         argv[iRet++] = "default";
         argv[iRet++] = "gw";
