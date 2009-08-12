@@ -38,6 +38,7 @@
 #define _DEV_BIT32_             0x00000300L     //                  32 bit
 #define _DEV_BIT16_             0x00000200L     //                  16 bit
 #define _DEV_BIT8_              0x00000100L     //                  8 bit
+#define _DEV_GNUC_NIOS2_        0x0000001FL     //                  Altera Nios II GCC
 #define _DEV_TI_CCS_            0x0000001EL     //                  TI's Code Composer
 #define _DEV_GNUC_AVR_          0x0000001DL     //                  WinAVR and AVRStudio4
 #define _DEV_RVCT_ARM_          0x0000001CL     //                  Keil RealView ARM
@@ -118,6 +119,8 @@
 
 #define _DEV_RENESAS_M32C_      (_DEV_BIT32_ | _DEV_RENESASM32C)
 #define _DEV_CCS_TMS_           (_DEV_BIT16_ | _DEV_TI_CCS_  | _DEV_COMMA_EXT_ | _DEV_DSP_)
+
+#define _DEV_NIOS2_             (_DEV_BIT32_ | _DEV_GNUC_NIOS2_               | _DEV_64BIT_SUPPORT_ | _DEV_COMMA_EXT_ | _DEV_ONLY_INT_MAIN_ | _DEV_ALIGNMENT_4_ )
 
 
 //---------------------------------------------------------------------------
@@ -905,6 +908,11 @@
     #elif defined (GNU_CF548X)
         #define TARGET_SYSTEM       _NO_OS_
         #define DEV_SYSTEM          _DEV_GNU_CF548X_
+
+    #elif defined (__NIOS2__)
+        #define TARGET_SYSTEM       _NO_OS_
+        #define DEV_SYSTEM          _DEV_NIOS2_
+
     #else
         #error 'ERROR: DEV_SYSTEM not found!'
     #endif
