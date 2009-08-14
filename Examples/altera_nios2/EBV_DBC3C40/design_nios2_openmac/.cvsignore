@@ -1,0 +1,15 @@
+db
+incremental_db
+*.done
+*.qarlog
+*.qar
+*.rpt
+*.summary
+timing
+*.cmp
+*.dpf
+*.eqn
+*.html
+*.pin
+*.ppf
+*.bak
