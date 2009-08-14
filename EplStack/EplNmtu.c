@@ -112,7 +112,11 @@ static tEplNmtuInstance EplNmtuInstance_g;
 // local function prototypes
 //---------------------------------------------------------------------------
 
+#if EPL_NMT_MAX_NODE_ID > 0
+
 static tEplKernel EplNmtuConfigureDll(void);
+
+#endif
 
 
 //=========================================================================//
@@ -352,12 +356,14 @@ tEplKernel  Ret;
                     {
                     unsigned int uiNodeId;
 
+#if EPL_NMT_MAX_NODE_ID > 0
                         // configure the DLL (PReq/PRes payload limits and PRes timeout)
                         Ret = EplNmtuConfigureDll();
                         if (Ret != kEplSuccessful)
                         {
                             break;
                         }
+#endif // EPL_NMT_MAX_NODE_ID > 0
 
                         // get node ID from OD
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_OBDU)) != 0) || (EPL_OBD_USE_KERNEL != FALSE)
@@ -669,6 +675,8 @@ tEplKernel Ret;
 //                                                                         //
 //=========================================================================//
 
+#if EPL_NMT_MAX_NODE_ID > 0
+
 //---------------------------------------------------------------------------
 //
 // Function:    EplNmtuConfigureDll
@@ -768,6 +776,8 @@ BYTE            bCount;
 Exit:
     return Ret;
 }
+
+#endif // EPL_NMT_MAX_NODE_ID > 0
 
 #endif // #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMTU)) != 0)
 

@@ -143,7 +143,7 @@
     #include <stdio.h>
 
     //29.11.2004 f.j. sonst ist memcpy und memset unbekannt
-//    #include <string.h>
+    #include <string.h>
 
     #define EPL_MEMCPY(dst,src,siz)     memcpy((void*)(dst),(const void*)(src),(size_t)(siz));
     #define EPL_MEMSET(dst,val,siz)     memset((void*)(dst),(int)(val),(size_t)(siz));

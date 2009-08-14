@@ -259,6 +259,10 @@ typedef union
 #define tabentries(a)   (sizeof(a)/sizeof(*(a)))
 #endif
 
+#ifndef min
+#define min(a,b)            (((a) < (b)) ? (a) : (b))
+#endif
+
 
 //---------------------------------------------------------------------------
 // const defines
