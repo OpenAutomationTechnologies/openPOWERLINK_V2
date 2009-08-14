@@ -1,0 +1,201 @@
+# -------------------------------------------------------------------------- #
+#
+# Copyright (C) 1991-2009 Altera Corporation
+# Your use of Altera Corporation's design tools, logic functions 
+# and other software and tools, and its AMPP partner logic 
+# functions, and any output files from any of the foregoing 
+# (including device programming or simulation files), and any 
+# associated documentation or information are expressly subject 
+# to the terms and conditions of the Altera Program License 
+# Subscription Agreement, Altera MegaCore Function License 
+# Agreement, or other applicable license agreement, including, 
+# without limitation, that your use is for the sole purpose of 
+# programming logic devices manufactured by Altera and sold by 
+# Altera or its authorized distributors.  Please refer to the 
+# applicable agreement for further details.
+#
+# -------------------------------------------------------------------------- #
+#
+# Quartus II
+# Version 9.0 Build 132 02/25/2009 SJ Full Version
+# Date created = 11:10:14  May 14, 2009
+#
+# -------------------------------------------------------------------------- #
+#
+# Notes:
+#
+# 1) The default values for assignments are stored in the file:
+#		nios_openMac_assignment_defaults.qdf
+#    If this file doesn't exist, see file:
+#		assignment_defaults.qdf
+#
+# 2) Altera recommends that you do not modify this file. This
+#    file is updated automatically by the Quartus II software
+#    and any changes you make may be lost or overwritten.
+#
+# -------------------------------------------------------------------------- #
+
+
+
+# Project-Wide Assignments
+# ========================
+set_global_assignment -name ORIGINAL_QUARTUS_VERSION 8.1
+set_global_assignment -name PROJECT_CREATION_TIME_DATE "11:25:58  APRIL 07, 2009"
+set_global_assignment -name LAST_QUARTUS_VERSION 9.0
+
+# Pin & Location Assignments
+# ==========================
+set_location_assignment PIN_AB19 -to phy_tx_en
+set_location_assignment PIN_AA18 -to phy_tx_d[0]
+set_location_assignment PIN_AB18 -to phy_tx_d[1]
+set_location_assignment PIN_T12 -to phy_rst_n
+set_location_assignment PIN_AB20 -to phy_rx_crsdv
+set_location_assignment PIN_V13 -to phy_rx_d[1]
+set_location_assignment PIN_W13 -to phy_rx_d[0]
+set_location_assignment PIN_AA20 -to phy_smi_clk
+set_location_assignment PIN_U14 -to phy_smi_io
+set_location_assignment PIN_B11 -to ext_clk
+set_location_assignment PIN_N21 -to sram_ncs
+set_location_assignment PIN_T15 -to flash_ncs
+set_location_assignment PIN_K21 -to adr[22]
+set_location_assignment PIN_K22 -to adr[21]
+set_location_assignment PIN_J21 -to adr[20]
+set_location_assignment PIN_W20 -to adr[19]
+set_location_assignment PIN_W19 -to adr[18]
+set_location_assignment PIN_AA21 -to adr[17]
+set_location_assignment PIN_L22 -to adr[16]
+set_location_assignment PIN_L21 -to adr[15]
+set_location_assignment PIN_M22 -to adr[14]
+set_location_assignment PIN_M21 -to adr[13]
+set_location_assignment PIN_N22 -to adr[12]
+set_location_assignment PIN_W21 -to adr[11]
+set_location_assignment PIN_Y22 -to adr[10]
+set_location_assignment PIN_Y21 -to adr[9]
+set_location_assignment PIN_U19 -to adr[8]
+set_location_assignment PIN_U20 -to adr[7]
+set_location_assignment PIN_T18 -to adr[6]
+set_location_assignment PIN_R19 -to adr[5]
+set_location_assignment PIN_H19 -to adr[4]
+set_location_assignment PIN_H20 -to adr[3]
+set_location_assignment PIN_J18 -to adr[2]
+set_location_assignment PIN_AA22 -to adr[1]
+set_location_assignment PIN_M19 -to data[15]
+set_location_assignment PIN_N17 -to data[14]
+set_location_assignment PIN_N18 -to data[13]
+set_location_assignment PIN_N20 -to data[12]
+set_location_assignment PIN_N19 -to data[11]
+set_location_assignment PIN_P20 -to data[10]
+set_location_assignment PIN_R18 -to data[9]
+set_location_assignment PIN_R20 -to data[8]
+set_location_assignment PIN_V21 -to data[7]
+set_location_assignment PIN_V22 -to data[6]
+set_location_assignment PIN_U21 -to data[5]
+set_location_assignment PIN_U22 -to data[4]
+set_location_assignment PIN_R21 -to data[3]
+set_location_assignment PIN_R22 -to data[2]
+set_location_assignment PIN_P21 -to data[1]
+set_location_assignment PIN_P22 -to data[0]
+set_location_assignment PIN_M20 -to nbe[0]
+set_location_assignment PIN_K19 -to nbe[1]
+set_location_assignment PIN_K18 -to noe
+set_location_assignment PIN_W22 -to nwe
+set_location_assignment PIN_G1 -to rstn
+
+# Classic Timing Assignments
+# ==========================
+set_global_assignment -name MIN_CORE_JUNCTION_TEMP 0
+set_global_assignment -name MAX_CORE_JUNCTION_TEMP 85
+set_global_assignment -name NOMINAL_CORE_SUPPLY_VOLTAGE 1.2V
+set_global_assignment -name USE_TIMEQUEST_TIMING_ANALYZER OFF
+
+# Analysis & Synthesis Assignments
+# ================================
+set_global_assignment -name FAMILY "Cyclone III"
+set_global_assignment -name DEVICE_FILTER_PACKAGE FBGA
+set_global_assignment -name DEVICE_FILTER_PIN_COUNT 484
+set_global_assignment -name DEVICE_FILTER_SPEED_GRADE 7
+set_global_assignment -name TOP_LEVEL_ENTITY nios_pll
+
+# Fitter Assignments
+# ==================
+set_global_assignment -name DEVICE EP3C40F484C7
+set_global_assignment -name OPTIMIZE_HOLD_TIMING "IO PATHS AND MINIMUM TPD PATHS"
+set_global_assignment -name ENABLE_INIT_DONE_OUTPUT OFF
+set_global_assignment -name FORCE_CONFIGURATION_VCCIO ON
+set_global_assignment -name STRATIX_DEVICE_IO_STANDARD "3.0-V LVTTL"
+set_global_assignment -name RESERVE_ALL_UNUSED_PINS_WEAK_PULLUP "AS INPUT TRI-STATED"
+set_global_assignment -name CYCLONEII_RESERVE_NCEO_AFTER_CONFIGURATION "USE AS REGULAR IO"
+set_global_assignment -name RESERVE_DATA0_AFTER_CONFIGURATION "AS INPUT TRI-STATED"
+set_global_assignment -name RESERVE_DATA1_AFTER_CONFIGURATION "AS INPUT TRI-STATED"
+set_global_assignment -name RESERVE_FLASH_NCE_AFTER_CONFIGURATION "USE AS REGULAR IO"
+set_global_assignment -name RESERVE_DCLK_AFTER_CONFIGURATION "USE AS PROGRAMMING PIN"
+
+# Assembler Assignments
+# =====================
+set_global_assignment -name GENERATE_RBF_FILE OFF
+set_global_assignment -name CYCLONEIII_CONFIGURATION_DEVICE AUTO
+set_global_assignment -name USE_CONFIGURATION_DEVICE ON
+
+# Power Estimation Assignments
+# ============================
+set_global_assignment -name POWER_PRESET_COOLING_SOLUTION "23 MM HEAT SINK WITH 200 LFPM AIRFLOW"
+set_global_assignment -name POWER_BOARD_THERMAL_MODEL "NONE (CONSERVATIVE)"
+
+# start EDA_TOOL_SETTINGS(eda_blast_fpga)
+# ---------------------------------------
+
+	# Analysis & Synthesis Assignments
+	# ================================
+set_global_assignment -name USE_GENERATED_PHYSICAL_CONSTRAINTS OFF -section_id eda_blast_fpga
+
+# end EDA_TOOL_SETTINGS(eda_blast_fpga)
+# -------------------------------------
+
+# ----------------------
+# start ENTITY(nios_pll)
+
+	# Classic Timing Assignments
+	# ==========================
+set_instance_assignment -name TCO_REQUIREMENT "5 ns" -to sram_adr
+set_instance_assignment -name TCO_REQUIREMENT "5 ns" -to sram_be_n
+set_instance_assignment -name TCO_REQUIREMENT "5 ns" -to sram_data
+set_instance_assignment -name TSU_REQUIREMENT "3.4 ns" -to sram_data
+
+	# start LOGICLOCK_REGION(Root Region)
+	# -----------------------------------
+
+		# LogicLock Region Assignments
+		# ============================
+set_global_assignment -name LL_ROOT_REGION ON -section_id "Root Region"
+set_global_assignment -name LL_MEMBER_STATE LOCKED -section_id "Root Region"
+
+	# end LOGICLOCK_REGION(Root Region)
+	# ---------------------------------
+
+	# start DESIGN_PARTITION(Top)
+	# ---------------------------
+
+		# Incremental Compilation Assignments
+		# ===================================
+set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
+set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
+set_global_assignment -name PARTITION_COLOR 16764057 -section_id Top
+
+	# end DESIGN_PARTITION(Top)
+	# -------------------------
+
+# end ENTITY(nios_pll)
+# --------------------
+
+set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT -section_id Top
+set_global_assignment -name ENABLE_SIGNALTAP ON
+set_global_assignment -name USE_SIGNALTAP_FILE stp1.stp
+set_global_assignment -name CYCLONEII_OPTIMIZATION_TECHNIQUE AREA
+set_global_assignment -name MISC_FILE nios_openMac.dpf
+set_global_assignment -name BDF_FILE nios_pll.bdf
+set_global_assignment -name QIP_FILE altpll0.qip
+set_global_assignment -name QIP_FILE niosII_openMac.qip
+set_global_assignment -name SIGNALTAP_FILE stp1.stp
+set_global_assignment -name SEARCH_PATH EPL/ -tag from_archive
+set_global_assignment -name SEARCH_PATH Programme/altera/90/quartus/libraries/others/maxplus2/ -tag from_archive
+set_global_assignment -name SEARCH_PATH megafunctions/ -tag from_archive

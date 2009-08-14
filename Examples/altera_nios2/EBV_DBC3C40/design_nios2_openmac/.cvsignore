@@ -1,5 +1,9 @@
 db
 incremental_db
+.sopc_builder
+niosII_openMac_sim
+niosII_openMac_generation_script
+*.pre_generation_ptf
 *.done
 *.qarlog
 *.qar
@@ -13,3 +17,4 @@ timing
 *.pin
 *.ppf
 *.bak
+*.txt
