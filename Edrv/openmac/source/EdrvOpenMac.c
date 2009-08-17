@@ -58,6 +58,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "omethlib.h" //openMAC header
 
 #include <sys/alt_cache.h>
+#include <sys/alt_irq.h>
 #include <alt_types.h>
 #define     u8      alt_u8
 #define     u16     alt_u16
@@ -184,7 +185,7 @@ struct EthDriver {
     u32                     fulltxqueue;
     
     //tx space
-    ometh_packet_typ       *txSpace[EDRV_MAX_TX_BUFFERS];
+    void*                   txSpace[EDRV_MAX_TX_BUFFERS];
     u8                      used_tx_buffers;
     
     //RX ASnd FIFO
@@ -198,7 +199,7 @@ struct EthDriver {
     } RXFIFO;
 #ifdef EDRV_AUTO_RESP
     //autoresp PRes
-    ometh_packet_typ       *autoresp_PRes;
+//    ometh_packet_typ       *autoresp_PRes;
 #endif
 } Eth;
 
@@ -618,7 +619,7 @@ void asyncCall(void) {
         //pass frame to EPL Stack
         Eth.driverParam.m_pfnRxHandler(&Eth.RXFIFO.fifo[Eth.RXFIFO.i_rd & Eth.RXFIFO.mask]);
         //ack frame in MAC
-        omethPacketFree( (Eth.RXFIFO.fifo[Eth.RXFIFO.i_rd & Eth.RXFIFO.mask].m_pbBuffer) - 4 );
+        omethPacketFree( (ometh_packet_typ*)(Eth.RXFIFO.fifo[Eth.RXFIFO.i_rd & Eth.RXFIFO.mask].m_pbBuffer) - 4 );
         
         Eth.RXFIFO.i_rd++;
     }
@@ -650,26 +651,22 @@ tEplKernel EdrvAllocTxMsgBuffer       (tEdrvTxBuffer * pBuffer_p) {
         return kEplEdrvNoFreeBufEntry;
 
     //p = malloc(buffer_size + 32);
-    p = (u8 *)alt_uncached_malloc(pBuffer_p->m_uiMaxBufferLen + 32);
+    p = (u8 *)alt_uncached_malloc(pBuffer_p->m_uiMaxBufferLen + 0xF);
     if(p == NULL)
+    {
         return kEplEdrvNoFreeBufEntry;
+    }
     
     pBuffer_p->m_uiBufferNumber = Eth.used_tx_buffers;
     
     Eth.txSpace[Eth.used_tx_buffers++] = (u32 *)p;
     
-    { //align frame pointer with 32bit variable
-        u32 p_adr = p;
-        p_adr += 0xf; p_adr &= ~0xf; //align address
-        p = p_adr;
-    }
-    
-//    while( (((u32)p) % 16) != 0)
-//        p++;
+    // align frame pointer to 16 Byte boundary
+    p = (u8*) (((unsigned long) (p + 0xF)) & 0xFFFFFFF0);
     
     *((u32 *)p) = pBuffer_p->m_uiMaxBufferLen;
     
-    pBuffer_p->m_pbBuffer = (p+4);
+    pBuffer_p->m_pbBuffer = (p + 4);
 /*    
 #ifdef EDRV_AUTO_RESP
     if(pBuffer_p->m_EplMsgType == kEplMsgTypePres) {
@@ -729,30 +726,36 @@ tEplKernel EdrvReleaseTxMsgBuffer     (tEdrvTxBuffer * pBuffer_p) {
 //---------------------------------------------------------------------------
 tEplKernel EdrvSendTxMsg              (tEdrvTxBuffer * pBuffer_p) {
     u16                 txLength = 0;
-    u32                *tmp32 = (u32 *)( pBuffer_p->m_pbBuffer - 4 );
+    ometh_packet_typ*   pPacket = (ometh_packet_typ *)( pBuffer_p->m_pbBuffer - 4 );
     
 #ifdef EDRV_AUTO_RESP
     tEplFrame      *pFrame;
     pFrame = (tEplFrame *) pBuffer_p->m_pbBuffer;
     
     if((tEplMsgType)AmiGetByteFromLe(&pFrame->m_le_bMessageType) == kEplMsgTypePres) {
-        if(omethResponseSet(Eth.EthFilters.PReq, Eth.autoresp_PRes) == OMETH_INVALID_PACKET)
+        if(omethResponseSet(Eth.EthFilters.PReq, pPacket) == OMETH_INVALID_PACKET)
+        {
             printf("Auto Resp Error!\n");
+        }
         
         Eth.driverParam.m_pfnTxHandler(pBuffer_p);
         return kEplSuccessful; //don't send PRes (auto send mode...)
     }
 #endif
     
-    *tmp32 = pBuffer_p->m_uiTxMsgLen;
+    pPacket->length = pBuffer_p->m_uiTxMsgLen;
     
-    txLength = omethTransmitArg(Eth.openMAC, (ometh_packet_typ *)tmp32, 
+    txLength = omethTransmitArg(Eth.openMAC, pPacket, 
                         sendAck, pBuffer_p);
-    if(txLength > 0) {
+    if(txLength > 0)
+    {
         Eth.msgsent++;
         return kEplSuccessful;
-    } else
+    }
+    else
+    {
         return kEplEdrvNoFreeBufEntry;
+    }
 }
 
 

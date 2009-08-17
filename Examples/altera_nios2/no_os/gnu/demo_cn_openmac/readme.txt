@@ -30,7 +30,46 @@ How to build the binary
 
 1. Open "Nios II Command Shell"
 
-2.
+2. Go to this subdirectory of openPOWERLINK:
+
+    $ cd Examples\altera_fpga\no_os\gnu\demo_cn_openmac
+
+3. Run script create-this-app to create the Makefile for
+   the demo application and the necessary BSP
+   (this step is only necessary once)
+
+    $ ./create-this-app
+
+4. Run make to build the ELF file
+
+    $ make
+
+
+How to import the project into Nios II IDE
+-------------------------------------------
+
+1. Start the "Nios II IDE"
+
+2. Select menu "File" -> "Import..."
+
+3. Select the import source "Altera" ->
+   "Existing Nios II software build tools project or folder into workspace"
+
+4. Browse to the main directory of openPOWERLINK
+   (via the button "Browse...")
+
+5. Press the button "Finish".
+
+6. Select menu "File" -> "Import..."
+
+7. Select the import source "Altera" ->
+   "Existing Nios II software build tools project or folder into workspace"
+
+8. Browse to the subdirectory
+   Examples\altera_fpga\no_os\gnu\demo_cn_openmac
+   of openPOWERLINK (via the button "Browse...")
+
+9. Press the button "Finish".
 
 
 How to run the demo
@@ -38,5 +77,15 @@ How to run the demo
 
 1. Setup the POWERLINK network as described in main readme.txt
 
-2.
+2. Program SOF file with Quartus II Programmer into FPGA.
+   It is located in the following subdirectory of openPOWERLINK
+   main directory:
+   \Examples\altera_fpga\EBV_DBC3C40\design_nios2_openmac\nios_openMac.sof
+   
+3. Download the ELF file to the target:
+
+    $ cd Examples\altera_fpga\no_os\gnu\demo_cn_openmac
+    $ make download-elf
+
+4. Enjoy the running POWERLINK network.
 

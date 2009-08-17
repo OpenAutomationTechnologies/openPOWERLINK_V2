@@ -631,7 +631,7 @@ static OMETH_H		omethCreateInt
 	ometh_reg_typ			*pRegBase;
 	struct OMETH_FILTER		*pFilterList;
 
-	if(hEth->config.macType != OMETH_MAC_TYPE_01)
+	if(pEthConfig->macType != OMETH_MAC_TYPE_01)
 		return 0; //openMac is type 1!!!
 
 	// check mempart handle and return if invalid

@@ -11,6 +11,15 @@
 #define IP_ADDR     0xc0a86401  // 192.168.100.1 // don't care the last byte!
 #define SUBNET_MASK 0xFFFFFF00  // 255.255.255.0
 
+
+// This function is the entry point for your object dictionary. It is defined
+// in OBJDICT.C by define EPL_OBD_INIT_RAM_NAME. Use this function name to define
+// this function prototype here. If you want to use more than one Epl
+// instances then the function name of each object dictionary has to differ.
+
+tEplKernel PUBLIC  EplObdInitRam (tEplObdInitParam MEM* pInitParam_p);
+
+
 tEplKernel PUBLIC AppCbSync(void);
 tEplKernel PUBLIC AppCbEvent(
     tEplApiEventType        EventType_p,   // IN: event type (enum)
@@ -47,8 +56,7 @@ int main(void) {
 
 
 int openPowerlink(void) {
-	u32		 				ip = IP_ADDR, // ip address
-                            i = 0;
+	u32		 				ip = IP_ADDR; // ip address
 	
 	const u8 				abMacAddr[] = {MAC_ADDR};
 	static tEplApiInitParam EplApiInitParam; //epl init parameter
@@ -94,7 +102,9 @@ int openPowerlink(void) {
 	EplApiInitParam.m_dwSerialNumber = -1;
 	EplApiInitParam.m_dwSubnetMask = SUBNET_MASK;
 	EplApiInitParam.m_dwDefaultGateway = 0;
-	EplApiInitParam.m_pfnCbEvent = AppCbEvent;	EplApiInitParam.m_pfnCbSyncProcess = AppCbSync;
+	EplApiInitParam.m_pfnCbEvent = AppCbEvent;
+    EplApiInitParam.m_pfnCbSyncProcess = AppCbSync;
+    EplApiInitParam.m_pfnObdInitRam = EplObdInitRam;
     
     // the ethernet driver needs to know the CN's node id
     //  so let him know!!!
@@ -104,7 +114,7 @@ int openPowerlink(void) {
     printf("init EPL Stack:\n");
 	EplRet = EplApiInitialize(&EplApiInitParam);
 	if(EplRet != kEplSuccessful) {
-        printf("init EPL Stack... error\n\n");
+        printf("init EPL Stack... error %X\n\n", EplRet);
 		return 10;
     }
     printf("init EPL Stack...ok\n\n");

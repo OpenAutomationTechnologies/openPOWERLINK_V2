@@ -46,6 +46,7 @@ ${MAINPATH}/EplStack/amiarm.c"
 # ${MAINPATH}/SharedBuff/SharedBuff.c ${MAINPATH}/SharedBuff/ShbIpc-LinuxKernel.c \
 
 NIOS2_APP_GEN_ARGS="--elf-name epl.elf --set OBJDUMP_INCLUDE_SOURCE 1 \
+--set CREATE_OBJDUMP 0 \
 --set CFLAGS=\"\"${CFLAGS}\"\" --set APP_INCLUDE_DIRS=\"\"${INCLUDES}\"\" --src-files $SRCFILES"
 #--set CFLAGS=\"${CFLAGS}\" --set APP_INCLUDE_DIRS=\"${INCLUDES}\" --src-files $SRCFILES"
 
