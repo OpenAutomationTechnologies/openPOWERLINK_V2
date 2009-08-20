@@ -156,10 +156,6 @@ set_global_assignment -name USE_GENERATED_PHYSICAL_CONSTRAINTS OFF -section_id e
 
 	# Classic Timing Assignments
 	# ==========================
-set_instance_assignment -name TCO_REQUIREMENT "5 ns" -to sram_adr
-set_instance_assignment -name TCO_REQUIREMENT "5 ns" -to sram_be_n
-set_instance_assignment -name TCO_REQUIREMENT "5 ns" -to sram_data
-set_instance_assignment -name TSU_REQUIREMENT "3.4 ns" -to sram_data
 
 	# start LOGICLOCK_REGION(Root Region)
 	# -----------------------------------
@@ -199,3 +195,14 @@ set_global_assignment -name SIGNALTAP_FILE stp1.stp
 set_global_assignment -name SEARCH_PATH EPL/ -tag from_archive
 set_global_assignment -name SEARCH_PATH Programme/altera/90/quartus/libraries/others/maxplus2/ -tag from_archive
 set_global_assignment -name SEARCH_PATH megafunctions/ -tag from_archive
+set_instance_assignment -name TCO_REQUIREMENT "5 ns" -from * -to adr
+set_instance_assignment -name TCO_REQUIREMENT "5 ns" -from * -to nbe
+set_instance_assignment -name TCO_REQUIREMENT "6 ns" -from * -to data
+set_instance_assignment -name TSU_REQUIREMENT "1 ns" -from * -to data
+set_instance_assignment -name TCO_REQUIREMENT "6 ns" -from * -to sram_ncs
+set_instance_assignment -name TCO_REQUIREMENT "6 ns" -from * -to noe
+set_instance_assignment -name TCO_REQUIREMENT "6 ns" -from * -to nwe
+set_instance_assignment -name TSU_REQUIREMENT "5 ns" -from * -to phy_rx_crsdv
+set_instance_assignment -name TSU_REQUIREMENT "5 ns" -from * -to phy_rx_d
+set_instance_assignment -name TCO_REQUIREMENT "5 ns" -from * -to phy_tx_en
+set_instance_assignment -name TCO_REQUIREMENT "5 ns" -from * -to phy_tx_d
