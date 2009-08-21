@@ -321,7 +321,7 @@ BEGIN
 				Rx_ActLL <= Rx_ActL;
 
 				IF Dma_Req = '1' AND Dma_Acki = '0' THEN
-					IF    Dma_Rw = '1' AND TXFifo_E = '0' AND TXFifo_AE = '0' THEN Dma_Acki <= '1'; 
+					IF    Dma_Rw = '1' AND TXFifo_E = '0' THEN Dma_Acki <= '1'; --AND TXFifo_AE = '0'
 					ELSIF Dma_Rw = '0' AND RXFifo_F = '0'                     THEN Dma_Acki <= '1'; 
 					END IF;
 				ELSE                                                               Dma_Acki <= '0';
