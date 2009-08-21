@@ -239,11 +239,11 @@ typedef struct
 // function prototypes
 //---------------------------------------------------------------------------
 
-tEplKernel PUBLIC EplApiInitialize(tEplApiInitParam* pInitParam_p);
+EPLDLLEXPORT tEplKernel PUBLIC EplApiInitialize(tEplApiInitParam* pInitParam_p);
 
-tEplKernel PUBLIC EplApiShutdown(void);
+EPLDLLEXPORT tEplKernel PUBLIC EplApiShutdown(void);
 
-tEplKernel PUBLIC EplApiReadObject(
+EPLDLLEXPORT tEplKernel PUBLIC EplApiReadObject(
             tEplSdoComConHdl* pSdoComConHdl_p,
             unsigned int      uiNodeId_p,
             unsigned int      uiIndex_p,
@@ -253,7 +253,7 @@ tEplKernel PUBLIC EplApiReadObject(
             tEplSdoType       SdoType_p,
             void*             pUserArg_p);
 
-tEplKernel PUBLIC EplApiWriteObject(
+EPLDLLEXPORT tEplKernel PUBLIC EplApiWriteObject(
             tEplSdoComConHdl* pSdoComConHdl_p,
             unsigned int      uiNodeId_p,
             unsigned int      uiIndex_p,
@@ -263,50 +263,50 @@ tEplKernel PUBLIC EplApiWriteObject(
             tEplSdoType       SdoType_p,
             void*             pUserArg_p);
 
-tEplKernel PUBLIC EplApiFreeSdoChannel(
+EPLDLLEXPORT tEplKernel PUBLIC EplApiFreeSdoChannel(
             tEplSdoComConHdl SdoComConHdl_p);
 
-tEplKernel PUBLIC EplApiReadLocalObject(
+EPLDLLEXPORT tEplKernel PUBLIC EplApiReadLocalObject(
             unsigned int      uiIndex_p,
             unsigned int      uiSubindex_p,
             void*             pDstData_p,
             unsigned int*     puiSize_p);
 
-tEplKernel PUBLIC EplApiWriteLocalObject(
+EPLDLLEXPORT tEplKernel PUBLIC EplApiWriteLocalObject(
             unsigned int      uiIndex_p,
             unsigned int      uiSubindex_p,
             void*             pSrcData_p,
             unsigned int      uiSize_p);
 
-tEplKernel PUBLIC EplApiCbObdAccess(tEplObdCbParam MEM* pParam_p);
+EPLDLLEXPORT tEplKernel PUBLIC EplApiCbObdAccess(tEplObdCbParam MEM* pParam_p);
 
-tEplKernel PUBLIC EplApiLinkObject( unsigned int    uiObjIndex_p,
+EPLDLLEXPORT tEplKernel PUBLIC EplApiLinkObject( unsigned int    uiObjIndex_p,
                                     void*           pVar_p,
                                     unsigned int*   puiVarEntries_p,
                                     tEplObdSize*    pEntrySize_p,
                                     unsigned int    uiFirstSubindex_p);
 
-tEplKernel PUBLIC EplApiExecNmtCommand(tEplNmtEvent NmtEvent_p);
+EPLDLLEXPORT tEplKernel PUBLIC EplApiExecNmtCommand(tEplNmtEvent NmtEvent_p);
 
-tEplKernel PUBLIC EplApiProcess(void);
+EPLDLLEXPORT tEplKernel PUBLIC EplApiProcess(void);
 
-tEplKernel PUBLIC EplApiPostUserEvent(void* pUserArg_p);
+EPLDLLEXPORT tEplKernel PUBLIC EplApiPostUserEvent(void* pUserArg_p);
 
 
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
-tEplKernel PUBLIC EplApiMnTriggerStateChange(unsigned int uiNodeId_p,
+EPLDLLEXPORT tEplKernel PUBLIC EplApiMnTriggerStateChange(unsigned int uiNodeId_p,
                                              tEplNmtNodeCommand  NodeCommand_p);
 #endif
 
-tEplKernel PUBLIC EplApiGetIdentResponse(
+EPLDLLEXPORT tEplKernel PUBLIC EplApiGetIdentResponse(
                                     unsigned int        uiNodeId_p,
                                     tEplIdentResponse** ppIdentResponse_p);
 
 
 // functions for process image will be implemented in separate file
-tEplKernel PUBLIC EplApiProcessImageSetup(void);
-tEplKernel PUBLIC EplApiProcessImageExchangeIn(tEplApiProcessImage* pPI_p);
-tEplKernel PUBLIC EplApiProcessImageExchangeOut(tEplApiProcessImage* pPI_p);
+EPLDLLEXPORT tEplKernel PUBLIC EplApiProcessImageSetup(void);
+EPLDLLEXPORT tEplKernel PUBLIC EplApiProcessImageExchangeIn(tEplApiProcessImage* pPI_p);
+EPLDLLEXPORT tEplKernel PUBLIC EplApiProcessImageExchangeOut(tEplApiProcessImage* pPI_p);
 
 
 #endif  // #ifndef _EPL_API_H_

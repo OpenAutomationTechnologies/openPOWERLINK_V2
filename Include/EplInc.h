@@ -269,9 +269,9 @@ typedef union
 //---------------------------------------------------------------------------
 
 // definitions for DLL export
-#if ((DEV_SYSTEM == _DEV_WIN32_) || (DEV_SYSTEM == _DEV_WIN_CE_)) && defined (COP_LIB)
+#if ((DEV_SYSTEM == _DEV_WIN32_) || (DEV_SYSTEM == _DEV_WIN_CE_)) && defined (_WINDLL)
 
-    #define EPLDLLEXPORT    __declspec (dllexport)
+    #define EPLDLLEXPORT extern __declspec(dllexport)
 
 #else
 
