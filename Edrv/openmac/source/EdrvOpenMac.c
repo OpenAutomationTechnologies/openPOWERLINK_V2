@@ -53,6 +53,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "EplInc.h"
 #include "edrv.h"
 #include "EplAmi.h"
+#include "Benchmark.h"
 
 #include "system.h" //FPGA system definitions
 #include "omethlib.h" //openMAC header
@@ -535,6 +536,7 @@ void set_NodeID(u8 nodeid) {
 int SoA_Hook(void *arg, ometh_packet_typ  *pPacket, OMETH_BUF_FREE_FCT  *pFct) {
     tEdrvRxBuffer       rxBuffer;
     
+    BENCHMARK_MOD_01_SET(6);
     rxBuffer.m_BufferInFrame = kEdrvBufferLastInFrame;
     rxBuffer.m_pbBuffer = (u8 *) &pPacket->data;
     rxBuffer.m_uiRxMsgLen = pPacket->length;
@@ -542,6 +544,7 @@ int SoA_Hook(void *arg, ometh_packet_typ  *pPacket, OMETH_BUF_FREE_FCT  *pFct) {
     rxBuffer.m_NetTime.m_dwSec = 0;
         
     Eth.driverParam.m_pfnRxHandler(&rxBuffer); //pass frame to Powerlink Stack
+    BENCHMARK_MOD_01_RESET(6);
     
     return 0;
 }
@@ -550,6 +553,7 @@ int SoA_Hook(void *arg, ometh_packet_typ  *pPacket, OMETH_BUF_FREE_FCT  *pFct) {
 int SoC_Hook(void *arg, ometh_packet_typ  *pPacket, OMETH_BUF_FREE_FCT  *pFct) {
     tEdrvRxBuffer       rxBuffer;
     
+    BENCHMARK_MOD_01_SET(6);
     rxBuffer.m_BufferInFrame = kEdrvBufferLastInFrame;
     rxBuffer.m_pbBuffer = (u8 *) &pPacket->data;
     rxBuffer.m_uiRxMsgLen = pPacket->length;
@@ -557,6 +561,7 @@ int SoC_Hook(void *arg, ometh_packet_typ  *pPacket, OMETH_BUF_FREE_FCT  *pFct) {
     rxBuffer.m_NetTime.m_dwSec = 0;
         
     Eth.driverParam.m_pfnRxHandler(&rxBuffer); //pass frame to Powerlink Stack
+    BENCHMARK_MOD_01_RESET(6);
     
     return 0;
 }
@@ -565,6 +570,7 @@ int SoC_Hook(void *arg, ometh_packet_typ  *pPacket, OMETH_BUF_FREE_FCT  *pFct) {
 int PReq_Hook(void *arg, ometh_packet_typ  *pPacket, OMETH_BUF_FREE_FCT  *pFct) {
     tEdrvRxBuffer       rxBuffer;
     
+    BENCHMARK_MOD_01_SET(6);
     rxBuffer.m_BufferInFrame = kEdrvBufferLastInFrame;
     rxBuffer.m_pbBuffer = (u8 *) &pPacket->data;
     rxBuffer.m_uiRxMsgLen = pPacket->length;
@@ -572,14 +578,17 @@ int PReq_Hook(void *arg, ometh_packet_typ  *pPacket, OMETH_BUF_FREE_FCT  *pFct) 
     rxBuffer.m_NetTime.m_dwSec = 0;
         
     Eth.driverParam.m_pfnRxHandler(&rxBuffer); //pass frame to Powerlink Stack
+    BENCHMARK_MOD_01_RESET(6);
     
     return 0;
 }
 
 //ASnd addressed to this node
 int ASnd_Hook(void *arg, ometh_packet_typ  *pPacket, OMETH_BUF_FREE_FCT  *pFct) {
+    BENCHMARK_MOD_01_SET(6);
     if( (Eth.RXFIFO.i_wr - Eth.RXFIFO.i_rd) >= Eth.EthHooksMaxPendings.ASnd) {
         Eth.RXFIFO.full++;
+        BENCHMARK_MOD_01_RESET(6);
         return -1; //ack this frame
     }
     //take the frame into the FIFO
@@ -589,6 +598,7 @@ int ASnd_Hook(void *arg, ometh_packet_typ  *pPacket, OMETH_BUF_FREE_FCT  *pFct) 
         pPacket->length;
     
     Eth.RXFIFO.i_wr++;
+    BENCHMARK_MOD_01_RESET(6);
     return 0; //the frame is used, so it 'll be acked later
 }
 
@@ -774,7 +784,9 @@ tEplKernel EdrvSendTxMsg              (tEdrvTxBuffer * pBuffer_p) {
 //---------------------------------------------------------------------------
 void sendAck(ometh_packet_typ *pPacket, void *arg, unsigned long time) {
     Eth.msgfree++;
+    BENCHMARK_MOD_01_SET(1);
     Eth.driverParam.m_pfnTxHandler(arg);
+    BENCHMARK_MOD_01_RESET(1);
 }
 
 //---------------------------------------------------------------------------

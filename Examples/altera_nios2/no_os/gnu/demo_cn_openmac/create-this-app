@@ -61,11 +61,28 @@ then
 fi
 
 
+# Don't run make if create-this-app script is called with --no-make arg
+SKIP_MAKE=
+while [ $# -gt 0 ]
+do
+  case "$1" in
+      --no-make)
+          SKIP_MAKE=1
+          ;;
+      --rebuild)
+          rm -f $BSP_DIR/public.mk ./Makefile
+          ;;
+  esac
+  shift
+done
+
+
 # Also make sure that the APP has not been created already.  Check for
 # existence of Makefile in the app directory
 if [ -f ./Makefile ]
 then
     echo Application has already been created!  Delete Makefile if you want to create a new application makefile
+    echo or call this script with parameter --rebuild
     exit 1
 fi
 
@@ -84,19 +101,6 @@ if [ ! -f $BSP_DIR/public.mk ]; then
     }
     popd >> /dev/null
 fi
-
-
-# Don't run make if create-this-app script is called with --no-make arg
-SKIP_MAKE=
-while [ $# -gt 0 ]
-do
-  case "$1" in
-      --no-make)
-          SKIP_MAKE=1
-          ;;
-  esac
-  shift
-done
 
 
 cmd="nios2-app-generate-makefile --bsp-dir $BSP_DIR --set QUARTUS_PROJECT_DIR=$SOPC_DIR $NIOS2_APP_GEN_ARGS"
@@ -119,7 +123,7 @@ if [ -z "$SKIP_MAKE" ]; then
 	echo
 	echo "To download and run the application:"
 	echo "    1. Make sure the board is connected to the system."
-	echo "    2. Run 'nios2-configure-sof <SOF_FILE_PATH>' to configure the FPGA with the hardware design."
+	echo "    2. Run 'nios2-configure-sof -C $SOPC_DIR' to configure the FPGA with the hardware design."
 	echo "    3. If you have a stdio device, run 'nios2-terminal' in a different shell."
 	echo "    4. Run 'make download-elf' from the application directory."
 	echo

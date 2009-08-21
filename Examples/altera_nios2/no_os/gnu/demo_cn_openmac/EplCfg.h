@@ -100,8 +100,8 @@
 #define EPL_NO_USER_KERNEL
 
 #ifndef BENCHMARK_MODULES
-#define BENCHMARK_MODULES       0 //0xEE800042L
-//#define BENCHMARK_MODULES       0xEE800042L
+//#define BENCHMARK_MODULES       0 //0xEE800042L
+#define BENCHMARK_MODULES       0xEE800043L
 #endif
 
 // Default defug level:

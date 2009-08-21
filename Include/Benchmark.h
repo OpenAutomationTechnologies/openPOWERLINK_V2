@@ -94,6 +94,25 @@
         #define BENCHMARK_MODULES           0x00000000
     #endif
 
+#elif (TARGET_SYSTEM == _NO_OS_) && (DEV_SYSTEM == _DEV_NIOS2_)
+
+    #include "system.h"
+
+    #ifdef DOUT_PIO_BASE
+        #include "altera_avalon_pio_regs.h"       // PIO access
+
+        #define BENCHMARK_SET(x)    IOWR_ALTERA_AVALON_PIO_SET_BITS(DOUT_PIO_BASE, \
+                                    (1 << (15 - (x))))
+        #define BENCHMARK_RESET(x)  IOWR_ALTERA_AVALON_PIO_CLEAR_BITS(DOUT_PIO_BASE, \
+                                    (1 << (15 - (x))))
+        #define BENCHMARK_TOGGLE(x) IOWR_ALTERA_AVALON_PIO_DATA(DOUT_PIO_BASE, \
+                                    ((IORD_ALTERA_AVALON_PIO_DATA(DOUT_PIO_BASE)) \
+                                    ^ (1 << (15 - (x)))))
+    #else
+        #undef BENCHMARK_MODULES
+        #define BENCHMARK_MODULES           0x00000000
+    #endif
+
 #else
     // disable Benchmarking
     #undef BENCHMARK_MODULES

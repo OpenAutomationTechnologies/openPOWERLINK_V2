@@ -41,7 +41,7 @@
 # ========================
 set_global_assignment -name ORIGINAL_QUARTUS_VERSION 8.1
 set_global_assignment -name PROJECT_CREATION_TIME_DATE "11:25:58  APRIL 07, 2009"
-set_global_assignment -name LAST_QUARTUS_VERSION 9.0
+set_global_assignment -name LAST_QUARTUS_VERSION "9.0 SP2"
 
 # Pin & Location Assignments
 # ==========================
@@ -206,3 +206,83 @@ set_instance_assignment -name TSU_REQUIREMENT "5 ns" -from * -to phy_rx_crsdv
 set_instance_assignment -name TSU_REQUIREMENT "5 ns" -from * -to phy_rx_d
 set_instance_assignment -name TCO_REQUIREMENT "5 ns" -from * -to phy_tx_en
 set_instance_assignment -name TCO_REQUIREMENT "5 ns" -from * -to phy_tx_d
+set_location_assignment PIN_T3 -to button[0]
+set_location_assignment PIN_R1 -to button[1]
+set_location_assignment PIN_R2 -to button[2]
+set_location_assignment PIN_P1 -to button[3]
+set_location_assignment PIN_R17 -to io24_o[0]
+set_location_assignment PIN_T17 -to io24_o[1]
+set_location_assignment PIN_U17 -to io24_o[2]
+set_location_assignment PIN_V16 -to io24_o[3]
+set_location_assignment PIN_W17 -to io24_o[4]
+set_location_assignment PIN_Y17 -to io24_o[5]
+set_location_assignment PIN_W15 -to io24_o[6]
+set_location_assignment PIN_U16 -to io24_o[7]
+set_location_assignment PIN_J22 -to io24_o[8]
+set_location_assignment PIN_H21 -to io24_o[9]
+set_location_assignment PIN_H22 -to io24_o[10]
+set_location_assignment PIN_F21 -to io24_o[11]
+set_location_assignment PIN_F22 -to io24_o[12]
+set_location_assignment PIN_E21 -to io24_o[13]
+set_location_assignment PIN_E22 -to io24_o[14]
+set_location_assignment PIN_D22 -to io24_o[15]
+set_location_assignment PIN_U2 -to led[0]
+set_location_assignment PIN_N5 -to led[1]
+set_location_assignment PIN_R5 -to led[2]
+set_location_assignment PIN_T4 -to led[3]
+set_location_assignment PIN_U1 -to led[4]
+set_location_assignment PIN_M5 -to led[5]
+set_location_assignment PIN_P5 -to led[6]
+set_location_assignment PIN_R6 -to led[7]
+set_instance_assignment -name IO_STANDARD "2.5 V" -to button[3]
+set_global_assignment -name IOBANK_VCCIO 2.5V -section_id 2
+set_global_assignment -name MISC_FILE "C:/Projekte/EPL_V2/Examples/altera_fpga/EBV_DBC3C40/design_nios2_openmac/nios_openMac.dpf"
+set_instance_assignment -name IO_STANDARD "2.5 V" -to led[7]
+set_instance_assignment -name IO_STANDARD "2.5 V" -to led[6]
+set_instance_assignment -name IO_STANDARD "2.5 V" -to led[5]
+set_instance_assignment -name IO_STANDARD "2.5 V" -to led[4]
+set_instance_assignment -name IO_STANDARD "2.5 V" -to led[3]
+set_instance_assignment -name IO_STANDARD "2.5 V" -to led[2]
+set_instance_assignment -name IO_STANDARD "2.5 V" -to led[1]
+set_instance_assignment -name IO_STANDARD "2.5 V" -to led[0]
+set_instance_assignment -name IO_STANDARD "2.5 V" -to button[2]
+set_instance_assignment -name IO_STANDARD "2.5 V" -to button[1]
+set_instance_assignment -name IO_STANDARD "2.5 V" -to button[0]
+set_global_assignment -name SLD_NODE_CREATOR_ID 110 -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_ENTITY_NAME sld_signaltap -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_clk -to "niosII_openMac:inst1|clk_0" -section_id auto_signaltap_0
+set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[0] -to "niosII_openMac:inst1|EPL_openMAC_0:the_EPL_openMAC_0|EPL_openMAC:epl_openmac_0|EPL_Mac:the_EthMac|rTx_En" -section_id auto_signaltap_0
+set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[1] -to "niosII_openMac:inst1|dout_pio:the_dout_pio|data_out[12]" -section_id auto_signaltap_0
+set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[2] -to "niosII_openMac:inst1|dout_pio:the_dout_pio|data_out[13]" -section_id auto_signaltap_0
+set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[3] -to "niosII_openMac:inst1|dout_pio:the_dout_pio|data_out[14]" -section_id auto_signaltap_0
+set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[4] -to "niosII_openMac:inst1|dout_pio:the_dout_pio|data_out[15]" -section_id auto_signaltap_0
+set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[5] -to "niosII_openMac:inst1|dout_pio:the_dout_pio|data_out[6]" -section_id auto_signaltap_0
+set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[6] -to phy_rx_crsdv -section_id auto_signaltap_0
+set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[0] -to "niosII_openMac:inst1|EPL_openMAC_0:the_EPL_openMAC_0|EPL_openMAC:epl_openmac_0|EPL_Mac:the_EthMac|rTx_En" -section_id auto_signaltap_0
+set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[1] -to "niosII_openMac:inst1|dout_pio:the_dout_pio|data_out[12]" -section_id auto_signaltap_0
+set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[2] -to "niosII_openMac:inst1|dout_pio:the_dout_pio|data_out[13]" -section_id auto_signaltap_0
+set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[3] -to "niosII_openMac:inst1|dout_pio:the_dout_pio|data_out[14]" -section_id auto_signaltap_0
+set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[4] -to "niosII_openMac:inst1|dout_pio:the_dout_pio|data_out[15]" -section_id auto_signaltap_0
+set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[5] -to "niosII_openMac:inst1|dout_pio:the_dout_pio|data_out[6]" -section_id auto_signaltap_0
+set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[6] -to phy_rx_crsdv -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_DATA_BITS=7" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_TRIGGER_BITS=7" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_NODE_INFO=805334528" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_POWER_UP_TRIGGER=0" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_STORAGE_QUALIFIER_INVERSION_MASK_LENGTH=0" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_ATTRIBUTE_MEM_MODE=OFF" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_STATE_FLOW_USE_GENERATED=0" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_STATE_BITS=11" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_BUFFER_FULL_STOP=1" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_CURRENT_RESOURCE_WIDTH=1" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_NODE_CRC_LOWORD=41131" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_TRIGGER_LEVEL=1" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_TRIGGER_IN_ENABLED=0" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_ADVANCED_TRIGGER_ENTITY=basic,1," -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_TRIGGER_LEVEL_PIPELINE=1" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_ENABLE_ADVANCED_TRIGGER=0" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_INVERSION_MASK=000000000000000000000000000000000000000000000000000" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_INVERSION_MASK_LENGTH=51" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_SEGMENT_SIZE=65536" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_NODE_CRC_HIWORD=25806" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_SAMPLE_DEPTH=65536" -section_id auto_signaltap_0

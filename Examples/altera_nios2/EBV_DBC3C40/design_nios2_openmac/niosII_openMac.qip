@@ -7,5 +7,5 @@ set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) EPL_openMA
 set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) EPL/EPL_Fifo.vhd]
 set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) EPL/EPL_Mii.vhd]
 set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) EPL/EPL_Mac.vhd]
-set_global_assignment -name SOPC_BUILDER_SIGNATURE_ID 00116732CA0E0000012319146116 
+set_global_assignment -name SOPC_BUILDER_SIGNATURE_ID 00116732CA0E000001233CAB468A 
  
