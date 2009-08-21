@@ -19,3 +19,5 @@ timing
 *.bak
 *.txt
 *.qws
+*.pof
+*.jdi
