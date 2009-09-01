@@ -200,7 +200,7 @@ typedef struct
     pthread_t           m_tThreadNewDataId;
     pthread_t           m_tThreadJobReadyId;
     tSigHndlrNewData    m_pfnSigHndlrNewData;
-    unsigned long       m_ulTimeOutJobReady;
+    unsigned long       m_ulTimeOutMsJobReady;
     tSigHndlrJobReady   m_pfnSigHndlrJobReady;
     tShbMemHeader*      m_pShbMemHeader;
     tShbMemKernelUser*  m_pShbMemKernelUser;
@@ -392,7 +392,7 @@ tShbMemKernelUser       *pShbMemKernelUser = malloc(sizeof(tShbMemKernelUser));
         pShbMemInst->m_tThreadNewDataId                         = INVALID_ID;
         pShbMemInst->m_tThreadJobReadyId                        = INVALID_ID;
         pShbMemInst->m_pfnSigHndlrNewData                       = NULL;
-        pShbMemInst->m_ulTimeOutJobReady                        = 0;
+        pShbMemInst->m_ulTimeOutMsJobReady                        = 0;
         pShbMemInst->m_pfnSigHndlrJobReady                      = NULL;
         pShbMemInst->m_pShbMemHeader                            = pShbMemHeader;
         pShbMemInst->m_iUserSpaceMem                            = 0;
@@ -572,7 +572,7 @@ tShbMemKernelUser       *pShbMemKernelUser = malloc(sizeof(tShbMemKernelUser));
         pShbMemInst->m_tThreadNewDataId                         = INVALID_ID;
         pShbMemInst->m_tThreadJobReadyId                        = INVALID_ID;
         pShbMemInst->m_pfnSigHndlrNewData                       = NULL;
-        pShbMemInst->m_ulTimeOutJobReady                        = 0;
+        pShbMemInst->m_ulTimeOutMsJobReady                        = 0;
         pShbMemInst->m_pfnSigHndlrJobReady                      = NULL;
         pShbMemInst->m_pShbMemHeader                            = pShbMemHeader;
         pShbMemInst->m_iUserSpaceMem                            = 0;
@@ -1200,7 +1200,7 @@ tShbError       ShbError;
         goto Exit;
     }
 
-    pShbMemInst->m_ulTimeOutJobReady = ulTimeOut_p;
+    pShbMemInst->m_ulTimeOutMsJobReady = ulTimeOut_p;
     pShbMemInst->m_pfnSigHndlrJobReady = pfnSignalHandlerJobReady_p;
 
     //create thread for signalling new data
@@ -1527,7 +1527,7 @@ struct timespec     sDelay;
     pShbInstance = (tShbMemInst*)pvThreadParam_p;
     pShbMemInst  = ShbIpcGetShbMemInst (pShbInstance);
     iSemJobReadyId = pShbMemInst->m_iSemJobReadyId;
-    ulTimeOut = pShbMemInst->m_ulTimeOutJobReady;
+    ulTimeOut = pShbMemInst->m_ulTimeOutMsJobReady;
 
    //check if user or kernelspace mem
     if (pShbMemInst->m_iUserSpaceMem==0)
@@ -1539,9 +1539,9 @@ struct timespec     sDelay;
         sSemBuf[0].sem_op=-1;
         sSemBuf[0].sem_flg=IPC_NOWAIT;
         TRACE0("ShbIpcThreadSignalJobReady wait for job ready Sem \n");
-        if (pShbMemInst->m_ulTimeOutJobReady != 0)
+        if (pShbMemInst->m_ulTimeOutMsJobReady != 0)
         {
-            ulTimeOut = pShbMemInst->m_ulTimeOutJobReady;
+            ulTimeOut = pShbMemInst->m_ulTimeOutMsJobReady;
         }
         else
         {

@@ -108,7 +108,7 @@ typedef void*  tShbInstance;
 
 
 typedef void  (*tShbCirSigHndlrNewData)  (tShbInstance pShbInstance_p, unsigned long ulDataBlockSize_p);
-typedef void  (*tShbCirSigHndlrReset)    (tShbInstance pShbInstance_p, unsigned int fTimeOut_p);
+typedef void  (*tShbCirSigHndlrReset)    (tShbInstance pShbInstance_p, unsigned int fTimeOutMs_p);
 
 
 
@@ -138,7 +138,7 @@ tShbError  ShbCirReleaseBuffer           (tShbInstance pShbInstance_p);
 
 #if !defined(INLINE_ENABLED)
 
-tShbError  ShbCirResetBuffer             (tShbInstance pShbInstance_p, unsigned long ulTimeOut_p, tShbCirSigHndlrReset pfnSignalHandlerReset_p);
+tShbError  ShbCirResetBuffer             (tShbInstance pShbInstance_p, unsigned long ulTimeOutMs_p, tShbCirSigHndlrReset pfnSignalHandlerReset_p);
 tShbError  ShbCirWriteDataBlock          (tShbInstance pShbInstance_p, const void* pSrcDataBlock_p, unsigned long ulDataBlockSize_p);
 tShbError  ShbCirAllocDataBlock          (tShbInstance pShbInstance_p, tShbCirChunk* pShbCirChunk_p, unsigned long ulDataBufferSize_p);
 tShbError  ShbCirWriteDataChunk          (tShbInstance pShbInstance_p, tShbCirChunk* pShbCirChunk_p, const void* pSrcDataChunk_p, unsigned long ulDataChunkSize_p, unsigned int* pfBufferCompleted_p);

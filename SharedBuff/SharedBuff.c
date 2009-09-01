@@ -427,7 +427,7 @@ Exit:
 
 INLINE_FUNCTION tShbError  ShbCirResetBuffer (
     tShbInstance pShbInstance_p,
-    unsigned long ulTimeOut_p,
+    unsigned long ulTimeOutMs_p,
     tShbCirSigHndlrReset pfnSignalHandlerReset_p)
 {
 
@@ -491,7 +491,7 @@ tShbError      ShbError;
     {
         // there is currently at least one running write operation
         // -> starting signal process to wait until the last write job is ready
-        ShbError = ShbIpcStartSignalingJobReady (pShbInstance_p, ulTimeOut_p, ShbCirSignalHandlerReset);
+        ShbError = ShbIpcStartSignalingJobReady (pShbInstance_p, ulTimeOutMs_p, ShbCirSignalHandlerReset);
     }
 
 

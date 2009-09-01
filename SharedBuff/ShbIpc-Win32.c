@@ -151,7 +151,7 @@ typedef struct
     tSigHndlrNewData    m_pfnSigHndlrNewData;
     HANDLE              m_hThreadJobReady;      // thread to signal that a job/operation is ready now (e.g. reset buffer)
     HANDLE              m_hEventJobReady;
-    unsigned long       m_ulTimeOutJobReady;
+    unsigned long       m_ulTimeOutMsJobReady;
     tSigHndlrJobReady   m_pfnSigHndlrJobReady;
     tShbMemHeader*      m_pShbMemHeader;
 
@@ -376,7 +376,7 @@ tShbError       ShbError;
     pShbMemInst->m_pfnSigHndlrNewData                  = NULL;
     pShbMemInst->m_hThreadJobReady                     = INVALID_HANDLE_VALUE;
     pShbMemInst->m_hEventJobReady                      = INVALID_HANDLE_VALUE;
-    pShbMemInst->m_ulTimeOutJobReady                   = 0;
+    pShbMemInst->m_ulTimeOutMsJobReady                 = 0;
     pShbMemInst->m_pfnSigHndlrJobReady                 = NULL;
     pShbMemInst->m_pShbMemHeader                       = pShbMemHeader;
 
@@ -950,7 +950,7 @@ tShbError       ShbError;
     }
 
 
-    pShbMemInst->m_ulTimeOutJobReady   = ulTimeOut_p;
+    pShbMemInst->m_ulTimeOutMsJobReady = ulTimeOut_p;
     pShbMemInst->m_pfnSigHndlrJobReady = pfnSignalHandlerJobReady_p;
 
 
@@ -1251,7 +1251,7 @@ DWORD  WINAPI  ShbIpcThreadSignalJobReady (
 
 tShbInstance*  pShbInstance;
 tShbMemInst*   pShbMemInst;
-DWORD          ulTimeOut;
+DWORD          ulTimeOutMs;
 DWORD          dwWaitResult;
 unsigned int   fTimeOut;
 
@@ -1263,20 +1263,20 @@ unsigned int   fTimeOut;
     pShbMemInst  = ShbIpcGetShbMemInst (pShbInstance);
     fTimeOut     = FALSE;
 
-    if (pShbMemInst->m_ulTimeOutJobReady != 0)
+    if (pShbMemInst->m_ulTimeOutMsJobReady != 0)
     {
-        ulTimeOut = pShbMemInst->m_ulTimeOutJobReady;
+        ulTimeOutMs = pShbMemInst->m_ulTimeOutMsJobReady;
     }
     else
     {
-        ulTimeOut = INFINITE;
+        ulTimeOutMs = INFINITE;
     }
 
     ASSERT((pShbMemInst->m_hEventJobReady != INVALID_HANDLE_VALUE) && (pShbMemInst->m_hEventJobReady != NULL));
 
     TRACE0("\nShbIpcThreadSignalJobReady(): enter wait state");
     dwWaitResult = WaitForSingleObject (pShbMemInst->m_hEventJobReady,          // HANDLE hHandle
-                                        ulTimeOut);                             // DWORD dwMilliseconds
+                                        ulTimeOutMs);                             // DWORD dwMilliseconds
     TRACE0("\nShbIpcThreadSignalJobReady(): wait state leaved: ---> ");
     switch (dwWaitResult)
     {

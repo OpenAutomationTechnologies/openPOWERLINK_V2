@@ -160,7 +160,7 @@ typedef struct
     unsigned long       m_ulFlagsBuffAccess;    // d.k. moved from tShbMemHeader, because each
                                                 // process needs to store the interrupt flags separately
     tSigHndlrNewData    m_pfnSigHndlrNewData;
-    unsigned long       m_ulTimeOutJobReady;
+    unsigned long       m_ulTimeOutMsJobReady;
     tSigHndlrJobReady   m_pfnSigHndlrJobReady;
     tShbMemHeader*      m_pShbMemHeader;
 //    int                 m_iThreadTermFlag;
@@ -376,7 +376,7 @@ struct sShbMemTable     *psMemTableElement;
     pShbMemInst->m_tThreadNewDataId                         = INVALID_ID;
     pShbMemInst->m_tThreadJobReadyId                        = INVALID_ID;
     pShbMemInst->m_pfnSigHndlrNewData                       = NULL;
-    pShbMemInst->m_ulTimeOutJobReady                        = 0;
+    pShbMemInst->m_ulTimeOutMsJobReady                      = 0;
     pShbMemInst->m_pfnSigHndlrJobReady                      = NULL;
     pShbMemInst->m_pShbMemHeader                            = pShbMemHeader;
  //   pShbMemInst->m_iThreadTermFlag                          = 0;
@@ -676,7 +676,7 @@ tShbMemHeader*  pShbMemHeader;
 
 INLINE_FUNCTION tShbError  ShbIpcStartSignalingJobReady (
     tShbInstance pShbInstance_p,
-    unsigned long ulTimeOut_p,
+    unsigned long ulTimeOutMs_p,
     tSigHndlrJobReady pfnSignalHandlerJobReady_p)
 {
 tShbMemInst*    pShbMemInst;
@@ -697,7 +697,7 @@ tShbError       ShbError;
         ShbError = kShbAlreadySignaling;
         goto Exit;
     }
-    pShbMemInst->m_ulTimeOutJobReady = ulTimeOut_p;
+    pShbMemInst->m_ulTimeOutMsJobReady = ulTimeOutMs_p;
     pShbMemInst->m_pfnSigHndlrJobReady = pfnSignalHandlerJobReady_p;
     pShbMemHeader->m_fJobReady = FALSE;
     //create thread for signalling new data
@@ -909,7 +909,7 @@ int ShbIpcThreadSignalJobReady (void *pvThreadParam_p)
 tShbInstance    pShbInstance;
 tShbMemInst*    pShbMemInst;
 tShbMemHeader*  pShbMemHeader;
-long            lTimeOut;
+long            lTimeOutJiffies;
 int             iRetVal=-1;
 
 //    daemonize("ShbJR%p", pvThreadParam_p);
@@ -919,12 +919,16 @@ int             iRetVal=-1;
     pShbMemHeader = ShbIpcGetShbMemHeader (pShbMemInst);
 
     DEBUG_LVL_29_TRACE0("ShbIpcThreadSignalJobReady wait for job ready Sem\n");
-    if (pShbMemInst->m_ulTimeOutJobReady != 0)
+    if (pShbMemInst->m_ulTimeOutMsJobReady != 0)
     {
-        lTimeOut = (long) pShbMemInst->m_ulTimeOutJobReady;
+        lTimeOutJiffies = (long) pShbMemInst->m_ulTimeOutMsJobReady / (1000 / HZ);
+        if (lTimeOutJiffies <= 0)
+        {   // wait at least 1 jiffy
+            lTimeOutJiffies = 1;
+        }
         //wait for job ready semaphore
         iRetVal = wait_event_interruptible_timeout(pShbMemHeader->m_WaitQueueJobReady,
-            (pShbMemHeader->m_fJobReady != FALSE), lTimeOut);
+            (pShbMemHeader->m_fJobReady != FALSE), lTimeOutJiffies);
     }
     else
     {
