@@ -1,4 +1,8 @@
+
 #include "Epl.h"
+
+#include "system.h"
+#include "altera_avalon_pio_regs.h"
 #include "alt_types.h"
 #include <sys/alt_cache.h>
 
@@ -128,14 +132,15 @@ int openPowerlink(void) {
 	EplRet = EplApiExecNmtCommand(kEplNmtEventSwReset);
     if (EplRet != kEplSuccessful) {
         printf("start EPL Stack... error\n\n");
-	    return 30;
+        return 30;
     }
     printf("start EPL Stack... ok\n\n");
     
     printf("NIOS II with openPowerlink is ready!\n\n");
     
-	while(1) {
-        //asyncCall();
+    while(1)
+    {
+        EplApiProcess();
         if (shutdown == TRUE)
             break;
     }
@@ -256,6 +261,25 @@ tEplKernel PUBLIC AppCbEvent(
                     break;
                 }
             }
+            break;
+        }
+
+        case kEplApiEventLed:
+        {   // status or error LED shall be changed
+
+#ifdef LED_STAERR_PIO_BASE
+            if (pEventArg_p->m_Led.m_fOn != FALSE)
+            {
+                // PIO clear => LED on
+                IOWR_ALTERA_AVALON_PIO_CLEAR_BITS(LED_PIO_BASE, pEventArg_p->m_Led.m_LedType);
+            }
+            else
+            {
+                // PIO set => LED off
+                IOWR_ALTERA_AVALON_PIO_SET_BITS(LED_PIO_BASE, pEventArg_p->m_Led.m_LedType);
+            }
+#endif
+
             break;
         }
 
