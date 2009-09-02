@@ -94,7 +94,7 @@
 //#define TARGET_HARDWARE                 TGTHW_PC_WRAPP
 
 // use no FIFOs, make direct calls
-#define EPL_NO_FIFO
+//#define EPL_NO_FIFO
 
 // use no IPC between user- and kernelspace modules, make direct calls
 #define EPL_NO_USER_KERNEL
@@ -128,6 +128,7 @@
 								| EPL_MODULE_NMT_CN \
 								| EPL_MODULE_NMTK \
 								| EPL_MODULE_NMTU \
+                                | EPL_MODULE_LEDU \
 								)
 
 /*								| EPL_MODULE_PDOU \ */
@@ -207,6 +208,9 @@
 // =========================================================================
 // Timer module specific defines
 // =========================================================================
+
+// max. number of timer entries for module Timeru
+#define EPL_TIMERU_MAX_ENTRIES          32
 
 // if TRUE it uses the Timer module implementation of EPL user also in EPL kernel
 #define EPL_TIMER_USE_USER              TRUE
