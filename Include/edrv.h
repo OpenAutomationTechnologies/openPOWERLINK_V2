@@ -5,7 +5,7 @@
 
   Project:      openPOWERLINK
 
-  Description:  interface for ethernetdriver
+  Description:  interface for Ethernet driver
 
   License:
 
@@ -77,7 +77,7 @@
 //---------------------------------------------------------------------------
 // const defines
 //---------------------------------------------------------------------------
-// --------------------------------------------------------------------------
+
 #define MAX_ETH_DATA_SIZE       1500
 #define MIN_ETH_DATA_SIZE         46
 
@@ -87,6 +87,13 @@
 
 #define ETH_CRC_SIZE	 4      // size of Ethernet CRC, i.e. FCS
 
+
+#define EDRV_FILTER_CHANGE_VALUE    0x01    // filter value changed
+#define EDRV_FILTER_CHANGE_MASK     0x02    // filter mask changed
+#define EDRV_FILTER_CHANGE_STATE    0x04    // filter state changed
+#define EDRV_FILTER_CHANGE_ALL      (EDRV_FILTER_CHANGE_VALUE \
+                                     | EDRV_FILTER_CHANGE_MASK \
+                                     | EDRV_FILTER_CHANGE_STATE)
 
 
 //---------------------------------------------------------------------------
@@ -113,7 +120,9 @@ typedef struct _tEdrvTxBuffer
     tEplNetTime     m_NetTime;              // OUT: Timestamp of end of transmission, set by ethernetdriver
     // ----------------------
     unsigned int    m_uiMaxBufferLen;       // IN/OUT: maximum length of the buffer
+
 } tEdrvTxBuffer;
+
 
 // format of a rx-buffer
 typedef struct _tEdrvRxBuffer
@@ -148,6 +157,21 @@ typedef struct
 } tEdrvInitParam;
 
 
+typedef struct
+{
+    unsigned int    m_uiHandle;   // [in/out] set by Edrv
+    BOOL            m_fEnable;
+    BYTE            m_abFilterValue[22];
+    BYTE            m_abFilterMask[22];
+    tEdrvTxBuffer*  m_pTxBuffer;  // Auto response
+#if (EDRV_FILTER_WITH_RX_HANDLER != FALSE)
+    tEdrvRxHandler  m_pfnRxHandler;
+#endif
+
+} tEdrvFilter;
+
+
+
 //---------------------------------------------------------------------------
 // function prototypes
 //---------------------------------------------------------------------------
@@ -163,13 +187,21 @@ tEplKernel EdrvUndefineRxMacAddrEntry (BYTE * pbMacAddr_p);
 //tEplKernel EdrvDefineUnicastEntry     (BYTE * pbUCEntry_p);
 //tEplKernel EdrvUndfineUnicastEntry    (BYTE * pbUCEntry_p);
 
-tEplKernel EdrvAllocTxMsgBuffer       (tEdrvTxBuffer * pBuffer_p);
-tEplKernel EdrvReleaseTxMsgBuffer     (tEdrvTxBuffer * pBuffer_p);
+tEplKernel EdrvAllocTxMsgBuffer     (tEdrvTxBuffer* pBuffer_p);
+tEplKernel EdrvReleaseTxMsgBuffer   (tEdrvTxBuffer* pBuffer_p);
+tEplKernel EdrvUpdateTxMsgBuffer    (tEdrvTxBuffer* pBuffer_p);
 
 //tEplKernel EdrvWriteMsg               (tBufferDescr * pbBuffer_p);
 tEplKernel EdrvSendTxMsg              (tEdrvTxBuffer * pBuffer_p);
 tEplKernel EdrvTxMsgReady              (tEdrvTxBuffer * pBuffer_p);
 tEplKernel EdrvTxMsgStart              (tEdrvTxBuffer * pBuffer_p);
+
+
+tEplKernel EdrvChangeFilter(tEdrvFilter*    pFilter_p,
+                            unsigned int    uiCount_p,
+                            unsigned int    uiEntryChanged_p,
+                            unsigned int    uiChangeFlags_p);
+
 
 //tEplKernel EdrvReadMsg                (void);
 

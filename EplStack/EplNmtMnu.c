@@ -1009,7 +1009,7 @@ tEplKernel      Ret = kEplSuccessful;
             if ((NmtStateChange_p.m_NmtEvent == kEplNmtEventTimerMsPreOp1)
                 || ((EplNmtMnuInstance_g.m_wFlags & EPL_NMTMNU_FLAG_USER_RESET) == 0))
             {
-                BENCHMARK_MOD_07_TOGGLE(9);
+                BENCHMARK_MOD_07_TOGGLE(7);
 
                 EPL_NMTMNU_DBG_POST_TRACE_VALUE(0,
                                                 EPL_C_ADR_BROADCAST,
@@ -2911,7 +2911,7 @@ tEplNmtState    ExpNmtState;
             wErrorCode_p = EPL_E_NMT_WRONG_STATE;
         }
 
-        BENCHMARK_MOD_07_TOGGLE(9);
+        BENCHMARK_MOD_07_TOGGLE(7);
 
         // $$$ start ERROR_TREATMENT and inform application
         Ret = EplNmtMnuInstance_g.m_pfnCbNodeEvent(uiNodeId_p,

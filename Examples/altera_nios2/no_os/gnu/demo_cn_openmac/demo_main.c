@@ -1,9 +1,6 @@
 #include "Epl.h"
 #include "alt_types.h"
 #include <sys/alt_cache.h>
-#define     u8      alt_u8
-#define     u16     alt_u16
-#define     u32     alt_u32
 
 #define NODEID      0x01 // should be NOT 0xF0 (=MN) in case of CN
 #define CYCLE_LEN   1000 // [us]
@@ -26,7 +23,7 @@ tEplKernel PUBLIC AppCbEvent(
     tEplApiEventArg*        pEventArg_p,   // IN: event argument (union)
     void GENERIC*           pUserArg_p);
 
-	u8  					VarIn1 = 0; // process var for test purpose
+	BYTE  					VarIn1 = 0; // process var for test purpose
     
     BOOL                    shutdown = FALSE;
 
@@ -56,9 +53,9 @@ int main(void) {
 
 
 int openPowerlink(void) {
-	u32		 				ip = IP_ADDR; // ip address
+	DWORD		 				ip = IP_ADDR; // ip address
 	
-	const u8 				abMacAddr[] = {MAC_ADDR};
+	const BYTE 				abMacAddr[] = {MAC_ADDR};
 	static tEplApiInitParam EplApiInitParam; //epl init parameter
 	// needed for process var
 	tEplObdSize         	ObdSize;
@@ -106,10 +103,6 @@ int openPowerlink(void) {
     EplApiInitParam.m_pfnCbSyncProcess = AppCbSync;
     EplApiInitParam.m_pfnObdInitRam = EplObdInitRam;
     
-    // the ethernet driver needs to know the CN's node id
-    //  so let him know!!!
-    set_NodeID(NODEID);
-
 	// initialize EPL stack
     printf("init EPL Stack:\n");
 	EplRet = EplApiInitialize(&EplApiInitParam);
@@ -142,8 +135,8 @@ int openPowerlink(void) {
     printf("NIOS II with openPowerlink is ready!\n\n");
     
 	while(1) {
-        asyncCall();
-        if(shutdown == TRUE)
+        //asyncCall();
+        if (shutdown == TRUE)
             break;
     }
     printf("Shutdown EPL Stack\n");
@@ -192,23 +185,29 @@ tEplKernel PUBLIC AppCbEvent(
                     // -> also shut down EplApiProcess() and main()
                     EplRet = kEplShutdown;
                     shutdown = TRUE;
+
+                    PRINTF2("%s(kEplNmtGsOff) originating event = 0x%X\n", __func__, pEventArg_p->m_NmtStateChange.m_NmtEvent);
                     break;
                 }
 
+                case kEplNmtGsInitialising:
+                case kEplNmtGsResetApplication:
                 case kEplNmtGsResetCommunication:
                 case kEplNmtGsResetConfiguration:
-                case kEplNmtMsPreOperational1:
-                    break;
+                case kEplNmtCsPreOperational1:
+                {
+                    PRINTF3("%s(0x%X) originating event = 0x%X\n",
+                            __func__,
+                            pEventArg_p->m_NmtStateChange.m_NewNmtState,
+                            pEventArg_p->m_NmtStateChange.m_NmtEvent);
 
-                case kEplNmtGsInitialising:
                     break;
-                case kEplNmtGsResetApplication:
-                    break;
+                }
+
                 case kEplNmtMsNotActive:
                     break;
                 case kEplNmtCsNotActive:
                     break;
-                case kEplNmtCsPreOperational1:
                     break;
 
                 case kEplNmtCsOperational:
@@ -229,7 +228,10 @@ tEplKernel PUBLIC AppCbEvent(
         case kEplApiEventWarning:
         {   // error or warning occured within the stack or the application
             // on error the API layer stops the NMT state machine
-            printf("CriticalError/Warning ");
+            PRINTF3("%s(Err/Warn): Source=%02X EplError=0x%03X",
+                    __func__,
+                    pEventArg_p->m_InternalError.m_EventSource,
+                    pEventArg_p->m_InternalError.m_EplError);
             // check additional argument
             switch (pEventArg_p->m_InternalError.m_EventSource)
             {
@@ -237,20 +239,20 @@ tEplKernel PUBLIC AppCbEvent(
                 case kEplEventSourceEventu:
                 {   // error occured within event processing
                     // either in kernel or in user part
-                    printf("in Event Processing (kernel / user)\n");
+                    PRINTF1(" OrgSource=%02X\n", pEventArg_p->m_InternalError.m_Arg.m_EventSource);
                     break;
                 }
 
                 case kEplEventSourceDllk:
                 {   // error occured within the data link layer (e.g. interrupt processing)
                     // the DWORD argument contains the DLL state and the NMT event
-                    printf("in DLL kernel\n");
+                    PRINTF1(" val=%lX\n", pEventArg_p->m_InternalError.m_Arg.m_dwArg);
                     break;
                 }
 
                 default:
                 {
-                    printf("\n");
+                    PRINTF0("\n");
                     break;
                 }
             }

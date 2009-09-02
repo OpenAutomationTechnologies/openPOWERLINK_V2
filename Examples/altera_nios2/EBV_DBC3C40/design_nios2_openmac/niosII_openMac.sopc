@@ -2,7 +2,7 @@
 <system name="niosII_openMac">
  <parameter name="bonusData">bonusData 
 {
-   element onchip_memory2_0.s1
+   element cpu_0.jtag_debug_module
    {
       datum _lockedAddress
       {
@@ -11,15 +11,23 @@
       }
       datum baseAddress
       {
-         value = "18890752";
+         value = "18913280";
          type = "long";
       }
    }
-   element jtag_uart_0
+   element cpu_0.data_master
+   {
+      datum _tags
+      {
+         value = "";
+         type = "String";
+      }
+   }
+   element dout_pio
    {
       datum _sortIndex
       {
-         value = "6";
+         value = "8";
          type = "int";
       }
       datum megawizard_uipreferences
@@ -41,11 +49,11 @@
          type = "String";
       }
    }
-   element din_pio.s1
+   element DBC3C40_SRAM_0.avalon_tristate_slave
    {
       datum baseAddress
       {
-         value = "18939968";
+         value = "17825792";
          type = "long";
       }
    }
@@ -62,64 +70,36 @@
          type = "String";
       }
    }
-   element cpu_0.jtag_debug_module
+   element led_pio.s1
    {
-      datum _lockedAddress
-      {
-         value = "0";
-         type = "boolean";
-      }
       datum baseAddress
       {
-         value = "18913280";
+         value = "18939936";
          type = "long";
       }
    }
-   element EPL_openMAC_0.Mii
+   element benchmark_pio.s1
    {
-      datum _lockedAddress
-      {
-         value = "0";
-         type = "boolean";
-      }
       datum baseAddress
       {
-         value = "18915344";
+         value = "18940000";
          type = "long";
       }
    }
-   element led_pio
+   element cfi_flash_0.s1
    {
-      datum _sortIndex
+      datum baseAddress
       {
-         value = "9";
-         type = "int";
-      }
-      datum megawizard_uipreferences
-      {
-         value = "{}";
-         type = "String";
+         value = "8388608";
+         type = "long";
       }
    }
-   element DBC3C40_SRAM_0
+   element din_pio.s1
    {
-      datum _sortIndex
+      datum baseAddress
       {
-         value = "3";
-         type = "int";
-      }
-   }
-   element din_pio
-   {
-      datum _sortIndex
-      {
-         value = "10";
-         type = "int";
-      }
-      datum megawizard_uipreferences
-      {
-         value = "{}";
-         type = "String";
+         value = "18939968";
+         type = "long";
       }
    }
    element niosII_openMac
@@ -138,40 +118,11 @@
          type = "String";
       }
    }
-   element dout_pio.s1
-   {
-      datum baseAddress
-      {
-         value = "18939904";
-         type = "long";
-      }
-   }
-   element led_pio.s1
-   {
-      datum baseAddress
-      {
-         value = "18939936";
-         type = "long";
-      }
-   }
-   element clk_0
+   element din_pio
    {
       datum _sortIndex
       {
-         value = "7";
-         type = "int";
-      }
-      datum sopceditor_expanded
-      {
-         value = "1";
-         type = "boolean";
-      }
-   }
-   element dout_pio
-   {
-      datum _sortIndex
-      {
-         value = "8";
+         value = "10";
          type = "int";
       }
       datum megawizard_uipreferences
@@ -201,11 +152,11 @@
          type = "long";
       }
    }
-   element cpu_0
+   element led_pio
    {
       datum _sortIndex
       {
-         value = "0";
+         value = "9";
          type = "int";
       }
       datum megawizard_uipreferences
@@ -214,7 +165,33 @@
          type = "String";
       }
    }
-   element EPL_openMAC_0.RX
+   element clk_0
+   {
+      datum _sortIndex
+      {
+         value = "7";
+         type = "int";
+      }
+      datum sopceditor_expanded
+      {
+         value = "1";
+         type = "boolean";
+      }
+   }
+   element jtag_uart_0
+   {
+      datum _sortIndex
+      {
+         value = "6";
+         type = "int";
+      }
+      datum megawizard_uipreferences
+      {
+         value = "{}";
+         type = "String";
+      }
+   }
+   element onchip_memory2_0.s1
    {
       datum _lockedAddress
       {
@@ -223,15 +200,33 @@
       }
       datum baseAddress
       {
-         value = "18915368";
+         value = "18890752";
          type = "long";
       }
    }
-   element DBC3C40_SRAM_0.avalon_tristate_slave
+   element benchmark_pio
    {
+      datum _sortIndex
+      {
+         value = "11";
+         type = "int";
+      }
+      datum megawizard_uipreferences
+      {
+         value = "{}";
+         type = "String";
+      }
+   }
+   element EPL_openMAC_0.Mii
+   {
+      datum _lockedAddress
+      {
+         value = "0";
+         type = "boolean";
+      }
       datum baseAddress
       {
-         value = "17825792";
+         value = "18915344";
          type = "long";
       }
    }
@@ -248,12 +243,46 @@
          type = "long";
       }
    }
-   element cfi_flash_0.s1
+   element dout_pio.s1
    {
       datum baseAddress
       {
-         value = "8388608";
+         value = "18939904";
          type = "long";
+      }
+   }
+   element DBC3C40_SRAM_0
+   {
+      datum _sortIndex
+      {
+         value = "3";
+         type = "int";
+      }
+   }
+   element EPL_openMAC_0.RX
+   {
+      datum _lockedAddress
+      {
+         value = "0";
+         type = "boolean";
+      }
+      datum baseAddress
+      {
+         value = "18915368";
+         type = "long";
+      }
+   }
+   element cpu_0
+   {
+      datum _sortIndex
+      {
+         value = "0";
+         type = "int";
+      }
+      datum megawizard_uipreferences
+      {
+         value = "{}";
+         type = "String";
       }
    }
 }
@@ -263,8 +292,8 @@
  <parameter name="hardcopyCompatible" value="false" />
  <parameter name="hdlLanguage" value="VHDL" />
  <parameter name="projectName" value="nios_openMac.qpf" />
- <parameter name="systemHash" value="-21688329593" />
- <parameter name="timeStamp" value="1250853184396" />
+ <parameter name="systemHash" value="-18494893141" />
+ <parameter name="timeStamp" value="1251728805704" />
  <module name="clk_0" kind="clock_source" version="9.0" enabled="1">
   <parameter name="clockFrequency" value="50000000" />
   <parameter name="clockFrequencyKnown" value="true" /></module>
@@ -440,6 +469,22 @@
   <parameter name="simDoTestBenchWiring" value="true" />
   <parameter name="simDrivenValue" value="0" />
   <parameter name="width" value="4" /></module>
+ <module
+   name="benchmark_pio"
+   kind="altera_avalon_pio"
+   version="9.0"
+   enabled="1">
+  <parameter name="bitClearingEdgeCapReg" value="false" />
+  <parameter name="bitModifyingOutReg" value="true" />
+  <parameter name="captureEdge" value="false" />
+  <parameter name="direction" value="Output" />
+  <parameter name="edgeType" value="RISING" />
+  <parameter name="generateIRQ" value="false" />
+  <parameter name="irqType" value="LEVEL" />
+  <parameter name="resetValue" value="0" />
+  <parameter name="simDoTestBenchWiring" value="false" />
+  <parameter name="simDrivenValue" value="0" />
+  <parameter name="width" value="8" /></module>
  <connection kind="clock" version="9.0" start="clk_0.clk" end="cpu_0.clk" />
  <connection
    kind="avalon"
@@ -455,11 +500,6 @@
    end="cpu_0.jtag_debug_module">
   <parameter name="arbitrationPriority" value="1" />
   <parameter name="baseAddress" value="0x01209800" /></connection>
- <connection
-   kind="clock"
-   version="9.0"
-   start="clk_0.clk"
-   end="tri_state_bridge_0.clk" />
  <connection
    kind="clock"
    version="9.0"
@@ -597,4 +637,17 @@
    start="cpu_0.data_master"
    end="din_pio.s1">
   <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x01210040" /></connection></system>
+  <parameter name="baseAddress" value="0x01210040" /></connection>
+ <connection kind="clock" version="9.0" start="clk_0.clk" end="benchmark_pio.clk" />
+ <connection
+   kind="avalon"
+   version="6.1"
+   start="cpu_0.data_master"
+   end="benchmark_pio.s1">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x01210060" /></connection>
+ <connection
+   kind="clock"
+   version="9.0"
+   start="clk_0.clk"
+   end="tri_state_bridge_0.clk" /></system>

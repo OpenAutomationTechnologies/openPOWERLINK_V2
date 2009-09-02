@@ -1,69 +1,66 @@
 /*----------------------------------------------------------------------------
 Copyright (c) 2009, B&R
+Copyright (c) 2009, SYSTEC electronic GmbH
 All rights reserved.
 
 Redistribution and use in source and binary forms,
-with or without modification, 
+with or without modification,
 are permitted provided that the following conditions are met:
 
-    * Redistributions of source code must retain the above copyright notice, 
+    * Redistributions of source code must retain the above copyright notice,
       this list of conditions and the following disclaimer.
     * Redistributions in binary form must reproduce the above copyright notice,
-      this list of conditions and the following disclaimer 
+      this list of conditions and the following disclaimer
       in the documentation and/or other materials provided with the distribution.
-    * Neither the name of the B&R nor the names of its contributors 
-      may be used to endorse or promote products derived from this software 
+    * Neither the name of the B&R nor the names of its contributors
+      may be used to endorse or promote products derived from this software
       without specific prior written permission.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
-AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, 
-THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR 
-A PARTICULAR PURPOSE ARE DISCLAIMED. 
-IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR 
-ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES 
-(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; 
-LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND 
-ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED.
+IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------
 
-  Project:          openPowerlink on NIOS II + openMAC
+  Project:          openPOWERLINK with openMAC
 
   Description:      Ethernet Driver for openMAC
 
-  Version:          1.0 (2009/03/24)
-  
+  $Revision$  $Date$
+
   Author:           Joerg Zelenka (zelenkaj)
-  
-  State:            tested on openPowerlink V1.3.0
-                    wait for next release (better compatibility to Stack's DLL)
-                    Auto Response ability experimental state!
+                    D. Krueger, completely reworked
+
+  State:            tested on openPOWERLINK V1.5.9
 
 ------------------------------------------------------------------------------
   History
 
  2009/03/24     zelenkaj    V1.0 implementation finished
  2009/03/26     zelenkaj    revised
-  
+ 2009/08/14     d.k.        adapted to new Ethernet driver interface
+
 ----------------------------------------------------------------------------*/
 
 
 #include "global.h"
 #include "EplInc.h"
 #include "edrv.h"
-#include "EplAmi.h"
 #include "Benchmark.h"
 
-#include "system.h" //FPGA system definitions
-#include "omethlib.h" //openMAC header
+#include "system.h"     // FPGA system definitions
+#include "omethlib.h"   // openMAC header
 
 #include <sys/alt_cache.h>
 #include <sys/alt_irq.h>
 #include <alt_types.h>
-#define     u8      alt_u8
-#define     u16     alt_u16
-#define     u32     alt_u32
 
 
 //---------------------------------------------------------------------------
@@ -79,9 +76,6 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define EPL_MAC_RX_IRQ                  EPL_OPENMAC_0_RX_IRQ
 //--- set the system's base adr ---
 
-//--- set driver feature(s) ---
-#define EDRV_AUTO_RESP //experimental!!!
-//--- set driver feature(s) ---
 
 //--- set driver's MTU ---
 #define EDRV_MAX_BUFFER_SIZE        1518
@@ -94,7 +88,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define EDRV_MAX_PEN_SOA            0 //1 buffer (no pending)
 #define EDRV_MAX_PEN_SOC            0 //1 buffer (no pending)
 #define EDRV_MAX_PEN_PREQ           0 //1 buffer (no pending)
-#define EDRV_MAX_PEN_ASND           12 //12 buffers (with pending)
+#define EDRV_MAX_PEN_ASND           12 //13 buffers (with pending)
 #define EDRV_MAX_PEN_TOME           0 //1 buffer (no pending)
 //--- set driver's hooks pendings ---
 // 1 + 1 + 1 + 12 + 1 = 16
@@ -103,6 +97,14 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //--- set driver's RX buffers ---
 #define EDRV_MAX_RX_BUFFERS         16
 //--- set driver's RX buffers ---
+
+//--- set driver's filters ---
+#define EDRV_MAX_FILTERS            16
+//--- set driver's filters ---
+
+//--- set driver's auto-response frames ---
+#define EDRV_MAX_AUTO_RESPONSES     14
+//--- set driver's auto-response frames ---
 
 //RX FIFO (for executing ASnd RX frames)
 //--- set FIFO size ---
@@ -128,200 +130,98 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #if (EDRV_MAX_RX_FIFO_SIZE < EDRV_MAX_PEN_ASND)
 	#error The FIFO size was set to small. FIFO size > ASnd pendings
 #endif
+
 #if (EDRV_MAX_RX_FIFO_SIZE > 32)
     #undef EDRV_MAX_RX_FIFO_SIZE
     #define EDRV_MAX_RX_FIFO_SIZE 32 //FIFO max. 32 entries!
 #endif
+
 #define EDRV_MASK_RX_FIFO (EDRV_MAX_RX_FIFO_SIZE - 1) //for masking the indices
 
-#ifndef EDRV_MAX_TX_BUFFERS
-    #error Set EDRV_MAX_TX_BUFFERS define in EplCfg.h!
+
+
+#if (EDRV_AUTO_RESPONSE == FALSE)
+    #error Please enable EDRV_AUTO_RESPONSE in EplCfg.h!
 #endif
 
+
+// borrowed from omethlibint.h
+#define GET_TYPE_BASE(typ, element, ptr)    \
+    ((typ*)( ((size_t)ptr) - (size_t)&((typ*)0)->element ))
+
+
 //---------------------------------------------------------------------------
-// variables
+// local types
 //---------------------------------------------------------------------------
 
-struct EthDriver {
+typedef struct _tEdrvInstance
+{
     //EPL spec
-    tEdrvInitParam          driverParam;
-    u8                      this_node_id;
-    
+    tEdrvInitParam          m_InitParam;
+
     //openMAC HAL Ethernet Driver
-    ometh_config_typ        ethConf;
-    OMETH_H                 openMAC;
-	//Hooks
-    struct {
-        OMETH_HOOK_H            SoA;
-        OMETH_HOOK_H            SoC;
-        OMETH_HOOK_H            PReq;
-        OMETH_HOOK_H            ASnd;
-		OMETH_HOOK_H            tome;
-        //add more hooks here...
-    } EthHooks;
-    //its max. pendings
-    struct {
-        u8                      SoA;
-        u8                      SoC;
-        u8                      PReq;
-        u8                      ASnd;
-		u8                      tome;
-        //add more pendings here...
-    } EthHooksMaxPendings;
-    //its filters
-    struct {
-        OMETH_FILTER_H          SoA;
-        OMETH_FILTER_H          SoC;
-        OMETH_FILTER_H          PReq;
-        OMETH_FILTER_H          ASnd;
-		OMETH_FILTER_H          tome;
-        //add more filters here...
-    } EthFilters;
-    
-    phy_reg_typ            *pPhy;
-    
+    ometh_config_typ        m_EthConf;
+    OMETH_H                 m_hOpenMac;
+    OMETH_HOOK_H            m_hHook;
+    OMETH_FILTER_H          m_ahFilter[EDRV_MAX_FILTERS];
+
+    phy_reg_typ*            m_pPhy;
+
+    // auto-response Tx buffers
+    tEdrvTxBuffer*          m_apTxBuffer[EDRV_MAX_FILTERS];
+
     //tx msg counter
-    u32                     msgfree;
-    u32                     msgsent;
-    u32                     fulltxqueue;
-    
+    DWORD                     msgfree;
+    DWORD                     msgsent;
+    DWORD                     fulltxqueue;
+
     //tx space
-    void*                   txSpace[EDRV_MAX_TX_BUFFERS];
-    u8                      used_tx_buffers;
-    
+/*
     //RX ASnd FIFO
     struct {
         tEdrvRxBuffer           fifo[EDRV_MAX_RX_FIFO_SIZE];
-        u32                     i_wr;
-        u32                     i_rd;
-        u32                     mask;
-        u32                     full;
-        u8                      size;
+        DWORD                     i_wr;
+        DWORD                     i_rd;
+        DWORD                     mask;
+        DWORD                     full;
+        BYTE                      size;
     } RXFIFO;
-#ifdef EDRV_AUTO_RESP
-    //autoresp PRes
-//    ometh_packet_typ       *autoresp_PRes;
-#endif
-} Eth;
+*/
+
+} tEdrvInstance;
 
 //---------------------------------------------------------------------------
 // prototypes
 //---------------------------------------------------------------------------
-//openMAC
-tEplKernel init_openMAC(void);
-//RX Hook functions
-int SoA_Hook(void *arg, ometh_packet_typ  *pPacket, OMETH_BUF_FREE_FCT  *pFct);
-int SoC_Hook(void *arg, ometh_packet_typ  *pPacket, OMETH_BUF_FREE_FCT  *pFct);
-int PReq_Hook(void *arg, ometh_packet_typ  *pPacket, OMETH_BUF_FREE_FCT  *pFct);
-int ASnd_Hook(void *arg, ometh_packet_typ  *pPacket, OMETH_BUF_FREE_FCT  *pFct);
-int tome_Hook(void *arg, ometh_packet_typ  *pPacket, OMETH_BUF_FREE_FCT  *pFct);
-tEplKernel initHook(OMETH_HOOK_H *hook,
-                    OMETH_HOOK_FCT *hookfct,
-                    OMETH_FILTER_H *filter,
-                    u8 *filterMask, u8 *filterValue, u8 maxPending);
-void sendAck(ometh_packet_typ *pPacket, void *arg, unsigned long time);
-void set_NodeID(u8 nodeid);
-void asyncCall(void);
+
+
+// RX Hook function
+static int EdrvRxHook(void *arg, ometh_packet_typ  *pPacket, OMETH_BUF_FREE_FCT  *pFct);
+
+static void EdrvCbSendAck(ometh_packet_typ *pPacket, void *arg, unsigned long time);
+
+static void EdrvRxInterruptHandler (void* pArg_p, alt_u32 dwInt_p);
+static void EdrvTxInterruptHandler (void* pArg_p, alt_u32 dwInt_p);
+
+
+//void asyncCall(void);
+
 
 //---------------------------------------------------------------------------
-//
-// Function:    init_openMAC
-//
-// Description: sets the phy, inits the MAC core and creats an instance
-//
-// Parameters:  void
-//
-// Returns:     Errorcode           = kEplSuccessful
-//                                  = kEplNoResource
-//
-// State:
-//
+// module globale vars
 //---------------------------------------------------------------------------
-tEplKernel init_openMAC(void) {
-    int i;
-    
-    ////////////////////
-    // initialize phy //
-    ////////////////////
-    Eth.pPhy = omethPhyInfo(Eth.openMAC, 0);
-    //printf("Phy activation ... ");
-    omethMiiControl(EDRV_MII_BASE, MII_CTRL_RESET);
-    for(i=0;i<1000;i++);
-    omethMiiControl(EDRV_MII_BASE, MII_CTRL_ACTIVE);
-    for(i=0;i<1000;i++);
-    omethMiiControl(EDRV_MII_BASE, MII_CTRL_RESET);
-    for(i=0;i<1000;i++);
-    omethMiiControl(EDRV_MII_BASE, MII_CTRL_ACTIVE);
-    for(i=0;i<1000;i++);  
-    //printf("done\n");
-    
-    ////////////////////////////////
-    // initialize ethernet driver //
-    ////////////////////////////////
-    omethInit();
-    
-    Eth.ethConf.adapter = 0; //adapter number
-    Eth.ethConf.macType = OMETH_MAC_TYPE_01; //more info in omethlib.h
-    Eth.ethConf.mode = OMETH_MODE_FULLDUPLEX + OMETH_MODE_HALFDUPLEX;
-    
-    Eth.ethConf.pPhyBase = EDRV_MII_BASE;
-    Eth.ethConf.pRamBase = EDRV_RAM_BASE;
-    Eth.ethConf.pRegBase = EDRV_MAC_BASE;
-    
-    Eth.ethConf.rxBuffers = EDRV_MAX_RX_BUFFERS;
-    Eth.ethConf.rxMtu = EDRV_MAX_BUFFER_SIZE;
-    
-    Eth.openMAC = omethCreate(&Eth.ethConf);
-    
-    if(Eth.openMAC == 0)
-        return kEplNoResource;
-    
-    return kEplSuccessful;
-}
 
-//---------------------------------------------------------------------------
-//
-// Function:    initHook
-//
-// Description: 
-//
-// Parameters:  *hook			points to the created hook after calling initHook
-//				*hookfct		should point to the hook function befor calling initHook
-//				*filter			points to the created filter after calling initHook
-//				*filterMask		should point to the first entry in an array (size 31)
-//				*filterValue	should point to the first entry in an array (size 31)
-//				 maxPending		should be the max. pending value for the hook
-//								0 ... the hook buffer will be reused after hook return
-//								1-n ... the buffer(s) will be used by the driver, 
-//                                       until the buffer is passed back with omethPacketFree()
-//
-// Returns:     Errorcode           = kEplSuccessful
-//                                  = kEplNoResource
-//
-// State:
-//
-//---------------------------------------------------------------------------
-tEplKernel initHook(OMETH_HOOK_H *hook,
-             OMETH_HOOK_FCT *hookfct,
-             OMETH_FILTER_H *filter,
-             u8 *filterMask, u8 *filterValue, u8 maxPending) {
-    
-    *hook = omethHookCreate(Eth.openMAC, hookfct, maxPending); //last argument max. pending
-    if(*hook == 0)
-        return kEplNoResource;
-    
-    *filter = omethFilterCreate(*hook, 0, filterMask, filterValue);
-    if(*filter == 0)
-        return kEplNoResource;
-    
-    return kEplSuccessful;
-}
+
+static tEdrvInstance EdrvInstance_l;
+
+
+
 
 //---------------------------------------------------------------------------
 //
 // Function:    EdrvInit
 //
-// Description: 
+// Description:
 //
 // Parameters:  pEdrvInitParam_p    = pointer to struct including the init-parameters
 //
@@ -331,188 +231,181 @@ tEplKernel initHook(OMETH_HOOK_H *hook,
 // State:
 //
 //---------------------------------------------------------------------------
-tEplKernel EdrvInit(tEdrvInitParam * pEdrvInitParam_p) {
-    tEplKernel      Ret = kEplSuccessful;
-    int             i;
-    u8              filterMask[31],
-                    filterValue[31];
-    
-    
+
+tEplKernel EdrvInit(tEdrvInitParam * pEdrvInitParam_p)
+{
+tEplKernel      Ret = kEplSuccessful;
+int             iRet;
+int             i;
+BYTE            abFilterMask[31],
+                abFilterValue[31];
+
+
     printf("initalize Ethernet Driver for openMAC\n");
-    memset(&Eth, 0, sizeof(Eth)); //reset driver struct
-    
-    Eth.driverParam = *pEdrvInitParam_p;
-    
+    memset(&EdrvInstance_l, 0, sizeof(EdrvInstance_l)); //reset driver struct
+
+    EdrvInstance_l.m_InitParam = *pEdrvInitParam_p;
+
     printf("MAC adr: %.2X-%.2X-%.2X-%.2X-%.2X-%.2X\n",
-        Eth.driverParam.m_abMyMacAddr[0],
-        Eth.driverParam.m_abMyMacAddr[1],
-        Eth.driverParam.m_abMyMacAddr[2],
-        Eth.driverParam.m_abMyMacAddr[3],
-        Eth.driverParam.m_abMyMacAddr[4],
-        Eth.driverParam.m_abMyMacAddr[5]);
-    
+        EdrvInstance_l.m_InitParam.m_abMyMacAddr[0],
+        EdrvInstance_l.m_InitParam.m_abMyMacAddr[1],
+        EdrvInstance_l.m_InitParam.m_abMyMacAddr[2],
+        EdrvInstance_l.m_InitParam.m_abMyMacAddr[3],
+        EdrvInstance_l.m_InitParam.m_abMyMacAddr[4],
+        EdrvInstance_l.m_InitParam.m_abMyMacAddr[5]);
+
     printf("init openMAC...");
-    Ret = init_openMAC();
-    if(Ret == kEplSuccessful)
-        printf(" done\n");
-    else
+
+    ////////////////////
+    // initialize phy //
+    ////////////////////
+    EdrvInstance_l.m_pPhy = omethPhyInfo(EdrvInstance_l.m_hOpenMac, 0);
+    //printf("Phy activation ... ");
+    omethMiiControl(EDRV_MII_BASE, MII_CTRL_RESET);
+    for(i=0;i<1000;i++);
+    omethMiiControl(EDRV_MII_BASE, MII_CTRL_ACTIVE);
+    for(i=0;i<1000;i++);
+    omethMiiControl(EDRV_MII_BASE, MII_CTRL_RESET);
+    for(i=0;i<1000;i++);
+    omethMiiControl(EDRV_MII_BASE, MII_CTRL_ACTIVE);
+    for(i=0;i<1000;i++);
+    //printf("done\n");
+
+    ////////////////////////////////
+    // initialize ethernet driver //
+    ////////////////////////////////
+    omethInit();
+
+    EdrvInstance_l.m_EthConf.adapter = 0; //adapter number
+    EdrvInstance_l.m_EthConf.macType = OMETH_MAC_TYPE_01;    // more info in omethlib.h
+    EdrvInstance_l.m_EthConf.mode = /*OMETH_MODE_FULLDUPLEX +*/
+                       OMETH_MODE_HALFDUPLEX;   // supported modes
+
+    EdrvInstance_l.m_EthConf.pPhyBase = EDRV_MII_BASE;
+    EdrvInstance_l.m_EthConf.pRamBase = EDRV_RAM_BASE;
+    EdrvInstance_l.m_EthConf.pRegBase = EDRV_MAC_BASE;
+
+    EdrvInstance_l.m_EthConf.rxBuffers = EDRV_MAX_RX_BUFFERS;
+    EdrvInstance_l.m_EthConf.rxMtu = EDRV_MAX_BUFFER_SIZE;
+
+    EdrvInstance_l.m_hOpenMac = omethCreate(&EdrvInstance_l.m_EthConf);
+
+    if (EdrvInstance_l.m_hOpenMac == 0)
+    {
+        Ret = kEplNoResource;
         printf(" error!\n");
-    
-    //init driver struct
-    Eth.fulltxqueue = 0;
-    Eth.msgfree = 0;
-    Eth.msgsent = 0;
-    Eth.this_node_id = 0x01;
-    Eth.used_tx_buffers = 0;
-    
-    //init RX FIFO
-    Eth.RXFIFO.full = 0;
-    Eth.RXFIFO.i_rd = 0;
-    Eth.RXFIFO.i_wr = 0;
-    Eth.RXFIFO.mask = EDRV_MASK_RX_FIFO;
-    Eth.RXFIFO.size = EDRV_MAX_RX_FIFO_SIZE;
-    for(i=0; i<Eth.RXFIFO.size; i++) {
-        Eth.RXFIFO.fifo[i].m_BufferInFrame = kEdrvBufferLastInFrame;
-        Eth.RXFIFO.fifo[i].m_NetTime.m_dwNanoSec = 0;
-        Eth.RXFIFO.fifo[i].m_NetTime.m_dwSec = 0;
-        Eth.RXFIFO.fifo[i].m_uiRxMsgLen = 0;
-        Eth.RXFIFO.fifo[i].m_pbBuffer = NULL;        
+        goto Exit;
     }
-    
-    /////////////////////////
-    // initialize RX hooks //
-    /////////////////////////
-    //RX max pending buffers
-	// set the definitions above!
-    Eth.EthHooksMaxPendings.ASnd = EDRV_MAX_PEN_ASND;
-    Eth.EthHooksMaxPendings.PReq = EDRV_MAX_PEN_PREQ;
-    Eth.EthHooksMaxPendings.SoA = EDRV_MAX_PEN_SOA;
-    Eth.EthHooksMaxPendings.SoC = EDRV_MAX_PEN_SOC;
-	Eth.EthHooksMaxPendings.tome = EDRV_MAX_PEN_TOME;
-    //add more hook pendings here...
-        
-    //Hook for PReq
-    printf("Hook for PReq...");
-    memset(filterMask, 0, sizeof(filterMask));
-    filterMask[12] = 0xFF; filterMask[13] = 0xFF; filterMask[14] = 0xFF;
-    filterMask[15] = 0xFF;
-    filterValue[12] = 0x88; filterValue[13] = 0xab; filterValue[14] = 0x03;
-    filterValue[15] = Eth.this_node_id;
-    
-    Ret = initHook(&Eth.EthHooks.PReq, PReq_Hook, &Eth.EthFilters.PReq,
-                    filterMask, filterValue, Eth.EthHooksMaxPendings.PReq);
-    if(Ret == kEplSuccessful)
-        printf(" done\n");
-    else
-        printf(" error!\n");
-    
-#ifdef EDRV_AUTO_RESP
-    printf("PRes auto resp init...");
-    if( !omethResponseInit(Eth.EthFilters.PReq) )
-        printf(" done\n");
-    else
-        printf(" error!\n");
-#endif
 
-    //Hook for SoA to me
-    printf("Hook for SoA...");
-    memset(filterMask, 0, sizeof(filterMask));
-    filterMask[12] = 0xFF; filterMask[13] = 0xFF; filterMask[14] = 0xFF;
-    filterMask[21] = 0xFF;
-    filterValue[12] = 0x88; filterValue[13] = 0xab; filterValue[14] = 0x05;
-    filterValue[21] = Eth.this_node_id;
+    //init driver struct
+    EdrvInstance_l.fulltxqueue = 0;
+    EdrvInstance_l.msgfree = 0;
+    EdrvInstance_l.msgsent = 0;
 
-    Ret = initHook(&Eth.EthHooks.SoA, SoA_Hook, &Eth.EthFilters.SoA,
-                    filterMask, filterValue, Eth.EthHooksMaxPendings.SoA);
-    if(Ret == kEplSuccessful)
-        printf(" done\n");
-    else
-        printf(" error!\n");
-    
-    //Hook for SoC
-    printf("Hook for SoC...");
-    memset(filterMask, 0, sizeof(filterMask));
-    filterMask[12] = 0xFF; filterMask[13] = 0xFF; filterMask[14] = 0xFF;
-    filterValue[12] = 0x88; filterValue[13] = 0xab; filterValue[14] = 0x01;
-    
-    Ret = initHook(&Eth.EthHooks.SoC, SoC_Hook, &Eth.EthFilters.SoC,
-                    filterMask, filterValue, Eth.EthHooksMaxPendings.SoC);
-    if(Ret == kEplSuccessful)
-        printf(" done\n");
-    else
-        printf(" error!\n");
-    
-    //Hook for ASnd
-    printf("Hook for ASnd...");
-    memset(filterMask, 0, sizeof(filterMask));
-    filterMask[12] = 0xFF; filterMask[13] = 0xFF; filterMask[14] = 0xFF;
-    filterMask[15] = 0xFF;
-    filterValue[12] = 0x88; filterValue[13] = 0xab; filterValue[14] = 0x06;
-    filterValue[15] = Eth.this_node_id;
+/*
+    //init RX FIFO
+    EdrvInstance_l.RXFIFO.full = 0;
+    EdrvInstance_l.RXFIFO.i_rd = 0;
+    EdrvInstance_l.RXFIFO.i_wr = 0;
+    EdrvInstance_l.RXFIFO.mask = EDRV_MASK_RX_FIFO;
+    EdrvInstance_l.RXFIFO.size = EDRV_MAX_RX_FIFO_SIZE;
+    for(i=0; i<EdrvInstance_l.RXFIFO.size; i++) {
+        EdrvInstance_l.RXFIFO.fifo[i].m_BufferInFrame = kEdrvBufferLastInFrame;
+        EdrvInstance_l.RXFIFO.fifo[i].m_NetTime.m_dwNanoSec = 0;
+        EdrvInstance_l.RXFIFO.fifo[i].m_NetTime.m_dwSec = 0;
+        EdrvInstance_l.RXFIFO.fifo[i].m_uiRxMsgLen = 0;
+        EdrvInstance_l.RXFIFO.fifo[i].m_pbBuffer = NULL;
+    }
+*/
 
-    Ret = initHook(&Eth.EthHooks.ASnd, ASnd_Hook, &Eth.EthFilters.ASnd,
-                    filterMask, filterValue, Eth.EthHooksMaxPendings.ASnd);
-    if(Ret == kEplSuccessful)
-        printf(" done\n");
-    else
-        printf(" error!\n");
+    // initialize the filters, so that they won't match any normal Ethernet frame
+    EPL_MEMSET(abFilterMask, 0, sizeof(abFilterMask));
+    EPL_MEMSET(abFilterMask, 0xFF, 6);
+    EPL_MEMSET(abFilterValue, 0, sizeof(abFilterValue));
+
+    // initialize RX hook
+    EdrvInstance_l.m_hHook = omethHookCreate(EdrvInstance_l.m_hOpenMac, EdrvRxHook, 0); //last argument max. pending
+    if (EdrvInstance_l.m_hHook == 0)
+    {
+        Ret = kEplNoResource;
+        goto Exit;
+    }
+
+    for (i = 0; i < EDRV_MAX_FILTERS; i++)
+    {
+        EdrvInstance_l.m_ahFilter[i] = omethFilterCreate(EdrvInstance_l.m_hHook, (void*) i, abFilterMask, abFilterValue);
+        if (EdrvInstance_l.m_ahFilter[i] == 0)
+        {
+            Ret = kEplNoResource;
+            goto Exit;
+        }
+
+        omethFilterDisable(EdrvInstance_l.m_ahFilter[i]);
+
+        if (i < EDRV_MAX_AUTO_RESPONSES)
+        {
+            // initialize the auto response for each filter ...
+            iRet = omethResponseInit(EdrvInstance_l.m_ahFilter[i]);
+            if (iRet != 0)
+            {
+                Ret = kEplNoResource;
+                goto Exit;
+            }
+
+            // ... but disable it
+            omethResponseDisable(EdrvInstance_l.m_ahFilter[i]);
+        }
+    }
 
     //Hook for all Packets addressed to this mac and not hooked by the others
     /* to configer a hook to get all packets that had not been hooked by the others
      *  set all filter mask bytes to zero and don't care the filter values
      */
-    printf("Hook for this MAC...");
-    memset(filterMask, 0, sizeof(filterMask));
-    filterMask[0] = 0xFF; filterMask[1] = 0xFF; filterMask[2] = 0xFF;
-	filterMask[3] = 0xFF; filterMask[4] = 0xFF; filterMask[5] = 0xFF; 
-    filterValue[0] = Eth.driverParam.m_abMyMacAddr[0];
-	filterValue[1] = Eth.driverParam.m_abMyMacAddr[1];
-	filterValue[2] = Eth.driverParam.m_abMyMacAddr[2];
-	filterValue[3] = Eth.driverParam.m_abMyMacAddr[3];
-	filterValue[4] = Eth.driverParam.m_abMyMacAddr[4];
-	filterValue[5] = Eth.driverParam.m_abMyMacAddr[5];
 
-    Ret = initHook(&Eth.EthHooks.tome, tome_Hook, &Eth.EthFilters.tome,
-                    filterMask, filterValue, Eth.EthHooksMaxPendings.tome);
+    // $$$ d.k. this Filter will be necessary, if Virtual Ethernet driver is available
+/*
+    printf("Hook for this MAC...");
+    memset(abFilterMask, 0, sizeof(abFilterMask));
+    abFilterMask[0] = 0xFF; abFilterMask[1] = 0xFF; abFilterMask[2] = 0xFF;
+	abFilterMask[3] = 0xFF; abFilterMask[4] = 0xFF; abFilterMask[5] = 0xFF;
+    abFilterValue[0] = EdrvInstance_l.m_InitParam.m_abMyMacAddr[0];
+	abFilterValue[1] = EdrvInstance_l.m_InitParam.m_abMyMacAddr[1];
+	abFilterValue[2] = EdrvInstance_l.m_InitParam.m_abMyMacAddr[2];
+	abFilterValue[3] = EdrvInstance_l.m_InitParam.m_abMyMacAddr[3];
+	abFilterValue[4] = EdrvInstance_l.m_InitParam.m_abMyMacAddr[4];
+	abFilterValue[5] = EdrvInstance_l.m_InitParam.m_abMyMacAddr[5];
+
+    Ret = initHook(&EdrvInstance_l.EthHooks.tome, tome_Hook, &EdrvInstance_l.EthFilters.tome,
+                    abFilterMask, abFilterValue, EdrvInstance_l.EthHooksMaxPendings.tome);
     if(Ret == kEplSuccessful)
         printf(" done\n");
     else
         printf(" error!\n");
-    
+*/
+
     ///////////////////////////
     // start Ethernet Driver //
     ///////////////////////////
-    omethStart(Eth.openMAC);
-    printf("Start Ethernet Driver\n");
-    
+    omethStart(EdrvInstance_l.m_hOpenMac, TRUE);
+    printf("Ethernet Driver started\n");
+
     ////////////////////
     // link NIOS' irq //
     ////////////////////
-    alt_irq_register(EPL_MAC_RX_IRQ, (void *)Eth.openMAC, omethRxIrqHandler);
-    alt_irq_register(EPL_MAC_TX_IRQ, (void *)Eth.openMAC, omethTxIrqHandler);
-    
+    if (alt_irq_register(EPL_MAC_RX_IRQ, EdrvInstance_l.m_hOpenMac, EdrvRxInterruptHandler))
+    {
+        Ret = kEplNoResource;
+    }
+
+    if (alt_irq_register(EPL_MAC_TX_IRQ, EdrvInstance_l.m_hOpenMac, EdrvTxInterruptHandler))
+    {
+        Ret = kEplNoResource;
+    }
+
+Exit:
     return Ret;
 }
 
-//---------------------------------------------------------------------------
-//
-// Function:    set_NodeID
-//
-// Description: set the device's Node ID in the ethernet driver
-//              this is important for filtering EPL frames
-//              it will be used to set packet-hardware filter
-//
-// Parameters:  nodeid - u8 value containing  Node ID
-//
-// Returns:     void
-//
-// State:
-//
-//---------------------------------------------------------------------------
-void set_NodeID(u8 nodeid) {
-    Eth.this_node_id = nodeid;
-    printf("set nodeID %i to Ethernet Driver\n", Eth.this_node_id);
-}
 
 //---------------------------------------------------------------------------
 //
@@ -532,83 +425,36 @@ void set_NodeID(u8 nodeid) {
 //
 //---------------------------------------------------------------------------
 
-//SoA addressed to this node
-int SoA_Hook(void *arg, ometh_packet_typ  *pPacket, OMETH_BUF_FREE_FCT  *pFct) {
-    tEdrvRxBuffer       rxBuffer;
-    
+static int EdrvRxHook(void *arg, ometh_packet_typ  *pPacket, OMETH_BUF_FREE_FCT  *pFct)
+{
+tEdrvRxBuffer       rxBuffer;
+unsigned int        uiIndex;
+
     BENCHMARK_MOD_01_SET(6);
     rxBuffer.m_BufferInFrame = kEdrvBufferLastInFrame;
-    rxBuffer.m_pbBuffer = (u8 *) &pPacket->data;
+    rxBuffer.m_pbBuffer = (BYTE *) &pPacket->data;
     rxBuffer.m_uiRxMsgLen = pPacket->length;
     rxBuffer.m_NetTime.m_dwNanoSec = 0;
     rxBuffer.m_NetTime.m_dwSec = 0;
-        
-    Eth.driverParam.m_pfnRxHandler(&rxBuffer); //pass frame to Powerlink Stack
-    BENCHMARK_MOD_01_RESET(6);
-    
-    return 0;
-}
 
-//every SoC
-int SoC_Hook(void *arg, ometh_packet_typ  *pPacket, OMETH_BUF_FREE_FCT  *pFct) {
-    tEdrvRxBuffer       rxBuffer;
-    
-    BENCHMARK_MOD_01_SET(6);
-    rxBuffer.m_BufferInFrame = kEdrvBufferLastInFrame;
-    rxBuffer.m_pbBuffer = (u8 *) &pPacket->data;
-    rxBuffer.m_uiRxMsgLen = pPacket->length;
-    rxBuffer.m_NetTime.m_dwNanoSec = 0;
-    rxBuffer.m_NetTime.m_dwSec = 0;
-        
-    Eth.driverParam.m_pfnRxHandler(&rxBuffer); //pass frame to Powerlink Stack
-    BENCHMARK_MOD_01_RESET(6);
-    
-    return 0;
-}
+    EdrvInstance_l.m_InitParam.m_pfnRxHandler(&rxBuffer); //pass frame to Powerlink Stack
 
-//PReq addressed to this node
-int PReq_Hook(void *arg, ometh_packet_typ  *pPacket, OMETH_BUF_FREE_FCT  *pFct) {
-    tEdrvRxBuffer       rxBuffer;
-    
-    BENCHMARK_MOD_01_SET(6);
-    rxBuffer.m_BufferInFrame = kEdrvBufferLastInFrame;
-    rxBuffer.m_pbBuffer = (u8 *) &pPacket->data;
-    rxBuffer.m_uiRxMsgLen = pPacket->length;
-    rxBuffer.m_NetTime.m_dwNanoSec = 0;
-    rxBuffer.m_NetTime.m_dwSec = 0;
-        
-    Eth.driverParam.m_pfnRxHandler(&rxBuffer); //pass frame to Powerlink Stack
-    BENCHMARK_MOD_01_RESET(6);
-    
-    return 0;
-}
+    uiIndex = (unsigned int) arg;
 
-//ASnd addressed to this node
-int ASnd_Hook(void *arg, ometh_packet_typ  *pPacket, OMETH_BUF_FREE_FCT  *pFct) {
-    BENCHMARK_MOD_01_SET(6);
-    if( (Eth.RXFIFO.i_wr - Eth.RXFIFO.i_rd) >= Eth.EthHooksMaxPendings.ASnd) {
-        Eth.RXFIFO.full++;
-        BENCHMARK_MOD_01_RESET(6);
-        return -1; //ack this frame
+    if (EdrvInstance_l.m_apTxBuffer[uiIndex] != NULL)
+    {   // filter with auto-response frame triggered
+        BENCHMARK_MOD_01_SET(5);
+        // call Tx handler function from DLL
+        EdrvInstance_l.m_InitParam.m_pfnTxHandler(EdrvInstance_l.m_apTxBuffer[uiIndex]);
+        BENCHMARK_MOD_01_RESET(5);
     }
-    //take the frame into the FIFO
-    Eth.RXFIFO.fifo[Eth.RXFIFO.i_rd & Eth.RXFIFO.mask].m_pbBuffer = (u8 *)
-        &pPacket->data;
-    Eth.RXFIFO.fifo[Eth.RXFIFO.i_rd & Eth.RXFIFO.mask].m_uiRxMsgLen =
-        pPacket->length;
-    
-    Eth.RXFIFO.i_wr++;
+
     BENCHMARK_MOD_01_RESET(6);
-    return 0; //the frame is used, so it 'll be acked later
+
+    return 0;
 }
 
-//every Ethernet Frame which was not hooked by the others and is addressed to this MAC
-int tome_Hook(void *arg, ometh_packet_typ  *pPacket, OMETH_BUF_FREE_FCT  *pFct) {
-	//TODO implement it
-
-	return 0; //ack frame
-}
-
+/*
 //---------------------------------------------------------------------------
 //
 // Function:    asyncCall
@@ -625,23 +471,24 @@ int tome_Hook(void *arg, ometh_packet_typ  *pPacket, OMETH_BUF_FREE_FCT  *pFct) 
 //
 //---------------------------------------------------------------------------
 void asyncCall(void) {
-    while(Eth.RXFIFO.i_wr - Eth.RXFIFO.i_rd) {
+    while(EdrvInstance_l.RXFIFO.i_wr - EdrvInstance_l.RXFIFO.i_rd) {
         //pass frame to EPL Stack
-        Eth.driverParam.m_pfnRxHandler(&Eth.RXFIFO.fifo[Eth.RXFIFO.i_rd & Eth.RXFIFO.mask]);
+        EdrvInstance_l.m_InitParam.m_pfnRxHandler(&EdrvInstance_l.RXFIFO.fifo[EdrvInstance_l.RXFIFO.i_rd & EdrvInstance_l.RXFIFO.mask]);
         //ack frame in MAC
-        omethPacketFree( (ometh_packet_typ*)(Eth.RXFIFO.fifo[Eth.RXFIFO.i_rd & Eth.RXFIFO.mask].m_pbBuffer) - 4 );
-        
-        Eth.RXFIFO.i_rd++;
+        omethPacketFree( (ometh_packet_typ*)(EdrvInstance_l.RXFIFO.fifo[EdrvInstance_l.RXFIFO.i_rd & EdrvInstance_l.RXFIFO.mask].m_pbBuffer) - 4 );
+
+        EdrvInstance_l.RXFIFO.i_rd++;
     }
-    
+
     omethPeriodic();
 }
+*/
 
 //---------------------------------------------------------------------------
 //
 // Function:    EdrvAllocTxMsgBuffer
 //
-// Description: 
+// Description:
 //
 // Parameters:  pBuffer_p   = pointer to Buffer structure
 //
@@ -651,43 +498,34 @@ void asyncCall(void) {
 // State:
 //
 //---------------------------------------------------------------------------
-tEplKernel EdrvAllocTxMsgBuffer       (tEdrvTxBuffer * pBuffer_p) {
-    u8             *p=NULL;
-        
-    if(pBuffer_p->m_uiMaxBufferLen > EDRV_MAX_BUFFER_SIZE)
-        return kEplEdrvNoFreeBufEntry;
+tEplKernel EdrvAllocTxMsgBuffer       (tEdrvTxBuffer * pBuffer_p)
+{
+tEplKernel          Ret = kEplSuccessful;
+ometh_packet_typ*   pPacket = NULL;
 
-    if(Eth.used_tx_buffers >= EDRV_MAX_TX_BUFFERS)
-        return kEplEdrvNoFreeBufEntry;
-
-    //p = malloc(buffer_size + 32);
-    p = (u8 *)alt_uncached_malloc(pBuffer_p->m_uiMaxBufferLen + 0xF);
-    if(p == NULL)
+    if (pBuffer_p->m_uiMaxBufferLen > EDRV_MAX_BUFFER_SIZE)
     {
-        return kEplEdrvNoFreeBufEntry;
+        Ret = kEplEdrvNoFreeBufEntry;
+        goto Exit;
     }
-    
-    pBuffer_p->m_uiBufferNumber = Eth.used_tx_buffers;
-    
-    Eth.txSpace[Eth.used_tx_buffers++] = (u32 *)p;
-    
-    // align frame pointer to 16 Byte boundary
-    p = (u8*) (((unsigned long) (p + 0xF)) & 0xFFFFFFF0);
-    
-    *((u32 *)p) = pBuffer_p->m_uiMaxBufferLen;
-    
-    pBuffer_p->m_pbBuffer = (p + 4);
-/*    
-#ifdef EDRV_AUTO_RESP
-    if(pBuffer_p->m_EplMsgType == kEplMsgTypePres) {
-        Eth.autoresp_PRes = (ometh_packet_typ *)p;
-        if(omethResponseSet(Eth.EthFilters.PReq, Eth.autoresp_PRes) == OMETH_INVALID_PACKET)
-            printf("Auto Resp Error!\n");
+
+    // malloc aligns each allocated buffer so every type fits into this buffer.
+    // this means 8 Byte alignment.
+    pPacket = (ometh_packet_typ*) alt_uncached_malloc(pBuffer_p->m_uiMaxBufferLen + sizeof (pPacket->length));
+    if (pPacket == NULL)
+    {
+        Ret = kEplEdrvNoFreeBufEntry;
+        goto Exit;
     }
-    //add other auto-response frames here...
-#endif
-*/
-    return kEplSuccessful;
+
+    pPacket->length = pBuffer_p->m_uiMaxBufferLen;
+
+    pBuffer_p->m_uiBufferNumber = EDRV_MAX_FILTERS;
+
+    pBuffer_p->m_pbBuffer = (BYTE*) &pPacket->data;
+
+Exit:
+    return Ret;
 }
 
 
@@ -695,7 +533,7 @@ tEplKernel EdrvAllocTxMsgBuffer       (tEdrvTxBuffer * pBuffer_p) {
 //
 // Function:    EdrvReleaseTxMsgBuffer
 //
-// Description: 
+// Description:
 //
 // Parameters:  pBuffer_p   = pointer to Buffer structure
 //
@@ -704,19 +542,72 @@ tEplKernel EdrvAllocTxMsgBuffer       (tEdrvTxBuffer * pBuffer_p) {
 // State:
 //
 //---------------------------------------------------------------------------
-tEplKernel EdrvReleaseTxMsgBuffer     (tEdrvTxBuffer * pBuffer_p) {   
-    int i = pBuffer_p->m_uiBufferNumber;
-    
-    if(Eth.txSpace[i] != NULL) {
-        //free(Eth.txSpace[i]); // free space
-        alt_uncached_free(Eth.txSpace[i]); // free space
-        pBuffer_p->m_pbBuffer = NULL;
-        Eth.txSpace[i] = NULL;
-        Eth.used_tx_buffers--;
-        return kEplSuccessful;
+tEplKernel EdrvReleaseTxMsgBuffer     (tEdrvTxBuffer * pBuffer_p)
+{
+tEplKernel          Ret = kEplSuccessful;
+ometh_packet_typ*   pPacket = NULL;
+
+    if (pBuffer_p->m_uiBufferNumber < EDRV_MAX_FILTERS)
+    {
+        // disable auto-response
+        omethResponseDisable(EdrvInstance_l.m_ahFilter[pBuffer_p->m_uiBufferNumber]);
     }
-    else
-        return kEplEdrvBufNotExisting;
+
+    if (pBuffer_p->m_pbBuffer == NULL)
+    {
+        Ret = kEplEdrvInvalidParam;
+        goto Exit;
+    }
+
+    pPacket = GET_TYPE_BASE(ometh_packet_typ, data, pBuffer_p->m_pbBuffer);
+
+    // mark buffer as free, before actually freeing it
+    pBuffer_p->m_pbBuffer = NULL;
+
+    alt_uncached_free(pPacket);
+
+Exit:
+    return Ret;
+}
+
+
+//---------------------------------------------------------------------------
+//
+// Function:    EdrvUpdateTxMsgBuffer
+//
+// Description:
+//
+// Parameters:  pBuffer_p   = pointer to Buffer structure
+//
+// Returns:     Errorcode   = kEplSuccessful
+//
+// State:
+//
+//---------------------------------------------------------------------------
+tEplKernel EdrvUpdateTxMsgBuffer     (tEdrvTxBuffer * pBuffer_p)
+{
+tEplKernel          Ret = kEplSuccessful;
+ometh_packet_typ*   pPacket = NULL;
+
+    if (pBuffer_p->m_uiBufferNumber >= EDRV_MAX_FILTERS)
+    {
+        Ret = kEplEdrvInvalidParam;
+        goto Exit;
+    }
+
+    pPacket = GET_TYPE_BASE(ometh_packet_typ, data, pBuffer_p->m_pbBuffer);
+
+    pPacket->length = pBuffer_p->m_uiTxMsgLen;
+
+    pPacket = omethResponseSet(EdrvInstance_l.m_ahFilter[pBuffer_p->m_uiBufferNumber], pPacket);
+    if (pPacket == OMETH_INVALID_PACKET)
+    {
+        Ret = kEplNoResource;
+        goto Exit;
+    }
+
+Exit:
+    return Ret;
 }
 
 
@@ -724,7 +615,7 @@ tEplKernel EdrvReleaseTxMsgBuffer     (tEdrvTxBuffer * pBuffer_p) {
 //
 // Function:    EdrvSendTxMsg
 //
-// Description: 
+// Description:
 //
 // Parameters:  pBuffer_p   = buffer descriptor to transmit
 //
@@ -734,39 +625,136 @@ tEplKernel EdrvReleaseTxMsgBuffer     (tEdrvTxBuffer * pBuffer_p) {
 // State:
 //
 //---------------------------------------------------------------------------
-tEplKernel EdrvSendTxMsg              (tEdrvTxBuffer * pBuffer_p) {
-    u16                 txLength = 0;
-    ometh_packet_typ*   pPacket = (ometh_packet_typ *)( pBuffer_p->m_pbBuffer - 4 );
-    
-#ifdef EDRV_AUTO_RESP
-    tEplFrame      *pFrame;
-    pFrame = (tEplFrame *) pBuffer_p->m_pbBuffer;
-    
-    if((tEplMsgType)AmiGetByteFromLe(&pFrame->m_le_bMessageType) == kEplMsgTypePres) {
-        if(omethResponseSet(Eth.EthFilters.PReq, pPacket) == OMETH_INVALID_PACKET)
-        {
-            printf("Auto Resp Error!\n");
-        }
-        
-        Eth.driverParam.m_pfnTxHandler(pBuffer_p);
-        return kEplSuccessful; //don't send PRes (auto send mode...)
-    }
-#endif
-    
-    pPacket->length = pBuffer_p->m_uiTxMsgLen;
-    
-    txLength = omethTransmitArg(Eth.openMAC, pPacket, 
-                        sendAck, pBuffer_p);
-    if(txLength > 0)
+tEplKernel EdrvSendTxMsg              (tEdrvTxBuffer * pBuffer_p)
+{
+tEplKernel          Ret = kEplSuccessful;
+ometh_packet_typ*   pPacket = NULL;
+unsigned long       ulTxLength;
+
+    if (pBuffer_p->m_uiBufferNumber < EDRV_MAX_FILTERS)
     {
-        Eth.msgsent++;
-        return kEplSuccessful;
+        Ret = kEplEdrvInvalidParam;
+        goto Exit;
+    }
+
+    pPacket = GET_TYPE_BASE(ometh_packet_typ, data, pBuffer_p->m_pbBuffer);
+
+    pPacket->length = pBuffer_p->m_uiTxMsgLen;
+
+    ulTxLength = omethTransmitArg(EdrvInstance_l.m_hOpenMac, pPacket,
+                        EdrvCbSendAck, pBuffer_p);
+    if (ulTxLength > 0)
+    {
+        EdrvInstance_l.msgsent++;
+        Ret = kEplSuccessful;
     }
     else
     {
-        return kEplEdrvNoFreeBufEntry;
+        Ret = kEplEdrvNoFreeBufEntry;
     }
+
+Exit:
+    return Ret;
 }
+
+
+tEplKernel EdrvChangeFilter(tEdrvFilter*    pFilter_p,
+                            unsigned int    uiCount_p,
+                            unsigned int    uiEntryChanged_p,
+                            unsigned int    uiChangeFlags_p)
+{
+tEplKernel      Ret = kEplSuccessful;
+unsigned int    uiIndex;
+unsigned int    uiEntry;
+
+    if (((uiCount_p != 0) && (pFilter_p == NULL))
+        || (uiCount_p >= EDRV_MAX_AUTO_RESPONSES))
+    {
+        Ret = kEplEdrvInvalidParam;
+        goto Exit;
+    }
+
+    if (uiEntryChanged_p >= uiCount_p)
+    {   // no specific entry changed
+        // -> all entries changed
+
+        // at first, disable all filters in openMAC
+        for (uiEntry = 0; uiEntry < EDRV_MAX_FILTERS; uiEntry++)
+        {
+            omethFilterDisable(EdrvInstance_l.m_ahFilter[uiEntry]);
+            omethResponseDisable(EdrvInstance_l.m_ahFilter[uiEntry]);
+        }
+
+        for (uiEntry = 0; uiEntry < uiCount_p; uiEntry++)
+        {
+            // set filter value and mask
+            for (uiIndex = 0; uiIndex < sizeof (pFilter_p->m_abFilterValue); uiIndex++)
+            {
+                omethFilterSetByteValue(EdrvInstance_l.m_ahFilter[uiEntry],
+                                        uiIndex,
+                                        pFilter_p[uiEntry].m_abFilterValue[uiIndex]);
+
+                omethFilterSetByteMask(EdrvInstance_l.m_ahFilter[uiEntry],
+                                       uiIndex,
+                                       pFilter_p[uiEntry].m_abFilterMask[uiIndex]);
+            }
+
+            // set auto response
+            if (pFilter_p[uiEntry].m_pTxBuffer != NULL)
+            {
+                EdrvInstance_l.m_apTxBuffer[uiEntry] = pFilter_p[uiEntry].m_pTxBuffer;
+
+                // set buffer number of TxBuffer to filter entry
+                pFilter_p[uiEntry].m_pTxBuffer->m_uiBufferNumber = uiEntry;
+                EdrvUpdateTxMsgBuffer(pFilter_p[uiEntry].m_pTxBuffer);
+                omethResponseEnable(EdrvInstance_l.m_ahFilter[uiEntry]);
+            }
+
+            if (pFilter_p[uiEntry].m_fEnable != FALSE)
+            {   // enable the filter
+                omethFilterEnable(EdrvInstance_l.m_ahFilter[uiEntry]);
+            }
+        }
+
+    }
+    else
+    {   // specific entry should be changed
+
+        if ((uiChangeFlags_p & (EDRV_FILTER_CHANGE_VALUE | EDRV_FILTER_CHANGE_MASK)) != 0)
+        {   // disable this filter entry
+            omethFilterDisable(EdrvInstance_l.m_ahFilter[uiEntryChanged_p]);
+
+            if ((uiChangeFlags_p & EDRV_FILTER_CHANGE_VALUE) != 0)
+            {   // filter value has changed
+                for (uiIndex = 0; uiIndex < sizeof (pFilter_p->m_abFilterValue); uiIndex++)
+                {
+                    omethFilterSetByteValue(EdrvInstance_l.m_ahFilter[uiEntryChanged_p],
+                                            uiIndex,
+                                            pFilter_p[uiEntryChanged_p].m_abFilterValue[uiIndex]);
+                }
+            }
+
+            if ((uiChangeFlags_p & EDRV_FILTER_CHANGE_MASK) != 0)
+            {   // filter mask has changed
+                for (uiIndex = 0; uiIndex < sizeof (pFilter_p->m_abFilterMask); uiIndex++)
+                {
+                    omethFilterSetByteMask(EdrvInstance_l.m_ahFilter[uiEntryChanged_p],
+                                           uiIndex,
+                                           pFilter_p[uiEntryChanged_p].m_abFilterMask[uiIndex]);
+                }
+            }
+        }
+
+        if (pFilter_p[uiEntryChanged_p].m_fEnable != FALSE)
+        {   // enable the filter
+            omethFilterEnable(EdrvInstance_l.m_ahFilter[uiEntryChanged_p]);
+        }
+    }
+
+Exit:
+    return Ret;
+}
+
 
 
 //---------------------------------------------------------------------------
@@ -782,10 +770,10 @@ tEplKernel EdrvSendTxMsg              (tEdrvTxBuffer * pBuffer_p) {
 // State:
 //
 //---------------------------------------------------------------------------
-void sendAck(ometh_packet_typ *pPacket, void *arg, unsigned long time) {
-    Eth.msgfree++;
+static void EdrvCbSendAck(ometh_packet_typ *pPacket, void *arg, unsigned long time) {
+    EdrvInstance_l.msgfree++;
     BENCHMARK_MOD_01_SET(1);
-    Eth.driverParam.m_pfnTxHandler(arg);
+    EdrvInstance_l.m_InitParam.m_pfnTxHandler(arg);
     BENCHMARK_MOD_01_RESET(1);
 }
 
@@ -802,14 +790,14 @@ void sendAck(ometh_packet_typ *pPacket, void *arg, unsigned long time) {
 // State:
 //
 //---------------------------------------------------------------------------
-tEplKernel EdrvShutdown(void) {    
+tEplKernel EdrvShutdown(void) {
     printf("Shutdown Ethernet Driver... ");
-    if(omethDestroy(Eth.openMAC) != 0) {
+    if(omethDestroy(EdrvInstance_l.m_hOpenMac) != 0) {
         printf("error\n");
         return kEplNoResource;
     }
     printf("done\n");
-    
+
     return kEplSuccessful;
 }
 
@@ -908,6 +896,13 @@ tEplKernel EdrvTxMsgStart              (tEdrvTxBuffer * pBuffer_p)
 //
 //---------------------------------------------------------------------------
 
-void EdrvInterruptHandler (void) {
-    
+static void EdrvRxInterruptHandler (void* pArg_p, alt_u32 dwInt_p)
+{
+    omethRxIrqHandler(pArg_p);
 }
+
+static void EdrvTxInterruptHandler (void* pArg_p, alt_u32 dwInt_p)
+{
+    omethTxIrqHandler(pArg_p);
+}
+

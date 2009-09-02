@@ -73,6 +73,7 @@
 #include "kernel/EplEventk.h"
 #include "kernel/EplObdk.h"         // function prototyps of the EplOBD-Modul
 #include "kernel/EplDllk.h"
+#include "Benchmark.h"
 
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLK)) != 0)
 
@@ -378,6 +379,8 @@ tEplNmtEvent            NmtEvent;
                     {   // threshold is reached
                         // $$$ d.k.: generate error history entry E_DLL_LOSS_SOC_TH
 
+                        BENCHMARK_MOD_02_TOGGLE(7);
+
                         // post event to NMT state machine
                         NmtEvent = kEplNmtEventNmtCycleError;
                         Event.m_EventSink = kEplEventSinkNmtk;
@@ -404,6 +407,8 @@ tEplNmtEvent            NmtEvent;
                         >= EplErrorHandlerkInstance_g.m_CnLossPreq.m_dwThreshold)
                     {   // threshold is reached
                         // $$$ d.k.: generate error history entry E_DLL_LOSS_PREQ_TH
+
+                        BENCHMARK_MOD_02_TOGGLE(7);
 
                         // post event to NMT state machine
                         NmtEvent = kEplNmtEventNmtCycleError;

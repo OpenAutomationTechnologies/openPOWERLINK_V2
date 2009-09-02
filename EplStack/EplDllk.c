@@ -160,13 +160,30 @@
 #define EPL_DLLK_TXFRAME_NMTREQ     2   // NMT Request from FIFO on CN / MN
 #define EPL_DLLK_TXFRAME_NONEPL     3   // non-EPL frame from FIFO on CN / MN
 #define EPL_DLLK_TXFRAME_PRES       4   // PRes on CN / MN
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
 #define EPL_DLLK_TXFRAME_SOC        5   // SoC on MN
 #define EPL_DLLK_TXFRAME_SOA        6   // SoA on MN
 #define EPL_DLLK_TXFRAME_PREQ       7   // PReq on MN
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
 #define EPL_DLLK_TXFRAME_COUNT      (7 + EPL_D_NMT_MaxCNNumber_U8 + 2)   // on MN: 7 + MaxPReq of regular CNs + 1 Diag + 1 Router
 #else
 #define EPL_DLLK_TXFRAME_COUNT      5   // on CN: 5
+#endif
+
+
+#define EPL_DLLK_FILTER_PREQ        0
+#define EPL_DLLK_FILTER_SOA_IDREQ   1
+#define EPL_DLLK_FILTER_SOA_STATREQ 2
+#define EPL_DLLK_FILTER_SOA_NMTREQ  3
+#define EPL_DLLK_FILTER_SOA_NONEPL  4
+#define EPL_DLLK_FILTER_SOA         5
+#define EPL_DLLK_FILTER_SOC         6
+#define EPL_DLLK_FILTER_ASND        7
+#define EPL_DLLK_FILTER_PRES        8
+
+#if EPL_DLL_PRES_FILTER_COUNT < 0
+#define EPL_DLLK_FILTER_COUNT       (8 + 1)
+#else
+#define EPL_DLLK_FILTER_COUNT       (8 + EPL_DLL_PRES_FILTER_COUNT)
 #endif
 
 // defines for tEdrvTxBuffer.m_uiTxBufLen
@@ -216,6 +233,8 @@ typedef struct
     tEplDllState        m_DllState;
     tEplDllkCbAsync     m_pfnCbAsync;
     tEplDllAsndFilter   m_aAsndFilter[EPL_DLL_MAX_ASND_SERVICE_ID];
+
+    tEdrvFilter         m_aFilter[EPL_DLLK_FILTER_COUNT];
 
     tEplDllkNodeInfo    m_aNodeInfo[EPL_NMT_MAX_NODE_ID];
 
@@ -485,9 +504,9 @@ tEdrvTxBuffer  *pTxBuffer = NULL;
         {
             uiHandle = EPL_DLLK_TXFRAME_NMTREQ;
         }
-
-        if (uiHandle >= EplDllkInstance_g.m_uiMaxTxFrames)
+        else
         {   // look for free entry
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
             uiHandle = EPL_DLLK_TXFRAME_PREQ;
             pTxBuffer = &EplDllkInstance_g.m_pTxBuffer[uiHandle];
             for (; uiHandle < EplDllkInstance_g.m_uiMaxTxFrames; uiHandle++, pTxBuffer++)
@@ -496,6 +515,12 @@ tEdrvTxBuffer  *pTxBuffer = NULL;
                 {   // free entry found
                     break;
                 }
+            }
+#endif
+            if (uiHandle >= EplDllkInstance_g.m_uiMaxTxFrames)
+            {
+                Ret = kEplEdrvNoFreeBufEntry;
+                goto Exit;
             }
         }
     }
@@ -507,6 +532,7 @@ tEdrvTxBuffer  *pTxBuffer = NULL;
     {
         uiHandle = EPL_DLLK_TXFRAME_PRES;
     }
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
     else if (MsgType_p == kEplMsgTypeSoc)
     {
         uiHandle = EPL_DLLK_TXFRAME_SOC;
@@ -537,6 +563,13 @@ tEdrvTxBuffer  *pTxBuffer = NULL;
             goto Exit;
         }
     }
+#else
+    else
+    {
+        Ret = kEplEdrvNoFreeBufEntry;
+        goto Exit;
+    }
+#endif
 
     // test if requested entry is free
     pTxBuffer = &EplDllkInstance_g.m_pTxBuffer[uiHandle];
@@ -684,7 +717,6 @@ tEdrvTxBuffer    *pTxBuffer = NULL;
     // mark buffer as free so that frame will not be send in future anymore
     // $$$ d.k. What's up with running transmissions?
     pTxBuffer->m_uiTxMsgLen = EPL_DLLK_BUFLEN_EMPTY;
-    pTxBuffer->m_pbBuffer = NULL;
 
     // delete Tx buffer
     Ret = EdrvReleaseTxMsgBuffer(pTxBuffer);
@@ -692,6 +724,8 @@ tEdrvTxBuffer    *pTxBuffer = NULL;
     {   // error occured while releasing Tx frame
         goto Exit;
     }
+
+    pTxBuffer->m_pbBuffer = NULL;
 
 Exit:
     return Ret;
@@ -772,13 +806,6 @@ tEplNmtState    NmtState;
                 case kEplNmtCsPreOperational1:
                 {
                     // update IdentRes and StatusRes
-                    Ret = EplDllkUpdateFrameIdentRes(&EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_IDENTRES],
-                                                     pNmtStateChange->m_NewNmtState);
-                    if (Ret != kEplSuccessful)
-                    {
-                        goto Exit;
-                    }
-
                     Ret = EplDllkUpdateFrameStatusRes(&EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_STATUSRES],
                                                       pNmtStateChange->m_NewNmtState);
                     if (Ret != kEplSuccessful)
@@ -786,7 +813,37 @@ tEplNmtState    NmtState;
                         goto Exit;
                     }
 
-                    // $$$ d.k. enable IdentRes and StatusRes
+                    Ret = EplDllkUpdateFrameIdentRes(&EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_IDENTRES],
+                                                     pNmtStateChange->m_NewNmtState);
+                    if (Ret != kEplSuccessful)
+                    {
+                        goto Exit;
+                    }
+
+                    // enable IdentRes and StatusRes
+#if (EDRV_AUTO_RESPONSE != FALSE)
+                    // enable corresponding Rx filter
+                    EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_SOA_STATREQ].m_fEnable = TRUE;
+                    Ret = EdrvChangeFilter(EplDllkInstance_g.m_aFilter,
+                                           EPL_DLLK_FILTER_COUNT,
+                                           EPL_DLLK_FILTER_SOA_STATREQ,
+                                           EDRV_FILTER_CHANGE_STATE);
+                    if (Ret != kEplSuccessful)
+                    {
+                        goto Exit;
+                    }
+
+                    // enable corresponding Rx filter
+                    EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_SOA_IDREQ].m_fEnable = TRUE;
+                    Ret = EdrvChangeFilter(EplDllkInstance_g.m_aFilter,
+                                           EPL_DLLK_FILTER_COUNT,
+                                           EPL_DLLK_FILTER_SOA_IDREQ,
+                                           EDRV_FILTER_CHANGE_STATE);
+                    if (Ret != kEplSuccessful)
+                    {
+                        goto Exit;
+                    }
+#endif
 
                     // update PRes (for sudden changes to PreOp2)
                     Ret = EplDllkUpdateFramePres(&EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_PRES],
@@ -796,14 +853,27 @@ tEplNmtState    NmtState;
                         goto Exit;
                     }
 
-                    // $$$ d.k. enable PRes (for sudden changes to PreOp2)
+                    // enable PRes (for sudden changes to PreOp2)
+#if (EDRV_AUTO_RESPONSE != FALSE)
+                    // enable corresponding Rx filter
+                    EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_PREQ].m_fEnable = TRUE;
+                    Ret = EdrvChangeFilter(EplDllkInstance_g.m_aFilter,
+                                           EPL_DLLK_FILTER_COUNT,
+                                           EPL_DLLK_FILTER_PREQ,
+                                           EDRV_FILTER_CHANGE_STATE);
+                    if (Ret != kEplSuccessful)
+                    {
+                        goto Exit;
+                    }
+#endif
+
                     break;
                 }
 
                 // node processes isochronous and asynchronous frames
                 case kEplNmtCsPreOperational2:
                 {
-                    // $$$ d.k. signal update of IdentRes and StatusRes on SoA
+                    // signal update of IdentRes and StatusRes on SoA
                     EplDllkInstance_g.m_bUpdateTxFrame = EPL_DLLK_UPDATE_BOTH;
 
                     // update PRes (necessary if coming from Stopped)
@@ -814,7 +884,19 @@ tEplNmtState    NmtState;
                         goto Exit;
                     }
 
-                    // $$$ d.k. enable PRes (necessary if coming from Stopped)
+                    // enable PRes (necessary if coming from Stopped)
+#if (EDRV_AUTO_RESPONSE != FALSE)
+                    // enable corresponding Rx filter
+                    EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_PREQ].m_fEnable = TRUE;
+                    Ret = EdrvChangeFilter(EplDllkInstance_g.m_aFilter,
+                                           EPL_DLLK_FILTER_COUNT,
+                                           EPL_DLLK_FILTER_PREQ,
+                                           EDRV_FILTER_CHANGE_STATE);
+                    if (Ret != kEplSuccessful)
+                    {
+                        goto Exit;
+                    }
+#endif
                     break;
                 }
 
@@ -842,7 +924,7 @@ tEplNmtState    NmtState;
                 case kEplNmtCsOperational:
                 case kEplNmtCsReadyToOperate:
                 {
-                    // $$$ d.k. signal update of IdentRes and StatusRes on SoA
+                    // signal update of IdentRes and StatusRes on SoA
                     EplDllkInstance_g.m_bUpdateTxFrame = EPL_DLLK_UPDATE_BOTH;
                     break;
                 }
@@ -850,10 +932,22 @@ tEplNmtState    NmtState;
                 // node stopped by MN
                 case kEplNmtCsStopped:
                 {
-                    // $$$ d.k. signal update of IdentRes and StatusRes on SoA
+                    // signal update of IdentRes and StatusRes on SoA
                     EplDllkInstance_g.m_bUpdateTxFrame = EPL_DLLK_UPDATE_BOTH;
 
-                    // $$$ d.k. disable PRes
+                    // disable PRes
+#if (EDRV_AUTO_RESPONSE != FALSE)
+                    // disable corresponding Rx filter
+                    EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_PREQ].m_fEnable = TRUE;
+                    Ret = EdrvChangeFilter(EplDllkInstance_g.m_aFilter,
+                                           EPL_DLLK_FILTER_COUNT,
+                                           EPL_DLLK_FILTER_PREQ,
+                                           EDRV_FILTER_CHANGE_STATE);
+                    if (Ret != kEplSuccessful)
+                    {
+                        goto Exit;
+                    }
+#endif
 
                     // update PRes
                     Ret = EplDllkUpdateFramePres(&EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_PRES],
@@ -1749,6 +1843,136 @@ BYTE            abMulticastMac[6];
     // mark Tx buffer as empty
     EplDllkInstance_g.m_pTxBuffer[uiHandle].m_uiTxMsgLen = EPL_DLLK_BUFLEN_EMPTY;
 
+
+    // setup filter structure for Edrv
+    EPL_MEMSET(EplDllkInstance_g.m_aFilter, 0, sizeof (EplDllkInstance_g.m_aFilter));
+
+    // setup ASnd filter
+    AmiSetQword48ToBe(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_ASND].m_abFilterValue[0],
+                      EPL_C_DLL_MULTICAST_ASND);
+    AmiSetQword48ToBe(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_ASND].m_abFilterMask[0],
+                      EPL_DLL_MACADDR_MASK);
+    EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_ASND].m_fEnable = TRUE;
+
+    // setup SoC filter
+    AmiSetQword48ToBe(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_SOC].m_abFilterValue[0],
+                      EPL_C_DLL_MULTICAST_SOC);
+    AmiSetQword48ToBe(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_SOC].m_abFilterMask[0],
+                      EPL_DLL_MACADDR_MASK);
+    EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_SOC].m_fEnable = TRUE;
+
+    // setup SoA filter
+    AmiSetQword48ToBe(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_SOA].m_abFilterValue[0],
+                      EPL_C_DLL_MULTICAST_SOA);
+    AmiSetQword48ToBe(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_SOA].m_abFilterMask[0],
+                      EPL_DLL_MACADDR_MASK);
+    EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_SOA].m_fEnable = TRUE;
+
+    // setup SoA/IdentReq filter
+    AmiSetQword48ToBe(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_SOA_IDREQ].m_abFilterValue[0],
+                      EPL_C_DLL_MULTICAST_SOA);
+    AmiSetQword48ToBe(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_SOA_IDREQ].m_abFilterMask[0],
+                      EPL_DLL_MACADDR_MASK);
+    AmiSetWordToBe(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_SOA_IDREQ].m_abFilterValue[12],
+                   EPL_C_DLL_ETHERTYPE_EPL);
+    AmiSetWordToBe(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_SOA_IDREQ].m_abFilterMask[12],
+                   0xFFFF);
+    AmiSetByteToBe(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_SOA_IDREQ].m_abFilterValue[14],
+                   kEplMsgTypeSoa);
+    AmiSetByteToBe(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_SOA_IDREQ].m_abFilterMask[14],
+                   0xFF);
+    AmiSetByteToBe(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_SOA_IDREQ].m_abFilterValue[20],
+                   kEplDllReqServiceIdent);
+    AmiSetByteToBe(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_SOA_IDREQ].m_abFilterMask[20],
+                   0xFF);
+    AmiSetByteToBe(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_SOA_IDREQ].m_abFilterValue[21],
+                   EplDllkInstance_g.m_DllConfigParam.m_uiNodeId);
+    AmiSetByteToBe(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_SOA_IDREQ].m_abFilterMask[21],
+                   0xFF);
+    EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_SOA_IDREQ].m_pTxBuffer = &EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_IDENTRES];
+    EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_SOA_IDREQ].m_fEnable = FALSE;
+
+    // setup SoA/StatusReq filter
+    AmiSetQword48ToBe(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_SOA_STATREQ].m_abFilterValue[0],
+                      EPL_C_DLL_MULTICAST_SOA);
+    AmiSetQword48ToBe(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_SOA_STATREQ].m_abFilterMask[0],
+                      EPL_DLL_MACADDR_MASK);
+    AmiSetWordToBe(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_SOA_STATREQ].m_abFilterValue[12],
+                   EPL_C_DLL_ETHERTYPE_EPL);
+    AmiSetWordToBe(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_SOA_STATREQ].m_abFilterMask[12],
+                   0xFFFF);
+    AmiSetByteToBe(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_SOA_STATREQ].m_abFilterValue[14],
+                   kEplMsgTypeSoa);
+    AmiSetByteToBe(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_SOA_STATREQ].m_abFilterMask[14],
+                   0xFF);
+    AmiSetByteToBe(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_SOA_STATREQ].m_abFilterValue[20],
+                   kEplDllReqServiceStatus);
+    AmiSetByteToBe(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_SOA_STATREQ].m_abFilterMask[20],
+                   0xFF);
+    AmiSetByteToBe(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_SOA_STATREQ].m_abFilterValue[21],
+                   EplDllkInstance_g.m_DllConfigParam.m_uiNodeId);
+    AmiSetByteToBe(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_SOA_STATREQ].m_abFilterMask[21],
+                   0xFF);
+    EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_SOA_STATREQ].m_pTxBuffer = &EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_STATUSRES];
+    EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_SOA_STATREQ].m_fEnable = FALSE;
+
+    // setup SoA/NmtReq filter
+    AmiSetQword48ToBe(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_SOA_NMTREQ].m_abFilterValue[0],
+                      EPL_C_DLL_MULTICAST_SOA);
+    AmiSetQword48ToBe(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_SOA_NMTREQ].m_abFilterMask[0],
+                      EPL_DLL_MACADDR_MASK);
+    AmiSetWordToBe(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_SOA_NMTREQ].m_abFilterValue[12],
+                   EPL_C_DLL_ETHERTYPE_EPL);
+    AmiSetWordToBe(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_SOA_NMTREQ].m_abFilterMask[12],
+                   0xFFFF);
+    AmiSetByteToBe(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_SOA_NMTREQ].m_abFilterValue[14],
+                   kEplMsgTypeSoa);
+    AmiSetByteToBe(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_SOA_NMTREQ].m_abFilterMask[14],
+                   0xFF);
+    AmiSetByteToBe(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_SOA_NMTREQ].m_abFilterValue[20],
+                   kEplDllReqServiceNmtRequest);
+    AmiSetByteToBe(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_SOA_NMTREQ].m_abFilterMask[20],
+                   0xFF);
+    AmiSetByteToBe(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_SOA_NMTREQ].m_abFilterValue[21],
+                   EplDllkInstance_g.m_DllConfigParam.m_uiNodeId);
+    AmiSetByteToBe(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_SOA_NMTREQ].m_abFilterMask[21],
+                   0xFF);
+    EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_SOA_NMTREQ].m_pTxBuffer = &EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_NMTREQ];
+    EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_SOA_NMTREQ].m_fEnable = FALSE;
+
+    // setup SoA/UnspecifiedReq filter
+    AmiSetQword48ToBe(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_SOA_NONEPL].m_abFilterValue[0],
+                      EPL_C_DLL_MULTICAST_SOA);
+    AmiSetQword48ToBe(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_SOA_NONEPL].m_abFilterMask[0],
+                      EPL_DLL_MACADDR_MASK);
+    AmiSetWordToBe(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_SOA_NONEPL].m_abFilterValue[12],
+                   EPL_C_DLL_ETHERTYPE_EPL);
+    AmiSetWordToBe(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_SOA_NONEPL].m_abFilterMask[12],
+                   0xFFFF);
+    AmiSetByteToBe(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_SOA_NONEPL].m_abFilterValue[14],
+                   kEplMsgTypeSoa);
+    AmiSetByteToBe(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_SOA_NONEPL].m_abFilterMask[14],
+                   0xFF);
+    AmiSetByteToBe(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_SOA_NONEPL].m_abFilterValue[20],
+                   kEplDllReqServiceUnspecified);
+    AmiSetByteToBe(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_SOA_NONEPL].m_abFilterMask[20],
+                   0xFF);
+    AmiSetByteToBe(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_SOA_NONEPL].m_abFilterValue[21],
+                   EplDllkInstance_g.m_DllConfigParam.m_uiNodeId);
+    AmiSetByteToBe(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_SOA_NONEPL].m_abFilterMask[21],
+                   0xFF);
+    EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_SOA_NONEPL].m_pTxBuffer = &EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_NONEPL];
+    EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_SOA_NONEPL].m_fEnable = FALSE;
+
+#if EPL_DLLK_FILTER_COUNT > EPL_DLLK_FILTER_PRES
+    // setup PRes filter
+    AmiSetQword48ToBe(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_PRES].m_abFilterValue[0],
+                      EPL_C_DLL_MULTICAST_PRES);
+    AmiSetQword48ToBe(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_PRES].m_abFilterMask[0],
+                      EPL_DLL_MACADDR_MASK);
+    EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_PRES].m_fEnable = FALSE;
+#endif
+
     // register multicast MACs in ethernet driver
     AmiSetQword48ToBe(&abMulticastMac[0], EPL_C_DLL_MULTICAST_SOC);
     Ret = EdrvDefineRxMacAddrEntry(abMulticastMac);
@@ -1805,9 +2029,37 @@ BYTE            abMulticastMac[6];
         EplDllkInstance_g.m_ullFrameTimeout = 1000LL
             * ((unsigned long long) EplDllkInstance_g.m_DllConfigParam.m_dwCycleLen);
     }
+    else
 #endif // (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
+    {   // local node is CN
 
+        // setup PReq filter
+        EPL_MEMCPY(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_PREQ].m_abFilterValue[0],
+                   &EplDllkInstance_g.m_be_abSrcMac[0], 6);
+        AmiSetQword48ToBe(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_PREQ].m_abFilterMask[0],
+                          EPL_DLL_MACADDR_MASK);
+        AmiSetWordToBe(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_PREQ].m_abFilterValue[12],
+                       EPL_C_DLL_ETHERTYPE_EPL);
+        AmiSetWordToBe(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_PREQ].m_abFilterMask[12],
+                       0xFFFF);
+        AmiSetByteToBe(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_PREQ].m_abFilterValue[14],
+                       kEplMsgTypePreq);
+        AmiSetByteToBe(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_PREQ].m_abFilterMask[14],
+                       0xFF);
+        AmiSetByteToBe(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_PREQ].m_abFilterValue[15],
+                       EplDllkInstance_g.m_DllConfigParam.m_uiNodeId);
+        AmiSetByteToBe(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_PREQ].m_abFilterMask[15],
+                       0xFF);
+        EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_PREQ].m_pTxBuffer = &EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_PRES];
+        EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_PREQ].m_fEnable = FALSE;
+
+    }
+
+    // clear all asynchronous buffers
     Ret = EplDllkCalAsyncClearBuffer();
+
+    // set filters in Edrv
+    Ret = EdrvChangeFilter(EplDllkInstance_g.m_aFilter, EPL_DLLK_FILTER_COUNT, EPL_DLLK_FILTER_COUNT, 0);
 
 Exit:
     return Ret;
@@ -1837,6 +2089,9 @@ unsigned int    uiIndex;
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
 unsigned int    uiHandle;
 #endif
+
+    // remove all filters from Edrv
+    Ret = EdrvChangeFilter(NULL, 0, 0, 0);
 
     // destroy all data structures
 
@@ -2170,7 +2425,21 @@ unsigned int    uiFrameCount;
                         // set buffer valid
                         pTxBuffer->m_uiTxMsgLen = uiFrameSize;
 
-                        // $$$ d.k. enable corresponding Rx filter and call EdrvUpdateTxMsgBuffer()
+#if (EDRV_AUTO_RESPONSE != FALSE)
+                        // update Tx buffer in Edrv
+                        Ret = EdrvUpdateTxMsgBuffer(pTxBuffer);
+
+                        // enable corresponding Rx filter
+                        EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_SOA_NMTREQ].m_fEnable = TRUE;
+                        Ret = EdrvChangeFilter(EplDllkInstance_g.m_aFilter,
+                                               EPL_DLLK_FILTER_COUNT,
+                                               EPL_DLLK_FILTER_SOA_NMTREQ,
+                                               EDRV_FILTER_CHANGE_STATE);
+                        if (Ret != kEplSuccessful)
+                        {
+                            goto Exit;
+                        }
+#endif
                     }
                     else if (Ret == kEplDllAsyncTxBufferEmpty)
                     {   // empty Tx buffer is not a real problem
@@ -2179,7 +2448,18 @@ unsigned int    uiFrameCount;
                         // mark Tx buffer as empty
                         pTxBuffer->m_uiTxMsgLen = EPL_DLLK_BUFLEN_EMPTY;
 
-                        // $$$ d.k. disable corresponding Rx filter
+#if (EDRV_AUTO_RESPONSE != FALSE)
+                        // disable corresponding Rx filter
+                        EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_SOA_NMTREQ].m_fEnable = FALSE;
+                        Ret = EdrvChangeFilter(EplDllkInstance_g.m_aFilter,
+                                               EPL_DLLK_FILTER_COUNT,
+                                               EPL_DLLK_FILTER_SOA_NMTREQ,
+                                               EDRV_FILTER_CHANGE_STATE);
+                        if (Ret != kEplSuccessful)
+                        {
+                            goto Exit;
+                        }
+#endif
                     }
                 }
             }
@@ -2209,7 +2489,21 @@ unsigned int    uiFrameCount;
                         // set buffer valid
                         pTxBuffer->m_uiTxMsgLen = uiFrameSize;
 
-                        // $$$ d.k. enable corresponding Rx filter and call EdrvUpdateTxMsgBuffer()
+#if (EDRV_AUTO_RESPONSE != FALSE)
+                        // update Tx buffer in Edrv
+                        Ret = EdrvUpdateTxMsgBuffer(pTxBuffer);
+
+                        // enable corresponding Rx filter
+                        EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_SOA_NONEPL].m_fEnable = TRUE;
+                        Ret = EdrvChangeFilter(EplDllkInstance_g.m_aFilter,
+                                               EPL_DLLK_FILTER_COUNT,
+                                               EPL_DLLK_FILTER_SOA_NONEPL,
+                                               EDRV_FILTER_CHANGE_STATE);
+                        if (Ret != kEplSuccessful)
+                        {
+                            goto Exit;
+                        }
+#endif
                     }
                     else if (Ret == kEplDllAsyncTxBufferEmpty)
                     {   // empty Tx buffer is not a real problem
@@ -2218,7 +2512,18 @@ unsigned int    uiFrameCount;
                         // mark Tx buffer as empty
                         pTxBuffer->m_uiTxMsgLen = EPL_DLLK_BUFLEN_EMPTY;
 
-                        // $$$ d.k. disable corresponding Rx filter
+#if (EDRV_AUTO_RESPONSE != FALSE)
+                        // disable corresponding Rx filter
+                        EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_SOA_NONEPL].m_fEnable = FALSE;
+                        Ret = EdrvChangeFilter(EplDllkInstance_g.m_aFilter,
+                                               EPL_DLLK_FILTER_COUNT,
+                                               EPL_DLLK_FILTER_SOA_NONEPL,
+                                               EDRV_FILTER_CHANGE_STATE);
+                        if (Ret != kEplSuccessful)
+                        {
+                            goto Exit;
+                        }
+#endif
                     }
                 }
             }
@@ -2299,6 +2604,9 @@ unsigned int    uiFrameCount;
         EplDllkInstance_g.m_bUpdateTxFrame = EPL_DLLK_UPDATE_BOTH;
     }
 
+#if (EDRV_AUTO_RESPONSE != FALSE)
+Exit:
+#endif
     return Ret;
 }
 
@@ -2716,6 +3024,11 @@ tEplErrorHandlerkEvent  DllEvent;
                         goto Exit;
                     }
 
+                    // $$$ d.k. only continue with sending of the SoA, if the received ASnd was the requested one
+                    //          or the transmission of the previous SoA has already finished.
+                    //          If we receive multiple ASnd after a SoA, we will get kEplInvalidOperation in SendSoa()
+                    //          otherwise.
+
                     // go ahead and send SoA
                     Ret = EplDllkMnSendSoa(NmtState_p,
                                            &DummyDllState,
@@ -2724,11 +3037,13 @@ tEplErrorHandlerkEvent  DllEvent;
                     // increment cycle counter to detect if EPL_C_DLL_PREOP1_START_CYCLES empty cycles are elapsed
                     EplDllkInstance_g.m_uiCycleCount++;
 
+                    Ret = kEplSuccessful;
+/*
                     if (Ret != kEplSuccessful)
                     {
                         goto Exit;
                     }
-
+*/
                     // reprogramming of timer will be done in CbFrameTransmitted()
                     break;
                 }
@@ -3111,6 +3426,9 @@ TGT_DLLK_DECLARE_FLAGS
 #if EDRV_EARLY_RX_INT == FALSE
             if (NmtState >= kEplNmtCsPreOperational2)
             {   // respond to and process PReq frames only in PreOp2, ReadyToOp and Op
+
+#if (EDRV_AUTO_RESPONSE == FALSE)
+                // Auto-response is disabled
                 // Does PRes exist?
                 pTxBuffer = &EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_PRES];
                 if (pTxBuffer->m_pbBuffer != NULL)
@@ -3125,13 +3443,16 @@ TGT_DLLK_DECLARE_FLAGS
                         goto Exit;
                     }
 #endif
-                    // save EA flag
-                    bFlag1 = AmiGetByteFromLe(&pFrame->m_Data.m_Preq.m_le_bFlag1);
-                    EplDllkInstance_g.m_bMnFlag1 =
-                        (EplDllkInstance_g.m_bMnFlag1 & ~EPL_FRAME_FLAG1_EA)
-                        | (bFlag1 & EPL_FRAME_FLAG1_EA);
                 }
 #endif
+#endif
+
+                // save EA flag
+                bFlag1 = AmiGetByteFromLe(&pFrame->m_Data.m_Preq.m_le_bFlag1);
+                EplDllkInstance_g.m_bMnFlag1 =
+                    (EplDllkInstance_g.m_bMnFlag1 & ~EPL_FRAME_FLAG1_EA)
+                    | (bFlag1 & EPL_FRAME_FLAG1_EA);
+
                 // inform PDO module
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOK)) != 0)
                 if (NmtState >= kEplNmtCsReadyToOperate)
@@ -3434,6 +3755,8 @@ TGT_DLLK_DECLARE_FLAGS
                 ReqServiceId = (tEplDllReqServiceId) AmiGetByteFromLe(&pFrame->m_Data.m_Soa.m_le_bReqServiceId);
                 if (ReqServiceId == kEplDllReqServiceStatus)
                 {   // StatusRequest
+#if (EDRV_AUTO_RESPONSE == FALSE)
+                    // Auto-response is not available
                     pTxBuffer = &EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_STATUSRES];
                     if (pTxBuffer->m_pbBuffer != NULL)
                     {   // StatusRes does exist
@@ -3445,45 +3768,49 @@ TGT_DLLK_DECLARE_FLAGS
                             goto Exit;
                         }
                         TGT_DBG_SIGNAL_TRACE_POINT(8);
-
-                        // update error signaling
-                        bFlag1 = AmiGetByteFromLe(&pFrame->m_Data.m_Soa.m_le_bFlag1);
-                        if (((bFlag1 ^ EplDllkInstance_g.m_bMnFlag1) & EPL_FRAME_FLAG1_ER) != 0)
-                        {   // exception reset flag was changed by MN
-                            // assume same state for EC in next cycle (clear all other bits)
-                            if ((bFlag1 & EPL_FRAME_FLAG1_ER) != 0)
-                            {
-                                // set EC and reset rest
-                                EplDllkInstance_g.m_bFlag1 = EPL_FRAME_FLAG1_EC;
-                            }
-                            else
-                            {
-                                // reset entire flag 1 (including EC and EN)
-                                EplDllkInstance_g.m_bFlag1 = 0;
-                            }
-
-                            // signal update of StatusRes
-                            Event.m_EventSink = kEplEventSinkDllk;
-                            Event.m_EventType = kEplEventTypeDllkFlag1;
-                            Event.m_uiSize = 0;
-                            Event.m_pArg = NULL;
-                            Ret = EplEventkPost(&Event);
-                            if (Ret != kEplSuccessful)
-                            {
-                                goto Exit;
-                            }
-                        }
-                        // save flag 1 from MN for Status request response cycle
-                        // $$$ d.k. only in PreOp1 and when async-only or not accessed isochronously
-                        EplDllkInstance_g.m_bMnFlag1 = bFlag1;
                     }
                     else
                     {   // no frame transmitted
                         pTxBuffer = NULL;
                     }
+#endif
+
+                    // update error signaling
+                    bFlag1 = AmiGetByteFromLe(&pFrame->m_Data.m_Soa.m_le_bFlag1);
+                    if (((bFlag1 ^ EplDllkInstance_g.m_bMnFlag1) & EPL_FRAME_FLAG1_ER) != 0)
+                    {   // exception reset flag was changed by MN
+                        // assume same state for EC in next cycle (clear all other bits)
+                        if ((bFlag1 & EPL_FRAME_FLAG1_ER) != 0)
+                        {
+                            // set EC and reset rest
+                            EplDllkInstance_g.m_bFlag1 = EPL_FRAME_FLAG1_EC;
+                        }
+                        else
+                        {
+                            // reset entire flag 1 (including EC and EN)
+                            EplDllkInstance_g.m_bFlag1 = 0;
+                        }
+
+                        // signal update of StatusRes
+                        Event.m_EventSink = kEplEventSinkDllk;
+                        Event.m_EventType = kEplEventTypeDllkFlag1;
+                        Event.m_uiSize = 0;
+                        Event.m_pArg = NULL;
+                        Ret = EplEventkPost(&Event);
+                        if (Ret != kEplSuccessful)
+                        {
+                            goto Exit;
+                        }
+                    }
+                    // save flag 1 from MN for Status request response cycle
+                    // $$$ d.k. only in PreOp1 and when async-only or not accessed isochronously
+                    EplDllkInstance_g.m_bMnFlag1 = bFlag1;
+
                 }
                 else if (ReqServiceId == kEplDllReqServiceIdent)
                 {   // IdentRequest
+#if (EDRV_AUTO_RESPONSE == FALSE)
+                    // Auto-response is not available
                     pTxBuffer = &EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_IDENTRES];
                     if (pTxBuffer->m_pbBuffer != NULL)
                     {   // IdentRes does exist
@@ -3499,9 +3826,12 @@ TGT_DLLK_DECLARE_FLAGS
                     {   // no frame transmitted
                         pTxBuffer = NULL;
                     }
+#endif
                 }
                 else if (ReqServiceId == kEplDllReqServiceNmtRequest)
                 {   // NmtRequest
+#if (EDRV_AUTO_RESPONSE == FALSE)
+                    // Auto-response is not available
                     pTxBuffer = &EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_NMTREQ];
                     if (pTxBuffer->m_pbBuffer != NULL)
                     {   // NmtRequest does exist
@@ -3532,10 +3862,12 @@ TGT_DLLK_DECLARE_FLAGS
                     {   // no frame transmitted
                         pTxBuffer = NULL;
                     }
-
+#endif
                 }
                 else if (ReqServiceId == kEplDllReqServiceUnspecified)
                 {   // unspecified invite
+#if (EDRV_AUTO_RESPONSE == FALSE)
+                    // Auto-response is not available
                     pTxBuffer = &EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_NONEPL];
                     if (pTxBuffer->m_pbBuffer != NULL)
                     {   // non-EPL frame does exist
@@ -3566,7 +3898,7 @@ TGT_DLLK_DECLARE_FLAGS
                     {   // no frame transmitted
                         pTxBuffer = NULL;
                     }
-
+#endif
                 }
                 else if (ReqServiceId == kEplDllReqServiceNo)
                 {   // no async service requested -> do nothing
@@ -3707,7 +4039,7 @@ Exit:
     {
     DWORD   dwArg;
 
-        BENCHMARK_MOD_02_TOGGLE(9);
+        BENCHMARK_MOD_02_TOGGLE(7);
 
         dwArg = EplDllkInstance_g.m_DllState | (NmtEvent << 8);
 
@@ -4057,7 +4389,7 @@ Exit:
     {
     DWORD   dwArg;
 
-        BENCHMARK_MOD_02_TOGGLE(9);
+        BENCHMARK_MOD_02_TOGGLE(7);
 
         dwArg = EplDllkInstance_g.m_DllState | (uiHandle << 16);
 
@@ -4101,7 +4433,10 @@ tEplFrame*      pTxFrame;
     AmiSetByteToLe(&pTxFrame->m_Data.m_Asnd.m_Payload.m_IdentResponse.m_le_bNmtStatus, (BYTE) NmtState_p);
     AmiSetByteToLe(&pTxFrame->m_Data.m_Asnd.m_Payload.m_IdentResponse.m_le_bFlag2, EplDllkInstance_g.m_bFlag2);
 
-    // $$$ d.k. call EdrvUpdateTxMsgBuffer()
+#if (EDRV_AUTO_RESPONSE != FALSE)
+    // update Tx buffer in Edrv
+    Ret = EdrvUpdateTxMsgBuffer(pTxBuffer_p);
+#endif
 
     return Ret;
 }
@@ -4135,7 +4470,10 @@ tEplFrame*      pTxFrame;
     AmiSetByteToLe(&pTxFrame->m_Data.m_Asnd.m_Payload.m_StatusResponse.m_le_bFlag2, EplDllkInstance_g.m_bFlag2);
     AmiSetByteToLe(&pTxFrame->m_Data.m_Asnd.m_Payload.m_StatusResponse.m_le_bFlag1, EplDllkInstance_g.m_bFlag1);
 
-    // $$$ d.k. call EdrvUpdateTxMsgBuffer()
+#if (EDRV_AUTO_RESPONSE != FALSE)
+    // update Tx buffer in Edrv
+    Ret = EdrvUpdateTxMsgBuffer(pTxBuffer_p);
+#endif
 
     return Ret;
 }
@@ -4189,7 +4527,10 @@ BYTE            bFlag1;
     // update frame (flag1)
     AmiSetByteToLe(&pTxFrame->m_Data.m_Pres.m_le_bFlag1, bFlag1);
 
-    // $$$ d.k. call EdrvUpdateTxMsgBuffer()
+#if (EDRV_AUTO_RESPONSE != FALSE)
+    // update Tx buffer in Edrv
+    Ret = EdrvUpdateTxMsgBuffer(pTxBuffer_p);
+#endif
 
     return Ret;
 }
@@ -4314,7 +4655,7 @@ Exit:
     {
     DWORD   dwArg;
 
-        BENCHMARK_MOD_02_TOGGLE(9);
+        BENCHMARK_MOD_02_TOGGLE(7);
 
         dwArg = EplDllkInstance_g.m_DllState | (kEplNmtEventDllCeFrameTimeout << 8);
 
@@ -4379,7 +4720,7 @@ Exit:
     {
     DWORD   dwArg;
 
-        BENCHMARK_MOD_02_TOGGLE(9);
+        BENCHMARK_MOD_02_TOGGLE(7);
 
         dwArg = EplDllkInstance_g.m_DllState | (kEplNmtEventDllMeSocTrig << 8);
 
@@ -4442,7 +4783,7 @@ Exit:
     {
     DWORD   dwArg;
 
-        BENCHMARK_MOD_02_TOGGLE(9);
+        BENCHMARK_MOD_02_TOGGLE(7);
 
         dwArg = EplDllkInstance_g.m_DllState | (kEplNmtEventDllMePresTimeout << 8);
 

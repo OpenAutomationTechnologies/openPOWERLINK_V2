@@ -1,40 +1,44 @@
-/* omethlib.h - Ethernet Library for FPGA MAC Controller*/ 
+/* omethlib.h - Ethernet Library for FPGA MAC Controller */
 /*
 ------------------------------------------------------------------------------
 Copyright (c) 2009, B&R
 All rights reserved.
 
-Redistribution and use in source and binary forms,
+Redistribution and use in source and binary forms, 
 with or without modification, 
 are permitted provided that the following conditions are met:
 
-    * Redistributions of source code must retain the above copyright notice, 
-      this list of conditions and the following disclaimer.
-    * Redistributions in binary form must reproduce the above copyright notice,
-      this list of conditions and the following disclaimer 
-      in the documentation and/or other materials provided with the distribution.
-    * Neither the name of the B&R nor the names of its contributors 
-      may be used to endorse or promote products derived from this software 
-      without specific prior written permission.
+- Redistributions of source code must retain the above copyright notice, 
+this list of conditions and the following disclaimer.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
+- Redistributions in binary form must reproduce the above copyright notice, 
+this list of conditions and the following disclaimer
+in the documentation and/or other materials provided with the distribution.
+
+- Neither the name of the B&R nor the names of
+its contributors may be used to endorse or promote products derived
+from this software without specific prior written permission.
+
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
 AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, 
-THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR 
-A PARTICULAR PURPOSE ARE DISCLAIMED. 
-IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR 
-ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES 
-(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; 
-LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND 
-ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF 
-THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR 
+PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR 
+CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, 
+EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, 
+PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; 
+OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
+WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR 
+OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, 
+EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 ------------------------------------------------------------------------------
  Module:    omethlib
  File:      omethlib.h
- Author:    Thomas Enzinger
- Created:   11.10.2004
- Revised:   26.03.2009
- State:     only tested on Nios II
+ Author:    Thomas Enzinger(enzingert)
+ Created:   12.03.2004
+ Revised:   21.08.2009
+ State:     tested on Altera Nios II and Xilinx Microblaze
 ------------------------------------------------------------------------------
 
  Functions:
@@ -43,6 +47,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  	omethInit				- initialize the ethernet driver (to be called once at startup)
  	omethCreate				- create driver instance
 	omethGetHandle			- get handle of an instance based on its adapter number
+	omethGetLinkSpeed		- get link-speed of this interface (10/100 MBit)
 
 	omethPeriodic			- must be called cyclic to update phy register table
 	omethPhyHardwareAdr		- get hardware address of phy
@@ -51,22 +56,29 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 	omethPhyWrite			- write phy register (blocking)
 	omethPhyRead			- read phy register (blocking)
 	omethPhyReadNonBlocking	- read phy register (nonblocking, can not be combined with omethPeriodic())
+	omethPhySetHalfDuplex	- set phy's halfduplex (the phy's will be set in omethPerodic())
 
 	omethHookCreate			- create hook to get callbacks for received frames
 	omethHookSetFunction	- change the callback function of a created hook
 
 	omethFilterCreate		- create a filter to specify which frames should call a hook
 	omethFilterSetPattern	- change all filter value/mask bytes of a filter
+	omethFilterSetByteMask  - change 1 filter mask byte of a filter
 	omethFilterSetByteValue - change 1 filter value byte of a filter
 	omethFilterSetArgument	- change the callback argument which a specific filter passes to the callback
 	omethFilterSetNoMatchIRQ- enable the NoMatch-IRQ
+	omethFilterSetHubPort	- set HUB port to which the filter should be limited (MAC Version >= 1.67 required)
 
 	omethSetSCNM			- define a filter for the slot communication management
 	omethResponseInit		- prepare a filter for auto response
 	omethResponseInitBuf	- prepare a filter for auto response and provide change buffers
-	omethResponseSet		- allign a packet which should be responded on a filter event
+	omethResponseSet		- align a packet which should be responded on a filter event
+	omethResponseLink		- link existing response buffer to another filter
+	omethResponseTime		- set ticks which are added to the IPG	
 	omethResponseDisable	- disable response frame
 	omethResponseEnable		- enable response frame
+	omethResponseCount		- get number of transmitted auto responses
+	omethResponseCountReset	- reset number of transmitted auto responses
 
 	omethTransmit			- transmit frame (immediately or after filter event set with omethSetSCNM)
 	omethTransmitArg		- transmit frame with argument for tx-callback
@@ -91,44 +103,55 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 	omethDestroy			- destroy driver instance (stop MAC and free all allocated resources)
 
-
-	EPLV2 MN Specific:
-		omethMnTransmit
-		omethMnTransmitTime
-		omethMnResponseAndFilterSet
-		omethMnResponseEnable
-		omethMnResponseDisable
-		omethMnSetNextRxBuffer
-		omethMnSetCurrentRxBuffer
-		omethMnRxIrqHandler
-		omethMnTxBegIrqHandler
-
 ------------------------------------------------------------------------------
  History:
- 12.03.2004     enzingert   reated
- 23.03.2009     zelenkaj    Changes in omethTxIrqHandler() to free all sent packets
-                             in the TX IR, to avoid TX queue overflow.
- 26.03.2009     zelenkaj    revised
-
+	see omethlib.c
 ----------------------------------------------------------------------------*/
 
 #ifndef __OMETHLIB_H__
 #define __OMETHLIB_H__
 
+//********** packet structure for ethernet frames ***********************
+typedef struct
+{
+	unsigned long	length;		// frame length excluding checksum
+
+	struct ometh_packet_data_typ
+	{
+		unsigned char dstMac[6];
+		unsigned char srcMac[6];
+		unsigned char ethertype[2];
+		unsigned char minData[46];	// minimum number of data bytes for a standard ethernet frame
+		unsigned char checkSum[4];
+	}data;
+}ometh_packet_typ;
+
 typedef struct OMETH_TYP*		OMETH_H;		// handle for ethernet driver
 typedef struct OMETH_HOOK*		OMETH_HOOK_H;	// handle for client hook
 typedef struct OMETH_FILTER*	OMETH_FILTER_H;	// handle for receive filter
 
-#define OMETH_MAC_TYPE_01		0x01	// 16 filters,16 rx,16 tx
-#define OMETH_MAC_TYPE_02		0x02	// 14 standard filters,2 x-filters, 16 rx,16 tx
-#define OMETH_MAC_TYPE_03		0x03	// 6 standard filters,2 p-filters, 16 rx, 16 tx
+#include <omethlib_target.h>	// target specific defines (BIG/LITTLE endian)
 
-#define OMETH_MODE_HALFDUPLEX	0x01	// half duplex supported
-#define OMETH_MODE_FULLDUPLEX	0x02	// full duplex supported
-#define OMETH_MODE_100			0x04
-#define OMETH_MODE_10			0x08
-#define OMETH_MODE_DIS_AUTO_NEG	0x10	// disable auto negotiation (10/100 and FULL/HALF must be selected explicitly)
-#define OMETH_MODE_PHY_LIST		0x20	// the user defines a list of phy-addresses which shall be used
+#define OMETH_MAC_TYPE_01		0x01	// 16 filters,16 rx,16 tx
+
+#define OMETH_MODE_HALFDUPLEX		0x0001	// half duplex supported
+#define OMETH_MODE_FULLDUPLEX		0x0002	// full duplex supported
+#define OMETH_MODE_10MBIT			0x0004	// 10MBit allowed (only use this if MAC is 10MBit-enabled in VHDL code)
+#define OMETH_MODE_100MBIT			0x0008	// 100MBit allowed
+
+#define OMETH_MODE_DIS_AUTO_NEG		0x0010	// disable auto negotiation (FULL/HALF must be selected explicitly)
+#define OMETH_MODE_PHY_LIST			0x0020	// the user defines a list of phy-addresses which shall be used
+#define OMETH_MODE_SET_RES_IPG		0x0040	// set inter package gap (config.ipg)
+#define OMETH_MODE_CRC_DETECT		0x0080	// MAC detects and counts CRC errors
+
+#define OMETH_MODE_DIS_AUTO_NEG_P0	0x0100	// disable auto negotiation (Port[0])
+#define OMETH_MODE_DIS_AUTO_NEG_P1	0x0200	// disable auto negotiation (Port[1])
+#define OMETH_MODE_DIS_AUTO_NEG_P2	0x0400	// disable auto negotiation (Port[2])
+#define OMETH_MODE_DIS_AUTO_NEG_P3	0x0800	// disable auto negotiation (Port[3])
+#define OMETH_MODE_DIS_AUTO_NEG_P4	0x1000	// disable auto negotiation (Port[4])
+#define OMETH_MODE_DIS_AUTO_NEG_P5	0x2000	// disable auto negotiation (Port[5])
+#define OMETH_MODE_DIS_AUTO_NEG_P6	0x4000	// disable auto negotiation (Port[6])
+#define OMETH_MODE_DIS_AUTO_NEG_P7	0x8000	// disable auto negotiation (Port[7])
 
 #define ETH_FLAGS_CRC_ERROR		0x0001		// crc error
 #define ETH_FLAGS_OVERSIZE		0x0002		// over size frame received
@@ -148,8 +171,8 @@ typedef struct OMETH_FILTER*	OMETH_FILTER_H;	// handle for receive filter
 typedef struct
 {
 	unsigned char	macType;	// MAC type : OMETH_MAC_TYPE_01
-	unsigned char	mode;		// OMETH_MODE_FULLDUPLEX, OMETH_MODE_HALFDUPLEX (or both)
-	unsigned char	adapter;	// Adapter number (any number can be chosen, must be uniqe)
+	unsigned char	adapter;	// Adapter number (any number can be chosen, must be unique)
+	unsigned short	mode;		// OMETH_MODE_FULLDUPLEX, OMETH_MODE_HALFDUPLEX (or both)
 
 	void			*pRamBase;	// base address of MAC RAM (filters+descriptors)
 	void			*pRegBase;	// base address of MAC control registers
@@ -163,19 +186,19 @@ typedef struct
 	// (only list phys which belong to the respective ethernet mac, not all existing phys !)
 	unsigned char	phyCount;	// number of valid bytes in phyList[]
 	unsigned char	phyList[OMETH_MAX_PHY_CNT];
+
+	unsigned short	responseIpg;	// inter package gap [ns] (values < 140 will result in a ipg of 140ns)
 }ometh_config_typ;
 
 //********************* network statistics ******************************
 typedef struct
 {
-	#ifndef OMETH_TRACE	// do not compile the following lines to increase trace performance
-		unsigned long rxOk;
-		unsigned long rxLost;
-		unsigned long rxOversize;
-		unsigned long rxCrcError;
-		unsigned long rxHookDisabled;	// frames received while hook is disabled, frame discarded
-		unsigned long rxHookOverflow;	// frames received but no availables buffer, frame discarded
-	#endif
+	unsigned long rxOk;
+	unsigned long rxLost;
+	unsigned long rxOversize;
+	unsigned long rxCrcError;
+	unsigned long rxHookDisabled;	// frames received while hook is disabled, frame discarded
+	unsigned long rxHookOverflow;	// frames received but no available buffer, frame discarded
 
 	unsigned long txCollision;		// total tx collisions on the bus
 	unsigned long txDone[16];		// [0]..number of sent frames with 0 collisions ...
@@ -194,7 +217,7 @@ typedef enum
 
 typedef struct
 {
-	unsigned short r[8];
+	unsigned short r[9];	// [8] contains register 1F
 }phy_reg_typ;
 
 //Phy REG 0
@@ -212,7 +235,7 @@ typedef struct
 #define	PHY_REG1_EXTENDED			0x0001	// extended capability
 #define	PHY_REG1_JABBER				0x0002	// jabber detected
 #define	PHY_REG1_LINK				0x0004	// linked
-#define	PHY_REG1_AUTONEGON			0x0008	// auto negotiation availibility
+#define	PHY_REG1_AUTONEG_CAPABLE	0x0008	// auto negotiation availability
 #define	PHY_REG1_REMOTEFAULT		0x0010	//
 #define	PHY_REG1_AUTONEGCOMPLETE	0x0020	// auto negotiation complete
 #define	PHY_REG1_PREAMBLESUPRESS	0x0040	//
@@ -232,6 +255,8 @@ typedef struct
 
 //Phy REG 4 (Advertisement Register)
 #define PHY_REG4_SELECTOR			0x0001	// IEEE 802.3 selector
+#define PHY_REG4_10T_HALF			0x0020	// advertise 10 BASE-T half duplex
+#define PHY_REG4_10T_FULL			0x0040	// advertise 10 BASE-T full duplex
 #define PHY_REG4_100TX_HALF			0x0080	// advertise 100 BASE-TX half duplex
 #define PHY_REG4_100TX_FULL			0x0100	// advertise 100 BASE-TX full duplex
 
@@ -247,21 +272,12 @@ typedef struct
 #define PHY_REG5_ACKNOWLEDGE		0x4000
 #define PHY_REG5_NEXTPAGE			0x8000
 
-
-//********** packet structure for ethernet frames ***********************
-typedef struct
-{
-	unsigned long	length;		// frame length excluding checksum
-
-	struct ometh_packet_data_typ
-	{
-		unsigned char dstMac[6];
-		unsigned char srcMac[6];
-		unsigned char ethertype[2];
-		unsigned char minData[46];	// minimum nubmer of data bytes for a standard ethernet frame
-		unsigned char checkSum[4];
-	}data;
-}ometh_packet_typ;
+//Phy REG 6 (Auto-Negotiation Expansion)
+#define PHY_REG6_PARALLEL_FAULT		0x0010
+#define PHY_REG6_NEXT_PAGE_PARTNER	0x0008
+#define PHY_REG6_NEXT_PAGE			0x0004
+#define PHY_REG6_NEW_PAGE			0x0002
+#define PHY_REG6_AUTO_NEG_ENABLE	0x0001
 
 //********** buffer structure for ethernet frames ***********************
 typedef struct
@@ -317,6 +333,10 @@ typedef int		OMETH_HOOK_FCT
 // convert eth-ticks to us and vica versa
 #define OMETH_TICKS_2_US(ticks)		((unsigned long)(ticks)/50u)
 #define OMETH_US_2_TICKS(us)		((unsigned long)(us)*50u)
+
+// convert eth-ticks to ns and vica versa
+#define OMETH_TICKS_2_NS(ticks)		((unsigned long)(ticks)*20u)
+#define OMETH_NS_2_TICKS(ns)		((unsigned long)(ns)/20u)
 
 /*****************************************************************************
 * 
@@ -442,6 +462,37 @@ phy_stat_enum		omethPhyLinkState
 
 /*****************************************************************************
 * 
+* omethGetLinkSpeed - Get link speed of a adapter
+* 
+* RETURN: 
+*	 0	 ... handle invalid or speed not known
+*	 10  ... 10 MBit
+*	 100 ... 100 MBit
+*
+*/
+unsigned short		omethGetLinkSpeed
+(
+ OMETH_H			hEth		/* handle of ethernet driver, see omethCreate()		*/
+);
+
+/*****************************************************************************
+* 
+* omethGetConfigMode - Get ethernet config mode
+* 
+* RETURN: 
+*   handle invalid or speed not known:  0
+*   config mode:                        != 0 
+*   
+*
+*/
+unsigned short		omethGetConfigMode
+(
+ OMETH_H			hEth		/* handle of ethernet driver, see omethCreate()		*/
+);
+
+
+/*****************************************************************************
+* 
 * omethPhyRead - Read Phy register
 * 
 * !!! The function can only be called in the same context as omethPeriodic()
@@ -504,6 +555,19 @@ int					omethPhyReadNonBlocking
  unsigned short		port,		/* phy number / port number of integrated hub (0-n)	*/
  unsigned short		reg,		/* read register number								*/
  unsigned short		*pValue		/* ptr to read value								*/
+);
+
+/*****************************************************************************
+* 
+* omethSetHalfDuplex - set phy's halfduplex (the phy's will be set in omethPerodic())
+*
+* RETURN: 
+*	 0	... no error
+*	-1	... error (you must call omethPerodic first)
+*/
+int			omethPhySetHalfDuplex
+(
+ void
 );
 
 /*****************************************************************************
@@ -645,6 +709,22 @@ int				omethFilterSetPattern
 
 /*****************************************************************************
 * 
+* omethFilterSetByteMask - sets one byte (mask, not value) to an filter
+*
+*	! the function does not disable the filter while changing the mask
+*		->	if more than 1 byte should be changed consistent omethFilterSetPattern()
+*			shall be used instead
+*
+*/
+void			omethFilterSetByteMask
+(
+ OMETH_FILTER_H	hFilter,	/* filter handle									*/
+ unsigned short	offset,		/* offset in the filterarray						*/
+ unsigned char	mask		/* mask to set										*/
+);
+
+/*****************************************************************************
+* 
 * omethFilterSetByteValue - sets one byte (value, not mask) to an filter
 *
 *	! the function does not disable the filter while changing the value
@@ -654,9 +734,9 @@ int				omethFilterSetPattern
 */
 void			omethFilterSetByteValue
 (
- OMETH_FILTER_H	hFilter,		/* filter handle									*/
- unsigned long	nOffset,		/* offset in the filterarray						*/
- unsigned char	nValue			/* value to set										*/
+ OMETH_FILTER_H	hFilter,	/* filter handle									*/
+ unsigned short	offset,		/* offset in the filterarray						*/
+ unsigned char	value		/* value to set										*/
 );
 
 /*****************************************************************************
@@ -703,6 +783,19 @@ int				omethFilterSetNoMatchIRQ
 
 /*****************************************************************************
 * 
+* omethFilterSetHubPort - set HUB port to which this filter should react
+*
+*	After creating a filter the port will be set to -1 (filter reacts to frames from all ports)
+* 
+*/
+void			omethFilterSetHubPort
+(
+ OMETH_FILTER_H	hFilter,		/* filter handle									*/
+ int			port			/* -1 .. react to all ports, 0-x reac only to port x */
+);
+
+/*****************************************************************************
+* 
 * omethFilterEnable - enable filter (after omethFilterCreate() the filter is
 *                     automatically enabled)
 *
@@ -712,7 +805,7 @@ int				omethFilterSetNoMatchIRQ
 *	- hFilter invalid
 *	
 */
-int				omethFilterEnable
+void				omethFilterEnable
 (
  OMETH_FILTER_H	hFilter
 );
@@ -728,7 +821,7 @@ int				omethFilterEnable
 *	- hFilter invalid
 *	
 */
-int				omethFilterDisable
+void				omethFilterDisable
 (
  OMETH_FILTER_H	hFilter
 );
@@ -796,7 +889,7 @@ int				omethResponseInit
 */
 int				omethResponseInitBuf
 (
- OMETH_FILTER_H	hFilter,		/* filter handle							*/
+ OMETH_FILTER_H		hFilter,	/* filter handle							*/
  ometh_packet_typ	*pPacket1,	/* spare packet for change buffer			*/
  ometh_packet_typ	*pPacket2	/* spare packet for change buffer			*/
 );
@@ -826,6 +919,51 @@ ometh_packet_typ	*omethResponseSet
  OMETH_FILTER_H		hFilter,	/* filter handle							*/
  ometh_packet_typ	*pPacket	/* packet which shall be responded			*/
 );
+
+
+/*****************************************************************************
+* 
+* omethResponseLink - link filter with response buffer of another filter
+* 
+*/
+int		omethResponseLink
+(
+ OMETH_FILTER_H		hFilterDst,		/* handle new filter which should get a response buffer	*/
+ OMETH_FILTER_H		hFilterSrc		/* response buffer from this filter is used				*/
+);
+
+/*****************************************************************************
+* 
+* omethResponseTime - set ticks which are added to the IPG
+* 
+*/
+int		omethResponseTime
+(
+ OMETH_FILTER_H		hFilter,		/* set time value for auto response		*/
+ unsigned long		ticks			/* delay ticks added to IPG				*/
+);
+
+/*****************************************************************************
+* 
+* omethResponseCount - returns the number of autoresonse-frames which were
+*						sent for this filter
+*/
+unsigned long		omethResponseCount
+(
+ OMETH_FILTER_H		hFilter		/* filter handle							*/
+);
+
+
+/*****************************************************************************
+* 
+* omethResponseCountReset - reset number of autoresonse-frames which were
+*							sent for this filter
+*/
+void				omethResponseCountReset
+(
+ OMETH_FILTER_H	hFilter		/* filter handle */
+);
+
 
 /*****************************************************************************
 * 
@@ -956,7 +1094,8 @@ unsigned char		omethTransmitPending
 */
 void			omethStart
 (
- OMETH_H		hEth		/* handle of ethernet driver, see omethCreate() */
+ OMETH_H		hEth,				/* handle of ethernet driver, see omethCreate() */
+ int			bClearPendingIrqs	/* TRUE: clear pending irq's */
 );
 
 /*****************************************************************************
@@ -1056,7 +1195,7 @@ ometh_stat_typ	*omethStatistics
 * The function will call the hook functions given with omethHookCreate()
 *
 *	!!! 
-*	Required Rx IRQ stack size on PX32 with TCP/IP Stack: min. 64 Byte
+*	Required Rx IRQ stack size on OM32 with TCP/IP Stack: min. 64 Byte
 *	The required stack size heavily depents of the installed hook functions.
 *
 * RETURN: -
@@ -1075,7 +1214,7 @@ void			omethRxIrqHandler
 * of a ethernet driver created with omethCreate().
 *
 *	!!! 
-*	Required Tx IRQ stack size on PX32 with TCP/IP Stack: min. 32 Byte
+*	Required Tx IRQ stack size on OM32 with TCP/IP Stack: min. 32 Byte
 *	The required stack size heavily depents of the buffer release functions
 *	passed with omethTransmit()
 *
@@ -1113,6 +1252,19 @@ void			omethTxIrqHandlerMux
 
 /*****************************************************************************
 * 
+* omethRxTxIrqHandlerMux - to be called from the IRQ if all MACs on the system
+*                          use the same IRQ for Rx and Tx
+* 
+* RETURN: -
+*
+*/
+void			omethRxTxIrqHandlerMux
+(
+ void
+);
+
+/*****************************************************************************
+* 
 * omethDestroy - stop ethernet driver instance and free all allocated resources
 * 
 * RETURN: 0..no error , -1 error
@@ -1125,144 +1277,5 @@ int				omethDestroy
 (
  OMETH_H		hEth		/* handle of ethernet driver, see omethCreate() */
 );
-
-/*****************************************************************************
-* 
-* omethMnTransmit - transmit a buffer to the network
-*	-> without a callback-function
-* 
-*/
-int					omethMnTransmit
-(
- OMETH_H			hEth,		/* handle of ethernet driver, see omethCreate() */
- ometh_packet_typ	*pPacket	/* packet to be sent							*/
-);
-
-/*****************************************************************************
-* 
-* omethMnTransmitTime - transmit a buffer to the network at defined time
-*	(same like omethMnTransmit, just the optional argument is additional)
-* 
-*/
-int						omethMnTransmitTime
-(
- OMETH_H				hEth,		/* handle of ethernet driver, see omethCreate() */
- ometh_packet_typ*		pPacket,	/* packet to be sent							*/
- unsigned long			time,		/* timestamp									*/
- int					bTxBegIRQ	/* TRUE: Set Tx-BegInt							*/
-);
-/*****************************************************************************
-* 
-* omethMnResponseAndFilterSet - set new packet and modify filter for
-*	response frame
-* 
-*/
-void				omethMnResponseAndFilterSet
-(
- OMETH_FILTER_H		hFilter,	/* filter handle							*/
- ometh_packet_typ	*pPacket,	/* packet which shall be responded			*/
- unsigned char		nOffset,	/* offset in the filterarray				*/
- unsigned char		nValue		/* value to set								*/
-);
-
-/*****************************************************************************
-* 
-* omethMnResponseEnable - enable auto response frame -> fast
-* 
-*/
-void				omethMnResponseEnable
-(
- OMETH_FILTER_H		hFilter		/* filter handle				*/
-);
-
-/*****************************************************************************
-* 
-* omethMnResponseDisable - disable auto response frame -> fast
-* 
-*/
-void				omethMnResponseDisable
-(
- OMETH_FILTER_H		hFilter		/* filter handle				*/
-);
-
-/*****************************************************************************
-* 
-* omethMnSetNextRxBuffer - set the next rx-descriptor
-* 
-*/
-void				omethMnSetNextRxBuffer
-(
- OMETH_H			hEth,		/* handle of ethernet driver, see omethCreate()		*/
- ometh_packet_typ	*pPacket	/* new packet for the next rx-descriptor			*/
-);
-
-/*****************************************************************************
-* 
-* omethMnSetCurrentRxBuffer - set the current rx-descriptor
-* 
-*/
-void				omethMnSetCurrentRxBuffer
-(
- OMETH_H			hEth,		/* handle of ethernet driver, see omethCreate()		*/
- ometh_packet_typ	*pPacket	/* new packet for the current rx-descriptor			*/
-);
-
-/*****************************************************************************
-* 
-* omethMnRxIrqHandler - Rx-Fast IRQHandler
-* 
-*/
-void			omethMnRxIrqHandler
-(
- OMETH_H		hEth			/* handle of ethernet driver, see omethCreate() */
-);
-
-/*****************************************************************************
-* 
-* omethNoFilterMatchIrqHandler - no filter match irq handler
-* 
-*/
-void			omethNoFilterMatchIrqHandler
-(
- OMETH_H		hEth		/* handle of ethernet driver, see omethCreate() */
-);
-
-/*****************************************************************************
-* 
-* omethMnTxBegIrqHandler - tx beginn irq handler
-* 
-*/
-void			omethMnTxBegIrqHandler
-(
- OMETH_H		hEth		/* handle of ethernet driver, see omethCreate() */
-);
-
-
-#ifdef OMETH_TRACE
-	//********* rx-trace callback function ****************
-	typedef void		OMETH_TRACE_RX_FCT
-	(
-		unsigned long	adapter,	/* ethernet adapter number	*/
-		ometh_buf_typ	*pRxBuf,	/* ptr to received buffer	*/
-		unsigned long	flags		/* descriptor flags			*/
-	);
-	
-	/*****************************************************************************
-	* 
-	* omethSetTraceFct - set trace fct before omethStart !!!
-	* 
-	* RETURN: -
-	*/
-	void omethSetTraceFct
-	(
-	 OMETH_TRACE_RX_FCT	*pTraceFct	/* ptr to trace function */
-	);
-
-	// optimized irq-multiplexer to handle 2 interfaces (2nd if only for trace)
-	void			omethRxIrqHandlerTrace2
-	(
-	 OMETH_H		*phEth		/* pointer to 2 handles of ethernet driver, see omethCreate() */
-	);
-#endif
 
 #endif

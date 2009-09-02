@@ -35,14 +35,20 @@ How to build the binary
     $ cd Examples\altera_fpga\no_os\gnu\demo_cn_openmac
 
 3. Run script create-this-app to create the Makefile for
-   the demo application and the necessary BSP
-   (this step is only necessary once)
+   the demo application and the necessary BSP.
+   (This step is only necessary once)
 
     $ ./create-this-app
 
-4. Run make to build the ELF file
+4. Run make to build the ELF file after changing the sources.
+   (The script create-this-app will do this automatically)
 
     $ make
+
+5. Rebuild the Makefile for the demo application and the
+   BSP, if the Nios II Design was changed inside the SOPC Builder.
+
+    $ ./create-this-app --rebuild
 
 
 How to import the project into Nios II IDE
@@ -52,7 +58,7 @@ How to import the project into Nios II IDE
 
 2. Select menu "File" -> "Import..."
 
-3. Select the import source "Altera" ->
+3. Select the import source "Altera Nios II" ->
    "Existing Nios II software build tools project or folder into workspace"
 
 4. Browse to the main directory of openPOWERLINK
@@ -62,7 +68,7 @@ How to import the project into Nios II IDE
 
 6. Select menu "File" -> "Import..."
 
-7. Select the import source "Altera" ->
+7. Select the import source "Altera Nios II" ->
    "Existing Nios II software build tools project or folder into workspace"
 
 8. Browse to the subdirectory

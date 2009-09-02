@@ -434,6 +434,8 @@ int inum;
 
 Exit:
     PRINTF1("main(): returns 0x%X\n", EplRet);
+    PRINTF0("Press Enter to quit!\n");
+    _getch();
     return EplRet;
 }
 

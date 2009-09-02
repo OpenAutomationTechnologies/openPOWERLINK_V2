@@ -1,40 +1,44 @@
-/* omethlib.h - Ethernet Library for FPGA MAC Controller*/ 
+/* omethlib.h - Ethernet Library for FPGA MAC Controller */
 /*
 ------------------------------------------------------------------------------
 Copyright (c) 2009, B&R
 All rights reserved.
 
-Redistribution and use in source and binary forms,
+Redistribution and use in source and binary forms, 
 with or without modification, 
 are permitted provided that the following conditions are met:
 
-    * Redistributions of source code must retain the above copyright notice, 
-      this list of conditions and the following disclaimer.
-    * Redistributions in binary form must reproduce the above copyright notice,
-      this list of conditions and the following disclaimer 
-      in the documentation and/or other materials provided with the distribution.
-    * Neither the name of the B&R nor the names of its contributors 
-      may be used to endorse or promote products derived from this software 
-      without specific prior written permission.
+- Redistributions of source code must retain the above copyright notice, 
+this list of conditions and the following disclaimer.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
+- Redistributions in binary form must reproduce the above copyright notice, 
+this list of conditions and the following disclaimer
+in the documentation and/or other materials provided with the distribution.
+
+- Neither the name of the B&R nor the names of
+its contributors may be used to endorse or promote products derived
+from this software without specific prior written permission.
+
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
 AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, 
-THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR 
-A PARTICULAR PURPOSE ARE DISCLAIMED. 
-IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR 
-ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES 
-(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; 
-LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND 
-ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF 
-THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR 
+PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR 
+CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, 
+EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, 
+PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; 
+OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
+WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR 
+OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, 
+EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 ------------------------------------------------------------------------------
  Module:    omethlib
  File:      omethlib.h
- Author:    Thomas Enzinger
- Created:   11.10.2004
- Revised:   26.03.2009
- State:     only tested on Nios II
+ Author:    Thomas Enzinger(enzingert)
+ Created:   12.03.2004
+ Revised:   21.08.2009
+ State:     tested on Altera Nios II and Xilinx Microblaze
 ------------------------------------------------------------------------------
 
  Functions:
@@ -43,6 +47,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  	omethInit				- initialize the ethernet driver (to be called once at startup)
  	omethCreate				- create driver instance
 	omethGetHandle			- get handle of an instance based on its adapter number
+	omethGetLinkSpeed		- get link-speed of this interface (10/100 MBit)
 
 	omethPeriodic			- must be called cyclic to update phy register table
 	omethPhyHardwareAdr		- get hardware address of phy
@@ -51,22 +56,29 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 	omethPhyWrite			- write phy register (blocking)
 	omethPhyRead			- read phy register (blocking)
 	omethPhyReadNonBlocking	- read phy register (nonblocking, can not be combined with omethPeriodic())
+	omethPhySetHalfDuplex	- set phy's halfduplex (the phy's will be set in omethPerodic())
 
 	omethHookCreate			- create hook to get callbacks for received frames
 	omethHookSetFunction	- change the callback function of a created hook
 
 	omethFilterCreate		- create a filter to specify which frames should call a hook
 	omethFilterSetPattern	- change all filter value/mask bytes of a filter
+	omethFilterSetByteMask  - change 1 filter mask byte of a filter
 	omethFilterSetByteValue - change 1 filter value byte of a filter
 	omethFilterSetArgument	- change the callback argument which a specific filter passes to the callback
 	omethFilterSetNoMatchIRQ- enable the NoMatch-IRQ
+	omethFilterSetHubPort	- set HUB port to which the filter should be limited (MAC Version >= 1.67 required)
 
 	omethSetSCNM			- define a filter for the slot communication management
 	omethResponseInit		- prepare a filter for auto response
 	omethResponseInitBuf	- prepare a filter for auto response and provide change buffers
-	omethResponseSet		- allign a packet which should be responded on a filter event
+	omethResponseSet		- align a packet which should be responded on a filter event
+	omethResponseLink		- link existing response buffer to another filter
+	omethResponseTime		- set ticks which are added to the IPG	
 	omethResponseDisable	- disable response frame
 	omethResponseEnable		- enable response frame
+	omethResponseCount		- get number of transmitted auto responses
+	omethResponseCountReset	- reset number of transmitted auto responses
 
 	omethTransmit			- transmit frame (immediately or after filter event set with omethSetSCNM)
 	omethTransmitArg		- transmit frame with argument for tx-callback
@@ -91,28 +103,19 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 	omethDestroy			- destroy driver instance (stop MAC and free all allocated resources)
 
-
-	EPLV2 MN Specific:
-		omethMnTransmit
-		omethMnTransmitTime
-		omethMnResponseAndFilterSet
-		omethMnResponseEnable
-		omethMnResponseDisable
-		omethMnSetNextRxBuffer
-		omethMnSetCurrentRxBuffer
-		omethMnRxIrqHandler
-		omethMnTxBegIrqHandler
-
 ------------------------------------------------------------------------------
  History:
- 12.03.2004 enzingert	created
- 23.03.2009 zelenkaj    Changes in omethTxIrqHandler() to free all sent packets
-                         in the TX IR, to avoid TX queue overflow.
- 26.03.2009 zelenkaj    revised
+	12.03.2004	enzinger	created
+	21.08.2009  zelenkaj    changes:	- line 1120 (omethPeriodic) 
+										  changed "WORD" to "unsigned short"
+										- omethFilterSetPattern() function
+										  changed pattern set for Microblaze
+										  NIOS II as before
 
 ----------------------------------------------------------------------------*/
 
 #include <omethlib.h>
+#include <omethlibint.h>
 #include <string.h>				// used functions: memcpy, memset
 #include <stdlib.h>				// used functions: calloc
 #include <omethlib_target.h>	// target specific defines (BIG/LITTLE endian)
@@ -127,67 +130,43 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 
+// only for special functions : mask and bits to adjust rx-mode in status register
+#define OMETH_REG_RXMODE_MASK		0x0003
+
+#define OMETH_REG_RXMODE_DEFAULT	0x0000
+#define OMETH_REG_RXMODE_HIGH_PRIO	0x0001
+#define OMETH_REG_RXMODE_BLOCK		0x0002
+#define OMETH_REG_RXMODE_AUTO		0x0003
+
+
+#define OMETH_MAX_RES_IPG		0x3F		// max response inter package gap
+
 #define OMETH_MIN_TX_FRAME		60	// minimal transmit frame length (without checksum)
 
-//-------------------- filter entry type (for 1 byte) --------------------
-typedef struct
-{
-	unsigned char mask;
-	unsigned char value;
-}ometh_filter_entry_typ;
+#define OMETH_INIT_LINK_SPEED	100
 
-//-------------------- filter type --------------------
-#define OMETH_FILTER_LEN	31
-#define OMETH_XFILTER_LEN	17	// x-filters have only 17 entries !
-#define OMETH_X_OFFSET		24	// frame offset for x-response
+//--------- Response IPG reduction for systems with 1 phy ---------------
+// (the real value will be higher because the lowest possible mac response ipg is 120ns)
 
-typedef struct
-{
-	ometh_filter_entry_typ	b[OMETH_FILTER_LEN];	// 31 filter entries
-	unsigned char			reserve;
-	unsigned char			command;	// command register
-}ometh_filter_typ;
+#define MICREL_KS8721_PHY_ID	0x22161
+#define	MICREL_KS8721_IPG		40			// due to phy runtime of 460ns the ipg can be reduced to 40 (40+2*460 = 960 ... minimum ipg)
 
-typedef struct
-{
-	ometh_filter_entry_typ	b[OMETH_XFILTER_LEN];	// 17 filter entries
-	unsigned char			reserve;
-	unsigned char			command;	// command register
-}ometh_xfilter_typ;
+#define PHY_MICREL_REG1F_NOAUTOMDIX	0x2000
 
-#define CMD_FILTER_SYNC	0x10	// this is a sync filter
-#define CMD_RX_NOMATCH	0x20	// if no filter match -> set nomatch irq
-#define CMD_FILTER_ON	0x40	// filter-on flag in command register
-#define CMD_TX_ENABLE	0x80	// enables auto transmitting of a tx descriptor
 
-//-------------------- rx/tx descriptor --------------------
-typedef struct
-{
-	unsigned char	high;
-	unsigned char	low;
-}ometh_desc_flags_bytes;
 
-typedef union	// descriptor status
-{
-	ometh_desc_flags_bytes	byte;
-	unsigned short			word;
-}ometh_desc_flags_union;
+#define SMSC_LAN8700			0x7C0C
 
-typedef struct
-{
-	#if OMETH_HW_MODE==0
-		ometh_desc_flags_union	flags;
-		unsigned short			len;		// number of bytes
-	#endif
-	#if OMETH_HW_MODE==1
-		unsigned short			len;		// number of bytes
-		ometh_desc_flags_union	flags;
-	#endif
+#ifdef OMETH_SWAP_WIRE_PAIRS
+	#define PHY_SMSC_REG1B_NOAUTOMDIX	0xA000
+#else
+	#define PHY_SMSC_REG1B_NOAUTOMDIX	0x8000
+#endif
 
-	unsigned long	pData;		// ptr to data
-	unsigned long	txStart;	// tx start time
-	unsigned long	time;		// time stamp
-}ometh_desc_typ;
+#define PHY_REG1F_OP_10HALF		1
+#define PHY_REG1F_OP_10FULL		5
+#define PHY_REG1F_OP_100HALF	2
+#define PHY_REG1F_OP_100FULL	6
 
 //-------------------- mii interface type --------------------
 volatile typedef struct
@@ -203,237 +182,13 @@ volatile typedef struct
 
 #define MII_REG_ENABLE		0x0080		// bit mask for reset bit in phy control
 
-#define FLAGS1_OWNER		0x01		// 1 if mac is the owner of the descriptor
-#define FLAGS1_LAST			0x02		// last-bit
-#define FLAGS1_SENT			0x04		// bit will be set if mac has sent a frame
-#define FLAGS1_START_TIME	0x40		// frame will be sent at given start time in descriptor
-#define FLAGS1_TX_BEG		0x20		// irq will be sent at given start time in descriptor
-
-#define FLAGS2_ALIGNMENT	0x10		// frame has alignment error
-
-//-------------------- hardware type 01 --------------------
-// Typ 01 has 16 filters, 16 rx descriptors and 16 tx descriptors
-#define MAC_HW_TYP_01_NB_FILTER		16
-#define MAC_HW_TYP_01_NB_RXDESC		16
-#define MAC_HW_TYP_01_NB_TXDESC		16
-
-//-------------------- hardware type 02 --------------------
-// Typ 02 has 14 standard filters, 4 xnode-filters, everything else like typ 01
-#define MAC_HW_TYP_02_NB_XFILTER	 4
-
-//-------------------- hardware type 03 --------------------
-// 2 tx descriptor queues, reduced filter possibility
-#define MAC_HW_TYP_03_NB_XFILTER		3	// only 1 of them can be used
-#define MAC_HW_TYP_03_NB_FILTER			16	// only 8 of them can be used
-#define MAC_HW_TYP_03_NB_RXDESC			16
-#define MAC_HW_TYP_03_NB_TXDESC_LOW		8
-#define MAC_HW_TYP_03_NB_TXDESC_HIGH	8
-
-typedef struct
-{
-	ometh_filter_typ	filter[MAC_HW_TYP_01_NB_FILTER];
-	ometh_desc_typ		rxDesc[MAC_HW_TYP_01_NB_RXDESC];
-	ometh_desc_typ		txDesc[MAC_HW_TYP_01_NB_TXDESC];
-}ometh_hw_typ1;
-
-typedef struct
-{
-	ometh_filter_typ	filter[MAC_HW_TYP_03_NB_FILTER];
-	ometh_desc_typ		rxDesc[MAC_HW_TYP_03_NB_RXDESC];
-	ometh_desc_typ		txDescLow[MAC_HW_TYP_03_NB_TXDESC_LOW];
-	ometh_desc_typ		txDescHigh[MAC_HW_TYP_03_NB_TXDESC_HIGH];
-}ometh_hw_typ3;
-
-//-------------------- buffer header --------------------
-#ifdef OMETH_TRACE
-	#include <omethTrace.h>
-
-	static	OMETH_TRACE_RX_FCT	*pTraceFctInt;		// global trace function for all adapters, must be set before omethStart()
-#endif
-
-// additional info about pending frames
-typedef struct ometh_pending_typ
-{
-	ometh_buf_typ				*pBuf;	// ptr to buffer
-	struct ometh_pending_typ	*pNext;	// ptr to next pending
-}ometh_pending_typ;
-
-//-------------------- client hook --------------------
-struct OMETH_HOOK
-{
-	OMETH_HOOK_FCT	*pFct;			// function ptr to hook
-	unsigned char	maxPending;		// number of max pending buffers
-	unsigned short	cntOverflow;	// statistics: buffer overflow
-
-	OMETH_H				hEth;		// handle to ethernet instance
-	ometh_buf_typ		*pRxBufBase;	// (only used for destroy function)
-	struct OMETH_HOOK	*pNext;			// ptr to next hook (only used for destroy function)
-	ometh_pending_typ	*pFreeRead;	// ptr to get next free ptr in the list
-	ometh_pending_typ	*pFreeWrite;// ptr to release next buffer
-	ometh_pending_typ	free[1];	// list with free pointers
-};
-
-// additional info about tx descriptors
-typedef struct ometh_tx_info_typ
-{
-	unsigned char				flags1;			// flags for the tx descriptor
-	unsigned char				index;			// index (required for filter configuration)
-	unsigned char				chgIndexWrite;	// last write index of change-buffer-system (auto response buffers)
-	unsigned char				chgIndexRead;	// last read index of change-buffer-system (auto response buffers)
-	ometh_desc_typ				*pDesc;			// ptr to tx descriptor
-	OMETH_BUF_FREE_FCT_ARG		*pFctFree;		// ptr to free function for this buffer (ptr to filter cmd for auto response descriptors)
-	void						*fctFreeArg;	// argument passed to free funcion after packet pointer
-	ometh_packet_typ			*pProduced[3];	// remember the produced frames for auto-response buffers here
-	struct ometh_tx_info_typ	*pNext;			// ptr to next tx info
-}ometh_tx_info_typ;
-
-// additional info about rx descriptors
-typedef struct ometh_rx_info_typ
-{
-	unsigned char				flags1;		// flags for the rx descriptor
-	ometh_desc_typ				*pDesc;		// ptr to rx descriptor
-	struct ometh_rx_info_typ	*pNext;		// ptr to next rx descriptor
-}ometh_rx_info_typ;
-
-
-// reference to filter hardware ports
-typedef struct ometh_filter_data_typ
-{
-	unsigned char			cmd;				// current filter command
-	unsigned char			txEnableRequest;	// auto response should be enabled at next omethResponseSet
-	unsigned char			len;				// filter length
-	unsigned char			*pCommand;			// ptr to filter command (can be different for different filters)
-	ometh_filter_entry_typ	*pFilterWriteOnly;	// ptr to filter data (write only area)
-}ometh_filter_data_typ;
-
-//-------------------- filter handle (must be 32 byte for efficient access in IRQ) --------------
-struct OMETH_FILTER
-{
-	OMETH_HOOK_H			hHook;			// ptr to used hook structure
-	void					*arg;			// argument for hook
-	ometh_tx_info_typ		*pTxInfo;		// ptr to tx descriptor which holds the auto-answer for this filter
-	ometh_filter_data_typ	*pFilterData;	// ptr to filter hardware
-};
-
-//-------------------- register flags ------------------------
-#define OMETH_REG_IE			0x8000		// irq enable
-#define OMETH_REG_SOFTIRQ		0x4000		// software IRQ
-#define OMETH_REG_HALF			0x2000		// hub enable (tx-control)
-
-#define OMETH_REG_XNODE_1		0x2000		// x-node enable (rx-control) filter 14,15
-#define OMETH_REG_XNODE_2		0x4000		// x-node enable (rx-control) filter 12,13
-
-#define OMETH_REG_XNODE			(OMETH_REG_XNODE_1 | OMETH_REG_XNODE_2)
-
-#define OMETH_REG_SYNC			0x1000		// set sync mode
-#define OMETH_REG_DIAG			0x1000		// enable diag (frames < 31 byte also generate IRQ)
-#define OMETH_REG_PENDING		0x0F00		// mask for pending field
-#define OMETH_REG_IQUIT			0x0100		// quit interrupt (only valid on clear port)
-#define OMETH_REG_RUN			0x0080		// run bit
-#define OMETH_REG_TX_BEG		0x0040		// quit tx beg irq
-#define OMETH_REG_RX_NOMATCH	0x0040		// quit interrupt -> nomatch
-#define OMETH_REG_LOST			0x0010		// lost flag (rx-control)
-
-// only for special functions : mask and bits to adjust rx-mode in status register
-#define OMETH_REG_RXMODE_MASK		0x0003
-
-#define OMETH_REG_RXMODE_DEFAULT	0x0000
-#define OMETH_REG_RXMODE_HIGH_PRIO	0x0001
-#define OMETH_REG_RXMODE_BLOCK		0x0002
-#define OMETH_REG_RXMODE_AUTO		0x0003
-
-typedef struct
-{
-	#if OMETH_HW_MODE==0
-		unsigned short	value;			// read/write port
-		unsigned short	setBit;			// set single bits in status register
-		unsigned short	clrBit;			// clear single bits in status register
-		unsigned short	setDescriptor;	// set descriptor index
-	#endif
-	#if OMETH_HW_MODE==1
-		unsigned short	setBit;			// set single bits in status register
-		unsigned short	value;			// read/write port
-		unsigned short	setDescriptor;	// set descriptor index
-		unsigned short	clrBit;			// clear single bits in status register
-	#endif
-}ometh_status_typ;					// mac rx/tx status registers
-
-typedef struct
-{
-	ometh_status_typ txStatus;	// tx control register
-	ometh_status_typ rxStatus;	// rx control register
-}ometh_reg_typ;					// mac control registers
-
-//-------------------- instance of ethernet driver --------------------
-struct OMETH_TYP
-{
-	unsigned short		rxLen;			// data length of rx buffers
-	unsigned char		nbFilter;		// number of filters
-	unsigned char		nbFilterX;		// number of filters for x-node functionality
-	unsigned char		txQueueEnable;	// will be set to 0 if upper layer switches queue sending off
-
-	unsigned char		cntTxQueueIn,cntTxQueueOut;		// counter to evaluate the number of pending tx descriptors
-
-	ometh_reg_typ		*pRegBase;		// control register base adr
-
-	struct OMETH_FILTER	*pFilterList;	// ptr to filter table (list of handles)
-
-	ometh_rx_info_typ	*pRxNext;	// ptr to next rx info
-
-	ometh_stat_typ		stat;
-
-	ometh_filter_data_typ	*pFilterSCNM;	// ptr to filter for SCNM Mode
-
-	ometh_tx_info_typ	*pTxInfo[2];	// ptr to first tx info
-	ometh_tx_info_typ	*pTxNext[2];	// ptr to next tx info
-	ometh_tx_info_typ	*pTxFree[2];	// ptr to next release buffer
-
-	ometh_tx_info_typ	*pTxAuto;		// first auto tx descriptor
-
-	ometh_config_typ	config;			// copy of config structure from omethCreate
-
-	unsigned char		phyCount;		// number of phy's on this mac (max 8)
-	unsigned char		phyLinkCount;	// nubmer of linked phys
-	unsigned char		phyLinkMax;		// max number of linked phys
-	unsigned char		phyHalfCount;	// nubmer of phys linked with half duplex
-
-	unsigned char		phyAdr[OMETH_MAX_PHY_CNT];		// array with phy addresses on MII interface
-	unsigned short		phyCmdRead[OMETH_MAX_PHY_CNT];	// phy write commands
-	unsigned short		phyCmdWrite[OMETH_MAX_PHY_CNT];	// phy read commands
-
-	phy_reg_typ			*pPhyReg;	// ptr to all phy register sets
-	unsigned short		phyPort;	// current port
-	unsigned short		phyReg;		// current register
-	
-	unsigned short		txVal;		// tx value for phy write
-	unsigned short		txPort;		// tx port for phy write
-	unsigned char		txReg;		// tx register for phy write
-
-	unsigned char		clearPendingIrqAtStart;	// will be set to 1 only for the first start
-
-	// hardware access for debug
-	union
-	{
-		ometh_hw_typ1	typ1;		// typ 1 hardware
-		ometh_hw_typ3	typ3;		// typ 3 hardware
-	}*pHardware;
-
-	unsigned char		*pRxBufBase;	// (only used for destroy function)
-	struct OMETH_HOOK	*pHookList;		// (only used for destroy function)
-
-	ometh_rx_info_typ	*pRxInfo;		// ptr to first rx info
-	
-	#if (OMETH_ENABLE_SOFT_IRQ==1)
-		OMETH_BUF_FREE_FCT	*pFctSoftIrq;	// function will be called if soft-IRQ was triggered (Tx-IRQ Level)
-	#endif
-
-	struct OMETH_TYP	*pNext;			// ptr to next driver instance
-};
-
 // constants for phy control
 //MII Interface
 #define PHY_REG_READ				0x6000	// MII read flags
 #define PHY_REG_WRITE				0x5002	// MII write flags 
+
+#define SMI_REG_READ				0x4800	// SMI read flags  (micrel switch)
+#define SMI_REG_WRITE				0x4002	// SMI write flags (micrel switch)
 
 typedef struct ometh_internal_typ
 {
@@ -443,31 +198,8 @@ typedef struct ometh_internal_typ
 
 static ometh_internal_typ	omethInternal;	// driver internal data
 
-
-//*************************************************************************************
-//
-// Get the base address of a structure where only the address of a sub-element is known
-//
-//	typ		: type name of the regarding struct (must be done with typedef)
-//	element	: name of the structure element from which we know the address
-//	ptr		: address of the structure element
-//
-//	result	: structure pointer to the base of the type
-//
-//  example:
-//		ometh_buf_typ	*pBuf;		// ptr to buffer
-//		// 'pPacket' is the address to the element 'packet' in the base type 'ometh_buf_typ'
-//		// the macro will return the base ptr
-//		pBuf = GET_TYPE_BASE( ometh_buf_typ, packet, pPacket);
-//
-//*************************************************************************************
-#define GET_TYPE_BASE(typ, element, ptr)	\
-	((typ*)( ((size_t)ptr) - (size_t)&((typ*)0)->element ))
-
-#ifdef OMETH_MAX_RETRY
-	#define SET_MAX_RETRY	pDesc->flags.byte.low = OMETH_MAX_RETRY
-#else
-	#define SET_MAX_RETRY	
+#ifndef OMETH_MAX_RETRY
+	#define OMETH_MAX_RETRY	0
 #endif
 
 //*************************************************************************************
@@ -494,9 +226,9 @@ static ometh_internal_typ	omethInternal;	// driver internal data
 	pInfo->pFctFree	= (OMETH_BUF_FREE_FCT_ARG*)pFct;	/* store callback for free function */	\
 																								\
 	hEth->cntTxQueueIn++;																		\
-	hEth->pTxNext[TX_QUEUE_INDEX] = pInfo->pNext;	/* switch to next info strucutre	*/		\
+	hEth->pTxNext[TX_QUEUE_INDEX] = pInfo->pNext;	/* switch to next info structure	*/		\
 																								\
-	SET_MAX_RETRY;																				\
+	pDesc->flags.byte.low	= OMETH_MAX_RETRY;													\
 	pDesc->flags.byte.high	= pInfo->flags1 | addFlags;	/* set flag to start transmitter */		\
 																								\
 	return len
@@ -504,6 +236,19 @@ static ometh_internal_typ	omethInternal;	// driver internal data
 //*************************************************************************************
 //	End of OMETH_TRANSMIT
 //*************************************************************************************
+
+
+//*************************************************************************************
+//
+// If the user has included assert.h in the file omethlib_target.h the functions will
+// use assert-calls
+//
+//*************************************************************************************
+#ifndef __ASSERT_H__	// if assert.h is not defined ...
+//	#define assert(x)	do{(x);}while(0)
+    #define assert(x)
+#endif
+
 
 /* -- exchange table to allocate the next change index number for auto transmit descriptors --------------	*/
 /* makes sure the result of chgIndexTab[x][y] is different to x and y */
@@ -522,24 +267,43 @@ static const unsigned long chgIndexHighBit[3] =
 	0x80000000
 };
 
-/*****************************************************************************
-* 
-* filter_set_flag - set command flag of packet filter
-* 
-* RETURN: -
-* 
-*/
-#define FILTER_SET_FLAG(pFilter, flag) (*pFilter->pCommand = (pFilter->cmd |= flag))
+// list of phy registers
+static const unsigned char phyRegMapping[] = {0,1,2,3,4,5,6,7,0x1F};
 
 /*****************************************************************************
 * 
-* filter_clear_flag - clear command flag of packet filter
-* 
-* RETURN: -
+* omethPacketFree - pass rx packet back to ethernet driver
 * 
 */
-#define FILTER_CLEAR_FLAG(pFilter, flag) (*pFilter->pCommand = (pFilter->cmd &= ~flag))
+void		omethPacketFree
+(
+ ometh_packet_typ	*pPacket	/* address of rx packet	*/
+ )
+{
+	ometh_pending_typ	*pQueue;	// ptr to buffer queue
+	OMETH_HOOK_H		hHook;		// hook handle leading to the data area of the buffer
+	ometh_buf_typ		*pBuf;		// ptr to buffer
 
+	// access to header of packet
+	pBuf  = GET_TYPE_BASE( ometh_buf_typ, packet, pPacket);
+	hHook = pBuf->hHook;
+
+	if(pPacket==0 || hHook==0) return;	// invalid
+
+	#ifdef OMETH_FREE_LOCK
+		OMETH_FREE_LOCK
+	#endif
+
+	pQueue = hHook->pFreeWrite;
+
+	pQueue->pBuf = pBuf;				// pass buffer back to the hooks buffer list (buffer queue)
+
+	hHook->pFreeWrite = pQueue->pNext;	// switch to next queue element
+
+	#ifdef OMETH_FREE_UNLOCK
+		OMETH_FREE_UNLOCK
+	#endif
+}
 
 #if (OMETH_ENABLE_SOFT_IRQ==1)
 	/*****************************************************************************
@@ -551,7 +315,7 @@ static const unsigned long chgIndexHighBit[3] =
 	*/
 	static void soft_irq_dummy
 	(
-	ometh_packet_typ	*pPacket	/* packet which should be released	*/
+		ometh_packet_typ	*pPacket	/* packet which should be released	*/
 	)
 	{
 	}
@@ -585,9 +349,16 @@ int		omethMiiControl
 	// reset and active at the same time ... not allowed
 	if((command & MII_CTRL_RESET) && (command & MII_CTRL_ACTIVE)) return -1;
 
-	if(command & MII_CTRL_RESET)  pPhy->control &= (unsigned short)~MII_REG_ENABLE;
-	if(command & MII_CTRL_ACTIVE) pPhy->control |= MII_REG_ENABLE;
-	
+	if(command & MII_CTRL_RESET)
+	{
+		while(pPhy->control & MII_REG_ENABLE) pPhy->control &= (unsigned short)~MII_REG_ENABLE;
+	}
+
+	if(command & MII_CTRL_ACTIVE)	
+	{
+		while((pPhy->control & MII_REG_ENABLE)==0) pPhy->control |= MII_REG_ENABLE;
+	}	
+
 	// return 1 if state is requested and phy enable is set
 	if((command & MII_CTRL_GET_STATE) && (pPhy->control & MII_REG_ENABLE) ) return 1;
 
@@ -618,7 +389,7 @@ static OMETH_H		omethCreateInt
 )
 {
 	OMETH_H			hEth;
-	unsigned long	len,i;
+	unsigned long	len,i,phyId;
 	unsigned char	*pByte;
 	unsigned short	data,readData;
 	unsigned char	nbTxDesc[2]={0,0};
@@ -631,14 +402,14 @@ static OMETH_H		omethCreateInt
 	ometh_reg_typ			*pRegBase;
 	struct OMETH_FILTER		*pFilterList;
 
-	if(pEthConfig->macType != OMETH_MAC_TYPE_01)
-		return 0; //openMac is type 1!!!
-
 	// check mempart handle and return if invalid
 	if(pEthConfig->rxBuffers == 0) return 0;
 
-	// check mode (full or half duplex must be set)
-	if((pEthConfig->mode & (OMETH_MODE_FULLDUPLEX|OMETH_MODE_HALFDUPLEX)) == 0) return 0;
+	// check mode, if no duplex flag is set .. use half duplex
+	if((pEthConfig->mode & (OMETH_MODE_FULLDUPLEX|OMETH_MODE_HALFDUPLEX)) == 0) pEthConfig->mode |= OMETH_MODE_HALFDUPLEX;
+
+	// check speed, use 100MBit if no flag is set
+	if((pEthConfig->mode & (OMETH_MODE_10MBIT|OMETH_MODE_100MBIT)) == 0) pEthConfig->mode |= OMETH_MODE_100MBIT;
 
 	// validate config type (to avoid resource conflicts)
 	for( hEth = omethInternal.pFirstEth ; hEth ; hEth = hEth->pNext )
@@ -659,8 +430,13 @@ static OMETH_H		omethCreateInt
 	// clear all bits in tx status except the hub-enable
 	pRegBase->txStatus.clrBit        = ~(unsigned short)OMETH_REG_HALF;
 	pRegBase->txStatus.setDescriptor = 0x0008;	// for MAC_TYP_03 .. reset queue index for 2nd tx queue
-	pRegBase->txStatus.setDescriptor = 0;
 
+	// only halfduplex is allowed ... no fullduplex -> set half-bit in mac register (which also enables the HUB)
+	if (((pEthConfig->mode & OMETH_MODE_HALFDUPLEX) != 0) && ((pEthConfig->mode & OMETH_MODE_FULLDUPLEX) == 0))
+	{
+		pRegBase->txStatus.setBit = OMETH_REG_HALF;
+	}
+	
 	// clear all pending rx irqs
 	while(pRegBase->rxStatus.value & OMETH_REG_PENDING) pRegBase->rxStatus.clrBit = OMETH_REG_IQUIT;
 
@@ -672,17 +448,9 @@ static OMETH_H		omethCreateInt
 
 	// clear all pending tx-beg irqs
 	while(pRegBase->txStatus.value & OMETH_REG_TX_BEG) pRegBase->txStatus.clrBit = OMETH_REG_TX_BEG;
-
-	// turn x-mode on if a specific mac type is defined
-	if(pEthConfig->macType == OMETH_MAC_TYPE_02)
-	{
-		pRegBase->rxStatus.setBit = OMETH_REG_XNODE;
-
-		// check if set-command was sucessful, otherwise the mode is not supported
-		if((pRegBase->rxStatus.value & OMETH_REG_XNODE) == 0 ) return 0;
-	}
-
+	
 	hEth = calloc(sizeof(struct OMETH_TYP),1);	// allocate memory for instance handle
+	assert(hEth);
 	if(hEth == 0) return 0;						// return if alloc failed - system is out of memory
 
 	// at the first start all pending IRQs shall be acknowledged
@@ -729,13 +497,61 @@ static OMETH_H		omethCreateInt
 			continue;					// phy not connected, look for next
 		}
 
-		if(data & PHY_REG1_LINK) hEth->phyLinkMax++;	// count links at startup
+		if(data & PHY_REG1_LINK) hEth->phyLinkCount++;	// count links at startup
 	}
 
-	// error ... no phys found
-	if(hEth->phyCount==0) return hEth;
+	if( (hEth->config.mode & OMETH_MODE_PHY_LIST) && (hEth->config.phyCount==0) )
+	{
+		// if phy-list-flag is set, and phyCount in configuration is 0 ... user knows that there are no phys to be configured
+		phyId = 0;
+	}
+	else
+	{
+		if(hEth->phyCount==0) return hEth;	// error ... no phys found
 
-	hEth->pRegBase = hEth->config.pRegBase;
+		// get phy IDs (Reg 2 and 3) to 32Bit var phyId
+		omethPhyRead(hEth, 0, 2, ((unsigned short*)&phyId));
+		omethPhyRead(hEth, 0, 3, ((unsigned short*)&phyId)+1);
+		phyId = phyId >> 4;	// remove revision number
+	}
+
+
+	// check if there is a special response IPG to be set
+	i = ~0;
+
+	// IPG controlled by user
+	if(pEthConfig->mode & OMETH_MODE_SET_RES_IPG)
+	{
+		i = pEthConfig->responseIpg;
+	}
+	// reduce IPG automatically depending on phy type (if there is just 1 phy existing)
+	else if (hEth->phyCount==1)
+	{
+		if(phyId==MICREL_KS8721_PHY_ID)	i = MICREL_KS8721_IPG;
+	}
+
+	// response IPG is defined, calculate value and write to descriptor
+	if(i != ~0)
+	{
+		// calculate value for ipg-register (80 ns offset, 20ns resolution)
+		if(i > 80)	i = (i-80)/20;
+		else		i = 1;			// value too small, take minimum
+
+		if (i > OMETH_MAX_RES_IPG) i = OMETH_MAX_RES_IPG;	// limit to maximum
+
+		i = OMETH_REG_SET_RES_IPG | (i << 8);				// move to proper bit position
+	}
+	else
+	{
+		i = 0;	// no IPG to be set, clear all bits
+	}
+	
+	// write IPG value to tx status register
+	pRegBase->txStatus.setDescriptor = i;
+
+	hEth->pRegBase	= hEth->config.pRegBase;
+	hEth->pHardware	= hEth->config.pRamBase;
+	pFilter			= hEth->config.pRamBase;
 
 	// overtake parameters to instance handle
 	hEth->rxLen = sizeof(pPacket->data) - sizeof(pPacket->data.minData) + hEth->config.rxMtu;
@@ -743,15 +559,10 @@ static OMETH_H		omethCreateInt
 	// get size of DPR
 	switch(hEth->config.macType)
 	{
-		case OMETH_MAC_TYPE_02:	// Typ 02 .. like typ 01 but with 2 x-filters
-			hEth->nbFilterX = MAC_HW_TYP_02_NB_XFILTER;
-
 		case OMETH_MAC_TYPE_01:	// Typ 01
-			hEth->pHardware	= hEth->config.pRamBase;
-
 			hEth->nbFilter	= MAC_HW_TYP_01_NB_FILTER;
-			pFilter			= hEth->config.pRamBase;
-			len				= sizeof(ometh_filter_typ) * MAC_HW_TYP_01_NB_FILTER;
+
+			len = sizeof(ometh_filter_typ) * hEth->nbFilter;
 
 			// too many rx buffers configured (hardware dependent)
 			if(hEth->config.rxBuffers > MAC_HW_TYP_01_NB_RXDESC) return hEth;
@@ -770,53 +581,6 @@ static OMETH_H		omethCreateInt
 			nbTxDesc[0] = MAC_HW_TYP_01_NB_TXDESC;
 
 			hEth->pTxInfo[0] = calloc(nbTxDesc[0] , sizeof(ometh_tx_info_typ));
-			if(hEth->pTxInfo[0] == 0) return hEth;
-
-			// write ptr to first tx descriptor to first info structure
-			hEth->pTxInfo[0]->pDesc = (ometh_desc_typ*)((size_t)hEth->config.pRamBase + len);
-			
-			len = len + sizeof(ometh_desc_typ) * nbTxDesc[0];
-			break;
-
-		case OMETH_MAC_TYPE_03:	// Typ 03
-			hEth->pHardware	= hEth->config.pRamBase;
-
-			hEth->nbFilterX = MAC_HW_TYP_03_NB_XFILTER;
-			hEth->nbFilter	= MAC_HW_TYP_03_NB_FILTER;
-			pFilter			= hEth->config.pRamBase;
-
-			// due to the strange arrangement in the memory only every second pair is existing ...
-			// so the filters are distributed over the double of the memory
-			len = sizeof(ometh_filter_typ) * MAC_HW_TYP_03_NB_FILTER;
-
-			// too many rx buffers configured (hardware dependent)
-			if(hEth->config.rxBuffers > MAC_HW_TYP_03_NB_RXDESC) return hEth;
-
-			// allocate structure with rx info
-			hEth->pRxInfo	= calloc(hEth->config.rxBuffers, sizeof(ometh_rx_info_typ));
-
-			if(hEth->pRxInfo == 0) return hEth;
-
-			// write ptr to first rx descriptor to first info structure
-			hEth->pRxInfo->pDesc = (ometh_desc_typ*)((size_t)hEth->config.pRamBase + len);
-
-			len	= len + sizeof(ometh_desc_typ) * (MAC_HW_TYP_03_NB_RXDESC);
-
-			// allocate structure with tx info
-			nbTxDesc[1]			= MAC_HW_TYP_03_NB_TXDESC_LOW;
-			hEth->pTxInfo[1]	= calloc(nbTxDesc[1],sizeof(ometh_tx_info_typ));
-
-			if(hEth->pTxInfo[1] == 0) return hEth;
-
-			// write ptr to first tx descriptor to first info structure
-			hEth->pTxInfo[1]->pDesc = (ometh_desc_typ*)((size_t)hEth->config.pRamBase + len);
-			
-			len = len + sizeof(ometh_desc_typ) * nbTxDesc[1];
-
-			// allocate structure with tx info
-			nbTxDesc[0]			= MAC_HW_TYP_03_NB_TXDESC_HIGH;
-			hEth->pTxInfo[0]	= calloc(nbTxDesc[0],sizeof(ometh_tx_info_typ));
-
 			if(hEth->pTxInfo[0] == 0) return hEth;
 
 			// write ptr to first tx descriptor to first info structure
@@ -851,7 +615,7 @@ static OMETH_H		omethCreateInt
 			pDesc++;
 		}
 
-		pTxInfo--;	// switch back to last info strucutre
+		pTxInfo--;	// switch back to last info structure
 		pTxInfo->flags1	= FLAGS1_OWNER | FLAGS1_LAST;
 		pTxInfo->pNext	= hEth->pTxInfo[i];				// ptr to first info
 
@@ -895,7 +659,7 @@ static OMETH_H		omethCreateInt
 		pDesc++;
 	}
 
-	pRxInfo--;	// switch back to last info strucutre
+	pRxInfo--;	// switch back to last info structure
 	pDesc--;	// switch to last descriptor
 
 	pDesc->flags.byte.high = pRxInfo->flags1	= FLAGS1_OWNER | FLAGS1_LAST;
@@ -928,14 +692,6 @@ static OMETH_H		omethCreateInt
 			pFilterList->pFilterData->pCommand	= &((ometh_xfilter_typ*)pFilter)->command;
 		}
 
-		// MAC_TYPE_3:
-		//	((i&2)==2)   do not use filters with bit1=1 (filter 2,3,6,7,10,11,14,15)
-		//	... to save memory these filters are not implemented at MAC_TYPE_03
-		if((hEth->config.macType == OMETH_MAC_TYPE_03) &&   ((i&2)==2) )
-		{
-			pFilterList->hHook = (OMETH_HOOK_H)-1;
-		}
-
 		pFilterList++;	// next filter list entry
 		pFilter++;		// next filter in RAM
 
@@ -946,49 +702,69 @@ static OMETH_H		omethCreateInt
 	// initialize all phy's and switch on/off hub
 	data = PHY_REG4_SELECTOR;		// generate value for register 4 (advertisement register)
 
-	if(hEth->config.mode & OMETH_MODE_FULLDUPLEX) data |= PHY_REG4_100TX_FULL;
+	if(hEth->config.mode & OMETH_MODE_FULLDUPLEX)
+	{
+		if(hEth->config.mode & OMETH_MODE_100MBIT) data |= PHY_REG4_100TX_FULL;
+		if(hEth->config.mode & OMETH_MODE_10MBIT) data |= PHY_REG4_10T_FULL;
+	}
 
 	// half duplex
 	if(hEth->config.mode & OMETH_MODE_HALFDUPLEX)
 	{
-		// clear full duplex bit if more then 1 phy is linked at startup
-		// (but not for mac_type_2 .. can also work with full duplex)
-		if((hEth->phyLinkMax > 1) && (hEth->config.macType != OMETH_MAC_TYPE_02))
-		{
-			data &= ~(unsigned short)PHY_REG4_100TX_FULL;
-		}
-
-		data |= PHY_REG4_100TX_HALF;
+		if(hEth->config.mode & OMETH_MODE_100MBIT) data |= PHY_REG4_100TX_HALF;
+		if(hEth->config.mode & OMETH_MODE_10MBIT) data |= PHY_REG4_10T_HALF;
 	}
+
+	hEth->phyLinkCount = 0;
+
+	// remember advertisement register for omethPeriodic()
+	hEth->r4Init = data;
 
 	// search for connected phys
 	for(i=0 ; i < hEth->phyCount ; i++)
 	{
-		if(hEth->config.mode & OMETH_MODE_DIS_AUTO_NEG)
+		len = 0;
+
+		// autoneg disabled for all ports
+		if(hEth->config.mode & OMETH_MODE_DIS_AUTO_NEG)	len = 1;
+
+		// check if autoneg is specially disabled for this port
+		if( (i<8) && ((hEth->config.mode>>i) & OMETH_MODE_DIS_AUTO_NEG_P0) ) len = 1;
+
+		if(len)	// disable autoneg for this port
 		{
 			data = 0;
 
 			if(hEth->config.mode & OMETH_MODE_FULLDUPLEX) data |= PHY_REG0_FULL;
+			if(hEth->config.mode & OMETH_MODE_100MBIT)    data |= PHY_REG0_100;
 
-			// 10/100 must be defined if autoneg is off
-			if(hEth->config.mode & OMETH_MODE_100)		data |= PHY_REG0_100;
-			else if ((hEth->config.mode & OMETH_MODE_10) == 0) return hEth;
+			omethPhyRead(hEth,i,0,&readData);
 
 			// write reg0 to turn autoneg off
-			omethPhyWrite(hEth, i, 0, data);
+			if(readData != data) omethPhyWrite(hEth, i, 0, data);
+
+			// also turn auto MDI/MDI-X off if autoneg is off
+			if(phyId==MICREL_KS8721_PHY_ID)
+			{
+				omethPhyWrite(hEth, i, 0x1F, PHY_MICREL_REG1F_NOAUTOMDIX);
+			}
+			if(phyId==SMSC_LAN8700)
+			{
+				omethPhyWrite(hEth, i, 0x1B, PHY_SMSC_REG1B_NOAUTOMDIX);
+			}
 		}
 		else
 		{
 			len = 0;	// flag to detect if reset is required
 
 			omethPhyRead(hEth,i,4,&readData);
-			if(readData != data) len=1;	// set flag to restart autoneg if register 4 is not the desired value
+			if(readData != hEth->r4Init) len=1;	// set flag to restart autoneg if register 4 is not the desired value
 			
-			omethPhyWrite(hEth, i, 4, data);	// set allowed modes (reg 4 , advertisement register)
+			omethPhyWrite(hEth, i, 4, hEth->r4Init);	// set allowed modes (reg 4 , advertisement register)
 
 			// readback register 4 from phy to make sure the phy is existing, otherwise error
 			omethPhyRead(hEth,i,4,&readData);
-			if(readData != data) return hEth;
+			if(readData != hEth->r4Init) return hEth;
 
 			// restart phy if register 4 or register 0 needs to be updated
 			omethPhyRead(hEth,i,0,&readData);
@@ -1002,14 +778,15 @@ static OMETH_H		omethCreateInt
 	}
 
 	//---------------------------------  allocate phy register memory -------------------------------
-	hEth->pPhyReg = calloc(sizeof(phy_reg_typ) * hEth->phyCount, 1);
+	hEth->pPhyReg = calloc(hEth->phyCount, sizeof(*hEth->pPhyReg));
 	if(hEth->pPhyReg == 0) return hEth;
 
 	#if (OMETH_ENABLE_SOFT_IRQ==1)
 		hEth->pFctSoftIrq = &soft_irq_dummy;	// set dummy function for Soft-IRQ
 	#endif
 
-	hEth->txQueueEnable = 1;				// by default the tx queue is enabled
+	hEth->linkSpeed		= OMETH_INIT_LINK_SPEED;	// start with speed 100, will be reduced if 10MBit link is detected
+	hEth->txQueueEnable	= 1;						// by default the tx queue is enabled
 
 	return hEth;	// return instance handle
 }
@@ -1027,12 +804,14 @@ OMETH_H			omethCreate
 	OMETH_H hEth;
 
 	hEth = omethCreateInt(pEthConfig);	// call internal create function
-	if(hEth==0)	return 0;
+	assert(hEth);
+	if(hEth==0) return 0;
 
 	// instance was allocated but not successful initialized
 	if(hEth->txQueueEnable == 0)
 	{
 		omethDestroy(hEth);
+		assert(0);
 		return 0;
 	}
 
@@ -1121,23 +900,67 @@ phy_stat_enum		omethPhyLinkState
 	if(hEth==0)					return OMETH_PHY_STATE_INVALID;
 	if(port >= hEth->phyCount)	return OMETH_PHY_STATE_INVALID;
 
-	// no link
-	if( (hEth->pPhyReg[port].r[1] & PHY_REG1_LINK) == 0 )		return OMETH_PHY_STATE_NOLINK;
+	port = (hEth->pPhyReg[port].r[8] >> 2) & 7;
 
-	// Full-Bit in advertisement not set -> link can only be half
-	if( (hEth->pPhyReg[port].r[4] & PHY_REG4_100TX_FULL) == 0 )	return OMETH_PHY_STATE_HALF;
+	if(port==PHY_REG1F_OP_100HALF  || port==PHY_REG1F_OP_10HALF)  return OMETH_PHY_STATE_HALF;
+	if(port==PHY_REG1F_OP_100FULL  || port==PHY_REG1F_OP_10FULL)  return OMETH_PHY_STATE_FULL;
 
-	// Full-Bit in link partner ability not set -> link can only be half
-	if( (hEth->pPhyReg[port].r[5] & PHY_REG4_100TX_FULL) == 0 )	return OMETH_PHY_STATE_HALF;
-
-	return OMETH_PHY_STATE_FULL;
+	return OMETH_PHY_STATE_NOLINK;
 }
+
+/*****************************************************************************
+* 
+* omethGetLinkSpeed - Get link speed of a adapter
+* 
+* RETURN: 
+*	 0	 ... handle invalid or speed not known
+*	 10  ... 10 MBit
+*	 100 ... 100 MBit
+*
+*/
+unsigned short		omethGetLinkSpeed
+(
+ OMETH_H			hEth		/* handle of ethernet driver, see omethCreate()		*/
+)
+{
+	if(hEth==0) return 0;
+
+	return hEth->linkSpeed;
+}
+
+
+/*****************************************************************************
+* 
+* omethGetConfigMode - Get ethernet config mode
+* 
+* RETURN: 
+*   handle invalid or speed not known:  0
+*   config mode:                        != 0 
+*   
+*
+*/
+unsigned short		omethGetConfigMode
+(
+ OMETH_H			hEth		/* handle of ethernet driver, see omethCreate()		*/
+)
+{
+    if(hEth==0) return 0;
+
+    return hEth->config.mode; 
+}
+
+
 
 /*****************************************************************************
 * 
 * omethPhyRead - Read Phy register
 * 
-* !!! The function can only be called in the same context as omethPeriodic()
+* !!! If the firmware uses the function omethPeriodic():
+* The function can only be called in the same context as omethPeriodic()
+*
+* port  0 .. 15          : port index of this ethernet instance
+* port  0x8000 .. 0x801F : the low byte is the phy-address
+* port  0x4000           : SMI interface for micrel switch
 *
 * RETURN: 
 *	 0	... no error
@@ -1149,6 +972,8 @@ int					omethPhyRead
 (
  OMETH_H			hEth,		/* handle of ethernet driver, see omethCreate()		*/
  unsigned short		port,		/* phy number / port number of integrated hub (0-n)	*/
+                                /* interpret port as phy-address if bit 15 is set */
+
  unsigned short		reg,		/* read register number */
  unsigned short		*pValue		/* ptr to read value */
 )
@@ -1156,13 +981,17 @@ int					omethPhyRead
 	ometh_mii_typ	*pMII = hEth->config.pPhyBase;
 	unsigned short	dataBackup;
 
-	if(hEth==0)					return -1;
-	if(port >= hEth->phyCount)	return -1;
+	if(hEth==0) return -1;
 
 	while(pMII->cmd.ack & 1);	// wait until busy = 0
 	dataBackup = pMII->data;	// backup data in case omethPeriodic() was waiting for a register
 
-	pMII->cmd.req = hEth->phyCmdRead[port] | (reg<<2);
+	if(port & 0x8000)		port = ((port&0x1F)<<7) | PHY_REG_READ;	// generate phy-read command from phy-address
+	else if(port & 0x4000)	port = SMI_REG_READ | ((reg&0xE0)<<2);	// patch the higher 3 bits of the register number to phy address
+	else 					port = hEth->phyCmdRead[port];			// take phy read command from ethernet-instance
+
+	pMII->cmd.req = port | ( (reg&0x1F)<<2 );
+
 	while(pMII->cmd.ack & 1);						// wait until busy = 0
 
 	if(pValue) *pValue = pMII->data;	// get response
@@ -1175,7 +1004,12 @@ int					omethPhyRead
 * 
 * omethPhyWrite - Write Phy register
 * 
-* !!! The function can only be called in the same context as omethPeriodic()
+* !!! If the firmware uses the function omethPeriodic():
+* The function can only be called in the same context as omethPeriodic()
+*
+* port  0 .. 15          : port index of this ethernet instance
+* port  0x8000 .. 0x801F : the low byte is the phy-address
+* port  0x4000           : SMI interface for micrel switch
 *
 * RETURN: 
 *	 0	... no error
@@ -1194,17 +1028,20 @@ int					omethPhyWrite
 	ometh_mii_typ *pMII = hEth->config.pPhyBase;
 	unsigned short	dataBackup;
 
-	if(hEth==0)					return -1;
-	if(port >= hEth->phyCount)	return -1;
+	if(hEth==0) return -1;
 
 	while(pMII->cmd.ack & 1);	// wait until busy = 0
 	dataBackup = pMII->data;	// backup data in case omethPeriodic() was waiting for a register
 		
-	pMII->data = value;
-	pMII->cmd.req = hEth->phyCmdWrite[port] | (reg<<2);
-	while(pMII->cmd.ack & 1);		// wait until busy = 0
+	if(port & 0x8000)		port = ((port&0x1F)<<7) | PHY_REG_WRITE;	// generate phy-read command from phy-address
+	else if(port & 0x4000)	port = SMI_REG_WRITE | ((reg&0xE0)<<2);		// patch the higher 3 bits of the register number to phy address
+	else					port = hEth->phyCmdWrite[port];				// take phy read command from ethernet-instance
 
-	pMII->data = dataBackup;		// restore backup for next omethPeriodic() call
+	pMII->data = value;
+	pMII->cmd.req = port | ( (reg&0x1F) <<2 );
+	while(pMII->cmd.ack & 1);	// wait until busy = 0
+
+	pMII->data = dataBackup;	// restore backup for next omethPeriodic() call
 	return 0;
 }
 
@@ -1220,6 +1057,9 @@ int					omethPhyWrite
 *		- omethPhyReadNonBlocking() can only be used for systems forced to either full
 *		  or half-duplex
 *
+* port  0 .. 15          : port index of this ethernet instance
+* port  0x8000 .. 0x801F : the low byte is the phy-address
+* port  0x4000           : SMI interface for micrel switch
 *
 * RETURN: 
 *	 0	... no error : *pValue contains the value of the register passed at the previous call !
@@ -1236,11 +1076,36 @@ int					omethPhyReadNonBlocking
 {
 	ometh_mii_typ*	pMII = hEth->config.pPhyBase;
 
-	if (pMII->cmd.ack & 1)		return -1;					// busy -> blocking
+	if (pMII->cmd.ack & 1) return -1;			// busy -> blocking
 
-	*pValue			= pMII->data;							// get response
-	pMII->cmd.req	= hEth->phyCmdRead[port] | (reg<<2);	// set new read commando
+	if(port & 0x8000)		port = ((port&0x1F)<<7) | PHY_REG_READ;	// generate phy-read command from phy-address
+	else if(port & 0x4000)	port = SMI_REG_READ | ((reg&0xE0)<<2);	// patch the higher 3 bits of the register number to phy address
+	else					port = hEth->phyCmdRead[port];			// take phy read command from ethernet-instance
 
+	*pValue			= pMII->data;				// get response
+	pMII->cmd.req = port | ( (reg&0x1F) <<2 );	// set new read commando
+
+	return 0;
+}
+
+/*****************************************************************************
+* 
+* omethSetHalfDuplex - set phy's halfduplex (the phy's will be set in omethPerodic())
+*
+* RETURN: 
+*	 0	... no error
+*	-1	... error (you must call omethPerodic first)
+*/
+int			omethPhySetHalfDuplex
+(
+ void
+)
+{
+	OMETH_H hEth = omethInternal.pPeriodicEth;
+
+	if (hEth == 0)	return -1;	// you must call omethPeriodic first
+
+	hEth->config.mode |= OMETH_MODE_FULLDUPLEX;
 	return 0;
 }
 
@@ -1255,9 +1120,9 @@ void			omethPeriodic
 )
 {
 	OMETH_H			hEth = omethInternal.pPeriodicEth;
-
 	phy_reg_typ		*pPhyReg;	// ptr to registers of processed phy
-	ometh_mii_typ	*pMII = hEth->config.pPhyBase;		// ptr to MII
+	ometh_mii_typ	*pMII;		// ptr to MII
+	unsigned short	x,r4,speed; //WORD			x,r4,speed;
 
 	if(hEth==0)	// initialize periodic if not yet done or if reset by a destroy-call
 	{
@@ -1274,15 +1139,30 @@ void			omethPeriodic
 		}
 
 		omethInternal.pPeriodicEth = hEth;		// start periodic phy control with last found instance
-		
+
 		pMII = hEth->config.pPhyBase;
 		pMII->cmd.req = hEth->phyCmdRead[0];	// initiate read command of phy 0 / register 0
 
 		return;
 	}
-	else if (pMII->cmd.ack & 1)
+
+	pMII = hEth->config.pPhyBase;	// ptr to MII
+	if (pMII->cmd.ack & 1)
 	{
 		return;	// mii busy
+	}
+
+	// switch to next instance if no phy is configured on this interface
+	if(hEth->phyCount == 0)
+	{
+		// switch to next adapter
+		hEth = hEth->pNext;
+		if(hEth==0) hEth = omethInternal.pFirstEth;	// take first instance if this was the last
+		omethInternal.pPeriodicEth = hEth;	// save for next periodic call
+
+		// start read command
+		pMII->cmd.req = hEth->phyCmdRead[0];	// initiate read command of phy 0 / register 0
+		return;
 	}
 
 	// check if tx-job for port0/reg4 is pending
@@ -1290,7 +1170,7 @@ void			omethPeriodic
 	{
 		pMII->data    = hEth->txVal;
 		pMII->cmd.req = hEth->phyCmdWrite[hEth->txPort] | (hEth->txReg << 2);
-		
+
 		hEth->txVal = 0;
 
 		if(hEth->txReg==4)	// reset phy after writing register 4 (write autoneg-restart to register 0)
@@ -1306,24 +1186,49 @@ void			omethPeriodic
 
 	// get data from MII
 	((unsigned short*)(pPhyReg))[hEth->phyReg] = pMII->data;
-	
+
+	if(pMII->data == 0xFFFF) hEth->phyOffline = 1;
+
 	hEth->phyReg++;
-	if(hEth->phyReg >= sizeof(phy_reg_typ)/sizeof(unsigned short))
+	if(hEth->phyReg >= sizeof(pPhyReg->r)/sizeof(pPhyReg->r[0]))
 	{
+		r4 = 0;
+
+		// evaluate speed and duplex setting
+
+		x = (pPhyReg->r[8] >> 2) & 7;	// get bit 4-2 which contains link status
+		speed = 0;
+		if(x==PHY_REG1F_OP_100HALF || x==PHY_REG1F_OP_100FULL) speed = 100;
+		if(x==PHY_REG1F_OP_10HALF  || x==PHY_REG1F_OP_10FULL)  speed = 10;
+
 		// count linked ports and switch to force duplex if required
-		if(pPhyReg->r[1] & PHY_REG1_LINK)
+		if(speed && (hEth->phyOffline==0) && (pPhyReg->r[1]&PHY_REG1_LINK) )
 		{
 			hEth->phyLinkCount++;
-			
+
+			if(speed != hEth->linkSpeed)	// link speed different to current detected link speed, something to do
+			{
+				if(speed > hEth->linkSpeed)	// reduce speed of this link if too fast
+				{
+					r4 = pPhyReg->r[4] & ~(unsigned short)(PHY_REG4_100TX_FULL | PHY_REG4_100TX_HALF);
+				}
+				else	// otherwise change speed to 10 MBit
+				{
+					hEth->pRegBase->rxStatus.setBit = OMETH_REG_10MBIT; // manipulate 10/100 flag
+					hEth->linkSpeed = 10;
+				}
+			}
+
 			// link is made with full duplex, change phy register if mac is forced to half duplex
-			if((pPhyReg->r[4] & PHY_REG4_100TX_FULL) && (pPhyReg->r[5] & PHY_REG5_100TX_FULL))
+			if(x==PHY_REG1F_OP_10FULL || x==PHY_REG1F_OP_100FULL)
 			{
 				// (do not switch phys to half duplex if mac_type 2 is selected)
-				if((hEth->phyLinkMax > 1) && (hEth->config.macType != OMETH_MAC_TYPE_02))
+				if(((hEth->phyLinkActive > 1) || (hEth->phyHalfMax > 0) || ((hEth->config.mode & OMETH_MODE_FULLDUPLEX) == 0)))
 				{
-					hEth->txVal  = (pPhyReg->r[4] & ~(unsigned short)PHY_REG4_100TX_FULL) | PHY_REG4_100TX_HALF;
-					hEth->txReg  = 4;
-					hEth->txPort = hEth->phyPort;
+					if(r4==0) r4 = pPhyReg->r[4];	// get r4 if not yet generated by last step
+					
+					// remove full-duplex flags, add half duplex flags
+					r4 = r4 & ~(unsigned short)(PHY_REG4_100TX_FULL | PHY_REG4_10T_FULL);
 				}
 			}
 			else
@@ -1332,21 +1237,50 @@ void			omethPeriodic
 				hEth->phyHalfCount++;
 			}
 		}
-		
-		hEth->phyPort++;	// next port ...
-		hEth->phyReg = 0;	// ... start at register 0
+		// phy not linked, set advertisement register
+		// (to avoid the phy links with too high speed, or with full duplex if not allowed)
+		else
+		{
+			r4 = hEth->r4Init;
+			
+			// remove 100MBit if there is at least one 10MBit link established
+			if(hEth->linkSpeed < 100)	r4 = r4 & ~(unsigned short)(PHY_REG4_100TX_FULL | PHY_REG4_100TX_HALF);
+			
+			// remove Full duplex capability if another port is connected
+			if(hEth->phyHalfMax || hEth->phyLinkActive) r4 = r4 & ~(unsigned short)(PHY_REG4_100TX_FULL | PHY_REG4_10T_FULL);
+		}
+
+		// generate register-write if requested (and if new value is different to current setting)
+		if(r4>0 && r4!=pPhyReg->r[4])
+		{
+			hEth->txVal  = r4;
+			hEth->txReg  = 4;
+			hEth->txPort = hEth->phyPort;
+		}
+
+		hEth->phyPort++;		// next port ...
+		hEth->phyReg = 0;		// ... start at register 0
+		hEth->phyOffline = 0;	// will be set if any register of the phy shows 0xFFFF
 
 		// start with first port if all ports were processed
 		if(hEth->phyPort >= hEth->phyCount)
 		{
-			// store max number of linked phys (if >1 the hub will be always activated and all ports
-			// linked with full duplex will be reset to connect with half duplex)
-			if(hEth->phyLinkCount > hEth->phyLinkMax) hEth->phyLinkMax = hEth->phyLinkCount;
+			hEth->phyLinkActive = hEth->phyLinkCount;  // store total number of linked ports
+			if(hEth->phyHalfCount > hEth->phyHalfMax) hEth->phyHalfMax = hEth->phyHalfCount;
+
+			// change back to 100 MBit (and setup MAC) (not for MACs with more than 1 port)
+			if(hEth->phyLinkActive==0 && hEth->phyCount==1)
+			{
+				if(hEth->linkSpeed == 10) hEth->pRegBase->rxStatus.clrBit = OMETH_REG_10MBIT;
+				hEth->linkSpeed		= OMETH_INIT_LINK_SPEED;
+				hEth->phyHalfMax	= 0;
+			}
 
 			// set mac to half mode if ever more than 2 ports were active at the same time or the only active
 			// port is linked with half duplex
 			// (also set half-bit if MAC Type 2 is selected ... this mode always requires a half duplex mac
-			if((hEth->phyLinkMax > 1) || (hEth->phyHalfCount > 0) || (hEth->config.macType == OMETH_MAC_TYPE_02))
+			if((hEth->phyLinkActive > 1) || ((hEth->config.mode & OMETH_MODE_FULLDUPLEX) == 0) ||
+				(hEth->phyHalfCount > 0))
 			{
 				hEth->pRegBase->txStatus.setBit = OMETH_REG_HALF;
 			}
@@ -1368,9 +1302,8 @@ void			omethPeriodic
 	}
 
 	// start read command
-	pMII->cmd.req = hEth->phyCmdRead[hEth->phyPort] | (hEth->phyReg<<2);
+	pMII->cmd.req = hEth->phyCmdRead[hEth->phyPort] | (phyRegMapping[hEth->phyReg]<<2);
 }
-
 
 /*****************************************************************************
 * 
@@ -1389,12 +1322,16 @@ OMETH_HOOK_H	omethHookCreate
 	ometh_pending_typ	*pQueue;
 	ometh_buf_typ		*pBuf;
 
+	assert(hEth);
+	assert(pFct);
+
 	if(hEth==0 || pFct==0) return 0;
 
 	if(pFct == OMETH_HOOK_DISABLED) pFct=0;
 
 	// allocate structure array for hook list (one hook for each filter)
 	hHook = calloc(sizeof(struct OMETH_HOOK) + maxPending * sizeof(ometh_pending_typ), 1);
+	assert(hHook);
 	if(hHook==0) return 0;
 
 	// add to the hook list of the instance to be able to destroy complete instance
@@ -1418,6 +1355,7 @@ OMETH_HOOK_H	omethHookCreate
 		hHook->pFreeRead = hHook->free;
 
 		pBuf = calloc(len * maxPending, 1);
+		assert(pBuf);
 		if(pBuf==0) return 0;
 
 		hHook->pRxBufBase = pBuf;	// store for destroy function
@@ -1476,6 +1414,7 @@ OMETH_FILTER_H	omethFilterCreate
 	OMETH_H			hEth;
 	int				i;
 
+	assert(hHook);
 	if(hHook==0) return 0;
 
 	hEth = hHook->hEth;	// access to driver handle
@@ -1488,12 +1427,18 @@ OMETH_FILTER_H	omethFilterCreate
 	{
 		if(hFilter->hHook == 0)	// free filter found
 		{
-			hFilter->arg	= arg;		// hook argument
-			hFilter->hHook	= hHook;	// reference to hook
+			hFilter->arg				= arg;		// hook argument
+			hFilter->hHook				= hHook;	// reference to hook
+			hFilter->pFilterData->hEth	= hEth;		// reference to ethernet interface
 
 			omethFilterSetPattern(hFilter, pMask, pValue);	// copy filter mask and values to the filter
 			
 			FILTER_SET_FLAG(hFilter->pFilterData, CMD_FILTER_ON);	// enable filter
+
+			hFilter->pFilterData->cmdHigh = 0;
+			*(hFilter->pFilterData->pCommand-1) = 0;
+
+			hEth->cntFilterUsed++;
 
 			return hFilter;
 		}
@@ -1501,6 +1446,7 @@ OMETH_FILTER_H	omethFilterCreate
 		hFilter++;
 	}
 
+	assert(0);
 	return 0;
 }
 
@@ -1521,6 +1467,7 @@ OMETH_FILTER_H	omethFilterCreateX
 	OMETH_H			hEth;
 	int				i;
 
+	assert(hHook);
 	if(hHook==0) return 0;
 
 	hEth = hHook->hEth;	// access to driver handle
@@ -1534,12 +1481,15 @@ OMETH_FILTER_H	omethFilterCreateX
 	{
 		if(hFilter->hHook == 0)	// free filter found
 		{
-			hFilter->arg	= arg;		// hook argument
-			hFilter->hHook	= hHook;	// reference to hook
+			hFilter->arg				= arg;		// hook argument
+			hFilter->hHook				= hHook;	// reference to hook
+			hFilter->pFilterData->hEth	= hEth;		// reference to ethernet interface
 
 			omethFilterSetPattern(hFilter, pMask, pValue);	// copy filter mask and values to the filter
 			
 			FILTER_SET_FLAG(hFilter->pFilterData, CMD_FILTER_ON);	// enable filter
+
+			hEth->cntFilterXUsed++;
 
 			return hFilter;
 		}
@@ -1547,6 +1497,7 @@ OMETH_FILTER_H	omethFilterCreateX
 		hFilter++;
 	}
 
+	assert(hHook);
 	return 0;
 }
 
@@ -1566,14 +1517,9 @@ int				omethFilterSetPattern
 	ometh_filter_data_typ	*pFilterData;
 	ometh_filter_entry_typ	*pFilterEntry;
 
-	OMETH_H		hEth;
 	int			i;
 
 	if(hFilter==0 || pMask==0 || pValue==0) return -1;
-
-	hEth = hFilter->hHook->hEth;
-	
-	if(hEth==0) return -1;
 
 	pFilterData = hFilter->pFilterData;
 
@@ -1582,8 +1528,8 @@ int				omethFilterSetPattern
 
 	pFilterEntry = pFilterData->pFilterWriteOnly;	// access to filter data
 
+#if defined(__NIOS2__)
 	i = pFilterData->len;
-
 	while(i--)
 	{
 		pFilterEntry->mask  = *(unsigned char*)pMask;
@@ -1594,7 +1540,17 @@ int				omethFilterSetPattern
 
 		pFilterEntry++;
 	}
-
+#elif defined(__MICROBLAZE__)
+	for(i=0; i<pFilterData->len; i++)
+	{
+		pFilterEntry->mask  = *(unsigned char*)(pMask + (i ^ 1));
+		pFilterEntry->value = *(unsigned char*)(pValue + (i ^ 1));
+		
+		pFilterEntry++;
+	}
+#else
+	#error "Unknown CPU!"
+#endif
 	// restore old command flag
 	*pFilterData->pCommand = pFilterData->cmd;
 
@@ -1603,21 +1559,21 @@ int				omethFilterSetPattern
 
 /*****************************************************************************
 * 
-* omethFilterSetByteValue - sets one byte (value, not mask) to an filter
+* omethFilterSetByteMask - sets one byte (mask, not value) to an filter
 *
-*	! the function does not disable the filter while changing the value
+*	! the function does not disable the filter while changing the mask
 *		->	if more than 1 byte should be changed consistent omethFilterSetPattern()
 *			shall be used instead
 *
 */
-void			omethFilterSetByteValue
+void			omethFilterSetByteMask
 (
- OMETH_FILTER_H	hFilter,		/* filter handle									*/
- unsigned long	nOffset,		/* offset in the filterarray						*/
- unsigned char	nValue			/* value to set										*/
+ OMETH_FILTER_H	hFilter,	/* filter handle									*/
+ unsigned short	offset,		/* offset in the filterarray						*/
+ unsigned char	mask		/* mask to set										*/
 )
 {
-	hFilter->pFilterData->pFilterWriteOnly[nOffset].value = nValue;
+	hFilter->pFilterData->pFilterWriteOnly[offset].mask = mask;
 }
 
 /*****************************************************************************
@@ -1667,12 +1623,6 @@ int				omethFilterSetNoMatchIRQ
  int			irqEnable		/* TRUE: IRQ will be triggerd if frame does not match this filter */
 )
 {
-	ometh_filter_data_typ	*pFilterData;
-
-	if (hFilter==0) return -1;
-
-	pFilterData = hFilter->pFilterData;
-
 	if (irqEnable)
 	{
 		// set RxMissFlag
@@ -1683,10 +1633,30 @@ int				omethFilterSetNoMatchIRQ
 		// clear RxMissFlag
 		FILTER_CLEAR_FLAG(hFilter->pFilterData, CMD_RX_NOMATCH);
 	}
-	// set/clear RxMiss Flag
-	*pFilterData->pCommand = pFilterData->cmd;
-
 	return 0;
+}
+
+/*****************************************************************************
+* 
+* omethFilterSetHubPort - set HUB port to which this filter should react
+*
+*	After creating a filter the port will be set to -1 (filter reacts to frames from all ports)
+* 
+*/
+void				omethFilterSetHubPort
+(
+ OMETH_FILTER_H	hFilter,		/* filter handle									*/
+ int			port			/* -1 .. react to all ports, 0-x reac only to port x */
+)
+{
+	ometh_filter_data_typ	*pFilterData = hFilter->pFilterData;
+
+	// switch hub selection off
+	pFilterData->cmdHigh = pFilterData->cmdHigh & ~(CMD_PORTSELECT_ENABLE + CMD_PORTSELECT_INDEX);	// clear bits for port control
+
+	if(port != -1) pFilterData->cmdHigh = pFilterData->cmdHigh | CMD_PORTSELECT_ENABLE | port;
+
+	*(pFilterData->pCommand-1) = pFilterData->cmdHigh;
 }
 
 /*****************************************************************************
@@ -1694,29 +1664,13 @@ int				omethFilterSetNoMatchIRQ
 * omethFilterEnable - enable filter
 *
 */
-int				omethFilterEnable
+void				omethFilterEnable
 (
  OMETH_FILTER_H	hFilter
 )
 {
 	// turn filter entry on
 	FILTER_SET_FLAG(hFilter->pFilterData, CMD_FILTER_ON);
-	return 0;
-}
-
-/*****************************************************************************
-* 
-* omethFilterDisable - disable filter
-*
-*/
-int				omethFilterDisable
-(
- OMETH_FILTER_H	hFilter
-)
-{
-	// disable filter
-	FILTER_CLEAR_FLAG(hFilter->pFilterData, CMD_FILTER_ON);
-	return 0;
 }
 
 /*****************************************************************************
@@ -1736,7 +1690,7 @@ int				omethSetSCNM
 	{
 		// verify if filter belongs to this driver instance (and check for invalid handle)
 		// if the handle is not valid the queue transmitter is disabled
-		if(hFilter == OMETH_INVALID_FILTER || hEth != hFilter->hHook->hEth )
+		if(hFilter == OMETH_INVALID_FILTER || hEth != hFilter->pFilterData->hEth )
 		{
 			hEth->pFilterSCNM = 0;
 			hEth->txQueueEnable = 0;	// queue sending is disabled
@@ -1795,9 +1749,12 @@ static ometh_tx_info_typ* allocTxDescriptor(OMETH_H hEth)
 		pInfo = hEth->pTxInfo[0];
 	}
 
-
 	// error if no buffers available
-	if(pInfo == pInfo->pNext) return 0;
+	if(pInfo == pInfo->pNext)
+	{
+		assert(0);
+		return 0;
+	}
 
 	// find info structure one before the last
 	while(1)
@@ -1810,6 +1767,7 @@ static ometh_tx_info_typ* allocTxDescriptor(OMETH_H hEth)
 	pInfo->flags1	= pNew->flags1;	// overtake last-flags
 	pInfo->pNext	= pNew->pNext;	// overtake link to next info structure
 
+	pNew->delayTime	= 0;
 	pNew->flags1	= 0;			// auto answer buffers have no flags
 	pNew->pNext		= pInfo;		// backwards-link of auto answer structures
 
@@ -1819,13 +1777,13 @@ static ometh_tx_info_typ* allocTxDescriptor(OMETH_H hEth)
 /*****************************************************************************
 * 
 * omethResponseInitBuf - initialize a installed filter for auto response frames
-*						and provice change buffers
-*						(this avoids that the funciton returns 0-pointers at the first
+*						and provide change buffers
+*						(this avoids that the function returns 0-pointers at the first
 *						1 or 2 calls)
 */
 int				omethResponseInitBuf
 (
- OMETH_FILTER_H	hFilter,		/* filter handle							*/
+ OMETH_FILTER_H		hFilter,	/* filter handle							*/
  ometh_packet_typ	*pPacket1,	/* spare packet for change buffer			*/
  ometh_packet_typ	*pPacket2	/* spare packet for change buffer			*/
 )
@@ -1838,18 +1796,28 @@ int				omethResponseInitBuf
 		hFilter->pTxInfo		// already initialized
 	  )
 	{
+		assert(0);
 		return -1;
 	}
 
-	hEth = hFilter->hHook->hEth;						// get driver instance from hook
+	hEth = hFilter->pFilterData->hEth;						// get driver instance from hook
 	
-	if(hEth->pRegBase->txStatus.value & OMETH_REG_RUN) return -1;	// new setup in run mode not allowed
+	if(hEth->pRegBase->txStatus.value & OMETH_REG_RUN)
+	{
+		assert(0);
+		return -1;	// new setup in run mode not allowed
+	}
 
-	if(hFilter->pFilterData == hEth->pFilterSCNM) return -1;		// SCNM filter can not be auto-response
+	if(hFilter->pFilterData == hEth->pFilterSCNM)
+	{
+		assert(0);
+		return -1;		// SCNM filter can not be auto-response
+	}
 
 	pTxInfo = allocTxDescriptor(hEth);		// allocate tx descriptor
 
-	if(pTxInfo==0) return -1;				// no desriptor available
+	assert(pTxInfo);
+	if(pTxInfo==0) return -1;				// no descriptor available
 
 	hFilter->pTxInfo = pTxInfo;				// this is the next autoresponse descriptor
 
@@ -1938,7 +1906,7 @@ ometh_packet_typ	*omethResponseSet
 	pDesc->len		= len;
 	
 	// decide which buffer can be released
-	pInfo->chgIndexRead = pDesc->txStart & 3;	// get current chg index from descritpor
+	pInfo->chgIndexRead = pDesc->txStart & 3;	// get current chg index from descriptor
 
 	// if buffer was not overtaken just during the last lines we have to take another buffer to pass back to the user
 	if (pInfo->chgIndexRead != newChgIndex) freeChgIndex = chgIndexTab[newChgIndex][pInfo->chgIndexRead];
@@ -1947,7 +1915,11 @@ ometh_packet_typ	*omethResponseSet
 	pInfo->chgIndexWrite = newChgIndex;			// the next cycle has to know the change index which was written the last time to generate a different one
 
 	// writing to flags1 is only allowed if owner is not yet set, otherwise collision with tx-irq-access to this field
-	if ((pDesc->flags.byte.high & FLAGS1_OWNER) == 0) pDesc->flags.byte.high = FLAGS1_OWNER;
+	if ((pDesc->flags.byte.high & FLAGS1_OWNER) == 0)
+	{
+		pDesc->txStart			= pInfo->delayTime;
+		pDesc->flags.byte.high	= FLAGS1_OWNER | FLAGS1_TX_DELAY;
+	}
 
 	// check tx-enable of filter and turn on if not already done
 	if(hFilter->pFilterData->txEnableRequest)
@@ -1957,6 +1929,57 @@ ometh_packet_typ	*omethResponseSet
 	}
 
 	return pInfo->pProduced[freeChgIndex];	// release the buffer which was produced at the last cycle
+}
+
+/*****************************************************************************
+* 
+* omethResponseLink - link filter with response buffer of another filter
+* 
+*/
+int		omethResponseLink
+(
+ OMETH_FILTER_H		hFilterDst,		/* handle new filter which should get a response buffer	*/
+ OMETH_FILTER_H		hFilterSrc		/* response buffer from this filter is used				*/
+)
+{
+	if(hFilterSrc==0)				return -1;	// hFilter invalid
+	if(hFilterDst==0)				return -1;	// hFilter invalid
+
+	if(hFilterDst->pTxInfo != 0)	return -1;	// destination filter does already have response buffer
+	if(hFilterSrc->pTxInfo == 0)	return -1;	// source filter does not have a response buffer
+
+	hFilterDst->pTxInfo = hFilterSrc->pTxInfo;
+	
+	// prepare filter command for auto response
+	FILTER_SET_FLAG(hFilterDst->pFilterData, hFilterDst->pTxInfo->index);
+
+	return 0;
+}
+
+
+/*****************************************************************************
+* 
+* omethResponseTime - set ticks which are added to the IPG
+* 
+*/
+int		omethResponseTime
+(
+ OMETH_FILTER_H		hFilter,		/* set time value for auto response		*/
+ unsigned long		ticks			/* delay ticks added to IPG				*/
+)
+{
+	ometh_tx_info_typ *pTxInfo;
+
+	if(hFilter==0)		return -1;	// hFilter invalid
+
+	pTxInfo = hFilter->pTxInfo;
+
+	if(pTxInfo == 0)	return -1;	// no tx-info installed, not an auto-response filter ?
+
+	pTxInfo->delayTime		= ticks;
+	pTxInfo->pDesc->txStart	= ticks;
+
+	return 0;
 }
 
 /*****************************************************************************
@@ -2009,6 +2032,39 @@ int					omethResponseEnable
 
 	return 0;
 }
+
+
+/*****************************************************************************
+* 
+* omethResponseCount - returns the number of autoresonse-frames which were
+*						sent for this filter
+*/
+unsigned long		omethResponseCount
+(
+ OMETH_FILTER_H		hFilter		/* filter handle							*/
+)
+{
+	if(hFilter==0 || hFilter->pTxInfo==0) return 0;
+
+	return hFilter->pTxInfo->autoTxCount;	
+}
+
+
+/*****************************************************************************
+* 
+* omethResponseCountReset - reset number of autoresonse-frames which were
+*							sent for this filter
+*/
+void				omethResponseCountReset
+(
+ OMETH_FILTER_H	hFilter		/* filter handle */
+)
+{
+	if(hFilter==0 || hFilter->pTxInfo==0) return;
+
+	hFilter->pTxInfo->autoTxCount = 0;
+}
+
 
 /*****************************************************************************
 * 
@@ -2096,20 +2152,23 @@ unsigned char		omethTransmitPending
 */
 void			omethStart
 (
- OMETH_H		hEth		/* handle of ethernet driver, see omethCreate() */
+ OMETH_H		hEth,				/* handle of ethernet driver, see omethCreate() */
+ int			bClearPendingIrqs	/* TRUE: clear pending irq's */
 )
 {
 	unsigned short setBit;
 
 	if(hEth==0) return;
 	
-	if(hEth->clearPendingIrqAtStart)
+	if (hEth->clearPendingIrqAtStart || bClearPendingIrqs)
 	{
 		hEth->clearPendingIrqAtStart=0;	// important for debugging .. clear pending irqs from last activation
 		
 		// quit pending irqs and clear lost-bit
 		while(hEth->pRegBase->rxStatus.value & OMETH_REG_PENDING) hEth->pRegBase->rxStatus.clrBit = OMETH_REG_IQUIT;
 		while(hEth->pRegBase->txStatus.value & OMETH_REG_PENDING) hEth->pRegBase->txStatus.clrBit = OMETH_REG_IQUIT;
+
+		hEth->pRxNext = &hEth->pRxInfo[hEth->pRegBase->rxStatus.value & 0x0f]; // set pRxNext descriptor info
 	}
 
 	hEth->pRegBase->rxStatus.clrBit = OMETH_REG_LOST;
@@ -2118,9 +2177,7 @@ void			omethStart
 
 	hEth->pRegBase->txStatus.setBit = setBit;
 
-	#ifdef OMETH_TRACE
-		setBit = setBit | OMETH_REG_DIAG;
-	#endif
+	if(hEth->config.mode & OMETH_MODE_CRC_DETECT) setBit = setBit | OMETH_REG_DIAG;
 
 	hEth->pRegBase->rxStatus.setBit = setBit;
 }
@@ -2142,47 +2199,6 @@ void			omethStop
 	hEth->pRegBase->txStatus.clrBit = OMETH_REG_RUN | OMETH_REG_IE;
 }
 
-/*****************************************************************************
-* 
-* omethGetTimestamp - get timestamp of a received packet
-* 
-*/
-unsigned long	omethGetTimestamp
-(
- ometh_packet_typ	*pPacket	/* address of rx packet*/
-)
-{
-	if(pPacket==0) return 0;
-
-	return GET_TYPE_BASE( ometh_buf_typ, packet, pPacket)->timeStamp;
-}
-
-/*****************************************************************************
-* 
-* omethPacketFree - pass rx packet back to ethernet driver
-* 
-*/
-void		omethPacketFree
-(
- ometh_packet_typ	*pPacket	/* address of rx packet	*/
-)
-{
-	ometh_pending_typ	*pQueue;	// ptr to buffer queue
-	OMETH_HOOK_H		hHook;		// hook handle leading to the data area of the buffer
-	ometh_buf_typ		*pBuf;		// ptr to buffer
-
-	// access to header of packet
-	pBuf  = GET_TYPE_BASE( ometh_buf_typ, packet, pPacket);
-	hHook = pBuf->hHook;
-
-	if(pPacket==0 || hHook==0) return;	// invalid
-
-	pQueue = hHook->pFreeWrite;
-
-	pQueue->pBuf = pBuf;				// pass buffer back to the hooks buffer list (buffer queue)
-		
-	hHook->pFreeWrite = pQueue->pNext;	// switch to next queue element
-}
 
 /*****************************************************************************
 * 
@@ -2270,273 +2286,6 @@ ometh_stat_typ	*omethStatistics
 
 /*****************************************************************************
 * 
-* omethRxIrqHandler - to be called from the MAC RX interrupt
-* 
-*/
-void			omethRxIrqHandler
-(
- OMETH_H		hEth		/* handle of ethernet driver, see omethCreate() */
-)
-{
-	// Timing measurement on PX32 IP20 Eval Board
-	//
-	// IRQ for hook with maxPending==0 and empty hook : 3,5 us
-	// IRQ for hook with maxPending==x and empty hook : 5 us    (4 us if no buffer available)
-
-	OMETH_HOOK_H			hHook;
-	OMETH_FILTER_H			hFilter;
-	ometh_buf_typ			*pRxBuf;
-	ometh_pending_typ		*pQueue;					// ptr to buffer queue
-	ometh_rx_info_typ		*pInfo;
-	ometh_desc_typ			*pDesc;
-	unsigned long			flags=0;
-
-	pInfo = hEth->pRxNext;	// access to next rx info structure
-	pDesc = pInfo->pDesc;	// access to rx descriptor
-
-	if(pDesc->flags.byte.high & FLAGS1_OWNER) return;	// leave IRQ if no rx-buffer available
-
-	// !! here hHook is abused to save stack-variables (until required for its original reason)
-	//	(faster processing)
-	hHook = (OMETH_HOOK_H)&hEth->pRegBase->rxStatus;
-	((ometh_status_typ*)hHook)->clrBit = OMETH_REG_IQUIT;
-
-	flags = pDesc->flags.word;
-
-	// access to buffer structure and set packet length
-	pRxBuf = GET_TYPE_BASE( ometh_buf_typ , packet.data, pDesc->pData);
-
-	pRxBuf->packet.length = (unsigned long)pDesc->len - 4;	// length without checksum
-	pRxBuf->timeStamp     = pDesc->time;					// overtake timestamp to packet header
-
-	if(((ometh_status_typ*)hHook)->value & OMETH_REG_LOST)
-	{
-		((ometh_status_typ*)hHook)->clrBit = OMETH_REG_LOST;
-
-		#ifndef OMETH_TRACE	// do not compile the following lines to increase trace performance
-			hEth->stat.rxLost++;
-		#else
-			pTraceFctInt(hEth->config.adapter, pRxBuf, (flags & ETH_FLAGS_ERROR_MASK) | ETH_FLAGS_RX_LOST);
-		#endif
-	}
-	else
-	{
-		#ifdef OMETH_TRACE
-			pTraceFctInt(hEth->config.adapter, pRxBuf, flags & ETH_FLAGS_ERROR_MASK);
-		#endif
-	}
-
-	if( (flags & (ETH_FLAGS_CRC_ERROR|ETH_FLAGS_OVERSIZE)) == 0 )
-	{
-		#ifndef OMETH_TRACE	// do not compile the following lines to increase trace performance
-			hEth->stat.rxOk++;
-		#endif
-
-		hFilter	= hEth->pFilterList + ((flags & 0xF0) >> 4);		// access to filter info structure
-		hHook	= hFilter->hHook;		// access to hook function of this filter
-
-		if(hHook->pFct)
-		{
-			if(hHook->pFreeRead==0)
-			{
-				// call hook function (no release function is passed because hook is not allowed to queue this frame)
-				hHook->pFct(hFilter->arg, &pRxBuf->packet, 0);
-			}
-			else
-			{
-				pRxBuf->hHook = hHook;				// overtake hook handle for free function
-
-				pQueue = hHook->pFreeRead;
-
-				if(pQueue->pBuf)		// buffer available for exchange
-				{
-					// call hook function
-					if(hHook->pFct(hFilter->arg, &pRxBuf->packet, omethPacketFree) == 0)
-					{
-						// use new frame for next rx at this descriptor
-						pDesc->pData = (unsigned long)&pQueue->pBuf->packet.data;
-
-						pQueue->pBuf = 0;					// remove buffer from list
-
-						hHook->pFreeRead = pQueue->pNext;	// switch to next buffer in queue
-					}
-				}
-				else
-				{		
-					hHook->cntOverflow++;			// too many buffers pending, buffer is not passed to the client
-					hEth->stat.rxHookOverflow++;	// also count in user accessible statistic structure
-				}
-			}
-		}
-		else
-		{
-			#ifndef OMETH_TRACE	// do not compile the following lines to increase trace performance
-				hEth->stat.rxHookDisabled++;
-			#endif
-		}
-	}
-	else
-	{
-		#ifndef OMETH_TRACE	// do not compile the following lines to increase trace performance
-			if(flags & ETH_FLAGS_OVERSIZE)	hEth->stat.rxOversize++;
-			if(flags & ETH_FLAGS_CRC_ERROR)	hEth->stat.rxCrcError++;
-		#endif
-	}
-
-	// pass buffer to MAC
-	pDesc->len				= hEth->rxLen;		// set maximum length for this buffer
-	pDesc->flags.byte.high	= pInfo->flags1;	// set owner and last flag
-	hEth->pRxNext			= pInfo->pNext;		// switch to next info for next rx
-}
-
-/*****************************************************************************
-* some changes (marked) were added by Joerg Zelenka 2009/03/23
-* omethTxIrqHandler - to be called from the MAC TX interrupt
-* 
-*/
-void			omethTxIrqHandler
-(
- OMETH_H		hEth		/* handle of ethernet driver, see omethCreate() */
-)
-{    
-	ometh_tx_info_typ	*pInfo	= hEth->pTxFree[0];	// access to next tx info structure;
-	ometh_desc_typ		*pDesc	= pInfo->pDesc;		// access to tx descriptor
-	unsigned long		i;
-
-
-    #if (OMETH_ENABLE_SOFT_IRQ==1)
-		// check if soft IRQ was triggered
-		if(hEth->pRegBase->txStatus.value & OMETH_REG_SOFTIRQ)
-		{
-			hEth->pRegBase->txStatus.clrBit = OMETH_REG_SOFTIRQ;
-			
-			hEth->pFctSoftIrq(0);		// call user function for software IRQ
-	        
-			return;
-		}
-	#endif
-
-	// return if no tx irq pending on this interface
-	if((hEth->pRegBase->txStatus.value & OMETH_REG_PENDING) == 0) return;
-
-	while(1)
-	{
-        // if it was not the last queue-descriptor .. it was an auto answer buffer
-		/* BEGIN CHANGES BY JOERG ZELENKA 2009/03/23 */
-        while(1) //if(pDesc->flags.byte.high & FLAGS1_SENT)
-		{
-            if(!(pDesc->flags.byte.high & FLAGS1_SENT))
-                break;
-            
-            i = (unsigned long)pDesc->flags.word & 0x0F;	// collisions of this frame
-			hEth->stat.txDone[i]++;							// count transmits depending on occured collisions
-			hEth->stat.txCollision += i;					// count collisions
-
-			// call free function with ptr
-			if(pInfo->pFctFree)
-			{
-				pInfo->pFctFree( GET_TYPE_BASE(ometh_packet_typ, data, pDesc->pData), pInfo->fctFreeArg, pDesc->time );
-			}
-
-			hEth->pTxFree[0] = pInfo->pNext;	// switch free ptr to next info strucutre
-
-			hEth->cntTxQueueOut++;
-
-			pDesc->flags.byte.high	= 0;				// clear sent-flag
-			pDesc->pData			= 0;				// mark buffer as free
-            
-            // ---
-            //next lines were added by Joerg Zelenka
-            pInfo = hEth->pTxFree[0];
-            pDesc = pInfo->pDesc;
-            // ---
-            
-            //break; //put break to top of while, into if packet was sent...
-		}
-        /* END CHANGES BY JOERG ZELENKA 2009/03/23 */
-
-		pInfo = hEth->pTxFree[1];	// try second priority queue
-		
-		if(pInfo) // check if 2nd transmit queue existing
-		{
-			pDesc	= pInfo->pDesc;		// access to tx descriptor
-
-			// if it was not the last queue-descriptor .. it was an auto answer buffer
-			if(pDesc->flags.byte.high & FLAGS1_SENT)
-			{
-				i = (unsigned long)pDesc->flags.word & 0x0F;	// collisions of this frame
-				hEth->stat.txDone[i]++;							// count transmits depending on occured collisions
-				hEth->stat.txCollision += i;					// count collisions
-
-				// call free function with ptr
-				if(pInfo->pFctFree)
-				{
-					pInfo->pFctFree( GET_TYPE_BASE(ometh_packet_typ, data, pDesc->pData), pInfo->fctFreeArg, pDesc->time );
-				}
-
-				hEth->pTxFree[1] = pInfo->pNext;	// switch free ptr to next info strucutre
-
-				hEth->cntTxQueueOut++;
-
-				pDesc->flags.byte.high	= 0;				// clear sent-flag
-				pDesc->pData			= 0;				// mark buffer as free
-				break;
-			}
-		}
-
-		// search through all auto transmit descriptors to find the one causing the irq
-		pInfo = hEth->pTxAuto;
-		while(1)
-		{
-			if(pInfo->flags1 & FLAGS1_LAST)	// this is already the last-descriptor of the queue
-			{
-				// return if no sent buffer found
-				hEth->stat.txSpuriousInt++;
-
-				hEth->pRegBase->txStatus.clrBit = OMETH_REG_IQUIT;	// quit tx irq
-				return;
-			}
-
-			pDesc = pInfo->pDesc;					// access to descriptor
-
-			if(pDesc->flags.byte.high & FLAGS1_SENT) break;	// descriptor found, break loop
-
-			pInfo = pInfo->pNext;					// switch to next tx info
-		}
-
-		i = (unsigned long)pDesc->flags.word & 0x0F;	// collisions of this frame
-		hEth->stat.txDone[i]++;							// count transmits depending on occured collisions
-		hEth->stat.txCollision += i;					// count collisions
-
-		pDesc->flags.byte.high = FLAGS1_OWNER;	// set owner flag for next auto tx
-		break;
-	}
-
-	hEth->pRegBase->txStatus.clrBit = OMETH_REG_IQUIT;	// quit tx irq
-}
-
-/*****************************************************************************
-* 
-* omethRxIrqHandlerMux - to be called from the MAC RX interrupt (multiplexer for all ethernet interfaces)
-* 
-*/
-void			omethRxIrqHandlerMux
-(
- void
-)
-{
-	OMETH_H		hEth = omethInternal.pFirstEth;
-
-	// call irq handler for all ethernet adapters
-	while(hEth)
-	{
-		omethRxIrqHandler(hEth);
-		hEth=hEth->pNext;
-	}
-}
-
-/*****************************************************************************
-* 
 * omethNoFilterMatchIrqHandler - no filter match irq handler
 *
 *	Calls the function OMETH_NOFILTERMATCHIRQ_HOOK_FCT() which must be defined
@@ -2549,31 +2298,13 @@ void			omethNoFilterMatchIrqHandler
  OMETH_H		hEth		/* handle of ethernet driver, see omethCreate() */
 )
 {
+	if ((hEth->pRegBase->rxStatus.value & OMETH_REG_RX_NOMATCH) != OMETH_REG_RX_NOMATCH) return;	// no irq
+
 	#ifdef OMETH_NOFILTERMATCHIRQ_HOOK_FCT
-		OMETH_NOFILTERMATCHIRQ_HOOK_FCT((void*)hEth->pRxNext->pDesc->pData);
+		if (OMETH_NOFILTERMATCHIRQ_HOOK_P != 0)	OMETH_NOFILTERMATCHIRQ_HOOK_FCT((void*)hEth->pRxNext->pDesc->pData);
 	#endif
 
 	hEth->pRegBase->rxStatus.clrBit = OMETH_REG_RX_NOMATCH;	// clear pending irq
-}
-
-/*****************************************************************************
-* 
-* omethTxIrqHandlerMux - to be called from the MAC TX interrupt (multiplexer for all ethernet interfaces)
-* 
-*/
-void			omethTxIrqHandlerMux
-(
- void
-)
-{
-	OMETH_H		hEth = omethInternal.pFirstEth;
-
-	// call irq handler for all ethernet adapters
-	while(hEth)
-	{
-		omethTxIrqHandler(hEth);
-		hEth=hEth->pNext;
-	}
 }
 
 
@@ -2603,7 +2334,7 @@ int				omethDestroy
 	{
 		omethInternal.pFirstEth = hEth->pNext;
 	}
-	else
+	else if (hFind)
 	{
 		while(hFind->pNext)
 		{
@@ -2654,383 +2385,92 @@ int				omethDestroy
 
 /*****************************************************************************
 * 
-* omethMnTransmit - transmit a buffer to the network
-*	-> without a callback-function
+* omethRxIrqHandlerMux - to be called from the MAC RX interrupt (multiplexer for all ethernet interfaces)
 * 
 */
-int					omethMnTransmit
+void			omethRxIrqHandlerMux
 (
- OMETH_H			hEth,		/* handle of ethernet driver, see omethCreate() */
- ometh_packet_typ	*pPacket	/* packet to be sent							*/
-)
+ void
+ )
 {
-	ometh_tx_info_typ	*pInfo	= hEth->pTxNext[0];		// access to next tx info structure
-	ometh_desc_typ		*pDesc	= pInfo->pDesc;			// access to tx descriptor
+	OMETH_H		hEth = omethInternal.pFirstEth;
 
-	if (pDesc->flags.byte.high & FLAGS1_OWNER)	return -1;
-
-	pDesc->pData	= (unsigned long)&pPacket->data;	// write buffer ptr to descriptor
-	pDesc->len		= (unsigned short)pPacket->length;	// write length
-
-	hEth->pTxNext[0] = pInfo->pNext;					// switch to next info strucutre
-
-	pDesc->flags.byte.high	= pInfo->flags1;			// set flag to start transmitter
-
-	return 0;
-}
-
-/*****************************************************************************
-* 
-* omethMnTransmitTime - transmit a buffer to the network at defined time
-*	(same like omethTransmitFast, just the optional argument is additional)
-* 
-*/
-int						omethMnTransmitTime
-(
- OMETH_H				hEth,		/* handle of ethernet driver, see omethCreate() */
- ometh_packet_typ*		pPacket,	/* packet to be sent							*/
- unsigned long			time,		/* timestamp									*/
- int					bTxBegIRQ	/* TRUE: Set Tx-BegInt							*/
-)
-{
-	ometh_tx_info_typ	*pInfo	= hEth->pTxNext[0];		// access to next tx info structure
-	ometh_desc_typ		*pDesc	= pInfo->pDesc;			// access to tx descriptor
-
-	if (pDesc->flags.byte.high & FLAGS1_OWNER)	return -1;
-
-	pDesc->pData	= (unsigned long)&pPacket->data;	// write buffer ptr to descriptor
-	pDesc->len		= (unsigned short)pPacket->length;	// write length
-	pDesc->txStart	= time;								// scheduled start time of this frame
-
-	hEth->pTxNext[0] = pInfo->pNext;					// switch to next info strucutre
-
-	if (bTxBegIRQ)
+	// call irq handler for all ethernet adapters
+	while(hEth)
 	{
-		pDesc->flags.byte.high	= pInfo->flags1 | FLAGS1_START_TIME | FLAGS1_TX_BEG;	// set flag to start transmitter
+		omethRxIrqHandler(hEth);
+		hEth=hEth->pNext;
 	}
-	else
+}
+
+/*****************************************************************************
+* 
+* omethTxIrqHandlerMux - to be called from the MAC TX interrupt (multiplexer for all ethernet interfaces)
+* 
+*/
+void			omethTxIrqHandlerMux
+(
+ void
+ )
+{
+	OMETH_H		hEth = omethInternal.pFirstEth;
+
+	// call irq handler for all ethernet adapters
+	while(hEth)
 	{
-		pDesc->flags.byte.high	= pInfo->flags1 | FLAGS1_START_TIME;					// set flag to start transmitter
+		omethTxIrqHandler(hEth);
+		hEth=hEth->pNext;
 	}
-
-	return 0;
 }
 
 /*****************************************************************************
 * 
-* omethMnResponseAndFilterSet - set new packet and modify filter for
-*	response frame
+* omethRxTxIrqHandlerMux - to be called from the IRQ if all MACs on the system
+*                          use the same IRQ for Rx and Tx
 * 
+* RETURN: -
+*
 */
-void				omethMnResponseAndFilterSet
+void			omethRxTxIrqHandlerMux
 (
- OMETH_FILTER_H		hFilter,	/* filter handle							*/
- ometh_packet_typ	*pPacket,	/* packet which shall be responded			*/
- unsigned char		nOffset,	/* offset in the filterarray				*/
- unsigned char		nValue		/* value to set								*/
+ void
 )
 {
-	register ometh_desc_typ			*pDesc = hFilter->pTxInfo->pDesc;			// access to hardware
+	OMETH_H			hEth = omethInternal.pFirstEth;
+	OMETH_H			hEthProcess=0;
+	ometh_reg_typ	*pRegBase;
 
-	// set new packet for auto response
-	pDesc->len = pPacket->length;
+	unsigned short	pending=0 , maxPending=0;
 
-	// overtake buffer to descriptor
-	pDesc->pData	= (unsigned long)&pPacket->data;
-
-	// access to filter data and set value
-	hFilter->pFilterData->pFilterWriteOnly[nOffset].value = nValue;
-
-	pDesc->flags.byte.high = FLAGS1_OWNER;
-}
-
-/*****************************************************************************
-* 
-* omethMnResponseEnable - enable auto response frame -> fast
-* 
-*/
-void				omethMnResponseEnable
-(
- OMETH_FILTER_H		hFilter		/* filter handle				*/
-)
-{
-	FILTER_SET_FLAG(hFilter->pFilterData, CMD_TX_ENABLE);
-}
-
-/*****************************************************************************
-* 
-* omethMnResponseDisable - disable auto response frame -> fast
-* 
-*/
-void				omethMnResponseDisable
-(
- OMETH_FILTER_H		hFilter		/* filter handle				*/
-)
-{
-	FILTER_CLEAR_FLAG(hFilter->pFilterData, CMD_TX_ENABLE);
-}
-
-/*****************************************************************************
-* 
-* omethMnSetNextRxBuffer - set the next rx-descriptor
-* 
-*/
-void				omethMnSetNextRxBuffer
-(
- OMETH_H			hEth,		/* handle of ethernet driver, see omethCreate()		*/
- ometh_packet_typ	*pPacket	/* new packet for the next rx-descriptor			*/
-)
-{
-	ometh_rx_info_typ		*pInfo;
-	ometh_desc_typ			*pDesc;
-
-	pInfo	= hEth->pRxNext->pNext;	// access to next rx info structure
-	pDesc	= pInfo->pDesc;			// access to rx descriptor
-
-	pDesc->len				= pPacket->length;
-	pDesc->pData			= (unsigned long)&pPacket->data;
-	pDesc->flags.byte.high	= pInfo->flags1;
-}
-
-/*****************************************************************************
-* 
-* omethMnSetCurrentRxBuffer - set the current rx-descriptor
-* 
-*/
-void				omethMnSetCurrentRxBuffer
-(
- OMETH_H			hEth,		/* handle of ethernet driver, see omethCreate()		*/
- ometh_packet_typ	*pPacket	/* new packet for the current rx-descriptor			*/
-)
-{
-	ometh_rx_info_typ		*pInfo;
-	ometh_desc_typ			*pDesc;
-
-	pInfo	= hEth->pRxNext;	// access to current rx info structure
-	pDesc	= pInfo->pDesc;		// access to rx descriptor
-
-	pDesc->len				= pPacket->length;
-	pDesc->pData			= (unsigned long)&pPacket->data;
-	pDesc->flags.byte.high	= pInfo->flags1;
-
-}
-
-/*****************************************************************************
-* 
-* omethMnRxIrqHandler - Rx-IRQHandler for EPLV2 MN
-* 
-*/
-void			omethMnRxIrqHandler
-(
- OMETH_H		hEth			/* handle of ethernet driver, see omethCreate() */
-)
-{
-	ometh_desc_typ			*pDesc;
-	ometh_packet_typ		*pRxBuffer;
-	OMETH_H					hEthArg;
-
-	hEthArg	= hEth;
-	pDesc	= hEth->pRxNext->pDesc;			// access to rx descriptor
-
-	if(pDesc->flags.byte.high & FLAGS1_OWNER) return;	// leave IRQ if no rx-buffer available
-
-	// access to buffer structure and set packet length
-	pRxBuffer = GET_TYPE_BASE(ometh_packet_typ , data, pDesc->pData);
-
-	pRxBuffer->length = (unsigned long)pDesc->len;	// length
-
-	#ifdef OMETH_RXIRQFAST_HOOK_FCT
-		pRxBuffer = OMETH_RXIRQFAST_HOOK_FCT(pRxBuffer);
-	#else
-		pRxBuffer = 0;
-	#endif
-
-	//
-	hEthArg->pRegBase->rxStatus.clrBit = OMETH_REG_IQUIT;
-
-	// pass buffer to MAC
-	if (pRxBuffer != 0)
+	// search for the irq source with the highest pending counter
+	while(hEth)
 	{
-		pDesc->len				= pRxBuffer->length;				// set maximum length for this buffer
-		pDesc->pData			= (unsigned long)&pRxBuffer->data;	// set pointer to data
-		pDesc->flags.byte.high	= hEthArg->pRxNext->flags1;				// set owner and last flag
-	}
-	hEth->pRxNext			= hEthArg->pRxNext->pNext;						// switch to next info for next rx
-}
+		pRegBase = hEth->pRegBase;
 
-
-
-
-/*****************************************************************************
-* 
-* omethMnTxBegIrqHandler - tx beginn irq handler
-* 
-*/
-void			omethMnTxBegIrqHandler
-(
- OMETH_H		hEth		/* handle of ethernet driver, see omethCreate() */
-)
-{
-	#ifdef OMETH_TXBEGIRQ_HOOK_FCT
-		OMETH_TXBEGIRQ_HOOK_FCT();
-	#endif
-
-	hEth->pRegBase->txStatus.clrBit = OMETH_REG_TX_BEG;		// clear pending irq
-}
-
-
-#ifdef OMETH_TRACE
-	/*****************************************************************************
-	* 
-	* omethSetTraceFct - set trace fct before omethStart !!!
-	* 
-	* RETURN: -
-	*/
-	void omethSetTraceFct
-	(
-	 OMETH_TRACE_RX_FCT	*pTraceFct	/* ptr to trace function */
-	)
-	{
-		pTraceFctInt = pTraceFct;
-	}
-
-	/*****************************************************************************
-	* 
-	* omethRxIrqHandlerTrace2 - special hook for trace to reach better performance (handle 2 is only for trace)
-	* 
-	*/
-	void			omethRxIrqHandlerTrace2
-	(
-	 OMETH_H		*phEth		/* pointer to 2 handles of ethernet driver, see omethCreate() */
-	)
-	{
-		OMETH_H				hEth;
-		OMETH_HOOK_H		hHook;
-		OMETH_FILTER_H		hFilter;
-		ometh_buf_typ		*pRxBuf;
-		ometh_pending_typ	*pQueue;					// ptr to buffer queue
-		ometh_rx_info_typ	*pInfo;
-		ometh_desc_typ		*pDesc;
-		unsigned long		flags=0;
-		unsigned long		i=8;
-
-		while(i--)
+		pending = pRegBase->rxStatus.value & OMETH_REG_PENDING;
+		if(pending > maxPending)
 		{
-			hHook = 0;	// to detect if at least 1 interface has received something
-
-			//------------------------------------------------------------- Interface [0] --------------------
-			hEth = phEth[0];
-			pInfo = hEth->pRxNext;	// access to next rx info structure
-			pDesc = pInfo->pDesc;	// access to rx descriptor
-
-			if((pDesc->flags.byte.high & FLAGS1_OWNER) == 0)
-			{
-				hHook = (OMETH_HOOK_H)&hEth->pRegBase->rxStatus;
-
-				((ometh_status_typ*)hHook)->clrBit = OMETH_REG_IQUIT;
-
-				flags = pDesc->flags.word;
-
-				// access to buffer structure and set packet length
-				pRxBuf = GET_TYPE_BASE( ometh_buf_typ , packet.data, pDesc->pData);
-
-				pRxBuf->packet.length = (unsigned long)pDesc->len - 4;	// length without checksum
-				pRxBuf->timeStamp     = pDesc->time;					// overtake timestamp to packet header
-
-				if(((ometh_status_typ*)hHook)->value & OMETH_REG_LOST)
-				{
-					((ometh_status_typ*)hHook)->clrBit = OMETH_REG_LOST;
-
-					pTraceFctInt(hEth->config.adapter, pRxBuf, (flags & ETH_FLAGS_ERROR_MASK) | ETH_FLAGS_RX_LOST);
-				}
-				else
-				{
-					pTraceFctInt(hEth->config.adapter, pRxBuf, flags & ETH_FLAGS_ERROR_MASK);
-				}
-
-				if( (flags & (ETH_FLAGS_CRC_ERROR|ETH_FLAGS_OVERSIZE)) == 0 )
-				{
-					hFilter	= hEth->pFilterList + ((flags & 0xF0) >> 4);		// access to filter info structure
-					hHook	= hFilter->hHook;		// access to hook function of this filter
-
-					if(hHook->pFct)
-					{
-						if(hHook->pFreeRead==0)
-						{
-							// call hook function (no release function is passed because hook is not allowed to queue this frame)
-							hHook->pFct(hFilter->arg, &pRxBuf->packet, 0);
-						}
-						else
-						{
-							pRxBuf->hHook = hHook;				// overtake hook handle for free function
-
-							pQueue = hHook->pFreeRead;
-
-							if(pQueue->pBuf)		// buffer available for exchange
-							{
-								// call hook function
-								if(hHook->pFct(hFilter->arg, &pRxBuf->packet, omethPacketFree) == 0)
-								{
-									// use new frame for next rx at this descriptor
-									pDesc->pData = (unsigned long)&pQueue->pBuf->packet.data;
-
-									pQueue->pBuf = 0;					// remove buffer from list
-
-									hHook->pFreeRead = pQueue->pNext;	// switch to next buffer in queue
-								}
-							}
-							else
-							{		
-								hHook->cntOverflow++;			// too many buffers pending, buffer is not passed to the client
-								hEth->stat.rxHookOverflow++;	// also count in user accessible statistic structure
-							}
-						}
-					}
-				}
-
-				// pass buffer to MAC
-				pDesc->len				= hEth->rxLen;		// set maximum length for this buffer
-				pDesc->flags.byte.high	= pInfo->flags1;	// set owner and last flag
-				hEth->pRxNext			= pInfo->pNext;		// switch to next info for next rx
-			}
-
-			//------------------------------------------------------------- Interface [1] (trace only) ------------
-			hEth = phEth[1];
-			pInfo = hEth->pRxNext;	// access to next rx info structure
-			pDesc = pInfo->pDesc;	// access to rx descriptor
-
-			if((pDesc->flags.byte.high & FLAGS1_OWNER)==0)
-			{
-				hHook = (OMETH_HOOK_H)&hEth->pRegBase->rxStatus;
-
-				((ometh_status_typ*)hHook)->clrBit = OMETH_REG_IQUIT;
-
-				// access to buffer structure and set packet length
-				pRxBuf = GET_TYPE_BASE( ometh_buf_typ , packet.data, pDesc->pData);
-
-				pRxBuf->packet.length = (unsigned long)pDesc->len - 4;	// length without checksum
-				pRxBuf->timeStamp     = pDesc->time;					// overtake timestamp to packet header
-
-				if(((ometh_status_typ*)hHook)->value & OMETH_REG_LOST)
-				{
-					((ometh_status_typ*)hHook)->clrBit = OMETH_REG_LOST;
-
-					pTraceFctInt(hEth->config.adapter, pRxBuf, (pDesc->flags.word & ETH_FLAGS_ERROR_MASK) | ETH_FLAGS_RX_LOST);
-				}
-				else
-				{
-					pTraceFctInt(hEth->config.adapter, pRxBuf, pDesc->flags.word & ETH_FLAGS_ERROR_MASK);
-				}
-
-				// pass buffer to MAC
-				pDesc->len				= hEth->rxLen;		// set maximum length for this buffer
-				pDesc->flags.byte.high	= pInfo->flags1;	// set owner and last flag
-				hEth->pRxNext			= pInfo->pNext;		// switch to next info for next rx
-			}
-
-			//------------------------------------------------------------- No Receive - Break ------------
-			if(hHook==0) break;
+			hEthProcess = hEth;
+			maxPending = pending;
 		}
-	}
-#endif
 
+		pending = pRegBase->txStatus.value & OMETH_REG_PENDING;
+		if(pending > maxPending)
+		{
+			hEthProcess = (OMETH_H)((size_t)hEth | 1);	// use bit 0 to mark that this is a tx-IRQ
+			maxPending = pending;
+		}
+
+		hEth=hEth->pNext;
+	}
+
+	if(hEthProcess==0)	// no pending irqs found ... suspicious
+	{
+		assert(0);
+		return;
+	}
+
+	// call the respective IRQ handler
+	if((size_t)hEthProcess & 1)	omethTxIrqHandler((OMETH_H)((size_t)hEthProcess ^ 1));
+	else						omethRxIrqHandler(hEthProcess);
+}

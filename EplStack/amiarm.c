@@ -81,11 +81,6 @@
 //  Typdefinitionen
 //---------------------------------------------------------------------------
 
-typedef struct
-{
-   WORD  m_wWord;
-
-} twStruct;
 
 typedef struct
 {
@@ -98,7 +93,6 @@ typedef struct
    QWORD  m_qwQword;
 
 } tqwStruct;
-
 
 typedef union
 {
@@ -174,15 +168,8 @@ void  PUBLIC  AmiSetByteToBe (void FAR* pAddr_p, BYTE bByteVal_p)
 
 INLINE_FUNCTION void  PUBLIC  AmiSetWordToBe (void FAR* pAddr_p, WORD wWordVal_p)
 {
-twStruct FAR*  pwStruct;
-twStruct wValue;
-
-   wValue.m_wWord   = (WORD)((wWordVal_p & 0x00FF) << 8); //LSB to MSB
-   wValue.m_wWord  |= (WORD)((wWordVal_p & 0xFF00) >> 8); //MSB to LSB
-
-   pwStruct = (twStruct FAR*)pAddr_p;
-   pwStruct->m_wWord = wValue.m_wWord;
-
+    (*((BYTE FAR*) (pAddr_p) + 0)) = AMI_HIBYTE (wWordVal_p);
+    (*((BYTE FAR*) (pAddr_p) + 1)) = AMI_LOBYTE (wWordVal_p);
 }
 
 
@@ -191,18 +178,10 @@ twStruct wValue;
 
 INLINE_FUNCTION void  PUBLIC  AmiSetDwordToBe (void FAR* pAddr_p, DWORD dwDwordVal_p)
 {
-tdwStruct FAR*  pdwStruct;
-tdwStruct dwValue;
-
-
-   dwValue.m_dwDword = ((dwDwordVal_p & 0x000000FF)<<24); //LSB to MSB
-   dwValue.m_dwDword|= ((dwDwordVal_p & 0x0000FF00)<<8);
-   dwValue.m_dwDword|= ((dwDwordVal_p & 0x00FF0000)>>8 );
-   dwValue.m_dwDword|= ((dwDwordVal_p & 0xFF000000)>>24); //MSB to LSB
-
-   pdwStruct = (tdwStruct FAR*)pAddr_p;
-   pdwStruct->m_dwDword = dwValue.m_dwDword;
-
+    (*((BYTE FAR*) (pAddr_p) + 0)) = AMI_HIBYTE (AMI_HIWORD (dwDwordVal_p));
+    (*((BYTE FAR*) (pAddr_p) + 1)) = AMI_LOBYTE (AMI_HIWORD (dwDwordVal_p));
+    (*((BYTE FAR*) (pAddr_p) + 2)) = AMI_HIBYTE (AMI_LOWORD (dwDwordVal_p));
+    (*((BYTE FAR*) (pAddr_p) + 3)) = AMI_LOBYTE (AMI_LOWORD (dwDwordVal_p));
 }
 
 
@@ -306,16 +285,12 @@ BYTE  PUBLIC  AmiGetByteFromBe (void FAR* pAddr_p)
 
 INLINE_FUNCTION WORD  PUBLIC  AmiGetWordFromBe (void FAR* pAddr_p)
 {
-twStruct FAR*  pwStruct;
-twStruct wValue;
+WORD wValue;
 
-   pwStruct = (twStruct FAR*)pAddr_p;
+    (wValue) =                   (WORD)  (*((BYTE FAR*) (pAddr_p) + 0));
+    (wValue) = ((wValue) << 8) | (WORD)  (*((BYTE FAR*) (pAddr_p) + 1));
 
-   wValue.m_wWord   = (WORD)((pwStruct->m_wWord & 0x00FF) << 8); //LSB to MSB
-   wValue.m_wWord  |= (WORD)((pwStruct->m_wWord & 0xFF00) >> 8); //MSB to LSB
-
-   return ( wValue.m_wWord );
-
+    return ( wValue );
 }
 
 
@@ -325,17 +300,14 @@ twStruct wValue;
 
 INLINE_FUNCTION DWORD  PUBLIC  AmiGetDwordFromBe (void FAR* pAddr_p)
 {
-tdwStruct FAR*  pdwStruct;
-tdwStruct dwValue;
+DWORD dwValue;
 
-   pdwStruct = (tdwStruct FAR*)pAddr_p;
+    (dwValue) =                    (DWORD) (*((BYTE FAR*) (pAddr_p) + 0));\
+    (dwValue) = ((dwValue) << 8) | (DWORD) (*((BYTE FAR*) (pAddr_p) + 1));\
+    (dwValue) = ((dwValue) << 8) | (DWORD) (*((BYTE FAR*) (pAddr_p) + 2));\
+    (dwValue) = ((dwValue) << 8) | (DWORD) (*((BYTE FAR*) (pAddr_p) + 3));
 
-   dwValue.m_dwDword = ((pdwStruct->m_dwDword & 0x000000FF)<<24); //LSB to MSB
-   dwValue.m_dwDword|= ((pdwStruct->m_dwDword & 0x0000FF00)<<8);
-   dwValue.m_dwDword|= ((pdwStruct->m_dwDword & 0x00FF0000)>>8 );
-   dwValue.m_dwDword|= ((pdwStruct->m_dwDword & 0xFF000000)>>24); //MSB to LSB
-
-   return ( dwValue.m_dwDword );
+    return ( dwValue );
 
 }
 

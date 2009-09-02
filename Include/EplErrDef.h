@@ -108,7 +108,7 @@ typedef enum
 //    kEplEdrvInvalidDriverType   = 0x0019,       // (PC: Windows or Linux) invalid driver type
 //    kEplEdrvDriverNotFound      = 0x001A,       // (PC: Windows or Linux) driver (DLL) could not be found
 //    kEplEdrvInvalidBaseAddress  = 0x001B,       // (PC: Windows or Linux) driver could not found the CAN controller
-//    kEplEdrvInvalidParam        = 0x001C,       // invalid param in function call
+    kEplEdrvInvalidParam        = 0x001C,       // invalid parameter in function call
 
     // area for COB module 0x0020 - 0x002F
 /*    kEplCobNoFreeEntry          = 0x0020,       // no free entry in RX- or TX-COB table

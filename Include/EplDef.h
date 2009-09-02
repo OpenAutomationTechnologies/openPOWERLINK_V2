@@ -126,6 +126,7 @@
 
 #define EPL_C_DLL_MAX_ASND_SERVICE_IDS  5   // see tEplDllAsndServiceId in EplDll.h
 
+#define EPL_DLL_MACADDR_MASK        0xFFFFFFFFFFFFLL // MAC address mask, canonical form
 
 
 // Default configuration
@@ -204,6 +205,14 @@
 
 #ifndef EPL_VETH_NAME
 #define EPL_VETH_NAME       "epl"   // name of net device in Linux
+#endif
+
+#ifndef EDRV_FILTER_WITH_RX_HANDLER
+#define EDRV_FILTER_WITH_RX_HANDLER         FALSE
+#endif
+
+#ifndef EDRV_AUTO_RESPONSE
+#define EDRV_AUTO_RESPONSE                  FALSE
 #endif
 
 /*

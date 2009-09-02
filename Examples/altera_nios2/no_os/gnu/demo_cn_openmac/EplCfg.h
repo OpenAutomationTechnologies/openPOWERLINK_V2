@@ -159,10 +159,14 @@
 // number of used ethernet controller
 #define EDRV_USED_ETH_CTRL              1
 
+// openMAC supports auto-response
+#define EDRV_AUTO_RESPONSE              TRUE
+
+
 // increase the number of Tx buffers, because we are master
 // and need one Tx buffer for each PReq and CN
 // + SoC + SoA + MN PRes + NmtCmd + ASnd + IdentRes + StatusRes.
-#define EDRV_MAX_TX_BUFFERS             5
+//#define EDRV_MAX_TX_BUFFERS             5
 
 
 // =========================================================================

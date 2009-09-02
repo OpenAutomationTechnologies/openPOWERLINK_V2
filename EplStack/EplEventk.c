@@ -654,9 +654,9 @@ unsigned int    fBufferCompleted;
         case kEplEventSinkPdok:
         case kEplEventSinkErrk:
         {
+            BENCHMARK_MOD_27_SET(2);
 #ifndef EPL_NO_FIFO
             // post message
-            BENCHMARK_MOD_27_SET(2);
             ShbError = ShbCirAllocDataBlock (EplEventkInstance_g.m_pShbUserToKernelInstance,
                                    &ShbCirChunk,
                                    ulDataSize);
@@ -704,11 +704,11 @@ unsigned int    fBufferCompleted;
                     goto Exit;
                 }
             }
-            BENCHMARK_MOD_27_RESET(2);
 
 #else
             Ret = EplEventkProcess(pEvent_p);
 #endif
+            BENCHMARK_MOD_27_RESET(2);
 
             break;
         }

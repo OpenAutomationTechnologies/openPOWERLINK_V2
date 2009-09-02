@@ -1,11 +1,11 @@
-set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) EPL/EPL_Mac_DPR_altera.vhd]
-set_global_assignment -name TCL_FILE [file join $::quartus(qip_path) EPL/EPL_Mac_AvalonIF_hw.tcl]
-set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) EPL/EPL_Mac_AvalonIF.vhd]
-set_global_assignment -name TCL_FILE [file join $::quartus(qip_path) EPL/DBC3C40_SRAM_hw.tcl]
-set_global_assignment -name SDC_FILE [file join $::quartus(qip_path) cpu_0.sdc]
-set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) EPL_openMAC_0.vhd]
 set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) EPL/EPL_Fifo.vhd]
+set_global_assignment -name SDC_FILE [file join $::quartus(qip_path) cpu_0.sdc]
 set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) EPL/EPL_Mii.vhd]
 set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) EPL/EPL_Mac.vhd]
-set_global_assignment -name SOPC_BUILDER_SIGNATURE_ID 00116732CA0E000001233CAB468A 
+set_global_assignment -name TCL_FILE [file join $::quartus(qip_path) EPL/EPL_Mac_AvalonIF_hw.tcl]
+set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) EPL/EPL_Mac_DPR_altera.vhd]
+set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) EPL_openMAC_0.vhd]
+set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) EPL/EPL_Mac_AvalonIF.vhd]
+set_global_assignment -name TCL_FILE [file join $::quartus(qip_path) EPL/DBC3C40_SRAM_hw.tcl]
+set_global_assignment -name SOPC_BUILDER_SIGNATURE_ID 005056C000080000012370DAC11A 
  

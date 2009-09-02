@@ -35,6 +35,7 @@
 <pathentry kind="src" path=""/>
 <pathentry kind="out" path=""/>
 <pathentry kind="con" path="org.eclipse.cdt.make.core.DISCOVERED_SCANNER_INFO"/>
+<pathentry kind="prj" path="/EPL_V2"/>
 </item>
     <item id="org.eclipse.cdt.make.core.buildtargets">
       <buildTargets>
