@@ -460,10 +460,25 @@ Exit:
 
 tEplKernel EdrvReleaseTxMsgBuffer(tEdrvTxBuffer * pBuffer_p)
 {
-    EPL_FREE(pBuffer_p->m_pbBuffer);
+BYTE*   pbBuffer = pBuffer_p->m_pbBuffer;
+
+    // mark buffer as free, before actually freeing it
     pBuffer_p->m_pbBuffer = NULL;
 
+    EPL_FREE(pbBuffer);
+
     return kEplSuccessful;
+}
+
+
+tEplKernel EdrvChangeFilter(tEdrvFilter*    pFilter_p,
+                            unsigned int    uiCount_p,
+                            unsigned int    uiEntryChanged_p,
+                            unsigned int    uiChangeFlags_p)
+{
+tEplKernel      Ret = kEplSuccessful;
+
+    return Ret;
 }
 
 
