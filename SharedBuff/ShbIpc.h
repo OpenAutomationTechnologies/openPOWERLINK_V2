@@ -99,6 +99,8 @@ tShbError  ShbIpcReleaseBuffer          (tShbInstance pShbInstance_p);
 
 #if !defined(SHBIPC_INLINE_ENABLED)
 
+tShbError  ShbIpcProcess (void);
+
 tShbError  ShbIpcEnterAtomicSection     (tShbInstance pShbInstance_p);
 tShbError  ShbIpcLeaveAtomicSection     (tShbInstance pShbInstance_p);
 
