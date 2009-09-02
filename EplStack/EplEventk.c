@@ -248,7 +248,7 @@ unsigned int    fShbNewCreated;
     // register eventhandler
     ShbError = ShbCirSetSignalHandlerNewData (EplEventkInstance_g.m_pShbUserToKernelInstance,
                                     EplEventkRxSignalHandlerCb,
-                                    kshbPriorityHigh);
+                                    kShbPriorityHigh);
     if(ShbError != kShbOk)
     {
         EPL_DBGLVL_EVENTK_TRACE1("EplEventkAddInstance(): ShbCirSetSignalHandlerNewData(U2K) -> 0x%X\n", ShbError);
