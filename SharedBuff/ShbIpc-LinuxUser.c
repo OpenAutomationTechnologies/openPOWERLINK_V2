@@ -758,6 +758,18 @@ int                 iFdMemDevice;
 
 
 //---------------------------------------------------------------------------
+//  Process function (only used for implementations without threads)
+//---------------------------------------------------------------------------
+
+tShbError  ShbIpcProcess (void)
+{
+tShbError       ShbError = kShbOk;
+
+    return ShbError;
+}
+
+
+//---------------------------------------------------------------------------
 //  Enter atomic section for Shared Buffer access
 //---------------------------------------------------------------------------
 

@@ -65,21 +65,23 @@
 
 typedef enum
 {
-    kShbOk                      =  0,
-    kShbNoReadableData          =  1,
-    kShbDataTruncated           =  2,
-    kShbBufferFull              =  3,
-    kShbDataOutsideBufferArea   =  4,
-    kShbBufferAlreadyCompleted  =  5,
-    kShbMemUsedByOtherProcs     =  6,
-    kShbOpenMismatch            =  7,
-    kShbInvalidBufferType       =  8,
-    kShbInvalidArg              =  9,
-    kShbBufferInvalid           = 10,
-    kShbOutOfMem                = 11,
-    kShbAlreadyReseting         = 12,
-    kShbAlreadySignaling        = 13,
-    kShbExceedDataSizeLimit     = 14,
+    kShbOk                          =  0,
+    kShbNoReadableData              =  1,
+    kShbDataTruncated               =  2,
+    kShbBufferFull                  =  3,
+    kShbDataOutsideBufferArea       =  4,
+    kShbBufferAlreadyCompleted      =  5,
+    kShbMemUsedByOtherProcs         =  6,
+    kShbOpenMismatch                =  7,
+    kShbInvalidBufferType           =  8,
+    kShbInvalidArg                  =  9,
+    kShbBufferInvalid               = 10,
+    kShbOutOfMem                    = 11,
+    kShbAlreadyReseting             = 12,
+    kShbAlreadySignaling            = 13,
+    kShbExceedDataSizeLimit         = 14,
+    kShbInterruptContextNotAllowed  = 15,
+    kShbInvalidSigHndlr             = 16,
 
 } tShbError;
 
@@ -89,7 +91,7 @@ typedef enum
 {
     kShbPriorityLow             =  0,
     kShbPriorityNormal          =  1,
-    kshbPriorityHigh            =  2
+    kShbPriorityHigh            =  2
 
 } tShbPriority;
 
@@ -131,6 +133,8 @@ extern "C" {
 
 tShbError  ShbInit (void);
 tShbError  ShbExit (void);
+
+tShbError  ShbProcess (void);
 
 // Circular Shared Buffer
 tShbError  ShbCirAllocBuffer             (unsigned long ulBufferSize_p, const char* pszBufferID_p, tShbInstance* ppShbInstance_p, unsigned int* pfShbNewCreated_p);

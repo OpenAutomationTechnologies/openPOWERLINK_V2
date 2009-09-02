@@ -284,6 +284,21 @@ tShbError  ShbError;
 
 
 
+//---------------------------------------------------------------------------
+//  Process Function for Shared Buffer Module
+//---------------------------------------------------------------------------
+
+tShbError  ShbProcess (void)
+{
+tShbError  ShbError;
+
+    ShbError = ShbIpcProcess();
+
+    return (ShbError);
+}
+
+
+
 
 
 //-------------------------------------------------------------------------//

@@ -467,6 +467,19 @@ tShbError       ShbError2;
 }
 
 
+
+//---------------------------------------------------------------------------
+//  Process function (only used for implementations without threads)
+//---------------------------------------------------------------------------
+
+tShbError  ShbIpcProcess (void)
+{
+tShbError       ShbError = kShbOk;
+
+    return ShbError;
+}
+
+
 #endif  // !defined(SHBIPC_INLINE_ENABLED)
 
 #if (!defined(SHBIPC_INLINED)) || defined(SHBIPC_INLINE_ENABLED)

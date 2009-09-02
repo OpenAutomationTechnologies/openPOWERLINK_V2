@@ -1287,6 +1287,44 @@ Exit:
 
 
 
+//---------------------------------------------------------------------------
+//
+// Function:    EplApiProcess
+//
+// Description: Process function for use in single threaded environment
+//              e.g. without any OS. It gives processing time to several
+//              tasks in the EPL stack.
+//
+// Parameters:  none
+//
+// Returns:     tEplKernel              = error code
+//
+//
+// State:
+//
+//---------------------------------------------------------------------------
+
+tEplKernel PUBLIC EplApiProcess(void)
+{
+tEplKernel Ret;
+tShbError  ShbError;
+
+    Ret = kEplSuccessful;
+
+    ShbError = ShbProcess();
+    if (ShbError != kShbOk)
+    {
+        Ret = kEplInvalidOperation;
+        goto Exit;
+    }
+    // Ret = EplTimeruProcess();
+
+Exit:
+    return Ret;
+}
+
+
+
 //=========================================================================//
 //                                                                         //
 //          P R I V A T E   F U N C T I O N S                              //
