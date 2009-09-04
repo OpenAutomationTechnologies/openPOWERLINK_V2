@@ -585,9 +585,12 @@ tShbError       ShbError;
     // insert ShbMemInst into NewData process list
     // higher priority entries first
     ppShbMemInst = &pProcessListNewDataFirst_g;
-    while (((*ppShbMemInst)->m_PriorityNewData >= pShbMemInst->m_PriorityNewData) &&
-           (*ppShbMemInst != NULL))
+    while (*ppShbMemInst != NULL)
     {
+        if ((*ppShbMemInst)->m_PriorityNewData < pShbMemInst->m_PriorityNewData)
+        {
+            break;
+        }
         ppShbMemInst = &(*ppShbMemInst)->m_pProcessListNewDataNext;
     }
     pShbMemInst->m_pProcessListNewDataNext = *ppShbMemInst;
