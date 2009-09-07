@@ -70,6 +70,8 @@
 ****************************************************************************/
 
 #include "user/EplTimeru.h"
+#include "EplTarget.h"
+
 
 /***************************************************************************/
 /*                                                                         */
@@ -149,6 +151,7 @@ tEplTimeruInstance EplTimeruInstance_g;
 // State:
 //
 //---------------------------------------------------------------------------
+
 tEplKernel PUBLIC EplTimeruInit()
 {
 tEplKernel  Ret;
@@ -157,6 +160,8 @@ tEplKernel  Ret;
 
 return Ret;
 }
+
+
 
 //---------------------------------------------------------------------------
 //
@@ -171,6 +176,7 @@ return Ret;
 // State:
 //
 //---------------------------------------------------------------------------
+
 tEplKernel PUBLIC EplTimeruAddInstance()
 {
 int nIdx;
@@ -195,23 +201,22 @@ tEplKernel Ret;
     // fill free timer list
     for (nIdx = 0; nIdx < EplTimeruInstance_g.m_uiMaxEntries-1; nIdx++)
     {
-        EplTimeruInstance.m_pEntries[nIdx].m_pNext = EplTimeruInstance.m_pEntries[nIdx+1];
-        EplTimeruInstance.m_pEntries[nIdx].m_pfnTimer = NULL;
+        EplTimeruInstance_g.m_pEntries[nIdx].m_pNext = &EplTimeruInstance_g.m_pEntries[nIdx+1];
     }
-    EplTimeruInstance.m_pEntries[EplTimeruInstance_g.m_uiMaxEntries-1].m_pNext = NULL;
-    EplTimeruInstance.m_pEntries[EplTimeruInstance_g.m_uiMaxEntries-1].m_pfnTimer = NULL;
+    EplTimeruInstance_g.m_pEntries[EplTimeruInstance_g.m_uiMaxEntries-1].m_pNext = NULL;
 
     EplTimeruInstance_g.m_pListTimerFirst = NULL;
     EplTimeruInstance_g.m_pListFreeTimerFirst = EplTimeruInstance_g.m_pEntries;
 
     // set start time to a value which is in any case less or equal than GetTickCount()
     // -> the only solution = 0
-    EplTimeruInstance.m_dwStartTimeMs = 0;
+    EplTimeruInstance_g.m_dwStartTimeMs = 0;
 
 Exit:
     return Ret;
 
 }
+
 
 
 //---------------------------------------------------------------------------
@@ -227,6 +232,7 @@ Exit:
 // State:
 //
 //---------------------------------------------------------------------------
+
 tEplKernel PUBLIC EplTimeruDelInstance()
 {
 tEplKernel  Ret;
@@ -237,6 +243,7 @@ tEplKernel  Ret;
 
     return Ret;
 }
+
 
 
 //---------------------------------------------------------------------------
@@ -254,6 +261,7 @@ tEplKernel  Ret;
 // State:
 //
 //---------------------------------------------------------------------------
+
 tEplKernel PUBLIC EplTimeruSetTimerMs(  tEplTimerHdl*   pTimerHdl_p,
                                         unsigned long   ulTimeMs_p,
                                         tEplTimerArg    Argument_p)
@@ -293,7 +301,7 @@ tEplKernel      Ret;
 
     *pTimerHdl_p = (tEplTimerHdl) pNewEntry;
 
-    // insert entry into timer list
+    // insert timer entry in timer list
     ppEntry = &EplTimeruInstance_g.m_pListTimerFirst;
     while (*ppEntry != NULL)
     {
@@ -305,6 +313,7 @@ tEplKernel      Ret;
         pNewEntry->m_dwTimeoutMs -= (*ppEntry)->m_dwTimeoutMs;
         ppEntry = &(*ppEntry)->m_pNext;
     }
+    // insert before **ppEntry
     pNewEntry->m_pNext = *ppEntry;
     *ppEntry = pNewEntry;
 
@@ -314,11 +323,12 @@ Exit:
 }
 
 
+
 //---------------------------------------------------------------------------
 //
 // Function:    EplTimeruModifyTimerMs
 //
-// Description: function change a timer and return a handle to the pointer
+// Description: function changes a timer and returns the corresponding handle
 //
 // Parameters:  pTimerHdl_p = pointer to a buffer to fill in the handle
 //              ulTime_p    = time for timer in ms
@@ -329,64 +339,188 @@ Exit:
 // State:
 //
 //---------------------------------------------------------------------------
+
 tEplKernel PUBLIC EplTimeruModifyTimerMs(tEplTimerHdl*    pTimerHdl_p,
                                         unsigned long     ulTimeMs_p,
                                         tEplTimerArg      Argument_p)
 {
-tEplKernel          Ret;
+tTimerEntry*    pTimerEntry;
+tTimerEntry**   ppEntry;
+DWORD           dwNewTimeoutMs;
+tTimerEntry*    pNewNext;
+BOOL            fFoundOldEntry;
+tEplKernel      Ret;
 
     Ret = kEplSuccessful;
 
-    // check parameter
+    // check pointer to handle
     if(pTimerHdl_p == NULL)
     {
         Ret = kEplTimerInvalidHandle;
         goto Exit;
     }
 
+    // check handle itself, i.e. was the handle initialized before
+    if (*pTimerHdl_p == 0)
+    {
+        Ret = EplTimeruSetTimerMs(pTimerHdl_p, ulTimeMs_p, Argument_p);
+        goto Exit;
+    }
+    
+    pTimerEntry    = (tTimerEntry*) *pTimerHdl_p;
+    dwNewTimeoutMs = (EplTgtGetTickCountMs() - EplTimeruInstance_g.m_dwStartTimeMs) + ulTimeMs_p;
+
+    // remove and reinsert timer entry
+    fFoundOldEntry = FALSE;
+    ppEntry = &EplTimeruInstance_g.m_pListTimerFirst;
+    while (*ppEntry != NULL)
+    {
+        if (*ppEntry == pTimerEntry)
+        {
+            // remove from timer list
+            fFoundOldEntry = TRUE;
+            *ppEntry = pTimerEntry->m_pNext;
+            if (*ppEntry == NULL)
+            {
+                break;
+            }
+            (*ppEntry)->m_dwTimeoutMs += pTimerEntry->m_dwTimeoutMs;
+        }
+
+        if ((*ppEntry)->m_dwTimeoutMs > dwNewTimeoutMs)
+        {
+            (*ppEntry)->m_dwTimeoutMs -= dwNewTimeoutMs;
+            break;
+        }
+        dwNewTimeoutMs -= (*ppEntry)->m_dwTimeoutMs;
+        ppEntry = &(*ppEntry)->m_pNext;
+    }
+    pNewNext = *ppEntry;
+    *ppEntry = pTimerEntry;
+
+    // remove timer entry from timer list if behind new insert location
+    if (fFoundOldEntry == FALSE)
+    {
+        while (*ppEntry != NULL)
+        {
+            if (*ppEntry == pTimerEntry)
+            {
+                // remove from timer list
+                fFoundOldEntry = TRUE;
+                (*ppEntry) = pTimerEntry->m_pNext;
+                if (*ppEntry != NULL)
+                {
+                    (*ppEntry)->m_dwTimeoutMs += pTimerEntry->m_dwTimeoutMs;
+                }
+            }
+    
+            ppEntry = &(*ppEntry)->m_pNext;
+        }
+    }
+    pTimerEntry->m_dwTimeoutMs = dwNewTimeoutMs;
+    
+    // remove timer entry from free list if not found in timer list
+    if (fFoundOldEntry == FALSE)
+    {
+        ppEntry = &EplTimeruInstance_g.m_pListFreeTimerFirst;
+        while (*ppEntry != NULL)
+        {
+            if (*ppEntry == pTimerEntry)
+            {
+                // remove from free list
+                *ppEntry = pTimerEntry->m_pNext;
+            }
+    
+            ppEntry = &(*ppEntry)->m_pNext;
+        }
+    }
+    pTimerEntry->m_pNext = pNewNext;
+
+    // copy the new TimerArg after the time value has been modified,
+    // thus a timer which occured immediately before the modification
+    // of the time value won't use the new TimerArg.
+    // If the new TimerArg would be used in this case, the old timer
+    // could not be distinguished from the new one.
+    // If the new timer is too fast, it may get lost.
+    EPL_MEMCPY(&pTimerEntry->m_TimerArg, &Argument_p, sizeof(tEplTimerArg));
 
 Exit:
     return Ret;
+
 }
+
+
 
 //---------------------------------------------------------------------------
 //
 // Function:    EplTimeruDeleteTimer
 //
-// Description: function delte a timer
-//
-//
+// Description: function deletes a timer
 //
 // Parameters:  pTimerHdl_p = pointer to a buffer to fill in the handle
 //
-//
 // Returns:     tEplKernel  = errorcode
-//
 //
 // State:
 //
 //---------------------------------------------------------------------------
+
 tEplKernel PUBLIC EplTimeruDeleteTimer(tEplTimerHdl*     pTimerHdl_p)
 {
-tEplKernel  Ret;
+tTimerEntry*    pTimerEntry;
+tTimerEntry**   ppEntry;
+tEplKernel      Ret;
+
 
     Ret = kEplSuccessful;
 
-    // check parameter
+    // check pointer to handle
     if(pTimerHdl_p == NULL)
     {
         Ret = kEplTimerInvalidHandle;
         goto Exit;
     }
 
-    // set handle invalide
+    // check handle itself, i.e. was the handle initialized before
+    if (*pTimerHdl_p == 0)
+    {
+        Ret = kEplSuccessful;
+        goto Exit;
+    }
+
+    pTimerEntry = (tTimerEntry*) *pTimerHdl_p;
+
+    // remove timer entry from timer list
+    ppEntry = &EplTimeruInstance_g.m_pListTimerFirst;
+    while (*ppEntry != NULL)
+    {
+        if (*ppEntry == pTimerEntry)
+        {
+            *ppEntry = pTimerEntry->m_pNext;
+            if (*ppEntry != NULL)
+            {
+                (*ppEntry)->m_dwTimeoutMs += pTimerEntry->m_dwTimeoutMs;
+            }
+            
+            // insert in free list
+            pTimerEntry->m_pNext = EplTimeruInstance_g.m_pListFreeTimerFirst;
+            EplTimeruInstance_g.m_pListFreeTimerFirst = pTimerEntry;
+            
+            break;
+        }
+            
+        ppEntry = &(*ppEntry)->m_pNext;
+    }
+
+    // set handle invalid
     *pTimerHdl_p = 0;
-
-
+    
 Exit:
     return Ret;
 
 }
+
+
 
 //=========================================================================//
 //                                                                         //
@@ -394,99 +528,6 @@ Exit:
 //                                                                         //
 //=========================================================================//
 
-
-//---------------------------------------------------------------------------
-//
-// Function:     SLLappend
-//
-// Description:  Puts a new item at the end of the list.
-//               2 mal verwendet (jeweils beim Entfernen eines Timers (Delete
-//               or Execute) um den Eintrag in die leere Liste zurückzulegen.
-//
-//
-// Parameters:
-//
-//
-// Returns:
-//
-//
-// State:
-//
-//---------------------------------------------------------------------------
-int SLLappend( tSLList *pThis_p, void *pNewItem_p )
-{
-
-    #ifdef WIN32
-        EnterCriticalSection(&pThis_p->m_CriticalSection);
-    #endif
-
-    SLL_ITER(pNewItem_p)->next = NULL;
-    pThis_p->last = pThis_p->last->next = SLL_ITER(pNewItem_p);
-    if( !pThis_p->head )
-    {
-        pThis_p->head = SLL_ITER(pNewItem_p);
-    }
-    pThis_p->size++;
-
-
-    #ifdef WIN32
-        LeaveCriticalSection(&pThis_p->m_CriticalSection);
-    #endif
-    
-return (pThis_p->size);
-}
-
-//---------------------------------------------------------------------------
-//
-// Function:     SLLremove()
-//
-// Description:  Removes an item from the List
-//               2x verwendet um Timer Element aus Liste zu entfernen.
-//
-// Parameters:
-//
-//
-// Returns:
-//
-//
-// State:
-//
-//---------------------------------------------------------------------------
-int SLLremove( struct SLList *pThis_p, const void *pItem_p )
-{
-tSLLiterator *SLLiter;
-int iId;
-
-
-    #ifdef WIN32
-        EnterCriticalSection(&pThis_p->m_CriticalSection);
-    #endif
-
-    iId = 0;
-    for( SLLiter = SLL_ITER(pThis_p); SLLiter->next; SLLiter=SLLiter->next )
-    {
-        if( SLLiter->next==pItem_p )
-        {
-            SLLiter->next = SLL_ITER(pItem_p)->next;
-            if( !SLLiter->next )
-            {
-                pThis_p->last = SLLiter;
-            }
-            pThis_p->size--;
-            goto Exit;
-        }
-        iId++;
-    }
-    iId = (-1);
-
-Exit:
-    
-    #ifdef WIN32
-        LeaveCriticalSection(&pThis_p->m_CriticalSection);
-    #endif
-
-return (iId);
-}
 
 
 // EOF
