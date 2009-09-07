@@ -225,8 +225,8 @@
 
 // currently no Timer functions are needed by EPL stack
 // so they are not implemented yet
-//void  PUBLIC TgtTimerInit(void);
-//DWORD PUBLIC TgtGetTickCount(void);
+//void  PUBLIC EplTgtTimerInit(void);
+DWORD PUBLIC EplTgtGetTickCountMs(void);
 //void PUBLIC TgtGetNetTime(tEplNetTime * pNetTime_p);
 
 // functions for ethernet driver
