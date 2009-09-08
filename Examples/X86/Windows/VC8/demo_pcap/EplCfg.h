@@ -96,9 +96,6 @@
 // use no FIFOs, make direct calls
 //#define EPL_NO_FIFO
 
-// use no IPC between user- and kernelspace modules, make direct calls
-#define EPL_NO_USER_KERNEL
-
 #ifndef BENCHMARK_MODULES
 #define BENCHMARK_MODULES       0 //0xEE800042L
 #endif
@@ -118,6 +115,7 @@
 // EPL application. Please add or delete modules for your application.
 #define EPL_MODULE_INTEGRATION (EPL_MODULE_OBDK \
                                | EPL_MODULE_PDOK \
+                               | EPL_MODULE_PDOU \
                                | EPL_MODULE_SDOS \
                                | EPL_MODULE_SDOC \
                                | EPL_MODULE_SDO_ASND \

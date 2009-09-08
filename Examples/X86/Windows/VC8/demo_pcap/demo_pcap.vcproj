@@ -279,9 +279,161 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\..\..\..\SharedBuff\SharedBuff.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\..\..\SharedBuff\ShbIpc.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\..\..\Include\SocketLinuxKernel.h"
 				>
 			</File>
+			<Filter
+				Name="Kernel Part"
+				>
+				<File
+					RelativePath="..\..\..\..\..\Include\kernel\EplDllk.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\..\..\Include\kernel\EplDllkCal.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\..\..\Include\kernel\EplDllkTgt.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\..\..\Include\kernel\EplErrorHandlerk.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\..\..\Include\kernel\EplEventk.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\..\..\Include\kernel\EplNmtk.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\..\..\Include\kernel\EplNmtkCal.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\..\..\Include\kernel\EplObdk.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\..\..\Include\kernel\EplObdkCal.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\..\..\Include\kernel\EplPdok.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\..\..\Include\kernel\EplPdokCal.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\..\..\Include\kernel\EplTimerHighResk.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\..\..\Include\kernel\EplTimerk.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\..\..\Include\kernel\VirtualEthernet.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="User Part"
+				>
+				<File
+					RelativePath="..\..\..\..\..\Include\user\EplCfgMau.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\..\..\Include\user\EplDllu.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\..\..\Include\user\EplDlluCal.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\..\..\Include\user\EplEventu.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\..\..\Include\user\EplIdentu.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\..\..\Include\user\EplLedu.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\..\..\Include\user\EplNmtCnu.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\..\..\Include\user\EplNmtMnu.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\..\..\Include\user\EplNmtu.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\..\..\Include\user\EplNmtuCal.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\..\..\Include\user\EplObdu.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\..\..\Include\user\EplObduCal.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\..\..\Include\user\EplPdou.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\..\..\Include\user\EplPdouCal.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\..\..\Include\user\EplSdoAsndu.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\..\..\Include\user\EplSdoAsySequ.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\..\..\Include\user\EplSdoComu.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\..\..\Include\user\EplSdoUdpu.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\..\..\Include\user\EplStatusu.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\..\..\Include\user\EplTimeru.h"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Objdict"
@@ -353,6 +505,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\..\..\..\EplStack\EplLedu.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\..\..\EplStack\EplNmtCnu.c"
 				>
 			</File>
@@ -402,6 +558,10 @@
 			</File>
 			<File
 				RelativePath="..\..\..\..\..\EplStack\EplPdou.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\..\..\EplStack\EplPdouCal.c"
 				>
 			</File>
 			<File
