@@ -248,6 +248,79 @@ tEplKernel  Ret;
 
 //---------------------------------------------------------------------------
 //
+// Function:    EplTimeruProcess
+//
+// Description: This function is called repeatedly from within the main
+//              loop of the application. It checks whether the first timer
+//              entry has been elapsed.
+//
+// Parameters:  none
+//
+// Returns:     tEplKernel  = errorcode
+//
+// State:
+//
+//---------------------------------------------------------------------------
+
+tEplKernel PUBLIC EplTimeruProcess()
+{
+tTimerEntry*        pTimerEntry;
+DWORD               dwTimeoutMs;
+BOOL                fElapsed;
+tEplEvent           EplEvent;
+tEplTimerEventArg   TimerEventArg;
+tEplKernel          Ret;
+
+
+    Ret      = kEplSuccessful;
+    fElapsed = FALSE;
+
+    // calculate elapsed time since start time
+    dwTimeoutMs = EplTgtGetTickCountMs() - EplTimeruInstance_g.m_dwStartTimeMs;
+
+    // Enter Critical Section
+    pTimerEntry = EplTimeruInstance_g.m_pListTimerFirst;
+    if (pTimerEntry != NULL)
+    {
+        if (dwTimeoutMs >= pTimerEntry->m_dwTimeoutMs)
+        {   // timeout elapsed
+            fElapsed = TRUE;        
+    
+            // remove entry from list
+            EplTimeruInstance_g.m_pListTimerFirst = pTimerEntry->m_pNext;
+        }
+    }
+    // Leave Critical Section
+
+    if (fElapsed != FALSE)
+    {
+        // adjust start time
+        EplTimeruInstance_g.m_dwStartTimeMs += pTimerEntry->m_dwTimeoutMs;
+
+        // call event function
+        TimerEventArg.m_TimerHdl = (tEplTimerHdl) pTimerEntry;
+        EPL_MEMCPY(&TimerEventArg.m_Arg, &pTimerEntry->m_TimerArg.m_Arg, sizeof (TimerEventArg.m_Arg));
+    
+        EplEvent.m_EventSink = pTimerEntry->m_TimerArg.m_EventSink;
+        EplEvent.m_EventType = kEplEventTypeTimer;
+        EPL_MEMSET(&EplEvent.m_NetTime, 0x00, sizeof(tEplNetTime));
+        EplEvent.m_pArg = &TimerEventArg;
+        EplEvent.m_uiSize = sizeof(TimerEventArg);
+
+        Ret = EplEventuPost(&EplEvent);
+
+        // append entry to free list
+        pTimerEntry->m_pNext = EplTimeruInstance_g.m_pListFreeTimerFirst;
+        EplTimeruInstance_g.m_pListFreeTimerFirst = pTimerEntry;
+    }
+
+    return Ret;
+}
+
+
+
+//---------------------------------------------------------------------------
+//
 // Function:    EplTimeruSetTimerMs
 //
 // Description: function creates a timer and returns a handle to the pointer

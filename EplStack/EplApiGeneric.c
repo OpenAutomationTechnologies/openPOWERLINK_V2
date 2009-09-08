@@ -1317,7 +1317,7 @@ tShbError  ShbError;
         Ret = kEplInvalidOperation;
         goto Exit;
     }
-    // Ret = EplTimeruProcess();
+    Ret = EplTimeruProcess();
 
 Exit:
     return Ret;
