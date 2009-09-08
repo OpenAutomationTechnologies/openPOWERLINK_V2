@@ -186,7 +186,7 @@ tEplKernel PUBLIC AppCbEvent(
             {
                 case kEplNmtGsOff:
                 {   // NMT state machine was shut down,
-                    // because of user signal (CTRL-C) or critical EPL stack error
+                    // because of critical EPL stack error
                     // -> also shut down EplApiProcess() and main()
                     EplRet = kEplShutdown;
                     shutdown = TRUE;
@@ -200,6 +200,8 @@ tEplKernel PUBLIC AppCbEvent(
                 case kEplNmtGsResetCommunication:
                 case kEplNmtGsResetConfiguration:
                 case kEplNmtCsPreOperational1:
+                case kEplNmtCsBasicEthernet:
+                case kEplNmtMsBasicEthernet:
                 {
                     PRINTF3("%s(0x%X) originating event = 0x%X\n",
                             __func__,

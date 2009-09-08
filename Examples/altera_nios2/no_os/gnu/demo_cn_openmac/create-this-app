@@ -37,6 +37,7 @@ ${MAINPATH}/EplStack/EplEventk.c ${MAINPATH}/EplStack/EplEventu.c \
 ${MAINPATH}/EplStack/EplNmtk.c ${MAINPATH}/EplStack/EplNmtkCal.c \
 ${MAINPATH}/EplStack/EplNmtu.c ${MAINPATH}/EplStack/EplNmtuCal.c ${MAINPATH}/EplStack/EplNmtCnu.c \
 ${MAINPATH}/EplStack/EplPdok.c ${MAINPATH}/EplStack/EplPdokCal.c \
+${MAINPATH}/EplStack/EplPdou.c ${MAINPATH}/EplStack/EplPdouCal.c \
 ${MAINPATH}/EplStack/EplObd.c \
 ${MAINPATH}/EplStack/EplSdoComu.c ${MAINPATH}/EplStack/EplSdoAsySequ.c ${MAINPATH}/EplStack/EplSdoAsndu.c \
 ${MAINPATH}/EplStack/EplTimeruNoOS.c \

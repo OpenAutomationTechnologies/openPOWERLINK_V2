@@ -71,6 +71,7 @@
 #ifndef _EPLCFG_H_
 #define _EPLCFG_H_
 
+#include "EplInc.h"
 
 
 
@@ -96,9 +97,6 @@
 // use no FIFOs, make direct calls
 //#define EPL_NO_FIFO
 
-// use no IPC between user- and kernelspace modules, make direct calls
-#define EPL_NO_USER_KERNEL
-
 #ifndef BENCHMARK_MODULES
 //#define BENCHMARK_MODULES       0 //0xEE800042L
 #define BENCHMARK_MODULES       0xEE800043L
@@ -119,6 +117,7 @@
 
 #define EPL_MODULE_INTEGRATION 	(0 \
 								| EPL_MODULE_OBDK \
+                                | EPL_MODULE_PDOU \
 								| EPL_MODULE_PDOK \
 								| EPL_MODULE_SDOS \
 								| EPL_MODULE_SDOC \
