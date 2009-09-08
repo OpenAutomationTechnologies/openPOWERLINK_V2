@@ -96,6 +96,8 @@ tEplKernel PUBLIC EplTimeruAddInstance(void);
 
 tEplKernel PUBLIC EplTimeruDelInstance(void);
 
+tEplKernel PUBLIC EplTimeruProcess(void);
+
 tEplKernel PUBLIC EplTimeruSetTimerMs(  tEplTimerHdl*   pTimerHdl_p,
                                         unsigned long   ulTimeMs_p,
                                         tEplTimerArg    Argument_p);
