@@ -70,10 +70,10 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------
 //--- set the system's base adr ---
 // MAC / MII IP CORE
-#define EDRV_MAC_BASE                   (void *)EPL_OPENMAC_0_REG_BASE
-#define EDRV_MII_BASE                   (void *)EPL_OPENMAC_0_MII_BASE
-#define EPL_MAC_TX_IRQ                  EPL_OPENMAC_0_REG_IRQ
-#define EPL_MAC_RX_IRQ                  EPL_OPENMAC_0_RX_IRQ
+#define EDRV_MAC_BASE                   (void *)OPENMAC_0_REG_BASE
+#define EDRV_MII_BASE                   (void *)OPENMAC_0_MII_BASE
+#define EPL_MAC_TX_IRQ                  OPENMAC_0_REG_IRQ
+#define EPL_MAC_RX_IRQ                  OPENMAC_0_RX_IRQ
 //--- set the system's base adr ---
 
 
@@ -720,7 +720,8 @@ unsigned int    uiEntry;
     else
     {   // specific entry should be changed
 
-        if ((uiChangeFlags_p & (EDRV_FILTER_CHANGE_VALUE | EDRV_FILTER_CHANGE_MASK)) != 0)
+        if (((uiChangeFlags_p & (EDRV_FILTER_CHANGE_VALUE | EDRV_FILTER_CHANGE_MASK)) != 0)
+            || (pFilter_p[uiEntryChanged_p].m_fEnable == FALSE))
         {   // disable this filter entry
             omethFilterDisable(EdrvInstance_l.m_ahFilter[uiEntryChanged_p]);
 
