@@ -480,7 +480,7 @@ tShbError       ShbError;
 //  Process function for NewData and JobReady signaling
 //---------------------------------------------------------------------------
 
-tShbError  ShbIpcProcess (void)
+INLINE_FUNCTION tShbError  ShbIpcProcess (void)
 {
 tShbError       ShbError = kShbOk;
 

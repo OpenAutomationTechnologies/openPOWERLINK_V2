@@ -467,19 +467,6 @@ tShbError       ShbError2;
 }
 
 
-
-//---------------------------------------------------------------------------
-//  Process function (only used for implementations without threads)
-//---------------------------------------------------------------------------
-
-tShbError  ShbIpcProcess (void)
-{
-tShbError       ShbError = kShbOk;
-
-    return ShbError;
-}
-
-
 #endif  // !defined(SHBIPC_INLINE_ENABLED)
 
 #if (!defined(SHBIPC_INLINED)) || defined(SHBIPC_INLINE_ENABLED)
@@ -774,6 +761,19 @@ void*  pShbShMemPtr;
     return (pShbShMemPtr);
 
 }
+
+
+//---------------------------------------------------------------------------
+//  Process function (only used for implementations without threads)
+//---------------------------------------------------------------------------
+
+INLINE_FUNCTION tShbError  ShbIpcProcess (void)
+{
+tShbError       ShbError = kShbOk;
+
+    return ShbError;
+}
+
 
 #endif
 
