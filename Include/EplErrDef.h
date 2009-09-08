@@ -206,18 +206,22 @@ typedef enum
 
     // area for PDO module 0x00B0 - 0x00BF
     kEplPdoNotExist             = 0x00B0,       // selected PDO does not exist
-    kEplPdoLengthExceeded       = 0x00B1,       // length of PDO mapping exceedes 64 bis
+    kEplPdoLengthExceeded       = 0x00B1,       // length of PDO mapping exceeds the current payload limit
     kEplPdoGranularityMismatch  = 0x00B2,       // configured PDO granularity is not equal to supported granularity
     kEplPdoInitError            = 0x00B3,       // error during initialisation of PDO module
     kEplPdoErrorPdoEncode       = 0x00B4,       // error during encoding a PDO
     kEplPdoErrorPdoDecode       = 0x00B5,       // error during decoding a PDO
     kEplPdoErrorSend            = 0x00B6,       // error during sending a PDO
-    kEplPdoErrorSyncWin         = 0x00B7,       // the SYNC window runs out during sending SYNC-PDOs
+    kEplPdoConfWhileEnabled     = 0x00B7,       // PDO configuration cannot be changed while it is enabled
     kEplPdoErrorMapp            = 0x00B8,       // invalid PDO mapping
     kEplPdoVarNotFound          = 0x00B9,       // variable was not found in function PdoSignalVar()
     kEplPdoErrorEmcyPdoLen      = 0x00BA,       // the length of a received PDO is unequal to the expected value
     kEplPdoWriteConstObject     = 0x00BB,       // constant object can not be written
                                                 // (only TxType, Inhibit-, Event Time for CANopen Kit)
+    kEplPdoSizeMismatch         = 0x00BC,       // bit size of object mapping is larger than the object size
+    kEplPdoToManyTxPdos         = 0x00BD,       // there exits more than one TPDO on CN
+    kEplPdoInvalidObjIndex      = 0x00BE,       // invalid object index used for PDO mapping or communication parameter
+    kEplPdoToManyPdos           = 0x00BF,       // there exit to many PDOs
 
     // area for LSS slave module
 /*    kEplLsssResetNode           = 0x0080,       // NMT command "reset node" has to be processed after LSS configuration

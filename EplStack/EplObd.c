@@ -1100,6 +1100,60 @@ Exit:
 
 }
 
+
+//---------------------------------------------------------------------------
+//
+// Function:    EplObdGetType()
+//
+// Description: function returns the data type of the specified entry
+//
+//
+// Parameters:  EPL_MCO_DECL_INSTANCE_PTR_ = Instancepointer
+//              uiIndex_p           = Index
+//              uiSubIndex_p        = Subindex
+//              pType_p             = pointer to tEplObdType for returnvalue
+//
+// Return:      tEplKernel = Errorcode
+//
+// State:
+//
+//---------------------------------------------------------------------------
+EPLDLLEXPORT tEplKernel PUBLIC EplObdGetType(EPL_MCO_DECL_INSTANCE_PTR_
+                                        unsigned int  uiIndex_p,
+                                        unsigned int  uiSubIndex_p,
+                                        tEplObdType*  pType_p)
+{
+tEplKernel          Ret;
+tEplObdEntryPtr     pObdEntry;
+tEplObdSubEntryPtr  pObdSubEntry;
+
+
+    // get pointer to index structure
+    Ret = EplObdGetIndexIntern (&EPL_MCO_GLB_VAR (m_ObdInitParam),
+                                uiIndex_p,
+                                &pObdEntry);
+    if(Ret != kEplSuccessful)
+    {
+        goto Exit;
+    }
+
+    // get pointer to subindex structure
+    Ret = EplObdGetSubindexIntern (pObdEntry,
+                                uiSubIndex_p,
+                                &pObdSubEntry);
+    if(Ret != kEplSuccessful)
+    {
+        goto Exit;
+    }
+
+    *pType_p = pObdSubEntry->m_Type;
+
+Exit:
+    return Ret;
+
+}
+
+
 //---------------------------------------------------------------------------
 //
 // Function:    EplObdReadEntryToLe()

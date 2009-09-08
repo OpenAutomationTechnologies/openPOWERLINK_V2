@@ -73,6 +73,7 @@
 #define _EPL_PDOKCAL_H_
 
 #include "EplInc.h"
+#include "EplEvent.h"
 //#include "EplPdo.h"
 
 //---------------------------------------------------------------------------
@@ -99,6 +100,7 @@ tEplKernel EplPdokCalSetTpdosValid(BOOL fValid_p);
 // gets flag for validity of TPDOs from shared memory
 tEplKernel EplPdokCalAreTpdosValid(BOOL * pfValid_p);
 
+tEplKernel EplPdokCalProcess(tEplEvent * pEvent_p);
 
 
 #endif  // #ifndef _EPL_PDOKCAL_H_

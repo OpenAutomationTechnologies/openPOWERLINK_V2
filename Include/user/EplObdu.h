@@ -189,6 +189,8 @@ EPLDLLEXPORT tEplKernel PUBLIC EplObduSearchVarEntry (EPL_MCO_DECL_INSTANCE_PTR_
 
 #define EplObduIsNumerical      EplObdIsNumerical
 
+#define EplObduGetType          EplObdGetType
+
 #endif // #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_OBDU)) != 0)
 
 #endif  // #ifndef _EPLOBDU_H_

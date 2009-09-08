@@ -71,10 +71,11 @@
 ****************************************************************************/
 
 #include "EplInc.h"
-//#include "user/EplPdouCal.h"
+#include "user/EplPdouCal.h"
 #include "user/EplObdu.h"
 #include "user/EplPdou.h"
 #include "EplSdoAc.h"
+#include "EplPdo.h"
 
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOU)) != 0)
 
@@ -145,16 +146,39 @@
 // local types
 //---------------------------------------------------------------------------
 
+typedef struct
+{
+    BYTE    m_abPdoIdToChannelIdRx[(EPL_PDOU_PDO_ID_MASK + 1)];
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
+    // only MN supports multiple TPDOS where indexing is necessary
+    BYTE    m_abPdoIdToChannelIdTx[(EPL_PDOU_PDO_ID_MASK + 1)];
+#endif
+
+    BOOL    m_fAllocated;
+    BOOL    m_fRunning;
+
+} tEplPdouInstance;
+
+
 //---------------------------------------------------------------------------
 // local vars
 //---------------------------------------------------------------------------
+
+static tEplPdouInstance  EplPdouInstance_g;
 
 
 //---------------------------------------------------------------------------
 // local function prototypes
 //---------------------------------------------------------------------------
 
-static tEplKernel EplPdouCheckPdoValidity(tEplObdCbParam MEM* pParam_p, unsigned int uiIndex_p);
+static tEplKernel EplPdouAlloc(BYTE abChannelIdToPdoIdRx_p[EPL_D_PDO_RPDOChannels_U16], unsigned int* puiCountChannelIdRx_p,
+                               BYTE abChannelIdToPdoIdTx_p[EPL_D_PDO_TPDOChannels_U16], unsigned int* puiCountChannelIdTx_p);
+
+static tEplKernel EplPdouConfigureAllPdos(void);
+
+static tEplKernel EplPdouCheckAndConfigurePdo(unsigned int uiIndex_p, BYTE  bMappObjectCount_p, tEplObdAccess AccessType_p, DWORD* pdwAbortCode_p);
+
+static tEplKernel EplPdouCheckPdoValidity(unsigned int uiMappParamIndex_p, DWORD* pdwAbortCode_p);
 
 static void EplPdouDecodeObjectMapping(QWORD qwObjectMapping_p,
                                     unsigned int* puiIndex_p,
@@ -164,8 +188,15 @@ static void EplPdouDecodeObjectMapping(QWORD qwObjectMapping_p,
 
 static tEplKernel EplPdouCheckObjectMapping(QWORD qwObjectMapping_p,
                                        tEplObdAccess AccessType_p,
+                                       tEplPdoMappObject* pMappObject_p,
                                        DWORD* pdwAbortCode_p,
                                        unsigned int* puiPdoSize_p);
+
+static tEplKernel EplPdouConfigureChannel(tEplPdoChannelConf* pChannelConf_p);
+
+static unsigned int EplPdouRxPdoIdToChannelId(unsigned int uiPdoId_p);
+
+static unsigned int EplPdouTxPdoIdToChannelId(unsigned int uiPdoId_p);
 
 
 
@@ -192,6 +223,9 @@ static tEplKernel EplPdouCheckObjectMapping(QWORD qwObjectMapping_p,
 
 tEplKernel EplPdouAddInstance(void)
 {
+    EPL_MEMSET(&EplPdouInstance_g, 0, sizeof(EplPdouInstance_g));
+    EplPdouInstance_g.m_fAllocated = FALSE;
+    EplPdouInstance_g.m_fRunning = FALSE;
 
     return kEplSuccessful;
 }
@@ -221,6 +255,66 @@ tEplKernel EplPdouDelInstance(void)
 
 //---------------------------------------------------------------------------
 //
+// Function:    EplPdouCbNmtStateChange
+//
+// Description: callback function for NMT state changes
+//
+// Parameters:  NmtStateChange_p        = NMT state change event
+//
+// Returns:     tEplKernel              = error code
+//
+//
+// State:
+//
+//---------------------------------------------------------------------------
+
+tEplKernel PUBLIC EplPdouCbNmtStateChange(tEplEventNmtStateChange NmtStateChange_p)
+{
+tEplKernel      Ret = kEplSuccessful;
+
+    switch (NmtStateChange_p.m_NewNmtState)
+    {
+        case kEplNmtGsOff:
+        case kEplNmtGsInitialising:
+        case kEplNmtGsResetApplication:
+        case kEplNmtGsResetCommunication:
+        {
+            EplPdouInstance_g.m_fAllocated = FALSE;
+            EplPdouInstance_g.m_fRunning = FALSE;
+            break;
+        }
+
+        case kEplNmtGsResetConfiguration:
+        {
+            EplPdouInstance_g.m_fAllocated = FALSE;
+            EplPdouInstance_g.m_fRunning = FALSE;
+
+            // forward PDO configuration to Pdok module
+            Ret = EplPdouConfigureAllPdos();
+            if (Ret != kEplSuccessful)
+            {
+                goto Exit;
+            }
+
+            EplPdouInstance_g.m_fRunning = TRUE;
+
+            break;
+        }
+
+        default:
+        {   // do nothing
+            break;
+        }
+
+    }
+
+Exit:
+    return Ret;
+}
+
+
+//---------------------------------------------------------------------------
+//
 // Function:    EplPdouCbObdAccess
 //
 // Description: callback function for OD accesses
@@ -237,28 +331,20 @@ tEplKernel EplPdouDelInstance(void)
 tEplKernel PUBLIC EplPdouCbObdAccess(tEplObdCbParam MEM* pParam_p)
 {
 tEplKernel          Ret = kEplSuccessful;
-unsigned int        uiPdoId;
 unsigned int        uiIndexType;
-tEplObdSize         ObdSize;
-BYTE                bObjectCount;
-QWORD               qwObjectMapping;
+BYTE                bMappObjectCount;
 tEplObdAccess       AccessType;
-BYTE                bMappSubindex;
 unsigned int        uiCurPdoSize;
-WORD                wMaxPdoSize;
-unsigned int        uiSubIndex;
 
-    // fetch PDO ID
-    uiPdoId = pParam_p->m_uiIndex & EPL_PDOU_PDO_ID_MASK;
-
-    // fetch object index type
-    uiIndexType = pParam_p->m_uiIndex & EPL_PDOU_OBD_IDX_MASK;
+    pParam_p->m_dwAbortCode = 0;
 
     if (pParam_p->m_ObdEvent != kEplObdEvPreWrite)
     {   // read accesses, post write events etc. are OK
-        pParam_p->m_dwAbortCode = 0;
         goto Exit;
     }
+
+    // fetch object index type
+    uiIndexType = pParam_p->m_uiIndex & EPL_PDOU_OBD_IDX_MASK;
 
     // check index type
     switch (uiIndexType)
@@ -267,8 +353,9 @@ unsigned int        uiSubIndex;
             // RPDO communication parameter accessed
         case EPL_PDOU_OBD_IDX_TX_COMM_PARAM:
         {   // TPDO communication parameter accessed
-            Ret = EplPdouCheckPdoValidity(pParam_p,
-                    (EPL_PDOU_OBD_IDX_MAPP_PARAM | pParam_p->m_uiIndex));
+            Ret = EplPdouCheckPdoValidity(
+                    (EPL_PDOU_OBD_IDX_MAPP_PARAM | pParam_p->m_uiIndex),
+                    &pParam_p->m_dwAbortCode);
             if (Ret != kEplSuccessful)
             {   // PDO is valid or does not exist
                 goto Exit;
@@ -295,6 +382,7 @@ unsigned int        uiSubIndex;
         {   // this callback function is only for
             // PDO mapping and communication parameters
             pParam_p->m_dwAbortCode = EPL_SDOAC_GENERAL_ERROR;
+            Ret = kEplPdoInvalidObjIndex;
             goto Exit;
         }
     }
@@ -305,77 +393,20 @@ unsigned int        uiSubIndex;
     {   // object mapping count accessed
 
         // PDO is enabled or disabled
-        bObjectCount = *((BYTE*) pParam_p->m_pArg);
+        bMappObjectCount = *((BYTE*) pParam_p->m_pArg);
 
-        if (bObjectCount == 0)
-        {   // PDO shall be disabled
-
-            // that is always possible
-            goto Exit;
-        }
-
-        // PDO shall be enabled
-        // it should have been disabled for this operation
-        Ret = EplPdouCheckPdoValidity(pParam_p, pParam_p->m_uiIndex);
+        Ret = EplPdouCheckAndConfigurePdo(pParam_p->m_uiIndex, bMappObjectCount, AccessType, &pParam_p->m_dwAbortCode);
         if (Ret != kEplSuccessful)
-        {   // PDO is valid or does not exist
+        {
             goto Exit;
         }
-
-        if (AccessType == kEplObdAccWrite)
-        {
-            uiSubIndex = 0x04;  // PReqActPayloadLimit_U16
-        }
-        else
-        {
-            uiSubIndex = 0x05;  // PResActPayloadLimit_U16
-        }
-
-        // fetch maximum PDO size from Object 1F98h: NMT_CycleTiming_REC
-        ObdSize = sizeof (wMaxPdoSize);
-        Ret = EplObduReadEntry(0x1F98, uiSubIndex, &wMaxPdoSize, &ObdSize);
-        if (Ret != kEplSuccessful)
-        {   // other fatal error occured
-            pParam_p->m_dwAbortCode = EPL_SDOAC_GENERAL_ERROR;
-            goto Exit;
-        }
-
-        // check all objectmappings
-        for (bMappSubindex = 1; bMappSubindex <= bObjectCount; bMappSubindex++)
-        {
-            // read object mapping from OD
-            ObdSize = sizeof (qwObjectMapping); // QWORD
-            Ret = EplObduReadEntry(pParam_p->m_uiIndex,
-                                bMappSubindex, &qwObjectMapping, &ObdSize);
-            if (Ret != kEplSuccessful)
-            {   // other fatal error occured
-                pParam_p->m_dwAbortCode = EPL_SDOAC_GENERAL_ERROR;
-                goto Exit;
-            }
-
-            // check object mapping
-            Ret = EplPdouCheckObjectMapping(qwObjectMapping,
-                                   AccessType,
-                                   &pParam_p->m_dwAbortCode,
-                                   &uiCurPdoSize);
-            if (Ret != kEplSuccessful)
-            {   // illegal object mapping
-                goto Exit;
-            }
-
-            if (uiCurPdoSize > wMaxPdoSize)
-            {   // mapping exceeds object size
-                pParam_p->m_dwAbortCode = EPL_SDOAC_GENERAL_ERROR;
-                Ret = kEplPdoVarNotFound;
-            }
-
-
-        }
-
     }
     else
     {   // ObjectMapping
-        Ret = EplPdouCheckPdoValidity(pParam_p, pParam_p->m_uiIndex);
+    tEplPdoMappObject   MappObject;
+    QWORD               qwObjectMapping;
+
+        Ret = EplPdouCheckPdoValidity(pParam_p->m_uiIndex, &pParam_p->m_dwAbortCode);
         if (Ret != kEplSuccessful)
         {   // PDO is valid or does not exist
             goto Exit;
@@ -387,6 +418,7 @@ unsigned int        uiSubIndex;
 
         Ret = EplPdouCheckObjectMapping(qwObjectMapping,
                                AccessType,
+                               &MappObject,
                                &pParam_p->m_dwAbortCode,
                                &uiCurPdoSize);
 
@@ -406,9 +438,211 @@ Exit:
 
 //---------------------------------------------------------------------------
 //
-// Function:    EplPdouCheckPdoValidity
+// Function:    EplPdouAlloc
 //
-// Description: check if PDO is valid
+// Description: allocate necessary memory for all existing PDOs
+//
+// Parameters:  void
+//
+// Returns:     tEplKernel              = error code
+//
+//
+// State:
+//
+//---------------------------------------------------------------------------
+
+static tEplKernel EplPdouAlloc(BYTE abChannelIdToPdoIdRx_p[EPL_D_PDO_RPDOChannels_U16], unsigned int* puiCountChannelIdRx_p,
+                               BYTE abChannelIdToPdoIdTx_p[EPL_D_PDO_TPDOChannels_U16], unsigned int* puiCountChannelIdTx_p)
+{
+tEplKernel          Ret = kEplSuccessful;
+tEplObdSize         ObdSize;
+BYTE                bNodeId;
+unsigned int        uiPdoId;
+unsigned int        uiCommParamIndex;
+tEplPdoAllocationParam  AllocParam;
+
+    AllocParam.m_uiRxPdoChannelCount = 0;
+    AllocParam.m_uiTxPdoChannelCount = 0;
+
+    EPL_MEMSET(EplPdouInstance_g.m_abPdoIdToChannelIdRx, 0, sizeof (EplPdouInstance_g.m_abPdoIdToChannelIdRx));
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
+    EPL_MEMSET(EplPdouInstance_g.m_abPdoIdToChannelIdTx, 0, sizeof (EplPdouInstance_g.m_abPdoIdToChannelIdTx));
+#endif
+
+    for (uiPdoId = 0, uiCommParamIndex = EPL_PDOU_OBD_IDX_RX_COMM_PARAM;
+        uiPdoId < sizeof (EplPdouInstance_g.m_abPdoIdToChannelIdRx);
+        uiPdoId++, uiCommParamIndex++)
+    {
+        ObdSize = sizeof (bNodeId);
+        // read node ID from OD
+        Ret = EplObduReadEntry(uiCommParamIndex, 0x01, &bNodeId, &ObdSize);
+        if ((Ret == kEplObdIndexNotExist)
+            || (Ret == kEplObdSubindexNotExist)
+            || (Ret == kEplObdIllegalPart))
+        {   // PDO does not exist
+            continue;
+        }
+        else if (Ret != kEplSuccessful)
+        {   // other fatal error occured
+            goto Exit;
+        }
+
+        if (AllocParam.m_uiRxPdoChannelCount > EPL_D_PDO_RPDOChannels_U16)
+        {
+            Ret = kEplPdoToManyPdos;
+            goto Exit;
+        }
+
+        EplPdouInstance_g.m_abPdoIdToChannelIdRx[uiPdoId] = AllocParam.m_uiRxPdoChannelCount;
+        abChannelIdToPdoIdRx_p[AllocParam.m_uiRxPdoChannelCount] = (BYTE) uiPdoId;
+
+        AllocParam.m_uiRxPdoChannelCount++;
+    }
+    *puiCountChannelIdRx_p = AllocParam.m_uiRxPdoChannelCount;
+
+    for (uiPdoId = 0, uiCommParamIndex = EPL_PDOU_OBD_IDX_TX_COMM_PARAM;
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
+        uiPdoId < sizeof (EplPdouInstance_g.m_abPdoIdToChannelIdRx);
+#else
+        uiPdoId < (EPL_PDOU_PDO_ID_MASK + 1);
+#endif
+        uiPdoId++, uiCommParamIndex++)
+    {
+        ObdSize = sizeof (bNodeId);
+        // read node ID from OD
+        Ret = EplObduReadEntry(uiCommParamIndex, 0x01, &bNodeId, &ObdSize);
+        if ((Ret == kEplObdIndexNotExist)
+            || (Ret == kEplObdSubindexNotExist)
+            || (Ret == kEplObdIllegalPart))
+        {   // PDO does not exist
+            continue;
+        }
+        else if (Ret != kEplSuccessful)
+        {   // other fatal error occured
+            goto Exit;
+        }
+
+        if (AllocParam.m_uiTxPdoChannelCount > EPL_D_PDO_TPDOChannels_U16)
+        {
+            Ret = kEplPdoToManyTxPdos;
+            goto Exit;
+        }
+
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
+        EplPdouInstance_g.m_abPdoIdToChannelIdTx[uiPdoId] = AllocParam.m_uiTxPdoChannelCount;
+#endif
+        abChannelIdToPdoIdTx_p[AllocParam.m_uiTxPdoChannelCount] = (BYTE) uiPdoId;
+
+        AllocParam.m_uiTxPdoChannelCount++;
+    }
+    *puiCountChannelIdTx_p = AllocParam.m_uiTxPdoChannelCount;
+
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) == 0)
+    // no MN support, so we must not have more than one TPDO
+    if (AllocParam.m_uiTxPdoChannelCount > 1)
+    {
+        Ret = kEplPdoToManyTxPdos;
+        goto Exit;
+    }
+#endif
+
+    // inform Pdok module
+    Ret = EplPdouCalAlloc(&AllocParam);
+    if (Ret != kEplSuccessful)
+    {
+        goto Exit;
+    }
+
+    EplPdouInstance_g.m_fAllocated = TRUE;
+
+Exit:
+    return Ret;
+}
+
+
+//---------------------------------------------------------------------------
+//
+// Function:    EplPdouConfigureAllPdos
+//
+// Description: configures all PDOs in Pdok module
+//
+// Parameters:  void
+//
+// Returns:     tEplKernel              = error code
+//
+//
+// State:
+//
+//---------------------------------------------------------------------------
+
+static tEplKernel EplPdouConfigureAllPdos(void)
+{
+tEplKernel          Ret = kEplSuccessful;
+tEplObdSize         ObdSize;
+BYTE                bMappObjectCount;
+unsigned int        uiIndex;
+unsigned int        uiMappParamIndex;
+BYTE                abChannelIdToPdoIdRx[EPL_D_PDO_RPDOChannels_U16];
+unsigned int        uiCountChannelIdRx;
+BYTE                abChannelIdToPdoIdTx[EPL_D_PDO_TPDOChannels_U16];
+unsigned int        uiCountChannelIdTx;
+DWORD               dwAbortCode = 0;
+
+    // check number of PDOs and allocate memory for them
+    Ret = EplPdouAlloc(abChannelIdToPdoIdRx, &uiCountChannelIdRx, abChannelIdToPdoIdTx, &uiCountChannelIdTx);
+    if (Ret != kEplSuccessful)
+    {
+        goto Exit;
+    }
+
+    for (uiIndex = 0; uiIndex < uiCountChannelIdRx; uiIndex++)
+    {
+        uiMappParamIndex = EPL_PDOU_OBD_IDX_RX_MAPP_PARAM + abChannelIdToPdoIdRx[uiIndex];
+
+        ObdSize = sizeof (bMappObjectCount);
+        // read mapping object count from OD
+        Ret = EplObduReadEntry(uiMappParamIndex, 0x00, &bMappObjectCount, &ObdSize);
+        if (Ret != kEplSuccessful)
+        {
+            goto Exit;
+        }
+
+        Ret = EplPdouCheckAndConfigurePdo(uiMappParamIndex, bMappObjectCount, kEplObdAccWrite, &dwAbortCode);
+        if (Ret != kEplSuccessful)
+        {
+            goto Exit;
+        }
+    }
+
+    for (uiIndex = 0; uiIndex < uiCountChannelIdTx; uiIndex++)
+    {
+        uiMappParamIndex = EPL_PDOU_OBD_IDX_TX_MAPP_PARAM + abChannelIdToPdoIdTx[uiIndex];
+
+        ObdSize = sizeof (bMappObjectCount);
+        // read mapping object count from OD
+        Ret = EplObduReadEntry(uiMappParamIndex, 0x00, &bMappObjectCount, &ObdSize);
+        if (Ret != kEplSuccessful)
+        {
+            goto Exit;
+        }
+
+        Ret = EplPdouCheckAndConfigurePdo(uiMappParamIndex, bMappObjectCount, kEplObdAccRead, &dwAbortCode);
+        if (Ret != kEplSuccessful)
+        {
+            goto Exit;
+        }
+    }
+
+Exit:
+    return Ret;
+}
+
+
+//---------------------------------------------------------------------------
+//
+// Function:    EplPdouCheckAndConfigurePdo
+//
+// Description: checks and configures the specified PDO in Pdok module
 //
 // Parameters:  pParam_p                = OBD parameter
 //
@@ -419,25 +653,172 @@ Exit:
 //
 //---------------------------------------------------------------------------
 
-static tEplKernel EplPdouCheckPdoValidity(tEplObdCbParam MEM* pParam_p, unsigned int uiIndex_p)
+static tEplKernel EplPdouCheckAndConfigurePdo(unsigned int uiMappParamIndex_p, BYTE  bMappObjectCount_p, tEplObdAccess AccessType_p, DWORD* pdwAbortCode_p)
 {
 tEplKernel          Ret = kEplSuccessful;
+unsigned int        uiPdoId;
+unsigned int        uiCommParamIndex;
 tEplObdSize         ObdSize;
-BYTE                bObjectCount;
+BYTE                bNodeId;
+QWORD               qwObjectMapping;
+BYTE                bMappSubindex;
+unsigned int        uiCurPdoSize;
+WORD                wMaxPdoSize;
+WORD                wCalcPdoSize = 0;
+unsigned int        uiSubIndex;
+tEplPdoChannelConf  PdoChannelConf;
+tEplPdoMappObject*  pMappObject;
 
-    ObdSize = 1;
-    // read number of mapped objects from OD; this indicates if the PDO is valid
-    Ret = EplObduReadEntry(uiIndex_p, 0x00, &bObjectCount, &ObdSize);
-    if (Ret != kEplSuccessful)
-    {   // other fatal error occured
-        pParam_p->m_dwAbortCode = EPL_SDOAC_GEN_INTERNAL_INCOMPATIBILITY;
+    // fetch PDO ID
+    uiPdoId = uiMappParamIndex_p & EPL_PDOU_PDO_ID_MASK;
+
+    uiCommParamIndex = ~EPL_PDOU_OBD_IDX_MAPP_PARAM & uiMappParamIndex_p;
+
+    // check access type
+    switch (AccessType_p)
+    {
+        case kEplObdAccWrite:
+        {   // RPDO mapping parameter accessed
+
+            PdoChannelConf.m_uiChannelId = EplPdouRxPdoIdToChannelId(uiPdoId);
+            PdoChannelConf.m_fTx = FALSE;
+            break;
+        }
+
+        case kEplObdAccRead:
+        {   // TPDO mapping parameter accessed
+
+            PdoChannelConf.m_uiChannelId = EplPdouTxPdoIdToChannelId(uiPdoId);
+            PdoChannelConf.m_fTx = TRUE;
+            break;
+        }
+
+        default:
+        {
+            *pdwAbortCode_p = EPL_SDOAC_GENERAL_ERROR;
+            Ret = kEplPdoInvalidObjIndex;
+            goto Exit;
+        }
+    }
+
+    if (bMappObjectCount_p == 0)
+    {   // PDO shall be disabled
+
+        PdoChannelConf.m_PdoChannel.m_uiNodeId = EPL_PDO_INVALID_NODE_ID;
+        PdoChannelConf.m_PdoChannel.m_uiMappObjectCount = 0;
+
+        Ret = EplPdouConfigureChannel(&PdoChannelConf);
+
         goto Exit;
     }
-    // entry read successfully
-    if (bObjectCount != 0)
-    {   // PDO in OD is still valid
-        pParam_p->m_dwAbortCode = EPL_SDOAC_GEN_PARAM_INCOMPATIBILITY;
-        Ret = kEplPdoNotExist;
+
+    // PDO shall be enabled
+
+    Ret = EplPdouCheckPdoValidity(uiMappParamIndex_p, pdwAbortCode_p);
+    if (Ret != kEplSuccessful)
+    {   // PDO is valid or does not exist
+        goto Exit;
+    }
+
+    if (AccessType_p == kEplObdAccWrite)
+    {
+        uiSubIndex = 0x04;  // PReqActPayloadLimit_U16
+    }
+    else
+    {
+        uiSubIndex = 0x05;  // PResActPayloadLimit_U16
+    }
+
+    // fetch maximum PDO size from Object 1F98h: NMT_CycleTiming_REC
+    ObdSize = sizeof (wMaxPdoSize);
+    Ret = EplObduReadEntry(0x1F98, uiSubIndex, &wMaxPdoSize, &ObdSize);
+    if (Ret != kEplSuccessful)
+    {   // other fatal error occured
+        *pdwAbortCode_p = EPL_SDOAC_GENERAL_ERROR;
+        goto Exit;
+    }
+
+    // check number of mappings agains size of array
+    if (bMappObjectCount_p > tabentries(PdoChannelConf.m_aMappObject))
+    {
+        *pdwAbortCode_p = EPL_SDOAC_VALUE_RANGE_EXCEEDED;
+        Ret = kEplObdValueTooHigh;
+        goto Exit;
+    }
+
+    pMappObject = &PdoChannelConf.m_aMappObject[0];
+
+    // check all objectmappings
+    for (bMappSubindex = 1; bMappSubindex <= bMappObjectCount_p; bMappSubindex++)
+    {
+        // read object mapping from OD
+        ObdSize = sizeof (qwObjectMapping); // QWORD
+        Ret = EplObduReadEntry(uiMappParamIndex_p,
+                            bMappSubindex, &qwObjectMapping, &ObdSize);
+        if (Ret != kEplSuccessful)
+        {   // other fatal error occured
+            *pdwAbortCode_p = EPL_SDOAC_GENERAL_ERROR;
+            goto Exit;
+        }
+
+        // check object mapping
+        Ret = EplPdouCheckObjectMapping(qwObjectMapping,
+                               AccessType_p,
+                               pMappObject,
+                               pdwAbortCode_p,
+                               &uiCurPdoSize);
+        if (Ret != kEplSuccessful)
+        {   // illegal object mapping
+            goto Exit;
+        }
+
+        if (uiCurPdoSize == 0)
+        {   // null mapping, go to next subindex
+            continue;
+        }
+
+        if (uiCurPdoSize > wMaxPdoSize)
+        {   // mapping exceeds object size
+            *pdwAbortCode_p = EPL_SDOAC_PDO_LENGTH_EXCEEDED;
+            Ret = kEplPdoLengthExceeded;
+            goto Exit;
+        }
+
+        if (uiCurPdoSize > wCalcPdoSize)
+        {
+            wCalcPdoSize = (WORD) uiCurPdoSize;
+        }
+
+        pMappObject++;
+
+    }
+
+    ObdSize = sizeof (bNodeId);
+    // read node ID from OD
+    Ret = EplObduReadEntry(uiCommParamIndex, 0x01, &bNodeId, &ObdSize);
+    if (Ret != kEplSuccessful)
+    {   // fatal error occured
+        goto Exit;
+    }
+
+    PdoChannelConf.m_PdoChannel.m_uiNodeId = bNodeId;
+
+    ObdSize = sizeof (PdoChannelConf.m_PdoChannel.m_bMappingVersion);
+    // read PDO mapping version
+    Ret = EplObdReadEntry(uiCommParamIndex, 0x02, &PdoChannelConf.m_PdoChannel.m_bMappingVersion, &ObdSize);
+    if (Ret != kEplSuccessful)
+    {   // other fatal error occured
+        goto Exit;
+    }
+
+    PdoChannelConf.m_PdoChannel.m_wPdoSize = wCalcPdoSize;
+    PdoChannelConf.m_PdoChannel.m_uiMappObjectCount = (unsigned int) (pMappObject - &PdoChannelConf.m_aMappObject[0]);
+
+    // do not make the call before Alloc has been called
+    Ret = EplPdouConfigureChannel(&PdoChannelConf);
+    if (Ret != kEplSuccessful)
+    {   // fatal error occured
+        *pdwAbortCode_p = EPL_SDOAC_GENERAL_ERROR;
         goto Exit;
     }
 
@@ -448,41 +829,125 @@ Exit:
 
 //---------------------------------------------------------------------------
 //
-// Function:    EplPdouDecodeObjectMapping
+// Function:    EplPdouConfigureChannel()
 //
-// Description: decodes the given object mapping entry into index, subindex,
-//              bit offset and bit size.
+// Description: This function configures the specified PDO channel.
 //
-// Parameters:  qwObjectMapping_p       = object mapping entry
-//              puiIndex_p              = [OUT] pointer to object index
-//              puiSubIndex_p           = [OUT] pointer to subindex
-//              puiBitOffset_p          = [OUT] pointer to bit offset
-//              puiBitSize_p            = [OUT] pointer to bit size
+// Parameters:  pChannelConf_p          = PDO channel configuration
 //
-// Returns:     (void)
+// Returns:     tEplKernel              = error code
+//
 //
 // State:
 //
 //---------------------------------------------------------------------------
 
-static void EplPdouDecodeObjectMapping(QWORD qwObjectMapping_p,
-                                    unsigned int* puiIndex_p,
-                                    unsigned int* puiSubIndex_p,
-                                    unsigned int* puiBitOffset_p,
-                                    unsigned int* puiBitSize_p)
+static tEplKernel EplPdouConfigureChannel(tEplPdoChannelConf* pChannelConf_p)
 {
-    *puiIndex_p = (unsigned int)
-                    (qwObjectMapping_p & 0x000000000000FFFFLL);
+tEplKernel      Ret = kEplSuccessful;
 
-    *puiSubIndex_p = (unsigned int)
-                    ((qwObjectMapping_p & 0x0000000000FF0000LL) >> 16);
+    if (EplPdouInstance_g.m_fAllocated != FALSE)
+    {
+        Ret = EplPdouCalConfigureChannel(pChannelConf_p);
+    }
 
-    *puiBitOffset_p = (unsigned int)
-                    ((qwObjectMapping_p & 0x0000FFFF00000000LL) >> 32);
+    return Ret;
+}
 
-    *puiBitSize_p = (unsigned int)
-                    ((qwObjectMapping_p & 0xFFFF000000000000LL) >> 48);
 
+//---------------------------------------------------------------------------
+//
+// Function:    EplPdouRxPdoIdToChannelId
+//
+// Description: converts RPDO-ID (i.e. lower part of object index) to channel ID
+//              which is used by Pdok module.
+//
+// Parameters:  pParam_p                = OBD parameter
+//
+// Returns:     tEplKernel              = error code
+//
+//
+// State:
+//
+//---------------------------------------------------------------------------
+
+static unsigned int EplPdouRxPdoIdToChannelId(unsigned int uiPdoId_p)
+{
+    return EplPdouInstance_g.m_abPdoIdToChannelIdRx[uiPdoId_p];
+}
+
+
+//---------------------------------------------------------------------------
+//
+// Function:    EplPdouTxPdoIdToChannelId
+//
+// Description: converts TPDO-ID (i.e. lower part of object index) to channel ID
+//              which is used by Pdok module.
+//
+// Parameters:  pParam_p                = OBD parameter
+//
+// Returns:     tEplKernel              = error code
+//
+//
+// State:
+//
+//---------------------------------------------------------------------------
+
+static unsigned int EplPdouTxPdoIdToChannelId(unsigned int uiPdoId_p)
+{
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
+    return EplPdouInstance_g.m_abPdoIdToChannelIdTx[uiPdoId_p];
+#else
+    return 0;
+#endif
+}
+
+
+//---------------------------------------------------------------------------
+//
+// Function:    EplPdouCheckPdoValidity
+//
+// Description: check if PDO is valid
+//
+// Parameters:  uiMappParamIndex_p      = object index of mapping parameter
+//              pdwAbortCode_p          = [OUT] pointer to SDO abort code
+//
+// Returns:     tEplKernel              = error code
+//
+//
+// State:
+//
+//---------------------------------------------------------------------------
+
+static tEplKernel EplPdouCheckPdoValidity(unsigned int uiMappParamIndex_p, DWORD* pdwAbortCode_p)
+{
+tEplKernel          Ret = kEplSuccessful;
+tEplObdSize         ObdSize;
+BYTE                bMappObjectCount;
+
+    if (EplPdouInstance_g.m_fRunning != FALSE)
+    {
+        // outside from NMT reset states the PDO should have been disabled before changing it
+
+        ObdSize = sizeof (bMappObjectCount);
+        // read number of mapped objects from OD; this indicates if the PDO is valid
+        Ret = EplObduReadEntry(uiMappParamIndex_p, 0x00, &bMappObjectCount, &ObdSize);
+        if (Ret != kEplSuccessful)
+        {   // other fatal error occured
+            *pdwAbortCode_p = EPL_SDOAC_GEN_INTERNAL_INCOMPATIBILITY;
+            goto Exit;
+        }
+        // entry read successfully
+        if (bMappObjectCount != 0)
+        {   // PDO in OD is still valid
+            *pdwAbortCode_p = EPL_SDOAC_GEN_PARAM_INCOMPATIBILITY;
+            Ret = kEplPdoConfWhileEnabled;
+            goto Exit;
+        }
+    }
+
+Exit:
+    return Ret;
 }
 
 
@@ -495,8 +960,10 @@ static void EplPdouDecodeObjectMapping(QWORD qwObjectMapping_p,
 // Parameters:  qwObjectMapping_p       = object mapping entry
 //              AccessType_p            = access type to mapped object:
 //                                        write = RPDO and read = TPDO
+//              pMappObject             = [OUT] pointer to mapping object structure
+//                                              which will be filled out
 //              puiPdoSize_p            = [OUT] pointer to covered PDO size
-//                                        (offset + size) in byte;
+//                                        (offset + size) in [byte];
 //                                        0 if mapping failed
 //              pdwAbortCode_p          = [OUT] pointer to SDO abort code;
 //                                        0 if mapping is possible
@@ -509,6 +976,7 @@ static void EplPdouDecodeObjectMapping(QWORD qwObjectMapping_p,
 
 static tEplKernel EplPdouCheckObjectMapping(QWORD qwObjectMapping_p,
                                        tEplObdAccess AccessType_p,
+                                       tEplPdoMappObject* pMappObject_p,
                                        DWORD* pdwAbortCode_p,
                                        unsigned int* puiPdoSize_p)
 {
@@ -518,8 +986,11 @@ unsigned int        uiIndex;
 unsigned int        uiSubIndex;
 unsigned int        uiBitOffset;
 unsigned int        uiBitSize;
+unsigned int        uiByteSize;
 tEplObdAccess       AccessType;
 BOOL                fNumerical;
+tEplObdType         ObdType;
+void*               pVar;
 
     if (qwObjectMapping_p == 0)
     {   // discard zero value
@@ -570,11 +1041,12 @@ BOOL                fNumerical;
         goto Exit;
     }
 
+    uiByteSize = (uiBitSize >> 3);
     ObdSize = EplObduGetDataSize(uiIndex, uiSubIndex);
-    if (ObdSize < (uiBitSize >> 3))
+    if (ObdSize < uiByteSize)
     {   // object does not exist or has smaller size
         *pdwAbortCode_p = EPL_SDOAC_GENERAL_ERROR;
-        Ret = kEplPdoVarNotFound;
+        Ret = kEplPdoSizeMismatch;
     }
 
     Ret = EplObduIsNumerical(uiIndex, uiSubIndex, &fNumerical);
@@ -585,7 +1057,7 @@ BOOL                fNumerical;
     }
 
     if ((fNumerical != FALSE)
-        && ((uiBitSize >> 3) != ObdSize))
+        && (uiByteSize != ObdSize))
     {
         // object is numerical,
         // therefor size has to fit, but it does not.
@@ -594,11 +1066,70 @@ BOOL                fNumerical;
         goto Exit;
     }
 
+    pVar = EplObduGetObjectDataPtr(uiIndex, uiSubIndex);
+    if (pVar == NULL)
+    {   // entry doesn't exist
+        *pdwAbortCode_p = EPL_SDOAC_OBJECT_NOT_EXIST;
+        Ret = kEplPdoVarNotFound;
+        goto Exit;
+    }
+
+    Ret = EplObduGetType(uiIndex, uiSubIndex, &ObdType);
+    if (Ret != kEplSuccessful)
+    {   // entry doesn't exist
+        *pdwAbortCode_p = EPL_SDOAC_OBJECT_NOT_EXIST;
+        goto Exit;
+    }
+
+    EPL_PDO_MAPPOBJECT_SET_BITOFFSET(pMappObject_p, uiBitOffset);
+    EPL_PDO_MAPPOBJECT_SET_BYTESIZE_OR_TYPE(pMappObject_p, uiByteSize, ObdType);
+    EPL_PDO_MAPPOBJECT_SET_VAR(pMappObject_p, pVar);
+
     // calucaled needed PDO size
-    *puiPdoSize_p = (uiBitOffset >> 3) + (uiBitSize >> 3);
+    *puiPdoSize_p = (uiBitOffset >> 3) + uiByteSize;
 
 Exit:
     return Ret;
+}
+
+
+//---------------------------------------------------------------------------
+//
+// Function:    EplPdouDecodeObjectMapping
+//
+// Description: decodes the given object mapping entry into index, subindex,
+//              bit offset and bit size.
+//
+// Parameters:  qwObjectMapping_p       = object mapping entry
+//              puiIndex_p              = [OUT] pointer to object index
+//              puiSubIndex_p           = [OUT] pointer to subindex
+//              puiBitOffset_p          = [OUT] pointer to bit offset
+//              puiBitSize_p            = [OUT] pointer to bit size
+//
+// Returns:     (void)
+//
+// State:
+//
+//---------------------------------------------------------------------------
+
+static void EplPdouDecodeObjectMapping(QWORD qwObjectMapping_p,
+                                    unsigned int* puiIndex_p,
+                                    unsigned int* puiSubIndex_p,
+                                    unsigned int* puiBitOffset_p,
+                                    unsigned int* puiBitSize_p)
+{
+    *puiIndex_p = (unsigned int)
+                    (qwObjectMapping_p & 0x000000000000FFFFLL);
+
+    *puiSubIndex_p = (unsigned int)
+                    ((qwObjectMapping_p & 0x0000000000FF0000LL) >> 16);
+
+    *puiBitOffset_p = (unsigned int)
+                    ((qwObjectMapping_p & 0x0000FFFF00000000LL) >> 32);
+
+    *puiBitSize_p = (unsigned int)
+                    ((qwObjectMapping_p & 0xFFFF000000000000LL) >> 48);
+
 }
 
 

@@ -69,6 +69,7 @@
 ****************************************************************************/
 
 #include "kernel/EplPdokCal.h"
+#include "kernel/EplPdok.h"
 
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOK)) != 0)
 
@@ -193,6 +194,55 @@ tEplKernel EplPdokCalDelInstance(void)
     return kEplSuccessful;
 }
 
+
+//---------------------------------------------------------------------------
+//
+// Function:    EplPdokCalProcess
+//
+// Description: This function processes events from PdouCal module.
+//
+// Parameters:  pEvent_p                = pointer to event structure
+//
+// Returns:     tEplKernel              = error code
+//
+//
+// State:
+//
+//---------------------------------------------------------------------------
+
+tEplKernel EplPdokCalProcess(tEplEvent * pEvent_p)
+{
+tEplKernel      Ret = kEplSuccessful;
+
+    switch (pEvent_p->m_EventType)
+    {
+        case kEplEventTypePdokAlloc:
+        {
+        tEplPdoAllocationParam* pAllocationParam;
+
+            pAllocationParam = (tEplPdoAllocationParam*) pEvent_p->m_pArg;
+            Ret = EplPdokAlloc(pAllocationParam);
+            break;
+        }
+
+        case kEplEventTypePdokConfig:
+        {
+        tEplPdoChannelConf* pChannelConf;
+
+            pChannelConf = (tEplPdoChannelConf*) pEvent_p->m_pArg;
+            Ret = EplPdokConfigureChannel(pChannelConf);
+            break;
+        }
+
+        default:
+        {
+            Ret = kEplInvalidEvent;
+            break;
+        }
+    }
+
+    return Ret;
+}
 
 //---------------------------------------------------------------------------
 //

@@ -133,7 +133,27 @@
 // ======================
 
 #ifndef EPL_D_PDO_Granularity_U8
-#define EPL_D_PDO_Granularity_U8    8    // minimum size of objects to be mapped in bits UNSIGNED8 O O 1 1
+#define EPL_D_PDO_Granularity_U8    8    // minimum size of objects to be mapped in [bit]
+#endif
+
+#ifndef EPL_D_PDO_RPDOChannelObjects_U8
+#define EPL_D_PDO_RPDOChannelObjects_U8 254 // number of supported mapped objects per RPDO channel
+#endif
+
+#ifndef EPL_D_PDO_TPDOChannelObjects_U8
+#define EPL_D_PDO_TPDOChannelObjects_U8 254 // number of supported mapped objects per TPDO channel
+#endif
+
+#ifndef EPL_D_PDO_RPDOChannels_U16
+#define EPL_D_PDO_RPDOChannels_U16  256     // number of supported RPDO channels
+#endif
+
+#ifndef EPL_D_PDO_TPDOChannels_U16
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
+#define EPL_D_PDO_TPDOChannels_U16  256     // number of supported TPDO channels
+#else
+#define EPL_D_PDO_TPDOChannels_U16  1       // number of supported TPDO channels
+#endif
 #endif
 
 #ifndef EPL_DLL_PRES_FILTER_COUNT
@@ -143,14 +163,14 @@
 #ifndef EPL_NMT_MAX_NODE_ID
 #if ((((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0) \
      || (EPL_DLL_PRES_FILTER_COUNT != 0))
-#define EPL_NMT_MAX_NODE_ID         254  // maximum node-ID with MN cross-traffic or support
+#define EPL_NMT_MAX_NODE_ID         254  // maximum node-ID with MN or cross-traffic support
 #else
-#define EPL_NMT_MAX_NODE_ID         0    // maximum node-ID without MN and cross-traffic support
+#define EPL_NMT_MAX_NODE_ID         0    // maximum node-ID with MN or cross-traffic support
 #endif
 #endif
 
 #ifndef EPL_D_NMT_MaxCNNumber_U8
-#define EPL_D_NMT_MaxCNNumber_U8    239  // maximum number of supported regular CNs in the Node ID range 1 .. 239 UNSIGNED8 O O 239 239
+#define EPL_D_NMT_MaxCNNumber_U8    239  // maximum number of supported regular CNs in the Node ID range 1 .. 239
 #endif
 
 // defines for EPL API layer static process image
@@ -267,16 +287,11 @@
 #define EPL_D_NWL_IPSupport_BOOL // Ability of the node cummunicate via IP BOOLEAN - - Y Y
 #define EPL_D_PDO_DynamicMapping_BOOL // Ability of a node to perform dynamic PDO mapping BOOLEAN O O Y Y
 #define EPL_D_PDO_MaxDescrMem_U32 // maximum cumulative memory consumption of TPDO and RPDO describing objects in byte UNSIGNED32 O O MAX_U32 MAX_U32
-#define EPL_D_PDO_RPDOChannels_U8 // number of supported RPDO channels UNSIGNED8 O O 256 256
 #define EPL_D_PDO_RPDOMaxMem_U32 // Maximum memory available for RPDO data per EPL cycle in byte UNSIGNED32 O O MAX_U32 MAX_U32
-#define EPL_D_PDO_RPDOObjects_U8 // Number of supported mapped objects per RPDO channel UNSIGNED8 O O 254 254
-#define EPL_D_PDO_TPDOChannels_U8 // number of supported TPDO channels UNSIGNED8 O - 256 -
 #define EPL_D_PDO_TPDOMaxMem_U32 // Maximum memory available for TPDO data per EPL cycle in byte UNSIGNED32 O O MAX_U32 MAX_U32
-#define EPL_D_PDO_TPDOObjects_U8 // Number of supported mapped objects per TPDO channel UNSIGNED8 O O 254 254
 #define EPL_D_SDO_ViaASnd_BOOL // Ability of a CN to perform SDO transfer by EPL ASnd BOOLEAN - M - -
 #define EPL_D_SDO_ViaPDO_BOOL // Ability of a node to perform SDO transfer by PDO BOOLEAN O O N N
 #define EPL_D_SDO_ViaUDPIP_BOOL // Ability of a CN to perform SDO transfer by UDP/IP BOOLEAN - M - -
-#define EPL_D_SYN_OptimizedSync_BOOL // Ability of node to perform optimized synchronisation BOOLEAN O O N N
 */
 
 // Emergency error codes

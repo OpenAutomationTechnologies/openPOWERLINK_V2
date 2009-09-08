@@ -178,6 +178,10 @@ typedef enum
                                         // arg is pointer to tEplFrame
     kEplEventTypeApiUserDef     = 0x19, // user-defined event
                                         // arg is user-defined pointer
+    kEplEventTypePdokAlloc      = 0x20, // alloc PDOs
+                                        // arg is pointer to tEplPdoAllocationParam
+    kEplEventTypePdokConfig     = 0x21, // configure PDO channel
+                                        // arg is pointer to tEplPdoChannelConf
 
 } tEplEventType;
 
@@ -197,6 +201,7 @@ typedef enum
     kEplEventSinkSdoAsySeq      = 0x09, // events for asyncronous SDO Sequence Layer module
     kEplEventSinkNmtMnu         = 0x0A, // events for NmtMnu module
     kEplEventSinkLedu           = 0x0B, // events for Ledu module
+    kEplEventSinkPdokCal        = 0x0C, // events for PdokCal module
     kEplEventSinkApi            = 0x0F, // events for API module
 
 } tEplEventSink;

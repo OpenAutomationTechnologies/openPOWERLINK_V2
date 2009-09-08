@@ -85,35 +85,91 @@
 // NodeId for PRes TPDO
 #define EPL_PDO_PRES_NODE_ID        0x00
 
+#define EPL_PDO_COMMUNICATION_PROFILE_START 0x1000
+
+
+#define EPL_PDO_MAPPOBJECT_IS_NUMERIC(pPdoMappObject_p) \
+            (pPdoMappObject_p->m_wByteSizeOrType < EPL_PDO_COMMUNICATION_PROFILE_START)
+
+#define EPL_PDO_MAPPOBJECT_GET_VAR(pPdoMappObject_p) \
+            pPdoMappObject_p->m_pVar
+
+#define EPL_PDO_MAPPOBJECT_SET_VAR(pPdoMappObject_p, pVar_p) \
+            (pPdoMappObject_p->m_pVar = pVar_p)
+
+#define EPL_PDO_MAPPOBJECT_GET_BITOFFSET(pPdoMappObject_p) \
+            pPdoMappObject_p->m_wBitOffset
+
+#define EPL_PDO_MAPPOBJECT_SET_BITOFFSET(pPdoMappObject_p, wBitOffset_p) \
+            (pPdoMappObject_p->m_wBitOffset = wBitOffset_p)
+
+#define EPL_PDO_MAPPOBJECT_GET_BYTESIZE(pPdoMappObject_p) \
+            (pPdoMappObject_p->m_wByteSizeOrType - EPL_PDO_COMMUNICATION_PROFILE_START)
+
+#define EPL_PDO_MAPPOBJECT_GET_TYPE(pPdoMappObject_p) \
+            ((tEplObdType) pPdoMappObject_p->m_wByteSizeOrType)
+
+#define EPL_PDO_MAPPOBJECT_SET_BYTESIZE_OR_TYPE(pPdoMappObject_p, wByteSize_p, ObdType_p) \
+            if ((ObdType_p == kEplObdTypVString) || (ObdType_p == kEplObdTypOString) || (ObdType_p == kEplObdTypDomain)) \
+            { \
+                pPdoMappObject_p->m_wByteSizeOrType = wByteSize_p + EPL_PDO_COMMUNICATION_PROFILE_START; \
+            } \
+            else \
+            { \
+                pPdoMappObject_p->m_wByteSizeOrType = ObdType_p; \
+            }
+
+
 
 //---------------------------------------------------------------------------
 // typedef
 //---------------------------------------------------------------------------
 
+// d.k. optimization idea: use bit-field for WORDs and BOOL.
+//      This will not be portable, because only unsigned int is allowed for bit-fields
+//      and unsigned int has only 16 bit width on 16 bit CPUs.
+
 typedef struct
 {
     void*               m_pVar;
-    WORD                m_wOffset;   // in Bits
-    WORD                m_wSize;     // in Bits
-    BOOL                m_fNumeric;  // numeric value -> use AMI functions
+    WORD                m_wBitOffset;   // in Bits
+    WORD                m_wByteSizeOrType;
 
-} tEplPdoMapping;
+} tEplPdoMappObject;
+
 
 typedef struct
 {
-    unsigned int        m_uiSizeOfStruct;
-    unsigned int        m_uiPdoId;
     unsigned int        m_uiNodeId;
-    // 0xFF=invalid, RPDO: 0x00=PReq, localNodeId=PRes, remoteNodeId=PRes
+    // 0xFF=invalid; RPDO: 0x00=PReq, localNodeId=PRes, remoteNodeId=PRes;
     //               TPDO: 0x00=PRes, MN: CnNodeId=PReq
 
-    BOOL                m_fTxRx;
+    WORD                m_wPdoSize;
     BYTE                m_bMappingVersion;
-    unsigned int        m_uiMaxMappingEntries; // maximum number of mapping entries, i.e. size of m_aPdoMapping
-    tEplPdoMapping      m_aPdoMapping[1];
+    unsigned int        m_uiMappObjectCount;    // actual number of used mapped objects
 
-} tEplPdoParam;
+} tEplPdoChannel;
 
+
+typedef struct
+{
+    // m_fTx and m_uiChannelId form the unique key
+    unsigned int        m_uiChannelId;
+    BOOL                m_fTx;              // TRUE = TPDO, FALSE = RPDO
+
+    tEplPdoChannel      m_PdoChannel;
+
+    tEplPdoMappObject   m_aMappObject[max(EPL_D_PDO_RPDOChannelObjects_U8, EPL_D_PDO_TPDOChannelObjects_U8)];
+
+} tEplPdoChannelConf;
+
+
+typedef struct
+{
+    unsigned int        m_uiRxPdoChannelCount;  // max. number of RPDO channels
+    unsigned int        m_uiTxPdoChannelCount;  // max. number of TPDO channels
+
+} tEplPdoAllocationParam;
 
 
 //---------------------------------------------------------------------------

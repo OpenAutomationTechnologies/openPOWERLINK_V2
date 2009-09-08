@@ -72,6 +72,7 @@
 #define _EPL_PDOU_H_
 
 #include "EplPdo.h"
+#include "EplNmt.h"
 
 
 //---------------------------------------------------------------------------
@@ -98,16 +99,8 @@ tEplKernel PUBLIC EplPdouCbObdAccess(tEplObdCbParam MEM* pParam_p);
 #define EplPdouCbObdAccess		NULL
 #endif
 
-// returns error if bPdoId_p is already valid
-/*
-tEplKernel EplPdouSetMapping(
-    BYTE bPdoId_p, BOOL fTxRx_p, BYTE bNodeId, BYTE bMappingVersion,
-    tEplPdoMapping * pMapping_p, BYTE bMaxEntries_p);
+tEplKernel PUBLIC EplPdouCbNmtStateChange(tEplEventNmtStateChange NmtStateChange_p);
 
-tEplKernel EplPdouGetMapping(
-    BYTE bPdoId_p, BOOL fTxRx_p, BYTE * pbNodeId, BYTE * pbMappingVersion,
-    tEplPdoMapping * pMapping_p, BYTE * pbMaxEntries_p);
-*/
 
 #endif  // #ifndef _EPL_PDOU_H_
 

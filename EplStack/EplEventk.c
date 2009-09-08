@@ -547,12 +547,30 @@ tEplEventSource         EventSource;
             break;
         }
 
-        //
+        // events for PDO module
         case kEplEventSinkPdok:
         {
-            // PDO-Module
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOK)) != 0)
             Ret = EplPdokProcess(pEvent_p);
+            if ((Ret != kEplSuccessful) && (Ret != kEplShutdown))
+            {
+                EventSource = kEplEventSourcePdok;
+
+                // Error event for API layer
+                EplEventkPostError(kEplEventSourceEventk,
+                                Ret,
+                                sizeof(EventSource),
+                                &EventSource);
+            }
+#endif
+            break;
+        }
+
+        // events for PDO CAL module
+        case kEplEventSinkPdokCal:
+        {
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOK)) != 0)
+            Ret = EplPdokCalProcess(pEvent_p);
             if ((Ret != kEplSuccessful) && (Ret != kEplShutdown))
             {
                 EventSource = kEplEventSourcePdok;
@@ -652,6 +670,7 @@ unsigned int    fBufferCompleted;
         case kEplEventSinkDllk:
         case kEplEventSinkDllkCal:
         case kEplEventSinkPdok:
+        case kEplEventSinkPdokCal:
         case kEplEventSinkErrk:
         {
             BENCHMARK_MOD_27_SET(2);

@@ -5,7 +5,7 @@
 
   Project:      openPOWERLINK
 
-  Description:  include file for kernel PDO module
+  Description:  include file for user PDO Communication Abstraction Layer module
 
   License:
 
@@ -64,17 +64,16 @@
 
   Revision History:
 
-  2006/05/22 d.k.:   start of the implementation, version 1.00
+  2009/09/03 d.k.:   start of the implementation, version 1.00
 
 
 ****************************************************************************/
 
-#ifndef _EPL_PDOK_H_
-#define _EPL_PDOK_H_
+#ifndef _EPL_PDOUCAL_H_
+#define _EPL_PDOUCAL_H_
 
+#include "EplInc.h"
 #include "EplPdo.h"
-#include "EplEvent.h"
-#include "EplDll.h"
 
 //---------------------------------------------------------------------------
 // const defines
@@ -90,33 +89,16 @@
 // function prototypes
 //---------------------------------------------------------------------------
 
-// process events from queue (PDOs/frames and SoA for synchronization)
-tEplKernel EplPdokProcess(tEplEvent * pEvent_p);
+tEplKernel EplPdouCalAddInstance(void);
 
-// copies RPDO to event queue for processing
-// is called by DLL in NMT_CS_READY_TO_OPERATE and NMT_CS_OPERATIONAL
-// PDO needs not to be valid
-tEplKernel EplPdokCbPdoReceived(tEplFrameInfo * pFrameInfo_p);
+tEplKernel EplPdouCalDelInstance(void);
 
-// posts pointer and size of TPDO to event queue
-// is called by DLL in NMT_CS_PRE_OPERATIONAL_2,
-//     NMT_CS_READY_TO_OPERATE and NMT_CS_OPERATIONAL
-tEplKernel EplPdokCbPdoTransmitted(tEplFrameInfo * pFrameInfo_p);
+tEplKernel EplPdouCalAlloc(tEplPdoAllocationParam* pAllocationParam_p);
 
-// posts SoA event to queue
-tEplKernel EplPdokCbSoa(tEplFrameInfo * pFrameInfo_p);
-
-tEplKernel EplPdokAddInstance(void);
-
-tEplKernel EplPdokDelInstance(void);
-
-
-tEplKernel EplPdokAlloc(tEplPdoAllocationParam* pAllocationParam_p);
-
-tEplKernel EplPdokConfigureChannel(tEplPdoChannelConf* pChannelConf_p);
+tEplKernel EplPdouCalConfigureChannel(tEplPdoChannelConf* pChannelConf_p);
 
 
 
-#endif  // #ifndef _EPL_PDOK_H_
+#endif  // #ifndef _EPL_PDOUCAL_H_
 
 

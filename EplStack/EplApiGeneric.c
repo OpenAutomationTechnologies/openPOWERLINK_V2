@@ -76,6 +76,8 @@
 #include "kernel/EplObdk.h"
 #include "kernel/EplDllkCal.h"
 #include "kernel/EplPdokCal.h"
+#include "user/EplPdouCal.h"
+#include "user/EplPdou.h"
 #include "user/EplDlluCal.h"
 #include "user/EplLedu.h"
 #include "user/EplNmtCnu.h"
@@ -383,6 +385,22 @@ tEplDllkInitParam   DllkInitParam;
 
 #endif
 
+    // initialize EplPdou module
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOU)) != 0)
+    Ret = EplPdouCalAddInstance();
+    if (Ret != kEplSuccessful)
+    {
+        goto Exit;
+    }
+
+    Ret = EplPdouAddInstance();
+    if (Ret != kEplSuccessful)
+    {
+        goto Exit;
+    }
+
+#endif
+
     // initialize EplNmtCnu module
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_CN)) != 0)
     Ret = EplNmtCnuAddInstance(EplApiInstance_g.m_InitParam.m_uiNodeId);
@@ -523,6 +541,20 @@ tEplKernel      Ret = kEplSuccessful;
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMTU)) != 0)
     Ret = EplNmtuDelInstance();
 //    PRINTF1("EplNmtuDelInstance():    0x%X\n", Ret);
+#endif
+
+    // deinitialize EplPdou module
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOU)) != 0)
+    Ret = EplPdouDelInstance();
+//    PRINTF1("EplPdouDelInstance():    0x%X\n", Ret);
+    Ret = EplPdouCalDelInstance();
+#endif
+
+    // deinitialize EplPdok module
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOK)) != 0)
+    Ret = EplPdokDelInstance();
+//    PRINTF1("EplPdokDelInstance():    0x%X\n", Ret);
+    Ret = EplPdokCalDelInstance();
 #endif
 
     // deinitialize Virtual Ethernet Driver
@@ -1623,6 +1655,15 @@ tEplApiEventArg     EventArg;
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_LEDU)) != 0)
     // forward event to Led module
     Ret = EplLeduCbNmtStateChange(NmtStateChange_p);
+    if (Ret != kEplSuccessful)
+    {
+        goto Exit;
+    }
+#endif
+
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOU)) != 0)
+    // forward event to Pdou module
+    Ret = EplPdouCbNmtStateChange(NmtStateChange_p);
     if (Ret != kEplSuccessful)
     {
         goto Exit;

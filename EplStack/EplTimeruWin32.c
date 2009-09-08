@@ -214,6 +214,29 @@ tEplKernel  Ret;
     return Ret;
 }
 
+
+//---------------------------------------------------------------------------
+//
+// Function:    EplTimeruProcess
+//
+// Description: This function is called repeatedly from within the main
+//              loop of the application. It checks whether the first timer
+//              entry has been elapsed.
+//
+// Parameters:  none
+//
+// Returns:     tEplKernel  = errorcode
+//
+// State:
+//
+//---------------------------------------------------------------------------
+
+tEplKernel PUBLIC EplTimeruProcess()
+{
+    return kEplSuccessful;
+}
+
+
 //---------------------------------------------------------------------------
 //
 // Function:    EplTimeruSetTimerMs

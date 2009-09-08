@@ -555,6 +555,7 @@ unsigned int    fBufferCompleted;
         case kEplEventSinkDllk:
         case kEplEventSinkDllkCal:
         case kEplEventSinkPdok:
+        case kEplEventSinkPdokCal:
         case kEplEventSinkErrk:
         {
 #ifndef EPL_NO_FIFO

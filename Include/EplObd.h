@@ -247,7 +247,7 @@ typedef enum
     kEplObdTypTimeOfDay    = 0x000C,
     kEplObdTypTimeDiff     = 0x000D
 
-}tEplObdType;
+} tEplObdType;
 // other types are not supported in this version
 
 

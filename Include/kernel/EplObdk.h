@@ -88,12 +88,12 @@
 // global variables
 //---------------------------------------------------------------------------
 
-extern BYTE MEM abEplObdTrashObject_g[8];
-
 //---------------------------------------------------------------------------
 // function prototypes
 //---------------------------------------------------------------------------
+
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_OBDK)) != 0)
+
 // ---------------------------------------------------------------------
 EPLDLLEXPORT tEplKernel PUBLIC EplObdInit (EPL_MCO_DECL_PTR_INSTANCE_PTR_
     tEplObdInitParam MEM*      pInitParam_p);
@@ -162,7 +162,14 @@ EPLDLLEXPORT tEplKernel PUBLIC EplObdSetNodeId(EPL_MCO_DECL_INSTANCE_PTR_
 EPLDLLEXPORT tEplKernel PUBLIC EplObdIsNumerical(EPL_MCO_DECL_INSTANCE_PTR_
                                         unsigned int  uiIndex_p,
                                         unsigned int  uiSubIndex_p,
-                                        BOOL*   pfEntryNumerical);
+                                        BOOL*   pfEntryNumerical_p);
+
+// ---------------------------------------------------------------------
+EPLDLLEXPORT tEplKernel PUBLIC EplObdGetType(EPL_MCO_DECL_INSTANCE_PTR_
+                                        unsigned int  uiIndex_p,
+                                        unsigned int  uiSubIndex_p,
+                                        tEplObdType*  pType_p);
+
 // ---------------------------------------------------------------------
 EPLDLLEXPORT tEplKernel PUBLIC EplObdWriteEntryFromLe (EPL_MCO_DECL_INSTANCE_PTR_
                                         unsigned int  uiIndex_p,
