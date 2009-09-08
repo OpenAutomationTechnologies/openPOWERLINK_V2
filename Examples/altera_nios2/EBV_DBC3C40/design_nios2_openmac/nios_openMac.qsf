@@ -191,7 +191,6 @@ set_global_assignment -name MISC_FILE nios_openMac.dpf
 set_global_assignment -name BDF_FILE nios_pll.bdf
 set_global_assignment -name QIP_FILE altpll0.qip
 set_global_assignment -name QIP_FILE niosII_openMac.qip
-set_global_assignment -name SIGNALTAP_FILE stp1.stp
 set_global_assignment -name SEARCH_PATH EPL/ -tag from_archive
 set_global_assignment -name SEARCH_PATH Programme/altera/90/quartus/libraries/others/maxplus2/ -tag from_archive
 set_global_assignment -name SEARCH_PATH megafunctions/ -tag from_archive
@@ -258,3 +257,4 @@ set_location_assignment PIN_G9 -to io3_3V_o[6]
 set_location_assignment PIN_G10 -to io3_3V_o[7]
 set_location_assignment PIN_F11 -to tp_phy_rx_crsdv
 set_location_assignment PIN_G11 -to tp_phy_tx_en
+set_global_assignment -name QIP_FILE EPL/OpenMAC_DMAFifo.qip

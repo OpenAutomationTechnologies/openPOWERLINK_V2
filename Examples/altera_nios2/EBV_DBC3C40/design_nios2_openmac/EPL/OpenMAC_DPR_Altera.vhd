@@ -1,20 +1,21 @@
------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------
+-- OpenMAC - DPR for Altera FPGA
 --
---	DPR (Altera) for EPL MAC
+-- Copyright (C) 2009 B&R
 --
--- Copyright (C) 2009  B&R 
---     
 -- This program is free software; you can redistribute it and/or modify
 -- it under the terms of the GNU General Public License as published by
 -- the Free Software Foundation; either version 2 of the License, or
 -- (at your option) any later version.
---  
 --
------------------------------------------------------------------------------------------------------------------------------
---
---
+------------------------------------------------------------------------------------------------------------------------
+-- Version History
+------------------------------------------------------------------------------------------------------------------------      
+--  2009-08-07  V0.01        Converted to official version.
+------------------------------------------------------------------------------------------------------------------------
+
 -------------------------------------------------------------------------------
--- 16 / 16 DPR for openMac
+-- 16 / 16 DPR
 --
 LIBRARY ieee;                   
 USE ieee.std_logic_1164.all;    
@@ -26,7 +27,7 @@ LIBRARY lpm;
 USE lpm.lpm_components.all;
 
 entity Dpr_16_16 is
-  generic(Simulate	:  in	boolean := false);
+  generic(Simulate	:  in	boolean);
   port (
 	 ClkA,  ClkB		:  in  std_logic;
 	 WeA,   WeB			:  in  std_logic := '0';
@@ -63,7 +64,7 @@ Ram: COMPONENT altsyncram
 end struct;
 
 -------------------------------------------------------------------------------
--- 8 / 16 DPR for openMac
+-- 16 / 32 DPR
 --
 LIBRARY ieee;                   
 USE ieee.std_logic_1164.all;    
@@ -75,7 +76,7 @@ LIBRARY lpm;
 USE lpm.lpm_components.all;
 
 entity Dpr_16_32 is
-  generic(Simulate	:  in	boolean := false);
+  generic(Simulate	:  in	boolean);
   port (
 	 ClkA,  ClkB		:  in  std_logic;
 	 WeA				:  in  std_logic := '0';
@@ -109,9 +110,8 @@ Ram: COMPONENT altsyncram
 end struct;
 
 -------------------------------------------------------------------------------
--- 8 / 8 DPR for openMac
---		
-
+-- 8 / 8 DPR 
+--
 LIBRARY ieee;                   
 USE ieee.std_logic_1164.all;    
 USE ieee.std_logic_arith.all;   
@@ -122,7 +122,7 @@ LIBRARY lpm;
 USE lpm.lpm_components.all;
 
 entity Dpr_8_8 is
-  generic(Simulate	:  in	boolean := false);
+  generic(Simulate	:  in	boolean);
   port (
 	 ClkA,  ClkB		:  in  std_logic;
 	 WeA,   WeB			:  in  std_logic := '0';
@@ -153,24 +153,24 @@ Ram: COMPONENT altsyncram
 
 end struct;
 
-
-
+------------------------------------------------------------------------------------------------------------------------
+-- ShadowRam for OpenMAC
+--
 LIBRARY ieee;
-USE ieee.std_logic_1164.all;
-
+USE ieee.std_logic_1164.ALL;
 LIBRARY altera_mf;
-USE altera_mf.altera_mf_components.all;
+USE altera_mf.altera_mf_components.ALL;
 
 ENTITY Shadow_Ram IS
 	PORT
 	(
 		address		: IN STD_LOGIC_VECTOR (8 DOWNTO 0);
 		byteena		: IN STD_LOGIC_VECTOR (1 DOWNTO 0);
-		clock		: IN STD_LOGIC ;
-		clken		: IN STD_LOGIC ;
+		clock		: IN STD_LOGIC;
+		clken		: IN STD_LOGIC;
 		data		: IN STD_LOGIC_VECTOR (15 DOWNTO 0);
-		wren		: IN STD_LOGIC ;
-		q		: OUT STD_LOGIC_VECTOR (15 DOWNTO 0)
+		wren		: IN STD_LOGIC;
+		q           : OUT STD_LOGIC_VECTOR (15 DOWNTO 0)
 	);
 END Shadow_Ram;
 
@@ -178,8 +178,6 @@ END Shadow_Ram;
 ARCHITECTURE SYN OF shadow_ram IS
 
 	SIGNAL sub_wire0	: STD_LOGIC_VECTOR (15 DOWNTO 0);
-
-
 
 	COMPONENT altsyncram
 	GENERIC (
@@ -241,7 +239,4 @@ BEGIN
 		q_a => sub_wire0
 	);
 
-
-
 END SYN;
-

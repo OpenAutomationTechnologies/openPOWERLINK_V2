@@ -1,29 +1,32 @@
------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------
+-- Avalon Interface of OpenMAC to use with NIOSII
 --
---		Altera Avalon Interface for EPL MAC AND Mii Core
---			for use with Nios II soft-core
+-- Copyright (C) 2009 B&R
 --
--- Copyright (C) 2009  B&R 
---     
--- This program is free software; you can redistribute it AND/OR modify
+-- This program is free software; you can redistribute it and/or modify
 -- it under the terms of the GNU General Public License as published by
--- the Free Software Foundation; either version 2 of the License, OR
+-- the Free Software Foundation; either version 2 of the License, or
 -- (at your option) any later version.
---  
---	Needs :	EPL_Mac.vhd (MAC)
---			EPL_Mii.vhd (serial management interface for phy)
---			EPL_Mac_DPR_altera.vhd (dual PORT ram)
---			EPL_Mac_AvalonIF_hw.tcl (for SOPC builder)
 --
------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------
+-- Version History
+------------------------------------------------------------------------------------------------------------------------
+-- 2009-05-20  V0.01        First version
+-- 2009-06-04  V0.10        Implemented FIFO for Data-Queing form/to DMA
+-- 2009-06-15  V0.11        Increased performance of FIFO
+-- 2009-06-20  V0.20        New FIFO concept. (FIFO IP of Altera used)
+-- 2009-06-26  V0.21        Little Bugfix of DMA -> Reset was handled wrong
+-- 2009-08-07  V0.30        Converted to official version
+-- 2009-08-21  V0.40		TX DMA run if fifo is not empty. Interface for Timer Cmp + IRQ
+-- 2009-09-03  V0.50		RX FIFO is definitely empty when a new frame arrives (Fifo sclr is set for 1 cycle)
+------------------------------------------------------------------------------------------------------------------------
 
 LIBRARY ieee;
 USE ieee.std_logic_1164.all;
 USE ieee.std_logic_arith.all;
 USE ieee.std_logic_unsigned.all;
 
-
-ENTITY EPL_openMAC IS
+ENTITY AlteraOpenMACIF IS
    GENERIC( MacTimer                    : IN    boolean := true;
             Simulate                    : IN    boolean := false);
    PORT (   Reset_n						: IN    STD_LOGIC;
@@ -37,9 +40,7 @@ ENTITY EPL_openMAC IS
             writedata                   : IN    STD_LOGIC_VECTOR(15 DOWNTO 0);
             readdata                    : OUT   STD_LOGIC_VECTOR(15 DOWNTO 0);
             nTx_Int						: OUT   STD_LOGIC;
-            nRx_Int						: OUT   STD_LOGIC;
-            nCmp_Int					: OUT   STD_LOGIC;
-		-- Avalon Master Interface (DMA)
+		-- Avalon Master Interface (the_DMAAvalonIF)
             m_read_n					: OUT   STD_LOGIC;
             m_write_n					: OUT   STD_LOGIC;
             m_byteenable_n              : OUT   STD_LOGIC_VECTOR(1 DOWNTO 0);
@@ -53,7 +54,7 @@ ENTITY EPL_openMAC IS
             rCrs_Dv                     : IN    STD_LOGIC;                     -- RMII Carrier Sense / Data Valid
             rTx_Dat                     : OUT   STD_LOGIC_VECTOR(1 DOWNTO 0);  -- RMII Tx Daten
             rTx_En                      : OUT   STD_LOGIC;                     -- RMII Tx_Enable
-		-- Serial Management Interface (Mii Core)
+		-- Serial Management Interface (the_Mii)
 			mii_Addr					: IN	STD_LOGIC_VECTOR(2 DOWNTO 0);	
 			mii_Sel						: IN	STD_LOGIC;						
 			mii_nBe						: IN	STD_LOGIC_VECTOR(1 DOWNTO 0);	
@@ -64,18 +65,28 @@ ENTITY EPL_openMAC IS
 			mii_Dio						: INOUT	STD_LOGIC;
 			mii_nResetOut				: OUT	STD_LOGIC;
 			mii_NodeNr					: IN	STD_LOGIC_VECTOR(7 DOWNTO 0) := (OTHERS => '0');
-		-- Dummy Interface for newer SOPC builders
+		-- Dummy Interface (for TX IRQ) for newer SOPC builders
 			d_chipselect                : IN    STD_LOGIC;
             d_read_n					: IN    STD_LOGIC;
             d_write_n					: IN    STD_LOGIC;
             d_byteenable                : IN    STD_LOGIC_VECTOR(1 DOWNTO 0);
             d_address                   : IN    STD_LOGIC_VECTOR(0 DOWNTO 0);
             d_writedata                 : IN    STD_LOGIC_VECTOR(15 DOWNTO 0);
-            d_readdata                  : OUT   STD_LOGIC_VECTOR(15 DOWNTO 0)
+            d_readdata                  : OUT   STD_LOGIC_VECTOR(15 DOWNTO 0);
+			nRx_Int						: OUT   STD_LOGIC;
+		-- MAC Timer Cmp Interface
+			t_chipselect                : IN    STD_LOGIC;
+            t_read_n					: IN    STD_LOGIC;
+            t_write_n					: IN    STD_LOGIC;
+            t_byteenable                : IN    STD_LOGIC_VECTOR(1 DOWNTO 0);
+            t_address                   : IN    STD_LOGIC_VECTOR(2 DOWNTO 0);
+            t_writedata                 : IN    STD_LOGIC_VECTOR(15 DOWNTO 0);
+            t_readdata                  : OUT   STD_LOGIC_VECTOR(15 DOWNTO 0);
+			nCmp_Int					: OUT   STD_LOGIC
         );
-END ENTITY EPL_openMAC;
+END ENTITY AlteraOpenMACIF;
 
-ARCHITECTURE struct OF EPL_openMAC IS
+ARCHITECTURE struct OF AlteraOpenMACIF IS
 
 -- Core Interface 
     SIGNAL  s_nWr						: STD_LOGIC;
@@ -100,14 +111,15 @@ ARCHITECTURE struct OF EPL_openMAC IS
     SIGNAL  Mac_Cmp_Wert                : STD_LOGIC_VECTOR(31 DOWNTO 0);
     SIGNAL  Mac_Cmp_On					: STD_LOGIC;
     SIGNAL  Mac_Cmp_Int					: STD_LOGIC;
-    
+
+    --- -> ???
     SIGNAL  rTx_Eni						: STD_LOGIC;
-    SIGNAL  ByteCnt                     : STD_LOGIC_VECTOR(4 DOWNTO 0);
+--    SIGNAL  ByteCnt                     : STD_LOGIC_VECTOR(4 DOWNTO 0);
 BEGIN
 
 	d_readdata <= (OTHERS => '0');
 
-	Core_Mii : ENTITY work.EPL_Mii
+	the_Mii : ENTITY work.OpenMAC_MII
 		PORT MAP (  nRst => Reset_n,
 					Clk  => Clk,
 				    --Slave IF
@@ -124,8 +136,7 @@ BEGIN
 					NodeNr    => mii_NodeNr
 				   );
 
-
-	the_EthMac : ENTITY work.EPL_Mac
+	the_Mac : ENTITY work.OpenMAC
 		GENERIC MAP (	HighAdr  => s_Addr'HIGH,
 						Simulate => Simulate,
 						Timer    => MacTimer
@@ -168,7 +179,7 @@ BEGIN
 	s_nWr    <= write_n;
 	
 	Sel_Cont <= '1' WHEN ( Chipselect = '1' AND ( read_n = '0' OR write_n = '0' ) AND address(10 DOWNTO 9) = "00" ) ELSE '0';
-	CsMacCmp <= '1' WHEN ( Chipselect = '1' AND ( read_n = '0' OR write_n = '0' ) AND address(10 DOWNTO 9) = "01" ) ELSE '0';
+	--CsMacCmp <= '1' WHEN ( Chipselect = '1' AND ( read_n = '0' OR write_n = '0' ) AND address(10 DOWNTO 9) = "01" ) ELSE '0';
 	Sel_Ram  <= '1' WHEN ( Chipselect = '1' AND ( read_n = '0' OR write_n = '0' ) AND address(10 DOWNTO 10) = "1" ) ELSE '0';
 
 	s_addr(11 DOWNTO 1) <= address(10 DOWNTO 1) &     address(0) WHEN ( Sel_Ram = '1' AND address(9) = '0' ) ELSE 
@@ -181,11 +192,11 @@ BEGIN
 				ShadowRead(7 DOWNTO 0)  & ShadowRead(15 DOWNTO 8) WHEN ( SelShadow = '1' ) ELSE
 				s_Dout(15 DOWNTO 8)     & s_Dout(7 DOWNTO 0)      WHEN ( ( Sel_Ram = '1' OR Sel_Cont = '1') AND byteenable = "00" ) ELSE
 				s_Dout(7 DOWNTO 0)      & s_Dout(15 DOWNTO 8)     WHEN ( Sel_Ram = '1' OR Sel_Cont = '1') ELSE
-				x"0" & "00" & Mac_Cmp_Int & Mac_Cmp_On & x"00";
+				(others => '0'); --x"0" & "00" & Mac_Cmp_Int & Mac_Cmp_On & x"00";
 
 	SelShadow <= '1' WHEN ( Sel_Ram = '1' AND address(9) = '0' ) ELSE '0';
 
-	theShadowRam : ENTITY work.Shadow_Ram 
+	the_ShadowRam : ENTITY work.Shadow_Ram 
 		PORT MAP (  clock => clk,
 					clken => SelShadow,
 					wren => read_n,
@@ -199,7 +210,7 @@ BEGIN
 -- Avalon Master Interface <-> openMac (new)
 	-----------------------------------------------------------------------
 
-	DMA_Avalon_Interface: BLOCK
+	the_DMAAvalonIF: BLOCK
 		-- Control
 		TYPE	SM_Active	IS	(sIdle, sAct);
 		SIGNAL	SM_Act      	:  SM_Active;
@@ -238,11 +249,12 @@ BEGIN
 		-- MAC
 		SIGNAL  rTx_EnL			:  STD_LOGIC;
 		SIGNAL  rCrs_DvL		:  STD_LOGIC;
+		signal	monitorCrsDv	:  std_logic_vector(3 downto 0); --monitor Crs Dv
 
 	BEGIN
 		Fifo_AClr <= NOT Reset_n;
 
-		the_TxFifo : ENTITY work.EPL_Fifo
+		the_TxFifo : ENTITY work.OpenMAC_DMAFifo
 		PORT MAP	(	aclr     	 => Fifo_AClr,
 						clock	 	 => Clk,
 						data	 	 => m_readdata(7 downto 0) & m_readdata(15 downto 8),
@@ -256,7 +268,7 @@ BEGIN
 						q			 => Dma_Din
 					);
 		
-		the_RxFifo : ENTITY work.EPL_Fifo
+		the_RxFifo : ENTITY work.OpenMAC_DMAFifo
 		PORT MAP	(	aclr     	 => Fifo_AClr,
 						clock	 	 => Clk,
 						data	 	 => Dma_Dout(7 downto 0) & Dma_Dout(15 downto 8),
@@ -287,7 +299,7 @@ BEGIN
 		RXFifo_Wr <= Dma_Req AND Dma_Acki AND NOT Dma_Rw;
 		RXFifo_Rd <= ( NOT m_wr_n AND NOT m_waitrequest AND NOT RXFifo_E ) OR RXFirstRead;
 
-		p_MacFifo : PROCESS ( Reset_n, Clk )	
+		p_DMAFifo : PROCESS ( Reset_n, Clk )	
 		BEGIN
 		
 			IF ( Reset_n = '0' ) THEN
@@ -320,8 +332,18 @@ BEGIN
 				Rx_ActL  <= Rx_Act;
 				Rx_ActLL <= Rx_ActL;
 
+				--monitor Crs Dv to find out beginning of rx frame
+				monitorCrsDv <= monitorCrsDv(2 downto 0) & rCrs_DvL; --shift into monitor vector
+				-- find two cycles 0 and two 1 => avoids rst when Crs Dv toggls at the end
+				if monitorCrsDv = "0011" then
+					RXFifo_Clr <= '1';
+				else
+					RXFifo_Clr <= '0';
+				end if;
+				
 				IF Dma_Req = '1' AND Dma_Acki = '0' THEN
-					IF    Dma_Rw = '1' AND TXFifo_E = '0' THEN Dma_Acki <= '1'; --AND TXFifo_AE = '0'
+					IF    Dma_Rw = '1' AND TXFifo_E = '0' --AND TXFifo_AE = '0' 
+						THEN Dma_Acki <= '1'; 
 					ELSIF Dma_Rw = '0' AND RXFifo_F = '0'                     THEN Dma_Acki <= '1'; 
 					END IF;
 				ELSE                                                               Dma_Acki <= '0';
@@ -400,41 +422,50 @@ BEGIN
 
 			END IF;
 			
-		END PROCESS p_MacFifo;
+		END PROCESS p_DMAFifo;
 		
-	END BLOCK DMA_Avalon_Interface;
+	END BLOCK the_DMAAvalonIF;
 
 	-----------------------------------------------------------------------
--- MAC-Time compare
+	-- MAC-Time compare
 	--  Address 0 : Cmp_H
 	--          2 : Cmp_L
 	--          4 : Enable int IF D0 = 1, Disable int IF D0 = 0 
 	-----------------------------------------------------------------------
 
-    nCmp_Int <= Mac_Cmp_Int;
+    nCmp_Int <= not Mac_Cmp_Int;
+	CsMacCmp <= t_chipselect;
 
 	p_MacCmp : PROCESS ( Reset_n, Clk )
 	BEGIN
 		IF ( Reset_n = '0' ) THEN
 			Mac_Cmp_Int  <= '0';
 			Mac_Cmp_On   <= '0';
-			Mac_Cmp_Wert <= (OTHERS => '0');
+			Mac_Cmp_Wert <= (OTHERS => '0'); 
+			t_readdata <= (others => '0');
 		ELSIF rising_edge( Clk ) THEN
 		
-			IF ( CsMacCmp = '1' AND write_n = '0' ) THEN
-				IF ( address(2) = '0' AND address(0) = '0' ) THEN
-					Mac_Cmp_Wert(31 DOWNTO 16) <= writedata;
-				ELSIF ( address(2) = '0' AND address(0) = '1' ) THEN
-					Mac_Cmp_Wert(15 DOWNTO 0) <= writedata;
-					Mac_Cmp_Int <= '0';
-				ELSIF ( address(2) = '1' ) THEN
-					Mac_Cmp_On <= writedata(0);
-				END IF;
+			IF ( CsMacCmp = '1' AND t_write_n = '0' ) THEN
+				case t_address(2 downto 1) is
+					when "00" => --0
+						Mac_Cmp_Wert(31 DOWNTO 16) <= t_writedata;
+					when "01" => --2
+						Mac_Cmp_Wert(15 DOWNTO 0) <= t_writedata;
+						Mac_Cmp_Int <= '0';
+					when "10" => --4
+						Mac_Cmp_On <= t_writedata(0);
+					when others =>
+						-- do nothing
+				end case;
 			END IF;
 
 			IF ( Mac_Cmp_On = '1' AND Mac_Cmp_Wert( Mac_Zeit'RANGE ) = Mac_Zeit ) THEN
 				Mac_Cmp_Int <= '1';
 			END IF;
+			
+			if t_chipselect = '1' and t_read_n = '0' then
+				t_readdata 	<= 	x"000" & "00" & Mac_Cmp_Int & Mac_Cmp_On;
+			end if;
 
 		END IF;
 	END PROCESS p_MacCmp;

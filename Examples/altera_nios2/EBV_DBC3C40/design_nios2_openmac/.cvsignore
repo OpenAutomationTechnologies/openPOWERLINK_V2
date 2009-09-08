@@ -21,3 +21,5 @@ timing
 *.qws
 *.pof
 *.jdi
+*.ptf.8.0
+*temp.vhd
