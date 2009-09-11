@@ -19,6 +19,7 @@
 -- 2009-08-07  V0.30        Converted to official version
 -- 2009-08-21  V0.40		TX DMA run if fifo is not empty. Interface for Timer Cmp + IRQ
 -- 2009-09-03  V0.50		RX FIFO is definitely empty when a new frame arrives (Fifo sclr is set for 1 cycle)
+-- 2009-09-07  V0.60		Added openFilter and openHub. Some changes in Mii core map. Added 2nd RMii Port.
 ------------------------------------------------------------------------------------------------------------------------
 
 LIBRARY ieee;
@@ -49,11 +50,16 @@ ENTITY AlteraOpenMACIF IS
             m_readdata                  : IN    STD_LOGIC_VECTOR(15 DOWNTO 0);
             m_waitrequest               : IN    STD_LOGIC;
             m_arbiterlock				: OUT   STD_LOGIC;
-		-- RMII
-            rRx_Dat                     : IN    STD_LOGIC_VECTOR(1 DOWNTO 0);  -- RMII Rx Daten
-            rCrs_Dv                     : IN    STD_LOGIC;                     -- RMII Carrier Sense / Data Valid
-            rTx_Dat                     : OUT   STD_LOGIC_VECTOR(1 DOWNTO 0);  -- RMII Tx Daten
-            rTx_En                      : OUT   STD_LOGIC;                     -- RMII Tx_Enable
+		-- RMII Port 0
+            rRx_Dat_0                   : IN    STD_LOGIC_VECTOR(1 DOWNTO 0);  -- RMII Rx Daten
+            rCrs_Dv_0                   : IN    STD_LOGIC;                     -- RMII Carrier Sense / Data Valid
+            rTx_Dat_0                   : OUT   STD_LOGIC_VECTOR(1 DOWNTO 0);  -- RMII Tx Daten
+            rTx_En_0                    : OUT   STD_LOGIC;                     -- RMII Tx_Enable
+		-- RMII Port 1
+            rRx_Dat_1                   : IN    STD_LOGIC_VECTOR(1 DOWNTO 0);  -- RMII Rx Daten
+            rCrs_Dv_1                   : IN    STD_LOGIC;                     -- RMII Carrier Sense / Data Valid
+            rTx_Dat_1                   : OUT   STD_LOGIC_VECTOR(1 DOWNTO 0);  -- RMII Tx Daten
+            rTx_En_1                    : OUT   STD_LOGIC;                     -- RMII Tx_Enable
 		-- Serial Management Interface (the_Mii)
 			mii_Addr					: IN	STD_LOGIC_VECTOR(2 DOWNTO 0);	
 			mii_Sel						: IN	STD_LOGIC;						
@@ -62,7 +68,9 @@ ENTITY AlteraOpenMACIF IS
 			mii_Data_In					: IN	STD_LOGIC_VECTOR(15 DOWNTO 0);	
 			mii_Data_Out				: OUT	STD_LOGIC_VECTOR(15 DOWNTO 0);	
 			mii_Clk						: OUT	STD_LOGIC;
-			mii_Dio						: INOUT	STD_LOGIC;
+			mii_Di						: IN	STD_LOGIC;
+			mii_Do						: OUT	STD_LOGIC;
+			mii_Doe						: OUT	STD_LOGIC;
 			mii_nResetOut				: OUT	STD_LOGIC;
 			mii_NodeNr					: IN	STD_LOGIC_VECTOR(7 DOWNTO 0) := (OTHERS => '0');
 		-- Dummy Interface (for TX IRQ) for newer SOPC builders
@@ -112,9 +120,27 @@ ARCHITECTURE struct OF AlteraOpenMACIF IS
     SIGNAL  Mac_Cmp_On					: STD_LOGIC;
     SIGNAL  Mac_Cmp_Int					: STD_LOGIC;
 
-    --- -> ???
+-- Mac RMii Signals to Filter
     SIGNAL  rTx_Eni						: STD_LOGIC;
---    SIGNAL  ByteCnt                     : STD_LOGIC_VECTOR(4 DOWNTO 0);
+	SIGNAL  rRx_Dati                   	: STD_LOGIC_VECTOR(1 DOWNTO 0);
+	SIGNAL  rCrs_Dvi                   	: STD_LOGIC;
+	SIGNAL  rTx_Dati                   	: STD_LOGIC_VECTOR(1 DOWNTO 0);
+
+-- Filter RMii Signals to Hub
+    SIGNAL  rTx_Enii					: STD_LOGIC;
+	SIGNAL  rRx_Datii                   : STD_LOGIC_VECTOR(1 DOWNTO 0);
+	SIGNAL  rCrs_Dvii                   : STD_LOGIC;
+	SIGNAL  rTx_Datii                   : STD_LOGIC_VECTOR(1 DOWNTO 0);
+
+-- Hub Signals
+	SIGNAL hubTxEn						: STD_LOGIC_VECTOR(3 downto 1);
+	SIGNAL hubTxDat0					: STD_LOGIC_VECTOR(3 downto 1);
+	SIGNAL hubTxDat1					: STD_LOGIC_VECTOR(3 downto 1);
+	SIGNAL RxPortInt					: integer RANGE 0 TO 3; --0 is idle
+	SIGNAL RxPort						: STD_LOGIC_VECTOR(1 downto 0);
+
+-- Mii Signals
+	SIGNAL mii_Doei						: STD_LOGIC;
 BEGIN
 
 	d_readdata <= (OTHERS => '0');
@@ -131,11 +157,14 @@ BEGIN
 					Data_Out => mii_Data_Out,
 					--Export
 					Mii_Clk   => mii_Clk,
-					Mii_Dio   => mii_Dio,
+					Mii_Di    => mii_Di,
+					Mii_Do	  => mii_Do,
+					Mii_Doe   => mii_Doei, -- '1' ... Input / '0' ... Output
 					nResetOut => mii_nResetOut,
 					NodeNr    => mii_NodeNr
-				   );
-
+				   );	
+	mii_Doe <= not mii_Doei;
+	
 	the_Mac : ENTITY work.OpenMAC
 		GENERIC MAP (	HighAdr  => s_Addr'HIGH,
 						Simulate => Simulate,
@@ -144,9 +173,9 @@ BEGIN
 		PORT MAP	(	nRes => Reset_n,
 						Clk  => Clk,
 						--Export
-						rRx_Dat  => rRx_Dat,
-						rCrs_Dv  => rCrs_Dv,
-						rTx_Dat  => rTx_Dat,
+						rRx_Dat  => rRx_Dati,
+						rCrs_Dv  => rCrs_Dvi,
+						rTx_Dat  => rTx_Dati,
 						rTx_En   => rTx_Eni,
 						Mac_Zeit => Mac_Zeit,
 						--ir
@@ -166,13 +195,57 @@ BEGIN
 						Dma_Ack  => Dma_Ack,
 						Dma_Addr => Dma_Addr,
 						Dma_Dout => Dma_Dout,
-						Dma_Din  => Dma_Din
+						Dma_Din  => Dma_Din,
+						-- Hub
+						Hub_Rx => RxPort
 					);
 
-	rTx_En <= rTx_Eni;
-
+	the_Filter : entity work.OpenFILTER
+		port map	(
+						nRst => Reset_n,
+						Clk => Clk,
+						nCheckShortFrames => '0',
+						RxDvIn => rCrs_Dvii,
+						RxDatIn => rRx_Datii,
+						RxDvOut => rCrs_Dvi,
+						RxDatOut => rRx_Dati,
+						TxEnIn => rTx_Eni,
+						TxDatIn => rTx_Dati,
+						TxEnOut => rTx_Enii,
+						TxDatOut => rTx_Datii
+		);
+	
+	the_Hub : entity work.OpenHub
+		generic map (	Ports => 3
+		)
+		port map 	(
+						nRst 			=> 	Reset_n,
+						Clk 			=> 	Clk,
+						RxDv 			=> 	rCrs_Dv_1 & rCrs_Dv_0 & rTx_Enii,
+						RxDat0 			=> 	rRx_Dat_1(0) & rRx_Dat_0(0) & rTx_Datii(0),
+						RxDat1 			=> 	rRx_Dat_1(1) & rRx_Dat_0(1) & rTx_Datii(1),
+						TxEn 			=> 	hubTxEn,
+						TxDat0 			=> 	hubTxDat0,
+						TxDat1 			=> 	hubTxDat1,
+						internPort 		=> 	1,
+						TransmitMask 	=> 	(others => '1'),
+						ReceivePort 	=> 	RxPortInt
+		);
+	RxPort <= conv_std_logic_vector(RxPortInt, RxPort'length);
+	
+	rTx_En_1 <= hubTxEn(3);
+	rTx_En_0 <= hubTxEn(2);
+	rCrs_Dvii <= hubTxEn(1);
+	
+	rTx_Dat_1(0) <= hubTxDat0(3);
+	rTx_Dat_0(0) <= hubTxDat0(2);
+	rRx_Datii(0) <= hubTxDat0(1);
+	
+	rTx_Dat_1(1) <= hubTxDat1(3);
+	rTx_Dat_0(1) <= hubTxDat1(2);
+	rRx_Datii(1) <= hubTxDat1(1);
 	-----------------------------------------------------------------------
--- Avalon Slave Interface <-> openMac
+	-- Avalon Slave Interface <-> openMac
 	-----------------------------------------------------------------------
 	
 	S_nBe    <= byteenable(0) & byteenable(1);
@@ -328,7 +401,7 @@ BEGIN
 				
 			ELSIF rising_edge( Clk ) THEN
 				rTx_EnL  <= rTx_Eni;
-				rCrs_DvL <= rCrs_Dv;
+				rCrs_DvL <= rCrs_Dvi; --changed here because of Hub insertion!!!
 				Rx_ActL  <= Rx_Act;
 				Rx_ActLL <= Rx_ActL;
 
@@ -386,7 +459,7 @@ BEGIN
 
 			-- Rx Control
 				IF    Dma_Req = '1' AND Dma_Rw = '0'                    THEN Rx_Act <= '1';
-				ELSIF rCrs_Dv = '0' AND RXTimeout(RXTimeout'HIGH) = '1' THEN Rx_Act <= '0';
+				ELSIF rCrs_Dvi = '0' AND RXTimeout(RXTimeout'HIGH) = '1' THEN Rx_Act <= '0'; --changed CrsDv !!!
 				END IF;
 
 				IF    Dma_Req = '1' AND Dma_Rw = '0' AND Rx_Act = '0'   THEN RXFifo_Addr <= Dma_Addr & '0';
@@ -412,7 +485,7 @@ BEGIN
 					END IF;
 				END IF;
 
-				IF    rCrs_DvL = '1' AND rCrs_Dv = '1' THEN RXTimeout <= (others => '0');
+				IF    rCrs_DvL = '1' AND rCrs_Dvi = '1' THEN RXTimeout <= (others => '0'); --changed CrsDv !!!
 				ELSIF RXTimeout(RXTimeout'HIGH) = '0'  THEN RXTimeout <= RXTimeout + 1;
 				END IF;
 				

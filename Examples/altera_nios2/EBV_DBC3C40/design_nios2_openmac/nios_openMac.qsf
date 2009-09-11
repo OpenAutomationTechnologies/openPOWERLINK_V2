@@ -45,15 +45,6 @@ set_global_assignment -name LAST_QUARTUS_VERSION "9.0 SP2"
 
 # Pin & Location Assignments
 # ==========================
-set_location_assignment PIN_AB19 -to phy_tx_en
-set_location_assignment PIN_AA18 -to phy_tx_d[0]
-set_location_assignment PIN_AB18 -to phy_tx_d[1]
-set_location_assignment PIN_T12 -to phy_rst_n
-set_location_assignment PIN_AB20 -to phy_rx_crsdv
-set_location_assignment PIN_V13 -to phy_rx_d[1]
-set_location_assignment PIN_W13 -to phy_rx_d[0]
-set_location_assignment PIN_AA20 -to phy_smi_clk
-set_location_assignment PIN_U14 -to phy_smi_io
 set_location_assignment PIN_B11 -to ext_clk
 set_location_assignment PIN_N21 -to sram_ncs
 set_location_assignment PIN_T15 -to flash_ncs
@@ -201,10 +192,6 @@ set_instance_assignment -name TSU_REQUIREMENT "1 ns" -from * -to data
 set_instance_assignment -name TCO_REQUIREMENT "6 ns" -from * -to sram_ncs
 set_instance_assignment -name TCO_REQUIREMENT "6 ns" -from * -to noe
 set_instance_assignment -name TCO_REQUIREMENT "6 ns" -from * -to nwe
-set_instance_assignment -name TSU_REQUIREMENT "5 ns" -from * -to phy_rx_crsdv
-set_instance_assignment -name TSU_REQUIREMENT "5 ns" -from * -to phy_rx_d
-set_instance_assignment -name TCO_REQUIREMENT "5 ns" -from * -to phy_tx_en
-set_instance_assignment -name TCO_REQUIREMENT "5 ns" -from * -to phy_tx_d
 set_location_assignment PIN_T3 -to button[0]
 set_location_assignment PIN_R1 -to button[1]
 set_location_assignment PIN_R2 -to button[2]
@@ -255,6 +242,31 @@ set_location_assignment PIN_J8 -to io3_3V_o[4]
 set_location_assignment PIN_H8 -to io3_3V_o[5]
 set_location_assignment PIN_G9 -to io3_3V_o[6]
 set_location_assignment PIN_G10 -to io3_3V_o[7]
-set_location_assignment PIN_F11 -to tp_phy_rx_crsdv
-set_location_assignment PIN_G11 -to tp_phy_tx_en
-set_global_assignment -name QIP_FILE EPL/OpenMAC_DMAFifo.qip
+set_location_assignment PIN_AB19 -to phy0_tx_en
+set_location_assignment PIN_AA18 -to phy0_tx_d[0]
+set_location_assignment PIN_AB18 -to phy0_tx_d[1]
+set_location_assignment PIN_T12 -to phy0_rst_n
+set_location_assignment PIN_AB20 -to phy0_rx_crsdv
+set_location_assignment PIN_V13 -to phy0_rx_d[1]
+set_location_assignment PIN_W13 -to phy0_rx_d[0]
+set_location_assignment PIN_AA20 -to phy0_smi_clk
+set_location_assignment PIN_U14 -to phy0_smi_io
+set_instance_assignment -name TSU_REQUIREMENT "4 ns" -from * -to phy0_rx_crsdv
+set_instance_assignment -name TSU_REQUIREMENT "4 ns" -from * -to phy0_rx_d
+set_instance_assignment -name TCO_REQUIREMENT "8 ns" -from * -to phy0_tx_en
+set_instance_assignment -name TCO_REQUIREMENT "8 ns" -from * -to phy0_tx_d
+set_instance_assignment -name TSU_REQUIREMENT "4 ns" -from * -to phy1_rx_crsdv
+set_instance_assignment -name TSU_REQUIREMENT "4 ns" -from * -to phy1_rx_d
+set_instance_assignment -name TCO_REQUIREMENT "8 ns" -from * -to phy1_tx_en
+set_instance_assignment -name TCO_REQUIREMENT "8 ns" -from * -to phy1_tx_d
+set_location_assignment PIN_AB14 -to phy1_tx_en
+set_location_assignment PIN_AA13 -to phy1_tx_d[0]
+set_location_assignment PIN_AB13 -to phy1_tx_d[1]
+set_location_assignment PIN_AB16 -to phy1_rx_crsdv
+set_location_assignment PIN_AB15 -to phy1_rx_d[1]
+set_location_assignment PIN_AA14 -to phy1_rx_d[0]
+set_location_assignment PIN_AA17 -to phy1_rst_n
+set_location_assignment PIN_AA16 -to phy1_smi_clk
+set_location_assignment PIN_AB17 -to phy1_smi_io
+set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to phy1_rx_d
+set_global_assignment -name QIP_FILE lpm_ff0.qip

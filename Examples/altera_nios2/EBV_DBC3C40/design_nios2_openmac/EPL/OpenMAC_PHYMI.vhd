@@ -12,6 +12,7 @@
 -- Version History
 ------------------------------------------------------------------------------------------------------------------------      
 -- 2009-08-07  V0.01        Converted to official version.
+-- 2009-09-07  V0.02		changed tristate port to In/Out and enable (Xilinx XPS doesn't like IO Ports...)
 ------------------------------------------------------------------------------------------------------------------------
 
 LIBRARY ieee;
@@ -29,9 +30,12 @@ ENTITY OpenMAC_MII IS
 			Data_In		: IN	std_logic_vector(15 DOWNTO 0);	
 			Data_Out	: OUT	std_logic_vector(15 DOWNTO 0);	
 			Mii_Clk		: OUT	std_logic;
-			Mii_Dio		: INOUT	std_logic;
+--			Mii_Dio		: InOut	std_logic;
+			Mii_Di : IN std_logic;
+			Mii_Do : out std_logic;
+			Mii_Doe : out std_logic; --'1' ... Input / '0' ... Output!!!
 			nResetOut	: OUT	std_logic;
-			NodeNr		: IN	std_logic_vector(7 DOWNTO 0) := (OTHERS => '0')
+			NodeNr		: IN	std_logic_vector(7 downto 0) := (others => '0')
 		);
 END ENTITY OpenMAC_MII;
 
@@ -50,7 +54,10 @@ BEGIN
 				   ShiftReg(15 DOWNTO 0);
 
 	Mii_Clk		<= iMiiClk;
-	Mii_Dio		<= M_Dout	WHEN M_Oe = '1'	ELSE 'Z';
+--	Mii_Dio		<= M_Dout	WHEN M_Oe = '1'	ELSE 'Z';
+	Mii_Do		<= M_Dout	WHEN M_Oe = '1'	ELSE 'Z';
+	Mii_Doe 		<= not M_Oe;
+	
 	nresetout	<= nReset;	
 
 p_Mii: PROCESS (Clk, nRst)
@@ -92,7 +99,7 @@ BEGIN
 				ELSE
 					IF	BytCnt(2) = '0' AND SrBusy = '1'	THEN				
 						M_Dout <= ShiftReg(31);	
-						ShiftReg <= ShiftReg(30 DOWNTO 0) & Mii_Dio;	
+						ShiftReg <= ShiftReg(30 DOWNTO 0) & Mii_Di; -- & Mii_Dio;	
 					END IF;		
 					BitCnt <= BitCnt - 1;
 					IF BitCnt = 0	THEN										

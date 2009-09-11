@@ -9,13 +9,15 @@
 # |  2009.08.07.12:17:06
 # | OpenMAC for Altera Nios II
 # | 
-# | C:/My_Designs/OpenMAC/src/OpenMAC_AvalonIF.vhd
+# |    OpenMAC_AvalonIF.vhd
 # | 
-# |    ./OpenMAC_AvalonIF.vhd syn
-# |    ./OpenMAC_PHYMI.vhd syn
-# |    ./OpenMAC_DMAFifo.vhd syn
-# |    ./OpenMAC_DPR_Altera.vhd syn
-# |    ./OpenMAC.vhd syn
+# |    OpenMAC_AvalonIF.vhd syn
+# |    OpenMAC_PHYMI.vhd syn
+# |    OpenMAC_DMAFifo.vhd syn
+# |    OpenMAC_DPR_Altera.vhd syn
+# |    OpenMAC.vhd syn
+# |    OpenHUB.vhd syn
+# |    OpenFILTER.vhd syn
 # | 
 # +-----------------------------------
 
@@ -23,12 +25,12 @@
 # +-----------------------------------
 # | module OpenMAC
 # | 
-set_module_property DESCRIPTION "OpenMAC for Altera Nios II"
+set_module_property DESCRIPTION "OpenMAC with OpenHUB and OpenFILTER for Altera Nios II"
 set_module_property NAME OpenMAC
 set_module_property VERSION 1.0
 set_module_property INTERNAL false
 set_module_property GROUP "Interface Protocols/Ethernet"
-set_module_property AUTHOR ""
+set_module_property AUTHOR "Bernecker + Rainer"
 set_module_property DISPLAY_NAME OpenMAC
 set_module_property LIBRARIES {ieee.std_logic_1164.all ieee.std_logic_arith.all ieee.std_logic_unsigned.all std.standard.all}
 set_module_property TOP_LEVEL_HDL_FILE OpenMAC_AvalonIF.vhd
@@ -46,6 +48,8 @@ add_file OpenMAC_PHYMI.vhd SYNTHESIS
 add_file OpenMAC_DMAFifo.vhd SYNTHESIS
 add_file OpenMAC_DPR_Altera.vhd SYNTHESIS
 add_file OpenMAC.vhd SYNTHESIS
+add_file OpenHUB.vhd SYNTHESIS
+add_file OpenFILTER.vhd SYNTHESIS
 # | 
 # +-----------------------------------
 
@@ -55,13 +59,13 @@ add_file OpenMAC.vhd SYNTHESIS
 add_parameter MacTimer BOOLEAN true
 set_parameter_property MacTimer DISPLAY_NAME MacTimer
 set_parameter_property MacTimer UNITS None
-set_parameter_property MacTimer DISPLAY_HINT ""
+set_parameter_property MacTimer DISPLAY_HINT "Enables a 32bit Timer to generate IRQ"
 set_parameter_property MacTimer AFFECTS_GENERATION false
 set_parameter_property MacTimer IS_HDL_PARAMETER true
 add_parameter Simulate BOOLEAN false
 set_parameter_property Simulate DISPLAY_NAME Simulate
 set_parameter_property Simulate UNITS None
-set_parameter_property Simulate DISPLAY_HINT ""
+set_parameter_property Simulate DISPLAY_HINT "Should be set in case of simulation"
 set_parameter_property Simulate AFFECTS_GENERATION false
 set_parameter_property Simulate IS_HDL_PARAMETER true
 # | 
@@ -120,7 +124,9 @@ add_interface portSMI conduit end
 set_interface_property portSMI ENABLED true
 
 add_interface_port portSMI mii_Clk export Output 1
-add_interface_port portSMI mii_Dio export Bidir 1
+add_interface_port portSMI mii_Di export Input 1
+add_interface_port portSMI mii_Do export Output 1
+add_interface_port portSMI mii_Doe export Output 1
 add_interface_port portSMI mii_nResetOut export Output 1
 add_interface_port portSMI mii_NodeNr export Input 8
 # | 
@@ -200,8 +206,8 @@ set_interface_property REG readLatency 0
 set_interface_property REG readWaitTime 1
 set_interface_property REG setupTime 0
 set_interface_property REG timingUnits Cycles
-set_interface_property REG writeWaitStates 1
-set_interface_property REG writeWaitTime 1
+set_interface_property REG writeWaitStates 0
+set_interface_property REG writeWaitTime 0
 
 set_interface_property REG ASSOCIATED_CLOCK clk_sink
 set_interface_property REG ENABLED true
@@ -289,16 +295,31 @@ add_interface_port interruptCMP nCmp_Int irq_n Output 1
 # +-----------------------------------
 
 # +-----------------------------------
-# | connection point RMII
+# | connection point RMII0
 # | 
-add_interface RMII conduit end
+add_interface RMII0 conduit end
 
-set_interface_property RMII ASSOCIATED_CLOCK clk_sink
-set_interface_property RMII ENABLED true
+set_interface_property RMII0 ASSOCIATED_CLOCK clk_sink
+set_interface_property RMII0 ENABLED true
 
-add_interface_port RMII rCrs_Dv export Input 1
-add_interface_port RMII rTx_Dat export Output 2
-add_interface_port RMII rTx_En export Output 1
-add_interface_port RMII rRx_Dat export Input 2
+add_interface_port RMII0 rCrs_Dv_0 export Input 1
+add_interface_port RMII0 rTx_Dat_0 export Output 2
+add_interface_port RMII0 rTx_En_0 export Output 1
+add_interface_port RMII0 rRx_Dat_0 export Input 2
+# | 
+# +-----------------------------------
+
+# +-----------------------------------
+# | connection point RMII1
+# | 
+add_interface RMII1 conduit end
+
+set_interface_property RMII1 ASSOCIATED_CLOCK clk_sink
+set_interface_property RMII1 ENABLED true
+
+add_interface_port RMII1 rCrs_Dv_1 export Input 1
+add_interface_port RMII1 rTx_Dat_1 export Output 2
+add_interface_port RMII1 rTx_En_1 export Output 1
+add_interface_port RMII1 rRx_Dat_1 export Input 2
 # | 
 # +-----------------------------------
