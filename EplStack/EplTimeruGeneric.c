@@ -200,7 +200,7 @@ return Ret;
 //
 //---------------------------------------------------------------------------
 
-tEplKernel PUBLIC EplTimeruAddInstance()
+tEplKernel PUBLIC EplTimeruAddInstance(void)
 {
 int nIdx;
 tEplKernel Ret;
@@ -278,7 +278,7 @@ Exit:
 //
 //---------------------------------------------------------------------------
 
-tEplKernel PUBLIC EplTimeruDelInstance()
+tEplKernel PUBLIC EplTimeruDelInstance(void)
 {
 tEplKernel  Ret;
 
@@ -298,6 +298,11 @@ tEplKernel  Ret;
 #endif
 
     EPL_FREE(EplTimeruInstance_g.m_pEntries);
+
+    EplTimeruInstance_g.m_pEntries = NULL;
+    EplTimeruInstance_g.m_pFreeListFirst = NULL;
+    EplTimeruInstance_g.m_pTimerListFirst = NULL;
+    EplTimeruInstance_g.m_uiFreeEntries = 0;
 
     return Ret;
 }
@@ -320,7 +325,7 @@ tEplKernel  Ret;
 //
 //---------------------------------------------------------------------------
 
-tEplKernel PUBLIC EplTimeruProcess()
+tEplKernel PUBLIC EplTimeruProcess(void)
 {
 tTimerEntry*        pTimerEntry;
 DWORD               dwTimeoutMs;

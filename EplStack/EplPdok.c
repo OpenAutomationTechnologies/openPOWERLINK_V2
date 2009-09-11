@@ -71,7 +71,7 @@
 #include "kernel/EplPdok.h"
 #include "kernel/EplPdokCal.h"
 #include "kernel/EplEventk.h"
-#include "kernel/EplObdk.h"
+#include "EplObd.h"
 
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOK)) != 0)
 
@@ -81,11 +81,7 @@
 
 #endif
 
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_OBDK)) == 0)
 
-    #error 'ERROR: Missing OBDk-Modul!'
-
-#endif
 /***************************************************************************/
 /*                                                                         */
 /*                                                                         */
