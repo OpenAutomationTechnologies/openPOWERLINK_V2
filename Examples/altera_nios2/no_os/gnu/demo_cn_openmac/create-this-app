@@ -40,7 +40,7 @@ ${MAINPATH}/EplStack/EplPdok.c ${MAINPATH}/EplStack/EplPdokCal.c \
 ${MAINPATH}/EplStack/EplPdou.c ${MAINPATH}/EplStack/EplPdouCal.c \
 ${MAINPATH}/EplStack/EplObd.c \
 ${MAINPATH}/EplStack/EplSdoComu.c ${MAINPATH}/EplStack/EplSdoAsySequ.c ${MAINPATH}/EplStack/EplSdoAsndu.c \
-${MAINPATH}/EplStack/EplTimeruNoOS.c \
+${MAINPATH}/EplStack/EplTimeruGeneric.c \
 ${MAINPATH}/EplStack/EplErrorHandlerk.c \
 ${MAINPATH}/EplStack/EplApiGeneric.c \
 ${MAINPATH}/ObjDicts/Api_CN/Objdict.c \

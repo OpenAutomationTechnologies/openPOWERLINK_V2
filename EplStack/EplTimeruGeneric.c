@@ -85,6 +85,14 @@
 // const defines
 //---------------------------------------------------------------------------
 
+#define TIMERU_TIMER_LIST   0
+#define TIMERU_FREE_LIST    1
+
+#if (TARGET_SYSTEM == _WIN32_)
+    #define TIMERU_EVENT_SHUTDOWN   0   // smaller index has higher priority
+    #define TIMERU_EVENT_WAKEUP     1
+#endif
+
 //---------------------------------------------------------------------------
 // local types
 //---------------------------------------------------------------------------
@@ -99,13 +107,19 @@ typedef struct _tTimerEntry
 
 typedef struct
 {
-    tTimerEntry*    m_pEntries;         // pointer to array of all timer entries
-    unsigned int    m_uiMaxEntries;
-    tTimerEntry*    m_pListTimerFirst;
-    tTimerEntry*    m_pListFreeTimerFirst;
-    unsigned int    m_uiFreeEntries;
-    DWORD           m_dwStartTimeMs;    // start time when the first timeout in list is based on
-    unsigned int    m_uiMinFreeEntries; // minimum number of free entries
+    tTimerEntry*        m_pEntries;         // pointer to array of all timer entries
+    tTimerEntry*        m_pTimerListFirst;
+    tTimerEntry*        m_pFreeListFirst;
+    DWORD               m_dwStartTimeMs;    // start time when the first timeout in list is based on
+
+    unsigned int        m_uiFreeEntries;
+    unsigned int        m_uiMinFreeEntries; // minimum number of free entries
+                                            // used to check if EPL_TIMERU_MAX_ENTRIES is large enough 
+#if (TARGET_SYSTEM == _WIN32_)
+    CRITICAL_SECTION    m_aCriticalSections[2];
+    HANDLE              m_hProcessThread;
+    HANDLE              m_ahEvents[2];      // WakeUp and ShutDown event handles
+#endif
 
 } tEplTimeruInstance;
 
@@ -118,6 +132,15 @@ tEplTimeruInstance EplTimeruInstance_g;
 //---------------------------------------------------------------------------
 // local function prototypes
 //---------------------------------------------------------------------------
+
+static INLINE_FUNCTION void  EplTimeruEnterCriticalSection (int nType_p);
+static INLINE_FUNCTION void  EplTimeruLeaveCriticalSection (int nType_p);
+static INLINE_FUNCTION DWORD EplTimeruGetTickCountMs (void);
+
+#if (TARGET_SYSTEM == _WIN32_)
+static DWORD PUBLIC EplTimeruProcessThread (LPVOID lpParameter);
+#endif
+
 
 /***************************************************************************/
 /*                                                                         */
@@ -187,30 +210,52 @@ tEplKernel Ret;
     // reset instance structure
     EPL_MEMSET(&EplTimeruInstance_g, 0, sizeof (EplTimeruInstance_g));
 
-    EplTimeruInstance_g.m_uiMaxEntries = EPL_TIMERU_MAX_ENTRIES;
-    EplTimeruInstance_g.m_uiFreeEntries = EPL_TIMERU_MAX_ENTRIES;
-    EplTimeruInstance_g.m_uiMinFreeEntries = EPL_TIMERU_MAX_ENTRIES;
-
-    EplTimeruInstance_g.m_pEntries = EPL_MALLOC(sizeof (tTimerEntry) * EplTimeruInstance_g.m_uiMaxEntries);
+    EplTimeruInstance_g.m_pEntries = EPL_MALLOC(sizeof (tTimerEntry) * EPL_TIMERU_MAX_ENTRIES);
     if (EplTimeruInstance_g.m_pEntries == NULL)
-    {   // allocating of queue entries failed
+    {   // allocating of timer entries failed
         Ret = kEplNoResource;
         goto Exit;
     }
 
+    EplTimeruInstance_g.m_pTimerListFirst = NULL;
+
     // fill free timer list
-    for (nIdx = 0; nIdx < EplTimeruInstance_g.m_uiMaxEntries-1; nIdx++)
+    for (nIdx = 0; nIdx < EPL_TIMERU_MAX_ENTRIES-1; nIdx++)
     {
         EplTimeruInstance_g.m_pEntries[nIdx].m_pNext = &EplTimeruInstance_g.m_pEntries[nIdx+1];
     }
-    EplTimeruInstance_g.m_pEntries[EplTimeruInstance_g.m_uiMaxEntries-1].m_pNext = NULL;
+    EplTimeruInstance_g.m_pEntries[EPL_TIMERU_MAX_ENTRIES-1].m_pNext = NULL;
 
-    EplTimeruInstance_g.m_pListTimerFirst = NULL;
-    EplTimeruInstance_g.m_pListFreeTimerFirst = EplTimeruInstance_g.m_pEntries;
+    EplTimeruInstance_g.m_pFreeListFirst = EplTimeruInstance_g.m_pEntries;
+    EplTimeruInstance_g.m_uiFreeEntries = EPL_TIMERU_MAX_ENTRIES;
+    EplTimeruInstance_g.m_uiMinFreeEntries = EPL_TIMERU_MAX_ENTRIES;
 
-    // set start time to a value which is in any case less or equal than GetTickCount()
+    // set start time to a value which is in any case less or equal than EplTimeruGetTickCountMs()
     // -> the only solution = 0
     EplTimeruInstance_g.m_dwStartTimeMs = 0;
+
+#if (TARGET_SYSTEM == _WIN32_)
+    InitializeCriticalSection(&EplTimeruInstance_g.m_aCriticalSections[TIMERU_TIMER_LIST]);
+    InitializeCriticalSection(&EplTimeruInstance_g.m_aCriticalSections[TIMERU_FREE_LIST]);
+
+    EplTimeruInstance_g.m_ahEvents[TIMERU_EVENT_WAKEUP]   = CreateEvent(NULL, FALSE, FALSE, NULL);
+    EplTimeruInstance_g.m_ahEvents[TIMERU_EVENT_SHUTDOWN] = CreateEvent(NULL, FALSE, FALSE, NULL);
+    if (EplTimeruInstance_g.m_ahEvents[TIMERU_EVENT_WAKEUP] == NULL
+        || EplTimeruInstance_g.m_ahEvents[TIMERU_EVENT_SHUTDOWN] == NULL)
+    {
+        Ret = kEplTimerThreadError;
+        goto Exit;
+    }
+
+    EplTimeruInstance_g.m_hProcessThread = CreateThread(NULL, 0,
+                                                        EplTimeruProcessThread,
+                                                        NULL, 0, NULL);
+    if (EplTimeruInstance_g.m_hProcessThread == NULL)
+    {
+        Ret = kEplTimerThreadError;
+        goto Exit;
+    }
+#endif
 
 Exit:
     return Ret;
@@ -239,6 +284,19 @@ tEplKernel  Ret;
 
     Ret = kEplSuccessful;
 
+#if (TARGET_SYSTEM == _WIN32_)
+    SetEvent( EplTimeruInstance_g.m_ahEvents[TIMERU_EVENT_SHUTDOWN] );
+
+    WaitForSingleObject( EplTimeruInstance_g.m_hProcessThread, INFINITE );
+
+    CloseHandle( EplTimeruInstance_g.m_hProcessThread );
+    CloseHandle( EplTimeruInstance_g.m_ahEvents[TIMERU_EVENT_SHUTDOWN] );
+    CloseHandle( EplTimeruInstance_g.m_ahEvents[TIMERU_EVENT_WAKEUP] );
+
+    DeleteCriticalSection( &EplTimeruInstance_g.m_aCriticalSections[TIMERU_TIMER_LIST] );
+    DeleteCriticalSection( &EplTimeruInstance_g.m_aCriticalSections[TIMERU_FREE_LIST] );
+#endif
+
     EPL_FREE(EplTimeruInstance_g.m_pEntries);
 
     return Ret;
@@ -266,37 +324,38 @@ tEplKernel PUBLIC EplTimeruProcess()
 {
 tTimerEntry*        pTimerEntry;
 DWORD               dwTimeoutMs;
-BOOL                fElapsed;
 tEplEvent           EplEvent;
 tEplTimerEventArg   TimerEventArg;
 tEplKernel          Ret;
 
 
     Ret      = kEplSuccessful;
-    fElapsed = FALSE;
 
+    EplTimeruEnterCriticalSection(TIMERU_TIMER_LIST);
     // calculate elapsed time since start time
-    dwTimeoutMs = EplTgtGetTickCountMs() - EplTimeruInstance_g.m_dwStartTimeMs;
+    dwTimeoutMs = EplTimeruGetTickCountMs() - EplTimeruInstance_g.m_dwStartTimeMs;
 
-    // Enter Critical Section
-    pTimerEntry = EplTimeruInstance_g.m_pListTimerFirst;
+    // observe first timer entry in timer list
+    pTimerEntry = EplTimeruInstance_g.m_pTimerListFirst;
     if (pTimerEntry != NULL)
     {
         if (dwTimeoutMs >= pTimerEntry->m_dwTimeoutMs)
         {   // timeout elapsed
-            fElapsed = TRUE;        
-    
-            // remove entry from list
-            EplTimeruInstance_g.m_pListTimerFirst = pTimerEntry->m_pNext;
+            // remove entry from timer list
+            EplTimeruInstance_g.m_pTimerListFirst = pTimerEntry->m_pNext;
+
+            // adjust start time
+            EplTimeruInstance_g.m_dwStartTimeMs += pTimerEntry->m_dwTimeoutMs;
+        }
+        else
+        {
+            pTimerEntry = NULL;
         }
     }
-    // Leave Critical Section
+    EplTimeruLeaveCriticalSection(TIMERU_TIMER_LIST);
 
-    if (fElapsed != FALSE)
+    if (pTimerEntry != NULL)
     {
-        // adjust start time
-        EplTimeruInstance_g.m_dwStartTimeMs += pTimerEntry->m_dwTimeoutMs;
-
         // call event function
         TimerEventArg.m_TimerHdl = (tEplTimerHdl) pTimerEntry;
         EPL_MEMCPY(&TimerEventArg.m_Arg, &pTimerEntry->m_TimerArg.m_Arg, sizeof (TimerEventArg.m_Arg));
@@ -310,8 +369,11 @@ tEplKernel          Ret;
         Ret = EplEventuPost(&EplEvent);
 
         // append entry to free list
-        pTimerEntry->m_pNext = EplTimeruInstance_g.m_pListFreeTimerFirst;
-        EplTimeruInstance_g.m_pListFreeTimerFirst = pTimerEntry;
+        EplTimeruEnterCriticalSection(TIMERU_FREE_LIST);
+        pTimerEntry->m_pNext = EplTimeruInstance_g.m_pFreeListFirst;
+        EplTimeruInstance_g.m_pFreeListFirst = pTimerEntry;
+        EplTimeruInstance_g.m_uiFreeEntries++;
+        EplTimeruLeaveCriticalSection(TIMERU_FREE_LIST);
     }
 
     return Ret;
@@ -353,29 +415,36 @@ tEplKernel      Ret;
         goto Exit;
     }
 
-    // fetch first entry from free timer list
-    pNewEntry = EplTimeruInstance_g.m_pListFreeTimerFirst;
+    // fetch entry from free timer list
+    EplTimeruEnterCriticalSection(TIMERU_FREE_LIST);
+    pNewEntry = EplTimeruInstance_g.m_pFreeListFirst;
+    if (pNewEntry != NULL)
+    {
+        EplTimeruInstance_g.m_pFreeListFirst = pNewEntry->m_pNext;
+        EplTimeruInstance_g.m_uiFreeEntries--;
+        if (EplTimeruInstance_g.m_uiMinFreeEntries > EplTimeruInstance_g.m_uiFreeEntries)
+        {
+            EplTimeruInstance_g.m_uiMinFreeEntries = EplTimeruInstance_g.m_uiFreeEntries;
+        }
+    }
+    EplTimeruLeaveCriticalSection(TIMERU_FREE_LIST);
+
     if (pNewEntry == NULL)
     {   // sorry, no free entry
         Ret = kEplTimerNoTimerCreated;
         goto Exit;
     }
-    EplTimeruInstance_g.m_pListFreeTimerFirst = pNewEntry->m_pNext;
-
-    if (EplTimeruInstance_g.m_uiMinFreeEntries > EplTimeruInstance_g.m_uiFreeEntries)
-    {
-        EplTimeruInstance_g.m_uiMinFreeEntries = EplTimeruInstance_g.m_uiFreeEntries;
-    }
-
-    // fill entry
-    EPL_MEMCPY(&pNewEntry->m_TimerArg, &Argument_p, sizeof(tEplTimerArg));
-    // calculate timeout based on start time
-    pNewEntry->m_dwTimeoutMs = (EplTgtGetTickCountMs() - EplTimeruInstance_g.m_dwStartTimeMs) + ulTimeMs_p;
 
     *pTimerHdl_p = (tEplTimerHdl) pNewEntry;
+    EPL_MEMCPY(&pNewEntry->m_TimerArg, &Argument_p, sizeof(tEplTimerArg));
 
     // insert timer entry in timer list
-    ppEntry = &EplTimeruInstance_g.m_pListTimerFirst;
+    EplTimeruEnterCriticalSection(TIMERU_TIMER_LIST);
+
+    // calculate timeout based on start time
+    pNewEntry->m_dwTimeoutMs = (EplTimeruGetTickCountMs() - EplTimeruInstance_g.m_dwStartTimeMs) + ulTimeMs_p;
+
+    ppEntry = &EplTimeruInstance_g.m_pTimerListFirst;
     while (*ppEntry != NULL)
     {
         if ((*ppEntry)->m_dwTimeoutMs > pNewEntry->m_dwTimeoutMs)
@@ -389,6 +458,14 @@ tEplKernel      Ret;
     // insert before **ppEntry
     pNewEntry->m_pNext = *ppEntry;
     *ppEntry = pNewEntry;
+    EplTimeruLeaveCriticalSection(TIMERU_TIMER_LIST);
+
+#if (TARGET_SYSTEM == _WIN32_)
+	if (ppEntry == &EplTimeruInstance_g.m_pTimerListFirst)
+    {
+        SetEvent( EplTimeruInstance_g.m_ahEvents[TIMERU_EVENT_WAKEUP] );
+    }
+#endif
 
 Exit:
     return Ret;
@@ -417,105 +494,15 @@ tEplKernel PUBLIC EplTimeruModifyTimerMs(tEplTimerHdl*    pTimerHdl_p,
                                         unsigned long     ulTimeMs_p,
                                         tEplTimerArg      Argument_p)
 {
-tTimerEntry*    pTimerEntry;
-tTimerEntry**   ppEntry;
-DWORD           dwNewTimeoutMs;
-tTimerEntry*    pNewNext;
-BOOL            fFoundOldEntry;
 tEplKernel      Ret;
 
-    Ret = kEplSuccessful;
-
-    // check pointer to handle
-    if(pTimerHdl_p == NULL)
+    Ret = EplTimeruDeleteTimer(pTimerHdl_p);
+    if (Ret != kEplSuccessful)
     {
-        Ret = kEplTimerInvalidHandle;
         goto Exit;
     }
 
-    // check handle itself, i.e. was the handle initialized before
-    if (*pTimerHdl_p == 0)
-    {
-        Ret = EplTimeruSetTimerMs(pTimerHdl_p, ulTimeMs_p, Argument_p);
-        goto Exit;
-    }
-    
-    pTimerEntry    = (tTimerEntry*) *pTimerHdl_p;
-    dwNewTimeoutMs = (EplTgtGetTickCountMs() - EplTimeruInstance_g.m_dwStartTimeMs) + ulTimeMs_p;
-
-    // remove and reinsert timer entry
-    fFoundOldEntry = FALSE;
-    ppEntry = &EplTimeruInstance_g.m_pListTimerFirst;
-    while (*ppEntry != NULL)
-    {
-        if (*ppEntry == pTimerEntry)
-        {
-            // remove from timer list
-            fFoundOldEntry = TRUE;
-            *ppEntry = pTimerEntry->m_pNext;
-            if (*ppEntry == NULL)
-            {
-                break;
-            }
-            (*ppEntry)->m_dwTimeoutMs += pTimerEntry->m_dwTimeoutMs;
-        }
-
-        if ((*ppEntry)->m_dwTimeoutMs > dwNewTimeoutMs)
-        {
-            (*ppEntry)->m_dwTimeoutMs -= dwNewTimeoutMs;
-            break;
-        }
-        dwNewTimeoutMs -= (*ppEntry)->m_dwTimeoutMs;
-        ppEntry = &(*ppEntry)->m_pNext;
-    }
-    pNewNext = *ppEntry;
-    *ppEntry = pTimerEntry;
-
-    // remove timer entry from timer list if behind new insert location
-    if (fFoundOldEntry == FALSE)
-    {
-        while (*ppEntry != NULL)
-        {
-            if (*ppEntry == pTimerEntry)
-            {
-                // remove from timer list
-                fFoundOldEntry = TRUE;
-                (*ppEntry) = pTimerEntry->m_pNext;
-                if (*ppEntry != NULL)
-                {
-                    (*ppEntry)->m_dwTimeoutMs += pTimerEntry->m_dwTimeoutMs;
-                }
-            }
-    
-            ppEntry = &(*ppEntry)->m_pNext;
-        }
-    }
-    pTimerEntry->m_dwTimeoutMs = dwNewTimeoutMs;
-    
-    // remove timer entry from free list if not found in timer list
-    if (fFoundOldEntry == FALSE)
-    {
-        ppEntry = &EplTimeruInstance_g.m_pListFreeTimerFirst;
-        while (*ppEntry != NULL)
-        {
-            if (*ppEntry == pTimerEntry)
-            {
-                // remove from free list
-                *ppEntry = pTimerEntry->m_pNext;
-            }
-    
-            ppEntry = &(*ppEntry)->m_pNext;
-        }
-    }
-    pTimerEntry->m_pNext = pNewNext;
-
-    // copy the new TimerArg after the time value has been modified,
-    // thus a timer which occured immediately before the modification
-    // of the time value won't use the new TimerArg.
-    // If the new TimerArg would be used in this case, the old timer
-    // could not be distinguished from the new one.
-    // If the new timer is too fast, it may get lost.
-    EPL_MEMCPY(&pTimerEntry->m_TimerArg, &Argument_p, sizeof(tEplTimerArg));
+    Ret = EplTimeruSetTimerMs(pTimerHdl_p, ulTimeMs_p, Argument_p);
 
 Exit:
     return Ret;
@@ -542,10 +529,12 @@ tEplKernel PUBLIC EplTimeruDeleteTimer(tEplTimerHdl*     pTimerHdl_p)
 {
 tTimerEntry*    pTimerEntry;
 tTimerEntry**   ppEntry;
+BOOL            fEntryFound;
 tEplKernel      Ret;
 
 
-    Ret = kEplSuccessful;
+    Ret         = kEplSuccessful;
+    fEntryFound = FALSE;
 
     // check pointer to handle
     if(pTimerHdl_p == NULL)
@@ -564,7 +553,8 @@ tEplKernel      Ret;
     pTimerEntry = (tTimerEntry*) *pTimerHdl_p;
 
     // remove timer entry from timer list
-    ppEntry = &EplTimeruInstance_g.m_pListTimerFirst;
+    EplTimeruEnterCriticalSection(TIMERU_TIMER_LIST);
+    ppEntry = &EplTimeruInstance_g.m_pTimerListFirst;
     while (*ppEntry != NULL)
     {
         if (*ppEntry == pTimerEntry)
@@ -574,15 +564,23 @@ tEplKernel      Ret;
             {
                 (*ppEntry)->m_dwTimeoutMs += pTimerEntry->m_dwTimeoutMs;
             }
-            
-            // insert in free list
-            pTimerEntry->m_pNext = EplTimeruInstance_g.m_pListFreeTimerFirst;
-            EplTimeruInstance_g.m_pListFreeTimerFirst = pTimerEntry;
-            
+
+            fEntryFound = TRUE;
             break;
         }
             
         ppEntry = &(*ppEntry)->m_pNext;
+    }
+    EplTimeruLeaveCriticalSection(TIMERU_TIMER_LIST);
+
+    if (fEntryFound)
+    {
+        // insert in free list
+        EplTimeruEnterCriticalSection(TIMERU_FREE_LIST);
+        pTimerEntry->m_pNext = EplTimeruInstance_g.m_pFreeListFirst;
+        EplTimeruInstance_g.m_pFreeListFirst = pTimerEntry;
+        EplTimeruInstance_g.m_uiFreeEntries++;
+        EplTimeruLeaveCriticalSection(TIMERU_FREE_LIST);
     }
 
     // set handle invalid
@@ -595,12 +593,150 @@ Exit:
 
 
 
+//---------------------------------------------------------------------------
+//
+// Function:    EplTimeruGetMinFreeEntries
+//
+// Description: returns the minimum number of free entries
+//              since this instance has been added
+//
+// Parameters:  none
+//
+// Returns:     unsigned int            = minimum number of free timer entries
+//
+// State:
+//
+//---------------------------------------------------------------------------
+
+unsigned int PUBLIC EplTimeruGetMinFreeEntries(void)
+{
+    return (EplTimeruInstance_g.m_uiMinFreeEntries);
+}
+
+
+
 //=========================================================================//
 //                                                                         //
 //          P R I V A T E   F U N C T I O N S                              //
 //                                                                         //
 //=========================================================================//
 
+//---------------------------------------------------------------------------
+//  EplTimeruGetTickCountMs
+//---------------------------------------------------------------------------
+
+static INLINE_FUNCTION DWORD EplTimeruGetTickCountMs (void)
+{
+DWORD	TickCountMs;
+
+#if (TARGET_SYSTEM == _WIN32_)
+	TickCountMs = GetTickCount();
+#else
+    TickCountMs = EplTgtGetTickCountMs();
+#endif
+
+	return TickCountMs;
+}
+
+
+//---------------------------------------------------------------------------
+//  EplTimeruEnterCriticalSection
+//---------------------------------------------------------------------------
+
+static INLINE_FUNCTION void EplTimeruEnterCriticalSection (int nType_p)
+{
+#if (TARGET_SYSTEM == _NO_OS_)
+    #ifdef EPL_NO_FIFO
+        EplTgtEnableGlobalInterrupt(FALSE);
+    #endif
+#elif (TARGET_SYSTEM == _WIN32_)
+    EnterCriticalSection(&EplTimeruInstance_g.m_aCriticalSections[nType_p]);
+#endif
+}
+
+
+//---------------------------------------------------------------------------
+//  EplTimeruLeaveCriticalSection
+//---------------------------------------------------------------------------
+
+static INLINE_FUNCTION void EplTimeruLeaveCriticalSection (int nType_p)
+{
+#if (TARGET_SYSTEM == _NO_OS_)
+    #ifdef EPL_NO_FIFO
+        EplTgtEnableGlobalInterrupt(TRUE);
+    #endif
+#elif (TARGET_SYSTEM == _WIN32_)
+    LeaveCriticalSection(&EplTimeruInstance_g.m_aCriticalSections[nType_p]);
+#endif
+}
+
+
+#if (TARGET_SYSTEM == _WIN32_)
+
+//---------------------------------------------------------------------------
+//  Thread for processing the timer list when using an operating system
+//---------------------------------------------------------------------------
+
+static DWORD PUBLIC EplTimeruProcessThread (LPVOID lpParameter)
+{
+tTimerEntry*	pTimerEntry;
+DWORD			dwTimeoutMs;
+DWORD           dwWaitResult;
+tEplKernel		Ret;
+
+    while (1)
+    {
+        Ret = EplTimeruProcess();
+        if (Ret != kEplSuccessful)
+        {
+            // Error
+        }
+        
+        // calculate time until the next timer event
+        EplTimeruEnterCriticalSection(TIMERU_TIMER_LIST);
+        pTimerEntry = EplTimeruInstance_g.m_pTimerListFirst;
+        if (pTimerEntry == NULL)
+        {   // timer list is empty
+            dwTimeoutMs = INFINITE;
+        }
+        else
+        {
+            dwTimeoutMs = EplTimeruGetTickCountMs() - EplTimeruInstance_g.m_dwStartTimeMs;
+            if (dwTimeoutMs > pTimerEntry->m_dwTimeoutMs)
+            {   // timeout elapsed
+                dwTimeoutMs = 0;
+            }
+            else
+            {   // adjust timeout with elapsed time since start time
+                dwTimeoutMs = pTimerEntry->m_dwTimeoutMs - dwTimeoutMs;
+            }
+        }
+        EplTimeruLeaveCriticalSection(TIMERU_TIMER_LIST);
+        
+        dwWaitResult = WaitForMultipleObjects(2, EplTimeruInstance_g.m_ahEvents, FALSE, dwTimeoutMs);
+        switch (dwWaitResult)
+        {
+            case (WAIT_OBJECT_0 + TIMERU_EVENT_SHUTDOWN):
+            {
+                goto Exit;
+            }
+            case (WAIT_OBJECT_0 + TIMERU_EVENT_WAKEUP):
+            case WAIT_TIMEOUT:
+            {
+                break;
+            }
+            default:
+            {
+                // Error
+            }
+        }
+    }
+
+Exit:
+    return 0;
+}
+
+#endif
 
 
 // EOF
