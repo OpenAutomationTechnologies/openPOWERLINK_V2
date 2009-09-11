@@ -24,3 +24,4 @@ timing
 *.ptf.8.0
 *temp.vhd
 *.smsg
+*.cdf
