@@ -581,7 +581,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\..\..\EplStack\EplTimeruWin32.c"
+				RelativePath="..\..\..\..\..\EplStack\EplTimeruGeneric.c"
 				>
 			</File>
 			<File
