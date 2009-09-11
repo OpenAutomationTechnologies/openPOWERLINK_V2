@@ -202,6 +202,7 @@ static void EdrvCbSendAck(ometh_packet_typ *pPacket, void *arg, unsigned long ti
 
 static void EdrvRxInterruptHandler (void* pArg_p, alt_u32 dwInt_p);
 static void EdrvTxInterruptHandler (void* pArg_p, alt_u32 dwInt_p);
+static void EdrvTimerInterruptHandler (void* pArg_p, alt_u32 dwInt_p);
 
 
 //void asyncCall(void);
@@ -398,6 +399,11 @@ BYTE            abFilterMask[31],
     }
 
     if (alt_irq_register(EPL_MAC_TX_IRQ, EdrvInstance_l.m_hOpenMac, EdrvTxInterruptHandler))
+    {
+        Ret = kEplNoResource;
+    }
+
+    if (alt_irq_register(EDRV_TIMER_IRQ, NULL, EdrvTimerInterruptHandler))
     {
         Ret = kEplNoResource;
     }
@@ -905,5 +911,10 @@ static void EdrvRxInterruptHandler (void* pArg_p, alt_u32 dwInt_p)
 static void EdrvTxInterruptHandler (void* pArg_p, alt_u32 dwInt_p)
 {
     omethTxIrqHandler(pArg_p);
+}
+
+static void EdrvTimerInterruptHandler (void* pArg_p, alt_u32 dwInt_p)
+{
+    omethPeriodic();
 }
 
