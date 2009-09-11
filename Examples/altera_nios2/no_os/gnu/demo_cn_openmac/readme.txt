@@ -54,6 +54,8 @@ How to build the binary
 How to import the project into Nios II IDE
 -------------------------------------------
 
+Requirement: Steps in the previous section "How to build the binary" are completed.
+
 1. Start the "Nios II IDE"
 
 2. Select menu "File" -> "Import..."
