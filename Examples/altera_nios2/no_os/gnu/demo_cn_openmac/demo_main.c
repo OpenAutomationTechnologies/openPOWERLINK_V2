@@ -269,19 +269,39 @@ tEplKernel PUBLIC AppCbEvent(
         case kEplApiEventLed:
         {   // status or error LED shall be changed
 
-#ifdef LED_STAERR_PIO_BASE
-            if (pEventArg_p->m_Led.m_fOn != FALSE)
+            switch (pEventArg_p->m_Led.m_LedType)
             {
-                // PIO clear => LED on
-                IOWR_ALTERA_AVALON_PIO_CLEAR_BITS(LED_PIO_BASE, pEventArg_p->m_Led.m_LedType);
-            }
-            else
-            {
-                // PIO set => LED off
-                IOWR_ALTERA_AVALON_PIO_SET_BITS(LED_PIO_BASE, pEventArg_p->m_Led.m_LedType);
-            }
+#ifdef LED_STATUS_PIO_BASE
+                case kEplLedTypeStatus:
+                {
+                    if (pEventArg_p->m_Led.m_fOn != FALSE)
+                    {
+                        IOWR_ALTERA_AVALON_PIO_DATA(LED_STATUS_PIO_BASE, 1);
+                    }
+                    else
+                    {
+                        IOWR_ALTERA_AVALON_PIO_DATA(LED_STATUS_PIO_BASE, 0);
+                    }
+                    break;
+                }
 #endif
-
+#ifdef LED_ERROR_PIO_BASE
+                case kEplLedTypeError:
+                {
+                    if (pEventArg_p->m_Led.m_fOn != FALSE)
+                    {
+                        IOWR_ALTERA_AVALON_PIO_DATA(LED_ERROR_PIO_BASE, 1);
+                    }
+                    else
+                    {
+                        IOWR_ALTERA_AVALON_PIO_DATA(LED_ERROR_PIO_BASE, 0);
+                    }
+                    break;
+                }
+#endif
+                default:
+                    break;
+            }
             break;
         }
 
