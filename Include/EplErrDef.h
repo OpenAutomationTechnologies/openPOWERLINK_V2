@@ -195,8 +195,8 @@ typedef enum
 
     // area for EPL Timer Modul 0x0090 - 0x009F
     kEplTimerInvalidHandle      = 0x0090,     // invalid handle for timer
-    kEplTimerNoTimerCreated     = 0x0091,     // no timer was created caused by
-                                                // an error
+    kEplTimerNoTimerCreated     = 0x0091,     // no timer was created caused by an error
+    kEplTimerThreadError        = 0x0092,     // process thread could not be created
 
     // area for EPL SDO/Asnd Module 0x00A0 - 0x0AF
     kEplSdoAsndInvalidNodeId    = 0x00A0,     //0 node id is invalid
