@@ -270,7 +270,7 @@ static tEplKernel EplNmtMnuCheckNmtState(
                                     WORD                wErrorCode_p,
                                     tEplNmtState        LocalNmtState_p);
 
-static tEplKernel EplNmtMnuStartBootStep1(void);
+static tEplKernel EplNmtMnuStartBootStep1(BOOL fNmtResetAllIssued_p);
 
 static tEplKernel EplNmtMnuStartBootStep2(void);
 
@@ -972,6 +972,7 @@ tEplKernel      Ret = kEplSuccessful;
         tEplTimerArg    TimerArg;
         tEplObdSize     ObdSize;
         tEplEvent       Event;
+		BOOL			fNmtResetAllIssued = FALSE;
 
             // reset IdentResponses and running IdentRequests and StatusRequests
             Ret = EplIdentuReset();
@@ -1020,13 +1021,14 @@ tEplKernel      Ret = kEplSuccessful;
                 {
                     break;
                 }
+				fNmtResetAllIssued = TRUE;
             }
 
             // clear global flags, e.g. reenable boot process
             EplNmtMnuInstance_g.m_wFlags = 0;
 
             // start network scan
-            Ret = EplNmtMnuStartBootStep1();
+            Ret = EplNmtMnuStartBootStep1(fNmtResetAllIssued);
 
             // start timer for 0x1F89/2 MNTimeoutPreOp1_U32
             ObdSize = sizeof (dwTimeout);
@@ -1689,13 +1691,14 @@ tEplKernel      Ret = kEplSuccessful;
 //
 //---------------------------------------------------------------------------
 
-static tEplKernel EplNmtMnuStartBootStep1(void)
+static tEplKernel EplNmtMnuStartBootStep1(BOOL fNmtResetAllIssued_p)
 {
-tEplKernel      Ret = kEplSuccessful;
-unsigned int    uiSubIndex;
-unsigned int    uiLocalNodeId;
-DWORD           dwNodeCfg;
-tEplObdSize     ObdSize;
+tEplKernel			Ret = kEplSuccessful;
+unsigned int		uiSubIndex;
+unsigned int		uiLocalNodeId;
+DWORD				dwNodeCfg;
+tEplObdSize			ObdSize;
+tEplNmtMnuNodeInfo*	pNodeInfo;
 
     // $$$ d.k.: save current time for 0x1F89/2 MNTimeoutPreOp1_U32
 
@@ -1714,8 +1717,10 @@ tEplObdSize     ObdSize;
         }
         if (uiSubIndex != uiLocalNodeId)
         {
+			pNodeInfo = EPL_NMTMNU_GET_NODEINFO(uiSubIndex);
+
             // reset flags "not scanned" and "isochronous"
-            EPL_NMTMNU_GET_NODEINFO(uiSubIndex)->m_wFlags &= ~(EPL_NMTMNU_NODE_FLAG_ISOCHRON | EPL_NMTMNU_NODE_FLAG_NOT_SCANNED);
+            pNodeInfo->m_wFlags &= ~(EPL_NMTMNU_NODE_FLAG_ISOCHRON | EPL_NMTMNU_NODE_FLAG_NOT_SCANNED);
 
             if (uiSubIndex == EPL_C_ADR_DIAG_DEF_NODE_ID)
             {   // diagnostic node must be scanned by MN in any case
@@ -1725,20 +1730,24 @@ tEplObdSize     ObdSize;
             }
 
             // save node config in local node info structure
-            EPL_NMTMNU_GET_NODEINFO(uiSubIndex)->m_dwNodeCfg = dwNodeCfg;
-            EPL_NMTMNU_GET_NODEINFO(uiSubIndex)->m_NodeState = kEplNmtMnuNodeStateUnknown;
+            pNodeInfo->m_dwNodeCfg = dwNodeCfg;
+            pNodeInfo->m_NodeState = kEplNmtMnuNodeStateUnknown;
 
             if ((dwNodeCfg & (EPL_NODEASSIGN_NODE_IS_CN | EPL_NODEASSIGN_NODE_EXISTS)) != 0)
             {   // node is configured as CN
-                // identify the node
-                Ret = EplIdentuRequestIdentResponse(uiSubIndex, EplNmtMnuCbIdentResponse);
-                if (Ret != kEplSuccessful)
-                {
-                    goto Exit;
-                }
+
+				if (fNmtResetAllIssued_p == FALSE)
+				{
+					// identify the node
+	                Ret = EplIdentuRequestIdentResponse(uiSubIndex, EplNmtMnuCbIdentResponse);
+					if (Ret != kEplSuccessful)
+					{
+						goto Exit;
+					}
+				}
 
                 // set flag "not scanned"
-                EPL_NMTMNU_GET_NODEINFO(uiSubIndex)->m_wFlags |= EPL_NMTMNU_NODE_FLAG_NOT_SCANNED;
+                pNodeInfo->m_wFlags |= EPL_NMTMNU_NODE_FLAG_NOT_SCANNED;
                 EplNmtMnuInstance_g.m_uiSignalSlaveCount++;
                 // signal slave counter shall be decremented if IdentRequest was sent once to a CN
 
