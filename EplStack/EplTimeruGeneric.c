@@ -372,13 +372,6 @@ tEplKernel          Ret;
         EplEvent.m_uiSize = sizeof(TimerEventArg);
 
         Ret = EplEventuPost(&EplEvent);
-
-        // append entry to free list
-        EplTimeruEnterCriticalSection(TIMERU_FREE_LIST);
-        pTimerEntry->m_pNext = EplTimeruInstance_g.m_pFreeListFirst;
-        EplTimeruInstance_g.m_pFreeListFirst = pTimerEntry;
-        EplTimeruInstance_g.m_uiFreeEntries++;
-        EplTimeruLeaveCriticalSection(TIMERU_FREE_LIST);
     }
 
     return Ret;
@@ -534,12 +527,10 @@ tEplKernel PUBLIC EplTimeruDeleteTimer(tEplTimerHdl*     pTimerHdl_p)
 {
 tTimerEntry*    pTimerEntry;
 tTimerEntry**   ppEntry;
-BOOL            fEntryFound;
 tEplKernel      Ret;
 
 
     Ret         = kEplSuccessful;
-    fEntryFound = FALSE;
 
     // check pointer to handle
     if(pTimerHdl_p == NULL)
@@ -569,8 +560,6 @@ tEplKernel      Ret;
             {
                 (*ppEntry)->m_dwTimeoutMs += pTimerEntry->m_dwTimeoutMs;
             }
-
-            fEntryFound = TRUE;
             break;
         }
             
@@ -578,15 +567,12 @@ tEplKernel      Ret;
     }
     EplTimeruLeaveCriticalSection(TIMERU_TIMER_LIST);
 
-    if (fEntryFound)
-    {
-        // insert in free list
-        EplTimeruEnterCriticalSection(TIMERU_FREE_LIST);
-        pTimerEntry->m_pNext = EplTimeruInstance_g.m_pFreeListFirst;
-        EplTimeruInstance_g.m_pFreeListFirst = pTimerEntry;
-        EplTimeruInstance_g.m_uiFreeEntries++;
-        EplTimeruLeaveCriticalSection(TIMERU_FREE_LIST);
-    }
+    // insert in free list
+    EplTimeruEnterCriticalSection(TIMERU_FREE_LIST);
+    pTimerEntry->m_pNext = EplTimeruInstance_g.m_pFreeListFirst;
+    EplTimeruInstance_g.m_pFreeListFirst = pTimerEntry;
+    EplTimeruInstance_g.m_uiFreeEntries++;
+    EplTimeruLeaveCriticalSection(TIMERU_FREE_LIST);
 
     // set handle invalid
     *pTimerHdl_p = 0;
