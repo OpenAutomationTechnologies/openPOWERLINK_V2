@@ -358,31 +358,8 @@ BYTE            abFilterMask[31],
         }
     }
 
-    //Hook for all Packets addressed to this mac and not hooked by the others
-    /* to configer a hook to get all packets that had not been hooked by the others
-     *  set all filter mask bytes to zero and don't care the filter values
-     */
-
-    // $$$ d.k. this Filter will be necessary, if Virtual Ethernet driver is available
-/*
-    printf("Hook for this MAC...");
-    memset(abFilterMask, 0, sizeof(abFilterMask));
-    abFilterMask[0] = 0xFF; abFilterMask[1] = 0xFF; abFilterMask[2] = 0xFF;
-	abFilterMask[3] = 0xFF; abFilterMask[4] = 0xFF; abFilterMask[5] = 0xFF;
-    abFilterValue[0] = EdrvInstance_l.m_InitParam.m_abMyMacAddr[0];
-	abFilterValue[1] = EdrvInstance_l.m_InitParam.m_abMyMacAddr[1];
-	abFilterValue[2] = EdrvInstance_l.m_InitParam.m_abMyMacAddr[2];
-	abFilterValue[3] = EdrvInstance_l.m_InitParam.m_abMyMacAddr[3];
-	abFilterValue[4] = EdrvInstance_l.m_InitParam.m_abMyMacAddr[4];
-	abFilterValue[5] = EdrvInstance_l.m_InitParam.m_abMyMacAddr[5];
-
-    Ret = initHook(&EdrvInstance_l.EthHooks.tome, tome_Hook, &EdrvInstance_l.EthFilters.tome,
-                    abFilterMask, abFilterValue, EdrvInstance_l.EthHooksMaxPendings.tome);
-    if(Ret == kEplSuccessful)
-        printf(" done\n");
-    else
-        printf(" error!\n");
-*/
+    // $$$ d.k. additional Filters for own MAC address and broadcast MAC
+    //          will be necessary, if Virtual Ethernet driver is available
 
     ///////////////////////////
     // start Ethernet Driver //
@@ -797,8 +774,16 @@ static void EdrvCbSendAck(ometh_packet_typ *pPacket, void *arg, unsigned long ti
 // State:
 //
 //---------------------------------------------------------------------------
-tEplKernel EdrvShutdown(void) {
+tEplKernel EdrvShutdown(void)
+{
     printf("Shutdown Ethernet Driver... ");
+
+    omethStop(EdrvInstance_l.m_hOpenMac);
+
+    alt_irq_register(EPL_MAC_RX_IRQ, EdrvInstance_l.m_hOpenMac, NULL);
+    alt_irq_register(EPL_MAC_TX_IRQ, EdrvInstance_l.m_hOpenMac, NULL);
+    alt_irq_register(EDRV_TIMER_IRQ, NULL, NULL);
+
     if(omethDestroy(EdrvInstance_l.m_hOpenMac) != 0) {
         printf("error\n");
         return kEplNoResource;
@@ -915,6 +900,12 @@ static void EdrvTxInterruptHandler (void* pArg_p, alt_u32 dwInt_p)
 
 static void EdrvTimerInterruptHandler (void* pArg_p, alt_u32 dwInt_p)
 {
+alt_u32 dwOldPriority;
+
+    dwOldPriority = alt_irq_interruptible(dwInt_p);
+
     omethPeriodic();
+    
+    alt_irq_non_interruptible(dwOldPriority);
 }
 
