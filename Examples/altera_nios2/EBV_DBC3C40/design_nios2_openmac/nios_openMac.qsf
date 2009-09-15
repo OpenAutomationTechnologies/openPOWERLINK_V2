@@ -270,3 +270,6 @@ set_location_assignment PIN_AA16 -to phy1_smi_clk
 set_location_assignment PIN_AB17 -to phy1_smi_io
 set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to phy1_rx_d
 set_global_assignment -name QIP_FILE lpm_ff0.qip
+set_global_assignment -name MISC_FILE "C:/Projekte/CVS_Projekte/EPL_V2/Examples/altera_nios2/EBV_DBC3C40/design_nios2_openmac/nios_openMac.dpf"
+set_location_assignment PIN_F11 -to io3_3V_o[8]
+set_location_assignment PIN_G11 -to io3_3V_o[9]

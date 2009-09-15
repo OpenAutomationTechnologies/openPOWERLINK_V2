@@ -73,7 +73,7 @@ applicable agreement for further details.
 )
 (pin
 	(input)
-	(rect -40 808 128 824)
+	(rect -40 832 128 848)
 	(text "INPUT" (rect 133 0 161 10)(font "Arial" (font_size 6)))
 	(text "phy0_rx_crsdv" (rect 9 0 83 12)(font "Arial" ))
 	(pt 168 8)
@@ -86,11 +86,11 @@ applicable agreement for further details.
 		(line (pt 117 12)(pt 121 8)(line_width 1))
 	)
 	(text "VCC" (rect 136 7 156 17)(font "Arial" (font_size 6)))
-	(annotation_block (location)(rect -104 824 -40 840))
+	(annotation_block (location)(rect -104 848 -40 864))
 )
 (pin
 	(input)
-	(rect -40 880 128 896)
+	(rect -40 904 128 920)
 	(text "INPUT" (rect 133 0 161 10)(font "Arial" (font_size 6)))
 	(text "phy1_rx_crsdv" (rect 9 0 83 12)(font "Arial" ))
 	(pt 168 8)
@@ -103,11 +103,11 @@ applicable agreement for further details.
 		(line (pt 117 12)(pt 121 8)(line_width 1))
 	)
 	(text "VCC" (rect 136 7 156 17)(font "Arial" (font_size 6)))
-	(annotation_block (location)(rect -104 896 -40 912))
+	(annotation_block (location)(rect -104 920 -40 936))
 )
 (pin
 	(input)
-	(rect -40 968 128 984)
+	(rect -40 992 128 1008)
 	(text "INPUT" (rect 133 0 161 10)(font "Arial" (font_size 6)))
 	(text "phy0_rx_d[1..0]" (rect 9 0 86 12)(font "Arial" ))
 	(pt 168 8)
@@ -120,11 +120,11 @@ applicable agreement for further details.
 		(line (pt 117 12)(pt 121 8)(line_width 1))
 	)
 	(text "VCC" (rect 136 7 156 17)(font "Arial" (font_size 6)))
-	(annotation_block (location)(rect -96 984 -40 1016))
+	(annotation_block (location)(rect -96 1008 -40 1040))
 )
 (pin
 	(input)
-	(rect -40 1048 128 1064)
+	(rect -40 1072 128 1088)
 	(text "INPUT" (rect 133 0 161 10)(font "Arial" (font_size 6)))
 	(text "phy1_rx_d[1..0]" (rect 9 0 86 12)(font "Arial" ))
 	(pt 168 8)
@@ -137,7 +137,7 @@ applicable agreement for further details.
 		(line (pt 117 12)(pt 121 8)(line_width 1))
 	)
 	(text "VCC" (rect 136 7 156 17)(font "Arial" (font_size 6)))
-	(annotation_block (location)(rect -104 1064 -40 1096))
+	(annotation_block (location)(rect -104 1088 -40 1120))
 )
 (pin
 	(output)
@@ -463,6 +463,39 @@ applicable agreement for further details.
 	(annotation_block (location)(rect 1104 560 1152 592))
 )
 (pin
+	(output)
+	(rect 928 864 1104 880)
+	(text "OUTPUT" (rect 1 0 39 10)(font "Arial" (font_size 6)))
+	(text "io3_3V_o[9]" (rect 90 0 147 12)(font "Arial" ))
+	(pt 0 8)
+	(drawing
+		(line (pt 0 8)(pt 52 8)(line_width 1))
+		(line (pt 52 4)(pt 78 4)(line_width 1))
+		(line (pt 52 12)(pt 78 12)(line_width 1))
+		(line (pt 52 12)(pt 52 4)(line_width 1))
+		(line (pt 78 4)(pt 82 8)(line_width 1))
+		(line (pt 82 8)(pt 78 12)(line_width 1))
+		(line (pt 78 12)(pt 82 8)(line_width 1))
+	)
+	(annotation_block (location)(rect 1160 896 1216 912))
+)
+(pin
+	(output)
+	(rect 272 792 448 808)
+	(text "OUTPUT" (rect 1 0 39 10)(font "Arial" (font_size 6)))
+	(text "io3_3V_o[8]" (rect 90 0 147 12)(font "Arial" ))
+	(pt 0 8)
+	(drawing
+		(line (pt 0 8)(pt 52 8)(line_width 1))
+		(line (pt 52 4)(pt 78 4)(line_width 1))
+		(line (pt 52 12)(pt 78 12)(line_width 1))
+		(line (pt 52 12)(pt 52 4)(line_width 1))
+		(line (pt 78 4)(pt 82 8)(line_width 1))
+		(line (pt 82 8)(pt 78 12)(line_width 1))
+		(line (pt 78 12)(pt 82 8)(line_width 1))
+	)
+)
+(pin
 	(bidir)
 	(rect 928 704 1104 720)
 	(text "BIDIR" (rect 1 0 25 10)(font "Arial" (font_size 6)))
@@ -737,7 +770,7 @@ applicable agreement for further details.
 	(flipy)
 )
 (symbol
-	(rect 176 792 240 872)
+	(rect 176 816 240 896)
 	(text "DFF" (rect 1 0 19 10)(font "Arial" (font_size 6)))
 	(text "inst9" (rect 3 68 26 80)(font "Arial" ))
 	(port
@@ -787,7 +820,7 @@ applicable agreement for further details.
 	)
 )
 (symbol
-	(rect 256 864 320 944)
+	(rect 256 888 320 968)
 	(text "DFF" (rect 1 0 19 10)(font "Arial" (font_size 6)))
 	(text "inst10" (rect 3 68 32 80)(font "Arial" ))
 	(port
@@ -937,7 +970,7 @@ applicable agreement for further details.
 	)
 )
 (symbol
-	(rect 176 944 320 1024)
+	(rect 176 968 320 1048)
 	(text "lpm_ff0" (rect 52 1 100 17)(font "Arial" (font_size 10)))
 	(text "inst6" (rect 8 64 31 76)(font "Arial" ))
 	(port
@@ -972,7 +1005,7 @@ applicable agreement for further details.
 	)
 )
 (symbol
-	(rect 176 1024 320 1104)
+	(rect 176 1048 320 1128)
 	(text "lpm_ff0" (rect 52 1 100 17)(font "Arial" (font_size 10)))
 	(text "inst7" (rect 8 64 31 76)(font "Arial" ))
 	(port
@@ -1499,57 +1532,8 @@ applicable agreement for further details.
 	(pt 488 -8)
 )
 (connector
-	(pt 128 976)
-	(pt 176 976)
-	(bus)
-)
-(connector
-	(pt 128 1056)
-	(pt 176 1056)
-	(bus)
-)
-(connector
-	(pt 128 888)
-	(pt 256 888)
-)
-(connector
-	(pt 128 816)
-	(pt 176 816)
-)
-(connector
-	(pt 176 1072)
-	(pt 152 1072)
-)
-(connector
-	(pt 176 832)
-	(pt 152 832)
-)
-(connector
-	(pt 256 904)
-	(pt 152 904)
-)
-(connector
-	(pt 176 992)
-	(pt 152 992)
-)
-(connector
-	(text "50meg0" (rect 66 760 104 772)(font "Arial" ))
-	(pt 152 776)
-	(pt 56 776)
-)
-(connector
 	(pt 120 -8)
 	(pt 144 -8)
-)
-(connector
-	(text "mac0_crs" (rect 346 808 394 820)(font "Arial" ))
-	(pt 240 816)
-	(pt 336 816)
-)
-(connector
-	(text "mac1_crs" (rect 346 880 394 892)(font "Arial" ))
-	(pt 320 888)
-	(pt 336 888)
 )
 (connector
 	(text "mac0_rxd[1..0]" (rect 50 368 124 380)(font "Arial" ))
@@ -1561,18 +1545,6 @@ applicable agreement for further details.
 	(text "mac1_rxd[1..0]" (rect 50 384 124 396)(font "Arial" ))
 	(pt 288 392)
 	(pt 120 392)
-	(bus)
-)
-(connector
-	(text "mac0_rxd[1..0]" (rect 346 984 420 996)(font "Arial" ))
-	(pt 320 992)
-	(pt 336 992)
-	(bus)
-)
-(connector
-	(text "mac1_rxd[1..0]" (rect 346 1064 420 1076)(font "Arial" ))
-	(pt 320 1072)
-	(pt 336 1072)
 	(bus)
 )
 (connector
@@ -1602,22 +1574,6 @@ applicable agreement for further details.
 (connector
 	(pt 912 360)
 	(pt 928 360)
-)
-(connector
-	(pt 152 992)
-	(pt 152 1072)
-)
-(connector
-	(pt 152 776)
-	(pt 152 832)
-)
-(connector
-	(pt 152 832)
-	(pt 152 904)
-)
-(connector
-	(pt 152 904)
-	(pt 152 992)
 )
 (connector
 	(pt 464 24)
@@ -1756,10 +1712,6 @@ applicable agreement for further details.
 	(pt 696 1112)
 )
 (connector
-	(pt 792 856)
-	(pt 928 856)
-)
-(connector
 	(pt 872 928)
 	(pt 928 928)
 )
@@ -1773,13 +1725,120 @@ applicable agreement for further details.
 	(pt 928 1112)
 	(bus)
 )
+(connector
+	(pt 928 872)
+	(pt 888 872)
+)
+(connector
+	(pt 888 872)
+	(pt 888 856)
+)
+(connector
+	(pt 792 856)
+	(pt 888 856)
+)
+(connector
+	(pt 888 856)
+	(pt 928 856)
+)
+(connector
+	(pt 128 1000)
+	(pt 176 1000)
+	(bus)
+)
+(connector
+	(pt 128 1080)
+	(pt 176 1080)
+	(bus)
+)
+(connector
+	(pt 128 912)
+	(pt 256 912)
+)
+(connector
+	(text "mac0_crs" (rect 346 832 394 844)(font "Arial" ))
+	(pt 240 840)
+	(pt 336 840)
+)
+(connector
+	(text "mac1_crs" (rect 346 904 394 916)(font "Arial" ))
+	(pt 320 912)
+	(pt 336 912)
+)
+(connector
+	(text "mac0_rxd[1..0]" (rect 346 1008 420 1020)(font "Arial" ))
+	(pt 320 1016)
+	(pt 336 1016)
+	(bus)
+)
+(connector
+	(text "mac1_rxd[1..0]" (rect 346 1088 420 1100)(font "Arial" ))
+	(pt 320 1096)
+	(pt 336 1096)
+	(bus)
+)
+(connector
+	(pt 128 840)
+	(pt 160 840)
+)
+(connector
+	(pt 160 840)
+	(pt 176 840)
+)
+(connector
+	(text "50meg0" (rect 66 784 104 796)(font "Arial" ))
+	(pt 56 800)
+	(pt 144 800)
+)
+(connector
+	(pt 144 856)
+	(pt 176 856)
+)
+(connector
+	(pt 144 800)
+	(pt 144 856)
+)
+(connector
+	(pt 144 928)
+	(pt 256 928)
+)
+(connector
+	(pt 144 856)
+	(pt 144 928)
+)
+(connector
+	(pt 176 1096)
+	(pt 144 1096)
+)
+(connector
+	(pt 144 1016)
+	(pt 176 1016)
+)
+(connector
+	(pt 144 928)
+	(pt 144 1016)
+)
+(connector
+	(pt 144 1016)
+	(pt 144 1096)
+)
+(connector
+	(pt 272 800)
+	(pt 160 800)
+)
+(connector
+	(pt 160 800)
+	(pt 160 840)
+)
 (junction (pt 912 312))
 (junction (pt 912 360))
-(junction (pt 152 992))
-(junction (pt 152 904))
-(junction (pt 152 832))
 (junction (pt 696 872))
 (junction (pt 696 944))
 (junction (pt 696 1032))
-(text "FlipFlops to meet RX line timing..." (rect -40 736 142 750)(font "Arial" (font_size 8)))
+(junction (pt 888 856))
+(junction (pt 160 840))
+(junction (pt 144 856))
+(junction (pt 144 928))
+(junction (pt 144 1016))
+(text "FlipFlops to meet RX line timing..." (rect -40 760 142 774)(font "Arial" (font_size 8)))
 (text "FlipFlops to meet TX line timing..." (rect 552 736 733 750)(font "Arial" (font_size 8)))
