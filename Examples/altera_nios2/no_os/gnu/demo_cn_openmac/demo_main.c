@@ -138,6 +138,10 @@ int openPowerlink(void) {
     
     printf("NIOS II with openPowerlink is ready!\n\n");
     
+#ifdef LED_PIO_BASE
+    IOWR_ALTERA_AVALON_PIO_DATA(LED_PIO_BASE, 0xFF);
+#endif
+
     while(1)
     {
         EplApiProcess();
