@@ -252,7 +252,7 @@ typedef struct
 {
 	ometh_status_typ txStatus;	// tx control register
 	ometh_status_typ rxStatus;	// rx control register
-}ometh_reg_typ;					// mac control registers
+} volatile ometh_reg_typ;					// mac control registers
 
 //-------------------- instance of ethernet driver --------------------
 struct OMETH_TYP

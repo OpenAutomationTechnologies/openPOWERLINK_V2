@@ -99,13 +99,14 @@ struct _tEdrvTxBuffer;
 struct _tEplDllkNodeInfo
 {
     unsigned int                m_uiNodeId;
-    tEplNmtState                m_NmtState;
     WORD                        m_wPresPayloadLimit;    // object 0x1F8D: NMT_PResPayloadLimitList_AU16
+    BYTE                        m_bPresFilterFlags;
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
-    WORD                        m_wPreqPayloadLimit;    // object 0x1F8B: NMT_MNPReqPayloadLimitList_AU16
     BYTE                        m_be_abMacAddr[6];
     BYTE                        m_bSoaFlag1;
     BOOL                        m_fSoftDelete;          // delete node after error and ignore error
+    WORD                        m_wPreqPayloadLimit;    // object 0x1F8B: NMT_MNPReqPayloadLimitList_AU16
+    tEplNmtState                m_NmtState;
     unsigned long               m_ulDllErrorEvents;
     DWORD                       m_dwPresTimeout;        // object 0x1F92: NMT_MNCNPResTimeout_AU32
     struct _tEdrvTxBuffer*      m_pPreqTxBuffer;
@@ -115,6 +116,13 @@ struct _tEplDllkNodeInfo
 };
 
 typedef struct _tEplDllkNodeInfo tEplDllkNodeInfo;
+
+
+// callback function for frame processing
+typedef tEplKernel (PUBLIC* tEplDllkCbProcessFrame) (tEplFrameInfo * pFrameInfo_p);
+
+typedef tEplKernel (PUBLIC* tEplDllkCbProcessTpdo) (tEplFrameInfo * pFrameInfo_p, BOOL fReadyFlag_p);
+
 
 //---------------------------------------------------------------------------
 // function prototypes
@@ -144,17 +152,8 @@ tEplKernel EplDllkDeregAsyncHandler(tEplDllkCbAsync pfnDllkCbAsync_p);
 // register C_DLL_MULTICAST_ASND in ethernet driver if any AsndServiceId is registered
 tEplKernel EplDllkSetAsndServiceIdFilter(tEplDllAsndServiceId ServiceId_p, tEplDllAsndFilter Filter_p);
 
-// creates the buffer for a Tx frame and registers it to the ethernet driver
-tEplKernel EplDllkCreateTxFrame(unsigned int * puiHandle_p,
-                                tEplFrame ** ppFrame_p,
-                                unsigned int * puiFrameSize_p,
-                                tEplMsgType MsgType_p,
-                                tEplDllAsndServiceId ServiceId_p);
 
-tEplKernel EplDllkDeleteTxFrame(unsigned int uiHandle_p);
-
-
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
+#if EPL_NMT_MAX_NODE_ID > 0
 
 tEplKernel EplDllkConfigNode(tEplDllNodeInfo* pNodeInfo_p);
 
@@ -162,7 +161,10 @@ tEplKernel EplDllkAddNode(tEplDllNodeOpParam* pNodeOpParam_p);
 
 tEplKernel EplDllkDeleteNode(tEplDllNodeOpParam* pNodeOpParam_p);
 
-//tEplKernel EplDllkSoftDeleteNode(unsigned int uiNodeId_p);
+#endif // EPL_NMT_MAX_NODE_ID > 0
+
+
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
 
 tEplKernel EplDllkSetFlag1OfNode(unsigned int uiNodeId_p, BYTE bSoaFlag1_p);
 

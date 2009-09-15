@@ -707,6 +707,7 @@ BYTE            bCount;
     if ((Ret == kEplObdIndexNotExist) || (Ret == kEplObdSubindexNotExist))
     {
         Ret = kEplSuccessful;
+        goto Exit;
     }
     else if (Ret != kEplSuccessful)
     {

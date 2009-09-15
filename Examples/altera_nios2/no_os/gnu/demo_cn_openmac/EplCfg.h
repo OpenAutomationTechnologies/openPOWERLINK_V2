@@ -183,6 +183,9 @@
 #define EPL_DLL_PRES_READY_AFTER_SOA    FALSE
 //#define EPL_DLL_PRES_READY_AFTER_SOA    TRUE
 
+// maximum count of Rx filter entries for PRes frames
+#define EPL_DLL_PRES_FILTER_COUNT   3
+
 
 // =========================================================================
 // OBD specific defines
@@ -207,12 +210,6 @@
 // =========================================================================
 // Timer module specific defines
 // =========================================================================
-
-// max. number of timer entries for module Timeru
-#define EPL_TIMERU_MAX_ENTRIES          32
-
-// if TRUE it uses the Timer module implementation of EPL user also in EPL kernel
-#define EPL_TIMER_USE_USER              TRUE
 
 // if TRUE the high resolution timer module will be used
 //#define EPL_TIMER_USE_HIGHRES              TRUE

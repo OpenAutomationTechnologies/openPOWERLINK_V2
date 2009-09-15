@@ -103,6 +103,12 @@
 #error "EPL module DLLK: EPL_DLL_PRES_READY_AFTER_* is enabled, but not EDRV_FAST_TXFRAMES."
 #endif
 
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0) \
+    && (EPL_DLL_PRES_FILTER_COUNT == 0)
+#error "MN support needs EPL_DLL_PRES_FILTER_COUNT != 0"
+#endif
+
+
 /***************************************************************************/
 /*                                                                         */
 /*                                                                         */
@@ -186,15 +192,20 @@
 #define EPL_DLLK_FILTER_COUNT       (8 + EPL_DLL_PRES_FILTER_COUNT)
 #endif
 
+
 // defines for tEdrvTxBuffer.m_uiTxBufLen
 #define EPL_DLLK_BUFLEN_EMPTY       0   // buffer is empty
 #define EPL_DLLK_BUFLEN_FILLING     1   // just the buffer is being filled
 #define EPL_DLLK_BUFLEN_MIN         60  // minimum ethernet frame length
 
-// defines for tEplDllInstance.m_bUpdateTxFrame
+// defines for tEplDllkInstance.m_bUpdateTxFrame
 #define EPL_DLLK_UPDATE_NONE        0   // no update necessary
 #define EPL_DLLK_UPDATE_STATUS      1   // StatusRes needs update
 #define EPL_DLLK_UPDATE_BOTH        2   // IdentRes and StatusRes need update
+
+// defines for tEplDllNodeInfo.m_bPresFilterFlags
+#define EPL_DLLK_FILTER_FLAG_PDO    0x01    // PRes needed for RPDO
+#define EPL_DLLK_FILTER_FLAG_HB     0x02    // PRes needed for Heartbeat Consumer
 
 
 //---------------------------------------------------------------------------
@@ -217,6 +228,7 @@ typedef enum
 
 } tEplDllState;
 
+
 typedef struct
 {
     tEplNmtState        m_NmtState;
@@ -228,6 +240,7 @@ typedef struct
     BYTE                m_bMnFlag1;         // Flag 1 with EA, ER from PReq, SoA of MN
     BYTE                m_bFlag2;           // Flag 2 with PR and RS for PRes, StatusRes, IdentRes
     BYTE                m_bUpdateTxFrame;
+    unsigned int        m_uiUsedPresFilterCount;
     tEplDllConfigParam  m_DllConfigParam;
     tEplDllIdentParam   m_DllIdentParam;
     tEplDllState        m_DllState;
@@ -305,6 +318,15 @@ static tEplKernel EplDllkUpdateFrameStatusRes(tEdrvTxBuffer* pTxBuffer_p, tEplNm
 // update PRes frame
 static tEplKernel EplDllkUpdateFramePres(tEdrvTxBuffer* pTxBuffer_p, tEplNmtState NmtState_p);
 
+// creates the buffer for a Tx frame and registers it to the ethernet driver
+static tEplKernel EplDllkCreateTxFrame(unsigned int * puiHandle_p,
+                                tEplFrame ** ppFrame_p,
+                                unsigned int * puiFrameSize_p,
+                                tEplMsgType MsgType_p,
+                                tEplDllAsndServiceId ServiceId_p);
+
+static tEplKernel EplDllkDeleteTxFrame(unsigned int uiHandle_p);
+
 // check frame and set missing information
 static tEplKernel EplDllkCheckFrame(tEplFrame * pFrame_p, unsigned int uiFrameSize_p);
 
@@ -313,13 +335,27 @@ static tEplKernel EplDllkCheckFrame(tEplFrame * pFrame_p, unsigned int uiFrameSi
 static tEplKernel PUBLIC EplDllkCbCnTimer(tEplTimerEventArg* pEventArg_p);
 #endif
 
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
 
-// process StartReducedCycle event
-static tEplKernel EplDllkProcessStartReducedCycle(tEplEvent * pEvent_p);
+#if EPL_NMT_MAX_NODE_ID > 0
 
 // MN: returns internal node info structure
 static tEplDllkNodeInfo* EplDllkGetNodeInfo(unsigned int uiNodeId_p);
+
+static tEplKernel EplDllkAddNodeFilter(tEplDllkNodeInfo* pIntNodeInfo_p, tEplDllNodeOpType NodeOpType_p, BOOL fUpdateEdrv_p);
+
+static tEplKernel EplDllkDeleteNodeFilter(tEplDllkNodeInfo* pIntNodeInfo_p, tEplDllNodeOpType NodeOpType_p, BOOL fUpdateEdrv_p);
+
+#endif
+
+
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
+
+static tEplKernel EplDllkAddNodeIsochronous(tEplDllkNodeInfo* pIntNodeInfo_p);
+
+static tEplKernel EplDllkDeleteNodeIsochronous(tEplDllkNodeInfo* pIntNodeInfo_p);
+
+// process StartReducedCycle event
+static tEplKernel EplDllkProcessStartReducedCycle(tEplEvent * pEvent_p);
 
 // transmit SoA
 static tEplKernel EplDllkMnSendSoa(tEplNmtState NmtState_p,
@@ -388,12 +424,11 @@ tEdrvInitParam  EdrvInitParam;
     // initialize state
     EplDllkInstance_g.m_DllState = kEplDllGsInit;
 
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
+#if EPL_NMT_MAX_NODE_ID > 0
     // set up node info structure
     for (uiIndex = 0; uiIndex < tabentries (EplDllkInstance_g.m_aNodeInfo); uiIndex++)
     {
         EplDllkInstance_g.m_aNodeInfo[uiIndex].m_uiNodeId = uiIndex + 1;
-//        EplDllkInstance_g.m_aNodeInfo[uiIndex].m_wPresPayloadLimit = 0xFFFF;
     }
 #endif
 
@@ -453,283 +488,6 @@ tEplKernel      Ret = kEplSuccessful;
     return Ret;
 }
 
-//---------------------------------------------------------------------------
-//
-// Function:    EplDllkCreateTxFrame
-//
-// Description: creates the buffer for a Tx frame and registers it to the
-//              ethernet driver
-//
-// Parameters:  puiHandle_p             = IN: handle to last allocated frame buffer
-//                                        OUT: handle to new frame buffer
-//              ppFrame_p               = OUT: pointer to pointer of EPL frame
-//              puiFrameSize_p          = IN/OUT: pointer to size of frame
-//                                        returned size is always equal or larger than
-//                                        requested size, if that is not possible
-//                                        an error will be returned
-//              MsgType_p               = EPL message type
-//              ServiceId_p             = Service ID in case of ASnd frame, otherwise
-//                                        kEplDllAsndNotDefined
-//
-// Returns:     tEplKernel              = error code
-//
-//
-// State:
-//
-//---------------------------------------------------------------------------
-
-tEplKernel EplDllkCreateTxFrame (unsigned int * puiHandle_p,
-                                 tEplFrame ** ppFrame_p,
-                                 unsigned int * puiFrameSize_p,
-                                 tEplMsgType MsgType_p,
-                                 tEplDllAsndServiceId ServiceId_p)
-{
-tEplKernel      Ret = kEplSuccessful;
-tEplFrame      *pTxFrame;
-unsigned int    uiHandle = EplDllkInstance_g.m_uiMaxTxFrames;
-tEdrvTxBuffer  *pTxBuffer = NULL;
-
-    if (MsgType_p == kEplMsgTypeAsnd)
-    {
-        // search for fixed Tx buffers
-        if (ServiceId_p == kEplDllAsndIdentResponse)
-        {
-            uiHandle = EPL_DLLK_TXFRAME_IDENTRES;
-        }
-        else if (ServiceId_p == kEplDllAsndStatusResponse)
-        {
-            uiHandle = EPL_DLLK_TXFRAME_STATUSRES;
-        }
-        else if ((ServiceId_p == kEplDllAsndNmtRequest) || (ServiceId_p == kEplDllAsndNmtCommand))
-        {
-            uiHandle = EPL_DLLK_TXFRAME_NMTREQ;
-        }
-        else
-        {   // look for free entry
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
-            uiHandle = EPL_DLLK_TXFRAME_PREQ;
-            pTxBuffer = &EplDllkInstance_g.m_pTxBuffer[uiHandle];
-            for (; uiHandle < EplDllkInstance_g.m_uiMaxTxFrames; uiHandle++, pTxBuffer++)
-            {
-                if (pTxBuffer->m_pbBuffer == NULL)
-                {   // free entry found
-                    break;
-                }
-            }
-#endif
-            if (uiHandle >= EplDllkInstance_g.m_uiMaxTxFrames)
-            {
-                Ret = kEplEdrvNoFreeBufEntry;
-                goto Exit;
-            }
-        }
-    }
-    else if (MsgType_p == kEplMsgTypeNonEpl)
-    {
-        uiHandle = EPL_DLLK_TXFRAME_NONEPL;
-    }
-    else if (MsgType_p == kEplMsgTypePres)
-    {
-        uiHandle = EPL_DLLK_TXFRAME_PRES;
-    }
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
-    else if (MsgType_p == kEplMsgTypeSoc)
-    {
-        uiHandle = EPL_DLLK_TXFRAME_SOC;
-    }
-    else if (MsgType_p == kEplMsgTypeSoa)
-    {
-        uiHandle = EPL_DLLK_TXFRAME_SOA;
-    }
-    else
-    {   // look for free entry
-        if ((uiHandle < EPL_DLLK_TXFRAME_PREQ)
-            || (uiHandle >= EplDllkInstance_g.m_uiMaxTxFrames))
-        {   // start with first PReq buffer
-            uiHandle = EPL_DLLK_TXFRAME_PREQ;
-        }
-        // otherwise start with last allocated handle
-        pTxBuffer = &EplDllkInstance_g.m_pTxBuffer[uiHandle];
-        for (; uiHandle < EplDllkInstance_g.m_uiMaxTxFrames; uiHandle++, pTxBuffer++)
-        {
-            if (pTxBuffer->m_pbBuffer == NULL)
-            {   // free entry found
-                break;
-            }
-        }
-        if (pTxBuffer->m_pbBuffer != NULL)
-        {
-            Ret = kEplEdrvNoFreeBufEntry;
-            goto Exit;
-        }
-    }
-#else
-    else
-    {
-        Ret = kEplEdrvNoFreeBufEntry;
-        goto Exit;
-    }
-#endif
-
-    // test if requested entry is free
-    pTxBuffer = &EplDllkInstance_g.m_pTxBuffer[uiHandle];
-    if (pTxBuffer->m_pbBuffer != NULL)
-    {   // entry is not free
-        Ret = kEplEdrvNoFreeBufEntry;
-        goto Exit;
-    }
-
-    // setup Tx buffer
-//    pTxBuffer->m_EplMsgType = MsgType_p;
-    pTxBuffer->m_uiMaxBufferLen = *puiFrameSize_p;
-
-    Ret = EdrvAllocTxMsgBuffer(pTxBuffer);
-    if (Ret != kEplSuccessful)
-    {   // error occured while registering Tx frame
-        goto Exit;
-    }
-
-    // because buffer size may be larger than requested
-    // memorize real length of frame
-    pTxBuffer->m_uiTxMsgLen = *puiFrameSize_p;
-
-    // fill whole frame with 0
-    EPL_MEMSET(pTxBuffer->m_pbBuffer, 0, pTxBuffer->m_uiMaxBufferLen);
-
-    pTxFrame = (tEplFrame *) pTxBuffer->m_pbBuffer;
-
-    if (MsgType_p != kEplMsgTypeNonEpl)
-    {   // fill out Frame only if it is an EPL frame
-        // ethertype
-        AmiSetWordToBe(&pTxFrame->m_be_wEtherType, EPL_C_DLL_ETHERTYPE_EPL);
-        // source node ID
-        AmiSetByteToLe(&pTxFrame->m_le_bSrcNodeId, (BYTE) EplDllkInstance_g.m_DllConfigParam.m_uiNodeId);
-        // source MAC address
-        EPL_MEMCPY(&pTxFrame->m_be_abSrcMac[0], &EplDllkInstance_g.m_be_abSrcMac[0], 6);
-        switch (MsgType_p)
-        {
-            case kEplMsgTypeAsnd:
-                // destination MAC address
-                AmiSetQword48ToBe(&pTxFrame->m_be_abDstMac[0], EPL_C_DLL_MULTICAST_ASND);
-                // destination node ID
-                switch (ServiceId_p)
-                {
-                    case kEplDllAsndIdentResponse:
-                    case kEplDllAsndStatusResponse:
-                    {   // IdentResponses and StatusResponses are Broadcast
-                        AmiSetByteToLe(&pTxFrame->m_le_bDstNodeId, (BYTE) EPL_C_ADR_BROADCAST);
-                        break;
-                    }
-
-                    default:
-                        break;
-                }
-                // ASnd Service ID
-                AmiSetByteToLe(&pTxFrame->m_Data.m_Asnd.m_le_bServiceId, ServiceId_p);
-                break;
-
-            case kEplMsgTypeSoc:
-                // destination MAC address
-                AmiSetQword48ToBe(&pTxFrame->m_be_abDstMac[0], EPL_C_DLL_MULTICAST_SOC);
-                // destination node ID
-                AmiSetByteToLe(&pTxFrame->m_le_bDstNodeId, (BYTE) EPL_C_ADR_BROADCAST);
-                // reset Flags
-                //AmiSetByteToLe(&pTxFrame->m_Data.m_Soc.m_le_bFlag1, (BYTE) 0);
-                //AmiSetByteToLe(&pTxFrame->m_Data.m_Soc.m_le_bFlag2, (BYTE) 0);
-                break;
-
-            case kEplMsgTypeSoa:
-                // destination MAC address
-                AmiSetQword48ToBe(&pTxFrame->m_be_abDstMac[0], EPL_C_DLL_MULTICAST_SOA);
-                // destination node ID
-                AmiSetByteToLe(&pTxFrame->m_le_bDstNodeId, (BYTE) EPL_C_ADR_BROADCAST);
-                // reset Flags
-                //AmiSetByteToLe(&pTxFrame->m_Data.m_Soa.m_le_bFlag1, (BYTE) 0);
-                //AmiSetByteToLe(&pTxFrame->m_Data.m_Soa.m_le_bFlag2, (BYTE) 0);
-                // EPL profile version
-                AmiSetByteToLe(&pTxFrame->m_Data.m_Soa.m_le_bEplVersion, (BYTE) EPL_SPEC_VERSION);
-                break;
-
-            case kEplMsgTypePres:
-                // destination MAC address
-                AmiSetQword48ToBe(&pTxFrame->m_be_abDstMac[0], EPL_C_DLL_MULTICAST_PRES);
-                // destination node ID
-                AmiSetByteToLe(&pTxFrame->m_le_bDstNodeId, (BYTE) EPL_C_ADR_BROADCAST);
-                // reset Flags
-                //AmiSetByteToLe(&pTxFrame->m_Data.m_Pres.m_le_bFlag1, (BYTE) 0);
-                //AmiSetByteToLe(&pTxFrame->m_Data.m_Pres.m_le_bFlag2, (BYTE) 0);
-                // PDO size
-                //AmiSetWordToLe(&pTxFrame->m_Data.m_Pres.m_le_wSize, 0);
-                break;
-
-            case kEplMsgTypePreq:
-                // reset Flags
-                //AmiSetByteToLe(&pTxFrame->m_Data.m_Preq.m_le_bFlag1, (BYTE) 0);
-                //AmiSetByteToLe(&pTxFrame->m_Data.m_Preq.m_le_bFlag2, (BYTE) 0);
-                // PDO size
-                //AmiSetWordToLe(&pTxFrame->m_Data.m_Preq.m_le_wSize, 0);
-                break;
-
-            default:
-                break;
-        }
-        // EPL message type
-        AmiSetByteToLe(&pTxFrame->m_le_bMessageType, (BYTE) MsgType_p);
-    }
-
-    *ppFrame_p = pTxFrame;
-    *puiFrameSize_p = pTxBuffer->m_uiMaxBufferLen;
-    *puiHandle_p = uiHandle;
-
-Exit:
-    return Ret;
-}
-
-//---------------------------------------------------------------------------
-//
-// Function:    EplDllkDeleteTxFrame
-//
-// Description: deletes the buffer for a Tx frame and frees it in the
-//              ethernet driver
-//
-// Parameters:  uiHandle_p              = IN: handle to frame buffer
-//
-// Returns:     tEplKernel              = error code
-//
-//
-// State:
-//
-//---------------------------------------------------------------------------
-
-tEplKernel EplDllkDeleteTxFrame (unsigned int uiHandle_p)
-{
-tEplKernel      Ret = kEplSuccessful;
-tEdrvTxBuffer    *pTxBuffer = NULL;
-
-    if (uiHandle_p >= EplDllkInstance_g.m_uiMaxTxFrames)
-    {   // handle is not valid
-        Ret = kEplDllIllegalHdl;
-        goto Exit;
-    }
-
-    pTxBuffer = &EplDllkInstance_g.m_pTxBuffer[uiHandle_p];
-
-    // mark buffer as free so that frame will not be send in future anymore
-    // $$$ d.k. What's up with running transmissions?
-    pTxBuffer->m_uiTxMsgLen = EPL_DLLK_BUFLEN_EMPTY;
-
-    // delete Tx buffer
-    Ret = EdrvReleaseTxMsgBuffer(pTxBuffer);
-    if (Ret != kEplSuccessful)
-    {   // error occured while releasing Tx frame
-        goto Exit;
-    }
-
-    pTxBuffer->m_pbBuffer = NULL;
-
-Exit:
-    return Ret;
-}
 
 //---------------------------------------------------------------------------
 //
@@ -983,7 +741,7 @@ tEplNmtState    NmtState;
 
             // update NMT state in instance structure
             // This is done after updating all Tx frames,
-            // so no frame will be transmitted by callback function, but is not up to date yet.
+            // so no frame will be transmitted by callback function, when it is not up to date yet.
             EplDllkInstance_g.m_NmtState = pNmtStateChange->m_NewNmtState;
             break;
         }
@@ -1263,37 +1021,6 @@ tEplKernel  Ret = kEplSuccessful;
 
 //---------------------------------------------------------------------------
 //
-// Function:    EplDllkGetNodeInfo()
-//
-// Description: returns node info structure of the specified node.
-//
-// Parameters:  uiNodeId_p              = node ID
-//
-// Returns:     tEplDllkNodeInfo*       = pointer to internal node info structure
-//
-//
-// State:
-//
-//---------------------------------------------------------------------------
-
-static tEplDllkNodeInfo* EplDllkGetNodeInfo(unsigned int uiNodeId_p)
-{
-    // $$$ d.k.: use hash algorithm to retrieve the appropriate node info structure
-    //           if size of array is less than 254.
-    uiNodeId_p--;   // node ID starts at 1 but array at 0
-    if (uiNodeId_p >= tabentries (EplDllkInstance_g.m_aNodeInfo))
-    {
-        return NULL;
-    }
-    else
-    {
-        return &EplDllkInstance_g.m_aNodeInfo[uiNodeId_p];
-    }
-}
-
-
-//---------------------------------------------------------------------------
-//
 // Function:    EplDllkConfigNode()
 //
 // Description: configures the specified node (e.g. payload limits and timeouts).
@@ -1353,8 +1080,8 @@ tEplNmtState        NmtState;
     pIntNodeInfo->m_bSoaFlag1 = 0;
     pIntNodeInfo->m_fSoftDelete = FALSE;
     pIntNodeInfo->m_ulDllErrorEvents = 0L;
-#endif
     pIntNodeInfo->m_NmtState = kEplNmtCsNotActive;
+#endif
 
 Exit:
     return Ret;
@@ -1380,8 +1107,6 @@ tEplKernel EplDllkAddNode(tEplDllNodeOpParam* pNodeOpParam_p)
 {
 tEplKernel          Ret = kEplSuccessful;
 tEplDllkNodeInfo*   pIntNodeInfo;
-tEplDllkNodeInfo**  ppIntNodeInfo;
-tEplFrame*          pTxFrame;
 tEplNmtState        NmtState;
 
     NmtState = EplDllkInstance_g.m_NmtState;
@@ -1397,82 +1122,41 @@ tEplNmtState        NmtState;
                                   pNodeOpParam_p->m_uiNodeId,
                                   0);
 
-    if (NmtState >= kEplNmtMsNotActive)
+    switch (pNodeOpParam_p->m_OpNodeType)
     {
-        switch (pNodeOpParam_p->m_OpNodeType)
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
+        case kEplDllNodeOpTypeIsochronous:
         {
-            case kEplDllNodeOpTypeIsochronous:
+            if (NmtState >= kEplNmtMsNotActive)
             {
-                if (pNodeOpParam_p->m_uiNodeId == EplDllkInstance_g.m_DllConfigParam.m_uiNodeId)
-                {   // we shall send PRes ourself
-                    // insert our node at the end of the list
-                    ppIntNodeInfo = &EplDllkInstance_g.m_pFirstNodeInfo;
-                    while ((*ppIntNodeInfo != NULL) && ((*ppIntNodeInfo)->m_pNextNodeInfo != NULL))
-                    {
-                        ppIntNodeInfo = &(*ppIntNodeInfo)->m_pNextNodeInfo;
-                    }
-                    if (*ppIntNodeInfo != NULL)
-                    {
-                        if ((*ppIntNodeInfo)->m_uiNodeId == pNodeOpParam_p->m_uiNodeId)
-                        {   // node was already added to list
-                            // $$$ d.k. maybe this should be an error
-                            goto Exit;
-                        }
-                        else
-                        {   // add our node at the end of the list
-                            ppIntNodeInfo = &(*ppIntNodeInfo)->m_pNextNodeInfo;
-                        }
-                    }
-                    // set "PReq"-TxBuffer to PRes-TxBuffer
-                    pIntNodeInfo->m_pPreqTxBuffer = &EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_PRES];
-                }
-                else
-                {   // normal CN shall be added to isochronous phase
-                    // insert node into list in ascending order
-                    ppIntNodeInfo = &EplDllkInstance_g.m_pFirstNodeInfo;
-                    while ((*ppIntNodeInfo != NULL)
-                           && ((*ppIntNodeInfo)->m_uiNodeId < pNodeOpParam_p->m_uiNodeId)
-                           && ((*ppIntNodeInfo)->m_uiNodeId != EplDllkInstance_g.m_DllConfigParam.m_uiNodeId))
-                    {
-                        ppIntNodeInfo = &(*ppIntNodeInfo)->m_pNextNodeInfo;
-                    }
-                    if ((*ppIntNodeInfo != NULL) && ((*ppIntNodeInfo)->m_uiNodeId == pNodeOpParam_p->m_uiNodeId))
-                    {   // node was already added to list
-                        // $$$ d.k. maybe this should be an error
-                        goto Exit;
-                    }
-                }
-
-                // initialize elements of internal node info structure
-                pIntNodeInfo->m_bSoaFlag1 = 0;
-                pIntNodeInfo->m_fSoftDelete = FALSE;
-                pIntNodeInfo->m_NmtState = kEplNmtCsNotActive;
-                if (pIntNodeInfo->m_pPreqTxBuffer != NULL)
-                {   // TxBuffer entry exists
-                    pTxFrame = (tEplFrame *) pIntNodeInfo->m_pPreqTxBuffer->m_pbBuffer;
-
-                    // set up destination MAC address
-                    EPL_MEMCPY(pTxFrame->m_be_abDstMac, pIntNodeInfo->m_be_abMacAddr, 6);
-
-                }
-                else
-                {   // TxBuffer for PReq does not exist
-                    Ret = kEplDllTxFrameInvalid;
-                    goto Exit;
-                }
-
-                pIntNodeInfo->m_ulDllErrorEvents = 0L;
-                // add node to list
-                pIntNodeInfo->m_pNextNodeInfo = *ppIntNodeInfo;
-                *ppIntNodeInfo = pIntNodeInfo;
-
-                break;
+                Ret = EplDllkAddNodeIsochronous(pIntNodeInfo);
+            }
+            else
+            {
+                Ret = kEplDllInvalidParam;
             }
 
-            default:
+            break;
+        }
+#endif
+
+        case kEplDllNodeOpTypeFilterPdo:
+        case kEplDllNodeOpTypeFilterHeartbeat:
+        {
+        BOOL    fUpdateEdrv = FALSE;
+
+            if ((NmtState >= kEplNmtCsNotActive) && (NmtState < kEplNmtMsNotActive))
             {
-                break;
+                fUpdateEdrv = TRUE;
             }
+            Ret = EplDllkAddNodeFilter(pIntNodeInfo, pNodeOpParam_p->m_OpNodeType, fUpdateEdrv);
+            break;
+        }
+
+        default:
+        {
+            Ret = kEplDllInvalidParam;
+            break;
         }
     }
 
@@ -1500,11 +1184,42 @@ tEplKernel EplDllkDeleteNode(tEplDllNodeOpParam* pNodeOpParam_p)
 {
 tEplKernel          Ret = kEplSuccessful;
 tEplDllkNodeInfo*   pIntNodeInfo;
-tEplDllkNodeInfo**  ppIntNodeInfo;
-tEplFrame*          pTxFrame;
 tEplNmtState        NmtState;
 
     NmtState = EplDllkInstance_g.m_NmtState;
+
+    if (pNodeOpParam_p->m_uiNodeId == EPL_C_ADR_BROADCAST)
+    {
+        switch (pNodeOpParam_p->m_OpNodeType)
+        {
+            case kEplDllNodeOpTypeFilterPdo:
+            case kEplDllNodeOpTypeFilterHeartbeat:
+            {
+            BOOL            fUpdateEdrv = FALSE;
+            unsigned int    uiIndex;
+
+                if ((NmtState >= kEplNmtCsNotActive) && (NmtState < kEplNmtMsNotActive))
+                {
+                    fUpdateEdrv = TRUE;
+                }
+
+                for (uiIndex = 0, pIntNodeInfo = &EplDllkInstance_g.m_aNodeInfo[0];
+                     uiIndex < tabentries (EplDllkInstance_g.m_aNodeInfo);
+                     uiIndex++, pIntNodeInfo++)
+                {
+                    Ret = EplDllkDeleteNodeFilter(pIntNodeInfo, pNodeOpParam_p->m_OpNodeType, fUpdateEdrv);
+                }
+                break;
+            }
+
+            default:
+            {
+                Ret = kEplDllInvalidParam;
+                break;
+            }
+        }
+        goto Exit;
+    }
 
     pIntNodeInfo = EplDllkGetNodeInfo(pNodeOpParam_p->m_uiNodeId);
     if (pIntNodeInfo == NULL)
@@ -1517,52 +1232,48 @@ tEplNmtState        NmtState;
                                   pNodeOpParam_p->m_uiNodeId,
                                   0);
 
-    if (NmtState >= kEplNmtMsNotActive)
+    switch (pNodeOpParam_p->m_OpNodeType)
     {
-        switch (pNodeOpParam_p->m_OpNodeType)
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
+        case kEplDllNodeOpTypeIsochronous:
         {
-            case kEplDllNodeOpTypeIsochronous:
+            if (NmtState >= kEplNmtMsNotActive)
             {
-                // search node in whole list
-                ppIntNodeInfo = &EplDllkInstance_g.m_pFirstNodeInfo;
-                while ((*ppIntNodeInfo != NULL) && ((*ppIntNodeInfo)->m_uiNodeId != pNodeOpParam_p->m_uiNodeId))
-                {
-                    ppIntNodeInfo = &(*ppIntNodeInfo)->m_pNextNodeInfo;
-                }
-                if ((*ppIntNodeInfo == NULL) || ((*ppIntNodeInfo)->m_uiNodeId != pNodeOpParam_p->m_uiNodeId))
-                {   // node was not found in list
-                    // $$$ d.k. maybe this should be an error
-                    goto Exit;
-                }
-
-                // remove node from list
-                *ppIntNodeInfo = pIntNodeInfo->m_pNextNodeInfo;
-
-                if (pIntNodeInfo->m_pPreqTxBuffer != NULL)
-                {   // disable TPDO
-                    pTxFrame = (tEplFrame *) pIntNodeInfo->m_pPreqTxBuffer->m_pbBuffer;
-
-                    if (pTxFrame != NULL)
-                    {   // frame does exist
-                        // update frame (disable RD in Flag1)
-                        AmiSetByteToLe(&pTxFrame->m_Data.m_Preq.m_le_bFlag1, 0);
-                    }
-                }
-
-                break;
+                Ret = EplDllkDeleteNodeIsochronous(pIntNodeInfo);
+            }
+            else
+            {
+                Ret = kEplDllInvalidParam;
             }
 
-            case kEplDllNodeOpTypeSoftDelete:
-            {
-                pIntNodeInfo->m_fSoftDelete = TRUE;
+            break;
+        }
 
-                break;
-            }
+        case kEplDllNodeOpTypeSoftDelete:
+        {
+            pIntNodeInfo->m_fSoftDelete = TRUE;
 
-            default:
+            break;
+        }
+#endif
+
+        case kEplDllNodeOpTypeFilterPdo:
+        case kEplDllNodeOpTypeFilterHeartbeat:
+        {
+        BOOL    fUpdateEdrv = FALSE;
+
+            if ((NmtState >= kEplNmtCsNotActive) && (NmtState < kEplNmtMsNotActive))
             {
-                break;
+                fUpdateEdrv = TRUE;
             }
+            Ret = EplDllkDeleteNodeFilter(pIntNodeInfo, pNodeOpParam_p->m_OpNodeType, fUpdateEdrv);
+            break;
+        }
+
+        default:
+        {
+            Ret = kEplDllInvalidParam;
+            break;
         }
     }
 
@@ -1708,6 +1419,8 @@ tEplFrame*      pTxFrame;
 unsigned int    uiHandle;
 unsigned int    uiFrameSize;
 BYTE            abMulticastMac[6];
+unsigned int        uiIndex;
+tEplDllkNodeInfo*   pIntNodeInfo;
 
     // initialize flags for PRes and StatusRes (leave Flag 1 unchanged)
     EplDllkInstance_g.m_bMnFlag1 = 0;
@@ -1807,7 +1520,7 @@ BYTE            abMulticastMac[6];
         && (EplDllkInstance_g.m_DllConfigParam.m_uiPresActPayloadLimit >= 36))
     {   // it is not configured as async-only CN,
         // so take part in isochronous phase and register PRes frame
-        uiFrameSize = EplDllkInstance_g.m_DllConfigParam.m_uiPresActPayloadLimit + 24;
+        uiFrameSize = EplDllkInstance_g.m_DllConfigParam.m_uiPresActPayloadLimit + EPL_FRAME_OFFSET_PDO_PAYLOAD;
         Ret = EplDllkCreateTxFrame(&uiHandle, &pTxFrame, &uiFrameSize, kEplMsgTypePres, kEplDllAsndNotDefined);
         if (Ret != kEplSuccessful)
         {   // error occured while registering Tx frame
@@ -1964,14 +1677,6 @@ BYTE            abMulticastMac[6];
     EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_SOA_NONEPL].m_pTxBuffer = &EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_NONEPL];
     EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_SOA_NONEPL].m_fEnable = FALSE;
 
-#if EPL_DLLK_FILTER_COUNT > EPL_DLLK_FILTER_PRES
-    // setup PRes filter
-    AmiSetQword48ToBe(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_PRES].m_abFilterValue[0],
-                      EPL_C_DLL_MULTICAST_PRES);
-    AmiSetQword48ToBe(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_PRES].m_abFilterMask[0],
-                      EPL_DLL_MACADDR_MASK);
-    EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_PRES].m_fEnable = FALSE;
-#endif
 
     // register multicast MACs in ethernet driver
     AmiSetQword48ToBe(&abMulticastMac[0], EPL_C_DLL_MULTICAST_SOC);
@@ -1986,8 +1691,6 @@ BYTE            abMulticastMac[6];
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
     if (NmtState_p >= kEplNmtMsNotActive)
     {   // local node is MN
-    unsigned int    uiIndex;
-    tEplDllkNodeInfo*   pIntNodeInfo;
 
         // SoC
         uiFrameSize = EPL_C_DLL_MINSIZE_SOC;
@@ -2009,10 +1712,9 @@ BYTE            abMulticastMac[6];
              uiIndex < tabentries (EplDllkInstance_g.m_aNodeInfo);
              uiIndex++, pIntNodeInfo++)
         {
-//                    EplDllkInstance_g.m_aNodeInfo[uiIndex].m_uiNodeId = uiIndex + 1;
             if (pIntNodeInfo->m_wPreqPayloadLimit > 0)
             {   // create PReq frame for this node
-                uiFrameSize = pIntNodeInfo->m_wPreqPayloadLimit + 24;
+                uiFrameSize = pIntNodeInfo->m_wPreqPayloadLimit + EPL_FRAME_OFFSET_PDO_PAYLOAD;
                 Ret = EplDllkCreateTxFrame(&uiHandle, &pTxFrame, &uiFrameSize, kEplMsgTypePreq, kEplDllAsndNotDefined);
                 if (Ret != kEplSuccessful)
                 {
@@ -2028,6 +1730,22 @@ BYTE            abMulticastMac[6];
         // calculate cycle length
         EplDllkInstance_g.m_ullFrameTimeout = 1000LL
             * ((unsigned long long) EplDllkInstance_g.m_DllConfigParam.m_dwCycleLen);
+
+        // setup PRes filter
+        AmiSetQword48ToBe(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_PRES].m_abFilterValue[0],
+                          EPL_C_DLL_MULTICAST_PRES);
+        AmiSetQword48ToBe(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_PRES].m_abFilterMask[0],
+                          EPL_DLL_MACADDR_MASK);
+        AmiSetWordToBe(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_PRES].m_abFilterValue[12],
+                       EPL_C_DLL_ETHERTYPE_EPL);
+        AmiSetWordToBe(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_PRES].m_abFilterMask[12],
+                       0xFFFF);
+        AmiSetByteToBe(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_PRES].m_abFilterValue[14],
+                       kEplMsgTypePres);
+        AmiSetByteToBe(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_PRES].m_abFilterMask[14],
+                       0xFF);
+        EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_PRES].m_fEnable = TRUE;
+
     }
     else
 #endif // (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
@@ -2053,6 +1771,68 @@ BYTE            abMulticastMac[6];
         EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_PREQ].m_pTxBuffer = &EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_PRES];
         EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_PREQ].m_fEnable = FALSE;
 
+        // setup PRes filter
+#if EPL_DLL_PRES_FILTER_COUNT < 0
+        AmiSetQword48ToBe(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_PRES].m_abFilterValue[0],
+                          EPL_C_DLL_MULTICAST_PRES);
+        AmiSetQword48ToBe(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_PRES].m_abFilterMask[0],
+                          EPL_DLL_MACADDR_MASK);
+        AmiSetWordToBe(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_PRES].m_abFilterValue[12],
+                       EPL_C_DLL_ETHERTYPE_EPL);
+        AmiSetWordToBe(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_PRES].m_abFilterMask[12],
+                       0xFFFF);
+        AmiSetByteToBe(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_PRES].m_abFilterValue[14],
+                       kEplMsgTypePres);
+        AmiSetByteToBe(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_PRES].m_abFilterMask[14],
+                       0xFF);
+        if (EplDllkInstance_g.m_uiUsedPresFilterCount > 0)
+        {
+            EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_PRES].m_fEnable = TRUE;
+        }
+        else
+        {
+            EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_PRES].m_fEnable = FALSE;
+        }
+
+#else
+        for (uiHandle = EPL_DLLK_FILTER_PRES; uiHandle < EPL_DLLK_FILTER_COUNT; uiHandle++)
+        {
+            AmiSetQword48ToBe(&EplDllkInstance_g.m_aFilter[uiHandle].m_abFilterValue[0],
+                              EPL_C_DLL_MULTICAST_PRES);
+            AmiSetQword48ToBe(&EplDllkInstance_g.m_aFilter[uiHandle].m_abFilterMask[0],
+                              EPL_DLL_MACADDR_MASK);
+            AmiSetWordToBe(&EplDllkInstance_g.m_aFilter[uiHandle].m_abFilterValue[12],
+                           EPL_C_DLL_ETHERTYPE_EPL);
+            AmiSetWordToBe(&EplDllkInstance_g.m_aFilter[uiHandle].m_abFilterMask[12],
+                           0xFFFF);
+            AmiSetByteToBe(&EplDllkInstance_g.m_aFilter[uiHandle].m_abFilterValue[14],
+                           kEplMsgTypePres);
+            AmiSetByteToBe(&EplDllkInstance_g.m_aFilter[uiHandle].m_abFilterMask[14],
+                           0xFF);
+            AmiSetByteToBe(&EplDllkInstance_g.m_aFilter[uiHandle].m_abFilterMask[16],
+                           0xFF);
+            EplDllkInstance_g.m_aFilter[uiHandle].m_fEnable = FALSE;
+        }
+
+        uiHandle = EPL_DLLK_FILTER_PRES;
+        for (uiIndex = 0, pIntNodeInfo = &EplDllkInstance_g.m_aNodeInfo[0];
+             uiIndex < tabentries (EplDllkInstance_g.m_aNodeInfo);
+             uiIndex++, pIntNodeInfo++)
+        {
+            if ((pIntNodeInfo->m_bPresFilterFlags & (EPL_DLLK_FILTER_FLAG_PDO | EPL_DLLK_FILTER_FLAG_HB)) != 0)
+            {
+                AmiSetByteToBe(&EplDllkInstance_g.m_aFilter[uiHandle].m_abFilterValue[16],
+                               pIntNodeInfo->m_uiNodeId);
+                EplDllkInstance_g.m_aFilter[uiHandle].m_fEnable = TRUE;
+
+                uiHandle++;
+                if (uiHandle >= EPL_DLLK_FILTER_COUNT)
+                {
+                    break;
+                }
+            }
+        }
+#endif
     }
 
     // clear all asynchronous buffers
@@ -2148,12 +1928,14 @@ unsigned int    uiHandle;
             {
                 uiHandle = (unsigned int) (EplDllkInstance_g.m_aNodeInfo[uiIndex].m_pPreqTxBuffer - EplDllkInstance_g.m_pTxBuffer);
                 EplDllkInstance_g.m_aNodeInfo[uiIndex].m_pPreqTxBuffer = NULL;
-                Ret = EplDllkDeleteTxFrame(uiHandle);
-                if (Ret != kEplSuccessful)
-                {   // error occured while deregistering Tx frame
-                    goto Exit;
+                if (uiHandle != EPL_DLLK_TXFRAME_PRES)
+                {
+                    Ret = EplDllkDeleteTxFrame(uiHandle);
+                    if (Ret != kEplSuccessful)
+                    {   // error occured while deregistering Tx frame
+                        goto Exit;
+                    }
                 }
-
             }
 
             // disable PReq and PRes for this node
@@ -2630,7 +2412,6 @@ Exit:
 static tEplKernel EplDllkProcessStartReducedCycle(tEplEvent * pEvent_p)
 {
 tEplKernel      Ret = kEplSuccessful;
-tEplDllNodeOpParam  NodeOpParam;
 
     // start the reduced cycle by programming the cycle timer
     // it is issued by NMT MN module, when PreOp1 is entered
@@ -2642,13 +2423,14 @@ tEplDllNodeOpParam  NodeOpParam;
     // and when it reaches EPL_C_DLL_PREOP1_START_CYCLES the SoA may contain invitations)
     EplDllkInstance_g.m_uiCycleCount = 0;
 
-    NodeOpParam.m_OpNodeType = kEplDllNodeOpTypeIsochronous;
-
     // remove any CN from isochronous phase
     while (EplDllkInstance_g.m_pFirstNodeInfo != NULL)
     {
-        NodeOpParam.m_uiNodeId = EplDllkInstance_g.m_pFirstNodeInfo->m_uiNodeId;
-        EplDllkDeleteNode(&NodeOpParam);
+        Ret = EplDllkDeleteNodeIsochronous(EplDllkInstance_g.m_pFirstNodeInfo);
+        if (Ret != kEplSuccessful)
+        {
+            goto Exit;
+        }
     }
 
     // change state to NonCyclic,
@@ -2666,6 +2448,7 @@ tEplDllNodeOpParam  NodeOpParam;
     }
 #endif
 
+Exit:
     return Ret;
 }
 #endif // (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
@@ -3464,9 +3247,9 @@ TGT_DLLK_DECLARE_FLAGS
                     }
 
                     // compares real frame size and PDO size
-                    if (((unsigned int) (AmiGetWordFromLe(&pFrame->m_Data.m_Preq.m_le_wSize) + 24)
+                    if (((unsigned int) (AmiGetWordFromLe(&pFrame->m_Data.m_Preq.m_le_wSize) + EPL_FRAME_OFFSET_PDO_PAYLOAD)
                          > FrameInfo.m_uiFrameSize)
-                         || (FrameInfo.m_uiFrameSize > (EplDllkInstance_g.m_DllConfigParam.m_uiPreqActPayloadLimit + 24)))
+                         || (FrameInfo.m_uiFrameSize > (EplDllkInstance_g.m_DllConfigParam.m_uiPreqActPayloadLimit + EPL_FRAME_OFFSET_PDO_PAYLOAD)))
                     {   // format error
                     tEplErrorHandlerkEvent  DllEvent;
 
@@ -3524,7 +3307,6 @@ TGT_DLLK_DECLARE_FLAGS
         {
 #if EPL_NMT_MAX_NODE_ID > 0
         tEplDllkNodeInfo*   pIntNodeInfo;
-        tEplHeartbeatEvent  HeartbeatEvent;
 #endif
 
             // PRes frame
@@ -3544,10 +3326,11 @@ TGT_DLLK_DECLARE_FLAGS
                     goto Exit;
                 }
 #endif
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
             }
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
             else if (EplDllkInstance_g.m_DllState == kEplDllMsWaitPres)
             {   // or process PRes frames in MsWaitPres
+            tEplHeartbeatEvent  HeartbeatEvent;
 
                 pIntNodeInfo = EplDllkInstance_g.m_pCurNodeInfo;
                 if ((pIntNodeInfo == NULL) || (pIntNodeInfo->m_uiNodeId != uiNodeId))
@@ -3566,16 +3349,7 @@ TGT_DLLK_DECLARE_FLAGS
                     goto Exit;
                 }
 
-#endif
-            }
-            else
-            {   // ignore PRes, because it was received in wrong NMT state
-                // but execute EplDllkChangeState() and post event to NMT module
-                break;
-            }
-
-#if EPL_NMT_MAX_NODE_ID > 0
-            {   // check NMT state of CN
+                // check NMT state of CN
                 HeartbeatEvent.m_wErrorCode = EPL_E_NO_ERROR;
                 HeartbeatEvent.m_NmtState =
                     (tEplNmtState) (AmiGetByteFromLe(&pFrame->m_Data.m_Pres.m_le_bNmtStatus) | EPL_NMT_TYPE_CS);
@@ -3615,6 +3389,11 @@ TGT_DLLK_DECLARE_FLAGS
                 }
             }
 #endif
+            else
+            {   // ignore PRes, because it was received in wrong NMT state
+                // but execute EplDllkChangeState() and post event to NMT module
+                break;
+            }
 
             // inform PDO module
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOK)) != 0)
@@ -3622,10 +3401,10 @@ TGT_DLLK_DECLARE_FLAGS
                 && (NmtState != kEplNmtMsPreOperational2))
             {   // inform PDO module only in ReadyToOp and Op
                 // compare real frame size and PDO size?
-                if (((unsigned int) (AmiGetWordFromLe(&pFrame->m_Data.m_Pres.m_le_wSize) + 24)
+                if (((unsigned int) (AmiGetWordFromLe(&pFrame->m_Data.m_Pres.m_le_wSize) + EPL_FRAME_OFFSET_PDO_PAYLOAD)
                     > FrameInfo.m_uiFrameSize)
 #if EPL_NMT_MAX_NODE_ID > 0
-                    || (FrameInfo.m_uiFrameSize > (unsigned int) (pIntNodeInfo->m_wPresPayloadLimit + 24))
+                    || (FrameInfo.m_uiFrameSize > (unsigned int) (pIntNodeInfo->m_wPresPayloadLimit + EPL_FRAME_OFFSET_PDO_PAYLOAD))
 #endif
                     )
                 {   // format error
@@ -4538,6 +4317,285 @@ BYTE            bFlag1;
 
 //---------------------------------------------------------------------------
 //
+// Function:    EplDllkCreateTxFrame
+//
+// Description: creates the buffer for a Tx frame and registers it to the
+//              ethernet driver
+//
+// Parameters:  puiHandle_p             = IN: handle to last allocated frame buffer
+//                                        OUT: handle to new frame buffer
+//              ppFrame_p               = OUT: pointer to pointer of EPL frame
+//              puiFrameSize_p          = IN/OUT: pointer to size of frame
+//                                        returned size is always equal or larger than
+//                                        requested size, if that is not possible
+//                                        an error will be returned
+//              MsgType_p               = EPL message type
+//              ServiceId_p             = Service ID in case of ASnd frame, otherwise
+//                                        kEplDllAsndNotDefined
+//
+// Returns:     tEplKernel              = error code
+//
+//
+// State:
+//
+//---------------------------------------------------------------------------
+
+static tEplKernel EplDllkCreateTxFrame (unsigned int * puiHandle_p,
+                                 tEplFrame ** ppFrame_p,
+                                 unsigned int * puiFrameSize_p,
+                                 tEplMsgType MsgType_p,
+                                 tEplDllAsndServiceId ServiceId_p)
+{
+tEplKernel      Ret = kEplSuccessful;
+tEplFrame      *pTxFrame;
+unsigned int    uiHandle = EplDllkInstance_g.m_uiMaxTxFrames;
+tEdrvTxBuffer  *pTxBuffer = NULL;
+
+    if (MsgType_p == kEplMsgTypeAsnd)
+    {
+        // search for fixed Tx buffers
+        if (ServiceId_p == kEplDllAsndIdentResponse)
+        {
+            uiHandle = EPL_DLLK_TXFRAME_IDENTRES;
+        }
+        else if (ServiceId_p == kEplDllAsndStatusResponse)
+        {
+            uiHandle = EPL_DLLK_TXFRAME_STATUSRES;
+        }
+        else if ((ServiceId_p == kEplDllAsndNmtRequest) || (ServiceId_p == kEplDllAsndNmtCommand))
+        {
+            uiHandle = EPL_DLLK_TXFRAME_NMTREQ;
+        }
+        else
+        {   // look for free entry
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
+            uiHandle = EPL_DLLK_TXFRAME_PREQ;
+            pTxBuffer = &EplDllkInstance_g.m_pTxBuffer[uiHandle];
+            for (; uiHandle < EplDllkInstance_g.m_uiMaxTxFrames; uiHandle++, pTxBuffer++)
+            {
+                if (pTxBuffer->m_pbBuffer == NULL)
+                {   // free entry found
+                    break;
+                }
+            }
+#endif
+            if (uiHandle >= EplDllkInstance_g.m_uiMaxTxFrames)
+            {
+                Ret = kEplEdrvNoFreeBufEntry;
+                goto Exit;
+            }
+        }
+    }
+    else if (MsgType_p == kEplMsgTypeNonEpl)
+    {
+        uiHandle = EPL_DLLK_TXFRAME_NONEPL;
+    }
+    else if (MsgType_p == kEplMsgTypePres)
+    {
+        uiHandle = EPL_DLLK_TXFRAME_PRES;
+    }
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
+    else if (MsgType_p == kEplMsgTypeSoc)
+    {
+        uiHandle = EPL_DLLK_TXFRAME_SOC;
+    }
+    else if (MsgType_p == kEplMsgTypeSoa)
+    {
+        uiHandle = EPL_DLLK_TXFRAME_SOA;
+    }
+    else
+    {   // look for free entry
+        if ((uiHandle < EPL_DLLK_TXFRAME_PREQ)
+            || (uiHandle >= EplDllkInstance_g.m_uiMaxTxFrames))
+        {   // start with first PReq buffer
+            uiHandle = EPL_DLLK_TXFRAME_PREQ;
+        }
+        // otherwise start with last allocated handle
+        pTxBuffer = &EplDllkInstance_g.m_pTxBuffer[uiHandle];
+        for (; uiHandle < EplDllkInstance_g.m_uiMaxTxFrames; uiHandle++, pTxBuffer++)
+        {
+            if (pTxBuffer->m_pbBuffer == NULL)
+            {   // free entry found
+                break;
+            }
+        }
+        if (pTxBuffer->m_pbBuffer != NULL)
+        {
+            Ret = kEplEdrvNoFreeBufEntry;
+            goto Exit;
+        }
+    }
+#else
+    else
+    {
+        Ret = kEplEdrvNoFreeBufEntry;
+        goto Exit;
+    }
+#endif
+
+    // test if requested entry is free
+    pTxBuffer = &EplDllkInstance_g.m_pTxBuffer[uiHandle];
+    if (pTxBuffer->m_pbBuffer != NULL)
+    {   // entry is not free
+        Ret = kEplEdrvNoFreeBufEntry;
+        goto Exit;
+    }
+
+    // setup Tx buffer
+//    pTxBuffer->m_EplMsgType = MsgType_p;
+    pTxBuffer->m_uiMaxBufferLen = *puiFrameSize_p;
+
+    Ret = EdrvAllocTxMsgBuffer(pTxBuffer);
+    if (Ret != kEplSuccessful)
+    {   // error occured while registering Tx frame
+        goto Exit;
+    }
+
+    // because buffer size may be larger than requested
+    // memorize real length of frame
+    pTxBuffer->m_uiTxMsgLen = *puiFrameSize_p;
+
+    // fill whole frame with 0
+    EPL_MEMSET(pTxBuffer->m_pbBuffer, 0, pTxBuffer->m_uiMaxBufferLen);
+
+    pTxFrame = (tEplFrame *) pTxBuffer->m_pbBuffer;
+
+    if (MsgType_p != kEplMsgTypeNonEpl)
+    {   // fill out Frame only if it is an EPL frame
+        // ethertype
+        AmiSetWordToBe(&pTxFrame->m_be_wEtherType, EPL_C_DLL_ETHERTYPE_EPL);
+        // source node ID
+        AmiSetByteToLe(&pTxFrame->m_le_bSrcNodeId, (BYTE) EplDllkInstance_g.m_DllConfigParam.m_uiNodeId);
+        // source MAC address
+        EPL_MEMCPY(&pTxFrame->m_be_abSrcMac[0], &EplDllkInstance_g.m_be_abSrcMac[0], 6);
+        switch (MsgType_p)
+        {
+            case kEplMsgTypeAsnd:
+                // destination MAC address
+                AmiSetQword48ToBe(&pTxFrame->m_be_abDstMac[0], EPL_C_DLL_MULTICAST_ASND);
+                // destination node ID
+                switch (ServiceId_p)
+                {
+                    case kEplDllAsndIdentResponse:
+                    case kEplDllAsndStatusResponse:
+                    {   // IdentResponses and StatusResponses are Broadcast
+                        AmiSetByteToLe(&pTxFrame->m_le_bDstNodeId, (BYTE) EPL_C_ADR_BROADCAST);
+                        break;
+                    }
+
+                    default:
+                        break;
+                }
+                // ASnd Service ID
+                AmiSetByteToLe(&pTxFrame->m_Data.m_Asnd.m_le_bServiceId, ServiceId_p);
+                break;
+
+            case kEplMsgTypeSoc:
+                // destination MAC address
+                AmiSetQword48ToBe(&pTxFrame->m_be_abDstMac[0], EPL_C_DLL_MULTICAST_SOC);
+                // destination node ID
+                AmiSetByteToLe(&pTxFrame->m_le_bDstNodeId, (BYTE) EPL_C_ADR_BROADCAST);
+                // reset Flags
+                //AmiSetByteToLe(&pTxFrame->m_Data.m_Soc.m_le_bFlag1, (BYTE) 0);
+                //AmiSetByteToLe(&pTxFrame->m_Data.m_Soc.m_le_bFlag2, (BYTE) 0);
+                break;
+
+            case kEplMsgTypeSoa:
+                // destination MAC address
+                AmiSetQword48ToBe(&pTxFrame->m_be_abDstMac[0], EPL_C_DLL_MULTICAST_SOA);
+                // destination node ID
+                AmiSetByteToLe(&pTxFrame->m_le_bDstNodeId, (BYTE) EPL_C_ADR_BROADCAST);
+                // reset Flags
+                //AmiSetByteToLe(&pTxFrame->m_Data.m_Soa.m_le_bFlag1, (BYTE) 0);
+                //AmiSetByteToLe(&pTxFrame->m_Data.m_Soa.m_le_bFlag2, (BYTE) 0);
+                // EPL profile version
+                AmiSetByteToLe(&pTxFrame->m_Data.m_Soa.m_le_bEplVersion, (BYTE) EPL_SPEC_VERSION);
+                break;
+
+            case kEplMsgTypePres:
+                // destination MAC address
+                AmiSetQword48ToBe(&pTxFrame->m_be_abDstMac[0], EPL_C_DLL_MULTICAST_PRES);
+                // destination node ID
+                AmiSetByteToLe(&pTxFrame->m_le_bDstNodeId, (BYTE) EPL_C_ADR_BROADCAST);
+                // reset Flags
+                //AmiSetByteToLe(&pTxFrame->m_Data.m_Pres.m_le_bFlag1, (BYTE) 0);
+                //AmiSetByteToLe(&pTxFrame->m_Data.m_Pres.m_le_bFlag2, (BYTE) 0);
+                // PDO size
+                //AmiSetWordToLe(&pTxFrame->m_Data.m_Pres.m_le_wSize, 0);
+                break;
+
+            case kEplMsgTypePreq:
+                // reset Flags
+                //AmiSetByteToLe(&pTxFrame->m_Data.m_Preq.m_le_bFlag1, (BYTE) 0);
+                //AmiSetByteToLe(&pTxFrame->m_Data.m_Preq.m_le_bFlag2, (BYTE) 0);
+                // PDO size
+                //AmiSetWordToLe(&pTxFrame->m_Data.m_Preq.m_le_wSize, 0);
+                break;
+
+            default:
+                break;
+        }
+        // EPL message type
+        AmiSetByteToLe(&pTxFrame->m_le_bMessageType, (BYTE) MsgType_p);
+    }
+
+    *ppFrame_p = pTxFrame;
+    *puiFrameSize_p = pTxBuffer->m_uiMaxBufferLen;
+    *puiHandle_p = uiHandle;
+
+Exit:
+    return Ret;
+}
+
+//---------------------------------------------------------------------------
+//
+// Function:    EplDllkDeleteTxFrame
+//
+// Description: deletes the buffer for a Tx frame and frees it in the
+//              ethernet driver
+//
+// Parameters:  uiHandle_p              = IN: handle to frame buffer
+//
+// Returns:     tEplKernel              = error code
+//
+//
+// State:
+//
+//---------------------------------------------------------------------------
+
+static tEplKernel EplDllkDeleteTxFrame (unsigned int uiHandle_p)
+{
+tEplKernel      Ret = kEplSuccessful;
+tEdrvTxBuffer    *pTxBuffer = NULL;
+
+    if (uiHandle_p >= EplDllkInstance_g.m_uiMaxTxFrames)
+    {   // handle is not valid
+        Ret = kEplDllIllegalHdl;
+        goto Exit;
+    }
+
+    pTxBuffer = &EplDllkInstance_g.m_pTxBuffer[uiHandle_p];
+
+    // mark buffer as free so that frame will not be send in future anymore
+    // $$$ d.k. What's up with running transmissions?
+    pTxBuffer->m_uiTxMsgLen = EPL_DLLK_BUFLEN_EMPTY;
+
+    // delete Tx buffer
+    Ret = EdrvReleaseTxMsgBuffer(pTxBuffer);
+    if (Ret != kEplSuccessful)
+    {   // error occured while releasing Tx frame
+        goto Exit;
+    }
+
+    pTxBuffer->m_pbBuffer = NULL;
+
+Exit:
+    return Ret;
+}
+
+
+//---------------------------------------------------------------------------
+//
 // Function:    EplDllkCheckFrame()
 //
 // Description: check frame and set missing information
@@ -4672,7 +4730,378 @@ Exit:
 }
 #endif
 
+
+#if EPL_NMT_MAX_NODE_ID > 0
+
+//---------------------------------------------------------------------------
+//
+// Function:    EplDllkGetNodeInfo()
+//
+// Description: returns node info structure of the specified node.
+//
+// Parameters:  uiNodeId_p              = node ID
+//
+// Returns:     tEplDllkNodeInfo*       = pointer to internal node info structure
+//
+//
+// State:
+//
+//---------------------------------------------------------------------------
+
+static tEplDllkNodeInfo* EplDllkGetNodeInfo(unsigned int uiNodeId_p)
+{
+    // $$$ d.k.: use hash algorithm to retrieve the appropriate node info structure
+    //           if size of array is less than 254.
+    uiNodeId_p--;   // node ID starts at 1 but array at 0
+    if (uiNodeId_p >= tabentries (EplDllkInstance_g.m_aNodeInfo))
+    {
+        return NULL;
+    }
+    else
+    {
+        return &EplDllkInstance_g.m_aNodeInfo[uiNodeId_p];
+    }
+}
+
+
+//---------------------------------------------------------------------------
+//
+// Function:    EplDllkAddNodeFilter()
+//
+// Description: adds PRes filter for the specified node.
+//
+// Parameters:  pIntNodeInfo_p          = pointer of internal node info structure
+//              NodeOpType_p            = type of PRes filter
+//
+// Returns:     tEplKernel              = error code
+//
+//
+// State:
+//
+//---------------------------------------------------------------------------
+
+static tEplKernel EplDllkAddNodeFilter(tEplDllkNodeInfo* pIntNodeInfo_p, tEplDllNodeOpType NodeOpType_p, BOOL fUpdateEdrv_p)
+{
+tEplKernel      Ret = kEplSuccessful;
+BYTE            bPresFilterFlags = 0;
+
+    switch (NodeOpType_p)
+    {
+        case kEplDllNodeOpTypeFilterPdo:
+        {
+            bPresFilterFlags = EPL_DLLK_FILTER_FLAG_PDO;
+            break;
+        }
+
+        case kEplDllNodeOpTypeFilterHeartbeat:
+        {
+            bPresFilterFlags = EPL_DLLK_FILTER_FLAG_HB;
+            break;
+        }
+
+        default:
+        {
+            Ret = kEplDllInvalidParam;
+            goto Exit;
+        }
+    }
+
+    if (fUpdateEdrv_p != FALSE)
+    {
+        if ((pIntNodeInfo_p->m_bPresFilterFlags & (EPL_DLLK_FILTER_FLAG_PDO | EPL_DLLK_FILTER_FLAG_HB)) == 0)
+        {
+#if EPL_DLL_PRES_FILTER_COUNT < 0
+            EplDllkInstance_g.m_uiUsedPresFilterCount++;
+            if (EplDllkInstance_g.m_uiUsedPresFilterCount == 1)
+            {
+                // enable PRes Rx filter
+                EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_PRES].m_fEnable = TRUE;
+                Ret = EdrvChangeFilter(EplDllkInstance_g.m_aFilter,
+                                       EPL_DLLK_FILTER_COUNT,
+                                       EPL_DLLK_FILTER_PRES,
+                                       EDRV_FILTER_CHANGE_STATE);
+                if (Ret != kEplSuccessful)
+                {
+                    goto Exit;
+                }
+            }
+
+#else
+        unsigned int    uiHandle;
+
+            for (uiHandle = EPL_DLLK_FILTER_PRES; uiHandle < EPL_DLLK_FILTER_COUNT; uiHandle++)
+            {
+                if (AmiGetByteFromLe(&EplDllkInstance_g.m_aFilter[uiHandle].m_abFilterValue[16]) == EPL_C_ADR_INVALID)
+                {
+                    AmiSetByteToBe(&EplDllkInstance_g.m_aFilter[uiHandle].m_abFilterValue[16],
+                                   pIntNodeInfo_p->m_uiNodeId);
+                    EplDllkInstance_g.m_aFilter[uiHandle].m_fEnable = TRUE;
+
+                    Ret = EdrvChangeFilter(EplDllkInstance_g.m_aFilter,
+                                           EPL_DLLK_FILTER_COUNT,
+                                           uiHandle,
+                                           (EDRV_FILTER_CHANGE_STATE | EDRV_FILTER_CHANGE_VALUE));
+                    if (Ret != kEplSuccessful)
+                    {
+                        goto Exit;
+                    }
+                    break;
+                }
+            }
+#endif
+        }
+
+    }
+    pIntNodeInfo_p->m_bPresFilterFlags |= bPresFilterFlags;
+
+Exit:
+    return Ret;
+}
+
+
+//---------------------------------------------------------------------------
+//
+// Function:    EplDllkDeleteNodeFilter()
+//
+// Description: deletes PRes filter for the specified node.
+//
+// Parameters:  pIntNodeInfo_p          = pointer of internal node info structure
+//              NodeOpType_p            = type of PRes filter
+//
+// Returns:     tEplKernel              = error code
+//
+//
+// State:
+//
+//---------------------------------------------------------------------------
+
+static tEplKernel EplDllkDeleteNodeFilter(tEplDllkNodeInfo* pIntNodeInfo_p, tEplDllNodeOpType NodeOpType_p, BOOL fUpdateEdrv_p)
+{
+tEplKernel      Ret = kEplSuccessful;
+BYTE            bPresFilterFlags = 0;
+
+    switch (NodeOpType_p)
+    {
+        case kEplDllNodeOpTypeFilterPdo:
+        {
+            bPresFilterFlags = EPL_DLLK_FILTER_FLAG_PDO;
+            break;
+        }
+
+        case kEplDllNodeOpTypeFilterHeartbeat:
+        {
+            bPresFilterFlags = EPL_DLLK_FILTER_FLAG_HB;
+            break;
+        }
+
+        default:
+        {
+            Ret = kEplDllInvalidParam;
+            goto Exit;
+        }
+    }
+
+    pIntNodeInfo_p->m_bPresFilterFlags &= ~bPresFilterFlags;
+
+    if (fUpdateEdrv_p != FALSE)
+    {
+        if ((pIntNodeInfo_p->m_bPresFilterFlags & (EPL_DLLK_FILTER_FLAG_PDO | EPL_DLLK_FILTER_FLAG_HB)) == 0)
+        {
+#if EPL_DLL_PRES_FILTER_COUNT < 0
+            if (EplDllkInstance_g.m_uiUsedPresFilterCount > 0)
+            {
+                EplDllkInstance_g.m_uiUsedPresFilterCount--;
+            }
+            if (EplDllkInstance_g.m_uiUsedPresFilterCount == 0)
+            {
+                // disable PRes Rx filter
+                EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_PRES].m_fEnable = FALSE;
+                Ret = EdrvChangeFilter(EplDllkInstance_g.m_aFilter,
+                                       EPL_DLLK_FILTER_COUNT,
+                                       EPL_DLLK_FILTER_PRES,
+                                       EDRV_FILTER_CHANGE_STATE);
+                if (Ret != kEplSuccessful)
+                {
+                    goto Exit;
+                }
+            }
+
+#else
+        unsigned int    uiHandle;
+
+            for (uiHandle = EPL_DLLK_FILTER_PRES; uiHandle < EPL_DLLK_FILTER_COUNT; uiHandle++)
+            {
+                if (AmiGetByteFromLe(&EplDllkInstance_g.m_aFilter[uiHandle].m_abFilterValue[16]) == pIntNodeInfo_p->m_uiNodeId)
+                {
+                    AmiSetByteToBe(&EplDllkInstance_g.m_aFilter[uiHandle].m_abFilterValue[16],
+                                   EPL_C_ADR_INVALID);
+                    EplDllkInstance_g.m_aFilter[uiHandle].m_fEnable = FALSE;
+
+                    Ret = EdrvChangeFilter(EplDllkInstance_g.m_aFilter,
+                                           EPL_DLLK_FILTER_COUNT,
+                                           uiHandle,
+                                           EDRV_FILTER_CHANGE_STATE);
+                    if (Ret != kEplSuccessful)
+                    {
+                        goto Exit;
+                    }
+                    break;
+                }
+            }
+#endif
+        }
+    }
+
+Exit:
+    return Ret;
+}
+
+
+#endif // EPL_NMT_MAX_NODE_ID > 0
+
+
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
+
+//---------------------------------------------------------------------------
+//
+// Function:    EplDllkAddNodeIsochronous()
+//
+// Description: adds the specified node to the isochronous phase.
+//
+// Parameters:  pNodeInfo_p             = pointer of node info structure
+//
+// Returns:     tEplKernel              = error code
+//
+//
+// State:
+//
+//---------------------------------------------------------------------------
+
+static tEplKernel EplDllkAddNodeIsochronous(tEplDllkNodeInfo* pIntNodeInfo_p)
+{
+tEplKernel          Ret = kEplSuccessful;
+tEplDllkNodeInfo**  ppIntNodeInfo;
+tEplFrame*          pTxFrame;
+
+    if (pIntNodeInfo_p->m_uiNodeId == EplDllkInstance_g.m_DllConfigParam.m_uiNodeId)
+    {   // we shall send PRes ourself
+        // insert our node at the end of the list
+        ppIntNodeInfo = &EplDllkInstance_g.m_pFirstNodeInfo;
+        while ((*ppIntNodeInfo != NULL) && ((*ppIntNodeInfo)->m_pNextNodeInfo != NULL))
+        {
+            ppIntNodeInfo = &(*ppIntNodeInfo)->m_pNextNodeInfo;
+        }
+        if (*ppIntNodeInfo != NULL)
+        {
+            if ((*ppIntNodeInfo)->m_uiNodeId == pIntNodeInfo_p->m_uiNodeId)
+            {   // node was already added to list
+                // $$$ d.k. maybe this should be an error
+                goto Exit;
+            }
+            else
+            {   // add our node at the end of the list
+                ppIntNodeInfo = &(*ppIntNodeInfo)->m_pNextNodeInfo;
+            }
+        }
+        // set "PReq"-TxBuffer to PRes-TxBuffer
+        pIntNodeInfo_p->m_pPreqTxBuffer = &EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_PRES];
+    }
+    else
+    {   // normal CN shall be added to isochronous phase
+        // insert node into list in ascending order
+        ppIntNodeInfo = &EplDllkInstance_g.m_pFirstNodeInfo;
+        while ((*ppIntNodeInfo != NULL)
+               && ((*ppIntNodeInfo)->m_uiNodeId < pIntNodeInfo_p->m_uiNodeId)
+               && ((*ppIntNodeInfo)->m_uiNodeId != EplDllkInstance_g.m_DllConfigParam.m_uiNodeId))
+        {
+            ppIntNodeInfo = &(*ppIntNodeInfo)->m_pNextNodeInfo;
+        }
+        if ((*ppIntNodeInfo != NULL) && ((*ppIntNodeInfo)->m_uiNodeId == pIntNodeInfo_p->m_uiNodeId))
+        {   // node was already added to list
+            // $$$ d.k. maybe this should be an error
+            goto Exit;
+        }
+
+        if (pIntNodeInfo_p->m_pPreqTxBuffer != NULL)
+        {   // TxBuffer entry exists
+            pTxFrame = (tEplFrame *) pIntNodeInfo_p->m_pPreqTxBuffer->m_pbBuffer;
+
+            // set up destination MAC address
+            EPL_MEMCPY(pTxFrame->m_be_abDstMac, pIntNodeInfo_p->m_be_abMacAddr, 6);
+
+        }
+        else
+        {   // TxBuffer for PReq does not exist
+            Ret = kEplDllTxFrameInvalid;
+            goto Exit;
+        }
+    }
+
+    // initialize elements of internal node info structure
+    pIntNodeInfo_p->m_bSoaFlag1 = 0;
+    pIntNodeInfo_p->m_fSoftDelete = FALSE;
+    pIntNodeInfo_p->m_NmtState = kEplNmtCsNotActive;
+    pIntNodeInfo_p->m_ulDllErrorEvents = 0L;
+    // add node to list
+    pIntNodeInfo_p->m_pNextNodeInfo = *ppIntNodeInfo;
+    *ppIntNodeInfo = pIntNodeInfo_p;
+
+Exit:
+    return Ret;
+}
+
+
+//---------------------------------------------------------------------------
+//
+// Function:    EplDllkDeleteNodeIsochronous()
+//
+// Description: removes the specified node from the isochronous phase.
+//
+// Parameters:  uiNodeId_p              = node ID
+//
+// Returns:     tEplKernel              = error code
+//
+//
+// State:
+//
+//---------------------------------------------------------------------------
+
+static tEplKernel EplDllkDeleteNodeIsochronous(tEplDllkNodeInfo* pIntNodeInfo_p)
+{
+tEplKernel          Ret = kEplSuccessful;
+tEplDllkNodeInfo**  ppIntNodeInfo;
+tEplFrame*          pTxFrame;
+
+    // search node in whole list
+    ppIntNodeInfo = &EplDllkInstance_g.m_pFirstNodeInfo;
+    while ((*ppIntNodeInfo != NULL) && (*ppIntNodeInfo != pIntNodeInfo_p))
+    {
+        ppIntNodeInfo = &(*ppIntNodeInfo)->m_pNextNodeInfo;
+    }
+    if ((*ppIntNodeInfo == NULL) || (*ppIntNodeInfo != pIntNodeInfo_p))
+    {   // node was not found in list
+        // $$$ d.k. maybe this should be an error
+        goto Exit;
+    }
+
+    // remove node from list
+    *ppIntNodeInfo = pIntNodeInfo_p->m_pNextNodeInfo;
+
+    if (pIntNodeInfo_p->m_pPreqTxBuffer != NULL)
+    {   // disable TPDO
+        pTxFrame = (tEplFrame *) pIntNodeInfo_p->m_pPreqTxBuffer->m_pbBuffer;
+
+        if (pTxFrame != NULL)
+        {   // frame does exist
+            // update frame (disable RD in Flag1)
+            AmiSetByteToLe(&pTxFrame->m_Data.m_Preq.m_le_bFlag1, 0);
+        }
+    }
+
+Exit:
+    return Ret;
+}
+
 
 //---------------------------------------------------------------------------
 //

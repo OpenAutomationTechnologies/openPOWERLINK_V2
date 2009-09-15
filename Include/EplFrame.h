@@ -108,6 +108,15 @@
 #define EPL_VERSION_MAIN            0xF0  // main version
 
 
+#define EPL_FRAME_OFFSET_DST_MAC        0
+#define EPL_FRAME_OFFSET_SRC_MAC        6
+#define EPL_FRAME_OFFSET_ETHER_TYPE     12
+#define EPL_FRAME_OFFSET_MSG_TYPE       14
+#define EPL_FRAME_OFFSET_DST_NODEID     15
+#define EPL_FRAME_OFFSET_SRC_NODEID     16
+#define EPL_FRAME_OFFSET_PDO_PAYLOAD    24
+
+
 //---------------------------------------------------------------------------
 // typedef
 //---------------------------------------------------------------------------

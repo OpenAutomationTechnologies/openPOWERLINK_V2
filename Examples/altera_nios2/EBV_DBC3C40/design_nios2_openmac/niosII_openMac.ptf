@@ -821,7 +821,7 @@ SYSTEM niosII_openMac
                comment = "Log2 size in bytes of each dcache line";
             }
          }
-         license_status = "ocp";
+         license_status = "encrypted";
          mainmem_slave = "cfi_flash_0/s1";
          datamem_slave = "cfi_flash_0/s1";
          maincomm_slave = "";
@@ -3398,7 +3398,7 @@ SYSTEM niosII_openMac
             }
             IRQ_MASTER cpu_0/data_master
             {
-               IRQ_Number = "1";
+               IRQ_Number = "0";
             }
             Base_Address = "0x00001000";
             Address_Group = "2";
@@ -3503,7 +3503,7 @@ SYSTEM niosII_openMac
             }
             IRQ_MASTER cpu_0/data_master
             {
-               IRQ_Number = "0";
+               IRQ_Number = "1";
             }
             Base_Address = "0x00000020";
             Address_Group = "3";

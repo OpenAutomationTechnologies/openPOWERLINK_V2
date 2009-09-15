@@ -766,7 +766,7 @@ tEplKernel          EplRet = kEplSuccessful;
 
 //        printk("bVarIn = 0x%02X bVarOut = 0x%02X\n", (WORD) bVarIn_l, (WORD) bVarOut_l);
     }
-    if (uiNodeId_g != EPL_C_ADR_MN_DEF_NODE_ID)
+//    if (uiNodeId_g != EPL_C_ADR_MN_DEF_NODE_ID)
     {
         bVarIn1_l++;
     }
@@ -775,7 +775,7 @@ tEplKernel          EplRet = kEplSuccessful;
     {   // we are the master and must run the control loop
 
         // collect inputs from CNs and own input
-        bSpeedSelect_l = bVarIn1_l | abSelect_l[0];
+        bSpeedSelect_l = /*bVarIn1_l |*/ abSelect_l[0];
 
         bModeSelect_l = abSelect_l[1] | abSelect_l[2];
 

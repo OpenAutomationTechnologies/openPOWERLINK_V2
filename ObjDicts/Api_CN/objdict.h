@@ -298,7 +298,9 @@ EPL_OBD_BEGIN ()
         EPL_OBD_BEGIN_INDEX_RAM(0x1F80, 0x01, NULL)
             EPL_OBD_SUBINDEX_RAM_VAR(0x1F80, 0x00, 0x07, 0x03, tEplObdUnsigned32, NMT_StartUp_U32, 0x00)
         EPL_OBD_END_INDEX(0x1F80)
+#endif
 
+#if EPL_NMT_MAX_NODE_ID > 0
         // Object 1F81h: NMT_NodeAssignment_AU32
         EPL_OBD_RAM_INDEX_RAM_ARRAY(0x1F81, 254, NULL, 0x07, 0x03, tEplObdUnsigned32, NMT_NodeAssignment_AU32, 0)
 #endif
@@ -343,10 +345,12 @@ EPL_OBD_BEGIN ()
             EPL_OBD_SUBINDEX_RAM_VAR(0x1F8C, 0x00, 0x05, 0x09, tEplObdUnsigned8, NMT_CurrNMTState_U8, 0x00)
         EPL_OBD_END_INDEX(0x1F8C)
 
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
+#if EPL_NMT_MAX_NODE_ID > 0
         // Object 1F8Dh: NMT_PResPayloadLimitList_AU16
         EPL_OBD_RAM_INDEX_RAM_ARRAY(0x1F8D, 254, NULL, 0x06, 0x03, tEplObdUnsigned16, NMT_PResPayloadLimitList_AU16, 36)
+#endif
 
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
         // Object 1F8Eh: NMT_MNNodeCurrState_AU8
         EPL_OBD_RAM_INDEX_RAM_ARRAY(0x1F8E, 254, NULL, 0x05, 0x01, tEplObdUnsigned8, NMT_MNNodeCurrState_AU8, 0x1C)
 

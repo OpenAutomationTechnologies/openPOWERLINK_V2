@@ -72,6 +72,7 @@
 #include "kernel/EplPdokCal.h"
 #include "kernel/EplEventk.h"
 #include "EplObd.h"
+#include "kernel/EplDllk.h"
 
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOK)) != 0)
 
@@ -276,7 +277,7 @@ tEplEvent       Event;
     Event.m_EventSink = kEplEventSinkPdok;
     Event.m_EventType = kEplEventTypePdoRx;
     // limit copied data to size of PDO (because from some CNs the frame is larger than necessary)
-    Event.m_uiSize = AmiGetWordFromLe(&pFrameInfo_p->m_pFrame->m_Data.m_Pres.m_le_wSize) + 24; // pFrameInfo_p->m_uiFrameSize;
+    Event.m_uiSize = AmiGetWordFromLe(&pFrameInfo_p->m_pFrame->m_Data.m_Pres.m_le_wSize) + EPL_FRAME_OFFSET_PDO_PAYLOAD; // pFrameInfo_p->m_uiFrameSize;
     Event.m_pArg = pFrameInfo_p->m_pFrame;
     Ret = EplEventkPost(&Event);
 
@@ -360,6 +361,19 @@ tEplKernel EplPdokAlloc(tEplPdoAllocationParam* pAllocationParam_p)
 {
 tEplKernel      Ret = kEplSuccessful;
 unsigned int    uiIndex;
+#if EPL_NMT_MAX_NODE_ID > 0
+tEplDllNodeOpParam  NodeOpParam;
+
+    NodeOpParam.m_OpNodeType = kEplDllNodeOpTypeFilterPdo;
+
+    NodeOpParam.m_uiNodeId = EPL_C_ADR_BROADCAST;
+
+    Ret = EplDllkDeleteNode(&NodeOpParam);
+    if (Ret != kEplSuccessful)
+    {
+        goto Exit;
+    }
+#endif // EPL_NMT_MAX_NODE_ID > 0
 
     if (EplPdokInstance_g.m_Allocation.m_uiRxPdoChannelCount !=
         pAllocationParam_p->m_uiRxPdoChannelCount)
@@ -474,9 +488,16 @@ Exit:
 tEplKernel EplPdokConfigureChannel(tEplPdoChannelConf* pChannelConf_p)
 {
 tEplKernel      Ret = kEplSuccessful;
+tEplPdoChannel* pDestPdoChannel;
 
     if (pChannelConf_p->m_fTx == FALSE)
     {   // RPDO
+#if EPL_NMT_MAX_NODE_ID > 0
+    tEplDllNodeOpParam  NodeOpParam;
+
+        NodeOpParam.m_OpNodeType = kEplDllNodeOpTypeFilterPdo;
+#endif
+
         if (pChannelConf_p->m_uiChannelId >= EplPdokInstance_g.m_Allocation.m_uiRxPdoChannelCount)
         {
             Ret = kEplPdoNotExist;
@@ -489,8 +510,24 @@ tEplKernel      Ret = kEplSuccessful;
             goto Exit;
         }
 
+        pDestPdoChannel = &EplPdokInstance_g.m_pRxPdoChannel[pChannelConf_p->m_uiChannelId];
+
+#if EPL_NMT_MAX_NODE_ID > 0
+        if ((pDestPdoChannel->m_uiNodeId != EPL_PDO_INVALID_NODE_ID)
+            && (pDestPdoChannel->m_uiNodeId != EPL_PDO_PREQ_NODE_ID))
+        {   // disable old PRes filter in DLL
+            NodeOpParam.m_uiNodeId = pDestPdoChannel->m_uiNodeId;
+
+            Ret = EplDllkDeleteNode(&NodeOpParam);
+            if (Ret != kEplSuccessful)
+            {
+                goto Exit;
+            }
+        }
+#endif // EPL_NMT_MAX_NODE_ID > 0
+
         // copy channel configuration to local structure
-        EPL_MEMCPY(&EplPdokInstance_g.m_pRxPdoChannel[pChannelConf_p->m_uiChannelId],
+        EPL_MEMCPY(pDestPdoChannel,
                    &pChannelConf_p->m_PdoChannel,
                    sizeof (pChannelConf_p->m_PdoChannel));
 
@@ -499,8 +536,20 @@ tEplKernel      Ret = kEplSuccessful;
                     (pChannelConf_p->m_PdoChannel.m_uiMappObjectCount
                        * sizeof (pChannelConf_p->m_aMappObject[0])));
 
-        // $$$ d.k. inform DLL about PRes filter for this PDO
-        //          EplDllkAddNode
+#if EPL_NMT_MAX_NODE_ID > 0
+        if ((pDestPdoChannel->m_uiNodeId != EPL_PDO_INVALID_NODE_ID)
+            && (pDestPdoChannel->m_uiNodeId != EPL_PDO_PREQ_NODE_ID))
+        {   // enable new PRes filter in DLL
+            NodeOpParam.m_uiNodeId = pDestPdoChannel->m_uiNodeId;
+
+            Ret = EplDllkAddNode(&NodeOpParam);
+            if (Ret != kEplSuccessful)
+            {
+                goto Exit;
+            }
+        }
+#endif // EPL_NMT_MAX_NODE_ID > 0
+
     }
     else
     {   // TPDO
@@ -564,7 +613,7 @@ tEplFrame*  pFrame;
 
             wPdoSize = AmiGetWordFromLe(&pFrame->m_Data.m_Pres.m_le_wSize);
 
-            Ret = EplPdokPdoDecode(pFrame, wPdoSize + 24);
+            Ret = EplPdokPdoDecode(pFrame, wPdoSize + EPL_FRAME_OFFSET_PDO_PAYLOAD);
 
             break;
 
@@ -884,7 +933,7 @@ unsigned int        uiMappObjectCount;
 
         // valid RPDO found
 
-        if ((unsigned int)(pPdoChannel->m_wPdoSize + 24) > uiFrameSize_p)
+        if ((unsigned int)(pPdoChannel->m_wPdoSize + EPL_FRAME_OFFSET_PDO_PAYLOAD) > uiFrameSize_p)
         {   // RPDO is too short
             // $$$ raise PDO error, set Ret
             goto Exit;

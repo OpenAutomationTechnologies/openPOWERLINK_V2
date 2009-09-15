@@ -27,18 +27,20 @@ tEplKernel PUBLIC AppCbEvent(
     tEplApiEventArg*        pEventArg_p,   // IN: event argument (union)
     void GENERIC*           pUserArg_p);
 
-	BYTE  					VarIn1 = 0; // process var for test purpose
-    
-    BOOL                    shutdown = FALSE;
+// process vars
+static BYTE     bVarIn1_l = 0;
+static BYTE     bVarOut1_l = 0;
+
+static BOOL     fShutdown_l = FALSE;
 
 int openPowerlink(void);
 
 int main(void) {
     int i=0;
-    
+
     alt_icache_flush_all();
     alt_dcache_flush_all();
-    
+
     printf("NIOS II is running...\n");
     printf("starting openPowerlink application...\n\n");
     while(1) {
@@ -51,27 +53,27 @@ int main(void) {
         for(i=0; i<1000000; i++);
     }
     printf("shut down NIOS II...\n%c", 4);
-    
+
     return 0;
 }
 
 
 int openPowerlink(void) {
 	DWORD		 				ip = IP_ADDR; // ip address
-	
+
 	const BYTE 				abMacAddr[] = {MAC_ADDR};
 	static tEplApiInitParam EplApiInitParam; //epl init parameter
 	// needed for process var
 	tEplObdSize         	ObdSize;
 	tEplKernel 				EplRet;
 	unsigned int			uiVarEntries;
-    
-    shutdown = FALSE;
-	
+
+    fShutdown_l = FALSE;
+
 	////////////////////////
 	// setup th EPL Stack //
 	////////////////////////
-	
+
 	// calc the IP address with the nodeid
 	ip &= 0xFFFFFF00; //dump the last byte
 	ip |= NODEID; // and mask it with the node id
@@ -106,38 +108,49 @@ int openPowerlink(void) {
 	EplApiInitParam.m_pfnCbEvent = AppCbEvent;
     EplApiInitParam.m_pfnCbSyncProcess = AppCbSync;
     EplApiInitParam.m_pfnObdInitRam = EplObdInitRam;
-    
+
 	// initialize EPL stack
     printf("init EPL Stack:\n");
 	EplRet = EplApiInitialize(&EplApiInitParam);
 	if(EplRet != kEplSuccessful) {
         printf("init EPL Stack... error %X\n\n", EplRet);
-		return 10;
+		goto Exit;
     }
     printf("init EPL Stack...ok\n\n");
 
 	// link process variables used by CN to object dictionary
-    printf("linkin process vars:\n");
-    ObdSize = sizeof(VarIn1);
+    printf("linking process vars:\n");
+    // link process variables used by CN to object dictionary
+    ObdSize = sizeof(bVarIn1_l);
     uiVarEntries = 1;
-    EplRet = EplApiLinkObject(0x6000, &VarIn1, &uiVarEntries, &ObdSize, 0x01);
-    if (EplRet != kEplSuccessful) {
-        printf("linkin process vars... error\n\n");
-	    return 20;
+    EplRet = EplApiLinkObject(0x6000, &bVarIn1_l, &uiVarEntries, &ObdSize, 0x01);
+    if (EplRet != kEplSuccessful)
+    {
+        printf("linking process vars... error\n\n");
+        goto ExitShutdown;
     }
-	printf("linkin process vars... ok\n\n");
-    
+
+    ObdSize = sizeof(bVarOut1_l);
+    uiVarEntries = 1;
+    EplRet = EplApiLinkObject(0x6200, &bVarOut1_l, &uiVarEntries, &ObdSize, 0x01);
+    if (EplRet != kEplSuccessful)
+    {
+        printf("linking process vars... error\n\n");
+        goto ExitShutdown;
+    }
+	printf("linking process vars... ok\n\n");
+
 	// start the EPL stack
     printf("start EPL Stack...\n");
 	EplRet = EplApiExecNmtCommand(kEplNmtEventSwReset);
     if (EplRet != kEplSuccessful) {
         printf("start EPL Stack... error\n\n");
-        return 30;
+        goto ExitShutdown;
     }
     printf("start EPL Stack... ok\n\n");
-    
+
     printf("NIOS II with openPowerlink is ready!\n\n");
-    
+
 #ifdef LED_PIO_BASE
     IOWR_ALTERA_AVALON_PIO_DATA(LED_PIO_BASE, 0xFF);
 #endif
@@ -145,13 +158,16 @@ int openPowerlink(void) {
     while(1)
     {
         EplApiProcess();
-        if (shutdown == TRUE)
+        if (fShutdown_l == TRUE)
             break;
     }
+
+ExitShutdown:
     printf("Shutdown EPL Stack\n");
     EplApiShutdown(); //shutdown node
-	
-	return 0;
+
+Exit:
+	return EplRet;
 }
 
 //---------------------------------------------------------------------------
@@ -193,7 +209,7 @@ tEplKernel PUBLIC AppCbEvent(
                     // because of critical EPL stack error
                     // -> also shut down EplApiProcess() and main()
                     EplRet = kEplShutdown;
-                    shutdown = TRUE;
+                    fShutdown_l = TRUE;
 
                     PRINTF2("%s(kEplNmtGsOff) originating event = 0x%X\n", __func__, pEventArg_p->m_NmtStateChange.m_NmtEvent);
                     break;
@@ -201,7 +217,6 @@ tEplKernel PUBLIC AppCbEvent(
 
                 case kEplNmtGsInitialising:
                 case kEplNmtGsResetApplication:
-                case kEplNmtGsResetCommunication:
                 case kEplNmtGsResetConfiguration:
                 case kEplNmtCsPreOperational1:
                 case kEplNmtCsBasicEthernet:
@@ -211,6 +226,18 @@ tEplKernel PUBLIC AppCbEvent(
                             __func__,
                             pEventArg_p->m_NmtStateChange.m_NewNmtState,
                             pEventArg_p->m_NmtStateChange.m_NmtEvent);
+                    break;
+                }
+
+                case kEplNmtGsResetCommunication:
+                {
+                BYTE    bNodeId = 0xF0;
+                    PRINTF3("%s(0x%X) originating event = 0x%X\n",
+                            __func__,
+                            pEventArg_p->m_NmtStateChange.m_NewNmtState,
+                            pEventArg_p->m_NmtStateChange.m_NmtEvent);
+
+                    EplRet = EplApiWriteLocalObject(0x1400, 0x01, &bNodeId, sizeof (bNodeId));
 
                     break;
                 }
@@ -340,7 +367,19 @@ tEplKernel PUBLIC AppCbSync(void)
 {
 	tEplKernel          EplRet = kEplSuccessful;
 
-	VarIn1++;
+#ifdef DIN_PIO_BASE
+    bVarIn1_l = IORD_ALTERA_AVALON_PIO_DATA(DIN_PIO_BASE);
+#else
+	bVarIn1_l++;
+#endif
+
+#ifdef DOUT_PIO_BASE
+    IOWR_ALTERA_AVALON_PIO_DATA(DOUT_PIO_BASE, bVarOut1_l);
+#endif
+
+#ifdef LED_PIO_BASE
+    IOWR_ALTERA_AVALON_PIO_DATA(LED_PIO_BASE, ~bVarOut1_l);
+#endif
 
     return EplRet;
 }

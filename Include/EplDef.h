@@ -157,7 +157,11 @@
 #endif
 
 #ifndef EPL_DLL_PRES_FILTER_COUNT
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
+#define EPL_DLL_PRES_FILTER_COUNT   -1   // maximum count of Rx filter entries for PRes frames
+#else
 #define EPL_DLL_PRES_FILTER_COUNT   0    // maximum count of Rx filter entries for PRes frames
+#endif
 #endif
 
 #ifndef EPL_NMT_MAX_NODE_ID
@@ -225,6 +229,15 @@
 
 #ifndef EPL_VETH_NAME
 #define EPL_VETH_NAME       "epl"   // name of net device in Linux
+#endif
+
+// rough approximation of max. number of timer entries for module EplTimeruGeneric
+#ifndef EPL_TIMERU_MAX_ENTRIES
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
+#define EPL_TIMERU_MAX_ENTRIES          (EPL_NMT_MAX_NODE_ID * 3)   // 3 timers for each node
+#else
+#define EPL_TIMERU_MAX_ENTRIES          7   // LED module 1 + NMT module 1 + SDO sequence layer 5
+#endif
 #endif
 
 #ifndef EDRV_FILTER_WITH_RX_HANDLER

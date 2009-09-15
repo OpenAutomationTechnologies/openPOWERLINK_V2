@@ -115,6 +115,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define EDRV_RAM_BASE (void *)(EDRV_MAC_BASE + 0x0800)
 
+/*
 #if EPL_MAC_RX_IRQ > EPL_MAC_TX_IRQ
     #warning RX IRQ should have a higher IRQ priority than TX!!!
 #endif
@@ -122,6 +123,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #if EPL_MAC_RX_IRQ > 0
     #warning RX IRQ should have the highest IRQ priority!!!
 #endif
+*/
 
 #if (EDRV_MAX_RX_BUFFERS > 16)
 	#error This MAC version can handle 16 rx buffers, not more!
