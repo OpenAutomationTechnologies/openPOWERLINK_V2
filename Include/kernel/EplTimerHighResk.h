@@ -93,12 +93,6 @@ tEplKernel PUBLIC EplTimerHighReskAddInstance(void);
 
 tEplKernel PUBLIC EplTimerHighReskDelInstance(void);
 
-tEplKernel PUBLIC EplTimerHighReskSetTimerNs(tEplTimerHdl*     pTimerHdl_p,
-                                    unsigned long long  ullTimeNs_p,
-                                    tEplTimerkCallback  pfnCallback_p,
-                                    unsigned long       ulArgument_p,
-                                    BOOL                fContinuously_p);
-
 tEplKernel PUBLIC EplTimerHighReskModifyTimerNs(tEplTimerHdl*     pTimerHdl_p,
                                     unsigned long long  ullTimeNs_p,
                                     tEplTimerkCallback  pfnCallback_p,
