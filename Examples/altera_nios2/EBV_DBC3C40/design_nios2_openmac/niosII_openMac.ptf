@@ -589,7 +589,7 @@ SYSTEM niosII_openMac
             Entry OpenMAC_0/TimerCmp
             {
                address = "0x00000010";
-               span = "0x00000010";
+               span = "0x00000008";
                is_bridge = "0";
             }
             Entry system_timer/s1
@@ -3259,7 +3259,7 @@ SYSTEM niosII_openMac
          {
             Has_IRQ = "1";
             Bus_Type = "avalon";
-            Write_Wait_States = "1cycles";
+            Write_Wait_States = "0cycles";
             Read_Wait_States = "1cycles";
             Hold_Time = "0cycles";
             Setup_Time = "0cycles";
@@ -3267,7 +3267,7 @@ SYSTEM niosII_openMac
             Address_Alignment = "dynamic";
             Well_Behaved_Waitrequest = "0";
             Is_Nonvolatile_Storage = "0";
-            Address_Span = "16";
+            Address_Span = "8";
             Read_Latency = "0";
             Is_Memory_Device = "0";
             Maximum_Pending_Read_Transactions = "0";
@@ -3275,8 +3275,8 @@ SYSTEM niosII_openMac
             Accepts_Internal_Connections = "1";
             Write_Latency = "0";
             Is_Flash = "0";
-            Data_Width = "16";
-            Address_Width = "3";
+            Data_Width = "32";
+            Address_Width = "1";
             Maximum_Burst_Size = "1";
             Register_Incoming_Signals = "0";
             Register_Outgoing_Signals = "0";
@@ -3331,28 +3331,29 @@ SYSTEM niosII_openMac
             PORT t_byteenable
             {
                type = "byteenable";
-               width = "2";
+               width = "4";
                direction = "input";
                Is_Enabled = "1";
             }
             PORT t_address
             {
                type = "address";
-               width = "3";
+               width = "1";
                direction = "input";
                Is_Enabled = "1";
+               declare_one_bit_as_std_logic_vector = "1";
             }
             PORT t_writedata
             {
                type = "writedata";
-               width = "16";
+               width = "32";
                direction = "input";
                Is_Enabled = "1";
             }
             PORT t_readdata
             {
                type = "readdata";
-               width = "16";
+               width = "32";
                direction = "output";
                Is_Enabled = "1";
             }
