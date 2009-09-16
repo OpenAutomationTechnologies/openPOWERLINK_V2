@@ -429,7 +429,7 @@ tShbError       ShbError;
         pShbMemHeader->m_SbhMagicID  = SBH_MAGIC_ID;
         pShbMemHeader->m_ulShMemSize = ulShMemSize;
         pShbMemHeader->m_ulRefCount  = 1;
-        strncpy (pShbMemHeader->m_szBufferID, pszBufferID_p, sizeof(pShbMemHeader->m_szBufferID)-1);
+        strcpy_s (pShbMemHeader->m_szBufferID, sizeof(pShbMemHeader->m_szBufferID), pszBufferID_p);
 
         #ifndef NDEBUG
         {
@@ -1153,16 +1153,16 @@ char  szObjectPrefix[MAX_PATH];
 
     if ( fGlobalObject_p )
     {
-        strncpy (szObjectPrefix, "Global\\", sizeof(szObjectPrefix));
+        strcpy_s (szObjectPrefix, sizeof(szObjectPrefix), "Global\\");
     }
     else
     {
-        _snprintf (szObjectPrefix, sizeof(szObjectPrefix), "PID%08lX_",
+        sprintf_s (szObjectPrefix, sizeof(szObjectPrefix), "PID%08lX_",
                    (unsigned long)GetCurrentProcessId());
     }
 
 
-    _snprintf (szObjectName, sizeof(szObjectName), "%s%s#%s",
+    sprintf_s (szObjectName, sizeof(szObjectName), "%s%s#%s",
                szObjectPrefix, pszBufferID_p, pszObjectJobName_p);
 
 
