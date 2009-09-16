@@ -95,7 +95,10 @@
 //#define TARGET_HARDWARE                 TGTHW_PC_WRAPP
 
 // use no FIFOs, make direct calls
-//#define EPL_NO_FIFO
+//#define EPL_USE_SHAREDBUFF   FALSE
+
+// do not use kernel part event queue (high priority), so make direct calls for kernel part events
+#define EPL_EVENT_USE_KERNEL_QUEUE      FALSE
 
 #ifndef BENCHMARK_MODULES
 //#define BENCHMARK_MODULES       0 //0xEE800042L

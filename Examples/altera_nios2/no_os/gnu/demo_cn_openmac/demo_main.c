@@ -120,7 +120,6 @@ int openPowerlink(void) {
 
 	// link process variables used by CN to object dictionary
     printf("linking process vars:\n");
-    // link process variables used by CN to object dictionary
     ObdSize = sizeof(bVarIn1_l);
     uiVarEntries = 1;
     EplRet = EplApiLinkObject(0x6000, &bVarIn1_l, &uiVarEntries, &ObdSize, 0x01);
@@ -232,12 +231,24 @@ tEplKernel PUBLIC AppCbEvent(
                 case kEplNmtGsResetCommunication:
                 {
                 BYTE    bNodeId = 0xF0;
+                DWORD   dwNodeAssignment = EPL_NODEASSIGN_NODE_EXISTS;
+
                     PRINTF3("%s(0x%X) originating event = 0x%X\n",
                             __func__,
                             pEventArg_p->m_NmtStateChange.m_NewNmtState,
                             pEventArg_p->m_NmtStateChange.m_NmtEvent);
 
+                    EplRet = EplApiWriteLocalObject(0x1F81, bNodeId, &dwNodeAssignment, sizeof (dwNodeAssignment));
+                    if (EplRet != kEplSuccessful)
+                    {
+                        goto Exit;
+                    }
+
                     EplRet = EplApiWriteLocalObject(0x1400, 0x01, &bNodeId, sizeof (bNodeId));
+                    if (EplRet != kEplSuccessful)
+                    {
+                        goto Exit;
+                    }
 
                     break;
                 }
@@ -340,6 +351,7 @@ tEplKernel PUBLIC AppCbEvent(
             break;
     }
 
+Exit:
     return EplRet;
 }
 

@@ -231,6 +231,14 @@
 #define EPL_VETH_NAME       "epl"   // name of net device in Linux
 #endif
 
+#ifndef EPL_EVENT_USE_KERNEL_QUEUE
+#define EPL_EVENT_USE_KERNEL_QUEUE          TRUE
+#endif
+
+#ifndef EPL_USE_SHAREDBUFF
+#define EPL_USE_SHAREDBUFF                  TRUE
+#endif
+
 // rough approximation of max. number of timer entries for module EplTimeruGeneric
 #ifndef EPL_TIMERU_MAX_ENTRIES
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)

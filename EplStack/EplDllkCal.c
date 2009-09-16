@@ -73,7 +73,7 @@
 #include "kernel/EplEventk.h"
 
 #include "EplDllCal.h"
-#ifndef EPL_NO_FIFO
+#if EPL_USE_SHAREDBUFF != FALSE
 #include "SharedBuff.h"
 #endif
 
@@ -136,7 +136,7 @@
 
 typedef struct
 {
-#ifndef EPL_NO_FIFO
+#if EPL_USE_SHAREDBUFF != FALSE
 //    tShbInstance    m_ShbInstanceRx;      // FIFO for Rx ASnd frames
     tShbInstance    m_ShbInstanceTxNmt;   // FIFO for Tx frames with NMT request priority
     tShbInstance    m_ShbInstanceTxGen;   // FIFO for Tx frames with generic priority
@@ -206,7 +206,7 @@ static tEplDllkCalInstance     EplDllkCalInstance_g;
 tEplKernel EplDllkCalAddInstance(void)
 {
 tEplKernel      Ret = kEplSuccessful;
-#ifndef EPL_NO_FIFO
+#if EPL_USE_SHAREDBUFF != FALSE
 tShbError       ShbError;
 unsigned int    fShbNewCreated;
 
@@ -279,7 +279,7 @@ unsigned int    fShbNewCreated;
 tEplKernel EplDllkCalDelInstance(void)
 {
 tEplKernel      Ret = kEplSuccessful;
-#ifndef EPL_NO_FIFO
+#if EPL_USE_SHAREDBUFF != FALSE
 tShbError       ShbError;
 
 /*    ShbError = ShbCirReleaseBuffer (EplDllkCalInstance_g.m_ShbInstanceRx);
@@ -447,7 +447,7 @@ tEplKernel      Ret = kEplSuccessful;
 tEplKernel EplDllkCalAsyncGetTxCount(tEplDllAsyncReqPriority * pPriority_p, unsigned int * puiCount_p)
 {
 tEplKernel  Ret = kEplSuccessful;
-#ifndef EPL_NO_FIFO
+#if EPL_USE_SHAREDBUFF != FALSE
 tShbError       ShbError;
 unsigned long   ulFrameCount;
 
@@ -536,7 +536,7 @@ Exit:
 tEplKernel EplDllkCalAsyncGetTxFrame(void * pFrame_p, unsigned int * puiFrameSize_p, tEplDllAsyncReqPriority Priority_p)
 {
 tEplKernel      Ret = kEplSuccessful;
-#ifndef EPL_NO_FIFO
+#if EPL_USE_SHAREDBUFF != FALSE
 tShbError       ShbError;
 unsigned long   ulFrameSize;
 
@@ -655,7 +655,7 @@ tEplKernel EplDllkCalAsyncSend(tEplFrameInfo * pFrameInfo_p, tEplDllAsyncReqPrio
 {
 tEplKernel  Ret = kEplSuccessful;
 tEplEvent       Event;
-#ifndef EPL_NO_FIFO
+#if EPL_USE_SHAREDBUFF != FALSE
 tShbError   ShbError;
 
     switch (Priority_p)
@@ -733,7 +733,7 @@ tShbError   ShbError;
     Event.m_uiSize = sizeof(Priority_p);
     Ret = EplEventkPost(&Event);
 
-#ifdef EPL_NO_FIFO
+#if EPL_USE_SHAREDBUFF == FALSE
 Exit:
 #endif
 
@@ -759,7 +759,7 @@ Exit:
 tEplKernel EplDllkCalAsyncClearBuffer(void)
 {
 tEplKernel  Ret = kEplSuccessful;
-#ifndef EPL_NO_FIFO
+#if EPL_USE_SHAREDBUFF != FALSE
 tShbError   ShbError;
 
     ShbError = ShbCirResetBuffer (EplDllkCalInstance_g.m_ShbInstanceTxNmt, 1000, NULL);
@@ -826,7 +826,7 @@ tEplKernel  Ret = kEplSuccessful;
 tEplKernel EplDllkCalGetStatistics(tEplDllkCalStatistics ** ppStatistics)
 {
 tEplKernel  Ret = kEplSuccessful;
-#ifndef EPL_NO_FIFO
+#if EPL_USE_SHAREDBUFF != FALSE
 tShbError   ShbError;
 
     ShbError = ShbCirGetReadBlockCount (EplDllkCalInstance_g.m_ShbInstanceTxNmt, &EplDllkCalInstance_g.m_Statistics.m_ulCurTxFrameCountNmt);
@@ -1133,7 +1133,7 @@ Exit:
 //  Callback handler for new data signaling
 //---------------------------------------------------------------------------
 
-#ifndef EPL_NO_FIFO
+#if EPL_USE_SHAREDBUFF != FALSE
 /*static void  EplDllkCalTxNmtSignalHandler (
     tShbInstance pShbRxInstance_p,
     unsigned long ulDataSize_p)
@@ -1141,7 +1141,7 @@ Exit:
 tEplKernel      Ret = kEplSuccessful;
 tEplEvent       Event;
 tEplDllAsyncReqPriority Priority;
-#ifndef EPL_NO_FIFO
+#if EPL_USE_SHAREDBUFF != FALSE
 tShbError   ShbError;
 unsigned long   ulBlockCount;
 
@@ -1172,7 +1172,7 @@ static void  EplDllkCalTxGenSignalHandler (
 tEplKernel      Ret = kEplSuccessful;
 tEplEvent       Event;
 tEplDllAsyncReqPriority Priority;
-#ifndef EPL_NO_FIFO
+#if EPL_USE_SHAREDBUFF != FALSE
 tShbError   ShbError;
 unsigned long   ulBlockCount;
 

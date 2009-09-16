@@ -97,13 +97,14 @@
 
 typedef enum
 {
-    kEplLeduModeOff         = 0x00,
-    kEplLeduModeOn          = 0x01,
-    kEplLeduModeFlickering  = 0x02,
-    kEplLeduModeBlinking    = 0x03,
-    kEplLeduModeSingleFlash = 0x04,
-    kEplLeduModeDoubleFlash = 0x05,
-    kEplLeduModeTripleFlash = 0x06,
+    kEplLeduModeInit        = 0x00,
+    kEplLeduModeOff         = 0x01,
+    kEplLeduModeOn          = 0x02,
+    kEplLeduModeFlickering  = 0x03,
+    kEplLeduModeBlinking    = 0x04,
+    kEplLeduModeSingleFlash = 0x05,
+    kEplLeduModeDoubleFlash = 0x06,
+    kEplLeduModeTripleFlash = 0x07,
 
 } tEplLeduMode;
 
@@ -407,6 +408,7 @@ BOOL            fLedOn = FALSE;
             // select timeout and new LED state corresponding to mode
             switch (EplLeduInstance_g.m_StatusLedMode)
             {
+                case kEplLeduModeInit:
                 case kEplLeduModeOn:
                 case kEplLeduModeOff:
                 {   // should not occur

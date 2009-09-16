@@ -77,44 +77,6 @@
 //---------------------------------------------------------------------------
 // const defines
 //---------------------------------------------------------------------------
-// =========================================================================
-// macros for memory access (depends on target system)
-// =========================================================================
-
-// NOTE:
-// The following macros are used to combine standard library definitions. Some
-// applications needs to use one common library function (e.g. memcpy()). So
-// you can set (or change) it here.
-
-#if (TARGET_SYSTEM == _NO_OS_)
-
-    #include <stdlib.h>
-    #include <stdio.h>
-
-    //29.11.2004 f.j. sonst ist memcpy und memset unbekannt
-    #include <string.h>
-
-//    #define EPL_MEMCPY(dst,src,siz)     memcpy((void*)(dst),(const void*)(src),(size_t)(siz));
-//    #define EPL_MEMSET(dst,val,siz)     memset((void*)(dst),(int)(val),(size_t)(siz));
-
-//    #define EPL_MALLOC(siz)             malloc((size_t)(siz))
-//    #define EPL_FREE(ptr)               free((void *)ptr)
-
-    #ifndef PRINTF0
-        #define PRINTF                      TRACE
-        #define PRINTF0(arg)                TRACE0(arg)
-        #define PRINTF1(arg,p1)             TRACE1(arg,p1)
-        #define PRINTF2(arg,p1,p2)          TRACE2(arg,p1,p2)
-        #define PRINTF3(arg,p1,p2,p3)       TRACE3(arg,p1,p2,p3)
-        #define PRINTF4(arg,p1,p2,p3,p4)    TRACE4(arg,p1,p2,p3,p4)
-        //#define PRINTF                      printf
-        //#define PRINTF0(arg)                PRINTF(arg)
-        //#define PRINTF1(arg,p1)             PRINTF(arg,p1)
-        //#define PRINTF2(arg,p1,p2)          PRINTF(arg,p1,p2)
-        //#define PRINTF3(arg,p1,p2,p3)       PRINTF(arg,p1,p2,p3)
-        //#define PRINTF4(arg,p1,p2,p3,p4)    PRINTF(arg,p1,p2,p3,p4)
-    #endif
-#endif
 
 
 //---------------------------------------------------------------------------

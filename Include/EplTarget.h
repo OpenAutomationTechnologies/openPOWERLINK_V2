@@ -93,16 +93,10 @@
     #include <stdlib.h>
     #include <stdio.h>
 
-    //29.11.2004 f.j. sonst ist memcpy und memset unbekannt
     #include <string.h>
 
     #define EPL_MEMCPY(dst,src,siz)     memcpy((void*)(dst),(const void*)(src),(size_t)(siz));
     #define EPL_MEMSET(dst,val,siz)     memset((void*)(dst),(int)(val),(size_t)(siz));
-
-    // f.j.: die Funktionen für <MemAlloc> und <MemFree> sind in WinMem.c definiert
-    //definition der Prototypen
-    void FAR*  MemAlloc (DWORD dwMemSize_p);
-    void       MemFree (void FAR* pMem_p);
 
     #define EPL_MALLOC(siz)             malloc((size_t)(siz))
     #define EPL_FREE(ptr)               free((void *)ptr)
@@ -135,8 +129,6 @@
 
     #include <stdlib.h>
     #include <stdio.h>
-
-    //29.11.2004 f.j. sonst ist memcpy und memset unbekannt
     #include <string.h>
 
     #define EPL_MEMCPY(dst,src,siz)     memcpy((void*)(dst),(const void*)(src),(size_t)(siz));
@@ -160,12 +152,17 @@
         //#define PRINTF4(arg,p1,p2,p3,p4)    TRACE4(arg,p1,p2,p3,p4)
     #endif
 
+    #if EPL_USE_SHAREDBUFF != FALSE
+        #define EplTgtEnableGlobalInterrupt ShbTgtEnableGlobalInterrupt
+    #endif
+
 
 #elif (TARGET_SYSTEM == _LINUX_)
 
     #ifndef __KERNEL__
         #include <stdlib.h>
         #include <stdio.h>
+        #include <string.h>
     #else
 //        #include <linux/config.h>
         #include <linux/module.h>
@@ -226,7 +223,7 @@ DWORD PUBLIC EplTgtGetTickCountMs(void);
 // functions for ethernet driver
 tEplKernel PUBLIC TgtInitEthIsr(void);
 void PUBLIC TgtFreeEthIsr(void);
-void  PUBLIC  TgtEnableGlobalInterrupt(BYTE fEnable_p);
+void PUBLIC EplTgtEnableGlobalInterrupt(BYTE fEnable_p);
 void PUBLIC TgtEnableEthInterrupt0(BYTE fEnable_p, unsigned int uiInterruptMask_p);
 void PUBLIC TgtEnableEthInterrupt1(BYTE fEnable_p, unsigned int uiInterruptMask_p);
 

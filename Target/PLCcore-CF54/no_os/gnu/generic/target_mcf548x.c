@@ -118,7 +118,7 @@ void fec_interrupt_handler(void);
 
 //---------------------------------------------------------------------------
 //
-// Function:    TgtEnableGlobalInterrupt()
+// Function:    EplTgtEnableGlobalInterrupt()
 //
 // Description: enable resp. disable interrupts globally
 //
@@ -131,7 +131,7 @@ void fec_interrupt_handler(void);
 //
 //---------------------------------------------------------------------------
 
-void  PUBLIC  TgtEnableGlobalInterrupt(BYTE fEnable_p)
+void  PUBLIC  EplTgtEnableGlobalInterrupt(BYTE fEnable_p)
 {
 
     if (fEnable_p != FALSE)

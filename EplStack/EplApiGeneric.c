@@ -95,7 +95,7 @@
 #include "kernel/EplPdok.h"
 #endif
 
-#ifndef EPL_NO_FIFO
+#if EPL_USE_SHAREDBUFF != FALSE
 #include "SharedBuff.h"
 #endif
 
@@ -245,7 +245,7 @@ tEplKernel PUBLIC EplApiInitialize(tEplApiInitParam * pInitParam_p)
 tEplKernel          Ret = kEplSuccessful;
 tEplObdInitParam    ObdInitParam;
 tEplDllkInitParam   DllkInitParam;
-#ifndef EPL_NO_FIFO
+#if EPL_USE_SHAREDBUFF != FALSE
     tShbError           ShbError;
 #endif
 
@@ -284,7 +284,7 @@ tEplDllkInitParam   DllkInitParam;
     }
 #endif
 
-#ifndef EPL_NO_FIFO
+#if EPL_USE_SHAREDBUFF != FALSE
     ShbError = ShbInit();
     if (ShbError != kShbOk)
     {
@@ -597,7 +597,7 @@ tEplKernel      Ret = kEplSuccessful;
     Ret = EplEventkDelInstance();
 //    PRINTF1("EplEventkDelInstance():  0x%X\n", Ret);
 
-#ifndef EPL_NO_FIFO
+#if EPL_USE_SHAREDBUFF != FALSE
     ShbExit();
 #endif
 

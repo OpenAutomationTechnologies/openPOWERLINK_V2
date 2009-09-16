@@ -136,25 +136,6 @@ static  int         TgtEthIsr (int nIrqNum_p, void* ppDevInstData_p, struct pt_r
 
 //---------------------------------------------------------------------------
 //
-// Function:    TgtEnableGlobalInterrupt()
-//
-// Description: enable resp. disable interrupts globally (does nothing under Linux)
-//
-// Parameters:  fEnable_p               = TRUE: enable interrupts
-//                                        FALSE: disable interrupts
-//
-// Return:
-//
-// State:       not tested
-//
-//---------------------------------------------------------------------------
-
-void  PUBLIC  TgtEnableGlobalInterrupt(BYTE fEnable_p)
-{
-}
-
-//---------------------------------------------------------------------------
-//
 // Function:    TgtInitEthIsr()
 //
 // Description: sets up the ethernet interrupt handler

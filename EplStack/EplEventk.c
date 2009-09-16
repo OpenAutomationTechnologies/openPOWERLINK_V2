@@ -80,7 +80,7 @@
 #include "kernel/EplPdokCal.h"
 #endif
 
-#ifdef EPL_NO_FIFO
+#if EPL_USE_SHAREDBUFF == FALSE
     #include "user/EplEventu.h"
 #else
     #include "SharedBuff.h"
@@ -115,32 +115,45 @@
 
 typedef struct
 {
-#ifndef EPL_NO_FIFO
+#if EPL_USE_SHAREDBUFF != FALSE
     tShbInstance    m_pShbKernelToUserInstance;
+#if EPL_EVENT_USE_KERNEL_QUEUE != FALSE
     tShbInstance    m_pShbUserToKernelInstance;
-#else
-
 #endif
+#endif
+
     tEplSyncCb      m_pfnCbSyncProcess;
     tEplSyncCb      m_pfnCbSyncSoc;
+
+#if (EPL_USE_SHAREDBUFF != FALSE) \
+    && (EPL_EVENT_USE_KERNEL_QUEUE != FALSE)
     unsigned int    m_uiUserToKernelFullCount;
+#endif
 
 } tEplEventkInstance;
+
 
 //---------------------------------------------------------------------------
 // modul globale vars
 //---------------------------------------------------------------------------
+
 static tEplEventkInstance EplEventkInstance_g;
+
+
 //---------------------------------------------------------------------------
 // local function prototypes
 //---------------------------------------------------------------------------
 
 // callback function for incoming events
-#ifndef EPL_NO_FIFO
+#if (EPL_USE_SHAREDBUFF != FALSE) \
+    && (EPL_EVENT_USE_KERNEL_QUEUE != FALSE)
+
 static void  EplEventkRxSignalHandlerCb (
     tShbInstance pShbRxInstance_p,
     unsigned long ulDataSize_p);
+
 #endif
+
 
 /***************************************************************************/
 /*                                                                         */
@@ -205,7 +218,7 @@ tEplKernel Ret;
 tEplKernel PUBLIC EplEventkAddInstance(tEplSyncCb pfnCbSyncProcess_p, tEplSyncCb pfnCbSyncSoc_p)
 {
 tEplKernel      Ret;
-#ifndef EPL_NO_FIFO
+#if EPL_USE_SHAREDBUFF != FALSE
 tShbError       ShbError;
 unsigned int    fShbNewCreated;
 #endif
@@ -213,13 +226,15 @@ unsigned int    fShbNewCreated;
     Ret = kEplSuccessful;
 
     // init instance structure
+#if EPL_EVENT_USE_KERNEL_QUEUE != FALSE
     EplEventkInstance_g.m_uiUserToKernelFullCount = 0;
+#endif
 
     // save callback-functions
     EplEventkInstance_g.m_pfnCbSyncProcess = pfnCbSyncProcess_p;
     EplEventkInstance_g.m_pfnCbSyncSoc = pfnCbSyncSoc_p;
 
-#ifndef EPL_NO_FIFO
+#if EPL_USE_SHAREDBUFF != FALSE
     // init shared loop buffer
     // kernel -> user
     ShbError = ShbCirAllocBuffer (EPL_EVENT_SIZE_SHB_KERNEL_TO_USER,
@@ -233,6 +248,7 @@ unsigned int    fShbNewCreated;
         goto Exit;
     }
 
+#if EPL_EVENT_USE_KERNEL_QUEUE != FALSE
     // user -> kernel
     ShbError = ShbCirAllocBuffer (EPL_EVENT_SIZE_SHB_USER_TO_KERNEL,
                                   EPL_EVENT_NAME_SHB_USER_TO_KERNEL,
@@ -255,6 +271,7 @@ unsigned int    fShbNewCreated;
         Ret = kEplNoResource;
         goto Exit;
     }
+#endif
 
 Exit:
 #endif
@@ -281,13 +298,14 @@ Exit:
 tEplKernel PUBLIC EplEventkDelInstance()
 {
 tEplKernel      Ret;
-#ifndef EPL_NO_FIFO
+#if EPL_USE_SHAREDBUFF != FALSE
 tShbError       ShbError;
 #endif
 
     Ret = kEplSuccessful;
 
-#ifndef EPL_NO_FIFO
+#if EPL_USE_SHAREDBUFF != FALSE
+#if EPL_EVENT_USE_KERNEL_QUEUE != FALSE
     // set eventhandler to NULL
     ShbError = ShbCirSetSignalHandlerNewData (EplEventkInstance_g.m_pShbUserToKernelInstance,
                                     NULL,
@@ -309,6 +327,7 @@ tShbError       ShbError;
     {
         EplEventkInstance_g.m_pShbUserToKernelInstance = NULL;
     }
+#endif
 
     // free buffer  Kernel -> User
     ShbError = ShbCirReleaseBuffer (EplEventkInstance_g.m_pShbKernelToUserInstance);
@@ -349,6 +368,8 @@ tEplEventSource         EventSource;
 
     Ret = kEplSuccessful;
 
+#if (EPL_USE_SHAREDBUFF != FALSE) \
+    && (EPL_EVENT_USE_KERNEL_QUEUE != FALSE)
     // error handling if event queue is full
     if (EplEventkInstance_g.m_uiUserToKernelFullCount > 0)
     {   // UserToKernel event queue has run out of space -> kEplNmtEventInternComError
@@ -356,9 +377,7 @@ tEplEventSource         EventSource;
         tEplEvent   Event;
         tEplNmtEvent NmtEvent;
 #endif
-#ifndef EPL_NO_FIFO
         tShbError   ShbError;
-#endif
 
         // directly call NMTk process function, because event queue is full
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMTK)) != 0)
@@ -374,9 +393,7 @@ tEplEventSource         EventSource;
 
         // NMT state machine changed to reset (i.e. NMT_GS_RESET_COMMUNICATION)
         // now, it is safe to reset the counter and empty the event queue
-#ifndef EPL_NO_FIFO
         ShbError = ShbCirResetBuffer (EplEventkInstance_g.m_pShbUserToKernelInstance, 1000, NULL);
-#endif
 
         EplEventkInstance_g.m_uiUserToKernelFullCount = 0;
         TGT_DBG_SIGNAL_TRACE_POINT(22);
@@ -384,6 +401,7 @@ tEplEventSource         EventSource;
         // also discard the current event (it doesn't matter if we lose another event)
         goto Exit;
     }
+#endif
 
     // check m_EventSink
     switch(pEvent_p->m_EventSink)
@@ -619,7 +637,10 @@ tEplEventSource         EventSource;
 
     } // end of switch(pEvent_p->m_EventSink)
 
+#if (EPL_USE_SHAREDBUFF != FALSE) \
+    && (EPL_EVENT_USE_KERNEL_QUEUE != FALSE)
 Exit:
+#endif
     return Ret;
 
 }
@@ -642,7 +663,7 @@ Exit:
 tEplKernel PUBLIC EplEventkPost(tEplEvent * pEvent_p)
 {
 tEplKernel      Ret;
-#ifndef EPL_NO_FIFO
+#if EPL_USE_SHAREDBUFF != FALSE
 tShbError       ShbError;
 tShbCirChunk    ShbCirChunk;
 unsigned long   ulDataSize;
@@ -656,7 +677,7 @@ unsigned int    fBufferCompleted;
     // it is neede because the Argument must by copied
     // to the buffer too and not only the pointer
 
-#ifndef EPL_NO_FIFO
+#if EPL_USE_SHAREDBUFF != FALSE
     // 2006/08/03 d.k.: Event and argument are posted as separate chunks to the event queue.
     ulDataSize = sizeof(tEplEvent) + ((pEvent_p->m_pArg != NULL) ? pEvent_p->m_uiSize : 0);
 #endif
@@ -674,7 +695,8 @@ unsigned int    fBufferCompleted;
         case kEplEventSinkErrk:
         {
             BENCHMARK_MOD_27_SET(2);
-#ifndef EPL_NO_FIFO
+#if (EPL_USE_SHAREDBUFF != FALSE) \
+    && (EPL_EVENT_USE_KERNEL_QUEUE != FALSE)
             // post message
             ShbError = ShbCirAllocDataBlock (EplEventkInstance_g.m_pShbUserToKernelInstance,
                                    &ShbCirChunk,
@@ -725,7 +747,13 @@ unsigned int    fBufferCompleted;
             }
 
 #else
+            #if EPL_EVENT_USE_KERNEL_QUEUE == FALSE
+                EplTgtEnableGlobalInterrupt(FALSE);
+            #endif
             Ret = EplEventkProcess(pEvent_p);
+            #if EPL_EVENT_USE_KERNEL_QUEUE == FALSE
+                EplTgtEnableGlobalInterrupt(TRUE);
+            #endif
 #endif
             BENCHMARK_MOD_27_RESET(2);
 
@@ -740,7 +768,7 @@ unsigned int    fBufferCompleted;
         case kEplEventSinkDlluCal:
         case kEplEventSinkErru:
         {
-#ifndef EPL_NO_FIFO
+#if EPL_USE_SHAREDBUFF != FALSE
             // post message
 //            BENCHMARK_MOD_27_SET(3);    // 74 µs until reset
             ShbError = ShbCirAllocDataBlock (EplEventkInstance_g.m_pShbKernelToUserInstance,
@@ -794,7 +822,7 @@ unsigned int    fBufferCompleted;
 
     }// end of switch(pEvent_p->m_EventSink)
 
-#ifndef EPL_NO_FIFO
+#if EPL_USE_SHAREDBUFF != FALSE
 Exit:
 #endif
     return Ret;
@@ -870,7 +898,8 @@ tEplEvent   EplEvent;
 //
 //---------------------------------------------------------------------------
 
-#ifndef EPL_NO_FIFO
+#if EPL_USE_SHAREDBUFF != FALSE
+#if EPL_EVENT_USE_KERNEL_QUEUE != FALSE
 static void  EplEventkRxSignalHandlerCb (
                 tShbInstance pShbRxInstance_p,
                 unsigned long ulDataSize_p)
@@ -919,6 +948,7 @@ BYTE            abDataBuffer[sizeof(tEplEvent) + EPL_MAX_EVENT_ARG_SIZE];
 Exit:
     return;
 }
+#endif
 #endif
 
 // EOF

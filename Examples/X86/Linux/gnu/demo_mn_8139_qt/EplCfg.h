@@ -54,7 +54,7 @@
 #define TARGET_HARDWARE                 TGTHW_PC_WRAPP
 
 // use no FIFOs, make direct calls
-//#define EPL_NO_FIFO
+//#define EPL_USE_SHAREDBUFF   FALSE
 
 #ifndef BENCHMARK_MODULES
 #define BENCHMARK_MODULES       0 //0xEE800042L

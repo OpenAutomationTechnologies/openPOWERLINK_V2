@@ -174,15 +174,23 @@ DWORD PUBLIC ShbTgtGetTickCountMs(void)
 
 void  PUBLIC  ShbTgtEnableGlobalInterrupt(BYTE fEnable_p)
 {
-static alt_irq_context context = 0; 
+static alt_irq_context  irq_context = 0; 
+static int              iLockCount = 0;
 
     if (fEnable_p != FALSE)
     {   // restore interrupts
-        alt_irq_enable_all(context);
+        if (--iLockCount == 0)
+        {
+            alt_irq_enable_all(irq_context);
+        }
     }
     else
     {   // disable interrupts
-        context = alt_irq_disable_all();
+        if (iLockCount == 0)
+        {
+            irq_context = alt_irq_disable_all();
+        }
+        iLockCount++;
     }
 }
 

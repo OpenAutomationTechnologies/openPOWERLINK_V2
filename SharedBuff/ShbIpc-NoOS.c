@@ -57,6 +57,8 @@
 
 
 #include "global.h"
+#include <stdlib.h>
+#include <string.h>
 #include "ShbTarget.h"
 
 #include "SharedBuff.h"
@@ -497,7 +499,7 @@ tShbError       ShbError = kShbOk;
     }
 
     ShbError = ShbIpcProcessJobReady();
-    
+
 Exit:
     return ShbError;
 
@@ -816,7 +818,7 @@ BOOL                fEndOfProcessList = FALSE;
 tShbError           ShbError = kShbOk;
 
     ppProcessListNewDataCurrent_g = &pProcessListNewDataFirst_g;
-    
+
     while (fEndOfProcessList == FALSE)
     {
         pfnSigHndlrNewData = NULL;
@@ -829,13 +831,13 @@ tShbError           ShbError = kShbOk;
         else
         {
             pShbMemHeader = ShbIpcGetShbMemHeader (pShbMemInst);
-            
+
             if (pShbMemHeader->m_fNewData != FALSE)
             {
                 pfnSigHndlrNewData = pShbMemInst->m_pfnSigHndlrNewData;
                 pShbInstance       = ShbIpcGetInstance(pShbMemInst);
                 Priority           = pShbMemInst->m_PriorityNewData;
-    
+
                 pShbMemHeader->m_fNewData = FALSE;
             }
 
@@ -859,7 +861,7 @@ tShbError           ShbError = kShbOk;
         }
     }
     ppProcessListNewDataCurrent_g = NULL;
-    
+
     return ShbError;
 }
 
@@ -882,7 +884,7 @@ BOOL                fEndOfProcessList = FALSE;
 tShbError           ShbError = kShbOk;
 
     ppProcessListJobReadyCurrent_g = &pProcessListJobReadyFirst_g;
-    
+
     while (fEndOfProcessList == FALSE)
     {
         pfnSigHndlrJobReady = NULL;
@@ -897,7 +899,7 @@ tShbError           ShbError = kShbOk;
             pShbMemHeader = ShbIpcGetShbMemHeader (pShbMemInst);
             ulTimeOutMs   = pShbMemInst->m_ulTimeOutMsJobReady;
             ulStartTimeMs = pShbMemInst->m_ulStartTimeMsJobReady;
-            
+
             if ((pShbMemHeader->m_fJobReady != FALSE) ||
                 (   (ulTimeOutMs != 0) &&
                     (ulTimeOutMs <= ShbTgtGetTickCountMs() - ulStartTimeMs)))
@@ -905,8 +907,8 @@ tShbError           ShbError = kShbOk;
                 pfnSigHndlrJobReady = pShbMemInst->m_pfnSigHndlrJobReady;
                 pShbInstance        = ShbIpcGetInstance(pShbMemInst);
                 fJobReady           = pShbMemHeader->m_fJobReady;
-    
-                // remove ShbMemInst from JobReady process list            
+
+                // remove ShbMemInst from JobReady process list
                 if (pShbMemInst->m_pProcessListJobReadyNext == NULL)
                 {
                     ShbIpcEnterAtomicSection(NULL);

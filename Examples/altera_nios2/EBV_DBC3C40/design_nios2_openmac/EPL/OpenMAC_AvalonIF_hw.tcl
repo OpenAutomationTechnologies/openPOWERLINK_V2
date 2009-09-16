@@ -239,8 +239,8 @@ set_interface_property TimerCmp readLatency 0
 set_interface_property TimerCmp readWaitTime 1
 set_interface_property TimerCmp setupTime 0
 set_interface_property TimerCmp timingUnits Cycles
-set_interface_property TimerCmp writeWaitStates 1
-set_interface_property TimerCmp writeWaitTime 1
+set_interface_property TimerCmp writeWaitStates 0
+set_interface_property TimerCmp writeWaitTime 0
 
 set_interface_property TimerCmp ASSOCIATED_CLOCK clk_sink
 set_interface_property TimerCmp ENABLED true
@@ -248,10 +248,10 @@ set_interface_property TimerCmp ENABLED true
 add_interface_port TimerCmp t_chipselect chipselect Input 1
 add_interface_port TimerCmp t_read_n read_n Input 1
 add_interface_port TimerCmp t_write_n write_n Input 1
-add_interface_port TimerCmp t_byteenable byteenable Input 2
+add_interface_port TimerCmp t_byteenable byteenable Input 4
 add_interface_port TimerCmp t_address address Input 1
-add_interface_port TimerCmp t_writedata writedata Input 16
-add_interface_port TimerCmp t_readdata readdata Output 16
+add_interface_port TimerCmp t_writedata writedata Input 32
+add_interface_port TimerCmp t_readdata readdata Output 32
 # | 
 # +-----------------------------------
 

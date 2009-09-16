@@ -637,7 +637,7 @@ DWORD	TickCountMs;
 static INLINE_FUNCTION void EplTimeruEnterCriticalSection (int nType_p)
 {
 #if (TARGET_SYSTEM == _NO_OS_)
-    #ifdef EPL_NO_FIFO
+    #if EPL_USE_SHAREDBUFF == FALSE
         EplTgtEnableGlobalInterrupt(FALSE);
     #endif
 #elif (TARGET_SYSTEM == _WIN32_)
@@ -653,7 +653,7 @@ static INLINE_FUNCTION void EplTimeruEnterCriticalSection (int nType_p)
 static INLINE_FUNCTION void EplTimeruLeaveCriticalSection (int nType_p)
 {
 #if (TARGET_SYSTEM == _NO_OS_)
-    #ifdef EPL_NO_FIFO
+    #if EPL_USE_SHAREDBUFF == FALSE
         EplTgtEnableGlobalInterrupt(TRUE);
     #endif
 #elif (TARGET_SYSTEM == _WIN32_)

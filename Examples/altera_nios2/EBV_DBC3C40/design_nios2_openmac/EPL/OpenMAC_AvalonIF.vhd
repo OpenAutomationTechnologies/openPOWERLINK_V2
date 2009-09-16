@@ -20,6 +20,7 @@
 -- 2009-08-21  V0.40		TX DMA run if fifo is not empty. Interface for Timer Cmp + IRQ
 -- 2009-09-03  V0.50		RX FIFO is definitely empty when a new frame arrives (Fifo sclr is set for 1 cycle)
 -- 2009-09-07  V0.60		Added openFilter and openHub. Some changes in Mii core map. Added 2nd RMii Port.
+-- 2009-09-15  V0.61		Added ability to read the Mac Time over Time Cmp Slave Interface (32 bits).
 ------------------------------------------------------------------------------------------------------------------------
 
 LIBRARY ieee;
@@ -86,10 +87,10 @@ ENTITY AlteraOpenMACIF IS
 			t_chipselect                : IN    STD_LOGIC;
             t_read_n					: IN    STD_LOGIC;
             t_write_n					: IN    STD_LOGIC;
-            t_byteenable                : IN    STD_LOGIC_VECTOR(1 DOWNTO 0);
-            t_address                   : IN    STD_LOGIC_VECTOR(2 DOWNTO 0);
-            t_writedata                 : IN    STD_LOGIC_VECTOR(15 DOWNTO 0);
-            t_readdata                  : OUT   STD_LOGIC_VECTOR(15 DOWNTO 0);
+            t_byteenable                : IN    STD_LOGIC_VECTOR(3 DOWNTO 0);
+            t_address                   : IN    STD_LOGIC_VECTOR(0 DOWNTO 0);
+            t_writedata                 : IN    STD_LOGIC_VECTOR(31 DOWNTO 0);
+            t_readdata                  : OUT   STD_LOGIC_VECTOR(31 DOWNTO 0);
 			nCmp_Int					: OUT   STD_LOGIC
         );
 END ENTITY AlteraOpenMACIF;
@@ -501,9 +502,7 @@ BEGIN
 
 	-----------------------------------------------------------------------
 	-- MAC-Time compare
-	--  Address 0 : Cmp_H
-	--          2 : Cmp_L
-	--          4 : Enable int IF D0 = 1, Disable int IF D0 = 0 
+	-- Mac Time output
 	-----------------------------------------------------------------------
 
     nCmp_Int <= not Mac_Cmp_Int;
@@ -519,13 +518,11 @@ BEGIN
 		ELSIF rising_edge( Clk ) THEN
 		
 			IF ( CsMacCmp = '1' AND t_write_n = '0' ) THEN
-				case t_address(2 downto 1) is
-					when "00" => --0
-						Mac_Cmp_Wert(31 DOWNTO 16) <= t_writedata;
-					when "01" => --2
-						Mac_Cmp_Wert(15 DOWNTO 0) <= t_writedata;
+				case t_address(0 downto 0) is
+					when "0" => --0
+						Mac_Cmp_Wert(31 DOWNTO 0) <= t_writedata;
 						Mac_Cmp_Int <= '0';
-					when "10" => --4
+					when "1" => --4
 						Mac_Cmp_On <= t_writedata(0);
 					when others =>
 						-- do nothing
@@ -537,7 +534,14 @@ BEGIN
 			END IF;
 			
 			if t_chipselect = '1' and t_read_n = '0' then
-				t_readdata 	<= 	x"000" & "00" & Mac_Cmp_Int & Mac_Cmp_On;
+				case t_address(0 downto 0) is
+					when "0" => --0
+						t_readdata <= Mac_Zeit(31 DOWNTO 0);
+					when "1" => --4
+						t_readdata <= x"0000000" & "00" & Mac_Cmp_Int & Mac_Cmp_On;
+					when others =>
+						t_readdata <= (others => '0');
+				end case;
 			end if;
 
 		END IF;
