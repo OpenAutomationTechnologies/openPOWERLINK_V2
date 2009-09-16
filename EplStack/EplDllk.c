@@ -633,7 +633,7 @@ tEplNmtState    NmtState;
                 {
                     // signal update of IdentRes and StatusRes on SoA
                     EplDllkInstance_g.m_bUpdateTxFrame = EPL_DLLK_UPDATE_BOTH;
-
+/*
                     // update PRes (necessary if coming from Stopped)
                     Ret = EplDllkUpdateFramePres(&EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_PRES],
                                                  pNmtStateChange->m_NewNmtState);
@@ -641,7 +641,7 @@ tEplNmtState    NmtState;
                     {
                         goto Exit;
                     }
-
+*/
                     // enable PRes (necessary if coming from Stopped)
 #if (EDRV_AUTO_RESPONSE != FALSE)
                     // enable corresponding Rx filter
