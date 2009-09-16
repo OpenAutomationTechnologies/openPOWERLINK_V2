@@ -134,9 +134,9 @@ tEplTimeruInstance EplTimeruInstance_g;
 // local function prototypes
 //---------------------------------------------------------------------------
 
-static INLINE_FUNCTION void  EplTimeruEnterCriticalSection (int nType_p);
-static INLINE_FUNCTION void  EplTimeruLeaveCriticalSection (int nType_p);
-static INLINE_FUNCTION DWORD EplTimeruGetTickCountMs (void);
+static void  EplTimeruEnterCriticalSection (int nType_p);
+static void  EplTimeruLeaveCriticalSection (int nType_p);
+static DWORD EplTimeruGetTickCountMs (void);
 
 #if (TARGET_SYSTEM == _WIN32_)
 static DWORD PUBLIC EplTimeruProcessThread (LPVOID lpParameter);
@@ -617,7 +617,7 @@ unsigned int PUBLIC EplTimeruGetMinFreeEntries(void)
 //  EplTimeruGetTickCountMs
 //---------------------------------------------------------------------------
 
-static INLINE_FUNCTION DWORD EplTimeruGetTickCountMs (void)
+static DWORD EplTimeruGetTickCountMs (void)
 {
 DWORD	TickCountMs;
 
@@ -635,7 +635,7 @@ DWORD	TickCountMs;
 //  EplTimeruEnterCriticalSection
 //---------------------------------------------------------------------------
 
-static INLINE_FUNCTION void EplTimeruEnterCriticalSection (int nType_p)
+static void EplTimeruEnterCriticalSection (int nType_p)
 {
 #if (TARGET_SYSTEM == _NO_OS_)
     #if EPL_USE_SHAREDBUFF == FALSE
@@ -651,7 +651,7 @@ static INLINE_FUNCTION void EplTimeruEnterCriticalSection (int nType_p)
 //  EplTimeruLeaveCriticalSection
 //---------------------------------------------------------------------------
 
-static INLINE_FUNCTION void EplTimeruLeaveCriticalSection (int nType_p)
+static void EplTimeruLeaveCriticalSection (int nType_p)
 {
 #if (TARGET_SYSTEM == _NO_OS_)
     #if EPL_USE_SHAREDBUFF == FALSE
