@@ -119,7 +119,7 @@ typedef struct _tEplDllkNodeInfo tEplDllkNodeInfo;
 
 
 // callback function for frame processing
-typedef tEplKernel (PUBLIC* tEplDllkCbProcessFrame) (tEplFrameInfo * pFrameInfo_p);
+typedef tEplKernel (PUBLIC* tEplDllkCbProcessRpdo) (tEplFrameInfo * pFrameInfo_p);
 
 typedef tEplKernel (PUBLIC* tEplDllkCbProcessTpdo) (tEplFrameInfo * pFrameInfo_p, BOOL fReadyFlag_p);
 
@@ -151,6 +151,12 @@ tEplKernel EplDllkDeregAsyncHandler(tEplDllkCbAsync pfnDllkCbAsync_p);
 
 // register C_DLL_MULTICAST_ASND in ethernet driver if any AsndServiceId is registered
 tEplKernel EplDllkSetAsndServiceIdFilter(tEplDllAsndServiceId ServiceId_p, tEplDllAsndFilter Filter_p);
+
+// registers handler for RPDOs frames
+tEplKernel EplDllkRegRpdoHandler(tEplDllkCbProcessRpdo pfnDllkCbProcessRpdo_p);
+
+// registers handler for TPDOs frames
+tEplKernel EplDllkRegTpdoHandler(tEplDllkCbProcessTpdo pfnDllkCbProcessTpdo_p);
 
 
 #if EPL_NMT_MAX_NODE_ID > 0

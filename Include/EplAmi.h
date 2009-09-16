@@ -126,6 +126,18 @@
             #include "../EplStack/amibe.c"
         #endif
     #endif
+/*
+#elif (TARGET_SYSTEM == _NO_OS_)
+    #if defined(__NIOS2__)   // it is like an ARM
+        #if defined(INLINE_FUNCTION_DEF)
+            #undef  INLINE_FUNCTION
+            #define INLINE_FUNCTION     INLINE_FUNCTION_DEF
+            #define INLINE_ENABLED      TRUE
+            #define EPL_AMI_INLINED
+            #include "../EplStack/amiarm.c"
+        #endif
+    #endif
+*/
 #endif
 
 //---------------------------------------------------------------------------
