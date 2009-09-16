@@ -59,7 +59,8 @@
                 $State$
 
                 Build Environment:
-                KEIL uVision 2
+                    Altera Nios2 GCC V3.4.6
+                    Microsoft Visual C 2005/2008
 
   -------------------------------------------------------------------------
 
