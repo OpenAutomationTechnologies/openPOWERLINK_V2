@@ -76,7 +76,7 @@ typedef  void  (*tSigHndlrJobReady) (tShbInstance pShbInstance_p, unsigned int f
         #include "ShbIpc-Win32.c"
     #endif
 
-#elif (TARGET_SYSTEM == _LINUX_)
+#elif (TARGET_SYSTEM == _LINUX_) && defined(__KERNEL__)
     #if defined(INLINE_FUNCTION_DEF)
         #undef  INLINE_FUNCTION
         #define INLINE_FUNCTION     INLINE_FUNCTION_DEF
@@ -84,6 +84,16 @@ typedef  void  (*tSigHndlrJobReady) (tShbInstance pShbInstance_p, unsigned int f
         #define SHBIPC_INLINED
         #include "ShbIpc-LinuxKernel.c"
     #endif
+
+#elif (TARGET_SYSTEM == _NO_OS_)
+    #if defined(INLINE_FUNCTION_DEF)
+        #undef  INLINE_FUNCTION
+        #define INLINE_FUNCTION     INLINE_FUNCTION_DEF
+        #define SHBIPC_INLINE_ENABLED      TRUE
+        #define SHBIPC_INLINED
+        #include "ShbIpc-NoOS.c"
+    #endif
+
 #endif
 
 

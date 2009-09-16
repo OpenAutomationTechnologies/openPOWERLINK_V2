@@ -212,6 +212,10 @@ tShbMemHeader*  pShbMemHeader;
     return (pShbMemHeader);
 }
 
+static tShbError        ShbIpcProcessNewData (void);
+static tShbError        ShbIpcProcessJobReady (void);
+
+
 #endif
 
 //---------------------------------------------------------------------------
@@ -222,23 +226,25 @@ tShbMemHeader*  pShbMemHeader;
 
 struct sShbMemTable*    psMemTableElementFirst_g;
 
-static tShbMemInst*     pProcessListNewDataFirst_g;
-static tShbMemInst**    ppProcessListNewDataCurrent_g;
-static tShbMemInst*     pProcessListJobReadyFirst_g;
-static tShbMemInst**    ppProcessListJobReadyCurrent_g;
+tShbMemInst*     pShbIpcProcessListNewDataFirst_g;
+tShbMemInst**    ppShbIpcProcessListNewDataCurrent_g;
+tShbMemInst*     pShbIpcProcessListJobReadyFirst_g;
+tShbMemInst**    ppShbIpcProcessListJobReadyCurrent_g;
 
-
-static tShbError        ShbIpcProcessNewData (void);
-static tShbError        ShbIpcProcessJobReady (void);
 
 static int              ShbIpcFindListElement       (int iBufferId, struct sShbMemTable **ppsReturnMemTableElement);
 static void             ShbIpcAppendListElement     (struct sShbMemTable *sNewMemTableElement);
 static void             ShbIpcDeleteListElement     (int iBufferId);
 
-#ifndef CONFIG_CRC32
 static void             ShbIpcCrc32GenTable         (unsigned long aulCrcTable[256]);
 static unsigned long    ShbIpcCrc32GetCrc           (const char *pcString, unsigned long aulCrcTable[256]);
-#endif
+
+#else
+
+extern tShbMemInst*     pShbIpcProcessListNewDataFirst_g;
+extern tShbMemInst**    ppShbIpcProcessListNewDataCurrent_g;
+extern tShbMemInst*     pShbIpcProcessListJobReadyFirst_g;
+extern tShbMemInst**    ppShbIpcProcessListJobReadyCurrent_g;
 
 #endif
 
@@ -259,10 +265,10 @@ static unsigned long    ShbIpcCrc32GetCrc           (const char *pcString, unsig
 tShbError  ShbIpcInit (void)
 {
     psMemTableElementFirst_g       = NULL;
-    pProcessListNewDataFirst_g     = NULL;
-    ppProcessListNewDataCurrent_g  = NULL;
-    pProcessListJobReadyFirst_g    = NULL;
-    ppProcessListJobReadyCurrent_g = NULL;
+    pShbIpcProcessListNewDataFirst_g     = NULL;
+    ppShbIpcProcessListNewDataCurrent_g  = NULL;
+    pShbIpcProcessListJobReadyFirst_g    = NULL;
+    ppShbIpcProcessListJobReadyCurrent_g = NULL;
 
     return (kShbOk);
 }
@@ -299,6 +305,7 @@ tShbInstance            pShbInstance;
 unsigned int            fShMemNewCreated=FALSE;
 void                    *pSharedMem=NULL;
 struct sShbMemTable     *psMemTableElement;
+unsigned long           aulCrcTable[256];
 
     DEBUG_LVL_29_TRACE0("ShbIpcAllocBuffer \n");
     if (ShbTgtIsInterruptContext())
@@ -310,15 +317,8 @@ struct sShbMemTable     *psMemTableElement;
     ulShMemSize      = ulBufferSize_p + sizeof(tShbMemHeader);
 
     //create Buffer ID
-#ifndef CONFIG_CRC32
-    {
-        unsigned long           aulCrcTable[256];
-        ShbIpcCrc32GenTable(aulCrcTable);
-        ulCrc32 = ShbIpcCrc32GetCrc(pszBufferID_p, aulCrcTable);
-    }
-#else
-    ulCrc32 = crc32(0xFFFFFFFF, pszBufferID_p, strlen(pszBufferID_p));
-#endif
+    ShbIpcCrc32GenTable(aulCrcTable);
+    ulCrc32 = ShbIpcCrc32GetCrc(pszBufferID_p, aulCrcTable);
 
     iBufferId=ulCrc32;
     DEBUG_LVL_29_TRACE2("ShbIpcAllocBuffer BufferSize:%d sizeof(tShb..):%d\n",ulBufferSize_p,sizeof(tShbMemHeader));
@@ -445,7 +445,7 @@ tShbError       ShbError;
     ShbIpcStopSignalingNewData (pShbInstance_p);
 
     // remove ShbMemInst from JobReady process list if signaling
-    ppShbMemInst = &pProcessListJobReadyFirst_g;
+    ppShbMemInst = &pShbIpcProcessListJobReadyFirst_g;
     while (*ppShbMemInst != NULL)
     {
         if (*ppShbMemInst == pShbMemInst)
@@ -460,9 +460,9 @@ tShbError       ShbError;
             {
                 *ppShbMemInst = pShbMemInst->m_pProcessListJobReadyNext;
             }
-            if (ppProcessListJobReadyCurrent_g == &pShbMemInst->m_pProcessListJobReadyNext)
+            if (ppShbIpcProcessListJobReadyCurrent_g == &pShbMemInst->m_pProcessListJobReadyNext)
             {
-                ppProcessListJobReadyCurrent_g = ppShbMemInst;
+                ppShbIpcProcessListJobReadyCurrent_g = ppShbMemInst;
             }
             break;
         }
@@ -601,7 +601,7 @@ tShbError       ShbError;
 
     // insert ShbMemInst into NewData process list
     // higher priority entries first
-    ppShbMemInst = &pProcessListNewDataFirst_g;
+    ppShbMemInst = &pShbIpcProcessListNewDataFirst_g;
     while (*ppShbMemInst != NULL)
     {
         if ((*ppShbMemInst)->m_PriorityNewData < pShbMemInst->m_PriorityNewData)
@@ -651,7 +651,7 @@ tShbError       ShbError;
     {   // signal handler was set before
         // remove pShbMemInst from NewData process list
         ShbError = kShbInvalidSigHndlr;
-        ppShbMemInst = &pProcessListNewDataFirst_g;
+        ppShbMemInst = &pShbIpcProcessListNewDataFirst_g;
         while (*ppShbMemInst != NULL)
         {
             if (*ppShbMemInst == pShbMemInst)
@@ -660,9 +660,9 @@ tShbError       ShbError;
                 pShbMemInst->m_pProcessListNewDataNext = NULL;
                 pShbMemInst->m_pfnSigHndlrNewData = NULL;
 
-                if (ppProcessListNewDataCurrent_g == &pShbMemInst->m_pProcessListNewDataNext)
+                if (ppShbIpcProcessListNewDataCurrent_g == &pShbMemInst->m_pProcessListNewDataNext)
                 {
-                    ppProcessListNewDataCurrent_g = ppShbMemInst;
+                    ppShbIpcProcessListNewDataCurrent_g = ppShbMemInst;
                 }
 
                 ShbError = kShbOk;
@@ -736,7 +736,7 @@ tShbError       ShbError;
 
     // insert ShbMemInst at the end of JobReady list
     // thus other operations on the list are not disturbed
-    ppShbMemInst = &pProcessListJobReadyFirst_g;
+    ppShbMemInst = &pShbIpcProcessListJobReadyFirst_g;
     while (*ppShbMemInst != NULL)
     {
         ppShbMemInst = &(*ppShbMemInst)->m_pProcessListJobReadyNext;
@@ -814,8 +814,8 @@ void*  pShbShMemPtr;
 //                                                                         //
 //=========================================================================//
 
-#if !defined(SHBIPC_INLINE_ENABLED)
 
+#if (!defined(SHBIPC_INLINED)) || defined(SHBIPC_INLINE_ENABLED)
 
 //---------------------------------------------------------------------------
 //  Process function for NewData signaling
@@ -832,13 +832,13 @@ tShbPriority        Priority = kShbPriorityLow;
 BOOL                fEndOfProcessList = FALSE;
 tShbError           ShbError = kShbOk;
 
-    ppProcessListNewDataCurrent_g = &pProcessListNewDataFirst_g;
+    ppShbIpcProcessListNewDataCurrent_g = &pShbIpcProcessListNewDataFirst_g;
 
     while (fEndOfProcessList == FALSE)
     {
         pfnSigHndlrNewData = NULL;
 
-        pShbMemInst = *ppProcessListNewDataCurrent_g;
+        pShbMemInst = *ppShbIpcProcessListNewDataCurrent_g;
         if (pShbMemInst == NULL)
         {
             fEndOfProcessList = TRUE;
@@ -856,7 +856,7 @@ tShbError           ShbError = kShbOk;
                 pShbMemHeader->m_fNewData = FALSE;
             }
 
-            ppProcessListNewDataCurrent_g = &pShbMemInst->m_pProcessListNewDataNext;
+            ppShbIpcProcessListNewDataCurrent_g = &pShbMemInst->m_pProcessListNewDataNext;
         }
 
         if (pfnSigHndlrNewData != NULL)
@@ -875,7 +875,7 @@ tShbError           ShbError = kShbOk;
             }
         }
     }
-    ppProcessListNewDataCurrent_g = NULL;
+    ppShbIpcProcessListNewDataCurrent_g = NULL;
 
     return ShbError;
 }
@@ -898,13 +898,13 @@ BOOL                fJobReady;
 BOOL                fEndOfProcessList = FALSE;
 tShbError           ShbError = kShbOk;
 
-    ppProcessListJobReadyCurrent_g = &pProcessListJobReadyFirst_g;
+    ppShbIpcProcessListJobReadyCurrent_g = &pShbIpcProcessListJobReadyFirst_g;
 
     while (fEndOfProcessList == FALSE)
     {
         pfnSigHndlrJobReady = NULL;
 
-        pShbMemInst = *ppProcessListJobReadyCurrent_g;
+        pShbMemInst = *ppShbIpcProcessListJobReadyCurrent_g;
         if (pShbMemInst == NULL)
         {
             fEndOfProcessList = TRUE;
@@ -927,19 +927,19 @@ tShbError           ShbError = kShbOk;
                 if (pShbMemInst->m_pProcessListJobReadyNext == NULL)
                 {
                     ShbIpcEnterAtomicSection(NULL);
-                    *ppProcessListJobReadyCurrent_g = pShbMemInst->m_pProcessListJobReadyNext;
+                    *ppShbIpcProcessListJobReadyCurrent_g = pShbMemInst->m_pProcessListJobReadyNext;
                     ShbIpcLeaveAtomicSection(NULL);
                 }
                 else
                 {
-                    *ppProcessListJobReadyCurrent_g = pShbMemInst->m_pProcessListJobReadyNext;
+                    *ppShbIpcProcessListJobReadyCurrent_g = pShbMemInst->m_pProcessListJobReadyNext;
                 }
                 pShbMemInst->m_pProcessListJobReadyNext = NULL;
                 pShbMemInst->m_pfnSigHndlrJobReady      = NULL;
             }
             else
             {
-                ppProcessListJobReadyCurrent_g = &pShbMemInst->m_pProcessListJobReadyNext;
+                ppShbIpcProcessListJobReadyCurrent_g = &pShbMemInst->m_pProcessListJobReadyNext;
             }
         }
 
@@ -948,14 +948,16 @@ tShbError           ShbError = kShbOk;
             pfnSigHndlrJobReady(pShbInstance, fJobReady);
         }
     }
-    ppProcessListJobReadyCurrent_g = NULL;
+    ppShbIpcProcessListJobReadyCurrent_g = NULL;
 
     return ShbError;
 }
 
+#endif
 
 
-#ifndef CONFIG_CRC32
+#if !defined(SHBIPC_INLINE_ENABLED)
+
 //Build the crc table
 static void ShbIpcCrc32GenTable(unsigned long aulCrcTable[256])
 {
@@ -995,7 +997,6 @@ static unsigned long ShbIpcCrc32GetCrc(const char *pcString,unsigned long aulCrc
     return( ulCrc^0xFFFFFFFF );
 
 }
-#endif
 
 static void ShbIpcAppendListElement (struct sShbMemTable *psNewMemTableElement)
 {
