@@ -264,3 +264,104 @@ Fellow worker:    Daniel Krüger (d.k.)
                       under Linux 2.6.22.
                     (d.k.)
 
+03.08.2009 V1.6     - EplDllk.c: only accept LossOfFrameTolerance (object 0x1C14) in non NMT reset states,
+                      because all other values are only valid on reset
+                    (d.k.)
+
+04.08.2009 V1.6     - changed semantic of EplDlluCalAsyncSend(): size includes Ethernet header now.
+                      The function is now compatible to EplDllkCalAsyncSend().
+                      This fixes wrong size of NMT commands and requests (were 14 bytes too large).
+                    (d.k.)
+
+05.08.2009 V1.6     - moved Virtual Ethernet driver from kernel part to user part:
+                      * moved initialization from DLLk module to EPL API layer
+                      * implemented setting of IP address and default gateway for virtual
+                        Ethernet interface.
+                    - Api_CN/objdict.h: made object 0x1F8F NMT_MNNodeExpState_AU8
+                      read-only according to spec
+                    (d.k.)
+
+07.08.2009 V1.6     - event queues: added error event post if sink does not exist
+                    - event processing: return error if event not handled
+                    - small corrections to NMT state machine to comply to spec
+                    - separated sync callback function into process and SoC,
+            		  this implies the updates of all demo projects
+            		  (i.e. use new CbSyncProcess for former CbSync)
+                    (d.k.)
+
+11.08.2009 V1.6     - changed the DLL module for the up-coming support of Ethernet controllers with auto-response feature,
+                      i.e. switched to event triggered update of IdentRes, StatusRes and PRes
+                      (they are not updated right before transmission anymore, but updated
+                      when their content has changed)
+                      and separated configuration of PReq/PRes payload limits and timeout from
+                      EplDllkAddNode().
+                    (d.k.)
+
+12.08.2009 V1.6     - timer modules: fixed pointer to unsigned long conversion and vice versa of user-specific timer argument.
+                      This will be bad on 64-bit CPUs where unsigned long has only 32 bit.
+                      Now it is a union.
+                    - improved debug messages in demo project for EdrvPcap under Windows.
+                    - switched definition of PRINTF under Windows from trace (debug output window)
+                      to standard printf, if _CONSOLE is defined (i.e. console project with main function
+                      instead of WinMain).
+                    (d.k.)
+
+14.08.2009 V1.6     - added Ethernet driver and demo project for OpenMAC with Altera Nios2 CPU as CN
+                      (including the Quartus II project for the EBV DBC3C40 board).
+                      The OpenMAC is an Ethernet controller written in VHDL with auto-response feature
+                    (d.k.)
+
+21.08.2009 V1.6     - export functions of EPL API Layer if compiled as Windows DLL (bug 2841082)
+                    - define the DLL export modifier if the project is compiled as DLL in
+                      Visual Studio (bug 2841086)
+                    (d.k.)
+
+01.09.2009 V1.6     - add "Ms" to Timeout variables in SharedBuffer and ShbIpc* implementation to
+                      clearly state the unit.
+                    - fixed ShbIpc-LinuxKernel implementation: job-ready timeout is now treated in unit of 1 ms.
+                    - add "Ms" to Timeout variables in SharedBuffer and ShbIpc* implementation to
+                      clearly state the unit.
+                    (d.k.)
+
+02.09.2009 V1.6     - Eventk.c and SharedBuff implementation: fixed case of enum constant kShbPriorityHigh
+                    - Added new ShbIpc implementation for use without any operating system (ShbIpc-NoOS.c)
+                    - Added target specific functions for ShbIpc-NoOS.c for the Altera Nios2 CPU
+                    (m.u.)
+
+02.09.2009 V1.6     - New feature: implemented support in DLL for Ethernet drivers/controllers with auto-response
+                      feature.
+                    - memory leak fixed in Ethernet drivers for Pcap and RTL8139 chip, when releasing TxBuffers.
+                      The real cause of this memory leak was in DLL module because it NULLified the m_pbBuffer pointer
+                      in the TxBuffer structure before calling EdrvReleaseTxBuffer.
+                    (d.k.)
+
+04.09.2009 V1.6     - Added EplTimeru implementation for use without any operating system and with Windows (EplTimeruGeneric.c).
+                      Now we have a proper functioning implementation of the low-res timers for Windows with PCap driver.
+                    (m.u.)
+
+08.09.2009 V1.6     - optimized PDO processing. It is several times faster that the old version.
+                      All projects need the new module EplPdouCal.c and the module EplPdou.c now.
+                      This implies adding EPL_MODULE_PDOU to the definition of EPL_MODULE_INTEGRATION in EplCfg.h.
+                    (d.k.)
+
+14.09.2009 V1.6     - fixed bug in boot step 1 of MN, where IdentRequest was issued twice (once by NMT Reset Node Sent event
+                      and once by EplNmtMnuStartBootStep1)
+                    (d.k.)
+
+15.09.2009 V1.6     - implemented PRes filtering in DLL and PDOk module.
+                    (d.k.)
+
+16.09.2009 V1.6     - renamed EPL_NO_FIFO to EPL_USE_SHAREDBUFF
+                    - LED module: inserted init state for status LED to force the status LED to off on NMT state initialization
+                    - implemented new macro EPL_EVENT_USE_KERNEL_QUEUE for disabling
+                      the kernel part event queue and directly processing kernel part events within interrupt lock
+                    - cleaned-up default object dictionary: replaced magic constants
+                      of object type and access rights with corresponding enum constants
+                    (d.k.)
+
+16.09.2009 V1.6     - implemented TimerHighResk for OpenMac (compare unit)
+                    (m.u.)
+
+17.09.2009 V1.6     - code clean-up: removed unnecessary code and comments, restructured some functions
+                    (d.k.)
+
