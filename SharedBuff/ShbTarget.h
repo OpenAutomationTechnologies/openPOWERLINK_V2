@@ -88,7 +88,7 @@
 // function prototypes
 //---------------------------------------------------------------------------
 
-void  PUBLIC  ShbTgtTimerInit(void);
+//void  PUBLIC  ShbTgtTimerInit(void);
 DWORD PUBLIC  ShbTgtGetTickCountMs(void);
 
 void  PUBLIC  ShbTgtEnableGlobalInterrupt(BYTE fEnable_p);
