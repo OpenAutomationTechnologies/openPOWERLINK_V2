@@ -153,6 +153,7 @@
     #endif
 
     #if EPL_USE_SHAREDBUFF != FALSE
+        #define EplTgtGetTickCountMs        ShbTgtGetTickCountMs
         #define EplTgtEnableGlobalInterrupt ShbTgtEnableGlobalInterrupt
     #endif
 
@@ -217,13 +218,14 @@
 // currently no Timer functions are needed by EPL stack
 // so they are not implemented yet
 //void  PUBLIC EplTgtTimerInit(void);
-DWORD PUBLIC EplTgtGetTickCountMs(void);
 //void PUBLIC TgtGetNetTime(tEplNetTime * pNetTime_p);
+
+DWORD PUBLIC EplTgtGetTickCountMs(void);
+void PUBLIC EplTgtEnableGlobalInterrupt(BYTE fEnable_p);
 
 // functions for ethernet driver
 tEplKernel PUBLIC TgtInitEthIsr(void);
 void PUBLIC TgtFreeEthIsr(void);
-void PUBLIC EplTgtEnableGlobalInterrupt(BYTE fEnable_p);
 void PUBLIC TgtEnableEthInterrupt0(BYTE fEnable_p, unsigned int uiInterruptMask_p);
 void PUBLIC TgtEnableEthInterrupt1(BYTE fEnable_p, unsigned int uiInterruptMask_p);
 

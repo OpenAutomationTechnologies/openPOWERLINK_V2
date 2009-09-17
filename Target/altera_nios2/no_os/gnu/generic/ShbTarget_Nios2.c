@@ -69,6 +69,7 @@
 
 #include "global.h"
 #include "sys/alt_irq.h"
+#include "sys/alt_alarm.h"
 
 
 
@@ -94,7 +95,6 @@
 // local vars
 //---------------------------------------------------------------------------
 
-static DWORD TimerValue_l;
 
 //---------------------------------------------------------------------------
 // local function prototypes
@@ -125,12 +125,12 @@ static DWORD TimerValue_l;
 // State:        
 //
 //---------------------------------------------------------------------------
-
+/*
 void PUBLIC ShbTgtTimerInit(void)
 {
     TimerValue_l = 0; // init tick count
 }
-
+*/
 
 
 //---------------------------------------------------------------------------
@@ -152,7 +152,11 @@ void PUBLIC ShbTgtTimerInit(void)
 
 DWORD PUBLIC ShbTgtGetTickCountMs(void)
 {
-    return (TimerValue_l);
+DWORD dwTicks;
+
+    dwTicks = alt_nticks();
+
+    return dwTicks;
 }
 
 
