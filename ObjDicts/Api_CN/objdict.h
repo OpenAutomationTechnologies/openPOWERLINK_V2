@@ -302,7 +302,7 @@ EPL_OBD_BEGIN ()
 
 #if EPL_NMT_MAX_NODE_ID > 0
         // Object 1F81h: NMT_NodeAssignment_AU32
-        EPL_OBD_RAM_INDEX_RAM_ARRAY(0x1F81, 254, NULL, kEplObdTypUInt32, kEplObdAccRW, tEplObdUnsigned32, NMT_NodeAssignment_AU32, 0)
+        EPL_OBD_RAM_INDEX_RAM_ARRAY(0x1F81, EPL_NMT_MAX_NODE_ID, NULL, kEplObdTypUInt32, kEplObdAccRW, tEplObdUnsigned32, NMT_NodeAssignment_AU32, 0)
 #endif
 
         // Object 1F82h: NMT_FeatureFlags_U32
@@ -347,7 +347,7 @@ EPL_OBD_BEGIN ()
 
 #if EPL_NMT_MAX_NODE_ID > 0
         // Object 1F8Dh: NMT_PResPayloadLimitList_AU16
-        EPL_OBD_RAM_INDEX_RAM_ARRAY(0x1F8D, 254, NULL, kEplObdTypUInt16, kEplObdAccRW, tEplObdUnsigned16, NMT_PResPayloadLimitList_AU16, 36)
+        EPL_OBD_RAM_INDEX_RAM_ARRAY(0x1F8D, EPL_NMT_MAX_NODE_ID, NULL, kEplObdTypUInt16, kEplObdAccRW, tEplObdUnsigned16, NMT_PResPayloadLimitList_AU16, 36)
 #endif
 
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
