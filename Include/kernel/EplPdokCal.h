@@ -94,12 +94,6 @@ tEplKernel EplPdokCalAddInstance(void);
 
 tEplKernel EplPdokCalDelInstance(void);
 
-// sets flag for validity of TPDOs in shared memory
-tEplKernel EplPdokCalSetTpdosValid(BOOL fValid_p);
-
-// gets flag for validity of TPDOs from shared memory
-tEplKernel EplPdokCalAreTpdosValid(BOOL * pfValid_p);
-
 tEplKernel EplPdokCalProcess(tEplEvent * pEvent_p);
 
 

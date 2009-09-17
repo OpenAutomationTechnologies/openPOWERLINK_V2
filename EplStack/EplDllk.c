@@ -75,10 +75,6 @@
 #include "edrv.h"
 #include "Benchmark.h"
 
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOK)) != 0)
-#include "kernel/EplPdok.h"
-#endif
-
 //#if EPL_TIMER_USE_HIGHRES != FALSE
 #include "kernel/EplTimerHighResk.h"
 //#endif
@@ -244,6 +240,8 @@ typedef struct
     tEplDllConfigParam  m_DllConfigParam;
     tEplDllIdentParam   m_DllIdentParam;
     tEplDllState        m_DllState;
+    tEplDllkCbProcessRpdo   m_pfnCbProcessRpdo;
+    tEplDllkCbProcessTpdo   m_pfnCbProcessTpdo;
     tEplDllkCbAsync     m_pfnCbAsync;
     tEplDllAsndFilter   m_aAsndFilter[EPL_DLL_MAX_ASND_SERVICE_ID];
 
@@ -308,6 +306,12 @@ static void EplDllkCbFrameReceived(tEdrvRxBuffer * pRxBuffer_p);
 
 // called from EdrvInterruptHandler()
 static void EplDllkCbFrameTransmitted(tEdrvTxBuffer * pTxBuffer_p);
+
+// forward RPDO to callback function
+static tEplKernel EplDllkForwardRpdo(tEplFrameInfo * pFrameInfo_p);
+
+// forward TPDO to callback function
+static tEplKernel EplDllkProcessTpdo(tEplFrameInfo * pFrameInfo_p, BOOL fReadyFlag_p);
 
 // update IdentRes frame
 static tEplKernel EplDllkUpdateFrameIdentRes(tEdrvTxBuffer* pTxBuffer_p, tEplNmtState NmtState_p);
@@ -954,6 +958,7 @@ tEplKernel  Ret = kEplSuccessful;
     return Ret;
 }
 
+
 //---------------------------------------------------------------------------
 //
 // Function:    EplDllkDeregAsyncHandler
@@ -985,6 +990,59 @@ tEplKernel  Ret = kEplSuccessful;
 
     return Ret;
 }
+
+
+//---------------------------------------------------------------------------
+//
+// Function:    EplDllkRegRpdoHandler
+//
+// Description: registers handler for RPDOs (used by PDO module)
+//
+// Parameters:  pfnDllkCbProcessRpdo_p  = pointer to callback function,
+//                                        which will be called in interrupt context.
+//
+// Returns:     tEplKernel              = error code
+//
+//
+// State:
+//
+//---------------------------------------------------------------------------
+
+tEplKernel EplDllkRegRpdoHandler(tEplDllkCbProcessRpdo pfnDllkCbProcessRpdo_p)
+{
+tEplKernel  Ret = kEplSuccessful;
+
+    EplDllkInstance_g.m_pfnCbProcessRpdo = pfnDllkCbProcessRpdo_p;
+
+    return Ret;
+}
+
+
+//---------------------------------------------------------------------------
+//
+// Function:    EplDllkRegTpdoHandler
+//
+// Description: registers handler for TPDOs (used by PDO module)
+//
+// Parameters:  pfnDllkCbProcessTpdo_p  = pointer to callback function,
+//                                        which will be called in context of kernel part event queue.
+//
+// Returns:     tEplKernel              = error code
+//
+//
+// State:
+//
+//---------------------------------------------------------------------------
+
+tEplKernel EplDllkRegTpdoHandler(tEplDllkCbProcessTpdo pfnDllkCbProcessTpdo_p)
+{
+tEplKernel  Ret = kEplSuccessful;
+
+    EplDllkInstance_g.m_pfnCbProcessTpdo = pfnDllkCbProcessTpdo_p;
+
+    return Ret;
+}
+
 
 //---------------------------------------------------------------------------
 //
@@ -1996,12 +2054,9 @@ static tEplKernel EplDllkProcessNmtEvent(tEplEvent * pEvent_p)
 tEplKernel      Ret = kEplSuccessful;
 tEplFrame      *pTxFrame;
 tEdrvTxBuffer  *pTxBuffer;
-//unsigned int    uiHandle;
 tEplNmtState    NmtState;
 tEplNmtEvent*   pNmtEvent;
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOK)) != 0)
 tEplFrameInfo   FrameInfo;
-#endif
 
     pNmtEvent = (tEplNmtEvent*) pEvent_p->m_pArg;
 
@@ -2018,6 +2073,8 @@ tEplFrameInfo   FrameInfo;
             {   // cyclic state is active, so preprocessing is necessary
 
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
+            BOOL    fReadyFlag;
+
                 if (NmtState >= kEplNmtMsNotActive)
                 {   // local node is MN
                 tEplDllkNodeInfo*   pIntNodeInfo;
@@ -2031,24 +2088,28 @@ tEplFrameInfo   FrameInfo;
                         {   // PReq does exist
                             pTxFrame = (tEplFrame *) pTxBuffer->m_pbBuffer;
 
-                            // process TPDO
-                            #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOK)) != 0)
-                            {
-                                FrameInfo.m_pFrame = pTxFrame;
-                                FrameInfo.m_uiFrameSize = pTxBuffer->m_uiTxMsgLen;
-                                Ret = EplPdokCbPdoTransmitted(&FrameInfo);
-                                if (Ret != kEplSuccessful)
-                                {
-                                    goto Exit;
-                                }
-                            }
-                            #endif
-
                             bFlag1 = pIntNodeInfo->m_bSoaFlag1 & EPL_FRAME_FLAG1_EA;
 
+                            // $$$ d.k. set EPL_FRAME_FLAG1_MS if necessary
+                            // update frame (Flag1)
+                            AmiSetByteToLe(&pTxFrame->m_Data.m_Preq.m_le_bFlag1, bFlag1);
+
                             if (NmtState == kEplNmtMsOperational)
-                            {   // leave RD flag untouched
-                                bFlag1 |= AmiGetByteFromLe(&pTxFrame->m_Data.m_Preq.m_le_bFlag1) & EPL_FRAME_FLAG1_RD;
+                            {
+                                fReadyFlag = TRUE;
+                            }
+                            else
+                            {
+                                fReadyFlag = FALSE;
+                            }
+
+                            // process TPDO
+                            FrameInfo.m_pFrame = pTxFrame;
+                            FrameInfo.m_uiFrameSize = pTxBuffer->m_uiTxMsgLen;
+                            Ret = EplDllkProcessTpdo(&FrameInfo, fReadyFlag);
+                            if (Ret != kEplSuccessful)
+                            {
+                                goto Exit;
                             }
 
                             if (pTxBuffer == &EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_PRES])
@@ -2056,10 +2117,6 @@ tEplFrameInfo   FrameInfo;
                                 // update NMT state
                                 AmiSetByteToLe(&pTxFrame->m_Data.m_Pres.m_le_bNmtStatus, (BYTE) NmtState);
                             }
-
-                            // $$$ d.k. set EPL_FRAME_FLAG1_MS if necessary
-                            // update frame (Flag1)
-                            AmiSetByteToLe(&pTxFrame->m_Data.m_Preq.m_le_bFlag1, bFlag1);
 
                         }
 
@@ -2078,17 +2135,13 @@ tEplFrameInfo   FrameInfo;
                         pTxFrame = (tEplFrame *) pTxBuffer->m_pbBuffer;
 
                         // process TPDO
-                        #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOK)) != 0)
+                        FrameInfo.m_pFrame = pTxFrame;
+                        FrameInfo.m_uiFrameSize = pTxBuffer->m_uiTxMsgLen;
+                        Ret = EplDllkProcessTpdo(&FrameInfo, TRUE);
+                        if (Ret != kEplSuccessful)
                         {
-                            FrameInfo.m_pFrame = pTxFrame;
-                            FrameInfo.m_uiFrameSize = pTxBuffer->m_uiTxMsgLen;
-                            Ret = EplPdokCbPdoTransmitted(&FrameInfo);
-                            if (Ret != kEplSuccessful)
-                            {
-                                goto Exit;
-                            }
+                            goto Exit;
                         }
-                        #endif
 
                         Ret = EplDllkUpdateFramePres(pTxBuffer, NmtState);
                         if (Ret != kEplSuccessful)
@@ -3270,7 +3323,7 @@ TGT_DLLK_DECLARE_FLAGS
                     }
 
                     // forward PReq frame as RPDO to PDO module
-                    Ret = EplPdokCbPdoReceived(&FrameInfo);
+                    Ret = EplDllkForwardRpdo(&FrameInfo);
                     if (Ret != kEplSuccessful)
                     {
                         goto Exit;
@@ -3283,7 +3336,7 @@ TGT_DLLK_DECLARE_FLAGS
                     // inform PDO module about PRes after PReq
                     FrameInfo.m_pFrame = (tEplFrame *) pTxBuffer->m_pbBuffer;
                     FrameInfo.m_uiFrameSize = pTxBuffer->m_uiTxMsgLen;
-                    Ret = EplPdokCbPdoTransmitted(&FrameInfo);
+                    Ret = EplDllkProcessTpdo(&FrameInfo, TRUE);
                     if (Ret != kEplSuccessful)
                     {
                         goto Exit;
@@ -3437,7 +3490,7 @@ TGT_DLLK_DECLARE_FLAGS
                     // reset RD flag and all other flags, but that does not matter, because they were processed above
                     AmiSetByteToLe(&pFrame->m_Data.m_Pres.m_le_bFlag1, 0);
                 }
-                Ret = EplPdokCbPdoReceived(&FrameInfo);
+                Ret = EplDllkForwardRpdo(&FrameInfo);
                 if (Ret != kEplSuccessful)
                 {
                     goto Exit;
@@ -3858,12 +3911,6 @@ tEplEvent       Event;
 tEplDllAsyncReqPriority Priority;
 tEplNmtState    NmtState;
 unsigned int    uiHandle;
-/*
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOK)) != 0) \
-    && (EPL_DLL_PRES_READY_AFTER_SOC == FALSE)
-tEplFrameInfo   FrameInfo;
-#endif
-*/
 TGT_DLLK_DECLARE_FLAGS
 
     TGT_DLLK_ENTER_CRITICAL_SECTION();
@@ -3923,18 +3970,6 @@ TGT_DLLK_DECLARE_FLAGS
         case EPL_DLLK_TXFRAME_PRES:
         default:
         {   // PRes resp. PReq frame sent
-
-/*
-            #if ((((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOK)) != 0) \
-                && (EPL_DLL_PRES_READY_AFTER_SOC == FALSE))
-            {
-                // inform PDO module
-                FrameInfo.m_pFrame = (tEplFrame *) pTxBuffer_p->m_pbBuffer;
-                FrameInfo.m_uiFrameSize = pTxBuffer_p->m_uiTxMsgLen;
-                Ret = EplPdokCbPdoTransmitted(&FrameInfo);
-            }
-            #endif
-*/
 
             #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
             {
@@ -4182,6 +4217,66 @@ Exit:
     TGT_DLLK_LEAVE_CRITICAL_SECTION();
 
     return;
+}
+
+
+//---------------------------------------------------------------------------
+//
+// Function:    EplDllkForwardRpdo
+//
+// Description: This function is called by DLL if PRes or PReq frame was
+//              received. It posts the frame to the event queue.
+//              It is called in states NMT_CS_READY_TO_OPERATE and NMT_CS_OPERATIONAL.
+//              The passed PDO needs not to be valid.
+//
+// Parameters:  pFrameInfo_p            = pointer to frame info structure
+//
+// Returns:     tEplKernel              = error code
+//
+//
+// State:
+//
+//---------------------------------------------------------------------------
+
+static tEplKernel EplDllkForwardRpdo(tEplFrameInfo * pFrameInfo_p)
+{
+tEplKernel      Ret = kEplSuccessful;
+
+    if (EplDllkInstance_g.m_pfnCbProcessRpdo != NULL)
+    {
+        Ret = EplDllkInstance_g.m_pfnCbProcessRpdo(pFrameInfo_p);
+    }
+
+    return Ret;
+}
+
+
+//---------------------------------------------------------------------------
+//
+// Function:    EplDllkProcessTpdo
+//
+// Description: This function forward the specified TPDO for processing to
+//              the registered callback function (i.e. to the PDO module).
+//
+// Parameters:  pFrameInfo_p            = pointer to frame info structure
+//
+// Returns:     tEplKernel              = error code
+//
+//
+// State:
+//
+//---------------------------------------------------------------------------
+
+static tEplKernel EplDllkProcessTpdo(tEplFrameInfo * pFrameInfo_p, BOOL fReadyFlag_p)
+{
+tEplKernel      Ret = kEplSuccessful;
+
+    if (EplDllkInstance_g.m_pfnCbProcessTpdo != NULL)
+    {
+        Ret = EplDllkInstance_g.m_pfnCbProcessTpdo(pFrameInfo_p, fReadyFlag_p);
+    }
+
+    return Ret;
 }
 
 

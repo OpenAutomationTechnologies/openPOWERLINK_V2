@@ -411,14 +411,7 @@ tEplEventSource         EventSource;
             if (EplEventkInstance_g.m_pfnCbSyncSoc != NULL)
             {
                 Ret = EplEventkInstance_g.m_pfnCbSyncSoc();
-                if (Ret == kEplSuccessful)
-                {
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOK)) != 0)
-                    // mark TPDOs as valid
-                    Ret = EplPdokCalSetTpdosValid(TRUE);
-#endif
-                }
-                else if ((Ret != kEplReject) && (Ret != kEplShutdown))
+                if ((Ret != kEplSuccessful) && (Ret != kEplReject) && (Ret != kEplShutdown))
                 {
                     EventSource = kEplEventSourceSyncCb;
 
@@ -472,14 +465,7 @@ tEplEventSource         EventSource;
                 if (EplEventkInstance_g.m_pfnCbSyncProcess != NULL)
                 {
                     Ret = EplEventkInstance_g.m_pfnCbSyncProcess();
-                    if (Ret == kEplSuccessful)
-                    {
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOK)) != 0)
-                        // mark TPDOs as valid
-                        Ret = EplPdokCalSetTpdosValid(TRUE);
-#endif
-                    }
-                    else if ((Ret != kEplReject) && (Ret != kEplShutdown))
+                    if ((Ret != kEplSuccessful) && (Ret != kEplReject) && (Ret != kEplShutdown))
                     {
                         EventSource = kEplEventSourceSyncCb;
 
@@ -497,22 +483,6 @@ tEplEventSource         EventSource;
                 if ((Ret != kEplSuccessful) && (Ret != kEplShutdown))
                 {
                     EventSource = kEplEventSourceDllk;
-
-                    // Error event for API layer
-                    EplEventkPostError(kEplEventSourceEventk,
-                                    Ret,
-                                    sizeof(EventSource),
-                                    &EventSource);
-                }
-#endif
-
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOK)) != 0)
-                // forward SoA event to PDO module
-                pEvent_p->m_EventType = kEplEventTypePdoSoa;
-                Ret = EplPdokProcess(pEvent_p);
-                if ((Ret != kEplSuccessful) && (Ret != kEplShutdown))
-                {
-                    EventSource = kEplEventSourcePdok;
 
                     // Error event for API layer
                     EplEventkPostError(kEplEventSourceEventk,
@@ -554,25 +524,6 @@ tEplEventSource         EventSource;
             if ((Ret != kEplSuccessful) && (Ret != kEplShutdown))
             {
                 EventSource = kEplEventSourceDllk;
-
-                // Error event for API layer
-                EplEventkPostError(kEplEventSourceEventk,
-                                Ret,
-                                sizeof(EventSource),
-                                &EventSource);
-            }
-#endif
-            break;
-        }
-
-        // events for PDO module
-        case kEplEventSinkPdok:
-        {
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOK)) != 0)
-            Ret = EplPdokProcess(pEvent_p);
-            if ((Ret != kEplSuccessful) && (Ret != kEplShutdown))
-            {
-                EventSource = kEplEventSourcePdok;
 
                 // Error event for API layer
                 EplEventkPostError(kEplEventSourceEventk,

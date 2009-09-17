@@ -46,7 +46,6 @@ ${MAINPATH}/EplStack/EplErrorHandlerk.c \
 ${MAINPATH}/EplStack/EplApiGeneric.c \
 ${MAINPATH}/ObjDicts/Api_CN/Objdict.c \
 ${MAINPATH}/EplStack/amiarm.c \
-${MAINPATH}/Target/altera_nios2/no_os/gnu/generic/EplTarget_Nios2.c \
 ${MAINPATH}/Target/altera_nios2/no_os/gnu/generic/ShbTarget_Nios2.c \
 ${MAINPATH}/SharedBuff/SharedBuff.c ${MAINPATH}/SharedBuff/ShbIpc-NoOS.c"
 

@@ -119,9 +119,9 @@ typedef struct _tEplDllkNodeInfo tEplDllkNodeInfo;
 
 
 // callback function for frame processing
-typedef tEplKernel (PUBLIC* tEplDllkCbProcessRpdo) (tEplFrameInfo * pFrameInfo_p);
+typedef tEplKernel (* tEplDllkCbProcessRpdo) (tEplFrameInfo * pFrameInfo_p);
 
-typedef tEplKernel (PUBLIC* tEplDllkCbProcessTpdo) (tEplFrameInfo * pFrameInfo_p, BOOL fReadyFlag_p);
+typedef tEplKernel (* tEplDllkCbProcessTpdo) (tEplFrameInfo * pFrameInfo_p, BOOL fReadyFlag_p);
 
 
 //---------------------------------------------------------------------------
@@ -143,7 +143,7 @@ tEplKernel EplDllkSetIdentity(tEplDllIdentParam * pDllIdentParam_p);
 // process internal events and do work that cannot be done in interrupt-context
 tEplKernel EplDllkProcess(tEplEvent * pEvent_p);
 
-// registers handler for non-EPL frames
+// registers handler for non-EPL frames (used by Virtual Ethernet driver)
 tEplKernel EplDllkRegAsyncHandler(tEplDllkCbAsync pfnDllkCbAsync_p);
 
 // deregisters handler for non-EPL frames

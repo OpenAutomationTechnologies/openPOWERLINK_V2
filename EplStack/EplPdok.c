@@ -69,7 +69,6 @@
 ****************************************************************************/
 
 #include "kernel/EplPdok.h"
-#include "kernel/EplPdokCal.h"
 #include "kernel/EplEventk.h"
 #include "EplObd.h"
 #include "kernel/EplDllk.h"
@@ -164,9 +163,9 @@ static tEplPdokInstance  EplPdokInstance_g;
 // local function prototypes
 //---------------------------------------------------------------------------
 
-static tEplKernel EplPdokPdoEncode(tEplFrame* pFrame_p, unsigned int uiFrameSize_p);
+static tEplKernel EplPdokCbProcessTpdo(tEplFrameInfo * pFrameInfo_p, BOOL fReadyFlag_p);
 
-static tEplKernel EplPdokPdoDecode(tEplFrame* pFrame_p, unsigned int uiFrameSize_p);
+static tEplKernel EplPdokPdoEncode(tEplFrame* pFrame_p, unsigned int uiFrameSize_p, BOOL fReadyFlag_p);
 
 static tEplKernel EplPdokCopyVarToPdo(BYTE* pbPayload_p, tEplPdoMappObject* pMappObject_p);
 
@@ -197,9 +196,13 @@ static tEplKernel EplPdokCopyVarFromPdo(BYTE* pbPayload_p, tEplPdoMappObject* pM
 
 tEplKernel EplPdokAddInstance(void)
 {
+tEplKernel      Ret = kEplSuccessful;
+
     EPL_MEMSET(&EplPdokInstance_g, 0, sizeof(EplPdokInstance_g));
 
-    return kEplSuccessful;
+    Ret = EplDllkRegTpdoHandler(EplPdokCbProcessTpdo);
+
+    return Ret;
 }
 
 //---------------------------------------------------------------------------
@@ -248,97 +251,6 @@ tEplKernel EplPdokDelInstance(void)
     }
 
     return kEplSuccessful;
-}
-
-
-//---------------------------------------------------------------------------
-//
-// Function:    EplPdokCbPdoReceived
-//
-// Description: This function is called by DLL if PRes or PReq frame was
-//              received. It posts the frame to the event queue.
-//              It is called in states NMT_CS_READY_TO_OPERATE and NMT_CS_OPERATIONAL.
-//              The passed PDO needs not to be valid.
-//
-// Parameters:  pFrameInfo_p            = pointer to frame info structure
-//
-// Returns:     tEplKernel              = error code
-//
-//
-// State:
-//
-//---------------------------------------------------------------------------
-
-tEplKernel EplPdokCbPdoReceived(tEplFrameInfo * pFrameInfo_p)
-{
-tEplKernel      Ret = kEplSuccessful;
-tEplEvent       Event;
-
-    Event.m_EventSink = kEplEventSinkPdok;
-    Event.m_EventType = kEplEventTypePdoRx;
-    // limit copied data to size of PDO (because from some CNs the frame is larger than necessary)
-    Event.m_uiSize = AmiGetWordFromLe(&pFrameInfo_p->m_pFrame->m_Data.m_Pres.m_le_wSize) + EPL_FRAME_OFFSET_PDO_PAYLOAD; // pFrameInfo_p->m_uiFrameSize;
-    Event.m_pArg = pFrameInfo_p->m_pFrame;
-    Ret = EplEventkPost(&Event);
-
-    return Ret;
-}
-
-//---------------------------------------------------------------------------
-//
-// Function:    EplPdokCbPdoTransmitted
-//
-// Description: This function is called by DLL if PRes or PReq frame was
-//              sent. It posts the pointer to the frame to the event queue.
-//              It is called in NMT_CS_PRE_OPERATIONAL_2,
-//              NMT_CS_READY_TO_OPERATE and NMT_CS_OPERATIONAL.
-//
-// Parameters:  pFrameInfo_p            = pointer to frame info structure
-//
-// Returns:     tEplKernel              = error code
-//
-//
-// State:
-//
-//---------------------------------------------------------------------------
-
-tEplKernel EplPdokCbPdoTransmitted(tEplFrameInfo * pFrameInfo_p)
-{
-tEplKernel      Ret = kEplSuccessful;
-
-    Ret = EplPdokPdoEncode(pFrameInfo_p->m_pFrame, pFrameInfo_p->m_uiFrameSize);
-
-    return Ret;
-}
-
-//---------------------------------------------------------------------------
-//
-// Function:    EplPdokCbSoa
-//
-// Description: This function is called by DLL if SoA frame was
-//              received resp. sent. It posts this event to the event queue.
-//
-// Parameters:  pFrameInfo_p            = pointer to frame info structure
-//
-// Returns:     tEplKernel              = error code
-//
-//
-// State:
-//
-//---------------------------------------------------------------------------
-
-tEplKernel EplPdokCbSoa(tEplFrameInfo * pFrameInfo_p)
-{
-tEplKernel      Ret = kEplSuccessful;
-tEplEvent       Event;
-
-    Event.m_EventSink = kEplEventSinkPdok;
-    Event.m_EventType = kEplEventTypePdoSoa;
-    Event.m_uiSize = 0;
-    Event.m_pArg = NULL;
-    Ret = EplEventkPost(&Event);
-
-    return Ret;
 }
 
 
@@ -584,14 +496,12 @@ Exit:
 
 //---------------------------------------------------------------------------
 //
-// Function:    EplPdokProcess
+// Function:    EplPdokPdoDecode
 //
-// Description: This function processes all received and transmitted PDOs.
-//              This function must not be interrupted by any other task
-//              except ISRs (like the ethernet driver ISR, which may call
-//              EplPdokCbFrameReceived() or EplPdokCbFrameTransmitted()).
+// Description: This function decodes a PDO from the specified frame.
 //
-// Parameters:  pEvent_p                = pointer to event structure
+// Parameters:  pFrame_p                = pointer to frame
+//              uiFrameSize_p           = size of frame
 //
 // Returns:     tEplKernel              = error code
 //
@@ -600,46 +510,120 @@ Exit:
 //
 //---------------------------------------------------------------------------
 
-tEplKernel EplPdokProcess(tEplEvent * pEvent_p)
+tEplKernel EplPdokPdoDecode(tEplFrame* pFrame_p, unsigned int uiFrameSize_p)
 {
-tEplKernel  Ret = kEplSuccessful;
-WORD        wPdoSize;
-tEplFrame*  pFrame;
+tEplKernel          Ret = kEplSuccessful;
+BYTE                bFrameData;
+unsigned int        uiNodeId;
+tEplMsgType         MsgType;
+tEplPdoChannel*     pPdoChannel;
+unsigned int        uiChannelId;
+tEplPdoMappObject*  pMappObject;
+unsigned int        uiMappObjectCount;
 
-    switch (pEvent_p->m_EventType)
-    {
-        case kEplEventTypePdoRx:  // RPDO received
-            pFrame = (tEplFrame *) pEvent_p->m_pArg;
-
-            wPdoSize = AmiGetWordFromLe(&pFrame->m_Data.m_Pres.m_le_wSize);
-
-            Ret = EplPdokPdoDecode(pFrame, wPdoSize + EPL_FRAME_OFFSET_PDO_PAYLOAD);
-
-            break;
-
-        case kEplEventTypePdoSoa: // SoA received
-
-            // invalidate TPDOs
-            Ret = EplPdokCalSetTpdosValid(FALSE);
-            break;
-
-//        case kEplEventTypePdoTx:  // TPDO transmitted
-        default:
-        {
-            ASSERTMSG(FALSE, "EplPdokProcess(): unhandled event type!\n");
-            Ret = kEplInvalidEvent;
-            break;
-        }
+    // check if received RPDO is valid
+    bFrameData = AmiGetByteFromLe(&pFrame_p->m_Data.m_Pres.m_le_bFlag1);
+    if ((bFrameData & EPL_FRAME_FLAG1_RD) == 0)
+    {   // RPDO invalid
+        goto Exit;
     }
 
+    // retrieve EPL message type
+    MsgType = AmiGetByteFromLe(&pFrame_p->m_le_bMessageType);
+    if (MsgType == kEplMsgTypePreq)
+    {   // RPDO is PReq frame
+        uiNodeId = EPL_PDO_PREQ_NODE_ID;  // 0x00
+    }
+    else
+    {   // RPDO is PRes frame
+        // retrieve node ID
+        uiNodeId = AmiGetByteFromLe(&pFrame_p->m_le_bSrcNodeId);
+    }
+
+    // search for appropriate valid RPDO
+    for (uiChannelId = 0, pPdoChannel = &EplPdokInstance_g.m_pRxPdoChannel[0];
+         uiChannelId < EplPdokInstance_g.m_Allocation.m_uiRxPdoChannelCount;
+         uiChannelId++, pPdoChannel++)
+    {
+        if (pPdoChannel->m_uiNodeId != uiNodeId)
+        {
+            continue;
+        }
+
+        // retrieve PDO version from frame
+        bFrameData = AmiGetByteFromLe(&pFrame_p->m_Data.m_Pres.m_le_bPdoVersion);
+        if ((pPdoChannel->m_bMappingVersion & EPL_VERSION_MAIN) != (bFrameData & EPL_VERSION_MAIN))
+        {   // PDO versions do not match
+            // $$$ raise PDO error
+            // termiate processing of this RPDO
+            goto Exit;
+        }
+
+        // valid RPDO found
+
+        if ((unsigned int)(pPdoChannel->m_wPdoSize + EPL_FRAME_OFFSET_PDO_PAYLOAD) > uiFrameSize_p)
+        {   // RPDO is too short
+            // $$$ raise PDO error, set Ret
+            goto Exit;
+        }
+
+        // process mapping
+        for (uiMappObjectCount = pPdoChannel->m_uiMappObjectCount, pMappObject = EplPdokInstance_g.m_paRxObject[uiChannelId];
+             uiMappObjectCount > 0;
+             uiMappObjectCount--, pMappObject++)
+        {
+
+            // copy object from process/OD variable to TPDO
+            Ret = EplPdokCopyVarFromPdo(&pFrame_p->m_Data.m_Pres.m_le_abPayload[0], pMappObject);
+            if (Ret != kEplSuccessful)
+            {   // other fatal error occured
+                goto Exit;
+            }
+
+        }
+
+        // processing finished successfully
+        break;
+    }
+
+Exit:
     return Ret;
 }
+
 
 //=========================================================================//
 //                                                                         //
 //          P R I V A T E   F U N C T I O N S                              //
 //                                                                         //
 //=========================================================================//
+
+//---------------------------------------------------------------------------
+//
+// Function:    EplPdokCbProcessTpdo
+//
+// Description: This function is called by DLL if PRes or PReq need to be encoded.
+//              It is called in NMT_CS_PRE_OPERATIONAL_2,
+//              NMT_CS_READY_TO_OPERATE and NMT_CS_OPERATIONAL.
+//
+// Parameters:  pFrameInfo_p            = pointer to frame info structure
+//              fReadyFlag_p            = state of RD flag which shall be set in TPDO
+//
+// Returns:     tEplKernel              = error code
+//
+//
+// State:
+//
+//---------------------------------------------------------------------------
+
+static tEplKernel EplPdokCbProcessTpdo(tEplFrameInfo * pFrameInfo_p, BOOL fReadyFlag_p)
+{
+tEplKernel      Ret = kEplSuccessful;
+
+    Ret = EplPdokPdoEncode(pFrameInfo_p->m_pFrame, pFrameInfo_p->m_uiFrameSize, fReadyFlag_p);
+
+    return Ret;
+}
+
 
 //---------------------------------------------------------------------------
 //
@@ -657,11 +641,10 @@ tEplFrame*  pFrame;
 //
 //---------------------------------------------------------------------------
 
-static tEplKernel EplPdokPdoEncode(tEplFrame* pFrame_p, unsigned int uiFrameSize_p)
+static tEplKernel EplPdokPdoEncode(tEplFrame* pFrame_p, unsigned int uiFrameSize_p, BOOL fReadyFlag_p)
 {
 tEplKernel          Ret = kEplSuccessful;
-BYTE                bFrameData;
-BOOL                fValid;
+BYTE                bFlag1;
 unsigned int        uiNodeId;
 tEplMsgType         MsgType;
 tEplPdoChannel*     pPdoChannel;
@@ -670,8 +653,8 @@ tEplPdoMappObject*  pMappObject;
 unsigned int        uiMappObjectCount;
 
     // set TPDO invalid, so that only fully processed TPDOs are sent as valid
-    bFrameData = AmiGetByteFromLe(&pFrame_p->m_Data.m_Pres.m_le_bFlag1);
-    AmiSetByteToLe(&pFrame_p->m_Data.m_Pres.m_le_bFlag1, (bFrameData & ~EPL_FRAME_FLAG1_RD));
+    bFlag1 = AmiGetByteFromLe(&pFrame_p->m_Data.m_Pres.m_le_bFlag1);
+    AmiSetByteToLe(&pFrame_p->m_Data.m_Pres.m_le_bFlag1, (bFlag1 & ~EPL_FRAME_FLAG1_RD));
 
     // retrieve EPL message type
     MsgType = AmiGetByteFromLe(&pFrame_p->m_le_bMessageType);
@@ -724,12 +707,10 @@ unsigned int        uiMappObjectCount;
         // set PDO size in frame
         AmiSetWordToLe(&pFrame_p->m_Data.m_Pres.m_le_wSize, pPdoChannel->m_wPdoSize);
 
-        Ret = EplPdokCalAreTpdosValid(&fValid);
-        if (fValid != FALSE)
+        if (fReadyFlag_p != FALSE)
         {
             // set TPDO valid
-            bFrameData = AmiGetByteFromLe(&pFrame_p->m_Data.m_Pres.m_le_bFlag1);
-            AmiSetByteToLe(&pFrame_p->m_Data.m_Pres.m_le_bFlag1, (bFrameData | EPL_FRAME_FLAG1_RD));
+            AmiSetByteToLe(&pFrame_p->m_Data.m_Pres.m_le_bFlag1, (bFlag1 | EPL_FRAME_FLAG1_RD));
         }
 
         // processing finished successfully
@@ -862,103 +843,6 @@ void*           pVar;
 
     }
 
-    return Ret;
-}
-
-
-//---------------------------------------------------------------------------
-//
-// Function:    EplPdokPdoDecode
-//
-// Description: This function decodes a PDO from the specified frame.
-//
-// Parameters:  pFrame_p                = pointer to frame
-//              uiFrameSize_p           = size of frame
-//
-// Returns:     tEplKernel              = error code
-//
-//
-// State:
-//
-//---------------------------------------------------------------------------
-
-static tEplKernel EplPdokPdoDecode(tEplFrame* pFrame_p, unsigned int uiFrameSize_p)
-{
-tEplKernel          Ret = kEplSuccessful;
-BYTE                bFrameData;
-unsigned int        uiNodeId;
-tEplMsgType         MsgType;
-tEplPdoChannel*     pPdoChannel;
-unsigned int        uiChannelId;
-tEplPdoMappObject*  pMappObject;
-unsigned int        uiMappObjectCount;
-
-    // check if received RPDO is valid
-    bFrameData = AmiGetByteFromLe(&pFrame_p->m_Data.m_Pres.m_le_bFlag1);
-    if ((bFrameData & EPL_FRAME_FLAG1_RD) == 0)
-    {   // RPDO invalid
-        goto Exit;
-    }
-
-    // retrieve EPL message type
-    MsgType = AmiGetByteFromLe(&pFrame_p->m_le_bMessageType);
-    if (MsgType == kEplMsgTypePreq)
-    {   // RPDO is PReq frame
-        uiNodeId = EPL_PDO_PREQ_NODE_ID;  // 0x00
-    }
-    else
-    {   // RPDO is PRes frame
-        // retrieve node ID
-        uiNodeId = AmiGetByteFromLe(&pFrame_p->m_le_bSrcNodeId);
-    }
-
-    // search for appropriate valid RPDO
-    for (uiChannelId = 0, pPdoChannel = &EplPdokInstance_g.m_pRxPdoChannel[0];
-         uiChannelId < EplPdokInstance_g.m_Allocation.m_uiRxPdoChannelCount;
-         uiChannelId++, pPdoChannel++)
-    {
-        if (pPdoChannel->m_uiNodeId != uiNodeId)
-        {
-            continue;
-        }
-
-        // retrieve PDO version from frame
-        bFrameData = AmiGetByteFromLe(&pFrame_p->m_Data.m_Pres.m_le_bPdoVersion);
-        if ((pPdoChannel->m_bMappingVersion & EPL_VERSION_MAIN) != (bFrameData & EPL_VERSION_MAIN))
-        {   // PDO versions do not match
-            // $$$ raise PDO error
-            // termiate processing of this RPDO
-            goto Exit;
-        }
-
-        // valid RPDO found
-
-        if ((unsigned int)(pPdoChannel->m_wPdoSize + EPL_FRAME_OFFSET_PDO_PAYLOAD) > uiFrameSize_p)
-        {   // RPDO is too short
-            // $$$ raise PDO error, set Ret
-            goto Exit;
-        }
-
-        // process mapping
-        for (uiMappObjectCount = pPdoChannel->m_uiMappObjectCount, pMappObject = EplPdokInstance_g.m_paRxObject[uiChannelId];
-             uiMappObjectCount > 0;
-             uiMappObjectCount--, pMappObject++)
-        {
-
-            // copy object from process/OD variable to TPDO
-            Ret = EplPdokCopyVarFromPdo(&pFrame_p->m_Data.m_Pres.m_le_abPayload[0], pMappObject);
-            if (Ret != kEplSuccessful)
-            {   // other fatal error occured
-                goto Exit;
-            }
-
-        }
-
-        // processing finished successfully
-        break;
-    }
-
-Exit:
     return Ret;
 }
 
