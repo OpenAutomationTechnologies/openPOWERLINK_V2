@@ -648,6 +648,17 @@ BYTE bHash;
     return Ret;
 }
 
+tEplKernel EdrvChangeFilter(tEdrvFilter*    pFilter_p,
+                            unsigned int    uiCount_p,
+                            unsigned int    uiEntryChanged_p,
+                            unsigned int    uiChangeFlags_p)
+{
+tEplKernel      Ret = kEplSuccessful;
+
+    return Ret;
+}
+
+
 //---------------------------------------------------------------------------
 //
 // Function:     EdrvAllocTxMsgBuffer

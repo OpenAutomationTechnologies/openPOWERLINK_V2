@@ -577,7 +577,7 @@ tShbError       ShbError;
             pShbMemInst->m_lThreadNewDataNice = -9;
             break;
 
-        case kshbPriorityHigh:
+        case kShbPriorityHigh:
             pShbMemInst->m_lThreadNewDataNice = -20;
             break;
 
