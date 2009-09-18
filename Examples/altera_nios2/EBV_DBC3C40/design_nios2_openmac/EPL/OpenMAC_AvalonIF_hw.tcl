@@ -102,7 +102,7 @@ set_interface_property Mii readWaitStates 0
 set_interface_property Mii readWaitTime 0
 set_interface_property Mii setupTime 0
 set_interface_property Mii timingUnits Cycles
-set_interface_property Mii writeWaitTime 0
+set_interface_property Mii writeWaitTime 1
 
 set_interface_property Mii ASSOCIATED_CLOCK clk_sink
 set_interface_property Mii ENABLED true
@@ -128,7 +128,6 @@ add_interface_port portSMI mii_Di export Input 1
 add_interface_port portSMI mii_Do export Output 1
 add_interface_port portSMI mii_Doe export Output 1
 add_interface_port portSMI mii_nResetOut export Output 1
-add_interface_port portSMI mii_NodeNr export Input 8
 # | 
 # +-----------------------------------
 

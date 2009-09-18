@@ -1,12 +1,36 @@
 ------------------------------------------------------------------------------------------------------------------------
 -- Avalon Interface of OpenMAC to use with NIOSII
 --
--- Copyright (C) 2009 B&R
+-- 	  Copyright (C) 2009 B&R
 --
--- This program is free software; you can redistribute it and/or modify
--- it under the terms of the GNU General Public License as published by
--- the Free Software Foundation; either version 2 of the License, or
--- (at your option) any later version.
+--    Redistribution and use in source and binary forms, with or without
+--    modification, are permitted provided that the following conditions
+--    are met:
+--
+--    1. Redistributions of source code must retain the above copyright
+--       notice, this list of conditions and the following disclaimer.
+--
+--    2. Redistributions in binary form must reproduce the above copyright
+--       notice, this list of conditions and the following disclaimer in the
+--       documentation and/or other materials provided with the distribution.
+--
+--    3. Neither the name of B&R nor the names of its
+--       contributors may be used to endorse or promote products derived
+--       from this software without prior written permission. For written
+--       permission, please contact office@br-automation.com
+--
+--    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+--    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+--    LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+--    FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+--    COPYRIGHT HOLDERS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+--    INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+--    BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+--    LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+--    CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+--    LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+--    ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+--    POSSIBILITY OF SUCH DAMAGE.
 --
 ------------------------------------------------------------------------------------------------------------------------
 -- Version History
@@ -21,6 +45,7 @@
 -- 2009-09-03  V0.50		RX FIFO is definitely empty when a new frame arrives (Fifo sclr is set for 1 cycle)
 -- 2009-09-07  V0.60		Added openFilter and openHub. Some changes in Mii core map. Added 2nd RMii Port.
 -- 2009-09-15  V0.61		Added ability to read the Mac Time over Time Cmp Slave Interface (32 bits).
+-- 2009-09-18  V0.62		Deleted in Phy Mii core NodeNr port. 
 ------------------------------------------------------------------------------------------------------------------------
 
 LIBRARY ieee;
@@ -73,7 +98,6 @@ ENTITY AlteraOpenMACIF IS
 			mii_Do						: OUT	STD_LOGIC;
 			mii_Doe						: OUT	STD_LOGIC;
 			mii_nResetOut				: OUT	STD_LOGIC;
-			mii_NodeNr					: IN	STD_LOGIC_VECTOR(7 DOWNTO 0) := (OTHERS => '0');
 		-- Dummy Interface (for TX IRQ) for newer SOPC builders
 			d_chipselect                : IN    STD_LOGIC;
             d_read_n					: IN    STD_LOGIC;
@@ -161,8 +185,7 @@ BEGIN
 					Mii_Di    => mii_Di,
 					Mii_Do	  => mii_Do,
 					Mii_Doe   => mii_Doei, -- '1' ... Input / '0' ... Output
-					nResetOut => mii_nResetOut,
-					NodeNr    => mii_NodeNr
+					nResetOut => mii_nResetOut
 				   );	
 	mii_Doe <= not mii_Doei;
 	
@@ -253,7 +276,6 @@ BEGIN
 	s_nWr    <= write_n;
 	
 	Sel_Cont <= '1' WHEN ( Chipselect = '1' AND ( read_n = '0' OR write_n = '0' ) AND address(10 DOWNTO 9) = "00" ) ELSE '0';
-	--CsMacCmp <= '1' WHEN ( Chipselect = '1' AND ( read_n = '0' OR write_n = '0' ) AND address(10 DOWNTO 9) = "01" ) ELSE '0';
 	Sel_Ram  <= '1' WHEN ( Chipselect = '1' AND ( read_n = '0' OR write_n = '0' ) AND address(10 DOWNTO 10) = "1" ) ELSE '0';
 
 	s_addr(11 DOWNTO 1) <= address(10 DOWNTO 1) &     address(0) WHEN ( Sel_Ram = '1' AND address(9) = '0' ) ELSE 
@@ -266,7 +288,7 @@ BEGIN
 				ShadowRead(7 DOWNTO 0)  & ShadowRead(15 DOWNTO 8) WHEN ( SelShadow = '1' ) ELSE
 				s_Dout(15 DOWNTO 8)     & s_Dout(7 DOWNTO 0)      WHEN ( ( Sel_Ram = '1' OR Sel_Cont = '1') AND byteenable = "00" ) ELSE
 				s_Dout(7 DOWNTO 0)      & s_Dout(15 DOWNTO 8)     WHEN ( Sel_Ram = '1' OR Sel_Cont = '1') ELSE
-				(others => '0'); --x"0" & "00" & Mac_Cmp_Int & Mac_Cmp_On & x"00";
+				(others => '0');
 
 	SelShadow <= '1' WHEN ( Sel_Ram = '1' AND address(9) = '0' ) ELSE '0';
 
@@ -281,7 +303,7 @@ BEGIN
 				);
 	
 	-----------------------------------------------------------------------
--- Avalon Master Interface <-> openMac (new)
+	-- Avalon Master Interface <-> openMac (new)
 	-----------------------------------------------------------------------
 
 	the_DMAAvalonIF: BLOCK
@@ -323,7 +345,7 @@ BEGIN
 		-- MAC
 		SIGNAL  rTx_EnL			:  STD_LOGIC;
 		SIGNAL  rCrs_DvL		:  STD_LOGIC;
-		signal	monitorCrsDv	:  std_logic_vector(3 downto 0); --monitor Crs Dv
+		signal	monitorCrsDv	:  std_logic_vector(3 downto 0); --monitor Crs Dv signal
 
 	BEGIN
 		Fifo_AClr <= NOT Reset_n;
@@ -402,7 +424,7 @@ BEGIN
 				
 			ELSIF rising_edge( Clk ) THEN
 				rTx_EnL  <= rTx_Eni;
-				rCrs_DvL <= rCrs_Dvi; --changed here because of Hub insertion!!!
+				rCrs_DvL <= rCrs_Dvi;
 				Rx_ActL  <= Rx_Act;
 				Rx_ActLL <= Rx_ActL;
 
@@ -416,7 +438,7 @@ BEGIN
 				end if;
 				
 				IF Dma_Req = '1' AND Dma_Acki = '0' THEN
-					IF    Dma_Rw = '1' AND TXFifo_E = '0' --AND TXFifo_AE = '0' 
+					IF    Dma_Rw = '1' AND TXFifo_E = '0' -- start when there is one entry / start when more entries are available ... AND TXFifo_AE = '0' 
 						THEN Dma_Acki <= '1'; 
 					ELSIF Dma_Rw = '0' AND RXFifo_F = '0'                     THEN Dma_Acki <= '1'; 
 					END IF;
@@ -460,7 +482,7 @@ BEGIN
 
 			-- Rx Control
 				IF    Dma_Req = '1' AND Dma_Rw = '0'                    THEN Rx_Act <= '1';
-				ELSIF rCrs_Dvi = '0' AND RXTimeout(RXTimeout'HIGH) = '1' THEN Rx_Act <= '0'; --changed CrsDv !!!
+				ELSIF rCrs_Dvi = '0' AND RXTimeout(RXTimeout'HIGH) = '1' THEN Rx_Act <= '0';
 				END IF;
 
 				IF    Dma_Req = '1' AND Dma_Rw = '0' AND Rx_Act = '0'   THEN RXFifo_Addr <= Dma_Addr & '0';
@@ -486,7 +508,7 @@ BEGIN
 					END IF;
 				END IF;
 
-				IF    rCrs_DvL = '1' AND rCrs_Dvi = '1' THEN RXTimeout <= (others => '0'); --changed CrsDv !!!
+				IF    rCrs_DvL = '1' AND rCrs_Dvi = '1' THEN RXTimeout <= (others => '0');
 				ELSIF RXTimeout(RXTimeout'HIGH) = '0'  THEN RXTimeout <= RXTimeout + 1;
 				END IF;
 				

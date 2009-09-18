@@ -3,7 +3,7 @@
 	openPOWERLINK.sourceforge.net
 
 
-	openPOWERLINK - FPGA design for EBV DBC3C40 with OpenMAC
+	openPOWERLINK - FPGA design for EBV DBC3C40 with openMAC
 	=========================================================
 
 

@@ -306,9 +306,9 @@ Fellow worker:    Daniel Krüger (d.k.)
                       instead of WinMain).
                     (d.k.)
 
-14.08.2009 V1.6     - added Ethernet driver and demo project for OpenMAC with Altera Nios2 CPU as CN
+14.08.2009 V1.6     - added Ethernet driver and demo project for openMAC with Altera Nios2 CPU as CN
                       (including the Quartus II project for the EBV DBC3C40 board).
-                      The OpenMAC is an Ethernet controller written in VHDL with auto-response feature
+                      The openMAC is an Ethernet controller written in VHDL with auto-response feature
                     (d.k.)
 
 21.08.2009 V1.6     - export functions of EPL API Layer if compiled as Windows DLL (bug 2841082)
@@ -329,7 +329,7 @@ Fellow worker:    Daniel Krüger (d.k.)
                     (m.u.)
 
 02.09.2009 V1.6     - New feature: implemented support in DLL for Ethernet drivers/controllers with auto-response
-                      feature.
+                      feature. There is a new function EdrvChangeFilter, which must be implemented by each Ethernet driver.
                     - memory leak fixed in Ethernet drivers for Pcap and RTL8139 chip, when releasing TxBuffers.
                       The real cause of this memory leak was in DLL module because it NULLified the m_pbBuffer pointer
                       in the TxBuffer structure before calling EdrvReleaseTxBuffer.
@@ -359,7 +359,7 @@ Fellow worker:    Daniel Krüger (d.k.)
                       of object type and access rights with corresponding enum constants
                     (d.k.)
 
-16.09.2009 V1.6     - implemented TimerHighResk for OpenMac (compare unit)
+16.09.2009 V1.6     - implemented TimerHighResk for openMAC (compare unit)
                     (m.u.)
 
 17.09.2009 V1.6     - code clean-up: removed unnecessary code and comments, restructured some functions

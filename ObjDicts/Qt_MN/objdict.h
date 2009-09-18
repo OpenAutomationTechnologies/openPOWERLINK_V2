@@ -47,7 +47,7 @@ EPL_OBD_BEGIN ()
         // Object 1018h: NMT_IdentityObject_REC
         EPL_OBD_BEGIN_INDEX_RAM(0x1018, 0x05, NULL)
             EPL_OBD_SUBINDEX_RAM_VAR(0x1018, 0x00, 0x05, 0x04, tEplObdUnsigned8, NumberOfEntries, 0x04)
-            EPL_OBD_SUBINDEX_RAM_VAR(0x1018, 0x01, 0x07, 0x01, tEplObdUnsigned32, VendorId_U32, 0x3f)
+            EPL_OBD_SUBINDEX_RAM_VAR(0x1018, 0x01, 0x07, 0x01, tEplObdUnsigned32, VendorId_U32, 0x00)
             EPL_OBD_SUBINDEX_RAM_VAR(0x1018, 0x02, 0x07, 0x01, tEplObdUnsigned32, ProductCode_U32, 0x1067)
             EPL_OBD_SUBINDEX_RAM_VAR(0x1018, 0x03, 0x07, 0x01, tEplObdUnsigned32, RevisionNo_U32, DEFINED_OBJ1018_VERSION)
             EPL_OBD_SUBINDEX_RAM_VAR(0x1018, 0x04, 0x07, 0x01, tEplObdUnsigned32, SerialNo_U32, 0x12345678)

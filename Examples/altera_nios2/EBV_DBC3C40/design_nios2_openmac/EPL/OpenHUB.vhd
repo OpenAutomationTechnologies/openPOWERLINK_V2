@@ -1,12 +1,36 @@
 ------------------------------------------------------------------------------------------------------------------------
 -- OpenHUB
 --
--- Copyright (C) 2009 B&R
+-- 	  Copyright (C) 2009 B&R
 --
--- This program is free software; you can redistribute it and/or modify
--- it under the terms of the GNU General Public License as published by
--- the Free Software Foundation; either version 2 of the License, or
--- (at your option) any later version.
+--    Redistribution and use in source and binary forms, with or without
+--    modification, are permitted provided that the following conditions
+--    are met:
+--
+--    1. Redistributions of source code must retain the above copyright
+--       notice, this list of conditions and the following disclaimer.
+--
+--    2. Redistributions in binary form must reproduce the above copyright
+--       notice, this list of conditions and the following disclaimer in the
+--       documentation and/or other materials provided with the distribution.
+--
+--    3. Neither the name of B&R nor the names of its
+--       contributors may be used to endorse or promote products derived
+--       from this software without prior written permission. For written
+--       permission, please contact office@br-automation.com
+--
+--    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+--    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+--    LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+--    FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+--    COPYRIGHT HOLDERS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+--    INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+--    BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+--    LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+--    CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+--    LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+--    ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+--    POSSIBILITY OF SUCH DAMAGE.
 --
 -- Note: RxDv, RxDat0 and RxDat1 have to be synchron to CLK
 --       ReceivePort return currently active Port
@@ -97,15 +121,13 @@ BEGIN
 		IF Master = 0 THEN
 			TxEnI <= (OTHERS => '0'); TxDatI0 <= (OTHERS => '0'); TxDatI1 <= (OTHERS => '0');
 			
-			-- Neue TransmitMask nur übernehmen wenn gerade kein Frame aktiv ist, um zu vermeiden
-			-- dass während eines Frames umgeschaltet und der Frame zerstört wird
+			-- Overtake new TransmitMask only, when there is no active frame.
 			TransmitMask_L <= TransmitMask;
 		ELSE
-			FOR i IN 1 TO Ports LOOP -- Empfangenen Frame an alle Ports ausgeben
-				IF i /= Master THEN  -- Nur nicht an den Ports wo der Frame reinkommt .. eh klar
+			FOR i IN 1 TO Ports LOOP -- output received frame to every port
+				IF i /= Master THEN  --  but not to the port where it is coming from - "eh kloar!"
 					
-					-- Daten senden wenn der Port freigeschalten ist (TransmitMask), oder wenn der
-					-- sendende Port der interne Port ist (dann wird immer an alle externen gesendet)
+					-- only send data to active ports (=> TransmitMask is set to '1') or the internal Port (Mac)
 					IF TransmitMask_L(i) = '1' OR Master = internPort THEN
 					
 						TxEnI(i)   <= '1';
@@ -113,8 +135,7 @@ BEGIN
 						TxDatI1(i) <= RxDatL1(Master);
 					END IF;
 
-					-- Wenn auf dem Port an den gesendet wird auch gerade ein Frame reinkommt ist das
-					-- eine Kollision
+					-- If there is a frame received and another is sent => collision!
 					IF RxDvL(i) = '1' THEN
 						Coll := true;
 						Master_at_Coll := Master;
@@ -139,8 +160,8 @@ BEGIN
 	MasterAtCollNumber <= Master_at_Coll;
 	CollStatus <= Coll;
 
-	-- Hier wird der aktive Empfangs-Port (ReceivePort) ausgegeben. Es kann erkannt werden ob
-	-- der HUB gerade inaktiv ist (0) oder ob an einem der Ports ein Frame empfangen wird (1..n)
+	-- Output the Master Port - identifies the port (1...n) which has received the packet.
+	-- If Master is 0, the Hub is inactive.
 	ReceivePort <= Master;
 
 END PROCESS do;

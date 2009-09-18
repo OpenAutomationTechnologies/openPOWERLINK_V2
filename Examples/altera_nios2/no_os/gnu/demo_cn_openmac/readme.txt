@@ -3,7 +3,7 @@
 	openPOWERLINK.sourceforge.net
 
 
-	openPOWERLINK - Demo for EBV DBC3C40 with OpenMAC
+	openPOWERLINK - Demo for EBV DBC3C40 with openMAC
 	==================================================
 
 

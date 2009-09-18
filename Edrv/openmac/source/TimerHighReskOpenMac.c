@@ -6,7 +6,7 @@
   Project:      openPOWERLINK
 
   Description:  implementation of high resolution timer module
-                using the MAC-Time Compare unit of the OpenMAC
+                using the MAC-Time Compare unit of the openMAC
 
   License:
 
@@ -193,7 +193,7 @@ tEplKernel      Ret;
 
     EplTimerHighReskCompareInterruptDisable();
     EplTimerHighReskSetCompareValue( 0 );
-    
+
     if (alt_irq_register(OPENMAC_0_TIMERCMP_IRQ, NULL, EplTimerHighReskInterruptHandler))
     {
         Ret = kEplNoResource;
@@ -225,9 +225,9 @@ tEplKernel  Ret = kEplSuccessful;
 
     EplTimerHighReskCompareInterruptDisable();
     EplTimerHighReskSetCompareValue( 0 );
-    
+
     alt_irq_register(OPENMAC_0_TIMERCMP_IRQ, NULL, NULL);
-    
+
     EPL_MEMSET(&EplTimerHighReskInstance_l, 0, sizeof (EplTimerHighReskInstance_l));
 
     return Ret;
@@ -334,7 +334,7 @@ DWORD                       dwTimeSteps;
     {
         dwTimeNs = (DWORD) ullTimeNs_p;
     }
-    
+
     if (dwTimeNs < 10000)
     {   // time is too less, so increase it to the minimum time
         dwTimeNs = 10000;

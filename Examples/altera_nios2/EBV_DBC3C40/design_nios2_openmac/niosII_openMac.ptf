@@ -3112,7 +3112,7 @@ SYSTEM niosII_openMac
          SYSTEM_BUILDER_INFO 
          {
             Bus_Type = "avalon";
-            Write_Wait_States = "0cycles";
+            Write_Wait_States = "1cycles";
             Read_Wait_States = "0cycles";
             Hold_Time = "0cycles";
             Setup_Time = "0cycles";
@@ -3243,13 +3243,6 @@ SYSTEM niosII_openMac
             type = "export";
             width = "1";
             direction = "output";
-            Is_Enabled = "1";
-         }
-         PORT mii_NodeNr
-         {
-            type = "export";
-            width = "8";
-            direction = "input";
             Is_Enabled = "1";
          }
       }
