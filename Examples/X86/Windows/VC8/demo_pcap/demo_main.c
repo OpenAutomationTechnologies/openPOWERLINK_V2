@@ -495,17 +495,26 @@ tEplKernel          EplRet = kEplSuccessful;
 
                 case kEplNmtGsResetCommunication:
                 {
-                DWORD   dwBuffer;
+                DWORD   dwNodeAssignment;
+                WORD    wPresPayloadLimit;
 
                     // configure OD for MN in state ResetComm after reseting the OD
                     // TODO: setup your own network configuration here
-                    dwBuffer = (EPL_NODEASSIGN_NODE_IS_CN | EPL_NODEASSIGN_NODE_EXISTS);    // 0x00000003L
-                    EplRet = EplApiWriteLocalObject(0x1F81, 0x01, &dwBuffer, 4);
-                    EplRet = EplApiWriteLocalObject(0x1F81, 0x02, &dwBuffer, 4);
-                    EplRet = EplApiWriteLocalObject(0x1F81, 0x03, &dwBuffer, 4);
-                    EplRet = EplApiWriteLocalObject(0x1F81, 0x20, &dwBuffer, 4);
-                    dwBuffer = (EPL_NODEASSIGN_MN_PRES | EPL_NODEASSIGN_NODE_EXISTS);       // 0x00010001L
-                    EplRet = EplApiWriteLocalObject(0x1F81, 0xF0, &dwBuffer, 4);
+                    dwNodeAssignment = (EPL_NODEASSIGN_NODE_IS_CN | EPL_NODEASSIGN_NODE_EXISTS);    // 0x00000003L
+                    EplRet = EplApiWriteLocalObject(0x1F81, 0x01, &dwNodeAssignment, 4);
+                    EplRet = EplApiWriteLocalObject(0x1F81, 0x02, &dwNodeAssignment, 4);
+                    EplRet = EplApiWriteLocalObject(0x1F81, 0x03, &dwNodeAssignment, 4);
+                    EplRet = EplApiWriteLocalObject(0x1F81, 0x04, &dwNodeAssignment, 4);
+                    EplRet = EplApiWriteLocalObject(0x1F81, 0x20, &dwNodeAssignment, 4);
+                    dwNodeAssignment = (EPL_NODEASSIGN_MN_PRES | EPL_NODEASSIGN_NODE_EXISTS);       // 0x00010001L
+                    EplRet = EplApiWriteLocalObject(0x1F81, 0xF0, &dwNodeAssignment, 4);
+
+                    wPresPayloadLimit = 50;
+                    EplRet = EplApiWriteLocalObject(0x1F8D, 0x01, &wPresPayloadLimit, 2);
+                    EplRet = EplApiWriteLocalObject(0x1F8D, 0x02, &wPresPayloadLimit, 2);
+                    EplRet = EplApiWriteLocalObject(0x1F8D, 0x03, &wPresPayloadLimit, 2);
+                    EplRet = EplApiWriteLocalObject(0x1F8D, 0x04, &wPresPayloadLimit, 2);
+                    EplRet = EplApiWriteLocalObject(0x1F8D, 0x20, &wPresPayloadLimit, 2);
                     // continue
                 }
 

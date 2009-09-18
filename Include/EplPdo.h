@@ -87,6 +87,12 @@
 
 #define EPL_PDO_COMMUNICATION_PROFILE_START 0x1000
 
+#if EPL_D_PDO_RPDOChannelObjects_U8 > EPL_D_PDO_TPDOChannelObjects_U8
+#define EPL_PDO_CHANNEL_OBJECT_COUNT    EPL_D_PDO_RPDOChannelObjects_U8
+#else
+#define EPL_PDO_CHANNEL_OBJECT_COUNT    EPL_D_PDO_TPDOChannelObjects_U8
+#endif
+
 
 #define EPL_PDO_MAPPOBJECT_IS_NUMERIC(pPdoMappObject_p) \
             (pPdoMappObject_p->m_wByteSizeOrType < EPL_PDO_COMMUNICATION_PROFILE_START)
@@ -159,7 +165,7 @@ typedef struct
 
     tEplPdoChannel      m_PdoChannel;
 
-    tEplPdoMappObject   m_aMappObject[max(EPL_D_PDO_RPDOChannelObjects_U8, EPL_D_PDO_TPDOChannelObjects_U8)];
+    tEplPdoMappObject   m_aMappObject[EPL_PDO_CHANNEL_OBJECT_COUNT];
 
 } tEplPdoChannelConf;
 
