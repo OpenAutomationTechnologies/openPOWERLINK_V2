@@ -24,6 +24,7 @@ MODULEOBJS	= demo_main.o \
 			  EplNmtk.o EplNmtkCal.o \
 			  EplNmtu.o EplNmtuCal.o EplNmtCnu.o \
 			  EplPdok.o EplPdokCal.o \
+			  EplPdou.o EplPdouCal.o \
 			  EplObdk.o \
 			  EplSdoUdpu.o EplSdoComu.o EplSdoAsySequ.o EplSdoAsndu.o \
 			  EplTimeruLinuxKernel.o \

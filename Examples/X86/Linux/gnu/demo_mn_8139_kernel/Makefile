@@ -24,6 +24,7 @@ MODULEOBJS	= demo_main.o \
 			  EplNmtu.o EplNmtuCal.o EplNmtCnu.o \
 			  EplNmtMnu.o EplIdentu.o EplStatusu.o \
 			  EplPdok.o EplPdokCal.o \
+			  EplPdou.o EplPdouCal.o \
 			  EplObdk.o EplObdkCal.o \
 			  EplObdu.o EplObduCal.o \
 			  EplSdoUdpu.o EplSdoComu.o EplSdoAsySequ.o EplSdoAsndu.o \

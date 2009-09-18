@@ -23,7 +23,8 @@ MODULEOBJS	= demo_main.o \
 			  EplEventk.o EplEventu.o \
 			  EplNmtk.o EplNmtkCal.o \
 			  EplNmtu.o EplNmtuCal.o EplNmtCnu.o \
-			  EplPdok.o EplPdokCal.o EplPdou.o \
+			  EplPdok.o EplPdokCal.o \
+			  EplPdou.o EplPdouCal.o \
 			  EplObdk.o EplObdkCal.o \
 			  EplObdu.o EplObduCal.o \
 			  EplSdoUdpu.o EplSdoComu.o EplSdoAsySequ.o EplSdoAsndu.o \
