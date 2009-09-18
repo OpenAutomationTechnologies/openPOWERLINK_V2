@@ -1591,7 +1591,7 @@ tEplEventNmtStateChange NmtStateChange;
     }// end of switch(NmtEvent)
 
     // inform higher layer about State-Change if needed
-    if(OldNmtState != EPL_MCO_GLB_VAR(m_NmtState))
+    if (OldNmtState != EPL_MCO_GLB_VAR(m_NmtState))
     {
         EPL_NMTK_DBG_POST_TRACE_VALUE(NmtEvent, OldNmtState, EPL_MCO_GLB_VAR(m_NmtState));
 

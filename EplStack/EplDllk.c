@@ -2143,6 +2143,8 @@ tEplFrameInfo   FrameInfo;
                             goto Exit;
                         }
 
+//                        BENCHMARK_MOD_02_TOGGLE(7);
+
                         Ret = EplDllkUpdateFramePres(pTxBuffer, NmtState);
                         if (Ret != kEplSuccessful)
                         {
@@ -2152,6 +2154,8 @@ tEplFrameInfo   FrameInfo;
 
                 }
             }
+
+//            BENCHMARK_MOD_02_TOGGLE(7);
 
             switch (EplDllkInstance_g.m_bUpdateTxFrame)
             {

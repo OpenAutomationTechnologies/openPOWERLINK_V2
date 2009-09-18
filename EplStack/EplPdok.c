@@ -72,6 +72,7 @@
 #include "kernel/EplEventk.h"
 #include "EplObd.h"
 #include "kernel/EplDllk.h"
+#include "Benchmark.h"
 
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOK)) != 0)
 
@@ -695,6 +696,7 @@ unsigned int        uiMappObjectCount;
              uiMappObjectCount--, pMappObject++)
         {
 
+            BENCHMARK_MOD_02_TOGGLE(7);
             // copy object from process/OD variable to TPDO
             Ret = EplPdokCopyVarToPdo(&pFrame_p->m_Data.m_Pres.m_le_abPayload[0], pMappObject);
             if (Ret != kEplSuccessful)

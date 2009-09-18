@@ -441,6 +441,7 @@ tEplEventSource         EventSource;
                                 &EventSource);
             }
 #endif
+            BENCHMARK_MOD_27_RESET(0);
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLK)) != 0)
             if ((pEvent_p->m_EventType == kEplEventTypeNmtEvent)
                 && ((*((tEplNmtEvent*)pEvent_p->m_pArg) == kEplNmtEventDllCeSoa)
@@ -461,6 +462,7 @@ tEplEventSource         EventSource;
                                     &EventSource);
                 }
 
+                BENCHMARK_MOD_27_SET(0);
                 // call process sync callback to allow the application to access the process variables
                 if (EplEventkInstance_g.m_pfnCbSyncProcess != NULL)
                 {
@@ -476,6 +478,7 @@ tEplEventSource         EventSource;
                                         &EventSource);
                     }
                 }
+                BENCHMARK_MOD_27_RESET(0);
 
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLK)) != 0)
                 // forward SoA event to DLLk module for cycle preprocessing
@@ -493,6 +496,7 @@ tEplEventSource         EventSource;
 #endif
 
             }
+            BENCHMARK_MOD_27_SET(0);
             break;
 #endif
         }
