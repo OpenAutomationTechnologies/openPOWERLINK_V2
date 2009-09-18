@@ -1,43 +1,43 @@
 
-INSTALLDIR  = /home/tftpboot/daniel
+INSTALLDIR  = /tftpboot
 
 MODULENAME = epl
 
 # ------------------------- Secondary Call ----------------------------------
 ifneq ($(KERNELRELEASE),)
 
-MAINPATH	= $(obj)/../../../../..
-INCLUDES	= -I$(MAINPATH)/Include \
-			  -I$(MAINPATH)/Edrv/fec_548x/include/net \
-			  -I$(obj) \
-			  -I$(MAINPATH)/Target/PLCcore-CF54/Linux/gnu/generic \
-			  -I$(MAINPATH)/Target/PLCcore-CF54/Linux/gnu/driver \
-			  -I$(MAINPATH)/SharedBuff \
-			  -I$(MAINPATH)/ObjDicts/Api_CN
+MAINPATH	:= ../../../../..
+MAINDIR	:= $(src)/$(MAINPATH)
+INCLUDES	:= -I$(MAINDIR)/Include \
+			  -I$(MAINDIR)/Edrv/fec_548x/include/net \
+			  -I$(src) \
+			  -I$(MAINDIR)/Target/PLCcore-CF54/Linux/gnu/generic \
+			  -I$(MAINDIR)/Target/PLCcore-CF54/Linux/gnu/driver \
+			  -I$(MAINDIR)/SharedBuff \
+			  -I$(MAINDIR)/ObjDicts/Api_CN
 
 MODULEOBJS	= demo_main.o \
-			  fec.o ks8721.o ksz8893.o \
-			  EplDllk.o EplDllkCal.o \
-			  EplDlluCal.o \
-			  EplLedu.o \
-			  EplEventk.o EplEventu.o \
-			  EplNmtk.o EplNmtkCal.o \
-			  EplNmtu.o EplNmtuCal.o EplNmtCnu.o \
-			  EplPdok.o EplPdokCal.o \
-			  EplPdou.o EplPdouCal.o \
-			  EplObdk.o EplObdkCal.o \
-			  EplObdu.o EplObduCal.o \
-			  EplSdoUdpu.o EplSdoComu.o EplSdoAsySequ.o EplSdoAsndu.o \
-			  EplTimeruLinuxKernel.o \
-			  EplErrorHandlerk.o \
-			  EplApiGeneric.o \
-			  Objdict.o \
-			  amibe.o \
-			  VirtualEthernetLinux.o \
-			  SharedBuff.o ShbIpc-LinuxKernel.o \
-			  SocketLinuxKernel.o \
-			  TimerHighReskMcf54xx.o \
-			  target_mcf548x.o proc_fs.o
+			  $(MAINPATH)/Edrv/fec_548x/net/fec.o $(MAINPATH)/Edrv/fec_548x/net/ks8721.o $(MAINPATH)/Edrv/fec_548x/net/ksz8893.o \
+			  $(MAINPATH)/EplStack/EplDllk.o $(MAINPATH)/EplStack/EplDllkCal.o \
+			  $(MAINPATH)/EplStack/EplDlluCal.o \
+			  $(MAINPATH)/EplStack/EplLedu.o \
+			  $(MAINPATH)/EplStack/EplEventk.o $(MAINPATH)/EplStack/EplEventu.o \
+			  $(MAINPATH)/EplStack/EplNmtk.o $(MAINPATH)/EplStack/EplNmtkCal.o \
+			  $(MAINPATH)/EplStack/EplNmtu.o $(MAINPATH)/EplStack/EplNmtuCal.o $(MAINPATH)/EplStack/EplNmtCnu.o \
+			  $(MAINPATH)/EplStack/EplPdok.o $(MAINPATH)/EplStack/EplPdokCal.o \
+			  $(MAINPATH)/EplStack/EplPdou.o $(MAINPATH)/EplStack/EplPdouCal.o \
+			  $(MAINPATH)/EplStack/EplObd.o \
+			  $(MAINPATH)/EplStack/EplSdoUdpu.o $(MAINPATH)/EplStack/EplSdoComu.o $(MAINPATH)/EplStack/EplSdoAsySequ.o $(MAINPATH)/EplStack/EplSdoAsndu.o \
+			  $(MAINPATH)/EplStack/EplTimeruLinuxKernel.o \
+			  $(MAINPATH)/EplStack/EplErrorHandlerk.o \
+			  $(MAINPATH)/EplStack/EplApiGeneric.o \
+			  $(MAINPATH)/ObjDicts/Api_CN/Objdict.o \
+			  $(MAINPATH)/EplStack/amibe.o \
+			  $(MAINPATH)/EplStack/VirtualEthernetLinux.o \
+			  $(MAINPATH)/SharedBuff/SharedBuff.o $(MAINPATH)/SharedBuff/ShbIpc-LinuxKernel.o \
+			  $(MAINPATH)/EplStack/SocketLinuxKernel.o \
+			  $(MAINPATH)/Target/PLCcore-CF54/Linux/gnu/generic/TimerHighReskMcf54xx.o \
+			  $(MAINPATH)/Target/PLCcore-CF54/Linux/gnu/generic/target_mcf548x.o $(MAINPATH)/Target/PLCcore-CF54/Linux/gnu/generic/proc_fs.o
 
 #           Select here between debug and release settings
 #DBG_MODE = NDEBUG
@@ -50,10 +50,15 @@ MODFLAGS =	-D$(DBG_MODE) -D_DBG_TRACE_POINTS_ -DDEF_DEBUG_LVL=0xEC000000L
 EXTRA_CFLAGS = $(INCLUDES) $(MODFLAGS)
 #EXTRA_CFLAGS = -Wa,-alhs $(INCLUDES) $(MODFLAGS)
 
-$(MODULENAME)-objs := $(MODULEOBJS)
-
 obj-m := $(MODULENAME).o
 
+$(MODULENAME)-y := $(MODULEOBJS)
+
+
+# add the object files of the stack to the variable clean-files,
+# because the object files in upper directories were not deleted otherwise.
+clean-files := $(MODULEOBJS) \
+		$(foreach f,$(MODULEOBJS),$(dir $(f)).$(notdir $(f)).cmd)
 
 
 # ------------------------- Primary Call ------------------------------------
@@ -91,16 +96,15 @@ installer:	call_driver_build
 	                dos2unix $(SCRIPTDIR)build-install.sh && chmod +x $(SCRIPTDIR)build-install.sh && $(SCRIPTDIR)build-install.sh
 
 
-endif
-
-
 .PHONY:     clean
 clean:
-			rm -f *.bak
-			rm -f *.tmp
-			rm -f *~ *.o *.ko
-			rm -f .built_in.o.cmd built_in.o
-			rm -f .*.cmd *.ko *.mod.c
-			rm -fr .tmp_versions/
+			$(MAKE)	-C $(KDIR)	SUBDIRS=$(PWD) clean
+#			rm -f *.bak
+#			rm -f *.tmp
+#			rm -f *~ *.o *.ko
+#			rm -f .built_in.o.cmd built_in.o
+#			rm -f .*.cmd *.ko *.mod.c
+#			rm -fr .tmp_versions/
 
+endif
 

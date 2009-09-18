@@ -1,43 +1,44 @@
 
-INSTALLDIR  = /home/tftpboot/daniel
 
 MODULENAME = epl
 
 # ------------------------- Secondary Call ----------------------------------
 ifneq ($(KERNELRELEASE),)
 
-MAINPATH	= $(obj)/../../../../..
-INCLUDES	= -I$(MAINPATH)/Include \
-			  -I$(MAINPATH)/Edrv/fec_548x/include/net \
-			  -I$(obj) \
-			  -I$(MAINPATH)/Target/PLCcore-CF54/Linux/gnu/generic \
-			  -I$(MAINPATH)/Target/PLCcore-CF54/Linux/gnu/driver \
-			  -I$(MAINPATH)/SharedBuff \
-			  -I$(MAINPATH)/ObjDicts/Api_CN
+# create relative path to the openPOWERLINK base directory
+MAINPATH	:= ../../../../..
+MAINDIR	:= $(src)/$(MAINPATH)
 
-MODULEOBJS	= demo_main.o \
-			  Edrv8139.o \
-			  EplDllk.o EplDllkCal.o \
-			  EplDlluCal.o \
-			  EplEventk.o EplEventu.o \
-			  EplNmtk.o EplNmtkCal.o \
-			  EplNmtu.o EplNmtuCal.o EplNmtCnu.o \
-			  EplNmtMnu.o EplIdentu.o EplStatusu.o \
-			  EplPdok.o EplPdokCal.o \
-			  EplPdou.o EplPdouCal.o \
-			  EplObdk.o EplObdkCal.o \
-			  EplObdu.o EplObduCal.o \
-			  EplSdoUdpu.o EplSdoComu.o EplSdoAsySequ.o EplSdoAsndu.o \
-			  EplTimeruLinuxKernel.o \
-			  EplErrorHandlerk.o \
-			  EplApiGeneric.o \
-			  Objdict.o \
-			  amix86.o \
-			  VirtualEthernetLinux.o \
-			  SharedBuff.o ShbIpc-LinuxKernel.o \
-			  SocketLinuxKernel.o \
-			  TimerHighReskX86.o \
-			  proc_fs.o
+# include paths
+INCLUDES	:= -I$(MAINDIR)/Include \
+			  -I$(src) \
+			  -I$(MAINDIR)/Target/PLCcore-CF54/Linux/gnu/generic \
+			  -I$(MAINDIR)/SharedBuff \
+			  -I$(MAINDIR)/ObjDicts/Api_CN
+
+# object files for kernel object with relative paths
+MODULEOBJS	= $(MAINPATH)/Edrv/Edrv8139.o \
+			  demo_main.o \
+			  $(MAINPATH)/EplStack/EplDllk.o $(MAINPATH)/EplStack/EplDllkCal.o \
+			  $(MAINPATH)/EplStack/EplDlluCal.o \
+			  $(MAINPATH)/EplStack/EplEventk.o $(MAINPATH)/EplStack/EplEventu.o \
+			  $(MAINPATH)/EplStack/EplNmtk.o $(MAINPATH)/EplStack/EplNmtkCal.o \
+			  $(MAINPATH)/EplStack/EplNmtu.o $(MAINPATH)/EplStack/EplNmtuCal.o $(MAINPATH)/EplStack/EplNmtCnu.o \
+			  $(MAINPATH)/EplStack/EplNmtMnu.o $(MAINPATH)/EplStack/EplIdentu.o $(MAINPATH)/EplStack/EplStatusu.o \
+			  $(MAINPATH)/EplStack/EplPdok.o $(MAINPATH)/EplStack/EplPdokCal.o \
+			  $(MAINPATH)/EplStack/EplPdou.o $(MAINPATH)/EplStack/EplPdouCal.o \
+			  $(MAINPATH)/EplStack/EplObd.o \
+			  $(MAINPATH)/EplStack/EplSdoUdpu.o $(MAINPATH)/EplStack/EplSdoComu.o $(MAINPATH)/EplStack/EplSdoAsySequ.o $(MAINPATH)/EplStack/EplSdoAsndu.o \
+			  $(MAINPATH)/EplStack/EplTimeruLinuxKernel.o \
+			  $(MAINPATH)/EplStack/EplErrorHandlerk.o \
+			  $(MAINPATH)/EplStack/EplApiGeneric.o \
+			  $(MAINPATH)/ObjDicts/Api_CN/Objdict.o \
+			  $(MAINPATH)/EplStack/amix86.o \
+			  $(MAINPATH)/EplStack/VirtualEthernetLinux.o \
+			  $(MAINPATH)/SharedBuff/SharedBuff.o $(MAINPATH)/SharedBuff/ShbIpc-LinuxKernel.o \
+			  $(MAINPATH)/EplStack/SocketLinuxKernel.o \
+			  $(MAINPATH)/Target/X86/Linux/gnu/generic/TimerHighReskX86.o \
+			  $(MAINPATH)/Target/PLCcore-CF54/Linux/gnu/generic/proc_fs.o
 
 #           Select here between debug and release settings
 #DBG_MODE = NDEBUG
@@ -51,10 +52,16 @@ MODFLAGS =	-D$(DBG_MODE) -D_DBG_TRACE_POINTS_ -DDEF_DEBUG_LVL=0xEC000000L
 EXTRA_CFLAGS = $(INCLUDES) $(MODFLAGS)
 #EXTRA_CFLAGS = -Wa,-alhs $(INCLUDES) $(MODFLAGS)
 
-$(MODULENAME)-objs := $(MODULEOBJS)
-
+# build rule for the kernel object epl.ko
 obj-m := $(MODULENAME).o
 
+$(MODULENAME)-y := $(MODULEOBJS)
+
+
+# add the object files of the stack to the variable clean-files,
+# because the object files in upper directories were not deleted otherwise.
+clean-files := $(MODULEOBJS) \
+		$(foreach f,$(MODULEOBJS),$(dir $(f)).$(notdir $(f)).cmd)
 
 
 # ------------------------- Primary Call ------------------------------------
@@ -67,9 +74,9 @@ KDIR			:= /lib/modules/$(shell uname -r)/build
 PWD				:= $(shell pwd)
 
 
-.PHONY:     call_driver_build
-call_driver_build:
-			$(MAKE)	-C $(KDIR)	SUBDIRS=$(PWD) modules
+.PHONY:     all
+all:
+			$(MAKE)	-C $(KDIR) M=$(PWD) modules
 
 #.PHONY:     install
 #install:    call_driver_build
@@ -77,7 +84,7 @@ call_driver_build:
 
 .PHONY:     clean
 clean:
-			$(MAKE)	-C $(KDIR)	SUBDIRS=$(PWD) clean
+			$(MAKE)	-C $(KDIR) M=$(PWD) clean
 #			rm -f *.bak
 #			rm -f *.tmp
 #			rm -f *~ *.o *.ko

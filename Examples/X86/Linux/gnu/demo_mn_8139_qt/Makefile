@@ -13,7 +13,6 @@ MAINDIR	:= $(src)/$(MAINPATH)
 INCLUDES	:= -I$(MAINDIR)/Include \
 			  -I$(src) \
 			  -I$(MAINDIR)/Target/PLCcore-CF54/Linux/gnu/generic \
-			  -I$(MAINDIR)/Target/PLCcore-CF54/Linux/gnu/driver \
 			  -I$(MAINDIR)/SharedBuff \
 			  -I$(MAINDIR)/ObjDicts/Qt_MN
 
@@ -27,8 +26,7 @@ MODULEOBJS	= $(MAINPATH)/Edrv/Edrv8139.o \
 			  $(MAINPATH)/EplStack/EplNmtMnu.o $(MAINPATH)/EplStack/EplIdentu.o $(MAINPATH)/EplStack/EplStatusu.o \
 			  $(MAINPATH)/EplStack/EplPdok.o $(MAINPATH)/EplStack/EplPdokCal.o \
 			  $(MAINPATH)/EplStack/EplPdou.o $(MAINPATH)/EplStack/EplPdouCal.o \
-			  $(MAINPATH)/EplStack/EplObd.o $(MAINPATH)/EplStack/EplObdkCal.o \
-			  $(MAINPATH)/EplStack/EplObdu.o $(MAINPATH)/EplStack/EplObduCal.o \
+			  $(MAINPATH)/EplStack/EplObd.o \
 			  $(MAINPATH)/EplStack/EplSdoUdpu.o $(MAINPATH)/EplStack/EplSdoComu.o $(MAINPATH)/EplStack/EplSdoAsySequ.o $(MAINPATH)/EplStack/EplSdoAsndu.o \
 			  $(MAINPATH)/EplStack/EplTimeruLinuxKernel.o \
 			  $(MAINPATH)/EplStack/EplErrorHandlerk.o \
@@ -77,7 +75,7 @@ PWD				:= $(shell pwd)
 
 
 .PHONY:     all
-all::
+all:
 			$(MAKE)	-C $(KDIR) M=$(PWD) modules
 			if [ ! -L EplUserApp/include/epl ] ; then ln -s ../../../../../../../Include EplUserApp/include/epl ; fi
 			dos2unix -p EplLoad
