@@ -319,8 +319,6 @@ Fellow worker:    Daniel Krüger (d.k.)
 01.09.2009 V1.6     - add "Ms" to Timeout variables in SharedBuffer and ShbIpc* implementation to
                       clearly state the unit.
                     - fixed ShbIpc-LinuxKernel implementation: job-ready timeout is now treated in unit of 1 ms.
-                    - add "Ms" to Timeout variables in SharedBuffer and ShbIpc* implementation to
-                      clearly state the unit.
                     (d.k.)
 
 02.09.2009 V1.6     - Eventk.c and SharedBuff implementation: fixed case of enum constant kShbPriorityHigh
