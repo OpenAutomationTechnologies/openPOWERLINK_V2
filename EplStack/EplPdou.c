@@ -665,7 +665,8 @@ BYTE                bMappSubindex;
 unsigned int        uiCurPdoSize;
 WORD                wMaxPdoSize;
 WORD                wCalcPdoSize = 0;
-unsigned int        uiSubIndex;
+unsigned int        uiPayloadLimitIndex;
+unsigned int        uiPayloadLimitSubIndex;
 tEplPdoChannelConf  PdoChannelConf;
 tEplPdoMappObject*  pMappObject;
 
@@ -720,18 +721,44 @@ tEplPdoMappObject*  pMappObject;
         goto Exit;
     }
 
+    ObdSize = sizeof (bNodeId);
+    // read node ID from OD
+    Ret = EplObduReadEntry(uiCommParamIndex, 0x01, &bNodeId, &ObdSize);
+    if (Ret != kEplSuccessful)
+    {   // fatal error occured
+        goto Exit;
+    }
+
     if (AccessType_p == kEplObdAccWrite)
     {
-        uiSubIndex = 0x04;  // PReqActPayloadLimit_U16
+        if (bNodeId == EPL_PDO_PREQ_NODE_ID)
+        {
+            uiPayloadLimitIndex = 0x1F98;   // NMT_CycleTiming_REC
+            uiPayloadLimitSubIndex = 0x04;  // PReqActPayloadLimit_U16
+        }
+        else
+        {
+            uiPayloadLimitIndex = 0x1F8D;   // NMT_PResPayloadLimitList_AU16
+            uiPayloadLimitSubIndex = bNodeId;
+        }
     }
     else
     {
-        uiSubIndex = 0x05;  // PResActPayloadLimit_U16
+        if (bNodeId == EPL_PDO_PRES_NODE_ID)
+        {
+            uiPayloadLimitIndex = 0x1F98;   // NMT_CycleTiming_REC
+            uiPayloadLimitSubIndex = 0x05;  // PResActPayloadLimit_U16
+        }
+        else
+        {
+            uiPayloadLimitIndex = 0x1F8B;   // NMT_MNPReqPayloadLimitList_AU16
+            uiPayloadLimitSubIndex = bNodeId;
+        }
     }
 
-    // fetch maximum PDO size from Object 1F98h: NMT_CycleTiming_REC
+    // fetch maximum PDO size from OD
     ObdSize = sizeof (wMaxPdoSize);
-    Ret = EplObduReadEntry(0x1F98, uiSubIndex, &wMaxPdoSize, &ObdSize);
+    Ret = EplObduReadEntry(uiPayloadLimitIndex, uiPayloadLimitSubIndex, &wMaxPdoSize, &ObdSize);
     if (Ret != kEplSuccessful)
     {   // other fatal error occured
         *pdwAbortCode_p = EPL_SDOAC_GENERAL_ERROR;
@@ -791,14 +818,6 @@ tEplPdoMappObject*  pMappObject;
 
         pMappObject++;
 
-    }
-
-    ObdSize = sizeof (bNodeId);
-    // read node ID from OD
-    Ret = EplObduReadEntry(uiCommParamIndex, 0x01, &bNodeId, &ObdSize);
-    if (Ret != kEplSuccessful)
-    {   // fatal error occured
-        goto Exit;
     }
 
     PdoChannelConf.m_PdoChannel.m_uiNodeId = bNodeId;
