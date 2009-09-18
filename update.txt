@@ -1,0 +1,42 @@
+  (c) SYSTEC electronic GmbH, D-07973 Greiz, August-Bebel-Str. 29
+        www.systec-electronic.com
+	openPOWERLINK.sourceforge.net
+
+
+	openPOWERLINK - Update Guide
+	=============================
+
+
+How to update from any previous version to version 1.6
+-------------------------------------------------------
+
+1. Name of element m_pfnCbSync in structure tEplApiInitParam has been
+   changed to m_pfnCbSyncProcess.
+   Rename this element in your application, where the stack is initialized.
+
+2. PDO user part module is always necessary now, because it actually reads,
+   checks and prepares the PDO configuration from the object dictionary for
+   efficient processing by the PDO kernel part module.
+
+   - Add the source files EplPdouCal.c and EplPdou.c to your project, i.e. makefile.
+   - Add the constant EPL_MODULE_PDOU to the definition of EPL_MODULE_INTEGRATION
+     in EplCfg.h of your project.
+
+3. Implement the function EdrvChangeFilter in your Ethernet driver.
+   Currently, just a dummy like the following code snippet is sufficient.
+
+tEplKernel EdrvChangeFilter(tEdrvFilter*    pFilter_p,
+                            unsigned int    uiCount_p,
+                            unsigned int    uiEntryChanged_p,
+                            unsigned int    uiChangeFlags_p)
+{
+tEplKernel      Ret = kEplSuccessful;
+
+    return Ret;
+}
+
+
+
+
+
+
