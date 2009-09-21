@@ -696,7 +696,7 @@ unsigned int        uiMappObjectCount;
              uiMappObjectCount--, pMappObject++)
         {
 
-            BENCHMARK_MOD_02_TOGGLE(7);
+            BENCHMARK_MOD_08_TOGGLE(7);
             // copy object from process/OD variable to TPDO
             Ret = EplPdokCopyVarToPdo(&pFrame_p->m_Data.m_Pres.m_le_abPayload[0], pMappObject);
             if (Ret != kEplSuccessful)

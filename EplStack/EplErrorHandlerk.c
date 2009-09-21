@@ -442,6 +442,8 @@ tEplNmtEvent            NmtEvent;
                     {   // threshold is reached
                         // $$$ d.k.: generate error history entry E_DLL_CRC_TH
 
+                        BENCHMARK_MOD_02_TOGGLE(7);
+
                         // post event to NMT state machine
                         NmtEvent = kEplNmtEventNmtCycleError;
                         Event.m_EventSink = kEplEventSinkNmtk;
@@ -458,6 +460,9 @@ tEplNmtEvent            NmtEvent;
             if ((ulDllErrorEvents & EPL_DLL_ERR_INVALID_FORMAT) != 0)
             {   // invalid format error occured (only direct reaction)
                 // $$$ d.k.: generate error history entry E_DLL_INVALID_FORMAT
+
+                BENCHMARK_MOD_02_TOGGLE(7);
+
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
                 if (pErrHandlerEvent->m_NmtState >= kEplNmtMsNotActive)
                 {   // MN is active
