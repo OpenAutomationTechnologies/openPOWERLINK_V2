@@ -92,7 +92,7 @@ int openPowerlink(void) {
 	EplApiInitParam.m_uiNodeId = NODEID; // defined at the top of this file!
 	EplApiInitParam.m_dwIpAddress = ip;
 	EplApiInitParam.m_uiIsochrTxMaxPayload = 100;
-	EplApiInitParam.m_uiIsochrRxMaxPayload = 100;
+	EplApiInitParam.m_uiIsochrRxMaxPayload = 256;
 	EplApiInitParam.m_dwPresMaxLatency = 50000;
 	EplApiInitParam.m_dwAsndMaxLatency = 150000;
 	EplApiInitParam.m_fAsyncOnly = FALSE;
@@ -285,6 +285,7 @@ tEplKernel PUBLIC AppCbEvent(
                 {
                 BYTE    bNodeId = 0xF0;
                 DWORD   dwNodeAssignment = EPL_NODEASSIGN_NODE_EXISTS;
+                WORD    wPresPayloadLimit = 256;
 
                     PRINTF3("%s(0x%X) originating event = 0x%X\n",
                             __func__,
@@ -299,6 +300,12 @@ tEplKernel PUBLIC AppCbEvent(
 
                     bNodeId = 0x04;
                     EplRet = EplApiWriteLocalObject(0x1F81, bNodeId, &dwNodeAssignment, sizeof (dwNodeAssignment));
+                    if (EplRet != kEplSuccessful)
+                    {
+                        goto Exit;
+                    }
+
+                    EplRet = EplApiWriteLocalObject(0x1F8D, bNodeId, &wPresPayloadLimit, sizeof (wPresPayloadLimit));
                     if (EplRet != kEplSuccessful)
                     {
                         goto Exit;
