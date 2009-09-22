@@ -5509,6 +5509,9 @@ static tEplKernel EplDllkMnSendPreq(tEplNmtState NmtState_p,
 tEplKernel      Ret = kEplSuccessful;
 tEdrvTxBuffer  *pTxBuffer = NULL;
 
+#if EPL_TIMER_USE_HIGHRES != FALSE
+    Ret = EplTimerHighReskDeleteTimer(&EplDllkInstance_g.m_TimerHdlResponse);
+#endif
 
     if (EplDllkInstance_g.m_pCurNodeInfo == NULL)
     {   // start with first isochronous CN
