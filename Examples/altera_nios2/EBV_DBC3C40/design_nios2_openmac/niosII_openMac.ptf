@@ -148,7 +148,7 @@ SYSTEM niosII_openMac
             Entry onchip_memory_0/s1
             {
                address = "0x00004000";
-               span = "0x00004000";
+               span = "0x00000400";
                is_bridge = "0";
             }
             Entry DBC3C40_SRAM_0/avalon_tristate_slave
@@ -532,7 +532,7 @@ SYSTEM niosII_openMac
             Entry onchip_memory_0/s1
             {
                address = "0x00004000";
-               span = "0x00004000";
+               span = "0x00000400";
                is_bridge = "0";
             }
             Entry DBC3C40_SRAM_0/avalon_tristate_slave
@@ -645,7 +645,7 @@ SYSTEM niosII_openMac
          gui_include_tightly_coupled_data_masters = "0";
          gui_omit_avalon_data_master = "0";
          cache_has_icache = "1";
-         cache_icache_size = "32768";
+         cache_icache_size = "16384";
          cache_icache_line_size = "32";
          cache_icache_ram_block_type = "AUTO";
          cache_icache_bursts = "0";
@@ -802,7 +802,7 @@ SYSTEM niosII_openMac
             }
             CONSTANT nasys_icache_size
             {
-               value = "32768";
+               value = "16384";
                comment = "Size in bytes of instruction cache";
             }
             CONSTANT nasys_icache_line_size
@@ -858,7 +858,7 @@ SYSTEM niosII_openMac
          View 
          {
             Settings_Summary = "Nios II/s
-            <br>&nbsp;&nbsp;32-Kbyte Instruction Cache
+            <br>&nbsp;&nbsp;16-Kbyte Instruction Cache
             
             <br>&nbsp;&nbsp;JTAG Debug Module
             ";
@@ -1719,7 +1719,7 @@ SYSTEM niosII_openMac
             PORT address
             {
                type = "address";
-               width = "12";
+               width = "8";
                direction = "input";
                Is_Enabled = "1";
             }
@@ -1792,7 +1792,7 @@ SYSTEM niosII_openMac
             Address_Alignment = "dynamic";
             Well_Behaved_Waitrequest = "0";
             Is_Nonvolatile_Storage = "0";
-            Address_Span = "16384";
+            Address_Span = "1024";
             Read_Latency = "1";
             Is_Memory_Device = "1";
             Maximum_Pending_Read_Transactions = "0";
@@ -1801,7 +1801,7 @@ SYSTEM niosII_openMac
             Write_Latency = "0";
             Is_Flash = "0";
             Data_Width = "32";
-            Address_Width = "12";
+            Address_Width = "8";
             Maximum_Burst_Size = "1";
             Register_Incoming_Signals = "0";
             Register_Outgoing_Signals = "0";
@@ -1842,7 +1842,7 @@ SYSTEM niosII_openMac
          gui_ram_block_type = "Automatic";
          Writeable = "1";
          dual_port = "0";
-         Size_Value = "16384";
+         Size_Value = "1024";
          Size_Multiple = "1";
          use_shallow_mem_blocks = "0";
          init_mem_content = "1";
@@ -1866,7 +1866,7 @@ SYSTEM niosII_openMac
                onchip_memory_0 
                {
                   Command1 = "@echo Post-processing to create $(notdir $@)";
-                  Command2 = "elf2hex $(ELF) 0x00004000 0x7FFF --width=32 $(QUARTUS_PROJECT_DIR)/onchip_memory_0.hex --create-lanes=0 ";
+                  Command2 = "elf2hex $(ELF) 0x00004000 0x43FF --width=32 $(QUARTUS_PROJECT_DIR)/onchip_memory_0.hex --create-lanes=0 ";
                   Dependency = "$(ELF)";
                   Target_File = "$(QUARTUS_PROJECT_DIR)/onchip_memory_0.hex";
                }
@@ -1959,12 +1959,12 @@ SYSTEM niosII_openMac
             Is_Memory_Device = "1";
             Address_Group = "0";
             Address_Alignment = "dynamic";
-            Address_Width = "12";
+            Address_Width = "8";
             Data_Width = "32";
             Has_IRQ = "0";
             Read_Wait_States = "0";
             Write_Wait_States = "0";
-            Address_Span = "16384";
+            Address_Span = "1024";
             Read_Latency = "1";
             Is_Channel = "1";
             Is_Enabled = "0";
