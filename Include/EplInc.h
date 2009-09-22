@@ -191,9 +191,9 @@ typedef union
 #define EPL_FEATURE_PDO_DYN         0x00000040
 #define EPL_FEATURE_NMT_UDP         0x00000080
 #define EPL_FEATURE_CFGMA           0x00000100
-#define EPL_FEATURE_DLL_MULTIPLEX   0x00000200
+#define EPL_FEATURE_DLL_MULTIPLEX   0x00000200  // CN specific
 #define EPL_FEATURE_NODEID_SW       0x00000400
-#define EPL_FEATURE_NMT_BASICETH    0x00000800
+#define EPL_FEATURE_NMT_BASICETH    0x00000800  // MN specific
 #define EPL_FEATURE_RT1             0x00001000
 #define EPL_FEATURE_RT2             0x00002000
 
@@ -232,7 +232,7 @@ typedef union
 #endif
 
 #ifndef EPL_DEF_FEATURE_PDO_DYN
-    #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOK)) != 0)
+    #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOU)) != 0)
         #define EPL_DEF_FEATURE_PDO_DYN         (EPL_FEATURE_PDO_DYN)
     #else
         #define EPL_DEF_FEATURE_PDO_DYN         0
@@ -247,12 +247,17 @@ typedef union
     #endif
 #endif
 
+#ifndef EPL_DEF_FEATURE_DLL_MULTIPLEX
+    #define EPL_DEF_FEATURE_DLL_MULTIPLEX       (EPL_FEATURE_DLL_MULTIPLEX)
+#endif
+
 #define EPL_DEF_FEATURE_FLAGS                   (EPL_DEF_FEATURE_ISOCHR \
                                                 | EPL_DEF_FEATURE_SDO_ASND \
                                                 | EPL_DEF_FEATURE_SDO_UDP \
                                                 | EPL_DEF_FEATURE_SDO_PDO \
                                                 | EPL_DEF_FEATURE_PDO_DYN \
-                                                | EPL_DEF_FEATURE_CFGMA)
+                                                | EPL_DEF_FEATURE_CFGMA \
+                                                | EPL_DEF_FEATURE_DLL_MULTIPLEX)
 
 
 #ifndef tabentries

@@ -91,10 +91,10 @@ int openPowerlink(void) {
 	EPL_MEMCPY(EplApiInitParam.m_abMacAddress, abMacAddr, sizeof(EplApiInitParam.m_abMacAddress));
 	EplApiInitParam.m_uiNodeId = NODEID; // defined at the top of this file!
 	EplApiInitParam.m_dwIpAddress = ip;
-	EplApiInitParam.m_uiIsochrTxMaxPayload = 100;
+	EplApiInitParam.m_uiIsochrTxMaxPayload = 256;
 	EplApiInitParam.m_uiIsochrRxMaxPayload = 256;
-	EplApiInitParam.m_dwPresMaxLatency = 50000;
-	EplApiInitParam.m_dwAsndMaxLatency = 150000;
+	EplApiInitParam.m_dwPresMaxLatency = 2000;
+	EplApiInitParam.m_dwAsndMaxLatency = 2000;
 	EplApiInitParam.m_fAsyncOnly = FALSE;
 	EplApiInitParam.m_dwFeatureFlags = -1;
 	EplApiInitParam.m_dwCycleLen = CYCLE_LEN;
@@ -105,7 +105,7 @@ int openPowerlink(void) {
 	EplApiInitParam.m_uiPrescaler = 2;
 	EplApiInitParam.m_dwLossOfFrameTolerance = 500000;
 	EplApiInitParam.m_dwAsyncSlotTimeout = 3000000;
-	EplApiInitParam.m_dwWaitSocPreq = 150000;
+	EplApiInitParam.m_dwWaitSocPreq = 0;
 	EplApiInitParam.m_dwDeviceType = -1;
 	EplApiInitParam.m_dwVendorId = -1;
 	EplApiInitParam.m_dwProductCode = -1;

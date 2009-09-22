@@ -24,7 +24,7 @@ do
           SKIP_MAKE=1
           ;;
       --rebuild)
-          rm -f ./public.mk
+          rm -f ./public.mk ./settings.bsp
           ;;
       --debug)
           NO_OPT=1

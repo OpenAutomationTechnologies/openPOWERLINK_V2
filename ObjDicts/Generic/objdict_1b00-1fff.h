@@ -164,10 +164,12 @@
             EPL_OBD_SUBINDEX_RAM_VAR(0x1F99, 0x00, kEplObdTypUInt32, kEplObdAccRW, tEplObdUnsigned32, NMT_CNBasicEthernetTimeout_U32, 5000000)  // in [us]
         EPL_OBD_END_INDEX(0x1F99)
 
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_VETH)) != 0)
         // Object 1F9Ah: NMT_HostName_VS
         EPL_OBD_BEGIN_INDEX_RAM(0x1F9A, 0x01, NULL)
            EPL_OBD_SUBINDEX_RAM_VSTRING(0x1F9A, 0x00, kEplObdAccR, host_name, 33, "")
         EPL_OBD_END_INDEX(0x1F9A)
+#endif
 
         // Object 1F9Eh: NMT_ResetCmd_U8
         EPL_OBD_BEGIN_INDEX_RAM(0x1F9E, 0x01, EplApiCbObdAccess)

@@ -191,14 +191,14 @@ typedef enum
 //    kEplPdoErrorSend            = 0x00B6,       // error during sending a PDO
     kEplPdoConfWhileEnabled     = 0x00B7,       // PDO configuration cannot be changed while it is enabled
     kEplPdoErrorMapp            = 0x00B8,       // invalid PDO mapping
-    kEplPdoVarNotFound          = 0x00B9,       // variable was not found in function PdoSignalVar()
-    kEplPdoErrorEmcyPdoLen      = 0x00BA,       // the length of a received PDO is unequal to the expected value
-    kEplPdoWriteConstObject     = 0x00BB,       // constant object can not be written
+    kEplPdoVarNotFound          = 0x00B9,       // the referenced object in a PDO mapping does not exist
+//    kEplPdoErrorEmcyPdoLen      = 0x00BA,       // the length of a received PDO is unequal to the expected value
+//    kEplPdoWriteConstObject     = 0x00BB,       // constant object can not be written
                                                 // (only TxType, Inhibit-, Event Time for CANopen Kit)
     kEplPdoSizeMismatch         = 0x00BC,       // bit size of object mapping is larger than the object size
-    kEplPdoToManyTxPdos         = 0x00BD,       // there exits more than one TPDO on CN
+    kEplPdoTooManyTxPdos        = 0x00BD,       // there exits more than one TPDO on CN
     kEplPdoInvalidObjIndex      = 0x00BE,       // invalid object index used for PDO mapping or communication parameter
-    kEplPdoToManyPdos           = 0x00BF,       // there exit to many PDOs
+    kEplPdoTooManyPdos           = 0x00BF,       // there exit to many PDOs
 
     // Configuration manager module 0x00C0 - 0x00CF
     kEplCfgMaConfigError        = 0x00C0,       // error in configuration manager

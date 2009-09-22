@@ -489,7 +489,7 @@ tEplPdoAllocationParam  AllocParam;
 
         if (AllocParam.m_uiRxPdoChannelCount > EPL_D_PDO_RPDOChannels_U16)
         {
-            Ret = kEplPdoToManyPdos;
+            Ret = kEplPdoTooManyPdos;
             goto Exit;
         }
 
@@ -524,7 +524,7 @@ tEplPdoAllocationParam  AllocParam;
 
         if (AllocParam.m_uiTxPdoChannelCount > EPL_D_PDO_TPDOChannels_U16)
         {
-            Ret = kEplPdoToManyTxPdos;
+            Ret = kEplPdoTooManyTxPdos;
             goto Exit;
         }
 
@@ -541,7 +541,7 @@ tEplPdoAllocationParam  AllocParam;
     // no MN support, so we must not have more than one TPDO
     if (AllocParam.m_uiTxPdoChannelCount > 1)
     {
-        Ret = kEplPdoToManyTxPdos;
+        Ret = kEplPdoTooManyTxPdos;
         goto Exit;
     }
 #endif
