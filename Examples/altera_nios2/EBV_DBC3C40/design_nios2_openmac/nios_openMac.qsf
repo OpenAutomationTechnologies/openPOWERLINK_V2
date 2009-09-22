@@ -185,6 +185,13 @@ set_global_assignment -name QIP_FILE niosII_openMac.qip
 set_global_assignment -name SEARCH_PATH EPL/ -tag from_archive
 set_global_assignment -name SEARCH_PATH Programme/altera/90/quartus/libraries/others/maxplus2/ -tag from_archive
 set_global_assignment -name SEARCH_PATH megafunctions/ -tag from_archive
+set_instance_assignment -name TCO_REQUIREMENT "5 ns" -from * -to adr
+set_instance_assignment -name TCO_REQUIREMENT "5 ns" -from * -to nbe
+set_instance_assignment -name TCO_REQUIREMENT "6 ns" -from * -to data
+set_instance_assignment -name TSU_REQUIREMENT "1 ns" -from * -to data
+set_instance_assignment -name TCO_REQUIREMENT "6 ns" -from * -to sram_ncs
+set_instance_assignment -name TCO_REQUIREMENT "6 ns" -from * -to noe
+set_instance_assignment -name TCO_REQUIREMENT "6 ns" -from * -to nwe
 set_location_assignment PIN_T3 -to button[0]
 set_location_assignment PIN_R1 -to button[1]
 set_location_assignment PIN_R2 -to button[2]
@@ -266,10 +273,3 @@ set_global_assignment -name QIP_FILE lpm_ff0.qip
 set_global_assignment -name MISC_FILE "C:/Projekte/CVS_Projekte/EPL_V2/Examples/altera_nios2/EBV_DBC3C40/design_nios2_openmac/nios_openMac.dpf"
 set_location_assignment PIN_F11 -to io3_3V_o[8]
 set_location_assignment PIN_G11 -to io3_3V_o[9]
-set_instance_assignment -name TCO_REQUIREMENT "5 ns" -from * -to adr -disable
-set_instance_assignment -name TCO_REQUIREMENT "5 ns" -from * -to nbe -disable
-set_instance_assignment -name TCO_REQUIREMENT "6 ns" -from * -to data -disable
-set_instance_assignment -name TSU_REQUIREMENT "5 ns" -from * -to data -disable
-set_instance_assignment -name TCO_REQUIREMENT "5 ns" -from * -to sram_ncs -disable
-set_instance_assignment -name TCO_REQUIREMENT "5 ns" -from * -to noe -disable
-set_instance_assignment -name TCO_REQUIREMENT "5 ns" -from * -to nwe -disable
