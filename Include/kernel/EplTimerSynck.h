@@ -82,10 +82,11 @@
 // typedef
 //---------------------------------------------------------------------------
 
-typedef struct tEplTgtTimeStamp;
+typedef struct _tEplTgtTimeStamp tEplTgtTimeStamp;
 
 typedef tEplKernel (* tEplTimerSynckCbSync) (void);
 typedef tEplKernel (* tEplTimerSynckCbLossOfSync) (void);
+
 
 //---------------------------------------------------------------------------
 // function prototypes
@@ -99,13 +100,15 @@ tEplKernel PUBLIC EplTimerSynckRegSyncHandler(tEplTimerSynckCbSync pfnTimerSynck
 
 tEplKernel PUBLIC EplTimerSynckRegLossOfSyncHandler(tEplTimerSynckCbLossOfSync pfnTimerSynckCbLossOfSync_p);
 
-tEplKernel PUBLIC EplTimerSynckSetSyncOffsetUs(long liOffset_p);
+tEplKernel PUBLIC EplTimerSynckSetSyncShiftUs(DWORD dwAdvanceShiftUs_p);
 
-tEplKernel PUBLIC EplTimerSynckSetCycleLenUs(long liCycleLen_p);
+tEplKernel PUBLIC EplTimerSynckSetCycleLenUs(DWORD dwCycleLenUs_p);
 
-tEplKernel PUBLIC EplTimerSynckSetLossOfSyncToleranceUs(long liLossSyncTolerance_p);
+tEplKernel PUBLIC EplTimerSynckSetLossOfSyncToleranceUs(DWORD dwLossOfSyncToleranceUs_p);
 
-tEplKernel PUBLIC EplTimerSynckSetLatestSyncTimeStamp(tEplTgtTimeStamp* pTimeStamp_p);
+tEplKernel PUBLIC EplTimerSynckTriggerAtTimeStamp(tEplTgtTimeStamp* pTimeStamp_p);
+
+tEplKernel PUBLIC EplTimerSynckStopSync(void);
 
 
 #endif  // #ifndef _EPLTIMERSYNCK_H_
