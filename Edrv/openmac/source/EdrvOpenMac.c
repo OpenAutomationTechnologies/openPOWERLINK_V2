@@ -71,7 +71,9 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //--- set the system's base adr ---
 // MAC / MII IP CORE
 #define EDRV_MAC_BASE                   (void *)OPENMAC_0_REG_BASE
+#define EDRV_MAC_LENGTH                 OPENMAC_0_REG_SPAN
 #define EDRV_MII_BASE                   (void *)OPENMAC_0_MII_BASE
+#define EDRV_MII_LENGTH                 OPENMAC_0_MII_SPAN
 #define EPL_MAC_TX_IRQ                  OPENMAC_0_REG_IRQ
 #define EPL_MAC_RX_IRQ                  OPENMAC_0_RX_IRQ
 //--- set the system's base adr ---
@@ -284,9 +286,9 @@ BYTE            abFilterMask[31],
     EdrvInstance_l.m_EthConf.mode = /*OMETH_MODE_FULLDUPLEX +*/
                        OMETH_MODE_HALFDUPLEX;   // supported modes
 
-    EdrvInstance_l.m_EthConf.pPhyBase = EDRV_MII_BASE;
-    EdrvInstance_l.m_EthConf.pRamBase = EDRV_RAM_BASE;
-    EdrvInstance_l.m_EthConf.pRegBase = EDRV_MAC_BASE;
+    EdrvInstance_l.m_EthConf.pPhyBase = (void*) alt_remap_uncached(EDRV_MII_BASE, EDRV_MII_LENGTH);
+    EdrvInstance_l.m_EthConf.pRamBase = (void*) alt_remap_uncached(EDRV_RAM_BASE, EDRV_MAC_LENGTH);
+    EdrvInstance_l.m_EthConf.pRegBase = (void*) alt_remap_uncached(EDRV_MAC_BASE, EDRV_MAC_LENGTH);
 
     EdrvInstance_l.m_EthConf.rxBuffers = EDRV_MAX_RX_BUFFERS;
     EdrvInstance_l.m_EthConf.rxMtu = EDRV_MAX_BUFFER_SIZE;
