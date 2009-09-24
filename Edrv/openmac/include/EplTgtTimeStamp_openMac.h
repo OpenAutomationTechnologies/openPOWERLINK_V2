@@ -80,9 +80,9 @@
 // typedef
 //---------------------------------------------------------------------------
 
-typedef struct {
+struct _tEplTgtTimeStamp {
     unsigned long   ulTimeStamp;
-} tEplTgtTimeStamp;
+};
 
 //---------------------------------------------------------------------------
 // function prototypes
