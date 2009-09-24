@@ -266,8 +266,6 @@ tEplFrame       NmtRequestFrame;
 
 
     // build info-structure
-    NmtRequestFrameInfo.m_NetTime.m_dwNanoSec = 0;
-    NmtRequestFrameInfo.m_NetTime.m_dwSec = 0;
     NmtRequestFrameInfo.m_pFrame = &NmtRequestFrame;
     NmtRequestFrameInfo.m_uiFrameSize = EPL_C_DLL_MINSIZE_NMTREQ; // sizeof(NmtRequestFrame);
 

@@ -617,8 +617,6 @@ tEplEvent   Event;
     Event.m_EventType = kEplEventTypeAsndRx;
     Event.m_pArg = pFrameInfo_p->m_pFrame;
     Event.m_uiSize = pFrameInfo_p->m_uiFrameSize;
-    // pass NetTime of frame to userspace
-    Event.m_NetTime = pFrameInfo_p->m_NetTime;
 
     Ret = EplEventkPost(&Event);
     if (Ret != kEplSuccessful)

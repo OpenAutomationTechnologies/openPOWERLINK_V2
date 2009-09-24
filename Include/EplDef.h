@@ -156,6 +156,14 @@
 #endif
 #endif
 
+#define EPL_DLL_PROCESS_SYNC_ON_SOC     0
+#define EPL_DLL_PROCESS_SYNC_ON_SOA     1
+#define EPL_DLL_PROCESS_SYNC_ON_TIMER   2   // use special timer sync module
+
+#ifndef EPL_DLL_PROCESS_SYNC
+#define EPL_DLL_PROCESS_SYNC        EPL_DLL_PROCESS_SYNC_ON_SOA // time of processing the isochronous task (sync callback of application and cycle preparation)
+#endif
+
 #ifndef EPL_DLL_PRES_FILTER_COUNT
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
 #define EPL_DLL_PRES_FILTER_COUNT   -1   // maximum count of Rx filter entries for PRes frames

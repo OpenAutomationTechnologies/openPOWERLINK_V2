@@ -158,6 +158,9 @@ tEplKernel EplDllkRegRpdoHandler(tEplDllkCbProcessRpdo pfnDllkCbProcessRpdo_p);
 // registers handler for TPDOs frames
 tEplKernel EplDllkRegTpdoHandler(tEplDllkCbProcessTpdo pfnDllkCbProcessTpdo_p);
 
+// registers handler for Sync event
+tEplKernel EplDllkRegSyncHandler(tEplSyncCb pfnCbSync_p);
+
 
 #if EPL_NMT_MAX_NODE_ID > 0
 

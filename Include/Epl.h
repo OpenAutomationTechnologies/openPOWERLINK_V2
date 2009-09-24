@@ -216,8 +216,7 @@ typedef struct
 
     tEplApiCbEvent      m_pfnCbEvent;
     void*               m_pEventUserArg;
-    tEplSyncCb          m_pfnCbSyncProcess;
-    tEplSyncCb          m_pfnCbSyncSoc;
+    tEplSyncCb          m_pfnCbSync;
 
     tEplObdInitRam      m_pfnObdInitRam;    // function initializes OBD in RAM
     tEplObdDeinitRam    m_pfnObdDeinitRam;  // function frees OBD (for future use, currently NULL)

@@ -462,8 +462,6 @@ tEplDllNodeOpParam  NodeOpParam;
     }
 
     // build info structure
-    FrameInfo.m_NetTime.m_dwNanoSec = 0;
-    FrameInfo.m_NetTime.m_dwSec = 0;
     FrameInfo.m_pFrame = pFrame;
     FrameInfo.m_uiFrameSize = sizeof(abBuffer);
 

@@ -237,8 +237,6 @@ tEplFrameInfo   FrameInfo;
     {
         FrameInfo.m_pFrame = (tEplFrame*) pEvent_p->m_pArg;
         FrameInfo.m_uiFrameSize = pEvent_p->m_uiSize;
-        // extract NetTime
-        FrameInfo.m_NetTime = pEvent_p->m_NetTime;
 
         MsgType = (tEplMsgType)AmiGetByteFromLe(&FrameInfo.m_pFrame->m_le_bMessageType);
         if (MsgType != kEplMsgTypeAsnd)

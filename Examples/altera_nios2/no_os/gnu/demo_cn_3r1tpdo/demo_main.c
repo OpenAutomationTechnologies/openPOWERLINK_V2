@@ -114,7 +114,7 @@ int openPowerlink(void) {
 	EplApiInitParam.m_dwSubnetMask = SUBNET_MASK;
 	EplApiInitParam.m_dwDefaultGateway = 0;
 	EplApiInitParam.m_pfnCbEvent = AppCbEvent;
-    EplApiInitParam.m_pfnCbSyncProcess = AppCbSync;
+    EplApiInitParam.m_pfnCbSync  = AppCbSync;
     EplApiInitParam.m_pfnObdInitRam = EplObdInitRam;
 
 	// initialize EPL stack

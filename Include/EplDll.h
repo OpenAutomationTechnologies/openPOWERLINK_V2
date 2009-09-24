@@ -133,7 +133,7 @@ typedef struct
 {
     unsigned int      m_uiFrameSize;
     tEplFrame       * m_pFrame;
-    tEplNetTime       m_NetTime;
+//    tEplNetTime       m_NetTime;
 
 } tEplFrameInfo;
 

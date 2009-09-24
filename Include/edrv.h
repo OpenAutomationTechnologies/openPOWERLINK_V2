@@ -100,6 +100,8 @@
 // types
 //---------------------------------------------------------------------------
 
+typedef struct _tEplTgtTimeStamp tEplTgtTimeStamp;
+
 // position of a buffer in an ethernet-frame
 typedef enum
 {
@@ -127,10 +129,10 @@ typedef struct _tEdrvTxBuffer
 // format of a rx-buffer
 typedef struct _tEdrvRxBuffer
 {
-    tEdrvBufferInFrame m_BufferInFrame;   // OUT position of received buffer in an ethernet-frame
-    unsigned int       m_uiRxMsgLen;        // OUT: length of received buffer (without CRC)
-    BYTE  *            m_pbBuffer;          // OUT: pointer to the buffer, set by ethernetdriver
-    tEplNetTime        m_NetTime;           // OUT: Timestamp of end of receiption
+    tEdrvBufferInFrame  m_BufferInFrame;    // OUT position of received buffer in an ethernet-frame
+    unsigned int        m_uiRxMsgLen;       // OUT: length of received buffer (without CRC)
+    BYTE  *             m_pbBuffer;         // OUT: pointer to the buffer, set by ethernetdriver
+    tEplTgtTimeStamp*   m_pTgtTimeStamp;    // OUT: pointer to Timestamp of end of receiption
 
 } tEdrvRxBuffer;
 

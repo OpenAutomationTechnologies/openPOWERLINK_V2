@@ -132,7 +132,7 @@ typedef enum
                                         // arg is pointer to tEplFrameInfo
     kEplEventTypePdoSoa         = 0x04, // SoA frame received event (isochronous phase completed)
                                         // arg is pointer to nothing
-    kEplEventTypeSyncSoc        = 0x05, // Sync event (e.g. SoC or anticipated SoC)
+    kEplEventTypeSync           = 0x05, // Sync event (e.g. SoC or anticipated SoC)
                                         // arg is pointer to nothing
     kEplEventTypeTimer          = 0x06, // Timer event
                                         // arg is pointer to tEplTimerEventArg

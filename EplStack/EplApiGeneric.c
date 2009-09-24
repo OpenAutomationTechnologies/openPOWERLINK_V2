@@ -294,7 +294,7 @@ tEplDllkInitParam   DllkInitParam;
 #endif
 
     // initialize EplEventk module
-    Ret = EplEventkInit(EplApiInstance_g.m_InitParam.m_pfnCbSyncProcess, EplApiInstance_g.m_InitParam.m_pfnCbSyncSoc);
+    Ret = EplEventkInit();
     if (Ret != kEplSuccessful)
     {
         goto Exit;
@@ -327,6 +327,12 @@ tEplDllkInitParam   DllkInitParam;
     }
     // copy MAC address back to instance structure
     EPL_MEMCPY(EplApiInstance_g.m_InitParam.m_abMacAddress, DllkInitParam.m_be_abSrcMac, 6);
+
+    Ret = EplDllkRegSyncHandler(EplApiInstance_g.m_InitParam.m_pfnCbSync);
+    if (Ret != kEplSuccessful)
+    {
+        goto Exit;
+    }
 
     // initialize EplErrorHandlerk module
     Ret = EplErrorHandlerkInit();

@@ -87,10 +87,10 @@
 //---------------------------------------------------------------------------
 
 // init function
-tEplKernel PUBLIC EplEventkInit(tEplSyncCb pfnCbSyncProcess_p, tEplSyncCb pfnCbSyncSoc_p);
+tEplKernel PUBLIC EplEventkInit(void);
 
 // add instance
-tEplKernel PUBLIC EplEventkAddInstance(tEplSyncCb pfnCbSyncProcess_p, tEplSyncCb pfnCbSyncSoc_p);
+tEplKernel PUBLIC EplEventkAddInstance(void);
 
 // delete instance
 tEplKernel PUBLIC EplEventkDelInstance(void);

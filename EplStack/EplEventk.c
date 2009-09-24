@@ -122,9 +122,6 @@ typedef struct
 #endif
 #endif
 
-    tEplSyncCb      m_pfnCbSyncProcess;
-    tEplSyncCb      m_pfnCbSyncSoc;
-
 #if (EPL_USE_SHAREDBUFF != FALSE) \
     && (EPL_EVENT_USE_KERNEL_QUEUE != FALSE)
     unsigned int    m_uiUserToKernelFullCount;
@@ -180,8 +177,7 @@ static void  EplEventkRxSignalHandlerCb (
 //
 // Description: function initializes the first instance
 //
-// Parameters:  pfnCbSyncProcess_p  = callback-function for process sync event
-//              pfnCbSyncSoc_p      = callback-function for SoC sync event
+// Parameters:  void
 //
 // Returns:     tEpKernel           = errorcode
 //
@@ -189,11 +185,11 @@ static void  EplEventkRxSignalHandlerCb (
 //
 //---------------------------------------------------------------------------
 
-tEplKernel PUBLIC EplEventkInit(tEplSyncCb pfnCbSyncProcess_p, tEplSyncCb pfnCbSyncSoc_p)
+tEplKernel PUBLIC EplEventkInit(void)
 {
 tEplKernel Ret;
 
-    Ret = EplEventkAddInstance(pfnCbSyncProcess_p, pfnCbSyncSoc_p);
+    Ret = EplEventkAddInstance();
 
     return Ret;
 
@@ -206,8 +202,7 @@ tEplKernel Ret;
 //
 // Description: function adds one more instance
 //
-// Parameters:  pfnCbSyncProcess_p  = callback-function for process sync event
-//              pfnCbSyncSoc_p      = callback-function for SoC sync event
+// Parameters:  void
 //
 // Returns:     tEpKernel           = errorcode
 //
@@ -215,7 +210,7 @@ tEplKernel Ret;
 //
 //---------------------------------------------------------------------------
 
-tEplKernel PUBLIC EplEventkAddInstance(tEplSyncCb pfnCbSyncProcess_p, tEplSyncCb pfnCbSyncSoc_p)
+tEplKernel PUBLIC EplEventkAddInstance(void)
 {
 tEplKernel      Ret;
 #if EPL_USE_SHAREDBUFF != FALSE
@@ -229,10 +224,6 @@ unsigned int    fShbNewCreated;
 #if EPL_EVENT_USE_KERNEL_QUEUE != FALSE
     EplEventkInstance_g.m_uiUserToKernelFullCount = 0;
 #endif
-
-    // save callback-functions
-    EplEventkInstance_g.m_pfnCbSyncProcess = pfnCbSyncProcess_p;
-    EplEventkInstance_g.m_pfnCbSyncSoc = pfnCbSyncSoc_p;
 
 #if EPL_USE_SHAREDBUFF != FALSE
     // init shared loop buffer
@@ -406,25 +397,6 @@ tEplEventSource         EventSource;
     // check m_EventSink
     switch(pEvent_p->m_EventSink)
     {
-        case kEplEventSinkSync:
-        {
-            if (EplEventkInstance_g.m_pfnCbSyncSoc != NULL)
-            {
-                Ret = EplEventkInstance_g.m_pfnCbSyncSoc();
-                if ((Ret != kEplSuccessful) && (Ret != kEplReject) && (Ret != kEplShutdown))
-                {
-                    EventSource = kEplEventSourceSyncCb;
-
-                    // Error event for API layer
-                    EplEventkPostError(kEplEventSourceEventk,
-                                    Ret,
-                                    sizeof(EventSource),
-                                    &EventSource);
-                }
-            }
-            break;
-        }
-
         // NMT-Kernel-Modul
         case kEplEventSinkNmtk:
         {
@@ -463,22 +435,6 @@ tEplEventSource         EventSource;
                 }
 
                 BENCHMARK_MOD_27_SET(0);
-                // call process sync callback to allow the application to access the process variables
-                if (EplEventkInstance_g.m_pfnCbSyncProcess != NULL)
-                {
-                    Ret = EplEventkInstance_g.m_pfnCbSyncProcess();
-                    if ((Ret != kEplSuccessful) && (Ret != kEplReject) && (Ret != kEplShutdown))
-                    {
-                        EventSource = kEplEventSourceSyncCb;
-
-                        // Error event for API layer
-                        EplEventkPostError(kEplEventSourceEventk,
-                                        Ret,
-                                        sizeof(EventSource),
-                                        &EventSource);
-                    }
-                }
-                BENCHMARK_MOD_27_RESET(0);
 
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLK)) != 0)
                 // forward SoA event to DLLk module for cycle preprocessing
@@ -494,9 +450,9 @@ tEplEventSource         EventSource;
                                     &EventSource);
                 }
 #endif
+                BENCHMARK_MOD_27_RESET(0);
 
             }
-            BENCHMARK_MOD_27_SET(0);
             break;
 #endif
         }

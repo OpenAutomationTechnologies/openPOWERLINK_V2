@@ -10,12 +10,7 @@
 How to update from any previous version to version 1.6
 -------------------------------------------------------
 
-1. Name of element m_pfnCbSync in structure tEplApiInitParam has been
-   changed to m_pfnCbSyncProcess.
-   Rename this element in your application, where the stack is initialized.
-
-
-2. PDO user part module is always necessary now, because it actually reads,
+1. PDO user part module is always necessary now, because it actually reads,
    checks and prepares the PDO configuration from the object dictionary for
    efficient processing by the PDO kernel part module.
 
@@ -24,14 +19,14 @@ How to update from any previous version to version 1.6
      in EplCfg.h of your project.
 
 
-3. To enable PRes cross-traffic on pure CNs it is necessary to define the
+2. To enable PRes cross-traffic on pure CNs it is necessary to define the
    macro EPL_DLL_PRES_FILTER_COUNT in EplCfg.h of your project. This macro
    defines the number of PRes filter entries in the DLL module and Ethernet
    driver. A value of -1 enables the reception of all PRes frames without
    specific filtering.
 
 
-4. Implement the function EdrvChangeFilter in your Ethernet driver.
+3. Implement the function EdrvChangeFilter in your Ethernet driver.
    Currently, just a dummy like the following code snippet is sufficient.
 
 tEplKernel EdrvChangeFilter(tEdrvFilter*    pFilter_p,
