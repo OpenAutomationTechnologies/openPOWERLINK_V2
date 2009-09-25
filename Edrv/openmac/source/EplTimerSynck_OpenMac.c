@@ -95,12 +95,12 @@
 /***************************************************************************/
 /*                                                                         */
 /*                                                                         */
-/*          C L A S S  EplTimerSynck                                             */
+/*          C L A S S  EplTimerSynck                                       */
 /*                                                                         */
 /*                                                                         */
 /***************************************************************************/
 //
-// Description:
+// Description: timer sync module implementation for openMAC
 //
 //
 /***************************************************************************/
@@ -149,15 +149,18 @@ typedef struct
     DWORD                       m_dwLossOfSyncTimeout;
 
     // EplTimerSynckCtrl specific
+    BOOL                        m_fRunning;
     DWORD                       m_adwActualTimeDiff[TIMEDIFF_COUNT];
     unsigned int                m_uiActualTimeDiffNextIndex;
     DWORD                       m_dwMeanTimeDiff;
-    DWORD                       m_dwTargetTimeDiff;
+    DWORD                       m_dwConfiguredTimeDiff;
     DWORD                       m_dwAdvanceShift;
     DWORD                       m_dwRejectThreshold;
+    DWORD                       m_dwTargetSyncTime;
+    DWORD                       m_dwPreviousSyncTime;
 
     // EplTimerSynckDrv specific
-    tEplTimerSynckTimerInfo     m_aTimerEntry[TIMER_COUNT];
+    tEplTimerSynckTimerInfo     m_aTimerInfo[TIMER_COUNT];
     unsigned int                m_uiActiveTimerHdl;
 
 } tEplTimerSynckInstance;
@@ -174,17 +177,27 @@ static tEplTimerSynckInstance   EplTimerSynckInstance_l;
 // local function prototypes
 //---------------------------------------------------------------------------
 
-static void  EplTimerSynckCtrlDoSyncAdjustment  (DWORD dwTimeStamp_p);
-static void  EplTimerSynckCtrlSetTargetTimeDiff (DWORD dwTargetTimeDiff_p);
+static tEplKernel EplTimerSynckCtrlDoSyncAdjustment (DWORD dwTimeStamp_p);
+static void  EplTimerSynckCtrlSetConfiguredTimeDiff (DWORD dwConfiguredTimeDiff_p);
 static void  EplTimerSynckCtrlUpdateLossOfSyncTolerance (void);
-static DWORD EplTimerSynckCtrlGetPeriod         (unsigned int uiTimerHdl_p);
+static DWORD EplTimerSynckCtrlGetNextAbsoluteTime   (unsigned int uiTimerHdl_p, DWORD dwCurrentTime_p);
 
-static inline void  EplTimerSynckDrvCompareInterruptDisable (void);
 static inline void  EplTimerSynckDrvCompareInterruptEnable  (void);
-static inline DWORD EplTimerSynckDrvGetTimeValue            (void);
+static inline void  EplTimerSynckDrvCompareInterruptDisable (void);
 static inline void  EplTimerSynckDrvSetCompareValue         (DWORD dwVal);
+static inline DWORD EplTimerSynckDrvGetTimeValue            (void);
+
 
 static void EplTimerSynckDrvInterruptHandler (void* pArg_p, alt_u32 dwInt_p);
+
+static tEplKernel EplTimerSynckDrvModifyTimerAbs(unsigned int uiTimerHdl_p,
+                                                 DWORD        dwAbsoluteTime_p);
+
+static tEplKernel EplTimerSynckDrvModifyTimerRel(unsigned int uiTimerHdl_p,
+                                                 int          iTimeAdjustment_p,
+                                                 DWORD*       pdwAbsoluteTime_p);
+
+static tEplKernel EplTimerSynckDrvDeleteTimer(unsigned int uiTimerHdl_p);
 
 
 //=========================================================================//
@@ -361,8 +374,9 @@ tEplKernel PUBLIC EplTimerSynckSetCycleLenUs (DWORD dwCycleLenUs_p)
 {
 tEplKernel      Ret = kEplSuccessful;
 
-
     EplTimerSynckInstance_l.m_dwCycleLenUs = dwCycleLenUs_p;
+
+    EplTimerSynckCtrlSetConfiguredTimeDiff(OMETH_US_2_TICKS(dwCycleLenUs_p));
 
     return Ret;
 
@@ -417,11 +431,16 @@ tEplKernel PUBLIC EplTimerSynckTriggerAtTimeStamp(tEplTgtTimeStamp* pTimeStamp_p
 {
 tEplKernel      Ret = kEplSuccessful;
 
+    Ret = EplTimerSynckDrvModifyTimerAbs(TIMER_HDL_LOSSOFSYNC,
+                                      (pTimeStamp_p->m_dwTimeStamp + EplTimerSynckInstance_l.m_dwLossOfSyncTimeout));
+    if (Ret != kEplSuccessful)
+    {
+        goto Exit;
+    }
 
-    // modify LossOfSync timer
+    Ret = EplTimerSynckCtrlDoSyncAdjustment(pTimeStamp_p->m_dwTimeStamp);
 
-    EplTimerSynckCtrlDoSyncAdjustment(pTimeStamp_p->m_dwTimeStamp);
-
+Exit:
     return Ret;
 
 }
@@ -446,7 +465,10 @@ tEplKernel PUBLIC EplTimerSynckStopSync (void)
 {
 tEplKernel      Ret = kEplSuccessful;
 
+    EplTimerSynckInstance_l.m_fRunning = FALSE;
 
+    Ret = EplTimerSynckDrvDeleteTimer(TIMER_HDL_SYNC);
+    Ret = EplTimerSynckDrvDeleteTimer(TIMER_HDL_LOSSOFSYNC);
 
     return Ret;
 }
@@ -459,17 +481,55 @@ tEplKernel      Ret = kEplSuccessful;
 //                                                                         //
 //=========================================================================//
 
+
+/***************************************************************************/
+/*                                                                         */
+/*                                                                         */
+/*          S U B C L A S S  EplTimerSynckCtrl                             */
+/*                                                                         */
+/*                                                                         */
+/***************************************************************************/
+//
+// Description: closed loop control implementation
+//
+/***************************************************************************/
+
 static void  EplTimerSynckCtrlAddActualTimeDiff     (DWORD dwActualTimeDiff_p);
 static void  EplTimerSynckCtrlCalcMeanTimeDiff      (void);
 static void  EplTimerSynckCtrlUpdateRejectThreshold (void);
 
 
-static void EplTimerSynckCtrlDoSyncAdjustment (DWORD dwTimeStamp_p)
+static tEplKernel EplTimerSynckCtrlDoSyncAdjustment (DWORD dwTimeStamp_p)
 {
-    EplTimerSynckCtrlAddActualTimeDiff(dwTimeStamp_p);
+tEplKernel      Ret = kEplSuccessful;
+DWORD           dwActualTimeDiff;
+int             iDeviation;
 
-    // there is still much to do
+    dwTimeStamp_p -= EplTimerSynckInstance_l.m_dwAdvanceShift;
 
+    if (EplTimerSynckInstance_l.m_fRunning != FALSE)
+    {
+        dwActualTimeDiff = dwTimeStamp_p - EplTimerSynckInstance_l.m_dwPreviousSyncTime;
+
+        EplTimerSynckCtrlAddActualTimeDiff(dwActualTimeDiff);
+
+        iDeviation = dwTimeStamp_p - EplTimerSynckInstance_l.m_dwTargetSyncTime;
+
+        iDeviation = iDeviation >> PROPORTIONAL_FRACTION_SHIFT;
+
+        Ret = EplTimerSynckDrvModifyTimerRel(TIMER_HDL_SYNC, iDeviation, &EplTimerSynckInstance_l.m_dwTargetSyncTime);
+    }
+    else
+    {   // first trigger
+        EplTimerSynckInstance_l.m_dwTargetSyncTime = dwTimeStamp_p + EplTimerSynckInstance_l.m_dwMeanTimeDiff;
+        EplTimerSynckInstance_l.m_fRunning = TRUE;
+
+        Ret = EplTimerSynckDrvModifyTimerAbs(TIMER_HDL_SYNC, EplTimerSynckInstance_l.m_dwTargetSyncTime);
+    }
+
+    EplTimerSynckInstance_l.m_dwPreviousSyncTime = dwTimeStamp_p;
+
+    return Ret;
 }
 
 
@@ -509,18 +569,18 @@ DWORD   dwTimeDiffSum;
 
 
 
-static void EplTimerSynckCtrlSetTargetTimeDiff (DWORD dwTargetTimeDiff_p)
+static void EplTimerSynckCtrlSetConfiguredTimeDiff (DWORD dwConfiguredTimeDiff_p)
 {
 int     nIdx;
 
-    EplTimerSynckInstance_l.m_dwTargetTimeDiff = dwTargetTimeDiff_p;
+    EplTimerSynckInstance_l.m_dwConfiguredTimeDiff = dwConfiguredTimeDiff_p;
 
     for (nIdx=0; nIdx < TIMEDIFF_COUNT; nIdx++)
     {
-        EplTimerSynckInstance_l.m_adwActualTimeDiff[nIdx] = dwTargetTimeDiff_p;
+        EplTimerSynckInstance_l.m_adwActualTimeDiff[nIdx] = dwConfiguredTimeDiff_p;
     }
 
-    EplTimerSynckInstance_l.m_dwMeanTimeDiff = dwTargetTimeDiff_p;
+    EplTimerSynckInstance_l.m_dwMeanTimeDiff = dwConfiguredTimeDiff_p;
 
     EplTimerSynckCtrlUpdateRejectThreshold();
 
@@ -541,133 +601,122 @@ DWORD   dwLossOfSyncTolerance;
 DWORD   dwMaxRejectThreshold;
 
     dwLossOfSyncTolerance = OMETH_US_2_TICKS(EplTimerSynckInstance_l.m_dwLossOfSyncToleranceUs);
-    dwMaxRejectThreshold  = dwTargetTimeDiff >> 1;
+    dwMaxRejectThreshold  = EplTimerSynckInstance_l.m_dwConfiguredTimeDiff >> 1;  // half of cycle length
+
+    EplTimerSynckInstance_l.m_dwRejectThreshold = EplTimerSynckInstance_l.m_dwConfiguredTimeDiff;
 
     if (dwLossOfSyncTolerance > dwMaxRejectThreshold)
     {
-        EplTimerSynckInstance_l.m_dwRejectThreshold = dwMaxRejectThreshold;
+        EplTimerSynckInstance_l.m_dwRejectThreshold += dwMaxRejectThreshold;
     }
     else
     {
-        EplTimerSynckInstance_l.m_dwRejectThreshold = dwLossOfSyncTolerance;
+        EplTimerSynckInstance_l.m_dwRejectThreshold += dwLossOfSyncTolerance;
     }
+
+    EplTimerSynckInstance_l.m_dwLossOfSyncTimeout = EplTimerSynckInstance_l.m_dwConfiguredTimeDiff + dwLossOfSyncTolerance;
 }
 
 
 
-static DWORD EplTimerSynckCtrlGetPeriod (unsigned int uiTimerHdl_p)
+static DWORD EplTimerSynckCtrlGetNextAbsoluteTime (unsigned int uiTimerHdl_p, DWORD dwCurrentTime_p)
 {
-DWORD   dwPeriod;
+DWORD   dwNextAbsoluteTime;
 
     switch (uiTimerHdl_p)
     {
         case TIMER_HDL_SYNC:
         {
-            dwPeriod = EplTimerSynckInstance_l.m_dwMeanTimeDiff;
+            // memorize current time as new target sync time
+            EplTimerSynckInstance_l.m_dwTargetSyncTime = dwCurrentTime_p;
+            dwNextAbsoluteTime = dwCurrentTime_p + EplTimerSynckInstance_l.m_dwMeanTimeDiff;
             break;
         }
 
         case TIMER_HDL_LOSSOFSYNC:
         {
-            dwPeriod = EplTimerSynckInstance_l.m_dwTargetTimeDiff;
+            dwNextAbsoluteTime = dwCurrentTime_p + EplTimerSynckInstance_l.m_dwConfiguredTimeDiff;
             break;
         }
 
         default:
         {
-            dwPeriod = 0;
+            dwNextAbsoluteTime = 0;
             break;
         }
     }
 
-    return dwPeriod;
+    return dwNextAbsoluteTime;
 
 }
 
 
 
 
+/***************************************************************************/
+/*                                                                         */
+/*                                                                         */
+/*          S U B C L A S S  EplTimerSynckDrv                              */
+/*                                                                         */
+/*                                                                         */
+/***************************************************************************/
+//
+// Description: timer driver implementation
+//
+/***************************************************************************/
+
+#define TIMER_DRV_MIN_TIME_DIFF     500
+
+static inline unsigned int EplTimerSynckDrvFindShortestTimer(void);
+
+static void EplTimerSynckDrvConfigureShortestTimer(void);
 
 
-static tEplKernel EplTimerSynckDrvModifyTimer(unsigned int uiTimerHdl_p,
-                                           DWORD        dwAbsoluteTime_p)
+
+static tEplKernel EplTimerSynckDrvModifyTimerAbs(unsigned int uiTimerHdl_p,
+                                              DWORD        dwAbsoluteTime_p)
 {
 tEplKernel                  Ret = kEplSuccessful;
-/*
-unsigned int                uiIndex;
-tEplTimerSynckDrvTimerInfo* pTimerInfo;
-DWORD                       dwTimeNs;
-DWORD                       dwTimeSteps;
+tEplTimerSynckTimerInfo*    pTimerInfo;
 
-    // check pointer to handle
-    if (pTimerHdl_p == NULL)
+    if (uiTimerHdl_p >= TIMER_COUNT)
     {
         Ret = kEplTimerInvalidHandle;
         goto Exit;
     }
 
-    if (fContinuously_p != FALSE)
+    pTimerInfo = &EplTimerSynckInstance_l.m_aTimerInfo[uiTimerHdl_p];
+    pTimerInfo->m_dwAbsoluteTime = dwAbsoluteTime_p;
+    pTimerInfo->m_fEnabled = TRUE;
+
+    EplTimerSynckDrvConfigureShortestTimer();
+
+Exit:
+    return Ret;
+
+}
+
+
+static tEplKernel EplTimerSynckDrvModifyTimerRel(unsigned int uiTimerHdl_p,
+                                                 int          iTimeAdjustment_p,
+                                                 DWORD*       pdwAbsoluteTime_p)
+{
+tEplKernel                  Ret = kEplSuccessful;
+tEplTimerSynckTimerInfo*    pTimerInfo;
+
+    if (uiTimerHdl_p >= TIMER_COUNT)
     {
-        Ret = kEplTimerNoTimerCreated;
+        Ret = kEplTimerInvalidHandle;
         goto Exit;
     }
 
-    if (*pTimerHdl_p == 0)
-    {   // no timer created yet
-        uiIndex = 0;
-        if (EplTimerSynckInstance_l.m_TimerInfo.m_pfnCallback != NULL)
-        {   // no free structure found
-            Ret = kEplTimerNoTimerCreated;
-            goto Exit;
-        }
-    }
-    else
-    {
-        uiIndex = (*pTimerHdl_p >> TIMERHDL_SHIFT) - 1;
-        if (uiIndex >= TIMER_COUNT)
-        {   // invalid handle
-            Ret = kEplTimerInvalidHandle;
-            goto Exit;
-        }
-    }
+    pTimerInfo = &EplTimerSynckInstance_l.m_aTimerInfo[uiTimerHdl_p];
+    pTimerInfo->m_dwAbsoluteTime += iTimeAdjustment_p;
+    *pdwAbsoluteTime_p = pTimerInfo->m_dwAbsoluteTime; 
+    pTimerInfo->m_fEnabled = TRUE;
 
-    // modify slice timer
-    pTimerInfo = &EplTimerSynckInstance_l.m_TimerInfo;
-    EplTimerSynckDrvCompareInterruptDisable();
+    EplTimerSynckDrvConfigureShortestTimer();
 
-    // increment timer handle (if timer expires right after this statement,
-    // the user would detect an unknown timer handle and discard it)
-    // => unused in this implementation, as the timer can always be stopped
-    pTimerInfo->m_EventArg.m_TimerHdl = ((pTimerInfo->m_EventArg.m_TimerHdl + 1) & TIMERHDL_MASK)
-                                        | ((uiIndex + 1) << TIMERHDL_SHIFT);
-
-    *pTimerHdl_p = pTimerInfo->m_EventArg.m_TimerHdl;
-
-    pTimerInfo->m_EventArg.m_Arg.m_dwVal = ulArgument_p;
-    pTimerInfo->m_pfnCallback = pfnCallback_p;
-
-    // calculate counter
-    if (ullTimeNs_p > 0xFFFFFFFF)
-    {   // time is too large, so decrease it to the maximum time
-        dwTimeNs = 0xFFFFFFFF;
-    }
-    else
-    {
-        dwTimeNs = (DWORD) ullTimeNs_p;
-    }
-
-    if (dwTimeNs < 10000)
-    {   // time is too less, so increase it to the minimum time
-        dwTimeNs = 10000;
-    }
-
-    dwTimeSteps = OMETH_NS_2_TICKS(dwTimeNs);
-
-    EplTimerSynckDrvSetCompareValue( EplTimerSynckDrvGetTimeValue() + dwTimeSteps);
-
-    // enable timer
-    EplTimerSynckDrvCompareInterruptEnable();
-*/
 Exit:
     return Ret;
 
@@ -678,49 +727,89 @@ Exit:
 static tEplKernel EplTimerSynckDrvDeleteTimer(unsigned int uiTimerHdl_p)
 {
 tEplKernel                  Ret = kEplSuccessful;
-/*
-unsigned int                uiIndex;
-tEplTimerSynckDrvTimerInfo* pTimerInfo;
+tEplTimerSynckTimerInfo*    pTimerInfo;
 
-    // check pointer to handle
-    if (pTimerHdl_p == NULL)
+    if (uiTimerHdl_p >= TIMER_COUNT)
     {
         Ret = kEplTimerInvalidHandle;
         goto Exit;
     }
 
-    pTimerInfo = &EplTimerSynckInstance_l.m_TimerInfo;
+    pTimerInfo = &EplTimerSynckInstance_l.m_aTimerInfo[uiTimerHdl_p];
+    pTimerInfo->m_fEnabled = FALSE;
 
-    if (*pTimerHdl_p == 0)
-    {   // no timer created yet
-        goto Exit;
-    }
-    else
-    {
-        uiIndex = (*pTimerHdl_p >> TIMERHDL_SHIFT) - 1;
-        if (uiIndex >= TIMER_COUNT)
-        {   // invalid handle
-            Ret = kEplTimerInvalidHandle;
-            goto Exit;
-        }
-        if (pTimerInfo->m_EventArg.m_TimerHdl != *pTimerHdl_p)
-        {   // invalid handle
-            goto Exit;
-        }
-    }
+    EplTimerSynckDrvConfigureShortestTimer();
 
-    pTimerInfo->m_pfnCallback = NULL;
-
-    *pTimerHdl_p = 0;
-
-    EplTimerSynckDrvCompareInterruptDisable();
-    EplTimerSynckDrvSetCompareValue( 0 );
-*/
 Exit:
     return Ret;
 
 }
 
+
+static inline unsigned int EplTimerSynckDrvFindShortestTimer(void)
+{
+unsigned int                uiTargetTimerHdl;
+unsigned int                uiCurrentTimerHdl;
+tEplTimerSynckTimerInfo*    pTimerInfo;
+DWORD                       dwAbsoluteTime = 0;
+
+    uiTargetTimerHdl = TIMER_HDL_INVALID;
+
+    for (pTimerInfo = &EplTimerSynckInstance_l.m_aTimerInfo[0],
+         uiCurrentTimerHdl = 0;
+         uiCurrentTimerHdl < TIMER_COUNT;
+         pTimerInfo++, uiCurrentTimerHdl++)
+    {
+        if (pTimerInfo->m_fEnabled != FALSE)
+        {
+            if ((uiTargetTimerHdl == TIMER_HDL_INVALID)
+                || ((long)(pTimerInfo->m_dwAbsoluteTime - dwAbsoluteTime) < 0))
+            {
+                dwAbsoluteTime = pTimerInfo->m_dwAbsoluteTime;
+                uiTargetTimerHdl = (unsigned int)(pTimerInfo - &EplTimerSynckInstance_l.m_aTimerInfo[0]);
+            }
+        }
+    }
+
+    return uiTargetTimerHdl;
+}
+
+
+static void EplTimerSynckDrvConfigureShortestTimer(void)
+{
+unsigned int                uiNextTimerHdl;
+tEplTimerSynckTimerInfo*    pTimerInfo;
+DWORD                       dwTargetAbsoluteTime;
+DWORD                       dwCurrentTime;
+
+    EplTimerSynckDrvCompareInterruptDisable();
+
+    uiNextTimerHdl = EplTimerSynckDrvFindShortestTimer();
+    if (uiNextTimerHdl != TIMER_HDL_INVALID)
+    {
+        pTimerInfo = &EplTimerSynckInstance_l.m_aTimerInfo[uiNextTimerHdl];
+
+        EplTimerSynckInstance_l.m_uiActiveTimerHdl = uiNextTimerHdl;
+        dwTargetAbsoluteTime = pTimerInfo->m_dwAbsoluteTime;
+
+        dwCurrentTime = EplTimerSynckDrvGetTimeValue();
+        if ((long)(dwTargetAbsoluteTime - dwCurrentTime) < TIMER_DRV_MIN_TIME_DIFF)
+        {
+            dwTargetAbsoluteTime = dwCurrentTime + TIMER_DRV_MIN_TIME_DIFF;
+        }
+
+        EplTimerSynckDrvSetCompareValue(dwTargetAbsoluteTime);
+
+        // enable timer
+        EplTimerSynckDrvCompareInterruptEnable();
+    }
+    else
+    {
+        EplTimerSynckDrvSetCompareValue(0);
+        EplTimerSynckInstance_l.m_uiActiveTimerHdl = TIMER_HDL_INVALID;
+    }
+
+}
 
 
 //---------------------------------------------------------------------------
@@ -757,17 +846,67 @@ static inline DWORD EplTimerSynckDrvGetTimeValue (void)
 
 static void EplTimerSynckDrvInterruptHandler (void* pArg_p, alt_u32 dwInt_p)
 {
+unsigned int                uiTimerHdl;
+tEplTimerSynckTimerInfo*    pTimerInfo;
+unsigned int                uiNextTimerHdl;
 
     BENCHMARK_MOD_24_SET(4);
 
-    EplTimerSynckDrvSetCompareValue(0);
-    EplTimerSynckDrvCompareInterruptDisable();
-/*
-    if (EplTimerSynckInstance_l.m_TimerInfo.m_pfnCallback != NULL)
+    uiTimerHdl = EplTimerSynckInstance_l.m_uiActiveTimerHdl;
+    if (uiTimerHdl < TIMER_COUNT)
     {
-        EplTimerSynckInstance_l.m_TimerInfo.m_pfnCallback(&EplTimerSynckInstance_l.m_TimerInfo.m_EventArg);
+        pTimerInfo = &EplTimerSynckInstance_l.m_aTimerInfo[uiTimerHdl];
+        pTimerInfo->m_dwAbsoluteTime = EplTimerSynckCtrlGetNextAbsoluteTime(uiTimerHdl, pTimerInfo->m_dwAbsoluteTime);
+
+        // execute the sync if it will elapse in a very short moment
+        // to give the sync event the highest priority.
+        uiNextTimerHdl = EplTimerSynckDrvFindShortestTimer();
+        if ((uiNextTimerHdl != uiTimerHdl)
+            && (uiNextTimerHdl == TIMER_HDL_SYNC))
+        {
+            pTimerInfo = &EplTimerSynckInstance_l.m_aTimerInfo[uiTimerHdl];
+
+            if ((pTimerInfo->m_fEnabled != FALSE)
+                && ((long)(pTimerInfo->m_dwAbsoluteTime - EplTimerSynckDrvGetTimeValue()) < TIMER_DRV_MIN_TIME_DIFF))
+            {
+                pTimerInfo->m_dwAbsoluteTime = EplTimerSynckCtrlGetNextAbsoluteTime(uiNextTimerHdl, pTimerInfo->m_dwAbsoluteTime);
+
+                if (EplTimerSynckInstance_l.m_pfnCbSync != NULL)
+                {
+                    EplTimerSynckInstance_l.m_pfnCbSync();
+                }
+            }
+        }
+
+        switch (uiTimerHdl)
+        {
+            case TIMER_HDL_SYNC:
+            {
+                if (EplTimerSynckInstance_l.m_pfnCbSync != NULL)
+                {
+                    EplTimerSynckInstance_l.m_pfnCbSync();
+                }
+                break;
+            }
+
+            case TIMER_HDL_LOSSOFSYNC:
+            {
+                if (EplTimerSynckInstance_l.m_pfnCbLossOfSync != NULL)
+                {
+                    EplTimerSynckInstance_l.m_pfnCbLossOfSync();
+                }
+                break;
+            }
+
+            default:
+            {
+                break;
+            }
+        }
     }
-*/
+
+    EplTimerSynckDrvConfigureShortestTimer();
+
     BENCHMARK_MOD_24_RESET(4);
     return;
 
