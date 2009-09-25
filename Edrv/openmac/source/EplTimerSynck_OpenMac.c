@@ -149,11 +149,12 @@ typedef struct
     DWORD                       m_dwLossOfSyncTimeout;
 
     // EplTimerSynckCtrl specific
-    DWORD                       m_aActualTimeDiff[TIMEDIFF_COUNT];
-    unsigned int                m_uiActualTimeDiffIndex;
+    DWORD                       m_adwActualTimeDiff[TIMEDIFF_COUNT];
+    unsigned int                m_uiActualTimeDiffNextIndex;
     DWORD                       m_dwMeanTimeDiff;
     DWORD                       m_dwTargetTimeDiff;
     DWORD                       m_dwAdvanceShift;
+    DWORD                       m_dwRejectThreshold;
 
     // EplTimerSynckDrv specific
     tEplTimerSynckTimerInfo     m_aTimerEntry[TIMER_COUNT];
@@ -173,8 +174,10 @@ static tEplTimerSynckInstance   EplTimerSynckInstance_l;
 // local function prototypes
 //---------------------------------------------------------------------------
 
-static void EplTimerSynckCtrlDoSyncAdjustment (DWORD dwTimeStamp_p);
-
+static void  EplTimerSynckCtrlDoSyncAdjustment  (DWORD dwTimeStamp_p);
+static void  EplTimerSynckCtrlSetTargetTimeDiff (DWORD dwTargetTimeDiff_p);
+static void  EplTimerSynckCtrlUpdateLossOfSyncTolerance (void);
+static DWORD EplTimerSynckCtrlGetPeriod         (unsigned int uiTimerHdl_p);
 
 static inline void  EplTimerSynckDrvCompareInterruptDisable (void);
 static inline void  EplTimerSynckDrvCompareInterruptEnable  (void);
@@ -388,6 +391,8 @@ tEplKernel      Ret = kEplSuccessful;
 
     EplTimerSynckInstance_l.m_dwLossOfSyncToleranceUs = dwLossOfSyncToleranceUs_p;
 
+    EplTimerSynckCtrlUpdateLossOfSyncTolerance();
+
     return Ret;
 
 }
@@ -445,7 +450,7 @@ tEplKernel      Ret = kEplSuccessful;
 
     return Ret;
 }
-    
+
 
 
 //=========================================================================//
@@ -454,48 +459,128 @@ tEplKernel      Ret = kEplSuccessful;
 //                                                                         //
 //=========================================================================//
 
+static void  EplTimerSynckCtrlAddActualTimeDiff     (DWORD dwActualTimeDiff_p);
+static void  EplTimerSynckCtrlCalcMeanTimeDiff      (void);
+static void  EplTimerSynckCtrlUpdateRejectThreshold (void);
+
 
 static void EplTimerSynckCtrlDoSyncAdjustment (DWORD dwTimeStamp_p)
 {
-    
-    
+    EplTimerSynckCtrlAddActualTimeDiff(dwTimeStamp_p);
+
+    // there is still much to do
+
+}
+
+
+static void EplTimerSynckCtrlAddActualTimeDiff (DWORD dwActualTimeDiff_p)
+{
+
+    // always add small TimeDiff values
+    // reject TimeDiff values which are too large
+    if (dwActualTimeDiff_p < EplTimerSynckInstance_l.m_dwRejectThreshold)
+    {
+        EplTimerSynckInstance_l.m_adwActualTimeDiff[EplTimerSynckInstance_l.m_uiActualTimeDiffNextIndex]
+            = dwActualTimeDiff_p;
+        EplTimerSynckInstance_l.m_uiActualTimeDiffNextIndex++;
+
+        EplTimerSynckCtrlCalcMeanTimeDiff();
+    }
+
 }
 
 
 
 static void EplTimerSynckCtrlCalcMeanTimeDiff (void)
 {
+int     nIdx;
+DWORD   dwTimeDiffSum;
+
+    dwTimeDiffSum = 0;
+
+    for (nIdx=0; nIdx < TIMEDIFF_COUNT; nIdx++)
+    {
+        dwTimeDiffSum += EplTimerSynckInstance_l.m_adwActualTimeDiff[nIdx];
+    }
+
+    EplTimerSynckInstance_l.m_dwMeanTimeDiff = dwTimeDiffSum >> TIMEDIFF_COUNT_SHIFT;
+
 }
 
 
 
 static void EplTimerSynckCtrlSetTargetTimeDiff (DWORD dwTargetTimeDiff_p)
 {
+int     nIdx;
+
+    EplTimerSynckInstance_l.m_dwTargetTimeDiff = dwTargetTimeDiff_p;
+
+    for (nIdx=0; nIdx < TIMEDIFF_COUNT; nIdx++)
+    {
+        EplTimerSynckInstance_l.m_adwActualTimeDiff[nIdx] = dwTargetTimeDiff_p;
+    }
+
+    EplTimerSynckInstance_l.m_dwMeanTimeDiff = dwTargetTimeDiff_p;
+
+    EplTimerSynckCtrlUpdateRejectThreshold();
+
+}
+
+
+
+static void EplTimerSynckCtrlUpdateLossOfSyncTolerance (void)
+{
+    EplTimerSynckCtrlUpdateRejectThreshold();
+}
+
+
+
+static void EplTimerSynckCtrlUpdateRejectThreshold (void)
+{
+DWORD   dwLossOfSyncTolerance;
+DWORD   dwMaxRejectThreshold;
+
+    dwLossOfSyncTolerance = OMETH_US_2_TICKS(EplTimerSynckInstance_l.m_dwLossOfSyncToleranceUs);
+    dwMaxRejectThreshold  = dwTargetTimeDiff >> 1;
+
+    if (dwLossOfSyncTolerance > dwMaxRejectThreshold)
+    {
+        EplTimerSynckInstance_l.m_dwRejectThreshold = dwMaxRejectThreshold;
+    }
+    else
+    {
+        EplTimerSynckInstance_l.m_dwRejectThreshold = dwLossOfSyncTolerance;
+    }
 }
 
 
 
 static DWORD EplTimerSynckCtrlGetPeriod (unsigned int uiTimerHdl_p)
 {
+DWORD   dwPeriod;
 
     switch (uiTimerHdl_p)
     {
         case TIMER_HDL_SYNC:
         {
+            dwPeriod = EplTimerSynckInstance_l.m_dwMeanTimeDiff;
             break;
         }
-        
+
         case TIMER_HDL_LOSSOFSYNC:
         {
+            dwPeriod = EplTimerSynckInstance_l.m_dwTargetTimeDiff;
             break;
         }
-        
+
         default:
         {
+            dwPeriod = 0;
             break;
         }
-        
     }
+
+    return dwPeriod;
 
 }
 
