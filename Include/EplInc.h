@@ -148,6 +148,10 @@ typedef struct
 } tEplNetTime;
 
 
+// forward declaration of target specific timestamp
+typedef struct _tEplTgtTimeStamp tEplTgtTimeStamp;
+
+
 // Hardware parameter structure
 typedef struct
 {

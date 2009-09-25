@@ -82,7 +82,6 @@
 // typedef
 //---------------------------------------------------------------------------
 
-typedef struct _tEplTgtTimeStamp tEplTgtTimeStamp;
 
 typedef tEplKernel (* tEplTimerSynckCbSync) (void);
 typedef tEplKernel (* tEplTimerSynckCbLossOfSync) (void);

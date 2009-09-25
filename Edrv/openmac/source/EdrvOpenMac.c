@@ -58,6 +58,8 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "system.h"     // FPGA system definitions
 #include "omethlib.h"   // openMAC header
 
+#include "EplTgtTimeStamp_openMac.h"
+
 #include <sys/alt_cache.h>
 #include <sys/alt_irq.h>
 #include <alt_types.h>
@@ -68,80 +70,34 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //---------------------------------------------------------------------------
 
 //------------------------------------------------------
-//--- set the system's base adr ---
-// MAC / MII IP CORE
+//--- set the system's base addresses ---
 #define EDRV_MAC_BASE                   (void *)OPENMAC_0_REG_BASE
 #define EDRV_MAC_LENGTH                 OPENMAC_0_REG_SPAN
 #define EDRV_MII_BASE                   (void *)OPENMAC_0_MII_BASE
 #define EDRV_MII_LENGTH                 OPENMAC_0_MII_SPAN
 #define EPL_MAC_TX_IRQ                  OPENMAC_0_REG_IRQ
 #define EPL_MAC_RX_IRQ                  OPENMAC_0_RX_IRQ
-//--- set the system's base adr ---
 
 
 //--- set driver's MTU ---
 #define EDRV_MAX_BUFFER_SIZE        1518
-//--- set driver's MTU ---
-
-//--- set driver's hooks pendings ---
-//RX hook buffer pendings
-// set to 0 if no buffer-pending is allowed
-// set 1..n the max pending RX buffers
-#define EDRV_MAX_PEN_SOA            0 //1 buffer (no pending)
-#define EDRV_MAX_PEN_SOC            0 //1 buffer (no pending)
-#define EDRV_MAX_PEN_PREQ           0 //1 buffer (no pending)
-#define EDRV_MAX_PEN_ASND           12 //13 buffers (with pending)
-#define EDRV_MAX_PEN_TOME           0 //1 buffer (no pending)
-//--- set driver's hooks pendings ---
-// 1 + 1 + 1 + 12 + 1 = 16
-// so you need 16 buffers set next definition to the sum
 
 //--- set driver's RX buffers ---
 #define EDRV_MAX_RX_BUFFERS         16
-//--- set driver's RX buffers ---
 
 //--- set driver's filters ---
 #define EDRV_MAX_FILTERS            16
-//--- set driver's filters ---
 
 //--- set driver's auto-response frames ---
 #define EDRV_MAX_AUTO_RESPONSES     14
-//--- set driver's auto-response frames ---
 
-//RX FIFO (for executing ASnd RX frames)
-//--- set FIFO size ---
-#define EDRV_MAX_RX_FIFO_SIZE       16 //should be 2^n not bigger than 32 and
-                                       //bigger than EDRV_MAX_PEN_ASND
-//--- set FIFO size ---
-//------------------------------------------------------
 
 #define EDRV_RAM_BASE (void *)(EDRV_MAC_BASE + 0x0800)
 
-/*
-#if EPL_MAC_RX_IRQ > EPL_MAC_TX_IRQ
-    #warning RX IRQ should have a higher IRQ priority than TX!!!
-#endif
-
-#if EPL_MAC_RX_IRQ > 0
-    #warning RX IRQ should have the highest IRQ priority!!!
-#endif
-*/
 
 #if (EDRV_MAX_RX_BUFFERS > 16)
 	#error This MAC version can handle 16 rx buffers, not more!
 #endif
-
-#if (EDRV_MAX_RX_FIFO_SIZE < EDRV_MAX_PEN_ASND)
-	#error The FIFO size was set to small. FIFO size > ASnd pendings
-#endif
-
-#if (EDRV_MAX_RX_FIFO_SIZE > 32)
-    #undef EDRV_MAX_RX_FIFO_SIZE
-    #define EDRV_MAX_RX_FIFO_SIZE 32 //FIFO max. 32 entries!
-#endif
-
-#define EDRV_MASK_RX_FIFO (EDRV_MAX_RX_FIFO_SIZE - 1) //for masking the indices
-
 
 
 #if (EDRV_AUTO_RESPONSE == FALSE)
@@ -177,20 +133,6 @@ typedef struct _tEdrvInstance
     //tx msg counter
     DWORD                     msgfree;
     DWORD                     msgsent;
-    DWORD                     fulltxqueue;
-
-    //tx space
-/*
-    //RX ASnd FIFO
-    struct {
-        tEdrvRxBuffer           fifo[EDRV_MAX_RX_FIFO_SIZE];
-        DWORD                     i_wr;
-        DWORD                     i_rd;
-        DWORD                     mask;
-        DWORD                     full;
-        BYTE                      size;
-    } RXFIFO;
-*/
 
 } tEdrvInstance;
 
@@ -209,8 +151,6 @@ static void EdrvTxInterruptHandler (void* pArg_p, alt_u32 dwInt_p);
 static void EdrvTimerInterruptHandler (void* pArg_p, alt_u32 dwInt_p);
 
 
-//void asyncCall(void);
-
 
 //---------------------------------------------------------------------------
 // module globale vars
@@ -221,6 +161,11 @@ static tEdrvInstance EdrvInstance_l;
 
 
 
+//=========================================================================//
+//                                                                         //
+//          P U B L I C   F U N C T I O N S                                //
+//                                                                         //
+//=========================================================================//
 
 //---------------------------------------------------------------------------
 //
@@ -303,25 +248,8 @@ BYTE            abFilterMask[31],
     }
 
     //init driver struct
-    EdrvInstance_l.fulltxqueue = 0;
     EdrvInstance_l.msgfree = 0;
     EdrvInstance_l.msgsent = 0;
-
-/*
-    //init RX FIFO
-    EdrvInstance_l.RXFIFO.full = 0;
-    EdrvInstance_l.RXFIFO.i_rd = 0;
-    EdrvInstance_l.RXFIFO.i_wr = 0;
-    EdrvInstance_l.RXFIFO.mask = EDRV_MASK_RX_FIFO;
-    EdrvInstance_l.RXFIFO.size = EDRV_MAX_RX_FIFO_SIZE;
-    for(i=0; i<EdrvInstance_l.RXFIFO.size; i++) {
-        EdrvInstance_l.RXFIFO.fifo[i].m_BufferInFrame = kEdrvBufferLastInFrame;
-        EdrvInstance_l.RXFIFO.fifo[i].m_NetTime.m_dwNanoSec = 0;
-        EdrvInstance_l.RXFIFO.fifo[i].m_NetTime.m_dwSec = 0;
-        EdrvInstance_l.RXFIFO.fifo[i].m_uiRxMsgLen = 0;
-        EdrvInstance_l.RXFIFO.fifo[i].m_pbBuffer = NULL;
-    }
-*/
 
     // initialize the filters, so that they won't match any normal Ethernet frame
     EPL_MEMSET(abFilterMask, 0, sizeof(abFilterMask));
@@ -396,80 +324,37 @@ Exit:
 
 //---------------------------------------------------------------------------
 //
-// Function:    receive Hook functions
+// Function:    EdrvShutdown
 //
-// Description: these functions will be called out of the Interrupt, when the
-//				received packet fits to the filter
-//
-// Parameters:  *arg (don't care)
-//              *pPacket pointer to received packet
-//              *pointer to free function (don't care)
-//
-// Returns:     0 if frame was used
-//              -1 if frame was not used
-//
-// State:
-//
-//---------------------------------------------------------------------------
-
-static int EdrvRxHook(void *arg, ometh_packet_typ  *pPacket, OMETH_BUF_FREE_FCT  *pFct)
-{
-tEdrvRxBuffer       rxBuffer;
-unsigned int        uiIndex;
-
-    BENCHMARK_MOD_01_SET(6);
-    rxBuffer.m_BufferInFrame = kEdrvBufferLastInFrame;
-    rxBuffer.m_pbBuffer = (BYTE *) &pPacket->data;
-    rxBuffer.m_uiRxMsgLen = pPacket->length;
-    rxBuffer.m_NetTime.m_dwNanoSec = 0;
-    rxBuffer.m_NetTime.m_dwSec = 0;
-
-    EdrvInstance_l.m_InitParam.m_pfnRxHandler(&rxBuffer); //pass frame to Powerlink Stack
-
-    uiIndex = (unsigned int) arg;
-
-    if (EdrvInstance_l.m_apTxBuffer[uiIndex] != NULL)
-    {   // filter with auto-response frame triggered
-        BENCHMARK_MOD_01_SET(5);
-        // call Tx handler function from DLL
-        EdrvInstance_l.m_InitParam.m_pfnTxHandler(EdrvInstance_l.m_apTxBuffer[uiIndex]);
-        BENCHMARK_MOD_01_RESET(5);
-    }
-
-    BENCHMARK_MOD_01_RESET(6);
-
-    return 0;
-}
-
-/*
-//---------------------------------------------------------------------------
-//
-// Function:    asyncCall
-//
-// Description: This function should be called ot of a while loop
-//				in the main-function. It executes the packets in the FIFO and
-//				lets them free (buffer will be returned to the MAC).
+// Description: Shutdown the Ethernet controller
 //
 // Parameters:  void
 //
-// Returns:     void
+// Returns:     Errorcode   = kEplSuccessful
 //
 // State:
 //
 //---------------------------------------------------------------------------
-void asyncCall(void) {
-    while(EdrvInstance_l.RXFIFO.i_wr - EdrvInstance_l.RXFIFO.i_rd) {
-        //pass frame to EPL Stack
-        EdrvInstance_l.m_InitParam.m_pfnRxHandler(&EdrvInstance_l.RXFIFO.fifo[EdrvInstance_l.RXFIFO.i_rd & EdrvInstance_l.RXFIFO.mask]);
-        //ack frame in MAC
-        omethPacketFree( (ometh_packet_typ*)(EdrvInstance_l.RXFIFO.fifo[EdrvInstance_l.RXFIFO.i_rd & EdrvInstance_l.RXFIFO.mask].m_pbBuffer) - 4 );
 
-        EdrvInstance_l.RXFIFO.i_rd++;
+tEplKernel EdrvShutdown(void)
+{
+    printf("Shutdown Ethernet Driver... ");
+
+    omethStop(EdrvInstance_l.m_hOpenMac);
+
+    alt_irq_register(EPL_MAC_RX_IRQ, EdrvInstance_l.m_hOpenMac, NULL);
+    alt_irq_register(EPL_MAC_TX_IRQ, EdrvInstance_l.m_hOpenMac, NULL);
+    alt_irq_register(EDRV_TIMER_IRQ, NULL, NULL);
+
+    if (omethDestroy(EdrvInstance_l.m_hOpenMac) != 0) {
+        printf("error\n");
+        return kEplNoResource;
     }
+    printf("done\n");
 
-    omethPeriodic();
+    return kEplSuccessful;
 }
-*/
+
 
 //---------------------------------------------------------------------------
 //
@@ -485,6 +370,7 @@ void asyncCall(void) {
 // State:
 //
 //---------------------------------------------------------------------------
+
 tEplKernel EdrvAllocTxMsgBuffer       (tEdrvTxBuffer * pBuffer_p)
 {
 tEplKernel          Ret = kEplSuccessful;
@@ -529,6 +415,7 @@ Exit:
 // State:
 //
 //---------------------------------------------------------------------------
+
 tEplKernel EdrvReleaseTxMsgBuffer     (tEdrvTxBuffer * pBuffer_p)
 {
 tEplKernel          Ret = kEplSuccessful;
@@ -571,6 +458,7 @@ Exit:
 // State:
 //
 //---------------------------------------------------------------------------
+
 tEplKernel EdrvUpdateTxMsgBuffer     (tEdrvTxBuffer * pBuffer_p)
 {
 tEplKernel          Ret = kEplSuccessful;
@@ -612,6 +500,7 @@ Exit:
 // State:
 //
 //---------------------------------------------------------------------------
+
 tEplKernel EdrvSendTxMsg              (tEdrvTxBuffer * pBuffer_p)
 {
 tEplKernel          Ret = kEplSuccessful;
@@ -744,59 +633,6 @@ Exit:
 }
 
 
-
-//---------------------------------------------------------------------------
-//
-// Function:    fctFree
-//
-// Description: function is needed by openMAC
-//
-// Parameters:  *pPacket ... packet which should be released
-//
-// Returns:     void
-//
-// State:
-//
-//---------------------------------------------------------------------------
-static void EdrvCbSendAck(ometh_packet_typ *pPacket, void *arg, unsigned long time) {
-    EdrvInstance_l.msgfree++;
-    BENCHMARK_MOD_01_SET(1);
-    EdrvInstance_l.m_InitParam.m_pfnTxHandler(arg);
-    BENCHMARK_MOD_01_RESET(1);
-}
-
-//---------------------------------------------------------------------------
-//
-// Function:    EdrvShutdown
-//
-// Description: Shutdown the Ethernet controller
-//
-// Parameters:  void
-//
-// Returns:     Errorcode   = kEplSuccessful
-//
-// State:
-//
-//---------------------------------------------------------------------------
-tEplKernel EdrvShutdown(void)
-{
-    printf("Shutdown Ethernet Driver... ");
-
-    omethStop(EdrvInstance_l.m_hOpenMac);
-
-    alt_irq_register(EPL_MAC_RX_IRQ, EdrvInstance_l.m_hOpenMac, NULL);
-    alt_irq_register(EPL_MAC_TX_IRQ, EdrvInstance_l.m_hOpenMac, NULL);
-    alt_irq_register(EDRV_TIMER_IRQ, NULL, NULL);
-
-    if(omethDestroy(EdrvInstance_l.m_hOpenMac) != 0) {
-        printf("error\n");
-        return kEplNoResource;
-    }
-    printf("done\n");
-
-    return kEplSuccessful;
-}
-
 //---------------------------------------------------------------------------
 //
 // Function:    EdrvDefineRxMacAddrEntry
@@ -810,11 +646,14 @@ tEplKernel EdrvShutdown(void)
 // State:
 //
 //---------------------------------------------------------------------------
-tEplKernel EdrvDefineRxMacAddrEntry (BYTE * pbMacAddr_p) {
-    tEplKernel  Ret = kEplSuccessful;
+
+tEplKernel EdrvDefineRxMacAddrEntry (BYTE * pbMacAddr_p)
+{
+tEplKernel  Ret = kEplSuccessful;
 
     return Ret;
 }
+
 
 //---------------------------------------------------------------------------
 //
@@ -829,11 +668,14 @@ tEplKernel EdrvDefineRxMacAddrEntry (BYTE * pbMacAddr_p) {
 // State:
 //
 //---------------------------------------------------------------------------
-tEplKernel EdrvUndefineRxMacAddrEntry (BYTE * pbMacAddr_p) {
+
+tEplKernel EdrvUndefineRxMacAddrEntry (BYTE * pbMacAddr_p)
+{
 tEplKernel  Ret = kEplSuccessful;
 
     return Ret;
 }
+
 
 //---------------------------------------------------------------------------
 //
@@ -848,6 +690,7 @@ tEplKernel  Ret = kEplSuccessful;
 // State:
 //
 //---------------------------------------------------------------------------
+
 tEplKernel EdrvTxMsgReady              (tEdrvTxBuffer * pBuffer_p)
 {
     tEplKernel Ret = kEplSuccessful;
@@ -869,14 +712,20 @@ tEplKernel EdrvTxMsgReady              (tEdrvTxBuffer * pBuffer_p)
 // State:
 //
 //---------------------------------------------------------------------------
+
 tEplKernel EdrvTxMsgStart              (tEdrvTxBuffer * pBuffer_p)
 {
-    tEplKernel Ret = kEplSuccessful;
-
+tEplKernel Ret = kEplSuccessful;
 
     return Ret;
 }
 
+
+//=========================================================================//
+//                                                                         //
+//          P R I V A T E   F U N C T I O N S                              //
+//                                                                         //
+//=========================================================================//
 
 //---------------------------------------------------------------------------
 //
@@ -911,5 +760,77 @@ alt_u32 dwOldPriority;
     omethPeriodic();
     
     alt_irq_non_interruptible(dwOldPriority);
+}
+
+
+
+//---------------------------------------------------------------------------
+//
+// Function:    EdrvCbSendAck
+//
+// Description: Tx callback function from openMAC
+//
+// Parameters:  *pPacket        = packet which should be released
+//
+// Returns:     void
+//
+// State:
+//
+//---------------------------------------------------------------------------
+static void EdrvCbSendAck(ometh_packet_typ *pPacket, void *arg, unsigned long time)
+{
+    EdrvInstance_l.msgfree++;
+    BENCHMARK_MOD_01_SET(1);
+    EdrvInstance_l.m_InitParam.m_pfnTxHandler(arg);
+    BENCHMARK_MOD_01_RESET(1);
+}
+
+
+//---------------------------------------------------------------------------
+//
+// Function:    EdrvRxHook
+//
+// Description: This function will be called out of the Interrupt, when the
+//              received packet fits to the filter
+//
+// Parameters:  arg         = user specific argument pointer
+//              pPacket     = pointer to received packet
+//              pFct        = pointer to free function (don't care)
+//
+// Returns:     0 if frame was used
+//              -1 if frame was not used
+//
+// State:
+//
+//---------------------------------------------------------------------------
+
+static int EdrvRxHook(void *arg, ometh_packet_typ  *pPacket, OMETH_BUF_FREE_FCT  *pFct)
+{
+tEdrvRxBuffer       rxBuffer;
+unsigned int        uiIndex;
+tEplTgtTimeStamp    TimeStamp;
+
+    BENCHMARK_MOD_01_SET(6);
+    rxBuffer.m_BufferInFrame = kEdrvBufferLastInFrame;
+    rxBuffer.m_pbBuffer = (BYTE *) &pPacket->data;
+    rxBuffer.m_uiRxMsgLen = pPacket->length;
+    TimeStamp.m_dwTimeStamp = omethGetTimestamp(pPacket);
+    rxBuffer.m_pTgtTimeStamp = &TimeStamp;
+
+    EdrvInstance_l.m_InitParam.m_pfnRxHandler(&rxBuffer); //pass frame to Powerlink Stack
+
+    uiIndex = (unsigned int) arg;
+
+    if (EdrvInstance_l.m_apTxBuffer[uiIndex] != NULL)
+    {   // filter with auto-response frame triggered
+        BENCHMARK_MOD_01_SET(5);
+        // call Tx handler function from DLL
+        EdrvInstance_l.m_InitParam.m_pfnTxHandler(EdrvInstance_l.m_apTxBuffer[uiIndex]);
+        BENCHMARK_MOD_01_RESET(5);
+    }
+
+    BENCHMARK_MOD_01_RESET(6);
+
+    return 0;
 }
 

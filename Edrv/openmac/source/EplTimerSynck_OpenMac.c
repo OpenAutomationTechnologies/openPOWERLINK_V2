@@ -67,9 +67,15 @@
 ****************************************************************************/
 
 #include "EplInc.h"
-#include "EplTimerSynck.h"
+#include "kernel/EplTimerSynck.h"
 #include "EplTgtTimeStamp_openMac.h"
+#include "Benchmark.h"
 
+#include "omethlib.h"
+#include "system.h"
+#include <sys/alt_irq.h>
+#include <alt_types.h>
+#include <io.h>
 
 
 /***************************************************************************/
@@ -131,7 +137,7 @@ typedef struct
     DWORD   m_dwAbsoluteTime;
     BOOL    m_fEnabled;
 
-} tEplTimerSynckTimerEntry;
+} tEplTimerSynckTimerInfo;
 
 typedef struct
 {
@@ -150,7 +156,7 @@ typedef struct
     DWORD                       m_dwAdvanceShift;
 
     // EplTimerSynckDrv specific
-    tEplTimerSynckTimerEntry    m_aTimerEntry[TIMER_COUNT];
+    tEplTimerSynckTimerInfo     m_aTimerEntry[TIMER_COUNT];
     unsigned int                m_uiActiveTimerHdl;
 
 } tEplTimerSynckInstance;
@@ -160,19 +166,22 @@ typedef struct
 // local vars
 //---------------------------------------------------------------------------
 
-static tEplTimeSynckInstance    EplTimeSynckInstance_l;
+static tEplTimerSynckInstance   EplTimerSynckInstance_l;
 
 
 //---------------------------------------------------------------------------
 // local function prototypes
 //---------------------------------------------------------------------------
 
-static inline void  EplTimerSynckCompareInterruptDisable (void);
-static inline void  EplTimerSynckCompareInterruptEnable  (void);
-static inline DWORD EplTimerSynckGetTimeValue            (void);
-static inline void  EplTimerSynckSetCompareValue         (DWORD dwVal);
+static void EplTimerSynckCtrlDoSyncAdjustment (DWORD dwTimeStamp_p);
 
-static void EplTimerSynckInterruptHandler (void* pArg_p, alt_u32 dwInt_p);
+
+static inline void  EplTimerSynckDrvCompareInterruptDisable (void);
+static inline void  EplTimerSynckDrvCompareInterruptEnable  (void);
+static inline DWORD EplTimerSynckDrvGetTimeValue            (void);
+static inline void  EplTimerSynckDrvSetCompareValue         (DWORD dwVal);
+
+static void EplTimerSynckDrvInterruptHandler (void* pArg_p, alt_u32 dwInt_p);
 
 
 //=========================================================================//
@@ -203,10 +212,10 @@ tEplKernel      Ret = kEplSuccessful;
 
     EPL_MEMSET(&EplTimerSynckInstance_l, 0, sizeof (EplTimerSynckInstance_l));
 
-    EplTimerSynckCompareInterruptDisable();
-    EplTimerSynckSetCompareValue( 0 );
+    EplTimerSynckDrvCompareInterruptDisable();
+    EplTimerSynckDrvSetCompareValue( 0 );
 
-    if (alt_irq_register(OPENMAC_0_TIMERCMP_IRQ, NULL, EplTimerSynckInterruptHandler))
+    if (alt_irq_register(OPENMAC_0_TIMERCMP_IRQ, NULL, EplTimerSynckDrvInterruptHandler))
     {
         Ret = kEplNoResource;
     }
@@ -236,8 +245,8 @@ tEplKernel PUBLIC EplTimerSynckDelInstance (void)
 tEplKernel      Ret = kEplSuccessful;
 
 
-    EplTimerSynckCompareInterruptDisable();
-    EplTimerSynckSetCompareValue( 0 );
+    EplTimerSynckDrvCompareInterruptDisable();
+    EplTimerSynckDrvSetCompareValue( 0 );
 
     alt_irq_register(OPENMAC_0_TIMERCMP_IRQ, NULL, NULL);
 
@@ -469,9 +478,29 @@ static void EplTimerSynckCtrlSetTargetTimeDiff (DWORD dwTargetTimeDiff_p)
 static DWORD EplTimerSynckCtrlGetPeriod (unsigned int uiTimerHdl_p)
 {
 
-    switch ()
+    switch (uiTimerHdl_p)
+    {
+        case TIMER_HDL_SYNC:
+        {
+            break;
+        }
+        
+        case TIMER_HDL_LOSSOFSYNC:
+        {
+            break;
+        }
+        
+        default:
+        {
+            break;
+        }
+        
+    }
 
 }
+
+
+
 
 
 
@@ -479,8 +508,9 @@ static tEplKernel EplTimerSynckDrvModifyTimer(unsigned int uiTimerHdl_p,
                                            DWORD        dwAbsoluteTime_p)
 {
 tEplKernel                  Ret = kEplSuccessful;
+/*
 unsigned int                uiIndex;
-tEplTimerHighReskTimerInfo* pTimerInfo;
+tEplTimerSynckDrvTimerInfo* pTimerInfo;
 DWORD                       dwTimeNs;
 DWORD                       dwTimeSteps;
 
@@ -500,7 +530,7 @@ DWORD                       dwTimeSteps;
     if (*pTimerHdl_p == 0)
     {   // no timer created yet
         uiIndex = 0;
-        if (EplTimerHighReskInstance_l.m_TimerInfo.m_pfnCallback != NULL)
+        if (EplTimerSynckInstance_l.m_TimerInfo.m_pfnCallback != NULL)
         {   // no free structure found
             Ret = kEplTimerNoTimerCreated;
             goto Exit;
@@ -517,8 +547,8 @@ DWORD                       dwTimeSteps;
     }
 
     // modify slice timer
-    pTimerInfo = &EplTimerHighReskInstance_l.m_TimerInfo;
-    EplTimerHighReskCompareInterruptDisable();
+    pTimerInfo = &EplTimerSynckInstance_l.m_TimerInfo;
+    EplTimerSynckDrvCompareInterruptDisable();
 
     // increment timer handle (if timer expires right after this statement,
     // the user would detect an unknown timer handle and discard it)
@@ -548,11 +578,11 @@ DWORD                       dwTimeSteps;
 
     dwTimeSteps = OMETH_NS_2_TICKS(dwTimeNs);
 
-    EplTimerHighReskSetCompareValue( EplTimerHighReskGetTimeValue() + dwTimeSteps);
+    EplTimerSynckDrvSetCompareValue( EplTimerSynckDrvGetTimeValue() + dwTimeSteps);
 
     // enable timer
-    EplTimerHighReskCompareInterruptEnable();
-
+    EplTimerSynckDrvCompareInterruptEnable();
+*/
 Exit:
     return Ret;
 
@@ -563,8 +593,9 @@ Exit:
 static tEplKernel EplTimerSynckDrvDeleteTimer(unsigned int uiTimerHdl_p)
 {
 tEplKernel                  Ret = kEplSuccessful;
+/*
 unsigned int                uiIndex;
-tEplTimerHighReskTimerInfo* pTimerInfo;
+tEplTimerSynckDrvTimerInfo* pTimerInfo;
 
     // check pointer to handle
     if (pTimerHdl_p == NULL)
@@ -573,7 +604,7 @@ tEplTimerHighReskTimerInfo* pTimerInfo;
         goto Exit;
     }
 
-    pTimerInfo = &EplTimerHighReskInstance_l.m_TimerInfo;
+    pTimerInfo = &EplTimerSynckInstance_l.m_TimerInfo;
 
     if (*pTimerHdl_p == 0)
     {   // no timer created yet
@@ -597,14 +628,24 @@ tEplTimerHighReskTimerInfo* pTimerInfo;
 
     *pTimerHdl_p = 0;
 
-    EplTimerHighReskCompareInterruptDisable();
-    EplTimerHighReskSetCompareValue( 0 );
-
+    EplTimerSynckDrvCompareInterruptDisable();
+    EplTimerSynckDrvSetCompareValue( 0 );
+*/
 Exit:
     return Ret;
 
 }
 
+
+
+//---------------------------------------------------------------------------
+// const defines
+//---------------------------------------------------------------------------
+
+#define TIMERCMP_REG_OFF_CTRL       4
+#define TIMERCMP_REG_OFF_CMP_VAL    0
+#define TIMERCMP_REG_OFF_STATUS     4
+#define TIMERCMP_REG_OFF_TIME_VAL   0
 
 
 static inline void EplTimerSynckDrvCompareInterruptDisable (void)
@@ -634,14 +675,14 @@ static void EplTimerSynckDrvInterruptHandler (void* pArg_p, alt_u32 dwInt_p)
 
     BENCHMARK_MOD_24_SET(4);
 
-    EplTimerHighReskSetCompareValue(0);
-    EplTimerHighReskCompareInterruptDisable();
-
-    if (EplTimerHighReskInstance_l.m_TimerInfo.m_pfnCallback != NULL)
+    EplTimerSynckDrvSetCompareValue(0);
+    EplTimerSynckDrvCompareInterruptDisable();
+/*
+    if (EplTimerSynckInstance_l.m_TimerInfo.m_pfnCallback != NULL)
     {
-        EplTimerHighReskInstance_l.m_TimerInfo.m_pfnCallback(&EplTimerHighReskInstance_l.m_TimerInfo.m_EventArg);
+        EplTimerSynckInstance_l.m_TimerInfo.m_pfnCallback(&EplTimerSynckInstance_l.m_TimerInfo.m_EventArg);
     }
-
+*/
     BENCHMARK_MOD_24_RESET(4);
     return;
 

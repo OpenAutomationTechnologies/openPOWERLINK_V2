@@ -100,7 +100,6 @@
 // types
 //---------------------------------------------------------------------------
 
-typedef struct _tEplTgtTimeStamp tEplTgtTimeStamp;
 
 // position of a buffer in an ethernet-frame
 typedef enum
