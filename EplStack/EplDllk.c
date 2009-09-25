@@ -84,6 +84,9 @@
 
 #include "kernel/EplDllkTgt.h"
 
+//#if (EPL_DLL_PROCESS_SYNC == EPL_DLL_PROCESS_SYNC_ON_TIMER)
+#include "kernel/EplTimerSynck.h"
+//#endif
 
 #if (EPL_DLL_PRES_READY_AFTER_SOA != FALSE) && (EPL_DLL_PRES_READY_AFTER_SOC != FALSE)
 #error "EPL module DLLK: select only one of EPL_DLL_PRES_READY_AFTER_SOA and EPL_DLL_PRES_READY_AFTER_SOC."
@@ -343,6 +346,12 @@ static tEplKernel EplDllkCheckFrame(tEplFrame * pFrame_p, unsigned int uiFrameSi
 static tEplKernel PUBLIC EplDllkCbCnTimer(tEplTimerEventArg* pEventArg_p);
 #endif
 
+#if (EPL_DLL_PROCESS_SYNC == EPL_DLL_PROCESS_SYNC_ON_TIMER)
+static tEplKernel PUBLIC EplDllkCbCnTimerSync(void);
+
+static tEplKernel PUBLIC EplDllkCbCnLossOfSync(void);
+#endif
+
 
 #if EPL_NMT_MAX_NODE_ID > 0
 
@@ -421,6 +430,33 @@ tEdrvInitParam  EdrvInitParam;
     }
 #endif
 
+#if (EPL_DLL_PROCESS_SYNC == EPL_DLL_PROCESS_SYNC_ON_TIMER)
+    Ret = EplTimerHighSynckAddInstance();
+    if (Ret != kEplSuccessful)
+    {   // error occured while initializing sync timer module
+        goto Exit;
+    }
+
+    Ret = EplTimerSynckRegSyncHandler(EplDllkCbCnTimerSync);
+    if (Ret != kEplSuccessful)
+    {
+        goto Exit;
+    }
+
+    Ret = EplTimerSynckRegLossOfSyncHandler(EplDllkCbCnLossOfSync);
+    if (Ret != kEplSuccessful)
+    {
+        goto Exit;
+    }
+
+    Ret = EplTimerSynckSetSyncShiftUs(EPL_DLL_SOC_SYNC_SHIFT_US);
+    if (Ret != kEplSuccessful)
+    {
+        goto Exit;
+    }
+
+#endif
+
     // if dynamic memory allocation available
     // allocate instance structure
     // allocate TPDO and RPDO table with default size
@@ -487,6 +523,10 @@ tEplKernel      Ret = kEplSuccessful;
 
     // reset state
     EplDllkInstance_g.m_DllState = kEplDllGsInit;
+
+#if (EPL_DLL_PROCESS_SYNC == EPL_DLL_PROCESS_SYNC_ON_TIMER)
+    Ret = EplTimerHighSynckDelInstance();
+#endif
 
 #if EPL_TIMER_USE_HIGHRES != FALSE
     Ret = EplTimerHighReskDelInstance();
@@ -571,6 +611,22 @@ tEplNmtState    NmtState;
                 // node processes only async frames
                 case kEplNmtCsPreOperational1:
                 {
+#if EPL_TIMER_USE_HIGHRES != FALSE
+                    Ret = EplTimerHighReskDeleteTimer(&EplDllkInstance_g.m_TimerHdlCycle);
+                    if (Ret != kEplSuccessful)
+                    {
+                        goto Exit;
+                    }
+#endif
+
+#if (EPL_DLL_PROCESS_SYNC == EPL_DLL_PROCESS_SYNC_ON_TIMER)
+                    Ret = EplTimerSynckStopSync();
+                    if (Ret != kEplSuccessful)
+                    {
+                        goto Exit;
+                    }
+#endif
+
                     // update IdentRes and StatusRes
                     Ret = EplDllkUpdateFrameStatusRes(&EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_STATUSRES],
                                                       pNmtStateChange->m_NewNmtState);
@@ -872,6 +928,10 @@ tEplNmtState    NmtState;
     {   // configuration updates are only allowed in state DLL_GS_INIT, except LossOfFrameTolerance,
         // because all other parameters are "valid on reset".
         EplDllkInstance_g.m_DllConfigParam.m_dwLossOfFrameTolerance = pDllConfigParam_p->m_dwLossOfFrameTolerance;
+
+#if (EPL_DLL_PROCESS_SYNC == EPL_DLL_PROCESS_SYNC_ON_TIMER)
+        Ret = EplTimerSynckSetLossOfSyncToleranceUs(pDllConfigParam_p->m_dwLossOfFrameTolerance);
+#endif
     }
     else
     {   // copy entire configuration to local storage,
@@ -1929,10 +1989,27 @@ tEplDllkNodeInfo*   pIntNodeInfo;
             }
         }
 #endif
+
+#if (EPL_DLL_PROCESS_SYNC == EPL_DLL_PROCESS_SYNC_ON_TIMER)
+        Ret = EplTimerSynckSetCycleLenUs(EplDllkInstance_g.m_DllConfigParam.m_dwCycleLen);
+        if (Ret != kEplSuccessful)
+        {
+            goto Exit;
+        }
+        Ret = EplTimerSynckSetLossOfSyncToleranceUs(EplDllkInstance_g.m_DllConfigParam.m_dwLossOfFrameTolerance);
+        if (Ret != kEplSuccessful)
+        {
+            goto Exit;
+        }
+#endif
     }
 
     // clear all asynchronous buffers
     Ret = EplDllkCalAsyncClearBuffer();
+    if (Ret != kEplSuccessful)
+    {
+        goto Exit;
+    }
 
     // set filters in Edrv
     Ret = EdrvChangeFilter(EplDllkInstance_g.m_aFilter, EPL_DLLK_FILTER_COUNT, EPL_DLLK_FILTER_COUNT, 0);
@@ -2065,6 +2142,18 @@ unsigned int    uiHandle;
     // delete timer
 #if EPL_TIMER_USE_HIGHRES != FALSE
     Ret = EplTimerHighReskDeleteTimer(&EplDllkInstance_g.m_TimerHdlCycle);
+    if (Ret != kEplSuccessful)
+    {
+        goto Exit;
+    }
+#endif
+
+#if (EPL_DLL_PROCESS_SYNC == EPL_DLL_PROCESS_SYNC_ON_TIMER)
+    Ret = EplTimerSynckStopSync();
+    if (Ret != kEplSuccessful)
+    {
+        goto Exit;
+    }
 #endif
 
 Exit:
@@ -3620,6 +3709,12 @@ TGT_DLLK_DECLARE_FLAGS
                 {
                     goto Exit;
                 }
+#elif (EPL_DLL_PROCESS_SYNC == EPL_DLL_PROCESS_SYNC_ON_TIMER)
+                Ret = EplTimerSynckTriggerAtTimeStamp(pRxBuffer_p->m_pTgtTimeStamp);
+                if (Ret != kEplSuccessful)
+                {
+                    goto Exit;
+                }
 #endif
 
                 // update cycle counter
@@ -4862,13 +4957,11 @@ TGT_DLLK_DECLARE_FLAGS
 
     TGT_DLLK_ENTER_CRITICAL_SECTION();
 
-#if EPL_TIMER_USE_HIGHRES != FALSE
     if (pEventArg_p->m_TimerHdl != EplDllkInstance_g.m_TimerHdlCycle)
     {   // zombie callback
         // just exit
         goto Exit;
     }
-#endif
 
     NmtState = EplDllkInstance_g.m_NmtState;
 
@@ -4883,8 +4976,103 @@ TGT_DLLK_DECLARE_FLAGS
         goto Exit;
     }
 
-    // 2008/10/15 d.k. reprogramming of timer not necessary,
-    // because it will be programmed, when SoC is received.
+    // restart the timer to detect further loss of SoC
+    Ret = EplTimerHighReskModifyTimerNs(&EplDllkInstance_g.m_TimerHdlCycle, EplDllkInstance_g.m_DllConfigParam.m_dwCycleLen, EplDllkCbCnTimer, 0L, FALSE);
+    if (Ret != kEplSuccessful)
+    {
+        goto Exit;
+    }
+
+Exit:
+    if (Ret != kEplSuccessful)
+    {
+    DWORD   dwArg;
+
+        BENCHMARK_MOD_02_TOGGLE(7);
+
+        dwArg = EplDllkInstance_g.m_DllState | (kEplNmtEventDllCeFrameTimeout << 8);
+
+        // Error event for API layer
+        Ret = EplEventkPostError(kEplEventSourceDllk,
+                        Ret,
+                        sizeof(dwArg),
+                        &dwArg);
+    }
+
+    TGT_DLLK_LEAVE_CRITICAL_SECTION();
+
+    return Ret;
+}
+#endif
+
+
+#if (EPL_DLL_PROCESS_SYNC == EPL_DLL_PROCESS_SYNC_ON_TIMER)
+//---------------------------------------------------------------------------
+//
+// Function:    EplDllkCbCnTimerSync()
+//
+// Description: called by timer sync module. It signals the Sync event.
+//
+// Parameters:  void
+//
+// Returns:     tEplKernel              = error code
+//
+//
+// State:
+//
+//---------------------------------------------------------------------------
+
+static tEplKernel PUBLIC EplDllkCbCnTimerSync(void)
+{
+tEplKernel      Ret = kEplSuccessful;
+tEplEvent       Event;
+
+    // trigger synchronous task
+    Event.m_EventSink = kEplEventSinkDllk;
+    Event.m_EventType = kEplEventTypeSync;
+    Event.m_uiSize = 0;
+    Ret = EplEventkPost(&Event);
+
+    return Ret;
+}
+
+
+//---------------------------------------------------------------------------
+//
+// Function:    EplDllkCbCnLossOfSync()
+//
+// Description: called by timer sync module. It signals that one Sync/SoC was lost.
+//
+// Parameters:  void
+//
+// Returns:     tEplKernel              = error code
+//
+//
+// State:
+//
+//---------------------------------------------------------------------------
+
+static tEplKernel PUBLIC EplDllkCbCnLossOfSync(void)
+{
+tEplKernel      Ret = kEplSuccessful;
+tEplNmtState    NmtState;
+
+TGT_DLLK_DECLARE_FLAGS
+
+    TGT_DLLK_ENTER_CRITICAL_SECTION();
+
+    NmtState = EplDllkInstance_g.m_NmtState;
+
+    if (NmtState <= kEplNmtGsResetConfiguration)
+    {
+        goto Exit;
+    }
+
+    Ret = EplDllkChangeState(kEplNmtEventDllCeFrameTimeout, NmtState);
+    if (Ret != kEplSuccessful)
+    {
+        goto Exit;
+    }
 
 Exit:
     if (Ret != kEplSuccessful)
