@@ -51,14 +51,14 @@ int main(void) {
 
     printf("NIOS II is running...\n");
     printf("starting openPowerlink application...\n\n");
-    while(1) {
-        if(openPowerlink() != 0) {
+    while (1) {
+        if (openPowerlink() != 0) {
             printf("openPowerlink was shut down because of an error\n");
             break;
         } else {
             printf("openPowerlink was shut down, restart...\n\n");
         }
-        for(i=0; i<1000000; i++);
+        for (i=0; i<1000000; i++);
     }
     printf("shut down NIOS II...\n%c", 4);
 

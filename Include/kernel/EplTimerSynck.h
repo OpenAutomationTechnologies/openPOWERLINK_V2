@@ -103,7 +103,7 @@ tEplKernel PUBLIC EplTimerSynckSetSyncShiftUs(DWORD dwAdvanceShiftUs_p);
 
 tEplKernel PUBLIC EplTimerSynckSetCycleLenUs(DWORD dwCycleLenUs_p);
 
-tEplKernel PUBLIC EplTimerSynckSetLossOfSyncToleranceUs(DWORD dwLossOfSyncToleranceUs_p);
+tEplKernel PUBLIC EplTimerSynckSetLossOfSyncToleranceNs(DWORD dwLossOfSyncToleranceNs_p);
 
 tEplKernel PUBLIC EplTimerSynckTriggerAtTimeStamp(tEplTgtTimeStamp* pTimeStamp_p);
 

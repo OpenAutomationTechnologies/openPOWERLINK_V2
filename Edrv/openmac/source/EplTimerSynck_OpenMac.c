@@ -141,9 +141,9 @@ typedef struct
 
 typedef struct
 {
-    DWORD                       m_dwAdvanceShiftUs;
-    DWORD                       m_dwCycleLenUs;
-    DWORD                       m_dwLossOfSyncToleranceUs;
+//    DWORD                       m_dwAdvanceShiftUs;
+//    DWORD                       m_dwCycleLenUs;
+    DWORD                       m_dwLossOfSyncToleranceNs;
     tEplTimerSynckCbSync        m_pfnCbSync;
     tEplTimerSynckCbLossOfSync  m_pfnCbLossOfSync;
     DWORD                       m_dwLossOfSyncTimeout;
@@ -195,7 +195,8 @@ static tEplKernel EplTimerSynckDrvModifyTimerAbs(unsigned int uiTimerHdl_p,
 
 static tEplKernel EplTimerSynckDrvModifyTimerRel(unsigned int uiTimerHdl_p,
                                                  int          iTimeAdjustment_p,
-                                                 DWORD*       pdwAbsoluteTime_p);
+                                                 DWORD*       pdwAbsoluteTime_p,
+                                                 BOOL*        pfAbsoluteTimeAlreadySet_p);
 
 static tEplKernel EplTimerSynckDrvDeleteTimer(unsigned int uiTimerHdl_p);
 
@@ -348,7 +349,8 @@ tEplKernel PUBLIC EplTimerSynckSetSyncShiftUs (DWORD dwAdvanceShiftUs_p)
 tEplKernel      Ret = kEplSuccessful;
 
 
-    EplTimerSynckInstance_l.m_dwAdvanceShiftUs = dwAdvanceShiftUs_p;
+//    EplTimerSynckInstance_l.m_dwAdvanceShiftUs = dwAdvanceShiftUs_p;
+    EplTimerSynckInstance_l.m_dwAdvanceShift = OMETH_US_2_TICKS(dwAdvanceShiftUs_p);
 
     return Ret;
 
@@ -374,8 +376,6 @@ tEplKernel PUBLIC EplTimerSynckSetCycleLenUs (DWORD dwCycleLenUs_p)
 {
 tEplKernel      Ret = kEplSuccessful;
 
-    EplTimerSynckInstance_l.m_dwCycleLenUs = dwCycleLenUs_p;
-
     EplTimerSynckCtrlSetConfiguredTimeDiff(OMETH_US_2_TICKS(dwCycleLenUs_p));
 
     return Ret;
@@ -386,7 +386,7 @@ tEplKernel      Ret = kEplSuccessful;
 
 //---------------------------------------------------------------------------
 //
-// Function:    EplTimerSynckSetLossOfSyncToleranceUs()
+// Function:    EplTimerSynckSetLossOfSyncToleranceNs()
 //
 // Description:
 //
@@ -398,12 +398,12 @@ tEplKernel      Ret = kEplSuccessful;
 //
 //---------------------------------------------------------------------------
 
-tEplKernel PUBLIC EplTimerSynckSetLossOfSyncToleranceUs (DWORD dwLossOfSyncToleranceUs_p)
+tEplKernel PUBLIC EplTimerSynckSetLossOfSyncToleranceNs (DWORD dwLossOfSyncToleranceNs_p)
 {
 tEplKernel      Ret = kEplSuccessful;
 
 
-    EplTimerSynckInstance_l.m_dwLossOfSyncToleranceUs = dwLossOfSyncToleranceUs_p;
+    EplTimerSynckInstance_l.m_dwLossOfSyncToleranceNs = dwLossOfSyncToleranceNs_p;
 
     EplTimerSynckCtrlUpdateLossOfSyncTolerance();
 
@@ -504,6 +504,7 @@ static tEplKernel EplTimerSynckCtrlDoSyncAdjustment (DWORD dwTimeStamp_p)
 tEplKernel      Ret = kEplSuccessful;
 DWORD           dwActualTimeDiff;
 int             iDeviation;
+BOOL            fCurrentSyncModified = FALSE;
 
     dwTimeStamp_p -= EplTimerSynckInstance_l.m_dwAdvanceShift;
 
@@ -517,7 +518,12 @@ int             iDeviation;
 
         iDeviation = iDeviation >> PROPORTIONAL_FRACTION_SHIFT;
 
-        Ret = EplTimerSynckDrvModifyTimerRel(TIMER_HDL_SYNC, iDeviation, &EplTimerSynckInstance_l.m_dwTargetSyncTime);
+        Ret = EplTimerSynckDrvModifyTimerRel(TIMER_HDL_SYNC, iDeviation, &EplTimerSynckInstance_l.m_dwTargetSyncTime, &fCurrentSyncModified);
+
+        if (fCurrentSyncModified != FALSE)
+        {   // set target to next sync
+            EplTimerSynckInstance_l.m_dwTargetSyncTime += EplTimerSynckInstance_l.m_dwMeanTimeDiff;
+        }
     }
     else
     {   // first trigger
@@ -543,8 +549,17 @@ static void EplTimerSynckCtrlAddActualTimeDiff (DWORD dwActualTimeDiff_p)
         EplTimerSynckInstance_l.m_adwActualTimeDiff[EplTimerSynckInstance_l.m_uiActualTimeDiffNextIndex]
             = dwActualTimeDiff_p;
         EplTimerSynckInstance_l.m_uiActualTimeDiffNextIndex++;
+        EplTimerSynckInstance_l.m_uiActualTimeDiffNextIndex &= (TIMEDIFF_COUNT - 1);
 
         EplTimerSynckCtrlCalcMeanTimeDiff();
+    }
+    else
+    {   // adjust target sync time, because of Loss of Sync
+        for (; dwActualTimeDiff_p >= EplTimerSynckInstance_l.m_dwRejectThreshold;
+             dwActualTimeDiff_p -= EplTimerSynckInstance_l.m_dwMeanTimeDiff,
+             EplTimerSynckInstance_l.m_dwTargetSyncTime += EplTimerSynckInstance_l.m_dwMeanTimeDiff)
+        {
+        }
     }
 
 }
@@ -600,7 +615,7 @@ static void EplTimerSynckCtrlUpdateRejectThreshold (void)
 DWORD   dwLossOfSyncTolerance;
 DWORD   dwMaxRejectThreshold;
 
-    dwLossOfSyncTolerance = OMETH_US_2_TICKS(EplTimerSynckInstance_l.m_dwLossOfSyncToleranceUs);
+    dwLossOfSyncTolerance = OMETH_NS_2_TICKS(EplTimerSynckInstance_l.m_dwLossOfSyncToleranceNs);
     dwMaxRejectThreshold  = EplTimerSynckInstance_l.m_dwConfiguredTimeDiff >> 1;  // half of cycle length
 
     EplTimerSynckInstance_l.m_dwRejectThreshold = EplTimerSynckInstance_l.m_dwConfiguredTimeDiff;
@@ -627,8 +642,6 @@ DWORD   dwNextAbsoluteTime;
     {
         case TIMER_HDL_SYNC:
         {
-            // memorize current time as new target sync time
-            EplTimerSynckInstance_l.m_dwTargetSyncTime = dwCurrentTime_p;
             dwNextAbsoluteTime = dwCurrentTime_p + EplTimerSynckInstance_l.m_dwMeanTimeDiff;
             break;
         }
@@ -699,7 +712,8 @@ Exit:
 
 static tEplKernel EplTimerSynckDrvModifyTimerRel(unsigned int uiTimerHdl_p,
                                                  int          iTimeAdjustment_p,
-                                                 DWORD*       pdwAbsoluteTime_p)
+                                                 DWORD*       pdwAbsoluteTime_p,
+                                                 BOOL*        pfAbsoluteTimeAlreadySet_p)
 {
 tEplKernel                  Ret = kEplSuccessful;
 tEplTimerSynckTimerInfo*    pTimerInfo;
@@ -711,8 +725,18 @@ tEplTimerSynckTimerInfo*    pTimerInfo;
     }
 
     pTimerInfo = &EplTimerSynckInstance_l.m_aTimerInfo[uiTimerHdl_p];
+    if (pTimerInfo->m_dwAbsoluteTime == *pdwAbsoluteTime_p)
+    {
+        *pfAbsoluteTimeAlreadySet_p = TRUE;
+    }
+    else
+    {
+        *pfAbsoluteTimeAlreadySet_p = FALSE;
+    }
+
     pTimerInfo->m_dwAbsoluteTime += iTimeAdjustment_p;
-    *pdwAbsoluteTime_p = pTimerInfo->m_dwAbsoluteTime; 
+
+    *pdwAbsoluteTime_p = pTimerInfo->m_dwAbsoluteTime;
     pTimerInfo->m_fEnabled = TRUE;
 
     EplTimerSynckDrvConfigureShortestTimer();

@@ -431,7 +431,7 @@ tEdrvInitParam  EdrvInitParam;
 #endif
 
 #if (EPL_DLL_PROCESS_SYNC == EPL_DLL_PROCESS_SYNC_ON_TIMER)
-    Ret = EplTimerHighSynckAddInstance();
+    Ret = EplTimerSynckAddInstance();
     if (Ret != kEplSuccessful)
     {   // error occured while initializing sync timer module
         goto Exit;
@@ -525,7 +525,7 @@ tEplKernel      Ret = kEplSuccessful;
     EplDllkInstance_g.m_DllState = kEplDllGsInit;
 
 #if (EPL_DLL_PROCESS_SYNC == EPL_DLL_PROCESS_SYNC_ON_TIMER)
-    Ret = EplTimerHighSynckDelInstance();
+    Ret = EplTimerSynckDelInstance();
 #endif
 
 #if EPL_TIMER_USE_HIGHRES != FALSE
@@ -930,7 +930,7 @@ tEplNmtState    NmtState;
         EplDllkInstance_g.m_DllConfigParam.m_dwLossOfFrameTolerance = pDllConfigParam_p->m_dwLossOfFrameTolerance;
 
 #if (EPL_DLL_PROCESS_SYNC == EPL_DLL_PROCESS_SYNC_ON_TIMER)
-        Ret = EplTimerSynckSetLossOfSyncToleranceUs(pDllConfigParam_p->m_dwLossOfFrameTolerance);
+        Ret = EplTimerSynckSetLossOfSyncToleranceNs(pDllConfigParam_p->m_dwLossOfFrameTolerance);
 #endif
     }
     else
@@ -1996,7 +1996,7 @@ tEplDllkNodeInfo*   pIntNodeInfo;
         {
             goto Exit;
         }
-        Ret = EplTimerSynckSetLossOfSyncToleranceUs(EplDllkInstance_g.m_DllConfigParam.m_dwLossOfFrameTolerance);
+        Ret = EplTimerSynckSetLossOfSyncToleranceNs(EplDllkInstance_g.m_DllConfigParam.m_dwLossOfFrameTolerance);
         if (Ret != kEplSuccessful)
         {
             goto Exit;
