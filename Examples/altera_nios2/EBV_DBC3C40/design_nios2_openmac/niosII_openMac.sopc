@@ -2,31 +2,31 @@
 <system name="niosII_openMac">
  <parameter name="bonusData">bonusData 
 {
-   element dout_pio
+   element cpu_0.data_master
    {
-      datum _sortIndex
+      datum _tags
       {
-         value = "8";
-         type = "int";
-      }
-      datum megawizard_uipreferences
-      {
-         value = "{}";
+         value = "";
          type = "String";
       }
    }
-   element OpenMAC_0.REG
+   element tri_state_bridge_0.avalon_slave
+   {
+      datum _tags
+      {
+         value = "";
+         type = "String";
+      }
+   }
+   element OpenMAC_0.Mii
    {
       datum baseAddress
       {
-         value = "4096";
+         value = "64";
          type = "long";
       }
    }
-   element niosII_openMac
-   {
-   }
-   element led_pio.s1
+   element cpu_0.jtag_debug_module
    {
       datum _lockedAddress
       {
@@ -35,68 +35,8 @@
       }
       datum baseAddress
       {
-         value = "544";
+         value = "8192";
          type = "long";
-      }
-   }
-   element DBC3C40_SRAM_0
-   {
-      datum _sortIndex
-      {
-         value = "4";
-         type = "int";
-      }
-   }
-   element benchmark_pio
-   {
-      datum _sortIndex
-      {
-         value = "7";
-         type = "int";
-      }
-      datum megawizard_uipreferences
-      {
-         value = "{}";
-         type = "String";
-      }
-   }
-   element led_error_pio
-   {
-      datum _sortIndex
-      {
-         value = "10";
-         type = "int";
-      }
-      datum megawizard_uipreferences
-      {
-         value = "{}";
-         type = "String";
-      }
-   }
-   element led_pio
-   {
-      datum _sortIndex
-      {
-         value = "9";
-         type = "int";
-      }
-      datum megawizard_uipreferences
-      {
-         value = "{}";
-         type = "String";
-      }
-   }
-   element din_pio
-   {
-      datum _sortIndex
-      {
-         value = "12";
-         type = "int";
-      }
-      datum megawizard_uipreferences
-      {
-         value = "{}";
-         type = "String";
       }
    }
    element jtag_uart_0.avalon_jtag_slave
@@ -112,40 +52,24 @@
          type = "long";
       }
    }
-   element tri_state_bridge_0
+   element benchmark_pio.s1
    {
-      datum _sortIndex
+      datum _lockedAddress
       {
-         value = "2";
-         type = "int";
+         value = "0";
+         type = "boolean";
       }
-      datum megawizard_uipreferences
-      {
-         value = "{}";
-         type = "String";
-      }
-   }
-   element led_status_pio.s1
-   {
       datum baseAddress
       {
-         value = "512";
+         value = "2048";
          type = "long";
       }
    }
-   element cpu_0.data_master
-   {
-      datum _tags
-      {
-         value = "";
-         type = "String";
-      }
-   }
-   element system_timer
+   element din_pio
    {
       datum _sortIndex
       {
-         value = "13";
+         value = "12";
          type = "int";
       }
       datum megawizard_uipreferences
@@ -167,37 +91,11 @@
          type = "long";
       }
    }
-   element system_timer.s1
-   {
-      datum _lockedAddress
-      {
-         value = "0";
-         type = "boolean";
-      }
-      datum baseAddress
-      {
-         value = "192";
-         type = "long";
-      }
-   }
-   element OpenMAC_0.RX
-   {
-      datum _tags
-      {
-         value = "";
-         type = "String";
-      }
-      datum baseAddress
-      {
-         value = "32";
-         type = "long";
-      }
-   }
-   element edrv_timer
+   element jtag_uart_0
    {
       datum _sortIndex
       {
-         value = "14";
+         value = "15";
          type = "int";
       }
       datum megawizard_uipreferences
@@ -219,25 +117,17 @@
          type = "String";
       }
    }
-   element cpu_0
+   element dout_pio.s1
    {
-      datum _sortIndex
+      datum _lockedAddress
       {
          value = "0";
-         type = "int";
+         type = "boolean";
       }
-      datum megawizard_uipreferences
+      datum baseAddress
       {
-         value = "{}";
-         type = "String";
-      }
-   }
-   element tri_state_bridge_0.avalon_slave
-   {
-      datum _tags
-      {
-         value = "";
-         type = "String";
+         value = "1024";
+         type = "long";
       }
    }
    element DBC3C40_SRAM_0.avalon_tristate_slave
@@ -253,7 +143,7 @@
          type = "long";
       }
    }
-   element edrv_timer.s1
+   element system_timer.s1
    {
       datum _lockedAddress
       {
@@ -262,15 +152,7 @@
       }
       datum baseAddress
       {
-         value = "128";
-         type = "long";
-      }
-   }
-   element OpenMAC_0.Mii
-   {
-      datum baseAddress
-      {
-         value = "64";
+         value = "192";
          type = "long";
       }
    }
@@ -287,15 +169,15 @@
          type = "String";
       }
    }
-   element OpenMAC_0
+   element DBC3C40_SRAM_0
    {
       datum _sortIndex
       {
-         value = "1";
+         value = "4";
          type = "int";
       }
    }
-   element benchmark_pio.s1
+   element onchip_memory_0.s1
    {
       datum _lockedAddress
       {
@@ -304,7 +186,151 @@
       }
       datum baseAddress
       {
-         value = "2048";
+         value = "16384";
+         type = "long";
+      }
+   }
+   element OpenMAC_0.RX
+   {
+      datum _tags
+      {
+         value = "";
+         type = "String";
+      }
+      datum baseAddress
+      {
+         value = "32";
+         type = "long";
+      }
+   }
+   element benchmark_pio
+   {
+      datum _sortIndex
+      {
+         value = "7";
+         type = "int";
+      }
+      datum megawizard_uipreferences
+      {
+         value = "{}";
+         type = "String";
+      }
+   }
+   element system_timer
+   {
+      datum _sortIndex
+      {
+         value = "13";
+         type = "int";
+      }
+      datum megawizard_uipreferences
+      {
+         value = "{}";
+         type = "String";
+      }
+   }
+   element led_error_pio.s1
+   {
+      datum baseAddress
+      {
+         value = "528";
+         type = "long";
+      }
+   }
+   element OpenMAC_0.TimerCmp
+   {
+      datum baseAddress
+      {
+         value = "16";
+         type = "long";
+      }
+   }
+   element dout_pio
+   {
+      datum _sortIndex
+      {
+         value = "8";
+         type = "int";
+      }
+      datum megawizard_uipreferences
+      {
+         value = "{}";
+         type = "String";
+      }
+   }
+   element led_pio
+   {
+      datum _sortIndex
+      {
+         value = "9";
+         type = "int";
+      }
+      datum megawizard_uipreferences
+      {
+         value = "{}";
+         type = "String";
+      }
+   }
+   element edrv_timer
+   {
+      datum _sortIndex
+      {
+         value = "14";
+         type = "int";
+      }
+      datum megawizard_uipreferences
+      {
+         value = "{}";
+         type = "String";
+      }
+   }
+   element OpenMAC_0
+   {
+      datum _sortIndex
+      {
+         value = "1";
+         type = "int";
+      }
+   }
+   element led_pio.s1
+   {
+      datum _lockedAddress
+      {
+         value = "0";
+         type = "boolean";
+      }
+      datum baseAddress
+      {
+         value = "544";
+         type = "long";
+      }
+   }
+   element led_status_pio.s1
+   {
+      datum baseAddress
+      {
+         value = "512";
+         type = "long";
+      }
+   }
+   element OpenMAC_0.REG
+   {
+      datum baseAddress
+      {
+         value = "4096";
+         type = "long";
+      }
+   }
+   element edrv_timer.s1
+   {
+      datum _lockedAddress
+      {
+         value = "0";
+         type = "boolean";
+      }
+      datum baseAddress
+      {
+         value = "128";
          type = "long";
       }
    }
@@ -321,6 +347,22 @@
          type = "long";
       }
    }
+   element niosII_openMac
+   {
+   }
+   element tri_state_bridge_0
+   {
+      datum _sortIndex
+      {
+         value = "2";
+         type = "int";
+      }
+      datum megawizard_uipreferences
+      {
+         value = "{}";
+         type = "String";
+      }
+   }
    element clk_0
    {
       datum _sortIndex
@@ -334,11 +376,24 @@
          type = "boolean";
       }
    }
-   element jtag_uart_0
+   element led_error_pio
    {
       datum _sortIndex
       {
-         value = "15";
+         value = "10";
+         type = "int";
+      }
+      datum megawizard_uipreferences
+      {
+         value = "{}";
+         type = "String";
+      }
+   }
+   element cpu_0
+   {
+      datum _sortIndex
+      {
+         value = "0";
          type = "int";
       }
       datum megawizard_uipreferences
@@ -360,61 +415,6 @@
          type = "String";
       }
    }
-   element led_error_pio.s1
-   {
-      datum baseAddress
-      {
-         value = "528";
-         type = "long";
-      }
-   }
-   element cpu_0.jtag_debug_module
-   {
-      datum _lockedAddress
-      {
-         value = "0";
-         type = "boolean";
-      }
-      datum baseAddress
-      {
-         value = "8192";
-         type = "long";
-      }
-   }
-   element OpenMAC_0.TimerCmp
-   {
-      datum baseAddress
-      {
-         value = "16";
-         type = "long";
-      }
-   }
-   element onchip_memory_0.s1
-   {
-      datum _lockedAddress
-      {
-         value = "0";
-         type = "boolean";
-      }
-      datum baseAddress
-      {
-         value = "16384";
-         type = "long";
-      }
-   }
-   element dout_pio.s1
-   {
-      datum _lockedAddress
-      {
-         value = "0";
-         type = "boolean";
-      }
-      datum baseAddress
-      {
-         value = "1024";
-         type = "long";
-      }
-   }
 }
 </parameter>
  <parameter name="deviceFamily" value="CYCLONEIII" />
@@ -423,7 +423,7 @@
  <parameter name="hdlLanguage" value="VHDL" />
  <parameter name="projectName" value="nios_openMac.qpf" />
  <parameter name="systemHash" value="-5337686757" />
- <parameter name="timeStamp" value="1253633416017" />
+ <parameter name="timeStamp" value="1254126551000" />
  <module name="clk_0" kind="clock_source" version="9.0" enabled="1">
   <parameter name="clockFrequency" value="50000000" />
   <parameter name="clockFrequencyKnown" value="true" /></module>
@@ -823,19 +823,19 @@
    version="9.0"
    start="cpu_0.d_irq"
    end="OpenMAC_0.interruptRX">
-  <parameter name="irqNumber" value="1" /></connection>
+  <parameter name="irqNumber" value="2" /></connection>
  <connection
    kind="interrupt"
    version="9.0"
    start="cpu_0.d_irq"
    end="OpenMAC_0.interruptTX">
-  <parameter name="irqNumber" value="0" /></connection>
+  <parameter name="irqNumber" value="1" /></connection>
  <connection
    kind="interrupt"
    version="9.0"
    start="cpu_0.d_irq"
    end="OpenMAC_0.interruptCMP">
-  <parameter name="irqNumber" value="2" /></connection>
+  <parameter name="irqNumber" value="0" /></connection>
  <connection
    kind="avalon"
    version="6.1"
