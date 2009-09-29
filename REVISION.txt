@@ -284,9 +284,6 @@ Fellow worker:    Daniel Krüger (d.k.)
 07.08.2009 V1.6     - event queues: added error event post if sink does not exist
                     - event processing: return error if event not handled
                     - small corrections to NMT state machine to comply to spec
-                    - separated sync callback function into process and SoC,
-            		  this implies the updates of all demo projects
-            		  (i.e. use new CbSyncProcess for former CbSync)
                     (d.k.)
 
 11.08.2009 V1.6     - changed the DLL module for the up-coming support of Ethernet controllers with auto-response feature,
@@ -362,4 +359,46 @@ Fellow worker:    Daniel Krüger (d.k.)
 
 17.09.2009 V1.6     - code clean-up: removed unnecessary code and comments, restructured some functions
                     (d.k.)
+
+18.09.2009 V1.6     - set default vendor-ID in public objdict.h files to 0x00
+                    - changed Makefile of all Linux projects: removed dummy C files
+                      that just contain includes of real C files. So these project directories look
+                      much cleaner now.
+                    - changed Makefile of all Linux projects to remove unnecessary EplObdu.c,
+                      EplObduCal.c and EplObdkCal.c. Only EplObd.c is necessary.
+                    - added EplPdouCal.c and EplPdou.c to Makefile of all demo projects
+                    - added constant EPL_MODULE_PDOU to the definition of EPL_MODULE_INTEGRATION
+                      in EplCfg.h of all demo projects
+                    (d.k.)
+
+
+18.09.2009 V1.6     - added new demo project "demo_cn_3r1tpdo" which maps 50 byte to 3 RPDOs and 50 byte 1 TPDO
+                    - added new OD "CiA401_3r1tpdo_CN" and moved address ranges 1000h-13FFh and 1B00h-1FFFh to a generic section
+                    (m.u.)
+
+21.09.2009 V1.6     - performance improvements of FPGA design for openMAC demo on EBV DBC3C40 board:
+                      * increased CPU clock to 90 MHz (one additional Read waitstate needs to be added to SRAM interface)
+                      * increased I-Cache to 16 kB
+                      * decreased size of onchip mem to 1 kB
+                    (d.k., m.u.)
+
+22.09.2009 V1.6     - bug fixed in DLL module on MN: delete timer for PRes timeout monitoring, before
+                      next PReq will be sent.
+                    (d.k.)
+
+24.09.2009 V1.6     - implemented macro for DLL configuration to select when to call the sync process function
+                      (e.g. on SoC, on SoA or via special timer sync module).
+                    - removed NetTime from tEdrvRxBuffer and tEplFrameInfo.
+                    - inserted target specific tEplTgtTimeStamp into tEdrvRxBuffer, which will be
+                      used by special timer sync module.
+                    - implemented timer sync module for openMAC, which triggers the sync process function
+                      a configurable time before the SoC.
+                    (d.k., m.u.)
+
+29.09.2009 V1.6     - demo_mn_8139_qt on X86:
+                      * fixed compiler errors
+                      * removed call to function EplPdokCalSetTpdosValid from EplApiProcessImage.c
+                        as this work around is no longer necessary
+                      * integrated the user mode Qt4 application into the Makefile for the kernel module
+                    (m.u.)
 
