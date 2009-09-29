@@ -22,8 +22,34 @@ Requirements
 
 - Altera Nios II Embedded Design Suite v9.0 or newer
 
-- POWERLINK network as described in main readme.txt
+- Experiences with this development environment are required
 
+
+How to build the design (generate the SOF file)
+------------------------------------------------
+
+These steps are only necessary if you want to change the FPGA design.
+Otherwise you can use the supplied SOF file and go directly to step 6.
+
+1. Open the Quartus project file nios_openMac.qpf with Altera Quartus II.
+
+2. Open the SOPC Builder via menu "Tools" -> "SOPC Builder".
+
+3. Press the button "Generate" in the SOPC Builder to regenerate the Nios II system.
+
+4. Close the SOPC Builder when the generation has finished.
+
+5. Start the compilation in the Quartus II window via menu "Processing" -> "Start Compilation".
+
+6. Use the design with the supplied demo projects in the openPOWERLINK
+   subdirectory Examples\altera_nios2\no_os\gnu.
+
+   Please refer to the readme.txt in the subdirectory of the demo project for
+   further information.
+
+
+Appendix
+=========
 
 Required files
 ---------------
@@ -55,20 +81,4 @@ Generated files and subdirectories
 - *_assignment_defaults.qdf ???
 - .sopc_builder/*
 - *.qif ???
-
-
-How to build the binary
-------------------------
-
-1. Open "Nios II Command Shell"
-
-2.
-
-
-How to run the demo
---------------------
-
-1. Setup the POWERLINK network as described in main readme.txt
-
-2.
 
