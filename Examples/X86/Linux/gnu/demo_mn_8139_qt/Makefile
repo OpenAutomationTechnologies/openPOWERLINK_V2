@@ -78,6 +78,9 @@ PWD				:= $(shell pwd)
 all:
 			$(MAKE)	-C $(KDIR) M=$(PWD) modules
 			if [ ! -L EplUserApp/include/epl ] ; then ln -s ../../../../../../../Include EplUserApp/include/epl ; fi
+			if [ ! -e EplUserApp/EplUserApp.pro ] ; then cd EplUserApp ; qmake -project -unix ; fi
+			if [ ! -e EplUserApp/Makefile ] ; then cd EplUserApp ; qmake -unix ; fi
+			cd EplUserApp && make
 			dos2unix -p EplLoad
 			dos2unix -p EplUnload
 			chmod +x EplLoad EplUnload

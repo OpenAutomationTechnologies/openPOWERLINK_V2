@@ -14,31 +14,12 @@ Consists of:
 - User mode application EplUserApp
 
 
-How to build kernel module:
----------------------------
+How to build kernel module and user mode application:
+-----------------------------------------------------
 
 run make in this directory
 
 $ make
-
-
-How to build user mode application:
------------------------------------
-
-create symlink for include directory
-
-$ ln -s ../../../../../../../Include EplUserApp/include/epl
-
-create Makefile with qmake
-
-$ cd EplUserApp
-$ qmake-qt4 -project -unix
-$ qmake-qt4 -unix
-
-finally, run make
-
-$ make
-
 
 
 How to run the demo:

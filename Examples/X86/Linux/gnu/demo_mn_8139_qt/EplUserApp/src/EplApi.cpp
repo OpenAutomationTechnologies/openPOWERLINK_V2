@@ -154,7 +154,7 @@ Slides*             pSlides;
 
     EplApiInitParam.m_pfnCbEvent = pEplProcessThread->getEventCbFunc();
     // Sync call back function not required for init from user space
-    EplApiInitParam.m_pfnCbSyncProcess = NULL;
+    EplApiInitParam.m_pfnCbSync = NULL;
 
     // init EPL
     EplRet = EplApiInitialize(&EplApiInitParam);

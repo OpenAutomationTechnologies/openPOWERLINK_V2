@@ -358,7 +358,7 @@ const char* pszNmtState = NULL;
                 {
                     pEplProcessThread_g->sigNodeStatus(pEventArg_p->m_Node.m_uiNodeId, -1);
                     pEplProcessThread_g->sigNodeDisappeared(pEventArg_p->m_Node.m_uiNodeId);
-                    PRINTF1("AppCbEvent(Node 0x%X): ErrorCode: 0x%04hX\n",
+                    PRINTF2("AppCbEvent(Node 0x%X): ErrorCode: 0x%04hX\n",
                             pEventArg_p->m_Node.m_uiNodeId,
                             pEventArg_p->m_Node.m_wErrorCode);
                     break;
