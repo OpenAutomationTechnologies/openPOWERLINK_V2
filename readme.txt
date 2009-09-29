@@ -55,7 +55,10 @@
 Documentation
 -------------
 
-The documentation of the openPOWERLINK protocol stack can be downloaded from
+The documentation of the openPOWERLINK protocol stack found in the subdirectory
+"Documenation".
+
+Further documentation can be downloaded from
 
     http://www.systec-electronic.com/html/index.pl/en_download_OpenPOWERLINK
 
