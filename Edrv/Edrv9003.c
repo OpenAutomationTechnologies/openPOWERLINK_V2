@@ -72,6 +72,7 @@
 #include "global.h"
 #include "EplInc.h"
 #include "edrv.h"
+#include "Benchmark.h"
 
 #include <linux/module.h>
 #include <linux/kernel.h>
@@ -862,7 +863,9 @@ int             iHandled = IRQ_HANDLED;
         if (pTxBuffer != NULL)
         {
             // call Tx handler of Data link layer
+            BENCHMARK_MOD_01_SET(1);
             EdrvInstance_l.m_InitParam.m_pfnTxHandler(pTxBuffer);
+            BENCHMARK_MOD_01_RESET(1);
         }
     }
 
@@ -884,6 +887,7 @@ int             iHandled = IRQ_HANDLED;
             goto Exit;
         }
 
+        BENCHMARK_MOD_01_SET(6);
         for (;;)
         {
             pbRxBuf = EdrvInstance_l.m_pbRxBuf;
@@ -945,6 +949,8 @@ int             iHandled = IRQ_HANDLED;
             }
 
         }
+        BENCHMARK_MOD_01_RESET(6);
+        
     }
 
     if ((bStatus & EDRV_REGB_INT_CNT_ERR) != 0)
