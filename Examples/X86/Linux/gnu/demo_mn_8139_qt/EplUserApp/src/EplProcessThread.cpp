@@ -293,7 +293,7 @@ const char* pszNmtState = NULL;
                     }
                     else if (EplRet == kEplSuccessful)
                     {   // local OD access (should not occur)
-                        PRINTF0("AppCbEvent(Node) write to local OD\n");
+                        printf("AppCbEvent(Node) write to local OD\n");
                     }
                     else
                     {   // error occured
@@ -310,7 +310,7 @@ const char* pszNmtState = NULL;
                         }
                         else
                         {
-                            PRINTF1("AppCbEvent(Node): EplApiWriteObject() returned 0x%03X\n", EplRet);
+                            printf("AppCbEvent(Node): EplApiWriteObject() returned 0x%03X\n", EplRet);
                         }
                     }
 
@@ -358,7 +358,7 @@ const char* pszNmtState = NULL;
                 {
                     pEplProcessThread_g->sigNodeStatus(pEventArg_p->m_Node.m_uiNodeId, -1);
                     pEplProcessThread_g->sigNodeDisappeared(pEventArg_p->m_Node.m_uiNodeId);
-                    PRINTF2("AppCbEvent(Node 0x%X): ErrorCode: 0x%04hX\n",
+                    printf("AppCbEvent(Node 0x%X): ErrorCode: 0x%04hX\n",
                             pEventArg_p->m_Node.m_uiNodeId,
                             pEventArg_p->m_Node.m_wErrorCode);
                     break;

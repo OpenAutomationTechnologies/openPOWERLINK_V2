@@ -946,8 +946,7 @@ int  iRet;
 
             // fall asleep itself in own wait queue
             iErr = wait_event_interruptible(WaitQueueProcess_g,
-                                            (atomic_read(&AtomicEventState_g) == EVENT_STATE_READY)
-                                            || (atomic_read(&AtomicEventState_g) == EVENT_STATE_TERM));
+                                            (atomic_read(&AtomicEventState_g) != EVENT_STATE_IOCTL));
             if (iErr != 0)
             {   // waiting was interrupted by signal
                 // pass control to event queue kernel thread, but signal termination
@@ -1036,13 +1035,18 @@ int  iRet;
                 goto Exit;
             }
 
+            if (atomic_read(&AtomicSyncState_g) == EVENT_STATE_READY)
+            {   // EplApiProcessImageExchangeIn called twice without calling EplApiProcessImageExchangeOut in between
+                iRet = (int) kEplInvalidOperation;
+                goto Exit;
+            }
+
             // pass control to event queue kernel thread
             atomic_set(&AtomicSyncState_g, EVENT_STATE_IOCTL);
 
             // fall asleep itself in own wait queue
             iErr = wait_event_interruptible(WaitQueuePI_In_g,
-                                            (atomic_read(&AtomicSyncState_g) == EVENT_STATE_READY)
-                                            || (atomic_read(&AtomicSyncState_g) == EVENT_STATE_TERM));
+                                            (atomic_read(&AtomicSyncState_g) != EVENT_STATE_IOCTL));
             if (iErr != 0)
             {   // waiting was interrupted by signal
                 // pass control to sync kernel thread, but signal termination
@@ -1096,7 +1100,7 @@ int  iRet;
             EplRet = EplApiProcessImageExchangeOut(&ProcessImageOut);
 
             // pass control to sync kernel thread
-            atomic_set(&AtomicSyncState_g, EVENT_STATE_TERM);
+            atomic_set(&AtomicSyncState_g, EVENT_STATE_IOCTL);
             wake_up_interruptible(&WaitQueueCbSync_g);
 
             // return to EplApiProcessImageExchangeout()
@@ -1198,8 +1202,7 @@ int  iErr;
 
     // wait for completion of application's event callback function, i.e. EplApiProcess() calls ioctl again
     iErr = wait_event_interruptible(WaitQueueCbEvent_g,
-                                    (atomic_read(&AtomicEventState_g) == EVENT_STATE_IOCTL)
-                                    || (atomic_read(&AtomicEventState_g) == EVENT_STATE_TERM));
+                                    (atomic_read(&AtomicEventState_g) != EVENT_STATE_READY));
     if ((iErr != 0) || (atomic_read(&AtomicEventState_g) == EVENT_STATE_TERM))
     {   // waiting was interrupted by signal
         EplRet = kEplShutdown;
@@ -1253,9 +1256,8 @@ int  iErr;
 
         // wait for call of EplApiProcessImageExchangeOut()
         iErr = wait_event_interruptible(WaitQueueCbSync_g,
-                                        (atomic_read(&AtomicSyncState_g) == EVENT_STATE_IOCTL)
-                                        || (atomic_read(&AtomicSyncState_g) == EVENT_STATE_TERM));
-        if ((iErr != 0) || (atomic_read(&AtomicEventState_g) == EVENT_STATE_IOCTL))
+                                        (atomic_read(&AtomicSyncState_g) != EVENT_STATE_READY));
+        if ((iErr != 0) || (atomic_read(&AtomicSyncState_g) == EVENT_STATE_TERM))
         {   // waiting was interrupted by signal or application called wrong function
             EplRet = kEplShutdown;
         }

@@ -182,6 +182,7 @@
 #define EDRV_REGDW_TCR_VER_C    0x74000000  // RTL8139C
 #define EDRV_REGDW_TCR_VER_CP   0x74800000  // RTL8139C+
 #define EDRV_REGDW_TCR_VER_D    0x74400000  // RTL8139D
+#define EDRV_REGDW_TCR_VER_B    0x78000000  // RTL8139B
 #define EDRV_REGDW_TCR_IFG96    0x03000000  // default interframe gap (960 ns)
 #define EDRV_REGDW_TCR_CRC      0x00010000  // disable appending of CRC by the controller
 #define EDRV_REGDW_TCR_MXDMAUNL 0x00000700  // maximum DMA burst size of 2048 b
@@ -585,6 +586,13 @@ DWORD i;
 
     if (pBuffer_p->m_uiMaxBufferLen > EDRV_MAX_FRAME_SIZE)
     {
+        Ret = kEplEdrvNoFreeBufEntry;
+        goto Exit;
+    }
+
+    if (EdrvInstance_l.m_pbTxBuf == NULL)
+    {
+        printk("%s Tx buffers currently not allocated\n", __FUNCTION__);
         Ret = kEplEdrvNoFreeBufEntry;
         goto Exit;
     }
@@ -1077,6 +1085,7 @@ DWORD   dwTemp;
     dwTemp = EDRV_REGDW_READ(EDRV_REGDW_TCR);
     if (((dwTemp & EDRV_REGDW_TCR_VER_MASK) != EDRV_REGDW_TCR_VER_C)
         && ((dwTemp & EDRV_REGDW_TCR_VER_MASK) != EDRV_REGDW_TCR_VER_D)
+        && ((dwTemp & EDRV_REGDW_TCR_VER_MASK) != EDRV_REGDW_TCR_VER_B)
         && ((dwTemp & EDRV_REGDW_TCR_VER_MASK) != EDRV_REGDW_TCR_VER_CP))
     {   // unsupported chip
         printk("%s Unsupported chip! TCR = 0x%08lX\n", __FUNCTION__, dwTemp);
