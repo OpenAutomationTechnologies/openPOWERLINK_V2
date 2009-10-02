@@ -264,6 +264,35 @@ Fellow worker:    Daniel Krüger (d.k.)
                       under Linux 2.6.22.
                     (d.k.)
 
+21.08.2009 V1.5.3   - export functions of EPL API Layer if compiled as Windows DLL (bug 2841082)
+                    - define the DLL export modifier if the project is compiled as DLL in
+                      Visual Studio (bug 2841086)
+                    (d.k.)
+
+02.09.2009 V1.5.3   - memory leak fixed in Ethernet drivers for Pcap and RTL8139 chip, when releasing TxBuffers.
+                      The real cause of this memory leak was in DLL module because it NULLified the m_pbBuffer pointer
+                      in the TxBuffer structure before calling EdrvReleaseTxBuffer.
+                    (d.k.)
+
+04.09.2009 V1.5.3   - added EplTimeru implementation for use without any operating system and with Windows (EplTimeruGeneric.c).
+                      Now we have a proper functioning implementation of the low-res timers for Windows with PCap driver.
+                    (m.u.)
+
+11.09.2009 V1.5.3   - fixed bug in Linux user-kernel wrapper, that prevents that TPDOs got valid
+                      (race condition in EplApiLinuxKernel.c)
+                    - Linux Qt demo:
+                      removed obsolete reference of PdokCal module in EplApiProcessImage.c
+                    (d.k.)
+
+01.10.2009 V1.5.3   - project test_api_kernel for PLCcore-CF54/Linux:
+                      added include directory Target\PLCcore-CF54\Linux\gnu\driver to Makefile
+                      in order to make project compilable
+                    - fixed bug in Edrv8139.c
+                      patch submitted by: andersblomdell, 2009-09-29 at openpowerlink help forum
+                    - added missing string.h include for Linux user space in EplTarget.h 
+                    - added benchmark macros for Davicom DM9003 ethernet driver
+                    (d.k.)
+
 03.08.2009 V1.6     - EplDllk.c: only accept LossOfFrameTolerance (object 0x1C14) in non NMT reset states,
                       because all other values are only valid on reset
                     (d.k.)
@@ -308,11 +337,6 @@ Fellow worker:    Daniel Krüger (d.k.)
                       The openMAC is an Ethernet controller written in VHDL with auto-response feature
                     (d.k.)
 
-21.08.2009 V1.6     - export functions of EPL API Layer if compiled as Windows DLL (bug 2841082)
-                    - define the DLL export modifier if the project is compiled as DLL in
-                      Visual Studio (bug 2841086)
-                    (d.k.)
-
 01.09.2009 V1.6     - add "Ms" to Timeout variables in SharedBuffer and ShbIpc* implementation to
                       clearly state the unit.
                     - fixed ShbIpc-LinuxKernel implementation: job-ready timeout is now treated in unit of 1 ms.
@@ -325,14 +349,7 @@ Fellow worker:    Daniel Krüger (d.k.)
 
 02.09.2009 V1.6     - New feature: implemented support in DLL for Ethernet drivers/controllers with auto-response
                       feature. There is a new function EdrvChangeFilter, which must be implemented by each Ethernet driver.
-                    - memory leak fixed in Ethernet drivers for Pcap and RTL8139 chip, when releasing TxBuffers.
-                      The real cause of this memory leak was in DLL module because it NULLified the m_pbBuffer pointer
-                      in the TxBuffer structure before calling EdrvReleaseTxBuffer.
                     (d.k.)
-
-04.09.2009 V1.6     - Added EplTimeru implementation for use without any operating system and with Windows (EplTimeruGeneric.c).
-                      Now we have a proper functioning implementation of the low-res timers for Windows with PCap driver.
-                    (m.u.)
 
 08.09.2009 V1.6     - optimized PDO processing. It is several times faster that the old version.
                       All projects need the new module EplPdouCal.c and the module EplPdou.c now.
@@ -400,5 +417,15 @@ Fellow worker:    Daniel Krüger (d.k.)
                       * removed call to function EplPdokCalSetTpdosValid from EplApiProcessImage.c
                         as this work around is no longer necessary
                       * integrated the user mode Qt4 application into the Makefile for the kernel module
+                    (m.u.)
+
+29.09.2009 V1.6     - revised main readme.txt
+                    - revised readme.txt files for EBV DBC3C40 board demo projects
+                    (d.k.)
+
+01.10.2009 V1.6     - project test_api_kernel for PLCcore-CF54/Linux:
+                      * removed call to function EplPdokCalSetTpdosValid from api_test.c
+                        as this work around is no longer necessary
+                    - added benchmark macros for Davicom DM9003 Edrv
                     (m.u.)
 
