@@ -284,14 +284,11 @@ Fellow worker:    Daniel Krüger (d.k.)
                       removed obsolete reference of PdokCal module in EplApiProcessImage.c
                     (d.k.)
 
-01.10.2009 V1.5.3   - project test_api_kernel for PLCcore-CF54/Linux:
-                      added include directory Target\PLCcore-CF54\Linux\gnu\driver to Makefile
-                      in order to make project compilable
-                    - fixed bug in Edrv8139.c
-                      patch submitted by: andersblomdell, 2009-09-29 at openpowerlink help forum
-                    - added missing string.h include for Linux user space in EplTarget.h 
+01.10.2009 V1.5.3   - fixed bug in Edrv8139.c
+                      patch submitted by: andersblomdell, 2009-09-29 at openPOWERLINK help forum
+                    - added missing string.h include for Linux user space in EplTarget.h
                     - added benchmark macros for Davicom DM9003 ethernet driver
-                    (d.k.)
+                    (m.u.)
 
 03.08.2009 V1.6     - EplDllk.c: only accept LossOfFrameTolerance (object 0x1C14) in non NMT reset states,
                       because all other values are only valid on reset
