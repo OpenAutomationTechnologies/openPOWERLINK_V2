@@ -152,19 +152,16 @@ typedef struct
 {
     unsigned long       m_SbiMagicID;           // magic ID ("SBI+")
 //    void*               m_pSharedMem;
-//    int                 m_tThreadNewDataId;
     struct task_struct* m_tThreadNewDataId;
     long                m_lThreadNewDataNice;   // nice value of the new data thread
-//    int                 m_tThreadJobReadyId;
     struct task_struct* m_tThreadJobReadyId;
     unsigned long       m_ulFlagsBuffAccess;    // d.k. moved from tShbMemHeader, because each
                                                 // process needs to store the interrupt flags separately
     tSigHndlrNewData    m_pfnSigHndlrNewData;
     unsigned long       m_ulTimeOutMsJobReady;
     tSigHndlrJobReady   m_pfnSigHndlrJobReady;
+    struct semaphore    m_SemaphoreStopThreadJobReady;
     tShbMemHeader*      m_pShbMemHeader;
-//    int                 m_iThreadTermFlag;
-//    struct completion   m_CompletionNewData;
     #ifndef NDEBUG
         unsigned long   m_ulThreadIDNewData;
         unsigned long   m_ulThreadIDJobReady;
@@ -378,11 +375,8 @@ struct sShbMemTable     *psMemTableElement;
     pShbMemInst->m_pfnSigHndlrNewData                       = NULL;
     pShbMemInst->m_ulTimeOutMsJobReady                      = 0;
     pShbMemInst->m_pfnSigHndlrJobReady                      = NULL;
+    sema_init(&pShbMemInst->m_SemaphoreStopThreadJobReady, 1);
     pShbMemInst->m_pShbMemHeader                            = pShbMemHeader;
- //   pShbMemInst->m_iThreadTermFlag                          = 0;
-
-    // initialize completion etc.
-//    init_completion(&pShbMemInst->m_CompletionNewData);
 
     ShbError         = kShbOk;
     if ( fShMemNewCreated )
@@ -445,9 +439,14 @@ tShbError       ShbError2;
 
     // stop threads in any case, because they are bound to that specific instance
     ShbError2 = ShbIpcStopSignalingNewData (pShbInstance_p);
-    // d.k.: Whats up with JobReady thread?
-    //       Just wake it up, but without setting the semaphore variable
-    wake_up_interruptible(&pShbMemHeader->m_WaitQueueJobReady);
+
+    down(&pShbMemInst->m_SemaphoreStopThreadJobReady);
+    if (pShbMemInst->m_tThreadJobReadyId != INVALID_ID)
+    {
+        kthread_stop(pShbMemInst->m_tThreadJobReadyId);
+    }
+    up(&pShbMemInst->m_SemaphoreStopThreadJobReady);
+
 
     if ( !--pShbMemHeader->m_ulRefCount )
     {
@@ -565,7 +564,6 @@ tShbError       ShbError;
     DEBUG_LVL_26_TRACE2("ShbIpcStartSignalingNewData(%p) m_pfnSigHndlrNewData = %p\n", pShbInstance_p, pfnSignalHandlerNewData_p);
     pShbMemInst->m_pfnSigHndlrNewData = pfnSignalHandlerNewData_p;
     pShbMemHeader->m_fNewData = FALSE;
-//    pShbMemInst->m_iThreadTermFlag = 0;
 
     switch (ShbPriority_p)
     {
@@ -584,7 +582,6 @@ tShbError       ShbError;
     }
 
     //create thread for signalling new data
-//    pShbMemInst->m_tThreadNewDataId = kernel_thread(ShbIpcThreadSignalNewData,pShbInstance_p,CLONE_KERNEL);
     pShbMemInst->m_tThreadNewDataId = kthread_run(ShbIpcThreadSignalNewData,
                                                   pShbInstance_p,
                                                   "ShbND%p", pShbInstance_p);
@@ -620,22 +617,7 @@ tShbError       ShbError;
     if (pShbMemInst->m_pfnSigHndlrNewData != NULL)
     {   // signal handler was set before
         kthread_stop(pShbMemInst->m_tThreadNewDataId);
-/*
-        int iErr;
-        //set termination flag in mem header
-        pShbMemInst->m_iThreadTermFlag = 1;
 
-        // check if thread is still running at all by sending the null-signal to this thread
-        iErr = kill_proc(pShbMemInst->m_tThreadNewDataId, 0, 1);
-        if (iErr == 0)
-        {
-            // wake up thread, because it is still running
-            wake_up_interruptible(&pShbMemHeader->m_WaitQueueNewData);
-
-            //wait for termination of thread
-            wait_for_completion(&pShbMemInst->m_CompletionNewData);
-        }
-*/
         pShbMemInst->m_pfnSigHndlrNewData = NULL;
         pShbMemInst->m_tThreadNewDataId = INVALID_ID;
     }
@@ -664,7 +646,7 @@ tShbMemHeader*  pShbMemHeader;
     pShbMemHeader->m_fNewData = TRUE;
     DEBUG_LVL_29_TRACE0("ShbIpcSignalNewData set Sem -> New Data\n");
 
-    wake_up_interruptible(&pShbMemHeader->m_WaitQueueNewData);
+    wake_up(&pShbMemHeader->m_WaitQueueNewData);
     return (kShbOk);
 }
 
@@ -700,8 +682,8 @@ tShbError       ShbError;
     pShbMemInst->m_ulTimeOutMsJobReady = ulTimeOutMs_p;
     pShbMemInst->m_pfnSigHndlrJobReady = pfnSignalHandlerJobReady_p;
     pShbMemHeader->m_fJobReady = FALSE;
+
     //create thread for signalling new data
-//    pShbMemInst->m_tThreadJobReadyId=kernel_thread(ShbIpcThreadSignalJobReady,pShbInstance_p,CLONE_KERNEL);
     pShbMemInst->m_tThreadJobReadyId = kthread_run(ShbIpcThreadSignalJobReady,
                                                    pShbInstance_p,
                                                    "ShbJR%p", pShbInstance_p);
@@ -731,7 +713,7 @@ tShbMemHeader*  pShbMemHeader;
     pShbMemHeader->m_fJobReady = TRUE;
     DEBUG_LVL_29_TRACE0("ShbIpcSignalJobReady set Sem -> Job Ready \n");
 
-    wake_up_interruptible(&pShbMemHeader->m_WaitQueueJobReady);
+    wake_up(&pShbMemHeader->m_WaitQueueJobReady);
     return (kShbOk);
 }
 
@@ -859,11 +841,8 @@ int ShbIpcThreadSignalNewData (void *pvThreadParam_p)
 tShbInstance    pShbInstance;
 tShbMemInst*    pShbMemInst;
 tShbMemHeader*  pShbMemHeader;
-int             iRetVal=-1;
 int             fCallAgain;
 
-//    daemonize("ShbND%p", pvThreadParam_p);
-    allow_signal(SIGTERM);
     pShbInstance = (tShbMemInst*)pvThreadParam_p;
     pShbMemInst  = ShbIpcGetShbMemInst (pShbInstance);
     pShbMemHeader = ShbIpcGetShbMemHeader (pShbMemInst);
@@ -875,15 +854,9 @@ int             fCallAgain;
 //            DEBUG_LVL_29_TRACE1("ShbIpcThreadSignalNewData wait for New Data Sem %p\n",pShbMemInst->m_pSemNewData);
     while (!kthread_should_stop())
     {
-        iRetVal = wait_event_interruptible(pShbMemHeader->m_WaitQueueNewData,
-//            (pShbMemInst->m_iThreadTermFlag != 0)
+        wait_event(pShbMemHeader->m_WaitQueueNewData,
             kthread_should_stop()
             || (pShbMemHeader->m_fNewData != FALSE));
-
-        if (iRetVal != 0)
-        {   // signal pending
-            break;
-        }
 
         if (pShbMemHeader->m_fNewData != FALSE)
         {
@@ -896,17 +869,8 @@ int             fCallAgain;
             } while (fCallAgain != FALSE);
         }
     }
-//    while (pShbMemInst->m_iThreadTermFlag==0);
-    DEBUG_LVL_29_TRACE0("ShbIpcThreadSignalNewData terminated \n");
-    //set thread completed
-//    complete_and_exit(&pShbMemInst->m_CompletionNewData, 0);
 
-    /* Hmm, linux becomes *very* unhappy without this ... */
-    while (!kthread_should_stop()) {
-        printk("%s: waiting for kthread_stop()\n", __FUNCTION__);
-        set_current_state(TASK_INTERRUPTIBLE);
-        schedule();
-    }
+    DEBUG_LVL_29_TRACE0("ShbIpcThreadSignalNewData terminated \n");
 
     return 0;
 }
@@ -925,8 +889,6 @@ tShbMemHeader*  pShbMemHeader;
 long            lTimeOutJiffies;
 int             iRetVal=-1;
 
-//    daemonize("ShbJR%p", pvThreadParam_p);
-    allow_signal(SIGTERM);
     pShbInstance = (tShbMemInst*)pvThreadParam_p;
     pShbMemInst  = ShbIpcGetShbMemInst (pShbInstance);
     pShbMemHeader = ShbIpcGetShbMemHeader (pShbMemInst);
@@ -940,14 +902,17 @@ int             iRetVal=-1;
             lTimeOutJiffies = 1;
         }
         //wait for job ready semaphore
-        iRetVal = wait_event_interruptible_timeout(pShbMemHeader->m_WaitQueueJobReady,
-            (pShbMemHeader->m_fJobReady != FALSE), lTimeOutJiffies);
+        iRetVal = wait_event_timeout(pShbMemHeader->m_WaitQueueJobReady,
+            kthread_should_stop()
+            || (pShbMemHeader->m_fJobReady != FALSE),
+            lTimeOutJiffies);
     }
     else
     {
         //wait for job ready semaphore
-        iRetVal = wait_event_interruptible(pShbMemHeader->m_WaitQueueJobReady,
-            (pShbMemHeader->m_fJobReady != FALSE));
+        wait_event(pShbMemHeader->m_WaitQueueJobReady,
+            kthread_should_stop()
+            || (pShbMemHeader->m_fJobReady != FALSE));
     }
 
     if (pShbMemInst->m_pfnSigHndlrJobReady != NULL)
@@ -957,6 +922,22 @@ int             iRetVal=-1;
     }
 
     pShbMemInst->m_pfnSigHndlrJobReady = NULL;
+
+    if (down_trylock(&pShbMemInst->m_SemaphoreStopThreadJobReady))
+    {   // lock failed
+        wait_event(pShbMemHeader->m_WaitQueueJobReady,
+                                 kthread_should_stop());
+
+        pShbMemInst->m_tThreadJobReadyId = INVALID_ID;
+    }
+    else
+    {
+        pShbMemInst->m_tThreadJobReadyId = INVALID_ID;
+        up(&pShbMemInst->m_SemaphoreStopThreadJobReady);
+    }
+
+    DEBUG_LVL_29_TRACE0("ShbIpcThreadSignalJobReady terminated\n");
+
     return 0;
 }
 
