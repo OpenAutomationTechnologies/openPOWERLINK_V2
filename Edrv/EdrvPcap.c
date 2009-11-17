@@ -597,7 +597,7 @@ int             iRet;
 DWORD           dwRet;
 
     // increase priority
-    SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_HIGHEST);
+    SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_TIME_CRITICAL);
 
     while( 1 )
     {
