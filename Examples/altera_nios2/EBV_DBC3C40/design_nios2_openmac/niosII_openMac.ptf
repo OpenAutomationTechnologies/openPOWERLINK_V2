@@ -50,6 +50,10 @@ SYSTEM niosII_openMac
          {
             reference_designators = "";
          }
+         altera_avalon_epcs_flash_controller 
+         {
+            reference_designators = "";
+         }
       }
       do_log_history = "0";
    }
@@ -161,6 +165,12 @@ SYSTEM niosII_openMac
             {
                address = "0x01000000";
                span = "0x00800000";
+               is_bridge = "0";
+            }
+            Entry epcs_flash_controller_0/epcs_control_port
+            {
+               address = "0x00008000";
+               span = "0x00000800";
                is_bridge = "0";
             }
          }
@@ -631,6 +641,12 @@ SYSTEM niosII_openMac
                span = "0x00000004";
                is_bridge = "0";
             }
+            Entry epcs_flash_controller_0/epcs_control_port
+            {
+               address = "0x00008000";
+               span = "0x00000800";
+               is_bridge = "0";
+            }
          }
       }
       WIZARD_SCRIPT_ARGUMENTS 
@@ -719,7 +735,7 @@ SYSTEM niosII_openMac
          hardware_multiply_impl = "embedded_mul";
          shift_rot_impl = "fast_le_shift";
          gui_hardware_multiply_setting = "embedded_mul_fast_le_shift";
-         reset_slave = "cfi_flash_0/s1";
+         reset_slave = "epcs_flash_controller_0/epcs_control_port";
          break_slave = "cpu_0/jtag_debug_module";
          exc_slave = "onchip_memory_0/s1";
          reset_offset = "0x00000000";
@@ -837,8 +853,8 @@ SYSTEM niosII_openMac
             }
          }
          license_status = "encrypted";
-         mainmem_slave = "cfi_flash_0/s1";
-         datamem_slave = "cfi_flash_0/s1";
+         mainmem_slave = "epcs_flash_controller_0/epcs_control_port";
+         datamem_slave = "epcs_flash_controller_0/epcs_control_port";
          maincomm_slave = "";
          germs_monitor_id = "";
       }
@@ -2351,7 +2367,7 @@ SYSTEM niosII_openMac
                {
                   BOOT_COPIER = "boot_loader_cfi.srec";
                   CPU_CLASS = "altera_nios2";
-                  CPU_RESET_ADDRESS = "0x1000000";
+                  CPU_RESET_ADDRESS = "0x8000";
                }
             }
             TARGET delete_placeholder_warning
@@ -4673,6 +4689,305 @@ SYSTEM niosII_openMac
       }
       PORT_WIRING 
       {
+      }
+   }
+   MODULE epcs_flash_controller_0
+   {
+      SLAVE epcs_control_port
+      {
+         PORT_WIRING 
+         {
+            PORT clk
+            {
+               type = "clk";
+               width = "1";
+               direction = "input";
+               Is_Enabled = "1";
+            }
+            PORT reset_n
+            {
+               type = "reset_n";
+               width = "1";
+               direction = "input";
+               Is_Enabled = "1";
+            }
+            PORT irq
+            {
+               type = "irq";
+               width = "1";
+               direction = "output";
+               Is_Enabled = "1";
+            }
+            PORT address
+            {
+               type = "address";
+               width = "9";
+               direction = "input";
+               Is_Enabled = "1";
+            }
+            PORT chipselect
+            {
+               type = "chipselect";
+               width = "1";
+               direction = "input";
+               Is_Enabled = "1";
+            }
+            PORT dataavailable
+            {
+               type = "dataavailable";
+               width = "1";
+               direction = "output";
+               Is_Enabled = "1";
+            }
+            PORT endofpacket
+            {
+               type = "endofpacket";
+               width = "1";
+               direction = "output";
+               Is_Enabled = "1";
+            }
+            PORT read_n
+            {
+               type = "read_n";
+               width = "1";
+               direction = "input";
+               Is_Enabled = "1";
+            }
+            PORT readdata
+            {
+               type = "readdata";
+               width = "32";
+               direction = "output";
+               Is_Enabled = "1";
+            }
+            PORT readyfordata
+            {
+               type = "readyfordata";
+               width = "1";
+               direction = "output";
+               Is_Enabled = "1";
+            }
+            PORT write_n
+            {
+               type = "write_n";
+               width = "1";
+               direction = "input";
+               Is_Enabled = "1";
+            }
+            PORT writedata
+            {
+               type = "writedata";
+               width = "32";
+               direction = "input";
+               Is_Enabled = "1";
+            }
+            PORT data_from_cpu
+            {
+               Is_Enabled = "0";
+               direction = "input";
+               type = "writedata";
+               width = "16";
+            }
+            PORT data_to_cpu
+            {
+               Is_Enabled = "0";
+               direction = "output";
+               type = "readdata";
+               width = "16";
+            }
+            PORT epcs_select
+            {
+               Is_Enabled = "0";
+               direction = "input";
+               type = "chipselect";
+               width = "1";
+            }
+            PORT mem_addr
+            {
+               Is_Enabled = "0";
+               direction = "input";
+               type = "address";
+               width = "3";
+            }
+         }
+         SYSTEM_BUILDER_INFO 
+         {
+            Has_IRQ = "1";
+            Bus_Type = "avalon";
+            Write_Wait_States = "1cycles";
+            Read_Wait_States = "1cycles";
+            Hold_Time = "0cycles";
+            Setup_Time = "0cycles";
+            Is_Printable_Device = "0";
+            Address_Alignment = "dynamic";
+            Well_Behaved_Waitrequest = "0";
+            Is_Nonvolatile_Storage = "1";
+            Address_Span = "2048";
+            Read_Latency = "0";
+            Is_Memory_Device = "1";
+            Maximum_Pending_Read_Transactions = "0";
+            Minimum_Uninterrupted_Run_Length = "1";
+            Accepts_Internal_Connections = "1";
+            Write_Latency = "0";
+            Is_Flash = "1";
+            Data_Width = "32";
+            Address_Width = "9";
+            Maximum_Burst_Size = "1";
+            Register_Incoming_Signals = "0";
+            Register_Outgoing_Signals = "0";
+            Interleave_Bursts = "0";
+            Linewrap_Bursts = "0";
+            Burst_On_Burst_Boundaries_Only = "0";
+            Always_Burst_Max_Burst = "0";
+            Is_Big_Endian = "0";
+            Is_Enabled = "1";
+            MASTERED_BY cpu_0/instruction_master
+            {
+               priority = "1";
+               Offset_Address = "0x00008000";
+            }
+            MASTERED_BY cpu_0/data_master
+            {
+               priority = "1";
+               Offset_Address = "0x00008000";
+            }
+            IRQ_MASTER cpu_0/data_master
+            {
+               IRQ_Number = "6";
+            }
+            Base_Address = "0x00008000";
+            Address_Group = "0";
+         }
+         WIZARD_SCRIPT_ARGUMENTS 
+         {
+            class = "altera_avalon_epcs_flash_controller";
+            flash_reference_designator = "";
+         }
+      }
+      PORT_WIRING 
+      {
+         PORT dclk
+         {
+            type = "export";
+            width = "1";
+            direction = "output";
+            Is_Enabled = "1";
+         }
+         PORT sce
+         {
+            type = "export";
+            width = "1";
+            direction = "output";
+            Is_Enabled = "1";
+         }
+         PORT sdo
+         {
+            type = "export";
+            width = "1";
+            direction = "output";
+            Is_Enabled = "1";
+         }
+         PORT data0
+         {
+            type = "export";
+            width = "1";
+            direction = "input";
+            Is_Enabled = "1";
+         }
+      }
+      WIZARD_SCRIPT_ARGUMENTS 
+      {
+         databits = "8";
+         targetclock = "20";
+         clockunits = "MHz";
+         clockmult = "1000000";
+         numslaves = "1";
+         ismaster = "1";
+         clockpolarity = "0";
+         clockphase = "0";
+         lsbfirst = "0";
+         extradelay = "0";
+         targetssdelay = "100";
+         delayunits = "us";
+         delaymult = "1e-006";
+         prefix = "epcs_";
+         register_offset = "0x400";
+         ignore_legacy_check = "1";
+         use_asmi_atom = "0";
+         MAKE 
+         {
+            MACRO 
+            {
+               EPCS_FLASH_CONTROLLER_0_BOOT_ROM_FLASHTARGET_ALT_SIM_PREFIX = "$(EPCS_FLASH_CONTROLLER_0_BOOT_ROM_FLASHTARGET_TMP1:0=)";
+               EPCS_FLASH_CONTROLLER_0_BOOT_ROM_FLASHTARGET_TMP1 = "$(ALT_SIM_OPTIMIZE:1=RUN_ON_HDL_SIMULATOR_ONLY_)";
+            }
+            MASTER cpu_0
+            {
+               MACRO 
+               {
+                  BOOTS_FROM_EPCS = "1";
+                  BOOT_COPIER_EPCS = "boot_loader_epcs.srec";
+                  CPU_CLASS = "altera_nios2";
+                  CPU_RESET_ADDRESS = "0x8000";
+               }
+            }
+            TARGET delete_placeholder_warning
+            {
+               epcs_flash_controller_0 
+               {
+                  Command1 = "rm -f $(SIMDIR)/contents_file_warning.txt";
+                  Is_Phony = "1";
+                  Target_File = "do_delete_placeholder_warning";
+               }
+            }
+            TARGET flashfiles
+            {
+               epcs_flash_controller_0 
+               {
+                  Command1 = "@if [ $(BOOTS_FROM_EPCS) -eq 1 ]; then echo Post-processing to create $(notdir $@) ; elf2flash --input=$(ELF) --flash= --boot=$(DBL_QUOTE)$(shell $(DBL_QUOTE)$(QUARTUS_ROOTDIR)/sopc_builder/bin/find_sopc_component_dir$(DBL_QUOTE) $(CPU_CLASS) $(QUARTUS_PROJECT_DIR))/$(BOOT_COPIER_EPCS)$(DBL_QUOTE) --outfile=$(EPCS_FLASH_CONTROLLER_0_BOOT_ROM_FLASHTARGET_ALT_SIM_PREFIX)epcs_flash_controller_0_boot_rom.flash --sim_optimize=$(ALT_SIM_OPTIMIZE) --epcs --base=0x0 --end=0x7FFFFFFF  ; fi";
+                  Dependency = "$(ELF)";
+                  Target_File = "$(EPCS_FLASH_CONTROLLER_0_BOOT_ROM_FLASHTARGET_ALT_SIM_PREFIX)epcs_flash_controller_0_boot_rom.flash";
+               }
+            }
+            TARGET sim
+            {
+               epcs_flash_controller_0 
+               {
+                  Command1 = "if [ ! -d $(SIMDIR) ]; then mkdir $(SIMDIR) ; fi";
+                  Command2 = "@echo Hardware simulation is not enabled for the target SOPC Builder system. Skipping creation of hardware simulation model contents and simulation symbol files. \\(Note: This does not affect the instruction set simulator.\\)";
+                  Command3 = "touch $(SIMDIR)/dummy_file";
+                  Dependency = "$(ELF)";
+                  Target_File = "$(SIMDIR)/dummy_file";
+               }
+            }
+         }
+         clockunit = "kHz";
+         delayunit = "us";
+      }
+      class = "altera_avalon_epcs_flash_controller";
+      class_version = "7.080902";
+      SYSTEM_BUILDER_INFO 
+      {
+         Is_Enabled = "1";
+         Clock_Source = "clk_1";
+         Has_Clock = "1";
+         Instantiate_In_System_Module = "1";
+         Required_Device_Family = "STRATIX,CYCLONE,CYCLONEII,CYCLONEIII,STRATIXIII,STRATIXII,STRATIXIIGX,ARRIAGX,STRATIXIIGXLITE,STRATIXIV,ARRIAII,TARPON";
+         Fixed_Module_Name = "epcs_controller";
+         Top_Level_Ports_Are_Enumerated = "1";
+         View 
+         {
+            MESSAGES 
+            {
+            }
+         }
+      }
+      HDL_INFO 
+      {
+         Precompiled_Simulation_Library_Files = "";
+         Simulation_HDL_Files = "";
+         Synthesis_HDL_Files = "__PROJECT_DIRECTORY__/epcs_flash_controller_0.vhd";
+         Synthesis_Only_Files = "";
       }
    }
 }

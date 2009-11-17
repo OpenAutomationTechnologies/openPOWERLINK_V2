@@ -116,10 +116,10 @@ set_global_assignment -name FORCE_CONFIGURATION_VCCIO ON
 set_global_assignment -name STRATIX_DEVICE_IO_STANDARD "3.0-V LVTTL"
 set_global_assignment -name RESERVE_ALL_UNUSED_PINS_WEAK_PULLUP "AS INPUT TRI-STATED"
 set_global_assignment -name CYCLONEII_RESERVE_NCEO_AFTER_CONFIGURATION "USE AS REGULAR IO"
-set_global_assignment -name RESERVE_DATA0_AFTER_CONFIGURATION "AS INPUT TRI-STATED"
-set_global_assignment -name RESERVE_DATA1_AFTER_CONFIGURATION "AS INPUT TRI-STATED"
+set_global_assignment -name RESERVE_DATA0_AFTER_CONFIGURATION "USE AS REGULAR IO"
+set_global_assignment -name RESERVE_DATA1_AFTER_CONFIGURATION "USE AS REGULAR IO"
 set_global_assignment -name RESERVE_FLASH_NCE_AFTER_CONFIGURATION "USE AS REGULAR IO"
-set_global_assignment -name RESERVE_DCLK_AFTER_CONFIGURATION "USE AS PROGRAMMING PIN"
+set_global_assignment -name RESERVE_DCLK_AFTER_CONFIGURATION "USE AS REGULAR IO"
 
 # Assembler Assignments
 # =====================
@@ -273,3 +273,14 @@ set_instance_assignment -name TSU_REQUIREMENT "5 ns" -from * -to data -disable
 set_instance_assignment -name TCO_REQUIREMENT "5 ns" -from * -to sram_ncs -disable
 set_instance_assignment -name TCO_REQUIREMENT "5 ns" -from * -to noe -disable
 set_instance_assignment -name TCO_REQUIREMENT "5 ns" -from * -to nwe -disable
+set_location_assignment PIN_K2 -to epcs_dclk
+set_location_assignment PIN_K1 -to epcs_sdi
+set_location_assignment PIN_D1 -to epcs_sdo
+set_location_assignment PIN_E2 -to epcs_ce_n
+set_global_assignment -name MISC_FILE "D:/Projekte/EPL/SW/EPL_V2/Examples/altera_nios2/EBV_DBC3C40/design_nios2_openmac/nios_openMac.dpf"
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to epcs_ce_n
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to epcs_dclk
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to epcs_sdi
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to epcs_sdo
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to io3_3V_o
+set_global_assignment -name GENERATE_JAM_FILE ON
