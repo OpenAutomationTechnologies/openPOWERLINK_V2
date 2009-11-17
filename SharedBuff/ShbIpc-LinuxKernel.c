@@ -71,6 +71,7 @@
 #include <linux/spinlock.h>
 #include <linux/wait.h>
 #include <linux/kthread.h>
+#include <linux/semaphore.h>
 
 
 
