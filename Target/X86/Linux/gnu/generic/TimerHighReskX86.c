@@ -231,12 +231,14 @@ unsigned int                 uiIndex;
 
         pTimer->function = EplTimerHighReskCallback;
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,28)
         /*
          * We use HRTIMER_CB_SOFTIRQ here.
          * HRTIMER_CB_IRQSAFE is critical as the callback function
          * would be called with IRQs disabled.
          */
         pTimer->cb_mode = HRTIMER_CB_SOFTIRQ;
+#endif
     }
 
     return Ret;
