@@ -1066,7 +1066,7 @@
 //---------------------------------------------------------------------------
 //  definitions for MPC565
 //---------------------------------------------------------------------------
-#elif __MWERKS__
+#elif defined (__MWERKS__)
 
 #ifdef __MC68K__
 
@@ -1236,7 +1236,7 @@
 
     #endif
 
-#elif (_MSC_VER == 800) // PC MS Visual C/C++ for DOS applications
+#elif (defined (_MSC_VER) && (_MSC_VER == 800)) // PC MS Visual C/C++ for DOS applications
 
     #define TARGET_SYSTEM   _DOS_
     #define DEV_SYSTEM      _DEV_MSVC_DOS_
