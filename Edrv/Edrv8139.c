@@ -683,7 +683,7 @@ DWORD       dwTemp;
     {   // transmission is already active
         Ret = kEplInvalidOperation;
         dwTemp = EDRV_REGDW_READ((EDRV_REGDW_TSD0 + (EdrvInstance_l.m_uiCurTxDesc * sizeof (DWORD))));
-        printk("%s InvOp TSD%u = 0x%08lX", __FUNCTION__, EdrvInstance_l.m_uiCurTxDesc, dwTemp);
+        printk("%s InvOp TSD%u = 0x%08lX", __FUNCTION__, EdrvInstance_l.m_uiCurTxDesc, (ULONG) dwTemp);
         printk("  Cmd = 0x%02X\n", (WORD) EDRV_REGB_READ(EDRV_REGB_COMMAND));
         goto Exit;
     }
@@ -1088,7 +1088,7 @@ DWORD   dwTemp;
         && ((dwTemp & EDRV_REGDW_TCR_VER_MASK) != EDRV_REGDW_TCR_VER_B)
         && ((dwTemp & EDRV_REGDW_TCR_VER_MASK) != EDRV_REGDW_TCR_VER_CP))
     {   // unsupported chip
-        printk("%s Unsupported chip! TCR = 0x%08lX\n", __FUNCTION__, dwTemp);
+        printk("%s Unsupported chip! TCR = 0x%08lX\n", __FUNCTION__, (ULONG) dwTemp);
         iResult = -ENODEV;
         goto Exit;
     }

@@ -287,7 +287,7 @@ tEplDllkCalStatistics* pDllkCalStats;
     // fetch running IdentRequests
     nSize += snprintf (pcBuffer_p + nSize, nBufferSize_p - nSize,
                        "running IdentRequests:      0x%08lX\n",
-                       EplIdentuGetRunningRequests());
+                       (ULONG) EplIdentuGetRunningRequests());
 
     // fetch state of NmtMnu module
     {
@@ -348,12 +348,12 @@ tEplDllkCalStatistics* pDllkCalStats;
             if (nNum == uiDbgTraceValuePos_l)
             {   // next value will be stored at that position
                 nSize += snprintf (pcBuffer_p + nSize, nBufferSize_p - nSize,
-                                   "*%08lX", adwDbgTraceValue_l[nNum]);
+                                   "*%08lX", (ULONG) adwDbgTraceValue_l[nNum]);
             }
             else
             {
                 nSize += snprintf (pcBuffer_p + nSize, nBufferSize_p - nSize,
-                                   " %08lX", adwDbgTraceValue_l[nNum]);
+                                   " %08lX", (ULONG) adwDbgTraceValue_l[nNum]);
             }
             if ((nNum & 0x00000007) == 0x00000007)
             {   // 8 values printed -> end of line reached

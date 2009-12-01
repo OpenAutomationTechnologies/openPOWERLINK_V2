@@ -639,7 +639,7 @@ tEplKernel          EplRet = kEplSuccessful;
                 case kEplEventSourceDllk:
                 {   // error occured within the data link layer (e.g. interrupt processing)
                     // the DWORD argument contains the DLL state and the NMT event
-                    printk(" val=%lX\n", pEventArg_p->m_InternalError.m_Arg.m_dwArg);
+                    printk(" val=%lX\n", (ULONG) pEventArg_p->m_InternalError.m_Arg.m_dwArg);
                     break;
                 }
 
