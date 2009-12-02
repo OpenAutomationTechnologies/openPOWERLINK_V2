@@ -271,7 +271,6 @@ const char* pszNmtState = NULL;
                 case kEplNmtNodeEventFound:
                 {
 
-                    pEplProcessThread_g->sigNodeStatus(pEventArg_p->m_Node.m_uiNodeId, 0);
                     pEplProcessThread_g->sigNodeAppeared(pEventArg_p->m_Node.m_uiNodeId);
 
                     break;
@@ -280,8 +279,6 @@ const char* pszNmtState = NULL;
                 case kEplNmtNodeEventCheckConf:
                 {
                 tEplSdoComConHdl SdoComConHdl;
-
-                    pEplProcessThread_g->sigNodeStatus(pEventArg_p->m_Node.m_uiNodeId, 1);
 
                     // update object 0x1006 on CN
                     EplRet = EplApiWriteObject(&SdoComConHdl, pEventArg_p->m_Node.m_uiNodeId,
@@ -322,15 +319,16 @@ const char* pszNmtState = NULL;
                     switch (pEventArg_p->m_Node.m_NmtState)
                     {
                         case kEplNmtGsOff:
-                        {
-                            pEplProcessThread_g->sigNodeStatus(pEventArg_p->m_Node.m_uiNodeId, 0);
-                            break;
-                        }
                         case kEplNmtGsInitialising:
                         case kEplNmtGsResetApplication:
                         case kEplNmtGsResetCommunication:
                         case kEplNmtGsResetConfiguration:
                         case kEplNmtCsNotActive:
+                        {
+//                            pEplProcessThread_g->sigNodeStatus(pEventArg_p->m_Node.m_uiNodeId, 0);
+                            pEplProcessThread_g->sigNodeDisappeared(pEventArg_p->m_Node.m_uiNodeId);
+                            break;
+                        }
                         case kEplNmtCsPreOperational1:
                         case kEplNmtCsPreOperational2:
                         case kEplNmtCsReadyToOperate:
@@ -357,7 +355,6 @@ const char* pszNmtState = NULL;
                 case kEplNmtNodeEventError:
                 {
                     pEplProcessThread_g->sigNodeStatus(pEventArg_p->m_Node.m_uiNodeId, -1);
-                    pEplProcessThread_g->sigNodeDisappeared(pEventArg_p->m_Node.m_uiNodeId);
                     printf("AppCbEvent(Node 0x%X): ErrorCode: 0x%04hX\n",
                             pEventArg_p->m_Node.m_uiNodeId,
                             pEventArg_p->m_Node.m_wErrorCode);
@@ -366,8 +363,6 @@ const char* pszNmtState = NULL;
 
                 default:
                 {
-                    pEplProcessThread_g->sigNodeStatus(pEventArg_p->m_Node.m_uiNodeId, -1);
-                    pEplProcessThread_g->sigNodeAppeared(pEventArg_p->m_Node.m_uiNodeId);
                 }
             }
             break;
@@ -422,15 +417,6 @@ tEplKernel          EplRet;
 
     // start process function
     EplRet = EplApiProcess();
-
-    // kill sync process
-    //kill(PidSync, SIGINT);
-
-    // wait for finish of sync process
-    //waitpid(PidSync, NULL, 0);
-
-    // ShutdownEpl:
-    //EplRet = EplApiShutdown();
 
 }
 
