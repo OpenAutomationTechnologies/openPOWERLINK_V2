@@ -230,14 +230,14 @@ tEplKernel PUBLIC AppCbEvent(
 
                 case kEplNmtGsResetCommunication:
                 {
-                BYTE    bNodeId = 0xF0;
+//                BYTE    bNodeId = 0xF0;
                 DWORD   dwNodeAssignment = EPL_NODEASSIGN_NODE_EXISTS;
 
                     PRINTF3("%s(0x%X) originating event = 0x%X\n",
                             __func__,
                             pEventArg_p->m_NmtStateChange.m_NewNmtState,
                             pEventArg_p->m_NmtStateChange.m_NmtEvent);
-
+/*
                     EplRet = EplApiWriteLocalObject(0x1F81, bNodeId, &dwNodeAssignment, sizeof (dwNodeAssignment));
                     if (EplRet != kEplSuccessful)
                     {
@@ -249,7 +249,7 @@ tEplKernel PUBLIC AppCbEvent(
                     {
                         goto Exit;
                     }
-
+*/
                     break;
                 }
 
