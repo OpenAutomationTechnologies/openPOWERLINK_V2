@@ -62,6 +62,7 @@
 #include "ShbLinuxKernel.h"
 #include "Debug.h"
 
+#include <linux/version.h>
 #include <linux/string.h>
 #include <linux/module.h>
 #include <asm/processor.h>
@@ -71,8 +72,9 @@
 #include <linux/spinlock.h>
 #include <linux/wait.h>
 #include <linux/kthread.h>
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 26)
 #include <linux/semaphore.h>
-
+#endif
 
 
 /***************************************************************************/
