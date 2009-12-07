@@ -25,7 +25,9 @@ Requirements
 
 - Experiences with this development environment are required
 
-- POWERLINK network as described in main readme.txt
+- POWERLINK network with Configuration Manager.
+  The corresponding XDD for this node can be found in the subdirectory
+  ObjDicts\CiA401_3r1tpdo_CN of the openPOWERLINK main directory.
 
 
 How to build the binary
