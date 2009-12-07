@@ -97,7 +97,15 @@ int bind(SOCKET s, const struct sockaddr *addr, int addrlen);
 
 int closesocket(SOCKET s);
 
+int listen(SOCKET s, int backlog);
+
+SOCKET accept(SOCKET s, struct sockaddr *addr, int* addrlen);
+
+int recv(SOCKET s, char* buf, int len, int flags);
+
 int recvfrom(SOCKET s, char* buf, int len, int flags, struct sockaddr *from, int * fromlen);
+
+int send(SOCKET s, const char* buf, int len, int flags);
 
 int sendto(SOCKET s, const char* buf, int len, int flags, const struct sockaddr *to, int tolen);
 

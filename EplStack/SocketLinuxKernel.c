@@ -168,6 +168,49 @@ int closesocket(SOCKET socket_p)
     return 0;
 }
 
+int listen(SOCKET socket_p, int backlog)
+{
+int rc;
+
+    rc = kernel_listen(socket_p, backlog);
+
+    return rc;
+}
+
+SOCKET accept(SOCKET socket_p, struct sockaddr *addr, int* addrlen)
+{
+int rc;
+SOCKET newsocket;
+
+    rc = kernel_accept(socket_p, &newsocket, 0);
+    if (rc < 0)
+    {
+        newsocket = NULL;
+        goto Exit;
+    }
+
+Exit:
+    return newsocket;
+}
+
+int recv(SOCKET socket_p, char* buf, int len, int flags)
+{
+int rc;
+struct msghdr msg;
+struct kvec iov;
+
+    msg.msg_control = NULL;
+    msg.msg_controllen = 0;
+    msg.msg_name = NULL;     // will be struct sock_addr
+    msg.msg_namelen = 0;
+    iov.iov_len = len;
+    iov.iov_base = buf;
+
+    rc = kernel_recvmsg(socket_p, &msg, &iov, 1, iov.iov_len, 0);
+
+    return rc;
+}
+
 int recvfrom(SOCKET socket_p, char* buf, int len, int flags, struct sockaddr *from, int * fromlen)
 {
 int rc;
@@ -182,6 +225,25 @@ struct kvec iov;
     iov.iov_base = buf;
 
     rc = kernel_recvmsg(socket_p, &msg, &iov, 1, iov.iov_len, 0);
+
+    return rc;
+}
+
+int send(SOCKET socket_p, const char* buf, int len, int flags)
+{
+int rc;
+struct msghdr msg;
+struct kvec iov;
+
+    msg.msg_control = NULL;
+    msg.msg_controllen = 0;
+    msg.msg_name = NULL;     // will be struct sock_addr
+    msg.msg_namelen = 0;
+    msg.msg_flags = 0;
+    iov.iov_len = len;
+    iov.iov_base = (char *)buf;
+
+    rc = kernel_sendmsg(socket_p, &msg, &iov, 1, len);
 
     return rc;
 }
