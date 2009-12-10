@@ -24,6 +24,9 @@ How to update from any previous version to version 1.6
    defines the number of PRes filter entries in the DLL module and Ethernet
    driver. A value of -1 enables the reception of all PRes frames without
    specific filtering.
+   Additionally, you need to include and properly configure objects
+   0x1F81 NMT_NodeAssignment_AU32 and 0x1F8D NMT_PResPayloadLimitList_AU16
+   in the local object dictionary for PRes cross-traffic.
 
 
 3. Implement the function EdrvChangeFilter in your Ethernet driver.

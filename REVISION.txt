@@ -385,7 +385,6 @@ Fellow worker:    Daniel Krüger (d.k.)
                       in EplCfg.h of all demo projects
                     (d.k.)
 
-
 18.09.2009 V1.6     - added new demo project "demo_cn_3r1tpdo" which maps 50 byte to 3 RPDOs and 50 byte 1 TPDO
                     - added new OD "CiA401_3r1tpdo_CN" and moved address ranges 1000h-13FFh and 1B00h-1FFFh to a generic section
                     (m.u.)
@@ -417,12 +416,26 @@ Fellow worker:    Daniel Krüger (d.k.)
                     (m.u.)
 
 29.09.2009 V1.6     - revised main readme.txt
+                    - added update.txt for description of necessary changes to your application project
+                      if updating any previous openPOWERLINK version.
                     - revised readme.txt files for EBV DBC3C40 board demo projects
                     (d.k.)
 
-01.10.2009 V1.6     - project test_api_kernel for PLCcore-CF54/Linux:
-                      * removed call to function EplPdokCalSetTpdosValid from api_test.c
-                        as this work around is no longer necessary
-                    - added benchmark macros for Davicom DM9003 Edrv
+01.10.2009 V1.6     - added benchmark macros for Davicom DM9003 Edrv
                     (m.u.)
+
+17.11.2009 V1.6     - design for openMAC demo project on EBV DBC3C40:
+                      added EPCS controller, so demo software can be stored persistently in serial flash.
+                    - EdrvPcap: set thread priority of worker thread to time critical
+                    - fixed compile bug in Linux kernel implementation of SharedBuff
+                      (added missing include of semaphore.h when kernel >= 2.6.26)
+                    (d.k.)
+
+01.12.2009 V1.6     - Inserted a cast to ULONG for printf with %l. This avoids a warning when compiling for the x86_64 arch.
+                    - HighResTimer for Linux kernel: Removed usage of HRTIMER_CB_SOFTIRQ for kernels >= 2.6.28
+                    (m.u.)
+
+04.12.2009 V1.6     - CN demo for EBV DBC3C40 board: configured RPDO to use PReq instead of PResMN,
+                      because this is the usual case for the POWERLINK demo network
+                    (d.k.)
 

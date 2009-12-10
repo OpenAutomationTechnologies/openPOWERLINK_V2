@@ -55,22 +55,25 @@
 1. Documentation
 -----------------
 
-The documentation of the openPOWERLINK protocol stack can be found in the
-subdirectory "Documenation".
+* The documentation of the openPOWERLINK protocol stack can be found in the
+  subdirectory "Documenation".
 
-Further documentation can be downloaded from
+* Further documentation can be downloaded from
 
     http://www.systec-electronic.com/html/index.pl/en_download_OpenPOWERLINK
 
     It contains an introduction and a reference manual. A free registration
     is required for downloading.
 
+* Update Guide for necessary changes to your application project, if you update
+  from a previous version of openPOWERLINK, can be found in file update.txt.
+
 
 2. Generic Requirements for all demo applications
 --------------------------------------------------
 
 - POWERLINK network:
-    * one or more POWERLINK I/O devices according CiA-401
+    * one or more POWERLINK I/O devices according device profile CiA-401
       (i.e. Controlled Nodes) with the following PDO mapping:
 
     RPDO (PollRequest from MN): length = 1 or 2 Bytes
@@ -125,7 +128,7 @@ Further documentation can be downloaded from
 3.1. Requirements for X86 demo under Linux
 -------------------------------------------
 
-- Linux kernel version 2.6.23 or later (last tested version 2.6.27)
+- Linux kernel version 2.6.23 or later (last tested version 2.6.31)
   with CONFIG_HIGH_RES_TIMERS enabled
     * this needs ACPI support, maybe you need to append "highres=on" or
       "acpi=force" to kernel command line for older BIOSes)
