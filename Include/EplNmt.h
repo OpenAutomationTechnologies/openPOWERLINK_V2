@@ -221,7 +221,7 @@ typedef enum
     kEplNmtNodeCommandSwUpdated = 0x03, // application updated software on CN successfully
     kEplNmtNodeCommandConfOk    = 0x04, // application / Configuration Manager has updated configuration on CN successfully
     kEplNmtNodeCommandConfReset = 0x05, // application / Configuration Manager has updated configuration on CN successfully
-                                        // and CN needs ResetConf so that the configuration gets actived
+                                        // and CN needs ResetConf so that the configuration gets activated
     kEplNmtNodeCommandConfErr   = 0x06, // application / Configuration Manager failed on updating configuration on CN
     kEplNmtNodeCommandStart     = 0x07, // if EPL_NMTST_NO_STARTNODE set it must be issued after kEplNmtNodeEventReadyToStart
 

@@ -120,7 +120,7 @@
 #define EPL_MODULE_DLLK        0x00000800L // DLL kernel part module
 #define EPL_MODULE_DLLU        0x00001000L // DLL user part module
 #define EPL_MODULE_OBDU        0x00002000L // OBD user part module
-#define EPL_MODULE_CFGMA       0x00004000L // Configuartioan Manager module
+#define EPL_MODULE_CFGMA       0x00004000L // Configuration Manager module
 #define EPL_MODULE_VETH        0x00008000L // virtual ethernet driver module
 #define EPL_MODULE_PDOU        0x00010000L // PDO user part module
 #define EPL_MODULE_LEDU        0x00020000L // LED user part module
