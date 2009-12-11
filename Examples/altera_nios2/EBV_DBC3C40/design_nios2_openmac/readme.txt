@@ -46,39 +46,3 @@ Otherwise you can use the supplied SOF file and go directly to step 6.
 
    Please refer to the readme.txt in the subdirectory of the demo project for
    further information.
-
-
-Appendix
-=========
-
-Required files
----------------
-
-- <project>.qpf (Quartus II project file)
-- <project>.qsf (Quartus II settings file)
-- <sopc_builder_system>.sopc (SOPC Builder system description)
-- <sopc_builder_system>.sopcinfo (SOPC Builder report file)
-- <toplevel>.bdf (top level schematic)
-- <toplevel>.vhd (top level VHDL)
-- EPL/* (VHDL and TCL source files of openMAC)
-- <project>.sof (SRAM source file; generated, but needed for delivery)
-- <megafunction_block>.qip, <megafunction_block>.bsf,
-  <megafunction_block>.ppf, <megafunction_block>.vhd
-- altpll0.qip, altpll0.bsf, altpll0.ppf, altpll0.vhd
-- *.tcl
-
-
-Generated files and subdirectories
------------------------------------
-
-- *.stp (SignalTap II file, needs special license)
-- db/* (Compilation database files)
-- incremental_db/* (Incremental database files)
-- <sopc_builder_system>.qip
-- altpll0.cmp
-- cpu_0.sdc, cpu_0.vhd, cpu_0_*.mif, cpu_0_*.vhd
-- EPL_openMAC_0.vhd, jtag_uart_0.vhd
-- *_assignment_defaults.qdf ???
-- .sopc_builder/*
-- *.qif ???
-
