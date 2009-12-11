@@ -1,0 +1,14 @@
+The main source code of the openPOWERLINK Protocol Stack is licensed under BSD
+license by SYS TEC electronic GmbH and third-party contributors.
+Some target platform specific parts of the stack are licensed under other
+licenses such as, without limitation, the GNU General Public License Version 2.
+Please refer to the file's header for the applicable license and the
+corresponding terms and conditions.
+
+Please take note that some files are copyrighted by Altera Corporation. Those
+are allowed to be used for the sole purpose of programming logic devices
+manufactured by Altera and sold by Altera or its authorized distributors.
+Please refer to the applicable license agreement from Altera for further
+details.
+
+It is not allowed to remove any copyright information.
