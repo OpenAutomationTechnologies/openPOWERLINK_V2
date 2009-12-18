@@ -293,6 +293,10 @@ EPL_OBD_BEGIN ()
         EPL_OBD_END_INDEX(0x1E40)
 #endif
 
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_CFM)) != 0)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY_NOINIT(0x1F22, EPL_NMT_MAX_NODE_ID, EplCfmuCbObdAccess, kEplObdTypDomain, kEplObdAccRW, Domain, CFM_ConciseDcfList_ADOM)
+#endif
+
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
         // Object 1F80h: NMT_StartUp_U32
         EPL_OBD_BEGIN_INDEX_RAM(0x1F80, 0x01, NULL)

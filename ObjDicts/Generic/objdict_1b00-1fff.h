@@ -70,6 +70,10 @@
         EPL_OBD_END_INDEX(0x1E40)
 #endif
 
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_CFM)) != 0)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY_NOINIT(0x1F22, EPL_NMT_MAX_NODE_ID, EplCfmuCbObdAccess, kEplObdTypDomain, kEplObdAccRW, Domain, CFM_ConciseDcfList_ADOM)
+#endif
+
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
         // Object 1F80h: NMT_StartUp_U32
         EPL_OBD_BEGIN_INDEX_RAM(0x1F80, 0x01, NULL)
@@ -79,7 +83,7 @@
 
 #if EPL_NMT_MAX_NODE_ID > 0
         // Object 1F81h: NMT_NodeAssignment_AU32
-        EPL_OBD_RAM_INDEX_RAM_ARRAY(0x1F81, 254, NULL, kEplObdTypUInt32, kEplObdAccRW, tEplObdUnsigned32, NMT_NodeAssignment_AU32, 0)
+        EPL_OBD_RAM_INDEX_RAM_ARRAY(0x1F81, EPL_NMT_MAX_NODE_ID, NULL, kEplObdTypUInt32, kEplObdAccRW, tEplObdUnsigned32, NMT_NodeAssignment_AU32, 0)
 #endif
 
         // Object 1F82h: NMT_FeatureFlags_U32
@@ -124,7 +128,7 @@
 
 #if EPL_NMT_MAX_NODE_ID > 0
         // Object 1F8Dh: NMT_PResPayloadLimitList_AU16
-        EPL_OBD_RAM_INDEX_RAM_ARRAY(0x1F8D, 254, NULL, kEplObdTypUInt16, kEplObdAccRW, tEplObdUnsigned16, NMT_PResPayloadLimitList_AU16, 36)
+        EPL_OBD_RAM_INDEX_RAM_ARRAY(0x1F8D, EPL_NMT_MAX_NODE_ID, NULL, kEplObdTypUInt16, kEplObdAccRW, tEplObdUnsigned16, NMT_PResPayloadLimitList_AU16, 36)
 #endif
 
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
