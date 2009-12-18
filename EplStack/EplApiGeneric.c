@@ -86,6 +86,7 @@
 #include "user/EplIdentu.h"
 #include "user/EplStatusu.h"
 #include "user/EplTimeru.h"
+#include "user/EplCfmu.h"
 
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_VETH)) != 0)
 #include "kernel/VirtualEthernet.h"
@@ -209,6 +210,11 @@ static tEplKernel PUBLIC  EplApiCbBootEvent(tEplNmtBootEvent BootEvent_p,
 // callback function of Ledu module
 static tEplKernel PUBLIC  EplApiCbLedStateChange(tEplLedType LedType_p,
                                                  BOOL fOn_p);
+#endif
+
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_CFM)) != 0)
+static tEplKernel PUBLIC  EplApiCbCfmEventCnProgress(tEplCfmEventCnProgress* pEventCnProgress_p);
+static tEplKernel PUBLIC  EplApiCbCfmEventCnResult(unsigned int uiNodeId_p, tEplNmtNodeCommand NodeCommand_p);
 #endif
 
 // OD initialization function (implemented in Objdict.c)
@@ -475,6 +481,15 @@ tEplDllkInitParam   DllkInitParam;
     }
 #endif
 
+    // initialize EplCfmu module
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_CFM)) != 0)
+    Ret = EplCfmuAddInstance(EplApiCbCfmEventCnProgress, EplApiCbCfmEventCnResult);
+    if (Ret != kEplSuccessful)
+    {
+        goto Exit;
+    }
+#endif
+
     // the application must start NMT state machine
     // via EplApiExecNmtCommand(kEplNmtEventSwReset)
     // and thereby the whole EPL stack
@@ -482,6 +497,7 @@ tEplDllkInitParam   DllkInitParam;
 Exit:
     return Ret;
 }
+
 
 //---------------------------------------------------------------------------
 //
@@ -509,6 +525,12 @@ tEplKernel      Ret = kEplSuccessful;
     //           during shutdown.
 
     // delete instance for all modules
+
+    // deinitialize EplCfmu module
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_CFM)) != 0)
+    Ret = EplCfmuDelInstance();
+//    PRINTF1("EplCfmuDelInstance():    0x%X\n", Ret);
+#endif
 
     // deinitialize EplSdoCom module
 #if ((((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOS)) != 0) || \
@@ -2151,6 +2173,12 @@ Exit:
     return Ret;
 }
 
+tEplKernel PUBLIC EplApiGetIdentResponse(
+                                    unsigned int        uiNodeId_p,
+                                    tEplIdentResponse** ppIdentResponse_p)
+{
+    return EplIdentuGetIdentResponse(uiNodeId_p, ppIdentResponse_p);
+}
 
 //---------------------------------------------------------------------------
 //
@@ -2312,6 +2340,67 @@ tEplApiEventArg EventArg;
 
     return Ret;
 
+}
+
+#endif
+
+
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_CFM)) != 0)
+
+//---------------------------------------------------------------------------
+//
+// Function:    EplApiCbCfmEventCnProgress
+//
+// Description: callback function for CFM progress events.
+//
+// Parameters:  pEventCnProgress_p  = pointer to structure with additional information
+//
+// Returns:     tEplKernel      = errorcode
+//
+// State:
+//
+//---------------------------------------------------------------------------
+
+static tEplKernel PUBLIC  EplApiCbCfmEventCnProgress(tEplCfmEventCnProgress* pEventCnProgress_p)
+{
+tEplKernel Ret;
+tEplApiEventArg EventArg;
+
+    Ret = kEplSuccessful;
+
+    // call user callback
+    EventArg.m_CfmProgress = *pEventCnProgress_p;
+
+    Ret = EplApiInstance_g.m_InitParam.m_pfnCbEvent(kEplApiEventCfmProgress,
+                                                    &EventArg,
+                                                    EplApiInstance_g.m_InitParam.m_pEventUserArg);
+
+    return Ret;
+}
+
+
+//---------------------------------------------------------------------------
+//
+// Function:    EplApiCbCfmEventCnResult
+//
+// Description: callback function for CFM CN result events.
+//
+// Parameters:  uiNodeId_p      = node-ID of CN
+//              NodeCommand_p   = NMT command which shall be executed
+//
+// Returns:     tEplKernel      = errorcode
+//
+// State:
+//
+//---------------------------------------------------------------------------
+
+static tEplKernel PUBLIC  EplApiCbCfmEventCnResult(unsigned int uiNodeId_p, tEplNmtNodeCommand NodeCommand_p)
+{
+tEplKernel Ret;
+
+    Ret = EplNmtMnuTriggerStateChange(uiNodeId_p, NodeCommand_p);
+
+    return Ret;
 }
 
 #endif

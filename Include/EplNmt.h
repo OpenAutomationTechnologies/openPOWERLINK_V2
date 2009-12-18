@@ -216,14 +216,16 @@ typedef enum
 
 typedef enum
 {
-    kEplNmtNodeCommandBoot      = 0x01, // if EPL_NODEASSIGN_START_CN not set it must be issued after kEplNmtNodeEventFound
-    kEplNmtNodeCommandSwOk      = 0x02, // application updated software on CN successfully
-    kEplNmtNodeCommandSwUpdated = 0x03, // application updated software on CN successfully
-    kEplNmtNodeCommandConfOk    = 0x04, // application / Configuration Manager has updated configuration on CN successfully
-    kEplNmtNodeCommandConfReset = 0x05, // application / Configuration Manager has updated configuration on CN successfully
-                                        // and CN needs ResetConf so that the configuration gets activated
-    kEplNmtNodeCommandConfErr   = 0x06, // application / Configuration Manager failed on updating configuration on CN
-    kEplNmtNodeCommandStart     = 0x07, // if EPL_NMTST_NO_STARTNODE set it must be issued after kEplNmtNodeEventReadyToStart
+    kEplNmtNodeCommandBoot          = 0x01, // if EPL_NODEASSIGN_START_CN not set it must be issued after kEplNmtNodeEventFound
+    kEplNmtNodeCommandSwOk          = 0x02, // application updated software on CN successfully
+    kEplNmtNodeCommandSwUpdated     = 0x03, // application updated software on CN successfully
+    kEplNmtNodeCommandConfOk        = 0x04, // application / Configuration Manager has updated configuration on CN successfully
+    kEplNmtNodeCommandConfRestored  = 0x05, // application / Configuration Manager has restored the original CN configuration
+                                            // and CN need ResetNode to complete the restore process, afterwards the new configuration can be downloaded
+    kEplNmtNodeCommandConfReset     = 0x06, // application / Configuration Manager has updated configuration on CN successfully
+                                            // and CN needs ResetConf so that the configuration gets activated
+    kEplNmtNodeCommandConfErr       = 0x07, // application / Configuration Manager failed on updating configuration on CN
+    kEplNmtNodeCommandStart         = 0x08, // if EPL_NMTST_NO_STARTNODE set it must be issued after kEplNmtNodeEventReadyToStart
 
 } tEplNmtNodeCommand;
 

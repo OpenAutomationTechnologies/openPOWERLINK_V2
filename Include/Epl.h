@@ -76,6 +76,7 @@
 #include "EplSdo.h"
 #include "EplObd.h"
 #include "EplLed.h"
+#include "EplCfm.h"
 #include "EplEvent.h"
 
 //---------------------------------------------------------------------------
@@ -128,6 +129,7 @@ typedef enum
     kEplApiEventSdo            = 0x62,    // m_Sdo
     kEplApiEventObdAccess      = 0x69,    // m_ObdCbParam
     kEplApiEventLed            = 0x70,    // m_Led
+    kEplApiEventCfmProgress    = 0x71,    // m_CfmProgress
 
 } tEplApiEventType;
 
@@ -142,6 +144,7 @@ typedef union
     tEplApiEventNode        m_Node;
     tEplApiEventBoot        m_Boot;
     tEplApiEventLed         m_Led;
+    tEplCfmEventCnProgress  m_CfmProgress;
 
 } tEplApiEventArg;
 

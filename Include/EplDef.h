@@ -128,6 +128,12 @@
 
 #define EPL_DLL_MACADDR_MASK        0xFFFFFFFFFFFFLL // MAC address mask, canonical form
 
+// constants for CDC file
+#define EPL_CDC_OFFSET_INDEX        0
+#define EPL_CDC_OFFSET_SUBINDEX     2
+#define EPL_CDC_OFFSET_SIZE         3
+#define EPL_CDC_OFFSET_DATA         7
+
 
 // Default configuration
 // ======================
@@ -213,6 +219,10 @@
 
 #ifndef EPL_OBD_USE_STORE_RESTORE
 #define EPL_OBD_USE_STORE_RESTORE       FALSE
+#endif
+
+#ifndef EPL_OBD_USE_LOAD_CONCISEDCF
+#define EPL_OBD_USE_LOAD_CONCISEDCF     FALSE
 #endif
 
 #ifndef EPL_OBD_CHECK_OBJECT_RANGE

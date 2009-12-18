@@ -201,14 +201,14 @@ typedef enum
     kEplPdoTooManyPdos           = 0x00BF,       // there exit to many PDOs
 
     // Configuration manager module 0x00C0 - 0x00CF
-    kEplCfgMaConfigError        = 0x00C0,       // error in configuration manager
-    kEplCfgMaSdocTimeOutError   = 0x00C1,       // error in configuration manager, Sdo timeout
-    kEplCfgMaInvalidDcf         = 0x00C2,       // configration file not valid
-    kEplCfgMaUnsupportedDcf     = 0x00C3,       // unsupported Dcf format
-    kEplCfgMaConfigWithErrors   = 0x00C4,       // configuration finished with errors
-    kEplCfgMaNoFreeConfig       = 0x00C5,       // no free configuration entry
-    kEplCfgMaNoConfigData       = 0x00C6,       // no configuration data present
-    kEplCfgMaUnsuppDatatypeDcf  = 0x00C7,       // unsupported datatype found in dcf
+    kEplCfmConfigError          = 0x00C0,       // error in configuration manager
+    kEplCfmSdocTimeOutError     = 0x00C1,       // error in configuration manager, Sdo timeout
+    kEplCfmInvalidDcf           = 0x00C2,       // configuration file not valid
+    kEplCfmUnsupportedDcf       = 0x00C3,       // unsupported Dcf format
+    kEplCfmConfigWithErrors     = 0x00C4,       // configuration finished with errors
+    kEplCfmNoFreeConfig         = 0x00C5,       // no free configuration entry
+    kEplCfmNoConfigData         = 0x00C6,       // no configuration data present
+    kEplCfmUnsuppDatatypeDcf    = 0x00C7,       // unsupported datatype found in dcf
                                                 // -> this entry was not configured
 
     kEplApiTaskDeferred         = 0x0140,       // EPL performs task in background and informs the application (or vice-versa), when it is finished

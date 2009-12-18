@@ -5,7 +5,7 @@
 
   Project:      openPOWERLINK
 
-  Description:  include file for userspace PDO module
+  Description:  include file for CFM module
 
   License:
 
@@ -58,22 +58,32 @@
                 $State$
 
                 Build Environment:
+                    GCC V3.4
 
   -------------------------------------------------------------------------
 
   Revision History:
 
-  2006/05/22 d.k.:   start of the implementation, version 1.00
-
+  2009/12/14 d.k.:   start of the implementation
 
 ****************************************************************************/
 
-#ifndef _EPL_PDOU_H_
-#define _EPL_PDOU_H_
+#ifndef _EPLCFM_H_
+#define _EPLCFM_H_
 
-#include "EplPdo.h"
-#include "EplNmt.h"
+#include "EplInc.h"
 
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_CFM)) != 0)
+
+#include "EplObd.h"
+
+/***************************************************************************/
+/*                                                                         */
+/*                                                                         */
+/*          G L O B A L   D E F I N I T I O N S                            */
+/*                                                                         */
+/*                                                                         */
+/***************************************************************************/
 
 //---------------------------------------------------------------------------
 // const defines
@@ -84,24 +94,27 @@
 // typedef
 //---------------------------------------------------------------------------
 
+typedef struct
+{
+    unsigned int        m_uiNodeId;
+    unsigned int        m_uiObjectIndex;
+    unsigned int        m_uiObjectSubIndex;
+    DWORD               m_dwSdoAbortCode;
+    tEplKernel          m_EplError;
+    DWORD               m_dwTotalNumberOfBytes;
+    DWORD               m_dwBytesDownloaded;
+
+} tEplCfmEventCnProgress;
+
+
 
 //---------------------------------------------------------------------------
 // function prototypes
 //---------------------------------------------------------------------------
 
-tEplKernel EplPdouAddInstance(void);
+EPLDLLEXPORT tEplKernel PUBLIC EplCfmuCbObdAccess(tEplObdCbParam MEM* pParam_p);
 
-tEplKernel EplPdouDelInstance(void);
 
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOU)) != 0)
-EPLDLLEXPORT tEplKernel PUBLIC EplPdouCbObdAccess(tEplObdCbParam MEM* pParam_p);
-#else
-#define EplPdouCbObdAccess		NULL
 #endif
 
-tEplKernel PUBLIC EplPdouCbNmtStateChange(tEplEventNmtStateChange NmtStateChange_p);
-
-
-#endif  // #ifndef _EPL_PDOU_H_
-
-
+#endif // _EPLCFM_H_

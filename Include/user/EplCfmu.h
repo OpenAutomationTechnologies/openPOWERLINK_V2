@@ -5,7 +5,7 @@
 
   Project:      openPOWERLINK
 
-  Description:  include file for userspace PDO module
+  Description:  include file for CFM module
 
   License:
 
@@ -58,22 +58,32 @@
                 $State$
 
                 Build Environment:
+                    GCC V3.4
 
   -------------------------------------------------------------------------
 
   Revision History:
 
-  2006/05/22 d.k.:   start of the implementation, version 1.00
+  2009/12/14 d.k.:   start of the implementation
 
 
 ****************************************************************************/
 
-#ifndef _EPL_PDOU_H_
-#define _EPL_PDOU_H_
+#ifndef _EPLCFMU_H_
+#define _EPLCFMU_H_
 
-#include "EplPdo.h"
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_CFM)) != 0)
+
 #include "EplNmt.h"
+#include "EplCfm.h"
 
+/***************************************************************************/
+/*                                                                         */
+/*                                                                         */
+/*          G L O B A L   D E F I N I T I O N S                            */
+/*                                                                         */
+/*                                                                         */
+/***************************************************************************/
 
 //---------------------------------------------------------------------------
 // const defines
@@ -85,23 +95,25 @@
 //---------------------------------------------------------------------------
 
 
+typedef tEplKernel (PUBLIC* tEplCfmCbEventCnProgress)
+(tEplCfmEventCnProgress* pEventCnProgress_p);
+
+
+typedef tEplKernel (PUBLIC* tEplCfmCbEventCnResult) (unsigned int uiNodeId_p, tEplNmtNodeCommand NodeCommand_p);
+
+
+
 //---------------------------------------------------------------------------
 // function prototypes
 //---------------------------------------------------------------------------
 
-tEplKernel EplPdouAddInstance(void);
+tEplKernel EplCfmuAddInstance(tEplCfmCbEventCnProgress pfnCbEventCnProgress_p, tEplCfmCbEventCnResult pfnCbEventCnResult_p);
 
-tEplKernel EplPdouDelInstance(void);
+tEplKernel EplCfmuDelInstance(void);
 
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOU)) != 0)
-EPLDLLEXPORT tEplKernel PUBLIC EplPdouCbObdAccess(tEplObdCbParam MEM* pParam_p);
-#else
-#define EplPdouCbObdAccess		NULL
+tEplKernel EplCfmuCheckConfig(unsigned int uiNodeId_p, tEplNmtNodeEvent NodeEvent_p);
+
+
 #endif
 
-tEplKernel PUBLIC EplPdouCbNmtStateChange(tEplEventNmtStateChange NmtStateChange_p);
-
-
-#endif  // #ifndef _EPL_PDOU_H_
-
-
+#endif // _EPLCFMU_H_

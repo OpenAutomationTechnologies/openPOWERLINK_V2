@@ -120,7 +120,7 @@
 #define EPL_MODULE_DLLK        0x00000800L // DLL kernel part module
 #define EPL_MODULE_DLLU        0x00001000L // DLL user part module
 #define EPL_MODULE_OBDU        0x00002000L // OBD user part module
-#define EPL_MODULE_CFGMA       0x00004000L // Configuration Manager module
+#define EPL_MODULE_CFM         0x00004000L // Configuration Manager module
 #define EPL_MODULE_VETH        0x00008000L // virtual ethernet driver module
 #define EPL_MODULE_PDOU        0x00010000L // PDO user part module
 #define EPL_MODULE_LEDU        0x00020000L // LED user part module
@@ -178,7 +178,7 @@ typedef union
 // macros
 // -------------------------------------------------------------------------
 
-#define EPL_SPEC_VERSION                    0x20    // ETHERNET Powerlink V. 2.0
+#define EPL_SPEC_VERSION                    0x20    // Ethernet POWERLINK V 2.0
 #define EPL_STACK_VERSION(ver,rev,rel)      ((((DWORD)(ver)) & 0xFF)|((((DWORD)(rev))&0xFF)<<8)|(((DWORD)(rel))<<16))
 #define EPL_OBJ1018_VERSION(ver,rev,rel)    ((((DWORD)(ver))<<16) |(((DWORD)(rev))&0xFFFF))
 #define EPL_STRING_VERSION(ver,rev,rel)     "V" #ver "." #rev " r" #rel
@@ -194,7 +194,7 @@ typedef union
 #define EPL_FEATURE_NMT_EXT         0x00000020
 #define EPL_FEATURE_PDO_DYN         0x00000040
 #define EPL_FEATURE_NMT_UDP         0x00000080
-#define EPL_FEATURE_CFGMA           0x00000100
+#define EPL_FEATURE_CFM             0x00000100
 #define EPL_FEATURE_DLL_MULTIPLEX   0x00000200  // CN specific
 #define EPL_FEATURE_NODEID_SW       0x00000400
 #define EPL_FEATURE_NMT_BASICETH    0x00000800  // MN specific
@@ -243,11 +243,11 @@ typedef union
     #endif
 #endif
 
-#ifndef EPL_DEF_FEATURE_CFGMA
-    #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_CFGMA)) != 0)
-        #define EPL_DEF_FEATURE_CFGMA           (EPL_FEATURE_CFGMA)
+#ifndef EPL_DEF_FEATURE_CFM
+    #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_CFM)) != 0)
+        #define EPL_DEF_FEATURE_CFM           (EPL_FEATURE_CFM)
     #else
-        #define EPL_DEF_FEATURE_CFGMA           0
+        #define EPL_DEF_FEATURE_CFM           0
     #endif
 #endif
 
@@ -260,7 +260,7 @@ typedef union
                                                 | EPL_DEF_FEATURE_SDO_UDP \
                                                 | EPL_DEF_FEATURE_SDO_PDO \
                                                 | EPL_DEF_FEATURE_PDO_DYN \
-                                                | EPL_DEF_FEATURE_CFGMA \
+                                                | EPL_DEF_FEATURE_CFM \
                                                 | EPL_DEF_FEATURE_DLL_MULTIPLEX)
 
 
@@ -360,6 +360,13 @@ typedef union
 #define EPL_DBGLVL_NMTMN_TRACE2         DEBUG_LVL_07_TRACE2
 #define EPL_DBGLVL_NMTMN_TRACE3         DEBUG_LVL_07_TRACE3
 #define EPL_DBGLVL_NMTMN_TRACE4         DEBUG_LVL_07_TRACE4
+
+#define EPL_DBGLVL_CFM                  DEBUG_LVL_08        // 0x00000080L
+#define EPL_DBGLVL_CFM_TRACE0           DEBUG_LVL_08_TRACE0
+#define EPL_DBGLVL_CFM_TRACE1           DEBUG_LVL_08_TRACE1
+#define EPL_DBGLVL_CFM_TRACE2           DEBUG_LVL_08_TRACE2
+#define EPL_DBGLVL_CFM_TRACE3           DEBUG_LVL_08_TRACE3
+#define EPL_DBGLVL_CFM_TRACE4           DEBUG_LVL_08_TRACE4
 
 //...
 
