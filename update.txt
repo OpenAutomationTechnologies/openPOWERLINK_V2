@@ -17,6 +17,10 @@ How to update from any previous version to version 1.6
    - Add the source files EplPdouCal.c and EplPdou.c to your project, i.e. makefile.
    - Add the constant EPL_MODULE_PDOU to the definition of EPL_MODULE_INTEGRATION
      in EplCfg.h of your project.
+   - Add the OD callback function EplPdouCbObdAccess to the PDO objects (index 0x1400 - 0x1AFF)
+     in your objdict.h. E.g.
+
+        EPL_OBD_BEGIN_INDEX_RAM(0x1400, 0x03, EplPdouCbObdAccess)
 
 
 2. To enable PRes cross-traffic on pure CNs it is necessary to define the
