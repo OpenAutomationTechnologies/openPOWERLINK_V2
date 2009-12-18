@@ -186,17 +186,18 @@ typedef enum
     kEplNmtMnuIntNodeEventNoIdentResponse   = 0x00,
     kEplNmtMnuIntNodeEventIdentResponse     = 0x01,
     kEplNmtMnuIntNodeEventBoot              = 0x02,
-    kEplNmtMnuIntNodeEventExecReset         = 0x03,
-    kEplNmtMnuIntNodeEventConfigured        = 0x04,
-    kEplNmtMnuIntNodeEventNoStatusResponse  = 0x05,
-    kEplNmtMnuIntNodeEventStatusResponse    = 0x06,
-    kEplNmtMnuIntNodeEventHeartbeat         = 0x07,
-    kEplNmtMnuIntNodeEventNmtCmdSent        = 0x08,
-    kEplNmtMnuIntNodeEventTimerIdentReq     = 0x09,
-    kEplNmtMnuIntNodeEventTimerStatReq      = 0x0A,
-    kEplNmtMnuIntNodeEventTimerStateMon     = 0x0B,
-    kEplNmtMnuIntNodeEventTimerLonger       = 0x0C,
-    kEplNmtMnuIntNodeEventError             = 0x0D,
+    kEplNmtMnuIntNodeEventExecResetConf     = 0x03,
+    kEplNmtMnuIntNodeEventExecResetNode     = 0x04,
+    kEplNmtMnuIntNodeEventConfigured        = 0x05,
+    kEplNmtMnuIntNodeEventNoStatusResponse  = 0x06,
+    kEplNmtMnuIntNodeEventStatusResponse    = 0x07,
+    kEplNmtMnuIntNodeEventHeartbeat         = 0x08,
+    kEplNmtMnuIntNodeEventNmtCmdSent        = 0x09,
+    kEplNmtMnuIntNodeEventTimerIdentReq     = 0x0A,
+    kEplNmtMnuIntNodeEventTimerStatReq      = 0x0B,
+    kEplNmtMnuIntNodeEventTimerStateMon     = 0x0C,
+    kEplNmtMnuIntNodeEventTimerLonger       = 0x0D,
+    kEplNmtMnuIntNodeEventError             = 0x0E,
 
 } tEplNmtMnuIntNodeEvent;
 
@@ -205,11 +206,12 @@ typedef enum
 {
     kEplNmtMnuNodeStateUnknown      = 0x00,
     kEplNmtMnuNodeStateIdentified   = 0x01,
-    kEplNmtMnuNodeStateResetConf    = 0x02, // CN reset after configuration update
-    kEplNmtMnuNodeStateConfigured   = 0x03, // BootStep1 completed
-    kEplNmtMnuNodeStateReadyToOp    = 0x04, // BootStep2 completed
-    kEplNmtMnuNodeStateComChecked   = 0x05, // Communication checked successfully
-    kEplNmtMnuNodeStateOperational  = 0x06, // CN is in NMT state OPERATIONAL
+    kEplNmtMnuNodeStateConfRestored = 0x02, // CN ResetNode after restore configuration
+    kEplNmtMnuNodeStateResetConf    = 0x03, // CN ResetConf after configuration update
+    kEplNmtMnuNodeStateConfigured   = 0x04, // BootStep1 completed
+    kEplNmtMnuNodeStateReadyToOp    = 0x05, // BootStep2 completed
+    kEplNmtMnuNodeStateComChecked   = 0x06, // Communication checked successfully
+    kEplNmtMnuNodeStateOperational  = 0x07, // CN is in NMT state OPERATIONAL
 
 } tEplNmtMnuNodeState;
 
@@ -774,9 +776,15 @@ WORD                wErrorCode = EPL_E_NO_ERROR;
             break;
         }
 
+        case kEplNmtNodeCommandConfRestored:
+        {
+            NodeEvent = kEplNmtMnuIntNodeEventExecResetNode;
+            break;
+        }
+
         case kEplNmtNodeCommandConfReset:
         {
-            NodeEvent = kEplNmtMnuIntNodeEventExecReset;
+            NodeEvent = kEplNmtMnuIntNodeEventExecResetConf;
             break;
         }
 
@@ -2277,13 +2285,42 @@ tEplTimerArg        TimerArg;
                     break;
                 }
             }
+            else if (pNodeInfo->m_NodeState == kEplNmtMnuNodeStateConfRestored)
+            {
+                // check/start configuration
+                // inform application
+                Ret = EplNmtMnuInstance_g.m_pfnCbNodeEvent(uiNodeId_p,
+                                                           kEplNmtNodeEventUpdateConf,
+                                                           NodeNmtState_p,
+                                                           EPL_E_NO_ERROR,
+                                                           (pNodeInfo->m_dwNodeCfg & EPL_NODEASSIGN_MANDATORY_CN) != 0);
+                if (Ret == kEplReject)
+                {   // interrupt boot process on user request
+                    EPL_NMTMNU_DBG_POST_TRACE_VALUE(kEplNmtMnuIntNodeEventBoot,
+                                                    uiNodeId_p,
+                                                    ((pNodeInfo->m_NodeState << 8)
+                                                     | Ret));
+
+                    Ret = kEplSuccessful;
+                    break;
+                }
+                else if (Ret != kEplSuccessful)
+                {
+                    EPL_NMTMNU_DBG_POST_TRACE_VALUE(kEplNmtMnuIntNodeEventBoot,
+                                                    uiNodeId_p,
+                                                    ((pNodeInfo->m_NodeState << 8)
+                                                     | Ret));
+
+                    break;
+                }
+            }
             else if (pNodeInfo->m_NodeState != kEplNmtMnuNodeStateResetConf)
             {   // wrong CN state
                 // ignore event
                 break;
             }
 
-            // $$$ d.k.: currently we assume configuration is OK
+            // we assume configuration is OK
 
             // continue BootStep1
         }
@@ -2291,6 +2328,7 @@ tEplTimerArg        TimerArg;
         case kEplNmtMnuIntNodeEventConfigured:
         {
             if ((pNodeInfo->m_NodeState != kEplNmtMnuNodeStateIdentified)
+                && (pNodeInfo->m_NodeState != kEplNmtMnuNodeStateConfRestored)
                 && (pNodeInfo->m_NodeState != kEplNmtMnuNodeStateResetConf))
             {   // wrong CN state
                 // ignore event
@@ -2459,9 +2497,31 @@ tEplTimerArg        TimerArg;
             break;
         }
 
-        case kEplNmtMnuIntNodeEventExecReset:
+        case kEplNmtMnuIntNodeEventExecResetNode:
         {
             if (pNodeInfo->m_NodeState != kEplNmtMnuNodeStateIdentified)
+            {   // wrong CN state
+                // ignore event
+                break;
+            }
+
+            pNodeInfo->m_NodeState = kEplNmtMnuNodeStateConfRestored;
+
+            EPL_NMTMNU_DBG_POST_TRACE_VALUE(NodeEvent_p,
+                                            uiNodeId_p,
+                                            (((NodeNmtState_p & 0xFF) << 8)
+                                            | kEplNmtCmdResetNode));
+
+            // send NMT reset node to CN for activation of restored configuration
+            Ret = EplNmtMnuSendNmtCommand(uiNodeId_p, kEplNmtCmdResetNode);
+
+            break;
+        }
+
+        case kEplNmtMnuIntNodeEventExecResetConf:
+        {
+            if ((pNodeInfo->m_NodeState != kEplNmtMnuNodeStateIdentified)
+                && (pNodeInfo->m_NodeState != kEplNmtMnuNodeStateConfRestored))
             {   // wrong CN state
                 // ignore event
                 break;
