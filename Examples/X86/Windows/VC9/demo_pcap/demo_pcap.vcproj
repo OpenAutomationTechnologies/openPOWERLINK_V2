@@ -536,18 +536,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\..\..\EplStack\EplObdkCal.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\..\..\EplStack\EplObdu.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\..\..\EplStack\EplObduCal.c"
-				>
-			</File>
-			<File
 				RelativePath="..\..\..\..\..\EplStack\EplPdok.c"
 				>
 			</File>
