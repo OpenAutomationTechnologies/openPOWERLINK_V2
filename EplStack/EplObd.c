@@ -2145,17 +2145,11 @@ BOOL                    fEntryNumerical;
     Access = (tEplObdAccess) pSubEntry->m_Access;
 
     // check access for write
-    // access violation if adress to current value is NULL
-    if ( ((Access & kEplObdAccConst) != 0) ||
-         (pDstData == NULL) )
+    if ((Access & kEplObdAccConst) != 0)
     {
         Ret = kEplObdAccessViolation;
         goto Exit;
     }
-
-    //------------------------------------------------------------------------
-    // get size of object
-    // -as ObdSize = ObdGetObjectSize (pSubEntry);
 
     //------------------------------------------------------------------------
     // To use the same callback function for ObdWriteEntry as well as for
@@ -2223,6 +2217,13 @@ BOOL                    fEntryNumerical;
         pDstData = (void MEM*) MemVStringDomain.m_pData;
     }
     #endif //#if (OBD_USE_STRING_DOMAIN_IN_RAM != FALSE)
+
+    // access violation if adress to current value is NULL
+    if (pDstData == NULL)
+    {
+        Ret = kEplObdAccessViolation;
+        goto Exit;
+    }
 
     // 07-dec-2004 r.d.: size from application is needed because callback function can change the object size
     // -as 16.11.04 CbParam.m_pArg     = &ObdSize;
