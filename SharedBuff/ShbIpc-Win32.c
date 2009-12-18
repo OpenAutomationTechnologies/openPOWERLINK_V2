@@ -1187,7 +1187,7 @@ BOOL          fTermRequ;
 int           fCallAgain;
 
 
-    TRACE1("\nShbIpcThreadSignalNewData(): SignalThread started (pShbInstance=0x%08lX)\n", (DWORD)pvThreadParam_p);
+    TRACE1("\nShbIpcThreadSignalNewData(): SignalThread started (pShbInstance=0x%p)\n", pvThreadParam_p);
 
     pShbInstance = (tShbMemInst*)pvThreadParam_p;
     pShbMemInst  = ShbIpcGetShbMemInst (pShbInstance);
@@ -1247,7 +1247,7 @@ int           fCallAgain;
         SetEvent (pShbMemInst->m_ahEventNewData[IDX_EVENT_TERM_RESP]);
     }
 
-    TRACE1("\nShbIpcThreadSignalNewData(): SignalThread terminated (pShbInstance=0x%08lX)\n", (DWORD)pShbInstance);
+    TRACE1("\nShbIpcThreadSignalNewData(): SignalThread terminated (pShbInstance=0x%p)\n", pShbInstance);
 
     ExitThread (0);
 
@@ -1270,7 +1270,7 @@ DWORD          dwWaitResult;
 unsigned int   fTimeOut;
 
 
-    TRACE1("\nShbIpcThreadSignalJobReady(): SignalThread started (pShbInstance=0x%08lX)\n", (DWORD)pvThreadParam_p);
+    TRACE1("\nShbIpcThreadSignalJobReady(): SignalThread started (pShbInstance=0x%p)\n", pvThreadParam_p);
 
 
     pShbInstance = (tShbInstance*)pvThreadParam_p;
@@ -1330,7 +1330,7 @@ unsigned int   fTimeOut;
     pShbMemInst->m_pfnSigHndlrJobReady = NULL;
 
 
-    TRACE1("\nShbIpcThreadSignalJobReady(): SignalThread terminated (pShbInstance=0x%08lX)\n", (DWORD)pShbInstance);
+    TRACE1("\nShbIpcThreadSignalJobReady(): SignalThread terminated (pShbInstance=0x%p)\n", pShbInstance);
 
     ExitThread (0);
 
