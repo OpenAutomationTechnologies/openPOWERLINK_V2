@@ -1497,7 +1497,7 @@
             #endif
         #endif
 
-        #define UNUSED_PARAMETER(par)
+        #define UNUSED_PARAMETER(par) par
 
         // MS Visual C++ compiler supports function inlining
         #define INLINE_FUNCTION_DEF __forceinline
@@ -1698,7 +1698,7 @@
 
             #define ASSERTMSG(expr,string)  if (!(expr)) { \
                                                 PRINTF0 ("Assertion failed: " string);\
-                                                while (1);}
+                                                for ( ; ; );}
     #else
         #define ASSERTMSG(expr,string)
     #endif
