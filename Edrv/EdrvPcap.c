@@ -478,6 +478,10 @@ tEplKernel EdrvChangeFilter(tEdrvFilter*    pFilter_p,
 {
 tEplKernel      Ret = kEplSuccessful;
 
+    UNUSED_PARAMETER(pFilter_p);
+    UNUSED_PARAMETER(uiCount_p);
+    UNUSED_PARAMETER(uiEntryChanged_p);
+    UNUSED_PARAMETER(uiChangeFlags_p);
     return Ret;
 }
 
@@ -498,8 +502,9 @@ tEplKernel      Ret = kEplSuccessful;
 
 tEplKernel EdrvUndefineRxMacAddrEntry (BYTE * pbMacAddr_p)
 {
+    UNUSED_PARAMETER(pbMacAddr_p);
 
-      return kEplSuccessful;
+    return kEplSuccessful;
 }
 
 
@@ -519,7 +524,9 @@ tEplKernel EdrvUndefineRxMacAddrEntry (BYTE * pbMacAddr_p)
 
 tEplKernel EdrvDefineRxMacAddrEntry   (BYTE * pbMacAddr_p)
 {
-     return kEplSuccessful;
+    UNUSED_PARAMETER(pbMacAddr_p);
+
+    return kEplSuccessful;
 }
 
 
@@ -599,7 +606,7 @@ DWORD           dwRet;
     // increase priority
     SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_TIME_CRITICAL);
 
-    while( 1 )
+    for (;;)
     {
 
         // Wait for events
@@ -807,9 +814,9 @@ tEplKernel PUBLIC EplTimerHighReskAddInstance(void)
 {
 tEplKernel      Ret = kEplSuccessful;
 LONG            lRet = 0;
-ULONG           ulMin = ~0;
-ULONG           ulMax = ~0;
-ULONG           ulCur = ~0;
+ULONG           ulMin = ~0UL;
+ULONG           ulMax = ~0UL;
+ULONG           ulCur = ~0UL;
 
 
     EPL_MEMSET(&EplTimerHighReskInstance_l, 0, sizeof (EplTimerHighReskInstance_l));
@@ -880,7 +887,7 @@ tEplKernel PUBLIC EplTimerHighReskDelInstance(void)
 {
 tEplKernel  Ret = kEplSuccessful;
 LONG            lRet = 0;
-ULONG           ulCur = ~0;
+ULONG           ulCur = ~0UL;
 
     // set timer resolution to old value
     lRet = NtSetTimerResolution(0, FALSE, &ulCur);
