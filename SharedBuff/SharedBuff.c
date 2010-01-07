@@ -997,11 +997,11 @@ INLINE_FUNCTION tShbError  ShbCirReadDataBlock (
 tShbCirBuff*      pShbCirBuff;
 tShbCirBlockSize  ShbCirBlockSize;
 unsigned long     ulDataReadable;
-unsigned char*    pShbCirDataPtr;
+unsigned char*    pShbCirDataPtr = NULL;
 unsigned char*    pDstDataPtr;
 unsigned long     ulDataSize = 0;  // d.k. GCC complains about uninitialized variable otherwise
 unsigned long     ulChunkSize;
-unsigned long     ulRdIndex;
+unsigned long     ulRdIndex = 0;
 tShbError         ShbError;
 
 
@@ -1055,6 +1055,11 @@ tShbError         ShbError;
         // get size of user data inside the current block
         ulDataSize  = ShbCirBlockSize.m_uiFullBlockSize - ShbCirBlockSize.m_uiAlignFillBytes;
         ulDataSize -= sizeof(tShbCirBlockSize);
+    }
+    else
+    {
+        ShbCirBlockSize.m_uiAlignFillBytes = 0;
+        ShbCirBlockSize.m_uiFullBlockSize = 0;
     }
 
 
@@ -1935,7 +1940,7 @@ int  ShbCirSignalHandlerNewData (
 
 tShbCirBuff*   pShbCirBuff;
 unsigned long  ulDataSize;
-unsigned long  ulBlockCount;
+unsigned long  ulBlockCount = 0;
 tShbError      ShbError;
 
 

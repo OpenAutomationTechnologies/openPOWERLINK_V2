@@ -283,7 +283,7 @@ tShbError  ShbIpcAllocBuffer (
 HANDLE          hSharedMem;
 LPVOID          pSharedMem;
 unsigned long   ulShMemSize;
-tShbMemInst*    pShbMemInst;
+tShbMemInst*    pShbMemInst = NULL;
 tShbMemHeader*  pShbMemHeader;
 tShbInstance    pShbInstance;
 unsigned int    fShMemNewCreated;
@@ -765,6 +765,7 @@ int             iPriority;
             iPriority = THREAD_PRIORITY_BELOW_NORMAL;
             break;
 
+        default:
         case kShbPriorityNormal:
             iPriority = THREAD_PRIORITY_NORMAL;
             break;
@@ -1083,26 +1084,26 @@ static void*  ShbIpcAllocPrivateMem (
 {
 
 HGLOBAL  hMem;
-void*    pMem;
+BYTE*    pbMem;
 
 
     hMem = GlobalAlloc (GMEM_FIXED, ulMemSize_p+sizeof(HGLOBAL));
-    pMem = GlobalLock  (hMem);
-    if (pMem != NULL)
+    pbMem = GlobalLock  (hMem);
+    if (pbMem != NULL)
     {
-        *(HGLOBAL*)pMem = hMem;
-        (BYTE*)pMem += sizeof(HGLOBAL);
+        *(HGLOBAL*)pbMem = hMem;
+        pbMem += sizeof(HGLOBAL);
     }
 
 
     #ifndef NDEBUG
     {
-        memset (pMem, 0xaa, ulMemSize_p);
+        memset (pbMem, 0xaa, ulMemSize_p);
     }
     #endif
 
 
-    return (pMem);
+    return (pbMem);
 
 }
 
@@ -1117,6 +1118,7 @@ static void  ShbIpcReleasePrivateMem (
 {
 
 HGLOBAL  hMem;
+BYTE*    pbMem;
 
 
     if (pMem_p == NULL)
@@ -1124,9 +1126,10 @@ HGLOBAL  hMem;
         return;
     }
 
+    pbMem = pMem_p;
 
-    (BYTE*)pMem_p -= sizeof(HGLOBAL);
-    hMem = *(HGLOBAL*)pMem_p;
+    pbMem -= sizeof(HGLOBAL);
+    hMem = *(HGLOBAL*)pbMem;
 
     GlobalUnlock (hMem);
     GlobalFree   (hMem);
