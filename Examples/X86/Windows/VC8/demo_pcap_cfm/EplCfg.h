@@ -103,7 +103,7 @@
 // Default defug level:
 // Only debug traces of these modules will be compiled which flags are set in define DEF_DEBUG_LVL.
 #ifndef DEF_DEBUG_LVL
-#define DEF_DEBUG_LVL           0xEC000000L
+#define DEF_DEBUG_LVL           0xEC000080L
 #endif
 //   EPL_DBGLVL_OBD         =   0x00000004L
 // * EPL_DBGLVL_ASSERT      =   0x20000000L
@@ -192,8 +192,8 @@
 // =========================================================================
 
 // if TRUE the high resolution timer module will be used
-#define EPL_TIMER_USE_HIGHRES              TRUE
-//#define EPL_TIMER_USE_HIGHRES              FALSE
+#define EPL_TIMER_USE_HIGHRES               TRUE
+//#define EPL_TIMER_USE_HIGHRES               FALSE
 
 
 #define EPL_CFM_CONFIGURE_CYCLE_LENGTH      TRUE

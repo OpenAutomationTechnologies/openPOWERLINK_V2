@@ -155,15 +155,6 @@ tEplKernel PUBLIC AppCbEvent(
 
 tEplKernel PUBLIC AppCbSync(void);
 
-//---------------------------------------------------------------------------
-//  Kernel Module specific Data Structures
-//---------------------------------------------------------------------------
-
-EXPORT_NO_SYMBOLS;
-
-
-module_init(EplLinInit);
-module_exit(EplLinExit);
 
 
 //=========================================================================//
@@ -206,9 +197,6 @@ pcap_if_t *alldevs;
 pcap_if_t *seldev;
 int i = 0;
 int inum;
-int m=0;
-// Variables for OBD extraction from CDC file
-BYTE *pbaData = NULL;
 
 // Variables for cdc file opening and extraction of data
 UINT uiFileSize = 0;
@@ -306,7 +294,7 @@ tEplObdSize ObdSize;
 
     EplApiInitParam.m_uiSizeOfStruct = sizeof (EplApiInitParam);
     EPL_MEMCPY(EplApiInitParam.m_abMacAddress, abMacAddr, sizeof (EplApiInitParam.m_abMacAddress));
-    EplApiInitParam.m_dwFeatureFlags = -1;
+    EplApiInitParam.m_dwFeatureFlags = ~0UL;
     EplApiInitParam.m_dwCycleLen = 10000;     // required for error detection
     EplApiInitParam.m_uiIsochrTxMaxPayload = 100; // const
     EplApiInitParam.m_uiIsochrRxMaxPayload = 100; // const
@@ -320,11 +308,11 @@ tEplObdSize ObdSize;
     EplApiInitParam.m_dwLossOfFrameTolerance = 900000000;
     EplApiInitParam.m_dwAsyncSlotTimeout = 10000000;
     EplApiInitParam.m_dwWaitSocPreq = 0;
-    EplApiInitParam.m_dwDeviceType = -1;              // NMT_DeviceType_U32
-    EplApiInitParam.m_dwVendorId = -1;                // NMT_IdentityObject_REC.VendorId_U32
-    EplApiInitParam.m_dwProductCode = -1;             // NMT_IdentityObject_REC.ProductCode_U32
-    EplApiInitParam.m_dwRevisionNumber = -1;          // NMT_IdentityObject_REC.RevisionNo_U32
-    EplApiInitParam.m_dwSerialNumber = -1;            // NMT_IdentityObject_REC.SerialNo_U32
+    EplApiInitParam.m_dwDeviceType = ~0UL;              // NMT_DeviceType_U32
+    EplApiInitParam.m_dwVendorId = ~0UL;                // NMT_IdentityObject_REC.VendorId_U32
+    EplApiInitParam.m_dwProductCode = ~0UL;             // NMT_IdentityObject_REC.ProductCode_U32
+    EplApiInitParam.m_dwRevisionNumber = ~0UL;          // NMT_IdentityObject_REC.RevisionNo_U32
+    EplApiInitParam.m_dwSerialNumber = ~0UL;            // NMT_IdentityObject_REC.SerialNo_U32
     EplApiInitParam.m_dwSubnetMask = SUBNET_MASK;
     EplApiInitParam.m_dwDefaultGateway = 0;
     EPL_MEMCPY(EplApiInitParam.m_sHostname, sHostname, sizeof(EplApiInitParam.m_sHostname));
@@ -374,13 +362,11 @@ tEplObdSize ObdSize;
 		goto Exit;
 	}
 	//Read the Binary file
-	for( uiLoopCount =0; uiLoopCount <= uiFileSize; uiLoopCount++)
+	for( uiLoopCount =0; uiLoopCount < uiFileSize; uiLoopCount++)
 	{
 		fread(&bCharRead, 1,1, fpConfigObj);
 		pbMnObdStartAddr[uiLoopCount] = bCharRead;
 	}
-	bCharRead = '\0';
-	pbMnObdStartAddr[uiLoopCount] = bCharRead;
 
 	// close the Binary file
 	fclose(fpConfigObj);
@@ -548,6 +534,7 @@ tEplKernel PUBLIC AppCbEvent(
 	static DWORD dwTempVar;
 	static QWORD qwTempVar;
 
+    UNUSED_PARAMETER(pUserArg_p);
 
     // check if NMT_GS_OFF is reached
     switch (EventType_p)
@@ -687,6 +674,31 @@ tEplKernel PUBLIC AppCbEvent(
             {
                 case kEplNmtNodeEventCheckConf:
                 {
+                    PRINTF2("%s(Node=0x%X, CheckConf)\n", __func__, pEventArg_p->m_Node.m_uiNodeId);
+                    break;
+                }
+
+                case kEplNmtNodeEventUpdateConf:
+                {
+                    PRINTF2("%s(Node=0x%X, UpdateConf)\n", __func__, pEventArg_p->m_Node.m_uiNodeId);
+                    break;
+                }
+
+                case kEplNmtNodeEventNmtState:
+                {
+                    PRINTF3("%s(Node=0x%X, NmtState=0x%X)\n", __func__, pEventArg_p->m_Node.m_uiNodeId, pEventArg_p->m_Node.m_NmtState);
+                    break;
+                }
+
+                case kEplNmtNodeEventError:
+                {
+                    PRINTF3("%s(Node=0x%X, Error=0x%X)\n", __func__, pEventArg_p->m_Node.m_uiNodeId, pEventArg_p->m_Node.m_wErrorCode);
+                    break;
+                }
+
+                case kEplNmtNodeEventFound:
+                {
+                    PRINTF2("%s(Node=0x%X, Found)\n", __func__, pEventArg_p->m_Node.m_uiNodeId);
                     break;
                 }
 
@@ -697,9 +709,59 @@ tEplKernel PUBLIC AppCbEvent(
             }
             break;
         }
+#endif
 
-        case kEplApiEventSdo:
-        {   //Previous SDO transfer finished
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_CFM)) != 0)
+        case kEplApiEventCfmProgress:
+        {
+            PRINTF4("%s(Node=0x%X, CFM-Progress: Object 0x%X/%u, ", __func__, pEventArg_p->m_CfmProgress.m_uiNodeId, pEventArg_p->m_CfmProgress.m_uiObjectIndex, pEventArg_p->m_CfmProgress.m_uiObjectSubIndex);
+            PRINTF2("%u/%u Bytes", pEventArg_p->m_CfmProgress.m_dwBytesDownloaded, pEventArg_p->m_CfmProgress.m_dwTotalNumberOfBytes);
+            if ((pEventArg_p->m_CfmProgress.m_dwSdoAbortCode != 0)
+                || (pEventArg_p->m_CfmProgress.m_EplError != kEplSuccessful))
+            {
+                PRINTF2(" -> SDO Abort=0x%lX, Error=0x%X)\n", pEventArg_p->m_CfmProgress.m_dwSdoAbortCode, pEventArg_p->m_CfmProgress.m_EplError);
+            }
+            else
+            {
+                PRINTF0(")\n");
+            }
+            break;
+        }
+
+        case kEplApiEventCfmResult:
+        {
+            switch (pEventArg_p->m_CfmResult.m_NodeCommand)
+            {
+                case kEplNmtNodeCommandConfOk:
+                {
+                    PRINTF2("%s(Node=0x%X, ConfOk)\n", __func__, pEventArg_p->m_CfmResult.m_uiNodeId);
+                    break;
+                }
+
+                case kEplNmtNodeCommandConfErr:
+                {
+                    PRINTF2("%s(Node=0x%X, ConfErr)\n", __func__, pEventArg_p->m_CfmResult.m_uiNodeId);
+                    break;
+                }
+
+                case kEplNmtNodeCommandConfReset:
+                {
+                    PRINTF2("%s(Node=0x%X, ConfReset)\n", __func__, pEventArg_p->m_CfmResult.m_uiNodeId);
+                    break;
+                }
+
+                case kEplNmtNodeCommandConfRestored:
+                {
+                    PRINTF2("%s(Node=0x%X, ConfRestored)\n", __func__, pEventArg_p->m_CfmResult.m_uiNodeId);
+                    break;
+                }
+
+                default:
+                {
+                    PRINTF3("%s(Node=0x%X, CfmResult=0x%X)\n", __func__, pEventArg_p->m_CfmResult.m_uiNodeId, pEventArg_p->m_CfmResult.m_NodeCommand);
+                    break;
+                }
+            }
             break;
         }
 #endif
