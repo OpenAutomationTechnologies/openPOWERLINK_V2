@@ -117,6 +117,14 @@ typedef struct
 } tEplApiEventLed;
 
 
+typedef struct
+{
+    unsigned int        m_uiNodeId;
+    tEplNmtNodeCommand  m_NodeCommand;
+
+} tEplApiEventCfmResult;
+
+
 typedef enum
 {
     kEplApiEventUserDef        = 0x00,    // m_pUserArg
@@ -130,6 +138,7 @@ typedef enum
     kEplApiEventObdAccess      = 0x69,    // m_ObdCbParam
     kEplApiEventLed            = 0x70,    // m_Led
     kEplApiEventCfmProgress    = 0x71,    // m_CfmProgress
+    kEplApiEventCfmResult      = 0x72,    // m_CfmResult
 
 } tEplApiEventType;
 
@@ -145,6 +154,7 @@ typedef union
     tEplApiEventBoot        m_Boot;
     tEplApiEventLed         m_Led;
     tEplCfmEventCnProgress  m_CfmProgress;
+    tEplApiEventCfmResult   m_CfmResult;
 
 } tEplApiEventArg;
 
