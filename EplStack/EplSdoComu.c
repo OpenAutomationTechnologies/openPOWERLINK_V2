@@ -865,6 +865,7 @@ tEplKernel PUBLIC EplSdoComReceiveCb (tEplSdoSeqConHdl    SdoSeqConHdl_p,
 {
 tEplKernel       Ret;
 
+    UNUSED_PARAMETER(uiDataSize_p);
 
     // search connection internally
     Ret = EplSdoComSearchConIntern(SdoSeqConHdl_p,
@@ -1193,6 +1194,7 @@ unsigned int        uiSize;
                                                                 0,
                                                                 kEplSdoComSendTypeAbort);
 
+                                    break;
                                 }
 
 
@@ -1606,8 +1608,6 @@ unsigned int        uiSize;
                     pSdoComCon->m_dwLastAbortCode = 0;
                     Ret = EplSdoComTransferFinished(SdoComCon_p, pSdoComCon, kEplSdoComTransferLowerLayerAbort);
 
-                    goto Exit;
-
                     break;
                 }
 
@@ -1637,6 +1637,7 @@ unsigned int        uiSize;
                     pSdoComCon->m_dwLastAbortCode = EPL_SDOAC_TIME_OUT;
                     Ret = EplSdoComTransferFinished(SdoComCon_p, pSdoComCon, kEplSdoComTransferLowerLayerAbort);
 
+                    break;
                 }
 
                 case kEplSdoComConEventTransferAbort:
@@ -1647,6 +1648,7 @@ unsigned int        uiSize;
                     pSdoComCon->m_dwLastAbortCode = EPL_SDOAC_TIME_OUT;
                     Ret = EplSdoComTransferFinished(SdoComCon_p, pSdoComCon, kEplSdoComTransferLowerLayerAbort);
 
+                    break;
                 }
 
                 default:
@@ -1791,6 +1793,7 @@ unsigned int        uiSize;
                     pSdoComCon->m_dwLastAbortCode = EPL_SDOAC_TIME_OUT;
                     Ret = EplSdoComTransferFinished(SdoComCon_p, pSdoComCon, kEplSdoComTransferLowerLayerAbort);
 
+                    break;
                 }
 
                 case kEplSdoComConEventTransferAbort:
@@ -1801,6 +1804,7 @@ unsigned int        uiSize;
                     pSdoComCon->m_dwLastAbortCode = EPL_SDOAC_TIME_OUT;
                     Ret = EplSdoComTransferFinished(SdoComCon_p, pSdoComCon, kEplSdoComTransferLowerLayerAbort);
 
+                    break;
                 }
 
                 default:
