@@ -2206,8 +2206,21 @@ BOOL                    fEntryNumerical;
         }
         else // if (pSdosTableEntry_p->m_bObjType == kEplObdTypDomain)
         {
-            ((tEplObdVarEntry MEM*) pCurrData)->m_Size  = MemVStringDomain.m_ObjSize;
-            ((tEplObdVarEntry MEM*) pCurrData)->m_pData = (void MEM*) MemVStringDomain.m_pData;
+        tEplObdVarEntry MEM*    pVarEntry = NULL;
+
+            Ret = EplObdGetVarEntry(pSubEntry, &pVarEntry);
+            if (Ret != kEplSuccessful)
+            {
+                goto Exit;
+            }
+            if (pVarEntry == NULL)
+            {
+                Ret = kEplObdAccessViolation;
+                goto Exit;
+            }
+
+            pVarEntry->m_Size  = MemVStringDomain.m_ObjSize;
+            pVarEntry->m_pData = (void MEM*) MemVStringDomain.m_pData;
         }
 
         // Because object size and object pointer are
@@ -2446,13 +2459,18 @@ void * pData;
         // -----------------------------------------------------------------
         // ObdTypes which has to be not checked because not NUM values
         case kEplObdTypDomain:
+        {
+        tEplObdVarEntry MEM*    pVarEntry = NULL;
+        tEplKernel              Ret;
 
-            pData = (void *) pSubIndexEntry_p->m_pCurrent;
-            if ((void MEM*) pData != (void MEM*) NULL)
+            Ret = EplObdGetVarEntry(pSubIndexEntry_p, &pVarEntry);
+            if ((Ret == kEplSuccessful)
+                && (pVarEntry != NULL))
             {
-                DataSize = ((tEplObdVarEntry MEM*) pData)->m_Size;
+                DataSize = pVarEntry->m_Size;
             }
             break;
+        }
 
         // -----------------------------------------------------------------
         case kEplObdTypVString:

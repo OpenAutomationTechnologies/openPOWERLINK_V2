@@ -465,7 +465,7 @@ tEplKernel PUBLIC EplSdoAsySeqInitCon(tEplSdoSeqConHdl* pSdoSeqConHdl_p,
 tEplKernel          Ret;
 unsigned int        uiCount;
 unsigned int        uiFreeCon;
-tEplSdoConHdl       ConHandle;
+tEplSdoConHdl       ConHandle = ~0U;
 tEplAsySdoSeqCon*   pAsySdoSeqCon;
     Ret = kEplSuccessful;
 

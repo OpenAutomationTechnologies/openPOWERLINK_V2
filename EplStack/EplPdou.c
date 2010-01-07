@@ -493,7 +493,7 @@ tEplPdoAllocationParam  AllocParam;
             goto Exit;
         }
 
-        EplPdouInstance_g.m_abPdoIdToChannelIdRx[uiPdoId] = AllocParam.m_uiRxPdoChannelCount;
+        EplPdouInstance_g.m_abPdoIdToChannelIdRx[uiPdoId] = (BYTE) AllocParam.m_uiRxPdoChannelCount;
         abChannelIdToPdoIdRx_p[AllocParam.m_uiRxPdoChannelCount] = (BYTE) uiPdoId;
 
         AllocParam.m_uiRxPdoChannelCount++;
@@ -529,7 +529,7 @@ tEplPdoAllocationParam  AllocParam;
         }
 
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
-        EplPdouInstance_g.m_abPdoIdToChannelIdTx[uiPdoId] = AllocParam.m_uiTxPdoChannelCount;
+        EplPdouInstance_g.m_abPdoIdToChannelIdTx[uiPdoId] = (BYTE) AllocParam.m_uiTxPdoChannelCount;
 #endif
         abChannelIdToPdoIdTx_p[AllocParam.m_uiTxPdoChannelCount] = (BYTE) uiPdoId;
 
@@ -1100,8 +1100,8 @@ void*               pVar;
         goto Exit;
     }
 
-    EPL_PDO_MAPPOBJECT_SET_BITOFFSET(pMappObject_p, uiBitOffset);
-    EPL_PDO_MAPPOBJECT_SET_BYTESIZE_OR_TYPE(pMappObject_p, uiByteSize, ObdType);
+    EPL_PDO_MAPPOBJECT_SET_BITOFFSET(pMappObject_p, (WORD) uiBitOffset);
+    EPL_PDO_MAPPOBJECT_SET_BYTESIZE_OR_TYPE(pMappObject_p, (WORD) uiByteSize, ObdType);
     EPL_PDO_MAPPOBJECT_SET_VAR(pMappObject_p, pVar);
 
     // calucaled needed PDO size

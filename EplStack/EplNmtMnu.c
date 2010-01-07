@@ -658,6 +658,7 @@ tEplNmtState    NmtState;
                      & (EPL_NODEASSIGN_NODE_IS_CN | EPL_NODEASSIGN_NODE_EXISTS))
                         != (EPL_NODEASSIGN_NODE_IS_CN | EPL_NODEASSIGN_NODE_EXISTS))
                     || ((pNodeInfo->m_NodeState != kEplNmtMnuNodeStateResetConf)
+                        && (pNodeInfo->m_NodeState != kEplNmtMnuNodeStateConfRestored)
                         && (pNodeInfo->m_NodeState != kEplNmtMnuNodeStateUnknown)))
                 {
                     Ret = EplIdentuRequestIdentResponse(uiNodeId_p, NULL);
@@ -1125,6 +1126,8 @@ tEplKernel PUBLIC EplNmtMnuCbCheckEvent(tEplNmtEvent NmtEvent_p)
 {
 tEplKernel      Ret = kEplSuccessful;
 
+    UNUSED_PARAMETER(NmtEvent_p);
+
     return Ret;
 }
 
@@ -1177,7 +1180,7 @@ tEplKernel      Ret;
 
                 if ((pTimerEventArg->m_Arg.m_dwVal & EPL_NMTMNU_TIMERARG_IDENTREQ) != 0L)
                 {
-                    if ((pNodeInfo->m_wFlags & EPL_NMTMNU_NODE_FLAG_COUNT_STATREQ)
+                    if ((DWORD)(pNodeInfo->m_wFlags & EPL_NMTMNU_NODE_FLAG_COUNT_STATREQ)
                         != (pTimerEventArg->m_Arg.m_dwVal & EPL_NMTMNU_TIMERARG_COUNT_SR))
                     {   // this is an old (already deleted or modified) timer
                         // but not the current timer
@@ -1205,7 +1208,7 @@ tEplKernel      Ret;
 
                 else if ((pTimerEventArg->m_Arg.m_dwVal & EPL_NMTMNU_TIMERARG_STATREQ) != 0L)
                 {
-                    if ((pNodeInfo->m_wFlags & EPL_NMTMNU_NODE_FLAG_COUNT_STATREQ)
+                    if ((DWORD)(pNodeInfo->m_wFlags & EPL_NMTMNU_NODE_FLAG_COUNT_STATREQ)
                         != (pTimerEventArg->m_Arg.m_dwVal & EPL_NMTMNU_TIMERARG_COUNT_SR))
                     {   // this is an old (already deleted or modified) timer
                         // but not the current timer
@@ -1233,7 +1236,7 @@ tEplKernel      Ret;
 
                 else if ((pTimerEventArg->m_Arg.m_dwVal & EPL_NMTMNU_TIMERARG_STATE_MON) != 0L)
                 {
-                    if ((pNodeInfo->m_wFlags & EPL_NMTMNU_NODE_FLAG_COUNT_STATREQ)
+                    if ((DWORD)(pNodeInfo->m_wFlags & EPL_NMTMNU_NODE_FLAG_COUNT_STATREQ)
                         != (pTimerEventArg->m_Arg.m_dwVal & EPL_NMTMNU_TIMERARG_COUNT_SR))
                     {   // this is an old (already deleted or modified) timer
                         // but not the current timer
@@ -1261,7 +1264,7 @@ tEplKernel      Ret;
 
                 else if ((pTimerEventArg->m_Arg.m_dwVal & EPL_NMTMNU_TIMERARG_LONGER) != 0L)
                 {
-                    if ((pNodeInfo->m_wFlags & EPL_NMTMNU_NODE_FLAG_COUNT_LONGER)
+                    if ((DWORD)(pNodeInfo->m_wFlags & EPL_NMTMNU_NODE_FLAG_COUNT_LONGER)
                         != (pTimerEventArg->m_Arg.m_dwVal & EPL_NMTMNU_TIMERARG_COUNT_LO))
                     {   // this is an old (already deleted or modified) timer
                         // but not the current timer
@@ -2163,7 +2166,8 @@ tEplTimerArg        TimerArg;
                                             uiNodeId_p,
                                             pNodeInfo->m_NodeState);
 
-            if (pNodeInfo->m_NodeState != kEplNmtMnuNodeStateResetConf)
+            if ((pNodeInfo->m_NodeState != kEplNmtMnuNodeStateResetConf)
+                && (pNodeInfo->m_NodeState != kEplNmtMnuNodeStateConfRestored))
             {
                 pNodeInfo->m_NodeState = kEplNmtMnuNodeStateIdentified;
             }
@@ -2217,7 +2221,8 @@ tEplTimerArg        TimerArg;
                 }
             }
 
-            if (pNodeInfo->m_NodeState != kEplNmtMnuNodeStateResetConf)
+            if ((pNodeInfo->m_NodeState != kEplNmtMnuNodeStateResetConf)
+                && (pNodeInfo->m_NodeState != kEplNmtMnuNodeStateConfRestored))
             {
                 // inform application
                 Ret = EplNmtMnuInstance_g.m_pfnCbNodeEvent(uiNodeId_p,
@@ -2362,7 +2367,8 @@ tEplTimerArg        TimerArg;
                 pNodeInfo->m_wFlags &= ~EPL_NMTMNU_NODE_FLAG_NOT_SCANNED;
             }
 
-            if (pNodeInfo->m_NodeState != kEplNmtMnuNodeStateResetConf)
+            if ((pNodeInfo->m_NodeState != kEplNmtMnuNodeStateResetConf)
+                && (pNodeInfo->m_NodeState != kEplNmtMnuNodeStateConfRestored))
             {
                 pNodeInfo->m_NodeState = kEplNmtMnuNodeStateUnknown;
             }
@@ -2477,7 +2483,8 @@ tEplTimerArg        TimerArg;
         case kEplNmtMnuIntNodeEventError:
         {   // currently only issued on kEplNmtNodeCommandConfErr
 
-            if (pNodeInfo->m_NodeState != kEplNmtMnuNodeStateIdentified)
+            if ((pNodeInfo->m_NodeState != kEplNmtMnuNodeStateIdentified)
+                && (pNodeInfo->m_NodeState != kEplNmtMnuNodeStateConfRestored))
             {   // wrong CN state
                 // ignore event
                 break;

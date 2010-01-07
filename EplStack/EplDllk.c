@@ -891,8 +891,8 @@ tEplNmtState    NmtState;
 #endif
         default:
         {
-            ASSERTMSG(FALSE, "EplDllkProcess(): unhandled event type!\n");
             Ret = kEplInvalidEvent;
+            ASSERTMSG(Ret != kEplInvalidEvent, "EplDllkProcess(): unhandled event type!\n");
             break;
         }
     }
@@ -1214,7 +1214,7 @@ tEplNmtState        NmtState;
     // copy node configuration
     if (pNodeInfo_p->m_wPresPayloadLimit > EplDllkInstance_g.m_DllConfigParam.m_uiIsochrRxMaxPayload)
     {
-        pIntNodeInfo->m_wPresPayloadLimit = EplDllkInstance_g.m_DllConfigParam.m_uiIsochrRxMaxPayload;
+        pIntNodeInfo->m_wPresPayloadLimit = (WORD) EplDllkInstance_g.m_DllConfigParam.m_uiIsochrRxMaxPayload;
     }
     else
     {
@@ -1225,7 +1225,7 @@ tEplNmtState        NmtState;
     pIntNodeInfo->m_dwPresTimeout = pNodeInfo_p->m_dwPresTimeout;
     if (pNodeInfo_p->m_wPreqPayloadLimit > EplDllkInstance_g.m_DllConfigParam.m_uiIsochrTxMaxPayload)
     {
-        pIntNodeInfo->m_wPreqPayloadLimit = EplDllkInstance_g.m_DllConfigParam.m_uiIsochrTxMaxPayload;
+        pIntNodeInfo->m_wPreqPayloadLimit = (WORD) EplDllkInstance_g.m_DllConfigParam.m_uiIsochrTxMaxPayload;
     }
     else
     {
@@ -1755,7 +1755,7 @@ tEplDllkNodeInfo*   pIntNodeInfo;
     AmiSetByteToBe(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_SOA_IDREQ].m_abFilterMask[20],
                    0xFF);
     AmiSetByteToBe(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_SOA_IDREQ].m_abFilterValue[21],
-                   EplDllkInstance_g.m_DllConfigParam.m_uiNodeId);
+                   (BYTE) EplDllkInstance_g.m_DllConfigParam.m_uiNodeId);
     AmiSetByteToBe(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_SOA_IDREQ].m_abFilterMask[21],
                    0xFF);
     EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_SOA_IDREQ].m_pTxBuffer = &EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_IDENTRES];
@@ -1779,7 +1779,7 @@ tEplDllkNodeInfo*   pIntNodeInfo;
     AmiSetByteToBe(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_SOA_STATREQ].m_abFilterMask[20],
                    0xFF);
     AmiSetByteToBe(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_SOA_STATREQ].m_abFilterValue[21],
-                   EplDllkInstance_g.m_DllConfigParam.m_uiNodeId);
+                   (BYTE) EplDllkInstance_g.m_DllConfigParam.m_uiNodeId);
     AmiSetByteToBe(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_SOA_STATREQ].m_abFilterMask[21],
                    0xFF);
     EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_SOA_STATREQ].m_pTxBuffer = &EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_STATUSRES];
@@ -1803,7 +1803,7 @@ tEplDllkNodeInfo*   pIntNodeInfo;
     AmiSetByteToBe(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_SOA_NMTREQ].m_abFilterMask[20],
                    0xFF);
     AmiSetByteToBe(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_SOA_NMTREQ].m_abFilterValue[21],
-                   EplDllkInstance_g.m_DllConfigParam.m_uiNodeId);
+                   (BYTE) EplDllkInstance_g.m_DllConfigParam.m_uiNodeId);
     AmiSetByteToBe(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_SOA_NMTREQ].m_abFilterMask[21],
                    0xFF);
     EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_SOA_NMTREQ].m_pTxBuffer = &EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_NMTREQ];
@@ -1827,7 +1827,7 @@ tEplDllkNodeInfo*   pIntNodeInfo;
     AmiSetByteToBe(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_SOA_NONEPL].m_abFilterMask[20],
                    0xFF);
     AmiSetByteToBe(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_SOA_NONEPL].m_abFilterValue[21],
-                   EplDllkInstance_g.m_DllConfigParam.m_uiNodeId);
+                   (BYTE) EplDllkInstance_g.m_DllConfigParam.m_uiNodeId);
     AmiSetByteToBe(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_SOA_NONEPL].m_abFilterMask[21],
                    0xFF);
     EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_SOA_NONEPL].m_pTxBuffer = &EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_NONEPL];
@@ -1921,7 +1921,7 @@ tEplDllkNodeInfo*   pIntNodeInfo;
         AmiSetByteToBe(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_PREQ].m_abFilterMask[14],
                        0xFF);
         AmiSetByteToBe(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_PREQ].m_abFilterValue[15],
-                       EplDllkInstance_g.m_DllConfigParam.m_uiNodeId);
+                       (BYTE) EplDllkInstance_g.m_DllConfigParam.m_uiNodeId);
         AmiSetByteToBe(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_PREQ].m_abFilterMask[15],
                        0xFF);
         EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_PREQ].m_pTxBuffer = &EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_PRES];
@@ -2639,6 +2639,8 @@ Exit:
 static tEplKernel EplDllkProcessStartReducedCycle(tEplEvent * pEvent_p)
 {
 tEplKernel      Ret = kEplSuccessful;
+
+    UNUSED_PARAMETER(pEvent_p);
 
     // start the reduced cycle by programming the cycle timer
     // it is issued by NMT MN module, when PreOp1 is entered
@@ -4088,7 +4090,7 @@ tEplKernel      Ret = kEplSuccessful;
 tEplEvent       Event;
 tEplDllAsyncReqPriority Priority;
 tEplNmtState    NmtState;
-unsigned int    uiHandle;
+unsigned int    uiHandle = 0xFF;
 TGT_DLLK_DECLARE_FLAGS
 
     TGT_DLLK_ENTER_CRITICAL_SECTION();
@@ -4887,6 +4889,8 @@ static tEplKernel EplDllkCheckFrame(tEplFrame * pFrame_p, unsigned int uiFrameSi
 {
 tEplMsgType     MsgType;
 WORD            wEtherType;
+
+    UNUSED_PARAMETER(uiFrameSize_p);
 
     // check frame
     if (pFrame_p != NULL)

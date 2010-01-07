@@ -118,6 +118,7 @@ typedef struct
     tEplSdoComConHdl    m_SdoComConHdl;
     tEplCfmuState       m_CfmState;
     unsigned int        m_uiCurDataSize;
+    BOOL                m_fDoStore;
 #if 0
     DWORD                 dwDataRead;
     DWORD                 dwMnTime;
@@ -353,6 +354,12 @@ DWORD               dwExpConfDate = 0;
 tEplIdentResponse*  pIdentResponse = NULL;
 BOOL                fDoUpdate = FALSE;
 
+    if ((NodeEvent_p != kEplNmtNodeEventCheckConf)
+        && (NodeEvent_p != kEplNmtNodeEventUpdateConf))
+    {
+        goto Exit;
+    }
+
     pNodeInfo = EplCfmuAllocNodeInfo(uiNodeId_p);
     if (pNodeInfo == NULL)
     {
@@ -404,24 +411,30 @@ BOOL                fDoUpdate = FALSE;
         {
             goto Exit;
         }
-#if (EPL_CFM_CONFIGURE_CYCLE_LENGTH != FALSE)
-        fDoUpdate = TRUE;
-#endif
     }
     else
     {
         ObdSize = sizeof (dwExpConfDate);
-        Ret = EplObdReadEntry(0x1F26, uiNodeId_p, &dwExpConfDate, &ObdSize);
+        Ret = EplObduReadEntry(0x1F26, uiNodeId_p, &dwExpConfDate, &ObdSize);
         if (Ret != kEplSuccessful)
         {
             EPL_DBGLVL_CFM_TRACE2("CN%x Error Reading 0x1F26 returns 0x%X\n", uiNodeId_p, Ret);
-            fDoUpdate = TRUE;
         }
         ObdSize = sizeof (dwExpConfTime);
-        Ret = EplObdReadEntry(0x1F27, uiNodeId_p, &dwExpConfTime, &ObdSize);
+        Ret = EplObduReadEntry(0x1F27, uiNodeId_p, &dwExpConfTime, &ObdSize);
         if (Ret != kEplSuccessful)
         {
             EPL_DBGLVL_CFM_TRACE2("CN%x Error Reading 0x1F27 returns 0x%X\n", uiNodeId_p, Ret);
+        }
+        if ((dwExpConfDate != 0)
+            || (dwExpConfTime != 0))
+        {   // store configuration in CN at the end of the download,
+            // because expected configuration date or time is set
+            pNodeInfo->m_fDoStore = TRUE;
+            pNodeInfo->m_EventCnProgress.m_dwTotalNumberOfBytes += sizeof (DWORD);
+        }
+        else
+        {   // expected configuration date and time is not set
             fDoUpdate = TRUE;
         }
         EplIdentuGetIdentResponse(uiNodeId_p, &pIdentResponse);
@@ -435,7 +448,7 @@ BOOL                fDoUpdate = FALSE;
 
 #if (EPL_CFM_CONFIGURE_CYCLE_LENGTH != FALSE)
     ObdSize = sizeof (EplCfmuInstance_g.m_le_dwCycleLength);
-    Ret = EplObdReadEntryToLe(0x1006, 0x00, &EplCfmuInstance_g.m_le_dwCycleLength, &ObdSize);
+    Ret = EplObduReadEntryToLe(0x1006, 0x00, &EplCfmuInstance_g.m_le_dwCycleLength, &ObdSize);
     if (Ret != kEplSuccessful)
     {   // local OD access failed
         EPL_DBGLVL_CFM_TRACE1("Local OBD read failed %d\n", Ret);
@@ -443,34 +456,38 @@ BOOL                fDoUpdate = FALSE;
     }
 #endif
 
-    // init command layer connection
-    Ret = EplSdoComDefineCon(&pNodeInfo->m_SdoComConHdl,
-                             uiNodeId_p,
-                             kEplSdoTypeAsnd);
-    if ((Ret != kEplSuccessful) && (Ret != kEplSdoComHandleExists))
-    {
-        goto Exit;
-    }
-
     if ((pNodeInfo->m_dwEntriesRemaining == 0)
-        || ((AmiGetDwordFromLe(&pIdentResponse->m_le_dwVerifyConfigurationDate) == dwExpConfDate)
-            && (AmiGetDwordFromLe(&pIdentResponse->m_le_dwVerifyConfigurationTime) == dwExpConfTime)))
+        || ((NodeEvent_p != kEplNmtNodeEventUpdateConf)
+            && (fDoUpdate == FALSE)
+            && ((AmiGetDwordFromLe(&pIdentResponse->m_le_dwVerifyConfigurationDate) == dwExpConfDate)
+                && (AmiGetDwordFromLe(&pIdentResponse->m_le_dwVerifyConfigurationTime) == dwExpConfTime))))
     {
         pNodeInfo->m_CfmState = kEplCfmuStateUpToDate;
 
-        //Already current version is available on the CN, no need to write new values, we can continue
+        // current version is already available on the CN, no need to write new values, we can continue
         EPL_DBGLVL_CFM_TRACE1("CN%x - Cfg Upto Date\n", uiNodeId_p);
 
         Ret = EplCfmuDownloadCycleLength(pNodeInfo);
+    }
+    else if (NodeEvent_p == kEplNmtNodeEventUpdateConf)
+    {
+        pNodeInfo->m_CfmState = kEplCfmuStateDownload;
+
+        Ret = EplCfmuDownloadObject(pNodeInfo);
+        if (Ret == kEplSuccessful)
+        {   // SDO transfer started
+            Ret = kEplReject;
+        }
     }
     else
     {
         pNodeInfo->m_CfmState = kEplCfmuStateWaitRestore;
 
+        pNodeInfo->m_EventCnProgress.m_dwTotalNumberOfBytes += sizeof (dw_le_Signature);
         AmiSetDwordToLe(&dw_le_Signature, 0x64616F6C);
         //Restore Default Parameters
-        EPL_DBGLVL_CFM_TRACE3("CN%x - Cfg Mismatch | MN Expects: %x-%x ", uiNodeId, (unsigned int)pstCfmCnParamsNode->dwMnDate, (unsigned int)pstCfmCnParamsNode->dwMnTime);
-        EPL_DBGLVL_CFM_TRACE2("CN Has: %x-%x. Restoring Default...\n", pIdentResponse->m_le_dwVerifyConfigurationDate, pIdentResponse->m_le_dwVerifyConfigurationTime);
+        EPL_DBGLVL_CFM_TRACE3("CN%x - Cfg Mismatch | MN Expects: %lx-%lx ", uiNodeId_p, dwExpConfDate, dwExpConfTime);
+        EPL_DBGLVL_CFM_TRACE2("CN Has: %lx-%lx. Restoring Default...\n", AmiGetDwordFromLe(&pIdentResponse->m_le_dwVerifyConfigurationDate), AmiGetDwordFromLe(&pIdentResponse->m_le_dwVerifyConfigurationTime));
 
         pNodeInfo->m_EventCnProgress.m_uiObjectIndex = 0x1011;
         pNodeInfo->m_EventCnProgress.m_uiObjectSubIndex = 0x01;
@@ -587,7 +604,6 @@ Exit:
 
 static tEplCfmuNodeInfo* EplCfmuAllocNodeInfo(unsigned int uiNodeId_p)
 {
-tEplKernel          Ret = kEplSuccessful;
 tEplCfmuNodeInfo*   pNodeInfo = NULL;
 
     if ((uiNodeId_p == 0)
@@ -603,7 +619,7 @@ tEplCfmuNodeInfo*   pNodeInfo = NULL;
     pNodeInfo = EPL_MALLOC(sizeof (*pNodeInfo));
     EPL_MEMSET(pNodeInfo, 0, sizeof (*pNodeInfo));
     pNodeInfo->m_EventCnProgress.m_uiNodeId = uiNodeId_p;
-    pNodeInfo->m_SdoComConHdl = ~0;
+    pNodeInfo->m_SdoComConHdl = ~0U;
 
     EPL_CFMU_GET_NODEINFO(uiNodeId_p) = pNodeInfo;
 
@@ -657,12 +673,15 @@ static tEplKernel EplCfmuFinishConfig(tEplCfmuNodeInfo* pNodeInfo_p, tEplNmtComm
 {
 tEplKernel      Ret = kEplSuccessful;
 
-    Ret = EplSdoComUndefineCon(pNodeInfo_p->m_SdoComConHdl);
-    pNodeInfo_p->m_SdoComConHdl = ~0;
-    if (Ret != kEplSuccessful)
+    if (pNodeInfo_p->m_SdoComConHdl != ~0U)
     {
-        EPL_DBGLVL_CFM_TRACE0("SDO Free Error!\n");
-        goto Exit;
+        Ret = EplSdoComUndefineCon(pNodeInfo_p->m_SdoComConHdl);
+        pNodeInfo_p->m_SdoComConHdl = ~0U;
+        if (Ret != kEplSuccessful)
+        {
+            EPL_DBGLVL_CFM_TRACE0("SDO Free Error!\n");
+            goto Exit;
+        }
     }
 
     if (EplCfmuInstance_g.m_pfnCbEventCnResult != NULL)
@@ -696,23 +715,12 @@ tEplKernel          Ret = kEplSuccessful;
 tEplCfmuNodeInfo*   pNodeInfo = pSdoComFinished_p->m_pUserArg;
 unsigned int        uiNodeId = pSdoComFinished_p->m_uiNodeId;
 
-    void *           pBufHeader = NULL;
-    UINT           uiDataSize = sizeof(UINT);        //Used during store and restore
-    static DWORD dwSignature;
-
     if (pNodeInfo == NULL)
     {
         return kEplInvalidNodeId;
     }
 
-    if (pSdoComFinished_p->m_SdoComConState == kEplSdoComTransferLowerLayerAbort)
-    {
-        pNodeInfo->m_EventCnProgress.m_dwSdoAbortCode = EPL_SDOAC_TIME_OUT;
-    }
-    else
-    {
-        pNodeInfo->m_EventCnProgress.m_dwSdoAbortCode = pSdoComFinished_p->m_dwAbortCode;
-    }
+    pNodeInfo->m_EventCnProgress.m_dwSdoAbortCode = pSdoComFinished_p->m_dwAbortCode;
     pNodeInfo->m_EventCnProgress.m_dwBytesDownloaded += pSdoComFinished_p->m_uiTransferredByte;
 
     Ret = EplCfmuCallCbProgress(pNodeInfo);
@@ -782,6 +790,7 @@ unsigned int        uiNodeId = pSdoComFinished_p->m_uiNodeId;
             if (Ret == kEplReject)
             {
                 pNodeInfo->m_CfmState = kEplCfmuStateUpToDate;
+                Ret = kEplSuccessful;
             }
             else
             {
@@ -826,7 +835,7 @@ tEplKernel      Ret = kEplSuccessful;
     }
     else
     {
-        EPL_DBGLVL_CFM_TRACE2("CN%x Writing 0x1006 returns 0x%X\n", uiNodeId_p, Ret);
+        EPL_DBGLVL_CFM_TRACE2("CN%x Writing 0x1006 returns 0x%X\n", pNodeInfo_p->m_EventCnProgress.m_uiNodeId, Ret);
     }
 #endif
 
@@ -854,6 +863,7 @@ static DWORD    dw_le_Signature;
 
     // forward data pointer for last transfer
     pNodeInfo_p->m_pbDataConciseDcf += pNodeInfo_p->m_uiCurDataSize;
+    pNodeInfo_p->m_dwBytesRemaining -= pNodeInfo_p->m_uiCurDataSize;
 
     if (pNodeInfo_p->m_dwEntriesRemaining > 0)
     {
@@ -875,7 +885,8 @@ static DWORD    dw_le_Signature;
         pNodeInfo_p->m_EventCnProgress.m_uiObjectSubIndex = AmiGetByteFromLe(&pNodeInfo_p->m_pbDataConciseDcf[EPL_CDC_OFFSET_SUBINDEX]);
         pNodeInfo_p->m_uiCurDataSize = AmiGetWordFromLe(&pNodeInfo_p->m_pbDataConciseDcf[EPL_CDC_OFFSET_SIZE]);
         pNodeInfo_p->m_pbDataConciseDcf += EPL_CDC_OFFSET_DATA;
-        pNodeInfo_p->m_dwBytesRemaining += EPL_CDC_OFFSET_DATA;
+        pNodeInfo_p->m_dwBytesRemaining -= EPL_CDC_OFFSET_DATA;
+        pNodeInfo_p->m_EventCnProgress.m_dwBytesDownloaded += EPL_CDC_OFFSET_DATA;
 
         if ((pNodeInfo_p->m_dwBytesRemaining < pNodeInfo_p->m_uiCurDataSize)
             || (pNodeInfo_p->m_uiCurDataSize == 0))
@@ -891,6 +902,8 @@ static DWORD    dw_le_Signature;
             goto Exit;
         }
 
+        pNodeInfo_p->m_dwEntriesRemaining--;
+
         Ret = EplCfmuSdoWriteObject(pNodeInfo_p, pNodeInfo_p->m_pbDataConciseDcf, pNodeInfo_p->m_uiCurDataSize);
         if (Ret != kEplSuccessful)
         {
@@ -900,17 +913,32 @@ static DWORD    dw_le_Signature;
     else
     {   // download finished
 
-        // store configuration into non-volatile memory
-        pNodeInfo_p->m_CfmState = kEplCfmuStateWaitStore;
-        AmiSetDwordToLe(&dw_le_Signature, 0x65766173);
-        pNodeInfo_p->m_EventCnProgress.m_uiObjectIndex = 0x1010;
-        pNodeInfo_p->m_EventCnProgress.m_uiObjectSubIndex = 0x01;
-        Ret = EplCfmuSdoWriteObject(pNodeInfo_p, &dw_le_Signature, sizeof (dw_le_Signature));
-        if (Ret != kEplSuccessful)
+        if (pNodeInfo_p->m_fDoStore != FALSE)
         {
-            goto Exit;
+            // store configuration into non-volatile memory
+            pNodeInfo_p->m_CfmState = kEplCfmuStateWaitStore;
+            AmiSetDwordToLe(&dw_le_Signature, 0x65766173);
+            pNodeInfo_p->m_EventCnProgress.m_uiObjectIndex = 0x1010;
+            pNodeInfo_p->m_EventCnProgress.m_uiObjectSubIndex = 0x01;
+            Ret = EplCfmuSdoWriteObject(pNodeInfo_p, &dw_le_Signature, sizeof (dw_le_Signature));
+            if (Ret != kEplSuccessful)
+            {
+                goto Exit;
+            }
         }
-
+        else
+        {
+            Ret = EplCfmuDownloadCycleLength(pNodeInfo_p);
+            if (Ret == kEplReject)
+            {
+                pNodeInfo_p->m_CfmState = kEplCfmuStateUpToDate;
+                Ret = kEplSuccessful;
+            }
+            else
+            {
+                Ret = EplCfmuFinishConfig(pNodeInfo_p, kEplNmtNodeCommandConfReset);
+            }
+        }
     }
 
 Exit:
@@ -944,6 +972,18 @@ tEplSdoComTransParamByIndex TransParamByIndex;
     {
         Ret = kEplApiInvalidParam;
         goto Exit;
+    }
+
+    if (pNodeInfo_p->m_SdoComConHdl == ~0)
+    {
+        // init command layer connection
+        Ret = EplSdoComDefineCon(&pNodeInfo_p->m_SdoComConHdl,
+                                 pNodeInfo_p->m_EventCnProgress.m_uiNodeId,
+                                 kEplSdoTypeAsnd);
+        if ((Ret != kEplSuccessful) && (Ret != kEplSdoComHandleExists))
+        {
+            goto Exit;
+        }
     }
 
     TransParamByIndex.m_pData = pSrcData_le_p;

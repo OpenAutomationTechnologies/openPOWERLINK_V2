@@ -676,7 +676,8 @@ DWORD			dwTimeoutMs;
 DWORD           dwWaitResult;
 tEplKernel		Ret;
 
-    while (1)
+    UNUSED_PARAMETER(lpParameter);
+    for (;;)
     {
         Ret = EplTimeruProcess();
         if (Ret != kEplSuccessful)
