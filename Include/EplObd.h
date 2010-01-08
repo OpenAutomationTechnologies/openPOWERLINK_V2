@@ -464,7 +464,7 @@ typedef struct _tEplObdInitParam tEplObdInitParam;
 typedef struct
 {
     tEplObdCommand  m_bCommand;
-    tEplObdPart        m_bCurrentOdPart;
+    tEplObdPart     m_bCurrentOdPart;
     void MEM*       m_pData;
     tEplObdSize     m_ObjSize;
 

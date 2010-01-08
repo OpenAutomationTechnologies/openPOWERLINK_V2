@@ -186,6 +186,8 @@
 
 #define EPL_OBD_USE_VARIABLE_SUBINDEX_TAB TRUE
 
+#define EPL_OBD_USE_LOAD_CONCISEDCF     TRUE
+
 
 // =========================================================================
 // Timer module specific defines

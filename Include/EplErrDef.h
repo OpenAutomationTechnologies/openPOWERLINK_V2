@@ -121,6 +121,10 @@ typedef enum
     kEplObdValueTooLow          = 0x0038,       // value to write to an object is too low
     kEplObdValueTooHigh         = 0x0039,       // value to write to an object is too high
     kEplObdValueLengthError     = 0x003A,       // value to write is to long or to short
+    kEplObdErrnoSet             = 0x003B,       // file I/O error occurred and errno is set
+    kEplObdInvalidDcf           = 0x003C,       // device configuration file (CDC) is not valid
+    kEplObdOutOfMemory          = 0x003D,       // out of memory
+    kEplObdNoConfigData         = 0x003E,       // no configuration data present (CDC is empty)
 //    kEplObdIllegalFloat         = 0x003B,       // illegal float variable
 //    kEplObdWrongOdBuilderKey    = 0x003F,       // OD was generated with demo version of tool ODBuilder
 
@@ -203,7 +207,7 @@ typedef enum
     // Configuration manager module 0x00C0 - 0x00CF
     kEplCfmConfigError          = 0x00C0,       // error in configuration manager
     kEplCfmSdocTimeOutError     = 0x00C1,       // error in configuration manager, Sdo timeout
-    kEplCfmInvalidDcf           = 0x00C2,       // configuration file not valid
+    kEplCfmInvalidDcf           = 0x00C2,       // device configuration file (CDC) is not valid
     kEplCfmUnsupportedDcf       = 0x00C3,       // unsupported Dcf format
     kEplCfmConfigWithErrors     = 0x00C4,       // configuration finished with errors
     kEplCfmNoFreeConfig         = 0x00C5,       // no free configuration entry

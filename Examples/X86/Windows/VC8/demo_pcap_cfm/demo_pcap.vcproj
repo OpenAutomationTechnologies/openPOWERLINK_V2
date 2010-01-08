@@ -530,10 +530,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\..\..\EplStack\EplNmtkCal.c"
-				>
-			</File>
-			<File
 				RelativePath="..\..\..\..\..\EplStack\EplNmtMnu.c"
 				>
 			</File>
@@ -542,11 +538,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\..\..\EplStack\EplNmtuCal.c"
+				RelativePath="..\..\..\..\..\EplStack\EplObd.c"
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\..\..\EplStack\EplObd.c"
+				RelativePath="..\..\..\..\..\EplStack\EplObdCdc.c"
 				>
 			</File>
 			<File

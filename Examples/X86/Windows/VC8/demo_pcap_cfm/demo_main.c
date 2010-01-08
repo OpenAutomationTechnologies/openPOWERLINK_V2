@@ -199,7 +199,6 @@ int i = 0;
 int inum;
 
 // Variables for cdc file opening and extraction of data
-UINT uiFileSize = 0;
 FILE *fpConfigObj=NULL;
 BYTE bCharRead=0;
 UINT uiLoopCount = 0;
@@ -350,10 +349,10 @@ tEplObdSize ObdSize;
 
 	//Get file length
 	fseek(fpConfigObj, 0, SEEK_END);
-	uiFileSize=ftell(fpConfigObj);
+	guiDataCount=ftell(fpConfigObj);
 	fseek(fpConfigObj, 0, SEEK_SET);
 	//Allocate memory to store MN Obd data from CDC file
-	pbMnObdStartAddr = (BYTE*)malloc(uiFileSize);
+	pbMnObdStartAddr = (BYTE*)malloc(guiDataCount);
 
 	if(!pbMnObdStartAddr)
 	{
@@ -362,16 +361,17 @@ tEplObdSize ObdSize;
 		goto Exit;
 	}
 	//Read the Binary file
-	for( uiLoopCount =0; uiLoopCount < uiFileSize; uiLoopCount++)
+	iRetFileOpen = fread(pbMnObdStartAddr, guiDataCount, 1, fpConfigObj);
+    /*
+	for( uiLoopCount =0; uiLoopCount < guiDataCount; uiLoopCount++)
 	{
 		fread(&bCharRead, 1,1, fpConfigObj);
 		pbMnObdStartAddr[uiLoopCount] = bCharRead;
 	}
+    */
 
 	// close the Binary file
 	fclose(fpConfigObj);
-	// Get the data size
-	guiDataCount = uiLoopCount - 1;
 
 ////////////////////////////////////////////////////////////////////////////////
 				// Initialize Powerlink Stack //

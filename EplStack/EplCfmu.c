@@ -285,7 +285,7 @@ Exit:
 tEplKernel EplCfmuDelInstance(void)
 {
 tEplKernel          Ret = kEplSuccessful;
-unsigned int        uiIndex;
+unsigned int        uiNodeId;
 tEplVarParam        VarParam;
 BYTE*               pbBuffer;
 tEplCfmuNodeInfo*   pNodeInfo;
@@ -294,9 +294,9 @@ tEplCfmuNodeInfo*   pNodeInfo;
     VarParam.m_pData = NULL;
     VarParam.m_Size = 0;
     VarParam.m_uiIndex = 0x1F22;
-    for (uiIndex = 0; uiIndex < EPL_NMT_MAX_NODE_ID; uiIndex++)
+    for (uiNodeId = 1; uiNodeId <= EPL_NMT_MAX_NODE_ID; uiNodeId++)
     {
-        pNodeInfo = EPL_CFMU_GET_NODEINFO(uiIndex);
+        pNodeInfo = EPL_CFMU_GET_NODEINFO(uiNodeId);
         if (pNodeInfo != NULL)
         {
             if (pNodeInfo->m_SdoComConHdl != ~0)
@@ -307,7 +307,7 @@ tEplCfmuNodeInfo*   pNodeInfo;
             pbBuffer = pNodeInfo->m_pbObdBufferConciseDcf;
             if (pbBuffer != NULL)
             {
-                VarParam.m_uiSubindex = uiIndex + 1;
+                VarParam.m_uiSubindex = uiNodeId;
                 VarParam.m_ValidFlag = kVarValidAll;
                 Ret = EplObdDefineVar(&VarParam);
                 // ignore return code, because buffer has to be freed anyway
@@ -316,7 +316,7 @@ tEplCfmuNodeInfo*   pNodeInfo;
                 pNodeInfo->m_pbObdBufferConciseDcf = NULL;
             }
             EPL_FREE(pNodeInfo);
-            EPL_CFMU_GET_NODEINFO(uiIndex) = NULL;
+            EPL_CFMU_GET_NODEINFO(uiNodeId) = NULL;
         }
     }
     Ret = kEplSuccessful;
@@ -328,7 +328,7 @@ tEplCfmuNodeInfo*   pNodeInfo;
 
 //-------------------------------------------------------------------------------------
 //
-// Function:    EplCfmuCheckConfig
+// Function:    EplCfmuProcessNodeEvent
 //
 // Description: starts the configuration of the specified CN if data/time differs with local values.
 //
@@ -343,7 +343,7 @@ tEplCfmuNodeInfo*   pNodeInfo;
 //
 //-------------------------------------------------------------------------------------
 
-tEplKernel EplCfmuCheckConfig(unsigned int uiNodeId_p, tEplNmtNodeEvent NodeEvent_p)
+tEplKernel EplCfmuProcessNodeEvent(unsigned int uiNodeId_p, tEplNmtNodeEvent NodeEvent_p)
 {
 tEplKernel          Ret = kEplSuccessful;
 static DWORD        dw_le_Signature;
@@ -883,7 +883,7 @@ static DWORD    dw_le_Signature;
         // fetch next item from ConciseDCF
         pNodeInfo_p->m_EventCnProgress.m_uiObjectIndex = AmiGetWordFromLe(&pNodeInfo_p->m_pbDataConciseDcf[EPL_CDC_OFFSET_INDEX]);
         pNodeInfo_p->m_EventCnProgress.m_uiObjectSubIndex = AmiGetByteFromLe(&pNodeInfo_p->m_pbDataConciseDcf[EPL_CDC_OFFSET_SUBINDEX]);
-        pNodeInfo_p->m_uiCurDataSize = AmiGetWordFromLe(&pNodeInfo_p->m_pbDataConciseDcf[EPL_CDC_OFFSET_SIZE]);
+        pNodeInfo_p->m_uiCurDataSize = (unsigned int) AmiGetDwordFromLe(&pNodeInfo_p->m_pbDataConciseDcf[EPL_CDC_OFFSET_SIZE]);
         pNodeInfo_p->m_pbDataConciseDcf += EPL_CDC_OFFSET_DATA;
         pNodeInfo_p->m_dwBytesRemaining -= EPL_CDC_OFFSET_DATA;
         pNodeInfo_p->m_EventCnProgress.m_dwBytesDownloaded += EPL_CDC_OFFSET_DATA;

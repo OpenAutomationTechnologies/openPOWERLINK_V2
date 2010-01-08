@@ -182,6 +182,8 @@ typedef enum
                                         // arg is pointer to tEplPdoAllocationParam
     kEplEventTypePdokConfig     = 0x21, // configure PDO channel
                                         // arg is pointer to tEplPdoChannelConf
+    kEplEventTypeNmtMnuNodeCmd  = 0x22, // trigger NMT node command
+                                        // arg is pointer to tEplNmtMnuNodeCmd
 
 } tEplEventType;
 

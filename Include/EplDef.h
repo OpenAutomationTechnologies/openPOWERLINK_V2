@@ -214,7 +214,7 @@
 #endif
 
 #ifndef EPL_OBD_MAX_STRING_SIZE
-#define EPL_OBD_MAX_STRING_SIZE        32          // is used for objects 0x1008/0x1009/0x100A
+#define EPL_OBD_MAX_STRING_SIZE         32      // is used for objects 0x1008/0x1009/0x100A
 #endif
 
 #ifndef EPL_OBD_USE_STORE_RESTORE
@@ -223,6 +223,10 @@
 
 #ifndef EPL_OBD_USE_LOAD_CONCISEDCF
 #define EPL_OBD_USE_LOAD_CONCISEDCF     FALSE
+#endif
+
+#ifndef EPL_OBD_DEF_CONCISEDCF_FILENAME
+#define EPL_OBD_DEF_CONCISEDCF_FILENAME "pl_obd.cdc"
 #endif
 
 #ifndef EPL_OBD_CHECK_OBJECT_RANGE
