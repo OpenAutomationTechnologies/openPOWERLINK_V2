@@ -5,7 +5,7 @@
 
   Project:      openPOWERLINK
 
-  Description:  source file for NMT-Kernelspace-Module
+  Description:  source file for NMT kernel part module
 
   License:
 
@@ -1628,6 +1628,7 @@ Exit:
     return Ret;
 }
 
+/*
 //---------------------------------------------------------------------------
 //
 // Function:    EplNmtkGetNmtState
@@ -1655,6 +1656,7 @@ tEplNmtState NmtState;
     return NmtState;
 
 }
+*/
 
 //=========================================================================//
 //                                                                         //

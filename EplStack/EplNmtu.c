@@ -5,7 +5,7 @@
 
   Project:      openPOWERLINK
 
-  Description:  source file for NMT-Userspace-Module
+  Description:  source file for NMT user part module
 
   License:
 
@@ -74,11 +74,9 @@
 #include "user/EplObdu.h"
 #include "user/EplTimeru.h"
 #include "user/EplDlluCal.h"
-#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMTK)) != 0)
-#include "kernel/EplNmtk.h"
-#endif
 
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMTU)) != 0)
+
 /***************************************************************************/
 /*                                                                         */
 /*                                                                         */
@@ -97,6 +95,7 @@
 
 typedef struct
 {
+    tEplNmtState                    m_LocalNmtState;
     tEplNmtuStateChangeCallback     m_pfnNmtChangeCb;
     tEplTimerHdl                    m_TimerHdl;
 
@@ -266,16 +265,7 @@ tEplEvent   Event;
 //---------------------------------------------------------------------------
 EPLDLLEXPORT tEplNmtState PUBLIC EplNmtuGetNmtState()
 {
-tEplNmtState    NmtState;
-
-    // $$$ call function of communication abstraction layer
-#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMTK)) != 0)
-    NmtState = EplNmtkGetNmtState();
-#else
-    NmtState = 0;
-#endif
-
-    return NmtState;
+    return EplNmtuInstance_g.m_LocalNmtState;
 }
 
 //---------------------------------------------------------------------------
@@ -314,6 +304,8 @@ tEplKernel  Ret;
             Ret = EplTimeruDeleteTimer(&EplNmtuInstance_g.m_TimerHdl);
 
             pNmtStateChange = (tEplEventNmtStateChange*)pEplEvent_p->m_pArg;
+
+            EplNmtuInstance_g.m_LocalNmtState = pNmtStateChange->m_NewNmtState;
 
             // call cb-functions to inform higher layer
             if(EplNmtuInstance_g.m_pfnNmtChangeCb != NULL)
