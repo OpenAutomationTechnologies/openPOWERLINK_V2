@@ -181,6 +181,14 @@
 // local types
 //---------------------------------------------------------------------------
 
+typedef struct
+{
+    unsigned int        m_uiNodeId;
+    tEplNmtNodeCommand  m_NodeCommand;
+
+} tEplNmtMnuNodeCmd;
+
+
 typedef enum
 {
     kEplNmtMnuIntNodeEventNoIdentResponse   = 0x00,
@@ -744,11 +752,9 @@ Exit:
 tEplKernel EplNmtMnuTriggerStateChange(unsigned int uiNodeId_p,
                                        tEplNmtNodeCommand  NodeCommand_p)
 {
-tEplKernel      Ret = kEplSuccessful;
-tEplNmtMnuIntNodeEvent  NodeEvent;
-tEplObdSize         ObdSize;
-BYTE                bNmtState;
-WORD                wErrorCode = EPL_E_NO_ERROR;
+tEplKernel          Ret = kEplSuccessful;
+tEplNmtMnuNodeCmd   NodeCmd;
+tEplEvent           Event;
 
     if ((uiNodeId_p == 0) || (uiNodeId_p >= EPL_C_ADR_BROADCAST))
     {
@@ -756,61 +762,23 @@ WORD                wErrorCode = EPL_E_NO_ERROR;
         goto Exit;
     }
 
-    switch (NodeCommand_p)
-    {
-        case kEplNmtNodeCommandBoot:
-        {
-            NodeEvent = kEplNmtMnuIntNodeEventBoot;
-            break;
-        }
-
-        case kEplNmtNodeCommandConfOk:
-        {
-            NodeEvent = kEplNmtMnuIntNodeEventConfigured;
-            break;
-        }
-
-        case kEplNmtNodeCommandConfErr:
-        {
-            NodeEvent = kEplNmtMnuIntNodeEventError;
-            wErrorCode = EPL_E_NMT_BPO1_CF_VERIFY;
-            break;
-        }
-
-        case kEplNmtNodeCommandConfRestored:
-        {
-            NodeEvent = kEplNmtMnuIntNodeEventExecResetNode;
-            break;
-        }
-
-        case kEplNmtNodeCommandConfReset:
-        {
-            NodeEvent = kEplNmtMnuIntNodeEventExecResetConf;
-            break;
-        }
-
-        default:
-        {   // invalid node command
-            goto Exit;
-        }
-    }
-
-    // fetch current NMT state
-    ObdSize = 1;
-    Ret = EplObduReadEntry(0x1F8E, uiNodeId_p, &bNmtState, &ObdSize);
+    NodeCmd.m_NodeCommand = NodeCommand_p;
+    NodeCmd.m_uiNodeId = uiNodeId_p;
+    Event.m_EventSink = kEplEventSinkNmtMnu;
+    Event.m_EventType = kEplEventTypeNmtMnuNodeCmd;
+    EPL_MEMSET(&Event.m_NetTime, 0x00, sizeof(Event.m_NetTime));
+    Event.m_pArg = &NodeCmd;
+    Event.m_uiSize = sizeof (NodeCmd);
+    Ret = EplEventuPost(&Event);
     if (Ret != kEplSuccessful)
     {
         goto Exit;
     }
 
-    Ret = EplNmtMnuProcessInternalEvent(uiNodeId_p,
-                                        (tEplNmtState) (bNmtState | EPL_NMT_TYPE_CS),
-                                        wErrorCode,
-                                        NodeEvent);
-
 Exit:
     return Ret;
 }
+
 
 //---------------------------------------------------------------------------
 //
@@ -1424,6 +1392,74 @@ tEplKernel      Ret;
                 }
             }
 
+            break;
+        }
+
+        case kEplEventTypeNmtMnuNodeCmd:
+        {
+        tEplNmtMnuNodeCmd*      pNodeCmd = (tEplNmtMnuNodeCmd*)pEvent_p->m_pArg;
+        tEplNmtMnuIntNodeEvent  NodeEvent;
+        tEplObdSize             ObdSize;
+        BYTE                    bNmtState;
+        WORD                    wErrorCode = EPL_E_NO_ERROR;
+
+            if ((pNodeCmd->m_uiNodeId == 0) || (pNodeCmd->m_uiNodeId >= EPL_C_ADR_BROADCAST))
+            {
+                Ret = kEplInvalidNodeId;
+                goto Exit;
+            }
+
+            switch (pNodeCmd->m_NodeCommand)
+            {
+                case kEplNmtNodeCommandBoot:
+                {
+                    NodeEvent = kEplNmtMnuIntNodeEventBoot;
+                    break;
+                }
+
+                case kEplNmtNodeCommandConfOk:
+                {
+                    NodeEvent = kEplNmtMnuIntNodeEventConfigured;
+                    break;
+                }
+
+                case kEplNmtNodeCommandConfErr:
+                {
+                    NodeEvent = kEplNmtMnuIntNodeEventError;
+                    wErrorCode = EPL_E_NMT_BPO1_CF_VERIFY;
+                    break;
+                }
+
+                case kEplNmtNodeCommandConfRestored:
+                {
+                    NodeEvent = kEplNmtMnuIntNodeEventExecResetNode;
+                    break;
+                }
+
+                case kEplNmtNodeCommandConfReset:
+                {
+                    NodeEvent = kEplNmtMnuIntNodeEventExecResetConf;
+                    break;
+                }
+
+                default:
+                {   // invalid node command
+                    goto Exit;
+                }
+            }
+
+            // fetch current NMT state
+            ObdSize = sizeof (bNmtState);
+            Ret = EplObduReadEntry(0x1F8E, pNodeCmd->m_uiNodeId, &bNmtState, &ObdSize);
+            if (Ret != kEplSuccessful)
+            {
+                goto Exit;
+            }
+
+            Ret = EplNmtMnuProcessInternalEvent(pNodeCmd->m_uiNodeId,
+                                                (tEplNmtState) (bNmtState | EPL_NMT_TYPE_CS),
+                                                wErrorCode,
+                                                NodeEvent);
             break;
         }
 
