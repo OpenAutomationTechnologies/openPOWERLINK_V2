@@ -5,9 +5,11 @@
 
   Project:      openPOWERLINK
 
-  Description:  source file for user PDO module
-                Currently, this module just implements a OD callback function
-                to check if the PDO configuration is valid.
+  Description:  source file for user part PDO module
+                This module implements an OD callback function
+                to check if the PDO configuration is valid
+                and forwards the configuration to the corresponding
+                kernel part module.
 
   License:
 
