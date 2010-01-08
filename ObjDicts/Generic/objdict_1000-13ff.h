@@ -19,7 +19,7 @@
 
         // Object 1006h: NMT_CycleLen_U32 in [us]
         EPL_OBD_BEGIN_INDEX_RAM(0x1006, 0x01, NULL)
-            EPL_OBD_SUBINDEX_RAM_VAR(0x1006, 0x00, kEplObdTypUInt32, kEplObdAccRW, tEplObdUnsigned32, NMT_CycleLen_U32, 0x00)   // in [us]
+            EPL_OBD_SUBINDEX_RAM_VAR(0x1006, 0x00, kEplObdTypUInt32, kEplObdAccSRW, tEplObdUnsigned32, NMT_CycleLen_U32, 0x00)   // in [us]
         EPL_OBD_END_INDEX(0x1006)
 
         // Object 1008h: NMT_ManufactDevName_VS
@@ -49,8 +49,8 @@
         // Object 1020h: CFM_VerifyConfiguration_REC
         EPL_OBD_BEGIN_INDEX_RAM(0x1020, 0x03, EplApiCbObdAccess)
             EPL_OBD_SUBINDEX_RAM_VAR(0x1020, 0x00, kEplObdTypUInt8, kEplObdAccConst, tEplObdUnsigned8, NumberOfEntries, 0x02)
-            EPL_OBD_SUBINDEX_RAM_VAR(0x1020, 0x01, kEplObdTypUInt32, kEplObdAccRW, tEplObdUnsigned32, ConfDate_U32, 0)
-            EPL_OBD_SUBINDEX_RAM_VAR(0x1020, 0x02, kEplObdTypUInt32, kEplObdAccRW, tEplObdUnsigned32, ConfTime_U32, 0)
+            EPL_OBD_SUBINDEX_RAM_VAR(0x1020, 0x01, kEplObdTypUInt32, kEplObdAccSRW, tEplObdUnsigned32, ConfDate_U32, 0)
+            EPL_OBD_SUBINDEX_RAM_VAR(0x1020, 0x02, kEplObdTypUInt32, kEplObdAccSRW, tEplObdUnsigned32, ConfTime_U32, 0)
 //            EPL_OBD_SUBINDEX_RAM_VAR(0x1020, 0x03, kEplObdTypUInt32, kEplObdAccRW, tEplObdUnsigned32, ConfId_U32, 0)
 //            EPL_OBD_SUBINDEX_RAM_VAR(0x1020, 0x04, kEplObdTypUInt32, kEplObdAccRW, tEplObdUnsigned32, VerifyConfInvalid_U32, 1)
         EPL_OBD_END_INDEX(0x1020)
@@ -71,6 +71,6 @@
 
         // Object 1300h: SDO_SequLayerTimeout_U32 in [ms]
         EPL_OBD_BEGIN_INDEX_RAM(0x1300, 0x01, NULL)
-            EPL_OBD_SUBINDEX_RAM_VAR(0x1300, 0x00, kEplObdTypUInt32, kEplObdAccRW, tEplObdUnsigned32, SDO_SequLayerTimeout_U32, 5000)
+            EPL_OBD_SUBINDEX_RAM_VAR(0x1300, 0x00, kEplObdTypUInt32, kEplObdAccSRW, tEplObdUnsigned32, SDO_SequLayerTimeout_U32, 5000)
         EPL_OBD_END_INDEX(0x1300)
 
