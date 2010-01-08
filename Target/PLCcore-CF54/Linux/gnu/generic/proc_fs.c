@@ -68,7 +68,6 @@
 
 ****************************************************************************/
 
-#include "kernel/EplNmtk.h"
 #include "user/EplNmtu.h"
 
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
@@ -276,7 +275,7 @@ tEplDllkCalStatistics* pDllkCalStats;
     // ---- EPL state ----
     nSize += snprintf (pcBuffer_p + nSize, nBufferSize_p - nSize,
                        "NMT state:                  0x%04X\n",
-                       (WORD) EplNmtkGetNmtState());
+                       (WORD) EplNmtuGetNmtState());
 
     EplDllkCalGetStatistics(&pDllkCalStats);
 
