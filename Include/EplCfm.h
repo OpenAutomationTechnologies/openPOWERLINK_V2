@@ -73,8 +73,6 @@
 
 #include "EplInc.h"
 
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_CFM)) != 0)
-
 #include "EplObd.h"
 
 /***************************************************************************/
@@ -115,6 +113,5 @@ typedef struct
 EPLDLLEXPORT tEplKernel PUBLIC EplCfmuCbObdAccess(tEplObdCbParam MEM* pParam_p);
 
 
-#endif
 
 #endif // _EPLCFM_H_
