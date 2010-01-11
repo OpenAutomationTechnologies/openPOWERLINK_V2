@@ -105,6 +105,9 @@
 #error "EPL API layer needs EPL module OBDK!"
 #endif
 
+#if (EPL_OBD_USE_LOAD_CONCISEDCF != FALSE)
+#include "EplObdCdc.h"
+#endif
 
 /***************************************************************************/
 /*                                                                         */
@@ -1563,6 +1566,21 @@ tEplApiEventArg     EventArg;
                 goto Exit;
             }
 
+#if (EPL_OBD_USE_LOAD_CONCISEDCF != FALSE)
+            Ret = EplObdCdcLoadFile(EPL_OBD_DEF_CONCISEDCF_FILENAME);
+            if (Ret != kEplSuccessful)
+            {
+                if (Ret == kEplReject)
+                {
+                    Ret = kEplSuccessful;
+                }
+                else
+                {
+                    goto Exit;
+                }
+            }
+
+#endif
             break;
         }
 

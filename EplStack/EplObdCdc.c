@@ -241,7 +241,7 @@ static tEplKernel EplObdCdcProcess(tEplObdCdcInfo* pCdcInfo_p);
 //
 // Parameters:  pszCdcFilename_p    = file name of the CDC file
 //
-// Returns:     tEplKernel              = error code
+// Returns:     tEplKernel          = error code
 //
 //
 // State:
@@ -256,7 +256,7 @@ DWORD           dwErrno;
 
     EPL_MEMSET(&CdcInfo, 0, sizeof (CdcInfo));
     CdcInfo.m_Type = kEplObdCdcTypeFile;
-    CdcInfo.m_Handle.m_hCdcFile = open(pszCdcFilename_p, O_RDONLY, 0666);
+    CdcInfo.m_Handle.m_hCdcFile = open(pszCdcFilename_p, O_RDONLY | O_BINARY, 0666);
     if (CdcInfo.m_Handle.m_hCdcFile < 0)
     {   // error occurred
         dwErrno = (DWORD) errno;
@@ -289,9 +289,10 @@ Exit:
 //
 // Description: loads the CDC specified by the buffer into the local OD.
 //
-// Parameters:  pszCdcFilename_p    = file name of the CDC file
+// Parameters:  pbCdc_p         = pointer to buffer containing the CDC
+//              uiCdcSize_p     = size of the CDC
 //
-// Returns:     tEplKernel              = error code
+// Returns:     tEplKernel      = error code
 //
 //
 // State:
@@ -331,13 +332,14 @@ Exit:
 
 //---------------------------------------------------------------------------
 //
-// Function:    EplPdouConfigureAllPdos
+// Function:    EplObdCdcLoadNextBuffer
 //
-// Description: configures all PDOs in Pdok module
+// Description: loads the next part of the buffer
 //
-// Parameters:  void
+// Parameters:  pCdcInfo_p          = pointer to CDC info structure
+//              iBufferSize         = number of bytes to load
 //
-// Returns:     tEplKernel              = error code
+// Returns:     tEplKernel          = error code
 //
 //
 // State:
@@ -348,6 +350,7 @@ static tEplKernel EplObdCdcLoadNextBuffer(tEplObdCdcInfo* pCdcInfo_p, size_t iBu
 {
 tEplKernel  Ret = kEplSuccessful;
 size_t      iReadSize;
+BYTE*       pbBuffer;
 
     switch (pCdcInfo_p->m_Type)
     {
@@ -364,19 +367,35 @@ size_t      iReadSize;
                 pCdcInfo_p->m_pbCurBuffer = EPL_MALLOC(iBufferSize);
                 if (pCdcInfo_p->m_pbCurBuffer == NULL)
                 {
-                    pCdcInfo_p->m_pbCurBuffer = NULL;
                     Ret = EplEventuPostError(kEplEventSourceObdu, kEplObdOutOfMemory, 0, NULL);
+                    if (Ret != kEplSuccessful)
+                    {
+                        goto Exit;
+                    }
+                    Ret = kEplReject;
                     goto Exit;
                 }
                 pCdcInfo_p->m_iBufferSize = iBufferSize;
             }
-            iReadSize = read(pCdcInfo_p->m_Handle.m_hCdcFile, pCdcInfo_p->m_pbCurBuffer, iBufferSize);
-            if (iReadSize < iBufferSize)
+            pbBuffer = pCdcInfo_p->m_pbCurBuffer;
+            do
             {
-                pCdcInfo_p->m_pbCurBuffer = NULL;
-                Ret = EplEventuPostError(kEplEventSourceObdu, kEplObdInvalidDcf, 0, NULL);
-                goto Exit;
+                iReadSize = read(pCdcInfo_p->m_Handle.m_hCdcFile, pbBuffer, iBufferSize);
+                if (iReadSize <= 0)
+                {
+                    Ret = EplEventuPostError(kEplEventSourceObdu, kEplObdInvalidDcf, 0, NULL);
+                    if (Ret != kEplSuccessful)
+                    {
+                        goto Exit;
+                    }
+                    Ret = kEplReject;
+                    goto Exit;
+                }
+                pbBuffer += iReadSize;
+                iBufferSize -= iReadSize;
+                pCdcInfo_p->m_iCdcSize -= iReadSize;
             }
+            while (iBufferSize > 0);
             break;
         }
 
@@ -384,8 +403,12 @@ size_t      iReadSize;
         {
             if (pCdcInfo_p->m_iBufferSize < iBufferSize)
             {
-                pCdcInfo_p->m_pbCurBuffer = NULL;
                 Ret = EplEventuPostError(kEplEventSourceObdu, kEplObdInvalidDcf, 0, NULL);
+                if (Ret != kEplSuccessful)
+                {
+                    goto Exit;
+                }
+                Ret = kEplReject;
                 goto Exit;
             }
             pCdcInfo_p->m_pbCurBuffer = pCdcInfo_p->m_Handle.m_pbNextBuffer;
@@ -402,13 +425,13 @@ Exit:
 
 //---------------------------------------------------------------------------
 //
-// Function:    EplPdouConfigureAllPdos
+// Function:    EplObdCdcProcess
 //
-// Description: configures all PDOs in Pdok module
+// Description: processes the specified CDC
 //
-// Parameters:  void
+// Parameters:  pCdcInfo_p          = pointer to CDC info structure
 //
-// Returns:     tEplKernel              = error code
+// Returns:     tEplKernel          = error code
 //
 //
 // State:
@@ -424,7 +447,7 @@ unsigned int    uiObjectSubIndex;
 size_t          iCurDataSize;
 
     Ret = EplObdCdcLoadNextBuffer(pCdcInfo_p, sizeof (DWORD));
-    if ((Ret != kEplSuccessful) || (pCdcInfo_p->m_pbCurBuffer == NULL))
+    if (Ret != kEplSuccessful)
     {
         goto Exit;
     }
@@ -439,7 +462,7 @@ size_t          iCurDataSize;
     for ( ; dwEntriesRemaining != 0; dwEntriesRemaining--)
     {
         Ret = EplObdCdcLoadNextBuffer(pCdcInfo_p, EPL_CDC_OFFSET_DATA);
-        if ((Ret != kEplSuccessful) || (pCdcInfo_p->m_pbCurBuffer == NULL))
+        if (Ret != kEplSuccessful)
         {
             goto Exit;
         }
@@ -449,7 +472,7 @@ size_t          iCurDataSize;
         iCurDataSize = (size_t) AmiGetDwordFromLe(&pCdcInfo_p->m_pbCurBuffer[EPL_CDC_OFFSET_SIZE]);
 
         Ret = EplObdCdcLoadNextBuffer(pCdcInfo_p, iCurDataSize);
-        if ((Ret != kEplSuccessful) || (pCdcInfo_p->m_pbCurBuffer == NULL))
+        if (Ret != kEplSuccessful)
         {
             goto Exit;
         }

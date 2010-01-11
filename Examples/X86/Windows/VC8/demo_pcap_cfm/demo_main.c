@@ -131,9 +131,6 @@ static DWORD    dw_le_LossOfSocTolerance_g; // object 0x1C14
 
 static DWORD uiNodeId_g = EPL_C_ADR_INVALID;
 
-static BYTE *pbMnObdStartAddr = NULL;
-static UINT guiDataCount;
-
 
 //---------------------------------------------------------------------------
 // local function prototypes
@@ -145,8 +142,6 @@ static UINT guiDataCount;
 // instances then the function name of each object dictionary has to differ.
 
 tEplKernel PUBLIC  EplObdInitRam (tEplObdInitParam MEM* pInitParam_p);
-
-void EplFreeMnObdBuffer(void);
 
 tEplKernel PUBLIC AppCbEvent(
     tEplApiEventType        EventType_p,   // IN: event type (enum)
@@ -188,6 +183,7 @@ tEplKernel          EplRet;
 static tEplApiInitParam EplApiInitParam = {0};
 char*               sHostname = HOSTNAME;
 unsigned int        uiVarEntries;
+tEplObdSize         ObdSize;
 
 
 char                cKey = 0;
@@ -198,13 +194,6 @@ pcap_if_t *seldev;
 int i = 0;
 int inum;
 
-// Variables for cdc file opening and extraction of data
-FILE *fpConfigObj=NULL;
-BYTE bCharRead=0;
-UINT uiLoopCount = 0;
-INT iRetFileOpen;
-
-tEplObdSize ObdSize;
 
     // activate realtime priority class
     SetPriorityClass(GetCurrentProcess(), REALTIME_PRIORITY_CLASS);
@@ -330,48 +319,6 @@ tEplObdSize ObdSize;
     EplApiInitParam.m_pfnObdInitRam = EplObdInitRam;
 ////////////////////////////////////////////////////////////////////////////////
 
-////////////////////////////////////////////////////////////////////////////////
-						// Open & Read CDC File //
-////////////////////////////////////////////////////////////////////////////////
-	//Open the file reading data
-	if( (iRetFileOpen = fopen_s(&fpConfigObj, CONFIG_FILE, "rb")) != 0 )
-	{
-			PRINTF0("Configuration file not opened\n");
-			EplRet = kEplShutdown;
-			goto Exit;
-	}
-	if (fpConfigObj == NULL)
-	{
-			PRINTF0("CDC file not opened\n");
-			EplRet = kEplShutdown;
-			goto Exit;
-	}
-
-	//Get file length
-	fseek(fpConfigObj, 0, SEEK_END);
-	guiDataCount=ftell(fpConfigObj);
-	fseek(fpConfigObj, 0, SEEK_SET);
-	//Allocate memory to store MN Obd data from CDC file
-	pbMnObdStartAddr = (BYTE*)malloc(guiDataCount);
-
-	if(!pbMnObdStartAddr)
-	{
-		PRINTF0("Error! Memory Allocation failed for MN Obd\n");
-		EplRet = kEplShutdown;
-		goto Exit;
-	}
-	//Read the Binary file
-	iRetFileOpen = fread(pbMnObdStartAddr, guiDataCount, 1, fpConfigObj);
-    /*
-	for( uiLoopCount =0; uiLoopCount < guiDataCount; uiLoopCount++)
-	{
-		fread(&bCharRead, 1,1, fpConfigObj);
-		pbMnObdStartAddr[uiLoopCount] = bCharRead;
-	}
-    */
-
-	// close the Binary file
-	fclose(fpConfigObj);
 
 ////////////////////////////////////////////////////////////////////////////////
 				// Initialize Powerlink Stack //
@@ -389,7 +336,6 @@ tEplObdSize ObdSize;
 
     if(EplRet != kEplSuccessful)
     {
-        EplFreeMnObdBuffer();
         goto Exit;
     }
 
@@ -476,7 +422,6 @@ tEplObdSize ObdSize;
 
     // delete instance for all modules
     EplRet = EplApiShutdown();
-	EplFreeMnObdBuffer();
     PRINTF1("EplApiShutdown():  0x%X\n", EplRet);
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -521,18 +466,7 @@ tEplKernel PUBLIC AppCbEvent(
     tEplApiEventArg*        pEventArg_p,   // IN: event argument (union)
     void GENERIC*           pUserArg_p)
 {
-	tEplKernel          EplRet = kEplSuccessful;
-	DWORD   dwBuffer;
-	WORD	uwIndex;
-	BYTE	ucSubIndex;
-	WORD	uwDataSize;
-	BYTE	*pbaData = NULL;
-    BYTE*   pbMnCurDataPtr;
-	static void *pvar = NULL;
-	static BYTE  bTempVar;
-	static WORD  wTempVar;
-	static DWORD dwTempVar;
-	static QWORD qwTempVar;
+tEplKernel          EplRet = kEplSuccessful;
 
     UNUSED_PARAMETER(pUserArg_p);
 
@@ -556,40 +490,6 @@ tEplKernel PUBLIC AppCbEvent(
 
                 case kEplNmtGsResetCommunication:
                 {
-                    // configure OD for MN in state ResetComm after reseting the OD
-                    // TODO: setup your own network configuration here
-                    dwBuffer = (EPL_NODEASSIGN_NODE_IS_CN | EPL_NODEASSIGN_NODE_EXISTS);    // 0x00000003L
-
-					pbMnCurDataPtr = pbMnObdStartAddr + OFFSET_FIRST_INDEX_IN_MN_OBD;
-
-					while ( pbMnCurDataPtr < ( pbMnObdStartAddr + guiDataCount ) )
-					{
-						/* Need to Implement pointer arithmatic & write Object function here */
-						uwIndex = AmiGetWordFromLe(pbMnCurDataPtr ); //1st two bytes
-						ucSubIndex = AmiGetByteFromLe(&pbMnCurDataPtr[EPL_CDC_OFFSET_SUBINDEX]); //third byte
-
-						uwDataSize = AmiGetWordFromLe(&pbMnCurDataPtr[EPL_CDC_OFFSET_SIZE]); //4th and 5th byte contain size
-
-						//DBUG_PRNT("Index %x %x %x\n", uwIndex, pbMnCurDataPtr, uwDataSize);
-
-						pbaData = (pbMnCurDataPtr + EPL_CDC_OFFSET_DATA); //Get the start of data
-						pbMnCurDataPtr = pbMnCurDataPtr + uwDataSize + EPL_CDC_OFFSET_DATA;
-
-						//DBUG_PRNT("Index: %x SI: %x D: %x\n",  uwIndex, ucSubIndex, *pbaData);
-
-						//Write the data read from Array
-                        EplRet = EplApiWriteObject(NULL, 0, uwIndex, ucSubIndex, pbaData, uwDataSize, kEplSdoTypeAsnd, NULL);
-						if (EplRet != kEplSuccessful)
-						{
-							PRINTF4("Error Writing %x sub index %x size %x returns 0x%X\n", uwIndex, ucSubIndex, uwDataSize, EplRet);
-						}
-					}
-					dwBuffer = (EPL_NODEASSIGN_MN_PRES | EPL_NODEASSIGN_NODE_EXISTS);       // 0x00010001L
-					EplRet = EplApiWriteLocalObject(0x1F81, 0xF0, &dwBuffer, 4);
-					if (EplRet != kEplSuccessful)
-					{
-						PRINTF1("Error Reading 0x1F81 returns 0x%X\n", EplRet);
-					}
 					// continue
 				}
 
@@ -654,6 +554,14 @@ tEplKernel PUBLIC AppCbEvent(
                 {   // error occured within the data link layer (e.g. interrupt processing)
                     // the DWORD argument contains the DLL state and the NMT event
                     PRINTF1(" val=%lX\n", pEventArg_p->m_InternalError.m_Arg.m_dwArg);
+                    break;
+                }
+
+                case kEplEventSourceObdk:
+                case kEplEventSourceObdu:
+                {   // error occured within OBD module
+                    // either in kernel or in user part
+                    PRINTF2(" Object=0x%04X/%u\n", pEventArg_p->m_InternalError.m_Arg.m_ObdError.m_uiIndex, pEventArg_p->m_InternalError.m_Arg.m_ObdError.m_uiSubIndex);
                     break;
                 }
 
@@ -946,16 +854,6 @@ tEplKernel          EplRet = kEplSuccessful;
     return EplRet;
 }
 
-
-//Free MnObd buffer
-void EplFreeMnObdBuffer(void)
-{
-	if( pbMnObdStartAddr != NULL )
-	{
-		free(pbMnObdStartAddr);
-		pbMnObdStartAddr = NULL;
-	}
-}
 
 // EOF
 

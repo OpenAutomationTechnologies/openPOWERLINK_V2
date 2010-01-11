@@ -188,6 +188,7 @@
 
 #define EPL_OBD_USE_LOAD_CONCISEDCF     TRUE
 
+#define EPL_OBD_DEF_CONCISEDCF_FILENAME "mnobd.cdc"
 
 // =========================================================================
 // Timer module specific defines
