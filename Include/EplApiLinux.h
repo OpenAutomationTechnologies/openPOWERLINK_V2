@@ -84,16 +84,16 @@
 //  Commands for <ioctl>
 //---------------------------------------------------------------------------
 
-#define EPLLIN_CMD_INITIALIZE               _IORW('=',  0, tEplApiInitParam)
+#define EPLLIN_CMD_INITIALIZE               _IOWR('=',  0, tEplApiInitParam)
 #define EPLLIN_CMD_PI_IN                    _IOW ('=',  1, tEplApiProcessImage)
 #define EPLLIN_CMD_PI_OUT                   _IOW ('=',  2, tEplApiProcessImage)
-#define EPLLIN_CMD_WRITE_OBJECT             _IORW('=',  3, tEplLinSdoObject)
-#define EPLLIN_CMD_READ_OBJECT              _IORW('=',  4, tEplLinSdoObject)
+#define EPLLIN_CMD_WRITE_OBJECT             _IOWR('=',  3, tEplLinSdoObject)
+#define EPLLIN_CMD_READ_OBJECT              _IOWR('=',  4, tEplLinSdoObject)
 #define EPLLIN_CMD_WRITE_LOCAL_OBJECT       _IOW ('=',  5, tEplLinLocalObject)
-#define EPLLIN_CMD_READ_LOCAL_OBJECT        _IORW('=',  6, tEplLinLocalObject)
+#define EPLLIN_CMD_READ_LOCAL_OBJECT        _IOWR('=',  6, tEplLinLocalObject)
 #define EPLLIN_CMD_FREE_SDO_CHANNEL         _IO  ('=',  7)  // ulArg_p ~ tEplSdoComConHdl
 #define EPLLIN_CMD_NMT_COMMAND              _IO  ('=',  8)  // ulArg_p ~ tEplNmtEvent
-#define EPLLIN_CMD_GET_EVENT                _IORW('=',  9, tEplLinEvent)
+#define EPLLIN_CMD_GET_EVENT                _IOWR('=',  9, tEplLinEvent)
 #define EPLLIN_CMD_MN_TRIGGER_STATE_CHANGE  _IOW ('=', 10, tEplLinNodeCmdObject)
 #define EPLLIN_CMD_PI_SETUP                 _IO  ('=', 11)
 #define EPLLIN_CMD_SHUTDOWN                 _IO  ('=', 12)
