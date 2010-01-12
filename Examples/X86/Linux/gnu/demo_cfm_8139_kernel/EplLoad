@@ -1,0 +1,74 @@
+#!/bin/sh
+
+
+if [ $USER != "root" ] ; then
+
+  echo "Please run 'sudo $0'"
+
+  exit
+fi
+
+
+echo -n "Check if high resolution timer support is available..."
+
+cat /proc/timer_list | grep 'hres_active.*1' > /dev/null
+if [ "$?" -ne "0" ] ; then
+  echo "  Failed"
+  echo
+  echo "  High resolution timer support is NOT active."
+  echo "  Maybe you need to add 'acpi=force' to kernel command line"
+  echo "  or try it on a more recent X86 processor."
+  echo
+  echo "The EPL module is and will not be loaded!"
+  echo
+  
+  exit
+else
+  echo "  OK"
+fi
+
+
+echo -n "Searching for RTL8139 nic..."
+
+module="epl"
+
+# unbind network card from ethernet driver
+pciid=$(lspci | grep RTL-8139 | awk "{printf \"0000:\"\$1}")
+if [ -z $pciid ] ; then
+  echo "  Failed"
+  echo
+  echo "  No network interface controller with"
+  echo "  Realtek RTL8139 chip found!"
+  echo
+  echo "The EPL module cannot be loaded!"
+  echo
+  
+  exit
+else
+  echo "  OK"
+fi
+
+
+echo "unbinding PCI device $pciid"
+echo -n $pciid > /sys/bus/pci/drivers/8139too/unbind
+
+cdcfile=`dirname $(readlink -f ${0})`/mnobd.cdc
+
+echo "Loading EPL module with CDC=${cdcfile}..."
+
+# invoke insmod with all arguments we got
+# and use a pathname, as insmod doesn't look in . by default
+/sbin/insmod `dirname $0`/$module.ko cdc="$cdcfile" $*
+
+if [ "$?" -ne "0" ] ; then
+  echo " Loading of EPL module failed"
+  exit 1
+else
+  echo "EPL module successfully loaded."
+  echo
+
+fi
+
+exit 0
+
+

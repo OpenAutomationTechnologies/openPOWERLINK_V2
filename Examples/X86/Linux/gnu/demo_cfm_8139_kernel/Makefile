@@ -80,6 +80,9 @@ PWD				:= $(shell pwd)
 .PHONY:     all
 all:
 			$(MAKE)	-C $(KDIR) M=$(PWD) modules
+			dos2unix -p EplLoad
+			dos2unix -p EplUnload
+			chmod +x EplLoad EplUnload
 
 #.PHONY:     install
 #install:    call_driver_build
