@@ -81,11 +81,14 @@
 
 #if (EPL_OBD_USE_LOAD_CONCISEDCF != FALSE)
 
+#if !((TARGET_SYSTEM == _LINUX_) && \
+      (defined(__KERNEL__)))
 #include <sys/stat.h>
 #include <assert.h>
 #include <stdlib.h>
 #include <fcntl.h>
 #include <errno.h>
+#endif
 
 #if (TARGET_SYSTEM == _WIN32_)
 

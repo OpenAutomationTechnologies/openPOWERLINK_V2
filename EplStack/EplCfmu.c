@@ -4,9 +4,9 @@
   (c) SYSTEC electronic GmbH, D-07973 Greiz, August-Bebel-Str. 29
       www.systec-electronic.com
 
-  Project:      openPOWERLINK - Epl Configuration source
+  Project:      openPOWERLINK
 
-  Description:  source file for CFM module
+  Description:  source file for Configuration Manager (CFM) module
 
   License:
 
@@ -713,7 +713,6 @@ static tEplKernel PUBLIC  EplCfmuCbSdoCon(tEplSdoComFinished* pSdoComFinished_p)
 {
 tEplKernel          Ret = kEplSuccessful;
 tEplCfmuNodeInfo*   pNodeInfo = pSdoComFinished_p->m_pUserArg;
-unsigned int        uiNodeId = pSdoComFinished_p->m_uiNodeId;
 
     if (pNodeInfo == NULL)
     {

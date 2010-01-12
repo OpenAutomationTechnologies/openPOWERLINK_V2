@@ -69,7 +69,7 @@
 
 ****************************************************************************/
 
-
+#include <asm/uaccess.h>
 #include <linux/mm.h>
 #include <linux/fs.h>
 #include <linux/syscalls.h>
@@ -153,10 +153,10 @@ mm_segment_t    old_fs;
     if (IS_ERR(hFile))
     {
         errno = (int) -PTR_ERR(hFile);
-        hFile == NULL;
+        hFile = NULL;
     }
 
-    retunr hFile;
+    return hFile;
 }
 
 
@@ -185,9 +185,9 @@ ssize_t         iRet;
     old_fs = get_fs();
     set_fs(KERNEL_DS);
 
-    pos = file_pos_read(fd);
+    pos = fd->f_pos;
     iRet = vfs_read(fd, buffer, count, &pos);
-    file_pos_write(fd, pos); 
+    fd->f_pos = pos;
 
     set_fs(old_fs);
 

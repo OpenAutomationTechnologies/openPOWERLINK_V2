@@ -181,9 +181,15 @@ static atomic_t             AtomicShutdown_g = ATOMIC_INIT(FALSE);
 
 static uint uiNodeId_g = EPL_C_ADR_INVALID;
 module_param_named(nodeid, uiNodeId_g, uint, 0);
+MODULE_PARM_DESC(nodeid, "Local Node-ID of this POWERLINK node (0x01 - 0xEF -> CNs, 0xF0 -> MN");
 
 static uint uiCycleLen_g = CYCLE_LEN;
 module_param_named(cyclelen, uiCycleLen_g, uint, 0);
+MODULE_PARM_DESC(cyclelen, "Cyclelength in [µs] (it is stored in object 0x1006)");
+
+static char* pszCdcFilename_g = EPL_OBD_DEF_CONCISEDCF_FILENAME;
+module_param_named(cdc, pszCdcFilename_g, charp, 0);
+MODULE_PARM_DESC(cdc, "Full path to ConciseDCF (CDC file) which is imported into the local object dictionary");
 
 
 //---------------------------------------------------------------------------
@@ -323,6 +329,12 @@ tEplObdSize         ObdSize;
 
     // initialize POWERLINK stack
     EplRet = EplApiInitialize(&EplApiInitParam);
+    if(EplRet != kEplSuccessful)
+    {
+        goto Exit;
+    }
+
+    EplRet = EplApiSetCdcFilename(pszCdcFilename_g);
     if(EplRet != kEplSuccessful)
     {
         goto Exit;
@@ -628,7 +640,7 @@ tEplKernel          EplRet = kEplSuccessful;
         case kEplApiEventCfmProgress:
         {
             PRINTF4("%s(Node=0x%X, CFM-Progress: Object 0x%X/%u, ", __func__, pEventArg_p->m_CfmProgress.m_uiNodeId, pEventArg_p->m_CfmProgress.m_uiObjectIndex, pEventArg_p->m_CfmProgress.m_uiObjectSubIndex);
-            PRINTF2("%u/%u Bytes", pEventArg_p->m_CfmProgress.m_dwBytesDownloaded, pEventArg_p->m_CfmProgress.m_dwTotalNumberOfBytes);
+            PRINTF2("%lu/%lu Bytes", (ULONG) pEventArg_p->m_CfmProgress.m_dwBytesDownloaded, (ULONG) pEventArg_p->m_CfmProgress.m_dwTotalNumberOfBytes);
             if ((pEventArg_p->m_CfmProgress.m_dwSdoAbortCode != 0)
                 || (pEventArg_p->m_CfmProgress.m_EplError != kEplSuccessful))
             {

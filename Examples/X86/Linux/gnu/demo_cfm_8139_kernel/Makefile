@@ -28,6 +28,7 @@ MODULEOBJS	= $(MAINPATH)/Edrv/Edrv8139.o \
 			  $(MAINPATH)/EplStack/EplPdok.o $(MAINPATH)/EplStack/EplPdokCal.o \
 			  $(MAINPATH)/EplStack/EplPdou.o $(MAINPATH)/EplStack/EplPdouCal.o \
 			  $(MAINPATH)/EplStack/EplObd.o \
+			  $(MAINPATH)/EplStack/EplObdCdc.o \
 			  $(MAINPATH)/EplStack/EplCfmu.o \
 			  $(MAINPATH)/EplStack/EplSdoUdpu.o $(MAINPATH)/EplStack/EplSdoComu.o $(MAINPATH)/EplStack/EplSdoAsySequ.o $(MAINPATH)/EplStack/EplSdoAsndu.o \
 			  $(MAINPATH)/EplStack/EplTimeruLinuxKernel.o \
