@@ -84,20 +84,20 @@
 //  Commands for <ioctl>
 //---------------------------------------------------------------------------
 
-#define EPLLIN_CMD_INITIALIZE               0   // ulArg_p ~ tEplApiInitParam*
-#define EPLLIN_CMD_PI_IN                    1   // ulArg_p ~ tEplApiProcessImage*
-#define EPLLIN_CMD_PI_OUT                   2   // ulArg_p ~ tEplApiProcessImage*
-#define EPLLIN_CMD_WRITE_OBJECT             3   // ulArg_p ~ tEplLinSdoObject*
-#define EPLLIN_CMD_READ_OBJECT              4   // ulArg_p ~ tEplLinSdoObject*
-#define EPLLIN_CMD_WRITE_LOCAL_OBJECT       5   // ulArg_p ~ tEplLinLocalObject*
-#define EPLLIN_CMD_READ_LOCAL_OBJECT        6   // ulArg_p ~ tEplLinLocalObject*
-#define EPLLIN_CMD_FREE_SDO_CHANNEL         7   // ulArg_p ~ tEplSdoComConHdl
-#define EPLLIN_CMD_NMT_COMMAND              8   // ulArg_p ~ tEplNmtEvent
-#define EPLLIN_CMD_GET_EVENT                9   // ulArg_p ~ tEplLinEvent*
-#define EPLLIN_CMD_MN_TRIGGER_STATE_CHANGE 10   // ulArg_p ~ tEplLinNodeCmdObject*
-#define EPLLIN_CMD_PI_SETUP                11   // ulArg_p ~ 0
-#define EPLLIN_CMD_SHUTDOWN                12   // ulArg_p ~ 0
-#define EPLLIN_CMD_POST_USER_EVENT         13   // ulArg_p ~ void* = pUserArg_p
+#define EPLLIN_CMD_INITIALIZE               _IORW('=',  0, tEplApiInitParam)
+#define EPLLIN_CMD_PI_IN                    _IOW ('=',  1, tEplApiProcessImage)
+#define EPLLIN_CMD_PI_OUT                   _IOW ('=',  2, tEplApiProcessImage)
+#define EPLLIN_CMD_WRITE_OBJECT             _IORW('=',  3, tEplLinSdoObject)
+#define EPLLIN_CMD_READ_OBJECT              _IORW('=',  4, tEplLinSdoObject)
+#define EPLLIN_CMD_WRITE_LOCAL_OBJECT       _IOW ('=',  5, tEplLinLocalObject)
+#define EPLLIN_CMD_READ_LOCAL_OBJECT        _IORW('=',  6, tEplLinLocalObject)
+#define EPLLIN_CMD_FREE_SDO_CHANNEL         _IO  ('=',  7)  // ulArg_p ~ tEplSdoComConHdl
+#define EPLLIN_CMD_NMT_COMMAND              _IO  ('=',  8)  // ulArg_p ~ tEplNmtEvent
+#define EPLLIN_CMD_GET_EVENT                _IORW('=',  9, tEplLinEvent)
+#define EPLLIN_CMD_MN_TRIGGER_STATE_CHANGE  _IOW ('=', 10, tEplLinNodeCmdObject)
+#define EPLLIN_CMD_PI_SETUP                 _IO  ('=', 11)
+#define EPLLIN_CMD_SHUTDOWN                 _IO  ('=', 12)
+#define EPLLIN_CMD_POST_USER_EVENT          _IO  ('=', 13)  // ulArg_p ~ void* = pUserArg_p
 
 
 //---------------------------------------------------------------------------
