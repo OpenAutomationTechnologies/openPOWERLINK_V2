@@ -166,6 +166,12 @@ typedef struct
 {
     tEplApiInitParam    m_InitParam;
 
+#if (EPL_OBD_USE_LOAD_CONCISEDCF != FALSE)
+    BYTE*               m_pbCdc;
+    unsigned int        m_uiCdcSize;
+    char*               m_pszCdcFilename;
+#endif
+
 } tEplApiInstance;
 
 //---------------------------------------------------------------------------
@@ -1152,6 +1158,61 @@ tEplKernel      Ret = kEplSuccessful;
 
 #endif // (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
 
+
+#if (EPL_OBD_USE_LOAD_CONCISEDCF != FALSE)
+//---------------------------------------------------------------------------
+//
+// Function:    EplApiSetCdcBuffer
+//
+// Description: sets the buffer containing the ConciseDCF (CDC file)
+//
+// Parameters:  pbCdc_p                 = pointer to byte array containing the CDC
+//              uiCdcSize_p             = size of the buffer
+//
+// Returns:     tEplKernel              = error code
+//
+//
+// State:
+//
+//---------------------------------------------------------------------------
+
+EPLDLLEXPORT tEplKernel PUBLIC EplApiSetCdcBuffer(BYTE* pbCdc_p, unsigned int uiCdcSize_p)
+{
+tEplKernel      Ret = kEplSuccessful;
+
+    EplApiInstance_g.m_pbCdc = pbCdc_p;
+    EplApiInstance_g.m_uiCdcSize = uiCdcSize_p;
+
+    return Ret;
+}
+
+
+//---------------------------------------------------------------------------
+//
+// Function:    EplApiSetCdcFilename
+//
+// Description: sets the file name of the ConciseDCF (CDC file)
+//
+// Parameters:  pszCdcFilename_p        = pointer to string with the CDC file name
+//
+// Returns:     tEplKernel              = error code
+//
+//
+// State:
+//
+//---------------------------------------------------------------------------
+
+EPLDLLEXPORT tEplKernel PUBLIC EplApiSetCdcFilename(char* pszCdcFilename_p)
+{
+tEplKernel      Ret = kEplSuccessful;
+
+    EplApiInstance_g.m_pszCdcFilename = pszCdcFilename_p;
+
+    return Ret;
+}
+#endif // (EPL_OBD_USE_LOAD_CONCISEDCF != FALSE)
+
+
 //---------------------------------------------------------------------------
 //
 // Function:    EplApiCbObdAccess
@@ -1567,7 +1628,18 @@ tEplApiEventArg     EventArg;
             }
 
 #if (EPL_OBD_USE_LOAD_CONCISEDCF != FALSE)
-            Ret = EplObdCdcLoadFile(EPL_OBD_DEF_CONCISEDCF_FILENAME);
+            if (EplApiInstance_g.m_pbCdc != NULL)
+            {
+                Ret = EplObdCdcLoadBuffer(EplApiInstance_g.m_pbCdc, EplApiInstance_g.m_uiCdcSize);
+            }
+            else if (EplApiInstance_g.m_pszCdcFilename != NULL)
+            {
+                Ret = EplObdCdcLoadFile(EplApiInstance_g.m_pszCdcFilename);
+            }
+            else
+            {
+                Ret = EplObdCdcLoadFile(EPL_OBD_DEF_CONCISEDCF_FILENAME);
+            }
             if (Ret != kEplSuccessful)
             {
                 if (Ret == kEplReject)

@@ -1,8 +1,10 @@
 /****************************************************************************
 
   (c) Kalycito Infotech Private Limited
+  (c) SYSTEC electronic GmbH, D-07973 Greiz, August-Bebel-Str. 29
+      www.systec-electronic.com
 
-  Project:      openPOWERLINK - Demo main written by Kalycito
+  Project:      openPOWERLINK - Demo main written originally by Kalycito
 
   Description:
 
@@ -61,8 +63,7 @@
 /*                                                                         */
 /*                                                                         */
 /***************************************************************************/
-#define OFFSET_FIRST_INDEX_IN_MN_OBD	4
-#define OFFSET_NUM_ENTRIES_MN 0
+
 //---------------------------------------------------------------------------
 // const defines
 //---------------------------------------------------------------------------
@@ -81,19 +82,16 @@
 #define IP_ADDR     0xc0a86401  // 192.168.100.1
 #define SUBNET_MASK 0xFFFFFF00  // 255.255.255.0
 #define HOSTNAME    "EPL Stack"
-#define IF_ETH      EPL_VETH_NAME
-#define CONFIG_DATA_BUFF_SIZE   10000 //TODO: Not a great idea to do this in Linux Kernel Mode. But is good enough for a demo
-#define CONFIG_FILE "mnobd.cdc"
 
 
 // LIGHT EFFECT
 #define DEFAULT_MAX_CYCLE_COUNT 20  // 6 is very fast
-#define DEFAULT_MODE            0x01
-#define LED_COUNT               5       // number of LEDs in one row
-#define LED_MASK                ((1 << LED_COUNT) - 1)
-#define DOUBLE_LED_MASK         ((1 << (LED_COUNT * 2)) - 1)
-#define MODE_COUNT              4
-#define MODE_MASK               ((1 << MODE_COUNT) - 1)
+#define APP_DEFAULT_MODE        0x01
+#define APP_LED_COUNT           5       // number of LEDs in one row
+#define APP_LED_MASK            ((1 << APP_LED_COUNT) - 1)
+#define APP_DOUBLE_LED_MASK     ((1 << (APP_LED_COUNT * 2)) - 1)
+#define APP_MODE_COUNT          5
+#define APP_MODE_MASK           ((1 << APP_MODE_COUNT) - 1)
 
 
 //---------------------------------------------------------------------------
@@ -125,9 +123,6 @@ int     iMaxCycleCount_l;   // maximum cycle count (i.e. number of cycles until 
 int     iToggle;            // indicates the light movement direction
 
 BYTE    abDomain_l[3000];
-
-static DWORD    dw_le_CycleLen_g;           // object 0x1006
-static DWORD    dw_le_LossOfSocTolerance_g; // object 0x1C14
 
 static DWORD uiNodeId_g = EPL_C_ADR_INVALID;
 
@@ -373,6 +368,22 @@ int inum;
         goto Exit;
     }
 
+    ObdSize = sizeof(bSpeedSelect_l);
+    uiVarEntries = 1;
+    EplRet = EplApiLinkObject(0x2000, &bSpeedSelect_l, &uiVarEntries, &ObdSize, 0x03);
+    if (EplRet != kEplSuccessful)
+    {
+        goto Exit;
+    }
+
+    ObdSize = sizeof(bSpeedSelectOld_l);
+    uiVarEntries = 1;
+    EplRet = EplApiLinkObject(0x2000, &bSpeedSelectOld_l, &uiVarEntries, &ObdSize, 0x04);
+    if (EplRet != kEplSuccessful)
+    {
+        goto Exit;
+    }
+
     ObdSize = sizeof(abSelect_l[0]);
     uiVarEntries = sizeof(abSelect_l);
     EplRet = EplApiLinkObject(0x2200, &abSelect_l[0], &uiVarEntries, &ObdSize, 0x01);
@@ -393,7 +404,7 @@ int inum;
     // reset old process variables
     bVarOut1Old_l = 0;
     bSpeedSelectOld_l = 0;
-    dwMode_l = DEFAULT_MODE;
+    dwMode_l = APP_DEFAULT_MODE;
     iMaxCycleCount_l = DEFAULT_MAX_CYCLE_COUNT;
 
     // start processing
@@ -491,7 +502,7 @@ tEplKernel          EplRet = kEplSuccessful;
                 case kEplNmtGsResetCommunication:
                 {
 					// continue
-				}
+                }
 
                 case kEplNmtGsResetConfiguration:
                 {
@@ -574,7 +585,6 @@ tEplKernel          EplRet = kEplSuccessful;
             break;
         }
 
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
         case kEplApiEventNode:
         {
             // check additional argument
@@ -617,7 +627,6 @@ tEplKernel          EplRet = kEplSuccessful;
             }
             break;
         }
-#endif
 
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_CFM)) != 0)
         case kEplApiEventCfmProgress:
@@ -712,22 +721,19 @@ tEplKernel          EplRet = kEplSuccessful;
 
 //        printk("bVarIn = 0x%02X bVarOut = 0x%02X\n", (WORD) bVarIn_l, (WORD) bVarOut_l);
     }
-//    if (uiNodeId_g != EPL_C_ADR_MN_DEF_NODE_ID)
-    {
-        bVarIn1_l++;
-    }
+    bVarIn1_l++;
 
     if (uiNodeId_g == EPL_C_ADR_MN_DEF_NODE_ID)
     {   // we are the master and must run the control loop
 
         // collect inputs from CNs and own input
-        bSpeedSelect_l = /*bVarIn1_l |*/ abSelect_l[0];
+        bSpeedSelect_l = abSelect_l[0];
 
         bModeSelect_l = abSelect_l[1] | abSelect_l[2];
 
-        if ((bModeSelect_l & MODE_MASK) != 0)
+        if ((bModeSelect_l & APP_MODE_MASK) != 0)
         {
-            dwMode_l = bModeSelect_l & MODE_MASK;
+            dwMode_l = bModeSelect_l & APP_MODE_MASK;
         }
 
         iCurCycleCount_l--;
@@ -738,7 +744,7 @@ tEplKernel          EplRet = kEplSuccessful;
             {   // fill-up
                 if (iToggle)
                 {
-                    if ((dwLeds_l & DOUBLE_LED_MASK) == 0x00)
+                    if ((dwLeds_l & APP_DOUBLE_LED_MASK) == 0x00)
                     {
                         dwLeds_l = 0x01;
                     }
@@ -746,7 +752,7 @@ tEplKernel          EplRet = kEplSuccessful;
                     {
                         dwLeds_l <<= 1;
                         dwLeds_l++;
-                        if (dwLeds_l >= DOUBLE_LED_MASK)
+                        if (dwLeds_l >= APP_DOUBLE_LED_MASK)
                         {
                             iToggle = 0;
                         }
@@ -755,35 +761,35 @@ tEplKernel          EplRet = kEplSuccessful;
                 else
                 {
                     dwLeds_l <<= 1;
-                    if ((dwLeds_l & DOUBLE_LED_MASK) == 0x00)
+                    if ((dwLeds_l & APP_DOUBLE_LED_MASK) == 0x00)
                     {
                         iToggle = 1;
                     }
                 }
-                bLedsRow1_l = (unsigned char) (dwLeds_l & LED_MASK);
-                bLedsRow2_l = (unsigned char) ((dwLeds_l >> LED_COUNT) & LED_MASK);
+                bLedsRow1_l = (unsigned char) (dwLeds_l & APP_LED_MASK);
+                bLedsRow2_l = (unsigned char) ((dwLeds_l >> APP_LED_COUNT) & APP_LED_MASK);
             }
 
             else if ((dwMode_l & 0x02) != 0)
             {   // running light forward
                 dwLeds_l <<= 1;
-                if ((dwLeds_l > DOUBLE_LED_MASK) || (dwLeds_l == 0x00000000L))
+                if ((dwLeds_l > APP_DOUBLE_LED_MASK) || (dwLeds_l == 0x00000000L))
                 {
                     dwLeds_l = 0x01;
                 }
-                bLedsRow1_l = (unsigned char) (dwLeds_l & LED_MASK);
-                bLedsRow2_l = (unsigned char) ((dwLeds_l >> LED_COUNT) & LED_MASK);
+                bLedsRow1_l = (unsigned char) (dwLeds_l & APP_LED_MASK);
+                bLedsRow2_l = (unsigned char) ((dwLeds_l >> APP_LED_COUNT) & APP_LED_MASK);
             }
 
             else if ((dwMode_l & 0x04) != 0)
             {   // running light backward
                 dwLeds_l >>= 1;
-                if ((dwLeds_l > DOUBLE_LED_MASK) || (dwLeds_l == 0x00000000L))
+                if ((dwLeds_l > APP_DOUBLE_LED_MASK) || (dwLeds_l == 0x00000000L))
                 {
-                    dwLeds_l = 1 << (LED_COUNT * 2);
+                    dwLeds_l = 1 << (APP_LED_COUNT * 2);
                 }
-                bLedsRow1_l = (unsigned char) (dwLeds_l & LED_MASK);
-                bLedsRow2_l = (unsigned char) ((dwLeds_l >> LED_COUNT) & LED_MASK);
+                bLedsRow1_l = (unsigned char) (dwLeds_l & APP_LED_MASK);
+                bLedsRow2_l = (unsigned char) ((dwLeds_l >> APP_LED_COUNT) & APP_LED_MASK);
             }
 
             else if ((dwMode_l & 0x08) != 0)
@@ -791,11 +797,12 @@ tEplKernel          EplRet = kEplSuccessful;
                 if (bLedsRow1_l == 0x00)
                 {
                     bLedsRow1_l = 0x01;
+                    iToggle = 1;
                 }
                 else if (iToggle)
                 {
                     bLedsRow1_l <<= 1;
-                    if( bLedsRow1_l >= 0x10 )
+                    if ( bLedsRow1_l >= (1 << (APP_LED_COUNT - 1)) )
                     {
                         iToggle = 0;
                     }
@@ -809,6 +816,36 @@ tEplKernel          EplRet = kEplSuccessful;
                     }
                 }
                 bLedsRow2_l = bLedsRow1_l;
+            }
+
+            else if ((dwMode_l & 0x10) != 0)
+            {   // Knightrider
+                if ((bLedsRow1_l == 0x00)
+                    || (bLedsRow2_l == 0x00)
+                    || ((bLedsRow2_l & ~APP_LED_MASK) != 0))
+                {
+                    bLedsRow1_l = 0x01;
+                    bLedsRow2_l = (1 << (APP_LED_COUNT - 1));
+                    iToggle = 1;
+                }
+                else if (iToggle)
+                {
+                    bLedsRow1_l <<= 1;
+                    bLedsRow2_l >>= 1;
+                    if ( bLedsRow1_l >= (1 << (APP_LED_COUNT - 1)) )
+                    {
+                        iToggle = 0;
+                    }
+                }
+                else
+                {
+                    bLedsRow1_l >>= 1;
+                    bLedsRow2_l <<= 1;
+                    if ( bLedsRow1_l <= 0x01 )
+                    {
+                        iToggle = 1;
+                    }
+                }
             }
 
             // set own output

@@ -104,12 +104,16 @@
     #else
         #include <asm/io.h>
     #endif
-    #include <unistd.h>
-    #include <sys/vfs.h>
-    #include <sys/types.h>
-    #include <sys/timeb.h>
-    #include <utime.h>
-    #include <limits.h>
+    #ifdef __KERNEL__
+        #include "PosixFileLinuxKernel.h"
+    #else
+        #include <unistd.h>
+        #include <sys/vfs.h>
+        #include <sys/types.h>
+        #include <sys/timeb.h>
+        #include <utime.h>
+        #include <limits.h>
+    #endif
 
 #elif (DEV_SYSTEM == _DEV_PAR_BECK1X3_)
 
@@ -134,6 +138,14 @@
     #define flush(h)                    // #define flush() to nothing
     #define mode_t int
 
+#endif
+
+#ifndef FD_TYPE
+#define FD_TYPE     int
+#endif
+
+#ifndef IS_FD_VALID
+#define IS_FD_VALID(iFd_p)  ((iFd_p) >= 0)
 #endif
 
 
@@ -204,8 +216,8 @@ typedef struct
     tEplObdCdcType  m_Type;
     union
     {
-        int     m_hCdcFile;
-        BYTE*   m_pbNextBuffer;
+        FD_TYPE     m_hCdcFile;
+        BYTE*       m_pbNextBuffer;
     } m_Handle;
     size_t          m_iCdcSize;
     size_t          m_iBufferSize;
@@ -257,7 +269,7 @@ DWORD           dwErrno;
     EPL_MEMSET(&CdcInfo, 0, sizeof (CdcInfo));
     CdcInfo.m_Type = kEplObdCdcTypeFile;
     CdcInfo.m_Handle.m_hCdcFile = open(pszCdcFilename_p, O_RDONLY | O_BINARY, 0666);
-    if (CdcInfo.m_Handle.m_hCdcFile < 0)
+    if (!IS_FD_VALID(CdcInfo.m_Handle.m_hCdcFile))
     {   // error occurred
         dwErrno = (DWORD) errno;
         Ret = EplEventuPostError(kEplEventSourceObdu, kEplObdErrnoSet, sizeof (dwErrno), &dwErrno);
@@ -349,7 +361,7 @@ Exit:
 static tEplKernel EplObdCdcLoadNextBuffer(tEplObdCdcInfo* pCdcInfo_p, size_t iBufferSize)
 {
 tEplKernel  Ret = kEplSuccessful;
-size_t      iReadSize;
+int         iReadSize;
 BYTE*       pbBuffer;
 
     switch (pCdcInfo_p->m_Type)
@@ -380,6 +392,7 @@ BYTE*       pbBuffer;
             pbBuffer = pCdcInfo_p->m_pbCurBuffer;
             do
             {
+                // warning C4267: 'Funktion': Konvertierung von 'size_t' nach 'unsigned int', Datenverlust möglich
                 iReadSize = read(pCdcInfo_p->m_Handle.m_hCdcFile, pbBuffer, iBufferSize);
                 if (iReadSize <= 0)
                 {

@@ -314,6 +314,8 @@ EPLDLLEXPORT tEplKernel PUBLIC EplApiGetIdentResponse(
                                     unsigned int        uiNodeId_p,
                                     tEplIdentResponse** ppIdentResponse_p);
 
+EPLDLLEXPORT tEplKernel PUBLIC EplApiSetCdcBuffer(BYTE* pbCdc_p, unsigned int uiCdcSize_p);
+EPLDLLEXPORT tEplKernel PUBLIC EplApiSetCdcFilename(char* pszCdcFilename_p);
 
 // functions for process image will be implemented in separate file
 EPLDLLEXPORT tEplKernel PUBLIC EplApiProcessImageSetup(void);
