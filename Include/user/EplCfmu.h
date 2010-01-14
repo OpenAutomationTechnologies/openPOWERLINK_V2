@@ -113,6 +113,8 @@ tEplKernel EplCfmuDelInstance(void);
 
 tEplKernel EplCfmuProcessNodeEvent(unsigned int uiNodeId_p, tEplNmtNodeEvent NodeEvent_p);
 
+BOOL EplCfmuIsSdoRunning(unsigned int uiNodeId_p);
+
 
 #endif
 

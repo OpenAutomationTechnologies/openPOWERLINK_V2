@@ -278,6 +278,10 @@ EPLDLLEXPORT tEplKernel PUBLIC EplApiWriteObject(
 EPLDLLEXPORT tEplKernel PUBLIC EplApiFreeSdoChannel(
             tEplSdoComConHdl SdoComConHdl_p);
 
+EPLDLLEXPORT tEplKernel PUBLIC EplApiAbortSdo(
+            tEplSdoComConHdl SdoComConHdl_p,
+            DWORD            dwAbortCode_p);
+
 EPLDLLEXPORT tEplKernel PUBLIC EplApiReadLocalObject(
             unsigned int      uiIndex_p,
             unsigned int      uiSubindex_p,

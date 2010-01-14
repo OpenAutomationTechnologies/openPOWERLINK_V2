@@ -101,6 +101,7 @@
 //States in Configuration Manager (CFM)
 typedef enum
 {
+    kEplCfmuStateIdle           = 0x00,
     kEplCfmuStateWaitRestore,
     kEplCfmuStateDownload,
     kEplCfmuStateWaitStore,
@@ -119,18 +120,7 @@ typedef struct
     tEplCfmuState       m_CfmState;
     unsigned int        m_uiCurDataSize;
     BOOL                m_fDoStore;
-#if 0
-    DWORD                 dwDataRead;
-    DWORD                 dwMnTime;
-    DWORD                 dwMnDate;
-    WORD                 wDataSize1F22;
-    WORD                 wIndex;
-    WORD                 wSubIndex;
-    WORD                 wDataSize;
 
-    tEplCfmCbConfig      cbCfmConfig;
-    tEplCfmCnStatus         EplCfmStatus;
-#endif
 } tEplCfmuNodeInfo;
 
 
@@ -162,39 +152,6 @@ static tEplCfmuInstance  EplCfmuInstance_g;
 static tEplCfmuNodeInfo* EplCfmuAllocNodeInfo(unsigned int uiNodeId_p);
 
 static tEplKernel EplCfmuCallCbProgress(tEplCfmuNodeInfo* pNodeInfo_p);
-
-#if 0
-//Structure of variables used by each CN
-typedef struct EplCfmCnConfigParams
-{
-    DWORD                 m_uiNodeId;
-    tEplCfmState         CfmState;
-    DWORD                 dwDataRead;
-    DWORD                 dwMnTime;
-    DWORD                 dwMnDate;
-#if (EPL_CFM_CONFIGURE_CYCLE_LENGTH != FALSE)
-    DWORD                 m_le_dwCycleLength;
-#endif
-    WORD                 wDataSize1F22;
-    WORD                 wIndex;
-    WORD                 wSubIndex;
-    WORD                 wDataSize;
-
-    BYTE*                  pbCnData;
-    BYTE*                 pbCnObdBuffer;
-    tEplCfmCbConfig      cbCfmConfig;
-    DWORD                 m_dwBytesRemaining;
-    tEplCfmCnStatus         EplCfmStatus;
-    struct EplCfmCnConfigParams    *pstNextNode;
-} tEplCfmCnConfigParams;
-
-
-static tEplCfmCnConfigParams *pstStartNode = NULL;
-
-tEplCfmCnConfigParams* EplCfmAddCnParamsNode ( DWORD dwNodeId );
-tEplCfmCnConfigParams* EplCfmGetCnParamsNode( DWORD dwNodeId );
-void EplCfmCopyCnParams(tEplCfmCnConfigParams *pstCfmCnParams);
-#endif
 
 static tEplKernel EplCfmuDownloadCycleLength(
             tEplCfmuNodeInfo* pNodeInfo_p);
@@ -462,12 +419,16 @@ BOOL                fDoUpdate = FALSE;
             && ((AmiGetDwordFromLe(&pIdentResponse->m_le_dwVerifyConfigurationDate) == dwExpConfDate)
                 && (AmiGetDwordFromLe(&pIdentResponse->m_le_dwVerifyConfigurationTime) == dwExpConfTime))))
     {
-        pNodeInfo->m_CfmState = kEplCfmuStateUpToDate;
+        pNodeInfo->m_CfmState = kEplCfmuStateIdle;
 
         // current version is already available on the CN, no need to write new values, we can continue
         EPL_DBGLVL_CFM_TRACE1("CN%x - Cfg Upto Date\n", uiNodeId_p);
 
         Ret = EplCfmuDownloadCycleLength(pNodeInfo);
+        if (Ret == kEplReject)
+        {
+            pNodeInfo->m_CfmState = kEplCfmuStateUpToDate;
+        }
     }
     else if (NodeEvent_p == kEplNmtNodeEventUpdateConf)
     {
@@ -505,6 +466,46 @@ BOOL                fDoUpdate = FALSE;
 
 Exit:
     return Ret;
+}
+
+
+//---------------------------------------------------------------------------
+//
+// Function:    EplCfmuIsSdoRunning
+//
+// Description: returns TRUE if a SDO is running for the specified node.
+//
+// Parameters:  uiNodeId_p              = node-ID
+//
+// Returns:     BOOL                    = TRUE, if SDO is running
+//                                        FALSE, otherwise
+//
+// State:
+//
+//---------------------------------------------------------------------------
+
+BOOL EplCfmuIsSdoRunning(unsigned int uiNodeId_p)
+{
+tEplCfmuNodeInfo*   pNodeInfo = NULL;
+BOOL                fSdoRunning = FALSE;
+
+    if ((uiNodeId_p == 0)
+        || (uiNodeId_p > EPL_NMT_MAX_NODE_ID))
+    {
+        goto Exit;
+    }
+    pNodeInfo = EPL_CFMU_GET_NODEINFO(uiNodeId_p);
+    if (pNodeInfo == NULL)
+    {
+        goto Exit;
+    }
+    if (pNodeInfo->m_CfmState != kEplCfmuStateIdle)
+    {
+        fSdoRunning = TRUE;
+    }
+
+Exit:
+    return fSdoRunning;
 }
 
 
@@ -684,6 +685,8 @@ tEplKernel      Ret = kEplSuccessful;
         }
     }
 
+    pNodeInfo_p->m_CfmState = kEplCfmuStateIdle;
+
     if (EplCfmuInstance_g.m_pfnCbEventCnResult != NULL)
     {
         Ret = EplCfmuInstance_g.m_pfnCbEventCnResult(pNodeInfo_p->m_EventCnProgress.m_uiNodeId, NmtCommand_p);
@@ -768,7 +771,7 @@ tEplCfmuNodeInfo*   pNodeInfo = pSdoComFinished_p->m_pUserArg;
         {
             if (pSdoComFinished_p->m_SdoComConState == kEplSdoComTransferFinished)
             {   // configuration successfully restored
-                EPL_DBGLVL_CFM_TRACE1("\nCN%x - Restore Complete. Resetting Node...\n", uiNodeId);
+                EPL_DBGLVL_CFM_TRACE1("\nCN%x - Restore Complete. Resetting Node...\n", pNodeInfo->m_EventCnProgress.m_uiNodeId);
 
                 // send NMT command reset node to activate the original configuration
                 Ret = EplCfmuFinishConfig(pNodeInfo, kEplNmtNodeCommandConfRestored);

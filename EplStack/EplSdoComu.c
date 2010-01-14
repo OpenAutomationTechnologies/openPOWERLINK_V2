@@ -779,6 +779,48 @@ Exit:
 
 }
 #endif
+
+
+//---------------------------------------------------------------------------
+//
+// Function:    EplSdoComGetNodeId
+//
+// Description: returns the remote node-ID which corresponds to the specified handle
+//
+// Parameters:  SdoComConHdl_p    = handle for the connection
+//
+// Returns:     tEplKernel  = errorcode
+//
+// State:
+//
+//---------------------------------------------------------------------------
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOC)) != 0)
+unsigned int PUBLIC EplSdoComGetNodeId(tEplSdoComConHdl  SdoComConHdl_p)
+{
+unsigned int    uiNodeId = EPL_C_ADR_INVALID;
+tEplSdoComCon*  pSdoComCon;
+
+    if(SdoComConHdl_p >= EPL_MAX_SDO_COM_CON)
+    {
+        goto Exit;
+    }
+
+    // get pointer to control structure
+    pSdoComCon = &SdoComInstance_g.m_SdoComCon[SdoComConHdl_p];
+
+    // check if handle ok
+    if(pSdoComCon->m_SdoSeqConHdl == 0)
+    {
+        goto Exit;
+    }
+
+    uiNodeId = pSdoComCon->m_uiNodeId;
+
+Exit:
+    return uiNodeId;
+}
+#endif
+
 //---------------------------------------------------------------------------
 //
 // Function:    EplSdoComSdoAbort

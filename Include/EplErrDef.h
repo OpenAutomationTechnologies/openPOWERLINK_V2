@@ -218,6 +218,7 @@ typedef enum
     kEplApiTaskDeferred         = 0x0140,       // EPL performs task in background and informs the application (or vice-versa), when it is finished
     kEplApiInvalidParam         = 0x0142,       // passed invalid parameters to a function (e.g. invalid node id)
     kEplApiNoObdInitRam         = 0x0143,       // no function pointer for ObdInitRam supplied
+    kEplApiSdoBusyIntern        = 0x0144,       // the SDO channel to this node is internally used by the stack (e.g. the CFM) and currently not available for the application.
 
     // area untill 0x07FF is reserved
     // area for user application from 0x0800 to 0x7FFF

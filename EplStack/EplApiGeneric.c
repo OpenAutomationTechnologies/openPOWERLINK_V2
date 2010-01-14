@@ -858,15 +858,21 @@ tEplKernel      Ret = kEplSuccessful;
     {   // perform SDO transfer
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOC)) != 0)
     tEplSdoComTransParamByIndex TransParamByIndex;
-//    tEplSdoComConHdl            SdoComConHdl;
 
         // check if application provides space for handle
         if (pSdoComConHdl_p == NULL)
         {
             Ret = kEplApiInvalidParam;
             goto Exit;
-//            pSdoComConHdl_p = &SdoComConHdl;
         }
+
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_CFM)) != 0)
+        if (EplCfmuIsSdoRunning(uiNodeId_p))
+        {
+            Ret = kEplApiSdoBusyIntern;
+            goto Exit;
+        }
+#endif
 
         // init command layer connection
         Ret = EplSdoComDefineCon(pSdoComConHdl_p,
@@ -953,24 +959,27 @@ tEplKernel      Ret = kEplSuccessful;
     {   // perform SDO transfer
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOC)) != 0)
     tEplSdoComTransParamByIndex TransParamByIndex;
-//    tEplSdoComConHdl            SdoComConHdl;
 
         // check if application provides space for handle
         if (pSdoComConHdl_p == NULL)
         {
             Ret = kEplApiInvalidParam;
             goto Exit;
-//            pSdoComConHdl_p = &SdoComConHdl;
         }
+
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_CFM)) != 0)
+        if (EplCfmuIsSdoRunning(uiNodeId_p))
+        {
+            Ret = kEplApiSdoBusyIntern;
+            goto Exit;
+        }
+#endif
 
         // d.k.: How to recycle command layer connection?
         //       Try to redefine it, which will return kEplSdoComHandleExists
         //       and the existing command layer handle.
         //       If the returned handle is busy, EplSdoComInitTransferByIndex()
         //       will return with error.
-        // $$$ d.k.: Collisions may occur with Configuration Manager, if both the application and
-        //           Configuration Manager, are trying to communicate with the very same node.
-        //     possible solution: disallow communication by application if Configuration Manager is busy
 
         // init command layer connection
         Ret = EplSdoComDefineCon(pSdoComConHdl_p,
@@ -1011,11 +1020,12 @@ Exit:
 // Function:    EplApiFreeSdoChannel()
 //
 // Description: frees the specified SDO channel.
-//              This function must be called after each call to EplApiReadObject()/EplApiWriteObject()
-//              which returns kEplApiTaskDeferred and the application
-//              is informed via the event callback function when the task is completed.
+//              This function must be called when the SDO channel to a remote node
+//              is not needed anymore. This may be done in the event callback function
+//              when the last SDO transfer to a remote node has completed.
 //
-// Parameters:  SdoComConHdl_p          = IN: SDO connection handle
+// Parameters:  SdoComConHdl_p          = IN: SDO connection handle which is not valid
+//                                        anymore after this call.
 //
 // Return:      tEplKernel              = error code
 //
@@ -1028,9 +1038,57 @@ tEplKernel      Ret = kEplSuccessful;
 
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOC)) != 0)
 
-    // init command layer connection
-    Ret = EplSdoComUndefineCon(SdoComConHdl_p);
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_CFM)) != 0)
+    if (EplCfmuIsSdoRunning(EplSdoComGetNodeId(SdoComConHdl_p)))
+    {
+        Ret = kEplApiSdoBusyIntern;
+    }
+    else
+#endif
+    {
+        // delete command layer connection
+        Ret = EplSdoComUndefineCon(SdoComConHdl_p);
+    }
+#else
+    Ret = kEplApiInvalidParam;
+#endif
 
+    return Ret;
+}
+
+
+// ----------------------------------------------------------------------------
+//
+// Function:    EplApiAbortSdo()
+//
+// Description: aborts the running SDO transfer on the specified SDO channel.
+//
+// Parameters:  SdoComConHdl_p          = IN: SDO connection handle
+//              dwAbortCode_p           = IN: SDO abort code which shall be send
+//                                        to the remote node.
+//
+// Return:      tEplKernel              = error code
+//
+// ----------------------------------------------------------------------------
+
+tEplKernel PUBLIC EplApiAbortSdo(
+            tEplSdoComConHdl SdoComConHdl_p,
+            DWORD            dwAbortCode_p)
+{
+tEplKernel      Ret = kEplSuccessful;
+
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOC)) != 0)
+
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_CFM)) != 0)
+    if (EplCfmuIsSdoRunning(EplSdoComGetNodeId(SdoComConHdl_p)))
+    {
+        Ret = kEplApiSdoBusyIntern;
+    }
+    else
+#endif
+    {
+        Ret = EplSdoComSdoAbort(SdoComConHdl_p, dwAbortCode_p);
+    }
 #else
     Ret = kEplApiInvalidParam;
 #endif
