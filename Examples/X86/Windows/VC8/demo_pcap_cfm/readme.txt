@@ -26,8 +26,14 @@ Requirements
 
 - POWERLINK network with one of the following nodes:
 
-    Node-ID 4:  B&R X20 POWERLINK Controller with the following modules (in this order)
-                X20BC0083 X20 Bus Controller POWERLINK
-                X20PS9400 24 VDC power supply module for BC
-                X20DO2322 2 Outputs 24 VDC / 0.5 A
-                X20DI2371 2 Digital Inputs 24 VDC, Sink, IEC 61131-2, Type 1
+    Node-ID 0x20:   B&R X20 POWERLINK Controller with the following modules (in this order)
+                    X20BC0083 X20 Bus Controller POWERLINK
+                    X20PS9400 24 VDC power supply module for BC
+                    X20DO2322 2 Outputs 24 VDC / 0.5 A
+                    X20DI2371 2 Digital Inputs 24 VDC, Sink, IEC 61131-2, Type 1
+
+    Node-ID 0x6E:   B&R X20 POWERLINK Controller with the following modules (in this order)
+                    X20BC0083 X20 Bus Controller POWERLINK
+                    X20PS9400 24 VDC power supply module for BC
+                    X20DO2322 2 Outputs 24 VDC / 0.5 A
+                    X20DI2371 2 Digital Inputs 24 VDC, Sink, IEC 61131-2, Type 1

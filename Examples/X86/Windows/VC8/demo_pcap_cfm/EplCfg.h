@@ -103,7 +103,7 @@
 // Default defug level:
 // Only debug traces of these modules will be compiled which flags are set in define DEF_DEBUG_LVL.
 #ifndef DEF_DEBUG_LVL
-#define DEF_DEBUG_LVL           0xEC000080L
+#define DEF_DEBUG_LVL           0xEC000084L
 #endif
 //   EPL_DBGLVL_OBD         =   0x00000004L
 // * EPL_DBGLVL_ASSERT      =   0x20000000L
