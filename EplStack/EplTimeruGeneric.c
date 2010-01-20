@@ -128,7 +128,7 @@ typedef struct
 // modul globale vars
 //---------------------------------------------------------------------------
 
-tEplTimeruInstance EplTimeruInstance_g;
+static tEplTimeruInstance EplTimeruInstance_g;
 
 //---------------------------------------------------------------------------
 // local function prototypes
