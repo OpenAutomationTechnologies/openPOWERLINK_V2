@@ -92,7 +92,7 @@
 #define EPL_SDO_HISTORY_SIZE        5
 
 #ifndef EPL_MAX_SDO_SEQ_CON
-#define EPL_MAX_SDO_SEQ_CON         10
+#define EPL_MAX_SDO_SEQ_CON         5
 #endif
 
 #define EPL_SEQ_DEFAULT_TIMEOUT     5000    // in [ms] => 5 sec
