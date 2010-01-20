@@ -3,3 +3,4 @@
 *.mod.c
 Module.symvers
 epl.ko
+epl.map
