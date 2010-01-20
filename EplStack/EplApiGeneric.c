@@ -2321,12 +2321,32 @@ Exit:
     return Ret;
 }
 
+
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
+//---------------------------------------------------------------------------
+//
+// Function:    EplApiGetIdentResponse
+//
+// Description: returns the stored IdentResponse frame of the specified node.
+//
+// Parameters:  uiNodeId_p              = node-ID for which the IdentResponse shall be returned
+//              ppIdentResponse_p       = pointer to pointer to IdentResponse
+//
+// Returns:     tEplKernel              = error code
+//
+//
+// State:
+//
+//---------------------------------------------------------------------------
+
 tEplKernel PUBLIC EplApiGetIdentResponse(
                                     unsigned int        uiNodeId_p,
                                     tEplIdentResponse** ppIdentResponse_p)
 {
     return EplIdentuGetIdentResponse(uiNodeId_p, ppIdentResponse_p);
 }
+#endif
+
 
 //---------------------------------------------------------------------------
 //
