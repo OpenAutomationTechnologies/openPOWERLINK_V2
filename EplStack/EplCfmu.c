@@ -733,7 +733,12 @@ tEplCfmuNodeInfo*   pNodeInfo = pSdoComFinished_p->m_pUserArg;
 
     switch (pNodeInfo->m_CfmState)
     {
-//#if (EPL_CFM_CONFIGURE_CYCLE_LENGTH != FALSE)
+        case kEplCfmuStateIdle:
+        {
+            Ret = EplCfmuFinishConfig(pNodeInfo, kEplNmtNodeCommandConfErr);
+            break;
+        }
+
         case kEplCfmuStateUpToDate:
         {
         tEplNmtCommand NmtCommand;
@@ -751,7 +756,6 @@ tEplCfmuNodeInfo*   pNodeInfo = pSdoComFinished_p->m_pUserArg;
             Ret = EplCfmuFinishConfig(pNodeInfo, NmtCommand);
             break;
         }
-//#endif
 
         case kEplCfmuStateDownload:
         {
