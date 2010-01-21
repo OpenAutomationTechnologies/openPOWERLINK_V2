@@ -8,13 +8,14 @@ ifneq ($(KERNELRELEASE),)
 # create relative path to the openPOWERLINK base directory
 MAINPATH	:= ../../../../..
 MAINDIR	:= $(src)/$(MAINPATH)
+OBJDICT := Api_CN
 
 # include paths
 INCLUDES	:= -I$(MAINDIR)/Include \
 			  -I$(src) \
 			  -I$(MAINDIR)/Target/PLCcore-CF54/Linux/gnu/generic \
 			  -I$(MAINDIR)/SharedBuff \
-			  -I$(MAINDIR)/ObjDicts/Api_CN
+			  -I$(MAINDIR)/ObjDicts/$(OBJDICT)
 
 # object files for kernel object with relative paths
 MODULEOBJS	= $(MAINPATH)/Edrv/Edrv8139.o \
@@ -34,7 +35,7 @@ MODULEOBJS	= $(MAINPATH)/Edrv/Edrv8139.o \
 			  $(MAINPATH)/EplStack/EplTimeruLinuxKernel.o \
 			  $(MAINPATH)/EplStack/EplErrorHandlerk.o \
 			  $(MAINPATH)/EplStack/EplApiGeneric.o \
-			  $(MAINPATH)/ObjDicts/Api_CN/Objdict.o \
+			  $(MAINPATH)/ObjDicts/$(OBJDICT)/Objdict.o \
 			  $(MAINPATH)/EplStack/amix86.o \
 			  $(MAINPATH)/EplStack/VirtualEthernetLinux.o \
 			  $(MAINPATH)/SharedBuff/SharedBuff.o $(MAINPATH)/SharedBuff/ShbIpc-LinuxKernel.o \
