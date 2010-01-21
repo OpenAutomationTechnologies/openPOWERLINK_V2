@@ -209,7 +209,7 @@
         #define EPL_OBD_BEGIN_PART_GENERIC()                                            static  tEplObdEntry  aObdTabGeneric_g[]      = {
         #define EPL_OBD_BEGIN_PART_MANUFACTURER()                                       static  tEplObdEntry  aObdTabManufacturer_g[] = {
         #define EPL_OBD_BEGIN_PART_DEVICE()                                             static  tEplObdEntry  aObdTabDevice_g[]       = {
-        #define EPL_OBD_END_PART()                                                      {EPL_OBD_TABLE_INDEX_END,(tEplObdSubEntryPtr)&dwObd_OBK_g,0,NULL}};
+        #define EPL_OBD_END_PART()                                                      {EPL_OBD_TABLE_INDEX_END,(tEplObdSubEntryPtr)(void*)&dwObd_OBK_g,0,NULL}};
 
         //---------------------------------------------------------------------------------------
         #define EPL_OBD_BEGIN_INDEX_RAM(ind,cnt,call)                                   {ind,(tEplObdSubEntryPtr)&aObdSubEntry##ind##Ram_g[0],cnt,(tEplObdCallback)call},
