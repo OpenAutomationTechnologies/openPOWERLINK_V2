@@ -63,6 +63,8 @@
 				AdditionalDependencies="user32.lib iphlpapi.lib"
 				LinkIncremental="2"
 				GenerateDebugInformation="true"
+				GenerateMapFile="true"
+				MapExports="true"
 				SubSystem="1"
 				TargetMachine="1"
 			/>
@@ -136,6 +138,8 @@
 				AdditionalDependencies="user32.lib iphlpapi.lib"
 				LinkIncremental="0"
 				GenerateDebugInformation="true"
+				GenerateMapFile="true"
+				MapExports="true"
 				SubSystem="1"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
