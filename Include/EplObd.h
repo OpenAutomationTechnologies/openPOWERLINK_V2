@@ -355,9 +355,9 @@ typedef struct
 
 typedef struct
 {
-    tEplObdSize      m_Size;
-    char *    m_pDefString;         // must be same offset as m_pString in tEplObdVString
-    char *    m_pString;
+    tEplObdSize     m_Size;
+    CONST char *    m_pDefString;         // must be same offset as m_pString in tEplObdVString
+    char *          m_pString;
 
 } tEplObdVStringDef;
 
@@ -392,7 +392,7 @@ typedef struct
     unsigned int    m_uiSubIndex;
     tEplObdType     m_Type;
     tEplObdAccess   m_Access;
-    void  *         m_pDefault;
+    CONST void ROM* m_pDefault;
     void  MEM*      m_pCurrent;     // points always to RAM
 
 } tEplObdSubEntry;

@@ -181,7 +181,7 @@ static tEplKernel EplObdAccessOdPartIntern (EPL_MCO_DECL_INSTANCE_PTR_
                             tEplObdEntryPtr pObdEnty_p,
                             tEplObdDir      Direction_p);
 
-static void *   EplObdGetObjectDefaultPtr (tEplObdSubEntryPtr pSubIndexEntry_p);
+static CONST void*     EplObdGetObjectDefaultPtr (tEplObdSubEntryPtr pSubIndexEntry_p);
 static void MEM*       EplObdGetObjectCurrentPtr (tEplObdSubEntryPtr pSubIndexEntry_p);
 
 #if (EPL_OBD_USE_STORE_RESTORE != FALSE)
@@ -193,7 +193,7 @@ static void MEM*       EplObdGetObjectCurrentPtr (tEplObdSubEntryPtr pSubIndexEn
 
 static void EplObdCopyObjectData (
                         void MEM*       pDstData_p,
-                        void *   pSrcData_p,
+                        CONST void *    pSrcData_p,
                         tEplObdSize     ObjSize_p,
                         tEplObdType     ObjType_p);
 
@@ -2587,16 +2587,16 @@ void * pData;
 //
 // Parameters:  pSubIndexEntry_p    = pointer to subindex structure
 //
-// Returns:     (void *)   = pointer to default value
+// Returns:     (CONST void *)      = pointer to default value
 //
 // State:
 //
 //---------------------------------------------------------------------------
 
-static void * EplObdGetObjectDefaultPtr (tEplObdSubEntryPtr pSubIndexEntry_p)
+static CONST void* EplObdGetObjectDefaultPtr (tEplObdSubEntryPtr pSubIndexEntry_p)
 {
 
-void *   pDefault;
+CONST void*     pDefault;
 tEplObdType     Type;
 
     ASSERTMSG (pSubIndexEntry_p != NULL, "EplObdGetObjectDefaultPtr(): pointer to SubEntry not valid!\n");
@@ -2619,11 +2619,11 @@ tEplObdType     Type;
             //    char *    m_pDefString; --> pointer to  default string
             //    char *    m_pString;    --> pointer to string in RAM
             //
-            pDefault = (void *) ((tEplObdVString *) pDefault)->m_pString;
+            pDefault = ((tEplObdVStringDef *) pDefault)->m_pDefString;
         }
         else if(Type == kEplObdTypOString)
         {
-             pDefault = (void *) ((tEplObdOString *) pDefault)->m_pString;
+             pDefault = ((tEplObdOStringDef *) pDefault)->m_pDefString;
         }
     }
 
@@ -3121,7 +3121,7 @@ tEplObdSubEntryPtr          pSubIndex;
 unsigned int                nSubIndexCount;
 tEplObdAccess               Access;
 void MEM*                   pDstData;
-void *               pDefault;
+CONST void*                 pDefault;
 tEplObdSize                 ObjSize;
 tEplKernel                  Ret;
 tEplObdCbStoreParam MEM     CbStore;
@@ -3428,7 +3428,7 @@ Exit:
 
 static void EplObdCopyObjectData (
             void MEM*           pDstData_p,
-            void *              pSrcData_p,
+            CONST void *        pSrcData_p,
             tEplObdSize         ObjSize_p,
             tEplObdType         ObjType_p)
 {
@@ -3578,16 +3578,16 @@ tEplObdAccess Access;
     Access = pSubindexEntry_p->m_Access;
 
     // If object has access type = const,
-    // for data only exists default values.
+    // only the default value exists.
     if ((Access & kEplObdAccConst) != 0)
     {
-        // The pointer to defualt value can be received from ObdGetObjectDefaultPtr()
+        // The pointer to default value can be received from ObdGetObjectDefaultPtr()
         pData = ((void *) EplObdGetObjectDefaultPtr (pSubindexEntry_p));
     }
     else
     {
         // The pointer to current value can be received from ObdGetObjectCurrentPtr()
-        pData = ((void *) EplObdGetObjectCurrentPtr (pSubindexEntry_p));
+        pData = EplObdGetObjectCurrentPtr (pSubindexEntry_p);
     }
 
     return pData;
