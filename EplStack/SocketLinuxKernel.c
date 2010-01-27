@@ -68,7 +68,7 @@
 
 ****************************************************************************/
 
-
+#include <linux/version.h>
 #include <linux/net.h>
 #include <linux/in.h>
 #include "SocketLinuxKernel.h"
@@ -172,24 +172,30 @@ int listen(SOCKET socket_p, int backlog)
 {
 int rc;
 
+#if LINUX_VERSION_CODE > KERNEL_VERSION(2, 6, 10)
     rc = kernel_listen(socket_p, backlog);
+#else
+    rc = -1;
+#endif
 
     return rc;
 }
 
 SOCKET accept(SOCKET socket_p, struct sockaddr *addr, int* addrlen)
 {
-int rc;
 SOCKET newsocket;
+#if LINUX_VERSION_CODE > KERNEL_VERSION(2, 6, 10)
+int rc;
 
     rc = kernel_accept(socket_p, &newsocket, 0);
     if (rc < 0)
     {
         newsocket = NULL;
-        goto Exit;
     }
+#else
+    newsocket = NULL;
+#endif
 
-Exit:
     return newsocket;
 }
 
