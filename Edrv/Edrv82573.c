@@ -5,7 +5,8 @@
 
   Project:      openPOWERLINK
 
-  Description:  Ethernet driver for Realtek RTL8139 chips (revision C, C+, D)
+  Description:  Ethernet driver for Intel 82573 Gigabit Ethernet Controller
+                and compatible.
 
   License:
 
@@ -115,90 +116,92 @@
 #define EDRV_MAX_TX_BUFFERS     20
 #endif
 
-#if 0
+#ifndef EDRV_MAX_TX_DESCS
+#define EDRV_MAX_TX_DESCS       16
+#endif
+
 #define EDRV_MAX_FRAME_SIZE     0x600
 
 #define EDRV_RX_BUFFER_SIZE     0x8610  // 32 kB + 16 Byte + 1,5 kB (WRAP is enabled)
 #define EDRV_RX_BUFFER_LENGTH   (EDRV_RX_BUFFER_SIZE & 0xF800)  // buffer size cut down to 2 kB alignment
 
 #define EDRV_TX_BUFFER_SIZE     (EDRV_MAX_TX_BUFFERS * EDRV_MAX_FRAME_SIZE) // n * (MTU + 14 + 4)
-#endif
+#define EDRV_TX_DESCS_SIZE      (EDRV_MAX_TX_DESCS * sizeof (tEdrvTxDesc))
+
+
+#define EDRV_AUTO_READ_DONE_TIMEOUT 10  // ms
+#define EDRV_MASTER_DISABLE_TIMEOUT 90  // ms
+
 
 #define DRV_NAME                "epl"
 
+// Tx descriptor definitions
+#define EDRV_TX_DESC_CMD_RS     0x08000000  // Report Status
+#define EDRV_TX_DESC_CMD_IFCS   0x02000000  // Insert Frame Check Sum
+#define EDRV_TX_DESC_CMD_EOP    0x01000000  // End of Packet
+#define EDRV_TX_DESC_CMD_DEF    (EDRV_TX_DESC_CMD_EOP \
+                               | EDRV_TX_DESC_CMD_IFCS \
+                               | EDRV_TX_DESC_CMD_RS)
+#define EDRV_TX_DESC_STATUS_DD  0x01        // Descriptor Done
+#define EDRV_TX_DESC_STATUS_EC  0x02        // Excess Collisions
+#define EDRV_TX_DESC_STATUS_LC  0x04        // Late Collision
 
-//#define EDRV_REGW_INT_MASK      0x3C    // interrupt mask register
-//#define EDRV_REGW_INT_STATUS    0x3E    // interrupt status register
-//#define EDRV_REGW_INT_ROK       0x0001  // Receive OK interrupt
-//#define EDRV_REGW_INT_RER       0x0002  // Receive error interrupt
-//#define EDRV_REGW_INT_TOK       0x0004  // Transmit OK interrupt
-//#define EDRV_REGW_INT_TER       0x0008  // Transmit error interrupt
-//#define EDRV_REGW_INT_RXOVW     0x0010  // Rx buffer overflow interrupt
-//#define EDRV_REGW_INT_PUN       0x0020  // Packet underrun/ link change interrupt
-//#define EDRV_REGW_INT_FOVW      0x0040  // Rx FIFO overflow interrupt
-//#define EDRV_REGW_INT_LENCHG    0x2000  // Cable length change interrupt
-//#define EDRV_REGW_INT_TIMEOUT   0x4000  // Time out interrupt
-//#define EDRV_REGW_INT_SERR      0x8000  // System error interrupt
-/*#define EDRV_REGW_INT_MASK_DEF  (EDRV_REGW_INT_ROK \
-                                 | EDRV_REGW_INT_RER \
-                                 | EDRV_REGW_INT_TOK \
-                                 | EDRV_REGW_INT_TER \
-                                 | EDRV_REGW_INT_RXOVW \
-                                 | EDRV_REGW_INT_FOVW \
-                                 | EDRV_REGW_INT_PUN \
-                                 | EDRV_REGW_INT_TIMEOUT \
-                                 | EDRV_REGW_INT_SERR)   // default interrupt mask
-*/
-//#define EDRV_REGB_COMMAND       0x37    // command register
-//#define EDRV_REGB_COMMAND_RST   0x10
-//#define EDRV_REGB_COMMAND_RE    0x08
-//#define EDRV_REGB_COMMAND_TE    0x04
-//#define EDRV_REGB_COMMAND_BUFE  0x01
-//
-//#define EDRV_REGB_CMD9346       0x50    // 93C46 command register
-//#define EDRV_REGB_CMD9346_LOCK  0x00    // lock configuration registers
-//#define EDRV_REGB_CMD9346_UNLOCK 0xC0   // unlock configuration registers
-//
-//#define EDRV_REGDW_RCR          0x44    // Rx configuration register
-//#define EDRV_REGDW_RCR_NO_FTH   0x0000E000  // no receive FIFO threshold
-//#define EDRV_REGDW_RCR_RBLEN32K 0x00001000  // 32 kB receive buffer
-//#define EDRV_REGDW_RCR_MXDMAUNL 0x00000700  // unlimited maximum DMA burst size
-//#define EDRV_REGDW_RCR_NOWRAP   0x00000080  // do not wrap frame at end of buffer
-//#define EDRV_REGDW_RCR_AER      0x00000020  // accept error frames (CRC, alignment, collided)
-//#define EDRV_REGDW_RCR_AR       0x00000010  // accept runt
-//#define EDRV_REGDW_RCR_AB       0x00000008  // accept broadcast frames
-//#define EDRV_REGDW_RCR_AM       0x00000004  // accept multicast frames
-//#define EDRV_REGDW_RCR_APM      0x00000002  // accept physical match frames
-//#define EDRV_REGDW_RCR_AAP      0x00000001  // accept all frames
-#if 0
-#define EDRV_REGDW_RCR_DEF      (EDRV_REGDW_RCR_NO_FTH \
-                                 | EDRV_REGDW_RCR_RBLEN32K \
-                                 | EDRV_REGDW_RCR_MXDMAUNL \
-                                 | EDRV_REGDW_RCR_NOWRAP \
-                                 | EDRV_REGDW_RCR_AB \
-                                 | EDRV_REGDW_RCR_AM \
-                                 | EDRV_REGDW_RCR_AAP /* promiscuous mode */ \
-                                 | EDRV_REGDW_RCR_APM)  // default value
-#endif
 
-//#define EDRV_REGDW_TCR          0x40    // Tx configuration register
-//#define EDRV_REGDW_TCR_VER_MASK 0x7CC00000  // mask for hardware version
-//#define EDRV_REGDW_TCR_VER_C    0x74000000  // RTL8139C
-//#define EDRV_REGDW_TCR_VER_CP   0x74800000  // RTL8139C+
-//#define EDRV_REGDW_TCR_VER_D    0x74400000  // RTL8139D
-//#define EDRV_REGDW_TCR_VER_B    0x78000000  // RTL8139B
-//#define EDRV_REGDW_TCR_IFG96    0x03000000  // default interframe gap (960 ns)
-//#define EDRV_REGDW_TCR_CRC      0x00010000  // disable appending of CRC by the controller
-//#define EDRV_REGDW_TCR_MXDMAUNL 0x00000700  // maximum DMA burst size of 2048 b
-//#define EDRV_REGDW_TCR_TXRETRY  0x00000000  // 16 retries
-/*#define EDRV_REGDW_TCR_DEF      (EDRV_REGDW_TCR_IFG96 \
-                                 | EDRV_REGDW_TCR_MXDMAUNL \
-                                 | EDRV_REGDW_TCR_TXRETRY)
-*/
-//#define EDRV_REGW_MULINT        0x5C    // multiple interrupt select register
-//
-//#define EDRV_REGDW_MPC          0x4C    // missed packet counter register
-//
+// Ethernet Controller Register Definitions
+#define EDRV_REGDW_CTRL         0x00000     // Device Control
+#define EDRV_REGDW_CTRL_FD      0x00000001  // Full-Duplex
+#define EDRV_REGDW_CTRL_MST_DIS 0x00000004  // GIO Master Disable
+#define EDRV_REGDW_CTRL_LRST    0x00000008  // Link Reset
+#define EDRV_REGDW_CTRL_SLU     0x00000040  // Set Link Up
+#define EDRV_REGDW_CTRL_RST     0x04000000  // Reset
+#define EDRV_REGDW_CTRL_PHY_RST 0x80000000  // PHY Reset
+
+#define EDRV_REGDW_CTRL_DEF     (EDRV_REGDW_CTRL_LRST \
+                               | EDRV_REGDW_CTRL_SLU)
+
+#define EDRV_REGDW_STATUS       0x00008     // Device Status
+#define EDRV_REGDW_STATUS_MST_EN 0x00080000 // GIO Master Enable Status
+
+#define EDRV_REGDW_EEC          0x00010     // EEPROM Control Register
+#define EDRV_REGDW_EEC_AUTO_RD  0x00000200  // Auto Read Done
+
+#define EDRV_REGDW_ICR          0x000C0     // Interrupt Cause Read
+#define EDRV_REGDW_IMS          0x000D0     // Interrupt Mask Set/Read
+#define EDRV_REGDW_IMC          0x000D8     // Interrupt Mask Clear
+#define EDRV_REGDW_INT_MASK_ALL 0xFFFFFFFF  // mask all interrupts
+#define EDRV_REGDW_INT_TXDW     0x00000001  // Transmit Descriptor Written Back
+#define EDRV_REGDW_INT_TXQE     0x00000002  // Transmit Descriptor Queue Empty
+#define EDRV_REGDW_INT_LSC      0x00000004  // Link Status Change
+#define EDRV_REGDW_INT_RXSEQ    0x00000008  // Receive Sequence Error
+#define EDRV_REGDW_INT_RXO      0x00000040  // Receiver Overrun
+#define EDRV_REGDW_INT_TXD_LOW  0x00008000  // Transmit Descriptor Low Threshold hit
+#define EDRV_REGDW_INT_MASK_DEF (EDRV_REGDW_INT_TXDW)   // default interrupt mask
+
+#define EDRV_REGDW_TIPG         0x000410    // Transmit Inter Packet Gap
+#define EDRV_REGDW_TIPG_DEF     0x00702008  // default according to Intel PCIe GbE Controllers Open Source Software Developer's Manual
+
+#define EDRV_REGDW_TXDCTL       0x003828    // Transmit Descriptor Control
+#define EDRV_REGDW_TXDCTL_GRAN  0x01000000  // Granularity (1=Descriptor, 0=Cache line)
+//#define EDRV_REGDW_TXDCTL_WTHRESH 0x01000000  // Write Back Threshold
+#define EDRV_REGDW_TXDCTL_DEF   (EDRV_REGDW_TXDCTL_GRAN)
+
+#define EDRV_REGDW_TCTL         0x000400    // Transmit Control
+#define EDRV_REGDW_TCTL_EN      0x00000002  // Transmit Enable
+#define EDRV_REGDW_TCTL_PSP     0x00000008  // Pad Short Packets
+#define EDRV_REGDW_TCTL_CT      0x000000F0  // Collision Threshold
+#define EDRV_REGDW_TCTL_COLD    0x0003F000  // Collision Distance
+#define EDRV_REGDW_TCTL_DEF     (EDRV_REGDW_TCTL_EN \
+                               | EDRV_REGDW_TCTL_PSP \
+                               | EDRV_REGDW_TCTL_CT \
+                               | EDRV_REGDW_TCTL_COLD)
+
+#define EDRV_REGDW_TDBAL        0x003800    // Transmit Descriptor Base Adress Low
+#define EDRV_REGDW_TDBAH        0x003804    // Transmit Descriptor Base Adress High
+#define EDRV_REGDW_TDLEN        0x003808    // Transmit Descriptor Length
+#define EDRV_REGDW_TDH          0x003810    // Transmit Descriptor Head
+#define EDRV_REGDW_TDT          0x003818    // Transmit Descriptor Tail
+
+
 //#define EDRV_REGDW_TSAD0        0x20    // Transmit start address of descriptor 0
 //#define EDRV_REGDW_TSAD1        0x24    // Transmit start address of descriptor 1
 //#define EDRV_REGDW_TSAD2        0x28    // Transmit start address of descriptor 2
@@ -219,10 +222,6 @@
 #define EDRV_REGDW_RAL0         0x05400     // Receive Address Low
 #define EDRV_REGDW_RAH0         0x05404     // Receive Address HIGH
 
-//#define EDRV_REGDW_MAR0         0x08    // Multicast address register 0
-//#define EDRV_REGDW_MAR4         0x0C    // Multicast address register 4
-//
-//
 //// defines for the status word in the receive buffer
 //#define EDRV_RXSTAT_MAR         0x8000  // Multicast address received
 //#define EDRV_RXSTAT_PAM         0x4000  // Physical address matched
@@ -235,60 +234,60 @@
 //#define EDRV_RXSTAT_ROK         0x0001  // Receive OK
 //
 //
-//#define EDRV_REGDW_WRITE(dwReg, dwVal)  writel(dwVal, EdrvInstance_l.m_pIoAddr + dwReg)
+#define EDRV_REGDW_WRITE(dwReg, dwVal)  writel(dwVal, EdrvInstance_l.m_pIoAddr + dwReg)
 //#define EDRV_REGW_WRITE(dwReg, wVal)    writew(wVal, EdrvInstance_l.m_pIoAddr + dwReg)
 //#define EDRV_REGB_WRITE(dwReg, bVal)    writeb(bVal, EdrvInstance_l.m_pIoAddr + dwReg)
 #define EDRV_REGDW_READ(dwReg)          readl(EdrvInstance_l.m_pIoAddr + dwReg)
 //#define EDRV_REGW_READ(dwReg)           readw(EdrvInstance_l.m_pIoAddr + dwReg)
 //#define EDRV_REGB_READ(dwReg)           readb(EdrvInstance_l.m_pIoAddr + dwReg)
-//
-//
-//// TracePoint support for realtime-debugging
-//#ifdef _DBG_TRACE_POINTS_
-//    void  PUBLIC  TgtDbgSignalTracePoint (BYTE bTracePointNumber_p);
-//    void  PUBLIC  TgtDbgPostTraceValue (DWORD dwTraceValue_p);
-//    #define TGT_DBG_SIGNAL_TRACE_POINT(p)   TgtDbgSignalTracePoint(p)
-//    #define TGT_DBG_POST_TRACE_VALUE(v)     TgtDbgPostTraceValue(v)
-//#else
-//    #define TGT_DBG_SIGNAL_TRACE_POINT(p)
-//    #define TGT_DBG_POST_TRACE_VALUE(v)
-//#endif
-//
-//#define EDRV_COUNT_SEND                 TGT_DBG_SIGNAL_TRACE_POINT(2)
-//#define EDRV_COUNT_TIMEOUT              TGT_DBG_SIGNAL_TRACE_POINT(3)
-//#define EDRV_COUNT_PCI_ERR              TGT_DBG_SIGNAL_TRACE_POINT(4)
-//#define EDRV_COUNT_TX                   TGT_DBG_SIGNAL_TRACE_POINT(5)
-//#define EDRV_COUNT_RX                   TGT_DBG_SIGNAL_TRACE_POINT(6)
-//#define EDRV_COUNT_LATECOLLISION        TGT_DBG_SIGNAL_TRACE_POINT(10)
-//#define EDRV_COUNT_TX_COL_RL            TGT_DBG_SIGNAL_TRACE_POINT(11)
-//#define EDRV_COUNT_TX_FUN               TGT_DBG_SIGNAL_TRACE_POINT(12)
-//#define EDRV_COUNT_TX_ERR               TGT_DBG_SIGNAL_TRACE_POINT(13)
-//#define EDRV_COUNT_RX_CRC               TGT_DBG_SIGNAL_TRACE_POINT(14)
-//#define EDRV_COUNT_RX_ERR               TGT_DBG_SIGNAL_TRACE_POINT(15)
-//#define EDRV_COUNT_RX_FOVW              TGT_DBG_SIGNAL_TRACE_POINT(16)
-//#define EDRV_COUNT_RX_PUN               TGT_DBG_SIGNAL_TRACE_POINT(17)
-//#define EDRV_COUNT_RX_FAE               TGT_DBG_SIGNAL_TRACE_POINT(18)
-//#define EDRV_COUNT_RX_OVW               TGT_DBG_SIGNAL_TRACE_POINT(19)
-//
-//#define EDRV_TRACE_CAPR(x)              TGT_DBG_POST_TRACE_VALUE(((x) & 0xFFFF) | 0x06000000)
-//#define EDRV_TRACE_RX_CRC(x)            TGT_DBG_POST_TRACE_VALUE(((x) & 0xFFFF) | 0x0E000000)
-//#define EDRV_TRACE_RX_ERR(x)            TGT_DBG_POST_TRACE_VALUE(((x) & 0xFFFF) | 0x0F000000)
-//#define EDRV_TRACE_RX_PUN(x)            TGT_DBG_POST_TRACE_VALUE(((x) & 0xFFFF) | 0x11000000)
-//#define EDRV_TRACE(x)                   TGT_DBG_POST_TRACE_VALUE(((x) & 0xFFFF0000) | 0x0000FEC0)
+
+
+// TracePoint support for realtime-debugging
+#ifdef _DBG_TRACE_POINTS_
+    void  PUBLIC  TgtDbgSignalTracePoint (BYTE bTracePointNumber_p);
+    void  PUBLIC  TgtDbgPostTraceValue (DWORD dwTraceValue_p);
+    #define TGT_DBG_SIGNAL_TRACE_POINT(p)   TgtDbgSignalTracePoint(p)
+    #define TGT_DBG_POST_TRACE_VALUE(v)     TgtDbgPostTraceValue(v)
+#else
+    #define TGT_DBG_SIGNAL_TRACE_POINT(p)
+    #define TGT_DBG_POST_TRACE_VALUE(v)
+#endif
+
+#define EDRV_COUNT_SEND                 TGT_DBG_SIGNAL_TRACE_POINT(2)
+#define EDRV_COUNT_TIMEOUT              TGT_DBG_SIGNAL_TRACE_POINT(3)
+#define EDRV_COUNT_PCI_ERR              TGT_DBG_SIGNAL_TRACE_POINT(4)
+#define EDRV_COUNT_TX                   TGT_DBG_SIGNAL_TRACE_POINT(5)
+#define EDRV_COUNT_RX                   TGT_DBG_SIGNAL_TRACE_POINT(6)
+#define EDRV_COUNT_LATECOLLISION        TGT_DBG_SIGNAL_TRACE_POINT(10)
+#define EDRV_COUNT_TX_COL_RL            TGT_DBG_SIGNAL_TRACE_POINT(11)
+#define EDRV_COUNT_TX_FUN               TGT_DBG_SIGNAL_TRACE_POINT(12)
+#define EDRV_COUNT_TX_ERR               TGT_DBG_SIGNAL_TRACE_POINT(13)
+#define EDRV_COUNT_RX_CRC               TGT_DBG_SIGNAL_TRACE_POINT(14)
+#define EDRV_COUNT_RX_ERR               TGT_DBG_SIGNAL_TRACE_POINT(15)
+#define EDRV_COUNT_RX_FOVW              TGT_DBG_SIGNAL_TRACE_POINT(16)
+#define EDRV_COUNT_RX_PUN               TGT_DBG_SIGNAL_TRACE_POINT(17)
+#define EDRV_COUNT_RX_FAE               TGT_DBG_SIGNAL_TRACE_POINT(18)
+#define EDRV_COUNT_RX_OVW               TGT_DBG_SIGNAL_TRACE_POINT(19)
+
+#define EDRV_TRACE_CAPR(x)              TGT_DBG_POST_TRACE_VALUE(((x) & 0xFFFF) | 0x06000000)
+#define EDRV_TRACE_RX_CRC(x)            TGT_DBG_POST_TRACE_VALUE(((x) & 0xFFFF) | 0x0E000000)
+#define EDRV_TRACE_RX_ERR(x)            TGT_DBG_POST_TRACE_VALUE(((x) & 0xFFFF) | 0x0F000000)
+#define EDRV_TRACE_RX_PUN(x)            TGT_DBG_POST_TRACE_VALUE(((x) & 0xFFFF) | 0x11000000)
+#define EDRV_TRACE(x)                   TGT_DBG_POST_TRACE_VALUE(((x) & 0xFFFF0000) | 0x0000FEC0)
 
 
 //---------------------------------------------------------------------------
 // local types
 //---------------------------------------------------------------------------
-/*
-typedef struct
-{
-    BOOL            m_fUsed;
-    unsigned int    m_uiSize;
-    MCD_bufDescFec *m_pBufDescr;
 
-} tEdrvTxBufferIntern;
-*/
+typedef
+{
+    QWORD               m_le_qwBufferAddr;
+    DWORD               m_le_dwLengthCmd;
+    DWORD               m_le_dwStatus;
+
+} tEdrvTxDesc;
+
 
 // Private structure
 typedef struct
@@ -299,8 +298,11 @@ typedef struct
     dma_addr_t          m_pRxBufDma;
     BYTE*               m_pbTxBuf;      // pointer to Tx buffer
     dma_addr_t          m_pTxBufDma;
+    tEdrvTxDesc*        m_pTxDesc;      // pointer to Tx descriptors
+    dma_addr_t          m_pTxDescDma;
     BOOL                m_afTxBufUsed[EDRV_MAX_TX_BUFFERS];
-    unsigned int        m_uiCurTxDesc;
+    unsigned int        m_uiTailTxDesc;
+    unsigned int        m_uiHeadTxDesc;
 
     tEdrvInitParam      m_InitParam;
     tEdrvTxBuffer*      m_pLastTransmittedTxBuffer;
@@ -676,9 +678,9 @@ unsigned int uiBufferNumber;
 //---------------------------------------------------------------------------
 tEplKernel EdrvSendTxMsg              (tEdrvTxBuffer * pBuffer_p)
 {
-tEplKernel Ret = kEplSuccessful;
-unsigned int uiBufferNumber;
-DWORD       dwTemp;
+tEplKernel      Ret = kEplSuccessful;
+unsigned int    uiBufferNumber;
+tEdrvTxDesc*    pTxDesc;
 
     uiBufferNumber = pBuffer_p->m_uiBufferNumber;
 
@@ -692,9 +694,6 @@ DWORD       dwTemp;
     if (EdrvInstance_l.m_pLastTransmittedTxBuffer != NULL)
     {   // transmission is already active
         Ret = kEplInvalidOperation;
-        dwTemp = EDRV_REGDW_READ((EDRV_REGDW_TSD0 + (EdrvInstance_l.m_uiCurTxDesc * sizeof (DWORD))));
-        printk("%s InvOp TSD%u = 0x%08lX", __FUNCTION__, EdrvInstance_l.m_uiCurTxDesc, (ULONG) dwTemp);
-        printk("  Cmd = 0x%02X\n", (WORD) EDRV_REGB_READ(EDRV_REGB_COMMAND));
         goto Exit;
     }
 
@@ -703,22 +702,20 @@ DWORD       dwTemp;
 
     EDRV_COUNT_SEND;
 
-    // pad with zeros if necessary, because controller does not do it
-    if (pBuffer_p->m_uiTxMsgLen < MIN_ETH_SIZE)
+    pTxDesc = &EdrvInstance_l.m_pTxDesc[EdrvInstance_l.m_uiTailTxDesc];
+    pTxDesc->m_le_qwBufferAddr = EdrvInstance_l.m_pTxBufDma + (uiBufferNumber * EDRV_MAX_FRAME_SIZE);
+    pTxDesc->m_le_dwStatus = 0;
+    pTxDesc->m_le_dwLengthCmd = ((DWORD) pBuffer_p->m_uiTxMsgLen) | EDRV_TX_DESC_CMD_DEF;
+
+    // increment Tx descriptor queue tail pointer
+    EdrvInstance_l.m_uiTailTxDesc++;
+    if (EdrvInstance_l.m_uiTailTxDesc >= EDRV_MAX_TX_DESCS)
     {
-        EPL_MEMSET(pBuffer_p->m_pbBuffer + pBuffer_p->m_uiTxMsgLen, 0, MIN_ETH_SIZE - pBuffer_p->m_uiTxMsgLen);
-        pBuffer_p->m_uiTxMsgLen = MIN_ETH_SIZE;
+        EdrvInstance_l.m_uiTailTxDesc = 0;
     }
 
-    // set DMA address of buffer
-    EDRV_REGDW_WRITE((EDRV_REGDW_TSAD0 + (EdrvInstance_l.m_uiCurTxDesc * sizeof (DWORD))), (EdrvInstance_l.m_pTxBufDma + (uiBufferNumber * EDRV_MAX_FRAME_SIZE)));
-    dwTemp = EDRV_REGDW_READ((EDRV_REGDW_TSAD0 + (EdrvInstance_l.m_uiCurTxDesc * sizeof (DWORD))));
-//    printk("%s TSAD%u = 0x%08lX", __FUNCTION__, EdrvInstance_l.m_uiCurTxDesc, dwTemp);
-
     // start transmission
-    EDRV_REGDW_WRITE((EDRV_REGDW_TSD0 + (EdrvInstance_l.m_uiCurTxDesc * sizeof (DWORD))), (EDRV_REGDW_TSD_TXTH_DEF | pBuffer_p->m_uiTxMsgLen));
-    dwTemp = EDRV_REGDW_READ((EDRV_REGDW_TSD0 + (EdrvInstance_l.m_uiCurTxDesc * sizeof (DWORD))));
-//    printk(" TSD%u = 0x%08lX / 0x%08lX\n", EdrvInstance_l.m_uiCurTxDesc, dwTemp, (DWORD)(EDRV_REGDW_TSD_TXTH_DEF | pBuffer_p->m_uiTxMsgLen));
+    EDRV_REGDW_WRITE(EDRV_REGDW_TDT, EdrvInstance_l.m_uiTailTxDesc);
 
 Exit:
     return Ret;
@@ -830,7 +827,8 @@ static int TgtEthIsr (int nIrqNum_p, void* ppDevInstData_p, struct pt_regs* ptRe
 //    EdrvInterruptHandler();
 tEdrvRxBuffer   RxBuffer;
 tEdrvTxBuffer*  pTxBuffer;
-WORD            wStatus;
+tEdrvTxDesc*    pTxDesc;
+DWORD           dwStatus;
 DWORD           dwTxStatus;
 DWORD           dwRxStatus;
 WORD            wCurRx;
@@ -841,19 +839,16 @@ int             iHandled = IRQ_HANDLED;
 //    printk("�");
 
     // read the interrupt status
-    wStatus = EDRV_REGW_READ(EDRV_REGW_INT_STATUS);
+    dwStatus = EDRV_REGDW_READ(EDRV_REGDW_ICR);
 
-    // acknowledge the interrupts
-    EDRV_REGW_WRITE(EDRV_REGW_INT_STATUS, wStatus);
-
-    if (wStatus == 0)
+    if (dwStatus == 0)
     {
         iHandled = IRQ_NONE;
         goto Exit;
     }
 
     // process tasks
-    if ((wStatus & (EDRV_REGW_INT_TER | EDRV_REGW_INT_TOK)) != 0)
+    if ((dwStatus & EDRV_REGDW_INT_TXDW) != 0)
     {   // transmit interrupt
 
         if (EdrvInstance_l.m_pbTxBuf == NULL)
@@ -862,25 +857,32 @@ int             iHandled = IRQ_HANDLED;
             goto Exit;
         }
 
+        pTxDesc = &EdrvInstance_l.m_pTxDesc[EdrvInstance_l.m_uiHeadTxDesc];
         // read transmit status
-        dwTxStatus = EDRV_REGDW_READ((EDRV_REGDW_TSD0 + (EdrvInstance_l.m_uiCurTxDesc * sizeof (DWORD))));
-        if ((dwTxStatus & (EDRV_REGDW_TSD_TOK | EDRV_REGDW_TSD_TABT | EDRV_REGDW_TSD_TUN)) != 0)
+        dwTxStatus = pTxDesc->m_le_dwStatus;
+        if ((dwTxStatus & EDRV_TX_DESC_STATUS_DD) != 0)
         {   // transmit finished
-            EdrvInstance_l.m_uiCurTxDesc = (EdrvInstance_l.m_uiCurTxDesc + 1) & 0x03;
+            // increment Tx descriptor queue head pointer
+            EdrvInstance_l.m_uiHeadTxDesc++;
+            if (EdrvInstance_l.m_uiHeadTxDesc >= EDRV_MAX_TX_DESCS)
+            {
+                EdrvInstance_l.m_uiHeadTxDesc = 0;
+            }
+
             pTxBuffer = EdrvInstance_l.m_pLastTransmittedTxBuffer;
             EdrvInstance_l.m_pLastTransmittedTxBuffer = NULL;
 
-            if ((dwTxStatus & EDRV_REGDW_TSD_TOK) != 0)
+            if ((dwTxStatus & EDRV_TX_DESC_STATUS_EC) != 0)
             {
-                EDRV_COUNT_TX;
+                EDRV_COUNT_TX_COL_RL;
             }
-            else if ((dwTxStatus & EDRV_REGDW_TSD_TUN) != 0)
+            else if ((dwTxStatus & EDRV_TX_DESC_STATUS_LC) != 0)
             {
-                EDRV_COUNT_TX_FUN;
+                EDRV_COUNT_LATECOLLISION;
             }
             else
-            {   // assume EDRV_REGDW_TSD_TABT
-                EDRV_COUNT_TX_COL_RL;
+            {
+                EDRV_COUNT_TX;
             }
 
 //            printk("T");
@@ -895,26 +897,26 @@ int             iHandled = IRQ_HANDLED;
             EDRV_COUNT_TX_ERR;
         }
     }
-
-    if ((wStatus & (EDRV_REGW_INT_RER | EDRV_REGW_INT_FOVW | EDRV_REGW_INT_RXOVW | EDRV_REGW_INT_PUN)) != 0)
+#if 0
+    if ((dwStatus & (EDRV_REGW_INT_RER | EDRV_REGW_INT_FOVW | EDRV_REGW_INT_RXOVW | EDRV_REGW_INT_PUN)) != 0)
     {   // receive error interrupt
 
-        if ((wStatus & EDRV_REGW_INT_FOVW) != 0)
+        if ((dwStatus & EDRV_REGW_INT_FOVW) != 0)
         {
             EDRV_COUNT_RX_FOVW;
         }
-        else if ((wStatus & EDRV_REGW_INT_RXOVW) != 0)
+        else if ((dwStatus & EDRV_REGW_INT_RXOVW) != 0)
         {
             EDRV_COUNT_RX_OVW;
         }
-        else if ((wStatus & EDRV_REGW_INT_PUN) != 0)
+        else if ((dwStatus & EDRV_REGW_INT_PUN) != 0)
         {   // Packet underrun
-            EDRV_TRACE_RX_PUN(wStatus);
+            EDRV_TRACE_RX_PUN(dwStatus);
             EDRV_COUNT_RX_PUN;
         }
-        else /*if ((wStatus & EDRV_REGW_INT_RER) != 0)*/
+        else /*if ((dwStatus & EDRV_REGW_INT_RER) != 0)*/
         {
-            EDRV_TRACE_RX_ERR(wStatus);
+            EDRV_TRACE_RX_ERR(dwStatus);
             EDRV_COUNT_RX_ERR;
         }
 
@@ -922,7 +924,7 @@ int             iHandled = IRQ_HANDLED;
         EdrvReinitRx();
     }
 
-    if ((wStatus & EDRV_REGW_INT_ROK) != 0)
+    if ((dwStatus & EDRV_REGW_INT_ROK) != 0)
     {   // receive interrupt
 
         if (EdrvInstance_l.m_pbRxBuf == NULL)
@@ -998,16 +1000,16 @@ int             iHandled = IRQ_HANDLED;
         }
     }
 
-    if ((wStatus & EDRV_REGW_INT_SERR) != 0)
+    if ((dwStatus & EDRV_REGW_INT_SERR) != 0)
     {   // PCI error
         EDRV_COUNT_PCI_ERR;
     }
 
-    if ((wStatus & EDRV_REGW_INT_TIMEOUT) != 0)
+    if ((dwStatus & EDRV_REGW_INT_TIMEOUT) != 0)
     {   // Timeout
         EDRV_COUNT_TIMEOUT;
     }
-
+#endif
 Exit:
     return iHandled;
 }
@@ -1034,6 +1036,7 @@ static int EdrvInitOne(struct pci_dev *pPciDev,
 {
 int     iResult = 0;
 DWORD   dwTemp;
+QWORD   qwTxDescAddress;
 
     if (EdrvInstance_l.m_pPciDev != NULL)
     {   // Edrv is already connected to a PCI device
@@ -1049,7 +1052,6 @@ DWORD   dwTemp;
         printk("%s pPciDev==NULL\n", __FUNCTION__);
     }
 
-#if 0
     // enable device
     printk("%s enable device\n", __FUNCTION__);
     iResult = pci_enable_device(pPciDev);
@@ -1078,49 +1080,81 @@ DWORD   dwTemp;
         iResult = -EIO;
         goto Exit;
     }
-#endif
 
-#if 0
     // enable PCI busmaster
     printk("%s enable busmaster\n", __FUNCTION__);
     pci_set_master (pPciDev);
 
-    // reset controller
-    printk("%s reset controller\n", __FUNCTION__);
-    EDRV_REGB_WRITE(EDRV_REGB_COMMAND, EDRV_REGB_COMMAND_RST);
+    // disable GIO Master accesses
+    dwTemp = EDRV_REGDW_READ(EDRV_REGDW_CTRL);
+    dwTemp |= EDRV_REGDW_CTRL_MST_DIS;
+    EDRV_REGDW_WRITE(EDRV_REGDW_CTRL, dwTemp);
 
-    // wait until reset has finished
-    for (iResult = 500; iResult > 0; iResult--)
+    // wait until master is disabled
+    for (iResult = EDRV_MASTER_DISABLED_TIMEOUT; iResult > 0; iResult--)
     {
-        if ((EDRV_REGB_READ(EDRV_REGB_COMMAND) & EDRV_REGB_COMMAND_RST) == 0)
+        if ((EDRV_REGDW_READ(EDRV_REGDW_STATUS) & EDRV_REGDW_STATUS_MST_EN) == 0)
         {
             break;
         }
 
-        schedule_timeout(10);
+        msleep(1);
     }
-
-    // check hardware version, i.e. chip ID
-    dwTemp = EDRV_REGDW_READ(EDRV_REGDW_TCR);
-    if (((dwTemp & EDRV_REGDW_TCR_VER_MASK) != EDRV_REGDW_TCR_VER_C)
-        && ((dwTemp & EDRV_REGDW_TCR_VER_MASK) != EDRV_REGDW_TCR_VER_D)
-        && ((dwTemp & EDRV_REGDW_TCR_VER_MASK) != EDRV_REGDW_TCR_VER_B)
-        && ((dwTemp & EDRV_REGDW_TCR_VER_MASK) != EDRV_REGDW_TCR_VER_CP))
-    {   // unsupported chip
-        printk("%s Unsupported chip! TCR = 0x%08lX\n", __FUNCTION__, (ULONG) dwTemp);
-        iResult = -ENODEV;
+    if (iResult == 0)
+    {
+        iResult = -EIO;
         goto Exit;
     }
 
     // disable interrupts
     printk("%s disable interrupts\n", __FUNCTION__);
-    EDRV_REGW_WRITE(EDRV_REGW_INT_MASK, 0);
-    // acknowledge all pending interrupts
-    EDRV_REGW_WRITE(EDRV_REGW_INT_STATUS, EDRV_REGW_READ(EDRV_REGW_INT_STATUS));
+    EDRV_REGDW_WRITE(EDRV_REGDW_IMC, EDRV_REGDW_INT_MASK_ALL);
+
+    // reset controller
+    printk("%s reset controller\n", __FUNCTION__);
+    dwTemp |= EDRV_REGDW_CTRL_RST;
+    EDRV_REGDW_WRITE(EDRV_REGDW_CTRL, dwTemp);
+
+    // wait until reset has finished and configuration from EEPROM was read
+    for (iResult = EDRV_AUTO_READ_DONE_TIMEOUT; iResult > 0; iResult--)
+    {
+        if ((EDRV_REGDW_READ(EDRV_REGDW_EEC) & EDRV_REGDW_COMMAND_EEC_AUTO_RD) != 0)
+        {
+            break;
+        }
+
+        msleep(1);
+    }
+    if (iResult == 0)
+    {
+        iResult = -EIO;
+        goto Exit;
+    }
+
+    // disable interrupts
+    printk("%s disable interrupts\n", __FUNCTION__);
+    EDRV_REGDW_WRITE(EDRV_REGDW_IMC, EDRV_REGDW_INT_MASK_ALL);
+    dwTemp = EDRV_REGDW_READ(EDRV_REGDW_ICR);
+
+    // set global configuration
+    printk("%s set global configuration\n", __FUNCTION__);
+    EDRV_REGDW_WRITE(EDRV_REGDW_CTRL, EDRV_REGDW_CTRL_DEF);
+
+    // PHY reset by software:
+    //1. Obtain the Software/Firmware semaphore (SWSM.SWESMBI - 05B50h; bit 1). Set it to 1b.
+    //2. Drive PHY reset (CTRL.PHY_RST at offset 0000h [bit 31], write 1b, wait 100 s, and then
+    //write 0b).
+    //3. Delay 10 ms
+    //4. Start configuring the PHY.
+    //5. Release the Software/Firmware semaphore
+
+    // set TIPG
+    printk("%s set TIPG\n", __FUNCTION__);
+    EDRV_REGDW_WRITE(EDRV_REGDW_TIPG, EDRV_REGDW_TIPG_DEF);
 
     // install interrupt handler
     printk("%s install interrupt handler\n", __FUNCTION__);
-    iResult = request_irq(pPciDev->irq, TgtEthIsr, IRQF_SHARED, DRV_NAME /*pPciDev->dev.name*/, pPciDev);
+    iResult = request_irq(pPciDev->irq, TgtEthIsr, IRQF_SHARED, DRV_NAME, pPciDev);
     if (iResult != 0)
     {
         goto Exit;
@@ -1165,6 +1199,14 @@ DWORD   dwTemp;
         goto Exit;
     }
 
+    EdrvInstance_l.m_pTxDesc = pci_alloc_consistent(pPciDev, EDRV_TX_DESCS_SIZE,
+                     &EdrvInstance_l.m_pTxDescDma);
+    if (EdrvInstance_l.m_pTxDesc == NULL)
+    {
+        iResult = -ENOMEM;
+        goto Exit;
+    }
+
     EdrvInstance_l.m_pbRxBuf = pci_alloc_consistent(pPciDev, EDRV_RX_BUFFER_SIZE,
                      &EdrvInstance_l.m_pRxBufDma);
     if (EdrvInstance_l.m_pbRxBuf == NULL)
@@ -1173,24 +1215,27 @@ DWORD   dwTemp;
         goto Exit;
     }
 
-    // reset pointers for Tx buffers
-    printk("%s reset pointers fo Tx buffers\n", __FUNCTION__);
-    EDRV_REGDW_WRITE(EDRV_REGDW_TSAD0, 0);
-    dwTemp = EDRV_REGDW_READ(EDRV_REGDW_TSAD0);
-    EDRV_REGDW_WRITE(EDRV_REGDW_TSAD1, 0);
-    dwTemp = EDRV_REGDW_READ(EDRV_REGDW_TSAD1);
-    EDRV_REGDW_WRITE(EDRV_REGDW_TSAD2, 0);
-    dwTemp = EDRV_REGDW_READ(EDRV_REGDW_TSAD2);
-    EDRV_REGDW_WRITE(EDRV_REGDW_TSAD3, 0);
-    dwTemp = EDRV_REGDW_READ(EDRV_REGDW_TSAD3);
+    // initialize Tx descriptors
+    printk("%s initialize Tx descriptors\n", __FUNCTION__);
+    EDRV_REGDW_WRITE(EDRV_REGDW_TXDCTL, EDRV_REGDW_TXDCTL_DEF);
+    qwTxDescAddress = EdrvInstance_l.m_pTxDescDma;
+    EDRV_REGDW_WRITE(EDRV_REGDW_TDBAL, (qwTxDescAddress & 0xFFFFFFFF));
+    EDRV_REGDW_WRITE(EDRV_REGDW_TDBAH, (qwTxDescAddress >> 32));
+    EDRV_REGDW_WRITE(EDRV_REGDW_TDLEN, EDRV_TX_DESCS_SIZE);
+    EDRV_REGDW_WRITE(EDRV_REGDW_TDH, 0);
+    EDRV_REGDW_WRITE(EDRV_REGDW_TDT, 0);
 
-    printk("    Command = 0x%02X\n", (WORD) EDRV_REGB_READ(EDRV_REGB_COMMAND));
-
+/*
     // set pointer for receive buffer in controller
     printk("%s set pointer to Rx buffer\n", __FUNCTION__);
     EDRV_REGDW_WRITE(EDRV_REGDW_RBSTART, EdrvInstance_l.m_pRxBufDma);
+*/
 
-    // enable transmitter and receiver
+    // enable transmitter
+    printk("%s set Tx conf register", __FUNCTION__);
+    EDRV_REGDW_WRITE(EDRV_REGDW_TCTL, EDRV_REGDW_TCTL_DEF);
+
+/*
     printk("%s enable Tx and Rx", __FUNCTION__);
     EDRV_REGB_WRITE(EDRV_REGB_COMMAND, (EDRV_REGB_COMMAND_RE | EDRV_REGB_COMMAND_TE));
     printk("  Command = 0x%02X\n", (WORD) EDRV_REGB_READ(EDRV_REGB_COMMAND));
@@ -1213,21 +1258,17 @@ DWORD   dwTemp;
     dwTemp = EDRV_REGDW_READ(EDRV_REGDW_MAR0);
     EDRV_REGDW_WRITE(EDRV_REGDW_MAR4, 0);
     dwTemp = EDRV_REGDW_READ(EDRV_REGDW_MAR4);
-
+*/
 /*
     // enable transmitter and receiver
     printk("%s enable Tx and Rx", __FUNCTION__);
     EDRV_REGB_WRITE(EDRV_REGB_COMMAND, (EDRV_REGB_COMMAND_RE | EDRV_REGB_COMMAND_TE));
     printk("  Command = 0x%02X\n", (WORD) EDRV_REGB_READ(EDRV_REGB_COMMAND));
 */
-    // disable early interrupts
-    EDRV_REGW_WRITE(EDRV_REGW_MULINT, 0);
 
     // enable interrupts
     printk("%s enable interrupts\n", __FUNCTION__);
-    EDRV_REGW_WRITE(EDRV_REGW_INT_MASK, EDRV_REGW_INT_MASK_DEF);
-
-#endif
+    EDRV_REGDW_WRITE(EDRV_REGDW_IMS, EDRV_REGDW_INT_MASK_DEF);
 
 Exit:
     printk("%s finished with %d\n", __FUNCTION__, iResult);
@@ -1251,6 +1292,7 @@ Exit:
 
 static void EdrvRemoveOne(struct pci_dev *pPciDev)
 {
+DWORD   dwTemp;
 
     if (EdrvInstance_l.m_pPciDev != pPciDev)
     {   // trying to remove unknown device
@@ -1260,10 +1302,11 @@ static void EdrvRemoveOne(struct pci_dev *pPciDev)
 
 #if 0
     // disable transmitter and receiver
-    EDRV_REGB_WRITE(EDRV_REGB_COMMAND, 0);
+    EDRV_REGDW_WRITE(EDRV_REGDW_TCTL, 0);
 
     // disable interrupts
-    EDRV_REGW_WRITE(EDRV_REGW_INT_MASK, 0);
+    EDRV_REGDW_WRITE(EDRV_REGDW_IMC, EDRV_REGDW_INT_MASK_ALL);
+    dwTemp = EDRV_REGDW_READ(EDRV_REGDW_ICR);
 
     // remove interrupt handler
     free_irq(pPciDev->irq, pPciDev);
@@ -1275,6 +1318,13 @@ static void EdrvRemoveOne(struct pci_dev *pPciDev)
         pci_free_consistent(pPciDev, EDRV_TX_BUFFER_SIZE,
                      EdrvInstance_l.m_pbTxBuf, EdrvInstance_l.m_pTxBufDma);
         EdrvInstance_l.m_pbTxBuf = NULL;
+    }
+
+    if (EdrvInstance_l.m_pTxDesc != NULL)
+    {
+        pci_free_consistent(pPciDev, EDRV_TX_BUFFER_SIZE,
+                     EdrvInstance_l.m_pTxDesc, EdrvInstance_l.m_pTxDescDma);
+        EdrvInstance_l.m_pTxDesc = NULL;
     }
 
     if (EdrvInstance_l.m_pbRxBuf != NULL)
