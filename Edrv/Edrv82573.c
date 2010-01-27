@@ -280,7 +280,7 @@
 // local types
 //---------------------------------------------------------------------------
 
-typedef
+typedef struct
 {
     QWORD               m_le_qwBufferAddr;
     DWORD               m_le_dwLengthCmd;
@@ -327,7 +327,7 @@ static void EdrvRemoveOne(struct pci_dev *pPciDev);
 // buffers and buffer descriptors and pointers
 
 static struct pci_device_id aEdrvPciTbl[] = {
-    {0x109a, 0x8086, PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0},
+    {0x8086, 0x109a, PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0},
     {0,}
 };
 MODULE_DEVICE_TABLE (pci, aEdrvPciTbl);
@@ -433,6 +433,7 @@ DWORD       dwVal;
     if (EdrvInstance_l.m_pPciDev == NULL)
     {
         printk("%s m_pPciDev=NULL\n", __FUNCTION__);
+        Ret = EdrvShutdown();
         Ret = kEplNoResource;
         goto Exit;
     }
@@ -496,13 +497,12 @@ tEplKernel EdrvShutdown(void)
 // State:
 //
 //---------------------------------------------------------------------------
-#if 0
 tEplKernel EdrvDefineRxMacAddrEntry (BYTE * pbMacAddr_p)
 {
 tEplKernel  Ret = kEplSuccessful;
 DWORD       dwData;
 BYTE        bHash;
-
+#if 0
     bHash = EdrvCalcHash (pbMacAddr_p);
 /*
     dwData = ether_crc(6, pbMacAddr_p);
@@ -524,7 +524,7 @@ BYTE        bHash;
         dwData |= 1 << bHash;
         EDRV_REGDW_WRITE(EDRV_REGDW_MAR0, dwData);
     }
-
+#endif
     return Ret;
 }
 
@@ -547,7 +547,7 @@ tEplKernel EdrvUndefineRxMacAddrEntry (BYTE * pbMacAddr_p)
 tEplKernel  Ret = kEplSuccessful;
 DWORD       dwData;
 BYTE        bHash;
-
+#if 0
     bHash = EdrvCalcHash (pbMacAddr_p);
 
     if (bHash > 31)
@@ -562,7 +562,7 @@ BYTE        bHash;
         dwData &= ~(1 << bHash);
         EDRV_REGDW_WRITE(EDRV_REGDW_MAR0, dwData);
     }
-
+#endif
     return Ret;
 }
 
@@ -784,6 +784,7 @@ tEplKernel Ret = kEplSuccessful;
 // State:
 //
 //---------------------------------------------------------------------------
+#if 0
 static void EdrvReinitRx(void)
 {
 BYTE    bCmd;
@@ -797,6 +798,7 @@ BYTE    bCmd;
     // set receive configuration register
     EDRV_REGDW_WRITE(EDRV_REGDW_RCR, EDRV_REGDW_RCR_DEF);
 }
+#endif
 
 
 //---------------------------------------------------------------------------
@@ -819,7 +821,7 @@ void EdrvInterruptHandler (void)
 #endif
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,19)
-static int TgtEthIsr (int nIrqNum_p, void* ppDevInstData_p)
+static irqreturn_t TgtEthIsr (int nIrqNum_p, void* ppDevInstData_p)
 #else
 static int TgtEthIsr (int nIrqNum_p, void* ppDevInstData_p, struct pt_regs* ptRegs_p)
 #endif
@@ -1013,7 +1015,6 @@ int             iHandled = IRQ_HANDLED;
 Exit:
     return iHandled;
 }
-#endif
 
 
 //---------------------------------------------------------------------------
@@ -1045,13 +1046,6 @@ QWORD   qwTxDescAddress;
         goto Exit;
     }
 
-    EdrvInstance_l.m_pPciDev = pPciDev;
-
-    if (EdrvInstance_l.m_pPciDev == NULL)
-    {
-        printk("%s pPciDev==NULL\n", __FUNCTION__);
-    }
-
     // enable device
     printk("%s enable device\n", __FUNCTION__);
     iResult = pci_enable_device(pPciDev);
@@ -1060,25 +1054,26 @@ QWORD   qwTxDescAddress;
         goto Exit;
     }
 
-    if ((pci_resource_flags(pPciDev, 1) & IORESOURCE_MEM) == 0)
+    EdrvInstance_l.m_pPciDev = pPciDev;
+
+    if (EdrvInstance_l.m_pPciDev == NULL)
     {
-        iResult = -ENODEV;
-        goto Exit;
+        printk("%s pPciDev==NULL\n", __FUNCTION__);
     }
 
     printk("%s request regions\n", __FUNCTION__);
     iResult = pci_request_regions(pPciDev, DRV_NAME);
     if (iResult != 0)
     {
-        goto Exit;
+        goto ExitFail;
     }
 
     printk("%s ioremap\n", __FUNCTION__);
-    EdrvInstance_l.m_pIoAddr = ioremap (pci_resource_start(pPciDev, 1), pci_resource_len(pPciDev, 1));
+    EdrvInstance_l.m_pIoAddr = ioremap (pci_resource_start(pPciDev, 0), pci_resource_len(pPciDev, 0));
     if (EdrvInstance_l.m_pIoAddr == NULL)
     {   // remap of controller's register space failed
         iResult = -EIO;
-        goto Exit;
+        goto ExitFail;
     }
 
     // enable PCI busmaster
@@ -1091,7 +1086,7 @@ QWORD   qwTxDescAddress;
     EDRV_REGDW_WRITE(EDRV_REGDW_CTRL, dwTemp);
 
     // wait until master is disabled
-    for (iResult = EDRV_MASTER_DISABLED_TIMEOUT; iResult > 0; iResult--)
+    for (iResult = EDRV_MASTER_DISABLE_TIMEOUT; iResult > 0; iResult--)
     {
         if ((EDRV_REGDW_READ(EDRV_REGDW_STATUS) & EDRV_REGDW_STATUS_MST_EN) == 0)
         {
@@ -1103,7 +1098,7 @@ QWORD   qwTxDescAddress;
     if (iResult == 0)
     {
         iResult = -EIO;
-        goto Exit;
+        goto ExitFail;
     }
 
     // disable interrupts
@@ -1118,7 +1113,7 @@ QWORD   qwTxDescAddress;
     // wait until reset has finished and configuration from EEPROM was read
     for (iResult = EDRV_AUTO_READ_DONE_TIMEOUT; iResult > 0; iResult--)
     {
-        if ((EDRV_REGDW_READ(EDRV_REGDW_EEC) & EDRV_REGDW_COMMAND_EEC_AUTO_RD) != 0)
+        if ((EDRV_REGDW_READ(EDRV_REGDW_EEC) & EDRV_REGDW_EEC_AUTO_RD) != 0)
         {
             break;
         }
@@ -1128,7 +1123,7 @@ QWORD   qwTxDescAddress;
     if (iResult == 0)
     {
         iResult = -EIO;
-        goto Exit;
+        goto ExitFail;
     }
 
     // disable interrupts
@@ -1157,7 +1152,7 @@ QWORD   qwTxDescAddress;
     iResult = request_irq(pPciDev->irq, TgtEthIsr, IRQF_SHARED, DRV_NAME, pPciDev);
     if (iResult != 0)
     {
-        goto Exit;
+        goto ExitFail;
     }
 
 /*
@@ -1196,7 +1191,7 @@ QWORD   qwTxDescAddress;
     if (EdrvInstance_l.m_pbTxBuf == NULL)
     {
         iResult = -ENOMEM;
-        goto Exit;
+        goto ExitFail;
     }
 
     EdrvInstance_l.m_pTxDesc = pci_alloc_consistent(pPciDev, EDRV_TX_DESCS_SIZE,
@@ -1204,7 +1199,7 @@ QWORD   qwTxDescAddress;
     if (EdrvInstance_l.m_pTxDesc == NULL)
     {
         iResult = -ENOMEM;
-        goto Exit;
+        goto ExitFail;
     }
 
     EdrvInstance_l.m_pbRxBuf = pci_alloc_consistent(pPciDev, EDRV_RX_BUFFER_SIZE,
@@ -1212,7 +1207,7 @@ QWORD   qwTxDescAddress;
     if (EdrvInstance_l.m_pbRxBuf == NULL)
     {
         iResult = -ENOMEM;
-        goto Exit;
+        goto ExitFail;
     }
 
     // initialize Tx descriptors
@@ -1232,7 +1227,7 @@ QWORD   qwTxDescAddress;
 */
 
     // enable transmitter
-    printk("%s set Tx conf register", __FUNCTION__);
+    printk("%s set Tx conf register\n", __FUNCTION__);
     EDRV_REGDW_WRITE(EDRV_REGDW_TCTL, EDRV_REGDW_TCTL_DEF);
 
 /*
@@ -1270,6 +1265,11 @@ QWORD   qwTxDescAddress;
     printk("%s enable interrupts\n", __FUNCTION__);
     EDRV_REGDW_WRITE(EDRV_REGDW_IMS, EDRV_REGDW_INT_MASK_DEF);
 
+    goto Exit;
+
+ExitFail:
+    EdrvRemoveOne(pPciDev);
+
 Exit:
     printk("%s finished with %d\n", __FUNCTION__, iResult);
     return iResult;
@@ -1300,13 +1300,15 @@ DWORD   dwTemp;
         goto Exit;
     }
 
-#if 0
-    // disable transmitter and receiver
-    EDRV_REGDW_WRITE(EDRV_REGDW_TCTL, 0);
+    if (EdrvInstance_l.m_pIoAddr != NULL)
+    {
+        // disable transmitter and receiver
+        EDRV_REGDW_WRITE(EDRV_REGDW_TCTL, 0);
 
-    // disable interrupts
-    EDRV_REGDW_WRITE(EDRV_REGDW_IMC, EDRV_REGDW_INT_MASK_ALL);
-    dwTemp = EDRV_REGDW_READ(EDRV_REGDW_ICR);
+        // disable interrupts
+        EDRV_REGDW_WRITE(EDRV_REGDW_IMC, EDRV_REGDW_INT_MASK_ALL);
+        dwTemp = EDRV_REGDW_READ(EDRV_REGDW_ICR);
+    }
 
     // remove interrupt handler
     free_irq(pPciDev->irq, pPciDev);
@@ -1322,7 +1324,7 @@ DWORD   dwTemp;
 
     if (EdrvInstance_l.m_pTxDesc != NULL)
     {
-        pci_free_consistent(pPciDev, EDRV_TX_BUFFER_SIZE,
+        pci_free_consistent(pPciDev, EDRV_TX_DESCS_SIZE,
                      EdrvInstance_l.m_pTxDesc, EdrvInstance_l.m_pTxDescDma);
         EdrvInstance_l.m_pTxDesc = NULL;
     }
@@ -1333,13 +1335,12 @@ DWORD   dwTemp;
                      EdrvInstance_l.m_pbRxBuf, EdrvInstance_l.m_pRxBufDma);
         EdrvInstance_l.m_pbRxBuf = NULL;
     }
-#endif
 
-#if 0
     // unmap controller's register space
     if (EdrvInstance_l.m_pIoAddr != NULL)
     {
         iounmap(EdrvInstance_l.m_pIoAddr);
+        EdrvInstance_l.m_pIoAddr = NULL;
     }
 
     // disable the PCI device
@@ -1347,7 +1348,6 @@ DWORD   dwTemp;
 
     // release memory regions
     pci_release_regions(pPciDev);
-#endif
 
     EdrvInstance_l.m_pPciDev = NULL;
 
