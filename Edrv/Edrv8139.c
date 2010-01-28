@@ -812,7 +812,7 @@ void EdrvInterruptHandler (void)
 #endif
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,19)
-static int TgtEthIsr (int nIrqNum_p, void* ppDevInstData_p)
+static irqreturn_t TgtEthIsr (int nIrqNum_p, void* ppDevInstData_p)
 #else
 static int TgtEthIsr (int nIrqNum_p, void* ppDevInstData_p, struct pt_regs* ptRegs_p)
 #endif
