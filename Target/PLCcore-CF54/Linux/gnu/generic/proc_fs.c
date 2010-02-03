@@ -248,7 +248,9 @@ static  int  EplLinProcRead (
 
 int             nSize;
 int             Eof;
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLK)) != 0)
 tEplDllkCalStatistics* pDllkCalStats;
+#endif
 
     nSize = 0;
     Eof   = 0;
@@ -273,14 +275,18 @@ tEplDllkCalStatistics* pDllkCalStats;
     //---------------------------------------------------------------
 
     // ---- EPL state ----
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMTU)) != 0)
     nSize += snprintf (pcBuffer_p + nSize, nBufferSize_p - nSize,
                        "NMT state:                  0x%04X\n",
                        (WORD) EplNmtuGetNmtState());
+#endif
 
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLK)) != 0)
     EplDllkCalGetStatistics(&pDllkCalStats);
 
     nSize += snprintf (pcBuffer_p + nSize, nBufferSize_p - nSize,
                        "CurAsyncTxGen=%lu CurAsyncTxNmt=%lu CurAsyncRx=%lu\nMaxAsyncTxGen=%lu MaxAsyncTxNmt=%lu MaxAsyncRx=%lu\n", pDllkCalStats->m_ulCurTxFrameCountGen, pDllkCalStats->m_ulCurTxFrameCountNmt, pDllkCalStats->m_ulCurRxFrameCount, pDllkCalStats->m_ulMaxTxFrameCountGen, pDllkCalStats->m_ulMaxTxFrameCountNmt, pDllkCalStats->m_ulMaxRxFrameCount);
+#endif
 
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
     // fetch running IdentRequests
@@ -413,7 +419,9 @@ tEplNmtEvent    NmtEvent;
         NmtEvent = (tEplNmtEvent) iVal;
     }
     // execute specified NMT command on write access of /proc/epl
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMTU)) != 0)
     EplNmtuNmtEvent(NmtEvent);
+#endif
 
     return count;
 }

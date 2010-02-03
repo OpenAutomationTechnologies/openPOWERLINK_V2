@@ -837,6 +837,7 @@ WORD            wCurRx;
 BYTE*           pbRxBuf;
 unsigned int    uiLength;
 int             iHandled = IRQ_HANDLED;
+unsigned int    uiTxCount = 0;
 
 //    printk("�");
 
@@ -846,6 +847,7 @@ int             iHandled = IRQ_HANDLED;
     if (dwStatus == 0)
     {
         iHandled = IRQ_NONE;
+        EDRV_COUNT_PCI_ERR;
         goto Exit;
     }
 
@@ -859,45 +861,58 @@ int             iHandled = IRQ_HANDLED;
             goto Exit;
         }
 
-        pTxDesc = &EdrvInstance_l.m_pTxDesc[EdrvInstance_l.m_uiHeadTxDesc];
-        // read transmit status
-        dwTxStatus = pTxDesc->m_le_dwStatus;
-        if ((dwTxStatus & EDRV_TX_DESC_STATUS_DD) != 0)
-        {   // transmit finished
-            // increment Tx descriptor queue head pointer
-            EdrvInstance_l.m_uiHeadTxDesc++;
-            if (EdrvInstance_l.m_uiHeadTxDesc >= EDRV_MAX_TX_DESCS)
-            {
-                EdrvInstance_l.m_uiHeadTxDesc = 0;
-            }
+        for ( ;; )
+        {
+            pTxDesc = &EdrvInstance_l.m_pTxDesc[EdrvInstance_l.m_uiHeadTxDesc];
+            // read transmit status
+            dwTxStatus = pTxDesc->m_le_dwStatus;
+            if ((dwTxStatus & EDRV_TX_DESC_STATUS_DD) != 0)
+            {   // transmit finished
+                uiTxCount++;
 
-            pTxBuffer = EdrvInstance_l.m_pLastTransmittedTxBuffer;
-            EdrvInstance_l.m_pLastTransmittedTxBuffer = NULL;
+                // increment Tx descriptor queue head pointer
+                EdrvInstance_l.m_uiHeadTxDesc++;
+                if (EdrvInstance_l.m_uiHeadTxDesc >= EDRV_MAX_TX_DESCS)
+                {
+                    EdrvInstance_l.m_uiHeadTxDesc = 0;
+                }
 
-            if ((dwTxStatus & EDRV_TX_DESC_STATUS_EC) != 0)
-            {
-                EDRV_COUNT_TX_COL_RL;
-            }
-            else if ((dwTxStatus & EDRV_TX_DESC_STATUS_LC) != 0)
-            {
-                EDRV_COUNT_LATECOLLISION;
+                pTxBuffer = EdrvInstance_l.m_pLastTransmittedTxBuffer;
+                EdrvInstance_l.m_pLastTransmittedTxBuffer = NULL;
+
+                if ((dwTxStatus & EDRV_TX_DESC_STATUS_EC) != 0)
+                {
+                    EDRV_COUNT_TX_COL_RL;
+                }
+                else if ((dwTxStatus & EDRV_TX_DESC_STATUS_LC) != 0)
+                {
+                    EDRV_COUNT_LATECOLLISION;
+                }
+                else
+                {
+                    EDRV_COUNT_TX;
+                }
+
+                //            printk("T");
+                if (pTxBuffer != NULL)
+                {
+                    // call Tx handler of Data link layer
+                    EdrvInstance_l.m_InitParam.m_pfnTxHandler(pTxBuffer);
+                }
             }
             else
             {
-                EDRV_COUNT_TX;
-            }
-
-//            printk("T");
-            if (pTxBuffer != NULL)
-            {
-                // call Tx handler of Data link layer
-                EdrvInstance_l.m_InitParam.m_pfnTxHandler(pTxBuffer);
+                if (uiTxCount == 0)
+                {
+                    EDRV_COUNT_TX_ERR;
+                }
+                break;
             }
         }
-        else
-        {
-            EDRV_COUNT_TX_ERR;
-        }
+    }
+    else
+    {
+        EDRV_COUNT_TIMEOUT;
     }
 #if 0
     if ((dwStatus & (EDRV_REGW_INT_RER | EDRV_REGW_INT_FOVW | EDRV_REGW_INT_RXOVW | EDRV_REGW_INT_PUN)) != 0)
