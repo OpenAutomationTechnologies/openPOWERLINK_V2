@@ -75,6 +75,7 @@
 #endif
 
 #include "kernel/EplDllkCal.h"
+#include "edrv.h"
 
 //#include <linux/config.h>
 #include <linux/module.h>
@@ -310,6 +311,10 @@ tEplDllkCalStatistics* pDllkCalStats;
                            uiMandatorySlaveCount, uiSignalSlaveCount, wFlags);
 
     }
+#endif
+
+#if (EDRV_USE_DIAGNOSTICS != FALSE)
+    nSize += EdrvGetDiagnostics(pcBuffer_p + nSize, nBufferSize_p - nSize);
 #endif
 
     // ---- FEC state ----

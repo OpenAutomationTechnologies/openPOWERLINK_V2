@@ -95,6 +95,9 @@
                                      | EDRV_FILTER_CHANGE_MASK \
                                      | EDRV_FILTER_CHANGE_STATE)
 
+#ifndef EDRV_USE_DIAGNOSTICS
+#define EDRV_USE_DIAGNOSTICS    FALSE
+#endif
 
 //---------------------------------------------------------------------------
 // types
@@ -203,6 +206,8 @@ tEplKernel EdrvChangeFilter(tEdrvFilter*    pFilter_p,
                             unsigned int    uiEntryChanged_p,
                             unsigned int    uiChangeFlags_p);
 
+
+int EdrvGetDiagnostics(char* pszBuffer_p, int iSize_p);
 
 //tEplKernel EdrvReadMsg                (void);
 

@@ -690,13 +690,13 @@ tEdrvTxDesc*    pTxDesc;
         Ret = kEplEdrvBufNotExisting;
         goto Exit;
     }
-
+/*
     if (EdrvInstance_l.m_pLastTransmittedTxBuffer != NULL)
     {   // transmission is already active
         Ret = kEplInvalidOperation;
         goto Exit;
     }
-
+*/
     // save pointer to buffer structure for TxHandler
     EdrvInstance_l.m_pLastTransmittedTxBuffer = pBuffer_p;
 
@@ -801,6 +801,32 @@ BYTE    bCmd;
 #endif
 
 
+int EdrvGetDiagnostics(char* pszBuffer_p, int iSize_p)
+{
+tEdrvTxDesc*    pTxDesc;
+DWORD           dwTxStatus;
+int             iUsedSize = 0;
+
+    iUsedSize += snprintf (pszBuffer_p + iUsedSize, iSize_p - iUsedSize,
+                       "Head: %u (%lu)\n",
+                       EdrvInstance_l.m_uiHeadTxDesc,
+                       (unsigned long) EDRV_REGDW_READ(EDRV_REGDW_TDH));
+
+    pTxDesc = &EdrvInstance_l.m_pTxDesc[EdrvInstance_l.m_uiHeadTxDesc];
+    dwTxStatus = pTxDesc->m_le_dwStatus;
+
+    iUsedSize += snprintf (pszBuffer_p + iUsedSize, iSize_p - iUsedSize,
+                       "Headstatus: %lX\n", (unsigned long) dwTxStatus);
+
+    iUsedSize += snprintf (pszBuffer_p + iUsedSize, iSize_p - iUsedSize,
+                       "Tail: %u (%lu)\n",
+                       EdrvInstance_l.m_uiTailTxDesc,
+                       (unsigned long) EDRV_REGDW_READ(EDRV_REGDW_TDT));
+
+    return iUsedSize;
+}
+
+
 //---------------------------------------------------------------------------
 //
 // Function:     EdrvInterruptHandler
@@ -861,13 +887,16 @@ unsigned int    uiTxCount = 0;
             goto Exit;
         }
 
-        for ( ;; )
+        do
         {
             pTxDesc = &EdrvInstance_l.m_pTxDesc[EdrvInstance_l.m_uiHeadTxDesc];
             // read transmit status
             dwTxStatus = pTxDesc->m_le_dwStatus;
             if ((dwTxStatus & EDRV_TX_DESC_STATUS_DD) != 0)
             {   // transmit finished
+                // delete DD flag
+                pTxDesc->m_le_dwStatus = 0;
+
                 uiTxCount++;
 
                 // increment Tx descriptor queue head pointer
@@ -899,6 +928,10 @@ unsigned int    uiTxCount = 0;
                     // call Tx handler of Data link layer
                     EdrvInstance_l.m_InitParam.m_pfnTxHandler(pTxBuffer);
                 }
+                else
+                {
+                    EDRV_COUNT_TX_FUN;
+                }
             }
             else
             {
@@ -909,6 +942,7 @@ unsigned int    uiTxCount = 0;
                 break;
             }
         }
+        while (EdrvInstance_l.m_uiHeadTxDesc != EdrvInstance_l.m_uiTailTxDesc);
     }
     else
     {
