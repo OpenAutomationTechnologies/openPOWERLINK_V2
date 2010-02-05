@@ -439,8 +439,6 @@ Fellow worker:    Daniel Krüger (d.k.)
                       because this is the usual case for the POWERLINK demo network
                     (d.k.)
 
-
-
 18.12.2009 V1.6     - EplObd.c: writing to Domains where no variable is linked (NULL pointer) is allowed
                       if OD callback function allocates memory.
                     - removed unnecessary EplObdu.c and similar files from Windows PCap demo project
@@ -457,15 +455,15 @@ Fellow worker:    Daniel Krüger (d.k.)
 07.01.2010 V1.6     - EPL API layer: added new event kEplApiEventCfmResult to inform the application
                       about the result of the CDC download process of the CFM
                     - fixed UNUSED_PARAMETER for MSVC in global.h
-                    - fixed compiler warning "conditional expression is constant" by replacing while(1) with for(;;)
-                    - CFM: added some sample CDCs for the Windows CFM demo
-                    - fixed bug in SDO command layer: added missing break in case. This bug caused an transfer
-                      start inside the SDO callback function after a lower layer abort to fail.
-                      Now it starts the reconnection as intended.
                     - added UNUSED_PARAMETER macro to several functions to fix "unused parameter" compiler warning.
                     - fixed compiler warning "conditional expression is constant" by replacing while(1) with for(;;)
+                    - CFM: added some sample CDCs for the Windows CFM demo
+                    - fixed bug in SDO command layer: added missing break in case. This bug caused a transfer
+                      start inside the SDO callback function after a lower layer abort to fail.
+                      Now it starts the reconnection as intended.
+                    - fixed compiler warning "conditional expression is constant" by replacing while(1) with for(;;)
                     - fixed signed/unsigned conflicts
-                    - added missing local variable initialization
+                    - added missing local variable initializations
                     - SharedBuff IPC for Windows: fixed compiler warning "standard incompliant L-value expression"
                     - Api_CN objdict.h: added object 0x1F22, 0x1F26 and 0x1F27 for CFM
                     - added support for DOMAIN arrays to the object dictionary module. This is especially
@@ -473,7 +471,36 @@ Fellow worker:    Daniel Krüger (d.k.)
                       (the DOMAIN arrays are instanciated by macro EPL_OBD_RAM_INDEX_RAM_VARARRAY_NOINIT in objdict.h)
                     (d.k.)
 
+08.01.2010 V1.6     - added EplObdCdc.c (module for local CDC file import)
+                    - added object 0x1F26 and 0x1F27 to the generic object dictionary
+                    - added store flag where appropriate to the generic object dictionary
+                    - Api_CN object dictionary: use the generic object dictionary parts from now on.
+                      This eases the maintainability.
+                    - removed dependency of NMT user part module on kernel part module.
+                      NMT CAL is not necessary anymore.
+                    - EplNmtMnuTriggerStateChange posts an event now. This makes this function
+                      thread-safe.
+                    (d.k.)
 
+12.01.2010 V1.6     - cleaned up ioctl commands for Linux kernel userspace wrapper. 
+                      They use now the proper _IO macros.
+                    - added wrapper for POSIX file API under Linux kernel
+                    - added demo project for CFM under Linux kernel (with RTL8139 network card)
+                    (d.k.)
 
+14.01.2010 V1.6     - added check to EPL API layer if SDO channel is used by CFM before performing a SDO transfer for the application.
+                      This gives the CFM a higher priority for SDO transfers than the application
+                    - EplObdCdc.c: added debug messages to local CDC import
+                    - added XDD file for MN object dictionary
+                    (d.k.)
 
+20.01.2010 V1.6     - reduced default number of SDO sequence layer instances to 5
+                    (d.k.)
+
+21.01.2010 V1.6     - fixed warning "dereferencing type-punned pointer will break
+                      strict-aliasing rules" in EplObdMacro.h
+                    - OBD module: declared default values in OBD as const
+                    - Object dictionary: added new macro for PDO mapping parameters:
+                      EPL_OBD_RAM_INDEX_RAM_PDO_MAPPING
+                    (d.k.)
 
