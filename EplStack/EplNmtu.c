@@ -385,19 +385,19 @@ tEplKernel  Ret;
                     // node listens for EPL-Frames and check timeout
                     case kEplNmtCsNotActive:
                     {
-                    DWORD           dwBuffer;
+                    DWORD           dwBasicEthernetTimeout;
                     tEplObdSize     ObdSize;
                     tEplTimerArg    TimerArg;
 
                         // create timer to switch automatically to BasicEthernet if no MN available in network
 
-                        // read NMT_CNBasicEthernetTimerout_U32 from OD
-                        ObdSize = sizeof(dwBuffer);
+                        // read NMT_CNBasicEthernetTimeout_U32 from OD
+                        ObdSize = sizeof(dwBasicEthernetTimeout);
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_OBDU)) != 0) || (EPL_OBD_USE_KERNEL != FALSE)
                         Ret = EplObduReadEntry(EPL_MCO_PTR_INSTANCE_PTR_
                                                 0x1F99,
                                                 0x00,
-                                                &dwBuffer,
+                                                &dwBasicEthernetTimeout,
                                                 &ObdSize);
 #else
                         Ret = kEplObdIndexNotExist;
@@ -406,18 +406,18 @@ tEplKernel  Ret;
                         {
                             break;
                         }
-                        if (dwBuffer != 0)
+                        if (dwBasicEthernetTimeout != 0)
                         {   // BasicEthernet is enabled
                             // convert us into ms
-                            dwBuffer = dwBuffer / 1000;
-                            if (dwBuffer == 0)
+                            dwBasicEthernetTimeout = dwBasicEthernetTimeout / 1000;
+                            if (dwBasicEthernetTimeout == 0)
                             {   // timer was below one ms
                                 // set one ms
-                                dwBuffer = 1;
+                                dwBasicEthernetTimeout = 1;
                             }
                             TimerArg.m_EventSink = kEplEventSinkNmtk;
                             TimerArg.m_Arg.m_dwVal = (DWORD) kEplNmtEventTimerBasicEthernet;
-                            Ret = EplTimeruModifyTimerMs(&EplNmtuInstance_g.m_TimerHdl, (unsigned long) dwBuffer, TimerArg);
+                            Ret = EplTimeruModifyTimerMs(&EplNmtuInstance_g.m_TimerHdl, (unsigned long) dwBasicEthernetTimeout, TimerArg);
                             // potential error is forwarded to event queue which generates error event
                         }
                         break;
@@ -469,7 +469,7 @@ tEplKernel  Ret;
                     // node listens for EPL-Frames and check timeout
                     case kEplNmtMsNotActive:
                     {
-                    DWORD           dwBuffer;
+                    DWORD           dwBasicEthernetTimeout;
                     tEplObdSize     ObdSize;
                     tEplTimerArg    TimerArg;
 
@@ -477,12 +477,12 @@ tEplKernel  Ret;
 
                         // check NMT_StartUp_U32.Bit13
                         // read NMT_StartUp_U32 from OD
-                        ObdSize = sizeof(dwBuffer);
+                        ObdSize = sizeof(dwBasicEthernetTimeout);
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_OBDU)) != 0) || (EPL_OBD_USE_KERNEL != FALSE)
                         Ret = EplObduReadEntry(EPL_MCO_PTR_INSTANCE_PTR_
                                                 0x1F80,
                                                 0x00,
-                                                &dwBuffer,
+                                                &dwBasicEthernetTimeout,
                                                 &ObdSize);
 #else
                         Ret = kEplObdIndexNotExist;
@@ -492,7 +492,7 @@ tEplKernel  Ret;
                             break;
                         }
 
-                        if((dwBuffer & EPL_NMTST_BASICETHERNET) == 0)
+                        if((dwBasicEthernetTimeout & EPL_NMTST_BASICETHERNET) == 0)
                         {   // NMT_StartUp_U32.Bit13 == 0
                             // new state PreOperational1
                             TimerArg.m_Arg.m_dwVal = (DWORD) kEplNmtEventTimerMsPreOp1;
@@ -504,12 +504,12 @@ tEplKernel  Ret;
                         }
 
                         // read NMT_BootTime_REC.MNWaitNotAct_U32 from OD
-                        ObdSize = sizeof(dwBuffer);
+                        ObdSize = sizeof(dwBasicEthernetTimeout);
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_OBDU)) != 0) || (EPL_OBD_USE_KERNEL != FALSE)
                         Ret = EplObduReadEntry(EPL_MCO_PTR_INSTANCE_PTR_
                                                 0x1F89,
                                                 0x01,
-                                                &dwBuffer,
+                                                &dwBasicEthernetTimeout,
                                                 &ObdSize);
 #else
                         Ret = kEplObdIndexNotExist;
@@ -519,14 +519,14 @@ tEplKernel  Ret;
                             break;
                         }
                         // convert us into ms
-                        dwBuffer = dwBuffer / 1000;
-                        if (dwBuffer == 0)
+                        dwBasicEthernetTimeout = dwBasicEthernetTimeout / 1000;
+                        if (dwBasicEthernetTimeout == 0)
                         {   // timer was below one ms
                             // set one ms
-                            dwBuffer = 1;
+                            dwBasicEthernetTimeout = 1;
                         }
                         TimerArg.m_EventSink = kEplEventSinkNmtk;
-                        Ret = EplTimeruModifyTimerMs(&EplNmtuInstance_g.m_TimerHdl, (unsigned long) dwBuffer, TimerArg);
+                        Ret = EplTimeruModifyTimerMs(&EplNmtuInstance_g.m_TimerHdl, (unsigned long) dwBasicEthernetTimeout, TimerArg);
                         // potential error is forwarded to event queue which generates error event
                         break;
                     }
@@ -534,42 +534,42 @@ tEplKernel  Ret;
                     // node processes only async frames
                     case kEplNmtMsPreOperational1:
                     {
-                    DWORD           dwBuffer = 0;
+                    DWORD           dwBasicEthernetTimeout = 0;
                     tEplObdSize     ObdSize;
                     tEplTimerArg    TimerArg;
 
                         // create timer to switch automatically to PreOp2 if MN identified all mandatory CNs
 
                         // read NMT_BootTime_REC.MNWaitPreOp1_U32 from OD
-                        ObdSize = sizeof(dwBuffer);
+                        ObdSize = sizeof(dwBasicEthernetTimeout);
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_OBDU)) != 0) || (EPL_OBD_USE_KERNEL != FALSE)
                         Ret = EplObduReadEntry(EPL_MCO_PTR_INSTANCE_PTR_
                                                 0x1F89,
                                                 0x03,
-                                                &dwBuffer,
+                                                &dwBasicEthernetTimeout,
                                                 &ObdSize);
                         if(Ret != kEplSuccessful)
                         {
                             // ignore error, because this timeout is optional
-                            dwBuffer = 0;
+                            dwBasicEthernetTimeout = 0;
                         }
 #endif
-                        if (dwBuffer == 0)
+                        if (dwBasicEthernetTimeout == 0)
                         {   // delay is deactivated
                             // immediately post timer event
                             Ret = EplNmtuNmtEvent(kEplNmtEventTimerMsPreOp2);
                             break;
                         }
                         // convert us into ms
-                        dwBuffer = dwBuffer / 1000;
-                        if (dwBuffer == 0)
+                        dwBasicEthernetTimeout = dwBasicEthernetTimeout / 1000;
+                        if (dwBasicEthernetTimeout == 0)
                         {   // timer was below one ms
                             // set one ms
-                            dwBuffer = 1;
+                            dwBasicEthernetTimeout = 1;
                         }
                         TimerArg.m_EventSink = kEplEventSinkNmtk;
                         TimerArg.m_Arg.m_dwVal = (DWORD) kEplNmtEventTimerMsPreOp2;
-                        Ret = EplTimeruModifyTimerMs(&EplNmtuInstance_g.m_TimerHdl, (unsigned long) dwBuffer, TimerArg);
+                        Ret = EplTimeruModifyTimerMs(&EplNmtuInstance_g.m_TimerHdl, (unsigned long) dwBasicEthernetTimeout, TimerArg);
                         // potential error is forwarded to event queue which generates error event
                         break;
                     }
