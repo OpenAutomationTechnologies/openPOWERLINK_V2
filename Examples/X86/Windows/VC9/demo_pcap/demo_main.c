@@ -495,17 +495,17 @@ tEplKernel          EplRet = kEplSuccessful;
 
                 case kEplNmtGsResetCommunication:
                 {
-                DWORD   dwBuffer;
+                DWORD   dwNodeAssignment;
 
                     // configure OD for MN in state ResetComm after reseting the OD
                     // TODO: setup your own network configuration here
-                    dwBuffer = (EPL_NODEASSIGN_NODE_IS_CN | EPL_NODEASSIGN_NODE_EXISTS);    // 0x00000003L
-                    EplRet = EplApiWriteLocalObject(0x1F81, 0x01, &dwBuffer, 4);
-                    EplRet = EplApiWriteLocalObject(0x1F81, 0x02, &dwBuffer, 4);
-                    EplRet = EplApiWriteLocalObject(0x1F81, 0x03, &dwBuffer, 4);
-                    EplRet = EplApiWriteLocalObject(0x1F81, 0x20, &dwBuffer, 4);
-                    dwBuffer = (EPL_NODEASSIGN_MN_PRES | EPL_NODEASSIGN_NODE_EXISTS);       // 0x00010001L
-                    EplRet = EplApiWriteLocalObject(0x1F81, 0xF0, &dwBuffer, 4);
+                    dwNodeAssignment = (EPL_NODEASSIGN_NODE_IS_CN | EPL_NODEASSIGN_NODE_EXISTS);    // 0x00000003L
+                    EplRet = EplApiWriteLocalObject(0x1F81, 0x01, &dwNodeAssignment, sizeof (dwNodeAssignment));
+                    EplRet = EplApiWriteLocalObject(0x1F81, 0x02, &dwNodeAssignment, sizeof (dwNodeAssignment));
+                    EplRet = EplApiWriteLocalObject(0x1F81, 0x03, &dwNodeAssignment, sizeof (dwNodeAssignment));
+                    EplRet = EplApiWriteLocalObject(0x1F81, 0x20, &dwNodeAssignment, sizeof (dwNodeAssignment));
+                    dwNodeAssignment = (EPL_NODEASSIGN_MN_PRES | EPL_NODEASSIGN_NODE_EXISTS);       // 0x00010001L
+                    EplRet = EplApiWriteLocalObject(0x1F81, 0xF0, &dwNodeAssignment, sizeof (dwNodeAssignment));
                     // continue
                 }
 
