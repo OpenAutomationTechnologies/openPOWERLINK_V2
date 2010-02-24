@@ -11,7 +11,14 @@ Contents
 ---------
 
 - Extended Demo for Controlled Node as standalone program on Nios II CPU.
-- There are 3 RPDOs and 1 TPDO. Cross-traffic is enabled.
+
+Performance Data
+-----------------
+
+- Minimum cycle length: 400 µs
+- PReq-PRes Latency: 1 µs
+- Process data: 50 bytes input and 50 bytes output
+- There are 3 RPDOs and 1 TPDO available. Cross-traffic is enabled.
 
 
 Requirements
@@ -20,8 +27,10 @@ Requirements
 - Development Board EBV DBC3C40 (Mercury Board)
 
 - Altera Quartus II v9.0 or newer (Web Edition is also possible)
+  Currently, v9.1 does not work.
 
 - Altera Nios II Embedded Design Suite v9.0 or newer
+  Currently, v9.1 does not work.
 
 - Experiences with this development environment are required
 
