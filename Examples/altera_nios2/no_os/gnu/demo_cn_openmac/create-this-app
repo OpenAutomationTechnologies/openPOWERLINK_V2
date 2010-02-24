@@ -35,8 +35,8 @@ ${MAINPATH}/EplStack/EplDllk.c ${MAINPATH}/EplStack/EplDllkCal.c \
 ${MAINPATH}/EplStack/EplDlluCal.c \
 ${MAINPATH}/EplStack/EplLedu.c \
 ${MAINPATH}/EplStack/EplEventk.c ${MAINPATH}/EplStack/EplEventu.c \
-${MAINPATH}/EplStack/EplNmtk.c ${MAINPATH}/EplStack/EplNmtkCal.c \
-${MAINPATH}/EplStack/EplNmtu.c ${MAINPATH}/EplStack/EplNmtuCal.c ${MAINPATH}/EplStack/EplNmtCnu.c \
+${MAINPATH}/EplStack/EplNmtk.c \
+${MAINPATH}/EplStack/EplNmtu.c ${MAINPATH}/EplStack/EplNmtCnu.c \
 ${MAINPATH}/EplStack/EplPdok.c ${MAINPATH}/EplStack/EplPdokCal.c \
 ${MAINPATH}/EplStack/EplPdou.c ${MAINPATH}/EplStack/EplPdouCal.c \
 ${MAINPATH}/EplStack/EplObd.c \
@@ -52,7 +52,6 @@ ${MAINPATH}/SharedBuff/SharedBuff.c ${MAINPATH}/SharedBuff/ShbIpc-NoOS.c"
 NIOS2_APP_GEN_ARGS="--elf-name epl.elf --set OBJDUMP_INCLUDE_SOURCE 1 \
 --set CREATE_OBJDUMP 0 \
 --set CFLAGS=\"${CFLAGS}\" --set APP_INCLUDE_DIRS=\"${INCLUDES}\" --src-files $SRCFILES"
-#--set CFLAGS=\"${CFLAGS}\" --set APP_INCLUDE_DIRS=\"${INCLUDES}\" --src-files $SRCFILES"
 #--set APP_CFLAGS_DEBUG_LEVEL \
 
 #echo "${NIOS2_APP_GEN_ARGS}"
