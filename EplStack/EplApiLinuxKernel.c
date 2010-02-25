@@ -198,6 +198,11 @@ typedef struct
 //  Local variables
 //---------------------------------------------------------------------------
 
+#if (EPL_OBD_USE_LOAD_CONCISEDCF != FALSE)
+static char* pszCdcFilename_g = EPL_OBD_DEF_CONCISEDCF_FILENAME;
+module_param_named(cdc, pszCdcFilename_g, charp, 0);
+MODULE_PARM_DESC(cdc, "Full path to ConciseDCF (CDC file) which is imported into the local object dictionary");
+#endif
 
 
 //---------------------------------------------------------------------------
@@ -326,6 +331,7 @@ int  nMinorNumber;
     EplRet = EplLinProcInit();
     if (EplRet != kEplSuccessful)
     {
+        iRet = -EIO;
         goto Exit;
     }
 
@@ -583,6 +589,12 @@ int  iRet;
             EplApiInitParam.m_pfnObdInitRam = EplObdInitRam;
 
             EplRet = EplApiInitialize(&EplApiInitParam);
+#if (EPL_OBD_USE_LOAD_CONCISEDCF != FALSE)
+            if (EplRet == kEplSuccessful)
+            {
+                EplRet = EplApiSetCdcFilename(pszCdcFilename_g);
+            }
+#endif
 
             uiEplState_g = EPL_STATE_INITED;
 
