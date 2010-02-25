@@ -192,16 +192,16 @@
 
           <Object index="2000" name="Generated Outputs 8 Bit" objectType="8">
             <SubObject subIndex="00" name="Number of elements" objectType="7" dataType="0005" accessType="ro" defaultValue="04" PDOmapping="no" />
-            <SubObject subIndex="01" name="Byte 1" objectType="7" dataType="0005" accessType="ro" PDOmapping="TPDO" />
-            <SubObject subIndex="02" name="Byte 2" objectType="7" dataType="0005" accessType="ro" PDOmapping="TPDO" />
-            <SubObject subIndex="03" name="Byte 3" objectType="7" dataType="0005" accessType="ro" PDOmapping="TPDO" />
-            <SubObject subIndex="04" name="Byte 4" objectType="7" dataType="0005" accessType="ro" PDOmapping="TPDO" />
+            <SubObject subIndex="01" name="LEDs row 1" objectType="7" dataType="0005" accessType="ro" PDOmapping="TPDO" />
+            <SubObject subIndex="02" name="LEDs row 2" objectType="7" dataType="0005" accessType="ro" PDOmapping="TPDO" />
+            <SubObject subIndex="03" name="Combined Speed Inputs" objectType="7" dataType="0005" accessType="ro" PDOmapping="TPDO" />
+            <SubObject subIndex="04" name="Previous Speed Inputs" objectType="7" dataType="0005" accessType="ro" PDOmapping="TPDO" />
           </Object>
           <Object index="2200" name="Inputs 8 Bit" objectType="8">
             <SubObject subIndex="00" name="Number of elements" objectType="7" dataType="0005" accessType="ro" defaultValue="17" PDOmapping="no" />
-            <SubObject subIndex="01" name="Byte 1" objectType="7" dataType="0005" accessType="rw" PDOmapping="RPDO" />
-            <SubObject subIndex="02" name="Byte 2" objectType="7" dataType="0005" accessType="rw" PDOmapping="RPDO" />
-            <SubObject subIndex="03" name="Byte 3" objectType="7" dataType="0005" accessType="rw" PDOmapping="RPDO" />
+            <SubObject subIndex="01" name="Speed Input 1" objectType="7" dataType="0005" accessType="rw" PDOmapping="RPDO" />
+            <SubObject subIndex="02" name="Mode Input 1" objectType="7" dataType="0005" accessType="rw" PDOmapping="RPDO" />
+            <SubObject subIndex="03" name="Mode Input 2" objectType="7" dataType="0005" accessType="rw" PDOmapping="RPDO" />
           </Object>
 
           <Object index="6000" name="Digital Input 8 Bit" objectType="8">
