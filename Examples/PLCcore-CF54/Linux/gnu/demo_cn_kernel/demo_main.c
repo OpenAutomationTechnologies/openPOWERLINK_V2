@@ -427,7 +427,14 @@ tEplObdSize         ObdSize;
 
 Exit:
     printk("EplLinInit(): returns 0x%X\n", EplRet);
-    return EplRet;
+    if (EplRet != kEplSuccessful)
+    {
+        return -ENODEV;
+    }
+    else
+    {
+        return 0;
+    }
 }
 
 
