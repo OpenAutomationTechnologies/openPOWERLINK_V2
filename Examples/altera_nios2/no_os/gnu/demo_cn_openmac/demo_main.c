@@ -231,7 +231,7 @@ tEplKernel PUBLIC AppCbEvent(
                 case kEplNmtGsResetCommunication:
                 {
 //                BYTE    bNodeId = 0xF0;
-                DWORD   dwNodeAssignment = EPL_NODEASSIGN_NODE_EXISTS;
+//                DWORD   dwNodeAssignment = EPL_NODEASSIGN_NODE_EXISTS;
 
                     PRINTF3("%s(0x%X) originating event = 0x%X\n",
                             __func__,
@@ -351,7 +351,7 @@ tEplKernel PUBLIC AppCbEvent(
             break;
     }
 
-Exit:
+//Exit:
     return EplRet;
 }
 
