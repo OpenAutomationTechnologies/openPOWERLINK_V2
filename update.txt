@@ -34,6 +34,8 @@ How to update from any previous version to version 1.6
 
 
 3. Implement the function EdrvChangeFilter in your Ethernet driver.
+   This new function will replace the functions EdrvDefineRxMacAddrEntry and
+   EdrvUndefineRxMacAddrEntry in the future. Consider implementing EdrvChangeFilter.
    Currently, just a dummy like the following code snippet is sufficient.
 
 tEplKernel EdrvChangeFilter(tEdrvFilter*    pFilter_p,

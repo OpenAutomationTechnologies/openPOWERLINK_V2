@@ -20,6 +20,11 @@
     It contains an introduction and a reference manual. A free registration
     is required for downloading.
 
+* The openPOWERLINK LiveCD with a ready-to-run Managing Node reference application
+  is available as pre-configured ISO image from
+
+    http://www.systec-electronic.com/openpowerlink_livecd
+
 * Update Guide for necessary changes to your application project, if you update
   from a previous version of openPOWERLINK, can be found in file update.txt.
 
@@ -46,41 +51,49 @@
     * CAT5 cables to connect the POWERLINK devices with the demo application
 
 - openPOWERLINK demo application with node-ID 240/0xF0.
-  When the demo application runs as MN (node-ID 240/0xF0) it drives a run light
+  When the demo application runs as MN (node-ID 240/0xF0) it drives a running light
   on the CNs. Otherwise it just behaves as CiA-401 I/O device.
 
 
 3. Available demo applications
 -------------------------------
 
-- X86 PC with Linux operating system (see section 3.1 for requirements)
-  + Qt demo: Examples\X86\Linux\gnu\demo_mn_8139_qt
-  + simple MN demo with application running together with stack in kernel:
-    Examples\X86\Linux\gnu\demo_mn_8139_kernel
+X86 PC with Linux operating system (see section 3.1 for requirements)
+  * Qt demo:
+    = Examples\X86\Linux\gnu\demo_mn_8139_qt
+  * simple MN demo with application running together with stack in kernel:
+    = Examples\X86\Linux\gnu\demo_mn_8139_kernel
+  * MN demo with Configuration Manager (CFM):
+    = Examples\X86\Linux\gnu\demo_cfm_8139_kernel
 
-- X86 PC with Microsoft Windows operating system (2000, XP or newer)
-  and WinPcap driver installed:
-  Examples\X86\Windows\VC8\demo_pcap
+X86 PC with Microsoft Windows operating system (2000, XP or newer)
+and WinPcap driver installed:
+  * simple MN demo for Microsoft Visual C 2005:
+    = Examples\X86\Windows\VC8\demo_pcap
+  * simple MN demo for Microsoft Visual C 2008:
+    = Examples\X86\Windows\VC9\demo_pcap
+  * MN demo with Configuration Manager (CFM) for Microsoft Visual C 2005:
+    = Examples\X86\Windows\VC8\demo_pcap_cfm
 
-- Freescale ColdFire MCF5484 (SYSTEC Development Board for ECUcore-5484)
-  with Linux operating system (see section 3.2 for requirements)
-  + simple CN demo which controls the LEDs and reads the pushbuttons on the devboard:
-    Examples\PLCcore-CF54\Linux\gnu\demo_cn_kernel
-  + simple CN and MN demo which controls the LEDs and reads the pushbuttons on the devboard
-    and drives a run light on other CNs if running as MN (node-ID 240/0xF0):
-    Examples\PLCcore-CF54\Linux\gnu\demo_mn_kernel
+Freescale ColdFire MCF5484 (SYSTEC Development Board for ECUcore-5484)
+with Linux operating system (see section 3.2 for requirements)
+  * simple CN demo which controls the LEDs and reads the pushbuttons on the devboard:
+    = Examples\PLCcore-CF54\Linux\gnu\demo_cn_kernel
+  * simple CN and MN demo which controls the LEDs and reads the pushbuttons on the devboard
+    and drives a running light on other CNs if running as MN (node-ID 240/0xF0):
+    = Examples\PLCcore-CF54\Linux\gnu\demo_mn_kernel
 
-- Hilscher netX-500 (Evaluation board Hilscher NXEB 500-HMI)
-  Examples\netx500\Linux\gnu\demo_mn_kernel
+Hilscher netX-500 (Evaluation board Hilscher NXEB 500-HMI)
+  = GPL-Addon Package: Examples\netx500\Linux\gnu\demo_mn_kernel
 
-- Atmel AT91RM9200 with Davicom DM9003 under Linux
-  Examples\at91rm9200\Linux\gnu\demo_mn_dm9003_kernel
+Atmel AT91RM9200 with Davicom DM9003 under Linux
+  = Examples\at91rm9200\Linux\gnu\demo_mn_dm9003_kernel
 
-- Altera Cyclone III on EBV DBC3C40 Development Board with Nios II Soft-CPU and openMAC
-  + simple CN demo which controls the LEDs and reads the pushbuttons on the devboard:
-    Examples\altera_nios2\no_os\gnu\demo_cn_openmac
-  + extended CN demo which controls the LEDs and reads the pushbuttons on the devboard:
-    Examples\altera_nios2\no_os\gnu\demo_cn_3r1tpdo
+Altera Cyclone III on EBV DBC3C40 Development Board with Nios II Soft-CPU and openMAC
+  * simple CN demo which controls the LEDs and reads the pushbuttons on the devboard:
+    = Examples\altera_nios2\no_os\gnu\demo_cn_openmac
+  * extended CN demo which controls the LEDs and reads the pushbuttons on the devboard:
+    = Examples\altera_nios2\no_os\gnu\demo_cn_3r1tpdo
 
 
 3.1. Requirements for X86 demo under Linux
@@ -104,7 +117,6 @@
     * Longshine LCS-8539TXR
     * Micronet SP160T V3
     * Micronet SP160TA V3
-
 
 
 3.2. Requirements for ColdFire MCF5484 demo
