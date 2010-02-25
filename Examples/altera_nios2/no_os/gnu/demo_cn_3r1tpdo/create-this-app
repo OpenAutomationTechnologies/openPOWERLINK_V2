@@ -50,6 +50,14 @@ ${MAINPATH}/EplStack/amiarm.c \
 ${MAINPATH}/Target/altera_nios2/no_os/gnu/generic/ShbTarget_Nios2.c \
 ${MAINPATH}/SharedBuff/SharedBuff.c ${MAINPATH}/SharedBuff/ShbIpc-NoOS.c"
 
+# work-around for bug in Nios2 EDS V9.0
+cmd="nios2-app-generate-makefile --bsp-dir $BSP_DIR --version"
+$cmd | grep "9.0"
+if [ "$?" == "0" ] ; then
+# V9.0 needs additional double quotes around the include directories
+INCLUDES=\"${INCLUDES}\"
+fi
+
 NIOS2_APP_GEN_ARGS="--elf-name epl.elf --set OBJDUMP_INCLUDE_SOURCE 1 \
 --set CREATE_OBJDUMP 0 \
 --set CFLAGS=\"${CFLAGS}\" --set APP_INCLUDE_DIRS=\"${INCLUDES}\" --src-files $SRCFILES"
