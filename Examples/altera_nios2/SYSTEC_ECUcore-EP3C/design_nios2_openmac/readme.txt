@@ -3,8 +3,8 @@
 	openPOWERLINK.sourceforge.net
 
 
-	openPOWERLINK - FPGA design for EBV DBC3C40 with openMAC
-	=========================================================
+	openPOWERLINK - FPGA design for SYS TEC ECUcore-EP3C with openMAC
+	==================================================================
 
 
 Contents
@@ -16,13 +16,11 @@ Contents
 Requirements
 -------------
 
-- Development Board EBV DBC3C40 (Mercury Board)
+- Development Board for SYS TEC ECUcore-EP3C
 
 - Altera Quartus II v9.0 or newer (Web Edition is also possible)
-  Currently, v9.1 does not work.
 
 - Altera Nios II Embedded Design Suite v9.0 or newer
-  Currently, v9.1 does not work.
 
 - Experiences with this development environment are required
 
