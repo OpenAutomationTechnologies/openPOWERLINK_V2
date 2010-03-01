@@ -72,6 +72,7 @@
 #include <asm/uaccess.h>
 #include <linux/mm.h>
 #include <linux/fs.h>
+#include <linux/sched.h>
 #include <linux/syscalls.h>
 #include <linux/fcntl.h>
 #include "PosixFileLinuxKernel.h"
