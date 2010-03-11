@@ -1,0 +1,5 @@
+*.cmd
+.tmp_versions
+*.mod.c
+Module.symvers
+epl.ko

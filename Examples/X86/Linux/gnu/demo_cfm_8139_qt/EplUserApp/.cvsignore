@@ -1,0 +1,5 @@
+EplUserApp
+EplUserApp.pro
+Makefile
+moc_*
+qrc_*
