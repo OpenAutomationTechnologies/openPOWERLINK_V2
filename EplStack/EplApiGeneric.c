@@ -1488,10 +1488,9 @@ Exit:
 
 tEplKernel PUBLIC EplApiProcess(void)
 {
-tEplKernel Ret;
+tEplKernel Ret = kEplSuccessful;
+#if EPL_USE_SHAREDBUFF != FALSE
 tShbError  ShbError;
-
-    Ret = kEplSuccessful;
 
     ShbError = ShbProcess();
     if (ShbError != kShbOk)
@@ -1499,9 +1498,12 @@ tShbError  ShbError;
         Ret = kEplInvalidOperation;
         goto Exit;
     }
+#endif
     Ret = EplTimeruProcess();
 
+#if EPL_USE_SHAREDBUFF != FALSE
 Exit:
+#endif
     return Ret;
 }
 
