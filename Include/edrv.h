@@ -103,6 +103,14 @@
 // types
 //---------------------------------------------------------------------------
 
+typedef struct _tEdrvTxBuffer tEdrvTxBuffer;
+typedef struct _tEdrvRxBuffer tEdrvRxBuffer;
+
+typedef void (*tEdrvRxHandler) (tEdrvRxBuffer * pRxBuffer_p);
+typedef void (*tEdrvTxHandler) (tEdrvTxBuffer * pTxBuffer_p);
+typedef tEplKernel (* tEdrvCyclicCbSync) (void);
+typedef tEplKernel (* tEdrvCyclicCbLossOfSync) (BOOL fNoTxBufferList_p);
+
 
 // position of a buffer in an ethernet-frame
 typedef enum
@@ -114,34 +122,30 @@ typedef enum
 
 
 // format of a tx-buffer
-typedef struct _tEdrvTxBuffer
+struct _tEdrvTxBuffer
 {
-//    tEplMsgType     m_EplMsgType;           // IN: type of EPL message, set by calling function
     unsigned int    m_uiTxMsgLen;           // IN: length of message to be send (set for each transmit call)
+    DWORD           m_dwTimeOffsetNs;       // IN: delay to a previous frame after which this frame will be transmitted
+    tEdrvTxHandler  m_pfnTxHandler;         // IN: special Tx callback function
     // ----------------------
     unsigned int    m_uiBufferNumber;       // OUT: number of the buffer, set by ethernetdriver
     BYTE  *         m_pbBuffer;             // OUT: pointer to the buffer, set by ethernetdriver
-    tEplNetTime     m_NetTime;              // OUT: Timestamp of end of transmission, set by ethernetdriver
     // ----------------------
     unsigned int    m_uiMaxBufferLen;       // IN/OUT: maximum length of the buffer
 
-} tEdrvTxBuffer;
+};
 
 
 // format of a rx-buffer
-typedef struct _tEdrvRxBuffer
+struct _tEdrvRxBuffer
 {
     tEdrvBufferInFrame  m_BufferInFrame;    // OUT position of received buffer in an ethernet-frame
     unsigned int        m_uiRxMsgLen;       // OUT: length of received buffer (without CRC)
     BYTE  *             m_pbBuffer;         // OUT: pointer to the buffer, set by ethernetdriver
     tEplTgtTimeStamp*   m_pTgtTimeStamp;    // OUT: pointer to Timestamp of end of receiption
 
-} tEdrvRxBuffer;
+};
 
-
-
-typedef void (*tEdrvRxHandler) (tEdrvRxBuffer * pRxBuffer_p);
-typedef void (*tEdrvTxHandler) (tEdrvTxBuffer * pTxBuffer_p);
 
 
 // format of init structure
@@ -188,9 +192,6 @@ tEplKernel EdrvShutdown               (void);
 tEplKernel EdrvDefineRxMacAddrEntry   (BYTE * pbMacAddr_p);
 tEplKernel EdrvUndefineRxMacAddrEntry (BYTE * pbMacAddr_p);
 
-//tEplKernel EdrvDefineUnicastEntry     (BYTE * pbUCEntry_p);
-//tEplKernel EdrvUndfineUnicastEntry    (BYTE * pbUCEntry_p);
-
 tEplKernel EdrvAllocTxMsgBuffer     (tEdrvTxBuffer* pBuffer_p);
 tEplKernel EdrvReleaseTxMsgBuffer   (tEdrvTxBuffer* pBuffer_p);
 tEplKernel EdrvUpdateTxMsgBuffer    (tEdrvTxBuffer* pBuffer_p);
@@ -209,7 +210,17 @@ tEplKernel EdrvChangeFilter(tEdrvFilter*    pFilter_p,
 
 int EdrvGetDiagnostics(char* pszBuffer_p, int iSize_p);
 
-//tEplKernel EdrvReadMsg                (void);
+// EdrvCyclic module
+tEplKernel EdrvCyclicInit(void);
+tEplKernel EdrvCyclicShutdown(void);
+tEplKernel EdrvCyclicSetCycleLenUs(DWORD dwCycleLenUs_p);
+tEplKernel EdrvCyclicStartCycle(void);
+tEplKernel EdrvCyclicStopCycle(void);
+tEplKernel EdrvCyclicSetMaxTxBufferListSize(unsigned int uiMaxListSize_p);
+tEplKernel EdrvCyclicSetNextTxBufferList(tEdrvTxBuffer** apTxBuffer_p, unsigned int uiTxBufferCount_p);
+tEplKernel EdrvCyclicRegSyncHandler(tEdrvCyclicCbSync pfnEdrvCyclicCbSync_p);
+tEplKernel EdrvCyclicRegLossOfSyncHandler(tEdrvCyclicCbLossOfSync pfnEdrvCyclicCbLossOfSync_p);
+
 
 // interrupt handler called by target specific interrupt handler
 void        EdrvInterruptHandler       (void);
