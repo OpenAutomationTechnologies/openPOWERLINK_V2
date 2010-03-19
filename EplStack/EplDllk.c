@@ -296,6 +296,9 @@ static tEplKernel EplDllkProcessCreate(tEplNmtState NmtState_p);
 // process the destroy event
 static tEplKernel EplDllkProcessDestroy(tEplNmtState OldNmtState_p);
 
+// process NMT state changes
+static tEplKernel EplDllkProcessNmtStateChange(tEplNmtState NewNmtState_p, tEplNmtState OldNmtState_p);
+
 // process the NMT event
 static tEplKernel EplDllkProcessNmtEvent(tEplEvent * pEvent_p);
 
@@ -569,244 +572,7 @@ tEplNmtState    NmtState;
 
             pNmtStateChange = (tEplEventNmtStateChange*) pEvent_p->m_pArg;
 
-            switch (pNmtStateChange->m_NewNmtState)
-            {
-                case kEplNmtGsOff:
-                case kEplNmtGsInitialising:
-                {
-                    // set EC flag in Flag 1, so the MN can detect a reboot and
-                    // will initialize the Error Signaling.
-                    EplDllkInstance_g.m_bFlag1 = EPL_FRAME_FLAG1_EC;
-
-                    // fall-through
-                }
-
-                case kEplNmtGsResetApplication:
-                case kEplNmtGsResetCommunication:
-                case kEplNmtGsResetConfiguration:
-                {
-                    // at first, update NMT state in instance structure to disable frame processing
-                    EplDllkInstance_g.m_NmtState = pNmtStateChange->m_NewNmtState;
-
-                    if (pNmtStateChange->m_OldNmtState > kEplNmtGsResetConfiguration)
-                    {
-                        // deinitialize DLL and destroy frames
-                        Ret = EplDllkProcessDestroy(pNmtStateChange->m_OldNmtState);
-                    }
-                    break;
-                }
-
-                // node listens for EPL-Frames and check timeout
-                case kEplNmtMsNotActive:
-                case kEplNmtCsNotActive:
-                {
-                    if (pNmtStateChange->m_OldNmtState <= kEplNmtGsResetConfiguration)
-                    {
-                        // setup DLL and create frames
-                        Ret = EplDllkProcessCreate(pNmtStateChange->m_NewNmtState);
-                    }
-                    break;
-                }
-
-                // node processes only async frames
-                case kEplNmtCsPreOperational1:
-                {
-#if EPL_TIMER_USE_HIGHRES != FALSE
-                    Ret = EplTimerHighReskDeleteTimer(&EplDllkInstance_g.m_TimerHdlCycle);
-                    if (Ret != kEplSuccessful)
-                    {
-                        goto Exit;
-                    }
-#endif
-
-#if (EPL_DLL_PROCESS_SYNC == EPL_DLL_PROCESS_SYNC_ON_TIMER)
-                    Ret = EplTimerSynckStopSync();
-                    if (Ret != kEplSuccessful)
-                    {
-                        goto Exit;
-                    }
-#endif
-
-                    // update IdentRes and StatusRes
-                    Ret = EplDllkUpdateFrameStatusRes(&EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_STATUSRES],
-                                                      pNmtStateChange->m_NewNmtState);
-                    if (Ret != kEplSuccessful)
-                    {
-                        goto Exit;
-                    }
-
-                    Ret = EplDllkUpdateFrameIdentRes(&EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_IDENTRES],
-                                                     pNmtStateChange->m_NewNmtState);
-                    if (Ret != kEplSuccessful)
-                    {
-                        goto Exit;
-                    }
-
-                    // enable IdentRes and StatusRes
-#if (EDRV_AUTO_RESPONSE != FALSE)
-                    // enable corresponding Rx filter
-                    EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_SOA_STATREQ].m_fEnable = TRUE;
-                    Ret = EdrvChangeFilter(EplDllkInstance_g.m_aFilter,
-                                           EPL_DLLK_FILTER_COUNT,
-                                           EPL_DLLK_FILTER_SOA_STATREQ,
-                                           EDRV_FILTER_CHANGE_STATE);
-                    if (Ret != kEplSuccessful)
-                    {
-                        goto Exit;
-                    }
-
-                    // enable corresponding Rx filter
-                    EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_SOA_IDREQ].m_fEnable = TRUE;
-                    Ret = EdrvChangeFilter(EplDllkInstance_g.m_aFilter,
-                                           EPL_DLLK_FILTER_COUNT,
-                                           EPL_DLLK_FILTER_SOA_IDREQ,
-                                           EDRV_FILTER_CHANGE_STATE);
-                    if (Ret != kEplSuccessful)
-                    {
-                        goto Exit;
-                    }
-#endif
-
-                    // update PRes (for sudden changes to PreOp2)
-                    Ret = EplDllkUpdateFramePres(&EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_PRES],
-                                                 pNmtStateChange->m_NewNmtState);
-                    if (Ret != kEplSuccessful)
-                    {
-                        goto Exit;
-                    }
-
-                    // enable PRes (for sudden changes to PreOp2)
-#if (EDRV_AUTO_RESPONSE != FALSE)
-                    // enable corresponding Rx filter
-                    EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_PREQ].m_fEnable = TRUE;
-                    Ret = EdrvChangeFilter(EplDllkInstance_g.m_aFilter,
-                                           EPL_DLLK_FILTER_COUNT,
-                                           EPL_DLLK_FILTER_PREQ,
-                                           EDRV_FILTER_CHANGE_STATE);
-                    if (Ret != kEplSuccessful)
-                    {
-                        goto Exit;
-                    }
-#endif
-
-                    break;
-                }
-
-                // node processes isochronous and asynchronous frames
-                case kEplNmtCsPreOperational2:
-                {
-                    // signal update of IdentRes and StatusRes on SoA
-                    EplDllkInstance_g.m_bUpdateTxFrame = EPL_DLLK_UPDATE_BOTH;
-/*
-                    // update PRes (necessary if coming from Stopped)
-                    Ret = EplDllkUpdateFramePres(&EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_PRES],
-                                                 pNmtStateChange->m_NewNmtState);
-                    if (Ret != kEplSuccessful)
-                    {
-                        goto Exit;
-                    }
-*/
-                    // enable PRes (necessary if coming from Stopped)
-#if (EDRV_AUTO_RESPONSE != FALSE)
-                    // enable corresponding Rx filter
-                    EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_PREQ].m_fEnable = TRUE;
-                    Ret = EdrvChangeFilter(EplDllkInstance_g.m_aFilter,
-                                           EPL_DLLK_FILTER_COUNT,
-                                           EPL_DLLK_FILTER_PREQ,
-                                           EDRV_FILTER_CHANGE_STATE);
-                    if (Ret != kEplSuccessful)
-                    {
-                        goto Exit;
-                    }
-#endif
-                    break;
-                }
-
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
-                case kEplNmtMsPreOperational1:
-                {
-                    // update IdentRes and StatusRes
-                    Ret = EplDllkUpdateFrameIdentRes(&EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_IDENTRES],
-                                                     pNmtStateChange->m_NewNmtState);
-                    if (Ret != kEplSuccessful)
-                    {
-                        goto Exit;
-                    }
-                    Ret = EplDllkUpdateFrameStatusRes(&EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_STATUSRES],
-                                                      pNmtStateChange->m_NewNmtState);
-
-                    break;
-                }
-
-                case kEplNmtMsPreOperational2:
-                case kEplNmtMsReadyToOperate:
-                case kEplNmtMsOperational:
-#endif // (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
-
-                case kEplNmtCsOperational:
-                case kEplNmtCsReadyToOperate:
-                {
-                    // signal update of IdentRes and StatusRes on SoA
-                    EplDllkInstance_g.m_bUpdateTxFrame = EPL_DLLK_UPDATE_BOTH;
-                    break;
-                }
-
-                // node stopped by MN
-                case kEplNmtCsStopped:
-                {
-                    // signal update of IdentRes and StatusRes on SoA
-                    EplDllkInstance_g.m_bUpdateTxFrame = EPL_DLLK_UPDATE_BOTH;
-
-                    // disable PRes
-#if (EDRV_AUTO_RESPONSE != FALSE)
-                    // disable corresponding Rx filter
-                    EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_PREQ].m_fEnable = TRUE;
-                    Ret = EdrvChangeFilter(EplDllkInstance_g.m_aFilter,
-                                           EPL_DLLK_FILTER_COUNT,
-                                           EPL_DLLK_FILTER_PREQ,
-                                           EDRV_FILTER_CHANGE_STATE);
-                    if (Ret != kEplSuccessful)
-                    {
-                        goto Exit;
-                    }
-#endif
-
-                    // update PRes
-                    Ret = EplDllkUpdateFramePres(&EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_PRES],
-                                                 pNmtStateChange->m_NewNmtState);
-                    if (Ret != kEplSuccessful)
-                    {
-                        goto Exit;
-                    }
-                    break;
-                }
-
-                // no EPL cycle
-                // -> normal ethernet communication
-                case kEplNmtMsBasicEthernet:
-                case kEplNmtCsBasicEthernet:
-                {
-                    // Fill Async Tx Buffer, because state BasicEthernet was entered
-                    Ret = EplDllkProcessFillTx(kEplDllAsyncReqPrioGeneric, pNmtStateChange->m_NewNmtState);
-                    if (Ret != kEplSuccessful)
-                    {
-                        goto Exit;
-                    }
-
-                    break;
-                }
-
-                default:
-                {
-                    Ret = kEplNmtInvalidState;
-                    goto Exit;
-                }
-            }
-
-            // update NMT state in instance structure
-            // This is done after updating all Tx frames,
-            // so no frame will be transmitted by callback function, when it is not up to date yet.
-            EplDllkInstance_g.m_NmtState = pNmtStateChange->m_NewNmtState;
+            Ret = EplDllkProcessNmtStateChange(pNmtStateChange->m_NewNmtState, pNmtStateChange->m_OldNmtState);
             break;
         }
 
@@ -897,7 +663,7 @@ tEplNmtState    NmtState;
         }
     }
 
-Exit:
+//Exit:
     return Ret;
 }
 
@@ -2155,6 +1921,269 @@ unsigned int    uiHandle;
         goto Exit;
     }
 #endif
+
+Exit:
+    return Ret;
+}
+
+
+//---------------------------------------------------------------------------
+//
+// Function:    EplDllkProcessNmtStateChange
+//
+// Description: process the NMT event
+//
+// Parameters:  NewNmtState_p           = new NMT state
+//
+// Returns:     tEplKernel              = error code
+//
+//
+// State:
+//
+//---------------------------------------------------------------------------
+
+static tEplKernel EplDllkProcessNmtStateChange(tEplNmtState NewNmtState_p, tEplNmtState OldNmtState_p)
+{
+tEplKernel      Ret = kEplSuccessful;
+
+    switch (NewNmtState_p)
+    {
+        case kEplNmtGsOff:
+        case kEplNmtGsInitialising:
+        {
+            // set EC flag in Flag 1, so the MN can detect a reboot and
+            // will initialize the Error Signaling.
+            EplDllkInstance_g.m_bFlag1 = EPL_FRAME_FLAG1_EC;
+
+            // fall-through
+        }
+
+        case kEplNmtGsResetApplication:
+        case kEplNmtGsResetCommunication:
+        case kEplNmtGsResetConfiguration:
+        {
+            // at first, update NMT state in instance structure to disable frame processing
+            EplDllkInstance_g.m_NmtState = NewNmtState_p;
+
+            if (OldNmtState_p > kEplNmtGsResetConfiguration)
+            {
+                // deinitialize DLL and destroy frames
+                Ret = EplDllkProcessDestroy(OldNmtState_p);
+            }
+            break;
+        }
+
+        // node listens for EPL-Frames and check timeout
+        case kEplNmtMsNotActive:
+        case kEplNmtCsNotActive:
+        {
+            if (OldNmtState_p <= kEplNmtGsResetConfiguration)
+            {
+                // setup DLL and create frames
+                Ret = EplDllkProcessCreate(NewNmtState_p);
+            }
+            break;
+        }
+
+        // node processes only async frames
+        case kEplNmtCsPreOperational1:
+        {
+#if EPL_TIMER_USE_HIGHRES != FALSE
+            Ret = EplTimerHighReskDeleteTimer(&EplDllkInstance_g.m_TimerHdlCycle);
+            if (Ret != kEplSuccessful)
+            {
+                goto Exit;
+            }
+#endif
+
+#if (EPL_DLL_PROCESS_SYNC == EPL_DLL_PROCESS_SYNC_ON_TIMER)
+            Ret = EplTimerSynckStopSync();
+            if (Ret != kEplSuccessful)
+            {
+                goto Exit;
+            }
+#endif
+
+            // update IdentRes and StatusRes
+            Ret = EplDllkUpdateFrameStatusRes(&EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_STATUSRES],
+                                              NewNmtState_p);
+            if (Ret != kEplSuccessful)
+            {
+                goto Exit;
+            }
+
+            Ret = EplDllkUpdateFrameIdentRes(&EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_IDENTRES],
+                                             NewNmtState_p);
+            if (Ret != kEplSuccessful)
+            {
+                goto Exit;
+            }
+
+            // enable IdentRes and StatusRes
+#if (EDRV_AUTO_RESPONSE != FALSE)
+            // enable corresponding Rx filter
+            EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_SOA_STATREQ].m_fEnable = TRUE;
+            Ret = EdrvChangeFilter(EplDllkInstance_g.m_aFilter,
+                                   EPL_DLLK_FILTER_COUNT,
+                                   EPL_DLLK_FILTER_SOA_STATREQ,
+                                   EDRV_FILTER_CHANGE_STATE);
+            if (Ret != kEplSuccessful)
+            {
+                goto Exit;
+            }
+
+            // enable corresponding Rx filter
+            EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_SOA_IDREQ].m_fEnable = TRUE;
+            Ret = EdrvChangeFilter(EplDllkInstance_g.m_aFilter,
+                                   EPL_DLLK_FILTER_COUNT,
+                                   EPL_DLLK_FILTER_SOA_IDREQ,
+                                   EDRV_FILTER_CHANGE_STATE);
+            if (Ret != kEplSuccessful)
+            {
+                goto Exit;
+            }
+#endif
+
+            // update PRes (for sudden changes to PreOp2)
+            Ret = EplDllkUpdateFramePres(&EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_PRES],
+                                         NewNmtState_p);
+            if (Ret != kEplSuccessful)
+            {
+                goto Exit;
+            }
+
+            // enable PRes (for sudden changes to PreOp2)
+#if (EDRV_AUTO_RESPONSE != FALSE)
+            // enable corresponding Rx filter
+            EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_PREQ].m_fEnable = TRUE;
+            Ret = EdrvChangeFilter(EplDllkInstance_g.m_aFilter,
+                                   EPL_DLLK_FILTER_COUNT,
+                                   EPL_DLLK_FILTER_PREQ,
+                                   EDRV_FILTER_CHANGE_STATE);
+            if (Ret != kEplSuccessful)
+            {
+                goto Exit;
+            }
+#endif
+
+            break;
+        }
+
+        // node processes isochronous and asynchronous frames
+        case kEplNmtCsPreOperational2:
+        {
+            // signal update of IdentRes and StatusRes on SoA
+            EplDllkInstance_g.m_bUpdateTxFrame = EPL_DLLK_UPDATE_BOTH;
+/*
+            // update PRes (necessary if coming from Stopped)
+            Ret = EplDllkUpdateFramePres(&EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_PRES],
+                                         pNmtStateChange->m_NewNmtState);
+            if (Ret != kEplSuccessful)
+            {
+                goto Exit;
+            }
+*/
+            // enable PRes (necessary if coming from Stopped)
+#if (EDRV_AUTO_RESPONSE != FALSE)
+            // enable corresponding Rx filter
+            EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_PREQ].m_fEnable = TRUE;
+            Ret = EdrvChangeFilter(EplDllkInstance_g.m_aFilter,
+                                   EPL_DLLK_FILTER_COUNT,
+                                   EPL_DLLK_FILTER_PREQ,
+                                   EDRV_FILTER_CHANGE_STATE);
+            if (Ret != kEplSuccessful)
+            {
+                goto Exit;
+            }
+#endif
+            break;
+        }
+
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
+        case kEplNmtMsPreOperational1:
+        {
+            // update IdentRes and StatusRes
+            Ret = EplDllkUpdateFrameIdentRes(&EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_IDENTRES],
+                                             NewNmtState_p);
+            if (Ret != kEplSuccessful)
+            {
+                goto Exit;
+            }
+            Ret = EplDllkUpdateFrameStatusRes(&EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_STATUSRES],
+                                              NewNmtState_p);
+
+            break;
+        }
+
+        case kEplNmtMsPreOperational2:
+        case kEplNmtMsReadyToOperate:
+        case kEplNmtMsOperational:
+#endif // (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
+
+        case kEplNmtCsOperational:
+        case kEplNmtCsReadyToOperate:
+        {
+            // signal update of IdentRes and StatusRes on SoA
+            EplDllkInstance_g.m_bUpdateTxFrame = EPL_DLLK_UPDATE_BOTH;
+            break;
+        }
+
+        // node stopped by MN
+        case kEplNmtCsStopped:
+        {
+            // signal update of IdentRes and StatusRes on SoA
+            EplDllkInstance_g.m_bUpdateTxFrame = EPL_DLLK_UPDATE_BOTH;
+
+            // disable PRes
+#if (EDRV_AUTO_RESPONSE != FALSE)
+            // disable corresponding Rx filter
+            EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_PREQ].m_fEnable = TRUE;
+            Ret = EdrvChangeFilter(EplDllkInstance_g.m_aFilter,
+                                   EPL_DLLK_FILTER_COUNT,
+                                   EPL_DLLK_FILTER_PREQ,
+                                   EDRV_FILTER_CHANGE_STATE);
+            if (Ret != kEplSuccessful)
+            {
+                goto Exit;
+            }
+#endif
+
+            // update PRes
+            Ret = EplDllkUpdateFramePres(&EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_PRES],
+                                         NewNmtState_p);
+            if (Ret != kEplSuccessful)
+            {
+                goto Exit;
+            }
+            break;
+        }
+
+        // no EPL cycle
+        // -> normal ethernet communication
+        case kEplNmtMsBasicEthernet:
+        case kEplNmtCsBasicEthernet:
+        {
+            // Fill Async Tx Buffer, because state BasicEthernet was entered
+            Ret = EplDllkProcessFillTx(kEplDllAsyncReqPrioGeneric, NewNmtState_p);
+            if (Ret != kEplSuccessful)
+            {
+                goto Exit;
+            }
+
+            break;
+        }
+
+        default:
+        {
+            Ret = kEplNmtInvalidState;
+            goto Exit;
+        }
+    }
+
+    // update NMT state in instance structure
+    // This is done after updating all Tx frames,
+    // so no frame will be transmitted by callback function, when it is not up to date yet.
+    EplDllkInstance_g.m_NmtState = NewNmtState_p;
 
 Exit:
     return Ret;
