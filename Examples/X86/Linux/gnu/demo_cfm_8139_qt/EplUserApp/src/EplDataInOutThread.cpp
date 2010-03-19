@@ -143,6 +143,7 @@ BYTE    abSelect_l[3];      // pushbuttons from CNs
 */
 BYTE    bModeSelect_l;      // state of the pushbuttons to select the mode
 BYTE    bSpeedSelect_l;     // state of the pushbuttons to increase/decrease the speed
+BYTE    bSpeedSelectOld_l = 0;
 unsigned int uiLeds;
 unsigned int uiLedsOld = 0;
 unsigned int uiInput;
@@ -289,6 +290,35 @@ unsigned int uiInputOld = 0;
 
             // restart cycle counter
             iCurCycleCount_l = iMaxCycleCount_l;
+        }
+
+        if (bSpeedSelectOld_l == 0)
+        {
+            if ((bSpeedSelect_l & 0x01) != 0)
+            {
+                if (iMaxCycleCount_l < 200)
+                {
+                    iMaxCycleCount_l++;
+                }
+                bSpeedSelectOld_l = bSpeedSelect_l;
+            }
+            else if ((bSpeedSelect_l & 0x02) != 0)
+            {
+                if (iMaxCycleCount_l > 1)
+                {
+                    iMaxCycleCount_l--;
+                }
+                bSpeedSelectOld_l = bSpeedSelect_l;
+            }
+            else if ((bSpeedSelect_l & 0x04) != 0)
+            {
+                iMaxCycleCount_l = DEFAULT_MAX_CYCLE_COUNT;
+                bSpeedSelectOld_l = bSpeedSelect_l;
+            }
+        }
+        else if (bSpeedSelect_l == 0)
+        {
+            bSpeedSelectOld_l = 0;
         }
 /*
         abPiOut[0] = bVarOut1_l;
