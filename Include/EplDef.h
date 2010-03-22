@@ -100,9 +100,9 @@
 #define EPL_C_DLL_T_BITTIME         10   // ns: Transmission time per bit on 100 Mbit/s network
 #define EPL_C_DLL_T_EPL_PDO_HEADER  10   // Byte: size of PReq and PRes EPL PDO message header
 #define EPL_C_DLL_T_ETH2_WRAPPER    18   // Byte: size of Ethernet type II wrapper consisting of header and checksum
-#define EPL_C_DLL_T_IFG             640  // ns: Ethernet Interframe Gap
+#define EPL_C_DLL_T_IFG             960  // ns: Ethernet Interframe Gap
 #define EPL_C_DLL_T_MIN_FRAME       5120 // ns: Size of minimum Ethernet frame (without preamble)
-#define EPL_C_DLL_T_PREAMBLE        960  // ns: Size of Ethernet frame preamble
+#define EPL_C_DLL_T_PREAMBLE        640  // ns: Size of Ethernet frame preamble
 
 #define EPL_C_DLL_MINSIZE_SOC       36   // minimum size of SoC without padding and CRC
 #define EPL_C_DLL_MINSIZE_PREQ      60   // minimum size of PRec without CRC
