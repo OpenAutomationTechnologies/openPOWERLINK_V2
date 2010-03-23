@@ -29,7 +29,7 @@ CFLAGS="-D${DBG_MODE} -DDEF_DEBUG_LVL=0xEC000000L"
 
 SRCFILES="demo_main.c \
 ${MAINPATH}/Edrv/openmac/source/EdrvOpenMac.c \
-${MAINPATH}/Edrv/openmac/source/TimerHighReskOpenMac.c \
+${MAINPATH}/Edrv/openmac/source/TimerHighResk_OpenMac.c \
 ${MAINPATH}/Edrv/openmac/source/omethlib.c ${MAINPATH}/Edrv/openmac/source/omethlibint.c \
 ${MAINPATH}/EplStack/EplDllk.c ${MAINPATH}/EplStack/EplDllkCal.c \
 ${MAINPATH}/EplStack/EplDlluCal.c \
