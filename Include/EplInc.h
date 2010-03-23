@@ -200,6 +200,7 @@ typedef union
 #define EPL_FEATURE_NMT_BASICETH    0x00000800  // MN specific
 #define EPL_FEATURE_RT1             0x00001000
 #define EPL_FEATURE_RT2             0x00002000
+#define EPL_FEATURE_PRES_CHAINING   0x00040000
 
 
 // generate EPL NMT_FeatureFlags_U32
@@ -255,13 +256,22 @@ typedef union
     #define EPL_DEF_FEATURE_DLL_MULTIPLEX       (EPL_FEATURE_DLL_MULTIPLEX)
 #endif
 
+#ifndef EPL_DEF_FEATURE_PRES_CHAINING
+    #if EPL_DLL_PRES_CHAINING_CN != FALSE
+        #define EPL_DEF_FEATURE_PRES_CHAINING   (EPL_FEATURE_PRES_CHAINING)
+    #else
+        #define EPL_DEF_FEATURE_PRES_CHAINING   0
+    #endif
+#endif
+
 #define EPL_DEF_FEATURE_FLAGS                   (EPL_DEF_FEATURE_ISOCHR \
                                                 | EPL_DEF_FEATURE_SDO_ASND \
                                                 | EPL_DEF_FEATURE_SDO_UDP \
                                                 | EPL_DEF_FEATURE_SDO_PDO \
                                                 | EPL_DEF_FEATURE_PDO_DYN \
                                                 | EPL_DEF_FEATURE_CFM \
-                                                | EPL_DEF_FEATURE_DLL_MULTIPLEX)
+                                                | EPL_DEF_FEATURE_DLL_MULTIPLEX \
+                                                | EPL_DEF_FEATURE_PRES_CHAINING)
 
 
 #ifndef tabentries

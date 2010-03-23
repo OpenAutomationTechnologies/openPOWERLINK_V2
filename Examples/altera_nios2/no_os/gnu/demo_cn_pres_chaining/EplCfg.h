@@ -64,7 +64,7 @@
 
   Revision History:
 
-  2006/06/06    k.t.: Start of Implementation
+  2010-03-23    m.u.: Start of Implementation
 
 ****************************************************************************/
 
@@ -171,6 +171,9 @@
 // + SoC + SoA + MN PRes + NmtCmd + ASnd + IdentRes + StatusRes.
 //#define EDRV_MAX_TX_BUFFERS             5
 
+// openMAC supports auto-response delay
+#define EDRV_AUTO_RESPONSE_DELAY        TRUE
+
 
 // =========================================================================
 // Data Link Layer (DLL) specific defines
@@ -188,6 +191,9 @@
 
 // maximum count of Rx filter entries for PRes frames
 #define EPL_DLL_PRES_FILTER_COUNT   3
+
+// CN supports PRes Chaining
+#define EPL_DLL_PRES_CHAINING_CN        TRUE
 
 
 // =========================================================================

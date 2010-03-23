@@ -182,6 +182,10 @@
 #endif
 #endif
 
+#ifndef EPL_DLL_PRES_CHAINING_CN
+#define EPL_DLL_PRES_CHAINING_CN        FALSE
+#endif
+
 #ifndef EPL_NMT_MAX_NODE_ID
 #if ((((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0) \
      || (EPL_DLL_PRES_FILTER_COUNT != 0))
@@ -280,6 +284,10 @@
 
 #ifndef EDRV_AUTO_RESPONSE
 #define EDRV_AUTO_RESPONSE                  FALSE
+#endif
+
+#ifndef EDRV_AUTO_RESPONSE_DELAY
+#define EDRV_AUTO_RESPONSE_DELAY            FALSE
 #endif
 
 /*
@@ -426,6 +434,7 @@
 #define EPL_NODEASSIGN_RT1              0x00000400L // Bit 10
 #define EPL_NODEASSIGN_RT2              0x00000800L // Bit 11
 #define EPL_NODEASSIGN_MN_PRES          0x00001000L // Bit 12
+#define EPL_NODEASSIGN_PRES_CHAINING    0x00004000L // Bit 14
 #define EPL_NODEASSIGN_VALID            0x80000000L // Bit 31
 
 //---------------------------------------------------------------------------
