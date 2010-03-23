@@ -2,7 +2,7 @@
 //  Generic Communication Profile Area 1000h - 13FFh
 //-----------------------------------------------------------------
 
-       // Object 1000h: NMT_DeviceType_U32
+        // Object 1000h: NMT_DeviceType_U32
         EPL_OBD_BEGIN_INDEX_RAM(0x1000, 0x01, NULL)
             EPL_OBD_SUBINDEX_RAM_VAR(0x1000, 0x00, kEplObdTypUInt32, kEplObdAccR, tEplObdUnsigned32, NMT_DeviceType_U32, 0xF0191)
         EPL_OBD_END_INDEX(0x1000)
@@ -68,6 +68,11 @@
             EPL_OBD_SUBINDEX_RAM_VAR(0x1030, 0x08, kEplObdTypUInt8, kEplObdAccRW, tEplObdUnsigned8, InterfaceAdminState_U8, 0x1)
             EPL_OBD_SUBINDEX_RAM_VAR(0x1030, 0x09, kEplObdTypBool, kEplObdAccRW, tEplObdBoolean, Valid_BOOL, 0x1)
         EPL_OBD_END_INDEX(0x1030)
+
+#if ((EPL_DLL_PRES_CHAINING_CN != FALSE) && (EPL_NMT_MAX_NODE_ID > 0))
+        // Object 1050h: NMT_RelativeLatencyDiff_AU32
+        EPL_OBD_RAM_INDEX_RAM_ARRAY(0x1050, EPL_NMT_MAX_NODE_ID, NULL, kEplObdTypUInt32, kEplObdAccR, tEplObdUnsigned32, NMT_RelativeLatencyDiff_AU32, 0)
+#endif
 
         // Object 1300h: SDO_SequLayerTimeout_U32 in [ms]
         EPL_OBD_BEGIN_INDEX_RAM(0x1300, 0x01, NULL)

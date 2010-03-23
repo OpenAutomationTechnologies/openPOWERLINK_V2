@@ -152,8 +152,13 @@
         EPL_OBD_END_INDEX(0x1F93)
 
         // Object 1F98h: NMT_CycleTiming_REC
+#if EPL_DLL_PRES_CHAINING_CN == FALSE
         EPL_OBD_BEGIN_INDEX_RAM(0x1F98, 0x09, NULL)
             EPL_OBD_SUBINDEX_RAM_VAR(0x1F98, 0x00, kEplObdTypUInt8, kEplObdAccConst, tEplObdUnsigned8, NumberOfEntries, 0x08)
+#else
+        EPL_OBD_BEGIN_INDEX_RAM(0x1F98, 0x0E, NULL)
+            EPL_OBD_SUBINDEX_RAM_VAR(0x1F98, 0x00, kEplObdTypUInt8, kEplObdAccConst, tEplObdUnsigned8, NumberOfEntries, 0x0E)
+#endif
             EPL_OBD_SUBINDEX_RAM_VAR(0x1F98, 0x01, kEplObdTypUInt16, kEplObdAccR, tEplObdUnsigned16, IsochrTxMaxPayload_U16, 0x00)
             EPL_OBD_SUBINDEX_RAM_VAR(0x1F98, 0x02, kEplObdTypUInt16, kEplObdAccR, tEplObdUnsigned16, IsochrRxMaxPayload_U16, 0x00)
             EPL_OBD_SUBINDEX_RAM_VAR(0x1F98, 0x03, kEplObdTypUInt32, kEplObdAccR, tEplObdUnsigned32, PResMaxLatency_U32, 0x00)     // in [ns]
@@ -163,6 +168,13 @@
             EPL_OBD_SUBINDEX_RAM_VAR(0x1F98, 0x07, kEplObdTypUInt8, kEplObdAccSRW, tEplObdUnsigned8, MultiplCycleCnt_U8, 0x00)
             EPL_OBD_SUBINDEX_RAM_VAR(0x1F98, 0x08, kEplObdTypUInt16, kEplObdAccSRW, tEplObdUnsigned16, AsyncMTU_U16, EPL_C_DLL_MIN_ASYNC_MTU)
 //            EPL_OBD_SUBINDEX_RAM_VAR(0x1F98, 0x09, kEplObdTypUInt16, kEplObdAccRW, tEplObdUnsigned16, Prescaler_U16, 0x02)
+#if EPL_DLL_PRES_CHAINING_CN != FALSE
+            EPL_OBD_SUBINDEX_RAM_VAR(0x1F98, 0x0A, kEplObdTypUInt8, kEplObdAccR, tEplObdUnsigned8, PResMode_U8, 0x00)
+            EPL_OBD_SUBINDEX_RAM_VAR(0x1F98, 0x0B, kEplObdTypUInt32, kEplObdAccR, tEplObdUnsigned32, PResTimeFirst_U32, 0x00)      // in [ns]
+            EPL_OBD_SUBINDEX_RAM_VAR(0x1F98, 0x0C, kEplObdTypUInt32, kEplObdAccR, tEplObdUnsigned32, PResTimeSecond_U32, 0x00)     // in [ns]
+            EPL_OBD_SUBINDEX_RAM_VAR(0x1F98, 0x0D, kEplObdTypUInt32, kEplObdAccR, tEplObdUnsigned32, SyncMNDelayFirst_U32, 0x00)   // in [ns]
+            EPL_OBD_SUBINDEX_RAM_VAR(0x1F98, 0x0E, kEplObdTypUInt32, kEplObdAccR, tEplObdUnsigned32, SyncMNDelaySecond_U32, 0x00)  // in [ns]
+#endif
         EPL_OBD_END_INDEX(0x1F98)
 
         // Object 1F99h: NMT_CNBasicEthernetTimeout_U32 in [us]
