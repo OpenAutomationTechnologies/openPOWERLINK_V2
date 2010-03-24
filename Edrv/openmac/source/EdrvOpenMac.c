@@ -449,7 +449,7 @@ Exit:
 //
 // Function:    EdrvUpdateTxMsgBuffer
 //
-// Description:
+// Description: Update tx-message buffer for use with auto-response filter 
 //
 // Parameters:  pBuffer_p   = pointer to Buffer structure
 //
@@ -534,6 +534,37 @@ Exit:
 }
 
 
+//---------------------------------------------------------------------------
+//
+// Function:    EdrvChangeFilter
+//
+// Description: Change all rx-filters or one specific rx-filter
+//              of the openMAC
+//
+// Parameters:  pFilter_p           = pointer to array of filter entries
+//              uiCount_p           = number of filters in array
+//              uiEntryChanged_p    = selects one specific filter which is
+//                                    to be changed. If value is equal to
+//                                    or larger than uiCount_p, all entries
+//                                    are selected.
+//              uiChangeFlags_p     = If one specific entry is selected,
+//                                    these flag bits show which filter
+//                                    properties have been changed.
+//                                    available flags:
+//                                      EDRV_FILTER_CHANGE_MASK
+//                                      EDRV_FILTER_CHANGE_VALUE
+//                                      EDRV_FILTER_CHANGE_STATE
+//                                      EDRV_FILTER_CHANGE_AUTO_RESPONSE
+//                                    if auto-response delay is supported:
+//                                      EDRV_FILTER_CHANGE_AUTO_RESPONSE_DELAY
+//
+// Returns:     Errorcode           = kEplSuccessful
+//                                  = kEplEdrvInvalidParam
+//
+// State:
+//
+//---------------------------------------------------------------------------
+
 tEplKernel EdrvChangeFilter(tEdrvFilter*    pFilter_p,
                             unsigned int    uiCount_p,
                             unsigned int    uiEntryChanged_p,
@@ -584,6 +615,32 @@ unsigned int    uiEntry;
                 pFilter_p[uiEntry].m_pTxBuffer->m_uiBufferNumber = uiEntry;
                 EdrvUpdateTxMsgBuffer(pFilter_p[uiEntry].m_pTxBuffer);
                 omethResponseEnable(EdrvInstance_l.m_ahFilter[uiEntry]);
+
+#if EDRV_AUTO_RESPONSE_DELAY != FALSE
+                {
+                DWORD dwDelayNs;
+
+                    // set auto-response delay
+                    dwDelayNs = pFilter_p[uiEntry].m_pTxBuffer->m_dwTimeOffsetNs;
+                    if (dwDelayNs == 0)
+                    {   // no auto-response delay is set
+                        // send frame immediately after IFG
+                        omethResponseTime(EdrvInstance_l.m_ahFilter[uiEntry], 0);
+                    }
+                    else
+                    {   // auto-response delay is set
+                    DWORD dwDelayAfterIfgNs;
+    
+                        if (dwDelayNs < EPL_C_DLL_T_IFG)
+                        {   // set delay to a minimum of IFG
+                            dwDelayNs = EPL_C_DLL_T_IFG;
+                        }
+                        dwDelayAfterIfgNs = dwDelayNs - EPL_C_DLL_T_IFG;
+                        omethResponseTime(EdrvInstance_l.m_ahFilter[uiEntry],
+                                          OMETH_NS_2_TICKS(dwDelayAfterIfgNs));
+                    }
+                }
+#endif
             }
 
             if (pFilter_p[uiEntry].m_fEnable != FALSE)
@@ -596,9 +653,15 @@ unsigned int    uiEntry;
     else
     {   // specific entry should be changed
 
-        if (((uiChangeFlags_p & (EDRV_FILTER_CHANGE_VALUE | EDRV_FILTER_CHANGE_MASK)) != 0)
+        if (((uiChangeFlags_p & (EDRV_FILTER_CHANGE_VALUE
+                                 | EDRV_FILTER_CHANGE_MASK
+#if EDRV_AUTO_RESPONSE_DELAY != FALSE
+                                 | EDRV_FILTER_CHANGE_AUTO_RESPONSE_DELAY
+#endif
+                                 | EDRV_FILTER_CHANGE_AUTO_RESPONSE)) != 0)
             || (pFilter_p[uiEntryChanged_p].m_fEnable == FALSE))
-        {   // disable this filter entry
+        {
+            // disable this filter entry
             omethFilterDisable(EdrvInstance_l.m_ahFilter[uiEntryChanged_p]);
 
             if ((uiChangeFlags_p & EDRV_FILTER_CHANGE_VALUE) != 0)
@@ -620,6 +683,55 @@ unsigned int    uiEntry;
                                            pFilter_p[uiEntryChanged_p].m_abFilterMask[uiIndex]);
                 }
             }
+
+            if ((uiChangeFlags_p & EDRV_FILTER_CHANGE_AUTO_RESPONSE) != 0)
+            {   // filter auto-response state or frame has changed
+                if (pFilter_p[uiEntryChanged_p].m_pTxBuffer != NULL)
+                {   // auto-response enable
+                    EdrvInstance_l.m_apTxBuffer[uiEntryChanged_p] = pFilter_p[uiEntryChanged_p].m_pTxBuffer;
+
+                    // set buffer number of TxBuffer to filter entry
+                    pFilter_p[uiEntryChanged_p].m_pTxBuffer->m_uiBufferNumber = uiEntryChanged_p;
+                    EdrvUpdateTxMsgBuffer(pFilter_p[uiEntryChanged_p].m_pTxBuffer);
+                    omethResponseEnable(EdrvInstance_l.m_ahFilter[uiEntryChanged_p]);
+                }
+                else
+                {   // auto-response disable
+                    omethResponseDisable(EdrvInstance_l.m_ahFilter[uiEntryChanged_p]);
+                }
+            }
+
+#if EDRV_AUTO_RESPONSE_DELAY != FALSE
+            if ((uiChangeFlags_p & EDRV_FILTER_CHANGE_AUTO_RESPONSE_DELAY) != 0)
+            {   // filter auto-response delay has changed
+            DWORD dwDelayNs;
+            
+                if (pFilter_p[uiEntryChanged_p].m_pTxBuffer == NULL)
+                {
+                    Ret = kEplEdrvInvalidParam;
+                    goto Exit;
+                }
+                dwDelayNs = pFilter_p[uiEntryChanged_p].m_pTxBuffer->m_dwTimeOffsetNs;
+
+                if (dwDelayNs == 0)
+                {   // no auto-response delay is set
+                    // send frame immediately after IFG
+                    omethResponseTime(EdrvInstance_l.m_ahFilter[uiEntryChanged_p], 0);
+                }
+                else
+                {   // auto-response delay is set
+                DWORD dwDelayAfterIfgNs;
+
+                    if (dwDelayNs < EPL_C_DLL_T_IFG)
+                    {   // set delay to a minimum of IFG
+                        dwDelayNs = EPL_C_DLL_T_IFG;
+                    }
+                    dwDelayAfterIfgNs = dwDelayNs - EPL_C_DLL_T_IFG;
+                    omethResponseTime(EdrvInstance_l.m_ahFilter[uiEntryChanged_p],
+                                      OMETH_NS_2_TICKS(dwDelayAfterIfgNs));
+                }
+            }
+#endif
         }
 
         if (pFilter_p[uiEntryChanged_p].m_fEnable != FALSE)

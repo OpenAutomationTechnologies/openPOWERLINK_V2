@@ -88,12 +88,20 @@
 #define ETH_CRC_SIZE	 4      // size of Ethernet CRC, i.e. FCS
 
 
-#define EDRV_FILTER_CHANGE_VALUE    0x01    // filter value changed
-#define EDRV_FILTER_CHANGE_MASK     0x02    // filter mask changed
-#define EDRV_FILTER_CHANGE_STATE    0x04    // filter state changed
+#define EDRV_FILTER_CHANGE_VALUE                0x01  // filter value changed
+#define EDRV_FILTER_CHANGE_MASK                 0x02  // filter mask changed
+#define EDRV_FILTER_CHANGE_STATE                0x04  // filter state changed
+#define EDRV_FILTER_CHANGE_AUTO_RESPONSE        0x08  // filter auto-resp. state changed
+#if EDRV_AUTO_RESPONSE_DELAY != FALSE
+#define EDRV_FILTER_CHANGE_AUTO_RESPONSE_DELAY  0x10  // filter auto-resp. delay changed
+#endif
+
 #define EDRV_FILTER_CHANGE_ALL      (EDRV_FILTER_CHANGE_VALUE \
                                      | EDRV_FILTER_CHANGE_MASK \
-                                     | EDRV_FILTER_CHANGE_STATE)
+                                     | EDRV_FILTER_CHANGE_STATE \
+                                     | EDRV_FILTER_CHANGE_AUTO_RESPONSE \
+                                     | (EDRV_AUTO_RESPONSE_DELAY ? EDRV_FILTER_CHANGE_AUTO_RESPONSE_DELAY : 0))
+                                     
 
 #ifndef EDRV_USE_DIAGNOSTICS
 #define EDRV_USE_DIAGNOSTICS    FALSE
