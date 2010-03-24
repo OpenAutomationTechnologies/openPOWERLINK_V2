@@ -107,6 +107,10 @@
 #error "MN support needs EPL_DLL_PRES_FILTER_COUNT != 0"
 #endif
 
+#if (EPL_DLL_PRES_CHAINING_CN != FALSE) && (EDRV_AUTO_RESPONSE_DELAY == FALSE)
+#error "Ethernet driver support for auto-response delay is required for PRes Chaining."
+#endif
+
 
 /***************************************************************************/
 /*                                                                         */
@@ -2056,10 +2060,11 @@ tEplKernel      Ret = kEplSuccessful;
 #if (EDRV_AUTO_RESPONSE != FALSE)
             // enable corresponding Rx filter
             EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_PREQ].m_fEnable = TRUE;
+            EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_PREQ].m_pTxBuffer = &EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_PRES];
             Ret = EdrvChangeFilter(EplDllkInstance_g.m_aFilter,
                                    EPL_DLLK_FILTER_COUNT,
                                    EPL_DLLK_FILTER_PREQ,
-                                   EDRV_FILTER_CHANGE_STATE);
+                                   EDRV_FILTER_CHANGE_STATE | EDRV_FILTER_CHANGE_AUTO_RESPONSE);
             if (Ret != kEplSuccessful)
             {
                 goto Exit;
@@ -2087,10 +2092,11 @@ tEplKernel      Ret = kEplSuccessful;
 #if (EDRV_AUTO_RESPONSE != FALSE)
             // enable corresponding Rx filter
             EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_PREQ].m_fEnable = TRUE;
+            EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_PREQ].m_pTxBuffer = &EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_PRES];
             Ret = EdrvChangeFilter(EplDllkInstance_g.m_aFilter,
                                    EPL_DLLK_FILTER_COUNT,
                                    EPL_DLLK_FILTER_PREQ,
-                                   EDRV_FILTER_CHANGE_STATE);
+                                   EDRV_FILTER_CHANGE_STATE | EDRV_FILTER_CHANGE_AUTO_RESPONSE);
             if (Ret != kEplSuccessful)
             {
                 goto Exit;
@@ -2134,14 +2140,13 @@ tEplKernel      Ret = kEplSuccessful;
             // signal update of IdentRes and StatusRes on SoA
             EplDllkInstance_g.m_bUpdateTxFrame = EPL_DLLK_UPDATE_BOTH;
 
-            // disable PRes
 #if (EDRV_AUTO_RESPONSE != FALSE)
-            // disable corresponding Rx filter
-            EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_PREQ].m_fEnable = TRUE;
+            // disable auto-response for PRes filter
+            EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_PREQ].m_pTxBuffer = NULL;
             Ret = EdrvChangeFilter(EplDllkInstance_g.m_aFilter,
                                    EPL_DLLK_FILTER_COUNT,
                                    EPL_DLLK_FILTER_PREQ,
-                                   EDRV_FILTER_CHANGE_STATE);
+                                   EDRV_FILTER_CHANGE_AUTO_RESPONSE);
             if (Ret != kEplSuccessful)
             {
                 goto Exit;
