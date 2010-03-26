@@ -288,6 +288,8 @@ typedef struct
 
 #if EPL_DLL_PRES_CHAINING_CN != FALSE
     DWORD               m_dwSyncResLatency;
+    unsigned int        m_uiSyncReqPrevNodeId;
+    tEplTgtTimeStamp*   m_pSyncReqPrevTimeStamp;
 #endif
 
 } tEplDllkInstance;
@@ -523,6 +525,7 @@ tEdrvInitParam  EdrvInitParam;
 
 #if EPL_DLL_PRES_CHAINING_CN != FALSE
     EplDllkInstance_g.m_dwSyncResLatency = pInitParam_p->m_dwSyncResLatency;
+    EplDllkInstance_g.m_pSyncReqPrevTimeStamp = EplTgtTimeStampAlloc();
 #endif
 
 Exit:
@@ -557,6 +560,10 @@ tEplKernel      Ret = kEplSuccessful;
 
 #if EPL_TIMER_USE_HIGHRES != FALSE
     Ret = EplTimerHighReskDelInstance();
+#endif
+
+#if EPL_DLL_PRES_CHAINING_CN != FALSE
+    EplTgtTimeStampFree(EplDllkInstance_g.m_pSyncReqPrevTimeStamp);
 #endif
 
     Ret = EdrvShutdown();
@@ -4017,6 +4024,20 @@ TGT_DLLK_DECLARE_FLAGS
                 {   // no async service requested -> do nothing
                 }
             }
+#if EPL_DLL_PRES_CHAINING_CN != FALSE
+            else
+            {   // other node is the target of the current request
+                // check ServiceId
+                ReqServiceId = (tEplDllReqServiceId) AmiGetByteFromLe(&pFrame->m_Data.m_Soa.m_le_bReqServiceId);
+                if (ReqServiceId == kEplDllReqServiceSync)
+                {   // SyncRequest
+                    // store node ID and TimeStamp
+                    EplDllkInstance_g.m_uiSyncReqPrevNodeId = uiNodeId;
+                    EplTgtTimeStampCopy(EplDllkInstance_g.m_pSyncReqPrevTimeStamp,
+                                        pRxBuffer_p->m_pTgtTimeStamp);
+                }
+            }
+#endif
 
 #if EPL_DLL_PRES_READY_AFTER_SOA != FALSE
             if (pTxBuffer == NULL)
@@ -4093,6 +4114,40 @@ TGT_DLLK_DECLARE_FLAGS
 
             if (uiAsndServiceId < EPL_DLL_MAX_ASND_SERVICE_ID)
             {   // ASnd service ID is valid
+            
+#if EPL_DLL_PRES_CHAINING_CN != FALSE
+                if (uiAsndServiceId == kEplDllAsndSyncResponse)
+                {
+                tEplFrame*  pTxFrameSyncRes;
+
+                    pTxFrameSyncRes = (tEplFrame *) EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_SYNCRES].m_pbBuffer;
+                    uiNodeId = (unsigned int) AmiGetByteFromLe(&pFrame->m_le_bSrcNodeId);
+
+                    if (uiNodeId == EplDllkInstance_g.m_uiSyncReqPrevNodeId)
+                    {
+                    DWORD   dwSyncDelayNs;
+                    
+                        dwSyncDelayNs = EplTgtTimeStampTimeDiffNs(EplDllkInstance_g.m_pSyncReqPrevTimeStamp,
+                                                                  pRxBuffer_p->m_pTgtTimeStamp);
+
+                        // update SyncRes frame (SyncDelay and SyncNodeNumber)
+                        AmiSetDwordToLe(&pTxFrameSyncRes->m_Data.m_Asnd.m_Payload.m_SyncResponse.m_le_dwSyncDelay, dwSyncDelayNs);
+                        AmiSetDwordToLe(&pTxFrameSyncRes->m_Data.m_Asnd.m_Payload.m_SyncResponse.m_le_dwSyncNodeNumber, (DWORD) uiNodeId);
+                    }
+                    else
+                    {
+                        AmiSetDwordToLe(&pTxFrameSyncRes->m_Data.m_Asnd.m_Payload.m_SyncResponse.m_le_dwSyncDelay, 0);
+                        AmiSetDwordToLe(&pTxFrameSyncRes->m_Data.m_Asnd.m_Payload.m_SyncResponse.m_le_dwSyncNodeNumber, (DWORD) 0);
+                    }
+
+                    // update Tx buffer in Edrv
+                    Ret = EdrvUpdateTxMsgBuffer(&EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_SYNCRES]);
+                    
+                    // reset stored node ID
+                    EplDllkInstance_g.m_uiSyncReqPrevNodeId = 0;
+                }
+#endif
+
                 if (EplDllkInstance_g.m_aAsndFilter[uiAsndServiceId] == kEplDllAsndFilterAny)
                 {   // ASnd service ID is registered
                     // forward frame via async receive FIFO to userspace
