@@ -167,32 +167,44 @@
 #define EPL_DLLK_TXFRAME_IDENTRES   0   // IdentResponse on CN / MN
 #define EPL_DLLK_TXFRAME_STATUSRES  1   // StatusResponse on CN / MN
 #define EPL_DLLK_TXFRAME_NMTREQ     2   // NMT Request from FIFO on CN / MN
-#define EPL_DLLK_TXFRAME_NONEPL     3   // non-EPL frame from FIFO on CN / MN
-#define EPL_DLLK_TXFRAME_PRES       4   // PRes on CN / MN
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
-#define EPL_DLLK_TXFRAME_SOC        5   // SoC on MN
-#define EPL_DLLK_TXFRAME_SOA        6   // SoA on MN
-#define EPL_DLLK_TXFRAME_PREQ       7   // PReq on MN
-#define EPL_DLLK_TXFRAME_COUNT      (7 + EPL_D_NMT_MaxCNNumber_U8 + 2)   // on MN: 7 + MaxPReq of regular CNs + 1 Diag + 1 Router
+#if EPL_DLL_PRES_CHAINING_CN != FALSE
+  #define EPL_DLLK_TXFRAME_SYNCRES  3   // SyncResponse on CN
+  #define EPL_DLLK_TXFRAME_NONEPL   4   // non-EPL frame from FIFO on CN / MN
 #else
-#define EPL_DLLK_TXFRAME_COUNT      5   // on CN: 5
+  #define EPL_DLLK_TXFRAME_NONEPL   3   // non-EPL frame from FIFO on CN / MN
+#endif
+#define EPL_DLLK_TXFRAME_PRES       (EPL_DLLK_TXFRAME_NONEPL + 1) // PRes on CN / MN
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
+  #define EPL_DLLK_TXFRAME_SOC      (EPL_DLLK_TXFRAME_PRES + 1)   // SoC on MN
+  #define EPL_DLLK_TXFRAME_SOA      (EPL_DLLK_TXFRAME_SOC + 1)    // SoA on MN
+  #define EPL_DLLK_TXFRAME_PREQ     (EPL_DLLK_TXFRAME_SOA + 1)    // PReq on MN
+  #define EPL_DLLK_TXFRAME_COUNT    (EPL_DLLK_TXFRAME_PREQ + EPL_D_NMT_MaxCNNumber_U8 + 2)
+                                     // on MN: 7 + MaxPReq of regular CNs + 1 Diag + 1 Router
+#else
+  #define EPL_DLLK_TXFRAME_COUNT      (EPL_DLLK_TXFRAME_PRES + 1)
 #endif
 
 
-#define EPL_DLLK_FILTER_PREQ        0
-#define EPL_DLLK_FILTER_SOA_IDREQ   1
-#define EPL_DLLK_FILTER_SOA_STATREQ 2
-#define EPL_DLLK_FILTER_SOA_NMTREQ  3
-#define EPL_DLLK_FILTER_SOA_NONEPL  4
-#define EPL_DLLK_FILTER_SOA         5
-#define EPL_DLLK_FILTER_SOC         6
-#define EPL_DLLK_FILTER_ASND        7
-#define EPL_DLLK_FILTER_PRES        8
+#define EPL_DLLK_FILTER_PREQ          0
+#define EPL_DLLK_FILTER_SOA_IDREQ     1
+#define EPL_DLLK_FILTER_SOA_STATREQ   2
+#define EPL_DLLK_FILTER_SOA_NMTREQ    3
+#if EPL_DLL_PRES_CHAINING_CN != FALSE
+  #define EPL_DLLK_FILTER_SOA_SYNCREQ 4
+  #define EPL_DLLK_FILTER_SOA_NONEPL  5
+#else
+  #define EPL_DLLK_FILTER_SOA_NONEPL  4
+#endif
+
+#define EPL_DLLK_FILTER_SOA           (EPL_DLLK_FILTER_SOA_NONEPL + 1)
+#define EPL_DLLK_FILTER_SOC           (EPL_DLLK_FILTER_SOA + 1)
+#define EPL_DLLK_FILTER_ASND          (EPL_DLLK_FILTER_SOC + 1)
+#define EPL_DLLK_FILTER_PRES          (EPL_DLLK_FILTER_ASND + 1)
 
 #if EPL_DLL_PRES_FILTER_COUNT < 0
-#define EPL_DLLK_FILTER_COUNT       (8 + 1)
+  #define EPL_DLLK_FILTER_COUNT       (EPL_DLLK_FILTER_PRES + 1)
 #else
-#define EPL_DLLK_FILTER_COUNT       (8 + EPL_DLL_PRES_FILTER_COUNT)
+  #define EPL_DLLK_FILTER_COUNT       (EPL_DLLK_FILTER_PRES + EPL_DLL_PRES_FILTER_COUNT)
 #endif
 
 
@@ -273,6 +285,10 @@ typedef struct
 
     unsigned int        m_uiCycleCount;     // cycle counter (needed for multiplexed cycle support)
     unsigned long long  m_ullFrameTimeout;  // frame timeout (cycle length + loss of frame tolerance)
+
+#if EPL_DLL_PRES_CHAINING_CN != FALSE
+    DWORD               m_dwSyncResLatency;
+#endif
 
 } tEplDllkInstance;
 
@@ -504,6 +520,10 @@ tEdrvInitParam  EdrvInitParam;
     {
         EplDllkInstance_g.m_pTxBuffer[uiIndex].m_pbBuffer = NULL;
     }
+
+#if EPL_DLL_PRES_CHAINING_CN != FALSE
+    EplDllkInstance_g.m_dwSyncResLatency = pInitParam_p->m_dwSyncResLatency;
+#endif
 
 Exit:
     return Ret;
@@ -1472,6 +1492,19 @@ tEplDllkNodeInfo*   pIntNodeInfo;
     // mark Tx buffer as empty
     EplDllkInstance_g.m_pTxBuffer[uiHandle].m_uiTxMsgLen = EPL_DLLK_BUFLEN_EMPTY;
 
+#if EPL_DLL_PRES_CHAINING_CN != FALSE
+    // SyncResponse
+    uiFrameSize = EPL_C_DLL_MINSIZE_SYNCRES;
+    Ret = EplDllkCreateTxFrame(&uiHandle, &pTxFrame, &uiFrameSize, kEplMsgTypeAsnd, kEplDllAsndSyncResponse);
+    if (Ret != kEplSuccessful)
+    {   // error occured while registering Tx frame
+        goto Exit;
+    }
+    // Latency
+    AmiSetDwordToLe(&pTxFrame->m_Data.m_Asnd.m_Payload.m_SyncResponse.m_le_dwLatency,
+        EplDllkInstance_g.m_dwSyncResLatency);
+#endif
+
     // non-EPL frame
     uiFrameSize = EPL_C_IP_MAX_MTU;
     Ret = EplDllkCreateTxFrame(&uiHandle, &pTxFrame, &uiFrameSize, kEplMsgTypeNonEpl, kEplDllAsndNotDefined);
@@ -1578,6 +1611,32 @@ tEplDllkNodeInfo*   pIntNodeInfo;
                    0xFF);
     EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_SOA_NMTREQ].m_pTxBuffer = &EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_NMTREQ];
     EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_SOA_NMTREQ].m_fEnable = FALSE;
+
+#if EPL_DLL_PRES_CHAINING_CN != FALSE
+    // setup SoA/SyncReq filter
+    AmiSetQword48ToBe(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_SOA_SYNCREQ].m_abFilterValue[0],
+                      EPL_C_DLL_MULTICAST_SOA);
+    AmiSetQword48ToBe(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_SOA_SYNCREQ].m_abFilterMask[0],
+                      EPL_DLL_MACADDR_MASK);
+    AmiSetWordToBe(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_SOA_SYNCREQ].m_abFilterValue[12],
+                   EPL_C_DLL_ETHERTYPE_EPL);
+    AmiSetWordToBe(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_SOA_SYNCREQ].m_abFilterMask[12],
+                   0xFFFF);
+    AmiSetByteToBe(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_SOA_SYNCREQ].m_abFilterValue[14],
+                   kEplMsgTypeSoa);
+    AmiSetByteToBe(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_SOA_SYNCREQ].m_abFilterMask[14],
+                   0xFF);
+    AmiSetByteToBe(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_SOA_SYNCREQ].m_abFilterValue[20],
+                   kEplDllReqServiceSync);
+    AmiSetByteToBe(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_SOA_SYNCREQ].m_abFilterMask[20],
+                   0xFF);
+    AmiSetByteToBe(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_SOA_SYNCREQ].m_abFilterValue[21],
+                   (BYTE) EplDllkInstance_g.m_DllConfigParam.m_uiNodeId);
+    AmiSetByteToBe(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_SOA_SYNCREQ].m_abFilterMask[21],
+                   0xFF);
+    EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_SOA_SYNCREQ].m_pTxBuffer = &EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_SYNCRES];
+    EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_SOA_SYNCREQ].m_fEnable = FALSE;
+#endif
 
     // setup SoA/UnspecifiedReq filter
     AmiSetQword48ToBe(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_SOA_NONEPL].m_abFilterValue[0],
@@ -1842,6 +1901,14 @@ unsigned int    uiHandle;
     {   // error occured while deregistering Tx frame
         goto Exit;
     }
+
+#if EPL_DLL_PRES_CHAINING_CN != FALSE
+    Ret = EplDllkDeleteTxFrame(EPL_DLLK_TXFRAME_SYNCRES);
+    if (Ret != kEplSuccessful)
+    {   // error occured while deregistering Tx frame
+        goto Exit;
+    }
+#endif
 
     Ret = EplDllkDeleteTxFrame(EPL_DLLK_TXFRAME_NONEPL);
     if (Ret != kEplSuccessful)
@@ -4632,6 +4699,7 @@ BYTE            bFlag1;
 //              ethernet driver
 //
 // Parameters:  puiHandle_p             = IN: handle to last allocated frame buffer
+//                                            used for faster search for PReq buffers
 //                                        OUT: handle to new frame buffer
 //              ppFrame_p               = OUT: pointer to pointer of EPL frame
 //              puiFrameSize_p          = IN/OUT: pointer to size of frame
@@ -4660,25 +4728,88 @@ tEplFrame      *pTxFrame;
 unsigned int    uiHandle = EplDllkInstance_g.m_uiMaxTxFrames;
 tEdrvTxBuffer  *pTxBuffer = NULL;
 
-    if (MsgType_p == kEplMsgTypeAsnd)
+    switch (MsgType_p)
     {
-        // search for fixed Tx buffers
-        if (ServiceId_p == kEplDllAsndIdentResponse)
+        case kEplMsgTypeAsnd:
         {
-            uiHandle = EPL_DLLK_TXFRAME_IDENTRES;
+            // search for fixed Tx buffers
+            switch (ServiceId_p)
+            {
+                case kEplDllAsndIdentResponse:
+                {
+                    uiHandle = EPL_DLLK_TXFRAME_IDENTRES;
+                    break;
+                }
+
+                case kEplDllAsndStatusResponse:
+                {
+                    uiHandle = EPL_DLLK_TXFRAME_STATUSRES;
+                    break;
+                }
+
+                case kEplDllAsndNmtRequest:
+                case kEplDllAsndNmtCommand:
+                {
+                    uiHandle = EPL_DLLK_TXFRAME_NMTREQ;
+                    break;
+                }
+
+#if EPL_DLL_PRES_CHAINING_CN != FALSE
+                case kEplDllAsndSyncResponse:
+                {
+                    uiHandle = EPL_DLLK_TXFRAME_SYNCRES;
+                    break;
+                }
+#endif
+
+                case kEplDllAsndNotDefined:
+                {
+                    Ret = kEplDllInvalidParam;
+                    goto Exit;
+                }
+                
+                case kEplDllAsndSdo:
+                {
+                    Ret = kEplEdrvBufNotExisting;
+                    goto Exit;
+                }
+            }
+            break;
         }
-        else if (ServiceId_p == kEplDllAsndStatusResponse)
+
+        case kEplMsgTypeNonEpl:
         {
-            uiHandle = EPL_DLLK_TXFRAME_STATUSRES;
+            uiHandle = EPL_DLLK_TXFRAME_NONEPL;
+            break;
         }
-        else if ((ServiceId_p == kEplDllAsndNmtRequest) || (ServiceId_p == kEplDllAsndNmtCommand))
+
+        case kEplMsgTypePres:
         {
-            uiHandle = EPL_DLLK_TXFRAME_NMTREQ;
+            uiHandle = EPL_DLLK_TXFRAME_PRES;
+            break;
         }
-        else
-        {   // look for free entry
+
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
-            uiHandle = EPL_DLLK_TXFRAME_PREQ;
+        case kEplMsgTypeSoc:
+        {
+            uiHandle = EPL_DLLK_TXFRAME_SOC;
+            break;
+        }
+
+        case kEplMsgTypeSoa:
+        {
+            uiHandle = EPL_DLLK_TXFRAME_SOA;
+            break;
+        }
+
+        case kEplMsgTypePreq:
+        {   // look for free entry
+            if ((uiHandle < EPL_DLLK_TXFRAME_PREQ)
+                || (uiHandle >= EplDllkInstance_g.m_uiMaxTxFrames))
+            {   // start with first PReq buffer
+                uiHandle = EPL_DLLK_TXFRAME_PREQ;
+            }
+            // otherwise start with last allocated handle
             pTxBuffer = &EplDllkInstance_g.m_pTxBuffer[uiHandle];
             for (; uiHandle < EplDllkInstance_g.m_uiMaxTxFrames; uiHandle++, pTxBuffer++)
             {
@@ -4687,60 +4818,21 @@ tEdrvTxBuffer  *pTxBuffer = NULL;
                     break;
                 }
             }
-#endif
-            if (uiHandle >= EplDllkInstance_g.m_uiMaxTxFrames)
+            if (pTxBuffer->m_pbBuffer != NULL)
             {
                 Ret = kEplEdrvNoFreeBufEntry;
                 goto Exit;
             }
+            break;
         }
-    }
-    else if (MsgType_p == kEplMsgTypeNonEpl)
-    {
-        uiHandle = EPL_DLLK_TXFRAME_NONEPL;
-    }
-    else if (MsgType_p == kEplMsgTypePres)
-    {
-        uiHandle = EPL_DLLK_TXFRAME_PRES;
-    }
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
-    else if (MsgType_p == kEplMsgTypeSoc)
-    {
-        uiHandle = EPL_DLLK_TXFRAME_SOC;
-    }
-    else if (MsgType_p == kEplMsgTypeSoa)
-    {
-        uiHandle = EPL_DLLK_TXFRAME_SOA;
-    }
-    else
-    {   // look for free entry
-        if ((uiHandle < EPL_DLLK_TXFRAME_PREQ)
-            || (uiHandle >= EplDllkInstance_g.m_uiMaxTxFrames))
-        {   // start with first PReq buffer
-            uiHandle = EPL_DLLK_TXFRAME_PREQ;
-        }
-        // otherwise start with last allocated handle
-        pTxBuffer = &EplDllkInstance_g.m_pTxBuffer[uiHandle];
-        for (; uiHandle < EplDllkInstance_g.m_uiMaxTxFrames; uiHandle++, pTxBuffer++)
+#else
+        default:
         {
-            if (pTxBuffer->m_pbBuffer == NULL)
-            {   // free entry found
-                break;
-            }
-        }
-        if (pTxBuffer->m_pbBuffer != NULL)
-        {
-            Ret = kEplEdrvNoFreeBufEntry;
+            Ret = kEplEdrvBufNotExisting;
             goto Exit;
         }
-    }
-#else
-    else
-    {
-        Ret = kEplEdrvNoFreeBufEntry;
-        goto Exit;
-    }
 #endif
+    }
 
     // test if requested entry is free
     pTxBuffer = &EplDllkInstance_g.m_pTxBuffer[uiHandle];
@@ -4751,7 +4843,6 @@ tEdrvTxBuffer  *pTxBuffer = NULL;
     }
 
     // setup Tx buffer
-//    pTxBuffer->m_EplMsgType = MsgType_p;
     pTxBuffer->m_uiMaxBufferLen = *puiFrameSize_p;
 
     Ret = EdrvAllocTxMsgBuffer(pTxBuffer);
@@ -4763,6 +4854,9 @@ tEdrvTxBuffer  *pTxBuffer = NULL;
     // because buffer size may be larger than requested
     // memorize real length of frame
     pTxBuffer->m_uiTxMsgLen = *puiFrameSize_p;
+    
+    // initialize time offset
+    pTxBuffer->m_dwTimeOffsetNs = 0;
 
     // fill whole frame with 0
     EPL_MEMSET(pTxBuffer->m_pbBuffer, 0, pTxBuffer->m_uiMaxBufferLen);
@@ -4780,6 +4874,7 @@ tEdrvTxBuffer  *pTxBuffer = NULL;
         switch (MsgType_p)
         {
             case kEplMsgTypeAsnd:
+            {
                 // destination MAC address
                 AmiSetQword48ToBe(&pTxFrame->m_be_abDstMac[0], EPL_C_DLL_MULTICAST_ASND);
                 // destination node ID
@@ -4792,57 +4887,86 @@ tEdrvTxBuffer  *pTxBuffer = NULL;
                         break;
                     }
 
-                    default:
+#if EPL_DLL_PRES_CHAINING_CN != FALSE
+                    case kEplDllAsndSyncResponse:
+                    {   // SyncResponse is send to MN
+                        AmiSetByteToLe(&pTxFrame->m_le_bDstNodeId, (BYTE) EPL_C_ADR_MN_DEF_NODE_ID);
+                        // SyncStatus: PResMode disabled / PResTimeFirst and PResTimeSecond invalid
+                        // AmiSetDwordToLe(&pTxFrame->m_Data.m_Asnd.m_Payload.m_SyncResponse.m_le_dwSyncStatus, 0);
+                        // init SyncNodeNumber
+                        // AmiSetDwordToLe(&pTxFrame->m_Data.m_Asnd.m_Payload.m_SyncResponse.m_le_dwSyncNodeNumber, 0);
+                        // init SyncDelay
+                        // AmiSetDwordToLe(&pTxFrame->m_Data.m_Asnd.m_Payload.m_SyncResponse.m_le_dwSyncDelay, 0);
                         break;
+                    }
+#endif
+                        
+                    default:
+                    {
+                        break;
+                    }
                 }
                 // ASnd Service ID
                 AmiSetByteToLe(&pTxFrame->m_Data.m_Asnd.m_le_bServiceId, ServiceId_p);
                 break;
-
-            case kEplMsgTypeSoc:
-                // destination MAC address
-                AmiSetQword48ToBe(&pTxFrame->m_be_abDstMac[0], EPL_C_DLL_MULTICAST_SOC);
-                // destination node ID
-                AmiSetByteToLe(&pTxFrame->m_le_bDstNodeId, (BYTE) EPL_C_ADR_BROADCAST);
-                // reset Flags
-                //AmiSetByteToLe(&pTxFrame->m_Data.m_Soc.m_le_bFlag1, (BYTE) 0);
-                //AmiSetByteToLe(&pTxFrame->m_Data.m_Soc.m_le_bFlag2, (BYTE) 0);
-                break;
-
-            case kEplMsgTypeSoa:
-                // destination MAC address
-                AmiSetQword48ToBe(&pTxFrame->m_be_abDstMac[0], EPL_C_DLL_MULTICAST_SOA);
-                // destination node ID
-                AmiSetByteToLe(&pTxFrame->m_le_bDstNodeId, (BYTE) EPL_C_ADR_BROADCAST);
-                // reset Flags
-                //AmiSetByteToLe(&pTxFrame->m_Data.m_Soa.m_le_bFlag1, (BYTE) 0);
-                //AmiSetByteToLe(&pTxFrame->m_Data.m_Soa.m_le_bFlag2, (BYTE) 0);
-                // EPL profile version
-                AmiSetByteToLe(&pTxFrame->m_Data.m_Soa.m_le_bEplVersion, (BYTE) EPL_SPEC_VERSION);
-                break;
+            }
 
             case kEplMsgTypePres:
+            {
                 // destination MAC address
                 AmiSetQword48ToBe(&pTxFrame->m_be_abDstMac[0], EPL_C_DLL_MULTICAST_PRES);
                 // destination node ID
                 AmiSetByteToLe(&pTxFrame->m_le_bDstNodeId, (BYTE) EPL_C_ADR_BROADCAST);
                 // reset Flags
-                //AmiSetByteToLe(&pTxFrame->m_Data.m_Pres.m_le_bFlag1, (BYTE) 0);
-                //AmiSetByteToLe(&pTxFrame->m_Data.m_Pres.m_le_bFlag2, (BYTE) 0);
+                // AmiSetByteToLe(&pTxFrame->m_Data.m_Pres.m_le_bFlag1, (BYTE) 0);
+                // AmiSetByteToLe(&pTxFrame->m_Data.m_Pres.m_le_bFlag2, (BYTE) 0);
                 // PDO size
-                //AmiSetWordToLe(&pTxFrame->m_Data.m_Pres.m_le_wSize, 0);
+                // AmiSetWordToLe(&pTxFrame->m_Data.m_Pres.m_le_wSize, 0);
                 break;
+            }
+
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
+            case kEplMsgTypeSoc:
+            {
+                // destination MAC address
+                AmiSetQword48ToBe(&pTxFrame->m_be_abDstMac[0], EPL_C_DLL_MULTICAST_SOC);
+                // destination node ID
+                AmiSetByteToLe(&pTxFrame->m_le_bDstNodeId, (BYTE) EPL_C_ADR_BROADCAST);
+                // reset Flags
+                // AmiSetByteToLe(&pTxFrame->m_Data.m_Soc.m_le_bFlag1, (BYTE) 0);
+                // AmiSetByteToLe(&pTxFrame->m_Data.m_Soc.m_le_bFlag2, (BYTE) 0);
+                break;
+            }
+
+            case kEplMsgTypeSoa:
+            {
+                // destination MAC address
+                AmiSetQword48ToBe(&pTxFrame->m_be_abDstMac[0], EPL_C_DLL_MULTICAST_SOA);
+                // destination node ID
+                AmiSetByteToLe(&pTxFrame->m_le_bDstNodeId, (BYTE) EPL_C_ADR_BROADCAST);
+                // reset Flags
+                // AmiSetByteToLe(&pTxFrame->m_Data.m_Soa.m_le_bFlag1, (BYTE) 0);
+                // AmiSetByteToLe(&pTxFrame->m_Data.m_Soa.m_le_bFlag2, (BYTE) 0);
+                // EPL profile version
+                AmiSetByteToLe(&pTxFrame->m_Data.m_Soa.m_le_bEplVersion, (BYTE) EPL_SPEC_VERSION);
+                break;
+            }
 
             case kEplMsgTypePreq:
+            {
                 // reset Flags
-                //AmiSetByteToLe(&pTxFrame->m_Data.m_Preq.m_le_bFlag1, (BYTE) 0);
-                //AmiSetByteToLe(&pTxFrame->m_Data.m_Preq.m_le_bFlag2, (BYTE) 0);
+                // AmiSetByteToLe(&pTxFrame->m_Data.m_Preq.m_le_bFlag1, (BYTE) 0);
+                // AmiSetByteToLe(&pTxFrame->m_Data.m_Preq.m_le_bFlag2, (BYTE) 0);
                 // PDO size
-                //AmiSetWordToLe(&pTxFrame->m_Data.m_Preq.m_le_wSize, 0);
+                // AmiSetWordToLe(&pTxFrame->m_Data.m_Preq.m_le_wSize, 0);
                 break;
+            }
+#endif
 
             default:
+            {
                 break;
+            }
         }
         // EPL message type
         AmiSetByteToLe(&pTxFrame->m_le_bMessageType, (BYTE) MsgType_p);
