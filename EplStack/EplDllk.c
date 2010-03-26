@@ -2120,6 +2120,19 @@ tEplKernel      Ret = kEplSuccessful;
             {
                 goto Exit;
             }
+
+#if EPL_DLL_PRES_CHAINING_CN != FALSE
+            // enable SyncReq Rx filter
+            EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_SOA_SYNCREQ].m_fEnable = TRUE;
+            Ret = EdrvChangeFilter(EplDllkInstance_g.m_aFilter,
+                                   EPL_DLLK_FILTER_COUNT,
+                                   EPL_DLLK_FILTER_SOA_SYNCREQ,
+                                   EDRV_FILTER_CHANGE_STATE);
+            if (Ret != kEplSuccessful)
+            {
+                goto Exit;
+            }
+#endif
 #endif
 
             // update PRes (for sudden changes to PreOp2)
