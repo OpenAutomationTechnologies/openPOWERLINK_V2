@@ -290,6 +290,10 @@ typedef struct
     DWORD               m_dwSyncResLatency;
     unsigned int        m_uiSyncReqPrevNodeId;
     tEplTgtTimeStamp*   m_pSyncReqPrevTimeStamp;
+
+    BOOL                m_fPrcEnabled;
+    DWORD               m_dwPrcPResTimeFirst;
+    DWORD               m_dwPrcPResFallBackTimeout;
 #endif
 
 } tEplDllkInstance;
@@ -3886,155 +3890,226 @@ TGT_DLLK_DECLARE_FLAGS
 
                 // check ServiceId
                 ReqServiceId = (tEplDllReqServiceId) AmiGetByteFromLe(&pFrame->m_Data.m_Soa.m_le_bReqServiceId);
-                if (ReqServiceId == kEplDllReqServiceStatus)
-                {   // StatusRequest
+                switch (ReqServiceId)
+                {
+                    case kEplDllReqServiceStatus:
+                    {   // StatusRequest
 #if (EDRV_AUTO_RESPONSE == FALSE)
-                    // Auto-response is not available
-                    pTxBuffer = &EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_STATUSRES];
-                    if (pTxBuffer->m_pbBuffer != NULL)
-                    {   // StatusRes does exist
-
-                        // send StatusRes
-                        Ret = EdrvSendTxMsg(pTxBuffer);
-                        if (Ret != kEplSuccessful)
-                        {
-                            goto Exit;
-                        }
-                        TGT_DBG_SIGNAL_TRACE_POINT(8);
-                    }
-                    else
-                    {   // no frame transmitted
-                        pTxBuffer = NULL;
-                    }
-#endif
-
-                    // update error signaling
-                    bFlag1 = AmiGetByteFromLe(&pFrame->m_Data.m_Soa.m_le_bFlag1);
-                    if (((bFlag1 ^ EplDllkInstance_g.m_bMnFlag1) & EPL_FRAME_FLAG1_ER) != 0)
-                    {   // exception reset flag was changed by MN
-                        // assume same state for EC in next cycle (clear all other bits)
-                        if ((bFlag1 & EPL_FRAME_FLAG1_ER) != 0)
-                        {
-                            // set EC and reset rest
-                            EplDllkInstance_g.m_bFlag1 = EPL_FRAME_FLAG1_EC;
-                        }
-                        else
-                        {
-                            // reset entire flag 1 (including EC and EN)
-                            EplDllkInstance_g.m_bFlag1 = 0;
-                        }
-
-                        // signal update of StatusRes
-                        Event.m_EventSink = kEplEventSinkDllk;
-                        Event.m_EventType = kEplEventTypeDllkFlag1;
-                        Event.m_uiSize = 0;
-                        Event.m_pArg = NULL;
-                        Ret = EplEventkPost(&Event);
-                        if (Ret != kEplSuccessful)
-                        {
-                            goto Exit;
-                        }
-                    }
-                    // save flag 1 from MN for Status request response cycle
-                    // $$$ d.k. only in PreOp1 and when async-only or not accessed isochronously
-                    EplDllkInstance_g.m_bMnFlag1 = bFlag1;
-
-                }
-                else if (ReqServiceId == kEplDllReqServiceIdent)
-                {   // IdentRequest
-#if (EDRV_AUTO_RESPONSE == FALSE)
-                    // Auto-response is not available
-                    pTxBuffer = &EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_IDENTRES];
-                    if (pTxBuffer->m_pbBuffer != NULL)
-                    {   // IdentRes does exist
-                        // send IdentRes
-                        Ret = EdrvSendTxMsg(pTxBuffer);
-                        if (Ret != kEplSuccessful)
-                        {
-                            goto Exit;
-                        }
-                        TGT_DBG_SIGNAL_TRACE_POINT(7);
-                    }
-                    else
-                    {   // no frame transmitted
-                        pTxBuffer = NULL;
-                    }
-#endif
-                }
-                else if (ReqServiceId == kEplDllReqServiceNmtRequest)
-                {   // NmtRequest
-#if (EDRV_AUTO_RESPONSE == FALSE)
-                    // Auto-response is not available
-                    pTxBuffer = &EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_NMTREQ];
-                    if (pTxBuffer->m_pbBuffer != NULL)
-                    {   // NmtRequest does exist
-                        // check if frame is not empty and not being filled
-                        if (pTxBuffer->m_uiTxMsgLen > EPL_DLLK_BUFLEN_FILLING)
-                        {
-                            // send NmtRequest
+                        // Auto-response is not available
+                        pTxBuffer = &EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_STATUSRES];
+                        if (pTxBuffer->m_pbBuffer != NULL)
+                        {   // StatusRes does exist
+    
+                            // send StatusRes
                             Ret = EdrvSendTxMsg(pTxBuffer);
                             if (Ret != kEplSuccessful)
                             {
                                 goto Exit;
                             }
+                            TGT_DBG_SIGNAL_TRACE_POINT(8);
+                        }
+                        else
+                        {   // no frame transmitted
+                            pTxBuffer = NULL;
+                        }
+#endif
 
-                            // decrement RS in Flag 2
-                            // The real update will be done later on event FillTx,
-                            // but for now it assures that a quite good value gets via the SoA event into the next PRes.
-                            if ((EplDllkInstance_g.m_bFlag2 & EPL_FRAME_FLAG2_RS) != 0)
+                        // update error signaling
+                        bFlag1 = AmiGetByteFromLe(&pFrame->m_Data.m_Soa.m_le_bFlag1);
+                        if (((bFlag1 ^ EplDllkInstance_g.m_bMnFlag1) & EPL_FRAME_FLAG1_ER) != 0)
+                        {   // exception reset flag was changed by MN
+                            // assume same state for EC in next cycle (clear all other bits)
+                            if ((bFlag1 & EPL_FRAME_FLAG1_ER) != 0)
                             {
-                                EplDllkInstance_g.m_bFlag2--;
+                                // set EC and reset rest
+                                EplDllkInstance_g.m_bFlag1 = EPL_FRAME_FLAG1_EC;
+                            }
+                            else
+                            {
+                                // reset entire flag 1 (including EC and EN)
+                                EplDllkInstance_g.m_bFlag1 = 0;
+                            }
+    
+                            // signal update of StatusRes
+                            Event.m_EventSink = kEplEventSinkDllk;
+                            Event.m_EventType = kEplEventTypeDllkFlag1;
+                            Event.m_uiSize = 0;
+                            Event.m_pArg = NULL;
+                            Ret = EplEventkPost(&Event);
+                            if (Ret != kEplSuccessful)
+                            {
+                                goto Exit;
+                            }
+                        }
+                        // save flag 1 from MN for Status request response cycle
+                        // $$$ d.k. only in PreOp1 and when async-only or not accessed isochronously
+                        EplDllkInstance_g.m_bMnFlag1 = bFlag1;
+                        break;
+                    }
+                    
+                    case kEplDllReqServiceIdent:
+                    {   // IdentRequest
+#if (EDRV_AUTO_RESPONSE == FALSE)
+                        // Auto-response is not available
+                        pTxBuffer = &EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_IDENTRES];
+                        if (pTxBuffer->m_pbBuffer != NULL)
+                        {   // IdentRes does exist
+                            // send IdentRes
+                            Ret = EdrvSendTxMsg(pTxBuffer);
+                            if (Ret != kEplSuccessful)
+                            {
+                                goto Exit;
+                            }
+                            TGT_DBG_SIGNAL_TRACE_POINT(7);
+                        }
+                        else
+                        {   // no frame transmitted
+                            pTxBuffer = NULL;
+                        }
+#endif
+                        break;
+                    }
+                    
+                    case kEplDllReqServiceNmtRequest:
+                    {   // NmtRequest
+#if (EDRV_AUTO_RESPONSE == FALSE)
+                        // Auto-response is not available
+                        pTxBuffer = &EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_NMTREQ];
+                        if (pTxBuffer->m_pbBuffer != NULL)
+                        {   // NmtRequest does exist
+                            // check if frame is not empty and not being filled
+                            if (pTxBuffer->m_uiTxMsgLen > EPL_DLLK_BUFLEN_FILLING)
+                            {
+                                // send NmtRequest
+                                Ret = EdrvSendTxMsg(pTxBuffer);
+                                if (Ret != kEplSuccessful)
+                                {
+                                    goto Exit;
+                                }
+    
+                                // decrement RS in Flag 2
+                                // The real update will be done later on event FillTx,
+                                // but for now it assures that a quite good value gets via the SoA event into the next PRes.
+                                if ((EplDllkInstance_g.m_bFlag2 & EPL_FRAME_FLAG2_RS) != 0)
+                                {
+                                    EplDllkInstance_g.m_bFlag2--;
+                                }
+                            }
+                            else
+                            {   // no frame transmitted
+                                pTxBuffer = NULL;
                             }
                         }
                         else
                         {   // no frame transmitted
                             pTxBuffer = NULL;
                         }
+#endif
+                        break;
                     }
-                    else
-                    {   // no frame transmitted
-                        pTxBuffer = NULL;
+                    
+#if EPL_DLL_PRES_CHAINING_CN != FALSE
+                    case kEplDllReqServiceSync:
+                    {   // SyncRequest
+                    DWORD   dwSyncControl;
+                    BYTE    be_abDestMacAddress[6];
+                    tEplDllkPrcCycleTiming  PrcCycleTiming;
+                    
+                        dwSyncControl = AmiGetDwordFromLe(&pFrame->m_Data.m_Soa.m_Payload.m_SyncRequest.m_le_dwSyncControl);
+                        AmiSetQword48ToBe(be_abDestMacAddress, AmiGetQword48FromLe(pFrame->m_Data.m_Soa.m_Payload.m_SyncRequest.m_le_abDestMacAddress));
+                        
+#warning TODO compare MAC
+//                        if ((dwSyncControl & EPL_SYNC_DEST_MAC_ADDRESS_VALID) &&
+//                            (be_abDestMacAddress[0] || be_abDestMacAddress[1] || be_abDestMacAddress[2] ||
+//                             be_abDestMacAddress[3] || be_abDestMacAddress[4] || be_abDestMacAddress[5]   ) &&
+//                            (!EPL_MEMCMP(be_abDestMacAddress, EplDllkInstance_g.m_be_abSrcMac)))
+//                        {   // DestMacAddress valid but unequal to own MAC address
+//                            break;
+//                        }
+
+                        PrcCycleTiming.m_dwPResTimeFirstNs = AmiGetDwordFromLe(&pFrame->m_Data.m_Soa.m_Payload.m_SyncRequest.m_le_dwPResTimeFirst);
+
+                        if (dwSyncControl & EPL_SYNC_PRES_TIME_FIRST_VALID)
+                        {
+                            EplDllkInstance_g.m_dwPrcPResTimeFirst = PrcCycleTiming.m_dwPResTimeFirstNs;
+                        }
+
+                        if (dwSyncControl & EPL_SYNC_PRES_FALL_BACK_TIMEOUT_VALID)
+                        {
+                            EplDllkInstance_g.m_dwPrcPResFallBackTimeout = AmiGetDwordFromLe(&pFrame->m_Data.m_Soa.m_Payload.m_SyncRequest.m_le_dwPResFallBackTimeout);
+                        }
+
+                        if (dwSyncControl & EPL_SYNC_PRES_MODE_RESET)
+                        {
+                            // PResModeReset overrules PResModeSet
+                            dwSyncControl &= ~EPL_SYNC_PRES_MODE_SET;
+                            
+#warning TODO EplDllkPResChainingDisable();
+                        }
+                        else if (dwSyncControl & EPL_SYNC_PRES_MODE_SET)
+                        {   // PRes Chaining is Enabled
+#warning TODO EplDllkPResChainingEnable();
+                        }
+
+                        PrcCycleTiming.m_dwPResTimeSecondNs = AmiGetDwordFromLe(&pFrame->m_Data.m_Soa.m_Payload.m_SyncRequest.m_le_dwPResTimeSecond);
+                        PrcCycleTiming.m_dwSyncMNDelayFirstNs = AmiGetDwordFromLe(&pFrame->m_Data.m_Soa.m_Payload.m_SyncRequest.m_le_dwSyncMnDelayFirst);
+                        PrcCycleTiming.m_dwSyncMNDelaySecondNs = AmiGetDwordFromLe(&pFrame->m_Data.m_Soa.m_Payload.m_SyncRequest.m_le_dwSyncMnDelaySecond);
+                    
+                        PrcCycleTiming.m_dwSyncControl = dwSyncControl & (EPL_SYNC_PRES_TIME_FIRST_VALID
+                                                                          | EPL_SYNC_PRES_TIME_SECOND_VALID
+                                                                          | EPL_SYNC_SYNC_MN_DELAY_FIRST_VALID
+                                                                          | EPL_SYNC_SYNC_MN_DELAY_SECOND_VALID
+                                                                          | EPL_SYNC_PRES_MODE_RESET
+                                                                          | EPL_SYNC_PRES_MODE_SET);
+
+#warning TODO CbUpdatePrcCycleTiming
+
+                        break;
                     }
 #endif
-                }
-                else if (ReqServiceId == kEplDllReqServiceUnspecified)
-                {   // unspecified invite
+                    
+                    case kEplDllReqServiceUnspecified:
+                    {   // unspecified invite
 #if (EDRV_AUTO_RESPONSE == FALSE)
-                    // Auto-response is not available
-                    pTxBuffer = &EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_NONEPL];
-                    if (pTxBuffer->m_pbBuffer != NULL)
-                    {   // non-EPL frame does exist
-                        // check if frame is not empty and not being filled
-                        if (pTxBuffer->m_uiTxMsgLen > EPL_DLLK_BUFLEN_FILLING)
-                        {
-                            // send non-EPL frame
-                            Ret = EdrvSendTxMsg(pTxBuffer);
-                            if (Ret != kEplSuccessful)
+                        // Auto-response is not available
+                        pTxBuffer = &EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_NONEPL];
+                        if (pTxBuffer->m_pbBuffer != NULL)
+                        {   // non-EPL frame does exist
+                            // check if frame is not empty and not being filled
+                            if (pTxBuffer->m_uiTxMsgLen > EPL_DLLK_BUFLEN_FILLING)
                             {
-                                goto Exit;
+                                // send non-EPL frame
+                                Ret = EdrvSendTxMsg(pTxBuffer);
+                                if (Ret != kEplSuccessful)
+                                {
+                                    goto Exit;
+                                }
+    
+                                // decrement RS in Flag 2
+                                // The real update will be done later on event FillTx,
+                                // but for now it assures that a quite good value gets via the SoA event into the next PRes.
+                                if ((EplDllkInstance_g.m_bFlag2 & EPL_FRAME_FLAG2_RS) != 0)
+                                {
+                                    EplDllkInstance_g.m_bFlag2--;
+                                }
                             }
-
-                            // decrement RS in Flag 2
-                            // The real update will be done later on event FillTx,
-                            // but for now it assures that a quite good value gets via the SoA event into the next PRes.
-                            if ((EplDllkInstance_g.m_bFlag2 & EPL_FRAME_FLAG2_RS) != 0)
-                            {
-                                EplDllkInstance_g.m_bFlag2--;
+                            else
+                            {   // no frame transmitted
+                                pTxBuffer = NULL;
                             }
                         }
                         else
                         {   // no frame transmitted
                             pTxBuffer = NULL;
                         }
-                    }
-                    else
-                    {   // no frame transmitted
-                        pTxBuffer = NULL;
-                    }
 #endif
-                }
-                else if (ReqServiceId == kEplDllReqServiceNo)
-                {   // no async service requested -> do nothing
+                        break;
+                    }
+                    
+                    case kEplDllReqServiceNo:
+                    {   // no async service requested -> do nothing
+                        break;
+                    }
                 }
             }
 #if EPL_DLL_PRES_CHAINING_CN != FALSE
@@ -4146,6 +4221,8 @@ TGT_DLLK_DECLARE_FLAGS
                         // update SyncRes frame (SyncDelay and SyncNodeNumber)
                         AmiSetDwordToLe(&pTxFrameSyncRes->m_Data.m_Asnd.m_Payload.m_SyncResponse.m_le_dwSyncDelay, dwSyncDelayNs);
                         AmiSetDwordToLe(&pTxFrameSyncRes->m_Data.m_Asnd.m_Payload.m_SyncResponse.m_le_dwSyncNodeNumber, (DWORD) uiNodeId);
+
+#warning TODO CbUpdateRelativeLatencyDiff
                     }
                     else
                     {

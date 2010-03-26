@@ -120,6 +120,16 @@ struct _tEplDllkNodeInfo
 
 typedef struct _tEplDllkNodeInfo tEplDllkNodeInfo;
 
+typedef struct
+{
+    DWORD   m_dwSyncControl;
+    DWORD   m_dwPResTimeFirstNs;
+    DWORD   m_dwPResTimeSecondNs;
+    DWORD   m_dwSyncMNDelayFirstNs;
+    DWORD   m_dwSyncMNDelaySecondNs;
+
+} tEplDllkPrcCycleTiming;
+
 
 // callback function for frame processing
 typedef tEplKernel (* tEplDllkCbProcessRpdo) (tEplFrameInfo * pFrameInfo_p);
