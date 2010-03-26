@@ -81,7 +81,7 @@
 
 
 #ifndef EPL_DLL_MAX_ASND_SERVICE_ID
-#define EPL_DLL_MAX_ASND_SERVICE_ID (EPL_C_DLL_MAX_ASND_SERVICE_IDS + 1)    // last is kEplDllAsndSdo == 5
+#define EPL_DLL_MAX_ASND_SERVICE_ID (EPL_C_DLL_MAX_ASND_SERVICE_IDS + 1)
 #endif
 
 //---------------------------------------------------------------------------
@@ -95,8 +95,10 @@ typedef enum
     kEplDllAsndStatusResponse   = 0x02,
     kEplDllAsndNmtRequest       = 0x03,
     kEplDllAsndNmtCommand       = 0x04,
-    kEplDllAsndSdo              = 0x05
-
+    kEplDllAsndSdo              = 0x05,
+#if EPL_DLL_PRES_CHAINING_CN != FALSE
+    kEplDllAsndSyncResponse     = 0x06
+#endif
 } tEplDllAsndServiceId;
 
 typedef enum
@@ -112,6 +114,9 @@ typedef enum
     kEplDllReqServiceIdent      = 0x01,
     kEplDllReqServiceStatus     = 0x02,
     kEplDllReqServiceNmtRequest = 0x03,
+#if EPL_DLL_PRES_CHAINING_CN != FALSE
+    kEplDllReqServiceSync       = 0x06,
+#endif
     kEplDllReqServiceUnspecified= 0xFF,
 
 } tEplDllReqServiceId;

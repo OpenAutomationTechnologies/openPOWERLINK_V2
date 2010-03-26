@@ -116,6 +116,15 @@
 #define EPL_FRAME_OFFSET_SRC_NODEID     16
 #define EPL_FRAME_OFFSET_PDO_PAYLOAD    24
 
+// defines for bit fields SyncControl and SyncStatus
+#define EPL_SYNC_PRES_TIME_FIRST_VALID          0x00000001
+#define EPL_SYNC_PRES_TIME_SECOND_VALID         0x00000002
+#define EPL_SYNC_SYNC_MN_DELAY_FIRST_VALID      0x00000004
+#define EPL_SYNC_SYNC_MN_DELAY_SECOND_VALID     0x00000008
+#define EPL_SYNC_PRES_FALL_BACK_TIMEOUT_VALID   0x00000010
+#define EPL_SYNC_DEST_MAC_ADDRESS_VALID         0x00000020
+#define EPL_SYNC_PRES_MODE_RESET                0x40000000
+#define EPL_SYNC_PRES_MODE_SET                  0x80000000
 
 //---------------------------------------------------------------------------
 // typedef
@@ -191,6 +200,27 @@ typedef struct
 
 typedef struct
 {
+    // Offset 23
+    BYTE                    m_le_bReserved;
+    DWORD                   m_le_dwSyncControl;
+    DWORD                   m_le_dwPResTimeFirst;
+    DWORD                   m_le_dwPResTimeSecond;
+    DWORD                   m_le_dwSyncMnDelayFirst;
+    DWORD                   m_le_dwSyncMnDelaySecond;
+    DWORD                   m_le_dwPResFallBackTimeout;
+    BYTE                    m_le_abDestMacAddress[6];
+    
+} PACK_STRUCT tEplSyncRequest;
+
+typedef union
+{
+    // Offset 23
+    tEplSyncRequest         m_SyncRequest;
+
+} tEplSoaPayload;
+
+typedef struct
+{
     // Offset 17
     BYTE                    m_le_bNmtStatus;                // NMT state
     // Offset 18
@@ -203,6 +233,8 @@ typedef struct
     BYTE                    m_le_bReqServiceTarget;
     // Offset 22
     BYTE                    m_le_bEplVersion;
+    // Offset 23
+    tEplSoaPayload          m_Payload;
 
 } PACK_STRUCT tEplSoaFrame;
 
@@ -271,6 +303,19 @@ typedef struct
 
 typedef struct
 {
+    // Offset 18
+    WORD                    m_le_wReserved;
+    DWORD                   m_le_dwSyncStatus;
+    DWORD                   m_le_dwLatency;
+    DWORD                   m_le_dwSyncNodeNumber;
+    DWORD                   m_le_dwSyncDelay;
+    DWORD                   m_le_dwPResTimeFirst;
+    DWORD                   m_le_dwPResTimeSecond;
+    
+} PACK_STRUCT tEplSyncResponse;
+
+typedef struct
+{
     BYTE                    m_le_bReserved;
     BYTE                    m_le_bTransactionId;
     BYTE                    m_le_bFlags;
@@ -310,6 +355,7 @@ typedef union
     tEplNmtCommandService   m_NmtCommandService;
     tEplNmtRequestService   m_NmtRequestService;
     tEplAsySdoSeq           m_SdoSequenceFrame;
+    tEplSyncResponse        m_SyncResponse;
     BYTE                    m_le_abPayload[256 /*D_NMT_ASndTxMaxPayload_U16
                                         / D_NMT_ASndRxMaxPayload_U16*/];
 

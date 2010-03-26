@@ -90,6 +90,9 @@ typedef struct
 {
     BYTE                m_be_abSrcMac[6];
     tEplHwParam         m_HwParam;
+#if EPL_DLL_PRES_CHAINING_CN != FALSE
+    DWORD               m_dwSyncResLatency;
+#endif
 
 } tEplDllkInitParam;
 

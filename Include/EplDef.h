@@ -110,6 +110,7 @@
 #define EPL_C_DLL_MINSIZE_SOA       24   // minimum size of SoA without padding and CRC
 #define EPL_C_DLL_MINSIZE_IDENTRES  176  // minimum size of IdentResponse without CRC
 #define EPL_C_DLL_MINSIZE_STATUSRES 72   // minimum size of StatusResponse without CRC
+#define EPL_C_DLL_MINSIZE_SYNCRES   44   // minimum size of SyncResponse without padding and CRC
 #define EPL_C_DLL_MINSIZE_NMTCMD    20   // minimum size of NmtCommand without CommandData, padding and CRC
 #define EPL_C_DLL_MINSIZE_NMTCMDEXT 52   // minimum size of NmtCommand without padding and CRC
 #define EPL_C_DLL_MINSIZE_NMTREQ    20   // minimum size of NmtRequest without CommandData, padding and CRC
@@ -124,7 +125,11 @@
 #define EPL_C_NMT_STATREQ_CYCLE     5    // sec: StatusRequest cycle time to be applied to AsyncOnly CNs
 #define EPL_C_SDO_EPL_PORT          3819
 
-#define EPL_C_DLL_MAX_ASND_SERVICE_IDS  5   // see tEplDllAsndServiceId in EplDll.h
+#if EPL_DLL_PRES_CHAINING_CN == FALSE
+  #define EPL_C_DLL_MAX_ASND_SERVICE_IDS  5   // see tEplDllAsndServiceId in EplDll.h
+#else
+  #define EPL_C_DLL_MAX_ASND_SERVICE_IDS  6
+#endif
 
 #define EPL_DLL_MACADDR_MASK        0xFFFFFFFFFFFFLL // MAC address mask, canonical form
 
