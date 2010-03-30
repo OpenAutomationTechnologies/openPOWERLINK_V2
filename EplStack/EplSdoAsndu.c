@@ -103,7 +103,7 @@ typedef struct
 } tEplSdoAsndInstance;
 
 //---------------------------------------------------------------------------
-// modul globale vars
+// module global vars
 //---------------------------------------------------------------------------
 
 static tEplSdoAsndInstance  SdoAsndInstance_g;

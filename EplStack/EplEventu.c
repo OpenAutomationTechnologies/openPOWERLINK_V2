@@ -126,7 +126,7 @@ typedef struct
 }tEplEventuInstance;
 
 //---------------------------------------------------------------------------
-// modul globale vars
+// module global vars
 //---------------------------------------------------------------------------
 
 //#if EPL_USE_SHAREDBUFF == FALSE

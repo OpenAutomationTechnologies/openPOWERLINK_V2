@@ -267,7 +267,7 @@ static int EdrvRemoveOne(struct platform_device *pPlatformDev_p);
 
 
 //---------------------------------------------------------------------------
-// module globale vars
+// module global vars
 //---------------------------------------------------------------------------
 
 

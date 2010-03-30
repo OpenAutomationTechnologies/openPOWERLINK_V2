@@ -126,7 +126,7 @@ typedef struct
 } tEplErrorHandlerkInstance;
 
 //---------------------------------------------------------------------------
-// modul globale vars
+// module global vars
 //---------------------------------------------------------------------------
 
 static tEplErrorHandlerkInstance EplErrorHandlerkInstance_g;

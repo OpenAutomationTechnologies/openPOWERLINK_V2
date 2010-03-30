@@ -131,7 +131,7 @@ typedef struct
 
 
 //---------------------------------------------------------------------------
-// modul globale vars
+// module global vars
 //---------------------------------------------------------------------------
 
 static tEplEventkInstance EplEventkInstance_g;

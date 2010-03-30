@@ -118,7 +118,7 @@ typedef struct
 
 
 //---------------------------------------------------------------------------
-// module globale vars
+// module global vars
 //---------------------------------------------------------------------------
 
 static tEdrvCyclicInstance EdrvCyclicInstance_l;

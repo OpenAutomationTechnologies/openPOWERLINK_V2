@@ -228,7 +228,7 @@ int                     ShbIpcThreadSignalJobReady  (void* pvThreadParam_p);
 #endif
 
 //---------------------------------------------------------------------------
-// modul globale vars
+// module global vars
 //---------------------------------------------------------------------------
 
 #if !defined(SHBIPC_INLINE_ENABLED)

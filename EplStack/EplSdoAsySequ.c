@@ -186,7 +186,7 @@ typedef struct
 }tEplAsySdoSequInstance;
 
 //---------------------------------------------------------------------------
-// modul globale vars
+// module global vars
 //---------------------------------------------------------------------------
 
 static tEplAsySdoSequInstance   AsySdoSequInstance_g;

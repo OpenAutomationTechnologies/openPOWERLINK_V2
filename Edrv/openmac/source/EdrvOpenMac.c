@@ -153,7 +153,7 @@ static void EdrvTimerInterruptHandler (void* pArg_p, alt_u32 dwInt_p);
 
 
 //---------------------------------------------------------------------------
-// module globale vars
+// module global vars
 //---------------------------------------------------------------------------
 
 

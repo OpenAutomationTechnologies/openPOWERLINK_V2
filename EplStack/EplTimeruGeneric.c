@@ -125,7 +125,7 @@ typedef struct
 } tEplTimeruInstance;
 
 //---------------------------------------------------------------------------
-// modul globale vars
+// module global vars
 //---------------------------------------------------------------------------
 
 static tEplTimeruInstance EplTimeruInstance_g;

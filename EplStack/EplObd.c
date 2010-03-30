@@ -119,7 +119,7 @@ typedef union
 
 
 //---------------------------------------------------------------------------
-// modul globale vars
+// module global vars
 //---------------------------------------------------------------------------
 
 // This macro replace the unspecific pointer to an instance through

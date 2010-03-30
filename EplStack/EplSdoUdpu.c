@@ -126,7 +126,7 @@ typedef struct
 } tEplSdoUdpInstance;
 
 //---------------------------------------------------------------------------
-// modul globale vars
+// module global vars
 //---------------------------------------------------------------------------
 
 static tEplSdoUdpInstance  SdoUdpInstance_g;

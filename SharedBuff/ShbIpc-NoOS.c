@@ -219,7 +219,7 @@ static tShbError        ShbIpcProcessJobReady (void);
 #endif
 
 //---------------------------------------------------------------------------
-// module globale vars
+// module global vars
 //---------------------------------------------------------------------------
 
 #if !defined(SHBIPC_INLINE_ENABLED)

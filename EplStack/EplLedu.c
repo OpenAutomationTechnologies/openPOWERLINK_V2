@@ -125,7 +125,7 @@ typedef struct
 
 
 //---------------------------------------------------------------------------
-// modul globale vars
+// module global vars
 //---------------------------------------------------------------------------
 
 static tEplLeduInstance   EplLeduInstance_g;

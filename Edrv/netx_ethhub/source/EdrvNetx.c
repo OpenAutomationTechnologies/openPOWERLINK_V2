@@ -230,7 +230,7 @@ static int EdrvRemoveOne(struct platform_device *pPlatformDev_p);
 
 
 //---------------------------------------------------------------------------
-// modul globale vars
+// module global vars
 //---------------------------------------------------------------------------
 // buffers and buffer descriptors and pointers
 

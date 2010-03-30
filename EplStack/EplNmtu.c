@@ -102,7 +102,7 @@ typedef struct
 } tEplNmtuInstance;
 
 //---------------------------------------------------------------------------
-// modul globale vars
+// module global vars
 //---------------------------------------------------------------------------
 
 static tEplNmtuInstance EplNmtuInstance_g;

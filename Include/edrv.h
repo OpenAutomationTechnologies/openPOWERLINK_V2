@@ -101,7 +101,7 @@
                                      | EDRV_FILTER_CHANGE_STATE \
                                      | EDRV_FILTER_CHANGE_AUTO_RESPONSE \
                                      | (EDRV_AUTO_RESPONSE_DELAY ? EDRV_FILTER_CHANGE_AUTO_RESPONSE_DELAY : 0))
-                                     
+
 
 #ifndef EDRV_USE_DIAGNOSTICS
 #define EDRV_USE_DIAGNOSTICS    FALSE

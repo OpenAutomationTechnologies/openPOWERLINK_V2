@@ -316,7 +316,7 @@ static void EdrvRemoveOne(struct pci_dev *pPciDev);
 
 
 //---------------------------------------------------------------------------
-// module globale vars
+// module global vars
 //---------------------------------------------------------------------------
 // buffers and buffer descriptors and pointers
 

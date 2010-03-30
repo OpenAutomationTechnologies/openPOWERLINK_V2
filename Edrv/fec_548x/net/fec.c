@@ -208,7 +208,7 @@ struct eth_if
 
 
 //---------------------------------------------------------------------------
-// modul globale vars
+// module global vars
 //---------------------------------------------------------------------------
 // buffers and buffer descriptors and pointers
 

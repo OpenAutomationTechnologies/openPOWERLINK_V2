@@ -119,7 +119,7 @@ INSTANCE_TYPE_BEGIN
 
 INSTANCE_TYPE_END
 //---------------------------------------------------------------------------
-// modul globale vars
+// module global vars
 //---------------------------------------------------------------------------
 // This macro replace the unspecific pointer to an instance through
 // the modul specific type for the local instance table. This macro
