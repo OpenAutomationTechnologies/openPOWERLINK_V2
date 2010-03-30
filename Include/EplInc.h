@@ -124,6 +124,7 @@
 #define EPL_MODULE_VETH        0x00008000L // virtual ethernet driver module
 #define EPL_MODULE_PDOU        0x00010000L // PDO user part module
 #define EPL_MODULE_LEDU        0x00020000L // LED user part module
+#define EPL_MODULE_GW309ASCII  0x00040000L // ASCII Gateway according to CiA309 part 3
 
 #include "EplCfg.h"     // EPL configuration file (configuration from application)
 

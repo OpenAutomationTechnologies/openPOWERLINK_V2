@@ -184,6 +184,8 @@ typedef enum
                                         // arg is pointer to tEplPdoChannelConf
     kEplEventTypeNmtMnuNodeCmd  = 0x22, // trigger NMT node command
                                         // arg is pointer to tEplNmtMnuNodeCmd
+    kEplEventTypeGw309AsciiReq  = 0x23, // GW309ASCII request
+                                        // arg is pointer to pointer of tEplGw309AsciiRequest
 
 } tEplEventType;
 
@@ -204,6 +206,7 @@ typedef enum
     kEplEventSinkNmtMnu         = 0x0A, // events for NmtMnu module
     kEplEventSinkLedu           = 0x0B, // events for Ledu module
     kEplEventSinkPdokCal        = 0x0C, // events for PdokCal module
+    kEplEventSinkGw309Ascii     = 0x0E, // events for GW309ASCII module
     kEplEventSinkApi            = 0x0F, // events for API module
 
 } tEplEventSink;
@@ -237,6 +240,7 @@ typedef enum
     kEplEventSourceEventu       = 0x1B, // Eventu module
     kEplEventSourceEplApi       = 0x1C, // Api module
     kEplEventSourceLedu         = 0x1D, // Ledu module
+    kEplEventSourceGw309Ascii   = 0x1E, // GW309ASCII module
 
 } tEplEventSource;
 
