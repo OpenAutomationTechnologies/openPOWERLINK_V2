@@ -165,8 +165,8 @@ Slides*             pSlides;
 //    EplApiInitParam.m_abMacAddress[5] = (BYTE) EplApiInitParam.m_uiNodeId;
     EplApiInitParam.m_dwFeatureFlags = -1;
     EplApiInitParam.m_dwCycleLen = CYCLE_LEN;     // required for error detection
-    EplApiInitParam.m_uiIsochrTxMaxPayload = 100; // const
-    EplApiInitParam.m_uiIsochrRxMaxPayload = 100; // const
+    EplApiInitParam.m_uiIsochrTxMaxPayload = 256; // const
+    EplApiInitParam.m_uiIsochrRxMaxPayload = 256; // const
     EplApiInitParam.m_dwPresMaxLatency = 50000;  // const; only required for IdentRes
     EplApiInitParam.m_uiPreqActPayloadLimit = 36; // required for initialisation (+28 bytes)
     EplApiInitParam.m_uiPresActPayloadLimit = 36; // required for initialisation of Pres frame (+28 bytes)

@@ -58,13 +58,15 @@ if [ -d /etc/udev/rules.d ] ; then
     cp 50-openPOWERLINK.rules /etc/udev/rules.d
 fi
 
-cdcfile=`dirname $(readlink -f ${0})`/mnobd.cdc
+if [ -z $CDCFILE ] ; then
+CDCFILE=`dirname $(readlink -f ${0})`/mnobd.cdc
+fi
 
-echo "Loading EPL module with CDC=${cdcfile}..."
+echo "Loading EPL module with CDC=${CDCFILE}..."
 
 # invoke insmod with all arguments we got
 # and use a pathname, as insmod doesn't look in . by default
-/sbin/insmod `dirname $0`/$module.ko cdc="$cdcfile" $*
+/sbin/insmod `dirname $0`/$module.ko cdc="$CDCFILE" $*
 
 if [ "$?" -ne "0" ] ; then
   echo " Loading of EPL module failed"

@@ -204,7 +204,7 @@
 #define EPL_TIMER_USE_HIGHRES              TRUE
 //#define EPL_TIMER_USE_HIGHRES              FALSE
 
-#define EPL_CFM_CONFIGURE_CYCLE_LENGTH      TRUE
+//#define EPL_CFM_CONFIGURE_CYCLE_LENGTH      TRUE
 
 
 // =========================================================================
