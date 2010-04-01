@@ -94,13 +94,16 @@
 #define EDRV_FILTER_CHANGE_AUTO_RESPONSE        0x08  // filter auto-resp. state changed
 #if EDRV_AUTO_RESPONSE_DELAY != FALSE
 #define EDRV_FILTER_CHANGE_AUTO_RESPONSE_DELAY  0x10  // filter auto-resp. delay changed
+#define EDRV_FILTER_CHANGE_AUTO_RESPONSE_DELAY_DEF  EDRV_FILTER_CHANGE_AUTO_RESPONSE_DELAY
+#else
+#define EDRV_FILTER_CHANGE_AUTO_RESPONSE_DELAY_DEF  0
 #endif
 
 #define EDRV_FILTER_CHANGE_ALL      (EDRV_FILTER_CHANGE_VALUE \
                                      | EDRV_FILTER_CHANGE_MASK \
                                      | EDRV_FILTER_CHANGE_STATE \
                                      | EDRV_FILTER_CHANGE_AUTO_RESPONSE \
-                                     | (EDRV_AUTO_RESPONSE_DELAY ? EDRV_FILTER_CHANGE_AUTO_RESPONSE_DELAY : 0))
+                                     | EDRV_FILTER_CHANGE_AUTO_RESPONSE_DELAY_DEF)
 
 
 #ifndef EDRV_USE_DIAGNOSTICS
