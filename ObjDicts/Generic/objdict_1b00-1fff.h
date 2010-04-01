@@ -113,7 +113,7 @@
         EPL_OBD_END_INDEX(0x1F89)
 
         // Object 1F8Ah: NMT_MNCycleTiming_REC
-        EPL_OBD_BEGIN_INDEX_RAM(0x1F8A, 0x06, NULL)
+        EPL_OBD_BEGIN_INDEX_RAM(0x1F8A, 0x03, NULL)
             EPL_OBD_SUBINDEX_RAM_VAR(0x1F8A, 0x00, kEplObdTypUInt8, kEplObdAccConst, tEplObdUnsigned8, NumberOfEntries, 0x02)
             EPL_OBD_SUBINDEX_RAM_VAR(0x1F8A, 0x01, kEplObdTypUInt32, kEplObdAccSRW, tEplObdUnsigned32, WaitSoCPReq_U32, 1000)    // in [ns]
             EPL_OBD_SUBINDEX_RAM_VAR(0x1F8A, 0x02, kEplObdTypUInt32, kEplObdAccSRW, tEplObdUnsigned32, AsyncSlotTimeout_U32, 100000) // in [ns]
