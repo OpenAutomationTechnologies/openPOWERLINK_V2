@@ -865,8 +865,6 @@ unsigned int    uiLength;
 int             iHandled = IRQ_HANDLED;
 unsigned int    uiTxCount = 0;
 
-//    printk("�");
-
     // read the interrupt status
     dwStatus = EDRV_REGDW_READ(EDRV_REGDW_ICR);
 
@@ -922,7 +920,6 @@ unsigned int    uiTxCount = 0;
                     EDRV_COUNT_TX;
                 }
 
-                //            printk("T");
                 if (pTxBuffer != NULL)
                 {
                     // call Tx handler of Data link layer
@@ -1186,7 +1183,7 @@ QWORD   qwTxDescAddress;
 
     // PHY reset by software:
     //1. Obtain the Software/Firmware semaphore (SWSM.SWESMBI - 05B50h; bit 1). Set it to 1b.
-    //2. Drive PHY reset (CTRL.PHY_RST at offset 0000h [bit 31], write 1b, wait 100 s, and then
+    //2. Drive PHY reset (CTRL.PHY_RST at offset 0000h [bit 31], write 1b, wait 100 us, and then
     //write 0b).
     //3. Delay 10 ms
     //4. Start configuring the PHY.
