@@ -131,9 +131,6 @@
     #include <stdio.h>
     #include <string.h>
 
-    #define EPL_MEMCPY(dst,src,siz)     memcpy((void*)(dst),(const void*)(src),(size_t)(siz));
-    #define EPL_MEMSET(dst,val,siz)     memset((void*)(dst),(int)(val),(size_t)(siz));
-
     #define EPL_MALLOC(siz)             malloc((size_t)(siz))
     #define EPL_FREE(ptr)               free((void *)ptr)
 
@@ -202,6 +199,18 @@
 
 
 #endif
+
+
+#ifndef EPL_MEMCPY
+    #define EPL_MEMCPY(dst,src,siz)     memcpy((dst),(src),(siz));
+#endif
+#ifndef EPL_MEMSET
+    #define EPL_MEMSET(dst,val,siz)     memset((dst),(val),(siz));
+#endif
+#ifndef EPL_MEMCMP
+    #define EPL_MEMCMP(src1,src2,siz)     memcmp((src1),(src2),(siz))
+#endif
+
 
 #define EPL_TGT_INTMASK_ETH     0x0001  // ethernet interrupt
 #define EPL_TGT_INTMASK_DMA     0x0002  // DMA interrupt
