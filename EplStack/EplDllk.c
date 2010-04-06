@@ -248,7 +248,7 @@ typedef struct
 {
     tEplNmtState        m_NmtState;
 
-    BYTE                m_be_abSrcMac[6];
+    BYTE                m_be_abLocalMac[6];
     tEdrvTxBuffer*      m_pTxBuffer;        // Buffers for Tx-Frames
     unsigned int        m_uiMaxTxFrames;
     BYTE                m_bFlag1;           // Flag 1 with EN, EC for PRes, StatusRes
@@ -515,7 +515,7 @@ tEdrvInitParam  EdrvInitParam;
 #endif
 
     // initialize Edrv
-    EPL_MEMCPY(EdrvInitParam.m_abMyMacAddr, pInitParam_p->m_be_abSrcMac, 6);
+    EPL_MEMCPY(EdrvInitParam.m_abMyMacAddr, pInitParam_p->m_be_abLocalMac, 6);
     EdrvInitParam.m_HwParam = pInitParam_p->m_HwParam;
     EdrvInitParam.m_pfnRxHandler = EplDllkCbFrameReceived;
     EdrvInitParam.m_pfnTxHandler = EplDllkCbFrameTransmitted;
@@ -527,8 +527,8 @@ tEdrvInitParam  EdrvInitParam;
 
     // copy local MAC address from Ethernet driver back to local instance structure
     // because Ethernet driver may have read it from controller EEPROM
-    EPL_MEMCPY(EplDllkInstance_g.m_be_abSrcMac, EdrvInitParam.m_abMyMacAddr, 6);
-    EPL_MEMCPY(pInitParam_p->m_be_abSrcMac, EdrvInitParam.m_abMyMacAddr, 6);
+    EPL_MEMCPY(EplDllkInstance_g.m_be_abLocalMac, EdrvInitParam.m_abMyMacAddr, 6);
+    EPL_MEMCPY(pInitParam_p->m_be_abLocalMac, EdrvInitParam.m_abMyMacAddr, 6);
 
     // initialize TxBuffer array
     for (uiIndex = 0; uiIndex < EplDllkInstance_g.m_uiMaxTxFrames; uiIndex++)
@@ -1758,7 +1758,7 @@ tEplDllkNodeInfo*   pIntNodeInfo;
 
         // setup PReq filter
         EPL_MEMCPY(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_PREQ].m_abFilterValue[0],
-                   &EplDllkInstance_g.m_be_abSrcMac[0], 6);
+                   &EplDllkInstance_g.m_be_abLocalMac[0], 6);
         AmiSetQword48ToBe(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_PREQ].m_abFilterMask[0],
                           EPL_DLL_MACADDR_MASK);
         AmiSetWordToBe(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_PREQ].m_abFilterValue[12],
@@ -4056,7 +4056,7 @@ TGT_DLLK_DECLARE_FLAGS
 //                        if ((dwSyncControl & EPL_SYNC_DEST_MAC_ADDRESS_VALID) &&
 //                            (be_abDestMacAddress[0] || be_abDestMacAddress[1] || be_abDestMacAddress[2] ||
 //                             be_abDestMacAddress[3] || be_abDestMacAddress[4] || be_abDestMacAddress[5]   ) &&
-//                            (!EPL_MEMCMP(be_abDestMacAddress, EplDllkInstance_g.m_be_abSrcMac)))
+//                            (!EPL_MEMCMP(be_abDestMacAddress, EplDllkInstance_g.m_be_abLocalMac)))
 //                        {   // DestMacAddress valid but unequal to own MAC address
 //                            break;
 //                        }
@@ -5058,7 +5058,7 @@ tEdrvTxBuffer  *pTxBuffer = NULL;
         // source node ID
         AmiSetByteToLe(&pTxFrame->m_le_bSrcNodeId, (BYTE) EplDllkInstance_g.m_DllConfigParam.m_uiNodeId);
         // source MAC address
-        EPL_MEMCPY(&pTxFrame->m_be_abSrcMac[0], &EplDllkInstance_g.m_be_abSrcMac[0], 6);
+        EPL_MEMCPY(&pTxFrame->m_be_abSrcMac[0], &EplDllkInstance_g.m_be_abLocalMac[0], 6);
         switch (MsgType_p)
         {
             case kEplMsgTypeAsnd:
@@ -5245,7 +5245,7 @@ WORD            wEtherType;
         if (AmiGetQword48FromBe(pFrame_p->m_be_abSrcMac) == 0)
         {
             // source MAC address
-            EPL_MEMCPY(&pFrame_p->m_be_abSrcMac[0], &EplDllkInstance_g.m_be_abSrcMac[0], 6);
+            EPL_MEMCPY(&pFrame_p->m_be_abSrcMac[0], &EplDllkInstance_g.m_be_abLocalMac[0], 6);
         }
 
         // check ethertype
@@ -6318,7 +6318,7 @@ tEplFrame*      pTxFrameSyncRes;
     if (EplDllkInstance_g.m_fPrcEnabled != FALSE)
     {   // relocate PReq filter from PResMN to PReq
         EPL_MEMCPY(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_PREQ].m_abFilterValue[0],
-                   &EplDllkInstance_g.m_be_abSrcMac[0], 6);
+                   &EplDllkInstance_g.m_be_abLocalMac[0], 6);
         AmiSetByteToBe(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_PREQ].m_abFilterValue[14],
                        kEplMsgTypePreq);
         AmiSetByteToBe(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_PREQ].m_abFilterMask[15],

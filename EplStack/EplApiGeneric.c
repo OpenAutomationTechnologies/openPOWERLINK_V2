@@ -333,7 +333,7 @@ tEplDllkInitParam   DllkInitParam;
 
     // initialize EplDllk module
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLK)) != 0)
-    EPL_MEMCPY(DllkInitParam.m_be_abSrcMac, EplApiInstance_g.m_InitParam.m_abMacAddress, 6);
+    EPL_MEMCPY(DllkInitParam.m_be_abLocalMac, EplApiInstance_g.m_InitParam.m_abMacAddress, 6);
     DllkInitParam.m_HwParam = EplApiInstance_g.m_InitParam.m_HwParam;
     Ret = EplDllkAddInstance(&DllkInitParam);
     if (Ret != kEplSuccessful)
@@ -341,7 +341,7 @@ tEplDllkInitParam   DllkInitParam;
         goto Exit;
     }
     // copy MAC address back to instance structure
-    EPL_MEMCPY(EplApiInstance_g.m_InitParam.m_abMacAddress, DllkInitParam.m_be_abSrcMac, 6);
+    EPL_MEMCPY(EplApiInstance_g.m_InitParam.m_abMacAddress, DllkInitParam.m_be_abLocalMac, 6);
 
     Ret = EplDllkRegSyncHandler(EplApiInstance_g.m_InitParam.m_pfnCbSync);
     if (Ret != kEplSuccessful)
