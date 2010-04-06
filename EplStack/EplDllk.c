@@ -5077,7 +5077,7 @@ tEdrvTxBuffer  *pTxBuffer = NULL;
 
 #if EPL_DLL_PRES_CHAINING_CN != FALSE
                     case kEplDllAsndSyncResponse:
-                    {   // SyncResponse is send to MN
+                    {   // SyncRes destination node ID is MN node ID
                         AmiSetByteToLe(&pTxFrame->m_le_bDstNodeId, (BYTE) EPL_C_ADR_MN_DEF_NODE_ID);
                         // SyncStatus: PResMode disabled / PResTimeFirst and PResTimeSecond invalid
                         // AmiSetDwordToLe(&pTxFrame->m_Data.m_Asnd.m_Payload.m_SyncResponse.m_le_dwSyncStatus, 0);
