@@ -3267,18 +3267,19 @@ tEplErrorHandlerkEvent  DllEvent;
 
                         case kEplDllMsWaitAsnd:
                         case kEplDllMsWaitSocTrig:
-                        {   // if m_LastReqServiceId is still valid,
-                            // SoA was not correctly answered
-                            // and user part has to be informed
-                            Ret = EplDllkAsyncFrameNotReceived(EplDllkInstance_g.m_LastReqServiceId,
-                                                               EplDllkInstance_g.m_uiLastTargetNodeId);
+                        {
+                            // send SoC
+                            Ret = EplDllkMnSendSoc();
                             if (Ret != kEplSuccessful)
                             {
                                 goto Exit;
                             }
 
-                            // send SoC
-                            Ret = EplDllkMnSendSoc();
+                            // if m_LastReqServiceId is still valid,
+                            // SoA was not correctly answered
+                            // and user part has to be informed
+                            Ret = EplDllkAsyncFrameNotReceived(EplDllkInstance_g.m_LastReqServiceId,
+                                                               EplDllkInstance_g.m_uiLastTargetNodeId);
                             if (Ret != kEplSuccessful)
                             {
                                 goto Exit;
