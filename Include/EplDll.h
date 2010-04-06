@@ -182,6 +182,9 @@ typedef struct
     // 0x1F8A.2: AsyncSlotTimeout_U32 in [ns]
     DWORD               m_dwAsyncSlotTimeout;
 
+    // constant response latency for SyncRes in [ns]
+    DWORD               m_dwSyncResLatency;
+
 } tEplDllConfigParam;
 
 typedef struct

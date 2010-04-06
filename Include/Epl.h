@@ -236,6 +236,8 @@ typedef struct
 
     tEplHwParam         m_HwParam;
 
+    DWORD               m_dwSyncResLatency; // constant response latency for SyncRes in [ns]
+
 } tEplApiInitParam;
 
 

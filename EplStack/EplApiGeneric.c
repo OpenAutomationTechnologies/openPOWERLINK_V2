@@ -2013,6 +2013,10 @@ BYTE                bTemp;
     }*/
 #endif
 
+#if EPL_DLL_PRES_CHAINING_CN != FALSE
+    DllConfigParam.m_dwSyncResLatency = EplApiInstance_g.m_InitParam.m_dwSyncResLatency;
+#endif
+
     DllConfigParam.m_uiSizeOfStruct = sizeof (DllConfigParam);
     Ret = EplDlluCalConfig(&DllConfigParam);
     if(Ret != kEplSuccessful)

@@ -108,6 +108,7 @@ int openPowerlink(void) {
 	EplApiInitParam.m_pfnCbEvent = AppCbEvent;
     EplApiInitParam.m_pfnCbSync  = AppCbSync;
     EplApiInitParam.m_pfnObdInitRam = EplObdInitRam;
+    EplApiInitParam.m_dwSyncResLatency = EPL_C_DLL_T_IFG;
 
 	// initialize EPL stack
     printf("init EPL Stack:\n");

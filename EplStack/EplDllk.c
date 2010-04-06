@@ -287,7 +287,6 @@ typedef struct
     unsigned long long  m_ullFrameTimeout;  // frame timeout (cycle length + loss of frame tolerance)
 
 #if EPL_DLL_PRES_CHAINING_CN != FALSE
-    DWORD               m_dwSyncResLatency;
     unsigned int        m_uiSyncReqPrevNodeId;
     tEplTgtTimeStamp*   m_pSyncReqPrevTimeStamp;
 
@@ -537,7 +536,6 @@ tEdrvInitParam  EdrvInitParam;
     }
 
 #if EPL_DLL_PRES_CHAINING_CN != FALSE
-    EplDllkInstance_g.m_dwSyncResLatency = pInitParam_p->m_dwSyncResLatency;
     EplDllkInstance_g.m_pSyncReqPrevTimeStamp = EplTgtTimeStampAlloc();
 #endif
 
@@ -1522,7 +1520,7 @@ tEplDllkNodeInfo*   pIntNodeInfo;
     }
     // Latency
     AmiSetDwordToLe(&pTxFrame->m_Data.m_Asnd.m_Payload.m_SyncResponse.m_le_dwLatency,
-        EplDllkInstance_g.m_dwSyncResLatency);
+        EplDllkInstance_g.m_DllConfigParam.m_dwSyncResLatency);
 #endif
 
     // non-EPL frame
