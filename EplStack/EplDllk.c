@@ -4050,14 +4050,13 @@ TGT_DLLK_DECLARE_FLAGS
                         dwSyncControl = AmiGetDwordFromLe(&pFrame->m_Data.m_Soa.m_Payload.m_SyncRequest.m_le_dwSyncControl);
                         AmiSetQword48ToBe(be_abDestMacAddress, AmiGetQword48FromLe(pFrame->m_Data.m_Soa.m_Payload.m_SyncRequest.m_le_abDestMacAddress));
                         
-#warning TODO compare MAC
-//                        if ((dwSyncControl & EPL_SYNC_DEST_MAC_ADDRESS_VALID) &&
-//                            (be_abDestMacAddress[0] || be_abDestMacAddress[1] || be_abDestMacAddress[2] ||
-//                             be_abDestMacAddress[3] || be_abDestMacAddress[4] || be_abDestMacAddress[5]   ) &&
-//                            (!EPL_MEMCMP(be_abDestMacAddress, EplDllkInstance_g.m_be_abLocalMac)))
-//                        {   // DestMacAddress valid but unequal to own MAC address
-//                            break;
-//                        }
+                        if ((dwSyncControl & EPL_SYNC_DEST_MAC_ADDRESS_VALID) &&
+                            (be_abDestMacAddress[0] || be_abDestMacAddress[1] || be_abDestMacAddress[2] ||
+                             be_abDestMacAddress[3] || be_abDestMacAddress[4] || be_abDestMacAddress[5]   ) &&
+                            (EPL_MEMCMP(&be_abDestMacAddress, &EplDllkInstance_g.m_be_abLocalMac, 6) != 0))
+                        {   // DestMacAddress valid but unequal to own MAC address
+                            break;
+                        }
 
                         PrcCycleTiming.m_dwPResTimeFirstNs = AmiGetDwordFromLe(&pFrame->m_Data.m_Soa.m_Payload.m_SyncRequest.m_le_dwPResTimeFirst);
 
