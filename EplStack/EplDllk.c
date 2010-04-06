@@ -4922,7 +4922,7 @@ static tEplKernel EplDllkCreateTxFrame (unsigned int * puiHandle_p,
 {
 tEplKernel      Ret = kEplSuccessful;
 tEplFrame      *pTxFrame;
-unsigned int    uiHandle = EplDllkInstance_g.m_uiMaxTxFrames;
+unsigned int    uiHandle = *puiHandle_p;
 tEdrvTxBuffer  *pTxBuffer = NULL;
 
     switch (MsgType_p)
