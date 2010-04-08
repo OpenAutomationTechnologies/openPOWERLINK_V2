@@ -132,7 +132,7 @@
 //#define EDRV_RX_BUFFER_SIZE     0x8610  // 32 kB + 16 Byte + 1,5 kB (WRAP is enabled)
 //#define EDRV_RX_BUFFER_LENGTH   (EDRV_RX_BUFFER_SIZE & 0xF800)  // buffer size cut down to 2 kB alignment
 #define EDRV_RX_BUFFER_PER_DESC_SIZE 2048
-#define EDRV_RX_BUFFER_SIZE     (EDRV_MAX_RX_BUFFERS * EDRV_RX_BUFFER_PER_DESC_SIZE)
+#define EDRV_RX_BUFFER_SIZE     (EDRV_MAX_RX_DESCS * EDRV_RX_BUFFER_PER_DESC_SIZE)
 #define EDRV_RX_DESCS_SIZE      (EDRV_MAX_RX_DESCS * sizeof (tEdrvRxDesc))
 
 #define EDRV_AUTO_READ_DONE_TIMEOUT 10  // ms
@@ -322,6 +322,8 @@ typedef struct
     void*               m_pIoAddr;      // pointer to register space of Ethernet controller
     BYTE*               m_pbRxBuf;      // pointer to Rx buffer
     dma_addr_t          m_pRxBufDma;
+    tEdrvRxDesc*        m_pRxDesc;      // pointer to Rx descriptors
+    dma_addr_t          m_pRxDescDma;
     BYTE*               m_pbTxBuf;      // pointer to Tx buffer
     dma_addr_t          m_pTxBufDma;
     tEdrvTxDesc*        m_pTxDesc;      // pointer to Tx descriptors
@@ -430,7 +432,6 @@ tEplKernel EdrvInit(tEdrvInitParam * pEdrvInitParam_p)
 {
 tEplKernel  Ret;
 int         iResult;
-DWORD       dwVal;
 int         iIndex;
 
     Ret = kEplSuccessful;
@@ -1259,7 +1260,7 @@ int     iIndex;
 
     // check if user specified a MAC address
     printk("%s check specified MAC address\n", __FUNCTION__);
-    if ((EdrvInstance_l.m_InitParam.m_abMyMacAddr[0] != 0)
+    if ((EdrvInstance_l.m_InitParam.m_abMyMacAddr[0] != 0) |
         (EdrvInstance_l.m_InitParam.m_abMyMacAddr[1] != 0) |
         (EdrvInstance_l.m_InitParam.m_abMyMacAddr[2] != 0) |
         (EdrvInstance_l.m_InitParam.m_abMyMacAddr[3] != 0) |
@@ -1287,8 +1288,8 @@ int     iIndex;
         EdrvInstance_l.m_InitParam.m_abMyMacAddr[2] = (dwTemp >> 16) & 0xFF;
         EdrvInstance_l.m_InitParam.m_abMyMacAddr[3] = (dwTemp >> 24) & 0xFF;
         dwTemp = EDRV_REGDW_READ((EDRV_REGDW_RAH0));
-        EdrvInstance_l.m_InitParam.m_abMyMacAddr[5] = (dwTemp >>  0) & 0xFF;
-        EdrvInstance_l.m_InitParam.m_abMyMacAddr[6] = (dwTemp >>  8) & 0xFF;
+        EdrvInstance_l.m_InitParam.m_abMyMacAddr[4] = (dwTemp >>  0) & 0xFF;
+        EdrvInstance_l.m_InitParam.m_abMyMacAddr[5] = (dwTemp >>  8) & 0xFF;
     }
 
     // initialize Multicast Table Array to 0
