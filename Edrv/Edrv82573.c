@@ -179,12 +179,16 @@
 #define EDRV_REGDW_INT_TXQE     0x00000002  // Transmit Descriptor Queue Empty
 #define EDRV_REGDW_INT_LSC      0x00000004  // Link Status Change
 #define EDRV_REGDW_INT_RXSEQ    0x00000008  // Receive Sequence Error
+#define EDRV_REGDW_INT_RXT0     0x00000080  // Link Status Change
 #define EDRV_REGDW_INT_RXDMT0   0x00000010  // Receive Descriptor Minimum Threshold Reached
 #define EDRV_REGDW_INT_RXO      0x00000040  // Receiver Overrun
 #define EDRV_REGDW_INT_TXD_LOW  0x00008000  // Transmit Descriptor Low Threshold hit
 
 #define EDRV_REGDW_INT_MASK_DEF (EDRV_REGDW_INT_TXDW \
-                               | EDRV_REGDW_INT_RXDMT0)
+                               | EDRV_REGDW_INT_RXT0 \
+                               | EDRV_REGDW_INT_RXDMT0 \
+                               | EDRV_REGDW_INT_RXO \
+                               | EDRV_REGDW_INT_RXSEQ)
 
 #define EDRV_REGDW_TIPG         0x000410    // Transmit Inter Packet Gap
 #define EDRV_REGDW_TIPG_DEF     0x00702008  // default according to Intel PCIe GbE Controllers Open Source Software Developer's Manual
@@ -233,10 +237,10 @@
 //#define EDRV_REGDW_TSD_TUN      0x00004000  // Transmit FIFO underrun
 //#define EDRV_REGDW_TSD_OWN      0x00002000  // Owner
 
-#define EDRV_REGDW_MTA0         0x05200     // Multicast Table Array
+#define EDRV_REGDW_MTA(n)       (0x05200 + 4*n)  // Multicast Table Array
 
-#define EDRV_REGDW_RAL0         0x05400     // Receive Address Low
-#define EDRV_REGDW_RAH0         0x05404     // Receive Address HIGH
+#define EDRV_REGDW_RAL(n)       (0x05400 + 8*n)  // Receive Address Low
+#define EDRV_REGDW_RAH(n)       (0x05404 + 8*n)  // Receive Address HIGH
 #define EDRV_REGDW_RAH_AV       0x80000000  // Receive Address Valid
 
 //// defines for the status word in the receive buffer
@@ -526,7 +530,7 @@ int         iIndex;
 
     for (iIndex = 1; iIndex < 16; iIndex++)
     {
-        dwData = EDRV_REGDW_READ(EDRV_REGDW_RAH0 + (iIndex * sizeof(DWORD)));
+        dwData = EDRV_REGDW_READ(EDRV_REGDW_RAH(iIndex));
         if (!(dwData & EDRV_REGDW_RAH_AV))
         {   // free MAC address entry
             break;
@@ -546,12 +550,12 @@ int         iIndex;
         dwData |= pbMacAddr_p[1] <<  8;
         dwData |= pbMacAddr_p[2] << 16;
         dwData |= pbMacAddr_p[3] << 24;
-        EDRV_REGDW_WRITE(EDRV_REGDW_RAL0, dwData);
+        EDRV_REGDW_WRITE(EDRV_REGDW_RAL(iIndex), dwData);
         dwData = 0;
         dwData |= pbMacAddr_p[4] <<  0;
         dwData |= pbMacAddr_p[5] <<  8;
         dwData |= EDRV_REGDW_RAH_AV;
-        EDRV_REGDW_WRITE(EDRV_REGDW_RAH0, dwData);
+        EDRV_REGDW_WRITE(EDRV_REGDW_RAH(iIndex), dwData);
     }
 
 Exit:
@@ -593,13 +597,13 @@ DWORD       dwAddrHigh;
 
     for (iIndex = 1; iIndex < 16; iIndex++)
     {
-        dwData = EDRV_REGDW_READ(EDRV_REGDW_RAH0 + (iIndex * sizeof(DWORD)));
+        dwData = EDRV_REGDW_READ(EDRV_REGDW_RAH(iIndex));
         if ((dwData & (EDRV_REGDW_RAH_AV | 0xFFFF)) == dwAddrHigh)
         {
-            dwData = EDRV_REGDW_READ(EDRV_REGDW_RAL0 + (iIndex * sizeof(DWORD)));
+            dwData = EDRV_REGDW_READ(EDRV_REGDW_RAL(iIndex));
             if (dwData == dwAddrLow)
             {   // set address valid bit to invalid
-                EDRV_REGDW_WRITE(EDRV_REGDW_RAH0 + (iIndex * sizeof(DWORD)), 0);
+                EDRV_REGDW_WRITE(EDRV_REGDW_RAH(iIndex), 0);
                 break;
             }
         }
@@ -848,6 +852,7 @@ int EdrvGetDiagnostics(char* pszBuffer_p, int iSize_p)
 tEdrvTxDesc*    pTxDesc;
 DWORD           dwTxStatus;
 int             iUsedSize = 0;
+int             iIndex;
 
     iUsedSize += snprintf (pszBuffer_p + iUsedSize, iSize_p - iUsedSize,
                        "Head: %u (%lu)\n",
@@ -864,6 +869,39 @@ int             iUsedSize = 0;
                        "Tail: %u (%lu)\n",
                        EdrvInstance_l.m_uiTailTxDesc,
                        (unsigned long) EDRV_REGDW_READ(EDRV_REGDW_TDT));
+
+    for (iIndex = 0; iIndex < 16; iIndex++)
+    {
+        iUsedSize += snprintf (pszBuffer_p + iUsedSize, iSize_p - iUsedSize,
+                           "RAH[%2u] RAL[%2u]: 0x%08lX 0x%08lX\n",
+                           iIndex, iIndex,
+                           (unsigned long) EDRV_REGDW_READ(EDRV_REGDW_RAH(iIndex)),
+                           (unsigned long) EDRV_REGDW_READ(EDRV_REGDW_RAL(iIndex)));
+    }
+
+    iUsedSize += snprintf (pszBuffer_p + iUsedSize, iSize_p - iUsedSize,
+                       "Interrupt Mask Set/Read Register:    0x%08lX\n",
+                       (unsigned long) EDRV_REGDW_READ(EDRV_REGDW_IMS));
+
+    iUsedSize += snprintf (pszBuffer_p + iUsedSize, iSize_p - iUsedSize,
+                       "Receive Control Register:            0x%08lX\n",
+                       (unsigned long) EDRV_REGDW_READ(EDRV_REGDW_RCTL));
+
+    iUsedSize += snprintf (pszBuffer_p + iUsedSize, iSize_p - iUsedSize,
+                       "Receive Descripter Control Register: 0x%08lX\n",
+                       (unsigned long) EDRV_REGDW_READ(EDRV_REGDW_RXDCTL));
+
+    iUsedSize += snprintf (pszBuffer_p + iUsedSize, iSize_p - iUsedSize,
+                       "Receive Descripter Lenght Register:  0x%08lX\n",
+                       (unsigned long) EDRV_REGDW_READ(EDRV_REGDW_RDLEN0));
+
+    iUsedSize += snprintf (pszBuffer_p + iUsedSize, iSize_p - iUsedSize,
+                       "Receive Descripter Head Register:    0x%08lX\n",
+                       (unsigned long) EDRV_REGDW_READ(EDRV_REGDW_RDH0));
+
+    iUsedSize += snprintf (pszBuffer_p + iUsedSize, iSize_p - iUsedSize,
+                       "Receive Descripter Tail Register:    0x%08lX\n",
+                       (unsigned long) EDRV_REGDW_READ(EDRV_REGDW_RDT0));
 
     return iUsedSize;
 }
@@ -983,10 +1021,17 @@ unsigned int    uiTxCount = 0;
         }
         while (EdrvInstance_l.m_uiHeadTxDesc != EdrvInstance_l.m_uiTailTxDesc);
     }
-    else
-    {
-        EDRV_COUNT_TIMEOUT;
+
+    if ((dwStatus & (EDRV_REGDW_INT_RXO | EDRV_REGDW_INT_RXSEQ)) != 0)
+    {   // receive error interrupt
+        EDRV_COUNT_RX_ERR;
     }
+
+    if ((dwStatus & (EDRV_REGDW_INT_RXT0 | EDRV_REGDW_INT_RXDMT0)) != 0)
+    {   // receive interrupt
+        EDRV_COUNT_RX;
+    }
+
 #if 0
     if ((dwStatus & (EDRV_REGW_INT_RER | EDRV_REGW_INT_FOVW | EDRV_REGW_INT_RXOVW | EDRV_REGW_INT_PUN)) != 0)
     {   // receive error interrupt
@@ -1288,26 +1333,26 @@ int     iIndex;
         (EdrvInstance_l.m_InitParam.m_abMyMacAddr[5] != 0)  )
     {   // write specified MAC address to controller
         dwTemp = 0;
-        EDRV_REGDW_WRITE(EDRV_REGDW_RAH0, dwTemp); // disable Entry
+        EDRV_REGDW_WRITE(EDRV_REGDW_RAH(0), dwTemp); // disable Entry
         dwTemp |= EdrvInstance_l.m_InitParam.m_abMyMacAddr[0] <<  0;
         dwTemp |= EdrvInstance_l.m_InitParam.m_abMyMacAddr[1] <<  8;
         dwTemp |= EdrvInstance_l.m_InitParam.m_abMyMacAddr[2] << 16;
         dwTemp |= EdrvInstance_l.m_InitParam.m_abMyMacAddr[3] << 24;
-        EDRV_REGDW_WRITE(EDRV_REGDW_RAL0, dwTemp);
+        EDRV_REGDW_WRITE(EDRV_REGDW_RAL(0), dwTemp);
         dwTemp = 0;
         dwTemp |= EdrvInstance_l.m_InitParam.m_abMyMacAddr[4] <<  0;
         dwTemp |= EdrvInstance_l.m_InitParam.m_abMyMacAddr[5] <<  8;
         dwTemp |= EDRV_REGDW_RAH_AV;
-        EDRV_REGDW_WRITE(EDRV_REGDW_RAH0, dwTemp);
+        EDRV_REGDW_WRITE(EDRV_REGDW_RAH(0), dwTemp);
     }
     else
     {   // read MAC address from controller
-        dwTemp = EDRV_REGDW_READ((EDRV_REGDW_RAL0));
+        dwTemp = EDRV_REGDW_READ(EDRV_REGDW_RAL(0));
         EdrvInstance_l.m_InitParam.m_abMyMacAddr[0] = (dwTemp >>  0) & 0xFF;
         EdrvInstance_l.m_InitParam.m_abMyMacAddr[1] = (dwTemp >>  8) & 0xFF;
         EdrvInstance_l.m_InitParam.m_abMyMacAddr[2] = (dwTemp >> 16) & 0xFF;
         EdrvInstance_l.m_InitParam.m_abMyMacAddr[3] = (dwTemp >> 24) & 0xFF;
-        dwTemp = EDRV_REGDW_READ((EDRV_REGDW_RAH0));
+        dwTemp = EDRV_REGDW_READ(EDRV_REGDW_RAH(0));
         EdrvInstance_l.m_InitParam.m_abMyMacAddr[4] = (dwTemp >>  0) & 0xFF;
         EdrvInstance_l.m_InitParam.m_abMyMacAddr[5] = (dwTemp >>  8) & 0xFF;
     }
@@ -1315,7 +1360,7 @@ int     iIndex;
     // initialize Multicast Table Array to 0
     for (iIndex = 0; iIndex < 128; iIndex++)
     {
-        EDRV_REGDW_WRITE(EDRV_REGDW_MTA0 + (iIndex * sizeof(DWORD)), 0);
+        EDRV_REGDW_WRITE(EDRV_REGDW_MTA(iIndex), 0);
     }
 
     // initialize Rx descriptors
