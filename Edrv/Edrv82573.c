@@ -410,7 +410,6 @@ static struct pci_driver EdrvDriver = {
 // local function prototypes
 //---------------------------------------------------------------------------
 
-static BYTE EdrvCalcHash (BYTE * pbMAC_p);
 
 
 
@@ -523,30 +522,40 @@ tEplKernel EdrvDefineRxMacAddrEntry (BYTE * pbMacAddr_p)
 {
 tEplKernel  Ret = kEplSuccessful;
 DWORD       dwData;
-BYTE        bHash;
-#if 0
-    bHash = EdrvCalcHash (pbMacAddr_p);
-/*
-    dwData = ether_crc(6, pbMacAddr_p);
+int         iIndex;
 
-    printk("EdrvDefineRxMacAddrEntry('%02X:%02X:%02X:%02X:%02X:%02X') hash = %u / %u  ether_crc = 0x%08lX\n",
-        (WORD) pbMacAddr_p[0], (WORD) pbMacAddr_p[1], (WORD) pbMacAddr_p[2],
-        (WORD) pbMacAddr_p[3], (WORD) pbMacAddr_p[4], (WORD) pbMacAddr_p[5],
-        (WORD) bHash, (WORD) (dwData >> 26), dwData);
-*/
-    if (bHash > 31)
+    for (iIndex = 1; iIndex < 16; iIndex++)
     {
-        dwData = EDRV_REGDW_READ(EDRV_REGDW_MAR4);
-        dwData |= 1 << (bHash - 32);
-        EDRV_REGDW_WRITE(EDRV_REGDW_MAR4, dwData);
+        dwData = EDRV_REGDW_READ(EDRV_REGDW_RAH0 + (iIndex * sizeof(DWORD)));
+        if (!(dwData & EDRV_REGDW_RAH_AV))
+        {   // free MAC address entry
+            break;
+        }
+    }
+
+    if (iIndex == 16)
+    {   // no free entry found
+        printk("%s Implementation of Multicast Table Array support required\n", __FUNCTION__);
+        Ret = kEplEdrvInitError;
+        goto Exit;
     }
     else
-    {
-        dwData = EDRV_REGDW_READ(EDRV_REGDW_MAR0);
-        dwData |= 1 << bHash;
-        EDRV_REGDW_WRITE(EDRV_REGDW_MAR0, dwData);
+    {   // write MAC address to free entry
+        dwData = 0;
+        dwData |= pbMacAddr_p[0] <<  0;
+        dwData |= pbMacAddr_p[1] <<  8;
+        dwData |= pbMacAddr_p[2] << 16;
+        dwData |= pbMacAddr_p[3] << 24;
+        EDRV_REGDW_WRITE(EDRV_REGDW_RAL0, dwData);
+        dwData = 0;
+        dwData |= pbMacAddr_p[4] <<  0;
+        dwData |= pbMacAddr_p[5] <<  8;
+        dwData |= EDRV_REGDW_RAH_AV;
+        EDRV_REGDW_WRITE(EDRV_REGDW_RAH0, dwData);
     }
-#endif
+
+Exit:
+
     return Ret;
 }
 
@@ -568,23 +577,34 @@ tEplKernel EdrvUndefineRxMacAddrEntry (BYTE * pbMacAddr_p)
 {
 tEplKernel  Ret = kEplSuccessful;
 DWORD       dwData;
-BYTE        bHash;
-#if 0
-    bHash = EdrvCalcHash (pbMacAddr_p);
+int         iIndex;
+DWORD       dwAddrLow;
+DWORD       dwAddrHigh;
 
-    if (bHash > 31)
+    dwAddrLow   = 0;
+    dwAddrLow  |= pbMacAddr_p[0] <<  0;
+    dwAddrLow  |= pbMacAddr_p[1] <<  8;
+    dwAddrLow  |= pbMacAddr_p[2] << 16;
+    dwAddrLow  |= pbMacAddr_p[3] << 24;
+    dwAddrHigh  = 0;
+    dwAddrHigh |= pbMacAddr_p[4] <<  0;
+    dwAddrHigh |= pbMacAddr_p[5] <<  8;
+    dwAddrHigh |= EDRV_REGDW_RAH_AV;
+
+    for (iIndex = 1; iIndex < 16; iIndex++)
     {
-        dwData = EDRV_REGDW_READ(EDRV_REGDW_MAR4);
-        dwData &= ~(1 << (bHash - 32));
-        EDRV_REGDW_WRITE(EDRV_REGDW_MAR4, dwData);
+        dwData = EDRV_REGDW_READ(EDRV_REGDW_RAH0 + (iIndex * sizeof(DWORD)));
+        if ((dwData & (EDRV_REGDW_RAH_AV | 0xFFFF)) == dwAddrHigh)
+        {
+            dwData = EDRV_REGDW_READ(EDRV_REGDW_RAL0 + (iIndex * sizeof(DWORD)));
+            if (dwData == dwAddrLow)
+            {   // set address valid bit to invalid
+                EDRV_REGDW_WRITE(EDRV_REGDW_RAH0 + (iIndex * sizeof(DWORD)), 0);
+                break;
+            }
+        }
     }
-    else
-    {
-        dwData = EDRV_REGDW_READ(EDRV_REGDW_MAR0);
-        dwData &= ~(1 << bHash);
-        EDRV_REGDW_WRITE(EDRV_REGDW_MAR0, dwData);
-    }
-#endif
+
     return Ret;
 }
 
@@ -1438,55 +1458,18 @@ Exit:;
 // Description: function calculates the entry for the hash-table from MAC
 //              address
 //
+//
 // Parameters:  pbMAC_p - pointer to MAC address
 //
 // Returns:     hash value
 //
-// State:
+// State:       at the moment, only perfect filters are used
 //
 //---------------------------------------------------------------------------
-#if 0
-#define HASH_BITS              6  // used bits in hash
-#define CRC32_POLY    0x04C11DB6  //
-//#define CRC32_POLY    0xEDB88320  //
-// G(x) = x32 + x26 + x23 + x22 + x16 + x12 + x11 + x10 + x8 + x7 + x5 + x4 + x2 + x + 1
 
+#if 0
 static BYTE EdrvCalcHash (BYTE * pbMAC_p)
 {
-DWORD dwByteCounter;
-DWORD dwBitCounter;
-DWORD dwData;
-DWORD dwCrc;
-DWORD dwCarry;
-BYTE * pbData;
-BYTE bHash;
-
-    pbData = pbMAC_p;
-
-    // calculate crc32 value of mac address
-    dwCrc = 0xFFFFFFFF;
-
-    for (dwByteCounter = 0; dwByteCounter < 6; dwByteCounter++)
-    {
-        dwData = *pbData;
-        pbData++;
-        for (dwBitCounter = 0; dwBitCounter < 8; dwBitCounter++, dwData >>= 1)
-        {
-            dwCarry = (((dwCrc >> 31) ^ dwData) & 1);
-            dwCrc = dwCrc << 1;
-            if (dwCarry != 0)
-            {
-                dwCrc = (dwCrc ^ CRC32_POLY) | dwCarry;
-            }
-        }
-    }
-
-//    printk("MyCRC = 0x%08lX\n", dwCrc);
-    // only upper 6 bits (HASH_BITS) are used
-    // which point to specific bit in the hash registers
-    bHash = (BYTE)((dwCrc >> (32 - HASH_BITS)) & 0x3f);
-
-    return bHash;
 }
 #endif
 
