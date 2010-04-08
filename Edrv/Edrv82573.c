@@ -120,14 +120,20 @@
 #define EDRV_MAX_TX_DESCS       16
 #endif
 
-#define EDRV_MAX_FRAME_SIZE     0x600
+#ifndef EDRV_MAX_RX_DESCS
+#define EDRV_MAX_RX_DESCS       16
+#endif
 
-#define EDRV_RX_BUFFER_SIZE     0x8610  // 32 kB + 16 Byte + 1,5 kB (WRAP is enabled)
-#define EDRV_RX_BUFFER_LENGTH   (EDRV_RX_BUFFER_SIZE & 0xF800)  // buffer size cut down to 2 kB alignment
+#define EDRV_MAX_FRAME_SIZE     0x600
 
 #define EDRV_TX_BUFFER_SIZE     (EDRV_MAX_TX_BUFFERS * EDRV_MAX_FRAME_SIZE) // n * (MTU + 14 + 4)
 #define EDRV_TX_DESCS_SIZE      (EDRV_MAX_TX_DESCS * sizeof (tEdrvTxDesc))
 
+//#define EDRV_RX_BUFFER_SIZE     0x8610  // 32 kB + 16 Byte + 1,5 kB (WRAP is enabled)
+//#define EDRV_RX_BUFFER_LENGTH   (EDRV_RX_BUFFER_SIZE & 0xF800)  // buffer size cut down to 2 kB alignment
+#define EDRV_RX_BUFFER_PER_DESC_SIZE 2048
+#define EDRV_RX_BUFFER_SIZE     (EDRV_MAX_RX_BUFFERS * EDRV_RX_BUFFER_PER_DESC_SIZE)
+#define EDRV_RX_DESCS_SIZE      (EDRV_MAX_RX_DESCS * sizeof (tEdrvRxDesc))
 
 #define EDRV_AUTO_READ_DONE_TIMEOUT 10  // ms
 #define EDRV_MASTER_DISABLE_TIMEOUT 90  // ms
@@ -173,9 +179,12 @@
 #define EDRV_REGDW_INT_TXQE     0x00000002  // Transmit Descriptor Queue Empty
 #define EDRV_REGDW_INT_LSC      0x00000004  // Link Status Change
 #define EDRV_REGDW_INT_RXSEQ    0x00000008  // Receive Sequence Error
+#define EDRV_REGDW_INT_RXDMT0   0x00000010  // Receive Descriptor Minimum Threshold Reached
 #define EDRV_REGDW_INT_RXO      0x00000040  // Receiver Overrun
 #define EDRV_REGDW_INT_TXD_LOW  0x00008000  // Transmit Descriptor Low Threshold hit
-#define EDRV_REGDW_INT_MASK_DEF (EDRV_REGDW_INT_TXDW)   // default interrupt mask
+
+#define EDRV_REGDW_INT_MASK_DEF (EDRV_REGDW_INT_TXDW \
+                               | EDRV_REGDW_INT_RXDMT0)
 
 #define EDRV_REGDW_TIPG         0x000410    // Transmit Inter Packet Gap
 #define EDRV_REGDW_TIPG_DEF     0x00702008  // default according to Intel PCIe GbE Controllers Open Source Software Developer's Manual
@@ -184,6 +193,10 @@
 #define EDRV_REGDW_TXDCTL_GRAN  0x01000000  // Granularity (1=Descriptor, 0=Cache line)
 //#define EDRV_REGDW_TXDCTL_WTHRESH 0x01000000  // Write Back Threshold
 #define EDRV_REGDW_TXDCTL_DEF   (EDRV_REGDW_TXDCTL_GRAN)
+
+#define EDRV_REGDW_RXDCTL       0x002828    // Receive Descriptor Control
+#define EDRV_REGDW_RXDCTL_GRAN  0x01000000  // Granularity (1=Descriptor, 0=Cache line)
+#define EDRV_REGDW_RXDCTL_DEF   (EDRV_REGDW_RXDCTL_GRAN)
 
 #define EDRV_REGDW_TCTL         0x000400    // Transmit Control
 #define EDRV_REGDW_TCTL_EN      0x00000002  // Transmit Enable
@@ -195,17 +208,22 @@
                                | EDRV_REGDW_TCTL_CT \
                                | EDRV_REGDW_TCTL_COLD)
 
+#define EDRV_REGDW_RCTL         0x000100    // Receive Control
+#define EDRV_REGDW_RCTL_EN      0x00000002  // Receive Enable
+#define EDRV_REGDW_RCTL_DEF     (EDRV_REGDW_RCTL_EN)
+
 #define EDRV_REGDW_TDBAL        0x003800    // Transmit Descriptor Base Adress Low
 #define EDRV_REGDW_TDBAH        0x003804    // Transmit Descriptor Base Adress High
 #define EDRV_REGDW_TDLEN        0x003808    // Transmit Descriptor Length
 #define EDRV_REGDW_TDH          0x003810    // Transmit Descriptor Head
 #define EDRV_REGDW_TDT          0x003818    // Transmit Descriptor Tail
 
+#define EDRV_REGDW_RDBAL0       0x002800    // Receive Descriptor Base Adress Low
+#define EDRV_REGDW_RDBAH0       0x002804    // Receive Descriptor Base Adress High
+#define EDRV_REGDW_RDLEN0       0x002808    // Receive Descriptor Length
+#define EDRV_REGDW_RDH0         0x002810    // Receive Descriptor Head
+#define EDRV_REGDW_RDT0         0x002818    // Receive Descriptor Tail
 
-//#define EDRV_REGDW_TSAD0        0x20    // Transmit start address of descriptor 0
-//#define EDRV_REGDW_TSAD1        0x24    // Transmit start address of descriptor 1
-//#define EDRV_REGDW_TSAD2        0x28    // Transmit start address of descriptor 2
-//#define EDRV_REGDW_TSAD3        0x2C    // Transmit start address of descriptor 3
 //#define EDRV_REGDW_TSD0         0x10    // Transmit status of descriptor 0
 //#define EDRV_REGDW_TSD_CRS      0x80000000  // Carrier sense lost
 //#define EDRV_REGDW_TSD_TABT     0x40000000  // Transmit Abort
@@ -214,13 +232,12 @@
 //#define EDRV_REGDW_TSD_TOK      0x00008000  // Transmit OK
 //#define EDRV_REGDW_TSD_TUN      0x00004000  // Transmit FIFO underrun
 //#define EDRV_REGDW_TSD_OWN      0x00002000  // Owner
-//
-//#define EDRV_REGDW_RBSTART      0x30    // Receive buffer start address
-//
-//#define EDRV_REGW_CAPR          0x38    // Current address of packet read
+
+#define EDRV_REGDW_MTA0         0x05200     // Multicast Table Array
 
 #define EDRV_REGDW_RAL0         0x05400     // Receive Address Low
 #define EDRV_REGDW_RAH0         0x05404     // Receive Address HIGH
+#define EDRV_REGDW_RAH_AV       0x80000000  // Receive Address Valid
 
 //// defines for the status word in the receive buffer
 //#define EDRV_RXSTAT_MAR         0x8000  // Multicast address received
@@ -287,6 +304,15 @@ typedef struct
     DWORD               m_le_dwStatus;
 
 } tEdrvTxDesc;
+
+typedef struct
+{
+    QWORD               m_le_qwBufferAddr;
+    WORD                m_le_wLength;
+    WORD                m_le_wChecksum;
+    DWORD               m_le_dwStatus;
+
+} tEdrvRxDesc;
 
 
 // Private structure
@@ -405,6 +431,7 @@ tEplKernel EdrvInit(tEdrvInitParam * pEdrvInitParam_p)
 tEplKernel  Ret;
 int         iResult;
 DWORD       dwVal;
+int         iIndex;
 
     Ret = kEplSuccessful;
 
@@ -438,19 +465,13 @@ DWORD       dwVal;
         goto Exit;
     }
 
-    // read MAC address from controller
+    // local MAC address might have been changed in EdrvInitOne
+    EPL_MEMCPY(pEdrvInitParam_p->m_abMyMacAddr, EdrvInstance_l.m_InitParam.m_abMyMacAddr, 6);
+
     printk("%s local MAC = ", __FUNCTION__);
-    dwVal = EDRV_REGDW_READ((EDRV_REGDW_RAL0));
-    for (iResult = 0; iResult < 4; iResult++)
+    for (iIndex = 0; iIndex < 6; iIndex++)
     {
-        pEdrvInitParam_p->m_abMyMacAddr[iResult] = (dwVal >> (iResult * 8)) & 0xFF;
-        printk("%02X ", (unsigned int)pEdrvInitParam_p->m_abMyMacAddr[iResult]);
-    }
-    dwVal = EDRV_REGDW_READ((EDRV_REGDW_RAH0));
-    for (iResult = 0; iResult < 2; iResult++)
-    {
-        pEdrvInitParam_p->m_abMyMacAddr[4+iResult] = (dwVal >> (iResult * 8)) & 0xFF;
-        printk("%02X ", (unsigned int)pEdrvInitParam_p->m_abMyMacAddr[4*iResult]);
+        printk("%02X ", (unsigned int)pEdrvInitParam_p->m_abMyMacAddr[iIndex]);
     }
     printk("\n");
 
@@ -1083,7 +1104,8 @@ static int EdrvInitOne(struct pci_dev *pPciDev,
 {
 int     iResult = 0;
 DWORD   dwTemp;
-QWORD   qwTxDescAddress;
+QWORD   qwDescAddress;
+int     iIndex;
 
     if (EdrvInstance_l.m_pPciDev != NULL)
     {   // Edrv is already connected to a PCI device
@@ -1132,7 +1154,7 @@ QWORD   qwTxDescAddress;
     EDRV_REGDW_WRITE(EDRV_REGDW_CTRL, dwTemp);
 
     // wait until master is disabled
-    for (iResult = EDRV_MASTER_DISABLE_TIMEOUT; iResult > 0; iResult--)
+    for (iIndex = EDRV_MASTER_DISABLE_TIMEOUT; iIndex > 0; iIndex--)
     {
         if ((EDRV_REGDW_READ(EDRV_REGDW_STATUS) & EDRV_REGDW_STATUS_MST_EN) == 0)
         {
@@ -1141,7 +1163,7 @@ QWORD   qwTxDescAddress;
 
         msleep(1);
     }
-    if (iResult == 0)
+    if (iIndex == 0)
     {
         iResult = -EIO;
         goto ExitFail;
@@ -1157,7 +1179,7 @@ QWORD   qwTxDescAddress;
     EDRV_REGDW_WRITE(EDRV_REGDW_CTRL, dwTemp);
 
     // wait until reset has finished and configuration from EEPROM was read
-    for (iResult = EDRV_AUTO_READ_DONE_TIMEOUT; iResult > 0; iResult--)
+    for (iIndex = EDRV_AUTO_READ_DONE_TIMEOUT; iIndex > 0; iIndex--)
     {
         if ((EDRV_REGDW_READ(EDRV_REGDW_EEC) & EDRV_REGDW_EEC_AUTO_RD) != 0)
         {
@@ -1166,7 +1188,7 @@ QWORD   qwTxDescAddress;
 
         msleep(1);
     }
-    if (iResult == 0)
+    if (iIndex == 0)
     {
         iResult = -EIO;
         goto ExitFail;
@@ -1201,35 +1223,6 @@ QWORD   qwTxDescAddress;
         goto ExitFail;
     }
 
-/*
-    // unlock configuration registers
-    printk("%s unlock configuration registers\n", __FUNCTION__);
-    EDRV_REGB_WRITE(EDRV_REGB_CMD9346, EDRV_REGB_CMD9346_UNLOCK);
-
-    // check if user specified a MAC address
-    printk("%s check specified MAC address\n", __FUNCTION__);
-    for (iResult = 0; iResult < 6; iResult++)
-    {
-        if (EdrvInstance_l.m_InitParam.m_abMyMacAddr[iResult] != 0)
-        {
-            printk("%s set local MAC address\n", __FUNCTION__);
-            // write this MAC address to controller
-            EDRV_REGDW_WRITE(EDRV_REGDW_IDR0,
-                le32_to_cpu(*((DWORD*)&EdrvInstance_l.m_InitParam.m_abMyMacAddr[0])));
-            dwTemp = EDRV_REGDW_READ(EDRV_REGDW_IDR0);
-
-            EDRV_REGDW_WRITE(EDRV_REGDW_IDR4,
-                le32_to_cpu(*((DWORD*)&EdrvInstance_l.m_InitParam.m_abMyMacAddr[4])));
-            dwTemp = EDRV_REGDW_READ(EDRV_REGDW_IDR4);
-            break;
-        }
-    }
-    iResult = 0;
-
-    // lock configuration registers
-    EDRV_REGB_WRITE(EDRV_REGB_CMD9346, EDRV_REGB_CMD9346_LOCK);
-*/
-
     // allocate buffers
     printk("%s allocate buffers\n", __FUNCTION__);
     EdrvInstance_l.m_pbTxBuf = pci_alloc_consistent(pPciDev, EDRV_TX_BUFFER_SIZE,
@@ -1256,55 +1249,91 @@ QWORD   qwTxDescAddress;
         goto ExitFail;
     }
 
+    EdrvInstance_l.m_pRxDesc = pci_alloc_consistent(pPciDev, EDRV_RX_DESCS_SIZE,
+                     &EdrvInstance_l.m_pRxDescDma);
+    if (EdrvInstance_l.m_pRxDesc == NULL)
+    {
+        iResult = -ENOMEM;
+        goto ExitFail;
+    }
+
+    // check if user specified a MAC address
+    printk("%s check specified MAC address\n", __FUNCTION__);
+    if ((EdrvInstance_l.m_InitParam.m_abMyMacAddr[0] != 0)
+        (EdrvInstance_l.m_InitParam.m_abMyMacAddr[1] != 0) |
+        (EdrvInstance_l.m_InitParam.m_abMyMacAddr[2] != 0) |
+        (EdrvInstance_l.m_InitParam.m_abMyMacAddr[3] != 0) |
+        (EdrvInstance_l.m_InitParam.m_abMyMacAddr[4] != 0) |
+        (EdrvInstance_l.m_InitParam.m_abMyMacAddr[5] != 0)  )
+    {   // write specified MAC address to controller
+        dwTemp = 0;
+        EDRV_REGDW_WRITE(EDRV_REGDW_RAH0, dwTemp); // disable Entry
+        dwTemp |= EdrvInstance_l.m_InitParam.m_abMyMacAddr[0] <<  0;
+        dwTemp |= EdrvInstance_l.m_InitParam.m_abMyMacAddr[1] <<  8;
+        dwTemp |= EdrvInstance_l.m_InitParam.m_abMyMacAddr[2] << 16;
+        dwTemp |= EdrvInstance_l.m_InitParam.m_abMyMacAddr[3] << 24;
+        EDRV_REGDW_WRITE(EDRV_REGDW_RAL0, dwTemp);
+        dwTemp = 0;
+        dwTemp |= EdrvInstance_l.m_InitParam.m_abMyMacAddr[4] <<  0;
+        dwTemp |= EdrvInstance_l.m_InitParam.m_abMyMacAddr[5] <<  8;
+        dwTemp |= EDRV_REGDW_RAH_AV;
+        EDRV_REGDW_WRITE(EDRV_REGDW_RAH0, dwTemp);
+    }
+    else
+    {   // read MAC address from controller
+        dwTemp = EDRV_REGDW_READ((EDRV_REGDW_RAL0));
+        EdrvInstance_l.m_InitParam.m_abMyMacAddr[0] = (dwTemp >>  0) & 0xFF;
+        EdrvInstance_l.m_InitParam.m_abMyMacAddr[1] = (dwTemp >>  8) & 0xFF;
+        EdrvInstance_l.m_InitParam.m_abMyMacAddr[2] = (dwTemp >> 16) & 0xFF;
+        EdrvInstance_l.m_InitParam.m_abMyMacAddr[3] = (dwTemp >> 24) & 0xFF;
+        dwTemp = EDRV_REGDW_READ((EDRV_REGDW_RAH0));
+        EdrvInstance_l.m_InitParam.m_abMyMacAddr[5] = (dwTemp >>  0) & 0xFF;
+        EdrvInstance_l.m_InitParam.m_abMyMacAddr[6] = (dwTemp >>  8) & 0xFF;
+    }
+
+    // initialize Multicast Table Array to 0
+    for (iIndex = 0; iIndex < 128; iIndex++)
+    {
+        EDRV_REGDW_WRITE(EDRV_REGDW_MTA0 + (iIndex * sizeof(DWORD)), 0);
+    }
+
+    // initialize Rx descriptors
+    printk("%s initialize Rx descriptors\n", __FUNCTION__);
+    for (iIndex = 0; iIndex < EDRV_MAX_RX_DESCS; iIndex++)
+    {
+        EdrvInstance_l.m_pRxDesc[iIndex].m_le_qwBufferAddr = EdrvInstance_l.m_pRxBufDma + (iIndex * EDRV_RX_BUFFER_PER_DESC_SIZE);
+    }
+    EDRV_REGDW_WRITE(EDRV_REGDW_RXDCTL, EDRV_REGDW_RXDCTL_DEF);
+    // Rx buffer size is set to 2048 by default
+    // Rx descriptor typ is set to legacy by default
+    qwDescAddress = EdrvInstance_l.m_pRxDescDma;
+    EDRV_REGDW_WRITE(EDRV_REGDW_RDBAL0, (qwDescAddress & 0xFFFFFFFF));
+    EDRV_REGDW_WRITE(EDRV_REGDW_RDBAH0, (qwDescAddress >> 32));
+    EDRV_REGDW_WRITE(EDRV_REGDW_RDLEN0, EDRV_RX_DESCS_SIZE);
+    EDRV_REGDW_WRITE(EDRV_REGDW_RDH0, 0);
+    EDRV_REGDW_WRITE(EDRV_REGDW_RDT0, 0);
+
+    // enable receiver
+    printk("%s set Rx conf register\n", __FUNCTION__);
+    EDRV_REGDW_WRITE(EDRV_REGDW_RCTL, EDRV_REGDW_RCTL_DEF);
+
     // initialize Tx descriptors
     printk("%s initialize Tx descriptors\n", __FUNCTION__);
     EDRV_REGDW_WRITE(EDRV_REGDW_TXDCTL, EDRV_REGDW_TXDCTL_DEF);
-    qwTxDescAddress = EdrvInstance_l.m_pTxDescDma;
-    EDRV_REGDW_WRITE(EDRV_REGDW_TDBAL, (qwTxDescAddress & 0xFFFFFFFF));
-    EDRV_REGDW_WRITE(EDRV_REGDW_TDBAH, (qwTxDescAddress >> 32));
+    qwDescAddress = EdrvInstance_l.m_pTxDescDma;
+    EDRV_REGDW_WRITE(EDRV_REGDW_TDBAL, (qwDescAddress & 0xFFFFFFFF));
+    EDRV_REGDW_WRITE(EDRV_REGDW_TDBAH, (qwDescAddress >> 32));
     EDRV_REGDW_WRITE(EDRV_REGDW_TDLEN, EDRV_TX_DESCS_SIZE);
     EDRV_REGDW_WRITE(EDRV_REGDW_TDH, 0);
     EDRV_REGDW_WRITE(EDRV_REGDW_TDT, 0);
-
-/*
-    // set pointer for receive buffer in controller
-    printk("%s set pointer to Rx buffer\n", __FUNCTION__);
-    EDRV_REGDW_WRITE(EDRV_REGDW_RBSTART, EdrvInstance_l.m_pRxBufDma);
-*/
 
     // enable transmitter
     printk("%s set Tx conf register\n", __FUNCTION__);
     EDRV_REGDW_WRITE(EDRV_REGDW_TCTL, EDRV_REGDW_TCTL_DEF);
 
 /*
-    printk("%s enable Tx and Rx", __FUNCTION__);
-    EDRV_REGB_WRITE(EDRV_REGB_COMMAND, (EDRV_REGB_COMMAND_RE | EDRV_REGB_COMMAND_TE));
-    printk("  Command = 0x%02X\n", (WORD) EDRV_REGB_READ(EDRV_REGB_COMMAND));
-
     // clear missed packet counter to enable Rx/Tx process
     EDRV_REGDW_WRITE(EDRV_REGDW_MPC, 0);
-
-    // set transmit configuration register
-    printk("%s set Tx conf register", __FUNCTION__);
-    EDRV_REGDW_WRITE(EDRV_REGDW_TCR, EDRV_REGDW_TCR_DEF);
-    printk(" = 0x%08X\n", EDRV_REGDW_READ(EDRV_REGDW_TCR));
-
-    // set receive configuration register
-    printk("%s set Rx conf register", __FUNCTION__);
-    EDRV_REGDW_WRITE(EDRV_REGDW_RCR, EDRV_REGDW_RCR_DEF);
-    printk(" = 0x%08X\n", EDRV_REGDW_READ(EDRV_REGDW_RCR));
-
-    // reset multicast MAC address filter
-    EDRV_REGDW_WRITE(EDRV_REGDW_MAR0, 0);
-    dwTemp = EDRV_REGDW_READ(EDRV_REGDW_MAR0);
-    EDRV_REGDW_WRITE(EDRV_REGDW_MAR4, 0);
-    dwTemp = EDRV_REGDW_READ(EDRV_REGDW_MAR4);
-*/
-/*
-    // enable transmitter and receiver
-    printk("%s enable Tx and Rx", __FUNCTION__);
-    EDRV_REGB_WRITE(EDRV_REGB_COMMAND, (EDRV_REGB_COMMAND_RE | EDRV_REGB_COMMAND_TE));
-    printk("  Command = 0x%02X\n", (WORD) EDRV_REGB_READ(EDRV_REGB_COMMAND));
 */
 
     // enable interrupts
