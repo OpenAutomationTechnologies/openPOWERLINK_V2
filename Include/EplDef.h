@@ -125,6 +125,10 @@
 #define EPL_C_NMT_STATREQ_CYCLE     5    // sec: StatusRequest cycle time to be applied to AsyncOnly CNs
 #define EPL_C_SDO_EPL_PORT          3819
 
+#ifndef EPL_DLL_PRES_CHAINING_CN
+#define EPL_DLL_PRES_CHAINING_CN        FALSE
+#endif
+
 #if EPL_DLL_PRES_CHAINING_CN == FALSE
   #define EPL_C_DLL_MAX_ASND_SERVICE_IDS  5   // see tEplDllAsndServiceId in EplDll.h
 #else
@@ -185,10 +189,6 @@
 #else
 #define EPL_DLL_PRES_FILTER_COUNT   0    // maximum count of Rx filter entries for PRes frames
 #endif
-#endif
-
-#ifndef EPL_DLL_PRES_CHAINING_CN
-#define EPL_DLL_PRES_CHAINING_CN        FALSE
 #endif
 
 #ifndef EPL_NMT_MAX_NODE_ID
