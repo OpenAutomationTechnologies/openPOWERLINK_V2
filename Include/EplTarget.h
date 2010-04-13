@@ -202,10 +202,10 @@
 
 
 #ifndef EPL_MEMCPY
-    #define EPL_MEMCPY(dst,src,siz)     memcpy((dst),(src),(siz));
+    #define EPL_MEMCPY(dst,src,siz)     memcpy((dst),(src),(siz))
 #endif
 #ifndef EPL_MEMSET
-    #define EPL_MEMSET(dst,val,siz)     memset((dst),(val),(siz));
+    #define EPL_MEMSET(dst,val,siz)     memset((dst),(val),(siz))
 #endif
 #ifndef EPL_MEMCMP
     #define EPL_MEMCMP(src1,src2,siz)     memcmp((src1),(src2),(siz))
