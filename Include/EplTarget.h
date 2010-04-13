@@ -131,9 +131,6 @@
     #include <stdio.h>
     #include <string.h>
 
-    #define EPL_MALLOC(siz)             malloc((size_t)(siz))
-    #define EPL_FREE(ptr)               free((void *)ptr)
-
     #ifndef PRINTF0
         #define PRINTF                      printf
         #define PRINTF0(arg)                PRINTF(arg)
@@ -208,7 +205,13 @@
     #define EPL_MEMSET(dst,val,siz)     memset((dst),(val),(siz))
 #endif
 #ifndef EPL_MEMCMP
-    #define EPL_MEMCMP(src1,src2,siz)     memcmp((src1),(src2),(siz))
+    #define EPL_MEMCMP(src1,src2,siz)   memcmp((src1),(src2),(siz))
+#endif
+#ifndef EPL_MALLOC
+    #define EPL_MALLOC(siz)             malloc(siz)
+#endif
+#ifndef EPL_FREE
+    #define EPL_FREE(ptr)               free(ptr)
 #endif
 
 
