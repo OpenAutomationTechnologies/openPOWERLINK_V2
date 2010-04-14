@@ -217,10 +217,10 @@ set_location_assignment PIN_N12 -to vIO_out[15]
 set_location_assignment PIN_T15 -to vIO_out[14]
 set_location_assignment PIN_N3 -to vIO_out[13]
 set_location_assignment PIN_P1 -to vIO_out[12]
-set_location_assignment PIN_P2 -to vIO_out[11]
-set_location_assignment PIN_R1 -to vIO_out[10]
-set_location_assignment PIN_L4 -to vIO_out[9]
-set_location_assignment PIN_K5 -to vIO_out[8]
+set_location_assignment PIN_R16 -to vIO_out[11]
+set_location_assignment PIN_P16 -to vIO_out[10]
+set_location_assignment PIN_P15 -to vIO_out[9]
+set_location_assignment PIN_N14 -to vIO_out[8]
 set_location_assignment PIN_N1 -to vIO_out[7]
 set_location_assignment PIN_N2 -to vIO_out[6]
 set_location_assignment PIN_L1 -to vIO_out[5]
@@ -229,10 +229,10 @@ set_location_assignment PIN_K1 -to vIO_out[3]
 set_location_assignment PIN_K2 -to vIO_out[2]
 set_location_assignment PIN_J1 -to vIO_out[1]
 set_location_assignment PIN_J2 -to vIO_out[0]
-set_location_assignment PIN_R16 -to vIO_in[3]
-set_location_assignment PIN_P16 -to vIO_in[2]
-set_location_assignment PIN_P15 -to vIO_in[1]
-set_location_assignment PIN_N14 -to vIO_in[0]
+set_location_assignment PIN_P2 -to vIO_in[3]
+set_location_assignment PIN_R1 -to vIO_in[2]
+set_location_assignment PIN_L4 -to vIO_in[1]
+set_location_assignment PIN_K5 -to vIO_in[0]
 set_global_assignment -name MISC_FILE "D:/Projekte/EPL/SW/EPL_V2/Examples/altera_nios2/SYSTEC_ECUcore-EP3C/design_nios2_openmac/nios_openMac.dpf"
 set_instance_assignment -name TCO_REQUIREMENT "8 ns" -from * -to fETH0_TXEN_out
 set_instance_assignment -name TCO_REQUIREMENT "8 ns" -from * -to fETH1_TXEN_out
@@ -372,3 +372,6 @@ set_location_assignment PIN_P6 -to vPCB_in[2]
 set_location_assignment PIN_L3 -to vPCB_in[1]
 set_location_assignment PIN_F3 -to vPCB_[0]
 set_instance_assignment -name CURRENT_STRENGTH_NEW 4MA -to altera_reserved_tdo
+set_location_assignment PIN_M10 -to fHex_CLK_out
+set_location_assignment PIN_T14 -to fHex_PL_out
+set_location_assignment PIN_N11 -to fHex_MRST_in
