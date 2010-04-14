@@ -2,13 +2,16 @@
 #include "Epl.h"
 
 #include "system.h"
+#ifdef NODESWITCH_SPI_BASE
+#include "altera_avalon_spi_regs.h"
+#endif
 #include "altera_avalon_pio_regs.h"
 #include "alt_types.h"
 #include <sys/alt_cache.h>
 
 #define NODEID      0x01 // should be NOT 0xF0 (=MN) in case of CN
 #define CYCLE_LEN   1000 // [us]
-#define MAC_ADDR	0x00, 0x12, 0x34, 0x56, 0x78, 0x9A
+#define MAC_ADDR    0x00, 0x12, 0x34, 0x56, 0x78, 0x9A
 #define IP_ADDR     0xc0a86401  // 192.168.100.1 // don't care the last byte!
 #define SUBNET_MASK 0xFFFFFF00  // 255.255.255.0
 
@@ -58,67 +61,80 @@ int main(void) {
 }
 
 
-int openPowerlink(void) {
-	DWORD		 				ip = IP_ADDR; // ip address
-
-	const BYTE 				abMacAddr[] = {MAC_ADDR};
-	static tEplApiInitParam EplApiInitParam; //epl init parameter
-	// needed for process var
-	tEplObdSize         	ObdSize;
-	tEplKernel 				EplRet;
-	unsigned int			uiVarEntries;
+int openPowerlink(void)
+{
+    const BYTE              abMacAddr[] = {MAC_ADDR};
+    static tEplApiInitParam EplApiInitParam = {0};
+    // needed for process var
+    tEplObdSize             ObdSize;
+    tEplKernel              EplRet;
+    unsigned int            uiVarEntries;
 
     fShutdown_l = FALSE;
 
-	////////////////////////
-	// setup th EPL Stack //
-	////////////////////////
+    ////////////////////////
+    // setup the EPL Stack //
+    ////////////////////////
 
-	// calc the IP address with the nodeid
-	ip &= 0xFFFFFF00; //dump the last byte
-	ip |= NODEID; // and mask it with the node id
+    // set EPL init parameters
+    EplApiInitParam.m_uiSizeOfStruct = sizeof (EplApiInitParam);
 
-	// set EPL init parameters
-	EplApiInitParam.m_uiSizeOfStruct = sizeof (EplApiInitParam);
-	EPL_MEMCPY(EplApiInitParam.m_abMacAddress, abMacAddr, sizeof(EplApiInitParam.m_abMacAddress));
-	EplApiInitParam.m_uiNodeId = NODEID; // defined at the top of this file!
-	EplApiInitParam.m_dwIpAddress = ip;
-	EplApiInitParam.m_uiIsochrTxMaxPayload = 100;
-	EplApiInitParam.m_uiIsochrRxMaxPayload = 100;
-	EplApiInitParam.m_dwPresMaxLatency = 50000;
-	EplApiInitParam.m_dwAsndMaxLatency = 150000;
-	EplApiInitParam.m_fAsyncOnly = FALSE;
-	EplApiInitParam.m_dwFeatureFlags = -1;
-	EplApiInitParam.m_dwCycleLen = CYCLE_LEN;
-	EplApiInitParam.m_uiPreqActPayloadLimit = 36;
-	EplApiInitParam.m_uiPresActPayloadLimit = 36;
-	EplApiInitParam.m_uiMultiplCycleCnt = 0;
-	EplApiInitParam.m_uiAsyncMtu = 1500;
-	EplApiInitParam.m_uiPrescaler = 2;
-	EplApiInitParam.m_dwLossOfFrameTolerance = 500000;
-	EplApiInitParam.m_dwAsyncSlotTimeout = 3000000;
-	EplApiInitParam.m_dwWaitSocPreq = 150000;
-	EplApiInitParam.m_dwDeviceType = -1;
-	EplApiInitParam.m_dwVendorId = -1;
-	EplApiInitParam.m_dwProductCode = -1;
-	EplApiInitParam.m_dwRevisionNumber = -1;
-	EplApiInitParam.m_dwSerialNumber = -1;
-	EplApiInitParam.m_dwSubnetMask = SUBNET_MASK;
-	EplApiInitParam.m_dwDefaultGateway = 0;
-	EplApiInitParam.m_pfnCbEvent = AppCbEvent;
+#ifdef NODESWITCH_SPI_BASE
+    // read node-ID from hex switch on baseboard, which is connected via SPI shift register
+    IOWR_ALTERA_AVALON_SPI_TXDATA(NODESWITCH_SPI_BASE, 0xFF);   // generate pulse for latching inputs
+    while ((IORD_ALTERA_AVALON_SPI_STATUS(NODESWITCH_SPI_BASE) & ALTERA_AVALON_SPI_STATUS_RRDY_MSK) == 0)
+    {   // wait
+    }
+    EplApiInitParam.m_uiNodeId = IORD_ALTERA_AVALON_SPI_RXDATA(NODESWITCH_SPI_BASE);
+#endif
+
+    if (EplApiInitParam.m_uiNodeId == EPL_C_ADR_INVALID)
+    {
+        EplApiInitParam.m_uiNodeId = NODEID; // defined at the top of this file!
+    }
+
+    EPL_MEMCPY(EplApiInitParam.m_abMacAddress, abMacAddr, sizeof(EplApiInitParam.m_abMacAddress));
+    EplApiInitParam.m_abMacAddress[5] = (BYTE) EplApiInitParam.m_uiNodeId;
+
+    // calculate IP address
+    EplApiInitParam.m_dwIpAddress = (0xFFFFFF00 & IP_ADDR) | EplApiInitParam.m_uiNodeId;
+
+    EplApiInitParam.m_uiIsochrTxMaxPayload = 100;
+    EplApiInitParam.m_uiIsochrRxMaxPayload = 100;
+    EplApiInitParam.m_dwPresMaxLatency = 50000;
+    EplApiInitParam.m_dwAsndMaxLatency = 150000;
+    EplApiInitParam.m_fAsyncOnly = FALSE;
+    EplApiInitParam.m_dwFeatureFlags = -1;
+    EplApiInitParam.m_dwCycleLen = CYCLE_LEN;
+    EplApiInitParam.m_uiPreqActPayloadLimit = 36;
+    EplApiInitParam.m_uiPresActPayloadLimit = 36;
+    EplApiInitParam.m_uiMultiplCycleCnt = 0;
+    EplApiInitParam.m_uiAsyncMtu = 1500;
+    EplApiInitParam.m_uiPrescaler = 2;
+    EplApiInitParam.m_dwLossOfFrameTolerance = 500000;
+    EplApiInitParam.m_dwAsyncSlotTimeout = 3000000;
+    EplApiInitParam.m_dwWaitSocPreq = 150000;
+    EplApiInitParam.m_dwDeviceType = -1;
+    EplApiInitParam.m_dwVendorId = -1;
+    EplApiInitParam.m_dwProductCode = -1;
+    EplApiInitParam.m_dwRevisionNumber = -1;
+    EplApiInitParam.m_dwSerialNumber = -1;
+    EplApiInitParam.m_dwSubnetMask = SUBNET_MASK;
+    EplApiInitParam.m_dwDefaultGateway = 0;
+    EplApiInitParam.m_pfnCbEvent = AppCbEvent;
     EplApiInitParam.m_pfnCbSync  = AppCbSync;
     EplApiInitParam.m_pfnObdInitRam = EplObdInitRam;
 
-	// initialize EPL stack
+    // initialize EPL stack
     printf("init EPL Stack:\n");
-	EplRet = EplApiInitialize(&EplApiInitParam);
-	if(EplRet != kEplSuccessful) {
+    EplRet = EplApiInitialize(&EplApiInitParam);
+    if(EplRet != kEplSuccessful) {
         printf("init EPL Stack... error %X\n\n", EplRet);
-		goto Exit;
+        goto Exit;
     }
     printf("init EPL Stack...ok\n\n");
 
-	// link process variables used by CN to object dictionary
+    // link process variables used by CN to object dictionary
     printf("linking process vars:\n");
     ObdSize = sizeof(bVarIn1_l);
     uiVarEntries = 1;
@@ -137,11 +153,11 @@ int openPowerlink(void) {
         printf("linking process vars... error\n\n");
         goto ExitShutdown;
     }
-	printf("linking process vars... ok\n\n");
+    printf("linking process vars... ok\n\n");
 
-	// start the EPL stack
+    // start the EPL stack
     printf("start EPL Stack...\n");
-	EplRet = EplApiExecNmtCommand(kEplNmtEventSwReset);
+    EplRet = EplApiExecNmtCommand(kEplNmtEventSwReset);
     if (EplRet != kEplSuccessful) {
         printf("start EPL Stack... error\n\n");
         goto ExitShutdown;
@@ -166,7 +182,7 @@ ExitShutdown:
     EplApiShutdown(); //shutdown node
 
 Exit:
-	return EplRet;
+    return EplRet;
 }
 
 //---------------------------------------------------------------------------
@@ -194,7 +210,7 @@ tEplKernel PUBLIC AppCbEvent(
     tEplApiEventArg*        pEventArg_p,   // IN: event argument (union)
     void GENERIC*           pUserArg_p)
 {
-	tEplKernel          EplRet = kEplSuccessful;
+    tEplKernel          EplRet = kEplSuccessful;
 
     // check if NMT_GS_OFF is reached
     switch (EventType_p)
@@ -377,12 +393,12 @@ tEplKernel PUBLIC AppCbEvent(
 
 tEplKernel PUBLIC AppCbSync(void)
 {
-	tEplKernel          EplRet = kEplSuccessful;
+    tEplKernel          EplRet = kEplSuccessful;
 
 #ifdef DIN_PIO_BASE
     bVarIn1_l = IORD_ALTERA_AVALON_PIO_DATA(DIN_PIO_BASE);
 #else
-	bVarIn1_l++;
+    bVarIn1_l++;
 #endif
 
 #ifdef DOUT_PIO_BASE

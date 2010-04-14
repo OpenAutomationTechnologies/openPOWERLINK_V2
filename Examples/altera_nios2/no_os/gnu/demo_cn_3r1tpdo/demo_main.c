@@ -2,6 +2,9 @@
 #include "Epl.h"
 
 #include "system.h"
+#ifdef NODESWITCH_SPI_BASE
+#include "altera_avalon_spi_regs.h"
+#endif
 #include "altera_avalon_pio_regs.h"
 #include "alt_types.h"
 #include <sys/alt_cache.h>
@@ -66,11 +69,10 @@ int main(void) {
 }
 
 
-int openPowerlink(void) {
-	DWORD		 				ip = IP_ADDR; // ip address
-
-	const BYTE 				abMacAddr[] = {MAC_ADDR};
-	static tEplApiInitParam EplApiInitParam; //epl init parameter
+int openPowerlink(void)
+{
+    const BYTE              abMacAddr[] = {MAC_ADDR};
+    static tEplApiInitParam EplApiInitParam = {0};
 	// needed for process var
 	tEplObdSize         	ObdSize;
 	tEplKernel 				EplRet;
@@ -82,15 +84,28 @@ int openPowerlink(void) {
 	// setup th EPL Stack //
 	////////////////////////
 
-	// calc the IP address with the nodeid
-	ip &= 0xFFFFFF00; //dump the last byte
-	ip |= NODEID; // and mask it with the node id
-
 	// set EPL init parameters
-	EplApiInitParam.m_uiSizeOfStruct = sizeof (EplApiInitParam);
-	EPL_MEMCPY(EplApiInitParam.m_abMacAddress, abMacAddr, sizeof(EplApiInitParam.m_abMacAddress));
-	EplApiInitParam.m_uiNodeId = NODEID; // defined at the top of this file!
-	EplApiInitParam.m_dwIpAddress = ip;
+    EplApiInitParam.m_uiSizeOfStruct = sizeof (EplApiInitParam);
+
+#ifdef NODESWITCH_SPI_BASE
+    // read node-ID from hex switch on baseboard, which is connected via SPI shift register
+    IOWR_ALTERA_AVALON_SPI_TXDATA(NODESWITCH_SPI_BASE, 0xFF);   // generate pulse for latching inputs
+    while ((IORD_ALTERA_AVALON_SPI_STATUS(NODESWITCH_SPI_BASE) & ALTERA_AVALON_SPI_STATUS_RRDY_MSK) == 0)
+    {   // wait
+    }
+    EplApiInitParam.m_uiNodeId = IORD_ALTERA_AVALON_SPI_RXDATA(NODESWITCH_SPI_BASE);
+#endif
+
+    if (EplApiInitParam.m_uiNodeId == EPL_C_ADR_INVALID)
+    {
+        EplApiInitParam.m_uiNodeId = NODEID; // defined at the top of this file!
+    }
+
+    EPL_MEMCPY(EplApiInitParam.m_abMacAddress, abMacAddr, sizeof(EplApiInitParam.m_abMacAddress));
+    EplApiInitParam.m_abMacAddress[5] = (BYTE) EplApiInitParam.m_uiNodeId;
+
+    // calculate IP address
+    EplApiInitParam.m_dwIpAddress = (0xFFFFFF00 & IP_ADDR) | EplApiInitParam.m_uiNodeId;
 	EplApiInitParam.m_uiIsochrTxMaxPayload = 256;
 	EplApiInitParam.m_uiIsochrRxMaxPayload = 256;
 	EplApiInitParam.m_dwPresMaxLatency = 2000;
