@@ -120,7 +120,7 @@ typedef struct _tEdrvRxBuffer tEdrvRxBuffer;
 typedef void (*tEdrvRxHandler) (tEdrvRxBuffer * pRxBuffer_p);
 typedef void (*tEdrvTxHandler) (tEdrvTxBuffer * pTxBuffer_p);
 typedef tEplKernel (* tEdrvCyclicCbSync) (void);
-typedef tEplKernel (* tEdrvCyclicCbLossOfSync) (BOOL fNoTxBufferList_p);
+typedef tEplKernel (* tEdrvCyclicCbError) (tEplKernel ErrorCode_p, tEdrvTxBuffer * pTxBuffer_p);
 
 
 // position of a buffer in an ethernet-frame
@@ -139,8 +139,13 @@ struct _tEdrvTxBuffer
     DWORD           m_dwTimeOffsetNs;       // IN: delay to a previous frame after which this frame will be transmitted
     tEdrvTxHandler  m_pfnTxHandler;         // IN: special Tx callback function
     // ----------------------
-    unsigned int    m_uiBufferNumber;       // OUT: number of the buffer, set by ethernetdriver
-    BYTE  *         m_pbBuffer;             // OUT: pointer to the buffer, set by ethernetdriver
+    unsigned int    m_uiBufferNumber;       // deprecated
+    union
+    {
+        DWORD       m_dwVal;
+        void*       m_pVal;
+    } m_BufferNumber;                       // OUT: number of the buffer, set by ethernetdriver
+    BYTE*           m_pbBuffer;             // OUT: pointer to the buffer, set by ethernetdriver
     // ----------------------
     unsigned int    m_uiMaxBufferLen;       // IN/OUT: maximum length of the buffer
 
@@ -230,7 +235,7 @@ tEplKernel EdrvCyclicStopCycle(void);
 tEplKernel EdrvCyclicSetMaxTxBufferListSize(unsigned int uiMaxListSize_p);
 tEplKernel EdrvCyclicSetNextTxBufferList(tEdrvTxBuffer** apTxBuffer_p, unsigned int uiTxBufferCount_p);
 tEplKernel EdrvCyclicRegSyncHandler(tEdrvCyclicCbSync pfnEdrvCyclicCbSync_p);
-tEplKernel EdrvCyclicRegLossOfSyncHandler(tEdrvCyclicCbLossOfSync pfnEdrvCyclicCbLossOfSync_p);
+tEplKernel EdrvCyclicRegErrorHandler(tEdrvCyclicCbError pfnEdrvCyclicCbError_p);
 
 
 // interrupt handler called by target specific interrupt handler

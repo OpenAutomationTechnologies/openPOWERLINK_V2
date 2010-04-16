@@ -163,6 +163,13 @@
 // const defines
 //---------------------------------------------------------------------------
 
+// the EdrvCyclic module is recommended for MN implementations;
+// disabling the EdrvCyclic module is deprecated
+#ifndef EPL_DLL_DISABLE_EDRV_CYCLIC
+#define EPL_DLL_DISABLE_EDRV_CYCLIC     FALSE
+#endif
+
+
 // defines for indexes of tEplDllInstance.m_pTxFrameInfo
 #define EPL_DLLK_TXFRAME_IDENTRES   0   // IdentResponse on CN / MN
 #define EPL_DLLK_TXFRAME_STATUSRES  1   // StatusResponse on CN / MN
@@ -340,7 +347,13 @@ static tEplKernel EplDllkChangeState(tEplNmtEvent NmtEvent_p, tEplNmtState NmtSt
 static void EplDllkCbFrameReceived(tEdrvRxBuffer * pRxBuffer_p);
 
 // called from EdrvInterruptHandler()
-static void EplDllkCbFrameTransmitted(tEdrvTxBuffer * pTxBuffer_p);
+static void EplDllkCbTransmittedNmtReq(tEdrvTxBuffer * pTxBuffer_p);
+static void EplDllkCbTransmittedNonEpl(tEdrvTxBuffer * pTxBuffer_p);
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
+static void EplDllkCbTransmittedPreq(tEdrvTxBuffer * pTxBuffer_p);
+static void EplDllkCbTransmittedSoa(tEdrvTxBuffer * pTxBuffer_p);
+static void EplDllkCbTransmittedSoc(tEdrvTxBuffer * pTxBuffer_p);
+#endif
 
 // forward RPDO to callback function
 static tEplKernel EplDllkForwardRpdo(tEplFrameInfo * pFrameInfo_p);
@@ -496,7 +509,6 @@ tEdrvInitParam  EdrvInitParam;
 
     // if dynamic memory allocation available
     // allocate instance structure
-    // allocate TPDO and RPDO table with default size
 
     // initialize and link pointers in instance structure to frame tables
     EplDllkInstance_g.m_pTxBuffer = aEplDllkTxBuffer_l;
@@ -517,7 +529,7 @@ tEdrvInitParam  EdrvInitParam;
     EPL_MEMCPY(EdrvInitParam.m_abMyMacAddr, pInitParam_p->m_be_abLocalMac, 6);
     EdrvInitParam.m_HwParam = pInitParam_p->m_HwParam;
     EdrvInitParam.m_pfnRxHandler = EplDllkCbFrameReceived;
-    EdrvInitParam.m_pfnTxHandler = EplDllkCbFrameTransmitted;
+//    EdrvInitParam.m_pfnTxHandler = EplDllkCbFrameTransmitted;
     Ret = EdrvInit(&EdrvInitParam);
     if (Ret != kEplSuccessful)
     {   // error occured while initializing ethernet driver
@@ -534,6 +546,17 @@ tEdrvInitParam  EdrvInitParam;
     {
         EplDllkInstance_g.m_pTxBuffer[uiIndex].m_pbBuffer = NULL;
     }
+
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
+#if (EPL_DLL_DISABLE_EDRV_CYCLIC == FALSE)
+    Ret = EdrvCyclicInit();
+    if (Ret != kEplSuccessful)
+    {
+        goto Exit;
+    }
+
+#endif
+#endif
 
 #if EPL_DLL_PRES_CHAINING_CN != FALSE
     EplDllkInstance_g.m_pSyncReqPrevTimeStamp = EplTgtTimeStampAlloc();
@@ -565,6 +588,12 @@ tEplKernel      Ret = kEplSuccessful;
     // reset state
     EplDllkInstance_g.m_DllState = kEplDllGsInit;
 
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
+#if (EPL_DLL_DISABLE_EDRV_CYCLIC == FALSE)
+    Ret = EdrvCyclicShutdown();
+#endif
+#endif
+
 #if (EPL_DLL_PROCESS_SYNC == EPL_DLL_PROCESS_SYNC_ON_TIMER)
     Ret = EplTimerSynckDelInstance();
 #endif
@@ -578,6 +607,7 @@ tEplKernel      Ret = kEplSuccessful;
 #endif
 
     Ret = EdrvShutdown();
+
     return Ret;
 }
 
@@ -1490,6 +1520,12 @@ tEplDllkNodeInfo*   pIntNodeInfo;
         {   // error occured while registering Tx frame
             goto Exit;
         }
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
+        if (NmtState_p >= kEplNmtMsNotActive)
+        {   // local node is MN
+            EplDllkInstance_g.m_pTxBuffer[uiHandle].m_pfnTxHandler = EplDllkCbTransmittedPreq;
+        }
+#endif
 
         // reset cycle counter
         EplDllkInstance_g.m_uiCycleCount = 0;
@@ -1509,6 +1545,7 @@ tEplDllkNodeInfo*   pIntNodeInfo;
     }
     // mark Tx buffer as empty
     EplDllkInstance_g.m_pTxBuffer[uiHandle].m_uiTxMsgLen = EPL_DLLK_BUFLEN_EMPTY;
+    EplDllkInstance_g.m_pTxBuffer[uiHandle].m_pfnTxHandler = EplDllkCbTransmittedNmtReq;
 
 #if EPL_DLL_PRES_CHAINING_CN != FALSE
     // SyncResponse
@@ -1532,6 +1569,7 @@ tEplDllkNodeInfo*   pIntNodeInfo;
     }
     // mark Tx buffer as empty
     EplDllkInstance_g.m_pTxBuffer[uiHandle].m_uiTxMsgLen = EPL_DLLK_BUFLEN_EMPTY;
+    EplDllkInstance_g.m_pTxBuffer[uiHandle].m_pfnTxHandler = EplDllkCbTransmittedNonEpl;
 
 
     // setup filter structure for Edrv
@@ -1702,6 +1740,7 @@ tEplDllkNodeInfo*   pIntNodeInfo;
         {   // error occured while registering Tx frame
             goto Exit;
         }
+        EplDllkInstance_g.m_pTxBuffer[uiHandle].m_pfnTxHandler = EplDllkCbTransmittedSoc;
 
         // SoA
         uiFrameSize = EPL_C_DLL_MINSIZE_SOA;
@@ -1710,6 +1749,7 @@ tEplDllkNodeInfo*   pIntNodeInfo;
         {   // error occured while registering Tx frame
             goto Exit;
         }
+        EplDllkInstance_g.m_pTxBuffer[uiHandle].m_pfnTxHandler = EplDllkCbTransmittedSoa;
 
         for (uiIndex = 0, pIntNodeInfo = &EplDllkInstance_g.m_aNodeInfo[0];
              uiIndex < tabentries (EplDllkInstance_g.m_aNodeInfo);
@@ -1723,6 +1763,7 @@ tEplDllkNodeInfo*   pIntNodeInfo;
                 {
                     goto Exit;
                 }
+                EplDllkInstance_g.m_pTxBuffer[uiHandle].m_pfnTxHandler = EplDllkCbTransmittedPreq;
                 pIntNodeInfo->m_pPreqTxBuffer = &EplDllkInstance_g.m_pTxBuffer[uiHandle];
 
                 // set destination node-ID in PReq
@@ -4367,29 +4408,29 @@ Exit:
     return;
 }
 
+
 //---------------------------------------------------------------------------
 //
 // Function:    EplDllkCbFrameTransmitted()
 //
 // Description: called from EdrvInterruptHandler().
-//              It signals
+//              It signals the transmission of the specified transmit buffer.
 //
-// Parameters:  pRxBuffer_p             = receive buffer structure
+// Parameters:  pTxBuffer_p             = transmit buffer structure
 //
 // Returns:     (none)
-//
 //
 // State:
 //
 //---------------------------------------------------------------------------
 
-static void EplDllkCbFrameTransmitted(tEdrvTxBuffer * pTxBuffer_p)
+static void EplDllkCbTransmittedNmtReq(tEdrvTxBuffer * pTxBuffer_p)
 {
 tEplKernel      Ret = kEplSuccessful;
 tEplEvent       Event;
 tEplDllAsyncReqPriority Priority;
 tEplNmtState    NmtState;
-unsigned int    uiHandle = 0xFF;
+unsigned int    uiHandle = EPL_DLLK_TXFRAME_NMTREQ;
 TGT_DLLK_DECLARE_FLAGS
 
     TGT_DLLK_ENTER_CRITICAL_SECTION();
@@ -4401,280 +4442,172 @@ TGT_DLLK_DECLARE_FLAGS
         goto Exit;
     }
 
-    uiHandle = (unsigned int)(pTxBuffer_p - EplDllkInstance_g.m_pTxBuffer);
+    // frame from NMT request FIFO sent
+    // mark Tx-buffer as empty
+    pTxBuffer_p->m_uiTxMsgLen = EPL_DLLK_BUFLEN_EMPTY;
 
-    switch (uiHandle)
+    // post event to DLL
+    Priority = kEplDllAsyncReqPrioNmt;
+    Event.m_EventSink = kEplEventSinkDllk;
+    Event.m_EventType = kEplEventTypeDllkFillTx;
+    EPL_MEMSET(&Event.m_NetTime, 0x00, sizeof(Event.m_NetTime));
+    Event.m_pArg = &Priority;
+    Event.m_uiSize = sizeof(Priority);
+    Ret = EplEventkPost(&Event);
+    if (Ret != kEplSuccessful)
     {
-        case EPL_DLLK_TXFRAME_NMTREQ:
-        {   // frame from NMT request FIFO sent
-            // mark Tx-buffer as empty
-            pTxBuffer_p->m_uiTxMsgLen = EPL_DLLK_BUFLEN_EMPTY;
+        goto Exit;
+    }
 
-            // post event to DLL
-            Priority = kEplDllAsyncReqPrioNmt;
-            Event.m_EventSink = kEplEventSinkDllk;
-            Event.m_EventType = kEplEventTypeDllkFillTx;
-            EPL_MEMSET(&Event.m_NetTime, 0x00, sizeof(Event.m_NetTime));
-            Event.m_pArg = &Priority;
-            Event.m_uiSize = sizeof(Priority);
-            Ret = EplEventkPost(&Event);
-            if (Ret != kEplSuccessful)
-            {
-                goto Exit;
-            }
+Exit:
+    if (Ret != kEplSuccessful)
+    {
+    DWORD   dwArg;
 
-            break;
-        }
+        BENCHMARK_MOD_02_TOGGLE(7);
 
-        case EPL_DLLK_TXFRAME_NONEPL:
-        {   // frame from generic priority FIFO sent
-            // mark Tx-buffer as empty
-            pTxBuffer_p->m_uiTxMsgLen = EPL_DLLK_BUFLEN_EMPTY;
+        dwArg = EplDllkInstance_g.m_DllState | (uiHandle << 16);
 
-            // post event to DLL
-            Priority = kEplDllAsyncReqPrioGeneric;
-            Event.m_EventSink = kEplEventSinkDllk;
-            Event.m_EventType = kEplEventTypeDllkFillTx;
-            EPL_MEMSET(&Event.m_NetTime, 0x00, sizeof(Event.m_NetTime));
-            Event.m_pArg = &Priority;
-            Event.m_uiSize = sizeof(Priority);
-            Ret = EplEventkPost(&Event);
+        // Error event for API layer
+        Ret = EplEventkPostError(kEplEventSourceDllk,
+                        Ret,
+                        sizeof(dwArg),
+                        &dwArg);
+    }
 
-            break;
-        }
+    TGT_DLLK_LEAVE_CRITICAL_SECTION();
+
+    return;
+}
+
+
+//---------------------------------------------------------------------------
+//
+// Function:    EplDllkCbFrameTransmitted()
+//
+// Description: called from EdrvInterruptHandler().
+//              It signals the transmission of the specified transmit buffer.
+//
+// Parameters:  pTxBuffer_p             = transmit buffer structure
+//
+// Returns:     (none)
+//
+// State:
+//
+//---------------------------------------------------------------------------
+
+static void EplDllkCbTransmittedNonEpl(tEdrvTxBuffer * pTxBuffer_p)
+{
+tEplKernel      Ret = kEplSuccessful;
+tEplEvent       Event;
+tEplDllAsyncReqPriority Priority;
+tEplNmtState    NmtState;
+unsigned int    uiHandle = EPL_DLLK_TXFRAME_NONEPL;
+TGT_DLLK_DECLARE_FLAGS
+
+    TGT_DLLK_ENTER_CRITICAL_SECTION();
+
+    NmtState = EplDllkInstance_g.m_NmtState;
+
+    if (NmtState <= kEplNmtGsResetConfiguration)
+    {
+        goto Exit;
+    }
+
+    // frame from generic priority FIFO sent
+    // mark Tx-buffer as empty
+    pTxBuffer_p->m_uiTxMsgLen = EPL_DLLK_BUFLEN_EMPTY;
+
+    // post event to DLL
+    Priority = kEplDllAsyncReqPrioGeneric;
+    Event.m_EventSink = kEplEventSinkDllk;
+    Event.m_EventType = kEplEventTypeDllkFillTx;
+    EPL_MEMSET(&Event.m_NetTime, 0x00, sizeof(Event.m_NetTime));
+    Event.m_pArg = &Priority;
+    Event.m_uiSize = sizeof(Priority);
+    Ret = EplEventkPost(&Event);
+
+Exit:
+    if (Ret != kEplSuccessful)
+    {
+    DWORD   dwArg;
+
+        BENCHMARK_MOD_02_TOGGLE(7);
+
+        dwArg = EplDllkInstance_g.m_DllState | (uiHandle << 16);
+
+        // Error event for API layer
+        Ret = EplEventkPostError(kEplEventSourceDllk,
+                        Ret,
+                        sizeof(dwArg),
+                        &dwArg);
+    }
+
+    TGT_DLLK_LEAVE_CRITICAL_SECTION();
+
+    return;
+}
+
+
+//---------------------------------------------------------------------------
+//
+// Function:    EplDllkCbFrameTransmitted()
+//
+// Description: called from EdrvInterruptHandler().
+//              It signals the transmission of the specified transmit buffer.
+//
+// Parameters:  pTxBuffer_p             = transmit buffer structure
+//
+// Returns:     (none)
+//
+// State:
+//
+//---------------------------------------------------------------------------
+
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
+static void EplDllkCbTransmittedPreq(tEdrvTxBuffer * pTxBuffer_p)
+{
+tEplKernel      Ret = kEplSuccessful;
+tEplNmtState    NmtState;
+unsigned int    uiHandle = EPL_DLLK_TXFRAME_PREQ;
+TGT_DLLK_DECLARE_FLAGS
+
+    TGT_DLLK_ENTER_CRITICAL_SECTION();
+
+    NmtState = EplDllkInstance_g.m_NmtState;
+
+    if (NmtState <= kEplNmtGsResetConfiguration)
+    {
+        goto Exit;
+    }
 
 #if ((((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOK)) != 0) \
     && (EPL_DLL_PRES_READY_AFTER_SOC == FALSE)) \
     || (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
-        case EPL_DLLK_TXFRAME_PRES:
-        default:
-        {   // PRes resp. PReq frame sent
+    // PRes resp. PReq frame sent
 
-            #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
-            {
-                if (NmtState >= kEplNmtMsPreOperational2)
-                {   // local node runs as MN in PREOP2
-                    if (pTxBuffer_p == &EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_PRES])
-                    {   // own Pres on MN, trigger SoA
-                        Ret = EplDllkChangeState(kEplNmtEventDllMeSoaTrig, NmtState);
-                    }
-                    else // if (pTxBuffer_p->m_EplMsgType == kEplMsgTypePreq)
-                    {
-                        // start PRes Timer
-    #if EPL_TIMER_USE_HIGHRES != FALSE
-                        Ret = EplTimerHighReskModifyTimerNs(&EplDllkInstance_g.m_TimerHdlResponse,
-                            EplDllkInstance_g.m_pCurNodeInfo->m_dwPresTimeout,
-                            EplDllkCbMnTimerResponse,
-                            0L,
-                            FALSE);
-    #endif
-                    }
-                }
+    #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
+    {
+        if (NmtState >= kEplNmtMsPreOperational2)
+        {   // local node runs as MN in PREOP2
+            if (pTxBuffer_p == &EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_PRES])
+            {   // own Pres on MN, trigger SoA
+                Ret = EplDllkChangeState(kEplNmtEventDllMeSoaTrig, NmtState);
             }
-            #endif
-
-        #if EPL_DLL_PRES_READY_AFTER_SOA != FALSE
-            goto Exit;
-        #else
-            break;
-        #endif
-        }
-#endif
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
-        case EPL_DLLK_TXFRAME_SOA:
-        {   // SoA frame sent
-        tEplNmtEvent NmtEvent = kEplNmtEventDllMeSoaSent;
-
-            // check if we are invited
-            if (EplDllkInstance_g.m_uiLastTargetNodeId == EplDllkInstance_g.m_DllConfigParam.m_uiNodeId)
+            else // if (pTxBuffer_p->m_EplMsgType == kEplMsgTypePreq)
             {
-            tEplFrame      *pTxFrame;
-
-                switch (EplDllkInstance_g.m_LastReqServiceId)
-                {
-                    case kEplDllReqServiceStatus:
-                    {   // StatusRequest
-                        if (EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_STATUSRES].m_pbBuffer != NULL)
-                        {   // StatusRes does exist
-
-                            // send StatusRes
-                            Ret = EdrvSendTxMsg(&EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_STATUSRES]);
-                            if (Ret != kEplSuccessful)
-                            {
-                                goto Exit;
-                            }
-                            TGT_DBG_SIGNAL_TRACE_POINT(8);
-
-                        }
-
-                        break;
-                    }
-
-                    case kEplDllReqServiceIdent:
-                    {   // IdentRequest
-                        if (EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_IDENTRES].m_pbBuffer != NULL)
-                        {   // IdentRes does exist
-
-                            // send IdentRes
-                            Ret = EdrvSendTxMsg(&EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_IDENTRES]);
-                            if (Ret != kEplSuccessful)
-                            {
-                                goto Exit;
-                            }
-                            TGT_DBG_SIGNAL_TRACE_POINT(7);
-                        }
-
-                        break;
-                    }
-
-                    case kEplDllReqServiceNmtRequest:
-                    {   // NmtRequest
-                        if (EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_NMTREQ].m_pbBuffer != NULL)
-                        {   // NmtRequest does exist
-                            // check if frame is not empty and not being filled
-                            if (EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_NMTREQ].m_uiTxMsgLen > EPL_DLLK_BUFLEN_FILLING)
-                            {
-                                // check if this frame is a NMT command,
-                                // then forward this frame back to NmtMnu module,
-                                // because it needs the time, when this frame is
-                                // actually sent, to start the timer for monitoring
-                                // the NMT state change.
-
-                                pTxFrame = (tEplFrame *) EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_NMTREQ].m_pbBuffer;
-                                if ((AmiGetByteFromLe(&pTxFrame->m_le_bMessageType)
-                                        == (BYTE) kEplMsgTypeAsnd)
-                                    && (AmiGetByteFromLe(&pTxFrame->m_Data.m_Asnd.m_le_bServiceId)
-                                        == (BYTE) kEplDllAsndNmtCommand))
-                                {   // post event directly to NmtMnu module
-                                    Event.m_EventSink = kEplEventSinkNmtMnu;
-                                    Event.m_EventType = kEplEventTypeNmtMnuNmtCmdSent;
-                                    Event.m_uiSize = EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_NMTREQ].m_uiTxMsgLen;
-                                    Event.m_pArg = pTxFrame;
-                                    Ret = EplEventkPost(&Event);
-
-                                }
-
-                                // send NmtRequest
-                                Ret = EdrvSendTxMsg(&EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_NMTREQ]);
-                                if (Ret != kEplSuccessful)
-                                {
-                                    goto Exit;
-                                }
-
-                            }
-                        }
-
-                        break;
-                    }
-
-                    case kEplDllReqServiceUnspecified:
-                    {   // unspecified invite
-                        if (EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_NONEPL].m_pbBuffer != NULL)
-                        {   // non-EPL frame does exist
-                            // check if frame is not empty and not being filled
-                            if (EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_NONEPL].m_uiTxMsgLen > EPL_DLLK_BUFLEN_FILLING)
-                            {
-                                // send non-EPL frame
-                                Ret = EdrvSendTxMsg(&EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_NONEPL]);
-                                if (Ret != kEplSuccessful)
-                                {
-                                    goto Exit;
-                                }
-
-                            }
-                        }
-
-                        break;
-                    }
-
-                    default:
-                    {
-                        break;
-                    }
-                }
-
-                // ASnd frame was sent, remove the request
-                EplDllkInstance_g.m_LastReqServiceId = kEplDllReqServiceNo;
-            }
-
-            // reprogram timer in PREOP1
-    #if EPL_TIMER_USE_HIGHRES != FALSE
-            if ((EplDllkInstance_g.m_DllState == kEplDllMsNonCyclic)
-                && (EplDllkInstance_g.m_DllConfigParam.m_dwAsyncSlotTimeout != 0))
-            {
-                Ret = EplTimerHighReskModifyTimerNs(&EplDllkInstance_g.m_TimerHdlCycle,
-                    EplDllkInstance_g.m_DllConfigParam.m_dwAsyncSlotTimeout,
-                    EplDllkCbMnTimerCycle,
+                // start PRes Timer
+#if EPL_TIMER_USE_HIGHRES != FALSE
+                Ret = EplTimerHighReskModifyTimerNs(&EplDllkInstance_g.m_TimerHdlResponse,
+                    EplDllkInstance_g.m_pCurNodeInfo->m_dwPresTimeout,
+                    EplDllkCbMnTimerResponse,
                     0L,
                     FALSE);
-                if (Ret != kEplSuccessful)
-                {
-                    goto Exit;
-                }
+#endif
             }
-    #endif
-
-            // forward event to ErrorHandler, DLLk and PDO module
-            Event.m_EventSink = kEplEventSinkNmtk;
-            Event.m_EventType = kEplEventTypeNmtEvent;
-            Event.m_uiSize = sizeof (NmtEvent);
-            Event.m_pArg = &NmtEvent;
-            Ret = EplEventkPost(&Event);
-            if (Ret != kEplSuccessful)
-            {
-                goto Exit;
-            }
-
-            break;
-        }
-
-        case EPL_DLLK_TXFRAME_SOC:
-        {   // SoC frame sent
-            if (EplDllkInstance_g.m_DllState == kEplDllMsWaitPreqTrig)
-            {
-
-    #if EPL_TIMER_USE_HIGHRES != FALSE
-                if (EplDllkInstance_g.m_DllConfigParam.m_dwWaitSocPreq != 0)
-                {   // start WaitSoCPReq Timer
-                    Ret = EplTimerHighReskModifyTimerNs(&EplDllkInstance_g.m_TimerHdlResponse,
-                        EplDllkInstance_g.m_DllConfigParam.m_dwWaitSocPreq,
-                        EplDllkCbMnTimerResponse,
-                        0L,
-                        FALSE);
-                    if (Ret != kEplSuccessful)
-                    {
-                        goto Exit;
-                    }
-                }
-                else
-    #endif
-                {   // immediately send first PReq
-                    Ret = EplDllkChangeState(kEplNmtEventDllMePresTimeout, NmtState);
-                    if (Ret != kEplSuccessful)
-                    {
-                        goto Exit;
-                    }
-                }
-            }
-        }
-    #endif
-
-        case EPL_DLLK_TXFRAME_IDENTRES:
-        case EPL_DLLK_TXFRAME_STATUSRES:
-        {   // catch IdentRes and StatusRes to make the default case work (for PReq)
-            // goto exit, because of EPL_DLL_PRES_READY_AFTER_SOA
-            goto Exit;
         }
     }
-
-#if EPL_DLL_PRES_READY_AFTER_SOA != FALSE
-    // signal process function readiness of PRes frame
-    Event.m_EventSink = kEplEventSinkDllk;
-    Event.m_EventType = kEplEventTypeDllkPresReady;
-    Event.m_uiSize = 0;
-    Event.m_pArg = NULL;
-    Ret = EplEventkPost(&Event);
-
+    #endif
 #endif
 
 Exit:
@@ -4697,6 +4630,293 @@ Exit:
 
     return;
 }
+#endif
+
+
+//---------------------------------------------------------------------------
+//
+// Function:    EplDllkCbFrameTransmitted()
+//
+// Description: called from EdrvInterruptHandler().
+//              It signals the transmission of the specified transmit buffer.
+//
+// Parameters:  pTxBuffer_p             = transmit buffer structure
+//
+// Returns:     (none)
+//
+// State:
+//
+//---------------------------------------------------------------------------
+
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
+static void EplDllkCbTransmittedSoa(tEdrvTxBuffer * pTxBuffer_p)
+{
+tEplKernel      Ret = kEplSuccessful;
+tEplEvent       Event;
+tEplNmtEvent NmtEvent = kEplNmtEventDllMeSoaSent;
+tEplNmtState    NmtState;
+unsigned int    uiHandle = EPL_DLLK_TXFRAME_SOA;
+TGT_DLLK_DECLARE_FLAGS
+
+    UNUSED_PARAMETER(pTxBuffer_p);
+
+    TGT_DLLK_ENTER_CRITICAL_SECTION();
+
+    NmtState = EplDllkInstance_g.m_NmtState;
+
+    if (NmtState <= kEplNmtGsResetConfiguration)
+    {
+        goto Exit;
+    }
+
+    // SoA frame sent
+
+    // check if we are invited
+    if (EplDllkInstance_g.m_uiLastTargetNodeId == EplDllkInstance_g.m_DllConfigParam.m_uiNodeId)
+    {
+    tEplFrame      *pTxFrame;
+
+        switch (EplDllkInstance_g.m_LastReqServiceId)
+        {
+            case kEplDllReqServiceStatus:
+            {   // StatusRequest
+                if (EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_STATUSRES].m_pbBuffer != NULL)
+                {   // StatusRes does exist
+
+                    // send StatusRes
+                    Ret = EdrvSendTxMsg(&EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_STATUSRES]);
+                    if (Ret != kEplSuccessful)
+                    {
+                        goto Exit;
+                    }
+                    TGT_DBG_SIGNAL_TRACE_POINT(8);
+
+                }
+
+                break;
+            }
+
+            case kEplDllReqServiceIdent:
+            {   // IdentRequest
+                if (EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_IDENTRES].m_pbBuffer != NULL)
+                {   // IdentRes does exist
+
+                    // send IdentRes
+                    Ret = EdrvSendTxMsg(&EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_IDENTRES]);
+                    if (Ret != kEplSuccessful)
+                    {
+                        goto Exit;
+                    }
+                    TGT_DBG_SIGNAL_TRACE_POINT(7);
+                }
+
+                break;
+            }
+
+            case kEplDllReqServiceNmtRequest:
+            {   // NmtRequest
+                if (EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_NMTREQ].m_pbBuffer != NULL)
+                {   // NmtRequest does exist
+                    // check if frame is not empty and not being filled
+                    if (EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_NMTREQ].m_uiTxMsgLen > EPL_DLLK_BUFLEN_FILLING)
+                    {
+                        // check if this frame is a NMT command,
+                        // then forward this frame back to NmtMnu module,
+                        // because it needs the time, when this frame is
+                        // actually sent, to start the timer for monitoring
+                        // the NMT state change.
+
+                        pTxFrame = (tEplFrame *) EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_NMTREQ].m_pbBuffer;
+                        if ((AmiGetByteFromLe(&pTxFrame->m_le_bMessageType)
+                                == (BYTE) kEplMsgTypeAsnd)
+                            && (AmiGetByteFromLe(&pTxFrame->m_Data.m_Asnd.m_le_bServiceId)
+                                == (BYTE) kEplDllAsndNmtCommand))
+                        {   // post event directly to NmtMnu module
+                            Event.m_EventSink = kEplEventSinkNmtMnu;
+                            Event.m_EventType = kEplEventTypeNmtMnuNmtCmdSent;
+                            Event.m_uiSize = EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_NMTREQ].m_uiTxMsgLen;
+                            Event.m_pArg = pTxFrame;
+                            Ret = EplEventkPost(&Event);
+
+                        }
+
+                        // send NmtRequest
+                        Ret = EdrvSendTxMsg(&EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_NMTREQ]);
+                        if (Ret != kEplSuccessful)
+                        {
+                            goto Exit;
+                        }
+
+                    }
+                }
+
+                break;
+            }
+
+            case kEplDllReqServiceUnspecified:
+            {   // unspecified invite
+                if (EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_NONEPL].m_pbBuffer != NULL)
+                {   // non-EPL frame does exist
+                    // check if frame is not empty and not being filled
+                    if (EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_NONEPL].m_uiTxMsgLen > EPL_DLLK_BUFLEN_FILLING)
+                    {
+                        // send non-EPL frame
+                        Ret = EdrvSendTxMsg(&EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_NONEPL]);
+                        if (Ret != kEplSuccessful)
+                        {
+                            goto Exit;
+                        }
+
+                    }
+                }
+
+                break;
+            }
+
+            default:
+            {
+                break;
+            }
+        }
+
+        // ASnd frame was sent, remove the request
+        EplDllkInstance_g.m_LastReqServiceId = kEplDllReqServiceNo;
+    }
+
+    // reprogram timer in PREOP1
+#if EPL_TIMER_USE_HIGHRES != FALSE
+    if ((EplDllkInstance_g.m_DllState == kEplDllMsNonCyclic)
+        && (EplDllkInstance_g.m_DllConfigParam.m_dwAsyncSlotTimeout != 0))
+    {
+        Ret = EplTimerHighReskModifyTimerNs(&EplDllkInstance_g.m_TimerHdlCycle,
+            EplDllkInstance_g.m_DllConfigParam.m_dwAsyncSlotTimeout,
+            EplDllkCbMnTimerCycle,
+            0L,
+            FALSE);
+        if (Ret != kEplSuccessful)
+        {
+            goto Exit;
+        }
+    }
+#endif
+
+    // forward event to ErrorHandler, DLLk and PDO module
+    Event.m_EventSink = kEplEventSinkNmtk;
+    Event.m_EventType = kEplEventTypeNmtEvent;
+    Event.m_uiSize = sizeof (NmtEvent);
+    Event.m_pArg = &NmtEvent;
+    Ret = EplEventkPost(&Event);
+    if (Ret != kEplSuccessful)
+    {
+        goto Exit;
+    }
+
+Exit:
+    if (Ret != kEplSuccessful)
+    {
+    DWORD   dwArg;
+
+        BENCHMARK_MOD_02_TOGGLE(7);
+
+        dwArg = EplDllkInstance_g.m_DllState | (uiHandle << 16);
+
+        // Error event for API layer
+        Ret = EplEventkPostError(kEplEventSourceDllk,
+                        Ret,
+                        sizeof(dwArg),
+                        &dwArg);
+    }
+
+    TGT_DLLK_LEAVE_CRITICAL_SECTION();
+
+    return;
+}
+#endif
+
+
+//---------------------------------------------------------------------------
+//
+// Function:    EplDllkCbFrameTransmitted()
+//
+// Description: called from EdrvInterruptHandler().
+//              It signals the transmission of the specified transmit buffer.
+//
+// Parameters:  pTxBuffer_p             = transmit buffer structure
+//
+// Returns:     (none)
+//
+// State:
+//
+//---------------------------------------------------------------------------
+
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
+static void EplDllkCbTransmittedSoc(tEdrvTxBuffer * pTxBuffer_p)
+{
+tEplKernel      Ret = kEplSuccessful;
+tEplNmtState    NmtState;
+unsigned int    uiHandle = EPL_DLLK_TXFRAME_SOC;
+TGT_DLLK_DECLARE_FLAGS
+
+    UNUSED_PARAMETER(pTxBuffer_p);
+
+    TGT_DLLK_ENTER_CRITICAL_SECTION();
+
+    NmtState = EplDllkInstance_g.m_NmtState;
+
+    if (NmtState <= kEplNmtGsResetConfiguration)
+    {
+        goto Exit;
+    }
+
+    // SoC frame sent
+    if (EplDllkInstance_g.m_DllState == kEplDllMsWaitPreqTrig)
+    {
+
+#if EPL_TIMER_USE_HIGHRES != FALSE
+        if (EplDllkInstance_g.m_DllConfigParam.m_dwWaitSocPreq != 0)
+        {   // start WaitSoCPReq Timer
+            Ret = EplTimerHighReskModifyTimerNs(&EplDllkInstance_g.m_TimerHdlResponse,
+                EplDllkInstance_g.m_DllConfigParam.m_dwWaitSocPreq,
+                EplDllkCbMnTimerResponse,
+                0L,
+                FALSE);
+            if (Ret != kEplSuccessful)
+            {
+                goto Exit;
+            }
+        }
+        else
+#endif
+        {   // immediately send first PReq
+            Ret = EplDllkChangeState(kEplNmtEventDllMePresTimeout, NmtState);
+            if (Ret != kEplSuccessful)
+            {
+                goto Exit;
+            }
+        }
+    }
+
+Exit:
+    if (Ret != kEplSuccessful)
+    {
+    DWORD   dwArg;
+
+        BENCHMARK_MOD_02_TOGGLE(7);
+
+        dwArg = EplDllkInstance_g.m_DllState | (uiHandle << 16);
+
+        // Error event for API layer
+        Ret = EplEventkPostError(kEplEventSourceDllk,
+                        Ret,
+                        sizeof(dwArg),
+                        &dwArg);
+    }
+
+    TGT_DLLK_LEAVE_CRITICAL_SECTION();
+
+    return;
+}
+#endif
 
 
 //---------------------------------------------------------------------------

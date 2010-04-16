@@ -130,7 +130,9 @@ typedef struct
 {
 
     tEdrvInitParam      m_InitParam;
-    tEdrvTxBuffer*      m_pLastTransmittedTxBuffer;
+    tEdrvTxBuffer*      m_pTransmittedTxBufferLastEntry;
+    tEdrvTxBuffer*      m_pTransmittedTxBufferFirstEntry;
+    CRITICAL_SECTION    m_CriticalSection;
 
     pcap_t*             m_pPcap;
 
@@ -322,6 +324,8 @@ DWORD dwRetVal = 0;
          goto Exit;
     }
 
+    InitializeCriticalSection(&EdrvInstance_l.m_CriticalSection);
+
 Exit:
     return Ret;
 }
@@ -356,6 +360,8 @@ tEplKernel EdrvShutdown( void )
     CloseHandle ( EdrvInstance_l.m_ahHandle[EDRV_HANDLE_TIMER0] );
     CloseHandle ( EdrvInstance_l.m_ahHandle[EDRV_HANDLE_TIMER1] );
 
+    DeleteCriticalSection(&EdrvInstance_l.m_CriticalSection);
+
     // clear instance structure
     EPL_MEMSET(&EdrvInstance_l, 0, sizeof (EdrvInstance_l));
 
@@ -382,14 +388,18 @@ tEplKernel EdrvSendTxMsg(tEdrvTxBuffer *pBuffer_p)
 tEplKernel  Ret = kEplSuccessful;
 int         iRet;
 
-    if (EdrvInstance_l.m_pLastTransmittedTxBuffer != NULL)
-    {   // transmission is already active
-        Ret = kEplInvalidOperation;
-        goto Exit;
+    EnterCriticalSection(&EdrvInstance_l.m_CriticalSection);
+    if (EdrvInstance_l.m_pTransmittedTxBufferLastEntry == NULL)
+    {
+        EdrvInstance_l.m_pTransmittedTxBufferLastEntry =
+            EdrvInstance_l.m_pTransmittedTxBufferFirstEntry = pBuffer_p;
     }
-
-    // save pointer to buffer structure for TxHandler
-    EdrvInstance_l.m_pLastTransmittedTxBuffer = pBuffer_p;
+    else
+    {
+        EdrvInstance_l.m_pTransmittedTxBufferLastEntry->m_BufferNumber.m_pVal = pBuffer_p;
+        EdrvInstance_l.m_pTransmittedTxBufferLastEntry = pBuffer_p;
+    }
+    LeaveCriticalSection(&EdrvInstance_l.m_CriticalSection);
 
     iRet = pcap_sendpacket(EdrvInstance_l.m_pPcap, pBuffer_p->m_pbBuffer, (int) pBuffer_p->m_uiTxMsgLen);
     if  (iRet != 0)
@@ -398,7 +408,7 @@ int         iRet;
         Ret = kEplInvalidOperation;
     }
 
-Exit:
+//Exit:
     return Ret;
 }
 
@@ -564,14 +574,21 @@ tEdrvRxBuffer   RxBuffer;
     }
     else
     {   // self generated traffic
-        if (pInstance->m_pLastTransmittedTxBuffer != NULL)
+        if (pInstance->m_pTransmittedTxBufferFirstEntry != NULL)
         {
-        tEdrvTxBuffer* pTxBuffer = pInstance->m_pLastTransmittedTxBuffer;
+        tEdrvTxBuffer* pTxBuffer = pInstance->m_pTransmittedTxBufferFirstEntry;
 
-            pInstance->m_pLastTransmittedTxBuffer = NULL;
-            if (pInstance->m_InitParam.m_pfnTxHandler != NULL)
+            EnterCriticalSection(&EdrvInstance_l.m_CriticalSection);
+            pInstance->m_pTransmittedTxBufferFirstEntry = pInstance->m_pTransmittedTxBufferFirstEntry->m_BufferNumber.m_pVal;
+            if (pInstance->m_pTransmittedTxBufferFirstEntry == NULL)
             {
-                pInstance->m_InitParam.m_pfnTxHandler(pTxBuffer);
+                pInstance->m_pTransmittedTxBufferLastEntry = NULL;
+            }
+            LeaveCriticalSection(&EdrvInstance_l.m_CriticalSection);
+
+            if (pTxBuffer->m_pfnTxHandler != NULL)
+            {
+                pTxBuffer->m_pfnTxHandler(pTxBuffer);
             }
         }
     }

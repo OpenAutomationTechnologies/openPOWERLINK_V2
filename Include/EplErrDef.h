@@ -97,6 +97,7 @@ typedef enum
     kEplEdrvNoFreeBufEntry      = 0x0014,       // no free entry in internal buffer table for Tx frames
     kEplEdrvBufNotExisting      = 0x0015,       // specified Tx buffer does not exist
     kEplEdrvInvalidParam        = 0x001C,       // invalid parameter in function call
+    kEplEdrvNextTxListNotEmpty  = 0x001D,       // next Tx buffer list is not empty, i.e. still in use
 
     // area for DLL module 0x0020 - 0x002F
     kEplDllIllegalHdl           = 0x0022,       // illegal handle for a TxFrame was passed

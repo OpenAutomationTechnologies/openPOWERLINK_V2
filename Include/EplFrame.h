@@ -208,7 +208,7 @@ typedef struct
     DWORD                   m_le_dwSyncMnDelayFirst;
     DWORD                   m_le_dwSyncMnDelaySecond;
     DWORD                   m_le_dwPResFallBackTimeout;
-    BYTE                    m_le_abDestMacAddress[6];
+    BYTE                    m_be_abDestMacAddress[6];
     
 } PACK_STRUCT tEplSyncRequest;
 
