@@ -331,7 +331,7 @@ tEplKernel  Ret;
 //
 // Function:    EplIdentuRequestIdentResponse
 //
-// Description: returns the IdentResponse for the specified node.
+// Description: Requests the IdentResponse for the specified node.
 //
 // Parameters:  uiNodeId_p                  = IN: node ID
 //              pfnCbResponse_p             = IN: function pointer to callback function
