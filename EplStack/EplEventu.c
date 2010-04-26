@@ -117,6 +117,7 @@ typedef struct
 {
 #if EPL_USE_SHAREDBUFF != FALSE
     tShbInstance        m_pShbKernelToUserInstance;
+    BYTE                m_abRxBuffer[sizeof(tEplEvent) + EPL_MAX_EVENT_ARG_SIZE];
 #if EPL_EVENT_USE_KERNEL_QUEUE != FALSE
     tShbInstance        m_pShbUserToKernelInstance;
 #endif
@@ -767,69 +768,45 @@ static void  EplEventuRxSignalHandlerCb (
 {
 tEplEvent      *pEplEvent;
 tShbError       ShbError;
-//unsigned long   ulBlockCount;
-//unsigned long   ulDataSize;
-BYTE            abDataBuffer[sizeof(tEplEvent) + EPL_MAX_EVENT_ARG_SIZE];
-                // d.k.: abDataBuffer contains the complete tEplEvent structure
-                //       and behind this the argument
+BYTE*           pabDataBuffer;
 
     TGT_DBG_SIGNAL_TRACE_POINT(21);
 
-// d.k. not needed because it is already done in SharedBuff
-/*    do
+    pabDataBuffer = &EplEventuInstance_g.m_abRxBuffer[0];
+
+    // copy data from event queue
+    ShbError = ShbCirReadDataBlock (pShbRxInstance_p,
+                            pabDataBuffer,
+                            sizeof(EplEventuInstance_g.m_abRxBuffer),
+                            &ulDataSize_p);
+    if(ShbError != kShbOk)
     {
-        BENCHMARK_MOD_28_SET(1);    // 4 µs until reset
-        // get messagesize
-        ShbError = ShbCirGetReadDataSize (pShbRxInstance_p, &ulDataSize);
-        if(ShbError != kShbOk)
-        {
-            // error goto exit
-            goto Exit;
-        }
+        EplEventuPostError(kEplEventSourceEventu, kEplEventReadError, sizeof (ShbError), &ShbError);
+        // error goto exit
+        goto Exit;
+    }
 
-        BENCHMARK_MOD_28_RESET(1);  // 14 µs until set
-*/
-        // copy data from event queue
-        ShbError = ShbCirReadDataBlock (pShbRxInstance_p,
-                                &abDataBuffer[0],
-                                sizeof(abDataBuffer),
-                                &ulDataSize_p);
-        if(ShbError != kShbOk)
-        {
-            // error goto exit
-            goto Exit;
-        }
+    // resolve the pointer to the event structure
+    pEplEvent = (tEplEvent *) pabDataBuffer;
+    // set Datasize
+    pEplEvent->m_uiSize = (ulDataSize_p - sizeof(tEplEvent));
+    if(pEplEvent->m_uiSize > 0)
+    {
+        // set pointer to argument
+        pEplEvent->m_pArg = &pabDataBuffer[sizeof(tEplEvent)];
+    }
+    else
+    {
+        //set pointer to NULL
+        pEplEvent->m_pArg = NULL;
+    }
 
-        // resolve the pointer to the event structure
-        pEplEvent = (tEplEvent *) abDataBuffer;
-        // set Datasize
-        pEplEvent->m_uiSize = (ulDataSize_p - sizeof(tEplEvent));
-        if(pEplEvent->m_uiSize > 0)
-        {
-            // set pointer to argument
-            pEplEvent->m_pArg = &abDataBuffer[sizeof(tEplEvent)];
-        }
-        else
-        {
-            //set pointer to NULL
-            pEplEvent->m_pArg = NULL;
-        }
+    BENCHMARK_MOD_28_SET(1);
+    // call processfunction
+    EplEventuProcess(pEplEvent);
 
-        BENCHMARK_MOD_28_SET(1);
-        // call processfunction
-        EplEventuProcess(pEplEvent);
+    BENCHMARK_MOD_28_RESET(1);
 
-        BENCHMARK_MOD_28_RESET(1);
-        // read number of left messages to process
-// d.k. not needed because it is already done in SharedBuff
-/*        ShbError = ShbCirGetReadBlockCount (pShbRxInstance_p, &ulBlockCount);
-        if (ShbError != kShbOk)
-        {
-            // error goto exit
-            goto Exit;
-        }
-    } while (ulBlockCount > 0);
-*/
 Exit:
     return;
 }

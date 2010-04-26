@@ -175,6 +175,7 @@ typedef enum
     // area for EPL Event-Modul 0x0080 - 0x008F
     kEplEventUnknownSink        = 0x0080,     // unknown sink for event
     kEplEventPostError          = 0x0081,     // error during post of event
+    kEplEventReadError          = 0x0082,     // error during reading of event from queue
 
     // area for EPL Timer Modul 0x0090 - 0x009F
     kEplTimerInvalidHandle      = 0x0090,     // invalid handle for timer

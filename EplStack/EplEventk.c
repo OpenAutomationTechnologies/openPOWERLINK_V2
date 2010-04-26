@@ -119,6 +119,7 @@ typedef struct
     tShbInstance    m_pShbKernelToUserInstance;
 #if EPL_EVENT_USE_KERNEL_QUEUE != FALSE
     tShbInstance    m_pShbUserToKernelInstance;
+    BYTE            m_abRxBuffer[sizeof(tEplEvent) + EPL_MAX_EVENT_ARG_SIZE];
 #endif
 #endif
 
@@ -817,34 +818,32 @@ static void  EplEventkRxSignalHandlerCb (
 {
 tEplEvent      *pEplEvent;
 tShbError       ShbError;
-//unsigned long   ulBlockCount;
-//unsigned long   ulDataSize;
-BYTE            abDataBuffer[sizeof(tEplEvent) + EPL_MAX_EVENT_ARG_SIZE];
-                // d.k.: abDataBuffer contains the complete tEplEvent structure
-                //       and behind this the argument
+BYTE*           pabDataBuffer;
 
     TGT_DBG_SIGNAL_TRACE_POINT(20);
 
+    pabDataBuffer = &EplEventkInstance_g.m_abRxBuffer[0];
     BENCHMARK_MOD_27_RESET(0);
     // copy data from event queue
     ShbError = ShbCirReadDataBlock (pShbRxInstance_p,
-                            &abDataBuffer[0],
-                            sizeof(abDataBuffer),
+                            pabDataBuffer,
+                            sizeof(EplEventkInstance_g.m_abRxBuffer),
                             &ulDataSize_p);
     if(ShbError != kShbOk)
     {
+        EplEventkPostError(kEplEventSourceEventk, kEplEventReadError, sizeof (ShbError), &ShbError);
         // error goto exit
         goto Exit;
     }
 
     // resolve the pointer to the event structure
-    pEplEvent = (tEplEvent *) abDataBuffer;
+    pEplEvent = (tEplEvent *) pabDataBuffer;
     // set Datasize
     pEplEvent->m_uiSize = (ulDataSize_p - sizeof(tEplEvent));
     if(pEplEvent->m_uiSize > 0)
     {
         // set pointer to argument
-        pEplEvent->m_pArg = &abDataBuffer[sizeof(tEplEvent)];
+        pEplEvent->m_pArg = &pabDataBuffer[sizeof(tEplEvent)];
     }
     else
     {

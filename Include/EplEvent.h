@@ -93,7 +93,7 @@
 
 // max size of event argument
 #ifndef EPL_MAX_EVENT_ARG_SIZE
-#define EPL_MAX_EVENT_ARG_SIZE      256 // because of PDO
+#define EPL_MAX_EVENT_ARG_SIZE      2048
 #endif
 
 #define EPL_DLL_ERR_MN_CRC           0x00000001L  // object 0x1C00
