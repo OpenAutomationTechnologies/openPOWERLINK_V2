@@ -1888,7 +1888,7 @@ BYTE            abFrame[EPL_SEQ_FRAME_SIZE];
 tEplFrame*      pEplFrame;
 unsigned int    uiFreeEntries;
 
-    if(pData_p == NULL)
+    if (pData_p == NULL)
     {   // set pointer to own frame
         EPL_MEMSET(&abFrame[0], 0x00, sizeof(abFrame));
         pEplFrame = (tEplFrame*)&abFrame[0];
@@ -1898,11 +1898,11 @@ unsigned int    uiFreeEntries;
         pEplFrame = pData_p;
     }
 
-    if(fFrameInHistory_p != FALSE)
+    if (fFrameInHistory_p != FALSE)
     {
         // check if only one free entry in history buffer
         uiFreeEntries = EplSdoAsyGetFreeEntriesFromHistory(pAsySdoSeqCon_p);
-        if(uiFreeEntries == 1)
+        if (uiFreeEntries <= 1)
         {   // request an acknowledge in dataframe
             // own scon = 3
             pAsySdoSeqCon_p->m_bRecSeqNum |= 0x03;
@@ -1927,12 +1927,12 @@ unsigned int    uiFreeEntries;
                                      uiDataSize_p,
                                      pEplFrame);    // pointer to frame
 
-    // check if all allright
+    // check if all alright
     if ((Ret == kEplSuccessful)
         && (fFrameInHistory_p != FALSE))
     {
         // set own scon to 2 if needed
-        if((pAsySdoSeqCon_p->m_bRecSeqNum & 0x03) == 0x03)
+        if ((pAsySdoSeqCon_p->m_bRecSeqNum & 0x03) == 0x03)
         {
             pAsySdoSeqCon_p->m_bRecSeqNum--;
         }
@@ -1941,7 +1941,7 @@ unsigned int    uiFreeEntries;
         Ret = EplSdoAsyAddFrameToHistory(pAsySdoSeqCon_p,
                                             pEplFrame,
                                             uiDataSize_p);
-        if (Ret == kEplSdoSeqNoFreeHistory)
+        if ((Ret == kEplSdoSeqNoFreeHistory) || (uiFreeEntries <= 1))
         {   // request Ack needed
             Ret = kEplSdoSeqRequestAckNeeded;
         }
