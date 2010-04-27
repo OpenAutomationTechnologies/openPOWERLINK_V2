@@ -1311,41 +1311,46 @@ unsigned int        uiSize;
                     // check if the frame is a SDO response and has the right transaction ID
                     bFlag = AmiGetByteFromLe(&pAsySdoCom_p->m_le_bFlags);
 
-                    // check if it is a abort
-                    if ((bFlag & 0x40) != 0)
-                    {   // SDO abort
-                        // clear control structure
-                        pSdoComCon->m_uiTransSize = 0;
-                        pSdoComCon->m_uiTransferredByte = 0;
-                        // change state
-                        pSdoComCon->m_SdoComState = kEplSdoComStateIdle;
-                        // reset abort code
-                        pSdoComCon->m_dwLastAbortCode = 0;
-                        // d.k.: do not execute anything further on this command
-                        break;
-                    }
-
-                    if (((bFlag & 0x80) != 0)
+                    if (((bFlag & 0x80) == 0)
                         && (AmiGetByteFromLe(&pAsySdoCom_p->m_le_bTransactionId) == pSdoComCon->m_bTransactionId))
                     {
+                        // check if it is a abort
+                        if ((bFlag & 0x40) != 0)
+                        {   // SDO abort
+                            // clear control structure
+                            pSdoComCon->m_uiTransSize = 0;
+                            pSdoComCon->m_uiTransferredByte = 0;
+                            // change state
+                            pSdoComCon->m_SdoComState = kEplSdoComStateIdle;
+                            // reset abort code
+                            pSdoComCon->m_dwLastAbortCode = 0;
+                            // d.k.: do not execute anything further on this command
+                            break;
+                        }
+
                         // check if it is a write
-                        if(pSdoComCon->m_SdoServiceType == kEplSdoServiceWriteByIndex)
+                        if (pSdoComCon->m_SdoServiceType == kEplSdoServiceWriteByIndex)
                         {
                             // write data to OD
                             uiSize = AmiGetWordFromLe(&pAsySdoCom_p->m_le_wSegmentSize);
-                            if(pSdoComCon->m_dwLastAbortCode == 0)
+                            if (uiSize > pSdoComCon->m_uiTransSize)
+                            {
+                                pSdoComCon->m_dwLastAbortCode = EPL_SDOAC_DATA_TYPE_LENGTH_TOO_HIGH;
+                                // send abort
+                                Ret = EplSdoComServerSendFrameIntern(pSdoComCon,
+                                                            0,
+                                                            0,
+                                                            kEplSdoComSendTypeAbort);
+                                goto Exit;
+                            }
+                            if (pSdoComCon->m_dwLastAbortCode == 0)
                             {
                                 EPL_MEMCPY(pSdoComCon->m_pData, &pAsySdoCom_p->m_le_abCommandData[0],uiSize);
+                                (pSdoComCon->m_pData) += uiSize;
                             }
                             // update counter
                             pSdoComCon->m_uiTransferredByte += uiSize;
                             pSdoComCon->m_uiTransSize -= uiSize;
-
-                            // update pointer
-                            if(pSdoComCon->m_dwLastAbortCode == 0)
-                            {
-                                (/*(BYTE*)*/pSdoComCon->m_pData) += uiSize;
-                            }
 
                             // check end of transfer
                             if((pAsySdoCom_p->m_le_bFlags & 0x30) == 0x30)
