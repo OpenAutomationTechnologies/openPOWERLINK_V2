@@ -1483,25 +1483,32 @@ unsigned int        uiSize;
                 // connection established
                 case kEplSdoComConEventConEstablished:
                 {
-                    //send first frame if needed
-                    if((pSdoComCon->m_uiTransSize > 0)
-                        &&(pSdoComCon->m_uiTargetIndex != 0))
+                    // send first frame if needed
+                    if ((pSdoComCon->m_uiTransSize > 0)
+                        && (pSdoComCon->m_uiTargetIndex != 0))
                     {   // start SDO transfer
+                        // check if segemted transfer
+                        if (pSdoComCon->m_SdoTransType == kEplSdoTransSegmented)
+                        {
+                            pSdoComCon->m_SdoComState = kEplSdoComStateClientSegmTrans;
+                        }
+                        else
+                        {
+                            pSdoComCon->m_SdoComState = kEplSdoComStateClientConnected;
+                        }
+
                         Ret = EplSdoComClientSend(pSdoComCon);
-                        if(Ret != kEplSuccessful)
+                        if (Ret != kEplSuccessful)
                         {
                             goto Exit;
                         }
 
-                        // check if segemted transfer
-                        if(pSdoComCon->m_SdoTransType == kEplSdoTransSegmented)
-                        {
-                            pSdoComCon->m_SdoComState = kEplSdoComStateClientSegmTrans;
-                            goto Exit;
-                        }
                     }
-                    // goto state kEplSdoComStateClientConnected
-                    pSdoComCon->m_SdoComState = kEplSdoComStateClientConnected;
+                    else
+                    {
+                        // goto state kEplSdoComStateClientConnected
+                        pSdoComCon->m_SdoComState = kEplSdoComStateClientConnected;
+                    }
                     goto Exit;
                 }
 
@@ -2658,7 +2665,7 @@ BYTE*           pbPayload;
                             pSdoComCon_p->m_pData += EPL_SDO_MAX_PAYLOAD;
                             // correct intern counter
                             pSdoComCon_p->m_uiTransSize -= EPL_SDO_MAX_PAYLOAD;
-                            pSdoComCon_p->m_uiTransferredByte = EPL_SDO_MAX_PAYLOAD;
+                            pSdoComCon_p->m_uiTransferredByte += EPL_SDO_MAX_PAYLOAD;
                             // calc size
                             uiSizeOfFrame += EPL_SDO_MAX_PAYLOAD;
 
@@ -2678,7 +2685,7 @@ BYTE*           pbPayload;
                             uiSizeOfFrame += pSdoComCon_p->m_uiTransSize;
                             // correct intern counter
                             pSdoComCon_p->m_uiTransSize = 0;
-                            pSdoComCon_p->m_uiTransferredByte = pSdoComCon_p->m_uiTransSize;
+                            pSdoComCon_p->m_uiTransferredByte += pSdoComCon_p->m_uiTransSize;
 
                         }
                     }
