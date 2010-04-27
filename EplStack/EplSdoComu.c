@@ -2136,7 +2136,7 @@ BYTE            bFlag;
                     pSdoComCon_p->m_pData +=(EPL_SDO_MAX_PAYLOAD-4);
 
                     // set segment size
-                    AmiSetWordToLe(&pCommandFrame->m_le_wSegmentSize,(EPL_SDO_MAX_PAYLOAD-4));
+                    AmiSetWordToLe(&pCommandFrame->m_le_wSegmentSize, EPL_SDO_MAX_PAYLOAD);
 
                     // send frame
                     uiSizeOfFrame += EPL_SDO_MAX_PAYLOAD;
@@ -2810,15 +2810,15 @@ tEplSdoComCon*      pSdoComCon;
                     bBuffer = AmiGetByteFromLe(&pAsySdoCom_p->m_le_bFlags);
                     // mask uninteressting bits
                     bBuffer &= 0x30;
-                    switch(bBuffer)
+                    switch (bBuffer)
                     {
                         // expedited transfer
                         case 0x00:
                         {
                             // check size of buffer
                             uiBuffer = AmiGetWordFromLe(&pAsySdoCom_p->m_le_wSegmentSize);
-                            if(uiBuffer > pSdoComCon->m_uiTransSize)
-                            {   // buffer provided by the application is to small
+                            if (uiBuffer > pSdoComCon->m_uiTransSize)
+                            {   // buffer provided by the application is too small
                                 // copy only a part
                                 uiDataSize = pSdoComCon->m_uiTransSize;
                             }
@@ -2840,12 +2840,12 @@ tEplSdoComCon*      pSdoComCon;
                         case 0x10:
                         {   // get total size of transfer
                             ulBuffer = AmiGetDwordFromLe(&pAsySdoCom_p->m_le_abCommandData[0]);
-                            if(ulBuffer <= pSdoComCon->m_uiTransSize)
-                            {   // buffer fit
+                            if (ulBuffer <= pSdoComCon->m_uiTransSize)
+                            {   // buffer fits
                                 pSdoComCon->m_uiTransSize = (unsigned int)ulBuffer;
                             }
                             else
-                            {   // buffer to small
+                            {   // buffer too small
                                 // send abort
                                 pSdoComCon->m_dwLastAbortCode = EPL_SDOAC_DATA_TYPE_LENGTH_TOO_HIGH;
                                 // -> send abort
@@ -2865,7 +2865,7 @@ tEplSdoComCon*      pSdoComCon;
 
                             // correct counter an pointer
                             pSdoComCon->m_pData += uiBuffer;
-                            pSdoComCon->m_uiTransferredByte += uiBuffer;
+                            pSdoComCon->m_uiTransferredByte = uiBuffer;
                             pSdoComCon->m_uiTransSize -= uiBuffer;
 
                             break;
@@ -2878,9 +2878,15 @@ tEplSdoComCon*      pSdoComCon;
                             // check size of buffer
                             uiBuffer = AmiGetWordFromLe(&pAsySdoCom_p->m_le_wSegmentSize);
                             // check if data to copy fit to buffer
-                            if(uiBuffer >= pSdoComCon->m_uiTransSize)
-                            {   // to much data
-                                uiBuffer =  (pSdoComCon->m_uiTransSize - 1);
+                            if (uiBuffer > pSdoComCon->m_uiTransSize)
+                            {   // segment too large
+                                // send abort
+                                pSdoComCon->m_dwLastAbortCode = EPL_SDOAC_INVALID_BLOCK_SIZE;
+                                // -> send abort
+                                EplSdoComClientSendAbort(pSdoComCon, pSdoComCon->m_dwLastAbortCode);
+                                // call callback of application
+                                Ret = EplSdoComTransferFinished(SdoComCon_p, pSdoComCon, kEplSdoComTransferRxAborted);
+                                goto Exit;
                             }
                             // copy data
                             EPL_MEMCPY(pSdoComCon->m_pData, &pAsySdoCom_p->m_le_abCommandData[0], uiBuffer);
@@ -2900,8 +2906,14 @@ tEplSdoComCon*      pSdoComCon;
                             uiBuffer = AmiGetWordFromLe(&pAsySdoCom_p->m_le_wSegmentSize);
                             // check if data to copy fit to buffer
                             if(uiBuffer > pSdoComCon->m_uiTransSize)
-                            {   // to much data
-                                uiBuffer =  (pSdoComCon->m_uiTransSize - 1);
+                            {   // segment too large
+                                // send abort
+                                pSdoComCon->m_dwLastAbortCode = EPL_SDOAC_INVALID_BLOCK_SIZE;
+                                // -> send abort
+                                EplSdoComClientSendAbort(pSdoComCon, pSdoComCon->m_dwLastAbortCode);
+                                // call callback of application
+                                Ret = EplSdoComTransferFinished(SdoComCon_p, pSdoComCon, kEplSdoComTransferRxAborted);
+                                goto Exit;
                             }
                             // copy data
                             EPL_MEMCPY(pSdoComCon->m_pData, &pAsySdoCom_p->m_le_abCommandData[0], uiBuffer);
