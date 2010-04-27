@@ -1795,7 +1795,7 @@ static tEplKernel EplObdCheckObjectRange (
 {
 
 tEplKernel      Ret;
-void *   pRangeData;
+const void *   pRangeData;
 
     ASSERTMSG (pSubindexEntry_p != NULL,
         "EplObdCheckObjectRange(): no address to subindex struct!\n");
