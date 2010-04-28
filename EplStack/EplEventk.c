@@ -422,18 +422,7 @@ tEplEventSource         EventSource;
                 || (*((tEplNmtEvent*)pEvent_p->m_pArg) == kEplNmtEventDllMeSoaSent)
 #endif
                 ))
-            {   // forward SoA event to error handler
-                Ret = EplErrorHandlerkProcess(pEvent_p);
-                if ((Ret != kEplSuccessful) && (Ret != kEplShutdown))
-                {
-                    EventSource = kEplEventSourceErrk;
-
-                    // Error event for API layer
-                    EplEventkPostError(kEplEventSourceEventk,
-                                    Ret,
-                                    sizeof(EventSource),
-                                    &EventSource);
-                }
+            {
 
                 BENCHMARK_MOD_27_SET(0);
 

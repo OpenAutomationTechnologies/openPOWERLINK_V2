@@ -71,6 +71,7 @@
 #include "kernel/EplDllk.h"
 #include "kernel/EplDllkCal.h"
 #include "kernel/EplEventk.h"
+#include "kernel/EplErrorHandlerk.h"
 #include "EplNmt.h"
 #include "edrv.h"
 #include "Benchmark.h"
@@ -172,23 +173,23 @@
 
 // defines for indexes of tEplDllInstance.m_pTxFrameInfo
 #define EPL_DLLK_TXFRAME_IDENTRES   0   // IdentResponse on CN / MN
-#define EPL_DLLK_TXFRAME_STATUSRES  1   // StatusResponse on CN / MN
-#define EPL_DLLK_TXFRAME_NMTREQ     2   // NMT Request from FIFO on CN / MN
+#define EPL_DLLK_TXFRAME_STATUSRES  2   // StatusResponse on CN / MN
+#define EPL_DLLK_TXFRAME_NMTREQ     4   // NMT Request from FIFO on CN / MN
 #if EPL_DLL_PRES_CHAINING_CN != FALSE
-  #define EPL_DLLK_TXFRAME_SYNCRES  3   // SyncResponse on CN
-  #define EPL_DLLK_TXFRAME_NONEPL   4   // non-EPL frame from FIFO on CN / MN
+  #define EPL_DLLK_TXFRAME_SYNCRES  6   // SyncResponse on CN
+  #define EPL_DLLK_TXFRAME_NONEPL   8   // non-EPL frame from FIFO on CN / MN
 #else
-  #define EPL_DLLK_TXFRAME_NONEPL   3   // non-EPL frame from FIFO on CN / MN
+  #define EPL_DLLK_TXFRAME_NONEPL   6   // non-EPL frame from FIFO on CN / MN
 #endif
-#define EPL_DLLK_TXFRAME_PRES       (EPL_DLLK_TXFRAME_NONEPL + 1) // PRes on CN / MN
+#define EPL_DLLK_TXFRAME_PRES       (EPL_DLLK_TXFRAME_NONEPL + 2) // PRes on CN / MN
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
-  #define EPL_DLLK_TXFRAME_SOC      (EPL_DLLK_TXFRAME_PRES + 1)   // SoC on MN
-  #define EPL_DLLK_TXFRAME_SOA      (EPL_DLLK_TXFRAME_SOC + 1)    // SoA on MN
-  #define EPL_DLLK_TXFRAME_PREQ     (EPL_DLLK_TXFRAME_SOA + 1)    // PReq on MN
-  #define EPL_DLLK_TXFRAME_COUNT    (EPL_DLLK_TXFRAME_PREQ + EPL_D_NMT_MaxCNNumber_U8 + 2)
-                                     // on MN: 7 + MaxPReq of regular CNs + 1 Diag + 1 Router
+  #define EPL_DLLK_TXFRAME_SOC      (EPL_DLLK_TXFRAME_PRES + 2)   // SoC on MN
+  #define EPL_DLLK_TXFRAME_SOA      (EPL_DLLK_TXFRAME_SOC + 2)    // SoA on MN
+  #define EPL_DLLK_TXFRAME_PREQ     (EPL_DLLK_TXFRAME_SOA + 2)    // PReq on MN
+  #define EPL_DLLK_TXFRAME_COUNT    (EPL_DLLK_TXFRAME_PREQ + (2 * (EPL_D_NMT_MaxCNNumber_U8 + 2)))
+                                    // on MN: 7 + MaxPReq of regular CNs + 1 Diag + 1 Router
 #else
-  #define EPL_DLLK_TXFRAME_COUNT      (EPL_DLLK_TXFRAME_PRES + 1)
+  #define EPL_DLLK_TXFRAME_COUNT    (EPL_DLLK_TXFRAME_PRES + 2)
 #endif
 
 
@@ -248,6 +249,11 @@ typedef enum
     kEplDllMsWaitAsndTrig   = 0x09, // MN: wait for ASnd trigger (SoA transmitted)
     kEplDllMsWaitAsnd       = 0x0A, // MN: wait for ASnd frame if SoA contained invitation
 
+    kEplDllMsProcessPrc,
+    kEplDllMsProcessPrcSync,
+    kEplDllMsProcessConv,
+    kEplDllMsProcessConvSync,
+
 } tEplDllState;
 
 
@@ -276,11 +282,24 @@ typedef struct
 
     tEplDllkNodeInfo    m_aNodeInfo[EPL_NMT_MAX_NODE_ID];
 
+    BYTE                m_bCurTxBufferOffsetIdentRes;
+    BYTE                m_bCurTxBufferOffsetStatusRes;
+    BYTE                m_bCurTxBufferOffsetPres;
+#if EPL_DLL_PRES_CHAINING_CN != FALSE
+    BYTE                m_bCurTxBufferOffsetSyncRes;
+#endif
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
     tEplDllkNodeInfo*   m_pFirstNodeInfo;
+#if (EPL_DLL_DISABLE_EDRV_CYCLIC != FALSE)
     tEplDllkNodeInfo*   m_pCurNodeInfo;
+#else
+    BYTE                m_bCurNodeIndex;
+    BYTE                m_aabNodeIdList[2][EPL_NMT_MAX_NODE_ID];
+#endif
     tEplDllReqServiceId m_LastReqServiceId;
     unsigned int        m_uiLastTargetNodeId;
+    BYTE                m_bCurTxBufferOffsetNmtReq;
+    BYTE                m_bCurTxBufferOffsetNonEpl;
 #endif
 
 #if EPL_TIMER_USE_HIGHRES != FALSE
@@ -1435,72 +1454,6 @@ tEplDllkNodeInfo*   pIntNodeInfo;
         goto Exit;
     }
 
-    // EPL profile version
-    AmiSetByteToLe(&pTxFrame->m_Data.m_Asnd.m_Payload.m_IdentResponse.m_le_bEplProfileVersion,
-        (BYTE) EPL_SPEC_VERSION);
-    // FeatureFlags
-    AmiSetDwordToLe(&pTxFrame->m_Data.m_Asnd.m_Payload.m_IdentResponse.m_le_dwFeatureFlags,
-        EplDllkInstance_g.m_DllConfigParam.m_dwFeatureFlags);
-    // MTU
-    AmiSetWordToLe(&pTxFrame->m_Data.m_Asnd.m_Payload.m_IdentResponse.m_le_wMtu,
-        (WORD) EplDllkInstance_g.m_DllConfigParam.m_uiAsyncMtu);
-    // PollInSize
-    AmiSetWordToLe(&pTxFrame->m_Data.m_Asnd.m_Payload.m_IdentResponse.m_le_wPollInSize,
-        (WORD)EplDllkInstance_g.m_DllConfigParam.m_uiPreqActPayloadLimit);
-    // PollOutSize
-    AmiSetWordToLe(&pTxFrame->m_Data.m_Asnd.m_Payload.m_IdentResponse.m_le_wPollOutSize,
-        (WORD)EplDllkInstance_g.m_DllConfigParam.m_uiPresActPayloadLimit);
-    // ResponseTime / PresMaxLatency
-    AmiSetDwordToLe(&pTxFrame->m_Data.m_Asnd.m_Payload.m_IdentResponse.m_le_dwResponseTime,
-        EplDllkInstance_g.m_DllConfigParam.m_dwPresMaxLatency);
-    // DeviceType
-    AmiSetDwordToLe(&pTxFrame->m_Data.m_Asnd.m_Payload.m_IdentResponse.m_le_dwDeviceType,
-        EplDllkInstance_g.m_DllIdentParam.m_dwDeviceType);
-    // VendorId
-    AmiSetDwordToLe(&pTxFrame->m_Data.m_Asnd.m_Payload.m_IdentResponse.m_le_dwVendorId,
-        EplDllkInstance_g.m_DllIdentParam.m_dwVendorId);
-    // ProductCode
-    AmiSetDwordToLe(&pTxFrame->m_Data.m_Asnd.m_Payload.m_IdentResponse.m_le_dwProductCode,
-        EplDllkInstance_g.m_DllIdentParam.m_dwProductCode);
-    // RevisionNumber
-    AmiSetDwordToLe(&pTxFrame->m_Data.m_Asnd.m_Payload.m_IdentResponse.m_le_dwRevisionNumber,
-        EplDllkInstance_g.m_DllIdentParam.m_dwRevisionNumber);
-    // SerialNumber
-    AmiSetDwordToLe(&pTxFrame->m_Data.m_Asnd.m_Payload.m_IdentResponse.m_le_dwSerialNumber,
-        EplDllkInstance_g.m_DllIdentParam.m_dwSerialNumber);
-    // VendorSpecificExt1
-    AmiSetQword64ToLe(&pTxFrame->m_Data.m_Asnd.m_Payload.m_IdentResponse.m_le_qwVendorSpecificExt1,
-        EplDllkInstance_g.m_DllIdentParam.m_qwVendorSpecificExt1);
-    // VerifyConfigurationDate
-    AmiSetDwordToLe(&pTxFrame->m_Data.m_Asnd.m_Payload.m_IdentResponse.m_le_dwVerifyConfigurationDate,
-        EplDllkInstance_g.m_DllIdentParam.m_dwVerifyConfigurationDate);
-    // VerifyConfigurationTime
-    AmiSetDwordToLe(&pTxFrame->m_Data.m_Asnd.m_Payload.m_IdentResponse.m_le_dwVerifyConfigurationTime,
-        EplDllkInstance_g.m_DllIdentParam.m_dwVerifyConfigurationTime);
-    // ApplicationSwDate
-    AmiSetDwordToLe(&pTxFrame->m_Data.m_Asnd.m_Payload.m_IdentResponse.m_le_dwApplicationSwDate,
-        EplDllkInstance_g.m_DllIdentParam.m_dwApplicationSwDate);
-    // ApplicationSwTime
-    AmiSetDwordToLe(&pTxFrame->m_Data.m_Asnd.m_Payload.m_IdentResponse.m_le_dwApplicationSwTime,
-        EplDllkInstance_g.m_DllIdentParam.m_dwApplicationSwTime);
-    // IPAddress
-    AmiSetDwordToLe(&pTxFrame->m_Data.m_Asnd.m_Payload.m_IdentResponse.m_le_dwIpAddress,
-        EplDllkInstance_g.m_DllIdentParam.m_dwIpAddress);
-    // SubnetMask
-    AmiSetDwordToLe(&pTxFrame->m_Data.m_Asnd.m_Payload.m_IdentResponse.m_le_dwSubnetMask,
-        EplDllkInstance_g.m_DllIdentParam.m_dwSubnetMask);
-    // DefaultGateway
-    AmiSetDwordToLe(&pTxFrame->m_Data.m_Asnd.m_Payload.m_IdentResponse.m_le_dwDefaultGateway,
-        EplDllkInstance_g.m_DllIdentParam.m_dwDefaultGateway);
-    // HostName
-    EPL_MEMCPY(&pTxFrame->m_Data.m_Asnd.m_Payload.m_IdentResponse.m_le_sHostname[0],
-        &EplDllkInstance_g.m_DllIdentParam.m_sHostname[0],
-        sizeof (EplDllkInstance_g.m_DllIdentParam.m_sHostname));
-    // VendorSpecificExt2
-    EPL_MEMCPY(&pTxFrame->m_Data.m_Asnd.m_Payload.m_IdentResponse.m_le_abVendorSpecificExt2[0],
-        &EplDllkInstance_g.m_DllIdentParam.m_abVendorSpecificExt2[0],
-        sizeof (EplDllkInstance_g.m_DllIdentParam.m_abVendorSpecificExt2));
-
     // StatusResponse
     uiFrameSize = EPL_C_DLL_MINSIZE_STATUSRES;
     Ret = EplDllkCreateTxFrame(&uiHandle, &pTxFrame, &uiFrameSize, kEplMsgTypeAsnd, kEplDllAsndStatusResponse);
@@ -1555,9 +1508,6 @@ tEplDllkNodeInfo*   pIntNodeInfo;
     {   // error occured while registering Tx frame
         goto Exit;
     }
-    // Latency
-    AmiSetDwordToLe(&pTxFrame->m_Data.m_Asnd.m_Payload.m_SyncResponse.m_le_dwLatency,
-        EplDllkInstance_g.m_DllConfigParam.m_dwSyncResLatency);
 #endif
 
     // non-EPL frame
@@ -2425,6 +2375,8 @@ tEdrvTxBuffer*  pTxBuffer;
                     break;
                 }
             }
+
+            Ret = EplErrorHandlerkCycleFinished((NmtState >= kEplNmtMsNotActive));
 
             break;
         }
@@ -3478,12 +3430,7 @@ tEplErrorHandlerkEvent  DllEvent;
 
     if (DllEvent.m_ulDllErrorEvents != 0)
     {   // error event set -> post it to error handler
-        Event.m_EventSink = kEplEventSinkErrk;
-        Event.m_EventType = kEplEventTypeDllError;
-        // $$$ d.k. set Event.m_NetTime to current time
-        Event.m_uiSize = sizeof (DllEvent);
-        Event.m_pArg = &DllEvent;
-        Ret = EplEventkPost(&Event);
+        Ret = EplErrorHandlerkPostError(&DllEvent);
     }
 
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
@@ -4653,7 +4600,7 @@ static void EplDllkCbTransmittedSoa(tEdrvTxBuffer * pTxBuffer_p)
 {
 tEplKernel      Ret = kEplSuccessful;
 tEplEvent       Event;
-tEplNmtEvent NmtEvent = kEplNmtEventDllMeSoaSent;
+tEplNmtEvent    NmtEvent = kEplNmtEventDllMeSoaSent;
 tEplNmtState    NmtState;
 unsigned int    uiHandle = EPL_DLLK_TXFRAME_SOA;
 TGT_DLLK_DECLARE_FLAGS
@@ -5142,9 +5089,10 @@ static tEplKernel EplDllkCreateTxFrame (unsigned int * puiHandle_p,
                                  tEplDllAsndServiceId ServiceId_p)
 {
 tEplKernel      Ret = kEplSuccessful;
-tEplFrame      *pTxFrame;
+tEplFrame*      pTxFrame;
 unsigned int    uiHandle = *puiHandle_p;
-tEdrvTxBuffer  *pTxBuffer = NULL;
+tEdrvTxBuffer*  pTxBuffer = NULL;
+unsigned int    nIndex = 0;
 
     switch (MsgType_p)
     {
@@ -5185,7 +5133,7 @@ tEdrvTxBuffer  *pTxBuffer = NULL;
                     Ret = kEplDllInvalidParam;
                     goto Exit;
                 }
-                
+
                 case kEplDllAsndSdo:
                 {
                     Ret = kEplEdrvBufNotExisting;
@@ -5252,147 +5200,209 @@ tEdrvTxBuffer  *pTxBuffer = NULL;
 #endif
     }
 
-    // test if requested entry is free
-    pTxBuffer = &EplDllkInstance_g.m_pTxBuffer[uiHandle];
-    if (pTxBuffer->m_pbBuffer != NULL)
-    {   // entry is not free
-        Ret = kEplEdrvNoFreeBufEntry;
-        goto Exit;
-    }
+    for ( ; nIndex < 2; nIndex++, uiHandle++)
+    {
+        // test if requested entry is free
+        pTxBuffer = &EplDllkInstance_g.m_pTxBuffer[uiHandle];
+        if (pTxBuffer->m_pbBuffer != NULL)
+        {   // entry is not free
+            Ret = kEplEdrvNoFreeBufEntry;
+            goto Exit;
+        }
 
-    // setup Tx buffer
-    pTxBuffer->m_uiMaxBufferLen = *puiFrameSize_p;
+        // setup Tx buffer
+        pTxBuffer->m_uiMaxBufferLen = *puiFrameSize_p;
 
-    Ret = EdrvAllocTxMsgBuffer(pTxBuffer);
-    if (Ret != kEplSuccessful)
-    {   // error occured while registering Tx frame
-        goto Exit;
-    }
+        Ret = EdrvAllocTxMsgBuffer(pTxBuffer);
+        if (Ret != kEplSuccessful)
+        {   // error occured while registering Tx frame
+            goto Exit;
+        }
 
-    // because buffer size may be larger than requested
-    // memorize real length of frame
-    pTxBuffer->m_uiTxMsgLen = *puiFrameSize_p;
-    
-    // initialize time offset
-    pTxBuffer->m_dwTimeOffsetNs = 0;
+        // because buffer size may be larger than requested
+        // memorize real length of frame
+        pTxBuffer->m_uiTxMsgLen = *puiFrameSize_p;
 
-    // fill whole frame with 0
-    EPL_MEMSET(pTxBuffer->m_pbBuffer, 0, pTxBuffer->m_uiMaxBufferLen);
+        // initialize time offset
+        pTxBuffer->m_dwTimeOffsetNs = 0;
 
-    pTxFrame = (tEplFrame *) pTxBuffer->m_pbBuffer;
+        // fill whole frame with 0
+        EPL_MEMSET(pTxBuffer->m_pbBuffer, 0, pTxBuffer->m_uiMaxBufferLen);
 
-    if (MsgType_p != kEplMsgTypeNonEpl)
-    {   // fill out Frame only if it is an EPL frame
-        // ethertype
-        AmiSetWordToBe(&pTxFrame->m_be_wEtherType, EPL_C_DLL_ETHERTYPE_EPL);
-        // source node ID
-        AmiSetByteToLe(&pTxFrame->m_le_bSrcNodeId, (BYTE) EplDllkInstance_g.m_DllConfigParam.m_uiNodeId);
-        // source MAC address
-        EPL_MEMCPY(&pTxFrame->m_be_abSrcMac[0], &EplDllkInstance_g.m_be_abLocalMac[0], 6);
-        switch (MsgType_p)
-        {
-            case kEplMsgTypeAsnd:
+        pTxFrame = (tEplFrame *) pTxBuffer->m_pbBuffer;
+
+        if (MsgType_p != kEplMsgTypeNonEpl)
+        {   // fill out Frame only if it is an EPL frame
+            // ethertype
+            AmiSetWordToBe(&pTxFrame->m_be_wEtherType, EPL_C_DLL_ETHERTYPE_EPL);
+            // source node ID
+            AmiSetByteToLe(&pTxFrame->m_le_bSrcNodeId, (BYTE) EplDllkInstance_g.m_DllConfigParam.m_uiNodeId);
+            // source MAC address
+            EPL_MEMCPY(&pTxFrame->m_be_abSrcMac[0], &EplDllkInstance_g.m_be_abLocalMac[0], 6);
+            switch (MsgType_p)
             {
-                // destination MAC address
-                AmiSetQword48ToBe(&pTxFrame->m_be_abDstMac[0], EPL_C_DLL_MULTICAST_ASND);
-                // destination node ID
-                switch (ServiceId_p)
+                case kEplMsgTypeAsnd:
                 {
-                    case kEplDllAsndIdentResponse:
-                    case kEplDllAsndStatusResponse:
-                    {   // IdentResponses and StatusResponses are Broadcast
-                        AmiSetByteToLe(&pTxFrame->m_le_bDstNodeId, (BYTE) EPL_C_ADR_BROADCAST);
-                        break;
-                    }
+                    // destination MAC address
+                    AmiSetQword48ToBe(&pTxFrame->m_be_abDstMac[0], EPL_C_DLL_MULTICAST_ASND);
+                    // destination node ID
+                    switch (ServiceId_p)
+                    {
+                        case kEplDllAsndIdentResponse:
+                        {
+                            // EPL profile version
+                            AmiSetByteToLe(&pTxFrame->m_Data.m_Asnd.m_Payload.m_IdentResponse.m_le_bEplProfileVersion,
+                                (BYTE) EPL_SPEC_VERSION);
+                            // FeatureFlags
+                            AmiSetDwordToLe(&pTxFrame->m_Data.m_Asnd.m_Payload.m_IdentResponse.m_le_dwFeatureFlags,
+                                EplDllkInstance_g.m_DllConfigParam.m_dwFeatureFlags);
+                            // MTU
+                            AmiSetWordToLe(&pTxFrame->m_Data.m_Asnd.m_Payload.m_IdentResponse.m_le_wMtu,
+                                (WORD) EplDllkInstance_g.m_DllConfigParam.m_uiAsyncMtu);
+                            // PollInSize
+                            AmiSetWordToLe(&pTxFrame->m_Data.m_Asnd.m_Payload.m_IdentResponse.m_le_wPollInSize,
+                                (WORD)EplDllkInstance_g.m_DllConfigParam.m_uiPreqActPayloadLimit);
+                            // PollOutSize
+                            AmiSetWordToLe(&pTxFrame->m_Data.m_Asnd.m_Payload.m_IdentResponse.m_le_wPollOutSize,
+                                (WORD)EplDllkInstance_g.m_DllConfigParam.m_uiPresActPayloadLimit);
+                            // ResponseTime / PresMaxLatency
+                            AmiSetDwordToLe(&pTxFrame->m_Data.m_Asnd.m_Payload.m_IdentResponse.m_le_dwResponseTime,
+                                EplDllkInstance_g.m_DllConfigParam.m_dwPresMaxLatency);
+                            // DeviceType
+                            AmiSetDwordToLe(&pTxFrame->m_Data.m_Asnd.m_Payload.m_IdentResponse.m_le_dwDeviceType,
+                                EplDllkInstance_g.m_DllIdentParam.m_dwDeviceType);
+                            // VendorId
+                            AmiSetDwordToLe(&pTxFrame->m_Data.m_Asnd.m_Payload.m_IdentResponse.m_le_dwVendorId,
+                                EplDllkInstance_g.m_DllIdentParam.m_dwVendorId);
+                            // ProductCode
+                            AmiSetDwordToLe(&pTxFrame->m_Data.m_Asnd.m_Payload.m_IdentResponse.m_le_dwProductCode,
+                                EplDllkInstance_g.m_DllIdentParam.m_dwProductCode);
+                            // RevisionNumber
+                            AmiSetDwordToLe(&pTxFrame->m_Data.m_Asnd.m_Payload.m_IdentResponse.m_le_dwRevisionNumber,
+                                EplDllkInstance_g.m_DllIdentParam.m_dwRevisionNumber);
+                            // SerialNumber
+                            AmiSetDwordToLe(&pTxFrame->m_Data.m_Asnd.m_Payload.m_IdentResponse.m_le_dwSerialNumber,
+                                EplDllkInstance_g.m_DllIdentParam.m_dwSerialNumber);
+                            // VendorSpecificExt1
+                            AmiSetQword64ToLe(&pTxFrame->m_Data.m_Asnd.m_Payload.m_IdentResponse.m_le_qwVendorSpecificExt1,
+                                EplDllkInstance_g.m_DllIdentParam.m_qwVendorSpecificExt1);
+                            // VerifyConfigurationDate
+                            AmiSetDwordToLe(&pTxFrame->m_Data.m_Asnd.m_Payload.m_IdentResponse.m_le_dwVerifyConfigurationDate,
+                                EplDllkInstance_g.m_DllIdentParam.m_dwVerifyConfigurationDate);
+                            // VerifyConfigurationTime
+                            AmiSetDwordToLe(&pTxFrame->m_Data.m_Asnd.m_Payload.m_IdentResponse.m_le_dwVerifyConfigurationTime,
+                                EplDllkInstance_g.m_DllIdentParam.m_dwVerifyConfigurationTime);
+                            // ApplicationSwDate
+                            AmiSetDwordToLe(&pTxFrame->m_Data.m_Asnd.m_Payload.m_IdentResponse.m_le_dwApplicationSwDate,
+                                EplDllkInstance_g.m_DllIdentParam.m_dwApplicationSwDate);
+                            // ApplicationSwTime
+                            AmiSetDwordToLe(&pTxFrame->m_Data.m_Asnd.m_Payload.m_IdentResponse.m_le_dwApplicationSwTime,
+                                EplDllkInstance_g.m_DllIdentParam.m_dwApplicationSwTime);
+                            // IPAddress
+                            AmiSetDwordToLe(&pTxFrame->m_Data.m_Asnd.m_Payload.m_IdentResponse.m_le_dwIpAddress,
+                                EplDllkInstance_g.m_DllIdentParam.m_dwIpAddress);
+                            // SubnetMask
+                            AmiSetDwordToLe(&pTxFrame->m_Data.m_Asnd.m_Payload.m_IdentResponse.m_le_dwSubnetMask,
+                                EplDllkInstance_g.m_DllIdentParam.m_dwSubnetMask);
+                            // DefaultGateway
+                            AmiSetDwordToLe(&pTxFrame->m_Data.m_Asnd.m_Payload.m_IdentResponse.m_le_dwDefaultGateway,
+                                EplDllkInstance_g.m_DllIdentParam.m_dwDefaultGateway);
+                            // HostName
+                            EPL_MEMCPY(&pTxFrame->m_Data.m_Asnd.m_Payload.m_IdentResponse.m_le_sHostname[0],
+                                &EplDllkInstance_g.m_DllIdentParam.m_sHostname[0],
+                                sizeof (EplDllkInstance_g.m_DllIdentParam.m_sHostname));
+                            // VendorSpecificExt2
+                            EPL_MEMCPY(&pTxFrame->m_Data.m_Asnd.m_Payload.m_IdentResponse.m_le_abVendorSpecificExt2[0],
+                                &EplDllkInstance_g.m_DllIdentParam.m_abVendorSpecificExt2[0],
+                                sizeof (EplDllkInstance_g.m_DllIdentParam.m_abVendorSpecificExt2));
+
+                            // fall-through
+                        }
+
+                        case kEplDllAsndStatusResponse:
+                        {   // IdentResponses and StatusResponses are Broadcast
+
+                            AmiSetByteToLe(&pTxFrame->m_le_bDstNodeId, (BYTE) EPL_C_ADR_BROADCAST);
+
+                            break;
+                        }
 
 #if EPL_DLL_PRES_CHAINING_CN != FALSE
-                    case kEplDllAsndSyncResponse:
-                    {   // SyncRes destination node ID is MN node ID
-                        AmiSetByteToLe(&pTxFrame->m_le_bDstNodeId, (BYTE) EPL_C_ADR_MN_DEF_NODE_ID);
-                        // SyncStatus: PResMode disabled / PResTimeFirst and PResTimeSecond invalid
-                        // AmiSetDwordToLe(&pTxFrame->m_Data.m_Asnd.m_Payload.m_SyncResponse.m_le_dwSyncStatus, 0);
-                        // init SyncNodeNumber
-                        // AmiSetDwordToLe(&pTxFrame->m_Data.m_Asnd.m_Payload.m_SyncResponse.m_le_dwSyncNodeNumber, 0);
-                        // init SyncDelay
-                        // AmiSetDwordToLe(&pTxFrame->m_Data.m_Asnd.m_Payload.m_SyncResponse.m_le_dwSyncDelay, 0);
-                        break;
-                    }
+                        case kEplDllAsndSyncResponse:
+                        {   // SyncRes destination node ID is MN node ID
+                            AmiSetByteToLe(&pTxFrame->m_le_bDstNodeId, (BYTE) EPL_C_ADR_MN_DEF_NODE_ID);
+                            // Latency
+                            AmiSetDwordToLe(&pTxFrame->m_Data.m_Asnd.m_Payload.m_SyncResponse.m_le_dwLatency,
+                                EplDllkInstance_g.m_DllConfigParam.m_dwSyncResLatency);
+                            // SyncStatus: PResMode disabled / PResTimeFirst and PResTimeSecond invalid
+                            // AmiSetDwordToLe(&pTxFrame->m_Data.m_Asnd.m_Payload.m_SyncResponse.m_le_dwSyncStatus, 0);
+                            // init SyncNodeNumber
+                            // AmiSetDwordToLe(&pTxFrame->m_Data.m_Asnd.m_Payload.m_SyncResponse.m_le_dwSyncNodeNumber, 0);
+                            // init SyncDelay
+                            // AmiSetDwordToLe(&pTxFrame->m_Data.m_Asnd.m_Payload.m_SyncResponse.m_le_dwSyncDelay, 0);
+                            break;
+                        }
 #endif
-                        
-                    default:
-                    {
-                        break;
+                            
+                        default:
+                        {
+                            break;
+                        }
                     }
+                    // ASnd Service ID
+                    AmiSetByteToLe(&pTxFrame->m_Data.m_Asnd.m_le_bServiceId, ServiceId_p);
+                    break;
                 }
-                // ASnd Service ID
-                AmiSetByteToLe(&pTxFrame->m_Data.m_Asnd.m_le_bServiceId, ServiceId_p);
-                break;
-            }
 
-            case kEplMsgTypePres:
-            {
-                // destination MAC address
-                AmiSetQword48ToBe(&pTxFrame->m_be_abDstMac[0], EPL_C_DLL_MULTICAST_PRES);
-                // destination node ID
-                AmiSetByteToLe(&pTxFrame->m_le_bDstNodeId, (BYTE) EPL_C_ADR_BROADCAST);
-                // reset Flags
-                // AmiSetByteToLe(&pTxFrame->m_Data.m_Pres.m_le_bFlag1, (BYTE) 0);
-                // AmiSetByteToLe(&pTxFrame->m_Data.m_Pres.m_le_bFlag2, (BYTE) 0);
-                // PDO size
-                // AmiSetWordToLe(&pTxFrame->m_Data.m_Pres.m_le_wSize, 0);
-                break;
-            }
+                case kEplMsgTypePres:
+                {
+                    // destination MAC address
+                    AmiSetQword48ToBe(&pTxFrame->m_be_abDstMac[0], EPL_C_DLL_MULTICAST_PRES);
+                    // destination node ID
+                    AmiSetByteToLe(&pTxFrame->m_le_bDstNodeId, (BYTE) EPL_C_ADR_BROADCAST);
+                    break;
+                }
 
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
-            case kEplMsgTypeSoc:
-            {
-                // destination MAC address
-                AmiSetQword48ToBe(&pTxFrame->m_be_abDstMac[0], EPL_C_DLL_MULTICAST_SOC);
-                // destination node ID
-                AmiSetByteToLe(&pTxFrame->m_le_bDstNodeId, (BYTE) EPL_C_ADR_BROADCAST);
-                // reset Flags
-                // AmiSetByteToLe(&pTxFrame->m_Data.m_Soc.m_le_bFlag1, (BYTE) 0);
-                // AmiSetByteToLe(&pTxFrame->m_Data.m_Soc.m_le_bFlag2, (BYTE) 0);
-                break;
-            }
+                case kEplMsgTypeSoc:
+                {
+                    // destination MAC address
+                    AmiSetQword48ToBe(&pTxFrame->m_be_abDstMac[0], EPL_C_DLL_MULTICAST_SOC);
+                    // destination node ID
+                    AmiSetByteToLe(&pTxFrame->m_le_bDstNodeId, (BYTE) EPL_C_ADR_BROADCAST);
+                    break;
+                }
 
-            case kEplMsgTypeSoa:
-            {
-                // destination MAC address
-                AmiSetQword48ToBe(&pTxFrame->m_be_abDstMac[0], EPL_C_DLL_MULTICAST_SOA);
-                // destination node ID
-                AmiSetByteToLe(&pTxFrame->m_le_bDstNodeId, (BYTE) EPL_C_ADR_BROADCAST);
-                // reset Flags
-                // AmiSetByteToLe(&pTxFrame->m_Data.m_Soa.m_le_bFlag1, (BYTE) 0);
-                // AmiSetByteToLe(&pTxFrame->m_Data.m_Soa.m_le_bFlag2, (BYTE) 0);
-                // EPL profile version
-                AmiSetByteToLe(&pTxFrame->m_Data.m_Soa.m_le_bEplVersion, (BYTE) EPL_SPEC_VERSION);
-                break;
-            }
+                case kEplMsgTypeSoa:
+                {
+                    // destination MAC address
+                    AmiSetQword48ToBe(&pTxFrame->m_be_abDstMac[0], EPL_C_DLL_MULTICAST_SOA);
+                    // destination node ID
+                    AmiSetByteToLe(&pTxFrame->m_le_bDstNodeId, (BYTE) EPL_C_ADR_BROADCAST);
+                    // EPL profile version
+                    AmiSetByteToLe(&pTxFrame->m_Data.m_Soa.m_le_bEplVersion, (BYTE) EPL_SPEC_VERSION);
+                    break;
+                }
 
-            case kEplMsgTypePreq:
-            {
-                // reset Flags
-                // AmiSetByteToLe(&pTxFrame->m_Data.m_Preq.m_le_bFlag1, (BYTE) 0);
-                // AmiSetByteToLe(&pTxFrame->m_Data.m_Preq.m_le_bFlag2, (BYTE) 0);
-                // PDO size
-                // AmiSetWordToLe(&pTxFrame->m_Data.m_Preq.m_le_wSize, 0);
-                break;
-            }
+                case kEplMsgTypePreq:
+                {
+                    break;
+                }
 #endif
 
-            default:
-            {
-                break;
+                default:
+                {
+                    break;
+                }
             }
+            // EPL message type
+            AmiSetByteToLe(&pTxFrame->m_le_bMessageType, (BYTE) MsgType_p);
         }
-        // EPL message type
-        AmiSetByteToLe(&pTxFrame->m_le_bMessageType, (BYTE) MsgType_p);
-    }
 
-    *ppFrame_p = pTxFrame;
-    *puiFrameSize_p = pTxBuffer->m_uiMaxBufferLen;
-    *puiHandle_p = uiHandle;
+        *ppFrame_p = pTxFrame;
+        *puiFrameSize_p = pTxBuffer->m_uiMaxBufferLen;
+        *puiHandle_p = uiHandle;
+    }
 
 Exit:
     return Ret;

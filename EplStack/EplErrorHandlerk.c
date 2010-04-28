@@ -335,13 +335,9 @@ return Ret;
 //
 // Description: processes error events from DLL
 //
-//
-//
-// Parameters:  pEvent_p = pointer to event-structur from buffer
-//
+// Parameters:  pEvent_p = pointer to event-structure from buffer
 //
 // Returns:      tEpKernel  = errorcode
-//
 //
 // State:
 //
@@ -605,85 +601,6 @@ tEplNmtEvent            NmtEvent;
             break;
         }
 
-        // NMT event
-        case kEplEventTypeNmtEvent:
-        {
-            if ((*(tEplNmtEvent*)pEvent_p->m_pArg) == kEplNmtEventDllCeSoa)
-            {   // SoA event of CN -> decrement threshold counters
-
-                if ((EplErrorHandlerkInstance_g.m_ulDllErrorEvents & EPL_DLL_ERR_CN_LOSS_SOC) == 0)
-                {   // decrement loss of SoC threshold counter, because it didn't occur last cycle
-                    if (EplErrorHandlerkInstance_g.m_CnLossSoc.m_dwThresholdCnt > 0)
-                    {
-                        EplErrorHandlerkInstance_g.m_CnLossSoc.m_dwThresholdCnt--;
-                    }
-                }
-
-                if ((EplErrorHandlerkInstance_g.m_ulDllErrorEvents & EPL_DLL_ERR_CN_CRC) == 0)
-                {   // decrement CRC threshold counter, because it didn't occur last cycle
-                    if (EplErrorHandlerkInstance_g.m_CnCrcErr.m_dwThresholdCnt > 0)
-                    {
-                        EplErrorHandlerkInstance_g.m_CnCrcErr.m_dwThresholdCnt--;
-                    }
-                }
-            }
-
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
-            else if ((*(tEplNmtEvent*)pEvent_p->m_pArg) == kEplNmtEventDllMeSoaSent)
-            {   // SoA event of MN -> decrement threshold counters
-            tEplDllkNodeInfo*   pIntNodeInfo;
-            unsigned int        uiNodeId;
-
-                Ret = EplDllkGetFirstNodeInfo(&pIntNodeInfo);
-                if (Ret != kEplSuccessful)
-                {
-                    break;
-                }
-                // iterate through node info structure list
-                while (pIntNodeInfo != NULL)
-                {
-                    uiNodeId = pIntNodeInfo->m_uiNodeId - 1;
-                    if (uiNodeId < tabentries(EplErrorHandlerkInstance_g.m_adwMnCnLossPresCumCnt))
-                    {
-                        if  (EplErrorHandlerkInstance_g.m_afMnCnLossPresEvent[uiNodeId] == FALSE)
-                        {
-                            if (EplErrorHandlerkInstance_g.m_adwMnCnLossPresThrCnt[uiNodeId] > 0)
-                            {
-                                EplErrorHandlerkInstance_g.m_adwMnCnLossPresThrCnt[uiNodeId]--;
-                            }
-                        }
-                        else
-                        {
-                            EplErrorHandlerkInstance_g.m_afMnCnLossPresEvent[uiNodeId] = FALSE;
-                        }
-                    }
-                    pIntNodeInfo = pIntNodeInfo->m_pNextNodeInfo;
-                }
-
-                if ((EplErrorHandlerkInstance_g.m_ulDllErrorEvents & EPL_DLL_ERR_MN_CRC) == 0)
-                {   // decrement CRC threshold counter, because it didn't occur last cycle
-                    if (EplErrorHandlerkInstance_g.m_MnCrcErr.m_dwThresholdCnt > 0)
-                    {
-                        EplErrorHandlerkInstance_g.m_MnCrcErr.m_dwThresholdCnt--;
-                    }
-                }
-
-                if ((EplErrorHandlerkInstance_g.m_ulDllErrorEvents & EPL_DLL_ERR_MN_CYCTIMEEXCEED) == 0)
-                {   // decrement cycle exceed threshold counter, because it didn't occur last cycle
-                    if (EplErrorHandlerkInstance_g.m_MnCycTimeExceed.m_dwThresholdCnt > 0)
-                    {
-                        EplErrorHandlerkInstance_g.m_MnCycTimeExceed.m_dwThresholdCnt--;
-                    }
-                }
-            }
-#endif
-
-            // reset error events
-            EplErrorHandlerkInstance_g.m_ulDllErrorEvents = 0L;
-
-            break;
-        }
-
         // unknown type
         default:
         {
@@ -697,6 +614,130 @@ tEplNmtEvent            NmtEvent;
     return Ret;
 
 }
+
+
+//---------------------------------------------------------------------------
+//
+// Function:    EplErrorHandlerkCycleFinished
+//
+// Description: cycle has been finished, so threshold counters can be decremented (called by DLL)
+//
+// Parameters:  fMN_p       = TRUE if local node is MN
+//
+// Returns:     tEpKernel  = errorcode
+//
+// State:
+//
+//---------------------------------------------------------------------------
+tEplKernel PUBLIC EplErrorHandlerkCycleFinished(BOOL fMN_p);
+{
+tEplKernel              Ret;
+
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
+    if (fMN_p != FALSE)
+    {   // local node is MN -> decrement MN threshold counters
+    tEplDllkNodeInfo*   pIntNodeInfo;
+    unsigned int        uiNodeId;
+
+        Ret = EplDllkGetFirstNodeInfo(&pIntNodeInfo);
+        if (Ret != kEplSuccessful)
+        {
+            break;
+        }
+        // iterate through node info structure list
+        while (pIntNodeInfo != NULL)
+        {
+            uiNodeId = pIntNodeInfo->m_uiNodeId - 1;
+            if (uiNodeId < tabentries(EplErrorHandlerkInstance_g.m_adwMnCnLossPresCumCnt))
+            {
+                if  (EplErrorHandlerkInstance_g.m_afMnCnLossPresEvent[uiNodeId] == FALSE)
+                {
+                    if (EplErrorHandlerkInstance_g.m_adwMnCnLossPresThrCnt[uiNodeId] > 0)
+                    {
+                        EplErrorHandlerkInstance_g.m_adwMnCnLossPresThrCnt[uiNodeId]--;
+                    }
+                }
+                else
+                {
+                    EplErrorHandlerkInstance_g.m_afMnCnLossPresEvent[uiNodeId] = FALSE;
+                }
+            }
+            pIntNodeInfo = pIntNodeInfo->m_pNextNodeInfo;
+        }
+
+        if ((EplErrorHandlerkInstance_g.m_ulDllErrorEvents & EPL_DLL_ERR_MN_CRC) == 0)
+        {   // decrement CRC threshold counter, because it didn't occur last cycle
+            if (EplErrorHandlerkInstance_g.m_MnCrcErr.m_dwThresholdCnt > 0)
+            {
+                EplErrorHandlerkInstance_g.m_MnCrcErr.m_dwThresholdCnt--;
+            }
+        }
+
+        if ((EplErrorHandlerkInstance_g.m_ulDllErrorEvents & EPL_DLL_ERR_MN_CYCTIMEEXCEED) == 0)
+        {   // decrement cycle exceed threshold counter, because it didn't occur last cycle
+            if (EplErrorHandlerkInstance_g.m_MnCycTimeExceed.m_dwThresholdCnt > 0)
+            {
+                EplErrorHandlerkInstance_g.m_MnCycTimeExceed.m_dwThresholdCnt--;
+            }
+        }
+    }
+    else
+#endif
+    {   // local node is CN -> decrement CN threshold counters
+
+        if ((EplErrorHandlerkInstance_g.m_ulDllErrorEvents & EPL_DLL_ERR_CN_LOSS_SOC) == 0)
+        {   // decrement loss of SoC threshold counter, because it didn't occur last cycle
+            if (EplErrorHandlerkInstance_g.m_CnLossSoc.m_dwThresholdCnt > 0)
+            {
+                EplErrorHandlerkInstance_g.m_CnLossSoc.m_dwThresholdCnt--;
+            }
+        }
+
+        if ((EplErrorHandlerkInstance_g.m_ulDllErrorEvents & EPL_DLL_ERR_CN_CRC) == 0)
+        {   // decrement CRC threshold counter, because it didn't occur last cycle
+            if (EplErrorHandlerkInstance_g.m_CnCrcErr.m_dwThresholdCnt > 0)
+            {
+                EplErrorHandlerkInstance_g.m_CnCrcErr.m_dwThresholdCnt--;
+            }
+        }
+    }
+
+    // reset error events
+    EplErrorHandlerkInstance_g.m_ulDllErrorEvents = 0L;
+
+    return Ret;
+
+}
+
+
+//---------------------------------------------------------------------------
+//
+// Function:    EplErrorHandlerkPostError
+//
+// Description: posts error events to error handler (called by DLL)
+//
+// Parameters:  pDllEvent_p = pointer to event-structure
+//
+// Returns:     tEpKernel  = errorcode
+//
+// State:
+//
+//---------------------------------------------------------------------------
+tEplKernel PUBLIC EplErrorHandlerkPostError(tEplErrorHandlerkEvent* pDllEvent_p)
+{
+tEplKernel              Ret;
+tEplEvent               Event;
+
+    Event.m_EventSink = kEplEventSinkErrk;
+    Event.m_EventType = kEplEventTypeDllError;
+    Event.m_uiSize = sizeof (*pDllEvent_p);
+    Event.m_pArg = pDllEvent_p;
+    Ret = EplEventkPost(&Event);
+
+    return Ret;
+
+}
+
 
 //=========================================================================//
 //                                                                         //
