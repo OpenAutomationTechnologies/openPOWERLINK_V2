@@ -686,7 +686,7 @@ DWORD i;
         {
             // free channel found
             TxBufTable_l[i].m_fUsed = TRUE;
-            pBuffer_p->m_uiBufferNumber = i;
+            pBuffer_p->m_BufferNumber.m_dwVal = i;
 #if TARGET_SYSTEM == _LINUX_
             pBuffer_p->m_pbBuffer = (BYTE *) phys_to_virt(TxBufTable_l[i].m_pBufDescr->dataPointer);
 #else
@@ -725,7 +725,7 @@ tEplKernel EdrvReleaseTxMsgBuffer     (tEdrvTxBuffer * pBuffer_p)
 {
 unsigned int uiBufferNumber;
 
-uiBufferNumber = pBuffer_p->m_uiBufferNumber;
+uiBufferNumber = pBuffer_p->m_BufferNumber.m_dwVal;
 
     if (uiBufferNumber < FEC_TX_BUF_NUMBER)
     {
@@ -765,7 +765,7 @@ unsigned int uiBufferNumber;
     // Receive the base address
     unsigned long base_addr = (unsigned long)fp->base_addr;
 
-    uiBufferNumber = pBuffer_p->m_uiBufferNumber;
+    uiBufferNumber = pBuffer_p->m_BufferNumber.m_dwVal;
 
     if ((uiBufferNumber < FEC_TX_BUF_NUMBER)
         && (TxBufTable_l[uiBufferNumber].m_fUsed != FALSE))
@@ -869,7 +869,7 @@ unsigned int uiBufferNumber;
     // Receive the base address
     unsigned long base_addr = (unsigned long)fp->base_addr;
 
-    uiBufferNumber = pBuffer_p->m_uiBufferNumber;
+    uiBufferNumber = pBuffer_p->m_BufferNumber.m_dwVal;
 
     if ((uiBufferNumber < FEC_TX_BUF_NUMBER)
         && (TxBufTable_l[uiBufferNumber].m_fUsed != FALSE))
@@ -1698,7 +1698,10 @@ tEdrvRxBuffer RxBuffer;
             pBuffer = pLastTransmittedTxBuffer_l;
             pLastTransmittedTxBuffer_l = NULL;
 
-            EdrvInitParam_l.m_pfnTxHandler(pBuffer);
+            if (pBuffer->m_pfnTxHandler != NULL)
+            {
+                pBuffer->m_pfnTxHandler(pBuffer);
+            }
         }
     }
 #endif
@@ -1868,7 +1871,10 @@ void fec_interrupt_fec_tx_handler(struct eth_if *nd)
         pBuffer = pLastTransmittedTxBuffer_l;
         pLastTransmittedTxBuffer_l = NULL;
 
-        EdrvInitParam_l.m_pfnTxHandler(pBuffer);
+        if (pBuffer->m_pfnTxHandler != NULL)
+        {
+            pBuffer->m_pfnTxHandler(pBuffer);
+        }
     }
 #endif
 }
@@ -1928,7 +1934,7 @@ unsigned int    uiBufferNumber;
         // so Tx and Rx frames are processed in the right order
         if (pLastTransmittedTxBuffer_l != NULL)
         {   // transmission is active
-            uiBufferNumber = pLastTransmittedTxBuffer_l->m_uiBufferNumber;
+            uiBufferNumber = pLastTransmittedTxBuffer_l->m_BufferNumber.m_dwVal;
 
             if ((uiBufferNumber < FEC_TX_BUF_NUMBER)
                 && (TxBufTable_l[uiBufferNumber].m_fUsed != FALSE))
@@ -1945,7 +1951,10 @@ unsigned int    uiBufferNumber;
                     pBuffer = pLastTransmittedTxBuffer_l;
                     pLastTransmittedTxBuffer_l = NULL;
 
-                    EdrvInitParam_l.m_pfnTxHandler(pBuffer);
+                    if (pBuffer->m_pfnTxHandler != NULL)
+                    {
+                        pBuffer->m_pfnTxHandler(pBuffer);
+                    }
                 }
             }
             else
