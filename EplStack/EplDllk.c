@@ -3226,6 +3226,16 @@ tEplErrorHandlerkEvent  DllEvent;
                         {   // start continuous cycle timer
                         tEplNmtEvent NmtEvent = kEplNmtEventDllMeSoaSent;
 
+                            // if m_LastReqServiceId is still valid,
+                            // SoA was not correctly answered
+                            // and user part has to be informed
+                            Ret = EplDllkAsyncFrameNotReceived(EplDllkInstance_g.m_LastReqServiceId,
+                                                               EplDllkInstance_g.m_uiLastTargetNodeId);
+                            if (Ret != kEplSuccessful)
+                            {
+                                goto Exit;
+                            }
+
 #if EPL_TIMER_USE_HIGHRES != FALSE
                             Ret = EplTimerHighReskModifyTimerNs(&EplDllkInstance_g.m_TimerHdlCycle,
                                 EplDllkInstance_g.m_ullFrameTimeout,
