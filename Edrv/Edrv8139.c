@@ -604,7 +604,7 @@ DWORD i;
         {
             // free channel found
             EdrvInstance_l.m_afTxBufUsed[i] = TRUE;
-            pBuffer_p->m_uiBufferNumber = i;
+            pBuffer_p->m_BufferNumber.m_dwVal = i;
             pBuffer_p->m_pbBuffer = EdrvInstance_l.m_pbTxBuf + (i * EDRV_MAX_FRAME_SIZE);
             pBuffer_p->m_uiMaxBufferLen = EDRV_MAX_FRAME_SIZE;
             break;
@@ -639,7 +639,7 @@ tEplKernel EdrvReleaseTxMsgBuffer     (tEdrvTxBuffer * pBuffer_p)
 {
 unsigned int uiBufferNumber;
 
-    uiBufferNumber = pBuffer_p->m_uiBufferNumber;
+    uiBufferNumber = pBuffer_p->m_BufferNumber.m_dwVal;
 
     if (uiBufferNumber < EDRV_MAX_TX_BUFFERS)
     {
@@ -670,7 +670,7 @@ tEplKernel Ret = kEplSuccessful;
 unsigned int uiBufferNumber;
 DWORD       dwTemp;
 
-    uiBufferNumber = pBuffer_p->m_uiBufferNumber;
+    uiBufferNumber = pBuffer_p->m_BufferNumber.m_dwVal;
 
     if ((uiBufferNumber >= EDRV_MAX_TX_BUFFERS)
         || (EdrvInstance_l.m_afTxBufUsed[uiBufferNumber] == FALSE))
@@ -877,7 +877,10 @@ int             iHandled = IRQ_HANDLED;
             if (pTxBuffer != NULL)
             {
                 // call Tx handler of Data link layer
-                EdrvInstance_l.m_InitParam.m_pfnTxHandler(pTxBuffer);
+                if (pTxBuffer->m_pfnTxHandler != NULL)
+                {
+                    pTxBuffer->m_pfnTxHandler(pTxBuffer);
+                }
             }
         }
         else
