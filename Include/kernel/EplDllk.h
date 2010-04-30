@@ -108,7 +108,7 @@ struct _tEplDllkNodeInfo
     WORD                        m_wPreqPayloadLimit;    // object 0x1F8B: NMT_MNPReqPayloadLimitList_AU16
     tEplNmtState                m_NmtState;
     unsigned long               m_ulDllErrorEvents;
-    DWORD                       m_dwPresTimeout;        // object 0x1F92: NMT_MNCNPResTimeout_AU32
+    DWORD                       m_dwPresTimeoutNs;        // object 0x1F92: NMT_MNCNPResTimeout_AU32
     struct _tEdrvTxBuffer*      m_pPreqTxBuffer;
     struct _tEplDllkNodeInfo*   m_pNextNodeInfo;
 #endif
@@ -187,7 +187,7 @@ tEplKernel EplDllkDeleteNode(tEplDllNodeOpParam* pNodeOpParam_p);
 
 tEplKernel EplDllkSetFlag1OfNode(unsigned int uiNodeId_p, BYTE bSoaFlag1_p);
 
-tEplKernel EplDllkGetFirstNodeInfo(tEplDllkNodeInfo** ppNodeInfo_p);
+tEplKernel EplDllkGetCurrentCnNodeIdList(BYTE** ppbCnNodeIdList_p);
 
 #endif // (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
 

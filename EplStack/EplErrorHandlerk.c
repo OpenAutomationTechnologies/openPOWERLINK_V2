@@ -629,25 +629,25 @@ tEplNmtEvent            NmtEvent;
 // State:
 //
 //---------------------------------------------------------------------------
-tEplKernel PUBLIC EplErrorHandlerkCycleFinished(BOOL fMN_p);
+tEplKernel PUBLIC EplErrorHandlerkCycleFinished(BOOL fMN_p)
 {
 tEplKernel              Ret;
 
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
     if (fMN_p != FALSE)
     {   // local node is MN -> decrement MN threshold counters
-    tEplDllkNodeInfo*   pIntNodeInfo;
-    unsigned int        uiNodeId;
+    BYTE*           pbCnNodeId;
+    unsigned int    uiNodeId;
 
-        Ret = EplDllkGetFirstNodeInfo(&pIntNodeInfo);
+        Ret = EplDllkGetCurrentCnNodeIdList(&pbCnNodeId);
         if (Ret != kEplSuccessful)
         {
-            break;
+            goto Exit;
         }
         // iterate through node info structure list
-        while (pIntNodeInfo != NULL)
+        while (*pbCnNodeId != EPL_C_ADR_INVALID)
         {
-            uiNodeId = pIntNodeInfo->m_uiNodeId - 1;
+            uiNodeId = *pbCnNodeId - 1;
             if (uiNodeId < tabentries(EplErrorHandlerkInstance_g.m_adwMnCnLossPresCumCnt))
             {
                 if  (EplErrorHandlerkInstance_g.m_afMnCnLossPresEvent[uiNodeId] == FALSE)
@@ -662,7 +662,7 @@ tEplKernel              Ret;
                     EplErrorHandlerkInstance_g.m_afMnCnLossPresEvent[uiNodeId] = FALSE;
                 }
             }
-            pIntNodeInfo = pIntNodeInfo->m_pNextNodeInfo;
+            pbCnNodeId++;
         }
 
         if ((EplErrorHandlerkInstance_g.m_ulDllErrorEvents & EPL_DLL_ERR_MN_CRC) == 0)
@@ -705,6 +705,7 @@ tEplKernel              Ret;
     // reset error events
     EplErrorHandlerkInstance_g.m_ulDllErrorEvents = 0L;
 
+Exit:
     return Ret;
 
 }

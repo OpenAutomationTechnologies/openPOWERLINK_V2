@@ -744,8 +744,8 @@ BYTE            bCount;
                     goto Exit;
                 }
 
-                ObdSize = sizeof (DllNodeInfo.m_dwPresTimeout);
-                Ret = EplObduReadEntry(0x1F92, uiIndex, &DllNodeInfo.m_dwPresTimeout, &ObdSize);
+                ObdSize = sizeof (DllNodeInfo.m_dwPresTimeoutNs);
+                Ret = EplObduReadEntry(0x1F92, uiIndex, &DllNodeInfo.m_dwPresTimeoutNs, &ObdSize);
                 if (Ret != kEplSuccessful)
                 {
                     goto Exit;
@@ -753,7 +753,7 @@ BYTE            bCount;
             }
             else
             {
-                DllNodeInfo.m_dwPresTimeout = 0;
+                DllNodeInfo.m_dwPresTimeoutNs = 0;
                 DllNodeInfo.m_wPreqPayloadLimit = 0;
             }
 #endif // (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)

@@ -100,6 +100,7 @@ typedef enum
     kEplEdrvNextTxListNotEmpty  = 0x001D,       // next Tx buffer list is not empty, i.e. still in use
 
     // area for DLL module 0x0020 - 0x002F
+    kEplDllOutOfMemory          = 0x0021,       // out of memory
     kEplDllIllegalHdl           = 0x0022,       // illegal handle for a TxFrame was passed
     kEplDllCbAsyncRegistered    = 0x0023,       // handler for non-EPL frames was already registered before
 //    kEplDllAsyncRxBufferFull    = 0x0024,       // receive buffer for asynchronous frames is full

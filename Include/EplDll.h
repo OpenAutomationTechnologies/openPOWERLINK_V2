@@ -218,7 +218,7 @@ typedef struct
     WORD                        m_wPresPayloadLimit;    // object 0x1F8D: NMT_PResPayloadLimitList_AU16
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
     WORD                        m_wPreqPayloadLimit;    // object 0x1F8B: NMT_MNPReqPayloadLimitList_AU16
-    DWORD                       m_dwPresTimeout;        // object 0x1F92: NMT_MNCNPResTimeout_AU32
+    DWORD                       m_dwPresTimeoutNs;        // object 0x1F92: NMT_MNCNPResTimeout_AU32
 #endif // (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
 
 } tEplDllNodeInfo;
