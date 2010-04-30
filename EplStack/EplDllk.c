@@ -284,7 +284,7 @@ typedef struct
 
     BYTE                m_bCurTxBufferOffsetIdentRes;
     BYTE                m_bCurTxBufferOffsetStatusRes;
-    BYTE                m_bCurTxBufferOffsetPres;
+    BYTE                m_bCurTxBufferOffsetCycle;      // PRes, SoC, SoA, PReq
 #if EPL_DLL_PRES_CHAINING_CN != FALSE
     BYTE                m_bCurTxBufferOffsetSyncRes;
 #endif
@@ -295,6 +295,7 @@ typedef struct
 #else
     BYTE                m_bCurNodeIndex;
     BYTE                m_aabNodeIdList[2][EPL_NMT_MAX_NODE_ID];
+    tEdrvTxBuffer**     m_ppTxBufferList;
 #endif
     tEplDllReqServiceId m_LastReqServiceId;
     unsigned int        m_uiLastTargetNodeId;
@@ -1682,6 +1683,7 @@ tEplDllkNodeInfo*   pIntNodeInfo;
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
     if (NmtState_p >= kEplNmtMsNotActive)
     {   // local node is MN
+    unsigned int    uiCount = 0;
 
         // SoC
         uiFrameSize = EPL_C_DLL_MINSIZE_SOC;
@@ -1707,6 +1709,8 @@ tEplDllkNodeInfo*   pIntNodeInfo;
         {
             if (pIntNodeInfo->m_wPreqPayloadLimit > 0)
             {   // create PReq frame for this node
+                uiCount++;
+
                 uiFrameSize = pIntNodeInfo->m_wPreqPayloadLimit + EPL_FRAME_OFFSET_PDO_PAYLOAD;
                 Ret = EplDllkCreateTxFrame(&uiHandle, &pTxFrame, &uiFrameSize, kEplMsgTypePreq, kEplDllAsndNotDefined);
                 if (Ret != kEplSuccessful)
@@ -1718,8 +1722,26 @@ tEplDllkNodeInfo*   pIntNodeInfo;
 
                 // set destination node-ID in PReq
                 AmiSetByteToLe(&pTxFrame->m_le_bDstNodeId, (BYTE) pIntNodeInfo->m_uiNodeId);
+                // $$$ do this in other buffer
             }
         }
+
+#if (EPL_DLL_DISABLE_EDRV_CYCLIC == FALSE)
+        // alloc TxBuffer pointer list
+        uiCount += 5;   // SoC, PResMN, SoA, ASnd, NULL
+        EplDllkInstance_g.m_ppTxBufferList = EPL_MALLOC(sizeof (tEdrvTxBuffer*) * uiCount);
+        if (EplDllkInstance_g.m_ppTxBufferList == NULL)
+        {
+            Ret = kEplOutOfMemory;
+            goto Exit;
+        }
+        
+        Ret = EdrvCyclicSetMaxTxBufferListSize(uiCount);
+        if (Ret = kEplSuccessful)
+        {
+            goto Exit;
+        }
+#endif
 
         // calculate cycle length
         EplDllkInstance_g.m_ullFrameTimeout = 1000LL
@@ -1888,7 +1910,11 @@ unsigned int    uiHandle;
     // remove all filters from Edrv
     Ret = EdrvChangeFilter(NULL, 0, 0, 0);
 
+#if (EPL_DLL_DISABLE_EDRV_CYCLIC == FALSE)
     // destroy all data structures
+    EPL_FREE(EplDllkInstance_g.m_ppTxBufferList);
+    EplDllkInstance_g.m_ppTxBufferList = NULL;
+#endif
 
     // delete Tx frames
     Ret = EplDllkDeleteTxFrame(EPL_DLLK_TXFRAME_IDENTRES);
@@ -2438,11 +2464,18 @@ tEplFrameInfo   FrameInfo;
     {   // local node is MN
     tEplDllkNodeInfo*   pIntNodeInfo;
     BYTE                bFlag1;
+    unsigned int        uiNextTxBufferOffset = EplDllkInstance_g.m_bCurTxBufferOffsetCycle ^ 1;
+#if (EPL_DLL_DISABLE_EDRV_CYCLIC == FALSE)
+    unsigned int        uiIndex = 0;
+    
+        EplDllkInstance_g.m_ppTxBufferList[uiIndex] = &EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_SOC + uiIndex];
+        uiIndex++;
+#endif
 
         pIntNodeInfo = EplDllkInstance_g.m_pFirstNodeInfo;
         while (pIntNodeInfo != NULL)
         {
-            pTxBuffer = pIntNodeInfo->m_pPreqTxBuffer;
+            pTxBuffer = &pIntNodeInfo->m_pPreqTxBuffer[uiNextTxBufferOffset];
             if ((pTxBuffer != NULL) && (pTxBuffer->m_pbBuffer != NULL))
             {   // PReq does exist
                 pTxFrame = (tEplFrame *) pTxBuffer->m_pbBuffer;
@@ -2477,11 +2510,26 @@ tEplFrameInfo   FrameInfo;
                     AmiSetByteToLe(&pTxFrame->m_Data.m_Pres.m_le_bNmtStatus, (BYTE) NmtState_p);
                 }
 
+#if (EPL_DLL_DISABLE_EDRV_CYCLIC == FALSE)
+                EplDllkInstance_g.m_ppTxBufferList[uiIndex] = pTxBuffer;
+                uiIndex++;
+#endif
+
             }
 
             pIntNodeInfo = pIntNodeInfo->m_pNextNodeInfo;
         }
 
+#if (EPL_DLL_DISABLE_EDRV_CYCLIC == FALSE)
+        
+        EplDllkInstance_g.m_ppTxBufferList[uiIndex] = &EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_SOA + uiIndex];
+        uiIndex++;
+
+        EplDllkInstance_g.m_ppTxBufferList[uiIndex] = NULL;
+        uiIndex++;
+
+        Ret = EdrvCyclicSetNextTxBufferList(EplDllkInstance_g.m_ppTxBufferList, uiIndex);
+#endif
     }
     else
 #endif // (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
@@ -3927,7 +3975,7 @@ TGT_DLLK_DECLARE_FLAGS
                         pTxBuffer = &EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_STATUSRES];
                         if (pTxBuffer->m_pbBuffer != NULL)
                         {   // StatusRes does exist
-    
+
                             // send StatusRes
                             Ret = EdrvSendTxMsg(pTxBuffer);
                             if (Ret != kEplSuccessful)
@@ -3957,7 +4005,7 @@ TGT_DLLK_DECLARE_FLAGS
                                 // reset entire flag 1 (including EC and EN)
                                 EplDllkInstance_g.m_bFlag1 = 0;
                             }
-    
+
                             // signal update of StatusRes
                             Event.m_EventSink = kEplEventSinkDllk;
                             Event.m_EventType = kEplEventTypeDllkFlag1;
@@ -3974,7 +4022,7 @@ TGT_DLLK_DECLARE_FLAGS
                         EplDllkInstance_g.m_bMnFlag1 = bFlag1;
                         break;
                     }
-                    
+
                     case kEplDllReqServiceIdent:
                     {   // IdentRequest
 #if (EDRV_AUTO_RESPONSE == FALSE)
@@ -3997,7 +4045,7 @@ TGT_DLLK_DECLARE_FLAGS
 #endif
                         break;
                     }
-                    
+
                     case kEplDllReqServiceNmtRequest:
                     {   // NmtRequest
 #if (EDRV_AUTO_RESPONSE == FALSE)
@@ -4014,7 +4062,7 @@ TGT_DLLK_DECLARE_FLAGS
                                 {
                                     goto Exit;
                                 }
-    
+
                                 // decrement RS in Flag 2
                                 // The real update will be done later on event FillTx,
                                 // but for now it assures that a quite good value gets via the SoA event into the next PRes.
@@ -4035,7 +4083,7 @@ TGT_DLLK_DECLARE_FLAGS
 #endif
                         break;
                     }
-                    
+
 #if EPL_DLL_PRES_CHAINING_CN != FALSE
                     case kEplDllReqServiceSync:
                     {   // SyncRequest
@@ -4045,10 +4093,10 @@ TGT_DLLK_DECLARE_FLAGS
                     tEplDllkPrcCycleTiming  PrcCycleTiming;
 
                         pTxFrameSyncRes = (tEplFrame *) EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_SYNCRES].m_pbBuffer;
-    
+
                         dwSyncControl = AmiGetDwordFromLe(&pFrame->m_Data.m_Soa.m_Payload.m_SyncRequest.m_le_dwSyncControl);
                         AmiSetQword48ToBe(be_abDestMacAddress, AmiGetQword48FromLe(pFrame->m_Data.m_Soa.m_Payload.m_SyncRequest.m_le_abDestMacAddress));
-                        
+
                         if ((dwSyncControl & EPL_SYNC_DEST_MAC_ADDRESS_VALID) &&
                             (be_abDestMacAddress[0] || be_abDestMacAddress[1] || be_abDestMacAddress[2] ||
                              be_abDestMacAddress[3] || be_abDestMacAddress[4] || be_abDestMacAddress[5]   ) &&
@@ -4063,7 +4111,7 @@ TGT_DLLK_DECLARE_FLAGS
                             (EplDllkInstance_g.m_dwPrcPResTimeFirst != PrcCycleTiming.m_dwPResTimeFirstNs))
                         {
                             EplDllkInstance_g.m_dwPrcPResTimeFirst = PrcCycleTiming.m_dwPResTimeFirstNs;
-                            
+
                             AmiSetDwordToLe(&pTxFrameSyncRes->m_Data.m_Asnd.m_Payload.m_SyncResponse.m_le_dwPResTimeFirst,
                                             PrcCycleTiming.m_dwPResTimeFirstNs);
                             AmiSetDwordToLe(&pTxFrameSyncRes->m_Data.m_Asnd.m_Payload.m_SyncResponse.m_le_dwSyncStatus,
@@ -4086,7 +4134,7 @@ TGT_DLLK_DECLARE_FLAGS
                         {
                             // PResModeReset overrules PResModeSet
                             dwSyncControl &= ~EPL_SYNC_PRES_MODE_SET;
-                            
+
                             Ret = EplDllkPResChainingDisable();
                             if (Ret != kEplSuccessful)
                             {
@@ -4105,7 +4153,7 @@ TGT_DLLK_DECLARE_FLAGS
                         PrcCycleTiming.m_dwPResTimeSecondNs = AmiGetDwordFromLe(&pFrame->m_Data.m_Soa.m_Payload.m_SyncRequest.m_le_dwPResTimeSecond);
                         PrcCycleTiming.m_dwSyncMNDelayFirstNs = AmiGetDwordFromLe(&pFrame->m_Data.m_Soa.m_Payload.m_SyncRequest.m_le_dwSyncMnDelayFirst);
                         PrcCycleTiming.m_dwSyncMNDelaySecondNs = AmiGetDwordFromLe(&pFrame->m_Data.m_Soa.m_Payload.m_SyncRequest.m_le_dwSyncMnDelaySecond);
-                    
+
                         PrcCycleTiming.m_dwSyncControl = dwSyncControl & (EPL_SYNC_PRES_TIME_FIRST_VALID
                                                                           | EPL_SYNC_PRES_TIME_SECOND_VALID
                                                                           | EPL_SYNC_SYNC_MN_DELAY_FIRST_VALID
@@ -4118,7 +4166,7 @@ TGT_DLLK_DECLARE_FLAGS
                         break;
                     }
 #endif
-                    
+
                     case kEplDllReqServiceUnspecified:
                     {   // unspecified invite
 #if (EDRV_AUTO_RESPONSE == FALSE)
@@ -4135,7 +4183,7 @@ TGT_DLLK_DECLARE_FLAGS
                                 {
                                     goto Exit;
                                 }
-    
+
                                 // decrement RS in Flag 2
                                 // The real update will be done later on event FillTx,
                                 // but for now it assures that a quite good value gets via the SoA event into the next PRes.
@@ -4156,7 +4204,7 @@ TGT_DLLK_DECLARE_FLAGS
 #endif
                         break;
                     }
-                    
+
                     case kEplDllReqServiceNo:
                     {   // no async service requested -> do nothing
                         break;
@@ -4253,7 +4301,7 @@ TGT_DLLK_DECLARE_FLAGS
 
             if (uiAsndServiceId < EPL_DLL_MAX_ASND_SERVICE_ID)
             {   // ASnd service ID is valid
-            
+
 #if EPL_DLL_PRES_CHAINING_CN != FALSE
                 if (uiAsndServiceId == kEplDllAsndSyncResponse)
                 {
@@ -4265,7 +4313,7 @@ TGT_DLLK_DECLARE_FLAGS
                     if (uiNodeId == EplDllkInstance_g.m_uiSyncReqPrevNodeId)
                     {
                     DWORD   dwSyncDelayNs;
-                    
+
                         dwSyncDelayNs = EplTgtTimeStampTimeDiffNs(EplDllkInstance_g.m_pSyncReqPrevTimeStamp,
                                                                   pRxBuffer_p->m_pTgtTimeStamp);
 
@@ -4283,7 +4331,7 @@ TGT_DLLK_DECLARE_FLAGS
 
                     // update Tx buffer in Edrv
                     Ret = EdrvUpdateTxMsgBuffer(&EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_SYNCRES]);
-                    
+
                     // reset stored node ID
                     EplDllkInstance_g.m_uiSyncReqPrevNodeId = 0;
                 }
@@ -5353,7 +5401,7 @@ unsigned int    nIndex = 0;
                             break;
                         }
 #endif
-                            
+
                         default:
                         {
                             break;
@@ -6507,7 +6555,7 @@ tEplFrame*      pTxFrameSyncRes;
     {
         if (EplDllkInstance_g.m_dwPrcPResTimeFirst == 0)
         {   // PRes Chaining mode requested but PResTimeFirst invalid
-            
+
             // it might be a good idea to post a warning to the application
         }
         else
@@ -6521,9 +6569,9 @@ tEplFrame*      pTxFrameSyncRes;
                            0x00); // disable Dst Node ID filter, value stays at own node ID
             AmiSetByteToBe(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_PREQ].m_abFilterMask[16],
                            0xFF); // enable Src Node ID filter, value has been set to node ID of MN
-    
+
             EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_PRES].m_dwTimeOffsetNs = EplDllkInstance_g.m_dwPrcPResTimeFirst;
-    
+
             Ret = EdrvChangeFilter(EplDllkInstance_g.m_aFilter, EPL_DLLK_FILTER_COUNT,
                                    EPL_DLLK_FILTER_PREQ, EDRV_FILTER_CHANGE_VALUE
                                                          | EDRV_FILTER_CHANGE_MASK
@@ -6532,11 +6580,11 @@ tEplFrame*      pTxFrameSyncRes;
             {
                 goto Exit;
             }
-    
+
             EplDllkInstance_g.m_fPrcEnabled = TRUE;
-            
+
             pTxFrameSyncRes = (tEplFrame *) EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_SYNCRES].m_pbBuffer;
-    
+
             AmiSetDwordToLe(&pTxFrameSyncRes->m_Data.m_Asnd.m_Payload.m_SyncResponse.m_le_dwSyncStatus,
                             AmiGetDwordFromLe(&pTxFrameSyncRes->m_Data.m_Asnd.m_Payload.m_SyncResponse.m_le_dwSyncStatus)
                             | EPL_SYNC_PRES_MODE_SET);
@@ -6548,7 +6596,7 @@ tEplFrame*      pTxFrameSyncRes;
             }
         }
     }
-    
+
 Exit:
 
     return Ret;
