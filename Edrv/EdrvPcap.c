@@ -388,6 +388,14 @@ tEplKernel EdrvSendTxMsg(tEdrvTxBuffer *pBuffer_p)
 tEplKernel  Ret = kEplSuccessful;
 int         iRet;
 
+//    TRACE4("%s: TxB=%p (%02X), last TxB=%p\n", __func__, pBuffer_p, (UINT)pBuffer_p->m_pbBuffer[5], EdrvInstance_l.m_pTransmittedTxBufferLastEntry);
+
+    if (pBuffer_p->m_BufferNumber.m_pVal != NULL)
+    {
+        Ret = kEplInvalidOperation;
+        goto Exit;
+    }
+
     EnterCriticalSection(&EdrvInstance_l.m_CriticalSection);
     if (EdrvInstance_l.m_pTransmittedTxBufferLastEntry == NULL)
     {
@@ -404,11 +412,11 @@ int         iRet;
     iRet = pcap_sendpacket(EdrvInstance_l.m_pPcap, pBuffer_p->m_pbBuffer, (int) pBuffer_p->m_uiTxMsgLen);
     if  (iRet != 0)
     {
-        PRINTF2("%s pcap_sendpacket returned %d\n", __func__, iRet);
+        PRINTF3("%s pcap_sendpacket returned %d (%s)\n", __func__, iRet, pcap_geterr(EdrvInstance_l.m_pPcap));
         Ret = kEplInvalidOperation;
     }
 
-//Exit:
+Exit:
     return Ret;
 }
 
@@ -446,6 +454,8 @@ tEplKernel Ret = kEplSuccessful;
         Ret = kEplEdrvNoFreeBufEntry;
         goto Exit;
     }
+
+    pBuffer_p->m_BufferNumber.m_pVal = NULL;
 
 Exit:
     return Ret;
@@ -578,18 +588,48 @@ tEdrvRxBuffer   RxBuffer;
         {
         tEdrvTxBuffer* pTxBuffer = pInstance->m_pTransmittedTxBufferFirstEntry;
 
-            EnterCriticalSection(&EdrvInstance_l.m_CriticalSection);
-            pInstance->m_pTransmittedTxBufferFirstEntry = pInstance->m_pTransmittedTxBufferFirstEntry->m_BufferNumber.m_pVal;
-            if (pInstance->m_pTransmittedTxBufferFirstEntry == NULL)
-            {
-                pInstance->m_pTransmittedTxBufferLastEntry = NULL;
-            }
-            LeaveCriticalSection(&EdrvInstance_l.m_CriticalSection);
+//            TRACE5("%s: (%02X) first TxB=%p (%02X), last TxB=%p\n", __func__, (UINT)pkt_data[5], pTxBuffer, (UINT)pTxBuffer->m_pbBuffer[5], EdrvInstance_l.m_pTransmittedTxBufferLastEntry);
 
-            if (pTxBuffer->m_pfnTxHandler != NULL)
+            if (memcmp(pkt_data, pTxBuffer->m_pbBuffer, 6) == 0)
             {
-                pTxBuffer->m_pfnTxHandler(pTxBuffer);
+                EnterCriticalSection(&EdrvInstance_l.m_CriticalSection);
+                pInstance->m_pTransmittedTxBufferFirstEntry = pInstance->m_pTransmittedTxBufferFirstEntry->m_BufferNumber.m_pVal;
+                if (pInstance->m_pTransmittedTxBufferFirstEntry == NULL)
+                {
+                    pInstance->m_pTransmittedTxBufferLastEntry = NULL;
+                }
+                LeaveCriticalSection(&EdrvInstance_l.m_CriticalSection);
+
+                pTxBuffer->m_BufferNumber.m_pVal = NULL;
+
+                if (pTxBuffer->m_pfnTxHandler != NULL)
+                {
+                    pTxBuffer->m_pfnTxHandler(pTxBuffer);
+                }
             }
+            else
+            {
+                TRACE("%s: no matching TxB: DstMAC=%02X%02X%02X%02X%02X%02X\n",
+                    __func__,
+                    (UINT)pkt_data[0],
+                    (UINT)pkt_data[1],
+                    (UINT)pkt_data[2],
+                    (UINT)pkt_data[3],
+                    (UINT)pkt_data[4],
+                    (UINT)pkt_data[5]);
+                TRACE("   current TxB %p: DstMAC=%02X%02X%02X%02X%02X%02X\n",
+                    pTxBuffer,
+                    (UINT)pTxBuffer->m_pbBuffer[0],
+                    (UINT)pTxBuffer->m_pbBuffer[1],
+                    (UINT)pTxBuffer->m_pbBuffer[2],
+                    (UINT)pTxBuffer->m_pbBuffer[3],
+                    (UINT)pTxBuffer->m_pbBuffer[4],
+                    (UINT)pTxBuffer->m_pbBuffer[5]);
+            }
+        }
+        else
+        {
+            TRACE("%s: no TxB: DstMAC=%02X%02X%02X%02X%02X%02X\n", __func__, pkt_data[0], pkt_data[1], pkt_data[2], pkt_data[3], pkt_data[4], pkt_data[5]);
         }
     }
 }

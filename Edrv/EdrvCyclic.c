@@ -267,6 +267,8 @@ tEplKernel  Ret = kEplSuccessful;
         }
 
         EdrvCyclicInstance_l.m_uiCurTxBufferList = 0;
+
+        EPL_MEMSET(EdrvCyclicInstance_l.m_paTxBufferList, 0, sizeof (*EdrvCyclicInstance_l.m_paTxBufferList) * uiMaxListSize_p * 2);
     }
 
     return Ret;
@@ -366,12 +368,19 @@ tEplKernel EdrvCyclicStartCycle (void)
 {
 tEplKernel      Ret = kEplSuccessful;
 
+    if (EdrvCyclicInstance_l.m_dwCycleLenUs == 0)
+    {
+        Ret = kEplEdrvInvalidParam;
+        goto Exit;
+    }
+
     Ret = EplTimerHighReskModifyTimerNs(&EdrvCyclicInstance_l.m_TimerHdlCycle,
         EdrvCyclicInstance_l.m_dwCycleLenUs * 1000ULL,
         EdrvCyclicCbTimerCycle,
         0L,
         TRUE);
 
+Exit:
     return Ret;
 
 }
@@ -492,9 +501,23 @@ tEplKernel      Ret = kEplSuccessful;
         goto Exit;
     }
 
+    if (EdrvCyclicInstance_l.m_paTxBufferList[EdrvCyclicInstance_l.m_uiCurTxBufferEntry] != NULL)
+    {
+        Ret = kEplEdrvTxListNotFinishedYet;
+        goto Exit;
+    }
+
+    EdrvCyclicInstance_l.m_paTxBufferList[EdrvCyclicInstance_l.m_uiCurTxBufferList] = NULL;
+
     // enter new cycle -> switch Tx buffer list
     EdrvCyclicInstance_l.m_uiCurTxBufferList ^= EdrvCyclicInstance_l.m_uiMaxTxBufferCount;
     EdrvCyclicInstance_l.m_uiCurTxBufferEntry = EdrvCyclicInstance_l.m_uiCurTxBufferList;
+
+    if (EdrvCyclicInstance_l.m_paTxBufferList[EdrvCyclicInstance_l.m_uiCurTxBufferEntry] == NULL)
+    {
+        Ret = kEplEdrvCurTxListEmpty;
+        goto Exit;
+    }
 
     Ret = EdrvCyclicProcessTxBufferList();
     if (Ret != kEplSuccessful)

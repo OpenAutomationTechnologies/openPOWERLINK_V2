@@ -956,8 +956,6 @@ tEplKernel EplDllkCalAsyncGetSoaRequest(tEplDllReqServiceId* pReqServiceId_p, un
 tEplKernel      Ret = kEplSuccessful;
 unsigned int    uiCount;
 
-//    *pReqServiceId_p = kEplDllReqServiceNo;
-
     for (uiCount = EPL_DLLKCAL_MAX_QUEUES; uiCount > 0; uiCount--)
     {
         switch (EplDllkCalInstance_g.m_uiNextRequestQueue)

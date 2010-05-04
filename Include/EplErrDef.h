@@ -98,6 +98,8 @@ typedef enum
     kEplEdrvBufNotExisting      = 0x0015,       // specified Tx buffer does not exist
     kEplEdrvInvalidParam        = 0x001C,       // invalid parameter in function call
     kEplEdrvNextTxListNotEmpty  = 0x001D,       // next Tx buffer list is not empty, i.e. still in use
+    kEplEdrvCurTxListEmpty      = 0x001E,       // current Tx buffer list is empty, i.e. DLL didn't provide one
+    kEplEdrvTxListNotFinishedYet= 0x001F,       // current Tx buffer list has not been finished yet, but new cycle has started
 
     // area for DLL module 0x0020 - 0x002F
     kEplDllOutOfMemory          = 0x0021,       // out of memory
@@ -223,7 +225,7 @@ typedef enum
     kEplApiNoObdInitRam         = 0x0143,       // no function pointer for ObdInitRam supplied
     kEplApiSdoBusyIntern        = 0x0144,       // the SDO channel to this node is internally used by the stack (e.g. the CFM) and currently not available for the application.
 
-    // area untill 0x07FF is reserved
+    // area until 0x07FF is reserved
     // area for user application from 0x0800 to 0x7FFF
 
 } tEplKernel;

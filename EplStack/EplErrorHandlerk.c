@@ -631,7 +631,7 @@ tEplNmtEvent            NmtEvent;
 //---------------------------------------------------------------------------
 tEplKernel PUBLIC EplErrorHandlerkCycleFinished(BOOL fMN_p)
 {
-tEplKernel              Ret;
+tEplKernel              Ret = kEplSuccessful;
 
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
     if (fMN_p != FALSE)

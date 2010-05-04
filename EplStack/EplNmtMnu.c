@@ -1283,6 +1283,12 @@ tEplKernel      Ret;
         tEplNmtCommand      NmtCommand;
         BYTE                bNmtState;
 
+            if (pEvent_p->m_uiSize < EPL_C_DLL_MINSIZE_NMTCMD)
+            {
+                Ret = EplEventuPostError(kEplEventSourceNmtMnu, kEplNmtInvalidFramePointer, sizeof (pEvent_p->m_uiSize), &pEvent_p->m_uiSize);
+                break;
+            }
+
             uiNodeId = AmiGetByteFromLe(&pFrame->m_le_bDstNodeId);
             NmtCommand = (tEplNmtCommand) AmiGetByteFromLe(&pFrame->m_Data.m_Asnd.m_Payload.m_NmtCommandService.m_le_bNmtCommandId);
 
