@@ -191,12 +191,6 @@
 // Timer module specific defines
 // =========================================================================
 
-// max. number of timer entries for module Timeru
-#define EPL_TIMERU_MAX_ENTRIES          32
-
-// if TRUE it uses the Timer module implementation of EPL user also in EPL kernel
-#define EPL_TIMER_USE_USER              TRUE
-
 // if TRUE the high resolution timer module will be used
 #define EPL_TIMER_USE_HIGHRES              TRUE
 //#define EPL_TIMER_USE_HIGHRES              FALSE

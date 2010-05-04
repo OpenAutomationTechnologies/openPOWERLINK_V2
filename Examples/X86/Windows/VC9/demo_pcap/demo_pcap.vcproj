@@ -468,6 +468,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\..\..\..\Edrv\EdrvCyclic.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\..\..\Edrv\EdrvPcap.c"
 				>
 			</File>

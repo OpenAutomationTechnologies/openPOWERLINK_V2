@@ -167,16 +167,6 @@ tEplKernel PUBLIC AppCbEvent(
 tEplKernel PUBLIC AppCbSync(void);
 
 
-//---------------------------------------------------------------------------
-//  Kernel Module specific Data Structures
-//---------------------------------------------------------------------------
-
-EXPORT_NO_SYMBOLS;
-
-
-module_init(EplLinInit);
-module_exit(EplLinExit);
-
 
 //=========================================================================//
 //                                                                         //
@@ -299,8 +289,8 @@ int inum;
 
     EplApiInitParam.m_uiSizeOfStruct = sizeof (EplApiInitParam);
     EPL_MEMCPY(EplApiInitParam.m_abMacAddress, abMacAddr, sizeof (EplApiInitParam.m_abMacAddress));
-    EplApiInitParam.m_dwFeatureFlags = -1;
-    EplApiInitParam.m_dwCycleLen = 20000;     // required for error detection
+    EplApiInitParam.m_dwFeatureFlags = ~0UL;
+    EplApiInitParam.m_dwCycleLen = 100000;     // required for error detection
     EplApiInitParam.m_uiIsochrTxMaxPayload = 100; // const
     EplApiInitParam.m_uiIsochrRxMaxPayload = 100; // const
     EplApiInitParam.m_dwPresMaxLatency = 50000;  // const; only required for IdentRes
@@ -313,11 +303,11 @@ int inum;
     EplApiInitParam.m_dwLossOfFrameTolerance = 900000000;
     EplApiInitParam.m_dwAsyncSlotTimeout = 10000000;
     EplApiInitParam.m_dwWaitSocPreq = 0;
-    EplApiInitParam.m_dwDeviceType = -1;              // NMT_DeviceType_U32
-    EplApiInitParam.m_dwVendorId = -1;                // NMT_IdentityObject_REC.VendorId_U32
-    EplApiInitParam.m_dwProductCode = -1;             // NMT_IdentityObject_REC.ProductCode_U32
-    EplApiInitParam.m_dwRevisionNumber = -1;          // NMT_IdentityObject_REC.RevisionNo_U32
-    EplApiInitParam.m_dwSerialNumber = -1;            // NMT_IdentityObject_REC.SerialNo_U32
+    EplApiInitParam.m_dwDeviceType = ~0UL;              // NMT_DeviceType_U32
+    EplApiInitParam.m_dwVendorId = ~0UL;                // NMT_IdentityObject_REC.VendorId_U32
+    EplApiInitParam.m_dwProductCode = ~0UL;             // NMT_IdentityObject_REC.ProductCode_U32
+    EplApiInitParam.m_dwRevisionNumber = ~0UL;          // NMT_IdentityObject_REC.RevisionNo_U32
+    EplApiInitParam.m_dwSerialNumber = ~0UL;            // NMT_IdentityObject_REC.SerialNo_U32
     EplApiInitParam.m_dwSubnetMask = SUBNET_MASK;
     EplApiInitParam.m_dwDefaultGateway = 0;
     EPL_MEMCPY(EplApiInitParam.m_sHostname, sHostname, sizeof(EplApiInitParam.m_sHostname));
@@ -475,6 +465,8 @@ tEplKernel PUBLIC AppCbEvent(
 {
 tEplKernel          EplRet = kEplSuccessful;
 
+    UNUSED_PARAMETER(pUserArg_p);
+
     // check if NMT_GS_OFF is reached
     switch (EventType_p)
     {
@@ -496,6 +488,7 @@ tEplKernel          EplRet = kEplSuccessful;
                 case kEplNmtGsResetCommunication:
                 {
                 DWORD   dwNodeAssignment;
+                WORD    wPresPayloadLimit;
 
                     // configure OD for MN in state ResetComm after reseting the OD
                     // TODO: setup your own network configuration here
@@ -503,9 +496,17 @@ tEplKernel          EplRet = kEplSuccessful;
                     EplRet = EplApiWriteLocalObject(0x1F81, 0x01, &dwNodeAssignment, sizeof (dwNodeAssignment));
                     EplRet = EplApiWriteLocalObject(0x1F81, 0x02, &dwNodeAssignment, sizeof (dwNodeAssignment));
                     EplRet = EplApiWriteLocalObject(0x1F81, 0x03, &dwNodeAssignment, sizeof (dwNodeAssignment));
+                    EplRet = EplApiWriteLocalObject(0x1F81, 0x04, &dwNodeAssignment, sizeof (dwNodeAssignment));
                     EplRet = EplApiWriteLocalObject(0x1F81, 0x20, &dwNodeAssignment, sizeof (dwNodeAssignment));
                     dwNodeAssignment = (EPL_NODEASSIGN_MN_PRES | EPL_NODEASSIGN_NODE_EXISTS);       // 0x00010001L
                     EplRet = EplApiWriteLocalObject(0x1F81, 0xF0, &dwNodeAssignment, sizeof (dwNodeAssignment));
+
+                    wPresPayloadLimit = 50;
+                    EplRet = EplApiWriteLocalObject(0x1F8D, 0x01, &wPresPayloadLimit, sizeof (wPresPayloadLimit));
+                    EplRet = EplApiWriteLocalObject(0x1F8D, 0x02, &wPresPayloadLimit, sizeof (wPresPayloadLimit));
+                    EplRet = EplApiWriteLocalObject(0x1F8D, 0x03, &wPresPayloadLimit, sizeof (wPresPayloadLimit));
+                    EplRet = EplApiWriteLocalObject(0x1F8D, 0x04, &wPresPayloadLimit, sizeof (wPresPayloadLimit));
+                    EplRet = EplApiWriteLocalObject(0x1F8D, 0x20, &wPresPayloadLimit, sizeof (wPresPayloadLimit));
                     // continue
                 }
 
@@ -766,7 +767,7 @@ tEplKernel          EplRet = kEplSuccessful;
 
 //        printk("bVarIn = 0x%02X bVarOut = 0x%02X\n", (WORD) bVarIn_l, (WORD) bVarOut_l);
     }
-    if (uiNodeId_g != EPL_C_ADR_MN_DEF_NODE_ID)
+//    if (uiNodeId_g != EPL_C_ADR_MN_DEF_NODE_ID)
     {
         bVarIn1_l++;
     }
@@ -775,7 +776,7 @@ tEplKernel          EplRet = kEplSuccessful;
     {   // we are the master and must run the control loop
 
         // collect inputs from CNs and own input
-        bSpeedSelect_l = bVarIn1_l | abSelect_l[0];
+        bSpeedSelect_l = /*bVarIn1_l |*/ abSelect_l[0];
 
         bModeSelect_l = abSelect_l[1] | abSelect_l[2];
 
