@@ -203,6 +203,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\..\..\..\Include\EplCfm.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\..\..\Include\EplDef.h"
 				>
 			</File>
@@ -354,7 +358,7 @@
 				Name="User Part"
 				>
 				<File
-					RelativePath="..\..\..\..\..\Include\user\EplCfgMau.h"
+					RelativePath="..\..\..\..\..\Include\user\EplCfmu.h"
 					>
 				</File>
 				<File
