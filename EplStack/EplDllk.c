@@ -442,6 +442,8 @@ static tEplKernel EplDllkAddNodeIsochronous(tEplDllkNodeInfo* pIntNodeInfo_p);
 
 static tEplKernel EplDllkDeleteNodeIsochronous(tEplDllkNodeInfo* pIntNodeInfo_p);
 
+static tEplKernel EplDllkIssueLossOfPres(unsigned int uiNodeId_p);
+
 // process StartReducedCycle event
 static tEplKernel EplDllkProcessStartReducedCycle(tEplEvent * pEvent_p);
 
@@ -2350,6 +2352,9 @@ tEdrvTxBuffer*  pTxBuffer;
         case kEplNmtEventDllCeSoa:
         case kEplNmtEventDllMeSoaSent:
         {   // do preprocessing for next cycle
+#if EPL_DLL_DISABLE_EDRV_CYCLIC == FALSE
+        BYTE*       pbCnNodeId = &EplDllkInstance_g.m_aabCnNodeIdList[EplDllkInstance_g.m_bCurTxBufferOffsetCycle][EplDllkInstance_g.m_bCurNodeIndex];
+#endif
 
             NmtState = EplDllkInstance_g.m_NmtState;
 
@@ -2407,10 +2412,28 @@ tEdrvTxBuffer*  pTxBuffer;
                 }
             }
 
+#if EPL_DLL_DISABLE_EDRV_CYCLIC == FALSE
+            if (EplDllkInstance_g.m_DllState > kEplDllMsNonCyclic)
+            {
+                while (*pbCnNodeId != EPL_C_ADR_INVALID)
+                {   // issue error for each CN in list which was not processed yet, i.e. PRes received
+
+                    Ret = EplDllkIssueLossOfPres(*pbCnNodeId);
+                    if (Ret != kEplSuccessful)
+                    {
+                        goto Exit;
+                    }
+
+                    pbCnNodeId++;
+                }
+            }
+#endif
+
             Ret = EplErrorHandlerkCycleFinished((NmtState >= kEplNmtMsNotActive));
 
             // switch to next cycle
             EplDllkInstance_g.m_bCurTxBufferOffsetCycle ^= 1;
+            EplDllkInstance_g.m_bCurNodeIndex = 0;
 
             break;
         }
@@ -4090,7 +4113,12 @@ tEplDllkNodeInfo*   pIntNodeInfo = NULL;
 #endif
     }
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
-    else if (EplDllkInstance_g.m_DllState == kEplDllMsWaitPres)
+    else
+#if EPL_DLL_DISABLE_EDRV_CYCLIC != FALSE
+        if (EplDllkInstance_g.m_DllState == kEplDllMsWaitPres)
+#else
+        if (EplDllkInstance_g.m_DllState > kEplDllMsNonCyclic)
+#endif
     {   // or process PRes frames in MsWaitPres
     tEplHeartbeatEvent  HeartbeatEvent;
 
@@ -4116,39 +4144,10 @@ tEplDllkNodeInfo*   pIntNodeInfo = NULL;
 
                 for (pbCnNodeId-- ; bNextNodeIndex > 0; bNextNodeIndex--, pbCnNodeId--)
                 {   // issue error for each CN in list between last and current
-                    pIntNodeInfo = EplDllkGetNodeInfo(*pbCnNodeId);
-                    if (pIntNodeInfo != NULL)
+                    Ret = EplDllkIssueLossOfPres(*pbCnNodeId);
+                    if (Ret != kEplSuccessful)
                     {
-                        if (pIntNodeInfo->m_fSoftDelete == FALSE)
-                        {   // normal isochronous CN
-                        tEplErrorHandlerkEvent  DllEvent;
-
-                            DllEvent.m_ulDllErrorEvents = EPL_DLL_ERR_MN_CN_LOSS_PRES;
-                            DllEvent.m_uiNodeId = pIntNodeInfo->m_uiNodeId;
-                            Ret = EplErrorHandlerkPostError(&DllEvent);
-                            if (Ret != kEplSuccessful)
-                            {
-                                goto Exit;
-                            }
-                        }
-                        else
-                        {   // CN shall be deleted softly, so remove it now, without issuing any error
-                        tEplDllNodeOpParam  NodeOpParam;
-
-                            NodeOpParam.m_OpNodeType = kEplDllNodeOpTypeIsochronous;
-                            NodeOpParam.m_uiNodeId = pIntNodeInfo->m_uiNodeId;
-
-                            Event.m_EventSink = kEplEventSinkDllkCal;
-                            Event.m_EventType = kEplEventTypeDllkDelNode;
-                            // $$$ d.k. set Event.m_NetTime to current time
-                            Event.m_uiSize = sizeof (NodeOpParam);
-                            Event.m_pArg = &NodeOpParam;
-                            Ret = EplEventkPost(&Event);
-                            if (Ret != kEplSuccessful)
-                            {
-                                goto Exit;
-                            }
-                        }
+                        goto Exit;
                     }
                 }
 
@@ -4270,6 +4269,68 @@ tEplDllkNodeInfo*   pIntNodeInfo = NULL;
 Exit:
     return Ret;
 }
+
+
+//---------------------------------------------------------------------------
+//
+// Function:    EplDllkIssueLossOfPres()
+//
+// Description: forwards this event to ErrorHandlerk module.
+//
+// Parameters:  uiNodeId_p      = node-ID of CN where no PRes frame was received
+//
+// Returns:     tEplKernel
+//
+// State:
+//
+//---------------------------------------------------------------------------
+
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
+static tEplKernel EplDllkIssueLossOfPres(unsigned int uiNodeId_p)
+{
+tEplKernel          Ret = kEplSuccessful;
+tEplDllkNodeInfo*   pIntNodeInfo;
+tEplEvent           Event;
+
+    pIntNodeInfo = EplDllkGetNodeInfo(uiNodeId_p);
+    if (pIntNodeInfo != NULL)
+    {
+        if (pIntNodeInfo->m_fSoftDelete == FALSE)
+        {   // normal isochronous CN
+        tEplErrorHandlerkEvent  DllEvent;
+
+            DllEvent.m_ulDllErrorEvents = EPL_DLL_ERR_MN_CN_LOSS_PRES;
+            DllEvent.m_uiNodeId = pIntNodeInfo->m_uiNodeId;
+            Ret = EplErrorHandlerkPostError(&DllEvent);
+            if (Ret != kEplSuccessful)
+            {
+                goto Exit;
+            }
+        }
+        else
+        {   // CN shall be deleted softly, so remove it now, without issuing any error
+        tEplDllNodeOpParam  NodeOpParam;
+
+            NodeOpParam.m_OpNodeType = kEplDllNodeOpTypeIsochronous;
+            NodeOpParam.m_uiNodeId = pIntNodeInfo->m_uiNodeId;
+
+            Event.m_EventSink = kEplEventSinkDllkCal;
+            Event.m_EventType = kEplEventTypeDllkDelNode;
+            // $$$ d.k. set Event.m_NetTime to current time
+            Event.m_uiSize = sizeof (NodeOpParam);
+            Event.m_pArg = &NodeOpParam;
+            Ret = EplEventkPost(&Event);
+            if (Ret != kEplSuccessful)
+            {
+                goto Exit;
+            }
+        }
+    }
+
+Exit:
+    return Ret;
+}
+#endif
 
 
 //---------------------------------------------------------------------------
