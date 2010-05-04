@@ -1617,6 +1617,10 @@ tEplEventNmtStateChange NmtStateChange;
 #else
         Ret = EplEventkPost(&Event);
 #endif
+        if (Ret != kEplSuccessful)
+        {
+            goto Exit;
+        }
 
         // inform higher layer about state change
         Event.m_EventSink = kEplEventSinkNmtu;

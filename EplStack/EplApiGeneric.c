@@ -267,7 +267,7 @@ tEplDllkInitParam   DllkInitParam;
     // reset instance structure
     EPL_MEMSET(&EplApiInstance_g, 0, sizeof (EplApiInstance_g));
 
-    EPL_MEMCPY(&EplApiInstance_g.m_InitParam, pInitParam_p, min(sizeof (tEplApiInitParam), pInitParam_p->m_uiSizeOfStruct));
+    EPL_MEMCPY(&EplApiInstance_g.m_InitParam, pInitParam_p, min(sizeof (tEplApiInitParam), (size_t) pInitParam_p->m_uiSizeOfStruct));
 
     // check event callback function pointer
     if (EplApiInstance_g.m_InitParam.m_pfnCbEvent == NULL)

@@ -113,7 +113,7 @@
 //---------------------------------------------------------------------------
 
 #ifndef EDRV_MAX_TX_BUFFERS
-#define EDRV_MAX_TX_BUFFERS     20
+#define EDRV_MAX_TX_BUFFERS     42
 #endif
 
 #ifndef EDRV_MAX_TX_DESCS

@@ -2512,6 +2512,13 @@ unsigned int    uiNextTxBufferOffset = EplDllkInstance_g.m_bCurTxBufferOffsetCyc
         }
         EplDllkInstance_g.m_ppTxBufferList[uiIndex] = pTxBuffer;
         uiIndex++;
+
+        // calculate WaitSoCPReq delay
+        if (EplDllkInstance_g.m_DllConfigParam.m_dwWaitSocPreq != 0)
+        {
+            dwNextTimeOffset = EplDllkInstance_g.m_DllConfigParam.m_dwWaitSocPreq
+                               + EPL_C_DLL_T_PREAMBLE + EPL_C_DLL_T_MIN_FRAME + EPL_C_DLL_T_IFG;
+        }
 #endif
 
         pbCnNodeId = &EplDllkInstance_g.m_aabCnNodeIdList[uiNextTxBufferOffset][0];

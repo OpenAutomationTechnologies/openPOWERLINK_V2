@@ -370,7 +370,7 @@ tEplKernel      Ret = kEplSuccessful;
 
     if (EdrvCyclicInstance_l.m_dwCycleLenUs == 0)
     {
-        Ret = kEplEdrvInvalidParam;
+        Ret = kEplEdrvInvalidCycleLen;
         goto Exit;
     }
 
