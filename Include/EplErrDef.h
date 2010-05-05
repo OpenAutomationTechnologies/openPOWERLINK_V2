@@ -93,6 +93,7 @@ typedef enum
     kEplInvalidEvent            = 0x000C,       // invalid event was posted to process function
 
     // area for EDRV module 0x0010 - 0x001F
+    kEplEdrvNoFreeTxDesc        = 0x0011,       // no free Tx descriptor available
     kEplEdrvInvalidCycleLen     = 0x0012,       // invalid cycle length (e.g. 0)
     kEplEdrvInitError           = 0x0013,       // initialisation error
     kEplEdrvNoFreeBufEntry      = 0x0014,       // no free entry in internal buffer table for Tx frames

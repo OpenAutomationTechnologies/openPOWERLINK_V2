@@ -733,6 +733,12 @@ tEdrvTxDesc*    pTxDesc;
         goto Exit;
     }
 
+    if (EdrvInstance_l.m_uiTailTxDesc == EdrvInstance_l.m_uiHeadTxDesc)
+    {
+        Ret = kEplEdrvNoFreeTxDesc;
+        goto Exit;
+    }
+
     EDRV_COUNT_SEND;
 
     // save pointer to buffer structure for TxHandler
