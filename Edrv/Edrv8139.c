@@ -655,6 +655,7 @@ unsigned int uiBufferNumber;
     if (uiBufferNumber < EDRV_MAX_TX_BUFFERS)
     {
         EdrvInstance_l.m_afTxBufUsed[uiBufferNumber] = FALSE;
+        pBuffer_p->m_pbBuffer = NULL;
     }
 
     return kEplSuccessful;
@@ -683,6 +684,12 @@ DWORD       dwTemp;
 
     uiBufferNumber = pBuffer_p->m_BufferNumber.m_dwVal;
 
+    if (pBuffer_p->m_pbBuffer == NULL)
+    {
+        Ret = kEplEdrvBufNotExisting;
+        goto Exit;
+    }
+
     if ((uiBufferNumber >= EDRV_MAX_TX_BUFFERS)
         || (EdrvInstance_l.m_afTxBufUsed[uiBufferNumber] == FALSE))
     {
@@ -696,9 +703,6 @@ DWORD       dwTemp;
         goto Exit;
     }
 
-    // save pointer to buffer structure for TxHandler
-    EdrvInstance_l.m_apTxBuffer[EdrvInstance_l.m_uiTailTxDesc] = pBuffer_p;
-
     EDRV_COUNT_SEND;
 
     // pad with zeros if necessary, because controller does not do it
@@ -707,6 +711,9 @@ DWORD       dwTemp;
         EPL_MEMSET(pBuffer_p->m_pbBuffer + pBuffer_p->m_uiTxMsgLen, 0, MIN_ETH_SIZE - pBuffer_p->m_uiTxMsgLen);
         pBuffer_p->m_uiTxMsgLen = MIN_ETH_SIZE;
     }
+
+    // save pointer to buffer structure for TxHandler
+    EdrvInstance_l.m_apTxBuffer[EdrvInstance_l.m_uiTailTxDesc] = pBuffer_p;
 
     // set DMA address of buffer
     EDRV_REGDW_WRITE(EDRV_REGDW_TSAD(EdrvInstance_l.m_uiTailTxDesc), (EdrvInstance_l.m_pTxBufDma + (uiBufferNumber * EDRV_MAX_FRAME_SIZE)));
@@ -863,42 +870,46 @@ int             iHandled = IRQ_HANDLED;
             goto Exit;
         }
 
-        // read transmit status
-        dwTxStatus = EDRV_REGDW_READ(EDRV_REGDW_TSD(EdrvInstance_l.m_uiHeadTxDesc));
-        if ((dwTxStatus & (EDRV_REGDW_TSD_TOK | EDRV_REGDW_TSD_TABT | EDRV_REGDW_TSD_TUN)) != 0)
-        {   // transmit finished
-            pTxBuffer = EdrvInstance_l.m_apTxBuffer[EdrvInstance_l.m_uiHeadTxDesc];
-            EdrvInstance_l.m_apTxBuffer[EdrvInstance_l.m_uiHeadTxDesc] = NULL;
+        while (EdrvInstance_l.m_apTxBuffer[EdrvInstance_l.m_uiHeadTxDesc] != NULL)
+        {
+            // read transmit status
+            dwTxStatus = EDRV_REGDW_READ(EDRV_REGDW_TSD(EdrvInstance_l.m_uiHeadTxDesc));
+            if ((dwTxStatus & (EDRV_REGDW_TSD_TOK | EDRV_REGDW_TSD_TABT | EDRV_REGDW_TSD_TUN)) != 0)
+            {   // transmit finished
+                pTxBuffer = EdrvInstance_l.m_apTxBuffer[EdrvInstance_l.m_uiHeadTxDesc];
+                EdrvInstance_l.m_apTxBuffer[EdrvInstance_l.m_uiHeadTxDesc] = NULL;
 
-            // increment tx queue head
-            EdrvInstance_l.m_uiHeadTxDesc = (EdrvInstance_l.m_uiHeadTxDesc + 1) & EDRV_TX_DESC_MASK;
+                // increment tx queue head
+                EdrvInstance_l.m_uiHeadTxDesc = (EdrvInstance_l.m_uiHeadTxDesc + 1) & EDRV_TX_DESC_MASK;
 
-            if ((dwTxStatus & EDRV_REGDW_TSD_TOK) != 0)
-            {
-                EDRV_COUNT_TX;
-            }
-            else if ((dwTxStatus & EDRV_REGDW_TSD_TUN) != 0)
-            {
-                EDRV_COUNT_TX_FUN;
-            }
-            else
-            {   // assume EDRV_REGDW_TSD_TABT
-                EDRV_COUNT_TX_COL_RL;
-            }
-
-//            printk("T");
-            if (pTxBuffer != NULL)
-            {
-                // call Tx handler of Data link layer
-                if (pTxBuffer->m_pfnTxHandler != NULL)
+                if ((dwTxStatus & EDRV_REGDW_TSD_TOK) != 0)
                 {
-                    pTxBuffer->m_pfnTxHandler(pTxBuffer);
+                    EDRV_COUNT_TX;
+                }
+                else if ((dwTxStatus & EDRV_REGDW_TSD_TUN) != 0)
+                {
+                    EDRV_COUNT_TX_FUN;
+                }
+                else
+                {   // assume EDRV_REGDW_TSD_TABT
+                    EDRV_COUNT_TX_COL_RL;
+                }
+
+    //            printk("T");
+                if (pTxBuffer != NULL)
+                {
+                    // call Tx handler of Data link layer
+                    if (pTxBuffer->m_pfnTxHandler != NULL)
+                    {
+                        pTxBuffer->m_pfnTxHandler(pTxBuffer);
+                    }
                 }
             }
-        }
-        else
-        {
-            EDRV_COUNT_TX_ERR;
+            else
+            {
+                EDRV_COUNT_TX_ERR;
+                break;
+            }
         }
     }
 
