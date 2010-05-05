@@ -752,24 +752,24 @@ tEplKernel PUBLIC EplEventkPostError(tEplEventSource EventSource_p,
                                      unsigned int    uiArgSize_p,
                                      void*           pArg_p)
 {
-tEplKernel  Ret;
-BYTE        abBuffer[EPL_MAX_EVENT_ARG_SIZE];
-tEplEventError* pEventError = (tEplEventError*) abBuffer;
-tEplEvent   EplEvent;
+tEplKernel      Ret;
+tEplEventError  EventError;
+tEplEvent       EplEvent;
 
     Ret = kEplSuccessful;
 
     // create argument
-    pEventError->m_EventSource = EventSource_p;
-    pEventError->m_EplError = EplError_p;
-    EPL_MEMCPY(&pEventError->m_Arg, pArg_p, uiArgSize_p);
+    EventError.m_EventSource = EventSource_p;
+    EventError.m_EplError = EplError_p;
+    uiArgSize_p = (unsigned int) min ((size_t) uiArgSize_p, sizeof (EventError.m_Arg));
+    EPL_MEMCPY(&EventError.m_Arg, pArg_p, uiArgSize_p);
 
     // create event
     EplEvent.m_EventType = kEplEventTypeError;
     EplEvent.m_EventSink = kEplEventSinkApi;
     EPL_MEMSET(&EplEvent.m_NetTime, 0x00, sizeof(EplEvent.m_NetTime));
-    EplEvent.m_uiSize = (sizeof(EventSource_p)+ sizeof(EplError_p)+ uiArgSize_p);
-    EplEvent.m_pArg = &abBuffer[0];
+    EplEvent.m_uiSize = (memberoffs (tEplEventError, m_Arg) + uiArgSize_p);
+    EplEvent.m_pArg = &EventError;
 
     // post errorevent
     Ret = EplEventkPost(&EplEvent);
