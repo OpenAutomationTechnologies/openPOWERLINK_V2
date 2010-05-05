@@ -112,8 +112,11 @@
 //---------------------------------------------------------------------------
 
 #ifndef EDRV_MAX_TX_BUFFERS
-#define EDRV_MAX_TX_BUFFERS     20
+#define EDRV_MAX_TX_BUFFERS     42
 #endif
+
+#define EDRV_MAX_TX_DESCS       4
+#define EDRV_TX_DESC_MASK       (EDRV_MAX_TX_DESCS-1)
 
 #define EDRV_MAX_FRAME_SIZE     0x600
 
@@ -199,7 +202,14 @@
 #define EDRV_REGDW_TSAD1        0x24    // Transmit start address of descriptor 1
 #define EDRV_REGDW_TSAD2        0x28    // Transmit start address of descriptor 2
 #define EDRV_REGDW_TSAD3        0x2C    // Transmit start address of descriptor 3
+#define EDRV_REGDW_TSAD(n)      (EDRV_REGDW_TSAD0 + 4*n)   // Transmit start address of descriptor n
+
 #define EDRV_REGDW_TSD0         0x10    // Transmit status of descriptor 0
+#define EDRV_REGDW_TSD1         0x14    // Transmit status of descriptor 1
+#define EDRV_REGDW_TSD2         0x18    // Transmit status of descriptor 2
+#define EDRV_REGDW_TSD3         0x1C    // Transmit status of descriptor 3
+#define EDRV_REGDW_TSD(n)       (EDRV_REGDW_TSD0 + 4*n)    // Transmit status of descriptor n
+
 #define EDRV_REGDW_TSD_CRS      0x80000000  // Carrier sense lost
 #define EDRV_REGDW_TSD_TABT     0x40000000  // Transmit Abort
 #define EDRV_REGDW_TSD_OWC      0x20000000  // Out of window collision
@@ -296,10 +306,11 @@ typedef struct
     BYTE*               m_pbTxBuf;      // pointer to Tx buffer
     dma_addr_t          m_pTxBufDma;
     BOOL                m_afTxBufUsed[EDRV_MAX_TX_BUFFERS];
-    unsigned int        m_uiCurTxDesc;
+    tEdrvTxBuffer*      m_apTxBuffer[EDRV_MAX_TX_DESCS];
+    unsigned int        m_uiHeadTxDesc;
+    unsigned int        m_uiTailTxDesc;
 
     tEdrvInitParam      m_InitParam;
-    tEdrvTxBuffer*      m_pLastTransmittedTxBuffer;
 
 } tEdrvInstance;
 
@@ -679,17 +690,14 @@ DWORD       dwTemp;
         goto Exit;
     }
 
-    if (EdrvInstance_l.m_pLastTransmittedTxBuffer != NULL)
-    {   // transmission is already active
-        Ret = kEplInvalidOperation;
-        dwTemp = EDRV_REGDW_READ((EDRV_REGDW_TSD0 + (EdrvInstance_l.m_uiCurTxDesc * sizeof (DWORD))));
-        printk("%s InvOp TSD%u = 0x%08lX", __FUNCTION__, EdrvInstance_l.m_uiCurTxDesc, (ULONG) dwTemp);
-        printk("  Cmd = 0x%02X\n", (WORD) EDRV_REGB_READ(EDRV_REGB_COMMAND));
+    if (EdrvInstance_l.m_apTxBuffer[EdrvInstance_l.m_uiTailTxDesc] != NULL)
+    {
+        Ret = kEplEdrvNoFreeTxDesc;
         goto Exit;
     }
 
     // save pointer to buffer structure for TxHandler
-    EdrvInstance_l.m_pLastTransmittedTxBuffer = pBuffer_p;
+    EdrvInstance_l.m_apTxBuffer[EdrvInstance_l.m_uiTailTxDesc] = pBuffer_p;
 
     EDRV_COUNT_SEND;
 
@@ -701,14 +709,17 @@ DWORD       dwTemp;
     }
 
     // set DMA address of buffer
-    EDRV_REGDW_WRITE((EDRV_REGDW_TSAD0 + (EdrvInstance_l.m_uiCurTxDesc * sizeof (DWORD))), (EdrvInstance_l.m_pTxBufDma + (uiBufferNumber * EDRV_MAX_FRAME_SIZE)));
-    dwTemp = EDRV_REGDW_READ((EDRV_REGDW_TSAD0 + (EdrvInstance_l.m_uiCurTxDesc * sizeof (DWORD))));
+    EDRV_REGDW_WRITE(EDRV_REGDW_TSAD(EdrvInstance_l.m_uiTailTxDesc), (EdrvInstance_l.m_pTxBufDma + (uiBufferNumber * EDRV_MAX_FRAME_SIZE)));
+    dwTemp = EDRV_REGDW_READ(EDRV_REGDW_TSAD(EdrvInstance_l.m_uiTailTxDesc));
 //    printk("%s TSAD%u = 0x%08lX", __FUNCTION__, EdrvInstance_l.m_uiCurTxDesc, dwTemp);
 
     // start transmission
-    EDRV_REGDW_WRITE((EDRV_REGDW_TSD0 + (EdrvInstance_l.m_uiCurTxDesc * sizeof (DWORD))), (EDRV_REGDW_TSD_TXTH_DEF | pBuffer_p->m_uiTxMsgLen));
-    dwTemp = EDRV_REGDW_READ((EDRV_REGDW_TSD0 + (EdrvInstance_l.m_uiCurTxDesc * sizeof (DWORD))));
+    EDRV_REGDW_WRITE(EDRV_REGDW_TSD(EdrvInstance_l.m_uiTailTxDesc), (EDRV_REGDW_TSD_TXTH_DEF | pBuffer_p->m_uiTxMsgLen));
+    dwTemp = EDRV_REGDW_READ(EDRV_REGDW_TSD(EdrvInstance_l.m_uiTailTxDesc));
 //    printk(" TSD%u = 0x%08lX / 0x%08lX\n", EdrvInstance_l.m_uiCurTxDesc, dwTemp, (DWORD)(EDRV_REGDW_TSD_TXTH_DEF | pBuffer_p->m_uiTxMsgLen));
+
+    // increment tx queue tail
+    EdrvInstance_l.m_uiTailTxDesc = (EdrvInstance_l.m_uiTailTxDesc + 1) & EDRV_TX_DESC_MASK;
 
 Exit:
     return Ret;
@@ -853,12 +864,14 @@ int             iHandled = IRQ_HANDLED;
         }
 
         // read transmit status
-        dwTxStatus = EDRV_REGDW_READ((EDRV_REGDW_TSD0 + (EdrvInstance_l.m_uiCurTxDesc * sizeof (DWORD))));
+        dwTxStatus = EDRV_REGDW_READ(EDRV_REGDW_TSD(EdrvInstance_l.m_uiHeadTxDesc));
         if ((dwTxStatus & (EDRV_REGDW_TSD_TOK | EDRV_REGDW_TSD_TABT | EDRV_REGDW_TSD_TUN)) != 0)
         {   // transmit finished
-            EdrvInstance_l.m_uiCurTxDesc = (EdrvInstance_l.m_uiCurTxDesc + 1) & 0x03;
-            pTxBuffer = EdrvInstance_l.m_pLastTransmittedTxBuffer;
-            EdrvInstance_l.m_pLastTransmittedTxBuffer = NULL;
+            pTxBuffer = EdrvInstance_l.m_apTxBuffer[EdrvInstance_l.m_uiHeadTxDesc];
+            EdrvInstance_l.m_apTxBuffer[EdrvInstance_l.m_uiHeadTxDesc] = NULL;
+
+            // increment tx queue head
+            EdrvInstance_l.m_uiHeadTxDesc = (EdrvInstance_l.m_uiHeadTxDesc + 1) & EDRV_TX_DESC_MASK;
 
             if ((dwTxStatus & EDRV_REGDW_TSD_TOK) != 0)
             {
@@ -1024,8 +1037,9 @@ Exit:
 static int EdrvInitOne(struct pci_dev *pPciDev,
                        const struct pci_device_id *pId)
 {
-int     iResult = 0;
-DWORD   dwTemp;
+unsigned int    nIdx;
+DWORD           dwTemp;
+int             iResult = 0;
 
     if (EdrvInstance_l.m_pPciDev != NULL)
     {   // Edrv is already connected to a PCI device
@@ -1159,14 +1173,15 @@ DWORD   dwTemp;
 
     // reset pointers for Tx buffers
     printk("%s reset pointers fo Tx buffers\n", __FUNCTION__);
-    EDRV_REGDW_WRITE(EDRV_REGDW_TSAD0, 0);
-    dwTemp = EDRV_REGDW_READ(EDRV_REGDW_TSAD0);
-    EDRV_REGDW_WRITE(EDRV_REGDW_TSAD1, 0);
-    dwTemp = EDRV_REGDW_READ(EDRV_REGDW_TSAD1);
-    EDRV_REGDW_WRITE(EDRV_REGDW_TSAD2, 0);
-    dwTemp = EDRV_REGDW_READ(EDRV_REGDW_TSAD2);
-    EDRV_REGDW_WRITE(EDRV_REGDW_TSAD3, 0);
-    dwTemp = EDRV_REGDW_READ(EDRV_REGDW_TSAD3);
+    for(nIdx=0; nIdx < EDRV_MAX_TX_DESCS; nIdx++)
+    {
+        EDRV_REGDW_WRITE(EDRV_REGDW_TSAD(nIdx), 0);
+        dwTemp = EDRV_REGDW_READ(EDRV_REGDW_TSAD(nIdx));
+        EdrvInstance_l.m_apTxBuffer[nIdx] = NULL;
+    }
+
+    EdrvInstance_l.m_uiHeadTxDesc = 0;
+    EdrvInstance_l.m_uiTailTxDesc = 0;
 
     printk("    Command = 0x%02X\n", (WORD) EDRV_REGB_READ(EDRV_REGB_COMMAND));
 
