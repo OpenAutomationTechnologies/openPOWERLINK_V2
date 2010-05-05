@@ -6039,9 +6039,9 @@ unsigned int    nIndex = 0;
             // EPL message type
             AmiSetByteToLe(&pTxFrame->m_le_bMessageType, (BYTE) MsgType_p);
         }
-
-        *puiFrameSize_p = pTxBuffer->m_uiMaxBufferLen;
     }
+
+    *puiFrameSize_p = pTxBuffer->m_uiMaxBufferLen;
 
 Exit:
     return Ret;
