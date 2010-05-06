@@ -284,6 +284,8 @@ typedef struct
 
     BYTE                m_bCurTxBufferOffsetIdentRes;
     BYTE                m_bCurTxBufferOffsetStatusRes;
+    BYTE                m_bCurTxBufferOffsetNmtReq;
+    BYTE                m_bCurTxBufferOffsetNonEpl;
     BYTE                m_bCurTxBufferOffsetCycle;      // PRes, SoC, SoA, PReq
 #if EPL_DLL_PRES_CHAINING_CN != FALSE
     BYTE                m_bCurTxBufferOffsetSyncRes;
@@ -300,8 +302,6 @@ typedef struct
     tEplDllReqServiceId m_aLastReqServiceId[2];
     unsigned int        m_auiLastTargetNodeId[2];
     BYTE                m_bCurLastSoaReq;
-    BYTE                m_bCurTxBufferOffsetNmtReq;
-    BYTE                m_bCurTxBufferOffsetNonEpl;
 #endif
 
 #if EPL_TIMER_USE_HIGHRES != FALSE
@@ -1907,10 +1907,12 @@ unsigned int    uiHandle;
     // remove all filters from Edrv
     Ret = EdrvChangeFilter(NULL, 0, 0, 0);
 
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
 #if (EPL_DLL_DISABLE_EDRV_CYCLIC == FALSE)
     // destroy all data structures
     EPL_FREE(EplDllkInstance_g.m_ppTxBufferList);
     EplDllkInstance_g.m_ppTxBufferList = NULL;
+#endif
 #endif
 
     // delete timer
@@ -1922,12 +1924,14 @@ unsigned int    uiHandle;
     }
 #endif
 
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
 #if (EPL_DLL_DISABLE_EDRV_CYCLIC == FALSE)
     Ret = EdrvCyclicStopCycle();
     if (Ret != kEplSuccessful)
     {
         goto Exit;
     }
+#endif
 #endif
 
 #if (EPL_DLL_PROCESS_SYNC == EPL_DLL_PROCESS_SYNC_ON_TIMER)
@@ -2352,9 +2356,6 @@ tEdrvTxBuffer*  pTxBuffer;
         case kEplNmtEventDllCeSoa:
         case kEplNmtEventDllMeSoaSent:
         {   // do preprocessing for next cycle
-#if EPL_DLL_DISABLE_EDRV_CYCLIC == FALSE
-        BYTE*       pbCnNodeId = &EplDllkInstance_g.m_aabCnNodeIdList[EplDllkInstance_g.m_bCurTxBufferOffsetCycle][EplDllkInstance_g.m_bCurNodeIndex];
-#endif
 
             NmtState = EplDllkInstance_g.m_NmtState;
 
@@ -2412,9 +2413,12 @@ tEdrvTxBuffer*  pTxBuffer;
                 }
             }
 
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
 #if EPL_DLL_DISABLE_EDRV_CYCLIC == FALSE
             if (EplDllkInstance_g.m_DllState > kEplDllMsNonCyclic)
             {
+            BYTE*   pbCnNodeId = &EplDllkInstance_g.m_aabCnNodeIdList[EplDllkInstance_g.m_bCurTxBufferOffsetCycle][EplDllkInstance_g.m_bCurNodeIndex];
+
                 while (*pbCnNodeId != EPL_C_ADR_INVALID)
                 {   // issue error for each CN in list which was not processed yet, i.e. PRes received
 
@@ -2428,12 +2432,20 @@ tEdrvTxBuffer*  pTxBuffer;
                 }
             }
 #endif
+#endif
 
             Ret = EplErrorHandlerkCycleFinished((NmtState >= kEplNmtMsNotActive));
 
             // switch to next cycle
             EplDllkInstance_g.m_bCurTxBufferOffsetCycle ^= 1;
-            EplDllkInstance_g.m_bCurNodeIndex = 0;
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
+#if EPL_DLL_DISABLE_EDRV_CYCLIC == FALSE
+            if (EplDllkInstance_g.m_DllState > kEplDllMsNonCyclic)
+            {
+                EplDllkInstance_g.m_bCurNodeIndex = 0;
+            }
+#endif
+#endif
 
             break;
         }
@@ -3046,7 +3058,6 @@ Exit:
 static tEplKernel EplDllkChangeState(tEplNmtEvent NmtEvent_p, tEplNmtState NmtState_p)
 {
 tEplKernel              Ret = kEplSuccessful;
-tEplEvent               Event;
 tEplErrorHandlerkEvent  DllEvent;
 
     DllEvent.m_ulDllErrorEvents = 0;
@@ -3421,6 +3432,9 @@ tEplErrorHandlerkEvent  DllEvent;
         case kEplNmtMsPreOperational2:
         case kEplNmtMsReadyToOperate:
         case kEplNmtMsOperational:
+        {
+        tEplEvent   Event;
+
             // full EPL cycle is active
             switch (NmtEvent_p)
             {
@@ -3690,6 +3704,7 @@ tEplErrorHandlerkEvent  DllEvent;
                     break;
             }
             break;
+        }
 #endif // (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
 
         default:
@@ -3953,7 +3968,6 @@ static tEplKernel EplDllkProcessReceivedPreq(tEplFrameInfo* pFrameInfo_p, tEplNm
 {
 tEplKernel      Ret = kEplSuccessful;
 tEplFrame*      pFrame;
-tEdrvTxBuffer*  pTxBuffer = NULL;
 BYTE            bFlag1;
 
     pFrame = pFrameInfo_p->m_pFrame;
@@ -3968,6 +3982,8 @@ BYTE            bFlag1;
     {   // respond to and process PReq frames only in PreOp2, ReadyToOp and Op
 
 #if (EDRV_AUTO_RESPONSE == FALSE)
+    tEdrvTxBuffer*  pTxBuffer = NULL;
+
         // Auto-response is disabled
         // Does PRes exist?
         pTxBuffer = &EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_PRES + EplDllkInstance_g.m_bCurTxBufferOffsetCycle];
@@ -4029,19 +4045,7 @@ BYTE            bFlag1;
             }
 
         }
-#if (EPL_DLL_PRES_READY_AFTER_SOC != FALSE)
-        if (pTxBuffer->m_pbBuffer != NULL)
-        {   // PRes does exist
-            // inform PDO module about PRes after PReq
-            FrameInfo.m_pFrame = (tEplFrame *) pTxBuffer->m_pbBuffer;
-            FrameInfo.m_uiFrameSize = pTxBuffer->m_uiTxMsgLen;
-            Ret = EplDllkProcessTpdo(pFrameInfo_p, TRUE);
-            if (Ret != kEplSuccessful)
-            {
-                goto Exit;
-            }
-        }
-#endif
+
 #endif
 
 #if EDRV_EARLY_RX_INT == FALSE
@@ -4076,10 +4080,8 @@ Exit:
 static tEplKernel EplDllkProcessReceivedPres(tEplFrameInfo* pFrameInfo_p, tEplNmtState NmtState_p, tEplNmtEvent* pNmtEvent_p)
 {
 tEplKernel      Ret = kEplSuccessful;
-tEplEvent       Event;
 tEplFrame*      pFrame;
 unsigned int    uiNodeId;
-BYTE            bFlag1;
 
 #if EPL_NMT_MAX_NODE_ID > 0
 tEplDllkNodeInfo*   pIntNodeInfo = NULL;
@@ -4128,6 +4130,7 @@ tEplDllkNodeInfo*   pIntNodeInfo = NULL;
 #endif
     {   // or process PRes frames in MsWaitPres
     tEplHeartbeatEvent  HeartbeatEvent;
+    BYTE                bFlag1;
 
 #if EPL_DLL_DISABLE_EDRV_CYCLIC != FALSE
         pIntNodeInfo = EplDllkInstance_g.m_pCurNodeInfo;
@@ -4190,6 +4193,8 @@ tEplDllkNodeInfo*   pIntNodeInfo = NULL;
 
         if (pIntNodeInfo->m_NmtState != HeartbeatEvent.m_NmtState)
         {   // NMT state of CN has changed -> post event to NmtMnu module
+        tEplEvent   Event;
+
             if (pIntNodeInfo->m_fSoftDelete == FALSE)
             {   // normal isochronous CN
                 HeartbeatEvent.m_uiNodeId = uiNodeId;
@@ -4782,7 +4787,6 @@ tEplKernel      Ret = kEplSuccessful;
 tEplFrame*      pFrame;
 unsigned int    uiAsndServiceId;
 unsigned int    uiNodeId;
-BYTE            bFlag1;
 
     UNUSED_PARAMETER(NmtState_p);
 
@@ -4796,6 +4800,8 @@ BYTE            bFlag1;
         && ((((tEplDllAsndServiceId) uiAsndServiceId) == kEplDllAsndStatusResponse)
         || (((tEplDllAsndServiceId) uiAsndServiceId) == kEplDllAsndIdentResponse)))
     {   // StatusRes or IdentRes received
+    BYTE    bFlag1;
+
         uiNodeId = AmiGetByteFromLe(&pFrame->m_le_bSrcNodeId);
         if ((EplDllkInstance_g.m_aLastReqServiceId[EplDllkInstance_g.m_bCurLastSoaReq] == ((tEplDllReqServiceId) uiAsndServiceId))
             && (uiNodeId == EplDllkInstance_g.m_auiLastTargetNodeId[EplDllkInstance_g.m_bCurLastSoaReq]))
