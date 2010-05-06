@@ -20,7 +20,7 @@ INCLUDES	:= -I$(MAINDIR)/Include \
 			  -I$(MAINDIR)/ObjDicts/Api_CN
 
 MODULEOBJS	= demo_main.o \
-			  $(MAINPATH)/Edrv/fec_548x/net/fec.o $(MAINPATH)/Edrv/fec_548x/net/ks8721.o $(MAINPATH)/Edrv/fec_548x/net/ksz8893.o \
+			  $(MAINPATH)/Edrv/fec_548x/net/fec.o $(MAINPATH)/Edrv/fec_548x/net/ks8721.o $(MAINPATH)/Edrv/fec_548x/net/ksz8893.o $(MAINPATH)/Edrv/EdrvCyclic.o \
 			  $(MAINPATH)/EplStack/EplDllk.o $(MAINPATH)/EplStack/EplDllkCal.o \
 			  $(MAINPATH)/EplStack/EplDlluCal.o \
 			  $(MAINPATH)/EplStack/EplLedu.o \
