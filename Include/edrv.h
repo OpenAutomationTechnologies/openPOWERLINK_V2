@@ -173,7 +173,6 @@ typedef struct
 //    WORD            m_wRxBufferSize;        // size of the whole rx buffer
 
     tEdrvRxHandler  m_pfnRxHandler;
-    tEdrvTxHandler  m_pfnTxHandler;
 
     tEplHwParam     m_HwParam;
 
