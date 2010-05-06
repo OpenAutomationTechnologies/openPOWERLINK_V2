@@ -152,6 +152,8 @@
 #define   FEC_TX_DMA_PRI        			(6)  // highest priority
 
 #define   FEC_TX_BUF_NUMBER					(EDRV_MAX_TX_BUFFERS)
+#define   FEC_TX_DESC_NUMBER                (32)
+#define   FEC_TX_DESC_MASK                  (FEC_TX_DESC_NUMBER-1)
 #define   FEC_RX_BUF_NUMBER					(32)
 #define   FEC_RX_INDEX_MASK                 (0x1F)
 

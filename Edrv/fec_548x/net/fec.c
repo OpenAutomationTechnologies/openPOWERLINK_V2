@@ -174,7 +174,7 @@ typedef struct
 {
     BOOL            m_fUsed;
     unsigned int    m_uiSize;
-    MCD_bufDescFec *m_pBufDescr;
+
 } tEdrvTxBufferTableIntern;
 
 // Private structure
@@ -293,11 +293,20 @@ void fec_interrupt_fec_rx_handler_fec1(void);
 // local types
 //---------------------------------------------------------------------------
 
+typedef struct
+{
+    BOOL                m_afTxBufUsed[FEC_TX_BUF_NUMBER];
+    tEdrvTxBuffer*      m_pLastTransmittedTxBuffer;
+    MCD_bufDescFec*     m_pTxDesc;
+
+} tEdrvInstance;
+
+
 //---------------------------------------------------------------------------
 // local vars
 //---------------------------------------------------------------------------
 tEdrvInitParam  EdrvInitParam_l;
-tEdrvTxBuffer * pLastTransmittedTxBuffer_l;
+tEdrvInstance   EdrvInstance_l;
 
 //---------------------------------------------------------------------------
 // local function prototypes
@@ -327,9 +336,11 @@ tEplKernel Ret;
 int iResult;
 unsigned long ulOffset;
 unsigned long ulTxBufPointer;
-MCD_bufDescFec *pTxBufDescr;
 
     Ret = kEplSuccessful;
+
+    // clear instance structure
+    EPL_MEMSET(&EdrvInstance_l, 0, sizeof (EdrvInstance_l));
 
     // save the init data
     EdrvInitParam_l = *pEdrvInitParam_p;
@@ -356,29 +367,25 @@ MCD_bufDescFec *pTxBufDescr;
 
     // adjust pointer to Tx buffer descriptors
 #if (EDRV_USED_ETH_CTRL == 0)
-    pTxBufDescr = (MCD_bufDescFec*)FEC_TX_DESC_FEC0; //0x80012040; //FEC_TX_DESC_FEC0;
+    EdrvInstance_l.pTxBufDescr = (MCD_bufDescFec*)FEC_TX_DESC_FEC0; //0x80012040; //FEC_TX_DESC_FEC0;
 #else
-    pTxBufDescr = (MCD_bufDescFec*)FEC_TX_DESC_FEC1;
+    EdrvInstance_l.pTxBufDescr = (MCD_bufDescFec*)FEC_TX_DESC_FEC1;
 #endif
 
     // initialize Tx buffer descriptors
-    for (i = 0; i < FEC_TX_BUF_NUMBER; i++)
+    for (i = 0; i < FEC_TX_DESC_NUMBER; i++)
     {
-        TxBufTable_l[i].m_pBufDescr = pTxBufDescr;
+        EdrvInstance_l.pTxBufDescr[i].statCtrl = MCD_FEC_INTERRUPT;
 
-        TxBufTable_l[i].m_pBufDescr->statCtrl = MCD_FEC_INTERRUPT;
+        // TODO move handling of pointer to TxBuf to AllocTxMsgBuffer
+
 #if TARGET_SYSTEM == _LINUX_
-        TxBufTable_l[i].m_pBufDescr->dataPointer = (unsigned int) virt_to_phys((void*)ulTxBufPointer);
+        EdrvInstance_l.pTxBufDescr[i].dataPointer = (unsigned int) virt_to_phys((void*)ulTxBufPointer);
 #else
-        TxBufTable_l[i].m_pBufDescr->dataPointer  = ulTxBufPointer;
+        EdrvInstance_l.pTxBufDescr[i].dataPointer  = ulTxBufPointer;
 #endif
-        TxBufTable_l[i].m_fUsed = FALSE;
-        TxBufTable_l[i].m_uiSize = FEC_MAXBUF_SIZE;
-
-        pTxBufDescr++;
         ulTxBufPointer += FEC_MAXBUF_SIZE;
     }
-
 
     // set mac address
 #if (EDRV_USED_ETH_CTRL == 0)
@@ -678,14 +685,19 @@ tEplKernel EdrvAllocTxMsgBuffer       (tEdrvTxBuffer * pBuffer_p)
 tEplKernel Ret = kEplSuccessful;
 DWORD i;
 
+    if (pBuffer_p->m_uiMaxBufferLen > EDRV_MAX_FRAME_SIZE)
+    {
+        Ret = kEplEdrvNoFreeBufEntry;
+        goto Exit;
+    }
+
     // search a free Tx buffer with appropriate size
     for (i = 0; i < FEC_TX_BUF_NUMBER; i++)
     {
-        if ((TxBufTable_l[i].m_fUsed == FALSE)
-            && (TxBufTable_l[i].m_uiSize >= pBuffer_p->m_uiMaxBufferLen))
+        if (EdrvInstance_l.m_afTxBufUsed[i] == FALSE)
         {
             // free channel found
-            TxBufTable_l[i].m_fUsed = TRUE;
+            EdrvInstance_l.m_afTxBufUsed[i] = TRUE;
             pBuffer_p->m_BufferNumber.m_dwVal = i;
 #if TARGET_SYSTEM == _LINUX_
             pBuffer_p->m_pbBuffer = (BYTE *) phys_to_virt(TxBufTable_l[i].m_pBufDescr->dataPointer);
