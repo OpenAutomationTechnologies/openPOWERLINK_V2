@@ -138,10 +138,8 @@ typedef enum
                                         // arg is pointer to tEplTimerEventArg
     kEplEventTypeHeartbeat      = 0x07, // Heartbeat event
                                         // arg is pointer to tEplHeartbeatEvent
-//    kEplEventTypeDllkCreate     = 0x08, // DLL kernel create event
-                                        // arg is pointer to the new tEplNmtState
-//    kEplEventTypeDllkDestroy    = 0x09, // DLL kernel destroy event
-                                        // arg is pointer to the old tEplNmtState
+    kEplEventTypeHistoryEntry   = 0x08, // Error history entry event
+                                        // arg is pointer to the tEplErrHistoryEntry
     kEplEventTypeDllkFlag1      = 0x09, // DLL kernel Flag 1 changed event
                                         // arg is pointer to nothing
     kEplEventTypeDllkFillTx     = 0x0A, // DLL kernel fill TxBuffer event
@@ -300,6 +298,7 @@ typedef struct
     unsigned long   m_ulDllErrorEvents;   // EPL_DLL_ERR_*
     unsigned int    m_uiNodeId;
     tEplNmtState    m_NmtState;
+    tEplKernel      m_EplError;
 
 } tEplErrorHandlerkEvent;
 

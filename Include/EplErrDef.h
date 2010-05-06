@@ -178,19 +178,20 @@ typedef enum
     kEplSdoComInvalidParam      = 0x0078,       // invalid parameters passed to function
 
     // area for EPL Event-Modul 0x0080 - 0x008F
-    kEplEventUnknownSink        = 0x0080,     // unknown sink for event
-    kEplEventPostError          = 0x0081,     // error during post of event
-    kEplEventReadError          = 0x0082,     // error during reading of event from queue
+    kEplEventUnknownSink        = 0x0080,       // unknown sink for event
+    kEplEventPostError          = 0x0081,       // error during post of event
+    kEplEventReadError          = 0x0082,       // error during reading of event from queue
+    kEplEventWrongSize          = 0x0083,       // event arg has wrong size
 
     // area for EPL Timer Modul 0x0090 - 0x009F
-    kEplTimerInvalidHandle      = 0x0090,     // invalid handle for timer
-    kEplTimerNoTimerCreated     = 0x0091,     // no timer was created caused by an error
-    kEplTimerThreadError        = 0x0092,     // process thread could not be created
+    kEplTimerInvalidHandle      = 0x0090,       // invalid handle for timer
+    kEplTimerNoTimerCreated     = 0x0091,       // no timer was created caused by an error
+    kEplTimerThreadError        = 0x0092,       // process thread could not be created
 
     // area for EPL SDO/Asnd Module 0x00A0 - 0x0AF
-    kEplSdoAsndInvalidNodeId    = 0x00A0,     //0 node id is invalid
-    kEplSdoAsndNoFreeHandle     = 0x00A1,     // no free handle for connection
-    kEplSdoAsndInvalidHandle    = 0x00A2,     // handle for connection is invalid
+    kEplSdoAsndInvalidNodeId    = 0x00A0,       // node-ID is invalid
+    kEplSdoAsndNoFreeHandle     = 0x00A1,       // no free handle for connection
+    kEplSdoAsndInvalidHandle    = 0x00A2,       // handle for connection is invalid
 
     // area for PDO module 0x00B0 - 0x00BF
     kEplPdoNotExist             = 0x00B0,       // selected PDO does not exist
@@ -209,7 +210,7 @@ typedef enum
     kEplPdoSizeMismatch         = 0x00BC,       // bit size of object mapping is larger than the object size
     kEplPdoTooManyTxPdos        = 0x00BD,       // there exits more than one TPDO on CN
     kEplPdoInvalidObjIndex      = 0x00BE,       // invalid object index used for PDO mapping or communication parameter
-    kEplPdoTooManyPdos           = 0x00BF,       // there exit to many PDOs
+    kEplPdoTooManyPdos          = 0x00BF,       // there exist too many PDOs
 
     // Configuration manager module 0x00C0 - 0x00CF
     kEplCfmConfigError          = 0x00C0,       // error in configuration manager

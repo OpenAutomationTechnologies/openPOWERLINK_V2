@@ -3063,6 +3063,7 @@ tEplErrorHandlerkEvent  DllEvent;
     DllEvent.m_ulDllErrorEvents = 0;
     DllEvent.m_uiNodeId = 0;
     DllEvent.m_NmtState = NmtState_p;
+    DllEvent.m_EplError = kEplSuccessful;
 
     switch (NmtState_p)
     {
@@ -5487,13 +5488,36 @@ TGT_DLLK_DECLARE_FLAGS
 
     BENCHMARK_MOD_02_TOGGLE(7);
 
-    dwArg = EplDllkInstance_g.m_DllState | (uiHandle << 16);
+    switch (ErrorCode_p)
+    {
+        case kEplEdrvCurTxListEmpty:
+        case kEplEdrvTxListNotFinishedYet:
+        case kEplEdrvNoFreeTxDesc:
+        {
+        tEplErrorHandlerkEvent  DllEvent;
 
-    // Error event for API layer
-    Ret = EplEventkPostError(kEplEventSourceDllk,
-                    ErrorCode_p,
-                    sizeof(dwArg),
-                    &dwArg);
+            DllEvent.m_ulDllErrorEvents = EPL_DLL_ERR_MN_CYCTIMEEXCEED;
+            DllEvent.m_uiNodeId = uiHandle;
+            DllEvent.m_NmtState = NmtState;
+            DllEvent.m_EplError = ErrorCode_p;
+
+            Ret = EplErrorHandlerkPostError(&DllEvent);
+
+            break;
+        }
+
+        default:
+        {
+            dwArg = EplDllkInstance_g.m_DllState | (uiHandle << 16);
+
+            // Error event for API layer
+            Ret = EplEventkPostError(kEplEventSourceDllk,
+                            ErrorCode_p,
+                            sizeof(dwArg),
+                            &dwArg);
+            break;
+        }
+    }
 
 Exit:
     TGT_DLLK_LEAVE_CRITICAL_SECTION();

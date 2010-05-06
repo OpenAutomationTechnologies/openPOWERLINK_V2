@@ -135,6 +135,9 @@ static tEplErrorHandlerkInstance EplErrorHandlerkInstance_g;
 // local function prototypes
 //---------------------------------------------------------------------------
 
+// posts history entry events
+static tEplKernel PUBLIC EplErrorHandlerkPostHistoryEntry(tEplErrHistoryEntry* pHistoryEntry_p);
+
 static tEplKernel EplErrorHandlerkLinkErrorCounter(
                                 tEplErrorHandlerkErrorCounter* pErrorCounter_p,
                                 unsigned int uiIndex_p);
@@ -337,7 +340,7 @@ return Ret;
 //
 // Parameters:  pEvent_p = pointer to event-structure from buffer
 //
-// Returns:      tEpKernel  = errorcode
+// Returns:     tEpKernel  = errorcode
 //
 // State:
 //
@@ -348,8 +351,11 @@ tEplKernel              Ret;
 unsigned long           ulDllErrorEvents;
 tEplEvent               Event;
 tEplNmtEvent            NmtEvent;
+tEplErrHistoryEntry     HistoryEntry;
 
     Ret = kEplSuccessful;
+
+    HistoryEntry.m_wEntryType = EPL_ERR_ENTRYTYPE_MODE_OCCURRED | EPL_ERR_ENTRYTYPE_PROF_EPL | EPL_ERR_ENTRYTYPE_HISTORY;
 
     // check m_EventType
     switch(pEvent_p->m_EventType)
@@ -373,7 +379,14 @@ tEplNmtEvent            NmtEvent;
                     if (EplErrorHandlerkInstance_g.m_CnLossSoc.m_dwThresholdCnt
                         >= EplErrorHandlerkInstance_g.m_CnLossSoc.m_dwThreshold)
                     {   // threshold is reached
-                        // $$$ d.k.: generate error history entry E_DLL_LOSS_SOC_TH
+                        // generate error history entry E_DLL_LOSS_SOC_TH
+                        HistoryEntry.m_wErrorCode = EPL_E_DLL_LOSS_SOC_TH;
+                        HistoryEntry.m_TimeStamp = pEvent_p->m_NetTime;
+                        Ret = EplErrorHandlerkPostHistoryEntry(&HistoryEntry);
+                        if (Ret != kEplSuccessful)
+                        {
+                            goto Exit;
+                        }
 
                         BENCHMARK_MOD_02_TOGGLE(7);
 
@@ -402,7 +415,14 @@ tEplNmtEvent            NmtEvent;
                     if (EplErrorHandlerkInstance_g.m_CnLossPreq.m_dwThresholdCnt
                         >= EplErrorHandlerkInstance_g.m_CnLossPreq.m_dwThreshold)
                     {   // threshold is reached
-                        // $$$ d.k.: generate error history entry E_DLL_LOSS_PREQ_TH
+                        // generate error history entry E_DLL_LOSS_PREQ_TH
+                        HistoryEntry.m_wErrorCode = EPL_E_DLL_LOSS_PREQ_TH;
+                        HistoryEntry.m_TimeStamp = pEvent_p->m_NetTime;
+                        Ret = EplErrorHandlerkPostHistoryEntry(&HistoryEntry);
+                        if (Ret != kEplSuccessful)
+                        {
+                            goto Exit;
+                        }
 
                         BENCHMARK_MOD_02_TOGGLE(7);
 
@@ -436,7 +456,14 @@ tEplNmtEvent            NmtEvent;
                     if (EplErrorHandlerkInstance_g.m_CnCrcErr.m_dwThresholdCnt
                         >= EplErrorHandlerkInstance_g.m_CnCrcErr.m_dwThreshold)
                     {   // threshold is reached
-                        // $$$ d.k.: generate error history entry E_DLL_CRC_TH
+                        // generate error history entry E_DLL_CRC_TH
+                        HistoryEntry.m_wErrorCode = EPL_E_DLL_CRC_TH;
+                        HistoryEntry.m_TimeStamp = pEvent_p->m_NetTime;
+                        Ret = EplErrorHandlerkPostHistoryEntry(&HistoryEntry);
+                        if (Ret != kEplSuccessful)
+                        {
+                            goto Exit;
+                        }
 
                         BENCHMARK_MOD_02_TOGGLE(7);
 
@@ -455,7 +482,15 @@ tEplNmtEvent            NmtEvent;
 
             if ((ulDllErrorEvents & EPL_DLL_ERR_INVALID_FORMAT) != 0)
             {   // invalid format error occured (only direct reaction)
-                // $$$ d.k.: generate error history entry E_DLL_INVALID_FORMAT
+                // generate error history entry E_DLL_INVALID_FORMAT
+                HistoryEntry.m_wErrorCode = EPL_E_DLL_INVALID_FORMAT;
+                HistoryEntry.m_TimeStamp = pEvent_p->m_NetTime;
+                AmiSetByteToLe(&HistoryEntry.m_abAddInfo[0], (BYTE) pErrHandlerEvent->m_uiNodeId);
+                Ret = EplErrorHandlerkPostHistoryEntry(&HistoryEntry);
+                if (Ret != kEplSuccessful)
+                {
+                    goto Exit;
+                }
 
                 BENCHMARK_MOD_02_TOGGLE(7);
 
@@ -511,7 +546,14 @@ tEplNmtEvent            NmtEvent;
                     if (EplErrorHandlerkInstance_g.m_MnCrcErr.m_dwThresholdCnt
                         >= EplErrorHandlerkInstance_g.m_MnCrcErr.m_dwThreshold)
                     {   // threshold is reached
-                        // $$$ d.k.: generate error history entry E_DLL_CRC_TH
+                        // generate error history entry E_DLL_CRC_TH
+                        HistoryEntry.m_wErrorCode = EPL_E_DLL_CRC_TH;
+                        HistoryEntry.m_TimeStamp = pEvent_p->m_NetTime;
+                        Ret = EplErrorHandlerkPostHistoryEntry(&HistoryEntry);
+                        if (Ret != kEplSuccessful)
+                        {
+                            goto Exit;
+                        }
 
                         // post event to NMT state machine
                         NmtEvent = kEplNmtEventNmtCycleError;
@@ -538,7 +580,15 @@ tEplNmtEvent            NmtEvent;
                     if (EplErrorHandlerkInstance_g.m_MnCycTimeExceed.m_dwThresholdCnt
                         >= EplErrorHandlerkInstance_g.m_MnCycTimeExceed.m_dwThreshold)
                     {   // threshold is reached
-                        // $$$ d.k.: generate error history entry E_DLL_CYCLE_EXCEED_TH
+                        // generate error history entry E_DLL_CYCLE_EXCEED_TH
+                        HistoryEntry.m_wErrorCode = EPL_E_DLL_CYCLE_EXCEED_TH;
+                        HistoryEntry.m_TimeStamp = pEvent_p->m_NetTime;
+                        AmiSetWordToLe(&HistoryEntry.m_abAddInfo[0], (WORD) pErrHandlerEvent->m_EplError);
+                        Ret = EplErrorHandlerkPostHistoryEntry(&HistoryEntry);
+                        if (Ret != kEplSuccessful)
+                        {
+                            goto Exit;
+                        }
 
                         // post event to NMT state machine
                         NmtEvent = kEplNmtEventNmtCycleError;
@@ -548,7 +598,18 @@ tEplNmtEvent            NmtEvent;
                         Event.m_uiSize = sizeof (NmtEvent);
                         Ret = EplEventkPost(&Event);
                     }
-                    // $$$ d.k.: else generate error history entry E_DLL_CYCLE_EXCEED
+                    else
+                    {   // generate error history entry E_DLL_CYCLE_EXCEED
+                        HistoryEntry.m_wErrorCode = EPL_E_DLL_CYCLE_EXCEED;
+                        HistoryEntry.m_TimeStamp = pEvent_p->m_NetTime;
+                        AmiSetWordToLe(&HistoryEntry.m_abAddInfo[0], (WORD) pErrHandlerEvent->m_EplError);
+                        Ret = EplErrorHandlerkPostHistoryEntry(&HistoryEntry);
+                        if (Ret != kEplSuccessful)
+                        {
+                            goto Exit;
+                        }
+                    }
+
                     EplErrorHandlerkInstance_g.m_ulDllErrorEvents |=
                         EPL_DLL_ERR_MN_CYCTIMEEXCEED;
                 }
@@ -577,7 +638,15 @@ tEplNmtEvent            NmtEvent;
                             NodeOpParam.m_OpNodeType = kEplDllNodeOpTypeIsochronous;
                             NodeOpParam.m_uiNodeId = pErrHandlerEvent->m_uiNodeId;
 
-                            // $$$ d.k.: generate error history entry E_DLL_LOSS_PRES_TH
+                            // generate error history entry E_DLL_LOSS_PRES_TH
+                            HistoryEntry.m_wErrorCode = EPL_E_DLL_LOSS_PRES_TH;
+                            HistoryEntry.m_TimeStamp = pEvent_p->m_NetTime;
+                            AmiSetByteToLe(&HistoryEntry.m_abAddInfo[0], (BYTE) pErrHandlerEvent->m_uiNodeId);
+                            Ret = EplErrorHandlerkPostHistoryEntry(&HistoryEntry);
+                            if (Ret != kEplSuccessful)
+                            {
+                                goto Exit;
+                            }
 
                             // remove node from isochronous phase
                             Ret = EplDllkDeleteNode(&NodeOpParam);
@@ -610,7 +679,7 @@ tEplNmtEvent            NmtEvent;
 
     } // end of switch(pEvent_p->m_EventType)
 
-
+Exit:
     return Ret;
 
 }
@@ -747,6 +816,35 @@ tEplEvent               Event;
 //          P R I V A T E   F U N C T I O N S                              //
 //                                                                         //
 //=========================================================================//
+
+//---------------------------------------------------------------------------
+//
+// Function:    EplErrorHandlerkPostHistoryEntry
+//
+// Description: posts history entry events to API layer
+//
+// Parameters:  pHistoryEntry_p     = pointer to history entry structure
+//
+// Returns:     tEpKernel  = errorcode
+//
+// State:
+//
+//---------------------------------------------------------------------------
+static tEplKernel PUBLIC EplErrorHandlerkPostHistoryEntry(tEplErrHistoryEntry* pHistoryEntry_p)
+{
+tEplKernel              Ret;
+tEplEvent               Event;
+
+    Event.m_EventSink = kEplEventSinkApi;
+    Event.m_EventType = kEplEventTypeHistoryEntry;
+    Event.m_uiSize = sizeof (*pHistoryEntry_p);
+    Event.m_pArg = pHistoryEntry_p;
+    Ret = EplEventkPost(&Event);
+
+    return Ret;
+
+}
+
 
 //---------------------------------------------------------------------------
 //

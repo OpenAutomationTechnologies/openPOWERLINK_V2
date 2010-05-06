@@ -132,6 +132,7 @@ typedef enum
 //    kEplApiEventRequestNmt     = 0x11,    // m_bNmtCmd
     kEplApiEventCriticalError  = 0x12,    // m_InternalError, Stack halted
     kEplApiEventWarning        = 0x13,    // m_InternalError, Stack running
+    kEplApiEventHistoryEntry   = 0x14,    // m_ErrHistoryEntry
     kEplApiEventNode           = 0x20,    // m_Node
     kEplApiEventBoot           = 0x21,    // m_Boot
     kEplApiEventSdo            = 0x62,    // m_Sdo
@@ -155,6 +156,7 @@ typedef union
     tEplApiEventLed         m_Led;
     tEplCfmEventCnProgress  m_CfmProgress;
     tEplApiEventCfmResult   m_CfmResult;
+    tEplErrHistoryEntry     m_ErrHistoryEntry;
 
 } tEplApiEventArg;
 

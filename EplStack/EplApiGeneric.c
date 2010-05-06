@@ -1575,6 +1575,21 @@ tEplApiEventType    EventType;
             break;
         }
 
+        // Error history entry event
+        case kEplEventTypeHistoryEntry:
+        {
+            if (pEplEvent_p->m_uiSize != sizeof (tEplErrHistoryEntry))
+            {
+                Ret = kEplEventWrongSize;
+                goto Exit;
+            }
+            EventType = kEplApiEventHistoryEntry;
+
+            // call user callback
+            Ret = EplApiInstance_g.m_InitParam.m_pfnCbEvent(EventType, (tEplApiEventArg*) pEplEvent_p->m_pArg, EplApiInstance_g.m_InitParam.m_pEventUserArg);
+            break;
+        }
+
         // user-defined event
         case kEplEventTypeApiUserDef:
         {
@@ -1596,6 +1611,7 @@ tEplApiEventType    EventType;
         }
     }
 
+Exit:
     return Ret;
 }
 

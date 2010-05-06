@@ -290,7 +290,7 @@ int inum;
     EplApiInitParam.m_uiSizeOfStruct = sizeof (EplApiInitParam);
     EPL_MEMCPY(EplApiInitParam.m_abMacAddress, abMacAddr, sizeof (EplApiInitParam.m_abMacAddress));
     EplApiInitParam.m_dwFeatureFlags = ~0UL;
-    EplApiInitParam.m_dwCycleLen = 100000;     // required for error detection
+    EplApiInitParam.m_dwCycleLen = 10000;     // required for error detection
     EplApiInitParam.m_uiIsochrTxMaxPayload = 100; // const
     EplApiInitParam.m_uiIsochrRxMaxPayload = 100; // const
     EplApiInitParam.m_dwPresMaxLatency = 50000;  // const; only required for IdentRes
@@ -489,6 +489,7 @@ tEplKernel          EplRet = kEplSuccessful;
                 {
                 DWORD   dwNodeAssignment;
                 WORD    wPresPayloadLimit;
+                DWORD   dwCycTimeExceedThreshold = 15;
 
                     // configure OD for MN in state ResetComm after reseting the OD
                     // TODO: setup your own network configuration here
@@ -507,6 +508,8 @@ tEplKernel          EplRet = kEplSuccessful;
                     EplRet = EplApiWriteLocalObject(0x1F8D, 0x03, &wPresPayloadLimit, sizeof (wPresPayloadLimit));
                     EplRet = EplApiWriteLocalObject(0x1F8D, 0x04, &wPresPayloadLimit, sizeof (wPresPayloadLimit));
                     EplRet = EplApiWriteLocalObject(0x1F8D, 0x20, &wPresPayloadLimit, sizeof (wPresPayloadLimit));
+
+                    EplRet = EplApiWriteLocalObject(0x1C02, 0x03, &dwCycTimeExceedThreshold, sizeof (dwCycTimeExceedThreshold));
                     // continue
                 }
 
@@ -598,6 +601,23 @@ tEplKernel          EplRet = kEplSuccessful;
                     break;
                 }
             }
+            break;
+        }
+
+        case kEplApiEventHistoryEntry:
+        {   // new history entry
+
+            PRINTF("%s(HistoryEntry): Type=0x%04X Code=0x%04X (0x%02X %02X %02X %02X %02X %02X)\n",
+                    __func__,
+                    pEventArg_p->m_ErrHistoryEntry.m_wEntryType,
+                    pEventArg_p->m_ErrHistoryEntry.m_wErrorCode,
+                    (WORD) pEventArg_p->m_ErrHistoryEntry.m_abAddInfo[0],
+                    (WORD) pEventArg_p->m_ErrHistoryEntry.m_abAddInfo[1],
+                    (WORD) pEventArg_p->m_ErrHistoryEntry.m_abAddInfo[2],
+                    (WORD) pEventArg_p->m_ErrHistoryEntry.m_abAddInfo[3],
+                    (WORD) pEventArg_p->m_ErrHistoryEntry.m_abAddInfo[4],
+                    (WORD) pEventArg_p->m_ErrHistoryEntry.m_abAddInfo[5],
+                    (WORD) pEventArg_p->m_ErrHistoryEntry.m_abAddInfo[6]);
             break;
         }
 
