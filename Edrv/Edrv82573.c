@@ -733,7 +733,7 @@ tEdrvTxDesc*    pTxDesc;
         goto Exit;
     }
 
-    if (EdrvInstance_l.m_uiTailTxDesc == EdrvInstance_l.m_uiHeadTxDesc)
+    if (EdrvInstance_l.m_apTxBuffer[EdrvInstance_l.m_uiTailTxDesc] != NULL)
     {
         Ret = kEplEdrvNoFreeTxDesc;
         goto Exit;
@@ -1356,6 +1356,7 @@ int     iIndex;
 
     // initialize Tx descriptors
     printk("%s initialize Tx descriptors\n", __FUNCTION__);
+    EPL_MEMSET(EdrvInstance_l.m_apTxBuffer, 0, sizeof (EdrvInstance_l.m_apTxBuffer));
     EDRV_REGDW_WRITE(EDRV_REGDW_TXDCTL, EDRV_REGDW_TXDCTL_DEF);
     qwDescAddress = EdrvInstance_l.m_pTxDescDma;
     EDRV_REGDW_WRITE(EDRV_REGDW_TDBAL, (qwDescAddress & 0xFFFFFFFF));
