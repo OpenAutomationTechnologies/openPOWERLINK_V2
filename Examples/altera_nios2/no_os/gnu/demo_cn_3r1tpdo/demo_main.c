@@ -128,6 +128,7 @@ int openPowerlink(void)
 	EplApiInitParam.m_dwSerialNumber = -1;
 	EplApiInitParam.m_dwSubnetMask = SUBNET_MASK;
 	EplApiInitParam.m_dwDefaultGateway = 0;
+    EplApiInitParam.m_dwApplicationSwDate = 1;       // PDL_LocVerApplSw_REC.ApplSwDate_U32 on programmable device or date portion of NMT_ManufactSwVers_VS on non-programmable device
 	EplApiInitParam.m_pfnCbEvent = AppCbEvent;
     EplApiInitParam.m_pfnCbSync  = AppCbSync;
     EplApiInitParam.m_pfnObdInitRam = EplObdInitRam;

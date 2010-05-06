@@ -101,8 +101,8 @@ int openPowerlink(void)
 
     EplApiInitParam.m_uiIsochrTxMaxPayload = 100;
     EplApiInitParam.m_uiIsochrRxMaxPayload = 100;
-    EplApiInitParam.m_dwPresMaxLatency = 50000;
-    EplApiInitParam.m_dwAsndMaxLatency = 150000;
+	EplApiInitParam.m_dwPresMaxLatency = 2000;
+	EplApiInitParam.m_dwAsndMaxLatency = 2000;
     EplApiInitParam.m_fAsyncOnly = FALSE;
     EplApiInitParam.m_dwFeatureFlags = -1;
     EplApiInitParam.m_dwCycleLen = CYCLE_LEN;
@@ -113,7 +113,7 @@ int openPowerlink(void)
     EplApiInitParam.m_uiPrescaler = 2;
     EplApiInitParam.m_dwLossOfFrameTolerance = 500000;
     EplApiInitParam.m_dwAsyncSlotTimeout = 3000000;
-    EplApiInitParam.m_dwWaitSocPreq = 150000;
+	EplApiInitParam.m_dwWaitSocPreq = 0;
     EplApiInitParam.m_dwDeviceType = -1;
     EplApiInitParam.m_dwVendorId = -1;
     EplApiInitParam.m_dwProductCode = -1;
@@ -121,6 +121,7 @@ int openPowerlink(void)
     EplApiInitParam.m_dwSerialNumber = -1;
     EplApiInitParam.m_dwSubnetMask = SUBNET_MASK;
     EplApiInitParam.m_dwDefaultGateway = 0;
+    EplApiInitParam.m_dwApplicationSwDate = 1;       // PDL_LocVerApplSw_REC.ApplSwDate_U32 on programmable device or date portion of NMT_ManufactSwVers_VS on non-programmable device
     EplApiInitParam.m_pfnCbEvent = AppCbEvent;
     EplApiInitParam.m_pfnCbSync  = AppCbSync;
     EplApiInitParam.m_pfnObdInitRam = EplObdInitRam;
