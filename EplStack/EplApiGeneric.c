@@ -2103,7 +2103,12 @@ BYTE                bTemp;
         Ret = EplObdReadEntry(0x1020, 2, &DllIdentParam.m_dwVerifyConfigurationTime, &ObdSize);
         // ignore any error, because this object is optional
 
-        // $$$ d.k.: fill rest of ident structure
+        DllIdentParam.m_dwApplicationSwDate = EplApiInstance_g.m_InitParam.m_dwApplicationSwDate;
+        DllIdentParam.m_dwApplicationSwTime = EplApiInstance_g.m_InitParam.m_dwApplicationSwTime;
+
+        DllIdentParam.m_qwVendorSpecificExt1 = EplApiInstance_g.m_InitParam.m_qwVendorSpecificExt1;
+
+        EPL_MEMCPY(&DllIdentParam.m_abVendorSpecificExt2[0], &EplApiInstance_g.m_InitParam.m_abVendorSpecificExt2[0], sizeof (DllIdentParam.m_abVendorSpecificExt2));
 
         DllIdentParam.m_uiSizeOfStruct = sizeof (DllIdentParam);
         Ret = EplDlluCalSetIdentity(&DllIdentParam);
