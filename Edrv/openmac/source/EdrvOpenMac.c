@@ -393,7 +393,7 @@ ometh_packet_typ*   pPacket = NULL;
 
     pPacket->length = pBuffer_p->m_uiMaxBufferLen;
 
-    pBuffer_p->m_uiBufferNumber = EDRV_MAX_FILTERS;
+    pBuffer_p->m_BufferNumber.m_dwVal = EDRV_MAX_FILTERS;
 
     pBuffer_p->m_pbBuffer = (BYTE*) &pPacket->data;
 
@@ -421,10 +421,10 @@ tEplKernel EdrvReleaseTxMsgBuffer     (tEdrvTxBuffer * pBuffer_p)
 tEplKernel          Ret = kEplSuccessful;
 ometh_packet_typ*   pPacket = NULL;
 
-    if (pBuffer_p->m_uiBufferNumber < EDRV_MAX_FILTERS)
+    if (pBuffer_p->m_BufferNumber.m_dwVal < EDRV_MAX_FILTERS)
     {
         // disable auto-response
-        omethResponseDisable(EdrvInstance_l.m_ahFilter[pBuffer_p->m_uiBufferNumber]);
+        omethResponseDisable(EdrvInstance_l.m_ahFilter[pBuffer_p->m_BufferNumber.m_dwVal]);
     }
 
     if (pBuffer_p->m_pbBuffer == NULL)
@@ -464,7 +464,7 @@ tEplKernel EdrvUpdateTxMsgBuffer     (tEdrvTxBuffer * pBuffer_p)
 tEplKernel          Ret = kEplSuccessful;
 ometh_packet_typ*   pPacket = NULL;
 
-    if (pBuffer_p->m_uiBufferNumber >= EDRV_MAX_FILTERS)
+    if (pBuffer_p->m_BufferNumber.m_dwVal >= EDRV_MAX_FILTERS)
     {
         Ret = kEplEdrvInvalidParam;
         goto Exit;
@@ -474,7 +474,7 @@ ometh_packet_typ*   pPacket = NULL;
 
     pPacket->length = pBuffer_p->m_uiTxMsgLen;
 
-    pPacket = omethResponseSet(EdrvInstance_l.m_ahFilter[pBuffer_p->m_uiBufferNumber], pPacket);
+    pPacket = omethResponseSet(EdrvInstance_l.m_ahFilter[pBuffer_p->m_BufferNumber.m_dwVal], pPacket);
     if (pPacket == OMETH_INVALID_PACKET)
     {
         Ret = kEplNoResource;
@@ -507,7 +507,7 @@ tEplKernel          Ret = kEplSuccessful;
 ometh_packet_typ*   pPacket = NULL;
 unsigned long       ulTxLength;
 
-    if (pBuffer_p->m_uiBufferNumber < EDRV_MAX_FILTERS)
+    if (pBuffer_p->m_BufferNumber.m_dwVal < EDRV_MAX_FILTERS)
     {
         Ret = kEplEdrvInvalidParam;
         goto Exit;
@@ -612,7 +612,8 @@ unsigned int    uiEntry;
                 EdrvInstance_l.m_apTxBuffer[uiEntry] = pFilter_p[uiEntry].m_pTxBuffer;
 
                 // set buffer number of TxBuffer to filter entry
-                pFilter_p[uiEntry].m_pTxBuffer->m_uiBufferNumber = uiEntry;
+                pFilter_p[uiEntry].m_pTxBuffer[0].m_BufferNumber.m_dwVal = uiEntry;
+                pFilter_p[uiEntry].m_pTxBuffer[1].m_BufferNumber.m_dwVal = uiEntry;
                 EdrvUpdateTxMsgBuffer(pFilter_p[uiEntry].m_pTxBuffer);
                 omethResponseEnable(EdrvInstance_l.m_ahFilter[uiEntry]);
 
@@ -691,7 +692,8 @@ unsigned int    uiEntry;
                     EdrvInstance_l.m_apTxBuffer[uiEntryChanged_p] = pFilter_p[uiEntryChanged_p].m_pTxBuffer;
 
                     // set buffer number of TxBuffer to filter entry
-                    pFilter_p[uiEntryChanged_p].m_pTxBuffer->m_uiBufferNumber = uiEntryChanged_p;
+                    pFilter_p[uiEntryChanged_p].m_pTxBuffer[0].m_BufferNumber.m_dwVal = uiEntryChanged_p;
+                    pFilter_p[uiEntryChanged_p].m_pTxBuffer[1].m_BufferNumber.m_dwVal = uiEntryChanged_p;
                     EdrvUpdateTxMsgBuffer(pFilter_p[uiEntryChanged_p].m_pTxBuffer);
                     omethResponseEnable(EdrvInstance_l.m_ahFilter[uiEntryChanged_p]);
                 }
