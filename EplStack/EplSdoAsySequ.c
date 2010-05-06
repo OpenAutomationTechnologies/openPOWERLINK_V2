@@ -1886,7 +1886,7 @@ static tEplKernel EplSdoAsySeqSendIntern(tEplAsySdoSeqCon*  pAsySdoSeqCon_p,
 tEplKernel      Ret;
 BYTE            abFrame[EPL_SEQ_FRAME_SIZE];
 tEplFrame*      pEplFrame;
-unsigned int    uiFreeEntries;
+unsigned int    uiFreeEntries = 0;
 
     if (pData_p == NULL)
     {   // set pointer to own frame

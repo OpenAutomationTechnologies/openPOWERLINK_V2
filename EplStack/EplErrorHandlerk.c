@@ -705,7 +705,9 @@ tEplKernel              Ret = kEplSuccessful;
     // reset error events
     EplErrorHandlerkInstance_g.m_ulDllErrorEvents = 0L;
 
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
 Exit:
+#endif
     return Ret;
 
 }
