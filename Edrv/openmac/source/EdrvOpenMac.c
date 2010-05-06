@@ -474,6 +474,8 @@ ometh_packet_typ*   pPacket = NULL;
 
     pPacket->length = pBuffer_p->m_uiTxMsgLen;
 
+    EdrvInstance_l.m_apTxBuffer[pBuffer_p->m_BufferNumber.m_dwVal] = pBuffer_p;
+
     pPacket = omethResponseSet(EdrvInstance_l.m_ahFilter[pBuffer_p->m_BufferNumber.m_dwVal], pPacket);
     if (pPacket == OMETH_INVALID_PACKET)
     {
@@ -609,8 +611,6 @@ unsigned int    uiEntry;
             // set auto response
             if (pFilter_p[uiEntry].m_pTxBuffer != NULL)
             {
-                EdrvInstance_l.m_apTxBuffer[uiEntry] = pFilter_p[uiEntry].m_pTxBuffer;
-
                 // set buffer number of TxBuffer to filter entry
                 pFilter_p[uiEntry].m_pTxBuffer[0].m_BufferNumber.m_dwVal = uiEntry;
                 pFilter_p[uiEntry].m_pTxBuffer[1].m_BufferNumber.m_dwVal = uiEntry;
@@ -689,8 +689,6 @@ unsigned int    uiEntry;
             {   // filter auto-response state or frame has changed
                 if (pFilter_p[uiEntryChanged_p].m_pTxBuffer != NULL)
                 {   // auto-response enable
-                    EdrvInstance_l.m_apTxBuffer[uiEntryChanged_p] = pFilter_p[uiEntryChanged_p].m_pTxBuffer;
-
                     // set buffer number of TxBuffer to filter entry
                     pFilter_p[uiEntryChanged_p].m_pTxBuffer[0].m_BufferNumber.m_dwVal = uiEntryChanged_p;
                     pFilter_p[uiEntryChanged_p].m_pTxBuffer[1].m_BufferNumber.m_dwVal = uiEntryChanged_p;
@@ -895,7 +893,15 @@ static void EdrvCbSendAck(ometh_packet_typ *pPacket, void *arg, unsigned long ti
 {
     EdrvInstance_l.msgfree++;
     BENCHMARK_MOD_01_SET(1);
-    EdrvInstance_l.m_InitParam.m_pfnTxHandler(arg);
+    if (arg != NULL)
+    {
+    tEdrvTxBuffer*  pTxBuffer = arg;
+
+        if (pTxBuffer->m_pfnTxHandler != NULL)
+        {
+            pTxBuffer->m_pfnTxHandler(pTxBuffer);
+        }
+    }
     BENCHMARK_MOD_01_RESET(1);
 }
 
@@ -939,7 +945,10 @@ tEplTgtTimeStamp    TimeStamp;
     {   // filter with auto-response frame triggered
         BENCHMARK_MOD_01_SET(5);
         // call Tx handler function from DLL
-        EdrvInstance_l.m_InitParam.m_pfnTxHandler(EdrvInstance_l.m_apTxBuffer[uiIndex]);
+        if (EdrvInstance_l.m_apTxBuffer[uiIndex]->m_pfnTxHandler != NULL)
+        {
+            EdrvInstance_l.m_apTxBuffer[uiIndex]->m_pfnTxHandler(EdrvInstance_l.m_apTxBuffer[uiIndex]);
+        }
         BENCHMARK_MOD_01_RESET(5);
     }
 
