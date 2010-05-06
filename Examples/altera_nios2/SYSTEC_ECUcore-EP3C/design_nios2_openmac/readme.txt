@@ -44,5 +44,10 @@ Otherwise you can use the supplied SOF file and go directly to step 6.
 6. Use the design with the supplied demo projects in the openPOWERLINK
    subdirectory Examples\altera_nios2\no_os\gnu.
 
+   Therefor, execute the following command in the "Nios II Command Shell"
+   before calling create-this-app to set the SOPC_DIR.
+
+    $ export SOPC_DIR=../../../SYSTEC_ECUcore-EP3C/design_nios2_openmac
+
    Please refer to the readme.txt in the subdirectory of the demo project for
    further information.
