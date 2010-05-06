@@ -139,7 +139,6 @@ struct _tEdrvTxBuffer
     DWORD           m_dwTimeOffsetNs;       // IN: delay to a previous frame after which this frame will be transmitted
     tEdrvTxHandler  m_pfnTxHandler;         // IN: special Tx callback function
     // ----------------------
-    unsigned int    m_uiBufferNumber;       // deprecated
     union
     {
         DWORD       m_dwVal;
