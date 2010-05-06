@@ -17,7 +17,7 @@ INCLUDES	:= -I$(MAINDIR)/Include \
 			  -I$(MAINDIR)/ObjDicts/Qt_MN
 
 # object files for kernel object with relative paths
-MODULEOBJS	= $(MAINPATH)/Edrv/Edrv8139.o \
+MODULEOBJS	= $(MAINPATH)/Edrv/Edrv8139.o $(MAINPATH)/Edrv/EdrvCyclic.o \
 			  $(MAINPATH)/EplStack/EplDllk.o $(MAINPATH)/EplStack/EplDllkCal.o \
 			  $(MAINPATH)/EplStack/EplDlluCal.o \
 			  $(MAINPATH)/EplStack/EplEventk.o $(MAINPATH)/EplStack/EplEventu.o \
