@@ -2740,7 +2740,7 @@ unsigned int    uiNextTxBufferOffset = EplDllkInstance_g.m_bCurTxBufferOffsetCyc
             }
 
             // switch to next cycle
-            EplDllkInstance_g.m_bCurTxBufferOffsetCycle = uiNextTxBufferOffset;
+            EplDllkInstance_g.m_bCurTxBufferOffsetCycle = (BYTE) uiNextTxBufferOffset;
         }
 
     }
