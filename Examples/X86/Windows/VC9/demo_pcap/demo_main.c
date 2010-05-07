@@ -601,6 +601,23 @@ tEplKernel          EplRet = kEplSuccessful;
             break;
         }
 
+        case kEplApiEventHistoryEntry:
+        {   // new history entry
+
+            PRINTF("%s(HistoryEntry): Type=0x%04X Code=0x%04X (0x%02X %02X %02X %02X %02X %02X)\n",
+                    __func__,
+                    pEventArg_p->m_ErrHistoryEntry.m_wEntryType,
+                    pEventArg_p->m_ErrHistoryEntry.m_wErrorCode,
+                    (WORD) pEventArg_p->m_ErrHistoryEntry.m_abAddInfo[0],
+                    (WORD) pEventArg_p->m_ErrHistoryEntry.m_abAddInfo[1],
+                    (WORD) pEventArg_p->m_ErrHistoryEntry.m_abAddInfo[2],
+                    (WORD) pEventArg_p->m_ErrHistoryEntry.m_abAddInfo[3],
+                    (WORD) pEventArg_p->m_ErrHistoryEntry.m_abAddInfo[4],
+                    (WORD) pEventArg_p->m_ErrHistoryEntry.m_abAddInfo[5],
+                    (WORD) pEventArg_p->m_ErrHistoryEntry.m_abAddInfo[6]);
+            break;
+        }
+
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
         case kEplApiEventNode:
         {
