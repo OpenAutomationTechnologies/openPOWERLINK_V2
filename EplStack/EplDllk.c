@@ -2181,6 +2181,12 @@ tEplKernel      Ret = kEplSuccessful;
 #endif
 
             // update PRes (for sudden changes to PreOp2)
+            Ret = EplDllkUpdateFramePres(&EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_PRES + (EplDllkInstance_g.m_bCurTxBufferOffsetCycle ^ 1)],
+                                         NewNmtState_p);
+            if (Ret != kEplSuccessful)
+            {
+                goto Exit;
+            }
             Ret = EplDllkUpdateFramePres(&EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_PRES + EplDllkInstance_g.m_bCurTxBufferOffsetCycle],
                                          NewNmtState_p);
             if (Ret != kEplSuccessful)
@@ -2211,15 +2217,7 @@ tEplKernel      Ret = kEplSuccessful;
         {
             // signal update of IdentRes and StatusRes on SoA
             EplDllkInstance_g.m_bUpdateTxFrame = EPL_DLLK_UPDATE_BOTH;
-/*
-            // update PRes (necessary if coming from Stopped)
-            Ret = EplDllkUpdateFramePres(&EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_PRES],
-                                         pNmtStateChange->m_NewNmtState);
-            if (Ret != kEplSuccessful)
-            {
-                goto Exit;
-            }
-*/
+
             // enable PRes (necessary if coming from Stopped)
 #if (EDRV_AUTO_RESPONSE != FALSE)
             // enable corresponding Rx filter
@@ -2240,6 +2238,22 @@ tEplKernel      Ret = kEplSuccessful;
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
         case kEplNmtMsPreOperational1:
         {
+#if EPL_TIMER_USE_HIGHRES != FALSE
+            Ret = EplTimerHighReskDeleteTimer(&EplDllkInstance_g.m_TimerHdlCycle);
+            if (Ret != kEplSuccessful)
+            {
+                goto Exit;
+            }
+#endif
+
+#if (EPL_DLL_DISABLE_EDRV_CYCLIC == FALSE)
+            Ret = EdrvCyclicStopCycle();
+            if (Ret != kEplSuccessful)
+            {
+                goto Exit;
+            }
+#endif
+
             // update IdentRes and StatusRes
             Ret = EplDllkUpdateFrameIdentRes(&EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_IDENTRES + EplDllkInstance_g.m_bCurTxBufferOffsetIdentRes],
                                              NewNmtState_p);
@@ -2286,6 +2300,12 @@ tEplKernel      Ret = kEplSuccessful;
 #endif
 
             // update PRes
+            Ret = EplDllkUpdateFramePres(&EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_PRES + (EplDllkInstance_g.m_bCurTxBufferOffsetCycle ^ 1)],
+                                         NewNmtState_p);
+            if (Ret != kEplSuccessful)
+            {
+                goto Exit;
+            }
             Ret = EplDllkUpdateFramePres(&EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_PRES + EplDllkInstance_g.m_bCurTxBufferOffsetCycle],
                                          NewNmtState_p);
             if (Ret != kEplSuccessful)
@@ -2436,12 +2456,12 @@ tEdrvTxBuffer*  pTxBuffer;
 
             Ret = EplErrorHandlerkCycleFinished((NmtState >= kEplNmtMsNotActive));
 
-            // switch to next cycle
-            EplDllkInstance_g.m_bCurTxBufferOffsetCycle ^= 1;
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
 #if EPL_DLL_DISABLE_EDRV_CYCLIC == FALSE
             if (EplDllkInstance_g.m_DllState > kEplDllMsNonCyclic)
             {
+                // switch to next cycle
+                EplDllkInstance_g.m_bCurTxBufferOffsetCycle ^= 1;
                 EplDllkInstance_g.m_bCurNodeIndex = 0;
             }
 #endif
@@ -2718,6 +2738,9 @@ unsigned int    uiNextTxBufferOffset = EplDllkInstance_g.m_bCurTxBufferOffsetCyc
             {
                 goto Exit;
             }
+
+            // switch to next cycle
+            EplDllkInstance_g.m_bCurTxBufferOffsetCycle = uiNextTxBufferOffset;
         }
 
     }
