@@ -588,7 +588,7 @@ tEplKernel          EplRet = kEplSuccessful;
         case kEplApiEventHistoryEntry:
         {   // new history entry
 
-            PRINTF("%s(HistoryEntry): Type=0x%04X Code=0x%04X (0x%02X %02X %02X %02X %02X %02X)\n",
+            PRINTF("%s(HistoryEntry): Type=0x%04X Code=0x%04X (0x%02X %02X %02X %02X %02X %02X %02X %02X)\n",
                     __func__,
                     pEventArg_p->m_ErrHistoryEntry.m_wEntryType,
                     pEventArg_p->m_ErrHistoryEntry.m_wErrorCode,
@@ -598,7 +598,8 @@ tEplKernel          EplRet = kEplSuccessful;
                     (WORD) pEventArg_p->m_ErrHistoryEntry.m_abAddInfo[3],
                     (WORD) pEventArg_p->m_ErrHistoryEntry.m_abAddInfo[4],
                     (WORD) pEventArg_p->m_ErrHistoryEntry.m_abAddInfo[5],
-                    (WORD) pEventArg_p->m_ErrHistoryEntry.m_abAddInfo[6]);
+                    (WORD) pEventArg_p->m_ErrHistoryEntry.m_abAddInfo[6],
+                    (WORD) pEventArg_p->m_ErrHistoryEntry.m_abAddInfo[7]);
             break;
         }
 
