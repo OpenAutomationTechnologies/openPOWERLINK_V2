@@ -50,6 +50,21 @@ tEplKernel      Ret = kEplSuccessful;
 
 
 
+How to update from version 1.6 to version 1.6.0.2 or higher
+------------------------------------------------------------
 
+1. Add the source file Edrv/EdrvCyclic.c to your MN project, i.e. makefile.
 
+2. Adapt your Ethernet driver to the changed Edrv API:
+   - rename tEdrvTxBuffer.m_uiBufferNumber to tEdrvTxBuffer.m_BufferNumber.m_dwVal
+   - use Tx callback function which is provided in each tEdrvTxBuffer in element
+     m_pfnTxHandler instead of the one from the initialization parameters.
+   - enhance the implementation of EdrvSendTxMsg, so that it can queue upto 5
+     Tx buffers for transmission. It should not be necessary anymore that the caller
+     has to wait until the Tx callback function is called before calling EdrvSendTxMsg
+     again. E.g. the module EdrvCyclic may call this function multiple times in close
+     succession.
+
+3. Handle the new event kEplApiEventHistoryEntry in your application (e.g. via
+   printf or storing it into a log file).
 
