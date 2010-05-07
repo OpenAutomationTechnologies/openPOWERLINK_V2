@@ -351,11 +351,9 @@ tEplKernel              Ret;
 unsigned long           ulDllErrorEvents;
 tEplEvent               Event;
 tEplNmtEvent            NmtEvent;
-tEplErrHistoryEntry     HistoryEntry;
 
     Ret = kEplSuccessful;
 
-    HistoryEntry.m_wEntryType = EPL_ERR_ENTRYTYPE_MODE_OCCURRED | EPL_ERR_ENTRYTYPE_PROF_EPL | EPL_ERR_ENTRYTYPE_HISTORY;
 
     // check m_EventType
     switch(pEvent_p->m_EventType)
@@ -363,8 +361,11 @@ tEplErrHistoryEntry     HistoryEntry;
         case kEplEventTypeDllError:
         {
         tEplErrorHandlerkEvent* pErrHandlerEvent = (tEplErrorHandlerkEvent*)pEvent_p->m_pArg;
+        tEplErrHistoryEntry     HistoryEntry = {0};
 
             ulDllErrorEvents = pErrHandlerEvent->m_ulDllErrorEvents;
+
+            HistoryEntry.m_wEntryType = EPL_ERR_ENTRYTYPE_MODE_OCCURRED | EPL_ERR_ENTRYTYPE_PROF_EPL | EPL_ERR_ENTRYTYPE_HISTORY;
 
             // check the several error events
             if ((ulDllErrorEvents & EPL_DLL_ERR_CN_LOSS_SOC) != 0)
