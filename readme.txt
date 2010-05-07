@@ -113,6 +113,7 @@ Altera Cyclone III on EBV DBC3C40 Development Board with Nios II Soft-CPU and op
     * D-Link DFE-528TX
     * LevelOne FNC-0109TX
     * Typhoon Speednet Card 10/100 PCI (P/N 70035)
+    * Longshine LCS-8038TX-R7
   Cardbus network cards (PCMCIA):
     * Longshine LCS-8539TXR
     * Micronet SP160T V3
