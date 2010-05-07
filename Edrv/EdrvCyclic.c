@@ -374,6 +374,12 @@ tEplKernel      Ret = kEplSuccessful;
         goto Exit;
     }
 
+    // clear Tx buffer list
+    EdrvCyclicInstance_l.m_uiCurTxBufferList = 0;
+    EdrvCyclicInstance_l.m_uiCurTxBufferEntry = 0;
+    EPL_MEMSET(EdrvCyclicInstance_l.m_paTxBufferList, 0,
+        sizeof (*EdrvCyclicInstance_l.m_paTxBufferList) * EdrvCyclicInstance_l.m_uiMaxTxBufferCount * 2);
+
     Ret = EplTimerHighReskModifyTimerNs(&EdrvCyclicInstance_l.m_TimerHdlCycle,
         EdrvCyclicInstance_l.m_dwCycleLenUs * 1000ULL,
         EdrvCyclicCbTimerCycle,
