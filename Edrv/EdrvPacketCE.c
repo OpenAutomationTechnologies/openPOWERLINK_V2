@@ -4,7 +4,7 @@
 
   Project:      openPOWERLINK - on Windows CE
 
-  Description:  source file for EdrvPcap.
+  Description:  source file for Ethernet driver for PacketCE.
 
   License:
 
@@ -77,9 +77,9 @@
 // local vars
 //---------------------------------------------------------------------------
 
-LPADAPTER m_lpAdapter;
-PACKET m_RxPacket;
-WCHAR m_pRxBuffer[RX_BUFFER_SIZE]={0};
+static LPADAPTER m_lpAdapter;
+static PACKET m_RxPacket;
+static WCHAR m_pRxBuffer[RX_BUFFER_SIZE]={0};
 static volatile BOOL g_bRun = TRUE;
 
 //---------------------------------------------------------------------------
@@ -136,8 +136,8 @@ typedef struct
     CRITICAL_SECTION    m_CriticalSection;
     HANDLE              m_ahHandle[EDRV_HANDLE_COUNT];
     HANDLE              m_hThread;
-	HANDLE				m_hEdrvRead;
-	HANDLE				m_hEdrvWrite;
+    HANDLE              m_hEdrvRead;
+    HANDLE              m_hEdrvWrite;
 
 } tEdrvInstance;
 
@@ -182,15 +182,15 @@ PIP_ADAPTER_INFO pAdapterInfo;
 PIP_ADAPTER_INFO pAdapter = NULL;
 DWORD dwRetVal = 0;
 Ret = kEplSuccessful;
-	// clear instance structure
-	EPL_MEMSET(&EdrvInstance_l, 0, sizeof (EdrvInstance_l));
-	
-	if (pEdrvInitParam_p->m_HwParam.m_pszDevName == NULL)
-	{
-		Ret = kEplEdrvInitError;
-		goto Exit;
-	}
-	
+    // clear instance structure
+    EPL_MEMSET(&EdrvInstance_l, 0, sizeof (EdrvInstance_l));
+    
+    if (pEdrvInitParam_p->m_HwParam.m_pszDevName == NULL)
+    {
+        Ret = kEplEdrvInitError;
+        goto Exit;
+    }
+    
     // search for the corresponding MAC address via IPHLPAPI
     ulOutBufLen = sizeof (IP_ADAPTER_INFO);
     pAdapterInfo = (IP_ADAPTER_INFO *) EPL_MALLOC(sizeof (IP_ADAPTER_INFO));
@@ -200,8 +200,8 @@ Ret = kEplSuccessful;
         Ret = kEplNoResource;
         goto Exit;
     }
-	
-	// Make an initial call to GetAdaptersInfo to get
+    
+    // Make an initial call to GetAdaptersInfo to get
     // the necessary size into the ulOutBufLen variable
     dwRetVal = GetAdaptersInfo(pAdapterInfo, &ulOutBufLen);
     if (dwRetVal == ERROR_BUFFER_OVERFLOW)
@@ -228,7 +228,7 @@ Ret = kEplSuccessful;
                 {   // corresponding adapter found
                     EPL_MEMCPY(pEdrvInitParam_p->m_abMyMacAddr, pAdapter->Address,
                         min(pAdapter->AddressLength, sizeof (pEdrvInitParam_p->m_abMyMacAddr)));
-					break;
+                    break;
                 }
             }
             pAdapter = pAdapter->Next;
@@ -244,36 +244,36 @@ Ret = kEplSuccessful;
         EPL_FREE(pAdapterInfo);
     }
 
-	// save the init data (with updated MAC address)
-	EdrvInstance_l.m_InitParam = *pEdrvInitParam_p;
+    // save the init data (with updated MAC address)
+    EdrvInstance_l.m_InitParam = *pEdrvInitParam_p;
 
-	m_lpAdapter = PacketOpenAdapter((LPTSTR)pEdrvInitParam_p->m_HwParam.m_pszDevName);
-	
-	// Create an handle to read packtes from the driver
-	EdrvInstance_l.m_hEdrvRead = CreateFile (L"PKT1:", GENERIC_READ, 0, 
-		NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-	
-	if (EdrvInstance_l.m_hEdrvRead == INVALID_HANDLE_VALUE) 
-	{
-		OutputDebugString( L"PKT ADATER NAMES: CREATE FILE FAILED\n" );
-		PacketSetLastError (GetLastError ());
-		Ret = kEplEdrvInitError;
+    m_lpAdapter = PacketOpenAdapter((LPTSTR)pEdrvInitParam_p->m_HwParam.m_pszDevName);
+    
+    // Create an handle to read packtes from the driver
+    EdrvInstance_l.m_hEdrvRead = CreateFile (L"PKT1:", GENERIC_READ, 0, 
+        NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+    
+    if (EdrvInstance_l.m_hEdrvRead == INVALID_HANDLE_VALUE) 
+    {
+        OutputDebugString( L"PKT ADATER NAMES: CREATE FILE FAILED\n" );
+        PacketSetLastError (GetLastError ());
+        Ret = kEplEdrvInitError;
         goto Exit;
-	}
+    }
 
-	// Create an handle to write packtes to the driver
-	EdrvInstance_l.m_hEdrvWrite = CreateFile (L"PKT1:", GENERIC_WRITE, 0, 
-	NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-	
-	if (EdrvInstance_l.m_hEdrvWrite == INVALID_HANDLE_VALUE) {
-		OutputDebugString( L"PKT ADATER NAMES: CREATE FILE FAILED\n" );
-		PacketSetLastError (GetLastError ());
-		Ret = kEplEdrvInitError;
+    // Create an handle to write packtes to the driver
+    EdrvInstance_l.m_hEdrvWrite = CreateFile (L"PKT1:", GENERIC_WRITE, 0, 
+    NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+    
+    if (EdrvInstance_l.m_hEdrvWrite == INVALID_HANDLE_VALUE) {
+        OutputDebugString( L"PKT ADATER NAMES: CREATE FILE FAILED\n" );
+        PacketSetLastError (GetLastError ());
+        Ret = kEplEdrvInitError;
         goto Exit;
-	}
-	
-	// get event handle for pcap instance
-	EdrvInstance_l.m_ahHandle[EDRV_HANDLE_PCAP] = m_lpAdapter->ReadEvent;
+    }
+    
+    // get event handle for pcap instance
+    EdrvInstance_l.m_ahHandle[EDRV_HANDLE_PCAP] = m_lpAdapter->ReadEvent;
     // Create two unnamed waitable timers for EplTimerHighResk sub-module.
     EdrvInstance_l.m_ahHandle[EDRV_HANDLE_TIMER0] =
         CreateEvent(NULL, FALSE, FALSE, NULL);
@@ -294,37 +294,37 @@ Ret = kEplSuccessful;
     // create event for signalling shutdown
     EdrvInstance_l.m_ahHandle[EDRV_HANDLE_EVENT] =
         CreateEvent(NULL, FALSE, FALSE, NULL);
-	
-	// Filter type 
-	dwFilter = NDIS_PACKET_TYPE_PROMISCUOUS;
-	
-	if (! PacketSetHwFilter (m_lpAdapter, dwFilter)) 
-	{
-			printf("HW filter fails");
-			PacketCloseAdapter (m_lpAdapter);
-			CloseHandle(EdrvInstance_l.m_hEdrvRead);
-			CloseHandle(EdrvInstance_l.m_hEdrvWrite);
-			Ret = kEplEdrvInitError;
-			goto Exit;
-	}
+    
+    // Filter type 
+    dwFilter = NDIS_PACKET_TYPE_PROMISCUOUS;
+    
+    if (! PacketSetHwFilter (m_lpAdapter, dwFilter)) 
+    {
+            printf("HW filter fails");
+            PacketCloseAdapter (m_lpAdapter);
+            CloseHandle(EdrvInstance_l.m_hEdrvRead);
+            CloseHandle(EdrvInstance_l.m_hEdrvWrite);
+            Ret = kEplEdrvInitError;
+            goto Exit;
+    }
 
-	// init the packet structure
-	m_RxPacket.Buffer				= m_pRxBuffer;
-	m_RxPacket.Length				= 256 * 1024;
-	m_RxPacket.ulBytesReceived		= 0;
-	m_RxPacket.bIoComplete			= FALSE;
+    // init the packet structure
+    m_RxPacket.Buffer                = m_pRxBuffer;
+    m_RxPacket.Length                = 256 * 1024;
+    m_RxPacket.ulBytesReceived        = 0;
+    m_RxPacket.bIoComplete            = FALSE;
 
-	// set a 64k buffer in the driver
-	PacketSetBuff (m_lpAdapter, 64 * 1024);
+    // set a 64k buffer in the driver
+    PacketSetBuff (m_lpAdapter, 64 * 1024);
 
-	// set number or write counter to one
-	PacketSetNumWrites (m_lpAdapter, 1);
+    // set number or write counter to one
+    PacketSetNumWrites (m_lpAdapter, 1);
 
-	// set the read time out to 1ms sec
-	PacketSetReadTimeout (m_lpAdapter, 1);
+    // set the read time out to 1ms sec
+    PacketSetReadTimeout (m_lpAdapter, 1);
 
-	// configure pcap for maximum responsiveness
-	PacketSetMinToCopy(m_lpAdapter, 0);
+    // configure pcap for maximum responsiveness
+    PacketSetMinToCopy(m_lpAdapter, 0);
 
     // Create the thread to begin execution on its own.
     EdrvInstance_l.m_hThread = CreateThread(
@@ -365,7 +365,7 @@ Exit:
 
 tEplKernel EdrvShutdown( void )
 {
-   // signal shutdown to the thread
+    // signal shutdown to the thread
     SetEvent(EdrvInstance_l.m_ahHandle[EDRV_HANDLE_EVENT]);
 
     WaitForSingleObject( EdrvInstance_l.m_hThread, INFINITE );
@@ -375,12 +375,12 @@ tEplKernel EdrvShutdown( void )
     CloseHandle ( EdrvInstance_l.m_ahHandle[EDRV_HANDLE_EVENT] );
     CloseHandle ( EdrvInstance_l.m_ahHandle[EDRV_HANDLE_TIMER0] );
     CloseHandle ( EdrvInstance_l.m_ahHandle[EDRV_HANDLE_TIMER1] );
-	
+    
     DeleteCriticalSection(&EdrvInstance_l.m_CriticalSection);
 
-	PacketCloseAdapter (m_lpAdapter);
-	CloseHandle(EdrvInstance_l.m_hEdrvRead);
-	CloseHandle(EdrvInstance_l.m_hEdrvWrite);
+    PacketCloseAdapter (m_lpAdapter);
+    CloseHandle(EdrvInstance_l.m_hEdrvRead);
+    CloseHandle(EdrvInstance_l.m_hEdrvWrite);
 
     // clear instance structure
     EPL_MEMSET(&EdrvInstance_l, 0, sizeof (EdrvInstance_l));
@@ -430,14 +430,14 @@ PACKET m_TxPacket;
     }
     LeaveCriticalSection(&EdrvInstance_l.m_CriticalSection);
 
-	m_TxPacket.Buffer = pBuffer_p->m_pbBuffer;
-	m_TxPacket.Length = pBuffer_p->m_uiTxMsgLen;
+    m_TxPacket.Buffer = pBuffer_p->m_pbBuffer;
+    m_TxPacket.Length = pBuffer_p->m_uiTxMsgLen;
 
-	if(!PacketSendPacket(m_lpAdapter,&m_TxPacket,0))
-	{
+    if(!PacketSendPacket(m_lpAdapter,&m_TxPacket,0))
+    {
         PRINTF3("%s pcap_sendpacket returned %d (%s)\n", __func__, iRet, pcap_geterr(EdrvInstance_l.m_pPcap));
-		Ret = kEplInvalidOperation;
-	}
+        Ret = kEplInvalidOperation;
+    }
 
 Exit:
     return Ret;
@@ -704,37 +704,37 @@ DWORD           dwRet;
 
             case WAIT_OBJECT_0 + EDRV_HANDLE_PCAP:
             {   
-				// frames were received
-				if (PacketReceivePacket (m_lpAdapter, &m_RxPacket, TRUE) == FALSE)	// last parameter is ignored
-				{
-					printf("APPL:Packet read error\n");
-					iRet = -1;
-					break;
-				}
+                // frames were received
+                if (PacketReceivePacket (m_lpAdapter, &m_RxPacket, TRUE) == FALSE)    // last parameter is ignored
+                {
+                    printf("APPL:Packet read error\n");
+                    iRet = -1;
+                    break;
+                }
 
-				// print packets
-				{
-					UINT	ulBytesReceived;
-					char	*RxBuffer;
-					UINT	offset = 0;
-					UINT	tlen1;
-					struct	bpf_hdr *hdr;
-				
-				
-					ulBytesReceived = m_RxPacket.ulBytesReceived;
-					RxBuffer = (char*)m_RxPacket.Buffer;	
+                // print packets
+                {
+                    UINT    ulBytesReceived;
+                    char    *RxBuffer;
+                    UINT    offset = 0;
+                    UINT    tlen1;
+                    struct    bpf_hdr *hdr;
+                
+                
+                    ulBytesReceived = m_RxPacket.ulBytesReceived;
+                    RxBuffer = (char*)m_RxPacket.Buffer;    
 
-					//
-					while (offset < ulBytesReceived) 
-					{	
-						hdr = (struct bpf_hdr *) (RxBuffer + offset);
-						tlen1 = hdr->bh_datalen;
-						offset += hdr->bh_hdrlen;
-						EdrvPacketHandler((unsigned char *)pInstance, RxBuffer+offset,
-										  hdr->bh_datalen);
-						offset = PACKET_WORDALIGN(offset + tlen1);
-					}	
-				}
+                    //
+                    while (offset < ulBytesReceived) 
+                    {    
+                        hdr = (struct bpf_hdr *) (RxBuffer + offset);
+                        tlen1 = hdr->bh_datalen;
+                        offset += hdr->bh_hdrlen;
+                        EdrvPacketHandler((unsigned char *)pInstance, RxBuffer+offset,
+                                          hdr->bh_datalen);
+                        offset = PACKET_WORDALIGN(offset + tlen1);
+                    }    
+                }
 
        
                 break;
@@ -832,8 +832,8 @@ typedef struct
 {
     tEplTimerEventArg   m_EventArg;
     tEplTimerkCallback  m_pfnCallback;
-	LARGE_INTEGER		m_liDueTime;
-	UINT				m_uiTimerId;
+    LARGE_INTEGER        m_liDueTime;
+    UINT                m_uiTimerId;
 
 } tEplTimerHighReskTimerInfo;
 
@@ -1051,94 +1051,94 @@ tEplKernel                  Ret = kEplSuccessful;
 unsigned int                uiIndex;
 tEplTimerHighReskTimerInfo* pTimerInfo;
 HANDLE                      hTimer;
-unsigned int				uiTimeMs_p = 0;
-MMRESULT					mTempTimerHdl = 0;
+unsigned int                uiTimeMs_p = 0;
+MMRESULT                    mTempTimerHdl = 0;
 
-		// check pointer to handle
-		if(pTimerHdl_p == NULL)
-		{
-			Ret = kEplTimerInvalidHandle;
-			goto Exit;
-		}
-		
-		if( ullTimeNs_p > (long long)1000000 )
-		{
-		//Convert nano seconds into milli seconds 
-		//Windows Timer accepts only milli secs time delays
-			uiTimeMs_p = (UINT ) (ullTimeNs_p /(long long)1000000);
-		}
-		else
-		{
-		//We create timer with 1 milli second delay
-		//If we get ullTimeNs_p with 0ns (OR) the above condition fails
-			uiTimeMs_p = 1;
-		}
-		
-		 if (*pTimerHdl_p == 0)
-		{   // no timer created yet
-			// search free timer info structure
-			pTimerInfo = &EplTimerHighReskInstance_l.m_aTimerInfo[0];
-			for (uiIndex = 0; uiIndex < TIMER_COUNT; uiIndex++, pTimerInfo++)
-			{
-				if (pTimerInfo->m_pfnCallback == NULL)
-				{   // free structure found
-					break;
-				}
-			}
-			if (uiIndex >= TIMER_COUNT)
-			{   // no free structure found
-				Ret = kEplTimerNoTimerCreated;
-				goto Exit;
-			}
-	    }
-		else
-		{
-			uiIndex = (*pTimerHdl_p >> TIMERHDL_SHIFT) - 1;
-			if (uiIndex > TIMER_COUNT)
-			{   // invalid handle
-				Ret = kEplTimerInvalidHandle;
-				goto Exit;
-			}
-			pTimerInfo = &EplTimerHighReskInstance_l.m_aTimerInfo[uiIndex];
-			// d.k.: assume that this info structure is the correct one
-	/*        if ((pTimerInfo->m_EventArg.m_TimerHdl != *pTimerHdl_p)
-				&& (pTimerInfo->m_pfnCallback == NULL))
-			{   // invalid handle
-				Ret = kEplTimerInvalidHandle;
-				goto Exit;
-			}*/
-		}
-		
-	   // increment timer handle (if timer expires right after this statement,
-	   // the user would detect an unknown timer handle and discard it)
-	   pTimerInfo->m_EventArg.m_TimerHdl = ((pTimerInfo->m_EventArg.m_TimerHdl + 1) & TIMERHDL_MASK)
+        // check pointer to handle
+        if(pTimerHdl_p == NULL)
+        {
+            Ret = kEplTimerInvalidHandle;
+            goto Exit;
+        }
+        
+        if( ullTimeNs_p > (long long)1000000 )
+        {
+        //Convert nano seconds into milli seconds 
+        //Windows Timer accepts only milli secs time delays
+            uiTimeMs_p = (UINT ) (ullTimeNs_p /(long long)1000000);
+        }
+        else
+        {
+        //We create timer with 1 milli second delay
+        //If we get ullTimeNs_p with 0ns (OR) the above condition fails
+            uiTimeMs_p = 1;
+        }
+        
+         if (*pTimerHdl_p == 0)
+        {   // no timer created yet
+            // search free timer info structure
+            pTimerInfo = &EplTimerHighReskInstance_l.m_aTimerInfo[0];
+            for (uiIndex = 0; uiIndex < TIMER_COUNT; uiIndex++, pTimerInfo++)
+            {
+                if (pTimerInfo->m_pfnCallback == NULL)
+                {   // free structure found
+                    break;
+                }
+            }
+            if (uiIndex >= TIMER_COUNT)
+            {   // no free structure found
+                Ret = kEplTimerNoTimerCreated;
+                goto Exit;
+            }
+        }
+        else
+        {
+            uiIndex = (*pTimerHdl_p >> TIMERHDL_SHIFT) - 1;
+            if (uiIndex > TIMER_COUNT)
+            {   // invalid handle
+                Ret = kEplTimerInvalidHandle;
+                goto Exit;
+            }
+            pTimerInfo = &EplTimerHighReskInstance_l.m_aTimerInfo[uiIndex];
+            // d.k.: assume that this info structure is the correct one
+    /*        if ((pTimerInfo->m_EventArg.m_TimerHdl != *pTimerHdl_p)
+                && (pTimerInfo->m_pfnCallback == NULL))
+            {   // invalid handle
+                Ret = kEplTimerInvalidHandle;
+                goto Exit;
+            }*/
+        }
+        
+       // increment timer handle (if timer expires right after this statement,
+       // the user would detect an unknown timer handle and discard it)
+       pTimerInfo->m_EventArg.m_TimerHdl = ((pTimerInfo->m_EventArg.m_TimerHdl + 1) & TIMERHDL_MASK)
                                         | ((uiIndex + 1) << TIMERHDL_SHIFT);
 
-	   if (fContinuously_p != FALSE)
-		{   // continuous timer
-			pTimerInfo->m_liDueTime.QuadPart = uiTimeMs_p;
-		}
-		else
-		{   // one-shot timer
-			pTimerInfo->m_liDueTime.QuadPart = 0LL;
-		}
+       if (fContinuously_p != FALSE)
+        {   // continuous timer
+            pTimerInfo->m_liDueTime.QuadPart = uiTimeMs_p;
+        }
+        else
+        {   // one-shot timer
+            pTimerInfo->m_liDueTime.QuadPart = 0LL;
+        }
 
-		pTimerInfo->m_EventArg.m_ulArg = ulArgument_p;
-		pTimerInfo->m_pfnCallback = pfnCallback_p;
+        pTimerInfo->m_EventArg.m_ulArg = ulArgument_p;
+        pTimerInfo->m_pfnCallback = pfnCallback_p;
 
-		*pTimerHdl_p = pTimerInfo->m_EventArg.m_TimerHdl;
+        *pTimerHdl_p = pTimerInfo->m_EventArg.m_TimerHdl;
 
-		// configure timer
-		hTimer = EdrvGetTimerHandle(uiIndex);
+        // configure timer
+        hTimer = EdrvGetTimerHandle(uiIndex);
 
-		pTimerInfo->m_uiTimerId = timeSetEvent(uiTimeMs_p,1,hTimer,0,TIME_CALLBACK_EVENT_SET);
+        pTimerInfo->m_uiTimerId = timeSetEvent(uiTimeMs_p,1,hTimer,0,TIME_CALLBACK_EVENT_SET);
 
-		if (!pTimerInfo->m_uiTimerId)
-		{
-			printf("timeSetEvent failed (%d)\n", GetLastError());
-			Ret = kEplTimerNoTimerCreated;
-			goto Exit;
-		}
+        if (!pTimerInfo->m_uiTimerId)
+        {
+            printf("timeSetEvent failed (%d)\n", GetLastError());
+            Ret = kEplTimerNoTimerCreated;
+            goto Exit;
+        }
 
 Exit:
     return Ret;
@@ -1167,7 +1167,7 @@ tEplKernel                  Ret = kEplSuccessful;
 unsigned int                uiIndex;
 tEplTimerHighReskTimerInfo* pTimerInfo;
 //HANDLE                      hTimer;
-MMRESULT						mResult;
+MMRESULT                        mResult;
 
     // check pointer to handle
     if(pTimerHdl_p == NULL)
@@ -1178,7 +1178,7 @@ MMRESULT						mResult;
 
     if (*pTimerHdl_p == 0)
     {   // no timer created yet
-		Ret = kEplTimerNoTimerCreated;
+        Ret = kEplTimerNoTimerCreated;
         goto Exit;
     }
     else
@@ -1205,9 +1205,9 @@ MMRESULT						mResult;
 
     mResult = timeKillEvent(pTimerInfo->m_uiTimerId);
 
-	//printf("Delete Timer: 0x%X\n", mResult);
+    //printf("Delete Timer: 0x%X\n", mResult);
 
-	*pTimerHdl_p = 0;
+    *pTimerHdl_p = 0;
 
 Exit:
     return Ret;
@@ -1243,14 +1243,14 @@ tEplTimerHighReskTimerInfo* pTimerInfo;
     if (pTimerInfo->m_liDueTime.QuadPart != 0)
     {   // periodic timer
     HANDLE  hTimer;
-	unsigned int uiTimeMs_p;
+    unsigned int uiTimeMs_p;
 
         // configure timer
         hTimer = EdrvGetTimerHandle(uiIndex_p);
 
-		uiTimeMs_p = (UINT)pTimerInfo->m_liDueTime.QuadPart;
+        uiTimeMs_p = (UINT)pTimerInfo->m_liDueTime.QuadPart;
 
-		pTimerInfo->m_uiTimerId = timeSetEvent(uiTimeMs_p,1,hTimer,0,TIME_CALLBACK_EVENT_SET);
+        pTimerInfo->m_uiTimerId = timeSetEvent(uiTimeMs_p,1,hTimer,0,TIME_CALLBACK_EVENT_SET);
         if (!pTimerInfo->m_uiTimerId)
         {
             printf("timeSetEvent failed (%d)\n", GetLastError());
