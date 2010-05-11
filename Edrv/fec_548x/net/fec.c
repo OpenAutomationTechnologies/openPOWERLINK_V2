@@ -170,13 +170,6 @@
 
 typedef unsigned char mac_addr[6];  // MAC address type.
 
-typedef struct
-{
-    BOOL            m_fUsed;
-    unsigned int    m_uiSize;
-
-} tEdrvTxBufferTableIntern;
-
 // Private structure
 struct fec_priv
 {
@@ -213,21 +206,16 @@ struct eth_if
 // buffers and buffer descriptors and pointers
 
 #if TARGET_SYSTEM == _LINUX_
-    unsigned char *fec_rxbuf;       // pointer to Rx array of buffers
-    unsigned char *fec_txbuf;       // pointer to Tx array of buffers
-
+    unsigned char *fec_rxbuf_g;       // pointer to Rx array of buffers
+    unsigned char *fec_txbuf_g;       // pointer to Tx array of buffers
 #elif TARGET_SYSTEM == _NO_OS_
-    extern unsigned char  fec_rxbuf[(FEC_RX_BUF_NUMBER * FEC_MAXBUF_SIZE) + 15];       // Reception array of buffers
-    extern unsigned char  fec_txbuf[(FEC_TX_BUF_NUMBER * FEC_MAXBUF_SIZE) + 15];       // Transmission array of buffers
-
+    extern unsigned char  fec_rxbuf_g[(FEC_RX_BUF_NUMBER * FEC_MAXBUF_SIZE) + 15];       // Reception array of buffers
+    extern unsigned char  fec_txbuf_g[(FEC_TX_BUF_NUMBER * FEC_MAXBUF_SIZE) + 15];       // Transmission array of buffers
 #endif
-
-tEdrvTxBufferTableIntern TxBufTable_l[FEC_TX_BUF_NUMBER];
 
 
 #if (EDRV_USED_ETH_CTRL == 0)
     mac_addr fec_mac_addr_fec0 = {0x00,0x11,0x22,0x33,0x44,0x50};   //Default IP address of FEC0
-    unsigned char *fec_rxbuf_fec0;	// original pointer to reception buffers from kmalloc
 
     struct fec_priv fec_priv_fec0;
 
@@ -238,7 +226,6 @@ tEdrvTxBufferTableIntern TxBufTable_l[FEC_TX_BUF_NUMBER];
 
 #else
     mac_addr fec_mac_addr_fec1 = {0x00,0x11,0x22,0x33,0x44,0x51};   //Default IP address of FEC1
-    unsigned char *fec_rxbuf_fec1;	// original pointer to reception buffers from kmalloc
 
     struct fec_priv fec_priv_fec1;
 
@@ -296,8 +283,12 @@ void fec_interrupt_fec_rx_handler_fec1(void);
 typedef struct
 {
     BOOL                m_afTxBufUsed[FEC_TX_BUF_NUMBER];
+    unsigned long       m_ulTxBufPointer;             // pointer to Tx buffer
     tEdrvTxBuffer*      m_pLastTransmittedTxBuffer;
     MCD_bufDescFec*     m_pTxDesc;
+    unsigned int        m_uiHeadTxDesc;
+    unsigned int        m_uiTailTxDesc;
+    tEdrvTxBuffer*      m_apTxBuffer[FEC_TX_DESC_NUMBER]; // pointers to previously sent tx buffers
 
 } tEdrvInstance;
 
@@ -331,11 +322,11 @@ BYTE EdrvCalcHash (BYTE * pbMAC_p);
 //---------------------------------------------------------------------------
 tEplKernel EdrvInit                   (tEdrvInitParam * pEdrvInitParam_p)
 {
-DWORD i;
-tEplKernel Ret;
-int iResult;
-unsigned long ulOffset;
-unsigned long ulTxBufPointer;
+DWORD               i;
+tEplKernel          Ret;
+int                 iResult;
+unsigned long       ulOffset;
+struct fec_priv *   fp;
 
     Ret = kEplSuccessful;
 
@@ -345,47 +336,42 @@ unsigned long ulTxBufPointer;
     // save the init data
     EdrvInitParam_l = *pEdrvInitParam_p;
 
-    pLastTransmittedTxBuffer_l = NULL;
-
 #if TARGET_SYSTEM == _LINUX_
     // -------- Memory allocation for Tx buffer --------
 
-    fec_txbuf = kmalloc(FEC_TX_BUF_NUMBER * FEC_MAXBUF_SIZE + 15, GFP_DMA);
+    fec_txbuf_g = kmalloc(FEC_TX_BUF_NUMBER * FEC_MAXBUF_SIZE + 15, GFP_DMA);
 
-    if (!fec_txbuf)
+    if (!fec_txbuf_g)
+    {
         return -ENOMEM;
+    }
 
-    ulOffset = ((virt_to_phys(fec_txbuf) + 15) & 0xFFFFFFF0) - virt_to_phys(fec_txbuf);
+    ulOffset = ((virt_to_phys(fec_txbuf_g) + 15) & 0xFFFFFFF0) - virt_to_phys(fec_txbuf_g);
 
-    ulTxBufPointer = ((unsigned long)fec_txbuf + ulOffset);
+    EdrvInstance_l.m_ulTxBufPointer = ((unsigned long)fec_txbuf_g + ulOffset);
 #else
     // -------- Tx buffer pointer adjustment to static buffer -------
 
-    ulTxBufPointer = ((unsigned long)(fec_txbuf + 15) & 0xFFFFFFF0);
-
+    EdrvInstance_l.m_ulTxBufPointer = ((unsigned long)(fec_txbuf_g + 15) & 0xFFFFFFF0);
 #endif
 
     // adjust pointer to Tx buffer descriptors
 #if (EDRV_USED_ETH_CTRL == 0)
-    EdrvInstance_l.pTxBufDescr = (MCD_bufDescFec*)FEC_TX_DESC_FEC0; //0x80012040; //FEC_TX_DESC_FEC0;
+    EdrvInstance_l.m_pTxDesc = (MCD_bufDescFec*)FEC_TX_DESC_FEC0;
 #else
-    EdrvInstance_l.pTxBufDescr = (MCD_bufDescFec*)FEC_TX_DESC_FEC1;
+    EdrvInstance_l.m_pTxDesc = (MCD_bufDescFec*)FEC_TX_DESC_FEC1;
 #endif
 
     // initialize Tx buffer descriptors
     for (i = 0; i < FEC_TX_DESC_NUMBER; i++)
     {
-        EdrvInstance_l.pTxBufDescr[i].statCtrl = MCD_FEC_INTERRUPT;
-
-        // TODO move handling of pointer to TxBuf to AllocTxMsgBuffer
-
-#if TARGET_SYSTEM == _LINUX_
-        EdrvInstance_l.pTxBufDescr[i].dataPointer = (unsigned int) virt_to_phys((void*)ulTxBufPointer);
-#else
-        EdrvInstance_l.pTxBufDescr[i].dataPointer  = ulTxBufPointer;
-#endif
-        ulTxBufPointer += FEC_MAXBUF_SIZE;
+        EdrvInstance_l.m_pTxDesc[i].statCtrl = MCD_FEC_INTERRUPT | MCD_FEC_END_FRAME;
+        EdrvInstance_l.m_apTxBuffer[i] = NULL;
     }
+    EdrvInstance_l.m_pTxDesc[FEC_TX_DESC_NUMBER-1].statCtrl |= MCD_FEC_WRAP;
+
+    EdrvInstance_l.m_uiHeadTxDesc = 0;
+    EdrvInstance_l.m_uiTailTxDesc = 0;
 
     // set mac address
 #if (EDRV_USED_ETH_CTRL == 0)
@@ -473,6 +459,23 @@ unsigned long ulTxBufPointer;
     TgtEnableEthInterrupt1(TRUE, EPL_TGT_INTMASK_ETH | EPL_TGT_INTMASK_DMA);
 #endif
 
+    // Receive the pointer to the private structure
+#if (EDRV_USED_ETH_CTRL == 0)
+    fp = (struct fec_priv *)fec_dev_fec0.if_ptr;
+#else
+    fp = (struct fec_priv *)fec_dev_fec1.if_ptr;
+#endif
+
+    // start tx dma task
+    MCD_startDma(fp->fecpriv_fec_tx_channel, (s8*) &EdrvInstance_l.m_pTxDesc[0], 0,
+             (s8*) &(FEC_FECTFDR(fp->base_addr)), 0,
+             FEC_MAX_FRM_SIZE, 0, fp->fecpriv_initiator_tx,
+             FEC_TX_DMA_PRI,
+             MCD_FECTX_DMA | MCD_INTERRUPT | MCD_TT_FLAGS_DEF | MCD_TT_FLAGS_SP,
+             MCD_NO_CSUM | MCD_NO_BYTE_SWAP);
+
+//    printf("A: LR=0x%03lX R=0x%03lX LW=0x%03lX W=0x%03lX\n", FEC_FECTLRFP(fp->base_addr), FEC_FECTFRP(fp->base_addr), FEC_FECTLWFP(fp->base_addr), FEC_FECTFWP(fp->base_addr));
+
 Exit:
     return Ret;
 
@@ -510,7 +513,7 @@ tEplKernel EdrvShutdown               (void)
 
 #if TARGET_SYSTEM == _LINUX_
     // memory deallocation of Tx buffers
-	kfree(fec_txbuf);
+	kfree(fec_txbuf_g);
 #endif
 
     TgtFreeEthIsr();
@@ -685,7 +688,7 @@ tEplKernel EdrvAllocTxMsgBuffer       (tEdrvTxBuffer * pBuffer_p)
 tEplKernel Ret = kEplSuccessful;
 DWORD i;
 
-    if (pBuffer_p->m_uiMaxBufferLen > EDRV_MAX_FRAME_SIZE)
+    if (pBuffer_p->m_uiMaxBufferLen > FEC_MAXBUF_SIZE)
     {
         Ret = kEplEdrvNoFreeBufEntry;
         goto Exit;
@@ -700,11 +703,12 @@ DWORD i;
             EdrvInstance_l.m_afTxBufUsed[i] = TRUE;
             pBuffer_p->m_BufferNumber.m_dwVal = i;
 #if TARGET_SYSTEM == _LINUX_
-            pBuffer_p->m_pbBuffer = (BYTE *) phys_to_virt(TxBufTable_l[i].m_pBufDescr->dataPointer);
+            pBuffer_p->m_pbBuffer = (BYTE *) phys_to_virt(EdrvInstance_l.m_ulTxBufPointer + FEC_MAXBUF_SIZE * i);
 #else
-            pBuffer_p->m_pbBuffer = (BYTE *) TxBufTable_l[i].m_pBufDescr->dataPointer;
+            pBuffer_p->m_pbBuffer = (BYTE *) (EdrvInstance_l.m_ulTxBufPointer + FEC_MAXBUF_SIZE * i);
 #endif
-            pBuffer_p->m_uiMaxBufferLen = TxBufTable_l[i].m_uiSize;
+            pBuffer_p->m_uiMaxBufferLen = FEC_MAXBUF_SIZE;
+
             break;
         }
     }
@@ -741,7 +745,7 @@ uiBufferNumber = pBuffer_p->m_BufferNumber.m_dwVal;
 
     if (uiBufferNumber < FEC_TX_BUF_NUMBER)
     {
-        TxBufTable_l[uiBufferNumber].m_fUsed = FALSE;
+        EdrvInstance_l.m_afTxBufUsed[uiBufferNumber] = FALSE;
     }
 
     return kEplSuccessful;
@@ -761,40 +765,42 @@ uiBufferNumber = pBuffer_p->m_BufferNumber.m_dwVal;
 // State:
 //
 //---------------------------------------------------------------------------
-tEplKernel EdrvSendTxMsg              (tEdrvTxBuffer * pBuffer_p)
+tEplKernel EdrvSendTxMsg              (tEdrvTxBuffer * pTxBuffer_p)
 {
-tEplKernel Ret = kEplSuccessful;
-MCD_bufDescFec * pBufferDesc;
-unsigned int uiBufferNumber;
+tEplKernel          Ret;
+MCD_bufDescFec *    pTxDesc;
+unsigned int        uiBufferNumber;
+unsigned long       base_addr;
+struct fec_priv *   fp;
 
-    //Receive the pointer to the private structure
-#if (EDRV_USED_ETH_CTRL == 0)
-    struct fec_priv *fp = (struct fec_priv *)fec_dev_fec0.if_ptr;
-#else
-    struct fec_priv *fp = (struct fec_priv *)fec_dev_fec1.if_ptr;
-#endif
+    Ret = kEplSuccessful;
 
-    // Receive the base address
-    unsigned long base_addr = (unsigned long)fp->base_addr;
+    uiBufferNumber = pTxBuffer_p->m_BufferNumber.m_dwVal;
 
-    uiBufferNumber = pBuffer_p->m_BufferNumber.m_dwVal;
-
-    if ((uiBufferNumber < FEC_TX_BUF_NUMBER)
-        && (TxBufTable_l[uiBufferNumber].m_fUsed != FALSE))
-    {
-        pBufferDesc = TxBufTable_l[uiBufferNumber].m_pBufDescr;
-    }
-    else
+    if ((uiBufferNumber >= FEC_TX_BUF_NUMBER)
+        || (EdrvInstance_l.m_afTxBufUsed[uiBufferNumber] == FALSE))
     {
         Ret = kEplEdrvBufNotExisting;
         goto Exit;
     }
 
-    if (pLastTransmittedTxBuffer_l != NULL)
-    {   // transmission is already active
-        Ret = kEplInvalidOperation;
+    // one descriptor has to be left empty for distinction between full and empty
+    if (((EdrvInstance_l.m_uiTailTxDesc + 1) & FEC_TX_DESC_MASK) == EdrvInstance_l.m_uiHeadTxDesc)
+    {
+        Ret = kEplEdrvNoFreeTxDesc;
         goto Exit;
     }
+
+
+    // Receive the pointer to the private structure
+#if (EDRV_USED_ETH_CTRL == 0)
+    fp = (struct fec_priv *)fec_dev_fec0.if_ptr;
+#else
+    fp = (struct fec_priv *)fec_dev_fec1.if_ptr;
+#endif
+
+    // Receive the base address
+    base_addr = (unsigned long)fp->base_addr;
 
     if ((FEC_TCR(base_addr) & FEC_TCR_GTS) != 0)
     {   // transmission was already stopped
@@ -810,18 +816,29 @@ unsigned int uiBufferNumber;
         FEC_TCR(base_addr) &= ~FEC_TCR_GTS;
     }
 
-    pLastTransmittedTxBuffer_l = pBuffer_p;
 
-//    printk("-");
+    // save pointer to buffer structure for TxHandler
+    EdrvInstance_l.m_apTxBuffer[EdrvInstance_l.m_uiTailTxDesc] = pTxBuffer_p;
 
-    pBufferDesc->length = pBuffer_p->m_uiTxMsgLen;
+    pTxDesc = &EdrvInstance_l.m_pTxDesc[EdrvInstance_l.m_uiTailTxDesc];
+    pTxDesc->length = pTxBuffer_p->m_uiTxMsgLen;
+
+#if TARGET_SYSTEM == _LINUX_
+    pTxDesc->dataPointer = (unsigned int) virt_to_phys((void*)(EdrvInstance_l.m_ulTxBufPointer
+                                                               + FEC_MAXBUF_SIZE * uiBufferNumber));
+#else
+    pTxDesc->dataPointer = EdrvInstance_l.m_ulTxBufPointer + FEC_MAXBUF_SIZE * uiBufferNumber;
+#endif
 
     // flush data cache before initializing the descriptor and starting DMA
 //    DcacheFlushInvalidateCacheBlock((void*)pBufferDesc->dataPointer, pBufferDesc->length);
 
-    pBufferDesc->statCtrl = (MCD_FEC_WRAP | MCD_FEC_INTERRUPT | MCD_FEC_END_FRAME | MCD_FEC_BUF_READY);
+    pTxDesc->statCtrl   |= MCD_FEC_BUF_READY;
 
-//    printf("S: LR=0x%03lX R=0x%03lX LW=0x%03lX W=0x%03lX\n", FEC_FECTLRFP(base_addr), FEC_FECTFRP(base_addr), FEC_FECTLWFP(base_addr), FEC_FECTFWP(base_addr));
+    // increment tx queue tail
+    EdrvInstance_l.m_uiTailTxDesc = (EdrvInstance_l.m_uiTailTxDesc + 1) & FEC_TX_DESC_MASK;
+
+//    printk("S: LR=0x%03X R=0x%03X LW=0x%03X W=0x%03X\n", FEC_FECTLRFP(base_addr), FEC_FECTFRP(base_addr), FEC_FECTLWFP(base_addr), FEC_FECTFWP(base_addr));
 
 #if EDRV_BENCHMARK != FALSE
     // set LED
@@ -834,14 +851,10 @@ unsigned int uiBufferNumber;
 
     TGT_DBG_SIGNAL_TRACE_POINT(2);
 
-    MCD_startDma(fp->fecpriv_fec_tx_channel, (s8*) pBufferDesc, 0,
-             (s8*) &(FEC_FECTFDR(base_addr)), 0,
-             FEC_MAX_FRM_SIZE, 0, fp->fecpriv_initiator_tx,
-             FEC_TX_DMA_PRI,
-             MCD_FECTX_DMA | MCD_INTERRUPT | MCD_TT_FLAGS_DEF | MCD_TT_FLAGS_SP,
-             MCD_NO_CSUM | MCD_NO_BYTE_SWAP);
+    // Tell the DMA to continue the reception
+    MCD_continDma(fp->fecpriv_fec_tx_channel);
 
-//    printf("A: LR=0x%03lX R=0x%03lX LW=0x%03lX W=0x%03lX\n", FEC_FECTLRFP(base_addr), FEC_FECTFRP(base_addr), FEC_FECTLWFP(base_addr), FEC_FECTFWP(base_addr));
+//    printk("A: LR=0x%03X R=0x%03X LW=0x%03X W=0x%03X\n", FEC_FECTLRFP(base_addr), FEC_FECTFRP(base_addr), FEC_FECTLWFP(base_addr), FEC_FECTFWP(base_addr));
 
 #if EDRV_BENCHMARK != FALSE
     // reset LED
@@ -865,34 +878,42 @@ Exit:
 // State:
 //
 //---------------------------------------------------------------------------
-tEplKernel EdrvTxMsgReady              (tEdrvTxBuffer * pBuffer_p)
+tEplKernel EdrvTxMsgReady              (tEdrvTxBuffer * pTxBuffer_p)
 {
-tEplKernel Ret = kEplSuccessful;
-MCD_bufDescFec * pBufferDesc;
-unsigned int uiBufferNumber;
+tEplKernel          Ret;
+MCD_bufDescFec *    pTxDesc;
+unsigned int        uiBufferNumber;
+struct fec_priv *   fp;
+unsigned long       base_addr;
 
-    //Receive the pointer to the private structure
-#if (EDRV_USED_ETH_CTRL == 0)
-    struct fec_priv *fp = (struct fec_priv *)fec_dev_fec0.if_ptr;
-#else
-    struct fec_priv *fp = (struct fec_priv *)fec_dev_fec1.if_ptr;
-#endif
+    Ret = kEplSuccessful;
 
-    // Receive the base address
-    unsigned long base_addr = (unsigned long)fp->base_addr;
+    uiBufferNumber = pTxBuffer_p->m_BufferNumber.m_dwVal;
 
-    uiBufferNumber = pBuffer_p->m_BufferNumber.m_dwVal;
-
-    if ((uiBufferNumber < FEC_TX_BUF_NUMBER)
-        && (TxBufTable_l[uiBufferNumber].m_fUsed != FALSE))
-    {
-        pBufferDesc = TxBufTable_l[uiBufferNumber].m_pBufDescr;
-    }
-    else
+    if ((uiBufferNumber >= FEC_TX_BUF_NUMBER)
+        || (EdrvInstance_l.m_afTxBufUsed[uiBufferNumber] == FALSE))
     {
         Ret = kEplEdrvBufNotExisting;
         goto Exit;
     }
+
+    // one descriptor has to be left empty for distinction between full and empty
+    if (((EdrvInstance_l.m_uiTailTxDesc + 1) & FEC_TX_DESC_MASK) == EdrvInstance_l.m_uiHeadTxDesc)
+    {
+        Ret = kEplEdrvNoFreeTxDesc;
+        goto Exit;
+    }
+
+
+    //Receive the pointer to the private structure
+#if (EDRV_USED_ETH_CTRL == 0)
+    fp = (struct fec_priv *)fec_dev_fec0.if_ptr;
+#else
+    fp = (struct fec_priv *)fec_dev_fec1.if_ptr;
+#endif
+
+    // Receive the base address
+    base_addr = (unsigned long)fp->base_addr;
 
     if ((FEC_TCR(base_addr) & FEC_TCR_GTS) != 0)
     {   // transmission was already stopped
@@ -918,14 +939,27 @@ unsigned int uiBufferNumber;
     // stop transmission gracefully
     FEC_TCR(base_addr) |= FEC_TCR_GTS;
 
-    pLastTransmittedTxBuffer_l = pBuffer_p;
 
-    pBufferDesc->length = pBuffer_p->m_uiTxMsgLen;
+    // save pointer to buffer structure for TxHandler
+    EdrvInstance_l.m_apTxBuffer[EdrvInstance_l.m_uiTailTxDesc] = pTxBuffer_p;
+
+    pTxDesc = &EdrvInstance_l.m_pTxDesc[EdrvInstance_l.m_uiTailTxDesc];
+    pTxDesc->length = pTxBuffer_p->m_uiTxMsgLen;
+
+#if TARGET_SYSTEM == _LINUX_
+    pTxDesc->dataPointer = (unsigned int) virt_to_phys((void*)(EdrvInstance_l.m_ulTxBufPointer
+                                                               + FEC_MAXBUF_SIZE * uiBufferNumber));
+#else
+    pTxDesc->dataPointer = EdrvInstance_l.m_ulTxBufPointer + FEC_MAXBUF_SIZE * uiBufferNumber;
+#endif
 
     // flush data cache before initializing the descriptor and starting DMA
-    DcacheFlushInvalidateCacheBlock((void*)pBufferDesc->dataPointer, pBufferDesc->length);
+    DcacheFlushInvalidateCacheBlock((void*)pTxDesc->dataPointer, pTxDesc->length);
 
-    pBufferDesc->statCtrl = (MCD_FEC_WRAP | MCD_FEC_INTERRUPT | MCD_FEC_END_FRAME | MCD_FEC_BUF_READY);
+    pTxDesc->statCtrl   |= MCD_FEC_BUF_READY;
+
+    // increment tx queue tail
+    EdrvInstance_l.m_uiTailTxDesc = (EdrvInstance_l.m_uiTailTxDesc + 1) & FEC_TX_DESC_MASK;
 
 //    printf("B: LR=0x%03lX R=0x%03lX LW=0x%03lX W=0x%03lX\n", FEC_FECTLRFP(base_addr), FEC_FECTFRP(base_addr), FEC_FECTLWFP(base_addr), FEC_FECTFWP(base_addr));
 //    FEC_FECTFRP(base_addr) = (FEC_FECTFRP(base_addr) - 0x40) & FEC_FIFOPOINTERMASK;
@@ -940,12 +974,8 @@ unsigned int uiBufferNumber;
 //    MCF_GPIO_PODR_PCIBG |= 0x02;  // Level
     TGT_DBG_SIGNAL_TRACE_POINT(3);
 
-    MCD_startDma(fp->fecpriv_fec_tx_channel, (s8*) pBufferDesc, 0,
-             (s8*) &(FEC_FECTFDR(base_addr)), 0,
-             FEC_MAX_FRM_SIZE, 0, fp->fecpriv_initiator_tx,
-             FEC_TX_DMA_PRI,
-             MCD_FECTX_DMA | MCD_INTERRUPT | MCD_TT_FLAGS_DEF | MCD_TT_FLAGS_SP,
-             MCD_NO_CSUM | MCD_NO_BYTE_SWAP);
+    // Tell the DMA to continue the reception
+    MCD_continDma(fp->fecpriv_fec_tx_channel);
 
 //    printf("D: LR=0x%03lX R=0x%03lX LW=0x%03lX W=0x%03lX\n", FEC_FECTLRFP(base_addr), FEC_FECTFRP(base_addr), FEC_FECTLWFP(base_addr), FEC_FECTFWP(base_addr));
 
@@ -972,18 +1002,22 @@ Exit:
 //---------------------------------------------------------------------------
 tEplKernel EdrvTxMsgStart              (tEdrvTxBuffer * pBuffer_p)
 {
-tEplKernel Ret = kEplSuccessful;
+tEplKernel          Ret;
+struct fec_priv *   fp;
+unsigned long       base_addr;
+
+    Ret = kEplSuccessful;
 
 
     //Receive the pointer to the private structure
 #if (EDRV_USED_ETH_CTRL == 0)
-    struct fec_priv *fp = (struct fec_priv *)fec_dev_fec0.if_ptr;
+    fp = (struct fec_priv *)fec_dev_fec0.if_ptr;
 #else
-    struct fec_priv *fp = (struct fec_priv *)fec_dev_fec1.if_ptr;
+    fp = (struct fec_priv *)fec_dev_fec1.if_ptr;
 #endif
 
     // Receive the base address
-    unsigned long base_addr = (unsigned long)fp->base_addr;
+    base_addr = (unsigned long)fp->base_addr;
 
 //    printf("1: LR=0x%03lX R=0x%03lX LW=0x%03lX W=0x%03lX\n", FEC_FECTLRFP(base_addr), FEC_FECTFRP(base_addr), FEC_FECTLWFP(base_addr), FEC_FECTFWP(base_addr));
     // restart transmission
@@ -1033,18 +1067,18 @@ int fec_init_module(void)
 #if TARGET_SYSTEM == _LINUX_
     // -------- Memory allocation for Rx buffer --------
 
-    fec_rxbuf = kmalloc(FEC_RX_BUF_NUMBER * FEC_MAXBUF_SIZE + 15, GFP_DMA);
+    fec_rxbuf_g = kmalloc(FEC_RX_BUF_NUMBER * FEC_MAXBUF_SIZE + 15, GFP_DMA);
 
-    if (!fec_rxbuf)
+    if (!fec_rxbuf_g)
         return -ENOMEM;
 
-    offset = (((unsigned int)virt_to_phys(fec_rxbuf) + 15) & 0xFFFFFFF0) - (unsigned int)virt_to_phys(fec_rxbuf);
+    offset = (((unsigned int)virt_to_phys(fec_rxbuf_g) + 15) & 0xFFFFFFF0) - (unsigned int)virt_to_phys(fec_rxbuf_g);
 
-    fec_priv_fec0.fecpriv_rxbuf = (void*)((unsigned long)fec_rxbuf + offset);
+    fec_priv_fec0.fecpriv_rxbuf = (void*)((unsigned long)fec_rxbuf_g + offset);
 #else
     // -------- Rx buffer pointer adjustment -------
 
-    fec_priv_fec0.fecpriv_rxbuf = (void*)(((unsigned long)fec_rxbuf + 15) & 0xFFFFFFF0);
+    fec_priv_fec0.fecpriv_rxbuf = (void*)(((unsigned long)fec_rxbuf_g + 15) & 0xFFFFFFF0);
 
 #endif
     // -------- Initialize FEC0 --------
@@ -1088,18 +1122,18 @@ int fec_init_module(void)
 #if TARGET_SYSTEM == _LINUX_
     // -------- Memory allocation for Rx buffer --------
 
-    fec_rxbuf = kmalloc(FEC_RX_BUF_NUMBER * FEC_MAXBUF_SIZE + 15, GFP_DMA);
+    fec_rxbuf_g = kmalloc(FEC_RX_BUF_NUMBER * FEC_MAXBUF_SIZE + 15, GFP_DMA);
 
-    if (!fec_rxbuf)
+    if (!fec_rxbuf_g)
         return -ENOMEM;
 
-    offset = (((unsigned int)virt_to_phys(fec_rxbuf) + 15) & 0xFFFFFFF0) - (unsigned int)virt_to_phys(fec_rxbuf);
+    offset = (((unsigned int)virt_to_phys(fec_rxbuf_g) + 15) & 0xFFFFFFF0) - (unsigned int)virt_to_phys(fec_rxbuf_g);
 
-    fec_priv_fec1.fecpriv_rxbuf = (void*)((unsigned long)fec_rxbuf + offset);
+    fec_priv_fec1.fecpriv_rxbuf = (void*)((unsigned long)fec_rxbuf_g + offset);
 #else
     // -------- Rx buffer pointer adjustment -------
 
-    fec_priv_fec1.fecpriv_rxbuf = (void*)(((unsigned long)fec_rxbuf + 15) & 0xFFFFFFF0);
+    fec_priv_fec1.fecpriv_rxbuf = (void*)(((unsigned long)fec_rxbuf_g + 15) & 0xFFFFFFF0);
 
 #endif
 
@@ -1166,7 +1200,7 @@ void fec_cleanup_module(void)
 
 #if TARGET_SYSTEM == _LINUX_
     // memory deallocation of Rx buffers
-	kfree(fec_rxbuf);
+	kfree(fec_rxbuf_g);
 #endif
 }
 
@@ -1182,10 +1216,6 @@ void fec_initialize (struct eth_if *nd)
 
     //Receive the pointer to the private structure
     struct fec_priv *fp = (struct fec_priv *)nd->if_ptr;
-
-    // Receive the base address
-    // d.k.: this is not needed
-//   unsigned long base_addr = (unsigned long)fp->base_addr;
 
     // Temporary variable
     int i;
@@ -1639,19 +1669,22 @@ int fec_access_mii(unsigned int base_addr, unsigned int *data)
 *************************************************************************/
 void EdrvInterruptHandler (void)
 {
+struct fec_priv *   fp;
+unsigned long       base_addr;
 #if EDRV_EARLY_RX_INT != FALSE
-tEdrvRxBuffer RxBuffer;
+tEdrvRxBuffer       RxBuffer;
 #endif
 
+
+    //Receive the pointer to the private structure
 #if (EDRV_USED_ETH_CTRL == 0)
-    //Receive the pointer to the private structure
-    struct fec_priv *fp = (struct fec_priv *)fec_dev_fec0.if_ptr;
+    fp = (struct fec_priv *)fec_dev_fec0.if_ptr;
 #else
-    //Receive the pointer to the private structure
-    struct fec_priv *fp = (struct fec_priv *)fec_dev_fec1.if_ptr;
+    fp = (struct fec_priv *)fec_dev_fec1.if_ptr;
 #endif
+
     // Receive the base address
-    unsigned long base_addr = (unsigned long)fp->base_addr;
+    base_addr = (unsigned long)fp->base_addr;
 
 //    isr_lock();
 #if EDRV_EARLY_RX_INT != FALSE
@@ -1694,25 +1727,28 @@ tEdrvRxBuffer RxBuffer;
         // reset TXF event
         FEC_EIR(base_addr) = FEC_EIR_TXF;
 
-//        printk("*");
         TGT_DBG_SIGNAL_TRACE_POINT(5);
 
-        if (pLastTransmittedTxBuffer_l != NULL)
+        while (EdrvInstance_l.m_uiHeadTxDesc != EdrvInstance_l.m_uiTailTxDesc)
         {   // transmission is active
-
-        tEdrvTxBuffer*  pBuffer;
+        tEdrvTxBuffer*  pTxBuffer;
 
 #if EDRV_BENCHMARK != FALSE
             // reset LED
             MCF_GPIO_PODR_PCIBR &= ~0x01;  // Level
 #endif
 
-            pBuffer = pLastTransmittedTxBuffer_l;
-            pLastTransmittedTxBuffer_l = NULL;
+            pTxBuffer = EdrvInstance_l.m_apTxBuffer[EdrvInstance_l.m_uiHeadTxDesc];
+            EdrvInstance_l.m_apTxBuffer[EdrvInstance_l.m_uiHeadTxDesc] = NULL;
 
-            if (pBuffer->m_pfnTxHandler != NULL)
+            EdrvInstance_l.m_uiHeadTxDesc = (EdrvInstance_l.m_uiHeadTxDesc + 1) & FEC_TX_DESC_MASK;
+
+            if (pTxBuffer != NULL)
             {
-                pBuffer->m_pfnTxHandler(pBuffer);
+                if (pTxBuffer->m_pfnTxHandler != NULL)
+                {
+                    pTxBuffer->m_pfnTxHandler(pTxBuffer);
+                }
             }
         }
     }
@@ -1863,29 +1899,30 @@ tEdrvRxBuffer RxBuffer;
 *************************************************************************/
 void fec_interrupt_fec_tx_handler(struct eth_if *nd)
 {
-
-    //Receive the pointer to the private structure
-    //struct fec_priv *fp = (struct fec_priv *)nd->if_ptr;
+tEdrvTxBuffer*  pTxBuffer;
 
     TGT_DBG_SIGNAL_TRACE_POINT(9);
 
 #if EDRV_DMA_TX_HANDLER != FALSE
-    if (pLastTransmittedTxBuffer_l != NULL)
+    while (EdrvInstance_l.m_uiHeadTxDesc != EdrvInstance_l.m_uiTailTxDesc)
     {   // transmission is active
-
-    tEdrvTxBuffer*  pBuffer;
 
 #if EDRV_BENCHMARK != FALSE
         // reset LED
         MCF_GPIO_PODR_PCIBR &= ~0x01;  // Level
 #endif
 
-        pBuffer = pLastTransmittedTxBuffer_l;
-        pLastTransmittedTxBuffer_l = NULL;
+        pTxBuffer = EdrvInstance_l.m_apTxBuffer[EdrvInstance_l.m_uiHeadTxDesc];
+        EdrvInstance_l.m_apTxBuffer[EdrvInstance_l.m_uiHeadTxDesc] = NULL;
 
-        if (pBuffer->m_pfnTxHandler != NULL)
+        EdrvInstance_l.m_uiHeadTxDesc = (EdrvInstance_l.m_uiHeadTxDesc + 1) & FEC_TX_DESC_MASK;
+
+        if (pTxBuffer != NULL)
         {
-            pBuffer->m_pfnTxHandler(pBuffer);
+            if (pTxBuffer->m_pfnTxHandler != NULL)
+            {
+                pTxBuffer->m_pfnTxHandler(pTxBuffer);
+            }
         }
     }
 #endif
@@ -1901,14 +1938,9 @@ void fec_interrupt_fec_tx_handler(struct eth_if *nd)
 void fec_interrupt_fec_rx_handler(struct eth_if *nd)
 {
 tEdrvRxBuffer   RxBuffer;
-unsigned int    uiBufferNumber;
 
     //Receive the pointer to the private structure
     struct fec_priv *fp = (struct fec_priv *)nd->if_ptr;
-
-    // Receive the base address
-    // d.k.: this is not needed
-//    unsigned long base_addr = (unsigned long)fp->base_addr;
 
 #if EDRV_EARLY_RX_INT != FALSE
     int i;
@@ -1920,8 +1952,6 @@ unsigned int    uiBufferNumber;
     //MCF_GPIO_PODR_PCIBG |= 0x04;  // Level
 #endif
     TGT_DBG_SIGNAL_TRACE_POINT(6);
-
-//    printk("+");
 
 #if EDRV_EARLY_RX_INT != FALSE
     // Set the FEC_FLAGS_RCV_PROC flag. This flag allows to avoid the new call of this handler while the frame processing is not done
@@ -1944,36 +1974,33 @@ unsigned int    uiBufferNumber;
 
         // before forwarding the Rx event, check if Tx finished,
         // so Tx and Rx frames are processed in the right order
-        if (pLastTransmittedTxBuffer_l != NULL)
+        while (EdrvInstance_l.m_uiHeadTxDesc != EdrvInstance_l.m_uiTailTxDesc)
         {   // transmission is active
-            uiBufferNumber = pLastTransmittedTxBuffer_l->m_BufferNumber.m_dwVal;
-
-            if ((uiBufferNumber < FEC_TX_BUF_NUMBER)
-                && (TxBufTable_l[uiBufferNumber].m_fUsed != FALSE))
-            {
-                if ((TxBufTable_l[uiBufferNumber].m_pBufDescr->statCtrl & MCD_FEC_BUF_READY) == 0)
-                {   // transmission has finished
-                tEdrvTxBuffer*  pBuffer;
+            if ((EdrvInstance_l.m_pTxDesc[EdrvInstance_l.m_uiHeadTxDesc].statCtrl & MCD_FEC_BUF_READY) == 0)
+            {   // transmission has finished
+            tEdrvTxBuffer*  pTxBuffer;
 
 #if EDRV_BENCHMARK != FALSE
-                    // reset LED
-                    MCF_GPIO_PODR_PCIBR &= ~0x01;  // Level
+                // reset LED
+                MCF_GPIO_PODR_PCIBR &= ~0x01;  // Level
 #endif
 
-                    pBuffer = pLastTransmittedTxBuffer_l;
-                    pLastTransmittedTxBuffer_l = NULL;
+                pTxBuffer = EdrvInstance_l.m_apTxBuffer[EdrvInstance_l.m_uiHeadTxDesc];
+                EdrvInstance_l.m_apTxBuffer[EdrvInstance_l.m_uiHeadTxDesc] = NULL;
 
-                    if (pBuffer->m_pfnTxHandler != NULL)
-                    {
-                        pBuffer->m_pfnTxHandler(pBuffer);
-                    }
+                EdrvInstance_l.m_uiHeadTxDesc = (EdrvInstance_l.m_uiHeadTxDesc + 1) & FEC_TX_DESC_MASK;
+
+                if (pTxBuffer->m_pfnTxHandler != NULL)
+                {
+                    pTxBuffer->m_pfnTxHandler(pTxBuffer);
                 }
             }
             else
-            {   // discard last Tx buffer
-                pLastTransmittedTxBuffer_l = NULL;
+            {
+                break;
             }
         }
+
 
         RxBuffer.m_BufferInFrame = kEdrvBufferLastInFrame;
         RxBuffer.m_uiRxMsgLen = fp->fecpriv_rxdesc[fp->fecpriv_current_rx].length - 4;
@@ -1998,8 +2025,7 @@ unsigned int    uiBufferNumber;
 //        isr_unlock();
 
         // Free the reception buffer
-           fp->fecpriv_rxdesc[fp->fecpriv_current_rx].length = FEC_MAXBUF_SIZE;
-//           fp->fecpriv_rxdesc[fp->fecpriv_current_rx].length = 16;
+        fp->fecpriv_rxdesc[fp->fecpriv_current_rx].length = FEC_MAXBUF_SIZE;
         fp->fecpriv_rxdesc[fp->fecpriv_current_rx].statCtrl &= ~MCD_FEC_END_FRAME;
         fp->fecpriv_rxdesc[fp->fecpriv_current_rx].statCtrl |= MCD_FEC_BUF_READY;
     }
