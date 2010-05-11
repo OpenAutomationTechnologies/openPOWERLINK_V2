@@ -118,10 +118,12 @@
 
 #ifndef EDRV_MAX_TX_DESCS
 #define EDRV_MAX_TX_DESCS       16
+#define EDRV_TX_DESC_MASK       (EDRV_MAX_TX_DESCS - 1)
 #endif
 
 #ifndef EDRV_MAX_RX_DESCS
 #define EDRV_MAX_RX_DESCS       16
+#define EDRV_RX_DESC_MASK       (EDRV_MAX_RX_DESCS - 1)
 #endif
 
 #define EDRV_MAX_FRAME_SIZE     0x600
@@ -733,7 +735,8 @@ tEdrvTxDesc*    pTxDesc;
         goto Exit;
     }
 
-    if (EdrvInstance_l.m_apTxBuffer[EdrvInstance_l.m_uiTailTxDesc] != NULL)
+    // one descriptor has to be left empty for distinction between full and empty
+    if (((EdrvInstance_l.m_uiTailTxDesc + 1) & EDRV_TX_DESC_MASK) == EdrvInstance_l.m_uiHeadTxDesc)
     {
         Ret = kEplEdrvNoFreeTxDesc;
         goto Exit;
@@ -750,11 +753,7 @@ tEdrvTxDesc*    pTxDesc;
     pTxDesc->m_le_dwLengthCmd = ((DWORD) pTxBuffer_p->m_uiTxMsgLen) | EDRV_TX_DESC_CMD_DEF;
 
     // increment Tx descriptor queue tail pointer
-    EdrvInstance_l.m_uiTailTxDesc++;
-    if (EdrvInstance_l.m_uiTailTxDesc >= EDRV_MAX_TX_DESCS)
-    {
-        EdrvInstance_l.m_uiTailTxDesc = 0;
-    }
+    EdrvInstance_l.m_uiTailTxDesc = (EdrvInstance_l.m_uiTailTxDesc + 1) & EDRV_TX_DESC_MASK;
 
     // start transmission
     EDRV_REGDW_WRITE(EDRV_REGDW_TDT, EdrvInstance_l.m_uiTailTxDesc);
@@ -970,11 +969,7 @@ unsigned int    uiTxCount = 0;
                 uiTxCount++;
 
                 // increment Tx descriptor queue head pointer
-                EdrvInstance_l.m_uiHeadTxDesc++;
-                if (EdrvInstance_l.m_uiHeadTxDesc >= EDRV_MAX_TX_DESCS)
-                {
-                    EdrvInstance_l.m_uiHeadTxDesc = 0;
-                }
+                EdrvInstance_l.m_uiHeadTxDesc = (EdrvInstance_l.m_uiHeadTxDesc + 1) & EDRV_TX_DESC_MASK;
 
                 if ((dwTxStatus & EDRV_TX_DESC_STATUS_EC) != 0)
                 {
@@ -1079,11 +1074,7 @@ unsigned int    uiTxCount = 0;
 //            printk("Status: 0x%02x ", (unsigned int)pRxDesc->m_bStatus);
             pRxDesc->m_bStatus = 0;
 
-            EdrvInstance_l.m_uiHeadRxDesc++;
-            if (EdrvInstance_l.m_uiHeadRxDesc >= EDRV_MAX_RX_DESCS)
-            {
-                EdrvInstance_l.m_uiHeadRxDesc = 0;
-            }
+            EdrvInstance_l.m_uiHeadRxDesc = (EdrvInstance_l.m_uiHeadRxDesc + 1) & EDRV_RX_DESC_MASK;
         }
 
         // release receive descriptors
