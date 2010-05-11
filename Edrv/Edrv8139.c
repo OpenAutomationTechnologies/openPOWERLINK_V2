@@ -86,6 +86,9 @@
 #include <asm/irq.h>
 #include <linux/sched.h>
 #include <linux/delay.h>
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 26)
+#include <linux/semaphore.h>
+#endif
 
 
 /***************************************************************************/
@@ -307,6 +310,7 @@ typedef struct
     dma_addr_t          m_pTxBufDma;
     BOOL                m_afTxBufUsed[EDRV_MAX_TX_BUFFERS];
     tEdrvTxBuffer*      m_apTxBuffer[EDRV_MAX_TX_DESCS];
+    spinlock_t          m_TxSpinlock;
     unsigned int        m_uiHeadTxDesc;
     unsigned int        m_uiTailTxDesc;
 
@@ -678,9 +682,12 @@ unsigned int uiBufferNumber;
 //---------------------------------------------------------------------------
 tEplKernel EdrvSendTxMsg              (tEdrvTxBuffer * pBuffer_p)
 {
-tEplKernel Ret = kEplSuccessful;
-unsigned int uiBufferNumber;
-DWORD       dwTemp;
+tEplKernel      Ret;
+unsigned int    uiBufferNumber;
+DWORD           dwTemp;
+unsigned long   ulFlags;
+
+    Ret = kEplSuccessful;
 
     uiBufferNumber = pBuffer_p->m_BufferNumber.m_dwVal;
 
@@ -697,6 +704,8 @@ DWORD       dwTemp;
         goto Exit;
     }
 
+    // array of pointers to tx buffers in queue is checked
+    // because all four tx descriptors should be used 
     if (EdrvInstance_l.m_apTxBuffer[EdrvInstance_l.m_uiTailTxDesc] != NULL)
     {
         Ret = kEplEdrvNoFreeTxDesc;
@@ -711,6 +720,8 @@ DWORD       dwTemp;
         EPL_MEMSET(pBuffer_p->m_pbBuffer + pBuffer_p->m_uiTxMsgLen, 0, MIN_ETH_SIZE - pBuffer_p->m_uiTxMsgLen);
         pBuffer_p->m_uiTxMsgLen = MIN_ETH_SIZE;
     }
+
+    spin_lock_irqsave(&EdrvInstance_l.m_TxSpinlock, ulFlags);
 
     // save pointer to buffer structure for TxHandler
     EdrvInstance_l.m_apTxBuffer[EdrvInstance_l.m_uiTailTxDesc] = pBuffer_p;
@@ -727,6 +738,8 @@ DWORD       dwTemp;
 
     // increment tx queue tail
     EdrvInstance_l.m_uiTailTxDesc = (EdrvInstance_l.m_uiTailTxDesc + 1) & EDRV_TX_DESC_MASK;
+
+    spin_unlock_irqrestore(&EdrvInstance_l.m_TxSpinlock, ulFlags);
 
 Exit:
     return Ret;
@@ -837,7 +850,6 @@ static int TgtEthIsr (int nIrqNum_p, void* ppDevInstData_p, struct pt_regs* ptRe
 {
 //    EdrvInterruptHandler();
 tEdrvRxBuffer   RxBuffer;
-tEdrvTxBuffer*  pTxBuffer;
 WORD            wStatus;
 DWORD           dwTxStatus;
 DWORD           dwRxStatus;
@@ -863,6 +875,7 @@ int             iHandled = IRQ_HANDLED;
     // process tasks
     if ((wStatus & (EDRV_REGW_INT_TER | EDRV_REGW_INT_TOK)) != 0)
     {   // transmit interrupt
+    tEdrvTxBuffer*  pTxBuffer;
 
         if (EdrvInstance_l.m_pbTxBuf == NULL)
         {
@@ -870,13 +883,18 @@ int             iHandled = IRQ_HANDLED;
             goto Exit;
         }
 
-        while (EdrvInstance_l.m_apTxBuffer[EdrvInstance_l.m_uiHeadTxDesc] != NULL)
+        spin_lock(&EdrvInstance_l.m_TxSpinlock);
+        pTxBuffer = EdrvInstance_l.m_apTxBuffer[EdrvInstance_l.m_uiHeadTxDesc];
+        spin_unlock(&EdrvInstance_l.m_TxSpinlock);
+
+        // pointer to tx buffer in queue is checked
+        // because all four tx descriptors should be used 
+        while (pTxBuffer != NULL)
         {
             // read transmit status
             dwTxStatus = EDRV_REGDW_READ(EDRV_REGDW_TSD(EdrvInstance_l.m_uiHeadTxDesc));
             if ((dwTxStatus & (EDRV_REGDW_TSD_TOK | EDRV_REGDW_TSD_TABT | EDRV_REGDW_TSD_TUN)) != 0)
             {   // transmit finished
-                pTxBuffer = EdrvInstance_l.m_apTxBuffer[EdrvInstance_l.m_uiHeadTxDesc];
                 EdrvInstance_l.m_apTxBuffer[EdrvInstance_l.m_uiHeadTxDesc] = NULL;
 
                 // increment tx queue head
@@ -895,15 +913,15 @@ int             iHandled = IRQ_HANDLED;
                     EDRV_COUNT_TX_COL_RL;
                 }
 
-    //            printk("T");
-                if (pTxBuffer != NULL)
+                // call Tx handler of Data link layer
+                if (pTxBuffer->m_pfnTxHandler != NULL)
                 {
-                    // call Tx handler of Data link layer
-                    if (pTxBuffer->m_pfnTxHandler != NULL)
-                    {
-                        pTxBuffer->m_pfnTxHandler(pTxBuffer);
-                    }
+                    pTxBuffer->m_pfnTxHandler(pTxBuffer);
                 }
+
+                spin_lock(&EdrvInstance_l.m_TxSpinlock);
+                pTxBuffer = EdrvInstance_l.m_apTxBuffer[EdrvInstance_l.m_uiHeadTxDesc];
+                spin_unlock(&EdrvInstance_l.m_TxSpinlock);
             }
             else
             {
@@ -1120,6 +1138,13 @@ int             iResult = 0;
         iResult = -ENODEV;
         goto Exit;
     }
+
+    // initialize spinlock for tx data structures
+    // It is required because the interrupt handler does not use the tx queue
+    // head pointer when checking for transmitted frames. Instead, it uses the
+    // array which stores the pointers to the tx buffers in the queue.
+    // By this means it is possible to make use of all four tx descriptors.
+    spin_lock_init(&EdrvInstance_l.m_TxSpinlock);
 
     // disable interrupts
     printk("%s disable interrupts\n", __FUNCTION__);
