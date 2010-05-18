@@ -573,7 +573,8 @@ tEplKernel          EplRet = kEplSuccessful;
 
                 case kEplNmtMsPreOperational1:
                 {
-                    printk("AppCbEvent(0x%X) originating event = 0x%X\n",
+                    printk("AppCbEvent(0x%X -> 0x%X) originating event = 0x%X\n",
+                           pEventArg_p->m_NmtStateChange.m_OldNmtState,
                            pEventArg_p->m_NmtStateChange.m_NewNmtState,
                            pEventArg_p->m_NmtStateChange.m_NmtEvent);
 
