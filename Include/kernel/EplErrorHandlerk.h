@@ -104,6 +104,9 @@ tEplKernel PUBLIC EplErrorHandlerkPostError(tEplErrorHandlerkEvent* pDllEvent_p)
 // cycle finished (decrement threshold counters)
 tEplKernel PUBLIC EplErrorHandlerkCycleFinished(BOOL fMN_p);
 
+// reset error flag for the specified CN
+tEplKernel PUBLIC EplErrorHandlerkResetCnError(unsigned int uiNodeId_p);
+
 
 #endif  // #ifndef _EPL_ERRORHANDLERK_H_
 

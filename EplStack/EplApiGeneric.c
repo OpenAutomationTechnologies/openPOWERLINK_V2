@@ -2033,6 +2033,9 @@ BYTE                bTemp;
     DllConfigParam.m_dwSyncResLatency = EplApiInstance_g.m_InitParam.m_dwSyncResLatency;
 #endif
 
+    DllConfigParam.m_fSyncOnPrcNode = EplApiInstance_g.m_InitParam.m_fSyncOnPrcNode;
+    DllConfigParam.m_uiSyncNodeId = EplApiInstance_g.m_InitParam.m_uiSyncNodeId;
+
     DllConfigParam.m_uiSizeOfStruct = sizeof (DllConfigParam);
     Ret = EplDlluCalConfig(&DllConfigParam);
     if(Ret != kEplSuccessful)

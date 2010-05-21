@@ -186,7 +186,7 @@ typedef struct
     DWORD               m_dwSyncResLatency;
 
     // synchronization trigger (AppCbSync, cycle preparation)
-    unsigned int        m_uiSyncNodeId;     // after PRes from CN with node-ID
+    unsigned int        m_uiSyncNodeId;     // after PRes from CN with this node-ID (0 = SoC, 255 = SoA)
     BOOL                m_fSyncOnPrcNode;   // TRUE: CN is PRes chained; FALSE: conventional CN (PReq/PRes)
 
 } tEplDllConfigParam;

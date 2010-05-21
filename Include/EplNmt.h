@@ -139,7 +139,7 @@ typedef enum
     kEplNmtEventDllMePresTimeout    =   0x02,
 //    kEplNmtEventDllMeAsnd           =   0x03,
     kEplNmtEventDllMeAsndTimeout    =   0x03,
-    kEplNmtEventDllMeSoaSent        =   0x04,
+//    kEplNmtEventDllMeSoaSent        =   0x04,
     kEplNmtEventDllMeSocTrig        =   0x05,
     kEplNmtEventDllMeSoaTrig        =   0x06,
     kEplNmtEventDllCeSoc            =   0x07,

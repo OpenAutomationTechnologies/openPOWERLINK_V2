@@ -94,6 +94,10 @@
 // const defines
 //---------------------------------------------------------------------------
 
+#define EPL_ERRORHANDLERK_CN_LOSS_PRES_EVENT_NONE   0   // not occurred
+#define EPL_ERRORHANDLERK_CN_LOSS_PRES_EVENT_OCC    1   // occurred
+#define EPL_ERRORHANDLERK_CN_LOSS_PRES_EVENT_THR    2   // threshold exceeded
+
 
 //---------------------------------------------------------------------------
 // local types
@@ -120,7 +124,7 @@ typedef struct
     DWORD                           m_adwMnCnLossPresCumCnt[254];   // object 0x1C07
     DWORD                           m_adwMnCnLossPresThrCnt[254];   // object 0x1C08
     DWORD                           m_adwMnCnLossPresThreshold[254];// object 0x1C09
-    BOOL                            m_afMnCnLossPresEvent[254];
+    BYTE                            m_abMnCnLossPresEvent[254];
 #endif
 
 } tEplErrorHandlerkInstance;
@@ -623,46 +627,54 @@ tEplNmtEvent            NmtEvent;
                 uiNodeId = pErrHandlerEvent->m_uiNodeId - 1;
                 if (uiNodeId < tabentries(EplErrorHandlerkInstance_g.m_adwMnCnLossPresCumCnt))
                 {
-                    // increment cumulative counter by 1
-                    EplErrorHandlerkInstance_g.m_adwMnCnLossPresCumCnt[uiNodeId]++;
-
-                    if (EplErrorHandlerkInstance_g.m_adwMnCnLossPresThreshold[uiNodeId] > 0)
+                    if  (EplErrorHandlerkInstance_g.m_abMnCnLossPresEvent[uiNodeId] == EPL_ERRORHANDLERK_CN_LOSS_PRES_EVENT_NONE)
                     {
-                        // increment threshold counter by 8
-                        EplErrorHandlerkInstance_g.m_adwMnCnLossPresThrCnt[uiNodeId] += 8;
-                        if (EplErrorHandlerkInstance_g.m_adwMnCnLossPresThrCnt[uiNodeId]
-                            >= EplErrorHandlerkInstance_g.m_adwMnCnLossPresThreshold[uiNodeId])
-                        {   // threshold is reached
-                        tEplHeartbeatEvent  HeartbeatEvent;
-                        tEplDllNodeOpParam  NodeOpParam;
+                        // increment cumulative counter by 1
+                        EplErrorHandlerkInstance_g.m_adwMnCnLossPresCumCnt[uiNodeId]++;
 
-                            NodeOpParam.m_OpNodeType = kEplDllNodeOpTypeIsochronous;
-                            NodeOpParam.m_uiNodeId = pErrHandlerEvent->m_uiNodeId;
+                        if (EplErrorHandlerkInstance_g.m_adwMnCnLossPresThreshold[uiNodeId] > 0)
+                        {
+                            // increment threshold counter by 8
+                            EplErrorHandlerkInstance_g.m_adwMnCnLossPresThrCnt[uiNodeId] += 8;
+                            if (EplErrorHandlerkInstance_g.m_adwMnCnLossPresThrCnt[uiNodeId]
+                                >= EplErrorHandlerkInstance_g.m_adwMnCnLossPresThreshold[uiNodeId])
+                            {   // threshold is reached
+                            tEplHeartbeatEvent  HeartbeatEvent;
+                            tEplDllNodeOpParam  NodeOpParam;
 
-                            // generate error history entry E_DLL_LOSS_PRES_TH
-                            HistoryEntry.m_wErrorCode = EPL_E_DLL_LOSS_PRES_TH;
-                            HistoryEntry.m_TimeStamp = pEvent_p->m_NetTime;
-                            AmiSetByteToLe(&HistoryEntry.m_abAddInfo[0], (BYTE) pErrHandlerEvent->m_uiNodeId);
-                            Ret = EplErrorHandlerkPostHistoryEntry(&HistoryEntry);
-                            if (Ret != kEplSuccessful)
-                            {
-                                goto Exit;
+                                EplErrorHandlerkInstance_g.m_abMnCnLossPresEvent[uiNodeId] = EPL_ERRORHANDLERK_CN_LOSS_PRES_EVENT_THR;
+
+                                NodeOpParam.m_OpNodeType = kEplDllNodeOpTypeIsochronous;
+                                NodeOpParam.m_uiNodeId = pErrHandlerEvent->m_uiNodeId;
+
+                                // generate error history entry E_DLL_LOSS_PRES_TH
+                                HistoryEntry.m_wErrorCode = EPL_E_DLL_LOSS_PRES_TH;
+                                HistoryEntry.m_TimeStamp = pEvent_p->m_NetTime;
+                                AmiSetByteToLe(&HistoryEntry.m_abAddInfo[0], (BYTE) pErrHandlerEvent->m_uiNodeId);
+                                Ret = EplErrorHandlerkPostHistoryEntry(&HistoryEntry);
+                                if (Ret != kEplSuccessful)
+                                {
+                                    goto Exit;
+                                }
+
+                                // remove node from isochronous phase
+                                Ret = EplDllkDeleteNode(&NodeOpParam);
+
+                                // inform NmtMnu module about state change, which shall send NMT command ResetNode to this CN
+                                HeartbeatEvent.m_uiNodeId = pErrHandlerEvent->m_uiNodeId;
+                                HeartbeatEvent.m_NmtState = kEplNmtCsNotActive;
+                                HeartbeatEvent.m_wErrorCode = EPL_E_DLL_LOSS_PRES_TH;
+                                Event.m_EventSink = kEplEventSinkNmtMnu;
+                                Event.m_EventType = kEplEventTypeHeartbeat;
+                                Event.m_uiSize = sizeof (HeartbeatEvent);
+                                Event.m_pArg = &HeartbeatEvent;
+                                Ret = EplEventkPost(&Event);
                             }
-
-                            // remove node from isochronous phase
-                            Ret = EplDllkDeleteNode(&NodeOpParam);
-
-                            // inform NmtMnu module about state change, which shall send NMT command ResetNode to this CN
-                            HeartbeatEvent.m_uiNodeId = pErrHandlerEvent->m_uiNodeId;
-                            HeartbeatEvent.m_NmtState = kEplNmtCsNotActive;
-                            HeartbeatEvent.m_wErrorCode = EPL_E_DLL_LOSS_PRES_TH;
-                            Event.m_EventSink = kEplEventSinkNmtMnu;
-                            Event.m_EventType = kEplEventTypeHeartbeat;
-                            Event.m_uiSize = sizeof (HeartbeatEvent);
-                            Event.m_pArg = &HeartbeatEvent;
-                            Ret = EplEventkPost(&Event);
+                            else
+                            {
+                                EplErrorHandlerkInstance_g.m_abMnCnLossPresEvent[uiNodeId] = EPL_ERRORHANDLERK_CN_LOSS_PRES_EVENT_OCC;
+                            }
                         }
-                        EplErrorHandlerkInstance_g.m_afMnCnLossPresEvent[uiNodeId] = TRUE;
                     }
                 }
             }
@@ -720,16 +732,16 @@ tEplKernel              Ret = kEplSuccessful;
             uiNodeId = *pbCnNodeId - 1;
             if (uiNodeId < tabentries(EplErrorHandlerkInstance_g.m_adwMnCnLossPresCumCnt))
             {
-                if  (EplErrorHandlerkInstance_g.m_afMnCnLossPresEvent[uiNodeId] == FALSE)
+                if  (EplErrorHandlerkInstance_g.m_abMnCnLossPresEvent[uiNodeId] == EPL_ERRORHANDLERK_CN_LOSS_PRES_EVENT_NONE)
                 {
                     if (EplErrorHandlerkInstance_g.m_adwMnCnLossPresThrCnt[uiNodeId] > 0)
                     {
                         EplErrorHandlerkInstance_g.m_adwMnCnLossPresThrCnt[uiNodeId]--;
                     }
                 }
-                else
+                else if  (EplErrorHandlerkInstance_g.m_abMnCnLossPresEvent[uiNodeId] == EPL_ERRORHANDLERK_CN_LOSS_PRES_EVENT_OCC)
                 {
-                    EplErrorHandlerkInstance_g.m_afMnCnLossPresEvent[uiNodeId] = FALSE;
+                    EplErrorHandlerkInstance_g.m_abMnCnLossPresEvent[uiNodeId] = EPL_ERRORHANDLERK_CN_LOSS_PRES_EVENT_NONE;
                 }
             }
             pbCnNodeId++;
@@ -778,6 +790,34 @@ tEplKernel              Ret = kEplSuccessful;
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
 Exit:
 #endif
+    return Ret;
+
+}
+
+
+//---------------------------------------------------------------------------
+//
+// Function:    EplErrorHandlerkResetCnError
+//
+// Description: resets the error flag for the specified CN
+//
+// Parameters:  uiNodeId_p  = node-ID of CN
+//
+// Returns:     tEpKernel   = errorcode
+//
+// State:
+//
+//---------------------------------------------------------------------------
+tEplKernel PUBLIC EplErrorHandlerkResetCnError(unsigned int uiNodeId_p)
+{
+tEplKernel              Ret = kEplSuccessful;
+
+    uiNodeId_p--;
+    if (uiNodeId_p < tabentries(EplErrorHandlerkInstance_g.m_adwMnCnLossPresCumCnt))
+    {
+        EplErrorHandlerkInstance_g.m_abMnCnLossPresEvent[uiNodeId_p] = EPL_ERRORHANDLERK_CN_LOSS_PRES_EVENT_NONE;
+    }
+
     return Ret;
 
 }

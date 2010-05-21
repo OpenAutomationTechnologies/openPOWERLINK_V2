@@ -129,6 +129,10 @@
 #define EPL_DLL_PRES_CHAINING_CN        FALSE
 #endif
 
+#ifndef EPL_DLL_PRES_CHAINING_MN
+#define EPL_DLL_PRES_CHAINING_MN        FALSE
+#endif
+
 #if EPL_DLL_PRES_CHAINING_CN == FALSE
   #define EPL_C_DLL_MAX_ASND_SERVICE_IDS  5   // see tEplDllAsndServiceId in EplDll.h
 #else

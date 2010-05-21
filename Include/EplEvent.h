@@ -168,14 +168,14 @@ typedef enum
                                         // arg is pointer to tEplDllNodeOpParam
     kEplEventTypeDllkConfigNode = 0x16, // configures parameters of node
                                         // arg is pointer to tEplDllNodeInfo
-//    kEplEventTypeDllkSoftDelNode= 0x16, // remove node softly from isochronous phase
-                                        // arg is pointer to unsigned int
     kEplEventTypeDllkStartReducedCycle = 0x17, // start reduced EPL cycle on MN
                                         // arg is pointer to nothing
     kEplEventTypeNmtMnuNmtCmdSent      = 0x18, // NMT command was actually sent
                                         // arg is pointer to tEplFrame
     kEplEventTypeApiUserDef     = 0x19, // user-defined event
                                         // arg is user-defined pointer
+    kEplEventTypeDllkCycleFinish= 0x1A, // SoA sent, cycle finished
+                                        // arg is pointer to nothing
     kEplEventTypePdokAlloc      = 0x20, // alloc PDOs
                                         // arg is pointer to tEplPdoAllocationParam
     kEplEventTypePdokConfig     = 0x21, // configure PDO channel

@@ -417,11 +417,7 @@ tEplEventSource         EventSource;
             BENCHMARK_MOD_27_RESET(0);
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLK)) != 0)
             if ((pEvent_p->m_EventType == kEplEventTypeNmtEvent)
-                && ((*((tEplNmtEvent*)pEvent_p->m_pArg) == kEplNmtEventDllCeSoa)
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
-                || (*((tEplNmtEvent*)pEvent_p->m_pArg) == kEplNmtEventDllMeSoaSent)
-#endif
-                ))
+                && (*((tEplNmtEvent*)pEvent_p->m_pArg) == kEplNmtEventDllCeSoa))
             {
 
                 BENCHMARK_MOD_27_SET(0);
