@@ -102,7 +102,7 @@
 #define _DEV_GNU_ARM7_          (_DEV_BIT32_ | _DEV_GNUC_ARM7_                | _DEV_64BIT_SUPPORT_ | _DEV_COMMA_EXT_ | _DEV_ONLY_INT_MAIN_)
 #define _DEV_WIN32_RTX_         (_DEV_BIT32_ | _DEV_MSVC_RTX_                ) //| _DEV_64BIT_SUPPORT_ | _DEV_COMMA_EXT_)
 #define _DEV_HIGHTEC_X86_       (_DEV_BIT32_ | _DEV_HIGHTEC_GNUC_X86_        ) //| _DEV_64BIT_SUPPORT_ | _DEV_COMMA_EXT_)
-#define _DEV_WIN_CE_            (_DEV_BIT32_ | _DEV_MSEVC_                   ) //| _DEV_64BIT_SUPPORT_ | _DEV_COMMA_EXT_)
+#define _DEV_WIN_CE_            (_DEV_BIT32_ | _DEV_MSEVC_                    | _DEV_64BIT_SUPPORT_ | _DEV_COMMA_EXT_)
 #define _DEV_KEIL_CARM_         (_DEV_BIT32_ | _DEV_KEIL_ARM_                 | _DEV_64BIT_SUPPORT_ | _DEV_COMMA_EXT_)
 #define _DEV_IAR_CARM_          (_DEV_BIT32_ | _DEV_IAR_ARM_                  | _DEV_64BIT_SUPPORT_ | _DEV_COMMA_EXT_)
 #define _DEV_RVCT_CARM_         (_DEV_BIT32_ | _DEV_RVCT_ARM_                 | _DEV_64BIT_SUPPORT_ | _DEV_COMMA_EXT_ | _DEV_ONLY_INT_MAIN_)

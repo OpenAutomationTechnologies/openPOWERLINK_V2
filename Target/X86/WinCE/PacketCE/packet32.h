@@ -67,7 +67,7 @@ BOOLEAN	PacketLoadDriver(VOID);
 BOOL PacketUnloadDriver (VOID);
 BOOL PacketSetMaxLookahead (LPADAPTER lpAdapter);
 DWORD PacketSetLastError (DWORD nNewError);
-
+DWORD PacketGetLastError (VOID);
 #ifdef __cplusplus
 }
 #endif

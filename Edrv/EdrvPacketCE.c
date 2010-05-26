@@ -408,11 +408,13 @@ tEplKernel EdrvSendTxMsg(tEdrvTxBuffer *pBuffer_p)
 {
 tEplKernel Ret = kEplSuccessful;
 PACKET m_TxPacket;
+int         iRet;
 
 //    TRACE4("%s: TxB=%p (%02X), last TxB=%p\n", __func__, pBuffer_p, (UINT)pBuffer_p->m_pbBuffer[5], EdrvInstance_l.m_pTransmittedTxBufferLastEntry);
 
     if (pBuffer_p->m_BufferNumber.m_pVal != NULL)
     {
+		printf("Invalid operation\n");
         Ret = kEplInvalidOperation;
         goto Exit;
     }
@@ -433,9 +435,10 @@ PACKET m_TxPacket;
     m_TxPacket.Buffer = pBuffer_p->m_pbBuffer;
     m_TxPacket.Length = pBuffer_p->m_uiTxMsgLen;
 
-    if(!PacketSendPacket(m_lpAdapter,&m_TxPacket,0))
+	iRet = PacketSendPacket(m_lpAdapter,&m_TxPacket,0); 
+    if(!iRet)
     {
-        PRINTF3("%s pcap_sendpacket returned %d (%s)\n", __func__, iRet, pcap_geterr(EdrvInstance_l.m_pPcap));
+        PRINTF3("%s PacketSendPacket returned %d (%d)\n", __func__, iRet, PacketGetLastError());
         Ret = kEplInvalidOperation;
     }
 
@@ -681,12 +684,18 @@ static DWORD WINAPI EdrvWorkerThread( void *pArgument_p )
 tEdrvInstance*  pInstance = pArgument_p;
 int             iRet;
 DWORD           dwRet;
-//UINT uiLoopCnt;
 
     // increase priority
-    SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_TIME_CRITICAL);
+    //SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_TIME_CRITICAL);
+	if( !CeSetThreadPriority(	GetCurrentThread(),
+								CE_THREAD_PRIO_256_HIGHEST	) )
+	{
+		printf("Error!! EdrvWorkerThread CeSetThreadPriority failed\n");
+	}
 
-    while( g_bRun )
+	printf("INFO: EdrvWorkerThread Priority: %d %d\n", CeGetThreadPriority(GetCurrentThread()), CE_THREAD_PRIO_256_HIGHEST);
+
+    for (;;)
     {
         // Wait for events
         dwRet = WaitForMultipleObjects(
@@ -1087,14 +1096,15 @@ MMRESULT                    mTempTimerHdl = 0;
             }
             if (uiIndex >= TIMER_COUNT)
             {   // no free structure found
+				printf("check 1\n");
                 Ret = kEplTimerNoTimerCreated;
                 goto Exit;
             }
         }
         else
         {
-            uiIndex = (*pTimerHdl_p >> TIMERHDL_SHIFT) - 1;
-            if (uiIndex > TIMER_COUNT)
+        uiIndex = (unsigned int)(*pTimerHdl_p >> TIMERHDL_SHIFT) - 1;
+        if (uiIndex >= TIMER_COUNT)
             {   // invalid handle
                 Ret = kEplTimerInvalidHandle;
                 goto Exit;
@@ -1123,8 +1133,8 @@ MMRESULT                    mTempTimerHdl = 0;
             pTimerInfo->m_liDueTime.QuadPart = 0LL;
         }
 
-        pTimerInfo->m_EventArg.m_ulArg = ulArgument_p;
-        pTimerInfo->m_pfnCallback = pfnCallback_p;
+    pTimerInfo->m_EventArg.m_Arg.m_dwVal = ulArgument_p;
+    pTimerInfo->m_pfnCallback = pfnCallback_p;
 
         *pTimerHdl_p = pTimerInfo->m_EventArg.m_TimerHdl;
 
@@ -1137,6 +1147,7 @@ MMRESULT                    mTempTimerHdl = 0;
         {
             printf("timeSetEvent failed (%d)\n", GetLastError());
             Ret = kEplTimerNoTimerCreated;
+			printf("check 2\n");
             goto Exit;
         }
 
@@ -1178,13 +1189,12 @@ MMRESULT                        mResult;
 
     if (*pTimerHdl_p == 0)
     {   // no timer created yet
-        Ret = kEplTimerNoTimerCreated;
-        goto Exit;
+         goto Exit;
     }
     else
     {
-        uiIndex = (*pTimerHdl_p >> TIMERHDL_SHIFT) - 1;
-        if (uiIndex > TIMER_COUNT)
+        uiIndex = (unsigned int)(*pTimerHdl_p >> TIMERHDL_SHIFT) - 1;
+        if (uiIndex >= TIMER_COUNT)
         {   // invalid handle
             Ret = kEplTimerInvalidHandle;
             goto Exit;

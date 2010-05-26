@@ -89,7 +89,7 @@
 #define TIMERU_TIMER_LIST   0
 #define TIMERU_FREE_LIST    1
 
-#if (TARGET_SYSTEM == _WIN32_)
+#if (TARGET_SYSTEM == _WIN32_ || TARGET_SYSTEM == _WINCE_ )
     #define TIMERU_EVENT_SHUTDOWN   0   // smaller index has higher priority
     #define TIMERU_EVENT_WAKEUP     1
 #endif
@@ -116,7 +116,7 @@ typedef struct
     unsigned int        m_uiFreeEntries;
     unsigned int        m_uiMinFreeEntries; // minimum number of free entries
                                             // used to check if EPL_TIMERU_MAX_ENTRIES is large enough 
-#if (TARGET_SYSTEM == _WIN32_)
+#if (TARGET_SYSTEM == _WIN32_ || TARGET_SYSTEM == _WINCE_ )
     CRITICAL_SECTION    m_aCriticalSections[2];
     HANDLE              m_hProcessThread;
     HANDLE              m_ahEvents[2];      // WakeUp and ShutDown event handles
@@ -138,7 +138,7 @@ static void  EplTimeruEnterCriticalSection (int nType_p);
 static void  EplTimeruLeaveCriticalSection (int nType_p);
 static DWORD EplTimeruGetTickCountMs (void);
 
-#if (TARGET_SYSTEM == _WIN32_)
+#if (TARGET_SYSTEM == _WIN32_ || TARGET_SYSTEM == _WINCE_ )
 static DWORD PUBLIC EplTimeruProcessThread (LPVOID lpParameter);
 #endif
 
@@ -235,7 +235,7 @@ tEplKernel Ret;
     // -> the only solution = 0
     EplTimeruInstance_g.m_dwStartTimeMs = 0;
 
-#if (TARGET_SYSTEM == _WIN32_)
+#if (TARGET_SYSTEM == _WIN32_ || TARGET_SYSTEM == _WINCE_ )
     InitializeCriticalSection(&EplTimeruInstance_g.m_aCriticalSections[TIMERU_TIMER_LIST]);
     InitializeCriticalSection(&EplTimeruInstance_g.m_aCriticalSections[TIMERU_FREE_LIST]);
 
@@ -285,7 +285,7 @@ tEplKernel  Ret;
 
     Ret = kEplSuccessful;
 
-#if (TARGET_SYSTEM == _WIN32_)
+#if (TARGET_SYSTEM == _WIN32_ || TARGET_SYSTEM == _WINCE_ )
     SetEvent( EplTimeruInstance_g.m_ahEvents[TIMERU_EVENT_SHUTDOWN] );
 
     WaitForSingleObject( EplTimeruInstance_g.m_hProcessThread, INFINITE );
@@ -459,7 +459,7 @@ tEplKernel      Ret;
     *ppEntry = pNewEntry;
     EplTimeruLeaveCriticalSection(TIMERU_TIMER_LIST);
 
-#if (TARGET_SYSTEM == _WIN32_)
+#if (TARGET_SYSTEM == _WIN32_ || TARGET_SYSTEM == _WINCE_ )
 	if (ppEntry == &EplTimeruInstance_g.m_pTimerListFirst)
     {
         SetEvent( EplTimeruInstance_g.m_ahEvents[TIMERU_EVENT_WAKEUP] );
@@ -621,7 +621,7 @@ static DWORD EplTimeruGetTickCountMs (void)
 {
 DWORD	TickCountMs;
 
-#if (TARGET_SYSTEM == _WIN32_)
+#if (TARGET_SYSTEM == _WIN32_ || TARGET_SYSTEM == _WINCE_ )
 	TickCountMs = GetTickCount();
 #else
     TickCountMs = EplTgtGetTickCountMs();
@@ -641,7 +641,7 @@ static void EplTimeruEnterCriticalSection (int nType_p)
     #if EPL_USE_SHAREDBUFF == FALSE
         EplTgtEnableGlobalInterrupt(FALSE);
     #endif
-#elif (TARGET_SYSTEM == _WIN32_)
+#elif (TARGET_SYSTEM == _WIN32_ || TARGET_SYSTEM == _WINCE_ )
     EnterCriticalSection(&EplTimeruInstance_g.m_aCriticalSections[nType_p]);
 #endif
 }
@@ -657,13 +657,13 @@ static void EplTimeruLeaveCriticalSection (int nType_p)
     #if EPL_USE_SHAREDBUFF == FALSE
         EplTgtEnableGlobalInterrupt(TRUE);
     #endif
-#elif (TARGET_SYSTEM == _WIN32_)
+#elif (TARGET_SYSTEM == _WIN32_ || TARGET_SYSTEM == _WINCE_ )
     LeaveCriticalSection(&EplTimeruInstance_g.m_aCriticalSections[nType_p]);
 #endif
 }
 
 
-#if (TARGET_SYSTEM == _WIN32_)
+#if (TARGET_SYSTEM == _WIN32_ || TARGET_SYSTEM == _WINCE_ )
 
 //---------------------------------------------------------------------------
 //  Thread for processing the timer list when using an operating system

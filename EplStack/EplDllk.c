@@ -1753,7 +1753,7 @@ tEplDllkNodeInfo*   pIntNodeInfo;
             goto Exit;
         }
 
-        if (EplDllkInstance_g.m_DllConfigParam.m_uiSyncNodeId == EPL_C_ADR_INVALID)
+        if (EplDllkInstance_g.m_DllConfigParam.m_uiSyncNodeId == EPL_C_ADR_SYNC_ON_SOC)
         {   // sync on SoC
             Ret = EdrvCyclicRegSyncHandler(EplDllkCbMnSyncHandler);
             if (Ret != kEplSuccessful)
@@ -2451,7 +2451,7 @@ tEdrvTxBuffer*  pTxBuffer;
     if ((EplDllkInstance_g.m_DllState > kEplDllMsNonCyclic)
 #endif
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
-        && (EplDllkInstance_g.m_DllConfigParam.m_uiSyncNodeId > EPL_C_ADR_INVALID)
+        && (EplDllkInstance_g.m_DllConfigParam.m_uiSyncNodeId > EPL_C_ADR_SYNC_ON_SOC)
         && (EplDllkInstance_g.m_fSyncProcessed == FALSE)
 #endif
         )
@@ -4271,7 +4271,7 @@ tEplDllkNodeInfo*   pIntNodeInfo = NULL;
         {
             EplDllkInstance_g.m_fPrcSlotFinished = TRUE;
 
-            if ((EplDllkInstance_g.m_DllConfigParam.m_uiSyncNodeId > EPL_C_ADR_INVALID)
+            if ((EplDllkInstance_g.m_DllConfigParam.m_uiSyncNodeId > EPL_C_ADR_SYNC_ON_SOC)
                 && (EplDllkInstance_g.m_fSyncProcessed == FALSE))
                 && (EplDllkInstance_g.m_DllConfigParam.m_fSyncOnPrcNode != FALSE))
             {
@@ -4389,7 +4389,7 @@ tEplDllkNodeInfo*   pIntNodeInfo = NULL;
 #endif
 
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
-    if ((EplDllkInstance_g.m_DllConfigParam.m_uiSyncNodeId > EPL_C_ADR_INVALID)
+    if ((EplDllkInstance_g.m_DllConfigParam.m_uiSyncNodeId > EPL_C_ADR_SYNC_ON_SOC)
         && (EplDllkInstance_g.m_fSyncProcessed == FALSE))
     {   // check if Sync event needs to be triggered
         if (
@@ -7260,7 +7260,7 @@ tEplFrame*      pTxFrame;
             goto Exit;
         }
 
-        if (EplDllkInstance_g.m_DllConfigParam.m_uiSyncNodeId == EPL_C_ADR_INVALID)
+        if (EplDllkInstance_g.m_DllConfigParam.m_uiSyncNodeId == EPL_C_ADR_SYNC_ON_SOC)
         {
             // trigger synchronous task on SoC
             Ret = EplDllkPostEvent(kEplEventTypeSync);
