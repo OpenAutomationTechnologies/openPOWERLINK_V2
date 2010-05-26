@@ -1469,6 +1469,12 @@ tEplKernel      Ret;
             break;
         }
 
+        case kEplEventTypeNmtMnuNodeAdded:
+        {
+            // $$$ d.k. implementation will be added
+            break;
+        }
+
         default:
         {
             Ret = kEplNmtInvalidEvent;
