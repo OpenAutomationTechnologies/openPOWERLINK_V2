@@ -751,7 +751,7 @@ void*           pVar;
     pbPayload_p += uiByteOffset;
     pVar = EPL_PDO_MAPPOBJECT_GET_VAR(pMappObject_p);
 
-    switch(EPL_PDO_MAPPOBJECT_GET_TYPE(pMappObject_p))
+    switch (EPL_PDO_MAPPOBJECT_GET_TYPE(pMappObject_p))
     {
         //-----------------------------------------------
         // types without ami
@@ -876,7 +876,7 @@ void*           pVar;
     pbPayload_p += uiByteOffset;
     pVar = EPL_PDO_MAPPOBJECT_GET_VAR(pMappObject_p);
 
-    switch(EPL_PDO_MAPPOBJECT_GET_TYPE(pMappObject_p))
+    switch (EPL_PDO_MAPPOBJECT_GET_TYPE(pMappObject_p))
     {
         //-----------------------------------------------
         // types without ami
