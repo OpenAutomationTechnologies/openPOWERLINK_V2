@@ -106,6 +106,7 @@
     TGT_DBG_POST_TRACE_VALUE((kEplEventSinkNmtMnu << 28) | (Event_p << 24) \
                              | (uiNodeId_p << 16) | wErrorCode_p)
 
+#define EPL_NMTMNU_PRES_CHAINING_MN         EPL_DLL_PRES_CHAINING_MN
 
 // defines for flags in node info structure
 #define EPL_NMTMNU_NODE_FLAG_ISOCHRON       0x0001  // CN is being accessed isochronously
@@ -120,6 +121,24 @@
                     // and copied to timerarg. When the timer event occures
                     // both will be compared and if unequal the timer event
                     // will be discarded, because it is an old one.
+#if EPL_NMTMNU_PRES_CHAINING != FALSE
+#define EPL_NMTMNU_NODE_FLAG_PRC_ADD_SCHEDULED      0x0001
+#define EPL_NMTMNU_NODE_FLAG_PRC_ADD_IN_PROGRESS    0x0002
+#define EPL_NMTMNU_NODE_FLAG_PRC_SHIFT_REQUIRED     0x0004
+#define EPL_NMTMNU_NODE_FLAG_PRC_SYNC_ERR           0x0008
+
+#define EPL_NMTMNU_NODE_FLAG_PRC_CALL_MEASURE       0x0010
+#define EPL_NMTMNU_NODE_FLAG_PRC_CALL_SHIFT         0x0020
+#define EPL_NMTMNU_NODE_FLAG_PRC_CALL_ADD           0x0030
+#define EPL_NMTMNU_NODE_FLAG_PRC_CALL_MASK          0x0030
+
+#define EPL_NMTMNU_NODE_FLAG_PRC_STOP_NODE          0x0100
+#define EPL_NMTMNU_NODE_FLAG_PRC_RESET_NODE         0x0200
+#define EPL_NMTMNU_NODE_FLAG_PRC_RESET_COM          0x0300
+#define EPL_NMTMNU_NODE_FLAG_PRC_RESET_CONF         0x0400
+#define EPL_NMTMNU_NODE_FLAG_PRC_RESET_SW           0x0500
+#define EPL_NMTMNU_NODE_FLAG_PRC_RESET_MASK         0x0700
+#endif
 
 // defines for timer arguments to draw a distinction between serveral events
 #define EPL_NMTMNU_TIMERARG_NODE_MASK   0x000000FFL // mask that contains the node-ID
@@ -230,8 +249,14 @@ typedef struct
     tEplTimerHdl        m_TimerHdlLonger;   // 2nd timer for NMT command EnableReadyToOp and CheckCommunication
     tEplNmtMnuNodeState m_NodeState;    // internal node state (kind of sub state of NMT state)
     DWORD               m_dwNodeCfg;    // subindex from 0x1F81
-    WORD                m_wFlags;       // flags: CN is being accessed isochronously
-
+    WORD                m_wFlags;       // node flags (see defines above)
+#if EPL_NMTMNU_PRES_CHAINING != FALSE
+    WORD                m_wPrcFlags;    // PRC specific node flags
+    DWORD               m_dwRelPropagationDelayNs;
+    DWORD               m_dwPResResponseTimeNs;
+    DWORD               m_dwPResResponseTimeCorrectionNs;
+    DWORD               m_dwPResResponseTimeNegOffsetNs;
+#endif
 } tEplNmtMnuNodeInfo;
 
 
@@ -280,6 +305,8 @@ static tEplKernel EplNmtMnuCheckNmtState(
                                     WORD                wErrorCode_p,
                                     tEplNmtState        LocalNmtState_p);
 
+static tEplKernel EplNmtMnuAddNodeIsochronous(unsigned int uiNodeId_p);
+
 static tEplKernel EplNmtMnuStartBootStep1(BOOL fNmtResetAllIssued_p);
 
 static tEplKernel EplNmtMnuStartBootStep2(void);
@@ -300,6 +327,20 @@ static tEplKernel EplNmtMnuProcessInternalEvent(
 
 static tEplKernel EplNmtMnuReset(void);
 
+#if EPL_NMTMNU_PRES_CHAINING != FALSE
+static tEplKernel EplNmtMnuPrcMeasure(void);
+static tEplKernel EplNmtMnuPrcShift(void);
+static tEplKernel EplNmtMnuPrcAdd(void);
+static tEplKernel EplNmtMnuPrcVerify(void);
+
+static tEplKernel EplNmtMnuPrcCbSyncResMeasure(void);
+static tEplKernel EplNmtMnuPrcCbSyncResShift(void);
+static tEplKernel EplNmtMnuPrcCbSyncResAdd(void);
+static tEplKernel EplNmtMnuPrcCbSyncResVerify(void);
+static tEplKernel EplNmtMnuPrcCbSyncResNextAction(void);
+
+static tEplKernel EplNmtMnuPrcConfig(void);
+#endif
 
 
 //=========================================================================//
@@ -1029,6 +1070,23 @@ tEplKernel      Ret = kEplSuccessful;
         // node processes isochronous and asynchronous frames
         case kEplNmtMsPreOperational2:
         {
+#if 0
+            // The change to PreOp2 is an implicit NMT command.
+            // Unexpected NMT states are ignored until
+            // the state monitor timer is elapsed.
+
+            // TODO this has to be done for all nodes
+            //      Additionally, the expected node state has to be set
+            //      to PreOp2.
+            EPL_NMTMNU_SET_FLAGS_TIMERARG_STATE_MON(
+                    pNodeInfo, uiNodeId_p, TimerArg);
+
+            // set NMT state change flag
+            pNodeInfo->m_wFlags |= EPL_NMTMNU_NODE_FLAG_NMT_CMD_ISSUED;
+
+            Ret = EplTimeruModifyTimerMs(&pNodeInfo->m_TimerHdlStatReq, EplNmtMnuInstance_g.m_ulStatusRequestDelay, TimerArg);
+#endif
+
             // add identified CNs to isochronous phase
             // send EnableReadyToOp to all identified CNs
             Ret = EplNmtMnuStartBootStep2();
@@ -1471,7 +1529,25 @@ tEplKernel      Ret;
 
         case kEplEventTypeNmtMnuNodeAdded:
         {
-            // $$$ d.k. implementation will be added
+        unsigned int        uiNodeId;
+        tEplNmtMnuNodeInfo* pNodeInfo;
+
+            uiNodeId  = *((unsigned int*) pEvent_p->m_pArg);
+            pNodeInfo = EPL_NMTMNU_GET_NODEINFO(uiNodeId);
+
+            pNodeInfo->m_wFlags |= EPL_NMTMNU_NODE_FLAG_ISOCHRON;
+
+            if (pNodeInfo->m_NodeState == kEplNmtMnuNodeStateConfigured)
+            {
+            tEplNmtState    NmtState;
+
+                NmtState = EplNmtuGetNmtState();
+                if (NmtState >= kEplNmtMsPreOperational2)
+                {
+                    Ret = EplNmtMnuNodeBootStep2(uiNodeId, pNodeInfo);
+                }
+            }
+
             break;
         }
 
@@ -1736,6 +1812,110 @@ tEplKernel      Ret = kEplSuccessful;
 
 //---------------------------------------------------------------------------
 //
+// Function:    EplNmtMnuAddNodeIsochronous
+//
+// Description: Adds the given node to the isochronous phase
+//
+// Parameters:  uiNodeId_p              = node ID of node which is to be added
+//
+// Returns:     tEplKernel              = error code
+//
+// State:
+//
+//---------------------------------------------------------------------------
+
+static tEplKernel EplNmtMnuAddNodeIsochronous(unsigned int uiNodeId_p)
+{
+tEplKernel          Ret;
+
+#if EPL_NMTMNU_PRES_CHAINING != FALSE
+tEplNmtMnuNodeInfo* pNodeInfo;
+
+    Ret = EplSuccessful;
+
+    if (uiNodeId_p != EPL_C_ADR_INVALID)
+    {
+        pNodeInfo = EPL_NMTMNU_GET_NODEINFO(uiNodeId_p);
+
+        if ((pNodeInfo->m_dwNodeCfg & EPL_NODEASSIGN_PRES_CHAINING) == 0)
+#endif
+        {   // node is added as PReq/PRes node
+        tEplDllNodeOpParam  NodeOpParam;
+
+            NodeOpParam.m_OpNodeType = kEplDllNodeOpTypeIsochronous;
+            NodeOpParam.m_uiNodeId = uiNodeId_p;
+
+            Ret = EplDlluCalAddNode(&NodeOpParam);
+            goto Exit;
+        }
+#if EPL_NMTMNU_PRES_CHAINING != FALSE
+        else
+        {   // node is a PRC node
+            // clear PRC specific flags
+            pNodeInfo->m_wPrcFlags = 0;
+
+            EplNmtMnuInstance_g.m_wFlags |= EPL_NMTMNU_FLAG_PRC_ADD_SCHEDULED;
+            pNodeInfo->m_wPrcFlags |= EPL_NMTMNU_NODE_FLAG_PRC_ADD_SCHEDULED;
+        }
+    }
+
+    if (EplNmtMnuInstance_g.m_wFlags & EPL_NMTMNU_FLAG_PRC_ADD_IN_PROGRESS)
+    {   // add PRC nodes is already in progress
+        goto Exit;
+    }
+
+    if (EplNmtMnuInstance_g.m_wFlags & EPL_NMTMNU_FLAG_PRC_ADD_SCHEDULED)
+    {
+    unsigned int    uiNodeId;
+    BOOL            fInvalidateNext;
+
+        fInvalidate = FALSE;
+
+        for (uiNodeId = 1; uiNodeId < 254; uiNodeId++)
+        {
+            pNodeInfo = EPL_NMTMNU_GET_NODEINFO(uiNodeId);
+            if (pNodeInfo == NULL)
+            {
+                continue;
+            }
+
+            if (pNodeInfo->m_wFlags & EPL_NMTMNU_NODE_FLAG_ISOCHRONOUS)
+            {
+                if (fInvalidateNext != FALSE)
+                {
+                    // set relative propagation delay to invalid
+                    pNodeInfo->m_dwRelPropagationDelayNs = 0;
+                    fInvalidateNext = FALSE;
+                }
+            }
+            else if (pNodeInfo->m_wPrcFlags & EPL_NMTMNU_NODE_FLAG_PRC_ADD_SCHEDULED)
+            {
+                pNodeInfo->m_wPrcFlags &= ~EPL_NMTMNU_NODE_FLAG_PRC_ADD_SCHEDULED;
+                pNodeInfo->m_wPrcFlags |=  EPL_NMTMNU_NODE_FLAG_PRC_ADD_IN_PROGRESS;
+                EplNmtMnuInstance_g.m_wFlags |= EPL_NMTMNU_FLAG_PRC_ADD_IN_PROGRESS;
+
+                // set relative propagation delay to invalid
+                pNodeInfo->m_dwRelPropagationDelayNs = 0;
+                fInvalidateNext = TRUE;
+            }
+        }
+
+        EplNmtMnuInstance_g.m_wFlags &= ~EPL_NMTMNU_FLAG_PRC_ADD_SCHEDULED;
+
+        if (EplNmtMnuInstance_g.m_wFlags & EPL_NMTMNU_FLAG_PRC_ADD_IN_PROGRESS)
+        {
+            Ret = EplNmtMnuPrcMeasure();
+        }
+    }
+#endif
+
+Exit:
+    return Ret;
+}
+
+
+//---------------------------------------------------------------------------
+//
 // Function:    EplNmtMnuStartBootStep1
 //
 // Description: starts BootStep1
@@ -1819,12 +1999,7 @@ tEplNmtMnuNodeInfo*	pNodeInfo;
         {   // subindex of MN
             if ((dwNodeCfg & (EPL_NODEASSIGN_MN_PRES | EPL_NODEASSIGN_NODE_EXISTS)) != 0)
             {   // MN shall send PRes
-            tEplDllNodeOpParam  NodeOpParam;
-
-                NodeOpParam.m_OpNodeType = kEplDllNodeOpTypeIsochronous;
-                NodeOpParam.m_uiNodeId = uiLocalNodeId;
-
-                Ret = EplDlluCalAddNode(&NodeOpParam);
+                Ret = EplNmtMnuAddNodeIsochronous(uiLocalNodeId);
             }
         }
     }
@@ -1921,25 +2096,16 @@ Exit:
 
 static tEplKernel EplNmtMnuNodeBootStep2(unsigned int uiNodeId_p, tEplNmtMnuNodeInfo* pNodeInfo_p)
 {
-tEplKernel      Ret = kEplSuccessful;
-tEplDllNodeOpParam  NodeOpParam;
-DWORD           dwNodeCfg;
-tEplTimerArg    TimerArg;
+tEplKernel          Ret;
+tEplTimerArg        TimerArg;
 
-    dwNodeCfg = pNodeInfo_p->m_dwNodeCfg;
-    if ((dwNodeCfg & EPL_NODEASSIGN_ASYNCONLY_NODE) == 0)
-    {   // add node to isochronous phase
-        NodeOpParam.m_OpNodeType = kEplDllNodeOpTypeIsochronous;
-        NodeOpParam.m_uiNodeId = uiNodeId_p;
+    Ret = kEplSuccessful;
 
-        pNodeInfo_p->m_wFlags |= EPL_NMTMNU_NODE_FLAG_ISOCHRON;
-
-        Ret = EplDlluCalAddNode(&NodeOpParam);
-        if (Ret != kEplSuccessful)
-        {
-            goto Exit;
-        }
-
+    // The check for addition to the isochronous phase
+    // implicates the check for NMT_CS_PRE_OPERATIONAL_2
+    if ((pNodeInfo_p->m_wFlags & EPL_NMTMNU_NODE_FLAG_ISOCHRON) == 0)
+    {
+        goto Exit;
     }
 
     EPL_NMTMNU_DBG_POST_TRACE_VALUE(0,
@@ -2940,6 +3106,18 @@ tEplNmtState    ExpNmtState;
         Ret = kEplReject;
         goto Exit;
     }
+    else if ((ExpNmtState == kEplNmtCsPreOperational2) &&
+             (NodeNmtState_p == kEplNmtCsPreOperational2))
+    {   // CN switched to PreOp2
+        if ((pNodeInfo_p->m_dwNodeCfg & EPL_NODEASSIGN_ASYNCONLY_NODE) == 0)
+        {   // add node to isochronous phase
+            Ret = EplNmtMnuAddNodeIsochronous(uiNodeId_p);
+            if (Ret != kEplSuccessful)
+            {
+                goto Exit;
+            }
+        }
+    }
     else if ((ExpNmtState == kEplNmtCsPreOperational2)
          && (NodeNmtState_p == kEplNmtCsReadyToOperate))
     {   // CN switched to ReadyToOp
@@ -2999,10 +3177,8 @@ tEplNmtState    ExpNmtState;
         }
 
     }
-    else if ((ExpNmtState != NodeNmtState_p)
-             && !((ExpNmtState == kEplNmtCsPreOperational1)
-                  && (NodeNmtState_p == kEplNmtCsPreOperational2)))
-    {   // CN is not in expected NMT state (without the exceptions above)
+    else if (ExpNmtState != NodeNmtState_p)
+    {   // CN is not in expected NMT state
     WORD wbeErrorCode;
 
         if ((pNodeInfo_p->m_wFlags & EPL_NMTMNU_NODE_FLAG_NOT_SCANNED) != 0)
@@ -3125,6 +3301,247 @@ int         iIndex;
     return Ret;
 }
 
+
+#if EPL_NMTMNU_PRES_CHAINING != FALSE
+//---------------------------------------------------------------------------
+//
+// Function:    EplNmtMnuPrcMeasure
+//
+// Description: Perform measure phase of PRC node insertion 
+//
+// Parameters:  void
+//
+// Returns:     tEplKernel              = error code
+//
+// State:
+//
+//---------------------------------------------------------------------------
+
+static tEplKernel EplNmtMnuPrcMeasure(void)
+{
+tEplKernel  Ret;
+
+    Ret = EplSuccessful;
+
+    return Ret;
+}
+
+
+//---------------------------------------------------------------------------
+//
+// Function:    EplNmtMnuPrcShift
+//
+// Description: Perform shift phase of PRC node insertion
+//
+// Parameters:  void
+//
+// Returns:     tEplKernel              = error code
+//
+// State:
+//
+//---------------------------------------------------------------------------
+
+static tEplKernel EplNmtMnuPrcShift(void);
+{
+tEplKernel  Ret;
+
+    Ret = EplSuccessful;
+
+    return Ret;
+}
+
+
+//---------------------------------------------------------------------------
+//
+// Function:    EplNmtMnuPrcAdd
+//
+// Description: Perform add phase of PRC node insertion 
+//
+// Parameters:  void
+//
+// Returns:     tEplKernel              = error code
+//
+// State:
+//
+//---------------------------------------------------------------------------
+
+static tEplKernel EplNmtMnuPrcAdd(void);
+{
+tEplKernel  Ret;
+
+    Ret = EplSuccessful;
+
+    return Ret;
+}
+
+
+//---------------------------------------------------------------------------
+//
+// Function:    EplNmtMnuPrcVerify
+//
+// Description: Perform verify for phase shift and phase add
+//
+// Parameters:  void
+//
+// Returns:     tEplKernel              = error code
+//
+// State:
+//
+//---------------------------------------------------------------------------
+
+static tEplKernel EplNmtMnuPrcVerify(void);
+{
+tEplKernel  Ret;
+
+    Ret = EplSuccessful;
+
+    return Ret;
+}
+
+
+//---------------------------------------------------------------------------
+//
+// Function:    EplNmtMnuPrcCbSyncResMeasure
+//
+// Description: SyncRes call-back function after SyncReq for measurement
+//
+// Parameters:  void
+//
+// Returns:     tEplKernel              = error code
+//
+// State:
+//
+//---------------------------------------------------------------------------
+
+static tEplKernel EplNmtMnuPrcCbSyncResMeasure(void);
+{
+tEplKernel  Ret;
+
+    Ret = EplSuccessful;
+
+    return Ret;
+}
+
+
+//---------------------------------------------------------------------------
+//
+// Function:    EplNmtMnuPrcCbSyncResShift
+//
+// Description: SyncRes call-back function after SyncReq for shifting
+//
+// Parameters:  void
+//
+// Returns:     tEplKernel              = error code
+//
+// State:
+//
+//---------------------------------------------------------------------------
+
+static tEplKernel EplNmtMnuPrcCbSyncResShift(void);
+{
+tEplKernel  Ret;
+
+    Ret = EplSuccessful;
+
+    return Ret;
+}
+
+
+//---------------------------------------------------------------------------
+//
+// Function:    EplNmtMnuPrcCbSyncResAdd
+//
+// Description: SyncRes call-back function after SyncReq for insertion
+//
+// Parameters:  void
+//
+// Returns:     tEplKernel              = error code
+//
+// State:
+//
+//---------------------------------------------------------------------------
+
+static tEplKernel EplNmtMnuPrcCbSyncResAdd(void);
+{
+tEplKernel  Ret;
+
+    Ret = EplSuccessful;
+
+    return Ret;
+}
+
+
+//---------------------------------------------------------------------------
+//
+// Function:    EplNmtMnuPrcCbSyncResVerify
+//
+// Description: SyncRes call-back function after SyncReq for verification
+//
+// Parameters:  void
+//
+// Returns:     tEplKernel              = error code
+//
+// State:
+//
+//---------------------------------------------------------------------------
+
+static tEplKernel EplNmtMnuPrcCbSyncResVerify(void);
+{
+tEplKernel  Ret;
+
+    Ret = EplSuccessful;
+
+    return Ret;
+}
+
+
+//---------------------------------------------------------------------------
+//
+// Function:    EplNmtMnuPrcCbSyncResNextAction
+//
+// Description: SyncRes call-back function if no specific handling is required
+//
+// Parameters:  void
+//
+// Returns:     tEplKernel              = error code
+//
+// State:
+//
+//---------------------------------------------------------------------------
+
+static tEplKernel EplNmtMnuPrcCbSyncResNextAction(void);
+{
+tEplKernel  Ret;
+
+    Ret = EplSuccessful;
+
+    return Ret;
+}
+
+
+//---------------------------------------------------------------------------
+//
+// Function:    EplNmtMnuPrcConfig
+//
+// Description: Configure PRes Chaining parameters
+//
+// Parameters:  void
+//
+// Returns:     tEplKernel              = error code
+//
+// State:
+//
+//---------------------------------------------------------------------------
+
+static tEplKernel EplNmtMnuPrcConfig(void);
+{
+tEplKernel  Ret;
+
+    Ret = EplSuccessful;
+
+    return Ret;
+}
+#endif // #if EPL_NMTMNU_PRES_CHAINING != FALSE
 
 #endif // #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
 
