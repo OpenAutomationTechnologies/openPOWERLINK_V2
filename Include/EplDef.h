@@ -83,6 +83,8 @@
 #define EPL_C_ADR_INVALID           0x00 // invalid EPL address
 #define EPL_C_ADR_MN_DEF_NODE_ID    0xF0 // EPL default address of MN
 #define EPL_C_ADR_RT1_DEF_NODE_ID   0xFE // EPL default address of router type 1
+#define EPL_C_ADR_SYNC_ON_SOC       0x00 // sync on SoC
+#define EPL_C_ADR_SYNC_ON_SOA       0xFF // sync on SoA
 #define EPL_C_DLL_ASND_PRIO_NMTRQST 7    // increased ASnd request priority to be used by NMT Requests
 #define EPL_C_DLL_ASND_PRIO_STD     0    // standard ASnd request priority
 #define EPL_C_DLL_ETHERTYPE_EPL     0x88AB
