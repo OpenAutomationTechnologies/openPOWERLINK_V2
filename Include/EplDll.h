@@ -96,7 +96,7 @@ typedef enum
     kEplDllAsndNmtRequest       = 0x03,
     kEplDllAsndNmtCommand       = 0x04,
     kEplDllAsndSdo              = 0x05,
-#if EPL_DLL_PRES_CHAINING_CN != FALSE
+#if (EPL_DLL_PRES_CHAINING_CN != FALSE) || (EPL_DLL_PRES_CHAINING_MN != FALSE)
     kEplDllAsndSyncResponse     = 0x06
 #endif
 } tEplDllAsndServiceId;
@@ -106,6 +106,7 @@ typedef enum
     kEplDllAsndFilterNone     = 0x00,
     kEplDllAsndFilterLocal    = 0x01,  // receive only ASnd frames with local or broadcast node ID
     kEplDllAsndFilterAny      = 0x02,  // receive any ASnd frame
+
 } tEplDllAsndFilter;
 
 typedef enum
@@ -114,7 +115,7 @@ typedef enum
     kEplDllReqServiceIdent      = 0x01,
     kEplDllReqServiceStatus     = 0x02,
     kEplDllReqServiceNmtRequest = 0x03,
-#if EPL_DLL_PRES_CHAINING_CN != FALSE
+#if (EPL_DLL_PRES_CHAINING_CN != FALSE) || (EPL_DLL_PRES_CHAINING_MN != FALSE)
     kEplDllReqServiceSync       = 0x06,
 #endif
     kEplDllReqServiceUnspecified= 0xFF,
@@ -239,6 +240,16 @@ typedef struct
 
 } tEplDllNodeOpParam;
 
+#if EPL_DLL_PRES_CHAINING_MN != FALSE
+typedef struct
+{
+    unsigned int  m_uiNodeId;
+    DWORD         m_dwSyncControl;
+    DWORD         m_dwPResTimeFirst;
+    DWORD         m_dwPResFallBackTimeout;
+
+} tEplDllSyncRequest;
+#endif
 
 //---------------------------------------------------------------------------
 // function prototypes
