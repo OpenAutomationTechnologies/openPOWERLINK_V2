@@ -350,6 +350,13 @@ static tEplKernel PUBLIC EplNmtMnuPrcCbSyncResAdd(unsigned int, tEplSyncResponse
 static tEplKernel PUBLIC EplNmtMnuPrcCbSyncResVerify(unsigned int, tEplSyncResponse*);
 static tEplKernel PUBLIC EplNmtMnuPrcCbSyncResNextAction(unsigned int, tEplSyncResponse*);
 
+static tEplKernel EplNmtMnuPrcCalcPResResponseTimeNs(
+                                    unsigned int    uiNodeId_p,
+                                    unsigned int    uiNodeIdPrevNode_p,
+                                    DWORD*          pdwPResResponseTimeNs_p);
+
+static DWORD EplNmtMnuPrcCalcPResChainingSlotTimeNs(void);
+
 static tEplKernel EplNmtMnuPrcConfig(void);
 #endif
 
@@ -2121,9 +2128,12 @@ tEplTimerArg        TimerArg;
     {   // node is async-only
     BYTE            bNmtState;
     tEplNmtState    NmtState;
+    tEplObdSize     ObdSize;
+
 
         // read object 0x1F8E NMT_MNNodeCurrState_AU8
-        Ret = EplObduReadEntry(0x1F8E, uiNodeId_p, &bNmtState, 1);
+        ObdSize = 1;
+        Ret = EplObduReadEntry(0x1F8E, uiNodeId_p, &bNmtState, &ObdSize);
         if (Ret != kEplSuccessful)
         {
             goto Exit;
@@ -3148,10 +3158,10 @@ tEplNmtState    ExpNmtState;
     {   // CN switched to PreOp2
         if (pNodeInfo_p->m_dwNodeCfg & EPL_NODEASSIGN_ASYNCONLY_NODE)
         {
-            if ((pNodeInfo->m_NodeState == kEplNmtMnuNodeStateConfigured) &&
+            if ((pNodeInfo_p->m_NodeState == kEplNmtMnuNodeStateConfigured) &&
                 (LocalNmtState_p >= kEplNmtMsPreOperational2))
             {
-                Ret = EplNmtMnuNodeBootStep2(uiNodeId, pNodeInfo);
+                Ret = EplNmtMnuNodeBootStep2(uiNodeId_p, pNodeInfo_p);
             }
         }
         else
@@ -3448,6 +3458,9 @@ DWORD               dwPResMnTimeoutNs;
 
     // no SyncReq has been sent
     // prepare shift phase and add phase
+
+    uiNodeIdPrevNode = EPL_C_ADR_INVALID;
+
     for (uiNodeId = uiNodeIdFirstNode; uiNodeId < 254; uiNodeId++)
     {
         pNodeInfo = EPL_NMTMNU_GET_NODEINFO(uiNodeId);
@@ -3460,7 +3473,11 @@ DWORD               dwPResMnTimeoutNs;
             && (   (pNodeInfo->m_wFlags & EPL_NMTMNU_NODE_FLAG_ISOCHRON)
                 || (pNodeInfo->m_wPrcFlags & EPL_NMTMNU_NODE_FLAG_PRC_ADD_IN_PROGRESS)))
         {
-            dwPResResponseTimeNs = EplNmtMnuPrcCalcPResResponseTimeNs(uiNodeId);
+            Ret = EplNmtMnuPrcCalcPResResponseTimeNs(uiNodeId, uiNodeIdPrevNode, &dwPResResponseTimeNs);
+            if (Ret != kEplSuccessful)
+            {
+                goto Exit;
+            }
 
             if (pNodeInfo->m_dwPResTimeFirstNs < dwPResResponseTimeNs)
             {
@@ -3471,6 +3488,8 @@ DWORD               dwPResMnTimeoutNs;
                     pNodeInfo->m_wPrcFlags |= EPL_NMTMNU_NODE_FLAG_PRC_SHIFT_REQUIRED;
                 }
             }
+
+            uiNodeIdPrevNode = uiNodeId;
         }
     }
 
@@ -3503,17 +3522,51 @@ Exit:
 //
 // Description: Calculate PRes Response Time of a node
 //
-// Parameters:  uiNodeId_p      = Node ID
+// Parameters:  uiNodeId_p              = IN:  Node ID
+//              uiNodeIdPrevNode_p      = IN:  Node ID of the predecessor node
+//              pdwPResResponseTimeNs_p = OUT: PRes Response Time in ns
 //
-// Returns:     DWORD           = PRes Response Time in ns
+// Returns:     tEplKernel              = error code
 //
 // State:
 //
 //---------------------------------------------------------------------------
 
-static DWORD EplNmtMnuPrcCalcPResResponseTimeNs(unsigned int uiNodeId_p)
+static tEplKernel EplNmtMnuPrcCalcPResResponseTimeNs(
+                                    unsigned int    uiNodeId_p,
+                                    unsigned int    uiNodeIdPrevNode_p,
+                                    DWORD*          pdwPResResponseTimeNs_p)
 {
-    return 0;
+tEplKernel  Ret;
+WORD        wPResPayloadLimitPrevNode;
+tEplObdSize ObdSize;
+
+
+    // $$$ check uiNodeIdPrevNode_p for EPL_C_ADR_INVALID
+
+    // read object 0x1F8D NMT_PResPayloadLimitList_AU16
+    ObdSize = 2;
+    Ret = EplObduReadEntry(0x1F8D, uiNodeIdPrevNode_p, &wPResPayloadLimitPrevNode, &ObdSize);
+    if (Ret != kEplSuccessful)
+    {
+        goto Exit;
+    }
+
+    *pdwPResResponseTimeNs_p =
+        // PRes Response Time of previous node
+        EPL_NMTMNU_GET_NODEINFO(uiNodeIdPrevNode_p)->m_dwPResTimeFirstNs
+        // Transmission time for PRes frame of previous node
+        + 8 * EPL_C_DLL_T_BITTIME * (wPResPayloadLimitPrevNode
+                                     + EPL_C_DLL_T_EPL_PDO_HEADER
+                                     + EPL_C_DLL_T_ETH2_WRAPPER)
+        + EPL_C_DLL_T_PREAMBLE
+        // Relative propragation delay from previous node to this node
+        + EPL_NMTMNU_GET_NODEINFO(uiNodeId_p)->m_dwRelPropagationDelayNs
+        // Time correction (hub jitter and part of measurement inaccuracy)
+        + 0;
+
+Exit:
+    return Ret;
 }
 
 
