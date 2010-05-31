@@ -279,28 +279,30 @@ tEplKernel PUBLIC EplSyncuRequestSyncResponse(
                                   tEplDllSyncRequest* pSyncRequestData_p,
                                   unsigned int        uiSize_p)
 {
-tEplKernel  Ret;
+tEplKernel      Ret;
+unsigned int    uiNodeId;
 
     Ret = kEplSuccessful;
+    uiNodeId = pSyncRequestData_p->m_uiNodeId;
 
-    if (uiNodeId_p == 0)
+    if (uiNodeId == 0)
     {
         Ret = kEplInvalidNodeId;
         goto Exit;
     }
 
     // decrement node ID, because array is zero based
-    uiNodeId_p--;
-    if (uiNodeId_p < tabentries (EplStatusuInstance_g.m_apfnCbResponse))
+    uiNodeId--;
+    if (uiNodeId < tabentries (EplSyncuInstance_g.m_apfnCbResponse))
     {
-        if (EplSyncuInstance_g.m_apfnCbResponse[uiNodeId_p] != NULL)
+        if (EplSyncuInstance_g.m_apfnCbResponse[uiNodeId] != NULL)
         {   // request already issued (maybe by someone else)
             Ret = kEplInvalidOperation;
         }
         else
         {
-            EplSyncuInstance_g.m_apfnCbResponse[uiNodeId_p] = pfnCbResponse_p;
-            Ret = EplDlluCalIssueSyncRequest(pSyncRequest_p, uiSize_p);
+            EplSyncuInstance_g.m_apfnCbResponse[uiNodeId] = pfnCbResponse_p;
+            Ret = EplDlluCalIssueSyncRequest(pSyncRequestData_p, uiSize_p);
         }
     }
     else
