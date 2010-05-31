@@ -1081,25 +1081,6 @@ tEplKernel      Ret = kEplSuccessful;
         // node processes isochronous and asynchronous frames
         case kEplNmtMsPreOperational2:
         {
-#if 0
-            // The change to PreOp2 is an implicit NMT command.
-            // Unexpected NMT states are ignored until
-            // the state monitor timer is elapsed.
-
-            // TODO this has to be done for all nodes
-            //      Additionally, the expected node state has to be set
-            //      to PreOp2.
-            EPL_NMTMNU_SET_FLAGS_TIMERARG_STATE_MON(
-                    pNodeInfo, uiNodeId_p, TimerArg);
-
-            // set NMT state change flag
-            pNodeInfo->m_wFlags |= EPL_NMTMNU_NODE_FLAG_NMT_CMD_ISSUED;
-
-            Ret = EplTimeruModifyTimerMs(&pNodeInfo->m_TimerHdlStatReq, EplNmtMnuInstance_g.m_ulStatusRequestDelay, TimerArg);
-#endif
-
-            // add identified CNs to isochronous phase
-            // send EnableReadyToOp to all identified CNs
             Ret = EplNmtMnuStartBootStep2();
 
             // wait for NMT state change of CNs
@@ -2025,8 +2006,9 @@ Exit:
 // Function:    EplNmtMnuStartBootStep2
 //
 // Description: starts BootStep2.
-//              That means add nodes to isochronous phase and send
-//              NMT EnableReadyToOp.
+//              That means checking if a node has reached PreOp2 and
+//              has been added to the isochronous phase.
+//              If this is met, the NMT EnableReadyToOp command is sent.
 //
 // Parameters:  (none)
 //
@@ -2045,23 +2027,45 @@ tEplNmtMnuNodeInfo* pNodeInfo;
 
     if ((EplNmtMnuInstance_g.m_wFlags & EPL_NMTMNU_FLAG_HALTED) == 0)
     {   // boot process is not halted
-        // add nodes to isochronous phase and send NMT EnableReadyToOp
         EplNmtMnuInstance_g.m_uiMandatorySlaveCount = 0;
         EplNmtMnuInstance_g.m_uiSignalSlaveCount = 0;
         // reset flag that application was informed about possible state change
         EplNmtMnuInstance_g.m_wFlags &= ~EPL_NMTMNU_FLAG_APP_INFORMED;
+    }
 
-        pNodeInfo = EplNmtMnuInstance_g.m_aNodeInfo;
-        for (uiIndex = 1; uiIndex <= tabentries(EplNmtMnuInstance_g.m_aNodeInfo); uiIndex++, pNodeInfo++)
+    pNodeInfo = EplNmtMnuInstance_g.m_aNodeInfo;
+    for (uiIndex = 1; uiIndex <= tabentries(EplNmtMnuInstance_g.m_aNodeInfo); uiIndex++, pNodeInfo++)
+    {
+        if (pNodeInfo->m_NodeState == kEplNmtMnuNodeStateConfigured)
         {
-            if (pNodeInfo->m_NodeState == kEplNmtMnuNodeStateConfigured)
-            {
-                Ret = EplNmtMnuNodeBootStep2(uiIndex, pNodeInfo);
-                if (Ret != kEplSuccessful)
-                {
-                    goto Exit;
-                }
+        tEplTimerArg    TimerArg;
+        BYTE            bNmtState;
 
+            // The change to PreOp2 is an implicit NMT command.
+            // Unexpected NMT states of the nodes are ignored until
+            // the state monitor timer is elapsed.
+            EPL_NMTMNU_SET_FLAGS_TIMERARG_STATE_MON(
+                    pNodeInfo, uiIndex, TimerArg);
+
+            // set NMT state change flag
+            pNodeInfo->m_wFlags |= EPL_NMTMNU_NODE_FLAG_NMT_CMD_ISSUED;
+
+            Ret = EplTimeruModifyTimerMs(&pNodeInfo->m_TimerHdlStatReq, EplNmtMnuInstance_g.m_ulStatusRequestDelay, TimerArg);
+            if (Ret != kEplSuccessful)
+            {
+                goto Exit;
+            }
+
+            // update object 0x1F8F NMT_MNNodeExpState_AU8 to PreOp2
+            bNmtState = (BYTE)(kEplNmtCsPreOperational2 & 0xFF);
+            Ret = EplObduWriteEntry(0x1F8F, uiIndex, &bNmtState, 1);
+            if (Ret != kEplSuccessful)
+            {
+                goto Exit;
+            }
+
+            if ((EplNmtMnuInstance_g.m_wFlags & EPL_NMTMNU_FLAG_HALTED) == 0)
+            {   // boot process is not halted
                 // set flag "not scanned"
                 pNodeInfo->m_wFlags |= EPL_NMTMNU_NODE_FLAG_NOT_SCANNED;
 
@@ -2088,8 +2092,9 @@ Exit:
 // Function:    EplNmtMnuNodeBootStep2
 //
 // Description: starts BootStep2 for the specified node.
-//              This means the CN is added to isochronous phase if not
-//              async-only and it gets the NMT command EnableReadyToOp.
+//              This means checking whether the CN is in NMT state PreOp2
+//              and whether it has been added to the isochronous phase.
+//              If both checks pass, it gets the NMT command EnableReadyToOp.
 //              The CN must be in node state Configured, when it enters
 //              BootStep2. When BootStep2 finishes, the CN is in node state
 //              ReadyToOp.
@@ -2112,11 +2117,33 @@ tEplTimerArg        TimerArg;
 
     Ret = kEplSuccessful;
 
-    // The check for addition to the isochronous phase
-    // implicates the check for NMT_CS_PRE_OPERATIONAL_2
-    if ((pNodeInfo_p->m_wFlags & EPL_NMTMNU_NODE_FLAG_ISOCHRON) == 0)
-    {
-        goto Exit;
+    if (pNodeInfo_p->m_dwNodeCfg & EPL_NODEASSIGN_ASYNCONLY_NODE)
+    {   // node is async-only
+    BYTE            bNmtState;
+    tEplNmtState    NmtState;
+
+        // read object 0x1F8E NMT_MNNodeCurrState_AU8
+        Ret = EplObduReadEntry(0x1F8E, uiNodeId_p, &bNmtState, 1);
+        if (Ret != kEplSuccessful)
+        {
+            goto Exit;
+        }
+        NmtState = (tEplNmtState) (bNmtState | EPL_NMT_TYPE_CS);
+
+        if (NmtState != kEplNmtCsPreOperational2)
+        {
+            goto Exit;
+        }
+    }
+    else
+    {   // node is not async-only
+
+        // The check whether the node has been added to the isochronous phase
+        // implicates the check for NMT state PreOp2
+        if ((pNodeInfo_p->m_wFlags & EPL_NMTMNU_NODE_FLAG_ISOCHRON) == 0)
+        {
+            goto Exit;
+        }
     }
 
     EPL_NMTMNU_DBG_POST_TRACE_VALUE(0,
@@ -2134,8 +2161,7 @@ tEplTimerArg        TimerArg;
         // when the timer expires the CN must be ReadyToOp
         EPL_NMTMNU_SET_FLAGS_TIMERARG_LONGER(
                 pNodeInfo_p, uiNodeId_p, TimerArg);
-//        TimerArg.m_EventSink = kEplEventSinkNmtMnu;
-//        TimerArg.m_Arg.m_dwVal = EPL_NMTMNU_TIMERARG_LONGER | uiNodeId_p;
+
         Ret = EplTimeruModifyTimerMs(&pNodeInfo_p->m_TimerHdlLonger, EplNmtMnuInstance_g.m_ulTimeoutReadyToOp, TimerArg);
     }
 
@@ -3120,7 +3146,15 @@ tEplNmtState    ExpNmtState;
     else if ((ExpNmtState == kEplNmtCsPreOperational2) &&
              (NodeNmtState_p == kEplNmtCsPreOperational2))
     {   // CN switched to PreOp2
-        if ((pNodeInfo_p->m_dwNodeCfg & EPL_NODEASSIGN_ASYNCONLY_NODE) == 0)
+        if (pNodeInfo_p->m_dwNodeCfg & EPL_NODEASSIGN_ASYNCONLY_NODE)
+        {
+            if ((pNodeInfo->m_NodeState == kEplNmtMnuNodeStateConfigured) &&
+                (LocalNmtState_p >= kEplNmtMsPreOperational2))
+            {
+                Ret = EplNmtMnuNodeBootStep2(uiNodeId, pNodeInfo);
+            }
+        }
+        else
         {   // add node to isochronous phase
             Ret = EplNmtMnuAddNodeIsochronous(uiNodeId_p);
             if (Ret != kEplSuccessful)
@@ -3426,7 +3460,7 @@ DWORD               dwPResMnTimeoutNs;
             && (   (pNodeInfo->m_wFlags & EPL_NMTMNU_NODE_FLAG_ISOCHRON)
                 || (pNodeInfo->m_wPrcFlags & EPL_NMTMNU_NODE_FLAG_PRC_ADD_IN_PROGRESS)))
         {
-            dwPResResponseTimeNs = 0; // $$$ calculate PRes Response Time
+            dwPResResponseTimeNs = EplNmtMnuPrcCalcPResResponseTimeNs(uiNodeId);
 
             if (pNodeInfo->m_dwPResTimeFirstNs < dwPResResponseTimeNs)
             {
@@ -3440,7 +3474,7 @@ DWORD               dwPResMnTimeoutNs;
         }
     }
 
-    dwPResMnTimeoutNs = 0; // $$$ calculate PRes Chaining Slot Time
+    dwPResMnTimeoutNs = EplNmtMnuPrcCalcPResChainingSlotTimeNs();
     
     if (EplNmtMnuInstance_g.m_dwPrcPResMnTimeoutNs < dwPResMnTimeoutNs)
     {
@@ -3460,6 +3494,46 @@ DWORD               dwPResMnTimeoutNs;
 
 Exit:
     return Ret;
+}
+
+
+//---------------------------------------------------------------------------
+//
+// Function:    EplNmtMnuPrcCalcPResResponseTimeNs
+//
+// Description: Calculate PRes Response Time of a node
+//
+// Parameters:  uiNodeId_p      = Node ID
+//
+// Returns:     DWORD           = PRes Response Time in ns
+//
+// State:
+//
+//---------------------------------------------------------------------------
+
+static DWORD EplNmtMnuPrcCalcPResResponseTimeNs(unsigned int uiNodeId_p)
+{
+    return 0;
+}
+
+
+//---------------------------------------------------------------------------
+//
+// Function:    EplNmtMnuPrcCalcPResChainingSlotTimeNs
+//
+// Description: Calculate PRes Chaining Slot Time
+//
+// Parameters:  none
+//
+// Returns:     DWORD           = PRes Chaining Slot Time in ns
+//
+// State:
+//
+//---------------------------------------------------------------------------
+
+static DWORD EplNmtMnuPrcCalcPResChainingSlotTimeNs(void)
+{
+    return 0;
 }
 
 
