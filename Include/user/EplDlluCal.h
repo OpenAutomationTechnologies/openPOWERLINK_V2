@@ -120,7 +120,10 @@ tEplKernel EplDlluCalDeleteNode(tEplDllNodeOpParam* pNodeOpParam_p);
 
 tEplKernel EplDlluCalIssueRequest(tEplDllReqServiceId Service_p, unsigned int uiNodeId_p, BYTE bSoaFlag1_p);
 
+#if EPL_DLL_PRES_CHAINING_MN != FALSE
 tEplKernel EplDlluCalIssueSyncRequest(tEplDllSyncRequest* pSyncRequest_p, unsigned int uiSize_p);
+#endif
+
 #endif
 
 
