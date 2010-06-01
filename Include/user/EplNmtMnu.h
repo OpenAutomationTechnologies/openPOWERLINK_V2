@@ -98,6 +98,14 @@ typedef tEplKernel (PUBLIC * tEplNmtMnuCbBootEvent) (
     WORD wErrorCode_p);
 
 
+typedef struct
+{
+    DWORD   m_dwPResResponseTimeCorrectionNs;
+    DWORD   m_dwPResResponseTimeNegOffsetNs;
+
+} tEplNmtMnuConfigParam;
+
+
 //---------------------------------------------------------------------------
 // function prototypes
 //---------------------------------------------------------------------------
@@ -131,6 +139,10 @@ tEplKernel PUBLIC EplNmtMnuCbCheckEvent(tEplNmtEvent NmtEvent_p);
 tEplKernel PUBLIC EplNmtMnuGetDiagnosticInfo(unsigned int* puiMandatorySlaveCount_p,
                                              unsigned int* puiSignalSlaveCount_p,
                                              WORD* pwFlags_p);
+
+#if EPL_NMTMNU_PRES_CHAINING_MN != FALSE
+tEplKernel PUBLIC EplNmtMnuPrcConfig(tEplNmtMnuConfigParam* pConfigParam_p);
+#endif
 
 #endif
 
