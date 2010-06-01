@@ -109,6 +109,10 @@
 #include "EplObdCdc.h"
 #endif
 
+#if EPL_NMTMNU_PRES_CHAINING_MN != FALSE
+#include "user/EplSyncu.h"
+#endif
+
 /***************************************************************************/
 /*                                                                         */
 /*                                                                         */
@@ -468,6 +472,16 @@ tEplDllkInitParam   DllkInitParam;
     {
         goto Exit;
     }
+
+#if EPL_NMTMNU_PRES_CHAINING_MN != FALSE
+    // initialize EplSyncu module
+    Ret = EplSyncuInit();
+    if (Ret != kEplSuccessful)
+    {
+        goto Exit;
+    }
+#endif
+
 #endif
 
     // initialize EplLedu module
