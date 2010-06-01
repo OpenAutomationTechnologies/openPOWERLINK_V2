@@ -109,8 +109,8 @@
 #define ETH_FRAME_BUF_SIZE                              1560   /* size of a frame buffer     */
 #define INTRAM_SEGMENT_SIZE                             0x8000 /* size of the internal ram segments */
 
-#define EDRV_MAX_BUFFERS    (unsigned int) ((INTRAM_SEGMENT_SIZE / ETH_FRAME_BUF_SIZE) - 1)
-    // number of frame buffers
+#define EDRV_BUFFERS_PER_UNIT   ((unsigned int) ((INTRAM_SEGMENT_SIZE / ETH_FRAME_BUF_SIZE) - 1))
+    // number of frame buffers per xC unit
     // first DWORD in segment 0 is hardwired + IRQ vectors, so it cannot be used
 
 #define ETHERNET_FIFO_EMPTY                             0 /* Empty pointer FIFO               */
@@ -202,7 +202,7 @@ typedef struct
     void __iomem*           m_apSramBase[2];// pointer to SRAM of xPEC unit
 
     tEdrvInitParam      m_InitParam;
-    tEdrvTxBuffer*      m_apTxBuffer[EDRV_MAX_BUFFERS];
+    tEdrvTxBuffer*      m_apTxBuffer[2 * EDRV_BUFFERS_PER_UNIT];
 
 } tEdrvInstance;
 
@@ -693,9 +693,9 @@ ETHHUB_FIFO_ELEMENT_T tFifoPtr;
 
     if (tFifoPtr.val != 0)
     {
-        if (pBuffer_p == EdrvInstance_l.m_pLastTransmittedTxBuffer)
+        if (pBuffer_p == EdrvInstance_l.m_apTxBuffer[(tFifoPtr.bf.FRAME_BUF_NUM - 1) * tFifoPtr.bf.INT_RAM_SEGMENT_NUM])
         {   // transmission of buffer is still active
-            EdrvInstance_l.m_pLastTransmittedTxBuffer = NULL;
+            EdrvInstance_l.m_apTxBuffer[(tFifoPtr.bf.FRAME_BUF_NUM - 1) * tFifoPtr.bf.INT_RAM_SEGMENT_NUM] = NULL;
 
             if (tFifoPtr.bf.RES1 != 0)
             {   // buffer was malloced
@@ -775,6 +775,8 @@ ETHHUB_FIFO_ELEMENT_T tFifoPtr;
         // retrieve the fifo element from the empty pointer FIFO
         tFifoPtr.val = pfifo_pop(ETHERNET_FIFO_EMPTY);
 
+        pBuffer_p->m_BufferNumber.m_uiVal = tFifoPtr.val | MSK_ETHHUB_FIFO_ELEMENT_RES1;
+
         // copy malloced buffer to SRAM
         memcpy_toio(EdrvInstance_l.m_apSramBase[tFifoPtr.bf.INT_RAM_SEGMENT_NUM]
                         + (ETH_FRAME_BUF_SIZE * tFifoPtr.bf.FRAME_BUF_NUM),
@@ -783,7 +785,7 @@ ETHHUB_FIFO_ELEMENT_T tFifoPtr;
     }
 
     // save pointer to buffer structure for TxHandler
-    EdrvInstance_l.m_apTxBuffer[tFifoPtr.bf.FRAME_BUF_NUM - 1] = pBuffer_p;
+    EdrvInstance_l.m_apTxBuffer[(tFifoPtr.bf.FRAME_BUF_NUM - 1) * tFifoPtr.bf.INT_RAM_SEGMENT_NUM] = pBuffer_p;
 
     tFifoPtr.bf.SUPPRESS_CON = 0;
     tFifoPtr.bf.FRAME_LEN = pBuffer_p->m_uiTxMsgLen;
@@ -933,8 +935,8 @@ DWORD           dwValue;
         // retrieve the fifo element from the conf low FIFO
         tFifoPtr.val = pfifo_pop(ETHERNET_FIFO_CON_LO);
 
-        pTxBuffer = EdrvInstance_l.m_apTxBuffer[tFifoPtr.bf.FRAME_BUF_NUM - 1];
-        EdrvInstance_l.m_apTxBuffer[tFifoPtr.bf.FRAME_BUF_NUM - 1] = NULL;
+        pTxBuffer = EdrvInstance_l.m_apTxBuffer[(tFifoPtr.bf.FRAME_BUF_NUM - 1) * tFifoPtr.bf.INT_RAM_SEGMENT_NUM];
+        EdrvInstance_l.m_apTxBuffer[(tFifoPtr.bf.FRAME_BUF_NUM - 1) * tFifoPtr.bf.INT_RAM_SEGMENT_NUM] = NULL;
 
         // decode the error code
         switch(tFifoPtr.bf.ERROR_CODE)
@@ -976,15 +978,8 @@ DWORD           dwValue;
 
         if (pTxBuffer != NULL)
         {
-
-            if ((tFifoPtr.val
-                    & (MSK_ETHHUB_FIFO_ELEMENT_FRAME_BUF_NUM
-                      | MSK_ETHHUB_FIFO_ELEMENT_INT_RAM_SEGMENT_NUM))
-                != (pTxBuffer->m_BufferNumber.m_uiVal
-                    & (MSK_ETHHUB_FIFO_ELEMENT_FRAME_BUF_NUM
-                      | MSK_ETHHUB_FIFO_ELEMENT_INT_RAM_SEGMENT_NUM)))
-            {   // current FIFO element does not equal the Tx buffer number
-                // assume it is a malloced one
+            if ((pTxBuffer->m_BufferNumber.m_uiVal & MSK_ETHHUB_FIFO_ELEMENT_RES1) != 0)
+            {   // current FIFO element is a malloced one
                 // release FIFO element to empty pointer FIFO
                 pfifo_push(ETHERNET_FIFO_EMPTY, tFifoPtr.val);
             }
@@ -1161,7 +1156,6 @@ struct netxeth_platform_data* pPlatformData;
 int                     iResult = 0;
 int                     iXcNo;
 ETHHUB_FIFO_ELEMENT_T   tFifoPtr;
-unsigned int            uiEmptyPtrCnt;
 unsigned int            uiFrame;
 
     pPlatformData =
@@ -1201,9 +1195,7 @@ unsigned int            uiFrame;
     tFifoPtr.bf.INT_RAM_SEGMENT_NUM = iXcNo;
 
     // first DWORD in segment 0 is hardwired + IRQ vectors, so it cannot be used
-    uiEmptyPtrCnt = (INTRAM_SEGMENT_SIZE / ETH_FRAME_BUF_SIZE) - 1;
-
-    for (uiFrame = 1; uiFrame <= uiEmptyPtrCnt; uiFrame++)
+    for (uiFrame = 1; uiFrame <= EDRV_BUFFERS_PER_UNIT; uiFrame++)
     {
         tFifoPtr.bf.FRAME_BUF_NUM = uiFrame;
         pfifo_push(ETHERNET_FIFO_EMPTY, tFifoPtr.val);
