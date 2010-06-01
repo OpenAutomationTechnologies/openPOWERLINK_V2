@@ -76,8 +76,6 @@
 #include "user/EplDlluCal.h"
 #include "Benchmark.h"
 
-#define EPL_NMTMNU_PRES_CHAINING_MN         EPL_DLL_PRES_CHAINING_MN
-
 #if EPL_NMTMNU_PRES_CHAINING_MN != FALSE
 #include "user/EplSyncu.h"
 #endif
@@ -216,7 +214,6 @@ typedef struct
 
 } tEplNmtMnuNodeCmd;
 
-
 typedef enum
 {
     kEplNmtMnuIntNodeEventNoIdentResponse   = 0x00,
@@ -263,8 +260,6 @@ typedef struct
     WORD                m_wPrcFlags;    // PRC specific node flags
     DWORD               m_dwRelPropagationDelayNs;
     DWORD               m_dwPResTimeFirstNs;
-    DWORD               m_dwPResResponseTimeCorrectionNs;
-    DWORD               m_dwPResResponseTimeNegOffsetNs;
 #endif
 } tEplNmtMnuNodeInfo;
 
@@ -284,6 +279,8 @@ typedef struct
     tEplNmtMnuCbBootEvent m_pfnCbBootEvent;
 #if EPL_NMTMNU_PRES_CHAINING_MN != FALSE
     DWORD               m_dwPrcPResMnTimeoutNs;
+    DWORD               m_dwPResResponseTimeCorrectionNs;
+    DWORD               m_dwPResResponseTimeNegOffsetNs;
 #endif
 } tEplNmtMnuInstance;
 
@@ -354,10 +351,9 @@ static tEplKernel EplNmtMnuPrcCalcPResResponseTimeNs(
                                     unsigned int    uiNodeId_p,
                                     unsigned int    uiNodeIdPrevNode_p,
                                     DWORD*          pdwPResResponseTimeNs_p);
-
-static DWORD EplNmtMnuPrcCalcPResChainingSlotTimeNs(void);
-
-static tEplKernel EplNmtMnuPrcConfig(void);
+static tEplKernel EplNmtMnuPrcCalcPResChainingSlotTimeNs(
+                                    unsigned int    uiNodeIdLastNode_p,
+                                    DWORD*          pdwPResChainingSlotTimeNs_p);
 #endif
 
 
@@ -437,6 +433,11 @@ tEplKernel Ret;
 
     // register NmtMnResponse callback function
     Ret = EplDlluCalRegAsndService(kEplDllAsndNmtRequest, EplNmtMnuCbNmtRequest, kEplDllAsndFilterLocal);
+
+#if EPL_NMTMNU_PRES_CHAINING_MN != FALSE
+    EplNmtMnuInstance_g.m_dwPResResponseTimeCorrectionNs =  50;
+    EplNmtMnuInstance_g.m_dwPResResponseTimeNegOffsetNs  = 500;
+#endif
 
 Exit:
     return Ret;
@@ -1644,6 +1645,38 @@ Exit:
     return Ret;
 }
 */
+
+
+#if EPL_NMTMNU_PRES_CHAINING_MN != FALSE
+//---------------------------------------------------------------------------
+//
+// Function:    EplNmtMnuPrcConfig
+//
+// Description: Configure PRes Chaining parameters
+//
+// Parameters:  void
+//
+// Returns:     tEplKernel              = error code
+//
+// State:
+//
+//---------------------------------------------------------------------------
+
+tEplKernel PUBLIC EplNmtMnuPrcConfig(tEplNmtMnuConfigParam* pConfigParam_p)
+{
+tEplKernel  Ret;
+
+    Ret = kEplSuccessful;
+
+    EplNmtMnuInstance_g.m_dwPResResponseTimeCorrectionNs =
+        pConfigParam_p->m_dwPResResponseTimeCorrectionNs;
+    EplNmtMnuInstance_g.m_dwPResResponseTimeNegOffsetNs =
+        pConfigParam_p->m_dwPResResponseTimeNegOffsetNs;
+
+    return Ret;
+}
+#endif
+
 
 //=========================================================================//
 //                                                                         //
@@ -3505,7 +3538,11 @@ DWORD               dwPResMnTimeoutNs;
         }
     }
 
-    dwPResMnTimeoutNs = EplNmtMnuPrcCalcPResChainingSlotTimeNs();
+    Ret = EplNmtMnuPrcCalcPResChainingSlotTimeNs(uiNodeIdPrevNode, &dwPResMnTimeoutNs);
+    if (Ret != kEplSuccessful)
+    {
+        goto Exit;
+    }
     
     if (EplNmtMnuInstance_g.m_dwPrcPResMnTimeoutNs < dwPResMnTimeoutNs)
     {
@@ -3553,8 +3590,8 @@ tEplKernel  Ret;
 WORD        wPResPayloadLimitPrevNode;
 tEplObdSize ObdSize;
 
-
     // $$$ check uiNodeIdPrevNode_p for EPL_C_ADR_INVALID
+    //     and handle special cases for node 1 and 2
 
     // read object 0x1F8D NMT_PResPayloadLimitList_AU16
     ObdSize = 2;
@@ -3567,15 +3604,15 @@ tEplObdSize ObdSize;
     *pdwPResResponseTimeNs_p =
         // PRes Response Time of previous node
         EPL_NMTMNU_GET_NODEINFO(uiNodeIdPrevNode_p)->m_dwPResTimeFirstNs
-        // Transmission time for PRes frame of previous node
-        + 8 * EPL_C_DLL_T_BITTIME * (wPResPayloadLimitPrevNode
-                                     + EPL_C_DLL_T_EPL_PDO_HEADER
-                                     + EPL_C_DLL_T_ETH2_WRAPPER)
-        + EPL_C_DLL_T_PREAMBLE
-        // Relative propragation delay from previous node to this node
+          // Transmission time for PRes frame of previous node
+        + (8 * EPL_C_DLL_T_BITTIME * (wPResPayloadLimitPrevNode
+                                      + EPL_C_DLL_T_EPL_PDO_HEADER
+                                      + EPL_C_DLL_T_ETH2_WRAPPER)
+           + EPL_C_DLL_T_PREAMBLE)
+          // Relative propragation delay from previous node to addressed node
         + EPL_NMTMNU_GET_NODEINFO(uiNodeId_p)->m_dwRelPropagationDelayNs
-        // Time correction (hub jitter and part of measurement inaccuracy)
-        + 0;
+          // Time correction (hub jitter and part of measurement inaccuracy)
+        + EplNmtMnuInstance_g.m_dwPResResponseTimeCorrectionNs;
 
 Exit:
     return Ret;
@@ -3588,17 +3625,71 @@ Exit:
 //
 // Description: Calculate PRes Chaining Slot Time
 //
-// Parameters:  none
+// Parameters:  pdwPResChainingSlotTimeNs_p = OUT: PRes Chaining Slot Time in ns
 //
-// Returns:     DWORD           = PRes Chaining Slot Time in ns
+// Returns:     tEplKernel                  = error code
 //
 // State:
 //
 //---------------------------------------------------------------------------
 
-static DWORD EplNmtMnuPrcCalcPResChainingSlotTimeNs(void)
+static tEplKernel EplNmtMnuPrcCalcPResChainingSlotTimeNs(
+                                    unsigned int    uiNodeIdLastNode_p,
+                                    DWORD*          pdwPResChainingSlotTimeNs_p)
 {
-    return 0;
+tEplKernel  Ret;
+WORD        wPResActPayloadLimit;
+WORD        wCnPReqPayloadLastNode;
+DWORD       dwCnResTimeoutLastNodeNs;
+tEplObdSize ObdSize;
+
+    // read object 0x1F98 NMT_CycleTiming_REC
+    // Sub-Index 05h PResActPayloadLimit_U16
+    ObdSize = 2;
+    Ret = EplObduReadEntry(0x1F98, 5, &wPResActPayloadLimit, &ObdSize);
+    if (Ret != kEplSuccessful)
+    {
+        goto Exit;
+    }
+
+    // read object 0x1F8B NMT_MNPReqPayloadLimitList_AU16
+    ObdSize = 2;
+    Ret = EplObduReadEntry(0x1F8B, uiNodeIdLastNode_p, &wCnPReqPayloadLastNode, &ObdSize);
+    if (Ret != kEplSuccessful)
+    {
+        goto Exit;
+    }
+
+    // read object 0x1F92 NMT_MNCNPResTimeout_AU32
+    ObdSize = 4;
+    Ret = EplObduReadEntry(0x1F92, uiNodeIdLastNode_p, &dwCnResTimeoutLastNodeNs, &ObdSize);
+    if (Ret != kEplSuccessful)
+    {
+        goto Exit;
+    }
+
+    *pdwPResChainingSlotTimeNs_p =
+        // Transmission time for PResMN frame
+        8 * EPL_C_DLL_T_BITTIME * (wPResActPayloadLimit
+                                   + EPL_C_DLL_T_EPL_PDO_HEADER
+                                   + EPL_C_DLL_T_ETH2_WRAPPER)
+          + EPL_C_DLL_T_PREAMBLE
+          // PRes Response Time of last node
+        + EPL_NMTMNU_GET_NODEINFO(uiNodeIdLastNode_p)->m_dwPResTimeFirstNs
+          // Relative propagation delay from last node to MN
+          // Due to Soft-MN limitations, NMT_MNCNPResTimeout_AU32.CNResTimeout
+          // of the last node is used.
+        + dwCnResTimeoutLastNodeNs
+          // Transmission time for PReq frame of last node
+        - (8 * EPL_C_DLL_T_BITTIME * (wCnPReqPayloadLastNode
+                                      + EPL_C_DLL_T_EPL_PDO_HEADER
+                                      + EPL_C_DLL_T_ETH2_WRAPPER)
+           + EPL_C_DLL_T_PREAMBLE)
+          // Time correction (hub jitter and part of measurement inaccuracy)
+        + EplNmtMnuInstance_g.m_dwPResResponseTimeCorrectionNs;
+
+Exit:
+    return Ret;
 }
 
 
@@ -3795,30 +3886,6 @@ tEplKernel  Ret;
 static tEplKernel PUBLIC EplNmtMnuPrcCbSyncResNextAction(
                                   unsigned int          uiNodeId_p,
                                   tEplSyncResponse*     pSyncResponse_p)
-{
-tEplKernel  Ret;
-
-    Ret = kEplSuccessful;
-
-    return Ret;
-}
-
-
-//---------------------------------------------------------------------------
-//
-// Function:    EplNmtMnuPrcConfig
-//
-// Description: Configure PRes Chaining parameters
-//
-// Parameters:  void
-//
-// Returns:     tEplKernel              = error code
-//
-// State:
-//
-//---------------------------------------------------------------------------
-
-static tEplKernel EplNmtMnuPrcConfig(void)
 {
 tEplKernel  Ret;
 
