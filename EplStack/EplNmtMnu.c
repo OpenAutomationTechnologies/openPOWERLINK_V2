@@ -2437,17 +2437,29 @@ tEplTimerArg        TimerArg;
             pNodeInfo->m_wFlags &= ~(EPL_NMTMNU_NODE_FLAG_ISOCHRON
                                      | EPL_NMTMNU_NODE_FLAG_NMT_CMD_ISSUED);
 
-            if ((NmtState == kEplNmtMsPreOperational1)
-                && ((pNodeInfo->m_wFlags & EPL_NMTMNU_NODE_FLAG_NOT_SCANNED) != 0))
+            if (NmtState == kEplNmtMsPreOperational1)
             {
-                // decrement only signal slave count
-                EplNmtMnuInstance_g.m_uiSignalSlaveCount--;
-                pNodeInfo->m_wFlags &= ~EPL_NMTMNU_NODE_FLAG_NOT_SCANNED;
+                if ((pNodeInfo->m_wFlags & EPL_NMTMNU_NODE_FLAG_NOT_SCANNED) != 0)
+                {
+                    // decrement only signal slave count
+                    EplNmtMnuInstance_g.m_uiSignalSlaveCount--;
+                    pNodeInfo->m_wFlags &= ~EPL_NMTMNU_NODE_FLAG_NOT_SCANNED;
+                }
+
+                // update object 0x1F8F NMT_MNNodeExpState_AU8 to PreOp1
+                bNmtState = (BYTE) (kEplNmtCsPreOperational1 & 0xFF);
+            }
+            else if (NmtState >= kEplNmtMsPreOperational2)
+            {
+                // update object 0x1F8F NMT_MNNodeExpState_AU8 to PreOp2
+                bNmtState = (BYTE) (kEplNmtCsPreOperational2 & 0xFF);
             }
 
-            // update object 0x1F8F NMT_MNNodeExpState_AU8 to PreOp1 (even if local state >= PreOp2)
-            bNmtState = (BYTE) (kEplNmtCsPreOperational1 & 0xFF);
             Ret = EplObduWriteEntry(0x1F8F, uiNodeId_p, &bNmtState, 1);
+            if (Ret != kEplSuccessful)
+            {
+                goto Exit;
+            }
 
             // check NMT state of CN
             Ret = EplNmtMnuCheckNmtState(uiNodeId_p, pNodeInfo, NodeNmtState_p, wErrorCode_p, NmtState);
