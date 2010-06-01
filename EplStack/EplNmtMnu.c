@@ -3586,12 +3586,45 @@ static tEplKernel EplNmtMnuPrcCalcPResResponseTimeNs(
                                     unsigned int    uiNodeIdPrevNode_p,
                                     DWORD*          pdwPResResponseTimeNs_p)
 {
-tEplKernel  Ret;
-WORD        wPResPayloadLimitPrevNode;
-tEplObdSize ObdSize;
+tEplKernel          Ret;
+WORD                wPResPayloadLimitPrevNode;
+tEplNmtMnuNodeInfo* pNodeInfoPrevNode;
+tEplObdSize         ObdSize;
 
-    // $$$ check uiNodeIdPrevNode_p for EPL_C_ADR_INVALID
-    //     and handle special cases for node 1 and 2
+    if (uiNodeIdPrevNode_p == EPL_C_ADR_INVALID)
+    {   // find predecessor node
+    unsigned int        uiNodeId;
+    tEplNmtMnuNodeInfo* pNodeInfo;
+
+        for (uiNodeId = uiNodeId_p - 1; uiNodeId >= 1; uiNodeId--)
+        {
+            pNodeInfo = EPL_NMTMNU_GET_NODEINFO(uiNodeId);
+            if (pNodeInfo == NULL)
+            {
+                continue;
+            }
+
+            if (   (pNodeInfo->m_dwNodeCfg & EPL_NODEASSIGN_PRES_CHAINING)
+                && (   (pNodeInfo->m_wFlags & EPL_NMTMNU_NODE_FLAG_ISOCHRON)
+                    || (pNodeInfo->m_wPrcFlags & EPL_NMTMNU_NODE_FLAG_PRC_ADD_IN_PROGRESS)))
+            {
+                uiNodeIdPrevNode_p = uiNodeId;
+                pNodeInfoPrevNode  = pNodeInfo;
+                break;
+            }
+        }
+
+        if (uiNodeIdPrevNode_p == EPL_C_ADR_INVALID)
+        {   // no predecessor node found
+            // PRes Response Time of first PRC node is defined to 0
+            *pdwPResResponseTimeNs_p = 0;
+            goto Exit;
+        }
+    }
+    else
+    {
+        pNodeInfoPrevNode = EPL_NMTMNU_GET_NODEINFO(uiNodeIdPrevNode_p);
+    }
 
     // read object 0x1F8D NMT_PResPayloadLimitList_AU16
     ObdSize = 2;
@@ -3602,8 +3635,8 @@ tEplObdSize ObdSize;
     }
 
     *pdwPResResponseTimeNs_p =
-        // PRes Response Time of previous node
-        EPL_NMTMNU_GET_NODEINFO(uiNodeIdPrevNode_p)->m_dwPResTimeFirstNs
+          // PRes Response Time of previous node
+          pNodeInfoPrevNode->m_dwPResTimeFirstNs
           // Transmission time for PRes frame of previous node
         + (8 * EPL_C_DLL_T_BITTIME * (wPResPayloadLimitPrevNode
                                       + EPL_C_DLL_T_EPL_PDO_HEADER
@@ -3613,6 +3646,19 @@ tEplObdSize ObdSize;
         + EPL_NMTMNU_GET_NODEINFO(uiNodeId_p)->m_dwRelPropagationDelayNs
           // Time correction (hub jitter and part of measurement inaccuracy)
         + EplNmtMnuInstance_g.m_dwPResResponseTimeCorrectionNs;
+
+    // apply negative offset for the second node, only
+    if (pNodeInfoPrevNode->m_dwPResTimeFirstNs == 0)
+    {
+        if (*pdwPResResponseTimeNs_p > EplNmtMnuInstance_g.m_dwPResResponseTimeNegOffsetNs)
+        {
+            *pdwPResResponseTimeNs_p -= EplNmtMnuInstance_g.m_dwPResResponseTimeNegOffsetNs;
+        }
+        else
+        {
+            *pdwPResResponseTimeNs_p = 0;
+        }
+    }
 
 Exit:
     return Ret;
@@ -3669,11 +3715,11 @@ tEplObdSize ObdSize;
     }
 
     *pdwPResChainingSlotTimeNs_p =
-        // Transmission time for PResMN frame
-        8 * EPL_C_DLL_T_BITTIME * (wPResActPayloadLimit
-                                   + EPL_C_DLL_T_EPL_PDO_HEADER
-                                   + EPL_C_DLL_T_ETH2_WRAPPER)
-          + EPL_C_DLL_T_PREAMBLE
+          // Transmission time for PResMN frame
+          (8 * EPL_C_DLL_T_BITTIME * (wPResActPayloadLimit
+                                      + EPL_C_DLL_T_EPL_PDO_HEADER
+                                      + EPL_C_DLL_T_ETH2_WRAPPER)
+           + EPL_C_DLL_T_PREAMBLE)
           // PRes Response Time of last node
         + EPL_NMTMNU_GET_NODEINFO(uiNodeIdLastNode_p)->m_dwPResTimeFirstNs
           // Relative propagation delay from last node to MN
