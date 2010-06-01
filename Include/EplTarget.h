@@ -95,11 +95,11 @@
 
     #include <string.h>
 
-    #define EPL_MEMCPY(dst,src,siz)     memcpy((void*)(dst),(const void*)(src),(size_t)(siz));
-    #define EPL_MEMSET(dst,val,siz)     memset((void*)(dst),(int)(val),(size_t)(siz));
+//    #define EPL_MEMCPY(dst,src,siz)     memcpy((void*)(dst),(const void*)(src),(size_t)(siz));
+//    #define EPL_MEMSET(dst,val,siz)     memset((void*)(dst),(int)(val),(size_t)(siz));
 
-    #define EPL_MALLOC(siz)             malloc((size_t)(siz))
-    #define EPL_FREE(ptr)               free((void *)ptr)
+//    #define EPL_MALLOC(siz)             malloc((size_t)(siz))
+//    #define EPL_FREE(ptr)               free((void *)ptr)
 
     #ifndef PRINTF0
         void trace (const char* fmt, ...);

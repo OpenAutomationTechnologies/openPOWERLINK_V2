@@ -101,6 +101,14 @@
 #define EPL_DLLCAL_BUFFER_SIZE_TX_GEN   32767
 #endif
 
+#ifndef EPL_DLLCAL_BUFFER_ID_TX_SYNC
+#define EPL_DLLCAL_BUFFER_ID_TX_SYNC    "EplSblDllCalTxSync"
+#endif
+
+#ifndef EPL_DLLCAL_BUFFER_SIZE_TX_SYNC
+#define EPL_DLLCAL_BUFFER_SIZE_TX_SYNC  8192
+#endif
+
 //---------------------------------------------------------------------------
 // typedef
 //---------------------------------------------------------------------------

@@ -133,6 +133,12 @@
 
 #ifndef EPL_DLL_PRES_CHAINING_MN
 #define EPL_DLL_PRES_CHAINING_MN        FALSE
+#else
+// disable PRC MN support if NMT MN module is not activated
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) == 0)
+#undef EPL_DLL_PRES_CHAINING_MN
+#define EPL_DLL_PRES_CHAINING_MN        FALSE
+#endif
 #endif
 
 #if EPL_DLL_PRES_CHAINING_CN == FALSE

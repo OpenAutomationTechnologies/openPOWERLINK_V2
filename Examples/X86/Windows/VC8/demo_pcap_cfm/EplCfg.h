@@ -168,6 +168,9 @@
 #define EPL_DLL_PRES_READY_AFTER_SOA    FALSE
 //#define EPL_DLL_PRES_READY_AFTER_SOA    TRUE
 
+// activate PResChaining support on MN
+#define EPL_DLL_PRES_CHAINING_MN        TRUE
+
 
 // =========================================================================
 // OBD specific defines

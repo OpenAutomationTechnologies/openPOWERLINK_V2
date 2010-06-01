@@ -107,7 +107,7 @@ typedef enum
     kEplDllOutOfMemory          = 0x0021,       // out of memory
     kEplDllIllegalHdl           = 0x0022,       // illegal handle for a TxFrame was passed
     kEplDllCbAsyncRegistered    = 0x0023,       // handler for non-EPL frames was already registered before
-//    kEplDllAsyncRxBufferFull    = 0x0024,       // receive buffer for asynchronous frames is full
+    kEplDllAsyncSyncReqFull     = 0x0024,       // buffer for SyncRequests is full
     kEplDllAsyncTxBufferEmpty   = 0x0025,       // transmit buffer for asynchronous frames is empty
     kEplDllAsyncTxBufferFull    = 0x0026,       // transmit buffer for asynchronous frames is full
     kEplDllNoNodeInfo           = 0x0027,       // MN: too less space in the internal node info structure

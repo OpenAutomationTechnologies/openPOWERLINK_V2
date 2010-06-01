@@ -78,6 +78,9 @@
 #include "kernel/EplDllkCal.h"
 #endif
 
+#if EPL_USE_SHAREDBUFF != FALSE
+#include "SharedBuff.h"
+#endif
 
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLU)) != 0)
 
@@ -92,6 +95,12 @@
 //---------------------------------------------------------------------------
 // const defines
 //---------------------------------------------------------------------------
+
+#if (EPL_DLL_PRES_CHAINING_MN != FALSE) \
+    && (EPL_USE_SHAREDBUFF == FALSE)
+#error "DLLCal module needs SharedBuffer for PRC MN"
+#endif
+
 
 //---------------------------------------------------------------------------
 // local types
@@ -138,6 +147,11 @@ typedef struct
 {
     tEplDlluCbAsnd  m_apfnDlluCbAsnd[EPL_DLL_MAX_ASND_SERVICE_ID];
 
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0) \
+    && (EPL_DLL_PRES_CHAINING_MN != FALSE)
+    tShbInstance    m_ShbInstanceTxSync;   // FIFO for SyncRequests
+#endif
+
 } tEplDlluCalInstance;
 
 //---------------------------------------------------------------------------
@@ -178,9 +192,24 @@ static tEplKernel EplDlluCalSetAsndServiceIdFilter(tEplDllAsndServiceId ServiceI
 tEplKernel EplDlluCalAddInstance(void)
 {
 tEplKernel      Ret = kEplSuccessful;
+#if EPL_DLL_PRES_CHAINING_MN != FALSE
+tShbError       ShbError;
+unsigned int    fShbNewCreated;
+#endif
 
     // reset instance structure
     EPL_MEMSET(&EplDlluCalInstance_g, 0, sizeof (EplDlluCalInstance_g));
+
+#if EPL_DLL_PRES_CHAINING_MN != FALSE
+    ShbError = ShbCirAllocBuffer (EPL_DLLCAL_BUFFER_SIZE_TX_SYNC, EPL_DLLCAL_BUFFER_ID_TX_SYNC,
+        &EplDlluCalInstance_g.m_ShbInstanceTxSync, &fShbNewCreated);
+    // returns kShbOk, kShbOpenMismatch, kShbOutOfMem or kShbInvalidArg
+
+    if (ShbError != kShbOk)
+    {
+        Ret = kEplNoResource;
+    }
+#endif
 
     return Ret;
 }
@@ -203,6 +232,16 @@ tEplKernel      Ret = kEplSuccessful;
 tEplKernel EplDlluCalDelInstance(void)
 {
 tEplKernel      Ret = kEplSuccessful;
+#if EPL_DLL_PRES_CHAINING_MN != FALSE
+tShbError       ShbError;
+
+    ShbError = ShbCirReleaseBuffer (EplDlluCalInstance_g.m_ShbInstanceTxSync);
+    if (ShbError != kShbOk)
+    {
+        Ret = kEplNoResource;
+    }
+    EplDlluCalInstance_g.m_ShbInstanceTxSync = NULL;
+#endif
 
     // reset instance structure
     EPL_MEMSET(&EplDlluCalInstance_g, 0, sizeof (EplDlluCalInstance_g));
@@ -453,6 +492,38 @@ Exit:
     return Ret;
 }
 
+//---------------------------------------------------------------------------
+//
+// Function:    EplDlluCalIssueSyncRequest()
+//
+// Description: issues a SyncRequest to the specified node.
+//
+// Parameters:  pSyncRequest_p          = pointer to SyncRequest structure
+//              uiSize_p                = size of SyncRequest structure
+//
+// Returns:     tEplKernel              = error code
+//
+//
+// State:
+//
+//---------------------------------------------------------------------------
+
+#if EPL_DLL_PRES_CHAINING_MN != FALSE
+tEplKernel EplDlluCalIssueSyncRequest(tEplDllSyncRequest* pSyncRequest_p, unsigned int uiSize_p)
+{
+tEplKernel  Ret = kEplSuccessful;
+tShbError   ShbError;
+
+    ShbError = ShbCirWriteDataBlock(EplDlluCalInstance_g.m_ShbInstanceTxSync, pSyncRequest_p, uiSize_p);
+    if (ShbError != kShbOk)
+    {
+        Ret = kEplDllAsyncSyncReqFull;
+    }
+
+//Exit:
+    return Ret;
+}
+#endif
 #endif
 
 

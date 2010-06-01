@@ -4330,7 +4330,7 @@ tEplDllkNodeInfo*   pIntNodeInfo = NULL;
             EplDllkInstance_g.m_fPrcSlotFinished = TRUE;
 
             if ((EplDllkInstance_g.m_DllConfigParam.m_uiSyncNodeId > EPL_C_ADR_SYNC_ON_SOC)
-                && (EplDllkInstance_g.m_fSyncProcessed == FALSE))
+                && (EplDllkInstance_g.m_fSyncProcessed == FALSE)
                 && (EplDllkInstance_g.m_DllConfigParam.m_fSyncOnPrcNode != FALSE))
             {
                 EplDllkInstance_g.m_fSyncProcessed = TRUE;
@@ -7206,7 +7206,9 @@ tEplDllkNodeInfo*   pNodeInfo;
         {
             EplDllkInstance_g.m_aLastReqServiceId[bCurReq_p] = kEplDllReqServiceUnspecified;
         }
-        Ret = EplDllkCalAsyncGetSoaRequest(&EplDllkInstance_g.m_aLastReqServiceId[bCurReq_p], &EplDllkInstance_g.m_auiLastTargetNodeId[bCurReq_p]);
+        Ret = EplDllkCalAsyncGetSoaRequest(&EplDllkInstance_g.m_aLastReqServiceId[bCurReq_p],
+                                           &EplDllkInstance_g.m_auiLastTargetNodeId[bCurReq_p],
+                                           &pTxFrame->m_Data.m_Soa.m_Payload);
         if (Ret != kEplSuccessful)
         {
             goto Exit;
