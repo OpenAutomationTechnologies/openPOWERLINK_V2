@@ -18,7 +18,7 @@ INCLUDES	:= -I$(MAINDIR)/Include \
 			  -I$(MAINDIR)/ObjDicts/Api_CN
 
 # object files for kernel object with relative paths
-MODULEOBJS	= $(MAINPATH)/Edrv/netx_ethhub/source/EdrvNetx.o \
+MODULEOBJS	= $(MAINPATH)/Edrv/netx_ethhub/source/EdrvNetx.o $(MAINPATH)/Edrv/EdrvCyclic.o \
 			  demo_main.o \
 			  $(MAINPATH)/EplStack/EplDllk.o $(MAINPATH)/EplStack/EplDllkCal.o \
 			  $(MAINPATH)/EplStack/EplDlluCal.o \

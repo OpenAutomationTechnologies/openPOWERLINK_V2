@@ -82,34 +82,18 @@
 /*                                                                         */
 /***************************************************************************/
 
-// Buffer handling:
-// All buffers are created statically (i.e. at compile time resp. at
-// initialisation via kmalloc() ) and not dynamically on request (i.e. via
-// EdrvAllocTxMsgBuffer().
-// EdrvAllocTxMsgBuffer() searches for an unused buffer which is large enough.
-// EdrvInit() may allocate some buffers with sizes less than maximum frame
-// size (i.e. 1514 bytes), e.g. for SoC, SoA, StatusResponse, IdentResponse,
-// NMT requests / commands. The less the size of the buffer the less the
-// number of the buffer.
-
 
 //---------------------------------------------------------------------------
 // const defines
 //---------------------------------------------------------------------------
-
-/*
-#ifndef EDRV_MAX_TX_BUFFERS
-#define EDRV_MAX_TX_BUFFERS     20
-#endif
-*/
 
 #define EDRV_MAX_FRAME_SIZE     (ETH_FRAME_BUF_SIZE)
 
 
 #define DRV_NAME                "netx-eth"
 
-#define EDRV_MIN_FIFO_EMPTY_ENTRIES     3   // the minimum number of entries for
-                                            // frame reception in empty FIFO
+#define EDRV_MIN_FIFO_EMPTY_ENTRIES     7   // the minimum number of entries for
+                                            // frame transmission and reception in empty FIFO
 
 #define EDRV_FIFO_OVERFLOW_MASK         ((1 << ETHERNET_FIFO_IND_LO) \
                                         | (1 << ETHERNET_FIFO_IND_HI))
@@ -124,6 +108,10 @@
 #define FIFO_ENTRIES                                    64     /* FIFO depth for each of the 8 FIFOs  */
 #define ETH_FRAME_BUF_SIZE                              1560   /* size of a frame buffer     */
 #define INTRAM_SEGMENT_SIZE                             0x8000 /* size of the internal ram segments */
+
+#define EDRV_MAX_BUFFERS    (unsigned int) ((INTRAM_SEGMENT_SIZE / ETH_FRAME_BUF_SIZE) - 1)
+    // number of frame buffers
+    // first DWORD in segment 0 is hardwired + IRQ vectors, so it cannot be used
 
 #define ETHERNET_FIFO_EMPTY                             0 /* Empty pointer FIFO               */
 #define ETHERNET_FIFO_IND_HI                            1 /* High priority indication FIFO    */
@@ -214,7 +202,7 @@ typedef struct
     void __iomem*           m_apSramBase[2];// pointer to SRAM of xPEC unit
 
     tEdrvInitParam      m_InitParam;
-    tEdrvTxBuffer*      m_pLastTransmittedTxBuffer;
+    tEdrvTxBuffer*      m_apTxBuffer[EDRV_MAX_BUFFERS];
 
 } tEdrvInstance;
 
@@ -638,7 +626,6 @@ tEplKernel Ret = kEplSuccessful;
 ETHHUB_FIFO_ELEMENT_T tFifoPtr;
 unsigned int uiRamSegment;
 unsigned int uiFrameNr;
-//DWORD i;
 
     if (pBuffer_p->m_uiMaxBufferLen > EDRV_MAX_FRAME_SIZE)
     {
@@ -677,28 +664,7 @@ unsigned int uiFrameNr;
         pBuffer_p->m_uiMaxBufferLen = EDRV_MAX_FRAME_SIZE;
     }
 
-    pBuffer_p->m_uiBufferNumber = tFifoPtr.val;
-
-/*
-    // search a free Tx buffer with appropriate size
-    for (i = 0; i < EDRV_MAX_TX_BUFFERS; i++)
-    {
-        if (EdrvInstance_l.m_afTxBufUsed[i] == FALSE)
-        {
-            // free channel found
-            EdrvInstance_l.m_afTxBufUsed[i] = TRUE;
-            pBuffer_p->m_uiBufferNumber = i;
-            pBuffer_p->m_pbBuffer = EdrvInstance_l.m_pbTxBuf + (i * EDRV_MAX_FRAME_SIZE);
-            pBuffer_p->m_uiMaxBufferLen = EDRV_MAX_FRAME_SIZE;
-            break;
-        }
-    }
-    if (i >= EDRV_MAX_TX_BUFFERS)
-    {
-        Ret = kEplEdrvNoFreeBufEntry;
-        goto Exit;
-    }
-*/
+    pBuffer_p->m_BufferNumber.m_uiVal = tFifoPtr.val;
 
 Exit:
     return Ret;
@@ -723,7 +689,7 @@ tEplKernel EdrvReleaseTxMsgBuffer     (tEdrvTxBuffer * pBuffer_p)
 {
 ETHHUB_FIFO_ELEMENT_T tFifoPtr;
 
-    tFifoPtr.val = pBuffer_p->m_uiBufferNumber;
+    tFifoPtr.val = pBuffer_p->m_BufferNumber.m_uiVal;
 
     if (tFifoPtr.val != 0)
     {
@@ -775,22 +741,13 @@ unsigned int uiBufferNumber;
 //DWORD       dwTemp;
 ETHHUB_FIFO_ELEMENT_T tFifoPtr;
 
-    uiBufferNumber = pBuffer_p->m_uiBufferNumber;
+    uiBufferNumber = pBuffer_p->m_BufferNumber.m_uiVal;
 
     if (uiBufferNumber == 0)
     {
         Ret = kEplEdrvBufNotExisting;
         goto Exit;
     }
-
-    if (EdrvInstance_l.m_pLastTransmittedTxBuffer != NULL)
-    {   // transmission is already active
-        Ret = kEplInvalidOperation;
-        goto Exit;
-    }
-
-    // save pointer to buffer structure for TxHandler
-    EdrvInstance_l.m_pLastTransmittedTxBuffer = pBuffer_p;
 
     EDRV_COUNT_SEND;
 
@@ -809,6 +766,12 @@ ETHHUB_FIFO_ELEMENT_T tFifoPtr;
     }
     else
     {
+        if (pfifo_empty(ETHERNET_FIFO_EMPTY))
+        {
+            Ret = kEplEdrvNoFreeTxDesc;
+            goto Exit;
+        }
+
         // retrieve the fifo element from the empty pointer FIFO
         tFifoPtr.val = pfifo_pop(ETHERNET_FIFO_EMPTY);
 
@@ -818,6 +781,9 @@ ETHHUB_FIFO_ELEMENT_T tFifoPtr;
                     pBuffer_p->m_pbBuffer,
                     pBuffer_p->m_uiTxMsgLen);
     }
+
+    // save pointer to buffer structure for TxHandler
+    EdrvInstance_l.m_apTxBuffer[tFifoPtr.bf.FRAME_BUF_NUM - 1] = pBuffer_p;
 
     tFifoPtr.bf.SUPPRESS_CON = 0;
     tFifoPtr.bf.FRAME_LEN = pBuffer_p->m_uiTxMsgLen;
@@ -964,11 +930,11 @@ DWORD           dwValue;
     if ((dwStatus & (MSK_ETHHUB_INTERRUPTS_ENABLE_CON_LO_VAL)) != 0)
     {   // transmit interrupt (confirmation low FIFO)
 
-        pTxBuffer = EdrvInstance_l.m_pLastTransmittedTxBuffer;
-        EdrvInstance_l.m_pLastTransmittedTxBuffer = NULL;
-
         // retrieve the fifo element from the conf low FIFO
         tFifoPtr.val = pfifo_pop(ETHERNET_FIFO_CON_LO);
+
+        pTxBuffer = EdrvInstance_l.m_apTxBuffer[tFifoPtr.bf.FRAME_BUF_NUM - 1];
+        EdrvInstance_l.m_apTxBuffer[tFifoPtr.bf.FRAME_BUF_NUM - 1] = NULL;
 
         // decode the error code
         switch(tFifoPtr.bf.ERROR_CODE)
@@ -1014,7 +980,7 @@ DWORD           dwValue;
             if ((tFifoPtr.val
                     & (MSK_ETHHUB_FIFO_ELEMENT_FRAME_BUF_NUM
                       | MSK_ETHHUB_FIFO_ELEMENT_INT_RAM_SEGMENT_NUM))
-                != (pTxBuffer->m_uiBufferNumber
+                != (pTxBuffer->m_BufferNumber.m_uiVal
                     & (MSK_ETHHUB_FIFO_ELEMENT_FRAME_BUF_NUM
                       | MSK_ETHHUB_FIFO_ELEMENT_INT_RAM_SEGMENT_NUM)))
             {   // current FIFO element does not equal the Tx buffer number
@@ -1024,7 +990,10 @@ DWORD           dwValue;
             }
 
             // call Tx handler of Data link layer
-            EdrvInstance_l.m_InitParam.m_pfnTxHandler(pTxBuffer);
+            if (pTxBuffer->m_pfnTxHandler != NULL)
+            {
+                pTxBuffer->m_pfnTxHandler(pTxBuffer);
+            }
         }
         else
         {   // unknown Tx buffer

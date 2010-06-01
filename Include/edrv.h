@@ -141,8 +141,9 @@ struct _tEdrvTxBuffer
     // ----------------------
     union
     {
-        DWORD       m_dwVal;
-        void*       m_pVal;
+        unsigned int    m_uiVal;
+        DWORD           m_dwVal;
+        void*           m_pVal;
     } m_BufferNumber;                       // OUT: number of the buffer, set by ethernetdriver
     BYTE*           m_pbBuffer;             // OUT: pointer to the buffer, set by ethernetdriver
     // ----------------------
