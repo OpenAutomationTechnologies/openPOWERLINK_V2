@@ -127,7 +127,7 @@
 #define EPL_NMTMNU_NODE_FLAG_PRC_ADD_SCHEDULED      0x0001
 #define EPL_NMTMNU_NODE_FLAG_PRC_ADD_IN_PROGRESS    0x0002
 #define EPL_NMTMNU_NODE_FLAG_PRC_SHIFT_REQUIRED     0x0004
-#define EPL_NMTMNU_NODE_FLAG_PRC_SYNC_ERR           0x0008
+#define EPL_NMTMNU_NODE_FLAG_PRC_SYNC_ERR           0x0008  // SyncRes 1-bit error counter
 
 #define EPL_NMTMNU_NODE_FLAG_PRC_CALL_MEASURE       0x0010
 #define EPL_NMTMNU_NODE_FLAG_PRC_CALL_SHIFT         0x0020
@@ -355,6 +355,8 @@ static tEplKernel EplNmtMnuPrcCalcPResResponseTimeNs(
 static tEplKernel EplNmtMnuPrcCalcPResChainingSlotTimeNs(
                                     unsigned int    uiNodeIdLastNode_p,
                                     DWORD*          pdwPResChainingSlotTimeNs_p);
+
+static tEplKernel EplNmtMnuPrcFindPredecessorNode(unsigned int uiNodeId_p);
 #endif
 
 
@@ -3450,39 +3452,54 @@ unsigned int        uiNodeIdPrevSyncReq;
             if (uiNodeIdFirstNode == EPL_C_ADR_INVALID)
             {
                 if (pNodeInfo->m_wPrcFlags & EPL_NMTMNU_NODE_FLAG_PRC_ADD_IN_PROGRESS)
-                {
+                {   // first add-in-progress node found
                     uiNodeIdFirstNode = uiNodeId;
                 }
-            }  // start processing after the first add-in-progress node
-            else if (pNodeInfo->m_dwRelPropagationDelayNs == 0)
-            {
-            tEplDllSyncRequest SyncRequestData;
-            unsigned int       uiSize;
-
-                SyncRequestData.m_dwSyncControl = 0;
-                uiSize = sizeof(unsigned int) + sizeof(DWORD);
-
-                if (fSyncReqSentToPrevNode == FALSE)
+                else
                 {
-                    SyncRequestData.m_uiNodeId = uiNodeIdPrevNode;
+                    uiNodeIdPrevNode = uiNodeId;
+                    continue;
+                }
+            }
+
+            // start processing with the first add-in-progress node
+            if (pNodeInfo->m_dwRelPropagationDelayNs == 0)
+            {
+                if (uiNodeIdPrevNode == EPL_C_ADR_INVALID)
+                {   // no predecessor node in isochronous phase
+                    pNodeInfo->m_dwRelPropagationDelayNs = EPL_C_DLL_T_IFG;
+                    // no SyncReq needs to be send
+                }
+                else
+                {   // predecessor node exists
+                tEplDllSyncRequest SyncRequestData;
+                unsigned int       uiSize;
+
+                    SyncRequestData.m_dwSyncControl = 0;
+                    uiSize = sizeof(unsigned int) + sizeof(DWORD);
+
+                    if (fSyncReqSentToPrevNode == FALSE)
+                    {
+                        SyncRequestData.m_uiNodeId = uiNodeIdPrevNode;
+
+                        Ret = EplSyncuRequestSyncResponse(EplNmtMnuPrcCbSyncResMeasure, &SyncRequestData, uiSize);
+                        if (Ret != kEplSuccessful)
+                        {
+                            goto Exit;
+                        }
+                    }
+
+                    SyncRequestData.m_uiNodeId = uiNodeId;
 
                     Ret = EplSyncuRequestSyncResponse(EplNmtMnuPrcCbSyncResMeasure, &SyncRequestData, uiSize);
                     if (Ret != kEplSuccessful)
                     {
                         goto Exit;
                     }
+
+                    fSyncReqSentToPrevNode = TRUE;
+                    uiNodeIdPrevSyncReq    = uiNodeId;
                 }
-
-                SyncRequestData.m_uiNodeId = uiNodeId;
-
-                Ret = EplSyncuRequestSyncResponse(EplNmtMnuPrcCbSyncResMeasure, &SyncRequestData, uiSize);
-                if (Ret != kEplSuccessful)
-                {
-                    goto Exit;
-                }
-
-                fSyncReqSentToPrevNode = TRUE;
-                uiNodeIdPrevSyncReq    = uiNodeId;
             }
             else
             {
@@ -3623,27 +3640,8 @@ tEplNmtMnuNodeInfo* pNodeInfoPrevNode;
 tEplObdSize         ObdSize;
 
     if (uiNodeIdPrevNode_p == EPL_C_ADR_INVALID)
-    {   // find predecessor node
-    unsigned int        uiNodeId;
-    tEplNmtMnuNodeInfo* pNodeInfo;
-
-        for (uiNodeId = uiNodeId_p - 1; uiNodeId >= 1; uiNodeId--)
-        {
-            pNodeInfo = EPL_NMTMNU_GET_NODEINFO(uiNodeId);
-            if (pNodeInfo == NULL)
-            {
-                continue;
-            }
-
-            if (   (pNodeInfo->m_dwNodeCfg & EPL_NODEASSIGN_PRES_CHAINING)
-                && (   (pNodeInfo->m_wFlags & EPL_NMTMNU_NODE_FLAG_ISOCHRON)
-                    || (pNodeInfo->m_wPrcFlags & EPL_NMTMNU_NODE_FLAG_PRC_ADD_IN_PROGRESS)))
-            {
-                uiNodeIdPrevNode_p = uiNodeId;
-                pNodeInfoPrevNode  = pNodeInfo;
-                break;
-            }
-        }
+    {   // no predecessor node passed
+        uiNodeIdPrevNode_p = EplNmtMnuPrcFindPredecessorNode(uiNodeId_p);
 
         if (uiNodeIdPrevNode_p == EPL_C_ADR_INVALID)
         {   // no predecessor node found
@@ -3652,10 +3650,8 @@ tEplObdSize         ObdSize;
             goto Exit;
         }
     }
-    else
-    {
-        pNodeInfoPrevNode = EPL_NMTMNU_GET_NODEINFO(uiNodeIdPrevNode_p);
-    }
+
+    pNodeInfoPrevNode = EPL_NMTMNU_GET_NODEINFO(uiNodeIdPrevNode_p);
 
     // read object 0x1F8D NMT_PResPayloadLimitList_AU16
     ObdSize = 2;
@@ -3772,6 +3768,50 @@ Exit:
 
 //---------------------------------------------------------------------------
 //
+// Function:    EplNmtMnuPrcFindPredecessorNode
+//
+// Description: Find the predecessor of the addressed node.
+//              The function processes only PRC nodes which are added
+//              to the isochronous phase or whose addition is in progress.
+//
+// Parameters:  uiNodeId_p          = Node ID of addressed node
+//
+// Returns:     unsigned int        = Node ID of the predecessor node
+//                                    EPL_C_ADR_INVALID if no node was found
+//
+// State:
+//
+//---------------------------------------------------------------------------
+
+static tEplKernel EplNmtMnuPrcFindPredecessorNode(unsigned int uiNodeId_p)
+{
+unsigned int        uiNodeId;
+tEplNmtMnuNodeInfo* pNodeInfo;
+
+    uiNodeId = EPL_C_ADR_INVALID;
+
+    for (uiNodeId = uiNodeId_p - 1; uiNodeId >= 1; uiNodeId--)
+    {
+        pNodeInfo = EPL_NMTMNU_GET_NODEINFO(uiNodeId);
+        if (pNodeInfo == NULL)
+        {
+            continue;
+        }
+
+        if (   (pNodeInfo->m_dwNodeCfg & EPL_NODEASSIGN_PRES_CHAINING)
+            && (   (pNodeInfo->m_wFlags & EPL_NMTMNU_NODE_FLAG_ISOCHRON)
+                || (pNodeInfo->m_wPrcFlags & EPL_NMTMNU_NODE_FLAG_PRC_ADD_IN_PROGRESS)))
+        {
+            break;
+        }
+    }
+
+    return uiNodeId;
+}
+
+
+//---------------------------------------------------------------------------
+//
 // Function:    EplNmtMnuPrcCbSyncResMeasure
 //
 // Description: SyncRes call-back function after SyncReq for measurement
@@ -3788,10 +3828,61 @@ static tEplKernel PUBLIC EplNmtMnuPrcCbSyncResMeasure(
                                   unsigned int          uiNodeId_p,
                                   tEplSyncResponse*     pSyncResponse_p)
 {
-tEplKernel  Ret;
+tEplKernel          Ret;
+unsigned int        uiNodeIdPredNode;
+tEplNmtMnuNodeInfo* pNodeInfo;
+DWORD               dwSyncNodeNumber;
 
     Ret = kEplSuccessful;
 
+    if (pSyncResponse_p == NULL)
+    {   // SyncRes not received
+        goto SyncError;
+    }
+
+    pNodeInfo = EPL_NMTMNU_GET_NODEINFO(uiNodeId_p);
+
+    if (pNodeInfo->m_dwRelPropagationDelayNs != 0)
+    {   // Relative propagation delay is already present
+        goto Exit;
+    }
+
+    uiNodeIdPredNode = EplNmtMnuPrcFindPredecessorNode(uiNodeId_p);
+    dwSyncNodeNumber = AmiGetDwordFromLe(&pSyncResponse_p->m_le_dwSyncNodeNumber);
+
+    if (dwSyncNodeNumber != uiNodeIdPredNode)
+    {   // SyncNodeNumber does not match predecessor node
+        goto SyncError;
+    }
+
+    pNodeInfo->m_dwRelPropagationDelayNs =
+          // difference between receive-times of SyncReq and SyncRes
+          AmiGetDwordFromLe(&pSyncResponse_p->m_le_dwSyncDelay)
+          // Transmission time for SyncReq frame
+        - (EPL_C_DLL_T_MIN_FRAME
+           + EPL_C_DLL_T_PREAMBLE);
+
+    // $$$ What about Latency of the Node?
+
+    if (pNodeInfo->m_wPrcFlags & EPL_NMTMNU_NODE_FLAG_PRC_SYNC_ERR)
+    {   // Previous SyncRes frame was not usable but this one is OK
+        // Clear error flag
+        pNodeInfo->m_wPrcFlags &= ~EPL_NMTMNU_NODE_FLAG_PRC_SYNC_ERR;
+    }
+
+SyncError:
+    if (pNodeInfo->m_wPrcFlags & EPL_NMTMNU_NODE_FLAG_PRC_SYNC_ERR)
+    {   // Sync Error flag already set
+        // Schedule reset node
+        pNodeInfo->m_wPrcFlags &= ~EPL_NMTMNU_NODE_FLAG_PRC_RESET_MASK;
+        pNodeInfo->m_wPrcFlags |= EPL_NMTMNU_NODE_FLAG_PRC_RESET_NODE;
+    }
+    else
+    {   // Set Sync Error flag
+        pNodeInfo->m_wPrcFlags |= EPL_NMTMNU_NODE_FLAG_PRC_SYNC_ERR;
+    }
+
+Exit:
     return Ret;
 }
 
