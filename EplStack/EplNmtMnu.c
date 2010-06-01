@@ -338,7 +338,7 @@ static tEplKernel EplNmtMnuReset(void);
 #if EPL_NMTMNU_PRES_CHAINING_MN != FALSE
 static tEplKernel EplNmtMnuPrcMeasure(void);
 static tEplKernel EplNmtMnuPrcCalculate(unsigned int uiNodeIdFirstNode_p);
-static tEplKernel EplNmtMnuPrcShift(void);
+static tEplKernel EplNmtMnuPrcShift(unsigned int uiNodeIdPrevShift_p);
 static tEplKernel EplNmtMnuPrcAdd(void);
 static tEplKernel EplNmtMnuPrcVerify(void);
 
@@ -357,6 +357,7 @@ static tEplKernel EplNmtMnuPrcCalcPResChainingSlotTimeNs(
                                     DWORD*          pdwPResChainingSlotTimeNs_p);
 
 static tEplKernel EplNmtMnuPrcFindPredecessorNode(unsigned int uiNodeId_p);
+static void       EplNmtMnuPrcSyncError(tEplNmtMnuNodeInfo* pNodeInfo_p);
 #endif
 
 
@@ -3606,7 +3607,7 @@ DWORD               dwPResMnTimeoutNs;
     }
 
     // enter next phase
-    Ret = EplNmtMnuPrcShift();
+    Ret = EplNmtMnuPrcShift(EPL_C_ADR_INVALID);
 
 Exit:
     return Ret;
@@ -3816,7 +3817,8 @@ tEplNmtMnuNodeInfo* pNodeInfo;
 //
 // Description: SyncRes call-back function after SyncReq for measurement
 //
-// Parameters:  void
+// Parameters:  uiNodeId_p              = Source node ID
+//              pSyncResponse_p         = Pointer to payload of SyncRes frame
 //
 // Returns:     tEplKernel              = error code
 //
@@ -3833,14 +3835,13 @@ unsigned int        uiNodeIdPredNode;
 tEplNmtMnuNodeInfo* pNodeInfo;
 DWORD               dwSyncNodeNumber;
 
-    Ret = kEplSuccessful;
+    pNodeInfo = EPL_NMTMNU_GET_NODEINFO(uiNodeId_p);
 
     if (pSyncResponse_p == NULL)
     {   // SyncRes not received
-        goto SyncError;
+        EplNmtMnuPrcSyncError(pNodeInfo);
+        goto Exit;
     }
-
-    pNodeInfo = EPL_NMTMNU_GET_NODEINFO(uiNodeId_p);
 
     if (pNodeInfo->m_dwRelPropagationDelayNs != 0)
     {   // Relative propagation delay is already present
@@ -3852,7 +3853,8 @@ DWORD               dwSyncNodeNumber;
 
     if (dwSyncNodeNumber != uiNodeIdPredNode)
     {   // SyncNodeNumber does not match predecessor node
-        goto SyncError;
+        EplNmtMnuPrcSyncError(pNodeInfo);
+        goto Exit;
     }
 
     pNodeInfo->m_dwRelPropagationDelayNs =
@@ -3870,20 +3872,40 @@ DWORD               dwSyncNodeNumber;
         pNodeInfo->m_wPrcFlags &= ~EPL_NMTMNU_NODE_FLAG_PRC_SYNC_ERR;
     }
 
-SyncError:
-    if (pNodeInfo->m_wPrcFlags & EPL_NMTMNU_NODE_FLAG_PRC_SYNC_ERR)
+Exit:
+    Ret = EplNmtMnuPrcCbSyncResNextAction(uiNodeId_p, pSyncResponse_p);
+
+    return Ret;
+}
+
+
+//---------------------------------------------------------------------------
+//
+// Function:    EplNmtMnuPrcSyncError
+//
+// Description: Sets the Sync Error flag and schedules reset node
+//              if required.
+//
+// Parameters:  pNodeInfo_p             = Pointer to NodeInfo
+//
+// Returns:     (none)
+//
+// State:
+//
+//---------------------------------------------------------------------------
+
+static void EplNmtMnuPrcSyncError(tEplNmtMnuNodeInfo* pNodeInfo_p)
+{
+    if (pNodeInfo_p->m_wPrcFlags & EPL_NMTMNU_NODE_FLAG_PRC_SYNC_ERR)
     {   // Sync Error flag already set
         // Schedule reset node
-        pNodeInfo->m_wPrcFlags &= ~EPL_NMTMNU_NODE_FLAG_PRC_RESET_MASK;
-        pNodeInfo->m_wPrcFlags |= EPL_NMTMNU_NODE_FLAG_PRC_RESET_NODE;
+        pNodeInfo_p->m_wPrcFlags &= ~EPL_NMTMNU_NODE_FLAG_PRC_RESET_MASK;
+        pNodeInfo_p->m_wPrcFlags |= EPL_NMTMNU_NODE_FLAG_PRC_RESET_NODE;
     }
     else
     {   // Set Sync Error flag
-        pNodeInfo->m_wPrcFlags |= EPL_NMTMNU_NODE_FLAG_PRC_SYNC_ERR;
+        pNodeInfo_p->m_wPrcFlags |= EPL_NMTMNU_NODE_FLAG_PRC_SYNC_ERR;
     }
-
-Exit:
-    return Ret;
 }
 
 
@@ -3893,7 +3915,7 @@ Exit:
 //
 // Description: Perform shift phase of PRC node insertion
 //
-// Parameters:  void
+// Parameters:  uiNodeIdPrevShift_p     = Node ID of previously shifted node
 //
 // Returns:     tEplKernel              = error code
 //
@@ -3901,12 +3923,54 @@ Exit:
 //
 //---------------------------------------------------------------------------
 
-static tEplKernel EplNmtMnuPrcShift(void)
+static tEplKernel EplNmtMnuPrcShift(unsigned int uiNodeIdPrevShift_p)
 {
-tEplKernel  Ret;
+tEplKernel          Ret;
+unsigned int        uiNodeId;
+tEplNmtMnuNodeInfo* pNodeInfo;
+tEplDllSyncRequest  SyncRequestData;
+unsigned int        uiSize;
 
     Ret = kEplSuccessful;
 
+    if (uiNodeIdPrevShift_p == EPL_C_ADR_INVALID)
+    {
+        uiNodeIdPrevShift_p = 255;
+    }
+
+    for (uiNodeId = uiNodeIdPrevShift_p - 1; uiNodeId >= 1; uiNodeId--)
+    {
+        pNodeInfo = EPL_NMTMNU_GET_NODEINFO(uiNodeId);
+        if (pNodeInfo == NULL)
+        {
+            continue;
+        }
+
+        if (pNodeInfo->m_wPrcFlags & EPL_NMTMNU_NODE_FLAG_PRC_SHIFT_REQUIRED)
+        {
+            break;
+        }
+    }
+
+    if (uiNodeId == 0)
+    {   // No node requires shifting
+        // Enter next phase
+        Ret = EplNmtMnuPrcAdd();
+        goto Exit;
+    }
+
+    // Call shift on reception of SyncRes
+    pNodeInfo->m_wPrcFlags |= EPL_NMTMNU_NODE_FLAG_PRC_CALL_SHIFT;
+
+    // Send SyncReq
+    SyncRequestData.m_uiNodeId        = uiNodeId;
+    SyncRequestData.m_dwSyncControl   = EPL_SYNC_PRES_TIME_FIRST_VALID;
+    SyncRequestData.m_dwPResTimeFirst = pNodeInfo->m_dwPResTimeFirstNs;
+    uiSize = sizeof(unsigned int) + 2*sizeof(DWORD);
+
+    Ret = EplSyncuRequestSyncResponse(EplNmtMnuPrcCbSyncResShift, &SyncRequestData, uiSize);
+
+Exit:
     return Ret;
 }
 
