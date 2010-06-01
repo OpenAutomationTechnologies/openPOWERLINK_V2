@@ -337,6 +337,7 @@ static tEplKernel EplNmtMnuReset(void);
 
 #if EPL_NMTMNU_PRES_CHAINING_MN != FALSE
 static tEplKernel EplNmtMnuPrcMeasure(void);
+static tEplKernel EplNmtMnuPrcCalculate(unsigned int uiNodeIdFirstNode_p);
 static tEplKernel EplNmtMnuPrcShift(void);
 static tEplKernel EplNmtMnuPrcAdd(void);
 static tEplKernel EplNmtMnuPrcVerify(void);
@@ -3426,8 +3427,6 @@ BOOL                fSyncReqSentToPrevNode;
 unsigned int        uiNodeIdFirstNode;
 unsigned int        uiNodeIdPrevNode;
 unsigned int        uiNodeIdPrevSyncReq;
-DWORD               dwPResResponseTimeNs;
-DWORD               dwPResMnTimeoutNs;
 
     Ret = kEplSuccessful;
 
@@ -3498,15 +3497,46 @@ DWORD               dwPResMnTimeoutNs;
     {   // at least one SyncReq has been sent
         pNodeInfo = EPL_NMTMNU_GET_NODEINFO(uiNodeIdPrevSyncReq);
         pNodeInfo->m_wPrcFlags |= EPL_NMTMNU_NODE_FLAG_PRC_CALL_MEASURE;
-        goto Exit;
+    }
+    else
+    {   // no SyncReq has been sent
+        // Prepare shift phase and add phase
+        EplNmtMnuPrcCalculate(uiNodeIdFirstNode);
     }
 
-    // no SyncReq has been sent
-    // prepare shift phase and add phase
+Exit:
+    return Ret;
+}
+
+
+//---------------------------------------------------------------------------
+//
+// Function:    EplNmtMnuPrcCalculate
+//
+// Description: Update calculation of PRes Response Times (CNs) and
+//              PRes Chaining Slot Time (MN).
+//
+// Parameters:  uiNodeIdFirstNode_p = Node ID of the first (lowest node ID)
+//                                    of nodes whose addition is in progress
+//
+// Returns:     tEplKernel          = error code
+//
+// State:
+//
+//---------------------------------------------------------------------------
+
+static tEplKernel EplNmtMnuPrcCalculate(unsigned int uiNodeIdFirstNode_p)
+{
+tEplKernel          Ret;
+unsigned int        uiNodeId;
+tEplNmtMnuNodeInfo* pNodeInfo;
+unsigned int        uiNodeIdPrevNode;
+DWORD               dwPResResponseTimeNs;
+DWORD               dwPResMnTimeoutNs;
 
     uiNodeIdPrevNode = EPL_C_ADR_INVALID;
 
-    for (uiNodeId = uiNodeIdFirstNode; uiNodeId < 254; uiNodeId++)
+    for (uiNodeId = uiNodeIdFirstNode_p; uiNodeId < 254; uiNodeId++)
     {
         pNodeInfo = EPL_NMTMNU_GET_NODEINFO(uiNodeId);
         if (pNodeInfo == NULL)
@@ -3558,6 +3588,7 @@ DWORD               dwPResMnTimeoutNs;
         }
     }
 
+    // enter next phase
     Ret = EplNmtMnuPrcShift();
 
 Exit:
