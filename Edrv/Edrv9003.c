@@ -80,6 +80,7 @@
 #include <linux/interrupt.h>
 #include <linux/init.h>
 #include <linux/errno.h>
+#include <linux/spinlock.h>
 #include <linux/major.h>
 #include <linux/version.h>
 #include <asm/io.h>
@@ -249,7 +250,10 @@ typedef struct
     BYTE*                   m_pbRxBuf;      // pointer to Rx buffer
 
     tEdrvInitParam          m_InitParam;
-    tEdrvTxBuffer*          m_pLastTransmittedTxBuffer;
+    tEdrvTxBuffer*          m_pTransmittedTxBufferLastEntry;
+    tEdrvTxBuffer*          m_pTransmittedTxBufferFirstEntry;
+    spinlock_t              m_TxSpinlock;
+    unsigned int            m_uiTxCount;
 
 } tEdrvInstance;
 
@@ -435,17 +439,7 @@ int         iResult;
 
     // save the init data
     EdrvInstance_l.m_InitParam = *pEdrvInitParam_p;
-/*
-    // clear driver structure
-    // 2008-11-24 d.k. because pci_unregister_driver() doesn't do it correctly;
-    //      one example: kobject_set_name() frees EdrvDriver.driver.kobj.name,
-    //      but does not set this pointer to NULL.
-    EPL_MEMSET(&EdrvDriver, 0, sizeof (EdrvDriver));
-    EdrvDriver.driver.name  = DRV_NAME,
-    EdrvDriver.id_table     = aEdrvPciTbl,
-    EdrvDriver.probe        = EdrvInitOne,
-    EdrvDriver.remove       = EdrvRemoveOne,
-*/
+
     // register platform driver
     iResult = platform_driver_register(&EdrvDriver);
     if (iResult != 0)
@@ -495,7 +489,7 @@ Exit:
 tEplKernel EdrvShutdown(void)
 {
 
-    // unregister PCI driver
+    // unregister platform driver
     PRINTF1("%s calling platform_driver_unregister()\n", __func__);
     platform_driver_unregister (&EdrvDriver);
 
@@ -679,39 +673,53 @@ tEplKernel EdrvReleaseTxMsgBuffer     (tEdrvTxBuffer * pBuffer_p)
 //---------------------------------------------------------------------------
 tEplKernel EdrvSendTxMsg              (tEdrvTxBuffer * pBuffer_p)
 {
-tEplKernel Ret = kEplSuccessful;
+tEplKernel      Ret = kEplSuccessful;
+unsigned long   ulFlags;
+unsigned int    uiCurTxCount;
 
-    if (EdrvInstance_l.m_pLastTransmittedTxBuffer != NULL)
-    {   // transmission is already active
+    if (pBuffer_p->m_BufferNumber.m_pVal != NULL)
+    {
         Ret = kEplInvalidOperation;
         goto Exit;
     }
 
-    // save pointer to buffer structure for TxHandler
-    EdrvInstance_l.m_pLastTransmittedTxBuffer = pBuffer_p;
+    spin_lock_irqsave(&EdrvInstance_l.m_TxSpinlock, ulFlags);
+    if (EdrvInstance_l.m_pTransmittedTxBufferLastEntry == NULL)
+    {
+        EdrvInstance_l.m_pTransmittedTxBufferLastEntry =
+            EdrvInstance_l.m_pTransmittedTxBufferFirstEntry = pBuffer_p;
+    }
+    else
+    {
+        EdrvInstance_l.m_pTransmittedTxBufferLastEntry->m_BufferNumber.m_pVal = pBuffer_p;
+        EdrvInstance_l.m_pTransmittedTxBufferLastEntry = pBuffer_p;
+    }
+    uiCurTxCount = EdrvInstance_l.m_uiTxCount;
+    spin_unlock_irqrestore(&EdrvInstance_l.m_TxSpinlock, ulFlags);
 
     EDRV_COUNT_SEND;
-/*
-    // pad with zeros if necessary, because controller does not do it
-    if (pBuffer_p->m_uiTxMsgLen < MIN_ETH_SIZE)
+
+    if (uiCurTxCount < 2)
     {
-        EPL_MEMSET(pBuffer_p->m_pbBuffer + pBuffer_p->m_uiTxMsgLen, 0, MIN_ETH_SIZE - pBuffer_p->m_uiTxMsgLen);
-        pBuffer_p->m_uiTxMsgLen = MIN_ETH_SIZE;
+        // start transmit buffer write with automatic pointer incrementation
+        EDRV_REG_SET_ADDRESS(EDRV_REGB_MWCMD);
+
+        // copy frame to Ethernet controller
+        EdrvRegCopyFrom(pBuffer_p->m_pbBuffer, pBuffer_p->m_uiTxMsgLen);
+
+        spin_lock_irqsave(&EdrvInstance_l.m_TxSpinlock, ulFlags);
+        uiCurTxCount = ++EdrvInstance_l.m_uiTxCount;
+        if (uiCurTxCount == 1)
+        {
+            // write length
+            EDRV_REGB_WRITE(EDRV_REGB_TXPLLR, (pBuffer_p->m_uiTxMsgLen & 0xFF));
+            EDRV_REGB_WRITE(EDRV_REGB_TXPLHR, ((pBuffer_p->m_uiTxMsgLen >> 8) & 0xFF));
+
+            // start transmission
+            EDRV_REGB_WRITE(EDRV_REGB_TCR, EDRV_REGB_TCR_TXREQ);
+        }
+        spin_unlock_irqrestore(&EdrvInstance_l.m_TxSpinlock, ulFlags);
     }
-*/
-
-    // write length
-    EDRV_REGB_WRITE(EDRV_REGB_TXPLLR, (pBuffer_p->m_uiTxMsgLen & 0xFF));
-    EDRV_REGB_WRITE(EDRV_REGB_TXPLHR, ((pBuffer_p->m_uiTxMsgLen >> 8) & 0xFF));
-
-    // start transmit buffer read with automatic pointer incrementation
-    EDRV_REG_SET_ADDRESS(EDRV_REGB_MWCMD);
-
-    // copy frame to Ethernet controller
-    EdrvRegCopyFrom(pBuffer_p->m_pbBuffer, pBuffer_p->m_uiTxMsgLen);
-
-    // start transmission
-    EDRV_REGB_WRITE(EDRV_REGB_TCR, EDRV_REGB_TCR_TXREQ);
 
 Exit:
     return Ret;
@@ -853,20 +861,59 @@ int             iHandled = IRQ_HANDLED;
     // process tasks
     if ((bStatus & EDRV_REGB_INT_PT) != 0)
     {   // transmit interrupt
-
-        // transmit finished
-        pTxBuffer = EdrvInstance_l.m_pLastTransmittedTxBuffer;
-        EdrvInstance_l.m_pLastTransmittedTxBuffer = NULL;
+    unsigned long   ulFlags;
+    unsigned int    uiCurTxCount;
+    tEdrvTxBuffer*  pNextTxBuffer = NULL;
 
         EDRV_COUNT_TX;
 
-        if (pTxBuffer != NULL)
+        spin_lock_irqsave(&EdrvInstance_l.m_TxSpinlock, ulFlags);
+        pTxBuffer = pInstance->m_pTransmittedTxBufferFirstEntry;
+        EdrvInstance_l.m_pTransmittedTxBufferFirstEntry = EdrvInstance_l.m_pTransmittedTxBufferFirstEntry->m_BufferNumber.m_pVal;
+        if (EdrvInstance_l.m_pTransmittedTxBufferFirstEntry == NULL)
         {
-            // call Tx handler of Data link layer
+            EdrvInstance_l.m_pTransmittedTxBufferLastEntry = NULL;
+        }
+        uiCurTxCount = --EdrvInstance_l.m_uiTxCount;
+        if (uiCurTxCount >= 1)
+        {
+            pNextTxBuffer = pTxBuffer->m_BufferNumber.m_pVal;
+
+            if (pNextTxBuffer != NULL)
+            {
+                // write length
+                EDRV_REGB_WRITE(EDRV_REGB_TXPLLR, (pNextTxBuffer->m_uiTxMsgLen & 0xFF));
+                EDRV_REGB_WRITE(EDRV_REGB_TXPLHR, ((pNextTxBuffer->m_uiTxMsgLen >> 8) & 0xFF));
+
+                // start transmission
+                EDRV_REGB_WRITE(EDRV_REGB_TCR, EDRV_REGB_TCR_TXREQ);
+            }
+        }
+        spin_unlock_irqrestore(&EdrvInstance_l.m_TxSpinlock, ulFlags);
+
+        pTxBuffer->m_BufferNumber.m_pVal = NULL;
+
+        if (pTxBuffer->m_pfnTxHandler != NULL)
+        {
             BENCHMARK_MOD_01_SET(1);
-            EdrvInstance_l.m_InitParam.m_pfnTxHandler(pTxBuffer);
+            pTxBuffer->m_pfnTxHandler(pTxBuffer);
             BENCHMARK_MOD_01_RESET(1);
         }
+
+        if ((uiCurTxCount >= 2) && (pNextTxBuffer != NULL))
+        {
+            pNextTxBuffer = pNextTxBuffer->m_BufferNumber.m_pVal;
+
+            if (pNextTxBuffer != NULL)
+            {
+                // start transmit buffer write with automatic pointer incrementation
+                EDRV_REG_SET_ADDRESS(EDRV_REGB_MWCMD);
+
+                // copy frame to Ethernet controller
+                EdrvRegCopyFrom(pNextTxBuffer->m_pbBuffer, pNextTxBuffer->m_uiTxMsgLen);
+            }
+        }
+
     }
 
     if ((bStatus & EDRV_REGB_INT_ROS) != 0)
@@ -1168,6 +1215,7 @@ struct resource* pResource;
     PRINTF1("%s enable interrupts\n", __func__);
     EDRV_REGB_WRITE(EDRV_REGB_IMR, EDRV_REGB_INT_MASK_DEF);
 
+    spin_lock_init(&EdrvInstance_l.m_TxSpinlock);
 
 Exit:
     PRINTF2("%s finished with %d\n", __func__, iResult);

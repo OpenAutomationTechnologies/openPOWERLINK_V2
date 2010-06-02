@@ -17,7 +17,7 @@ INCLUDES	:= -I$(MAINDIR)/Include \
 			  -I$(MAINDIR)/ObjDicts/Api_CN
 
 MODULEOBJS	= demo_main.o \
-			  $(MAINPATH)/Edrv/Edrv9003.o \
+			  $(MAINPATH)/Edrv/Edrv9003.o $(MAINPATH)/Edrv/EdrvCyclic.o \
 			  $(MAINPATH)/EplStack/EplDllk.o $(MAINPATH)/EplStack/EplDllkCal.o \
 			  $(MAINPATH)/EplStack/EplDlluCal.o \
 			  $(MAINPATH)/EplStack/EplLedu.o \
