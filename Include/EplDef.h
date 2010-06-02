@@ -141,10 +141,6 @@
 #endif
 #endif
 
-#ifndef EPL_NMTMNU_PRES_CHAINING_MN
-#define EPL_NMTMNU_PRES_CHAINING_MN     EPL_DLL_PRES_CHAINING_MN
-#endif
-
 #if EPL_DLL_PRES_CHAINING_CN == FALSE
   #define EPL_C_DLL_MAX_ASND_SERVICE_IDS  5   // see tEplDllAsndServiceId in EplDll.h
 #else
@@ -218,6 +214,14 @@
 
 #ifndef EPL_D_NMT_MaxCNNumber_U8
 #define EPL_D_NMT_MaxCNNumber_U8    239  // maximum number of supported regular CNs in the Node ID range 1 .. 239
+#endif
+
+#ifndef EPL_NMTMNU_PRES_CHAINING_MN
+#define EPL_NMTMNU_PRES_CHAINING_MN     EPL_DLL_PRES_CHAINING_MN
+#endif
+
+#ifndef EPL_NMTMNU_PRC_NODE_ADD_MAX_NUM
+#define EPL_NMTMNU_PRC_NODE_ADD_MAX_NUM EPL_D_NMT_MaxCNNumber_U8
 #endif
 
 // defines for EPL API layer static process image
