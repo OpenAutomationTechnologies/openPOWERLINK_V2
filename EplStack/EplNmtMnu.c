@@ -507,11 +507,16 @@ tEplKernel EplNmtMnuSendNmtCommandEx(unsigned int uiNodeId_p,
                                     void* pNmtCommandData_p,
                                     unsigned int uiDataSize_p)
 {
-tEplKernel      Ret = kEplSuccessful;
-tEplFrameInfo   FrameInfo;
-BYTE            abBuffer[EPL_C_DLL_MINSIZE_NMTCMDEXT];
-tEplFrame*      pFrame = (tEplFrame*) abBuffer;
+tEplKernel          Ret;
+tEplFrameInfo       FrameInfo;
+BYTE                abBuffer[EPL_C_DLL_MINSIZE_NMTCMDEXT];
+tEplFrame*          pFrame;
 tEplDllNodeOpParam  NodeOpParam;
+#if EPL_NMTMNU_PRES_CHAINING_MN != FALSE
+tEplNmtMnuNodeInfo* pNodeInfo;
+#endif
+
+    Ret = kEplSuccessful;
 
     if ((uiNodeId_p == 0) || (uiNodeId_p > EPL_C_ADR_BROADCAST))
     {   // invalid node ID specified
@@ -528,7 +533,103 @@ tEplDllNodeOpParam  NodeOpParam;
     // $$$ d.k. may be check in future versions if the caller wants to perform prohibited state transitions
     //     the CN should not perform these transitions, but the expected NMT state will be changed and never fullfilled.
 
+#if EPL_NMTMNU_PRES_CHAINING_MN != FALSE
+    pNodeInfo = EPL_NMTMNU_GET_NODEINFO(uiNodeId_p);
+
+    if (pNodeInfo->m_dwNodeCfg & EPL_NODEASSIGN_PRES_CHAINING)
+    {   // Node is a PRes Chaining node
+    DWORD   wPrcFlagsCmdReset;
+
+        switch (NmtCommand_p)
+        {
+            case kEplNmtCmdStopNode:
+            {
+                wPrcFlagsCmdReset = EPL_NMTMNU_NODE_FLAG_PRC_STOP_NODE;
+                break;
+            }
+            case kEplNmtCmdResetNode:
+            {
+                wPrcFlagsCmdReset = EPL_NMTMNU_NODE_FLAG_PRC_RESET_NODE;
+                break;
+            }
+            case kEplNmtCmdResetCommunication:
+            {
+                wPrcFlagsCmdReset = EPL_NMTMNU_NODE_FLAG_PRC_RESET_COM;
+                break;
+            }
+            case kEplNmtCmdResetConfiguration:
+            {
+                wPrcFlagsCmdReset = EPL_NMTMNU_NODE_FLAG_PRC_RESET_CONF;
+                break;
+            }
+            case kEplNmtCmdSwReset:
+            {
+                wPrcFlagsCmdReset = EPL_NMTMNU_NODE_FLAG_PRC_RESET_SW;
+                break;
+            }
+            default:
+            {
+                wPrcFlagsCmdReset = 0;
+                break;
+            }
+        }
+
+        if (wPrcFlagsCmdReset != 0)
+        {
+            if (pNodeInfo->m_wPrcFlags & EPL_NMTMNU_NODE_FLAG_PRC_ADD_IN_PROGRESS)
+            {   // Addition to the isochronous phase is in progress for this node
+                // Remove it
+                pNodeInfo->m_wPrcFlags &= ~EPL_NMTMNU_NODE_FLAG_PRC_ADD_IN_PROGRESS;
+            }
+            else if (pNodeInfo->m_wFlags & EPL_NMTMNU_NODE_FLAG_ISOCHRON)
+            {   // PRes Chaining is enabled
+            tEplDllSyncRequest SyncReqData;
+            unsigned int       uiSize;
+
+                // Store NMT command for later execution
+                // $$$ Handle present reset flags in accordance to their reset "depth"
+                pNodeInfo->m_wPrcFlags |= wPrcFlagsCmdReset;
+
+                // Disable PRes Chaining
+                SyncReqData.m_uiNodeId      = uiNodeId_p;
+                SyncReqData.m_dwSyncControl = EPL_SYNC_PRES_MODE_RESET;
+                uiSize = sizeof(unsigned int) + sizeof(DWORD);
+
+                Ret = EplSyncuRequestSyncResponse(EplNmtMnuPrcCbSyncResNextAction, &SyncReqData, uiSize);
+                switch (Ret)
+                {
+                    case kEplSuccessful:
+                    {
+                        // Mark node as removed from the isochronous phase
+                        pNodeInfo->m_wFlags &= ~EPL_NMTMNU_NODE_FLAG_ISOCHRON;
+                        // Send NMT command when SyncRes is received
+                        goto Exit;
+                    }
+
+                    case kEplInvalidOperation:
+                    {   // There has already been posted a SyncReq for this node.
+                        // Retry when SyncRes is received
+                        Ret = kEplSuccessful;
+                        goto Exit;
+                    }
+
+                    default:
+                    {
+                        goto Exit;
+                    }
+                }
+            }
+            // $$$ How to handle nodes for which an add SyncReq has been send,
+            //     but the SyncRes is not jet received?
+
+            // $$$ Handle the situation that a SyncReq has been send and the next reset node
+            //     command is to be sent before the appropriate SyncRes is received.
+        }
+    }
+#endif
+
     // build frame
+    pFrame = (tEplFrame*) abBuffer;
     EPL_MEMSET(pFrame, 0x00, sizeof(abBuffer));
     AmiSetByteToLe(&pFrame->m_le_bDstNodeId, (BYTE) uiNodeId_p);
     AmiSetByteToLe(&pFrame->m_Data.m_Asnd.m_le_bServiceId, (BYTE) kEplDllAsndNmtCommand);
@@ -545,15 +646,22 @@ tEplDllNodeOpParam  NodeOpParam;
 
     // send NMT-Request
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLU)) != 0)
-    Ret = EplDlluCalAsyncSend(&FrameInfo,    // pointer to frameinfo
-                           kEplDllAsyncReqPrioNmt); // priority
-#endif
+    Ret = EplDlluCalAsyncSend(&FrameInfo, kEplDllAsyncReqPrioNmt);
     if (Ret != kEplSuccessful)
     {
         goto Exit;
     }
+#endif
 
     EPL_DBGLVL_NMTMN_TRACE2("NMTCmd(%02X->%02X)\n", NmtCommand_p, uiNodeId_p);
+
+#if EPL_NMTMNU_PRES_CHAINING_MN != FALSE
+    if (pNodeInfo->m_dwNodeCfg & EPL_NODEASSIGN_PRES_CHAINING)
+    {   // Node is a PRes Chaining node
+        // The following action (delete node) is only necessary for non-PRC nodes
+        goto Exit;
+    }
+#endif
 
     switch (NmtCommand_p)
     {
@@ -585,7 +693,9 @@ tEplDllNodeOpParam  NodeOpParam;
         }
 
         default:
+        {
             goto Exit;
+        }
     }
 
     // The expected node state will be updated when the NMT command
@@ -1856,6 +1966,7 @@ static tEplKernel EplNmtMnuCbNodeAdded(unsigned int uiNodeId_p)
 tEplKernel          Ret;
 tEplNmtMnuNodeInfo* pNodeInfo;
 
+    Ret = kEplSuccessful;
     pNodeInfo = EPL_NMTMNU_GET_NODEINFO(uiNodeId_p);
 
     pNodeInfo->m_wFlags |= EPL_NMTMNU_NODE_FLAG_ISOCHRON;
@@ -1870,6 +1981,8 @@ tEplNmtMnuNodeInfo* pNodeInfo;
             Ret = EplNmtMnuNodeBootStep2(uiNodeId_p, pNodeInfo);
         }
     }
+
+    return Ret;
 }
 
 
@@ -3667,6 +3780,8 @@ WORD                wPResPayloadLimitPredNode;
 tEplNmtMnuNodeInfo* pNodeInfoPredNode;
 tEplObdSize         ObdSize;
 
+    Ret = kEplSuccessful;
+
     if (uiNodeIdPredNode_p == EPL_C_ADR_INVALID)
     {   // no predecessor node passed
         uiNodeIdPredNode_p = EplNmtMnuPrcFindPredecessorNode(uiNodeId_p);
@@ -3965,7 +4080,8 @@ unsigned int        uiSize;
 
     // The search starts with the previous shift node
     // as this node might require a second SyncReq
-    for (uiNodeId = uiNodeIdPrevShift_p; uiNodeId >= 1; uiNodeId--)
+    uiNodeId = uiNodeIdPrevShift_p;
+    do
     {
         pNodeInfo = EPL_NMTMNU_GET_NODEINFO(uiNodeId);
         if (pNodeInfo == NULL)
@@ -3977,7 +4093,10 @@ unsigned int        uiSize;
         {
             break;
         }
+
+        uiNodeId--;
     }
+    while (uiNodeId >= 1);
 
     if (uiNodeId == 0)
     {   // No node requires shifting
@@ -4072,7 +4191,6 @@ unsigned int        uiNodeId;
 tEplNmtMnuNodeInfo* pNodeInfo;
 tEplDllSyncRequest  SyncReqData;
 unsigned int        SyncReqNum;
-unsigned int        uiNodeIdLastSyncReq;
 tEplNmtMnuNodeInfo* pNodeInfoLastSyncReq;
 
     Ret = kEplSuccessful;
@@ -4101,7 +4219,7 @@ tEplNmtMnuNodeInfo* pNodeInfoLastSyncReq;
                                           + dwCNLossOfSocToleranceNs;
 
     SyncReqNum = 0;
-    uiNodeIdLastSyncReq = EPL_C_ADR_INVALID;
+    pNodeInfoLastSyncReq = NULL;
 
     // The search starts with the next node after the previous one
     for (uiNodeId = uiNodeIdPrevAdd_p + 1; uiNodeId <= 254; uiNodeId++)
@@ -4127,7 +4245,6 @@ tEplNmtMnuNodeInfo* pNodeInfoLastSyncReq;
             }
 
             SyncReqNum++;
-            uiNodeIdLastSyncReq  = uiNodeId;
             pNodeInfoLastSyncReq = pNodeInfo;
 
             if (SyncReqNum == EPL_NMTMNU_PRC_NODE_ADD_MAX_NUM)
@@ -4137,7 +4254,7 @@ tEplNmtMnuNodeInfo* pNodeInfoLastSyncReq;
         }
     }
 
-    if (uiNodeIdLastSyncReq != EPL_C_ADR_INVALID)
+    if (pNodeInfoLastSyncReq != NULL)
     {
         pNodeInfoLastSyncReq->m_wPrcFlags |= EPL_NMTMNU_NODE_FLAG_PRC_CALL_ADD;
     }
@@ -4197,20 +4314,26 @@ tEplNmtMnuNodeInfo* pNodeInfo;
         // because node has already been added to isochronous phase in module Dllk
         pNodeInfo->m_wPrcFlags &= ~EPL_NMTMNU_NODE_FLAG_PRC_RESET_MASK;
         pNodeInfo->m_wPrcFlags |= EPL_NMTMNU_NODE_FLAG_PRC_RESET_NODE;
-        goto Exit;
+        goto NextAction;
     }
 
     // No additional node-added event is received for PRC nodes
     // thus the handler has to be called manually.
-    EplNmtMnuCbNodeAdded(uiNodeId_p);
+    Ret = EplNmtMnuCbNodeAdded(uiNodeId_p);
+    if (Ret != kEplSuccessful)
+    {
+        goto Exit;
+    }
+
     pNodeInfo->m_wPrcFlags &= ~EPL_NMTMNU_NODE_FLAG_PRC_ADD_IN_PROGRESS;
 
     // Schedule verify
     pNodeInfo->m_wPrcFlags |= EPL_NMTMNU_NODE_FLAG_PRC_VERIFY;
 
-Exit:
+NextAction:
     Ret = EplNmtMnuPrcCbSyncResNextAction(uiNodeId_p, pSyncResponse_p);
 
+Exit:
     return Ret;
 }
 
@@ -4306,7 +4429,8 @@ Exit:
 //
 // Function:    EplNmtMnuPrcCbSyncResNextAction
 //
-// Description: SyncRes call-back function if no specific handling is required
+// Description: SyncRes call-back function if no specific handling is required.
+//              The next-action node flags are evaluated.
 //
 // Parameters:  uiNodeId_p              = Source node ID
 //              pSyncResponse_p         = Pointer to payload of SyncRes frame
@@ -4323,11 +4447,106 @@ static tEplKernel PUBLIC EplNmtMnuPrcCbSyncResNextAction(
 {
 tEplKernel          Ret;
 tEplNmtMnuNodeInfo* pNodeInfo;
+tEplNmtCommand      NmtCommand;
 
+    UNUSED_PARAMETER(pSyncResponse_p);
     Ret = kEplSuccessful;
 
     pNodeInfo = EPL_NMTMNU_GET_NODEINFO(uiNodeId_p);
 
+    switch (pNodeInfo->m_wPrcFlags & EPL_NMTMNU_NODE_FLAG_PRC_RESET_MASK)
+    {
+        case EPL_NMTMNU_NODE_FLAG_PRC_STOP_NODE:
+        {
+            NmtCommand = kEplNmtCmdStopNode;
+            break;
+        }
+
+        case EPL_NMTMNU_NODE_FLAG_PRC_RESET_NODE:
+        {
+            NmtCommand = kEplNmtCmdResetNode;
+            break;
+        }
+
+        case EPL_NMTMNU_NODE_FLAG_PRC_RESET_COM:
+        {
+            NmtCommand = kEplNmtCmdResetCommunication;
+            break;
+        }
+
+        case EPL_NMTMNU_NODE_FLAG_PRC_RESET_CONF:
+        {
+            NmtCommand = kEplNmtCmdResetConfiguration;
+            break;
+        }
+
+        case EPL_NMTMNU_NODE_FLAG_PRC_RESET_SW:
+        {
+            NmtCommand = kEplNmtCmdSwReset;
+            break;
+        }
+
+        default:
+        {
+            NmtCommand = kEplNmtCmdInvalidService;
+            break;
+        }
+    }
+
+    pNodeInfo->m_wPrcFlags &= ~EPL_NMTMNU_NODE_FLAG_PRC_RESET_MASK;
+
+    if (NmtCommand != kEplNmtCmdInvalidService)
+    {
+        Ret = EplNmtMnuSendNmtCommand(uiNodeId_p, NmtCommand);
+        if (Ret != kEplSuccessful)
+        {
+            goto Exit;
+        }
+    }
+
+    switch (pNodeInfo->m_wPrcFlags & EPL_NMTMNU_NODE_FLAG_PRC_CALL_MASK)
+    {
+        case EPL_NMTMNU_NODE_FLAG_PRC_CALL_MEASURE:
+        {
+            pNodeInfo->m_wPrcFlags &= ~EPL_NMTMNU_NODE_FLAG_PRC_CALL_MASK;
+            Ret = EplNmtMnuPrcMeasure();
+            goto Exit;
+        }
+
+        case EPL_NMTMNU_NODE_FLAG_PRC_CALL_SHIFT:
+        {
+            pNodeInfo->m_wPrcFlags &= ~EPL_NMTMNU_NODE_FLAG_PRC_CALL_MASK;
+            Ret = EplNmtMnuPrcShift(uiNodeId_p);
+            if (Ret != kEplSuccessful)
+            {
+                goto Exit;
+            }
+            break;
+        }
+
+        case EPL_NMTMNU_NODE_FLAG_PRC_CALL_ADD:
+        {
+            pNodeInfo->m_wPrcFlags &= ~EPL_NMTMNU_NODE_FLAG_PRC_CALL_MASK;
+            Ret = EplNmtMnuPrcAdd(uiNodeId_p);
+            if (Ret != kEplSuccessful)
+            {
+                goto Exit;
+            }
+            break;
+        }
+
+        default:
+        {
+            break;
+        }
+    }
+
+    if (pNodeInfo->m_wPrcFlags & EPL_NMTMNU_NODE_FLAG_PRC_VERIFY)
+    {
+        Ret = EplNmtMnuPrcVerify(uiNodeId_p);
+    }
+
+Exit:
     return Ret;
 }
 #endif // #if EPL_NMTMNU_PRES_CHAINING_MN != FALSE
