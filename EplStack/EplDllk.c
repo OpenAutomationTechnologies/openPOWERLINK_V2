@@ -2691,8 +2691,8 @@ unsigned int    uiNextTxBufferOffset = EplDllkInstance_g.m_bCurTxBufferOffsetCyc
                     tEplDllkNodeInfo*   pIntPrcNodeInfo;
 
                         pIntPrcNodeInfo = EplDllkInstance_g.m_pFirstPrcNodeInfo;
-                        while (pIntNodeInfo != NULL)
-                        {   // PReq to CN
+                        while (pIntPrcNodeInfo != NULL)
+                        {
                             *pbCnNodeId = (BYTE) pIntPrcNodeInfo->m_uiNodeId;
                             pbCnNodeId++;
 #if (EPL_DLL_DISABLE_EDRV_CYCLIC == FALSE)
