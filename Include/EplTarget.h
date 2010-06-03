@@ -194,15 +194,12 @@
         #include <linux/version.h>
     #endif
 
-    #define EPL_MEMCPY(dst,src,siz)     memcpy((void*)(dst),(const void*)(src),(size_t)(siz));
-    #define EPL_MEMSET(dst,val,siz)     memset((void*)(dst),(int)(val),(size_t)(siz));
+//    #define EPL_MEMCPY(dst,src,siz)     memcpy((void*)(dst),(const void*)(src),(size_t)(siz));
+//    #define EPL_MEMSET(dst,val,siz)     memset((void*)(dst),(int)(val),(size_t)(siz));
 
-    #ifndef __KERNEL__
-        #define EPL_MALLOC(siz)             malloc((size_t)(siz))
-        #define EPL_FREE(ptr)               free((void *)ptr)
-    #else
-        #define EPL_MALLOC(siz)             kmalloc((size_t)(siz), GFP_KERNEL)
-        #define EPL_FREE(ptr)               kfree((void *)ptr)
+    #ifdef __KERNEL__
+        #define EPL_MALLOC(siz)             kmalloc(siz, GFP_KERNEL)
+        #define EPL_FREE(ptr)               kfree(ptr)
     #endif
 
     #ifndef PRINTF0
