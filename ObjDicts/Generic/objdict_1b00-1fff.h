@@ -16,7 +16,7 @@
             EPL_OBD_SUBINDEX_RAM_VAR(0x1C02, 0x00, kEplObdTypUInt8, kEplObdAccConst, tEplObdUnsigned8, NumberOfEntries, 0x03)
             EPL_OBD_SUBINDEX_RAM_USERDEF_NOINIT(0x1C02, 0x01, kEplObdTypUInt32, kEplObdAccRW, tEplObdUnsigned32, CumulativeCnt_U32)
             EPL_OBD_SUBINDEX_RAM_USERDEF(0x1C02, 0x02, kEplObdTypUInt32, kEplObdAccR, tEplObdUnsigned32, ThresholdCnt_U32, 0x0)
-            EPL_OBD_SUBINDEX_RAM_USERDEF(0x1C02, 0x03, kEplObdTypUInt32, kEplObdAccSRW, tEplObdUnsigned32, Threshold_U32, 0x1)
+            EPL_OBD_SUBINDEX_RAM_USERDEF(0x1C02, 0x03, kEplObdTypUInt32, kEplObdAccSRW, tEplObdUnsigned32, Threshold_U32, 15)
         EPL_OBD_END_INDEX(0x1C0F)
 
         // Object 1C07h: DLL_MNCNLossPResCumCnt_AU32
