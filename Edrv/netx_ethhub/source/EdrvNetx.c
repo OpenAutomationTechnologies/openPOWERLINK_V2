@@ -63,15 +63,23 @@
 #include <linux/sched.h>
 #include <linux/delay.h>
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,27)
 #include <asm/hardware.h>
 #include <asm/arch/hardware.h>
 #include <asm/arch/netx-regs.h>
 #include <asm/arch/pfifo.h>
 #include <asm/arch/xc.h>
 #include <asm/arch/eth.h>
+#else
+#include <mach/hardware.h>
+#include <mach/netx-regs.h>
+#include <mach/pfifo.h>
+#include <mach/xc.h>
+#include <mach/eth.h>
+#endif
 
 // include the register definition file of the 2port Ethernet Hub
-#include "eth_2port_hub_xpec_regdef.h"
+#include "../include/eth_2port_hub_xpec_regdef.h"
 
 
 /***************************************************************************/
@@ -280,7 +288,7 @@ static struct platform_driver EdrvDriver = {
 //static BYTE EdrvCalcHash (BYTE * pbMAC_p);
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,19)
-static int TgtEthIsr (int nIrqNum_p, void* ppDevInstData_p);
+static irqreturn_t TgtEthIsr (int nIrqNum_p, void* ppDevInstData_p);
 #else
 static int TgtEthIsr (int nIrqNum_p, void* ppDevInstData_p, struct pt_regs* ptRegs_p);
 #endif
@@ -426,7 +434,7 @@ unsigned int uiCount;
     // install IRQ handler
     iResult = request_irq(EdrvInstance_l.m_apXc[0]->irq,
                           &TgtEthIsr,
-                          IRQF_NODELAY, //IRQF_SHARED,
+                          0, //IRQF_NODELAY, //IRQF_SHARED,
                           DRV_NAME,
                           &EdrvInstance_l);
     if (iResult != 0)
@@ -896,7 +904,7 @@ void EdrvInterruptHandler (void)
 #endif
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,19)
-static int TgtEthIsr (int nIrqNum_p, void* ppDevInstData_p)
+static irqreturn_t TgtEthIsr (int nIrqNum_p, void* ppDevInstData_p)
 #else
 static int TgtEthIsr (int nIrqNum_p, void* ppDevInstData_p, struct pt_regs* ptRegs_p)
 #endif
@@ -905,7 +913,7 @@ static int TgtEthIsr (int nIrqNum_p, void* ppDevInstData_p, struct pt_regs* ptRe
 tEdrvRxBuffer   RxBuffer;
 tEdrvTxBuffer*  pTxBuffer;
 DWORD           dwStatus;
-int             iHandled = IRQ_HANDLED;
+irqreturn_t     iHandled = IRQ_HANDLED;
 ETHHUB_FIFO_ELEMENT_T tFifoPtr;
 int             iFillLevel;
 ETHHUB_STATUS_AREA_BASE_T* ptCounters;
