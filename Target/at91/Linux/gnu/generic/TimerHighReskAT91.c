@@ -87,8 +87,13 @@
 #include <linux/clk.h>
 #include <linux/err.h>
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,27)
 #include <asm/arch/at91rm9200.h>
 #include <asm/arch/at91_tc.h>
+#else
+#include <mach/at91rm9200.h>
+#include <mach/at91_tc.h>
+#endif
 
 #include <asm/div64.h>
 
