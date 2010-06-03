@@ -3734,10 +3734,11 @@ DWORD               dwPResMnTimeoutNs;
     
     if (EplNmtMnuInstance_g.m_dwPrcPResMnTimeoutNs < dwPResMnTimeoutNs)
     {
-    tEplDllNodeInfo DllNodeInfo;
+    tEplDllNodeInfo DllNodeInfo = {0};
 
         EplNmtMnuInstance_g.m_dwPrcPResMnTimeoutNs = dwPResMnTimeoutNs;
         DllNodeInfo.m_dwPresTimeoutNs              = dwPResMnTimeoutNs;
+        DllNodeInfo.m_uiNodeId                     = EPL_C_ADR_MN_DEF_NODE_ID;
 
         Ret = EplDlluCalConfigNode(&DllNodeInfo);
         if (Ret != kEplSuccessful)
@@ -3930,8 +3931,6 @@ static tEplKernel EplNmtMnuPrcFindPredecessorNode(unsigned int uiNodeId_p)
 {
 unsigned int        uiNodeId;
 tEplNmtMnuNodeInfo* pNodeInfo;
-
-    uiNodeId = EPL_C_ADR_INVALID;
 
     for (uiNodeId = uiNodeId_p - 1; uiNodeId >= 1; uiNodeId--)
     {
