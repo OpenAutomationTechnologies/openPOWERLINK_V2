@@ -645,13 +645,12 @@ Exit:
 //---------------------------------------------------------------------------
 tEplKernel EdrvReleaseTxMsgBuffer     (tEdrvTxBuffer * pBuffer_p)
 {
-    if (pBuffer_p == EdrvInstance_l.m_pLastTransmittedTxBuffer)
-    {   // transmission of buffer is still active
-        EdrvInstance_l.m_pLastTransmittedTxBuffer = NULL;
+BYTE*   pbBuffer = pBuffer_p->m_pbBuffer;
 
-    }
-    // free buffer
-    EPL_FREE(pBuffer_p->m_pbBuffer);
+    // mark buffer as free, before actually freeing it
+    pBuffer_p->m_pbBuffer = NULL;
+
+    EPL_FREE(pbBuffer);
 
     return kEplSuccessful;
 
@@ -868,7 +867,7 @@ int             iHandled = IRQ_HANDLED;
         EDRV_COUNT_TX;
 
         spin_lock_irqsave(&EdrvInstance_l.m_TxSpinlock, ulFlags);
-        pTxBuffer = pInstance->m_pTransmittedTxBufferFirstEntry;
+        pTxBuffer = EdrvInstance_l.m_pTransmittedTxBufferFirstEntry;
         EdrvInstance_l.m_pTransmittedTxBufferFirstEntry = EdrvInstance_l.m_pTransmittedTxBufferFirstEntry->m_BufferNumber.m_pVal;
         if (EdrvInstance_l.m_pTransmittedTxBufferFirstEntry == NULL)
         {
