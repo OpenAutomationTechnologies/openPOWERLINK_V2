@@ -189,6 +189,11 @@ tEplKernel EplDllkSetFlag1OfNode(unsigned int uiNodeId_p, BYTE bSoaFlag1_p);
 
 tEplKernel EplDllkGetCurrentCnNodeIdList(BYTE** ppbCnNodeIdList_p);
 
+
+#if EPL_DLL_PRES_CHAINING_MN != FALSE
+tEplKernel EplDllkGetCnMacAddress(unsigned int uiNodeId_p, BYTE* pb_be_CnMacAddress_p);
+#endif
+
 #endif // (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
 
 #endif // (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLK)) != 0)

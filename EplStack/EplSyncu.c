@@ -357,7 +357,7 @@ tEplSyncuCbResponse pfnCbResponse;
         // reset callback function pointer so that caller may issue next request
         EplSyncuInstance_g.m_apfnCbResponse[uiIndex] = NULL;
 
-        if (pFrameInfo_p->m_uiFrameSize < EPL_C_DLL_MINSIZE_STATUSRES)
+        if (pFrameInfo_p->m_uiFrameSize < EPL_C_DLL_MINSIZE_SYNCRES)
         {   // SyncResponse not received or it has invalid size
             Ret = pfnCbResponse(uiNodeId, NULL);
         }

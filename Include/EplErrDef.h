@@ -112,6 +112,7 @@ typedef enum
     kEplDllAsyncTxBufferFull    = 0x0026,       // transmit buffer for asynchronous frames is full
     kEplDllNoNodeInfo           = 0x0027,       // MN: too less space in the internal node info structure
     kEplDllInvalidParam         = 0x0028,       // invalid parameters passed to function
+    kEplDllInvalidAsndServiceId = 0x0029,       // invalid AsndServiceId specified
     kEplDllTxBufNotReady        = 0x002E,       // TxBuffer (e.g. for PReq) is not ready yet
     kEplDllTxFrameInvalid       = 0x002F,       // TxFrame (e.g. for PReq) is invalid or does not exist
 

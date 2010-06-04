@@ -400,6 +400,10 @@ tEplKernel  Ret = kEplSuccessful;
         Ret = EplDlluCalSetAsndServiceIdFilter(ServiceId_p, Filter_p);
 
     }
+    else
+    {
+        Ret = kEplDllInvalidAsndServiceId;
+    }
 
     return Ret;
 }

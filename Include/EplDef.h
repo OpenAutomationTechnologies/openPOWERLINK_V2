@@ -109,7 +109,7 @@
 #define EPL_C_DLL_MINSIZE_SOC       36   // minimum size of SoC without padding and CRC
 #define EPL_C_DLL_MINSIZE_PREQ      60   // minimum size of PRec without CRC
 #define EPL_C_DLL_MINSIZE_PRES      60   // minimum size of PRes without CRC
-#define EPL_C_DLL_MINSIZE_SOA       24   // minimum size of SoA without padding and CRC
+#define EPL_C_DLL_MINSIZE_SOA       54   // minimum size of SoA without padding and CRC
 #define EPL_C_DLL_MINSIZE_IDENTRES  176  // minimum size of IdentResponse without CRC
 #define EPL_C_DLL_MINSIZE_STATUSRES 72   // minimum size of StatusResponse without CRC
 #define EPL_C_DLL_MINSIZE_SYNCRES   44   // minimum size of SyncResponse without padding and CRC
@@ -141,7 +141,7 @@
 #endif
 #endif
 
-#if EPL_DLL_PRES_CHAINING_CN == FALSE
+#if (EPL_DLL_PRES_CHAINING_CN == FALSE) && (EPL_DLL_PRES_CHAINING_MN == FALSE)
   #define EPL_C_DLL_MAX_ASND_SERVICE_IDS  5   // see tEplDllAsndServiceId in EplDll.h
 #else
   #define EPL_C_DLL_MAX_ASND_SERVICE_IDS  6

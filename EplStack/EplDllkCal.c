@@ -1067,7 +1067,13 @@ unsigned int    uiCount;
 
                 // next queue will be CnGenReq queue
                 EplDllkCalInstance_g.m_uiNextRequestQueue = 0;
-                if (ShbCirGetReadBlockCount(EplDllkCalInstance_g.m_ShbInstanceTxSync, &ulSyncReqCount) > 0)
+                ShbError = ShbCirGetReadBlockCount(EplDllkCalInstance_g.m_ShbInstanceTxSync, &ulSyncReqCount);
+                if (ShbError != kShbOk)
+                {
+                    Ret = kEplNoResource;
+                    goto Exit;
+                }
+                if (ulSyncReqCount > 0)
                 {
                     ShbError = ShbCirReadDataBlock (EplDllkCalInstance_g.m_ShbInstanceTxSync, (BYTE *) &SyncRequest, sizeof (SyncRequest), &ulSyncReqSize);
                     if (ShbError != kShbOk)
@@ -1090,6 +1096,11 @@ unsigned int    uiCount;
                     }
 
                     *puiNodeId_p = SyncRequest.m_uiNodeId;
+                    Ret = EplDllkGetCnMacAddress(SyncRequest.m_uiNodeId, &pSoaPayload_p->m_SyncRequest.m_be_abDestMacAddress[0]);
+                    if (Ret != kEplSuccessful)
+                    {
+                        goto Exit;
+                    }
                     *pReqServiceId_p = kEplDllReqServiceSync;
                     goto Exit;
                 }

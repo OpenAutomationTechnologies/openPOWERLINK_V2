@@ -1067,6 +1067,10 @@ tEplKernel  Ret = kEplSuccessful;
     {
         EplDllkInstance_g.m_aAsndFilter[ServiceId_p] = Filter_p;
     }
+    else
+    {
+        Ret = kEplDllInvalidAsndServiceId;
+    }
 
     return Ret;
 }
@@ -1403,6 +1407,43 @@ tEplKernel          Ret = kEplSuccessful;
 
     return Ret;
 }
+
+
+//---------------------------------------------------------------------------
+//
+// Function:    EplDllkGetCnMacAddress()
+//
+// Description: returns the MAC address of the specified node.
+//
+// Parameters:  uiNodeId_p              = [IN] node-ID of CN
+//              pb_be_CnMacAddress_p    = [OUT] MAC address of the specified CN
+//
+// Returns:     tEplKernel              = error code
+//
+//
+// State:
+//
+//---------------------------------------------------------------------------
+
+#if EPL_DLL_PRES_CHAINING_MN != FALSE
+tEplKernel EplDllkGetCnMacAddress(unsigned int uiNodeId_p, BYTE* pb_be_CnMacAddress_p)
+{
+tEplKernel          Ret = kEplSuccessful;
+tEplDllkNodeInfo*   pNodeInfo;
+
+    pNodeInfo = EplDllkGetNodeInfo(uiNodeId_p);
+    if (pNodeInfo == NULL)
+    {   // no node info structure available
+        Ret = kEplDllNoNodeInfo;
+        goto Exit;
+    }
+
+    EPL_MEMCPY(pb_be_CnMacAddress_p, pNodeInfo->m_be_abMacAddr, 6);
+
+Exit:
+    return Ret;
+}
+#endif
 
 #endif // (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
 
