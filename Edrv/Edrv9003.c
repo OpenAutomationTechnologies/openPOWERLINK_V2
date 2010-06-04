@@ -161,6 +161,20 @@
 #define EDRV_REGB_IRQCR         0x39    // IRQ pin control register
 #define EDRV_REGB_SWITCHCR      0x52    // Switch control register
 #define EDRV_REGB_SWITCHCR_RST_SW   0x40    // reset switch core
+#define EDRV_REGB_SWITCHCR_SNF_PORT0        0x00    // sniffer port number 0
+#define EDRV_REGB_SWITCHCR_SNF_PORT1        0x08    // sniffer port number 1
+#define EDRV_REGB_SWITCHCR_SNF_PORT3        0x18    // sniffer port number 3 (processor port)
+#define EDRV_REGB_SWITCHCR_SNF_PORT_MASK    0x18    // mask for sniffer port number
+#define EDRV_REGB_SWITCHCR_AGE_NO           0x00    // no address aging
+#define EDRV_REGB_SWITCHCR_AGE_64SEC        0x01    // 64 +-32 sec
+#define EDRV_REGB_SWITCHCR_AGE_128SEC       0x02    // 128 +-64 sec
+#define EDRV_REGB_SWITCHCR_AGE_256SEC       0x03    // 256 +-128 sec
+#define EDRV_REGB_PINDEX        0x60    // per port control/status index register
+#define EDRV_REGB_PPFCR         0x65    // per port forward control register
+#define EDRV_REGB_PPFCR_MONI_TX     0x40    // Tx packet monitored
+#define EDRV_REGB_PPFCR_MONI_RX     0x20    // Rx packet monitored
+#define EDRV_REGB_PPFCR_DEF     (EDRV_REGB_PPFCR_MONI_TX \
+                                 | EDRV_REGB_PPFCR_MONI_RX) // default
 #define EDRV_REGB_MRCMDX        0xF0    // Memory data pre-fetch read command without address increment register
 #define EDRV_REGB_MRCMD         0xF2    // Memory data read command with address increment register
 #define EDRV_REGB_MWCMD         0xF8    // Memory data write command with address increment register
@@ -236,6 +250,22 @@
 #define EDRV_TRACE_RX_ERR(x)            TGT_DBG_POST_TRACE_VALUE(((x) & 0xFFFF) | 0x0F000000)
 #define EDRV_TRACE_RX_PUN(x)            TGT_DBG_POST_TRACE_VALUE(((x) & 0xFFFF) | 0x11000000)
 #define EDRV_TRACE(x)                   TGT_DBG_POST_TRACE_VALUE(((x) & 0xFFFF0000) | 0x0000FEC0)
+
+
+/* Port 0 can be enabled as sniffer port.
+   This means if the multiple devices with this Ethernet controller are
+   wired in line topology, you can watch all traffic on the first port.
+
+   [PC]-----\      /----------\      /----------\      /------------
+            |      |          |      |          |      |
+         +------------+    +------------+    +------------+
+         |Port0  Port1|    |Port0  Port1|    |Port0  Port1|
+         |  Device A  |    |  Device B  |    |  Device C  |
+         +------------+    +------------+    +------------+
+*/
+#ifndef EDRV_ENABLE_PORT0_SNIFFER
+#define EDRV_ENABLE_PORT0_SNIFFER       FALSE
+#endif
 
 
 //---------------------------------------------------------------------------
@@ -1205,6 +1235,18 @@ struct resource* pResource;
         PRINTF2("%s broadcast hash: %02X\n", __func__, (WORD) EdrvCalcHash(abBroadcast));
     }
 */
+
+    #if EDRV_ENABLE_PORT0_SNIFFER != FALSE
+    PRINTF1("%s set port 0 as sniffer port... ", __func__);
+    EDRV_REGB_WRITE(EDRV_REGB_SWITCHCR,
+        ((EDRV_REGB_READ(EDRV_REGB_SWITCHCR) & ~EDRV_REGB_SWITCHCR_SNF_PORT_MASK) | EDRV_REGB_SWITCHCR_AGE_64SEC));
+    /* forward RX_MONI and TX_MONI for port 0 to sniffer port */
+    EDRV_REGB_WRITE(EDRV_REGB_PINDEX, (EDRV_REGB_READ(EDRV_REGB_PINDEX) & 0xfc));
+    EDRV_REGB_WRITE(EDRV_REGB_PPFCR, EDRV_REGB_PPFCR_DEF);
+    /* forward RX_MONI and TX_MONI for port 3 (processor port) to sniffer port */
+    EDRV_REGB_WRITE(EDRV_REGB_PINDEX, (EDRV_REGB_READ(EDRV_REGB_PINDEX) | 0x03));
+    EDRV_REGB_WRITE(EDRV_REGB_PPFCR, EDRV_REGB_PPFCR_DEF);
+    #endif
 
     // enable receiver
     PRINTF1("%s enable Rx\n", __func__);
