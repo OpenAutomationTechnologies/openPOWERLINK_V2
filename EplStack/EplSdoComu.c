@@ -1523,6 +1523,16 @@ unsigned int        uiSize;
                     break;
                 }
 
+                // abort to send from higher layer
+                case kEplSdoComConEventAbort:
+                {
+                    // call callback of application
+                    pSdoComCon->m_dwLastAbortCode = *((DWORD*)pSdoComCon->m_pData);
+                    Ret = EplSdoComTransferFinished(SdoComCon_p, pSdoComCon, kEplSdoComTransferTxAborted);
+
+                    break;
+                }
+
                 case kEplSdoComConEventConClosed:
                 case kEplSdoComConEventInitError:
                 case kEplSdoComConEventTimeout:
@@ -2863,7 +2873,7 @@ tEplSdoComCon*      pSdoComCon;
                                 // -> send abort
                                 EplSdoComClientSendAbort(pSdoComCon, pSdoComCon->m_dwLastAbortCode);
                                 // call callback of application
-                                Ret = EplSdoComTransferFinished(SdoComCon_p, pSdoComCon, kEplSdoComTransferRxAborted);
+                                Ret = EplSdoComTransferFinished(SdoComCon_p, pSdoComCon, kEplSdoComTransferTxAborted);
                                 goto Exit;
                             }
 
@@ -2897,7 +2907,7 @@ tEplSdoComCon*      pSdoComCon;
                                 // -> send abort
                                 EplSdoComClientSendAbort(pSdoComCon, pSdoComCon->m_dwLastAbortCode);
                                 // call callback of application
-                                Ret = EplSdoComTransferFinished(SdoComCon_p, pSdoComCon, kEplSdoComTransferRxAborted);
+                                Ret = EplSdoComTransferFinished(SdoComCon_p, pSdoComCon, kEplSdoComTransferTxAborted);
                                 goto Exit;
                             }
                             // copy data
@@ -2924,7 +2934,7 @@ tEplSdoComCon*      pSdoComCon;
                                 // -> send abort
                                 EplSdoComClientSendAbort(pSdoComCon, pSdoComCon->m_dwLastAbortCode);
                                 // call callback of application
-                                Ret = EplSdoComTransferFinished(SdoComCon_p, pSdoComCon, kEplSdoComTransferRxAborted);
+                                Ret = EplSdoComTransferFinished(SdoComCon_p, pSdoComCon, kEplSdoComTransferTxAborted);
                                 goto Exit;
                             }
                             // copy data
