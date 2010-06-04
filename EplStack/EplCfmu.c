@@ -106,6 +106,7 @@ typedef enum
     kEplCfmuStateDownload,
     kEplCfmuStateWaitStore,
     kEplCfmuStateUpToDate,
+    kEplCfmuStateInternalAbort,
 
 } tEplCfmuState;
 
@@ -322,6 +323,16 @@ BOOL                fDoUpdate = FALSE;
     {
         Ret = kEplInvalidNodeId;
         goto Exit;
+    }
+
+    if (pNodeInfo->m_CfmState != kEplCfmuStateIdle)
+    {
+        pNodeInfo->m_CfmState = kEplCfmuStateInternalAbort;
+        Ret = EplSdoComSdoAbort(pNodeInfo->m_SdoComConHdl, EPL_SDOAC_DATA_NOT_TRANSF_DUE_LOCAL_CONTROL);
+        if (Ret != kEplSuccessful)
+        {
+            goto Exit;
+        }
     }
 
     pNodeInfo->m_uiCurDataSize = 0;
@@ -802,6 +813,12 @@ tEplCfmuNodeInfo*   pNodeInfo = pSdoComFinished_p->m_pUserArg;
             {
                 Ret = EplCfmuFinishConfig(pNodeInfo, kEplNmtNodeCommandConfReset);
             }
+            break;
+        }
+
+        case kEplCfmuStateInternalAbort:
+        {
+            // configuration was aborted
             break;
         }
     }
