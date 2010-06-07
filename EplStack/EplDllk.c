@@ -5010,42 +5010,61 @@ unsigned int    uiNodeId;
     uiAsndServiceId = (unsigned int) AmiGetByteFromLe(&pFrame->m_Data.m_Asnd.m_le_bServiceId);
 
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
-    if ((EplDllkInstance_g.m_DllState >= kEplDllMsNonCyclic)
-        && ((((tEplDllAsndServiceId) uiAsndServiceId) == kEplDllAsndStatusResponse)
-        || (((tEplDllAsndServiceId) uiAsndServiceId) == kEplDllAsndIdentResponse)))
-    {   // StatusRes or IdentRes received
-    BYTE    bFlag1;
-
-        uiNodeId = AmiGetByteFromLe(&pFrame->m_le_bSrcNodeId);
-        if ((EplDllkInstance_g.m_aLastReqServiceId[EplDllkInstance_g.m_bCurLastSoaReq] == ((tEplDllReqServiceId) uiAsndServiceId))
-            && (uiNodeId == EplDllkInstance_g.m_auiLastTargetNodeId[EplDllkInstance_g.m_bCurLastSoaReq]))
-        {   // mark request as responded
-            EplDllkInstance_g.m_aLastReqServiceId[EplDllkInstance_g.m_bCurLastSoaReq] = kEplDllReqServiceNo;
-        }
-        if (((tEplDllAsndServiceId) uiAsndServiceId) == kEplDllAsndIdentResponse)
-        {   // memorize MAC address of CN for PReq
-        tEplDllkNodeInfo*   pIntNodeInfo;
-
-            pIntNodeInfo = EplDllkGetNodeInfo(uiNodeId);
-            if (pIntNodeInfo == NULL)
-            {   // no node info structure available
-                Ret = kEplDllNoNodeInfo;
-                goto Exit;
-            }
-            else
-            {
-                EPL_MEMCPY(pIntNodeInfo->m_be_abMacAddr, pFrame->m_be_abSrcMac, 6);
-            }
-        }
-
-        // forward Flag2 to asynchronous scheduler
-        bFlag1 = AmiGetByteFromLe(&pFrame->m_Data.m_Asnd.m_Payload.m_StatusResponse.m_le_bFlag2);
-        Ret = EplDllkCalAsyncSetPendingRequests(uiNodeId,
-            ((tEplDllAsyncReqPriority) ((bFlag1 & EPL_FRAME_FLAG2_PR) >> EPL_FRAME_FLAG2_PR_SHIFT)),
-            (bFlag1 & EPL_FRAME_FLAG2_RS));
-        if (Ret != kEplSuccessful)
+    if (EplDllkInstance_g.m_DllState >= kEplDllMsNonCyclic)
+    {
+        switch ((tEplDllAsndServiceId) uiAsndServiceId)
         {
-            goto Exit;
+            case kEplDllAsndStatusResponse:
+            case kEplDllAsndIdentResponse:
+#if (EPL_DLL_PRES_CHAINING_MN != FALSE)
+            case kEplDllAsndSyncResponse:
+#endif
+            {
+            BYTE    bFlag1;
+
+                uiNodeId = AmiGetByteFromLe(&pFrame->m_le_bSrcNodeId);
+                if ((EplDllkInstance_g.m_aLastReqServiceId[EplDllkInstance_g.m_bCurLastSoaReq] == ((tEplDllReqServiceId) uiAsndServiceId))
+                    && (uiNodeId == EplDllkInstance_g.m_auiLastTargetNodeId[EplDllkInstance_g.m_bCurLastSoaReq]))
+                {   // mark request as responded
+                    EplDllkInstance_g.m_aLastReqServiceId[EplDllkInstance_g.m_bCurLastSoaReq] = kEplDllReqServiceNo;
+                }
+                if (((tEplDllAsndServiceId) uiAsndServiceId) == kEplDllAsndIdentResponse)
+                {   // memorize MAC address of CN for PReq
+                tEplDllkNodeInfo*   pIntNodeInfo;
+
+                    pIntNodeInfo = EplDllkGetNodeInfo(uiNodeId);
+                    if (pIntNodeInfo == NULL)
+                    {   // no node info structure available
+                        Ret = kEplDllNoNodeInfo;
+                        goto Exit;
+                    }
+                    else
+                    {
+                        EPL_MEMCPY(pIntNodeInfo->m_be_abMacAddr, pFrame->m_be_abSrcMac, 6);
+                    }
+                }
+                else if (((tEplDllAsndServiceId) uiAsndServiceId) == kEplDllAsndSyncResponse)
+                {
+                    break;
+                }
+
+                // forward Flag2 to asynchronous scheduler
+                bFlag1 = AmiGetByteFromLe(&pFrame->m_Data.m_Asnd.m_Payload.m_StatusResponse.m_le_bFlag2);
+                Ret = EplDllkCalAsyncSetPendingRequests(uiNodeId,
+                    ((tEplDllAsyncReqPriority) ((bFlag1 & EPL_FRAME_FLAG2_PR) >> EPL_FRAME_FLAG2_PR_SHIFT)),
+                    (bFlag1 & EPL_FRAME_FLAG2_RS));
+                if (Ret != kEplSuccessful)
+                {
+                    goto Exit;
+                }
+
+                break;
+            }
+
+            default:
+            {
+                break;
+            }
         }
     }
 #endif
@@ -7511,6 +7530,9 @@ tEplFrameInfo   FrameInfo;
     {
         case kEplDllReqServiceIdent:
         case kEplDllReqServiceStatus:
+#if (EPL_DLL_PRES_CHAINING_MN != FALSE)
+        case kEplDllReqServiceSync:
+#endif
             // ASnd service registered?
             if (EplDllkInstance_g.m_aAsndFilter[ReqServiceId_p] == kEplDllAsndFilterAny)
             {   // ASnd service ID is registered
