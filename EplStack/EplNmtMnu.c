@@ -115,6 +115,7 @@
 #define EPL_NMTMNU_NODE_FLAG_NOT_SCANNED    0x0002  // CN was not scanned once -> decrement SignalCounter and reset flag
 #define EPL_NMTMNU_NODE_FLAG_HALTED         0x0004  // boot process for this CN is halted
 #define EPL_NMTMNU_NODE_FLAG_NMT_CMD_ISSUED 0x0008  // NMT command was just issued, wrong NMT states will be tolerated
+#define EPL_NMTMNU_NODE_FLAG_PREOP2_REACHED 0x0010  // NodeAddIsochronous has been called, waiting for ISOCHRON
 #define EPL_NMTMNU_NODE_FLAG_COUNT_STATREQ  0x0300  // counter for StatusRequest timer handle
 #define EPL_NMTMNU_NODE_FLAG_COUNT_LONGER   0x0C00  // counter for longer timeouts timer handle
 #define EPL_NMTMNU_NODE_FLAG_INC_STATREQ    0x0100  // increment for StatusRequest timer handle
@@ -538,7 +539,7 @@ tEplNmtMnuNodeInfo* pNodeInfo;
 
     if (pNodeInfo->m_dwNodeCfg & EPL_NODEASSIGN_PRES_CHAINING)
     {   // Node is a PRes Chaining node
-    DWORD   wPrcFlagsCmdReset;
+    WORD   wPrcFlagsCmdReset;
 
         switch (NmtCommand_p)
         {
@@ -2012,6 +2013,11 @@ tEplNmtMnuNodeInfo* pNodeInfo;
     if (uiNodeId_p != EPL_C_ADR_INVALID)
     {
         pNodeInfo = EPL_NMTMNU_GET_NODEINFO(uiNodeId_p);
+        if (pNodeInfo == NULL)
+        {
+            Ret = kEplInvalidNodeId;
+            goto Exit;
+        }
 
         if ((pNodeInfo->m_dwNodeCfg & EPL_NODEASSIGN_PRES_CHAINING) == 0)
 #endif
@@ -2055,6 +2061,8 @@ tEplNmtMnuNodeInfo* pNodeInfo;
                 continue;
             }
 
+            // $$$ only PRC
+            
             if (pNodeInfo->m_wFlags & EPL_NMTMNU_NODE_FLAG_ISOCHRON)
             {
                 if (fInvalidateNext != FALSE)
@@ -2074,6 +2082,7 @@ tEplNmtMnuNodeInfo* pNodeInfo;
                 pNodeInfo->m_dwRelPropagationDelayNs = 0;
                 fInvalidateNext = TRUE;
             }
+            // $$$ else if: falls es noch einen ADD_IN_PROGRESS gibt, Fehler
         }
 
         EplNmtMnuInstance_g.m_wFlags &= ~EPL_NMTMNU_FLAG_PRC_ADD_SCHEDULED;
@@ -2612,7 +2621,8 @@ tEplTimerArg        TimerArg;
 
             // reset flags ISOCHRON and NMT_CMD_ISSUED
             pNodeInfo->m_wFlags &= ~(EPL_NMTMNU_NODE_FLAG_ISOCHRON
-                                     | EPL_NMTMNU_NODE_FLAG_NMT_CMD_ISSUED);
+                                     | EPL_NMTMNU_NODE_FLAG_NMT_CMD_ISSUED
+                                     | EPL_NMTMNU_NODE_FLAG_PREOP2_REACHED);
 
             if (NmtState == kEplNmtMsPreOperational1)
             {
@@ -3344,21 +3354,26 @@ tEplNmtState    ExpNmtState;
     }
     else if ((ExpNmtState == kEplNmtCsPreOperational2) &&
              (NodeNmtState_p == kEplNmtCsPreOperational2))
-    {   // CN switched to PreOp2
-        if (pNodeInfo_p->m_dwNodeCfg & EPL_NODEASSIGN_ASYNCONLY_NODE)
-        {
-            if ((pNodeInfo_p->m_NodeState == kEplNmtMnuNodeStateConfigured) &&
-                (LocalNmtState_p >= kEplNmtMsPreOperational2))
+    {   // CN is PreOp2
+        if ((pNodeInfo_p->m_wFlags & EPL_NMTMNU_NODE_FLAG_PREOP2_REACHED) == 0)
+        {   // CN switched to PreOp2
+            pNodeInfo_p->m_wFlags |= EPL_NMTMNU_NODE_FLAG_PREOP2_REACHED;
+
+            if (pNodeInfo_p->m_dwNodeCfg & EPL_NODEASSIGN_ASYNCONLY_NODE)
             {
-                Ret = EplNmtMnuNodeBootStep2(uiNodeId_p, pNodeInfo_p);
+                if ((pNodeInfo_p->m_NodeState == kEplNmtMnuNodeStateConfigured) &&
+                    (LocalNmtState_p >= kEplNmtMsPreOperational2))
+                {
+                    Ret = EplNmtMnuNodeBootStep2(uiNodeId_p, pNodeInfo_p);
+                }
             }
-        }
-        else
-        {   // add node to isochronous phase
-            Ret = EplNmtMnuAddNodeIsochronous(uiNodeId_p);
-            if (Ret != kEplSuccessful)
-            {
-                goto Exit;
+            else
+            {   // add node to isochronous phase
+                Ret = EplNmtMnuAddNodeIsochronous(uiNodeId_p);
+                if (Ret != kEplSuccessful)
+                {
+                    goto Exit;
+                }
             }
         }
     }
