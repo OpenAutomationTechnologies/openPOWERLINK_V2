@@ -221,14 +221,14 @@
             <SubObject subIndex="07" name="Byte 7" objectType="7" dataType="0005" accessType="ro" PDOmapping="TPDO" />
             <SubObject subIndex="08" name="Byte 8" objectType="7" dataType="0005" accessType="ro" PDOmapping="TPDO" />
             <SubObject subIndex="09" name="Byte 9" objectType="7" dataType="0005" accessType="ro" PDOmapping="TPDO" />
-            <SubObject subIndex="10" name="Byte 10" objectType="7" dataType="0005" accessType="ro" PDOmapping="TPDO" />
-            <SubObject subIndex="11" name="Byte 11" objectType="7" dataType="0005" accessType="ro" PDOmapping="TPDO" />
-            <SubObject subIndex="12" name="Byte 12" objectType="7" dataType="0005" accessType="ro" PDOmapping="TPDO" />
-            <SubObject subIndex="13" name="Byte 13" objectType="7" dataType="0005" accessType="ro" PDOmapping="TPDO" />
-            <SubObject subIndex="14" name="Byte 14" objectType="7" dataType="0005" accessType="ro" PDOmapping="TPDO" />
-            <SubObject subIndex="15" name="Byte 15" objectType="7" dataType="0005" accessType="ro" PDOmapping="TPDO" />
-            <SubObject subIndex="16" name="Byte 16" objectType="7" dataType="0005" accessType="ro" PDOmapping="TPDO" />
-            <SubObject subIndex="17" name="Byte 17" objectType="7" dataType="0005" accessType="ro" PDOmapping="TPDO" />
+            <SubObject subIndex="0A" name="Byte 10" objectType="7" dataType="0005" accessType="ro" PDOmapping="TPDO" />
+            <SubObject subIndex="0B" name="Byte 11" objectType="7" dataType="0005" accessType="ro" PDOmapping="TPDO" />
+            <SubObject subIndex="0C" name="Byte 12" objectType="7" dataType="0005" accessType="ro" PDOmapping="TPDO" />
+            <SubObject subIndex="0D" name="Byte 13" objectType="7" dataType="0005" accessType="ro" PDOmapping="TPDO" />
+            <SubObject subIndex="0E" name="Byte 14" objectType="7" dataType="0005" accessType="ro" PDOmapping="TPDO" />
+            <SubObject subIndex="0F" name="Byte 15" objectType="7" dataType="0005" accessType="ro" PDOmapping="TPDO" />
+            <SubObject subIndex="10" name="Byte 16" objectType="7" dataType="0005" accessType="ro" PDOmapping="TPDO" />
+            <SubObject subIndex="11" name="Byte 17" objectType="7" dataType="0005" accessType="ro" PDOmapping="TPDO" />
           </Object>
           <Object index="2001" name="Virtual Inputs 32 Bit" objectType="8">
             <SubObject subIndex="00" name="Number of elements" objectType="7" dataType="0005" accessType="ro" defaultValue="8" PDOmapping="no" />
@@ -242,7 +242,7 @@
             <SubObject subIndex="08" name="DWORD 8" objectType="7" dataType="0007" accessType="ro" PDOmapping="TPDO" />
           </Object>
 
-          <Object index="2100" name="Virtual Outputs 8 Bit" objectType="8">
+          <Object index="2200" name="Virtual Outputs 8 Bit" objectType="8">
             <SubObject subIndex="00" name="Number of elements" objectType="7" dataType="0005" accessType="ro" defaultValue="17" PDOmapping="no" />
             <SubObject subIndex="01" name="Byte 1" objectType="7" dataType="0005" accessType="rw" PDOmapping="RPDO" />
             <SubObject subIndex="02" name="Byte 2" objectType="7" dataType="0005" accessType="rw" PDOmapping="RPDO" />
@@ -253,12 +253,12 @@
             <SubObject subIndex="07" name="Byte 7" objectType="7" dataType="0005" accessType="rw" PDOmapping="RPDO" />
             <SubObject subIndex="08" name="Byte 8" objectType="7" dataType="0005" accessType="rw" PDOmapping="RPDO" />
             <SubObject subIndex="09" name="Byte 9" objectType="7" dataType="0005" accessType="rw" PDOmapping="RPDO" />
-            <SubObject subIndex="10" name="Byte 10" objectType="7" dataType="0005" accessType="rw" PDOmapping="RPDO" />
-            <SubObject subIndex="11" name="Byte 11" objectType="7" dataType="0005" accessType="rw" PDOmapping="RPDO" />
-            <SubObject subIndex="12" name="Byte 12" objectType="7" dataType="0005" accessType="rw" PDOmapping="RPDO" />
-            <SubObject subIndex="13" name="Byte 13" objectType="7" dataType="0005" accessType="rw" PDOmapping="RPDO" />
-            <SubObject subIndex="14" name="Byte 14" objectType="7" dataType="0005" accessType="rw" PDOmapping="RPDO" />
-            <SubObject subIndex="15" name="Byte 15" objectType="7" dataType="0005" accessType="rw" PDOmapping="RPDO" />
+            <SubObject subIndex="0A" name="Byte 10" objectType="7" dataType="0005" accessType="rw" PDOmapping="RPDO" />
+            <SubObject subIndex="0B" name="Byte 11" objectType="7" dataType="0005" accessType="rw" PDOmapping="RPDO" />
+            <SubObject subIndex="0C" name="Byte 12" objectType="7" dataType="0005" accessType="rw" PDOmapping="RPDO" />
+            <SubObject subIndex="0D" name="Byte 13" objectType="7" dataType="0005" accessType="rw" PDOmapping="RPDO" />
+            <SubObject subIndex="0E" name="Byte 14" objectType="7" dataType="0005" accessType="rw" PDOmapping="RPDO" />
+            <SubObject subIndex="0F" name="Byte 15" objectType="7" dataType="0005" accessType="rw" PDOmapping="RPDO" />
           </Object>
           <Object index="2201" name="Virtual Outputs 32 Bit" objectType="8">
             <SubObject subIndex="00" name="Number of elements" objectType="7" dataType="0005" accessType="ro" defaultValue="8" PDOmapping="no" />
