@@ -735,7 +735,7 @@ BYTE            bCount;
             }
 
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
-            if ((dwNodeCfg & EPL_NODEASSIGN_NODE_IS_CN) != 0)
+            if ((dwNodeCfg & (EPL_NODEASSIGN_NODE_IS_CN | EPL_NODEASSIGN_PRES_CHAINING)) == EPL_NODEASSIGN_NODE_IS_CN)
             {   // node is CN
                 ObdSize = sizeof (DllNodeInfo.m_wPreqPayloadLimit);
                 Ret = EplObduReadEntry(0x1F8B, uiIndex, &DllNodeInfo.m_wPreqPayloadLimit, &ObdSize);
