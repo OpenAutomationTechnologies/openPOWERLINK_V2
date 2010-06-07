@@ -1085,6 +1085,32 @@ unsigned int    uiCount;
                     if (ulSyncReqSize > memberoffs(tEplDllSyncRequest, m_dwSyncControl))
                     {
                         AmiSetDwordToLe(&pSoaPayload_p->m_SyncRequest.m_le_dwSyncControl, SyncRequest.m_dwSyncControl);
+                        if ((SyncRequest.m_dwSyncControl & EPL_SYNC_PRES_MODE_SET) != 0)
+                        {
+                        tEplDllNodeOpParam  NodeOpParam;
+
+                            NodeOpParam.m_OpNodeType = kEplDllNodeOpTypeIsochronous;
+                            NodeOpParam.m_uiNodeId = SyncRequest.m_uiNodeId;
+
+                            Ret = EplDllkAddNode(&NodeOpParam);
+                            if (Ret != kEplSuccessful)
+                            {
+                                goto Exit;
+                            }
+                        }
+                        if ((SyncRequest.m_dwSyncControl & EPL_SYNC_PRES_MODE_RESET) != 0)
+                        {
+                        tEplDllNodeOpParam  NodeOpParam;
+
+                            NodeOpParam.m_OpNodeType = kEplDllNodeOpTypeIsochronous;
+                            NodeOpParam.m_uiNodeId = SyncRequest.m_uiNodeId;
+
+                            Ret = EplDllkDeleteNode(&NodeOpParam);
+                            if (Ret != kEplSuccessful)
+                            {
+                                goto Exit;
+                            }
+                        }
                     }
                     if (ulSyncReqSize > memberoffs(tEplDllSyncRequest, m_dwPResTimeFirst))
                     {
