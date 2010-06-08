@@ -282,8 +282,8 @@ typedef struct
     tEplNmtMnuCbBootEvent m_pfnCbBootEvent;
 #if EPL_NMTMNU_PRES_CHAINING_MN != FALSE
     DWORD               m_dwPrcPResMnTimeoutNs;
-    DWORD               m_dwPResResponseTimeCorrectionNs;
-    DWORD               m_dwPResResponseTimeNegOffsetNs;
+    DWORD               m_dwPrcPResTimeFirstCorrectionNs;
+    DWORD               m_dwPrcPResTimeFirstNegOffsetNs;
 #endif
 } tEplNmtMnuInstance;
 
@@ -444,8 +444,8 @@ tEplKernel Ret;
     Ret = EplDlluCalRegAsndService(kEplDllAsndNmtRequest, EplNmtMnuCbNmtRequest, kEplDllAsndFilterLocal);
 
 #if EPL_NMTMNU_PRES_CHAINING_MN != FALSE
-    EplNmtMnuInstance_g.m_dwPResResponseTimeCorrectionNs =  50;
-    EplNmtMnuInstance_g.m_dwPResResponseTimeNegOffsetNs  = 500;
+    EplNmtMnuInstance_g.m_dwPrcPResTimeFirstCorrectionNs =  50;
+    EplNmtMnuInstance_g.m_dwPrcPResTimeFirstNegOffsetNs  = 500;
 #endif
 
 Exit:
@@ -1776,10 +1776,10 @@ tEplKernel  Ret;
 
     Ret = kEplSuccessful;
 
-    EplNmtMnuInstance_g.m_dwPResResponseTimeCorrectionNs =
-        pConfigParam_p->m_dwPResResponseTimeCorrectionNs;
-    EplNmtMnuInstance_g.m_dwPResResponseTimeNegOffsetNs =
-        pConfigParam_p->m_dwPResResponseTimeNegOffsetNs;
+    EplNmtMnuInstance_g.m_dwPrcPResTimeFirstCorrectionNs =
+        pConfigParam_p->m_dwPrcPResTimeFirstCorrectionNs;
+    EplNmtMnuInstance_g.m_dwPrcPResTimeFirstNegOffsetNs =
+        pConfigParam_p->m_dwPrcPResTimeFirstNegOffsetNs;
 
     return Ret;
 }
@@ -3854,14 +3854,14 @@ tEplObdSize         ObdSize;
           // Relative propragation delay from predecessor node to addressed node
         + EPL_NMTMNU_GET_NODEINFO(uiNodeId_p)->m_dwRelPropagationDelayNs
           // Time correction (hub jitter and part of measurement inaccuracy)
-        + EplNmtMnuInstance_g.m_dwPResResponseTimeCorrectionNs;
+        + EplNmtMnuInstance_g.m_dwPrcPResTimeFirstCorrectionNs;
 
     // apply negative offset for the second node, only
     if (pNodeInfoPredNode->m_dwPResTimeFirstNs == 0)
     {
-        if (*pdwPResResponseTimeNs_p > EplNmtMnuInstance_g.m_dwPResResponseTimeNegOffsetNs)
+        if (*pdwPResResponseTimeNs_p > EplNmtMnuInstance_g.m_dwPrcPResTimeFirstNegOffsetNs)
         {
-            *pdwPResResponseTimeNs_p -= EplNmtMnuInstance_g.m_dwPResResponseTimeNegOffsetNs;
+            *pdwPResResponseTimeNs_p -= EplNmtMnuInstance_g.m_dwPrcPResTimeFirstNegOffsetNs;
         }
         else
         {
@@ -3941,7 +3941,7 @@ tEplObdSize ObdSize;
                                       + EPL_C_DLL_T_ETH2_WRAPPER)
            + EPL_C_DLL_T_PREAMBLE)
           // Time correction (hub jitter and part of measurement inaccuracy)
-        + EplNmtMnuInstance_g.m_dwPResResponseTimeCorrectionNs;
+        + EplNmtMnuInstance_g.m_dwPrcPResTimeFirstCorrectionNs;
 
 Exit:
     return Ret;
@@ -4013,6 +4013,7 @@ tEplKernel          Ret;
 unsigned int        uiNodeIdPredNode;
 tEplNmtMnuNodeInfo* pNodeInfo;
 DWORD               dwSyncNodeNumber;
+DWORD               dwSyncDelay;
 
     pNodeInfo = EPL_NMTMNU_GET_NODEINFO(uiNodeId_p);
 
@@ -4036,14 +4037,28 @@ DWORD               dwSyncNodeNumber;
         goto Exit;
     }
 
-    pNodeInfo->m_dwRelPropagationDelayNs =
-          // difference between receive-times of SyncReq and SyncRes
-          AmiGetDwordFromLe(&pSyncResponse_p->m_le_dwSyncDelay)
-          // Transmission time for SyncReq frame
-        - (EPL_C_DLL_T_MIN_FRAME
-           + EPL_C_DLL_T_PREAMBLE);
+    dwSyncDelay = AmiGetDwordFromLe(&pSyncResponse_p->m_le_dwSyncDelay);
 
-    // $$$ What about Latency of the Node?
+#if 0
+    if (dwSyncDelay >= (EPL_C_DLL_T_MIN_FRAME + EPL_C_DLL_T_PREAMBLE))
+    {
+        // Relative propagation delay
+        // contains the Response Latency of the predecessor CN
+        pNodeInfo->m_dwRelPropagationDelayNs =
+              // Difference between receive-times of SyncReq and SyncRes
+              dwSyncDelay
+              // Transmission time for SyncReq frame
+            - (EPL_C_DLL_T_MIN_FRAME + EPL_C_DLL_T_PREAMBLE);
+    }
+    else
+    {   // Received SyncDelay is too small
+        // Schedule reset node
+        pNodeInfo->m_wPrcFlags &= ~EPL_NMTMNU_NODE_FLAG_PRC_RESET_MASK;
+        pNodeInfo->m_wPrcFlags |= EPL_NMTMNU_NODE_FLAG_PRC_RESET_NODE;
+    }
+#else
+    pNodeInfo->m_dwRelPropagationDelayNs = dwSyncDelay;
+#endif
 
     // If a previous SyncRes frame was not usable,
     // the Sync Error flag is cleared as this one is OK
