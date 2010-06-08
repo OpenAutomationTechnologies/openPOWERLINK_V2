@@ -577,10 +577,12 @@ tEplNmtMnuNodeInfo* pNodeInfo;
 
         if (wPrcFlagsCmdReset != 0)
         {
-            if (pNodeInfo->m_wPrcFlags & EPL_NMTMNU_NODE_FLAG_PRC_ADD_IN_PROGRESS)
-            {   // Addition to the isochronous phase is in progress for this node
-                // Remove it
-                pNodeInfo->m_wPrcFlags &= ~EPL_NMTMNU_NODE_FLAG_PRC_ADD_IN_PROGRESS;
+            if (pNodeInfo->m_wPrcFlags & (EPL_NMTMNU_NODE_FLAG_PRC_ADD_SCHEDULED |
+                                          EPL_NMTMNU_NODE_FLAG_PRC_ADD_IN_PROGRESS))
+            {   // For this node, addition to the isochronous phase is scheduled
+                // or in progress
+                pNodeInfo->m_wPrcFlags &= ~(EPL_NMTMNU_NODE_FLAG_PRC_ADD_SCHEDULED |
+                                            EPL_NMTMNU_NODE_FLAG_PRC_ADD_IN_PROGRESS);
             }
             else if (pNodeInfo->m_wFlags & EPL_NMTMNU_NODE_FLAG_ISOCHRON)
             {   // PRes Chaining is enabled
