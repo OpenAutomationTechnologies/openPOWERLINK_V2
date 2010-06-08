@@ -2636,10 +2636,28 @@ tEplTimerArg        TimerArg;
                 // update object 0x1F8F NMT_MNNodeExpState_AU8 to PreOp1
                 bNmtState = (BYTE) (kEplNmtCsPreOperational1 & 0xFF);
             }
-            else if (NmtState >= kEplNmtMsPreOperational2)
-            {
+            else
+            {   // MN is running full cycle
                 // update object 0x1F8F NMT_MNNodeExpState_AU8 to PreOp2
                 bNmtState = (BYTE) (kEplNmtCsPreOperational2 & 0xFF);
+
+                if (NodeNmtState_p == kEplNmtCsPreOperational1)
+                {   // The CN did not yet switch to PreOp2
+                tEplTimerArg TimerArg;
+
+                    // Set NMT state change flag and ignore unexpected NMT states
+                    // until the state monitor timer is elapsed.
+                    pNodeInfo->m_wFlags |= EPL_NMTMNU_NODE_FLAG_NMT_CMD_ISSUED;
+
+                    EPL_NMTMNU_SET_FLAGS_TIMERARG_STATE_MON(
+                            pNodeInfo, uiNodeId_p, TimerArg);
+
+                    Ret = EplTimeruModifyTimerMs(&pNodeInfo->m_TimerHdlStatReq, EplNmtMnuInstance_g.m_ulStatusRequestDelay, TimerArg);
+                    if (Ret != kEplSuccessful)
+                    {
+                        goto Exit;
+                    }
+                }
             }
 
             Ret = EplObduWriteEntry(0x1F8F, uiNodeId_p, &bNmtState, 1);
@@ -2659,25 +2677,28 @@ tEplTimerArg        TimerArg;
                 break;
             }
 
-            // request StatusResponse immediately,
-            // because we want a fast boot-up of CNs
-            Ret = EplStatusuRequestStatusResponse(uiNodeId_p, EplNmtMnuCbStatusResponse);
-            if (Ret != kEplSuccessful)
-            {
-                EPL_NMTMNU_DBG_POST_TRACE_VALUE(NodeEvent_p,
-                                                uiNodeId_p,
-                                                Ret);
-
-                if (Ret == kEplInvalidOperation)
-                {   // the only situation when this should happen is, when
-                    // StatusResponse was already requested from within
-                    // the StatReq timer event.
-                    // so ignore this error.
-                    Ret = kEplSuccessful;
-                }
-                else
+            if ((pNodeInfo->m_wFlags & EPL_NMTMNU_NODE_FLAG_NMT_CMD_ISSUED) == 0)
+            {   // No state monitor timer is required
+                // Request StatusResponse immediately,
+                // because we want a fast boot-up of CNs
+                Ret = EplStatusuRequestStatusResponse(uiNodeId_p, EplNmtMnuCbStatusResponse);
+                if (Ret != kEplSuccessful)
                 {
-                    break;
+                    EPL_NMTMNU_DBG_POST_TRACE_VALUE(NodeEvent_p,
+                                                    uiNodeId_p,
+                                                    Ret);
+
+                    if (Ret == kEplInvalidOperation)
+                    {   // the only situation when this should happen is, when
+                        // StatusResponse was already requested from within
+                        // the StatReq timer event.
+                        // so ignore this error.
+                        Ret = kEplSuccessful;
+                    }
+                    else
+                    {
+                        break;
+                    }
                 }
             }
 
@@ -3440,6 +3461,18 @@ tEplNmtState    ExpNmtState;
     {   // CN is not in expected NMT state
     WORD wbeErrorCode;
 
+        if (wErrorCode_p == 0)
+        {   // assume wrong NMT state error
+            if ((pNodeInfo_p->m_wFlags & EPL_NMTMNU_NODE_FLAG_NMT_CMD_ISSUED) != 0)
+            {   // NMT command has been just issued;
+                // ignore wrong NMT state until timer expires;
+                // other errors like LOSS_PRES_TH are still processed
+                goto Exit;
+            }
+
+            wErrorCode_p = EPL_E_NMT_WRONG_STATE;
+        }
+
         if ((pNodeInfo_p->m_wFlags & EPL_NMTMNU_NODE_FLAG_NOT_SCANNED) != 0)
         {
             // decrement only signal slave count if checked once
@@ -3455,18 +3488,6 @@ tEplNmtState    ExpNmtState;
 
         // -> CN is in wrong NMT state
         pNodeInfo_p->m_NodeState = kEplNmtMnuNodeStateUnknown;
-
-        if (wErrorCode_p == 0)
-        {   // assume wrong NMT state error
-            if ((pNodeInfo_p->m_wFlags & EPL_NMTMNU_NODE_FLAG_NMT_CMD_ISSUED) != 0)
-            {   // NMT command has been just issued;
-                // ignore wrong NMT state until timer expires;
-                // other errors like LOSS_PRES_TH are still processed
-                goto Exit;
-            }
-
-            wErrorCode_p = EPL_E_NMT_WRONG_STATE;
-        }
 
         BENCHMARK_MOD_07_TOGGLE(7);
 
