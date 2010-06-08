@@ -100,8 +100,8 @@ typedef tEplKernel (PUBLIC * tEplNmtMnuCbBootEvent) (
 
 typedef struct
 {
-    DWORD   m_dwPResResponseTimeCorrectionNs;
-    DWORD   m_dwPResResponseTimeNegOffsetNs;
+    DWORD   m_dwPrcPResTimeFirstCorrectionNs;
+    DWORD   m_dwPrcPResTimeFirstNegOffsetNs;
 
 } tEplNmtMnuConfigParam;
 
