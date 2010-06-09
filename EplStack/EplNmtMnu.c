@@ -127,22 +127,23 @@
 #if EPL_NMTMNU_PRES_CHAINING_MN != FALSE
 #define EPL_NMTMNU_NODE_FLAG_PRC_ADD_SCHEDULED      0x0001
 #define EPL_NMTMNU_NODE_FLAG_PRC_ADD_IN_PROGRESS    0x0002
-#define EPL_NMTMNU_NODE_FLAG_PRC_SHIFT_REQUIRED     0x0004
-#define EPL_NMTMNU_NODE_FLAG_PRC_SYNC_ERR           0x0008  // SyncRes 1-bit error counter
+#define EPL_NMTMNU_NODE_FLAG_PRC_ADD_SYNCREQ_SENT   0x0004  // Covers time between SyncReq and SyncRes for addition
+#define EPL_NMTMNU_NODE_FLAG_PRC_SHIFT_REQUIRED     0x0010
+#define EPL_NMTMNU_NODE_FLAG_PRC_SYNC_ERR           0x0020  // SyncRes 1-bit error counter
 
-#define EPL_NMTMNU_NODE_FLAG_PRC_CALL_MEASURE       0x0010
-#define EPL_NMTMNU_NODE_FLAG_PRC_CALL_SHIFT         0x0020
-#define EPL_NMTMNU_NODE_FLAG_PRC_CALL_ADD           0x0030
-#define EPL_NMTMNU_NODE_FLAG_PRC_CALL_MASK          0x0030
+#define EPL_NMTMNU_NODE_FLAG_PRC_CALL_MEASURE       0x0100
+#define EPL_NMTMNU_NODE_FLAG_PRC_CALL_SHIFT         0x0200
+#define EPL_NMTMNU_NODE_FLAG_PRC_CALL_ADD           0x0300
+#define EPL_NMTMNU_NODE_FLAG_PRC_CALL_MASK          0x0300
 
-#define EPL_NMTMNU_NODE_FLAG_PRC_VERIFY             0x0040
+#define EPL_NMTMNU_NODE_FLAG_PRC_VERIFY             0x0400
 
-#define EPL_NMTMNU_NODE_FLAG_PRC_STOP_NODE          0x0100
-#define EPL_NMTMNU_NODE_FLAG_PRC_RESET_NODE         0x0200
-#define EPL_NMTMNU_NODE_FLAG_PRC_RESET_COM          0x0300
-#define EPL_NMTMNU_NODE_FLAG_PRC_RESET_CONF         0x0400
-#define EPL_NMTMNU_NODE_FLAG_PRC_RESET_SW           0x0500
-#define EPL_NMTMNU_NODE_FLAG_PRC_RESET_MASK         0x0700
+#define EPL_NMTMNU_NODE_FLAG_PRC_STOP_NODE          0x1000
+#define EPL_NMTMNU_NODE_FLAG_PRC_RESET_NODE         0x2000
+#define EPL_NMTMNU_NODE_FLAG_PRC_RESET_COM          0x3000
+#define EPL_NMTMNU_NODE_FLAG_PRC_RESET_CONF         0x4000
+#define EPL_NMTMNU_NODE_FLAG_PRC_RESET_SW           0x5000
+#define EPL_NMTMNU_NODE_FLAG_PRC_RESET_MASK         0x7000
 #endif
 
 // defines for timer arguments to draw a distinction between serveral events
@@ -581,11 +582,14 @@ tEplNmtMnuNodeInfo* pNodeInfo;
                                           EPL_NMTMNU_NODE_FLAG_PRC_ADD_IN_PROGRESS))
             {   // For this node, addition to the isochronous phase is scheduled
                 // or in progress
+                // Skip additon for this node
                 pNodeInfo->m_wPrcFlags &= ~(EPL_NMTMNU_NODE_FLAG_PRC_ADD_SCHEDULED |
                                             EPL_NMTMNU_NODE_FLAG_PRC_ADD_IN_PROGRESS);
             }
-            else if (pNodeInfo->m_wFlags & EPL_NMTMNU_NODE_FLAG_ISOCHRON)
-            {   // PRes Chaining is enabled
+
+            if (   (pNodeInfo->m_wFlags & EPL_NMTMNU_NODE_FLAG_ISOCHRON)
+                || (pNodeInfo->m_wPrcFlags & EPL_NMTMNU_NODE_FLAG_PRC_ADD_SYNCREQ_SENT))
+            {   // PRes Chaining is or is going to be enabled
             tEplDllSyncRequest SyncReqData;
             unsigned int       uiSize;
 
@@ -622,9 +626,6 @@ tEplNmtMnuNodeInfo* pNodeInfo;
                     }
                 }
             }
-            // $$$ How to handle nodes for which an add SyncReq has been send,
-            //     but the SyncRes is not jet received?
-
             // $$$ Handle the situation that a SyncReq has been send and the next reset node
             //     command is to be sent before the appropriate SyncRes is received.
         }
@@ -2621,7 +2622,7 @@ tEplTimerArg        TimerArg;
                 pNodeInfo->m_NodeState = kEplNmtMnuNodeStateIdentified;
             }
 
-            // reset flags ISOCHRON and NMT_CMD_ISSUED
+            // reset flags ISOCHRON, NMT_CMD_ISSUED, and PREOP2_REACHED
             pNodeInfo->m_wFlags &= ~(EPL_NMTMNU_NODE_FLAG_ISOCHRON
                                      | EPL_NMTMNU_NODE_FLAG_NMT_CMD_ISSUED
                                      | EPL_NMTMNU_NODE_FLAG_PREOP2_REACHED);
@@ -3357,6 +3358,12 @@ BYTE            bNmtState;
 BYTE            bNmtStatePrev;
 tEplNmtState    ExpNmtState;
 
+    if (pNodeInfo_p->m_NodeState == kEplNmtMnuNodeStateUnknown)
+    {   // CN is already in state unknown, which means that it got
+        // NMT reset command earlier
+        goto Exit;
+    }
+
     ObdSize = 1;
     // read object 0x1F8F NMT_MNNodeExpState_AU8
     Ret = EplObduReadEntry(0x1F8F, uiNodeId_p, &bNmtState, &ObdSize);
@@ -3480,12 +3487,6 @@ tEplNmtState    ExpNmtState;
             // decrement only signal slave count if checked once
             EplNmtMnuInstance_g.m_uiSignalSlaveCount--;
             pNodeInfo_p->m_wFlags &= ~EPL_NMTMNU_NODE_FLAG_NOT_SCANNED;
-        }
-
-        if (pNodeInfo_p->m_NodeState == kEplNmtMnuNodeStateUnknown)
-        {   // CN is already in state unknown, which means that it got
-            // NMT reset command earlier
-            goto Exit;
         }
 
         // -> CN is in wrong NMT state
@@ -4296,6 +4297,8 @@ tEplNmtMnuNodeInfo* pNodeInfoLastSyncReq;
                 goto Exit;
             }
 
+            pNodeInfo->m_wPrcFlags |= EPL_NMTMNU_NODE_FLAG_PRC_ADD_SYNCREQ_SENT;
+
             SyncReqNum++;
             pNodeInfoLastSyncReq = pNodeInfo;
 
@@ -4377,7 +4380,10 @@ tEplNmtMnuNodeInfo* pNodeInfo;
         goto Exit;
     }
 
-    pNodeInfo->m_wPrcFlags &= ~EPL_NMTMNU_NODE_FLAG_PRC_ADD_IN_PROGRESS;
+    // Flag ISOCHRON has been set in EplNmtMnuCbNodeAdded,
+    // thus this flags are reset.
+    pNodeInfo->m_wPrcFlags &= ~(EPL_NMTMNU_NODE_FLAG_PRC_ADD_IN_PROGRESS |
+                                EPL_NMTMNU_NODE_FLAG_PRC_ADD_SYNCREQ_SENT);
 
     // Schedule verify
     pNodeInfo->m_wPrcFlags |= EPL_NMTMNU_NODE_FLAG_PRC_VERIFY;
