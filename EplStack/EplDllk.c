@@ -5043,10 +5043,12 @@ unsigned int    uiNodeId;
                         EPL_MEMCPY(pIntNodeInfo->m_be_abMacAddr, pFrame->m_be_abSrcMac, 6);
                     }
                 }
+#if (EPL_DLL_PRES_CHAINING_MN != FALSE)
                 else if (((tEplDllAsndServiceId) uiAsndServiceId) == kEplDllAsndSyncResponse)
                 {
                     break;
                 }
+#endif
 
                 // forward Flag2 to asynchronous scheduler
                 bFlag1 = AmiGetByteFromLe(&pFrame->m_Data.m_Asnd.m_Payload.m_StatusResponse.m_le_bFlag2);
