@@ -275,7 +275,7 @@ typedef struct
     unsigned int        m_uiMandatorySlaveCount;
     unsigned int        m_uiSignalSlaveCount;
     unsigned long       m_ulStatusRequestDelay; // in [ms] (object 0x1006 * EPL_C_NMT_STATREQ_CYCLE)
-    unsigned long       m_ulTimeoutReadyToOp;   // in [ms] (object 0x1F89/5)
+    unsigned long       m_ulTimeoutReadyToOp;   // in [ms] (object 0x1F89/4)
     unsigned long       m_ulTimeoutCheckCom;    // in [ms] (object 0x1006 * MultiplexedCycleCount)
     WORD                m_wFlags;               // global flags
     DWORD               m_dwNmtStartup;         // object 0x1F80 NMT_StartUp_U32
@@ -1026,9 +1026,9 @@ tEplKernel      Ret = kEplSuccessful;
                 }
             }
 
-            // fetch ReadyToOp Timeout from OD
+            // fetch MNTimeoutPreOp2_U32 from OD
             ObdSize = sizeof (dwTimeout);
-            Ret = EplObduReadEntry(0x1F89, 5, &dwTimeout, &ObdSize);
+            Ret = EplObduReadEntry(0x1F89, 4, &dwTimeout, &ObdSize);
             if (Ret != kEplSuccessful)
             {
                 break;
