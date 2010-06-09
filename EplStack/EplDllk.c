@@ -4818,9 +4818,10 @@ BYTE            bFlag1;
                 goto Exit;
             }
 
-#if EPL_DLL_PRES_CHAINING_CN != FALSE
+#if (EPL_DLL_PRES_CHAINING_CN != FALSE) || (EPL_DLL_PRES_CHAINING_MN != FALSE)
             case kEplDllReqServiceSync:
             {   // SyncRequest
+#if EPL_DLL_PRES_CHAINING_CN != FALSE
             DWORD       dwSyncControl;
             BYTE        be_abDestMacAddress[6];
             tEplFrame*  pTxFrameSyncRes;
@@ -4897,6 +4898,7 @@ BYTE            bFlag1;
 
 #warning TODO CbUpdatePrcCycleTiming
 
+#endif
                 goto Exit;
             }
 #endif
@@ -6061,6 +6063,9 @@ unsigned int    nIndex = 0;
                 }
 
                 case kEplDllAsndSdo:
+#if (EPL_DLL_PRES_CHAINING_CN == FALSE) && (EPL_DLL_PRES_CHAINING_MN != FALSE)
+                case kEplDllAsndSyncResponse:
+#endif
                 {
                     Ret = kEplEdrvBufNotExisting;
                     goto Exit;
