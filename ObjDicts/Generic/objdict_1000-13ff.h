@@ -42,7 +42,7 @@
             EPL_OBD_SUBINDEX_RAM_VAR(0x1018, 0x00, kEplObdTypUInt8, kEplObdAccConst, tEplObdUnsigned8, NumberOfEntries, 0x04)
             EPL_OBD_SUBINDEX_RAM_VAR(0x1018, 0x01, kEplObdTypUInt32, kEplObdAccR, tEplObdUnsigned32, VendorId_U32, 0x00)
             EPL_OBD_SUBINDEX_RAM_VAR(0x1018, 0x02, kEplObdTypUInt32, kEplObdAccR, tEplObdUnsigned32, ProductCode_U32, 0x1083)
-            EPL_OBD_SUBINDEX_RAM_VAR(0x1018, 0x03, kEplObdTypUInt32, kEplObdAccR, tEplObdUnsigned32, RevisionNo_U32, DEFINED_OBJ1018_VERSION)
+            EPL_OBD_SUBINDEX_RAM_VAR(0x1018, 0x03, kEplObdTypUInt32, kEplObdAccR, tEplObdUnsigned32, RevisionNo_U32, EPL_DEFINED_OBJ1018_VERSION)
             EPL_OBD_SUBINDEX_RAM_VAR(0x1018, 0x04, kEplObdTypUInt32, kEplObdAccR, tEplObdUnsigned32, SerialNo_U32, 0x12345678)
         EPL_OBD_END_INDEX(0x1018)
 
