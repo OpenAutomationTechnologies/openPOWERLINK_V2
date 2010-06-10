@@ -342,7 +342,7 @@ int inum;
     EplRet = EplApiLinkObject(0x6000, &bVarIn1_l, &uiVarEntries, &ObdSize, 0x01);
     if (EplRet != kEplSuccessful)
     {
-        goto Exit;
+        goto ExitShutdown;
     }
 
     ObdSize = sizeof(bVarOut1_l);
@@ -350,7 +350,7 @@ int inum;
     EplRet = EplApiLinkObject(0x6200, &bVarOut1_l, &uiVarEntries, &ObdSize, 0x01);
     if (EplRet != kEplSuccessful)
     {
-        goto Exit;
+        goto ExitShutdown;
     }
 
     // link process variables used by MN to object dictionary
@@ -359,7 +359,7 @@ int inum;
     EplRet = EplApiLinkObject(0x2000, &bLedsRow1_l, &uiVarEntries, &ObdSize, 0x01);
     if (EplRet != kEplSuccessful)
     {
-        goto Exit;
+        goto ExitShutdown;
     }
 
     ObdSize = sizeof(bLedsRow2_l);
@@ -367,7 +367,7 @@ int inum;
     EplRet = EplApiLinkObject(0x2000, &bLedsRow2_l, &uiVarEntries, &ObdSize, 0x02);
     if (EplRet != kEplSuccessful)
     {
-        goto Exit;
+        goto ExitShutdown;
     }
 
     ObdSize = sizeof(bSpeedSelect_l);
@@ -391,7 +391,7 @@ int inum;
     EplRet = EplApiLinkObject(0x2200, &abSelect_l[0], &uiVarEntries, &ObdSize, 0x01);
     if (EplRet != kEplSuccessful)
     {
-        goto Exit;
+        goto ExitShutdown;
     }
 
     // link a DOMAIN to object 0x6100, but do not exit, if it is missing
@@ -411,6 +411,10 @@ int inum;
 
     // start processing
     EplRet = EplApiExecNmtCommand(kEplNmtEventSwReset);
+    if (EplRet != kEplSuccessful)
+    {
+        goto ExitShutdown;
+    }
 
     PRINTF0("Press Esc to leave the programm\n");
     // wait for key hit
@@ -419,6 +423,33 @@ int inum;
         if (_kbhit())
         {
             cKey = (BYTE)_getch() ;
+            switch (cKey)
+            {
+                case 'r':
+                {
+                    EplRet = EplApiExecNmtCommand(kEplNmtEventSwReset);
+                    if (EplRet != kEplSuccessful)
+                    {
+                        goto ExitShutdown;
+                    }
+                    break;
+                }
+
+                case 'c':
+                {
+                    EplRet = EplApiExecNmtCommand(kEplNmtEventNmtCycleError);
+                    if (EplRet != kEplSuccessful)
+                    {
+                        goto ExitShutdown;
+                    }
+                    break;
+                }
+
+                default:
+                {
+                    break;
+                }
+            }
         }
         Sleep(1500);
 
@@ -428,7 +459,7 @@ int inum;
 ////////////////////////////////////////////////////////////////////////////////
 				// Stop the stack //
 ////////////////////////////////////////////////////////////////////////////////
-
+ExitShutdown:
     // halt the NMT state machine
     // so the processing of POWERLINK frames stops
     EplRet = EplApiExecNmtCommand(kEplNmtEventSwitchOff);
