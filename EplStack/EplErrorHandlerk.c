@@ -808,6 +808,8 @@ Exit:
 // State:
 //
 //---------------------------------------------------------------------------
+
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
 tEplKernel PUBLIC EplErrorHandlerkResetCnError(unsigned int uiNodeId_p)
 {
 tEplKernel              Ret = kEplSuccessful;
@@ -821,6 +823,7 @@ tEplKernel              Ret = kEplSuccessful;
     return Ret;
 
 }
+#endif
 
 
 //---------------------------------------------------------------------------

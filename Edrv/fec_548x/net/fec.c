@@ -1899,13 +1899,13 @@ tEdrvRxBuffer       RxBuffer;
 *************************************************************************/
 void fec_interrupt_fec_tx_handler(struct eth_if *nd)
 {
-tEdrvTxBuffer*  pTxBuffer;
 
     TGT_DBG_SIGNAL_TRACE_POINT(9);
 
 #if EDRV_DMA_TX_HANDLER != FALSE
     while (EdrvInstance_l.m_uiHeadTxDesc != EdrvInstance_l.m_uiTailTxDesc)
     {   // transmission is active
+    tEdrvTxBuffer*  pTxBuffer;
 
 #if EDRV_BENCHMARK != FALSE
         // reset LED
