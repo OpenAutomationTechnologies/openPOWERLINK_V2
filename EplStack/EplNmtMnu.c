@@ -1118,6 +1118,9 @@ tEplKernel      Ret = kEplSuccessful;
             // reset IdentResponses and running IdentRequests and StatusRequests
             Ret = EplIdentuReset();
             Ret = EplStatusuReset();
+#if EPL_NMTMNU_PRES_CHAINING_MN != FALSE
+            Ret = EplSyncuReset();
+#endif
 
             // reset timers
             Ret = EplNmtMnuReset();
@@ -2006,6 +2009,11 @@ tEplNmtMnuNodeInfo* pNodeInfo;
             goto Exit;
         }
 
+        // clear PRC specific values
+        pNodeInfo->m_wPrcFlags = 0;
+        pNodeInfo->m_dwPResTimeFirstNs = 0;
+        pNodeInfo->m_dwRelPropagationDelayNs = 0;
+
         if ((pNodeInfo->m_dwNodeCfg & EPL_NODEASSIGN_PRES_CHAINING) == 0)
 #endif
         {   // node is added as PReq/PRes node
@@ -2020,8 +2028,6 @@ tEplNmtMnuNodeInfo* pNodeInfo;
 #if EPL_NMTMNU_PRES_CHAINING_MN != FALSE
         else
         {   // node is a PRC node
-            // clear PRC specific flags
-            pNodeInfo->m_wPrcFlags = 0;
 
             EplNmtMnuInstance_g.m_wFlags |= EPL_NMTMNU_FLAG_PRC_ADD_SCHEDULED;
             pNodeInfo->m_wPrcFlags |= EPL_NMTMNU_NODE_FLAG_PRC_ADD_SCHEDULED;
