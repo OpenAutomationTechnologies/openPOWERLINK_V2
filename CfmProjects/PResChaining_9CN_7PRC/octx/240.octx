@@ -117,7 +117,7 @@
     </Object>
     <Object index="1000" name="NMT_DeviceType_U32" objectType="7" dataType="0007" accessType="const" defaultValue="0x000F0191" PDOmapping="NO" CDCFlag="FALSE"/>
     <Object index="1001" name="ERR_ErrorRegister_U8" objectType="7" dataType="0005" accessType="ro" defaultValue="0" PDOmapping="OPTIONAL" CDCFlag="FALSE"/>
-    <Object index="1006" name="NMT_CycleLen_U32" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0x7530" PDOmapping="NO" CDCFlag="TRUE"/>
+    <Object index="1006" name="NMT_CycleLen_U32" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0x1388" PDOmapping="NO" CDCFlag="TRUE"/>
     <Object index="1008" name="NMT_ManufactDevName_VS" objectType="7" dataType="0009" accessType="const" PDOmapping="NO" CDCFlag="FALSE"/>
     <Object index="1009" name="NMT_ManufactHwVers_VS" objectType="7" dataType="0009" accessType="const" PDOmapping="NO" CDCFlag="FALSE"/>
     <Object index="100A" name="NMT_ManufactSwVers_VS" objectType="7" dataType="0009" accessType="const" PDOmapping="NO" CDCFlag="FALSE"/>
@@ -234,7 +234,7 @@
      <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" defaultValue="3" PDOmapping="NO" CDCFlag="TRUE"/>
      <SubObject subIndex="01" name="CumulativeCnt_U32" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="TRUE"/>
      <SubObject subIndex="02" name="ThresholdCnt_U32" objectType="7" dataType="0007" accessType="ro" defaultValue="0" PDOmapping="NO" CDCFlag="TRUE"/>
-     <SubObject subIndex="03" name="Threshold_U32" objectType="7" dataType="0007" accessType="rw" defaultValue="15" actualValue="0xF" PDOmapping="NO" CDCFlag="TRUE"/>
+     <SubObject subIndex="03" name="Threshold_U32" objectType="7" dataType="0007" accessType="rw" defaultValue="15" actualValue="0x2F" PDOmapping="NO" CDCFlag="TRUE"/>
     </Object>
     <Object index="1C07" name="DLL_MNCNLossPResCumCnt_AU32" objectType="8" dataType="0007" PDOmapping="NO" CDCFlag="FALSE">
      <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="ro" defaultValue="254" PDOmapping="NO" CDCFlag="FALSE"/>
@@ -1028,15 +1028,15 @@
     <Object index="1C14" name="DLL_CNLossOfSocTolerance_U32" objectType="7" dataType="0007" accessType="rw" defaultValue="300000" actualValue="0x35A4E900" PDOmapping="NO" CDCFlag="TRUE"/>
     <Object index="1F26" name="CFM_ExpConfDateList_AU32" objectType="8" dataType="0007" PDOmapping="NO" CDCFlag="TRUE">
      <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="ro" defaultValue="254" PDOmapping="NO" CDCFlag="TRUE"/>
-     <SubObject subIndex="01" name="CNConfigurationDate01" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="TRUE"/>
-     <SubObject subIndex="02" name="CNConfigurationDate02" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="TRUE"/>
-     <SubObject subIndex="03" name="CNConfigurationDate03" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="TRUE"/>
-     <SubObject subIndex="04" name="CNConfigurationDate04" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="TRUE"/>
-     <SubObject subIndex="05" name="CNConfigurationDate05" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="TRUE"/>
-     <SubObject subIndex="06" name="CNConfigurationDate06" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="TRUE"/>
-     <SubObject subIndex="07" name="CNConfigurationDate07" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="TRUE"/>
-     <SubObject subIndex="08" name="CNConfigurationDate08" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="TRUE"/>
-     <SubObject subIndex="09" name="CNConfigurationDate09" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="TRUE"/>
+     <SubObject subIndex="01" name="CNConfigurationDate01" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0x132B602" PDOmapping="NO" CDCFlag="TRUE"/>
+     <SubObject subIndex="02" name="CNConfigurationDate02" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0x132B602" PDOmapping="NO" CDCFlag="TRUE"/>
+     <SubObject subIndex="03" name="CNConfigurationDate03" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0x132B602" PDOmapping="NO" CDCFlag="TRUE"/>
+     <SubObject subIndex="04" name="CNConfigurationDate04" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0x132B602" PDOmapping="NO" CDCFlag="TRUE"/>
+     <SubObject subIndex="05" name="CNConfigurationDate05" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0x132B602" PDOmapping="NO" CDCFlag="TRUE"/>
+     <SubObject subIndex="06" name="CNConfigurationDate06" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0x132B602" PDOmapping="NO" CDCFlag="TRUE"/>
+     <SubObject subIndex="07" name="CNConfigurationDate07" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0x132B602" PDOmapping="NO" CDCFlag="TRUE"/>
+     <SubObject subIndex="08" name="CNConfigurationDate08" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0x132B602" PDOmapping="NO" CDCFlag="TRUE"/>
+     <SubObject subIndex="09" name="CNConfigurationDate09" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0x132B602" PDOmapping="NO" CDCFlag="TRUE"/>
      <SubObject subIndex="0A" name="CNConfigurationDate0A" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="TRUE"/>
      <SubObject subIndex="0B" name="CNConfigurationDate0B" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="TRUE"/>
      <SubObject subIndex="0C" name="CNConfigurationDate0C" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="TRUE"/>
@@ -1285,15 +1285,15 @@
     </Object>
     <Object index="1F27" name="CFM_ExpConfTimeList_AU32" objectType="8" dataType="0007" PDOmapping="NO" CDCFlag="TRUE">
      <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="ro" defaultValue="254" PDOmapping="NO" CDCFlag="TRUE"/>
-     <SubObject subIndex="01" name="CNConfigurationTime01" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="TRUE"/>
-     <SubObject subIndex="02" name="CNConfigurationTime02" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="TRUE"/>
-     <SubObject subIndex="03" name="CNConfigurationTime03" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="TRUE"/>
-     <SubObject subIndex="04" name="CNConfigurationTime04" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="TRUE"/>
-     <SubObject subIndex="05" name="CNConfigurationTime05" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="TRUE"/>
-     <SubObject subIndex="06" name="CNConfigurationTime06" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="TRUE"/>
-     <SubObject subIndex="07" name="CNConfigurationTime07" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="TRUE"/>
-     <SubObject subIndex="08" name="CNConfigurationTime08" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="TRUE"/>
-     <SubObject subIndex="09" name="CNConfigurationTime09" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="TRUE"/>
+     <SubObject subIndex="01" name="CNConfigurationTime01" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0x532" PDOmapping="NO" CDCFlag="TRUE"/>
+     <SubObject subIndex="02" name="CNConfigurationTime02" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0x532" PDOmapping="NO" CDCFlag="TRUE"/>
+     <SubObject subIndex="03" name="CNConfigurationTime03" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0x532" PDOmapping="NO" CDCFlag="TRUE"/>
+     <SubObject subIndex="04" name="CNConfigurationTime04" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0x532" PDOmapping="NO" CDCFlag="TRUE"/>
+     <SubObject subIndex="05" name="CNConfigurationTime05" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0x532" PDOmapping="NO" CDCFlag="TRUE"/>
+     <SubObject subIndex="06" name="CNConfigurationTime06" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0x532" PDOmapping="NO" CDCFlag="TRUE"/>
+     <SubObject subIndex="07" name="CNConfigurationTime07" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0x532" PDOmapping="NO" CDCFlag="TRUE"/>
+     <SubObject subIndex="08" name="CNConfigurationTime08" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0x532" PDOmapping="NO" CDCFlag="TRUE"/>
+     <SubObject subIndex="09" name="CNConfigurationTime09" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0x532" PDOmapping="NO" CDCFlag="TRUE"/>
      <SubObject subIndex="0A" name="CNConfigurationTime0A" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="TRUE"/>
      <SubObject subIndex="0B" name="CNConfigurationTime0B" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="TRUE"/>
      <SubObject subIndex="0C" name="CNConfigurationTime0C" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="TRUE"/>
@@ -1542,12 +1542,17 @@
     </Object>
     <Object index="1F80" name="NMT_StartUp_U32" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
     <Object index="1F81" name="NMT_NodeAssignment_AU32" objectType="8" dataType="0007" PDOmapping="NO" CDCFlag="TRUE">
-     <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" defaultValue="254" actualValue="0x5" PDOmapping="NO" CDCFlag="TRUE"/>
+     <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" defaultValue="254" actualValue="09" PDOmapping="NO" CDCFlag="TRUE"/>
      <SubObject subIndex="F0" name="NodeAssignmentF0" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0x80001001" PDOmapping="NO" CDCFlag="TRUE"/>
      <SubObject subIndex="02" name="CNAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0X80004007" PDOmapping="NO" CDCFlag="TRUE"/>
      <SubObject subIndex="04" name="CNAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0X80004007" CDCFlag="TRUE"/>
      <SubObject subIndex="01" name="CNAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0X80004007" PDOmapping="NO" CDCFlag="TRUE"/>
-     <SubObject subIndex="6E" name="CNAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0X80000007" PDOmapping="NO" CDCFlag="TRUE"/>
+     <SubObject subIndex="03" name="CNAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0X80004007" PDOmapping="NO" CDCFlag="TRUE"/>
+     <SubObject subIndex="05" name="CNAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0X80004007" CDCFlag="TRUE"/>
+     <SubObject subIndex="06" name="CNAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0X80004007" CDCFlag="TRUE"/>
+     <SubObject subIndex="07" name="CNAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0X80004007" CDCFlag="TRUE"/>
+     <SubObject subIndex="08" name="CNAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0X80000007" CDCFlag="TRUE"/>
+     <SubObject subIndex="09" name="CNAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0X80000007" CDCFlag="TRUE"/>
     </Object>
     <Object index="1F82" name="NMT_FeatureFlags_U32" objectType="7" dataType="0007" accessType="const" defaultValue="0x245" PDOmapping="NO" CDCFlag="FALSE"/>
     <Object index="1F83" name="NMT_EPLVersion_U8" objectType="7" dataType="0005" accessType="const" defaultValue="0x20" PDOmapping="NO" CDCFlag="FALSE"/>
@@ -2588,11 +2593,10 @@
      <SubObject subIndex="FE" name="CurrStateFE" objectType="7" dataType="0005" accessType="ro" defaultValue="28" PDOmapping="NO" CDCFlag="FALSE"/>
     </Object>
     <Object index="1F92" name="NMT_MNCNPResTimeout_AU32" objectType="8" dataType="0007" PDOmapping="NO" CDCFlag="TRUE">
-     <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" defaultValue="254" actualValue="0xa" PDOmapping="NO" CDCFlag="TRUE"/>
+     <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" defaultValue="254" actualValue="09" PDOmapping="NO" CDCFlag="TRUE"/>
      <SubObject subIndex="02" name="CNResTimeout" objectType="7" dataType="0007" accessType="rw" defaultValue="25000" actualValue="27000" PDOmapping="NO" CDCFlag="TRUE"/>
      <SubObject subIndex="04" name="CNResTimeout" objectType="7" dataType="0007" accessType="rw" defaultValue="25000" actualValue="27000" PDOmapping="NO" CDCFlag="TRUE"/>
      <SubObject subIndex="01" name="CNResTimeout" objectType="7" dataType="0007" accessType="rw" defaultValue="25000" actualValue="27000" PDOmapping="NO" CDCFlag="TRUE"/>
-     <SubObject subIndex="6E" name="CNResTimeout" objectType="7" dataType="0007" accessType="rw" defaultValue="25000" actualValue="27000" PDOmapping="NO" CDCFlag="TRUE"/>
      <SubObject subIndex="05" name="CNResTimeout" objectType="7" dataType="0007" accessType="rw" defaultValue="25000" actualValue="27000" PDOmapping="NO" CDCFlag="TRUE"/>
      <SubObject subIndex="03" name="CNResTimeout" objectType="7" dataType="0007" accessType="rw" defaultValue="25000" actualValue="27000" PDOmapping="NO" CDCFlag="TRUE"/>
      <SubObject subIndex="06" name="CNResTimeout" objectType="7" dataType="0007" accessType="rw" defaultValue="25000" actualValue="27000" PDOmapping="NO" CDCFlag="TRUE"/>

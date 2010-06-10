@@ -378,8 +378,8 @@
     </Object>
     <Object index="1020" name="CFM_VerifyConfiguration_REC" objectType="9" PDOmapping="NO" CDCFlag="TRUE">
      <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" defaultValue="2" PDOmapping="NO" CDCFlag="TRUE"/>
-     <SubObject subIndex="01" name="ConfDate_U32" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="TRUE"/>
-     <SubObject subIndex="02" name="ConfTime_U32" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="TRUE"/>
+     <SubObject subIndex="01" name="ConfDate_U32" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="" PDOmapping="NO" CDCFlag="TRUE"/>
+     <SubObject subIndex="02" name="ConfTime_U32" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="" PDOmapping="NO" CDCFlag="TRUE"/>
     </Object>
     <Object index="1030" name="NMT_InterfaceGroup_0h_REC" objectType="9" PDOmapping="NO" CDCFlag="FALSE">
      <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" defaultValue="9" PDOmapping="NO" CDCFlag="FALSE"/>
