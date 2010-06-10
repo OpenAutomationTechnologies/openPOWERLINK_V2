@@ -28,17 +28,17 @@ else
 fi
 
 
-echo -n "Searching for RTL8139 nic..."
+echo -n "Searching for Intel 82573 NIC..."
 
 module="epl"
 
 # unbind network card from ethernet driver
-pciid=$(lspci | grep RTL-8139 | awk "{printf \"0000:\"\$1}")
+pciid=$(lspci | grep "Intel Corporation 82573" | awk "{printf \"0000:\"\$1}")
 if [ -z $pciid ] ; then
   echo "  Failed"
   echo
   echo "  No network interface controller with"
-  echo "  Realtek RTL8139 chip found!"
+  echo "  Intel 82573 chip found!"
   echo
   echo "The EPL module cannot be loaded!"
   echo
@@ -50,7 +50,7 @@ fi
 
 
 echo "unbinding PCI device $pciid"
-echo -n $pciid > /sys/bus/pci/drivers/8139too/unbind
+echo -n $pciid > /sys/bus/pci/drivers/e1000e/unbind
 
 cdcfile=`dirname $(readlink -f ${0})`/mnobd.cdc
 

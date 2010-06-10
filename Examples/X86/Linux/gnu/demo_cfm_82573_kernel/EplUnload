@@ -8,9 +8,9 @@ module="epl"
 rm -f /etc/udev/rules.d/50-openPOWERLINK.rules
 
 # rebinding network card to ethernet driver
-pciid=$(lspci | grep RTL-8139 | awk "{printf \"0000:\"\$1}")
+pciid=$(lspci | grep "Intel Corporation 82573" | awk "{printf \"0000:\"\$1}")
 echo "rebinding pci device $pciid to network driver"
-echo -n $pciid > /sys/bus/pci/drivers/8139too/bind
+echo -n $pciid > /sys/bus/pci/drivers/e1000e/bind
 
 
 
