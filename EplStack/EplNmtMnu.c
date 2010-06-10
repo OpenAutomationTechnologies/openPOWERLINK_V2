@@ -3621,7 +3621,7 @@ unsigned int        uiNodeIdPrevSyncReq;
             if (uiNodeIdFirstNode == EPL_C_ADR_INVALID)
             {
                 if (pNodeInfo->m_wPrcFlags & EPL_NMTMNU_NODE_FLAG_PRC_ADD_IN_PROGRESS)
-                {   // first add-in-progress node found
+                {   // First add-in-progress node found
                     uiNodeIdFirstNode = uiNodeId;
                 }
                 else
@@ -3631,16 +3631,16 @@ unsigned int        uiNodeIdPrevSyncReq;
                 }
             }
 
-            // start processing with the first add-in-progress node
+            // Start processing with the first add-in-progress node
             if (pNodeInfo->m_dwRelPropagationDelayNs == 0)
             {
                 if (uiNodeIdPredNode == EPL_C_ADR_INVALID)
-                {   // no predecessor node in isochronous phase
+                {   // No predecessor node in isochronous phase
                     pNodeInfo->m_dwRelPropagationDelayNs = EPL_C_DLL_T_IFG;
-                    // no SyncReq needs to be send
+                    // No SyncReq needs to be send
                 }
                 else
-                {   // predecessor node exists
+                {   // Predecessor node exists
                 tEplDllSyncRequest SyncRequestData;
                 unsigned int       uiSize;
 
@@ -3680,14 +3680,26 @@ unsigned int        uiNodeIdPrevSyncReq;
     }
 
     if (uiNodeIdPrevSyncReq != EPL_C_ADR_INVALID)
-    {   // at least one SyncReq has been sent
+    {   // At least one SyncReq has been sent
         pNodeInfo = EPL_NMTMNU_GET_NODEINFO(uiNodeIdPrevSyncReq);
         pNodeInfo->m_wPrcFlags |= EPL_NMTMNU_NODE_FLAG_PRC_CALL_MEASURE;
     }
     else
-    {   // no SyncReq has been sent
-        // Prepare shift phase and add phase
-        EplNmtMnuPrcCalculate(uiNodeIdFirstNode);
+    {   // No SyncReq has been sent
+        if (uiNodeIdFirstNode == EPL_C_ADR_INVALID)
+        {   // No add-in-progress node has been found. This might happen
+            // due to reset-node NMT commands which were issued
+            // between the first and the second measure scan.
+            EplNmtMnuInstance_g.m_wFlags &= ~EPL_NMTMNU_FLAG_PRC_ADD_IN_PROGRESS;
+
+            // A new insertion process can be started
+            Ret = EplNmtMnuAddNodeIsochronous(EPL_C_ADR_INVALID);
+        }
+        else
+        {
+            // Prepare shift phase and add phase
+            Ret = EplNmtMnuPrcCalculate(uiNodeIdFirstNode);
+        }
     }
 
 Exit:
@@ -3719,6 +3731,13 @@ tEplNmtMnuNodeInfo* pNodeInfo;
 unsigned int        uiNodeIdPredNode;
 DWORD               dwPResResponseTimeNs;
 DWORD               dwPResMnTimeoutNs;
+
+    if (   (uiNodeIdFirstNode_p == EPL_C_ADR_INVALID)
+        || (uiNodeIdFirstNode_p >= EPL_C_ADR_BROADCAST))
+    {   // invalid node ID specified
+        Ret = kEplInvalidNodeId;
+        goto Exit;
+    }
 
     uiNodeIdPredNode = EPL_C_ADR_INVALID;
 
