@@ -3681,6 +3681,14 @@ tEplErrorHandlerkEvent  DllEvent;
 
                             // forward dummy SoA event to DLLk, ErrorHandler and PDO module
                             // to trigger preparation of first cycle
+                            if (EplDllkInstance_g.m_DllConfigParam.m_uiSyncNodeId == EPL_C_ADR_SYNC_ON_SOC)
+                            {
+                                Ret = EplDllkPostEvent(kEplEventTypeSync);
+                                if (Ret != kEplSuccessful)
+                                {
+                                    goto Exit;
+                                }
+                            }
                             Ret = EplDllkPostEvent(kEplEventTypeDllkCycleFinish);
                             if (Ret != kEplSuccessful)
                             {
