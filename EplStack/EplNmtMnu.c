@@ -4397,16 +4397,27 @@ Exit:
 static tEplKernel EplNmtMnuPrcVerify(unsigned int uiNodeId_p)
 {
 tEplKernel          Ret;
+tEplNmtMnuNodeInfo* pNodeInfo;
 tEplDllSyncRequest  SyncReqData;
 unsigned int        uiSize;
 
     Ret = kEplSuccessful;
 
-    SyncReqData.m_uiNodeId      = uiNodeId_p;
-    SyncReqData.m_dwSyncControl = 0;
-    uiSize = sizeof(unsigned int) + sizeof(DWORD);
+    pNodeInfo = EPL_NMTMNU_GET_NODEINFO(uiNodeId_p);
 
-    Ret = EplSyncuRequestSyncResponse(EplNmtMnuPrcCbSyncResVerify, &SyncReqData, uiSize);
+    if (pNodeInfo->m_wFlags & EPL_NMTMNU_NODE_FLAG_ISOCHRON)
+    {
+        SyncReqData.m_uiNodeId      = uiNodeId_p;
+        SyncReqData.m_dwSyncControl = 0;
+        uiSize = sizeof(unsigned int) + sizeof(DWORD);
+
+        Ret = EplSyncuRequestSyncResponse(EplNmtMnuPrcCbSyncResVerify, &SyncReqData, uiSize);
+    }
+    else
+    {   // Node has been removed by a reset-node NMT command
+        // Verification is no longer necessary
+        pNodeInfo->m_wPrcFlags &= ~EPL_NMTMNU_NODE_FLAG_PRC_VERIFY;
+    }
 
     return Ret;
 }
