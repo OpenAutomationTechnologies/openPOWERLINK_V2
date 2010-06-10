@@ -3337,6 +3337,7 @@ static tEplKernel EplNmtMnuCheckNmtState(
                                     tEplNmtState        LocalNmtState_p)
 {
 tEplKernel      Ret = kEplSuccessful;
+tEplKernel      RetUpdate = kEplSuccessful;
 tEplObdSize     ObdSize;
 BYTE            bNmtState;
 BYTE            bNmtStatePrev;
@@ -3418,7 +3419,7 @@ tEplNmtState    ExpNmtState;
             Ret = EplNmtMnuNodeCheckCom(uiNodeId_p, pNodeInfo_p);
             if (Ret != kEplSuccessful)
             {
-                goto Exit;
+                goto ExitButUpdate;
             }
 
             if ((LocalNmtState_p == kEplNmtMsOperational)
@@ -3486,7 +3487,7 @@ tEplNmtState    ExpNmtState;
                                                    (pNodeInfo_p->m_dwNodeCfg & EPL_NODEASSIGN_MANDATORY_CN) != 0);
         if (Ret != kEplSuccessful)
         {
-            goto Exit;
+            goto ExitButUpdate;
         }
 
         EPL_NMTMNU_DBG_POST_TRACE_VALUE(0,
@@ -3507,28 +3508,32 @@ tEplNmtState    ExpNmtState;
 //        goto Exit;
     }
 
+ExitButUpdate:
     // check if NMT_MNNodeCurrState_AU8 has to be changed
     ObdSize = 1;
-    Ret = EplObduReadEntry(0x1F8E, uiNodeId_p, &bNmtStatePrev, &ObdSize);
-    if (Ret != kEplSuccessful)
+    RetUpdate = EplObduReadEntry(0x1F8E, uiNodeId_p, &bNmtStatePrev, &ObdSize);
+    if (RetUpdate != kEplSuccessful)
     {
+        Ret = RetUpdate;
         goto Exit;
     }
     if (bNmtState != bNmtStatePrev)
     {
         // update object 0x1F8E NMT_MNNodeCurrState_AU8
-        Ret = EplObduWriteEntry(0x1F8E, uiNodeId_p, &bNmtState, 1);
-        if (Ret != kEplSuccessful)
+        RetUpdate = EplObduWriteEntry(0x1F8E, uiNodeId_p, &bNmtState, 1);
+        if (RetUpdate != kEplSuccessful)
         {
+            Ret =RetUpdate;
             goto Exit;
         }
-        Ret = EplNmtMnuInstance_g.m_pfnCbNodeEvent(uiNodeId_p,
+        RetUpdate = EplNmtMnuInstance_g.m_pfnCbNodeEvent(uiNodeId_p,
                                                kEplNmtNodeEventNmtState,
                                                NodeNmtState_p,
                                                wErrorCode_p,
                                                (pNodeInfo_p->m_dwNodeCfg & EPL_NODEASSIGN_MANDATORY_CN) != 0);
-        if (Ret != kEplSuccessful)
+        if (RetUpdate != kEplSuccessful)
         {
+            Ret = RetUpdate;
             goto Exit;
         }
     }
