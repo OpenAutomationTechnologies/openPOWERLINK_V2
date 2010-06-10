@@ -7354,7 +7354,7 @@ tEplFrame      *pTxFrame;
     {   // SoA does exist
         pTxFrame = (tEplFrame *) pTxBuffer->m_pbBuffer;
 
-        Ret = EplDllkUpdateFrameSoa(pTxBuffer, NmtState_p, fEnableInvitation_p, 0);
+        Ret = EplDllkUpdateFrameSoa(pTxBuffer, NmtState_p, fEnableInvitation_p, EplDllkInstance_g.m_bCurLastSoaReq);
         if (Ret != kEplSuccessful)
         {
             goto Exit;
