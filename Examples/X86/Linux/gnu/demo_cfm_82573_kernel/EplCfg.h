@@ -169,6 +169,9 @@
 #define EPL_DLL_PRES_READY_AFTER_SOA    FALSE
 //#define EPL_DLL_PRES_READY_AFTER_SOA    TRUE
 
+// activate PResChaining support on MN
+#define EPL_DLL_PRES_CHAINING_MN        TRUE
+
 
 // =========================================================================
 // OBD specific defines
@@ -202,6 +205,15 @@
 
 #define EPL_CFM_CONFIGURE_CYCLE_LENGTH      TRUE
 
+// =========================================================================
+// SDO module specific defines
+// =========================================================================
+
+// increase the number of SDO channels, because we are master
+#define EPL_SDO_MAX_CONNECTION_ASND 100
+#define EPL_MAX_SDO_SEQ_CON         100
+#define EPL_MAX_SDO_COM_CON         100
+#define EPL_SDO_MAX_CONNECTION_UDP  50
 
 
 #endif //_EPLCFG_H_

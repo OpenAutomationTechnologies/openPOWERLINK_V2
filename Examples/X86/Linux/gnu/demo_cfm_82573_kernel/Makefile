@@ -25,7 +25,7 @@ MODULEOBJS	= $(MAINPATH)/Edrv/Edrv82573.o $(MAINPATH)/Edrv/EdrvCyclic.o \
 			  $(MAINPATH)/EplStack/EplEventk.o $(MAINPATH)/EplStack/EplEventu.o \
 			  $(MAINPATH)/EplStack/EplNmtk.o $(MAINPATH)/EplStack/EplNmtkCal.o \
 			  $(MAINPATH)/EplStack/EplNmtu.o $(MAINPATH)/EplStack/EplNmtuCal.o $(MAINPATH)/EplStack/EplNmtCnu.o \
-			  $(MAINPATH)/EplStack/EplNmtMnu.o $(MAINPATH)/EplStack/EplIdentu.o $(MAINPATH)/EplStack/EplStatusu.o \
+			  $(MAINPATH)/EplStack/EplNmtMnu.o $(MAINPATH)/EplStack/EplIdentu.o $(MAINPATH)/EplStack/EplStatusu.o $(MAINPATH)/EplStack/EplSyncu.o \
 			  $(MAINPATH)/EplStack/EplPdok.o $(MAINPATH)/EplStack/EplPdokCal.o \
 			  $(MAINPATH)/EplStack/EplPdou.o $(MAINPATH)/EplStack/EplPdouCal.o \
 			  $(MAINPATH)/EplStack/EplObd.o \
