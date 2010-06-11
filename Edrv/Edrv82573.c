@@ -1075,6 +1075,7 @@ unsigned int    uiTxCount = 0;
             pRxDesc->m_bStatus = 0;
 
             EdrvInstance_l.m_uiHeadRxDesc = (EdrvInstance_l.m_uiHeadRxDesc + 1) & EDRV_RX_DESC_MASK;
+            pRxDesc = &EdrvInstance_l.m_pRxDesc[EdrvInstance_l.m_uiHeadRxDesc];
         }
 
         // release receive descriptors
