@@ -4156,9 +4156,14 @@ unsigned int        uiSize;
             continue;
         }
 
-        if (pNodeInfo->m_wPrcFlags & EPL_NMTMNU_NODE_FLAG_PRC_SHIFT_REQUIRED)
+        if (   (pNodeInfo->m_dwNodeCfg & EPL_NODEASSIGN_PRES_CHAINING)
+            && (   (pNodeInfo->m_wFlags & EPL_NMTMNU_NODE_FLAG_ISOCHRON)
+                || (pNodeInfo->m_wPrcFlags & EPL_NMTMNU_NODE_FLAG_PRC_ADD_IN_PROGRESS)))
         {
-            break;
+            if (pNodeInfo->m_wPrcFlags & EPL_NMTMNU_NODE_FLAG_PRC_SHIFT_REQUIRED)
+            {
+                break;
+            }
         }
 
         uiNodeId--;
