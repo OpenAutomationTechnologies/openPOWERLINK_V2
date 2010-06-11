@@ -154,6 +154,8 @@
 // number of used ethernet controller
 //#define EDRV_USED_ETH_CTRL              1
 
+#define EDRV_USE_DIAGNOSTICS            TRUE
+
 
 // =========================================================================
 // Data Link Layer (DLL) specific defines
