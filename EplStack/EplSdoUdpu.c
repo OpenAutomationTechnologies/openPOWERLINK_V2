@@ -774,10 +774,10 @@ tEplSdoConHdl       SdoConHdl;
                             (iError - 4));
                     if (Ret != kEplSuccessful)
                     {
-                        PRINTF4("%s new con: ip=%X, port=%u, Ret=0x%X\n",
+                        PRINTF4("%s new con: ip=%lX, port=%u, Ret=0x%X\n",
                                 __func__,
                                 ntohl(pInstance->m_aSdoAbsUdpConnection[iFreeEntry].m_ulIpAddr),
-                                ntohs(pInstance->m_aSdoAbsUdpConnection[iFreeEntry].m_uiPort),
+                                ntohs((unsigned short) pInstance->m_aSdoAbsUdpConnection[iFreeEntry].m_uiPort),
                                 Ret);
                     }
                 }
@@ -808,10 +808,10 @@ tEplSdoConHdl       SdoConHdl;
                         (iError - 4));
                 if (Ret != kEplSuccessful)
                 {
-                    PRINTF4("%s known con: ip=%X, port=%u, Ret=0x%X\n",
+                    PRINTF4("%s known con: ip=%lX, port=%u, Ret=0x%X\n",
                             __func__,
                             ntohl(pInstance->m_aSdoAbsUdpConnection[iCount].m_ulIpAddr),
-                            ntohs(pInstance->m_aSdoAbsUdpConnection[iCount].m_uiPort),
+                            ntohs((unsigned short) pInstance->m_aSdoAbsUdpConnection[iCount].m_uiPort),
                             Ret);
                 }
             }

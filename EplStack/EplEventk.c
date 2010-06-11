@@ -439,8 +439,8 @@ tEplEventSource         EventSource;
                 BENCHMARK_MOD_27_RESET(0);
 
             }
-            break;
 #endif
+            break;
         }
 
         // events for Dllk module
@@ -481,10 +481,10 @@ tEplEventSource         EventSource;
             break;
         }
 
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOK)) != 0)
         // events for PDO CAL module
         case kEplEventSinkPdokCal:
         {
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOK)) != 0)
             Ret = EplPdokCalProcess(pEvent_p);
             if ((Ret != kEplSuccessful) && (Ret != kEplShutdown))
             {
@@ -496,15 +496,15 @@ tEplEventSource         EventSource;
                                 sizeof(EventSource),
                                 &EventSource);
             }
-#endif
             break;
         }
+#endif
 
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLK)) != 0)
         // events for Error handler module
         case kEplEventSinkErrk:
         {
             // only call error handler if DLL is present
-#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLK)) != 0)
             Ret = EplErrorHandlerkProcess(pEvent_p);
             if ((Ret != kEplSuccessful) && (Ret != kEplShutdown))
             {
@@ -517,8 +517,8 @@ tEplEventSource         EventSource;
                                 &EventSource);
             }
             break;
-#endif
         }
+#endif
 
         // unknown sink
         default:

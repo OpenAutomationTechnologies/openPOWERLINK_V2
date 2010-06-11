@@ -1112,8 +1112,8 @@ tShbError         ShbError;
             memset (pShbCirDataPtr, 0xDD, ulDataSize - ulChunkSize);
         }
 
-        ClrShbCirBlockSize.m_uiFullBlockSize  = /*(unsigned int)*/ -1;     // -1 = xFFFFFFF
-        ClrShbCirBlockSize.m_uiAlignFillBytes = /*(unsigned int)*/ -1;     // -1 = Fxxxxxxx
+        ClrShbCirBlockSize.m_uiFullBlockSize  = ~0U;     // -1 = xFFFFFFF
+        ClrShbCirBlockSize.m_uiAlignFillBytes = ~0U;     // -1 = Fxxxxxxx
         *(tShbCirBlockSize*)(pShbCirDataPtr + pShbCirBuff->m_ulRdIndex) = ClrShbCirBlockSize;
     }
     #endif  // #ifndef NDEBUG

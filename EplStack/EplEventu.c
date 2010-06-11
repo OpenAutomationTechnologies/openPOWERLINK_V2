@@ -368,10 +368,10 @@ tEplEventSource         EventSource;
     // check m_EventSink
     switch(pEvent_p->m_EventSink)
     {
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMTU)) != 0)
         // NMT-User-Module
         case kEplEventSinkNmtu:
         {
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMTU)) != 0)
             Ret = EplNmtuProcessEvent(pEvent_p);
             if ((Ret != kEplSuccessful) && (Ret != kEplShutdown))
             {
@@ -383,9 +383,9 @@ tEplEventSource         EventSource;
                                 sizeof(EventSource),
                                 &EventSource);
             }
-#endif
             break;
         }
+#endif
 
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
         // NMT-MN-User-Module
