@@ -684,7 +684,7 @@ unsigned int        uiMappObjectCount;
         if ((unsigned int)(pPdoChannel->m_wPdoSize + 24) > uiFrameSize_p)
         {   // TPDO is too short
             // $$$ raise PDO error, set Ret
-            goto Exit;
+            break;
         }
 
         // set PDO version in frame
@@ -716,8 +716,11 @@ unsigned int        uiMappObjectCount;
         }
 
         // processing finished successfully
-        break;
+        goto Exit;
     }
+
+    // set PDO size in frame to zero, because no TPDO mapped
+    AmiSetWordToLe(&pFrame_p->m_Data.m_Pres.m_le_wSize, 0);
 
 Exit:
     return Ret;
