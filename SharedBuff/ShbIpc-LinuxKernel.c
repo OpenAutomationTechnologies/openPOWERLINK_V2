@@ -854,6 +854,15 @@ int             fCallAgain;
 
     set_user_nice(current, pShbMemInst->m_lThreadNewDataNice);
 
+#ifdef CONFIG_PREEMPT_RT
+    if (pShbMemInst->m_lThreadNewDataNice == -20) // highest priority
+    {
+    struct sched_param  rt_prio;
+        rt_prio.sched_priority = 79;
+        sched_setscheduler(current, SCHED_FIFO, &rt_prio);
+    }
+#endif
+
 //            DEBUG_LVL_29_TRACE1("ShbIpcThreadSignalNewData wait for New Data Sem %p\n",pShbMemInst->m_pSemNewData);
     while (!kthread_should_stop())
     {
