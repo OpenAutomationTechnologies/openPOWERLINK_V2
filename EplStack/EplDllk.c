@@ -1799,13 +1799,10 @@ tEplDllkNodeInfo*   pIntNodeInfo;
             goto Exit;
         }
 
-        if (EplDllkInstance_g.m_DllConfigParam.m_uiSyncNodeId == EPL_C_ADR_SYNC_ON_SOC)
-        {   // sync on SoC
-            Ret = EdrvCyclicRegSyncHandler(EplDllkCbMnSyncHandler);
-            if (Ret != kEplSuccessful)
-            {
-                goto Exit;
-            }
+        Ret = EdrvCyclicRegSyncHandler(EplDllkCbMnSyncHandler);
+        if (Ret != kEplSuccessful)
+        {
+            goto Exit;
         }
 #endif
 
@@ -2452,6 +2449,15 @@ tEplNmtState    NmtState;
 
             NmtState = EplDllkInstance_g.m_NmtState;
 
+#if (EPL_DLL_PROCESS_SYNC == EPL_DLL_PROCESS_SYNC_ON_SOA)
+            if (EplDllkInstance_g.m_DllState != kEplDllGsInit)
+            {   // cyclic state is active, so preprocessing is necessary
+
+                Ret = EplDllkProcessSync(NmtState);
+            }
+//            BENCHMARK_MOD_02_TOGGLE(7);
+#endif
+
             Ret = EplDllkProcessCycleFinish(NmtState);
 
             break;
@@ -2487,26 +2493,6 @@ static tEplKernel EplDllkProcessCycleFinish(tEplNmtState NmtState_p)
 {
 tEplKernel      Ret = kEplReject;
 tEdrvTxBuffer*  pTxBuffer;
-
-#if (EPL_DLL_PROCESS_SYNC == EPL_DLL_PROCESS_SYNC_ON_SOA) \
-    || (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
-#if (EPL_DLL_PROCESS_SYNC == EPL_DLL_PROCESS_SYNC_ON_SOA)
-    if ((EplDllkInstance_g.m_DllState != kEplDllGsInit)
-        && (EplDllkInstance_g.m_DllState != kEplDllMsNonCyclic)
-#elif (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
-    if ((EplDllkInstance_g.m_DllState > kEplDllMsNonCyclic)
-#endif
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
-        && (EplDllkInstance_g.m_DllConfigParam.m_uiSyncNodeId > EPL_C_ADR_SYNC_ON_SOC)
-        && (EplDllkInstance_g.m_fSyncProcessed == FALSE)
-#endif
-        )
-    {   // cyclic state is active, so preprocessing is necessary
-
-        Ret = EplDllkProcessSync(NmtState_p);
-    }
-//            BENCHMARK_MOD_02_TOGGLE(7);
-#endif
 
     switch (EplDllkInstance_g.m_bUpdateTxFrame)
     {
@@ -2587,6 +2573,12 @@ tEdrvTxBuffer*  pTxBuffer;
         // switch to next cycle
         EplDllkInstance_g.m_bCurTxBufferOffsetCycle ^= 1;
         EplDllkInstance_g.m_bCurNodeIndex = 0;
+
+        if (EplDllkInstance_g.m_DllConfigParam.m_uiSyncNodeId == EPL_C_ADR_SYNC_ON_SOC)
+        {   // cyclic state is active, so preprocessing is necessary
+
+            Ret = EplDllkProcessSync(NmtState_p);
+        }
     }
 #endif
 #endif
@@ -4390,8 +4382,24 @@ tEplDllkNodeInfo*   pIntNodeInfo = NULL;
                 }
             }
         }
+        else
 #endif
 #endif
+
+        if ((EplDllkInstance_g.m_DllConfigParam.m_uiSyncNodeId > EPL_C_ADR_SYNC_ON_SOC)
+            && (EplDllkInstance_g.m_fSyncProcessed == FALSE)
+#if EPL_DLL_PRES_CHAINING_MN != FALSE
+            && (EplDllkInstance_g.m_DllConfigParam.m_fSyncOnPrcNode != EplDllkInstance_g.m_fPrcSlotFinished)
+#endif
+            && (uiNodeId > EplDllkInstance_g.m_DllConfigParam.m_uiSyncNodeId))
+        {
+            EplDllkInstance_g.m_fSyncProcessed = TRUE;
+            Ret = EplDllkPostEvent(kEplEventTypeSync);
+            if (Ret != kEplSuccessful)
+            {
+                goto Exit;
+            }
+        }
 
         // forward Flag2 to asynchronous scheduler
         bFlag1 = AmiGetByteFromLe(&pFrame->m_Data.m_Asnd.m_Payload.m_StatusResponse.m_le_bFlag2);
@@ -4504,7 +4512,7 @@ tEplDllkNodeInfo*   pIntNodeInfo = NULL;
             (EplDllkInstance_g.m_DllConfigParam.m_fSyncOnPrcNode != EplDllkInstance_g.m_fPrcSlotFinished)
             &&
 #endif
-            (uiNodeId >= EplDllkInstance_g.m_DllConfigParam.m_uiSyncNodeId))
+            (uiNodeId == EplDllkInstance_g.m_DllConfigParam.m_uiSyncNodeId))
         {
             EplDllkInstance_g.m_fSyncProcessed = TRUE;
             Ret = EplDllkPostEvent(kEplEventTypeSync);
@@ -5557,14 +5565,25 @@ TGT_DLLK_DECLARE_FLAGS
         {
             goto Exit;
         }
+
+        // forward event to ErrorHandler and DLLk module
+        Ret = EplDllkPostEvent(kEplEventTypeDllkCycleFinish);
+        if (Ret != kEplSuccessful)
+        {
+            goto Exit;
+        }
     }
 #endif
 
-    // forward event to ErrorHandler and DLLk module
-    Ret = EplDllkPostEvent(kEplEventTypeDllkCycleFinish);
-    if (Ret != kEplSuccessful)
-    {
-        goto Exit;
+    if ((EplDllkInstance_g.m_DllState > kEplDllMsNonCyclic)
+        && (EplDllkInstance_g.m_DllConfigParam.m_uiSyncNodeId > EPL_C_ADR_SYNC_ON_SOC)
+        && (EplDllkInstance_g.m_fSyncProcessed == FALSE))
+    {   // cyclic state is active, so preprocessing is necessary
+        Ret = EplDllkPostEvent(kEplEventTypeSync);
+        if (Ret != kEplSuccessful)
+        {
+            goto Exit;
+        }
     }
 
 Exit:
@@ -7153,7 +7172,7 @@ TGT_DLLK_DECLARE_FLAGS
         goto Exit;
     }
 
-    Ret = EplDllkPostEvent(kEplEventTypeSync);
+    Ret = EplDllkPostEvent(kEplEventTypeDllkCycleFinish);
 
 Exit:
     if (Ret != kEplSuccessful)
