@@ -385,18 +385,18 @@ char        sBufferMask[16];
     // configure IP address of virtual network interface
     // for TCP/IP communication over the POWERLINK network
     snprintf(sBufferIp, sizeof (sBufferIp),
-             "%lu.%lu.%lu.%lu",
-             (dwIpAddress_p >> 24),
-             ((dwIpAddress_p >> 16) & 0xFF),
-             ((dwIpAddress_p >> 8) & 0xFF),
-             (dwIpAddress_p & 0xFF));
+             "%u.%u.%u.%u",
+             (unsigned int) (dwIpAddress_p >> 24),
+             (unsigned int) ((dwIpAddress_p >> 16) & 0xFF),
+             (unsigned int) ((dwIpAddress_p >> 8) & 0xFF),
+             (unsigned int) (dwIpAddress_p & 0xFF));
 
     snprintf(sBufferMask, sizeof (sBufferMask),
-             "%lu.%lu.%lu.%lu",
-             (dwSubnetMask_p >> 24),
-             ((dwSubnetMask_p >> 16) & 0xFF),
-             ((dwSubnetMask_p >> 8) & 0xFF),
-             (dwSubnetMask_p & 0xFF));
+             "%u.%u.%u.%u",
+             (unsigned int) (dwSubnetMask_p >> 24),
+             (unsigned int) ((dwSubnetMask_p >> 16) & 0xFF),
+             (unsigned int) ((dwSubnetMask_p >> 8) & 0xFF),
+             (unsigned int) (dwSubnetMask_p & 0xFF));
 
     /* set up a minimal environment */
     iRet = 0;
@@ -434,11 +434,11 @@ char        sBuffer[16];
         // configure default gateway of virtual network interface
         // for TCP/IP communication over the POWERLINK network
         snprintf(sBuffer, sizeof (sBuffer),
-                 "%lu.%lu.%lu.%lu",
-                 (dwDefaultGateway_p >> 24),
-                 ((dwDefaultGateway_p >> 16) & 0xFF),
-                 ((dwDefaultGateway_p >> 8) & 0xFF),
-                 (dwDefaultGateway_p & 0xFF));
+                 "%u.%u.%u.%u",
+                 (unsigned int) (dwDefaultGateway_p >> 24),
+                 (unsigned int) ((dwDefaultGateway_p >> 16) & 0xFF),
+                 (unsigned int) ((dwDefaultGateway_p >> 8) & 0xFF),
+                 (unsigned int) (dwDefaultGateway_p & 0xFF));
 
         /* set up a minimal environment */
         iRet = 0;
