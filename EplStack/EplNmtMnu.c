@@ -585,7 +585,7 @@ tEplNmtMnuNodeInfo* pNodeInfo;
                             goto Exit;
                         }
 
-                        case kEplInvalidOperation:
+                        case kEplNmtSyncReqRejected:
                         {   // There has already been posted a SyncReq for this node.
                             // Retry when SyncRes is received
                             Ret = kEplSuccessful;

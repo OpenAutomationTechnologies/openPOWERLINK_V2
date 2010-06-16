@@ -297,7 +297,7 @@ unsigned int    uiNodeId;
     {
         if (EplSyncuInstance_g.m_apfnCbResponse[uiNodeId] != NULL)
         {   // request already issued (maybe by someone else)
-            Ret = kEplInvalidOperation;
+            Ret = kEplNmtSyncReqRejected;
         }
         else
         {
