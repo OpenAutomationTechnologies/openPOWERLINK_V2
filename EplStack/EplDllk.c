@@ -2642,7 +2642,6 @@ unsigned int    uiNextTxBufferOffset = EplDllkInstance_g.m_bCurTxBufferOffsetCyc
     unsigned int        uiIndex = 0;
     DWORD               dwNextTimeOffsetNs = 0;
     DWORD               dwAccFrameLenNs = 0;
-    BYTE                bNextSoaReq = EplDllkInstance_g.m_bCurLastSoaReq ^ 1;
 
         pTxBuffer = &EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_SOC + uiNextTxBufferOffset];
         pTxBuffer->m_dwTimeOffsetNs = dwNextTimeOffsetNs;
@@ -2773,14 +2772,14 @@ unsigned int    uiNextTxBufferOffset = EplDllkInstance_g.m_bCurTxBufferOffsetCyc
         pTxBuffer->m_dwTimeOffsetNs = dwNextTimeOffsetNs;
         // $$$ d.k. fEnableInvitation_p = ((NmtState_p != kEplNmtMsPreOperational1) || (EplDllkInstance_g.m_uiCycleCount >= EPL_C_DLL_PREOP1_START_CYCLES))
         //          currently, EplDllkProcessSync is not called in PreOp1
-        Ret = EplDllkUpdateFrameSoa(pTxBuffer, NmtState_p, TRUE, bNextSoaReq);
+        Ret = EplDllkUpdateFrameSoa(pTxBuffer, NmtState_p, TRUE, uiNextTxBufferOffset);
         EplDllkInstance_g.m_ppTxBufferList[uiIndex] = pTxBuffer;
         uiIndex++;
 
         // check if we are invited in SoA
-        if (EplDllkInstance_g.m_auiLastTargetNodeId[bNextSoaReq] == EplDllkInstance_g.m_DllConfigParam.m_uiNodeId)
+        if (EplDllkInstance_g.m_auiLastTargetNodeId[uiNextTxBufferOffset] == EplDllkInstance_g.m_DllConfigParam.m_uiNodeId)
         {
-            switch (EplDllkInstance_g.m_aLastReqServiceId[bNextSoaReq])
+            switch (EplDllkInstance_g.m_aLastReqServiceId[uiNextTxBufferOffset])
             {
                 case kEplDllReqServiceStatus:
                 {   // StatusRequest
@@ -2851,7 +2850,7 @@ unsigned int    uiNextTxBufferOffset = EplDllkInstance_g.m_bCurTxBufferOffsetCyc
             }
 
             // ASnd frame will be sent, remove the request
-            EplDllkInstance_g.m_aLastReqServiceId[bNextSoaReq] = kEplDllReqServiceNo;
+            EplDllkInstance_g.m_aLastReqServiceId[uiNextTxBufferOffset] = kEplDllReqServiceNo;
         }
 
         // set last list element to NULL
@@ -3216,6 +3215,9 @@ tEplKernel      Ret = kEplSuccessful;
             FALSE);
     }
 #endif
+
+    EplDllkInstance_g.m_bCurLastSoaReq = 0;
+    EplDllkInstance_g.m_bCurTxBufferOffsetCycle = 0;
 
 Exit:
     return Ret;
@@ -3673,15 +3675,7 @@ tEplErrorHandlerkEvent  DllEvent;
 
                             // forward dummy SoA event to DLLk, ErrorHandler and PDO module
                             // to trigger preparation of first cycle
-                            if (EplDllkInstance_g.m_DllConfigParam.m_uiSyncNodeId == EPL_C_ADR_SYNC_ON_SOC)
-                            {
-                                Ret = EplDllkPostEvent(kEplEventTypeSync);
-                                if (Ret != kEplSuccessful)
-                                {
-                                    goto Exit;
-                                }
-                            }
-                            Ret = EplDllkPostEvent(kEplEventTypeDllkCycleFinish);
+                            Ret = EplDllkPostEvent(kEplEventTypeSync);
                             if (Ret != kEplSuccessful)
                             {
                                 goto Exit;
