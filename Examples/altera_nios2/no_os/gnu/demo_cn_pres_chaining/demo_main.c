@@ -30,9 +30,17 @@ tEplKernel PUBLIC AppCbEvent(
     tEplApiEventArg*        pEventArg_p,   // IN: event argument (union)
     void GENERIC*           pUserArg_p);
 
-// process vars
-static BYTE     bVarIn1_l = 0;
-static BYTE     bVarOut1_l = 0;
+// 50 byte input process vars
+static BYTE     bButtonInputs_l         = 0;
+static BYTE     abVirtualInputs_l[17];
+static DWORD    adwVirtualInputs_l[8];
+
+// 50 byte output process vars
+static WORD     wDigitalOutputs_l       = 0;
+static BYTE     bLedOutputs_l           = 0;
+static BYTE     abVirtualOutputs_l[15];
+static DWORD    adwVirtualOutputs_l[8];
+
 
 static BOOL     fShutdown_l = FALSE;
 
@@ -46,14 +54,14 @@ int main(void) {
 
     printf("NIOS II is running...\n");
     printf("starting openPowerlink application...\n\n");
-    while(1) {
-        if(openPowerlink() != 0) {
+    while (1) {
+        if (openPowerlink() != 0) {
             printf("openPowerlink was shut down because of an error\n");
             break;
         } else {
             printf("openPowerlink was shut down, restart...\n\n");
         }
-        for(i=0; i<1000000; i++);
+        for (i=0; i<1000000; i++);
     }
     printf("shut down NIOS II...\n%c", 4);
 
@@ -76,7 +84,7 @@ int openPowerlink(void)
 	// setup th EPL Stack //
 	////////////////////////
 
-    // set EPL init parameters
+	// set EPL init parameters
     EplApiInitParam.m_uiSizeOfStruct = sizeof (EplApiInitParam);
 
 #ifdef NODESWITCH_SPI_BASE
@@ -98,16 +106,15 @@ int openPowerlink(void)
 
     // calculate IP address
     EplApiInitParam.m_dwIpAddress = (0xFFFFFF00 & IP_ADDR) | EplApiInitParam.m_uiNodeId;
-
-	EplApiInitParam.m_uiIsochrTxMaxPayload = 100;
-	EplApiInitParam.m_uiIsochrRxMaxPayload = 100;
+	EplApiInitParam.m_uiIsochrTxMaxPayload = 256;
+	EplApiInitParam.m_uiIsochrRxMaxPayload = 256;
 	EplApiInitParam.m_dwPresMaxLatency = 2000;
 	EplApiInitParam.m_dwAsndMaxLatency = 2000;
 	EplApiInitParam.m_fAsyncOnly = FALSE;
 	EplApiInitParam.m_dwFeatureFlags = -1;
 	EplApiInitParam.m_dwCycleLen = CYCLE_LEN;
-	EplApiInitParam.m_uiPreqActPayloadLimit = 36;
-	EplApiInitParam.m_uiPresActPayloadLimit = 36;
+	EplApiInitParam.m_uiPreqActPayloadLimit = 50;
+	EplApiInitParam.m_uiPresActPayloadLimit = 50;
 	EplApiInitParam.m_uiMultiplCycleCnt = 0;
 	EplApiInitParam.m_uiAsyncMtu = 1500;
 	EplApiInitParam.m_uiPrescaler = 2;
@@ -138,18 +145,63 @@ int openPowerlink(void)
 
 	// link process variables used by CN to object dictionary
     printf("linking process vars:\n");
-    ObdSize = sizeof(bVarIn1_l);
+    ObdSize = sizeof(bButtonInputs_l);
     uiVarEntries = 1;
-    EplRet = EplApiLinkObject(0x6000, &bVarIn1_l, &uiVarEntries, &ObdSize, 0x01);
+    EplRet = EplApiLinkObject(0x6000, &bButtonInputs_l, &uiVarEntries, &ObdSize, 0x01);
     if (EplRet != kEplSuccessful)
     {
         printf("linking process vars... error\n\n");
         goto ExitShutdown;
     }
 
-    ObdSize = sizeof(bVarOut1_l);
+    ObdSize = sizeof(abVirtualInputs_l[0]);
+    uiVarEntries = 17;
+    EplRet = EplApiLinkObject(0x2000, abVirtualInputs_l, &uiVarEntries, &ObdSize, 0x01);
+    if (EplRet != kEplSuccessful)
+    {
+        printf("linking process vars... error\n\n");
+        goto ExitShutdown;
+    }
+
+    ObdSize = sizeof(adwVirtualInputs_l[0]);
+    uiVarEntries = 8;
+    EplRet = EplApiLinkObject(0x2001, adwVirtualInputs_l, &uiVarEntries, &ObdSize, 0x01);
+    if (EplRet != kEplSuccessful)
+    {
+        printf("linking process vars... error\n\n");
+        goto ExitShutdown;
+    }
+
+    ObdSize = sizeof(wDigitalOutputs_l);
     uiVarEntries = 1;
-    EplRet = EplApiLinkObject(0x6200, &bVarOut1_l, &uiVarEntries, &ObdSize, 0x01);
+    EplRet = EplApiLinkObject(0x6300, &wDigitalOutputs_l, &uiVarEntries, &ObdSize, 0x01);
+    if (EplRet != kEplSuccessful)
+    {
+        printf("linking process vars... error\n\n");
+        goto ExitShutdown;
+    }
+
+    ObdSize = sizeof(bLedOutputs_l);
+    uiVarEntries = 1;
+    EplRet = EplApiLinkObject(0x6200, &bLedOutputs_l, &uiVarEntries, &ObdSize, 0x01);
+    if (EplRet != kEplSuccessful)
+    {
+        printf("linking process vars... error\n\n");
+        goto ExitShutdown;
+    }
+
+    ObdSize = sizeof(abVirtualOutputs_l[0]);
+    uiVarEntries = 15;
+    EplRet = EplApiLinkObject(0x2200, abVirtualOutputs_l, &uiVarEntries, &ObdSize, 0x01);
+    if (EplRet != kEplSuccessful)
+    {
+        printf("linking process vars... error\n\n");
+        goto ExitShutdown;
+    }
+
+    ObdSize = sizeof(adwVirtualOutputs_l[0]);
+    uiVarEntries = 8;
+    EplRet = EplApiLinkObject(0x2201, adwVirtualOutputs_l, &uiVarEntries, &ObdSize, 0x01);
     if (EplRet != kEplSuccessful)
     {
         printf("linking process vars... error\n\n");
@@ -248,26 +300,34 @@ tEplKernel PUBLIC AppCbEvent(
 
                 case kEplNmtGsResetCommunication:
                 {
-//                BYTE    bNodeId = 0xF0;
-//                DWORD   dwNodeAssignment = EPL_NODEASSIGN_NODE_EXISTS;
+                BYTE    bNodeId = 0xF0;
+                DWORD   dwNodeAssignment = EPL_NODEASSIGN_NODE_EXISTS;
+                WORD    wPresPayloadLimit = 256;
 
                     PRINTF3("%s(0x%X) originating event = 0x%X\n",
                             __func__,
                             pEventArg_p->m_NmtStateChange.m_NewNmtState,
                             pEventArg_p->m_NmtStateChange.m_NmtEvent);
-/*
+
                     EplRet = EplApiWriteLocalObject(0x1F81, bNodeId, &dwNodeAssignment, sizeof (dwNodeAssignment));
                     if (EplRet != kEplSuccessful)
                     {
                         goto Exit;
                     }
 
-                    EplRet = EplApiWriteLocalObject(0x1400, 0x01, &bNodeId, sizeof (bNodeId));
+                    bNodeId = 0x04;
+                    EplRet = EplApiWriteLocalObject(0x1F81, bNodeId, &dwNodeAssignment, sizeof (dwNodeAssignment));
                     if (EplRet != kEplSuccessful)
                     {
                         goto Exit;
                     }
-*/
+
+                    EplRet = EplApiWriteLocalObject(0x1F8D, bNodeId, &wPresPayloadLimit, sizeof (wPresPayloadLimit));
+                    if (EplRet != kEplSuccessful)
+                    {
+                        goto Exit;
+                    }
+
                     break;
                 }
 
@@ -387,7 +447,7 @@ tEplKernel PUBLIC AppCbEvent(
             break;
     }
 
-//Exit:
+Exit:
     return EplRet;
 }
 
@@ -413,21 +473,34 @@ tEplKernel PUBLIC AppCbEvent(
 
 tEplKernel PUBLIC AppCbSync(void)
 {
-	tEplKernel          EplRet = kEplSuccessful;
+	tEplKernel EplRet = kEplSuccessful;
+    int        nIdx;
 
 #ifdef DIN_PIO_BASE
-    bVarIn1_l = IORD_ALTERA_AVALON_PIO_DATA(DIN_PIO_BASE);
+    bButtonInputs_l = IORD_ALTERA_AVALON_PIO_DATA(DIN_PIO_BASE);
 #else
-	bVarIn1_l++;
+	bButtonInputs_l++;
 #endif
 
 #ifdef DOUT_PIO_BASE
-    IOWR_ALTERA_AVALON_PIO_DATA(DOUT_PIO_BASE, bVarOut1_l);
+    IOWR_ALTERA_AVALON_PIO_DATA(DOUT_PIO_BASE, wDigitalOutputs_l);
 #endif
 
 #ifdef LED_PIO_BASE
-    IOWR_ALTERA_AVALON_PIO_DATA(LED_PIO_BASE, ~bVarOut1_l);
+    IOWR_ALTERA_AVALON_PIO_DATA(LED_PIO_BASE, ~bLedOutputs_l);
 #endif
+
+    for (nIdx = 0; nIdx < 15; nIdx++)
+    {
+        abVirtualInputs_l[nIdx] = (~abVirtualOutputs_l[nIdx])-1;
+    }
+    abVirtualInputs_l[16] = (~bButtonInputs_l)-1;
+    abVirtualInputs_l[17] = (~bLedOutputs_l)-1;
+
+    for (nIdx = 0; nIdx < 8; nIdx++)
+    {
+        adwVirtualInputs_l[nIdx] = (~adwVirtualOutputs_l[nIdx])-1;
+    }
 
     return EplRet;
 }

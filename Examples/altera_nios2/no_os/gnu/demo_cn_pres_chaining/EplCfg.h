@@ -192,8 +192,14 @@
 // maximum count of Rx filter entries for PRes frames
 #define EPL_DLL_PRES_FILTER_COUNT   3
 
+
+#define EPL_DLL_PROCESS_SYNC        EPL_DLL_PROCESS_SYNC_ON_TIMER
+
+// negative time shift of isochronous task in relation to SoC
+#define EPL_DLL_SOC_SYNC_SHIFT_US       150
+
 // CN supports PRes Chaining
-#define EPL_DLL_PRES_CHAINING_CN        TRUE
+#define EPL_DLL_PRES_CHAINING_CN        FALSE
 
 
 // =========================================================================
@@ -221,7 +227,7 @@
 // =========================================================================
 
 // if TRUE the high resolution timer module will be used
-#define EPL_TIMER_USE_HIGHRES           TRUE
+#define EPL_TIMER_USE_HIGHRES           FALSE
 
 
 
@@ -240,8 +246,8 @@
 // API Layer specific defines
 // =========================================================================
 
-#define EPL_API_PROCESS_IMAGE_SIZE_IN 0 //disable
-#define EPL_API_PROCESS_IMAGE_SIZE_OUT 0 //disable
+//#define EPL_API_PROCESS_IMAGE_SIZE_IN 0 //disable
+//#define EPL_API_PROCESS_IMAGE_SIZE_OUT 0 //disable
 
 #endif //_EPLCFG_H_
 
