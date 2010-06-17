@@ -590,41 +590,44 @@ tEdrvRxBuffer   RxBuffer;
 
 //            TRACE5("%s: (%02X) first TxB=%p (%02X), last TxB=%p\n", __func__, (UINT)pkt_data[5], pTxBuffer, (UINT)pTxBuffer->m_pbBuffer[5], EdrvInstance_l.m_pTransmittedTxBufferLastEntry);
 
-            if (memcmp(pkt_data, pTxBuffer->m_pbBuffer, 6) == 0)
+            if (pTxBuffer->m_pbBuffer != NULL)
             {
-                EnterCriticalSection(&EdrvInstance_l.m_CriticalSection);
-                pInstance->m_pTransmittedTxBufferFirstEntry = pInstance->m_pTransmittedTxBufferFirstEntry->m_BufferNumber.m_pVal;
-                if (pInstance->m_pTransmittedTxBufferFirstEntry == NULL)
+                if (memcmp(pkt_data, pTxBuffer->m_pbBuffer, 6) == 0)
                 {
-                    pInstance->m_pTransmittedTxBufferLastEntry = NULL;
+                    EnterCriticalSection(&EdrvInstance_l.m_CriticalSection);
+                    pInstance->m_pTransmittedTxBufferFirstEntry = pInstance->m_pTransmittedTxBufferFirstEntry->m_BufferNumber.m_pVal;
+                    if (pInstance->m_pTransmittedTxBufferFirstEntry == NULL)
+                    {
+                        pInstance->m_pTransmittedTxBufferLastEntry = NULL;
+                    }
+                    LeaveCriticalSection(&EdrvInstance_l.m_CriticalSection);
+
+                    pTxBuffer->m_BufferNumber.m_pVal = NULL;
+
+                    if (pTxBuffer->m_pfnTxHandler != NULL)
+                    {
+                        pTxBuffer->m_pfnTxHandler(pTxBuffer);
+                    }
                 }
-                LeaveCriticalSection(&EdrvInstance_l.m_CriticalSection);
-
-                pTxBuffer->m_BufferNumber.m_pVal = NULL;
-
-                if (pTxBuffer->m_pfnTxHandler != NULL)
+                else
                 {
-                    pTxBuffer->m_pfnTxHandler(pTxBuffer);
+                    TRACE("%s: no matching TxB: DstMAC=%02X%02X%02X%02X%02X%02X\n",
+                        __func__,
+                        (UINT)pkt_data[0],
+                        (UINT)pkt_data[1],
+                        (UINT)pkt_data[2],
+                        (UINT)pkt_data[3],
+                        (UINT)pkt_data[4],
+                        (UINT)pkt_data[5]);
+                    TRACE("   current TxB %p: DstMAC=%02X%02X%02X%02X%02X%02X\n",
+                        pTxBuffer,
+                        (UINT)pTxBuffer->m_pbBuffer[0],
+                        (UINT)pTxBuffer->m_pbBuffer[1],
+                        (UINT)pTxBuffer->m_pbBuffer[2],
+                        (UINT)pTxBuffer->m_pbBuffer[3],
+                        (UINT)pTxBuffer->m_pbBuffer[4],
+                        (UINT)pTxBuffer->m_pbBuffer[5]);
                 }
-            }
-            else
-            {
-                TRACE("%s: no matching TxB: DstMAC=%02X%02X%02X%02X%02X%02X\n",
-                    __func__,
-                    (UINT)pkt_data[0],
-                    (UINT)pkt_data[1],
-                    (UINT)pkt_data[2],
-                    (UINT)pkt_data[3],
-                    (UINT)pkt_data[4],
-                    (UINT)pkt_data[5]);
-                TRACE("   current TxB %p: DstMAC=%02X%02X%02X%02X%02X%02X\n",
-                    pTxBuffer,
-                    (UINT)pTxBuffer->m_pbBuffer[0],
-                    (UINT)pTxBuffer->m_pbBuffer[1],
-                    (UINT)pTxBuffer->m_pbBuffer[2],
-                    (UINT)pTxBuffer->m_pbBuffer[3],
-                    (UINT)pTxBuffer->m_pbBuffer[4],
-                    (UINT)pTxBuffer->m_pbBuffer[5]);
             }
         }
         else
