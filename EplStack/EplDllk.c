@@ -215,6 +215,7 @@
   #define EPL_DLLK_FILTER_COUNT       (EPL_DLLK_FILTER_PRES + EPL_DLL_PRES_FILTER_COUNT)
 #endif
 
+#define EPL_DLLK_SOAREQ_COUNT       3
 
 // defines for tEdrvTxBuffer.m_uiTxBufLen
 #define EPL_DLLK_BUFLEN_EMPTY       0   // buffer is empty
@@ -293,9 +294,10 @@ typedef struct
 #else
     BYTE                m_bCurNodeIndex;
     tEdrvTxBuffer**     m_ppTxBufferList;
+    BYTE                m_bSyncLastSoaReq;
 #endif
-    tEplDllReqServiceId m_aLastReqServiceId[2];
-    unsigned int        m_auiLastTargetNodeId[2];
+    tEplDllReqServiceId m_aLastReqServiceId[EPL_DLLK_SOAREQ_COUNT];
+    unsigned int        m_auiLastTargetNodeId[EPL_DLLK_SOAREQ_COUNT];
     BYTE                m_bCurLastSoaReq;
     BOOL                m_fSyncProcessed;
 #if EPL_DLL_PRES_CHAINING_MN != FALSE
@@ -1403,7 +1405,7 @@ tEplKernel EplDllkGetCurrentCnNodeIdList(BYTE** ppbCnNodeIdList_p)
 {
 tEplKernel          Ret = kEplSuccessful;
 
-    *ppbCnNodeIdList_p = &EplDllkInstance_g.m_aabCnNodeIdList[EplDllkInstance_g.m_bCurTxBufferOffsetCycle][0];
+    *ppbCnNodeIdList_p = &EplDllkInstance_g.m_aabCnNodeIdList[EplDllkInstance_g.m_bCurTxBufferOffsetCycle ^ 1][0];
 
     return Ret;
 }
@@ -2538,42 +2540,12 @@ tEdrvTxBuffer*  pTxBuffer;
         }
     }
 
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
-#if EPL_DLL_DISABLE_EDRV_CYCLIC == FALSE
-    if (EplDllkInstance_g.m_DllState > kEplDllMsNonCyclic)
-    {
-    BYTE*   pbCnNodeId = &EplDllkInstance_g.m_aabCnNodeIdList[EplDllkInstance_g.m_bCurTxBufferOffsetCycle][EplDllkInstance_g.m_bCurNodeIndex];
-
-        while (*pbCnNodeId != EPL_C_ADR_INVALID)
-        {   // issue error for each CN in list which was not processed yet, i.e. PRes received
-
-            Ret = EplDllkIssueLossOfPres(*pbCnNodeId);
-            if (Ret != kEplSuccessful)
-            {
-                goto Exit;
-            }
-
-            pbCnNodeId++;
-        }
-    }
-#endif
-#endif
-
     Ret = EplErrorHandlerkCycleFinished((NmtState_p >= kEplNmtMsNotActive));
 
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
-    EplDllkInstance_g.m_fSyncProcessed = FALSE;
-#if EPL_DLL_PRES_CHAINING_MN != FALSE
-    EplDllkInstance_g.m_fPrcSlotFinished = FALSE;
-#endif
-
 #if EPL_DLL_DISABLE_EDRV_CYCLIC == FALSE
     if (EplDllkInstance_g.m_DllState > kEplDllMsNonCyclic)
     {
-        // switch to next cycle
-        EplDllkInstance_g.m_bCurTxBufferOffsetCycle ^= 1;
-        EplDllkInstance_g.m_bCurNodeIndex = 0;
-
         if (EplDllkInstance_g.m_DllConfigParam.m_uiSyncNodeId == EPL_C_ADR_SYNC_ON_SOC)
         {   // cyclic state is active, so preprocessing is necessary
 
@@ -2770,16 +2742,23 @@ unsigned int    uiNextTxBufferOffset = EplDllkInstance_g.m_bCurTxBufferOffsetCyc
 #if (EPL_DLL_DISABLE_EDRV_CYCLIC == FALSE)
         pTxBuffer = &EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_SOA + uiNextTxBufferOffset];
         pTxBuffer->m_dwTimeOffsetNs = dwNextTimeOffsetNs;
+        // switch SoAReq buffer
+        EplDllkInstance_g.m_bSyncLastSoaReq++;
+        if (EplDllkInstance_g.m_bSyncLastSoaReq >= EPL_DLLK_SOAREQ_COUNT)
+        {
+            EplDllkInstance_g.m_bSyncLastSoaReq = 0;
+        }
+
         // $$$ d.k. fEnableInvitation_p = ((NmtState_p != kEplNmtMsPreOperational1) || (EplDllkInstance_g.m_uiCycleCount >= EPL_C_DLL_PREOP1_START_CYCLES))
         //          currently, EplDllkProcessSync is not called in PreOp1
-        Ret = EplDllkUpdateFrameSoa(pTxBuffer, NmtState_p, TRUE, uiNextTxBufferOffset);
+        Ret = EplDllkUpdateFrameSoa(pTxBuffer, NmtState_p, TRUE, EplDllkInstance_g.m_bSyncLastSoaReq);
         EplDllkInstance_g.m_ppTxBufferList[uiIndex] = pTxBuffer;
         uiIndex++;
 
         // check if we are invited in SoA
-        if (EplDllkInstance_g.m_auiLastTargetNodeId[uiNextTxBufferOffset] == EplDllkInstance_g.m_DllConfigParam.m_uiNodeId)
+        if (EplDllkInstance_g.m_auiLastTargetNodeId[EplDllkInstance_g.m_bSyncLastSoaReq] == EplDllkInstance_g.m_DllConfigParam.m_uiNodeId)
         {
-            switch (EplDllkInstance_g.m_aLastReqServiceId[uiNextTxBufferOffset])
+            switch (EplDllkInstance_g.m_aLastReqServiceId[EplDllkInstance_g.m_bSyncLastSoaReq])
             {
                 case kEplDllReqServiceStatus:
                 {   // StatusRequest
@@ -2850,7 +2829,7 @@ unsigned int    uiNextTxBufferOffset = EplDllkInstance_g.m_bCurTxBufferOffsetCyc
             }
 
             // ASnd frame will be sent, remove the request
-            EplDllkInstance_g.m_aLastReqServiceId[uiNextTxBufferOffset] = kEplDllReqServiceNo;
+            EplDllkInstance_g.m_aLastReqServiceId[EplDllkInstance_g.m_bSyncLastSoaReq] = kEplDllReqServiceNo;
         }
 
         // set last list element to NULL
@@ -3646,15 +3625,7 @@ tEplErrorHandlerkEvent  DllEvent;
                         case kEplDllMsNonCyclic:
                         {   // start continuous cycle timer
 
-                            // if m_LastReqServiceId is still valid,
-                            // SoA was not correctly answered
-                            // and user part has to be informed
-                            Ret = EplDllkAsyncFrameNotReceived(EplDllkInstance_g.m_aLastReqServiceId[EplDllkInstance_g.m_bCurLastSoaReq],
-                                                               EplDllkInstance_g.m_auiLastTargetNodeId[EplDllkInstance_g.m_bCurLastSoaReq]);
-                            if (Ret != kEplSuccessful)
-                            {
-                                goto Exit;
-                            }
+                            // ASndTimeout is checked on next SoC Tx callback function
 
 #if EPL_DLL_DISABLE_EDRV_CYCLIC == FALSE
 
@@ -3672,6 +3643,9 @@ tEplErrorHandlerkEvent  DllEvent;
 
                             // new DLL state
                             EplDllkInstance_g.m_DllState = kEplDllMsWaitSocTrig;
+
+                            // initialize SoAReq number for ProcessSync (cycle preparation)
+                            EplDllkInstance_g.m_bSyncLastSoaReq = EplDllkInstance_g.m_bCurLastSoaReq;
 
                             // forward dummy SoA event to DLLk, ErrorHandler and PDO module
                             // to trigger preparation of first cycle
@@ -3871,7 +3845,12 @@ tEplErrorHandlerkEvent  DllEvent;
                     // report if SoA was correctly answered
                     Ret = EplDllkAsyncFrameNotReceived(EplDllkInstance_g.m_aLastReqServiceId[EplDllkInstance_g.m_bCurLastSoaReq],
                                                        EplDllkInstance_g.m_auiLastTargetNodeId[EplDllkInstance_g.m_bCurLastSoaReq]);
-                    EplDllkInstance_g.m_bCurLastSoaReq ^= 1;
+                    // switch SoAReq buffer
+                    EplDllkInstance_g.m_bCurLastSoaReq++;
+                    if (EplDllkInstance_g.m_bCurLastSoaReq >= EPL_DLLK_SOAREQ_COUNT)
+                    {
+                        EplDllkInstance_g.m_bCurLastSoaReq = 0;
+                    }
                     break;
                 }
 #endif
@@ -7154,6 +7133,7 @@ static tEplKernel EplDllkCbMnSyncHandler(void)
 {
 tEplKernel      Ret = kEplSuccessful;
 tEplNmtState    NmtState;
+BYTE*           pbCnNodeId;
 
 TGT_DLLK_DECLARE_FLAGS
 
@@ -7165,6 +7145,30 @@ TGT_DLLK_DECLARE_FLAGS
     {
         goto Exit;
     }
+
+    // do cycle finish which has to be done inside the callback function triggered by interrupt
+    pbCnNodeId = &EplDllkInstance_g.m_aabCnNodeIdList[EplDllkInstance_g.m_bCurTxBufferOffsetCycle][EplDllkInstance_g.m_bCurNodeIndex];
+
+    while (*pbCnNodeId != EPL_C_ADR_INVALID)
+    {   // issue error for each CN in list which was not processed yet, i.e. PRes received
+
+        Ret = EplDllkIssueLossOfPres(*pbCnNodeId);
+        if (Ret != kEplSuccessful)
+        {
+            goto Exit;
+        }
+
+        pbCnNodeId++;
+    }
+
+    EplDllkInstance_g.m_fSyncProcessed = FALSE;
+#if EPL_DLL_PRES_CHAINING_MN != FALSE
+    EplDllkInstance_g.m_fPrcSlotFinished = FALSE;
+#endif
+
+    // switch to next cycle
+    EplDllkInstance_g.m_bCurTxBufferOffsetCycle ^= 1;
+    EplDllkInstance_g.m_bCurNodeIndex = 0;
 
     Ret = EplDllkPostEvent(kEplEventTypeDllkCycleFinish);
 
