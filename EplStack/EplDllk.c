@@ -974,20 +974,21 @@ tEplKernel  Ret = kEplSuccessful;
 // Parameters:  pfnCbSync_p             = pointer to callback function,
 //                                        which will be called in event context.
 //
-// Returns:     tEplKernel              = error code
+// Returns:     tEplSyncCb              = old callback function
 //
 //
 // State:
 //
 //---------------------------------------------------------------------------
 
-tEplKernel EplDllkRegSyncHandler(tEplSyncCb pfnCbSync_p)
+tEplSyncCb EplDllkRegSyncHandler(tEplSyncCb pfnCbSync_p)
 {
-tEplKernel  Ret = kEplSuccessful;
+tEplSyncCb  pfnCbOld;
 
+    pfnCbOld = EplDllkInstance_g.m_pfnCbSync;
     EplDllkInstance_g.m_pfnCbSync = pfnCbSync_p;
 
-    return Ret;
+    return pfnCbOld;
 }
 
 

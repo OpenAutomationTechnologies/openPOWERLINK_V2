@@ -206,6 +206,7 @@ typedef enum
     kEplPdoConfWhileEnabled     = 0x00B7,       // PDO configuration cannot be changed while it is enabled
     kEplPdoErrorMapp            = 0x00B8,       // invalid PDO mapping
     kEplPdoVarNotFound          = 0x00B9,       // the referenced object in a PDO mapping does not exist
+    kEplPdoVarNotMappable       = 0x00BA,       // the referenced object in a PDO mapping is not mappable
 //    kEplPdoErrorEmcyPdoLen      = 0x00BA,       // the length of a received PDO is unequal to the expected value
 //    kEplPdoWriteConstObject     = 0x00BB,       // constant object can not be written
                                                 // (only TxType, Inhibit-, Event Time for CANopen Kit)
@@ -229,6 +230,13 @@ typedef enum
     kEplApiInvalidParam         = 0x0142,       // passed invalid parameters to a function (e.g. invalid node id)
     kEplApiNoObdInitRam         = 0x0143,       // no function pointer for ObdInitRam supplied
     kEplApiSdoBusyIntern        = 0x0144,       // the SDO channel to this node is internally used by the stack (e.g. the CFM) and currently not available for the application.
+    kEplApiPIAlreadyAllocated   = 0x0145,       // process image is already allocated
+    kEplApiPIOutOfMemory        = 0x0146,       // process image: out of memory
+    kEplApiPISizeExceeded       = 0x0147,       // process image: variable linking or copy job exceeds the size of the PI
+    kEplApiPINotAllocated       = 0x0148,       // process image is not allocated
+    kEplApiPIJobQueueFull       = 0x0149,       // process image: job queue is full
+    kEplApiPIJobQueueEmpty      = 0x014A,       // process image: job queue is empty
+    kEplApiPIInvalidJobSize     = 0x014B,       // process image: invalid job size
 
     // area until 0x07FF is reserved
     // area for user application from 0x0800 to 0x7FFF

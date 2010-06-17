@@ -255,6 +255,25 @@ typedef struct
 } tEplApiProcessImage;
 
 
+typedef struct
+{
+    void*          m_pPart;
+    unsigned int   m_uiOffset;
+    unsigned int   m_uiSize;
+
+} tEplApiProcessImagePart;
+
+
+typedef struct
+{
+    tEplApiProcessImagePart    m_In;
+    tEplApiProcessImagePart    m_Out;
+    unsigned int               m_uiPriority; // 0 = highest
+    BOOL                       m_fNonBlocking;
+
+} tEplApiProcessImageCopyJob;
+
+
 //---------------------------------------------------------------------------
 // function prototypes
 //---------------------------------------------------------------------------
@@ -333,6 +352,20 @@ EPLDLLEXPORT tEplKernel PUBLIC EplApiSetCdcFilename(char* pszCdcFilename_p);
 EPLDLLEXPORT tEplKernel PUBLIC EplApiProcessImageSetup(void);
 EPLDLLEXPORT tEplKernel PUBLIC EplApiProcessImageExchangeIn(tEplApiProcessImage* pPI_p);
 EPLDLLEXPORT tEplKernel PUBLIC EplApiProcessImageExchangeOut(tEplApiProcessImage* pPI_p);
+
+EPLDLLEXPORT tEplKernel PUBLIC EplApiProcessImageAlloc(
+    unsigned int uiSizeProcessImageIn_p,
+    unsigned int uiSizeProcessImageOut_p);
+EPLDLLEXPORT tEplKernel PUBLIC EplApiProcessImageFree(void);
+EPLDLLEXPORT tEplKernel PUBLIC EplApiProcessImageExchange(
+    tEplApiProcessImageCopyJob* pCopyJob_p);
+EPLDLLEXPORT tEplKernel PUBLIC EplApiProcessImageLinkObject(
+    unsigned int    uiObjIndex_p,
+    unsigned int    uiFirstSubindex_p,
+    unsigned int    uiOffsetPI_p,
+    BOOL            fOutputPI_p,
+    tEplObdSize     EntrySize_p,
+    unsigned int*   puiVarEntries_p);
 
 
 #endif  // #ifndef _EPL_API_H_
