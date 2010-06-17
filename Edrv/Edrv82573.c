@@ -274,7 +274,7 @@
 #define EDRV_COUNT_LATECOLLISION        TGT_DBG_SIGNAL_TRACE_POINT(10)
 #define EDRV_COUNT_TX_COL_RL            TGT_DBG_SIGNAL_TRACE_POINT(11)
 #define EDRV_COUNT_TX_FUN               TGT_DBG_SIGNAL_TRACE_POINT(12)
-#define EDRV_COUNT_TX_ERR               TGT_DBG_SIGNAL_TRACE_POINT(13)
+#define EDRV_COUNT_TX_TEST              TGT_DBG_SIGNAL_TRACE_POINT(13)
 #define EDRV_COUNT_RX_CRC               TGT_DBG_SIGNAL_TRACE_POINT(14)
 #define EDRV_COUNT_RX_ERR               TGT_DBG_SIGNAL_TRACE_POINT(15)
 #define EDRV_COUNT_RX_SEQ               TGT_DBG_SIGNAL_TRACE_POINT(16)
@@ -1074,6 +1074,11 @@ int             iHandled;
             else
             {
                 break;
+            }
+
+            if (pRxDesc->m_bStatus != 0)
+            {
+                EDRV_COUNT_TX_TEST;
             }
         }
         while (EdrvInstance_l.m_uiHeadTxDesc != EdrvInstance_l.m_uiTailTxDesc);
