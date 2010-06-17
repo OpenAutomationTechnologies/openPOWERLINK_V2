@@ -277,7 +277,7 @@ tEplObdSize         ObdSize;
     EplApiInitParam.m_uiSizeOfStruct = sizeof (EplApiInitParam);
     EPL_MEMCPY(EplApiInitParam.m_abMacAddress, abMacAddr, sizeof (EplApiInitParam.m_abMacAddress));
 //    EplApiInitParam.m_abMacAddress[5] = (BYTE) EplApiInitParam.m_uiNodeId;
-    EplApiInitParam.m_dwFeatureFlags = -1;
+    EplApiInitParam.m_dwFeatureFlags = (DWORD) ~0UL;
     EplApiInitParam.m_dwCycleLen = uiCycleLen_g;     // required for error detection
     EplApiInitParam.m_uiIsochrTxMaxPayload = 100; // const
     EplApiInitParam.m_uiIsochrRxMaxPayload = 100; // const
@@ -291,11 +291,11 @@ tEplObdSize         ObdSize;
     EplApiInitParam.m_dwLossOfFrameTolerance = 500000;
     EplApiInitParam.m_dwAsyncSlotTimeout = 3000000;
     EplApiInitParam.m_dwWaitSocPreq = 150000;
-    EplApiInitParam.m_dwDeviceType = -1;              // NMT_DeviceType_U32
-    EplApiInitParam.m_dwVendorId = -1;                // NMT_IdentityObject_REC.VendorId_U32
-    EplApiInitParam.m_dwProductCode = -1;             // NMT_IdentityObject_REC.ProductCode_U32
-    EplApiInitParam.m_dwRevisionNumber = -1;          // NMT_IdentityObject_REC.RevisionNo_U32
-    EplApiInitParam.m_dwSerialNumber = -1;            // NMT_IdentityObject_REC.SerialNo_U32
+    EplApiInitParam.m_dwDeviceType = (DWORD) ~0UL;      // NMT_DeviceType_U32
+    EplApiInitParam.m_dwVendorId = (DWORD) ~0UL;        // NMT_IdentityObject_REC.VendorId_U32
+    EplApiInitParam.m_dwProductCode = (DWORD) ~0UL;     // NMT_IdentityObject_REC.ProductCode_U32
+    EplApiInitParam.m_dwRevisionNumber = (DWORD) ~0UL;  // NMT_IdentityObject_REC.RevisionNo_U32
+    EplApiInitParam.m_dwSerialNumber = (DWORD) ~0UL;    // NMT_IdentityObject_REC.SerialNo_U32
     EplApiInitParam.m_dwSubnetMask = SUBNET_MASK;
     EplApiInitParam.m_dwDefaultGateway = 0;
     EPL_MEMCPY(EplApiInitParam.m_sHostname, sHostname, sizeof(EplApiInitParam.m_sHostname));
