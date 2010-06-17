@@ -776,7 +776,7 @@ tEplSdoConHdl       SdoConHdl;
                     {
                         PRINTF4("%s new con: ip=%lX, port=%u, Ret=0x%X\n",
                                 __func__,
-                                ntohl(pInstance->m_aSdoAbsUdpConnection[iFreeEntry].m_ulIpAddr),
+                                (unsigned long) ntohl(pInstance->m_aSdoAbsUdpConnection[iFreeEntry].m_ulIpAddr),
                                 ntohs((unsigned short) pInstance->m_aSdoAbsUdpConnection[iFreeEntry].m_uiPort),
                                 Ret);
                     }
@@ -810,7 +810,7 @@ tEplSdoConHdl       SdoConHdl;
                 {
                     PRINTF4("%s known con: ip=%lX, port=%u, Ret=0x%X\n",
                             __func__,
-                            ntohl(pInstance->m_aSdoAbsUdpConnection[iCount].m_ulIpAddr),
+                            (unsigned long) ntohl(pInstance->m_aSdoAbsUdpConnection[iCount].m_ulIpAddr),
                             ntohs((unsigned short) pInstance->m_aSdoAbsUdpConnection[iCount].m_uiPort),
                             Ret);
                 }
