@@ -1045,20 +1045,21 @@ void*               pVar;
     if (Ret != kEplSuccessful)
     {   // entry doesn't exist
         *pdwAbortCode_p = EPL_SDOAC_OBJECT_NOT_EXIST;
+        Ret = kEplPdoVarNotFound;
         goto Exit;
     }
 
     if ((AccessType & kEplObdAccPdo) == 0)
     {   // object is not mappable
         *pdwAbortCode_p = EPL_SDOAC_OBJECT_NOT_MAPPABLE;
-        Ret = kEplPdoVarNotFound;
+        Ret = kEplPdoVarNotMappable;
         goto Exit;
     }
 
     if ((AccessType & AccessType_p) == 0)
     {   // object is not writeable (RPDO) or readable (TPDO) respectively
         *pdwAbortCode_p = EPL_SDOAC_OBJECT_NOT_MAPPABLE;
-        Ret = kEplPdoVarNotFound;
+        Ret = kEplPdoVarNotMappable;
         goto Exit;
     }
 
