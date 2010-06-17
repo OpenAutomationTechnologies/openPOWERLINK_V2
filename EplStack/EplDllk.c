@@ -374,7 +374,7 @@ static void EplDllkCbFrameReceived(tEdrvRxBuffer * pRxBuffer_p);
 
 static tEplKernel EplDllkProcessReceivedPreq(tEplFrameInfo* pFrameInfo_p, tEplNmtState NmtState_p);
 static tEplKernel EplDllkProcessReceivedPres(tEplFrameInfo* pFrameInfo_p, tEplNmtState NmtState_p, tEplNmtEvent* pNmtEvent_p);
-static tEplKernel EplDllkProcessReceivedSoc(tEplFrameInfo* pFrameInfo_p, tEplNmtState NmtState_p);
+static tEplKernel EplDllkProcessReceivedSoc(tEdrvRxBuffer* pRxBuffer_p, tEplNmtState NmtState_p);
 static tEplKernel EplDllkProcessReceivedSoa(tEplFrameInfo* pFrameInfo_p, tEplNmtState NmtState_p);
 static tEplKernel EplDllkProcessReceivedAsnd(tEplFrameInfo* pFrameInfo_p, tEplNmtState NmtState_p);
 
@@ -4018,7 +4018,7 @@ TGT_DLLK_DECLARE_FLAGS
             // SoC frame
             NmtEvent = kEplNmtEventDllCeSoc;
 
-            Ret = EplDllkProcessReceivedSoc(&FrameInfo, NmtState);
+            Ret = EplDllkProcessReceivedSoc(pRxBuffer_p, NmtState);
             if (Ret != kEplSuccessful)
             {
                 goto Exit;
@@ -4575,15 +4575,16 @@ Exit:
 //
 //---------------------------------------------------------------------------
 
-static tEplKernel EplDllkProcessReceivedSoc(tEplFrameInfo* pFrameInfo_p, tEplNmtState NmtState_p)
+static tEplKernel EplDllkProcessReceivedSoc(tEdrvRxBuffer* pRxBuffer_p, tEplNmtState NmtState_p)
 {
 tEplKernel      Ret = kEplSuccessful;
-tEplFrame*      pFrame;
 #if EPL_DLL_PRES_READY_AFTER_SOC != FALSE
 tEdrvTxBuffer*  pTxBuffer = NULL;
 #endif
 
-    pFrame = pFrameInfo_p->m_pFrame;
+#if (EPL_DLL_PROCESS_SYNC != EPL_DLL_PROCESS_SYNC_ON_TIMER)
+    UNUSED_PARAMETER(pRxBuffer_p);
+#endif
 
     if (NmtState_p >= kEplNmtMsNotActive)
     {   // MN is active -> wrong msg type
