@@ -183,7 +183,7 @@ static uint uiNodeId_g = EPL_C_ADR_INVALID;
 module_param_named(nodeid, uiNodeId_g, uint, 0);
 MODULE_PARM_DESC(nodeid, "Local Node-ID of this POWERLINK node (0x01 - 0xEF -> CNs, 0xF0 -> MN");
 
-static uint uiCycleLen_g = CYCLE_LEN;
+static uint uiCycleLen_g = 0;
 module_param_named(cyclelen, uiCycleLen_g, uint, 0);
 MODULE_PARM_DESC(cyclelen, "Cyclelength in [µs] (it is stored in object 0x1006)");
 
@@ -298,7 +298,7 @@ tEplObdSize         ObdSize;
     EplApiInitParam.m_dwDefaultGateway = 0;
     EPL_MEMCPY(EplApiInitParam.m_sHostname, sHostname, sizeof(EplApiInitParam.m_sHostname));
     EplApiInitParam.m_uiSyncNodeId = EPL_C_ADR_SYNC_ON_SOA; // for fSyncOnPrcNode==TRUE, this means last PRC node
-    EplApiInitParam.m_fSyncOnPrcNode = FALSE;
+    EplApiInitParam.m_fSyncOnPrcNode = TRUE;
 
     // currently unset parameters left at default value 0
     //EplApiInitParam.m_qwVendorSpecificExt1;
@@ -516,11 +516,15 @@ tEplKernel          EplRet = kEplSuccessful;
 
                 case kEplNmtGsResetCommunication:
                 {
-					// continue
+                    // continue
                 }
 
                 case kEplNmtGsResetConfiguration:
                 {
+                    if (uiCycleLen_g != 0)
+                    {
+                        EplRet = EplApiWriteLocalObject(0x1006, 0x00, &uiCycleLen_g, sizeof (uiCycleLen_g));
+                    }
                     // continue
                 }
 
