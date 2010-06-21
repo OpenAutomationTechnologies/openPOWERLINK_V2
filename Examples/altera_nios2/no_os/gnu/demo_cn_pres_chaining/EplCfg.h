@@ -199,7 +199,7 @@
 #define EPL_DLL_SOC_SYNC_SHIFT_US       150
 
 // CN supports PRes Chaining
-#define EPL_DLL_PRES_CHAINING_CN        FALSE
+#define EPL_DLL_PRES_CHAINING_CN        TRUE
 
 
 // =========================================================================
