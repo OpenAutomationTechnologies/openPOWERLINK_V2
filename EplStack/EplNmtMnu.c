@@ -3352,6 +3352,7 @@ tEplNmtState    ExpNmtState;
     if (pNodeInfo_p->m_NodeState == kEplNmtMnuNodeStateUnknown)
     {   // CN is already in state unknown, which means that it got
         // NMT reset command earlier
+        Ret = kEplReject;
         goto Exit;
     }
 
