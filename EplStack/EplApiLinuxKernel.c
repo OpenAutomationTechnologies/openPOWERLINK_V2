@@ -71,19 +71,10 @@
 ****************************************************************************/
 
 
-// kernel modul and driver
-
-//#include <linux/version.h>
-//#include <linux/config.h>
-
 #include <linux/module.h>
 #include <linux/fs.h>
-#include <linux/cdev.h>
 #include <linux/types.h>
 
-//#include <linux/module.h>
-//#include <linux/kernel.h>
-//#include <linux/init.h>
 //#include <linux/errno.h>
 
 // scheduling
@@ -97,7 +88,6 @@
 
 #include "Epl.h"
 #include "EplApiLinux.h"
-//#include "kernel/EplPdokCal.h"
 #include "proc_fs.h"
 
 
@@ -1023,7 +1013,7 @@ int  iRet;
             break;
         }
 
-
+#if 0
         // ----------------------------------------------------------
         case EPLLIN_CMD_PI_SETUP:
         {
@@ -1118,6 +1108,96 @@ int  iRet;
             // return to EplApiProcessImageExchangeout()
             iRet = (int) EplRet;
 
+            break;
+        }
+#endif
+
+        // ----------------------------------------------------------
+        case EPLLIN_CMD_PI_ALLOC:
+        {
+        tEplLinProcessImageAlloc    PIAlloc;
+
+            iErr = copy_from_user(&PIAlloc, (const void*)ulArg_p, sizeof (PIAlloc));
+            if (iErr != 0)
+            {
+                iRet = -EIO;
+                goto Exit;
+            }
+
+            EplRet = EplApiProcessImageAlloc(PIAlloc.m_uiSizeProcessImageIn,
+                                             PIAlloc.m_uiSizeProcessImageOut,
+                                             PIAlloc.m_uiQueueEntriesLo,
+                                             PIAlloc.m_uiQueueEntriesHi);
+            iRet = (int) EplRet;
+            break;
+        }
+
+
+        // ----------------------------------------------------------
+        case EPLLIN_CMD_PI_FREE:
+        {
+
+            EplRet = EplApiProcessImageFree();
+            iRet = (int) EplRet;
+            break;
+        }
+
+
+        // ----------------------------------------------------------
+        case EPLLIN_CMD_PI_EXCHANGE:
+        {
+        tEplApiProcessImageCopyJob      CopyJob;
+
+            iErr = copy_from_user(&CopyJob, (const void*)ulArg_p, sizeof (CopyJob));
+            if (iErr != 0)
+            {
+                iRet = -EIO;
+                goto Exit;
+            }
+
+            EplRet = EplApiProcessImageExchange(&CopyJob);
+            iRet = (int) EplRet;
+            break;
+        }
+
+
+        // ----------------------------------------------------------
+        case EPLLIN_CMD_PI_LINKOBJECT:
+        {
+        tEplLinProcessImageLinkObject   PILinkObject;
+        unsigned int                    uiVarEntries;
+
+            iErr = copy_from_user(&PILinkObject, (const void*)ulArg_p, sizeof (PILinkObject));
+            if (iErr != 0)
+            {
+                iRet = -EIO;
+                goto Exit;
+            }
+
+            iErr = get_user(uiVarEntries,
+                            PILinkObject.m_puiVarEntries);
+            if (iErr != 0)
+            {
+                iRet = -EIO;
+                goto Exit;
+            }
+
+            EplRet = EplApiProcessImageLinkObject(PILinkObject.m_uiObjIndex,
+                                                  PILinkObject.m_uiFirstSubindex,
+                                                  PILinkObject.m_uiOffsetPI,
+                                                  PILinkObject.m_fOutputPI,
+                                                  PILinkObject.m_EntrySize,
+                                                  &uiVarEntries);
+
+            iErr = put_user(uiVarEntries,
+                            PILinkObject.m_puiVarEntries);
+            if (iErr != 0)
+            {
+                iRet = -EIO;
+                goto Exit;
+            }
+
+            iRet = (int) EplRet;
             break;
         }
 

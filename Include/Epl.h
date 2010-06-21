@@ -348,14 +348,18 @@ EPLDLLEXPORT tEplKernel PUBLIC EplApiGetIdentResponse(
 EPLDLLEXPORT tEplKernel PUBLIC EplApiSetCdcBuffer(BYTE* pbCdc_p, unsigned int uiCdcSize_p);
 EPLDLLEXPORT tEplKernel PUBLIC EplApiSetCdcFilename(char* pszCdcFilename_p);
 
-// functions for process image will be implemented in separate file
+#if 0
 EPLDLLEXPORT tEplKernel PUBLIC EplApiProcessImageSetup(void);
 EPLDLLEXPORT tEplKernel PUBLIC EplApiProcessImageExchangeIn(tEplApiProcessImage* pPI_p);
 EPLDLLEXPORT tEplKernel PUBLIC EplApiProcessImageExchangeOut(tEplApiProcessImage* pPI_p);
+#endif
 
+// functions for process image are implemented in separate file
 EPLDLLEXPORT tEplKernel PUBLIC EplApiProcessImageAlloc(
     unsigned int uiSizeProcessImageIn_p,
-    unsigned int uiSizeProcessImageOut_p);
+    unsigned int uiSizeProcessImageOut_p,
+    unsigned int uiQueueEntriesLo_p,
+    unsigned int uiQueueEntriesHi_p);
 EPLDLLEXPORT tEplKernel PUBLIC EplApiProcessImageFree(void);
 EPLDLLEXPORT tEplKernel PUBLIC EplApiProcessImageExchange(
     tEplApiProcessImageCopyJob* pCopyJob_p);

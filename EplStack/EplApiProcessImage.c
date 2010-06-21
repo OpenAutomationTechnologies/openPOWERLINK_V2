@@ -74,6 +74,8 @@
 
 #if (TARGET_SYSTEM == _LINUX_) && defined(__KERNEL__)
 #include <asm/uaccess.h>
+#include <linux/completion.h>
+#include <asm/current.h>
 #endif
 
 #if EPL_USE_SHAREDBUFF == FALSE
@@ -193,6 +195,31 @@ static tEplApiProcessImageInstance  EplApiProcessImageInstance_g;
 //---------------------------------------------------------------------------
 // local function prototypes
 //---------------------------------------------------------------------------
+
+static tEplKernel EplApiProcessImageExchangeInt(
+    tEplApiProcessImageCopyJob* pCopyJob_p);
+
+static tEplKernel EplApiProcessImagePostCopyJob(
+    tEplApiProcessImageCopyJobInt* pCopyJob_p);
+
+static tEplKernel EplApiProcessImageFetchCopyJob(
+    unsigned int uiPriority_p,
+    tEplApiProcessImageCopyJobInt* pCopyJob_p);
+
+static tEplKernel EplApiProcessImageCreateCompletion(
+    tEplApiProcessImageCopyJobInt* pCopyJob_p);
+
+static tEplKernel EplApiProcessImageWaitForCompletion(
+    tEplApiProcessImageCopyJobInt* pCopyJob_p);
+
+static tEplKernel EplApiProcessImageDeleteCompletion(
+    tEplApiProcessImageCopyJobInt* pCopyJob_p);
+
+static tEplKernel EplApiProcessImageSignalCompletion(
+    tEplApiProcessImageCopyJobInt* pCopyJob_p);
+
+static tEplKernel PUBLIC EplApiProcessImageCbSync(void);
+
 
 
 //=========================================================================//
@@ -370,7 +397,14 @@ Exit:
 //
 // Description: link process variable from process image to object in OD
 //
-// Parameters:  (none)
+// Parameters:  uiObjIndex_p            = object index
+//              uiFirstSubindex_p       = sub-index of object where first variable shall be linked to
+//              uiOffsetPI_p            = offset of first process variable in process image
+//              fOutputPI_p             = FALSE, input process image
+//                                        TRUE, output process image
+//              EntrySize_p             = size of one process variable
+//              puiVarEntries_p         = [IN] number of process variables, which shall be linked to OD
+//                                        [OUT] actual number of process variable, which were linked to OD
 //
 // Returns:     tEplKernel              = error code
 //
@@ -444,7 +478,6 @@ Exit:
 
 tEplKernel PUBLIC EplApiProcessImageExchange(
     tEplApiProcessImageCopyJob* pCopyJob_p)
-
 {
 tEplKernel                      Ret = kEplSuccessful;
 tEplApiProcessImageCopyJobInt   IntCopyJob;
@@ -507,7 +540,7 @@ Exit:
     return Ret;
 }
 
-
+#if 0
 //---------------------------------------------------------------------------
 //
 // Function:    EplApiProcessImageSetup()
@@ -708,6 +741,7 @@ tEplKernel      Ret = kEplSuccessful;
 
     return Ret;
 }
+#endif
 
 
 //=========================================================================//
@@ -733,7 +767,6 @@ tEplKernel      Ret = kEplSuccessful;
 
 static tEplKernel EplApiProcessImageExchangeInt(
     tEplApiProcessImageCopyJob* pCopyJob_p)
-
 {
 tEplKernel      Ret = kEplSuccessful;
 

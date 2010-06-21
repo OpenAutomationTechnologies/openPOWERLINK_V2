@@ -98,6 +98,10 @@
 #define EPLLIN_CMD_PI_SETUP                 _IO  ('=', 11)
 #define EPLLIN_CMD_SHUTDOWN                 _IO  ('=', 12)
 #define EPLLIN_CMD_POST_USER_EVENT          _IO  ('=', 13)  // ulArg_p ~ void* = pUserArg_p
+#define EPLLIN_CMD_PI_ALLOC                 _IOW ('=', 14, tEplLinProcessImageAlloc)
+#define EPLLIN_CMD_PI_FREE                  _IO  ('=', 15)
+#define EPLLIN_CMD_PI_EXCHANGE              _IOW ('=', 16, tEplApiProcessImageCopyJob)
+#define EPLLIN_CMD_PI_LINKOBJECT            _IOWR('=', 16, tEplLinProcessImageLinkObject)
 
 
 //---------------------------------------------------------------------------
@@ -115,24 +119,24 @@ typedef struct
 
 typedef struct
 {
-    tEplSdoComConHdl  m_SdoComConHdl;
-    BOOL              m_fValidSdoComConHdl;
-    unsigned int      m_uiNodeId;
-    unsigned int      m_uiIndex;
-    unsigned int      m_uiSubindex;
-    void*             m_le_pData;
-    unsigned int      m_uiSize;
-    tEplSdoType       m_SdoType;
-    void*             m_pUserArg;
+    tEplSdoComConHdl    m_SdoComConHdl;
+    BOOL                m_fValidSdoComConHdl;
+    unsigned int        m_uiNodeId;
+    unsigned int        m_uiIndex;
+    unsigned int        m_uiSubindex;
+    void*               m_le_pData;
+    unsigned int        m_uiSize;
+    tEplSdoType         m_SdoType;
+    void*               m_pUserArg;
 
 } tEplLinSdoObject;
 
 typedef struct
 {
-    unsigned int      m_uiIndex;
-    unsigned int      m_uiSubindex;
-    void*             m_pData;
-    unsigned int      m_uiSize;
+    unsigned int        m_uiIndex;
+    unsigned int        m_uiSubindex;
+    void*               m_pData;
+    unsigned int        m_uiSize;
 
 } tEplLinLocalObject;
 
@@ -142,6 +146,27 @@ typedef struct
     tEplNmtNodeCommand  m_NodeCommand;
 
 } tEplLinNodeCmdObject;
+
+typedef struct
+{
+    unsigned int        m_uiSizeProcessImageIn;
+    unsigned int        m_uiSizeProcessImageOut;
+    unsigned int        m_uiQueueEntriesLo;
+    unsigned int        m_uiQueueEntriesHi;
+
+} tEplLinProcessImageAlloc;
+
+typedef struct
+{
+    unsigned int        m_uiObjIndex;
+    unsigned int        m_uiFirstSubindex;
+    unsigned int        m_uiOffsetPI;
+    BOOL                m_fOutputPI;
+    tEplObdSize         m_EntrySize;
+    unsigned int*       m_puiVarEntries;
+
+} tEplLinProcessImageLinkObject;
+
 
 //---------------------------------------------------------------------------
 // function prototypes

@@ -71,15 +71,6 @@
 
 #include "Epl.h"
 #include "EplApiLinux.h"
-//#include "kernel/EplDllk.h"
-//#include "kernel/EplEventk.h"
-//#include "kernel/EplNmtk.h"
-//#include "kernel/EplObdk.h"
-//#include "kernel/EplDllkCal.h"
-//#include "kernel/EplPdokCal.h"
-//#include "user/EplDlluCal.h"
-//#include "user/EplNmtCnu.h"
-//#include "user/EplSdoComu.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -731,6 +722,144 @@ Exit:
 
 //---------------------------------------------------------------------------
 //
+// Function:    EplApiProcessImageAlloc()
+//
+// Description: allocates a dynamic process image
+//
+// Parameters:  uiSizeProcessImageIn_p  = size of input process image
+//              uiSizeProcessImageOut_p = size of output process image
+//
+// Returns:     tEplKernel              = error code
+//
+// State:
+//
+//---------------------------------------------------------------------------
+
+tEplKernel PUBLIC EplApiProcessImageAlloc(
+    unsigned int uiSizeProcessImageIn_p,
+    unsigned int uiSizeProcessImageOut_p,
+    unsigned int uiQueueEntriesLo_p,
+    unsigned int uiQueueEntriesHi_p)
+{
+tEplKernel      Ret = kEplSuccessful;
+int             iRet;
+tEplLinProcessImageAlloc    PIAlloc;
+
+    PIAlloc.m_uiSizeProcessImageIn  = uiSizeProcessImageIn_p
+    PIAlloc.m_uiSizeProcessImageOut = uiSizeProcessImageOut_p
+    PIAlloc.m_uiQueueEntriesLo      = uiQueueEntriesLo_p
+    PIAlloc.m_uiQueueEntriesHi      = uiQueueEntriesHi_p
+
+    iRet = ioctl (EplApiInstance_g.m_hDrvInst, EPLLIN_CMD_PI_ALLOC, &PIAlloc);
+    Ret = (tEplKernel)iRet;
+
+    return Ret;
+}
+
+
+//---------------------------------------------------------------------------
+//
+// Function:    EplApiProcessImageFree()
+//
+// Description: frees the dynamic process image
+//
+// Parameters:  (none)
+//
+// Returns:     tEplKernel              = error code
+//
+// State:
+//
+//---------------------------------------------------------------------------
+
+tEplKernel PUBLIC EplApiProcessImageFree(void)
+{
+tEplKernel      Ret = kEplSuccessful;
+int             iRet;
+
+    iRet = ioctl (EplApiInstance_g.m_hDrvInst, EPLLIN_CMD_PI_FREE, 0);
+    Ret = (tEplKernel)iRet;
+
+    return Ret;
+}
+
+
+//---------------------------------------------------------------------------
+//
+// Function:    EplApiProcessImageLinkObject()
+//
+// Description: link process variable from process image to object in OD
+//
+// Parameters:  uiObjIndex_p            = object index
+//              uiFirstSubindex_p       = sub-index of object where first variable shall be linked to
+//              uiOffsetPI_p            = offset of first process variable in process image
+//              fOutputPI_p             = FALSE, input process image
+//                                        TRUE, output process image
+//              EntrySize_p             = size of one process variable
+//              puiVarEntries_p         = [IN] number of process variables, which shall be linked to OD
+//                                        [OUT] actual number of process variable, which were linked to OD
+//
+// Returns:     tEplKernel              = error code
+//
+// State:
+//
+//---------------------------------------------------------------------------
+
+tEplKernel PUBLIC EplApiProcessImageLinkObject(
+    unsigned int    uiObjIndex_p,
+    unsigned int    uiFirstSubindex_p,
+    unsigned int    uiOffsetPI_p,
+    BOOL            fOutputPI_p,
+    tEplObdSize     EntrySize_p,
+    unsigned int*   puiVarEntries_p)
+{
+tEplKernel      Ret = kEplSuccessful;
+int             iRet;
+tEplLinProcessImageLinkObject   PILinkObject;
+
+    PILinkObject.m_uiObjIndex       = uiObjIndex_p
+    PILinkObject.m_uiFirstSubindex  = uiFirstSubindex_p
+    PILinkObject.m_uiOffsetPI       = uiOffsetPI_p
+    PILinkObject.m_fOutputPI        = fOutputPI_p
+    PILinkObject.m_EntrySize        = EntrySize_p
+    PILinkObject.m_uiVarEntries     = puiVarEntries_p
+
+    iRet = ioctl (EplApiInstance_g.m_hDrvInst, EPLLIN_CMD_PI_LINKOBJECT, &PILinkObject);
+    Ret = (tEplKernel)iRet;
+
+    return Ret;
+}
+
+
+//---------------------------------------------------------------------------
+//
+// Function:    EplApiProcessImageExchange()
+//
+// Description: Perform a copy job.
+//
+// Parameters:  pCopyJob_p              = pointer to copy job structure
+//
+// Returns:     tEplKernel              = error code
+//
+// State:
+//
+//---------------------------------------------------------------------------
+
+tEplKernel PUBLIC EplApiProcessImageExchange(
+    tEplApiProcessImageCopyJob* pCopyJob_p)
+{
+tEplKernel      Ret = kEplSuccessful;
+int             iRet;
+
+    iRet = ioctl (EplApiInstance_g.m_hDrvInst, EPLLIN_CMD_PI_EXCHANGE, pCopyJob_p);
+    Ret = (tEplKernel)iRet;
+
+    return Ret;
+}
+
+
+#if 0
+//---------------------------------------------------------------------------
+//
 // Function:    EplApiProcessImageSetup()
 //
 // Description: sets up a static process image
@@ -820,6 +949,7 @@ int             iRet;
 
     return Ret;
 }
+#endif
 
 
 //=========================================================================//
