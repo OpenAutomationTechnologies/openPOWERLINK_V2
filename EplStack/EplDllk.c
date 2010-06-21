@@ -375,8 +375,8 @@ static void EplDllkCbFrameReceived(tEdrvRxBuffer * pRxBuffer_p);
 static tEplKernel EplDllkProcessReceivedPreq(tEplFrameInfo* pFrameInfo_p, tEplNmtState NmtState_p);
 static tEplKernel EplDllkProcessReceivedPres(tEplFrameInfo* pFrameInfo_p, tEplNmtState NmtState_p, tEplNmtEvent* pNmtEvent_p);
 static tEplKernel EplDllkProcessReceivedSoc(tEdrvRxBuffer* pRxBuffer_p, tEplNmtState NmtState_p);
-static tEplKernel EplDllkProcessReceivedSoa(tEplFrameInfo* pFrameInfo_p, tEplNmtState NmtState_p);
-static tEplKernel EplDllkProcessReceivedAsnd(tEplFrameInfo* pFrameInfo_p, tEplNmtState NmtState_p);
+static tEplKernel EplDllkProcessReceivedSoa(tEdrvRxBuffer* pRxBuffer_p, tEplNmtState NmtState_p);
+static tEplKernel EplDllkProcessReceivedAsnd(tEplFrameInfo* pFrameInfo_p, tEdrvRxBuffer* pRxBuffer_p, tEplNmtState NmtState_p);
 
 // called from EdrvInterruptHandler()
 static void EplDllkCbTransmittedNmtReq(tEdrvTxBuffer * pTxBuffer_p);
@@ -1852,7 +1852,8 @@ tEplDllkNodeInfo*   pIntNodeInfo;
                        0xFF);
 #if EPL_DLL_PRES_CHAINING_CN != FALSE
         AmiSetByteToBe(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_PREQ].m_abFilterValue[16],
-                       EPL_C_ADR_MN_DEF_NODE_ID); // filter value is not enabled, yet
+                       EPL_C_ADR_MN_DEF_NODE_ID); // Source node filter value is set for PRes Chaining
+                                                  // but not yet enabled
 #endif
         EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_PREQ].m_pTxBuffer = &EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_PRES];
         EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_PREQ].m_fEnable = FALSE;
@@ -4033,7 +4034,7 @@ TGT_DLLK_DECLARE_FLAGS
             // SoA frame
             NmtEvent = kEplNmtEventDllCeSoa;
 
-            Ret = EplDllkProcessReceivedSoa(&FrameInfo, NmtState);
+            Ret = EplDllkProcessReceivedSoa(pRxBuffer_p, NmtState);
             if (Ret != kEplSuccessful)
             {
                 goto Exit;
@@ -4047,7 +4048,7 @@ TGT_DLLK_DECLARE_FLAGS
             // ASnd frame
             NmtEvent = kEplNmtEventDllCeAsnd;
 
-            Ret = EplDllkProcessReceivedAsnd(&FrameInfo, NmtState);
+            Ret = EplDllkProcessReceivedAsnd(&FrameInfo, pRxBuffer_p, NmtState);
             if (Ret != kEplSuccessful)
             {
                 goto Exit;
@@ -4567,7 +4568,7 @@ Exit:
 //
 // Description: called from EplDllkCbFrameReceived()
 //
-// Parameters:  pFrameInfo_p            = pointer to frame info structure of received frame
+// Parameters:  pRxBuffer_p             = Edrv receive buffer structure
 //              NmtState_p              = current local NMT state
 //
 // Returns:     tEplKernel
@@ -4656,7 +4657,7 @@ Exit:
 //
 // Description: called from EplDllkCbFrameReceived()
 //
-// Parameters:  pFrameInfo_p            = pointer to frame info structure of received frame
+// Parameters:  pRxBuffer_p             = Edrv receive buffer structure
 //              NmtState_p              = current local NMT state
 //
 // Returns:     tEplKernel
@@ -4665,7 +4666,7 @@ Exit:
 //
 //---------------------------------------------------------------------------
 
-static tEplKernel EplDllkProcessReceivedSoa(tEplFrameInfo* pFrameInfo_p, tEplNmtState NmtState_p)
+static tEplKernel EplDllkProcessReceivedSoa(tEdrvRxBuffer* pRxBuffer_p, tEplNmtState NmtState_p)
 {
 tEplKernel      Ret = kEplSuccessful;
 tEplFrame*      pFrame;
@@ -4674,7 +4675,7 @@ tEplDllReqServiceId     ReqServiceId;
 unsigned int    uiNodeId;
 BYTE            bFlag1;
 
-    pFrame = pFrameInfo_p->m_pFrame;
+    pFrame = (tEplFrame *) pRxBuffer_p->m_pbBuffer;
 
     if (NmtState_p >= kEplNmtMsNotActive)
     {   // MN is active -> wrong msg type
@@ -4814,20 +4815,18 @@ BYTE            bFlag1;
             {   // SyncRequest
 #if EPL_DLL_PRES_CHAINING_CN != FALSE
             DWORD       dwSyncControl;
-            BYTE        be_abDestMacAddress[6];
             tEplFrame*  pTxFrameSyncRes;
             tEplDllkPrcCycleTiming  PrcCycleTiming;
 
                 pTxFrameSyncRes = (tEplFrame *) EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_SYNCRES].m_pbBuffer;
 
                 dwSyncControl = AmiGetDwordFromLe(&pFrame->m_Data.m_Soa.m_Payload.m_SyncRequest.m_le_dwSyncControl);
-                AmiSetQword48ToBe(be_abDestMacAddress, AmiGetQword48FromLe(pFrame->m_Data.m_Soa.m_Payload.m_SyncRequest.m_le_abDestMacAddress));
 
                 if ((dwSyncControl & EPL_SYNC_DEST_MAC_ADDRESS_VALID) &&
-                    (be_abDestMacAddress[0] || be_abDestMacAddress[1] || be_abDestMacAddress[2] ||
-                     be_abDestMacAddress[3] || be_abDestMacAddress[4] || be_abDestMacAddress[5]   ) &&
-                    (EPL_MEMCMP(&be_abDestMacAddress, &EplDllkInstance_g.m_be_abLocalMac, 6) != 0))
+                    (EPL_MEMCMP(&pFrame->m_Data.m_Soa.m_Payload.m_SyncRequest.m_be_abDestMacAddress,
+                                &EplDllkInstance_g.m_be_abLocalMac, 6) != 0))
                 {   // DestMacAddress valid but unequal to own MAC address
+                    // SyncReq is ignored
                     goto Exit;
                 }
 
@@ -4988,7 +4987,9 @@ Exit:
 //
 //---------------------------------------------------------------------------
 
-static tEplKernel EplDllkProcessReceivedAsnd(tEplFrameInfo* pFrameInfo_p, tEplNmtState NmtState_p)
+static tEplKernel EplDllkProcessReceivedAsnd(tEplFrameInfo* pFrameInfo_p,
+                                             tEdrvRxBuffer* pRxBuffer_p,
+                                             tEplNmtState   NmtState_p)
 {
 tEplKernel      Ret = kEplSuccessful;
 tEplFrame*      pFrame;
@@ -4996,6 +4997,9 @@ unsigned int    uiAsndServiceId;
 unsigned int    uiNodeId;
 
     UNUSED_PARAMETER(NmtState_p);
+#if EPL_DLL_PRES_CHAINING_CN == FALSE
+    UNUSED_PARAMETER(pRxBuffer_p);
+#endif
 
     pFrame = pFrameInfo_p->m_pFrame;
 
