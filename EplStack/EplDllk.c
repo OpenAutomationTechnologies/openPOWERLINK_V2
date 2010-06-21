@@ -1850,11 +1850,10 @@ tEplDllkNodeInfo*   pIntNodeInfo;
                        (BYTE) EplDllkInstance_g.m_DllConfigParam.m_uiNodeId);
         AmiSetByteToBe(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_PREQ].m_abFilterMask[15],
                        0xFF);
-#if EPL_DLL_PRES_CHAINING_CN != FALSE
         AmiSetByteToBe(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_PREQ].m_abFilterValue[16],
-                       EPL_C_ADR_MN_DEF_NODE_ID); // Source node filter value is set for PRes Chaining
-                                                  // but not yet enabled
-#endif
+                       EPL_C_ADR_MN_DEF_NODE_ID);
+        AmiSetByteToBe(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_PREQ].m_abFilterMask[16],
+                       0xFF);
         EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_PREQ].m_pTxBuffer = &EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_PRES];
         EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_PREQ].m_fEnable = FALSE;
 
@@ -1932,6 +1931,11 @@ tEplDllkNodeInfo*   pIntNodeInfo;
         {
             goto Exit;
         }
+#endif
+
+#if EPL_DLL_PRES_CHAINING_CN != FALSE
+        EplDllkInstance_g.m_fPrcEnabled         = FALSE;
+        EplDllkInstance_g.m_uiSyncReqPrevNodeId = 0;
 #endif
     }
 
@@ -7622,48 +7626,37 @@ tEplFrame*      pTxFrameSyncRes;
 
     if (EplDllkInstance_g.m_fPrcEnabled == FALSE)
     {
-        if (EplDllkInstance_g.m_dwPrcPResTimeFirst == 0)
-        {   // PRes Chaining mode requested but PResTimeFirst invalid
+        // relocate PReq filter to PResMN
+        AmiSetQword48ToBe(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_PREQ].m_abFilterValue[0],
+                          EPL_C_DLL_MULTICAST_PRES);
+        AmiSetByteToBe(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_PREQ].m_abFilterValue[14],
+                       kEplMsgTypePres);
+        AmiSetByteToBe(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_PREQ].m_abFilterValue[15],
+                       EPL_C_ADR_BROADCAST); // Set Destination Node ID to C_ADR_BROADCAST
 
-            // it might be a good idea to post a warning to the application
-        }
-        else
+        EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_PRES].m_dwTimeOffsetNs = EplDllkInstance_g.m_dwPrcPResTimeFirst;
+        EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_PRES + 1].m_dwTimeOffsetNs = EplDllkInstance_g.m_dwPrcPResTimeFirst;
+
+        Ret = EdrvChangeFilter(EplDllkInstance_g.m_aFilter, EPL_DLLK_FILTER_COUNT,
+                               EPL_DLLK_FILTER_PREQ,
+                               EDRV_FILTER_CHANGE_VALUE | EDRV_FILTER_CHANGE_AUTO_RESPONSE_DELAY);
+        if (Ret != kEplSuccessful)
         {
-            // relocate PReq filter to PResMN
-            AmiSetQword48ToBe(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_PREQ].m_abFilterValue[0],
-                              EPL_C_DLL_MULTICAST_PRES);
-            AmiSetByteToBe(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_PREQ].m_abFilterValue[14],
-                           kEplMsgTypePres);
-            AmiSetByteToBe(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_PREQ].m_abFilterMask[15],
-                           0x00); // disable Dst Node ID filter, value stays at own node ID
-            AmiSetByteToBe(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_PREQ].m_abFilterMask[16],
-                           0xFF); // enable Src Node ID filter, value has been set to node ID of MN
+            goto Exit;
+        }
 
-            EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_PRES].m_dwTimeOffsetNs = EplDllkInstance_g.m_dwPrcPResTimeFirst;
-            EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_PRES + 1].m_dwTimeOffsetNs = EplDllkInstance_g.m_dwPrcPResTimeFirst;
+        EplDllkInstance_g.m_fPrcEnabled = TRUE;
 
-            Ret = EdrvChangeFilter(EplDllkInstance_g.m_aFilter, EPL_DLLK_FILTER_COUNT,
-                                   EPL_DLLK_FILTER_PREQ, EDRV_FILTER_CHANGE_VALUE
-                                                         | EDRV_FILTER_CHANGE_MASK
-                                                         | EDRV_FILTER_CHANGE_AUTO_RESPONSE_DELAY);
-            if (Ret != kEplSuccessful)
-            {
-                goto Exit;
-            }
+        pTxFrameSyncRes = (tEplFrame *) EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_SYNCRES].m_pbBuffer;
 
-            EplDllkInstance_g.m_fPrcEnabled = TRUE;
-
-            pTxFrameSyncRes = (tEplFrame *) EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_SYNCRES].m_pbBuffer;
-
-            AmiSetDwordToLe(&pTxFrameSyncRes->m_Data.m_Asnd.m_Payload.m_SyncResponse.m_le_dwSyncStatus,
-                            AmiGetDwordFromLe(&pTxFrameSyncRes->m_Data.m_Asnd.m_Payload.m_SyncResponse.m_le_dwSyncStatus)
-                            | EPL_SYNC_PRES_MODE_SET);
-            // update SyncRes Tx buffer in Edrv
-            Ret = EdrvUpdateTxMsgBuffer(&EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_SYNCRES]);
-            if (Ret != kEplSuccessful)
-            {
-                goto Exit;
-            }
+        AmiSetDwordToLe(&pTxFrameSyncRes->m_Data.m_Asnd.m_Payload.m_SyncResponse.m_le_dwSyncStatus,
+                        AmiGetDwordFromLe(&pTxFrameSyncRes->m_Data.m_Asnd.m_Payload.m_SyncResponse.m_le_dwSyncStatus)
+                        | EPL_SYNC_PRES_MODE_SET);
+        // update SyncRes Tx buffer in Edrv
+        Ret = EdrvUpdateTxMsgBuffer(&EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_SYNCRES]);
+        if (Ret != kEplSuccessful)
+        {
+            goto Exit;
         }
     }
 
@@ -7700,24 +7693,21 @@ tEplFrame*      pTxFrameSyncRes;
         AmiSetByteToBe(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_PREQ].m_abFilterValue[14],
                        kEplMsgTypePreq);
         AmiSetByteToBe(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_PREQ].m_abFilterMask[15],
-                       0xFF); // enable Dst Node ID filter, value has been set to own node ID
-        AmiSetByteToBe(&EplDllkInstance_g.m_aFilter[EPL_DLLK_FILTER_PREQ].m_abFilterMask[16],
-                       0x00); // disable Src Node ID filter, value stays at node ID of MN
+                       (BYTE) EplDllkInstance_g.m_DllConfigParam.m_uiNodeId); // Set Dst Node ID
 
         // disable auto-response delay
         EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_PRES].m_dwTimeOffsetNs = 0;
         EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_PRES + 1].m_dwTimeOffsetNs = 0;
 
+        EplDllkInstance_g.m_fPrcEnabled = FALSE;
+
         Ret = EdrvChangeFilter(EplDllkInstance_g.m_aFilter, EPL_DLLK_FILTER_COUNT,
-                               EPL_DLLK_FILTER_PREQ, EDRV_FILTER_CHANGE_VALUE
-                                                     | EDRV_FILTER_CHANGE_MASK
-                                                     | EDRV_FILTER_CHANGE_AUTO_RESPONSE_DELAY);
+                               EPL_DLLK_FILTER_PREQ,
+                               EDRV_FILTER_CHANGE_VALUE | EDRV_FILTER_CHANGE_AUTO_RESPONSE_DELAY);
         if (Ret != kEplSuccessful)
         {
             goto Exit;
         }
-
-        EplDllkInstance_g.m_fPrcEnabled = FALSE;
 
         pTxFrameSyncRes = (tEplFrame *) EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_SYNCRES].m_pbBuffer;
 
