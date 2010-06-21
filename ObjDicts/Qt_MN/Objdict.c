@@ -17,5 +17,6 @@
 
 #include "Epl.h"            // function prototype of OD callback function
 #include "EplObd.h"         // function prototypes of the EplOBD-Modul
+#include "user/EplPdou.h"   // function prototype of OD callback function
 #include "obdcfg.h" 
 #include "EplObjDef.h"
