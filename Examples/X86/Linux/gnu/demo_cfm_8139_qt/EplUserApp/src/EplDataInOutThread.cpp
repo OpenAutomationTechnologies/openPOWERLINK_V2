@@ -117,30 +117,70 @@ BYTE    bLedsRow2_l;        // current state of the LEDs in row 2
 
 EplDataInOutThread::EplDataInOutThread()
 {
-    m_EplPiIn.m_pImage  = &PiIn_g;
-    m_EplPiIn.m_uiSize  = sizeof (PiIn_g);
-    m_EplPiOut.m_pImage = &PiOut_g;
-    m_EplPiOut.m_uiSize  = sizeof (PiOut_g);
-
     dwMode_l = APP_DEFAULT_MODE;
     iMaxCycleCount_l = DEFAULT_MAX_CYCLE_COUNT;
 
     memset(&PiIn_g, 0, sizeof (PiIn_g));
     memset(&PiOut_g, 0,  sizeof (PiOut_g));
-/*
-    bVarOut1_l = 0;
-    bLedsRow1_l = 0;
-    bLedsRow2_l = 0;
-*/
 }
+
+
+tEplKernel EplDataInOutThread::SetupProcessImage()
+{
+tEplKernel          EplRet;
+unsigned int        uiVarEntries;
+
+    EplRet = EplApiProcessImageAlloc(sizeof (PiIn_g), sizeof (PiOut_g), 2 , 2);
+    if (EplRet != kEplSuccessful)
+    {
+        printf("EplApiProcessImageAlloc():  0x%X\n", EplRet);
+        goto Exit;
+    }
+
+    // link process variables to OD
+    uiVarEntries = 1;
+    EplRet = EplApiProcessImageLinkObject(0x6000, 0x01, memberoffs(tAppProcessImageIn, m_bVarIn1), FALSE, sizeof (PiIn_g.m_bVarIn1), &uiVarEntries);
+    if (EplRet != kEplSuccessful)
+    {
+        goto Exit;
+    }
+
+    uiVarEntries = 3;
+    EplRet = EplApiProcessImageLinkObject(0x2200, 0x01, memberoffs(tAppProcessImageIn, m_abSelect), FALSE, sizeof (PiIn_g.m_abSelect[0]), &uiVarEntries);
+    if (EplRet != kEplSuccessful)
+    {
+        goto Exit;
+    }
+
+    uiVarEntries = 1;
+    EplRet = EplApiProcessImageLinkObject(0x6200, 0x01, memberoffs(tAppProcessImageOut, m_bVarOut1), TRUE, sizeof (PiOut_g.m_bVarOut1), &uiVarEntries);
+    if (EplRet != kEplSuccessful)
+    {
+        goto Exit;
+    }
+
+    uiVarEntries = 1;
+    EplRet = EplApiProcessImageLinkObject(0x2000, 0x01, memberoffs(tAppProcessImageOut, m_bLedsRow1), TRUE, sizeof (PiOut_g.m_bLedsRow1), &uiVarEntries);
+    if (EplRet != kEplSuccessful)
+    {
+        goto Exit;
+    }
+
+    uiVarEntries = 1;
+    EplRet = EplApiProcessImageLinkObject(0x2000, 0x02, memberoffs(tAppProcessImageOut, m_bLedsRow2), TRUE, sizeof (PiOut_g.m_bLedsRow2), &uiVarEntries);
+    if (EplRet != kEplSuccessful)
+    {
+        goto Exit;
+    }
+
+Exit:
+    return EplRet;
+}
+
 
 void EplDataInOutThread::run()
 {
 tEplKernel          EplRet;
-/*
-BYTE    bVarIn1_l;
-BYTE    abSelect_l[3];      // pushbuttons from CNs
-*/
 BYTE    bModeSelect_l;      // state of the pushbuttons to select the mode
 BYTE    bSpeedSelect_l;     // state of the pushbuttons to increase/decrease the speed
 BYTE    bSpeedSelectOld_l = 0;
@@ -149,20 +189,26 @@ unsigned int uiLedsOld = 0;
 unsigned int uiInput;
 unsigned int uiInputOld = 0;
 
-    do
+tEplApiProcessImageCopyJob  PICopyJob;
+
+    PICopyJob.m_In.m_pPart      = &PiIn_g;
+    PICopyJob.m_In.m_uiOffset   = 0;
+    PICopyJob.m_In.m_uiSize     = sizeof (PiIn_g);
+    PICopyJob.m_Out.m_pPart     = &PiOut_g;
+    PICopyJob.m_Out.m_uiOffset  = 0;
+    PICopyJob.m_Out.m_uiSize    = sizeof (PiOut_g);
+    PICopyJob.m_uiPriority      = 0;
+    PICopyJob.m_fNonBlocking    = FALSE;
+
+    for (;;)
     {
 
-        EplRet = EplApiProcessImageExchangeIn(&m_EplPiIn);
+        EplRet = EplApiProcessImageExchange(&PICopyJob);
         if (EplRet != kEplSuccessful)
         {
             break;
         }
-/*
-        bVarIn1_l = abPiIn[0];
-        abSelect_l[0] = abPiIn[1];
-        abSelect_l[1] = abPiIn[2];
-        abSelect_l[2] = abPiIn[3];
-*/
+
         // collect inputs from CNs and own input
         bSpeedSelect_l = (PiIn_g.m_bVarIn1 | PiIn_g.m_abSelect[0]) & 0x07;
 
@@ -286,7 +332,6 @@ unsigned int uiInputOld = 0;
             }
             // set own output
             PiOut_g.m_bVarOut1 = PiOut_g.m_bLedsRow1;
-//            bVarOut1_l = (bLedsRow1_l & 0x03) | (bLedsRow2_l << 2);
 
             // restart cycle counter
             iCurCycleCount_l = iMaxCycleCount_l;
@@ -320,16 +365,9 @@ unsigned int uiInputOld = 0;
         {
             bSpeedSelectOld_l = 0;
         }
-/*
-        abPiOut[0] = bVarOut1_l;
-        abPiOut[1] = bLedsRow1_l;
-        abPiOut[2] = bLedsRow2_l;
-*/
+
         uiInput = ((PiIn_g.m_abSelect[1] | PiIn_g.m_abSelect[2]) & APP_LED_MASK)
                   | ((PiIn_g.m_abSelect[0] & APP_LED_MASK) << APP_LED_COUNT);
-
-        // leave sync callback function by passing the output process image to the stack
-        EplRet = EplApiProcessImageExchangeOut(&m_EplPiOut);
 
         uiLeds = PiOut_g.m_bLedsRow1 | (PiOut_g.m_bLedsRow2 << APP_LED_COUNT);
 
@@ -347,8 +385,8 @@ unsigned int uiInputOld = 0;
         }
 
 
+        QThread::msleep(8);
     }
-    while (EplRet == kEplSuccessful);
 }
 
 

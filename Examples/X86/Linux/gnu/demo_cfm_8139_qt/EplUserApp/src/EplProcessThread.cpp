@@ -119,6 +119,8 @@ const char* pszNmtState = NULL;
                     // because of user signal (CTRL-C) or critical EPL stack error
                     // -> also shut down EplApiProcess()
                     EplRet = kEplShutdown;
+                    // and unblock DataInDataOutThread
+                    EplApiProcessImageFree();
 
                     printf("AppCbEvent(kEplNmtGsOff) originating event = 0x%X\n",
                            pEventArg_p->m_NmtStateChange.m_NmtEvent);

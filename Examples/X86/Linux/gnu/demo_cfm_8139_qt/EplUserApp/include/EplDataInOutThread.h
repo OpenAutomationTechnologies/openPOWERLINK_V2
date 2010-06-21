@@ -41,13 +41,15 @@ public:
 
     void acknowledge();
 
+    tEplKernel SetupProcessImage();
+
 signals:
     void processImageInChanged(unsigned int uiData_p);
     void processImageOutChanged(unsigned int uiData_p);
 
 private:
-    tEplApiProcessImage m_EplPiIn;
-    tEplApiProcessImage m_EplPiOut;
+//    tEplApiProcessImage m_EplPiIn;
+//    tEplApiProcessImage m_EplPiOut;
 
     volatile unsigned int   m_uiAckCount;
     unsigned int            m_uiCount;

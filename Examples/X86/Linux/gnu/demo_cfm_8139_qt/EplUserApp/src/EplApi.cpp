@@ -123,8 +123,6 @@ EplApi::EplApi(MainWindow *pMainWindow_p, unsigned int uiNodeId_p)
 {
 const char*         sHostname = HOSTNAME;
 tEplKernel          EplRet;
-//tEplObdSize         ObdSize;
-//unsigned int        uiVarEntries;
 EplState*           pEplState;
 Slides*             pSlides;
 
@@ -212,45 +210,14 @@ Slides*             pSlides;
         goto Exit;
     }
 
-    EplRet = EplApiProcessImageSetup();
+    EplRet = pEplDataInOutThread->SetupProcessImage();
     if (EplRet != kEplSuccessful)
     {
-        printf("%s: EplApiProcessImageSetup() failed\n", __FUNCTION__);
+        printf("%s: pEplDataInOutThread->SetupProcessImage() failed\n", __FUNCTION__);
         goto Exit;
     }
     printf("Setup Process Image Successfull\n");
 
-/*
-    // link process variables to OD
-    ObdSize = sizeof(bVarIn_l);
-    uiVarEntries = 1;
-    EplRet = EplApiLinkObject(0x6000, &bVarIn_l, &uiVarEntries, &ObdSize, 0x01);
-    if (EplRet != kEplSuccessful)
-    {
-        goto Exit;
-    }
-
-    ObdSize = sizeof(bVarOut_l);
-    uiVarEntries = 1;
-    EplRet = EplApiLinkObject(0x6200, &bVarOut_l, &uiVarEntries, &ObdSize, 0x01);
-    if (EplRet != kEplSuccessful)
-    {
-        goto Exit;
-    }
-
-    // link a DOMAIN to object 0x6100, but do not exit, if it is missing
-    ObdSize = sizeof(abDomain_l);
-    uiVarEntries = 1;
-    EplRet = EplApiLinkObject(0x6100, &abDomain_l, &uiVarEntries, &ObdSize, 0x00);
-    if (EplRet != kEplSuccessful)
-    {
-        printf("EplApiDefineObject(0x6100): returns 0x%X\n", EplRet);
-    }
-
-    // reset old process variables
-    bVarInOld_l = 0;
-    bVarOutOld_l = 0;
-*/
     // start the EPL stack
     EplRet = EplApiExecNmtCommand(kEplNmtEventSwReset);
 
@@ -275,6 +242,9 @@ tEplKernel          EplRet;
     printf("wait for Off...\n");
     pEplProcessThread->waitForNmtStateOff();
     printf("reached Off\n");
+
+    EplRet = EplApiProcessImageFree();
+    printf("EplApiProcessImageFree():  0x%X\n", EplRet);
 
     EplRet = EplApiShutdown();
     printf("EplApiShutdown():  0x%X\n", EplRet);
