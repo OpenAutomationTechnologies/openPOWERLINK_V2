@@ -745,10 +745,10 @@ tEplKernel      Ret = kEplSuccessful;
 int             iRet;
 tEplLinProcessImageAlloc    PIAlloc;
 
-    PIAlloc.m_uiSizeProcessImageIn  = uiSizeProcessImageIn_p
-    PIAlloc.m_uiSizeProcessImageOut = uiSizeProcessImageOut_p
-    PIAlloc.m_uiQueueEntriesLo      = uiQueueEntriesLo_p
-    PIAlloc.m_uiQueueEntriesHi      = uiQueueEntriesHi_p
+    PIAlloc.m_uiSizeProcessImageIn  = uiSizeProcessImageIn_p;
+    PIAlloc.m_uiSizeProcessImageOut = uiSizeProcessImageOut_p;
+    PIAlloc.m_uiQueueEntriesLo      = uiQueueEntriesLo_p;
+    PIAlloc.m_uiQueueEntriesHi      = uiQueueEntriesHi_p;
 
     iRet = ioctl (EplApiInstance_g.m_hDrvInst, EPLLIN_CMD_PI_ALLOC, &PIAlloc);
     Ret = (tEplKernel)iRet;
@@ -816,12 +816,12 @@ tEplKernel      Ret = kEplSuccessful;
 int             iRet;
 tEplLinProcessImageLinkObject   PILinkObject;
 
-    PILinkObject.m_uiObjIndex       = uiObjIndex_p
-    PILinkObject.m_uiFirstSubindex  = uiFirstSubindex_p
-    PILinkObject.m_uiOffsetPI       = uiOffsetPI_p
-    PILinkObject.m_fOutputPI        = fOutputPI_p
-    PILinkObject.m_EntrySize        = EntrySize_p
-    PILinkObject.m_uiVarEntries     = puiVarEntries_p
+    PILinkObject.m_uiObjIndex       = uiObjIndex_p;
+    PILinkObject.m_uiFirstSubindex  = uiFirstSubindex_p;
+    PILinkObject.m_uiOffsetPI       = uiOffsetPI_p;
+    PILinkObject.m_fOutputPI        = fOutputPI_p;
+    PILinkObject.m_EntrySize        = EntrySize_p;
+    PILinkObject.m_puiVarEntries    = puiVarEntries_p;
 
     iRet = ioctl (EplApiInstance_g.m_hDrvInst, EPLLIN_CMD_PI_LINKOBJECT, &PILinkObject);
     Ret = (tEplKernel)iRet;

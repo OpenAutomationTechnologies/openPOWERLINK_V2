@@ -74,7 +74,7 @@
 #include <linux/module.h>
 #include <linux/fs.h>
 #include <linux/types.h>
-
+#include <linux/semaphore.h>
 //#include <linux/errno.h>
 
 // scheduling
@@ -618,7 +618,7 @@ int  iRet;
             }
 
             // free process image which unlocks any blocking threads of application
-            EplApiProcessImageFree():
+            EplApiProcessImageFree();
 
             TRACE0("EPL: - EPLLIN_CMD_SHUTDOWN\n");
             iRet = 0;

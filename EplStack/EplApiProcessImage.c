@@ -75,6 +75,7 @@
 #if (TARGET_SYSTEM == _LINUX_) && defined(__KERNEL__)
 #include <asm/uaccess.h>
 #include <linux/completion.h>
+#include <linux/semaphore.h>
 #include <asm/current.h>
 #endif
 
@@ -176,6 +177,7 @@ typedef struct
     tEplSyncCb          m_pfnOrgCbSync;
 #if (TARGET_SYSTEM == _LINUX_) && defined(__KERNEL__)
     struct task_struct* m_pCurrentTask;
+    struct semaphore    m_SemaCbSync;
 #elif (TARGET_SYSTEM == _WIN32_)
     DWORD               m_dwCurrentThreadId;
 #else
@@ -252,6 +254,7 @@ tEplKernel PUBLIC EplApiProcessImageAlloc(
 {
 tEplKernel      Ret = kEplSuccessful;
 tShbError       ShbError;
+unsigned int    fShbNewCreated;
 
     if ((EplApiProcessImageInstance_g.m_In.m_pImage != NULL)
         || (EplApiProcessImageInstance_g.m_Out.m_pImage != NULL))
@@ -293,6 +296,10 @@ tShbError       ShbError;
         Ret = kEplNoResource;
         goto Exit;
     }
+
+#if (TARGET_SYSTEM == _LINUX_) && defined(__KERNEL__)
+    sema_init(&EplApiProcessImageInstance_g.m_SemaCbSync, 0);
+#endif
 
     EplApiProcessImageInstance_g.m_pfnOrgCbSync = EplDllkRegSyncHandler(EplApiProcessImageCbSync);
 
@@ -365,6 +372,11 @@ tEplApiProcessImageCopyJobInt   CopyJob;
         {
             break;
         }
+    }
+
+    if (Ret == kEplApiPIJobQueueEmpty)
+    {
+        Ret = kEplSuccessful;
     }
 
     EPL_FREE(EplApiProcessImageInstance_g.m_In.m_pImage);
@@ -516,6 +528,13 @@ tEplApiProcessImageCopyJobInt   IntCopyJob;
             goto Exit;
         }
     }
+#if (TARGET_SYSTEM == _LINUX_) && defined(__KERNEL__)
+    else
+    {
+        Ret = kEplApiPINonBlockingNotSupp;
+        goto Exit;
+    }
+#endif
 
     Ret = EplApiProcessImagePostCopyJob(&IntCopyJob);
 
@@ -531,6 +550,14 @@ tEplApiProcessImageCopyJobInt   IntCopyJob;
                 // therefor, indicate shutdown to application thread
                 Ret = kEplShutdown;
             }
+#if (TARGET_SYSTEM == _LINUX_) && defined(__KERNEL__)
+            else
+            {
+                Ret = EplApiProcessImageExchangeInt(&IntCopyJob.m_CopyJob);
+            }
+            // signal completion of copy job back to CbSync
+            up(&EplApiProcessImageInstance_g.m_SemaCbSync);
+#endif
         }
 
         EplApiProcessImageDeleteCompletion(&IntCopyJob);
@@ -779,9 +806,24 @@ tEplKernel      Ret = kEplSuccessful;
         void*   pPIVar = ((BYTE*) EplApiProcessImageInstance_g.m_In.m_pImage) + pCopyJob_p->m_In.m_uiOffset;
 
             #if (TARGET_SYSTEM == _LINUX_) && defined(__KERNEL__)
-                copy_to_user(pCopyJob_p->m_In.m_pPart,
+            int     iErr;
+
+                iErr = copy_to_user(pCopyJob_p->m_In.m_pPart,
                     pPIVar,
                     pCopyJob_p->m_In.m_uiSize);
+                if (iErr != 0)
+                {
+                    PRINTF("%s: copy_to_user(%p, %p, %u) returned %i\n",
+                            __func__,
+                            pCopyJob_p->m_In.m_pPart,
+                            pPIVar,
+                            pCopyJob_p->m_In.m_uiSize,
+                            iErr);
+
+                    Ret = kEplApiPIInvalidPIPointer;
+                    goto Exit;
+                }
+
             #else
                 EPL_MEMCPY(pCopyJob_p->m_In.m_pPart,
                     pPIVar,
@@ -799,9 +841,24 @@ tEplKernel      Ret = kEplSuccessful;
         void*   pPIVar = ((BYTE*) EplApiProcessImageInstance_g.m_Out.m_pImage) + pCopyJob_p->m_Out.m_uiOffset;
 
             #if (TARGET_SYSTEM == _LINUX_) && defined(__KERNEL__)
-                copy_from_user(pPIVar,
+            int     iErr;
+
+                iErr = copy_from_user(pPIVar,
                     pCopyJob_p->m_Out.m_pPart,
                     pCopyJob_p->m_Out.m_uiSize);
+                if (iErr != 0)
+                {
+                    PRINTF("%s: copy_from_user(%p, %p, %u) returned %i\n",
+                            __func__,
+                            pPIVar,
+                            pCopyJob_p->m_Out.m_pPart,
+                            pCopyJob_p->m_Out.m_uiSize,
+                            iErr);
+
+                    Ret = kEplApiPIInvalidPIPointer;
+                    goto Exit;
+                }
+
             #else
                 EPL_MEMCPY(pPIVar,
                     pCopyJob_p->m_Out.m_pPart,
@@ -810,7 +867,9 @@ tEplKernel      Ret = kEplSuccessful;
         }
     }
 
+#if (TARGET_SYSTEM == _LINUX_) && defined(__KERNEL__)
 Exit:
+#endif
     return Ret;
 }
 
@@ -910,7 +969,7 @@ unsigned long   ulCopyJobSize = 0;
     }
     if (ulCopyJobCount > 0)
     {
-        ShbError = ShbCirReadDataBlock (ShbInstanceTxSync, pCopyJob_p, sizeof (*pCopyJob_p), &ulCopyJobSize);
+        ShbError = ShbCirReadDataBlock (ShbInstance, pCopyJob_p, sizeof (*pCopyJob_p), &ulCopyJobSize);
         if (ShbError != kShbOk)
         {
             Ret = kEplNoResource;
@@ -992,14 +1051,14 @@ static tEplKernel EplApiProcessImageWaitForCompletion(
 tEplKernel      Ret = kEplSuccessful;
 
 #if (TARGET_SYSTEM == _LINUX_) && defined(__KERNEL__)
-    wait_for_complete(pCopyJob_p->m_Event.m_pCompletion);
+    wait_for_completion(pCopyJob_p->m_Event.m_pCompletion);
 #elif (TARGET_SYSTEM == _WIN32_)
     WaitForSingleObject(pCopyJob_p->m_Event.m_hEvent, INFINITE);
 #else
 #error "OS currently not supported by EplApiProcessImage!"
 #endif
 
-Exit:
+//Exit:
     return Ret;
 }
 
@@ -1072,7 +1131,7 @@ tEplKernel      Ret = kEplSuccessful;
         // $$$ post special event to event queue
     }
 
-Exit:
+//Exit:
     return Ret;
 }
 
@@ -1094,6 +1153,9 @@ Exit:
 static tEplKernel PUBLIC EplApiProcessImageCbSync(void)
 {
 tEplKernel                      Ret = kEplSuccessful;
+#if !((TARGET_SYSTEM == _LINUX_) && defined(__KERNEL__))
+tEplKernel                      RetExchange;
+#endif
 tEplApiProcessImageCopyJobInt   CopyJob;
 
     // memorize current thread, so that Exchange() can detect if it is called from within this function
@@ -1117,17 +1179,28 @@ tEplApiProcessImageCopyJobInt   CopyJob;
     Ret = EplApiProcessImageFetchCopyJob(0, &CopyJob);
     if (Ret == kEplSuccessful)
     {
-        Ret = EplApiProcessImageExchangeInt(&CopyJob.m_CopyJob);
-        if (Ret != kEplSuccessful)
-        {
-            goto Exit;
-        }
+#if !((TARGET_SYSTEM == _LINUX_) && defined(__KERNEL__))
+        RetExchange = EplApiProcessImageExchangeInt(&CopyJob.m_CopyJob);
+#endif
 
         Ret = EplApiProcessImageSignalCompletion(&CopyJob);
+#if !((TARGET_SYSTEM == _LINUX_) && defined(__KERNEL__))
+        if (RetExchange != kEplSuccessful)
+        {
+            Ret = RetExchange;
+            goto Exit;
+        }
+#endif
+
         if (Ret != kEplSuccessful)
         {
             goto Exit;
         }
+#if (TARGET_SYSTEM == _LINUX_) && defined(__KERNEL__)
+        // wait until Exchange function completes the copy job
+        down_killable(&EplApiProcessImageInstance_g.m_SemaCbSync);
+#endif
+
     }
     else if (Ret != kEplApiPIJobQueueEmpty)
     {
@@ -1137,22 +1210,35 @@ tEplApiProcessImageCopyJobInt   CopyJob;
     Ret = EplApiProcessImageFetchCopyJob(1, &CopyJob);
     if (Ret == kEplSuccessful)
     {
-        Ret = EplApiProcessImageExchangeInt(&CopyJob.m_CopyJob);
-        if (Ret != kEplSuccessful)
-        {
-            goto Exit;
-        }
+#if !((TARGET_SYSTEM == _LINUX_) && defined(__KERNEL__))
+        RetExchange = EplApiProcessImageExchangeInt(&CopyJob.m_CopyJob);
+#endif
 
         Ret = EplApiProcessImageSignalCompletion(&CopyJob);
+#if !((TARGET_SYSTEM == _LINUX_) && defined(__KERNEL__))
+        if (RetExchange != kEplSuccessful)
+        {
+            Ret = RetExchange;
+            goto Exit;
+        }
+#endif
+
         if (Ret != kEplSuccessful)
         {
             goto Exit;
         }
+#if (TARGET_SYSTEM == _LINUX_) && defined(__KERNEL__)
+        // wait until Exchange function completes the copy job
+        down_killable(&EplApiProcessImageInstance_g.m_SemaCbSync);
+#endif
+
     }
     else if (Ret != kEplApiPIJobQueueEmpty)
     {
         goto Exit;
     }
+
+    Ret = kEplSuccessful;
 
 Exit:
 #if (TARGET_SYSTEM == _LINUX_) && defined(__KERNEL__)

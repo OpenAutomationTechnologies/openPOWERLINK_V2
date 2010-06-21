@@ -237,6 +237,8 @@ typedef enum
     kEplApiPIJobQueueFull       = 0x0149,       // process image: job queue is full
     kEplApiPIJobQueueEmpty      = 0x014A,       // process image: job queue is empty
     kEplApiPIInvalidJobSize     = 0x014B,       // process image: invalid job size
+    kEplApiPIInvalidPIPointer   = 0x014C,       // process image: pointer to application's process image is invalid
+    kEplApiPINonBlockingNotSupp = 0x014D,       // process image: non-blocking copy jobs are not supported on this target
 
     // area until 0x07FF is reserved
     // area for user application from 0x0800 to 0x7FFF
