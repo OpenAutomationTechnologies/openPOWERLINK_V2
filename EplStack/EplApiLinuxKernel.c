@@ -456,6 +456,9 @@ int  iRet;
 
         }
 
+        // free process image
+        EplApiProcessImageFree();
+
         TRACE0("EPL:   call EplApiShutdown()\n");
         // EPL stack can be safely shut down
         // delete instance for all EPL modules
@@ -613,6 +616,9 @@ int  iRet;
                 EplRet = EplApiExecNmtCommand(kEplNmtEventSwitchOff);
 
             }
+
+            // free process image which unlocks any blocking threads of application
+            EplApiProcessImageFree():
 
             TRACE0("EPL: - EPLLIN_CMD_SHUTDOWN\n");
             iRet = 0;
