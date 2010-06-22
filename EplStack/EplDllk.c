@@ -4841,6 +4841,15 @@ BYTE            bFlag1;
                 {
                     EplDllkInstance_g.m_dwPrcPResTimeFirst = PrcCycleTiming.m_dwPResTimeFirstNs;
 
+                    EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_PRES].m_dwTimeOffsetNs = PrcCycleTiming.m_dwPResTimeFirstNs;
+                    Ret = EdrvChangeFilter(EplDllkInstance_g.m_aFilter, EPL_DLLK_FILTER_COUNT,
+                                           EPL_DLLK_FILTER_PREQ,
+                                           EDRV_FILTER_CHANGE_AUTO_RESPONSE_DELAY);
+                    if (Ret != kEplSuccessful)
+                    {
+                        goto Exit;
+                    }
+
                     AmiSetDwordToLe(&pTxFrameSyncRes->m_Data.m_Asnd.m_Payload.m_SyncResponse.m_le_dwPResTimeFirst,
                                     PrcCycleTiming.m_dwPResTimeFirstNs);
                     AmiSetDwordToLe(&pTxFrameSyncRes->m_Data.m_Asnd.m_Payload.m_SyncResponse.m_le_dwSyncStatus,
@@ -5088,7 +5097,9 @@ unsigned int    uiNodeId;
             DWORD   dwSyncDelayNs;
 
                 dwSyncDelayNs = EplTgtTimeStampTimeDiffNs(EplDllkInstance_g.m_pSyncReqPrevTimeStamp,
-                                                          pRxBuffer_p->m_pTgtTimeStamp);
+                                                          pRxBuffer_p->m_pTgtTimeStamp)
+                                // Transmission time for SyncReq frame
+                                - (EPL_C_DLL_T_MIN_FRAME + EPL_C_DLL_T_PREAMBLE);
 
                 // update SyncRes frame (SyncDelay and SyncNodeNumber)
                 AmiSetDwordToLe(&pTxFrameSyncRes->m_Data.m_Asnd.m_Payload.m_SyncResponse.m_le_dwSyncDelay, dwSyncDelayNs);
@@ -7635,7 +7646,6 @@ tEplFrame*      pTxFrameSyncRes;
                        EPL_C_ADR_BROADCAST); // Set Destination Node ID to C_ADR_BROADCAST
 
         EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_PRES].m_dwTimeOffsetNs = EplDllkInstance_g.m_dwPrcPResTimeFirst;
-        EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_PRES + 1].m_dwTimeOffsetNs = EplDllkInstance_g.m_dwPrcPResTimeFirst;
 
         Ret = EdrvChangeFilter(EplDllkInstance_g.m_aFilter, EPL_DLLK_FILTER_COUNT,
                                EPL_DLLK_FILTER_PREQ,
@@ -7697,7 +7707,6 @@ tEplFrame*      pTxFrameSyncRes;
 
         // disable auto-response delay
         EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_PRES].m_dwTimeOffsetNs = 0;
-        EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_PRES + 1].m_dwTimeOffsetNs = 0;
 
         EplDllkInstance_g.m_fPrcEnabled = FALSE;
 
