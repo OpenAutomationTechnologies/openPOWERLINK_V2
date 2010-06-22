@@ -2222,7 +2222,7 @@ tEplNmtMnuNodeInfo* pNodeInfo;
     pNodeInfo = EplNmtMnuInstance_g.m_aNodeInfo;
     for (uiIndex = 1; uiIndex <= tabentries(EplNmtMnuInstance_g.m_aNodeInfo); uiIndex++, pNodeInfo++)
     {
-        if (pNodeInfo->m_NodeState == kEplNmtMnuNodeStateConfigured)
+        if (pNodeInfo->m_NodeState != kEplNmtMnuNodeStateUnknown)
         {
         tEplTimerArg    TimerArg;
         BYTE            bNmtState;
@@ -2250,7 +2250,8 @@ tEplNmtMnuNodeInfo* pNodeInfo;
                 goto Exit;
             }
 
-            if ((EplNmtMnuInstance_g.m_wFlags & EPL_NMTMNU_FLAG_HALTED) == 0)
+            if ((pNodeInfo->m_NodeState == kEplNmtMnuNodeStateConfigured) &&
+                ((EplNmtMnuInstance_g.m_wFlags & EPL_NMTMNU_FLAG_HALTED) == 0))
             {   // boot process is not halted
                 // set flag "not scanned"
                 pNodeInfo->m_wFlags |= EPL_NMTMNU_NODE_FLAG_NOT_SCANNED;
