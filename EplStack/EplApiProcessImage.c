@@ -256,6 +256,13 @@ tEplKernel      Ret = kEplSuccessful;
 tShbError       ShbError;
 unsigned int    fShbNewCreated;
 
+    TRACE5("%s: Alloc(%u, %u, %u, %u)\n",
+          __func__,
+          uiSizeProcessImageIn_p,
+          uiSizeProcessImageOut_p,
+          uiQueueEntriesLo_p,
+          uiQueueEntriesHi_p);
+
     if ((EplApiProcessImageInstance_g.m_In.m_pImage != NULL)
         || (EplApiProcessImageInstance_g.m_Out.m_pImage != NULL))
     {
@@ -278,6 +285,13 @@ unsigned int    fShbNewCreated;
         goto Exit;
     }
     EplApiProcessImageInstance_g.m_Out.m_uiSize = uiSizeProcessImageOut_p;
+
+    TRACE5("%s: Alloc(%p, %u, %p, %u)\n",
+          __func__,
+          EplApiProcessImageInstance_g.m_In.m_pImage,
+          EplApiProcessImageInstance_g.m_In.m_uiSize,
+          EplApiProcessImageInstance_g.m_Out.m_pImage,
+          EplApiProcessImageInstance_g.m_Out.m_uiSize);
 
     ShbError = ShbCirAllocBuffer (uiQueueEntriesLo_p * sizeof (tEplApiProcessImageCopyJobInt), EPL_API_PI_BUFFER_ID_LO,
         &EplApiProcessImageInstance_g.m_ShbInstanceJobQueueLo, &fShbNewCreated);
@@ -511,7 +525,7 @@ tEplApiProcessImageCopyJobInt   IntCopyJob;
     }
 
     if ((EplApiProcessImageInstance_g.m_In.m_uiSize == 0)
-        || (EplApiProcessImageInstance_g.m_Out.m_uiSize = 0))
+        || (EplApiProcessImageInstance_g.m_Out.m_uiSize == 0))
     {   // the process image has been freed
         // therefor, indicate shutdown to application thread
         Ret = kEplShutdown;
@@ -545,7 +559,7 @@ tEplApiProcessImageCopyJobInt   IntCopyJob;
             EplApiProcessImageWaitForCompletion(&IntCopyJob);
 
             if ((EplApiProcessImageInstance_g.m_In.m_uiSize == 0)
-                || (EplApiProcessImageInstance_g.m_Out.m_uiSize = 0))
+                || (EplApiProcessImageInstance_g.m_Out.m_uiSize == 0))
             {   // in the mean time the process image has been freed
                 // therefor, indicate shutdown to application thread
                 Ret = kEplShutdown;
@@ -858,7 +872,6 @@ tEplKernel      Ret = kEplSuccessful;
                     Ret = kEplApiPIInvalidPIPointer;
                     goto Exit;
                 }
-
             #else
                 EPL_MEMCPY(pPIVar,
                     pCopyJob_p->m_Out.m_pPart,
