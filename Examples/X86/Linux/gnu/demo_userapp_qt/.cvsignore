@@ -1,0 +1,5 @@
+demo_userapp_qt
+demo_userapp_qt.pro
+Makefile
+moc_*
+qrc_*

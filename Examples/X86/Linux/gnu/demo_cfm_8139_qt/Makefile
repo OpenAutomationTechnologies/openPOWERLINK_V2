@@ -2,6 +2,9 @@
 
 MODULENAME = epl
 
+QTDEMODIR = ../demo_userapp_qt
+QTDEMONAME = demo_userapp_qt
+
 # ------------------------- Secondary Call ----------------------------------
 ifneq ($(KERNELRELEASE),)
 
@@ -11,7 +14,7 @@ MAINDIR	:= $(src)/$(MAINPATH)
 
 # include paths
 INCLUDES	:= -I$(MAINDIR)/Include \
-			  -I$(src) \
+			  -I$(src)/include \
 			  -I$(MAINDIR)/Target/PLCcore-CF54/Linux/gnu/generic \
 			  -I$(MAINDIR)/SharedBuff \
 			  -I$(MAINDIR)/ObjDicts/Qt_MN
@@ -80,12 +83,13 @@ PWD				:= $(shell pwd)
 
 .PHONY:     all
 all:
-			$(MAKE)	-C $(KDIR) M=$(PWD) modules
-			if [ ! -L EplUserApp/include/epl ] ; then ln -s ../../../../../../../Include EplUserApp/include/epl ; fi
-			if [ ! -e EplUserApp/EplUserApp.pro ] ; then cd EplUserApp ; qmake -project -unix ; fi
-			if [ ! -e EplUserApp/Makefile ] ; then cd EplUserApp ; qmake -unix ; fi
-			cd EplUserApp && make
-			dos2unix -p EplLoad
+			@$(MAKE) -C $(KDIR) M=$(PWD) modules
+			@if [ ! -L $(QTDEMODIR)/include/eplstack ] ; then ln -s ../../../../../../Include $(QTDEMODIR)/include/eplstack ; fi
+			@if [ ! -L $(QTDEMODIR)/include/eplcfg -o "`readlink -f $(QTDEMODIR)/include/eplcfg`" != "$(PWD)/include" ] ; then echo "Create link for EplCfg.h" ; rm -f $(QTDEMODIR)/include/eplcfg $(QTDEMODIR)/$(QTDEMONAME).pro $(QTDEMODIR)/Makefile ; ln -s "$(PWD)/include" $(QTDEMODIR)/include/eplcfg ; fi
+			@if [ ! -e $(QTDEMODIR)/$(QTDEMONAME).pro ] ; then echo "Create Qt project file" ; cd $(QTDEMODIR) ; qmake -project -unix ; rm -f $(QTDEMODIR)/Makefile ; fi
+			@if [ ! -e $(QTDEMODIR)/Makefile ] ; then echo "Create Makefile from Qt project file" ; cd $(QTDEMODIR) ; qmake -unix ; fi
+			$(MAKE) -C $(QTDEMODIR)
+			@dos2unix -p EplLoad
 			dos2unix -p EplUnload
 			chmod +x EplLoad EplUnload
 
