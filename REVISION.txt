@@ -504,3 +504,169 @@ Fellow worker:    Daniel Krüger (d.k.)
                       EPL_OBD_RAM_INDEX_RAM_PDO_MAPPING
                     (d.k.)
 
+01.03.2010 V1.7     - PosixFileLinuxKernel.c: added include for linux/sched.h, 
+                      because some kernel versions need this
+                    (d.k.)
+
+11.03.2010 V1.7     - added new Qt demo with Configuration Manager
+                    (d.k.)
+
+16.03.2010 V1.7     - EplApiGeneric.c: added #ifdef to EplApiProcess function if SharedBuff is disabled.
+                   (d.k.)
+
+19.03.2010 V1.7     - added speed selection feature to Qt CFM demo for Linux
+                    - OD of Qt demo: objdict.h uses the new generic includes
+                    - added new EdrvCyclic module
+                    (d.k.)
+
+22.03.2010 V1.7     - Fixed values of constants EPL_C_DLL_T_IFG and EPL_C_DLL_T_PREAMBLE
+                    - Started implementation of PRes Chaining CN support
+                    (m.u.)
+
+24.03.2010 V1.7     - EplDllk: Disable auto-response when CN enters state NMT_CS_STOPPED
+                      In contrast to the previous behaviour, the rx-filter stays enabled.
+                    (m.u.)
+
+01.04.2010 V1.7     - generic objdict_*.h: fixed wrong sub-index count of object 0x1F8A
+                    (d.k.)
+
+06.04.2010 V1.7     - EplTarget.h: Add defines for EPL_MEMCPY, MEMSET and MEMCMP if not defined for the current target
+                    - EplDllk: Use puiHandle_p in EplDllkCreateTxFrame for acceleration of PReq frame search
+                    - EplDllk: Rename element m_be_abSrcMac of EplDllkInitParam and EplDllkInstance to m_be_abLocalMac
+                    (m.u.)
+
+08.04.2010 V1.7     - demo_mn_82573_kernel: Add demo for Intel 82573 Ethernet controller
+                    (m.u.)
+
+13.04.2010 V1.7     - EplTarget.h:
+                      * Add default macro definitions for EPL_MALLOC and EPL_FREE without type casts
+                        The specific macro definitions have been removed from target _NO_OS_.
+                      * Remove ';' after memcpy and memset macro definitions
+                        This has already been introduced for memcmp and allows usage of the
+                        macros in a more flexible way.
+                    (m.u.)
+
+14.04.2010 V1.7     - demo projects for Altera FPGA: added support for node-ID hex switch
+                    (d.k.)
+
+26.04.2010 V1.7     - increased EPL_MAX_EVENT_ARG_SIZE, so it is large enough for PDO channel configuration;
+                      additionally, moved Rx data buffer in event modules from stack to local static memory.
+                    (d.k.)
+
+27.04.2010 V1.7     - SDO command layer:
+                      * fixed bugs in SDO server (wrong segment size on ReadByIndex on segmented transfer
+                        and wrong segmented transfer on WriteByIndex)
+                      * and on SDO client side (wrongly calculated number of transferred bytes)
+                    - SDO sequence layer: go to state WaitAck right when last free history entry is used
+                    - fixed const pointer mismatch in OBD module
+                    (d.k.)
+
+28.04.2010 V1.7     - changed interface between DLLk module and ErrorHandlerk:
+                      added PostError and CycleFinished function to ErrorHandlerk
+                    - added FPGA project for SYS TEC ECUcore-EP3C (new system-on-module with Altera Cyclone III)
+                    (d.k.)
+
+29.04.2010 V1.7     - EplDllk: Add error handling for the case that the last SoA of the reduced cycle phase is not answered
+                    - Edrv8139:
+                      * Use tx callback function of tx buffer instead of a common tx callback function
+                      * Use new m_BufferNumber union
+                    - EdrvFec_548x:
+                      * Use tx callback function of tx buffer instead of a common tx callback function
+                      * Use new m_BufferNumber union
+                    (m.u.)
+
+30.04.2010 V1.7     - EplDllk: renamed structure element m_dwPresTimeout to m_dwPresTimeoutNs
+                    - changed interface between DLLk and ErrorHandlerk:
+                      ErrorHandlerk gets byte array with CN node-IDs of finished cycle from DLLk
+                    (d.k.)
+
+04.05.2010 V1.7     - EplNmtk: Added error handling for EplDllkProcess
+                    (m.u.)
+                    - finished EdrvCyclic support of DLLk module.
+                      This includes double buffering of Tx frames.
+                    (d.k.)
+
+06.05.2010 V1.7     - implemented generation of error history entries in ErrorHandlerk
+                    - DLL: issue CycleTimeExceeded errors on particular EdrvCyclic errors
+                    - EdrvOpenMac: updated Tx buffer handling to new interface (seperate Tx handler for each Tx buffer)
+                    - added EdrvCyclic to all Makefile's for X86 (only MN demo projects)
+                    - removed TxHandler parameter in init parameter structure of Edrv
+                    - EplApiGeneric: forward application date and time and vendor specific extensions from init structure to DLL
+                    (d.k.)
+
+07.05.2010 V1.7     - added handling of kEplApiEventHistoryEntry to all demo projects
+                    (d.k.)
+
+21.05.2010 V1.7     - added fexible Sync to DLL in MN-mode
+                    (d.k.)
+
+26.05.2010 V1.7     - EplNmtMnu:
+                      * Added function EplNmtMnuAddNodeIsochronous
+                      * Added event handling for kEplEventTypeNmtMnuNodeAdded
+                      * Moved add node from BootStep2 to NmtStateChange PreOp2
+                      * Started implementation of PRes Chaining MN support
+                    (m.u.)
+
+01.06.2010 V1.7     - updated EdrvNetx.c and the corresponding MN demo for new EdrvCyclic module
+                    - renamed demo_pcap_cfm project from demo_pcap to demo_pcap_cfm
+                    (d.k.)
+                    - EplNmtMnu: Set expected node NMT state in dependence to MN state
+                    (m.u.)
+
+02.06.2010 V1.7     - updated Edrv9003.c and the corresponding MN demo for new EdrvCyclic module
+                    (d.k.)
+
+03.06.2010 V1.7     - Generic objdict 0x1b00-0x1fff: Fixed 1C02h subindex 03h default value to 15
+                    (m.u.)
+                    - EplTarget.h: removed casts on malloc, memcpy etc. function parameters for
+                      Linux (kernel and user space)
+                    (d.k.)
+
+04.06.2010 V1.7     - EplCfmu.c: if configuration process is running when starting a new one,
+                      the old one will be aborted first
+                    - EplDll:
+                      * added error handling when too large ASndServiceId is registered
+                      * increased number of ASndServiceIds if PRC MN is enabled
+                    - EplSdoComu.c:
+                      * indicate TxAborted to the application when SDO abort was send by the client itself
+                      * handle EplSdoComSdoAbort even if connection has not been established yet
+                    - Edrv9003.c: added option to enable port monitoring on port0
+                    (d.k.)
+
+07.06.2010 V1.7     - fixed XDD for 3r1tpdo demo (wrong index and subindex number of process variables)
+                    (d.k.)
+
+09.06.2010 V1.7     - Added CFM project PResChaining_9CN_7PRC for openCONFIGURATOR to the openPOWERLINK package
+                    - Added demo_cfm_82573_kernel project
+                    (m.u.)
+
+10.06.2010 V1.7     - added EPL_ prefix to DEFINED_*_VERSION macros
+                    - reversed version number ordering in EPL_STACK_VERSION.
+                      The major version is on the MSB position now and the release number on the LSB position.
+                      This allows a comparison of version numbers, e.g. for #if.
+                    - fixed compiler errors and warnings
+                    - EplNmtMnu.c: fixed handling ReadyToOp and ErrorTreatment: update current NMT state in OD and inform application about this
+                    (d.k.)
+
+14.06.2010 V1.7     - EplPdok.c: set PDO size to zero if no valid PDO exists, otherwise the old PDO size remains.
+                    (d.k.)
+
+16.06.2010 V1.7     - ShbIpc-LinuxKernel: Set real-time priority -80 for SharedBuffer with
+                                          highest nice priority if RT-PREEMPT support is present
+                    (m.u.)
+
+17.06.2010 V1.7     - implemented new ProcessImage functionality and API
+                    - PDO: return kEplPdoVarNotFound instead of original error code if mapped object does not exist
+                    (d.k.)
+                    - EplSdoUdpu: Fixed warnings on 64-bit architectures
+                    - ObjDicts/CiA401_3r1tpdo_CN: Added xdd with PResChaining support
+                    (m.u.)
+
+21.06.2010 V1.7     - adapted Qt CFM demo for 8139 to new ProcessImage API
+                    (d.k.)
+
+22.06.2010 V1.7     - moved Qt user-space demo project to separate directory, because it is generic
+                      for several Linux kernel modules for different Ethernet controllers.
+                    (d.k.)
+                    - EplNmtMnu: Fixed bug in start of BootStep2
+                    (m.u.)
