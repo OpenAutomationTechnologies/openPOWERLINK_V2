@@ -39,10 +39,9 @@
 ------------------------------------------------------------------------------------------------------------------------
 -- Version History
 ------------------------------------------------------------------------------------------------------------------------
---	           V0.00-0.20   Aus Standard Mac generiert
--- 2009-03-30  V0.30        Fehler bei Rx-Dam : Rx_Dma_Inh und gleich auch Tx_DmaAckl
---                                             Ist von 10 MBaud übergeblieben.
+--	           V0.00-0.30   First generation.
 -- 2009-08-07  V0.31        Converted to official version.
+-- 2010-04-12  V0.40		Added Auto-Response Delay functionality (TxDel)
 ------------------------------------------------------------------------------------------------------------------------
 
 LIBRARY ieee;
@@ -52,7 +51,8 @@ USE ieee.std_logic_unsigned.ALL;
 
 ENTITY OpenMAC IS
 	GENERIC( HighAdr                : IN    integer := 16;
-             Timer                  : IN    boolean := true;
+			 Timer                  : IN    boolean := true;
+			 TxDel					: IN	boolean := true;
              Simulate               : IN    boolean := false
            );
 	PORT ( nRes, Clk                : IN    std_logic;
@@ -366,7 +366,7 @@ BEGIN
 END PROCESS Calc;
 
 bTxDesc:	BLOCK
-	TYPE	sDESC	IS	(sIdle, sLen, sTimL, sTimH, sAdrH, sAdrL, sBegL, sBegH, sData, sStat, sColl );
+	TYPE	sDESC	IS	(sIdle, sLen, sTimL, sTimH, sAdrH, sAdrL, sBegL, sBegH, sDel, sData, sStat, sColl );
 	SIGNAL	Dsm, Tx_Dsm_Next					: sDESC;
 	SIGNAL	DescRam_Out, DescRam_In				: std_logic_vector(15 DOWNTO 0);
 	 ALIAS	TX_LEN								: std_logic_vector(11 DOWNTO 0)	IS	DescRam_Out(11 DOWNTO 0);
@@ -385,6 +385,7 @@ bTxDesc:	BLOCK
 	SIGNAL	ZeitL								: std_logic_vector(15 DOWNTO 0);	
 	SIGNAL	Tx_Ie, Tx_Wait						: std_logic;
 	SIGNAL	Tx_BegInt, Tx_BegSet, Tx_Early		: std_logic;
+	SIGNAL	Tx_Del								: std_logic;
 	SIGNAL	Ext_Tx, Ext_Ack						: std_logic;
 	SIGNAL	Tx_Desc, Tx_Desc_One, Ext_Desc		: std_logic_vector( 3 DOWNTO 0);
 	SIGNAL	Tx_Icnt								: std_logic_vector( 4 DOWNTO 0);
@@ -394,6 +395,9 @@ bTxDesc:	BLOCK
 	SIGNAL	Tx_Idle, TxInt						: std_logic;
 	SIGNAL	Tx_Ident							: std_logic_vector( 1 DOWNTO 0);
 	SIGNAL	Start_TxS							: std_logic;
+	SIGNAL	Tx_Del_Cnt							: std_logic_vector(32 downto 0);
+	 ALIAS	Tx_Del_End							: std_logic is Tx_Del_Cnt(Tx_Del_Cnt'high);
+	SIGNAL	Tx_Del_Run							: std_logic;
 	
 BEGIN
 
@@ -451,7 +455,8 @@ RamH:	ENTITY	work.Dpr_16_16
 			);
 
 pTxSm: PROCESS( nRes, Clk, Dsm, 
-				Tx_On, TX_OWN, Retry_Cnt, Ext_Tx, Tx_Wait, Sm_Tx, F_End, Tx_Col, Ext_Ack )
+				Tx_On, TX_OWN, Retry_Cnt, Ext_Tx, Tx_Wait,
+				Sm_Tx, F_End, Tx_Col, Ext_Ack )
 BEGIN
 
 		
@@ -465,10 +470,15 @@ BEGIN
 			WHEN sLen	 =>								Tx_Dsm_Next <= sAdrH; 
 			WHEN sBegH	 =>								Tx_Dsm_Next <= sBegL;
 			WHEN sBegL	 =>	IF	   Tx_On  = '0'	THEN	Tx_Dsm_Next <= sIdle;
+							ELSIF Tx_Del = '1'  THEN	Tx_Dsm_Next <= sDel;
 							ELSIF Sm_Tx = R_Pre THEN	Tx_Dsm_Next <= sTimH; 
 							END IF;
+			WHEN sDel	 =>	if	  Tx_Del_End = '1'	then	
+														Tx_Dsm_Next <= sTimH;
+							end if;
 			WHEN sAdrH	 =>								Tx_Dsm_Next <= sAdrL;
 			WHEN sAdrL	 =>	IF    Tx_On  = '0'	THEN	Tx_Dsm_Next <= sIdle;
+							ELSIF Tx_Del = '1'	THEN	Tx_Dsm_Next <= sBegH;
 							ELSE						Tx_Dsm_Next <= sBegL;	
 							END IF;
 			WHEN sTimH	 =>								Tx_Dsm_Next <= sTimL;
@@ -495,7 +505,7 @@ BEGIN
 		Tx_BegSet <= '0'; Tx_Early <= '0'; Auto_Coll <= '0'; 
 		Ext_Tx <= '0'; Ext_Ack <= '0'; ClrCol <= '0'; Ext_Desc <= (OTHERS => '0'); Max_Retry <= (OTHERS => '0');
 		ZeitL <= (OTHERS => '0'); Tx_Count <= (OTHERS => '0'); Tx_Ident <= "00"; 
-		Dma_Tx_Addr <= (OTHERS => '0');
+		Dma_Tx_Addr <= (OTHERS => '0'); Tx_Del <= '0'; Tx_Del_Run <= '0'; Tx_Del_Cnt <= (others => '0');
 	ELSIF	rising_edge( Clk ) 	THEN
 
 		IF	Dsm = sStat AND Desc_We = '1'	THEN	ClrCol  <= '1';	
@@ -520,10 +530,11 @@ BEGIN
 			OR (Tx_Col = '1' AND Ext_Tx = '1' )				
 			OR dsm = sColl	 )							THEN	Start_TxS <= '0';		
 																Auto_Coll <= Auto_Coll OR (Tx_Col AND Ext_Tx); 
-		ELSIF	Dsm = sAdrH								THEN	Start_TxS <= '1';		
+		ELSIF	Dsm = sAdrH and Tx_Del = '0'			THEN	Start_TxS <= '1';		
+		ELSIF	Dsm = sDel and Tx_Del_End = '1'			THEN	Start_TxS <= '1';
 		ELSIF	Sm_Tx = R_Idl							THEN	Auto_Coll <= '0';
 		END IF;
-
+		
 		IF		Dsm = sIdle		THEN	Last_Desc <= TX_LAST;	
 		END IF;
 
@@ -535,11 +546,26 @@ BEGIN
 			IF	Ext_Tx = '1' OR Tx_Wait  = '0' 	 THEN	
 													Max_Retry <= TX_RETRY;
 													Tx_Early  <= TX_BEGON;
+				IF	TxDel = true			THEN	Tx_Del	  <= TX_BEGDEL;
+				END IF;
 			END IF;
 		ELSIF Dsm = sTimH					THEN	Tx_BegSet <= Tx_Early;
-		ELSIF Dsm = sTimL					THEN	Tx_BegSet <= '0';		
+		ELSIF Dsm = sTimL					THEN	Tx_BegSet <= '0';
+		ELSIF Dsm = sIdle					THEN	Tx_Del <= '0';
 		END IF;
+		
+		if	TxDel = true and Tx_Del = '1' then
+			if	Dsm = sBegH							then	Tx_Del_Cnt(Tx_Del_Cnt'high)	<= '0';
+															Tx_Del_Cnt(31 downto 16)	<= DescRam_Out;
+			elsif	Dsm = sBegL						then	Tx_Del_Cnt(15 downto  0) <= DescRam_Out;
+			elsif	Dsm = sDel and Tx_Del_Run = '1'	then	Tx_Del_Cnt <= Tx_Del_Cnt - 1;
+			end if;
 
+			if		Tx_Del_Run = '0' and  Dsm = sDel and Ipg = '0'	then	Tx_Del_Run <= '1';
+			elsif	Tx_Del_End = '1'								then	Tx_Del_Run <= '0';
+			end if;
+
+		end if;
 		
 		IF		Dsm = sAdrL		 THEN	Dma_Tx_Addr(15 DOWNTO 1)	<= DescRam_Out(15 DOWNTO 1);	
 		ELSIF	Tx_Dma_Ack = '1' THEN	Dma_Tx_Addr(15 DOWNTO 1)	<= Dma_Tx_Addr(15 DOWNTO 1) + 1;	
@@ -569,7 +595,7 @@ BEGIN
 END PROCESS pTxControl;
 
 	Start_Tx <= '1'	WHEN	Start_TxS = '1' AND Block_Col = '0'		ELSE
-				'1'	WHEN	R_Req = '1'								ELSE	
+				'1'	WHEN	not TxDel and R_Req = '1'				ELSE	
 				'0';	
 	F_TxB <=	Tx_LatchH	WHEN	H_Byte = '0'	ELSE
 				Tx_Buf;
@@ -596,7 +622,7 @@ BEGIN
 		Tx_On   <= '0'; Tx_Ie <= '0'; Tx_Half  <= '0'; Tx_Wait  <= '0'; nTx_BegInt <= '0';
 		Tx_Desc_One <= (OTHERS => '0');
 		Tx_Icnt <= (OTHERS => '0'); TxInt <= '0'; Tx_SoftInt <= '0'; Tx_BegInt  <= '0';
-		Tx_Ipg  <= conv_std_logic_vector( 42, 6);	
+		Tx_Ipg  <= conv_std_logic_vector( 39, 6);	--( 42, 6);	
 	ELSIF	rising_edge( Clk )	THEN
 
 		IF	Sel_TxL = '1'	THEN
