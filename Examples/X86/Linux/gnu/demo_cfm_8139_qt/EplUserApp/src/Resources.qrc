@@ -1,6 +1,0 @@
- <!DOCTYPE RCC><RCC version="1.0">
- <qresource prefix="/img">
-     <file alias="sys_tec_logo.png">../images/SYS_TEC_LOGO_Bunt.png</file>
-     <file alias="powerlink_logo.jpg">../images/Powerlink_Logo_CMYK.jpg</file>
- </qresource>
- </RCC>
