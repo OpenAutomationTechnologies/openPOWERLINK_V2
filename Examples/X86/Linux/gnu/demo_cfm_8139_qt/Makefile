@@ -90,8 +90,8 @@ all:
 			@if [ ! -e $(QTDEMODIR)/Makefile ] ; then echo "Create Makefile from Qt project file" ; cd $(QTDEMODIR) ; qmake -unix ; fi
 			$(MAKE) -C $(QTDEMODIR)
 			@dos2unix -p EplLoad
-			dos2unix -p EplUnload
-			chmod +x EplLoad EplUnload
+			@dos2unix -p EplUnload
+			@chmod +x EplLoad EplUnload
 
 
 #.PHONY:     install

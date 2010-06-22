@@ -2,6 +2,9 @@
 
 MODULENAME = epl
 
+QTDEMODIR = ../demo_userapp_qt
+QTDEMONAME = demo_userapp_qt
+
 # ------------------------- Secondary Call ----------------------------------
 ifneq ($(KERNELRELEASE),)
 
@@ -11,7 +14,7 @@ MAINDIR	:= $(src)/$(MAINPATH)
 
 # include paths
 INCLUDES	:= -I$(MAINDIR)/Include \
-			  -I$(src) \
+			  -I$(src)/include \
 			  -I$(MAINDIR)/Target/PLCcore-CF54/Linux/gnu/generic \
 			  -I$(MAINDIR)/SharedBuff \
 			  -I$(MAINDIR)/ObjDicts/Qt_MN
@@ -30,7 +33,8 @@ MODULEOBJS	= $(MAINPATH)/Edrv/Edrv8139.o $(MAINPATH)/Edrv/EdrvCyclic.o \
 			  $(MAINPATH)/EplStack/EplSdoUdpu.o $(MAINPATH)/EplStack/EplSdoComu.o $(MAINPATH)/EplStack/EplSdoAsySequ.o $(MAINPATH)/EplStack/EplSdoAsndu.o \
 			  $(MAINPATH)/EplStack/EplTimeruLinuxKernel.o \
 			  $(MAINPATH)/EplStack/EplErrorHandlerk.o \
-			  $(MAINPATH)/EplStack/EplApiGeneric.o $(MAINPATH)/EplStack/EplApiLinuxKernel.o EplApiProcessImage.o \
+			  $(MAINPATH)/EplStack/EplApiGeneric.o $(MAINPATH)/EplStack/EplApiLinuxKernel.o \
+			  $(MAINPATH)/EplStack/EplApiProcessImage.o \
 			  $(MAINPATH)/ObjDicts/Qt_MN/Objdict.o \
 			  $(MAINPATH)/EplStack/amix86.o \
 			  $(MAINPATH)/EplStack/VirtualEthernetLinux.o \
@@ -76,14 +80,15 @@ PWD				:= $(shell pwd)
 
 .PHONY:     all
 all:
-			$(MAKE)	-C $(KDIR) M=$(PWD) modules
-			if [ ! -L EplUserApp/include/epl ] ; then ln -s ../../../../../../../Include EplUserApp/include/epl ; fi
-			if [ ! -e EplUserApp/EplUserApp.pro ] ; then cd EplUserApp ; qmake -project -unix ; fi
-			if [ ! -e EplUserApp/Makefile ] ; then cd EplUserApp ; qmake -unix ; fi
-			cd EplUserApp && make
-			dos2unix -p EplLoad
-			dos2unix -p EplUnload
-			chmod +x EplLoad EplUnload
+			@$(MAKE) -C $(KDIR) M=$(PWD) modules
+			@if [ ! -L $(QTDEMODIR)/include/eplstack ] ; then ln -s ../../../../../../Include $(QTDEMODIR)/include/eplstack ; fi
+			@if [ ! -L $(QTDEMODIR)/include/eplcfg -o "`readlink -f $(QTDEMODIR)/include/eplcfg`" != "$(PWD)/include" ] ; then echo "Create link for EplCfg.h" ; rm -f $(QTDEMODIR)/include/eplcfg $(QTDEMODIR)/$(QTDEMONAME).pro $(QTDEMODIR)/Makefile ; ln -s "$(PWD)/include" $(QTDEMODIR)/include/eplcfg ; fi
+			@if [ ! -e $(QTDEMODIR)/$(QTDEMONAME).pro ] ; then echo "Create Qt project file" ; cd $(QTDEMODIR) ; qmake -project -unix ; rm -f $(QTDEMODIR)/Makefile ; fi
+			@if [ ! -e $(QTDEMODIR)/Makefile ] ; then echo "Create Makefile from Qt project file" ; cd $(QTDEMODIR) ; qmake -unix ; fi
+			$(MAKE) -C $(QTDEMODIR)
+			@dos2unix -p EplLoad
+			@dos2unix -p EplUnload
+			@chmod +x EplLoad EplUnload
 
 
 #.PHONY:     install
@@ -93,7 +98,14 @@ all:
 .PHONY:     clean
 clean:
 			$(MAKE)	-C $(KDIR) M=$(PWD) clean
-#			rm -f *.bak
+			@if [ -e $(QTDEMODIR)/Makefile ] ; then $(MAKE) -C $(QTDEMODIR) clean ; fi
+
+.PHONY:     distclean
+distclean:
+			$(MAKE)	-C $(KDIR) M=$(PWD) clean
+			@if [ -e $(QTDEMODIR)/Makefile ] ; then $(MAKE) -C $(QTDEMODIR) distclean ; fi
+			rm -f $(QTDEMODIR)/$(QTDEMONAME).pro
+
 #			rm -f *.tmp
 #			rm -f *~ *.o *.ko
 #			rm -f .built_in.o.cmd built_in.o

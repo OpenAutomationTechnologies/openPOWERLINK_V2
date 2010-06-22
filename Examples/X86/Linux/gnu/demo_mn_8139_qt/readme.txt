@@ -11,7 +11,7 @@ Consists of:
 ------------
 
 - Kernel module epl.ko
-- User mode application EplUserApp
+- User mode application demo_userapp_qt located one directory upward.
 
 
 How to build kernel module and user mode application:
@@ -31,13 +31,7 @@ $ sudo ./EplLoad
 
 start the Qt application
 
-$ ./EplUserApp/EplUserApp
+$ ../demo_userapp_qt/demo_userapp_qt
 
-optionally, configure the IP address of the virtual Ethernet driver
-for TCP/IP communication in asynchronous phase.
-This has to be done after starting the stack by pressing the button
-"Start EPL Stack" in the Qt application. Because the virtual Ethernet
-interface "epl" exists only, when the stack is running.
-
-$ sudo ifconfig epl 192.168.100.240
-
+Start the stack by pressing the button "Start EPL Stack"
+in the Qt application.

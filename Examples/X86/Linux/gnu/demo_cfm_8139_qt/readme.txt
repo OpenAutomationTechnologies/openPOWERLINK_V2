@@ -33,5 +33,5 @@ start the Qt application
 
 $ ../demo_userapp_qt/demo_userapp_qt
 
-Starting the stack by pressing the button "Start EPL Stack"
+Start the stack by pressing the button "Start EPL Stack"
 in the Qt application.
