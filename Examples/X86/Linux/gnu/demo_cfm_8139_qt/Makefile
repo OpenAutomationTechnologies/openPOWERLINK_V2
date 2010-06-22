@@ -101,7 +101,14 @@ all:
 .PHONY:     clean
 clean:
 			$(MAKE)	-C $(KDIR) M=$(PWD) clean
-#			rm -f *.bak
+			@if [ -e $(QTDEMODIR)/Makefile ] ; then $(MAKE) -C $(QTDEMODIR) clean ; fi
+
+.PHONY:     distclean
+distclean:
+			$(MAKE)	-C $(KDIR) M=$(PWD) clean
+			@if [ -e $(QTDEMODIR)/Makefile ] ; then $(MAKE) -C $(QTDEMODIR) distclean ; fi
+			rm -f $(QTDEMODIR)/$(QTDEMONAME).pro
+
 #			rm -f *.tmp
 #			rm -f *~ *.o *.ko
 #			rm -f .built_in.o.cmd built_in.o Module.symvers
