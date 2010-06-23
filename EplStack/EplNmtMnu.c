@@ -1639,9 +1639,9 @@ tEplKernel      Ret;
         case kEplEventTypeNmtMnuNodeAdded:
         {
         unsigned int        uiNodeId;
- 
+
             uiNodeId = *((unsigned int*) pEvent_p->m_pArg);
-            
+
             Ret = EplNmtMnuCbNodeAdded(uiNodeId);
             break;
         }
@@ -2055,7 +2055,7 @@ tEplNmtMnuNodeInfo* pNodeInfo;
             }
 
             // $$$ only PRC
-            
+
             if (pNodeInfo->m_wFlags & EPL_NMTMNU_NODE_FLAG_ISOCHRON)
             {
                 if (fInvalidateNext != FALSE)
@@ -3587,7 +3587,7 @@ int         iIndex;
 //
 // Function:    EplNmtMnuPrcMeasure
 //
-// Description: Perform measure phase of PRC node insertion 
+// Description: Perform measure phase of PRC node insertion
 //
 // Parameters:  void
 //
@@ -3786,7 +3786,7 @@ DWORD               dwPResMnTimeoutNs;
     {
         goto Exit;
     }
-    
+
     if (EplNmtMnuInstance_g.m_dwPrcPResMnTimeoutNs < dwPResMnTimeoutNs)
     {
     tEplDllNodeInfo DllNodeInfo = {0};
@@ -4245,7 +4245,7 @@ Exit:
 //
 // Function:    EplNmtMnuPrcAdd
 //
-// Description: Perform add phase of PRC node insertion 
+// Description: Perform add phase of PRC node insertion
 //
 // Parameters:  uiNodeIdPrevAdd_p       = Node ID of previously added node
 //
