@@ -10,7 +10,7 @@
 Contents
 ---------
 
-- Demo for Controlled Node as standalone program on Nios II CPU
+- Extended Demo for Controlled Node as standalone program on Nios II CPU.
   with support for Poll Response Chaining.
 
 Performance Data
@@ -18,6 +18,8 @@ Performance Data
 
 - Minimum cycle length: 400 µs
 - PReq-PRes Latency: 1 µs
+- Process data: 50 bytes input and 50 bytes output
+- There are 3 RPDOs and 1 TPDO available. Cross-traffic is enabled.
 
 
 Requirements
@@ -31,7 +33,9 @@ Requirements
 
 - Experiences with this development environment are required
 
-- POWERLINK network as described in main readme.txt
+- POWERLINK network with Configuration Manager.
+  The corresponding XDD for this node can be found in the subdirectory
+  ObjDicts\CiA401_3r1tpdo_CN of the openPOWERLINK main directory.
 
 
 How to build the binary
