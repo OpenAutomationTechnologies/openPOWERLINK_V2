@@ -112,6 +112,10 @@
 #error "Ethernet driver support for auto-response delay is required for PRes Chaining."
 #endif
 
+#if (EPL_DLL_PRES_CHAINING_CN != FALSE) && (EPL_DLL_PROCESS_SYNC != EPL_DLL_PROCESS_SYNC_ON_TIMER)
+#error "PRes Chaining CN support requires EPL_DLL_PROCESS_SYNC == EPL_DLL_PROCESS_SYNC_ON_TIMER."
+#endif
+
 
 /***************************************************************************/
 /*                                                                         */
@@ -487,6 +491,10 @@ static tEplKernel PUBLIC EplDllkCbMnTimerResponse(tEplTimerEventArg* pEventArg_p
 static tEplKernel EplDllkPResChainingEnable (void);
 static tEplKernel EplDllkPResChainingDisable (void);
 
+#if (EPL_DLL_PROCESS_SYNC == EPL_DLL_PROCESS_SYNC_ON_TIMER)
+static tEplKernel PUBLIC EplDllkCbCnPResFallBackTimeout(void);
+#endif
+
 #endif
 
 
@@ -546,6 +554,14 @@ tEdrvInitParam  EdrvInitParam;
     {
         goto Exit;
     }
+
+#if EPL_DLL_PRES_CHAINING_CN != FALSE
+    Ret = EplTimerSynckRegLossOfSyncHandler2(EplDllkCbCnPResFallBackTimeout);
+    if (Ret != kEplSuccessful)
+    {
+        goto Exit;
+    }
+#endif
 
     Ret = EplTimerSynckSetSyncShiftUs(EPL_DLL_SOC_SYNC_SHIFT_US);
     if (Ret != kEplSuccessful)
@@ -2204,7 +2220,11 @@ tEplKernel      Ret = kEplSuccessful;
 #endif
 
 #if EPL_DLL_PRES_CHAINING_CN != FALSE
-#warning TODO disable PRes Chaining at fall-back to PreOp1
+            Ret = EplDllkPResChainingDisable();
+            if (Ret != kEplSuccessful)
+            {
+                goto Exit;
+            }
 #endif
 
             // update IdentRes and StatusRes
@@ -4258,16 +4278,12 @@ tEplDllkNodeInfo*   pIntNodeInfo = NULL;
         (uiNodeId == EPL_C_ADR_MN_DEF_NODE_ID))
     {   // handle PResMN as PReq for PRes Chaining
         *pNmtEvent_p = kEplNmtEventDllCePreq;
-
-        Ret = EplDllkChangeState(*pNmtEvent_p, NmtState_p);
-        if (Ret != kEplSuccessful)
-        {
-            goto Exit;
-        }
     }
+    else
 #endif
-
-    *pNmtEvent_p = kEplNmtEventDllCePres;
+    {
+        *pNmtEvent_p = kEplNmtEventDllCePres;
+    }
 
     if ((NmtState_p >= kEplNmtCsPreOperational2)
         && (NmtState_p <= kEplNmtCsOperational))
@@ -4483,7 +4499,8 @@ tEplDllkNodeInfo*   pIntNodeInfo = NULL;
 #endif
 
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
-    if ((EplDllkInstance_g.m_DllConfigParam.m_uiSyncNodeId > EPL_C_ADR_SYNC_ON_SOC)
+    if ((EplDllkInstance_g.m_DllState > kEplDllMsNonCyclic)
+        && (EplDllkInstance_g.m_DllConfigParam.m_uiSyncNodeId > EPL_C_ADR_SYNC_ON_SOC)
         && (EplDllkInstance_g.m_fSyncProcessed == FALSE))
     {   // check if Sync event needs to be triggered
         if (
@@ -7668,10 +7685,14 @@ tEplFrame*      pTxFrameSyncRes;
         {
             goto Exit;
         }
+
+#if (EPL_DLL_PROCESS_SYNC == EPL_DLL_PROCESS_SYNC_ON_TIMER)
+        Ret = EplTimerSynckSetLossOfSyncTolerance2Ns(EplDllkInstance_g.m_dwPrcPResFallBackTimeout);
+#endif
     }
 
 Exit:
-
+//    PRINTF("%s: returns %d\n", __func__, Ret);
     return Ret;
 }
 
@@ -7729,13 +7750,77 @@ tEplFrame*      pTxFrameSyncRes;
         {
             goto Exit;
         }
+
+#if (EPL_DLL_PROCESS_SYNC == EPL_DLL_PROCESS_SYNC_ON_TIMER)
+        Ret = EplTimerSynckSetLossOfSyncTolerance2Ns(0);
+#endif
     }
 
 Exit:
-
     return Ret;
 }
 
+
+#if (EPL_DLL_PROCESS_SYNC == EPL_DLL_PROCESS_SYNC_ON_TIMER)
+
+//---------------------------------------------------------------------------
+//
+// Function:    EplDllkCbCnPResFallBackTimeout()
+//
+// Description: called by timer sync module. It signals that PResFallBackTimeout has triggered.
+//
+// Parameters:  void
+//
+// Returns:     tEplKernel              = error code
+//
+//
+// State:
+//
+//---------------------------------------------------------------------------
+
+static tEplKernel PUBLIC EplDllkCbCnPResFallBackTimeout(void)
+{
+tEplKernel      Ret = kEplSuccessful;
+tEplNmtState    NmtState;
+
+TGT_DLLK_DECLARE_FLAGS
+
+    TGT_DLLK_ENTER_CRITICAL_SECTION();
+
+    NmtState = EplDllkInstance_g.m_NmtState;
+
+    if (NmtState <= kEplNmtGsResetConfiguration)
+    {
+        goto Exit;
+    }
+
+    Ret = EplDllkPResChainingDisable();
+    if (Ret != kEplSuccessful)
+    {
+        goto Exit;
+    }
+
+Exit:
+    if (Ret != kEplSuccessful)
+    {
+    DWORD   dwArg;
+
+        BENCHMARK_MOD_02_TOGGLE(7);
+
+        dwArg = EplDllkInstance_g.m_DllState | (kEplNmtEventDllCeFrameTimeout << 8);
+
+        // Error event for API layer
+        Ret = EplEventkPostError(kEplEventSourceDllk,
+                        Ret,
+                        sizeof(dwArg),
+                        &dwArg);
+    }
+
+    TGT_DLLK_LEAVE_CRITICAL_SECTION();
+
+    return Ret;
+}
+#endif
 
 #endif // #if EPL_DLL_PRES_CHAINING_CN != FALSE
 
