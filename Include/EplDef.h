@@ -147,6 +147,10 @@
   #define EPL_C_DLL_MAX_ASND_SERVICE_IDS  6
 #endif
 
+#if (EPL_DLL_PRES_CHAINING_CN != FALSE)
+#define EPL_TIMER_SYNC_SECOND_LOSS_OF_SYNC  TRUE
+#endif
+
 #define EPL_DLL_MACADDR_MASK        0xFFFFFFFFFFFFLL // MAC address mask, canonical form
 
 // constants for CDC file

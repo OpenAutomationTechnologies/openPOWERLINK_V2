@@ -99,11 +99,15 @@ tEplKernel PUBLIC EplTimerSynckRegSyncHandler(tEplTimerSynckCbSync pfnTimerSynck
 
 tEplKernel PUBLIC EplTimerSynckRegLossOfSyncHandler(tEplTimerSynckCbLossOfSync pfnTimerSynckCbLossOfSync_p);
 
+tEplKernel PUBLIC EplTimerSynckRegLossOfSyncHandler2(tEplTimerSynckCbLossOfSync pfnTimerSynckCbLossOfSync2_p);
+
 tEplKernel PUBLIC EplTimerSynckSetSyncShiftUs(DWORD dwAdvanceShiftUs_p);
 
 tEplKernel PUBLIC EplTimerSynckSetCycleLenUs(DWORD dwCycleLenUs_p);
 
 tEplKernel PUBLIC EplTimerSynckSetLossOfSyncToleranceNs(DWORD dwLossOfSyncToleranceNs_p);
+
+tEplKernel PUBLIC EplTimerSynckSetLossOfSyncTolerance2Ns(DWORD dwLossOfSyncTolerance2Ns_p);
 
 tEplKernel PUBLIC EplTimerSynckTriggerAtTimeStamp(tEplTgtTimeStamp* pTimeStamp_p);
 

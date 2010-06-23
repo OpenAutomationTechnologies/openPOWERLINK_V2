@@ -90,6 +90,9 @@
 // const defines
 //---------------------------------------------------------------------------
 
+#ifndef EPL_TIMER_SYNC_SECOND_LOSS_OF_SYNC
+#define EPL_TIMER_SYNC_SECOND_LOSS_OF_SYNC      FALSE
+#endif
 
 
 /***************************************************************************/
@@ -119,7 +122,12 @@
 #define TIMER_HDL_SYNC          0
 #define TIMER_HDL_LOSSOFSYNC    1
 #define TIMER_HDL_INVALID       0xFF
+#if (EPL_TIMER_SYNC_SECOND_LOSS_OF_SYNC != FALSE)
+#define TIMER_HDL_LOSSOFSYNC2   2
+#define TIMER_COUNT             3
+#else
 #define TIMER_COUNT             2
+#endif
 
 #define TIMEDIFF_COUNT_SHIFT    3
 #define TIMEDIFF_COUNT          (1 << TIMEDIFF_COUNT_SHIFT)
@@ -143,10 +151,15 @@ typedef struct
 {
 //    DWORD                       m_dwAdvanceShiftUs;
 //    DWORD                       m_dwCycleLenUs;
-    DWORD                       m_dwLossOfSyncToleranceNs;
     tEplTimerSynckCbSync        m_pfnCbSync;
+    DWORD                       m_dwLossOfSyncToleranceNs;
     tEplTimerSynckCbLossOfSync  m_pfnCbLossOfSync;
     DWORD                       m_dwLossOfSyncTimeout;
+#if (EPL_TIMER_SYNC_SECOND_LOSS_OF_SYNC != FALSE)
+    DWORD                       m_dwLossOfSyncTolerance2Ns;
+    tEplTimerSynckCbLossOfSync  m_pfnCbLossOfSync2;
+    DWORD                       m_dwLossOfSyncTimeout2;
+#endif
 
     // EplTimerSynckCtrl specific
     BOOL                        m_fRunning;
@@ -329,6 +342,35 @@ tEplKernel      Ret = kEplSuccessful;
 }
 
 
+#if (EPL_TIMER_SYNC_SECOND_LOSS_OF_SYNC != FALSE)
+
+//---------------------------------------------------------------------------
+//
+// Function:    EplTimerSynckRegLossOfSyncHandler2()
+//
+// Description: registers handler for second loss of sync (needed for PResFallBackTimeout)
+//
+// Parameters:  pfnTimerSynckCbSync2_p  = pointer to callback function
+//
+// Return:      tEplKernel      = error code
+//
+// State:       not tested
+//
+//---------------------------------------------------------------------------
+
+tEplKernel PUBLIC EplTimerSynckRegLossOfSyncHandler2 (tEplTimerSynckCbLossOfSync pfnTimerSynckCbLossOfSync2_p)
+{
+tEplKernel      Ret = kEplSuccessful;
+
+
+    EplTimerSynckInstance_l.m_pfnCbLossOfSync2 = pfnTimerSynckCbLossOfSync2_p;
+
+    return Ret;
+
+}
+
+#endif
+
 
 //---------------------------------------------------------------------------
 //
@@ -412,6 +454,45 @@ tEplKernel      Ret = kEplSuccessful;
 }
 
 
+#if (EPL_TIMER_SYNC_SECOND_LOSS_OF_SYNC != FALSE)
+
+//---------------------------------------------------------------------------
+//
+// Function:    EplTimerSynckSetLossOfSyncToleranceNs()
+//
+// Description:
+//
+// Parameters:
+//
+// Return:      tEplKernel      = error code
+//
+// State:       not tested
+//
+//---------------------------------------------------------------------------
+
+tEplKernel PUBLIC EplTimerSynckSetLossOfSyncTolerance2Ns (DWORD dwLossOfSyncTolerance2Ns_p)
+{
+tEplKernel      Ret = kEplSuccessful;
+
+
+    EplTimerSynckInstance_l.m_dwLossOfSyncTolerance2Ns = dwLossOfSyncTolerance2Ns_p;
+
+    if (dwLossOfSyncTolerance2Ns_p > 0)
+    {
+        EplTimerSynckInstance_l.m_dwLossOfSyncTimeout2 = EplTimerSynckInstance_l.m_dwConfiguredTimeDiff
+                + OMETH_NS_2_TICKS(EplTimerSynckInstance_l.m_dwLossOfSyncTolerance2Ns);
+    }
+    else
+    {
+        EplTimerSynckInstance_l.m_dwLossOfSyncTimeout2 = 0;
+    }
+
+    return Ret;
+
+}
+
+#endif
+
 
 //---------------------------------------------------------------------------
 //
@@ -437,6 +518,18 @@ tEplKernel      Ret = kEplSuccessful;
     {
         goto Exit;
     }
+
+#if (EPL_TIMER_SYNC_SECOND_LOSS_OF_SYNC != FALSE)
+    if (EplTimerSynckInstance_l.m_dwLossOfSyncTimeout2 > 0)
+    {
+        Ret = EplTimerSynckDrvModifyTimerAbs(TIMER_HDL_LOSSOFSYNC2,
+                                          (pTimeStamp_p->m_dwTimeStamp + EplTimerSynckInstance_l.m_dwLossOfSyncTimeout2));
+        if (Ret != kEplSuccessful)
+        {
+            goto Exit;
+        }
+    }
+#endif
 
     Ret = EplTimerSynckCtrlDoSyncAdjustment(pTimeStamp_p->m_dwTimeStamp);
 
@@ -469,6 +562,9 @@ tEplKernel      Ret = kEplSuccessful;
 
     Ret = EplTimerSynckDrvDeleteTimer(TIMER_HDL_SYNC);
     Ret = EplTimerSynckDrvDeleteTimer(TIMER_HDL_LOSSOFSYNC);
+#if (EPL_TIMER_SYNC_SECOND_LOSS_OF_SYNC != FALSE)
+    Ret = EplTimerSynckDrvDeleteTimer(TIMER_HDL_LOSSOFSYNC2);
+#endif
 
     return Ret;
 }
@@ -921,6 +1017,17 @@ unsigned int                uiNextTimerHdl;
                 }
                 break;
             }
+
+#if (EPL_TIMER_SYNC_SECOND_LOSS_OF_SYNC != FALSE)
+            case TIMER_HDL_LOSSOFSYNC2:
+            {
+                if (EplTimerSynckInstance_l.m_pfnCbLossOfSync2 != NULL)
+                {
+                    EplTimerSynckInstance_l.m_pfnCbLossOfSync2();
+                }
+                break;
+            }
+#endif
 
             default:
             {
