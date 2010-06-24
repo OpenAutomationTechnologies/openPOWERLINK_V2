@@ -10,5 +10,5 @@ set_global_assignment -name TCL_FILE [file join $::quartus(qip_path) EPL/OpenMAC
 set_global_assignment -name SDC_FILE [file join $::quartus(qip_path) cpu_0.sdc]
 set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) EPL/OpenHUB.vhd]
 set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) EPL/OpenFILTER.vhd]
-set_global_assignment -name SOPC_BUILDER_SIGNATURE_ID 005056C00008000001295FB13DD0 
+set_global_assignment -name SOPC_BUILDER_SIGNATURE_ID 005056C000080000012969107093 
  

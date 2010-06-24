@@ -284,3 +284,13 @@ set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to epcs_sdi
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to epcs_sdo
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to io3_3V_o
 set_global_assignment -name GENERATE_JAM_FILE ON
+set_location_assignment PIN_M1 -to nav_up
+set_location_assignment PIN_M2 -to nav_down
+set_location_assignment PIN_N1 -to nav_left
+set_location_assignment PIN_P2 -to nav_right
+set_location_assignment PIN_N2 -to nav_push
+set_instance_assignment -name IO_STANDARD "2.5 V" -to nav_up
+set_instance_assignment -name IO_STANDARD "2.5 V" -to nav_down
+set_instance_assignment -name IO_STANDARD "2.5 V" -to nav_left
+set_instance_assignment -name IO_STANDARD "2.5 V" -to nav_right
+set_instance_assignment -name IO_STANDARD "2.5 V" -to nav_push

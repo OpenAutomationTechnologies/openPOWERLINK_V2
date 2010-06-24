@@ -95,6 +95,9 @@ int openPowerlink(void)
     }
     EplApiInitParam.m_uiNodeId = IORD_ALTERA_AVALON_SPI_RXDATA(NODESWITCH_SPI_BASE);
 #endif
+#ifdef NODESWITCH_PIO_BASE
+    EplApiInitParam.m_uiNodeId = IORD_ALTERA_AVALON_PIO_DATA(NODESWITCH_PIO_BASE);
+#endif
 
     if (EplApiInitParam.m_uiNodeId == EPL_C_ADR_INVALID)
     {
@@ -135,7 +138,7 @@ int openPowerlink(void)
     EplApiInitParam.m_dwSyncResLatency = EPL_C_DLL_T_IFG;
 
 	// initialize EPL stack
-    printf("init EPL Stack:\n");
+    printf("init EPL Stack with node-ID 0x%02X:\n", EplApiInitParam.m_uiNodeId);
 	EplRet = EplApiInitialize(&EplApiInitParam);
 	if(EplRet != kEplSuccessful) {
         printf("init EPL Stack... error %X\n\n", EplRet);
