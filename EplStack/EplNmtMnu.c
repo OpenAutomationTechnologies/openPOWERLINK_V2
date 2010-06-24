@@ -2209,7 +2209,9 @@ static tEplKernel EplNmtMnuStartBootStep2(void)
 tEplKernel      Ret = kEplSuccessful;
 unsigned int    uiIndex;
 tEplNmtMnuNodeInfo* pNodeInfo;
-
+tEplObdSize     ObdSize;
+BYTE            bNmtState;
+tEplNmtState    ExpNmtState;
 
     if ((EplNmtMnuInstance_g.m_wFlags & EPL_NMTMNU_FLAG_HALTED) == 0)
     {   // boot process is not halted
@@ -2222,10 +2224,20 @@ tEplNmtMnuNodeInfo* pNodeInfo;
     pNodeInfo = EplNmtMnuInstance_g.m_aNodeInfo;
     for (uiIndex = 1; uiIndex <= tabentries(EplNmtMnuInstance_g.m_aNodeInfo); uiIndex++, pNodeInfo++)
     {
-        if (pNodeInfo->m_NodeState != kEplNmtMnuNodeStateUnknown)
+        ObdSize = 1;
+        // read object 0x1F8F NMT_MNNodeExpState_AU8
+        Ret = EplObduReadEntry(0x1F8F, uiIndex, &bNmtState, &ObdSize);
+        if (Ret != kEplSuccessful)
+        {
+            goto Exit;
+        }
+
+        // compute expected NMT state
+        ExpNmtState = (tEplNmtState) (bNmtState | EPL_NMT_TYPE_CS);
+
+        if (ExpNmtState == kEplNmtCsPreOperational1)
         {
         tEplTimerArg    TimerArg;
-        BYTE            bNmtState;
 
             // The change to PreOp2 is an implicit NMT command.
             // Unexpected NMT states of the nodes are ignored until
