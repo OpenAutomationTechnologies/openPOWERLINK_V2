@@ -5590,6 +5590,7 @@ TGT_DLLK_DECLARE_FLAGS
         && (EplDllkInstance_g.m_DllConfigParam.m_uiSyncNodeId > EPL_C_ADR_SYNC_ON_SOC)
         && (EplDllkInstance_g.m_fSyncProcessed == FALSE))
     {   // cyclic state is active, so preprocessing is necessary
+        EplDllkInstance_g.m_fSyncProcessed = TRUE;
         Ret = EplDllkPostEvent(kEplEventTypeSync);
         if (Ret != kEplSuccessful)
         {
