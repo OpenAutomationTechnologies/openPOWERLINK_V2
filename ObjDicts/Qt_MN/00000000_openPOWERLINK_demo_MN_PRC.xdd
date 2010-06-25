@@ -204,6 +204,193 @@
             <SubObject subIndex="03" name="Mode Input 2" objectType="7" dataType="0005" accessType="rw" PDOmapping="RPDO" />
           </Object>
 
+          <Object index="2600" name="Extended Outputs 8 Bit" objectType="8">
+            <SubObject subIndex="00" name="Number of elements" objectType="7" dataType="0005" accessType="ro" defaultValue="07" PDOmapping="no" />
+            <SubObject subIndex="01" name="Extended Outputs 1" objectType="7" dataType="0005" accessType="ro" PDOmapping="TPDO" />
+            <SubObject subIndex="02" name="Extended Outputs 2" objectType="7" dataType="0005" accessType="ro" PDOmapping="TPDO" />
+            <SubObject subIndex="03" name="Extended Outputs 3" objectType="7" dataType="0005" accessType="ro" PDOmapping="TPDO" />
+            <SubObject subIndex="04" name="Extended Outputs 4" objectType="7" dataType="0005" accessType="ro" PDOmapping="TPDO" />
+            <SubObject subIndex="05" name="Extended Outputs 5" objectType="7" dataType="0005" accessType="ro" PDOmapping="TPDO" />
+            <SubObject subIndex="06" name="Extended Outputs 6" objectType="7" dataType="0005" accessType="ro" PDOmapping="TPDO" />
+            <SubObject subIndex="07" name="Extended Outputs 7" objectType="7" dataType="0005" accessType="ro" PDOmapping="TPDO" />
+          </Object>
+          <Object index="2601" name="Extended Outputs 32 Bit" objectType="8">
+            <SubObject subIndex="00" name="Number of elements"  objectType="7" dataType="0005" accessType="ro" defaultValue="78" PDOmapping="no" />
+            <SubObject subIndex="01" name="Extended Outputs 1"  objectType="7" dataType="0005" accessType="ro" PDOmapping="TPDO" />
+            <SubObject subIndex="02" name="Extended Outputs 2"  objectType="7" dataType="0005" accessType="ro" PDOmapping="TPDO" />
+            <SubObject subIndex="03" name="Extended Outputs 3"  objectType="7" dataType="0005" accessType="ro" PDOmapping="TPDO" />
+            <SubObject subIndex="04" name="Extended Outputs 4"  objectType="7" dataType="0005" accessType="ro" PDOmapping="TPDO" />
+            <SubObject subIndex="05" name="Extended Outputs 5"  objectType="7" dataType="0005" accessType="ro" PDOmapping="TPDO" />
+            <SubObject subIndex="06" name="Extended Outputs 6"  objectType="7" dataType="0005" accessType="ro" PDOmapping="TPDO" />
+            <SubObject subIndex="07" name="Extended Outputs 7"  objectType="7" dataType="0005" accessType="ro" PDOmapping="TPDO" />
+            <SubObject subIndex="08" name="Extended Outputs 8"  objectType="7" dataType="0005" accessType="ro" PDOmapping="TPDO" />
+            <SubObject subIndex="09" name="Extended Outputs 9"  objectType="7" dataType="0005" accessType="ro" PDOmapping="TPDO" />
+            <SubObject subIndex="0A" name="Extended Outputs 10" objectType="7" dataType="0005" accessType="ro" PDOmapping="TPDO" />
+            <SubObject subIndex="0B" name="Extended Outputs 11" objectType="7" dataType="0005" accessType="ro" PDOmapping="TPDO" />
+            <SubObject subIndex="0C" name="Extended Outputs 12" objectType="7" dataType="0005" accessType="ro" PDOmapping="TPDO" />
+            <SubObject subIndex="0D" name="Extended Outputs 13" objectType="7" dataType="0005" accessType="ro" PDOmapping="TPDO" />
+            <SubObject subIndex="0E" name="Extended Outputs 14" objectType="7" dataType="0005" accessType="ro" PDOmapping="TPDO" />
+            <SubObject subIndex="0F" name="Extended Outputs 15" objectType="7" dataType="0005" accessType="ro" PDOmapping="TPDO" />
+            <SubObject subIndex="10" name="Extended Outputs 16" objectType="7" dataType="0005" accessType="ro" PDOmapping="TPDO" />
+            <SubObject subIndex="11" name="Extended Outputs 17" objectType="7" dataType="0005" accessType="ro" PDOmapping="TPDO" />
+            <SubObject subIndex="12" name="Extended Outputs 18" objectType="7" dataType="0005" accessType="ro" PDOmapping="TPDO" />
+            <SubObject subIndex="13" name="Extended Outputs 19" objectType="7" dataType="0005" accessType="ro" PDOmapping="TPDO" />
+            <SubObject subIndex="14" name="Extended Outputs 20" objectType="7" dataType="0005" accessType="ro" PDOmapping="TPDO" />
+            <SubObject subIndex="15" name="Extended Outputs 21" objectType="7" dataType="0005" accessType="ro" PDOmapping="TPDO" />
+            <SubObject subIndex="16" name="Extended Outputs 22" objectType="7" dataType="0005" accessType="ro" PDOmapping="TPDO" />
+            <SubObject subIndex="17" name="Extended Outputs 23" objectType="7" dataType="0005" accessType="ro" PDOmapping="TPDO" />
+            <SubObject subIndex="18" name="Extended Outputs 24" objectType="7" dataType="0005" accessType="ro" PDOmapping="TPDO" />
+            <SubObject subIndex="19" name="Extended Outputs 25" objectType="7" dataType="0005" accessType="ro" PDOmapping="TPDO" />
+            <SubObject subIndex="1A" name="Extended Outputs 26" objectType="7" dataType="0005" accessType="ro" PDOmapping="TPDO" />
+            <SubObject subIndex="1B" name="Extended Outputs 27" objectType="7" dataType="0005" accessType="ro" PDOmapping="TPDO" />
+            <SubObject subIndex="1C" name="Extended Outputs 28" objectType="7" dataType="0005" accessType="ro" PDOmapping="TPDO" />
+            <SubObject subIndex="1D" name="Extended Outputs 29" objectType="7" dataType="0005" accessType="ro" PDOmapping="TPDO" />
+            <SubObject subIndex="1E" name="Extended Outputs 30" objectType="7" dataType="0005" accessType="ro" PDOmapping="TPDO" />
+            <SubObject subIndex="1F" name="Extended Outputs 31" objectType="7" dataType="0005" accessType="ro" PDOmapping="TPDO" />
+            <SubObject subIndex="20" name="Extended Outputs 32" objectType="7" dataType="0005" accessType="ro" PDOmapping="TPDO" />
+            <SubObject subIndex="21" name="Extended Outputs 33" objectType="7" dataType="0005" accessType="ro" PDOmapping="TPDO" />
+            <SubObject subIndex="22" name="Extended Outputs 34" objectType="7" dataType="0005" accessType="ro" PDOmapping="TPDO" />
+            <SubObject subIndex="23" name="Extended Outputs 35" objectType="7" dataType="0005" accessType="ro" PDOmapping="TPDO" />
+            <SubObject subIndex="24" name="Extended Outputs 36" objectType="7" dataType="0005" accessType="ro" PDOmapping="TPDO" />
+            <SubObject subIndex="25" name="Extended Outputs 37" objectType="7" dataType="0005" accessType="ro" PDOmapping="TPDO" />
+            <SubObject subIndex="26" name="Extended Outputs 38" objectType="7" dataType="0005" accessType="ro" PDOmapping="TPDO" />
+            <SubObject subIndex="27" name="Extended Outputs 39" objectType="7" dataType="0005" accessType="ro" PDOmapping="TPDO" />
+            <SubObject subIndex="28" name="Extended Outputs 40" objectType="7" dataType="0005" accessType="ro" PDOmapping="TPDO" />
+            <SubObject subIndex="29" name="Extended Outputs 41" objectType="7" dataType="0005" accessType="ro" PDOmapping="TPDO" />
+            <SubObject subIndex="2A" name="Extended Outputs 42" objectType="7" dataType="0005" accessType="ro" PDOmapping="TPDO" />
+            <SubObject subIndex="2B" name="Extended Outputs 43" objectType="7" dataType="0005" accessType="ro" PDOmapping="TPDO" />
+            <SubObject subIndex="2C" name="Extended Outputs 44" objectType="7" dataType="0005" accessType="ro" PDOmapping="TPDO" />
+            <SubObject subIndex="2D" name="Extended Outputs 45" objectType="7" dataType="0005" accessType="ro" PDOmapping="TPDO" />
+            <SubObject subIndex="2E" name="Extended Outputs 46" objectType="7" dataType="0005" accessType="ro" PDOmapping="TPDO" />
+            <SubObject subIndex="2F" name="Extended Outputs 47" objectType="7" dataType="0005" accessType="ro" PDOmapping="TPDO" />
+            <SubObject subIndex="30" name="Extended Outputs 48" objectType="7" dataType="0005" accessType="ro" PDOmapping="TPDO" />
+            <SubObject subIndex="31" name="Extended Outputs 49" objectType="7" dataType="0005" accessType="ro" PDOmapping="TPDO" />
+            <SubObject subIndex="32" name="Extended Outputs 50" objectType="7" dataType="0005" accessType="ro" PDOmapping="TPDO" />
+            <SubObject subIndex="33" name="Extended Outputs 51" objectType="7" dataType="0005" accessType="ro" PDOmapping="TPDO" />
+            <SubObject subIndex="34" name="Extended Outputs 52" objectType="7" dataType="0005" accessType="ro" PDOmapping="TPDO" />
+            <SubObject subIndex="35" name="Extended Outputs 53" objectType="7" dataType="0005" accessType="ro" PDOmapping="TPDO" />
+            <SubObject subIndex="36" name="Extended Outputs 54" objectType="7" dataType="0005" accessType="ro" PDOmapping="TPDO" />
+            <SubObject subIndex="37" name="Extended Outputs 55" objectType="7" dataType="0005" accessType="ro" PDOmapping="TPDO" />
+            <SubObject subIndex="38" name="Extended Outputs 56" objectType="7" dataType="0005" accessType="ro" PDOmapping="TPDO" />
+            <SubObject subIndex="39" name="Extended Outputs 57" objectType="7" dataType="0005" accessType="ro" PDOmapping="TPDO" />
+            <SubObject subIndex="3A" name="Extended Outputs 58" objectType="7" dataType="0005" accessType="ro" PDOmapping="TPDO" />
+            <SubObject subIndex="3B" name="Extended Outputs 59" objectType="7" dataType="0005" accessType="ro" PDOmapping="TPDO" />
+            <SubObject subIndex="3C" name="Extended Outputs 60" objectType="7" dataType="0005" accessType="ro" PDOmapping="TPDO" />
+            <SubObject subIndex="3D" name="Extended Outputs 61" objectType="7" dataType="0005" accessType="ro" PDOmapping="TPDO" />
+            <SubObject subIndex="3E" name="Extended Outputs 62" objectType="7" dataType="0005" accessType="ro" PDOmapping="TPDO" />
+            <SubObject subIndex="3F" name="Extended Outputs 63" objectType="7" dataType="0005" accessType="ro" PDOmapping="TPDO" />
+            <SubObject subIndex="40" name="Extended Outputs 64" objectType="7" dataType="0005" accessType="ro" PDOmapping="TPDO" />
+            <SubObject subIndex="41" name="Extended Outputs 65" objectType="7" dataType="0005" accessType="ro" PDOmapping="TPDO" />
+            <SubObject subIndex="42" name="Extended Outputs 66" objectType="7" dataType="0005" accessType="ro" PDOmapping="TPDO" />
+            <SubObject subIndex="43" name="Extended Outputs 67" objectType="7" dataType="0005" accessType="ro" PDOmapping="TPDO" />
+            <SubObject subIndex="44" name="Extended Outputs 68" objectType="7" dataType="0005" accessType="ro" PDOmapping="TPDO" />
+            <SubObject subIndex="45" name="Extended Outputs 69" objectType="7" dataType="0005" accessType="ro" PDOmapping="TPDO" />
+            <SubObject subIndex="46" name="Extended Outputs 70" objectType="7" dataType="0005" accessType="ro" PDOmapping="TPDO" />
+            <SubObject subIndex="47" name="Extended Outputs 71" objectType="7" dataType="0005" accessType="ro" PDOmapping="TPDO" />
+            <SubObject subIndex="48" name="Extended Outputs 72" objectType="7" dataType="0005" accessType="ro" PDOmapping="TPDO" />
+            <SubObject subIndex="49" name="Extended Outputs 73" objectType="7" dataType="0005" accessType="ro" PDOmapping="TPDO" />
+            <SubObject subIndex="4A" name="Extended Outputs 74" objectType="7" dataType="0005" accessType="ro" PDOmapping="TPDO" />
+            <SubObject subIndex="4B" name="Extended Outputs 75" objectType="7" dataType="0005" accessType="ro" PDOmapping="TPDO" />
+            <SubObject subIndex="4C" name="Extended Outputs 76" objectType="7" dataType="0005" accessType="ro" PDOmapping="TPDO" />
+            <SubObject subIndex="4D" name="Extended Outputs 77" objectType="7" dataType="0005" accessType="ro" PDOmapping="TPDO" />
+            <SubObject subIndex="4E" name="Extended Outputs 78" objectType="7" dataType="0005" accessType="ro" PDOmapping="TPDO" />
+          </Object>
+          <Object index="2700" name="Extended Inputs 8 Bit" objectType="8">
+            <SubObject subIndex="00" name="Number of elements" objectType="7" dataType="0005" accessType="ro" defaultValue="12" PDOmapping="no" />
+            <SubObject subIndex="01" name="Extended Inputs 1"  objectType="7" dataType="0005" accessType="rw" PDOmapping="RPDO" />
+            <SubObject subIndex="02" name="Extended Inputs 2"  objectType="7" dataType="0005" accessType="rw" PDOmapping="RPDO" />
+            <SubObject subIndex="03" name="Extended Inputs 3"  objectType="7" dataType="0005" accessType="rw" PDOmapping="RPDO" />
+            <SubObject subIndex="04" name="Extended Inputs 4"  objectType="7" dataType="0005" accessType="rw" PDOmapping="RPDO" />
+            <SubObject subIndex="05" name="Extended Inputs 5"  objectType="7" dataType="0005" accessType="rw" PDOmapping="RPDO" />
+            <SubObject subIndex="06" name="Extended Inputs 6"  objectType="7" dataType="0005" accessType="rw" PDOmapping="RPDO" />
+            <SubObject subIndex="07" name="Extended Inputs 7"  objectType="7" dataType="0005" accessType="rw" PDOmapping="RPDO" />
+            <SubObject subIndex="08" name="Extended Inputs 8"  objectType="7" dataType="0005" accessType="rw" PDOmapping="RPDO" />
+            <SubObject subIndex="09" name="Extended Inputs 9"  objectType="7" dataType="0005" accessType="rw" PDOmapping="RPDO" />
+            <SubObject subIndex="0A" name="Extended Inputs 10" objectType="7" dataType="0005" accessType="rw" PDOmapping="RPDO" />
+            <SubObject subIndex="0B" name="Extended Inputs 11" objectType="7" dataType="0005" accessType="rw" PDOmapping="RPDO" />
+            <SubObject subIndex="0C" name="Extended Inputs 12" objectType="7" dataType="0005" accessType="rw" PDOmapping="RPDO" />
+          </Object>
+          <Object index="2701" name="Extended Inputs 32 Bit" objectType="8">
+            <SubObject subIndex="00" name="Number of elements" objectType="7" dataType="0005" accessType="ro" defaultValue="77" PDOmapping="no" />
+            <SubObject subIndex="01" name="Extended Inputs 1"  objectType="7" dataType="0005" accessType="rw" PDOmapping="RPDO" />
+            <SubObject subIndex="02" name="Extended Inputs 2"  objectType="7" dataType="0005" accessType="rw" PDOmapping="RPDO" />
+            <SubObject subIndex="03" name="Extended Inputs 3"  objectType="7" dataType="0005" accessType="rw" PDOmapping="RPDO" />
+            <SubObject subIndex="04" name="Extended Inputs 4"  objectType="7" dataType="0005" accessType="rw" PDOmapping="RPDO" />
+            <SubObject subIndex="05" name="Extended Inputs 5"  objectType="7" dataType="0005" accessType="rw" PDOmapping="RPDO" />
+            <SubObject subIndex="06" name="Extended Inputs 6"  objectType="7" dataType="0005" accessType="rw" PDOmapping="RPDO" />
+            <SubObject subIndex="07" name="Extended Inputs 7"  objectType="7" dataType="0005" accessType="rw" PDOmapping="RPDO" />
+            <SubObject subIndex="08" name="Extended Inputs 8"  objectType="7" dataType="0005" accessType="rw" PDOmapping="RPDO" />
+            <SubObject subIndex="09" name="Extended Inputs 9"  objectType="7" dataType="0005" accessType="rw" PDOmapping="RPDO" />
+            <SubObject subIndex="0A" name="Extended Inputs 10" objectType="7" dataType="0005" accessType="rw" PDOmapping="RPDO" />
+            <SubObject subIndex="0B" name="Extended Inputs 11" objectType="7" dataType="0005" accessType="rw" PDOmapping="RPDO" />
+            <SubObject subIndex="0C" name="Extended Inputs 12" objectType="7" dataType="0005" accessType="rw" PDOmapping="RPDO" />
+            <SubObject subIndex="0D" name="Extended Inputs 13" objectType="7" dataType="0005" accessType="rw" PDOmapping="RPDO" />
+            <SubObject subIndex="0E" name="Extended Inputs 14" objectType="7" dataType="0005" accessType="rw" PDOmapping="RPDO" />
+            <SubObject subIndex="0F" name="Extended Inputs 15" objectType="7" dataType="0005" accessType="rw" PDOmapping="RPDO" />
+            <SubObject subIndex="10" name="Extended Inputs 16" objectType="7" dataType="0005" accessType="rw" PDOmapping="RPDO" />
+            <SubObject subIndex="11" name="Extended Inputs 17" objectType="7" dataType="0005" accessType="rw" PDOmapping="RPDO" />
+            <SubObject subIndex="12" name="Extended Inputs 18" objectType="7" dataType="0005" accessType="rw" PDOmapping="RPDO" />
+            <SubObject subIndex="13" name="Extended Inputs 19" objectType="7" dataType="0005" accessType="rw" PDOmapping="RPDO" />
+            <SubObject subIndex="14" name="Extended Inputs 20" objectType="7" dataType="0005" accessType="rw" PDOmapping="RPDO" />
+            <SubObject subIndex="15" name="Extended Inputs 21" objectType="7" dataType="0005" accessType="rw" PDOmapping="RPDO" />
+            <SubObject subIndex="16" name="Extended Inputs 22" objectType="7" dataType="0005" accessType="rw" PDOmapping="RPDO" />
+            <SubObject subIndex="17" name="Extended Inputs 23" objectType="7" dataType="0005" accessType="rw" PDOmapping="RPDO" />
+            <SubObject subIndex="18" name="Extended Inputs 24" objectType="7" dataType="0005" accessType="rw" PDOmapping="RPDO" />
+            <SubObject subIndex="19" name="Extended Inputs 25" objectType="7" dataType="0005" accessType="rw" PDOmapping="RPDO" />
+            <SubObject subIndex="1A" name="Extended Inputs 26" objectType="7" dataType="0005" accessType="rw" PDOmapping="RPDO" />
+            <SubObject subIndex="1B" name="Extended Inputs 27" objectType="7" dataType="0005" accessType="rw" PDOmapping="RPDO" />
+            <SubObject subIndex="1C" name="Extended Inputs 28" objectType="7" dataType="0005" accessType="rw" PDOmapping="RPDO" />
+            <SubObject subIndex="1D" name="Extended Inputs 29" objectType="7" dataType="0005" accessType="rw" PDOmapping="RPDO" />
+            <SubObject subIndex="1E" name="Extended Inputs 30" objectType="7" dataType="0005" accessType="rw" PDOmapping="RPDO" />
+            <SubObject subIndex="1F" name="Extended Inputs 31" objectType="7" dataType="0005" accessType="rw" PDOmapping="RPDO" />
+            <SubObject subIndex="20" name="Extended Inputs 32" objectType="7" dataType="0005" accessType="rw" PDOmapping="RPDO" />
+            <SubObject subIndex="21" name="Extended Inputs 33" objectType="7" dataType="0005" accessType="rw" PDOmapping="RPDO" />
+            <SubObject subIndex="22" name="Extended Inputs 34" objectType="7" dataType="0005" accessType="rw" PDOmapping="RPDO" />
+            <SubObject subIndex="23" name="Extended Inputs 35" objectType="7" dataType="0005" accessType="rw" PDOmapping="RPDO" />
+            <SubObject subIndex="24" name="Extended Inputs 36" objectType="7" dataType="0005" accessType="rw" PDOmapping="RPDO" />
+            <SubObject subIndex="25" name="Extended Inputs 37" objectType="7" dataType="0005" accessType="rw" PDOmapping="RPDO" />
+            <SubObject subIndex="26" name="Extended Inputs 38" objectType="7" dataType="0005" accessType="rw" PDOmapping="RPDO" />
+            <SubObject subIndex="27" name="Extended Inputs 39" objectType="7" dataType="0005" accessType="rw" PDOmapping="RPDO" />
+            <SubObject subIndex="28" name="Extended Inputs 40" objectType="7" dataType="0005" accessType="rw" PDOmapping="RPDO" />
+            <SubObject subIndex="29" name="Extended Inputs 41" objectType="7" dataType="0005" accessType="rw" PDOmapping="RPDO" />
+            <SubObject subIndex="2A" name="Extended Inputs 42" objectType="7" dataType="0005" accessType="rw" PDOmapping="RPDO" />
+            <SubObject subIndex="2B" name="Extended Inputs 43" objectType="7" dataType="0005" accessType="rw" PDOmapping="RPDO" />
+            <SubObject subIndex="2C" name="Extended Inputs 44" objectType="7" dataType="0005" accessType="rw" PDOmapping="RPDO" />
+            <SubObject subIndex="2D" name="Extended Inputs 45" objectType="7" dataType="0005" accessType="rw" PDOmapping="RPDO" />
+            <SubObject subIndex="2E" name="Extended Inputs 46" objectType="7" dataType="0005" accessType="rw" PDOmapping="RPDO" />
+            <SubObject subIndex="2F" name="Extended Inputs 47" objectType="7" dataType="0005" accessType="rw" PDOmapping="RPDO" />
+            <SubObject subIndex="30" name="Extended Inputs 48" objectType="7" dataType="0005" accessType="rw" PDOmapping="RPDO" />
+            <SubObject subIndex="31" name="Extended Inputs 49" objectType="7" dataType="0005" accessType="rw" PDOmapping="RPDO" />
+            <SubObject subIndex="32" name="Extended Inputs 50" objectType="7" dataType="0005" accessType="rw" PDOmapping="RPDO" />
+            <SubObject subIndex="33" name="Extended Inputs 51" objectType="7" dataType="0005" accessType="rw" PDOmapping="RPDO" />
+            <SubObject subIndex="34" name="Extended Inputs 52" objectType="7" dataType="0005" accessType="rw" PDOmapping="RPDO" />
+            <SubObject subIndex="35" name="Extended Inputs 53" objectType="7" dataType="0005" accessType="rw" PDOmapping="RPDO" />
+            <SubObject subIndex="36" name="Extended Inputs 54" objectType="7" dataType="0005" accessType="rw" PDOmapping="RPDO" />
+            <SubObject subIndex="37" name="Extended Inputs 55" objectType="7" dataType="0005" accessType="rw" PDOmapping="RPDO" />
+            <SubObject subIndex="38" name="Extended Inputs 56" objectType="7" dataType="0005" accessType="rw" PDOmapping="RPDO" />
+            <SubObject subIndex="39" name="Extended Inputs 57" objectType="7" dataType="0005" accessType="rw" PDOmapping="RPDO" />
+            <SubObject subIndex="3A" name="Extended Inputs 58" objectType="7" dataType="0005" accessType="rw" PDOmapping="RPDO" />
+            <SubObject subIndex="3B" name="Extended Inputs 59" objectType="7" dataType="0005" accessType="rw" PDOmapping="RPDO" />
+            <SubObject subIndex="3C" name="Extended Inputs 60" objectType="7" dataType="0005" accessType="rw" PDOmapping="RPDO" />
+            <SubObject subIndex="3D" name="Extended Inputs 61" objectType="7" dataType="0005" accessType="rw" PDOmapping="RPDO" />
+            <SubObject subIndex="3E" name="Extended Inputs 62" objectType="7" dataType="0005" accessType="rw" PDOmapping="RPDO" />
+            <SubObject subIndex="3F" name="Extended Inputs 63" objectType="7" dataType="0005" accessType="rw" PDOmapping="RPDO" />
+            <SubObject subIndex="40" name="Extended Inputs 64" objectType="7" dataType="0005" accessType="rw" PDOmapping="RPDO" />
+            <SubObject subIndex="41" name="Extended Inputs 65" objectType="7" dataType="0005" accessType="rw" PDOmapping="RPDO" />
+            <SubObject subIndex="42" name="Extended Inputs 66" objectType="7" dataType="0005" accessType="rw" PDOmapping="RPDO" />
+            <SubObject subIndex="43" name="Extended Inputs 67" objectType="7" dataType="0005" accessType="rw" PDOmapping="RPDO" />
+            <SubObject subIndex="44" name="Extended Inputs 68" objectType="7" dataType="0005" accessType="rw" PDOmapping="RPDO" />
+            <SubObject subIndex="45" name="Extended Inputs 69" objectType="7" dataType="0005" accessType="rw" PDOmapping="RPDO" />
+            <SubObject subIndex="46" name="Extended Inputs 70" objectType="7" dataType="0005" accessType="rw" PDOmapping="RPDO" />
+            <SubObject subIndex="47" name="Extended Inputs 71" objectType="7" dataType="0005" accessType="rw" PDOmapping="RPDO" />
+            <SubObject subIndex="48" name="Extended Inputs 72" objectType="7" dataType="0005" accessType="rw" PDOmapping="RPDO" />
+            <SubObject subIndex="49" name="Extended Inputs 73" objectType="7" dataType="0005" accessType="rw" PDOmapping="RPDO" />
+            <SubObject subIndex="4A" name="Extended Inputs 74" objectType="7" dataType="0005" accessType="rw" PDOmapping="RPDO" />
+            <SubObject subIndex="4B" name="Extended Inputs 75" objectType="7" dataType="0005" accessType="rw" PDOmapping="RPDO" />
+            <SubObject subIndex="4C" name="Extended Inputs 76" objectType="7" dataType="0005" accessType="rw" PDOmapping="RPDO" />
+            <SubObject subIndex="4D" name="Extended Inputs 77" objectType="7" dataType="0005" accessType="rw" PDOmapping="RPDO" />
+          </Object>
+
           <Object index="6000" name="Digital Input 8 Bit" objectType="8">
             <SubObject subIndex="00" name="Number of elements" objectType="7" dataType="0005" accessType="ro" defaultValue="1" PDOmapping="no" />
             <SubObject subIndex="01" name="Byte 1" objectType="7" dataType="0005" accessType="ro" PDOmapping="TPDO" />
