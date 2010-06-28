@@ -141,7 +141,7 @@ typedef enum
     kEplNmtInvalidEvent         = 0x0042,       // invalid event send to NMT-modul
     kEplNmtInvalidState         = 0x0043,       // unknown state in NMT-State-Maschine
     kEplNmtInvalidParam         = 0x0044,       // invalid parameters specified
-    kEplNmtSyncReqRejected      = 0x0045,       // SyncReq cound not be issued
+    kEplNmtSyncReqRejected      = 0x0045,       // SyncReq could not be issued
 
     // area for SDO/UDP module 0x0050 - 0x005F
     kEplSdoUdpMissCb            = 0x0050,       // missing callback-function pointer during inti of
