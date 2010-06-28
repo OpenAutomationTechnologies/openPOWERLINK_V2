@@ -257,7 +257,7 @@ tEplTimeruData*     pData;
     init_timer(&pData->m_Timer);
     pData->m_Timer.function = EplTimeruCbMs;
     pData->m_Timer.data = (unsigned long) pData;
-    pData->m_Timer.expires = jiffies + ulTime_p * HZ / 1000;
+    pData->m_Timer.expires = jiffies + 1 + ((ulTime_p * HZ) + 999) / 1000;
 
     EPL_MEMCPY(&pData->TimerArgument, &Argument_p, sizeof(tEplTimerArg));
 
@@ -313,7 +313,7 @@ tEplTimeruData*     pData;
         goto Exit;
     }
 
-    mod_timer(&pData->m_Timer, (jiffies + ulTime_p * HZ / 1000));
+    mod_timer(&pData->m_Timer, (jiffies + 1 + ((ulTime_p * HZ) + 999) / 1000));
 
     // copy the TimerArg after the timer is restarted,
     // so that a timer occured immediately before mod_timer
