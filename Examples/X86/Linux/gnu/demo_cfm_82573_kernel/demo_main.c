@@ -88,6 +88,8 @@
 
 #include "Epl.h"
 #include "proc_fs.h"
+#include "PosixFileLinuxKernel.h"
+
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,0)
     // remove ("make invisible") obsolete symbols for kernel versions 2.6
@@ -191,6 +193,8 @@ static char* pszCdcFilename_g = EPL_OBD_DEF_CONCISEDCF_FILENAME;
 module_param_named(cdc, pszCdcFilename_g, charp, 0);
 MODULE_PARM_DESC(cdc, "Full path to ConciseDCF (CDC file) which is imported into the local object dictionary");
 
+static FD_TYPE hAppFdTracingEnabled_g;
+
 
 //---------------------------------------------------------------------------
 // local function prototypes
@@ -256,6 +260,9 @@ unsigned int        uiVarEntries;
 tEplObdSize         ObdSize;
 
     atomic_set(&AtomicShutdown_g, TRUE);
+
+    // open character device from debugfs to disable tracing when necessary
+    hAppFdTracingEnabled_g = open("/sys/kernel/debug/tracing/tracing_enabled", O_WRONLY, 0666);
 
     // get node ID from insmod command line
     EplApiInitParam.m_uiNodeId = uiNodeId_g;
@@ -454,6 +461,7 @@ tEplKernel          EplRet;
     EplRet = EplLinProcFree();
     PRINTF1("EplLinProcFree():        0x%X\n", EplRet);
 
+    close(hAppFdTracingEnabled_g);
 }
 
 
@@ -608,6 +616,18 @@ tEplKernel          EplRet = kEplSuccessful;
 
         case kEplApiEventHistoryEntry:
         {   // new history entry
+
+            if ((pEventArg_p->m_ErrHistoryEntry.m_wErrorCode == EPL_E_DLL_CYCLE_EXCEED_TH)
+                && (IS_FD_VALID(hAppFdTracingEnabled_g)))
+            {
+            mm_segment_t    old_fs;
+            ssize_t         iRet;
+
+                old_fs = get_fs();
+                set_fs(KERNEL_DS);
+
+                iRet = vfs_write(hAppFdTracingEnabled_g, "0", 1);
+            }
 
             PRINTF("%s(HistoryEntry): Type=0x%04X Code=0x%04X (0x%02X %02X %02X %02X %02X %02X %02X %02X)\n",
                     __func__,
