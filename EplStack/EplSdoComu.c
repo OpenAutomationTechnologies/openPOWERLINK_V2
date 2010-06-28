@@ -3035,6 +3035,12 @@ unsigned int    uiSizeOfFrame;
             Ret = EplSdoAsySeqSendData(pSdoComCon_p->m_SdoSeqConHdl,
                                         uiSizeOfFrame,
                                         pFrame);
+            if (Ret == kEplSdoSeqConnectionBusy)
+            {
+                PRINTF2("%s tried to send abort 0x%X while connection is already closed\n",
+                    __func__, dwAbortCode_p);
+                Ret = kEplSuccessful;
+            }
             break;
         }
 
