@@ -90,6 +90,11 @@
 #define EPL_EVENT_SIZE_SHB_USER_TO_KERNEL   32768   // 32 kByte
 #endif
 
+#define EPL_EVENT_NAME_SHB_KERNEL_INTERNAL  "ShbKernelInternal"
+#ifndef EPL_EVENT_SIZE_SHB_KERNEL_INTERNAL
+#define EPL_EVENT_SIZE_SHB_KERNEL_INTERNAL  32768   // 32 kByte
+#endif
+
 
 // max size of event argument
 #ifndef EPL_MAX_EVENT_ARG_SIZE

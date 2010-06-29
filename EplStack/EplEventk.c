@@ -119,6 +119,7 @@ typedef struct
     tShbInstance    m_pShbKernelToUserInstance;
 #if EPL_EVENT_USE_KERNEL_QUEUE != FALSE
     tShbInstance    m_pShbUserToKernelInstance;
+    tShbInstance    m_pShbKernelInternalInstance;
     BYTE            m_abRxBuffer[sizeof(tEplEvent) + EPL_MAX_EVENT_ARG_SIZE];
 #endif
 #endif
@@ -253,13 +254,35 @@ unsigned int    fShbNewCreated;
         goto Exit;
     }
 
+    ShbError = ShbCirAllocBuffer (EPL_EVENT_SIZE_SHB_KERNEL_INTERNAL,
+                                  EPL_EVENT_NAME_SHB_KERNEL_INTERNAL,
+                                  &EplEventkInstance_g.m_pShbKernelInternalInstance,
+                                  &fShbNewCreated);
+    if(ShbError != kShbOk)
+    {
+        EPL_DBGLVL_EVENTK_TRACE1("EplEventkAddInstance(): ShbCirAllocBuffer(Kint) -> 0x%X\n", ShbError);
+        Ret = kEplNoResource;
+        goto Exit;
+    }
+
     // register eventhandler
-    ShbError = ShbCirSetSignalHandlerNewData (EplEventkInstance_g.m_pShbUserToKernelInstance,
+    ShbError = ShbCirSetSignalHandlerNewData (EplEventkInstance_g.m_pShbKernelInternalInstance,
                                     EplEventkRxSignalHandlerCb,
                                     kShbPriorityHigh);
     if(ShbError != kShbOk)
     {
-        EPL_DBGLVL_EVENTK_TRACE1("EplEventkAddInstance(): ShbCirSetSignalHandlerNewData(U2K) -> 0x%X\n", ShbError);
+        EPL_DBGLVL_EVENTK_TRACE1("EplEventkAddInstance(): ShbCirSetSignalHandlerNewData(Kint) -> 0x%X\n", ShbError);
+        Ret = kEplNoResource;
+        goto Exit;
+    }
+
+    ShbError = ShbCirConnectMaster (EplEventkInstance_g.m_pShbUserToKernelInstance,
+                                    EplEventkRxSignalHandlerCb,
+                                    EplEventkInstance_g.m_pShbKernelInternalInstance,
+                                    kShbPriorityNormal);
+    if(ShbError != kShbOk)
+    {
+        EPL_DBGLVL_EVENTK_TRACE1("EplEventkAddInstance(): ShbCirConnectMaster(U2K) -> 0x%X\n", ShbError);
         Ret = kEplNoResource;
         goto Exit;
     }
@@ -299,12 +322,22 @@ tShbError       ShbError;
 #if EPL_USE_SHAREDBUFF != FALSE
 #if EPL_EVENT_USE_KERNEL_QUEUE != FALSE
     // set eventhandler to NULL
-    ShbError = ShbCirSetSignalHandlerNewData (EplEventkInstance_g.m_pShbUserToKernelInstance,
+    ShbError = ShbCirConnectMaster (EplEventkInstance_g.m_pShbUserToKernelInstance,
+                                    NULL,
+                                    EplEventkInstance_g.m_pShbKernelInternalInstance,
+                                    kShbPriorityNormal);
+    if(ShbError != kShbOk)
+    {
+        EPL_DBGLVL_EVENTK_TRACE1("EplEventkDelInstance(): ShbCirConnectMaster(U2K) -> 0x%X\n", ShbError);
+        Ret = kEplNoResource;
+    }
+
+    ShbError = ShbCirSetSignalHandlerNewData (EplEventkInstance_g.m_pShbKernelInternalInstance,
                                     NULL,
                                     kShbPriorityNormal);
     if(ShbError != kShbOk)
     {
-        EPL_DBGLVL_EVENTK_TRACE1("EplEventkDelInstance(): ShbCirSetSignalHandlerNewData(U2K) -> 0x%X\n", ShbError);
+        EPL_DBGLVL_EVENTK_TRACE1("EplEventkDelInstance(): ShbCirSetSignalHandlerNewData(Kint) -> 0x%X\n", ShbError);
         Ret = kEplNoResource;
     }
 
@@ -318,6 +351,18 @@ tShbError       ShbError;
     else
     {
         EplEventkInstance_g.m_pShbUserToKernelInstance = NULL;
+    }
+
+    // free buffer Kernel internal
+    ShbError = ShbCirReleaseBuffer (EplEventkInstance_g.m_pShbKernelInternalInstance);
+    if(ShbError != kShbOk)
+    {
+        EPL_DBGLVL_EVENTK_TRACE1("EplEventkDelInstance(): ShbCirReleaseBuffer(Kint) -> 0x%X\n", ShbError);
+        Ret = kEplNoResource;
+    }
+    else
+    {
+        EplEventkInstance_g.m_pShbKernelInternalInstance = NULL;
     }
 #endif
 
@@ -595,7 +640,7 @@ unsigned int    fBufferCompleted;
 #if (EPL_USE_SHAREDBUFF != FALSE) \
     && (EPL_EVENT_USE_KERNEL_QUEUE != FALSE)
             // post message
-            ShbError = ShbCirAllocDataBlock (EplEventkInstance_g.m_pShbUserToKernelInstance,
+            ShbError = ShbCirAllocDataBlock (EplEventkInstance_g.m_pShbKernelInternalInstance,
                                    &ShbCirChunk,
                                    ulDataSize);
             switch (ShbError)
@@ -617,7 +662,7 @@ unsigned int    fBufferCompleted;
                     goto Exit;
                 }
             }
-            ShbError = ShbCirWriteDataChunk (EplEventkInstance_g.m_pShbUserToKernelInstance,
+            ShbError = ShbCirWriteDataChunk (EplEventkInstance_g.m_pShbKernelInternalInstance,
                                    &ShbCirChunk,
                                    pEvent_p,
                                    sizeof (tEplEvent),
@@ -630,7 +675,7 @@ unsigned int    fBufferCompleted;
             }
             if (fBufferCompleted == FALSE)
             {
-                ShbError = ShbCirWriteDataChunk (EplEventkInstance_g.m_pShbUserToKernelInstance,
+                ShbError = ShbCirWriteDataChunk (EplEventkInstance_g.m_pShbKernelInternalInstance,
                                        &ShbCirChunk,
                                        pEvent_p->m_pArg,
                                        (unsigned long) pEvent_p->m_uiSize,
