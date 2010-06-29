@@ -133,6 +133,7 @@ typedef struct
     BOOL                m_fJobReady;
     wait_queue_head_t   m_WaitQueueNewData;
     wait_queue_head_t   m_WaitQueueJobReady;
+    tShbInstance*       m_pShbInstMaster;
 
     #ifndef NDEBUG
         unsigned long   m_ulOwnerProcID;
@@ -391,6 +392,7 @@ struct sShbMemTable     *psMemTableElement;
         pShbMemHeader->m_ulShMemSize = ulShMemSize;
         pShbMemHeader->m_ulRefCount  = 1;
         pShbMemHeader->m_iBufferId=iBufferId;
+        pShbMemHeader->m_pShbInstMaster = NULL;
         // initialize spinlock
         spin_lock_init(&pShbMemHeader->m_SpinlockBuffAccess);
         // initialize wait queues
@@ -536,6 +538,32 @@ Exit:
 
 
 //---------------------------------------------------------------------------
+//  Set master instance of this slave instance
+//---------------------------------------------------------------------------
+
+INLINE_FUNCTION tShbError  ShbIpcSetMaster (
+    tShbInstance pShbInstance_p,
+    tShbInstance pShbInstanceMaster_p)
+{
+
+tShbMemHeader*  pShbMemHeader;
+
+    if (pShbInstance_p == NULL)
+    {
+        return (kShbInvalidArg);
+    }
+
+    pShbMemHeader = ShbIpcGetShbMemHeader (pShbInstance_p);
+
+    pShbMemHeader->m_pShbInstMaster = pShbInstanceMaster_p;
+
+    return (kShbOk);
+
+}
+
+
+
+//---------------------------------------------------------------------------
 //  Start signaling of new data (called from reading process)
 //---------------------------------------------------------------------------
 
@@ -650,6 +678,12 @@ tShbMemHeader*  pShbMemHeader;
     DEBUG_LVL_29_TRACE0("ShbIpcSignalNewData set Sem -> New Data\n");
 
     wake_up(&pShbMemHeader->m_WaitQueueNewData);
+
+    if (pShbMemHeader->m_pShbInstMaster != NULL)
+    {
+        return ShbIpcSignalNewData(pShbMemHeader->m_pShbInstMaster);
+    }
+
     return (kShbOk);
 }
 

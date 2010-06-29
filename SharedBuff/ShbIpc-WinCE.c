@@ -123,6 +123,7 @@ typedef struct
     unsigned long       m_SbhMagicID;       // magic ID ("SBH*")
     unsigned long       m_ulShMemSize;
     unsigned long       m_ulRefCount;
+    tShbInstance*       m_pShbInstMaster;
     char                m_szBufferID[MAX_LEN_BUFFER_ID];
 
     #ifndef NDEBUG
@@ -447,6 +448,7 @@ size_t			convertedChars = 0;
         pShbMemHeader->m_SbhMagicID  = SBH_MAGIC_ID;
         pShbMemHeader->m_ulShMemSize = ulShMemSize;
         pShbMemHeader->m_ulRefCount  = 1;
+        pShbMemHeader->m_pShbInstMaster = NULL;
         strcpy_s (pShbMemHeader->m_szBufferID, sizeof(pShbMemHeader->m_szBufferID), pszBufferID_p);
 
         #ifndef NDEBUG
@@ -708,6 +710,32 @@ tShbError     ShbError;
 
 
 //---------------------------------------------------------------------------
+//  Set master instance of this slave instance
+//---------------------------------------------------------------------------
+
+INLINE_FUNCTION tShbError  ShbIpcSetMaster (
+    tShbInstance pShbInstance_p,
+    tShbInstance pShbInstanceMaster_p)
+{
+
+tShbMemHeader*  pShbMemHeader;
+
+    if (pShbInstance_p == NULL)
+    {
+        return (kShbInvalidArg);
+    }
+
+    pShbMemHeader = ShbIpcGetShbMemHeader (pShbInstance_p);
+
+    pShbMemHeader->m_pShbInstMaster = pShbInstanceMaster_p;
+
+    return (kShbOk);
+
+}
+
+
+
+//---------------------------------------------------------------------------
 //  Start signaling of new data (called from reading process)
 //---------------------------------------------------------------------------
 
@@ -921,6 +949,7 @@ INLINE_FUNCTION tShbError  ShbIpcSignalNewData (
 {
 
 tShbMemInst*  pShbMemInst;
+tShbMemHeader*  pShbMemHeader;
 HANDLE  hEventNewData;
 BOOL    fRes;
 
@@ -934,6 +963,7 @@ BOOL    fRes;
 
 
     pShbMemInst = ShbIpcGetShbMemInst (pShbInstance_p);
+    pShbMemHeader = ShbIpcGetShbMemHeader (pShbInstance_p);
 
     ASSERT(pShbMemInst->m_ahEventNewData[IDX_EVENT_NEW_DATA] != INVALID_HANDLE_VALUE);
     hEventNewData = pShbMemInst->m_ahEventNewData[IDX_EVENT_NEW_DATA];
@@ -942,6 +972,11 @@ BOOL    fRes;
         fRes = SetEvent (hEventNewData);
         // TRACE1("\nShbIpcSignalNewData(): EventNewData set (Result=%d)\n", (int)fRes);
         ASSERT( fRes );
+    }
+
+    if (pShbMemHeader->m_pShbInstMaster != NULL)
+    {
+        return ShbIpcSignalNewData(pShbMemHeader->m_pShbInstMaster);
     }
 
     // TRACE0("\nShbIpcSignalNewData(): leave\n");

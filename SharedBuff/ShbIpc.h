@@ -114,6 +114,7 @@ tShbError  ShbIpcProcess (void);
 tShbError  ShbIpcEnterAtomicSection     (tShbInstance pShbInstance_p);
 tShbError  ShbIpcLeaveAtomicSection     (tShbInstance pShbInstance_p);
 
+tShbError  ShbIpcSetMaster              (tShbInstance pShbInstance_p, tShbInstance pShbInstanceMaster_p);
 tShbError  ShbIpcStartSignalingNewData  (tShbInstance pShbInstance_p, tSigHndlrNewData pfnSignalHandlerNewData_p, tShbPriority ShbPriority_p);
 tShbError  ShbIpcStopSignalingNewData   (tShbInstance pShbInstance_p);
 tShbError  ShbIpcSignalNewData          (tShbInstance pShbInstance_p);

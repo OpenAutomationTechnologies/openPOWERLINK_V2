@@ -126,8 +126,10 @@
 //  Local types
 //---------------------------------------------------------------------------
 
+typedef struct _tShbCirBuff tShbCirBuff;
+
 // structure to administrate circular shared buffer head
-typedef struct
+struct _tShbCirBuff
 {
     unsigned long          m_ShbCirMagicID;     // magic ID ("SBC#")
     unsigned long          m_ulBufferTotalSize; // over-all size of complete buffer
@@ -143,9 +145,10 @@ typedef struct
     tShbCirSigHndlrNewData m_pfnSigHndlrNewData;// application handler to signal new data
     unsigned int           m_fBufferLocked;     // TRUE if buffer is locked (because of pending reset request)
     tShbCirSigHndlrReset   m_pfnSigHndlrReset;  // application handler to signal buffer reset is done
+    tShbInstance*          m_pShbInstSlave;     // slave instance
     unsigned char          m_Data;              // start of data area (the real data size is unknown at this time)
 
-} tShbCirBuff;
+};
 
 
 // structure to administrate linear shared buffer head
@@ -234,6 +237,8 @@ tShbLinBuff*  pShbLinBuff;
 // not inlined internal functions
 int           ShbCirSignalHandlerNewData (tShbInstance pShbInstance_p);
 void          ShbCirSignalHandlerReset   (tShbInstance pShbInstance_p, unsigned int fTimeOut_p);
+static tShbError ShbCirLinkSlave (tShbCirBuff*  pShbCirBuff_p, tShbInstance*  pShbInstSlave_p, tShbPriority  ShbPriority_p);
+static tShbError ShbCirUnlinkSlave (tShbCirBuff*  pShbCirBuff_p, tShbInstance*  pShbInstSlave_p);
 
 #endif
 
@@ -381,6 +386,7 @@ tShbError      ShbError;
         pShbCirBuff->m_pfnSigHndlrNewData = NULL;
         pShbCirBuff->m_fBufferLocked      = FALSE;
         pShbCirBuff->m_pfnSigHndlrReset   = NULL;
+        pShbCirBuff->m_pShbInstSlave      = NULL;
     }
     else
     {
@@ -1275,6 +1281,75 @@ Exit:
 
 
 //---------------------------------------------------------------------------
+//  Set master instance of this slave instance
+//---------------------------------------------------------------------------
+
+INLINE_FUNCTION tShbError  ShbCirConnectMaster (
+    tShbInstance pShbInstance_p,
+    tShbCirSigHndlrNewData pfnSignalHandlerNewData_p,
+    tShbInstance pShbInstanceMaster_p,
+    tShbPriority ShbPriority_p)
+{
+
+tShbCirBuff*   pShbCirBuff;
+tShbError      ShbError;
+
+
+    // check arguments
+    if ((pShbInstance_p == NULL) || (pShbInstanceMaster_p == NULL))
+    {
+        ShbError = kShbInvalidArg;
+        goto Exit;
+    }
+
+
+    pShbCirBuff  = ShbCirGetBuffer (pShbInstance_p);
+    ShbError     = kShbOk;
+
+    if (pShbCirBuff->m_ShbCirMagicID != SBC_MAGIC_ID)
+    {
+        ShbError = kShbInvalidBufferType;
+        goto Exit;
+    }
+
+    ShbError = ShbIpcSetMaster(pShbInstance_p, pShbInstanceMaster_p);
+    if (ShbError != kShbOk)
+    {
+        goto Exit;
+    }
+
+    if (pfnSignalHandlerNewData_p != NULL)
+    {
+        // set a new signal handler
+        if (pShbCirBuff->m_pfnSigHndlrNewData != NULL)
+        {
+            ShbError = kShbAlreadySignaling;
+            goto Exit;
+        }
+
+        pShbCirBuff->m_pfnSigHndlrNewData = pfnSignalHandlerNewData_p;
+        ShbError = ShbCirLinkSlave(ShbCirGetBuffer(pShbInstanceMaster_p), pShbInstance_p, ShbPriority_p);
+    }
+    else
+    {
+        // remove existing signal handler
+        ShbError = ShbCirUnlinkSlave(ShbCirGetBuffer(pShbInstanceMaster_p), pShbInstance_p);
+        if (pShbCirBuff->m_pfnSigHndlrNewData != NULL)
+        {
+            pShbCirBuff->m_pfnSigHndlrNewData (pShbInstance_p, 0);
+        }
+        pShbCirBuff->m_pfnSigHndlrNewData = NULL;
+    }
+
+Exit:
+
+    return (ShbError);
+
+}
+
+
+
+//---------------------------------------------------------------------------
 //  Set application handler to signal new data for Circular Shared Buffer
 //  d.k.: new parameter priority as enum
 //---------------------------------------------------------------------------
@@ -1942,6 +2017,7 @@ tShbCirBuff*   pShbCirBuff;
 unsigned long  ulDataSize;
 unsigned long  ulBlockCount = 0;
 tShbError      ShbError;
+int            fCallAgain = FALSE;
 
 
     // check arguments
@@ -1962,23 +2038,26 @@ tShbError      ShbError;
     // call application handler
     if (pShbCirBuff->m_pfnSigHndlrNewData != NULL)
     {
-/*        do
-        {*/
-            ShbError = ShbCirGetReadDataSize (pShbInstance_p, &ulDataSize);
-            if ((ulDataSize > 0) && (ShbError == kShbOk))
-            {
-                pShbCirBuff->m_pfnSigHndlrNewData (pShbInstance_p, ulDataSize);
-            }
+        ShbError = ShbCirGetReadDataSize (pShbInstance_p, &ulDataSize);
+        if ((ulDataSize > 0) && (ShbError == kShbOk))
+        {
+            pShbCirBuff->m_pfnSigHndlrNewData (pShbInstance_p, ulDataSize);
+        }
 
-            ShbError = ShbCirGetReadBlockCount (pShbInstance_p, &ulBlockCount);
-/*        }
-        while ((ulBlockCount > 0) && (ShbError == kShbOk));*/
+        ShbError = ShbCirGetReadBlockCount (pShbInstance_p, &ulBlockCount);
+
+        fCallAgain = ((ulBlockCount > 0) && (ShbError == kShbOk));
+
+        if ((pShbCirBuff->m_pShbInstSlave != NULL) && (fCallAgain == FALSE))
+        {
+            fCallAgain = ShbCirSignalHandlerNewData(pShbCirBuff->m_pShbInstSlave);
+        }
     }
 
     // Return TRUE if there are pending blocks.
     // In that case ShbIpc tries to call this function again immediately if there
     // is no other filled shared buffer with higher priority.
-    return ((ulBlockCount > 0) && (ShbError == kShbOk));
+    return fCallAgain;
 
 }
 
@@ -2053,6 +2132,61 @@ tShbCirBuff*  pShbCirBuff;
     return;
 
 }
+
+
+
+//---------------------------------------------------------------------------
+//  Link slave instance into this instance
+//---------------------------------------------------------------------------
+
+static tShbError  ShbCirLinkSlave (
+    tShbCirBuff*  pShbCirBuff_p,
+    tShbInstance* pShbInstSlave_p,
+    tShbPriority  ShbPriority_p)
+{
+tShbError      ShbError = kShbOk;
+
+    if (pShbCirBuff_p->m_pShbInstSlave == NULL)
+    {
+        pShbCirBuff_p->m_pShbInstSlave = pShbInstSlave_p;
+    }
+    else
+    {
+        ShbError = ShbCirLinkSlave(ShbCirGetBuffer(pShbCirBuff_p->m_pShbInstSlave), pShbInstSlave_p, ShbPriority_p);
+    }
+
+    return (ShbError);
+
+}
+
+
+//---------------------------------------------------------------------------
+//  Unlink slave instance from this instance
+//---------------------------------------------------------------------------
+
+static tShbError  ShbCirUnlinkSlave (
+    tShbCirBuff*  pShbCirBuff_p,
+    tShbInstance* pShbInstSlave_p)
+{
+tShbError      ShbError = kShbOk;
+
+    if (pShbCirBuff_p->m_pShbInstSlave == NULL)
+    {
+        ShbError = kShbInvalidSigHndlr;
+    }
+    else if (pShbCirBuff_p->m_pShbInstSlave == pShbInstSlave_p)
+    {
+        pShbCirBuff_p->m_pShbInstSlave = NULL;
+    }
+    else
+    {
+        ShbError = ShbCirUnlinkSlave(ShbCirGetBuffer(pShbCirBuff_p->m_pShbInstSlave), pShbInstSlave_p);
+    }
+
+    return (ShbError);
+
+}
+
 
 #endif
 

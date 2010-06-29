@@ -134,6 +134,7 @@ typedef struct
     int                 m_iBufferId;
     BOOL                m_fNewData;
     BOOL                m_fJobReady;
+    tShbInstance*       m_pShbInstMaster;
 
 } tShbMemHeader;
 
@@ -393,6 +394,7 @@ unsigned long           aulCrcTable[256];
         pShbMemHeader->m_ulShMemSize = ulShMemSize;
         pShbMemHeader->m_ulRefCount  = 1;
         pShbMemHeader->m_iBufferId   = iBufferId;
+        pShbMemHeader->m_pShbInstMaster = NULL;
     }
     else
     {
@@ -561,6 +563,32 @@ tShbError       ShbError = kShbOk;
 
 
 //---------------------------------------------------------------------------
+//  Set master instance of this slave instance
+//---------------------------------------------------------------------------
+
+INLINE_FUNCTION tShbError  ShbIpcSetMaster (
+    tShbInstance pShbInstance_p,
+    tShbInstance pShbInstanceMaster_p)
+{
+
+tShbMemHeader*  pShbMemHeader;
+
+    if (pShbInstance_p == NULL)
+    {
+        return (kShbInvalidArg);
+    }
+
+    pShbMemHeader = ShbIpcGetShbMemHeader (pShbInstance_p);
+
+    pShbMemHeader->m_pShbInstMaster = pShbInstanceMaster_p;
+
+    return (kShbOk);
+
+}
+
+
+
+//---------------------------------------------------------------------------
 //  Start signaling of new data (called from reading instance)
 //---------------------------------------------------------------------------
 
@@ -695,6 +723,11 @@ tShbMemHeader*  pShbMemHeader;
     //set semaphore
     pShbMemHeader->m_fNewData = TRUE;
     DEBUG_LVL_29_TRACE0("ShbIpcSignalNewData set Sem -> New Data\n");
+
+    if (pShbMemHeader->m_pShbInstMaster != NULL)
+    {
+        return ShbIpcSignalNewData(pShbMemHeader->m_pShbInstMaster);
+    }
 
     return (kShbOk);
 }
