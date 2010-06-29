@@ -571,7 +571,8 @@ tEplNmtMnuNodeInfo* pNodeInfo;
 
                     // Disable PRes Chaining
                     SyncReqData.m_uiNodeId      = uiNodeId_p;
-                    SyncReqData.m_dwSyncControl = EPL_SYNC_PRES_MODE_RESET;
+                    SyncReqData.m_dwSyncControl = EPL_SYNC_PRES_MODE_RESET |
+                                                  EPL_SYNC_DEST_MAC_ADDRESS_VALID;
                     uiSize = sizeof(unsigned int) + sizeof(DWORD);
 
                     Ret = EplSyncuRequestSyncResponse(EplNmtMnuPrcCbSyncResNextAction, &SyncReqData, uiSize);
@@ -3664,7 +3665,7 @@ unsigned int        uiNodeIdPrevSyncReq;
                 tEplDllSyncRequest SyncRequestData;
                 unsigned int       uiSize;
 
-                    SyncRequestData.m_dwSyncControl = 0;
+                    SyncRequestData.m_dwSyncControl = EPL_SYNC_DEST_MAC_ADDRESS_VALID;
                     uiSize = sizeof(unsigned int) + sizeof(DWORD);
 
                     if (fSyncReqSentToPredNode == FALSE)
@@ -4196,7 +4197,8 @@ unsigned int        uiSize;
 
     // Send SyncReq
     SyncRequestData.m_uiNodeId        = uiNodeId;
-    SyncRequestData.m_dwSyncControl   = EPL_SYNC_PRES_TIME_FIRST_VALID;
+    SyncRequestData.m_dwSyncControl   = EPL_SYNC_PRES_TIME_FIRST_VALID |
+                                        EPL_SYNC_DEST_MAC_ADDRESS_VALID;
     SyncRequestData.m_dwPResTimeFirst = pNodeInfo->m_dwPResTimeFirstNs;
     uiSize = sizeof(unsigned int) + 2*sizeof(DWORD);
 
@@ -4284,7 +4286,8 @@ tEplNmtMnuNodeInfo* pNodeInfoLastSyncReq;
     // prepare SyncReq
     SyncReqData.m_dwSyncControl = EPL_SYNC_PRES_MODE_SET |
                                   EPL_SYNC_PRES_TIME_FIRST_VALID |
-                                  EPL_SYNC_PRES_FALL_BACK_TIMEOUT_VALID;
+                                  EPL_SYNC_PRES_FALL_BACK_TIMEOUT_VALID |
+                                  EPL_SYNC_DEST_MAC_ADDRESS_VALID;
 
     // read object 0x1006 NMT_CycleLen_U32
     ObdSize = sizeof(DWORD);
@@ -4457,7 +4460,7 @@ unsigned int        uiSize;
     if (pNodeInfo->m_wFlags & EPL_NMTMNU_NODE_FLAG_ISOCHRON)
     {
         SyncReqData.m_uiNodeId      = uiNodeId_p;
-        SyncReqData.m_dwSyncControl = 0;
+        SyncReqData.m_dwSyncControl = EPL_SYNC_DEST_MAC_ADDRESS_VALID;
         uiSize = sizeof(unsigned int) + sizeof(DWORD);
 
         Ret = EplSyncuRequestSyncResponse(EplNmtMnuPrcCbSyncResVerify, &SyncReqData, uiSize);

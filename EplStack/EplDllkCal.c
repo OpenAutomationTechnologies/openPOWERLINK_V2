@@ -1126,12 +1126,16 @@ unsigned int    uiCount;
                         AmiSetDwordToLe(&pSoaPayload_p->m_SyncRequest.m_le_dwPResFallBackTimeout, SyncRequest.m_dwPResFallBackTimeout);
                     }
 
-                    *puiNodeId_p = SyncRequest.m_uiNodeId;
-                    Ret = EplDllkGetCnMacAddress(SyncRequest.m_uiNodeId, &pSoaPayload_p->m_SyncRequest.m_be_abDestMacAddress[0]);
-                    if (Ret != kEplSuccessful)
+                    if ((SyncRequest.m_dwSyncControl & EPL_SYNC_DEST_MAC_ADDRESS_VALID) != 0)
                     {
-                        goto Exit;
+                        Ret = EplDllkGetCnMacAddress(SyncRequest.m_uiNodeId, &pSoaPayload_p->m_SyncRequest.m_be_abDestMacAddress[0]);
+                        if (Ret != kEplSuccessful)
+                        {
+                            goto Exit;
+                        }
                     }
+
+                    *puiNodeId_p = SyncRequest.m_uiNodeId;
                     *pReqServiceId_p = kEplDllReqServiceSync;
                     goto Exit;
                 }
