@@ -1938,9 +1938,17 @@
     </Object>
     <Object index="1F80" name="NMT_StartUp_U32" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
     <Object index="1F81" name="NMT_NodeAssignment_AU32" objectType="8" dataType="0007" PDOmapping="NO" CDCFlag="TRUE">
-     <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" defaultValue="254" actualValue="0x2" CDCFlag="TRUE"/>
+     <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" defaultValue="254" actualValue="09" CDCFlag="TRUE"/>
      <SubObject subIndex="01" name="NodeAssignment01" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0X80004007" CDCFlag="TRUE"/>
-     <SubObject subIndex="F0" name="NodeAssignmentF0" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0x80001001" CDCFlag="TRUE"/>
+     <SubObject subIndex="F0" name="NodeAssignmentF0" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0x80001001" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
+     <SubObject subIndex="02" name="CNAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0X80004007" CDCFlag="TRUE"/>
+     <SubObject subIndex="03" name="CNAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0X80004007" CDCFlag="TRUE"/>
+     <SubObject subIndex="04" name="CNAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0X80004007" CDCFlag="TRUE"/>
+     <SubObject subIndex="05" name="CNAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0X80004007" CDCFlag="TRUE"/>
+     <SubObject subIndex="06" name="CNAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0X80004007" PDOmapping="NO" CDCFlag="TRUE"/>
+     <SubObject subIndex="07" name="CNAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0X80004007" PDOmapping="NO" CDCFlag="TRUE"/>
+     <SubObject subIndex="08" name="CNAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0X80000007" CDCFlag="TRUE"/>
+     <SubObject subIndex="09" name="CNAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0X80000007" CDCFlag="TRUE"/>
     </Object>
     <Object index="1F82" name="NMT_FeatureFlags_U32" objectType="7" dataType="0007" accessType="const" defaultValue="0x245" PDOmapping="NO" CDCFlag="FALSE"/>
     <Object index="1F83" name="NMT_EPLVersion_U8" objectType="7" dataType="0005" accessType="const" defaultValue="0x20" PDOmapping="NO" CDCFlag="FALSE"/>
@@ -1948,45 +1956,45 @@
      <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" defaultValue="254" CDCFlag="TRUE"/>
      <SubObject subIndex="01" name="DeviceTypeId01" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="02" name="DeviceTypeId02" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
-     <SubObject subIndex="03" name="DeviceTypeId03" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
+     <SubObject subIndex="03" name="DeviceTypeId03" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="04" name="DeviceTypeId04" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="05" name="DeviceTypeId05" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
-     <SubObject subIndex="06" name="DeviceTypeId06" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
+     <SubObject subIndex="06" name="DeviceTypeId06" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="07" name="DeviceTypeId07" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="08" name="DeviceTypeId08" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="09" name="DeviceTypeId09" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
-     <SubObject subIndex="0A" name="DeviceTypeId0A" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
+     <SubObject subIndex="0A" name="DeviceTypeId0A" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="0B" name="DeviceTypeId0B" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="0C" name="DeviceTypeId0C" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="0D" name="DeviceTypeId0D" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
-     <SubObject subIndex="0E" name="DeviceTypeId0E" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
+     <SubObject subIndex="0E" name="DeviceTypeId0E" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="0F" name="DeviceTypeId0F" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="10" name="DeviceTypeId10" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
-     <SubObject subIndex="11" name="DeviceTypeId11" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
+     <SubObject subIndex="11" name="DeviceTypeId11" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="12" name="DeviceTypeId12" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="13" name="DeviceTypeId13" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="14" name="DeviceTypeId14" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="15" name="DeviceTypeId15" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="16" name="DeviceTypeId16" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="17" name="DeviceTypeId17" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
-     <SubObject subIndex="18" name="DeviceTypeId18" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
+     <SubObject subIndex="18" name="DeviceTypeId18" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="19" name="DeviceTypeId19" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="1A" name="DeviceTypeId1A" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="1B" name="DeviceTypeId1B" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
-     <SubObject subIndex="1C" name="DeviceTypeId1C" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
+     <SubObject subIndex="1C" name="DeviceTypeId1C" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="1D" name="DeviceTypeId1D" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="1E" name="DeviceTypeId1E" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="1F" name="DeviceTypeId1F" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="20" name="DeviceTypeId20" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="21" name="DeviceTypeId21" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="22" name="DeviceTypeId22" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
-     <SubObject subIndex="23" name="DeviceTypeId23" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
+     <SubObject subIndex="23" name="DeviceTypeId23" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="24" name="DeviceTypeId24" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="25" name="DeviceTypeId25" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="26" name="DeviceTypeId26" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="27" name="DeviceTypeId27" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="28" name="DeviceTypeId28" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
-     <SubObject subIndex="29" name="DeviceTypeId29" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
+     <SubObject subIndex="29" name="DeviceTypeId29" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="2A" name="DeviceTypeId2A" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="2B" name="DeviceTypeId2B" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="2C" name="DeviceTypeId2C" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
@@ -1996,7 +2004,7 @@
      <SubObject subIndex="30" name="DeviceTypeId30" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="31" name="DeviceTypeId31" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="32" name="DeviceTypeId32" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
-     <SubObject subIndex="33" name="DeviceTypeId33" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
+     <SubObject subIndex="33" name="DeviceTypeId33" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="34" name="DeviceTypeId34" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="35" name="DeviceTypeId35" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="36" name="DeviceTypeId36" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
@@ -2004,7 +2012,7 @@
      <SubObject subIndex="38" name="DeviceTypeId38" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="39" name="DeviceTypeId39" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="3A" name="DeviceTypeId3A" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
-     <SubObject subIndex="3B" name="DeviceTypeId3B" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
+     <SubObject subIndex="3B" name="DeviceTypeId3B" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="3C" name="DeviceTypeId3C" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="3D" name="DeviceTypeId3D" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="3E" name="DeviceTypeId3E" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
@@ -2014,7 +2022,7 @@
      <SubObject subIndex="42" name="DeviceTypeId42" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="43" name="DeviceTypeId43" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="44" name="DeviceTypeId44" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
-     <SubObject subIndex="45" name="DeviceTypeId45" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
+     <SubObject subIndex="45" name="DeviceTypeId45" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="46" name="DeviceTypeId46" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="47" name="DeviceTypeId47" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="48" name="DeviceTypeId48" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
@@ -2038,14 +2046,14 @@
      <SubObject subIndex="5A" name="DeviceTypeId5A" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="5B" name="DeviceTypeId5B" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="5C" name="DeviceTypeId5C" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
-     <SubObject subIndex="5D" name="DeviceTypeId5D" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
+     <SubObject subIndex="5D" name="DeviceTypeId5D" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="5E" name="DeviceTypeId5E" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
-     <SubObject subIndex="5F" name="DeviceTypeId5F" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
+     <SubObject subIndex="5F" name="DeviceTypeId5F" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="60" name="DeviceTypeId60" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="61" name="DeviceTypeId61" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="62" name="DeviceTypeId62" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="63" name="DeviceTypeId63" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
-     <SubObject subIndex="64" name="DeviceTypeId64" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
+     <SubObject subIndex="64" name="DeviceTypeId64" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="65" name="DeviceTypeId65" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="66" name="DeviceTypeId66" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="67" name="DeviceTypeId67" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
@@ -2083,48 +2091,48 @@
      <SubObject subIndex="87" name="DeviceTypeId87" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="88" name="DeviceTypeId88" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="89" name="DeviceTypeId89" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
-     <SubObject subIndex="8A" name="DeviceTypeId8A" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
+     <SubObject subIndex="8A" name="DeviceTypeId8A" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="8B" name="DeviceTypeId8B" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="8C" name="DeviceTypeId8C" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="8D" name="DeviceTypeId8D" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
-     <SubObject subIndex="8E" name="DeviceTypeId8E" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
+     <SubObject subIndex="8E" name="DeviceTypeId8E" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="8F" name="DeviceTypeId8F" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="90" name="DeviceTypeId90" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
-     <SubObject subIndex="91" name="DeviceTypeId91" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
+     <SubObject subIndex="91" name="DeviceTypeId91" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="92" name="DeviceTypeId92" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="93" name="DeviceTypeId93" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="94" name="DeviceTypeId94" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
-     <SubObject subIndex="95" name="DeviceTypeId95" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
+     <SubObject subIndex="95" name="DeviceTypeId95" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="96" name="DeviceTypeId96" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="97" name="DeviceTypeId97" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
-     <SubObject subIndex="98" name="DeviceTypeId98" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
+     <SubObject subIndex="98" name="DeviceTypeId98" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="99" name="DeviceTypeId99" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="9A" name="DeviceTypeId9A" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="9B" name="DeviceTypeId9B" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="9C" name="DeviceTypeId9C" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="9D" name="DeviceTypeId9D" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="9E" name="DeviceTypeId9E" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
-     <SubObject subIndex="9F" name="DeviceTypeId9F" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
+     <SubObject subIndex="9F" name="DeviceTypeId9F" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="A0" name="DeviceTypeIdA0" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="A1" name="DeviceTypeIdA1" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="A2" name="DeviceTypeIdA2" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
-     <SubObject subIndex="A3" name="DeviceTypeIdA3" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
+     <SubObject subIndex="A3" name="DeviceTypeIdA3" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="A4" name="DeviceTypeIdA4" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="A5" name="DeviceTypeIdA5" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="A6" name="DeviceTypeIdA6" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="A7" name="DeviceTypeIdA7" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="A8" name="DeviceTypeIdA8" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="A9" name="DeviceTypeIdA9" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
-     <SubObject subIndex="AA" name="DeviceTypeIdAA" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
+     <SubObject subIndex="AA" name="DeviceTypeIdAA" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="AB" name="DeviceTypeIdAB" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="AC" name="DeviceTypeIdAC" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="AD" name="DeviceTypeIdAD" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="AE" name="DeviceTypeIdAE" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="AF" name="DeviceTypeIdAF" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="B0" name="DeviceTypeIdB0" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
-     <SubObject subIndex="B1" name="DeviceTypeIdB1" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
+     <SubObject subIndex="B1" name="DeviceTypeIdB1" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="B2" name="DeviceTypeIdB2" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
-     <SubObject subIndex="B3" name="DeviceTypeIdB3" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
+     <SubObject subIndex="B3" name="DeviceTypeIdB3" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="B4" name="DeviceTypeIdB4" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="B5" name="DeviceTypeIdB5" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="B6" name="DeviceTypeIdB6" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
@@ -2135,7 +2143,7 @@
      <SubObject subIndex="BB" name="DeviceTypeIdBB" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="BC" name="DeviceTypeIdBC" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="BD" name="DeviceTypeIdBD" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
-     <SubObject subIndex="BE" name="DeviceTypeIdBE" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
+     <SubObject subIndex="BE" name="DeviceTypeIdBE" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="BF" name="DeviceTypeIdBF" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="C0" name="DeviceTypeIdC0" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="C1" name="DeviceTypeIdC1" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
@@ -2152,7 +2160,7 @@
      <SubObject subIndex="CC" name="DeviceTypeIdCC" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="CD" name="DeviceTypeIdCD" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="CE" name="DeviceTypeIdCE" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
-     <SubObject subIndex="CF" name="DeviceTypeIdCF" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
+     <SubObject subIndex="CF" name="DeviceTypeIdCF" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="D0" name="DeviceTypeIdD0" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="D1" name="DeviceTypeIdD1" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="D2" name="DeviceTypeIdD2" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
@@ -2163,7 +2171,7 @@
      <SubObject subIndex="D7" name="DeviceTypeIdD7" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="D8" name="DeviceTypeIdD8" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="D9" name="DeviceTypeIdD9" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
-     <SubObject subIndex="DA" name="DeviceTypeIdDA" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
+     <SubObject subIndex="DA" name="DeviceTypeIdDA" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="DB" name="DeviceTypeIdDB" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="DC" name="DeviceTypeIdDC" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="DD" name="DeviceTypeIdDD" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
@@ -2177,9 +2185,9 @@
      <SubObject subIndex="E5" name="DeviceTypeIdE5" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="E6" name="DeviceTypeIdE6" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="E7" name="DeviceTypeIdE7" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
-     <SubObject subIndex="E8" name="DeviceTypeIdE8" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
+     <SubObject subIndex="E8" name="DeviceTypeIdE8" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="E9" name="DeviceTypeIdE9" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
-     <SubObject subIndex="EA" name="DeviceTypeIdEA" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
+     <SubObject subIndex="EA" name="DeviceTypeIdEA" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="EB" name="DeviceTypeIdEB" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="EC" name="DeviceTypeIdEC" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="ED" name="DeviceTypeIdED" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
@@ -2472,7 +2480,7 @@
      <SubObject subIndex="02" name="PResPayloadLimit02" objectType="7" dataType="0006" accessType="rw" defaultValue="36" actualValue="0x24" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="03" name="PResPayloadLimit03" objectType="7" dataType="0006" accessType="rw" defaultValue="36" actualValue="0x24" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="04" name="PResPayloadLimit04" objectType="7" dataType="0006" accessType="rw" defaultValue="36" actualValue="0x24" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
-     <SubObject subIndex="05" name="PResPayloadLimit05" objectType="7" dataType="0006" accessType="rw" defaultValue="36" actualValue="0x24" CDCFlag="TRUE"/>
+     <SubObject subIndex="05" name="PResPayloadLimit05" objectType="7" dataType="0006" accessType="rw" defaultValue="36" actualValue="0x24" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="06" name="PResPayloadLimit06" objectType="7" dataType="0006" accessType="rw" defaultValue="36" actualValue="0x24" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="07" name="PResPayloadLimit07" objectType="7" dataType="0006" accessType="rw" defaultValue="36" actualValue="0x24" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="08" name="PResPayloadLimit08" objectType="7" dataType="0006" accessType="rw" defaultValue="36" actualValue="0x24" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
@@ -2489,14 +2497,14 @@
      <SubObject subIndex="13" name="PResPayloadLimit13" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="14" name="PResPayloadLimit14" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="15" name="PResPayloadLimit15" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
-     <SubObject subIndex="16" name="PResPayloadLimit16" objectType="7" dataType="0006" accessType="rw" defaultValue="36" CDCFlag="TRUE"/>
+     <SubObject subIndex="16" name="PResPayloadLimit16" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="17" name="PResPayloadLimit17" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="18" name="PResPayloadLimit18" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="19" name="PResPayloadLimit19" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="1A" name="PResPayloadLimit1A" objectType="7" dataType="0006" accessType="rw" defaultValue="36" CDCFlag="TRUE"/>
      <SubObject subIndex="1B" name="PResPayloadLimit1B" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="1C" name="PResPayloadLimit1C" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
-     <SubObject subIndex="1D" name="PResPayloadLimit1D" objectType="7" dataType="0006" accessType="rw" defaultValue="36" CDCFlag="TRUE"/>
+     <SubObject subIndex="1D" name="PResPayloadLimit1D" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="1E" name="PResPayloadLimit1E" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="1F" name="PResPayloadLimit1F" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="20" name="PResPayloadLimit20" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
@@ -2504,7 +2512,7 @@
      <SubObject subIndex="22" name="PResPayloadLimit22" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="23" name="PResPayloadLimit23" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="24" name="PResPayloadLimit24" objectType="7" dataType="0006" accessType="rw" defaultValue="36" CDCFlag="TRUE"/>
-     <SubObject subIndex="25" name="PResPayloadLimit25" objectType="7" dataType="0006" accessType="rw" defaultValue="36" CDCFlag="TRUE"/>
+     <SubObject subIndex="25" name="PResPayloadLimit25" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="26" name="PResPayloadLimit26" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="27" name="PResPayloadLimit27" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="28" name="PResPayloadLimit28" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
@@ -2517,60 +2525,60 @@
      <SubObject subIndex="2F" name="PResPayloadLimit2F" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="30" name="PResPayloadLimit30" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="31" name="PResPayloadLimit31" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
-     <SubObject subIndex="32" name="PResPayloadLimit32" objectType="7" dataType="0006" accessType="rw" defaultValue="36" CDCFlag="TRUE"/>
+     <SubObject subIndex="32" name="PResPayloadLimit32" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="33" name="PResPayloadLimit33" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="34" name="PResPayloadLimit34" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="35" name="PResPayloadLimit35" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="36" name="PResPayloadLimit36" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
-     <SubObject subIndex="37" name="PResPayloadLimit37" objectType="7" dataType="0006" accessType="rw" defaultValue="36" CDCFlag="TRUE"/>
+     <SubObject subIndex="37" name="PResPayloadLimit37" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="38" name="PResPayloadLimit38" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
-     <SubObject subIndex="39" name="PResPayloadLimit39" objectType="7" dataType="0006" accessType="rw" defaultValue="36" CDCFlag="TRUE"/>
+     <SubObject subIndex="39" name="PResPayloadLimit39" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="3A" name="PResPayloadLimit3A" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
-     <SubObject subIndex="3B" name="PResPayloadLimit3B" objectType="7" dataType="0006" accessType="rw" defaultValue="36" CDCFlag="TRUE"/>
+     <SubObject subIndex="3B" name="PResPayloadLimit3B" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="3C" name="PResPayloadLimit3C" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="3D" name="PResPayloadLimit3D" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="3E" name="PResPayloadLimit3E" objectType="7" dataType="0006" accessType="rw" defaultValue="36" CDCFlag="TRUE"/>
      <SubObject subIndex="3F" name="PResPayloadLimit3F" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="40" name="PResPayloadLimit40" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="41" name="PResPayloadLimit41" objectType="7" dataType="0006" accessType="rw" defaultValue="36" CDCFlag="TRUE"/>
-     <SubObject subIndex="42" name="PResPayloadLimit42" objectType="7" dataType="0006" accessType="rw" defaultValue="36" CDCFlag="TRUE"/>
+     <SubObject subIndex="42" name="PResPayloadLimit42" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="43" name="PResPayloadLimit43" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="44" name="PResPayloadLimit44" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
-     <SubObject subIndex="45" name="PResPayloadLimit45" objectType="7" dataType="0006" accessType="rw" defaultValue="36" CDCFlag="TRUE"/>
+     <SubObject subIndex="45" name="PResPayloadLimit45" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="46" name="PResPayloadLimit46" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="47" name="PResPayloadLimit47" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
-     <SubObject subIndex="48" name="PResPayloadLimit48" objectType="7" dataType="0006" accessType="rw" defaultValue="36" CDCFlag="TRUE"/>
-     <SubObject subIndex="49" name="PResPayloadLimit49" objectType="7" dataType="0006" accessType="rw" defaultValue="36" CDCFlag="TRUE"/>
+     <SubObject subIndex="48" name="PResPayloadLimit48" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
+     <SubObject subIndex="49" name="PResPayloadLimit49" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="4A" name="PResPayloadLimit4A" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="4B" name="PResPayloadLimit4B" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
-     <SubObject subIndex="4C" name="PResPayloadLimit4C" objectType="7" dataType="0006" accessType="rw" defaultValue="36" CDCFlag="TRUE"/>
+     <SubObject subIndex="4C" name="PResPayloadLimit4C" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="4D" name="PResPayloadLimit4D" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="4E" name="PResPayloadLimit4E" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="4F" name="PResPayloadLimit4F" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
-     <SubObject subIndex="50" name="PResPayloadLimit50" objectType="7" dataType="0006" accessType="rw" defaultValue="36" CDCFlag="TRUE"/>
+     <SubObject subIndex="50" name="PResPayloadLimit50" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="51" name="PResPayloadLimit51" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="52" name="PResPayloadLimit52" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
-     <SubObject subIndex="53" name="PResPayloadLimit53" objectType="7" dataType="0006" accessType="rw" defaultValue="36" CDCFlag="TRUE"/>
+     <SubObject subIndex="53" name="PResPayloadLimit53" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="54" name="PResPayloadLimit54" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="55" name="PResPayloadLimit55" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
-     <SubObject subIndex="56" name="PResPayloadLimit56" objectType="7" dataType="0006" accessType="rw" defaultValue="36" CDCFlag="TRUE"/>
+     <SubObject subIndex="56" name="PResPayloadLimit56" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="57" name="PResPayloadLimit57" objectType="7" dataType="0006" accessType="rw" defaultValue="36" CDCFlag="TRUE"/>
      <SubObject subIndex="58" name="PResPayloadLimit58" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="59" name="PResPayloadLimit59" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="5A" name="PResPayloadLimit5A" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="5B" name="PResPayloadLimit5B" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="5C" name="PResPayloadLimit5C" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
-     <SubObject subIndex="5D" name="PResPayloadLimit5D" objectType="7" dataType="0006" accessType="rw" defaultValue="36" CDCFlag="TRUE"/>
+     <SubObject subIndex="5D" name="PResPayloadLimit5D" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="5E" name="PResPayloadLimit5E" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="5F" name="PResPayloadLimit5F" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
-     <SubObject subIndex="60" name="PResPayloadLimit60" objectType="7" dataType="0006" accessType="rw" defaultValue="36" CDCFlag="TRUE"/>
+     <SubObject subIndex="60" name="PResPayloadLimit60" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="61" name="PResPayloadLimit61" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="62" name="PResPayloadLimit62" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="63" name="PResPayloadLimit63" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
-     <SubObject subIndex="64" name="PResPayloadLimit64" objectType="7" dataType="0006" accessType="rw" defaultValue="36" CDCFlag="TRUE"/>
+     <SubObject subIndex="64" name="PResPayloadLimit64" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="65" name="PResPayloadLimit65" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="66" name="PResPayloadLimit66" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
-     <SubObject subIndex="67" name="PResPayloadLimit67" objectType="7" dataType="0006" accessType="rw" defaultValue="36" CDCFlag="TRUE"/>
+     <SubObject subIndex="67" name="PResPayloadLimit67" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="68" name="PResPayloadLimit68" objectType="7" dataType="0006" accessType="rw" defaultValue="36" CDCFlag="TRUE"/>
      <SubObject subIndex="69" name="PResPayloadLimit69" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="6A" name="PResPayloadLimit6A" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
@@ -2587,12 +2595,12 @@
      <SubObject subIndex="75" name="PResPayloadLimit75" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="76" name="PResPayloadLimit76" objectType="7" dataType="0006" accessType="rw" defaultValue="36" CDCFlag="TRUE"/>
      <SubObject subIndex="77" name="PResPayloadLimit77" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
-     <SubObject subIndex="78" name="PResPayloadLimit78" objectType="7" dataType="0006" accessType="rw" defaultValue="36" CDCFlag="TRUE"/>
+     <SubObject subIndex="78" name="PResPayloadLimit78" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="79" name="PResPayloadLimit79" objectType="7" dataType="0006" accessType="rw" defaultValue="36" CDCFlag="TRUE"/>
      <SubObject subIndex="7A" name="PResPayloadLimit7A" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="7B" name="PResPayloadLimit7B" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="7C" name="PResPayloadLimit7C" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
-     <SubObject subIndex="7D" name="PResPayloadLimit7D" objectType="7" dataType="0006" accessType="rw" defaultValue="36" CDCFlag="TRUE"/>
+     <SubObject subIndex="7D" name="PResPayloadLimit7D" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="7E" name="PResPayloadLimit7E" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="7F" name="PResPayloadLimit7F" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="80" name="PResPayloadLimit80" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
@@ -2602,7 +2610,7 @@
      <SubObject subIndex="84" name="PResPayloadLimit84" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="85" name="PResPayloadLimit85" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="86" name="PResPayloadLimit86" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
-     <SubObject subIndex="87" name="PResPayloadLimit87" objectType="7" dataType="0006" accessType="rw" defaultValue="36" CDCFlag="TRUE"/>
+     <SubObject subIndex="87" name="PResPayloadLimit87" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="88" name="PResPayloadLimit88" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="89" name="PResPayloadLimit89" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="8A" name="PResPayloadLimit8A" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
@@ -2610,46 +2618,46 @@
      <SubObject subIndex="8C" name="PResPayloadLimit8C" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="8D" name="PResPayloadLimit8D" objectType="7" dataType="0006" accessType="rw" defaultValue="36" CDCFlag="TRUE"/>
      <SubObject subIndex="8E" name="PResPayloadLimit8E" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
-     <SubObject subIndex="8F" name="PResPayloadLimit8F" objectType="7" dataType="0006" accessType="rw" defaultValue="36" CDCFlag="TRUE"/>
+     <SubObject subIndex="8F" name="PResPayloadLimit8F" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="90" name="PResPayloadLimit90" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="91" name="PResPayloadLimit91" objectType="7" dataType="0006" accessType="rw" defaultValue="36" CDCFlag="TRUE"/>
      <SubObject subIndex="92" name="PResPayloadLimit92" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="93" name="PResPayloadLimit93" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
-     <SubObject subIndex="94" name="PResPayloadLimit94" objectType="7" dataType="0006" accessType="rw" defaultValue="36" CDCFlag="TRUE"/>
+     <SubObject subIndex="94" name="PResPayloadLimit94" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="95" name="PResPayloadLimit95" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="96" name="PResPayloadLimit96" objectType="7" dataType="0006" accessType="rw" defaultValue="36" CDCFlag="TRUE"/>
      <SubObject subIndex="97" name="PResPayloadLimit97" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
-     <SubObject subIndex="98" name="PResPayloadLimit98" objectType="7" dataType="0006" accessType="rw" defaultValue="36" CDCFlag="TRUE"/>
+     <SubObject subIndex="98" name="PResPayloadLimit98" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="99" name="PResPayloadLimit99" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="9A" name="PResPayloadLimit9A" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
-     <SubObject subIndex="9B" name="PResPayloadLimit9B" objectType="7" dataType="0006" accessType="rw" defaultValue="36" CDCFlag="TRUE"/>
+     <SubObject subIndex="9B" name="PResPayloadLimit9B" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="9C" name="PResPayloadLimit9C" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="9D" name="PResPayloadLimit9D" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="9E" name="PResPayloadLimit9E" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
-     <SubObject subIndex="9F" name="PResPayloadLimit9F" objectType="7" dataType="0006" accessType="rw" defaultValue="36" CDCFlag="TRUE"/>
+     <SubObject subIndex="9F" name="PResPayloadLimit9F" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="A0" name="PResPayloadLimitA0" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="A1" name="PResPayloadLimitA1" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
-     <SubObject subIndex="A2" name="PResPayloadLimitA2" objectType="7" dataType="0006" accessType="rw" defaultValue="36" CDCFlag="TRUE"/>
+     <SubObject subIndex="A2" name="PResPayloadLimitA2" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="A3" name="PResPayloadLimitA3" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="A4" name="PResPayloadLimitA4" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="A5" name="PResPayloadLimitA5" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="A6" name="PResPayloadLimitA6" objectType="7" dataType="0006" accessType="rw" defaultValue="36" CDCFlag="TRUE"/>
      <SubObject subIndex="A7" name="PResPayloadLimitA7" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="A8" name="PResPayloadLimitA8" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
-     <SubObject subIndex="A9" name="PResPayloadLimitA9" objectType="7" dataType="0006" accessType="rw" defaultValue="36" CDCFlag="TRUE"/>
+     <SubObject subIndex="A9" name="PResPayloadLimitA9" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="AA" name="PResPayloadLimitAA" objectType="7" dataType="0006" accessType="rw" defaultValue="36" CDCFlag="TRUE"/>
      <SubObject subIndex="AB" name="PResPayloadLimitAB" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="AC" name="PResPayloadLimitAC" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="AD" name="PResPayloadLimitAD" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="AE" name="PResPayloadLimitAE" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="AF" name="PResPayloadLimitAF" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
-     <SubObject subIndex="B0" name="PResPayloadLimitB0" objectType="7" dataType="0006" accessType="rw" defaultValue="36" CDCFlag="TRUE"/>
+     <SubObject subIndex="B0" name="PResPayloadLimitB0" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="B1" name="PResPayloadLimitB1" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="B2" name="PResPayloadLimitB2" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="B3" name="PResPayloadLimitB3" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="B4" name="PResPayloadLimitB4" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="B5" name="PResPayloadLimitB5" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
-     <SubObject subIndex="B6" name="PResPayloadLimitB6" objectType="7" dataType="0006" accessType="rw" defaultValue="36" CDCFlag="TRUE"/>
+     <SubObject subIndex="B6" name="PResPayloadLimitB6" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="B7" name="PResPayloadLimitB7" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="B8" name="PResPayloadLimitB8" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="B9" name="PResPayloadLimitB9" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
@@ -2665,41 +2673,41 @@
      <SubObject subIndex="C3" name="PResPayloadLimitC3" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="C4" name="PResPayloadLimitC4" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="C5" name="PResPayloadLimitC5" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
-     <SubObject subIndex="C6" name="PResPayloadLimitC6" objectType="7" dataType="0006" accessType="rw" defaultValue="36" CDCFlag="TRUE"/>
+     <SubObject subIndex="C6" name="PResPayloadLimitC6" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="C7" name="PResPayloadLimitC7" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="C8" name="PResPayloadLimitC8" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="C9" name="PResPayloadLimitC9" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
-     <SubObject subIndex="CA" name="PResPayloadLimitCA" objectType="7" dataType="0006" accessType="rw" defaultValue="36" CDCFlag="TRUE"/>
+     <SubObject subIndex="CA" name="PResPayloadLimitCA" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="CB" name="PResPayloadLimitCB" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="CC" name="PResPayloadLimitCC" objectType="7" dataType="0006" accessType="rw" defaultValue="36" CDCFlag="TRUE"/>
      <SubObject subIndex="CD" name="PResPayloadLimitCD" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="CE" name="PResPayloadLimitCE" objectType="7" dataType="0006" accessType="rw" defaultValue="36" CDCFlag="TRUE"/>
      <SubObject subIndex="CF" name="PResPayloadLimitCF" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
-     <SubObject subIndex="D0" name="PResPayloadLimitD0" objectType="7" dataType="0006" accessType="rw" defaultValue="36" CDCFlag="TRUE"/>
+     <SubObject subIndex="D0" name="PResPayloadLimitD0" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="D1" name="PResPayloadLimitD1" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="D2" name="PResPayloadLimitD2" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="D3" name="PResPayloadLimitD3" objectType="7" dataType="0006" accessType="rw" defaultValue="36" CDCFlag="TRUE"/>
      <SubObject subIndex="D4" name="PResPayloadLimitD4" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="D5" name="PResPayloadLimitD5" objectType="7" dataType="0006" accessType="rw" defaultValue="36" CDCFlag="TRUE"/>
      <SubObject subIndex="D6" name="PResPayloadLimitD6" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
-     <SubObject subIndex="D7" name="PResPayloadLimitD7" objectType="7" dataType="0006" accessType="rw" defaultValue="36" CDCFlag="TRUE"/>
+     <SubObject subIndex="D7" name="PResPayloadLimitD7" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="D8" name="PResPayloadLimitD8" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="D9" name="PResPayloadLimitD9" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="DA" name="PResPayloadLimitDA" objectType="7" dataType="0006" accessType="rw" defaultValue="36" CDCFlag="TRUE"/>
      <SubObject subIndex="DB" name="PResPayloadLimitDB" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="DC" name="PResPayloadLimitDC" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="DD" name="PResPayloadLimitDD" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
-     <SubObject subIndex="DE" name="PResPayloadLimitDE" objectType="7" dataType="0006" accessType="rw" defaultValue="36" CDCFlag="TRUE"/>
+     <SubObject subIndex="DE" name="PResPayloadLimitDE" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="DF" name="PResPayloadLimitDF" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="E0" name="PResPayloadLimitE0" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
-     <SubObject subIndex="E1" name="PResPayloadLimitE1" objectType="7" dataType="0006" accessType="rw" defaultValue="36" CDCFlag="TRUE"/>
+     <SubObject subIndex="E1" name="PResPayloadLimitE1" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="E2" name="PResPayloadLimitE2" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="E3" name="PResPayloadLimitE3" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="E4" name="PResPayloadLimitE4" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
-     <SubObject subIndex="E5" name="PResPayloadLimitE5" objectType="7" dataType="0006" accessType="rw" defaultValue="36" CDCFlag="TRUE"/>
+     <SubObject subIndex="E5" name="PResPayloadLimitE5" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="E6" name="PResPayloadLimitE6" objectType="7" dataType="0006" accessType="rw" defaultValue="36" CDCFlag="TRUE"/>
      <SubObject subIndex="E7" name="PResPayloadLimitE7" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
-     <SubObject subIndex="E8" name="PResPayloadLimitE8" objectType="7" dataType="0006" accessType="rw" defaultValue="36" CDCFlag="TRUE"/>
+     <SubObject subIndex="E8" name="PResPayloadLimitE8" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="E9" name="PResPayloadLimitE9" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="EA" name="PResPayloadLimitEA" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="EB" name="PResPayloadLimitEB" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
@@ -2718,7 +2726,7 @@
      <SubObject subIndex="F8" name="PResPayloadLimitF8" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="F9" name="PResPayloadLimitF9" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="FA" name="PResPayloadLimitFA" objectType="7" dataType="0006" accessType="rw" defaultValue="36" CDCFlag="TRUE"/>
-     <SubObject subIndex="FB" name="PResPayloadLimitFB" objectType="7" dataType="0006" accessType="rw" defaultValue="36" CDCFlag="TRUE"/>
+     <SubObject subIndex="FB" name="PResPayloadLimitFB" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="FC" name="PResPayloadLimitFC" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="FD" name="PResPayloadLimitFD" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="FE" name="PResPayloadLimitFE" objectType="7" dataType="0006" accessType="rw" defaultValue="36" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
@@ -2981,16 +2989,16 @@
      <SubObject subIndex="FE" name="CurrStateFE" objectType="7" dataType="0005" accessType="ro" defaultValue="28" CDCFlag="FALSE"/>
     </Object>
     <Object index="1F92" name="NMT_MNCNPResTimeout_AU32" objectType="8" dataType="0007" CDCFlag="TRUE">
-     <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" defaultValue="254" actualValue="0x9" CDCFlag="TRUE"/>
-     <SubObject subIndex="01" name="CNPResTimeout01" objectType="7" dataType="0007" accessType="rw" defaultValue="25000" actualValue="0x5B90" CDCFlag="TRUE"/>
-     <SubObject subIndex="02" name="CNResTimeout" objectType="7" dataType="0007" accessType="rw" defaultValue="25000" actualValue="0x5B90" CDCFlag="TRUE"/>
-     <SubObject subIndex="03" name="CNResTimeout" objectType="7" dataType="0007" accessType="rw" defaultValue="25000" actualValue="0x5B90" CDCFlag="TRUE"/>
-     <SubObject subIndex="04" name="CNResTimeout" objectType="7" dataType="0007" accessType="rw" defaultValue="25000" actualValue="0x5B90" CDCFlag="TRUE"/>
-     <SubObject subIndex="05" name="CNResTimeout" objectType="7" dataType="0007" accessType="rw" defaultValue="25000" actualValue="0x5B90" CDCFlag="TRUE"/>
-     <SubObject subIndex="06" name="CNResTimeout" objectType="7" dataType="0007" accessType="rw" defaultValue="25000" actualValue="0x5B90" CDCFlag="TRUE"/>
-     <SubObject subIndex="07" name="CNResTimeout" objectType="7" dataType="0007" accessType="rw" defaultValue="25000" actualValue="0x5B90" CDCFlag="TRUE"/>
-     <SubObject subIndex="08" name="CNResTimeout" objectType="7" dataType="0007" accessType="rw" defaultValue="25000" actualValue="0x5B90" CDCFlag="TRUE"/>
-     <SubObject subIndex="09" name="CNResTimeout" objectType="7" dataType="0007" accessType="rw" defaultValue="25000" actualValue="0x5B90" CDCFlag="TRUE"/>
+     <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" defaultValue="254" actualValue="09" CDCFlag="TRUE"/>
+     <SubObject subIndex="01" name="CNPResTimeout01" objectType="7" dataType="0007" accessType="rw" defaultValue="25000" actualValue="23440" CDCFlag="TRUE"/>
+     <SubObject subIndex="02" name="CNResTimeout" objectType="7" dataType="0007" accessType="rw" defaultValue="25000" actualValue="0x5EB0" CDCFlag="TRUE"/>
+     <SubObject subIndex="03" name="CNResTimeout" objectType="7" dataType="0007" accessType="rw" defaultValue="25000" actualValue="0x61D0" CDCFlag="TRUE"/>
+     <SubObject subIndex="04" name="CNResTimeout" objectType="7" dataType="0007" accessType="rw" defaultValue="25000" actualValue="0x64F0" CDCFlag="TRUE"/>
+     <SubObject subIndex="05" name="CNResTimeout" objectType="7" dataType="0007" accessType="rw" defaultValue="25000" actualValue="0x6810" CDCFlag="TRUE"/>
+     <SubObject subIndex="06" name="CNResTimeout" objectType="7" dataType="0007" accessType="rw" defaultValue="25000" actualValue="0x6B30" CDCFlag="TRUE"/>
+     <SubObject subIndex="07" name="CNResTimeout" objectType="7" dataType="0007" accessType="rw" defaultValue="25000" actualValue="0x6E50" CDCFlag="TRUE"/>
+     <SubObject subIndex="08" name="CNResTimeout" objectType="7" dataType="0007" accessType="rw" defaultValue="25000" actualValue="0x7170" CDCFlag="TRUE"/>
+     <SubObject subIndex="09" name="CNResTimeout" objectType="7" dataType="0007" accessType="rw" defaultValue="25000" actualValue="0x7490" CDCFlag="TRUE"/>
     </Object>
     <Object index="1F93" name="NMT_EPLNodeID_REC" objectType="9" CDCFlag="FALSE">
      <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" defaultValue="2" CDCFlag="FALSE"/>

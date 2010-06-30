@@ -1463,7 +1463,7 @@
      <SubObject subIndex="02" name="MappingVersion_U8" objectType="7" dataType="0005" accessType="rw" defaultValue="0" actualValue="0" PDOmapping="NO" CDCFlag="TRUE"/>
     </Object>
     <Object index="1A00" name="PDO_TxMappParam_00h_AU64" objectType="8" dataType="001B" PDOmapping="NO" CDCFlag="TRUE">
-     <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="rw" defaultValue="254" actualValue="0x1" PDOmapping="NO" CDCFlag="TRUE"/>
+     <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="rw" defaultValue="254" actualValue="0x15" PDOmapping="NO" CDCFlag="TRUE"/>
      <SubObject subIndex="01" name="ObjectMapping" objectType="7" dataType="001B" accessType="rw" defaultValue="0x0008000000016000" actualValue="0x0008000000016000" PDOmapping="NO" CDCFlag="TRUE"/>
      <SubObject subIndex="02" name="ObjectMapping" objectType="7" dataType="001B" accessType="rw" defaultValue="0x0008000800026000" actualValue="0x0008000800026000" PDOmapping="NO" CDCFlag="TRUE"/>
      <SubObject subIndex="03" name="ObjectMapping" objectType="7" dataType="001B" accessType="rw" defaultValue="0x0008001000036000" actualValue="0x0008001000036000" PDOmapping="NO" CDCFlag="TRUE"/>
@@ -1484,7 +1484,7 @@
      <SubObject subIndex="12" name="ObjectMapping" objectType="7" dataType="001B" accessType="rw" defaultValue="0x001000D0000A6401" actualValue="0x001000D0000A6401" PDOmapping="NO" CDCFlag="TRUE"/>
      <SubObject subIndex="13" name="ObjectMapping" objectType="7" dataType="001B" accessType="rw" defaultValue="0x001000E0000B6401" actualValue="0x001000E0000B6401" PDOmapping="NO" CDCFlag="TRUE"/>
      <SubObject subIndex="14" name="ObjectMapping" objectType="7" dataType="001B" accessType="rw" defaultValue="0x001000F0000C6401" actualValue="0x001000F0000C6401" PDOmapping="NO" CDCFlag="TRUE"/>
-     <SubObject subIndex="15" name="ObjectMapping" objectType="7" dataType="001B" accessType="rw" defaultValue="0" actualValue="0" PDOmapping="NO" CDCFlag="TRUE"/>
+     <SubObject subIndex="15" name="ObjectMapping" objectType="7" dataType="001B" accessType="rw" defaultValue="0" actualValue="0x0020010000016402" PDOmapping="NO" CDCFlag="TRUE"/>
      <SubObject subIndex="16" name="ObjectMapping" objectType="7" dataType="001B" accessType="rw" defaultValue="0" actualValue="0" PDOmapping="NO" CDCFlag="TRUE"/>
      <SubObject subIndex="17" name="ObjectMapping" objectType="7" dataType="001B" accessType="rw" defaultValue="0" actualValue="0" PDOmapping="NO" CDCFlag="TRUE"/>
      <SubObject subIndex="18" name="ObjectMapping" objectType="7" dataType="001B" accessType="rw" defaultValue="0" actualValue="0" PDOmapping="NO" CDCFlag="TRUE"/>
@@ -1790,7 +1790,7 @@
      <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" defaultValue="8" PDOmapping="NO" CDCFlag="TRUE"/>
      <SubObject subIndex="01" name="IsochrTxMaxPayload_U16" objectType="7" dataType="0006" accessType="const" defaultValue="1490" PDOmapping="NO" CDCFlag="TRUE"/>
      <SubObject subIndex="02" name="IsochrRxMaxPayload_U16" objectType="7" dataType="0006" accessType="const" defaultValue="1490" PDOmapping="NO" CDCFlag="TRUE"/>
-     <SubObject subIndex="03" name="PResMaxLatency_U32" objectType="7" dataType="0007" accessType="const" defaultValue="2000" actualValue="0x5B90" PDOmapping="NO" CDCFlag="TRUE"/>
+     <SubObject subIndex="03" name="PResMaxLatency_U32" objectType="7" dataType="0007" accessType="const" defaultValue="2000" actualValue="0x61D0" PDOmapping="NO" CDCFlag="TRUE"/>
      <SubObject subIndex="04" name="PReqActPayload_U16" objectType="7" dataType="0006" accessType="rw" defaultValue="256" actualValue="0x24" PDOmapping="NO" CDCFlag="TRUE"/>
      <SubObject subIndex="05" name="PResActPayload_U16" objectType="7" dataType="0006" accessType="rw" defaultValue="256" actualValue="0x24" PDOmapping="NO" CDCFlag="TRUE"/>
      <SubObject subIndex="06" name="ASndMaxLatency_U32" objectType="7" dataType="0007" accessType="const" defaultValue="2000" PDOmapping="NO" CDCFlag="TRUE"/>
