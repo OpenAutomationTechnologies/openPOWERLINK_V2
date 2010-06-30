@@ -900,7 +900,7 @@ int             fCallAgain;
 //            DEBUG_LVL_29_TRACE1("ShbIpcThreadSignalNewData wait for New Data Sem %p\n",pShbMemInst->m_pSemNewData);
     while (!kthread_should_stop())
     {
-        wait_event(pShbMemHeader->m_WaitQueueNewData,
+        wait_event_interruptible(pShbMemHeader->m_WaitQueueNewData,
             kthread_should_stop()
             || (pShbMemHeader->m_fNewData != FALSE));
 
@@ -956,7 +956,7 @@ int             iRetVal=-1;
     else
     {
         //wait for job ready semaphore
-        wait_event(pShbMemHeader->m_WaitQueueJobReady,
+        wait_event_interruptible(pShbMemHeader->m_WaitQueueJobReady,
             kthread_should_stop()
             || (pShbMemHeader->m_fJobReady != FALSE));
     }
@@ -971,7 +971,7 @@ int             iRetVal=-1;
 
     if (down_trylock(&pShbMemInst->m_SemaphoreStopThreadJobReady))
     {   // lock failed
-        wait_event(pShbMemHeader->m_WaitQueueJobReady,
+        wait_event_interruptible(pShbMemHeader->m_WaitQueueJobReady,
                                  kthread_should_stop());
 
         pShbMemInst->m_tThreadJobReadyId = INVALID_ID;
