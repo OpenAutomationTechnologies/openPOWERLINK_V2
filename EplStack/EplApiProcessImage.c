@@ -465,19 +465,27 @@ void*           pVar;
     if (fOutputPI_p == FALSE)
     {   // input PI
         pVar = ((BYTE*) EplApiProcessImageInstance_g.m_In.m_pImage) + uiOffsetPI_p;
-        if ((uiOffsetPI_p + (*puiVarEntries_p * EntrySize_p)) > EplApiProcessImageInstance_g.m_In.m_uiSize)
-        {
+        if ((uiOffsetPI_p + EntrySize_p) > EplApiProcessImageInstance_g.m_In.m_uiSize)
+        {   // at least one entry should fit into the PI, but it doesn't
             Ret = kEplApiPISizeExceeded;
             goto Exit;
+        }
+        if ((uiOffsetPI_p + (*puiVarEntries_p * EntrySize_p)) > EplApiProcessImageInstance_g.m_In.m_uiSize)
+        {   // limit the number of entries
+            *puiVarEntries_p = (EplApiProcessImageInstance_g.m_In.m_uiSize - uiOffsetPI_p) / EntrySize_p;
         }
     }
     else
     {   // output PI
         pVar = ((BYTE*) EplApiProcessImageInstance_g.m_Out.m_pImage) + uiOffsetPI_p;
-        if ((uiOffsetPI_p + (*puiVarEntries_p * EntrySize_p)) > EplApiProcessImageInstance_g.m_Out.m_uiSize)
-        {
+        if ((uiOffsetPI_p + EntrySize_p) > EplApiProcessImageInstance_g.m_Out.m_uiSize)
+        {   // at least one entry should fit into the PI, but it doesn't
             Ret = kEplApiPISizeExceeded;
             goto Exit;
+        }
+        if ((uiOffsetPI_p + (*puiVarEntries_p * EntrySize_p)) > EplApiProcessImageInstance_g.m_Out.m_uiSize)
+        {   // limit the number of entries
+            *puiVarEntries_p = (EplApiProcessImageInstance_g.m_Out.m_uiSize - uiOffsetPI_p) / EntrySize_p;
         }
     }
 
@@ -1039,7 +1047,9 @@ tEplKernel      Ret = kEplSuccessful;
 #error "OS currently not supported by EplApiProcessImage!"
 #endif
 
+#if (TARGET_SYSTEM == _LINUX_) && defined(__KERNEL__)
 Exit:
+#endif
     return Ret;
 }
 
@@ -1100,7 +1110,7 @@ tEplKernel      Ret = kEplSuccessful;
     pCopyJob_p->m_Event.m_pCompletion = NULL;
 #elif (TARGET_SYSTEM == _WIN32_)
     CloseHandle(pCopyJob_p->m_Event.m_hEvent);
-    pCopyJob_p->m_Event.m_hEvent = -1;
+    pCopyJob_p->m_Event.m_hEvent = INVALID_HANDLE_VALUE;
 #else
 #error "OS currently not supported by EplApiProcessImage!"
 #endif
