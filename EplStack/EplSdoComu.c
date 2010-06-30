@@ -3037,8 +3037,8 @@ unsigned int    uiSizeOfFrame;
                                         pFrame);
             if (Ret == kEplSdoSeqConnectionBusy)
             {
-                PRINTF2("%s tried to send abort 0x%X while connection is already closed\n",
-                    __func__, dwAbortCode_p);
+                PRINTF2("%s tried to send abort 0x%lX while connection is already closed\n",
+                    __func__, (unsigned long) dwAbortCode_p);
                 Ret = kEplSuccessful;
             }
             break;
