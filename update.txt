@@ -68,3 +68,9 @@ How to update from version 1.6 to version 1.6.0.2 or higher
 3. Handle the new event kEplApiEventHistoryEntry in your application (e.g. via
    printf or storing it into a log file).
 
+
+
+How to update from version 1.6 to version 1.6.0.5 or higher
+------------------------------------------------------------
+
+1. The process image API changed. Please see the reference manual for further details.
