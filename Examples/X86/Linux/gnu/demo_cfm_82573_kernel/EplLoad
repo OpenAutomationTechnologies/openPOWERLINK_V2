@@ -77,7 +77,8 @@ chrt -f -p 80 `ps -C \`ps -e -o comm |grep ^irq/.*epl\$\` -o pid --no-headers`
 # For kernel-queue shared-buffer thread, priority -80 is set in ShbIpc-LinuxKernel.c
 
 # Enable tracing
-#echo 'EplDllk* EdrvCyclic* TgtEthIsr' > /sys/kernel/debug/tracing/set_ftrace_filter
+#echo function_graph > /sys/kernel/debug/tracing/current_tracer
+#echo 'EplDllk* EdrvCyclic* TgtEthIsr EplPdok* EplEventk* EplNmtk*' > /sys/kernel/debug/tracing/set_ftrace_filter
 #echo 1 > /sys/kernel/debug/tracing/tracing_enabled
 
 exit 0
