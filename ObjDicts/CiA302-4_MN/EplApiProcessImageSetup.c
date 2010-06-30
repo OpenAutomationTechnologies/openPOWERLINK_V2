@@ -278,7 +278,6 @@ static tEplKernel EplApiProcessImageLinkRange(
 {
 tEplKernel      Ret = kEplSuccessful;
 unsigned int    uiVarEntries;
-tEplObdSize     ObdSize;
 
     for (; uiObjIndexStart_p <= uiObjIndexEnd_p;
         uiObjIndexStart_p++, uiOffsetPI_p += EntrySize_p * uiSubindexCountPerIndex_p)
