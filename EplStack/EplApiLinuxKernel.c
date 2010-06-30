@@ -1006,7 +1006,7 @@ int  iRet;
                 vfree(pBufHeader);
             }
 
-            iErr = copy_to_user(Event.m_pEventArg, pEventArg_g, min(sizeof (tEplApiEventArg), Event.m_uiEventArgSize));
+            iErr = copy_to_user(Event.m_pEventArg, pEventArg_g, min(sizeof (tEplApiEventArg), (size_t) Event.m_uiEventArgSize));
             if (iErr != 0)
             {   // not all data could be copied
                 iRet = -EIO;
