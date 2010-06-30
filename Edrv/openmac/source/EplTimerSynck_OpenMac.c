@@ -458,7 +458,7 @@ tEplKernel      Ret = kEplSuccessful;
 
 //---------------------------------------------------------------------------
 //
-// Function:    EplTimerSynckSetLossOfSyncToleranceNs()
+// Function:    EplTimerSynckSetLossOfSyncTolerance2Ns()
 //
 // Description:
 //
