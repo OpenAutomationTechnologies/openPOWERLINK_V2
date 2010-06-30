@@ -4923,7 +4923,7 @@ BYTE            bFlag1;
                                                                   | EPL_SYNC_PRES_MODE_RESET
                                                                   | EPL_SYNC_PRES_MODE_SET);
 
-#warning TODO CbUpdatePrcCycleTiming
+                // $$$ m.u.: CbUpdatePrcCycleTiming
 
 #endif
                 goto Exit;
@@ -5129,7 +5129,7 @@ unsigned int    uiNodeId;
                 AmiSetDwordToLe(&pTxFrameSyncRes->m_Data.m_Asnd.m_Payload.m_SyncResponse.m_le_dwSyncDelay, dwSyncDelayNs);
                 AmiSetDwordToLe(&pTxFrameSyncRes->m_Data.m_Asnd.m_Payload.m_SyncResponse.m_le_dwSyncNodeNumber, (DWORD) uiNodeId);
 
-#warning TODO CbUpdateRelativeLatencyDiff
+                // $$$ m.u.: CbUpdateRelativeLatencyDiff
             }
             else
             {
