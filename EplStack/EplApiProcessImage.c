@@ -1221,7 +1221,7 @@ tEplApiProcessImageCopyJobInt   CopyJob;
         }
 #if (TARGET_SYSTEM == _LINUX_) && defined(__KERNEL__)
         // wait until Exchange function completes the copy job
-        down_killable(&EplApiProcessImageInstance_g.m_SemaCbSync);
+        down_interruptible(&EplApiProcessImageInstance_g.m_SemaCbSync);
 #endif
 
     }
@@ -1252,7 +1252,7 @@ tEplApiProcessImageCopyJobInt   CopyJob;
         }
 #if (TARGET_SYSTEM == _LINUX_) && defined(__KERNEL__)
         // wait until Exchange function completes the copy job
-        down_killable(&EplApiProcessImageInstance_g.m_SemaCbSync);
+        down_interruptible(&EplApiProcessImageInstance_g.m_SemaCbSync);
 #endif
 
     }
