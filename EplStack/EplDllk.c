@@ -4883,6 +4883,13 @@ BYTE            bFlag1;
                 if (dwSyncControl & EPL_SYNC_PRES_FALL_BACK_TIMEOUT_VALID)
                 {
                     EplDllkInstance_g.m_dwPrcPResFallBackTimeout = AmiGetDwordFromLe(&pFrame->m_Data.m_Soa.m_Payload.m_SyncRequest.m_le_dwPResFallBackTimeout);
+
+#if (EPL_DLL_PROCESS_SYNC == EPL_DLL_PROCESS_SYNC_ON_TIMER)
+                    if (EplDllkInstance_g.m_fPrcEnabled != FALSE)
+                    {
+                        Ret = EplTimerSynckSetLossOfSyncTolerance2Ns(EplDllkInstance_g.m_dwPrcPResFallBackTimeout);
+                    }
+#endif
                 }
 
                 if (dwSyncControl & EPL_SYNC_PRES_MODE_RESET)
@@ -6935,6 +6942,10 @@ tEplFrame*          pTxFrame;
         }
         // set "PReq"-TxBuffer to PRes-TxBuffer
         pIntNodeInfo_p->m_pPreqTxBuffer = &EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_PRES];
+
+        // Reset PRC Slot Timeout
+        // which is required if falling back to PreOp1
+        pIntNodeInfo_p->m_dwPresTimeoutNs = 0;
     }
     else
     {   // normal CN shall be added to isochronous phase
