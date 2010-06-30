@@ -621,12 +621,15 @@ tEplKernel          EplRet = kEplSuccessful;
                 && (IS_FD_VALID(hAppFdTracingEnabled_g)))
             {
             mm_segment_t    old_fs;
+            loff_t          pos;
             ssize_t         iRet;
 
                 old_fs = get_fs();
                 set_fs(KERNEL_DS);
 
-                iRet = vfs_write(hAppFdTracingEnabled_g, "0", 1);
+                pos = hAppFdTracingEnabled_g->f_pos;
+                iRet = vfs_write(hAppFdTracingEnabled_g, "0", 1, &pos);
+                hAppFdTracingEnabled_g->f_pos = pos;
             }
 
             PRINTF("%s(HistoryEntry): Type=0x%04X Code=0x%04X (0x%02X %02X %02X %02X %02X %02X %02X %02X)\n",
