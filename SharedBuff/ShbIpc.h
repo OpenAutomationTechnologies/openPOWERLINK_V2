@@ -109,6 +109,8 @@ tShbError  ShbIpcExit (void);
 tShbError  ShbIpcAllocBuffer            (unsigned long ulBufferSize_p, const char* pszBufferID_p, tShbInstance* ppShbInstance_p, unsigned int* pfShbNewCreated_p);
 tShbError  ShbIpcReleaseBuffer          (tShbInstance pShbInstance_p);
 
+tShbError  ShbIpcSignalNewData          (tShbInstance pShbInstance_p);
+
 #if !defined(SHBIPC_INLINE_ENABLED)
 
 tShbError  ShbIpcProcess (void);
@@ -119,7 +121,6 @@ tShbError  ShbIpcLeaveAtomicSection     (tShbInstance pShbInstance_p);
 tShbError  ShbIpcSetMaster              (tShbInstance pShbInstance_p, tShbInstance pShbInstanceMaster_p);
 tShbError  ShbIpcStartSignalingNewData  (tShbInstance pShbInstance_p, tSigHndlrNewData pfnSignalHandlerNewData_p, tShbPriority ShbPriority_p);
 tShbError  ShbIpcStopSignalingNewData   (tShbInstance pShbInstance_p);
-tShbError  ShbIpcSignalNewData          (tShbInstance pShbInstance_p);
 
 tShbError  ShbIpcStartSignalingJobReady (tShbInstance pShbInstance_p, unsigned long ulTimeOut_p, tSigHndlrJobReady pfnSignalHandlerJobReady_p);
 tShbError  ShbIpcSignalJobReady         (tShbInstance pShbInstance_p);

@@ -567,6 +567,52 @@ tShbError       ShbError2;
 }
 
 
+//---------------------------------------------------------------------------
+//  Signal new data (called from writing process)
+//---------------------------------------------------------------------------
+
+tShbError  ShbIpcSignalNewData (
+    tShbInstance pShbInstance_p)
+{
+
+tShbMemInst*  pShbMemInst;
+tShbMemHeader*  pShbMemHeader;
+HANDLE  hEventNewData;
+BOOL    fRes;
+
+
+    // TRACE0("\nShbIpcSignalNewData(): enter\n");
+
+    if (pShbInstance_p == NULL)
+    {
+        return (kShbInvalidArg);
+    }
+
+
+    pShbMemInst = ShbIpcGetShbMemInst (pShbInstance_p);
+    pShbMemHeader = ShbIpcGetShbMemHeader (pShbInstance_p);
+
+    ASSERT(pShbMemInst->m_ahEventNewData[IDX_EVENT_NEW_DATA] != INVALID_HANDLE_VALUE);
+    hEventNewData = pShbMemInst->m_ahEventNewData[IDX_EVENT_NEW_DATA];
+    if (hEventNewData != INVALID_HANDLE_VALUE)
+    {
+        fRes = SetEvent (hEventNewData);
+        // TRACE1("\nShbIpcSignalNewData(): EventNewData set (Result=%d)\n", (int)fRes);
+        ASSERT( fRes );
+    }
+
+    if (pShbMemHeader->m_pShbInstMaster != NULL)
+    {
+        return ShbIpcSignalNewData(pShbMemHeader->m_pShbInstMaster);
+    }
+
+    // TRACE0("\nShbIpcSignalNewData(): leave\n");
+    return (kShbOk);
+
+}
+
+
+
 #endif  // !defined(SHBIPC_INLINE_ENABLED)
 
 #if (!defined(SHBIPC_INLINED)) || defined(SHBIPC_INLINE_ENABLED)
@@ -900,52 +946,6 @@ DWORD         dwWaitResult;
     pShbMemInst->m_pfnSigHndlrNewData = NULL;
 
 
-    return (kShbOk);
-
-}
-
-
-
-//---------------------------------------------------------------------------
-//  Signal new data (called from writing process)
-//---------------------------------------------------------------------------
-
-INLINE_FUNCTION tShbError  ShbIpcSignalNewData (
-    tShbInstance pShbInstance_p)
-{
-
-tShbMemInst*  pShbMemInst;
-tShbMemHeader*  pShbMemHeader;
-HANDLE  hEventNewData;
-BOOL    fRes;
-
-
-    // TRACE0("\nShbIpcSignalNewData(): enter\n");
-
-    if (pShbInstance_p == NULL)
-    {
-        return (kShbInvalidArg);
-    }
-
-
-    pShbMemInst = ShbIpcGetShbMemInst (pShbInstance_p);
-    pShbMemHeader = ShbIpcGetShbMemHeader (pShbInstance_p);
-
-    ASSERT(pShbMemInst->m_ahEventNewData[IDX_EVENT_NEW_DATA] != INVALID_HANDLE_VALUE);
-    hEventNewData = pShbMemInst->m_ahEventNewData[IDX_EVENT_NEW_DATA];
-    if (hEventNewData != INVALID_HANDLE_VALUE)
-    {
-        fRes = SetEvent (hEventNewData);
-        // TRACE1("\nShbIpcSignalNewData(): EventNewData set (Result=%d)\n", (int)fRes);
-        ASSERT( fRes );
-    }
-
-    if (pShbMemHeader->m_pShbInstMaster != NULL)
-    {
-        return ShbIpcSignalNewData(pShbMemHeader->m_pShbInstMaster);
-    }
-
-    // TRACE0("\nShbIpcSignalNewData(): leave\n");
     return (kShbOk);
 
 }

@@ -490,6 +490,34 @@ tShbError       ShbError;
 }
 
 
+//---------------------------------------------------------------------------
+//  Signal new data (called from writing instance)
+//---------------------------------------------------------------------------
+
+tShbError  ShbIpcSignalNewData (
+    tShbInstance pShbInstance_p)
+{
+tShbMemHeader*  pShbMemHeader;
+
+    if (pShbInstance_p == NULL)
+    {
+        return (kShbInvalidArg);
+    }
+    pShbMemHeader = ShbIpcGetShbMemHeader (ShbIpcGetShbMemInst (pShbInstance_p));
+    //set semaphore
+    pShbMemHeader->m_fNewData = TRUE;
+    DEBUG_LVL_29_TRACE0("ShbIpcSignalNewData set Sem -> New Data\n");
+
+    if (pShbMemHeader->m_pShbInstMaster != NULL)
+    {
+        return ShbIpcSignalNewData(pShbMemHeader->m_pShbInstMaster);
+    }
+
+    return (kShbOk);
+}
+
+
+
 #endif  // !defined(SHBIPC_INLINE_ENABLED)
 
 #if (!defined(SHBIPC_INLINED)) || defined(SHBIPC_INLINE_ENABLED)
@@ -702,34 +730,6 @@ tShbError       ShbError;
 
     return ShbError;
 
-}
-
-
-
-//---------------------------------------------------------------------------
-//  Signal new data (called from writing instance)
-//---------------------------------------------------------------------------
-
-INLINE_FUNCTION tShbError  ShbIpcSignalNewData (
-    tShbInstance pShbInstance_p)
-{
-tShbMemHeader*  pShbMemHeader;
-
-    if (pShbInstance_p == NULL)
-    {
-        return (kShbInvalidArg);
-    }
-    pShbMemHeader = ShbIpcGetShbMemHeader (ShbIpcGetShbMemInst (pShbInstance_p));
-    //set semaphore
-    pShbMemHeader->m_fNewData = TRUE;
-    DEBUG_LVL_29_TRACE0("ShbIpcSignalNewData set Sem -> New Data\n");
-
-    if (pShbMemHeader->m_pShbInstMaster != NULL)
-    {
-        return ShbIpcSignalNewData(pShbMemHeader->m_pShbInstMaster);
-    }
-
-    return (kShbOk);
 }
 
 
