@@ -349,7 +349,6 @@ EPLDLLEXPORT tEplKernel PUBLIC EplApiSetCdcBuffer(BYTE* pbCdc_p, unsigned int ui
 EPLDLLEXPORT tEplKernel PUBLIC EplApiSetCdcFilename(char* pszCdcFilename_p);
 
 #if 0
-EPLDLLEXPORT tEplKernel PUBLIC EplApiProcessImageSetup(void);
 EPLDLLEXPORT tEplKernel PUBLIC EplApiProcessImageExchangeIn(tEplApiProcessImage* pPI_p);
 EPLDLLEXPORT tEplKernel PUBLIC EplApiProcessImageExchangeOut(tEplApiProcessImage* pPI_p);
 #endif
@@ -371,6 +370,8 @@ EPLDLLEXPORT tEplKernel PUBLIC EplApiProcessImageLinkObject(
     tEplObdSize     EntrySize_p,
     unsigned int*   puiVarEntries_p);
 
+// objdict specific setup function
+EPLDLLEXPORT tEplKernel PUBLIC EplApiProcessImageSetup(void);
 
 #endif  // #ifndef _EPL_API_H_
 
