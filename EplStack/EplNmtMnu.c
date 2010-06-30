@@ -2138,6 +2138,13 @@ tEplNmtMnuNodeInfo*	pNodeInfo;
             // reset flags "not scanned" and "isochronous"
             pNodeInfo->m_wFlags &= ~(EPL_NMTMNU_NODE_FLAG_ISOCHRON | EPL_NMTMNU_NODE_FLAG_NOT_SCANNED);
 
+#if EPL_NMTMNU_PRES_CHAINING_MN != FALSE
+            // Reset all PRC flags and PRC related values
+            pNodeInfo->m_wPrcFlags = 0;
+            pNodeInfo->m_dwPResTimeFirstNs = 0;
+            pNodeInfo->m_dwRelPropagationDelayNs = 0;
+#endif
+
             if (uiSubIndex == EPL_C_ADR_DIAG_DEF_NODE_ID)
             {   // diagnostic node must be scanned by MN in any case
                 dwNodeCfg |= (EPL_NODEASSIGN_NODE_IS_CN | EPL_NODEASSIGN_NODE_EXISTS);
