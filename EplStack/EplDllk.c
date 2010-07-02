@@ -4843,12 +4843,14 @@ BYTE            bFlag1;
 
                 dwSyncControl = AmiGetDwordFromLe(&pFrame->m_Data.m_Soa.m_Payload.m_SyncRequest.m_le_dwSyncControl);
 
-                if ((dwSyncControl & EPL_SYNC_DEST_MAC_ADDRESS_VALID) &&
-                    (EPL_MEMCMP(&pFrame->m_Data.m_Soa.m_Payload.m_SyncRequest.m_be_abDestMacAddress,
-                                &EplDllkInstance_g.m_be_abLocalMac, 6) != 0))
-                {   // DestMacAddress valid but unequal to own MAC address
-                    // SyncReq is ignored
-                    goto Exit;
+                if (dwSyncControl & EPL_SYNC_DEST_MAC_ADDRESS_VALID)
+                {
+                    if (EPL_MEMCMP(&pFrame->m_Data.m_Soa.m_Payload.m_SyncRequest.m_be_abDestMacAddress,
+                                   &EplDllkInstance_g.m_be_abLocalMac, 6) != 0)
+                    {   // DestMacAddress valid but unequal to own MAC address
+                        // SyncReq is ignored
+                        goto Exit;
+                    }
                 }
 
                 PrcCycleTiming.m_dwPResTimeFirstNs = AmiGetDwordFromLe(&pFrame->m_Data.m_Soa.m_Payload.m_SyncRequest.m_le_dwPResTimeFirst);
@@ -4912,10 +4914,6 @@ BYTE            bFlag1;
                     }
                 }
 
-                PrcCycleTiming.m_dwPResTimeSecondNs = AmiGetDwordFromLe(&pFrame->m_Data.m_Soa.m_Payload.m_SyncRequest.m_le_dwPResTimeSecond);
-                PrcCycleTiming.m_dwSyncMNDelayFirstNs = AmiGetDwordFromLe(&pFrame->m_Data.m_Soa.m_Payload.m_SyncRequest.m_le_dwSyncMnDelayFirst);
-                PrcCycleTiming.m_dwSyncMNDelaySecondNs = AmiGetDwordFromLe(&pFrame->m_Data.m_Soa.m_Payload.m_SyncRequest.m_le_dwSyncMnDelaySecond);
-
                 PrcCycleTiming.m_dwSyncControl = dwSyncControl & (EPL_SYNC_PRES_TIME_FIRST_VALID
                                                                   | EPL_SYNC_PRES_TIME_SECOND_VALID
                                                                   | EPL_SYNC_SYNC_MN_DELAY_FIRST_VALID
@@ -4923,8 +4921,14 @@ BYTE            bFlag1;
                                                                   | EPL_SYNC_PRES_MODE_RESET
                                                                   | EPL_SYNC_PRES_MODE_SET);
 
-                // $$$ m.u.: CbUpdatePrcCycleTiming
+                if (PrcCycleTiming.m_dwSyncControl != 0)
+                {
+                    PrcCycleTiming.m_dwPResTimeSecondNs = AmiGetDwordFromLe(&pFrame->m_Data.m_Soa.m_Payload.m_SyncRequest.m_le_dwPResTimeSecond);
+                    PrcCycleTiming.m_dwSyncMNDelayFirstNs = AmiGetDwordFromLe(&pFrame->m_Data.m_Soa.m_Payload.m_SyncRequest.m_le_dwSyncMnDelayFirst);
+                    PrcCycleTiming.m_dwSyncMNDelaySecondNs = AmiGetDwordFromLe(&pFrame->m_Data.m_Soa.m_Payload.m_SyncRequest.m_le_dwSyncMnDelaySecond);
 
+                    // $$$ m.u.: CbUpdatePrcCycleTiming
+                }
 #endif
                 goto Exit;
             }
