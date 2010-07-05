@@ -560,9 +560,8 @@ tEplNmtMnuNodeInfo* pNodeInfo;
                                                 EPL_NMTMNU_NODE_FLAG_PRC_ADD_IN_PROGRESS);
                 }
 
-                if (   (pNodeInfo->m_wFlags & EPL_NMTMNU_NODE_FLAG_ISOCHRON)
-                    || (pNodeInfo->m_wPrcFlags & EPL_NMTMNU_NODE_FLAG_PRC_ADD_SYNCREQ_SENT))
-                {   // PRes Chaining is or is going to be enabled
+                if (pNodeInfo->m_wFlags & EPL_NMTMNU_NODE_FLAG_ISOCHRON)
+                {   // PRes Chaining is enabled
                 tEplDllSyncRequest SyncReqData;
                 unsigned int       uiSize;
 
@@ -600,10 +599,16 @@ tEplNmtMnuNodeInfo* pNodeInfo;
                     }
                 }
 
-                if (pNodeInfo->m_wPrcFlags & EPL_NMTMNU_NODE_FLAG_PRC_RESET_MASK)
-                {   // Node-reset NMT command is scheduled and will be issued
-                    // when the next SyncRes is received.
+                if (pNodeInfo->m_wPrcFlags & (EPL_NMTMNU_NODE_FLAG_PRC_RESET_MASK |
+                                              EPL_NMTMNU_NODE_FLAG_PRC_ADD_SYNCREQ_SENT))
+                {   // A Node-reset NMT command was already scheduled or
+                    // PRes Chaining is going to be enabled but the appropriate SyncRes
+                    // has not been received, yet.
+
+                    // Set the current NMT command if it has higher priortity than a present one.
                     EplNmtMnuPrcSetFlagsNmtCommandReset(pNodeInfo, NmtCommand_p);
+
+                    // Wait for the SyncRes
                     goto Exit;
                 }
 
@@ -4050,7 +4055,6 @@ tEplKernel          Ret;
 unsigned int        uiNodeIdPredNode;
 tEplNmtMnuNodeInfo* pNodeInfo;
 DWORD               dwSyncNodeNumber;
-DWORD               dwSyncDelay;
 
     pNodeInfo = EPL_NMTMNU_GET_NODEINFO(uiNodeId_p);
 
@@ -4074,28 +4078,7 @@ DWORD               dwSyncDelay;
         goto Exit;
     }
 
-    dwSyncDelay = AmiGetDwordFromLe(&pSyncResponse_p->m_le_dwSyncDelay);
-
-#if 0
-    if (dwSyncDelay >= (EPL_C_DLL_T_MIN_FRAME + EPL_C_DLL_T_PREAMBLE))
-    {
-        // Relative propagation delay
-        // contains the Response Latency of the predecessor CN
-        pNodeInfo->m_dwRelPropagationDelayNs =
-              // Difference between receive-times of SyncReq and SyncRes
-              dwSyncDelay
-              // Transmission time for SyncReq frame
-            - (EPL_C_DLL_T_MIN_FRAME + EPL_C_DLL_T_PREAMBLE);
-    }
-    else
-    {   // Received SyncDelay is too small
-        // Schedule reset node
-        pNodeInfo->m_wPrcFlags &= ~EPL_NMTMNU_NODE_FLAG_PRC_RESET_MASK;
-        pNodeInfo->m_wPrcFlags |= EPL_NMTMNU_NODE_FLAG_PRC_RESET_NODE;
-    }
-#else
-    pNodeInfo->m_dwRelPropagationDelayNs = dwSyncDelay;
-#endif
+    pNodeInfo->m_dwRelPropagationDelayNs = AmiGetDwordFromLe(&pSyncResponse_p->m_le_dwSyncDelay);
 
     // If a previous SyncRes frame was not usable,
     // the Sync Error flag is cleared as this one is OK
@@ -4412,6 +4395,8 @@ tEplNmtMnuNodeInfo* pNodeInfo;
         // because node has already been added to isochronous phase in module Dllk
         pNodeInfo->m_wPrcFlags &= ~EPL_NMTMNU_NODE_FLAG_PRC_RESET_MASK;
         pNodeInfo->m_wPrcFlags |= EPL_NMTMNU_NODE_FLAG_PRC_RESET_NODE;
+
+        pNodeInfo->m_wPrcFlags &= ~EPL_NMTMNU_NODE_FLAG_PRC_ADD_SYNCREQ_SENT;
         goto NextAction;
     }
 
