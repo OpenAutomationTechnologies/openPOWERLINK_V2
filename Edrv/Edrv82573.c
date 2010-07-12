@@ -216,12 +216,14 @@
 
 #define EDRV_REGDW_RCTL         0x000100    // Receive Control
 #define EDRV_REGDW_RCTL_EN      0x00000002  // Receive Enable
+#define EDRV_REGDW_RCTL_SBP     0x00000004  // Store Bad Packets (to recognize collisions)
 #define EDRV_REGDW_RCTL_BAM     0x00008000  // Broadcast Accept Mode
 #define EDRV_REGDW_RCTL_SECRC   0x04000000  // Strip Ethernet CRC (do not store in host memory)
 
 #define EDRV_REGDW_RCTL_BSIZE_2048  0x00000000  // buffer size is 2048 byte
 
 #define EDRV_REGDW_RCTL_DEF     (EDRV_REGDW_RCTL_EN \
+                               | EDRV_REGDW_RCTL_SBP \
                                | EDRV_REGDW_RCTL_BAM \
                                | EDRV_REGDW_RCTL_SECRC \
                                | EDRV_REGDW_RCTL_BSIZE_2048)
@@ -243,6 +245,12 @@
 #define EDRV_REGDW_RAL(n)       (0x05400 + 8*n)  // Receive Address Low
 #define EDRV_REGDW_RAH(n)       (0x05404 + 8*n)  // Receive Address HIGH
 #define EDRV_REGDW_RAH_AV       0x80000000  // Receive Address Valid
+
+#define EDRV_REGDW_CRCERRS      0x004000    // CRC Error Count
+#define EDRV_REGDW_LATECOL      0x004020    // Late Collision Count
+#define EDRV_REGDW_COLC         0x004028    // Collision Count
+#define EDRV_REGDW_SEC          0x004038    // Sequence Error Count
+#define EDRV_REGDW_RLEC         0x004040    // Receive Length Error Count
 
 // defines for the status byte in the receive descriptor
 #define EDRV_RXSTAT_DD            0x01    // Descriptor Done (Processed by Hardware)
@@ -840,7 +848,10 @@ int             iUsedSize = 0;
 int             iIndex;
 
     iUsedSize += snprintf (pszBuffer_p + iUsedSize, iSize_p - iUsedSize,
-                       "Head: %u (%lu)\n",
+                       "\nEdrv Diagnostic Information\n");
+
+    iUsedSize += snprintf (pszBuffer_p + iUsedSize, iSize_p - iUsedSize,
+                       "Head: %u (%lu)",
                        EdrvInstance_l.m_uiHeadTxDesc,
                        (unsigned long) EDRV_REGDW_READ(EDRV_REGDW_TDH));
 
@@ -848,7 +859,7 @@ int             iIndex;
     dwTxStatus = pTxDesc->m_le_dwStatus;
 
     iUsedSize += snprintf (pszBuffer_p + iUsedSize, iSize_p - iUsedSize,
-                       "Headstatus: %lX\n", (unsigned long) dwTxStatus);
+                       "      Headstatus: %lX\n", (unsigned long) dwTxStatus);
 
     iUsedSize += snprintf (pszBuffer_p + iUsedSize, iSize_p - iUsedSize,
                        "Tail: %u (%lu)\n",
@@ -863,6 +874,10 @@ int             iIndex;
                            (unsigned long) EDRV_REGDW_READ(EDRV_REGDW_RAH(iIndex)),
                            (unsigned long) EDRV_REGDW_READ(EDRV_REGDW_RAL(iIndex)));
     }
+
+    iUsedSize += snprintf (pszBuffer_p + iUsedSize, iSize_p - iUsedSize,
+                       "Status Register:                     0x%08lX\n",
+                       (unsigned long) EDRV_REGDW_READ(EDRV_REGDW_STATUS));
 
     iUsedSize += snprintf (pszBuffer_p + iUsedSize, iSize_p - iUsedSize,
                        "Interrupt Mask Set/Read Register:    0x%08lX\n",
@@ -889,6 +904,30 @@ int             iIndex;
                        "Receive Descripter Tail Register:    0x%08lX (%u)\n",
                        (unsigned long) EDRV_REGDW_READ(EDRV_REGDW_RDT0),
                        EdrvInstance_l.m_uiTailRxDesc);
+
+
+    iUsedSize += snprintf (pszBuffer_p + iUsedSize, iSize_p - iUsedSize,
+                       "CRC Error Count:                     %lu\n",
+                       (unsigned long) EDRV_REGDW_READ(EDRV_REGDW_CRCERRS));
+
+    iUsedSize += snprintf (pszBuffer_p + iUsedSize, iSize_p - iUsedSize,
+                       "Late Collision Count:                %lu\n",
+                       (unsigned long) EDRV_REGDW_READ(EDRV_REGDW_LATECOL));
+
+    iUsedSize += snprintf (pszBuffer_p + iUsedSize, iSize_p - iUsedSize,
+                       "Collision Count:                     %lu\n",
+                       (unsigned long) EDRV_REGDW_READ(EDRV_REGDW_COLC));
+
+    iUsedSize += snprintf (pszBuffer_p + iUsedSize, iSize_p - iUsedSize,
+                       "Sequence Error Count:                %lu\n",
+                       (unsigned long) EDRV_REGDW_READ(EDRV_REGDW_SEC));
+
+    iUsedSize += snprintf (pszBuffer_p + iUsedSize, iSize_p - iUsedSize,
+                       "Receive Length Error Count:          %lu\n",
+                       (unsigned long) EDRV_REGDW_READ(EDRV_REGDW_RLEC));
+
+    iUsedSize += snprintf (pszBuffer_p + iUsedSize, iSize_p - iUsedSize,
+                       "\n");
 
     return iUsedSize;
 }
