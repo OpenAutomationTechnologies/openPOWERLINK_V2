@@ -3603,6 +3603,10 @@ int         iIndex;
         Ret = EplTimeruDeleteTimer(&EPL_NMTMNU_GET_NODEINFO(iIndex)->m_TimerHdlLonger);
     }
 
+#if EPL_NMTMNU_PRES_CHAINING_MN != FALSE
+    EplNmtMnuInstance_g.m_dwPrcPResMnTimeoutNs = 0;
+#endif
+
     return Ret;
 }
 
