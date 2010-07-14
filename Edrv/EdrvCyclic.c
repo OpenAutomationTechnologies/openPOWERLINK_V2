@@ -73,6 +73,11 @@
 #include "edrv.h"
 #include "kernel/EplTimerHighResk.h"
 
+#if EDRV_CYCLIC_DIAGNOSTICS != FALSE
+#include <stdio.h>
+#endif
+
+
 #if EPL_TIMER_USE_HIGHRES == FALSE
 #error "EdrvCyclic needs EPL_TIMER_USE_HIGHRES = TRUE"
 #endif
@@ -92,6 +97,19 @@
 // const defines
 //---------------------------------------------------------------------------
 
+#if EDRV_CYCLIC_DIAGNOSTICS != FALSE
+#ifndef EDRV_CYCLIC_SAMPLE_NUM
+#define EDRV_CYCLIC_SAMPLE_NUM                           10
+#endif
+
+#ifndef EDRV_CYCLIC_SAMPLE_TH_CYCLE_TIME_DIFF_US
+#define EDRV_CYCLIC_SAMPLE_TH_CYCLE_TIME_DIFF_US        100
+#endif
+
+#ifndef EDRV_CYCLIC_SAMPLE_TH_SPARE_TIME_US
+#define EDRV_CYCLIC_SAMPLE_TH_SPARE_TIME_US             100
+#endif
+#endif
 
 //---------------------------------------------------------------------------
 // local types
@@ -109,6 +127,31 @@ typedef struct
     tEplTimerHdl        m_TimerHdlSlot;
     tEdrvCyclicCbSync   m_pfnCbSync;
     tEdrvCyclicCbError  m_pfnCbError;
+
+#if EDRV_CYCLIC_DIAGNOSTICS != FALSE
+    // continuous min/max/avg measurement
+    unsigned long long  m_ullCycleCount;
+    DWORD               m_dwCycleTimeMin;
+    DWORD               m_dwCycleTimeMax;
+    unsigned long long  m_ullCycleTimeMeanSum;  // sums run over after some years for ct=400
+    DWORD               m_dwUsedCycleTimeMin;
+    DWORD               m_dwUsedCycleTimeMax;
+    unsigned long long  m_ullUsedCycleTimeMeanSum;
+    DWORD               m_dwSpareCycleTimeMin;
+    DWORD               m_dwSpareCycleTimeMax;
+    unsigned long long  m_ullSpareCycleTimeMeanSum;
+
+    // sampling of runaway cycles
+    BOOL                m_fRunSampling;
+    int                 m_iSampleNo;
+    unsigned long long  m_aullSampleTimeStamp[EDRV_CYCLIC_SAMPLE_NUM];  // SOC send
+    DWORD               m_adwCycleTime[EDRV_CYCLIC_SAMPLE_NUM];         // until next SOC send
+    DWORD               m_adwUsedCycleTime[EDRV_CYCLIC_SAMPLE_NUM];
+    DWORD               m_adwSpareCycleTime[EDRV_CYCLIC_SAMPLE_NUM];
+
+    unsigned long long  m_ullStartCycleTimeStamp;
+    unsigned long long  m_ullLastSlotTimeStamp;                         // SoA send
+#endif
 
 } tEdrvCyclicInstance;
 
@@ -199,6 +242,13 @@ tEplKernel  Ret;
     // clear instance structure
     EPL_MEMSET(&EdrvCyclicInstance_l, 0, sizeof (EdrvCyclicInstance_l));
 
+#if EDRV_CYCLIC_DIAGNOSTICS != FALSE
+    EdrvCyclicInstance_l.m_iSampleNo    = -1;
+
+    EdrvCyclicInstance_l.m_dwCycleTimeMin      = 0xFFFFFFFF;
+    EdrvCyclicInstance_l.m_dwUsedCycleTimeMin  = 0xFFFFFFFF;
+    EdrvCyclicInstance_l.m_dwSpareCycleTimeMin = 0xFFFFFFFF;
+#endif
 
 //Exit:
     return Ret;
@@ -501,11 +551,22 @@ static tEplKernel PUBLIC EdrvCyclicCbTimerCycle(tEplTimerEventArg* pEventArg_p)
 {
 tEplKernel      Ret = kEplSuccessful;
 
+#if EDRV_CYCLIC_DIAGNOSTICS != FALSE
+DWORD           dwCycleTime;
+DWORD           dwUsedCycleTime;
+DWORD           dwSpareCycleTime;
+unsigned long long ullStartNewCycleTimeStamp;
+#endif
+
     if (pEventArg_p->m_TimerHdl != EdrvCyclicInstance_l.m_TimerHdlCycle)
     {   // zombie callback
         // just exit
         goto Exit;
     }
+
+#if EDRV_CYCLIC_DIAGNOSTICS != FALSE
+    ullStartNewCycleTimeStamp = EplTgtGetTimeStampNs();
+#endif
 
     if (EdrvCyclicInstance_l.m_paTxBufferList[EdrvCyclicInstance_l.m_uiCurTxBufferEntry] != NULL)
     {
@@ -535,6 +596,70 @@ tEplKernel      Ret = kEplSuccessful;
     {
         Ret = EdrvCyclicInstance_l.m_pfnCbSync();
     }
+
+#if EDRV_CYCLIC_DIAGNOSTICS != FALSE
+    if (EdrvCyclicInstance_l.m_ullStartCycleTimeStamp != 0)
+    {
+        // calculate time diffs of previous cycle
+        dwCycleTime      = (DWORD) (ullStartNewCycleTimeStamp - EdrvCyclicInstance_l.m_ullStartCycleTimeStamp);
+        dwUsedCycleTime  = (DWORD) (EdrvCyclicInstance_l.m_ullLastSlotTimeStamp - EdrvCyclicInstance_l.m_ullStartCycleTimeStamp);
+        dwSpareCycleTime = (DWORD) (ullStartNewCycleTimeStamp - EdrvCyclicInstance_l.m_ullLastSlotTimeStamp);
+
+        // continuously update min/max/mean values
+        if (EdrvCyclicInstance_l.m_dwCycleTimeMin > dwCycleTime)
+        {
+            EdrvCyclicInstance_l.m_dwCycleTimeMin = dwCycleTime;
+        }
+        if (EdrvCyclicInstance_l.m_dwCycleTimeMax < dwCycleTime)
+        {
+            EdrvCyclicInstance_l.m_dwCycleTimeMax = dwCycleTime;
+        }
+        if (EdrvCyclicInstance_l.m_dwUsedCycleTimeMin > dwUsedCycleTime)
+        {
+            EdrvCyclicInstance_l.m_dwUsedCycleTimeMin = dwUsedCycleTime;
+        }
+        if (EdrvCyclicInstance_l.m_dwUsedCycleTimeMax < dwUsedCycleTime)
+        {
+            EdrvCyclicInstance_l.m_dwUsedCycleTimeMax = dwUsedCycleTime;
+        }
+        if (EdrvCyclicInstance_l.m_dwSpareCycleTimeMin > dwSpareCycleTime)
+        {
+            EdrvCyclicInstance_l.m_dwSpareCycleTimeMin = dwSpareCycleTime;
+        }
+        if (EdrvCyclicInstance_l.m_dwSpareCycleTimeMax < dwSpareCycleTime)
+        {
+            EdrvCyclicInstance_l.m_dwSpareCycleTimeMax = dwSpareCycleTime;
+        }
+
+        EdrvCyclicInstance_l.m_ullCycleTimeMeanSum      += dwCycleTime;
+        EdrvCyclicInstance_l.m_ullUsedCycleTimeMeanSum  += dwUsedCycleTime;
+        EdrvCyclicInstance_l.m_ullSpareCycleTimeMeanSum += dwSpareCycleTime;
+        EdrvCyclicInstance_l.m_ullCycleCount++;
+
+        // sample previous cycle if deviations exceed threshold
+        if (    (EdrvCyclicInstance_l.m_iSampleNo == -1) /* sample first cycle for start time */
+                || (abs(dwCycleTime - EdrvCyclicInstance_l.m_dwCycleLenUs * 1000) > EDRV_CYCLIC_SAMPLE_TH_CYCLE_TIME_DIFF_US * 1000)
+                || (dwSpareCycleTime < EDRV_CYCLIC_SAMPLE_TH_SPARE_TIME_US * 1000))
+        {
+            int iSampleNo;
+
+            iSampleNo = EdrvCyclicInstance_l.m_iSampleNo + 1;
+
+            EdrvCyclicInstance_l.m_aullSampleTimeStamp[iSampleNo] = EdrvCyclicInstance_l.m_ullStartCycleTimeStamp;
+            EdrvCyclicInstance_l.m_adwCycleTime[iSampleNo] = dwCycleTime;
+            EdrvCyclicInstance_l.m_adwUsedCycleTime[iSampleNo]   = dwUsedCycleTime;
+            EdrvCyclicInstance_l.m_adwSpareCycleTime[iSampleNo]  = dwSpareCycleTime;
+
+            EdrvCyclicInstance_l.m_iSampleNo = iSampleNo;
+            if (EdrvCyclicInstance_l.m_iSampleNo == EDRV_CYCLIC_SAMPLE_NUM-1)
+            {
+                EdrvCyclicInstance_l.m_iSampleNo = 0;
+            }
+        }
+    }
+
+    EdrvCyclicInstance_l.m_ullStartCycleTimeStamp = ullStartNewCycleTimeStamp;
+#endif
 
 Exit:
     if (Ret != kEplSuccessful)
@@ -573,6 +698,10 @@ tEdrvTxBuffer*  pTxBuffer = NULL;
         // just exit
         goto Exit;
     }
+
+#if EDRV_CYCLIC_DIAGNOSTICS != FALSE
+    EdrvCyclicInstance_l.m_ullLastSlotTimeStamp = EplTgtGetTimeStampNs();
+#endif
 
     pTxBuffer = EdrvCyclicInstance_l.m_paTxBufferList[EdrvCyclicInstance_l.m_uiCurTxBufferEntry];
     Ret = EdrvSendTxMsg(pTxBuffer);
@@ -652,4 +781,81 @@ Exit:
     return Ret;
 }
 
+
+#if EDRV_CYCLIC_DIAGNOSTICS != FALSE
+//---------------------------------------------------------------------------
+//
+// Function:    EdrvCyclicGetDiagnostics()
+//
+// Description: Write diagnostic information to string buffer
+//
+// Parameters:  void
+//
+// Returns:     int                 = Used size
+//
+//
+// State:
+//
+//---------------------------------------------------------------------------
+
+int EdrvCyclicGetDiagnostics(char* pszBuffer_p, int iSize_p)
+{
+int             iUsedSize = 0;
+unsigned long   ulDurationS;
+
+    iUsedSize += snprintf (pszBuffer_p + iUsedSize, iSize_p - iUsedSize,
+            "== Min/Max/Avg Results =========================================\n\n");
+
+    ulDurationS = (unsigned long) (EdrvCyclicInstance_l.m_ullCycleTimeMeanSum / 1000000000LL);
+    iUsedSize += snprintf (pszBuffer_p + iUsedSize, iSize_p - iUsedSize,
+            " Measure Duration: %02lu:%02lu:%02lu (hh:mm:ss)\n",
+            ulDurationS/60/60, (ulDurationS/60)%60, ulDurationS%60);
+
+    iUsedSize += snprintf (pszBuffer_p + iUsedSize, iSize_p - iUsedSize,
+            "                                Minimum    Average    Maximum\n");
+
+    iUsedSize += snprintf (pszBuffer_p + iUsedSize, iSize_p - iUsedSize,
+            " Cycle Time (ns)             %10lu %10llu %10lu\n",
+            (ULONG) EdrvCyclicInstance_l.m_dwCycleTimeMin,
+            EdrvCyclicInstance_l.m_ullCycleTimeMeanSum/EdrvCyclicInstance_l.m_ullCycleCount,
+            (ULONG) EdrvCyclicInstance_l.m_dwCycleTimeMax);
+
+    iUsedSize += snprintf (pszBuffer_p + iUsedSize, iSize_p - iUsedSize,
+            " Used Cycle Time (ns)        %10lu %10llu %10lu\n",
+            (ULONG) EdrvCyclicInstance_l.m_dwUsedCycleTimeMin,
+            EdrvCyclicInstance_l.m_ullUsedCycleTimeMeanSum/EdrvCyclicInstance_l.m_ullCycleCount,
+            (ULONG) EdrvCyclicInstance_l.m_dwUsedCycleTimeMax);
+
+    iUsedSize += snprintf (pszBuffer_p + iUsedSize, iSize_p - iUsedSize,
+            " Spare Cycle Time (ns)       %10lu %10llu %10lu\n\n",
+            (ULONG) EdrvCyclicInstance_l.m_dwSpareCycleTimeMin,
+            EdrvCyclicInstance_l.m_ullSpareCycleTimeMeanSum/EdrvCyclicInstance_l.m_ullCycleCount,
+            (ULONG) EdrvCyclicInstance_l.m_dwSpareCycleTimeMax);
+
+    if (EdrvCyclicInstance_l.m_iSampleNo >= 0)
+    {
+        int iSampleNo = 0;
+
+        iUsedSize += snprintf (pszBuffer_p + iUsedSize, iSize_p - iUsedSize,
+                "== Sample Results ==============================================\n\n");
+
+        iUsedSize += snprintf (pszBuffer_p + iUsedSize, iSize_p - iUsedSize,
+                " Sampled Cycles: %u (buffer size: %u samples)\n",
+                EdrvCyclicInstance_l.m_iSampleNo, EDRV_CYCLIC_SAMPLE_NUM-1); // time ref sample 0 is not included
+
+        while ((iSampleNo <= EdrvCyclicInstance_l.m_iSampleNo) && (iSize_p - iUsedSize > 100))
+        {
+            iUsedSize += snprintf (pszBuffer_p + iUsedSize, iSize_p - iUsedSize,
+                    "%llu;%lu;%lu;%lu\n",
+                    EdrvCyclicInstance_l.m_aullSampleTimeStamp[iSampleNo],
+                    (ULONG) EdrvCyclicInstance_l.m_adwCycleTime[iSampleNo],
+                    (ULONG) EdrvCyclicInstance_l.m_adwUsedCycleTime[iSampleNo],
+                    (ULONG) EdrvCyclicInstance_l.m_adwSpareCycleTime[iSampleNo]);
+            iSampleNo++;
+        }
+    }
+
+    return (iUsedSize);
+}
+#endif
 

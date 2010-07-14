@@ -319,6 +319,10 @@
 #define EDRV_AUTO_RESPONSE_DELAY            FALSE
 #endif
 
+#ifndef EDRV_CYCLIC_DIAGNOSTICS
+#define EDRV_CYCLIC_DIAGNOSTICS             FALSE
+#endif
+
 /*
 #define EPL_D_CFG_ConfigManager_BOOL // Ability of a MN node to perform Configuration Manager functions BOOLEAN O - N -
 #define EPL_D_CFM_VerifyConf_BOOL   // Support of objects CFM_VerifyConfiguration_REC, CFM_ExpConfDateList_AU32, CFM_ExpConfTimeList_AU32 BOOLEAN O O N N

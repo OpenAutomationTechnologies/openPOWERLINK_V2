@@ -256,6 +256,8 @@
 DWORD PUBLIC EplTgtGetTickCountMs(void);
 void PUBLIC EplTgtEnableGlobalInterrupt(BYTE fEnable_p);
 
+unsigned long long PUBLIC EplTgtGetTimeStampNs(void);
+
 // functions for ethernet driver
 tEplKernel PUBLIC TgtInitEthIsr(void);
 void PUBLIC TgtFreeEthIsr(void);
