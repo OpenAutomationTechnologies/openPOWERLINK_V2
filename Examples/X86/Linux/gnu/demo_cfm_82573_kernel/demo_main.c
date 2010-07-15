@@ -461,7 +461,10 @@ tEplKernel          EplRet;
     EplRet = EplLinProcFree();
     PRINTF1("EplLinProcFree():        0x%X\n", EplRet);
 
-    close(hAppFdTracingEnabled_g);
+    if (IS_FD_VALID(hAppFdTracingEnabled_g))
+    {
+        close(hAppFdTracingEnabled_g);
+    }
 }
 
 
