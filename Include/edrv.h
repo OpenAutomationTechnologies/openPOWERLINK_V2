@@ -110,6 +110,15 @@
 #define EDRV_USE_DIAGNOSTICS    FALSE
 #endif
 
+#ifndef EDRV_CYCLIC_DIAGNOSTICS
+#define EDRV_CYCLIC_DIAGNOSTICS                 FALSE
+#endif
+
+#ifndef EDRV_CYCLIC_SAMPLE_NUM
+#define EDRV_CYCLIC_SAMPLE_NUM                    501
+#endif
+
+
 //---------------------------------------------------------------------------
 // types
 //---------------------------------------------------------------------------
@@ -194,6 +203,30 @@ typedef struct
 } tEdrvFilter;
 
 
+typedef struct
+{
+    // continuous min/max/avg measurement
+    unsigned long long  m_ullCycleCount;
+    DWORD               m_dwCycleTimeMin;
+    DWORD               m_dwCycleTimeMax;
+    unsigned long long  m_ullCycleTimeMeanSum;  // sums run over after some years for ct=400
+    DWORD               m_dwUsedCycleTimeMin;
+    DWORD               m_dwUsedCycleTimeMax;
+    unsigned long long  m_ullUsedCycleTimeMeanSum;
+    DWORD               m_dwSpareCycleTimeMin;
+    DWORD               m_dwSpareCycleTimeMax;
+    unsigned long long  m_ullSpareCycleTimeMeanSum;
+
+    // sampling of runaway cycles
+    unsigned int        m_uiSampleNum;
+    unsigned int        m_uiSampleBufferedNum;
+    unsigned long long  m_aullSampleTimeStamp[EDRV_CYCLIC_SAMPLE_NUM];  // SOC send
+    DWORD               m_adwCycleTime[EDRV_CYCLIC_SAMPLE_NUM];         // until next SOC send
+    DWORD               m_adwUsedCycleTime[EDRV_CYCLIC_SAMPLE_NUM];
+    DWORD               m_adwSpareCycleTime[EDRV_CYCLIC_SAMPLE_NUM];
+
+} tEdrvCyclicDiagnostics;
+
 
 //---------------------------------------------------------------------------
 // function prototypes
@@ -235,6 +268,7 @@ tEplKernel EdrvCyclicSetMaxTxBufferListSize(unsigned int uiMaxListSize_p);
 tEplKernel EdrvCyclicSetNextTxBufferList(tEdrvTxBuffer** apTxBuffer_p, unsigned int uiTxBufferCount_p);
 tEplKernel EdrvCyclicRegSyncHandler(tEdrvCyclicCbSync pfnEdrvCyclicCbSync_p);
 tEplKernel EdrvCyclicRegErrorHandler(tEdrvCyclicCbError pfnEdrvCyclicCbError_p);
+tEplKernel EdrvCyclicGetDiagnostics(tEdrvCyclicDiagnostics** ppDiagnostics_p);
 
 
 // interrupt handler called by target specific interrupt handler
