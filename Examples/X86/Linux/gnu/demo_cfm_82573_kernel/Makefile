@@ -42,6 +42,7 @@ MODULEOBJS	= $(MAINPATH)/Edrv/Edrv82573.o $(MAINPATH)/Edrv/EdrvCyclic.o \
 			  $(MAINPATH)/EplStack/SocketLinuxKernel.o \
 			  $(MAINPATH)/EplStack/PosixFileLinuxKernel.o \
 			  $(MAINPATH)/Target/X86/Linux/gnu/generic/TimerHighReskX86.o \
+			  $(MAINPATH)/Target/X86/Linux/gnu/generic/EplTgtTimeStamp.o \
 			  $(MAINPATH)/Target/PLCcore-CF54/Linux/gnu/generic/proc_fs.o
 
 #           Select here between debug and release settings
