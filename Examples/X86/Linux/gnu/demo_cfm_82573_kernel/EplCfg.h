@@ -130,6 +130,7 @@
                                | EPL_MODULE_VETH
 //                               | EPL_MODULE_OBDU
 
+
 // =========================================================================
 // EPL ethernet driver (Edrv) specific defines
 // =========================================================================
@@ -155,6 +156,7 @@
 //#define EDRV_USED_ETH_CTRL              1
 
 #define EDRV_USE_DIAGNOSTICS            TRUE
+#define EDRV_CYCLIC_DIAGNOSTICS         TRUE
 
 
 // =========================================================================
