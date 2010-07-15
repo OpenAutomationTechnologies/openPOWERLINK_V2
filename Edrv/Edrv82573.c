@@ -257,6 +257,7 @@
 #define EDRV_RXSTAT_EOP           0x02    // End of Packet
 #define EDRV_RXERR_CE             0x01    // CRC Error
 #define EDRV_RXERR_SEQ            0x04    // Sequence Error
+#define EDRV_RXERR_OTHER          0xE2    // Other Error
 
 
 #define EDRV_REGDW_WRITE(dwReg, dwVal)  writel(dwVal, EdrvInstance_l.m_pIoAddr + dwReg)
@@ -283,11 +284,11 @@
 #define EDRV_COUNT_TX_COL_RL            TGT_DBG_SIGNAL_TRACE_POINT(11)
 #define EDRV_COUNT_TX_FUN               TGT_DBG_SIGNAL_TRACE_POINT(12)
 #define EDRV_COUNT_TX_TEST              TGT_DBG_SIGNAL_TRACE_POINT(13)
-#define EDRV_COUNT_RX_CRC               TGT_DBG_SIGNAL_TRACE_POINT(14)
-#define EDRV_COUNT_RX_ERR               TGT_DBG_SIGNAL_TRACE_POINT(15)
-#define EDRV_COUNT_RX_SEQ               TGT_DBG_SIGNAL_TRACE_POINT(16)
-#define EDRV_COUNT_RX_ORUN              TGT_DBG_SIGNAL_TRACE_POINT(17)
-#define EDRV_COUNT_RX_ALL               TGT_DBG_SIGNAL_TRACE_POINT(18)
+#define EDRV_COUNT_RX_ERR_CRC           TGT_DBG_SIGNAL_TRACE_POINT(14)
+#define EDRV_COUNT_RX_ERR_MULT          TGT_DBG_SIGNAL_TRACE_POINT(15)
+#define EDRV_COUNT_RX_ERR_SEQ           TGT_DBG_SIGNAL_TRACE_POINT(16)
+#define EDRV_COUNT_RX_ERR_OTHER         TGT_DBG_SIGNAL_TRACE_POINT(17)
+#define EDRV_COUNT_RX_ORUN              TGT_DBG_SIGNAL_TRACE_POINT(18)
 
 #define EDRV_TRACE_CAPR(x)              TGT_DBG_POST_TRACE_VALUE(((x) & 0xFFFF) | 0x06000000)
 #define EDRV_TRACE_RX_CRC(x)            TGT_DBG_POST_TRACE_VALUE(((x) & 0xFFFF) | 0x0E000000)
@@ -987,8 +988,6 @@ int             iHandled;
     {
     unsigned int   uiHeadRxDescOrg;
 
-        EDRV_COUNT_RX_ALL;
-
         if (EdrvInstance_l.m_pbRxBuf == NULL)
         {
             printk("%s Rx buffers currently not allocated\n", __FUNCTION__);
@@ -1026,15 +1025,19 @@ int             iHandled;
 
                     if ((bRxStatus & EDRV_RXSTAT_EOP) == 0)
                     {   // Multiple descriptors used for one packet
-                        EDRV_COUNT_RX_ERR;
+                        EDRV_COUNT_RX_ERR_MULT;
                     }
                     else if ((bRxError & EDRV_RXERR_CE) != 0)
                     {   // CRC error
-                        EDRV_COUNT_RX_CRC;
+                        EDRV_COUNT_RX_ERR_CRC;
                     }
                     else if ((bRxError & EDRV_RXERR_SEQ) != 0)
                     {   // Packet sequence error
-                        EDRV_COUNT_RX_SEQ;
+                        EDRV_COUNT_RX_ERR_SEQ;
+                    }
+                    else if ((bRxError & EDRV_RXERR_OTHER) != 0)
+                    {   // Other error
+                        EDRV_COUNT_RX_ERR_OTHER;
                     }
                     else
                     {   // Packet is OK
@@ -1056,7 +1059,7 @@ int             iHandled;
                 }
                 else
                 {   // Status written by hardware but desc not done
-                    EDRV_COUNT_RX_ERR;
+                    EDRV_COUNT_RX_ERR_OTHER;
                 }
 
                 pRxDesc->m_bStatus = 0;
@@ -1143,7 +1146,7 @@ int             iHandled;
 
         if ((dwStatus & (EDRV_REGDW_INT_RXSEQ)) != 0)
         {   // Ethernet frame sequencing error
-            EDRV_COUNT_RX_SEQ;
+            EDRV_COUNT_RX_ERR_SEQ;
         }
 
         if ((dwStatus & (EDRV_REGDW_INT_RXO)) != 0)
