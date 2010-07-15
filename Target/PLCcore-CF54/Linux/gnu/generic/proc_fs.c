@@ -247,142 +247,231 @@ static  int  EplLinProcRead (
     void* pData_p)
 {
 
-int             nSize;
-int             Eof;
+int                     nSize;
+static int              Eof;
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLK)) != 0)
-tEplDllkCalStatistics* pDllkCalStats;
+tEplDllkCalStatistics*  pDllkCalStats;
+#endif
+#if (EDRV_CYCLIC_DIAGNOSTICS != FALSE)
+tEdrvCyclicDiagnostics* pEdrvCyclicDiag;
+static unsigned int     uiSampleNo;
 #endif
 
     nSize = 0;
-    Eof   = 0;
 
     // count calls of this function
 #ifdef _DBG_TRACE_POINTS_
     TgtDbgSignalTracePoint(0);
 #endif
 
-    //---------------------------------------------------------------
-    // generate static information
-    //---------------------------------------------------------------
+    if (Offset_p == 0)
+    {
+        Eof   = 0;
+        *ppcStart_p = pcBuffer_p;
 
-    // ---- Driver information ----
-    nSize += snprintf (pcBuffer_p + nSize, nBufferSize_p - nSize,
-                       "%s    %s    (c) 2006 %s\n",
-                       EPL_PRODUCT_NAME, EPL_PRODUCT_VERSION, EPL_PRODUCT_MANUFACTURER);
+        //---------------------------------------------------------------
+        // generate static information
+        //---------------------------------------------------------------
+
+        // ---- Driver information ----
+        nSize += snprintf (pcBuffer_p + nSize, nBufferSize_p - nSize,
+                           "%s    %s    (c) 2006 %s\n",
+                           EPL_PRODUCT_NAME, EPL_PRODUCT_VERSION, EPL_PRODUCT_MANUFACTURER);
 
 
-    //---------------------------------------------------------------
-    // generate process information
-    //---------------------------------------------------------------
+        //---------------------------------------------------------------
+        // generate process information
+        //---------------------------------------------------------------
 
-    // ---- EPL state ----
+        // ---- EPL state ----
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMTU)) != 0)
-    nSize += snprintf (pcBuffer_p + nSize, nBufferSize_p - nSize,
-                       "NMT state:                  0x%04X\n",
-                       (WORD) EplNmtuGetNmtState());
+        nSize += snprintf (pcBuffer_p + nSize, nBufferSize_p - nSize,
+                           "NMT state:                  0x%04X\n",
+                           (WORD) EplNmtuGetNmtState());
 #endif
 
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLK)) != 0)
-    EplDllkCalGetStatistics(&pDllkCalStats);
+        EplDllkCalGetStatistics(&pDllkCalStats);
 
-    nSize += snprintf (pcBuffer_p + nSize, nBufferSize_p - nSize,
-                       "CurAsyncTxGen=%lu CurAsyncTxNmt=%lu CurAsyncRx=%lu\nMaxAsyncTxGen=%lu MaxAsyncTxNmt=%lu MaxAsyncRx=%lu\n", pDllkCalStats->m_ulCurTxFrameCountGen, pDllkCalStats->m_ulCurTxFrameCountNmt, pDllkCalStats->m_ulCurRxFrameCount, pDllkCalStats->m_ulMaxTxFrameCountGen, pDllkCalStats->m_ulMaxTxFrameCountNmt, pDllkCalStats->m_ulMaxRxFrameCount);
+        nSize += snprintf (pcBuffer_p + nSize, nBufferSize_p - nSize,
+                           "CurAsyncTxGen=%lu CurAsyncTxNmt=%lu CurAsyncRx=%lu\nMaxAsyncTxGen=%lu MaxAsyncTxNmt=%lu MaxAsyncRx=%lu\n", pDllkCalStats->m_ulCurTxFrameCountGen, pDllkCalStats->m_ulCurTxFrameCountNmt, pDllkCalStats->m_ulCurRxFrameCount, pDllkCalStats->m_ulMaxTxFrameCountGen, pDllkCalStats->m_ulMaxTxFrameCountNmt, pDllkCalStats->m_ulMaxRxFrameCount);
 #endif
 
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
-    // fetch running IdentRequests
-    nSize += snprintf (pcBuffer_p + nSize, nBufferSize_p - nSize,
-                       "running IdentRequests:      0x%08lX\n",
-                       (ULONG) EplIdentuGetRunningRequests());
-
-    // fetch state of NmtMnu module
-    {
-    unsigned int    uiMandatorySlaveCount;
-    unsigned int    uiSignalSlaveCount;
-    WORD            wFlags;
-
-        EplNmtMnuGetDiagnosticInfo(&uiMandatorySlaveCount,
-                                   &uiSignalSlaveCount,
-                                   &wFlags);
-
-
+        // fetch running IdentRequests
         nSize += snprintf (pcBuffer_p + nSize, nBufferSize_p - nSize,
-                           "MN  MandSlaveCount: %u  SigSlaveCount: %u  Flags: 0x%X\n",
-                           uiMandatorySlaveCount, uiSignalSlaveCount, wFlags);
+                           "running IdentRequests:      0x%08lX\n",
+                           (ULONG) EplIdentuGetRunningRequests());
 
-    }
+        // fetch state of NmtMnu module
+        {
+        unsigned int    uiMandatorySlaveCount;
+        unsigned int    uiSignalSlaveCount;
+        WORD            wFlags;
+
+            EplNmtMnuGetDiagnosticInfo(&uiMandatorySlaveCount,
+                                       &uiSignalSlaveCount,
+                                       &wFlags);
+
+
+            nSize += snprintf (pcBuffer_p + nSize, nBufferSize_p - nSize,
+                               "MN  MandSlaveCount: %u  SigSlaveCount: %u  Flags: 0x%X\n",
+                               uiMandatorySlaveCount, uiSignalSlaveCount, wFlags);
+
+        }
 #endif
 
 #if (EDRV_USE_DIAGNOSTICS != FALSE)
-    nSize += EdrvGetDiagnostics(pcBuffer_p + nSize, nBufferSize_p - nSize);
+        nSize += EdrvGetDiagnostics(pcBuffer_p + nSize, nBufferSize_p - nSize);
 #endif
 
-    // ---- FEC state ----
-    #ifdef CONFIG_COLDFIRE
-    {
-        // Receive the base address
-        unsigned long base_addr;
-        #if (EDRV_USED_ETH_CTRL == 0)
-            // Set the base address of FEC0
-            base_addr = FEC_BASE_ADDR_FEC0;
-        #else
-            // Set the base address of FEC1
-            base_addr = FEC_BASE_ADDR_FEC1;
-        #endif
+
+#if (EDRV_CYCLIC_DIAGNOSTICS != FALSE)
+        // Diagnostic information of EdrvCyclic
+        EdrvCyclicGetDiagnostics(&pEdrvCyclicDiag);
 
         nSize += snprintf (pcBuffer_p + nSize, nBufferSize_p - nSize,
-                           "FEC_ECR = 0x%08X FEC_EIR = 0x%08X FEC_EIMR = 0x%08X\nFEC_TCR = 0x%08X FECTFSR = 0x%08X FECRFSR = 0x%08X\n",
-                           FEC_ECR(base_addr), FEC_EIR(base_addr), FEC_EIMR(base_addr), FEC_TCR(base_addr), FEC_FECTFSR(base_addr), FEC_FECRFSR(base_addr));
-    }
-    #endif
-
-
-    // ---- DBG: TracePoints ----
-    #ifdef _DBG_TRACE_POINTS_
-    {
-        int nNum;
-
-        nSize += snprintf (pcBuffer_p + nSize, nBufferSize_p - nSize,
-                           "DbgTracePoints:\n");
-        for (nNum=0; nNum<(sizeof(aatmDbgTracePoint_l)/sizeof(atomic_t)); nNum++)
+                "EdrvCyclic Diagnostic Information\n");
         {
+        unsigned long   ulDurationS;
+
+            ulDurationS = (unsigned long) (pEdrvCyclicDiag->m_ullCycleTimeMeanSum / 1000000000LL);
             nSize += snprintf (pcBuffer_p + nSize, nBufferSize_p - nSize,
-                               " TracePoint[%2d]: %d\n", (int)nNum,
-                               atomic_read(&aatmDbgTracePoint_l[nNum]));
+                    " Duration: %02lu:%02lu:%02lu (hh:mm:ss)\n",
+                    ulDurationS/60/60, (ulDurationS/60)%60, ulDurationS%60);
         }
 
         nSize += snprintf (pcBuffer_p + nSize, nBufferSize_p - nSize,
-                           "DbgTraceValues:\n");
-        for (nNum=0; nNum<DBG_TRACE_VALUES; nNum++)
+                "                                Minimum    Average    Maximum\n");
+
+        nSize += snprintf (pcBuffer_p + nSize, nBufferSize_p - nSize,
+                " Cycle Time (us)             %10lu %10llu %10lu\n",
+                (ULONG) pEdrvCyclicDiag->m_dwCycleTimeMin/1000,
+                (pEdrvCyclicDiag->m_ullCycleTimeMeanSum/pEdrvCyclicDiag->m_ullCycleCount+500)/1000,
+                (ULONG) (pEdrvCyclicDiag->m_dwCycleTimeMax+999)/1000);
+
+        nSize += snprintf (pcBuffer_p + nSize, nBufferSize_p - nSize,
+                " Used Cycle Time (us)                 - %10llu %10lu\n",
+                (pEdrvCyclicDiag->m_ullUsedCycleTimeMeanSum/pEdrvCyclicDiag->m_ullCycleCount+500)/1000,
+                (ULONG) (pEdrvCyclicDiag->m_dwUsedCycleTimeMax+999)/1000);
+
+        nSize += snprintf (pcBuffer_p + nSize, nBufferSize_p - nSize,
+                " Spare Cycle Time (us)       %10lu %10llu          -\n",
+                (ULONG) pEdrvCyclicDiag->m_dwSpareCycleTimeMin/1000,
+                (pEdrvCyclicDiag->m_ullSpareCycleTimeMeanSum/pEdrvCyclicDiag->m_ullCycleCount+500)/1000);
+
+        nSize += snprintf (pcBuffer_p + nSize, nBufferSize_p - nSize,
+                " Runaway Cycles: %u / Buffered Cycles: %u\n",
+                pEdrvCyclicDiag->m_uiSampleNum-1, pEdrvCyclicDiag->m_uiSampleBufferedNum-1); // time ref sample 0 is not included
+
+        uiSampleNo = 0;
+        if (pEdrvCyclicDiag->m_uiSampleBufferedNum > 1)
         {
-            if (nNum == uiDbgTraceValuePos_l)
-            {   // next value will be stored at that position
-                nSize += snprintf (pcBuffer_p + nSize, nBufferSize_p - nSize,
-                                   "*%08lX", (ULONG) adwDbgTraceValue_l[nNum]);
-            }
-            else
+            nSize += snprintf (pcBuffer_p + nSize, nBufferSize_p - nSize,
+                    " CycleStart      CycleLength    UsedTime   SpareTime\n");
+            nSize += snprintf (pcBuffer_p + nSize, nBufferSize_p - nSize,
+                    " KernelTime [ns]        [us]        [us]        [us]\n");
+            nSize += snprintf (pcBuffer_p + nSize, nBufferSize_p - nSize,
+                    " %15llu\n",
+                    pEdrvCyclicDiag->m_aullSampleTimeStamp[uiSampleNo]);
+        }
+        uiSampleNo++;
+#endif
+
+    }
+    else if (Eof == 0)
+    {   // Offset_p > 0 && not finished
+
+        *ppcStart_p = pcBuffer_p;
+
+#if (EDRV_CYCLIC_DIAGNOSTICS != FALSE)
+        EdrvCyclicGetDiagnostics(&pEdrvCyclicDiag);
+
+        while ((uiSampleNo < pEdrvCyclicDiag->m_uiSampleBufferedNum) && (nBufferSize_p - nSize > 100))
+        {
+            nSize += snprintf (pcBuffer_p + nSize, nBufferSize_p - nSize,
+                    " %15llu %11lu %11lu %11lu\n",
+                    pEdrvCyclicDiag->m_aullSampleTimeStamp[uiSampleNo],
+                    (ULONG) (pEdrvCyclicDiag->m_adwCycleTime[uiSampleNo]+500)/1000,
+                    (ULONG) (pEdrvCyclicDiag->m_adwUsedCycleTime[uiSampleNo]+999)/1000,
+                    (ULONG) pEdrvCyclicDiag->m_adwSpareCycleTime[uiSampleNo]/1000);
+            uiSampleNo++;
+        }
+        if (nSize > 0)
+        {
+            goto Exit;
+        }
+
+        nSize += snprintf (pcBuffer_p + nSize, nBufferSize_p - nSize,
+                "\n");
+#endif
+
+        // ---- FEC state ----
+        #ifdef CONFIG_COLDFIRE
+        {
+            // Receive the base address
+            unsigned long base_addr;
+            #if (EDRV_USED_ETH_CTRL == 0)
+                // Set the base address of FEC0
+                base_addr = FEC_BASE_ADDR_FEC0;
+            #else
+                // Set the base address of FEC1
+                base_addr = FEC_BASE_ADDR_FEC1;
+            #endif
+
+            nSize += snprintf (pcBuffer_p + nSize, nBufferSize_p - nSize,
+                               "FEC_ECR = 0x%08X FEC_EIR = 0x%08X FEC_EIMR = 0x%08X\nFEC_TCR = 0x%08X FECTFSR = 0x%08X FECRFSR = 0x%08X\n",
+                               FEC_ECR(base_addr), FEC_EIR(base_addr), FEC_EIMR(base_addr), FEC_TCR(base_addr), FEC_FECTFSR(base_addr), FEC_FECRFSR(base_addr));
+        }
+        #endif
+
+
+        // ---- DBG: TracePoints ----
+        #ifdef _DBG_TRACE_POINTS_
+        {
+            int nNum;
+
+            nSize += snprintf (pcBuffer_p + nSize, nBufferSize_p - nSize,
+                               "DbgTracePoints:\n");
+            for (nNum=0; nNum<(sizeof(aatmDbgTracePoint_l)/sizeof(atomic_t)); nNum++)
             {
                 nSize += snprintf (pcBuffer_p + nSize, nBufferSize_p - nSize,
-                                   " %08lX", (ULONG) adwDbgTraceValue_l[nNum]);
+                                   " TracePoint[%2d]: %d\n", (int)nNum,
+                                   atomic_read(&aatmDbgTracePoint_l[nNum]));
             }
-            if ((nNum & 0x00000007) == 0x00000007)
-            {   // 8 values printed -> end of line reached
+
+            nSize += snprintf (pcBuffer_p + nSize, nBufferSize_p - nSize,
+                               "DbgTraceValues:\n");
+            for (nNum=0; nNum<DBG_TRACE_VALUES; nNum++)
+            {
+                if (nNum == uiDbgTraceValuePos_l)
+                {   // next value will be stored at that position
+                    nSize += snprintf (pcBuffer_p + nSize, nBufferSize_p - nSize,
+                                       "*%08lX", (ULONG) adwDbgTraceValue_l[nNum]);
+                }
+                else
+                {
+                    nSize += snprintf (pcBuffer_p + nSize, nBufferSize_p - nSize,
+                                       " %08lX", (ULONG) adwDbgTraceValue_l[nNum]);
+                }
+                if ((nNum & 0x00000007) == 0x00000007)
+                {   // 8 values printed -> end of line reached
+                    nSize += snprintf (pcBuffer_p + nSize, nBufferSize_p - nSize,
+                                       "\n");
+                }
+            }
+            if ((nNum & 0x00000007) != 0x00000007)
+            {   // number of values printed is not a multiple of 8 -> print new line
                 nSize += snprintf (pcBuffer_p + nSize, nBufferSize_p - nSize,
                                    "\n");
             }
         }
-        if ((nNum & 0x00000007) != 0x00000007)
-        {   // number of values printed is not a multiple of 8 -> print new line
-            nSize += snprintf (pcBuffer_p + nSize, nBufferSize_p - nSize,
-                               "\n");
-        }
+        #endif
+
+        Eof = 1;
     }
-    #endif
 
-
-    Eof = 1;
     goto Exit;
-
 
 Exit:
 
