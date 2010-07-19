@@ -78,10 +78,6 @@ chrt -f -p 81 `ps -C sirq-hrtimer/1 -o pid --no-headers`
 chrt -f -p 80 `ps -C \`ps -e -o comm |grep ^irq/.*epl\$\` -o pid --no-headers` 
 # For kernel-queue shared-buffer thread, priority -80 (79) is set in ShbIpc-LinuxKernel.c
 
-# Lower priority of migration kernel threads
-chrt -f -p 78 `ps -C migration/0 -o pid --no-headers`
-chrt -f -p 78 `ps -C migration/1 -o pid --no-headers`
-
 
 # Enable tracing
 #echo function_graph > /sys/kernel/debug/tracing/current_tracer
