@@ -335,7 +335,7 @@ static unsigned int     uiSampleNo;
         {
         unsigned long   ulDurationS;
 
-            ulDurationS = (unsigned long) (pEdrvCyclicDiag->m_ullCycleTimeMeanSum / 1000000000LL);
+            ulDurationS = (unsigned long) do_div(pEdrvCyclicDiag->m_ullCycleTimeMeanSum, 1000000000L);
             nSize += snprintf (pcBuffer_p + nSize, nBufferSize_p - nSize,
                     " Duration: %02lu:%02lu:%02lu (hh:mm:ss)\n",
                     ulDurationS/60/60, (ulDurationS/60)%60, ulDurationS%60);
@@ -347,18 +347,18 @@ static unsigned int     uiSampleNo;
         nSize += snprintf (pcBuffer_p + nSize, nBufferSize_p - nSize,
                 " Cycle Time (us)             %10lu %10llu %10lu\n",
                 (ULONG) pEdrvCyclicDiag->m_dwCycleTimeMin/1000,
-                (pEdrvCyclicDiag->m_ullCycleTimeMeanSum/pEdrvCyclicDiag->m_ullCycleCount+500)/1000,
+                do_div(do_div(pEdrvCyclicDiag->m_ullCycleTimeMeanSum, pEdrvCyclicDiag->m_ullCycleCount)+500, 1000),
                 (ULONG) (pEdrvCyclicDiag->m_dwCycleTimeMax+999)/1000);
 
         nSize += snprintf (pcBuffer_p + nSize, nBufferSize_p - nSize,
                 " Used Cycle Time (us)                 - %10llu %10lu\n",
-                (pEdrvCyclicDiag->m_ullUsedCycleTimeMeanSum/pEdrvCyclicDiag->m_ullCycleCount+500)/1000,
+                do_div(do_div(pEdrvCyclicDiag->m_ullUsedCycleTimeMeanSum, pEdrvCyclicDiag->m_ullCycleCount)+500, 1000),
                 (ULONG) (pEdrvCyclicDiag->m_dwUsedCycleTimeMax+999)/1000);
 
         nSize += snprintf (pcBuffer_p + nSize, nBufferSize_p - nSize,
                 " Spare Cycle Time (us)       %10lu %10llu          -\n",
                 (ULONG) pEdrvCyclicDiag->m_dwSpareCycleTimeMin/1000,
-                (pEdrvCyclicDiag->m_ullSpareCycleTimeMeanSum/pEdrvCyclicDiag->m_ullCycleCount+500)/1000);
+                do_div(do_div(pEdrvCyclicDiag->m_ullSpareCycleTimeMeanSum, pEdrvCyclicDiag->m_ullCycleCount)+500, 1000));
 
         nSize += snprintf (pcBuffer_p + nSize, nBufferSize_p - nSize,
                 " Runaway Cycles: %u / Buffered Cycles: %u\n",
