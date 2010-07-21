@@ -644,7 +644,7 @@ unsigned long long ullStartNewCycleTimeStamp;
         EdrvCyclicInstance_l.m_Diag.m_ullCycleTimeMeanSum      += dwCycleTime;
         EdrvCyclicInstance_l.m_Diag.m_ullUsedCycleTimeMeanSum  += dwUsedCycleTime;
         EdrvCyclicInstance_l.m_Diag.m_ullSpareCycleTimeMeanSum += dwSpareCycleTime;
-        EdrvCyclicInstance_l.m_Diag.m_ullCycleCount++;
+        EdrvCyclicInstance_l.m_Diag.m_ulCycleCount++;
 
         // sample previous cycle if deviations exceed threshold
         if (    (EdrvCyclicInstance_l.m_Diag.m_uiSampleNum == 0) /* sample first cycle for start time */

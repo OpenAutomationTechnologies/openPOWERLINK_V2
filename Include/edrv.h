@@ -206,7 +206,7 @@ typedef struct
 typedef struct
 {
     // continuous min/max/avg measurement
-    unsigned long long  m_ullCycleCount;
+    unsigned long       m_ulCycleCount;
     DWORD               m_dwCycleTimeMin;
     DWORD               m_dwCycleTimeMax;
     unsigned long long  m_ullCycleTimeMeanSum;  // sums run over after some years for ct=400
