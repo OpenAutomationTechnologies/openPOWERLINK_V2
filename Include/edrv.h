@@ -107,15 +107,14 @@
 
 
 #ifndef EDRV_USE_DIAGNOSTICS
-#define EDRV_USE_DIAGNOSTICS    FALSE
+#define EDRV_USE_DIAGNOSTICS                    FALSE
 #endif
 
-#ifndef EDRV_CYCLIC_DIAGNOSTICS
-#define EDRV_CYCLIC_DIAGNOSTICS                 FALSE
+#ifndef EDRV_CYCLIC_USE_DIAGNOSTICS
+#define EDRV_CYCLIC_USE_DIAGNOSTICS             FALSE
 #endif
-
 #ifndef EDRV_CYCLIC_SAMPLE_NUM
-#define EDRV_CYCLIC_SAMPLE_NUM                    501
+#define EDRV_CYCLIC_SAMPLE_NUM                  501
 #endif
 
 
@@ -206,7 +205,7 @@ typedef struct
 typedef struct
 {
     // continuous min/max/avg measurement
-    unsigned long       m_ulCycleCount;
+    unsigned long       m_ullCycleCount;
     DWORD               m_dwCycleTimeMin;
     DWORD               m_dwCycleTimeMax;
     unsigned long long  m_ullCycleTimeMeanSum;  // sums run over after some years for ct=400

@@ -156,7 +156,7 @@
 //#define EDRV_USED_ETH_CTRL              1
 
 #define EDRV_USE_DIAGNOSTICS            TRUE
-#define EDRV_CYCLIC_DIAGNOSTICS         TRUE
+#define EDRV_CYCLIC_USE_DIAGNOSTICS     TRUE
 
 
 // =========================================================================
