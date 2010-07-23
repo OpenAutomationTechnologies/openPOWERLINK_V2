@@ -93,7 +93,7 @@
 // const defines
 //---------------------------------------------------------------------------
 
-#if EDRV_CYCLIC_DIAGNOSTICS != FALSE
+#if EDRV_CYCLIC_USE_DIAGNOSTICS != FALSE
 #ifndef EDRV_CYCLIC_SAMPLE_TH_CYCLE_TIME_DIFF_US
 #define EDRV_CYCLIC_SAMPLE_TH_CYCLE_TIME_DIFF_US         50
 #endif
@@ -121,7 +121,7 @@ typedef struct
     tEdrvCyclicCbSync   m_pfnCbSync;
     tEdrvCyclicCbError  m_pfnCbError;
 
-#if EDRV_CYCLIC_DIAGNOSTICS != FALSE
+#if EDRV_CYCLIC_USE_DIAGNOSTICS != FALSE
     unsigned int        m_uiSampleNo;
     unsigned long long  m_ullStartCycleTimeStamp;
     unsigned long long  m_ullLastSlotTimeStamp;
@@ -218,7 +218,7 @@ tEplKernel  Ret;
     // clear instance structure
     EPL_MEMSET(&EdrvCyclicInstance_l, 0, sizeof (EdrvCyclicInstance_l));
 
-#if EDRV_CYCLIC_DIAGNOSTICS != FALSE
+#if EDRV_CYCLIC_USE_DIAGNOSTICS != FALSE
     EdrvCyclicInstance_l.m_Diag.m_dwCycleTimeMin        = 0xFFFFFFFF;
     EdrvCyclicInstance_l.m_Diag.m_dwUsedCycleTimeMin    = 0xFFFFFFFF;
     EdrvCyclicInstance_l.m_Diag.m_dwSpareCycleTimeMin   = 0xFFFFFFFF;
@@ -410,7 +410,7 @@ tEplKernel      Ret = kEplSuccessful;
         0L,
         TRUE);
 
-#if EDRV_CYCLIC_DIAGNOSTICS != FALSE
+#if EDRV_CYCLIC_USE_DIAGNOSTICS != FALSE
     EdrvCyclicInstance_l.m_ullLastSlotTimeStamp = 0;
 #endif
 
@@ -440,6 +440,10 @@ tEplKernel      Ret = kEplSuccessful;
 
     Ret = EplTimerHighReskDeleteTimer(&EdrvCyclicInstance_l.m_TimerHdlCycle);
     Ret = EplTimerHighReskDeleteTimer(&EdrvCyclicInstance_l.m_TimerHdlSlot);
+
+#if EDRV_CYCLIC_USE_DIAGNOSTICS != FALSE
+    EdrvCyclicInstance_l.m_ullStartCycleTimeStamp = 0;
+#endif
 
     return Ret;
 
@@ -501,7 +505,7 @@ tEplKernel      Ret = kEplSuccessful;
 }
 
 
-#if EDRV_CYCLIC_DIAGNOSTICS != FALSE
+#if EDRV_CYCLIC_USE_DIAGNOSTICS != FALSE
 //---------------------------------------------------------------------------
 //
 // Function:    EdrvCyclicGetDiagnostics()
@@ -553,7 +557,7 @@ static tEplKernel PUBLIC EdrvCyclicCbTimerCycle(tEplTimerEventArg* pEventArg_p)
 {
 tEplKernel      Ret = kEplSuccessful;
 
-#if EDRV_CYCLIC_DIAGNOSTICS != FALSE
+#if EDRV_CYCLIC_USE_DIAGNOSTICS != FALSE
 DWORD           dwCycleTime;
 DWORD           dwUsedCycleTime;
 DWORD           dwSpareCycleTime;
@@ -566,7 +570,7 @@ unsigned long long ullStartNewCycleTimeStamp;
         goto Exit;
     }
 
-#if EDRV_CYCLIC_DIAGNOSTICS != FALSE
+#if EDRV_CYCLIC_USE_DIAGNOSTICS != FALSE
     ullStartNewCycleTimeStamp = EplTgtGetTimeStampNs();
 #endif
 
@@ -599,7 +603,7 @@ unsigned long long ullStartNewCycleTimeStamp;
         Ret = EdrvCyclicInstance_l.m_pfnCbSync();
     }
 
-#if EDRV_CYCLIC_DIAGNOSTICS != FALSE
+#if EDRV_CYCLIC_USE_DIAGNOSTICS != FALSE
     if (EdrvCyclicInstance_l.m_ullStartCycleTimeStamp != 0)
     {
         // calculate time diffs of previous cycle
@@ -644,7 +648,7 @@ unsigned long long ullStartNewCycleTimeStamp;
         EdrvCyclicInstance_l.m_Diag.m_ullCycleTimeMeanSum      += dwCycleTime;
         EdrvCyclicInstance_l.m_Diag.m_ullUsedCycleTimeMeanSum  += dwUsedCycleTime;
         EdrvCyclicInstance_l.m_Diag.m_ullSpareCycleTimeMeanSum += dwSpareCycleTime;
-        EdrvCyclicInstance_l.m_Diag.m_ulCycleCount++;
+        EdrvCyclicInstance_l.m_Diag.m_ullCycleCount++;
 
         // sample previous cycle if deviations exceed threshold
         if (    (EdrvCyclicInstance_l.m_Diag.m_uiSampleNum == 0) /* sample first cycle for start time */
@@ -714,7 +718,7 @@ tEdrvTxBuffer*  pTxBuffer = NULL;
         goto Exit;
     }
 
-#if EDRV_CYCLIC_DIAGNOSTICS != FALSE
+#if EDRV_CYCLIC_USE_DIAGNOSTICS != FALSE
     EdrvCyclicInstance_l.m_ullLastSlotTimeStamp = EplTgtGetTimeStampNs();
 #endif
 
