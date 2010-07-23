@@ -252,7 +252,7 @@ static int              Eof;
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLK)) != 0)
 tEplDllkCalStatistics*  pDllkCalStats;
 #endif
-#if (EDRV_CYCLIC_DIAGNOSTICS != FALSE)
+#if (EDRV_CYCLIC_USE_DIAGNOSTICS != FALSE)
 tEdrvCyclicDiagnostics* pEdrvCyclicDiag;
 static unsigned int     uiSampleNo;
 #endif
@@ -326,60 +326,64 @@ static unsigned int     uiSampleNo;
 #endif
 
 
-#if (EDRV_CYCLIC_DIAGNOSTICS != FALSE)
+#if (EDRV_CYCLIC_USE_DIAGNOSTICS != FALSE)
         // Diagnostic information of EdrvCyclic
         EdrvCyclicGetDiagnostics(&pEdrvCyclicDiag);
 
         nSize += snprintf (pcBuffer_p + nSize, nBufferSize_p - nSize,
                 "EdrvCyclic Diagnostic Information\n");
         {
-        unsigned long   ulDurationS;
+        unsigned long long  ullDurationS;
+        unsigned long       ulDurationS;
 
-            ulDurationS = (ULONG) do_div(pEdrvCyclicDiag->m_ullCycleTimeMeanSum, 1000000000L);
+            ullDurationS = pEdrvCyclicDiag->m_ullCycleTimeMeanSum;
+            do_div(ullDurationS, 1000000000L);
+            ulDurationS  = (unsigned long) ullDurationS;
             nSize += snprintf (pcBuffer_p + nSize, nBufferSize_p - nSize,
-                    " Duration: %02lu:%02lu:%02lu (hh:mm:ss)\n",
-                    ulDurationS/60/60, (ulDurationS/60)%60, ulDurationS%60);
+                    " Duration: %02lu:%02lu:%02lu (hh:mm:ss) / Cycles: %llu\n",
+                    ulDurationS/60/60, (ulDurationS/60)%60, ulDurationS%60,
+                    pEdrvCyclicDiag->m_ullCycleCount);
         }
 
-        nSize += snprintf (pcBuffer_p + nSize, nBufferSize_p - nSize,
-                "                                Minimum    Average    Maximum\n");
-
         {
-        unsigned long   ulMean;
-
-            ulMean = (ULONG) do_div(pEdrvCyclicDiag->m_ullCycleTimeMeanSum, pEdrvCyclicDiag->m_ulCycleCount);
-            nSize += snprintf (pcBuffer_p + nSize, nBufferSize_p - nSize,
-                    " Cycle Time (us)             %10lu %10lu %10lu\n",
-                    (ULONG) pEdrvCyclicDiag->m_dwCycleTimeMin/1000,
-                    ulMean+500/1000,
-                    (ULONG) (pEdrvCyclicDiag->m_dwCycleTimeMax+999)/1000);
-
-            ulMean = (ULONG) do_div(pEdrvCyclicDiag->m_ullUsedCycleTimeMeanSum, pEdrvCyclicDiag->m_ulCycleCount);
-            nSize += snprintf (pcBuffer_p + nSize, nBufferSize_p - nSize,
-                    " Used Cycle Time (us)                 - %10lu %10lu\n",
-                    ulMean+500/1000,
-                    (ULONG) (pEdrvCyclicDiag->m_dwUsedCycleTimeMax+999)/1000);
-
-            ulMean = (ULONG) do_div(pEdrvCyclicDiag->m_ullSpareCycleTimeMeanSum, pEdrvCyclicDiag->m_ulCycleCount);
-            nSize += snprintf (pcBuffer_p + nSize, nBufferSize_p - nSize,
-                    " Spare Cycle Time (us)       %10lu %10lu          -\n",
-                    (ULONG) pEdrvCyclicDiag->m_dwSpareCycleTimeMin/1000,
-                    ulMean+500/1000);
+        unsigned long long  ullMeanCycleTime;
+        unsigned long long  ullMeanUsedTime;
+        unsigned long long  ullMeanSpareTime;
 
             nSize += snprintf (pcBuffer_p + nSize, nBufferSize_p - nSize,
-                    " Runaway Cycles: %u / Buffered Cycles: %u\n",
-                    pEdrvCyclicDiag->m_uiSampleNum-1, pEdrvCyclicDiag->m_uiSampleBufferedNum-1); // time ref sample 0 is not included
+                    "     Start of Cycle   Cycle Time    Used Time   Spare Time\n");
+            nSize += snprintf (pcBuffer_p + nSize, nBufferSize_p - nSize,
+                    "               [ns]         [us]         [us]         [us]\n");
+
+            nSize += snprintf (pcBuffer_p + nSize, nBufferSize_p - nSize,
+                    " Minimum          - %12lu            - %12lu\n",
+                    (unsigned long) (pEdrvCyclicDiag->m_dwCycleTimeMin / 1000),
+                    (unsigned long) (pEdrvCyclicDiag->m_dwSpareCycleTimeMin / 1000));
+
+            ullMeanCycleTime = pEdrvCyclicDiag->m_ullCycleTimeMeanSum;
+            do_div(ullMeanCycleTime, pEdrvCyclicDiag->m_ullCycleCount);
+            ullMeanUsedTime = pEdrvCyclicDiag->m_ullUsedCycleTimeMeanSum;
+            do_div(ullMeanUsedTime, pEdrvCyclicDiag->m_ullCycleCount);
+            ullMeanSpareTime = pEdrvCyclicDiag->m_ullSpareCycleTimeMeanSum;
+            do_div(ullMeanSpareTime, pEdrvCyclicDiag->m_ullCycleCount);
+
+            nSize += snprintf (pcBuffer_p + nSize, nBufferSize_p - nSize,
+                    " Average          - %12lu %12lu %12lu\n",
+                    ((unsigned long) ullMeanCycleTime + 500) / 1000,
+                    ((unsigned long) ullMeanUsedTime + 500) / 1000,
+                    ((unsigned long) ullMeanSpareTime + 500) / 1000);
+
+            nSize += snprintf (pcBuffer_p + nSize, nBufferSize_p - nSize,
+                    " Maximum          - %12lu %12lu            -\n",
+                    (unsigned long) ((pEdrvCyclicDiag->m_dwCycleTimeMax + 999) / 1000),
+                    (unsigned long) ((pEdrvCyclicDiag->m_dwUsedCycleTimeMax + 999) / 1000));
         }
 
         uiSampleNo = 0;
         if (pEdrvCyclicDiag->m_uiSampleBufferedNum > 1)
         {
             nSize += snprintf (pcBuffer_p + nSize, nBufferSize_p - nSize,
-                    " CycleStart      CycleLength    UsedTime   SpareTime\n");
-            nSize += snprintf (pcBuffer_p + nSize, nBufferSize_p - nSize,
-                    " KernelTime [ns]        [us]        [us]        [us]\n");
-            nSize += snprintf (pcBuffer_p + nSize, nBufferSize_p - nSize,
-                    " %15llu\n",
+                    " %18llu            -            -            -\n",
                     pEdrvCyclicDiag->m_aullSampleTimeStamp[uiSampleNo]);
         }
         uiSampleNo++;
@@ -391,13 +395,13 @@ static unsigned int     uiSampleNo;
 
         *ppcStart_p = pcBuffer_p;
 
-#if (EDRV_CYCLIC_DIAGNOSTICS != FALSE)
+#if (EDRV_CYCLIC_USE_DIAGNOSTICS != FALSE)
         EdrvCyclicGetDiagnostics(&pEdrvCyclicDiag);
 
         while ((uiSampleNo < pEdrvCyclicDiag->m_uiSampleBufferedNum) && (nBufferSize_p - nSize > 100))
         {
             nSize += snprintf (pcBuffer_p + nSize, nBufferSize_p - nSize,
-                    " %15llu %11lu %11lu %11lu\n",
+                    " %18llu %12lu %12lu %12lu\n",
                     pEdrvCyclicDiag->m_aullSampleTimeStamp[uiSampleNo],
                     (ULONG) (pEdrvCyclicDiag->m_adwCycleTime[uiSampleNo]+500)/1000,
                     (ULONG) (pEdrvCyclicDiag->m_adwUsedCycleTime[uiSampleNo]+999)/1000,
@@ -410,7 +414,8 @@ static unsigned int     uiSampleNo;
         }
 
         nSize += snprintf (pcBuffer_p + nSize, nBufferSize_p - nSize,
-                "\n");
+                " Runaway Cycles: %u (%u in buffer)\n\n",
+                pEdrvCyclicDiag->m_uiSampleNum-1, pEdrvCyclicDiag->m_uiSampleBufferedNum-1); // time ref sample 0 is not included
 #endif
 
         // ---- FEC state ----
