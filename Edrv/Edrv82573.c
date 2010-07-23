@@ -343,6 +343,10 @@ typedef struct
 
     tEdrvInitParam      m_InitParam;
 
+#if EDRV_USE_DIAGNOSTICS != FALSE
+    unsigned long long  m_ullInterruptCount;
+#endif
+
 } tEdrvInstance;
 
 
@@ -841,12 +845,28 @@ static void EdrvReinitRx(void)
 #endif
 
 
+
+#if EDRV_USE_DIAGNOSTICS != FALSE
+//---------------------------------------------------------------------------
+//
+// Function:    EdrvGetDiagnostics
+//
+// Description: Print diagnostic information to buffer
+//
+// Parameters:  pszBuffer_p     = Pointer to buffer
+//              iSize_p         = Size of buffer
+//
+// Returns:     Number of printed characters
+//
+// State:
+//
+//---------------------------------------------------------------------------
+
 int EdrvGetDiagnostics(char* pszBuffer_p, int iSize_p)
 {
 tEdrvTxDesc*    pTxDesc;
 DWORD           dwTxStatus;
 int             iUsedSize = 0;
-int             iIndex;
 
     iUsedSize += snprintf (pszBuffer_p + iUsedSize, iSize_p - iUsedSize,
                        "\nEdrv Diagnostic Information\n");
@@ -867,6 +887,7 @@ int             iIndex;
                        EdrvInstance_l.m_uiTailTxDesc,
                        (unsigned long) EDRV_REGDW_READ(EDRV_REGDW_TDT));
 
+#if 0
     for (iIndex = 0; iIndex < 16; iIndex++)
     {
         iUsedSize += snprintf (pszBuffer_p + iUsedSize, iSize_p - iUsedSize,
@@ -905,7 +926,11 @@ int             iIndex;
                        "Receive Descripter Tail Register:    0x%08lX (%u)\n",
                        (unsigned long) EDRV_REGDW_READ(EDRV_REGDW_RDT0),
                        EdrvInstance_l.m_uiTailRxDesc);
+#endif
 
+    iUsedSize += snprintf (pszBuffer_p + iUsedSize, iSize_p - iUsedSize,
+                       "Edrv Interrupts:                     %llu\n",
+                       EdrvInstance_l.m_ullInterruptCount);
 
     iUsedSize += snprintf (pszBuffer_p + iUsedSize, iSize_p - iUsedSize,
                        "CRC Error Count:                     %lu\n",
@@ -932,6 +957,8 @@ int             iIndex;
 
     return iUsedSize;
 }
+#endif
+
 
 
 //---------------------------------------------------------------------------
@@ -981,6 +1008,10 @@ int             iHandled;
         EDRV_REGDW_WRITE(EDRV_REGDW_ICR, dwStatus);
     }
         
+#if EDRV_USE_DIAGNOSTICS != FALSE
+    EdrvInstance_l.m_ullInterruptCount++;
+#endif
+
     // Receive or/and transmit interrupt
     // Handling of Rx has priority
     if ((dwStatus & (EDRV_REGDW_INT_RXT0 | EDRV_REGDW_INT_SRPD | EDRV_REGDW_INT_RXDMT0 | // Receive interrupt
@@ -1410,11 +1441,6 @@ int     iIndex;
     // enable transmitter
     printk("%s set Tx conf register\n", __FUNCTION__);
     EDRV_REGDW_WRITE(EDRV_REGDW_TCTL, EDRV_REGDW_TCTL_DEF);
-
-/*
-    // clear missed packet counter to enable Rx/Tx process
-    EDRV_REGDW_WRITE(EDRV_REGDW_MPC, 0);
-*/
 
     // enable interrupts
     printk("%s enable interrupts\n", __FUNCTION__);
