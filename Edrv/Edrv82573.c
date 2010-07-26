@@ -137,6 +137,7 @@
 
 #define EDRV_AUTO_READ_DONE_TIMEOUT 10  // ms
 #define EDRV_MASTER_DISABLE_TIMEOUT 90  // ms
+#define EDRV_LINK_UP_TIMEOUT        3000 // ms
 
 
 #define DRV_NAME                "epl"
@@ -166,6 +167,7 @@
                                | EDRV_REGDW_CTRL_SLU)
 
 #define EDRV_REGDW_STATUS       0x00008     // Device Status
+#define EDRV_REGDW_STATUS_LU    0x00000002 // Link Up Indication
 #define EDRV_REGDW_STATUS_MST_EN 0x00080000 // GIO Master Enable Status
 
 #define EDRV_REGDW_EEC          0x00010     // EEPROM Control Register
@@ -251,6 +253,9 @@
 #define EDRV_REGDW_COLC         0x004028    // Collision Count
 #define EDRV_REGDW_SEC          0x004038    // Sequence Error Count
 #define EDRV_REGDW_RLEC         0x004040    // Receive Length Error Count
+
+#define EDRV_REGDW_SWSM         0x005B50    // Software Semaphore
+#define EDRV_REGDW_SWSM_SWESMBI 0x00000002  // Software EEPROM Semaphore Bit
 
 // defines for the status byte in the receive descriptor
 #define EDRV_RXSTAT_DD            0x01    // Descriptor Done (Processed by Hardware)
@@ -1236,14 +1241,14 @@ int     iIndex;
         printk("%s pPciDev==NULL\n", __FUNCTION__);
     }
 
-    printk("%s request regions\n", __FUNCTION__);
+    //printk("%s request regions\n", __FUNCTION__);
     iResult = pci_request_regions(pPciDev, DRV_NAME);
     if (iResult != 0)
     {
         goto ExitFail;
     }
 
-    printk("%s ioremap\n", __FUNCTION__);
+    //printk("%s ioremap\n", __FUNCTION__);
     EdrvInstance_l.m_pIoAddr = ioremap (pci_resource_start(pPciDev, 0), pci_resource_len(pPciDev, 0));
     if (EdrvInstance_l.m_pIoAddr == NULL)
     {   // remap of controller's register space failed
@@ -1252,7 +1257,7 @@ int     iIndex;
     }
 
     // enable PCI busmaster
-    printk("%s enable busmaster\n", __FUNCTION__);
+    //printk("%s enable busmaster\n", __FUNCTION__);
     pci_set_master (pPciDev);
 
     // disable GIO Master accesses
@@ -1277,11 +1282,11 @@ int     iIndex;
     }
 
     // disable interrupts
-    printk("%s disable interrupts\n", __FUNCTION__);
+    //printk("%s disable interrupts\n", __FUNCTION__);
     EDRV_REGDW_WRITE(EDRV_REGDW_IMC, EDRV_REGDW_INT_MASK_ALL);
 
     // reset controller
-    printk("%s reset controller\n", __FUNCTION__);
+    //printk("%s reset controller\n", __FUNCTION__);
     dwTemp |= EDRV_REGDW_CTRL_RST;
     EDRV_REGDW_WRITE(EDRV_REGDW_CTRL, dwTemp);
 
@@ -1302,28 +1307,47 @@ int     iIndex;
     }
 
     // disable interrupts
-    printk("%s disable interrupts\n", __FUNCTION__);
+    //printk("%s disable interrupts\n", __FUNCTION__);
     EDRV_REGDW_WRITE(EDRV_REGDW_IMC, EDRV_REGDW_INT_MASK_ALL);
     dwTemp = EDRV_REGDW_READ(EDRV_REGDW_ICR);
 
     // set global configuration
-    printk("%s set global configuration\n", __FUNCTION__);
+    //printk("%s set global configuration\n", __FUNCTION__);
     EDRV_REGDW_WRITE(EDRV_REGDW_CTRL, EDRV_REGDW_CTRL_DEF);
 
-    // PHY reset by software:
-    //1. Obtain the Software/Firmware semaphore (SWSM.SWESMBI - 05B50h; bit 1). Set it to 1b.
-    //2. Drive PHY reset (CTRL.PHY_RST at offset 0000h [bit 31], write 1b, wait 100 us, and then
-    //write 0b).
-    //3. Delay 10 ms
-    //4. Start configuring the PHY.
-    //5. Release the Software/Firmware semaphore
+    // PHY reset by software
+    // 1. Obtain the Software/Firmware semaphore (SWSM.SWESMBI). Set it to 1b.
+    dwTemp = EDRV_REGDW_READ(EDRV_REGDW_SWSM);
+    dwTemp |= EDRV_REGDW_SWSM_SWESMBI;
+    EDRV_REGDW_WRITE(EDRV_REGDW_SWSM, dwTemp);
+    // 2. Drive PHY reset (CTRL.PHY_RST, write 1b, wait 100 us, and then write 0b).
+    dwTemp = EDRV_REGDW_READ(EDRV_REGDW_CTRL);
+    dwTemp |= EDRV_REGDW_CTRL_PHY_RST;
+    EDRV_REGDW_WRITE(EDRV_REGDW_CTRL, dwTemp);
+    msleep(1);
+    dwTemp &= ~EDRV_REGDW_CTRL_PHY_RST;
+    EDRV_REGDW_WRITE(EDRV_REGDW_CTRL, dwTemp);
+    // 3. Delay 10 ms
+    msleep(10);
+    // 4. Start configuring the PHY.
+
+    // 5. Release the Software/Firmware semaphore
+    dwTemp = EDRV_REGDW_READ(EDRV_REGDW_SWSM);
+    dwTemp &= ~EDRV_REGDW_SWSM_SWESMBI;
+    EDRV_REGDW_WRITE(EDRV_REGDW_SWSM, dwTemp);
+
+    // Clear statistical registers
+    dwTemp = EDRV_REGDW_READ(EDRV_REGDW_CRCERRS);
+    dwTemp = EDRV_REGDW_READ(EDRV_REGDW_LATECOL);
+    dwTemp = EDRV_REGDW_READ(EDRV_REGDW_COLC);
+    dwTemp = EDRV_REGDW_READ(EDRV_REGDW_SEC);
+    dwTemp = EDRV_REGDW_READ(EDRV_REGDW_RLEC);
 
     // set TIPG
-    printk("%s set TIPG\n", __FUNCTION__);
     EDRV_REGDW_WRITE(EDRV_REGDW_TIPG, EDRV_REGDW_TIPG_DEF);
 
     // install interrupt handler
-    printk("%s install interrupt handler\n", __FUNCTION__);
+    //printk("%s install interrupt handler\n", __FUNCTION__);
     iResult = request_irq(pPciDev->irq, TgtEthIsr, IRQF_SHARED, DRV_NAME, pPciDev);
     if (iResult != 0)
     {
@@ -1331,7 +1355,7 @@ int     iIndex;
     }
 
     // allocate buffers
-    printk("%s allocate buffers\n", __FUNCTION__);
+    //printk("%s allocate buffers\n", __FUNCTION__);
     EdrvInstance_l.m_pbTxBuf = pci_alloc_consistent(pPciDev, EDRV_TX_BUFFER_SIZE,
                      &EdrvInstance_l.m_pTxBufDma);
     if (EdrvInstance_l.m_pbTxBuf == NULL)
@@ -1365,7 +1389,7 @@ int     iIndex;
     }
 
     // check if user specified a MAC address
-    printk("%s check specified MAC address\n", __FUNCTION__);
+    //printk("%s check specified MAC address\n", __FUNCTION__);
     if ((EdrvInstance_l.m_InitParam.m_abMyMacAddr[0] != 0) |
         (EdrvInstance_l.m_InitParam.m_abMyMacAddr[1] != 0) |
         (EdrvInstance_l.m_InitParam.m_abMyMacAddr[2] != 0) |
@@ -1405,7 +1429,7 @@ int     iIndex;
     }
 
     // initialize Rx descriptors
-    printk("%s initialize Rx descriptors\n", __FUNCTION__);
+    //printk("%s initialize Rx descriptors\n", __FUNCTION__);
     for (iIndex = 0; iIndex < EDRV_MAX_RX_DESCS; iIndex++)
     {
         EdrvInstance_l.m_pRxDesc[iIndex].m_le_qwBufferAddr = EdrvInstance_l.m_pRxBufDma + (iIndex * EDRV_RX_BUFFER_PER_DESC_SIZE);
@@ -1424,11 +1448,11 @@ int     iIndex;
     EDRV_REGDW_WRITE(EDRV_REGDW_RDT0, EDRV_MAX_RX_DESCS - 1);
 
     // enable receiver
-    printk("%s set Rx conf register\n", __FUNCTION__);
+    //printk("%s set Rx conf register\n", __FUNCTION__);
     EDRV_REGDW_WRITE(EDRV_REGDW_RCTL, EDRV_REGDW_RCTL_DEF);
 
     // initialize Tx descriptors
-    printk("%s initialize Tx descriptors\n", __FUNCTION__);
+    //printk("%s initialize Tx descriptors\n", __FUNCTION__);
     EPL_MEMSET(EdrvInstance_l.m_apTxBuffer, 0, sizeof (EdrvInstance_l.m_apTxBuffer));
     EDRV_REGDW_WRITE(EDRV_REGDW_TXDCTL, EDRV_REGDW_TXDCTL_DEF);
     qwDescAddress = EdrvInstance_l.m_pTxDescDma;
@@ -1439,12 +1463,29 @@ int     iIndex;
     EDRV_REGDW_WRITE(EDRV_REGDW_TDT, 0);
 
     // enable transmitter
-    printk("%s set Tx conf register\n", __FUNCTION__);
+    //printk("%s set Tx conf register\n", __FUNCTION__);
     EDRV_REGDW_WRITE(EDRV_REGDW_TCTL, EDRV_REGDW_TCTL_DEF);
 
     // enable interrupts
-    printk("%s enable interrupts\n", __FUNCTION__);
+    //printk("%s enable interrupts\n", __FUNCTION__);
     EDRV_REGDW_WRITE(EDRV_REGDW_IMS, EDRV_REGDW_INT_MASK_DEF);
+
+    // wait until link is up
+    printk("%s waiting for link up...\n", __FUNCTION__);
+    for (iIndex = EDRV_LINK_UP_TIMEOUT; iIndex > 0; iIndex -= 100)
+    {
+        if ((EDRV_REGDW_READ(EDRV_REGDW_STATUS) & EDRV_REGDW_STATUS_LU) != 0)
+        {
+            break;
+        }
+
+        msleep(100);
+    }
+    if (iIndex == 0)
+    {
+        iResult = -EIO;
+        goto ExitFail;
+    }
 
     goto Exit;
 
