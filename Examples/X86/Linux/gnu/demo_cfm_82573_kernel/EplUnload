@@ -4,9 +4,6 @@ module="epl"
 # invoke rmmod with all arguments we got
 /sbin/rmmod $module $* || exit 1
 
-# Remove udev rule
-rm -f /etc/udev/rules.d/50-openPOWERLINK.rules
-
 # rebinding network card to ethernet driver
 pciid=$(lspci | grep "Intel Corporation 82573" | awk "{printf \"0000:\"\$1}")
 echo "rebinding pci device $pciid to network driver"
