@@ -171,6 +171,9 @@
 // activate PResChaining support on MN
 #define EPL_DLL_PRES_CHAINING_MN        TRUE
 
+// Disable deferred release of rx-buffers until EdrvPcap supports it
+#define EPL_DLL_DISABLE_DEFERRED_RXFRAME_RELEASE    TRUE
+
 
 // =========================================================================
 // OBD specific defines
