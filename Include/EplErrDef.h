@@ -98,6 +98,7 @@ typedef enum
     kEplEdrvInitError           = 0x0013,       // initialisation error
     kEplEdrvNoFreeBufEntry      = 0x0014,       // no free entry in internal buffer table for Tx frames
     kEplEdrvBufNotExisting      = 0x0015,       // specified Tx buffer does not exist
+    kEplEdrvInvalidRxBuf        = 0x0016,       // specified Rx buffer is invalid
     kEplEdrvInvalidParam        = 0x001C,       // invalid parameter in function call
     kEplEdrvNextTxListNotEmpty  = 0x001D,       // next Tx buffer list is not empty, i.e. still in use
     kEplEdrvCurTxListEmpty      = 0x001E,       // current Tx buffer list is empty, i.e. DLL didn't provide one
