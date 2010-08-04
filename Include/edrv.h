@@ -125,7 +125,14 @@
 typedef struct _tEdrvTxBuffer tEdrvTxBuffer;
 typedef struct _tEdrvRxBuffer tEdrvRxBuffer;
 
-typedef void (*tEdrvRxHandler) (tEdrvRxBuffer * pRxBuffer_p);
+typedef enum
+{
+    kEdrvReleaseRxBufferImmediately = 0x00,
+    kEdrvReleaseRxBufferLater       = 0x01
+
+} tEdrvReleaseRxBuffer;
+
+typedef tEdrvReleaseRxBuffer (*tEdrvRxHandler) (tEdrvRxBuffer * pRxBuffer_p);
 typedef void (*tEdrvTxHandler) (tEdrvTxBuffer * pTxBuffer_p);
 typedef tEplKernel (* tEdrvCyclicCbSync) (void);
 typedef tEplKernel (* tEdrvCyclicCbError) (tEplKernel ErrorCode_p, tEdrvTxBuffer * pTxBuffer_p);
@@ -243,11 +250,12 @@ tEplKernel EdrvAllocTxMsgBuffer     (tEdrvTxBuffer* pBuffer_p);
 tEplKernel EdrvReleaseTxMsgBuffer   (tEdrvTxBuffer* pBuffer_p);
 tEplKernel EdrvUpdateTxMsgBuffer    (tEdrvTxBuffer* pBuffer_p);
 
-//tEplKernel EdrvWriteMsg               (tBufferDescr * pbBuffer_p);
-tEplKernel EdrvSendTxMsg              (tEdrvTxBuffer * pBuffer_p);
-tEplKernel EdrvTxMsgReady              (tEdrvTxBuffer * pBuffer_p);
-tEplKernel EdrvTxMsgStart              (tEdrvTxBuffer * pBuffer_p);
+//tEplKernel EdrvWriteMsg             (tBufferDescr* pbBuffer_p);
+tEplKernel EdrvSendTxMsg            (tEdrvTxBuffer* pBuffer_p);
+tEplKernel EdrvTxMsgReady           (tEdrvTxBuffer* pBuffer_p);
+tEplKernel EdrvTxMsgStart           (tEdrvTxBuffer* pBuffer_p);
 
+tEplKernel EdrvReleaseRxBuffer      (tEdrvRxBuffer* pBuffer_p); 
 
 tEplKernel EdrvChangeFilter(tEdrvFilter*    pFilter_p,
                             unsigned int    uiCount_p,
