@@ -374,10 +374,10 @@ static tEplKernel EplDllkProcessFillTx(tEplDllAsyncReqPriority AsyncReqPriority_
 static tEplKernel EplDllkChangeState(tEplNmtEvent NmtEvent_p, tEplNmtState NmtState_p);
 
 // called from EdrvInterruptHandler()
-static void EplDllkCbFrameReceived(tEdrvRxBuffer * pRxBuffer_p);
+static tEdrvReleaseRxBuffer EplDllkCbFrameReceived(tEdrvRxBuffer * pRxBuffer_p);
 
-static tEplKernel EplDllkProcessReceivedPreq(tEplFrameInfo* pFrameInfo_p, tEplNmtState NmtState_p);
-static tEplKernel EplDllkProcessReceivedPres(tEplFrameInfo* pFrameInfo_p, tEplNmtState NmtState_p, tEplNmtEvent* pNmtEvent_p);
+static tEplKernel EplDllkProcessReceivedPreq(tEplFrameInfo* pFrameInfo_p, tEplNmtState NmtState_p, tEdrvReleaseRxBuffer* pReleaseRxBuffer_p);
+static tEplKernel EplDllkProcessReceivedPres(tEplFrameInfo* pFrameInfo_p, tEplNmtState NmtState_p, tEplNmtEvent* pNmtEvent_p, tEdrvReleaseRxBuffer* pReleaseRxBuffer_p);
 static tEplKernel EplDllkProcessReceivedSoc(tEdrvRxBuffer* pRxBuffer_p, tEplNmtState NmtState_p);
 static tEplKernel EplDllkProcessReceivedSoa(tEdrvRxBuffer* pRxBuffer_p, tEplNmtState NmtState_p);
 static tEplKernel EplDllkProcessReceivedAsnd(tEplFrameInfo* pFrameInfo_p, tEdrvRxBuffer* pRxBuffer_p, tEplNmtState NmtState_p);
@@ -1093,6 +1093,37 @@ tEplKernel  Ret = kEplSuccessful;
 
     return Ret;
 }
+
+
+//---------------------------------------------------------------------------
+//
+// Function:    EplDllkReleaseRxFrame()
+//
+// Description: Releases the rx buffer for the specified rx frame in Edrv
+//
+// Parameters:  pFrame_p                = pointer to frame
+//              uiFrameSize_p           = size of frame
+//
+// Returns:     tEplKernel              = error code
+//
+//
+// State:
+//
+//---------------------------------------------------------------------------
+#if EPL_DLL_DISABLE_DEFERRED_RXFRAME_RELEASE == FALSE
+tEplKernel EplDllkReleaseRxFrame(tEplFrame* pFrame_p, unsigned int uiFrameSize_p)
+{
+tEplKernel      Ret;
+tEdrvRxBuffer   RxBuffer;
+
+    RxBuffer.m_pbBuffer   = (BYTE*) pFrame_p;
+    RxBuffer.m_uiRxMsgLen = uiFrameSize_p;
+
+    Ret = EdrvReleaseRxBuffer(&RxBuffer);
+
+    return Ret;
+}
+#endif
 
 
 #if EPL_NMT_MAX_NODE_ID > 0
@@ -3918,15 +3949,16 @@ Exit:
 //
 //---------------------------------------------------------------------------
 
-static void EplDllkCbFrameReceived(tEdrvRxBuffer * pRxBuffer_p)
+static tEdrvReleaseRxBuffer EplDllkCbFrameReceived(tEdrvRxBuffer * pRxBuffer_p)
 {
-tEplKernel      Ret = kEplSuccessful;
-tEplNmtState    NmtState;
-tEplNmtEvent    NmtEvent = kEplNmtEventNoEvent;
-tEplEvent       Event;
-tEplFrame*      pFrame;
-tEplFrameInfo   FrameInfo;
-tEplMsgType     MsgType;
+tEdrvReleaseRxBuffer    ReleaseRxBuffer = kEdrvReleaseRxBufferImmediately;
+tEplKernel              Ret             = kEplSuccessful;
+tEplNmtState            NmtState;
+tEplNmtEvent            NmtEvent        = kEplNmtEventNoEvent;
+tEplEvent               Event;
+tEplFrame*              pFrame;
+tEplFrameInfo           FrameInfo;
+tEplMsgType             MsgType;
 
 TGT_DLLK_DECLARE_FLAGS
 
@@ -4018,7 +4050,7 @@ TGT_DLLK_DECLARE_FLAGS
             }
             NmtEvent = kEplNmtEventDllCePreq;
 
-            Ret = EplDllkProcessReceivedPreq(&FrameInfo, NmtState);
+            Ret = EplDllkProcessReceivedPreq(&FrameInfo, NmtState, &ReleaseRxBuffer);
             if (Ret != kEplSuccessful)
             {
                 goto Exit;
@@ -4030,7 +4062,7 @@ TGT_DLLK_DECLARE_FLAGS
         case kEplMsgTypePres:
         {
 
-            Ret = EplDllkProcessReceivedPres(&FrameInfo, NmtState, &NmtEvent);
+            Ret = EplDllkProcessReceivedPres(&FrameInfo, NmtState, &NmtEvent, &ReleaseRxBuffer);
             if (Ret != kEplSuccessful)
             {
                 goto Exit;
@@ -4126,7 +4158,7 @@ Exit:
 
     TGT_DLLK_LEAVE_CRITICAL_SECTION();
 
-    return;
+    return ReleaseRxBuffer;
 }
 
 
@@ -4136,8 +4168,11 @@ Exit:
 //
 // Description: called from EplDllkCbFrameReceived()
 //
-// Parameters:  pFrameInfo_p            = pointer to frame info structure of received frame
-//              NmtState_p              = current local NMT state
+// Parameters:  pFrameInfo_p            = [IN] Pointer to frame info structure
+//                                        of received frame
+//              NmtState_p              = [IN] Current local NMT state
+//              pReleaseRxBuffer_p      = [OUT] Return whether RxBuffer is
+//                                        released immediately or later 
 //
 // Returns:     tEplKernel
 //
@@ -4145,7 +4180,9 @@ Exit:
 //
 //---------------------------------------------------------------------------
 
-static tEplKernel EplDllkProcessReceivedPreq(tEplFrameInfo* pFrameInfo_p, tEplNmtState NmtState_p)
+static tEplKernel EplDllkProcessReceivedPreq(   tEplFrameInfo*          pFrameInfo_p,
+                                                tEplNmtState            NmtState_p,
+                                                tEdrvReleaseRxBuffer*   pReleaseRxBuffer_p)
 {
 tEplKernel      Ret = kEplSuccessful;
 tEplFrame*      pFrame;
@@ -4220,7 +4257,12 @@ BYTE            bFlag1;
 
             // forward PReq frame as RPDO to PDO module
             Ret = EplDllkForwardRpdo(pFrameInfo_p);
-            if (Ret != kEplSuccessful)
+            if (Ret == kEplReject)
+            {
+                *pReleaseRxBuffer_p = kEdrvReleaseRxBufferLater;
+                Ret = kEplSuccessful;
+            }
+            else if (Ret != kEplSuccessful)
             {
                 goto Exit;
             }
@@ -4248,9 +4290,12 @@ Exit:
 //
 // Description: called from EplDllkCbFrameReceived()
 //
-// Parameters:  pFrameInfo_p            = pointer to frame info structure of received frame
-//              NmtState_p              = current local NMT state
-//              pNmtEvent_p             = [OUT] pointer to NMT event
+// Parameters:  pFrameInfo_p            = [IN] Pointer to frame info structure
+//                                        of received frame
+//              NmtState_p              = [IN] Current local NMT state
+//              pNmtEvent_p             = [OUT] Pointer to NMT event
+//              pReleaseRxBuffer_p      = [OUT] Return whether RxBuffer is
+//                                        released immediately or later 
 //
 // Returns:     tEplKernel
 //
@@ -4258,7 +4303,10 @@ Exit:
 //
 //---------------------------------------------------------------------------
 
-static tEplKernel EplDllkProcessReceivedPres(tEplFrameInfo* pFrameInfo_p, tEplNmtState NmtState_p, tEplNmtEvent* pNmtEvent_p)
+static tEplKernel EplDllkProcessReceivedPres(   tEplFrameInfo*          pFrameInfo_p,
+                                                tEplNmtState            NmtState_p,
+                                                tEplNmtEvent*           pNmtEvent_p,
+                                                tEdrvReleaseRxBuffer*   pReleaseRxBuffer_p)
 {
 tEplKernel      Ret = kEplSuccessful;
 tEplFrame*      pFrame;
@@ -4491,7 +4539,12 @@ tEplDllkNodeInfo*   pIntNodeInfo = NULL;
             AmiSetByteToLe(&pFrame->m_Data.m_Pres.m_le_bFlag1, 0);
         }
         Ret = EplDllkForwardRpdo(pFrameInfo_p);
-        if (Ret != kEplSuccessful)
+        if (Ret == kEplReject)
+        {
+            *pReleaseRxBuffer_p = kEdrvReleaseRxBufferLater;
+            Ret = kEplSuccessful;
+        }
+        else if (Ret != kEplSuccessful)
         {
             goto Exit;
         }
