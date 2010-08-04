@@ -588,6 +588,11 @@ unsigned int        uiMappObjectCount;
     }
 
 Exit:
+#if EPL_DLL_DISABLE_DEFERRED_RXFRAME_RELEASE == FALSE
+    EplDllkReleaseRxFrame(pFrame_p, uiFrameSize_p);
+    // $$$ return value?
+#endif
+
     return Ret;
 }
 
