@@ -141,6 +141,11 @@
 #endif
 #endif
 
+// Disabling deferred release of rx buffers is deprecated
+#ifndef EPL_DLL_DISABLE_DEFERRED_RXFRAME_RELEASE
+#define EPL_DLL_DISABLE_DEFERRED_RXFRAME_RELEASE   FALSE
+#endif
+
 #if (EPL_DLL_PRES_CHAINING_CN == FALSE) && (EPL_DLL_PRES_CHAINING_MN == FALSE)
   #define EPL_C_DLL_MAX_ASND_SERVICE_IDS  5   // see tEplDllAsndServiceId in EplDll.h
 #else
