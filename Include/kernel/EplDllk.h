@@ -171,6 +171,9 @@ tEplKernel EplDllkRegTpdoHandler(tEplDllkCbProcessTpdo pfnDllkCbProcessTpdo_p);
 // registers handler for Sync event
 tEplSyncCb EplDllkRegSyncHandler(tEplSyncCb pfnCbSync_p);
 
+// Releases the rx buffer for the specified rx frame in Edrv
+tEplKernel EplDllkReleaseRxFrame(tEplFrame* pFrame_p, unsigned int uiFrameSize_p);
+
 
 #if EPL_NMT_MAX_NODE_ID > 0
 
