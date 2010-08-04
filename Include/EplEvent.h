@@ -132,7 +132,7 @@ typedef enum
     kEplEventTypeNmtEvent       = 0x01, // NMT event
                                         // arg is pointer to tEplNmtEvent
     kEplEventTypePdoRx          = 0x02, // PDO frame received event (PRes/PReq)
-                                        // arg is pointer to tEplFrame
+                                        // arg is pointer to tEplFrameInfo
     kEplEventTypePdoTx          = 0x03, // PDO frame transmitted event (PRes/PReq)
                                         // arg is pointer to tEplFrameInfo
     kEplEventTypePdoSoa         = 0x04, // SoA frame received event (isochronous phase completed)
