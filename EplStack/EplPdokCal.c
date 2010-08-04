@@ -244,11 +244,19 @@ tEplKernel      Ret = kEplSuccessful;
 
         case kEplEventTypePdoRx:  // RPDO received
         {
+#if EPL_DLL_DISABLE_DEFERRED_RXFRAME_RELEASE == FALSE
+        tEplFrameInfo*  pFrameInfo;
+
+            pFrameInfo = (tEplFrameInfo *) pEvent_p->m_pArg;
+
+            Ret = EplPdokPdoDecode(pFrameInfo->m_pFrame, pFrameInfo->m_uiFrameSize);
+#else
         tEplFrame*  pFrame;
 
             pFrame = (tEplFrame *) pEvent_p->m_pArg;
 
             Ret = EplPdokPdoDecode(pFrame, pEvent_p->m_uiSize);
+#endif
 
             break;
         }
@@ -295,10 +303,21 @@ tEplEvent       Event;
 
     Event.m_EventSink = kEplEventSinkPdokCal;
     Event.m_EventType = kEplEventTypePdoRx;
+#if EPL_DLL_DISABLE_DEFERRED_RXFRAME_RELEASE == FALSE
+    Event.m_uiSize    = sizeof(tEplFrameInfo);
+    Event.m_pArg      = pFrameInfo_p;
+#else
     // limit copied data to size of PDO (because from some CNs the frame is larger than necessary)
     Event.m_uiSize = AmiGetWordFromLe(&pFrameInfo_p->m_pFrame->m_Data.m_Pres.m_le_wSize) + EPL_FRAME_OFFSET_PDO_PAYLOAD; // pFrameInfo_p->m_uiFrameSize;
     Event.m_pArg = pFrameInfo_p->m_pFrame;
+#endif
     Ret = EplEventkPost(&Event);
+#if EPL_DLL_DISABLE_DEFERRED_RXFRAME_RELEASE == FALSE
+    if (Ret == kEplSuccessful)
+    {
+        Ret = kEplReject; // Reject release of rx buffer
+    }
+#endif
 
     return Ret;
 }
