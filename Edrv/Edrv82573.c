@@ -87,6 +87,7 @@
 #include <asm/irq.h>
 #include <linux/sched.h>
 #include <linux/delay.h>
+#include <linux/gfp.h>
 
 
 /***************************************************************************/
@@ -121,6 +122,10 @@
 #define EDRV_TX_DESC_MASK       (EDRV_MAX_TX_DESCS - 1)
 #endif
 
+#ifndef EDRV_MAX_RX_BUFFERS
+#define EDRV_MAX_RX_BUFFERS     256
+#endif
+
 #ifndef EDRV_MAX_RX_DESCS
 #define EDRV_MAX_RX_DESCS       16
 #define EDRV_RX_DESC_MASK       (EDRV_MAX_RX_DESCS - 1)
@@ -131,9 +136,9 @@
 #define EDRV_TX_BUFFER_SIZE     (EDRV_MAX_TX_BUFFERS * EDRV_MAX_FRAME_SIZE) // n * (MTU + 14 + 4)
 #define EDRV_TX_DESCS_SIZE      (EDRV_MAX_TX_DESCS * sizeof (tEdrvTxDesc))
 
-#define EDRV_RX_BUFFER_PER_DESC_SIZE 2048
-#define EDRV_RX_BUFFER_SIZE     (EDRV_MAX_RX_DESCS * EDRV_RX_BUFFER_PER_DESC_SIZE)
-#define EDRV_RX_DESCS_SIZE      (EDRV_MAX_RX_DESCS * sizeof (tEdrvRxDesc))
+#define EDRV_RX_BUFFER_SIZE_SHIFT   11  // 2048 Byte
+#define EDRV_RX_BUFFER_SIZE         (1 << EDRV_RX_BUFFER_SIZE_SHIFT)
+#define EDRV_RX_DESCS_SIZE          (EDRV_MAX_RX_DESCS * sizeof (tEdrvRxDesc))
 
 #define EDRV_AUTO_READ_DONE_TIMEOUT 10  // ms
 #define EDRV_MASTER_DISABLE_TIMEOUT 90  // ms
@@ -331,16 +336,21 @@ typedef struct
 {
     struct pci_dev*     m_pPciDev;      // pointer to PCI device structure
     void*               m_pIoAddr;      // pointer to register space of Ethernet controller
-    BYTE*               m_pbRxBuf;      // pointer to Rx buffer
-    dma_addr_t          m_pRxBufDma;
+
     tEdrvRxDesc*        m_pRxDesc;      // pointer to Rx descriptors
-    dma_addr_t          m_pRxDescDma;
+    dma_addr_t          m_pRxDescDma;   // dma pointer to Rx descriptors
+    BYTE*               m_apbRxBufInDesc[EDRV_MAX_RX_DESCS];
+    BYTE*               m_apbRxBufFree[EDRV_MAX_RX_BUFFERS - EDRV_MAX_RX_DESCS];
+    int                 m_iRxBufFreeTop;
+    int                 m_iPageAllocations;
+
     BYTE*               m_pbTxBuf;      // pointer to Tx buffer
     dma_addr_t          m_pTxBufDma;
     tEdrvTxDesc*        m_pTxDesc;      // pointer to Tx descriptors
     tEdrvTxBuffer*      m_apTxBuffer[EDRV_MAX_TX_DESCS];
     dma_addr_t          m_pTxDescDma;
     BOOL                m_afTxBufUsed[EDRV_MAX_TX_BUFFERS];
+
     unsigned int        m_uiHeadTxDesc;
     unsigned int        m_uiTailTxDesc;
     unsigned int        m_uiHeadRxDesc;
@@ -350,6 +360,7 @@ typedef struct
 
 #if EDRV_USE_DIAGNOSTICS != FALSE
     unsigned long long  m_ullInterruptCount;
+    int                 m_iRxBufFreeMin;
 #endif
 
 } tEdrvInstance;
@@ -892,6 +903,11 @@ int             iUsedSize = 0;
                        EdrvInstance_l.m_uiTailTxDesc,
                        (unsigned long) EDRV_REGDW_READ(EDRV_REGDW_TDT));
 
+    iUsedSize += snprintf (pszBuffer_p + iUsedSize, iSize_p - iUsedSize,
+                       "Free RxBuffers: %d (Min: %d)",
+                       EdrvInstance_l.m_iRxBufFreeTop + 1,
+                       EdrvInstance_l.m_iRxBufFreeMin);
+
 #if 0
     for (iIndex = 0; iIndex < 16; iIndex++)
     {
@@ -968,6 +984,35 @@ int             iUsedSize = 0;
 
 //---------------------------------------------------------------------------
 //
+// Function:    EdrvReleaseRxBuffer
+//
+// Description: Release a RxBuffer to the Edrv
+//
+// Parameters:  pbRxBuffer_p    = Pointer to buffer
+//
+// Returns:     None
+//
+// State:
+//
+//---------------------------------------------------------------------------
+
+tEplKernel EdrvReleaseRxBuffer(tEdrvRxBuffer* pRxBuffer_p)
+{
+tEplKernel EplRet = kEplEdrvInvalidRxBuf;
+
+    if (EdrvInstance_l.m_iRxBufFreeTop < (EDRV_MAX_RX_BUFFERS-1))
+    {
+        EdrvInstance_l.m_apbRxBufFree[++EdrvInstance_l.m_iRxBufFreeTop] = pRxBuffer_p->m_pbBuffer;
+        EplRet = kEplSuccessful;
+    }
+
+    return EplRet; 
+}
+
+
+
+//---------------------------------------------------------------------------
+//
 // Function:     EdrvInterruptHandler
 //
 // Description:  interrupt handler
@@ -1009,7 +1054,7 @@ int             iHandled;
     }
 
     if ((dwStatus & EDRV_REGDW_INT_INT_ASSERTED) == 0)
-    {   // Acknowledge manually
+    {   // Manual acknowledge required
         EDRV_REGDW_WRITE(EDRV_REGDW_ICR, dwStatus);
     }
         
@@ -1023,12 +1068,6 @@ int             iHandled;
                      EDRV_REGDW_INT_TXDW)) != 0)                                         // Transmit interrupt
     {
     unsigned int   uiHeadRxDescOrg;
-
-        if (EdrvInstance_l.m_pbRxBuf == NULL)
-        {
-            printk("%s Rx buffers currently not allocated\n", __FUNCTION__);
-            goto Exit;
-        }
 
         if (EdrvInstance_l.m_pbTxBuf == NULL)
         {
@@ -1048,10 +1087,11 @@ int             iHandled;
 
             while (pRxDesc->m_bStatus != 0)
             {   // Rx frame available
-            tEdrvRxBuffer   RxBuffer;
-            unsigned int    uiLength;
-            BYTE            bRxStatus;
-            BYTE            bRxError;
+            tEdrvRxBuffer           RxBuffer;
+            tEdrvReleaseRxBuffer    RetReleaseRxBuffer;
+            unsigned int            uiLength;
+            BYTE                    bRxStatus;
+            BYTE                    bRxError;
 
                 bRxStatus = pRxDesc->m_bStatus;
                 bRxError  = pRxDesc->m_bError;
@@ -1077,6 +1117,8 @@ int             iHandled;
                     }
                     else
                     {   // Packet is OK
+                    BYTE**  ppbRxBufInDesc;
+
                         RxBuffer.m_BufferInFrame = kEdrvBufferLastInFrame;
 
                         // Get length of received packet
@@ -1084,13 +1126,52 @@ int             iHandled;
                         uiLength = AmiGetWordFromLe(&pRxDesc->m_le_wLength);
                         RxBuffer.m_uiRxMsgLen = uiLength;
 
-                        // Calculate pointer to current packet in receive buffer
-                        RxBuffer.m_pbBuffer = EdrvInstance_l.m_pbRxBuf + EDRV_RX_BUFFER_PER_DESC_SIZE * EdrvInstance_l.m_uiHeadRxDesc;
+                        ppbRxBufInDesc = &EdrvInstance_l.m_apbRxBufInDesc[EdrvInstance_l.m_uiHeadRxDesc];
+                        RxBuffer.m_pbBuffer = *ppbRxBufInDesc;
 
                         EDRV_COUNT_RX;
 
+                        pci_dma_sync_single_for_cpu(EdrvInstance_l.m_pPciDev,
+                                                    (dma_addr_t) AmiGetQword64FromLe(&pRxDesc->m_le_qwBufferAddr),
+                                                    EDRV_RX_BUFFER_SIZE, PCI_DMA_FROMDEVICE);
+
                         // Call Rx handler of Data link layer
-                        EdrvInstance_l.m_InitParam.m_pfnRxHandler(&RxBuffer);
+                        RetReleaseRxBuffer = EdrvInstance_l.m_InitParam.m_pfnRxHandler(&RxBuffer);
+                        if (RetReleaseRxBuffer == kEdrvReleaseRxBufferLater)
+                        {
+                        dma_addr_t  DmaAddr;
+
+                            if (EdrvInstance_l.m_iRxBufFreeTop >= 0)
+                            {
+#if EDRV_USE_DIAGNOSTICS != FALSE
+                                if (EdrvInstance_l.m_iRxBufFreeTop < EdrvInstance_l.m_iRxBufFreeMin)
+                                {
+                                    EdrvInstance_l.m_iRxBufFreeMin = EdrvInstance_l.m_iRxBufFreeTop;
+                                }
+#endif
+                                pci_unmap_single(EdrvInstance_l.m_pPciDev,
+                                                 (dma_addr_t) AmiGetQword64FromLe(&pRxDesc->m_le_qwBufferAddr),
+                                                 EDRV_RX_BUFFER_SIZE, PCI_DMA_FROMDEVICE);
+
+                                *ppbRxBufInDesc = EdrvInstance_l.m_apbRxBufFree[EdrvInstance_l.m_iRxBufFreeTop--];
+
+                                DmaAddr = pci_map_single(EdrvInstance_l.m_pPciDev, (void*) *ppbRxBufInDesc,
+                                                         EDRV_RX_BUFFER_SIZE, PCI_DMA_FROMDEVICE);
+                                if (pci_dma_mapping_error(EdrvInstance_l.m_pPciDev, DmaAddr))
+                                {
+                                    // $$$ How to signal dma mapping error
+                                }
+
+                                AmiSetQword64ToLe(&pRxDesc->m_le_qwBufferAddr, (QWORD) DmaAddr);
+                            }
+                            else
+                            {
+                                // $$$ How to signal no free RxBuffers left?
+#if EDRV_USE_DIAGNOSTICS != FALSE
+                                EdrvInstance_l.m_iRxBufFreeMin = -1;
+#endif
+                            }
+                        }
                     }
                 }
                 else
@@ -1214,10 +1295,13 @@ Exit:
 static int EdrvInitOne(struct pci_dev *pPciDev,
                        const struct pci_device_id *pId)
 {
-int     iResult = 0;
-DWORD   dwTemp;
-QWORD   qwDescAddress;
-int     iIndex;
+int             iResult = 0;
+DWORD           dwTemp;
+QWORD           qwDescAddress;
+int             iIndex;
+unsigned int    uiOrder;
+unsigned int    uiRxBuffersInAllocation;
+unsigned int    nRxBuffer;
 
     if (EdrvInstance_l.m_pPciDev != NULL)
     {   // Edrv is already connected to a PCI device
@@ -1355,7 +1439,15 @@ int     iIndex;
     }
 
     // allocate buffers
+    iResult = pci_set_dma_mask(pPciDev, DMA_BIT_MASK(32));
+    if (iResult != 0)
+    {
+        printk(KERN_WARNING "Edrv82573: No suitable DMA available.\n");
+        goto ExitFail;
+    }
+
     //printk("%s allocate buffers\n", __FUNCTION__);
+    // allocate tx-buffers
     EdrvInstance_l.m_pbTxBuf = pci_alloc_consistent(pPciDev, EDRV_TX_BUFFER_SIZE,
                      &EdrvInstance_l.m_pTxBufDma);
     if (EdrvInstance_l.m_pbTxBuf == NULL)
@@ -1364,6 +1456,7 @@ int     iIndex;
         goto ExitFail;
     }
 
+    // allocate tx-descriptors
     EdrvInstance_l.m_pTxDesc = pci_alloc_consistent(pPciDev, EDRV_TX_DESCS_SIZE,
                      &EdrvInstance_l.m_pTxDescDma);
     if (EdrvInstance_l.m_pTxDesc == NULL)
@@ -1372,14 +1465,7 @@ int     iIndex;
         goto ExitFail;
     }
 
-    EdrvInstance_l.m_pbRxBuf = pci_alloc_consistent(pPciDev, EDRV_RX_BUFFER_SIZE,
-                     &EdrvInstance_l.m_pRxBufDma);
-    if (EdrvInstance_l.m_pbRxBuf == NULL)
-    {
-        iResult = -ENOMEM;
-        goto ExitFail;
-    }
-
+    // allocate rx-descriptors
     EdrvInstance_l.m_pRxDesc = pci_alloc_consistent(pPciDev, EDRV_RX_DESCS_SIZE,
                      &EdrvInstance_l.m_pRxDescDma);
     if (EdrvInstance_l.m_pRxDesc == NULL)
@@ -1387,6 +1473,54 @@ int     iIndex;
         iResult = -ENOMEM;
         goto ExitFail;
     }
+
+
+    // allocate rx-buffers
+    if ((EDRV_RX_BUFFER_SIZE_SHIFT - PAGE_SHIFT) >= 0)
+    {   // rx-buffer is larger than or equal to page size
+        uiOrder = EDRV_RX_BUFFER_SIZE_SHIFT - PAGE_SHIFT;
+        uiRxBuffersInAllocation = 1;
+    }
+    else
+    {   // Multiple rx-buffers fit into one page
+        uiOrder = 0;
+        uiRxBuffersInAllocation = 1 << (PAGE_SHIFT - EDRV_RX_BUFFER_SIZE_SHIFT);
+    }
+
+    for (nRxBuffer = 0; nRxBuffer < EDRV_MAX_RX_BUFFERS; )
+    {
+    unsigned long   ulBufferPointer;
+    unsigned int    nInAlloc;
+
+        ulBufferPointer = __get_free_pages(GFP_KERNEL, uiOrder);
+        if (ulBufferPointer == 0)
+        {
+            iResult = -ENOMEM;
+            goto ExitFail;
+        }
+        EdrvInstance_l.m_iPageAllocations++;
+
+        for (nInAlloc = 0; nInAlloc < uiRxBuffersInAllocation; nInAlloc++)
+        {
+            if (nRxBuffer < EDRV_MAX_RX_DESCS)
+            {   // Insert rx-buffer in rx-descriptor
+                EdrvInstance_l.m_apbRxBufInDesc[nRxBuffer] = (BYTE*) ulBufferPointer;
+            }
+            else
+            {   // Insert rx-buffer in free-rx-buffer stack
+                EdrvInstance_l.m_apbRxBufFree[nRxBuffer - EDRV_MAX_RX_DESCS] = (BYTE*) ulBufferPointer;
+            }
+
+            nRxBuffer++;
+            ulBufferPointer += EDRV_RX_BUFFER_SIZE;
+        }
+    }
+
+    EdrvInstance_l.m_iRxBufFreeTop = EDRV_MAX_RX_BUFFERS - EDRV_MAX_RX_DESCS - 1;
+#if EDRV_USE_DIAGNOSTICS != FALSE
+    EdrvInstance_l.m_iRxBufFreeMin = EDRV_MAX_RX_BUFFERS - EDRV_MAX_RX_DESCS;
+#endif
+
 
     // check if user specified a MAC address
     //printk("%s check specified MAC address\n", __FUNCTION__);
@@ -1432,9 +1566,21 @@ int     iIndex;
     //printk("%s initialize Rx descriptors\n", __FUNCTION__);
     for (iIndex = 0; iIndex < EDRV_MAX_RX_DESCS; iIndex++)
     {
-        EdrvInstance_l.m_pRxDesc[iIndex].m_le_qwBufferAddr = EdrvInstance_l.m_pRxBufDma + (iIndex * EDRV_RX_BUFFER_PER_DESC_SIZE);
-        EdrvInstance_l.m_pRxDesc[iIndex].m_bStatus         = 0;
+    dma_addr_t  DmaAddr;
+
+        // get dma streaming
+        DmaAddr = pci_map_single(EdrvInstance_l.m_pPciDev, (void*) EdrvInstance_l.m_apbRxBufInDesc[iIndex],
+                                 EDRV_RX_BUFFER_SIZE, PCI_DMA_FROMDEVICE);
+        if (pci_dma_mapping_error(EdrvInstance_l.m_pPciDev, DmaAddr))
+        {
+            iResult = -ENOMEM;
+            goto ExitFail;
+        }
+
+        AmiSetQword64ToLe(&EdrvInstance_l.m_pRxDesc[iIndex].m_le_qwBufferAddr, (QWORD) DmaAddr);
+        EdrvInstance_l.m_pRxDesc[iIndex].m_bStatus = 0;
     }
+
     EDRV_REGDW_WRITE(EDRV_REGDW_RXDCTL, EDRV_REGDW_RXDCTL_DEF);
     // Rx buffer size is set to 2048 by default
     // Rx descriptor typ is set to legacy by default
@@ -1514,7 +1660,10 @@ Exit:
 
 static void EdrvRemoveOne(struct pci_dev *pPciDev)
 {
-DWORD   dwTemp;
+DWORD           dwTemp;
+unsigned int    uiOrder;
+unsigned long   ulBufferPointer;
+unsigned int    nRxBuffer;
 
     if (EdrvInstance_l.m_pPciDev != pPciDev)
     {   // trying to remove unknown device
@@ -1524,12 +1673,12 @@ DWORD   dwTemp;
 
     if (EdrvInstance_l.m_pIoAddr != NULL)
     {
-        // disable transmitter and receiver
-        EDRV_REGDW_WRITE(EDRV_REGDW_TCTL, 0);
-
         // disable interrupts
         EDRV_REGDW_WRITE(EDRV_REGDW_IMC, EDRV_REGDW_INT_MASK_ALL);
         dwTemp = EDRV_REGDW_READ(EDRV_REGDW_ICR);
+
+        // disable transmitter and receiver
+        EDRV_REGDW_WRITE(EDRV_REGDW_TCTL, 0);
     }
 
     // remove interrupt handler
@@ -1551,11 +1700,51 @@ DWORD   dwTemp;
         EdrvInstance_l.m_pTxDesc = NULL;
     }
 
-    if (EdrvInstance_l.m_pbRxBuf != NULL)
+    if ((EDRV_RX_BUFFER_SIZE_SHIFT - PAGE_SHIFT) >= 0)
+    {   // rx-buffer is larger than or equal to page size
+        uiOrder = EDRV_RX_BUFFER_SIZE_SHIFT - PAGE_SHIFT;
+    }
+    else
+    {   // Multiple rx-buffers fit into one page
+        uiOrder = 0;
+    }
+
+    for (nRxBuffer = 0; nRxBuffer < EDRV_MAX_RX_DESCS; nRxBuffer++)
     {
-        pci_free_consistent(pPciDev, EDRV_RX_BUFFER_SIZE,
-                     EdrvInstance_l.m_pbRxBuf, EdrvInstance_l.m_pRxBufDma);
-        EdrvInstance_l.m_pbRxBuf = NULL;
+        ulBufferPointer = (unsigned long) EdrvInstance_l.m_apbRxBufInDesc[nRxBuffer];
+
+        if ((uiOrder == 0) && ((ulBufferPointer & ((1UL << PAGE_SHIFT)-1)) == 0))
+        {
+            free_pages(ulBufferPointer, uiOrder);
+            EdrvInstance_l.m_iPageAllocations--;
+        }
+    }
+
+    for (nRxBuffer = 0; nRxBuffer < EDRV_MAX_RX_BUFFERS; nRxBuffer++)
+    {
+        ulBufferPointer = (unsigned long) EdrvInstance_l.m_apbRxBufFree[nRxBuffer];
+
+        if ((uiOrder == 0) && ((ulBufferPointer & ((1UL << PAGE_SHIFT)-1)) == 0))
+        {
+            free_pages(ulBufferPointer, uiOrder);
+            EdrvInstance_l.m_iPageAllocations--;
+        }
+    }
+
+    if (EdrvInstance_l.m_iPageAllocations > 0)
+    {
+        printk("%s Less pages freed than allocated (%d)\n", __FUNCTION__, EdrvInstance_l.m_iPageAllocations);
+    }
+    else if (EdrvInstance_l.m_iPageAllocations < 0)
+    {
+        printk("%s Attempted to free more pages than allocated (%d)\n", __FUNCTION__, (EdrvInstance_l.m_iPageAllocations * -1));
+    }
+
+    if (EdrvInstance_l.m_pRxDesc != NULL)
+    {
+        pci_free_consistent(pPciDev, EDRV_RX_DESCS_SIZE,
+                     EdrvInstance_l.m_pRxDesc, EdrvInstance_l.m_pRxDescDma);
+        EdrvInstance_l.m_pRxDesc = NULL;
     }
 
     // unmap controller's register space
