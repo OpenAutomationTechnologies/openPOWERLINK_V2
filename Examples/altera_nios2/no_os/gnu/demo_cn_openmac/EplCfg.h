@@ -189,6 +189,9 @@
 // maximum count of Rx filter entries for PRes frames
 #define EPL_DLL_PRES_FILTER_COUNT   3
 
+// Disable deferred release of rx-buffers until Edrv for openMAC supports it
+#define EPL_DLL_DISABLE_DEFERRED_RXFRAME_RELEASE    TRUE
+
 
 // =========================================================================
 // OBD specific defines

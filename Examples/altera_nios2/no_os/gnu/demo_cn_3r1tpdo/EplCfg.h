@@ -195,6 +195,9 @@
 // negative time shift of isochronous task in relation to SoC
 #define EPL_DLL_SOC_SYNC_SHIFT_US       150
 
+// Disable deferred release of rx-buffers until Edrv for openMAC supports it
+#define EPL_DLL_DISABLE_DEFERRED_RXFRAME_RELEASE    TRUE
+
 
 // =========================================================================
 // OBD specific defines

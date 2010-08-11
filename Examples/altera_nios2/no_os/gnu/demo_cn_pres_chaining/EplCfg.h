@@ -201,6 +201,9 @@
 // CN supports PRes Chaining
 #define EPL_DLL_PRES_CHAINING_CN        TRUE
 
+// Disable deferred release of rx-buffers until Edrv for openMAC supports it
+#define EPL_DLL_DISABLE_DEFERRED_RXFRAME_RELEASE    TRUE
+
 
 // =========================================================================
 // OBD specific defines
