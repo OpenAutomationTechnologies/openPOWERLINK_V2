@@ -1476,7 +1476,7 @@ SYSTEM niosII_openMac
             Write_Latency = "0";
             Is_Flash = "0";
             Maximum_Burst_Size = "1";
-            Register_Incoming_Signals = "1";
+            Register_Incoming_Signals = "0";
             Register_Outgoing_Signals = "1";
             Interleave_Bursts = "0";
             Linewrap_Bursts = "0";
