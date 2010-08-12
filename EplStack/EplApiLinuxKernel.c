@@ -222,8 +222,11 @@ static  int      EplLinOpen    (struct inode* pDeviceFile_p, struct file* pInsta
 static  int      EplLinRelease (struct inode* pDeviceFile_p, struct file* pInstance_p);
 static  ssize_t  EplLinRead    (struct file* pInstance_p, char* pDstBuff_p, size_t BuffSize_p, loff_t* pFileOffs_p);
 static  ssize_t  EplLinWrite   (struct file* pInstance_p, const char* pSrcBuff_p, size_t BuffSize_p, loff_t* pFileOffs_p);
+#ifdef HAVE_UNLOCKED_IOCTL
+static  long     EplLinIoctl   (struct file* pInstance_p, unsigned int uiIoctlCmd_p, unsigned long ulArg_p);
+#else
 static  int      EplLinIoctl   (struct inode* pDeviceFile_p, struct file* pInstance_p, unsigned int uiIoctlCmd_p, unsigned long ulArg_p);
-
+#endif
 
 
 
@@ -248,7 +251,11 @@ static struct file_operations  EplLinFileOps_g =
     .release =   EplLinRelease,
     .read =      EplLinRead,
     .write =     EplLinWrite,
+#ifdef HAVE_UNLOCKED_IOCTL
+    .unlocked_ioctl = EplLinIoctl,
+#else
     .ioctl =     EplLinIoctl,
+#endif
 
 };
 
@@ -546,11 +553,18 @@ int  iRet;
 //  -> ioctl(...)
 //---------------------------------------------------------------------------
 
+#ifdef HAVE_UNLOCKED_IOCTL
+static long EplLinIoctl (
+    struct file* pInstance_p,
+    unsigned int uiIoctlCmd_p,
+    unsigned long ulArg_p)
+#else
 static int  EplLinIoctl (
     struct inode* pDeviceFile_p,    // information about the device to open
     struct file* pInstance_p,       // information about driver instance
     unsigned int uiIoctlCmd_p,      // Ioctl command to execute
     unsigned long ulArg_p)          // Ioctl command specific argument/parameter
+#endif
 {
 
 tEplKernel          EplRet;
