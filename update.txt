@@ -74,3 +74,14 @@ How to update from version 1.6 to version 1.6.0.5 or higher
 ------------------------------------------------------------
 
 1. The process image API changed. Please see the reference manual for further details.
+
+
+
+How to update from version 1.6.0.6 to version 1.6.0.7 or higher
+----------------------------------------------------------------
+
+1. The process image input and output direction changed to the network point of view.
+   Please see the reference manual for further details.
+
+2. Either define EPL_DLL_DISABLE_DEFERRED_RXFRAME_RELEASE to TRUE or implement the
+   function EdrvReleaseRxBuffer in your Ethernet driver like done in Edrv82573.c.
