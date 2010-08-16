@@ -174,6 +174,9 @@
 #define EPL_DLL_PRES_READY_AFTER_SOA    FALSE
 //#define EPL_DLL_PRES_READY_AFTER_SOA    TRUE
 
+// Disable deferred release of rx-buffers until Edrv9003 supports it
+#define EPL_DLL_DISABLE_DEFERRED_RXFRAME_RELEASE    TRUE
+
 
 // =========================================================================
 // OBD specific defines
