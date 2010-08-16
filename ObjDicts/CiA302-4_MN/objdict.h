@@ -651,234 +651,234 @@ EPL_OBD_BEGIN ()
 
     EPL_OBD_BEGIN_PART_DEVICE ()
 
-        // static input process image
+        // static input process image (from network point of view)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA000, (252), NULL, kEplObdTypInt8, kEplObdAccVPRW, tEplObdInteger8, SHORT_Merker, 0x00)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA000, (252), NULL, kEplObdTypInt8, kEplObdAccVPR, tEplObdInteger8, SHORT_Merker, 0x00)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA001, (252), NULL, kEplObdTypInt8, kEplObdAccVPRW, tEplObdInteger8, SHORT_Merker, 0x00)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA001, (252), NULL, kEplObdTypInt8, kEplObdAccVPR, tEplObdInteger8, SHORT_Merker, 0x00)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA002, (252), NULL, kEplObdTypInt8, kEplObdAccVPRW, tEplObdInteger8, SHORT_Merker, 0x00)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA002, (252), NULL, kEplObdTypInt8, kEplObdAccVPR, tEplObdInteger8, SHORT_Merker, 0x00)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA003, (252), NULL, kEplObdTypInt8, kEplObdAccVPRW, tEplObdInteger8, SHORT_Merker, 0x00)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA003, (252), NULL, kEplObdTypInt8, kEplObdAccVPR, tEplObdInteger8, SHORT_Merker, 0x00)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA004, (252), NULL, kEplObdTypInt8, kEplObdAccVPRW, tEplObdInteger8, SHORT_Merker, 0x00)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA004, (252), NULL, kEplObdTypInt8, kEplObdAccVPR, tEplObdInteger8, SHORT_Merker, 0x00)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA005, (252), NULL, kEplObdTypInt8, kEplObdAccVPRW, tEplObdInteger8, SHORT_Merker, 0x00)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA005, (252), NULL, kEplObdTypInt8, kEplObdAccVPR, tEplObdInteger8, SHORT_Merker, 0x00)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA006, (252), NULL, kEplObdTypInt8, kEplObdAccVPRW, tEplObdInteger8, SHORT_Merker, 0x00)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA006, (252), NULL, kEplObdTypInt8, kEplObdAccVPR, tEplObdInteger8, SHORT_Merker, 0x00)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA007, (252), NULL, kEplObdTypInt8, kEplObdAccVPRW, tEplObdInteger8, SHORT_Merker, 0x00)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA007, (252), NULL, kEplObdTypInt8, kEplObdAccVPR, tEplObdInteger8, SHORT_Merker, 0x00)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA008, (252), NULL, kEplObdTypInt8, kEplObdAccVPRW, tEplObdInteger8, SHORT_Merker, 0x00)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA008, (252), NULL, kEplObdTypInt8, kEplObdAccVPR, tEplObdInteger8, SHORT_Merker, 0x00)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA009, (252), NULL, kEplObdTypInt8, kEplObdAccVPRW, tEplObdInteger8, SHORT_Merker, 0x00)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA009, (252), NULL, kEplObdTypInt8, kEplObdAccVPR, tEplObdInteger8, SHORT_Merker, 0x00)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA00A, (252), NULL, kEplObdTypInt8, kEplObdAccVPRW, tEplObdInteger8, SHORT_Merker, 0x00)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA00A, (252), NULL, kEplObdTypInt8, kEplObdAccVPR, tEplObdInteger8, SHORT_Merker, 0x00)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA00B, (252), NULL, kEplObdTypInt8, kEplObdAccVPRW, tEplObdInteger8, SHORT_Merker, 0x00)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA00B, (252), NULL, kEplObdTypInt8, kEplObdAccVPR, tEplObdInteger8, SHORT_Merker, 0x00)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA00C, (252), NULL, kEplObdTypInt8, kEplObdAccVPRW, tEplObdInteger8, SHORT_Merker, 0x00)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA00C, (252), NULL, kEplObdTypInt8, kEplObdAccVPR, tEplObdInteger8, SHORT_Merker, 0x00)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA00D, (252), NULL, kEplObdTypInt8, kEplObdAccVPRW, tEplObdInteger8, SHORT_Merker, 0x00)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA00D, (252), NULL, kEplObdTypInt8, kEplObdAccVPR, tEplObdInteger8, SHORT_Merker, 0x00)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA00E, (252), NULL, kEplObdTypInt8, kEplObdAccVPRW, tEplObdInteger8, SHORT_Merker, 0x00)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA00E, (252), NULL, kEplObdTypInt8, kEplObdAccVPR, tEplObdInteger8, SHORT_Merker, 0x00)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA00F, (252), NULL, kEplObdTypInt8, kEplObdAccVPRW, tEplObdInteger8, SHORT_Merker, 0x00)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA00F, (252), NULL, kEplObdTypInt8, kEplObdAccVPR, tEplObdInteger8, SHORT_Merker, 0x00)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA040, (252), NULL, kEplObdTypUInt8, kEplObdAccVPRW, tEplObdUnsigned8, BYTE_Merker, 0x00)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA040, (252), NULL, kEplObdTypUInt8, kEplObdAccVPR, tEplObdUnsigned8, BYTE_Merker, 0x00)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA041, (252), NULL, kEplObdTypUInt8, kEplObdAccVPRW, tEplObdUnsigned8, BYTE_Merker, 0x00)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA041, (252), NULL, kEplObdTypUInt8, kEplObdAccVPR, tEplObdUnsigned8, BYTE_Merker, 0x00)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA042, (252), NULL, kEplObdTypUInt8, kEplObdAccVPRW, tEplObdUnsigned8, BYTE_Merker, 0x00)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA042, (252), NULL, kEplObdTypUInt8, kEplObdAccVPR, tEplObdUnsigned8, BYTE_Merker, 0x00)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA043, (252), NULL, kEplObdTypUInt8, kEplObdAccVPRW, tEplObdUnsigned8, BYTE_Merker, 0x00)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA043, (252), NULL, kEplObdTypUInt8, kEplObdAccVPR, tEplObdUnsigned8, BYTE_Merker, 0x00)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA044, (252), NULL, kEplObdTypUInt8, kEplObdAccVPRW, tEplObdUnsigned8, BYTE_Merker, 0x00)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA044, (252), NULL, kEplObdTypUInt8, kEplObdAccVPR, tEplObdUnsigned8, BYTE_Merker, 0x00)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA045, (252), NULL, kEplObdTypUInt8, kEplObdAccVPRW, tEplObdUnsigned8, BYTE_Merker, 0x00)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA045, (252), NULL, kEplObdTypUInt8, kEplObdAccVPR, tEplObdUnsigned8, BYTE_Merker, 0x00)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA046, (252), NULL, kEplObdTypUInt8, kEplObdAccVPRW, tEplObdUnsigned8, BYTE_Merker, 0x00)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA046, (252), NULL, kEplObdTypUInt8, kEplObdAccVPR, tEplObdUnsigned8, BYTE_Merker, 0x00)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA047, (252), NULL, kEplObdTypUInt8, kEplObdAccVPRW, tEplObdUnsigned8, BYTE_Merker, 0x00)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA047, (252), NULL, kEplObdTypUInt8, kEplObdAccVPR, tEplObdUnsigned8, BYTE_Merker, 0x00)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA048, (252), NULL, kEplObdTypUInt8, kEplObdAccVPRW, tEplObdUnsigned8, BYTE_Merker, 0x00)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA048, (252), NULL, kEplObdTypUInt8, kEplObdAccVPR, tEplObdUnsigned8, BYTE_Merker, 0x00)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA049, (252), NULL, kEplObdTypUInt8, kEplObdAccVPRW, tEplObdUnsigned8, BYTE_Merker, 0x00)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA049, (252), NULL, kEplObdTypUInt8, kEplObdAccVPR, tEplObdUnsigned8, BYTE_Merker, 0x00)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA04A, (252), NULL, kEplObdTypUInt8, kEplObdAccVPRW, tEplObdUnsigned8, BYTE_Merker, 0x00)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA04A, (252), NULL, kEplObdTypUInt8, kEplObdAccVPR, tEplObdUnsigned8, BYTE_Merker, 0x00)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA04B, (252), NULL, kEplObdTypUInt8, kEplObdAccVPRW, tEplObdUnsigned8, BYTE_Merker, 0x00)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA04B, (252), NULL, kEplObdTypUInt8, kEplObdAccVPR, tEplObdUnsigned8, BYTE_Merker, 0x00)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA04C, (252), NULL, kEplObdTypUInt8, kEplObdAccVPRW, tEplObdUnsigned8, BYTE_Merker, 0x00)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA04C, (252), NULL, kEplObdTypUInt8, kEplObdAccVPR, tEplObdUnsigned8, BYTE_Merker, 0x00)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA04D, (252), NULL, kEplObdTypUInt8, kEplObdAccVPRW, tEplObdUnsigned8, BYTE_Merker, 0x00)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA04D, (252), NULL, kEplObdTypUInt8, kEplObdAccVPR, tEplObdUnsigned8, BYTE_Merker, 0x00)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA04E, (252), NULL, kEplObdTypUInt8, kEplObdAccVPRW, tEplObdUnsigned8, BYTE_Merker, 0x00)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA04E, (252), NULL, kEplObdTypUInt8, kEplObdAccVPR, tEplObdUnsigned8, BYTE_Merker, 0x00)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA04F, (252), NULL, kEplObdTypUInt8, kEplObdAccVPRW, tEplObdUnsigned8, BYTE_Merker, 0x00)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA04F, (252), NULL, kEplObdTypUInt8, kEplObdAccVPR, tEplObdUnsigned8, BYTE_Merker, 0x00)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA0C0, (252), NULL, kEplObdTypInt16, kEplObdAccVPRW, tEplObdInteger16, INT_Merker, 0)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA0C0, (252), NULL, kEplObdTypInt16, kEplObdAccVPR, tEplObdInteger16, INT_Merker, 0)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA0C1, (252), NULL, kEplObdTypInt16, kEplObdAccVPRW, tEplObdInteger16, INT_Merker, 0)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA0C1, (252), NULL, kEplObdTypInt16, kEplObdAccVPR, tEplObdInteger16, INT_Merker, 0)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA0C2, (252), NULL, kEplObdTypInt16, kEplObdAccVPRW, tEplObdInteger16, INT_Merker, 0)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA0C2, (252), NULL, kEplObdTypInt16, kEplObdAccVPR, tEplObdInteger16, INT_Merker, 0)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA0C3, (252), NULL, kEplObdTypInt16, kEplObdAccVPRW, tEplObdInteger16, INT_Merker, 0)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA0C3, (252), NULL, kEplObdTypInt16, kEplObdAccVPR, tEplObdInteger16, INT_Merker, 0)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA0C4, (252), NULL, kEplObdTypInt16, kEplObdAccVPRW, tEplObdInteger16, INT_Merker, 0)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA0C4, (252), NULL, kEplObdTypInt16, kEplObdAccVPR, tEplObdInteger16, INT_Merker, 0)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA0C5, (252), NULL, kEplObdTypInt16, kEplObdAccVPRW, tEplObdInteger16, INT_Merker, 0)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA0C5, (252), NULL, kEplObdTypInt16, kEplObdAccVPR, tEplObdInteger16, INT_Merker, 0)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA0C6, (252), NULL, kEplObdTypInt16, kEplObdAccVPRW, tEplObdInteger16, INT_Merker, 0)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA0C6, (252), NULL, kEplObdTypInt16, kEplObdAccVPR, tEplObdInteger16, INT_Merker, 0)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA0C7, (252), NULL, kEplObdTypInt16, kEplObdAccVPRW, tEplObdInteger16, INT_Merker, 0)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA0C7, (252), NULL, kEplObdTypInt16, kEplObdAccVPR, tEplObdInteger16, INT_Merker, 0)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA100, (252), NULL, kEplObdTypUInt16, kEplObdAccVPRW, tEplObdUnsigned16, WORD_Merker, 0)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA100, (252), NULL, kEplObdTypUInt16, kEplObdAccVPR, tEplObdUnsigned16, WORD_Merker, 0)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA101, (252), NULL, kEplObdTypUInt16, kEplObdAccVPRW, tEplObdUnsigned16, WORD_Merker, 0)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA101, (252), NULL, kEplObdTypUInt16, kEplObdAccVPR, tEplObdUnsigned16, WORD_Merker, 0)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA102, (252), NULL, kEplObdTypUInt16, kEplObdAccVPRW, tEplObdUnsigned16, WORD_Merker, 0)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA102, (252), NULL, kEplObdTypUInt16, kEplObdAccVPR, tEplObdUnsigned16, WORD_Merker, 0)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA103, (252), NULL, kEplObdTypUInt16, kEplObdAccVPRW, tEplObdUnsigned16, WORD_Merker, 0)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA103, (252), NULL, kEplObdTypUInt16, kEplObdAccVPR, tEplObdUnsigned16, WORD_Merker, 0)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA104, (252), NULL, kEplObdTypUInt16, kEplObdAccVPRW, tEplObdUnsigned16, WORD_Merker, 0)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA104, (252), NULL, kEplObdTypUInt16, kEplObdAccVPR, tEplObdUnsigned16, WORD_Merker, 0)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA105, (252), NULL, kEplObdTypUInt16, kEplObdAccVPRW, tEplObdUnsigned16, WORD_Merker, 0)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA105, (252), NULL, kEplObdTypUInt16, kEplObdAccVPR, tEplObdUnsigned16, WORD_Merker, 0)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA106, (252), NULL, kEplObdTypUInt16, kEplObdAccVPRW, tEplObdUnsigned16, WORD_Merker, 0)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA106, (252), NULL, kEplObdTypUInt16, kEplObdAccVPR, tEplObdUnsigned16, WORD_Merker, 0)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA107, (252), NULL, kEplObdTypUInt16, kEplObdAccVPRW, tEplObdUnsigned16, WORD_Merker, 0)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA107, (252), NULL, kEplObdTypUInt16, kEplObdAccVPR, tEplObdUnsigned16, WORD_Merker, 0)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA1C0, (252), NULL, kEplObdTypUInt32, kEplObdAccVPRW, tEplObdUnsigned32, DWORD_Merker, 0)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA1C0, (252), NULL, kEplObdTypUInt32, kEplObdAccVPR, tEplObdUnsigned32, DWORD_Merker, 0)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA1C1, (252), NULL, kEplObdTypUInt32, kEplObdAccVPRW, tEplObdUnsigned32, DWORD_Merker, 0)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA1C1, (252), NULL, kEplObdTypUInt32, kEplObdAccVPR, tEplObdUnsigned32, DWORD_Merker, 0)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA1C2, (252), NULL, kEplObdTypUInt32, kEplObdAccVPRW, tEplObdUnsigned32, DWORD_Merker, 0)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA1C2, (252), NULL, kEplObdTypUInt32, kEplObdAccVPR, tEplObdUnsigned32, DWORD_Merker, 0)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA1C3, (252), NULL, kEplObdTypUInt32, kEplObdAccVPRW, tEplObdUnsigned32, DWORD_Merker, 0)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA1C3, (252), NULL, kEplObdTypUInt32, kEplObdAccVPR, tEplObdUnsigned32, DWORD_Merker, 0)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA200, (252), NULL, kEplObdTypUInt32, kEplObdAccVPRW, tEplObdUnsigned32, DWORD_Merker, 0)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA200, (252), NULL, kEplObdTypUInt32, kEplObdAccVPR, tEplObdUnsigned32, DWORD_Merker, 0)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA201, (252), NULL, kEplObdTypUInt32, kEplObdAccVPRW, tEplObdUnsigned32, DWORD_Merker, 0)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA201, (252), NULL, kEplObdTypUInt32, kEplObdAccVPR, tEplObdUnsigned32, DWORD_Merker, 0)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA202, (252), NULL, kEplObdTypUInt32, kEplObdAccVPRW, tEplObdUnsigned32, DWORD_Merker, 0)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA202, (252), NULL, kEplObdTypUInt32, kEplObdAccVPR, tEplObdUnsigned32, DWORD_Merker, 0)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA203, (252), NULL, kEplObdTypUInt32, kEplObdAccVPRW, tEplObdUnsigned32, DWORD_Merker, 0)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA203, (252), NULL, kEplObdTypUInt32, kEplObdAccVPR, tEplObdUnsigned32, DWORD_Merker, 0)
 
 
-        // static output process image
+        // static output process image (from network point of view)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA480, (252), NULL, kEplObdTypInt8, kEplObdAccVPR, tEplObdInteger8, SHORT_Merker, 0x00)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA480, (252), NULL, kEplObdTypInt8, kEplObdAccVPRW, tEplObdInteger8, SHORT_Merker, 0x00)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA481, (252), NULL, kEplObdTypInt8, kEplObdAccVPR, tEplObdInteger8, SHORT_Merker, 0x00)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA481, (252), NULL, kEplObdTypInt8, kEplObdAccVPRW, tEplObdInteger8, SHORT_Merker, 0x00)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA482, (252), NULL, kEplObdTypInt8, kEplObdAccVPR, tEplObdInteger8, SHORT_Merker, 0x00)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA482, (252), NULL, kEplObdTypInt8, kEplObdAccVPRW, tEplObdInteger8, SHORT_Merker, 0x00)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA483, (252), NULL, kEplObdTypInt8, kEplObdAccVPR, tEplObdInteger8, SHORT_Merker, 0x00)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA483, (252), NULL, kEplObdTypInt8, kEplObdAccVPRW, tEplObdInteger8, SHORT_Merker, 0x00)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA484, (252), NULL, kEplObdTypInt8, kEplObdAccVPR, tEplObdInteger8, SHORT_Merker, 0x00)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA484, (252), NULL, kEplObdTypInt8, kEplObdAccVPRW, tEplObdInteger8, SHORT_Merker, 0x00)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA485, (252), NULL, kEplObdTypInt8, kEplObdAccVPR, tEplObdInteger8, SHORT_Merker, 0x00)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA485, (252), NULL, kEplObdTypInt8, kEplObdAccVPRW, tEplObdInteger8, SHORT_Merker, 0x00)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA486, (252), NULL, kEplObdTypInt8, kEplObdAccVPR, tEplObdInteger8, SHORT_Merker, 0x00)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA486, (252), NULL, kEplObdTypInt8, kEplObdAccVPRW, tEplObdInteger8, SHORT_Merker, 0x00)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA487, (252), NULL, kEplObdTypInt8, kEplObdAccVPR, tEplObdInteger8, SHORT_Merker, 0x00)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA487, (252), NULL, kEplObdTypInt8, kEplObdAccVPRW, tEplObdInteger8, SHORT_Merker, 0x00)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA488, (252), NULL, kEplObdTypInt8, kEplObdAccVPR, tEplObdInteger8, SHORT_Merker, 0x00)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA488, (252), NULL, kEplObdTypInt8, kEplObdAccVPRW, tEplObdInteger8, SHORT_Merker, 0x00)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA489, (252), NULL, kEplObdTypInt8, kEplObdAccVPR, tEplObdInteger8, SHORT_Merker, 0x00)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA489, (252), NULL, kEplObdTypInt8, kEplObdAccVPRW, tEplObdInteger8, SHORT_Merker, 0x00)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA48A, (252), NULL, kEplObdTypInt8, kEplObdAccVPR, tEplObdInteger8, SHORT_Merker, 0x00)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA48A, (252), NULL, kEplObdTypInt8, kEplObdAccVPRW, tEplObdInteger8, SHORT_Merker, 0x00)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA48B, (252), NULL, kEplObdTypInt8, kEplObdAccVPR, tEplObdInteger8, SHORT_Merker, 0x00)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA48B, (252), NULL, kEplObdTypInt8, kEplObdAccVPRW, tEplObdInteger8, SHORT_Merker, 0x00)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA48C, (252), NULL, kEplObdTypInt8, kEplObdAccVPR, tEplObdInteger8, SHORT_Merker, 0x00)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA48C, (252), NULL, kEplObdTypInt8, kEplObdAccVPRW, tEplObdInteger8, SHORT_Merker, 0x00)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA48D, (252), NULL, kEplObdTypInt8, kEplObdAccVPR, tEplObdInteger8, SHORT_Merker, 0x00)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA48D, (252), NULL, kEplObdTypInt8, kEplObdAccVPRW, tEplObdInteger8, SHORT_Merker, 0x00)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA48E, (252), NULL, kEplObdTypInt8, kEplObdAccVPR, tEplObdInteger8, SHORT_Merker, 0x00)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA48E, (252), NULL, kEplObdTypInt8, kEplObdAccVPRW, tEplObdInteger8, SHORT_Merker, 0x00)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA48F, (252), NULL, kEplObdTypInt8, kEplObdAccVPR, tEplObdInteger8, SHORT_Merker, 0x00)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA48F, (252), NULL, kEplObdTypInt8, kEplObdAccVPRW, tEplObdInteger8, SHORT_Merker, 0x00)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA4C0, (252), NULL, kEplObdTypUInt8, kEplObdAccVPR, tEplObdUnsigned8, BYTE_Merker, 0x00)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA4C0, (252), NULL, kEplObdTypUInt8, kEplObdAccVPRW, tEplObdUnsigned8, BYTE_Merker, 0x00)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA4C1, (252), NULL, kEplObdTypUInt8, kEplObdAccVPR, tEplObdUnsigned8, BYTE_Merker, 0x00)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA4C1, (252), NULL, kEplObdTypUInt8, kEplObdAccVPRW, tEplObdUnsigned8, BYTE_Merker, 0x00)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA4C2, (252), NULL, kEplObdTypUInt8, kEplObdAccVPR, tEplObdUnsigned8, BYTE_Merker, 0x00)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA4C2, (252), NULL, kEplObdTypUInt8, kEplObdAccVPRW, tEplObdUnsigned8, BYTE_Merker, 0x00)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA4C3, (252), NULL, kEplObdTypUInt8, kEplObdAccVPR, tEplObdUnsigned8, BYTE_Merker, 0x00)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA4C3, (252), NULL, kEplObdTypUInt8, kEplObdAccVPRW, tEplObdUnsigned8, BYTE_Merker, 0x00)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA4C4, (252), NULL, kEplObdTypUInt8, kEplObdAccVPR, tEplObdUnsigned8, BYTE_Merker, 0x00)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA4C4, (252), NULL, kEplObdTypUInt8, kEplObdAccVPRW, tEplObdUnsigned8, BYTE_Merker, 0x00)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA4C5, (252), NULL, kEplObdTypUInt8, kEplObdAccVPR, tEplObdUnsigned8, BYTE_Merker, 0x00)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA4C5, (252), NULL, kEplObdTypUInt8, kEplObdAccVPRW, tEplObdUnsigned8, BYTE_Merker, 0x00)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA4C6, (252), NULL, kEplObdTypUInt8, kEplObdAccVPR, tEplObdUnsigned8, BYTE_Merker, 0x00)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA4C6, (252), NULL, kEplObdTypUInt8, kEplObdAccVPRW, tEplObdUnsigned8, BYTE_Merker, 0x00)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA4C7, (252), NULL, kEplObdTypUInt8, kEplObdAccVPR, tEplObdUnsigned8, BYTE_Merker, 0x00)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA4C7, (252), NULL, kEplObdTypUInt8, kEplObdAccVPRW, tEplObdUnsigned8, BYTE_Merker, 0x00)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA4C8, (252), NULL, kEplObdTypUInt8, kEplObdAccVPR, tEplObdUnsigned8, BYTE_Merker, 0x00)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA4C8, (252), NULL, kEplObdTypUInt8, kEplObdAccVPRW, tEplObdUnsigned8, BYTE_Merker, 0x00)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA4C9, (252), NULL, kEplObdTypUInt8, kEplObdAccVPR, tEplObdUnsigned8, BYTE_Merker, 0x00)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA4C9, (252), NULL, kEplObdTypUInt8, kEplObdAccVPRW, tEplObdUnsigned8, BYTE_Merker, 0x00)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA4CA, (252), NULL, kEplObdTypUInt8, kEplObdAccVPR, tEplObdUnsigned8, BYTE_Merker, 0x00)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA4CA, (252), NULL, kEplObdTypUInt8, kEplObdAccVPRW, tEplObdUnsigned8, BYTE_Merker, 0x00)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA4CB, (252), NULL, kEplObdTypUInt8, kEplObdAccVPR, tEplObdUnsigned8, BYTE_Merker, 0x00)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA4CB, (252), NULL, kEplObdTypUInt8, kEplObdAccVPRW, tEplObdUnsigned8, BYTE_Merker, 0x00)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA4CC, (252), NULL, kEplObdTypUInt8, kEplObdAccVPR, tEplObdUnsigned8, BYTE_Merker, 0x00)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA4CC, (252), NULL, kEplObdTypUInt8, kEplObdAccVPRW, tEplObdUnsigned8, BYTE_Merker, 0x00)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA4CD, (252), NULL, kEplObdTypUInt8, kEplObdAccVPR, tEplObdUnsigned8, BYTE_Merker, 0x00)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA4CD, (252), NULL, kEplObdTypUInt8, kEplObdAccVPRW, tEplObdUnsigned8, BYTE_Merker, 0x00)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA4CE, (252), NULL, kEplObdTypUInt8, kEplObdAccVPR, tEplObdUnsigned8, BYTE_Merker, 0x00)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA4CE, (252), NULL, kEplObdTypUInt8, kEplObdAccVPRW, tEplObdUnsigned8, BYTE_Merker, 0x00)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA4CF, (252), NULL, kEplObdTypUInt8, kEplObdAccVPR, tEplObdUnsigned8, BYTE_Merker, 0x00)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA4CF, (252), NULL, kEplObdTypUInt8, kEplObdAccVPRW, tEplObdUnsigned8, BYTE_Merker, 0x00)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA540, (252), NULL, kEplObdTypInt16, kEplObdAccVPR, tEplObdInteger16, INT_Merker, 0)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA540, (252), NULL, kEplObdTypInt16, kEplObdAccVPRW, tEplObdInteger16, INT_Merker, 0)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA541, (252), NULL, kEplObdTypInt16, kEplObdAccVPR, tEplObdInteger16, INT_Merker, 0)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA541, (252), NULL, kEplObdTypInt16, kEplObdAccVPRW, tEplObdInteger16, INT_Merker, 0)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA542, (252), NULL, kEplObdTypInt16, kEplObdAccVPR, tEplObdInteger16, INT_Merker, 0)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA542, (252), NULL, kEplObdTypInt16, kEplObdAccVPRW, tEplObdInteger16, INT_Merker, 0)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA543, (252), NULL, kEplObdTypInt16, kEplObdAccVPR, tEplObdInteger16, INT_Merker, 0)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA543, (252), NULL, kEplObdTypInt16, kEplObdAccVPRW, tEplObdInteger16, INT_Merker, 0)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA544, (252), NULL, kEplObdTypInt16, kEplObdAccVPR, tEplObdInteger16, INT_Merker, 0)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA544, (252), NULL, kEplObdTypInt16, kEplObdAccVPRW, tEplObdInteger16, INT_Merker, 0)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA545, (252), NULL, kEplObdTypInt16, kEplObdAccVPR, tEplObdInteger16, INT_Merker, 0)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA545, (252), NULL, kEplObdTypInt16, kEplObdAccVPRW, tEplObdInteger16, INT_Merker, 0)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA546, (252), NULL, kEplObdTypInt16, kEplObdAccVPR, tEplObdInteger16, INT_Merker, 0)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA546, (252), NULL, kEplObdTypInt16, kEplObdAccVPRW, tEplObdInteger16, INT_Merker, 0)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA547, (252), NULL, kEplObdTypInt16, kEplObdAccVPR, tEplObdInteger16, INT_Merker, 0)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA547, (252), NULL, kEplObdTypInt16, kEplObdAccVPRW, tEplObdInteger16, INT_Merker, 0)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA580, (252), NULL, kEplObdTypUInt16, kEplObdAccVPR, tEplObdUnsigned16, WORD_Merker, 0)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA580, (252), NULL, kEplObdTypUInt16, kEplObdAccVPRW, tEplObdUnsigned16, WORD_Merker, 0)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA581, (252), NULL, kEplObdTypUInt16, kEplObdAccVPR, tEplObdUnsigned16, WORD_Merker, 0)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA581, (252), NULL, kEplObdTypUInt16, kEplObdAccVPRW, tEplObdUnsigned16, WORD_Merker, 0)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA582, (252), NULL, kEplObdTypUInt16, kEplObdAccVPR, tEplObdUnsigned16, WORD_Merker, 0)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA582, (252), NULL, kEplObdTypUInt16, kEplObdAccVPRW, tEplObdUnsigned16, WORD_Merker, 0)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA583, (252), NULL, kEplObdTypUInt16, kEplObdAccVPR, tEplObdUnsigned16, WORD_Merker, 0)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA583, (252), NULL, kEplObdTypUInt16, kEplObdAccVPRW, tEplObdUnsigned16, WORD_Merker, 0)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA584, (252), NULL, kEplObdTypUInt16, kEplObdAccVPR, tEplObdUnsigned16, WORD_Merker, 0)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA584, (252), NULL, kEplObdTypUInt16, kEplObdAccVPRW, tEplObdUnsigned16, WORD_Merker, 0)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA585, (252), NULL, kEplObdTypUInt16, kEplObdAccVPR, tEplObdUnsigned16, WORD_Merker, 0)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA585, (252), NULL, kEplObdTypUInt16, kEplObdAccVPRW, tEplObdUnsigned16, WORD_Merker, 0)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA586, (252), NULL, kEplObdTypUInt16, kEplObdAccVPR, tEplObdUnsigned16, WORD_Merker, 0)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA586, (252), NULL, kEplObdTypUInt16, kEplObdAccVPRW, tEplObdUnsigned16, WORD_Merker, 0)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA587, (252), NULL, kEplObdTypUInt16, kEplObdAccVPR, tEplObdUnsigned16, WORD_Merker, 0)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA587, (252), NULL, kEplObdTypUInt16, kEplObdAccVPRW, tEplObdUnsigned16, WORD_Merker, 0)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA640, (252), NULL, kEplObdTypUInt32, kEplObdAccVPR, tEplObdUnsigned32, DWORD_Merker, 0)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA640, (252), NULL, kEplObdTypUInt32, kEplObdAccVPRW, tEplObdUnsigned32, DWORD_Merker, 0)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA641, (252), NULL, kEplObdTypUInt32, kEplObdAccVPR, tEplObdUnsigned32, DWORD_Merker, 0)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA641, (252), NULL, kEplObdTypUInt32, kEplObdAccVPRW, tEplObdUnsigned32, DWORD_Merker, 0)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA642, (252), NULL, kEplObdTypUInt32, kEplObdAccVPR, tEplObdUnsigned32, DWORD_Merker, 0)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA642, (252), NULL, kEplObdTypUInt32, kEplObdAccVPRW, tEplObdUnsigned32, DWORD_Merker, 0)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA643, (252), NULL, kEplObdTypUInt32, kEplObdAccVPR, tEplObdUnsigned32, DWORD_Merker, 0)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA643, (252), NULL, kEplObdTypUInt32, kEplObdAccVPRW, tEplObdUnsigned32, DWORD_Merker, 0)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA680, (252), NULL, kEplObdTypUInt32, kEplObdAccVPR, tEplObdUnsigned32, DWORD_Merker, 0)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA680, (252), NULL, kEplObdTypUInt32, kEplObdAccVPRW, tEplObdUnsigned32, DWORD_Merker, 0)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA681, (252), NULL, kEplObdTypUInt32, kEplObdAccVPR, tEplObdUnsigned32, DWORD_Merker, 0)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA681, (252), NULL, kEplObdTypUInt32, kEplObdAccVPRW, tEplObdUnsigned32, DWORD_Merker, 0)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA682, (252), NULL, kEplObdTypUInt32, kEplObdAccVPR, tEplObdUnsigned32, DWORD_Merker, 0)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA682, (252), NULL, kEplObdTypUInt32, kEplObdAccVPRW, tEplObdUnsigned32, DWORD_Merker, 0)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA683, (252), NULL, kEplObdTypUInt32, kEplObdAccVPR, tEplObdUnsigned32, DWORD_Merker, 0)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA683, (252), NULL, kEplObdTypUInt32, kEplObdAccVPRW, tEplObdUnsigned32, DWORD_Merker, 0)
 
     EPL_OBD_END_PART ()
 

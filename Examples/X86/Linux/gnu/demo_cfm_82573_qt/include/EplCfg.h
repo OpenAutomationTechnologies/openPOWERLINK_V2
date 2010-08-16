@@ -216,12 +216,12 @@
 // EPL API layer specific defines
 // =========================================================================
 
-// size of static input process image
+// size of static input (from network point of view) process image
 // set to 0 to disable static process image
 // it shall not exceed 252 and be a multiple of 4
 #define EPL_API_PROCESS_IMAGE_SIZE_IN       16
 
-// size of static output process image
+// size of static output (from network point of view) process image
 // set to 0 to disable static process image
 // it shall not exceed 252 and be a multiple of 4
 #define EPL_API_PROCESS_IMAGE_SIZE_OUT      16
