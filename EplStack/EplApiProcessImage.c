@@ -839,25 +839,24 @@ tEplKernel      Ret = kEplSuccessful;
             #if (TARGET_SYSTEM == _LINUX_) && defined(__KERNEL__)
             int     iErr;
 
-                iErr = copy_to_user(pCopyJob_p->m_In.m_pPart,
-                    pPIVar,
+                iErr = copy_from_user(pPIVar,
+                    pCopyJob_p->m_In.m_pPart,
                     pCopyJob_p->m_In.m_uiSize);
                 if (iErr != 0)
                 {
-                    PRINTF("%s: copy_to_user(%p, %p, %u) returned %i\n",
+                    PRINTF("%s: copy_from_user(%p, %p, %u) returned %i\n",
                             __func__,
-                            pCopyJob_p->m_In.m_pPart,
                             pPIVar,
+                            pCopyJob_p->m_In.m_pPart,
                             pCopyJob_p->m_In.m_uiSize,
                             iErr);
 
                     Ret = kEplApiPIInvalidPIPointer;
                     goto Exit;
                 }
-
             #else
-                EPL_MEMCPY(pCopyJob_p->m_In.m_pPart,
-                    pPIVar,
+                EPL_MEMCPY(pPIVar,
+                    pCopyJob_p->m_In.m_pPart,
                     pCopyJob_p->m_In.m_uiSize);
             #endif
         }
@@ -874,15 +873,15 @@ tEplKernel      Ret = kEplSuccessful;
             #if (TARGET_SYSTEM == _LINUX_) && defined(__KERNEL__)
             int     iErr;
 
-                iErr = copy_from_user(pPIVar,
-                    pCopyJob_p->m_Out.m_pPart,
+                iErr = copy_to_user(pCopyJob_p->m_Out.m_pPart,
+                    pPIVar,
                     pCopyJob_p->m_Out.m_uiSize);
                 if (iErr != 0)
                 {
-                    PRINTF("%s: copy_from_user(%p, %p, %u) returned %i\n",
+                    PRINTF("%s: copy_to_user(%p, %p, %u) returned %i\n",
                             __func__,
-                            pPIVar,
                             pCopyJob_p->m_Out.m_pPart,
+                            pPIVar,
                             pCopyJob_p->m_Out.m_uiSize,
                             iErr);
 
@@ -890,8 +889,8 @@ tEplKernel      Ret = kEplSuccessful;
                     goto Exit;
                 }
             #else
-                EPL_MEMCPY(pPIVar,
-                    pCopyJob_p->m_Out.m_pPart,
+                EPL_MEMCPY(pCopyJob_p->m_Out.m_pPart,
+                    pPIVar,
                     pCopyJob_p->m_Out.m_uiSize);
             #endif
         }

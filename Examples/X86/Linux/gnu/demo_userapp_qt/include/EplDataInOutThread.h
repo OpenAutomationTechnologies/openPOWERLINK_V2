@@ -19,7 +19,7 @@ typedef struct
     BYTE    m_bVarIn1;
     BYTE    m_abSelect[3];  // pushbuttons from CNs
 
-} __attribute__((packed)) tAppProcessImageIn;
+} __attribute__((packed)) tAppProcessImageOut;
 
 typedef struct
 {
@@ -27,7 +27,7 @@ typedef struct
     BYTE    m_bLedsRow1;    // current state of the LEDs in row 1
     BYTE    m_bLedsRow2;    // current state of the LEDs in row 2
 
-} __attribute__((packed)) tAppProcessImageOut;
+} __attribute__((packed)) tAppProcessImageIn;
 
 
 class EplDataInOutThread : public QThread

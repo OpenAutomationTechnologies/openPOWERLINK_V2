@@ -139,35 +139,35 @@ unsigned int        uiVarEntries;
 
     // link process variables to OD
     uiVarEntries = 1;
-    EplRet = EplApiProcessImageLinkObject(0x6000, 0x01, memberoffs(tAppProcessImageIn, m_bVarIn1), FALSE, sizeof (PiIn_g.m_bVarIn1), &uiVarEntries);
+    EplRet = EplApiProcessImageLinkObject(0x6000, 0x01, memberoffs(tAppProcessImageOut, m_bVarIn1), TRUE, sizeof (PiOut_g.m_bVarIn1), &uiVarEntries);
     if (EplRet != kEplSuccessful)
     {
         goto Exit;
     }
 
     uiVarEntries = 3;
-    EplRet = EplApiProcessImageLinkObject(0x2200, 0x01, memberoffs(tAppProcessImageIn, m_abSelect), FALSE, sizeof (PiIn_g.m_abSelect[0]), &uiVarEntries);
+    EplRet = EplApiProcessImageLinkObject(0x2200, 0x01, memberoffs(tAppProcessImageOut, m_abSelect), TRUE, sizeof (PiOut_g.m_abSelect[0]), &uiVarEntries);
     if (EplRet != kEplSuccessful)
     {
         goto Exit;
     }
 
     uiVarEntries = 1;
-    EplRet = EplApiProcessImageLinkObject(0x6200, 0x01, memberoffs(tAppProcessImageOut, m_bVarOut1), TRUE, sizeof (PiOut_g.m_bVarOut1), &uiVarEntries);
+    EplRet = EplApiProcessImageLinkObject(0x6200, 0x01, memberoffs(tAppProcessImageIn, m_bVarOut1), FALSE, sizeof (PiIn_g.m_bVarOut1), &uiVarEntries);
     if (EplRet != kEplSuccessful)
     {
         goto Exit;
     }
 
     uiVarEntries = 1;
-    EplRet = EplApiProcessImageLinkObject(0x2000, 0x01, memberoffs(tAppProcessImageOut, m_bLedsRow1), TRUE, sizeof (PiOut_g.m_bLedsRow1), &uiVarEntries);
+    EplRet = EplApiProcessImageLinkObject(0x2000, 0x01, memberoffs(tAppProcessImageIn, m_bLedsRow1), FALSE, sizeof (PiIn_g.m_bLedsRow1), &uiVarEntries);
     if (EplRet != kEplSuccessful)
     {
         goto Exit;
     }
 
     uiVarEntries = 1;
-    EplRet = EplApiProcessImageLinkObject(0x2000, 0x02, memberoffs(tAppProcessImageOut, m_bLedsRow2), TRUE, sizeof (PiOut_g.m_bLedsRow2), &uiVarEntries);
+    EplRet = EplApiProcessImageLinkObject(0x2000, 0x02, memberoffs(tAppProcessImageIn, m_bLedsRow2), FALSE, sizeof (PiIn_g.m_bLedsRow2), &uiVarEntries);
     if (EplRet != kEplSuccessful)
     {
         goto Exit;
@@ -202,7 +202,6 @@ tEplApiProcessImageCopyJob  PICopyJob;
 
     for (;;)
     {
-
         EplRet = EplApiProcessImageExchange(&PICopyJob);
         if (EplRet != kEplSuccessful)
         {
@@ -210,9 +209,9 @@ tEplApiProcessImageCopyJob  PICopyJob;
         }
 
         // collect inputs from CNs and own input
-        bSpeedSelect_l = (PiIn_g.m_bVarIn1 | PiIn_g.m_abSelect[0]) & 0x07;
+        bSpeedSelect_l = (PiOut_g.m_bVarIn1 | PiOut_g.m_abSelect[0]) & 0x07;
 
-        bModeSelect_l = PiIn_g.m_abSelect[1] | PiIn_g.m_abSelect[2];
+        bModeSelect_l = PiOut_g.m_abSelect[1] | PiOut_g.m_abSelect[2];
 
         if ((bModeSelect_l & APP_MODE_MASK) != 0)
         {
@@ -249,8 +248,8 @@ tEplApiProcessImageCopyJob  PICopyJob;
                         iToggle = 1;
                     }
                 }
-                PiOut_g.m_bLedsRow1 = (unsigned char) (dwLeds_l & APP_LED_MASK);
-                PiOut_g.m_bLedsRow2 = (unsigned char) ((dwLeds_l >> APP_LED_COUNT) & APP_LED_MASK);
+                PiIn_g.m_bLedsRow1 = (unsigned char) (dwLeds_l & APP_LED_MASK);
+                PiIn_g.m_bLedsRow2 = (unsigned char) ((dwLeds_l >> APP_LED_COUNT) & APP_LED_MASK);
             }
 
             else if ((dwMode_l & 0x02) != 0)
@@ -260,8 +259,8 @@ tEplApiProcessImageCopyJob  PICopyJob;
                 {
                     dwLeds_l = 0x01;
                 }
-                PiOut_g.m_bLedsRow1 = (unsigned char) (dwLeds_l & APP_LED_MASK);
-                PiOut_g.m_bLedsRow2 = (unsigned char) ((dwLeds_l >> APP_LED_COUNT) & APP_LED_MASK);
+                PiIn_g.m_bLedsRow1 = (unsigned char) (dwLeds_l & APP_LED_MASK);
+                PiIn_g.m_bLedsRow2 = (unsigned char) ((dwLeds_l >> APP_LED_COUNT) & APP_LED_MASK);
             }
 
             else if ((dwMode_l & 0x04) != 0)
@@ -271,67 +270,67 @@ tEplApiProcessImageCopyJob  PICopyJob;
                 {
                     dwLeds_l = 1 << (APP_LED_COUNT * 2);
                 }
-                PiOut_g.m_bLedsRow1 = (unsigned char) (dwLeds_l & APP_LED_MASK);
-                PiOut_g.m_bLedsRow2 = (unsigned char) ((dwLeds_l >> APP_LED_COUNT) & APP_LED_MASK);
+                PiIn_g.m_bLedsRow1 = (unsigned char) (dwLeds_l & APP_LED_MASK);
+                PiIn_g.m_bLedsRow2 = (unsigned char) ((dwLeds_l >> APP_LED_COUNT) & APP_LED_MASK);
             }
 
             else if ((dwMode_l & 0x08) != 0)
             {   // Knightrider
-                if (PiOut_g.m_bLedsRow1 == 0x00)
+                if (PiIn_g.m_bLedsRow1 == 0x00)
                 {
-                    PiOut_g.m_bLedsRow1 = 0x01;
+                    PiIn_g.m_bLedsRow1 = 0x01;
                     iToggle = 1;
                 }
                 else if (iToggle)
                 {
-                    PiOut_g.m_bLedsRow1 <<= 1;
-                    if ( PiOut_g.m_bLedsRow1 >= (1 << (APP_LED_COUNT - 1)) )
+                    PiIn_g.m_bLedsRow1 <<= 1;
+                    if ( PiIn_g.m_bLedsRow1 >= (1 << (APP_LED_COUNT - 1)) )
                     {
                         iToggle = 0;
                     }
                 }
                 else
                 {
-                    PiOut_g.m_bLedsRow1 >>= 1;
-                    if( PiOut_g.m_bLedsRow1 <= 0x01 )
+                    PiIn_g.m_bLedsRow1 >>= 1;
+                    if( PiIn_g.m_bLedsRow1 <= 0x01 )
                     {
                         iToggle = 1;
                     }
                 }
-                PiOut_g.m_bLedsRow2 = PiOut_g.m_bLedsRow1;
+                PiIn_g.m_bLedsRow2 = PiIn_g.m_bLedsRow1;
             }
 
             else if ((dwMode_l & 0x10) != 0)
             {   // Knightrider
-                if ((PiOut_g.m_bLedsRow1 == 0x00)
-                    || (PiOut_g.m_bLedsRow2 == 0x00)
-                    || ((PiOut_g.m_bLedsRow2 & ~APP_LED_MASK) != 0))
+                if ((PiIn_g.m_bLedsRow1 == 0x00)
+                    || (PiIn_g.m_bLedsRow2 == 0x00)
+                    || ((PiIn_g.m_bLedsRow2 & ~APP_LED_MASK) != 0))
                 {
-                    PiOut_g.m_bLedsRow1 = 0x01;
-                    PiOut_g.m_bLedsRow2 = (1 << (APP_LED_COUNT - 1));
+                    PiIn_g.m_bLedsRow1 = 0x01;
+                    PiIn_g.m_bLedsRow2 = (1 << (APP_LED_COUNT - 1));
                     iToggle = 1;
                 }
                 else if (iToggle)
                 {
-                    PiOut_g.m_bLedsRow1 <<= 1;
-                    PiOut_g.m_bLedsRow2 >>= 1;
-                    if ( PiOut_g.m_bLedsRow1 >= (1 << (APP_LED_COUNT - 1)) )
+                    PiIn_g.m_bLedsRow1 <<= 1;
+                    PiIn_g.m_bLedsRow2 >>= 1;
+                    if ( PiIn_g.m_bLedsRow1 >= (1 << (APP_LED_COUNT - 1)) )
                     {
                         iToggle = 0;
                     }
                 }
                 else
                 {
-                    PiOut_g.m_bLedsRow1 >>= 1;
-                    PiOut_g.m_bLedsRow2 <<= 1;
-                    if ( PiOut_g.m_bLedsRow1 <= 0x01 )
+                    PiIn_g.m_bLedsRow1 >>= 1;
+                    PiIn_g.m_bLedsRow2 <<= 1;
+                    if ( PiIn_g.m_bLedsRow1 <= 0x01 )
                     {
                         iToggle = 1;
                     }
                 }
             }
             // set own output
-            PiOut_g.m_bVarOut1 = PiOut_g.m_bLedsRow1;
+            PiIn_g.m_bVarOut1 = PiIn_g.m_bLedsRow1;
 
             // restart cycle counter
             iCurCycleCount_l = iMaxCycleCount_l;
@@ -366,10 +365,10 @@ tEplApiProcessImageCopyJob  PICopyJob;
             bSpeedSelectOld_l = 0;
         }
 
-        uiInput = ((PiIn_g.m_abSelect[1] | PiIn_g.m_abSelect[2]) & APP_LED_MASK)
-                  | ((PiIn_g.m_abSelect[0] & APP_LED_MASK) << APP_LED_COUNT);
+        uiInput = ((PiOut_g.m_abSelect[1] | PiOut_g.m_abSelect[2]) & APP_LED_MASK)
+                  | ((PiOut_g.m_abSelect[0] & APP_LED_MASK) << APP_LED_COUNT);
 
-        uiLeds = PiOut_g.m_bLedsRow1 | (PiOut_g.m_bLedsRow2 << APP_LED_COUNT);
+        uiLeds = PiIn_g.m_bLedsRow1 | (PiIn_g.m_bLedsRow2 << APP_LED_COUNT);
 
         // display of MN shows both CN rows
         if (uiInput != uiInputOld)
