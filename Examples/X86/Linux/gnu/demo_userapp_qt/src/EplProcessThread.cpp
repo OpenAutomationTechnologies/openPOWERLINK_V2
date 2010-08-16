@@ -369,7 +369,7 @@ const char* pszNmtState = NULL;
             if ((pEventArg_p->m_CfmProgress.m_dwSdoAbortCode != 0)
                 || (pEventArg_p->m_CfmProgress.m_EplError != kEplSuccessful))
             {
-                PRINTF2(" -> SDO Abort=0x%lX, Error=0x%X)\n", pEventArg_p->m_CfmProgress.m_dwSdoAbortCode, pEventArg_p->m_CfmProgress.m_EplError);
+                PRINTF2(" -> SDO Abort=0x%lX, Error=0x%X)\n", (unsigned long) pEventArg_p->m_CfmProgress.m_dwSdoAbortCode, pEventArg_p->m_CfmProgress.m_EplError);
             }
             else
             {
