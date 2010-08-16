@@ -700,6 +700,23 @@ Fellow worker:    Daniel Krüger (d.k.)
 
 15.07.2010 V1.7     - EdrvCyclic: Added cycle time measurement
                     - demo_cfm_82573_kernel: Fixed handling of bad file descriptor
-                    - Edrv82573: Added recognition all frame errors
+                    - Edrv82573: Added recognition of all frame errors
                     (m.u.)
 
+04.08.2010 V1.7     - Edrv82573: Allocate RxBuffers dynamically (using gfp and dma streaming);
+                      Enable deferred release of RxBuffers
+                    (m.u.)
+
+12.08.2010 V1.7     - EplApiLinuxKernel.c: use unlocked_ioctl instead of plain ioctl if available.
+                      This might solve some timing problems with Linux user-space, because
+                      the big kernel lock (BKL) isn't aquired anymore. The BKL is not needed anyway.
+                    (d.k.)
+
+16.08.2010 V1.7     - EplApiProcessImage:
+                      * Changed semaphore mechanism in order to allow priority inheritence
+                      * Exchanged direction of the process image to correspond to the network point of view
+                    - updated manual L-1098 to clarify the data direction of the process images
+                    - Edrv82573:
+                      * Added possible interrupt throttling setups as comments
+                      * Switched to message signaled interrupt
+                    (m.u., d.k.)
