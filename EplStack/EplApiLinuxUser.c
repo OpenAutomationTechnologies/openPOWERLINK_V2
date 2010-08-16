@@ -698,6 +698,13 @@ tEplKernel PUBLIC EplApiProcess(void)
 tEplKernel      Ret = kEplSuccessful;
 int             iRet;
 
+#if 0
+int             hFdTracingEnabled;
+
+    // open file from debugfs to disable tracing on interresting event
+    hFdTracingEnabled = open("/sys/kernel/debug/tracing/tracing_enabled", O_WRONLY, 0666);
+#endif
+
     EplApiInstance_g.m_Event.m_pEventArg = &EplApiInstance_g.m_EventArg;
     EplApiInstance_g.m_Event.m_pEventType = &EplApiInstance_g.m_EventType;
     EplApiInstance_g.m_Event.m_uiEventArgSize = sizeof (EplApiInstance_g.m_EventArg);
@@ -711,9 +718,23 @@ int             iRet;
             Ret = kEplShutdown;
             goto Exit;
         }
+
+#if 0
+        if ((EplApiInstance_g.m_Event.m_pEventArg->m_ErrHistoryEntry.m_wErrorCode == EPL_E_DLL_CYCLE_EXCEED)
+            && (hFdTracingEnabled != -1))
+        {
+            lseek(hFdTracingEnabled, 0, SEEK_SET);
+            write(hFdTracingEnabled, "0", 1);
+        }
+#endif
+
         // call user event callback function
         EplApiInstance_g.m_Event.m_RetCbEvent = EplApiInstance_g.m_InitParam.m_pfnCbEvent(EplApiInstance_g.m_EventType, &EplApiInstance_g.m_EventArg, EplApiInstance_g.m_InitParam.m_pEventUserArg);
     }
+
+#if 0
+    close(hFdTracingEnabled);
+#endif
 
 Exit:
     return Ret;
