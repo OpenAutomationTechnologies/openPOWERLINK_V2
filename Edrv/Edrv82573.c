@@ -88,6 +88,7 @@
 #include <linux/sched.h>
 #include <linux/delay.h>
 #include <linux/gfp.h>
+#include <linux/semaphore.h>
 
 
 /***************************************************************************/
@@ -172,13 +173,14 @@
                                | EDRV_REGDW_CTRL_SLU)
 
 #define EDRV_REGDW_STATUS       0x00008     // Device Status
-#define EDRV_REGDW_STATUS_LU    0x00000002 // Link Up Indication
+#define EDRV_REGDW_STATUS_LU    0x00000002  // Link Up Indication
 #define EDRV_REGDW_STATUS_MST_EN 0x00080000 // GIO Master Enable Status
 
 #define EDRV_REGDW_EEC          0x00010     // EEPROM Control Register
 #define EDRV_REGDW_EEC_AUTO_RD  0x00000200  // Auto Read Done
 
 #define EDRV_REGDW_ICR          0x000C0     // Interrupt Cause Read
+#define EDRV_REGDW_ITR          0x000C4     // Interrupt Throttling Rate
 #define EDRV_REGDW_IMS          0x000D0     // Interrupt Mask Set/Read
 #define EDRV_REGDW_IMC          0x000D8     // Interrupt Mask Clear
 #define EDRV_REGDW_INT_MASK_ALL 0xFFFFFFFF  // mask all interrupts
@@ -199,19 +201,22 @@
                                | EDRV_REGDW_INT_RXO \
                                | EDRV_REGDW_INT_RXSEQ)
 
-#define EDRV_REGDW_TIPG         0x000410    // Transmit Inter Packet Gap
+#define EDRV_REGDW_TIPG         0x00410     // Transmit Inter Packet Gap
 #define EDRV_REGDW_TIPG_DEF     0x00702008  // default according to Intel PCIe GbE Controllers Open Source Software Developer's Manual
 
-#define EDRV_REGDW_TXDCTL       0x003828    // Transmit Descriptor Control
+#define EDRV_REGDW_RDTR         0x02820     // Receive Interrupt Packet Delay Timer
+#define EDRV_REGDW_RADV         0x0282C     // Receive Interrupt Absolute Delay Timer
+
+#define EDRV_REGDW_TXDCTL       0x03828     // Transmit Descriptor Control
 #define EDRV_REGDW_TXDCTL_GRAN  0x01000000  // Granularity (1=Descriptor, 0=Cache line)
 //#define EDRV_REGDW_TXDCTL_WTHRESH 0x01000000  // Write Back Threshold
 #define EDRV_REGDW_TXDCTL_DEF   (EDRV_REGDW_TXDCTL_GRAN)
 
-#define EDRV_REGDW_RXDCTL       0x002828    // Receive Descriptor Control
+#define EDRV_REGDW_RXDCTL       0x02828     // Receive Descriptor Control
 #define EDRV_REGDW_RXDCTL_GRAN  0x01000000  // Granularity (1=Descriptor, 0=Cache line)
 #define EDRV_REGDW_RXDCTL_DEF   (EDRV_REGDW_RXDCTL_GRAN)
 
-#define EDRV_REGDW_TCTL         0x000400    // Transmit Control
+#define EDRV_REGDW_TCTL         0x00400     // Transmit Control
 #define EDRV_REGDW_TCTL_EN      0x00000002  // Transmit Enable
 #define EDRV_REGDW_TCTL_PSP     0x00000008  // Pad Short Packets
 #define EDRV_REGDW_TCTL_CT      0x000000F0  // Collision Threshold
@@ -221,7 +226,7 @@
                                | EDRV_REGDW_TCTL_CT \
                                | EDRV_REGDW_TCTL_COLD)
 
-#define EDRV_REGDW_RCTL         0x000100    // Receive Control
+#define EDRV_REGDW_RCTL         0x00100     // Receive Control
 #define EDRV_REGDW_RCTL_EN      0x00000002  // Receive Enable
 #define EDRV_REGDW_RCTL_SBP     0x00000004  // Store Bad Packets (to recognize collisions)
 #define EDRV_REGDW_RCTL_BAM     0x00008000  // Broadcast Accept Mode
@@ -235,17 +240,17 @@
                                | EDRV_REGDW_RCTL_SECRC \
                                | EDRV_REGDW_RCTL_BSIZE_2048)
 
-#define EDRV_REGDW_TDBAL        0x003800    // Transmit Descriptor Base Adress Low
-#define EDRV_REGDW_TDBAH        0x003804    // Transmit Descriptor Base Adress High
-#define EDRV_REGDW_TDLEN        0x003808    // Transmit Descriptor Length
-#define EDRV_REGDW_TDH          0x003810    // Transmit Descriptor Head
-#define EDRV_REGDW_TDT          0x003818    // Transmit Descriptor Tail
+#define EDRV_REGDW_TDBAL        0x03800     // Transmit Descriptor Base Adress Low
+#define EDRV_REGDW_TDBAH        0x03804     // Transmit Descriptor Base Adress High
+#define EDRV_REGDW_TDLEN        0x03808     // Transmit Descriptor Length
+#define EDRV_REGDW_TDH          0x03810     // Transmit Descriptor Head
+#define EDRV_REGDW_TDT          0x03818     // Transmit Descriptor Tail
 
-#define EDRV_REGDW_RDBAL0       0x002800    // Receive Descriptor Base Adress Low
-#define EDRV_REGDW_RDBAH0       0x002804    // Receive Descriptor Base Adress High
-#define EDRV_REGDW_RDLEN0       0x002808    // Receive Descriptor Length
-#define EDRV_REGDW_RDH0         0x002810    // Receive Descriptor Head
-#define EDRV_REGDW_RDT0         0x002818    // Receive Descriptor Tail
+#define EDRV_REGDW_RDBAL0       0x02800     // Receive Descriptor Base Adress Low
+#define EDRV_REGDW_RDBAH0       0x02804     // Receive Descriptor Base Adress High
+#define EDRV_REGDW_RDLEN0       0x02808     // Receive Descriptor Length
+#define EDRV_REGDW_RDH0         0x02810     // Receive Descriptor Head
+#define EDRV_REGDW_RDT0         0x02818     // Receive Descriptor Tail
 
 #define EDRV_REGDW_MTA(n)       (0x05200 + 4*n)  // Multicast Table Array
 
@@ -253,25 +258,28 @@
 #define EDRV_REGDW_RAH(n)       (0x05404 + 8*n)  // Receive Address HIGH
 #define EDRV_REGDW_RAH_AV       0x80000000  // Receive Address Valid
 
-#define EDRV_REGDW_CRCERRS      0x004000    // CRC Error Count
-#define EDRV_REGDW_LATECOL      0x004020    // Late Collision Count
-#define EDRV_REGDW_COLC         0x004028    // Collision Count
-#define EDRV_REGDW_SEC          0x004038    // Sequence Error Count
-#define EDRV_REGDW_RLEC         0x004040    // Receive Length Error Count
+#define EDRV_REGDW_CRCERRS      0x04000     // CRC Error Count
+#define EDRV_REGDW_LATECOL      0x04020     // Late Collision Count
+#define EDRV_REGDW_COLC         0x04028     // Collision Count
+#define EDRV_REGDW_SEC          0x04038     // Sequence Error Count
+#define EDRV_REGDW_RLEC         0x04040     // Receive Length Error Count
 
-#define EDRV_REGDW_SWSM         0x005B50    // Software Semaphore
+#define EDRV_REGDW_SWSM         0x05B50     // Software Semaphore
 #define EDRV_REGDW_SWSM_SWESMBI 0x00000002  // Software EEPROM Semaphore Bit
 
 // defines for the status byte in the receive descriptor
-#define EDRV_RXSTAT_DD            0x01    // Descriptor Done (Processed by Hardware)
-#define EDRV_RXSTAT_EOP           0x02    // End of Packet
-#define EDRV_RXERR_CE             0x01    // CRC Error
-#define EDRV_RXERR_SEQ            0x04    // Sequence Error
-#define EDRV_RXERR_OTHER          0xE2    // Other Error
+#define EDRV_RXSTAT_DD          0x01        // Descriptor Done (Processed by Hardware)
+#define EDRV_RXSTAT_EOP         0x02        // End of Packet
+#define EDRV_RXERR_CE           0x01        // CRC Error
+#define EDRV_RXERR_SEQ          0x04        // Sequence Error
+#define EDRV_RXERR_OTHER        0xE2        // Other Error
 
 
 #define EDRV_REGDW_WRITE(dwReg, dwVal)  writel(dwVal, EdrvInstance_l.m_pIoAddr + dwReg)
 #define EDRV_REGDW_READ(dwReg)          readl(EdrvInstance_l.m_pIoAddr + dwReg)
+
+
+#define EDRV_SAMPLE_NUM         10000
 
 
 // TracePoint support for realtime-debugging
@@ -340,8 +348,12 @@ typedef struct
     tEdrvRxDesc*        m_pRxDesc;      // pointer to Rx descriptors
     dma_addr_t          m_pRxDescDma;   // dma pointer to Rx descriptors
     BYTE*               m_apbRxBufInDesc[EDRV_MAX_RX_DESCS];
-    BYTE*               m_apbRxBufFree[EDRV_MAX_RX_BUFFERS - EDRV_MAX_RX_DESCS];
+                                        // Stack of free rx buffers
+                                        // +1 additional place if ReleaseRxBuffer is called
+                                        // before return of RxHandler (multi processor)
+    BYTE*               m_apbRxBufFree[EDRV_MAX_RX_BUFFERS - EDRV_MAX_RX_DESCS + 1];
     int                 m_iRxBufFreeTop;
+    struct semaphore    m_SemaRxBufRelease;
     int                 m_iPageAllocations;
 
     BYTE*               m_pbTxBuf;      // pointer to Tx buffer
@@ -361,6 +373,9 @@ typedef struct
 #if EDRV_USE_DIAGNOSTICS != FALSE
     unsigned long long  m_ullInterruptCount;
     int                 m_iRxBufFreeMin;
+    unsigned int        m_uiRxCount[EDRV_SAMPLE_NUM];
+    unsigned int        m_uiTxCount[EDRV_SAMPLE_NUM];
+    unsigned int        m_uiPos;
 #endif
 
 } tEdrvInstance;
@@ -904,7 +919,7 @@ int             iUsedSize = 0;
                        (unsigned long) EDRV_REGDW_READ(EDRV_REGDW_TDT));
 
     iUsedSize += snprintf (pszBuffer_p + iUsedSize, iSize_p - iUsedSize,
-                       "Free RxBuffers: %d (Min: %d)",
+                       "Free RxBuffers: %d (Min: %d)\n",
                        EdrvInstance_l.m_iRxBufFreeTop + 1,
                        EdrvInstance_l.m_iRxBufFreeMin);
 
@@ -973,6 +988,85 @@ int             iUsedSize = 0;
                        "Receive Length Error Count:          %lu\n",
                        (unsigned long) EDRV_REGDW_READ(EDRV_REGDW_RLEC));
 
+    {
+    const unsigned int  kuiHistNum = 14;
+
+    unsigned int    uiRxCountMean;
+    unsigned int    uiTxCountMean;
+    unsigned int    auiHistRx[kuiHistNum];
+    unsigned int    auiHistTx[kuiHistNum];
+    unsigned int    uiHistRxMax;
+    unsigned int    uiHistTxMax;
+    int             nIdx;
+
+        uiRxCountMean = 0;
+        uiTxCountMean = 0;
+        for (nIdx=0; nIdx < EDRV_SAMPLE_NUM; nIdx++)
+        {
+            uiRxCountMean += EdrvInstance_l.m_uiRxCount[nIdx] * 100;
+            uiTxCountMean += EdrvInstance_l.m_uiTxCount[nIdx] * 100;
+        }
+                
+        uiRxCountMean /= EDRV_SAMPLE_NUM;
+        uiTxCountMean /= EDRV_SAMPLE_NUM;
+
+        iUsedSize += snprintf (pszBuffer_p + iUsedSize, iSize_p - iUsedSize,
+                           "Rx/Int %u.%02u / Tx/Int %u.%02u\n",
+                            uiRxCountMean/100, uiRxCountMean%100,
+                            uiTxCountMean/100, uiTxCountMean%100);
+
+        uiHistRxMax = 0;
+        uiHistTxMax = 0;
+        for (nIdx = 0; nIdx < kuiHistNum; nIdx++)
+        {
+            auiHistRx[nIdx] = 0;
+            auiHistTx[nIdx] = 0;
+        }
+
+        for (nIdx = 0; nIdx < EDRV_SAMPLE_NUM; nIdx++)
+        {
+            if (EdrvInstance_l.m_uiRxCount[nIdx] < kuiHistNum)
+            {
+                auiHistRx[EdrvInstance_l.m_uiRxCount[nIdx]]++;
+            }
+            else if (EdrvInstance_l.m_uiRxCount[nIdx] > uiHistRxMax)
+            {
+                uiHistRxMax = EdrvInstance_l.m_uiRxCount[nIdx];
+            }
+
+            if (EdrvInstance_l.m_uiTxCount[nIdx] < kuiHistNum)
+            {
+                auiHistTx[EdrvInstance_l.m_uiTxCount[nIdx]]++;
+            }
+            else if (EdrvInstance_l.m_uiTxCount[nIdx] > uiHistTxMax)
+            {
+                uiHistTxMax = EdrvInstance_l.m_uiTxCount[nIdx];
+            }
+        }
+        
+        if (uiHistRxMax > 0)
+        {
+            iUsedSize += snprintf (pszBuffer_p + iUsedSize, iSize_p - iUsedSize,
+                               "MaxRx %3u\n", uiHistRxMax);
+        }
+
+        if (uiHistTxMax > 0)
+        {
+            iUsedSize += snprintf (pszBuffer_p + iUsedSize, iSize_p - iUsedSize,
+                               "MaxTx %3u\n", uiHistTxMax);
+        }
+
+        for (nIdx = kuiHistNum-1; nIdx >= 0; nIdx--)
+        {
+            if ((auiHistRx[nIdx] != 0) || (auiHistTx[nIdx] != 0))
+            {
+                iUsedSize += snprintf (pszBuffer_p + iUsedSize, iSize_p - iUsedSize,
+                                   "Hist  %3u  %5u  %5u\n",
+                                    nIdx, auiHistRx[nIdx], auiHistTx[nIdx]);
+            }
+        }
+    }
+
     iUsedSize += snprintf (pszBuffer_p + iUsedSize, iSize_p - iUsedSize,
                        "\n");
 
@@ -1002,7 +1096,10 @@ tEplKernel EplRet = kEplEdrvInvalidRxBuf;
 
     if (EdrvInstance_l.m_iRxBufFreeTop < (EDRV_MAX_RX_BUFFERS-1))
     {
+        down_interruptible(&EdrvInstance_l.m_SemaRxBufRelease);
         EdrvInstance_l.m_apbRxBufFree[++EdrvInstance_l.m_iRxBufFreeTop] = pRxBuffer_p->m_pbBuffer;
+        up(&EdrvInstance_l.m_SemaRxBufRelease);
+
         EplRet = kEplSuccessful;
     }
 
@@ -1060,6 +1157,8 @@ int             iHandled;
         
 #if EDRV_USE_DIAGNOSTICS != FALSE
     EdrvInstance_l.m_ullInterruptCount++;
+    EdrvInstance_l.m_uiRxCount[EdrvInstance_l.m_uiPos] = 0;
+    EdrvInstance_l.m_uiTxCount[EdrvInstance_l.m_uiPos] = 0;
 #endif
 
     // Receive or/and transmit interrupt
@@ -1089,9 +1188,12 @@ int             iHandled;
             {   // Rx frame available
             tEdrvRxBuffer           RxBuffer;
             tEdrvReleaseRxBuffer    RetReleaseRxBuffer;
-            unsigned int            uiLength;
             BYTE                    bRxStatus;
             BYTE                    bRxError;
+
+#if EDRV_USE_DIAGNOSTICS != FALSE
+                EdrvInstance_l.m_uiRxCount[EdrvInstance_l.m_uiPos]++;
+#endif
 
                 bRxStatus = pRxDesc->m_bStatus;
                 bRxError  = pRxDesc->m_bError;
@@ -1123,8 +1225,7 @@ int             iHandled;
 
                         // Get length of received packet
                         // m_le_wLength does not contain CRC as EDRV_REGDW_RCTL_SECRC is set
-                        uiLength = AmiGetWordFromLe(&pRxDesc->m_le_wLength);
-                        RxBuffer.m_uiRxMsgLen = uiLength;
+                        RxBuffer.m_uiRxMsgLen = AmiGetWordFromLe(&pRxDesc->m_le_wLength);
 
                         ppbRxBufInDesc = &EdrvInstance_l.m_apbRxBufInDesc[EdrvInstance_l.m_uiHeadRxDesc];
                         RxBuffer.m_pbBuffer = *ppbRxBufInDesc;
@@ -1139,30 +1240,38 @@ int             iHandled;
                         RetReleaseRxBuffer = EdrvInstance_l.m_InitParam.m_pfnRxHandler(&RxBuffer);
                         if (RetReleaseRxBuffer == kEdrvReleaseRxBufferLater)
                         {
-                        dma_addr_t  DmaAddr;
-
                             if (EdrvInstance_l.m_iRxBufFreeTop >= 0)
                             {
+                            dma_addr_t  DmaAddr;
+                            BYTE*       pbRxBufInDescPrev;
+
 #if EDRV_USE_DIAGNOSTICS != FALSE
                                 if (EdrvInstance_l.m_iRxBufFreeTop < EdrvInstance_l.m_iRxBufFreeMin)
                                 {
                                     EdrvInstance_l.m_iRxBufFreeMin = EdrvInstance_l.m_iRxBufFreeTop;
                                 }
 #endif
-                                pci_unmap_single(EdrvInstance_l.m_pPciDev,
-                                                 (dma_addr_t) AmiGetQword64FromLe(&pRxDesc->m_le_qwBufferAddr),
-                                                 EDRV_RX_BUFFER_SIZE, PCI_DMA_FROMDEVICE);
-
+                                pbRxBufInDescPrev = *ppbRxBufInDesc;
+                                down_interruptible(&EdrvInstance_l.m_SemaRxBufRelease);
                                 *ppbRxBufInDesc = EdrvInstance_l.m_apbRxBufFree[EdrvInstance_l.m_iRxBufFreeTop--];
+                                up(&EdrvInstance_l.m_SemaRxBufRelease);
 
-                                DmaAddr = pci_map_single(EdrvInstance_l.m_pPciDev, (void*) *ppbRxBufInDesc,
-                                                         EDRV_RX_BUFFER_SIZE, PCI_DMA_FROMDEVICE);
-                                if (pci_dma_mapping_error(EdrvInstance_l.m_pPciDev, DmaAddr))
+                                if (*ppbRxBufInDesc != pbRxBufInDescPrev)
                                 {
-                                    // $$$ How to signal dma mapping error
-                                }
+                                    pci_unmap_single(EdrvInstance_l.m_pPciDev,
+                                                     (dma_addr_t) AmiGetQword64FromLe(&pRxDesc->m_le_qwBufferAddr),
+                                                     EDRV_RX_BUFFER_SIZE, PCI_DMA_FROMDEVICE);
 
-                                AmiSetQword64ToLe(&pRxDesc->m_le_qwBufferAddr, (QWORD) DmaAddr);
+                                    DmaAddr = pci_map_single(EdrvInstance_l.m_pPciDev, (void*) *ppbRxBufInDesc,
+                                                             EDRV_RX_BUFFER_SIZE, PCI_DMA_FROMDEVICE);
+                                    if (pci_dma_mapping_error(EdrvInstance_l.m_pPciDev, DmaAddr))
+                                    {
+                                        printk("%s DMA mapping error\n", __FUNCTION__);
+                                        // $$$ Signal dma mapping error
+                                    }
+
+                                    AmiSetQword64ToLe(&pRxDesc->m_le_qwBufferAddr, (QWORD) DmaAddr);
+                                }
                             }
                             else
                             {
@@ -1192,6 +1301,10 @@ int             iHandled;
             {   // Transmit finished
             tEdrvTxBuffer*  pTxBuffer;
             DWORD           dwTxStatus;
+
+#if EDRV_USE_DIAGNOSTICS != FALSE
+                EdrvInstance_l.m_uiTxCount[EdrvInstance_l.m_uiPos]++;
+#endif
 
                 dwTxStatus = pTxDesc->m_le_dwStatus;
 
@@ -1272,6 +1385,14 @@ int             iHandled;
         }
     }
 
+#if EDRV_USE_DIAGNOSTICS != FALSE
+    EdrvInstance_l.m_uiPos++;
+    if (EdrvInstance_l.m_uiPos == EDRV_SAMPLE_NUM)
+    {
+        EdrvInstance_l.m_uiPos = 0;
+    }
+#endif
+
 Exit:
     return iHandled;
 }
@@ -1339,6 +1460,8 @@ unsigned int    nRxBuffer;
         iResult = -EIO;
         goto ExitFail;
     }
+
+    sema_init(&EdrvInstance_l.m_SemaRxBufRelease, 1);
 
     // enable PCI busmaster
     //printk("%s enable busmaster\n", __FUNCTION__);
@@ -1429,6 +1552,29 @@ unsigned int    nRxBuffer;
 
     // set TIPG
     EDRV_REGDW_WRITE(EDRV_REGDW_TIPG, EDRV_REGDW_TIPG_DEF);
+
+    // set interrupt throttling
+    // setup 1: 12,8us inter-interrupt interval
+    //EDRV_REGDW_WRITE(EDRV_REGDW_ITR, 50);
+    // setup 2: 25,6us inter-interrupt interval
+    //EDRV_REGDW_WRITE(EDRV_REGDW_ITR, 100);
+    // setup 3: 51,2us inter-interrupt interval (sporadic errors)
+    //EDRV_REGDW_WRITE(EDRV_REGDW_ITR, 200);
+    // setup 4: 64us inter-interrupt interval (abort with error)
+    //EDRV_REGDW_WRITE(EDRV_REGDW_ITR, 250);
+    // setup 5: 10,2us interrupt delay after packet reception
+    //          102,4us max. delay 
+    //          no throttling for packet transmission
+    //EDRV_REGDW_WRITE(EDRV_REGDW_RDTR, 10);
+    //EDRV_REGDW_WRITE(EDRV_REGDW_RADV, 100);
+
+    // Enable Message Signaled Interrupt
+    //printk("%s Enable MSI\n", __FUNCTION__);
+    iResult = pci_enable_msi(pPciDev);
+    if (iResult != 0)
+    {
+        printk("%s Could not enable MSI\n", __FUNCTION__);
+    }
 
     // install interrupt handler
     //printk("%s install interrupt handler\n", __FUNCTION__);
@@ -1684,6 +1830,9 @@ unsigned int    nRxBuffer;
     // remove interrupt handler
     free_irq(pPciDev->irq, pPciDev);
 
+    // Disable Message Signaled Interrupt
+    //printk("%s Disable MSI\n", __FUNCTION__);
+    pci_disable_msi(pPciDev);
 
     // free buffers
     if (EdrvInstance_l.m_pbTxBuf != NULL)
@@ -1711,6 +1860,10 @@ unsigned int    nRxBuffer;
 
     for (nRxBuffer = 0; nRxBuffer < EDRV_MAX_RX_DESCS; nRxBuffer++)
     {
+        pci_unmap_single(EdrvInstance_l.m_pPciDev,
+                         (dma_addr_t) AmiGetQword64FromLe(&EdrvInstance_l.m_pRxDesc[nRxBuffer].m_le_qwBufferAddr),
+                         EDRV_RX_BUFFER_SIZE, PCI_DMA_FROMDEVICE);
+
         ulBufferPointer = (unsigned long) EdrvInstance_l.m_apbRxBufInDesc[nRxBuffer];
 
         if ((uiOrder == 0) && ((ulBufferPointer & ((1UL << PAGE_SHIFT)-1)) == 0))
@@ -1720,9 +1873,14 @@ unsigned int    nRxBuffer;
         }
     }
 
-    for (nRxBuffer = 0; nRxBuffer < EDRV_MAX_RX_BUFFERS; nRxBuffer++)
+    if (EdrvInstance_l.m_iRxBufFreeTop < EDRV_MAX_RX_BUFFERS-EDRV_MAX_RX_DESCS-1)
     {
-        ulBufferPointer = (unsigned long) EdrvInstance_l.m_apbRxBufFree[nRxBuffer];
+        printk("%s %d rx-buffers were lost\n", __FUNCTION__, EdrvInstance_l.m_iRxBufFreeTop);
+    }
+
+    for (; EdrvInstance_l.m_iRxBufFreeTop >= 0; EdrvInstance_l.m_iRxBufFreeTop--)
+    {
+        ulBufferPointer = (unsigned long) EdrvInstance_l.m_apbRxBufFree[EdrvInstance_l.m_iRxBufFreeTop];
 
         if ((uiOrder == 0) && ((ulBufferPointer & ((1UL << PAGE_SHIFT)-1)) == 0))
         {
@@ -1762,7 +1920,8 @@ unsigned int    nRxBuffer;
 
     EdrvInstance_l.m_pPciDev = NULL;
 
-Exit:;
+Exit:
+    return;
 }
 
 
