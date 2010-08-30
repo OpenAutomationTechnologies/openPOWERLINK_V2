@@ -353,7 +353,7 @@ typedef struct
                                         // before return of RxHandler (multi processor)
     BYTE*               m_apbRxBufFree[EDRV_MAX_RX_BUFFERS - EDRV_MAX_RX_DESCS + 1];
     int                 m_iRxBufFreeTop;
-    struct semaphore    m_SemaRxBufRelease;
+    spinlock_t          m_SpinLockRxBufRelease;
     int                 m_iPageAllocations;
 
     BYTE*               m_pbTxBuf;      // pointer to Tx buffer
@@ -1096,9 +1096,11 @@ tEplKernel EplRet = kEplEdrvInvalidRxBuf;
 
     if (EdrvInstance_l.m_iRxBufFreeTop < (EDRV_MAX_RX_BUFFERS-1))
     {
-        down_interruptible(&EdrvInstance_l.m_SemaRxBufRelease);
+    unsigned long   ulFlags;
+
+        spin_lock_irqsave(&EdrvInstance_l.m_SpinLockRxBufRelease, ulFlags);
         EdrvInstance_l.m_apbRxBufFree[++EdrvInstance_l.m_iRxBufFreeTop] = pRxBuffer_p->m_pbBuffer;
-        up(&EdrvInstance_l.m_SemaRxBufRelease);
+        spin_unlock_irqrestore(&EdrvInstance_l.m_SpinLockRxBufRelease, ulFlags);
 
         EplRet = kEplSuccessful;
     }
@@ -1242,8 +1244,9 @@ int             iHandled;
                         {
                             if (EdrvInstance_l.m_iRxBufFreeTop >= 0)
                             {
-                            dma_addr_t  DmaAddr;
-                            BYTE*       pbRxBufInDescPrev;
+                            dma_addr_t      DmaAddr;
+                            BYTE*           pbRxBufInDescPrev;
+                            unsigned long   ulFlags;
 
 #if EDRV_USE_DIAGNOSTICS != FALSE
                                 if (EdrvInstance_l.m_iRxBufFreeTop < EdrvInstance_l.m_iRxBufFreeMin)
@@ -1252,9 +1255,10 @@ int             iHandled;
                                 }
 #endif
                                 pbRxBufInDescPrev = *ppbRxBufInDesc;
-                                down_interruptible(&EdrvInstance_l.m_SemaRxBufRelease);
+
+                                spin_lock_irqsave(&EdrvInstance_l.m_SpinLockRxBufRelease, ulFlags);
                                 *ppbRxBufInDesc = EdrvInstance_l.m_apbRxBufFree[EdrvInstance_l.m_iRxBufFreeTop--];
-                                up(&EdrvInstance_l.m_SemaRxBufRelease);
+                                spin_unlock_irqrestore(&EdrvInstance_l.m_SpinLockRxBufRelease, ulFlags);
 
                                 if (*ppbRxBufInDesc != pbRxBufInDescPrev)
                                 {
@@ -1461,7 +1465,7 @@ unsigned int    nRxBuffer;
         goto ExitFail;
     }
 
-    sema_init(&EdrvInstance_l.m_SemaRxBufRelease, 1);
+    spin_lock_init(&EdrvInstance_l.m_SpinLockRxBufRelease);
 
     // enable PCI busmaster
     //printk("%s enable busmaster\n", __FUNCTION__);
