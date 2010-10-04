@@ -749,13 +749,13 @@ EPL_OBD_BEGIN ()
 
         EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA107, (252), NULL, kEplObdTypUInt16, kEplObdAccVPR, tEplObdUnsigned16, WORD_Merker, 0)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA1C0, (252), NULL, kEplObdTypUInt32, kEplObdAccVPR, tEplObdUnsigned32, DWORD_Merker, 0)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA1C0, (252), NULL, kEplObdTypInt32, kEplObdAccVPR, tEplObdInteger32, LINT_Merker, 0)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA1C1, (252), NULL, kEplObdTypUInt32, kEplObdAccVPR, tEplObdUnsigned32, DWORD_Merker, 0)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA1C1, (252), NULL, kEplObdTypInt32, kEplObdAccVPR, tEplObdInteger32, LINT_Merker, 0)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA1C2, (252), NULL, kEplObdTypUInt32, kEplObdAccVPR, tEplObdUnsigned32, DWORD_Merker, 0)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA1C2, (252), NULL, kEplObdTypInt32, kEplObdAccVPR, tEplObdInteger32, LINT_Merker, 0)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA1C3, (252), NULL, kEplObdTypUInt32, kEplObdAccVPR, tEplObdUnsigned32, DWORD_Merker, 0)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA1C3, (252), NULL, kEplObdTypInt32, kEplObdAccVPR, tEplObdInteger32, LINT_Merker, 0)
 
         EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA200, (252), NULL, kEplObdTypUInt32, kEplObdAccVPR, tEplObdUnsigned32, DWORD_Merker, 0)
 
@@ -864,13 +864,13 @@ EPL_OBD_BEGIN ()
 
         EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA587, (252), NULL, kEplObdTypUInt16, kEplObdAccVPRW, tEplObdUnsigned16, WORD_Merker, 0)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA640, (252), NULL, kEplObdTypUInt32, kEplObdAccVPRW, tEplObdUnsigned32, DWORD_Merker, 0)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA640, (252), NULL, kEplObdTypInt32, kEplObdAccVPRW, tEplObdInteger32, LINT_Merker, 0)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA641, (252), NULL, kEplObdTypUInt32, kEplObdAccVPRW, tEplObdUnsigned32, DWORD_Merker, 0)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA641, (252), NULL, kEplObdTypInt32, kEplObdAccVPRW, tEplObdInteger32, LINT_Merker, 0)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA642, (252), NULL, kEplObdTypUInt32, kEplObdAccVPRW, tEplObdUnsigned32, DWORD_Merker, 0)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA642, (252), NULL, kEplObdTypInt32, kEplObdAccVPRW, tEplObdInteger32, LINT_Merker, 0)
 
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA643, (252), NULL, kEplObdTypUInt32, kEplObdAccVPRW, tEplObdUnsigned32, DWORD_Merker, 0)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA643, (252), NULL, kEplObdTypInt32, kEplObdAccVPRW, tEplObdInteger32, LINT_Merker, 0)
 
         EPL_OBD_RAM_INDEX_RAM_VARARRAY (0xA680, (252), NULL, kEplObdTypUInt32, kEplObdAccVPRW, tEplObdUnsigned32, DWORD_Merker, 0)
 
