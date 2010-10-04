@@ -81,13 +81,17 @@
 // const defines
 //---------------------------------------------------------------------------
 
-#define SDO_NODEID  0xF0
-
 //---------------------------------------------------------------------------
 // modul globale vars
 //---------------------------------------------------------------------------
 
 EplProcessThread    *pEplProcessThread_g;
+
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_CFM)) == 0)
+// Configuration Manager is not available,
+// so store local CycleLen for configuration of remote CNs
+static DWORD        dw_le_CycleLen_g;
+#endif
 
 //---------------------------------------------------------------------------
 // Event callback function
@@ -132,6 +136,30 @@ const char* pszNmtState = NULL;
                 case kEplNmtGsResetCommunication:
                 {
 
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_CFM)) == 0)
+                // Configuration Manager is not available,
+                // so set up appropriate defaults in OD
+                DWORD   dwNodeAssignment;
+
+                    dwNodeAssignment = (EPL_NODEASSIGN_NODE_IS_CN |
+                                EPL_NODEASSIGN_NODE_EXISTS);    // 0x00000003L
+                    EplRet = EplApiWriteLocalObject(0x1F81, 0x01, &dwNodeAssignment, sizeof (dwNodeAssignment));
+                    EplRet = EplApiWriteLocalObject(0x1F81, 0x02, &dwNodeAssignment, sizeof (dwNodeAssignment));
+                    EplRet = EplApiWriteLocalObject(0x1F81, 0x03, &dwNodeAssignment, sizeof (dwNodeAssignment));
+                    EplRet = EplApiWriteLocalObject(0x1F81, 0x04, &dwNodeAssignment, sizeof (dwNodeAssignment));
+                    EplRet = EplApiWriteLocalObject(0x1F81, 0x05, &dwNodeAssignment, sizeof (dwNodeAssignment));
+                    EplRet = EplApiWriteLocalObject(0x1F81, 0x06, &dwNodeAssignment, sizeof (dwNodeAssignment));
+                    EplRet = EplApiWriteLocalObject(0x1F81, 0x07, &dwNodeAssignment, sizeof (dwNodeAssignment));
+                    EplRet = EplApiWriteLocalObject(0x1F81, 0x08, &dwNodeAssignment, sizeof (dwNodeAssignment));
+                    EplRet = EplApiWriteLocalObject(0x1F81, 0x20, &dwNodeAssignment, sizeof (dwNodeAssignment));
+                    EplRet = EplApiWriteLocalObject(0x1F81, 0xFE, &dwNodeAssignment, sizeof (dwNodeAssignment));
+                    EplRet = EplApiWriteLocalObject(0x1F81, 0x6E, &dwNodeAssignment, sizeof (dwNodeAssignment));
+
+                    dwNodeAssignment = (EPL_NODEASSIGN_MN_PRES |
+                                EPL_NODEASSIGN_NODE_EXISTS);    // 0x00010001L
+                    EplRet = EplApiWriteLocalObject(0x1F81, 0xF0, &dwNodeAssignment, sizeof (dwNodeAssignment));
+#endif
+
                     pszNmtState = "ResetCommunication";
                     pEplProcessThread_g->sigEplStatus(1);
 
@@ -141,6 +169,22 @@ const char* pszNmtState = NULL;
 
                 case kEplNmtGsResetConfiguration:
                 {
+
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_CFM)) == 0)
+                // Configuration Manager is not available,
+                // so fetch object 0x1006 NMT_CycleLen_U32 from local OD
+                // (in little endian byte order)
+                // for configuration of remote CN
+                unsigned int uiSize;
+
+                    uiSize = 4;
+                    EplRet = EplApiReadObject(NULL, 0, 0x1006, 0x00, &dw_le_CycleLen_g,
+                                              &uiSize, kEplSdoTypeAsnd, NULL);
+                    if (EplRet != kEplSuccessful)
+                    {   // local OD access failed
+                        break;
+                    }
+#endif
 
                     pszNmtState = "ResetConfiguration";
                     pEplProcessThread_g->sigEplStatus(1);
@@ -288,6 +332,44 @@ const char* pszNmtState = NULL;
             {
                 case kEplNmtNodeEventCheckConf:
                 {
+
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_CFM)) == 0)
+                // Configuration Manager is not available,
+                // so configure CycleLen (object 0x1006) on CN
+                tEplSdoComConHdl SdoComConHdl;
+
+                    // update object 0x1006 on CN
+                    EplRet = EplApiWriteObject(&SdoComConHdl, pEventArg_p->m_Node.m_uiNodeId,
+                                               0x1006, 0x00, &dw_le_CycleLen_g, 4,
+                                               kEplSdoTypeAsnd, NULL);
+                    if (EplRet == kEplApiTaskDeferred)
+                    {   // SDO transfer started
+                        EplRet = kEplReject;
+                    }
+                    else if (EplRet == kEplSuccessful)
+                    {   // local OD access (should not occur)
+                        printf("AppCbEvent(Node) write to local OD\n");
+                    }
+                    else
+                    {   // error occured
+
+                        EplRet = EplApiFreeSdoChannel(SdoComConHdl);
+                        SdoComConHdl = 0;
+
+                        EplRet = EplApiWriteObject(&SdoComConHdl, pEventArg_p->m_Node.m_uiNodeId,
+                                                   0x1006, 0x00, &dw_le_CycleLen_g, 4,
+                                                   kEplSdoTypeAsnd, NULL);
+                        if (EplRet == kEplApiTaskDeferred)
+                        {   // SDO transfer started
+                            EplRet = kEplReject;
+                        }
+                        else
+                        {
+                            printf("AppCbEvent(Node): EplApiWriteObject() returned 0x%03X\n", EplRet);
+                        }
+                    }
+#endif
+
                     PRINTF2("%s(Node=0x%X, CheckConf)\n", __func__, pEventArg_p->m_Node.m_uiNodeId);
                     break;
                 }
@@ -412,6 +494,31 @@ const char* pszNmtState = NULL;
                     break;
                 }
             }
+            break;
+        }
+#endif
+
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_CFM)) == 0)
+        // Configuration Manager is not available,
+        // so process SDO events
+        case kEplApiEventSdo:
+        {   // SDO transfer finished
+            EplRet = EplApiFreeSdoChannel(pEventArg_p->m_Sdo.m_SdoComConHdl);
+            if (EplRet != kEplSuccessful)
+            {
+                break;
+            }
+            if (pEventArg_p->m_Sdo.m_SdoComConState == kEplSdoComTransferFinished)
+            {   // continue boot-up of CN with NMT command Reset Configuration
+                EplRet = EplApiMnTriggerStateChange(pEventArg_p->m_Sdo.m_uiNodeId,
+                                                    kEplNmtNodeCommandConfReset);
+            }
+            else
+            {   // indicate configuration error CN
+                EplRet = EplApiMnTriggerStateChange(pEventArg_p->m_Sdo.m_uiNodeId,
+                                                    kEplNmtNodeCommandConfErr);
+            }
+
             break;
         }
 #endif
