@@ -720,3 +720,20 @@ Fellow worker:    Daniel Krüger (d.k.)
                       * Added possible interrupt throttling setups as comments
                       * Switched to message signaled interrupt
                     (m.u., d.k.)
+
+30.08.2010 V1.7     - Edrv82573: Used spinlock instead of semaphore as semaphore must not be used in irq context
+                    (m.u.)
+
+04.10.2010 V1.7     - changed object dictionary (objdict.h and similar files and XDDs):
+                      + CiA302-4 OD: ranges 0xA1C0++ and 0xA640++ are of type Int32
+                      + IdentityObject 0x1018: use value 0 for ProductCode and SerialNumber
+                      + changed ManufacturerName (0x1008) to "openPOWERLINK device"
+                      + default values of Thresholds in 0x1C00, 0x1C0B, 0x1C0D changed to 15 according to EPSG 301
+                    - demo_userapp_qt: readded the code to work in configurations without CFM
+                    (d.k.)
+
+05.10.2010 V1.7     - support mapping of BOOLEAN objects on byte boundaries
+                    - unified demo project for Altera Cyclone III FPGA. From now on there is only one demo project,
+                      which is compatible with the standard openPOWERLINK MN demos.
+                    (d.k.)
+
