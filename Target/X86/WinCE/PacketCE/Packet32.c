@@ -3,9 +3,11 @@
 #include <winsock.h>
 #include <ndis.h>
 #include "Packet32.h"
+
 //---------------------------------------------------------------------------
 // Global device handle
-HANDLE	g_hDev = NULL;
+HANDLE	g_hDriver = NULL;
+HANDLE	g_hActiveDriver = NULL;
 static DWORD g_nW32NLastError = ERROR_SUCCESS;
 
 
@@ -107,7 +109,7 @@ BOOLEAN PacketReceivePacket(LPADAPTER lpAdapter,LPPACKET lpPacket,BOOLEAN Sync)
 	}
 
 	bResult = DeviceIoControl (lpAdapter->hFile, PIOC_READ_PACKET, lpPacket->Buffer, 
-		lpPacket->Length, lpPacket->Buffer, lpPacket->Length, (LPDWORD)&(lpPacket->ulBytesReceived), NULL);
+		lpPacket->Length, lpPacket->Buffer, lpPacket->Length, (LPDWORD) &(lpPacket->ulBytesReceived), NULL);
 
 
 	PacketSetLastError (GetLastError ());
@@ -178,7 +180,7 @@ BOOLEAN PacketSendPacket(LPADAPTER lpAdapter,LPPACKET lpPacket,BOOLEAN Sync)
 	
 	// send the packet
 	bResult = DeviceIoControl (lpAdapter->hFile, PIOC_WRITE_PACKET, lpPacket->Buffer, 
-		lpPacket->Length, lpPacket->Buffer, lpPacket->Length, (LPDWORD)&(lpPacket->ulBytesReceived), NULL);
+		lpPacket->Length, lpPacket->Buffer, lpPacket->Length, (LPDWORD) &(lpPacket->ulBytesReceived), NULL);
 
 	lpPacket->bIoComplete = bResult;
 	if (bResult == FALSE) {
@@ -217,7 +219,7 @@ BOOLEAN PacketSetBpf(LPADAPTER lpAdapter,struct bpf_program *fp)
 	}
 
     bResult = DeviceIoControl (lpAdapter->hFile, PIOC_SETF, (char*)fp->bf_insns, 
-		fp->bf_len * sizeof (struct bpf_insn), NULL, 0, (LPDWORD)&BytesReturned,NULL);
+		fp->bf_len * sizeof (struct bpf_insn), NULL, 0, (LPDWORD) &BytesReturned,NULL);
 
 	PacketSetLastError (GetLastError ());
 	return bResult;
@@ -250,8 +252,8 @@ BOOLEAN PacketSetBuff(LPADAPTER lpAdapter,int dim)
 	}
 
 	// send the IOCTL
-    bResult = DeviceIoControl (lpAdapter->hFile, PIOC_SET_BUFFER_SIZE, &dim, 4, NULL, 
-		0, (LPDWORD)&BytesReturned, NULL);
+    bResult = DeviceIoControl (lpAdapter->hFile, PIOC_SET_BUFFER_SIZE, (LPVOID) &dim, sizeof(int), NULL, 
+		0, (LPDWORD) &BytesReturned, NULL);
 
 	PacketSetLastError (GetLastError ());
 
@@ -282,7 +284,7 @@ BOOLEAN PacketSetReadTimeout(LPADAPTER lpAdapter,int timeout)
 	}
 
     bResult = DeviceIoControl (lpAdapter->hFile, PIOC_SRTIMEOUT, &timeout, 4, 
-		NULL, 0, (LPDWORD)&BytesReturned, NULL);
+		NULL, 0, (LPDWORD) &BytesReturned, NULL);
 
 	PacketSetLastError (GetLastError ());
 
@@ -598,7 +600,7 @@ BOOLEAN PacketResetAdapter(LPADAPTER lpAdapter)
 
 	// send IOCTL
 	bResult = DeviceIoControl (lpAdapter->hFile, (DWORD) PIOC_RESET, NULL,
-		0, NULL, 0, (LPDWORD)&BytesReturned, NULL);
+		0, NULL, 0, (LPDWORD) &BytesReturned, NULL);
 	
 	PacketSetLastError (GetLastError ());
 
@@ -733,7 +735,7 @@ BOOLEAN PacketGetNetType (LPADAPTER lpAdapter,NetType *type)
 		return FALSE;
 	}
 
-    pOidData = (PPACKET_OID_DATA)HeapAlloc (GetProcessHeap (), HEAP_ZERO_MEMORY, IoCtlBufferLength);
+    pOidData = (PPACKET_OID_DATA) HeapAlloc (GetProcessHeap (), HEAP_ZERO_MEMORY, IoCtlBufferLength);
     if (pOidData == NULL) {
 		PacketSetLastError (GetLastError ());
 		return FALSE;
@@ -787,7 +789,7 @@ BOOL PacketSetMaxLookahead (LPADAPTER lpAdapter)
 		return FALSE;
 	}
 
-    pOidData = (PPACKET_OID_DATA)GlobalAllocPtr(GMEM_MOVEABLE | GMEM_ZEROINIT, IoCtlBufferLength);
+    pOidData = (PPACKET_OID_DATA) GlobalAllocPtr(GMEM_MOVEABLE | GMEM_ZEROINIT, IoCtlBufferLength);
     if (pOidData == NULL) {
 		PacketSetLastError (GetLastError ());
 		return FALSE;
@@ -834,7 +836,7 @@ BOOLEAN PacketSetHwFilter(LPADAPTER lpAdapter,ULONG Filter)
 		return FALSE;
 	}
 
-    pOidData = (PPACKET_OID_DATA)GlobalAllocPtr(GMEM_MOVEABLE | GMEM_ZEROINIT, IoCtlBufferLength);
+    pOidData = (PPACKET_OID_DATA) GlobalAllocPtr(GMEM_MOVEABLE | GMEM_ZEROINIT, IoCtlBufferLength);
     if (pOidData == NULL) {
 		PacketSetLastError (GetLastError ());
 		return FALSE;
@@ -894,21 +896,45 @@ BOOLEAN PacketSetMinToCopy(LPADAPTER lpAdapter,int nbytes)
 //---------------------------------------------------------------------------
 BOOLEAN	PacketLoadDriver(VOID)
 {
-	// Register the packet driver
+DWORD dwLastError;
+
+    // Register the packet driver
 	
-	OutputDebugString( L"About to RegisterDevice...\n" );
+	OutputDebugString( L"About to RegisterDevice...\r\n" );
+/*
+	g_hDev = RegisterDevice (DRIVER_NAME, 0, DRIVER_DLL, DRIVER_INSTANCE);
 
-	//g_hDev = RegisterDevice (DRIVER_NAME, 0, DRIVER_DLL, DRIVER_INSTANCE);
-//	g_hDev = CreateFile(L"PKT1:",GENERIC_WRITE,0,NULL,OPEN_EXISTING,FILE_ATTRIBUTE_NORMAL,NULL);
+	PacketSetLastError (GetLastError ());
 
-	//PacketSetLastError (GetLastError ());
-
-	//if (g_hDev == NULL) {
-	//	OutputDebugString( L"RegisterDevice failed!\n" );
-	//	return FALSE;
-	//}
-
-	return TRUE;
+	if (g_hDev == NULL) {
+		OutputDebugString( L"RegisterDevice failed!\n" );
+		return FALSE;
+	}
+*/
+/*    
+    g_hActiveDriver = ActivateDeviceEx(L"\\Drivers\\BuiltIn\\PktDrv", NULL, 0, NULL);
+    if (g_hActiveDriver == INVALID_HANDLE_VALUE || g_hActiveDriver == NULL)
+    {
+        dwLastError = GetLastError();
+        OutputDebugString( L"(PKT) -> Unable to load driver!\r\n" );
+        return FALSE;
+    }
+    
+    g_hDriver = CreateFile (L"PKT1:", GENERIC_READ | GENERIC_WRITE,
+                                     FILE_SHARE_READ | FILE_SHARE_WRITE,
+                                     NULL,
+                                     OPEN_EXISTING,
+                                     FILE_ATTRIBUTE_NORMAL,
+                                     NULL);
+    
+    if (g_hDriver == INVALID_HANDLE_VALUE)
+    { 
+        dwLastError = GetLastError();
+        ERRORMSG(1,(TEXT("(PKT) -> Unable to open PacketDrv (PKT) driver!\r\n")));
+        return FALSE;
+    }
+*/	
+    return TRUE;
 }
 
 
@@ -924,15 +950,37 @@ BOOLEAN	PacketLoadDriver(VOID)
 //---------------------------------------------------------------------------
 BOOL PacketUnloadDriver (VOID)
 {
-	// Unregister the packet driver
+BOOL fRet;
+
+    fRet = TRUE;
+    /*
+    // Unregister the packet driver
 	if (g_hDev != NULL) {
-	//	DeregisterDevice (g_hDev);
-		/*CloseHandle(g_hDev);*/
+		DeregisterDevice (g_hDev);
 		PacketSetLastError (GetLastError ());
 		g_hDev = NULL;
 	}
 	
-	return TRUE;
+    if (g_hDriver != INVALID_HANDLE_VALUE)
+    {
+        fRet = CloseHandle (g_hDriver);
+        if (fRet == FALSE)
+        {
+            ERRORMSG(1,(TEXT("Unable to close PacketDrv (PKT) driver!\r\n")));
+        }
+    }
+    */
+/*    
+    if (g_hActiveDriver != INVALID_HANDLE_VALUE) 
+    {
+        fRet = DeactivateDevice (g_hActiveDriver);
+        if (fRet == FALSE)
+        {
+            ERRORMSG(1,(TEXT("Unable to unlod PKT driver!\r\n")));
+        }
+    }
+*/
+	return (fRet);
 }
 
 
@@ -953,9 +1001,9 @@ LPADAPTER PacketOpenAdapter (LPTSTR AdapterName)
 	WCHAR		wchEvName[64];
 
 	// Allocate memory for adapter object
-	lpAdapter = (LPADAPTER)HeapAlloc (GetProcessHeap (),  HEAP_ZERO_MEMORY, sizeof (ADAPTER));
+	lpAdapter = (LPADAPTER) HeapAlloc (GetProcessHeap (),  HEAP_ZERO_MEMORY, sizeof (ADAPTER));
 	if (lpAdapter == NULL) {
-		OutputDebugString( L"Check 1\n");
+		OutputDebugString( L"Check 1\r\n");
 		PacketSetLastError (GetLastError ());
 		return NULL;
 	}
@@ -965,16 +1013,17 @@ LPADAPTER PacketOpenAdapter (LPTSTR AdapterName)
 	lpAdapter->hFile = CreateFile (DRIVER_OPEN_STRING, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 	if (lpAdapter->hFile == INVALID_HANDLE_VALUE) {
 		PacketSetLastError (GetLastError ());
-		OutputDebugString( L"Check 2\n");
+		OutputDebugString( L"Check 2\r\n");
 		HeapFree (GetProcessHeap (), 0, lpAdapter);
 		return NULL;
 	}
 
 	// open the specified adapter
 	if (DeviceIoControl (lpAdapter->hFile, PIOC_OPEN_ADAPTER, (LPVOID)AdapterName, 
-		wcslen (AdapterName)*sizeof (TCHAR), NULL, 0, &dwRet, NULL) == FALSE) {
+		wcslen (AdapterName)*sizeof (TCHAR), NULL, 0, &dwRet, NULL) == FALSE) 
+    {
 
-		OutputDebugString( L"Check 3\n");
+		OutputDebugString( L"Check 3\r\n");
 		PacketSetLastError (GetLastError ());
 
 		DeviceIoControl (lpAdapter->hFile, PIOC_CLOSE_ADAPTER, NULL, 0, NULL, 0, &dwRet, NULL);

@@ -248,7 +248,15 @@ Ret = kEplSuccessful;
     EdrvInstance_l.m_InitParam = *pEdrvInitParam_p;
 
     m_lpAdapter = PacketOpenAdapter((LPTSTR)pEdrvInitParam_p->m_HwParam.m_pszDevName);
-    
+//$$$$$$$$$$ d.g. Keine Abfrage ob Pointer == NULL $$$$$$
+    if (m_lpAdapter == NULL)
+    {
+        OutputDebugString( L"PKT ADATER NAMES: OPEN ADAPTER FAILED\n" );
+        PacketSetLastError (GetLastError ());
+        Ret = kEplEdrvInitError;
+        goto Exit;
+    }
+
     // Create an handle to read packtes from the driver
     EdrvInstance_l.m_hEdrvRead = CreateFile (L"PKT1:", GENERIC_READ, 0, 
         NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
@@ -315,7 +323,7 @@ Ret = kEplSuccessful;
     m_RxPacket.bIoComplete            = FALSE;
 
     // set a 64k buffer in the driver
-    PacketSetBuff (m_lpAdapter, 64 * 1024);
+  //  PacketSetBuff (m_lpAdapter, 64 * 1024);
 
     // set number or write counter to one
     PacketSetNumWrites (m_lpAdapter, 1);
