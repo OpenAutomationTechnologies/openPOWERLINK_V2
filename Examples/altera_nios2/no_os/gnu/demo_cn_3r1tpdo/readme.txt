@@ -11,6 +11,7 @@ Contents
 ---------
 
 - Extended Demo for Controlled Node as standalone program on Nios II CPU.
+  with support for PollResponse Chaining according to EPSG DS 302-C.
 
 Performance Data
 -----------------
@@ -25,6 +26,7 @@ Requirements
 -------------
 
 - Development Board EBV DBC3C40 (Mercury Board)
+  or SYS TEC Development Board for ECUcore-EP3C
 
 - Altera Quartus II v9.0 or newer (Web Edition is also possible)
 
@@ -32,7 +34,8 @@ Requirements
 
 - Experiences with this development environment are required
 
-- POWERLINK network with Configuration Manager.
+- POWERLINK network as described in main readme.txt
+  or alternatively a POWERLINK network with Configuration Manager.
   The corresponding XDD for this node can be found in the subdirectory
   ObjDicts\CiA401_3r1tpdo_CN of the openPOWERLINK main directory.
 

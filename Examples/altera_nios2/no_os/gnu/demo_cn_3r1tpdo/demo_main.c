@@ -116,8 +116,8 @@ int openPowerlink(void)
 	EplApiInitParam.m_fAsyncOnly = FALSE;
 	EplApiInitParam.m_dwFeatureFlags = -1;
 	EplApiInitParam.m_dwCycleLen = CYCLE_LEN;
-	EplApiInitParam.m_uiPreqActPayloadLimit = 50;
-	EplApiInitParam.m_uiPresActPayloadLimit = 50;
+	EplApiInitParam.m_uiPreqActPayloadLimit = 36;
+	EplApiInitParam.m_uiPresActPayloadLimit = 36;
 	EplApiInitParam.m_uiMultiplCycleCnt = 0;
 	EplApiInitParam.m_uiAsyncMtu = 1500;
 	EplApiInitParam.m_uiPrescaler = 2;
@@ -135,6 +135,7 @@ int openPowerlink(void)
 	EplApiInitParam.m_pfnCbEvent = AppCbEvent;
     EplApiInitParam.m_pfnCbSync  = AppCbSync;
     EplApiInitParam.m_pfnObdInitRam = EplObdInitRam;
+    EplApiInitParam.m_dwSyncResLatency = EPL_C_DLL_T_IFG;
 
 	// initialize EPL stack
     printf("init EPL Stack with node-ID 0x%02X:\n", EplApiInitParam.m_uiNodeId);
@@ -485,19 +486,19 @@ tEplKernel PUBLIC AppCbSync(void)
 #endif
 
 #ifdef DOUT_PIO_BASE
-    IOWR_ALTERA_AVALON_PIO_DATA(DOUT_PIO_BASE, wDigitalOutputs_l);
+    IOWR_ALTERA_AVALON_PIO_DATA(DOUT_PIO_BASE, bLedOutputs_l);
 #endif
 
 #ifdef LED_PIO_BASE
-    IOWR_ALTERA_AVALON_PIO_DATA(LED_PIO_BASE, ~bLedOutputs_l);
+    IOWR_ALTERA_AVALON_PIO_DATA(LED_PIO_BASE, ~wDigitalOutputs_l);
 #endif
 
     for (nIdx = 0; nIdx < 15; nIdx++)
     {
         abVirtualInputs_l[nIdx] = (~abVirtualOutputs_l[nIdx])-1;
     }
-    abVirtualInputs_l[16] = (~bButtonInputs_l)-1;
-    abVirtualInputs_l[17] = (~bLedOutputs_l)-1;
+    abVirtualInputs_l[15] = (~bButtonInputs_l)-1;
+    abVirtualInputs_l[16] = (~bLedOutputs_l)-1;
 
     for (nIdx = 0; nIdx < 8; nIdx++)
     {
