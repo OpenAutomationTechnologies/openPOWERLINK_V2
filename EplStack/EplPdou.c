@@ -1033,8 +1033,17 @@ void*               pVar;
         goto Exit;
     }
 
-    if ((uiBitSize & 0x7) != 0x0)
-    {   // bit mapping is not supported
+    Ret = EplObduGetType(uiIndex, uiSubIndex, &ObdType);
+    if (Ret != kEplSuccessful)
+    {   // entry doesn't exist
+        *pdwAbortCode_p = EPL_SDOAC_OBJECT_NOT_EXIST;
+        Ret = kEplPdoVarNotFound;
+        goto Exit;
+    }
+
+    if (((uiBitSize & 0x7) != 0x0)
+        && ((uiBitSize != 1) || (ObdType != kEplObdTypBool)))
+    {   // bit mapping is not supported, except for BOOLEAN objects on byte boundaries
         *pdwAbortCode_p = EPL_SDOAC_GENERAL_ERROR;
         Ret = kEplPdoGranularityMismatch;
         goto Exit;
@@ -1063,7 +1072,15 @@ void*               pVar;
         goto Exit;
     }
 
-    uiByteSize = (uiBitSize >> 3);
+    if (ObdType == kEplObdTypBool)
+    {   // bit size of BOOLEAN object was checked above
+        uiByteSize = 1;
+    }
+    else
+    {
+        uiByteSize = (uiBitSize >> 3);
+    }
+
     ObdSize = EplObduGetDataSize(uiIndex, uiSubIndex);
     if (ObdSize < uiByteSize)
     {   // object does not exist or has smaller size
@@ -1093,13 +1110,6 @@ void*               pVar;
     {   // entry doesn't exist
         *pdwAbortCode_p = EPL_SDOAC_OBJECT_NOT_EXIST;
         Ret = kEplPdoVarNotFound;
-        goto Exit;
-    }
-
-    Ret = EplObduGetType(uiIndex, uiSubIndex, &ObdType);
-    if (Ret != kEplSuccessful)
-    {   // entry doesn't exist
-        *pdwAbortCode_p = EPL_SDOAC_OBJECT_NOT_EXIST;
         goto Exit;
     }
 
