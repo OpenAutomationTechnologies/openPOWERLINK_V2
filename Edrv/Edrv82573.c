@@ -88,7 +88,9 @@
 #include <linux/sched.h>
 #include <linux/delay.h>
 #include <linux/gfp.h>
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 26)
 #include <linux/semaphore.h>
+#endif
 
 
 /***************************************************************************/
