@@ -327,12 +327,23 @@ BOOL                fDoUpdate = FALSE;
 
     if (pNodeInfo->m_CfmState != kEplCfmuStateIdle)
     {
+        // send abort
         pNodeInfo->m_CfmState = kEplCfmuStateInternalAbort;
         Ret = EplSdoComSdoAbort(pNodeInfo->m_SdoComConHdl, EPL_SDOAC_DATA_NOT_TRANSF_DUE_LOCAL_CONTROL);
         if (Ret != kEplSuccessful)
         {
             goto Exit;
         }
+
+        // close connection
+        Ret = EplSdoComUndefineCon(pNodeInfo->m_SdoComConHdl);
+        pNodeInfo->m_SdoComConHdl = ~0U;
+        if (Ret != kEplSuccessful)
+        {
+            EPL_DBGLVL_CFM_TRACE0("SDO Free Error!\n");
+            goto Exit;
+        }
+
     }
 
     pNodeInfo->m_uiCurDataSize = 0;
@@ -1048,6 +1059,7 @@ tEplSdoComTransParamByIndex TransParamByIndex;
         }
 
         // retry transfer
+        TransParamByIndex.m_SdoComConHdl = pNodeInfo_p->m_SdoComConHdl;
         Ret = EplSdoComInitTransferByIndex(&TransParamByIndex);
     }
 

@@ -582,15 +582,15 @@ tEplAsySdoSeqCon*   pAsySdoSeqCon;
         {   // free entry found
             pAsySdoSeqCon = &AsySdoSequInstance_g.m_AsySdoConnection[uiFreeCon];
             pAsySdoSeqCon->m_ConHandle = ConHandle;
+            // increment use counter
+            pAsySdoSeqCon->m_uiUseCount++;
+
             uiCount = uiFreeCon;
         }
     }
 
     // set handle
     *pSdoSeqConHdl_p = (uiCount | EPL_SDO_ASY_HANDLE);
-
-    // increment use counter
-    pAsySdoSeqCon->m_uiUseCount++;
 
     // call intern process function
     Ret = EplSdoAsySeqProcess(uiCount,
@@ -913,13 +913,6 @@ unsigned int        uiFreeEntries;
                     // set set send rcon to 0
                     pAsySdoSeqCon->m_bSendSeqNum = 0x00;
 
-                    // init History
-                    Ret = EplSdoAsyInitHistory(pAsySdoSeqCon);
-                    if(Ret != kEplSuccessful)
-                    {
-                        goto Exit;
-                    }
-
                     Ret = EplSdoAsySeqSendIntern(pAsySdoSeqCon,
                                                  0,
                                                  NULL,
@@ -1159,6 +1152,13 @@ unsigned int        uiFreeEntries;
                         // change state to kEplAsySdoStateConnected
                         pAsySdoSeqCon->m_SdoState = kEplAsySdoStateConnected;
 
+                        // init History
+                        Ret = EplSdoAsyInitHistory(pAsySdoSeqCon);
+                        if(Ret != kEplSuccessful)
+                        {
+                            goto Exit;
+                        }
+
                         // set timer
                         Ret = EplSdoAsySeqSetTimer(pAsySdoSeqCon,
                                                 EPL_SEQ_DEFAULT_TIMEOUT);
@@ -1266,6 +1266,13 @@ unsigned int        uiFreeEntries;
                         // change state to kEplAsySdoStateConnected
                         pAsySdoSeqCon->m_SdoState = kEplAsySdoStateConnected;
 
+                        // init History
+                        Ret = EplSdoAsyInitHistory(pAsySdoSeqCon);
+                        if(Ret != kEplSuccessful)
+                        {
+                            goto Exit;
+                        }
+
                         // set timer
                         Ret = EplSdoAsySeqSetTimer(pAsySdoSeqCon,
                                                 EPL_SEQ_DEFAULT_TIMEOUT);
@@ -1293,6 +1300,13 @@ unsigned int        uiFreeEntries;
                         }
                         // change state to kEplAsySdoStateConnected
                         pAsySdoSeqCon->m_SdoState = kEplAsySdoStateConnected;
+
+                        // init History
+                        Ret = EplSdoAsyInitHistory(pAsySdoSeqCon);
+                        if(Ret != kEplSuccessful)
+                        {
+                            goto Exit;
+                        }
 
                         // set timer
                         Ret = EplSdoAsySeqSetTimer(pAsySdoSeqCon,
@@ -2085,7 +2099,7 @@ tEplAsySdoSeqCon*   pAsySdoSeqCon;
                 pAsySdoSeqCon->m_ConHandle = ConHdl_p;
                 // increment use counter
                 pAsySdoSeqCon->m_uiUseCount++;
-                uiCount = uiFreeEntry ;
+                uiCount = uiFreeEntry;
             }
         }
 
