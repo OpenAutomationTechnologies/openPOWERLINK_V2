@@ -214,7 +214,7 @@ tEplKernel PUBLIC EplSdoAsyReceiveCb (tEplSdoConHdl       ConHdl_p,
                                         tEplAsySdoSeq*      pSdoSeqData_p,
                                         unsigned int        uiDataSize_p);
 
-static tEplKernel EplSdoAsyInitHistory(void);
+static tEplKernel EplSdoAsyInitHistory(tEplAsySdoSeqCon*  pAsySdoSeqCon_p);
 
 static tEplKernel EplSdoAsyAddFrameToHistory(tEplAsySdoSeqCon*  pAsySdoSeqCon_p,
                                         tEplFrame*      pFrame_p,
@@ -335,13 +335,6 @@ tEplKernel  Ret;
 
     // set controllstructure to 0
     EPL_MEMSET(&AsySdoSequInstance_g.m_AsySdoConnection[0], 0x00, sizeof(AsySdoSequInstance_g.m_AsySdoConnection));
-
-    // init History
-    Ret = EplSdoAsyInitHistory();
-    if(Ret != kEplSuccessful)
-    {
-        goto Exit;
-    }
 
 #if defined(WIN32) || defined(_WIN32)
     // create critical section for process function
@@ -919,6 +912,14 @@ unsigned int        uiFreeEntries;
                     pAsySdoSeqCon->m_bRecSeqNum = 0x01;
                     // set set send rcon to 0
                     pAsySdoSeqCon->m_bSendSeqNum = 0x00;
+
+                    // init History
+                    Ret = EplSdoAsyInitHistory(pAsySdoSeqCon);
+                    if(Ret != kEplSuccessful)
+                    {
+                        goto Exit;
+                    }
+
                     Ret = EplSdoAsySeqSendIntern(pAsySdoSeqCon,
                                                  0,
                                                  NULL,
@@ -2119,7 +2120,7 @@ Exit:
 //
 // Function:        EplSdoAsyInitHistory
 //
-// Description:     inti function for history buffer
+// Description:     init function for history buffer
 //
 //
 //
@@ -2132,17 +2133,15 @@ Exit:
 // State:
 //
 //---------------------------------------------------------------------------
-static tEplKernel EplSdoAsyInitHistory(void)
+static tEplKernel EplSdoAsyInitHistory(tEplAsySdoSeqCon*  pAsySdoSeqCon_p)
 {
 tEplKernel      Ret;
-unsigned int    uiCount;
 
     Ret = kEplSuccessful;
-    // init m_bFreeEntries in history-buffer
-    for(uiCount = 0; uiCount < EPL_MAX_SDO_SEQ_CON; uiCount++)
-    {
-        AsySdoSequInstance_g.m_AsySdoConnection[uiCount].m_SdoConHistory.m_bFreeEntries = EPL_SDO_HISTORY_SIZE;
-    }
+
+    pAsySdoSeqCon_p->m_SdoConHistory.m_bFreeEntries = EPL_SDO_HISTORY_SIZE;
+    pAsySdoSeqCon_p->m_SdoConHistory.m_bAck = 0;
+    pAsySdoSeqCon_p->m_SdoConHistory.m_bWrite = 0;
 
     return Ret;
 }
