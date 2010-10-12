@@ -363,7 +363,7 @@
             <SubObject subIndex="19" name="ObjectMapping 25" objectType="7" dataType="001B" accessType="rw" defaultValue="0x0" PDOmapping="no" />
           </Object>
           <Object index="1601" name="PDO_RxMappParam_1h_AU64" objectType="8">
-            <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="rw" defaultValue="0x01" PDOmapping="no" />
+            <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="rw" defaultValue="0x00" PDOmapping="no" />
             <SubObject subIndex="01" name="ObjectMapping 1" objectType="7" dataType="001B" accessType="rw" defaultValue="0x0008000000012200" PDOmapping="no" />
             <SubObject subIndex="02" name="ObjectMapping 2" objectType="7" dataType="001B" accessType="rw" defaultValue="0x0008000800022200" PDOmapping="no" />
             <SubObject subIndex="03" name="ObjectMapping 3" objectType="7" dataType="001B" accessType="rw" defaultValue="0x0008001000022200" PDOmapping="no" />
@@ -391,7 +391,7 @@
             <SubObject subIndex="19" name="ObjectMapping 25" objectType="7" dataType="001B" accessType="rw" defaultValue="0x0" PDOmapping="no" />
           </Object>
           <Object index="1602" name="PDO_RxMappParam_2h_AU64" objectType="8">
-            <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="rw" defaultValue="0x01" PDOmapping="no" />
+            <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="rw" defaultValue="0x00" PDOmapping="no" />
             <SubObject subIndex="01" name="ObjectMapping 1" objectType="7" dataType="001B" accessType="rw" defaultValue="0x0010000000016300" PDOmapping="no" />
             <SubObject subIndex="02" name="ObjectMapping 2" objectType="7" dataType="001B" accessType="rw" defaultValue="0x0" PDOmapping="no" />
             <SubObject subIndex="03" name="ObjectMapping 3" objectType="7" dataType="001B" accessType="rw" defaultValue="0x0" PDOmapping="no" />
