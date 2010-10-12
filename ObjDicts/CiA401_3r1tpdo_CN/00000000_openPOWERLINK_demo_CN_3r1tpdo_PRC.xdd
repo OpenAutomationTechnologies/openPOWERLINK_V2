@@ -1060,7 +1060,7 @@
         />
         <CNFeatures
           DLLCNFeatureMultiplex="true"
-          DLLCNFeatureChaining="true"
+          CNPResChaining="true"
           NMTCNSoC2PReq="0"
         />
 
