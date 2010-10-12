@@ -1027,6 +1027,29 @@ tEplSdoComTransParamByIndex TransParamByIndex;
             Ret = EplSdoComInitTransferByIndex(&TransParamByIndex);
         }
     }
+    else if (Ret == kEplSdoSeqConnectionBusy)
+    {
+        // close connection
+        Ret = EplSdoComUndefineCon(pNodeInfo_p->m_SdoComConHdl);
+        pNodeInfo_p->m_SdoComConHdl = ~0U;
+        if (Ret != kEplSuccessful)
+        {
+            EPL_DBGLVL_CFM_TRACE0("SDO Free Error!\n");
+            goto Exit;
+        }
+
+        // reinit command layer connection
+        Ret = EplSdoComDefineCon(&pNodeInfo_p->m_SdoComConHdl,
+                                 pNodeInfo_p->m_EventCnProgress.m_uiNodeId,
+                                 kEplSdoTypeAsnd);
+        if ((Ret != kEplSuccessful) && (Ret != kEplSdoComHandleExists))
+        {
+            goto Exit;
+        }
+
+        // retry transfer
+        Ret = EplSdoComInitTransferByIndex(&TransParamByIndex);
+    }
 
 Exit:
     return Ret;
