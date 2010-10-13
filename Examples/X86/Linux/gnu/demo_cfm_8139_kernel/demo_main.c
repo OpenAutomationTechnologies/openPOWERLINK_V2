@@ -183,7 +183,7 @@ static uint uiNodeId_g = EPL_C_ADR_INVALID;
 module_param_named(nodeid, uiNodeId_g, uint, 0);
 MODULE_PARM_DESC(nodeid, "Local Node-ID of this POWERLINK node (0x01 - 0xEF -> CNs, 0xF0 -> MN");
 
-static uint uiCycleLen_g = CYCLE_LEN;
+static uint uiCycleLen_g = 0;
 module_param_named(cyclelen, uiCycleLen_g, uint, 0);
 MODULE_PARM_DESC(cyclelen, "Cyclelength in [µs] (it is stored in object 0x1006)");
 
@@ -254,6 +254,8 @@ static tEplApiInitParam EplApiInitParam = {0};
 char*               sHostname = HOSTNAME;
 unsigned int        uiVarEntries;
 tEplObdSize         ObdSize;
+BOOL                fApiInit = FALSE;
+BOOL                fLinProcInit =FALSE;
 
     atomic_set(&AtomicShutdown_g, TRUE);
 
@@ -328,6 +330,7 @@ tEplObdSize         ObdSize;
     {
         goto Exit;
     }
+    fLinProcInit = TRUE;
 
     // initialize POWERLINK stack
     EplRet = EplApiInitialize(&EplApiInitParam);
@@ -335,6 +338,7 @@ tEplObdSize         ObdSize;
     {
         goto Exit;
     }
+    fApiInit = TRUE;
 
     EplRet = EplApiSetCdcFilename(pszCdcFilename_g);
     if(EplRet != kEplSuccessful)
@@ -423,6 +427,15 @@ Exit:
     PRINTF1("EplLinInit(): returns 0x%X\n", EplRet);
     if (EplRet != kEplSuccessful)
     {
+        if (fApiInit != FALSE)
+        {
+            EplApiShutdown();
+        }
+        if (fLinProcInit != FALSE)
+        {
+            EplLinProcFree();
+        }
+
         return -ENODEV;
     }
     else
@@ -516,11 +529,15 @@ tEplKernel          EplRet = kEplSuccessful;
 
                 case kEplNmtGsResetCommunication:
                 {
-					// continue
+                    // continue
                 }
 
                 case kEplNmtGsResetConfiguration:
                 {
+                    if (uiCycleLen_g != 0)
+                    {
+                        EplRet = EplApiWriteLocalObject(0x1006, 0x00, &uiCycleLen_g, sizeof (uiCycleLen_g));
+                    }
                     // continue
                 }
 

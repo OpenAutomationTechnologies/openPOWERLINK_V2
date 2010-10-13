@@ -255,6 +255,8 @@ char*               sHostname = HOSTNAME;
 //char                sBuffer[16];
 unsigned int        uiVarEntries;
 tEplObdSize         ObdSize;
+BOOL                fApiInit = FALSE;
+BOOL                fLinProcInit =FALSE;
 
     atomic_set(&AtomicShutdown_g, TRUE);
 
@@ -330,6 +332,7 @@ tEplObdSize         ObdSize;
     {
         goto Exit;
     }
+    fLinProcInit = TRUE;
 
     // initialize POWERLINK stack
     EplRet = EplApiInitialize(&EplApiInitParam);
@@ -337,6 +340,7 @@ tEplObdSize         ObdSize;
     {
         goto Exit;
     }
+    fApiInit = TRUE;
 
     // link process variables used by CN to object dictionary
     ObdSize = sizeof(bVarIn1_l);
@@ -404,7 +408,7 @@ tEplObdSize         ObdSize;
     EplRet = EplApiLinkObject(0x6100, &abDomain_l, &uiVarEntries, &ObdSize, 0x00);
     if (EplRet != kEplSuccessful)
     {
-        printk("EplApiLinkObject(0x6100): returns 0x%X\n", EplRet);
+        PRINTF1("EplApiLinkObject(0x6100): returns 0x%X\n", EplRet);
     }
 
     // reset old process variables
@@ -413,35 +417,23 @@ tEplObdSize         ObdSize;
     dwMode_l = APP_DEFAULT_MODE;
     iMaxCycleCount_l = DEFAULT_MAX_CYCLE_COUNT;
 
-#if 0
-    // configure IP address of virtual network interface
-    // for TCP/IP communication over the POWERLINK network
-    sprintf(sBuffer, "%lu.%lu.%lu.%lu", (EplApiInitParam.m_dwIpAddress >> 24), ((EplApiInitParam.m_dwIpAddress >> 16) & 0xFF), ((EplApiInitParam.m_dwIpAddress >> 8) & 0xFF), (EplApiInitParam.m_dwIpAddress & 0xFF));
-    /* set up a minimal environment */
-    iRet = 0;
-    envp[iRet++] = "HOME=/";
-    envp[iRet++] = "PATH=/sbin:/bin:/usr/sbin:/usr/bin";
-    envp[iRet] = NULL;
-
-    /* set up the argument list */
-    iRet = 0;
-    argv[iRet++] = "/sbin/ifconfig";
-    argv[iRet++] = IF_ETH;
-    argv[iRet++] = sBuffer;
-    argv[iRet] = NULL;
-
-    /* call ifconfig to configure the virtual network interface */
-    iRet = call_usermodehelper(argv[0], argv, envp, 1);
-    printk("ifconfig %s %s returned %d\n", argv[1], argv[2], iRet);
-#endif
     // start the NMT state machine
     EplRet = EplApiExecNmtCommand(kEplNmtEventSwReset);
     atomic_set(&AtomicShutdown_g, FALSE);
 
 Exit:
-    printk("EplLinInit(): returns 0x%X\n", EplRet);
+    PRINTF1("EplLinInit(): returns 0x%X\n", EplRet);
     if (EplRet != kEplSuccessful)
     {
+        if (fApiInit != FALSE)
+        {
+            EplApiShutdown();
+        }
+        if (fLinProcInit != FALSE)
+        {
+            EplLinProcFree();
+        }
+
         return -ENODEV;
     }
     else
@@ -467,11 +459,11 @@ tEplKernel          EplRet;
     }*/
     // delete instance for all modules
     EplRet = EplApiShutdown();
-    printk("EplApiShutdown():  0x%X\n", EplRet);
+    PRINTF1("EplApiShutdown():  0x%X\n", EplRet);
 
     // deinitialize proc fs
     EplRet = EplLinProcFree();
-    printk("EplLinProcFree():        0x%X\n", EplRet);
+    PRINTF1("EplLinProcFree():        0x%X\n", EplRet);
 
 }
 
@@ -510,6 +502,8 @@ tEplKernel PUBLIC AppCbEvent(
 {
 tEplKernel          EplRet = kEplSuccessful;
 
+    UNUSED_PARAMETER(pUserArg_p);
+
     // check if NMT_GS_OFF is reached
     switch (EventType_p)
     {
@@ -523,7 +517,7 @@ tEplKernel          EplRet = kEplSuccessful;
                     // -> also shut down EplApiProcess() and main()
                     EplRet = kEplShutdown;
 
-                    printk("AppCbEvent(kEplNmtGsOff) originating event = 0x%X\n", pEventArg_p->m_NmtStateChange.m_NmtEvent);
+                    PRINTF2("%s(kEplNmtGsOff) originating event = 0x%X\n", __func__, pEventArg_p->m_NmtStateChange.m_NmtEvent);
 
                     // wake up EplLinExit()
                     atomic_set(&AtomicShutdown_g, TRUE);
@@ -576,7 +570,8 @@ tEplKernel          EplRet = kEplSuccessful;
 
                 case kEplNmtMsPreOperational1:
                 {
-                    printk("AppCbEvent(0x%X) originating event = 0x%X\n",
+                    printk("AppCbEvent(0x%X -> 0x%X) originating event = 0x%X\n",
+                           pEventArg_p->m_NmtStateChange.m_OldNmtState,
                            pEventArg_p->m_NmtStateChange.m_NewNmtState,
                            pEventArg_p->m_NmtStateChange.m_NmtEvent);
 
@@ -634,7 +629,10 @@ tEplKernel          EplRet = kEplSuccessful;
         {   // error or warning occured within the stack or the application
             // on error the API layer stops the NMT state machine
 
-            printk("AppCbEvent(Err/Warn): Source=%02X EplError=0x%03X", pEventArg_p->m_InternalError.m_EventSource, pEventArg_p->m_InternalError.m_EplError);
+            PRINTF3("%s(Err/Warn): Source=%02X EplError=0x%03X",
+                    __func__,
+                    pEventArg_p->m_InternalError.m_EventSource,
+                    pEventArg_p->m_InternalError.m_EplError);
             // check additional argument
             switch (pEventArg_p->m_InternalError.m_EventSource)
             {
@@ -642,20 +640,28 @@ tEplKernel          EplRet = kEplSuccessful;
                 case kEplEventSourceEventu:
                 {   // error occured within event processing
                     // either in kernel or in user part
-                    printk(" OrgSource=%02X\n", pEventArg_p->m_InternalError.m_Arg.m_EventSource);
+                    PRINTF1(" OrgSource=%02X\n", pEventArg_p->m_InternalError.m_Arg.m_EventSource);
                     break;
                 }
 
                 case kEplEventSourceDllk:
                 {   // error occured within the data link layer (e.g. interrupt processing)
                     // the DWORD argument contains the DLL state and the NMT event
-                    printk(" val=%lX\n", (ULONG) pEventArg_p->m_InternalError.m_Arg.m_dwArg);
+                    PRINTF1(" val=%lX\n", (ULONG) pEventArg_p->m_InternalError.m_Arg.m_dwArg);
+                    break;
+                }
+
+                case kEplEventSourceObdk:
+                case kEplEventSourceObdu:
+                {   // error occured within OBD module
+                    // either in kernel or in user part
+                    PRINTF2(" Object=0x%04X/%u\n", pEventArg_p->m_InternalError.m_Arg.m_ObdError.m_uiIndex, pEventArg_p->m_InternalError.m_Arg.m_ObdError.m_uiSubIndex);
                     break;
                 }
 
                 default:
                 {
-                    printk("\n");
+                    PRINTF0("\n");
                     break;
                 }
             }

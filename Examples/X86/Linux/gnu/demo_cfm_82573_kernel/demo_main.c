@@ -258,6 +258,8 @@ static tEplApiInitParam EplApiInitParam = {0};
 char*               sHostname = HOSTNAME;
 unsigned int        uiVarEntries;
 tEplObdSize         ObdSize;
+BOOL                fApiInit = FALSE;
+BOOL                fLinProcInit =FALSE;
 
     atomic_set(&AtomicShutdown_g, TRUE);
 
@@ -335,6 +337,7 @@ tEplObdSize         ObdSize;
     {
         goto Exit;
     }
+    fLinProcInit = TRUE;
 
     // initialize POWERLINK stack
     EplRet = EplApiInitialize(&EplApiInitParam);
@@ -342,6 +345,7 @@ tEplObdSize         ObdSize;
     {
         goto Exit;
     }
+    fApiInit = TRUE;
 
     EplRet = EplApiSetCdcFilename(pszCdcFilename_g);
     if(EplRet != kEplSuccessful)
@@ -430,6 +434,15 @@ Exit:
     PRINTF1("EplLinInit(): returns 0x%X\n", EplRet);
     if (EplRet != kEplSuccessful)
     {
+        if (fApiInit != FALSE)
+        {
+            EplApiShutdown();
+        }
+        if (fLinProcInit != FALSE)
+        {
+            EplLinProcFree();
+        }
+
         return -ENODEV;
     }
     else
