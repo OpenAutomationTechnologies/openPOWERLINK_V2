@@ -100,7 +100,7 @@ Leds::Leds(int iCount_p, int iWidth_p, const QPalette & palette_p,
     // create array for pointers to LedButtons
     m_ppLedButtons = new QToolButton*[iCount_p];
 
-    for (nIdx = iCount_p - 1; nIdx >= 0; nIdx--)
+    for (nIdx = 0; nIdx < iCount_p; nIdx++)
     {
         m_ppLedButtons[nIdx] = new QToolButton;
         m_ppLedButtons[nIdx]->setPalette(palette_p);
