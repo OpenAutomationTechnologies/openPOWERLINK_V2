@@ -58,13 +58,23 @@
 3. Available demo applications
 -------------------------------
 
-X86 PC with Linux operating system (see section 3.1 for requirements)
+X86 PC with Realtek RTL8139 network card and Linux operating system (see section 3.1 for requirements)
   * Qt demo:
     = Examples\X86\Linux\gnu\demo_mn_8139_qt
   * simple MN demo with application running together with stack in kernel:
     = Examples\X86\Linux\gnu\demo_mn_8139_kernel
   * MN demo with Configuration Manager (CFM):
     = Examples\X86\Linux\gnu\demo_cfm_8139_kernel
+  * Qt demo with Configuration Manager (CFM):
+    = Examples\X86\Linux\gnu\demo_cfm_8139_qt
+
+X86 PC with Intel 82573 network chip and Linux operating system
+  * Qt demo:
+    = Examples\X86\Linux\gnu\demo_mn_82573_qt
+  * MN demo with Configuration Manager (CFM):
+    = Examples\X86\Linux\gnu\demo_cfm_82573_kernel
+  * Qt demo with Configuration Manager (CFM):
+    = Examples\X86\Linux\gnu\demo_cfm_82573_qt
 
 X86 PC with Microsoft Windows operating system (2000, XP or newer)
 and WinPcap driver installed:
@@ -73,7 +83,7 @@ and WinPcap driver installed:
   * simple MN demo for Microsoft Visual C 2008:
     = Examples\X86\Windows\VC9\demo_pcap
   * MN demo with Configuration Manager (CFM) for Microsoft Visual C 2005:
-    = Examples\X86\Windows\VC8\demo_pcap_cfm
+    = Examples\X86\Windows\VC8\demo_cfm_pcap
 
 Freescale ColdFire MCF5484 (SYSTEC Development Board for ECUcore-5484)
 with Linux operating system (see section 3.2 for requirements)
@@ -89,10 +99,9 @@ Hilscher netX-500 (Evaluation board Hilscher NXEB 500-HMI)
 Atmel AT91RM9200 with Davicom DM9003 under Linux
   = Examples\at91rm9200\Linux\gnu\demo_mn_dm9003_kernel
 
-Altera Cyclone III on EBV DBC3C40 Development Board with Nios II Soft-CPU and openMAC
-  * simple CN demo which controls the LEDs and reads the pushbuttons on the devboard:
-    = Examples\altera_nios2\no_os\gnu\demo_cn_openmac
-  * extended CN demo which controls the LEDs and reads the pushbuttons on the devboard:
+Altera Cyclone III on EBV DBC3C40 Development Board or SYS TEC ECUcore-EP3C Development Board
+with Nios II Soft-CPU and openMAC
+  * CN demo which controls the LEDs and reads the pushbuttons on the devboard:
     = Examples\altera_nios2\no_os\gnu\demo_cn_3r1tpdo
 
 
