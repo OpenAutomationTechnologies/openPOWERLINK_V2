@@ -52,13 +52,15 @@ fi
 echo "unbinding PCI device $pciid"
 echo -n $pciid > /sys/bus/pci/drivers/8139too/unbind
 
-cdcfile=`dirname $(readlink -f ${0})`/mnobd.cdc
+if [ -z $CDCFILE ] ; then
+CDCFILE=`dirname $(readlink -f ${0})`/mnobd.cdc
+fi
 
-echo "Loading EPL module with CDC=${cdcfile}..."
+echo "Loading EPL module with CDC=${CDCFILE}..."
 
 # invoke insmod with all arguments we got
 # and use a pathname, as insmod doesn't look in . by default
-/sbin/insmod `dirname $0`/$module.ko cdc="$cdcfile" $*
+/sbin/insmod `dirname $0`/$module.ko cdc="$CDCFILE" $*
 
 if [ "$?" -ne "0" ] ; then
   echo " Loading of EPL module failed"
