@@ -54,6 +54,8 @@ echo -n $pciid > /sys/bus/pci/drivers/8139too/unbind
 
 if [ -z $CDCFILE ] ; then
 CDCFILE=`dirname $(readlink -f ${0})`/mnobd.cdc
+else
+CDCFILE=`readlink -f ${CDCFILE}`
 fi
 
 echo "Loading EPL module with CDC=${CDCFILE}..."
@@ -70,6 +72,21 @@ else
   echo
 
 fi
+
+# Set real-time priority -82 for hr-timer threads
+chrt -f -p 81 `ps -C sirq-hrtimer/0 -o pid --no-headers`
+chrt -f -p 81 `ps -C sirq-hrtimer/1 -o pid --no-headers` 
+# Set real-time priority -81 for Ethernet ISR thread
+chrt -f -p 80 `ps -C \`ps -e -o comm |grep ^irq/.*epl\$\` -o pid --no-headers` 
+# For kernel-queue shared-buffer thread, priority -80 (79) is set in ShbIpc-LinuxKernel.c
+
+
+# Enable tracing
+#echo function_graph > /sys/kernel/debug/tracing/current_tracer
+#echo 'EplDllk* EdrvCyclic* TgtEthIsr EplPdok* EplEventk* EplNmtk*' > /sys/kernel/debug/tracing/set_ftrace_filter
+#echo funcgraph-abstime > /sys/kernel/debug/tracing/trace_options
+#echo > /sys/kernel/debug/tracing/trace
+#echo 1 > /sys/kernel/debug/tracing/tracing_enabled
 
 exit 0
 

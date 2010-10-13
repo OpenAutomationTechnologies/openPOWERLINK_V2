@@ -1,6 +1,16 @@
 #!/bin/sh
 
 
+# Used by udev rule
+if [ $# -ge 1 ] ; then
+    if [ $1 = "edrv_thread_priority" ] ; then
+        # Set real-time priority -81 for Ethernet ISR thread
+        chrt -f -p 80 `ps -C \`ps -e -o comm |grep ^irq/.*epl\$\` -o pid --no-headers` 
+        exit
+    fi
+fi
+
+
 if [ $USER != "root" ] ; then
 
   echo "Please run 'sudo $0'"
@@ -53,9 +63,16 @@ echo "unbinding PCI device $pciid"
 echo -n $pciid > /sys/bus/pci/drivers/8139too/unbind
 
 
-# install special udev rule, which sets the mode bits appropriately
+# install special udev rule
 if [ -d /etc/udev/rules.d ] ; then
-    cp 50-openPOWERLINK.rules /etc/udev/rules.d
+    EPLLOAD_PATH=`dirname $(readlink -f ${0})`
+    cat 50-openPOWERLINK.rules | sed "s#EPLLOAD_PATH#${EPLLOAD_PATH}#" > /etc/udev/rules.d/50-openPOWERLINK.rules
+    which service > /dev/null
+    if [ "$?" -eq "0" ] ; then
+        service udev reload
+    else
+        /etc/init.d/udev reload
+    fi
 fi
 
 echo "Loading EPL module..."
@@ -74,6 +91,22 @@ else
   echo
 
 fi
+
+# Set real-time priority -82 for hr-timer threads
+chrt -f -p 81 `ps -C sirq-hrtimer/0 -o pid --no-headers`
+chrt -f -p 81 `ps -C sirq-hrtimer/1 -o pid --no-headers` 
+# For kernel-queue shared-buffer thread, priority -80 is set in ShbIpc-LinuxKernel.c
+# For Ethernet ISR thread, priority -81 is set by udev rule
+
+
+# Enable tracing
+#echo function       > /sys/kernel/debug/tracing/current_tracer
+#echo sched_switch   > /sys/kernel/debug/tracing/current_tracer
+#echo function_graph > /sys/kernel/debug/tracing/current_tracer
+#echo 'EplDllk* EdrvCyclic* TgtEthIsr EplPdok* EplEventk* EplNmtk* EplLin* EplApi*' > /sys/kernel/debug/tracing/set_ftrace_filter
+#echo funcgraph-abstime > /sys/kernel/debug/tracing/trace_options
+#echo 1 > /sys/kernel/debug/tracing/tracing_enabled
+#chmod o+w /sys/kernel/debug/tracing/tracing_enabled
 
 exit 0
 

@@ -54,6 +54,8 @@ echo -n $pciid > /sys/bus/pci/drivers/e1000e/unbind
 
 if [ -z $CDCFILE ] ; then
 CDCFILE=`dirname $(readlink -f ${0})`/mnobd.cdc
+else
+CDCFILE=`readlink -f ${CDCFILE}`
 fi
 
 echo "Loading EPL module with CDC=${CDCFILE}..."
