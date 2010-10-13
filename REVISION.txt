@@ -732,7 +732,7 @@ Fellow worker:    Daniel Krüger (d.k.)
                     - demo_userapp_qt: readded the code to work in configurations without CFM
                     (d.k.)
 
-05.10.2010 V1.7     - support mapping of BOOLEAN objects on byte boundaries
+05.10.2010 V1.7     - PDO module: support mapping of BOOLEAN objects on byte boundaries
                     - unified demo project for Altera Cyclone III FPGA. From now on there is only one demo project,
                       which is compatible with the standard openPOWERLINK MN demos.
                     (d.k.)
