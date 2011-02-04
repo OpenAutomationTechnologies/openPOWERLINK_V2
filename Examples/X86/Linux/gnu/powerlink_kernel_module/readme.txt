@@ -3,8 +3,8 @@
 	openPOWERLINK.sourceforge.net
 
 
-	openPOWERLINK - Qt Demo for Intel 82573 network chips
-	======================================================
+openPOWERLINK - Kernel module for openPOWERLINK user space applications
+=======================================================================
 
 
 Consists of:
@@ -55,7 +55,7 @@ Howto generate a new network configuration with openCONFIGURATOR
 
 7. Select "No" under "Auto Generate" (Important!)
     and press "Ok"
-    
+
 8. Select "Advanced View" under menu "View".
 
 9. Add CNs via right mouse button click on item "openPOWERLINK_MN" in "Network Browser".

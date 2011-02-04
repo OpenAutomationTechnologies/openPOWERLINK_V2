@@ -53,7 +53,7 @@
 
                 $Author$
 
-                $Revision$  $Date$
+                $Revision$
 
                 $State$
 
@@ -70,9 +70,6 @@
 
 #ifndef _EPLCFG_H_
 #define _EPLCFG_H_
-
-
-
 
 // =========================================================================
 // generic defines which for whole EPL Stack
@@ -95,12 +92,11 @@
 
 // use no FIFOs, make direct calls
 //#define EPL_USE_SHAREDBUFF   FALSE
-
 #ifndef BENCHMARK_MODULES
 #define BENCHMARK_MODULES       0 //0xEE800042L
 #endif
 
-// Default defug level:
+// Default debug level:
 // Only debug traces of these modules will be compiled which flags are set in define DEF_DEBUG_LVL.
 #ifndef DEF_DEBUG_LVL
 #define DEF_DEBUG_LVL           0xEC000080L
@@ -110,6 +106,13 @@
 // * EPL_DBGLVL_ERROR       =   0x40000000L
 // * EPL_DBGLVL_ALWAYS      =   0x80000000L
 
+
+// enable CFM module depending on CONFIG_CFM
+#ifdef CONFIG_CFM
+#define EPL_MODULE_CFM_CONFIG EPL_MODULE_CFM
+#else
+#define EPL_MODULE_CFM_CONFIG 0
+#endif
 
 // EPL_MODULE_INTEGRATION defines all modules which are included in
 // EPL application. Please add or delete modules for your application.
@@ -126,7 +129,7 @@
                                | EPL_MODULE_NMTK \
                                | EPL_MODULE_DLLK \
                                | EPL_MODULE_DLLU \
-                               | EPL_MODULE_CFM \
+                               | EPL_MODULE_CFM_CONFIG \
                                | EPL_MODULE_VETH
 //                               | EPL_MODULE_OBDU
 
@@ -159,8 +162,9 @@
 // + SoC + SoA + MN PRes + NmtCmd + ASnd + IdentRes + StatusRes.
 #define EDRV_MAX_TX_BUFFERS             80
 
+#if (CONFIG_EDRV == 82573)
 #define EDRV_USE_DIAGNOSTICS            TRUE
-
+#endif
 
 // =========================================================================
 // Data Link Layer (DLL) specific defines
@@ -176,9 +180,13 @@
 #define EPL_DLL_PRES_READY_AFTER_SOA    FALSE
 //#define EPL_DLL_PRES_READY_AFTER_SOA    TRUE
 
+#if (CONFIG_EDRV == 8139)
+// Disable deferred release of rx-buffers until Edrv8139 supports it
+#define EPL_DLL_DISABLE_DEFERRED_RXFRAME_RELEASE    TRUE
+#endif
+
 // activate PResChaining support on MN
 #define EPL_DLL_PRES_CHAINING_MN        TRUE
-
 
 // =========================================================================
 // OBD specific defines
@@ -195,33 +203,42 @@
 //#define EPL_OBD_USE_STRING_DOMAIN_IN_RAM    FALSE
 #define EPL_OBD_USE_STRING_DOMAIN_IN_RAM    TRUE
 
-#define EPL_OBD_USE_VARIABLE_SUBINDEX_TAB TRUE
+#define EPL_OBD_USE_VARIABLE_SUBINDEX_TAB   TRUE
 
-#define EPL_OBD_USE_LOAD_CONCISEDCF     TRUE
+#ifdef CONFIG_CFM
+#define EPL_OBD_USE_LOAD_CONCISEDCF         TRUE
+#define EPL_OBD_DEF_CONCISEDCF_FILENAME     "mnobd.cdc"
 
-#define EPL_OBD_DEF_CONCISEDCF_FILENAME "mnobd.cdc"
+#define EPL_CFM_CONFIGURE_CYCLE_LENGTH      TRUE
+
+// Configure if the range from 0xA000 is used for
+// mapping client objects.
+// openCONFIGURATOR uses this range for mapping
+// objects.
+#ifdef CONFIG_OPENCONFIGURATOR_MAPPING
+#define EPL_OBD_INCLUDE_A000_TO_DEVICE_PART TRUE
+#endif
+
+#endif
 
 // =========================================================================
 // Timer module specific defines
 // =========================================================================
 
 // if TRUE the high resolution timer module will be used
-#define EPL_TIMER_USE_HIGHRES              TRUE
+#define EPL_TIMER_USE_HIGHRES               TRUE
 //#define EPL_TIMER_USE_HIGHRES              FALSE
-
-#define EPL_CFM_CONFIGURE_CYCLE_LENGTH      TRUE
-
 
 // =========================================================================
 // EPL API layer specific defines
 // =========================================================================
 
-// size of static input (from network point of view) process image
+// size of static input process image
 // set to 0 to disable static process image
 // it shall not exceed 252 and be a multiple of 4
 #define EPL_API_PROCESS_IMAGE_SIZE_IN       16
 
-// size of static output (from network point of view) process image
+// size of static output process image
 // set to 0 to disable static process image
 // it shall not exceed 252 and be a multiple of 4
 #define EPL_API_PROCESS_IMAGE_SIZE_OUT      16
@@ -245,6 +262,3 @@
 
 
 #endif //_EPLCFG_H_
-
-
-
