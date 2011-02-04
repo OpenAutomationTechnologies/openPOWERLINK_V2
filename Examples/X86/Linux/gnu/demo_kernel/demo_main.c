@@ -54,7 +54,7 @@
 
                 $Author$
 
-                $Revision$  $Date$
+                $Revision$
 
                 $State$
 
@@ -88,6 +88,8 @@
 
 #include "Epl.h"
 #include "proc_fs.h"
+#include "PosixFileLinuxKernel.h"
+
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,0)
     // remove ("make invisible") obsolete symbols for kernel versions 2.6
@@ -112,7 +114,12 @@
 MODULE_LICENSE("Dual BSD/GPL");
 #ifdef MODULE_AUTHOR
     MODULE_AUTHOR("Daniel.Krueger@SYSTEC-electronic.com");
+
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_CFM)) != 0)
     MODULE_DESCRIPTION("openPOWERLINK MN demo with CFM");
+#else
+    MODULE_DESCRIPTION("EPL MN demo");
+#endif
 #endif
 
 //---------------------------------------------------------------------------
@@ -133,7 +140,7 @@ MODULE_LICENSE("Dual BSD/GPL");
 #define CYCLE_LEN   5000 // [us]
 #define IP_ADDR     0xc0a86401  // 192.168.100.1
 #define SUBNET_MASK 0xFFFFFF00  // 255.255.255.0
-#define HOSTNAME    "SYS TEC electronic EPL Stack    "
+#define HOSTNAME    "openPOWERLINK Stack    "
 
 
 // LIGHT EFFECT
@@ -179,6 +186,10 @@ BYTE    abDomain_l[3000];
 static wait_queue_head_t    WaitQueueShutdown_g; // wait queue for tEplNmtEventSwitchOff
 static atomic_t             AtomicShutdown_g = ATOMIC_INIT(FALSE);
 
+#ifndef CONFIG_CFM
+static DWORD    dw_le_CycleLen_g;
+#endif
+
 static uint uiNodeId_g = EPL_C_ADR_INVALID;
 module_param_named(nodeid, uiNodeId_g, uint, 0);
 MODULE_PARM_DESC(nodeid, "Local Node-ID of this POWERLINK node (0x01 - 0xEF -> CNs, 0xF0 -> MN");
@@ -187,9 +198,13 @@ static uint uiCycleLen_g = 0;
 module_param_named(cyclelen, uiCycleLen_g, uint, 0);
 MODULE_PARM_DESC(cyclelen, "Cyclelength in [µs] (it is stored in object 0x1006)");
 
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_CFM)) != 0)
 static char* pszCdcFilename_g = EPL_OBD_DEF_CONCISEDCF_FILENAME;
 module_param_named(cdc, pszCdcFilename_g, charp, 0);
 MODULE_PARM_DESC(cdc, "Full path to ConciseDCF (CDC file) which is imported into the local object dictionary");
+#endif
+
+static FD_TYPE hAppFdTracingEnabled_g;
 
 
 //---------------------------------------------------------------------------
@@ -259,6 +274,9 @@ BOOL                fLinProcInit =FALSE;
 
     atomic_set(&AtomicShutdown_g, TRUE);
 
+    // open character device from debugfs to disable tracing when necessary
+    hAppFdTracingEnabled_g = open("/sys/kernel/debug/tracing/tracing_enabled", O_WRONLY, 0666);
+
     // get node ID from insmod command line
     EplApiInitParam.m_uiNodeId = uiNodeId_g;
 
@@ -290,7 +308,11 @@ BOOL                fLinProcInit =FALSE;
     EplApiInitParam.m_uiPrescaler = 2;         // required for sync
     EplApiInitParam.m_dwLossOfFrameTolerance = 500000;
     EplApiInitParam.m_dwAsyncSlotTimeout = 3000000;
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_CFM)) != 0)
     EplApiInitParam.m_dwWaitSocPreq = 0;
+#else
+    EplApiInitParam.m_dwWaitSocPreq = 150000;
+#endif
     EplApiInitParam.m_dwDeviceType = (DWORD) ~0UL;      // NMT_DeviceType_U32
     EplApiInitParam.m_dwVendorId = (DWORD) ~0UL;        // NMT_IdentityObject_REC.VendorId_U32
     EplApiInitParam.m_dwProductCode = (DWORD) ~0UL;     // NMT_IdentityObject_REC.ProductCode_U32
@@ -300,6 +322,8 @@ BOOL                fLinProcInit =FALSE;
     EplApiInitParam.m_dwDefaultGateway = 0;
     EPL_MEMCPY(EplApiInitParam.m_sHostname, sHostname, sizeof(EplApiInitParam.m_sHostname));
     EplApiInitParam.m_uiSyncNodeId = EPL_C_ADR_SYNC_ON_SOA;
+
+    // todo jba, was true for 82573_cfm_kernel check if it depends on PRC define!
     EplApiInitParam.m_fSyncOnPrcNode = FALSE;
 
     // currently unset parameters left at default value 0
@@ -328,6 +352,7 @@ BOOL                fLinProcInit =FALSE;
     EplRet = EplLinProcInit();
     if (EplRet != kEplSuccessful)
     {
+        PRINTF0("EplLinProcInit failed!\n");
         goto Exit;
     }
     fLinProcInit = TRUE;
@@ -336,15 +361,20 @@ BOOL                fLinProcInit =FALSE;
     EplRet = EplApiInitialize(&EplApiInitParam);
     if(EplRet != kEplSuccessful)
     {
+        PRINTF0("EplApiInitialize failed!\n");
         goto Exit;
     }
     fApiInit = TRUE;
 
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_CFM)) != 0)
     EplRet = EplApiSetCdcFilename(pszCdcFilename_g);
     if(EplRet != kEplSuccessful)
     {
         goto Exit;
     }
+#endif
+
+    PRINTF0("Linking objects ...\n");
 
     // link process variables used by CN to object dictionary
     ObdSize = sizeof(bVarIn1_l);
@@ -364,6 +394,7 @@ BOOL                fLinProcInit =FALSE;
     }
 
     // link process variables used by MN to object dictionary
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
     ObdSize = sizeof(bLedsRow1_l);
     uiVarEntries = 1;
     EplRet = EplApiLinkObject(0x2000, &bLedsRow1_l, &uiVarEntries, &ObdSize, 0x01);
@@ -403,6 +434,7 @@ BOOL                fLinProcInit =FALSE;
     {
         goto Exit;
     }
+#endif
 
     // link a DOMAIN to object 0x6100, but do not exit, if it is missing
     ObdSize = sizeof(abDomain_l);
@@ -467,6 +499,10 @@ tEplKernel          EplRet;
     EplRet = EplLinProcFree();
     PRINTF1("EplLinProcFree():        0x%X\n", EplRet);
 
+    if (IS_FD_VALID(hAppFdTracingEnabled_g))
+    {
+        close(hAppFdTracingEnabled_g);
+    }
 }
 
 
@@ -529,22 +565,59 @@ tEplKernel          EplRet = kEplSuccessful;
 
                 case kEplNmtGsResetCommunication:
                 {
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_CFM)) != 0)
+                DWORD   dwNodeAssignment;
+
+                    // configure OD for MN in state ResetComm after reseting the OD
+                    // TODO: setup your own network configuration here
+                    dwNodeAssignment = (EPL_NODEASSIGN_NODE_IS_CN | EPL_NODEASSIGN_NODE_EXISTS);    // 0x00000003L
+                    EplRet = EplApiWriteLocalObject(0x1F81, 0x01, &dwNodeAssignment, sizeof (dwNodeAssignment));
+                    EplRet = EplApiWriteLocalObject(0x1F81, 0x02, &dwNodeAssignment, sizeof (dwNodeAssignment));
+                    EplRet = EplApiWriteLocalObject(0x1F81, 0x03, &dwNodeAssignment, sizeof (dwNodeAssignment));
+                    EplRet = EplApiWriteLocalObject(0x1F81, 0x04, &dwNodeAssignment, sizeof (dwNodeAssignment));
+                    EplRet = EplApiWriteLocalObject(0x1F81, 0x05, &dwNodeAssignment, sizeof (dwNodeAssignment));
+                    EplRet = EplApiWriteLocalObject(0x1F81, 0x06, &dwNodeAssignment, sizeof (dwNodeAssignment));
+                    EplRet = EplApiWriteLocalObject(0x1F81, 0x07, &dwNodeAssignment, sizeof (dwNodeAssignment));
+                    EplRet = EplApiWriteLocalObject(0x1F81, 0x08, &dwNodeAssignment, sizeof (dwNodeAssignment));
+                    EplRet = EplApiWriteLocalObject(0x1F81, 0x20, &dwNodeAssignment, sizeof (dwNodeAssignment));
+                    EplRet = EplApiWriteLocalObject(0x1F81, 0xFE, &dwNodeAssignment, sizeof (dwNodeAssignment));
+                    EplRet = EplApiWriteLocalObject(0x1F81, 0x6E, &dwNodeAssignment, sizeof (dwNodeAssignment));
+
+//                    dwNodeAssignment |= EPL_NODEASSIGN_MANDATORY_CN;    // 0x0000000BL
+//                    EplRet = EplApiWriteLocalObject(0x1F81, 0x6E, &dwNodeAssignment, sizeof (dwNodeAssignment));
+                    dwNodeAssignment = (EPL_NODEASSIGN_MN_PRES | EPL_NODEASSIGN_NODE_EXISTS);       // 0x00010001L
+                    EplRet = EplApiWriteLocalObject(0x1F81, 0xF0, &dwNodeAssignment, sizeof (dwNodeAssignment));
+#endif
                     // continue
                 }
 
                 case kEplNmtGsResetConfiguration:
                 {
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_CFM)) != 0)
                     if (uiCycleLen_g != 0)
                     {
                         EplRet = EplApiWriteLocalObject(0x1006, 0x00, &uiCycleLen_g, sizeof (uiCycleLen_g));
                     }
+#else
+                    unsigned int uiSize;
+
+                    // fetch object 0x1006 NMT_CycleLen_U32 from local OD (in little endian byte order)
+                    // for configuration of remote CN
+                    uiSize = 4;
+                    EplRet = EplApiReadObject(NULL, 0, 0x1006, 0x00, &dw_le_CycleLen_g, &uiSize, kEplSdoTypeAsnd, NULL);
+                    if (EplRet != kEplSuccessful)
+                    {   // local OD access failed
+                        break;
+                    }
+#endif
                     // continue
                 }
 
                 case kEplNmtMsPreOperational1:
                 {
-                    PRINTF3("%s(0x%X) originating event = 0x%X\n",
+                    PRINTF4("%s(0x%X -> 0x%X) originating event = 0x%X\n",
                             __func__,
+                           pEventArg_p->m_NmtStateChange.m_OldNmtState,
                            pEventArg_p->m_NmtStateChange.m_NewNmtState,
                            pEventArg_p->m_NmtStateChange.m_NmtEvent);
 
@@ -622,6 +695,21 @@ tEplKernel          EplRet = kEplSuccessful;
         case kEplApiEventHistoryEntry:
         {   // new history entry
 
+            if ((pEventArg_p->m_ErrHistoryEntry.m_wErrorCode == EPL_E_DLL_CYCLE_EXCEED_TH)
+                && (IS_FD_VALID(hAppFdTracingEnabled_g)))
+            {
+            mm_segment_t    old_fs;
+            loff_t          pos;
+            ssize_t         iRet;
+
+                old_fs = get_fs();
+                set_fs(KERNEL_DS);
+
+                pos = hAppFdTracingEnabled_g->f_pos;
+                iRet = vfs_write(hAppFdTracingEnabled_g, "0", 1, &pos);
+                hAppFdTracingEnabled_g->f_pos = pos;
+            }
+
             PRINTF("%s(HistoryEntry): Type=0x%04X Code=0x%04X (0x%02X %02X %02X %02X %02X %02X %02X %02X)\n",
                     __func__,
                     pEventArg_p->m_ErrHistoryEntry.m_wEntryType,
@@ -644,6 +732,36 @@ tEplKernel          EplRet = kEplSuccessful;
             {
                 case kEplNmtNodeEventCheckConf:
                 {
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_CFM)) == 0)
+                 tEplSdoComConHdl SdoComConHdl;
+                    // update object 0x1006 on CN
+                    EplRet = EplApiWriteObject(&SdoComConHdl, pEventArg_p->m_Node.m_uiNodeId, 0x1006, 0x00, &dw_le_CycleLen_g, 4, kEplSdoTypeAsnd, NULL);
+                    if (EplRet == kEplApiTaskDeferred)
+                    {   // SDO transfer started
+                        EplRet = kEplReject;
+                    }
+                    else if (EplRet == kEplSuccessful)
+                    {   // local OD access (should not occur)
+                        printk("AppCbEvent(Node) write to local OD\n");
+                    }
+                    else
+                    {   // error occured
+                        TGT_DBG_SIGNAL_TRACE_POINT(1);
+
+                        EplRet = EplApiFreeSdoChannel(SdoComConHdl);
+                        SdoComConHdl = 0;
+
+                        EplRet = EplApiWriteObject(&SdoComConHdl, pEventArg_p->m_Node.m_uiNodeId, 0x1006, 0x00, &dw_le_CycleLen_g, 4, kEplSdoTypeAsnd, NULL);
+                        if (EplRet == kEplApiTaskDeferred)
+                        {   // SDO transfer started
+                            EplRet = kEplReject;
+                        }
+                        else
+                        {
+                            printk("AppCbEvent(Node): EplApiWriteObject() returned 0x%02X\n", EplRet);
+                        }
+                    }
+#endif
                     PRINTF2("%s(Node=0x%X, CheckConf)\n", __func__, pEventArg_p->m_Node.m_uiNodeId);
                     break;
                 }
@@ -679,6 +797,29 @@ tEplKernel          EplRet = kEplSuccessful;
             }
             break;
         }
+
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_CFM)) == 0)
+        case kEplApiEventSdo:
+        {   // SDO transfer finished
+            EplRet = EplApiFreeSdoChannel(pEventArg_p->m_Sdo.m_SdoComConHdl);
+            if (EplRet != kEplSuccessful)
+            {
+                break;
+            }
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
+            if (pEventArg_p->m_Sdo.m_SdoComConState == kEplSdoComTransferFinished)
+            {   // continue boot-up of CN with NMT command Reset Configuration
+                EplRet = EplApiMnTriggerStateChange(pEventArg_p->m_Sdo.m_uiNodeId, kEplNmtNodeCommandConfReset);
+            }
+            else
+            {   // indicate configuration error CN
+                EplRet = EplApiMnTriggerStateChange(pEventArg_p->m_Sdo.m_uiNodeId, kEplNmtNodeCommandConfErr);
+            }
+#endif
+
+            break;
+        }
+#endif
 
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_CFM)) != 0)
         case kEplApiEventCfmProgress:
@@ -947,4 +1088,3 @@ tEplKernel          EplRet = kEplSuccessful;
 
 
 // EOF
-

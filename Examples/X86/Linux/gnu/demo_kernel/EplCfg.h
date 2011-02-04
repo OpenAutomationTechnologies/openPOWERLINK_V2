@@ -53,7 +53,7 @@
 
                 $Author$
 
-                $Revision$  $Date$
+                $Revision$
 
                 $State$
 
@@ -70,9 +70,6 @@
 
 #ifndef _EPLCFG_H_
 #define _EPLCFG_H_
-
-
-
 
 // =========================================================================
 // generic defines which for whole EPL Stack
@@ -103,13 +100,20 @@
 // Default defug level:
 // Only debug traces of these modules will be compiled which flags are set in define DEF_DEBUG_LVL.
 #ifndef DEF_DEBUG_LVL
-#define DEF_DEBUG_LVL           0xEC000000L
+#define DEF_DEBUG_LVL           0xEC000080L
 #endif
 //   EPL_DBGLVL_OBD         =   0x00000004L
 // * EPL_DBGLVL_ASSERT      =   0x20000000L
 // * EPL_DBGLVL_ERROR       =   0x40000000L
 // * EPL_DBGLVL_ALWAYS      =   0x80000000L
 
+
+// enable CFM module depending on CONFIG_CFM
+#ifdef CONFIG_CFM
+#define EPL_MODULE_CFM_CONFIG EPL_MODULE_CFM
+#else
+#define EPL_MODULE_CFM_CONFIG 0
+#endif
 
 // EPL_MODULE_INTEGRATION defines all modules which are included in
 // EPL application. Please add or delete modules for your application.
@@ -126,6 +130,7 @@
                                | EPL_MODULE_NMTK \
                                | EPL_MODULE_DLLK \
                                | EPL_MODULE_DLLU \
+                               | EPL_MODULE_CFM_CONFIG \
                                | EPL_MODULE_VETH
 //                               | EPL_MODULE_OBDU
 
@@ -153,8 +158,9 @@
 // number of used ethernet controller
 //#define EDRV_USED_ETH_CTRL              1
 
-#define EDRV_USE_DIAGNOSTICS            TRUE
-
+// set defines to TRUE for diagnostics
+#define EDRV_USE_DIAGNOSTICS            FALSE
+#define EDRV_CYCLIC_USE_DIAGNOSTICS     FALSE
 
 // =========================================================================
 // Data Link Layer (DLL) specific defines
@@ -170,6 +176,15 @@
 #define EPL_DLL_PRES_READY_AFTER_SOA    FALSE
 //#define EPL_DLL_PRES_READY_AFTER_SOA    TRUE
 
+//#ifdef CONFIG_CFM
+// activate PResChaining support on MN
+#define EPL_DLL_PRES_CHAINING_MN        TRUE
+//#endif
+
+#if (CONFIG_EDRV == 8139)
+// Disable deferred release of rx-buffers until Edrv8139 supports it
+#define EPL_DLL_DISABLE_DEFERRED_RXFRAME_RELEASE    TRUE
+#endif
 
 // =========================================================================
 // OBD specific defines
@@ -186,17 +201,24 @@
 //#define EPL_OBD_USE_STRING_DOMAIN_IN_RAM    FALSE
 #define EPL_OBD_USE_STRING_DOMAIN_IN_RAM    TRUE
 
-#define EPL_OBD_USE_VARIABLE_SUBINDEX_TAB TRUE
+#define EPL_OBD_USE_VARIABLE_SUBINDEX_TAB   TRUE
 
+#ifdef CONFIG_CFM
+#define EPL_OBD_USE_LOAD_CONCISEDCF         TRUE
+#define EPL_OBD_DEF_CONCISEDCF_FILENAME     "mnobd.cdc"
+#define EPL_CFM_CONFIGURE_CYCLE_LENGTH      TRUE
+#endif
 
 // =========================================================================
 // Timer module specific defines
 // =========================================================================
 
-// if TRUE the high resolution timer module will be used
-#define EPL_TIMER_USE_HIGHRES              TRUE
-//#define EPL_TIMER_USE_HIGHRES              FALSE
+// if TRUE it uses the Timer module implementation of EPL user also in EPL kernel
+#define EPL_TIMER_USE_USER                  TRUE
 
+// if TRUE the high resolution timer module will be used
+#define EPL_TIMER_USE_HIGHRES               TRUE
+//#define EPL_TIMER_USE_HIGHRES              FALSE
 
 // =========================================================================
 // SDO module specific defines
@@ -210,6 +232,3 @@
 
 
 #endif //_EPLCFG_H_
-
-
-
