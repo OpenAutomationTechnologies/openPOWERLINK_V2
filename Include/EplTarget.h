@@ -192,6 +192,7 @@
         #include <linux/errno.h>
         #include <linux/major.h>
         #include <linux/version.h>
+        #include <linux/slab.h>
     #endif
 
 //    #define EPL_MEMCPY(dst,src,siz)     memcpy((void*)(dst),(const void*)(src),(size_t)(siz));
