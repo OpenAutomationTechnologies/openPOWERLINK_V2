@@ -1,0 +1,64 @@
+#!/bin/sh
+###############################################################################
+#
+# Script to unload openPOWERLINK module
+# 
+###############################################################################
+
+###############################################################################
+# Print usage of script
+#
+usage()
+{
+        echo >&2 \
+        "usage: EplUnload [-h] <powerlink module>\n" \
+        "-h, print usage\n"
+        exit 1
+}
+
+###############################################################################
+# set defaults
+#
+module=
+
+###############################################################################
+# Read command line arguments
+#
+while [ $# -gt 0 ]
+do
+    case "$1" in
+        --)     shift; break;;
+        -h)     usage ;;
+        -*|*)   module=$1; shift; break ;;
+    esac
+    shift
+done
+
+
+# invoke rmmod with all arguments we got
+echo removing module $module
+
+/sbin/rmmod $module $* || exit 1
+
+# Remove udev rule
+rm -f /etc/udev/rules.d/50-openPOWERLINK.rules
+
+###############################################################################
+#
+# Check if suitable ethernet card is available
+#
+module=`basename $module .ko`
+if echo "$module" | grep -q "8139" ; then
+    nic="RTL-8139"
+    nicdev="8139too"
+elif echo "$module" | grep -q "82573" ; then
+    nic="Intel Corporation 82573"
+    nicdev="e1000e"
+else
+    echo "No valid network interface controller specified!"
+    usage
+fi
+
+pciid=$(lspci | grep "${nic}" | awk "{printf \"0000:\"\$1}")
+echo "rebinding pci device $pciid to network driver"
+echo -n $pciid > /sys/bus/pci/drivers/${nicdev}/bind

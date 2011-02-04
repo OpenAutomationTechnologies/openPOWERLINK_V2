@@ -1,0 +1,200 @@
+#!/bin/sh
+
+###############################################################################
+#
+# Script to load openPOWERLINK module
+# 
+###############################################################################
+
+###############################################################################
+# Print usage of script
+#
+usage()
+{
+        echo >&2 \
+        "usage: EplLoad [-h] [-c <cdcfile>] [-t <tracer>] [-s] <powerlink_module> [module args]\n" \
+        "-c, specify CDC file\n" \
+        "-s, set priority (used by udev rule)\n" \
+        "-t, set ftrace tracer\n" \
+        "-h, print usage\n"
+        exit 1
+}
+
+loadfail()
+{
+	echo "  Failed"
+        echo
+        echo "  No network interface controller with"
+        echo "  $nic chip found!"
+        echo
+        echo "The EPL module cannot be loaded!"
+        echo
+
+        exit 1
+}
+
+###############################################################################
+# set defaults
+#
+cdcfile=
+module=
+setprio=false
+tracing=nop
+
+###############################################################################
+# Read command line arguments
+#
+while [ $# -gt 0 ]
+do
+    case "$1" in
+        -s)     setprio=true;;
+        -c)     cdcfile=$2; shift;;
+        -t)     tracing=$2; shift;;
+        --)     shift; break;;
+        -h)     usage ;;
+        *)      module=$1; shift; break;;
+    esac
+    shift
+done
+
+###############################################################################
+# Used by udev rule to set priority
+if [ "$setprio" = "true" ] ; then
+    # Set real-time priority -81 for Ethernet ISR thread
+    chrt -f -p 80 `ps -C \`ps -e -o comm |grep ^irq/.*epl\$\` -o pid --no-headers` 
+    exit
+fi
+
+###############################################################################
+# must be root to load module
+if [ $USER != "root" ] ; then
+  echo "Please run 'sudo $0'"
+  exit
+fi
+
+###############################################################################
+#
+# Check if high resolution timer support is available
+#
+echo -n "Check if high resolution timer support is available..."
+
+cat /proc/timer_list | grep 'hres_active.*1' > /dev/null
+if [ "$?" -ne "0" ] ; then
+  echo "  Failed"
+  echo
+  echo "  High resolution timer support is NOT active."
+  echo "  Maybe you need to add 'acpi=force' to kernel command line"
+  echo "  or try it on a more recent X86 processor."
+  echo
+  echo "The POWERLINK module is and will not be loaded!"
+  echo
+  
+  exit
+else
+  echo "  OK"
+fi
+
+###############################################################################
+#
+# Check if module does exist
+#
+if [ ! -f  `dirname $0`/$module ] ; then
+    echo "POWERLINK module `dirname $0`/$module.ko does not exist!"
+    exit 1
+fi
+
+###############################################################################
+#
+# Check if suitable ethernet card is available
+#
+module=`basename $module .ko`
+if echo "$module" | grep -q "8139" ; then
+    nic="RTL-8139"
+    nicdev="8139too"
+elif echo "$module" | grep -q "82573" ; then
+    nic="Intel Corporation 82573"
+    nicdev="e1000e"
+else
+    echo "No valid network interface controller specified!"
+    usage
+fi
+
+echo -n "Searching for ${nic} nic..."
+
+# unbind network card from ethernet driver
+pciid=$(lspci | grep "${nic}" | awk "{printf \"0000:\"\$1}")
+if [ -z $pciid ] ; then
+    loadfail
+else
+    echo "  OK"
+fi
+
+echo "unbinding PCI device $pciid"
+echo -n $pciid > /sys/bus/pci/drivers/${nicdev}/unbind
+
+###############################################################################
+#
+# install special udev rule for kernel stack module (without demo!)
+if [ ! `echo "$module" | grep -q "demo"` ] ; then
+    if [ -d /etc/udev/rules.d ] ; then
+        EPLLOAD_PATH=`dirname $(readlink -f ${0})`
+        cat 50-openPOWERLINK.rules | sed "s#EPLLOAD_PATH#${EPLLOAD_PATH}#" > /etc/udev/rules.d/50-openPOWERLINK.rules
+        which service > /dev/null
+        if [ "$?" -eq "0" ] ; then
+            service udev reload
+        else
+            /etc/init.d/udev reload
+        fi
+    fi
+fi
+
+if [ -z $cdcfile ] ; then
+    echo "Loading POWERLINK module ..."
+
+    # invoke insmod with all arguments we got
+    # and use a pathname, as insmod doesn't look in . by default
+    /sbin/insmod `dirname $0`/$module.ko $*
+else
+    CDC_PATH=`readlink -f ${cdcfile}`
+    echo "Loading POWERLINK module with CDC=${CDC_PATH}..."
+
+    # invoke insmod with all arguments we got
+    # and use a pathname, as insmod doesn't look in . by default
+    /sbin/insmod `dirname $0`/$module.ko cdc="$CDC_PATH" $*
+fi
+
+if [ "$?" -ne "0" ] ; then
+    echo " Loading of POWERLINK module failed"
+    exit 1
+else
+    echo "POWERLINK module successfully loaded."
+    echo
+    echo "Please start the POWERLINK demo application."
+    echo
+fi
+
+# Set real-time priority -82 for hr-timer threads
+chrt -f -p 81 `ps -C sirq-hrtimer/0 -o pid --no-headers`
+chrt -f -p 81 `ps -C sirq-hrtimer/1 -o pid --no-headers` 
+# For kernel-queue shared-buffer thread, priority -80 is set in ShbIpc-LinuxKernel.c
+
+# For Ethernet ISR thread, priority -81 is set (for kernel stack module by udev rule!)
+if echo "$module" | grep -q "demo" ; then
+    chrt -f -p 80 `ps -C \`ps -e -o comm |grep ^irq/.*powerlin.*\$\` -o pid --no-headers` 
+fi
+
+# Enable tracing
+if [ ! "$tracing" = "nop" ] ; then
+    echo $tracing > /sys/kernel/debug/tracing/current_tracer
+    #echo function       > /sys/kernel/debug/tracing/current_tracer
+    #echo sched_switch   > /sys/kernel/debug/tracing/current_tracer
+    #echo function_graph > /sys/kernel/debug/tracing/current_tracer
+    echo 'EplDllk* EdrvCyclic* TgtEthIsr EplPdok* EplEventk* EplNmtk* EplLin* EplApi*' > /sys/kernel/debug/tracing/set_ftrace_filter
+    echo funcgraph-abstime > /sys/kernel/debug/tracing/trace_options
+    echo 1 > /sys/kernel/debug/tracing/tracing_enabled
+    chmod o+w /sys/kernel/debug/tracing/tracing_enabled
+fi
+
+exit 0
+
+

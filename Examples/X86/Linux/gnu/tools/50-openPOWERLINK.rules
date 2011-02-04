@@ -1,0 +1,9 @@
+# for easy startup, we allow others to access the EPL driver
+SUBSYSTEM=="misc", KERNEL=="epl", NAME="epl", OWNER="root", GROUP="root", MODE="0666"
+
+# for production, you should create a special group, where the user
+# which runs the application belongs to.
+#SUBSYSTEM=="misc", KERNEL=="epl", NAME="epl", OWNER="root", GROUP="epl", MODE="0660"
+
+# hack to adjust the priority of the IRQ thread after the EPL stack has been initialized
+SUBSYSTEM=="net", KERNEL=="epl", ACTION=="add", RUN+="EPLLOAD_PATH/EplLoad -s"
