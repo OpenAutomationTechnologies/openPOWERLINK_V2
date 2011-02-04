@@ -1542,6 +1542,10 @@
         #define ULONG unsigned long int
     #endif
 
+    #ifndef ULONGLONG
+        #define ULONGLONG unsigned long long int
+    #endif
+
 
     // --- logic types ---
     #ifndef BYTE
