@@ -79,6 +79,22 @@
 #include <linux/kthread.h>
 #endif
 
+#if (TARGET_SYSTEM == _LINUX_) && !defined(__KERNEL__)
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <pthread.h>
+
+
+#define INVALID_SOCKET  0
+
+typedef struct socket* SOCKET;
+
+#define closesocket close
+#endif
+
+
 
 /***************************************************************************/
 /*                                                                         */
@@ -121,6 +137,8 @@ typedef struct
 
 #elif (TARGET_SYSTEM == _LINUX_) && defined(__KERNEL__)
     struct task_struct*     m_ThreadHandle;
+#elif (TARGET_SYSTEM == _LINUX_) && !defined(__KERNEL__)
+    pthread_t*              m_ThreadHandle;
 #endif
 
 } tEplSdoUdpInstance;
@@ -681,6 +699,8 @@ Exit:
 static DWORD PUBLIC EplSdoUdpThread(LPVOID lpParameter)
 #elif (TARGET_SYSTEM == _LINUX_) && defined(__KERNEL__)
 static int EplSdoUdpThread(void * pArg_p)
+#elif (TARGET_SYSTEM == _LINUX_) && !defined(__KERNEL__)
+static void *EplSdoUdpThread(void * pArg_p)
 #endif
 {
 tEplKernel          Ret;

@@ -105,7 +105,9 @@
     #ifdef __arm__
         #include <sys/io.h>
     #else
+        #ifdef __KERNEL__
         #include <asm/io.h>
+    #endif
     #endif
     #ifdef __KERNEL__
         #include "PosixFileLinuxKernel.h"
