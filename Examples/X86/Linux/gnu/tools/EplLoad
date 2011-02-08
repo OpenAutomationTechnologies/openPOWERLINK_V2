@@ -40,6 +40,7 @@ cdcfile=
 module=
 setprio=false
 tracing=nop
+isndemo=0
 
 ###############################################################################
 # Read command line arguments
@@ -105,6 +106,14 @@ fi
 
 ###############################################################################
 #
+# Check if it is a demo with application
+#
+echo "$module" | grep -q "demo"
+isndemo=$?
+
+###############################################################################
+
+#
 # Check if suitable ethernet card is available
 #
 module=`basename $module .ko`
@@ -135,7 +144,7 @@ echo -n $pciid > /sys/bus/pci/drivers/${nicdev}/unbind
 ###############################################################################
 #
 # install special udev rule for kernel stack module (without demo!)
-if [ ! `echo "$module" | grep -q "demo"` ] ; then
+if [ "$isndemo" -ne "0" ] ; then
     if [ -d /etc/udev/rules.d ] ; then
         EPLLOAD_PATH=`dirname $(readlink -f ${0})`
         cat 50-openPOWERLINK.rules | sed "s#EPLLOAD_PATH#${EPLLOAD_PATH}#" > /etc/udev/rules.d/50-openPOWERLINK.rules
@@ -167,10 +176,15 @@ if [ "$?" -ne "0" ] ; then
     echo " Loading of POWERLINK module failed"
     exit 1
 else
+    if [ "$isndemo" -ne "0" ] ; then
     echo "POWERLINK module successfully loaded."
     echo
     echo "Please start the POWERLINK demo application."
     echo
+    else
+        echo "POWERLINK demo application successfully loaded."
+        echo    
+    fi
 fi
 
 # Set real-time priority -82 for hr-timer threads
@@ -179,8 +193,8 @@ chrt -f -p 81 `ps -C sirq-hrtimer/1 -o pid --no-headers`
 # For kernel-queue shared-buffer thread, priority -80 is set in ShbIpc-LinuxKernel.c
 
 # For Ethernet ISR thread, priority -81 is set (for kernel stack module by udev rule!)
-if echo "$module" | grep -q "demo" ; then
-    chrt -f -p 80 `ps -C \`ps -e -o comm |grep ^irq/.*powerlin.*\$\` -o pid --no-headers` 
+if [ "$isndemo" -eq "0" ] ; then
+    chrt -f -p 80 `ps -C \`ps -e -o comm |grep ^irq/.*epl*\$\` -o pid --no-headers` 
 fi
 
 # Enable tracing

@@ -82,7 +82,7 @@ IF (UNIX)
     
     OPTION (CFG_X86_LINUX_DEMO_KERNEL "Build Linux kernel based demo application" OFF)
     CMAKE_DEPENDENT_OPTION (CFG_X86_LINUX_DEMO_QT "Build Linux QT demo application" OFF
-                            "NOT CFG_POWERLINK_PROCESS_IMAGE" OFF)
+                            "NOT CFG_POWERLINK_PROCESS_IMAGE;CFG_KERNEL_STACK" OFF)
     CMAKE_DEPENDENT_OPTION (CFG_X86_LINUX_DEMO_PROCESS_IMAGE_CONSOLE "Build Linux process image based console demo application" OFF
                             "CFG_POWERLINK_PROCESS_IMAGE" OFF)
     CMAKE_DEPENDENT_OPTION (CFG_X86_LINUX_DEMO_PROCESS_IMAGE_QT "Build Linux process image based QT demo application" ON

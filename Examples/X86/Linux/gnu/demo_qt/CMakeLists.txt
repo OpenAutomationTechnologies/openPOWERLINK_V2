@@ -53,7 +53,11 @@
 FIND_PACKAGE(Qt4 REQUIRED)
 
 SET(KERNELMOD_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../powerlink_kernel_module)
-SET(USERLIB_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../powerlink_user_lib)
+
+IF (NOT CFG_KERNEL_STACK)
+        MESSAGE(WARNING "This demo does only work with the kernel base stack!")
+ENDIF (NOT CFG_KERNEL_STACK)    
+                       
 
 SET(DEMO_SOURCES src/Circles.cpp
                  src/EplApi.cpp
@@ -63,13 +67,8 @@ SET(DEMO_SOURCES src/Circles.cpp
                  src/Leds.cpp
                  src/main.cpp
                  src/MainWindow.cpp
-                 src/Slides.cpp)
-                        
-IF (CFG_KERNEL_STACK)
-    SET(DEMO_SOURCES ${DEMO_SOURCES}
+                 src/Slides.cpp
         ${POWERLINK_SOURCE_DIR}/EplStack/EplApiLinuxUser.c) 
-ENDIF (CFG_KERNEL_STACK)                  
-                 
                  
 SET(DEMO_HEADERS include/Circles.h
                  include/EplDataInOutThread.h
@@ -87,7 +86,10 @@ ADD_DEFINITIONS(${QT_DEFINITIONS})
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/include
                     ${POWERLINK_INCLUDE_DIR}
                     ${CMAKE_CURRENT_BINARY_DIR}
+                    ${KERNELMOD_INCLUDE_DIR}
                     )
+                    
+ADD_DEFINITIONS(-DCONFIG_POWERLINK_KERNELSTACK)
                     
                     #
 # Configure depending selected mode
@@ -98,21 +100,13 @@ IF(CFG_POWERLINK_CFM)
 
     IF (CFG_POWERLINK_PROCESS_IMAGE)
     
-        MESSAGE(WARNING "Not using process image! Please use demo_process_image_qt for process image demo application!")
+        MESSAGE(WARNING "This demo does not using process image! "
+                        "Please use demo_process_image_qt for process image demo application!")
     
     ENDIF(CFG_POWERLINK_PROCESS_IMAGE)
     
 ENDIF(CFG_POWERLINK_CFM)
                     
-# Configure depending on using usermode stack or kernel stack
-IF (CFG_KERNEL_STACK)
-    INCLUDE_DIRECTORIES(${KERNELMOD_INCLUDE_DIR})
-    ADD_DEFINITIONS(-DCONFIG_POWERLINK_KERNELSTACK)
-ELSE (CFG_KERNEL_STACK)
-    INCLUDE_DIRECTORIES(${USERLIB_INCLUDE_DIR})
-    ADD_DEFINITIONS(-DCONFIG_POWERLINK_USERSTACK) 
-ENDIF (CFG_KERNEL_STACK)  
-
 QT4_WRAP_CPP(DEMO_HEADERS_MOC ${DEMO_HEADERS})
 QT4_ADD_RESOURCES(DEMO_RESOURCES_RCC ${DEMO_RESOURCES})
 
@@ -122,13 +116,8 @@ ADD_EXECUTABLE(demo_qt ${DEMO_SOURCES}
                                                               
 TARGET_LINK_LIBRARIES(demo_qt ${QT_LIBRARIES})
                                        
-IF (NOT CONFIG_KERNEL_STACK)
-    TARGET_LINK_LIBRARIES(demo_qt powerlink pcap pthread rt)  
-ENDIF (NOT CONFIG_KERNEL_STACK)
-
 # add installation rules
 INSTALL(TARGETS demo_qt RUNTIME DESTINATION bin)
 INSTALL(FILES mnobd.cdc DESTINATION bin)
-INSTALL(PROGRAMS set_prio DESTINATION bin)
                                                                  
                 

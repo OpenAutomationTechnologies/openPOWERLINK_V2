@@ -118,7 +118,7 @@ MODULE_LICENSE("Dual BSD/GPL");
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_CFM)) != 0)
     MODULE_DESCRIPTION("openPOWERLINK MN demo with CFM");
 #else
-    MODULE_DESCRIPTION("EPL MN demo");
+    MODULE_DESCRIPTION("openPOWERLINK MN demo");
 #endif
 #endif
 
@@ -186,7 +186,7 @@ BYTE    abDomain_l[3000];
 static wait_queue_head_t    WaitQueueShutdown_g; // wait queue for tEplNmtEventSwitchOff
 static atomic_t             AtomicShutdown_g = ATOMIC_INIT(FALSE);
 
-#ifndef CONFIG_CFM
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_CFM)) == 0)
 static DWORD    dw_le_CycleLen_g;
 #endif
 
@@ -194,9 +194,14 @@ static uint uiNodeId_g = EPL_C_ADR_INVALID;
 module_param_named(nodeid, uiNodeId_g, uint, 0);
 MODULE_PARM_DESC(nodeid, "Local Node-ID of this POWERLINK node (0x01 - 0xEF -> CNs, 0xF0 -> MN");
 
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_CFM)) != 0)
 static uint uiCycleLen_g = 0;
+#else
+static uint uiCycleLen_g = CYCLE_LEN;
+#endif
+
 module_param_named(cyclelen, uiCycleLen_g, uint, 0);
-MODULE_PARM_DESC(cyclelen, "Cyclelength in [Âµs] (it is stored in object 0x1006)");
+MODULE_PARM_DESC(cyclelen, "Cyclelength in [µs] (it is stored in object 0x1006)");
 
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_CFM)) != 0)
 static char* pszCdcFilename_g = EPL_OBD_DEF_CONCISEDCF_FILENAME;
@@ -322,8 +327,6 @@ BOOL                fLinProcInit =FALSE;
     EplApiInitParam.m_dwDefaultGateway = 0;
     EPL_MEMCPY(EplApiInitParam.m_sHostname, sHostname, sizeof(EplApiInitParam.m_sHostname));
     EplApiInitParam.m_uiSyncNodeId = EPL_C_ADR_SYNC_ON_SOA;
-
-    // todo jba, was true for 82573_cfm_kernel check if it depends on PRC define!
     EplApiInitParam.m_fSyncOnPrcNode = FALSE;
 
     // currently unset parameters left at default value 0

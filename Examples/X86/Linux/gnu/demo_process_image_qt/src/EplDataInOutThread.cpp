@@ -114,7 +114,7 @@ tEplKernel PUBLIC AppCbSync(void)
     {
         /* Running Leds */
         /* period for LED flashing determined by inputs */
-        pEplDataInOutThread_g->m_uiPeriod[i] = (pEplDataInOutThread_g->m_uiInput[i] == 0) ? 1 : (pEplDataInOutThread_g->m_uiInput[i] * 10);
+        pEplDataInOutThread_g->m_uiPeriod[i] = (pEplDataInOutThread_g->m_uiInput[i] == 0) ? 1 : (pEplDataInOutThread_g->m_uiInput[i] * 20);
         if (pEplDataInOutThread_g->m_uiCnt % pEplDataInOutThread_g->m_uiPeriod[i] == 0)
         {
             if (pEplDataInOutThread_g->m_uiLeds[i] == 0x00)

@@ -1,10 +1,10 @@
-openPOWERLINK on Linux X86
+openPOWERLINK on Linux x86
 ==========================
 
 1 Introduction
 --------------
-  This file contains documentation for the openPOWERLINK stack on Linux X86.
-  The openPOWERLINK stack for X86 Linux is available in two different
+  This file contains documentation for the openPOWERLINK stack on Linux x86.
+  The openPOWERLINK stack for Linux x86 is available in two different
   versions:
   - as Linux userspace library
   - as Linux kernel module
@@ -14,13 +14,13 @@ openPOWERLINK on Linux X86
 --------------
 2.1 POWERLINK network
   - POWERLINK network with controlled nodes (CN)
-        * openPOWERLINK controlled nodes, e.g. Altera based FPGA evaluation boards
+        * openPOWERLINK controlled nodes, e.g. Altera-based FPGA evaluation boards
         * B&R POWERLINK controlled nodes
         * other POWERLINK controlled nodes
 
 2.2 Network Controller
   One of the following network controllers is required to run openPOWERLINK on
-  Linux X86.
+  Linux x86.
 
   - Network controller card with Intel 82573 chip
     For example:
@@ -53,38 +53,36 @@ openPOWERLINK on Linux X86
 
 2.3.1 Real-Time Kernel
 
-   For good performance an minimal jitter on the POWERLINK cycle a real-time
+   For best performance and minimal jitter on the POWERLINK cycle a real-time
    Linux kernel is recommended. The RT-Preempt patch maintaind by Ingo Molnar
    provides the necessary real-time extensions (https://rt.wiki.kernel.org).
 
    Thread Priorities
    If using a real-time kernel, the real-time priorities of the necessary
    threads must be adjusted for deterministic POWERLINK behaviour.
-
-   If you are using the kernel based stack this will be done when loading the
-   kernel module by the EplLoad script. For the userspace stack you should
-   adjust the priorities with the delivered script
+   If you are using the kernel based stack, the EplLoad script coming along
+   with the stack automatically carries out the required priority changes.
+   For the userspace stack, a script setting the priorities is provided in
    Examples/X86/Linux/gnu/tools/set_prio. It increases the thread priorities of
-   the high resolution timer and ethernet threads.
-
+   the high resolution timer and of the Ethernet IRQ threads.
 2.4 Libraries and Tools
 
 2.4.1 CMake
-   For building the openPOWERLINK stack and demo applications the open-source
-   cross-platform build tool CMake is used (http://www.cmake.org). The CMake
-   version V2.6 or higher is needed for compilation.
+   For building the openPOWERLINK stack and demo applications the Open Source
+   cross-platform build tool CMake is used (http://www.cmake.org). CMake
+   version V2.6 or higher is required.
 
 2.4.2 libpcap library
   In order to use the userspace POWERLINK stack the libpcap library is needed
-  to access the ethernet interface.
+  to access the Ethernet interface.
 
 2.4.3 openCONFIGURATOR
-  For configuration of your POWERLINK network the open-source configuration
+  For configuration of your POWERLINK network the Open Source configuration
   tool openCONFIGURATOR should be used. The tool is available as SourceForge
   project. (http://sourceforge.net/projects/openconf/)
 
-  The openCONFIGURATOR projects used by the demo examples could be found in
-  the directory: CfmProjects.
+  The openCONFIGURATOR projects used by the demo examples are found in the
+  directory: CfmProjects.
 
   openCONFIGURATOR creates two file which are used by the openPOWERLINK stack
   and application:
@@ -92,24 +90,25 @@ openPOWERLINK on Linux X86
                 process image. It depends on the available data field of the
                 CNs used in your configuration.
 
-  * mnobd.cdc   This file is used by the stack to determine which CNs should
-                be accessed, which objects they have, how should the objects
-                be mapped into a process image and what default values should
-                be set.
+  * mnobd.cdc   This file is used to configure the MN stack. It includes all
+                configuration data of the CNs and the network mapping
+				information. CN configuration is handled by the configuration
+				manager (CFM) module of the MN.
 
 
-3 openPOWERLINK STACK
+3 openPOWERLINK Stack
 ---------------------
-  The openPOWERLINK stack for X86 Linux is available in two different
+  The openPOWERLINK stack for Linux x86 is available in two different
   versions:
   - kernel module
   - userspace library
 
-3.1 Linux kernel based stack
+3.1 Linux kernel-based stack
+  
+  The openPOWERLINK stack may be implemented as Linux kernel module. This
+  solution provides the best performance, but is limited to the available
+  openPOWERLINK network drivers.
 
-  The openPOWERLINK stack is implemented as Linux kernel module. This solution
-  provides the best performance but is limited to the available openPOWERLINK
-  network drivers.
   The kernel based stack is located in:
   Examples/X86/Linux/gnu/powerlink_kernel_module
 
@@ -117,56 +116,67 @@ openPOWERLINK on Linux X86
   The Linux userspace implementation of the openPOWERLINK stack provides all
   functions for a software based POWERLINK solution running as Linux userspace
   application. The stack uses the libpcap library for accessing the network
-  interface and therefore istotally independant of the used network card and
+  interface and is therefore totally independant of the used network card and
   driver.
 
-  The userspace stack is located in: Examples/X86/Linux/gnu/powerlink_user_lib
+  The userspace stack is located in: 
+  Examples/X86/Linux/gnu/powerlink_user_lib
 
 4 Tools
 -------
   There are some shellscripts used for loading POWERLINK modules, setting
-  thread priorities and so on. This tools are located in:
+  thread priorities etc. 
+  
+  These tools are located in:
   Examples/X86/Linux/gnu/tools
 
 5 Demo applications
 -------------------
   There are several demo applications available. The POWERLINK demo applications
-  could visualize the digital inputs of POWERLINK controlled nodes and are driving
-  a running light on the CNs digital outputs.
+  are able to visualize the digital inputs of POWERLINK controlled nodes and are
+  driving a running light on the CNs digital outputs.
 
 5.1 Kernel demo
   The kernel demo is a simple demo application running together with the stack
   in kernel mode.
-  It is located in:  Examples/X86/Linux/gnu/demo_kernel
+  
+  It is located in:
+  Examples/X86/Linux/gnu/demo_kernel
 
 5.2 QT demo
   The QT demo is a simple QT demo application which can be used together
   with the openPOWERLINK kernel module.
-  It could be found in: Examples/X86/Linux/gnu/demo_qt
+  
+  It can be found in:
+  Examples/X86/Linux/gnu/demo_qt
 
 5.3 QT demo with process image
   This QT demo implements a POWERLINK managing node (MN) using the configuration
   manager (CFM) to initialize the controlled nodes. It uses a network configuration
-  created with the openCONFIGURATOR tool. This demo could be used either with
+  created with the openCONFIGURATOR tool. This demo can be used either with
   the kernel based stack or with the userspace stack.
-  It is found in: Examples/X86/Linux/gnu/demo_process_image_qt
+  
+  It is found in: 
+  Examples/X86/Linux/gnu/demo_process_image_qt
 
 5.4 Console demo with process image
   This demo also implements a POWERLINK MN with CFM. It is implemented as
   console application and is intended to machines where no graphical user
-  interface is available. This demo could be used either with the kernel based
+  interface is available. This demo can be used either with the kernel-based
   stack or with the userspace stack.
-  It is located in: Examples/X86/Linux/gnu/demo_process_image_console
+  
+  It is located in: 
+  Examples/X86/Linux/gnu/demo_process_image_console 
 
 6 Building
 ----------
 
 6.1 CMake
   For building openPOWELRINK on Linux the build utility CMake
-  (http://www.cmake.org/) is used. CMake is used to control the software
+  (http://www.cmake.org/) is used. CMake controls the software
   compilation process using simple platform and compiler independent
   configuration files. Depending on the architecture different build
-  files could be created. On Linux CMake could create:
+  files can be created. On Linux CMake may create:
   * Unix Makefiles (tested)
   * Eclipse CDT4 - Unix Makefiles
   * Kdevelop3 - Unix Makefiles
@@ -183,7 +193,7 @@ openPOWERLINK on Linux X86
   * ccmake
     ccmake is a curses based user interface for cmake.
   * cmake -i
-    If cmake is called with option -i you can interactive select your build
+    If cmake is called with option -i you can interactively select your build
     options.
 
   The following build configuration options are available:
@@ -191,26 +201,25 @@ openPOWERLINK on Linux X86
   CFG_DEBUG_LVL         Debug level to be used for openPOWERLINK debugging
                         functions.
 
-  CFG_KERNEL_DIR        The directory where the kernel sources are located
-                        which should be used for building the kernel modules.
-                        If it is not set the sources of the running kernel
-                        will be used.
+  CFG_KERNEL_DIR        The directory where the kernel sources used for building
+                        the kernel modules are located. If it is not set the
+						sources of the running kernel will be used:
                         /lib/modules/$(shell uname -r)/build
 
-  CFG_KERNEL_STACK      Determines if kernel stack or usermode stack will be
+  CFG_KERNEL_STACK      Determines whether kernel stack or usermode stack are
                         compiled. If enabled, kernel stack will be compiled.
 
   CFG_POWERLINK_CFM     If enabled, the POWERLINK stack will be compiled with
                         configuration manager (CFM). The configuration manager
                         is used to configure the CNs on the network.
                         (For additional information on the CFM see chapter 6.7
-                        of EPSG Draft Standard 201, Ethernet POWERLINK,
+                        of EPSG Draft Standard 301, Ethernet POWERLINK,
                         Communication Profile Specification)
 
                         CFM must be enabled in order to use the process image
-                        based demos!
+                        based demos.
 
-  CFG_POWERLINK_EDRV    Selects the ethernet driver used for the kernel based
+  CFG_POWERLINK_EDRV    Selects the Ethernet driver used for the kernel based
                         stack and demos. Valid options are:
                         8139:   Realtek 8139 based network interface cards
                         82573:  Intel 82573 based network interface cards
@@ -220,38 +229,40 @@ openPOWERLINK on Linux X86
                         into the stack. Instead of using single variables and
                         linking them to the object dictionary a whole process
                         image could be mapped. Process images are required if
-                        you want to use configurations created by
-                        openCONFIGURATOR. openCONFIGURATOR provides the header
-                        file xap.h which defines the structure of the process
-                        image. It contains all synchronous data fields which
-                        are supported by the configured CNs.
+                        configurations created by openCONFIGURATOR should be
+						used. openCONFIGURATOR provides the header file xap.h 
+						which defines the structure of the process image. It
+						contains all synchronous data fields supported by the
+						configured CNs.
 
                         Process images must be enabled for using the process
                         image demo applications. The kernel based demos and
-                        the standard QT demo doesn't use process images!
+                        the standard QT demo do not use process images!                                                                 
 
   CFG_X86_LINUX_DEMO_KERNEL
                         If enabled the kernel demo will be compiled.
-                        It could not be used if CFM_POWERLINK_PROCESS_IMAGE is
+                        It cannot be used if CFM_POWERLINK_PROCESS_IMAGE is
                         enabled!
 
   CFG_X86_LINUX_DEMO_PROCESS_IMAGE_CONSOLE
                         If enabled the process image based console application
-                        will be compiled. It could be used either with the kernel
+                        will be compiled. It can be used either with the kernel
                         stack or with the userspace stack.
+						
                         Requires: CFM_POWERLINK_CFM, CFM_POWERLINK_PROCESS_IMAGE
 
   CFG_X86_LINUX_DEMO_PROCESS_IMAGE_QT
                         If enabled the process image based QT application
-                        will be compiled. It could be used either with the kernel
+                        will be compiled. It can be used either with the kernel
                         stack or with the userspace stack.
+						
                         Requires: CFM_POWERLINK_CFM, CFM_POWERLINK_PROCESS_IMAGE
 
   CFG_X86_LINUX_DEMO_QT
                         If enabled the standard QT application will be compiled.
-                        It could only be used with the kernel stack!
-                        It could not be used if CFM_POWERLINK_PROCESS_IMAGE is
-                        enabled!
+                        It can only be used with the kernel stack.
+                        This option is not allowed if CFM_POWERLINK_PROCESS_IMAGE
+						is enabled!
 
   CMAKE_INSTALL_PREFIX  Specifies the installation directory where your files
                         will be installed. Default directory is:
@@ -262,19 +273,18 @@ openPOWERLINK on Linux X86
                         If the build type debug is specified, the code is compiled
                         with debugging options.
 
-6.3 Out of Source Builds
-  CMake support out of source builds. Therefore all generated files could be
-  located in a separate build directory and you keep your sources clean. It is
-  recommended to use a separate build directory for building the openPOWERLINK
-  stack and demo applications.
+6.3 Out-of-Source Builds
+  CMake support out-of-source builds. Therefore, all generated files are located
+  in a seperate build directory which keeps your sources clean. It is recommended
+  to use a separate build directory for building the openPOWERLINK stack and the 
+  demo applications.
 
 6.4 Build Instructions
   Follow the steps below to build the stack and demo applications:
 
   1. Creating the build directory
-     To separate the build files from the source code you should create a
-     separate build directory. We create the build in your openPOWERLINK
-     root directory.
+     To separate the build files from the source code, a separate directory shall
+	 be created, e.g. a directory called 'build' in the openPOWERLINK root:
      > cd openPOWERLINK
      > mkdir build
 
@@ -284,35 +294,35 @@ openPOWERLINK on Linux X86
      > cd build
      > cmake-gui .. (cmake -i .., ccmake ..)
 
-     If you are using the cmake-gui, you could select your build options in the
-     GUI. After setting the desired options press "Configure". If there are new
-     options depending on your selection. You will see the new options marked in
-     red. You could configure the new options and press "Configure" again. If you
-     don't get any red marked options, you could press "Generate" to generate
-     your build files (Unix Makefiles).
+     If using the cmake-gui, the build options are selected in the GUI. After
+	 setting the desired options press "Configure". New options might appear
+	 according to the current selection. New options will be marked in red. 
+	 Further configuration settings may be changed and accepted by pressing
+	 "Configure" again. If there are no red-marked options, "Generate" writes
+	 the build files (Unix Makefiles).
 
   3. Building
      No we can build all necessary software modules by calling
-     make in the build directory
      > make
 
   4. Installation
-     To install your compile files to a single directory, type:
+     To install the compiled files to a single directory, type:
      > make install
 
-     Your target files will be installed in the configured installation
-     directory and you could start the stack and demos there.
+     The target files will be installed in the configured installation
+     directory. There, the stack and demos can be started.
 
 
 7. Running POWERLINK
 --------------------
 
 7.1  Starting kernel modules
-  To start your kernel modules, the scripts EplLoad and EplUnload will be provided.
-  The scripts will be installed in your installation directory. In addition to
-  insert the kernel module they adjust priorities and unbind the network device
-  from the standard driver to be able to be used by openPOWERLINK. Therefore
-  you always should use the scripts to start your kernel modules.
+  To start the POWERLINK kernel modules, the scripts EplLoad and EplUnload are
+  used. The scripts will be installed in the installation directory. Additionally
+  to inserting the kernel module they adjust priorities and unbind the network
+  device from the standard driver. This allows the usage of the Ethernet card by
+  openPOWERLINK.
+  It is recommended to use the scripts to start openPOWERLINK.
 
   For example:
   Start the kernel stack using the Intel 82573 network controller with a

@@ -93,5 +93,8 @@ ENDIF (NOT CFG_KERNEL_STACK)
 # add installation rules
 INSTALL(TARGETS demo_pi_console RUNTIME DESTINATION bin)
 INSTALL(FILES mnobd.cdc DESTINATION bin)
-INSTALL(PROGRAMS set_prio DESTINATION bin)            
+IF (NOT CFG_KERNEL_STACK)
+    INSTALL(PROGRAMS ${CMAKE_CURRENT_SOURCE_DIR}/../tools/set_prio DESTINATION bin)
+ENDIF (NOT CFG_KERNEL_STACK)
+            
                 
