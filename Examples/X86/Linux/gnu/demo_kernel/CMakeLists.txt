@@ -84,18 +84,20 @@ IF(CFG_POWERLINK_CFM)
 
     IF (CFG_POWERLINK_PROCESS_IMAGE)
 
-        MESSAGE(FATAL_ERROR "Process image demo not available as kernel demo!")
+        #MESSAGE(FATAL_ERROR "Process image demo not available as kernel demo!")
         SET(OBJDICT CiA302-4_MN)
         SET(MODULE_DEFS "${MODULE_DEFS} -DCONFIG_OPENCONFIGURATOR_MAPPING")
         SET(MODULE_SOURCE_FILES ${MODULE_SOURCE_FILES}
-                                ${CMAKE_CURRENT_SOURCE_DIR}/demo_main_pi.c)
+                                ${CMAKE_CURRENT_SOURCE_DIR}/demo_main.c
+                                ${POWERLINK_SOURCE_DIR}/ObjDicts/CiA302-4_MN/EplApiProcessImageSetup.c
+                                )
 
     ELSE(CFG_POWERLINK_PROCESS_IMAGE)
 
         SET(OBJDICT Qt_MN)
         SET(MODULE_SOURCE_FILES ${MODULE_SOURCE_FILES}
-                                ${CMAKE_CURRENT_SOURCE_DIR}/demo_main.c)
-
+                                ${CMAKE_CURRENT_SOURCE_DIR}/demo_main.c
+                                )
     ENDIF(CFG_POWERLINK_PROCESS_IMAGE)
 
 ELSE(CFG_POWERLINK_CFM)
@@ -213,8 +215,13 @@ ADD_CUSTOM_TARGET(
 
 # add installation rules
 INSTALL(FILES ${MODULE_OUTPUT_DIR}/${MODULE_NAME}.ko DESTINATION bin)
+
 IF(CFG_POWERLINK_CFM)
-    INSTALL(FILES mnobd.cdc DESTINATION bin)
+    IF (CFG_POWERLINK_PROCESS_IMAGE)
+        INSTALL(FILES mnobd_pi.cdc DESTINATION bin RENAME mnobd.cdc)
+    ELSE (CFG_POWERLINK_PROCESS_IMAGE)
+        INSTALL(FILES mnobd.cdc DESTINATION bin)
+    ENDIF (CFG_POWERLINK_PROCESS_IMAGE)
 ENDIF(CFG_POWERLINK_CFM)    
 INSTALL(PROGRAMS ${CMAKE_CURRENT_SOURCE_DIR}/../tools/EplLoad DESTINATION bin)
 INSTALL(PROGRAMS ${CMAKE_CURRENT_SOURCE_DIR}/../tools/EplUnload DESTINATION bin)

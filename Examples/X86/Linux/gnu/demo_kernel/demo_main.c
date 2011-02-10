@@ -200,6 +200,39 @@ static uint uiCycleLen_g = 0;
 static uint uiCycleLen_g = CYCLE_LEN;
 #endif
 
+#ifdef CONFIG_OPENCONFIGURATOR_MAPPING
+
+#include "xap.h"
+
+static PI_IN AppProcessImageIn_g;
+static PI_OUT AppProcessImageOut_g;
+static tEplApiProcessImageCopyJob AppProcessImageCopyJob_g;
+
+/*----------------------------------------------------------------------------*/
+/* application defines and variables */
+#define DEFAULT_MAX_CYCLE_COUNT 20      // 6 is very fast
+#define APP_LED_COUNT_1         8       // number of LEDs for CN1
+#define APP_LED_MASK_1          (1 << (APP_LED_COUNT_1 - 1))
+#define MAX_NODES               255
+
+typedef struct
+{
+    unsigned int            m_uiLeds;
+    unsigned int            m_uiLedsOld;
+    unsigned int            m_uiInput;
+    unsigned int            m_uiInputOld;
+    unsigned int            m_uiPeriod;
+    int                     m_iToggle;
+} APP_NODE_VAR_T;
+
+static int                  iUsedNodeIds_g[] = {1, 32, 110, 0};
+static unsigned int         uiCnt_g;
+static APP_NODE_VAR_T       nodeVar_g[MAX_NODES];
+/*----------------------------------------------------------------------------*/
+
+#endif
+
+
 module_param_named(cyclelen, uiCycleLen_g, uint, 0);
 MODULE_PARM_DESC(cyclelen, "Cyclelength in [µs] (it is stored in object 0x1006)");
 
@@ -272,8 +305,12 @@ static  int  __init  EplLinInit (void)
 tEplKernel          EplRet;
 static tEplApiInitParam EplApiInitParam = {0};
 char*               sHostname = HOSTNAME;
+
+#ifndef CONFIG_OPENCONFIGURATOR_MAPPING
 unsigned int        uiVarEntries;
 tEplObdSize         ObdSize;
+#endif
+
 BOOL                fApiInit = FALSE;
 BOOL                fLinProcInit =FALSE;
 
@@ -342,7 +379,6 @@ BOOL                fLinProcInit =FALSE;
     EplApiInitParam.m_pfnCbSync  = AppCbSync;
     EplApiInitParam.m_pfnObdInitRam = EplObdInitRam;
 
-
     printk("\n\n Hello, I'm a simple POWERLINK node running as %s!\n  (build: %s / %s)\n\n",
             (uiNodeId_g == EPL_C_ADR_MN_DEF_NODE_ID ?
                 "Managing Node" : "Controlled Node"),
@@ -377,6 +413,32 @@ BOOL                fLinProcInit =FALSE;
     }
 #endif
 
+#ifdef CONFIG_OPENCONFIGURATOR_MAPPING
+    PRINTF0("Initializing process image...\n");
+    PRINTF1("Size of input process image: %ld\n", sizeof(AppProcessImageIn_g));
+    PRINTF1("Size of output process image: %ld\n", sizeof (AppProcessImageOut_g));
+
+    AppProcessImageCopyJob_g.m_fNonBlocking = FALSE;
+    AppProcessImageCopyJob_g.m_uiPriority = 0;
+    AppProcessImageCopyJob_g.m_In.m_pPart = &AppProcessImageIn_g;
+    AppProcessImageCopyJob_g.m_In.m_uiOffset = 0;
+    AppProcessImageCopyJob_g.m_In.m_uiSize = sizeof (AppProcessImageIn_g);
+    AppProcessImageCopyJob_g.m_Out.m_pPart = &AppProcessImageOut_g;
+    AppProcessImageCopyJob_g.m_Out.m_uiOffset = 0;
+    AppProcessImageCopyJob_g.m_Out.m_uiSize = sizeof (AppProcessImageOut_g);
+
+    EplRet = EplApiProcessImageAlloc(sizeof (AppProcessImageIn_g), sizeof (AppProcessImageOut_g), 2, 2);
+    if (EplRet != kEplSuccessful)
+    {
+        goto Exit;
+    }
+
+    EplRet = EplApiProcessImageSetup();
+    if (EplRet != kEplSuccessful)
+    {
+        goto Exit;
+    }
+#else
     PRINTF0("Linking objects ...\n");
 
     // link process variables used by CN to object dictionary
@@ -453,6 +515,8 @@ BOOL                fLinProcInit =FALSE;
     bSpeedSelectOld_l = 0;
     dwMode_l = APP_DEFAULT_MODE;
     iMaxCycleCount_l = DEFAULT_MAX_CYCLE_COUNT;
+#endif
+
 
     // start the NMT state machine
     EplRet = EplApiExecNmtCommand(kEplNmtEventSwReset);
@@ -911,6 +975,70 @@ tEplKernel PUBLIC AppCbSync(void)
 {
 tEplKernel          EplRet = kEplSuccessful;
 
+#ifdef CONFIG_OPENCONFIGURATOR_MAPPING
+    int                 i;
+
+    EplRet = EplApiProcessImageExchange(&AppProcessImageCopyJob_g);
+    if (EplRet != kEplSuccessful)
+    {
+        return EplRet;
+    }
+
+    uiCnt_g++;
+
+    nodeVar_g[0].m_uiInput = AppProcessImageOut_g.CN1_M00_Digital_Input_8_Bit_Byte_1;
+    nodeVar_g[1].m_uiInput = AppProcessImageOut_g.CN32_M00_Digital_Input_8_Bit_Byte_1;
+    nodeVar_g[2].m_uiInput = AppProcessImageOut_g.CN110_M00_Digital_Input_8_Bit_Byte_1;
+
+    for (i = 0; (i < MAX_NODES) && (iUsedNodeIds_g[i] != 0); i++)
+    {
+        /* Running Leds */
+        /* period for LED flashing determined by inputs */
+        nodeVar_g[i].m_uiPeriod = (nodeVar_g[i].m_uiInput == 0) ? 1 : (nodeVar_g[i].m_uiInput * 20);
+        if (uiCnt_g % nodeVar_g[i].m_uiPeriod == 0)
+        {
+            if (nodeVar_g[i].m_uiLeds == 0x00)
+            {
+                nodeVar_g[i].m_uiLeds = 0x1;
+                nodeVar_g[i].m_iToggle = 1;
+            }
+            else
+            {
+                if (nodeVar_g[i].m_iToggle)
+                {
+                    nodeVar_g[i].m_uiLeds <<= 1;
+                    if (nodeVar_g[i].m_uiLeds == APP_LED_MASK_1)
+                    {
+                        nodeVar_g[i].m_iToggle = 0;
+                    }
+                }
+                else
+                {
+                    nodeVar_g[i].m_uiLeds >>= 1;
+                    if (nodeVar_g[i].m_uiLeds == 0x01)
+                    {
+                        nodeVar_g[i].m_iToggle = 1;
+                    }
+                }
+            }
+        }
+
+        if (nodeVar_g[i].m_uiInput != nodeVar_g[i].m_uiInputOld)
+        {
+            nodeVar_g[i].m_uiInputOld = nodeVar_g[i].m_uiInput;
+        }
+
+        if (nodeVar_g[i].m_uiLeds != nodeVar_g[i].m_uiLedsOld)
+        {
+            nodeVar_g[i].m_uiLedsOld = nodeVar_g[i].m_uiLeds;
+        }
+    }
+
+    AppProcessImageIn_g.CN1_M00_Digital_Ouput_8_Bit_Byte_1 = nodeVar_g[0].m_uiLeds;
+    AppProcessImageIn_g.CN32_M00_Digital_Ouput_8_Bit_Byte_1 = nodeVar_g[1].m_uiLeds;
+    AppProcessImageIn_g.CN110_M00_Digital_Ouput_8_Bit_Byte_1 = nodeVar_g[2].m_uiLeds;
+
+#else
     if (bVarOut1Old_l != bVarOut1_l)
     {   // output variable has changed
         bVarOut1Old_l = bVarOut1_l;
@@ -1084,6 +1212,7 @@ tEplKernel          EplRet = kEplSuccessful;
     }
 
     TGT_DBG_SIGNAL_TRACE_POINT(1);
+#endif
 
     return EplRet;
 }

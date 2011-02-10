@@ -209,6 +209,10 @@
 #define EPL_CFM_CONFIGURE_CYCLE_LENGTH      TRUE
 #endif
 
+#ifdef CONFIG_OPENCONFIGURATOR_MAPPING
+#define EPL_OBD_INCLUDE_A000_TO_DEVICE_PART TRUE
+#endif
+
 // =========================================================================
 // Timer module specific defines
 // =========================================================================
