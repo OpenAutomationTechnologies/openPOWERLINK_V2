@@ -102,6 +102,7 @@
 #define EPLLIN_CMD_PI_FREE                  _IO  ('=', 15)
 #define EPLLIN_CMD_PI_EXCHANGE              _IOW ('=', 16, tEplApiProcessImageCopyJob)
 #define EPLLIN_CMD_PI_LINKOBJECT            _IOWR('=', 16, tEplLinProcessImageLinkObject)
+#define EPLLIN_CMD_SET_CDC_FILENAME         _IOW ('=', 18, tEplLinCdcFilename)
 
 
 //---------------------------------------------------------------------------
@@ -166,6 +167,13 @@ typedef struct
     unsigned int*       m_puiVarEntries;
 
 } tEplLinProcessImageLinkObject;
+
+typedef struct
+{
+    size_t              m_uiFilenameSize;
+    char*               m_pszCdcFilename;
+
+} tEplLinCdcFilename;
 
 
 //---------------------------------------------------------------------------

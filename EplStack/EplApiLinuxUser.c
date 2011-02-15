@@ -878,6 +878,39 @@ int             iRet;
 }
 
 
+#if (EPL_OBD_USE_LOAD_CONCISEDCF != FALSE)
+//---------------------------------------------------------------------------
+//
+// Function:    EplApiSetCdcFilename
+//
+// Description: sets the file name of the ConciseDCF (CDC file)
+//
+// Parameters:  pszCdcFilename_p        = pointer to string with the CDC file name
+//
+// Returns:     tEplKernel              = error code
+//
+//
+// State:
+//
+//---------------------------------------------------------------------------
+
+EPLDLLEXPORT tEplKernel PUBLIC EplApiSetCdcFilename(char* pszCdcFilename_p)
+{
+tEplKernel          Ret = kEplSuccessful;
+int                 iRet;
+tEplLinCdcFilename  CdcFilename;
+
+    CdcFilename.m_pszCdcFilename = pszCdcFilename_p;
+    CdcFilename.m_uiFilenameSize = strlen(pszCdcFilename_p);
+
+    iRet = ioctl (EplApiInstance_g.m_hDrvInst, EPLLIN_CMD_SET_CDC_FILENAME, &CdcFilename);
+    Ret = (tEplKernel)iRet;
+
+    return Ret;
+}
+#endif // (EPL_OBD_USE_LOAD_CONCISEDCF != FALSE)
+
+
 #if 0
 //---------------------------------------------------------------------------
 //

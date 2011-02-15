@@ -174,6 +174,10 @@ static wait_queue_head_t    WaitQueueCbSync_g;  // wait queue EplLinCbSync
 static wait_queue_head_t    WaitQueuePI_In_g;   // wait queue for EplApiProcessImageExchangeIn (user process)
 static atomic_t             AtomicSyncState_g = ATOMIC_INIT(EVENT_STATE_INIT);
 
+#if (EPL_OBD_USE_LOAD_CONCISEDCF != FALSE)
+static char                 szCdcFilename_g[PATH_MAX];
+#endif
+
 
 //---------------------------------------------------------------------------
 //  Local types
@@ -311,7 +315,7 @@ int  nMinorNumber;
     init_waitqueue_head(&WaitQueueCbEvent_g);
     init_waitqueue_head(&WaitQueueProcess_g);
     init_waitqueue_head(&WaitQueueRelease_g);
-
+    szCdcFilename_g[0] = '\0';
 
     // register misc device
     iErr = misc_register(&EplLinMiscDevice_g);
@@ -1249,6 +1253,40 @@ int  iRet;
             break;
         }
 
+
+
+#if (EPL_OBD_USE_LOAD_CONCISEDCF != FALSE)
+        // ----------------------------------------------------------
+        case EPLLIN_CMD_SET_CDC_FILENAME:
+        {
+        tEplLinCdcFilename  CdcFilename;
+
+            iErr = copy_from_user(&CdcFilename, (const void*)ulArg_p, sizeof (CdcFilename));
+            if (iErr != 0)
+            {
+                iRet = -EIO;
+                goto Exit;
+            }
+
+            if (CdcFilename.m_uiFilenameSize > (PATH_MAX - 1))
+            {
+                iRet = kEplApiInvalidParam;
+                break;
+            }
+
+            iErr = copy_from_user(&szCdcFilename_g[0], CdcFilename.m_pszCdcFilename, CdcFilename.m_uiFilenameSize);
+            if (iErr != 0)
+            {
+                iRet = -EIO;
+                goto Exit;
+            }
+            szCdcFilename_g[CdcFilename.m_uiFilenameSize] = '\0';
+
+            EplRet = EplApiSetCdcFilename(szCdcFilename_g);
+            iRet = (int) EplRet;
+            break;
+        }
+#endif
 
 
         // ----------------------------------------------------------
