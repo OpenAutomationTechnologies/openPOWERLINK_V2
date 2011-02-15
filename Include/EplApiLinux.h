@@ -101,7 +101,7 @@
 #define EPLLIN_CMD_PI_ALLOC                 _IOW ('=', 14, tEplLinProcessImageAlloc)
 #define EPLLIN_CMD_PI_FREE                  _IO  ('=', 15)
 #define EPLLIN_CMD_PI_EXCHANGE              _IOW ('=', 16, tEplApiProcessImageCopyJob)
-#define EPLLIN_CMD_PI_LINKOBJECT            _IOWR('=', 16, tEplLinProcessImageLinkObject)
+#define EPLLIN_CMD_PI_LINKOBJECT            _IOWR('=', 17, tEplLinProcessImageLinkObject)
 #define EPLLIN_CMD_SET_CDC_FILENAME         _IOW ('=', 18, tEplLinCdcFilename)
 
 
