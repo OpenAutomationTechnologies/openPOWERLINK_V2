@@ -576,7 +576,15 @@ tEplApiProcessImageCopyJobInt   IntCopyJob;
 #if (TARGET_SYSTEM == _LINUX_) && defined(__KERNEL__)
     if (pCopyJob_p->m_fNonBlocking == FALSE)
     {
-        down_interruptible(&EplApiProcessImageInstance_g.m_SemaCbSync);
+    int iRet;
+
+        iRet = down_interruptible(&EplApiProcessImageInstance_g.m_SemaCbSync);
+        if (iRet != 0)
+        {
+            printk("%s: down_interruptible failed with %d\n", __func__, iRet);
+            Ret = kEplShutdown;
+            goto Exit;
+        }
     }
 #endif
 
@@ -1216,6 +1224,8 @@ static tEplKernel PUBLIC EplApiProcessImageCbSync(void)
 tEplKernel                      Ret = kEplSuccessful;
 #if !((TARGET_SYSTEM == _LINUX_) && defined(__KERNEL__))
 tEplKernel                      RetExchange;
+#else
+int                             iRet;
 #endif
 tEplApiProcessImageCopyJobInt   CopyJob;
 
@@ -1262,8 +1272,15 @@ tEplApiProcessImageCopyJobInt   CopyJob;
 
 #if (TARGET_SYSTEM == _LINUX_) && defined(__KERNEL__)
         // wait until Exchange function completes the copy job
-        down_interruptible(&EplApiProcessImageInstance_g.m_SemaCbSync);
-        up(&EplApiProcessImageInstance_g.m_SemaCbSync);
+        iRet = down_interruptible(&EplApiProcessImageInstance_g.m_SemaCbSync);
+        if (iRet != 0)
+        {
+            printk("%s: down_interruptible failed with %d\n", __func__, iRet);
+        }
+        else
+        {
+            up(&EplApiProcessImageInstance_g.m_SemaCbSync);
+        }
 
         // Hint: CopyJob specific semaphore would be required
 #endif
@@ -1296,8 +1313,15 @@ tEplApiProcessImageCopyJobInt   CopyJob;
 
 #if (TARGET_SYSTEM == _LINUX_) && defined(__KERNEL__)
         // wait until Exchange function completes the copy job
-        down_interruptible(&EplApiProcessImageInstance_g.m_SemaCbSync);
-        up(&EplApiProcessImageInstance_g.m_SemaCbSync);
+        iRet = down_interruptible(&EplApiProcessImageInstance_g.m_SemaCbSync);
+        if (iRet != 0)
+        {
+            printk("%s: down_interruptible failed with %d\n", __func__, iRet);
+        }
+        else
+        {
+            up(&EplApiProcessImageInstance_g.m_SemaCbSync);
+        }
 
         // Hint: CopyJob specific semaphore would be required
 #endif
