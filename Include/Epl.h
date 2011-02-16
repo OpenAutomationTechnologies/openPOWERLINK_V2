@@ -373,6 +373,14 @@ EPLDLLEXPORT tEplKernel PUBLIC EplApiProcessImageLinkObject(
 // objdict specific setup function
 EPLDLLEXPORT tEplKernel PUBLIC EplApiProcessImageSetup(void);
 
+// functions for getting cleartext values of stack states and events
+extern char *EplGetNmtEventStr(tEplNmtEvent nmtEvent_p);
+extern char *EplGetEventTypeStr(tEplEventType eventType_p);
+extern char *EplGetEventSourceStr(tEplEventSource eventSrc_p);
+extern char *EplGetEventSinkStr(tEplEventSink eventSink_p);
+extern char *EplGetNmtStateStr(tEplNmtState nmtState_p);
+
+
 #endif  // #ifndef _EPL_API_H_
 
 
