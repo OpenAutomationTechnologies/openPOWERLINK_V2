@@ -1,0 +1,8 @@
+<RCC>
+    <qresource prefix="/img">
+        <file>ledgreen.png</file>
+        <file>ledred.png</file>
+        <file>ledyellow.png</file>
+        <file>powerlink_open_source.png</file>
+    </qresource>
+</RCC>
