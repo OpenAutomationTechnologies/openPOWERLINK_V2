@@ -58,23 +58,9 @@
 3. Available demo applications
 -------------------------------
 
-X86 PC with Realtek RTL8139 network card and Linux operating system (see section 3.1 for requirements)
-  * Qt demo:
-    = Examples\X86\Linux\gnu\demo_mn_8139_qt
-  * simple MN demo with application running together with stack in kernel:
-    = Examples\X86\Linux\gnu\demo_mn_8139_kernel
-  * MN demo with Configuration Manager (CFM):
-    = Examples\X86\Linux\gnu\demo_cfm_8139_kernel
-  * Qt demo with Configuration Manager (CFM):
-    = Examples\X86\Linux\gnu\demo_cfm_8139_qt
-
-X86 PC with Intel 82573 network chip and Linux operating system
-  * Qt demo:
-    = Examples\X86\Linux\gnu\demo_mn_82573_qt
-  * MN demo with Configuration Manager (CFM):
-    = Examples\X86\Linux\gnu\demo_cfm_82573_kernel
-  * Qt demo with Configuration Manager (CFM):
-    = Examples\X86\Linux\gnu\demo_cfm_82573_qt
+X86 PC and Linux operating system
+  There are several demo applications available for Linux. Detailed documentation
+  is located in Documentation/linux-x86.txt
 
 X86 PC with Microsoft Windows operating system (2000, XP or newer)
 and WinPcap driver installed:
@@ -104,32 +90,13 @@ with Nios II Soft-CPU and openMAC
   * CN demo which controls the LEDs and reads the pushbuttons on the devboard:
     = Examples\altera_nios2\no_os\gnu\demo_cn_3r1tpdo
 
+3.3. Requirements for X86 Linux demos
+-------------------------------------
 
-3.1. Requirements for X86 demo under Linux
--------------------------------------------
-
-- Linux kernel version 2.6.23 or later (last tested version 2.6.31)
-  with CONFIG_HIGH_RES_TIMERS enabled
-    * this needs ACPI support, maybe you need to append "highres=on" or
-      "acpi=force" to kernel command line for older BIOSes)
-    * check /proc/timer_list if .hres_active is 1
-      $ cat /proc/timer_list | grep 'hres_active'
-
-- Network controller card with Realtek RTL8139 Rev C or D chip onboard
-  PCI network cards:
-    * Zyxel FN312 (tested)
-    * Netgear FA311 v2 Rev-D1 (tested)
-    * D-Link DFE-528TX
-    * LevelOne FNC-0109TX
-    * Typhoon Speednet Card 10/100 PCI (P/N 70035)
-    * Longshine LCS-8038TX-R7
-  Cardbus network cards (PCMCIA):
-    * Longshine LCS-8539TXR
-    * Micronet SP160T V3
-    * Micronet SP160TA V3
+Detailed documentation is located in Documentation/linux-x86.txt
 
 
-3.2. Requirements for ColdFire MCF5484 demo
+3.3. Requirements for ColdFire MCF5484 demo
 --------------------------------------------
 
 - Linux-BSP and toolchain for ColdFire MCF5484
@@ -137,36 +104,25 @@ with Nios II Soft-CPU and openMAC
 - Host PC with Linux
 
 
-3.3. Steps to build and execute the demo application
------------------------------------------------------
+3.4. Steps to build and execute the demo application for the MCF5484
+--------------------------------------------------------------------
 
 1.  Setup build environment on the host computer
-    (e.g. install Linux-BSP and toolchain for ColdFire MCF5484
-     or install Linux kernel sources for X86)
+    (e.g. install Linux-BSP and toolchain for ColdFire MCF5484)
 
 2.  Compile the sample application,
     e.g. for ColdFire MCF5484 with Linux execute the following commands
             $ cd Examples/PLCcore-CF54/Linux/gnu/demo_mn_kernel
             $ make
 
-    for X86 with RTL8139 network controller try the following
-	        $ cd Examples/X86/Linux/gnu/demo_mn_8139_kernel
-	        $ make
-
-3.  Unload an existing 8139 driver under Linux (if necessary):
-	        $ rmmod 8139too.ko
-
-    Unload the running application before:
-            $ rmmod epl.ko
-
-4.  Copy the built sample application (i.e. the Linux kernel object epl.ko) to
+3.  Copy the built sample application (i.e. the Linux kernel object epl.ko) to
     the target (e.g. via FTP or NFS) and run it.
             $ insmod epl.ko
     With an additional parameter 'nodeid' the node-ID can be set manually.
     It overwrites any hardware settings.
             $ insmod epl.ko nodeid=240
 
-5.  Now you may modify the sources to your needs and restart from 2.
+4.  Now you may modify the sources to your needs and restart from 2.
     (e.g. change the cycle length and the network configuration in demo_main.c)
 
 
