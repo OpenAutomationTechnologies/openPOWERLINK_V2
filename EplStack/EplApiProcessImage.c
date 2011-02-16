@@ -75,7 +75,12 @@
 #if (TARGET_SYSTEM == _LINUX_) && defined(__KERNEL__)
 #include <asm/uaccess.h>
 #include <linux/completion.h>
+#include <linux/version.h>
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 26)
 #include <linux/semaphore.h>
+#else
+#include <asm/semaphore.h>
+#endif
 #include <asm/current.h>
 #elif (TARGET_SYSTEM == _LINUX_) && !defined(__KERNEL__)
 #include <sys/types.h>
@@ -581,9 +586,10 @@ tEplApiProcessImageCopyJobInt   IntCopyJob;
     {
         if (Ret == kEplSuccessful)
         {
-            EplApiProcessImageWaitForCompletion(&IntCopyJob);
+            Ret = EplApiProcessImageWaitForCompletion(&IntCopyJob);
 
-            if ((EplApiProcessImageInstance_g.m_In.m_uiSize == 0)
+            if ((Ret != kEplSuccessful)
+                || (EplApiProcessImageInstance_g.m_In.m_uiSize == 0)
                 || (EplApiProcessImageInstance_g.m_Out.m_uiSize == 0))
             {   // in the mean time the process image has been freed
                 // therefor, indicate shutdown to application thread
@@ -1093,7 +1099,14 @@ static tEplKernel EplApiProcessImageWaitForCompletion(
 tEplKernel      Ret = kEplSuccessful;
 
 #if (TARGET_SYSTEM == _LINUX_) && defined(__KERNEL__)
-    wait_for_completion(pCopyJob_p->m_Event.m_pCompletion);
+int             iRes;
+
+    iRes = wait_for_completion_interruptible(pCopyJob_p->m_Event.m_pCompletion);
+    if (iRes != 0)
+    {
+        Ret = kEplShutdown;
+    }
+
 #elif (TARGET_SYSTEM == _LINUX_) && !defined(__KERNEL__)
     sem_wait(&pCopyJob_p->m_Event.m_semCompletion);
 #elif (TARGET_SYSTEM == _WIN32_)
