@@ -75,6 +75,8 @@
 #if (TARGET_SYSTEM == _LINUX_) && defined(__KERNEL__)
 #include <asm/uaccess.h>
 #include <linux/completion.h>
+#include <linux/mm.h>
+#include <linux/highmem.h>
 #include <linux/version.h>
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 26)
 #include <linux/semaphore.h>
@@ -144,6 +146,10 @@
 // const defines
 //---------------------------------------------------------------------------
 
+#ifndef EPL_API_PI_MAX_SIZE
+#define EPL_API_PI_MAX_SIZE         65536
+#endif
+
 #ifndef EPL_API_PI_BUFFER_ID_LO
 #define EPL_API_PI_BUFFER_ID_LO     "EplApiPIJobQueueLo"
 #endif
@@ -157,6 +163,21 @@
 // local types
 //---------------------------------------------------------------------------
 
+#if (TARGET_SYSTEM == _LINUX_) && defined(__KERNEL__)
+
+#define EPL_API_PI_PAGE_COUNT       ((EPL_API_PI_MAX_SIZE >> PAGE_SHIFT) + 1)
+
+// special completion structure for Linux Kernel
+typedef struct
+{
+    struct completion       m_Completion;
+    struct page*            m_apPageIn[EPL_API_PI_PAGE_COUNT];
+    struct page*            m_apPageOut[EPL_API_PI_PAGE_COUNT];
+
+} tEplApiProcessImageCompletion;
+#endif
+
+
 typedef struct
 {
     tEplApiProcessImageCopyJob  m_CopyJob;
@@ -165,7 +186,7 @@ typedef struct
         tEplEventSink           m_EventSink;
         // more OS specific event types
 #if (TARGET_SYSTEM == _LINUX_) && defined(__KERNEL__)
-        struct completion*      m_pCompletion;
+        tEplApiProcessImageCompletion* m_pCompletion;
 #elif (TARGET_SYSTEM == _LINUX_) && !defined(__KERNEL__)
         sem_t                   m_semCompletion;
 #elif (TARGET_SYSTEM == _WIN32_)
@@ -188,7 +209,6 @@ typedef struct
     tEplSyncCb          m_pfnOrgCbSync;
 #if (TARGET_SYSTEM == _LINUX_) && defined(__KERNEL__)
     struct task_struct* m_pCurrentTask;
-    struct semaphore    m_SemaCbSync;
 #elif (TARGET_SYSTEM == _LINUX_) && !defined(__KERNEL__)
     pthread_t           m_currentThreadId;
 #elif (TARGET_SYSTEM == _WIN32_)
@@ -235,6 +255,18 @@ static tEplKernel EplApiProcessImageSignalCompletion(
 
 static tEplKernel PUBLIC EplApiProcessImageCbSync(void);
 
+#if (TARGET_SYSTEM == _LINUX_) && defined(__KERNEL__)
+static tEplKernel EplApiProcessImageGetUserPages(
+    tEplApiProcessImage* pImage_p,
+    tEplApiProcessImagePart* pPart_p, BOOL fOut_p,
+    struct page** ppPage_p);
+
+static void EplApiProcessImagePutUserPages(
+    struct page** ppPage_p, BOOL fDirty_p);
+
+static tEplKernel EplApiProcessImageExchangeIntUserPages(
+    tEplApiProcessImageCopyJobInt* pCopyJob_p);
+#endif
 
 
 //=========================================================================//
@@ -323,10 +355,6 @@ unsigned int    fShbNewCreated;
         Ret = kEplNoResource;
         goto Exit;
     }
-
-#if (TARGET_SYSTEM == _LINUX_) && defined(__KERNEL__)
-    sema_init(&EplApiProcessImageInstance_g.m_SemaCbSync, 1);
-#endif
 
     EplApiProcessImageInstance_g.m_pfnOrgCbSync = EplDllkRegSyncHandler(EplApiProcessImageCbSync);
 
@@ -562,6 +590,7 @@ tEplApiProcessImageCopyJobInt   IntCopyJob;
         Ret = EplApiProcessImageCreateCompletion(&IntCopyJob);
         if (Ret != kEplSuccessful)
         {
+            EplApiProcessImageDeleteCompletion(&IntCopyJob);
             goto Exit;
         }
     }
@@ -574,18 +603,6 @@ tEplApiProcessImageCopyJobInt   IntCopyJob;
 #endif
 
 #if (TARGET_SYSTEM == _LINUX_) && defined(__KERNEL__)
-    if (pCopyJob_p->m_fNonBlocking == FALSE)
-    {
-    int iRet;
-
-        iRet = down_interruptible(&EplApiProcessImageInstance_g.m_SemaCbSync);
-        if (iRet != 0)
-        {
-            printk("%s: down_interruptible failed with %d\n", __func__, iRet);
-            Ret = kEplShutdown;
-            goto Exit;
-        }
-    }
 #endif
 
     Ret = EplApiProcessImagePostCopyJob(&IntCopyJob);
@@ -603,17 +620,7 @@ tEplApiProcessImageCopyJobInt   IntCopyJob;
                 // therefor, indicate shutdown to application thread
                 Ret = kEplShutdown;
             }
-#if (TARGET_SYSTEM == _LINUX_) && defined(__KERNEL__)
-            else
-            {
-                Ret = EplApiProcessImageExchangeInt(&IntCopyJob.m_CopyJob);
-            }
-#endif
         }
-#if (TARGET_SYSTEM == _LINUX_) && defined(__KERNEL__)
-        // signal completion of copy job back to CbSync
-        up(&EplApiProcessImageInstance_g.m_SemaCbSync);
-#endif
 
         EplApiProcessImageDeleteCompletion(&IntCopyJob);
     }
@@ -622,208 +629,6 @@ Exit:
     return Ret;
 }
 
-#if 0
-//---------------------------------------------------------------------------
-//
-// Function:    EplApiProcessImageSetup()
-//
-// Description: sets up static process image
-//
-// Parameters:  (none)
-//
-// Returns:     tEplKernel              = error code
-//
-//
-// State:
-//
-//---------------------------------------------------------------------------
-
-tEplKernel PUBLIC EplApiProcessImageSetup(void)
-{
-tEplKernel      Ret = kEplSuccessful;
-#if ((EPL_API_PROCESS_IMAGE_SIZE_IN > 0) || (EPL_API_PROCESS_IMAGE_SIZE_OUT > 0))
-unsigned int    uiVarEntries;
-tEplObdSize     ObdSize;
-#endif
-
-#if EPL_API_PROCESS_IMAGE_SIZE_IN > 0
-    uiVarEntries = EPL_API_PROCESS_IMAGE_SIZE_IN;
-    ObdSize = 1;
-    Ret = EplApiLinkObject(
-                            0x2000,
-                            EplApiProcessImageInstance_g.m_abProcessImageInput,
-                            &uiVarEntries,
-                            &ObdSize,
-                            1);
-
-    uiVarEntries = EPL_API_PROCESS_IMAGE_SIZE_IN;
-    ObdSize = 1;
-    Ret = EplApiLinkObject(
-                            0x2001,
-                            EplApiProcessImageInstance_g.m_abProcessImageInput,
-                            &uiVarEntries,
-                            &ObdSize,
-                            1);
-
-    ObdSize = 2;
-    uiVarEntries = EPL_API_PROCESS_IMAGE_SIZE_IN / ObdSize;
-    Ret = EplApiLinkObject(
-                            0x2010,
-                            EplApiProcessImageInstance_g.m_abProcessImageInput,
-                            &uiVarEntries,
-                            &ObdSize,
-                            1);
-
-    ObdSize = 2;
-    uiVarEntries = EPL_API_PROCESS_IMAGE_SIZE_IN / ObdSize;
-    Ret = EplApiLinkObject(
-                            0x2011,
-                            EplApiProcessImageInstance_g.m_abProcessImageInput,
-                            &uiVarEntries,
-                            &ObdSize,
-                            1);
-
-    ObdSize = 4;
-    uiVarEntries = EPL_API_PROCESS_IMAGE_SIZE_IN / ObdSize;
-    Ret = EplApiLinkObject(
-                            0x2020,
-                            EplApiProcessImageInstance_g.m_abProcessImageInput,
-                            &uiVarEntries,
-                            &ObdSize,
-                            1);
-
-    ObdSize = 4;
-    uiVarEntries = EPL_API_PROCESS_IMAGE_SIZE_IN / ObdSize;
-    Ret = EplApiLinkObject(
-                            0x2021,
-                            EplApiProcessImageInstance_g.m_abProcessImageInput,
-                            &uiVarEntries,
-                            &ObdSize,
-                            1);
-#endif
-
-#if EPL_API_PROCESS_IMAGE_SIZE_OUT > 0
-    uiVarEntries = EPL_API_PROCESS_IMAGE_SIZE_OUT;
-    ObdSize = 1;
-    Ret = EplApiLinkObject(
-                            0x2030,
-                            EplApiProcessImageInstance_g.m_abProcessImageOutput,
-                            &uiVarEntries,
-                            &ObdSize,
-                            1);
-
-    uiVarEntries = EPL_API_PROCESS_IMAGE_SIZE_OUT;
-    ObdSize = 1;
-    Ret = EplApiLinkObject(
-                            0x2031,
-                            EplApiProcessImageInstance_g.m_abProcessImageOutput,
-                            &uiVarEntries,
-                            &ObdSize,
-                            1);
-
-    ObdSize = 2;
-    uiVarEntries = EPL_API_PROCESS_IMAGE_SIZE_OUT / ObdSize;
-    Ret = EplApiLinkObject(
-                            0x2040,
-                            EplApiProcessImageInstance_g.m_abProcessImageOutput,
-                            &uiVarEntries,
-                            &ObdSize,
-                            1);
-
-    ObdSize = 2;
-    uiVarEntries = EPL_API_PROCESS_IMAGE_SIZE_OUT / ObdSize;
-    Ret = EplApiLinkObject(
-                            0x2041,
-                            EplApiProcessImageInstance_g.m_abProcessImageOutput,
-                            &uiVarEntries,
-                            &ObdSize,
-                            1);
-
-    ObdSize = 4;
-    uiVarEntries = EPL_API_PROCESS_IMAGE_SIZE_OUT / ObdSize;
-    Ret = EplApiLinkObject(
-                            0x2050,
-                            EplApiProcessImageInstance_g.m_abProcessImageOutput,
-                            &uiVarEntries,
-                            &ObdSize,
-                            1);
-
-    ObdSize = 4;
-    uiVarEntries = EPL_API_PROCESS_IMAGE_SIZE_OUT / ObdSize;
-    Ret = EplApiLinkObject(
-                            0x2051,
-                            EplApiProcessImageInstance_g.m_abProcessImageOutput,
-                            &uiVarEntries,
-                            &ObdSize,
-                            1);
-#endif
-
-    return Ret;
-}
-
-//----------------------------------------------------------------------------
-// Function:    EplApiProcessImageExchangeIn()
-//
-// Description: replaces passed input process image with the one of EPL stack
-//
-// Parameters:  pPI_p                   = input process image
-//
-// Returns:     tEplKernel              = error code
-//
-// State:
-//----------------------------------------------------------------------------
-
-tEplKernel PUBLIC EplApiProcessImageExchangeIn(tEplApiProcessImage* pPI_p)
-{
-tEplKernel      Ret = kEplSuccessful;
-
-#if EPL_API_PROCESS_IMAGE_SIZE_IN > 0
-    #if (TARGET_SYSTEM == _LINUX_) && defined(__KERNEL__)
-        copy_to_user(pPI_p->m_pImage,
-            EplApiProcessImageInstance_g.m_abProcessImageInput,
-            min(pPI_p->m_uiSize, sizeof (EplApiProcessImageInstance_g.m_abProcessImageInput)));
-    #else
-        EPL_MEMCPY(pPI_p->m_pImage,
-            EplApiProcessImageInstance_g.m_abProcessImageInput,
-            min(pPI_p->m_uiSize, sizeof (EplApiProcessImageInstance_g.m_abProcessImageInput)));
-    #endif
-#endif
-
-    return Ret;
-}
-
-
-//----------------------------------------------------------------------------
-// Function:    EplApiProcessImageExchangeOut()
-//
-// Description: copies passed output process image to EPL stack.
-//
-// Parameters:  pPI_p                   = output process image
-//
-// Returns:     tEplKernel              = error code
-//
-// State:
-//----------------------------------------------------------------------------
-
-tEplKernel PUBLIC EplApiProcessImageExchangeOut(tEplApiProcessImage* pPI_p)
-{
-tEplKernel      Ret = kEplSuccessful;
-
-#if EPL_API_PROCESS_IMAGE_SIZE_OUT > 0
-    #if (TARGET_SYSTEM == _LINUX_) && defined(__KERNEL__)
-        copy_from_user(EplApiProcessImageInstance_g.m_abProcessImageOutput,
-            pPI_p->m_pImage,
-            min(pPI_p->m_uiSize, sizeof (EplApiProcessImageInstance_g.m_abProcessImageOutput)));
-    #else
-        EPL_MEMCPY(EplApiProcessImageInstance_g.m_abProcessImageOutput,
-            pPI_p->m_pImage,
-            min(pPI_p->m_uiSize, sizeof (EplApiProcessImageInstance_g.m_abProcessImageOutput)));
-    #endif
-#endif
-
-    return Ret;
-}
-#endif
 
 
 //=========================================================================//
@@ -856,9 +661,11 @@ tEplKernel      Ret = kEplSuccessful;
     {
         if ((pCopyJob_p->m_In.m_pPart != NULL)
             && (EplApiProcessImageInstance_g.m_In.m_pImage != NULL)
-            && ((pCopyJob_p->m_In.m_uiOffset + pCopyJob_p->m_In.m_uiSize) <= EplApiProcessImageInstance_g.m_In.m_uiSize))
+            && ((pCopyJob_p->m_In.m_uiOffset + pCopyJob_p->m_In.m_uiSize)
+                <= EplApiProcessImageInstance_g.m_In.m_uiSize))
         {
-        void*   pPIVar = ((BYTE*) EplApiProcessImageInstance_g.m_In.m_pImage) + pCopyJob_p->m_In.m_uiOffset;
+        void*   pPIVar = ((BYTE*) EplApiProcessImageInstance_g.m_In.m_pImage)
+                            + pCopyJob_p->m_In.m_uiOffset;
 
             #if (TARGET_SYSTEM == _LINUX_) && defined(__KERNEL__)
             int     iErr;
@@ -890,9 +697,11 @@ tEplKernel      Ret = kEplSuccessful;
     {
         if ((pCopyJob_p->m_Out.m_pPart != NULL)
             && (EplApiProcessImageInstance_g.m_Out.m_pImage != NULL)
-            && ((pCopyJob_p->m_Out.m_uiOffset + pCopyJob_p->m_Out.m_uiSize) <= EplApiProcessImageInstance_g.m_Out.m_uiSize))
+            && ((pCopyJob_p->m_Out.m_uiOffset + pCopyJob_p->m_Out.m_uiSize)
+                <= EplApiProcessImageInstance_g.m_Out.m_uiSize))
         {
-        void*   pPIVar = ((BYTE*) EplApiProcessImageInstance_g.m_Out.m_pImage) + pCopyJob_p->m_Out.m_uiOffset;
+        void*   pPIVar = ((BYTE*) EplApiProcessImageInstance_g.m_Out.m_pImage)
+                            + pCopyJob_p->m_Out.m_uiOffset;
 
             #if (TARGET_SYSTEM == _LINUX_) && defined(__KERNEL__)
             int     iErr;
@@ -1044,6 +853,229 @@ Exit:
 }
 
 
+#if (TARGET_SYSTEM == _LINUX_) && defined(__KERNEL__)
+//---------------------------------------------------------------------------
+//
+// Function:    EplApiProcessImageGetUserPages()
+//
+// Description: Gets the page entries for the referred process image part.
+//
+// Parameters:  pImage_p        = pointer to process image
+//              pPart_p         = pointer to part structure
+//              fOut_p          = TRUE if output copy job
+//              ppPage_p        = pointer to page entry pointers
+//
+// Returns:     tEplKernel              = error code
+//
+// State:
+//
+//---------------------------------------------------------------------------
+
+static tEplKernel EplApiProcessImageGetUserPages(
+    tEplApiProcessImage* pImage_p,
+    tEplApiProcessImagePart* pPart_p, BOOL fOut_p,
+    struct page** ppPage_p)
+{
+tEplKernel      Ret = kEplSuccessful;
+int             iRet;
+unsigned int    uiNrOfPages;
+
+    if (pPart_p->m_uiSize > EPL_API_PI_MAX_SIZE)
+    {
+        Ret = kEplApiPISizeExceeded;
+        goto Exit;
+    }
+
+    if ((pPart_p->m_uiSize > 0)
+        && (pPart_p->m_pPart != NULL)
+        && (pImage_p->m_pImage != NULL)
+        && ((pPart_p->m_uiOffset + pPart_p->m_uiSize)
+            <= pImage_p->m_uiSize))
+    {
+        uiNrOfPages = (((unsigned long)pPart_p->m_pPart & ~PAGE_MASK)
+                + pPart_p->m_uiSize + PAGE_SIZE - 1) >> PAGE_SHIFT;
+        down_read(&current->mm->mmap_sem);
+        iRet = get_user_pages(current, current->mm,
+                (unsigned long)pPart_p->m_pPart,
+                uiNrOfPages, fOut_p, 0, ppPage_p,
+                NULL);
+        up_read(&current->mm->mmap_sem);
+        if (iRet != uiNrOfPages)
+        {
+            PRINTF("%s: get_user_pages(%p, %u, %d, %p) returned %d\n",
+                    __func__,
+                    pPart_p->m_pPart,
+                    uiNrOfPages, fOut_p,
+                    ppPage_p, iRet);
+            EplApiProcessImagePutUserPages(ppPage_p, FALSE);
+            Ret = kEplApiPIOutOfMemory;
+            goto Exit;
+        }
+    }
+
+Exit:
+    return Ret;
+}
+
+
+//---------------------------------------------------------------------------
+//
+// Function:    EplApiProcessImagePutUserPages()
+//
+// Description: Puts the specified page entries.
+//
+// Parameters:  ppPage_p        = pointer to page entry pointers
+//              fDirty_p        = TRUE, if pages should be marked dirty
+//
+// Returns:     tEplKernel              = error code
+//
+// State:
+//
+//---------------------------------------------------------------------------
+
+static void EplApiProcessImagePutUserPages(
+    struct page** ppPage_p, BOOL fDirty_p)
+{
+unsigned int    nIndex;
+
+    for (nIndex = 0; nIndex < EPL_API_PI_PAGE_COUNT; nIndex++)
+    {
+        if (ppPage_p[nIndex] == NULL)
+        {
+            break;
+        }
+        if (fDirty_p != FALSE)
+        {
+            set_page_dirty_lock(ppPage_p[nIndex]);
+        }
+        put_page(ppPage_p[nIndex]);
+        ppPage_p[nIndex] = NULL;
+    }
+}
+
+
+//---------------------------------------------------------------------------
+//
+// Function:    EplApiProcessImageExchangeIntUserPages()
+//
+// Description: Perform the actual copy job on mapped user pages.
+//
+// Parameters:  pCopyJob_p              = pointer to internal copy job structure
+//
+// Returns:     tEplKernel              = error code
+//
+// State:
+//
+//---------------------------------------------------------------------------
+
+static tEplKernel EplApiProcessImageExchangeIntUserPages(
+    tEplApiProcessImageCopyJobInt* pCopyJob_p)
+{
+tEplKernel      Ret = kEplSuccessful;
+unsigned int    nIndex;
+struct page**   ppPage;
+unsigned long   ulOffset;
+unsigned long   ulLength;
+unsigned long   ulSize;
+void*           pPIVar;
+tEplApiProcessImagePart* pPart;
+void*           pVirtUserPart;
+
+    // copy input image
+    ppPage = pCopyJob_p->m_Event.m_pCompletion->m_apPageIn;
+
+    pPart = &pCopyJob_p->m_CopyJob.m_In;
+
+    if ((pPart->m_uiSize > 0)
+        && (pPart->m_pPart != NULL)
+        && (EplApiProcessImageInstance_g.m_In.m_pImage != NULL)
+        && ((pPart->m_uiOffset + pPart->m_uiSize)
+            <= EplApiProcessImageInstance_g.m_In.m_uiSize))
+    {
+        pPIVar = ((BYTE*) EplApiProcessImageInstance_g.m_In.m_pImage)
+                    + pPart->m_uiOffset;
+
+        ulOffset = ((unsigned long)pPart->m_pPart) & (PAGE_SIZE - 1);
+
+        ulLength = 0;
+
+        for (nIndex = 0; nIndex < EPL_API_PI_PAGE_COUNT; nIndex++)
+        {
+            if (ppPage[nIndex] == NULL)
+            {
+                break;
+            }
+
+            ulSize = min ((PAGE_SIZE - ulOffset), pPart->m_uiSize - ulLength);
+            pVirtUserPart = kmap_atomic(ppPage[nIndex], KM_USER0);
+
+            EPL_MEMCPY(pPIVar,
+                pVirtUserPart + ulOffset,
+                ulSize);
+
+            kunmap_atomic(pVirtUserPart, KM_USER0);
+
+            pPIVar += ulSize;
+            ulLength += ulSize;
+            ulOffset = 0;
+
+            if (ulLength >= pPart->m_uiSize)
+            {
+                break;
+            }
+        }
+    }
+
+    // copy output image
+    ppPage = pCopyJob_p->m_Event.m_pCompletion->m_apPageOut;
+
+    pPart = &pCopyJob_p->m_CopyJob.m_Out;
+
+    if ((pPart->m_uiSize > 0)
+        && (pPart->m_pPart != NULL)
+        && (EplApiProcessImageInstance_g.m_Out.m_pImage != NULL)
+        && ((pPart->m_uiOffset + pPart->m_uiSize)
+            <= EplApiProcessImageInstance_g.m_Out.m_uiSize))
+    {
+        pPIVar = ((BYTE*) EplApiProcessImageInstance_g.m_Out.m_pImage)
+                    + pPart->m_uiOffset;
+
+        ulOffset = ((unsigned long)pPart->m_pPart) & (PAGE_SIZE - 1);
+
+        ulLength = 0;
+
+        for (nIndex = 0; nIndex < EPL_API_PI_PAGE_COUNT; nIndex++)
+        {
+            if (ppPage[nIndex] == NULL)
+            {
+                break;
+            }
+
+            ulSize = min ((PAGE_SIZE - ulOffset), pPart->m_uiSize - ulLength);
+            pVirtUserPart = kmap_atomic(ppPage[nIndex], KM_USER0);
+
+            EPL_MEMCPY(pVirtUserPart + ulOffset,
+                pPIVar,
+                ulSize);
+
+            kunmap_atomic(pVirtUserPart, KM_USER0);
+
+            pPIVar += ulSize;
+            ulLength += ulSize;
+            ulOffset = 0;
+
+            if (ulLength >= pPart->m_uiSize)
+            {
+                break;
+            }
+        }
+    }
+
+    return Ret;
+}
+#endif
+
+
 //---------------------------------------------------------------------------
 //
 // Function:    EplApiProcessImageCreateCompletion()
@@ -1064,15 +1096,40 @@ static tEplKernel EplApiProcessImageCreateCompletion(
 tEplKernel      Ret = kEplSuccessful;
 
 #if (TARGET_SYSTEM == _LINUX_) && defined(__KERNEL__)
+
     pCopyJob_p->m_Event.m_pCompletion = EPL_MALLOC(sizeof (*pCopyJob_p->m_Event.m_pCompletion));
     if (pCopyJob_p->m_Event.m_pCompletion == NULL)
     {
         Ret = kEplApiPIOutOfMemory;
         goto Exit;
     }
-    init_completion(pCopyJob_p->m_Event.m_pCompletion);
+    init_completion(&pCopyJob_p->m_Event.m_pCompletion->m_Completion);
+
+    EPL_MEMSET (pCopyJob_p->m_Event.m_pCompletion->m_apPageIn,
+            0, sizeof (pCopyJob_p->m_Event.m_pCompletion->m_apPageIn));
+    EPL_MEMSET (pCopyJob_p->m_Event.m_pCompletion->m_apPageOut,
+            0, sizeof (pCopyJob_p->m_Event.m_pCompletion->m_apPageOut));
+
+    // fetch page pointers for userspace memory
+    Ret = EplApiProcessImageGetUserPages(&EplApiProcessImageInstance_g.m_In,
+            &pCopyJob_p->m_CopyJob.m_In, FALSE,
+            pCopyJob_p->m_Event.m_pCompletion->m_apPageIn);
+    if (Ret != kEplSuccessful)
+    {
+        goto Exit;
+    }
+
+    Ret = EplApiProcessImageGetUserPages(&EplApiProcessImageInstance_g.m_Out,
+            &pCopyJob_p->m_CopyJob.m_Out, TRUE,
+            pCopyJob_p->m_Event.m_pCompletion->m_apPageOut);
+    if (Ret != kEplSuccessful)
+    {
+        goto Exit;
+    }
+
 #elif (TARGET_SYSTEM == _LINUX_) && !defined(__KERNEL__)
     sem_init(&pCopyJob_p->m_Event.m_semCompletion, 0, 0);
+
 #elif (TARGET_SYSTEM == _WIN32_)
     pCopyJob_p->m_Event.m_hEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
 
@@ -1109,7 +1166,7 @@ tEplKernel      Ret = kEplSuccessful;
 #if (TARGET_SYSTEM == _LINUX_) && defined(__KERNEL__)
 int             iRes;
 
-    iRes = wait_for_completion_interruptible(pCopyJob_p->m_Event.m_pCompletion);
+    iRes = wait_for_completion_interruptible(&pCopyJob_p->m_Event.m_pCompletion->m_Completion);
     if (iRes != 0)
     {
         Ret = kEplShutdown;
@@ -1148,13 +1205,27 @@ static tEplKernel EplApiProcessImageDeleteCompletion(
 tEplKernel      Ret = kEplSuccessful;
 
 #if (TARGET_SYSTEM == _LINUX_) && defined(__KERNEL__)
-    EPL_FREE(pCopyJob_p->m_Event.m_pCompletion);
-    pCopyJob_p->m_Event.m_pCompletion = NULL;
+    if (pCopyJob_p->m_Event.m_pCompletion != NULL)
+    {
+        EplApiProcessImagePutUserPages(
+                pCopyJob_p->m_Event.m_pCompletion->m_apPageIn, FALSE);
+        EplApiProcessImagePutUserPages(
+                pCopyJob_p->m_Event.m_pCompletion->m_apPageOut, TRUE);
+        EPL_FREE(pCopyJob_p->m_Event.m_pCompletion);
+        pCopyJob_p->m_Event.m_pCompletion = NULL;
+    }
+
 #elif (TARGET_SYSTEM == _LINUX_) && !defined(__KERNEL__)
     sem_destroy(&pCopyJob_p->m_Event.m_semCompletion);
+
 #elif (TARGET_SYSTEM == _WIN32_)
-    CloseHandle(pCopyJob_p->m_Event.m_hEvent);
-    pCopyJob_p->m_Event.m_hEvent = INVALID_HANDLE_VALUE;
+    if ((pCopyJob_p->m_Event.m_hEvent != NULL)
+        && (pCopyJob_p->m_Event.m_hEvent != INVALID_HANDLE_VALUE))
+    {
+        CloseHandle(pCopyJob_p->m_Event.m_hEvent);
+        pCopyJob_p->m_Event.m_hEvent = INVALID_HANDLE_VALUE;
+    }
+
 #else
 #error "OS currently not supported by EplApiProcessImage!"
 #endif
@@ -1186,7 +1257,7 @@ tEplKernel      Ret = kEplSuccessful;
     if (pCopyJob_p->m_CopyJob.m_fNonBlocking == FALSE)
     {
 #if (TARGET_SYSTEM == _LINUX_) && defined(__KERNEL__)
-        complete(pCopyJob_p->m_Event.m_pCompletion);
+        complete(&pCopyJob_p->m_Event.m_pCompletion->m_Completion);
 #elif (TARGET_SYSTEM == _LINUX_) && !defined(__KERNEL__)
         sem_post(&pCopyJob_p->m_Event.m_semCompletion);
 #elif (TARGET_SYSTEM == _WIN32_)
@@ -1222,11 +1293,7 @@ tEplKernel      Ret = kEplSuccessful;
 static tEplKernel PUBLIC EplApiProcessImageCbSync(void)
 {
 tEplKernel                      Ret = kEplSuccessful;
-#if !((TARGET_SYSTEM == _LINUX_) && defined(__KERNEL__))
 tEplKernel                      RetExchange;
-#else
-int                             iRet;
-#endif
 tEplApiProcessImageCopyJobInt   CopyJob;
 
     // memorize current thread, so that Exchange() can detect if it is called from within this function
@@ -1252,38 +1319,24 @@ tEplApiProcessImageCopyJobInt   CopyJob;
     Ret = EplApiProcessImageFetchCopyJob(0, &CopyJob);
     if (Ret == kEplSuccessful)
     {
-#if !((TARGET_SYSTEM == _LINUX_) && defined(__KERNEL__))
+#if (TARGET_SYSTEM == _LINUX_) && defined(__KERNEL__)
+        RetExchange = EplApiProcessImageExchangeIntUserPages(&CopyJob);
+#else
         RetExchange = EplApiProcessImageExchangeInt(&CopyJob.m_CopyJob);
 #endif
 
         Ret = EplApiProcessImageSignalCompletion(&CopyJob);
-#if !((TARGET_SYSTEM == _LINUX_) && defined(__KERNEL__))
         if (RetExchange != kEplSuccessful)
         {
             Ret = RetExchange;
             goto Exit;
         }
-#endif
 
         if (Ret != kEplSuccessful)
         {
             goto Exit;
         }
 
-#if (TARGET_SYSTEM == _LINUX_) && defined(__KERNEL__)
-        // wait until Exchange function completes the copy job
-        iRet = down_interruptible(&EplApiProcessImageInstance_g.m_SemaCbSync);
-        if (iRet != 0)
-        {
-            printk("%s: down_interruptible failed with %d\n", __func__, iRet);
-        }
-        else
-        {
-            up(&EplApiProcessImageInstance_g.m_SemaCbSync);
-        }
-
-        // Hint: CopyJob specific semaphore would be required
-#endif
     }
     else if (Ret != kEplApiPIJobQueueEmpty)
     {
@@ -1293,38 +1346,24 @@ tEplApiProcessImageCopyJobInt   CopyJob;
     Ret = EplApiProcessImageFetchCopyJob(1, &CopyJob);
     if (Ret == kEplSuccessful)
     {
-#if !((TARGET_SYSTEM == _LINUX_) && defined(__KERNEL__))
+#if (TARGET_SYSTEM == _LINUX_) && defined(__KERNEL__)
+        RetExchange = EplApiProcessImageExchangeIntUserPages(&CopyJob);
+#else
         RetExchange = EplApiProcessImageExchangeInt(&CopyJob.m_CopyJob);
 #endif
 
         Ret = EplApiProcessImageSignalCompletion(&CopyJob);
-#if !((TARGET_SYSTEM == _LINUX_) && defined(__KERNEL__))
         if (RetExchange != kEplSuccessful)
         {
             Ret = RetExchange;
             goto Exit;
         }
-#endif
 
         if (Ret != kEplSuccessful)
         {
             goto Exit;
         }
 
-#if (TARGET_SYSTEM == _LINUX_) && defined(__KERNEL__)
-        // wait until Exchange function completes the copy job
-        iRet = down_interruptible(&EplApiProcessImageInstance_g.m_SemaCbSync);
-        if (iRet != 0)
-        {
-            printk("%s: down_interruptible failed with %d\n", __func__, iRet);
-        }
-        else
-        {
-            up(&EplApiProcessImageInstance_g.m_SemaCbSync);
-        }
-
-        // Hint: CopyJob specific semaphore would be required
-#endif
     }
     else if (Ret != kEplApiPIJobQueueEmpty)
     {
