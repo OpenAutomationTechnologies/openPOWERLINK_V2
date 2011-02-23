@@ -81,9 +81,9 @@
 //             min        = minor version (will be set to 0 if major version will be incremented)
 //                 build  = current build (will be set to 0 if minor version will be incremented)
 //
-#define EPL_DEFINED_STACK_VERSION   EPL_STACK_VERSION   (1, 6, 0)
-#define EPL_DEFINED_OBJ1018_VERSION EPL_OBJ1018_VERSION (1, 6, 0)
-#define EPL_DEFINED_STRING_VERSION  EPL_STRING_VERSION  (1, 6, 0)
+#define EPL_DEFINED_STACK_VERSION   EPL_STACK_VERSION   (1, 7, 1)
+#define EPL_DEFINED_OBJ1018_VERSION EPL_OBJ1018_VERSION (1, 7, 1)
+#define EPL_DEFINED_STRING_VERSION  EPL_STRING_VERSION  (1, 7, 1)
 
 
 // -----------------------------------------------------------------------------
