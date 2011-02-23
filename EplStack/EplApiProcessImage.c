@@ -76,6 +76,8 @@
 #include <asm/uaccess.h>
 #include <linux/completion.h>
 #include <linux/mm.h>
+#include <linux/mm_types.h>
+#include <linux/sched.h>
 #include <linux/highmem.h>
 #include <linux/version.h>
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 26)
