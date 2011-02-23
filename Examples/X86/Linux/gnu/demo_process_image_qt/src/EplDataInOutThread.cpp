@@ -270,9 +270,17 @@ run() implements the starting point for the data input/output thread.
 *******************************************************************************/
 void EplDataInOutThread::run()
 {
+tEplKernel  EplRet;
+
+    printf("EplDataInOutThread started\n");
     for (;;)
     {
-        AppCbSync();
+        EplRet = AppCbSync();
+        if (EplRet != kEplSuccessful)
+        {
+            printf("EplDataInOutThread stopped with 0x%X\n", EplRet);
+            return;
+        }
         QThread::msleep(8);
     }
 }
