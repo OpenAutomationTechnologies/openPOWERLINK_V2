@@ -482,7 +482,7 @@ Fellow worker:    Daniel Krüger (d.k.)
                       thread-safe.
                     (d.k.)
 
-12.01.2010 V1.6     - cleaned up ioctl commands for Linux kernel userspace wrapper. 
+12.01.2010 V1.6     - cleaned up ioctl commands for Linux kernel userspace wrapper.
                       They use now the proper _IO macros.
                     - added wrapper for POSIX file API under Linux kernel
                     - added demo project for CFM under Linux kernel (with RTL8139 network card)
@@ -504,7 +504,7 @@ Fellow worker:    Daniel Krüger (d.k.)
                       EPL_OBD_RAM_INDEX_RAM_PDO_MAPPING
                     (d.k.)
 
-01.03.2010 V1.7     - PosixFileLinuxKernel.c: added include for linux/sched.h, 
+01.03.2010 V1.7     - PosixFileLinuxKernel.c: added include for linux/sched.h,
                       because some kernel versions need this
                     (d.k.)
 
@@ -735,5 +735,11 @@ Fellow worker:    Daniel Krüger (d.k.)
 05.10.2010 V1.7     - PDO module: support mapping of BOOLEAN objects on byte boundaries
                     - unified demo project for Altera Cyclone III FPGA. From now on there is only one demo project,
                       which is compatible with the standard openPOWERLINK MN demos.
+                    (d.k.)
+
+24.02.2011 V1.7.1   - Created Git repository under git://openpowerlink.git.sourceforge.net/gitroot/openpowerlink/openpowerlink
+                      This repository contains the full history starting from version 1.1
+                    - New Feature: PCAP driver for Linux userspace. The stack can run now in Linux userspace totally.
+                    - Change: Converted all Linux X86 projects to use CMake.
                     (d.k.)
 
