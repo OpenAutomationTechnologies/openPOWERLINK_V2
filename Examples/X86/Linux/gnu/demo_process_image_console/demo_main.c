@@ -181,35 +181,6 @@ tEplKernel PUBLIC AppCbEvent(
 tEplKernel PUBLIC AppCbSync(void);
 tEplKernel PUBLIC AppInit(void);
 
-
-#ifdef CONFIG_POWERLINK_USERSTACK
-//---------------------------------------------------------------------------
-// Function:            getMacAdrs
-//
-// Description:         get mac address of interface
-//
-// Parameters:
-//
-// Returns:             void
-//---------------------------------------------------------------------------
-void getMacAdrs(char *ifName, BYTE *macAdrs)
-{
-    int    fd;
-    struct ifreq ifr;
-
-    fd = socket(AF_INET, SOCK_DGRAM, 0);
-
-    ifr.ifr_addr.sa_family = AF_INET;
-    strncpy(ifr.ifr_name, ifName, IFNAMSIZ - 1);
-
-    ioctl(fd, SIOCGIFHWADDR, &ifr);
-
-    close(fd);
-
-    EPL_MEMCPY(macAdrs, ifr.ifr_hwaddr.sa_data, 6);
-}
-#endif
-
 //---------------------------------------------------------------------------
 // Function:            _kbhit
 //
@@ -442,29 +413,17 @@ int  main (int argc, char **argv)
     {   // do nothing
     }
     strncpy(devName, seldev->name, 127);
-
-    /* extract mac address of adapter */
-    getMacAdrs(devName, EplApiInitParam.m_abMacAddress);
-    printf("Using Adapter: %s MAC Address:%.2x:%.2x:%.2x:%.2x:%.2x:%.2x\n",
-             seldev->name,
-             (unsigned char)EplApiInitParam.m_abMacAddress[0],
-             (unsigned char)EplApiInitParam.m_abMacAddress[1],
-             (unsigned char)EplApiInitParam.m_abMacAddress[2],
-             (unsigned char)EplApiInitParam.m_abMacAddress[3],
-             (unsigned char)EplApiInitParam.m_abMacAddress[4],
-             (unsigned char)EplApiInitParam.m_abMacAddress[5]);
     // pass selected device name to Edrv
     EplApiInitParam.m_HwParam.m_pszDevName = devName;
-
 #endif
 
     EplApiInitParam.m_uiNodeId = uiNodeId_g = NODEID;
     EplApiInitParam.m_dwIpAddress = (0xFFFFFF00 & IP_ADDR) | EplApiInitParam.m_uiNodeId;
 
-    EplApiInitParam.m_fAsyncOnly = FALSE;
-
+    /* write 00:00:00:00:00:00 to MAC address, so that the driver uses the real hardware address */
     EPL_MEMCPY(EplApiInitParam.m_abMacAddress, abMacAddr, sizeof (EplApiInitParam.m_abMacAddress));
-    EplApiInitParam.m_abMacAddress[5] = (BYTE) EplApiInitParam.m_uiNodeId;
+
+    EplApiInitParam.m_fAsyncOnly = FALSE;
 
     EplApiInitParam.m_dwFeatureFlags = -1;
     EplApiInitParam.m_dwCycleLen = uiCycleLen_g;        // required for error detection

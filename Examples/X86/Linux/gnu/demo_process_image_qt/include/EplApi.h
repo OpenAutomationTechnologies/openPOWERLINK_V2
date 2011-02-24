@@ -90,7 +90,6 @@ private:
     EplProcessThread    *pEplProcessThread;
     EplDataInOutThread  *pEplDataInOutThread;
 #ifdef CONFIG_POWERLINK_USERSTACK
-    void                getMacAdrs(char *ifName, BYTE *macAdrs);
     tEplKernel          getPcapDev(char *ifName);
 #endif
 };

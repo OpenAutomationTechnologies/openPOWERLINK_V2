@@ -174,9 +174,6 @@ EplApi::EplApi(MainWindow *pMainWindow_p, unsigned int uiNodeId_p, QString devNa
 
     EplApiInitParam.m_fAsyncOnly = FALSE;
 
-    EPL_MEMCPY(EplApiInitParam.m_abMacAddress, abMacAddr, sizeof (EplApiInitParam.m_abMacAddress));
-
-    // EplApiInitParam.m_abMacAddress[5] = (BYTE) EplApiInitParam.m_uiNodeId;
     EplApiInitParam.m_dwFeatureFlags = -1;
     EplApiInitParam.m_dwCycleLen = CYCLE_LEN;           // required for error detection
     EplApiInitParam.m_uiIsochrTxMaxPayload = 256;       // const
@@ -205,6 +202,9 @@ EplApi::EplApi(MainWindow *pMainWindow_p, unsigned int uiNodeId_p, QString devNa
 
     // set callback functions
     EplApiInitParam.m_pfnCbEvent = pEplProcessThread->getEventCbFunc();
+
+    /* write 00:00:00:00:00:00 to MAC address, so that the driver uses the real hardware address */
+    EPL_MEMCPY(EplApiInitParam.m_abMacAddress, abMacAddr, sizeof (EplApiInitParam.m_abMacAddress));
 
 #ifdef CONFIG_POWERLINK_USERSTACK
     EplApiInitParam.m_HwParam.m_pszDevName = devName_p.toAscii().data();
@@ -292,30 +292,3 @@ unsigned int EplApi::defaultNodeId()
     return NODEID;
 }
 
-#ifdef CONFIG_POWERLINK_USERSTACK
-/**
-********************************************************************************
-\brief  Gets the MAC address of the interface
-
-getMacAdrs() gets the MAC address of a network interface.
-
-\param          ifName          Name of the network interface
-\param          macAdrs         Pointer to store the MAC address
-*******************************************************************************/
-void EplApi::getMacAdrs(char *ifName, BYTE *macAdrs)
-{
-    int    fd;
-    struct ifreq ifr;
-
-    fd = socket(AF_INET, SOCK_DGRAM, 0);
-
-    ifr.ifr_addr.sa_family = AF_INET;
-    strncpy(ifr.ifr_name, ifName, IFNAMSIZ - 1);
-
-    ioctl(fd, SIOCGIFHWADDR, &ifr);
-
-    close(fd);
-
-    memcpy(macAdrs, ifr.ifr_hwaddr.sa_data, 6);
-}
-#endif

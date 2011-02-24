@@ -63,6 +63,11 @@
 #include <sys/syscall.h>
 #include <semaphore.h>
 
+#include <sys/socket.h>
+#include <sys/ioctl.h>
+#include <netinet/in.h>
+#include <net/if.h>
+
 /***************************************************************************/
 /*                                                                         */
 /*                                                                         */
@@ -139,6 +144,33 @@ static void EdrvPacketHandler(u_char *param, const struct pcap_pkthdr *header, c
 static void *EdrvWorkerThread(void *);
 
 //---------------------------------------------------------------------------
+// Function:            getMacAdrs
+//
+// Description:         get mac address of interface
+//
+// Parameters:          ifName  device name of ethernet interface
+//                      macAdrs Pointer to store MAC address
+//
+// Returns:             void
+//---------------------------------------------------------------------------
+static void getMacAdrs(char *ifName, BYTE *macAdrs)
+{
+    int    fd;
+    struct ifreq ifr;
+
+    fd = socket(AF_INET, SOCK_DGRAM, 0);
+
+    ifr.ifr_addr.sa_family = AF_INET;
+    strncpy(ifr.ifr_name, ifName, IFNAMSIZ - 1);
+
+    ioctl(fd, SIOCGIFHWADDR, &ifr);
+
+    close(fd);
+
+    EPL_MEMCPY(macAdrs, ifr.ifr_hwaddr.sa_data, 6);
+}
+
+//---------------------------------------------------------------------------
 // Function:    EdrvInit
 //
 // Description: function for init of the Ethernet controller
@@ -163,6 +195,20 @@ tEplKernel EdrvInit(tEdrvInitParam *pEdrvInitParam_p)
     {
         Ret = kEplEdrvInitError;
         goto Exit;
+    }
+
+    /* if no MAC address was specified read MAC address of used
+     * ethernet interface
+     */
+    if ((pEdrvInitParam_p->m_abMyMacAddr[0] == 0) &&
+        (pEdrvInitParam_p->m_abMyMacAddr[1] == 0) &&
+        (pEdrvInitParam_p->m_abMyMacAddr[2] == 0) &&
+        (pEdrvInitParam_p->m_abMyMacAddr[3] == 0) &&
+        (pEdrvInitParam_p->m_abMyMacAddr[4] == 0) &&
+        (pEdrvInitParam_p->m_abMyMacAddr[5] == 0)  )
+    {   // read MAC address from controller
+        getMacAdrs(pEdrvInitParam_p->m_HwParam.m_pszDevName,
+                   pEdrvInitParam_p->m_abMyMacAddr);
     }
 
     // save the init data (with updated MAC address)
@@ -454,6 +500,7 @@ static void EdrvPacketHandler(u_char *pUser_p,
     else
     {   // self generated traffic
         FTRACE_MARKER("%s TX-receive", __func__);
+
         if (pInstance->m_pTransmittedTxBufferFirstEntry != NULL)
         {
             tEdrvTxBuffer* pTxBuffer = pInstance->m_pTransmittedTxBufferFirstEntry;
@@ -501,8 +548,8 @@ static void EdrvPacketHandler(u_char *pUser_p,
         }
         else
         {
-            TRACE("%s: no TxB: DstMAC=%02X%02X%02X%02X%02X%02X\n", __func__, pkt_data[0], pkt_data[1],
-                  pkt_data[2], pkt_data[3], pkt_data[4], pkt_data[5]);
+            //TRACE("%s: no TxB: DstMAC=%02X%02X%02X%02X%02X%02X\n", __func__, pkt_data[0], pkt_data[1],
+            //      pkt_data[2], pkt_data[3], pkt_data[4], pkt_data[5]);
         }
     }
 }
