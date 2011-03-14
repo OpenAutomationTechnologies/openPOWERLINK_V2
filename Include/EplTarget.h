@@ -88,7 +88,7 @@
 #if (TARGET_SYSTEM == _WIN32_)
 
     #define _WIN32_WINDOWS 0x0401
-    #define _WIN32_WINNT   0x0400
+    #define _WIN32_WINNT   0x0501
 
     #include <stdlib.h>
     #include <stdio.h>
