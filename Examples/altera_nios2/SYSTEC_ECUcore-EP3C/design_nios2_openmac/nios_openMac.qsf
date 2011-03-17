@@ -136,7 +136,6 @@ set_global_assignment -name QIP_FILE altpll0.qip
 set_global_assignment -name QIP_FILE niosII_openMac.qip
 set_global_assignment -name IOBANK_VCCIO 3.3V -section_id 2
 set_global_assignment -name MISC_FILE "C:/Projekte/EPL_V2/Examples/altera_fpga/EBV_DBC3C40/design_nios2_openmac/nios_openMac.dpf"
-set_global_assignment -name QIP_FILE lpm_ff0.qip
 set_global_assignment -name MISC_FILE "C:/Projekte/CVS_Projekte/EPL_V2/Examples/altera_nios2/EBV_DBC3C40/design_nios2_openmac/nios_openMac.dpf"
 set_instance_assignment -name TCO_REQUIREMENT "5 ns" -from * -to adr -disable
 set_instance_assignment -name TCO_REQUIREMENT "5 ns" -from * -to nbe -disable
