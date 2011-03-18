@@ -171,6 +171,9 @@
 // + SoC + SoA + MN PRes + NmtCmd + ASnd + IdentRes + StatusRes.
 //#define EDRV_MAX_TX_BUFFERS             5
 
+// openMAC supports auto-response delay
+#define EDRV_AUTO_RESPONSE_DELAY        TRUE
+
 
 // =========================================================================
 // Data Link Layer (DLL) specific defines
@@ -194,6 +197,9 @@
 
 // negative time shift of isochronous task in relation to SoC
 #define EPL_DLL_SOC_SYNC_SHIFT_US       150
+
+// CN supports PRes Chaining
+#define EPL_DLL_PRES_CHAINING_CN        TRUE
 
 // Disable deferred release of rx-buffers until Edrv for openMAC supports it
 #define EPL_DLL_DISABLE_DEFERRED_RXFRAME_RELEASE    TRUE
