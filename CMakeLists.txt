@@ -50,7 +50,12 @@
 #
 ################################################################################
 
-CMAKE_MINIMUM_REQUIRED (VERSION 2.6)
+IF (WIN32)
+    # ensure working support of VS.NET 2010
+    CMAKE_MINIMUM_REQUIRED (VERSION 2.8.4)
+ELSE (WIN32)
+    CMAKE_MINIMUM_REQUIRED (VERSION 2.6)
+ENDIF (WIN32)
 
 PROJECT (openPOWERLINK C CXX)
 
@@ -88,6 +93,17 @@ IF (UNIX)
     CMAKE_DEPENDENT_OPTION (CFG_X86_LINUX_DEMO_PROCESS_IMAGE_QT "Build Linux process image based QT demo application" ON
                             "CFG_POWERLINK_PROCESS_IMAGE" OFF)
 ENDIF (UNIX)   
+
+IF (WIN32)
+    SET(CFG_DEBUG_LVL "0xEC000000L" CACHE STRING "Debug Level for debug output")
+
+    OPTION (CFG_POWERLINK_CFM "Use POWERLINK configuration manager (CFM)" ON)
+    OPTION (CFG_POWERLINK_PROCESS_IMAGE "Use process image to transfer synchronous data between stack and application" ON)
+    OPTION (CFG_X86_WINDOWS_DLL "Build Windows POWERLINK library as DLL" ON)
+
+    CMAKE_DEPENDENT_OPTION (CFG_X86_WINDOWS_DEMO_PROCESS_IMAGE_CONSOLE "Build Windows process image based console demo application" ON
+                            "CFG_POWERLINK_PROCESS_IMAGE" OFF)
+ENDIF (WIN32)
 
 ###############################################################################
 # Set global definitions
@@ -139,3 +155,17 @@ IF (CFG_X86_LINUX_DEMO_PROCESS_IMAGE_CONSOLE)
 ENDIF (CFG_X86_LINUX_DEMO_PROCESS_IMAGE_CONSOLE)
 
 ENDIF(UNIX)
+
+
+###############################################################################
+# Windows examples
+###############################################################################
+IF(WIN32)
+    # Add subdirectory of winpcap based MN CFM library
+    ADD_SUBDIRECTORY(Examples/X86/Windows/VC/powerlink_user_lib)
+
+    # Add subdirectory of process image based console demo application        
+    IF (CFG_X86_WINDOWS_DEMO_PROCESS_IMAGE_CONSOLE)
+        ADD_SUBDIRECTORY(Examples/X86/Windows/VC/demo_process_image_console)
+    ENDIF (CFG_X86_WINDOWS_DEMO_PROCESS_IMAGE_CONSOLE)
+ENDIF(WIN32)
