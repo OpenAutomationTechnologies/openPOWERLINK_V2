@@ -2902,6 +2902,11 @@ unsigned int    uiNextTxBufferOffset = EplDllkInstance_g.m_bCurTxBufferOffsetCyc
         {   // PRes does exist
             pTxFrame = (tEplFrame *) pTxBuffer->m_pbBuffer;
 
+            if (NmtState_p != kEplNmtCsOperational)
+            {
+                fReadyFlag = FALSE;
+            }
+
             // process TPDO
             FrameInfo.m_pFrame = pTxFrame;
             FrameInfo.m_uiFrameSize = pTxBuffer->m_uiTxMsgLen;
