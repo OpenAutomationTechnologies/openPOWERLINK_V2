@@ -2695,6 +2695,11 @@ unsigned int    uiNextTxBufferOffset = EplDllkInstance_g.m_bCurTxBufferOffsetCyc
 
         pbCnNodeId = &EplDllkInstance_g.m_aabCnNodeIdList[uiNextTxBufferOffset][0];
 
+        if (NmtState_p != kEplNmtMsOperational)
+        {
+            fReadyFlag = FALSE;
+        }
+
         pIntNodeInfo = EplDllkInstance_g.m_pFirstNodeInfo;
         while (pIntNodeInfo != NULL)
         {
@@ -2708,15 +2713,6 @@ unsigned int    uiNextTxBufferOffset = EplDllkInstance_g.m_bCurTxBufferOffsetCyc
                 // $$$ d.k. set EPL_FRAME_FLAG1_MS if necessary
                 // update frame (Flag1)
                 AmiSetByteToLe(&pTxFrame->m_Data.m_Preq.m_le_bFlag1, bFlag1);
-
-                if (NmtState_p == kEplNmtMsOperational)
-                {
-                    fReadyFlag = TRUE;
-                }
-                else
-                {
-                    fReadyFlag = FALSE;
-                }
 
                 // process TPDO
                 FrameInfo.m_pFrame = pTxFrame;
@@ -4172,7 +4168,7 @@ Exit:
 //                                        of received frame
 //              NmtState_p              = [IN] Current local NMT state
 //              pReleaseRxBuffer_p      = [OUT] Return whether RxBuffer is
-//                                        released immediately or later 
+//                                        released immediately or later
 //
 // Returns:     tEplKernel
 //
@@ -4295,7 +4291,7 @@ Exit:
 //              NmtState_p              = [IN] Current local NMT state
 //              pNmtEvent_p             = [OUT] Pointer to NMT event
 //              pReleaseRxBuffer_p      = [OUT] Return whether RxBuffer is
-//                                        released immediately or later 
+//                                        released immediately or later
 //
 // Returns:     tEplKernel
 //
