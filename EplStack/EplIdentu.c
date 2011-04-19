@@ -167,7 +167,7 @@ static tEplKernel PUBLIC EplIdentuCbIdentResponse(tEplFrameInfo * pFrameInfo_p);
 //
 //---------------------------------------------------------------------------
 
-EPLDLLEXPORT tEplKernel PUBLIC EplIdentuInit()
+tEplKernel PUBLIC EplIdentuInit()
 {
 tEplKernel Ret;
 
@@ -195,7 +195,7 @@ tEplKernel Ret;
 //
 //---------------------------------------------------------------------------
 
-EPLDLLEXPORT tEplKernel PUBLIC EplIdentuAddInstance()
+tEplKernel PUBLIC EplIdentuAddInstance()
 {
 tEplKernel Ret;
 
@@ -230,7 +230,7 @@ tEplKernel Ret;
 //
 //---------------------------------------------------------------------------
 
-EPLDLLEXPORT tEplKernel PUBLIC EplIdentuDelInstance()
+tEplKernel PUBLIC EplIdentuDelInstance()
 {
 tEplKernel  Ret;
 
@@ -264,7 +264,7 @@ tEplKernel  Ret;
 //
 //---------------------------------------------------------------------------
 
-EPLDLLEXPORT tEplKernel PUBLIC EplIdentuReset()
+tEplKernel PUBLIC EplIdentuReset()
 {
 tEplKernel  Ret;
 int         iIndex;
