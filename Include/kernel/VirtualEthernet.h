@@ -95,7 +95,7 @@ tEplKernel PUBLIC VEthAddInstance(const BYTE abSrcMac_p[6]);
 
 tEplKernel PUBLIC VEthDelInstance(void);
 
-tEplKernel PUBLIC VEthSetIpAddress(DWORD dwIpAddress_p, DWORD dwSubnetMask_p);
+tEplKernel PUBLIC VEthSetIpAddress(DWORD dwIpAddress_p, DWORD dwSubnetMask_p, WORD wMtu_p);
 
 tEplKernel PUBLIC VEthSetDefaultGateway(DWORD dwDefaultGateway_p);
 

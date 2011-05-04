@@ -373,14 +373,15 @@ tEplKernel  Ret = kEplSuccessful;
     return Ret;
 }
 
-tEplKernel PUBLIC VEthSetIpAddress(DWORD dwIpAddress_p, DWORD dwSubnetMask_p)
+tEplKernel PUBLIC VEthSetIpAddress(DWORD dwIpAddress_p, DWORD dwSubnetMask_p, WORD wMtu_p)
 {
 tEplKernel  Ret = kEplSuccessful;
 int         iRet;
-char*       argv[6];
+char*       argv[8];
 char*       envp[3];
 char        sBufferIp[16];
 char        sBufferMask[16];
+char        sBufferMtu[6];
 
     // configure IP address of virtual network interface
     // for TCP/IP communication over the POWERLINK network
@@ -398,6 +399,10 @@ char        sBufferMask[16];
              (unsigned int) ((dwSubnetMask_p >> 8) & 0xFF),
              (unsigned int) (dwSubnetMask_p & 0xFF));
 
+    snprintf(sBufferMtu, sizeof (sBufferMtu),
+             "%u",
+             (unsigned int) wMtu_p);
+
     /* set up a minimal environment */
     iRet = 0;
     envp[iRet++] = "HOME=/";
@@ -411,6 +416,8 @@ char        sBufferMask[16];
     argv[iRet++] = sBufferIp;
     argv[iRet++] = "netmask";
     argv[iRet++] = sBufferMask;
+    argv[iRet++] = "mtu";
+    argv[iRet++] = sBufferMtu;
     argv[iRet] = NULL;
 
     /* call ifconfig to configure the virtual network interface */

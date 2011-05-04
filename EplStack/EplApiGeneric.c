@@ -2103,7 +2103,7 @@ BYTE                bTemp;
 
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_VETH)) != 0)
         // configure Virtual Ethernet Driver
-        Ret = VEthSetIpAddress(DllIdentParam.m_dwIpAddress, DllIdentParam.m_dwSubnetMask);
+        Ret = VEthSetIpAddress(DllIdentParam.m_dwIpAddress, DllIdentParam.m_dwSubnetMask, (WORD) DllConfigParam.m_uiAsyncMtu);
         if(Ret != kEplSuccessful)
         {
             goto Exit;
