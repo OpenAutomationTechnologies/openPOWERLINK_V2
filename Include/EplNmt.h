@@ -232,11 +232,12 @@ typedef enum
 
 typedef enum
 {
-    kEplNmtBootEventBootStep1Finish = 0x00, // PreOp2 is possible
-    kEplNmtBootEventBootStep2Finish = 0x01, // ReadyToOp is possible
-    kEplNmtBootEventCheckComFinish  = 0x02, // Operational is possible
-    kEplNmtBootEventOperational     = 0x03, // all mandatory CNs are Operational
-    kEplNmtBootEventError           = 0x04, // boot process halted because of an error
+    kEplNmtBootEventBootStep1Finish = 0x00,  // PreOp2 is possible
+    kEplNmtBootEventBootStep2Finish = 0x01,  // ReadyToOp is possible for MN
+    kEplNmtBootEventEnableReadyToOp = 0x02,  // ReadyToOP is possible for CN
+    kEplNmtBootEventCheckComFinish  = 0x03,  // Operational is possible
+    kEplNmtBootEventOperational     = 0x04,  // all mandatory CNs are Operational
+    kEplNmtBootEventError           = 0x05,  // boot process halted because of an error
 
 } tEplNmtBootEvent;
 

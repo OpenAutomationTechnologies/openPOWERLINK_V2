@@ -189,6 +189,9 @@ static tEplApiInstance  EplApiInstance_g;
 // local function prototypes
 //---------------------------------------------------------------------------
 
+// EplNmtCnu check event callback function
+static tEplKernel PUBLIC EplApiCbCnCheckEvent(tEplNmtEvent NmtEvent_p);
+
 // NMT state change event callback function
 static tEplKernel PUBLIC EplApiCbNmtStateChange(tEplEventNmtStateChange NmtStateChange_p);
 
@@ -213,11 +216,11 @@ static tEplKernel PUBLIC  EplApiCbNodeEvent(unsigned int uiNodeId_p,
                                             tEplNmtState NmtState_p,
                                             WORD wErrorCode_p,
                                             BOOL fMandatory_p);
+#endif // (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
 
 static tEplKernel PUBLIC  EplApiCbBootEvent(tEplNmtBootEvent BootEvent_p,
                                             tEplNmtState NmtState_p,
                                             WORD wErrorCode_p);
-#endif
 
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_LEDU)) != 0)
 // callback function of Ledu module
@@ -425,6 +428,12 @@ tEplDllkInitParam   DllkInitParam;
     // initialize EplNmtCnu module
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_CN)) != 0)
     Ret = EplNmtCnuAddInstance(EplApiInstance_g.m_InitParam.m_uiNodeId);
+    if (Ret != kEplSuccessful)
+    {
+        goto Exit;
+    }
+
+    Ret = EplNmtCnuRegisterCheckEventCb(EplApiCbCnCheckEvent);
     if (Ret != kEplSuccessful)
     {
         goto Exit;
@@ -1197,6 +1206,51 @@ tEplEvent   Event;
     Ret = EplEventuPost(&Event);
 
     return Ret;
+}
+
+//---------------------------------------------------------------------------
+//
+// Function:    EplApiCbCnCheckEvent
+//
+// Description: posts boot event directly to API layer (without using
+//              shared buffers)
+//
+// Parameters:  NmtEvent_p     = Nmt event
+//
+// Returns:     tEpKernel  = errorcode
+//
+// State:
+//
+//---------------------------------------------------------------------------
+static tEplKernel PUBLIC EplApiCbCnCheckEvent(tEplNmtEvent NmtEvent_p)
+{
+tEplKernel              Ret = kEplSuccessful;
+tEplNmtState            NmtState;
+
+   switch (NmtEvent_p)
+   {
+        case kEplNmtEventEnableReadyToOperate:
+        {
+            NmtState = EplNmtuGetNmtState();
+
+            // inform application
+            Ret = EplApiCbBootEvent(kEplNmtBootEventEnableReadyToOp,
+                                    NmtState,
+                                    EPL_E_NO_ERROR);
+            if (Ret != kEplSuccessful)
+            {
+                goto exit;
+            }
+
+            break;
+        }
+
+        default:
+        break;
+   }
+
+exit:
+   return Ret;
 }
 
 
@@ -2479,6 +2533,7 @@ Exit:
 
 }
 
+#endif // (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
 
 //---------------------------------------------------------------------------
 //
@@ -2519,7 +2574,6 @@ tEplApiEventArg EventArg;
 
 }
 
-#endif // (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
 
 
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_LEDU)) != 0)
