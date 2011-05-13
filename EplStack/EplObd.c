@@ -2139,9 +2139,6 @@ BOOL                    fEntryNumerical;
         goto Exit;
     }
 
-    // get pointer to object data
-    pDstData = (void MEM*) EplObdGetObjectDataPtrIntern (pSubEntry);
-
     Access = (tEplObdAccess) pSubEntry->m_Access;
 
     // check access for write
@@ -2162,6 +2159,7 @@ BOOL                    fEntryNumerical;
     // adapted by user callback function, re-read
     // this values.
     ObdSize = EplObdGetObjectSize (pSubEntry);
+    // get pointer to object data
     pDstData = (void MEM*) EplObdGetObjectDataPtrIntern (pSubEntry);
 
     // 09-dec-2004 r.d.:
