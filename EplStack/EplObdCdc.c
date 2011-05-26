@@ -119,12 +119,12 @@
         #include <utime.h>
         #include <limits.h>
     #endif
-
+#elif (TARGET_SYSTEM == _VXWORKS_)
+	#include "ioLib.h"
 #elif (DEV_SYSTEM == _DEV_PAR_BECK1X3_)
 
     #include <io.h>
     #include <string.h>
-
 #endif
 
 #if (TARGET_SYSTEM == _WIN32_)
@@ -273,7 +273,11 @@ DWORD           dwErrno;
 
     EPL_MEMSET(&CdcInfo, 0, sizeof (CdcInfo));
     CdcInfo.m_Type = kEplObdCdcTypeFile;
+#if (TARGET_SYSTEM == _VXWORKS_)
+    CdcInfo.m_Handle.m_hCdcFile = open(pszCdcFilename_p, O_RDONLY, 0666);
+#else
     CdcInfo.m_Handle.m_hCdcFile = open(pszCdcFilename_p, O_RDONLY | O_BINARY, 0666);
+#endif
     if (!IS_FD_VALID(CdcInfo.m_Handle.m_hCdcFile))
     {   // error occurred
         dwErrno = (DWORD) errno;
