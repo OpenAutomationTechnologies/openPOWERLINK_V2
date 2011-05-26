@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wrxml>
+    <properties platform="VxWorks" platform_name="vxworks-6.8" root="1" type="DownloadableKernelModuleProject"/>
+    <attributes>
+        <mapAttribute>
+            <listAttribute key="BLD::Info|GlobalMacros">
+                <stringAttribute value="PROJECT_TYPE"/>
+                <stringAttribute value="DEFINES"/>
+                <stringAttribute value="EXPAND_DBG"/>
+            </listAttribute>
+            <stringAttribute key="BLD::Info|GlobalMacro|DEFINES" value=""/>
+            <stringAttribute key="BLD::Info|GlobalMacro|EXPAND_DBG" value="0"/>
+            <stringAttribute key="BLD::Info|GlobalMacro|PROJECT_TYPE" value="DKM"/>
+            <listAttribute key="BLD::Info|Incl|PENTIUM4gnu">
+                <stringAttribute value="-I$(WIND_BASE)/target/h/wrn/coreip"/>
+                <stringAttribute value="-I$(PRJ_ROOT_DIR)/../../../../../Target/generic/VxWorks/hrtimer"/>
+                <stringAttribute value="-I$(PRJ_ROOT_DIR)/../../../../../ObjDicts/CiA302-4_MN"/>
+                <stringAttribute value="-I$(PRJ_ROOT_DIR)"/>
+                <stringAttribute value="-I$(PRJ_ROOT_DIR)/../../../../../Include"/>
+                <stringAttribute value="-I$(PRJ_ROOT_DIR)/../../../../../SharedBuff"/>
+                <stringAttribute value="-I$(WIND_BASE)/target/h"/>
+            </listAttribute>
+            <listAttribute key="BLD::Info|Incl|SIMLINUXgnu">
+                <stringAttribute value="-I$(WIND_BASE)/target/h/wrn/coreip"/>
+                <stringAttribute value="-I$(WIND_BASE)/target/h"/>
+            </listAttribute>
+            <listAttribute key="BLD::Info|Macros">
+                <stringAttribute value="VX_CPU_FAMILY"/>
+                <stringAttribute value="CPU"/>
+                <stringAttribute value="TOOL_FAMILY"/>
+                <stringAttribute value="TOOL"/>
+                <stringAttribute value="TOOL_PATH"/>
+                <stringAttribute value="CC_ARCH_SPEC"/>
+                <stringAttribute value="VSB_DIR"/>
+                <stringAttribute value="VSB_CONFIG_FILE"/>
+                <stringAttribute value="LIBPATH"/>
+                <stringAttribute value="LIBS"/>
+            </listAttribute>
+            <stringAttribute key="BLD::Info|Macro|CC_ARCH_SPEC|value|PENTIUM4gnu" value="-mtune=pentium4 -march=pentium4 -nostdlib -fno-builtin -fno-defer-pop"/>
+            <stringAttribute key="BLD::Info|Macro|CC_ARCH_SPEC|value|SIMLINUXgnu" value="-mtune=i486 -march=i486"/>
+            <stringAttribute key="BLD::Info|Macro|CPU|value|PENTIUM4gnu" value="PENTIUM4"/>
+            <stringAttribute key="BLD::Info|Macro|CPU|value|SIMLINUXgnu" value="SIMLINUX"/>
+            <stringAttribute key="BLD::Info|Macro|LIBPATH|value|PENTIUM4gnu" value=""/>
+            <stringAttribute key="BLD::Info|Macro|LIBPATH|value|SIMLINUXgnu" value=""/>
+            <stringAttribute key="BLD::Info|Macro|LIBS|value|PENTIUM4gnu" value=""/>
+            <stringAttribute key="BLD::Info|Macro|LIBS|value|SIMLINUXgnu" value=""/>
+            <stringAttribute key="BLD::Info|Macro|TOOL_FAMILY|value|PENTIUM4gnu" value="gnu"/>
+            <stringAttribute key="BLD::Info|Macro|TOOL_FAMILY|value|SIMLINUXgnu" value="gnu"/>
+            <stringAttribute key="BLD::Info|Macro|TOOL_PATH|value|PENTIUM4gnu" value=""/>
+            <stringAttribute key="BLD::Info|Macro|TOOL_PATH|value|SIMLINUXgnu" value=""/>
+            <stringAttribute key="BLD::Info|Macro|TOOL|value|PENTIUM4gnu" value="gnu"/>
+            <stringAttribute key="BLD::Info|Macro|TOOL|value|SIMLINUXgnu" value="gnu"/>
+            <stringAttribute key="BLD::Info|Macro|VSB_CONFIG_FILE|value|PENTIUM4gnu" value="$(VSB_DIR)/h/config/vsbConfig.h"/>
+            <stringAttribute key="BLD::Info|Macro|VSB_CONFIG_FILE|value|SIMLINUXgnu" value="$(VSB_DIR)/h/config/vsbConfig.h"/>
+            <stringAttribute key="BLD::Info|Macro|VSB_DIR|value|PENTIUM4gnu" value="$(WIND_BASE)/target/lib"/>
+            <stringAttribute key="BLD::Info|Macro|VSB_DIR|value|SIMLINUXgnu" value="$(WIND_BASE)/target/lib"/>
+            <stringAttribute key="BLD::Info|Macro|VX_CPU_FAMILY|value|PENTIUM4gnu" value="pentium"/>
+            <stringAttribute key="BLD::Info|Macro|VX_CPU_FAMILY|value|SIMLINUXgnu" value="simlinux"/>
+            <listAttribute key="BLD::Info|Tools">
+                <stringAttribute value="C-Compiler"/>
+                <stringAttribute value="C++-Compiler"/>
+                <stringAttribute value="Linker"/>
+                <stringAttribute value="Partial Image Linker"/>
+                <stringAttribute value="Librarian"/>
+                <stringAttribute value="Assembler"/>
+            </listAttribute>
+            <stringAttribute key="BLD::Info|Tool|Assembler|cmd|PENTIUM4gnu" value="echo &quot;building $@&quot;;%assemblerprefix% $(TOOL_PATH)ccpentium %DebugModeFlags% %ToolFlags% $(ADDED_CFLAGS) %Includes% $(ADDED_INCLUDES) -DCPU=$(CPU) -DTOOL_FAMILY=$(TOOL_FAMILY) -DTOOL=$(TOOL) -D_WRS_KERNEL  -D_VSB_CONFIG_FILE=\&quot;$(VSB_CONFIG_FILE)\&quot;   $(DEFINES) -o %OutFile% -c %InFile%"/>
+            <stringAttribute key="BLD::Info|Tool|Assembler|cmd|SIMLINUXgnu" value="echo &quot;building $@&quot;;%assemblerprefix% $(TOOL_PATH)ccpentium %DebugModeFlags% %ToolFlags% $(ADDED_CFLAGS) %Includes% $(ADDED_INCLUDES) -DCPU=$(CPU) -DTOOL_FAMILY=$(TOOL_FAMILY) -DTOOL=$(TOOL) -D_WRS_KERNEL  -D_VSB_CONFIG_FILE=\&quot;$(VSB_CONFIG_FILE)\&quot;   $(DEFINES) -o %OutFile% -c %InFile%"/>
+            <stringAttribute key="BLD::Info|Tool|Assembler|dbgFlags|PENTIUM4gnu" value="-g"/>
+            <stringAttribute key="BLD::Info|Tool|Assembler|dbgFlags|SIMLINUXgnu" value="-g"/>
+            <stringAttribute key="BLD::Info|Tool|Assembler|derivedSigs|PENTIUM4gnu" value="*.o"/>
+            <stringAttribute key="BLD::Info|Tool|Assembler|derivedSigs|SIMLINUXgnu" value="*.o"/>
+            <stringAttribute key="BLD::Info|Tool|Assembler|flags|PENTIUM4gnu" value="$(CC_ARCH_SPEC) -ansi   -xassembler-with-cpp  -MD -MP"/>
+            <stringAttribute key="BLD::Info|Tool|Assembler|flags|SIMLINUXgnu" value="$(CC_ARCH_SPEC) -ansi   -xassembler-with-cpp  -MD -MP"/>
+            <stringAttribute key="BLD::Info|Tool|Assembler|nonDbgFlags|PENTIUM4gnu" value="-O2"/>
+            <stringAttribute key="BLD::Info|Tool|Assembler|nonDbgFlags|SIMLINUXgnu" value="-O2 -nostdlib -fno-builtin -fno-defer-pop"/>
+            <booleanAttribute key="BLD::Info|Tool|Assembler|object" value="true"/>
+            <booleanAttribute key="BLD::Info|Tool|Assembler|passAble" value="false"/>
+            <stringAttribute key="BLD::Info|Tool|Assembler|sigs" value="*.s"/>
+            <stringAttribute key="BLD::Info|Tool|C++-Compiler|cmd|PENTIUM4gnu" value="echo &quot;building $@&quot;;%cppcompilerprefix% $(TOOL_PATH)ccpentium %DebugModeFlags% %ToolFlags% $(ADDED_C++FLAGS) %Includes% $(ADDED_INCLUDES) -DCPU=$(CPU) -DTOOL_FAMILY=$(TOOL_FAMILY) -DTOOL=$(TOOL) -D_WRS_KERNEL  -D_VSB_CONFIG_FILE=\&quot;$(VSB_CONFIG_FILE)\&quot;   $(DEFINES) -o %OutFile% -c %InFile%"/>
+            <stringAttribute key="BLD::Info|Tool|C++-Compiler|cmd|SIMLINUXgnu" value="echo &quot;building $@&quot;;%cppcompilerprefix% $(TOOL_PATH)ccpentium %DebugModeFlags% %ToolFlags% $(ADDED_C++FLAGS) %Includes% $(ADDED_INCLUDES) -DCPU=$(CPU) -DTOOL_FAMILY=$(TOOL_FAMILY) -DTOOL=$(TOOL) -D_WRS_KERNEL  -D_VSB_CONFIG_FILE=\&quot;$(VSB_CONFIG_FILE)\&quot;   $(DEFINES) -o %OutFile% -c %InFile%"/>
+            <stringAttribute key="BLD::Info|Tool|C++-Compiler|dbgFlags|PENTIUM4gnu" value="-g"/>
+            <stringAttribute key="BLD::Info|Tool|C++-Compiler|dbgFlags|SIMLINUXgnu" value="-g"/>
+            <stringAttribute key="BLD::Info|Tool|C++-Compiler|derivedSigs|PENTIUM4gnu" value="*.o"/>
+            <stringAttribute key="BLD::Info|Tool|C++-Compiler|derivedSigs|SIMLINUXgnu" value="*.o"/>
+            <stringAttribute key="BLD::Info|Tool|C++-Compiler|flags|PENTIUM4gnu" value="$(CC_ARCH_SPEC) -ansi -Wall   -MD -MP"/>
+            <stringAttribute key="BLD::Info|Tool|C++-Compiler|flags|SIMLINUXgnu" value="$(CC_ARCH_SPEC) -ansi -Wall   -MD -MP"/>
+            <stringAttribute key="BLD::Info|Tool|C++-Compiler|nonDbgFlags|PENTIUM4gnu" value="-O2"/>
+            <stringAttribute key="BLD::Info|Tool|C++-Compiler|nonDbgFlags|SIMLINUXgnu" value="-O2 -nostdlib -fno-builtin -fno-defer-pop"/>
+            <booleanAttribute key="BLD::Info|Tool|C++-Compiler|object" value="true"/>
+            <booleanAttribute key="BLD::Info|Tool|C++-Compiler|passAble" value="false"/>
+            <stringAttribute key="BLD::Info|Tool|C++-Compiler|sigs" value="*.cpp;*.C;*.cxx;*.cc"/>
+            <stringAttribute key="BLD::Info|Tool|C-Compiler|cmd|PENTIUM4gnu" value="echo &quot;building $@&quot;;%ccompilerprefix% $(TOOL_PATH)ccpentium %DebugModeFlags% %ToolFlags% $(ADDED_CFLAGS) %Includes% $(ADDED_INCLUDES) -DCPU=$(CPU) -DTOOL_FAMILY=$(TOOL_FAMILY) -DTOOL=$(TOOL) -D_WRS_KERNEL  -D_VSB_CONFIG_FILE=\&quot;$(VSB_CONFIG_FILE)\&quot;   $(DEFINES) -o %OutFile% -c %InFile%"/>
+            <stringAttribute key="BLD::Info|Tool|C-Compiler|cmd|SIMLINUXgnu" value="echo &quot;building $@&quot;;%ccompilerprefix% $(TOOL_PATH)ccpentium %DebugModeFlags% %ToolFlags% $(ADDED_CFLAGS) %Includes% $(ADDED_INCLUDES) -DCPU=$(CPU) -DTOOL_FAMILY=$(TOOL_FAMILY) -DTOOL=$(TOOL) -D_WRS_KERNEL  -D_VSB_CONFIG_FILE=\&quot;$(VSB_CONFIG_FILE)\&quot;   $(DEFINES) -o %OutFile% -c %InFile%"/>
+            <stringAttribute key="BLD::Info|Tool|C-Compiler|dbgFlags|PENTIUM4gnu" value="-g"/>
+            <stringAttribute key="BLD::Info|Tool|C-Compiler|dbgFlags|SIMLINUXgnu" value="-g"/>
+            <stringAttribute key="BLD::Info|Tool|C-Compiler|derivedSigs|PENTIUM4gnu" value="*.o"/>
+            <stringAttribute key="BLD::Info|Tool|C-Compiler|derivedSigs|SIMLINUXgnu" value="*.o"/>
+            <stringAttribute key="BLD::Info|Tool|C-Compiler|flags|PENTIUM4gnu" value="$(CC_ARCH_SPEC) -Wall   -MD -MP"/>
+            <stringAttribute key="BLD::Info|Tool|C-Compiler|flags|SIMLINUXgnu" value="$(CC_ARCH_SPEC) -ansi  -Wall   -MD -MP"/>
+            <stringAttribute key="BLD::Info|Tool|C-Compiler|nonDbgFlags|PENTIUM4gnu" value="-O2"/>
+            <stringAttribute key="BLD::Info|Tool|C-Compiler|nonDbgFlags|SIMLINUXgnu" value="-O2 -nostdlib -fno-builtin -fno-defer-pop"/>
+            <booleanAttribute key="BLD::Info|Tool|C-Compiler|object" value="true"/>
+            <booleanAttribute key="BLD::Info|Tool|C-Compiler|passAble" value="false"/>
+            <stringAttribute key="BLD::Info|Tool|C-Compiler|sigs" value="*.c"/>
+            <stringAttribute key="BLD::Info|Tool|Librarian|cmd|PENTIUM4gnu" value="echo &quot;building $@&quot;;%archiverprefix% $(TOOL_PATH)arpentium %ToolFlags% %OutFile% %Objects% $(ADDED_OBJECTS)"/>
+            <stringAttribute key="BLD::Info|Tool|Librarian|cmd|SIMLINUXgnu" value="echo &quot;building $@&quot;;%archiverprefix% $(TOOL_PATH)arpentium %ToolFlags% %OutFile% %Objects% $(ADDED_OBJECTS)"/>
+            <stringAttribute key="BLD::Info|Tool|Librarian|dbgFlags|PENTIUM4gnu" value=""/>
+            <stringAttribute key="BLD::Info|Tool|Librarian|dbgFlags|SIMLINUXgnu" value=""/>
+            <stringAttribute key="BLD::Info|Tool|Librarian|derivedSigs|PENTIUM4gnu" value="*.a"/>
+            <stringAttribute key="BLD::Info|Tool|Librarian|derivedSigs|SIMLINUXgnu" value="*.a"/>
+            <stringAttribute key="BLD::Info|Tool|Librarian|flags|PENTIUM4gnu" value="crus"/>
+            <stringAttribute key="BLD::Info|Tool|Librarian|flags|SIMLINUXgnu" value="crus"/>
+            <stringAttribute key="BLD::Info|Tool|Librarian|nonDbgFlags|PENTIUM4gnu" value=""/>
+            <stringAttribute key="BLD::Info|Tool|Librarian|nonDbgFlags|SIMLINUXgnu" value=""/>
+            <booleanAttribute key="BLD::Info|Tool|Librarian|object" value="false"/>
+            <booleanAttribute key="BLD::Info|Tool|Librarian|passAble" value="true"/>
+            <stringAttribute key="BLD::Info|Tool|Librarian|sigs" value=""/>
+            <stringAttribute key="BLD::Info|Tool|Linker|cmd|PENTIUM4gnu" value="echo &quot;building $@&quot;;rm -f %OutFile%;nmpentium %Objects% %Libraries% | tclsh $(WIND_BASE)/host/resource/hutils/tcl/munch.tcl -c pentium -tags $(VSB_DIR)/tags/pentium/PENTIUM4/common/dkm.tags &gt; $(OBJ_DIR)/ctdt.c;%ccompilerprefix% $(TOOL_PATH)ccpentium %DebugModeFlags% $(CC_ARCH_SPEC) -fdollars-in-identifiers -Wall  $(ADDED_CFLAGS) %Includes% $(ADDED_INCLUDES) -DCPU=$(CPU) -DTOOL_FAMILY=$(TOOL_FAMILY) -DTOOL=$(TOOL) -D_WRS_KERNEL  -D_VSB_CONFIG_FILE=\&quot;$(VSB_CONFIG_FILE)\&quot;   $(DEFINES)  -o $(OBJ_DIR)/ctdt.o -c $(OBJ_DIR)/ctdt.c;%linkerprefix% $(TOOL_PATH)ccpentium -r -nostdlib -Wl,-X %ToolFlags% -o %OutFile% $(OBJ_DIR)/ctdt.o %Objects% %Libraries% $(LIBPATH) $(LIBS) $(ADDED_LIBPATH) $(ADDED_LIBS) &amp;&amp; if [ &quot;$(EXPAND_DBG)&quot; = &quot;1&quot; ]; then plink &quot;$@&quot;;fi"/>
+            <stringAttribute key="BLD::Info|Tool|Linker|cmd|SIMLINUXgnu" value="echo &quot;building $@&quot;;rm -f %OutFile%;nmpentium %Objects% %Libraries% | tclsh $(WIND_BASE)/host/resource/hutils/tcl/munch.tcl -c pentium -tags $(VSB_DIR)/tags/simlinux/SIMLINUX/common/dkm.tags &gt; $(OBJ_DIR)/ctdt.c;%ccompilerprefix% $(TOOL_PATH)ccpentium %DebugModeFlags% $(CC_ARCH_SPEC) -fdollars-in-identifiers -Wall  $(ADDED_CFLAGS) %Includes% $(ADDED_INCLUDES) -DCPU=$(CPU) -DTOOL_FAMILY=$(TOOL_FAMILY) -DTOOL=$(TOOL) -D_WRS_KERNEL  -D_VSB_CONFIG_FILE=\&quot;$(VSB_CONFIG_FILE)\&quot;   $(DEFINES)  -o $(OBJ_DIR)/ctdt.o -c $(OBJ_DIR)/ctdt.c;%linkerprefix% $(TOOL_PATH)ccpentium -r -nostdlib -Wl,-X %ToolFlags% -o %OutFile% $(OBJ_DIR)/ctdt.o %Objects% %Libraries% $(LIBPATH) $(LIBS) $(ADDED_LIBPATH) $(ADDED_LIBS) &amp;&amp; if [ &quot;$(EXPAND_DBG)&quot; = &quot;1&quot; ]; then plink &quot;$@&quot;;fi"/>
+            <stringAttribute key="BLD::Info|Tool|Linker|dbgFlags|PENTIUM4gnu" value="-g"/>
+            <stringAttribute key="BLD::Info|Tool|Linker|dbgFlags|SIMLINUXgnu" value="-g"/>
+            <stringAttribute key="BLD::Info|Tool|Linker|derivedSigs|PENTIUM4gnu" value="*.out"/>
+            <stringAttribute key="BLD::Info|Tool|Linker|derivedSigs|SIMLINUXgnu" value="*.out"/>
+            <stringAttribute key="BLD::Info|Tool|Linker|flags|PENTIUM4gnu" value="-T $(WIND_BASE)/target/h/tool/gnu/ldscripts/link.OUT"/>
+            <stringAttribute key="BLD::Info|Tool|Linker|flags|SIMLINUXgnu" value="-T $(WIND_BASE)/target/h/tool/gnu/ldscripts/link.OUT"/>
+            <stringAttribute key="BLD::Info|Tool|Linker|nonDbgFlags|PENTIUM4gnu" value="-O2"/>
+            <stringAttribute key="BLD::Info|Tool|Linker|nonDbgFlags|SIMLINUXgnu" value="-O2 -nostdlib -fno-builtin -fno-defer-pop"/>
+            <booleanAttribute key="BLD::Info|Tool|Linker|object" value="false"/>
+            <booleanAttribute key="BLD::Info|Tool|Linker|passAble" value="false"/>
+            <stringAttribute key="BLD::Info|Tool|Linker|sigs" value=""/>
+            <stringAttribute key="BLD::Info|Tool|Partial Image Linker|cmd|PENTIUM4gnu" value="echo &quot;building $@&quot;;%linkerprefix% $(TOOL_PATH)ccpentium -r -nostdlib -Wl,-X %ToolFlags% -o %OutFile% %Objects% $(ADDED_OBJECTS) %Libraries% $(LIBPATH) $(LIBS) $(ADDED_LIBPATH) $(ADDED_LIBS) &amp;&amp; if [ &quot;$(EXPAND_DBG)&quot; = &quot;1&quot; ]; then plink &quot;$@&quot;;fi"/>
+            <stringAttribute key="BLD::Info|Tool|Partial Image Linker|cmd|SIMLINUXgnu" value="echo &quot;building $@&quot;;%linkerprefix% $(TOOL_PATH)ccpentium -r -nostdlib -Wl,-X %ToolFlags% -o %OutFile% %Objects% $(ADDED_OBJECTS) %Libraries% $(LIBPATH) $(LIBS) $(ADDED_LIBPATH) $(ADDED_LIBS) &amp;&amp; if [ &quot;$(EXPAND_DBG)&quot; = &quot;1&quot; ]; then plink &quot;$@&quot;;fi"/>
+            <stringAttribute key="BLD::Info|Tool|Partial Image Linker|dbgFlags|PENTIUM4gnu" value=""/>
+            <stringAttribute key="BLD::Info|Tool|Partial Image Linker|dbgFlags|SIMLINUXgnu" value=""/>
+            <stringAttribute key="BLD::Info|Tool|Partial Image Linker|derivedSigs|PENTIUM4gnu" value="*.o"/>
+            <stringAttribute key="BLD::Info|Tool|Partial Image Linker|derivedSigs|SIMLINUXgnu" value="*.o"/>
+            <stringAttribute key="BLD::Info|Tool|Partial Image Linker|flags|PENTIUM4gnu" value=""/>
+            <stringAttribute key="BLD::Info|Tool|Partial Image Linker|flags|SIMLINUXgnu" value=""/>
+            <stringAttribute key="BLD::Info|Tool|Partial Image Linker|nonDbgFlags|PENTIUM4gnu" value=""/>
+            <stringAttribute key="BLD::Info|Tool|Partial Image Linker|nonDbgFlags|SIMLINUXgnu" value=""/>
+            <booleanAttribute key="BLD::Info|Tool|Partial Image Linker|object" value="false"/>
+            <booleanAttribute key="BLD::Info|Tool|Partial Image Linker|passAble" value="true"/>
+            <stringAttribute key="BLD::Info|Tool|Partial Image Linker|sigs" value=""/>
+            <stringAttribute key="BLD::Info|cmd" value="%makeprefix% make --no-print-directory"/>
+            <stringAttribute key="BLD::Info|defaultSpec" value="PENTIUM4gnu"/>
+            <stringAttribute key="BLD::Info|redirDir|PENTIUM4gnu" value="PENTIUM4gnu"/>
+            <stringAttribute key="BLD::Info|redirDir|SIMLINUXgnu" value="SIMLINUXgnu"/>
+            <stringAttribute key="BLD::Info|redirRoot" value=""/>
+            <listAttribute key="BLD::Info|specs">
+                <stringAttribute value="PENTIUM4gnu"/>
+                <stringAttribute value="SIMLINUXgnu"/>
+            </listAttribute>
+            <intAttribute key="BuildSupportEnabled" value="1"/>
+            <booleanAttribute key="BuildTargetCentric" value="true"/>
+        </mapAttribute>
+    </attributes>
+    <buildtargets>
+        <buildtarget buildtool="Linker" name="demo_process_image_console" passed="false" targetname="demo_process_image_console">
+            <contents>
+                <buildtargetreference name="/demo_process_image_console/demo_process_image_console_partialImage"/>
+            </contents>
+        </buildtarget>
+        <buildtarget buildtool="Partial Image Linker" name="demo_process_image_console_partialImage" passed="true" targetname="demo_process_image_console_partialImage">
+            <contents>
+                <folder name="/demo_process_image_console" recursive="true"/>
+            </contents>
+        </buildtarget>
+    </buildtargets>
+</wrxml>
