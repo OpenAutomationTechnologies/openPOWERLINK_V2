@@ -62,6 +62,10 @@ X86 PC and Linux operating system
   There are several demo applications available for Linux. Detailed documentation
   is located in Documentation/linux-x86.txt
 
+X86 PC and VxWorks operating system
+  There is a MN demo applications available for VxWorks. Detailed documentation
+  is located in Documentation/vxworks.txt
+
 X86 PC with Microsoft Windows operating system (2000, XP or newer)
 and WinPcap driver installed:
   * simple MN demo for Microsoft Visual C 2005:
@@ -90,10 +94,15 @@ with Nios II Soft-CPU and openMAC
   * CN demo which controls the LEDs and reads the pushbuttons on the devboard:
     = Examples\altera_nios2\no_os\gnu\demo_cn_3r1tpdo
 
-3.3. Requirements for X86 Linux demos
+3.1. Requirements for X86 Linux demos
 -------------------------------------
 
 Detailed documentation is located in Documentation/linux-x86.txt
+
+3.2. Requirements for VxWorks demos
+-------------------------------------
+
+Detailed documentation is located in Documentation/vxworks.txt
 
 
 3.3. Requirements for ColdFire MCF5484 demo
