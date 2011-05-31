@@ -1312,7 +1312,7 @@ int    iRet;
 
 
     // DO7:             TOUT1 = O
-    MCF_GPT_GMS0 = 0x00000024;          // set Timer0 to simple GPIO and TOUT1 = 0
+    MCF_GPT_GMS0 = 0x00000024;          // set Timer0 to simple GPIO and TOUT0 = 0
                                         // pin state: 0x30=on / 0x20=off
 
     // (DO8):           PLD -> nothing to do here
@@ -2286,7 +2286,7 @@ int  iRet;
             MCF_GPT_GMS3 &= 0xFFFFFFEF;
         }
 
-        // DO8
+        // DO7
         if (dwIoData & 0x00000080)
         {
             MCF_GPT_GMS0 |= 0x00000010;
