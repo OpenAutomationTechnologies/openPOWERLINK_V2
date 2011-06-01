@@ -91,6 +91,7 @@ typedef enum
     kEplReject                  = 0x000A,       // reject the subsequent command
     kEplRetry                   = 0x000B,       // retry this command
     kEplInvalidEvent            = 0x000C,       // invalid event was posted to process function
+    kEplInvalidParam            = 0x000D,       // invalid parameter specified
 
     // area for EDRV module 0x0010 - 0x001F
     kEplEdrvNoFreeTxDesc        = 0x0011,       // no free Tx descriptor available
@@ -133,6 +134,7 @@ typedef enum
     kEplObdInvalidDcf           = 0x003C,       // device configuration file (CDC) is not valid
     kEplObdOutOfMemory          = 0x003D,       // out of memory
     kEplObdNoConfigData         = 0x003E,       // no configuration data present (CDC is empty)
+    kEplObdAccessAdopted        = 0x003F,       // OD access adopted
 //    kEplObdIllegalFloat         = 0x003B,       // illegal float variable
 //    kEplObdWrongOdBuilderKey    = 0x003F,       // OD was generated with demo version of tool ODBuilder
 
