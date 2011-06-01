@@ -1011,7 +1011,7 @@
             #endif
         #endif
 
-        #define UNUSED_PARAMETER(par)
+        #define UNUSED_PARAMETER(par) par = par
 
     #endif
 
