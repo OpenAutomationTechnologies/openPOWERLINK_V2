@@ -140,15 +140,11 @@ EPLDLLEXPORT tEplKernel PUBLIC EplObduGetAccessType(unsigned int uiIndex_p,
                                         unsigned int   uiSubIndex_p,
                                         tEplObdAccess* pAccessTyp_p);
 // ---------------------------------------------------------------------
-EPLDLLEXPORT tEplKernel PUBLIC EplObduReadEntryToLe (unsigned int        uiIndex_p,
-                                        unsigned int        uiSubIndex_p,
-                                        void *              pDstData_p,
-                                        tEplObdSize *       pSize_p);
+EPLDLLEXPORT tEplKernel PUBLIC EplObduReadEntryToLe (
+                                        tEplObdParam* pObdParam_p);
 // ---------------------------------------------------------------------
-EPLDLLEXPORT tEplKernel PUBLIC EplObduWriteEntryFromLe (unsigned int  uiIndex_p,
-                                        unsigned int  uiSubIndex_p,
-                                        void *        pSrcData_p,
-                                        tEplObdSize   Size_p);
+EPLDLLEXPORT tEplKernel PUBLIC EplObduWriteEntryFromLe (
+                                        tEplObdParam* pObdParam_p);
 
 // ---------------------------------------------------------------------
 EPLDLLEXPORT tEplKernel PUBLIC EplObduSearchVarEntry (EPL_MCO_DECL_INSTANCE_PTR_
