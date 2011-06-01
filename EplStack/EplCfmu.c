@@ -871,6 +871,8 @@ tEplKernel      Ret = kEplSuccessful;
     {
         EPL_DBGLVL_CFM_TRACE2("CN%x Writing 0x1006 returns 0x%X\n", pNodeInfo_p->m_EventCnProgress.m_uiNodeId, Ret);
     }
+#else
+    UNUSED_PARAMETER(pNodeInfo_p);
 #endif
 
     return Ret;
