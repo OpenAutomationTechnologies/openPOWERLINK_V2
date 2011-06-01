@@ -2113,16 +2113,23 @@ BYTE            bFlag;
             if(pSdoComCon_p->m_SdoTransType == kEplSdoTransExpedited)
             {   // Expedited transfer
                 // copy data in frame
-                Ret = EplObduReadEntryToLe(uiIndex_p,
-                                        uiSubIndex_p,
-                                        &pCommandFrame->m_le_abCommandData[0],
-                                        (tEplObdSize*)&pSdoComCon_p->m_uiTransSize);
-                if(Ret != kEplSuccessful)
+            tEplObdParam    ObdParam;
+
+                EPL_MEMSET(&ObdParam, 0, sizeof (ObdParam));
+                ObdParam.m_SegmentSize = (tEplObdSize) pSdoComCon_p->m_uiTransSize;
+                ObdParam.m_TransferSize = ObdParam.m_SegmentSize;
+                ObdParam.m_uiIndex = uiIndex_p;
+                ObdParam.m_uiSubIndex = uiSubIndex_p;
+                ObdParam.m_pData = &pCommandFrame->m_le_abCommandData[0];
+
+                Ret = EplObdReadEntryToLe(&ObdParam);
+                if (Ret != kEplSuccessful)
                 {
                     goto Exit;
                 }
 
                 // set size of frame
+                pSdoComCon_p->m_uiTransSize = ObdParam.m_SegmentSize;
                 AmiSetWordToLe(&pCommandFrame->m_le_wSegmentSize, (WORD) pSdoComCon_p->m_uiTransSize);
 
                 // correct byte-counter
@@ -2391,51 +2398,28 @@ BYTE*           pbSrcData;
     {   // expedited transfer
         // size checking is done by EplObduWriteEntryFromLe()
 
-        Ret = EplObduWriteEntryFromLe(uiIndex,
-                                    uiSubindex,
-                                    pbSrcData,
-                                    pSdoComCon_p->m_uiTransSize);
-        switch (Ret)
+    tEplObdParam    ObdParam;
+
+        EPL_MEMSET(&ObdParam, 0, sizeof (ObdParam));
+        ObdParam.m_SegmentSize = (tEplObdSize) pSdoComCon_p->m_uiTransSize;
+        ObdParam.m_TransferSize = ObdParam.m_SegmentSize;
+        ObdParam.m_uiIndex = uiIndex;
+        ObdParam.m_uiSubIndex = uiSubindex;
+        ObdParam.m_pData = pbSrcData;
+
+        Ret = EplObdWriteEntryFromLe(&ObdParam);
+        if (Ret != kEplSuccessful)
         {
-            case kEplSuccessful:
+            if (ObdParam.m_dwAbortCode != 0)
             {
-                break;
+                pSdoComCon_p->m_dwLastAbortCode = ObdParam.m_dwAbortCode;
             }
-
-            case kEplObdAccessViolation:
-            {
-                pSdoComCon_p->m_dwLastAbortCode = EPL_SDOAC_UNSUPPORTED_ACCESS;
-                // send abort
-                goto Abort;
-            }
-
-            case kEplObdValueLengthError:
-            {
-                pSdoComCon_p->m_dwLastAbortCode = EPL_SDOAC_DATA_TYPE_LENGTH_NOT_MATCH;
-                // send abort
-                goto Abort;
-            }
-
-            case kEplObdValueTooHigh:
-            {
-                pSdoComCon_p->m_dwLastAbortCode = EPL_SDOAC_VALUE_RANGE_TOO_HIGH;
-                // send abort
-                goto Abort;
-            }
-
-            case kEplObdValueTooLow:
-            {
-                pSdoComCon_p->m_dwLastAbortCode = EPL_SDOAC_VALUE_RANGE_TOO_LOW;
-                // send abort
-                goto Abort;
-            }
-
-            default:
+            else
             {
                 pSdoComCon_p->m_dwLastAbortCode = EPL_SDOAC_GENERAL_ERROR;
-                // send abort
-                goto Abort;
             }
+            // send abort
+            goto Abort;
         }
         // send command acknowledge
         Ret = EplSdoComServerSendFrameIntern(pSdoComCon_p,

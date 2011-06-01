@@ -867,11 +867,17 @@ tEplKernel      Ret = kEplSuccessful;
     if (uiNodeId_p == 0
         || uiNodeId_p == EplObdGetNodeId())
     {   // local OD access can be performed
-    tEplObdSize     ObdSize;
+    tEplObdParam    ObdParam;
 
-        ObdSize = (tEplObdSize) *puiSize_p;
-        Ret = EplObdReadEntryToLe(uiIndex_p, uiSubindex_p, pDstData_le_p, &ObdSize);
-        *puiSize_p = (unsigned int) ObdSize;
+        EPL_MEMSET(&ObdParam, 0, sizeof (ObdParam));
+        ObdParam.m_SegmentSize = (tEplObdSize) *puiSize_p;
+        ObdParam.m_TransferSize = ObdParam.m_SegmentSize;
+        ObdParam.m_uiIndex = uiIndex_p;
+        ObdParam.m_uiSubIndex = uiSubindex_p;
+        ObdParam.m_pData = pDstData_le_p;
+
+        Ret = EplObdReadEntryToLe(&ObdParam);
+        *puiSize_p = (unsigned int) ObdParam.m_SegmentSize;
     }
     else
     {   // perform SDO transfer
@@ -971,8 +977,16 @@ tEplKernel      Ret = kEplSuccessful;
     if (uiNodeId_p == 0
         || uiNodeId_p == EplObdGetNodeId())
     {   // local OD access can be performed
+    tEplObdParam    ObdParam;
 
-        Ret = EplObdWriteEntryFromLe(uiIndex_p, uiSubindex_p, pSrcData_le_p, uiSize_p);
+        EPL_MEMSET(&ObdParam, 0, sizeof (ObdParam));
+        ObdParam.m_SegmentSize = (tEplObdSize) uiSize_p;
+        ObdParam.m_TransferSize = ObdParam.m_SegmentSize;
+        ObdParam.m_uiIndex = uiIndex_p;
+        ObdParam.m_uiSubIndex = uiSubindex_p;
+        ObdParam.m_pData = pSrcData_le_p;
+
+        Ret = EplObdWriteEntryFromLe(&ObdParam);
     }
     else
     {   // perform SDO transfer

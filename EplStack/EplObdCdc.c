@@ -460,9 +460,10 @@ static tEplKernel EplObdCdcProcess(tEplObdCdcInfo* pCdcInfo_p)
 {
 tEplKernel      Ret = kEplSuccessful;
 DWORD           dwEntriesRemaining;
-unsigned int    uiObjectIndex;
-unsigned int    uiObjectSubIndex;
+tEplObdParam    ObdParam;
 size_t          iCurDataSize;
+
+    EPL_MEMSET(&ObdParam, 0, sizeof (ObdParam));
 
     Ret = EplObdCdcLoadNextBuffer(pCdcInfo_p, sizeof (DWORD));
     if (Ret != kEplSuccessful)
@@ -485,27 +486,33 @@ size_t          iCurDataSize;
             goto Exit;
         }
 
-        uiObjectIndex = AmiGetWordFromLe(&pCdcInfo_p->m_pbCurBuffer[EPL_CDC_OFFSET_INDEX]);
-        uiObjectSubIndex = AmiGetByteFromLe(&pCdcInfo_p->m_pbCurBuffer[EPL_CDC_OFFSET_SUBINDEX]);
+        ObdParam.m_uiIndex = AmiGetWordFromLe(&pCdcInfo_p->m_pbCurBuffer[EPL_CDC_OFFSET_INDEX]);
+        ObdParam.m_uiSubIndex = AmiGetByteFromLe(&pCdcInfo_p->m_pbCurBuffer[EPL_CDC_OFFSET_SUBINDEX]);
         iCurDataSize = (size_t) AmiGetDwordFromLe(&pCdcInfo_p->m_pbCurBuffer[EPL_CDC_OFFSET_SIZE]);
 
-        EPL_DBGLVL_OBD_TRACE4("%s: Reading object 0x%04X/%u with size %u from CDC\n", __func__, uiObjectIndex, uiObjectSubIndex, iCurDataSize);
+        EPL_DBGLVL_OBD_TRACE4("%s: Reading object 0x%04X/%u with size %u from CDC\n", __func__,
+                ObdParam.m_uiIndex, ObdParam.m_uiSubIndex, iCurDataSize);
         Ret = EplObdCdcLoadNextBuffer(pCdcInfo_p, iCurDataSize);
         if (Ret != kEplSuccessful)
         {
-            EPL_DBGLVL_OBD_TRACE2("%s: Reading the corresponding data from CDC failed with 0x%02X\n", __func__, Ret);
+            EPL_DBGLVL_OBD_TRACE2("%s: Reading the corresponding data from CDC failed with 0x%02X\n",
+                    __func__, Ret);
             goto Exit;
         }
 
-        Ret = EplObdWriteEntryFromLe(uiObjectIndex, uiObjectSubIndex, pCdcInfo_p->m_pbCurBuffer, (tEplObdSize) iCurDataSize);
+        ObdParam.m_pData = pCdcInfo_p->m_pbCurBuffer;
+        ObdParam.m_SegmentSize = (tEplObdSize) iCurDataSize;
+        ObdParam.m_TransferSize = (tEplObdSize) iCurDataSize;
+        Ret = EplObdWriteEntryFromLe(&ObdParam);
         if (Ret != kEplSuccessful)
         {
         tEplEventObdError   ObdError;
 
-            ObdError.m_uiIndex = uiObjectIndex;
-            ObdError.m_uiSubIndex = uiObjectSubIndex;
+            ObdError.m_uiIndex = ObdParam.m_uiIndex;
+            ObdError.m_uiSubIndex = ObdParam.m_uiSubIndex;
 
-            EPL_DBGLVL_OBD_TRACE4("%s: Writing object 0x%04X/%u to local OBD failed with 0x%02X\n", __func__, uiObjectIndex, uiObjectSubIndex, Ret);
+            EPL_DBGLVL_OBD_TRACE4("%s: Writing object 0x%04X/%u to local OBD failed with 0x%02X\n",
+                    __func__, ObdParam.m_uiIndex, ObdParam.m_uiSubIndex, Ret);
             Ret = EplEventuPostError(kEplEventSourceObdu, Ret, sizeof (ObdError), &ObdError);
             if (Ret != kEplSuccessful)
             {

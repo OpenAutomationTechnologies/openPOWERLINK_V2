@@ -426,12 +426,22 @@ BOOL                fDoUpdate = FALSE;
     }
 
 #if (EPL_CFM_CONFIGURE_CYCLE_LENGTH != FALSE)
-    ObdSize = sizeof (EplCfmuInstance_g.m_le_dwCycleLength);
-    Ret = EplObduReadEntryToLe(0x1006, 0x00, &EplCfmuInstance_g.m_le_dwCycleLength, &ObdSize);
-    if (Ret != kEplSuccessful)
-    {   // local OD access failed
-        EPL_DBGLVL_CFM_TRACE1("Local OBD read failed %d\n", Ret);
-        goto Exit;
+    {
+    tEplObdParam    ObdParam;
+
+        EPL_MEMSET(&ObdParam, 0, sizeof (ObdParam));
+        ObdParam.m_SegmentSize = (tEplObdSize) sizeof (EplCfmuInstance_g.m_le_dwCycleLength);
+        ObdParam.m_TransferSize = ObdParam.m_SegmentSize;
+        ObdParam.m_uiIndex = 0x1006;
+        ObdParam.m_uiSubIndex = 0x00;
+        ObdParam.m_pData = &EplCfmuInstance_g.m_le_dwCycleLength;
+
+        Ret = EplObdReadEntryToLe(&ObdParam);
+        if (Ret != kEplSuccessful)
+        {   // local OD access failed
+            EPL_DBGLVL_CFM_TRACE1("Local OBD read failed %d\n", Ret);
+            goto Exit;
+        }
     }
 #endif
 
