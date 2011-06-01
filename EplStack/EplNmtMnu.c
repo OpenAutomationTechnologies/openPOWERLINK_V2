@@ -2873,6 +2873,17 @@ tEplTimerArg        TimerArg;
                 pNodeInfo->m_NodeState = kEplNmtMnuNodeStateUnknown;
             }
 
+            // check NMT state of CN
+            Ret = EplNmtMnuCheckNmtState(uiNodeId_p, pNodeInfo, NodeNmtState_p, wErrorCode_p, NmtState);
+            if (Ret == kEplReject)
+            {
+                Ret = kEplSuccessful;
+            }
+            else if (Ret != kEplSuccessful)
+            {
+                break;
+            }
+
             // $$$ d.k. check start time for 0x1F89/2 MNTimeoutPreOp1_U32
             // $$$ d.k. check individual timeout 0x1F89/6 MNIdentificationTimeout_U32
             // if mandatory node and timeout elapsed -> halt boot procedure
@@ -3379,7 +3390,7 @@ tEplNmtState    ExpNmtState;
     {   // CN is already in state unknown, which means that it got
         // NMT reset command earlier
         Ret = kEplReject;
-        goto Exit;
+        goto ExitButUpdate;
     }
 
     ObdSize = 1;
@@ -3398,7 +3409,7 @@ tEplNmtState    ExpNmtState;
     if (ExpNmtState == kEplNmtCsNotActive)
     {   // ignore the current state, because the CN shall be not active
         Ret = kEplReject;
-        goto Exit;
+        goto ExitButUpdate;
     }
     else if ((ExpNmtState == kEplNmtCsPreOperational2) &&
              (NodeNmtState_p == kEplNmtCsPreOperational2))
