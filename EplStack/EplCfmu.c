@@ -479,8 +479,10 @@ BOOL                fDoUpdate = FALSE;
         pNodeInfo->m_EventCnProgress.m_dwTotalNumberOfBytes += sizeof (dw_le_Signature);
         AmiSetDwordToLe(&dw_le_Signature, 0x64616F6C);
         //Restore Default Parameters
-        EPL_DBGLVL_CFM_TRACE3("CN%x - Cfg Mismatch | MN Expects: %lx-%lx ", uiNodeId_p, dwExpConfDate, dwExpConfTime);
-        EPL_DBGLVL_CFM_TRACE2("CN Has: %lx-%lx. Restoring Default...\n", AmiGetDwordFromLe(&pIdentResponse->m_le_dwVerifyConfigurationDate), AmiGetDwordFromLe(&pIdentResponse->m_le_dwVerifyConfigurationTime));
+        EPL_DBGLVL_CFM_TRACE3("CN%x - Cfg Mismatch | MN Expects: %lx-%lx ", uiNodeId_p, (unsigned long) dwExpConfDate, (unsigned long) dwExpConfTime);
+        EPL_DBGLVL_CFM_TRACE2("CN Has: %lx-%lx. Restoring Default...\n",
+                (unsigned long) AmiGetDwordFromLe(&pIdentResponse->m_le_dwVerifyConfigurationDate),
+                (unsigned long) AmiGetDwordFromLe(&pIdentResponse->m_le_dwVerifyConfigurationTime));
 
         pNodeInfo->m_EventCnProgress.m_uiObjectIndex = 0x1011;
         pNodeInfo->m_EventCnProgress.m_uiObjectSubIndex = 0x01;
