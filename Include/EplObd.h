@@ -400,24 +400,66 @@ typedef struct
 // r.d.: has always to be, because of new OBD-Macros for arrays
 typedef tEplObdSubEntry * tEplObdSubEntryPtr;
 
+
+typedef enum
+{
+    kEplSdoAddrTypeNodeId   =   0x00,
+    kEplSdoAddrTypeIp       =   0x01,
+
+} tEplSdoAddrType;
+
+typedef struct
+{
+    tEplSdoAddrType m_SdoAddrType;
+    unsigned int    m_uiNodeId;     // Node-ID of the remote side
+#if 0
+    union
+    {
+        struct sockaddr_storage m_SockAddr;
+    } m_Address;
+#endif
+} tEplSdoAddress;
+
+
+struct _tEplObdParam;
+
+typedef struct _tEplObdParam tEplObdParam;
+
+typedef tEplKernel (PUBLIC ROM* tEplObdCbAccessFinished) (/*EPL_MCO_DECL_INSTANCE_HDL_*/
+    tEplObdParam MEM* pParam_p);
+
 // -------------------------------------------------------------------------
 // callback function for object dictionary module
 // -------------------------------------------------------------------------
 
 // parameters for callback function
-typedef struct
+struct _tEplObdParam
 {
     tEplObdEvent    m_ObdEvent;
     unsigned int    m_uiIndex;
     unsigned int    m_uiSubIndex;
-    void *          m_pArg;
+    void *          m_pArg;             // obsolete
     DWORD           m_dwAbortCode;
+    tEplSdoAddress* m_pRemoteAddress;   // pointer to caller identification
+    void *          m_pData;
+    tEplObdSize     m_TransferSize;     // transfer size from SDO or local app
+    tEplObdSize     m_ObjSize;          // current object size from OD
+    tEplObdSize     m_SegmentSize;
+    tEplObdSize     m_SegmentOffset;
 
-} tEplObdCbParam;
+    tEplObdType     m_Type;
+    tEplObdAccess   m_Access;
 
-// define type for callback function: pParam_p points to tEplObdCbParam
-typedef tEplKernel (PUBLIC ROM* tEplObdCallback) (CCM_DECL_INSTANCE_HDL_
-    tEplObdCbParam MEM* pParam_p);
+    void *          m_pHandle;
+    tEplObdCbAccessFinished m_pfnAccessFinished;
+
+};
+
+#define tEplObdCbParam      tEplObdParam
+
+
+typedef tEplKernel (PUBLIC ROM* tEplObdCallback) (/*EPL_MCO_DECL_INSTANCE_HDL_*/
+    tEplObdParam MEM* pParam_p);
 
 // do not change the order for this struct!!!
 
