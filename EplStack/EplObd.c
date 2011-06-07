@@ -469,19 +469,20 @@ void MEM*               pSrcData;
                                &pSrcData);
     if (Ret != kEplSuccessful)
     {
+        if (Ret == kEplObdSegmentReturned)
+        {
+            Ret = kEplObdValueLengthError;
+        }
         goto Exit;
     }
 
     // read value from object
     EPL_MEMCPY (ObdParam.m_pData, pSrcData, ObdParam.m_SegmentSize);
 
-    if (ObdParam.m_Type == kEplObdTypVString)
-    {
-        if (*pSize_p > ObdParam.m_SegmentSize)
-        {   // space left to set the terminating null-character
-            ((char MEM*) pDstData_p)[ObdParam.m_SegmentSize] = '\0';
-            ObdParam.m_SegmentSize++;
-        }
+    if ((ObdParam.m_Type == kEplObdTypVString)
+        && (*pSize_p > ObdParam.m_SegmentSize))
+    {   // space left to set the terminating null-character
+        ((char MEM*) pDstData_p)[ObdParam.m_SegmentSize] = '\0';
     }
     *pSize_p = ObdParam.m_SegmentSize;
 
@@ -1164,6 +1165,7 @@ EPLDLLEXPORT tEplKernel PUBLIC EplObdReadEntryToLe (EPL_MCO_DECL_INSTANCE_PTR_
                                         tEplObdParam* pObdParam_p)
 {
 tEplKernel                      Ret;
+tEplKernel                      RetCb;
 tEplObdEntryPtr                 pObdEntry;
 tEplObdSubEntryPtr              pSubEntry;
 void *                          pSrcData;
@@ -1179,7 +1181,7 @@ tEplObdSize                     OrgSegmentSize;
                                &pObdEntry,
                                &pSubEntry,
                                &pSrcData);
-    if (Ret != kEplSuccessful)
+    if ((Ret != kEplSuccessful) && (Ret != kEplObdSegmentReturned))
     {
         goto Exit;
     }
@@ -1197,12 +1199,10 @@ tEplObdSize                     OrgSegmentSize;
             // read value from object
             EPL_MEMCPY (pObdParam_p->m_pData, pSrcData, pObdParam_p->m_SegmentSize);
 
-            if ((pObdParam_p->m_pRemoteAddress == NULL)
-                && (pObdParam_p->m_Type == kEplObdTypVString)
+            if ((pObdParam_p->m_Type == kEplObdTypVString)
                 && (OrgSegmentSize > pObdParam_p->m_SegmentSize))
-            {   // local read and space left to set the terminating null-character
+            {   // space left to set the terminating null-character
                 ((char MEM*) pObdParam_p->m_pData)[pObdParam_p->m_SegmentSize] = '\0';
-                pObdParam_p->m_SegmentSize++;
             }
             break;
         }
@@ -1290,9 +1290,13 @@ tEplObdSize                     OrgSegmentSize;
     // write address of destination data to structure of callback parameters
     // so callback function can change this data after reading
     pObdParam_p->m_pArg     = pObdParam_p->m_pData;
-    pObdParam_p->m_ObdEvent = kEplObdEvPostRead;
-    Ret = EplObdCallObjectCallback (EPL_MCO_INSTANCE_PTR_
+    pObdParam_p->m_ObdEvent = kEplObdEvPostReadLe;
+    RetCb = EplObdCallObjectCallback (EPL_MCO_INSTANCE_PTR_
         pObdEntry->m_fpCallback, pObdParam_p);
+    if (RetCb != kEplSuccessful)
+    {
+        Ret = RetCb;
+    }
 
 Exit:
 
@@ -2093,9 +2097,10 @@ BOOL                    fEntryNumerical;
     //      the data pointer or size. This prevents a recursive call to
     //      the callback function if it calls EplObdGetEntry().
     #if (EPL_OBD_USE_STRING_DOMAIN_IN_RAM != FALSE)
-    if ( (pObdParam_p->m_Type == kEplObdTypVString) ||
-         (pObdParam_p->m_Type == kEplObdTypDomain)  ||
-         (pObdParam_p->m_Type == kEplObdTypOString))
+    if ((pObdParam_p->m_SegmentOffset == 0)
+        && ((pObdParam_p->m_Type == kEplObdTypVString)
+            || (pObdParam_p->m_Type == kEplObdTypDomain)
+            || (pObdParam_p->m_Type == kEplObdTypOString)))
     {
         // fill out new arg-struct
         MemVStringDomain.m_DownloadSize = pObdParam_p->m_TransferSize;
@@ -2154,17 +2159,17 @@ BOOL                    fEntryNumerical;
     }
     #endif //#if (OBD_USE_STRING_DOMAIN_IN_RAM != FALSE)
 
-    // access violation if adress to current value is NULL
-    if (pDstData == NULL)
-    {
-        Ret = kEplObdAccessViolation;
-        pObdParam_p->m_dwAbortCode = EPL_SDOAC_UNSUPPORTED_ACCESS;
-        goto Exit;
+    // normalize the source data before calling the OD callback function
+    if ((pObdParam_p->m_Type == kEplObdTypVString)
+        && (((char MEM*) pObdParam_p->m_pData)[pObdParam_p->m_SegmentSize - 1] == '\0'))
+    {   // last byte of source string contains null character
+
+        pObdParam_p->m_SegmentSize -= 1;
+
+        // $$$ the transfer size is still too large
     }
 
-    // 07-dec-2004 r.d.: size from application is needed because callback function can change the object size
-    // -as 16.11.04 CbParam.m_pArg     = &ObdSize;
-    // 09-dec-2004 r.d.: CbParam.m_pArg     = &Size_p;
+    // call the OD callback function with kEplObdEvInitWrite
     pObdParam_p->m_ObjSize  = ObdSize;
     pObdParam_p->m_pArg     = &pObdParam_p->m_ObjSize;
     pObdParam_p->m_ObdEvent = kEplObdEvInitWrite;
@@ -2172,6 +2177,14 @@ BOOL                    fEntryNumerical;
         pObdEntry->m_fpCallback, pObdParam_p);
     if (Ret != kEplSuccessful)
     {
+        goto Exit;
+    }
+
+    // access violation if address to current value is NULL
+    if (pDstData == NULL)
+    {
+        Ret = kEplObdAccessViolation;
+        pObdParam_p->m_dwAbortCode = EPL_SDOAC_UNSUPPORTED_ACCESS;
         goto Exit;
     }
 
@@ -2184,33 +2197,32 @@ BOOL                    fEntryNumerical;
     }
 
     Ret = EplObdIsNumericalIntern(pObdParam_p->m_Type, &fEntryNumerical);
-    if (pSubEntry->m_Type == kEplObdTypVString)
-    {
-        if (((char MEM*) pObdParam_p->m_pData)[pObdParam_p->m_TransferSize - 1] == '\0')
-        {   // last byte of source string contains null character
-
-            // reserve one byte in destination for 0-termination
-            pObdParam_p->m_TransferSize -= 1;
-        }
-        else if (pObdParam_p->m_TransferSize >= ObdSize)
-        {   // source string is not 0-terminated
-            // and destination buffer is too short
-            Ret = kEplObdValueLengthError;
-            goto Exit;
-        }
-    }
-
     if (Ret != kEplSuccessful)
     {
         goto Exit;
     }
 
     if ((fEntryNumerical != FALSE)
-        && (pObdParam_p->m_TransferSize != ObdSize))
+        && ((pObdParam_p->m_SegmentOffset != 0)
+            || (pObdParam_p->m_TransferSize != pObdParam_p->m_SegmentSize)
+            || (pObdParam_p->m_SegmentSize != pObdParam_p->m_ObjSize)))
     {
         // type is numerical, therefor size has to fit, but it does not.
         Ret = kEplObdValueLengthError;
         goto Exit;
+    }
+
+    // check if offset given
+    if (pObdParam_p->m_SegmentOffset != 0)
+    {
+        if ((pObdParam_p->m_SegmentOffset > pObdParam_p->m_ObjSize)
+            || (pObdParam_p->m_SegmentSize > (pObdParam_p->m_ObjSize - pObdParam_p->m_SegmentOffset)))
+        {   // segment does not fit into the object
+            Ret = kEplObdValueLengthError;
+            goto Exit;
+        }
+
+        pDstData = ((BYTE*) pDstData) + pObdParam_p->m_SegmentOffset;
     }
 
     // set output parameters
@@ -2285,12 +2297,12 @@ tEplKernel              Ret;
     }
 
     // copy object data to OBD
-    EPL_MEMCPY (pDstData_p, pObdParam_p->m_pData, pObdParam_p->m_ObjSize);
+    EPL_MEMCPY (pDstData_p, pObdParam_p->m_pData, pObdParam_p->m_SegmentSize);
 
     // terminate string with 0
     if (pSubEntry_p->m_Type == kEplObdTypVString)
     {
-        ((char MEM*) pDstData_p)[pObdParam_p->m_ObjSize] = '\0';
+        ((char MEM*) pDstData_p)[pObdParam_p->m_SegmentSize] = '\0';
     }
 
     // write address of destination to structure of callback parameters
@@ -2342,6 +2354,7 @@ tEplObdAccess           Access;
 void MEM*               pSrcData;
 void MEM*               pDstData;
 tEplObdSize             ObdSize;
+BOOL                    fEntryNumerical;
 
     // check for all API function if instance is valid
     EPL_MCO_CHECK_INSTANCE_STATE ();
@@ -2367,14 +2380,6 @@ tEplObdSize             ObdSize;
     // get pointer to object data
     pSrcData = EplObdGetObjectDataPtrIntern (pSubEntry);
 
-    // check source pointer
-    if (pSrcData == NULL)
-    {
-        Ret = kEplObdAccessViolation;
-        pObdParam_p->m_dwAbortCode = EPL_SDOAC_UNSUPPORTED_ACCESS;
-        goto Exit;
-    }
-
     // get size of data and check if application has reserved enough memory
     ObdSize = EplObdGetDataSizeIntern (pSubEntry);
 
@@ -2385,8 +2390,8 @@ tEplObdSize             ObdSize;
     // address of source data to structure of callback parameters
     // so callback function can change this data before reading
     pObdParam_p->m_ObjSize  = ObdSize;
-    pObdParam_p->m_pData    = pSrcData;
-    pObdParam_p->m_pArg     = pSrcData;
+    pObdParam_p->m_pData    = ((BYTE*) pSrcData) + pObdParam_p->m_SegmentOffset;
+    pObdParam_p->m_pArg     = pObdParam_p->m_pData;
     pObdParam_p->m_ObdEvent = kEplObdEvPreRead;
     Ret = EplObdCallObjectCallback (EPL_MCO_INSTANCE_PTR_
         pObdEntry->m_fpCallback, pObdParam_p);
@@ -2395,21 +2400,62 @@ tEplObdSize             ObdSize;
         goto Exit;
     }
 
-    // check if offset given and calc correct number of bytes to read
-    if (pObdParam_p->m_SegmentSize < ObdSize)
+    // check source pointer
+    if (pObdParam_p->m_pData == NULL)
+    {
+        Ret = kEplObdAccessViolation;
+        pObdParam_p->m_dwAbortCode = EPL_SDOAC_UNSUPPORTED_ACCESS;
+        goto Exit;
+    }
+
+    Ret = EplObdIsNumericalIntern(pObdParam_p->m_Type, &fEntryNumerical);
+    if (Ret != kEplSuccessful)
+    {
+        goto Exit;
+    }
+
+    if ((fEntryNumerical != FALSE)
+        && ((pObdParam_p->m_SegmentOffset != 0)
+            || (pObdParam_p->m_SegmentSize != pObdParam_p->m_ObjSize)))
+    {
+        // type is numerical, therefor size has to fit, but it does not.
+        Ret = kEplObdValueLengthError;
+        goto Exit;
+    }
+
+    if (pObdParam_p->m_SegmentOffset > pObdParam_p->m_ObjSize)
     {
         Ret = kEplObdValueLengthError;
         goto Exit;
     }
 
-    pObdParam_p->m_SegmentSize = ObdSize;
+    // check if offset given and calc correct number of bytes to read
+    if (pObdParam_p->m_SegmentOffset != 0)
+    {
+    tEplObdSize RemainingObjSize;
 
-    pObdParam_p->m_pData    = pDstData;
+        Ret = kEplObdSegmentReturned;
+        RemainingObjSize = pObdParam_p->m_ObjSize - pObdParam_p->m_SegmentOffset;
+
+        if (pObdParam_p->m_SegmentSize > RemainingObjSize)
+        {
+            pObdParam_p->m_SegmentSize = RemainingObjSize;
+        }
+    }
+    else if (pObdParam_p->m_SegmentSize < pObdParam_p->m_ObjSize)
+    {   // segment offset == 0 and segment size is less than object size
+        Ret = kEplObdSegmentReturned;
+    }
+    else
+    {   // segment offset == 0 and segment size is greater or equal than object size
+        pObdParam_p->m_SegmentSize = pObdParam_p->m_ObjSize;
+    }
 
     // set output parameters
     *ppObdEntry_p = pObdEntry;
     *ppSubEntry_p = pSubEntry;
-    *ppSrcData_p = pSrcData;
+    *ppSrcData_p = pObdParam_p->m_pData;
+    pObdParam_p->m_pData    = pDstData;
 
     // all checks are done
     // the caller may now convert the numerial source value in platform byte order to little endian byte order
