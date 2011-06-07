@@ -130,8 +130,10 @@ typedef enum
     kEplObdEvCheckExist            = 0x06,    // checking if object does exist (reading and writing)    NULL
     kEplObdEvPreRead               = 0x00,    // before reading an object                               source data buffer in OD
     kEplObdEvPostRead              = 0x01,    // after reading an object                                destination data buffer from caller
+    kEplObdEvPostReadLe            = 0x08,    // after reading an object                                destination data buffer from caller in little endian
     kEplObdEvWrStringDomain        = 0x07,    // event for changing string/domain data pointer or size  struct tEplObdVStringDomain in RAM
     kEplObdEvInitWrite             = 0x04,    // initializes writing an object (checking object size)   size of object in OD (tEplObdSize)
+    kEplObdEvInitWriteLe           = 0x04,    // initializes writing an object (checking object size)   size of object in OD (tEplObdSize)
     kEplObdEvPreWrite              = 0x02,    // before writing an object                               source data buffer from caller
     kEplObdEvPostWrite             = 0x03,    // after writing an object                                destination data buffer in OD
 //    kEplObdEvAbortSdo              = 0x05     // after an abort of an SDO transfer
