@@ -138,6 +138,9 @@ typedef enum
 //    kEplObdIllegalFloat         = 0x003B,       // illegal float variable
 //    kEplObdWrongOdBuilderKey    = 0x003F,       // OD was generated with demo version of tool ODBuilder
 
+    // area for OBD module 0x00D0 - 0x00DF
+    kEplObdSegmentReturned       = 0x00D0,       // only segment of object returned
+
     // area for NMT module 0x0040 - 0x004F
     kEplNmtUnknownCommand       = 0x0040,       // unknown NMT command
     kEplNmtInvalidFramePointer  = 0x0041,       // pointer to the frame is not valid
