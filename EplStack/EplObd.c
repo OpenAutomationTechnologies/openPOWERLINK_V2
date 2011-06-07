@@ -199,7 +199,7 @@ static void EplObdCopyObjectData (
 
 static void * EplObdGetObjectDataPtrIntern (tEplObdSubEntryPtr pSubindexEntry_p);
 
-static tEplKernel EplObdIsNumericalIntern(tEplObdSubEntryPtr pObdSubEntry_p,
+static tEplKernel EplObdIsNumericalIntern(tEplObdType Type_p,
                                         BOOL*         pfEntryNumerical_p);
 
 static tEplKernel PUBLIC EplObdReadEntryPre (EPL_MCO_DECL_INSTANCE_PTR_
@@ -1074,7 +1074,7 @@ tEplObdSubEntryPtr  pObdSubEntry;
         goto Exit;
     }
 
-    Ret = EplObdIsNumericalIntern(pObdSubEntry, pfEntryNumerical_p);
+    Ret = EplObdIsNumericalIntern(pObdSubEntry->m_Type, pfEntryNumerical_p);
 
 
 Exit:
@@ -2183,6 +2183,7 @@ BOOL                    fEntryNumerical;
         goto Exit;
     }
 
+    Ret = EplObdIsNumericalIntern(pObdParam_p->m_Type, &fEntryNumerical);
     if (pSubEntry->m_Type == kEplObdTypVString)
     {
         if (((char MEM*) pObdParam_p->m_pData)[pObdParam_p->m_TransferSize - 1] == '\0')
@@ -2199,7 +2200,6 @@ BOOL                    fEntryNumerical;
         }
     }
 
-    Ret = EplObdIsNumericalIntern(pSubEntry, &fEntryNumerical);
     if (Ret != kEplSuccessful)
     {
         goto Exit;
@@ -3514,8 +3514,7 @@ tEplObdSize StrSize = 0;
 //
 //
 // Parameters:  EPL_MCO_DECL_INSTANCE_PTR_ = Instancepointer
-//              uiIndex_p           = Index
-//              uiSubIndex_p        = Subindex
+//              Type_p              = Data type of the object
 //              pfEntryNumerical_p  = pointer to BOOL for returnvalue
 //                                  -> TRUE if entry a numerical value
 //                                  -> FALSE if entry not a numerical value
@@ -3525,16 +3524,16 @@ tEplObdSize StrSize = 0;
 // State:
 //
 //---------------------------------------------------------------------------
-static tEplKernel EplObdIsNumericalIntern(tEplObdSubEntryPtr pObdSubEntry_p,
+static tEplKernel EplObdIsNumericalIntern(tEplObdType Type_p,
                                         BOOL*         pfEntryNumerical_p)
 {
 tEplKernel          Ret = kEplSuccessful;
 
 
     // get Type
-    if((pObdSubEntry_p->m_Type == kEplObdTypVString)
-        || (pObdSubEntry_p->m_Type == kEplObdTypOString)
-        || (pObdSubEntry_p->m_Type == kEplObdTypDomain))
+    if((Type_p == kEplObdTypVString)
+        || (Type_p == kEplObdTypOString)
+        || (Type_p == kEplObdTypDomain))
     {   // not numerical types
         *pfEntryNumerical_p = FALSE;
     }
