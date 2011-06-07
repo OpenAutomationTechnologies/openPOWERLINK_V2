@@ -3386,6 +3386,9 @@ BYTE            bNmtState;
 BYTE            bNmtStatePrev;
 tEplNmtState    ExpNmtState;
 
+    // compute BYTE of current NMT state
+    bNmtState = ((BYTE) NodeNmtState_p & 0xFF);
+
     if (pNodeInfo_p->m_NodeState == kEplNmtMnuNodeStateUnknown)
     {   // CN is already in state unknown, which means that it got
         // NMT reset command earlier
@@ -3403,8 +3406,6 @@ tEplNmtState    ExpNmtState;
 
     // compute expected NMT state
     ExpNmtState = (tEplNmtState) (bNmtState | EPL_NMT_TYPE_CS);
-    // compute BYTE of current NMT state
-    bNmtState = ((BYTE) NodeNmtState_p & 0xFF);
 
     if (ExpNmtState == kEplNmtCsNotActive)
     {   // ignore the current state, because the CN shall be not active
