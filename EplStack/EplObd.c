@@ -382,6 +382,7 @@ void MEM*               pDstData;
     ObdParam.m_pData        = pSrcData_p;
     ObdParam.m_TransferSize = Size_p;
     ObdParam.m_SegmentSize  = Size_p;
+    ObdParam.m_ObdEvent     = kEplObdEvInitWrite;
 
     Ret = EplObdWriteEntryPre (EPL_MCO_INSTANCE_PTR_
                                &ObdParam,
@@ -1335,6 +1336,8 @@ void MEM*               pDstData;
 QWORD                   qwBuffer;
 void*                   pBuffer = &qwBuffer;
 
+    pObdParam_p->m_ObdEvent = kEplObdEvInitWriteLe;
+
     Ret = EplObdWriteEntryPre (EPL_MCO_INSTANCE_PTR_
                                pObdParam_p,
                                &pObdEntry,
@@ -2052,6 +2055,7 @@ tEplObdAccess           Access;
 void MEM*               pDstData;
 tEplObdSize             ObdSize;
 BOOL                    fEntryNumerical;
+tEplObdEvent            OrgObdEvent;
 
 #if (EPL_OBD_USE_STRING_DOMAIN_IN_RAM != FALSE)
     tEplObdVStringDomain MEM    MemVStringDomain;
@@ -2060,6 +2064,8 @@ BOOL                    fEntryNumerical;
 
     // check for all API function if instance is valid
     EPL_MCO_CHECK_INSTANCE_STATE ();
+
+    OrgObdEvent = pObdParam_p->m_ObdEvent;
 
     //------------------------------------------------------------------------
     // get address of index and subindex entry
@@ -2169,10 +2175,10 @@ BOOL                    fEntryNumerical;
         // $$$ the transfer size is still too large
     }
 
-    // call the OD callback function with kEplObdEvInitWrite
+    // call the OD callback function with kEplObdEvInitWrite/kEplObdEvInitWriteLe
     pObdParam_p->m_ObjSize  = ObdSize;
     pObdParam_p->m_pArg     = &pObdParam_p->m_ObjSize;
-    pObdParam_p->m_ObdEvent = kEplObdEvInitWrite;
+    pObdParam_p->m_ObdEvent = OrgObdEvent;
     Ret = EplObdCallObjectCallback (EPL_MCO_INSTANCE_PTR_
         pObdEntry->m_fpCallback, pObdParam_p);
     if (Ret != kEplSuccessful)
