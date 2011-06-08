@@ -129,7 +129,7 @@ typedef enum
     kEplObdVarEntryNotExist     = 0x0037,       // object does not contain VarEntry structure
     kEplObdValueTooLow          = 0x0038,       // value to write to an object is too low
     kEplObdValueTooHigh         = 0x0039,       // value to write to an object is too high
-    kEplObdValueLengthError     = 0x003A,       // value to write is to long or to short
+    kEplObdValueLengthError     = 0x003A,       // value to write is too long or too short
     kEplObdErrnoSet             = 0x003B,       // file I/O error occurred and errno is set
     kEplObdInvalidDcf           = 0x003C,       // device configuration file (CDC) is not valid
     kEplObdOutOfMemory          = 0x003D,       // out of memory
@@ -140,6 +140,7 @@ typedef enum
 
     // area for OBD module 0x00D0 - 0x00DF
     kEplObdSegmentReturned       = 0x00D0,       // only segment of object returned
+    kEplObdNumValSizeMismatch    = 0x00D1,       // segment size on read access does not match the object size of the numerical value
 
     // area for NMT module 0x0040 - 0x004F
     kEplNmtUnknownCommand       = 0x0040,       // unknown NMT command

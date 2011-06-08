@@ -2425,7 +2425,8 @@ BOOL                    fEntryNumerical;
             || (pObdParam_p->m_SegmentSize != pObdParam_p->m_ObjSize)))
     {
         // type is numerical, therefor size has to fit, but it does not.
-        Ret = kEplObdValueLengthError;
+        Ret = kEplObdNumValSizeMismatch;
+        pObdParam_p->m_dwAbortCode = EPL_SDOAC_DATA_TYPE_LENGTH_NOT_MATCH;
         goto Exit;
     }
 
