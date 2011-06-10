@@ -2800,6 +2800,7 @@ tEplKernel              Ret;
     Ret = EplObdGetIndexIntern (&EPL_MCO_GLB_VAR (m_ObdInitParam), pObdParam_p->m_uiIndex, &pObdEntry);
     if (Ret != kEplSuccessful)
     {
+        pObdParam_p->m_dwAbortCode = EPL_SDOAC_OBJECT_NOT_EXIST;
         goto Exit;
     }
 
@@ -2808,6 +2809,7 @@ tEplKernel              Ret;
     Ret = EplObdGetSubindexIntern (pObdEntry, pObdParam_p->m_uiSubIndex, ppObdSubEntry_p);
     if (Ret != kEplSuccessful)
     {
+        pObdParam_p->m_dwAbortCode = EPL_SDOAC_SUB_INDEX_NOT_EXIST;
         goto Exit;
     }
 
