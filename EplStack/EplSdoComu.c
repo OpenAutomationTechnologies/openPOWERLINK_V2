@@ -2030,6 +2030,96 @@ Exit:
 
 //---------------------------------------------------------------------------
 //
+// Function:    EplSdoComServerCbExpeditedReadFinished();
+//
+// Description: function is called by the adopter of the OD read access
+//
+// Parameters:  pObdParam_p     = pointer to OBD parameter structure
+//
+// Returns:     tEplKernel  =  errorcode
+//
+// State:
+//
+//---------------------------------------------------------------------------
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOS)) != 0)
+static tEplKernel PUBLIC EplSdoComServerCbExpeditedReadFinished(tEplObdParam* pObdParam_p)
+{
+tEplKernel      Ret;
+tEplSdoComCon*  pSdoComCon;
+BYTE            abFrame[EPL_MAX_SDO_FRAME_SIZE];
+tEplFrame*      pFrame;
+tEplAsySdoCom*  pCommandFrame;
+unsigned int    uiSizeOfFrame;
+BYTE            bFlag;
+
+    Ret = kEplSuccessful;
+
+    pSdoComCon = pObdParam_p->m_pHandle;
+
+    if (pObdParam_p->m_dwAbortCode != 0)
+    {
+        // send abort
+        pSdoComCon->m_pData = (BYTE*)&pObdParam_p->m_dwAbortCode;
+        Ret = EplSdoComServerSendFrameIntern(pSdoComCon,
+                                    pObdParam_p->m_uiIndex,
+                                    pObdParam_p->m_uiSubIndex,
+                                    kEplSdoComSendTypeAbort);
+
+        pSdoComCon->m_SdoComState = kEplSdoComStateIdle;
+        goto Exit;
+    }
+
+    pFrame = (tEplFrame*)&abFrame[0];
+
+    EPL_MEMSET(&abFrame[0], 0x00, sizeof(abFrame));
+
+    // build generic part of frame
+    // get pointer to command layerpart of frame
+    pCommandFrame = &pFrame->m_Data.m_Asnd.m_Payload.m_SdoSequenceFrame.m_le_abSdoSeqPayload;
+    AmiSetByteToLe(&pCommandFrame->m_le_bCommandId, pSdoComCon->m_SdoServiceType);
+    AmiSetByteToLe(&pCommandFrame->m_le_bTransactionId, pSdoComCon->m_bTransactionId);
+
+    // set size to header size
+    uiSizeOfFrame = 8;
+
+    // set response flag
+    bFlag = AmiGetByteFromLe( &pCommandFrame->m_le_bFlags);
+    bFlag |= 0x80;
+    AmiSetByteToLe(&pCommandFrame->m_le_bFlags,  bFlag);
+
+    // check type of resonse
+    if (pSdoComCon->m_SdoTransType == kEplSdoTransExpedited)
+    {   // Expedited transfer
+        // copy data to frame
+        EPL_MEMCPY(&pCommandFrame->m_le_abCommandData[0], pObdParam_p->m_pData, pObdParam_p->m_SegmentSize);
+
+        // set size of frame
+        pSdoComCon->m_uiTransSize = pObdParam_p->m_SegmentSize;
+        AmiSetWordToLe(&pCommandFrame->m_le_wSegmentSize, (WORD) pSdoComCon->m_uiTransSize);
+
+        // correct byte-counter
+        uiSizeOfFrame += pSdoComCon->m_uiTransSize;
+        pSdoComCon->m_uiTransferredByte += pSdoComCon->m_uiTransSize;
+        pSdoComCon->m_uiTransSize = 0;
+
+
+        // send frame
+        uiSizeOfFrame += pSdoComCon->m_uiTransSize;
+        Ret = EplSdoAsySeqSendData(pSdoComCon->m_SdoSeqConHdl,
+                                    uiSizeOfFrame,
+                                    pFrame);
+
+        pSdoComCon->m_SdoComState = kEplSdoComStateIdle;
+        pSdoComCon->m_uiTransSize = 0;
+    }
+
+Exit:
+    return Ret;
+}
+#endif
+
+//---------------------------------------------------------------------------
+//
 // Function:        EplSdoComServerSendFrameIntern();
 //
 // Description:    function creats and send a frame for server
@@ -2121,10 +2211,22 @@ BYTE            bFlag;
                 ObdParam.m_uiIndex = uiIndex_p;
                 ObdParam.m_uiSubIndex = uiSubIndex_p;
                 ObdParam.m_pData = &pCommandFrame->m_le_abCommandData[0];
+                ObdParam.m_pHandle = pSdoComCon_p;
+                ObdParam.m_pfnAccessFinished = EplSdoComServerCbExpeditedReadFinished;
 
                 Ret = EplObdReadEntryToLe(&ObdParam);
-                if (Ret != kEplSuccessful)
+                if (Ret == kEplObdAccessAdopted)
                 {
+                    goto Exit;
+                }
+                else if (Ret != kEplSuccessful)
+                {
+                    // send abort
+                    pSdoComCon_p->m_pData = (BYTE*)&ObdParam.m_dwAbortCode;
+                    Ret = EplSdoComServerSendFrameIntern(pSdoComCon_p,
+                                                uiIndex_p,
+                                                uiSubIndex_p,
+                                                kEplSdoComSendTypeAbort);
                     goto Exit;
                 }
 
@@ -2268,6 +2370,59 @@ Exit:
     return Ret;
 }
 #endif
+
+//---------------------------------------------------------------------------
+//
+// Function:    EplSdoComServerCbExpeditedWriteFinished();
+//
+// Description: function is called by the adopter of the OD write access
+//
+// Parameters:  pObdParam_p     = pointer to OBD parameter structure
+//
+// Returns:     tEplKernel  =  errorcode
+//
+// State:
+//
+//---------------------------------------------------------------------------
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOS)) != 0)
+static tEplKernel PUBLIC EplSdoComServerCbExpeditedWriteFinished(tEplObdParam* pObdParam_p)
+{
+tEplKernel      Ret;
+tEplSdoComCon*  pSdoComCon;
+
+    Ret = kEplSuccessful;
+
+    pSdoComCon = pObdParam_p->m_pHandle;
+
+    if (pObdParam_p->m_dwAbortCode != 0)
+    {
+        // send abort
+        pSdoComCon->m_pData = (BYTE*)&pObdParam_p->m_dwAbortCode;
+        Ret = EplSdoComServerSendFrameIntern(pSdoComCon,
+                                    pObdParam_p->m_uiIndex,
+                                    pObdParam_p->m_uiSubIndex,
+                                    kEplSdoComSendTypeAbort);
+    }
+    else
+    {
+
+        // send command acknowledge
+        Ret = EplSdoComServerSendFrameIntern(pSdoComCon,
+                                        0,
+                                        0,
+                                        kEplSdoComSendTypeAckRes);
+
+        pSdoComCon->m_uiTransSize = 0;
+    }
+
+    pSdoComCon->m_SdoComState = kEplSdoComStateIdle;
+
+//Exit:
+    return Ret;
+}
+#endif
+
+
 //---------------------------------------------------------------------------
 //
 // Function:        EplSdoComServerInitWriteByIndex
@@ -2406,9 +2561,15 @@ BYTE*           pbSrcData;
         ObdParam.m_uiIndex = uiIndex;
         ObdParam.m_uiSubIndex = uiSubindex;
         ObdParam.m_pData = pbSrcData;
+        ObdParam.m_pHandle = pSdoComCon_p;
+        ObdParam.m_pfnAccessFinished = EplSdoComServerCbExpeditedReadFinished;
 
         Ret = EplObdWriteEntryFromLe(&ObdParam);
-        if (Ret != kEplSuccessful)
+        if (Ret == kEplObdAccessAdopted)
+        {
+            goto Exit;
+        }
+        else if (Ret != kEplSuccessful)
         {
             if (ObdParam.m_dwAbortCode != 0)
             {
