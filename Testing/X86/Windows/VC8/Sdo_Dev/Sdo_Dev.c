@@ -119,6 +119,11 @@ static void EplAppPrintMenue(void);
 static void EplAppDumpData(void*         pData_p,
                            unsigned long ulDataSize_p);
 
+static tEplKernel PUBLIC EplAppCbAccessFinished(tEplObdParam* pObdParam_p);
+
+static tEplKernel PUBLIC EplAppProcessEvent(
+            tEplEvent* pEplEvent_p);
+
 /***************************************************************************/
 /*                                                                         */
 /*                                                                         */
@@ -251,7 +256,7 @@ BYTE                        bBuffer;
     }
 
     // initialize EplEventu-Module
-    Ret = EplEventuInit(NULL);
+    Ret = EplEventuInit(EplAppProcessEvent);
     if(Ret != kEplSuccessful)
     {
         goto Exit;
@@ -858,6 +863,8 @@ BYTE                        bBuffer;
 
                 ObdParam.m_pData = abTest_l;
                 ObdParam.m_TransferSize = ObdParam.m_SegmentSize;
+                ObdParam.m_pHandle = (void*)0xBEEFDEAD;
+                ObdParam.m_pfnAccessFinished = EplAppCbAccessFinished;
                 Ret = EplObdReadEntryToLe(&ObdParam);
                 printf("Read of local object 0x%X/%u with object size %u returned\n   code 0x%X, size=%u, offset=%u",
                     ObdParam.m_uiIndex, ObdParam.m_uiSubIndex,
@@ -923,6 +930,139 @@ Exit:
 //          P R I V A T E   F U N C T I O N S                              //
 //                                                                         //
 //=========================================================================//
+
+//---------------------------------------------------------------------------
+//
+// Function:    EplApiProcessEvent
+//
+// Description: processes events from event queue and forwards these to
+//              the application's event callback function
+//
+// Parameters:  pEplEvent_p =   pointer to event
+//
+// Returns:     tEplKernel  = errorcode
+//
+// State:
+//
+//---------------------------------------------------------------------------
+
+static tEplKernel PUBLIC EplAppProcessEvent(
+            tEplEvent* pEplEvent_p)
+{
+tEplKernel          Ret = kEplSuccessful;
+tEplTimerEventArg*  pTimerEventArg;
+tEplObdParam*       pObdParam;
+BYTE                abData[] = {0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0};
+
+    Ret = kEplSuccessful;
+    // check parameter
+    if (pEplEvent_p == NULL)
+    {
+        Ret = kEplSdoSeqInvalidEvent;
+        goto Exit;
+    }
+
+    if (pEplEvent_p->m_EventType != kEplEventTypeTimer)
+    {
+        Ret = kEplSdoSeqInvalidEvent;
+        goto Exit;
+    }
+
+    // get timerhdl
+    pTimerEventArg = (tEplTimerEventArg*)pEplEvent_p->m_pArg;
+
+    // get pointer to intern control structure of connection
+    if (pTimerEventArg->m_Arg.m_pVal == NULL)
+    {
+        goto Exit;
+    }
+    pObdParam = (tEplObdParam*)pTimerEventArg->m_Arg.m_pVal;
+
+    pObdParam->m_pData = &abData[0];
+
+    if (pObdParam->m_uiSubIndex == 3)
+    {
+        pObdParam->m_dwAbortCode = EPL_SDOAC_DATA_NOT_TRANSF_DUE_LOCAL_CONTROL;
+    }
+
+    printf("EplAppProcessEvent(0x%04X/%u Ev=%X pData=%p Off=%u Size=%u ObjSize=%u Acc=%X Typ=%X)\n",
+        pObdParam->m_uiIndex, pObdParam->m_uiSubIndex,
+        pObdParam->m_ObdEvent,
+        pObdParam->m_pData, pObdParam->m_SegmentOffset, pObdParam->m_SegmentSize,
+        pObdParam->m_ObjSize, pObdParam->m_Access, pObdParam->m_Type);
+
+    Ret = pObdParam->m_pfnAccessFinished(pObdParam);
+
+    EPL_FREE(pObdParam);
+
+Exit:
+    return Ret;
+}
+
+//---------------------------------------------------------------------------
+//
+// Function:    EplAppCbAccessFinished();
+//
+// Description: function is called by the adopter of the OD access
+//
+// Parameters:  pObdParam_p     = pointer to OBD parameter structure
+//
+// Returns:     tEplKernel  =  errorcode
+//
+// State:
+//
+//---------------------------------------------------------------------------
+
+static tEplKernel PUBLIC EplAppCbAccessFinished(tEplObdParam* pObdParam_p)
+{
+tEplKernel      Ret;
+
+    Ret = kEplSuccessful;
+
+    if (pObdParam_p->m_ObdEvent == kEplObdEvPreRead)
+    {
+        printf("Local read of object ");
+    }
+    else
+    {
+        printf("Local write of object ");
+    }
+    printf("0x%04X/0x%02X finished %u bytes transferred\n(Abortcode: 0x%04x Handle: 0x%x)\n",
+        pObdParam_p->m_uiIndex,
+        pObdParam_p->m_uiSubIndex,
+        pObdParam_p->m_SegmentSize,
+        pObdParam_p->m_dwAbortCode,
+        pObdParam_p->m_pHandle);
+
+    switch (pObdParam_p->m_SegmentSize)
+    {
+        case 0:
+            printf("no Bytes transfered\n");
+            break;
+
+        case 1:
+            printf("BYTE: 0x%02X\n", (WORD)AmiGetByteFromLe(pObdParam_p->m_pData));
+            break;
+
+        case 2:
+            printf("WORD: 0x%04X\n", AmiGetWordFromLe(pObdParam_p->m_pData));
+            break;
+
+        case 3:
+            printf("3 BYTEs: 0x%06X\n", AmiGetDword24FromLe(pObdParam_p->m_pData));
+            break;
+
+        case 4:
+            printf("DWORD: 0x%08X\n", AmiGetDwordFromLe(pObdParam_p->m_pData));
+            break;
+
+        default:
+            EplAppDumpData(pObdParam_p->m_pData, min (pObdParam_p->m_SegmentSize, 256));
+            break;
+    }
+
+    return Ret;
+}
 
 //---------------------------------------------------------------------------
 //
@@ -1033,6 +1173,43 @@ tEplKernel          Ret = kEplSuccessful;
         pParam_p->m_pData, pParam_p->m_SegmentOffset, pParam_p->m_SegmentSize,
         pParam_p->m_ObjSize, pParam_p->m_Access, pParam_p->m_Type);
 
+    if ((pParam_p->m_uiSubIndex >= 2)
+        && ((pParam_p->m_ObdEvent == kEplObdEvInitWrite)
+            || (pParam_p->m_ObdEvent == kEplObdEvPreRead)))
+    {   // adopt the transfer
+    tEplObdParam*   pMyObdParam;
+    tEplTimerArg    TimerArg;
+    tEplTimerHdl    EplTimerHdl;
+
+        if (pParam_p->m_pfnAccessFinished == NULL)
+        {
+            pParam_p->m_dwAbortCode = EPL_SDOAC_DATA_NOT_TRANSF_OR_STORED;
+            Ret = kEplObdAccessViolation;
+            goto Exit;
+        }
+
+        pMyObdParam = EPL_MALLOC(sizeof (*pMyObdParam));
+        if (pMyObdParam == NULL)
+        {
+            Ret = kEplObdOutOfMemory;
+            pParam_p->m_dwAbortCode = EPL_SDOAC_OUT_OF_MEMORY;
+            goto Exit;
+        }
+
+        EPL_MEMCPY(pMyObdParam, pParam_p, sizeof (*pMyObdParam));
+
+        TimerArg.m_EventSink = kEplEventSinkApi;
+        TimerArg.m_Arg.m_pVal = pMyObdParam;
+
+        Ret = EplTimeruSetTimerMs(&EplTimerHdl,
+                                    2000,
+                                    TimerArg);
+
+        Ret = kEplObdAccessAdopted;
+        printf("  Adopted\n");
+    }
+
+Exit:
     return Ret;
 }
 

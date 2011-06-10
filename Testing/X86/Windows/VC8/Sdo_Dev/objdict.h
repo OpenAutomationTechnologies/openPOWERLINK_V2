@@ -63,18 +63,22 @@ EPL_OBD_BEGIN ()
 
     EPL_OBD_BEGIN_PART_MANUFACTURER ()
 
-        EPL_OBD_BEGIN_INDEX_RAM(0x2000, 0x02, EplAppCbObdAccess)
+        EPL_OBD_BEGIN_INDEX_RAM(0x2000, 0x04, EplAppCbObdAccess)
             EPL_OBD_SUBINDEX_RAM_VAR(0x2000, 0x00, kEplObdTypUInt8, kEplObdAccCR, tEplObdUnsigned8, number_of_entries, 0x1)
             EPL_OBD_SUBINDEX_RAM_USERDEF(0x2000, 0x01, kEplObdTypUInt8, kEplObdAccVPRW, tEplObdUnsigned8, Sendb1, 0x0)
+            EPL_OBD_SUBINDEX_RAM_USERDEF(0x2000, 0x02, kEplObdTypUInt8, kEplObdAccVPRW, tEplObdUnsigned8, Sendb1, 0x0)
+            EPL_OBD_SUBINDEX_RAM_USERDEF(0x2000, 0x03, kEplObdTypUInt8, kEplObdAccVPRW, tEplObdUnsigned8, Sendb1, 0x0)
         EPL_OBD_END_INDEX(0x2000)
 
         EPL_OBD_BEGIN_INDEX_RAM(0x2100, 0x01, EplAppCbObdAccess)
             EPL_OBD_SUBINDEX_RAM_DOMAIN(0x2100,0x00,0x03,TEST_DOMAIN)
         EPL_OBD_END_INDEX(0x2100)
 
-        EPL_OBD_BEGIN_INDEX_RAM(0x2200, 0x02, EplAppCbObdAccess)
+        EPL_OBD_BEGIN_INDEX_RAM(0x2200, 0x04, EplAppCbObdAccess)
             EPL_OBD_SUBINDEX_RAM_VAR(0x2200, 0x00, kEplObdTypUInt8, kEplObdAccCR, tEplObdUnsigned8, number_of_entries, 0x1)
             EPL_OBD_SUBINDEX_RAM_USERDEF(0x2200, 0x01, kEplObdTypUInt16, kEplObdAccVPRW, tEplObdUnsigned16, Recvb1, 0x0)
+            EPL_OBD_SUBINDEX_RAM_USERDEF(0x2200, 0x02, kEplObdTypUInt16, kEplObdAccVPRW, tEplObdUnsigned16, Recvb1, 0x0)
+            EPL_OBD_SUBINDEX_RAM_USERDEF(0x2200, 0x03, kEplObdTypUInt16, kEplObdAccVPRW, tEplObdUnsigned16, Recvb1, 0x0)
         EPL_OBD_END_INDEX(0x2200)
 
     EPL_OBD_END_PART ()
