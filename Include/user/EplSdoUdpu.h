@@ -98,6 +98,8 @@ tEplKernel PUBLIC EplSdoUdpuDelInstance(void);
 
 tEplKernel PUBLIC EplSdoUdpuConfig(unsigned long ulIpAddr_p, unsigned int uiPort_p);
 
+tEplKernel PUBLIC EplSdoUdpuSetNetAddress(DWORD dwNetAddr_p);
+
 tEplKernel PUBLIC EplSdoUdpuInitCon(tEplSdoConHdl*  pSdoConHandle_p,
                                unsigned int    uiTargetNodeId_p);
 

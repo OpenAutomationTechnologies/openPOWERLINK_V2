@@ -141,6 +141,8 @@ typedef struct
     pthread_t*              m_ThreadHandle;
 #endif
 
+    DWORD                   m_dwNetAddress;
+
 } tEplSdoUdpInstance;
 
 //---------------------------------------------------------------------------
@@ -254,6 +256,8 @@ WSADATA             Wsa;
         goto Exit;
     }
 
+    SdoUdpInstance_g.m_dwNetAddress = 0xC0A86400;   // 192.168.100.0
+
 #if (TARGET_SYSTEM == _WIN32_)
     // start winsock2 for win32
     // windows specific start of socket
@@ -348,6 +352,31 @@ Exit:
 #endif
     return Ret;
 }
+
+
+//---------------------------------------------------------------------------
+//
+// Function:    EplSdoUdpuSetNetAddress
+//
+// Description: configurates the network part of the IP address
+//              -> network part + node-ID = IP address
+//
+// Parameters:  dwNetAddr_p     = network part of IP address in platform byte order
+//
+// Returns:     tEplKernel  = Errorcode
+//
+// State:
+//
+//---------------------------------------------------------------------------
+tEplKernel PUBLIC EplSdoUdpuSetNetAddress(DWORD dwNetAddr_p)
+{
+tEplKernel          Ret = kEplSuccessful;
+
+    SdoUdpInstance_g.m_dwNetAddress = dwNetAddr_p;
+
+    return Ret;
+}
+
 
 //---------------------------------------------------------------------------
 //
@@ -537,7 +566,7 @@ tEplSdoUdpCon*      pSdoUdpCon;
         pSdoUdpCon = &SdoUdpInstance_g.m_aSdoAbsUdpConnection[uiFreeCon];
         // save infos for connection
         pSdoUdpCon->m_uiPort = htons(EPL_C_SDO_EPL_PORT);
-        pSdoUdpCon->m_ulIpAddr = htonl(0xC0A86400 | uiTargetNodeId_p);   // 192.168.100.uiTargetNodeId_p
+        pSdoUdpCon->m_ulIpAddr = htonl(SdoUdpInstance_g.m_dwNetAddress | uiTargetNodeId_p);   // 192.168.100.uiTargetNodeId_p
 
         // set handle
         *pSdoConHandle_p = (uiFreeCon | EPL_SDO_UDP_HANDLE);
