@@ -2422,7 +2422,9 @@ BOOL                    fEntryNumerical;
 
     if ((fEntryNumerical != FALSE)
         && ((pObdParam_p->m_SegmentOffset != 0)
-            || (pObdParam_p->m_SegmentSize != pObdParam_p->m_ObjSize)))
+            || (pObdParam_p->m_ObjSize > pObdParam_p->m_SegmentSize)
+            || ((pObdParam_p->m_SegmentSize > pObdParam_p->m_ObjSize)
+                && (pObdParam_p->m_TransferSize != 0))))
     {
         // type is numerical, therefor size has to fit, but it does not.
         Ret = kEplObdNumValSizeMismatch;
