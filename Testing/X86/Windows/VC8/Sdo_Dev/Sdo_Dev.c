@@ -380,6 +380,62 @@ BYTE                        bBuffer;
                 break;
             }
 
+            // 2
+            case '2':
+            {
+            int iVal1 = 0;
+            int iVal2 = 0;
+            int iVal3 = 0;
+            int iVal4 = 0;
+            DWORD dwNetAddress = 0;
+            int iNumber;
+
+                printf("\nNetwork address (e.g. 192.168.100.0): ");
+                iNumber = scanf("%i.%i.%i.%i", &iVal1, &iVal2, &iVal3, &iVal4);
+                if (iNumber < 2)
+                {
+                    printf("\nInvalid address specified!\n");
+                    break;
+                }
+
+                dwNetAddress = iVal1;
+                dwNetAddress <<= 8;
+                dwNetAddress |= iVal2;
+                dwNetAddress <<= 8;
+                dwNetAddress |= iVal3;
+                dwNetAddress <<= 8;
+                dwNetAddress |= iVal4;
+
+                Ret = EplSdoUdpuSetNetAddress(dwNetAddress);
+                if(Ret != kEplSuccessful)
+                {
+                    printf("Setting of new network address failed: 0x%03X\n", Ret);
+                }
+                else
+                {
+                    printf("Network address %lX set successfully\n", (unsigned long) dwNetAddress);
+                }
+                break;
+            }
+
+            // 3
+            case '3':
+            {
+            int iVal1 = 0;
+            int iNumber;
+
+                printf("\nRemote node-ID (e.g. 0x21): ");
+                iNumber = scanf("%i", &iVal1);
+                if (iNumber != 1)
+                {
+                    printf("\nInvalid node-ID specified!\n");
+                    break;
+                }
+
+                bTargetNodeId_l = (BYTE) iVal1;
+                break;
+            }
+
             // a
             case 'a':
             {
@@ -655,6 +711,85 @@ BYTE                        bBuffer;
 
                 break;
             }
+
+            // r
+            case 'r':
+            {
+            int iVal1 = 0;
+            int iVal2 = 0;
+            int iNumber;
+
+                // read arbitrary remote object
+                TransParamByIndex.m_pData = &abTest_l[0];
+                TransParamByIndex.m_SdoAccessType = kEplSdoAccessTypeRead;
+                TransParamByIndex.m_SdoComConHdl = SdoComConHdl;
+                TransParamByIndex.m_uiTimeout = 0;
+                TransParamByIndex.m_pfnSdoFinishedCb = EplAppSdoConnectionCb;
+                TransParamByIndex.m_pUserArg = TransParamByIndex.m_pData;
+
+                printf("\nObject index[/sub-index] (e.g. 0x1000/0): ");
+                iNumber = scanf("%i/%i", &iVal1, &iVal2);
+                if (iNumber >= 1)
+                {
+                    TransParamByIndex.m_uiIndex = (unsigned int) iVal1;
+
+                    if (iNumber == 2)
+                    {
+                        TransParamByIndex.m_uiSubindex = (unsigned int) iVal2;
+                    }
+                    else
+                    {
+                        TransParamByIndex.m_uiSubindex = 0;
+                    }
+                }
+                else
+                {
+                    printf("\nWrong input!\n");
+                    break;
+                }
+
+                printf("\nSegment Size (e.g. 4): ");
+                iNumber = scanf("%i", &iVal1);
+                if (iNumber >= 1)
+                {
+                    TransParamByIndex.m_uiDataSize = iVal1;
+                }
+                else
+                {
+                    printf("\nWrong input!\n");
+                    break;
+                }
+
+                if (TransParamByIndex.m_uiDataSize > sizeof (abTest_l))
+                {
+                    TransParamByIndex.m_uiDataSize = sizeof (abTest_l);
+                }
+
+                // init buffer
+                uiCount = sizeof(abTest_l) / 4;
+                while (uiCount > 0)
+                {
+                    ((DWORD*)abTest_l)[uiCount - 1] = 0xDEADBEEF;
+                    uiCount--;
+                }
+
+                Ret = EplSdoComInitTransferByIndex(&TransParamByIndex);
+                printf("Read of remote object 0x%X/%u with transfer size %u returned\n   code 0x%X",
+                    TransParamByIndex.m_uiIndex, TransParamByIndex.m_uiSubindex,
+                    TransParamByIndex.m_uiDataSize,
+                    Ret);
+                if (Ret != kEplSuccessful)
+                {
+                    printf("   Error!\n");
+                }
+                else
+                {
+                    printf("   Waiting for finish\n");
+                }
+
+                break;
+            }
+
 #endif
 
             // A
@@ -1241,6 +1376,8 @@ static void EplAppPrintMenue()
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOC)) != 0)
     printf("0 \t Close SDO via UDP connection\n");
     printf("1 \t Define SDO via UDP connection\n");
+    printf("2 \t Set network part of IP address\n");
+    printf("3 \t Set remote node-ID\n");
     printf("a \t Read remote object 0x1000\n");
     printf("b \t Read remote object 0x1001\n");
     printf("c \t Read remote object 0x1008\n");
@@ -1251,6 +1388,7 @@ static void EplAppPrintMenue()
     printf("h \t Write 0xFF to remote object 0x1000\n");
     printf("i \t Write 0xFF to remote object 0x1030 subindex 1\n");
     printf("j \t Write 0xFFFF to remote object 0x1030 subindex 8\n");
+    printf("r \t Read arbitrary remote object in LE\n");
 #endif
 
     printf("A \t Read local object 0x1000\n");
