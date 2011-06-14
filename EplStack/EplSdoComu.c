@@ -1286,7 +1286,8 @@ unsigned int        uiSize;
                 case kEplSdoComConEventFrameSended:
                 {
                     // check if it is a read
-                    if(pSdoComCon->m_SdoServiceType == kEplSdoServiceReadByIndex)
+                    if ((pSdoComCon->m_SdoTransType != kEplSdoTransExpedited)
+                        && (pSdoComCon->m_SdoServiceType == kEplSdoServiceReadByIndex))
                     {
                         // send next frame
                         EplSdoComServerSendFrameIntern(pSdoComCon,
@@ -2207,7 +2208,7 @@ BYTE            bFlag;
 
                 EPL_MEMSET(&ObdParam, 0, sizeof (ObdParam));
                 ObdParam.m_SegmentSize = (tEplObdSize) pSdoComCon_p->m_uiTransSize;
-                ObdParam.m_TransferSize = ObdParam.m_SegmentSize;
+                ObdParam.m_TransferSize = 0;
                 ObdParam.m_uiIndex = uiIndex_p;
                 ObdParam.m_uiSubIndex = uiSubIndex_p;
                 ObdParam.m_pData = &pCommandFrame->m_le_abCommandData[0];
@@ -2217,6 +2218,7 @@ BYTE            bFlag;
                 Ret = EplObdReadEntryToLe(&ObdParam);
                 if (Ret == kEplObdAccessAdopted)
                 {
+                    Ret = kEplSuccessful;
                     goto Exit;
                 }
                 else if (Ret != kEplSuccessful)
@@ -2567,6 +2569,7 @@ BYTE*           pbSrcData;
         Ret = EplObdWriteEntryFromLe(&ObdParam);
         if (Ret == kEplObdAccessAdopted)
         {
+            Ret = kEplSuccessful;
             goto Exit;
         }
         else if (Ret != kEplSuccessful)
