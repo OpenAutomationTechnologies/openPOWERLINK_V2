@@ -137,7 +137,8 @@
     #define O_BINARY 0
     #define _MAX_PATH PATH_MAX
     #define flush  fsync
-
+#elif (TARGET_SYSTEM == _VXWORKS_)
+    #define O_BINARY 0
 #elif (DEV_SYSTEM == _DEV_PAR_BECK1X3_)
 
     #define flush(h)                    // #define flush() to nothing
@@ -273,11 +274,7 @@ DWORD           dwErrno;
 
     EPL_MEMSET(&CdcInfo, 0, sizeof (CdcInfo));
     CdcInfo.m_Type = kEplObdCdcTypeFile;
-#if (TARGET_SYSTEM == _VXWORKS_)
-    CdcInfo.m_Handle.m_hCdcFile = open(pszCdcFilename_p, O_RDONLY, 0666);
-#else
     CdcInfo.m_Handle.m_hCdcFile = open(pszCdcFilename_p, O_RDONLY | O_BINARY, 0666);
-#endif
     if (!IS_FD_VALID(CdcInfo.m_Handle.m_hCdcFile))
     {   // error occurred
         dwErrno = (DWORD) errno;

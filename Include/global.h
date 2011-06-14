@@ -959,6 +959,7 @@
     #elif defined (__NIOS2__)
         #define TARGET_SYSTEM       _NO_OS_
         #define DEV_SYSTEM          _DEV_NIOS2_
+    #else
         #error 'ERROR: DEV_SYSTEM not found!'
     #endif
 
