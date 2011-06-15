@@ -99,7 +99,7 @@
    <ObjectList>
     <Object index="1000" name="NMT_DeviceType_U32" objectType="7" dataType="0007" accessType="const" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
     <Object index="1001" name="ERR_ErrorRegister_U8" objectType="7" dataType="0005" accessType="ro" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
-    <Object index="1006" name="NMT_CycleLen_U32" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0x1388" CDCFlag="TRUE"/>
+    <Object index="1006" name="NMT_CycleLen_U32" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0xC350" CDCFlag="TRUE"/>
     <Object index="1008" name="NMT_ManufactDevName_VS" objectType="7" dataType="0009" accessType="const" CDCFlag="FALSE"/>
     <Object index="1009" name="NMT_ManufactHwVers_VS" objectType="7" dataType="0009" accessType="const" CDCFlag="FALSE"/>
     <Object index="100A" name="NMT_ManufactSwVers_VS" objectType="7" dataType="0009" accessType="const" CDCFlag="FALSE"/>
@@ -921,27 +921,27 @@
      <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" defaultValue="1" CDCFlag="FALSE"/>
      <SubObject subIndex="01" name="CumulativeCnt_U32" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="FALSE"/>
     </Object>
-    <Object index="1C14" name="DLL_CNLossOfSocTolerance_U32" objectType="7" dataType="0007" accessType="rw" defaultValue="100000" actualValue="1000000" PDOmapping="NO" CDCFlag="TRUE"/>
-    <Object index="1F26" name="CFM_ExpConfDateList_AU32" objectType="8" dataType="0007" CDCFlag="TRUE">
-     <SubObject subIndex="01" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="9896" CDCFlag="TRUE"/>
+    <Object index="1C14" name="DLL_CNLossOfSocTolerance_U32" objectType="7" dataType="0007" accessType="rw" defaultValue="100000" actualValue="10000000" PDOmapping="NO" CDCFlag="TRUE"/>
+    <Object index="1F26" name="CFM_ExpConfDateList_AU32" objectType="8" dataType="0007" PDOmapping="NO" CDCFlag="TRUE">
+     <SubObject subIndex="01" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="10027" CDCFlag="TRUE"/>
      <SubObject subIndex="02" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="9832" CDCFlag="TRUE"/>
      <SubObject subIndex="03" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
-     <SubObject subIndex="04" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
+     <SubObject subIndex="04" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="05" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="06" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="07" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
-     <SubObject subIndex="08" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
+     <SubObject subIndex="08" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="09" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="0A" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="0B" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
-     <SubObject subIndex="0C" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
+     <SubObject subIndex="0C" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="0D" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="0E" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="0F" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="10" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="11" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="12" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
-     <SubObject subIndex="13" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
+     <SubObject subIndex="13" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="14" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="15" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="16" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
@@ -952,22 +952,22 @@
      <SubObject subIndex="1B" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="1C" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="1D" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
-     <SubObject subIndex="1E" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
+     <SubObject subIndex="1E" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="1F" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
-     <SubObject subIndex="20" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="9896" CDCFlag="TRUE"/>
+     <SubObject subIndex="20" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="10027" CDCFlag="TRUE"/>
      <SubObject subIndex="21" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
-     <SubObject subIndex="22" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
+     <SubObject subIndex="22" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="23" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="24" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
-     <SubObject subIndex="25" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
+     <SubObject subIndex="25" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="26" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="27" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="28" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
-     <SubObject subIndex="29" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
+     <SubObject subIndex="29" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="2A" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="2B" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="2C" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
-     <SubObject subIndex="2D" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
+     <SubObject subIndex="2D" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="2E" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="2F" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="30" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
@@ -978,208 +978,208 @@
      <SubObject subIndex="35" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="36" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="37" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
-     <SubObject subIndex="38" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
+     <SubObject subIndex="38" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="39" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="3A" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="3B" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
-     <SubObject subIndex="3C" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
+     <SubObject subIndex="3C" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="3D" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="3E" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
-     <SubObject subIndex="3F" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
+     <SubObject subIndex="3F" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="40" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="41" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="42" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
-     <SubObject subIndex="43" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
+     <SubObject subIndex="43" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="44" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="45" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="46" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
-     <SubObject subIndex="47" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
+     <SubObject subIndex="47" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="48" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="49" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
-     <SubObject subIndex="4A" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
+     <SubObject subIndex="4A" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="4B" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="4C" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="4D" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
-     <SubObject subIndex="4E" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
+     <SubObject subIndex="4E" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="4F" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="50" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="51" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="52" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="53" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="54" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
-     <SubObject subIndex="55" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
+     <SubObject subIndex="55" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="56" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="57" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="58" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
-     <SubObject subIndex="59" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
+     <SubObject subIndex="59" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="5A" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="5B" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="5C" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
-     <SubObject subIndex="5D" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
+     <SubObject subIndex="5D" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="5E" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="5F" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
-     <SubObject subIndex="60" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
+     <SubObject subIndex="60" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="61" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="62" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="63" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
-     <SubObject subIndex="64" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
+     <SubObject subIndex="64" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="65" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="66" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="67" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
-     <SubObject subIndex="68" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
+     <SubObject subIndex="68" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="69" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="6A" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
-     <SubObject subIndex="6B" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
+     <SubObject subIndex="6B" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="6C" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="6D" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
-     <SubObject subIndex="6E" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="9896" CDCFlag="TRUE"/>
+     <SubObject subIndex="6E" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="10027" CDCFlag="TRUE"/>
      <SubObject subIndex="6F" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="70" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="71" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="72" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
-     <SubObject subIndex="73" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
+     <SubObject subIndex="73" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="74" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="75" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
-     <SubObject subIndex="76" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
+     <SubObject subIndex="76" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="77" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="78" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="79" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
-     <SubObject subIndex="7A" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
+     <SubObject subIndex="7A" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="7B" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="7C" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="7D" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
-     <SubObject subIndex="7E" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
+     <SubObject subIndex="7E" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="7F" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="80" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
-     <SubObject subIndex="81" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
+     <SubObject subIndex="81" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="82" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="83" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="84" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
-     <SubObject subIndex="85" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
+     <SubObject subIndex="85" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="86" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="87" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="88" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
-     <SubObject subIndex="89" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
+     <SubObject subIndex="89" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="8A" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="8B" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="8C" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="8D" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="8E" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="8F" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
-     <SubObject subIndex="90" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
+     <SubObject subIndex="90" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="91" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="92" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="93" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
-     <SubObject subIndex="94" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
+     <SubObject subIndex="94" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="95" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="96" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="9832" CDCFlag="TRUE"/>
-     <SubObject subIndex="97" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
+     <SubObject subIndex="97" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="98" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="99" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="9A" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
-     <SubObject subIndex="9B" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
+     <SubObject subIndex="9B" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="9C" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="9D" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="9E" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
-     <SubObject subIndex="9F" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
+     <SubObject subIndex="9F" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="A0" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="A1" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
-     <SubObject subIndex="A2" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
+     <SubObject subIndex="A2" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="A3" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="A4" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="A5" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
-     <SubObject subIndex="A6" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
+     <SubObject subIndex="A6" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="A7" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="A8" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="A9" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="AA" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="AB" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="AC" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
-     <SubObject subIndex="AD" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
+     <SubObject subIndex="AD" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="AE" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="AF" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="B0" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
-     <SubObject subIndex="B1" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
+     <SubObject subIndex="B1" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="B2" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="B3" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="B4" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
-     <SubObject subIndex="B5" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
+     <SubObject subIndex="B5" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="B6" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="B7" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="B8" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="B9" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="BA" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="BB" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
-     <SubObject subIndex="BC" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
+     <SubObject subIndex="BC" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="BD" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="BE" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="BF" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
-     <SubObject subIndex="C0" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
+     <SubObject subIndex="C0" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="C1" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="C2" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="C3" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
-     <SubObject subIndex="C4" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
+     <SubObject subIndex="C4" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="C5" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="C6" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="C7" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="C8" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="C9" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="CA" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
-     <SubObject subIndex="CB" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
+     <SubObject subIndex="CB" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="CC" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="CD" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="CE" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
-     <SubObject subIndex="CF" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
+     <SubObject subIndex="CF" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="D0" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="D1" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
-     <SubObject subIndex="D2" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
+     <SubObject subIndex="D2" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="D3" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="D4" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="D5" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
-     <SubObject subIndex="D6" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
+     <SubObject subIndex="D6" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="D7" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="D8" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="D9" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
-     <SubObject subIndex="DA" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
+     <SubObject subIndex="DA" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="DB" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="DC" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
-     <SubObject subIndex="DD" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
+     <SubObject subIndex="DD" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="DE" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="DF" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="E0" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
-     <SubObject subIndex="E1" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
+     <SubObject subIndex="E1" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="E2" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="E3" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="E4" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="E5" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="E6" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="E7" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
-     <SubObject subIndex="E8" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
+     <SubObject subIndex="E8" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="E9" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="EA" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="EB" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
-     <SubObject subIndex="EC" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
+     <SubObject subIndex="EC" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="ED" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="EE" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="EF" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
-     <SubObject subIndex="F0" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
+     <SubObject subIndex="F0" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="F1" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="F2" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
-     <SubObject subIndex="F3" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
+     <SubObject subIndex="F3" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="F4" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="F5" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="F6" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
-     <SubObject subIndex="F7" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
+     <SubObject subIndex="F7" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="F8" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="F9" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="FA" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
-     <SubObject subIndex="FB" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
+     <SubObject subIndex="FB" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="FC" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="FD" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="FE" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
     </Object>
     <Object index="1F27" name="CFM_ExpConfTimeList_AU32" objectType="8" dataType="0007" CDCFlag="TRUE">
-     <SubObject subIndex="01" name="CNConfigurationTime" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="56379000" CDCFlag="TRUE"/>
+     <SubObject subIndex="01" name="CNConfigurationTime" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="44354000" CDCFlag="TRUE"/>
      <SubObject subIndex="02" name="CNConfigurationTime" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="60280000" CDCFlag="TRUE"/>
      <SubObject subIndex="03" name="CNConfigurationTime" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="04" name="CNConfigurationTime" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
@@ -1210,7 +1210,7 @@
      <SubObject subIndex="1D" name="CNConfigurationTime" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="1E" name="CNConfigurationTime" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="1F" name="CNConfigurationTime" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
-     <SubObject subIndex="20" name="CNConfigurationTime" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="56379000" CDCFlag="TRUE"/>
+     <SubObject subIndex="20" name="CNConfigurationTime" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="44354000" CDCFlag="TRUE"/>
      <SubObject subIndex="21" name="CNConfigurationTime" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="22" name="CNConfigurationTime" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="23" name="CNConfigurationTime" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
@@ -1288,7 +1288,7 @@
      <SubObject subIndex="6B" name="CNConfigurationTime" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="6C" name="CNConfigurationTime" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="6D" name="CNConfigurationTime" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
-     <SubObject subIndex="6E" name="CNConfigurationTime" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="56379000" CDCFlag="TRUE"/>
+     <SubObject subIndex="6E" name="CNConfigurationTime" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="44354000" CDCFlag="TRUE"/>
      <SubObject subIndex="6F" name="CNConfigurationTime" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="70" name="CNConfigurationTime" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="71" name="CNConfigurationTime" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
@@ -1435,69 +1435,69 @@
      <SubObject subIndex="FE" name="CNConfigurationTime" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
     </Object>
     <Object index="1F80" name="NMT_StartUp_U32" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
-    <Object index="1F81" name="NMT_NodeAssignment_AU32" objectType="8" dataType="0007" CDCFlag="TRUE">
+    <Object index="1F81" name="NMT_NodeAssignment_AU32" objectType="8" dataType="0007" PDOmapping="NO" CDCFlag="TRUE">
      <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="rw" defaultValue="254" CDCFlag="FALSE"/>
      <SubObject subIndex="01" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0X80000007" CDCFlag="TRUE"/>
      <SubObject subIndex="02" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="TRUE"/>
-     <SubObject subIndex="03" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
+     <SubObject subIndex="03" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" PDOmapping="DEFAULT" CDCFlag="FALSE"/>
      <SubObject subIndex="04" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="05" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="06" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
-     <SubObject subIndex="07" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
+     <SubObject subIndex="07" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" PDOmapping="DEFAULT" CDCFlag="FALSE"/>
      <SubObject subIndex="08" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="09" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="0A" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="0B" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="0C" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
-     <SubObject subIndex="0D" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
+     <SubObject subIndex="0D" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" PDOmapping="DEFAULT" CDCFlag="FALSE"/>
      <SubObject subIndex="0E" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="0F" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="10" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
-     <SubObject subIndex="11" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
+     <SubObject subIndex="11" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" PDOmapping="DEFAULT" CDCFlag="FALSE"/>
      <SubObject subIndex="12" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="13" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
-     <SubObject subIndex="14" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
+     <SubObject subIndex="14" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" PDOmapping="DEFAULT" CDCFlag="FALSE"/>
      <SubObject subIndex="15" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="16" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="17" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="18" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="19" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="1A" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
-     <SubObject subIndex="1B" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
+     <SubObject subIndex="1B" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" PDOmapping="DEFAULT" CDCFlag="FALSE"/>
      <SubObject subIndex="1C" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="1D" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
-     <SubObject subIndex="1E" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
+     <SubObject subIndex="1E" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" PDOmapping="DEFAULT" CDCFlag="FALSE"/>
      <SubObject subIndex="1F" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="20" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0X80000007" CDCFlag="TRUE"/>
      <SubObject subIndex="21" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
-     <SubObject subIndex="22" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
+     <SubObject subIndex="22" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" PDOmapping="DEFAULT" CDCFlag="FALSE"/>
      <SubObject subIndex="23" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="24" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="25" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="26" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="27" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
-     <SubObject subIndex="28" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
+     <SubObject subIndex="28" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" PDOmapping="DEFAULT" CDCFlag="FALSE"/>
      <SubObject subIndex="29" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="2A" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="2B" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
-     <SubObject subIndex="2C" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
+     <SubObject subIndex="2C" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" PDOmapping="DEFAULT" CDCFlag="FALSE"/>
      <SubObject subIndex="2D" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="2E" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
-     <SubObject subIndex="2F" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
+     <SubObject subIndex="2F" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" PDOmapping="DEFAULT" CDCFlag="FALSE"/>
      <SubObject subIndex="30" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="31" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="32" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
-     <SubObject subIndex="33" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
+     <SubObject subIndex="33" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" PDOmapping="DEFAULT" CDCFlag="FALSE"/>
      <SubObject subIndex="34" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="35" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
-     <SubObject subIndex="36" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
+     <SubObject subIndex="36" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" PDOmapping="DEFAULT" CDCFlag="FALSE"/>
      <SubObject subIndex="37" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="38" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
-     <SubObject subIndex="39" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
+     <SubObject subIndex="39" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" PDOmapping="DEFAULT" CDCFlag="FALSE"/>
      <SubObject subIndex="3A" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="3B" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="3C" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
-     <SubObject subIndex="3D" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
+     <SubObject subIndex="3D" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" PDOmapping="DEFAULT" CDCFlag="FALSE"/>
      <SubObject subIndex="3E" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="3F" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="40" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
@@ -1507,183 +1507,183 @@
      <SubObject subIndex="44" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="45" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="46" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
-     <SubObject subIndex="47" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
+     <SubObject subIndex="47" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" PDOmapping="DEFAULT" CDCFlag="FALSE"/>
      <SubObject subIndex="48" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="49" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
-     <SubObject subIndex="4A" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
+     <SubObject subIndex="4A" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" PDOmapping="DEFAULT" CDCFlag="FALSE"/>
      <SubObject subIndex="4B" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="4C" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="4D" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
-     <SubObject subIndex="4E" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
+     <SubObject subIndex="4E" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" PDOmapping="DEFAULT" CDCFlag="FALSE"/>
      <SubObject subIndex="4F" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="50" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
-     <SubObject subIndex="51" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
+     <SubObject subIndex="51" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" PDOmapping="DEFAULT" CDCFlag="FALSE"/>
      <SubObject subIndex="52" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="53" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
-     <SubObject subIndex="54" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
+     <SubObject subIndex="54" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" PDOmapping="DEFAULT" CDCFlag="FALSE"/>
      <SubObject subIndex="55" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="56" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="57" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
-     <SubObject subIndex="58" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
+     <SubObject subIndex="58" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" PDOmapping="DEFAULT" CDCFlag="FALSE"/>
      <SubObject subIndex="59" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="5A" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="5B" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="5C" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="5D" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="5E" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
-     <SubObject subIndex="5F" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
+     <SubObject subIndex="5F" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" PDOmapping="DEFAULT" CDCFlag="FALSE"/>
      <SubObject subIndex="60" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="61" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
-     <SubObject subIndex="62" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
+     <SubObject subIndex="62" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" PDOmapping="DEFAULT" CDCFlag="FALSE"/>
      <SubObject subIndex="63" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="64" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
-     <SubObject subIndex="65" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
+     <SubObject subIndex="65" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" PDOmapping="DEFAULT" CDCFlag="FALSE"/>
      <SubObject subIndex="66" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="67" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="68" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
-     <SubObject subIndex="69" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
+     <SubObject subIndex="69" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" PDOmapping="DEFAULT" CDCFlag="FALSE"/>
      <SubObject subIndex="6A" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="6B" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
-     <SubObject subIndex="6C" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
+     <SubObject subIndex="6C" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" PDOmapping="DEFAULT" CDCFlag="FALSE"/>
      <SubObject subIndex="6D" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="6E" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0X80000007" CDCFlag="TRUE"/>
      <SubObject subIndex="6F" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
-     <SubObject subIndex="70" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
+     <SubObject subIndex="70" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" PDOmapping="DEFAULT" CDCFlag="FALSE"/>
      <SubObject subIndex="71" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="72" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
-     <SubObject subIndex="73" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
+     <SubObject subIndex="73" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" PDOmapping="DEFAULT" CDCFlag="FALSE"/>
      <SubObject subIndex="74" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="75" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="76" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="77" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="78" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="79" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
-     <SubObject subIndex="7A" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
+     <SubObject subIndex="7A" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" PDOmapping="DEFAULT" CDCFlag="FALSE"/>
      <SubObject subIndex="7B" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="7C" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
-     <SubObject subIndex="7D" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
+     <SubObject subIndex="7D" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" PDOmapping="DEFAULT" CDCFlag="FALSE"/>
      <SubObject subIndex="7E" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="7F" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="80" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="81" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="82" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="83" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
-     <SubObject subIndex="84" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
+     <SubObject subIndex="84" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" PDOmapping="DEFAULT" CDCFlag="FALSE"/>
      <SubObject subIndex="85" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="86" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
-     <SubObject subIndex="87" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
+     <SubObject subIndex="87" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" PDOmapping="DEFAULT" CDCFlag="FALSE"/>
      <SubObject subIndex="88" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="89" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="8A" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
-     <SubObject subIndex="8B" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
+     <SubObject subIndex="8B" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" PDOmapping="DEFAULT" CDCFlag="FALSE"/>
      <SubObject subIndex="8C" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="8D" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
-     <SubObject subIndex="8E" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
+     <SubObject subIndex="8E" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" PDOmapping="DEFAULT" CDCFlag="FALSE"/>
      <SubObject subIndex="8F" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="90" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="91" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="92" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="93" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="94" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
-     <SubObject subIndex="95" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
+     <SubObject subIndex="95" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" PDOmapping="DEFAULT" CDCFlag="FALSE"/>
      <SubObject subIndex="96" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="97" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
-     <SubObject subIndex="98" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
+     <SubObject subIndex="98" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" PDOmapping="DEFAULT" CDCFlag="FALSE"/>
      <SubObject subIndex="99" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="9A" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="9B" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
-     <SubObject subIndex="9C" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
+     <SubObject subIndex="9C" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" PDOmapping="DEFAULT" CDCFlag="FALSE"/>
      <SubObject subIndex="9D" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="9E" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
-     <SubObject subIndex="9F" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
+     <SubObject subIndex="9F" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" PDOmapping="DEFAULT" CDCFlag="FALSE"/>
      <SubObject subIndex="A0" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="A1" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
-     <SubObject subIndex="A2" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
+     <SubObject subIndex="A2" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" PDOmapping="DEFAULT" CDCFlag="FALSE"/>
      <SubObject subIndex="A3" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="A4" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="A5" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
-     <SubObject subIndex="A6" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
+     <SubObject subIndex="A6" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" PDOmapping="DEFAULT" CDCFlag="FALSE"/>
      <SubObject subIndex="A7" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="A8" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
-     <SubObject subIndex="A9" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
+     <SubObject subIndex="A9" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" PDOmapping="DEFAULT" CDCFlag="FALSE"/>
      <SubObject subIndex="AA" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="AB" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="AC" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="AD" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="AE" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="AF" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
-     <SubObject subIndex="B0" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
+     <SubObject subIndex="B0" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" PDOmapping="DEFAULT" CDCFlag="FALSE"/>
      <SubObject subIndex="B1" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="B2" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
-     <SubObject subIndex="B3" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
+     <SubObject subIndex="B3" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" PDOmapping="DEFAULT" CDCFlag="FALSE"/>
      <SubObject subIndex="B4" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="B5" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="B6" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
-     <SubObject subIndex="B7" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
+     <SubObject subIndex="B7" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" PDOmapping="DEFAULT" CDCFlag="FALSE"/>
      <SubObject subIndex="B8" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="B9" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
-     <SubObject subIndex="BA" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
+     <SubObject subIndex="BA" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" PDOmapping="DEFAULT" CDCFlag="FALSE"/>
      <SubObject subIndex="BB" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="BC" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="BD" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
-     <SubObject subIndex="BE" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
+     <SubObject subIndex="BE" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" PDOmapping="DEFAULT" CDCFlag="FALSE"/>
      <SubObject subIndex="BF" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="C0" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
-     <SubObject subIndex="C1" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
+     <SubObject subIndex="C1" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" PDOmapping="DEFAULT" CDCFlag="FALSE"/>
      <SubObject subIndex="C2" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="C3" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
-     <SubObject subIndex="C4" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
+     <SubObject subIndex="C4" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" PDOmapping="DEFAULT" CDCFlag="FALSE"/>
      <SubObject subIndex="C5" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="C6" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="C7" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="C8" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="C9" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="CA" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
-     <SubObject subIndex="CB" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
+     <SubObject subIndex="CB" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" PDOmapping="DEFAULT" CDCFlag="FALSE"/>
      <SubObject subIndex="CC" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="CD" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="CE" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="CF" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="D0" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="D1" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
-     <SubObject subIndex="D2" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
+     <SubObject subIndex="D2" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" PDOmapping="DEFAULT" CDCFlag="FALSE"/>
      <SubObject subIndex="D3" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="D4" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
-     <SubObject subIndex="D5" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
+     <SubObject subIndex="D5" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" PDOmapping="DEFAULT" CDCFlag="FALSE"/>
      <SubObject subIndex="D6" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="D7" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="D8" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
-     <SubObject subIndex="D9" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
+     <SubObject subIndex="D9" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" PDOmapping="DEFAULT" CDCFlag="FALSE"/>
      <SubObject subIndex="DA" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="DB" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
-     <SubObject subIndex="DC" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
+     <SubObject subIndex="DC" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" PDOmapping="DEFAULT" CDCFlag="FALSE"/>
      <SubObject subIndex="DD" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="DE" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
-     <SubObject subIndex="DF" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
+     <SubObject subIndex="DF" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" PDOmapping="DEFAULT" CDCFlag="FALSE"/>
      <SubObject subIndex="E0" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="E1" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="E2" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="E3" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="E4" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="E5" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
-     <SubObject subIndex="E6" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
+     <SubObject subIndex="E6" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" PDOmapping="DEFAULT" CDCFlag="FALSE"/>
      <SubObject subIndex="E7" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="E8" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="E9" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
-     <SubObject subIndex="EA" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
+     <SubObject subIndex="EA" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" PDOmapping="DEFAULT" CDCFlag="FALSE"/>
      <SubObject subIndex="EB" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="EC" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
-     <SubObject subIndex="ED" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
+     <SubObject subIndex="ED" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" PDOmapping="DEFAULT" CDCFlag="FALSE"/>
      <SubObject subIndex="EE" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="EF" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
-     <SubObject subIndex="F0" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0x80001001" CDCFlag="TRUE"/>
+     <SubObject subIndex="F0" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0x80001001" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="F1" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="F2" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="F3" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
-     <SubObject subIndex="F4" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
+     <SubObject subIndex="F4" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" PDOmapping="DEFAULT" CDCFlag="FALSE"/>
      <SubObject subIndex="F5" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="F6" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
-     <SubObject subIndex="F7" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
+     <SubObject subIndex="F7" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" PDOmapping="DEFAULT" CDCFlag="FALSE"/>
      <SubObject subIndex="F8" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="F9" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
      <SubObject subIndex="FA" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="FALSE"/>
@@ -1698,21 +1698,21 @@
      <SubObject subIndex="01" name="CNDeviceTypeId" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="02" name="CNDeviceTypeId" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="03" name="CNDeviceTypeId" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
-     <SubObject subIndex="04" name="CNDeviceTypeId" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
+     <SubObject subIndex="04" name="CNDeviceTypeId" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="05" name="CNDeviceTypeId" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="06" name="CNDeviceTypeId" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
-     <SubObject subIndex="07" name="CNDeviceTypeId" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
+     <SubObject subIndex="07" name="CNDeviceTypeId" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="08" name="CNDeviceTypeId" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="09" name="CNDeviceTypeId" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="0A" name="CNDeviceTypeId" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
-     <SubObject subIndex="0B" name="CNDeviceTypeId" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
+     <SubObject subIndex="0B" name="CNDeviceTypeId" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="0C" name="CNDeviceTypeId" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="0D" name="CNDeviceTypeId" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="0E" name="CNDeviceTypeId" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
-     <SubObject subIndex="0F" name="CNDeviceTypeId" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
+     <SubObject subIndex="0F" name="CNDeviceTypeId" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="10" name="CNDeviceTypeId" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="11" name="CNDeviceTypeId" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
-     <SubObject subIndex="12" name="CNDeviceTypeId" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
+     <SubObject subIndex="12" name="CNDeviceTypeId" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="13" name="CNDeviceTypeId" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="14" name="CNDeviceTypeId" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="15" name="CNDeviceTypeId" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
@@ -1722,7 +1722,7 @@
      <SubObject subIndex="19" name="CNDeviceTypeId" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="1A" name="CNDeviceTypeId" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="1B" name="CNDeviceTypeId" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
-     <SubObject subIndex="1C" name="CNDeviceTypeId" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
+     <SubObject subIndex="1C" name="CNDeviceTypeId" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="1D" name="CNDeviceTypeId" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="1E" name="CNDeviceTypeId" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="1F" name="CNDeviceTypeId" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
@@ -1732,7 +1732,7 @@
      <SubObject subIndex="23" name="CNDeviceTypeId" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="24" name="CNDeviceTypeId" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="25" name="CNDeviceTypeId" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
-     <SubObject subIndex="26" name="CNDeviceTypeId" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
+     <SubObject subIndex="26" name="CNDeviceTypeId" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="27" name="CNDeviceTypeId" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="28" name="CNDeviceTypeId" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="29" name="CNDeviceTypeId" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
@@ -1806,21 +1806,21 @@
      <SubObject subIndex="6D" name="CNDeviceTypeId" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="6E" name="CNDeviceTypeId" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="6F" name="CNDeviceTypeId" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
-     <SubObject subIndex="70" name="CNDeviceTypeId" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
+     <SubObject subIndex="70" name="CNDeviceTypeId" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="71" name="CNDeviceTypeId" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="72" name="CNDeviceTypeId" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="73" name="CNDeviceTypeId" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="74" name="CNDeviceTypeId" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="75" name="CNDeviceTypeId" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="76" name="CNDeviceTypeId" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
-     <SubObject subIndex="77" name="CNDeviceTypeId" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
+     <SubObject subIndex="77" name="CNDeviceTypeId" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="78" name="CNDeviceTypeId" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="79" name="CNDeviceTypeId" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="7A" name="CNDeviceTypeId" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="7B" name="CNDeviceTypeId" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="7C" name="CNDeviceTypeId" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="7D" name="CNDeviceTypeId" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
-     <SubObject subIndex="7E" name="CNDeviceTypeId" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
+     <SubObject subIndex="7E" name="CNDeviceTypeId" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="7F" name="CNDeviceTypeId" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="80" name="CNDeviceTypeId" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="81" name="CNDeviceTypeId" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
@@ -1917,11 +1917,11 @@
      <SubObject subIndex="DC" name="CNDeviceTypeId" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="DD" name="CNDeviceTypeId" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="DE" name="CNDeviceTypeId" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
-     <SubObject subIndex="DF" name="CNDeviceTypeId" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
+     <SubObject subIndex="DF" name="CNDeviceTypeId" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="E0" name="CNDeviceTypeId" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
      <SubObject subIndex="E1" name="CNDeviceTypeId" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="E2" name="CNDeviceTypeId" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
-     <SubObject subIndex="E3" name="CNDeviceTypeId" objectType="7" dataType="0007" accessType="rw" defaultValue="0" CDCFlag="TRUE"/>
+     <SubObject subIndex="E3" name="CNDeviceTypeId" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="E4" name="CNDeviceTypeId" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="E5" name="CNDeviceTypeId" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
      <SubObject subIndex="E6" name="CNDeviceTypeId" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="DEFAULT" CDCFlag="TRUE"/>
@@ -1960,7 +1960,7 @@
     <Object index="1F8A" name="NMT_MNCycleTiming_REC" objectType="9" CDCFlag="TRUE">
      <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="ro" defaultValue="2" CDCFlag="FALSE"/>
      <SubObject subIndex="01" name="WaitSoCPReq_U32" objectType="7" dataType="0007" accessType="rw" defaultValue="1000" CDCFlag="FALSE"/>
-     <SubObject subIndex="02" name="AsyncSlotTimeout_U32" objectType="7" dataType="0007" accessType="rw" defaultValue="100000" actualValue="0x186A0" CDCFlag="TRUE"/>
+     <SubObject subIndex="02" name="AsyncSlotTimeout_U32" objectType="7" dataType="0007" accessType="rw" defaultValue="100000" actualValue="0x5F5E100" CDCFlag="TRUE"/>
     </Object>
     <Object index="1F8B" name="NMT_MNPReqPayloadLimitList_AU16" objectType="8" dataType="0006" CDCFlag="TRUE">
      <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="rw" defaultValue="254" CDCFlag="TRUE"/>
