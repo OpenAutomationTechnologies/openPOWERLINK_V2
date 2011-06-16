@@ -56,9 +56,10 @@
 
 /***************************************************************************/
 /* includes */
+#if defined __linux__
+
 #include <stdio.h>
 #include <unistd.h>
-#include <pcap.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/select.h>
@@ -82,6 +83,14 @@
 #include <pthread.h>
 #endif
 
+#elif defined WIN32
+
+#define _WINSOCKAPI_ // prevent windows.h from including winsock.h
+#include <conio.h>
+
+#endif  // WIN32
+
+#include <pcap.h>
 #include "Epl.h"
 
 /***************************************************************************/
@@ -95,8 +104,22 @@
 //---------------------------------------------------------------------------
 // const defines
 //---------------------------------------------------------------------------
+#if defined __linux__
+
 #define SET_CPU_AFFINITY
 #define MAIN_THREAD_PRIORITY            20
+
+#elif defined WIN32
+
+// TracePoint support for realtime-debugging
+#ifdef _DBG_TRACE_POINTS_
+    void  PUBLIC  TgtDbgSignalTracePoint (BYTE bTracePointNumber_p);
+    #define TGT_DBG_SIGNAL_TRACE_POINT(p)   TgtDbgSignalTracePoint(p)
+#else
+    #define TGT_DBG_SIGNAL_TRACE_POINT(p)
+#endif
+
+#endif // WIN32
 
 #define NODEID      0xF0                //=> MN
 #define IP_ADDR     0xc0a86401          // 192.168.100.1
@@ -112,11 +135,10 @@
 //---------------------------------------------------------------------------
 // module global vars
 //---------------------------------------------------------------------------
-
 CONST BYTE abMacAddr[] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
-static uint uiNodeId_g = EPL_C_ADR_INVALID;
-static uint uiCycleLen_g = 0;
-static uint uiCurCycleLen_g = 0;
+static unsigned int uiNodeId_g = EPL_C_ADR_INVALID;
+static unsigned int uiCycleLen_g = 0;
+static unsigned int uiCurCycleLen_g = 0;
 static char *pLogFile_g = NULL;
 
 /* process image stuff */
@@ -181,6 +203,7 @@ tEplKernel PUBLIC AppCbEvent(
 tEplKernel PUBLIC AppCbSync(void);
 tEplKernel PUBLIC AppInit(void);
 
+#if defined __linux__
 //---------------------------------------------------------------------------
 // Function:            _kbhit
 //
@@ -225,6 +248,7 @@ static int _kbhit(void)
             break;
     }
 }
+#endif
 
 //---------------------------------------------------------------------------
 // Function:            printlog
@@ -241,17 +265,25 @@ static void printlog(char *fmt, ...)
     va_list             arglist;
     time_t              timeStamp;
     struct tm           timeVal;
+	struct tm           *p_timeVal;
     char                timeStr[20];
 
     time(&timeStamp);
-    localtime_r(&timeStamp, &timeVal);
-    strftime(timeStr, 20, "%Y/%m/%d %H:%M:%S", &timeVal);
 
-    fprintf (stderr, "%s - ", timeStr);
+#if defined __linux__
+    localtime_r(&timeStamp, &timeVal);
+	strftime(timeStr, 20, "%Y/%m/%d %H:%M:%S", &timeVal);
+#else
+	p_timeVal = localtime(&timeStamp);
+	strftime(timeStr, 20, "%Y/%m/%d %H:%M:%S", p_timeVal);
+#endif	
+
+	fprintf (stderr, "%s - ", timeStr);
     va_start(arglist, fmt);
     vfprintf(stderr, fmt, arglist);
     va_end(arglist);
 }
+
 
 //=========================================================================//
 //                                                                         //
@@ -277,7 +309,9 @@ int  main (int argc, char **argv)
     char                        cKey = 0;
 
 #ifdef CONFIG_POWERLINK_USERSTACK
-    struct sched_param          schedParam;
+#ifdef __linux__
+	struct sched_param          schedParam;
+#endif
 
     // variables for Pcap
     char                        sErr_Msg[ PCAP_ERRBUF_SIZE ];
@@ -290,6 +324,7 @@ int  main (int argc, char **argv)
 
     int                         opt;
 
+#ifdef __linux__
     /* get command line parameters */
     while ((opt = getopt(argc, argv, "c:l:")) != -1)
     {
@@ -308,9 +343,12 @@ int  main (int argc, char **argv)
             goto Exit;
         }
     }
+#endif
 
 #ifdef CONFIG_POWERLINK_USERSTACK
-    /* adjust process priority */
+
+#if defined __linux__
+	/* adjust process priority */
     if (nice (-20) == -1)         // push nice level in case we have no RTPreempt
     {
         EPL_DBGLVL_ERROR_TRACE2("%s() couldn't set nice value! (%s)\n", __func__, strerror(errno));
@@ -336,7 +374,16 @@ int  main (int argc, char **argv)
     /* Initialize target specific stuff */
     EplTgtInit();
 
-#endif
+#elif defined WIN32
+
+	// activate realtime priority class
+    SetPriorityClass(GetCurrentProcess(), REALTIME_PRIORITY_CLASS);
+    // lower the priority of this thread
+    SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_IDLE);
+
+#endif // WIN32
+	
+#endif // CONFIG_POWERLINK_USERSTACK
 
     /* Enabling ftrace for debugging */
     FTRACE_OPEN();
@@ -355,7 +402,7 @@ int  main (int argc, char **argv)
 
 #ifdef CONFIG_POWERLINK_USERSTACK
 
-    /* Retrieve the device list on the local machine */
+	/* Retrieve the device list on the local machine */
     if (pcap_findalldevs(&alldevs, sErr_Msg) == -1)
     {
         fprintf(stderr, "Error in pcap_findalldevs: %s\n", sErr_Msg);
@@ -363,58 +410,61 @@ int  main (int argc, char **argv)
         goto Exit;
     }
 
-    printf("\nList of Ethernet Cards Found in this System: \n");
-    printf("--------------------------------------------------\n");
-    /* Print the list */
+	PRINTF0("--------------------------------------------------\n");
+    PRINTF0("List of Ethernet Cards Found in this System: \n");
+    PRINTF0("--------------------------------------------------\n");
+	
+	 /* Print the list */
     for (seldev = alldevs; seldev != NULL; seldev = seldev->next)
     {
-        printf("%d. ", ++i);
+        PRINTF1("%d. ", ++i);
 
         if (seldev->description)
         {
-            printf("%s\n      %s\n", seldev->description, seldev->name);
+            PRINTF2("%s\n      %s\n", seldev->description, seldev->name);
         }
         else
         {
-            printf("%s\n", seldev->name);
+            PRINTF1("%s\n", seldev->name);
         }
     }
-
-    if (i == 0)
+	
+	if (i == 0)
     {
-        printf("\nNo interfaces found! Make sure LibPcap is installed.\n");
+        PRINTF0("\nNo interfaces found! Make sure WinPcap is installed.\n");
         EplRet = kEplNoResource;
         goto Exit;
     }
 
-    printf("--------------------------------------------------\n");
-    printf("Select the interface to be used for POWERLINK (1-%d):", i);
-    if (scanf("%d", &inum) == EOF)
+	PRINTF0("--------------------------------------------------\n");
+    PRINTF1("Select the interface to be used for POWERLINK (1-%d):",i);
+	if (scanf("%d", &inum) == EOF)
     {
         pcap_freealldevs(alldevs);
         EplRet = kEplNoResource;
         goto Exit;
     }
-
-    printf("--------------------------------------------------\n");
+    PRINTF0("--------------------------------------------------\n");
     if ((inum < 1) || (inum > i))
     {
-        printf("\nInterface number out of range.\n");
+        PRINTF0("\nInterface number out of range.\n");
         /* Free the device list */
         pcap_freealldevs(alldevs);
         EplRet = kEplNoResource;
         goto Exit;
     }
-
-    /* Jump to the selected adapter */
+	
+	/* Jump to the selected adapter */
     for (seldev = alldevs, i = 0;
          i < (inum - 1);
          seldev = seldev->next, i++)
     {   // do nothing
     }
-    strncpy(devName, seldev->name, 127);
+
+	strncpy(devName, seldev->name, 127);
     // pass selected device name to Edrv
     EplApiInitParam.m_HwParam.m_pszDevName = devName;
+
 #endif
 
     EplApiInitParam.m_uiNodeId = uiNodeId_g = NODEID;
@@ -462,7 +512,7 @@ int  main (int argc, char **argv)
 #endif
 
 
-    printf("\n\nHello, I'm a Linux Userspace POWERLINK node running as %s!\n  (build: %s / %s)\n\n",
+    printf("\n\nHello, I'm a Userspace POWERLINK node running as %s!\n  (build: %s / %s)\n\n",
             (uiNodeId_g == EPL_C_ADR_MN_DEF_NODE_ID ?
                 "Managing Node" : "Controlled Node"),
             __DATE__, __TIME__);
@@ -549,15 +599,17 @@ int  main (int argc, char **argv)
     // wait for key hit
     while (cKey != 0x1B)
     {
-
-
-
         if (_kbhit())
         {
+		
+#ifdef WIN32
+			cKey = (BYTE)_getch() ;
+#else
             if (read(STDIN_FILENO, &cKey, 1) < 0)
             {
                 break;
             }
+#endif
 
             switch (cKey)
             {
@@ -587,18 +639,33 @@ int  main (int argc, char **argv)
                 }
             }
         }
+
+#ifdef WIN32
+		Sleep(1500);
+#endif
     }
-
+	
     FTRACE_ENABLE(FALSE);
-
+	
 ExitShutdown:
     // halt the NMT state machine
     // so the processing of POWERLINK frames stops
     EplRet = EplApiExecNmtCommand(kEplNmtEventSwitchOff);
+	 
+	// delete process image
+    EplRet = EplApiProcessImageFree();
+	
     // delete instance for all modules
     EplRet = EplApiShutdown();
 
 Exit:
+    PRINTF1("main(): returns 0x%X\n", EplRet);
+
+#ifdef WIN32
+    PRINTF0("Press Enter to quit!\n");
+    _getch();
+#endif
+
     return EplRet;
 }
 
@@ -633,11 +700,13 @@ Exit:
 tEplKernel PUBLIC AppCbEvent(
     tEplApiEventType        EventType_p,   // IN: event type (enum)
     tEplApiEventArg*        pEventArg_p,   // IN: event argument (union)
-    void GENERIC*           pUserArg_p __attribute((unused)))
+    void GENERIC*           pUserArg_p)    //__attribute((unused))
 
 {
     tEplKernel          EplRet = kEplSuccessful;
     UINT                uiVarLen;
+
+	UNUSED_PARAMETER(pUserArg_p);
 
     // check if NMT_GS_OFF is reached
     switch (EventType_p)

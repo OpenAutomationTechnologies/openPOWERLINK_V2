@@ -6,7 +6,7 @@
 #     B&R Strasse 1, A-5142 Eggelsberg
 #     www.br-automation.com
 #
-# Description: cmake file of linux userspace demo application
+# Description: cmake file of userspace console demo application
 #
 # License:
 #
@@ -50,51 +50,76 @@
 #
 ################################################################################
 
+#
 # additional compiler flags
-
-ADD_DEFINITIONS(-Wall -Wextra -pedantic -std=c99 -pthread -D_GNU_SOURCE
-                    -D_POSIX_C_SOURCE=200112L)
+#
+IF (UNIX)
+    ADD_DEFINITIONS(-Wall -Wextra -pedantic -std=c99 -pthread -D_GNU_SOURCE -D_POSIX_C_SOURCE=200112L)
+ELSEIF (WIN32)
+    ADD_DEFINITIONS(-D_CONSOLE -DWPCAP -DHAVE_REMOTE)
+ENDIF ()
 
 # additional include directories
-SET(KERNELMOD_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../powerlink_kernel_module)
-SET(USERLIB_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../../Generic/powerlink_user_lib)
+SET(USERLIB_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../powerlink_user_lib)
+IF (UNIX)
+    SET(KERNELMOD_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../X86/Linux/gnu/powerlink_kernel_module)
+ENDIF (UNIX)
 
 # set sources of POWERLINK application
-SET (DEMO_SOURCES
-        demo_main.c
-        ${POWERLINK_SOURCE_DIR}/ObjDicts/CiA302-4_MN/EplApiProcessImageSetup.c
-        )
-	
-IF (CFG_KERNEL_STACK)
-    SET(DEMO_SOURCES ${DEMO_SOURCES}
-        ${POWERLINK_SOURCE_DIR}/EplStack/EplDebug.c
-        ${POWERLINK_SOURCE_DIR}/EplStack/EplApiLinuxUser.c
-        )
-    INCLUDE_DIRECTORIES(${KERNELMOD_INCLUDE_DIR})
-    ADD_DEFINITIONS(-DCONFIG_POWERLINK_KERNELSTACK)
-ELSE (CFG_KERNEL_STACK)
-    INCLUDE_DIRECTORIES(${USERLIB_INCLUDE_DIR})
+SET (DEMO_SOURCES demo_main.c)
+
+IF (UNIX)
+    IF (CFG_KERNEL_STACK)
+        SET(DEMO_SOURCES ${DEMO_SOURCES}
+                         ${POWERLINK_SOURCE_DIR}/EplStack/EplDebug.c
+                         ${POWERLINK_SOURCE_DIR}/EplStack/EplApiLinuxUser.c
+            )
+        INCLUDE_DIRECTORIES(${KERNELMOD_INCLUDE_DIR})
+        ADD_DEFINITIONS(-DCONFIG_POWERLINK_KERNELSTACK)
+    ELSE (CFG_KERNEL_STACK)
+        INCLUDE_DIRECTORIES(${USERLIB_INCLUDE_DIR})
+        ADD_DEFINITIONS(-DCONFIG_POWERLINK_USERSTACK)
+    ENDIF (CFG_KERNEL_STACK) 	
+ELSE (UNIX)
     ADD_DEFINITIONS(-DCONFIG_POWERLINK_USERSTACK)
-ENDIF (CFG_KERNEL_STACK) 	
-	
-INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})	
-                    
+    INCLUDE_DIRECTORIES(${USERLIB_INCLUDE_DIR})
+ENDIF (UNIX)
+
+
+INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
+
+IF (WIN32)
+    INCLUDE_DIRECTORIES(${POWERLINK_SOURCE_DIR}/Target/X86/Windows/WpdPack/Include)
+
+    IF (CMAKE_CL_64)
+        LINK_DIRECTORIES(${POWERLINK_SOURCE_DIR}/Target/X86/Windows/WpdPack/Lib/x64)
+    ELSE (CMAKE_CL_64)
+        LINK_DIRECTORIES(${POWERLINK_SOURCE_DIR}/Target/X86/Windows/WpdPack/Lib)
+    ENDIF (CMAKE_CL_64)
+ENDIF (WIN32)
+
+
 ADD_EXECUTABLE(demo_pi_console ${DEMO_SOURCES})
 
 SET_PROPERTY(TARGET demo_pi_console
-             PROPERTY COMPILE_DEFINITIONS_DEBUG DEBUG;DEF_DEBUG_LVL=${CFG_DEBUG_LVL})                   
-            
-IF (NOT CFG_KERNEL_STACK)
-    TARGET_LINK_LIBRARIES(demo_pi_console powerlink pcap pthread rt)
-ELSE (NOT CFG_KERNEL_STACK)
-    TARGET_LINK_LIBRARIES(demo_pi_console pthread rt)
-ENDIF (NOT CFG_KERNEL_STACK)  
+             PROPERTY COMPILE_DEFINITIONS_DEBUG DEBUG;DEF_DEBUG_LVL=${CFG_DEBUG_LVL})
+
+IF (UNIX)
+    IF (NOT CFG_KERNEL_STACK)
+        TARGET_LINK_LIBRARIES(demo_pi_console powerlink pcap pthread rt)
+    ELSE (NOT CFG_KERNEL_STACK)
+        TARGET_LINK_LIBRARIES(demo_pi_console pthread rt)
+    ENDIF (NOT CFG_KERNEL_STACK)
+ELSEIF (WIN32)
+    TARGET_LINK_LIBRARIES(demo_pi_console openPOWERLINK wpcap iphlpapi)
+ENDIF ()
 
 # add installation rules
 INSTALL(TARGETS demo_pi_console RUNTIME DESTINATION bin)
 INSTALL(FILES mnobd.cdc DESTINATION bin)
-IF (NOT CFG_KERNEL_STACK)
-    INSTALL(PROGRAMS ${CMAKE_CURRENT_SOURCE_DIR}/../tools/set_prio DESTINATION bin)
-ENDIF (NOT CFG_KERNEL_STACK)
-            
-                
+
+IF (UNIX)
+    IF (NOT CFG_KERNEL_STACK)
+        INSTALL(PROGRAMS ${CMAKE_CURRENT_SOURCE_DIR}/../../Linux/gnu/tools/set_prio DESTINATION bin)
+    ENDIF (NOT CFG_KERNEL_STACK)
+ENDIF (UNIX)
