@@ -1,9 +1,9 @@
 /**
 ********************************************************************************
 
-  \file           EplProcessThread.h
+  \file           EplApi.h
 
-  \brief          Header file for POWERLINK process thread
+  \brief          Header file for EplApi class
 
   (c) SYSTEC electronic GmbH, D-07973 Greiz, August-Bebel-Str. 29
       www.systec-electronic.com
@@ -53,68 +53,41 @@
            any other provision of this License.
 
 *******************************************************************************/
-
-#ifndef EPL_PROCESS_THREAD_H
-#define EPL_PROCESS_THREAD_H
+#ifndef EPL_API_H
+#define EPL_API_H
 
 /******************************************************************************/
 /* includes */
-#include <QThread>
-#include <QMutex>
-#include <QWaitCondition>
-
-extern "C" {
-#include "global.h"
+#include "EplProcessThread.h"
+#include "EplDataInOutThread.h"
 #include "Epl.h"
-}
 
 /******************************************************************************/
-/* class definitions */
+/* class declarations */
+class MainWindow;
 class QWidget;
-class QString;
 
 /**
 ********************************************************************************
-\brief  EplProcessThread class
+\brief  EplApi class
 
-Class EplProcessThread implements the thread used to control the POWERLINK
-network (NMT).
+Class EplApi implements the API interface to the openPOWERLINK stack.
 *******************************************************************************/
-class EplProcessThread : public QThread
+class EplApi
 {
-    Q_OBJECT
-
 public:
-    EplProcessThread();
-
-    void run();
-    void sigEplStatus(int iStatus_p);
-    void sigNmtState(tEplNmtState State_p);
-    void sigNodeAppeared(int iNodeId_p)
-             { emit nodeAppeared(iNodeId_p); };
-    void sigNodeDisappeared(int iNodeId_p)
-             { emit nodeDisappeared(iNodeId_p); };
-    void sigNodeStatus(int iNodeId_p, int iStatus_p)
-             { emit nodeStatusChanged(iNodeId_p, iStatus_p); };
-
-    tEplApiCbEvent getEventCbFunc();
-
-    void waitForNmtStateOff();
-    void reachedNmtStateOff();
-
-signals:
-    void eplStatusChanged(int iStatus_p);
-    void nmtStateChanged(const QString &strState_p);
-    void nodeAppeared(int iNodeId_p);
-    void nodeDisappeared(int iNodeId_p);
-    void allNodesRemoved();
-    void nodeStatusChanged(int iNodeId_p, int iStatus_p);
+    EplApi(MainWindow *pMainWindow_p, unsigned int uiNodeId_p, QString devName_p);
+    ~EplApi();
+    static unsigned int defaultNodeId();
 
 private:
-    QMutex         Mutex;
-    QWaitCondition NmtStateOff;
+    tEplApiInitParam    EplApiInitParam;
 
-    int iEplStatus;
+    EplProcessThread    *pEplProcessThread;
+    EplDataInOutThread  *pEplDataInOutThread;
+#ifdef CONFIG_POWERLINK_USERSTACK
+    tEplKernel          getPcapDev(char *ifName);
+#endif
 };
 
 #endif

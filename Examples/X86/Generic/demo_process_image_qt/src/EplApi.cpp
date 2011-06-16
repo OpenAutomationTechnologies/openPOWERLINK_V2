@@ -53,6 +53,7 @@
            any other provision of this License.
 
 *******************************************************************************/
+#define _WINSOCKAPI_ // prevent windows.h from including winsock.h
 
 /******************************************************************************/
 /* includes */
@@ -67,13 +68,16 @@
 #include "EplOutput.h"
 #include "MainWindow.h"
 
-#include "pcap.h"
-#include "stdio.h"
-#include "string.h"
-#include <netinet/in.h>
-#include <net/if.h>
-#include <sys/socket.h>
-#include <sys/ioctl.h>
+#include <pcap.h>
+#include <stdio.h>
+#include <string.h>
+
+#if (LINUX)
+	#include <netinet/in.h>
+	#include <net/if.h>
+	#include <sys/socket.h>
+	#include <sys/ioctl.h>
+#endif
 
 /******************************************************************************/
 /* definitions */

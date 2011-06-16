@@ -1502,6 +1502,16 @@
         // MS Visual C++ compiler supports function inlining
         #define INLINE_FUNCTION_DEF __forceinline
 
+		// Redefine TRUE/FALSE if necessary
+		#ifdef FALSE
+		#undef FALSE
+		#endif
+		#define FALSE 0
+		#ifdef TRUE
+		#undef TRUE
+		#endif
+		#define TRUE 1
+
         // to actually enable inlining just include the following two lines
         // #define INLINE_FUNCTION     INLINE_FUNCTION_DEF
         // #define INLINE_ENABLED      TRUE

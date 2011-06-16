@@ -1,9 +1,9 @@
 /**
 ********************************************************************************
 
-  \file           EplDataInOutThread.h
+  \file           EplProcessThread.h
 
-  \brief          Header file for Data Input/Output class
+  \brief          Header file for POWERLINK process thread
 
   (c) SYSTEC electronic GmbH, D-07973 Greiz, August-Bebel-Str. 29
       www.systec-electronic.com
@@ -54,22 +54,15 @@
 
 *******************************************************************************/
 
-#ifndef EPL_DATA_IN_OUT_THREAD_H
-#define EPL_DATA_IN_OUT_THREAD_H
+#ifndef EPL_PROCESS_THREAD_H
+#define EPL_PROCESS_THREAD_H
 
 /******************************************************************************/
 /* includes */
 #include <QThread>
-
-extern "C" {
-#include "global.h"
+#include <QMutex>
+#include <QWaitCondition>
 #include "Epl.h"
-}
-#include "xap.h"
-
-/******************************************************************************/
-/* definitions */
-#define MAX_NODES       255
 
 /******************************************************************************/
 /* class definitions */
@@ -78,44 +71,46 @@ class QString;
 
 /**
 ********************************************************************************
-\brief  EplDataInOutThread class
+\brief  EplProcessThread class
 
-Class EplDataInOutThread implements the thread used to transfer synchronous
-data between the CNs and the MN.
+Class EplProcessThread implements the thread used to control the POWERLINK
+network (NMT).
 *******************************************************************************/
-class EplDataInOutThread : public QThread
+class EplProcessThread : public QThread
 {
     Q_OBJECT
 
 public:
-    EplDataInOutThread();
+    EplProcessThread();
 
     void run();
+    void sigEplStatus(int iStatus_p);
+    void sigNmtState(tEplNmtState State_p);
+    void sigNodeAppeared(int iNodeId_p)
+             { emit nodeAppeared(iNodeId_p); };
+    void sigNodeDisappeared(int iNodeId_p)
+             { emit nodeDisappeared(iNodeId_p); };
+    void sigNodeStatus(int iNodeId_p, int iStatus_p)
+             { emit nodeStatusChanged(iNodeId_p, iStatus_p); };
 
-    void acknowledge();
-    void inChanged(unsigned int uiInput_p, int iUsedNodeId_p);
-    void outChanged(unsigned int uiLed_p, int iUsedNodeId_p);
+    tEplApiCbEvent getEventCbFunc();
 
-    tEplKernel SetupProcessImage();
-    tEplSyncCb getSyncCbFunc();
-
-    unsigned int            m_uiCnt;
-
-    unsigned int            m_uiLeds[MAX_NODES];
-    unsigned int            m_uiLedsOld[MAX_NODES];
-    unsigned int            m_uiInput[MAX_NODES];
-    unsigned int            m_uiInputOld[MAX_NODES];
-    unsigned int            m_uiPeriod[MAX_NODES];
-    int                     m_iToggle[MAX_NODES];
+    void waitForNmtStateOff();
+    void reachedNmtStateOff();
 
 signals:
-    void processImageInChanged(unsigned int uiData_p, unsigned int uiNodeId_p);
-    void processImageOutChanged(unsigned int uiData_p, unsigned int uiNodeId_p);
+    void eplStatusChanged(int iStatus_p);
+    void nmtStateChanged(const QString &strState_p);
+    void nodeAppeared(int iNodeId_p);
+    void nodeDisappeared(int iNodeId_p);
+    void allNodesRemoved();
+    void nodeStatusChanged(int iNodeId_p, int iStatus_p);
 
 private:
-    volatile unsigned int   m_uiAckCount;
-    unsigned int            m_uiCount;
+    QMutex         Mutex;
+    QWaitCondition NmtStateOff;
 
+    int iEplStatus;
 };
 
 #endif

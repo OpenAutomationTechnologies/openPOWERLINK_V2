@@ -1,9 +1,9 @@
 /**
 ********************************************************************************
 
-  \file           main.cpp
+  \file           EplDataInOutThread.h
 
-  \brief          main module of the QT demo application
+  \brief          Header file for Data Input/Output class
 
   (c) SYSTEC electronic GmbH, D-07973 Greiz, August-Bebel-Str. 29
       www.systec-electronic.com
@@ -54,38 +54,66 @@
 
 *******************************************************************************/
 
+#ifndef EPL_DATA_IN_OUT_THREAD_H
+#define EPL_DATA_IN_OUT_THREAD_H
+
 /******************************************************************************/
 /* includes */
-#include <QApplication>
+#include <QThread>
 
-#include "MainWindow.h"
+#include "Epl.h"
+#include "xap.h"
+
+/******************************************************************************/
+/* definitions */
+#define MAX_NODES       255
+
+/******************************************************************************/
+/* class definitions */
+class QWidget;
+class QString;
 
 /**
 ********************************************************************************
-\brief  main function
+\brief  EplDataInOutThread class
 
-main function of the QT demo application
-
-\param  argc            number of command line arguments
-\param  argv            pointer to command line argument strings
-
-\return application return value
+Class EplDataInOutThread implements the thread used to transfer synchronous
+data between the CNs and the MN.
 *******************************************************************************/
-int main(int argc, char *argv[])
+class EplDataInOutThread : public QThread
 {
-    MainWindow   *pMainWindow;
-    QApplication *pApp;
+    Q_OBJECT
 
-#ifdef CONFIG_POWERLINK_USERSTACK
-    /* Initialize target specific stuff */
-    EplTgtInit();
+public:
+    EplDataInOutThread();
+
+    void run();
+
+    void acknowledge();
+    void inChanged(unsigned int uiInput_p, int iUsedNodeId_p);
+    void outChanged(unsigned int uiLed_p, int iUsedNodeId_p);
+
+    tEplKernel SetupProcessImage();
+    tEplSyncCb getSyncCbFunc();
+
+    unsigned int            m_uiCnt;
+
+    unsigned int            m_uiLeds[MAX_NODES];
+    unsigned int            m_uiLedsOld[MAX_NODES];
+    unsigned int            m_uiInput[MAX_NODES];
+    unsigned int            m_uiInputOld[MAX_NODES];
+    unsigned int            m_uiPeriod[MAX_NODES];
+    int                     m_iToggle[MAX_NODES];
+
+signals:
+    void processImageInChanged(unsigned int uiData_p, unsigned int uiNodeId_p);
+    void processImageOutChanged(unsigned int uiData_p, unsigned int uiNodeId_p);
+
+private:
+    volatile unsigned int   m_uiAckCount;
+    unsigned int            m_uiCount;
+
+};
+
 #endif
-
-    pApp        = new QApplication(argc, argv);
-    pMainWindow = new MainWindow;
-    pMainWindow->show();
-
-    return pApp->exec();
-}
-
 

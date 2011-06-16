@@ -1,9 +1,9 @@
 /**
 ********************************************************************************
 
-  \file           EplApi.h
+  \file           main.cpp
 
-  \brief          Header file for EplApi class
+  \brief          main module of the QT demo application
 
   (c) SYSTEC electronic GmbH, D-07973 Greiz, August-Bebel-Str. 29
       www.systec-electronic.com
@@ -53,46 +53,41 @@
            any other provision of this License.
 
 *******************************************************************************/
-#ifndef EPL_API_H
-#define EPL_API_H
 
 /******************************************************************************/
 /* includes */
-#include "EplProcessThread.h"
-#include "EplDataInOutThread.h"
+#include <QApplication>
 
-extern "C" {
-#include "global.h"
-#include "Epl.h"
-}
-
-/******************************************************************************/
-/* class declarations */
-class MainWindow;
-class QWidget;
+#include "MainWindow.h"
 
 /**
 ********************************************************************************
-\brief  EplApi class
+\brief  main function
 
-Class EplApi implements the API interface to the openPOWERLINK stack.
+main function of the QT demo application
+
+\param  argc            number of command line arguments
+\param  argv            pointer to command line argument strings
+
+\return application return value
 *******************************************************************************/
-class EplApi
+int main(int argc, char *argv[])
 {
-public:
-    EplApi(MainWindow *pMainWindow_p, unsigned int uiNodeId_p, QString devName_p);
-    ~EplApi();
-    static unsigned int defaultNodeId();
+    MainWindow   *pMainWindow;
+    QApplication *pApp;
 
-private:
-    tEplApiInitParam    EplApiInitParam;
-
-    EplProcessThread    *pEplProcessThread;
-    EplDataInOutThread  *pEplDataInOutThread;
-#ifdef CONFIG_POWERLINK_USERSTACK
-    tEplKernel          getPcapDev(char *ifName);
+#ifdef __linux__
+	#ifdef CONFIG_POWERLINK_USERSTACK
+		/* Initialize target specific stuff */
+		EplTgtInit();
+	#endif
 #endif
-};
 
-#endif
+    pApp        = new QApplication(argc, argv);
+    pMainWindow = new MainWindow;
+    pMainWindow->show();
+
+    return pApp->exec();
+}
+
 

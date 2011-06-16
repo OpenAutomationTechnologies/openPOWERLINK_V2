@@ -49,11 +49,19 @@
 #          any other provision of this License.
 #
 ################################################################################
-
 FIND_PACKAGE(Qt4 REQUIRED)
 
-SET(KERNELMOD_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../powerlink_kernel_module)
-SET(USERLIB_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../../Generic/powerlink_user_lib)
+IF (WIN32)
+	# additional compiler flags
+	ADD_DEFINITIONS(-D_CONSOLE -DWPCAP -DHAVE_REMOTE)
+	ADD_DEFINITIONS(-DCONFIG_POWERLINK_USERSTACK)
+ENDIF (WIN32)
+
+# additional include directories
+SET(USERLIB_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../powerlink_user_lib)
+IF (UNIX)
+    SET(KERNELMOD_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../X86/Linux/gnu/powerlink_kernel_module)
+ENDIF (UNIX)
 
 SET(DEMO_SOURCES src/EplApi.cpp
                  src/EplCnState.cpp
@@ -66,10 +74,10 @@ SET(DEMO_SOURCES src/EplApi.cpp
                  src/main.cpp
                  src/MainWindow.cpp
                  src/NodeState.cpp
-                 ${POWERLINK_SOURCE_DIR}/ObjDicts/CiA302-4_MN/EplApiProcessImageSetup.c)
-                         
+    )
                  
-SET(DEMO_HEADERS include/EplCnState.h
+SET(DEMO_HEADERS include/EplApi.h
+                 include/EplCnState.h
                  include/EplDataInOutThread.h
                  include/EplInput.h
                  include/EplOutput.h
@@ -77,23 +85,23 @@ SET(DEMO_HEADERS include/EplCnState.h
                  include/EplState.h
                  include/Leds.h
                  include/MainWindow.h
-                 include/NodeState.h)
+                 include/NodeState.h
+    )
 
 SET(DEMO_RESOURCES resources/Resources.qrc)
 
 IF (CFG_KERNEL_STACK)
-
-    SET(DEMO_SOURCES ${DEMO_SOURCES}
-        ${POWERLINK_SOURCE_DIR}/EplStack/EplApiLinuxUser.c)
-         
+    IF (UNIX)
+        SET(DEMO_SOURCES ${DEMO_SOURCES}
+                         ${POWERLINK_SOURCE_DIR}/EplStack/EplApiLinuxUser.c)
+    ENDIF (UNIX)
 ELSE (CFG_KERNEL_STACK)
-
     SET(DEMO_SOURCES ${DEMO_SOURCES}
-        src/InterfaceSelectDialog.cpp)
-        
-    SET(DEMO_HEADERS ${DEMO_HEADERS} include/InterfaceSelectDialog.h)      
-        
+                     src/InterfaceSelectDialog.cpp)
+	SET(DEMO_HEADERS ${DEMO_HEADERS}
+                     include/InterfaceSelectDialog.h)      
 ENDIF (CFG_KERNEL_STACK)                 
+
 
 INCLUDE(${QT_USE_FILE})
 ADD_DEFINITIONS(${QT_DEFINITIONS})
@@ -101,9 +109,13 @@ ADD_DEFINITIONS(${QT_DEFINITIONS})
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/include
                     ${POWERLINK_INCLUDE_DIR}
                     ${CMAKE_CURRENT_BINARY_DIR}
-                    )
-                    
-ADD_DEFINITIONS(-DCONFIG_CFM -DCONFIG_OPENCONFIGURATOR_MAPPING)                                       
+)
+
+IF (WIN32)
+    INCLUDE_DIRECTORIES(${POWERLINK_SOURCE_DIR}/Target/X86/Windows/WpdPack/Include)
+ENDIF (WIN32)
+
+ADD_DEFINITIONS(-DCONFIG_CFM -DCONFIG_OPENCONFIGURATOR_MAPPING)
 
 # Configure depending on using usermode stack or kernel stack
 IF (CFG_KERNEL_STACK)
@@ -112,32 +124,57 @@ IF (CFG_KERNEL_STACK)
 ELSE (CFG_KERNEL_STACK)
     INCLUDE_DIRECTORIES(${USERLIB_INCLUDE_DIR})
     ADD_DEFINITIONS(-DCONFIG_POWERLINK_USERSTACK) 
-ENDIF (CFG_KERNEL_STACK)                 
+ENDIF (CFG_KERNEL_STACK)      
 
 # Setup QT4 Wrappers
 QT4_WRAP_CPP(DEMO_HEADERS_MOC ${DEMO_HEADERS})
 QT4_WRAP_UI(DEMO_FORMS_HEADERS ${DEMO_FORMS})
 QT4_ADD_RESOURCES(DEMO_RESOURCES_RCC ${DEMO_RESOURCES})
 
+IF (WIN32)
+    IF (CMAKE_CL_64)
+        LINK_DIRECTORIES(${POWERLINK_SOURCE_DIR}/Target/X86/Windows/WpdPack/Lib/x64)
+    ELSE (CMAKE_CL_64)
+        LINK_DIRECTORIES(${POWERLINK_SOURCE_DIR}/Target/X86/Windows/WpdPack/Lib)
+    ENDIF (CMAKE_CL_64)
+
+    SOURCE_GROUP("Source Files" FILES ${DEMO_SOURCES})
+    SOURCE_GROUP("QT-generated Files" FILES ${DEMO_HEADERS_MOC} ${DEMO_RESOURCES_RCC})
+    SOURCE_GROUP("Header Files" FILES ${DEMO_HEADERS})
+ENDIF (WIN32)
+
 ADD_EXECUTABLE(demo_pi_qt ${DEMO_SOURCES}
-                    ${DEMO_HEADERS_MOC}
-                    ${DEMO_FORMS_HEADERS}
-                    ${DEMO_RESOURCES_RCC})
-                                                              
-TARGET_LINK_LIBRARIES(demo_pi_qt ${QT_LIBRARIES})
-                                       
-IF (NOT CFG_KERNEL_STACK)
-    TARGET_LINK_LIBRARIES(demo_pi_qt powerlink pcap pthread rt)  
-ENDIF (NOT CFG_KERNEL_STACK)  
+                          ${DEMO_HEADERS}
+                          ${DEMO_HEADERS_MOC}
+                          ${DEMO_FORMS_HEADERS}
+                          ${DEMO_RESOURCES_RCC}
+)
+
+IF (WIN32)
+    TARGET_LINK_LIBRARIES(demo_pi_qt openPOWERLINK wpcap iphlpapi ${QT_LIBRARIES})
+ELSEIF(UNIX)
+    TARGET_LINK_LIBRARIES(demo_pi_qt ${QT_LIBRARIES})
+
+    IF (NOT CFG_KERNEL_STACK)
+        TARGET_LINK_LIBRARIES(demo_pi_qt powerlink pcap pthread rt)  
+    ENDIF (NOT CFG_KERNEL_STACK)  
+ENDIF (WIN32)
+
+
+SET_PROPERTY(TARGET demo_pi_qt
+             PROPERTY COMPILE_DEFINITIONS_DEBUG DEBUG;DEF_DEBUG_LVL=${CFG_DEBUG_LVL})
 
 # add installation rules
 INSTALL(TARGETS demo_pi_qt RUNTIME DESTINATION bin)
 INSTALL(FILES mnobd.cdc DESTINATION bin)
-IF (NOT CFG_KERNEL_STACK)
-    INSTALL(PROGRAMS ${CMAKE_CURRENT_SOURCE_DIR}/../tools/set_prio DESTINATION bin)
-ENDIF (NOT CFG_KERNEL_STACK)
 
-
-
-                                                          
-                
+IF (WIN32)
+    INSTALL(FILES ${QT_BINARY_DIR}/QtCore4.dll DESTINATION bin)
+    INSTALL(FILES ${QT_BINARY_DIR}/QtGui4.dll DESTINATION bin)
+    INSTALL(FILES ${QT_BINARY_DIR}/QtCored4.dll DESTINATION bin)
+    INSTALL(FILES ${QT_BINARY_DIR}/QtGuid4.dll DESTINATION bin)
+ELSEIF (UNIX)
+    IF (NOT CFG_KERNEL_STACK)
+        INSTALL(PROGRAMS ${CMAKE_CURRENT_SOURCE_DIR}/../../Linux/gnu/tools/set_prio DESTINATION bin)
+    ENDIF (NOT CFG_KERNEL_STACK)
+ENDIF (WIN32)

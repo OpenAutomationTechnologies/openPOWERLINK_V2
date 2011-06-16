@@ -249,6 +249,10 @@
 // function prototypes
 //---------------------------------------------------------------------------
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // currently no Timer functions are needed by EPL stack
 // so they are not implemented yet
 //void  PUBLIC EplTgtTimerInit(void);
@@ -275,6 +279,10 @@ tEplTgtTimeStamp* PUBLIC EplTgtTimeStampAlloc (void);
 
 tEplKernel PUBLIC EplTgtInit(void);
 tEplKernel PUBLIC EplTgtCleanup(void);
+
+#ifdef __cplusplus
+}  // extern "C"
+#endif
 
 #endif  // #ifndef _EPLTARGET_H_
 
