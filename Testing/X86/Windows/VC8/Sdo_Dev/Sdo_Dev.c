@@ -728,6 +728,7 @@ BYTE                        bBuffer;
                 TransParamByIndex.m_pUserArg = TransParamByIndex.m_pData;
 
                 printf("\nObject index[/sub-index] (e.g. 0x1000/0): ");
+                fflush(stdin);
                 iNumber = scanf("%i/%i", &iVal1, &iVal2);
                 if (iNumber >= 1)
                 {
@@ -749,6 +750,7 @@ BYTE                        bBuffer;
                 }
 
                 printf("\nSegment Size (e.g. 4): ");
+                fflush(stdin);
                 iNumber = scanf("%i", &iVal1);
                 if (iNumber >= 1)
                 {
@@ -775,6 +777,184 @@ BYTE                        bBuffer;
 
                 Ret = EplSdoComInitTransferByIndex(&TransParamByIndex);
                 printf("Read of remote object 0x%X/%u with transfer size %u returned\n   code 0x%X",
+                    TransParamByIndex.m_uiIndex, TransParamByIndex.m_uiSubindex,
+                    TransParamByIndex.m_uiDataSize,
+                    Ret);
+                if (Ret != kEplSuccessful)
+                {
+                    printf("   Error!\n");
+                }
+                else
+                {
+                    printf("   Waiting for finish\n");
+                }
+
+                break;
+            }
+
+            // s
+            case 's':
+            {
+            int iVal1 = 0;
+            int iVal2 = 0;
+            int iNumber;
+
+                // write string to arbitrary remote object
+                TransParamByIndex.m_SdoAccessType = kEplSdoAccessTypeWrite;
+                TransParamByIndex.m_SdoComConHdl = SdoComConHdl;
+                TransParamByIndex.m_uiTimeout = 0;
+                TransParamByIndex.m_pfnSdoFinishedCb = EplAppSdoConnectionCb;
+
+                printf("\nObject index[/sub-index] (e.g. 0x1000/0): ");
+                fflush(stdin);
+                iNumber = scanf("%i/%i", &iVal1, &iVal2);
+                if (iNumber >= 1)
+                {
+                    TransParamByIndex.m_uiIndex = (unsigned int) iVal1;
+
+                    if (iNumber == 2)
+                    {
+                        TransParamByIndex.m_uiSubindex = (unsigned int) iVal2;
+                    }
+                    else
+                    {
+                        TransParamByIndex.m_uiSubindex = 0;
+                    }
+                }
+                else
+                {
+                    printf("\nWrong input!\n");
+                    break;
+                }
+
+                // init buffer
+                uiCount = sizeof(abTest_l) / 4;
+                while (uiCount > 0)
+                {
+                    ((DWORD*)abTest_l)[uiCount - 1] = 0xDEADBEEF;
+                    uiCount--;
+                }
+
+                printf("\nString to be written to object: ");
+                fflush(stdin);
+                TransParamByIndex.m_pData = fgets((char*) &abTest_l[0], sizeof (abTest_l), stdin);
+                if (TransParamByIndex.m_pData == NULL)
+                {
+                    printf("\nWrong input!\n");
+                    break;
+                }
+
+                TransParamByIndex.m_uiDataSize = strlen((const char*) abTest_l) - 1;
+
+                TransParamByIndex.m_pUserArg = TransParamByIndex.m_pData;
+                Ret = EplSdoComInitTransferByIndex(&TransParamByIndex);
+                printf("Write of remote object 0x%X/%u with transfer size %u returned\n   code 0x%X",
+                    TransParamByIndex.m_uiIndex, TransParamByIndex.m_uiSubindex,
+                    TransParamByIndex.m_uiDataSize,
+                    Ret);
+                if (Ret != kEplSuccessful)
+                {
+                    printf("   Error!\n");
+                }
+                else
+                {
+                    printf("   Waiting for finish\n");
+                }
+
+                break;
+            }
+
+            // w
+            case 'w':
+            {
+            int iVal1 = 0;
+            int iVal2 = 0;
+            int iNumber;
+            char* pszToken;
+            char* pszRemainder;
+
+                // write bytes to arbitrary remote object
+                TransParamByIndex.m_SdoAccessType = kEplSdoAccessTypeWrite;
+                TransParamByIndex.m_SdoComConHdl = SdoComConHdl;
+                TransParamByIndex.m_uiTimeout = 0;
+                TransParamByIndex.m_pfnSdoFinishedCb = EplAppSdoConnectionCb;
+
+                printf("\nObject index[/sub-index] (e.g. 0x1000/0): ");
+                fflush(stdin);
+                iNumber = scanf("%i/%i", &iVal1, &iVal2);
+                if (iNumber >= 1)
+                {
+                    TransParamByIndex.m_uiIndex = (unsigned int) iVal1;
+
+                    if (iNumber == 2)
+                    {
+                        TransParamByIndex.m_uiSubindex = (unsigned int) iVal2;
+                    }
+                    else
+                    {
+                        TransParamByIndex.m_uiSubindex = 0;
+                    }
+                }
+                else
+                {
+                    printf("\nWrong input!\n");
+                    break;
+                }
+
+                printf("\nSegment Size (0 if you want to specify the actual byte string): ");
+                fflush(stdin);
+                iNumber = scanf("%i", &iVal1);
+                if (iNumber == 1)
+                {
+                    TransParamByIndex.m_uiDataSize = iVal1;
+                }
+                else
+                {
+                    printf("\nWrong input!\n");
+                    break;
+                }
+
+                // init buffer
+                uiCount = sizeof(abTest_l) / 4;
+                while (uiCount > 0)
+                {
+                    ((DWORD*)abTest_l)[uiCount - 1] = uiCount;
+                    uiCount--;
+                }
+
+                if (TransParamByIndex.m_uiDataSize == 0)
+                {
+                    printf("\nBytes to be written to object in LE (eg. 12 AB 3F): ");
+                    fflush(stdin);
+                    TransParamByIndex.m_pData = fgets((char*) &abTest_l[0], sizeof (abTest_l), stdin);
+                    if (TransParamByIndex.m_pData == NULL)
+                    {
+                        printf("\nWrong input!\n");
+                        break;
+                    }
+
+                    pszRemainder = (char*) &abTest_l[0];
+                    TransParamByIndex.m_uiDataSize = 0;
+                    do
+                    {
+                        pszToken = pszRemainder;
+                        abTest_l[TransParamByIndex.m_uiDataSize] = (BYTE) strtol(pszToken, &pszRemainder, 16);
+                        if (pszToken == pszRemainder)
+                        {
+                            break;
+                        }
+                        TransParamByIndex.m_uiDataSize++;
+                    }
+                    while (*pszRemainder != '\0');
+                }
+                else
+                {
+                    TransParamByIndex.m_pData = &abTest_l[0];
+                }
+
+                TransParamByIndex.m_pUserArg = TransParamByIndex.m_pData;
+                Ret = EplSdoComInitTransferByIndex(&TransParamByIndex);
+                printf("Write of remote object 0x%X/%u with transfer size %u returned\n   code 0x%X",
                     TransParamByIndex.m_uiIndex, TransParamByIndex.m_uiSubindex,
                     TransParamByIndex.m_uiDataSize,
                     Ret);
@@ -950,6 +1130,7 @@ BYTE                        bBuffer;
                 EPL_MEMSET(&ObdParam, 0, sizeof (ObdParam));
 
                 printf("\nObject index[/sub-index] (e.g. 0x1000/0): ");
+                fflush(stdin);
                 iNumber = scanf("%i/%i", &iVal1, &iVal2);
                 if (iNumber >= 1)
                 {
@@ -967,6 +1148,7 @@ BYTE                        bBuffer;
                 }
 
                 printf("\nSegment Size [and Segment Offset] (e.g. 4/0): ");
+                fflush(stdin);
                 iNumber = scanf("%i/%i", &iVal1, &iVal2);
                 if (iNumber >= 1)
                 {
@@ -1016,6 +1198,180 @@ BYTE                        bBuffer;
                         (WORD) ((BYTE*)ObdParam.m_pData)[min(ObdParam.m_SegmentSize, sizeof (abTest_l) - 1)],
                         ObdParam.m_SegmentOffset);
                     EplAppDumpData(ObdParam.m_pData, min (ObdParam.m_SegmentSize, 256));
+                }
+
+                break;
+            }
+
+            // S
+            case 'S':
+            {
+            int iVal1 = 0;
+            int iVal2 = 0;
+            int iNumber;
+
+                // write string to arbitrary local object
+                EPL_MEMSET(&ObdParam, 0, sizeof (ObdParam));
+
+                printf("\nObject index[/sub-index] (e.g. 0x1000/0): ");
+                fflush(stdin);
+                iNumber = scanf("%i/%i", &iVal1, &iVal2);
+                if (iNumber >= 1)
+                {
+                    ObdParam.m_uiIndex = (unsigned int) iVal1;
+
+                    if (iNumber == 2)
+                    {
+                        ObdParam.m_uiSubIndex = (unsigned int) iVal2;
+                    }
+                }
+                else
+                {
+                    printf("\nWrong input!\n");
+                    break;
+                }
+
+                printf("\nSegment Offset (e.g. 0): ");
+                fflush(stdin);
+                iNumber = scanf("%i", &iVal1);
+                if (iNumber == 1)
+                {
+                    ObdParam.m_SegmentOffset = iVal1;
+                }
+                else
+                {
+                    printf("\nWrong input!\n");
+                    break;
+                }
+
+                // init buffer
+                uiCount = sizeof(abTest_l) / 4;
+                while (uiCount > 0)
+                {
+                    ((DWORD*)abTest_l)[uiCount - 1] = 0xDEADBEEF;
+                    uiCount--;
+                }
+
+                printf("\nString to be written to object: ");
+                fflush(stdin);
+                ObdParam.m_pData = fgets((char*) &abTest_l[0], sizeof (abTest_l), stdin);
+                if (ObdParam.m_pData == NULL)
+                {
+                    printf("\nWrong input!\n");
+                    break;
+                }
+
+                ObdParam.m_SegmentSize = strlen((const char*) abTest_l) - 1;
+
+                ObdParam.m_TransferSize = ObdParam.m_SegmentSize;
+                ObdParam.m_pHandle = (void*)0xBEEFDEAD;
+                ObdParam.m_pfnAccessFinished = EplAppCbAccessFinished;
+                Ret = EplObdWriteEntryFromLe(&ObdParam);
+                printf("Write to local object 0x%X/%u with object size %u returned\n   code 0x%X, size=%u, offset=%u",
+                    ObdParam.m_uiIndex, ObdParam.m_uiSubIndex,
+                    ObdParam.m_ObjSize,
+                    Ret, ObdParam.m_SegmentSize, ObdParam.m_SegmentOffset);
+                if (Ret != kEplSuccessful)
+                {
+                    printf("   Error!\n");
+                }
+                else
+                {
+                    printf("   successfully\n");
+                }
+
+                break;
+            }
+
+            // W
+            case 'W':
+            {
+            int iVal1 = 0;
+            int iVal2 = 0;
+            int iNumber;
+            char* pszToken;
+            char* pszRemainder;
+
+                // write bytes to arbitrary local object
+                EPL_MEMSET(&ObdParam, 0, sizeof (ObdParam));
+
+                printf("\nObject index[/sub-index] (e.g. 0x1000/0): ");
+                fflush(stdin);
+                iNumber = scanf("%i/%i", &iVal1, &iVal2);
+                if (iNumber >= 1)
+                {
+                    ObdParam.m_uiIndex = (unsigned int) iVal1;
+
+                    if (iNumber == 2)
+                    {
+                        ObdParam.m_uiSubIndex = (unsigned int) iVal2;
+                    }
+                }
+                else
+                {
+                    printf("\nWrong input!\n");
+                    break;
+                }
+
+                printf("\nSegment Offset (e.g. 0): ");
+                fflush(stdin);
+                iNumber = scanf("%i", &iVal1);
+                if (iNumber == 1)
+                {
+                    ObdParam.m_SegmentOffset = iVal1;
+                }
+                else
+                {
+                    printf("\nWrong input!\n");
+                    break;
+                }
+
+                // init buffer
+                uiCount = sizeof(abTest_l) / 4;
+                while (uiCount > 0)
+                {
+                    ((DWORD*)abTest_l)[uiCount - 1] = 0xDEADBEEF;
+                    uiCount--;
+                }
+
+                printf("\nBytes to be written to object in LE (eg. 12 AB 3F): ");
+                fflush(stdin);
+                ObdParam.m_pData = fgets((char*) &abTest_l[0], sizeof (abTest_l), stdin);
+                if (ObdParam.m_pData == NULL)
+                {
+                    printf("\nWrong input!\n");
+                    break;
+                }
+
+                pszRemainder = (char*) &abTest_l[0];
+                ObdParam.m_SegmentSize = 0;
+                do
+                {
+                    pszToken = pszRemainder;
+                    abTest_l[ObdParam.m_SegmentSize] = (BYTE) strtol(pszToken, &pszRemainder, 16);
+                    if (pszToken == pszRemainder)
+                    {
+                        break;
+                    }
+                    ObdParam.m_SegmentSize++;
+                }
+                while (*pszRemainder != '\0');
+
+                ObdParam.m_TransferSize = ObdParam.m_SegmentSize;
+                ObdParam.m_pHandle = (void*)0xBEEFDEAD;
+                ObdParam.m_pfnAccessFinished = EplAppCbAccessFinished;
+                Ret = EplObdWriteEntryFromLe(&ObdParam);
+                printf("Write to local object 0x%X/%u with object size %u returned\n   code 0x%X, size=%u, offset=%u",
+                    ObdParam.m_uiIndex, ObdParam.m_uiSubIndex,
+                    ObdParam.m_ObjSize,
+                    Ret, ObdParam.m_SegmentSize, ObdParam.m_SegmentOffset);
+                if (Ret != kEplSuccessful)
+                {
+                    printf("   Error!\n");
+                }
+                else
+                {
+                    printf("   successfully\n");
                 }
 
                 break;
@@ -1120,11 +1476,12 @@ BYTE                abData[] = {0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0};
         pObdParam->m_dwAbortCode = EPL_SDOAC_DATA_NOT_TRANSF_DUE_LOCAL_CONTROL;
     }
 
-    printf("EplAppProcessEvent(0x%04X/%u Ev=%X pData=%p Off=%u Size=%u ObjSize=%u Acc=%X Typ=%X)\n",
+    printf("EplAppProcessEvent(0x%04X/%u Ev=%X pData=%p Off=%u Size=%u\n"
+           "                   ObjSize=%u TransSize=%u Acc=%X Typ=%X)\n",
         pObdParam->m_uiIndex, pObdParam->m_uiSubIndex,
         pObdParam->m_ObdEvent,
         pObdParam->m_pData, pObdParam->m_SegmentOffset, pObdParam->m_SegmentSize,
-        pObdParam->m_ObjSize, pObdParam->m_Access, pObdParam->m_Type);
+        pObdParam->m_ObjSize, pObdParam->m_TransferSize, pObdParam->m_Access, pObdParam->m_Type);
 
     Ret = pObdParam->m_pfnAccessFinished(pObdParam);
 
@@ -1302,19 +1659,25 @@ tEplKernel PUBLIC EplAppCbObdAccess(tEplObdParam MEM* pParam_p)
 {
 tEplKernel          Ret = kEplSuccessful;
 
-    printf("EplAppCbObdAccess(0x%04X/%u Ev=%X pData=%p Off=%u Size=%u ObjSize=%u Acc=%X Typ=%X)\n",
+    printf("EplAppCbObdAccess(0x%04X/%u Ev=%X pData=%p Off=%u Size=%u\n"
+           "                  ObjSize=%u TransSize=%u Acc=%X Typ=%X)\n",
         pParam_p->m_uiIndex, pParam_p->m_uiSubIndex,
         pParam_p->m_ObdEvent,
         pParam_p->m_pData, pParam_p->m_SegmentOffset, pParam_p->m_SegmentSize,
-        pParam_p->m_ObjSize, pParam_p->m_Access, pParam_p->m_Type);
+        pParam_p->m_ObjSize, pParam_p->m_TransferSize, pParam_p->m_Access, pParam_p->m_Type);
 
     if ((pParam_p->m_uiSubIndex >= 2)
-        && ((pParam_p->m_ObdEvent == kEplObdEvInitWrite)
+        && ((pParam_p->m_ObdEvent == kEplObdEvInitWriteLe)
             || (pParam_p->m_ObdEvent == kEplObdEvPreRead)))
     {   // adopt the transfer
     tEplObdParam*   pMyObdParam;
     tEplTimerArg    TimerArg;
     tEplTimerHdl    EplTimerHdl;
+
+        if (pParam_p->m_ObdEvent == kEplObdEvInitWriteLe)
+        {
+            EplAppDumpData(pParam_p->m_pData, min (pParam_p->m_SegmentSize, 256));
+        }
 
         if (pParam_p->m_pfnAccessFinished == NULL)
         {
@@ -1389,6 +1752,8 @@ static void EplAppPrintMenue()
     printf("i \t Write 0xFF to remote object 0x1030 subindex 1\n");
     printf("j \t Write 0xFFFF to remote object 0x1030 subindex 8\n");
     printf("r \t Read arbitrary remote object in LE\n");
+    printf("s \t Write string to arbitrary remote object\n");
+    printf("w \t Write bytes to arbitrary remote object in LE\n");
 #endif
 
     printf("A \t Read local object 0x1000\n");
@@ -1399,6 +1764,8 @@ static void EplAppPrintMenue()
     printf("F \t Write 2000 Byte to local object 0x2100\n");
     printf("G \t Read local object 0x2100\n");
     printf("R \t Read arbitrary local object in LE\n");
+    printf("S \t Write string to arbitrary local object\n");
+    printf("W \t Write bytes to arbitrary local object in LE\n");
 
     printf("? \t show help\n");
     printf("\n");
