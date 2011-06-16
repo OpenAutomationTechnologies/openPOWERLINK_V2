@@ -2199,6 +2199,7 @@ tEplObdEvent            OrgObdEvent;
     if (pObdParam_p->m_TransferSize > ObdSize)
     {
         Ret = kEplObdValueLengthError;
+        pObdParam_p->m_dwAbortCode = EPL_SDOAC_DATA_TYPE_LENGTH_TOO_HIGH;
         goto Exit;
     }
 
@@ -2215,6 +2216,7 @@ tEplObdEvent            OrgObdEvent;
     {
         // type is numerical, therefor size has to fit, but it does not.
         Ret = kEplObdValueLengthError;
+        pObdParam_p->m_dwAbortCode = EPL_SDOAC_DATA_TYPE_LENGTH_NOT_MATCH;
         goto Exit;
     }
 
@@ -2225,6 +2227,7 @@ tEplObdEvent            OrgObdEvent;
             || (pObdParam_p->m_SegmentSize > (pObdParam_p->m_ObjSize - pObdParam_p->m_SegmentOffset)))
         {   // segment does not fit into the object
             Ret = kEplObdValueLengthError;
+            pObdParam_p->m_dwAbortCode = EPL_SDOAC_DATA_TYPE_LENGTH_TOO_HIGH;
             goto Exit;
         }
 
@@ -2435,6 +2438,7 @@ BOOL                    fEntryNumerical;
     if (pObdParam_p->m_SegmentOffset > pObdParam_p->m_ObjSize)
     {
         Ret = kEplObdValueLengthError;
+        pObdParam_p->m_dwAbortCode = EPL_SDOAC_DATA_TYPE_LENGTH_TOO_LOW;
         goto Exit;
     }
 
