@@ -53,7 +53,7 @@
 FIND_PACKAGE(Qt4 REQUIRED)
 
 SET(KERNELMOD_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../powerlink_kernel_module)
-SET(USERLIB_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../powerlink_user_lib)
+SET(USERLIB_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../../Generic/powerlink_user_lib)
 
 SET(DEMO_SOURCES src/EplApi.cpp
                  src/EplCnState.cpp

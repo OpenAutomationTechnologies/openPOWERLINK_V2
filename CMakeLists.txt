@@ -73,16 +73,16 @@ INCLUDE(CMakeDependentOption)
 ###############################################################################
 #SET(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/bin)
 
-# some compilation options if we compile on a unix system
+SET(CFG_DEBUG_LVL "0xEC000000L" CACHE STRING "Debug Level for debug output")
+OPTION (CFG_POWERLINK_CFM "Use POWERLINK configuration manager (CFM)" ON)
+OPTION (CFG_POWERLINK_PROCESS_IMAGE "Use process image to transfer synchronous data between stack and application" ON)
+
+# additional Linux settings
 IF (UNIX)
     SET(CFG_KERNEL_DIR "" CACHE PATH
         "Select the kernel directory to be used, if not specified, system kernel dir will be used!")
-    SET(CFG_DEBUG_LVL "0xEC000000L" CACHE STRING "Debug Level for debug output")
 
     SET(CFG_POWERLINK_EDRV "82573" CACHE STRING "Valid drivers are 8139,82573")
-    OPTION (CFG_POWERLINK_CFM "Use POWERLINK configuration manager (CFM)" ON)
-    OPTION (CFG_POWERLINK_PROCESS_IMAGE "Use process image to transfer synchronous data between stack and application" ON)
-
     OPTION (CFG_KERNEL_STACK "Use POWERLINK kernel based stack (if OFF, userspace library will be used!)" OFF)
     
     OPTION (CFG_X86_LINUX_DEMO_KERNEL "Build Linux kernel based demo application" OFF)
@@ -94,11 +94,8 @@ IF (UNIX)
                             "CFG_POWERLINK_PROCESS_IMAGE" OFF)
 ENDIF (UNIX)   
 
+# additional Windows settings
 IF (WIN32)
-    SET(CFG_DEBUG_LVL "0xEC000000L" CACHE STRING "Debug Level for debug output")
-
-    OPTION (CFG_POWERLINK_CFM "Use POWERLINK configuration manager (CFM)" ON)
-    OPTION (CFG_POWERLINK_PROCESS_IMAGE "Use process image to transfer synchronous data between stack and application" ON)
     OPTION (CFG_X86_WINDOWS_DLL "Build Windows POWERLINK library as DLL" ON)
 
     CMAKE_DEPENDENT_OPTION (CFG_X86_WINDOWS_DEMO_PROCESS_IMAGE_CONSOLE "Build Windows process image based console demo application" ON
@@ -113,58 +110,51 @@ ENDIF (WIN32)
 INCLUDE_DIRECTORIES (
     ${openPOWERLINK_SOURCE_DIR}/Include
     ${openPOWERLINK_SOURCE_DIR}/SharedBuff
-    ) 
+) 
 
 SET(POWERLINK_SOURCE_DIR ${CMAKE_SOURCE_DIR})
 SET(POWERLINK_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/Include)
 SET(EDRV_SOURCE_DIR ${CMAKE_SOURCE_DIR}/Edrv)    
 
 ###############################################################################
-# Linux examples
+# Examples
 ###############################################################################
-IF(UNIX)
-
 # Add subdirectory of pcap based MN CFM library
 IF (NOT CFG_KERNEL_STACK)
-    ADD_SUBDIRECTORY(Examples/X86/Linux/gnu/powerlink_user_lib)
+    ADD_SUBDIRECTORY(Examples/X86/Generic/powerlink_user_lib)
 ENDIF (NOT CFG_KERNEL_STACK)
 
-# Add subdirectory of kernel module
-IF (CFG_KERNEL_STACK)
-    ADD_SUBDIRECTORY(Examples/X86/Linux/gnu/powerlink_kernel_module)
-ENDIF (CFG_KERNEL_STACK)
+# Linux specific part
+IF(UNIX)
+    # Add subdirectory of kernel module
+    IF (CFG_KERNEL_STACK)
+        ADD_SUBDIRECTORY(Examples/X86/Linux/gnu/powerlink_kernel_module)
+    ENDIF (CFG_KERNEL_STACK)
 
-# Add subdirectory of kernel demo application        
-IF (CFG_X86_LINUX_DEMO_KERNEL)
-    ADD_SUBDIRECTORY(Examples/X86/Linux/gnu/demo_kernel)
-ENDIF (CFG_X86_LINUX_DEMO_KERNEL)
-        
-# Add subdirectory of QT demo application
-IF (CFG_X86_LINUX_DEMO_QT)
-    ADD_SUBDIRECTORY(Examples/X86/Linux/gnu/demo_qt)
-ENDIF (CFG_X86_LINUX_DEMO_QT)
+    # Add subdirectory of kernel demo application        
+    IF (CFG_X86_LINUX_DEMO_KERNEL)
+        ADD_SUBDIRECTORY(Examples/X86/Linux/gnu/demo_kernel)
+    ENDIF (CFG_X86_LINUX_DEMO_KERNEL)
+            
+    # Add subdirectory of QT demo application
+    IF (CFG_X86_LINUX_DEMO_QT)
+        ADD_SUBDIRECTORY(Examples/X86/Linux/gnu/demo_qt)
+    ENDIF (CFG_X86_LINUX_DEMO_QT)
 
-# Add subdirectory of process image based QT demo application
-IF (CFG_X86_LINUX_DEMO_PROCESS_IMAGE_QT)
-    ADD_SUBDIRECTORY(Examples/X86/Linux/gnu/demo_process_image_qt)
-ENDIF (CFG_X86_LINUX_DEMO_PROCESS_IMAGE_QT)
+    # Add subdirectory of process image based QT demo application
+    IF (CFG_X86_LINUX_DEMO_PROCESS_IMAGE_QT)
+        ADD_SUBDIRECTORY(Examples/X86/Linux/gnu/demo_process_image_qt)
+    ENDIF (CFG_X86_LINUX_DEMO_PROCESS_IMAGE_QT)
 
-# Add subdirectory of process image based console demo application        
-IF (CFG_X86_LINUX_DEMO_PROCESS_IMAGE_CONSOLE)
-    ADD_SUBDIRECTORY(Examples/X86/Linux/gnu/demo_process_image_console)
-ENDIF (CFG_X86_LINUX_DEMO_PROCESS_IMAGE_CONSOLE)
-
+    # Add subdirectory of process image based console demo application
+    IF (CFG_X86_LINUX_DEMO_PROCESS_IMAGE_CONSOLE)
+        ADD_SUBDIRECTORY(Examples/X86/Linux/gnu/demo_process_image_console)
+    ENDIF (CFG_X86_LINUX_DEMO_PROCESS_IMAGE_CONSOLE)
 ENDIF(UNIX)
 
-
-###############################################################################
-# Windows examples
-###############################################################################
+# Windows specific part
 IF(WIN32)
-    # Add subdirectory of winpcap based MN CFM library
-    ADD_SUBDIRECTORY(Examples/X86/Windows/VC/powerlink_user_lib)
-
-    # Add subdirectory of process image based console demo application        
+    # Add subdirectory of process image based console demo application
     IF (CFG_X86_WINDOWS_DEMO_PROCESS_IMAGE_CONSOLE)
         ADD_SUBDIRECTORY(Examples/X86/Windows/VC/demo_process_image_console)
     ENDIF (CFG_X86_WINDOWS_DEMO_PROCESS_IMAGE_CONSOLE)

@@ -6,7 +6,7 @@
 #     B&R Strasse 1, A-5142 Eggelsberg
 #     www.br-automation.com
 #
-# Description: cmake file of Windows userspace openPOWERLINK library
+# Description: cmake file of userspace openPOWERLINK library
 #
 # License:
 #
@@ -53,15 +53,17 @@
 #
 # additional compiler flags
 #
-ADD_DEFINITIONS(-D_CONSOLE -DWPCAP -DHAVE_REMOTE)
-
+IF (UNIX)
+    ADD_DEFINITIONS(-Wall -Wextra -pedantic -std=c99 -pthread -D_GNU_SOURCE -D_POSIX_C_SOURCE=200112L)
+ELSEIF (WIN32)
+    ADD_DEFINITIONS(-D_CONSOLE -DWPCAP -DHAVE_REMOTE)
+ENDIF ()
+	
 #
 # Configure depending selected mode
 #
 IF(CFG_POWERLINK_CFM)
-
     IF(CFG_POWERLINK_PROCESS_IMAGE)
-
         SET(OBJDICT CiA302-4_MN)
         ADD_DEFINITIONS(-DCONFIG_CFM -DCONFIG_OPENCONFIGURATOR_MAPPING)
         SET(LIB_SOURCES ${LIB_SOURCES}
@@ -79,9 +81,7 @@ IF(CFG_POWERLINK_CFM)
         SET(LIB_OBJDICT ${LIB_OBJDICT}
                         ${POWERLINK_SOURCE_DIR}/ObjDicts/${OBJDICT}/EplApiProcessImageSetup.c
             )
-
     ELSE(CFG_POWERLINK_PROCESS_IMAGE)
-
         SET(OBJDICT Qt_MN)
         ADD_DEFINITIONS(-DCONFIG_CFM)
         SET(LIB_SOURCES ${LIB_SOURCES}
@@ -95,55 +95,81 @@ IF(CFG_POWERLINK_CFM)
         SET (LIB_HEADERS_USER ${LIB_HEADERS_USER}
                               ${POWERLINK_SOURCE_DIR}/Include/user/EplCfmu.h
             )
-
     ENDIF(CFG_POWERLINK_PROCESS_IMAGE)
-
 ELSE(CFG_POWERLINK_CFM)
-
     SET(OBJDICT Qt_MN)
-
 ENDIF(CFG_POWERLINK_CFM)
 
-IF(CFG_X86_WINDOWS_DLL)
-    SET(LIB_TYPE "SHARED")
-ELSE(CFG_X86_WINDOWS_DLL)
-    SET(LIB_TYPE "STATIC")
-ENDIF(CFG_X86_WINDOWS_DLL)
+#
+# Set type of library
+#
+IF (WIN32)
+    IF(CFG_X86_WINDOWS_DLL)
+        SET(LIB_TYPE "SHARED")
+    ELSE(CFG_X86_WINDOWS_DLL)
+        SET(LIB_TYPE "STATIC")
+    ENDIF(CFG_X86_WINDOWS_DLL)
+ENDIF ()
 
 #
 # setup ethernet driver to use
 #
-SET(LIB_SOURCES ${LIB_SOURCES}
-                ${POWERLINK_SOURCE_DIR}/Edrv/EdrvPcap.c
-    )
+IF (UNIX)
+    SET(LIB_SOURCES ${LIB_SOURCES}
+                    ${POWERLINK_SOURCE_DIR}/Edrv/EdrvPcapLinux.c
+        )
+ELSEIF (WIN32)
+    SET(LIB_SOURCES ${LIB_SOURCES}
+                    ${POWERLINK_SOURCE_DIR}/Edrv/EdrvPcap.c
+        )
+ENDIF ()
 
 #
 # setup object dictionary to use
 #
 SET(LIB_OBJDICT ${LIB_OBJDICT}
                 ${POWERLINK_SOURCE_DIR}/ObjDicts/${OBJDICT}/Objdict.c
-                ${POWERLINK_SOURCE_DIR}/ObjDicts/${OBJDICT}/Objdict.h
+                ${POWERLINK_SOURCE_DIR}/ObjDicts/${OBJDICT}/EplApiProcessImageSetup.c
+                ${POWERLINK_SOURCE_DIR}/ObjDicts/${OBJDICT}/objdict.h
                 ${POWERLINK_SOURCE_DIR}/ObjDicts/${OBJDICT}/obdcfg.h
                 ${POWERLINK_SOURCE_DIR}/ObjDicts/Generic/objdict_1000-13ff.h
                 ${POWERLINK_SOURCE_DIR}/ObjDicts/Generic/objdict_1b00-1fff.h
     )
 
 #
-# set sources of POWERLINK library
+# set general sources of POWERLINK library
 #
 SET (LIB_SOURCES ${LIB_SOURCES}
                  ${POWERLINK_SOURCE_DIR}/EplStack/EplApiGeneric.c
                  ${POWERLINK_SOURCE_DIR}/EplStack/EplDebug.c
                  ${POWERLINK_SOURCE_DIR}/EplStack/EplObd.c
-                 ${POWERLINK_SOURCE_DIR}/EplStack/EplTimeruGeneric.c
                  ${POWERLINK_SOURCE_DIR}/EplStack/EplApiProcessImage.c
+                 ${POWERLINK_SOURCE_DIR}/Edrv/EdrvCyclic.c
                  ${POWERLINK_SOURCE_DIR}/EplStack/amix86.c
                  ${POWERLINK_SOURCE_DIR}/SharedBuff/SharedBuff.c
-                 ${POWERLINK_SOURCE_DIR}/SharedBuff/ShbIpc-Win32.c
                  ${POWERLINK_SOURCE_DIR}/Edrv/EdrvCyclic.c
-                 ${POWERLINK_SOURCE_DIR}/EplStack/trace.c
     )
 
+IF (UNIX)
+    SET (LIB_SOURCES ${LIB_SOURCES}
+                     ${POWERLINK_SOURCE_DIR}/EplStack/EplSdoUdpu.c
+                     ${POWERLINK_SOURCE_DIR}/EplStack/EplTimeruLinuxUser.c
+                     ${POWERLINK_SOURCE_DIR}/EplStack/EplTimerHighReskPosix.c
+                     ${POWERLINK_SOURCE_DIR}/SharedBuff/ShbIpc-LinuxPthreads.c
+                     ${POWERLINK_SOURCE_DIR}/Target/X86/Linux/gnu/generic/ftraceDebug.c
+                     ${POWERLINK_SOURCE_DIR}/Target/X86/Linux/gnu/generic/EplTgtInitPosix.c
+        )
+ELSEIF (WIN32)
+    SET (LIB_SOURCES ${LIB_SOURCES}
+                     ${POWERLINK_SOURCE_DIR}/EplStack/EplTimeruGeneric.c
+                     ${POWERLINK_SOURCE_DIR}/SharedBuff/ShbIpc-Win32.c
+                     ${POWERLINK_SOURCE_DIR}/EplStack/trace.c
+        )
+ENDIF ()
+
+#
+# set kernel part sources of POWERLINK library
+#
 SET (LIB_SOURCES_KERNEL ${LIB_SOURCES_KERNEL}
                         ${POWERLINK_SOURCE_DIR}/EplStack/EplDllk.c
                         ${POWERLINK_SOURCE_DIR}/EplStack/EplDllkCal.c
@@ -155,6 +181,9 @@ SET (LIB_SOURCES_KERNEL ${LIB_SOURCES_KERNEL}
                         ${POWERLINK_SOURCE_DIR}/EplStack/EplErrorHandlerk.c
     )
 
+#
+# set user part sources of POWERLINK library
+#
 SET (LIB_SOURCES_USER ${LIB_SOURCES_USER}
                       ${POWERLINK_SOURCE_DIR}/EplStack/EplDlluCal.c
                       ${POWERLINK_SOURCE_DIR}/EplStack/EplEventu.c
@@ -173,7 +202,7 @@ SET (LIB_SOURCES_USER ${LIB_SOURCES_USER}
     )
 
 #
-# set header files of POWERLINK library
+# set general header files of POWERLINK library
 #
 SET (LIB_HEADERS ${LIB_HEADERS}
                  ./EplCfg.h
@@ -206,6 +235,9 @@ SET (LIB_HEADERS ${LIB_HEADERS}
                  ${POWERLINK_SOURCE_DIR}/SharedBuff/ShbIpc.h
     )
 
+#
+# set kernel part header files of POWERLINK library
+#
 SET (LIB_HEADERS_KERNEL ${LIB_HEADERS_KERNEL}
                         ${POWERLINK_SOURCE_DIR}/Include/kernel/EplDllk.h
                         ${POWERLINK_SOURCE_DIR}/Include/kernel/EplDllkCal.h
@@ -222,6 +254,9 @@ SET (LIB_HEADERS_KERNEL ${LIB_HEADERS_KERNEL}
                         ${POWERLINK_SOURCE_DIR}/Include/kernel/EplTimerk.h
     )
 
+#
+# set user part header files of POWERLINK library
+#
 SET (LIB_HEADERS_USER ${LIB_HEADERS_USER}
                       ${POWERLINK_SOURCE_DIR}/Include/user/EplDllu.h
                       ${POWERLINK_SOURCE_DIR}/Include/user/EplDlluCal.h
@@ -256,6 +291,9 @@ ELSE (CMAKE_CL_64)
     LINK_DIRECTORIES(${POWERLINK_SOURCE_DIR}/Target/X86/Windows/WpdPack/Lib)
 ENDIF (CMAKE_CL_64)
 
+#
+# Group source files
+#
 SOURCE_GROUP("Source Files" FILES ${LIB_SOURCES})
 SOURCE_GROUP("Source Files\\Kernel Part" FILES ${LIB_SOURCES_KERNEL})
 SOURCE_GROUP("Source Files\\User Part" FILES ${LIB_SOURCES_USER})
@@ -264,14 +302,54 @@ SOURCE_GROUP("Header Files\\Kernel Part" FILES ${LIB_HEADERS_KERNEL})
 SOURCE_GROUP("Header Files\\User Part" FILES ${LIB_HEADERS_USER})
 SOURCE_GROUP("Object Dictionary" FILES ${LIB_OBJDICT})
 
-ADD_LIBRARY(openPOWERLINK ${LIB_TYPE} ${LIB_SOURCES} ${LIB_SOURCES_KERNEL} ${LIB_SOURCES_USER} ${LIB_HEADERS} ${LIB_HEADERS_KERNEL} ${LIB_HEADERS_USER} ${LIB_OBJDICT})
+#
+# Source include directories
+#
+INCLUDE_DIRECTORIES(
+    .
+    ${POWERLINK_SOURCE_DIR}/ObjDicts/${OBJDICT}
+)
 
-TARGET_LINK_LIBRARIES(openPOWERLINK wpcap iphlpapi)
+IF (WIN32)
+    INCLUDE_DIRECTORIES(${INCLUDE_DIRECTORIES}
+                        ${POWERLINK_SOURCE_DIR}/Target/X86/Windows/WpdPack/Include
+    )
+ENDIF (WIN32)
 
-SET_PROPERTY(TARGET openPOWERLINK
-             PROPERTY COMPILE_DEFINITIONS_DEBUG DEBUG;DEF_DEBUG_LVL=${CFG_DEBUG_LVL})
 
-# install
-IF (CFG_X86_WINDOWS_DLL)
-    INSTALL(TARGETS openPOWERLINK RUNTIME DESTINATION bin)
-ENDIF (CFG_X86_WINDOWS_DLL)
+#
+# Library include directories
+#
+IF (WIN32)
+    IF (CMAKE_CL_64)
+        LINK_DIRECTORIES(${POWERLINK_SOURCE_DIR}/Target/X86/Windows/WpdPack/Lib/x64)
+    ELSE (CMAKE_CL_64)
+        LINK_DIRECTORIES(${POWERLINK_SOURCE_DIR}/Target/X86/Windows/WpdPack/Lib)
+    ENDIF (CMAKE_CL_64)
+ENDIF ()
+
+#
+# Define library source code 
+#
+IF (UNIX)
+    ADD_LIBRARY(powerlink ${LIB_SOURCES} ${LIB_SOURCES_KERNEL} ${LIB_SOURCES_USER} ${LIB_HEADERS} ${LIB_HEADERS_KERNEL} ${LIB_HEADERS_USER} ${LIB_OBJDICT})
+
+    SET_PROPERTY(TARGET powerlink
+                 PROPERTY COMPILE_DEFINITIONS_DEBUG DEBUG;DEF_DEBUG_LVL=${CFG_DEBUG_LVL})	
+ELSEIF (WIN32)
+    ADD_LIBRARY(openPOWERLINK ${LIB_TYPE} ${LIB_SOURCES} ${LIB_SOURCES_KERNEL} ${LIB_SOURCES_USER} ${LIB_HEADERS} ${LIB_HEADERS_KERNEL} ${LIB_HEADERS_USER} ${LIB_OBJDICT})
+
+    TARGET_LINK_LIBRARIES(openPOWERLINK wpcap iphlpapi)
+
+    SET_PROPERTY(TARGET openPOWERLINK
+                 PROPERTY COMPILE_DEFINITIONS_DEBUG DEBUG;DEF_DEBUG_LVL=${CFG_DEBUG_LVL})
+ENDIF ()
+
+#
+# Installation
+#
+IF (WIN32)
+    IF (CFG_X86_WINDOWS_DLL)
+        INSTALL(TARGETS openPOWERLINK RUNTIME DESTINATION bin)
+    ENDIF (CFG_X86_WINDOWS_DLL)
+ENDIF ()

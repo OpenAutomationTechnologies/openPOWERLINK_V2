@@ -57,7 +57,7 @@ ADD_DEFINITIONS(-Wall -Wextra -pedantic -std=c99 -pthread -D_GNU_SOURCE
 
 # additional include directories
 SET(KERNELMOD_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../powerlink_kernel_module)
-SET(USERLIB_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../powerlink_user_lib)
+SET(USERLIB_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../../Generic/powerlink_user_lib)
 
 # set sources of POWERLINK application
 SET (DEMO_SOURCES

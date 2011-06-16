@@ -54,7 +54,7 @@
 ADD_DEFINITIONS(-D_CONSOLE -DWPCAP -DHAVE_REMOTE)
 
 # additional include directories
-SET(USERLIB_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../powerlink_user_lib)
+SET(USERLIB_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../../Generic/powerlink_user_lib)
 
 # set sources of POWERLINK application
 SET (DEMO_SOURCES demo_main.c)
