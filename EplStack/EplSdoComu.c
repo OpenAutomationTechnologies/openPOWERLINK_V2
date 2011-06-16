@@ -1120,7 +1120,6 @@ tEplSdoComCon*      pSdoComCon;
 BYTE                bFlag;
 
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOS)) != 0)
-DWORD               dwAbortCode;
 unsigned int        uiSize;
 #endif
 
@@ -1227,10 +1226,8 @@ unsigned int        uiSize;
                                 default:
                                 {
                                     //  unsupported command
-                                    //       -> abort senden
-                                    dwAbortCode = EPL_SDOAC_UNKNOWN_COMMAND_SPECIFIER;
                                     // send abort
-                                    pSdoComCon->m_pData = (BYTE*)&dwAbortCode;
+                                    pSdoComCon->m_dwLastAbortCode = EPL_SDOAC_UNKNOWN_COMMAND_SPECIFIER;
                                     Ret = EplSdoComServerSendFrameIntern(pSdoComCon,
                                                                 0,
                                                                 0,
@@ -1944,9 +1941,8 @@ DWORD           dwAbortCode;
     Ret = EplObduGetAccessType(uiIndex, uiSubindex, &AccessType);
     if(Ret == kEplObdSubindexNotExist)
     {   // subentry doesn't exist
-        dwAbortCode = EPL_SDOAC_SUB_INDEX_NOT_EXIST;
+        pSdoComCon_p->m_dwLastAbortCode = EPL_SDOAC_SUB_INDEX_NOT_EXIST;
         // send abort
-        pSdoComCon_p->m_pData = (BYTE*)&dwAbortCode;
         Ret = EplSdoComServerSendFrameIntern(pSdoComCon_p,
                                     uiIndex,
                                     uiSubindex,
@@ -1955,9 +1951,8 @@ DWORD           dwAbortCode;
     }
     else if(Ret != kEplSuccessful)
     {   // entry doesn't exist
-        dwAbortCode = EPL_SDOAC_OBJECT_NOT_EXIST;
+        pSdoComCon_p->m_dwLastAbortCode = EPL_SDOAC_OBJECT_NOT_EXIST;
         // send abort
-        pSdoComCon_p->m_pData = (BYTE*)&dwAbortCode;
         Ret = EplSdoComServerSendFrameIntern(pSdoComCon_p,
                                     uiIndex,
                                     uiSubindex,
@@ -1970,17 +1965,16 @@ DWORD           dwAbortCode;
         && ((AccessType & kEplObdAccConst) == 0))
     {
 
-        if((AccessType & kEplObdAccWrite) != 0)
+        if ((AccessType & kEplObdAccWrite) != 0)
         {
             // entry read a write only object
-            dwAbortCode = EPL_SDOAC_READ_TO_WRITE_ONLY_OBJ;
+            pSdoComCon_p->m_dwLastAbortCode = EPL_SDOAC_READ_TO_WRITE_ONLY_OBJ;
         }
         else
         {
-            dwAbortCode = EPL_SDOAC_UNSUPPORTED_ACCESS;
+            pSdoComCon_p->m_dwLastAbortCode = EPL_SDOAC_UNSUPPORTED_ACCESS;
         }
         // send abort
-        pSdoComCon_p->m_pData = (BYTE*)&dwAbortCode;
         Ret = EplSdoComServerSendFrameIntern(pSdoComCon_p,
                                     uiIndex,
                                     uiSubindex,
@@ -2011,12 +2005,11 @@ DWORD           dwAbortCode;
                                     uiIndex,
                                     uiSubindex,
                                     kEplSdoComSendTypeRes);
-    if(Ret != kEplSuccessful)
+    if (Ret != kEplSuccessful)
     {
         // error -> abort
-        dwAbortCode = EPL_SDOAC_GENERAL_ERROR;
+        pSdoComCon_p->m_dwLastAbortCode = EPL_SDOAC_GENERAL_ERROR;
         // send abort
-        pSdoComCon_p->m_pData = (BYTE*)&dwAbortCode;
         Ret = EplSdoComServerSendFrameIntern(pSdoComCon_p,
                                     uiIndex,
                                     uiSubindex,
@@ -2060,7 +2053,7 @@ BYTE            bFlag;
     if (pObdParam_p->m_dwAbortCode != 0)
     {
         // send abort
-        pSdoComCon->m_pData = (BYTE*)&pObdParam_p->m_dwAbortCode;
+        pSdoComCon->m_dwLastAbortCode = pObdParam_p->m_dwAbortCode;
         Ret = EplSdoComServerSendFrameIntern(pSdoComCon,
                                     pObdParam_p->m_uiIndex,
                                     pObdParam_p->m_uiSubIndex,
@@ -2224,7 +2217,7 @@ BYTE            bFlag;
                 else if (Ret != kEplSuccessful)
                 {
                     // send abort
-                    pSdoComCon_p->m_pData = (BYTE*)&ObdParam.m_dwAbortCode;
+                    pSdoComCon_p->m_dwLastAbortCode = ObdParam.m_dwAbortCode;
                     Ret = EplSdoComServerSendFrameIntern(pSdoComCon_p,
                                                 uiIndex_p,
                                                 uiSubIndex_p,
@@ -2350,7 +2343,7 @@ BYTE            bFlag;
             AmiSetByteToLe(&pCommandFrame->m_le_bFlags,  bFlag);
 
             // copy abortcode to frame
-            AmiSetDwordToLe(&pCommandFrame->m_le_abCommandData[0], *((DWORD*)pSdoComCon_p->m_pData));
+            AmiSetDwordToLe(&pCommandFrame->m_le_abCommandData[0], pSdoComCon_p->m_dwLastAbortCode);
 
             // set size of segment
             AmiSetWordToLe(&pCommandFrame->m_le_wSegmentSize, sizeof(DWORD));
@@ -2399,7 +2392,7 @@ tEplSdoComCon*  pSdoComCon;
     if (pObdParam_p->m_dwAbortCode != 0)
     {
         // send abort
-        pSdoComCon->m_pData = (BYTE*)&pObdParam_p->m_dwAbortCode;
+        pSdoComCon->m_dwLastAbortCode = pObdParam_p->m_dwAbortCode;
         Ret = EplSdoComServerSendFrameIntern(pSdoComCon,
                                     pObdParam_p->m_uiIndex,
                                     pObdParam_p->m_uiSubIndex,
@@ -2452,10 +2445,9 @@ unsigned int    uiSubindex;
 unsigned int    uiBytesToTransfer;
 tEplObdSize     EntrySize;
 tEplObdAccess   AccessType;
-DWORD           dwAbortCode;
+unsigned int    uiSegmentSize;
 BYTE*           pbSrcData;
-
-    dwAbortCode = 0;
+tEplObdParam    ObdParam;
 
     // a init of a write
     // -> variable part of header possible
@@ -2651,10 +2643,9 @@ BYTE*           pbSrcData;
     }
 
 Abort:
-    if(pSdoComCon_p->m_dwLastAbortCode != 0)
+    if (pSdoComCon_p->m_dwLastAbortCode != 0)
     {
         // send abort
-        pSdoComCon_p->m_pData = (BYTE*)&pSdoComCon_p->m_dwLastAbortCode;
         Ret = EplSdoComServerSendFrameIntern(pSdoComCon_p,
                                     uiIndex,
                                     uiSubindex,
