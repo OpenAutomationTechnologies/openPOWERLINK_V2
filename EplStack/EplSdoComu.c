@@ -1992,7 +1992,7 @@ DWORD           dwAbortCode;
 
     // get size of object to see iof segmented or expedited transfer
     EntrySize = EplObduGetDataSize(uiIndex, uiSubindex);
-    if(EntrySize > EPL_SDO_MAX_PAYLOAD)
+    if(EntrySize > EPL_SDO_MAX_SEGMENT_SIZE)
     {   // segmented transfer
         pSdoComCon_p->m_SdoTransType = kEplSdoTransSegmented;
         // get pointer to object-entry data
@@ -2149,26 +2149,26 @@ BYTE            bFlag;
                     // init variable header
                     AmiSetDwordToLe(&pCommandFrame->m_le_abCommandData[0],pSdoComCon_p->m_uiTransSize);
                     // copy data in frame
-                    EPL_MEMCPY(&pCommandFrame->m_le_abCommandData[4],pSdoComCon_p->m_pData, (EPL_SDO_MAX_PAYLOAD-4));
+                    EPL_MEMCPY(&pCommandFrame->m_le_abCommandData[4],pSdoComCon_p->m_pData, (EPL_SDO_MAX_SEGMENT_SIZE-4));
 
                     // correct byte-counter
-                    pSdoComCon_p->m_uiTransSize -= (EPL_SDO_MAX_PAYLOAD-4);
-                    pSdoComCon_p->m_uiTransferredByte += (EPL_SDO_MAX_PAYLOAD-4);
+                    pSdoComCon_p->m_uiTransSize -= (EPL_SDO_MAX_SEGMENT_SIZE-4);
+                    pSdoComCon_p->m_uiTransferredByte += (EPL_SDO_MAX_SEGMENT_SIZE-4);
                     // move data pointer
-                    pSdoComCon_p->m_pData +=(EPL_SDO_MAX_PAYLOAD-4);
+                    pSdoComCon_p->m_pData +=(EPL_SDO_MAX_SEGMENT_SIZE-4);
 
                     // set segment size
-                    AmiSetWordToLe(&pCommandFrame->m_le_wSegmentSize, EPL_SDO_MAX_PAYLOAD);
+                    AmiSetWordToLe(&pCommandFrame->m_le_wSegmentSize, EPL_SDO_MAX_SEGMENT_SIZE);
 
                     // send frame
-                    uiSizeOfFrame += EPL_SDO_MAX_PAYLOAD;
+                    uiSizeOfFrame += EPL_SDO_MAX_SEGMENT_SIZE;
                     Ret = EplSdoAsySeqSendData(pSdoComCon_p->m_SdoSeqConHdl,
                                                 uiSizeOfFrame,
                                                 pFrame);
 
                 }
                 else if((pSdoComCon_p->m_uiTransferredByte > 0)
-                    &&(pSdoComCon_p->m_uiTransSize > EPL_SDO_MAX_PAYLOAD))
+                    &&(pSdoComCon_p->m_uiTransSize > EPL_SDO_MAX_SEGMENT_SIZE))
                 {   // segment
                     // set segment flag
                     bFlag = AmiGetByteFromLe( &pCommandFrame->m_le_bFlags);
@@ -2176,19 +2176,19 @@ BYTE            bFlag;
                     AmiSetByteToLe(&pCommandFrame->m_le_bFlags,  bFlag);
 
                     // copy data in frame
-                    EPL_MEMCPY(&pCommandFrame->m_le_abCommandData[0],pSdoComCon_p->m_pData, EPL_SDO_MAX_PAYLOAD);
+                    EPL_MEMCPY(&pCommandFrame->m_le_abCommandData[0],pSdoComCon_p->m_pData, EPL_SDO_MAX_SEGMENT_SIZE);
 
                     // correct byte-counter
-                    pSdoComCon_p->m_uiTransSize -= EPL_SDO_MAX_PAYLOAD;
-                    pSdoComCon_p->m_uiTransferredByte += EPL_SDO_MAX_PAYLOAD;
+                    pSdoComCon_p->m_uiTransSize -= EPL_SDO_MAX_SEGMENT_SIZE;
+                    pSdoComCon_p->m_uiTransferredByte += EPL_SDO_MAX_SEGMENT_SIZE;
                     // move data pointer
-                    pSdoComCon_p->m_pData +=EPL_SDO_MAX_PAYLOAD;
+                    pSdoComCon_p->m_pData +=EPL_SDO_MAX_SEGMENT_SIZE;
 
                     // set segment size
-                    AmiSetWordToLe(&pCommandFrame->m_le_wSegmentSize,EPL_SDO_MAX_PAYLOAD);
+                    AmiSetWordToLe(&pCommandFrame->m_le_wSegmentSize,EPL_SDO_MAX_SEGMENT_SIZE);
 
                     // send frame
-                    uiSizeOfFrame += EPL_SDO_MAX_PAYLOAD;
+                    uiSizeOfFrame += EPL_SDO_MAX_SEGMENT_SIZE;
                     Ret = EplSdoAsySeqSendData(pSdoComCon_p->m_SdoSeqConHdl,
                                                 uiSizeOfFrame,
                                                 pFrame);
@@ -2595,7 +2595,7 @@ BYTE*           pbPayload;
 
                 case kEplSdoServiceWriteByIndex:
                 {
-                    if(pSdoComCon_p->m_uiTransSize > EPL_SDO_MAX_PAYLOAD )
+                    if(pSdoComCon_p->m_uiTransSize > EPL_SDO_MAX_SEGMENT_SIZE )
                     {   // segmented transfer
                         // -> variable part of header needed
                         // save that transfer is segmented
@@ -2605,7 +2605,7 @@ BYTE*           pbPayload;
                         // set pointer to real payload
                         pbPayload = &pCommandFrame->m_le_abCommandData[4];
                         // fill rest of header
-                        AmiSetWordToLe( &pCommandFrame->m_le_wSegmentSize, EPL_SDO_MAX_PAYLOAD);
+                        AmiSetWordToLe( &pCommandFrame->m_le_wSegmentSize, EPL_SDO_MAX_SEGMENT_SIZE);
                         bFlags = 0x10;
                         AmiSetByteToLe( &pCommandFrame->m_le_bFlags, bFlags);
                         // create command header
@@ -2615,14 +2615,14 @@ BYTE*           pbPayload;
                         // on byte for reserved
                         pbPayload += 2;
                         // calc size
-                        uiSizeOfFrame += EPL_SDO_MAX_PAYLOAD;
+                        uiSizeOfFrame += EPL_SDO_MAX_SEGMENT_SIZE;
 
                         // copy payload
-                        EPL_MEMCPY( pbPayload,pSdoComCon_p->m_pData,  (EPL_SDO_MAX_PAYLOAD - 8));
-                        pSdoComCon_p->m_pData += (EPL_SDO_MAX_PAYLOAD - 8);
+                        EPL_MEMCPY( pbPayload,pSdoComCon_p->m_pData,  (EPL_SDO_MAX_SEGMENT_SIZE - 8));
+                        pSdoComCon_p->m_pData += (EPL_SDO_MAX_SEGMENT_SIZE - 8);
                         // correct intern counter
-                        pSdoComCon_p->m_uiTransSize -= (EPL_SDO_MAX_PAYLOAD - 8);
-                        pSdoComCon_p->m_uiTransferredByte = (EPL_SDO_MAX_PAYLOAD - 8);
+                        pSdoComCon_p->m_uiTransSize -= (EPL_SDO_MAX_SEGMENT_SIZE - 8);
+                        pSdoComCon_p->m_uiTransferredByte = (EPL_SDO_MAX_SEGMENT_SIZE - 8);
 
                     }
                     else
@@ -2668,21 +2668,21 @@ BYTE*           pbPayload;
                 {   // send next frame
                     if(pSdoComCon_p->m_SdoTransType == kEplSdoTransSegmented)
                     {
-                        if(pSdoComCon_p->m_uiTransSize > EPL_SDO_MAX_PAYLOAD)
+                        if(pSdoComCon_p->m_uiTransSize > EPL_SDO_MAX_SEGMENT_SIZE)
                         {   // next segment
                             pbPayload = &pCommandFrame->m_le_abCommandData[0];
                             // fill rest of header
-                            AmiSetWordToLe( &pCommandFrame->m_le_wSegmentSize, EPL_SDO_MAX_PAYLOAD);
+                            AmiSetWordToLe( &pCommandFrame->m_le_wSegmentSize, EPL_SDO_MAX_SEGMENT_SIZE);
                             bFlags = 0x20;
                             AmiSetByteToLe( &pCommandFrame->m_le_bFlags, bFlags);
                             // copy data
-                            EPL_MEMCPY( pbPayload,pSdoComCon_p->m_pData,  EPL_SDO_MAX_PAYLOAD);
-                            pSdoComCon_p->m_pData += EPL_SDO_MAX_PAYLOAD;
+                            EPL_MEMCPY( pbPayload,pSdoComCon_p->m_pData,  EPL_SDO_MAX_SEGMENT_SIZE);
+                            pSdoComCon_p->m_pData += EPL_SDO_MAX_SEGMENT_SIZE;
                             // correct intern counter
-                            pSdoComCon_p->m_uiTransSize -= EPL_SDO_MAX_PAYLOAD;
-                            pSdoComCon_p->m_uiTransferredByte += EPL_SDO_MAX_PAYLOAD;
+                            pSdoComCon_p->m_uiTransSize -= EPL_SDO_MAX_SEGMENT_SIZE;
+                            pSdoComCon_p->m_uiTransferredByte += EPL_SDO_MAX_SEGMENT_SIZE;
                             // calc size
-                            uiSizeOfFrame += EPL_SDO_MAX_PAYLOAD;
+                            uiSizeOfFrame += EPL_SDO_MAX_SEGMENT_SIZE;
 
 
                         }

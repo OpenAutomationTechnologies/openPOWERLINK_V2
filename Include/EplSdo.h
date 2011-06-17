@@ -81,8 +81,8 @@
 // const defines
 //---------------------------------------------------------------------------
 // global defines
-#ifndef EPL_SDO_MAX_PAYLOAD
-#define EPL_SDO_MAX_PAYLOAD     256
+#ifndef EPL_SDO_MAX_SEGMENT_SIZE
+#define EPL_SDO_MAX_SEGMENT_SIZE     256
 #endif
 
 // handle between Protocol Abstraction Layer and asynchronous SDO Sequence Layer
