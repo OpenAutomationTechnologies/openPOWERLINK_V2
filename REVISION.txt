@@ -741,5 +741,22 @@ Fellow worker:    Daniel Krüger (d.k.)
                       This repository contains the full history starting from version 1.1
                     - New Feature: PCAP driver for Linux userspace. The stack can run now in Linux userspace totally.
                     - Change: Converted all Linux X86 projects to use CMake.
+                    - Bug fix: There were a race condition and some other bugs in the process image
+                      implementation in Linux User Kernel Wrapper.
+                    (d.k.)
+
+17.06.2011 V1.7.2   - Bug fix: Ready flag handling in TPDOs was wrong.
+                    - New feature: The virtual Ethernet driver can set the MTU.
+                    - New feature: forward CN event EnableReadyToOp to application
+                    - Bug fix: Update object 0x1F8E on MN also in case of no IdentResponse.
+                    - Bug fix: Enable PResChaining in Altera FPGA demo project
+                    - Change: Rename .cvsignore to .gitignore
+                    - Bug fix: some compiler warnings (also on 64-bit Linux) should be gone now.
+                    - New feature: OD accesses can be adopted now by the OD callback function.
+                      This means the OD access is deferred, processed in background and finished later.
+                      Currently, this feature does not work for segmented SDO read accesses.
+                    - New feature: default OD callback function, which is called for non-existing
+                      objects.
+                    - New feature: SDO via UDP: New function to change network part of IP address.
                     (d.k.)
 
