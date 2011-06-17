@@ -107,6 +107,7 @@ INSTANCE_TYPE_BEGIN
 
     STATIC      tEplObdInitParam               INST_FAR    m_ObdInitParam;
     STATIC      tEplObdStoreLoadObjCallback    INST_NEAR   m_fpStoreLoadObjCallback;
+    STATIC      tEplObdEntry                   INST_NEAR   m_DefaultObdEntry;
 
 INSTANCE_TYPE_END
 
@@ -297,6 +298,9 @@ tEplKernel Ret;
 
     // clear callback function for command LOAD and STORE
     EPL_MCO_GLB_VAR (m_fpStoreLoadObjCallback) = NULL;
+
+    // clear default OD entry
+    EPL_MEMSET(&EPL_MCO_GLB_VAR (m_DefaultObdEntry), 0, sizeof (EPL_MCO_GLB_VAR (m_DefaultObdEntry)));
 
     // sign instance as used
     EPL_MCO_WRITE_INSTANCE_STATE (kStateUsed);
@@ -1555,6 +1559,37 @@ tEplObdParam  MEM   ObdParam;
     return Ret;
 
 }
+
+
+//---------------------------------------------------------------------------
+//
+// Function:    EplObdSetDefaultObdCallback()
+//
+// Description: function set address to default OD callbackfunction
+//
+// Parameters:  pfnCallback_p
+//
+// Return:      tEplKernel
+//
+// State:
+//
+//---------------------------------------------------------------------------
+
+EPLDLLEXPORT tEplKernel PUBLIC EplObdSetDefaultObdCallback (EPL_MCO_DECL_INSTANCE_PTR_
+                                                            tEplObdCallback pfnCallback_p)
+{
+
+    EPL_MCO_CHECK_INSTANCE_STATE ();
+
+    // set new address of callback function
+    EPL_MCO_GLB_VAR (m_DefaultObdEntry.m_fpCallback) = pfnCallback_p;
+
+    return kEplSuccessful;
+
+}
+
+
+
 //=========================================================================//
 //                                                                         //
 //          P R I V A T E   D E F I N I T I O N S                          //
@@ -1626,8 +1661,13 @@ tEplObdCallback MEM  fpCallback;
 static tEplObdSize EplObdGetDataSizeIntern (tEplObdSubEntryPtr pSubIndexEntry_p)
 {
 
-tEplObdSize DataSize;
+tEplObdSize DataSize = 0;
 void MEM*   pData;
+
+    if (pSubIndexEntry_p == NULL)
+    {
+        goto Exit;
+    }
 
     // If OD entry is defined by macro EPL_OBD_SUBINDEX_ROM_VSTRING
     // then the current pointer is always NULL. The function
@@ -1645,6 +1685,7 @@ void MEM*   pData;
 
     }
 
+Exit:
     return DataSize;
 
 }
@@ -1738,10 +1779,14 @@ static tEplKernel EplObdCheckObjectRange (
 tEplKernel      Ret;
 const void *   pRangeData;
 
-    ASSERTMSG (pSubindexEntry_p != NULL,
-        "EplObdCheckObjectRange(): no address to subindex struct!\n");
+    //ASSERTMSG (pSubindexEntry_p != NULL,
+    //    "EplObdCheckObjectRange(): no address to subindex struct!\n");
 
     Ret  = kEplSuccessful;
+    if (pSubindexEntry_p == NULL)
+    {
+        goto Exit;
+    }
 
     // check if data range has to be checked
     if ((pSubindexEntry_p->m_Access & kEplObdAccRange) == 0)
@@ -2104,6 +2149,7 @@ tEplObdEvent            OrgObdEvent;
     //      the callback function if it calls EplObdGetEntry().
     #if (EPL_OBD_USE_STRING_DOMAIN_IN_RAM != FALSE)
     if ((pObdParam_p->m_SegmentOffset == 0)
+        && (pSubEntry != NULL)
         && ((pObdParam_p->m_Type == kEplObdTypVString)
             || (pObdParam_p->m_Type == kEplObdTypDomain)
             || (pObdParam_p->m_Type == kEplObdTypOString)))
@@ -2399,7 +2445,14 @@ BOOL                    fEntryNumerical;
     // address of source data to structure of callback parameters
     // so callback function can change this data before reading
     pObdParam_p->m_ObjSize  = ObdSize;
-    pObdParam_p->m_pData    = ((BYTE*) pSrcData) + pObdParam_p->m_SegmentOffset;
+    if (pSrcData == NULL)
+    {
+        pObdParam_p->m_pData    = NULL;
+    }
+    else
+    {
+        pObdParam_p->m_pData    = ((BYTE*) pSrcData) + pObdParam_p->m_SegmentOffset;
+    }
     pObdParam_p->m_pArg     = pObdParam_p->m_pData;
     pObdParam_p->m_ObdEvent = kEplObdEvPreRead;
     Ret = EplObdCallObjectCallback (EPL_MCO_INSTANCE_PTR_
@@ -2505,6 +2558,11 @@ static tEplObdSize EplObdGetObjectSize (tEplObdSubEntryPtr pSubIndexEntry_p)
 
 tEplObdSize DataSize = 0;
 void * pData;
+
+    if (pSubIndexEntry_p == NULL)
+    {
+        goto Exit;
+    }
 
     switch (pSubIndexEntry_p->m_Type)
     {
@@ -2670,6 +2728,7 @@ void * pData;
             break;
     }
 
+Exit:
     return DataSize;
 }
 
@@ -2749,7 +2808,11 @@ static tEplKernel EplObdGetVarEntry (
 tEplKernel Ret = kEplObdVarEntryNotExist;
 
     ASSERT (ppVarEntry_p != NULL);   // is not allowed to be NULL
-    ASSERT (pSubindexEntry_p != NULL);
+    //ASSERT (pSubindexEntry_p != NULL);
+    if (pSubindexEntry_p == NULL)
+    {
+        goto Exit;
+    }
 
     // check VAR-Flag - only this object points to variables
     if ((pSubindexEntry_p->m_Access & kEplObdAccVar) != 0)
@@ -2767,6 +2830,7 @@ tEplKernel Ret = kEplObdVarEntryNotExist;
         Ret = kEplSuccessful;
     }
 
+Exit:
     return Ret;
 
 }
@@ -2806,21 +2870,33 @@ tEplKernel              Ret;
     Ret = EplObdGetIndexIntern (&EPL_MCO_GLB_VAR (m_ObdInitParam), pObdParam_p->m_uiIndex, &pObdEntry);
     if (Ret != kEplSuccessful)
     {
-        pObdParam_p->m_dwAbortCode = EPL_SDOAC_OBJECT_NOT_EXIST;
-        goto Exit;
-    }
+        if (EPL_MCO_GLB_VAR (m_DefaultObdEntry.m_fpCallback) == NULL)
+        {   // no default OD callback function registered
+            pObdParam_p->m_dwAbortCode = EPL_SDOAC_OBJECT_NOT_EXIST;
+            goto Exit;
+        }
+        pObdEntry = &EPL_MCO_GLB_VAR (m_DefaultObdEntry);
+        pObdEntry->m_uiIndex = pObdParam_p->m_uiIndex;
 
-    //------------------------------------------------------------------------
-    // get address of entry of subindex
-    Ret = EplObdGetSubindexIntern (pObdEntry, pObdParam_p->m_uiSubIndex, ppObdSubEntry_p);
-    if (Ret != kEplSuccessful)
+        *ppObdSubEntry_p = NULL;
+
+        pObdParam_p->m_Access = kEplObdAccRW;
+        pObdParam_p->m_Type = kEplObdTypDomain;
+    }
+    else
     {
-        pObdParam_p->m_dwAbortCode = EPL_SDOAC_SUB_INDEX_NOT_EXIST;
-        goto Exit;
-    }
+        //------------------------------------------------------------------------
+        // get address of entry of subindex
+        Ret = EplObdGetSubindexIntern (pObdEntry, pObdParam_p->m_uiSubIndex, ppObdSubEntry_p);
+        if (Ret != kEplSuccessful)
+        {
+            pObdParam_p->m_dwAbortCode = EPL_SDOAC_SUB_INDEX_NOT_EXIST;
+            goto Exit;
+        }
 
-    pObdParam_p->m_Access = (*ppObdSubEntry_p)->m_Access;
-    pObdParam_p->m_Type = (*ppObdSubEntry_p)->m_Type;
+        pObdParam_p->m_Access = (*ppObdSubEntry_p)->m_Access;
+        pObdParam_p->m_Type = (*ppObdSubEntry_p)->m_Type;
+    }
 
     //------------------------------------------------------------------------
     // call callback function to inform user/stack that an object will be searched
@@ -3662,10 +3738,14 @@ tEplKernel Ret = kEplSuccessful;
 static void * EplObdGetObjectDataPtrIntern (tEplObdSubEntryPtr pSubindexEntry_p)
 {
 
-void * pData;
+void * pData = NULL;
 tEplObdAccess Access;
 
-    ASSERTMSG (pSubindexEntry_p != NULL, "EplObdGetObjectDataPtrIntern(): pointer to SubEntry not valid!\n");
+    //ASSERTMSG (pSubindexEntry_p != NULL, "EplObdGetObjectDataPtrIntern(): pointer to SubEntry not valid!\n");
+    if (pSubindexEntry_p == NULL)
+    {
+        goto Exit;
+    }
 
     // there are are some objects whose data pointer has to get from other structure
     // get access type for this object
@@ -3684,6 +3764,7 @@ tEplObdAccess Access;
         pData = EplObdGetObjectCurrentPtr (pSubindexEntry_p);
     }
 
+Exit:
     return pData;
 
 }
