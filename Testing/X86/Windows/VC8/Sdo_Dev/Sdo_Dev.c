@@ -124,6 +124,9 @@ static tEplKernel PUBLIC EplAppCbAccessFinished(tEplObdParam* pObdParam_p);
 static tEplKernel PUBLIC EplAppProcessEvent(
             tEplEvent* pEplEvent_p);
 
+static tEplKernel PUBLIC EplAppCbDefaultObdAccess(tEplObdParam MEM* pParam_p);
+
+
 /***************************************************************************/
 /*                                                                         */
 /*                                                                         */
@@ -226,6 +229,12 @@ BYTE                        bBuffer;
     // initialize EplObd-Module
     Ret = EplObdInit(&ObdInitParam);
     if(Ret != kEplSuccessful)
+    {
+        goto Exit;
+    }
+
+    Ret = EplObdSetDefaultObdCallback(EplAppCbDefaultObdAccess);
+    if (Ret != kEplSuccessful)
     {
         goto Exit;
     }
@@ -1669,6 +1678,93 @@ tEplKernel          Ret = kEplSuccessful;
     if ((pParam_p->m_uiSubIndex >= 2)
         && ((pParam_p->m_ObdEvent == kEplObdEvInitWriteLe)
             || (pParam_p->m_ObdEvent == kEplObdEvPreRead)))
+    {   // adopt the transfer
+    tEplObdParam*   pMyObdParam;
+    tEplTimerArg    TimerArg;
+    tEplTimerHdl    EplTimerHdl;
+
+        if (pParam_p->m_ObdEvent == kEplObdEvInitWriteLe)
+        {
+            EplAppDumpData(pParam_p->m_pData, min (pParam_p->m_SegmentSize, 256));
+        }
+
+        if (pParam_p->m_pfnAccessFinished == NULL)
+        {
+            pParam_p->m_dwAbortCode = EPL_SDOAC_DATA_NOT_TRANSF_OR_STORED;
+            Ret = kEplObdAccessViolation;
+            goto Exit;
+        }
+
+        pMyObdParam = EPL_MALLOC(sizeof (*pMyObdParam));
+        if (pMyObdParam == NULL)
+        {
+            Ret = kEplObdOutOfMemory;
+            pParam_p->m_dwAbortCode = EPL_SDOAC_OUT_OF_MEMORY;
+            goto Exit;
+        }
+
+        EPL_MEMCPY(pMyObdParam, pParam_p, sizeof (*pMyObdParam));
+
+        TimerArg.m_EventSink = kEplEventSinkApi;
+        TimerArg.m_Arg.m_pVal = pMyObdParam;
+
+        Ret = EplTimeruSetTimerMs(&EplTimerHdl,
+                                    2000,
+                                    TimerArg);
+
+        Ret = kEplObdAccessAdopted;
+        printf("  Adopted\n");
+    }
+
+Exit:
+    return Ret;
+}
+
+
+//---------------------------------------------------------------------------
+//
+// Function:    EplAppCbDefaultObdAccess
+//
+// Description: callback function for default OD accesses
+//
+// Parameters:  pParam_p                = OBD parameter
+//
+// Returns:     tEplKernel              = error code
+//
+//
+// State:
+//
+//---------------------------------------------------------------------------
+
+static tEplKernel PUBLIC EplAppCbDefaultObdAccess(tEplObdParam MEM* pParam_p)
+{
+tEplKernel          Ret = kEplSuccessful;
+
+    printf("EplAppCbDefaultObdAccess(0x%04X/%u Ev=%X pData=%p Off=%u Size=%u\n"
+           "                         ObjSize=%u TransSize=%u Acc=%X Typ=%X)\n",
+        pParam_p->m_uiIndex, pParam_p->m_uiSubIndex,
+        pParam_p->m_ObdEvent,
+        pParam_p->m_pData, pParam_p->m_SegmentOffset, pParam_p->m_SegmentSize,
+        pParam_p->m_ObjSize, pParam_p->m_TransferSize, pParam_p->m_Access, pParam_p->m_Type);
+
+    if (pParam_p->m_uiIndex != 0x2500)
+    {
+        printf("  Object does not exist!\n");
+        pParam_p->m_dwAbortCode = EPL_SDOAC_OBJECT_NOT_EXIST;
+        Ret = kEplObdIndexNotExist;
+        goto Exit;
+    }
+
+    if (pParam_p->m_uiSubIndex > 10)
+    {
+        printf("  Sub-index does not exist!\n");
+        pParam_p->m_dwAbortCode = EPL_SDOAC_SUB_INDEX_NOT_EXIST;
+        Ret = kEplObdSubindexNotExist;
+        goto Exit;
+    }
+
+    if ((pParam_p->m_ObdEvent == kEplObdEvInitWriteLe)
+        || (pParam_p->m_ObdEvent == kEplObdEvPreRead))
     {   // adopt the transfer
     tEplObdParam*   pMyObdParam;
     tEplTimerArg    TimerArg;
