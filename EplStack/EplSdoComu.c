@@ -2146,8 +2146,8 @@ BYTE            bFlag;
                     bFlag = AmiGetByteFromLe( &pCommandFrame->m_le_bFlags);
                     bFlag |= 0x10;
                     AmiSetByteToLe(&pCommandFrame->m_le_bFlags,  bFlag);
-                    // init variable header
-                    AmiSetDwordToLe(&pCommandFrame->m_le_abCommandData[0],pSdoComCon_p->m_uiTransSize);
+                    // init data size in variable header, which includes itself
+                    AmiSetDwordToLe(&pCommandFrame->m_le_abCommandData[0], pSdoComCon_p->m_uiTransSize + 4);
                     // copy data in frame
                     EPL_MEMCPY(&pCommandFrame->m_le_abCommandData[4],pSdoComCon_p->m_pData, (EPL_SDO_MAX_SEGMENT_SIZE-4));
 
@@ -2307,6 +2307,8 @@ BYTE*           pbSrcData;
         pbSrcData = &pAsySdoCom_p->m_le_abCommandData[8];
         // save size
         pSdoComCon_p->m_uiTransSize = AmiGetDwordFromLe(&pAsySdoCom_p->m_le_abCommandData[0]);
+        // subtract header
+        pSdoComCon_p->m_uiTransSize -= 8;
 
     }
     else if ((pAsySdoCom_p->m_le_bFlags & 0x30) == 0x00)
@@ -2595,13 +2597,14 @@ BYTE*           pbPayload;
 
                 case kEplSdoServiceWriteByIndex:
                 {
-                    if(pSdoComCon_p->m_uiTransSize > EPL_SDO_MAX_SEGMENT_SIZE )
+                    if(pSdoComCon_p->m_uiTransSize > (EPL_SDO_MAX_SEGMENT_SIZE - 4))
                     {   // segmented transfer
                         // -> variable part of header needed
                         // save that transfer is segmented
                         pSdoComCon_p->m_SdoTransType = kEplSdoTransSegmented;
                         // fill variable part of header
-                        AmiSetDwordToLe( &pCommandFrame->m_le_abCommandData[0], pSdoComCon_p->m_uiTransSize);
+                        // set data size which includes the header
+                        AmiSetDwordToLe( &pCommandFrame->m_le_abCommandData[0], pSdoComCon_p->m_uiTransSize + 8);
                         // set pointer to real payload
                         pbPayload = &pCommandFrame->m_le_abCommandData[4];
                         // fill rest of header
@@ -2860,8 +2863,10 @@ tEplSdoComCon*      pSdoComCon;
 
                         // start of a segmented transfer
                         case 0x10:
-                        {   // get total size of transfer
+                        {   // get total size of transfer including the header
                             ulBuffer = AmiGetDwordFromLe(&pAsySdoCom_p->m_le_abCommandData[0]);
+                            // subtract size of variable header from data size
+                            ulBuffer -= 4;
                             if (ulBuffer <= pSdoComCon->m_uiTransSize)
                             {   // buffer fits
                                 pSdoComCon->m_uiTransSize = (unsigned int)ulBuffer;
@@ -2880,7 +2885,7 @@ tEplSdoComCon*      pSdoComCon;
                             // get segment size
                             // check size of buffer
                             uiBuffer = AmiGetWordFromLe(&pAsySdoCom_p->m_le_wSegmentSize);
-                            // subtract size of vaiable header from datasize
+                            // subtract size of variable header from segment size
                             uiBuffer -= 4;
                             // copy data
                             EPL_MEMCPY(pSdoComCon->m_pData, &pAsySdoCom_p->m_le_abCommandData[4], uiBuffer);
