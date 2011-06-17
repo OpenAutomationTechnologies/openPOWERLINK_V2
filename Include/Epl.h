@@ -244,6 +244,8 @@ typedef struct
     unsigned int        m_uiSyncNodeId;     // after PRes from CN with this node-ID (0 = SoC, 255 = SoA)
     BOOL                m_fSyncOnPrcNode;   // TRUE: CN is PRes chained; FALSE: conventional CN (PReq/PRes)
 
+    tEplObdCallback     m_pfnDefaultObdCallback;    // default OD callback function
+
 } tEplApiInitParam;
 
 

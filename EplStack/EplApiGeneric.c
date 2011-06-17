@@ -304,6 +304,12 @@ tEplDllkInitParam   DllkInitParam;
     {
         goto Exit;
     }
+
+    Ret = EplObdSetDefaultObdCallback(EplApiInstance_g.m_InitParam.m_pfnDefaultObdCallback);
+    if (Ret != kEplSuccessful)
+    {
+        goto Exit;
+    }
 #endif
 
 #if EPL_USE_SHAREDBUFF != FALSE
