@@ -3382,12 +3382,13 @@ static tEplKernel EplNmtMnuCheckNmtState(
 tEplKernel      Ret = kEplSuccessful;
 tEplKernel      RetUpdate = kEplSuccessful;
 tEplObdSize     ObdSize;
-BYTE            bNmtState;
+BYTE            bNodeNmtState;
+BYTE            bExpNmtState;
 BYTE            bNmtStatePrev;
 tEplNmtState    ExpNmtState;
 
     // compute BYTE of current NMT state
-    bNmtState = ((BYTE) NodeNmtState_p & 0xFF);
+    bNodeNmtState = ((BYTE) NodeNmtState_p & 0xFF);
 
     if (pNodeInfo_p->m_NodeState == kEplNmtMnuNodeStateUnknown)
     {   // CN is already in state unknown, which means that it got
@@ -3398,14 +3399,14 @@ tEplNmtState    ExpNmtState;
 
     ObdSize = 1;
     // read object 0x1F8F NMT_MNNodeExpState_AU8
-    Ret = EplObduReadEntry(0x1F8F, uiNodeId_p, &bNmtState, &ObdSize);
+    Ret = EplObduReadEntry(0x1F8F, uiNodeId_p, &bExpNmtState, &ObdSize);
     if (Ret != kEplSuccessful)
     {
         goto Exit;
     }
 
     // compute expected NMT state
-    ExpNmtState = (tEplNmtState) (bNmtState | EPL_NMT_TYPE_CS);
+    ExpNmtState = (tEplNmtState) (bExpNmtState | EPL_NMT_TYPE_CS);
 
     if (ExpNmtState == kEplNmtCsNotActive)
     {   // ignore the current state, because the CN shall be not active
@@ -3449,7 +3450,7 @@ tEplNmtState    ExpNmtState;
         pNodeInfo_p->m_NodeState = kEplNmtMnuNodeStateReadyToOp;
 
         // update object 0x1F8F NMT_MNNodeExpState_AU8 to ReadyToOp
-        Ret = EplObduWriteEntry(0x1F8F, uiNodeId_p, &bNmtState, 1);
+        Ret = EplObduWriteEntry(0x1F8F, uiNodeId_p, &bNodeNmtState, 1);
         if (Ret != kEplSuccessful)
         {
             goto Exit;
@@ -3562,10 +3563,10 @@ ExitButUpdate:
         Ret = RetUpdate;
         goto Exit;
     }
-    if (bNmtState != bNmtStatePrev)
+    if (bNodeNmtState != bNmtStatePrev)
     {
         // update object 0x1F8E NMT_MNNodeCurrState_AU8
-        RetUpdate = EplObduWriteEntry(0x1F8E, uiNodeId_p, &bNmtState, 1);
+        RetUpdate = EplObduWriteEntry(0x1F8E, uiNodeId_p, &bNodeNmtState, 1);
         if (RetUpdate != kEplSuccessful)
         {
             Ret =RetUpdate;
