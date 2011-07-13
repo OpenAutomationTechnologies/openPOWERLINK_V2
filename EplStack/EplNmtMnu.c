@@ -3486,7 +3486,7 @@ tEplNmtState    ExpNmtState;
         }
 
     }
-    else if ((ExpNmtState == kEplNmtCsReadyToOperate)
+    else if ((pNodeInfo_p->m_NodeState == kEplNmtMnuNodeStateComChecked)
              && (NodeNmtState_p == kEplNmtCsOperational))
     {   // CN switched to OPERATIONAL
         pNodeInfo_p->m_NodeState = kEplNmtMnuNodeStateOperational;
