@@ -57,10 +57,10 @@
 
 #define EPL_TASK_PRIORITY_HRTIMER       1
 #define EPL_TASK_PRIORITY_NETTX         1
-#define EPL_TASK_PRIORITY_SHB           55
-#define EPL_TASK_PRIORITY_UTIMER        80
-#define EPL_TASK_PRIORITY_SHB_JOB	80
-#define EPL_TASK_PRIORITY_SDOUDP        80
+#define EPL_TASK_PRIORITY_SHB           10
+#define EPL_TASK_PRIORITY_UTIMER        50
+#define EPL_TASK_PRIORITY_SHB_JOB	50
+#define EPL_TASK_PRIORITY_SDOUDP        50
 #define EPL_TASK_STACK_SIZE             32768
 
 // =========================================================================

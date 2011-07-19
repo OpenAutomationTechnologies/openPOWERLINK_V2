@@ -59,6 +59,7 @@
 #include <taskLib.h>
 #include <sysLib.h>
 
+
 /***************************************************************************/
 /*                                                                         */
 /*                                                                         */
@@ -199,6 +200,25 @@ int openPowerlinkInit (char *pszEthName, unsigned int uiDevNumber)
     static tEplApiInitParam EplApiInitParam = {0};
     char*               sHostname = HOSTNAME;
     BOOL                fApiInit = FALSE;
+    int                 tid;
+
+    // Adjust task priorities of system tasks
+
+    /* shell task is normally set to priority 1 which could disturb
+     * openPOWERLINK if long-running commands are entered. Therefore
+     * we lower the performance to 20
+     */
+    tid = taskIdSelf();
+    printf ("Task ID: %d\n", tid);
+    taskPrioritySet(tid, 20);
+
+    /* The priority of the network stack task has to be increased (default:50)
+     * in order to get network packets in time!
+     */
+    if ((tid = taskNameToId("tNet0")) != -1 )
+    {
+        taskPrioritySet(tid, 5);
+    }
 
     // Initialize high-resolution timer library
     hrtimer_init(EPL_TASK_PRIORITY_HRTIMER, EPL_TASK_STACK_SIZE);

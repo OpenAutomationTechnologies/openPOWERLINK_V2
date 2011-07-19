@@ -38,8 +38,8 @@ openPOWERLINK on VxWorks
 
   * mnobd.cdc   This file is used to configure the MN stack. It includes all
                 configuration data of the CNs and the network mapping
-		information. CN configuration is handled by the configuration
-		manager (CFM) module of the MN.
+        information. CN configuration is handled by the configuration
+        manager (CFM) module of the MN.
 
 2.4 POWERLINK network
 ---------------------
@@ -145,6 +145,31 @@ openPOWERLINK on VxWorks
   - void timerdev_show(void)
     This function could be implemented to provide timer device information
     needed for debugging.
+
+4.4 Task Priorities
+-------------------
+  As VxWorks provides a priority-based preemptive scheduler it is important
+  to assign the right task priorities in order to get a stable POWERLINK
+  cycle.
+
+  The priorities of the tasks created by openPOWERLINK are setup in EplCfg.h.
+  They are assigned as follows:
+
+  Task Name                          Priority
+  ------------------------------------------------------------------------------
+  High-Resolution timer tasks        1
+  TX callback handler task           1
+  Shared Buffer Tasks                10 (User->Kernel direction will be
+                                         increased by 5 in ShbIpc-VxWorks.c
+                                         ==> 5)
+  User timer task                    50
+
+  Additionally you have to increase the priority of the network stack task to be
+  able to get all network packets in time:
+
+  Task Name    Default Priority      Adjusted Priority
+  ------------------------------------------------------------------------------
+  tNet0        50                    5
 
 5 Supported Architectures and Targets
 --------------------------------------------------------------------------------

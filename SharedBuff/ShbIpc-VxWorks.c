@@ -604,7 +604,7 @@ tShbError  ShbIpcStartSignalingNewData(tShbInstance pShbInstance_p,
     switch (ShbPriority_p)
     {
         case kShbPriorityLow:
-            iSchedPriority += 10;
+            iSchedPriority += 5;
             break;
 
         case kShbPriorityNormal:
@@ -612,7 +612,7 @@ tShbError  ShbIpcStartSignalingNewData(tShbInstance pShbInstance_p,
             break;
 
         case kShbPriorityHigh:
-            iSchedPriority -= 10;
+            iSchedPriority -= 5;
             break;
     }
 
