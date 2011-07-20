@@ -605,7 +605,7 @@ tEplNmtMnuNodeInfo* pNodeInfo;
                     // PRes Chaining is going to be enabled but the appropriate SyncRes
                     // has not been received, yet.
 
-                    // Set the current NMT command if it has higher priortity than a present one.
+                    // Set the current NMT command if it has higher priority than a present one.
                     EplNmtMnuPrcSetFlagsNmtCommandReset(pNodeInfo, NmtCommand_p);
 
                     // Wait for the SyncRes
