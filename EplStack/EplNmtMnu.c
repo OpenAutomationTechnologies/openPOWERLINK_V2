@@ -3412,6 +3412,13 @@ tEplNmtState    ExpNmtState;
         Ret = kEplReject;
         goto ExitButUpdate;
     }
+    else if ((ExpNmtState == kEplNmtCsStopped) &&
+            (NodeNmtState_p == kEplNmtCsStopped))
+    {
+        // reset flags ISOCHRON and PREOP2_REACHED
+        pNodeInfo_p->m_wFlags &= ~(EPL_NMTMNU_NODE_FLAG_ISOCHRON
+                                 | EPL_NMTMNU_NODE_FLAG_PREOP2_REACHED);
+    }
     else if ((ExpNmtState == kEplNmtCsPreOperational2) &&
              (NodeNmtState_p == kEplNmtCsPreOperational2))
     {   // CN is PreOp2
