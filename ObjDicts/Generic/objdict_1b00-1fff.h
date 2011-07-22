@@ -125,7 +125,7 @@
 
         // Object 1F8Ch: NMT_CurrNMTState_U8
         EPL_OBD_BEGIN_INDEX_RAM(0x1F8C, 0x01, NULL)
-            EPL_OBD_SUBINDEX_RAM_VAR(0x1F8C, 0x00, kEplObdTypUInt8, (kEplObdAccR | kEplObdAccPdo), tEplObdUnsigned8, NMT_CurrNMTState_U8, 0x00)
+            EPL_OBD_SUBINDEX_RAM_VAR(0x1F8C, 0x00, kEplObdTypUInt8, (kEplObdAccR | kEplObdAccPdo), tEplObdUnsigned8, NMT_CurrNMTState_U8, 0x1C)
         EPL_OBD_END_INDEX(0x1F8C)
 
 #if EPL_NMT_MAX_NODE_ID > 0
