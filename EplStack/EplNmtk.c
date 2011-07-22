@@ -343,7 +343,7 @@ tEplEventNmtStateChange NmtStateChange;
 
     // save NMT-State
     // needed for later comparison to
-    // inform hgher layer about state change
+    // inform higher layer about state change
     OldNmtState = EPL_MCO_GLB_VAR(m_NmtState);
 
     // NMT-State-Maschine
