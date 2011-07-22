@@ -969,7 +969,17 @@ Exit:
 
 tEplKernel PUBLIC EplNmtMnuCbNmtStateChange(tEplEventNmtStateChange NmtStateChange_p)
 {
-tEplKernel      Ret = kEplSuccessful;
+    tEplKernel      Ret = kEplSuccessful;
+    BYTE            NewMnNmtState;
+
+    // Save new MN state in object 0x1F8E
+    NewMnNmtState   = (BYTE) NmtStateChange_p.m_NewNmtState;
+
+    Ret = EplObdWriteEntry(0x1F8E, 240, &NewMnNmtState, 1);
+    if(Ret != kEplSuccessful)
+    {
+        return  Ret;
+    }
 
     // do work which must be done in that state
     switch (NmtStateChange_p.m_NewNmtState)
