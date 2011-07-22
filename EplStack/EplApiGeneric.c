@@ -1200,8 +1200,8 @@ tEplEvent   Event;
     Event.m_NetTime.m_dwNanoSec = 0;
     Event.m_NetTime.m_dwSec = 0;
     Event.m_EventType = kEplEventTypeApiUserDef;
-    Event.m_pArg = pUserArg_p;
-    Event.m_uiSize = 0;
+    Event.m_pArg = &pUserArg_p;
+    Event.m_uiSize = sizeof (pUserArg_p);
 
     Ret = EplEventuPost(&Event);
 
@@ -1660,7 +1660,7 @@ tEplApiEventType    EventType;
         tEplApiEventArg ApiEventArg;
 
             EventType = kEplApiEventUserDef;
-            ApiEventArg.m_pUserArg = pEplEvent_p->m_pArg;
+            ApiEventArg.m_pUserArg = *(void**)pEplEvent_p->m_pArg;
 
             // call user callback
             Ret = EplApiInstance_g.m_InitParam.m_pfnCbEvent(EventType, &ApiEventArg, EplApiInstance_g.m_InitParam.m_pEventUserArg);
