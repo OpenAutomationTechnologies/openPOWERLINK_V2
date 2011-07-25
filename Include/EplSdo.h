@@ -113,20 +113,20 @@
 //---------------------------------------------------------------------------
 // typedef
 //---------------------------------------------------------------------------
-// handle between Protocol Abstraction Layer and asynchronuus SDO Sequence Layer
+// handle between Protocol Abstraction Layer and asynchronous SDO Sequence Layer
 typedef unsigned int tEplSdoConHdl;
 
 // callback function pointer for Protocol Abstraction Layer to call
-// asynchronuus SDO Sequence Layer
+// asynchronous SDO Sequence Layer
 typedef tEplKernel (PUBLIC* tEplSequLayerReceiveCb ) (
     tEplSdoConHdl       ConHdl_p,
     tEplAsySdoSeq*      pSdoSeqData_p,
     unsigned int        uiDataSize_p);
 
-// handle between asynchronuus SDO Sequence Layer and SDO Command layer
+// handle between asynchronous SDO Sequence Layer and SDO Command layer
 typedef unsigned int tEplSdoSeqConHdl;
 
-// callback function pointer for asynchronuus SDO Sequence Layer to call
+// callback function pointer for asynchronous SDO Sequence Layer to call
 // SDO Command layer for received data
 typedef tEplKernel (PUBLIC* tEplSdoComReceiveCb) (
     tEplSdoSeqConHdl    SdoSeqConHdl_p,
@@ -146,7 +146,7 @@ typedef enum
 
 }tEplAsySdoConState;
 
-// callback function pointer for asynchronuus SDO Sequence Layer to call
+// callback function pointer for asynchronous SDO Sequence Layer to call
 // SDO Command layer for connection status
 typedef tEplKernel (PUBLIC* tEplSdoComConCb) (
     tEplSdoSeqConHdl    SdoSeqConHdl_p,
