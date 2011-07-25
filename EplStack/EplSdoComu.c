@@ -975,7 +975,7 @@ tEplSdoComConEvent  SdoComConEvent = kEplSdoComConEventSendFirst;
 
         case kAsySdoConStateAckReceived:
         {
-            EPL_DBGLVL_SDO_TRACE0("Acknowlage received\n");
+            EPL_DBGLVL_SDO_TRACE0("Acknowledge received\n");
             SdoComConEvent = kEplSdoComConEventAckReceived;
             // continue transmission
             break;
