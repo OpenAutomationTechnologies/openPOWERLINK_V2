@@ -2387,7 +2387,7 @@ tEplAsySdoConHistory*   pHistory;
 //
 // Function:        EplSdoAsyGetFreeEntriesFromHistory
 //
-// Description:     function returns the number of free histroy entries
+// Description:     function returns the number of free history entries
 //
 //
 //
