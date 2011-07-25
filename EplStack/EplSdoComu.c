@@ -336,7 +336,7 @@ tEplKernel Ret;
 
     Ret = kEplSuccessful;
 
-    // init controll structure
+    // init control structure
     EPL_MEMSET(&SdoComInstance_g, 0x00, sizeof(SdoComInstance_g));
 
     // init instance of lower layer
@@ -687,7 +687,7 @@ tEplSdoComCon*      pSdoComCon;
     }
 
 
-    // clean controll structure
+    // clean control structure
     EPL_MEMSET(pSdoComCon, 0x00, sizeof(tEplSdoComCon));
 Exit:
     return Ret;
@@ -697,12 +697,12 @@ Exit:
 //
 // Function:    EplSdoComGetState
 //
-// Description: function returns the state fo the connection
+// Description: function returns the state of the connection
 //
 //
 //
 // Parameters:  SdoComConHdl_p    = handle for the connection
-//              pSdoComFinished_p = pointer to structur for sdo state
+//              pSdoComFinished_p = pointer to structure for sdo state
 //
 //
 // Returns:     tEplKernel  = errorcode

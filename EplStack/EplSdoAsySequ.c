@@ -311,7 +311,7 @@ tEplKernel  Ret;
 
     Ret = kEplSuccessful;
 
-    // check functionpointer
+    // check function pointer
     if(fpSdoComCb_p == NULL)
     {
         Ret = kEplSdoSeqMissCb;
@@ -322,7 +322,7 @@ tEplKernel  Ret;
         AsySdoSequInstance_g.m_fpSdoComReceiveCb = fpSdoComCb_p;
     }
 
-    // check functionpointer
+    // check function pointer
     if(fpSdoComConCb_p == NULL)
     {
         Ret = kEplSdoSeqMissCb;
@@ -333,7 +333,7 @@ tEplKernel  Ret;
         AsySdoSequInstance_g.m_fpSdoComConCb = fpSdoComConCb_p;
     }
 
-    // set controllstructure to 0
+    // set control structure to 0
     EPL_MEMSET(&AsySdoSequInstance_g.m_AsySdoConnection[0], 0x00, sizeof(AsySdoSequInstance_g.m_AsySdoConnection));
 
 #if defined(WIN32) || defined(_WIN32)
@@ -664,8 +664,8 @@ Exit:
 //
 // Function:    EplSdoAsySeqProcessEvent
 //
-// Description: function processes extern events
-//              -> later needed for timeout controll with timer-module
+// Description: function processes external events
+//              -> later needed for timeout control with timer-module
 //
 //
 //
@@ -734,7 +734,7 @@ unsigned int        uiCount;
     }
 
 
-    // process event and call processfunction if needed
+    // process event and call process function if needed
     Ret = EplSdoAsySeqProcess(uiCount,
                                 0,
                                 NULL,
@@ -786,7 +786,7 @@ tEplAsySdoSeqCon*   pAsySdoSeqCon;
 
     if (pAsySdoSeqCon->m_uiUseCount == 0)
     {
-        // process close in processfunction
+        // process close in process function
         Ret = EplSdoAsySeqProcess(uiHandle,
                                     0,
                                     NULL,
@@ -812,7 +812,7 @@ tEplAsySdoSeqCon*   pAsySdoSeqCon;
         // delete timer
         EplTimeruDeleteTimer(&pAsySdoSeqCon->m_EplTimerHdl);
 
-        // clean controllstructure
+        // clean control structure
         EPL_MEMSET(pAsySdoSeqCon, 0x00, sizeof(tEplAsySdoSeqCon));
         pAsySdoSeqCon->m_SdoConHistory.m_bFreeEntries = EPL_SDO_HISTORY_SIZE;
     }
@@ -2061,7 +2061,7 @@ tEplAsySdoSeqCon*   pAsySdoSeqCon;
 
         EPL_DBGLVL_SDO_TRACE2("Handle: 0x%x , First Databyte 0x%x\n", ConHdl_p,((BYTE*)pSdoSeqData_p)[0]);
 
-        // search controll structure for this connection
+        // search control structure for this connection
         pAsySdoSeqCon = &AsySdoSequInstance_g.m_AsySdoConnection[uiCount];
         while (uiCount < EPL_MAX_SDO_SEQ_CON)
         {
