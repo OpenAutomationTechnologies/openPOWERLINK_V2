@@ -2443,7 +2443,7 @@ tEplTimerArg    TimerArg;
                                     TimerArg);
     }
     else
-    {   // modify exisiting timer
+    {   // modify existing timer
         Ret = EplTimeruModifyTimerMs(&pAsySdoSeqCon_p->m_EplTimerHdl,
                                     ulTimeout,
                                     TimerArg);
