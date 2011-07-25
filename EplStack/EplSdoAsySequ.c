@@ -141,7 +141,7 @@ typedef struct
 
 }tEplAsySdoConHistory;
 
-// state of the statemaschine
+// state of the statemachine
 typedef enum
 {
     kEplAsySdoStateIdle         = 0x00,

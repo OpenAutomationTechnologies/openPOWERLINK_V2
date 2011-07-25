@@ -80,7 +80,7 @@ typedef enum
 {
     // area for generic errors 0x0000 - 0x000F
     kEplSuccessful              = 0x0000,       // no error/successful run
-    kEplIllegalInstance         = 0x0001,       // the called Instanz does not exist
+    kEplIllegalInstance         = 0x0001,       // the called instance does not exist
     kEplInvalidInstanceParam    = 0x0002,       //
     kEplNoFreeInstance          = 0x0003,       // XxxAddInstance was called but no free instance is available
     kEplWrongSignature          = 0x0004,       // wrong signature while writing to object 0x1010 or 0x1011
@@ -161,7 +161,7 @@ typedef enum
     kEplSdoSeqUnsupportedProt   = 0x0063,       // unsupported Protocol selected
     kEplSdoSeqNoFreeHistory     = 0x0064,       // no free entry in history
     kEplSdoSeqFrameSizeError    = 0x0065,       // the size of the frames is not correct
-    kEplSdoSeqRequestAckNeeded  = 0x0066,       // indeicates that the history buffer is full
+    kEplSdoSeqRequestAckNeeded  = 0x0066,       // indicates that the history buffer is full
                                                 // and a ack request is needed
     kEplSdoSeqInvalidFrame      = 0x0067,       // frame not valid
     kEplSdoSeqConnectionBusy    = 0x0068,       // connection is busy -> retry later

@@ -1250,7 +1250,7 @@ tEplKernel      Ret = kEplSuccessful;
 //
 // Function:    EplNmtMnuCbCheckEvent
 //
-// Description: callback funktion for NMT events before they are actually executed.
+// Description: callback function for NMT events before they are actually executed.
 //              The EPL API layer must forward NMT events from NmtCnu module.
 //              This module will reject some NMT commands while MN.
 //
