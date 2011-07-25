@@ -5,7 +5,7 @@
 
   Project:      openPOWERLINK
 
-  Description:  source file for asychronous SDO Sequence Layer module
+  Description:  source file for asynchronous SDO Sequence Layer module
 
   License:
 
@@ -117,7 +117,7 @@
 // local types
 //---------------------------------------------------------------------------
 
-// events for processfunction
+// events for process function
 typedef enum
 {
     kAsySdoSeqEventNoEvent  =   0x00,   // no Event
@@ -236,7 +236,7 @@ static tEplKernel EplSdoAsySeqSetTimer(tEplAsySdoSeqCon* pAsySdoSeqCon_p,
 /***************************************************************************/
 /*                                                                         */
 /*                                                                         */
-/*          C L A S S  <EPL asychronous SDO Sequence layer>                 */
+/*          C L A S S  <EPL asynchronous SDO Sequence layer>                 */
 /*                                                                         */
 /*                                                                         */
 /***************************************************************************/

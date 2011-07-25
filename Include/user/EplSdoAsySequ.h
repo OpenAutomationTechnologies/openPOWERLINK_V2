@@ -5,7 +5,7 @@
 
   Project:      openPOWERLINK
 
-  Description:  include file for asychrionus SDO Sequence Layer module
+  Description:  include file for asynchronous SDO Sequence Layer module
 
   License:
 
