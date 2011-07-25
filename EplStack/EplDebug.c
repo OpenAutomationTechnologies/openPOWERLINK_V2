@@ -146,7 +146,7 @@ static char    *eplEvtSrcStr_g[] = {
     "EventSourceObdu", // Obdu module
     "EventSourceSdoUdp", // Sdo/Udp module
     "EventSourceSdoAsnd", // Sdo/Asnd module
-    "EventSourceSdoAsySeq", // Sdo asynchronus Sequence Layer module
+    "EventSourceSdoAsySeq", // Sdo asynchronous Sequence Layer module
     "EventSourceSdoCom", // Sdo command layer module
     "EventSourceTimeru", // Timeru module
     "EventSourceCfgMau", // CfgMau module

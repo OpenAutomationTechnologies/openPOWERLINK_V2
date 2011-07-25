@@ -408,7 +408,7 @@ tEplEventSource         EventSource;
 
 #if ((((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOC)) != 0)   \
      || (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOS)) != 0))
-        // events for asynchronus SDO Sequence Layer
+        // events for asynchronous SDO Sequence Layer
         case kEplEventSinkSdoAsySeq:
         {
             Ret = EplSdoAsySeqProcessEvent(pEvent_p);

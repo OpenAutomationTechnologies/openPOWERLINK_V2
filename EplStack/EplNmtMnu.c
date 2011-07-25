@@ -1071,7 +1071,7 @@ tEplKernel      Ret = kEplSuccessful;
             break;
         }
 
-        // node process isochronus and asynchronus frames
+        // node process isochronous and asynchronous frames
         case kEplNmtCsPreOperational2:
         {
             break;
@@ -1090,7 +1090,7 @@ tEplKernel      Ret = kEplSuccessful;
         }
 
         // node stopped by MN
-        // -> only process asynchronus frames
+        // -> only process asynchronous frames
         case kEplNmtCsStopped:
         {
             break;
@@ -1141,7 +1141,7 @@ tEplKernel      Ret = kEplSuccessful;
 */
 
             // inform DLL about NMT state change,
-            // so that it can clear the asynchonous queues and start the reduced cycle
+            // so that it can clear the asynchronous queues and start the reduced cycle
             Event.m_EventSink = kEplEventSinkDllk;
             Event.m_EventType = kEplEventTypeDllkStartReducedCycle;
             EPL_MEMSET(&Event.m_NetTime, 0x00, sizeof(Event.m_NetTime));

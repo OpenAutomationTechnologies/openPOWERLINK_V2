@@ -101,10 +101,10 @@
 
 #define EPL_SEQ_NUM_THRESHOLD       100     // threshold which distinguishes between old and new sequence numbers
 
-// define frame with size of Asnd-Header-, SDO Sequenze Header size, SDO Command header
+// define frame with size of Asnd-Header-, SDO Sequence Header size, SDO Command header
 // and Ethernet-Header size
 #define EPL_SEQ_FRAME_SIZE          24
-// size of the header of the asynchronus SDO Sequence layer
+// size of the header of the asynchronous SDO Sequence layer
 #define EPL_SEQ_HEADER_SIZE         4
 
 // buffersize for one frame in history
@@ -236,12 +236,12 @@ static tEplKernel EplSdoAsySeqSetTimer(tEplAsySdoSeqCon* pAsySdoSeqCon_p,
 /***************************************************************************/
 /*                                                                         */
 /*                                                                         */
-/*          C L A S S  <EPL asychronus SDO Sequence layer>                 */
+/*          C L A S S  <EPL asychronous SDO Sequence layer>                 */
 /*                                                                         */
 /*                                                                         */
 /***************************************************************************/
 //
-// Description: this module contains the asynchronus SDO Sequence Layer for
+// Description: this module contains the asynchronous SDO Sequence Layer for
 //              the EPL SDO service
 //
 //
@@ -832,8 +832,8 @@ Exit:
 //
 // Function:    EplEplSdoAsySeqProcess
 //
-// Description: intern function to process the asynchronus SDO Sequence Layer
-//              state maschine
+// Description: intern function to process the asynchronous SDO Sequence Layer
+//              state machine
 //
 //
 //
