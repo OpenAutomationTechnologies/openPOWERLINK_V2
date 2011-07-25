@@ -1077,7 +1077,7 @@ tEplKernel      Ret = kEplSuccessful;
             break;
         }
 
-        // node should be configured und application is ready
+        // node should be configured and application is ready
         case kEplNmtCsReadyToOperate:
         {
             break;
@@ -1210,7 +1210,7 @@ tEplKernel      Ret = kEplSuccessful;
             break;
         }
 
-        // node should be configured und application is ready
+        // node should be configured and application is ready
         case kEplNmtMsReadyToOperate:
         {
             // check if PRes of CNs are OK

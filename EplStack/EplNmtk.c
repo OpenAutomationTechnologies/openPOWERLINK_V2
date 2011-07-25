@@ -293,7 +293,7 @@ tEplKernel              Ret = kEplSuccessful;
 // Function:        EplNmtkProcess
 //
 // Description: main process function
-//              -> process NMT-State-Maschine und read NMT-Events from Queue
+//              -> process NMT-State-Maschine and read NMT-Events from Queue
 //
 //
 //
@@ -799,7 +799,7 @@ tEplEventNmtStateChange NmtStateChange;
             break;
         }
 
-        // node should be configured und application is ready
+        // node should be configured and application is ready
         case kEplNmtCsReadyToOperate:
         {
              // check events

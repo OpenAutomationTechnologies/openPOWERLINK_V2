@@ -630,7 +630,7 @@ Exit:
 //
 // Function:    EplSdoComUndefineCon
 //
-// Description: function undefine a SDO connection
+// Description: function undefines a SDO connection
 //
 //
 //
