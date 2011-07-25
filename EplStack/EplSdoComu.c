@@ -117,7 +117,7 @@ typedef enum
     kEplSdoComConEventAckReceived   = 0x04, // acknowledge received by lower layer
                                         // -> continue sending
     kEplSdoComConEventFrameSended   = 0x05, // lower has send a frame
-    kEplSdoComConEventInitError     = 0x06, // error duringinitialisiation
+    kEplSdoComConEventInitError     = 0x06, // error during initialisation
                                             // of the connection
     kEplSdoComConEventTimeout       = 0x07, // timeout in lower layer
     kEplSdoComConEventTransferAbort = 0x08, // transfer abort by lower layer
@@ -133,13 +133,13 @@ typedef enum
 typedef enum
 {
     kEplSdoComSendTypeReq      = 0x00,  // send a request
-    kEplSdoComSendTypeAckRes   = 0x01,  // send a resonse without data
+    kEplSdoComSendTypeAckRes   = 0x01,  // send a response without data
     kEplSdoComSendTypeRes      = 0x02,  // send response with data
     kEplSdoComSendTypeAbort    = 0x03   // send abort
 
 }tEplSdoComSendType;
 
-// state of the state maschine
+// state of the state machine
 typedef enum
 {
     // General State
@@ -191,7 +191,7 @@ typedef struct
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOC)) != 0)
     // only for client
     unsigned int        m_uiTargetIndex;    // index to access
-    unsigned int        m_uiTargetSubIndex; // subiondex to access
+    unsigned int        m_uiTargetSubIndex; // subindex to access
 
     // for future use
     unsigned int        m_uiTimeout;        // timeout for this connection
