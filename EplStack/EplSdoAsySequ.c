@@ -463,7 +463,7 @@ tEplAsySdoSeqCon*   pAsySdoSeqCon;
     Ret = kEplSuccessful;
 
     // check SdoType
-    // call init function of the protcol abstraction layer
+    // call init function of the protocol abstraction layer
     // which tries to find an existing connection to the same node
     switch (SdoType)
     {
