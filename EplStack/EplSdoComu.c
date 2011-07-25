@@ -1097,7 +1097,7 @@ tEplSdoComConHdl    HdlFree;
 // Function:        EplSdoComProcessIntern
 //
 // Description:     search a Sdo Sequence Layer connection handle in the
-//                  control structer of the Command Layer
+//                  control structure of the Command Layer
 //
 //
 //
