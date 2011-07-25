@@ -1924,7 +1924,7 @@ unsigned int    uiFreeEntries = 0;
         }
     }
 
-    // fillin header informations
+    // filling header informations
     // set service id sdo
     AmiSetByteToLe( &pEplFrame->m_Data.m_Asnd.m_le_bServiceId, 0x05);
     AmiSetByteToLe( &pEplFrame->m_Data.m_Asnd.m_Payload.m_SdoSequenceFrame.m_le_abReserved,0x00);
