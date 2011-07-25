@@ -608,14 +608,14 @@ Exit:
 //
 // Function:    EplSdoAsySeqSendData
 //
-// Description: send sata unsing a established connection
+// Description: send data using an established connection
 //
 //
 //
 // Parameters:  pSdoSeqConHdl_p = connection handle
 //              uiDataSize_p    = Size of Frame to send
-//                                  -> wihtout SDO sequence layer header, Asnd header
-//                                     and ethernetnet
+//                                  -> without SDO sequence layer header, Asnd header
+//                                     and ethernet
 //                                  ==> SDO Sequence layer payload
 //              SdoType          = Type of the SDO connection
 //
