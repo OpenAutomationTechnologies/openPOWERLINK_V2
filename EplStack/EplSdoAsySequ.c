@@ -1617,7 +1617,7 @@ unsigned int        uiFreeEntries;
                     uiFreeEntries = EplSdoAsyGetFreeEntriesFromHistory(pAsySdoSeqCon);
                     if ((uiFreeEntries < EPL_SDO_HISTORY_SIZE)
                         && (pAsySdoSeqCon->m_uiRetryCount < EPL_SEQ_RETRY_COUNT))
-                    {   // unacknowlegded frames in history
+                    {   // unacknowledged frames in history
                         // and retry counter not exceeded
 
                         // resend data with acknowledge request
@@ -2213,7 +2213,7 @@ tEplAsySdoConHistory*   pHistory;
         // store size
         pHistory->m_auiFrameSize[pHistory->m_bWrite] = uiSize_p;
 
-        // decremend number of free bufferentries
+        // decrement number of free bufferentries
         pHistory->m_bFreeEntries--;
 
         // increment writeindex
@@ -2240,7 +2240,7 @@ Exit:
 //
 // Function:        EplSdoAsyAckFrameToHistory
 //
-// Description:     function to delete acknowledged frames fron history buffer
+// Description:     function to delete acknowledged frames from history buffer
 //
 //
 //
@@ -2413,7 +2413,7 @@ unsigned int uiFreeEntries;
 //
 // Function:        EplSdoAsySeqSetTimer
 //
-// Description:     function sets or modify timer in timermosule
+// Description:     function sets or modify timer in timermodule
 //
 //
 //
