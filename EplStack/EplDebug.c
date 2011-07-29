@@ -266,6 +266,20 @@ static tApiEventInfo ApiEventInfo_g[] =
 
 static unsigned int uiNumApiEventInfo_g = (sizeof(ApiEventInfo_g) / sizeof(*(ApiEventInfo_g)));
 
+// text strings for NMT node events
+static char *EplNmtNodeEvtTypeStr_g[] =
+{
+    "Found",                    // 0x00
+    "Update software",          // 0x01
+    "Check configuration",      // 0x02
+    "Update configuration",     // 0x03
+    "Verify configuration",     // 0x04
+    "Ready to start",           // 0x05
+    "NMT state",                // 0x06
+    "NMT error",                // 0x07
+};
+unsigned int uiEplNmtNodeEvtTypeStr_g = (sizeof(EplNmtNodeEvtTypeStr_g) / sizeof(*(EplNmtNodeEvtTypeStr_g)));
+
 //=========================================================================//
 //                                                                         //
 //          P U B L I C   F U N C T I O N S                                //
@@ -447,4 +461,28 @@ char *EplGetApiEventStr( tEplApiEventType ApiEvent_p)
     }
 
     return eplInvalidStr_g;
+}
+
+//---------------------------------------------------------------------------
+//
+// Function:    EplGetNmtNodeEventTypeStr()
+//
+// Description: returns the string of the specified NMT node event
+//
+// Parameters:  NodeEventType_p        Type of NMT node event
+//
+// Returns:     event type string if found
+//              eplInvalidStr_g if not found
+//
+//---------------------------------------------------------------------------
+char *EplGetNmtNodeEventTypeStr( tEplNmtNodeEvent NodeEventType_p )
+{
+    if( NodeEventType_p >= uiEplNmtNodeEvtTypeStr_g )
+    {
+        return  eplInvalidStr_g;
+    }
+    else
+    {
+        return  EplNmtNodeEvtTypeStr_g[ NodeEventType_p ];
+    }
 }
