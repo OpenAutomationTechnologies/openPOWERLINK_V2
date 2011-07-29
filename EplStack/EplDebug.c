@@ -59,6 +59,7 @@
 //=========================================================================//
 #include "Epl.h"
 #include "EplNmt.h"
+#include <stdlib.h>
 
 //=========================================================================//
 // Type definitions                                                        //
@@ -67,6 +68,12 @@ typedef struct {
     tEplNmtState        m_nmtState;
     char                *m_sNmtState;
 } tNmtStateInfo;
+
+typedef struct
+{
+    tEplApiEventType    m_ApiEvent;
+    char                *m_sApiEvent;
+} tApiEventInfo;
 
 static char *eplInvalidStr_g = "INVALID";
 
@@ -239,6 +246,26 @@ static tNmtStateInfo nmtStateInfo_g[] =
 };
 unsigned int uiNumNmtStateInfo_g = (sizeof(nmtStateInfo_g) / sizeof(*(nmtStateInfo_g)));
 
+/* text strings for API events */
+static tApiEventInfo ApiEventInfo_g[] =
+{
+    { kEplApiEventUserDef,          "User defined"                      },
+    { kEplApiEventNmtStateChange,   "NMT state change"                  },
+    { kEplApiEventCriticalError,    "CRITICAL error -> stack halted"    },
+    { kEplApiEventWarning,          "Warning"                           },
+    { kEplApiEventHistoryEntry,     "History entry"                     },
+    { kEplApiEventNode,             "Node event"                        },
+    { kEplApiEventBoot,             "Boot event"                        },
+    { kEplApiEventSdo,              "SDO event"                         },
+    { kEplApiEventObdAccess,        "OBD access"                        },
+    { kEplApiEventLed,              "LED event"                         },
+    { kEplApiEventCfmProgress,      "CFM progress"                      },
+    { kEplApiEventCfmResult,        "CFM result"                        },
+    { kEplApiEventReceivedPres,     "Received PRes frame"               },
+};
+
+static unsigned int uiNumApiEventInfo_g = (sizeof(ApiEventInfo_g) / sizeof(*(ApiEventInfo_g)));
+
 //=========================================================================//
 //                                                                         //
 //          P U B L I C   F U N C T I O N S                                //
@@ -355,3 +382,69 @@ char *EplGetNmtStateStr(tEplNmtState nmtState_p)
     return eplInvalidStr_g;
 }
 
+//---------------------------------------------------------------------------
+//
+// Function:    EplDebugCompareApiEvent()
+//
+// Description: Compare two API events. Used by EplGetApiEventStr's bsearch().
+//
+// Parameters:  Key (element to search), Array
+//
+// Returns:     -1, 0, or 1 if event id is smaller, equal or greater
+//
+//---------------------------------------------------------------------------
+static int
+EplDebugCompareApiEvent( const void *pvEventKey, const void *pvEventArray )
+{
+    tApiEventInfo    *pEventKey  = (tEplApiEventType *) pvEventKey;
+    tApiEventInfo    *pEventArry = (tEplApiEventType *) pvEventArray;
+
+    if( pEventKey->m_ApiEvent < pEventArry->m_ApiEvent )
+    {
+        return  -1;
+    }
+    else if( pEventKey->m_ApiEvent > pEventArry->m_ApiEvent )
+    {
+        return  1;
+    }
+
+    return 0;
+}
+
+//---------------------------------------------------------------------------
+//
+// Function:    EplGetApiEventStr()
+//
+// Description: returns the string of the specified API event
+//
+//              The function uses stdlib's bsearch() to shorten
+//              the average search time.
+//
+// Parameters:  ApiEvent_p            API event to translate
+//
+// Returns:     String describing the API event, if found
+//              eplInvalidStr_g if not found
+//
+//---------------------------------------------------------------------------
+char *EplGetApiEventStr( tEplApiEventType ApiEvent_p)
+{
+    char            *pstrReturn;
+    tApiEventInfo   *pApiEventInfo;
+    tApiEventInfo   Key;
+
+    // Init
+    Key.m_ApiEvent  = ApiEvent_p;
+
+    // Search element
+    pApiEventInfo   = bsearch(  &Key, ApiEventInfo_g,
+                                uiNumApiEventInfo_g, sizeof(Key),
+                                EplDebugCompareApiEvent);
+
+    // Check result
+    if( NULL != pApiEventInfo )
+    {
+        return  pApiEventInfo->m_sApiEvent;
+    }
+
+    return eplInvalidStr_g;
+}
