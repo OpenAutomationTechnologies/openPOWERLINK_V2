@@ -544,7 +544,7 @@ static void * EplTimeruProcessThread(void *pArgument_p __attribute((unused)))
 //
 //
 //
-// Parameters:  lpParameter = pointer to structur of type tEplTimeruData
+// Parameters:  lpParameter = pointer to structure of type tEplTimeruData
 //
 //
 // Returns:     (none)
