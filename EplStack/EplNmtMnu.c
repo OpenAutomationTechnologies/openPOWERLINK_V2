@@ -156,42 +156,41 @@
 #define EPL_NMTMNU_TIMERARG_COUNT_LO    0x00000C00L // counter for longer timeouts
                     // The counters must have the same position as in the node flags above.
 
-#define EPL_NMTMNU_SET_FLAGS_TIMERARG_STATREQ(pNodeInfo_p, uiNodeId_p, TimerArg_p) \
-    pNodeInfo_p->m_wFlags = \
-        ((pNodeInfo_p->m_wFlags + EPL_NMTMNU_NODE_FLAG_INC_STATREQ) \
-         & EPL_NMTMNU_NODE_FLAG_COUNT_STATREQ) \
-        | (pNodeInfo_p->m_wFlags & ~EPL_NMTMNU_NODE_FLAG_COUNT_STATREQ); \
-    TimerArg_p.m_Arg.m_dwVal = EPL_NMTMNU_TIMERARG_STATREQ | uiNodeId_p | \
-        (pNodeInfo_p->m_wFlags & EPL_NMTMNU_NODE_FLAG_COUNT_STATREQ); \
-    TimerArg_p.m_EventSink = kEplEventSinkNmtMnu;
+#define EPL_NMTMNU_SET_FLAGS_TIMERARG_STATREQ(pNodeInfo_p, uiNodeId_p, TimerArg_p)                  \
+    pNodeInfo_p->m_wFlags       =   ((pNodeInfo_p->m_wFlags + EPL_NMTMNU_NODE_FLAG_INC_STATREQ) &   \
+                                    EPL_NMTMNU_NODE_FLAG_COUNT_STATREQ)                         |   \
+                                    (pNodeInfo_p->m_wFlags & ~EPL_NMTMNU_NODE_FLAG_COUNT_STATREQ);  \
+    TimerArg_p.m_Arg.m_dwVal    =   EPL_NMTMNU_TIMERARG_STATREQ                                 |   \
+                                    uiNodeId_p                                                  |   \
+                                    (pNodeInfo_p->m_wFlags & EPL_NMTMNU_NODE_FLAG_COUNT_STATREQ);   \
+    TimerArg_p.m_EventSink      =   kEplEventSinkNmtMnu;
 
-#define EPL_NMTMNU_SET_FLAGS_TIMERARG_IDENTREQ(pNodeInfo_p, uiNodeId_p, TimerArg_p) \
-    pNodeInfo_p->m_wFlags = \
-        ((pNodeInfo_p->m_wFlags + EPL_NMTMNU_NODE_FLAG_INC_STATREQ) \
-         & EPL_NMTMNU_NODE_FLAG_COUNT_STATREQ) \
-        | (pNodeInfo_p->m_wFlags & ~EPL_NMTMNU_NODE_FLAG_COUNT_STATREQ); \
-    TimerArg_p.m_Arg.m_dwVal = EPL_NMTMNU_TIMERARG_IDENTREQ | uiNodeId_p | \
-        (pNodeInfo_p->m_wFlags & EPL_NMTMNU_NODE_FLAG_COUNT_STATREQ); \
-    TimerArg_p.m_EventSink = kEplEventSinkNmtMnu;
+#define EPL_NMTMNU_SET_FLAGS_TIMERARG_IDENTREQ(pNodeInfo_p, uiNodeId_p, TimerArg_p)                 \
+    pNodeInfo_p->m_wFlags       =   ((pNodeInfo_p->m_wFlags + EPL_NMTMNU_NODE_FLAG_INC_STATREQ) &   \
+                                    EPL_NMTMNU_NODE_FLAG_COUNT_STATREQ)                         |   \
+                                    (pNodeInfo_p->m_wFlags & ~EPL_NMTMNU_NODE_FLAG_COUNT_STATREQ);  \
+    TimerArg_p.m_Arg.m_dwVal    =   EPL_NMTMNU_TIMERARG_IDENTREQ                                |   \
+                                    uiNodeId_p                                                  |   \
+                                    (pNodeInfo_p->m_wFlags & EPL_NMTMNU_NODE_FLAG_COUNT_STATREQ);   \
+    TimerArg_p.m_EventSink      =   kEplEventSinkNmtMnu;
 
-#define EPL_NMTMNU_SET_FLAGS_TIMERARG_LONGER(pNodeInfo_p, uiNodeId_p, TimerArg_p) \
-    pNodeInfo_p->m_wFlags = \
-        ((pNodeInfo_p->m_wFlags + EPL_NMTMNU_NODE_FLAG_INC_LONGER) \
-         & EPL_NMTMNU_NODE_FLAG_COUNT_LONGER) \
-        | (pNodeInfo_p->m_wFlags & ~EPL_NMTMNU_NODE_FLAG_COUNT_LONGER); \
-    TimerArg_p.m_Arg.m_dwVal = EPL_NMTMNU_TIMERARG_LONGER | uiNodeId_p | \
-        (pNodeInfo_p->m_wFlags & EPL_NMTMNU_NODE_FLAG_COUNT_LONGER); \
-    TimerArg_p.m_EventSink = kEplEventSinkNmtMnu;
+#define EPL_NMTMNU_SET_FLAGS_TIMERARG_LONGER(pNodeInfo_p, uiNodeId_p, TimerArg_p)                   \
+    pNodeInfo_p->m_wFlags       =   ((pNodeInfo_p->m_wFlags + EPL_NMTMNU_NODE_FLAG_INC_LONGER)  &   \
+                                    EPL_NMTMNU_NODE_FLAG_COUNT_LONGER)                          |   \
+                                    (pNodeInfo_p->m_wFlags & ~EPL_NMTMNU_NODE_FLAG_COUNT_LONGER);   \
+    TimerArg_p.m_Arg.m_dwVal    =   EPL_NMTMNU_TIMERARG_LONGER                                  |   \
+                                    uiNodeId_p                                                  |   \
+                                    (pNodeInfo_p->m_wFlags & EPL_NMTMNU_NODE_FLAG_COUNT_LONGER);    \
+    TimerArg_p.m_EventSink      =   kEplEventSinkNmtMnu;
 
-#define EPL_NMTMNU_SET_FLAGS_TIMERARG_STATE_MON(pNodeInfo_p, uiNodeId_p, TimerArg_p) \
-    pNodeInfo_p->m_wFlags = \
-        ((pNodeInfo_p->m_wFlags + EPL_NMTMNU_NODE_FLAG_INC_STATREQ) \
-         & EPL_NMTMNU_NODE_FLAG_COUNT_STATREQ) \
-        | (pNodeInfo_p->m_wFlags & ~EPL_NMTMNU_NODE_FLAG_COUNT_STATREQ); \
-    TimerArg_p.m_Arg.m_dwVal = EPL_NMTMNU_TIMERARG_STATE_MON | uiNodeId_p | \
-        (pNodeInfo_p->m_wFlags & EPL_NMTMNU_NODE_FLAG_COUNT_STATREQ); \
-    TimerArg_p.m_EventSink = kEplEventSinkNmtMnu;
-
+#define EPL_NMTMNU_SET_FLAGS_TIMERARG_STATE_MON(pNodeInfo_p, uiNodeId_p, TimerArg_p)                \
+    pNodeInfo_p->m_wFlags       =   ((pNodeInfo_p->m_wFlags + EPL_NMTMNU_NODE_FLAG_INC_STATREQ) &   \
+                                    EPL_NMTMNU_NODE_FLAG_COUNT_STATREQ)                         |   \
+                                    (pNodeInfo_p->m_wFlags & ~EPL_NMTMNU_NODE_FLAG_COUNT_STATREQ);  \
+    TimerArg_p.m_Arg.m_dwVal    =   EPL_NMTMNU_TIMERARG_STATE_MON                               |   \
+                                    uiNodeId_p                                                  |   \
+                                    (pNodeInfo_p->m_wFlags & EPL_NMTMNU_NODE_FLAG_COUNT_STATREQ);   \
+    TimerArg_p.m_EventSink      =   kEplEventSinkNmtMnu;
 
 // defines for global flags
 #define EPL_NMTMNU_FLAG_HALTED              0x0001  // boot process is halted
