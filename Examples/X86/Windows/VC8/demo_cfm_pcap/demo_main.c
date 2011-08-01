@@ -508,7 +508,7 @@ tEplKernel          EplRet = kEplSuccessful;
 
         case kEplApiEventCriticalError:
         case kEplApiEventWarning:
-        {   // error or warning occured within the stack or the application
+        {   // error or warning occurred within the stack or the application
             // on error the API layer stops the NMT state machine
 
             PRINTF3("%s(Err/Warn): Source=%02X EplError=0x%03X",
@@ -520,14 +520,14 @@ tEplKernel          EplRet = kEplSuccessful;
             {
                 case kEplEventSourceEventk:
                 case kEplEventSourceEventu:
-                {   // error occured within event processing
+                {   // error occurred within event processing
                     // either in kernel or in user part
                     PRINTF1(" OrgSource=%02X\n", pEventArg_p->m_InternalError.m_Arg.m_EventSource);
                     break;
                 }
 
                 case kEplEventSourceDllk:
-                {   // error occured within the data link layer (e.g. interrupt processing)
+                {   // error occurred within the data link layer (e.g. interrupt processing)
                     // the DWORD argument contains the DLL state and the NMT event
                     PRINTF1(" val=%lX\n", pEventArg_p->m_InternalError.m_Arg.m_dwArg);
                     break;
@@ -535,7 +535,7 @@ tEplKernel          EplRet = kEplSuccessful;
 
                 case kEplEventSourceObdk:
                 case kEplEventSourceObdu:
-                {   // error occured within OBD module
+                {   // error occurred within OBD module
                     // either in kernel or in user part
                     PRINTF2(" Object=0x%04X/%u\n", pEventArg_p->m_InternalError.m_Arg.m_ObdError.m_uiIndex, pEventArg_p->m_InternalError.m_Arg.m_ObdError.m_uiSubIndex);
                     break;

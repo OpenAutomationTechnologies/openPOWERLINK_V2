@@ -202,7 +202,7 @@ typedef struct
 
 	unsigned long txCollision;		// total tx collisions on the bus
 	unsigned long txDone[16];		// [0]..number of sent frames with 0 collisions ...
-	unsigned long txSpuriousInt;	// tx int occured but no frame sent ??
+	unsigned long txSpuriousInt;	// tx int occurred but no frame sent ??
 }ometh_stat_typ;
 
 

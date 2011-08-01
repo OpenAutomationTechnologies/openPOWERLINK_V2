@@ -284,7 +284,7 @@ typedef struct
 typedef struct
 {
     tEplEventSource m_EventSource;              // module which posted this error event
-    tEplKernel      m_EplError;                 // EPL error which occured
+    tEplKernel      m_EplError;                 // EPL error which occurred
     union
     {
         BYTE                    m_bArg;

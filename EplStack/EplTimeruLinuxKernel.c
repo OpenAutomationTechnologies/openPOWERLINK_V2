@@ -316,7 +316,7 @@ tEplTimeruData*     pData;
     mod_timer(&pData->m_Timer, (jiffies + 1 + ((ulTime_p * HZ) + 999) / 1000));
 
     // copy the TimerArg after the timer is restarted,
-    // so that a timer occured immediately before mod_timer
+    // so that a timer occurred immediately before mod_timer
     // won't use the new TimerArg and
     // therefore the old timer cannot be distinguished from the new one.
     // But if the new timer is too fast, it may get lost.

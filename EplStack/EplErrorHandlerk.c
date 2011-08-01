@@ -373,7 +373,7 @@ tEplNmtEvent            NmtEvent;
 
             // check the several error events
             if ((ulDllErrorEvents & EPL_DLL_ERR_CN_LOSS_SOC) != 0)
-            {   // loss of SoC event occured
+            {   // loss of SoC event occurred
                 // increment cumulative counter by 1
                 EplErrorHandlerkInstance_g.m_CnLossSoc.m_dwCumulativeCnt++;
 
@@ -409,7 +409,7 @@ tEplNmtEvent            NmtEvent;
             }
 
             if ((ulDllErrorEvents & EPL_DLL_ERR_CN_LOSS_PREQ) != 0)
-            {   // loss of PReq event occured
+            {   // loss of PReq event occurred
                 // increment cumulative counter by 1
                 EplErrorHandlerkInstance_g.m_CnLossPreq.m_dwCumulativeCnt++;
 
@@ -450,7 +450,7 @@ tEplNmtEvent            NmtEvent;
             }
 
             if ((ulDllErrorEvents & EPL_DLL_ERR_CN_CRC) != 0)
-            {   // CRC error event occured
+            {   // CRC error event occurred
                 // increment cumulative counter by 1
                 EplErrorHandlerkInstance_g.m_CnCrcErr.m_dwCumulativeCnt++;
 
@@ -486,7 +486,7 @@ tEplNmtEvent            NmtEvent;
             }
 
             if ((ulDllErrorEvents & EPL_DLL_ERR_INVALID_FORMAT) != 0)
-            {   // invalid format error occured (only direct reaction)
+            {   // invalid format error occurred (only direct reaction)
                 // generate error history entry E_DLL_INVALID_FORMAT
                 HistoryEntry.m_wErrorCode = EPL_E_DLL_INVALID_FORMAT;
                 HistoryEntry.m_TimeStamp = pEvent_p->m_NetTime;
@@ -540,7 +540,7 @@ tEplNmtEvent            NmtEvent;
 
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
             if ((ulDllErrorEvents & EPL_DLL_ERR_MN_CRC) != 0)
-            {   // CRC error event occured
+            {   // CRC error event occurred
                 // increment cumulative counter by 1
                 EplErrorHandlerkInstance_g.m_MnCrcErr.m_dwCumulativeCnt++;
 
@@ -574,7 +574,7 @@ tEplNmtEvent            NmtEvent;
             }
 
             if ((ulDllErrorEvents & EPL_DLL_ERR_MN_CYCTIMEEXCEED) != 0)
-            {   // cycle time exceeded event occured
+            {   // cycle time exceeded event occurred
                 // increment cumulative counter by 1
                 EplErrorHandlerkInstance_g.m_MnCycTimeExceed.m_dwCumulativeCnt++;
 
@@ -621,7 +621,7 @@ tEplNmtEvent            NmtEvent;
             }
 
             if ((ulDllErrorEvents & EPL_DLL_ERR_MN_CN_LOSS_PRES) != 0)
-            {   // CN loss PRes event occured
+            {   // CN loss PRes event occurred
             unsigned int uiNodeId;
 
                 uiNodeId = pErrHandlerEvent->m_uiNodeId - 1;

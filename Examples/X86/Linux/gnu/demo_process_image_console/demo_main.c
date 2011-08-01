@@ -209,12 +209,12 @@ static int _kbhit(void)
     iSelectRetVal = select(maxFd, &readFds, NULL, NULL, &timeout);
     switch (iSelectRetVal)
     {
-        /* select timeout occured, no packet received */
+        /* select timeout occurred, no packet received */
         case 0:
             return FALSE;
             break;
 
-            /* select error occured*/
+            /* select error occurred*/
         case -1:
             return FALSE;
             break;
@@ -713,7 +713,7 @@ tEplKernel PUBLIC AppCbEvent(
 
         case kEplApiEventCriticalError:
         case kEplApiEventWarning:
-        {   // error or warning occured within the stack or the application
+        {   // error or warning occurred within the stack or the application
             // on error the API layer stops the NMT state machine
 
             printlog("%s(Err/Warn): Source=%02X EplError=0x%03X",
@@ -729,7 +729,7 @@ tEplKernel PUBLIC AppCbEvent(
             {
                 case kEplEventSourceEventk:
                 case kEplEventSourceEventu:
-                {   // error occured within event processing
+                {   // error occurred within event processing
                     // either in kernel or in user part
                     printlog(" OrgSource=%02X\n", pEventArg_p->m_InternalError.m_Arg.m_EventSource);
                     FTRACE_MARKER(" OrgSource=%02X\n", pEventArg_p->m_InternalError.m_Arg.m_EventSource);
@@ -737,7 +737,7 @@ tEplKernel PUBLIC AppCbEvent(
                 }
 
                 case kEplEventSourceDllk:
-                {   // error occured within the data link layer (e.g. interrupt processing)
+                {   // error occurred within the data link layer (e.g. interrupt processing)
                     // the DWORD argument contains the DLL state and the NMT event
                     printlog(" val=%X\n", pEventArg_p->m_InternalError.m_Arg.m_dwArg);
                     FTRACE_MARKER(" val=%X\n", pEventArg_p->m_InternalError.m_Arg.m_dwArg);

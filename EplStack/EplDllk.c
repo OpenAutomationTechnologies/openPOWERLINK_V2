@@ -531,7 +531,7 @@ tEdrvInitParam  EdrvInitParam;
 #if EPL_TIMER_USE_HIGHRES != FALSE
     Ret = EplTimerHighReskInit();
     if (Ret != kEplSuccessful)
-    {   // error occured while initializing high resolution timer module
+    {   // error occurred while initializing high resolution timer module
         goto Exit;
     }
 #endif
@@ -539,7 +539,7 @@ tEdrvInitParam  EdrvInitParam;
 #if (EPL_DLL_PROCESS_SYNC == EPL_DLL_PROCESS_SYNC_ON_TIMER)
     Ret = EplTimerSynckAddInstance();
     if (Ret != kEplSuccessful)
-    {   // error occured while initializing sync timer module
+    {   // error occurred while initializing sync timer module
         goto Exit;
     }
 
@@ -596,7 +596,7 @@ tEdrvInitParam  EdrvInitParam;
 //    EdrvInitParam.m_pfnTxHandler = EplDllkCbFrameTransmitted;
     Ret = EdrvInit(&EdrvInitParam);
     if (Ret != kEplSuccessful)
-    {   // error occured while initializing ethernet driver
+    {   // error occurred while initializing ethernet driver
         goto Exit;
     }
 
@@ -1547,7 +1547,7 @@ tEplDllkNodeInfo*   pIntNodeInfo;
     uiFrameSize = EPL_C_DLL_MINSIZE_IDENTRES;
     Ret = EplDllkCreateTxFrame(&uiHandle, &uiFrameSize, kEplMsgTypeAsnd, kEplDllAsndIdentResponse);
     if (Ret != kEplSuccessful)
-    {   // error occured while registering Tx frame
+    {   // error occurred while registering Tx frame
         goto Exit;
     }
 
@@ -1555,7 +1555,7 @@ tEplDllkNodeInfo*   pIntNodeInfo;
     uiFrameSize = EPL_C_DLL_MINSIZE_STATUSRES;
     Ret = EplDllkCreateTxFrame(&uiHandle, &uiFrameSize, kEplMsgTypeAsnd, kEplDllAsndStatusResponse);
     if (Ret != kEplSuccessful)
-    {   // error occured while registering Tx frame
+    {   // error occurred while registering Tx frame
         goto Exit;
     }
 
@@ -1564,7 +1564,7 @@ tEplDllkNodeInfo*   pIntNodeInfo;
     uiFrameSize = EPL_C_DLL_MINSIZE_SYNCRES;
     Ret = EplDllkCreateTxFrame(&uiHandle, &uiFrameSize, kEplMsgTypeAsnd, kEplDllAsndSyncResponse);
     if (Ret != kEplSuccessful)
-    {   // error occured while registering Tx frame
+    {   // error occurred while registering Tx frame
         goto Exit;
     }
 #endif
@@ -1577,7 +1577,7 @@ tEplDllkNodeInfo*   pIntNodeInfo;
         uiFrameSize = EplDllkInstance_g.m_DllConfigParam.m_uiPresActPayloadLimit + EPL_FRAME_OFFSET_PDO_PAYLOAD;
         Ret = EplDllkCreateTxFrame(&uiHandle, &uiFrameSize, kEplMsgTypePres, kEplDllAsndNotDefined);
         if (Ret != kEplSuccessful)
-        {   // error occured while registering Tx frame
+        {   // error occurred while registering Tx frame
             goto Exit;
         }
 
@@ -1594,7 +1594,7 @@ tEplDllkNodeInfo*   pIntNodeInfo;
     uiFrameSize = EPL_C_IP_MAX_MTU;
     Ret = EplDllkCreateTxFrame(&uiHandle, &uiFrameSize, kEplMsgTypeAsnd, kEplDllAsndNmtRequest);
     if (Ret != kEplSuccessful)
-    {   // error occured while registering Tx frame
+    {   // error occurred while registering Tx frame
         goto Exit;
     }
     // mark Tx buffer as empty
@@ -1608,7 +1608,7 @@ tEplDllkNodeInfo*   pIntNodeInfo;
     uiFrameSize = EPL_C_IP_MAX_MTU;
     Ret = EplDllkCreateTxFrame(&uiHandle, &uiFrameSize, kEplMsgTypeNonEpl, kEplDllAsndNotDefined);
     if (Ret != kEplSuccessful)
-    {   // error occured while registering Tx frame
+    {   // error occurred while registering Tx frame
         goto Exit;
     }
     // mark Tx buffer as empty
@@ -1785,7 +1785,7 @@ tEplDllkNodeInfo*   pIntNodeInfo;
         uiFrameSize = EPL_C_DLL_MINSIZE_SOC;
         Ret = EplDllkCreateTxFrame(&uiHandle, &uiFrameSize, kEplMsgTypeSoc, kEplDllAsndNotDefined);
         if (Ret != kEplSuccessful)
-        {   // error occured while registering Tx frame
+        {   // error occurred while registering Tx frame
             goto Exit;
         }
         EplDllkInstance_g.m_pTxBuffer[uiHandle].m_pfnTxHandler = EplDllkCbTransmittedSoc;
@@ -1796,7 +1796,7 @@ tEplDllkNodeInfo*   pIntNodeInfo;
         uiFrameSize = EPL_C_DLL_MINSIZE_SOA;
         Ret = EplDllkCreateTxFrame(&uiHandle, &uiFrameSize, kEplMsgTypeSoa, kEplDllAsndNotDefined);
         if (Ret != kEplSuccessful)
-        {   // error occured while registering Tx frame
+        {   // error occurred while registering Tx frame
             goto Exit;
         }
         EplDllkInstance_g.m_pTxBuffer[uiHandle].m_pfnTxHandler = EplDllkCbTransmittedSoa;
@@ -2072,39 +2072,39 @@ unsigned int    uiHandle;
     // delete Tx frames
     Ret = EplDllkDeleteTxFrame(EPL_DLLK_TXFRAME_IDENTRES);
     if (Ret != kEplSuccessful)
-    {   // error occured while deregistering Tx frame
+    {   // error occurred while deregistering Tx frame
         goto Exit;
     }
 
     Ret = EplDllkDeleteTxFrame(EPL_DLLK_TXFRAME_STATUSRES);
     if (Ret != kEplSuccessful)
-    {   // error occured while deregistering Tx frame
+    {   // error occurred while deregistering Tx frame
         goto Exit;
     }
 
     Ret = EplDllkDeleteTxFrame(EPL_DLLK_TXFRAME_PRES);
     if (Ret != kEplSuccessful)
-    {   // error occured while deregistering Tx frame
+    {   // error occurred while deregistering Tx frame
         goto Exit;
     }
 
     Ret = EplDllkDeleteTxFrame(EPL_DLLK_TXFRAME_NMTREQ);
     if (Ret != kEplSuccessful)
-    {   // error occured while deregistering Tx frame
+    {   // error occurred while deregistering Tx frame
         goto Exit;
     }
 
 #if EPL_DLL_PRES_CHAINING_CN != FALSE
     Ret = EplDllkDeleteTxFrame(EPL_DLLK_TXFRAME_SYNCRES);
     if (Ret != kEplSuccessful)
-    {   // error occured while deregistering Tx frame
+    {   // error occurred while deregistering Tx frame
         goto Exit;
     }
 #endif
 
     Ret = EplDllkDeleteTxFrame(EPL_DLLK_TXFRAME_NONEPL);
     if (Ret != kEplSuccessful)
-    {   // error occured while deregistering Tx frame
+    {   // error occurred while deregistering Tx frame
         goto Exit;
     }
 
@@ -2114,13 +2114,13 @@ unsigned int    uiHandle;
 
         Ret = EplDllkDeleteTxFrame(EPL_DLLK_TXFRAME_SOC);
         if (Ret != kEplSuccessful)
-        {   // error occured while deregistering Tx frame
+        {   // error occurred while deregistering Tx frame
             goto Exit;
         }
 
         Ret = EplDllkDeleteTxFrame(EPL_DLLK_TXFRAME_SOA);
         if (Ret != kEplSuccessful)
-        {   // error occured while deregistering Tx frame
+        {   // error occurred while deregistering Tx frame
             goto Exit;
         }
 
@@ -2134,7 +2134,7 @@ unsigned int    uiHandle;
                 {
                     Ret = EplDllkDeleteTxFrame(uiHandle);
                     if (Ret != kEplSuccessful)
-                    {   // error occured while deregistering Tx frame
+                    {   // error occurred while deregistering Tx frame
                         goto Exit;
                     }
                 }
@@ -6252,7 +6252,7 @@ unsigned int    nIndex = 0;
 
         Ret = EdrvAllocTxMsgBuffer(pTxBuffer);
         if (Ret != kEplSuccessful)
-        {   // error occured while registering Tx frame
+        {   // error occurred while registering Tx frame
             goto Exit;
         }
 
@@ -6482,7 +6482,7 @@ unsigned int    nIndex = 0;
         // delete Tx buffer
         Ret = EdrvReleaseTxMsgBuffer(pTxBuffer);
         if (Ret != kEplSuccessful)
-        {   // error occured while releasing Tx frame
+        {   // error occurred while releasing Tx frame
             goto Exit;
         }
 

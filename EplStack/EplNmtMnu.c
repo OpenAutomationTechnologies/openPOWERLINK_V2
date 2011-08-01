@@ -2438,7 +2438,7 @@ tEplNmtMnuNodeInfo* pNodeInfo;
 
                 EplNmtMnuInstance_g.m_uiSignalSlaveCount++;
                 // signal slave counter shall be decremented if timeout elapsed and regardless of an error
-                // mandatory slave counter shall be decremented if timeout elapsed and no error occured
+                // mandatory slave counter shall be decremented if timeout elapsed and no error occurred
             }
         }
     }
@@ -2455,7 +2455,7 @@ Exit:
 // Function:    EplNmtMnuNodeCheckCom
 //
 // Description: checks communication of the specified node.
-//              That means wait some time and if no error occured everything
+//              That means wait some time and if no error occurred everything
 //              is OK.
 //
 // Parameters:  uiNodeId_p              = node ID
@@ -2479,7 +2479,7 @@ tEplTimerArg    TimerArg;
     {   // CN is not async-only and timeout for CheckCom was set
 
         // check communication,
-        // that means wait some time and if no error occured everything is OK;
+        // that means wait some time and if no error occurred everything is OK;
 
         // start timer (when the timer expires the CN must be still ReadyToOp)
         EPL_NMTMNU_SET_FLAGS_TIMERARG_LONGER(
@@ -2595,7 +2595,7 @@ Exit:
 //
 // Parameters:  uiNodeId_p              = node ID
 //              NodeNmtState_p          = NMT state of CN
-//              NodeEvent_p             = occured events
+//              NodeEvent_p             = occurred events
 //
 // Returns:     tEplKernel              = error code
 //

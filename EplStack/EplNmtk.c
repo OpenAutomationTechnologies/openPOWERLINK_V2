@@ -744,7 +744,7 @@ tEplEventNmtStateChange NmtStateChange;
                     break;
                 }
 
-                // error occured
+                // error occurred
                 case kEplNmtEventNmtCycleError:
                 {   // NMT_CT11
                     // reset flags
@@ -850,7 +850,7 @@ tEplEventNmtStateChange NmtStateChange;
                     break;
                 }
 
-                // error occured
+                // error occurred
                 case kEplNmtEventNmtCycleError:
                 {   // NMT_CT11
                     EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtCsPreOperational1;
@@ -932,7 +932,7 @@ tEplEventNmtStateChange NmtStateChange;
                     break;
                 }
 
-                // error occured
+                // error occurred
                 case kEplNmtEventNmtCycleError:
                 {   // NMT_CT11
                     EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtCsPreOperational1;
@@ -1000,7 +1000,7 @@ tEplEventNmtStateChange NmtStateChange;
                     break;
                 }
 
-                // error occured
+                // error occurred
                 case kEplNmtEventNmtCycleError:
                 {   // NMT_CT11
                     EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtCsPreOperational1;
@@ -1061,7 +1061,7 @@ tEplEventNmtStateChange NmtStateChange;
                     break;
                 }
 
-                // error occured
+                // error occurred
                 // d.k.: how does this error occur? on CRC errors
 /*                case kEplNmtEventNmtCycleError:
                 {
@@ -1240,7 +1240,7 @@ tEplEventNmtStateChange NmtStateChange;
                     break;
                 }
 
-                // error occured
+                // error occurred
                 // d.k. MSPreOp1->CSPreOp1: nonsense -> keep state
                 /*
                 case kEplNmtEventNmtCycleError:
@@ -1338,7 +1338,7 @@ tEplEventNmtStateChange NmtStateChange;
                     break;
                 }
 
-                // error occured
+                // error occurred
                 case kEplNmtEventNmtCycleError:
                 {   // NMT_MT6
                     EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtMsPreOperational1;
@@ -1416,7 +1416,7 @@ tEplEventNmtStateChange NmtStateChange;
                     break;
                 }
 
-                // error occured
+                // error occurred
                 case kEplNmtEventNmtCycleError:
                 {   // NMT_MT6
                     EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtMsPreOperational1;
@@ -1492,7 +1492,7 @@ tEplEventNmtStateChange NmtStateChange;
                     break;
                 }
 
-                // error occured
+                // error occurred
                 case kEplNmtEventNmtCycleError:
                 {   // NMT_MT6
                     EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtMsPreOperational1;
@@ -1562,7 +1562,7 @@ tEplEventNmtStateChange NmtStateChange;
                     break;
                 }
 
-                // error occured
+                // error occurred
                 // d.k. BE->PreOp1 on cycle error? No
 /*                case kEplNmtEventNmtCycleError:
                 {

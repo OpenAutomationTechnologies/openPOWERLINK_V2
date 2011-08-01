@@ -695,7 +695,7 @@ Exit:
 //
 //
 // Parameters:  EventSource_p   = source-module of the errorevent
-//              EplError_p     = code of occured error
+//              EplError_p     = code of occurred error
 //              uiArgSize_p     = size of the argument
 //              pArg_p          = pointer to the argument
 //
