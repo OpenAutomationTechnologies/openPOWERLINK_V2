@@ -146,7 +146,7 @@
 #define EPL_NMTMNU_NODE_FLAG_PRC_RESET_MASK         0x7000
 #endif
 
-// defines for timer arguments to draw a distinction between serveral events
+// defines for timer arguments to draw a distinction between several events
 #define EPL_NMTMNU_TIMERARG_NODE_MASK   0x000000FFL // mask that contains the node-ID
 #define EPL_NMTMNU_TIMERARG_IDENTREQ    0x00010000L // timer event is for IdentRequest
 #define EPL_NMTMNU_TIMERARG_STATREQ     0x00020000L // timer event is for StatusRequest
