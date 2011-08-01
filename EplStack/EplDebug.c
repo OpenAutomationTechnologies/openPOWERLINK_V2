@@ -280,6 +280,18 @@ static char *EplNmtNodeEvtTypeStr_g[] =
 };
 unsigned int uiEplNmtNodeEvtTypeStr_g = (sizeof(EplNmtNodeEvtTypeStr_g) / sizeof(*(EplNmtNodeEvtTypeStr_g)));
 
+// text strings for NMT boot events
+static char *EplNmtBootEvtTypeStr_g[] =
+{
+    "Boot step 1 finished",     // 0x00     PreOp2 is possible
+    "Boot step 2 finished",     // 0x01     ReadyToOp is possible for MN
+    "EnableReadyToOp",          // 0x02     ReadyToOP is possible for CN
+    "CheckComFinish",           // 0x03     Operational is possible
+    "Operational",              // 0x04     all mandatory CNs are Operational
+    "Error",                    // 0x05
+};
+unsigned int uiEplNmtBootEvtTypeStr_g = (sizeof(EplNmtBootEvtTypeStr_g) / sizeof(*(EplNmtBootEvtTypeStr_g)));
+
 //=========================================================================//
 //                                                                         //
 //          P U B L I C   F U N C T I O N S                                //
@@ -484,5 +496,29 @@ char *EplGetNmtNodeEventTypeStr( tEplNmtNodeEvent NodeEventType_p )
     else
     {
         return  EplNmtNodeEvtTypeStr_g[ NodeEventType_p ];
+    }
+}
+
+//---------------------------------------------------------------------------
+//
+// Function:    EplGetNmtBootEventTypeStr()
+//
+// Description: returns the string of the specified NMT boot event
+//
+// Parameters:  NodeEventType_p        Type of NMT boot event
+//
+// Returns:     event type string if found
+//              eplInvalidStr_g if not found
+//
+//---------------------------------------------------------------------------
+char *EplGetNmtBootEventTypeStr( tEplNmtBootEvent BootEventType_p )
+{
+    if( BootEventType_p >= uiEplNmtBootEvtTypeStr_g )
+    {
+        return  eplInvalidStr_g;
+    }
+    else
+    {
+        return  EplNmtBootEvtTypeStr_g[ BootEventType_p ];
     }
 }
