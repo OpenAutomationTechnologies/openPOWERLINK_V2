@@ -5,7 +5,7 @@
 
   Project:      openPOWERLINK
 
-  Description:  source file for Epl-Userspace-Event-Modul
+  Description:  source file for Epl-Userspace-Event-Module
 
   License:
 
@@ -139,7 +139,7 @@ static tEplEventuInstance EplEventuInstance_g;
 //---------------------------------------------------------------------------
 
 #if EPL_USE_SHAREDBUFF != FALSE
-// callback function for incomming events
+// callback function for incoming events
 static void  EplEventuRxSignalHandlerCb (
     tShbInstance pShbRxInstance_p,
     unsigned long ulDataSize_p);
@@ -349,7 +349,7 @@ return Ret;
 //
 //
 //
-// Parameters:  pEvent_p = pointer to event-structur from buffer
+// Parameters:  pEvent_p = pointer to event-structure from buffer
 //
 //
 // Returns:      tEpKernel  = errorcode
@@ -530,7 +530,7 @@ tEplEventSource         EventSource;
 //
 //
 //
-// Parameters:  pEvent_p = pointer to event-structur from buffer
+// Parameters:  pEvent_p = pointer to event-structure from buffer
 //
 //
 // Returns:      tEpKernel  = errorcode
@@ -747,7 +747,7 @@ tEplEvent       EplEvent;
 //
 // Function:    EplEventuRxSignalHandlerCb()
 //
-// Description: Callback-function for evets from kernelspace
+// Description: Callback-function for events from kernelspace
 //
 //
 //
