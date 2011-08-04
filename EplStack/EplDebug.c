@@ -130,7 +130,6 @@ static char *eplEvtStr_g[] = {
     "NmtEventSwitchOff",            // enter state Off
     "NmtEventCriticalError",        // enter state Off because of critical error
 };
-unsigned int uiNumEplEvtStr_g = (sizeof(eplEvtStr_g) / sizeof(*(eplEvtStr_g)));
 
 // text strings for POWERLINK event sources
 static char    *eplEvtSrcStr_g[] = {
@@ -166,7 +165,6 @@ static char    *eplEvtSrcStr_g[] = {
     "EventSourceLedu",          // Ledu module
     "EventSourceGw309Ascii",    // GW309ASCII module
 };
-unsigned int uiNumEplEvtSrcStr_g = (sizeof(eplEvtSrcStr_g) / sizeof(*(eplEvtSrcStr_g)));
 
 // text strings for POWERLINK event sinks
 static char * eplEvtSinkStr_g[] = {
@@ -186,7 +184,6 @@ static char * eplEvtSinkStr_g[] = {
     "EventSinkGw309Ascii",
     "EventSinkApi"
 };
-unsigned int uiNumEplEvtSinkStr_g = (sizeof(eplEvtSinkStr_g) / sizeof(*(eplEvtSinkStr_g)));
 
 // text strings for POWERLINK event types
 static char *eplEvtTypeStr_g[] = {
@@ -225,7 +222,6 @@ static char *eplEvtTypeStr_g[] = {
     "EventTypeGw309AsciiReq",           // GW309ASCII request
     "EventTypeNmtMnuNodeAdded",         // node was added to isochronous phase by DLL
 };
-unsigned int uiNumEplEvtTypeStr_g = (sizeof(eplEvtTypeStr_g) / sizeof(*(eplEvtTypeStr_g)));
 
 // text strings for POWERLINK states
 static tNmtStateInfo nmtStateInfo_g[] =
@@ -249,7 +245,6 @@ static tNmtStateInfo nmtStateInfo_g[] =
     { kEplNmtMsOperational,         "NmtMsOperational"          },
     { kEplNmtMsBasicEthernet,       "NmtMsBasicEthernet"        },
 };
-unsigned int uiNumNmtStateInfo_g = (sizeof(nmtStateInfo_g) / sizeof(*(nmtStateInfo_g)));
 
 // text strings for API events
 static tApiEventInfo ApiEventInfo_g[] =
@@ -269,8 +264,6 @@ static tApiEventInfo ApiEventInfo_g[] =
     { kEplApiEventReceivedPres,     "Received PRes frame"               },
 };
 
-static unsigned int uiNumApiEventInfo_g = (sizeof(ApiEventInfo_g) / sizeof(*(ApiEventInfo_g)));
-
 // text strings for NMT node events
 static char *EplNmtNodeEvtTypeStr_g[] =
 {
@@ -283,7 +276,6 @@ static char *EplNmtNodeEvtTypeStr_g[] =
     "NMT state",                // 0x06
     "NMT error",                // 0x07
 };
-unsigned int uiEplNmtNodeEvtTypeStr_g = (sizeof(EplNmtNodeEvtTypeStr_g) / sizeof(*(EplNmtNodeEvtTypeStr_g)));
 
 // text strings for NMT boot events
 static char *EplNmtBootEvtTypeStr_g[] =
@@ -295,7 +287,6 @@ static char *EplNmtBootEvtTypeStr_g[] =
     "Operational",              // 0x04     all mandatory CNs are Operational
     "Error",                    // 0x05
 };
-unsigned int uiEplNmtBootEvtTypeStr_g = (sizeof(EplNmtBootEvtTypeStr_g) / sizeof(*(EplNmtBootEvtTypeStr_g)));
 
 //=========================================================================//
 //                                                                         //
@@ -315,7 +306,7 @@ unsigned int uiEplNmtBootEvtTypeStr_g = (sizeof(EplNmtBootEvtTypeStr_g) / sizeof
 //---------------------------------------------------------------------------
 char *EplGetNmtEventStr(tEplNmtEvent nmtEvent_p)
 {
-    if (nmtEvent_p >= uiNumEplEvtStr_g)
+    if (nmtEvent_p >= tabentries(eplEvtStr_g))
     {
         return eplInvalidStr_g;
     }
@@ -337,7 +328,7 @@ char *EplGetNmtEventStr(tEplNmtEvent nmtEvent_p)
 //---------------------------------------------------------------------------
 char *EplGetEventSourceStr(tEplEventSource eventSrc_p)
 {
-    if (eventSrc_p >= uiNumEplEvtSrcStr_g)
+    if (eventSrc_p >= tabentries(eplEvtSrcStr_g))
     {
         return eplInvalidStr_g;
     }
@@ -359,7 +350,7 @@ char *EplGetEventSourceStr(tEplEventSource eventSrc_p)
 //---------------------------------------------------------------------------
 char *EplGetEventSinkStr(tEplEventSink eventSink_p)
 {
-    if (eventSink_p >= uiNumEplEvtSinkStr_g)
+    if (eventSink_p >= tabentries(eplEvtSinkStr_g))
     {
         return eplInvalidStr_g;
     }
@@ -381,7 +372,7 @@ char *EplGetEventSinkStr(tEplEventSink eventSink_p)
 //---------------------------------------------------------------------------
 char *EplGetEventTypeStr(tEplEventType eventType_p)
 {
-    if (eventType_p >= uiNumEplEvtTypeStr_g)
+    if (eventType_p >= tabentries(eplEvtTypeStr_g))
     {
         return eplInvalidStr_g;
     }
@@ -405,7 +396,7 @@ char *EplGetNmtStateStr(tEplNmtState nmtState_p)
 {
     unsigned int         i;
 
-    for (i = 0; i < uiNumNmtStateInfo_g; i++)
+    for (i = 0; i < tabentries(nmtStateInfo_g); i++)
     {
         if (nmtStateInfo_g[i].m_nmtState == nmtState_p)
             return (nmtStateInfo_g[i].m_sNmtState);
@@ -468,7 +459,8 @@ char *EplGetApiEventStr( tEplApiEventType ApiEvent_p)
 
     // Search element
     pApiEventInfo   = bsearch(  &Key, ApiEventInfo_g,
-                                uiNumApiEventInfo_g, sizeof(Key),
+                                tabentries(ApiEventInfo_g),
+                                sizeof(Key),
                                 EplDebugCompareApiEvent);
 
     // Check result
@@ -494,7 +486,7 @@ char *EplGetApiEventStr( tEplApiEventType ApiEvent_p)
 //---------------------------------------------------------------------------
 char *EplGetNmtNodeEventTypeStr( tEplNmtNodeEvent NodeEventType_p )
 {
-    if( NodeEventType_p >= uiEplNmtNodeEvtTypeStr_g )
+    if( NodeEventType_p >= tabentries(EplNmtNodeEvtTypeStr_g) )
     {
         return  eplInvalidStr_g;
     }
@@ -518,7 +510,7 @@ char *EplGetNmtNodeEventTypeStr( tEplNmtNodeEvent NodeEventType_p )
 //---------------------------------------------------------------------------
 char *EplGetNmtBootEventTypeStr( tEplNmtBootEvent BootEventType_p )
 {
-    if( BootEventType_p >= uiEplNmtBootEvtTypeStr_g )
+    if( BootEventType_p >= tabentries(EplNmtBootEvtTypeStr_g) )
     {
         return  eplInvalidStr_g;
     }
