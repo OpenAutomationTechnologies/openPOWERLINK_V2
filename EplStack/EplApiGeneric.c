@@ -587,6 +587,11 @@ tEplKernel      Ret = kEplSuccessful;
 //    PRINTF1("EplStatusuDelInstance():  0x%X\n", Ret);
 #endif
 
+#if EPL_NMTMNU_PRES_CHAINING_MN != FALSE
+    // deinitialize Sync module
+    Ret = EplSyncuDelInstance();
+#endif
+
     // deinitialize EplNmtCnu module
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_CN)) != 0)
     Ret = EplNmtCnuDelInstance();
@@ -656,6 +661,9 @@ tEplKernel      Ret = kEplSuccessful;
 #if EPL_USE_SHAREDBUFF != FALSE
     ShbExit();
 #endif
+
+    // deinitialize Obd module
+    Ret = EplObdDeleteInstance();
 
     return Ret;
 }
