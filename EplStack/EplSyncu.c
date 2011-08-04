@@ -68,6 +68,8 @@
 
 ****************************************************************************/
 
+#if EPL_DLL_PRES_CHAINING_MN != FALSE
+
 #include "user/EplSyncu.h"
 #include "user/EplDlluCal.h"
 
@@ -370,6 +372,8 @@ tEplSyncuCbResponse pfnCbResponse;
 Exit:
     return Ret;
 }
+
+#endif // EPL_DLL_PRES_CHAINING_MN != FALSE
 
 // EOF
 
