@@ -425,31 +425,31 @@ int  main (int argc, char **argv)
 
     EplApiInitParam.m_fAsyncOnly = FALSE;
 
-    EplApiInitParam.m_dwFeatureFlags = -1;
-    EplApiInitParam.m_dwCycleLen = uiCycleLen_g;        // required for error detection
-    EplApiInitParam.m_uiIsochrTxMaxPayload = 256;       // const
-    EplApiInitParam.m_uiIsochrRxMaxPayload = 256;       // const
-    EplApiInitParam.m_dwPresMaxLatency = 50000;         // const; only required for IdentRes
-    EplApiInitParam.m_uiPreqActPayloadLimit = 36;       // required for initialisation (+28 bytes)
-    EplApiInitParam.m_uiPresActPayloadLimit = 36;       // required for initialisation of Pres frame (+28 bytes)
-    EplApiInitParam.m_dwAsndMaxLatency = 150000;        // const; only required for IdentRes
-    EplApiInitParam.m_uiMultiplCycleCnt = 0;            // required for error detection
-    EplApiInitParam.m_uiAsyncMtu = 1500;                // required to set up max frame size
-    EplApiInitParam.m_uiPrescaler = 2;                  // required for sync
-    EplApiInitParam.m_dwLossOfFrameTolerance = 500000;
-    EplApiInitParam.m_dwAsyncSlotTimeout = 3000000;
-    EplApiInitParam.m_dwWaitSocPreq = 150000;
-    EplApiInitParam.m_dwDeviceType = -1;      // NMT_DeviceType_U32
-    EplApiInitParam.m_dwVendorId = -1;        // NMT_IdentityObject_REC.VendorId_U32
-    EplApiInitParam.m_dwProductCode = -1;     // NMT_IdentityObject_REC.ProductCode_U32
-    EplApiInitParam.m_dwRevisionNumber = -1;  // NMT_IdentityObject_REC.RevisionNo_U32
-    EplApiInitParam.m_dwSerialNumber = -1;    // NMT_IdentityObject_REC.SerialNo_U32
+    EplApiInitParam.m_dwFeatureFlags            = -1;
+    EplApiInitParam.m_dwCycleLen                = uiCycleLen_g;     // required for error detection
+    EplApiInitParam.m_uiIsochrTxMaxPayload      = 256;              // const
+    EplApiInitParam.m_uiIsochrRxMaxPayload      = 256;              // const
+    EplApiInitParam.m_dwPresMaxLatency          = 50000;            // const; only required for IdentRes
+    EplApiInitParam.m_uiPreqActPayloadLimit     = 36;               // required for initialisation (+28 bytes)
+    EplApiInitParam.m_uiPresActPayloadLimit     = 36;               // required for initialisation of Pres frame (+28 bytes)
+    EplApiInitParam.m_dwAsndMaxLatency          = 150000;           // const; only required for IdentRes
+    EplApiInitParam.m_uiMultiplCycleCnt         = 0;                // required for error detection
+    EplApiInitParam.m_uiAsyncMtu                = 1500;             // required to set up max frame size
+    EplApiInitParam.m_uiPrescaler               = 2;                // required for sync
+    EplApiInitParam.m_dwLossOfFrameTolerance    = 500000;
+    EplApiInitParam.m_dwAsyncSlotTimeout        = 3000000;
+    EplApiInitParam.m_dwWaitSocPreq             = 150000;
+    EplApiInitParam.m_dwDeviceType              = -1;               // NMT_DeviceType_U32
+    EplApiInitParam.m_dwVendorId                = -1;               // NMT_IdentityObject_REC.VendorId_U32
+    EplApiInitParam.m_dwProductCode             = -1;               // NMT_IdentityObject_REC.ProductCode_U32
+    EplApiInitParam.m_dwRevisionNumber          = -1;               // NMT_IdentityObject_REC.RevisionNo_U32
+    EplApiInitParam.m_dwSerialNumber            = -1;               // NMT_IdentityObject_REC.SerialNo_U32
 
-    EplApiInitParam.m_dwSubnetMask = SUBNET_MASK;
-    EplApiInitParam.m_dwDefaultGateway = 0;
+    EplApiInitParam.m_dwSubnetMask              = SUBNET_MASK;
+    EplApiInitParam.m_dwDefaultGateway          = 0;
     EPL_MEMCPY(EplApiInitParam.m_sHostname, sHostname, sizeof(EplApiInitParam.m_sHostname));
-    EplApiInitParam.m_uiSyncNodeId = EPL_C_ADR_SYNC_ON_SOA;
-    EplApiInitParam.m_fSyncOnPrcNode = FALSE;
+    EplApiInitParam.m_uiSyncNodeId              = EPL_C_ADR_SYNC_ON_SOA;
+    EplApiInitParam.m_fSyncOnPrcNode            = FALSE;
 
     // set callback functions
     EplApiInitParam.m_pfnCbEvent = AppCbEvent;
