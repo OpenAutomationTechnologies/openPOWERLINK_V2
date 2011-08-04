@@ -580,7 +580,7 @@ tEplApiProcessImageCopyJobInt   IntCopyJob;
     if ((EplApiProcessImageInstance_g.m_In.m_uiSize == 0)
         || (EplApiProcessImageInstance_g.m_Out.m_uiSize == 0))
     {   // the process image has been freed
-        // therefor, indicate shutdown to application thread
+        // therefore, indicate shutdown to application thread
         Ret = kEplShutdown;
         goto Exit;
     }
@@ -619,7 +619,7 @@ tEplApiProcessImageCopyJobInt   IntCopyJob;
                 || (EplApiProcessImageInstance_g.m_In.m_uiSize == 0)
                 || (EplApiProcessImageInstance_g.m_Out.m_uiSize == 0))
             {   // in the mean time the process image has been freed
-                // therefor, indicate shutdown to application thread
+                // therefore, indicate shutdown to application thread
                 Ret = kEplShutdown;
             }
         }

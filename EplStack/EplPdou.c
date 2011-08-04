@@ -1099,7 +1099,7 @@ void*               pVar;
         && (uiByteSize != ObdSize))
     {
         // object is numerical,
-        // therefor size has to fit, but it does not.
+        // therefore size has to fit, but it does not.
         *pdwAbortCode_p = EPL_SDOAC_GENERAL_ERROR;
         Ret = kEplPdoVarNotFound;
         goto Exit;
@@ -1117,7 +1117,7 @@ void*               pVar;
     EPL_PDO_MAPPOBJECT_SET_BYTESIZE_OR_TYPE(pMappObject_p, (WORD) uiByteSize, ObdType);
     EPL_PDO_MAPPOBJECT_SET_VAR(pMappObject_p, pVar);
 
-    // calucaled needed PDO size
+    // Calculate needed PDO size
     *puiPdoSize_p = (uiBitOffset >> 3) + uiByteSize;
 
 Exit:
