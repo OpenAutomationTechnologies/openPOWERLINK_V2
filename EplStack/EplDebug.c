@@ -80,7 +80,7 @@ static char *eplInvalidStr_g = "INVALID";
 //---------------------------------------------------------------------------
 // module global vars
 //---------------------------------------------------------------------------
-/* text strings for POWERLINK events */
+// text strings for POWERLINK events
 static char *eplEvtStr_g[] = {
     "NmtEventNoEvent",              //
     "NmtEventDllMePres",            //
@@ -132,7 +132,7 @@ static char *eplEvtStr_g[] = {
 };
 unsigned int uiNumEplEvtStr_g = (sizeof(eplEvtStr_g) / sizeof(*(eplEvtStr_g)));
 
-/* text strings for POWERLINK event sources */
+// text strings for POWERLINK event sources
 static char    *eplEvtSrcStr_g[] = {
     "0",                        // reserved
 
@@ -168,7 +168,7 @@ static char    *eplEvtSrcStr_g[] = {
 };
 unsigned int uiNumEplEvtSrcStr_g = (sizeof(eplEvtSrcStr_g) / sizeof(*(eplEvtSrcStr_g)));
 
-/* text strings for POWERLINK event sinks */
+// text strings for POWERLINK event sinks
 static char * eplEvtSinkStr_g[] = {
     "EventSinkSync",
     "EventSinkNmtk",
@@ -188,7 +188,7 @@ static char * eplEvtSinkStr_g[] = {
 };
 unsigned int uiNumEplEvtSinkStr_g = (sizeof(eplEvtSinkStr_g) / sizeof(*(eplEvtSinkStr_g)));
 
-/* text strings for POWERLINK event types */
+// text strings for POWERLINK event types
 static char *eplEvtTypeStr_g[] = {
     "0",                                // reserved
     "EventTypeNmtEvent",                // NMT event
@@ -227,7 +227,7 @@ static char *eplEvtTypeStr_g[] = {
 };
 unsigned int uiNumEplEvtTypeStr_g = (sizeof(eplEvtTypeStr_g) / sizeof(*(eplEvtTypeStr_g)));
 
-/* text strings for POWERLINK states */
+// text strings for POWERLINK states
 static tNmtStateInfo nmtStateInfo_g[] =
 {
     { kEplNmtGsOff,                 "NmtGsOff"                  },
@@ -251,7 +251,7 @@ static tNmtStateInfo nmtStateInfo_g[] =
 };
 unsigned int uiNumNmtStateInfo_g = (sizeof(nmtStateInfo_g) / sizeof(*(nmtStateInfo_g)));
 
-/* text strings for API events */
+// text strings for API events
 static tApiEventInfo ApiEventInfo_g[] =
 {
     { kEplApiEventUserDef,          "User defined"                      },
