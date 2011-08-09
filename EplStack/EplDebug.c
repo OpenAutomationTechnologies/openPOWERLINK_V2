@@ -418,8 +418,8 @@ char *EplGetNmtStateStr(tEplNmtState nmtState_p)
 static int
 EplDebugCompareApiEvent( const void *pvEventKey, const void *pvEventArray )
 {
-    tApiEventInfo    *pEventKey  = (tEplApiEventType *) pvEventKey;
-    tApiEventInfo    *pEventArry = (tEplApiEventType *) pvEventArray;
+    tApiEventInfo    *pEventKey  = (tApiEventInfo *) pvEventKey;
+    tApiEventInfo    *pEventArry = (tApiEventInfo *) pvEventArray;
 
     if( pEventKey->m_ApiEvent < pEventArry->m_ApiEvent )
     {
