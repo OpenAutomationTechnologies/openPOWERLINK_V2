@@ -450,7 +450,6 @@ EplDebugCompareApiEvent( const void *pvEventKey, const void *pvEventArray )
 //---------------------------------------------------------------------------
 char *EplGetApiEventStr( tEplApiEventType ApiEvent_p)
 {
-    char            *pstrReturn;
     tApiEventInfo   *pApiEventInfo;
     tApiEventInfo   Key;
 
