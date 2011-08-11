@@ -152,7 +152,7 @@
                                | EPL_MODULE_NMT_MN)
 //                               | EPL_MODULE_VETH
 //                               | EPL_MODULE_OBDU
-#else if defined WIN32
+#elif defined WIN32
 #define EPL_MODULE_INTEGRATION (EPL_MODULE_OBDK \
                                | EPL_MODULE_PDOK \
                                | EPL_MODULE_PDOU \
