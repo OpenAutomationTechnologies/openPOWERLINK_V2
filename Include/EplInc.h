@@ -94,8 +94,9 @@
     #else
         // MSVC needs to include windows.h at first
         // the following defines ar necessary for function prototypes for waitable timers
-        //#define _WIN32_WINDOWS 0x0401
-        //#define _WIN32_WINNT   0x0501
+        #define _WIN32_WINDOWS 0x0401
+        #define _WIN32_WINNT   0x0501
+
         #include <windows.h>
         #include <process.h>
     #endif
