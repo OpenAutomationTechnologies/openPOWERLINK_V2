@@ -374,14 +374,14 @@ EPLDLLEXPORT tEplKernel PUBLIC EplApiProcessImageLinkObject(
 EPLDLLEXPORT tEplKernel PUBLIC EplApiProcessImageSetup(void);
 
 // functions for getting cleartext values of stack states and events
-extern char *EplGetNmtEventStr(tEplNmtEvent nmtEvent_p);
-extern char *EplGetEventTypeStr(tEplEventType eventType_p);
-extern char *EplGetEventSourceStr(tEplEventSource eventSrc_p);
-extern char *EplGetEventSinkStr(tEplEventSink eventSink_p);
-extern char *EplGetNmtStateStr(tEplNmtState nmtState_p);
-extern char *EplGetApiEventStr( tEplApiEventType ApiEvent_p);
-extern char *EplGetNmtNodeEventTypeStr( tEplNmtNodeEvent NodeEventType_p );
-extern char *EplGetNmtBootEventTypeStr( tEplNmtBootEvent BootEventType_p );
+EPLDLLEXPORT char *EplGetNmtEventStr(tEplNmtEvent nmtEvent_p);
+EPLDLLEXPORT char *EplGetEventTypeStr(tEplEventType eventType_p);
+EPLDLLEXPORT char *EplGetEventSourceStr(tEplEventSource eventSrc_p);
+EPLDLLEXPORT char *EplGetEventSinkStr(tEplEventSink eventSink_p);
+EPLDLLEXPORT char *EplGetNmtStateStr(tEplNmtState nmtState_p);
+EPLDLLEXPORT char *EplGetApiEventStr( tEplApiEventType ApiEvent_p);
+EPLDLLEXPORT char *EplGetNmtNodeEventTypeStr( tEplNmtNodeEvent NodeEventType_p );
+EPLDLLEXPORT char *EplGetNmtBootEventTypeStr( tEplNmtBootEvent BootEventType_p );
 
 #endif  // #ifndef _EPL_API_H_
 
