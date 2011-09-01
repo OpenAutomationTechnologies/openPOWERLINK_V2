@@ -62,7 +62,7 @@ ENDIF ()
 # additional include directories
 SET(USERLIB_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../powerlink_user_lib)
 IF (UNIX)
-    SET(KERNELMOD_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../X86/Linux/gnu/powerlink_kernel_module)
+    SET(KERNELMOD_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../../X86/Linux/gnu/powerlink_kernel_module)
 ENDIF (UNIX)
 
 # set sources of POWERLINK application
