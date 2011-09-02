@@ -241,7 +241,7 @@ openPOWERLINK on Linux x86
 
   CFG_X86_LINUX_DEMO_KERNEL
                         If enabled the kernel demo will be compiled.
-                        It cannot be used if CFM_POWERLINK_PROCESS_IMAGE is
+                        It cannot be used if CFG_POWERLINK_PROCESS_IMAGE is
                         enabled!
 
   CFG_X86_LINUX_DEMO_PROCESS_IMAGE_CONSOLE
@@ -249,19 +249,19 @@ openPOWERLINK on Linux x86
                         will be compiled. It can be used either with the kernel
                         stack or with the userspace stack.
 						
-                        Requires: CFM_POWERLINK_CFM, CFM_POWERLINK_PROCESS_IMAGE
+                        Requires: CFG_POWERLINK_CFM, CFG_POWERLINK_PROCESS_IMAGE
 
   CFG_X86_LINUX_DEMO_PROCESS_IMAGE_QT
                         If enabled the process image based QT application
                         will be compiled. It can be used either with the kernel
                         stack or with the userspace stack.
 						
-                        Requires: CFM_POWERLINK_CFM, CFM_POWERLINK_PROCESS_IMAGE
+                        Requires: CFG_POWERLINK_CFM, CFG_POWERLINK_PROCESS_IMAGE
 
   CFG_X86_LINUX_DEMO_QT
                         If enabled the standard QT application will be compiled.
                         It can only be used with the kernel stack.
-                        This option is not allowed if CFM_POWERLINK_PROCESS_IMAGE
+                        This option is not allowed if CFG_POWERLINK_PROCESS_IMAGE
 						is enabled!
 
   CMAKE_INSTALL_PREFIX  Specifies the installation directory where your files
