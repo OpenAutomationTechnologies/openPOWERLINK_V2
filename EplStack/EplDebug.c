@@ -288,6 +288,17 @@ static char *EplNmtBootEvtTypeStr_g[] =
     "Error",                    // 0x05
 };
 
+// text strings for SDO command layer connection states
+static char *EplSdoComConStateStr_g[] =
+{
+    "NotActive",                // 0x00
+    "Running",                  // 0x01
+    "TxAborted",                // 0x02
+    "RxAborted",                // 0x03
+    "Finished",                 // 0x04
+    "LowerLayerAbort",          // 0x05
+};
+
 //=========================================================================//
 //                                                                         //
 //          P U B L I C   F U N C T I O N S                                //
@@ -516,5 +527,29 @@ char *EplGetNmtBootEventTypeStr( tEplNmtBootEvent BootEventType_p )
     else
     {
         return  EplNmtBootEvtTypeStr_g[ BootEventType_p ];
+    }
+}
+
+//---------------------------------------------------------------------------
+//
+// Function:    EplGetSdoComConStateStr
+//
+// Description: returns the string of the specified SDO command connection state
+//
+// Parameters:  SdoComConState_p        SDO comand layer connection state
+//
+// Returns:     SDO command connection state string if found
+//              eplInvalidStr_g if not found
+//
+//---------------------------------------------------------------------------
+char *EplGetSdoComConStateStr( tEplSdoComConState SdoComConState_p )
+{
+    if( SdoComConState_p >= tabentries(EplSdoComConStateStr_g) )
+    {
+        return  eplInvalidStr_g;
+    }
+    else
+    {
+        return  EplSdoComConStateStr_g[ SdoComConState_p ];
     }
 }

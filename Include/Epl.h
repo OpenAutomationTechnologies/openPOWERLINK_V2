@@ -382,6 +382,7 @@ EPLDLLEXPORT char *EplGetNmtStateStr(tEplNmtState nmtState_p);
 EPLDLLEXPORT char *EplGetApiEventStr( tEplApiEventType ApiEvent_p);
 EPLDLLEXPORT char *EplGetNmtNodeEventTypeStr( tEplNmtNodeEvent NodeEventType_p );
 EPLDLLEXPORT char *EplGetNmtBootEventTypeStr( tEplNmtBootEvent BootEventType_p );
+EPLDLLEXPORT char *EplGetSdoComConStateStr( tEplSdoComConState SdoComConState_p );
 
 #endif  // #ifndef _EPL_API_H_
 
