@@ -79,6 +79,13 @@ SET (DEMO_SOURCES demo_main.c
                   ${POWERLINK_SOURCE_DIR}/ObjDicts/${OBJDICT}/EplApiProcessImageSetup.c
 )
 
+# The TRACE macros need trace.c on the Windows platform
+IF (WIN32)
+    SET(DEMO_SOURCES ${DEMO_SOURCES}
+                     ${POWERLINK_SOURCE_DIR}/EplStack/trace.c
+       )
+ENDIF (WIN32)
+
 IF (UNIX)
     IF (CFG_KERNEL_STACK)
         SET(DEMO_SOURCES ${DEMO_SOURCES}
