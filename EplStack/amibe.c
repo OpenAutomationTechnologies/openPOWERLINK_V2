@@ -138,6 +138,12 @@ void  PUBLIC  AmiSetByteToLe (void FAR* pAddr_p, BYTE bByteVal_p)
 
 INLINE_FUNCTION void  PUBLIC  AmiSetWordToLe (void FAR* pAddr_p, WORD wWordVal_p)
 {
+#if defined (__MICROBLAZE__)
+BYTE *dst=(BYTE*)pAddr_p, *src=(BYTE*)&wWordVal_p;
+
+   *(dst+0) = *(src+1);
+   *(dst+1) = *(src+0);
+#else
 twStruct FAR*  pwStruct;
 twStruct wValue;
 
@@ -146,7 +152,7 @@ twStruct wValue;
 
    pwStruct = (twStruct FAR*)pAddr_p;
    pwStruct->m_wWord = wValue.m_wWord;
-
+#endif
 }
 
 
@@ -155,6 +161,14 @@ twStruct wValue;
 
 INLINE_FUNCTION void  PUBLIC  AmiSetDwordToLe (void FAR* pAddr_p, DWORD dwDwordVal_p)
 {
+#if defined (__MICROBLAZE__)
+BYTE *dst=(BYTE*)pAddr_p, *src=(BYTE*)&dwDwordVal_p;
+	
+   *(dst+0) = *(src+3);
+   *(dst+1) = *(src+2);
+   *(dst+2) = *(src+1);
+   *(dst+3) = *(src+0);
+#else
 tdwStruct FAR*  pdwStruct;
 tdwStruct dwValue;
 
@@ -166,6 +180,7 @@ tdwStruct dwValue;
 
    pdwStruct = (tdwStruct FAR*)pAddr_p;
    pdwStruct->m_dwDword = dwValue.m_dwDword;
+#endif
 
 }
 
@@ -204,10 +219,17 @@ void  PUBLIC  AmiSetByteToBe (void FAR* pAddr_p, BYTE bByteVal_p)
 
 INLINE_FUNCTION void  PUBLIC  AmiSetWordToBe (void FAR* pAddr_p, WORD wWordVal_p)
 {
+#if defined (__MICROBLAZE__)
+BYTE *pDst = (BYTE *) pAddr_p, *pSrc = (BYTE *)&wWordVal_p;
+	
+   *pDst = *pSrc;
+   *(pDst+1) = *(pSrc+1);
+#else
 twStruct FAR*  pwStruct;
 
    pwStruct = (twStruct FAR*)pAddr_p;
    pwStruct->m_wWord = wWordVal_p;
+#endif
 
 }
 
@@ -217,10 +239,19 @@ twStruct FAR*  pwStruct;
 
 INLINE_FUNCTION void  PUBLIC  AmiSetDwordToBe (void FAR* pAddr_p, DWORD dwDwordVal_p)
 {
+#if defined (__MICROBLAZE__)
+BYTE *dst=(BYTE*)pAddr_p, *src=(BYTE*)&dwDwordVal_p;
+	
+   *(dst+0) = *(src+0);
+   *(dst+1) = *(src+1);
+   *(dst+2) = *(src+2);
+   *(dst+3) = *(src+3);
+#else
 tdwStruct FAR*  pdwStruct;
 
    pdwStruct = (tdwStruct FAR*)pAddr_p;
    pdwStruct->m_dwDword = dwDwordVal_p;
+#endif
 
 }
 
@@ -258,6 +289,14 @@ BYTE  PUBLIC  AmiGetByteFromLe (void FAR* pAddr_p)
 
 INLINE_FUNCTION WORD  PUBLIC  AmiGetWordFromLe (void FAR* pAddr_p)
 {
+#if defined (__MICROBLAZE__)
+BYTE *pSrc = pAddr_p;
+WORD wDst;
+	
+   wDst = (*(pSrc+1) << 8) | (*(pSrc+0));
+	
+   return wDst;
+#else
 twStruct FAR*  pwStruct;
 twStruct wValue;
 
@@ -267,7 +306,7 @@ twStruct wValue;
    wValue.m_wWord  |= (WORD)((pwStruct->m_wWord & 0xFF00) >> 8); //MSB to LSB
 
    return ( wValue.m_wWord );
-
+#endif
 }
 
 
@@ -277,6 +316,14 @@ twStruct wValue;
 
 INLINE_FUNCTION DWORD  PUBLIC  AmiGetDwordFromLe (void FAR* pAddr_p)
 {
+#if defined (__MICROBLAZE__)
+BYTE FAR *pbSrc = pAddr_p;
+	
+   return (((DWORD)pbSrc[0]) <<  0) | 
+           (((DWORD)pbSrc[1]) <<  8) |
+           (((DWORD)pbSrc[2]) << 16) |
+           (((DWORD)pbSrc[3]) << 24);
+#else
 tdwStruct FAR*  pdwStruct;
 tdwStruct dwValue;
 
@@ -288,6 +335,7 @@ tdwStruct dwValue;
    dwValue.m_dwDword|= ((pdwStruct->m_dwDword & 0xFF000000)>>24); //MSB to LSB
 
    return ( dwValue.m_dwDword );
+#endif
 
 }
 
@@ -323,10 +371,17 @@ BYTE  PUBLIC  AmiGetByteFromBe (void FAR* pAddr_p)
 
 INLINE_FUNCTION WORD  PUBLIC  AmiGetWordFromBe (void FAR* pAddr_p)
 {
+#if defined (__MICROBLAZE__)
+BYTE FAR *pbSrc = pAddr_p;
+	
+   return ((DWORD)(pbSrc[0]) << 8) | 
+          ((DWORD)(pbSrc[1]) << 0);
+#else
 twStruct FAR*  pwStruct;
 
    pwStruct = (twStruct FAR*)pAddr_p;
    return ( pwStruct->m_wWord );
+#endif
 
 }
 
@@ -337,10 +392,19 @@ twStruct FAR*  pwStruct;
 
 INLINE_FUNCTION DWORD  PUBLIC  AmiGetDwordFromBe (void FAR* pAddr_p)
 {
+#if defined (__MICROBLAZE__)
+BYTE FAR *pbSrc = pAddr_p;
+	
+   return (((DWORD)pbSrc[0]) << 24) | 
+           (((DWORD)pbSrc[1]) << 16) |
+           (((DWORD)pbSrc[2]) <<  8) |
+           (((DWORD)pbSrc[3]) <<  0);
+#else
 tdwStruct FAR*  pdwStruct;
 
    pdwStruct = (tdwStruct FAR*)pAddr_p;
    return ( pdwStruct->m_dwDword );
+#endif
 
 }
 
@@ -495,11 +559,23 @@ INLINE_FUNCTION void PUBLIC AmiSetQword64ToLe (void FAR* pAddr_p, QWORD qwQwordV
 
 INLINE_FUNCTION void PUBLIC AmiSetQword64ToBe (void FAR* pAddr_p, QWORD qwQwordVal_p)
 {
-
+#if defined (__MICROBLAZE__)
+BYTE *dst=(BYTE*)pAddr_p, *src=(BYTE*)&qwQwordVal_p;
+	
+    *(dst+0) = *(src+0);
+    *(dst+1) = *(src+1);
+    *(dst+2) = *(src+2);
+    *(dst+3) = *(src+3);
+    *(dst+4) = *(src+4);
+    *(dst+5) = *(src+5);
+    *(dst+6) = *(src+6);
+    *(dst+7) = *(src+7);
+#else
 QWORD FAR* pqwDst;
 
     pqwDst  = (QWORD FAR*) pAddr_p;
     *pqwDst = qwQwordVal_p;
+#endif
 
 }
 
@@ -553,7 +629,20 @@ tqwStruct      qwStruct;
 
 INLINE_FUNCTION QWORD PUBLIC AmiGetQword64FromBe (void FAR* pAddr_p)
 {
+#if defined (__MICROBLAZE__)
+tqwStruct      qwStruct;
 
+    ((BYTE FAR*) &qwStruct.m_qwQword)[0] = ((BYTE FAR*) pAddr_p)[0];
+    ((BYTE FAR*) &qwStruct.m_qwQword)[1] = ((BYTE FAR*) pAddr_p)[1];
+    ((BYTE FAR*) &qwStruct.m_qwQword)[2] = ((BYTE FAR*) pAddr_p)[2];
+    ((BYTE FAR*) &qwStruct.m_qwQword)[3] = ((BYTE FAR*) pAddr_p)[3];
+    ((BYTE FAR*) &qwStruct.m_qwQword)[4] = ((BYTE FAR*) pAddr_p)[4];
+    ((BYTE FAR*) &qwStruct.m_qwQword)[5] = ((BYTE FAR*) pAddr_p)[5];
+    ((BYTE FAR*) &qwStruct.m_qwQword)[6] = ((BYTE FAR*) pAddr_p)[6];
+    ((BYTE FAR*) &qwStruct.m_qwQword)[7] = ((BYTE FAR*) pAddr_p)[7];
+
+    return ( qwStruct.m_qwQword );
+#else
 tqwStruct FAR* pqwStruct;
 tqwStruct      qwStruct;
 
@@ -561,7 +650,7 @@ tqwStruct      qwStruct;
     qwStruct.m_qwQword = pqwStruct->m_qwQword;
 
     return ( qwStruct.m_qwQword );
-
+#endif
 }
 
 
@@ -667,7 +756,9 @@ tqwStruct      qwStruct;
 
     qwStruct.m_qwQword  = AmiGetQword64FromBe (pAddr_p);
     qwStruct.m_qwQword >>= 24;
-
+#if defined (__MICROBLAZE__)
+    qwStruct.m_qwQword &= 0x000000FFFFFFFFFFLL;
+#endif
     return ( qwStruct.m_qwQword );
 
 }
@@ -777,7 +868,9 @@ tqwStruct      qwStruct;
 
     qwStruct.m_qwQword  = AmiGetQword64FromBe (pAddr_p);
     qwStruct.m_qwQword >>= 16;
-
+#if defined (__MICROBLAZE__)
+    qwStruct.m_qwQword &= 0x0000FFFFFFFFFFFFLL;
+#endif
     return ( qwStruct.m_qwQword );
 
 }
@@ -889,6 +982,9 @@ tqwStruct      qwStruct;
 
     qwStruct.m_qwQword  = AmiGetQword64FromBe (pAddr_p);
     qwStruct.m_qwQword >>= 8;
+#if defined (__MICROBLAZE__)
+    qwStruct.m_qwQword &= 0x00FFFFFFFFFFFFFFLL;
+#endif
 
     return ( qwStruct.m_qwQword );
 

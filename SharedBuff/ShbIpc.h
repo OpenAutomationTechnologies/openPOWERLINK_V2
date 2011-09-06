@@ -94,6 +94,10 @@ typedef  void  (*tSigHndlrJobReady) (tShbInstance pShbInstance_p, unsigned int f
         #define SHBIPC_INLINE_ENABLED      TRUE
         #define SHBIPC_INLINED
         #include "ShbIpc-NoOS.c"
+		#if defined(__MICROBLAZE__)
+			#define MICROBLAZE_SHBIPC_SIGNALLING_REQ //define is required for using signalling data functions
+			                                         // otherwise causing compilation error with mb-gcc compiler
+		#endif
     #endif
 
 #endif
