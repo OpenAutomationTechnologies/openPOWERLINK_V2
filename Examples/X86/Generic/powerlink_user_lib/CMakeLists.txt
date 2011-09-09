@@ -58,46 +58,31 @@ IF (UNIX)
 ELSEIF (WIN32)
     ADD_DEFINITIONS(-D_CONSOLE -DWPCAP -DHAVE_REMOTE)
 ENDIF ()
-	
+
+# Select object dictionary	
+SET(OBJDICT CiA302-4_MN)
+
 #
 # Configure depending selected mode
 #
 IF(CFG_POWERLINK_CFM)
+
+    SET(LIB_SOURCES ${LIB_SOURCES}
+                    ${POWERLINK_SOURCE_DIR}/EplStack/EplObdCdc.c
+        )
+    SET (LIB_SOURCES_USER ${LIB_SOURCES_USER}
+                          ${POWERLINK_SOURCE_DIR}/EplStack/EplCfmu.c
+        )
+    SET (LIB_HEADERS_USER ${LIB_HEADERS_USER}
+                          ${POWERLINK_SOURCE_DIR}/Include/user/EplCfmu.h
+        )
+
+    ADD_DEFINITIONS(-DCONFIG_CFM)
+
     IF(CFG_POWERLINK_PROCESS_IMAGE)
-        SET(OBJDICT CiA302-4_MN)
-        ADD_DEFINITIONS(-DCONFIG_CFM -DCONFIG_OPENCONFIGURATOR_MAPPING)
-        SET(LIB_SOURCES ${LIB_SOURCES}
-                        ${POWERLINK_SOURCE_DIR}/EplStack/EplObdCdc.c
-            )
-
-        SET (LIB_SOURCES_USER ${LIB_SOURCES_USER}
-                              ${POWERLINK_SOURCE_DIR}/EplStack/EplCfmu.c
-            )
-
-        SET (LIB_HEADERS_USER ${LIB_HEADERS_USER}
-                              ${POWERLINK_SOURCE_DIR}/Include/user/EplCfmu.h
-            )
-
-        SET(LIB_OBJDICT ${LIB_OBJDICT}
-                        ${POWERLINK_SOURCE_DIR}/ObjDicts/${OBJDICT}/EplApiProcessImageSetup.c
-            )
-    ELSE(CFG_POWERLINK_PROCESS_IMAGE)
-        SET(OBJDICT Qt_MN)
-        ADD_DEFINITIONS(-DCONFIG_CFM)
-        SET(LIB_SOURCES ${LIB_SOURCES}
-                        ${POWERLINK_SOURCE_DIR}/EplStack/EplObdCdc.c
-            )
-
-        SET (LIB_SOURCES_USER ${LIB_SOURCES_USER}
-                              ${POWERLINK_SOURCE_DIR}/EplStack/EplCfmu.c
-            )
-
-        SET (LIB_HEADERS_USER ${LIB_HEADERS_USER}
-                              ${POWERLINK_SOURCE_DIR}/Include/user/EplCfmu.h
-            )
+        ADD_DEFINITIONS( -DCONFIG_OPENCONFIGURATOR_MAPPING)
     ENDIF(CFG_POWERLINK_PROCESS_IMAGE)
-ELSE(CFG_POWERLINK_CFM)
-    SET(OBJDICT Qt_MN)
+
 ENDIF(CFG_POWERLINK_CFM)
 
 #
@@ -129,7 +114,6 @@ ENDIF ()
 #
 SET(LIB_OBJDICT ${LIB_OBJDICT}
                 ${POWERLINK_SOURCE_DIR}/ObjDicts/${OBJDICT}/Objdict.c
-                ${POWERLINK_SOURCE_DIR}/ObjDicts/${OBJDICT}/EplApiProcessImageSetup.c
                 ${POWERLINK_SOURCE_DIR}/ObjDicts/${OBJDICT}/objdict.h
                 ${POWERLINK_SOURCE_DIR}/ObjDicts/${OBJDICT}/obdcfg.h
                 ${POWERLINK_SOURCE_DIR}/ObjDicts/Generic/objdict_1000-13ff.h
@@ -277,13 +261,6 @@ SET (LIB_HEADERS_USER ${LIB_HEADERS_USER}
                       ${POWERLINK_SOURCE_DIR}/Include/user/EplStatusu.h
                       ${POWERLINK_SOURCE_DIR}/Include/user/EplTimeru.h
     )
-
-
-INCLUDE_DIRECTORIES(
-    .
-    ${POWERLINK_SOURCE_DIR}/ObjDicts/${OBJDICT}
-    ${POWERLINK_SOURCE_DIR}/Target/X86/Windows/WpdPack/Include
-)
 
 IF (CMAKE_CL_64)
     LINK_DIRECTORIES(${POWERLINK_SOURCE_DIR}/Target/X86/Windows/WpdPack/Lib/x64)

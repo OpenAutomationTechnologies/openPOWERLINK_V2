@@ -59,14 +59,25 @@ ELSEIF (WIN32)
     ADD_DEFINITIONS(-D_CONSOLE -DWPCAP -DHAVE_REMOTE)
 ENDIF ()
 
+SET(OBJDICT CiA302-4_MN)
+
 # additional include directories
 SET(USERLIB_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../powerlink_user_lib)
 IF (UNIX)
     SET(KERNELMOD_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../../X86/Linux/gnu/powerlink_kernel_module)
 ENDIF (UNIX)
 
+#
+# Source include directories
+#
+INCLUDE_DIRECTORIES(
+    ${POWERLINK_SOURCE_DIR}/ObjDicts/${OBJDICT}
+)
+
 # set sources of POWERLINK application
-SET (DEMO_SOURCES demo_main.c)
+SET (DEMO_SOURCES demo_main.c
+                  ${POWERLINK_SOURCE_DIR}/ObjDicts/${OBJDICT}/EplApiProcessImageSetup.c
+)
 
 IF (UNIX)
     IF (CFG_KERNEL_STACK)
@@ -123,3 +134,5 @@ IF (UNIX)
         INSTALL(PROGRAMS ${CMAKE_CURRENT_SOURCE_DIR}/../../Linux/gnu/tools/set_prio DESTINATION bin)
     ENDIF (NOT CFG_KERNEL_STACK)
 ENDIF (UNIX)
+
+SOURCE_GROUP("Demo Application" FILES ${DEMO_SOURCES})

@@ -51,6 +51,8 @@
 ################################################################################
 FIND_PACKAGE(Qt4 REQUIRED)
 
+SET(OBJDICT CiA302-4_MN)
+
 IF (WIN32)
 	# additional compiler flags
 	ADD_DEFINITIONS(-D_CONSOLE -DWPCAP -DHAVE_REMOTE)
@@ -74,6 +76,7 @@ SET(DEMO_SOURCES src/EplApi.cpp
                  src/main.cpp
                  src/MainWindow.cpp
                  src/NodeState.cpp
+                 ${POWERLINK_SOURCE_DIR}/ObjDicts/${OBJDICT}/EplApiProcessImageSetup.c
     )
                  
 SET(DEMO_HEADERS include/EplApi.h
