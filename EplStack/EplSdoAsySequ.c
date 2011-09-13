@@ -479,6 +479,7 @@ tEplAsySdoSeqCon*   pAsySdoSeqCon;
             }
 #else
             Ret = kEplSdoSeqUnsupportedProt;
+            goto Exit;
 #endif
             break;
         }
@@ -495,6 +496,7 @@ tEplAsySdoSeqCon*   pAsySdoSeqCon;
             }
 #else
             Ret = kEplSdoSeqUnsupportedProt;
+            goto Exit;
 #endif
             break;
         }
