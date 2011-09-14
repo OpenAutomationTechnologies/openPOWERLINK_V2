@@ -1005,6 +1005,32 @@ int             iRet;
 }
 #endif
 
+//---------------------------------------------------------------------------
+//
+// Function:    EplApiGetIdentResponse
+//
+// Description: returns the stored IdentResponse frame of the specified node.
+//
+// Parameters:  uiNodeId_p              = node-ID for which the IdentResponse shall be returned
+//              ppIdentResponse_p       = pointer to pointer to IdentResponse
+//
+// Returns:     tEplKernel              = error code
+//
+//
+// State:
+//
+//---------------------------------------------------------------------------
+
+tEplKernel PUBLIC EplApiGetIdentResponse(
+                                    unsigned int        uiNodeId_p,
+                                    tEplIdentResponse** ppIdentResponse_p)
+{
+    // This function is currently not supported
+    // in the Linux kernel space implementation
+    *ppIdentResponse_p  = NULL;
+
+    return  kEplInvalidOperation;
+}
 
 //=========================================================================//
 //                                                                         //
