@@ -86,15 +86,6 @@
 // const defines
 //---------------------------------------------------------------------------
 
-// float definitions and macros
-#define _SHIFTED_EXPONENT_MASK_SP   0xff
-#define _BIAS_SP                    126
-#define T_SP                        23
-#define EXPONENT_DENORM_SP          (-_BIAS_SP)
-#define BASE_TO_THE_T_SP            ((float) 8388608.0)
-#define GET_EXPONENT_SP(x)          ((((x) >> T_SP) & _SHIFTED_EXPONENT_MASK_SP) - _BIAS_SP)
-
-
 //---------------------------------------------------------------------------
 // local types
 //---------------------------------------------------------------------------
