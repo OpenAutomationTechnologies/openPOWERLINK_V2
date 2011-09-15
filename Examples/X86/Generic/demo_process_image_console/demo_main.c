@@ -86,12 +86,12 @@
 #elif defined WIN32
 
 #define _WINSOCKAPI_ // prevent windows.h from including winsock.h
-#include <conio.h>
 
 #endif  // WIN32
 
 #include "Epl.h"
 #include <pcap.h>
+#include "EplTgtConio.h"
 
 /***************************************************************************/
 /*                                                                         */
@@ -202,53 +202,6 @@ tEplKernel PUBLIC AppCbEvent(
     void GENERIC*           pUserArg_p);
 tEplKernel PUBLIC AppCbSync(void);
 tEplKernel PUBLIC AppInit(void);
-
-#if defined __linux__
-//---------------------------------------------------------------------------
-// Function:            _kbhit
-//
-// Description:         check if key was pressed
-//
-// Parameters:          N/A
-//
-// Returns:             TRUE if key was pressed
-//---------------------------------------------------------------------------
-static int _kbhit(void)
-{
-    struct timeval timeout;
-    fd_set readFds;
-    int maxFd;
-    int iSelectRetVal;
-
-    /* initialize file descriptor set */
-    maxFd = STDIN_FILENO + 1;
-    FD_ZERO(&readFds);
-    FD_SET(STDIN_FILENO, &readFds);
-
-    /* initialize timeout value */
-    timeout.tv_sec = 0;
-    timeout.tv_usec = 100000;
-
-    iSelectRetVal = select(maxFd, &readFds, NULL, NULL, &timeout);
-    switch (iSelectRetVal)
-    {
-        /* select timeout occured, no packet received */
-        case 0:
-            return FALSE;
-            break;
-
-            /* select error occured*/
-        case -1:
-            return FALSE;
-            break;
-
-            /* packet available for receive*/
-        default:
-            return TRUE;
-            break;
-    }
-}
-#endif
 
 //---------------------------------------------------------------------------
 // Function:            printlog
@@ -599,17 +552,9 @@ int  main (int argc, char **argv)
     // wait for key hit
     while (cKey != 0x1B)
     {
-        if (_kbhit())
+        if( EplTgtKbhit() )
         {
-		
-#ifdef WIN32
-			cKey = (BYTE)_getch() ;
-#else
-            if (read(STDIN_FILENO, &cKey, 1) < 0)
-            {
-                break;
-            }
-#endif
+            cKey    = (BYTE) EplTgtGetch();
 
             switch (cKey)
             {
@@ -640,9 +585,7 @@ int  main (int argc, char **argv)
             }
         }
 
-#ifdef WIN32
-		Sleep(1500);
-#endif
+        EplTgtMilliSleep( 1500 );
     }
 	
     FTRACE_ENABLE(FALSE);
@@ -663,7 +606,7 @@ Exit:
 
 #ifdef WIN32
     PRINTF0("Press Enter to quit!\n");
-    _getch();
+    EplTgtGetch();
 #endif
 
     return EplRet;

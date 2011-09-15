@@ -77,6 +77,7 @@ INCLUDE_DIRECTORIES(
 # set sources of POWERLINK application
 SET (DEMO_SOURCES demo_main.c
                   ${POWERLINK_SOURCE_DIR}/ObjDicts/${OBJDICT}/EplApiProcessImageSetup.c
+                  ${POWERLINK_SOURCE_DIR}/EplStack/EplTgtConio.c
 )
 
 # The TRACE macros need trace.c on the Windows platform
