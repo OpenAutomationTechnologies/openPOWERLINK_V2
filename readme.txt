@@ -58,19 +58,36 @@
 3. Available demo applications
 -------------------------------
 
-X86 PC and Linux operating system
-  There are several demo applications available for Linux. Detailed documentation
-  is located in Documentation/linux-x86.txt
+X86 PC with Linux or Windows operating system
 
-X86 PC with Microsoft Windows operating system (2000, XP or newer)
-and WinPcap driver installed:
-  * simple MN demo for Microsoft Visual C 2005:
-    = Examples\X86\Windows\VC8\demo_pcap
-  * simple MN demo for Microsoft Visual C 2008:
-    = Examples\X86\Windows\VC9\demo_pcap
-  * MN demo with Configuration Manager (CFM) for Microsoft Visual C 2005:
-    = Examples\X86\Windows\VC8\demo_cfm_pcap
+  * MN demo application using a console based interface
+    = Examples\X86\Generic\demo_process_image_console
+  * MN demo application using a Qt based interface
+    = Examples\X86\Generic\demo_process_image_qt
 
+  These demo applications can be built for both Linux and Windows.
+  CMake is used as a cross-platform build system.
+
+  On Linux, these demo applications can be configured to use either
+  a pcap based stack that is located in user space, or to use a 
+  stack that is located in kernel space.
+  Detailed documentation for Linux can be found in Documentation/linux-x86.txt
+
+  Supported Versions: 2.6.23 or later
+  Supported build environments: GCC
+  Requirements:   libpcap  http://www.tcpdump.org
+                  CMake    http://www.cmake.org
+                  Qt       http://qt.nokia.com/
+
+  On Windows, these demo applications only support a pcap based stack in
+  use space.
+
+  Supported Versions: Windows 2000, Xp, Vista, 7
+  Supported build environments: Microsoft Visual Studio 2005, 2008, 2010
+  Requirements:   WinPcap  http://www.winpcap.org
+                  CMake    http://www.cmake.org
+                  Qt       http://qt.nokia.com/
+  
 Freescale ColdFire MCF5484 (SYSTEC Development Board for ECUcore-5484)
 with Linux operating system (see section 3.2 for requirements)
   * simple CN demo which controls the LEDs and reads the pushbuttons on the devboard:

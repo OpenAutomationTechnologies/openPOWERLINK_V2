@@ -157,7 +157,7 @@ openPOWERLINK on Linux x86
   the kernel based stack or with the userspace stack.
   
   It is found in: 
-  Examples/X86/Linux/gnu/demo_process_image_qt
+  Examples/X86/Generic/demo_process_image_qt
 
 5.4 Console demo with process image
   This demo also implements a POWERLINK MN with CFM. It is implemented as
@@ -166,7 +166,7 @@ openPOWERLINK on Linux x86
   stack or with the userspace stack.
   
   It is located in: 
-  Examples/X86/Linux/gnu/demo_process_image_console 
+  Examples/X86/Generic/demo_process_image_console 
 
 6 Building
 ----------
