@@ -558,6 +558,12 @@ tEplKernel          EplRet;
     {   // waiting was interrupted by signal or application called wrong function
         EplRet = kEplShutdown;
     }*/
+
+#ifdef CONFIG_OPENCONFIGURATOR_MAPPING
+    // Free resources used by the process image API
+    EplRet = EplApiProcessImageFree();
+#endif
+
     // delete instance for all modules
     EplRet = EplApiShutdown();
     PRINTF1("EplApiShutdown():  0x%X\n", EplRet);
