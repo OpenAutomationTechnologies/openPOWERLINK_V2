@@ -72,6 +72,8 @@
 #ifndef _EPLSYNCU_H_
 #define _EPLSYNCU_H_
 
+#if EPL_DLL_PRES_CHAINING_MN != FALSE
+
 #include "EplDll.h"
 
 
@@ -104,6 +106,8 @@ tEplKernel PUBLIC EplSyncuRequestSyncResponse(
                                   tEplSyncuCbResponse   pfnCbResponse_p,
                                   tEplDllSyncRequest*   pSyncRequestData_p,
                                   unsigned int          uiSize_p);
+
+#endif // EPL_DLL_PRES_CHAINING_MN != FALSE
 
 #endif  // #ifndef _EPLSYNCU_H_
 
