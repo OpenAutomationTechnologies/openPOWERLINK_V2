@@ -87,7 +87,9 @@
 //---------------------------------------------------------------------------
 // typedef
 //---------------------------------------------------------------------------
-
+#ifdef __cplusplus
+    extern "C" {
+#endif
 
 typedef struct
 {
@@ -374,13 +376,15 @@ EPLDLLEXPORT tEplKernel PUBLIC EplApiProcessImageLinkObject(
 EPLDLLEXPORT tEplKernel PUBLIC EplApiProcessImageSetup(void);
 
 // functions for getting cleartext values of stack states and events
-extern char *EplGetNmtEventStr(tEplNmtEvent nmtEvent_p);
-extern char *EplGetEventTypeStr(tEplEventType eventType_p);
-extern char *EplGetEventSourceStr(tEplEventSource eventSrc_p);
-extern char *EplGetEventSinkStr(tEplEventSink eventSink_p);
-extern char *EplGetNmtStateStr(tEplNmtState nmtState_p);
+EPLDLLEXPORT char *EplGetNmtEventStr(tEplNmtEvent nmtEvent_p);
+EPLDLLEXPORT char *EplGetEventTypeStr(tEplEventType eventType_p);
+EPLDLLEXPORT char *EplGetEventSourceStr(tEplEventSource eventSrc_p);
+EPLDLLEXPORT char *EplGetEventSinkStr(tEplEventSink eventSink_p);
+EPLDLLEXPORT char *EplGetNmtStateStr(tEplNmtState nmtState_p);
+
+#ifdef __cplusplus
+	}
+#endif
 
 
 #endif  // #ifndef _EPL_API_H_
-
-

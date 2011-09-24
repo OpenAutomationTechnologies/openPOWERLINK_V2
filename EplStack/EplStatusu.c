@@ -166,7 +166,7 @@ static tEplKernel PUBLIC EplStatusuCbStatusResponse(tEplFrameInfo * pFrameInfo_p
 //
 //---------------------------------------------------------------------------
 
-EPLDLLEXPORT tEplKernel PUBLIC EplStatusuInit()
+tEplKernel PUBLIC EplStatusuInit()
 {
 tEplKernel Ret;
 
@@ -194,7 +194,7 @@ tEplKernel Ret;
 //
 //---------------------------------------------------------------------------
 
-EPLDLLEXPORT tEplKernel PUBLIC EplStatusuAddInstance()
+tEplKernel PUBLIC EplStatusuAddInstance()
 {
 tEplKernel Ret;
 
@@ -229,7 +229,7 @@ tEplKernel Ret;
 //
 //---------------------------------------------------------------------------
 
-EPLDLLEXPORT tEplKernel PUBLIC EplStatusuDelInstance()
+tEplKernel PUBLIC EplStatusuDelInstance()
 {
 tEplKernel  Ret;
 
@@ -258,7 +258,7 @@ tEplKernel  Ret;
 //
 //---------------------------------------------------------------------------
 
-EPLDLLEXPORT tEplKernel PUBLIC EplStatusuReset()
+tEplKernel PUBLIC EplStatusuReset()
 {
 tEplKernel  Ret;
 

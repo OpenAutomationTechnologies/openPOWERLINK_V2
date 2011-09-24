@@ -162,7 +162,7 @@ static tEplKernel PUBLIC EplSyncuCbSyncResponse(tEplFrameInfo * pFrameInfo_p);
 //
 //---------------------------------------------------------------------------
 
-EPLDLLEXPORT tEplKernel PUBLIC EplSyncuInit()
+tEplKernel PUBLIC EplSyncuInit()
 {
 tEplKernel Ret;
 
@@ -186,7 +186,7 @@ tEplKernel Ret;
 //
 //---------------------------------------------------------------------------
 
-EPLDLLEXPORT tEplKernel PUBLIC EplSyncuAddInstance()
+tEplKernel PUBLIC EplSyncuAddInstance()
 {
 tEplKernel Ret;
 
@@ -216,7 +216,7 @@ tEplKernel Ret;
 //
 //---------------------------------------------------------------------------
 
-EPLDLLEXPORT tEplKernel PUBLIC EplSyncuDelInstance()
+tEplKernel PUBLIC EplSyncuDelInstance()
 {
 tEplKernel  Ret;
 
@@ -243,7 +243,7 @@ tEplKernel  Ret;
 //
 //---------------------------------------------------------------------------
 
-EPLDLLEXPORT tEplKernel PUBLIC EplSyncuReset()
+tEplKernel PUBLIC EplSyncuReset()
 {
 tEplKernel  Ret;
 
