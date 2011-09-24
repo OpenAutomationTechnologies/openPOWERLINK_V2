@@ -85,7 +85,7 @@
 //---------------------------------------------------------------------------
 
 // These definitions are important for level-debug traces.
-// A macro DEBUG_GLB_LVL() defines the current debug-level using following bis.
+// A macro DEBUG_GLB_LVL defines the current debug-level using following bis.
 // If the corresponding bit is set then trace message will be printed out
 // (only if NDEBUG is not defined). The upper debug-levels are reserved for
 // the debug-levels ALWAYS, ERROR and ASSERT.
@@ -166,7 +166,7 @@
     #define DEF_DEBUG_LVL                   (DEBUG_LVL_ALWAYS | DEBUG_LVL_ERROR)
 #endif
 #ifndef DEBUG_GLB_LVL
-    #define DEBUG_GLB_LVL()                 (DEF_DEBUG_LVL)
+    #define DEBUG_GLB_LVL                 (DEF_DEBUG_LVL)
 #endif
 
 
@@ -186,7 +186,7 @@
     #define DEBUG_TRACE2(lvl,str,p1,p2)         TraceLvl((lvl),str,p1,p2)
     #define DEBUG_TRACE3(lvl,str,p1,p2,p3)      TraceLvl((lvl),str,p1,p2,p3)
     #define DEBUG_TRACE4(lvl,str,p1,p2,p3,p4)   TraceLvl((lvl),str,p1,p2,p3,p4)
-    #define DEBUG_GLB_LVL()                     dwDebugLevel_g
+    #define DEBUG_GLB_LVL                     dwDebugLevel_g
 
 #else
 
@@ -197,7 +197,7 @@
     //
     // Example: DEBUG_TRACE1(DEBUG_LVL_ERROR, "error code %d", dwRet);
 
-    #if (DEBUG_GLB_LVL() & DEBUG_LVL_ALWAYS)
+    #if (DEBUG_GLB_LVL & DEBUG_LVL_ALWAYS)
         #define DEBUG_LVL_ALWAYS_TRACE0(str)                TRACE0(str)
         #define DEBUG_LVL_ALWAYS_TRACE1(str,p1)             TRACE1(str,p1)
         #define DEBUG_LVL_ALWAYS_TRACE2(str,p1,p2)          TRACE2(str,p1,p2)
@@ -211,7 +211,7 @@
         #define DEBUG_LVL_ALWAYS_TRACE4(str,p1,p2,p3,p4)
     #endif
 
-    #if (DEBUG_GLB_LVL() & DEBUG_LVL_ERROR)
+    #if (DEBUG_GLB_LVL & DEBUG_LVL_ERROR)
         #define DEBUG_LVL_ERROR_TRACE0(str)                 TRACE0(str)
         #define DEBUG_LVL_ERROR_TRACE1(str,p1)              TRACE1(str,p1)
         #define DEBUG_LVL_ERROR_TRACE2(str,p1,p2)           TRACE2(str,p1,p2)
@@ -225,7 +225,7 @@
         #define DEBUG_LVL_ERROR_TRACE4(str,p1,p2,p3,p4)
     #endif
 
-    #if (DEBUG_GLB_LVL() & DEBUG_LVL_ASSERT)
+    #if (DEBUG_GLB_LVL & DEBUG_LVL_ASSERT)
         #define DEBUG_LVL_ASSERT_TRACE0(str)                TRACE0(str)
         #define DEBUG_LVL_ASSERT_TRACE1(str,p1)             TRACE1(str,p1)
         #define DEBUG_LVL_ASSERT_TRACE2(str,p1,p2)          TRACE2(str,p1,p2)
@@ -239,7 +239,7 @@
         #define DEBUG_LVL_ASSERT_TRACE4(str,p1,p2,p3,p4)
     #endif
 
-    #if (DEBUG_GLB_LVL() & DEBUG_LVL_29)
+    #if (DEBUG_GLB_LVL & DEBUG_LVL_29)
         #define DEBUG_LVL_29_TRACE0(str)                    TRACE0(str)
         #define DEBUG_LVL_29_TRACE1(str,p1)                 TRACE1(str,p1)
         #define DEBUG_LVL_29_TRACE2(str,p1,p2)              TRACE2(str,p1,p2)
@@ -253,7 +253,7 @@
         #define DEBUG_LVL_29_TRACE4(str,p1,p2,p3,p4)
     #endif
 
-    #if (DEBUG_GLB_LVL() & DEBUG_LVL_28)
+    #if (DEBUG_GLB_LVL & DEBUG_LVL_28)
         #define DEBUG_LVL_28_TRACE0(str)                    TRACE0(str)
         #define DEBUG_LVL_28_TRACE1(str,p1)                 TRACE1(str,p1)
         #define DEBUG_LVL_28_TRACE2(str,p1,p2)              TRACE2(str,p1,p2)
@@ -267,7 +267,7 @@
         #define DEBUG_LVL_28_TRACE4(str,p1,p2,p3,p4)
     #endif
 
-    #if (DEBUG_GLB_LVL() & DEBUG_LVL_27)
+    #if (DEBUG_GLB_LVL & DEBUG_LVL_27)
         #define DEBUG_LVL_27_TRACE0(str)                    TRACE0(str)
         #define DEBUG_LVL_27_TRACE1(str,p1)                 TRACE1(str,p1)
         #define DEBUG_LVL_27_TRACE2(str,p1,p2)              TRACE2(str,p1,p2)
@@ -281,7 +281,7 @@
         #define DEBUG_LVL_27_TRACE4(str,p1,p2,p3,p4)
     #endif
 
-    #if (DEBUG_GLB_LVL() & DEBUG_LVL_26)
+    #if (DEBUG_GLB_LVL & DEBUG_LVL_26)
         #define DEBUG_LVL_26_TRACE0(str)                    TRACE0(str)
         #define DEBUG_LVL_26_TRACE1(str,p1)                 TRACE1(str,p1)
         #define DEBUG_LVL_26_TRACE2(str,p1,p2)              TRACE2(str,p1,p2)
@@ -295,7 +295,7 @@
         #define DEBUG_LVL_26_TRACE4(str,p1,p2,p3,p4)
     #endif
 
-    #if (DEBUG_GLB_LVL() & DEBUG_LVL_25)
+    #if (DEBUG_GLB_LVL & DEBUG_LVL_25)
         #define DEBUG_LVL_25_TRACE0(str)                    TRACE0(str)
         #define DEBUG_LVL_25_TRACE1(str,p1)                 TRACE1(str,p1)
         #define DEBUG_LVL_25_TRACE2(str,p1,p2)              TRACE2(str,p1,p2)
@@ -309,7 +309,7 @@
         #define DEBUG_LVL_25_TRACE4(str,p1,p2,p3,p4)
     #endif
 
-    #if (DEBUG_GLB_LVL() & DEBUG_LVL_24)
+    #if (DEBUG_GLB_LVL & DEBUG_LVL_24)
         #define DEBUG_LVL_24_TRACE0(str)                    TRACE0(str)
         #define DEBUG_LVL_24_TRACE1(str,p1)                 TRACE1(str,p1)
         #define DEBUG_LVL_24_TRACE2(str,p1,p2)              TRACE2(str,p1,p2)
@@ -323,7 +323,7 @@
         #define DEBUG_LVL_24_TRACE4(str,p1,p2,p3,p4)
     #endif
 
-    #if (DEBUG_GLB_LVL() & DEBUG_LVL_23)
+    #if (DEBUG_GLB_LVL & DEBUG_LVL_23)
         #define DEBUG_LVL_23_TRACE0(str)                    TRACE0(str)
         #define DEBUG_LVL_23_TRACE1(str,p1)                 TRACE1(str,p1)
         #define DEBUG_LVL_23_TRACE2(str,p1,p2)              TRACE2(str,p1,p2)
@@ -337,7 +337,7 @@
         #define DEBUG_LVL_23_TRACE4(str,p1,p2,p3,p4)
     #endif
 
-    #if (DEBUG_GLB_LVL() & DEBUG_LVL_22)
+    #if (DEBUG_GLB_LVL & DEBUG_LVL_22)
         #define DEBUG_LVL_22_TRACE0(str)                    TRACE0(str)
         #define DEBUG_LVL_22_TRACE1(str,p1)                 TRACE1(str,p1)
         #define DEBUG_LVL_22_TRACE2(str,p1,p2)              TRACE2(str,p1,p2)
@@ -351,7 +351,7 @@
         #define DEBUG_LVL_22_TRACE4(str,p1,p2,p3,p4)
     #endif
 
-    #if (DEBUG_GLB_LVL() & DEBUG_LVL_21)
+    #if (DEBUG_GLB_LVL & DEBUG_LVL_21)
         #define DEBUG_LVL_21_TRACE0(str)                    TRACE0(str)
         #define DEBUG_LVL_21_TRACE1(str,p1)                 TRACE1(str,p1)
         #define DEBUG_LVL_21_TRACE2(str,p1,p2)              TRACE2(str,p1,p2)
@@ -365,7 +365,7 @@
         #define DEBUG_LVL_21_TRACE4(str,p1,p2,p3,p4)
     #endif
 
-    #if (DEBUG_GLB_LVL() & DEBUG_LVL_20)
+    #if (DEBUG_GLB_LVL & DEBUG_LVL_20)
         #define DEBUG_LVL_20_TRACE0(str)                    TRACE0(str)
         #define DEBUG_LVL_20_TRACE1(str,p1)                 TRACE1(str,p1)
         #define DEBUG_LVL_20_TRACE2(str,p1,p2)              TRACE2(str,p1,p2)
@@ -379,7 +379,7 @@
         #define DEBUG_LVL_20_TRACE4(str,p1,p2,p3,p4)
     #endif
 
-    #if (DEBUG_GLB_LVL() & DEBUG_LVL_19)
+    #if (DEBUG_GLB_LVL & DEBUG_LVL_19)
         #define DEBUG_LVL_19_TRACE0(str)                    TRACE0(str)
         #define DEBUG_LVL_19_TRACE1(str,p1)                 TRACE1(str,p1)
         #define DEBUG_LVL_19_TRACE2(str,p1,p2)              TRACE2(str,p1,p2)
@@ -393,7 +393,7 @@
         #define DEBUG_LVL_19_TRACE4(str,p1,p2,p3,p4)
     #endif
 
-    #if (DEBUG_GLB_LVL() & DEBUG_LVL_18)
+    #if (DEBUG_GLB_LVL & DEBUG_LVL_18)
         #define DEBUG_LVL_18_TRACE0(str)                    TRACE0(str)
         #define DEBUG_LVL_18_TRACE1(str,p1)                 TRACE1(str,p1)
         #define DEBUG_LVL_18_TRACE2(str,p1,p2)              TRACE2(str,p1,p2)
@@ -407,7 +407,7 @@
         #define DEBUG_LVL_18_TRACE4(str,p1,p2,p3,p4)
     #endif
 
-    #if (DEBUG_GLB_LVL() & DEBUG_LVL_17)
+    #if (DEBUG_GLB_LVL & DEBUG_LVL_17)
         #define DEBUG_LVL_17_TRACE0(str)                    TRACE0(str)
         #define DEBUG_LVL_17_TRACE1(str,p1)                 TRACE1(str,p1)
         #define DEBUG_LVL_17_TRACE2(str,p1,p2)              TRACE2(str,p1,p2)
@@ -421,7 +421,7 @@
         #define DEBUG_LVL_17_TRACE4(str,p1,p2,p3,p4)
     #endif
 
-    #if (DEBUG_GLB_LVL() & DEBUG_LVL_16)
+    #if (DEBUG_GLB_LVL & DEBUG_LVL_16)
         #define DEBUG_LVL_16_TRACE0(str)                    TRACE0(str)
         #define DEBUG_LVL_16_TRACE1(str,p1)                 TRACE1(str,p1)
         #define DEBUG_LVL_16_TRACE2(str,p1,p2)              TRACE2(str,p1,p2)
@@ -435,7 +435,7 @@
         #define DEBUG_LVL_16_TRACE4(str,p1,p2,p3,p4)
     #endif
 
-    #if (DEBUG_GLB_LVL() & DEBUG_LVL_15)
+    #if (DEBUG_GLB_LVL & DEBUG_LVL_15)
         #define DEBUG_LVL_15_TRACE0(str)                    TRACE0(str)
         #define DEBUG_LVL_15_TRACE1(str,p1)                 TRACE1(str,p1)
         #define DEBUG_LVL_15_TRACE2(str,p1,p2)              TRACE2(str,p1,p2)
@@ -449,7 +449,7 @@
         #define DEBUG_LVL_15_TRACE4(str,p1,p2,p3,p4)
     #endif
 
-    #if (DEBUG_GLB_LVL() & DEBUG_LVL_14)
+    #if (DEBUG_GLB_LVL & DEBUG_LVL_14)
         #define DEBUG_LVL_14_TRACE0(str)                    TRACE0(str)
         #define DEBUG_LVL_14_TRACE1(str,p1)                 TRACE1(str,p1)
         #define DEBUG_LVL_14_TRACE2(str,p1,p2)              TRACE2(str,p1,p2)
@@ -463,7 +463,7 @@
         #define DEBUG_LVL_14_TRACE4(str,p1,p2,p3,p4)
     #endif
 
-    #if (DEBUG_GLB_LVL() & DEBUG_LVL_13)
+    #if (DEBUG_GLB_LVL & DEBUG_LVL_13)
         #define DEBUG_LVL_13_TRACE0(str)                    TRACE0(str)
         #define DEBUG_LVL_13_TRACE1(str,p1)                 TRACE1(str,p1)
         #define DEBUG_LVL_13_TRACE2(str,p1,p2)              TRACE2(str,p1,p2)
@@ -477,7 +477,7 @@
         #define DEBUG_LVL_13_TRACE4(str,p1,p2,p3,p4)
     #endif
 
-    #if (DEBUG_GLB_LVL() & DEBUG_LVL_12)
+    #if (DEBUG_GLB_LVL & DEBUG_LVL_12)
         #define DEBUG_LVL_12_TRACE0(str)                    TRACE0(str)
         #define DEBUG_LVL_12_TRACE1(str,p1)                 TRACE1(str,p1)
         #define DEBUG_LVL_12_TRACE2(str,p1,p2)              TRACE2(str,p1,p2)
@@ -491,7 +491,7 @@
         #define DEBUG_LVL_12_TRACE4(str,p1,p2,p3,p4)
     #endif
 
-    #if (DEBUG_GLB_LVL() & DEBUG_LVL_11)
+    #if (DEBUG_GLB_LVL & DEBUG_LVL_11)
         #define DEBUG_LVL_11_TRACE0(str)                    TRACE0(str)
         #define DEBUG_LVL_11_TRACE1(str,p1)                 TRACE1(str,p1)
         #define DEBUG_LVL_11_TRACE2(str,p1,p2)              TRACE2(str,p1,p2)
@@ -505,7 +505,7 @@
         #define DEBUG_LVL_11_TRACE4(str,p1,p2,p3,p4)
     #endif
 
-    #if (DEBUG_GLB_LVL() & DEBUG_LVL_10)
+    #if (DEBUG_GLB_LVL & DEBUG_LVL_10)
         #define DEBUG_LVL_10_TRACE0(str)                    TRACE0(str)
         #define DEBUG_LVL_10_TRACE1(str,p1)                 TRACE1(str,p1)
         #define DEBUG_LVL_10_TRACE2(str,p1,p2)              TRACE2(str,p1,p2)
@@ -519,7 +519,7 @@
         #define DEBUG_LVL_10_TRACE4(str,p1,p2,p3,p4)
     #endif
 
-    #if (DEBUG_GLB_LVL() & DEBUG_LVL_09)
+    #if (DEBUG_GLB_LVL & DEBUG_LVL_09)
         #define DEBUG_LVL_09_TRACE0(str)                    TRACE0(str)
         #define DEBUG_LVL_09_TRACE1(str,p1)                 TRACE1(str,p1)
         #define DEBUG_LVL_09_TRACE2(str,p1,p2)              TRACE2(str,p1,p2)
@@ -533,7 +533,7 @@
         #define DEBUG_LVL_09_TRACE4(str,p1,p2,p3,p4)
     #endif
 
-    #if (DEBUG_GLB_LVL() & DEBUG_LVL_08)
+    #if (DEBUG_GLB_LVL & DEBUG_LVL_08)
         #define DEBUG_LVL_08_TRACE0(str)                    TRACE0(str)
         #define DEBUG_LVL_08_TRACE1(str,p1)                 TRACE1(str,p1)
         #define DEBUG_LVL_08_TRACE2(str,p1,p2)              TRACE2(str,p1,p2)
@@ -547,7 +547,7 @@
         #define DEBUG_LVL_08_TRACE4(str,p1,p2,p3,p4)
     #endif
 
-    #if (DEBUG_GLB_LVL() & DEBUG_LVL_07)
+    #if (DEBUG_GLB_LVL & DEBUG_LVL_07)
         #define DEBUG_LVL_07_TRACE0(str)                    TRACE0(str)
         #define DEBUG_LVL_07_TRACE1(str,p1)                 TRACE1(str,p1)
         #define DEBUG_LVL_07_TRACE2(str,p1,p2)              TRACE2(str,p1,p2)
@@ -561,7 +561,7 @@
         #define DEBUG_LVL_07_TRACE4(str,p1,p2,p3,p4)
     #endif
 
-    #if (DEBUG_GLB_LVL() & DEBUG_LVL_06)
+    #if (DEBUG_GLB_LVL & DEBUG_LVL_06)
         #define DEBUG_LVL_06_TRACE0(str)                    TRACE0(str)
         #define DEBUG_LVL_06_TRACE1(str,p1)                 TRACE1(str,p1)
         #define DEBUG_LVL_06_TRACE2(str,p1,p2)              TRACE2(str,p1,p2)
@@ -575,7 +575,7 @@
         #define DEBUG_LVL_06_TRACE4(str,p1,p2,p3,p4)
     #endif
 
-    #if (DEBUG_GLB_LVL() & DEBUG_LVL_05)
+    #if (DEBUG_GLB_LVL & DEBUG_LVL_05)
         #define DEBUG_LVL_05_TRACE0(str)                    TRACE0(str)
         #define DEBUG_LVL_05_TRACE1(str,p1)                 TRACE1(str,p1)
         #define DEBUG_LVL_05_TRACE2(str,p1,p2)              TRACE2(str,p1,p2)
@@ -589,7 +589,7 @@
         #define DEBUG_LVL_05_TRACE4(str,p1,p2,p3,p4)
     #endif
 
-    #if (DEBUG_GLB_LVL() & DEBUG_LVL_04)
+    #if (DEBUG_GLB_LVL & DEBUG_LVL_04)
         #define DEBUG_LVL_04_TRACE0(str)                    TRACE0(str)
         #define DEBUG_LVL_04_TRACE1(str,p1)                 TRACE1(str,p1)
         #define DEBUG_LVL_04_TRACE2(str,p1,p2)              TRACE2(str,p1,p2)
@@ -603,7 +603,7 @@
         #define DEBUG_LVL_04_TRACE4(str,p1,p2,p3,p4)
     #endif
 
-    #if (DEBUG_GLB_LVL() & DEBUG_LVL_03)
+    #if (DEBUG_GLB_LVL & DEBUG_LVL_03)
         #define DEBUG_LVL_03_TRACE0(str)                    TRACE0(str)
         #define DEBUG_LVL_03_TRACE1(str,p1)                 TRACE1(str,p1)
         #define DEBUG_LVL_03_TRACE2(str,p1,p2)              TRACE2(str,p1,p2)
@@ -617,7 +617,7 @@
         #define DEBUG_LVL_03_TRACE4(str,p1,p2,p3,p4)
     #endif
 
-    #if (DEBUG_GLB_LVL() & DEBUG_LVL_02)
+    #if (DEBUG_GLB_LVL & DEBUG_LVL_02)
         #define DEBUG_LVL_02_TRACE0(str)                    TRACE0(str)
         #define DEBUG_LVL_02_TRACE1(str,p1)                 TRACE1(str,p1)
         #define DEBUG_LVL_02_TRACE2(str,p1,p2)              TRACE2(str,p1,p2)
@@ -631,7 +631,7 @@
         #define DEBUG_LVL_02_TRACE4(str,p1,p2,p3,p4)
     #endif
 
-    #if (DEBUG_GLB_LVL() & DEBUG_LVL_01)
+    #if (DEBUG_GLB_LVL & DEBUG_LVL_01)
         #define DEBUG_LVL_01_TRACE0(str)                    TRACE0(str)
         #define DEBUG_LVL_01_TRACE1(str,p1)                 TRACE1(str,p1)
         #define DEBUG_LVL_01_TRACE2(str,p1,p2)              TRACE2(str,p1,p2)
@@ -671,7 +671,7 @@
     } // von extern "C"
     #endif
 
-    #define DEBUG_DUMP_DATA(lvl,str,ptr,siz)    if ((DEBUG_GLB_LVL() & (lvl))==(lvl)) \
+    #define DEBUG_DUMP_DATA(lvl,str,ptr,siz)    if ((DEBUG_GLB_LVL & (lvl))==(lvl)) \
                                                     DumpData (str, (BYTE MEM*) (ptr), (WORD) (siz));
 
 #else
@@ -692,13 +692,13 @@
 
         // For WIN32 process will be killed after closing message box.
 
-        #define DEBUG_ASSERT0(expr,str)         if (!(expr ) && ((DEBUG_GLB_LVL() & DEBUG_LVL_ASSERT)!=0)) { \
+        #define DEBUG_ASSERT0(expr,str)         if (!(expr ) && ((DEBUG_GLB_LVL & DEBUG_LVL_ASSERT)!=0)) { \
                                                     MessageBox (NULL, \
                                                         "Assertion failed: line " __LINE__ " file " __FILE__ \
                                                         "\n    -> " str "\n"); \
                                                     ExitProcess (-1); }
 
-        #define DEBUG_ASSERT1(expr,str,p1)      if (!(expr ) && ((DEBUG_GLB_LVL() & DEBUG_LVL_ASSERT)!=0)) { \
+        #define DEBUG_ASSERT1(expr,str,p1)      if (!(expr ) && ((DEBUG_GLB_LVL & DEBUG_LVL_ASSERT)!=0)) { \
                                                     MessageBox (NULL, \
                                                         "Assertion failed: line " __LINE__ " file " __FILE__ \
                                                         "\n    -> " str "\n"); \
