@@ -485,7 +485,7 @@ tEplPdoAllocationParam  AllocParam;
             continue;
         }
         else if (Ret != kEplSuccessful)
-        {   // other fatal error occured
+        {   // other fatal error occurred
             goto Exit;
         }
 
@@ -520,7 +520,7 @@ tEplPdoAllocationParam  AllocParam;
             continue;
         }
         else if (Ret != kEplSuccessful)
-        {   // other fatal error occured
+        {   // other fatal error occurred
             goto Exit;
         }
 
@@ -727,7 +727,7 @@ tEplPdoMappObject*  pMappObject;
     // read node ID from OD
     Ret = EplObduReadEntry(uiCommParamIndex, 0x01, &bNodeId, &ObdSize);
     if (Ret != kEplSuccessful)
-    {   // fatal error occured
+    {   // fatal error occurred
         goto Exit;
     }
 
@@ -762,7 +762,7 @@ tEplPdoMappObject*  pMappObject;
     ObdSize = sizeof (wMaxPdoSize);
     Ret = EplObduReadEntry(uiPayloadLimitIndex, uiPayloadLimitSubIndex, &wMaxPdoSize, &ObdSize);
     if (Ret != kEplSuccessful)
-    {   // other fatal error occured
+    {   // other fatal error occurred
         *pdwAbortCode_p = EPL_SDOAC_GENERAL_ERROR;
         goto Exit;
     }
@@ -785,7 +785,7 @@ tEplPdoMappObject*  pMappObject;
         Ret = EplObduReadEntry(uiMappParamIndex_p,
                             bMappSubindex, &qwObjectMapping, &ObdSize);
         if (Ret != kEplSuccessful)
-        {   // other fatal error occured
+        {   // other fatal error occurred
             *pdwAbortCode_p = EPL_SDOAC_GENERAL_ERROR;
             goto Exit;
         }
@@ -828,7 +828,7 @@ tEplPdoMappObject*  pMappObject;
     // read PDO mapping version
     Ret = EplObdReadEntry(uiCommParamIndex, 0x02, &PdoChannelConf.m_PdoChannel.m_bMappingVersion, &ObdSize);
     if (Ret != kEplSuccessful)
-    {   // other fatal error occured
+    {   // other fatal error occurred
         goto Exit;
     }
 
@@ -838,7 +838,7 @@ tEplPdoMappObject*  pMappObject;
     // do not make the call before Alloc has been called
     Ret = EplPdouConfigureChannel(&PdoChannelConf);
     if (Ret != kEplSuccessful)
-    {   // fatal error occured
+    {   // fatal error occurred
         *pdwAbortCode_p = EPL_SDOAC_GENERAL_ERROR;
         goto Exit;
     }
@@ -954,7 +954,7 @@ BYTE                bMappObjectCount;
         // read number of mapped objects from OD; this indicates if the PDO is valid
         Ret = EplObduReadEntry(uiMappParamIndex_p, 0x00, &bMappObjectCount, &ObdSize);
         if (Ret != kEplSuccessful)
-        {   // other fatal error occured
+        {   // other fatal error occurred
             *pdwAbortCode_p = EPL_SDOAC_GEN_INTERNAL_INCOMPATIBILITY;
             goto Exit;
         }
@@ -1099,7 +1099,7 @@ void*               pVar;
         && (uiByteSize != ObdSize))
     {
         // object is numerical,
-        // therefor size has to fit, but it does not.
+        // therefore size has to fit, but it does not.
         *pdwAbortCode_p = EPL_SDOAC_GENERAL_ERROR;
         Ret = kEplPdoVarNotFound;
         goto Exit;
@@ -1117,7 +1117,7 @@ void*               pVar;
     EPL_PDO_MAPPOBJECT_SET_BYTESIZE_OR_TYPE(pMappObject_p, (WORD) uiByteSize, ObdType);
     EPL_PDO_MAPPOBJECT_SET_VAR(pMappObject_p, pVar);
 
-    // calucaled needed PDO size
+    // Calculate needed PDO size
     *puiPdoSize_p = (uiBitOffset >> 3) + uiByteSize;
 
 Exit:

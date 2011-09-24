@@ -778,7 +778,7 @@ Exit:
 // Description: post error event from kernel part to API layer
 //
 // Parameters:  EventSource_p   = source-module of the error event
-//              EplError_p      = code of occured error
+//              EplError_p      = code of occurred error
 //              ArgSize_p       = size of the argument
 //              pArg_p          = pointer to the argument
 //

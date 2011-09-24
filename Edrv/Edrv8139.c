@@ -987,7 +987,7 @@ int             iHandled = IRQ_HANDLED;
             }
 
             if ((dwRxStatus & EDRV_RXSTAT_ROK) == 0)
-            {   // error occured while receiving this frame
+            {   // error occurred while receiving this frame
                 // ignore it
                 if ((dwRxStatus & EDRV_RXSTAT_FAE) != 0)
                 {

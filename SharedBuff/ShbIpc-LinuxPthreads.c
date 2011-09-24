@@ -118,9 +118,9 @@
 //------------------------------------------------------------------------------
 
 // This structure is the common header for the shared memory region used
-// by all processes attached this shared memory. It includes common
+// by all processes attached to this shared memory. It includes common
 // information to administrate/manage the shared buffer from a couple of
-// separated processes (e.g. the refernce counter). This structure is
+// separated processes (e.g. the reference counter). This structure is
 // located at the start of the shared memory region itself and exists
 // consequently only one times per shared memory instance.
 typedef struct
@@ -140,7 +140,7 @@ typedef struct
 // resp. target specific information to administrate/manage the shared
 // buffer from a separate process. Every process attached to the shared
 // buffer has its own runtime instance of this structure with its individual
-// runtime data (e.g. the scope of an event handle is limitted to the
+// runtime data (e.g. the scope of an event handle is limited to the
 // owner process only). The structure member <m_pShbMemHeader> points
 // to the (process specific) start address of the shared memory region
 // itself.
@@ -447,7 +447,7 @@ tShbError  ShbIpcReleaseBuffer (tShbInstance pShbInstance_p)
         ShbError = kShbMemUsedByOtherProcs;
     }
 
-    //delete privat mem
+    //delete private mem
     ShbIpcReleasePrivateMem (pShbMemInst);
 
     return (ShbError);
@@ -622,7 +622,7 @@ tShbError  ShbIpcStartSignalingNewData(tShbInstance pShbInstance_p,
             break;
     }
 
-    //create thread for signalling new data
+    //create thread for signaling new data
     if (pthread_create(&pShbMemInst->m_tThreadNewDataId, NULL,
                    &ShbIpcThreadSignalNewData, pShbInstance_p) != 0)
     {

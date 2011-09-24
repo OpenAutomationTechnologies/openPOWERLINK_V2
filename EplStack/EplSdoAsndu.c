@@ -324,7 +324,7 @@ Exit:
 //
 // Function:    EplSdoAsnduSendData
 //
-// Description: send data using exisiting connection
+// Description: send data using existing connection
 //
 //
 //

@@ -436,7 +436,7 @@ tEplKernel  Ret;
                         break;
                     }
 
-                    // node should be configured und application is ready
+                    // node should be configured and application is ready
                     case kEplNmtCsReadyToOperate:
                     {
                         break;
@@ -580,7 +580,7 @@ tEplKernel  Ret;
                         break;
                     }
 
-                    // node should be configured und application is ready
+                    // node should be configured and application is ready
                     case kEplNmtMsReadyToOperate:
                     {
                         break;

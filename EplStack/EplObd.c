@@ -2279,7 +2279,7 @@ BOOL                    fEntryNumerical;
     if ((fEntryNumerical != FALSE)
         && (Size_p != ObdSize))
     {
-        // type is numerical, therefor size has to fit, but it does not.
+        // type is numerical, therefore size has to fit, but it does not.
         Ret = kEplObdValueLengthError;
         goto Exit;
     }
@@ -2294,7 +2294,7 @@ BOOL                    fEntryNumerical;
     *ppDstData_p = pDstData;
 
     // all checks are done
-    // the caller may now convert the numerial source value to platform byte order in a temporary buffer
+    // the caller may now convert the numerical source value to platform byte order in a temporary buffer
 
 Exit:
 
@@ -2487,8 +2487,8 @@ void * pData;
             }
             else
             {
-                // The current position is not decleared. The string
-                // is located in ROM, therefor use default pointer.
+                // The current position is not declared. The string
+                // is located in ROM, therefore use default pointer.
                 pData = (void *) pSubIndexEntry_p->m_pDefault;
                 if ((CONST void ROM*) pData != (CONST void ROM*) NULL)
                 {
@@ -2513,8 +2513,8 @@ void * pData;
             }
             else
             {
-                // The current position is not decleared. The string
-                // is located in ROM, therefor use default pointer.
+                // The current position is not declared. The string
+                // is located in ROM, therefore use default pointer.
                 pData = (void *) pSubIndexEntry_p->m_pDefault;
                 if ((CONST void ROM*) pData != (CONST void ROM*) NULL)
                 {

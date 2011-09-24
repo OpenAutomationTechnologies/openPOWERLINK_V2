@@ -238,7 +238,7 @@ typedef enum
     kEplEventSourceObdu         = 0x14, // Obdu module
     kEplEventSourceSdoUdp       = 0x15, // Sdo/Udp module
     kEplEventSourceSdoAsnd      = 0x16, // Sdo/Asnd module
-    kEplEventSourceSdoAsySeq    = 0x17, // Sdo asynchronus Sequence Layer module
+    kEplEventSourceSdoAsySeq    = 0x17, // Sdo asynchronous Sequence Layer module
     kEplEventSourceSdoCom       = 0x18, // Sdo command layer module
     kEplEventSourceTimeru       = 0x19, // Timeru module
     kEplEventSourceCfgMau       = 0x1A, // CfgMau module
@@ -284,7 +284,7 @@ typedef struct
 typedef struct
 {
     tEplEventSource m_EventSource;              // module which posted this error event
-    tEplKernel      m_EplError;                 // EPL error which occured
+    tEplKernel      m_EplError;                 // EPL error which occurred
     union
     {
         BYTE                    m_bArg;

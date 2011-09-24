@@ -397,7 +397,7 @@ tEplKernel PUBLIC EplTimeruModifyTimerMs(tEplTimerHdl*     pTimerHdl_p,
     }
 
     // copy the TimerArg after the timer is restarted,
-    // so that a timer occured immediately before timer_settime
+    // so that a timer occurred immediately before timer_settime
     // won't use the new TimerArg and
     // therefore the old timer cannot be distinguished from the new one.
     // But if the new timer is too fast, it may get lost.

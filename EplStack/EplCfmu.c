@@ -481,7 +481,7 @@ BOOL                fDoUpdate = FALSE;
         }
         else
         {
-            // error occured
+            // error occurred
             EPL_DBGLVL_CFM_TRACE1("CfmCbEvent(Node): EplCfmuSdoWriteObject() returned 0x%02X\n", Ret);
         }
     }

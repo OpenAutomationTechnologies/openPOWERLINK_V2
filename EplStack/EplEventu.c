@@ -5,7 +5,7 @@
 
   Project:      openPOWERLINK
 
-  Description:  source file for Epl-Userspace-Event-Modul
+  Description:  source file for Epl-Userspace-Event-Module
 
   License:
 
@@ -139,7 +139,7 @@ static tEplEventuInstance EplEventuInstance_g;
 //---------------------------------------------------------------------------
 
 #if EPL_USE_SHAREDBUFF != FALSE
-// callback function for incomming events
+// callback function for incoming events
 static void  EplEventuRxSignalHandlerCb (
     tShbInstance pShbRxInstance_p,
     unsigned long ulDataSize_p);
@@ -349,7 +349,7 @@ return Ret;
 //
 //
 //
-// Parameters:  pEvent_p = pointer to event-structur from buffer
+// Parameters:  pEvent_p = pointer to event-structure from buffer
 //
 //
 // Returns:      tEpKernel  = errorcode
@@ -408,7 +408,7 @@ tEplEventSource         EventSource;
 
 #if ((((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOC)) != 0)   \
      || (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOS)) != 0))
-        // events for asynchronus SDO Sequence Layer
+        // events for asynchronous SDO Sequence Layer
         case kEplEventSinkSdoAsySeq:
         {
             Ret = EplSdoAsySeqProcessEvent(pEvent_p);
@@ -530,7 +530,7 @@ tEplEventSource         EventSource;
 //
 //
 //
-// Parameters:  pEvent_p = pointer to event-structur from buffer
+// Parameters:  pEvent_p = pointer to event-structure from buffer
 //
 //
 // Returns:      tEpKernel  = errorcode
@@ -695,7 +695,7 @@ Exit:
 //
 //
 // Parameters:  EventSource_p   = source-module of the errorevent
-//              EplError_p     = code of occured error
+//              EplError_p     = code of occurred error
 //              uiArgSize_p     = size of the argument
 //              pArg_p          = pointer to the argument
 //
@@ -747,7 +747,7 @@ tEplEvent       EplEvent;
 //
 // Function:    EplEventuRxSignalHandlerCb()
 //
-// Description: Callback-function for evets from kernelspace
+// Description: Callback-function for events from kernelspace
 //
 //
 //

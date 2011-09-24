@@ -117,7 +117,7 @@ typedef enum
     kEplSdoComConEventAckReceived   = 0x04, // acknowledge received by lower layer
                                         // -> continue sending
     kEplSdoComConEventFrameSended   = 0x05, // lower has send a frame
-    kEplSdoComConEventInitError     = 0x06, // error duringinitialisiation
+    kEplSdoComConEventInitError     = 0x06, // error during initialisation
                                             // of the connection
     kEplSdoComConEventTimeout       = 0x07, // timeout in lower layer
     kEplSdoComConEventTransferAbort = 0x08, // transfer abort by lower layer
@@ -133,13 +133,13 @@ typedef enum
 typedef enum
 {
     kEplSdoComSendTypeReq      = 0x00,  // send a request
-    kEplSdoComSendTypeAckRes   = 0x01,  // send a resonse without data
+    kEplSdoComSendTypeAckRes   = 0x01,  // send a response without data
     kEplSdoComSendTypeRes      = 0x02,  // send response with data
     kEplSdoComSendTypeAbort    = 0x03   // send abort
 
 }tEplSdoComSendType;
 
-// state of the state maschine
+// state of the state machine
 typedef enum
 {
     // General State
@@ -191,7 +191,7 @@ typedef struct
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOC)) != 0)
     // only for client
     unsigned int        m_uiTargetIndex;    // index to access
-    unsigned int        m_uiTargetSubIndex; // subiondex to access
+    unsigned int        m_uiTargetSubIndex; // subindex to access
 
     // for future use
     unsigned int        m_uiTimeout;        // timeout for this connection
@@ -336,7 +336,7 @@ tEplKernel Ret;
 
     Ret = kEplSuccessful;
 
-    // init controll structure
+    // init control structure
     EPL_MEMSET(&SdoComInstance_g, 0x00, sizeof(SdoComInstance_g));
 
     // init instance of lower layer
@@ -630,7 +630,7 @@ Exit:
 //
 // Function:    EplSdoComUndefineCon
 //
-// Description: function undefine a SDO connection
+// Description: function undefines a SDO connection
 //
 //
 //
@@ -687,7 +687,7 @@ tEplSdoComCon*      pSdoComCon;
     }
 
 
-    // clean controll structure
+    // clean control structure
     EPL_MEMSET(pSdoComCon, 0x00, sizeof(tEplSdoComCon));
 Exit:
     return Ret;
@@ -697,12 +697,12 @@ Exit:
 //
 // Function:    EplSdoComGetState
 //
-// Description: function returns the state fo the connection
+// Description: function returns the state of the connection
 //
 //
 //
 // Parameters:  SdoComConHdl_p    = handle for the connection
-//              pSdoComFinished_p = pointer to structur for sdo state
+//              pSdoComFinished_p = pointer to structure for sdo state
 //
 //
 // Returns:     tEplKernel  = errorcode
@@ -975,7 +975,7 @@ tEplSdoComConEvent  SdoComConEvent = kEplSdoComConEventSendFirst;
 
         case kAsySdoConStateAckReceived:
         {
-            EPL_DBGLVL_SDO_TRACE0("Acknowlage received\n");
+            EPL_DBGLVL_SDO_TRACE0("Acknowledge received\n");
             SdoComConEvent = kEplSdoComConEventAckReceived;
             // continue transmission
             break;
@@ -1097,7 +1097,7 @@ tEplSdoComConHdl    HdlFree;
 // Function:        EplSdoComProcessIntern
 //
 // Description:     search a Sdo Sequence Layer connection handle in the
-//                  control structer of the Command Layer
+//                  control structure of the Command Layer
 //
 //
 //

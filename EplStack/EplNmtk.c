@@ -293,7 +293,7 @@ tEplKernel              Ret = kEplSuccessful;
 // Function:        EplNmtkProcess
 //
 // Description: main process function
-//              -> process NMT-State-Maschine und read NMT-Events from Queue
+//              -> process NMT-State-Maschine and read NMT-Events from Queue
 //
 //
 //
@@ -343,7 +343,7 @@ tEplEventNmtStateChange NmtStateChange;
 
     // save NMT-State
     // needed for later comparison to
-    // inform hgher layer about state change
+    // inform higher layer about state change
     OldNmtState = EPL_MCO_GLB_VAR(m_NmtState);
 
     // NMT-State-Maschine
@@ -744,7 +744,7 @@ tEplEventNmtStateChange NmtStateChange;
                     break;
                 }
 
-                // error occured
+                // error occurred
                 case kEplNmtEventNmtCycleError:
                 {   // NMT_CT11
                     // reset flags
@@ -799,7 +799,7 @@ tEplEventNmtStateChange NmtStateChange;
             break;
         }
 
-        // node should be configured und application is ready
+        // node should be configured and application is ready
         case kEplNmtCsReadyToOperate:
         {
              // check events
@@ -850,7 +850,7 @@ tEplEventNmtStateChange NmtStateChange;
                     break;
                 }
 
-                // error occured
+                // error occurred
                 case kEplNmtEventNmtCycleError:
                 {   // NMT_CT11
                     EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtCsPreOperational1;
@@ -932,7 +932,7 @@ tEplEventNmtStateChange NmtStateChange;
                     break;
                 }
 
-                // error occured
+                // error occurred
                 case kEplNmtEventNmtCycleError:
                 {   // NMT_CT11
                     EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtCsPreOperational1;
@@ -1000,7 +1000,7 @@ tEplEventNmtStateChange NmtStateChange;
                     break;
                 }
 
-                // error occured
+                // error occurred
                 case kEplNmtEventNmtCycleError:
                 {   // NMT_CT11
                     EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtCsPreOperational1;
@@ -1061,7 +1061,7 @@ tEplEventNmtStateChange NmtStateChange;
                     break;
                 }
 
-                // error occured
+                // error occurred
                 // d.k.: how does this error occur? on CRC errors
 /*                case kEplNmtEventNmtCycleError:
                 {
@@ -1240,7 +1240,7 @@ tEplEventNmtStateChange NmtStateChange;
                     break;
                 }
 
-                // error occured
+                // error occurred
                 // d.k. MSPreOp1->CSPreOp1: nonsense -> keep state
                 /*
                 case kEplNmtEventNmtCycleError:
@@ -1338,7 +1338,7 @@ tEplEventNmtStateChange NmtStateChange;
                     break;
                 }
 
-                // error occured
+                // error occurred
                 case kEplNmtEventNmtCycleError:
                 {   // NMT_MT6
                     EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtMsPreOperational1;
@@ -1416,7 +1416,7 @@ tEplEventNmtStateChange NmtStateChange;
                     break;
                 }
 
-                // error occured
+                // error occurred
                 case kEplNmtEventNmtCycleError:
                 {   // NMT_MT6
                     EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtMsPreOperational1;
@@ -1492,7 +1492,7 @@ tEplEventNmtStateChange NmtStateChange;
                     break;
                 }
 
-                // error occured
+                // error occurred
                 case kEplNmtEventNmtCycleError:
                 {   // NMT_MT6
                     EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtMsPreOperational1;
@@ -1562,7 +1562,7 @@ tEplEventNmtStateChange NmtStateChange;
                     break;
                 }
 
-                // error occured
+                // error occurred
                 // d.k. BE->PreOp1 on cycle error? No
 /*                case kEplNmtEventNmtCycleError:
                 {
