@@ -90,6 +90,9 @@
 #include <sys/types.h>
 #include <semaphore.h>
 #include <pthread.h>
+#elif (TARGET_SYSTEM == _VXWORKS_)
+#include <semLib.h>
+#include <taskLib.h>
 #endif
 
 #if EPL_USE_SHAREDBUFF == FALSE
@@ -193,6 +196,8 @@ typedef struct
         sem_t                   m_semCompletion;
 #elif (TARGET_SYSTEM == _WIN32_)
         HANDLE                  m_hEvent;
+#elif (TARGET_SYSTEM == _VXWORKS_)
+        SEM_ID					m_semCompletion;
 #else
 #error "OS currently not supported by EplApiProcessImage!"
 #endif
@@ -215,6 +220,8 @@ typedef struct
     pthread_t           m_currentThreadId;
 #elif (TARGET_SYSTEM == _WIN32_)
     DWORD               m_dwCurrentThreadId;
+#elif (TARGET_SYSTEM == _VXWORKS_)
+    int					m_currentThreadId;
 #else
 #error "OS currently not supported by EplApiProcessImage!"
 #endif
@@ -565,6 +572,8 @@ tEplApiProcessImageCopyJobInt   IntCopyJob;
     if (pthread_equal(EplApiProcessImageInstance_g.m_currentThreadId, pthread_self()))
 #elif (TARGET_SYSTEM == _WIN32_)
     if (EplApiProcessImageInstance_g.m_dwCurrentThreadId == GetCurrentThreadId())
+#elif (TARGET_SYSTEM == _VXWORKS_)
+    if (EplApiProcessImageInstance_g.m_currentThreadId == taskIdSelf())    	
 #else
 #error "OS currently not supported by EplApiProcessImage!"
 #endif
@@ -1134,7 +1143,11 @@ tEplKernel      Ret = kEplSuccessful;
 
 #elif (TARGET_SYSTEM == _WIN32_)
     pCopyJob_p->m_Event.m_hEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
-
+#elif (TARGET_SYSTEM == _VXWORKS_)
+    if ((pCopyJob_p->m_Event.m_semCompletion = semBCreate(SEM_Q_FIFO, SEM_EMPTY)) == NULL)
+    {
+    	Ret = kEplNoResource;
+    }
 #else
 #error "OS currently not supported by EplApiProcessImage!"
 #endif
@@ -1178,6 +1191,8 @@ int             iRes;
     sem_wait(&pCopyJob_p->m_Event.m_semCompletion);
 #elif (TARGET_SYSTEM == _WIN32_)
     WaitForSingleObject(pCopyJob_p->m_Event.m_hEvent, INFINITE);
+#elif (TARGET_SYSTEM == _VXWORKS_)
+    semTake(pCopyJob_p->m_Event.m_semCompletion, WAIT_FOREVER);
 #else
 #error "OS currently not supported by EplApiProcessImage!"
 #endif
@@ -1227,8 +1242,10 @@ tEplKernel      Ret = kEplSuccessful;
         CloseHandle(pCopyJob_p->m_Event.m_hEvent);
         pCopyJob_p->m_Event.m_hEvent = INVALID_HANDLE_VALUE;
     }
-
-#else
+#elif (TARGET_SYSTEM == _VXWORKS_)
+    semDelete(pCopyJob_p->m_Event.m_semCompletion);
+    
+#else    
 #error "OS currently not supported by EplApiProcessImage!"
 #endif
 
@@ -1264,6 +1281,8 @@ tEplKernel      Ret = kEplSuccessful;
         sem_post(&pCopyJob_p->m_Event.m_semCompletion);
 #elif (TARGET_SYSTEM == _WIN32_)
         SetEvent(pCopyJob_p->m_Event.m_hEvent);
+#elif (TARGET_SYSTEM == _VXWORKS_)
+        semGive(pCopyJob_p->m_Event.m_semCompletion);
 #else
 #error "OS currently not supported by EplApiProcessImage!"
 #endif
@@ -1305,6 +1324,8 @@ tEplApiProcessImageCopyJobInt   CopyJob;
     EplApiProcessImageInstance_g.m_currentThreadId = pthread_self();
 #elif (TARGET_SYSTEM == _WIN32_)
     EplApiProcessImageInstance_g.m_dwCurrentThreadId = GetCurrentThreadId();
+#elif (TARGET_SYSTEM == _VXWORKS_)
+    EplApiProcessImageInstance_g.m_currentThreadId = taskIdSelf();
 #else
 #error "OS currently not supported by EplApiProcessImage!"
 #endif
@@ -1381,6 +1402,8 @@ Exit:
     EplApiProcessImageInstance_g.m_currentThreadId = 0;
 #elif (TARGET_SYSTEM == _WIN32_)
     EplApiProcessImageInstance_g.m_dwCurrentThreadId = ~0UL;
+#elif (TARGET_SYSTEM == _VXWORKS_)
+    EplApiProcessImageInstance_g.m_currentThreadId = 0;
 #else
 #error "OS currently not supported by EplApiProcessImage!"
 #endif

@@ -119,12 +119,12 @@
         #include <utime.h>
         #include <limits.h>
     #endif
-
+#elif (TARGET_SYSTEM == _VXWORKS_)
+	#include "ioLib.h"
 #elif (DEV_SYSTEM == _DEV_PAR_BECK1X3_)
 
     #include <io.h>
     #include <string.h>
-
 #endif
 
 #if (TARGET_SYSTEM == _WIN32_)
@@ -137,7 +137,8 @@
     #define O_BINARY 0
     #define _MAX_PATH PATH_MAX
     #define flush  fsync
-
+#elif (TARGET_SYSTEM == _VXWORKS_)
+    #define O_BINARY 0
 #elif (DEV_SYSTEM == _DEV_PAR_BECK1X3_)
 
     #define flush(h)                    // #define flush() to nothing

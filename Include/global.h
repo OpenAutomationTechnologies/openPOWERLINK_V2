@@ -12,7 +12,7 @@
     11.04.2003   f.j. Ergaenzung fuer Mitsubishi NC30 Compiler
     17.06.2003   -rs  Definition von Basistypen in <#ifndef _WINDEF_> gesetzt
     16.04.2004   r.d. Ergaenzung fuer Borland C++ Builder
-    30.08.2004   -rs  TRACE5 eingefügt
+    30.08.2004   -rs  TRACE5 eingefï¿½gt
     23.12.2005   d.k. Definitions for IAR compiler
 
     $Id$
@@ -121,7 +121,7 @@
 #define _DEV_CCS_TMS_           (_DEV_BIT16_ | _DEV_TI_CCS_  | _DEV_COMMA_EXT_ | _DEV_DSP_)
 
 #define _DEV_NIOS2_             (_DEV_BIT32_ | _DEV_GNUC_NIOS2_               | _DEV_64BIT_SUPPORT_ | _DEV_COMMA_EXT_ | _DEV_ONLY_INT_MAIN_ | _DEV_ALIGNMENT_4_ )
-
+#define _DEV_VXWORKS_           (_DEV_BIT32_ | _DEV_LINUX_GCC_                | _DEV_64BIT_SUPPORT_ | _DEV_COMMA_EXT_)
 
 //---------------------------------------------------------------------------
 //  usefull macros
@@ -144,6 +144,7 @@
 #define _LINUX_              1
 #define _PXROS_              2
 #define _ECOSPRO_            3
+#define _VXWORKS_            4
 
 
 //---------------------------------------------------------------------------
@@ -812,53 +813,99 @@
 
     #define UNUSED_PARAMETER(par)
 
-
 //---------------------------------------------------------------------------
 //  definitions for WinAVR compiler e.g. for Atmel's AT90CAN128
 //---------------------------------------------------------------------------
-
 #elif defined(__GNUC__) && defined (__AVR__) // NOTE: has to be defined before __GNUC__ section!
 
-    #define TARGET_SYSTEM           _NO_OS_
-    #define DEV_SYSTEM              _DEV_GNU_WINAVR8_
+     #define TARGET_SYSTEM           _NO_OS_
+     #define DEV_SYSTEM              _DEV_GNU_WINAVR8_
 
-    //#include <avr/pgmspace.h>
-    #define ROM_INIT __attribute__((__progmem__))   // variables will be initialized directly in ROM (means no copy from RAM in startup)
-    //#define ROM_INIT                // variables will be initialized directly in ROM (means no copy from RAM in startup)
+     //#include <avr/pgmspace.h>
+     #define ROM_INIT __attribute__((__progmem__))   // variables will be initialized directly in ROM (means no copy from RAM in startup)
+     //#define ROM_INIT                // variables will be initialized directly in ROM (means no copy from RAM in startup)
+     #define ROM                     // code or variables mapped to ROM (i.e. flash)
+     #define HWACC                   // hardware access through external memory (i.e. CAN)
+     #define MEM                     // Memory attribute to optimize speed and code of pointer access.
+     #define NEAR                    // variables mapped to internal data storage location
+     #define FAR                     // variables mapped to external data storage location
+     #define CONST const             // variables mapped to ROM (i.e. flash)
+     #define LARGE
+
+     // These types can be adjusted by users to match application requirements. The goal is to
+     // minimize code memory and maximize speed.
+     #define GENERIC                 // generic pointer to point to application data
+                                     // Variables with this attribute can be located in external
+                                     // or internal data memory.
+
+     #define REENTRANT
+     #define PUBLIC
+
+     // note: WinAVR is supports 64 bit variables but it needs to much memory resources!
+     // Thats why NO_QWORD should be set in project settings!
+     #ifndef NO_QWORD
+     #ifndef QWORD
+         #define QWORD unsigned long long int
+     #endif
+     #endif
+
+     #ifndef NDEBUG
+         #include <stdio.h>              // prototype printf() (for TRACE)
+         //#define TRACE  printf
+         #define TRACE(arg, ...)         do { static char __s[] ROM_INIT = (arg); \
+                                         printf_P(__s, ## __VA_ARGS__); } while (0)
+     #endif
+
+     #define UNUSED_PARAMETER(par)
+
+//---------------------------------------------------------------------------
+//  definitions for VxWorks
+//---------------------------------------------------------------------------
+
+#elif defined(__GNUC__) && defined (__VXWORKS__)
+
+    #define TARGET_SYSTEM           _VXWORKS_
+    #define DEV_SYSTEM              _DEV_VXWORKS_
+
+    #define ROM_INIT                // variables will be initialized directly in ROM (means no copy from RAM in startup)
     #define ROM                     // code or variables mapped to ROM (i.e. flash)
+                                    // usage: CONST BYTE ROM foo = 0x00;
     #define HWACC                   // hardware access through external memory (i.e. CAN)
-    #define MEM                     // Memory attribute to optimize speed and code of pointer access.
-    #define NEAR                    // variables mapped to internal data storage location
-    #define FAR                     // variables mapped to external data storage location
-    #define CONST const             // variables mapped to ROM (i.e. flash)
-    #define LARGE
 
     // These types can be adjusted by users to match application requirements. The goal is to
     // minimize code memory and maximize speed.
     #define GENERIC                 // generic pointer to point to application data
                                     // Variables with this attribute can be located in external
                                     // or internal data memory.
+    #define MEM                     // Memory attribute to optimize speed and code of pointer access.
+
+    #ifndef NEAR
+        #define NEAR                // variables mapped to internal data storage location
+    #endif
+
+    #ifndef FAR
+        #define FAR                 // variables mapped to external data storage location
+    #endif
+
+    #ifndef CONST
+        #define CONST const         // variables mapped to ROM (i.e. flash)
+    #endif
+
+    #define LARGE
+
+    #ifndef QWORD
+        #define QWORD long long
+    #endif
 
     #define REENTRANT
     #define PUBLIC
 
-    // note: WinAVR is supports 64 bit variables but it needs to much memory resources!
-    // Thats why NO_QWORD should be set in project settings!
-    #ifndef NO_QWORD
-    #ifndef QWORD
-        #define QWORD unsigned long long int
-    #endif
-    #endif
-
     #ifndef NDEBUG
         #include <stdio.h>              // prototype printf() (for TRACE)
-        //#define TRACE  printf
-        #define TRACE(arg, ...)         do { static char __s[] ROM_INIT = (arg); \
-                                        printf_P(__s, ## __VA_ARGS__); } while (0)
+        #define TRACE  printf
     #endif
 
     #define UNUSED_PARAMETER(par)
-
 
 //---------------------------------------------------------------------------
 //  definitions for Motorola PowerPC family 5x5 (555/565)
@@ -912,7 +959,6 @@
     #elif defined (__NIOS2__)
         #define TARGET_SYSTEM       _NO_OS_
         #define DEV_SYSTEM          _DEV_NIOS2_
-
     #else
         #error 'ERROR: DEV_SYSTEM not found!'
     #endif

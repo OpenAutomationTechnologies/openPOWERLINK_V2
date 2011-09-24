@@ -1,0 +1,255 @@
+openPOWERLINK on VxWorks
+==========================
+
+1 Introduction
+--------------------------------------------------------------------------------
+  This file contains documentation for the openPOWERLINK stack on VxWorks.
+
+
+2 Requirements
+--------------------------------------------------------------------------------
+
+2.1 Operating System
+--------------------
+  The VxWorks version of the openPOWERLINK stack is implemented and tested on
+  VxWorks Version 6.8.
+
+2.2 Build Environment
+---------------------
+  To build the openPOWERLINK stack on VxWorks the following build environment
+  is required.
+  - VxWorks 6.8 Development Environment with WindRiver Workbench 3.2
+  - GNU C compiler for Intel X86 architecture
+
+2.3 openCONFIGURATOR
+--------------------
+  For configuration of your POWERLINK network the Open Source configuration
+  tool openCONFIGURATOR should be used. The tool is available as SourceForge
+  project. (http://sourceforge.net/projects/openconf/)
+
+  The openCONFIGURATOR projects used by the demo examples are found in the
+  directory: CfmProjects.
+
+  openCONFIGURATOR creates two file which are used by the openPOWERLINK stack
+  and application:
+  * xap.h       The header file contains the structure definition for your
+                process image. It depends on the available data field of the
+                CNs used in your configuration.
+
+  * mnobd.cdc   This file is used to configure the MN stack. It includes all
+                configuration data of the CNs and the network mapping
+        information. CN configuration is handled by the configuration
+        manager (CFM) module of the MN.
+
+2.4 POWERLINK network
+---------------------
+  For testing a VxWorks openPOWERLINK MN a POWERLINK network with controlled
+  nodes (CNs) is required. You can use the following CNs:
+        * openPOWERLINK controlled nodes, e.g. Altera-based FPGA evaluation boards
+        * B&R POWERLINK controlled nodes
+        * other POWERLINK controlled nodes
+
+  The POWERLINK MN demo application is able to visualize the digital inputs
+  of the POWERLINK CNs and are driving a running light on the CNs digital
+  outputs. The application used CNs with node numbers 1, 32 and 110.
+
+
+3 Limitations
+--------------------------------------------------------------------------------
+  The VxWorks openPOWERLINK implementation has the following limitations at
+  the moment:
+  - SDO over UDP is not supported
+  - There is no virtual ethernet driver to be able to transfer standard ethernet
+    traffic on the POWERLINK network.
+
+
+4 Implementation details
+--------------------------------------------------------------------------------
+  The following section contains information about the implementation of
+  openPOWERLINK on VxWorks and give some hints about porting to other
+  targets.
+
+4.1 Operating System Functions
+------------------------------
+  Multitasking:
+  openPOWERLINK uses the VxWorks APIs for task synchronisation and communication.
+  - VxWorks Tasks (taskLib)
+  - Semaphores and Mutexes (semLib, semMLib, semBLib, semCLib)
+
+  File System:
+  To read the mnobd.cdc file which specifies the POWERLINK network configuration,
+  it needs a file system where the file is located.
+
+  Logging/Debugging:
+  To provide debugging output the logMsg() function which is provided in
+  logLib is used.
+
+4.2 Ethernet Interface
+----------------------
+  openPOWERLINK uses the VxWorks MUX network interface. Therefore, openPOWERLINK
+  should run on every network interface for which a VxWorks drivers is available.
+  The network device to be used for POWERLINK should not be used by VxWorks!
+
+4.3 Timer Architecture
+----------------------
+  The VxWorks operating system doesn't provide high-resolution timers. Therefore
+  the openPOWERLINK provides it's own high-resolution timer library. The timer
+  library will be used to implement the high-resolution timers in
+  EplStack/EplTimerHighReskVxWorks.c and the user timers in
+  EplStack/EplTimeruVxWorks.c.
+
+  The timer library itself is located in Target/generic/VxWorks/hrtimer
+
+  The timer library is structured in 3 modules:
+  - hrtimerLib    - Contains the application interface to the timer library
+  - hrtimer       - Contains internal timer library functions
+  - {timerdevice} - The hardware related parts for the specific timer device
+
+  If the timer library will be ported to another target, the timerdevice
+  module has to be ported to the new hardware. The current implementation for
+  Intel X86 contains an implementation for the Intel HPET timer device (hpetTimer).
+
+  The timer device module has to provide the following functions:
+
+  - int timerdev_init(void)
+    All initialization for the timer device (which is not yet performed in the
+    BSP!) has to be done here.
+
+  - void timerdev_shutdown(void)
+    All cleanup stuff must be located here.
+
+  - void timerdev_arm(unsigned long long diffTimeout_p)
+    This function arms the timer device with the specified timeout. The timeout
+    is a relative time in nanoseconds. The timer device has to be programmed
+    to generate an interrupt when the timer expires.
+
+  - void timerdev_disarm(void)
+    Here, the timer device will be disarmed.
+
+  - int timerdev_readClock(unsigned long long* pClock_p)
+    This function reads the current clock value of the timer. It has to be
+    ensured that there is no clock overrun whithin the expected running time
+    of the application!
+
+  - int timerdev_registerInterruptHandler(VOIDFUNCPTR pHandler_p, int iArg_p)
+    This function is used to connect the timer libraries interrupt handler
+    to the timer device interrupt. The timer device module is responsible for
+    hardware specific stuff like interrupt acknowledge. The timer handling will
+    be done in the connected handler.
+
+  - void timerdev_start(void)
+    void timerdev_stop(void)
+    void timerdev_reset(void)
+    These functions are used to start, stop or reset the timer device.
+
+  - void timerdev_show(void)
+    This function could be implemented to provide timer device information
+    needed for debugging.
+
+4.4 Task Priorities
+-------------------
+  As VxWorks provides a priority-based preemptive scheduler it is important
+  to assign the right task priorities in order to get a stable POWERLINK
+  cycle.
+
+  The priorities of the tasks created by openPOWERLINK are setup in EplCfg.h.
+  They are assigned as follows:
+
+  Task Name                          Priority
+  ------------------------------------------------------------------------------
+  High-Resolution timer tasks        1
+  TX callback handler task           1
+  Shared Buffer Tasks                10 (User->Kernel direction will be
+                                         increased by 5 in ShbIpc-VxWorks.c
+                                         ==> 5)
+  User timer task                    50
+
+  Additionally you have to increase the priority of the network stack task to be
+  able to get all network packets in time:
+
+  Task Name    Default Priority      Adjusted Priority
+  ------------------------------------------------------------------------------
+  tNet0        50                    5
+
+5 Supported Architectures and Targets
+--------------------------------------------------------------------------------
+
+5.1 Supported Architectures
+-----------------
+  The following architectures are currently supported by the openPOWERLINK stack.
+
+  - Intel X86 (only UP no SMP!)
+
+5.2 Supported Targets
+---------------------
+
+5.2.1 B&R APC810
+----------------
+
+  The B&R BSP for APC 810 (Based on Pentium4) is used.
+
+  Intel HPET timer
+  ----------------
+  The BSP uses the Intel timestamp driver vxbIntelTimestamp.c. On UP systems
+  the timestamp counter TSC is used for timestamping thus, the HPET device
+  could be used for openPOWERLINK. However, the BSP has to be modified so that
+  the functions hpetInit() and hpetMmuMap() will be called in order to be able
+  to access the HPET from the openPOWERLINK high-resolution timer library.
+
+  Supported Etherent Interfaces
+  -----------------------------
+  openPOWERLINK is supported on the following ethernet interfaces:
+  - Intel 82573 Gigabit Ethernet, gei825xxVxbEnd.c
+
+
+6 Available demo applications
+--------------------------------------------------------------------------------
+
+6.1 demo_process_image_console
+------------------------------
+  This demo implements a POWERLINK managing node (MN) using the configuration
+  manager (CFM) to initialize the controlled nodes. It uses the demo system
+  configuration also used for Linux which is located in
+  CfmProjects/Linux_Demo_3CN.
+
+  It is located in:
+  Examples/X86/VxWorks/gnu/demo_process_image_console
+
+
+7 Running openPOWERLINK on VxWorks
+--------------------------------------------------------------------------------
+7.1 Build
+---------
+  - Add the openPOWERLINK source path to your linked resources:
+    'Window/Preferences' -> 'General/Workspace/LinkedResources'
+    Click on New: Set a name and the path of your openPOWERLINK sources.
+
+  - Import the demo application project into the WindRiver Workbench
+    'File/Import' -> 'General/Existing Projects into Workspace'
+    In 'Select Root Directory' browse to the directory of the demo application
+    to build.
+
+  - Build project
+    Select project with right mouse button and select: 'Build Project'
+
+7.2 Connect and Download
+------------------------
+  - Create a target server connection to your target in the Remote Systems
+    view and connect to it.
+
+  - Download openPOWERLINK by selecting the project with right mouse button
+    and select "Download VxWorks Kernel Task"
+
+7.2 Starting/Stopping POWERLINK
+----------------------
+  - To start openPOWERLINK: open a hostShell on your target and type:
+    -> openPowerlinkInit ("gei", 0)
+    This starts POWERLINK on the ethernet interface gei0 (Intel Gigabit Ethernet)
+
+  - To stop openPOWERLINK, type in a hostShell:
+    -> openPowerlinkExit
+
+
+8 Troubleshooting
+--------------------------------------------------------------------------------
+
