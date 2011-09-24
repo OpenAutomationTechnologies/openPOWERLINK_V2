@@ -1,0 +1,137 @@
+
+----------------------------------------------------------------------------
+--                            Design Analysis                             --
+----------------------------------------------------------------------------
+Analyze pcore xil_systick ...
+
+INFO:EDK:1467 - Generic parameter C_BASEADDR/C_HIGHADDR will not be used since
+   user does not have any register space ...
+
+----------------------------------------------------------------------------
+--                            File Generation                             --
+----------------------------------------------------------------------------
+Creating HDL source directory ...
+Generating top peripheral VHDL template ...
+Generating stub user logic VHDL template ...
+HDL templates successfully generated ...
+Creating data directory ...
+Generating XPS inteface files ...
+Compiling vhdl file
+"C:/Xilinx/11.1/EDK/hw/XilinxProcessorIPLib/pcores/proc_common_v3_00_a/hdl/vhdl/
+proc_common_pkg.vhd" in Library proc_common_v3_00_a.
+Package <proc_common_pkg> compiled.
+Package body <proc_common_pkg> compiled.
+Compiling vhdl file
+"C:/Xilinx/11.1/EDK/hw/XilinxProcessorIPLib/pcores/proc_common_v3_00_a/hdl/vhdl/
+or_muxcy.vhd" in Library proc_common_v3_00_a.
+Entity <or_muxcy> compiled.
+Entity <or_muxcy> (Architecture <implementation>) compiled.
+Compiling vhdl file
+"C:/Xilinx/11.1/EDK/hw/XilinxProcessorIPLib/pcores/proc_common_v3_00_a/hdl/vhdl/
+family_support.vhd" in Library proc_common_v3_00_a.
+Package <family_support> compiled.
+Package body <family_support> compiled.
+Compiling vhdl file
+"C:/Xilinx/11.1/EDK/hw/XilinxProcessorIPLib/pcores/proc_common_v3_00_a/hdl/vhdl/
+counter_f.vhd" in Library proc_common_v3_00_a.
+Entity <counter_f> compiled.
+Entity <counter_f> (Architecture <imp>) compiled.
+Compiling vhdl file
+"C:/Xilinx/11.1/EDK/hw/XilinxProcessorIPLib/pcores/proc_common_v3_00_a/hdl/vhdl/
+pselect_f.vhd" in Library proc_common_v3_00_a.
+Entity <pselect_f> compiled.
+Entity <pselect_f> (Architecture <imp>) compiled.
+Compiling vhdl file
+"C:/Xilinx/11.1/EDK/hw/XilinxProcessorIPLib/pcores/proc_common_v3_00_a/hdl/vhdl/
+or_gate128.vhd" in Library proc_common_v3_00_a.
+Entity <or_gate128> compiled.
+Entity <or_gate128> (Architecture <imp>) compiled.
+Compiling vhdl file
+"C:/Xilinx/11.1/EDK/hw/XilinxProcessorIPLib/pcores/proc_common_v3_00_a/hdl/vhdl/
+ipif_pkg.vhd" in Library proc_common_v3_00_a.
+Package <ipif_pkg> compiled.
+Package body <ipif_pkg> compiled.
+Compiling vhdl file
+"C:/Xilinx/11.1/EDK/hw/XilinxProcessorIPLib/pcores/plbv46_slave_single_v1_01_a/h
+dl/vhdl/plb_address_decoder.vhd" in Library plbv46_slave_single_v1_01_a.
+Entity <plb_address_decoder> compiled.
+Entity <plb_address_decoder> (Architecture <IMP>) compiled.
+Compiling vhdl file
+"C:/Xilinx/11.1/EDK/hw/XilinxProcessorIPLib/pcores/plbv46_slave_single_v1_01_a/h
+dl/vhdl/plb_slave_attachment.vhd" in Library plbv46_slave_single_v1_01_a.
+Entity <plb_slave_attachment> compiled.
+Entity <plb_slave_attachment> (Architecture <implementation>) compiled.
+Compiling vhdl file
+"C:/Xilinx/11.1/EDK/hw/XilinxProcessorIPLib/pcores/plbv46_slave_single_v1_01_a/h
+dl/vhdl/plbv46_slave_single.vhd" in Library plbv46_slave_single_v1_01_a.
+Entity <plbv46_slave_single> compiled.
+Entity <plbv46_slave_single> (Architecture <implementation>) compiled.
+Compiling vhdl file
+"C:/vhdl/xilinx/spartan6/openSlave_EPL02/pcores/xil_systick_v1_00_a/data/../hdl/
+vhdl/user_logic.vhd" in Library xil_systick_v1_00_a.
+Entity <user_logic> compiled.
+Entity <user_logic> (Architecture <IMP>) compiled.
+Compiling vhdl file
+"C:/vhdl/xilinx/spartan6/openSlave_EPL02/pcores/xil_systick_v1_00_a/data/../hdl/
+vhdl/xil_systick.vhd" in Library xil_systick_v1_00_a.
+Entity <xil_systick> compiled.
+Entity <xil_systick> (Architecture <IMP>) compiled.
+
+
+Analyzing HDL attributes ...
+Entity name = xil_systick
+INFO:EDK:1607 - IPTYPE set to value : PERIPHERAL
+INFO:EDK:1511 - IMP_NETLIST set to value : TRUE
+INFO:EDK:1486 - HDL set to value : VHDL
+WARNING:EDK:2577 - Unable to delete temparary XST project file
+   C:\vhdl\xilinx\spartan6\openSlave_EPL02\pcores\xil_systick_v1_00_a\data\_xil_
+   systick_xst.prj : 13
+XPS interface files successfully generated ...
+Creating development directory ...
+Generating command option file ...
+Generating readme file ...
+Development misc files successfully generated ...
+No ProjNavigator support files will be generated at this time ...
+No XST synthesis support files will be generated at this time ...
+No BFM simulation files will be generated at this time ...
+No software driver files will be generated at this time ...
+
+----------------------------------------------------------------------------
+--                              Final Report                              --
+----------------------------------------------------------------------------
+Thank you for using Create and Import Peripheral Wizard! Please find your
+peripheral hardware templates under
+C:\vhdl\xilinx\spartan6\openSlave_EPL02/pcores/xil_systick_v1_00_a.
+
+Peripheral Summary:
+
+  top name       : xil_systick
+  version        : 1.00.a
+  type           : PLB (v4.6) slave
+  features       : slave attachment
+                   user memory spaces
+
+Address Block Summary:
+
+  user memory 0  : C_MEM0_BASEADDR
+                 : C_MEM0_HIGHADDR
+
+File Summary
+
+  - HDL source -
+  C:\vhdl\xilinx\spartan6\openSlave_EPL02/pcores/xil_systick_v1_00_a/hdl
+  top entity     : vhdl/xil_systick.vhd
+  user logic     : vhdl/user_logic.vhd
+
+  - XPS interface -
+  C:\vhdl\xilinx\spartan6\openSlave_EPL02/pcores/xil_systick_v1_00_a/data
+  mpd            : xil_systick_v2_1_0.mpd
+  pao            : xil_systick_v2_1_0.pao
+
+  - Misc file -
+  C:\vhdl\xilinx\spartan6\openSlave_EPL02/pcores/xil_systick_v1_00_a/devl
+  help           : README.txt
+  option         : ipwiz.opt
+  log            : ipwiz.log
+
+

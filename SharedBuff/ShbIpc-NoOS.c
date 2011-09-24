@@ -520,7 +520,7 @@ tShbMemHeader*  pShbMemHeader;
 
 #endif  // !defined(SHBIPC_INLINE_ENABLED)
 
-#if (!defined(SHBIPC_INLINED)) || defined(SHBIPC_INLINE_ENABLED)
+#if (!defined(SHBIPC_INLINED)) || defined(SHBIPC_INLINE_ENABLED) || defined(MICROBLAZE_SHBIPC_SIGNALLING_REQ)
 
 
 //---------------------------------------------------------------------------

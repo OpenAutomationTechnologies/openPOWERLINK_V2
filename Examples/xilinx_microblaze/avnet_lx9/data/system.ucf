@@ -1,0 +1,108 @@
+#  Avnet Spartan-6 LX9 MicroBoard
+Net fpga_0_USB_UART_RX_pin LOC=R7 | IOSTANDARD = LVCMOS33;
+Net fpga_0_USB_UART_TX_pin LOC=T7 | IOSTANDARD = LVCMOS33;
+
+Net fpga_0_LEDs_4Bits_GPIO_IO_O_pin<0> LOC=P4 | IOSTANDARD = LVCMOS18;
+Net fpga_0_LEDs_4Bits_GPIO_IO_O_pin<1> LOC=L6 | IOSTANDARD = LVCMOS18;
+Net fpga_0_LEDs_4Bits_GPIO_IO_O_pin<2> LOC=F5 | IOSTANDARD = LVCMOS18;
+Net fpga_0_LEDs_4Bits_GPIO_IO_O_pin<3> LOC=C2 | IOSTANDARD = LVCMOS18;
+
+Net fpga_0_clk_1_sys_clk_pin TNM_NET = sys_clk_pin;
+TIMESPEC TS_sys_clk_pin = PERIOD sys_clk_pin 66666.7 kHz;
+Net fpga_0_clk_1_sys_clk_pin TNM_NET = sys_clk_pin  |  LOC=K15 | IOSTANDARD = LVCMOS33;
+Net fpga_0_rst_1_sys_rst_pin TIG;
+Net fpga_0_rst_1_sys_rst_pin LOC=V4 | IOSTANDARD = LVCMOS33 | PULLDOWN;
+
+###### microblaze_0
+### Set Vccaux for S6LX9 MicroBoard to 3.3V ###
+CONFIG VCCAUX = "3.3" ;
+
+##copied from optimised system
+CONFIG MCB_PERFORMANCE= STANDARD;
+# Addresses
+NET fpga_0_MCB3_LPDDR_mcbx_dram_addr_pin<0>          LOC = J7  | IOSTANDARD = MOBILE_DDR;             # "LPDDR_A0"
+NET fpga_0_MCB3_LPDDR_mcbx_dram_addr_pin<1>          LOC = J6  | IOSTANDARD = MOBILE_DDR;             # "LPDDR_A1"
+NET fpga_0_MCB3_LPDDR_mcbx_dram_addr_pin<2>          LOC = H5  | IOSTANDARD = MOBILE_DDR;             # "LPDDR_A2"
+NET fpga_0_MCB3_LPDDR_mcbx_dram_addr_pin<3>          LOC = L7  | IOSTANDARD = MOBILE_DDR;             # "LPDDR_A3"
+NET fpga_0_MCB3_LPDDR_mcbx_dram_addr_pin<4>          LOC = F3  | IOSTANDARD = MOBILE_DDR;             # "LPDDR_A4"
+NET fpga_0_MCB3_LPDDR_mcbx_dram_addr_pin<5>          LOC = H4  | IOSTANDARD = MOBILE_DDR;             # "LPDDR_A5"
+NET fpga_0_MCB3_LPDDR_mcbx_dram_addr_pin<6>          LOC = H3  | IOSTANDARD = MOBILE_DDR;             # "LPDDR_A6"
+NET fpga_0_MCB3_LPDDR_mcbx_dram_addr_pin<7>          LOC = H6  | IOSTANDARD = MOBILE_DDR;             # "LPDDR_A7"
+NET fpga_0_MCB3_LPDDR_mcbx_dram_addr_pin<8>          LOC = D2  | IOSTANDARD = MOBILE_DDR;             # "LPDDR_A8"
+NET fpga_0_MCB3_LPDDR_mcbx_dram_addr_pin<9>          LOC = D1  | IOSTANDARD = MOBILE_DDR;             # "LPDDR_A9"
+NET fpga_0_MCB3_LPDDR_mcbx_dram_addr_pin<10>         LOC = F4  | IOSTANDARD = MOBILE_DDR;             # "LPDDR_A10"
+NET fpga_0_MCB3_LPDDR_mcbx_dram_addr_pin<11>         LOC = D3  | IOSTANDARD = MOBILE_DDR;             # "LPDDR_A11"
+NET fpga_0_MCB3_LPDDR_mcbx_dram_addr_pin<12>         LOC = G6  | IOSTANDARD = MOBILE_DDR;             # "LPDDR_A12"
+NET fpga_0_MCB3_LPDDR_mcbx_dram_ba_pin<0>         LOC = F2  | IOSTANDARD = MOBILE_DDR;             # "LPDDR_BA0"
+NET fpga_0_MCB3_LPDDR_mcbx_dram_ba_pin<1>         LOC = F1  | IOSTANDARD = MOBILE_DDR;             # "LPDDR_BA1"
+# Data                                                                  
+NET fpga_0_MCB3_LPDDR_mcbx_dram_dq_pin<0>         LOC = L2  | IOSTANDARD = MOBILE_DDR;             # "LPDDR_DQ0"
+NET fpga_0_MCB3_LPDDR_mcbx_dram_dq_pin<1>         LOC = L1  | IOSTANDARD = MOBILE_DDR;             # "LPDDR_DQ1"
+NET fpga_0_MCB3_LPDDR_mcbx_dram_dq_pin<2>         LOC = K2  | IOSTANDARD = MOBILE_DDR;             # "LPDDR_DQ2"
+NET fpga_0_MCB3_LPDDR_mcbx_dram_dq_pin<3>         LOC = K1  | IOSTANDARD = MOBILE_DDR;             # "LPDDR_DQ3"
+NET fpga_0_MCB3_LPDDR_mcbx_dram_dq_pin<4>         LOC = H2  | IOSTANDARD = MOBILE_DDR;             # "LPDDR_DQ4"
+NET fpga_0_MCB3_LPDDR_mcbx_dram_dq_pin<5>         LOC = H1  | IOSTANDARD = MOBILE_DDR;             # "LPDDR_DQ5"
+NET fpga_0_MCB3_LPDDR_mcbx_dram_dq_pin<6>         LOC = J3  | IOSTANDARD = MOBILE_DDR;             # "LPDDR_DQ6"
+NET fpga_0_MCB3_LPDDR_mcbx_dram_dq_pin<7>         LOC = J1  | IOSTANDARD = MOBILE_DDR;             # "LPDDR_DQ7"
+NET fpga_0_MCB3_LPDDR_mcbx_dram_dq_pin<8>         LOC = M3  | IOSTANDARD = MOBILE_DDR;             # "LPDDR_DQ8"
+NET fpga_0_MCB3_LPDDR_mcbx_dram_dq_pin<9>         LOC = M1  | IOSTANDARD = MOBILE_DDR;             # "LPDDR_DQ9"
+NET fpga_0_MCB3_LPDDR_mcbx_dram_dq_pin<10>        LOC = N2  | IOSTANDARD = MOBILE_DDR;             # "LPDDR_DQ10"
+NET fpga_0_MCB3_LPDDR_mcbx_dram_dq_pin<11>        LOC = N1  | IOSTANDARD = MOBILE_DDR;             # "LPDDR_DQ11"
+NET fpga_0_MCB3_LPDDR_mcbx_dram_dq_pin<12>        LOC = T2  | IOSTANDARD = MOBILE_DDR;             # "LPDDR_DQ12"
+NET fpga_0_MCB3_LPDDR_mcbx_dram_dq_pin<13>        LOC = T1  | IOSTANDARD = MOBILE_DDR;             # "LPDDR_DQ13"
+NET fpga_0_MCB3_LPDDR_mcbx_dram_dq_pin<14>        LOC = U2  | IOSTANDARD = MOBILE_DDR;             # "LPDDR_DQ14"
+NET fpga_0_MCB3_LPDDR_mcbx_dram_dq_pin<15>        LOC = U1  | IOSTANDARD = MOBILE_DDR;             # "LPDDR_DQ15"
+NET fpga_0_MCB3_LPDDR_mcbx_dram_ldm_pin         LOC = K3  | IOSTANDARD = MOBILE_DDR;             # "LPDDR_LDM"
+NET fpga_0_MCB3_LPDDR_mcbx_dram_udm_pin         LOC = K4  | IOSTANDARD = MOBILE_DDR;             # "LPDDR_UDM"
+NET fpga_0_MCB3_LPDDR_mcbx_dram_dqs_pin        LOC = L4  | IOSTANDARD = MOBILE_DDR;             # "LPDDR_LDQS"
+NET fpga_0_MCB3_LPDDR_mcbx_dram_udqs_pin        LOC = P2  | IOSTANDARD = MOBILE_DDR;             # "LPDDR_UDQS"
+# Clock
+NET fpga_0_MCB3_LPDDR_mcbx_dram_clk_n_pin        LOC = G1  | IOSTANDARD = DIFF_MOBILE_DDR;        # "LPDDR_CK_N"
+NET fpga_0_MCB3_LPDDR_mcbx_dram_clk_pin        LOC = G3  | IOSTANDARD = DIFF_MOBILE_DDR;        # "LPDDR_CK_P"
+NET fpga_0_MCB3_LPDDR_mcbx_dram_cke_pin         LOC = H7  | IOSTANDARD = MOBILE_DDR;             # "LPDDR_CKE"
+# Control
+NET fpga_0_MCB3_LPDDR_mcbx_dram_cas_n_pin       LOC = K5  | IOSTANDARD = MOBILE_DDR;             # "LPDDR_CAS#"
+NET fpga_0_MCB3_LPDDR_mcbx_dram_ras_n_pin       LOC = L5  | IOSTANDARD = MOBILE_DDR;             # "LPDDR_RAS#"
+NET fpga_0_MCB3_LPDDR_mcbx_dram_we_n_pin        LOC = E3  | IOSTANDARD = MOBILE_DDR;             # "LPDDR_WE#"
+NET fpga_0_MCB3_LPDDR_rzq_pin         LOC = N4  | IOSTANDARD = MOBILE_DDR;             # "LPDDR_RZQ"
+#### PHY 1 (FMC-ISMNET J2)
+NET phy0_Mii_TxClk_pin LOC = H17 | IOSTANDARD = LVCMOS33; 
+NET phy0_Mii_TxEn_pin LOC = L17 | IOSTANDARD = LVCMOS33;
+NET phy0_Mii_TxDat_pin<3> LOC = J16 | IOSTANDARD = LVCMOS33;
+NET phy0_Mii_TxDat_pin<2> LOC = J18 | IOSTANDARD = LVCMOS33;
+NET phy0_Mii_TxDat_pin<1> LOC = K17 | IOSTANDARD = LVCMOS33;
+NET phy0_Mii_TxDat_pin<0> LOC = K18 | IOSTANDARD = LVCMOS33;
+#NET phy0_Mii_TxEr_pin LOC = "";
+NET phy0_Mii_RxClk_pin LOC = L15 | IOSTANDARD = LVCMOS33;
+NET phy0_Mii_RxDv_pin LOC = P17 | IOSTANDARD = LVCMOS33;
+NET phy0_Mii_RxDat_pin<3> LOC = P18 | IOSTANDARD = LVCMOS33 | PULLUP;
+NET phy0_Mii_RxDat_pin<2> LOC = N15 | IOSTANDARD = LVCMOS33 | PULLUP;
+NET phy0_Mii_RxDat_pin<1> LOC = N16 | IOSTANDARD = LVCMOS33 | PULLUP;
+NET phy0_Mii_RxDat_pin<0> LOC = T17 | IOSTANDARD = LVCMOS33 | PULLUP;
+NET phy0_Mii_RxErr_pin LOC = N18 | IOSTANDARD = LVCMOS33;
+NET phy0_Mii_Crs_pin LOC = N17 | IOSTANDARD = LVCMOS33 | PULLDOWN;
+NET phy0_Mii_Col_pin LOC = M18 | IOSTANDARD = LVCMOS33 | PULLDOWN;
+#NET phy0_Mii_RxClk_pin PERIOD = 40ns HIGH 20ns;
+#NET phy0_Mii_TxClk_pin PERIOD = 40ns HIGH 20ns;
+#OFFSET = IN 10ns VALID 20ns BEFORE phy0_Mii_RxClk_pin;
+###PHY1 MII
+#NET phy0_pwdn_pin LOC = "A12" | TIG;
+NET phys_miid_pin<0> LOC = L18 | IOSTANDARD = LVCMOS33;
+NET phy0_miic_pin LOC = M16 | IOSTANDARD = LVCMOS33;
+NET phy0_resetn_pin LOC = T18 | IOSTANDARD = LVCMOS33 | TIG;
+## Timing constraints revised by Joerg Zelenka 2011-07-12
+### MII receive timing
+#### T = 40 ns
+#### tco = 10...30 ns
+#### => in before = T - tco = 30...10 ns (take worst case of 10 ns)
+#### note: data is valid (worst case) 10 ns before and 10 ns after clock edge
+NET "phy0_Mii_RxClk_pin" TNM_NET = "phy0_Mii_RxClk_pin";
+TIMESPEC "TS_RXCLK" = PERIOD "phy0_Mii_RxClk_pin" 40 ns HIGH 20 ns;
+OFFSET = IN 10 ns VALID 10 ns BEFORE "phy0_Mii_RxClk_pin";
+### MII transmit timing
+#### T = 40 ns
+#### tsu/th = 10/0 ns
+#### => out after = T - tsu = 40 - 10 = 30 ns
+NET "phy0_Mii_TxClk_pin" TNM_NET = "phy0_Mii_TxClk_pin";
+TIMESPEC "TS_TXCLK" = PERIOD "phy0_Mii_TxClk_pin" 40 ns HIGH 20 ns;
+OFFSET = OUT 30 ns AFTER "phy0_Mii_TxClk_pin";

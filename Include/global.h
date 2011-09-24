@@ -38,6 +38,7 @@
 #define _DEV_BIT32_             0x00000300L     //                  32 bit
 #define _DEV_BIT16_             0x00000200L     //                  16 bit
 #define _DEV_BIT8_              0x00000100L     //                  8 bit
+#define _DEV_GNUC_MICROBLAZE    0x00000020L     //                  Xilinx Microblaze GCC //not present in altera but needed
 #define _DEV_GNUC_NIOS2_        0x0000001FL     //                  Altera Nios II GCC
 #define _DEV_TI_CCS_            0x0000001EL     //                  TI's Code Composer
 #define _DEV_GNUC_AVR_          0x0000001DL     //                  WinAVR and AVRStudio4
@@ -122,6 +123,8 @@
 
 #define _DEV_NIOS2_             (_DEV_BIT32_ | _DEV_GNUC_NIOS2_               | _DEV_64BIT_SUPPORT_ | _DEV_COMMA_EXT_ | _DEV_ONLY_INT_MAIN_ | _DEV_ALIGNMENT_4_ )
 #define _DEV_VXWORKS_           (_DEV_BIT32_ | _DEV_LINUX_GCC_                | _DEV_64BIT_SUPPORT_ | _DEV_COMMA_EXT_)
+#define _DEV_MICROBLAZE_        (_DEV_BIT32_ | _DEV_GNUC_MICROBLAZE   | _DEV_BIGEND_ | _DEV_64BIT_SUPPORT_ | _DEV_COMMA_EXT_ | _DEV_ONLY_INT_MAIN_ | _DEV_ALIGNMENT_4_ )
+
 
 //---------------------------------------------------------------------------
 //  usefull macros
@@ -959,6 +962,11 @@
     #elif defined (__NIOS2__)
         #define TARGET_SYSTEM       _NO_OS_
         #define DEV_SYSTEM          _DEV_NIOS2_
+
+    #elif defined (__MICROBLAZE__)
+        #define TARGET_SYSTEM       _NO_OS_
+        #define DEV_SYSTEM          _DEV_MICROBLAZE_
+
     #else
         #error 'ERROR: DEV_SYSTEM not found!'
     #endif
