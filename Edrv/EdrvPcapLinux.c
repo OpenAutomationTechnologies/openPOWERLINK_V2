@@ -569,6 +569,8 @@ static void EdrvPacketHandler(u_char *pUser_p,
 //---------------------------------------------------------------------------
 static void * EdrvWorkerThread(void *pArgument_p)
 {
+    int PcapRet;
+
     tEdrvInstance*  pInstance = (tEdrvInstance *)pArgument_p;
     char sErr_Msg[ PCAP_ERRBUF_SIZE ];
 
@@ -596,10 +598,27 @@ static void * EdrvWorkerThread(void *pArgument_p)
    /* signal that thread is successfully started */
    sem_post(&pInstance->m_syncSem);
 
-   if (pcap_loop (pInstance->m_pPcapThread, -1, EdrvPacketHandler, (u_char*)pInstance) < 0)
+   PcapRet  = pcap_loop (pInstance->m_pPcapThread, -1, EdrvPacketHandler, (u_char*)pInstance);
+
+   switch( PcapRet )
    {
-       EPL_DBGLVL_ERROR_TRACE1("%s() pcap_loop error or terminated!\n", __func__);
+       case 0:
+           EPL_DBGLVL_ERROR_TRACE1("%s(): pcap_loop ended because 'cnt' is exhausted.\n", __func__);
+           break;
+
+       case -1:
+           EPL_DBGLVL_ERROR_TRACE1("%s(): pcap_loop ended because of an error!\n", __func__);
+           break;
+
+       case -2:
+           EPL_DBGLVL_ERROR_TRACE1("%s(): pcap_loop ended normally.\n", __func__);
+           break;
+
+       default:
+           EPL_DBGLVL_ERROR_TRACE1("%s(): pcap_loop ended (unknown return value).\n", __func__);
+           break;
    }
+
    return NULL;
 }
 
