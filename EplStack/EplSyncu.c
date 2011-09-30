@@ -68,10 +68,10 @@
 
 ****************************************************************************/
 
-#if EPL_DLL_PRES_CHAINING_MN != FALSE
-
 #include "user/EplSyncu.h"
 #include "user/EplDlluCal.h"
+
+#if EPL_DLL_PRES_CHAINING_MN != FALSE
 
 /***************************************************************************/
 /*                                                                         */

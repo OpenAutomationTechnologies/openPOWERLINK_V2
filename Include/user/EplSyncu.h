@@ -72,10 +72,9 @@
 #ifndef _EPLSYNCU_H_
 #define _EPLSYNCU_H_
 
-#if EPL_DLL_PRES_CHAINING_MN != FALSE
-
 #include "EplDll.h"
 
+#if EPL_DLL_PRES_CHAINING_MN != FALSE
 
 //---------------------------------------------------------------------------
 // const defines
