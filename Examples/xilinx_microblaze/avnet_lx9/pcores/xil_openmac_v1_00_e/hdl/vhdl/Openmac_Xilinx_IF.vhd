@@ -38,7 +38,7 @@
 -- 2009-05-20  V0.01        First version
 -- 2009-06-04  V0.10        Implemented FIFO for Data-Queing form/to DMA
 -- 2009-06-15  V0.11        Increased performance of FIFO
--- 2009-06-20  V0.20        New FIFO concept. (FIFO IP of Altera used)
+-- 2009-06-20  V0.20        New FIFO concept.
 -- 2009-06-26  V0.21        Little Bugfix of DMA -> Reset was handled wrong
 -- 2009-08-07  V0.30        Converted to official version
 -- 2009-08-21  V0.40		TX DMA run if fifo is not empty. Interface for Timer Cmp + IRQ
