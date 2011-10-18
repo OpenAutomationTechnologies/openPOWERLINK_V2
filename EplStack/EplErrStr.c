@@ -42,8 +42,8 @@ static CONST tEplErrStrDefinition ROM aEplErrStrDefinition_g[] =
 {
     /* area for generic errors 0x0000 - 0x000F */
     {kEplSuccessful,           "no error/successful run"},
-    {kEplIllegalInstance,      "the called Instanz does not exist"},
-    {kEplInvalidInstanceParam, ""},
+    {kEplIllegalInstance,      "the called instance does not exist"},
+    {kEplInvalidInstanceParam, "invalid instance parameter"},
     {kEplNoFreeInstance,       "XxxAddInstance was called but no free instance is available"},
     {kEplWrongSignature,       "wrong signature while writing to object 0x1010 or 0x1011"},
     {kEplInvalidOperation,     "operation not allowed in this situation"},

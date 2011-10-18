@@ -381,6 +381,10 @@ EPLDLLEXPORT char *EplGetEventTypeStr(tEplEventType eventType_p);
 EPLDLLEXPORT char *EplGetEventSourceStr(tEplEventSource eventSrc_p);
 EPLDLLEXPORT char *EplGetEventSinkStr(tEplEventSink eventSink_p);
 EPLDLLEXPORT char *EplGetNmtStateStr(tEplNmtState nmtState_p);
+EPLDLLEXPORT char *EplGetApiEventStr( tEplApiEventType ApiEvent_p);
+EPLDLLEXPORT char *EplGetNmtNodeEventTypeStr( tEplNmtNodeEvent NodeEventType_p );
+EPLDLLEXPORT char *EplGetNmtBootEventTypeStr( tEplNmtBootEvent BootEventType_p );
+EPLDLLEXPORT char *EplGetSdoComConStateStr( tEplSdoComConState SdoComConState_p );
 
 #ifdef __cplusplus
 	}
