@@ -261,7 +261,7 @@ static tApiEventInfo ApiEventInfo_g[] =
     { kEplApiEventLed,              "LED event"                         },
     { kEplApiEventCfmProgress,      "CFM progress"                      },
     { kEplApiEventCfmResult,        "CFM result"                        },
-    { kEplApiEventReceivedPres,     "Received PRes frame"               },
+//    { kEplApiEventReceivedPres,     "Received PRes frame"               },
 };
 
 // text strings for NMT node events
