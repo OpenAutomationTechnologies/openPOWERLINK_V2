@@ -108,7 +108,7 @@
             EPL_OBD_SUBINDEX_RAM_VAR(0x1F89, 0x01, kEplObdTypUInt32, kEplObdAccSRW, tEplObdUnsigned32, MNWaitNotAct_U32, 1000000)        // in [us]
             EPL_OBD_SUBINDEX_RAM_VAR(0x1F89, 0x02, kEplObdTypUInt32, kEplObdAccSRW, tEplObdUnsigned32, MNTimeoutPreOp1_U32, 500000)      // in [us]
             EPL_OBD_SUBINDEX_RAM_VAR(0x1F89, 0x03, kEplObdTypUInt32, kEplObdAccSRW, tEplObdUnsigned32, MNWaitPreOp1_U32, 500000)         // in [us]
-            EPL_OBD_SUBINDEX_RAM_VAR(0x1F89, 0x04, kEplObdTypUInt32, kEplObdAccSRW, tEplObdUnsigned32, MNTimeoutPreOp2_U32, 500000)      // in [us]
+            EPL_OBD_SUBINDEX_RAM_VAR(0x1F89, 0x04, kEplObdTypUInt32, kEplObdAccSRW, tEplObdUnsigned32, MNTimeoutPreOp2_U32, 5000000)      // in [us]
             EPL_OBD_SUBINDEX_RAM_VAR(0x1F89, 0x05, kEplObdTypUInt32, kEplObdAccSRW, tEplObdUnsigned32, MNTimeoutReadyToOp_U32, 500000)   // in [us]
         EPL_OBD_END_INDEX(0x1F89)
 

@@ -3131,7 +3131,7 @@
             <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" PDOmapping="no" defaultValue="5"/>
             <SubObject subIndex="01" name="MNWaitNotAct_U32" objectType="7" dataType="0007" accessType="rw" PDOmapping="no" lowLimit="250" defaultValue="1000000"/>
             <SubObject subIndex="02" name="MNTimeoutPreOp1_U32" objectType="7" dataType="0007" accessType="rw" PDOmapping="no" defaultValue="500000"/>
-            <SubObject subIndex="03" name="MNWaitPreOp1_U32" objectType="7" dataType="0007" accessType="rw" PDOmapping="no" defaultValue="1000000"/>
+            <SubObject subIndex="03" name="MNWaitPreOp1_U32" objectType="7" dataType="0007" accessType="rw" PDOmapping="no" defaultValue="500000"/>
             <SubObject subIndex="04" name="MNTimeoutPreOp2_U32" objectType="7" dataType="0007" accessType="rw" PDOmapping="no" defaultValue="5000000"/>
             <SubObject subIndex="05" name="MNTimeoutReadyToOp_U32" objectType="7" dataType="0007" accessType="rw" PDOmapping="no" defaultValue="500000"/>
           </Object>
