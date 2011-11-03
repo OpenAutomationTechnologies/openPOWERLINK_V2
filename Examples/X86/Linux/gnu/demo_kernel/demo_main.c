@@ -638,7 +638,7 @@ tEplKernel          EplRet = kEplSuccessful;
 
                 case kEplNmtGsResetCommunication:
                 {
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_CFM)) != 0)
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_CFM)) == 0)
                 DWORD   dwNodeAssignment;
 
                     // configure OD for MN in state ResetComm after reseting the OD
