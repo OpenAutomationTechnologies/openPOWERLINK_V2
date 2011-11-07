@@ -68,7 +68,6 @@
 #include "EplOutput.h"
 #include "MainWindow.h"
 
-#include <pcap.h>
 #include <stdio.h>
 #include <string.h>
 
