@@ -40,11 +40,11 @@
       (i.e. Controlled Nodes) with the following PDO mapping:
 
     RPDO (PollRequest from MN): length = 1 or 2 Bytes
-	                            containing the values for the digital outputs
-	                            PDO version = 0
-	TPDO (PollResponse): length = min. 1 Byte
-	                     containing the values from the digital inputs
-	                     PDO version = 0
+                                containing the values for the digital outputs
+                                PDO version = 0
+    TPDO (PollResponse):        length = min. 1 Byte
+                                containing the values from the digital inputs
+                                PDO version = 0
 
     * Node-IDs of the Controlled Nodes (CN): 1, 32 or 110
 
