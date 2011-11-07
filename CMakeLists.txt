@@ -83,7 +83,7 @@ OPTION (CFG_POWERLINK_PROCESS_IMAGE "Use process image to transfer synchronous d
 CMAKE_DEPENDENT_OPTION (CFG_X86_DEMO_PROCESS_IMAGE_CONSOLE "Build process image based console demo application" ON
                         "CFG_POWERLINK_PROCESS_IMAGE" OFF)
 
-IF (QT4_FOUND)	
+IF (QT4_FOUND)
     CMAKE_DEPENDENT_OPTION (CFG_X86_DEMO_PROCESS_IMAGE_QT "Build process image based QT demo application" OFF
                             "CFG_POWERLINK_PROCESS_IMAGE" OFF)
 ENDIF (QT4_FOUND)
@@ -91,7 +91,7 @@ ENDIF (QT4_FOUND)
 # additional Linux settings
 IF (UNIX)
     SET(CFG_KERNEL_DIR "" CACHE PATH "Select the kernel directory to be used, if not specified, system kernel dir will be used!")
-    SET(CFG_POWERLINK_EDRV "82573" CACHE STRING "Valid drivers are 8139,82573")
+    SET(CFG_POWERLINK_EDRV "82573" CACHE STRING "Valid drivers are 8139, 82573, Fec")
     OPTION (CFG_KERNEL_STACK "Use POWERLINK kernel based stack (if OFF, userspace library will be used!)" OFF)
     OPTION (CFG_X86_LINUX_DEMO_KERNEL "Build Linux kernel based demo application" OFF)
     CMAKE_DEPENDENT_OPTION (CFG_X86_LINUX_DEMO_QT "Build Linux QT demo application" OFF
