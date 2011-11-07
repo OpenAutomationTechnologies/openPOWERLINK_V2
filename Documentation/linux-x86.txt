@@ -65,6 +65,7 @@ openPOWERLINK on Linux x86
    For the userspace stack, a script setting the priorities is provided in
    Examples/X86/Linux/gnu/tools/set_prio. It increases the thread priorities of
    the high resolution timer and of the Ethernet IRQ threads.
+
 2.4 Libraries and Tools
 
 2.4.1 CMake
@@ -230,10 +231,10 @@ openPOWERLINK on Linux x86
                         linking them to the object dictionary a whole process
                         image could be mapped. Process images are required if
                         configurations created by openCONFIGURATOR should be
-						used. openCONFIGURATOR provides the header file xap.h 
-						which defines the structure of the process image. It
-						contains all synchronous data fields supported by the
-						configured CNs.
+                        used. openCONFIGURATOR provides the header file xap.h 
+                        which defines the structure of the process image. It
+                        contains all synchronous data fields supported by the
+                        configured CNs.
 
                         Process images must be enabled for using the process
                         image demo applications. The kernel based demos and
