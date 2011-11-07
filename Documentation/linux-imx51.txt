@@ -1,0 +1,407 @@
+openPOWERLINK under Linux on Freescale i.MX51 ARM
+=================================================
+
+1 Introduction
+--------------
+  This file contains documentation for the openPOWERLINK stack under Linux
+  on i.MX51. The openPOWERLINK stack under Linux on i.MX51 is available in
+  two different versions:
+  - as Linux userspace library
+  - as Linux kernel module
+
+
+2 Requirements
+--------------
+2.1 POWERLINK network
+  - POWERLINK network with controlled nodes (CN)
+        * openPOWERLINK controlled nodes, e.g. Altera-based FPGA evaluation boards
+        * B&R POWERLINK controlled nodes
+        * other POWERLINK controlled nodes
+
+2.2 Network Controller
+  One of the following network controllers is required to run openPOWERLINK under
+  Linux on i.MX51.
+
+  - Freescale Microcontroller with Fast Ethernet Controller (FEC)
+    For example:
+    - Freescale i.MX51 Evaluation Kit (EVK) (tested)
+
+2.3 Linux Kernel
+  - Linux kernel version 2.6.35.3-433-g0fae922
+    with CONFIG_FEC disabled
+    * The fec driver in this linux version is broken. Using 'unbind' crashes
+      the kernel. Use ltib for building a user-defined kernel without this driver.
+      (see 2.4).
+
+2.4 Libraries and Tools
+
+2.4.1 CMake
+  For building the openPOWERLINK stack and demo applications the Open Source
+  cross-platform build tool CMake is used (http://www.cmake.org). CMake
+  version V2.6 or higher is required.
+
+2.4.2 LTIB
+  The LTIB (Linux Target Image Builder) can be used to build BSPs (Board Support
+  Packages) for a number of target platforms, including ARM, PowerPC and Coldfire.
+
+  For the i.MX51 Evaluation Kit it is used to build a customized Linux kernel.
+
+2.4.3 openCONFIGURATOR
+  For configuration of your POWERLINK network the Open Source configuration
+  tool openCONFIGURATOR should be used. The tool is available as SourceForge
+  project. (http://sourceforge.net/projects/openconf/)
+
+  The openCONFIGURATOR projects used by the demo examples are found in the
+  directory: CfmProjects.
+
+  openCONFIGURATOR creates two file which are used by the openPOWERLINK stack
+  and application:
+  * xap.h       The header file contains the structure definition for your
+                process image. It depends on the available data field of the
+                CNs used in your configuration.
+
+  * mnobd.cdc   This file is used to configure the MN stack. It includes all
+                configuration data of the CNs and the network mapping
+				information. CN configuration is handled by the configuration
+				manager (CFM) module of the MN.
+
+
+3 openPOWERLINK Stack
+---------------------
+  The openPOWERLINK stack for Linux i.MX51 is available in two different
+  versions:
+  - kernel module
+  - userspace library
+
+3.1 Linux kernel-based stack
+
+  The openPOWERLINK stack may be implemented as Linux kernel module. This
+  solution provides the best performance, but is limited to the available
+  openPOWERLINK network drivers.
+
+  The kernel based stack is located in:
+  Examples/X86/Linux/gnu/powerlink_kernel_module
+
+3.2 Linux userspace stack
+
+  The Linux userspace implementation of the openPOWERLINK stack provides all
+  functions for a software based POWERLINK solution running as Linux userspace
+  application. The stack uses the libpcap library for accessing the network
+  interface and is therefore totally independant of the used network card and
+  driver.
+
+  The userspace stack is located in: 
+  Examples/X86/Linux/gnu/powerlink_user_lib
+
+
+4 Tools
+-------
+  There are some shellscripts used for loading POWERLINK modules, setting
+  thread priorities etc.
+
+  These tools are located in:
+  Examples/X86/Linux/gnu/tools
+
+
+5 Demo applications
+-------------------
+  There are several demo applications available. The POWERLINK demo applications
+  are able to visualize the digital inputs of POWERLINK controlled nodes and are
+  driving a running light on the CNs digital outputs.
+
+5.1 Kernel demo
+  The kernel demo is a simple demo application running together with the stack
+  in kernel mode.
+
+  It is located in:
+  Examples/X86/Linux/gnu/demo_kernel
+
+5.2 QT demo
+  The QT demo is a simple QT demo application which can be used together
+  with the openPOWERLINK kernel module.
+
+  It can be found in:
+  Examples/X86/Linux/gnu/demo_qt
+
+5.3 QT demo with process image
+  This QT demo implements a POWERLINK managing node (MN) using the configuration
+  manager (CFM) to initialize the controlled nodes. It uses a network configuration
+  created with the openCONFIGURATOR tool. This demo can be used either with
+  the kernel based stack or with the userspace stack.
+
+  It is found in:
+  Examples/X86/Generic/demo_process_image_qt
+
+5.4 Console demo with process image
+  This demo also implements a POWERLINK MN with CFM. It is implemented as
+  console application and is intended to machines where no graphical user
+  interface is available. This demo can be used either with the kernel-based
+  stack or with the userspace stack.
+
+  It is located in:
+  Examples/X86/Generic/demo_process_image_console
+
+
+6 Building
+----------
+
+6.1 CMake
+  For building openPOWERLINK on Linux the build utility CMake
+  (http://www.cmake.org/) is used. CMake controls the software
+  compilation process using simple platform and compiler independent
+  configuration files. Depending on the architecture different build
+  files can be created. On Linux CMake may create:
+  * Unix Makefiles (tested)
+  * Eclipse CDT4 - Unix Makefiles
+  * Kdevelop3 - Unix Makefiles
+  * CodeBlocks - Unix Makefiles
+
+6.1.1 Configuration with CMake
+  The configuration of different build options of the openPOWERLINK stack will
+  be done through the cmake interface.
+
+  There are three possible ways for configuring your build options
+  * cmake-gui
+    This is the most comfortable way for configuring the build options. cmake-gui
+    is a graphical user interface for CMake.
+  * ccmake
+    ccmake is a curses based user interface for cmake.
+  * cmake -i
+    If cmake is called with option -i you can interactively select your build
+    options.
+
+  The following build configuration options are available:
+
+  CFG_DEBUG_LVL         Debug level to be used for openPOWERLINK debugging
+                        functions.
+
+  CFG_KERNEL_DIR        The directory where the kernel sources used for building
+                        the kernel modules are located. If it is not set the
+						sources of the running kernel will be used:
+                        /lib/modules/$(shell uname -r)/build
+
+  CFG_KERNEL_STACK      Determines whether kernel stack or usermode stack are
+                        compiled. If enabled, kernel stack will be compiled.
+
+  CFG_POWERLINK_CFM     If enabled, the POWERLINK stack will be compiled with
+                        configuration manager (CFM). The configuration manager
+                        is used to configure the CNs on the network.
+                        (For additional information on the CFM see chapter 6.7
+                        of EPSG Draft Standard 301, Ethernet POWERLINK,
+                        Communication Profile Specification)
+
+                        CFM must be enabled in order to use the process image
+                        based demos.
+
+  CFG_POWERLINK_EDRV    Selects the Ethernet driver used for the kernel based
+                        stack and demos. Valid options are:
+                        8139:   Realtek 8139 based network interface cards
+                        82573:  Intel 82573 based network interface cards
+
+  CFG_POWERLINK_PROCESS_IMAGE
+                        If enabled, the process image functions are compiled
+                        into the stack. Instead of using single variables and
+                        linking them to the object dictionary a whole process
+                        image could be mapped. Process images are required if
+                        configurations created by openCONFIGURATOR should be
+                        used. openCONFIGURATOR provides the header file xap.h 
+                        which defines the structure of the process image. It
+                        contains all synchronous data fields supported by the
+                        configured CNs.
+
+                        Process images must be enabled for using the process
+                        image demo applications. The kernel based demos and
+                        the standard QT demo do not use process images! 
+
+  CFG_X86_LINUX_DEMO_KERNEL
+                        If enabled the kernel demo will be compiled.
+                        It cannot be used if CFG_POWERLINK_PROCESS_IMAGE is
+                        enabled!
+
+  CFG_X86_LINUX_DEMO_PROCESS_IMAGE_CONSOLE
+                        If enabled the process image based console application
+                        will be compiled. It can be used either with the kernel
+                        stack or with the userspace stack.
+
+                        Requires: CFG_POWERLINK_CFM, CFG_POWERLINK_PROCESS_IMAGE
+
+  CFG_X86_LINUX_DEMO_PROCESS_IMAGE_QT
+                        If enabled the process image based QT application
+                        will be compiled. It can be used either with the kernel
+                        stack or with the userspace stack.
+
+                        Requires: CFG_POWERLINK_CFM, CFG_POWERLINK_PROCESS_IMAGE
+
+  CFG_X86_LINUX_DEMO_QT
+                        If enabled the standard QT application will be compiled.
+                        It can only be used with the kernel stack.
+                        This option is not allowed if CFG_POWERLINK_PROCESS_IMAGE
+						is enabled!
+
+  CMAKE_INSTALL_PREFIX  Specifies the installation directory where your files
+                        will be installed. Default directory is:
+                        ${CMAKE_BUILD_DIR}/bin
+
+  CMAKE_BUILD_TYPE      Specifies your build type.
+                        Valid build types are: Debug,Release
+                        If the build type debug is specified, the code is compiled
+                        with debugging options.
+
+6.1.2 Out-of-Source Builds
+  CMake supports out-of-source builds. Therefore, all generated files are located
+  in a seperate build directory which keeps your sources clean. It is recommended
+  to use a separate build directory for building the openPOWERLINK stack and the 
+  demo applications.
+
+
+6.2 Build Instructions
+
+6.2.1 Building the QT Demo for i.MX51 Evaluation Kit (EVK)
+
+  Follow the steps below to build the user-space QT demo application (A),
+  the customized Linux kernel (B) and the openPOWERLINK kernel module (C).
+
+  The steps under A have to be done on the target system.
+  The steps under B and C have to be done on a separate Linux host.
+
+  A  openPOWERLINK QT demo application
+
+  A1 Setting up the target board
+     Setup the i.MX51 EVK board in accordance to the instructions in chapter 3
+     of the "i.MX51 EVK Linux - Quick Start Guide"
+     The steps below assume that the deployed Ubuntu SD Card is used.
+
+  A2 Installation of required packages for git, CMake and QT4
+     > sudo apt-get install git-core git-gui gitk
+     > sudo apt-get install cmake cmake-gui
+     > sudo apt-get install libqt4-dev qt4-qmake
+
+  A3 Extracting the openPOWERLINK source code package
+     It is assumed that the source directory is named openPOWERLINK
+
+  A4 Creating the openPOWERLINK build directory
+     To separate the build files from the source code, a separate directory shall
+	 be created, e.g. a directory called 'build' in the openPOWERLINK root:
+     > cd openPOWERLINK
+     > mkdir build
+
+  A5 Entering the build directory and executing cmake
+     CMake has to be executed in the build directory with the path to the
+     source directory as parameter.
+     > cd build
+     > cmake-gui .. (cmake -i .., ccmake ..)
+
+     If using the cmake-gui, after pressing Configure the toolchain has to be
+         specified. Select "Unix Makefiles" with "Use default native compilers"
+
+     If using the cmake-gui, the build options are selected in the GUI. After
+	 setting the desired options press "Configure". New options might appear
+	 according to the current selection. New options will be marked in red.
+	 Further configuration settings may be changed and accepted by pressing
+	 "Configure" again. If there are no red-marked options, "Generate" writes
+	 the build files (Unix Makefiles).
+
+         Set CFG_KERNEL_DIR to "/usr/src/linux-headers-2.6.31-611-imx51"
+         Select CFG_KERNEL_STACK
+         Set CFG_POWERLINK_EDRV to "8139"
+         Select CFG_POWERLINK_PROCESS_IMAGE
+         Select CFG_X86_DEMO_PROCESS_IMAGE_QT
+         Select CFG_X86_DEMO_PROCESS_IMAGE_CONSOLE
+
+     For building the QT demo application it is required to build a kernel module, too.
+         As the preinstalled kernel headers do not match the used Linux kernel, this module
+         is not usable. The CMake selections are choosen in a way that the build
+         is successful.
+
+  A6 Building
+     No we can build the QT demo by calling
+     > make
+
+  A7 Installation
+     To install the compiled files to the configured installation directory, type:
+     > make install
+
+     Copy the QT demo (demo_pi_qt) and the CDC file (mnobd.cdc) to the home folder.
+
+  B  Customized Linux Kernel
+
+  B1 Setting up LTIB
+     Freescale supplies the LTIB build system which contains the kernel source
+     code for the i.MX51 target board on their web page (www.freescale.com/imx51evk).
+     For the build system download the file L2.6.35_10.11.01_ER_source_bundle.tar.gz
+       which is referred to as L2.6.35_10.11_ER_SOURCE.
+     For the documentation download the file L2.6.35_10.11.01_ER_docs.tar.gz
+       which is referred to as IMX51_ER1011_LINUXDOCS_BUNDLE.
+
+     Please set up LTIB according to "i.MX51_EVK_Linux_BSP_UserGuide.pdf" under
+     section 2.2.
+
+  B2 Building of the Linux kernel
+     > ./ltib -m config
+     Select 'Configure the kernel' and exit from ltib saving changes.
+     > ./ltib --leavesrc
+     Disable the FEC ethernet driver (CONFIG_FEC) from kernel configuration
+     (Device Drivers -> Network device support -> Ethernet (10 or 100Mbit) ->
+      FEC ethernet controller (of ColdFire and some i.MX CPUs)).
+     Leave the kernel configuration with saving changes.
+     Afterwards, the customized Linux kernel will be built.
+
+       The parameter --leavesrc instructs LTIB to keep the kernel sources
+       which are required to build the openPOWERLINK kernel module.
+
+  B3 Installation
+     The image of the Linux kernel (contained in file <ltib path>/rootfs/boot/uImage)
+     has to be copied to a reserved memory range of the SD card.
+     This is described in section 8.1 of "i.MX51_EVK_Linux_BSP_UserGuide.pdf".
+
+  C  openPOWERLINK kernel module
+
+  C1 Creating the openPOWERLINK build directory
+     To separate the build files from the source code, a separate directory shall
+	 be created, e.g. a directory called 'build' in the openPOWERLINK root:
+     > cd openPOWERLINK
+     > mkdir build
+
+  C2 Entering the build directory and executing cmake
+     CMake has to be executed in the build directory with the path to the
+     source directory as parameter.
+     > cd build
+     > cmake-gui .. (cmake -i .., ccmake ..)
+
+     If using the cmake-gui, after pressing Configure the toolchain has to be
+         selected. Use 'Specify toolchain file for cross-compiling' and point
+         to Examples/imx51/Linux/gnu/toolchain-arm-fsl-linux-gnueabi.cmake
+
+     Set CFG_KERNEL_DIR to <ltib path>/rpm/BUILD/linux
+     Select CFG_KERNEL_STACK
+     Set CFG_POWERLINK_EDRV to Fec
+     Select CFG_POWERLINK_CFM
+     Select CFG_POWERLINK_PROCESS_IMAGE
+     Deselect CFG_X86_DEMO_PROCESS_IMAGE_CONSOLE
+     Deselect CFG_X86_DEMO_PROCESS_IMAGE_QT
+
+  C3 Building the openPOWERLINK kernel module
+     No we can build all necessary software modules by calling
+     > make
+
+  C4 Installation
+     To install the compiled files to the configured installation directory, type:
+     > make install
+
+     Copy the kernel module (powerlinkfec.ko) to the home folder of the Ubuntu
+     root file system on the SD card.
+
+
+7. Running POWERLINK
+--------------------
+
+7.1  Starting the QT Demo on the i.MX51 Evaluation Kit (EVK)
+
+  1. Starting the openPOWERLINK kernel module
+     > cd
+     > sudo insmod powerlinkfec.ko cdc=/home/lucid/mnobd.cdc
+
+  2. Starting the QT Demo
+     > sudo ./demo_pi_qt
+     Press "Start POWERLINK"
+
