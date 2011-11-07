@@ -102,14 +102,8 @@
 
 #elif (TARGET_SYSTEM == _LINUX_)
 
-    #ifdef __arm__
-        #include <sys/io.h>
-    #else
-        #ifdef __KERNEL__
-        #include <asm/io.h>
-    #endif
-    #endif
     #ifdef __KERNEL__
+        #include <asm/io.h>
         #include "PosixFileLinuxKernel.h"
     #else
         #include <unistd.h>
