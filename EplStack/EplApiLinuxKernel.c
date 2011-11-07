@@ -315,7 +315,9 @@ int  nMinorNumber;
     init_waitqueue_head(&WaitQueueCbEvent_g);
     init_waitqueue_head(&WaitQueueProcess_g);
     init_waitqueue_head(&WaitQueueRelease_g);
+#if (EPL_OBD_USE_LOAD_CONCISEDCF != FALSE)
     szCdcFilename_g[0] = '\0';
+#endif
 
     // register misc device
     iErr = misc_register(&EplLinMiscDevice_g);
