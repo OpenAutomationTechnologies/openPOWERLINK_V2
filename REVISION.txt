@@ -743,3 +743,64 @@ Fellow worker:    Daniel Krüger (d.k.)
                     - Change: Converted all Linux X86 projects to use CMake.
                     (d.k.)
 
+2011-03-18 V1.8     - Enable PResChaining in Altera FPGA demo project
+                    (Daniel Krueger)
+
+2011-04-14 V1.8     - Fix ready flag of TPDO on MN and CN
+                    (Daniel Krueger)
+
+2011-05-04 V1.8     - VirtualEthernet: add capability of setting the MTU
+                    (Daniel Krueger)
+
+2011-05-13 V1.8     - Forward new event kEplNmtBootEventEnableReadyToOp on CN to application
+                    (Michael Hogger)
+
+2011-06-01 V1.8     - MN: Update object 0x1F8E also in case of no IdentResponse
+                    (Daniel Krueger)
+
+2011-06-07 V1.8     - MN: fix uninitialized variable bNmtState in function EplNmtMnuCheckNmtState
+                    - Rename cvsignore to gitignore
+                    (Daniel Krueger)
+
+2011-06-09 V1.8     - Add support for VxWorks on X86
+                    (Josef Baumgartner)
+
+2011-06-17 V1.8     - SDO Command Layer: Fix SDO segmented transfer data size calculation
+                    (Daniel Krueger)
+
+2011-06-21 V1.8     - Modifications to compile the stack as Windows DLL
+                    - Adjust header files to correctly resolve dependencies with VC10
+                    - Use CMake for Windows / Visual Studio target (library and console demo)
+                    - Update of WdpPack/WinPcap to 4.1.2
+                    - Joined Windows and Linux version of QT demo, powerlink_user_lib and demo_process_image_console
+                    (Wolfgang Seiss)
+
+2011-07-26 V1.8     - Fix several typos in source files
+                    - MN: Reset flags if node is in CsStopped.
+                    (Wolfgang Wallner)
+
+2011-08-13 V1.8     - Add EplErrStr module provided by E. Dumas
+                    (Daniel Krueger)
+
+2011-09-13 V1.8     - SDO Sequence Layer: Fix handling of unsupported SDO sequence layer protocols.
+                    (Wolfgang Wallner)
+
+2011-09-19 V1.8     - Obd: Remove unused float macros from stack sources.
+                    - Obd: Set default value for object 0x1F8C to 0x1C (NotActive).
+                    - NmtMnu: Update object 0x1F8E/240 when MN changes state.
+                    (Wolfgang Wallner)
+
+2011-09-20 V1.8     - Add Xilinx/Microblaze platform to the stack (projects for Avnet LX150T (IEK) and LX9 MicroBoard)
+                    (Thomas Mair)
+
+2011-10-18 V1.8     - Changes according to EPSG DS 301 V1.1.0
+                      * Correct definition of 0x1C00 and 0x1C02
+                      * Correct name and default value of object 0x1C14
+                      * Correct default value of 0x1C0F
+                      * Correct default values of 0x1F89/03
+                      * Correct default value of 0x1F8C
+                    (Wolfgang Seiss)
+
+2011-11-07 V1.8     - EdrvFec: Add Ethernet driver for Freescale FEC (i.MX and some Coldfire)
+                    (Michael Ulbricht)
+
