@@ -71,14 +71,14 @@
 #ifndef _EPLCFG_H_
 #define _EPLCFG_H_
 
-#ifdef __linux__
+#ifdef (TARGET_SYSTEM == _LINUX_)
 /* assure that system priorities of hrtimer and net-rx kernel threads are set appropriate */
 #define EPL_THREAD_PRIORITY_HIGH     75
 #define EPL_THREAD_PRIORITY_MEDIUM   50
 #define EPL_THREAD_PRIORITY_LOW      49
 
 #undef FTRACE_DEBUG
-#endif // __linux__
+#endif // (TARGET_SYSTEM == _LINUX_)
 
 // =========================================================================
 // generic defines which for whole EPL Stack
@@ -135,7 +135,7 @@
 
 // EPL_MODULE_INTEGRATION defines all modules which are included in
 // EPL application. Please add or delete modules for your application.
-#if defined __linux__
+#if (TARGET_SYSTEM == _LINUX_)
 #define EPL_MODULE_INTEGRATION (EPL_MODULE_OBDK \
                                | EPL_MODULE_PDOK \
                                | EPL_MODULE_PDOU \
@@ -152,7 +152,7 @@
 //                               | EPL_MODULE_VETH
 //                               | EPL_MODULE_OBDU
 //                               | EPL_MODULE_SDO_UDP
-#elif defined WIN32
+#elif (TARGET_SYSTEM == _WIN32_)
 #define EPL_MODULE_INTEGRATION (EPL_MODULE_OBDK \
                                | EPL_MODULE_PDOK \
                                | EPL_MODULE_PDOU \

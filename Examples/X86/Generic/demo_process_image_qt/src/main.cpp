@@ -76,7 +76,7 @@ int main(int argc, char *argv[])
     MainWindow   *pMainWindow;
     QApplication *pApp;
 
-#ifdef __linux__
+#if (TARGET_SYSTEM == _LINUX_)
 	#ifdef CONFIG_POWERLINK_USERSTACK
 		/* Initialize target specific stuff */
 		EplTgtInit();
