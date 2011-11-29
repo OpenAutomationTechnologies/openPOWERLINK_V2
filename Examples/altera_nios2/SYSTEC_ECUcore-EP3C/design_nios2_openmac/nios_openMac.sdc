@@ -8,8 +8,8 @@
 # Date         : Fri Jan 22 23:00:52 W. Europe Standard Time 2010
 #
 ###########################################################################
- 
- 
+
+
 # WARNING: Expected ENABLE_CLOCK_LATENCY to be set to 'ON', but it is set to 'OFF'
 #          In SDC, create_generated_clock auto-generates clock latency
 #
@@ -455,4 +455,15 @@ set_false_path -from [get_keepers {*niosII_openMac_clock_4*|slave_writedata_d1[9
 
 
 # ---------------------------------------------
+
+# JTAG Signal Constraints constrain the TCK port (uncomment the line below if altera_reserved_tck isn't already defined)
+#create_clock -name tck -period 100 [get_ports altera_reserved_tck]
+# Cut all paths to and from tck
+set_clock_groups -asynchronous -group [get_clocks altera_reserved_tck]
+# Constrain the TDI port
+set_input_delay -clock altera_reserved_tck -clock_fall 1 [get_ports altera_reserved_tdi]
+# Constrain the TMS port
+set_input_delay -clock altera_reserved_tck -clock_fall 1 [get_ports altera_reserved_tms]
+# Constrain the TDO port
+set_output_delay -clock altera_reserved_tck -clock_fall 1 [get_ports altera_reserved_tdo]
 
