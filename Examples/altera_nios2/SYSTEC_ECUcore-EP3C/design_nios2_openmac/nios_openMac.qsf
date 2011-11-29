@@ -374,3 +374,4 @@ set_instance_assignment -name CURRENT_STRENGTH_NEW 4MA -to altera_reserved_tdo
 set_location_assignment PIN_M10 -to fHex_CLK_out
 set_location_assignment PIN_T14 -to fHex_PL_out
 set_location_assignment PIN_N11 -to fHex_MRST_in
+set_global_assignment -name SDC_FILE nios_openMac.sdc
