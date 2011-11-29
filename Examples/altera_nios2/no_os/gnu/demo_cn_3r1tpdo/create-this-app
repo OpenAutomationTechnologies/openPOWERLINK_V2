@@ -61,10 +61,15 @@ if [ "$?" == "0" ] ; then
 # V9.0 needs additional double quotes around the include directories
 INCLUDES=\"${INCLUDES}\"
 fi
+if [ -n "${COMSPEC}" ]; then
+# Under Windows we need double quotes, but not under Linux
+INCLUDES=\"${INCLUDES}\"
+CFLAGS=\"${CFLAGS}\"
+fi
 
 NIOS2_APP_GEN_ARGS="--elf-name epl.elf --set OBJDUMP_INCLUDE_SOURCE 1 \
 --set CREATE_OBJDUMP 0 \
---set CFLAGS=\"${CFLAGS}\" --set APP_INCLUDE_DIRS=\"${INCLUDES}\" --src-files $SRCFILES"
+--set CFLAGS=${CFLAGS} --set APP_INCLUDE_DIRS=${INCLUDES} --src-files $SRCFILES"
 #--set APP_CFLAGS_DEBUG_LEVEL \
 
 #echo "${NIOS2_APP_GEN_ARGS}"
