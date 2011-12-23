@@ -444,6 +444,7 @@ int         iResult;
     if (EdrvInstance_l.m_pPciDev == NULL)
     {
         printk("%s m_pPciDev=NULL\n", __FUNCTION__);
+        Ret = EdrvShutdown();
         Ret = kEplNoResource;
         goto Exit;
     }
@@ -705,7 +706,7 @@ unsigned long   ulFlags;
     }
 
     // array of pointers to tx buffers in queue is checked
-    // because all four tx descriptors should be used 
+    // because all four tx descriptors should be used
     if (EdrvInstance_l.m_apTxBuffer[EdrvInstance_l.m_uiTailTxDesc] != NULL)
     {
         Ret = kEplEdrvNoFreeTxDesc;
@@ -888,7 +889,7 @@ int             iHandled = IRQ_HANDLED;
         spin_unlock(&EdrvInstance_l.m_TxSpinlock);
 
         // pointer to tx buffer in queue is checked
-        // because all four tx descriptors should be used 
+        // because all four tx descriptors should be used
         while (pTxBuffer != NULL)
         {
             // read transmit status
