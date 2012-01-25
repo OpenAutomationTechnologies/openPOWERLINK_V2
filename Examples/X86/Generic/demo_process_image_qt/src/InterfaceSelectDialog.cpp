@@ -124,7 +124,24 @@ int InterfaceSelectDialog::fillList(void)
     for (seldev = alldevs; seldev != NULL; seldev = seldev->next)
     {
         numIntf ++;
-        new QListWidgetItem(seldev->name, m_deviceListWidget);
+        QListWidgetItem *newItem = new QListWidgetItem;
+
+        QString devName(seldev->name);
+        QVariant data(devName);
+
+        QString devDesc;
+        if (seldev->description)
+        {
+            devDesc = seldev->description;
+        }
+        else
+        {
+            devDesc = seldev->name;
+        }
+        newItem->setData(Qt::UserRole, data);
+        newItem->setText(devDesc);
+        m_deviceListWidget->addItem(newItem);
+
     }
     pcap_freealldevs(alldevs);
 
@@ -147,8 +164,8 @@ void InterfaceSelectDialog::itemChanged(QListWidgetItem *current,
                                         QListWidgetItem *previous)
 {
     // set devName to the current Item
-    m_devName = current->text();
-    printf ("%s", m_devName.toAscii().data());
+    m_devDesc = current->text();
+    m_devName = current->data(Qt::UserRole).toString();
 }
 
 /**

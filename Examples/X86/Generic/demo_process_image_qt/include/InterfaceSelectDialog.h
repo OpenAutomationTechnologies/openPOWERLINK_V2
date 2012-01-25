@@ -87,6 +87,7 @@ private slots:
 private:
     QListWidget     *m_deviceListWidget;
     QString         m_devName;
+    QString         m_devDesc;
 };
 
 #endif /* INTERFACESELECTDIALOG_H_ */
