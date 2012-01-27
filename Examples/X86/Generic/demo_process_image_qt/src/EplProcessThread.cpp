@@ -372,9 +372,7 @@ tEplKernel PUBLIC AppCbEvent(tEplApiEventType EventType_p,
 
                 case kEplNmtNodeEventFound:
                 {
-
                     pEplProcessThread_g->sigNodeAppeared(pEventArg_p->m_Node.m_uiNodeId);
-
                     break;
                 }
 
@@ -389,7 +387,6 @@ tEplKernel PUBLIC AppCbEvent(tEplApiEventType EventType_p,
                         case kEplNmtGsResetConfiguration:
                         case kEplNmtCsNotActive:
                         {
-//                            pEplProcessThread_g->sigNodeStatus(pEventArg_p->m_Node.m_uiNodeId, 0);
                             pEplProcessThread_g->sigNodeDisappeared(pEventArg_p->m_Node.m_uiNodeId);
                             break;
                         }
@@ -397,6 +394,7 @@ tEplKernel PUBLIC AppCbEvent(tEplApiEventType EventType_p,
                         case kEplNmtCsPreOperational2:
                         case kEplNmtCsReadyToOperate:
                         {
+                            pEplProcessThread_g->sigNodeAppeared(pEventArg_p->m_Node.m_uiNodeId);
                             pEplProcessThread_g->sigNodeStatus(pEventArg_p->m_Node.m_uiNodeId, 1);
                             break;
                         }
