@@ -88,7 +88,6 @@
 
 #elif (TARGET_SYSTEM == _WIN32_)
 
-#define _WINSOCKAPI_ // prevent windows.h from including winsock.h
 #include <pcap.h>
 
 #endif  // (TARGET_SYSTEM == _WIN32_)
