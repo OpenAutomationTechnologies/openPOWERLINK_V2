@@ -400,7 +400,10 @@ static void EdrvRemoveOne(struct pci_dev *pPciDev);
 // buffers and buffer descriptors and pointers
 
 static struct pci_device_id aEdrvPciTbl[] = {
-    {0x8086, 0x109a, PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0},
+    {0x8086, 0x109a, PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0},  // 82573L
+    {0x8086, 0x1501, PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0},  // 82567V
+    {0x8086, 0x150c, PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0},  // 82583V
+    {0x8086, 0x10de, PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0},  // 82567LM
     {0,}
 };
 MODULE_DEVICE_TABLE (pci, aEdrvPciTbl);

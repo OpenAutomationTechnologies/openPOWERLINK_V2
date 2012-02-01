@@ -1,0 +1,5 @@
+82573,Intel Corporation 82573L,e1000e
+82573,Intel Corporation 82567V,e1000e
+82573,Intel Corporation 82583V,e1000e
+82573,Intel Corporation 82567LM,e1000e
+8139,RTL-8139,8139too
