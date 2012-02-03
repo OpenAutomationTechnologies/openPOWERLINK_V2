@@ -91,7 +91,7 @@ ENDIF (QT4_FOUND)
 # additional Linux settings
 IF (UNIX)
     SET(CFG_KERNEL_DIR "" CACHE PATH "Select the kernel directory to be used, if not specified, system kernel dir will be used!")
-    SET(CFG_POWERLINK_EDRV "82573" CACHE STRING "Valid drivers are 8139, 82573, Fec")
+    SET(CFG_POWERLINK_EDRV "82573" CACHE STRING "Valid drivers are 8139, 82573, 8255x, Fec")
     OPTION (CFG_KERNEL_STACK "Use POWERLINK kernel based stack (if OFF, userspace library will be used!)" OFF)
     OPTION (CFG_X86_LINUX_DEMO_KERNEL "Build Linux kernel based demo application" OFF)
     CMAKE_DEPENDENT_OPTION (CFG_X86_LINUX_DEMO_QT "Build Linux QT demo application" OFF
@@ -125,7 +125,7 @@ IF (NOT CFG_KERNEL_STACK)
     ADD_SUBDIRECTORY(Examples/X86/Generic/powerlink_user_lib)
 ENDIF (NOT CFG_KERNEL_STACK)
 
-# Add subdirectory of process image based console demo application        
+# Add subdirectory of process image based console demo application
 IF (CFG_X86_DEMO_PROCESS_IMAGE_CONSOLE)
     ADD_SUBDIRECTORY(Examples/X86/Generic/demo_process_image_console)
 ENDIF (CFG_X86_DEMO_PROCESS_IMAGE_CONSOLE)

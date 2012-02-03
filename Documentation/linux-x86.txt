@@ -22,7 +22,7 @@ openPOWERLINK on Linux x86
   One of the following network controllers is required to run openPOWERLINK on
   Linux x86.
 
-  - Network controller card with Intel 82573 chip
+  - Network controller card with Intel 82573L (or compatible) 1GBit Ethernet chip
     For example:
     - B&R APC 810 Industrial PC on-board network chip (tested)
 
@@ -39,6 +39,11 @@ openPOWERLINK on Linux x86
       * Longshine LCS-8539TXR
       * Micronet SP160T V3
       * Micronet SP160TA V3
+
+  - Network controller card with Intel 8255x 100MBit Ethernet chip
+    For example:
+    - B&R APC 620 Industrial PC on-board network chip (tested)
+    - Intel Pro 100 82557/8/9/1 Ethernet Interface card (tested)
 
   - Standard Linux network controller through libpcap library
     (for user-space stack version)
