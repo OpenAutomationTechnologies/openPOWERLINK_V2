@@ -1,68 +1,84 @@
 /****************************************************************************
+  (c) SYSTEC electronic GmbH, D-07973 Greiz, August-Bebel-Str. 29
+      www.systec-electronic.com
+  (c) Bernecker + Rainer Industrie-Elektronik Ges.m.b.H.
+      A-5142 Eggelsberg, B&R Strasse 1
+      www.br-automation.com
 
-Copyright (c) 2009, B&R
-Copyright (c) 2009, SYSTEC electronic GmbH
-All rights reserved.
+  Project:      openPOWERLINK
 
-Redistribution and use in source and binary forms,
-with or without modification,
-are permitted provided that the following conditions are met:
+  Description:  main file for the direct IO example
 
-    * Redistributions of source code must retain the above copyright notice,
-      this list of conditions and the following disclaimer.
-    * Redistributions in binary form must reproduce the above copyright notice,
-      this list of conditions and the following disclaimer
-      in the documentation and/or other materials provided with the distribution.
-    * Neither the name of the B&R nor the names of its contributors
-      may be used to endorse or promote products derived from this software
-      without specific prior written permission.
+  License:
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
-THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED.
-IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
-ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
-ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
-THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+    Redistribution and use in source and binary forms, with or without
+    modification, are permitted provided that the following conditions
+    are met:
+
+    1. Redistributions of source code must retain the above copyright
+       notice, this list of conditions and the following disclaimer.
+
+    2. Redistributions in binary form must reproduce the above copyright
+       notice, this list of conditions and the following disclaimer in the
+       documentation and/or other materials provided with the distribution.
+
+    3. Neither the name of SYSTEC electronic GmbH nor the names of its
+       contributors may be used to endorse or promote products derived
+       from this software without prior written permission. For written
+       permission, please contact info@systec-electronic.com.
+
+    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+    LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+    FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+    COPYRIGHT HOLDERS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+    INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+    BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+    LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+    CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+    LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+    ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+    POSSIBILITY OF SUCH DAMAGE.
+
+    Severability Clause:
+
+        If a provision of this License is or becomes illegal, invalid or
+        unenforceable in any jurisdiction, that shall not affect:
+        1. the validity or enforceability in that jurisdiction of any other
+           provision of this License; or
+        2. the validity or enforceability in other jurisdictions of that or
+           any other provision of this License.
 
   -------------------------------------------------------------------------
 
-                $RCSfile: demo_main.c,v $
+                $RCSfile$
 
-                $Author: Josef Baumgartner $
+                $Author$
 
-                $Revision: 1.2 $  $Date: 2009/09/28 14:38:37 $
+                $Revision$  $Date$
 
-                $State: Exp $
+                $State$
 
                 Build Environment:
-                    ...
-
-  -------------------------------------------------------------------------
-
-  Revision History:
-
-  2006/06/06    k.t.: Start of Implementation
+                    GCC V3.4
 
 ****************************************************************************/
+
 /* includes */
 #include "Epl.h"
 
 #include "xparameters.h"
 #include "xgpio_l.h"
-#include "IRQ_Microblaze.h"
-#include "Benchmark.h"
+#include "mb_interface.h"
+#include "xilinx_irq.h"
+#include "xilinx_usleep.h"
 
 /******************************************************************************/
 /* defines */
 
-#define NODEID      0x01 // should be NOT 0xF0 (=MN) in case of CN
+#define NODEID      0x01 // This node id is overwritten when the dip switches are != 0! Additionally this should be NOT 0xF0 (=MN) in case of CN
 #define CYCLE_LEN   1000 // [us]
-#define MAC_ADDR	0x00, 0x12, 0x34, 0x56, 0x78, NODEID
+#define MAC_ADDR    0x00, 0x12, 0x34, 0x56, 0x78, NODEID
 #define IP_ADDR     0xc0a86401  // 192.168.100.1 // don't care the last byte!
 #define SUBNET_MASK 0xFFFFFF00  // 255.255.255.0
 
@@ -78,147 +94,140 @@ tEplKernel PUBLIC AppCbEvent(
     tEplApiEventArg*        pEventArg_p,   // IN: event argument (union)
     void GENERIC*           pUserArg_p);
 
-BYTE		digitalIn[4];
-BYTE		digitalOut[4];
+BYTE        digitalIn[4];
+BYTE        digitalOut[4];
 
 static BOOL     fShutdown_l = FALSE;
 
 int openPowerlink(void);
 
-int main(void) 
+int main(void)
 {
-	int iCnt=0;
-	
-	#if XPAR_MICROBLAZE_0_USE_ICACHE
-		#warning "ICACHE is used!"
-		microblaze_init_icache_range(0, XPAR_MICROBLAZE_0_CACHE_BYTE_SIZE);
-		microblaze_enable_icache();
-	#endif
-	
-	#if XPAR_MICROBLAZE_0_USE_DCACHE
-		#warning "DCACHE is used!"
-		microblaze_init_dcache_range(0, XPAR_MICROBLAZE_0_DCACHE_BYTE_SIZE);
-		microblaze_enable_dcache();
-	#endif
-	
-	PRINTF0("MICROBLAZE is running...\n");
-	
-	PRINTF0("starting openPowerlink application...\n");
-	while(1) {
-		if(openPowerlink() != 0) {
-			PRINTF0("openPowerlink was shut down because of an error\n");
-			break;
-		} else {
-			PRINTF0("openPowerlink was shut down, restart...\n\n");
-		}
-			for(iCnt=0; iCnt<1000000; iCnt++)
-				asm("NOP ;");
-		}
-		PRINTF1("shut down MICROBLAZE...\n%c", 4);
-	
-	#if XPAR_MICROBLAZE_0_USE_DCACHE
-		microblaze_disable_dcache();
-		microblaze_init_dcache_range(0, XPAR_MICROBLAZE_0_DCACHE_BYTE_SIZE);
-	#endif
-	
-	#if XPAR_MICROBLAZE_0_USE_ICACHE
-		microblaze_disable_icache();
-		microblaze_init_icache_range(0, XPAR_MICROBLAZE_0_CACHE_BYTE_SIZE);
-	#endif
-	
-	return 0;
+#if XPAR_MICROBLAZE_USE_ICACHE
+    microblaze_invalidate_icache();
+    microblaze_enable_icache();
+#endif
+
+#if XPAR_MICROBLAZE_USE_DCACHE
+    microblaze_invalidate_dcache();
+    microblaze_enable_dcache();
+#endif
+
+    PRINTF0("MICROBLAZE is running...\n");
+
+    PRINTF0("starting openPowerlink application...\n");
+    while(1) {
+        if(openPowerlink() != 0) {
+            PRINTF0("openPowerlink was shut down because of an error\n");
+            break;
+        } else {
+            PRINTF0("openPowerlink was shut down, restart...\n\n");
+        }
+            usleep(7000);
+        }
+        PRINTF1("shut down MICROBLAZE...\n%c", 4);
+
+#if XPAR_MICROBLAZE_USE_DCACHE
+    microblaze_invalidate_dcache();
+    microblaze_disable_dcache();
+#endif
+
+#if XPAR_MICROBLAZE_USE_ICACHE
+    microblaze_invalidate_icache();
+    microblaze_disable_icache();
+#endif
+
+    return 0;
 }
 
 
 int openPowerlink(void)
 {
-	DWORD		 				ip = IP_ADDR; // ip address
+    DWORD                         ip = IP_ADDR; // ip address
+    unsigned char nodeId = NODEID;
 
-	const BYTE 				abMacAddr[] = {MAC_ADDR};
-	static tEplApiInitParam EplApiInitParam; //epl init parameter
-	// needed for process var
-	tEplObdSize         	ObdSize;
-	tEplKernel 				EplRet;
-	unsigned int			uiVarEntries;
+    const BYTE                 abMacAddr[] = {MAC_ADDR};
+    static tEplApiInitParam EplApiInitParam; //epl init parameter
+    // needed for process var
+    tEplObdSize             ObdSize;
+    tEplKernel                 EplRet;
+    unsigned int            uiVarEntries;
 
     fShutdown_l = FALSE;
-    
-    //Init Interrupt Controller
-    {
-    	XIntc *Intc = getIntc(); //get Interrupt Controller Instance
-    	XStatus Status = 0;
-    	PRINTF0("Init Xilinx Interrupt Controller:\n");
-    	//init device
-		Status = XIntc_Initialize(Intc, XPAR_XPS_INTC_0_DEVICE_ID);
-		if (Status != XST_SUCCESS)
-			return -1;
-		
-		//set options
-		Status = XIntc_SetOptions(Intc, XIN_SVC_ALL_ISRS_OPTION);
-		if (Status != XST_SUCCESS)
-			return -1;
-		PRINTF0("done!\n");
-    }
-    
-#ifdef XPAR_LEDS_8BIT_BASEADDR
+
+    initInterrupts();
+
+#ifdef XPAR_LEDS_OUTPUT_BASEADDR
     //Set USER LEDs (8bit)
     PRINTF0("set User LEDs (8bit)\n");
-    XGpio_WriteReg(XPAR_LEDS_8BIT_BASEADDR, XGPIO_TRI_OFFSET, 0);
+    XGpio_WriteReg(XPAR_LEDS_OUTPUT_BASEADDR, XGPIO_TRI_OFFSET, 0);
 #endif
 
 #ifdef XPAR_POWERLINK_LED_BASEADDR
     XGpio_WriteReg(XPAR_POWERLINK_LED_BASEADDR, XGPIO_TRI_OFFSET, 0);
 #endif
 
-	////////////////////////
-	// setup th EPL Stack //
-	////////////////////////
+#ifdef XPAR_DIP_SWITCHES_BASEADDR
+    nodeId = XGpio_ReadReg(XPAR_DIP_SWITCHES_BASEADDR, 0);
 
-	// calc the IP address with the nodeid
-	ip &= 0xFFFFFF00; //dump the last byte
-	ip |= NODEID; // and mask it with the node id
+    if (nodeId == 0)
+    {
+        nodeId = NODEID;
+    }
+#endif
 
-	// set EPL init parameters
-	EplApiInitParam.m_uiSizeOfStruct = sizeof (EplApiInitParam);
-	EPL_MEMCPY(EplApiInitParam.m_abMacAddress, abMacAddr, sizeof(EplApiInitParam.m_abMacAddress));
-	EplApiInitParam.m_uiNodeId = NODEID; // defined at the top of this file!
-	EplApiInitParam.m_dwIpAddress = ip;
-	EplApiInitParam.m_uiIsochrTxMaxPayload = 256;
-	EplApiInitParam.m_uiIsochrRxMaxPayload = 256;
-	EplApiInitParam.m_dwPresMaxLatency = 2000;
-	EplApiInitParam.m_dwAsndMaxLatency = 2000;
-	EplApiInitParam.m_fAsyncOnly = FALSE;
-	EplApiInitParam.m_dwFeatureFlags = -1;
-	EplApiInitParam.m_dwCycleLen = CYCLE_LEN;
-	EplApiInitParam.m_uiPreqActPayloadLimit = 36;
-	EplApiInitParam.m_uiPresActPayloadLimit = 36;
-	EplApiInitParam.m_uiMultiplCycleCnt = 0;
-	EplApiInitParam.m_uiAsyncMtu = 1500;
-	EplApiInitParam.m_uiPrescaler = 2;
-	EplApiInitParam.m_dwLossOfFrameTolerance = 5000000;
-	EplApiInitParam.m_dwAsyncSlotTimeout = 3000000;
-	EplApiInitParam.m_dwWaitSocPreq = 0;
-	EplApiInitParam.m_dwDeviceType = -1;
-	EplApiInitParam.m_dwVendorId = -1;
-	EplApiInitParam.m_dwProductCode = -1;
-	EplApiInitParam.m_dwRevisionNumber = -1;
-	EplApiInitParam.m_dwSerialNumber = -1;
-	EplApiInitParam.m_dwSubnetMask = SUBNET_MASK;
-	EplApiInitParam.m_dwDefaultGateway = 0;
-	EplApiInitParam.m_pfnCbEvent = AppCbEvent;
+    ////////////////////////
+    // setup the EPL Stack //
+    ////////////////////////
+
+    PRINTF1("Node Id is set to: 0x%X\n",nodeId);
+
+    // calc the IP address with the nodeid
+    ip &= 0xFFFFFF00; //dump the last byte
+    ip |= nodeId; // and mask it with the node id
+
+    // set EPL init parameters
+    EplApiInitParam.m_uiSizeOfStruct = sizeof (EplApiInitParam);
+    EPL_MEMCPY(EplApiInitParam.m_abMacAddress, abMacAddr, sizeof(EplApiInitParam.m_abMacAddress));
+    EplApiInitParam.m_abMacAddress[5] = nodeId;
+    EplApiInitParam.m_uiNodeId = nodeId; // defined at the top of this file!
+    EplApiInitParam.m_dwIpAddress = ip;
+    EplApiInitParam.m_uiIsochrTxMaxPayload = 36;
+    EplApiInitParam.m_uiIsochrRxMaxPayload = 36;
+    EplApiInitParam.m_dwPresMaxLatency = 2000;
+    EplApiInitParam.m_dwAsndMaxLatency = 2000;
+    EplApiInitParam.m_fAsyncOnly = FALSE;
+    EplApiInitParam.m_dwFeatureFlags = -1;
+    EplApiInitParam.m_dwCycleLen = CYCLE_LEN;
+    EplApiInitParam.m_uiPreqActPayloadLimit = 36;
+    EplApiInitParam.m_uiPresActPayloadLimit = 36;
+    EplApiInitParam.m_uiMultiplCycleCnt = 0;
+    EplApiInitParam.m_uiAsyncMtu = 300;
+    EplApiInitParam.m_uiPrescaler = 2;
+    EplApiInitParam.m_dwLossOfFrameTolerance = 5000000;
+    EplApiInitParam.m_dwAsyncSlotTimeout = 3000000;
+    EplApiInitParam.m_dwWaitSocPreq = 0;
+    EplApiInitParam.m_dwDeviceType = -1;
+    EplApiInitParam.m_dwVendorId = -1;
+    EplApiInitParam.m_dwProductCode = -1;
+    EplApiInitParam.m_dwRevisionNumber = -1;
+    EplApiInitParam.m_dwSerialNumber = -1;
+    EplApiInitParam.m_dwSubnetMask = SUBNET_MASK;
+    EplApiInitParam.m_dwDefaultGateway = 0;
+    EplApiInitParam.m_pfnCbEvent = AppCbEvent;
     EplApiInitParam.m_pfnCbSync  = AppCbSync;
     EplApiInitParam.m_pfnObdInitRam = EplObdInitRam;
 
-	// initialize EPL stack
+    // initialize EPL stack
     PRINTF0("init EPL Stack:\n");
-	EplRet = EplApiInitialize(&EplApiInitParam);
-	if(EplRet != kEplSuccessful) {
+    EplRet = EplApiInitialize(&EplApiInitParam);
+    if(EplRet != kEplSuccessful) {
         PRINTF1("init EPL Stack... error %X\n\n", EplRet);
-		goto Exit;
+        goto Exit;
     }
     PRINTF0("init EPL Stack...ok\n\n");
 
-	// link process variables used by CN to object dictionary
+    // link process variables used by CN to object dictionary
     PRINTF0("linking process vars:\n");
     ObdSize = sizeof(digitalIn[0]);
     uiVarEntries = 4;
@@ -238,12 +247,12 @@ int openPowerlink(void)
         goto ExitShutdown;
     }
 
-	PRINTF0("linking process vars... ok\n\n");
-	
+    PRINTF0("linking process vars... ok\n\n");
 
-	// start the EPL stack
+
+    // start the EPL stack
     PRINTF0("start EPL Stack...\n");
-	EplRet = EplApiExecNmtCommand(kEplNmtEventSwReset);
+    EplRet = EplApiExecNmtCommand(kEplNmtEventSwReset);
     if (EplRet != kEplSuccessful) {
         PRINTF0("start EPL Stack... error\n\n");
         goto ExitShutdown;
@@ -251,6 +260,8 @@ int openPowerlink(void)
     PRINTF0("start EPL Stack... ok\n\n");
 
     PRINTF0("MICROBLAZE with openPowerlink is ready!\n\n");
+
+    enableInterrupts();
 
     while(1)
     {
@@ -264,7 +275,7 @@ ExitShutdown:
     EplApiShutdown(); //shutdown node
 
 Exit:
-	return EplRet;
+    return EplRet;
 }
 
 //---------------------------------------------------------------------------
@@ -292,8 +303,8 @@ tEplKernel PUBLIC AppCbEvent(
     tEplApiEventArg*        pEventArg_p,   // IN: event argument (union)
     void GENERIC*           pUserArg_p)
 {
-	tEplKernel          EplRet = kEplSuccessful;
-	static DWORD eplLeds = 0;
+    tEplKernel          EplRet = kEplSuccessful;
+    static DWORD eplLeds = 0;
 
     // check if NMT_GS_OFF is reached
     switch (EventType_p)
@@ -345,6 +356,7 @@ tEplKernel PUBLIC AppCbEvent(
                     }
 
                     bNodeId = 0x04;
+                    dwNodeAssignment = 0x0;
                     EplRet = EplApiWriteLocalObject(0x1F81, bNodeId, &dwNodeAssignment, sizeof (dwNodeAssignment));
                     if (EplRet != kEplSuccessful)
                     {
@@ -363,13 +375,13 @@ tEplKernel PUBLIC AppCbEvent(
                     break;
                 case kEplNmtCsNotActive:
                     break;
-				
-				case kEplNmtCsReadyToOperate:
-					PRINTF0("enable operate\n");
-					break;
-				
+
+                case kEplNmtCsReadyToOperate:
+                    PRINTF0("enable operate\n");
+                    break;
+
                 case kEplNmtCsOperational:
-                	PRINTF0("ready 2 operate\n");
+                    PRINTF0("ready 2 operate\n");
                     break;
                 case kEplNmtMsOperational:
                     break;
@@ -512,6 +524,9 @@ tEplKernel EplRet = kEplSuccessful;
 #ifdef XPAR_PUSH_BUTTONS_3BIT_BASEADDR
     digitalIn[0] = XGpio_ReadReg(XPAR_PUSH_BUTTONS_3BIT_BASEADDR, XGPIO_DATA_OFFSET);
 #endif
+    digitalIn[1]++;
+    digitalIn[2]++;
+    digitalIn[3]++;
 
 #ifdef XPAR_LEDS_OUTPUT_BASEADDR
     XGpio_WriteReg(XPAR_LEDS_OUTPUT_BASEADDR, XGPIO_DATA_OFFSET, digitalOut[0]);
