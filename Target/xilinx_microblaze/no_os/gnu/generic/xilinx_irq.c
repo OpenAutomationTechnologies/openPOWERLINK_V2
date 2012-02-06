@@ -9,6 +9,7 @@
 
   Description:  target specific functions
                 to Xilinx Microblaze CPU without any OS
+                file for interrupt settings
 
   License:
 
@@ -65,161 +66,132 @@
 
 ****************************************************************************/
 
-#include "global.h"
-#include "Benchmark.h"
-
-#include "xparameters.h"
 #include "xilinx_irq.h"
 
+DWORD dwMsCount_g = 0;
 
-/***************************************************************************/
-/*                                                                         */
-/*                                                                         */
-/*          G L O B A L   D E F I N I T I O N S                            */
-/*                                                                         */
-/*                                                                         */
-/***************************************************************************/
-
-//---------------------------------------------------------------------------
-// const defines
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-// modul global types
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-// local vars
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-// local function prototypes
-//---------------------------------------------------------------------------
-
-
-//=========================================================================//
-//                                                                         //
-//          P U B L I C   F U N C T I O N S                                //
-//                                                                         //
-//=========================================================================//
-
+static void FitTimerIrqHandler (void* pArg_p)
+{
+    dwMsCount_g++;
+}
 
 //---------------------------------------------------------------------------
 //
-// Function:     ShbTgtGetTickCount
+// Function:    initInterrupts
 //
-// Description:  This function returns the current value of timer.
+// Description: inits the global interrupt and registers the fit timer handler
 //
+// Parameters:  void
 //
-// Parameters:   none
-//
-//
-// Returns:      DWORD with tick count in us
-//
+// Returns:     void
 //
 // State:
 //
 //---------------------------------------------------------------------------
-
-DWORD PUBLIC ShbTgtGetTickCountMs(void)
+void initInterrupts(void)
 {
-DWORD dwTicks;
+    //note: master enable is asserted, otherwise sharedBuff would enter deadlock
+    enableInterruptMaster();
 
-    //FIXME: Find another way to generate a system tick...
-    dwTicks = getMSCount();
+    //register fit irq handler
+    XIntc_RegisterHandler(XPAR_PCP_INTC_BASEADDR, XPAR_PCP_INTC_FIT_TIMER_0_INTERRUPT_INTR,
+            (XInterruptHandler)FitTimerIrqHandler, 0);
 
-    return dwTicks;
+    //enable the fit interrupt
+    XIntc_EnableIntr(XPAR_PCP_INTC_BASEADDR, XPAR_FIT_TIMER_0_INTERRUPT_MASK);
 }
 
-
-
 //---------------------------------------------------------------------------
 //
-// Function:    ShbTgtEnableGlobalInterrupt()
+// Function:    enableInterrupts
 //
-// Description: enable resp. disable interrupts globally
+// Description: enable the microblaze interrupt
 //
-// Parameters:  fEnable_p               = TRUE: enable interrupts
-//                                        FALSE: disable interrupts
+// Parameters:  void
 //
-// Return:
+// Returns:     void
 //
-// State:       not tested
+// State:
 //
 //---------------------------------------------------------------------------
-
-void  PUBLIC  ShbTgtEnableGlobalInterrupt(BYTE fEnable_p)
+void enableInterrupts(void)
 {
-static int              iLockCount = 0;
-
-    if (fEnable_p != FALSE)
-    {   // restore interrupts
-
-        if (--iLockCount == 0)
-        {
-            enableInterruptMaster();
-        }
-    }
-    else
-    {   // disable interrupts
-
-        if (iLockCount == 0)
-        {
-            disableInterruptMaster();
-        }
-        iLockCount++;
-    }
-
+    //enable microblaze interrupts
+    microblaze_enable_interrupts();
 }
 
-
-
 //---------------------------------------------------------------------------
 //
-// Function:    ShbTgtIsInterruptContext()
+// Function:    disableInterrupts
 //
-// Description: check if processor is in interrupt context
+// Description: disable the microblaze interrupt
 //
-// Parameters:  none
+// Parameters:  void
 //
-// Return:      FALSE - not in interrupt context
-//              TRUE  - in interrupt context
+// Returns:     void
 //
-// State:       not tested
+// State:
 //
 //---------------------------------------------------------------------------
-
-BYTE  PUBLIC  ShbTgtIsInterruptContext(void)
+void disableInterrupts(void)
 {
-    // No real interrupt context check is performed.
-    // This would be possible with a flag in the ISR, only.
-    // For now, simply return ME.
-
-    DWORD dwGIE;
-
-    dwGIE = Xil_In32(XPAR_PCP_INTC_BASEADDR + XIN_MER_OFFSET) & \
-            XIN_INT_MASTER_ENABLE_MASK;
-
-    if(dwGIE == 0)
-    {
-        //master enable is off
-        return TRUE;
-    }
-    else
-    {
-        //master enable is on
-        return FALSE;
-    }
+    //disable microblaze interrupts
+    microblaze_disable_interrupts();
 }
 
+//---------------------------------------------------------------------------
+//
+// Function:    enableInterruptMaster
+//
+// Description: enables the interrupt master interrupt
+//
+// Parameters:  void
+//
+// Returns:     void
+//
+// State:
+//
+//---------------------------------------------------------------------------
+void enableInterruptMaster(void)
+{
+    //enable global interrupt master
+    XIntc_MasterEnable(XPAR_PCP_INTC_BASEADDR);
+}
 
-//=========================================================================//
-//                                                                         //
-//          S T A T I C   F U N C T I O N S                                //
-//                                                                         //
-//=========================================================================//
+//---------------------------------------------------------------------------
+//
+// Function:    disableInterruptMaster
+//
+// Description: disable the interrupt master interrupt
+//
+// Parameters:  void
+//
+// Returns:     void
+//
+// State:
+//
+//---------------------------------------------------------------------------
+void disableInterruptMaster(void)
+{
+    //disable global interrupt master
+    XIntc_MasterDisable(XPAR_PCP_INTC_BASEADDR);
+}
 
+//---------------------------------------------------------------------------
+//
+// Function:    getMSCount
+//
+// Description:
+//
+// Parameters:  void
+//
+// Returns:     mscount           = the count in ms
+//
+// State:
+//
+//---------------------------------------------------------------------------
+DWORD getMSCount(void)
+{
+    return dwMsCount_g;
+}
 
