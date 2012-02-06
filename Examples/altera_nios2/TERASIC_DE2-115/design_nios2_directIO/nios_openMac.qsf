@@ -1,0 +1,269 @@
+################################################################################################################
+#general
+set_global_assignment -name DEVICE EP4CE115F29C7
+set_global_assignment -name FAMILY "Cyclone IV E"
+set_global_assignment -name TOP_LEVEL_ENTITY nios_pll
+set_global_assignment -name ORIGINAL_QUARTUS_VERSION 9.1
+set_global_assignment -name LAST_QUARTUS_VERSION "10.1 SP1"
+set_global_assignment -name PROJECT_CREATION_TIME_DATE "11:02:17 SEPTEMBER 13,2010"
+set_global_assignment -name CYCLONEII_RESERVE_NCEO_AFTER_CONFIGURATION "USE AS REGULAR IO"
+set_global_assignment -name RESERVE_DATA0_AFTER_CONFIGURATION "USE AS REGULAR IO"
+set_global_assignment -name RESERVE_DATA1_AFTER_CONFIGURATION "USE AS REGULAR IO"
+set_global_assignment -name RESERVE_FLASH_NCE_AFTER_CONFIGURATION "USE AS REGULAR IO"
+set_global_assignment -name RESERVE_DCLK_AFTER_CONFIGURATION "USE AS REGULAR IO"
+
+#pin assignments
+set_location_assignment PIN_AB7 -to SRAM_ADDR[1]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to SRAM_ADDR[1]
+set_location_assignment PIN_AD7 -to SRAM_ADDR[2]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to SRAM_ADDR[2]
+set_location_assignment PIN_AE7 -to SRAM_ADDR[3]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to SRAM_ADDR[3]
+set_location_assignment PIN_AC7 -to SRAM_ADDR[4]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to SRAM_ADDR[4]
+set_location_assignment PIN_AB6 -to SRAM_ADDR[5]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to SRAM_ADDR[5]
+set_location_assignment PIN_AE6 -to SRAM_ADDR[6]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to SRAM_ADDR[6]
+set_location_assignment PIN_AB5 -to SRAM_ADDR[7]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to SRAM_ADDR[7]
+set_location_assignment PIN_AC5 -to SRAM_ADDR[8]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to SRAM_ADDR[8]
+set_location_assignment PIN_AF5 -to SRAM_ADDR[9]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to SRAM_ADDR[9]
+set_location_assignment PIN_T7 -to SRAM_ADDR[10]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to SRAM_ADDR[10]
+set_location_assignment PIN_AF2 -to SRAM_ADDR[11]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to SRAM_ADDR[11]
+set_location_assignment PIN_AD3 -to SRAM_ADDR[12]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to SRAM_ADDR[12]
+set_location_assignment PIN_AB4 -to SRAM_ADDR[13]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to SRAM_ADDR[13]
+set_location_assignment PIN_AC3 -to SRAM_ADDR[14]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to SRAM_ADDR[14]
+set_location_assignment PIN_AA4 -to SRAM_ADDR[15]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to SRAM_ADDR[15]
+set_location_assignment PIN_AB11 -to SRAM_ADDR[16]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to SRAM_ADDR[16]
+set_location_assignment PIN_AC11 -to SRAM_ADDR[17]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to SRAM_ADDR[17]
+set_location_assignment PIN_AB9 -to SRAM_ADDR[18]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to SRAM_ADDR[18]
+set_location_assignment PIN_AB8 -to SRAM_ADDR[19]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to SRAM_ADDR[19]
+set_location_assignment PIN_AH3 -to SRAM_DQ[0]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to SRAM_DQ[0]
+set_location_assignment PIN_AF4 -to SRAM_DQ[1]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to SRAM_DQ[1]
+set_location_assignment PIN_AG4 -to SRAM_DQ[2]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to SRAM_DQ[2]
+set_location_assignment PIN_AH4 -to SRAM_DQ[3]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to SRAM_DQ[3]
+set_location_assignment PIN_AF6 -to SRAM_DQ[4]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to SRAM_DQ[4]
+set_location_assignment PIN_AG6 -to SRAM_DQ[5]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to SRAM_DQ[5]
+set_location_assignment PIN_AH6 -to SRAM_DQ[6]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to SRAM_DQ[6]
+set_location_assignment PIN_AF7 -to SRAM_DQ[7]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to SRAM_DQ[7]
+set_location_assignment PIN_AD1 -to SRAM_DQ[8]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to SRAM_DQ[8]
+set_location_assignment PIN_AD2 -to SRAM_DQ[9]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to SRAM_DQ[9]
+set_location_assignment PIN_AE2 -to SRAM_DQ[10]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to SRAM_DQ[10]
+set_location_assignment PIN_AE1 -to SRAM_DQ[11]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to SRAM_DQ[11]
+set_location_assignment PIN_AE3 -to SRAM_DQ[12]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to SRAM_DQ[12]
+set_location_assignment PIN_AE4 -to SRAM_DQ[13]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to SRAM_DQ[13]
+set_location_assignment PIN_AF3 -to SRAM_DQ[14]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to SRAM_DQ[14]
+set_location_assignment PIN_AG3 -to SRAM_DQ[15]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to SRAM_DQ[15]
+set_location_assignment PIN_AF8 -to SRAM_CE_n
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to SRAM_CE_n
+set_location_assignment PIN_AD5 -to SRAM_OE_n
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to SRAM_OE_n
+set_location_assignment PIN_AE8 -to SRAM_WE_n
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to SRAM_WE_n
+set_location_assignment PIN_Y2 -to EXT_CLK
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to EXT_CLK
+set_location_assignment PIN_AC4 -to SRAM_BE_n[1]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to SRAM_BE_n[1]
+set_location_assignment PIN_AD4 -to SRAM_BE_n[0]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to SRAM_BE_n[0]
+set_location_assignment PIN_T8 -to SRAM_ADDR[20]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to SRAM_ADDR[20]
+set_location_assignment PIN_N7 -to EPCS_DATA0
+set_location_assignment PIN_P3 -to EPCS_DCLK
+set_location_assignment PIN_E2 -to EPCS_SCE
+set_location_assignment PIN_F4 -to EPCS_SDO
+set_location_assignment PIN_A17 -to PHY0_GXCLK
+set_location_assignment PIN_C20 -to PHY0_MDC
+set_location_assignment PIN_B21 -to PHY0_MDIO
+set_location_assignment PIN_C19 -to PHY0_RESET_n
+set_location_assignment PIN_A15 -to PHY0_RXCLK
+set_location_assignment PIN_C15 -to PHY0_RXD[3]
+set_location_assignment PIN_D17 -to PHY0_RXD[2]
+set_location_assignment PIN_D16 -to PHY0_RXD[1]
+set_location_assignment PIN_C16 -to PHY0_RXD[0]
+set_location_assignment PIN_C17 -to PHY0_RXDV
+set_location_assignment PIN_B17 -to PHY0_TXCLK
+set_location_assignment PIN_B19 -to PHY0_TXD[3]
+set_location_assignment PIN_A19 -to PHY0_TXD[2]
+set_location_assignment PIN_D19 -to PHY0_TXD[1]
+set_location_assignment PIN_C18 -to PHY0_TXD[0]
+set_location_assignment PIN_A18 -to PHY0_TXEN
+set_location_assignment PIN_C23 -to PHY1_GXCLK
+set_location_assignment PIN_D23 -to PHY1_MDC
+set_location_assignment PIN_D25 -to PHY1_MDIO
+set_location_assignment PIN_D22 -to PHY1_RESET_n
+set_location_assignment PIN_B15 -to PHY1_RXCLK
+set_location_assignment PIN_D21 -to PHY1_RXD[3]
+set_location_assignment PIN_A23 -to PHY1_RXD[2]
+set_location_assignment PIN_C21 -to PHY1_RXD[1]
+set_location_assignment PIN_B23 -to PHY1_RXD[0]
+set_location_assignment PIN_A22 -to PHY1_RXDV
+set_location_assignment PIN_C22 -to PHY1_TXCLK
+set_location_assignment PIN_C26 -to PHY1_TXD[3]
+set_location_assignment PIN_B26 -to PHY1_TXD[2]
+set_location_assignment PIN_A26 -to PHY1_TXD[1]
+set_location_assignment PIN_C25 -to PHY1_TXD[0]
+set_location_assignment PIN_B25 -to PHY1_TXEN
+set_location_assignment PIN_B18 -to PHY0_TXER
+set_location_assignment PIN_A25 -to PHY1_TXER
+set_location_assignment PIN_Y23 -to NODE_SWITCH[7]
+set_location_assignment PIN_Y24 -to NODE_SWITCH[6]
+set_location_assignment PIN_AA22 -to NODE_SWITCH[5]
+set_location_assignment PIN_AA23 -to NODE_SWITCH[4]
+set_location_assignment PIN_AA24 -to NODE_SWITCH[3]
+set_location_assignment PIN_AB23 -to NODE_SWITCH[2]
+set_location_assignment PIN_AB24 -to NODE_SWITCH[1]
+set_location_assignment PIN_AC24 -to NODE_SWITCH[0]
+set_location_assignment PIN_AB26 -to SW[7]
+set_location_assignment PIN_AD26 -to SW[6]
+set_location_assignment PIN_AC26 -to SW[5]
+set_location_assignment PIN_AB27 -to SW[4]
+set_location_assignment PIN_AD27 -to SW[3]
+set_location_assignment PIN_AC27 -to SW[2]
+set_location_assignment PIN_AC28 -to SW[1]
+set_location_assignment PIN_AB28 -to SW[0]
+set_location_assignment PIN_G21 -to LEDG[7]
+set_location_assignment PIN_G22 -to LEDG[6]
+set_location_assignment PIN_G20 -to LEDG[5]
+set_location_assignment PIN_H21 -to LEDG[4]
+set_location_assignment PIN_E24 -to LEDG[3]
+set_location_assignment PIN_E25 -to LEDG[2]
+set_location_assignment PIN_E22 -to LEDG[1]
+set_location_assignment PIN_E21 -to LEDG[0]
+set_location_assignment PIN_H19 -to LEDR[7]
+set_location_assignment PIN_J19 -to LEDR[6]
+set_location_assignment PIN_E18 -to LEDR[5]
+set_location_assignment PIN_F18 -to LEDR[4]
+set_location_assignment PIN_F21 -to LEDR[3]
+set_location_assignment PIN_E19 -to LEDR[2]
+set_location_assignment PIN_F19 -to LEDR[1]
+set_location_assignment PIN_G19 -to LEDR[0]
+set_location_assignment PIN_G15 -to LEDR[15]
+set_location_assignment PIN_F15 -to LEDR[14]
+set_location_assignment PIN_H17 -to LEDR[13]
+set_location_assignment PIN_J16 -to LEDR[12]
+set_location_assignment PIN_H16 -to LEDR[11]
+set_location_assignment PIN_J15 -to LEDR[10]
+set_location_assignment PIN_G17 -to LEDR[9]
+set_location_assignment PIN_J17 -to LEDR[8]
+set_location_assignment PIN_H22 -to HEX0[6]
+set_location_assignment PIN_J22 -to HEX0[5]
+set_location_assignment PIN_L25 -to HEX0[4]
+set_location_assignment PIN_L26 -to HEX0[3]
+set_location_assignment PIN_E17 -to HEX0[2]
+set_location_assignment PIN_F22 -to HEX0[1]
+set_location_assignment PIN_G18 -to HEX0[0]
+set_location_assignment PIN_U24 -to HEX1[6]
+set_location_assignment PIN_U23 -to HEX1[5]
+set_location_assignment PIN_W25 -to HEX1[4]
+set_location_assignment PIN_W22 -to HEX1[3]
+set_location_assignment PIN_W21 -to HEX1[2]
+set_location_assignment PIN_Y22 -to HEX1[1]
+set_location_assignment PIN_M24 -to HEX1[0]
+
+#others
+set_global_assignment -name STRATIX_DEVICE_IO_STANDARD "2.5 V"
+set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
+set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT_AND_ROUTING -section_id Top
+set_global_assignment -name PARTITION_COLOR 16764057 -section_id Top
+set_global_assignment -name LL_ROOT_REGION ON -section_id "Root Region"
+set_global_assignment -name LL_MEMBER_STATE LOCKED -section_id "Root Region"
+set_global_assignment -name MIN_CORE_JUNCTION_TEMP 0
+set_global_assignment -name MAX_CORE_JUNCTION_TEMP 85
+set_global_assignment -name USE_CONFIGURATION_DEVICE ON
+set_global_assignment -name CYCLONEIII_CONFIGURATION_DEVICE EPCS64
+set_global_assignment -name STRATIXIII_UPDATE_MODE REMOTE
+set_global_assignment -name ON_CHIP_BITSTREAM_DECOMPRESSION OFF
+set_global_assignment -name OUTPUT_IO_TIMING_ENDPOINT "NEAR END"
+set_global_assignment -name SMART_RECOMPILE ON
+set_global_assignment -name OPTIMIZE_MULTI_CORNER_TIMING ON
+set_global_assignment -name POWER_PRESET_COOLING_SOLUTION "23 MM HEAT SINK WITH 200 LFPM AIRFLOW"
+set_global_assignment -name POWER_BOARD_THERMAL_MODEL "NONE (CONSERVATIVE)"
+set_global_assignment -name SYNCHRONIZER_IDENTIFICATION AUTO
+
+
+################################################################################################################
+
+set_global_assignment -name MISC_FILE "c:/Work/RepositoryWORK/openPOWERLINK_CNDK/fpga/altera/TERASIC_DE2-115/nios2_openmac_SimpleLatchedIO/nios_openMac.dpf"
+set_location_assignment PIN_M23 -to KEY[0]
+set_location_assignment PIN_M21 -to KEY[1]
+set_location_assignment PIN_N21 -to KEY[2]
+set_location_assignment PIN_R24 -to KEY[3]
+set_location_assignment PIN_AE22 -to SW_BENCHMARK_OUT[0]
+set_location_assignment PIN_AF21 -to SW_BENCHMARK_OUT[1]
+set_location_assignment PIN_AF22 -to SW_BENCHMARK_OUT[2]
+set_location_assignment PIN_AD22 -to SW_BENCHMARK_OUT[3]
+set_location_assignment PIN_AG25 -to SW_BENCHMARK_OUT[4]
+set_location_assignment PIN_AD25 -to SW_BENCHMARK_OUT[5]
+set_location_assignment PIN_AH25 -to SW_BENCHMARK_OUT[6]
+set_location_assignment PIN_AE25 -to SW_BENCHMARK_OUT[7]
+set_global_assignment -name ENABLE_LOGIC_ANALYZER_INTERFACE ON
+set_global_assignment -name USE_LOGIC_ANALYZER_INTERFACE_FILE benchmark.lai
+set_location_assignment PIN_AG22 -to altera_reserved_lai_0_0
+set_location_assignment PIN_AE24 -to altera_reserved_lai_0_1
+set_location_assignment PIN_AH22 -to altera_reserved_lai_0_2
+set_location_assignment PIN_AF26 -to altera_reserved_lai_0_3
+set_location_assignment PIN_AE20 -to altera_reserved_lai_0_4
+set_location_assignment PIN_AG23 -to altera_reserved_lai_0_5
+set_location_assignment PIN_AF20 -to altera_reserved_lai_0_6
+set_location_assignment PIN_AH26 -to altera_reserved_lai_0_7
+set_location_assignment PIN_AE15 -to PLK_OPERATIONAL
+set_location_assignment PIN_L2 -to LCD_DATA[2]
+set_location_assignment PIN_L1 -to LCD_DATA[1]
+set_location_assignment PIN_L3 -to LCD_DATA[0]
+set_location_assignment PIN_M5 -to LCD_DATA[7]
+set_location_assignment PIN_M3 -to LCD_DATA[6]
+set_location_assignment PIN_K2 -to LCD_DATA[5]
+set_location_assignment PIN_K1 -to LCD_DATA[4]
+set_location_assignment PIN_K7 -to LCD_DATA[3]
+set_location_assignment PIN_L4 -to LCD_EN
+set_location_assignment PIN_M1 -to LCS_RW
+set_location_assignment PIN_M2 -to LCD_RS
+set_location_assignment PIN_L5 -to LCD_ON
+set_global_assignment -name RESERVE_ALL_UNUSED_PINS_WEAK_PULLUP "AS INPUT TRI-STATED WITH WEAK PULL-UP"
+set_global_assignment -name CRC_ERROR_OPEN_DRAIN OFF
+set_global_assignment -name OUTPUT_IO_TIMING_NEAR_END_VMEAS "HALF VCCIO" -rise
+set_global_assignment -name OUTPUT_IO_TIMING_NEAR_END_VMEAS "HALF VCCIO" -fall
+set_global_assignment -name OUTPUT_IO_TIMING_FAR_END_VMEAS "HALF SIGNAL SWING" -rise
+set_global_assignment -name OUTPUT_IO_TIMING_FAR_END_VMEAS "HALF SIGNAL SWING" -fall
+set_location_assignment PIN_C24 -to PHY1_RXER
+set_location_assignment PIN_D18 -to PHY0_RXER
+set_global_assignment -name MISC_FILE "c:/Work/RepositoryWORK/openPOWERLINK_CNDK/fpga/altera/TERASIC_DE2-115/ink_pcp_DirectIO/nios_openMac.dpf"
+set_global_assignment -name SDC_FILE POWERLINK/sdc/PLK_MII_base.sdc
+set_global_assignment -name VHDL_FILE sevsegEncode.vhd
+set_global_assignment -name BDF_FILE nios_pll.bdf
+set_global_assignment -name QIP_FILE niosII_openMac.qip
+set_global_assignment -name OPTIMIZE_HOLD_TIMING "ALL PATHS"
+set_global_assignment -name FITTER_EFFORT "STANDARD FIT"
+set_global_assignment -name MISC_FILE "C:/mairt/workspace/openPOWERLINK_CNDK_mairt/fpga/altera/TERASIC_DE2-115/ink_pcp_DirectIO/nios_openMac.dpf"
+set_global_assignment -name MISC_FILE "C:/mairt/workspace/openPOWERLINK_mairt/Examples/altera_nios2/TERASIC_DE2-115/design_nios2_directIO/nios_openMac.dpf"
+set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
