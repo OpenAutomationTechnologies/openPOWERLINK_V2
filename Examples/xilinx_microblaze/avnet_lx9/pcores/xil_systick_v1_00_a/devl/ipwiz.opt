@@ -1,8 +1,0 @@
--batch 
--create xil_systick 
--ver 1.00.a 
--dir "C:\vhdl\xilinx\spartan6\openSlave_EPL02" 
--lang vhdl 
--bus plbv46 s 
--mem 1 
--xps 

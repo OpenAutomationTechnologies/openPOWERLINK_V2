@@ -8,18 +8,23 @@
 # Package:   csg324
 # Speed Grade:  -2
 # Processor number: 1
-# Processor 1: microblaze_0
+# Processor 1: pcp
 # System clock frequency: 66.7
 # Debug Interface: On-Chip HW Debug Module
 # ##############################################################################
  PARAMETER VERSION = 2.1.0
 
 
+ PORT fpga_0_SPI_FLASH_SCK_pin = fpga_0_SPI_FLASH_SCK_pin, DIR = IO
+ PORT fpga_0_SPI_FLASH_MISO_pin = fpga_0_SPI_FLASH_MISO_pin, DIR = IO
+ PORT fpga_0_SPI_FLASH_MOSI_pin = fpga_0_SPI_FLASH_MOSI_pin, DIR = IO
+ PORT fpga_0_SPI_FLASH_SS_pin = fpga_0_SPI_FLASH_SS_pin, DIR = IO
  PORT fpga_0_SPI_FLASH_SPI_HOLDn_pin = net_vcc, DIR = O
  PORT fpga_0_SPI_FLASH_SPI_Wn_pin = net_vcc, DIR = O
  PORT fpga_0_USB_UART_RX_pin = fpga_0_USB_UART_RX_pin, DIR = I
  PORT fpga_0_USB_UART_TX_pin = fpga_0_USB_UART_TX_pin, DIR = O
  PORT fpga_0_LEDs_4Bits_GPIO_IO_O_pin = fpga_0_LEDs_4Bits_GPIO_IO_O_pin, DIR = O, VEC = [0:3]
+ PORT fpga_0_DIP_Switch_4Bits_GPIO_IO_I_pin = fpga_0_DIP_Switch_4Bits_GPIO_IO_I_pin, DIR = I, VEC = [0:3]
  PORT fpga_0_MCB3_LPDDR_mcbx_dram_addr_pin = fpga_0_MCB3_LPDDR_mcbx_dram_addr_pin, DIR = O, VEC = [12:0]
  PORT fpga_0_MCB3_LPDDR_mcbx_dram_ba_pin = fpga_0_MCB3_LPDDR_mcbx_dram_ba_pin, DIR = O, VEC = [1:0]
  PORT fpga_0_MCB3_LPDDR_mcbx_dram_ras_n_pin = fpga_0_MCB3_LPDDR_mcbx_dram_ras_n_pin, DIR = O
@@ -36,77 +41,88 @@
  PORT fpga_0_MCB3_LPDDR_rzq_pin = fpga_0_MCB3_LPDDR_rzq_pin, DIR = IO
  PORT fpga_0_clk_1_sys_clk_pin = CLK_S, DIR = I, SIGIS = CLK, CLK_FREQ = 66666667
  PORT fpga_0_rst_1_sys_rst_pin = sys_rst_s, DIR = I, SIGIS = RST, RST_POLARITY = 1
- PORT phy0_pwdn_pin = net_vcc, DIR = O
-# PORT phy0_miid_pin = xil_openmac_0_Mii_D, DIR = IO
- PORT phy0_miic_pin = xil_openmac_0_Mii_Clk, DIR = O
- PORT phy0_resetn_pin = xil_openmac_0_nResetOut, DIR = O
-# PORT phy1_pwdn_pin = net_vcc, DIR = O
-# PORT phy1_miid_pin = xil_openmac_0_Mii_D, DIR = IO
-# PORT phy1_miic_pin = xil_openmac_0_Mii_Clk, DIR = O
-# PORT phy1_resetn_pin = xil_openmac_0_nResetOut, DIR = O
-# # both Phys
- PORT phys_miid_pin = xil_openmac_0_Mii_D, DIR = IO, VEC = [1:0]
-# # Ethernet Phy 0
- PORT phy0_Mii_RxClk_pin = phy0_Mii_RxClk, DIR = I
- PORT phy0_Mii_RxDat_pin = phy0_Mii_RxDat, DIR = I, VEC = [3:0]
- PORT phy0_Mii_RxDv_pin = phy0_Mii_RxDv, DIR = I
- PORT phy0_Mii_TxClk_pin = phy0_Mii_TxClk, DIR = I
- PORT phy0_Mii_TxDat_pin = phy0_Mii_TxDat, DIR = O, VEC = [3:0]
- PORT phy0_Mii_TxEn_pin = phy0_Mii_TxEn, DIR = O
- PORT phy0_Mii_Crs_pin = phy0_Mii_Crs, DIR = I
- PORT phy0_Mii_TxEr_pin = phy0_Mii_TxEr, DIR = O
- PORT phy0_Mii_RxErr_pin = phy0_Mii_RxErr, DIR = I
- PORT phy0_Mii_Col_pin = phy0_Mii_Col, DIR = I
+ PORT plb_powerlink_0_phyMii0_RxClk_pin = plb_powerlink_0_phyMii0_RxClk, DIR = I
+ PORT plb_powerlink_0_phyMii0_RxDat_pin = plb_powerlink_0_phyMii0_RxDat, DIR = I, VEC = [3:0]
+ PORT plb_powerlink_0_phyMii0_RxDv_pin = plb_powerlink_0_phyMii0_RxDv, DIR = I
+ PORT plb_powerlink_0_phyMii0_RxEr_pin = plb_powerlink_0_phyMii0_RxEr, DIR = I
+ PORT plb_powerlink_0_phyMii0_TxClk_pin = plb_powerlink_0_phyMii0_TxClk, DIR = I
+ PORT plb_powerlink_0_phyMii0_TxDat_pin = plb_powerlink_0_phyMii0_TxDat, DIR = O, VEC = [3:0]
+ PORT plb_powerlink_0_phyMii0_TxEn_pin = plb_powerlink_0_phyMii0_TxEn, DIR = O
+ PORT plb_powerlink_0_phyMii0_TxEr_pin = plb_powerlink_0_phyMii0_TxEr, DIR = O
+ PORT plb_powerlink_0_phy_SMIDat_pin = plb_powerlink_0_phy_SMIDat, DIR = IO
+ PORT plb_powerlink_0_phy_SMIClk_pin = plb_powerlink_0_phy_SMIClk, DIR = O
+ PORT plb_powerlink_0_phy_Rst_n_pin = plb_powerlink_0_phy_Rst_n, DIR = O
+ PORT plb_powerlink_0_phy0_link_pin = plb_powerlink_0_phy0_link, DIR = I
 
+
+BEGIN xps_intc
+ PARAMETER INSTANCE = pcp_intc
+ PARAMETER HW_VER = 2.01.a
+ PARAMETER C_BASEADDR = 0x81800000
+ PARAMETER C_HIGHADDR = 0x8180ffff
+ BUS_INTERFACE SPLB = pcp_plb
+ PORT Intr = xps_hwicap_0_IP2INTC_Irpt & fit_timer_0_Interrupt_0 & plb_powerlink_0_mac_irq & plb_powerlink_0_tcp_irq
+ PORT Irq = xps_intc_0_Irq
+END
 
 BEGIN proc_sys_reset
  PARAMETER INSTANCE = proc_sys_reset_0
  PARAMETER C_EXT_RESET_HIGH = 1
  PARAMETER HW_VER = 3.00.a
- PORT Slowest_sync_clk = clk_50_0000MHzPLL0
+ PORT Slowest_sync_clk = clk_50_0000MHzPLL1
  PORT Ext_Reset_In = sys_rst_s
- PORT MB_Debug_Sys_Rst = Debug_SYS_Rst
  PORT Dcm_locked = Dcm_all_locked
  PORT MB_Reset = mb_reset
  PORT Bus_Struct_Reset = sys_bus_reset
  PORT Peripheral_Reset = sys_periph_reset
 END
 
-BEGIN xps_bram_if_cntlr
- PARAMETER INSTANCE = packets_cntlr_1
- PARAMETER HW_VER = 1.00.b
- PARAMETER C_SPLB_NATIVE_DWIDTH = 32
- PARAMETER C_BASEADDR = 0x00008000
- PARAMETER C_HIGHADDR = 0x0000ffff
- BUS_INTERFACE SPLB = dma_plb
- BUS_INTERFACE PORTA = packets_cntlr_1_PORTA
-END
-
-BEGIN lmb_bram_if_cntlr
- PARAMETER INSTANCE = packets_cntlr_0
- PARAMETER HW_VER = 3.00.b
- PARAMETER C_BASEADDR = 0x00008000
- PARAMETER C_HIGHADDR = 0x0000ffff
- BUS_INTERFACE SLMB = dlmb
- BUS_INTERFACE BRAM_PORT = packets_cntlr_0_BRAM_PORT
-END
-
-BEGIN bram_block
- PARAMETER INSTANCE = packets_bram
+BEGIN plb_powerlink
+ PARAMETER INSTANCE = plb_powerlink_0
  PARAMETER HW_VER = 1.00.a
- BUS_INTERFACE PORTA = packets_cntlr_1_PORTA
- BUS_INTERFACE PORTB = packets_cntlr_0_BRAM_PORT
+ PARAMETER C_TX_INT_PKT = TRUE
+ PARAMETER C_USE_RMII = FALSE
+ PARAMETER C_USE_2ND_PHY = false
+ PARAMETER C_RX_INT_PKT = TRUE
+ PARAMETER C_PACKET_LOCATION = 0
+ PARAMETER C_OBSERVER_ENABLE = true
+ PARAMETER C_IP_CORE_MODE = 5
+ PARAMETER C_MAC_CMP_BASEADDR = 0xcb020000
+ PARAMETER C_MAC_CMP_HIGHADDR = 0xcb02ffff
+ PARAMETER C_MAC_PKT_BASEADDR = 0x20000000
+ PARAMETER C_MAC_PKT_HIGHADDR = 0x2000ffff
+ PARAMETER C_MAC_REG_BASEADDR = 0xcb000000
+ PARAMETER C_MAC_REG_HIGHADDR = 0xcb00ffff
+ PARAMETER C_MAC_NUM_RX_BUFFER_USER = 4
+ PARAMETER C_MAC_PKT_SIZE_TX_USER = 7690
+ BUS_INTERFACE MAC_REG = pcp_plb
+ BUS_INTERFACE MAC_PKT = pcp_plb
+ PORT mac_irq = plb_powerlink_0_mac_irq
+ PORT tcp_irq = plb_powerlink_0_tcp_irq
+ PORT clk50 = clk_50_0000MHzPLL1
+ PORT phyMii0_RxClk = plb_powerlink_0_phyMii0_RxClk
+ PORT phyMii0_RxDat = plb_powerlink_0_phyMii0_RxDat
+ PORT phyMii0_RxDv = plb_powerlink_0_phyMii0_RxDv
+ PORT phyMii0_RxEr = plb_powerlink_0_phyMii0_RxEr
+ PORT phyMii0_TxClk = plb_powerlink_0_phyMii0_TxClk
+ PORT phyMii0_TxDat = plb_powerlink_0_phyMii0_TxDat
+ PORT phyMii0_TxEn = plb_powerlink_0_phyMii0_TxEn
+ PORT phyMii0_TxEr = plb_powerlink_0_phyMii0_TxEr
+ PORT phy_SMIDat = plb_powerlink_0_phy_SMIDat
+ PORT phy_SMIClk = plb_powerlink_0_phy_SMIClk
+ PORT phy_Rst_n = plb_powerlink_0_phy_Rst_n
+ PORT phy0_link = plb_powerlink_0_phy0_link
 END
 
 BEGIN microblaze
- PARAMETER INSTANCE = microblaze_0
- PARAMETER C_USE_BARREL = 1
+ PARAMETER INSTANCE = pcp
+ PARAMETER C_USE_BARREL = 0
  PARAMETER C_DEBUG_ENABLED = 1
  PARAMETER HW_VER = 8.20.a
- PARAMETER C_ICACHE_BASEADDR = 0x44000000
- PARAMETER C_ICACHE_HIGHADDR = 0x47ffffff
- PARAMETER C_DCACHE_BASEADDR = 0x44000000
- PARAMETER C_DCACHE_HIGHADDR = 0x47ffffff
+ PARAMETER C_ICACHE_BASEADDR = 0x10000000
+ PARAMETER C_ICACHE_HIGHADDR = 0x13ffffff
+ PARAMETER C_DCACHE_BASEADDR = 0x10000000
+ PARAMETER C_DCACHE_HIGHADDR = 0x13ffffff
  PARAMETER C_NUMBER_OF_PC_BRK = 0
  PARAMETER C_CACHE_BYTE_SIZE = 2048
  PARAMETER C_ICACHE_ALWAYS_USED = 1
@@ -115,18 +131,17 @@ BEGIN microblaze
  PARAMETER C_USE_HW_MUL = 0
  PARAMETER C_USE_MSR_INSTR = 0
  PARAMETER C_USE_PCMP_INSTR = 0
- PARAMETER C_AREA_OPTIMIZED = 1
+ PARAMETER C_AREA_OPTIMIZED = 0
  PARAMETER C_USE_ICACHE = 1
  PARAMETER C_USE_DCACHE = 1
  PARAMETER C_NUMBER_OF_WR_ADDR_BRK = 0
  PARAMETER C_NUMBER_OF_RD_ADDR_BRK = 0
- BUS_INTERFACE DPLB = mb_plb
- BUS_INTERFACE IPLB = mb_plb
- BUS_INTERFACE DEBUG = microblaze_0_mdm_bus
- BUS_INTERFACE IXCL = microblaze_0_IXCL
- BUS_INTERFACE DXCL = microblaze_0_DXCL
+ BUS_INTERFACE DPLB = pcp_plb
  BUS_INTERFACE DLMB = dlmb
  BUS_INTERFACE ILMB = ilmb
+ BUS_INTERFACE IXCL = pcp_IXCL
+ BUS_INTERFACE DXCL = pcp_DXCL
+ BUS_INTERFACE DEBUG = mdm_0_MBDEBUG_0
  PORT MB_RESET = mb_reset
  PORT INTERRUPT = xps_intc_0_Irq
 END
@@ -138,36 +153,16 @@ BEGIN mdm
  PARAMETER HW_VER = 2.00.b
  PARAMETER C_BASEADDR = 0x84400000
  PARAMETER C_HIGHADDR = 0x8440ffff
- BUS_INTERFACE SPLB = mb_plb
- BUS_INTERFACE MBDEBUG_0 = microblaze_0_mdm_bus
+ BUS_INTERFACE SPLB = pcp_plb
+ BUS_INTERFACE MBDEBUG_0 = mdm_0_MBDEBUG_0
  PORT Debug_SYS_Rst = Debug_SYS_Rst
  PORT Interrupt = mdm_0_Interrupt
 END
 
-BEGIN plbv46_plbv46_bridge
- PARAMETER INSTANCE = mb_to_mac_bridge
- PARAMETER HW_VER = 1.04.a
- PARAMETER C_NUM_ADDR_RNG = 1
- PARAMETER C_BRIDGE_BASEADDR = 0x86200000
- PARAMETER C_BRIDGE_HIGHADDR = 0x8620ffff
- PARAMETER C_RNG0_BASEADDR = 0xcec00000
- PARAMETER C_RNG0_HIGHADDR = 0xcec3ffff
- PARAMETER C_BUS_CLOCK_RATIO = 2
- BUS_INTERFACE MPLB = mac_plb
- BUS_INTERFACE SPLB = mb_plb
-END
-
 BEGIN plb_v46
- PARAMETER INSTANCE = mb_plb
+ PARAMETER INSTANCE = pcp_plb
  PARAMETER HW_VER = 1.05.a
- PORT PLB_Clk = clk_100_0000MHzPLL0
- PORT SYS_Rst = sys_bus_reset
-END
-
-BEGIN plb_v46
- PARAMETER INSTANCE = mac_plb
- PARAMETER HW_VER = 1.05.a
- PORT PLB_Clk = clk_50_0000MHzPLL0
+ PORT PLB_Clk = clk_100_0000MHzPLL1
  PORT SYS_Rst = sys_bus_reset
 END
 
@@ -190,15 +185,17 @@ END
 BEGIN lmb_v10
  PARAMETER INSTANCE = ilmb
  PARAMETER HW_VER = 2.00.b
- PORT LMB_Clk = clk_100_0000MHzPLL0
+ PORT LMB_Clk = clk_100_0000MHzPLL1
  PORT SYS_Rst = sys_bus_reset
 END
 
-BEGIN plb_v46
- PARAMETER INSTANCE = dma_plb
- PARAMETER HW_VER = 1.05.a
- PORT PLB_Clk = clk_50_0000MHzPLL0
- PORT SYS_Rst = sys_bus_reset
+BEGIN fit_timer
+ PARAMETER INSTANCE = fit_timer_0
+ PARAMETER HW_VER = 1.01.b
+ PARAMETER C_NO_CLOCKS = 50000
+ PORT Clk = clk_50_0000MHzPLL1
+ PORT Rst = sys_bus_reset
+ PORT Interrupt = fit_timer_0_Interrupt_0
 END
 
 BEGIN lmb_bram_if_cntlr
@@ -213,7 +210,7 @@ END
 BEGIN lmb_v10
  PARAMETER INSTANCE = dlmb
  PARAMETER HW_VER = 2.00.b
- PORT LMB_Clk = clk_100_0000MHzPLL0
+ PORT LMB_Clk = clk_100_0000MHzPLL1
  PORT SYS_Rst = sys_bus_reset
 END
 
@@ -236,35 +233,42 @@ BEGIN clock_generator
  PARAMETER C_CLKOUT3_PHASE = 0
  PARAMETER C_CLKOUT3_GROUP = PLL1
  PARAMETER C_CLKOUT3_BUF = TRUE
+ PARAMETER C_CLKOUT4_FREQ = 4000000
+ PARAMETER C_CLKOUT4_PHASE = 0
+ PARAMETER C_CLKOUT4_GROUP = NONE
+ PARAMETER C_CLKOUT4_BUF = TRUE
  PARAMETER C_EXT_RESET_HIGH = 1
  PARAMETER HW_VER = 4.02.a
  PORT CLKIN = CLK_S
  PORT CLKOUT0 = clk_333_3333MHzPLL0_nobuf
  PORT CLKOUT1 = clk_333_3333MHz180PLL0_nobuf
- PORT CLKOUT2 = clk_50_0000MHzPLL0
- PORT CLKOUT3 = clk_100_0000MHzPLL0
+ PORT CLKOUT2 = clk_50_0000MHzPLL1
+ PORT CLKOUT3 = clk_100_0000MHzPLL1
+ PORT CLKOUT4 = clk_4_0000MHz
  PORT RST = sys_rst_s
  PORT LOCKED = Dcm_all_locked
 END
 
-BEGIN xps_uartlite
- PARAMETER INSTANCE = USB_UART
- PARAMETER C_BAUDRATE = 9600
- PARAMETER C_DATA_BITS = 8
- PARAMETER C_USE_PARITY = 0
- PARAMETER C_ODD_PARITY = 0
- PARAMETER HW_VER = 1.02.a
- PARAMETER C_BASEADDR = 0x84000000
- PARAMETER C_HIGHADDR = 0x8400ffff
- BUS_INTERFACE SPLB = mb_plb
- PORT RX = fpga_0_USB_UART_RX_pin
- PORT TX = fpga_0_USB_UART_TX_pin
- PORT Interrupt = USB_UART_Interrupt
+BEGIN xps_spi
+ PARAMETER INSTANCE = SPI_FLASH
+ PARAMETER C_FIFO_EXIST = 0
+ PARAMETER C_SCK_RATIO = 128
+ PARAMETER C_NUM_SS_BITS = 1
+ PARAMETER C_NUM_TRANSFER_BITS = 8
+ PARAMETER HW_VER = 2.02.a
+ PARAMETER C_BASEADDR = 0x83400000
+ PARAMETER C_HIGHADDR = 0x8340ffff
+ BUS_INTERFACE SPLB = pcp_plb
+ PORT SPISEL = net_vcc
+ PORT SCK = fpga_0_SPI_FLASH_SCK_pin
+ PORT MISO = fpga_0_SPI_FLASH_MISO_pin
+ PORT MOSI = fpga_0_SPI_FLASH_MOSI_pin
+ PORT SS = fpga_0_SPI_FLASH_SS_pin
 END
 
 BEGIN mpmc
  PARAMETER INSTANCE = MCB3_LPDDR
- PARAMETER C_NUM_PORTS = 2
+ PARAMETER C_NUM_PORTS = 1
  PARAMETER C_PORT_CONFIG = 1
  PARAMETER C_MCB_LOC = MEMC3
  PARAMETER C_MCB_RZQ_LOC = N4
@@ -273,14 +277,14 @@ BEGIN mpmc
  PARAMETER C_MEM_DATA_WIDTH = 16
  PARAMETER C_PIM0_BASETYPE = 1
  PARAMETER HW_VER = 6.04.a
- PARAMETER C_PIM1_BASETYPE = 2
+ PARAMETER C_PIM1_BASETYPE = 0
  PARAMETER C_XCL0_B_IN_USE = 1
- PARAMETER C_MPMC_BASEADDR = 0x44000000
- PARAMETER C_MPMC_HIGHADDR = 0x47ffffff
- BUS_INTERFACE SPLB1 = dma_plb
- BUS_INTERFACE XCL0 = microblaze_0_IXCL
- BUS_INTERFACE XCL0_B = microblaze_0_DXCL
- PORT MPMC_Clk0 = clk_100_0000MHzPLL0
+ PARAMETER C_ARB0_ALGO = ROUND_ROBIN
+ PARAMETER C_MPMC_BASEADDR = 0x10000000
+ PARAMETER C_MPMC_HIGHADDR = 0x13ffffff
+ BUS_INTERFACE XCL0 = pcp_IXCL
+ BUS_INTERFACE XCL0_B = pcp_DXCL
+ PORT MPMC_Clk0 = clk_100_0000MHzPLL1
  PORT MPMC_Rst = sys_periph_reset
  PORT MPMC_Clk_Mem_2x = clk_333_3333MHzPLL0_nobuf
  PORT MPMC_Clk_Mem_2x_180 = clk_333_3333MHz180PLL0_nobuf
@@ -301,58 +305,29 @@ BEGIN mpmc
  PORT rzq = fpga_0_MCB3_LPDDR_rzq_pin
 END
 
-BEGIN xil_openmac
- PARAMETER INSTANCE = xil_openmac_0
- PARAMETER HW_VER = 1.00.e
- PARAMETER useRmii_g = false
- PARAMETER C_MEM0_BASEADDR = 0xcec20000
- PARAMETER C_MEM0_HIGHADDR = 0xcec2ffff
- BUS_INTERFACE SPLB = mac_plb
- BUS_INTERFACE MPLB = dma_plb
- PORT phyMii0_RxClk = phy0_Mii_RxClk
- PORT TX_IR_n = xil_openmac_0_TX_IR_n
- PORT RX_IR_n = xil_openmac_0_RX_IR_n
- PORT Cmp_IR_n = xil_openmac_0_Cmp_IR_n
- PORT phyMii0_RxDat = phy0_Mii_RxDat
- PORT phyMii0_RxDv = phy0_Mii_RxDv
- PORT phyMii0_TxClk = phy0_Mii_TxClk
- PORT phyMii0_TxDat = phy0_Mii_TxDat
- PORT phyMii0_TxEn = phy0_Mii_TxEn
- PORT phyMii0_Crs = phy0_Mii_Crs
- PORT phyMii0_TxEr = phy0_Mii_TxEr
- PORT phyMii0_RxErr = phy0_Mii_RxErr
- PORT phyMii0_Col = phy0_Mii_Col
-# PORT phyMii1_RxClk = phy1_Mii_RxClk
-# PORT phyMii1_RxDat = phy1_Mii_RxDat
-# PORT phyMii1_RxDv = phy1_Mii_RxDv
-# PORT phyMii1_TxClk = phy1_Mii_TxClk
-# PORT phyMii1_TxDat = phy1_Mii_TxDat
-# PORT phyMii1_TxEn = phy1_Mii_TxEn
-# PORT phyMii1_Crs = phy1_Mii_Crs
-# PORT phyMii1_TxEr = phy1_Mii_TxEr
-# PORT phyMii1_RxErr = phy1_Mii_RxErr
-# PORT phyMii1_Col = phy1_Mii_Col
- PORT Mii_D = xil_openmac_0_Mii_D
- PORT Mii_Clk = xil_openmac_0_Mii_Clk
- PORT nResetOut = xil_openmac_0_nResetOut
+BEGIN xps_hwicap
+ PARAMETER INSTANCE = xps_hwicap_0
+ PARAMETER HW_VER = 5.01.a
+ PARAMETER C_BASEADDR = 0x86800000
+ PARAMETER C_HIGHADDR = 0x8680ffff
+ BUS_INTERFACE SPLB = pcp_plb
+ PORT ICAP_Clk = clk_4_0000MHz
+ PORT IP2INTC_Irpt = xps_hwicap_0_IP2INTC_Irpt
 END
 
-BEGIN xil_systick
- PARAMETER INSTANCE = xil_systick_0
- PARAMETER HW_VER = 1.00.a
- PARAMETER C_MEM0_BASEADDR = 0xcec00000
- PARAMETER C_MEM0_HIGHADDR = 0xcec0ffff
- BUS_INTERFACE SPLB = mac_plb
-END
-
-BEGIN xps_intc
- PARAMETER INSTANCE = xps_intc_0
- PARAMETER HW_VER = 2.01.a
- PARAMETER C_BASEADDR = 0x81800000
- PARAMETER C_HIGHADDR = 0x8180ffff
- BUS_INTERFACE SPLB = mb_plb
- PORT Intr = USB_UART_Interrupt & mdm_0_Interrupt & xil_openmac_0_Cmp_IR_n & xil_openmac_0_RX_IR_n & xil_openmac_0_TX_IR_n
- PORT Irq = xps_intc_0_Irq
+BEGIN xps_uartlite
+ PARAMETER INSTANCE = USB_UART
+ PARAMETER C_BAUDRATE = 9600
+ PARAMETER C_DATA_BITS = 8
+ PARAMETER C_USE_PARITY = 0
+ PARAMETER C_ODD_PARITY = 0
+ PARAMETER HW_VER = 1.02.a
+ PARAMETER C_BASEADDR = 0x8681c100
+ PARAMETER C_HIGHADDR = 0x8681c10f
+ BUS_INTERFACE SPLB = pcp_plb
+ PORT RX = fpga_0_USB_UART_RX_pin
+ PORT TX = fpga_0_USB_UART_TX_pin
+ PORT Interrupt = USB_UART_Interrupt
 END
 
 BEGIN xps_gpio
@@ -362,9 +337,22 @@ BEGIN xps_gpio
  PARAMETER C_INTERRUPT_PRESENT = 0
  PARAMETER C_IS_DUAL = 0
  PARAMETER HW_VER = 2.00.a
- PARAMETER C_BASEADDR = 0x81400000
- PARAMETER C_HIGHADDR = 0x8140ffff
- BUS_INTERFACE SPLB = mb_plb
+ PARAMETER C_BASEADDR = 0x86818000
+ PARAMETER C_HIGHADDR = 0x868181ff
+ BUS_INTERFACE SPLB = pcp_plb
  PORT GPIO_IO_O = fpga_0_LEDs_4Bits_GPIO_IO_O_pin
+END
+
+BEGIN xps_gpio
+ PARAMETER INSTANCE = DIP_Switches
+ PARAMETER C_ALL_INPUTS = 1
+ PARAMETER C_GPIO_WIDTH = 4
+ PARAMETER C_INTERRUPT_PRESENT = 0
+ PARAMETER C_IS_DUAL = 0
+ PARAMETER HW_VER = 2.00.a
+ PARAMETER C_BASEADDR = 0x86814000
+ PARAMETER C_HIGHADDR = 0x868141ff
+ BUS_INTERFACE SPLB = pcp_plb
+ PORT GPIO_IO_I = fpga_0_DIP_Switch_4Bits_GPIO_IO_I_pin
 END
 

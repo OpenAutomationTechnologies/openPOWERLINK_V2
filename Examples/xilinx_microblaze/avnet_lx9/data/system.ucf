@@ -7,6 +7,18 @@ Net fpga_0_LEDs_4Bits_GPIO_IO_O_pin<1> LOC=L6 | IOSTANDARD = LVCMOS18;
 Net fpga_0_LEDs_4Bits_GPIO_IO_O_pin<2> LOC=F5 | IOSTANDARD = LVCMOS18;
 Net fpga_0_LEDs_4Bits_GPIO_IO_O_pin<3> LOC=C2 | IOSTANDARD = LVCMOS18;
 
+Net fpga_0_DIP_Switch_4Bits_GPIO_IO_I_pin<0> LOC=B3 | IOSTANDARD = LVCMOS33 | PULLDOWN;
+Net fpga_0_DIP_Switch_4Bits_GPIO_IO_I_pin<1> LOC=A3 | IOSTANDARD = LVCMOS33 | PULLDOWN;
+Net fpga_0_DIP_Switch_4Bits_GPIO_IO_I_pin<2> LOC=B4 | IOSTANDARD = LVCMOS33 | PULLDOWN;
+Net fpga_0_DIP_Switch_4Bits_GPIO_IO_I_pin<3> LOC=A4 | IOSTANDARD = LVCMOS33 | PULLDOWN;
+
+Net fpga_0_SPI_FLASH_SCK_pin LOC=R15 | IOSTANDARD = LVCMOS33;
+Net fpga_0_SPI_FLASH_MISO_pin LOC=R13 | IOSTANDARD = LVCMOS33;
+Net fpga_0_SPI_FLASH_MOSI_pin LOC=T13 | IOSTANDARD = LVCMOS33;
+Net fpga_0_SPI_FLASH_SS_pin LOC=V3  | IOSTANDARD = LVCMOS33;
+Net fpga_0_SPI_FLASH_SPI_HOLDn_pin LOC=V14  | IOSTANDARD = LVCMOS33;
+Net fpga_0_SPI_FLASH_SPI_Wn_pin LOC=T14  | IOSTANDARD = LVCMOS33;
+
 Net fpga_0_clk_1_sys_clk_pin TNM_NET = sys_clk_pin;
 TIMESPEC TS_sys_clk_pin = PERIOD sys_clk_pin 66666.7 kHz;
 Net fpga_0_clk_1_sys_clk_pin TNM_NET = sys_clk_pin  |  LOC=K15 | IOSTANDARD = LVCMOS33;
@@ -65,44 +77,83 @@ NET fpga_0_MCB3_LPDDR_mcbx_dram_cas_n_pin       LOC = K5  | IOSTANDARD = MOBILE_
 NET fpga_0_MCB3_LPDDR_mcbx_dram_ras_n_pin       LOC = L5  | IOSTANDARD = MOBILE_DDR;             # "LPDDR_RAS#"
 NET fpga_0_MCB3_LPDDR_mcbx_dram_we_n_pin        LOC = E3  | IOSTANDARD = MOBILE_DDR;             # "LPDDR_WE#"
 NET fpga_0_MCB3_LPDDR_rzq_pin         LOC = N4  | IOSTANDARD = MOBILE_DDR;             # "LPDDR_RZQ"
-#### PHY 1 (FMC-ISMNET J2)
-NET phy0_Mii_TxClk_pin LOC = H17 | IOSTANDARD = LVCMOS33; 
-NET phy0_Mii_TxEn_pin LOC = L17 | IOSTANDARD = LVCMOS33;
-NET phy0_Mii_TxDat_pin<3> LOC = J16 | IOSTANDARD = LVCMOS33;
-NET phy0_Mii_TxDat_pin<2> LOC = J18 | IOSTANDARD = LVCMOS33;
-NET phy0_Mii_TxDat_pin<1> LOC = K17 | IOSTANDARD = LVCMOS33;
-NET phy0_Mii_TxDat_pin<0> LOC = K18 | IOSTANDARD = LVCMOS33;
-#NET phy0_Mii_TxEr_pin LOC = "";
-NET phy0_Mii_RxClk_pin LOC = L15 | IOSTANDARD = LVCMOS33;
-NET phy0_Mii_RxDv_pin LOC = P17 | IOSTANDARD = LVCMOS33;
-NET phy0_Mii_RxDat_pin<3> LOC = P18 | IOSTANDARD = LVCMOS33 | PULLUP;
-NET phy0_Mii_RxDat_pin<2> LOC = N15 | IOSTANDARD = LVCMOS33 | PULLUP;
-NET phy0_Mii_RxDat_pin<1> LOC = N16 | IOSTANDARD = LVCMOS33 | PULLUP;
-NET phy0_Mii_RxDat_pin<0> LOC = T17 | IOSTANDARD = LVCMOS33 | PULLUP;
-NET phy0_Mii_RxErr_pin LOC = N18 | IOSTANDARD = LVCMOS33;
-NET phy0_Mii_Crs_pin LOC = N17 | IOSTANDARD = LVCMOS33 | PULLDOWN;
-NET phy0_Mii_Col_pin LOC = M18 | IOSTANDARD = LVCMOS33 | PULLDOWN;
-#NET phy0_Mii_RxClk_pin PERIOD = 40ns HIGH 20ns;
-#NET phy0_Mii_TxClk_pin PERIOD = 40ns HIGH 20ns;
-#OFFSET = IN 10ns VALID 20ns BEFORE phy0_Mii_RxClk_pin;
-###PHY1 MII
-#NET phy0_pwdn_pin LOC = "A12" | TIG;
-NET phys_miid_pin<0> LOC = L18 | IOSTANDARD = LVCMOS33;
-NET phy0_miic_pin LOC = M16 | IOSTANDARD = LVCMOS33;
-NET phy0_resetn_pin LOC = T18 | IOSTANDARD = LVCMOS33 | TIG;
-## Timing constraints revised by Joerg Zelenka 2011-07-12
-### MII receive timing
-#### T = 40 ns
-#### tco = 10...30 ns
-#### => in before = T - tco = 30...10 ns (take worst case of 10 ns)
-#### note: data is valid (worst case) 10 ns before and 10 ns after clock edge
-NET "phy0_Mii_RxClk_pin" TNM_NET = "phy0_Mii_RxClk_pin";
-TIMESPEC "TS_RXCLK" = PERIOD "phy0_Mii_RxClk_pin" 40 ns HIGH 20 ns;
-OFFSET = IN 10 ns VALID 10 ns BEFORE "phy0_Mii_RxClk_pin";
-### MII transmit timing
-#### T = 40 ns
-#### tsu/th = 10/0 ns
-#### => out after = T - tsu = 40 - 10 = 30 ns
-NET "phy0_Mii_TxClk_pin" TNM_NET = "phy0_Mii_TxClk_pin";
-TIMESPEC "TS_TXCLK" = PERIOD "phy0_Mii_TxClk_pin" 40 ns HIGH 20 ns;
-OFFSET = OUT 30 ns AFTER "phy0_Mii_TxClk_pin";
+
+################################################################################
+# POWERLINK IP-Core
+## PHY 0
+NET plb_powerlink_0_phyMii0_TxClk_pin LOC = H17 | IOSTANDARD = LVCMOS33; 
+NET plb_powerlink_0_phyMii0_TxEn_pin LOC = L17 | IOSTANDARD = LVCMOS33;
+NET plb_powerlink_0_phyMii0_TxDat_pin<3> LOC = J16 | IOSTANDARD = LVCMOS33;
+NET plb_powerlink_0_phyMii0_TxDat_pin<2> LOC = J18 | IOSTANDARD = LVCMOS33;
+NET plb_powerlink_0_phyMii0_TxDat_pin<1> LOC = K17 | IOSTANDARD = LVCMOS33;
+NET plb_powerlink_0_phyMii0_TxDat_pin<0> LOC = K18 | IOSTANDARD = LVCMOS33;
+NET plb_powerlink_0_phyMii0_RxClk_pin LOC = L15 | IOSTANDARD = LVCMOS33;
+NET plb_powerlink_0_phyMii0_RxDv_pin LOC = P17 | IOSTANDARD = LVCMOS33 | PULLDOWN;
+NET plb_powerlink_0_phyMii0_RxDat_pin<3> LOC = P18 | IOSTANDARD = LVCMOS33 | PULLUP;
+NET plb_powerlink_0_phyMii0_RxDat_pin<2> LOC = N15 | IOSTANDARD = LVCMOS33 | PULLUP;
+NET plb_powerlink_0_phyMii0_RxDat_pin<1> LOC = N16 | IOSTANDARD = LVCMOS33 | PULLUP;
+NET plb_powerlink_0_phyMii0_RxDat_pin<0> LOC = T17 | IOSTANDARD = LVCMOS33 | PULLUP;
+NET plb_powerlink_0_phyMii0_RxEr_pin LOC = N18 | IOSTANDARD = LVCMOS33;
+NET plb_powerlink_0_phy_SMIDat_pin LOC = L18 | IOSTANDARD = LVCMOS33;
+NET plb_powerlink_0_phy_SMIClk_pin LOC = M16 | IOSTANDARD = LVCMOS33;
+NET plb_powerlink_0_phy_Rst_n_pin LOC = T18 | IOSTANDARD = LVCMOS33 | TIG;
+
+## DIRECT I/O
+### Connector J5
+#NET plb_powerlink_0_pio_portio<0>          LOC = F15 | IOSTANDARD = LVCMOS33;               # "PMOD1_P1"
+#NET plb_powerlink_0_pio_portio<1>          LOC = F16 | IOSTANDARD = LVCMOS33;               # "PMOD1_P2"
+#NET plb_powerlink_0_pio_portio<2>          LOC = C17 | IOSTANDARD = LVCMOS33;               # "PMOD1_P3"
+#NET plb_powerlink_0_pio_portio<3>          LOC = C18 | IOSTANDARD = LVCMOS33;               # "PMOD1_P4"
+#NET plb_powerlink_0_pio_portio<4>          LOC = F14 | IOSTANDARD = LVCMOS33;               # "PMOD1_P7"
+#NET plb_powerlink_0_pio_portio<5>          LOC = G14 | IOSTANDARD = LVCMOS33;               # "PMOD1_P8"
+#NET plb_powerlink_0_pio_portio<6>          LOC = D17 | IOSTANDARD = LVCMOS33;               # "PMOD1_P9"
+#NET plb_powerlink_0_pio_portio<7>         LOC = D18 | IOSTANDARD = LVCMOS33;               # "PMOD1_P10"
+### Connector J4
+#NET plb_powerlink_0_pio_portio<8>          LOC = H12 | IOSTANDARD = LVCMOS33;               # "PMOD2_P1"
+#NET plb_powerlink_0_pio_portio<9>          LOC = G13 | IOSTANDARD = LVCMOS33;               # "PMOD2_P2"
+#NET plb_powerlink_0_pio_portio<10>          LOC = E16 | IOSTANDARD = LVCMOS33;               # "PMOD2_P3"
+#NET plb_powerlink_0_pio_portio<11>          LOC = E18 | IOSTANDARD = LVCMOS33;               # "PMOD2_P4"
+#NET plb_powerlink_0_pio_portio<12>          LOC = K12 | IOSTANDARD = LVCMOS33;               # "PMOD2_P7"
+#NET plb_powerlink_0_pio_portio<13>          LOC = K13 | IOSTANDARD = LVCMOS33;               # "PMOD2_P8"
+#NET plb_powerlink_0_pio_portio<14>          LOC = F17 | IOSTANDARD = LVCMOS33;               # "PMOD2_P9"
+#NET plb_powerlink_0_pio_portio<15>         LOC = F18 | IOSTANDARD = LVCMOS33;               # "PMOD2_P10"
+################################################################################
+
+################################################################################
+# TIMING CONSTRAINTS
+## Clock groups
+### PLB and MAC clock
+NET "clk_100_0000MHzPLL1" TNM = "PLB_CLK_GRP";
+NET "clk_50_0000MHzPLL1" TNM = "MAC_CLK_GRP";
+
+### PHY0 clock
+NET "plb_powerlink_0_phyMii0_RxClk_pin" TNM_NET = "PHY0_RXCLK_GRP";
+TIMESPEC "TS_RXCLK" = PERIOD "PHY0_RXCLK_GRP" 40 ns HIGH 20 ns;
+NET "plb_powerlink_0_phyMii0_TxClk_pin" TNM_NET = "PHY0_TXCLK_GRP";
+TIMESPEC "TS_TXCLK" = PERIOD "PHY0_TXCLK_GRP" 40 ns HIGH 20 ns;
+
+#### ICAP clock
+NET "clk_4_0000MHz" TNM = "ICAP_CLK_GRP";
+
+### cut path
+#### PLB <--> ICAP
+TIMESPEC TS_PLB_ICAP_TIG = FROM "PLB_CLK_GRP" TO "ICAP_CLK_GRP" TIG;
+TIMESPEC TS_ICAP_PLB_TIG = FROM "ICAP_CLK_GRP" TO "PLB_CLK_GRP" TIG;
+
+### PLB <--> MAC
+TIMESPEC TS_PLB_MAC_TIG = FROM "PLB_CLK_GRP" TO "MAC_CLK_GRP" TIG;
+TIMESPEC TS_MAC_PLB_TIG = FROM "MAC_CLK_GRP" TO "PLB_CLK_GRP" TIG;
+
+### MAC <--> PHY0
+TIMESPEC TS_PLB_PHY0TX_TIG = FROM "MAC_CLK_GRP" TO "PHY0_TXCLK_GRP" TIG;
+TIMESPEC TS_PHY0TX_PLB_TIG = FROM "PHY0_TXCLK_GRP" TO "MAC_CLK_GRP" TIG;
+TIMESPEC TS_PLB_PHY0RX_TIG = FROM "MAC_CLK_GRP" TO "PHY0_RXCLK_GRP" TIG;
+TIMESPEC TS_PHY0RX_PLB_TIG = FROM "PHY0_RXCLK_GRP" TO "MAC_CLK_GRP" TIG;
+
+## I/O
+### PHY0
+#### T = 40 ns , tco = 10..30 ns => valid window of 10 ns before/after edge
+OFFSET = IN 10 ns VALID 10 ns BEFORE "plb_powerlink_0_phyMii0_RxClk_pin";
+#### T = 40 ns , tsu = 10 ns , th = 0 => T-tsu ns after edge
+OFFSET = OUT 30 ns AFTER "plb_powerlink_0_phyMii0_TxClk_pin";
+################################################################################

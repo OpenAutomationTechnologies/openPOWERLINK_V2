@@ -23,6 +23,8 @@ ExternalMemSim: 0
 UcfFile: data/system.ucf
 EnableParTimingError: 1
 ShowLicenseDialog: 1
-Processor: microblaze_0
+LockAddr: MCB3_LPDDR,C_MPMC_BASEADDR
+LockAddr: plb_powerlink_0,C_MAC_PKT_BASEADDR
+Processor: pcp
 ElfImp: 
 ElfSim: 
