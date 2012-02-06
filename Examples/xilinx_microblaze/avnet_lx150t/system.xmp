@@ -3,6 +3,7 @@ XmpVersion: 13.2
 VerMgmt: 13.2
 IntStyle: default
 Flow: ise
+ModuleSearchPath: pcores/plb_powerlink_v1_00_a
 MHS File: system.mhs
 Architecture: spartan6
 Device: xc6slx150t
@@ -23,6 +24,8 @@ ExternalMemSim: 0
 UcfFile: data/system.ucf
 EnableParTimingError: 1
 ShowLicenseDialog: 1
-Processor: microblaze_0
+LockAddr: MCB_DDR3,C_MPMC_BASEADDR
+LockAddr: plb_powerlink_0,C_MAC_PKT_BASEADDR
+Processor: pcp
 ElfImp: 
 ElfSim: 

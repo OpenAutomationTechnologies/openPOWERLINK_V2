@@ -1,9 +1,0 @@
-##############################################################################
-## Filename:          G:\Saranya\BR_POWERLINK-SLAVE_XILINX_V0.1.9\Reference_design\Powerlink\Spartan6-LX150T\pcores/xil_openmac_v1_00_e/data/xil_openmac_v2_1_0.bbd
-## Description:       Black Box Definition
-## Date:              Tue Jun 07 11:29:12 2011 (by Create and Import Peripheral Wizard)
-##############################################################################
-
-Files
-################################################################################
-fifo_txmii.ngc,dual_port_ram_16_16.ngc,dual_port_ram_16_32.ngc,fifo32.ngc,fifo_rxmii.ngc
