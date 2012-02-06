@@ -1,0 +1,63 @@
+# clk_0
+# pcp_cpu
+set_global_assignment -name SDC_FILE [file join $::quartus(qip_path) pcp_cpu.sdc]
+set_global_assignment -name SOURCE_FILE [file join $::quartus(qip_path) pcp_cpu.ocp]
+# tri_state_bridge_0
+# DBC3C40_SRAM_0
+set_global_assignment -name TCL_FILE [file join $::quartus(qip_path) DB3C40/DBC3C40_SRAM_hw.tcl]
+# tc_i_mem_pcp
+# jtag_uart_0
+# system_timer
+# clock_crossing_0
+# epcs_flash_controller_0
+# status_led_pio
+# altpll_0
+set_global_assignment -name TCL_FILE [file join $::quartus(ip_rootpath) altera/sopc_builder_ip/altera_avalon_altpll/altera_avalon_altpll_hw.tcl]
+set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) altpll_0.vhd]
+# remote_update_cycloneiii_0
+set_global_assignment -name TCL_FILE [file join $::quartus(ip_rootpath) altera/sopc_builder_ip/altera_avalon_remote_update_cycloneiii/altera_avalon_remote_update_cycloneiii_hw.tcl]
+set_global_assignment -name VERILOG_FILE [file join $::quartus(ip_rootpath) altera/sopc_builder_ip/altera_avalon_remote_update_cycloneiii/altera_avalon_remote_update_cycloneiii.v]
+set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) remote_update_cycloneiii_0.v]
+# powerlink_0
+set_global_assignment -name TCL_FILE [file join $::quartus(qip_path) POWERLINK/powerlink_hw.tcl]
+set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) POWERLINK/src/powerlink.vhd]
+set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) POWERLINK/src/pdi.vhd]
+set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) POWERLINK/src/pdi_par.vhd]
+set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) POWERLINK/src/pdi_dpr_Altera.vhd]
+set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) POWERLINK/src/pdi_tripleVBufLogic.vhd]
+set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) POWERLINK/src/pdi_apIrqGen.vhd]
+set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) POWERLINK/src/pdi_controlStatusReg.vhd]
+set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) POWERLINK/src/pdi_event.vhd]
+set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) POWERLINK/src/pdi_led.vhd]
+set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) POWERLINK/src/pdi_simpleReg.vhd]
+set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) POWERLINK/src/OpenFILTER.vhd]
+set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) POWERLINK/src/OpenHUB.vhd]
+set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) POWERLINK/src/OpenMAC.vhd]
+set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) POWERLINK/src/openMAC_Ethernet.vhd]
+set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) POWERLINK/src/openMAC_cmp.vhd]
+set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) POWERLINK/src/openMAC_phyAct.vhd]
+set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) POWERLINK/src/OpenMAC_DPR_Altera.vhd]
+set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) POWERLINK/src/OpenMAC_DMAFifo_Altera.vhd]
+set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) POWERLINK/src/OpenMAC_DMAmaster.vhd]
+set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) POWERLINK/src/OpenMAC_DMAmaster/dma_handler.vhd]
+set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) POWERLINK/src/OpenMAC_DMAmaster/master_handler.vhd]
+set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) POWERLINK/src/OpenMAC_PHYMI.vhd]
+set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) POWERLINK/src/OpenMAC_rmii2mii.vhd]
+set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) POWERLINK/src/portio.vhd]
+set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) POWERLINK/src/portio_cnt.vhd]
+set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) POWERLINK/src/spi.vhd]
+set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) POWERLINK/src/spi_sreg.vhd]
+set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) POWERLINK/src/pdi_spi.vhd]
+set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) POWERLINK/src/lib/addr_decoder.vhd]
+set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) POWERLINK/src/lib/edgedet.vhd]
+set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) POWERLINK/src/lib/req_ack.vhd]
+set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) POWERLINK/src/lib/sync.vhd]
+set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) POWERLINK/src/lib/slow2fastSync.vhd]
+set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) POWERLINK/src/lib/memMap.vhd]
+set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) POWERLINK/powerlink.vhd]
+set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) powerlink_0.vhd]
+# sysid
+# null
+set_global_assignment -name SDC_FILE [file join $::quartus(ip_rootpath) altera/sopc_builder_ip/altera_avalon_clock_adapter/altera_avalon_clock_adapter.sdc]
+set_global_assignment -name SOPC_BUILDER_SIGNATURE_ID 080027009C3A000001354328875C 
+ 
