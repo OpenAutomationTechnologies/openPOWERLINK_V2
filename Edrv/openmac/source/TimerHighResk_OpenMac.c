@@ -2,6 +2,10 @@
 
   (c) SYSTEC electronic GmbH, D-07973 Greiz, August-Bebel-Str. 29
       www.systec-electronic.com
+  (c) Bernecker + Rainer Industrie-Elektronik Ges.m.b.H.
+      A-5142 Eggelsberg, B&R Strasse 1
+      www.br-automation.com
+
 
   Project:      openPOWERLINK
 
@@ -48,23 +52,6 @@
         2. the validity or enforceability in other jurisdictions of that or
            any other provision of this License.
 
-  -------------------------------------------------------------------------
-
-                $RCSfile$
-
-                $Author$
-
-                $Revision$  $Date$
-
-                $State$
-
-                Build Environment:
-                    GNU
-
-  -------------------------------------------------------------------------
-
-  Revision History:
-
 ****************************************************************************/
 
 #include "EplInc.h"
@@ -75,6 +62,10 @@
 #include <sys/alt_irq.h>
 #include <alt_types.h>
 #include <io.h>
+
+#ifdef CPU_UTIL
+#include "cpuUtil.h"
+#endif
 
 
 
@@ -98,6 +89,15 @@
 #define TIMERCMP_REG_OFF_STATUS     4
 #define TIMERCMP_REG_OFF_TIME_VAL   0
 
+#ifdef __POWERLINK
+#define HIGHRES_TIMER_IRQ           POWERLINK_0_MAC_CMP_IRQ
+#define HIGHRES_TIMER_BASE          POWERLINK_0_MAC_CMP_BASE
+#elif defined(__OPENMAC)
+#define HIGHRES_TIMER_IRQ           OPENMAC_0_CMP_IRQ
+#define HIGHRES_TIMER_BASE          OPENMAC_0_CMP_BASE
+#else
+#error "Configuration unknown!"
+#endif
 
 #define TIMERHDL_MASK               0x0FFFFFFF
 #define TIMERHDL_SHIFT              28
@@ -194,7 +194,7 @@ tEplKernel      Ret;
     EplTimerHighReskCompareInterruptDisable();
     EplTimerHighReskSetCompareValue( 0 );
 
-    if (alt_irq_register(OPENMAC_0_TIMERCMP_IRQ, NULL, EplTimerHighReskInterruptHandler))
+    if (alt_irq_register(HIGHRES_TIMER_IRQ, NULL, EplTimerHighReskInterruptHandler))
     {
         Ret = kEplNoResource;
     }
@@ -226,7 +226,7 @@ tEplKernel  Ret = kEplSuccessful;
     EplTimerHighReskCompareInterruptDisable();
     EplTimerHighReskSetCompareValue( 0 );
 
-    alt_irq_register(OPENMAC_0_TIMERCMP_IRQ, NULL, NULL);
+    alt_irq_register(HIGHRES_TIMER_IRQ, NULL, NULL);
 
     EPL_MEMSET(&EplTimerHighReskInstance_l, 0, sizeof (EplTimerHighReskInstance_l));
 
@@ -423,29 +423,32 @@ Exit:
 
 static inline void EplTimerHighReskCompareInterruptDisable (void)
 {
-    IOWR_32DIRECT( OPENMAC_0_TIMERCMP_BASE, TIMERCMP_REG_OFF_CTRL, 0 );
+    IOWR_32DIRECT(HIGHRES_TIMER_BASE, TIMERCMP_REG_OFF_CTRL, 0 );
 }
 
 static inline void EplTimerHighReskCompareInterruptEnable (void)
 {
-    IOWR_32DIRECT( OPENMAC_0_TIMERCMP_BASE, TIMERCMP_REG_OFF_CTRL, 1 );
+    IOWR_32DIRECT( HIGHRES_TIMER_BASE, TIMERCMP_REG_OFF_CTRL, 1 );
 }
 
 static inline void EplTimerHighReskSetCompareValue (DWORD dwVal)
 {
-    IOWR_32DIRECT( OPENMAC_0_TIMERCMP_BASE, TIMERCMP_REG_OFF_CMP_VAL, dwVal );
+    IOWR_32DIRECT( HIGHRES_TIMER_BASE, TIMERCMP_REG_OFF_CMP_VAL, dwVal );
 }
 
 static inline DWORD EplTimerHighReskGetTimeValue (void)
 {
-    return IORD_32DIRECT( OPENMAC_0_TIMERCMP_BASE, TIMERCMP_REG_OFF_TIME_VAL );
+    return IORD_32DIRECT( HIGHRES_TIMER_BASE, TIMERCMP_REG_OFF_TIME_VAL );
 }
-
 
 static void EplTimerHighReskInterruptHandler (void* pArg_p, alt_u32 dwInt_p)
 {
 
     BENCHMARK_MOD_24_SET(4);
+
+#ifdef CPU_UTIL
+    isrcall_cpuutil();
+#endif
 
     EplTimerHighReskSetCompareValue(0);
     EplTimerHighReskCompareInterruptDisable();
@@ -456,7 +459,7 @@ static void EplTimerHighReskInterruptHandler (void* pArg_p, alt_u32 dwInt_p)
     }
 
     BENCHMARK_MOD_24_RESET(4);
+
     return;
 
 }
-

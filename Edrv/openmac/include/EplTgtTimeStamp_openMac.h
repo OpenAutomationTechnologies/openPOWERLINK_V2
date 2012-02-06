@@ -2,6 +2,10 @@
 
   (c) SYSTEC electronic GmbH, D-07973 Greiz, August-Bebel-Str. 29
       www.systec-electronic.com
+  (c) Bernecker + Rainer Industrie-Elektronik Ges.m.b.H.
+      A-5142 Eggelsberg, B&R Strasse 1
+      www.br-automation.com
+
 
   Project:      openPOWERLINK
 
@@ -48,7 +52,6 @@
            any other provision of this License.
 
   -------------------------------------------------------------------------
-
                 $RCSfile$
 
                 $Author$
@@ -59,13 +62,6 @@
 
                 Build Environment:
                     GCC V3.4
-
-  -------------------------------------------------------------------------
-
-  Revision History:
-
-  2009/09/24 m.u.:   start of the implementation
-
 
 ****************************************************************************/
 
