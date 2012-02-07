@@ -51,6 +51,18 @@
         2. the validity or enforceability in other jurisdictions of that or
            any other provision of this License.
 
+  -------------------------------------------------------------------------
+                $RCSfile$
+
+                $Author$
+
+                $Revision$  $Date$
+
+                $State$
+
+                Build Environment:
+                    GCC V3.4
+
 ****************************************************************************/
 
 #include "EplInc.h"
@@ -228,13 +240,18 @@ static void  EplTimerSynckCtrlUpdateLossOfSyncTolerance (void);
 static DWORD EplTimerSynckCtrlGetNextAbsoluteTime   (unsigned int uiTimerHdl_p, DWORD dwCurrentTime_p);
 
 static inline void  EplTimerSynckDrvCompareInterruptEnable  (void);
-static inline void  EplTimerSynckDrvCompareTogPdiInterruptEnable  (void);
+
 static inline void  EplTimerSynckDrvCompareInterruptDisable (void);
-static inline void  EplTimerSynckDrvCompareTogPdiInterruptDisable  (void);
+
 static inline void  EplTimerSynckDrvSetCompareValue         (DWORD dwVal);
-static inline void  EplTimerSynckDrvSetCompareTogPdiValue         (DWORD dwVal);
+
 static inline DWORD EplTimerSynckDrvGetTimeValue            (void);
 
+#ifdef EPL_TIMER_USE_COMPARE_PDI_INT
+static inline void  EplTimerSynckDrvCompareTogPdiInterruptEnable  (void);
+static inline void  EplTimerSynckDrvCompareTogPdiInterruptDisable  (void);
+static inline void  EplTimerSynckDrvSetCompareTogPdiValue         (DWORD dwVal);
+#endif //EPL_TIMER_USE_COMPARE_PDI_INT
 
 static void EplTimerSynckDrvInterruptHandler (void* pArg_p, DWORD dwInt_p);
 

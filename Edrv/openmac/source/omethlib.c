@@ -231,33 +231,33 @@ static ometh_internal_typ    omethInternal;    // driver internal data
 //*************************************************************************************
 //    Begin of OMETH_TRANSMIT / Macro for omethTransmitXX()
 //*************************************************************************************
-#define    OMETH_TRANSMIT( ARG, TIME, addFlags, TX_QUEUE_INDEX )
-    ometh_tx_info_typ    *pInfo    = hEth->pTxNext[TX_QUEUE_INDEX];    /* access to next tx info structure */
-    ometh_desc_typ        *pDesc    = pInfo->pDesc;            /* access to tx descriptor */
-    unsigned short        len;
-
-    /* check if descriptor is free */
-    if(pPacket == 0)                return 0;    /* invalid packet passed */
-    if(hEth->txQueueEnable == 0)    return 0;
-    if(pDesc->pData != 0)            return 0;    /* descriptor is not free (queue full !) */
-
-    len = pPacket->length;    /* padding, ethernet frames must be at least 64 byte long */
-    if(len < OMETH_MIN_TX_FRAME) len=OMETH_MIN_TX_FRAME;
-
-    pDesc->pData    = (unsigned long)&pPacket->data;    /* write buffer ptr to descriptor */
-    pDesc->len        = len;
-    pInfo->fctFreeArg    = ARG;    /* store user argument for tx-callback */
-    pDesc->txStart        = TIME;    /* scheduled start time of this frame  */
-    /* (if reaching this descriptor the tx-queue will wait until the time is reached */
-    pInfo->pFctFree    = (OMETH_BUF_FREE_FCT_ARG*)pFct;    /* store callback for free function */
-
-    hEth->cntTxQueueIn++;
-    hEth->pTxNext[TX_QUEUE_INDEX] = pInfo->pNext;    /* switch to next info structure    */
-
-    pDesc->flags.byte.low    = OMETH_MAX_RETRY;
-    pDesc->flags.byte.high    = pInfo->flags1 | addFlags;    /* set flag to start transmitter */
-
-    return len
+#define    OMETH_TRANSMIT( ARG, TIME, addFlags, TX_QUEUE_INDEX )                                    \
+    ometh_tx_info_typ    *pInfo    = hEth->pTxNext[TX_QUEUE_INDEX];    /* access to next tx info structure */   \
+    ometh_desc_typ        *pDesc    = pInfo->pDesc;            /* access to tx descriptor */        \
+    unsigned short        len;                                                                      \
+                                                                                                    \
+    /* check if descriptor is free */                                                               \
+    if(pPacket == 0)                return 0;    /* invalid packet passed */                        \
+    if(hEth->txQueueEnable == 0)    return 0;                                                       \
+    if(pDesc->pData != 0)            return 0;    /* descriptor is not free (queue full !) */       \
+                                                                                                    \
+    len = pPacket->length;    /* padding, ethernet frames must be at least 64 byte long */          \
+    if(len < OMETH_MIN_TX_FRAME) len=OMETH_MIN_TX_FRAME;                                            \
+                                                                                                    \
+    pDesc->pData    = (unsigned long)&pPacket->data;    /* write buffer ptr to descriptor */        \
+    pDesc->len        = len;                                                                        \
+    pInfo->fctFreeArg    = ARG;    /* store user argument for tx-callback */                        \
+    pDesc->txStart        = TIME;    /* scheduled start time of this frame  */                      \
+    /* (if reaching this descriptor the tx-queue will wait until the time is reached */             \
+    pInfo->pFctFree    = (OMETH_BUF_FREE_FCT_ARG*)pFct;    /* store callback for free function */   \
+                                                                                                    \
+    hEth->cntTxQueueIn++;                                                                           \
+    hEth->pTxNext[TX_QUEUE_INDEX] = pInfo->pNext;    /* switch to next info structure    */         \
+                                                                                                    \
+    pDesc->flags.byte.low    = OMETH_MAX_RETRY;                                                     \
+    pDesc->flags.byte.high    = pInfo->flags1 | addFlags;    /* set flag to start transmitter */    \
+                                                                                                    \
+    return len                                                                                      \
 
 //*************************************************************************************
 //    End of OMETH_TRANSMIT

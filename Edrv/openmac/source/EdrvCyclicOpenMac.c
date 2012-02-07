@@ -53,6 +53,18 @@
         2. the validity or enforceability in other jurisdictions of that or
            any other provision of this License.
 
+  -------------------------------------------------------------------------
+                $RCSfile$
+
+                $Author$
+
+                $Revision$  $Date$
+
+                $State$
+
+                Build Environment:
+                    GCC V3.4
+
 ****************************************************************************/
 
 #include "global.h"
