@@ -364,45 +364,12 @@ tEplKernel PUBLIC AppCbEvent(tEplApiEventType EventType_p,
                 case kEplNmtCsPreOperational1:
                 case kEplNmtCsBasicEthernet:
                 case kEplNmtMsBasicEthernet:
-                {
-                    PRINTF3("%s(0x%X) originating event = 0x%X\n",
-                            __func__,
-                            pEventArg_p->m_NmtStateChange.m_NewNmtState,
-                            pEventArg_p->m_NmtStateChange.m_NmtEvent);
-                    break;
-                }
-
                 case kEplNmtGsResetCommunication:
                 {
-                BYTE    bNodeId = 0xF0;
-                DWORD   dwNodeAssignment = EPL_NODEASSIGN_NODE_EXISTS;
-                WORD    wPresPayloadLimit = 256;
-
                     PRINTF3("%s(0x%X) originating event = 0x%X\n",
                             __func__,
                             pEventArg_p->m_NmtStateChange.m_NewNmtState,
                             pEventArg_p->m_NmtStateChange.m_NmtEvent);
-
-
-                    EplRet = EplApiWriteLocalObject(0x1F81, bNodeId, &dwNodeAssignment, sizeof (dwNodeAssignment));
-                    if (EplRet != kEplSuccessful)
-                    {
-                        goto Exit;
-                    }
-
-                    bNodeId = 0x04;
-                    dwNodeAssignment = 0x0;
-                    EplRet = EplApiWriteLocalObject(0x1F81, bNodeId, &dwNodeAssignment, sizeof (dwNodeAssignment));
-                    if (EplRet != kEplSuccessful)
-                    {
-                        goto Exit;
-                    }
-
-                    EplRet = EplApiWriteLocalObject(0x1F8D, bNodeId, &wPresPayloadLimit, sizeof (wPresPayloadLimit));
-                    if (EplRet != kEplSuccessful)
-                    {
-                        goto Exit;
-                    }
                     break;
                 }
 
@@ -431,7 +398,7 @@ tEplKernel PUBLIC AppCbEvent(tEplApiEventType EventType_p,
             // fall through
         }
         case kEplApiEventWarning:
-        {   // error or warning occured within the stack or the application
+        {   // error or warning occurred within the stack or the application
             // on error the API layer stops the NMT state machine
             PRINTF3("%s(Err/Warn): Source=%02X EplError=0x%03X",
                     __func__,
@@ -442,14 +409,14 @@ tEplKernel PUBLIC AppCbEvent(tEplApiEventType EventType_p,
             {
                 case kEplEventSourceEventk:
                 case kEplEventSourceEventu:
-                {   // error occured within event processing
+                {   // error occurred within event processing
                     // either in kernel or in user part
                     PRINTF1(" OrgSource=%02X\n", pEventArg_p->m_InternalError.m_Arg.m_EventSource);
                     break;
                 }
 
                 case kEplEventSourceDllk:
-                {   // error occured within the data link layer (e.g. interrupt processing)
+                {   // error occurred within the data link layer (e.g. interrupt processing)
                     // the DWORD argument contains the DLL state and the NMT event
                     PRINTF1(" val=%lX\n", pEventArg_p->m_InternalError.m_Arg.m_dwArg);
                     break;
@@ -514,7 +481,6 @@ tEplKernel PUBLIC AppCbEvent(tEplApiEventType EventType_p,
             break;
     }
 
-Exit:
     return EplRet;
 }
 
