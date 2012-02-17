@@ -97,8 +97,6 @@
         #define _WIN32_WINDOWS 0x0401
         #define _WIN32_WINNT   0x0501
 
-        #define _WINSOCKAPI_ // prevent windows.h from including winsock.h
-
         #include <windows.h>
         #include <process.h>
     #endif

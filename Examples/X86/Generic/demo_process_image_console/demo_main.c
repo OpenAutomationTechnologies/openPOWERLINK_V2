@@ -55,6 +55,10 @@
 
 
 /***************************************************************************/
+#if (TARGET_SYSTEM == _WIN32_)
+#define _WINSOCKAPI_ // prevent windows.h from including winsock.h
+#endif  // (TARGET_SYSTEM == _WIN32_)
+
 /* includes */
 #include "Epl.h"
 
@@ -87,9 +91,7 @@
 #endif
 
 #elif (TARGET_SYSTEM == _WIN32_)
-
 #include <pcap.h>
-
 #endif  // (TARGET_SYSTEM == _WIN32_)
 
 #include "EplTgtConio.h"
