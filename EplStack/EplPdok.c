@@ -727,6 +727,12 @@ unsigned int        uiMappObjectCount;
     // set PDO size in frame to zero, because no TPDO mapped
     AmiSetWordToLe(&pFrame_p->m_Data.m_Pres.m_le_wSize, 0);
 
+    if (fReadyFlag_p != FALSE)
+    {
+        // set TPDO valid even if TPDO size is 0
+        AmiSetByteToLe(&pFrame_p->m_Data.m_Pres.m_le_bFlag1, (bFlag1 | EPL_FRAME_FLAG1_RD));
+    }
+
 Exit:
     return Ret;
 }
