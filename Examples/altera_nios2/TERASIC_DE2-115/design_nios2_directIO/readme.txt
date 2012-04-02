@@ -19,8 +19,8 @@ Requirements
 
 - Development Board TERASIC_DE2-115 (INK Board)
 
-- Altera Quartus II v10.0 SP1 or newer (Web Edition is also possible)
-  and Altera Nios II Embedded Design Suite v10.0 SP1 or newer
+- Altera Quartus II v10.1 SP1 or newer (Web Edition is also possible)
+  and Altera Nios II Embedded Design Suite v10.1 SP1 or newer
   (http://www.altera.com/support/software/download/nios2/dnl-nios2.jsp )
 
 - Experiences with this development environment are required
