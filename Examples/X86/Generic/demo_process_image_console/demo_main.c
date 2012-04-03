@@ -55,9 +55,14 @@
 
 
 /***************************************************************************/
-/* includes */
-#if defined __linux__
+#if (TARGET_SYSTEM == _WIN32_)
+#define _WINSOCKAPI_ // prevent windows.h from including winsock.h
+#endif  // (TARGET_SYSTEM == _WIN32_)
 
+/* includes */
+#include "Epl.h"
+
+#if (TARGET_SYSTEM == _LINUX_)
 #include <stdio.h>
 #include <unistd.h>
 #include <sys/types.h>
@@ -81,16 +86,14 @@
 
 #ifndef CONFIG_POWERLINK_USERSTACK
 #include <pthread.h>
+#else
+#include <pcap.h>
 #endif
 
-#elif defined WIN32
-
-#define _WINSOCKAPI_ // prevent windows.h from including winsock.h
-
-#endif  // WIN32
-
-#include "Epl.h"
+#elif (TARGET_SYSTEM == _WIN32_)
 #include <pcap.h>
+#endif  // (TARGET_SYSTEM == _WIN32_)
+
 #include "EplTgtConio.h"
 
 /***************************************************************************/
@@ -104,12 +107,12 @@
 //---------------------------------------------------------------------------
 // const defines
 //---------------------------------------------------------------------------
-#if defined __linux__
+#if (TARGET_SYSTEM == _LINUX_)
 
 #define SET_CPU_AFFINITY
 #define MAIN_THREAD_PRIORITY            20
 
-#elif defined WIN32
+#elif (TARGET_SYSTEM == _WIN32_)
 
 // TracePoint support for realtime-debugging
 #ifdef _DBG_TRACE_POINTS_
@@ -119,7 +122,7 @@
     #define TGT_DBG_SIGNAL_TRACE_POINT(p)
 #endif
 
-#endif // WIN32
+#endif // (TARGET_SYSTEM == _WIN32_)
 
 #define NODEID      0xF0                //=> MN
 #define IP_ADDR     0xc0a86401          // 192.168.100.1
@@ -223,13 +226,13 @@ static void printlog(char *fmt, ...)
 
     time(&timeStamp);
 
-#if defined __linux__
+#if (TARGET_SYSTEM == _LINUX_)
     localtime_r(&timeStamp, &timeVal);
 	strftime(timeStr, 20, "%Y/%m/%d %H:%M:%S", &timeVal);
 #else
 	p_timeVal = localtime(&timeStamp);
 	strftime(timeStr, 20, "%Y/%m/%d %H:%M:%S", p_timeVal);
-#endif	
+#endif
 
 	fprintf (stderr, "%s - ", timeStr);
     va_start(arglist, fmt);
@@ -262,7 +265,7 @@ int  main (int argc, char **argv)
     char                        cKey = 0;
 
 #ifdef CONFIG_POWERLINK_USERSTACK
-#ifdef __linux__
+#if (TARGET_SYSTEM == _LINUX_)
 	struct sched_param          schedParam;
 #endif
 
@@ -277,7 +280,7 @@ int  main (int argc, char **argv)
 
     int                         opt;
 
-#ifdef __linux__
+#if (TARGET_SYSTEM == _LINUX_)
     /* get command line parameters */
     while ((opt = getopt(argc, argv, "c:l:")) != -1)
     {
@@ -300,7 +303,7 @@ int  main (int argc, char **argv)
 
 #ifdef CONFIG_POWERLINK_USERSTACK
 
-#if defined __linux__
+#if (TARGET_SYSTEM == _LINUX_)
 	/* adjust process priority */
     if (nice (-20) == -1)         // push nice level in case we have no RTPreempt
     {
@@ -327,15 +330,15 @@ int  main (int argc, char **argv)
     /* Initialize target specific stuff */
     EplTgtInit();
 
-#elif defined WIN32
+#elif (TARGET_SYSTEM == _WIN32_)
 
 	// activate realtime priority class
     SetPriorityClass(GetCurrentProcess(), REALTIME_PRIORITY_CLASS);
     // lower the priority of this thread
     SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_IDLE);
 
-#endif // WIN32
-	
+#endif // (TARGET_SYSTEM == _WIN32_)
+
 #endif // CONFIG_POWERLINK_USERSTACK
 
     /* Enabling ftrace for debugging */
@@ -363,10 +366,10 @@ int  main (int argc, char **argv)
         goto Exit;
     }
 
-	PRINTF0("--------------------------------------------------\n");
+    PRINTF0("--------------------------------------------------\n");
     PRINTF0("List of Ethernet Cards Found in this System: \n");
     PRINTF0("--------------------------------------------------\n");
-	
+
 	 /* Print the list */
     for (seldev = alldevs; seldev != NULL; seldev = seldev->next)
     {
@@ -381,7 +384,7 @@ int  main (int argc, char **argv)
             PRINTF1("%s\n", seldev->name);
         }
     }
-	
+
 	if (i == 0)
     {
         PRINTF0("\nNo interfaces found! Make sure WinPcap is installed.\n");
@@ -406,7 +409,7 @@ int  main (int argc, char **argv)
         EplRet = kEplNoResource;
         goto Exit;
     }
-	
+
 	/* Jump to the selected adapter */
     for (seldev = alldevs, i = 0;
          i < (inum - 1);
@@ -587,24 +590,24 @@ int  main (int argc, char **argv)
 
         EplTgtMilliSleep( 1500 );
     }
-	
+
     FTRACE_ENABLE(FALSE);
-	
+
 ExitShutdown:
     // halt the NMT state machine
     // so the processing of POWERLINK frames stops
     EplRet = EplApiExecNmtCommand(kEplNmtEventSwitchOff);
-	 
+
 	// delete process image
     EplRet = EplApiProcessImageFree();
-	
+
     // delete instance for all modules
     EplRet = EplApiShutdown();
 
 Exit:
     PRINTF1("main(): returns 0x%X\n", EplRet);
 
-#ifdef WIN32
+#if (TARGET_SYSTEM == _WIN32_)
     PRINTF0("Press Enter to quit!\n");
     EplTgtGetch();
 #endif

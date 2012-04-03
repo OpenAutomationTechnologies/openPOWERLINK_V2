@@ -87,7 +87,7 @@
 #include <linux/spinlock.h>
 
 #define TGT_DLLK_DECLARE_CRITICAL_SECTION \
-        static spinlock_t TgtDllkCriticalSection_l = SPIN_LOCK_UNLOCKED;
+        DEFINE_SPINLOCK(TgtDllkCriticalSection_l);
 
 #define TGT_DLLK_DECLARE_FLAGS \
         unsigned long ulTgtDllkFlags;

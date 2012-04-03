@@ -1,10 +1,11 @@
 /****************************************************************************
-
-  Copyright (c) 2009, B&R
   (c) SYSTEC electronic GmbH, D-07973 Greiz, August-Bebel-Str. 29
       www.systec-electronic.com
+  (c) Bernecker + Rainer Industrie-Elektronik Ges.m.b.H.
+      A-5142 Eggelsberg, B&R Strasse 1
+      www.br-automation.com
 
-  Project:      Project independend shared buffer (linear + circular)
+  Project:      openPOWERLINK
 
   Description:  target specific functions
                 to Xilinx Microblaze CPU without any OS
@@ -51,14 +52,16 @@
 
   -------------------------------------------------------------------------
 
-                Author: ZelenkaJ
+                $RCSfile$
 
-                2009-11-23
+                $Author$
 
-  -------------------------------------------------------------------------
+                $Revision$  $Date$
 
-  Revision History:
-  2009-11-23	initial creation of the file
+                $State$
+
+                Build Environment:
+                    GCC V3.4
 
 ****************************************************************************/
 
@@ -66,7 +69,7 @@
 #include "Benchmark.h"
 
 #include "xparameters.h"
-#include "IRQ_Microblaze.h"
+#include "xilinx_irq.h"
 
 
 /***************************************************************************/
@@ -113,11 +116,11 @@
 //
 // Parameters:   none
 //
-// 
-// Returns:      DWORD with tick count in µs
+//
+// Returns:      DWORD with tick count in us
 //
 //
-// State:        
+// State:
 //
 //---------------------------------------------------------------------------
 
@@ -125,7 +128,8 @@ DWORD PUBLIC ShbTgtGetTickCountMs(void)
 {
 DWORD dwTicks;
 
-    dwTicks = *((DWORD*)XPAR_XIL_SYSTICK_0_MEM0_BASEADDR);
+    //FIXME: Find another way to generate a system tick...
+    dwTicks = getMSCount();
 
     return dwTicks;
 }
@@ -150,38 +154,21 @@ DWORD dwTicks;
 void  PUBLIC  ShbTgtEnableGlobalInterrupt(BYTE fEnable_p)
 {
 static int              iLockCount = 0;
-static int				iFirstTime = 0;
-XIntc *Intc = getIntc();
 
     if (fEnable_p != FALSE)
     {   // restore interrupts
-		if (--iLockCount == 0)
+
+        if (--iLockCount == 0)
         {
-    		if(iFirstTime == 0)
-    		{
-	    		//start IRC
-	    		XIntc_Start(Intc, XIN_REAL_MODE);
-    		}
-    		
-    		//enable all IRQs
-			XIntc_Enable(Intc, XPAR_XPS_INTC_0_XIL_OPENMAC_0_RX_IR_N_INTR);
-			XIntc_Enable(Intc, XPAR_XPS_INTC_0_XIL_OPENMAC_0_TX_IR_N_INTR);
-			XIntc_Enable(Intc, XPAR_XPS_INTC_0_XIL_OPENMAC_0_CMP_IR_N_INTR);
-			
-    		if(iFirstTime++ == 0)
-    		{
-	    		//enable all IRQs on Microblaze
-	    		microblaze_enable_interrupts();
-    		}
+            enableInterruptMaster();
         }
     }
     else
     {   // disable interrupts
+
         if (iLockCount == 0)
         {
-			XIntc_Disable(Intc, XPAR_XPS_INTC_0_XIL_OPENMAC_0_RX_IR_N_INTR);
-			XIntc_Disable(Intc, XPAR_XPS_INTC_0_XIL_OPENMAC_0_TX_IR_N_INTR);
-			XIntc_Disable(Intc, XPAR_XPS_INTC_0_XIL_OPENMAC_0_CMP_IR_N_INTR);
+            disableInterruptMaster();
         }
         iLockCount++;
     }
@@ -209,8 +196,23 @@ BYTE  PUBLIC  ShbTgtIsInterruptContext(void)
 {
     // No real interrupt context check is performed.
     // This would be possible with a flag in the ISR, only.
-    // For now, the global interrupt enable flag is checked.
-	return FALSE;
+    // For now, simply return ME.
+
+    DWORD dwGIE;
+
+    dwGIE = Xil_In32(XPAR_PCP_INTC_BASEADDR + XIN_MER_OFFSET) & \
+            XIN_INT_MASTER_ENABLE_MASK;
+
+    if(dwGIE == 0)
+    {
+        //master enable is off
+        return TRUE;
+    }
+    else
+    {
+        //master enable is on
+        return FALSE;
+    }
 }
 
 

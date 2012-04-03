@@ -159,7 +159,7 @@ typedef struct _tEplTgtTimeStamp tEplTgtTimeStamp;
 typedef struct
 {
     unsigned int    m_uiDevNumber;  // device number for selecting Ethernet controller
-    char*           m_pszDevName;   // device name (valid if non-null)
+    const char*     m_pszDevName;   // device name (valid if non-null)
 
 } tEplHwParam;
 

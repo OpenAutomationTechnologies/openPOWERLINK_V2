@@ -2,6 +2,10 @@
 
   (c) SYSTEC electronic GmbH, D-07973 Greiz, August-Bebel-Str. 29
       www.systec-electronic.com
+  (c) Bernecker + Rainer Industrie-Elektronik Ges.m.b.H.
+      A-5142 Eggelsberg, B&R Strasse 1
+      www.br-automation.com
+
 
   Project:      openPOWERLINK
 
@@ -48,7 +52,6 @@
            any other provision of this License.
 
   -------------------------------------------------------------------------
-
                 $RCSfile$
 
                 $Author$
@@ -58,11 +61,7 @@
                 $State$
 
                 Build Environment:
-                    GNU
-
-  -------------------------------------------------------------------------
-
-  Revision History:
+                    GCC V3.4
 
 ****************************************************************************/
 
@@ -72,10 +71,28 @@
 #include "Benchmark.h"
 
 #include "omethlib.h"
+#ifdef __NIOS2__
 #include "system.h"
 #include <sys/alt_irq.h>
 #include <alt_types.h>
 #include <io.h>
+#elif defined(__MICROBLAZE__)
+#include "xparameters.h"
+#include "xil_io.h"
+#include "xintc_l.h"
+#else
+#error
+#endif
+
+#ifdef __NIOS2__
+#define TSYN_RD32(base, offset)            IORD_32DIRECT(base, offset)
+#define TSYN_WR32(base, offset, write)    IOWR_32DIRECT(base, offset, write)
+#elif defined(__MICROBLAZE__)
+#define TSYN_RD32(base, offset)            Xil_In32((base+offset))
+#define TSYN_WR32(base, offset, write)    Xil_Out32((base+offset), write)
+#else
+#error "Configuration unknown!"
+#endif
 
 
 /***************************************************************************/
@@ -94,6 +111,27 @@
 #define EPL_TIMER_SYNC_SECOND_LOSS_OF_SYNC      FALSE
 #endif
 
+#ifdef __NIOS2__
+#ifdef __POWERLINK
+#define EPL_TIMER_SYNC_BASE         POWERLINK_0_MAC_CMP_BASE //from system.h
+#define EPL_TIMER_SYNC_IRQ          POWERLINK_0_MAC_CMP_IRQ
+#if POWERLINK_0_MAC_CMP_TIMESYNCHW != FALSE
+    #define EPL_TIMER_USE_COMPARE_PDI_INT
+#endif
+#elif defined(__OPENMAC)
+#define EPL_TIMER_SYNC_BASE         OPENMAC_0_CMP_BASE //from system.h
+#define EPL_TIMER_SYNC_IRQ          OPENMAC_0_CMP_IRQ
+#else
+#error "Configuration unknown!"
+#endif
+#elif defined(__MICROBLAZE__)
+#define EPL_TIMER_INTC_BASE        XPAR_PCP_INTC_BASEADDR
+#define EPL_TIMER_SYNC_BASE        XPAR_PLB_POWERLINK_0_MAC_CMP_BASEADDR
+#define EPL_TIMER_SYNC_IRQ        XPAR_PCP_INTC_PLB_POWERLINK_0_TCP_IRQ_INTR
+#define EPL_TIMER_SYNC_IRQ_MASK    XPAR_PLB_POWERLINK_0_TCP_IRQ_MASK
+#else
+#error "Configuration unknown!"
+#endif
 
 /***************************************************************************/
 /*                                                                         */
@@ -136,6 +174,7 @@
 #define PROPORTIONAL_FRACTION       (1 << PROPORTIONAL_FRACTION_SHIFT)
 
 
+
 //---------------------------------------------------------------------------
 // local types
 //---------------------------------------------------------------------------
@@ -176,6 +215,11 @@ typedef struct
     tEplTimerSynckTimerInfo     m_aTimerInfo[TIMER_COUNT];
     unsigned int                m_uiActiveTimerHdl;
 
+#ifdef EPL_TIMER_USE_COMPARE_PDI_INT
+    WORD                        m_wCompareTogPdiIntEnabled;
+    WORD                        m_wSyncIntCycle;
+    DWORD                       m_wCycleCnt;
+#endif //EPL_TIMER_USE_COMPARE_PDI_INT
 } tEplTimerSynckInstance;
 
 
@@ -196,12 +240,20 @@ static void  EplTimerSynckCtrlUpdateLossOfSyncTolerance (void);
 static DWORD EplTimerSynckCtrlGetNextAbsoluteTime   (unsigned int uiTimerHdl_p, DWORD dwCurrentTime_p);
 
 static inline void  EplTimerSynckDrvCompareInterruptEnable  (void);
+
 static inline void  EplTimerSynckDrvCompareInterruptDisable (void);
+
 static inline void  EplTimerSynckDrvSetCompareValue         (DWORD dwVal);
+
 static inline DWORD EplTimerSynckDrvGetTimeValue            (void);
 
+#ifdef EPL_TIMER_USE_COMPARE_PDI_INT
+static inline void  EplTimerSynckDrvCompareTogPdiInterruptEnable  (void);
+static inline void  EplTimerSynckDrvCompareTogPdiInterruptDisable  (void);
+static inline void  EplTimerSynckDrvSetCompareTogPdiValue         (DWORD dwVal);
+#endif //EPL_TIMER_USE_COMPARE_PDI_INT
 
-static void EplTimerSynckDrvInterruptHandler (void* pArg_p, alt_u32 dwInt_p);
+static void EplTimerSynckDrvInterruptHandler (void* pArg_p, DWORD dwInt_p);
 
 static tEplKernel EplTimerSynckDrvModifyTimerAbs(unsigned int uiTimerHdl_p,
                                                  DWORD        dwAbsoluteTime_p);
@@ -244,11 +296,27 @@ tEplKernel      Ret = kEplSuccessful;
 
     EplTimerSynckDrvCompareInterruptDisable();
     EplTimerSynckDrvSetCompareValue( 0 );
+#ifdef EPL_TIMER_USE_COMPARE_PDI_INT
+    EplTimerSynckDrvCompareTogPdiInterruptDisable();
+    EplTimerSynckDrvSetCompareTogPdiValue( 0 );
+#endif //EPL_TIMER_USE_COMPARE_PDI_INT
 
-    if (alt_irq_register(OPENMAC_0_TIMERCMP_IRQ, NULL, EplTimerSynckDrvInterruptHandler))
+#ifdef __NIOS2__
+    if (alt_irq_register(EPL_TIMER_SYNC_IRQ, NULL, EplTimerSynckDrvInterruptHandler))
     {
         Ret = kEplNoResource;
     }
+#elif defined(__MICROBLAZE__)
+    {
+        DWORD curIntEn = TSYN_RD32(EPL_TIMER_INTC_BASE, XIN_IER_OFFSET);
+
+        XIntc_RegisterHandler(EPL_TIMER_INTC_BASE, EPL_TIMER_SYNC_IRQ,
+                (XInterruptHandler)EplTimerSynckDrvInterruptHandler, (void*)NULL);
+        XIntc_EnableIntr(EPL_TIMER_INTC_BASE, EPL_TIMER_SYNC_IRQ_MASK | curIntEn);
+    }
+#else
+#error"Configuration unknown!"
+#endif
 
     return Ret;
 
@@ -277,9 +345,19 @@ tEplKernel      Ret = kEplSuccessful;
 
     EplTimerSynckDrvCompareInterruptDisable();
     EplTimerSynckDrvSetCompareValue( 0 );
+#ifdef EPL_TIMER_USE_COMPARE_PDI_INT
+    EplTimerSynckDrvCompareTogPdiInterruptDisable();
+    EplTimerSynckDrvSetCompareTogPdiValue( 0 );
+#endif //EPL_TIMER_USE_COMPARE_PDI_INT
 
-    alt_irq_register(OPENMAC_0_TIMERCMP_IRQ, NULL, NULL);
-
+#ifdef __NIOS2__
+    alt_irq_register(EPL_TIMER_SYNC_IRQ, NULL, NULL);
+#elif defined(__MICROBLAZE__)
+    XIntc_RegisterHandler(EPL_TIMER_INTC_BASE, EPL_TIMER_SYNC_IRQ,
+            (XInterruptHandler)NULL, (void*)NULL);
+#else
+#error "Configuration unknown!"
+#endif
     EPL_MEMSET(&EplTimerSynckInstance_l, 0, sizeof (EplTimerSynckInstance_l));
 
     return Ret;
@@ -570,6 +648,43 @@ tEplKernel      Ret = kEplSuccessful;
 }
 
 
+#ifdef EPL_TIMER_USE_COMPARE_PDI_INT
+//---------------------------------------------------------------------------
+//
+// Function:    EplTimerSynckCompareTogPdiIntEnable()
+//
+// Description: This function enables the compare pdi interrupt externally
+//
+// Parameters:  void
+//
+// Return:      void
+//
+//---------------------------------------------------------------------------
+void PUBLIC EplTimerSynckCompareTogPdiIntEnable (DWORD wSyncIntCycle_p)
+{
+    EplTimerSynckInstance_l.m_wCompareTogPdiIntEnabled = TRUE;
+    EplTimerSynckInstance_l.m_wSyncIntCycle = wSyncIntCycle_p;
+    EplTimerSynckInstance_l.m_wCycleCnt = 0;
+}
+
+//---------------------------------------------------------------------------
+//
+// Function:    EplTimerSynckCompareTogPdiIntDisable()
+//
+// Description: This function disables the compare pdi interrupt externally
+//
+// Parameters:  void
+//
+// Return:      void
+//
+//---------------------------------------------------------------------------
+void PUBLIC EplTimerSynckCompareTogPdiIntDisable (void)
+{
+    EplTimerSynckInstance_l.m_wCompareTogPdiIntEnabled = FALSE;
+    EplTimerSynckInstance_l.m_wSyncIntCycle = 0;
+    EplTimerSynckInstance_l.m_wCycleCnt = 0;
+}
+#endif //EPL_TIMER_USE_COMPARE_PDI_INT
 
 //=========================================================================//
 //                                                                         //
@@ -903,6 +1018,9 @@ DWORD                       dwTargetAbsoluteTime;
 DWORD                       dwCurrentTime;
 
     EplTimerSynckDrvCompareInterruptDisable();
+#ifdef EPL_TIMER_USE_COMPARE_PDI_INT
+    EplTimerSynckDrvCompareTogPdiInterruptDisable();
+#endif //EPL_TIMER_USE_COMPARE_PDI_INT
 
     uiNextTimerHdl = EplTimerSynckDrvFindShortestTimer();
     if (uiNextTimerHdl != TIMER_HDL_INVALID)
@@ -919,6 +1037,17 @@ DWORD                       dwCurrentTime;
         }
 
         EplTimerSynckDrvSetCompareValue(dwTargetAbsoluteTime);
+#ifdef EPL_TIMER_USE_COMPARE_PDI_INT
+        if(EplTimerSynckInstance_l.m_wCompareTogPdiIntEnabled == TRUE )
+        {
+            if ((EplTimerSynckInstance_l.m_wCycleCnt % EplTimerSynckInstance_l.m_wSyncIntCycle) == 0)
+            {
+                EplTimerSynckDrvSetCompareTogPdiValue( dwTargetAbsoluteTime + EplTimerSynckInstance_l.m_dwAdvanceShift - EplTimerSynckInstance_l.m_dwConfiguredTimeDiff );
+                // enable compare pdi interrupt
+                EplTimerSynckDrvCompareTogPdiInterruptEnable();
+            }
+        }
+#endif //EPL_TIMER_USE_COMPARE_PDI_INT
 
         // enable timer
         EplTimerSynckDrvCompareInterruptEnable();
@@ -926,6 +1055,7 @@ DWORD                       dwCurrentTime;
     else
     {
         EplTimerSynckDrvSetCompareValue(0);
+
         EplTimerSynckInstance_l.m_uiActiveTimerHdl = TIMER_HDL_INVALID;
     }
 
@@ -936,41 +1066,71 @@ DWORD                       dwCurrentTime;
 // const defines
 //---------------------------------------------------------------------------
 
-#define TIMERCMP_REG_OFF_CTRL       4
-#define TIMERCMP_REG_OFF_CMP_VAL    0
-#define TIMERCMP_REG_OFF_STATUS     4
-#define TIMERCMP_REG_OFF_TIME_VAL   0
+#define TIMERCMP_REG_OFF_CTRL                       4
+#define TIMERCMP_REG_OFF_CTRL_COMPARE_PDI          12
+#define TIMERCMP_REG_OFF_CMP_VAL                    0
+#define TIMERCMP_REG_OFF_CMP_VAL_COMPARE_PDI        8
+#define TIMERCMP_REG_OFF_STATUS                     4
+#define TIMERCMP_REG_OFF_TIME_VAL                   0
 
 
 static inline void EplTimerSynckDrvCompareInterruptDisable (void)
 {
-    IOWR_32DIRECT( OPENMAC_0_TIMERCMP_BASE, TIMERCMP_REG_OFF_CTRL, 0 );
+    TSYN_WR32( EPL_TIMER_SYNC_BASE, TIMERCMP_REG_OFF_CTRL, 0 );
 }
+
+#ifdef EPL_TIMER_USE_COMPARE_PDI_INT
+static inline void EplTimerSynckDrvCompareTogPdiInterruptDisable (void)
+{
+    TSYN_WR32( EPL_TIMER_SYNC_BASE, TIMERCMP_REG_OFF_CTRL_COMPARE_PDI, 0 );
+}
+#endif //EPL_TIMER_USE_COMPARE_PDI_INT
 
 static inline void EplTimerSynckDrvCompareInterruptEnable (void)
 {
-    IOWR_32DIRECT( OPENMAC_0_TIMERCMP_BASE, TIMERCMP_REG_OFF_CTRL, 1 );
+    TSYN_WR32( EPL_TIMER_SYNC_BASE, TIMERCMP_REG_OFF_CTRL, 1 );
+
 }
+
+#ifdef EPL_TIMER_USE_COMPARE_PDI_INT
+static inline void EplTimerSynckDrvCompareTogPdiInterruptEnable (void)
+{
+    TSYN_WR32( EPL_TIMER_SYNC_BASE, TIMERCMP_REG_OFF_CTRL_COMPARE_PDI, 1 );
+
+}
+#endif //EPL_TIMER_USE_COMPARE_PDI_INT
 
 static inline void EplTimerSynckDrvSetCompareValue (DWORD dwVal)
 {
-    IOWR_32DIRECT( OPENMAC_0_TIMERCMP_BASE, TIMERCMP_REG_OFF_CMP_VAL, dwVal );
+    TSYN_WR32( EPL_TIMER_SYNC_BASE, TIMERCMP_REG_OFF_CMP_VAL, dwVal );
 }
+
+#ifdef EPL_TIMER_USE_COMPARE_PDI_INT
+static inline void EplTimerSynckDrvSetCompareTogPdiValue (DWORD dwVal)
+{
+    TSYN_WR32( EPL_TIMER_SYNC_BASE, TIMERCMP_REG_OFF_CMP_VAL_COMPARE_PDI, dwVal );
+}
+#endif //EPL_TIMER_USE_COMPARE_PDI_INT
 
 static inline DWORD EplTimerSynckDrvGetTimeValue (void)
 {
-    return IORD_32DIRECT( OPENMAC_0_TIMERCMP_BASE, TIMERCMP_REG_OFF_TIME_VAL );
+    return TSYN_RD32( EPL_TIMER_SYNC_BASE, TIMERCMP_REG_OFF_TIME_VAL );
 }
 
 
 
-static void EplTimerSynckDrvInterruptHandler (void* pArg_p, alt_u32 dwInt_p)
+static void EplTimerSynckDrvInterruptHandler (void* pArg_p, DWORD dwInt_p)
 {
 unsigned int                uiTimerHdl;
 tEplTimerSynckTimerInfo*    pTimerInfo;
 unsigned int                uiNextTimerHdl;
 
     BENCHMARK_MOD_24_SET(4);
+
+#ifdef EPL_TIMER_USE_COMPARE_PDI_INT
+    // increment cycle count
+    EplTimerSynckInstance_l.m_wCycleCnt++;
+#endif //EPL_TIMER_USE_COMPARE_PDI_INT
 
     uiTimerHdl = EplTimerSynckInstance_l.m_uiActiveTimerHdl;
     if (uiTimerHdl < TIMER_COUNT)

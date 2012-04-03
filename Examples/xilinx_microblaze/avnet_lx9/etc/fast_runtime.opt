@@ -34,14 +34,6 @@ Program map
 -pr b;                   # Pack internal FF/latches into IOBs
 #-fp <design>.mfp;       # Floorplan file
 -ol high;
-#Added by Kalycito
-#-xe normal ; # Extra Effort none-normal-continue_on_impossible
--bp ; # BRAM maping enabled
-#-l ; # Remove logic replication
--lc area ;
--global_opt area ;# Optimizae area [Either "-l" or "-global_opt area" Both wont function at a time]
--logic_opt on; #Logic optimization enabled
-#Ends here Kalycito
 -timing;
 -detail;
 <inputdir><design>.ngd;  # Input NGD file

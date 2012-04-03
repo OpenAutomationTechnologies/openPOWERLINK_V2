@@ -1,7 +1,9 @@
 /****************************************************************************
-
   (c) SYSTEC electronic GmbH, D-07973 Greiz, August-Bebel-Str. 29
       www.systec-electronic.com
+  (c) Bernecker + Rainer Industrie-Elektronik Ges.m.b.H.
+      A-5142 Eggelsberg, B&R Strasse 1
+      www.br-automation.com
 
   Project:      openPOWERLINK
 
@@ -49,24 +51,19 @@
 
   -------------------------------------------------------------------------
 
-                $RCSfile: EplCfg.h,v $
+                $RCSfile$
 
-                $Author: D.Krueger $
+                $Author$
 
-                $Revision: 1.2 $  $Date: 2009/09/28 14:38:37 $
+                $Revision$  $Date$
 
-                $State: Exp $
+                $State$
 
                 Build Environment:
-                    ...
-
-  -------------------------------------------------------------------------
-
-  Revision History:
-
-  2006/06/06    k.t.: Start of Implementation
+                    GCC V3.4
 
 ****************************************************************************/
+
 
 #ifndef _EPLCFG_H_
 #define _EPLCFG_H_
@@ -118,22 +115,22 @@
 // EPL_MODULE_INTEGRATION defines all modules which are included in
 // EPL application. Please add or delete modules for your application.
 
-#define EPL_MODULE_INTEGRATION 	(0 \
-								| EPL_MODULE_OBDK \
+#define EPL_MODULE_INTEGRATION     (0 \
+                                | EPL_MODULE_OBDK \
                                 | EPL_MODULE_PDOU \
-								| EPL_MODULE_PDOK \
-								| EPL_MODULE_SDOS \
-								| EPL_MODULE_SDOC \
-								| EPL_MODULE_SDO_ASND \
-								| EPL_MODULE_DLLK \
-								| EPL_MODULE_DLLU \
-								| EPL_MODULE_NMT_CN \
-								| EPL_MODULE_NMTK \
-								| EPL_MODULE_NMTU \
+                                | EPL_MODULE_PDOK \
+                                | EPL_MODULE_SDOS \
+                                | EPL_MODULE_SDOC \
+                                | EPL_MODULE_SDO_ASND \
+                                | EPL_MODULE_DLLK \
+                                | EPL_MODULE_DLLU \
+                                | EPL_MODULE_NMT_CN \
+                                | EPL_MODULE_NMTK \
+                                | EPL_MODULE_NMTU \
                                 | EPL_MODULE_LEDU \
-								)
+                                )
 
-/*								| EPL_MODULE_PDOU \ */
+/*                                | EPL_MODULE_PDOU \ */
 
 
 
@@ -151,7 +148,7 @@
 //#define EDRV_EARLY_RX_INT               TRUE
 
 // enables setting of several port pins for benchmarking purposes
-#define EDRV_BENCHMARK                  FALSE
+#define EDRV_BENCHMARK                  TRUE
 //#define EDRV_BENCHMARK                  TRUE // MCF_GPIO_PODR_PCIBR
 
 // Call Tx handler (i.e. EplDllCbFrameTransmitted()) already if DMA has finished,
@@ -171,9 +168,9 @@
 // + SoC + SoA + MN PRes + NmtCmd + ASnd + IdentRes + StatusRes.
 //#define EDRV_MAX_TX_BUFFERS             5
 
-#define EDRV_AUTO_RESPONSE_DELAY 		TRUE
+#define EDRV_AUTO_RESPONSE_DELAY         TRUE
 
-#define EPL_DLL_PRES_CHAINING_CN		TRUE
+#define EPL_DLL_PRES_CHAINING_CN        TRUE
 
 
 // =========================================================================
@@ -207,7 +204,7 @@
 // OBD specific defines
 // =========================================================================
 
-#define EPL_OBD_USE_KERNEL				TRUE
+#define EPL_OBD_USE_KERNEL                TRUE
 
 // switch this define to TRUE if Epl should compare object range
 // automaticly

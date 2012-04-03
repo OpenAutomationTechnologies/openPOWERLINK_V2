@@ -102,6 +102,11 @@ typedef  void  (*tSigHndlrJobReady) (tShbInstance pShbInstance_p, unsigned int f
 
 #endif
 
+struct sShbMemTable{
+    int                 m_iBufferId;
+    void*               m_pBuffer;
+    struct sShbMemTable *m_psNextMemTableElement;
+};
 
 //---------------------------------------------------------------------------
 //  Prototypes

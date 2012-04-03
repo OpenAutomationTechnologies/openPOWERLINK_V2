@@ -1,8 +1,56 @@
-#!/bin/sh
+#!/bin/bash
 ###############################################################################
 #
-# Script to unload openPOWERLINK module
-# 
+#  (c) SYSTEC electronic GmbH, D-07973 Greiz, August-Bebel-Str. 29
+#      www.systec-electronic.com
+#
+# (c) Bernecker + Rainer Industrie-Elektronik Ges.m.b.H.
+#     B&R Strasse 1, A-5142 Eggelsberg, www.br-automation.com
+#
+#  Project:      openPOWERLINK
+#
+#  Description:  Script to unload openPOWERLINK kernel module
+#
+#  License:
+#
+#    Redistribution and use in source and binary forms, with or without
+#    modification, are permitted provided that the following conditions
+#    are met:
+#
+#    1. Redistributions of source code must retain the above copyright
+#       notice, this list of conditions and the following disclaimer.
+#
+#    2. Redistributions in binary form must reproduce the above copyright
+#       notice, this list of conditions and the following disclaimer in the
+#       documentation and/or other materials provided with the distribution.
+#
+#    3. Neither the name of SYSTEC electronic GmbH nor the names of its
+#       contributors may be used to endorse or promote products derived
+#       from this software without prior written permission. For written
+#       permission, please contact info@systec-electronic.com.
+#
+#    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+#    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+#    LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+#    FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+#    COPYRIGHT HOLDERS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+#    INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+#    BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+#    LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+#    CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+#    LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+#    ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+#    POSSIBILITY OF SUCH DAMAGE.
+#
+#    Severability Clause:
+#
+#        If a provision of this License is or becomes illegal, invalid or
+#        unenforceable in any jurisdiction, that shall not affect:
+#        1. the validity or enforceability in that jurisdiction of any other
+#           provision of this License; or
+#        2. the validity or enforceability in other jurisdictions of that or
+#           any other provision of this License.
+#
 ###############################################################################
 
 ###############################################################################
@@ -10,10 +58,10 @@
 #
 usage()
 {
-        echo >&2 \
-        "usage: EplUnload [-h] <powerlink module>\n" \
-        "-h, print usage\n"
-        exit 1
+    echo >&2 \
+    "usage: EplUnload [-h] <powerlink module>\n" \
+    "-h, print usage\n"
+    exit 1
 }
 
 ###############################################################################
@@ -42,23 +90,51 @@ echo removing module $module
 
 # Remove udev rule
 rm -f /etc/udev/rules.d/50-openPOWERLINK.rules
+udevadm control --reload-rules
+
+module=`basename $module .ko`
 
 ###############################################################################
 #
 # Check if suitable ethernet card is available
+# If we find more than one ethernet card we provide a prompt to select one.
 #
-module=`basename $module .ko`
-if echo "$module" | grep -q "8139" ; then
-    nic="RTL-8139"
-    nicdev="8139too"
-elif echo "$module" | grep -q "82573" ; then
-    nic="Intel Corporation 82573"
-    nicdev="e1000e"
-else
+let i=0
+while read line; do
+    device=`echo $line | cut -f1 -d","`
+    devname=`echo $line | cut -f2 -d","`
+    driver=`echo $line | cut -f3 -d","`
+
+    if echo "$module" | grep -q "$device" ; then
+        lspci=`lspci | grep "${devname}"`
+        pciid=$(lspci | grep "${devname}" | awk "{printf \"0000:\"\$1}")
+        if [ ! -z "$lspci" ]; then
+            let i=i+1
+            echo "$i) $lspci"
+            if [ -z $devs ] ; then
+                devs="$pciid"
+                drivers="$driver"
+            else
+                devs="$devs,$pciid"
+                drivers="$drivers,$driver"
+            fi
+        fi
+    fi
+done < devices.txt
+
+if [ $i -gt 1 ] ; then
+    read -p "Please select the ethernet controller to use > " num
+elif [ $i -eq 1 ]; then
+    num=1
+elif [ $i -eq 0 ] ; then
     echo "No valid network interface controller specified!"
     usage
+    
 fi
 
-pciid=$(lspci | grep "${nic}" | awk "{printf \"0000:\"\$1}")
-echo "rebinding pci device $pciid to network driver"
-echo -n $pciid > /sys/bus/pci/drivers/${nicdev}/bind
+pciid=`echo $devs | cut -f$num -d","`
+driver=`echo $drivers | cut -f$num -d","`
+
+echo "rebinding PCI device $pciid to network driver"
+echo -n $pciid > /sys/bus/pci/drivers/${driver}/bind
+

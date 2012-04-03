@@ -59,7 +59,6 @@
 #include "global.h"
 #include "SharedBuff.h"
 #include "ShbIpc.h"
-#include "ShbLinuxKernel.h"
 #include "Debug.h"
 
 #include <linux/version.h>

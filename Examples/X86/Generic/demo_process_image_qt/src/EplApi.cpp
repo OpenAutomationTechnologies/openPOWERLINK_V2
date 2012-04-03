@@ -210,7 +210,10 @@ EplApi::EplApi(MainWindow *pMainWindow_p, unsigned int uiNodeId_p, QString devNa
     EPL_MEMCPY(EplApiInitParam.m_abMacAddress, abMacAddr, sizeof (EplApiInitParam.m_abMacAddress));
 
 #ifdef CONFIG_POWERLINK_USERSTACK
-    EplApiInitParam.m_HwParam.m_pszDevName = devName_p.toAscii().data();
+    // Copy the selected interface string to a local variable
+    strcpy(devName, devName_p.toStdString().c_str());
+    
+    EplApiInitParam.m_HwParam.m_pszDevName = devName;
     EplApiInitParam.m_pfnObdInitRam = EplObdInitRam;
     EplApiInitParam.m_pfnCbSync = pEplDataInOutThread->getSyncCbFunc();
 #else
