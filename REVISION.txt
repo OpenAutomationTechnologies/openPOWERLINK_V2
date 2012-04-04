@@ -804,3 +804,57 @@ Fellow worker:    Daniel Krüger (d.k.)
 2011-11-07 V1.8     - EdrvFec: Add Ethernet driver for Freescale FEC (i.MX and some Coldfire)
                     (Michael Ulbricht)
 
+2011-12-23 V1.8.1   - [FIX] Fix initialization of Edrv8139
+                    (Josef Baumgartner)
+
+2011-12-23 V1.8.1   - [TASK] Cleanup generic demos
+                    (Josef Baumgartner)
+
+2011-12-30 V1.8.1   - [TASK] Cleanup EplErrStr.c
+                    - [FIX] Linux demo_kernel does not compile on x86_64
+                    (Josef Baumgartner)
+
+2012-01-25 V1.8.1   - [FIX] Unreadable network interfaces in QT demo on Windows
+                    - [FIX] Correct syntax error in EplCfg.h
+                    - [FIX] ShbLinuxKernel.h included in ShbIpc-NoOS.c
+                    (Josef Baumgartner)
+
+2012-01-27 V1.8.1   - [FIX] Linux pcap does not reconnect after lost link
+                    (Josef Baumgartner)
+
+2012-01-31 V1.8.1   - [FIX] QT demo misses CN reconnect
+                    - [FIX] SPIN_LOCK_UNLOCKED is undefined on recent Linux kernels
+                    (Josef Baumgartner)
+
+2012-02-02 V1.8.1   - [FIX] QT demo network interface string is not passed with correct type
+                    (Wolfgang Seiss)
+
+2012-02-03 V1.8.1   - [FEATURE] Add additional devices to Edrv82573: 82573L, 82567V, 82583V, 82567LM
+                    (Josef Baumgartner)
+
+2012-02-06 V1.8.1   - [FEATURE] Update of the Xilinx examples for Avnet LX150T (IEK)
+                                and LX9 MicroBoard with new POWERLINK IP-core
+                    - [FEATURE] Update of the Altera example for EBV DBC3C40 board
+                                with the new POWERLINK IP-core
+                    - [FEATURE] Added the TERASIC INK board demo to the Altera FPGA demos
+                    (Thomas Mair)
+
+2012-02-07 V1.8.1   - [FEATURE] Add Intel 8255x 100MBit Edrv for Linux
+                    (Thomas Mair)
+
+2012-02-15 V1.8.1   - [FIX] Remove cross-traffic mapping in the FPGA CN demos
+                    - [FIX] Adjust the MN and CN XDD files
+                    (Wolfgang Seiss)
+
+2012-02-17 V1.8.1   - [FIX] Windows projects can use EplSdoUdpu.c,
+                      this also fixes demo_pi_console compile errors in VS2010
+                    (Wolfgang Seiss)
+
+2012-03-27 V1.8.1   - [FEATURE] Add support for Intel 82574L ethernet device
+                    (Josef Baumgartner)
+
+2012-04-04 V1.8.1   - altera_nios2: Use Altera Enhanced Interrupt API
+                    - [FEATURE] Update of the Altera example for SYS TEC ECUcore-EP3C board
+                                with the new POWERLINK IP-core
+                    (Daniel Krueger)
+
