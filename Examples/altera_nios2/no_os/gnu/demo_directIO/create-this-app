@@ -177,16 +177,15 @@ SOF_FILE := $(wildcard $(QUARTUS_PROJECT_DIR)/*.sof)
 
 .PHONY : $(PROGRAM_EPCS_TARGET)
 $(PROGRAM_EPCS_TARGET) : $(ELF)
-
-    @$(ECHO) Info: Programming $(basename $@).flash
-    @if [ -n "$($(basename $@)_EPCS_FLAGS)" ]; \
-    then \
-        nios2-configure-sof $(DOWNLOAD_CABLE_FLAG) -C $(QUARTUS_PROJECT_DIR); \
-        sof2flash --epcs --input=$(SOF_FILE) --output=sof.flash; \
-        $(ELF2FLASH) --after=sof.flash --input=$(ELF) --outfile=$(basename $@)_after_sof.flash --sim_optimize=$(SIM_OPTIMIZE) $(elf2flash_extra_args); \
-        $(ECHO) $(FLASHPROG) $(SOPC_SYSID_FLAG) --epcs --base=$($(basename $@)_START) sof.flash $(basename $@)_after_sof.flash; \
-        $(FLASHPROG) $(DOWNLOAD_CABLE_FLAG) $(SOPC_SYSID_FLAG) --epcs --base=$($(basename $@)_START) -g --override=../generic/nios2-flash-override.txt sof.flash $(basename $@)_after_sof.flash; \
-    fi
+	@$(ECHO) Info: Programming $(basename $@).flash
+	@if [ -n "$($(basename $@)_EPCS_FLAGS)" ]; \
+	then \
+		nios2-configure-sof $(DOWNLOAD_CABLE_FLAG) -C $(QUARTUS_PROJECT_DIR); \
+		sof2flash --epcs --input=$(SOF_FILE) --output=sof.flash; \
+		$(ELF2FLASH) --after=sof.flash --input=$(ELF) --outfile=$(basename $@)_after_sof.flash --sim_optimize=$(SIM_OPTIMIZE) $(elf2flash_extra_args); \
+		$(ECHO) $(FLASHPROG) $(SOPC_SYSID_FLAG) --epcs --base=$($(basename $@)_START) sof.flash $(basename $@)_after_sof.flash; \
+		$(FLASHPROG) $(DOWNLOAD_CABLE_FLAG) $(SOPC_SYSID_FLAG) --epcs --base=$($(basename $@)_START) -g --override=../generic/nios2-flash-override.txt sof.flash $(basename $@)_after_sof.flash; \
+	fi
 
 Heredoc
 
