@@ -75,6 +75,9 @@
 #include "alt_types.h"
 #include "nios2.h"
 #include <sys/alt_cache.h>
+#ifdef NODE_SWITCH_SPI_BASE
+#include "altera_avalon_spi_regs.h"
+#endif
 #endif // __NIOS2__
 
 #ifdef LCD_BASE
@@ -84,7 +87,7 @@
 
 /******************************************************************************/
 /* defines */
-#ifndef NODE_SWITCH_PIO_BASE
+#if !defined(NODE_SWITCH_PIO_BASE) && !defined(NODE_SWITCH_SPI_BASE)
 #define SET_NODE_ID_PER_SW //apply this define if no node switches are connected.
  #warning No Node ID module present in SOPC. Node ID can only be set by SW!
 #endif
@@ -583,6 +586,15 @@ WORD GetNodeId (void)
 #ifdef NODE_SWITCH_PIO_BASE
     /* read port configuration input pins */
     nodeId = IORD_ALTERA_AVALON_PIO_DATA(NODE_SWITCH_PIO_BASE);
+#endif
+
+#ifdef NODE_SWITCH_SPI_BASE
+    // read node-ID from hex switch on baseboard, which is connected via SPI shift register
+    IOWR_ALTERA_AVALON_SPI_TXDATA(NODE_SWITCH_SPI_BASE, 0xFF);   // generate pulse for latching inputs
+    while ((IORD_ALTERA_AVALON_SPI_STATUS(NODE_SWITCH_SPI_BASE) & ALTERA_AVALON_SPI_STATUS_RRDY_MSK) == 0)
+    {   // wait
+    }
+    nodeId = IORD_ALTERA_AVALON_SPI_RXDATA(NODE_SWITCH_SPI_BASE);
 #endif
 
 #ifdef SET_NODE_ID_PER_SW
