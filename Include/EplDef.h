@@ -92,7 +92,7 @@
 #define EPL_C_DLL_MAX_ASYNC_MTU     1500 // Byte: maximum asynchronous payload in bytes
 #define EPL_C_DLL_MAX_PAYL_OFFSET   1499 // Byte: maximum offset of Ethernet frame payload, requires C_IP_MAX_MTU
 #define EPL_C_DLL_MAX_RS            7
-#define EPL_C_DLL_MIN_ASYNC_MTU     282  // Byte: minimum asynchronous payload in bytes.
+#define EPL_C_DLL_MIN_ASYNC_MTU     300  // Byte: minimum asynchronous payload in bytes.
 #define EPL_C_DLL_MIN_PAYL_OFFSET   45   // Byte: minimum offset of Ethernet frame payload
 #define EPL_C_DLL_MULTICAST_ASND    0x01111E000004LL // EPL ASnd multicast MAC address, canonical form
 #define EPL_C_DLL_MULTICAST_PRES    0x01111E000002LL // EPL PRes multicast MAC address, canonical form
