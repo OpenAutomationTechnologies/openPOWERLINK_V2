@@ -115,12 +115,14 @@
 #ifdef __POWERLINK
 #define EPL_TIMER_SYNC_BASE         POWERLINK_0_MAC_CMP_BASE //from system.h
 #define EPL_TIMER_SYNC_IRQ          POWERLINK_0_MAC_CMP_IRQ
+#define EPL_TIMER_SYNC_IRQ_IC_ID    POWERLINK_0_MAC_CMP_IRQ_INTERRUPT_CONTROLLER_ID
 #if POWERLINK_0_MAC_CMP_TIMESYNCHW != FALSE
     #define EPL_TIMER_USE_COMPARE_PDI_INT
 #endif
 #elif defined(__OPENMAC)
 #define EPL_TIMER_SYNC_BASE         OPENMAC_0_CMP_BASE //from system.h
 #define EPL_TIMER_SYNC_IRQ          OPENMAC_0_CMP_IRQ
+#define EPL_TIMER_SYNC_IRQ_IC_ID    OPENMAC_0_CMP_IRQ_INTERRUPT_CONTROLLER_ID
 #else
 #error "Configuration unknown!"
 #endif
@@ -253,7 +255,11 @@ static inline void  EplTimerSynckDrvCompareTogPdiInterruptDisable  (void);
 static inline void  EplTimerSynckDrvSetCompareTogPdiValue         (DWORD dwVal);
 #endif //EPL_TIMER_USE_COMPARE_PDI_INT
 
-static void EplTimerSynckDrvInterruptHandler (void* pArg_p, DWORD dwInt_p);
+static void EplTimerSynckDrvInterruptHandler (void* pArg_p
+#ifndef ALT_ENHANCED_INTERRUPT_API_PRESENT
+        , DWORD dwInt_p
+#endif
+        );
 
 static tEplKernel EplTimerSynckDrvModifyTimerAbs(unsigned int uiTimerHdl_p,
                                                  DWORD        dwAbsoluteTime_p);
@@ -302,7 +308,8 @@ tEplKernel      Ret = kEplSuccessful;
 #endif //EPL_TIMER_USE_COMPARE_PDI_INT
 
 #ifdef __NIOS2__
-    if (alt_irq_register(EPL_TIMER_SYNC_IRQ, NULL, EplTimerSynckDrvInterruptHandler))
+    if (alt_ic_isr_register(EPL_TIMER_SYNC_IRQ_IC_ID, EPL_TIMER_SYNC_IRQ,
+                EplTimerSynckDrvInterruptHandler, NULL, NULL))
     {
         Ret = kEplNoResource;
     }
@@ -351,7 +358,8 @@ tEplKernel      Ret = kEplSuccessful;
 #endif //EPL_TIMER_USE_COMPARE_PDI_INT
 
 #ifdef __NIOS2__
-    alt_irq_register(EPL_TIMER_SYNC_IRQ, NULL, NULL);
+    alt_ic_isr_register(EPL_TIMER_SYNC_IRQ_IC_ID, EPL_TIMER_SYNC_IRQ,
+            NULL, NULL, NULL);
 #elif defined(__MICROBLAZE__)
     XIntc_RegisterHandler(EPL_TIMER_INTC_BASE, EPL_TIMER_SYNC_IRQ,
             (XInterruptHandler)NULL, (void*)NULL);
@@ -1119,7 +1127,11 @@ static inline DWORD EplTimerSynckDrvGetTimeValue (void)
 
 
 
-static void EplTimerSynckDrvInterruptHandler (void* pArg_p, DWORD dwInt_p)
+static void EplTimerSynckDrvInterruptHandler (void* pArg_p
+#ifndef ALT_ENHANCED_INTERRUPT_API_PRESENT
+        , DWORD dwInt_p
+#endif
+        )
 {
 unsigned int                uiTimerHdl;
 tEplTimerSynckTimerInfo*    pTimerInfo;

@@ -118,6 +118,7 @@
     #define EDRV_MAC_BASE           (void *)POWERLINK_0_MAC_REG_BASE
     #define EDRV_MAC_SPAN                   POWERLINK_0_MAC_REG_SPAN
     #define EDRV_MAC_IRQ                    POWERLINK_0_MAC_REG_IRQ
+    #define EDRV_MAC_IRQ_IC_ID              POWERLINK_0_MAC_REG_IRQ_INTERRUPT_CONTROLLER_ID
     #define EDRV_RAM_BASE           (void *)(EDRV_MAC_BASE + 0x0800)
     #define EDRV_MII_BASE           (void *)(EDRV_MAC_BASE + 0x1000)
     #define EDRV_IRQ_BASE           (void *)(EDRV_MAC_BASE + 0x1010)
@@ -297,7 +298,11 @@ static int EdrvRxHook(void *arg, ometh_packet_typ  *pPacket, OMETH_BUF_FREE_FCT 
 
 static void EdrvCbSendAck(ometh_packet_typ *pPacket, void *arg, unsigned long time);
 
-static void EdrvIrqHandler (void* pArg_p, DWORD dwInt_p);
+static void EdrvIrqHandler (void* pArg_p
+#ifndef ALT_ENHANCED_INTERRUPT_API_PRESENT
+        , DWORD dwInt_p
+#endif
+        );
 
 
 
@@ -523,7 +528,8 @@ BYTE            abFilterMask[31],
 
 // register openMAC Rx and Tx IRQ
 #ifdef __NIOS2__
-    if (alt_irq_register(EDRV_MAC_IRQ, EdrvInstance_l.m_hOpenMac, EdrvIrqHandler))
+    if (alt_ic_isr_register(EDRV_MAC_IRQ_IC_ID, EDRV_MAC_IRQ,
+                EdrvIrqHandler, EdrvInstance_l.m_hOpenMac, NULL))
     {
         Ret = kEplNoResource;
     }
@@ -574,7 +580,7 @@ tEplKernel EdrvShutdown(void)
 
 // deregister openMAC Rx and Tx IRQ
 #ifdef __NIOS2__
-    alt_irq_register(EDRV_MAC_IRQ, NULL, NULL);
+    alt_ic_isr_register(EDRV_MAC_IRQ_IC_ID, EDRV_MAC_IRQ, NULL, NULL, NULL);
 #elif defined(__MICROBLAZE__)
     XIntc_RegisterHandler(EDRV_INTC_BASE, EDRV_MAC_IRQ,
                 (XInterruptHandler)NULL, (void*)NULL);
@@ -1285,7 +1291,11 @@ tEplKernel Ret = kEplSuccessful;
 //
 //---------------------------------------------------------------------------
 
-static void EdrvIrqHandler (void* pArg_p, DWORD dwInt_p)
+static void EdrvIrqHandler (void* pArg_p
+#ifndef ALT_ENHANCED_INTERRUPT_API_PRESENT
+        , DWORD dwInt_p
+#endif
+        )
 {
 
 #ifdef CPU_UTIL

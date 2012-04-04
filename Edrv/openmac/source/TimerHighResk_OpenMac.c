@@ -103,9 +103,11 @@
 
 #ifdef __POWERLINK
 #define HIGHRES_TIMER_IRQ           POWERLINK_0_MAC_CMP_IRQ
+#define HIGHRES_TIMER_IRQ_IC_ID     POWERLINK_0_MAC_CMP_IRQ_INTERRUPT_CONTROLLER_ID
 #define HIGHRES_TIMER_BASE          POWERLINK_0_MAC_CMP_BASE
 #elif defined(__OPENMAC)
 #define HIGHRES_TIMER_IRQ           OPENMAC_0_CMP_IRQ
+#define HIGHRES_TIMER_IRQ_IC_ID     OPENMAC_0_CMP_IRQ_INTERRUPT_CONTROLLER_ID
 #define HIGHRES_TIMER_BASE          OPENMAC_0_CMP_BASE
 #else
 #error "Configuration unknown!"
@@ -146,7 +148,11 @@ static inline void  EplTimerHighReskCompareInterruptEnable  (void);
 static inline DWORD EplTimerHighReskGetTimeValue            (void);
 static inline void  EplTimerHighReskSetCompareValue         (DWORD dwVal);
 
-static void EplTimerHighReskInterruptHandler (void* pArg_p, alt_u32 dwInt_p);
+static void EplTimerHighReskInterruptHandler (void* pArg_p
+#ifndef ALT_ENHANCED_INTERRUPT_API_PRESENT
+        , DWORD dwInt_p
+#endif
+        );
 
 
 //=========================================================================//
@@ -453,7 +459,11 @@ static inline DWORD EplTimerHighReskGetTimeValue (void)
     return IORD_32DIRECT( HIGHRES_TIMER_BASE, TIMERCMP_REG_OFF_TIME_VAL );
 }
 
-static void EplTimerHighReskInterruptHandler (void* pArg_p, alt_u32 dwInt_p)
+static void EplTimerHighReskInterruptHandler (void* pArg_p
+#ifndef ALT_ENHANCED_INTERRUPT_API_PRESENT
+        , DWORD dwInt_p
+#endif
+        )
 {
 
     BENCHMARK_MOD_24_SET(4);
