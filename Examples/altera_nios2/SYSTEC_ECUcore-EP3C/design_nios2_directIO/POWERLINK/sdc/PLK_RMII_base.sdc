@@ -49,7 +49,7 @@ set_clock_groups -asynchronous 	-group $clkGroup \
 				-group $ext_clk
 
 # cut reset input
-set_false_path -from [get_ports rstn] -to [get_registers *]
+#set_false_path -from [get_ports rstn] -to [get_registers *]
 # ----------------------------------------------------------------------------------
 
 # ----------------------------------------------------------------------------------
@@ -121,8 +121,8 @@ set phy_out_max	[expr $phy_tsu + $phy_tpcb]
 set phy_out_min	[expr $phy_th - $phy_tpcb]
 
 ## input
-set_input_delay -clock CLK50_virt -max $phy_in_max [get_ports {fETH?_ECRSDV_in phy?_rx_err vETH?_RXD_in[*]}]
-set_input_delay -clock CLK50_virt -min $phy_in_min [get_ports {fETH?_ECRSDV_in phy?_rx_err vETH?_RXD_in[*]}]
+set_input_delay -clock CLK50_virt -max $phy_in_max [get_ports {fETH?_ECRSDV_in vETH?_RXD_in[*]}]
+set_input_delay -clock CLK50_virt -min $phy_in_min [get_ports {fETH?_ECRSDV_in vETH?_RXD_in[*]}]
 ## output
 set_output_delay -clock CLK50_virt -max $phy_out_max [get_ports {fETH?_TXEN_out vETH?_TXD_out[*]}]
 set_output_delay -clock CLK50_virt -min $phy_out_min [get_ports {fETH?_TXEN_out vETH?_TXD_out[*]}]
@@ -130,8 +130,7 @@ set_output_delay -clock CLK50_virt -min $phy_out_min [get_ports {fETH?_TXEN_out 
 set_false_path -from [get_registers *] -to [get_ports fnETH_RST_out]
 set_false_path -from [get_registers *] -to [get_ports fETH_MDC_out]
 set_false_path -from [get_registers *] -to [get_ports fETH_MDIO_inout]
-#set_false_path -from [get_ports PHY?_MDIO] -to [get_registers *]
-set_false_path -from [get_ports phy?_link] -to [get_registers *]
+#set_false_path -from [get_ports phy?_link] -to [get_registers *]
 ## multicycle
 ## Note: TX signals are latched at falling edge of 100 MHz signal
 ### from FPGA to PHY
@@ -147,6 +146,15 @@ set_false_path -from [get_registers *] -to [get_ports fSPI_CLK_Flash_out]
 set_false_path -from [get_registers *] -to [get_ports fnSPI_CS_Flash_out]
 set_false_path -from [get_registers *] -to [get_ports fSPI_MTSR_Flash_out]
 set_false_path -from [get_ports fSPI_MRST_Flash_in] -to [get_registers *]
+
+###SPI
+set_false_path -from [get_ports fHex_MRST_in] -to [get_registers *]
+set_false_path -from [get_registers *] -to [get_ports fHex_PL_out]
+set_false_path -from [get_registers *] -to [get_ports fHex_CLK_out]
+
+###Debug
+set_false_path -from [get_registers *] -to [get_ports vDBG_out[*]]
+
 ###IOs
 #### example for output: set_false_path -from [get_registers *] -to [get_ports LED[*]]
 #### example for input:  set_false_path -from [get_ports BUTTON[*]] -to [get_registers *]
