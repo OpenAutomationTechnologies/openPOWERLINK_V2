@@ -840,7 +840,7 @@ Fellow worker:    Daniel Krüger (d.k.)
                     (Thomas Mair)
 
 2012-02-07 V1.8.1   - [FEATURE] Add Intel 8255x 100MBit Edrv for Linux
-                    (Thomas Mair)
+                    (Josef Baumgartner)
 
 2012-02-15 V1.8.1   - [FIX] Remove cross-traffic mapping in the FPGA CN demos
                     - [FIX] Adjust the MN and CN XDD files
