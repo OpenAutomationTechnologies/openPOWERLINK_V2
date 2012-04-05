@@ -228,22 +228,6 @@
          type = "int";
       }
    }
-   element status_led_pio.s1
-   {
-      datum baseAddress
-      {
-         value = "32";
-         type = "long";
-      }
-   }
-   element clock_crossing_0.s1
-   {
-      datum baseAddress
-      {
-         value = "33554432";
-         type = "long";
-      }
-   }
    element system_timer.s1
    {
       datum _lockedAddress
@@ -267,6 +251,22 @@
       datum baseAddress
       {
          value = "2048";
+         type = "long";
+      }
+   }
+   element status_led_pio.s1
+   {
+      datum baseAddress
+      {
+         value = "32";
+         type = "long";
+      }
+   }
+   element clock_crossing_0.s1
+   {
+      datum baseAddress
+      {
+         value = "33554432";
          type = "long";
       }
    }
@@ -342,8 +342,8 @@
  <parameter name="maxAdditionalLatency" value="0" />
  <parameter name="projectName" value="nios_openMac.qpf" />
  <parameter name="sopcBorderPoints" value="true" />
- <parameter name="systemHash" value="-5890507926" />
- <parameter name="timeStamp" value="1333540329692" />
+ <parameter name="systemHash" value="-4937300332" />
+ <parameter name="timeStamp" value="1333626948594" />
  <module kind="clock_source" version="11.0" enabled="1" name="clkpcp">
   <parameter name="clockFrequency" value="100000000" />
   <parameter name="clockFrequencyKnown" value="true" />
@@ -422,7 +422,7 @@
   <parameter name="instSlaveMapParam"><![CDATA[<address-map><slave name='pcp_cpu.jtag_debug_module' start='0x2000' end='0x2800' /><slave name='onchip_memory_0.s1' start='0x4000' end='0x4400' /><slave name='SRAM_0.avalon_tristate_slave' start='0x200000' end='0x400000' /><slave name='jtag_uart_0.avalon_jtag_slave' start='0x2000000' end='0x2000008' /><slave name='status_led_pio.s1' start='0x2000020' end='0x2000040' /><slave name='node_switch_spi.spi_control_port' start='0x2000040' end='0x2000060' /><slave name='system_timer.s1' start='0x2000080' end='0x20000A0' /><slave name='powerlink_0.MAC_CMP' start='0x2000100' end='0x2000110' /><slave name='benchmark_pio.s1' start='0x2000800' end='0x2000820' /><slave name='powerlink_0.MAC_REG' start='0x2002000' end='0x2004000' /><slave name='epcs_flash_controller_0.epcs_control_port' start='0x2008000' end='0x2008800' /></address-map>]]></parameter>
   <parameter name="instAddrWidth" value="26" />
   <parameter name="impl" value="Small" />
-  <parameter name="icache_size" value="_16384" />
+  <parameter name="icache_size" value="_8192" />
   <parameter name="icache_ramBlockType" value="Automatic" />
   <parameter name="icache_numTCIM" value="_0" />
   <parameter name="icache_burstType" value="None" />

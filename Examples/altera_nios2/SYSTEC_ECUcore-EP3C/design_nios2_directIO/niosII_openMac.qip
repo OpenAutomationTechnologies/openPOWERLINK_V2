@@ -54,5 +54,5 @@ set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) powerlink_
 # clk50
 # null
 set_global_assignment -name SDC_FILE [file join $::quartus(ip_rootpath) altera/sopc_builder_ip/altera_avalon_clock_adapter/altera_avalon_clock_adapter.sdc]
-set_global_assignment -name SOPC_BUILDER_SIGNATURE_ID 0A0027000000000001367D32CA70 
+set_global_assignment -name SOPC_BUILDER_SIGNATURE_ID 0A002700000000000136825CD364 
  

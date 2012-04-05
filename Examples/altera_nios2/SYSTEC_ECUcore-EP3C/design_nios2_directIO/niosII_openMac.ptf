@@ -662,7 +662,7 @@ SYSTEM niosII_openMac
          gui_include_tightly_coupled_data_masters = "0";
          gui_omit_avalon_data_master = "0";
          cache_has_icache = "1";
-         cache_icache_size = "16384";
+         cache_icache_size = "8192";
          cache_icache_line_size = "32";
          cache_icache_ram_block_type = "AUTO";
          cache_icache_bursts = "0";
@@ -820,7 +820,7 @@ SYSTEM niosII_openMac
             }
             CONSTANT nasys_icache_size
             {
-               value = "16384";
+               value = "8192";
                comment = "Size in bytes of instruction cache";
             }
             CONSTANT nasys_icache_line_size
@@ -876,7 +876,7 @@ SYSTEM niosII_openMac
          View 
          {
             Settings_Summary = "Nios II/s
-            <br>&nbsp;&nbsp;16-Kbyte Instruction Cache
+            <br>&nbsp;&nbsp;8-Kbyte Instruction Cache
             
             <br>&nbsp;&nbsp;JTAG Debug Module
             ";
