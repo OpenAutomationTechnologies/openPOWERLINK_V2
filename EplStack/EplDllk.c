@@ -4632,8 +4632,8 @@ tEdrvTxBuffer*  pTxBuffer = NULL;
     }
 #endif
 
-    if (NmtState_p >= kEplNmtCsPreOperational2)
-    {   // SoC frames only in PreOp2, ReadyToOp and Op
+    if (NmtState_p >= kEplNmtCsStopped)
+    {   // SoC frames only in Stopped, PreOp2, ReadyToOp and Operational
 
 #if (EPL_DLL_PROCESS_SYNC == EPL_DLL_PROCESS_SYNC_ON_SOC)
         // trigger synchronous task
