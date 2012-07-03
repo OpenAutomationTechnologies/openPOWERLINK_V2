@@ -146,7 +146,7 @@ fi
 # Check if module does exist
 #
 if [ ! -f  `dirname $0`/$module ] ; then
-    echo "  openPOWERLINK module `dirname $0`/$module.ko does not exist!"
+    echo "  openPOWERLINK module `dirname $0`/$module does not exist!"
     echo "  Please specify an existing module!"
     exit 1
 fi
