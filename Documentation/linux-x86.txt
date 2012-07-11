@@ -82,7 +82,11 @@ openPOWERLINK on Linux x86
   In order to use the userspace POWERLINK stack the libpcap library is needed
   to access the Ethernet interface.
 
-2.4.3 openCONFIGURATOR
+2.4.3 QT4 development tools
+  If you want to build the QT demo application the QT4 development tools must
+  be installed on the system.
+
+2.4.4 openCONFIGURATOR
   For configuration of your POWERLINK network the Open Source configuration
   tool openCONFIGURATOR should be used. The tool is available as SourceForge
   project. (http://sourceforge.net/projects/openconf/)
@@ -359,10 +363,12 @@ openPOWERLINK on Linux x86
   > sudo ./demo_pi_qt
 
   If you are using a real-time kernel you should adjust thread priorities using
-  the delivered script set_prio before starting the application
+  the delivered script set_prio before starting the application. To be able to
+  increase the priority of the right ethernet interrupt thread, you have to
+  specifcy the used ethernet interface.
 
   > cd bin
-  > sudo ./set_prio
+  > sudo ./set_prio eth1
 
 
 8. Troubleshooting
