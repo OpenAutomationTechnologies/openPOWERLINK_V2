@@ -260,6 +260,7 @@ typedef enum
 typedef struct
 {
     tEplNmtState        m_NmtState;
+    QWORD               m_qwRelativeTime;
 
     BYTE                m_be_abLocalMac[6];
     tEdrvTxBuffer*      m_pTxBuffer;        // Buffers for Tx-Frames
@@ -2203,6 +2204,8 @@ tEplKernel      Ret = kEplSuccessful;
         case kEplNmtGsOff:
         case kEplNmtGsInitialising:
         {
+            EplDllkInstance_g.m_qwRelativeTime  = 0;
+
             // set EC flag in Flag 1, so the MN can detect a reboot and
             // will initialize the Error Signaling.
             EplDllkInstance_g.m_bFlag1 = EPL_FRAME_FLAG1_EC;
@@ -2680,6 +2683,13 @@ unsigned int    uiNextTxBufferOffset = EplDllkInstance_g.m_bCurTxBufferOffsetCyc
 
         pTxBuffer = &EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_SOC + uiNextTxBufferOffset];
         pTxBuffer->m_dwTimeOffsetNs = dwNextTimeOffsetNs;
+
+        pTxFrame = (tEplFrame *) pTxBuffer->m_pbBuffer;
+
+        // Set SoC relative time
+        AmiSetQword64ToLe( &pTxFrame->m_Data.m_Soc.m_le_RelativeTime,	EplDllkInstance_g.m_qwRelativeTime );
+        EplDllkInstance_g.m_qwRelativeTime	+= EplDllkInstance_g.m_DllConfigParam.m_dwCycleLen;
+
         if (EplDllkInstance_g.m_ppTxBufferList == NULL)
         {
             goto Exit;

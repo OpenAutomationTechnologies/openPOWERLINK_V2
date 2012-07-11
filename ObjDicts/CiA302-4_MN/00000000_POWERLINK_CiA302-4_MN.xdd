@@ -4514,7 +4514,7 @@
           NMTMNSoA2ASndTx="0"
           NMTMNASnd2SoC="0" 
           NMTNetTime="false"
-          NMTRelativeTime="false"
+          NMTRelativeTime="true"
           DLLMNFeatureMultiplex="false"
           DLLMNPResChaining="true"
           PDOTPDOChannels="4" 
