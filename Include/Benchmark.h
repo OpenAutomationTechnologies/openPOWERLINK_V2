@@ -111,6 +111,19 @@
         #define BENCHMARK_TOGGLE(x) IOWR_ALTERA_AVALON_PIO_DATA(BENCHMARK_PIO_BASE, \
                                     ((IORD_ALTERA_AVALON_PIO_DATA(BENCHMARK_PIO_BASE)) \
                                     ^ (1 << (x))))
+    #elif defined(PCP_0_BENCHMARK_PIO_BASE)
+        #include "altera_avalon_pio_regs.h"       // PIO access
+
+        #if PCP_0_BENCHMARK_PIO_BIT_MODIFYING_OUTPUT_REGISTER == 0
+            #error Please enable individual bit setting/clearing of output register for benchmark_pio module in QSYS Builder
+        #endif
+        #define BENCHMARK_SET(x)    IOWR_ALTERA_AVALON_PIO_SET_BITS(PCP_0_BENCHMARK_PIO_BASE, \
+                                    (1 << (x)))
+        #define BENCHMARK_RESET(x)  IOWR_ALTERA_AVALON_PIO_CLEAR_BITS(PCP_0_BENCHMARK_PIO_BASE, \
+                                    (1 << (x)))
+        #define BENCHMARK_TOGGLE(x) IOWR_ALTERA_AVALON_PIO_DATA(PCP_0_BENCHMARK_PIO_BASE, \
+                                    ((IORD_ALTERA_AVALON_PIO_DATA(PCP_0_BENCHMARK_PIO_BASE)) \
+                                    ^ (1 << (x))))
     #else
         #undef BENCHMARK_MODULES
         #define BENCHMARK_MODULES           0x00000000
