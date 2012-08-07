@@ -76,7 +76,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // instances then the function name of each object dictionary has to differ.
 tEplKernel PUBLIC  EplObdInitRam (tEplObdInitParam MEM* pInitParam_p);
 
-tEplKernel PUBLIC AppCbSync(void);
+tEplKernel PUBLIC AppCbSync(void) SECTION_MAIN_APP_CB_SYNC;
 tEplKernel PUBLIC AppCbEvent(
     tEplApiEventType        EventType_p,
     tEplApiEventArg*        pEventArg_p,

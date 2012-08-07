@@ -90,7 +90,8 @@
 // function prototypes
 //---------------------------------------------------------------------------
 
-tEplKernel EplPdokPdoDecode(tEplFrame* pFrame_p, unsigned int uiFrameSize_p);
+tEplKernel EplPdokPdoDecode(tEplFrame* pFrame_p,
+                            unsigned int uiFrameSize_p) SECTION_PDOK_PDO_DECODE;
 
 tEplKernel EplPdokAddInstance(void);
 

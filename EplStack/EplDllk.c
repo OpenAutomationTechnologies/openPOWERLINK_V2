@@ -377,7 +377,7 @@ static tEplKernel EplDllkProcessFillTx(tEplDllAsyncReqPriority AsyncReqPriority_
 static tEplKernel EplDllkChangeState(tEplNmtEvent NmtEvent_p, tEplNmtState NmtState_p);
 
 // called from EdrvInterruptHandler()
-static tEdrvReleaseRxBuffer EplDllkCbFrameReceived(tEdrvRxBuffer * pRxBuffer_p);
+static tEdrvReleaseRxBuffer EplDllkCbFrameReceived(tEdrvRxBuffer * pRxBuffer_p) SECTION_DLLK_FRAME_RCVD_CB;
 
 static tEplKernel EplDllkProcessReceivedPreq(tEplFrameInfo* pFrameInfo_p, tEplNmtState NmtState_p, tEdrvReleaseRxBuffer* pReleaseRxBuffer_p);
 static tEplKernel EplDllkProcessReceivedPres(tEplFrameInfo* pFrameInfo_p, tEplNmtState NmtState_p, tEplNmtEvent* pNmtEvent_p, tEdrvReleaseRxBuffer* pReleaseRxBuffer_p);

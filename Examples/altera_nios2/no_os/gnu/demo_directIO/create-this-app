@@ -2,6 +2,8 @@
 #
 # This script creates the openPOWERLINK demo CN application in this directory.
 
+TC_I_MEM=tc_i_mem_pcp
+
 if [ -z "$SOPC_DIR" ]; then
 SOPC_DIR=../../../EBV_DBC3C40/design_nios2_directIO/
 fi
@@ -60,7 +62,7 @@ ${MAINDIR}/Edrv/openmac/include \
 $(pwd) \
 ${MAINDIR}/SharedBuff \
 ${MAINDIR}/ObjDicts/CiA401_CN \
-${MAINDIR}/Target/altera_nios2/no_os/gnu/include"
+${MAINDIR}/Target/altera_nios2/no_os/gnu/generic"
 
 # set DBG_MODE according to user args
 if [ -z "$DEBUG" ]; then
@@ -132,7 +134,7 @@ then
 fi
 
 if [ -z "$DEBUG" ]; then
-    NIOS2_APP_GEN_ARGS="${NIOS2_APP_GEN_ARGS} --set APP_CFLAGS_OPTIMIZATION -O3"
+    NIOS2_APP_GEN_ARGS="${NIOS2_APP_GEN_ARGS} --set APP_CFLAGS_OPTIMIZATION -O2"
 fi
 
 # Also make sure that the APP has not been created already.  Check for
@@ -163,6 +165,14 @@ if [ -n "$REBUILD" -o ! -f $BSP_DIR/public.mk ]; then
     popd >> /dev/null
 fi
 
+# Set TCI memory size
+TCIMEM_SIZE=$(nios2-bsp-query-settings --settings $BSP_DIR/settings.bsp --cmd puts [get_addr_span $TC_I_MEM])
+
+if [ -z "$TCIMEM_SIZE" ]; then
+    TCIMEM_SIZE=0
+fi
+
+NIOS2_APP_GEN_ARGS="${NIOS2_APP_GEN_ARGS} --set APP_CFLAGS_DEFINED_SYMBOLS -DALT_TCIMEM_SIZE=${TCIMEM_SIZE}"
 
 cmd="nios2-app-generate-makefile --bsp-dir $BSP_DIR --set QUARTUS_PROJECT_DIR=$SOPC_DIR $NIOS2_APP_GEN_ARGS"
 

@@ -164,9 +164,14 @@ static tEplPdokInstance  EplPdokInstance_g;
 // local function prototypes
 //---------------------------------------------------------------------------
 
-static tEplKernel EplPdokCbProcessTpdo(tEplFrameInfo * pFrameInfo_p, BOOL fReadyFlag_p);
+static tEplKernel EplPdokCbProcessTpdo(tEplFrameInfo * pFrameInfo_p,
+                                       BOOL fReadyFlag_p)
+                                       SECTION_PDOK_PROCESS_TPDO_CB;
 
-static tEplKernel EplPdokPdoEncode(tEplFrame* pFrame_p, unsigned int uiFrameSize_p, BOOL fReadyFlag_p);
+static tEplKernel EplPdokPdoEncode(tEplFrame* pFrame_p,
+                                   unsigned int uiFrameSize_p,
+                                   BOOL fReadyFlag_p)
+                                   SECTION_PDOK_ENCODE_TPDO_CB;
 
 static tEplKernel EplPdokCopyVarToPdo(BYTE* pbPayload_p, tEplPdoMappObject* pMappObject_p);
 
