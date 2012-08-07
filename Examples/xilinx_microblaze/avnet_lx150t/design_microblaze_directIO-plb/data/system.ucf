@@ -1,0 +1,309 @@
+#  Spartan-6 LX150T Development Board
+Net fpga_0_RS232_USB_RX_pin LOC=AE2  | IOSTANDARD = LVCMOS33;
+Net fpga_0_RS232_USB_TX_pin LOC=AE1  | IOSTANDARD = LVCMOS33;
+
+# Flash memory controller
+Net fpga_0_FLASH_16Mx16_Mem_A_pin<30> LOC=N17 | IOSTANDARD = LVCMOS25;
+Net fpga_0_FLASH_16Mx16_Mem_A_pin<29> LOC=V26 | IOSTANDARD = LVCMOS25;
+Net fpga_0_FLASH_16Mx16_Mem_A_pin<28> LOC=V24 | IOSTANDARD = LVCMOS25;
+Net fpga_0_FLASH_16Mx16_Mem_A_pin<27> LOC=T26 | IOSTANDARD = LVCMOS25;
+Net fpga_0_FLASH_16Mx16_Mem_A_pin<26> LOC=T24 | IOSTANDARD = LVCMOS25;
+Net fpga_0_FLASH_16Mx16_Mem_A_pin<25> LOC=R24 | IOSTANDARD = LVCMOS25;
+Net fpga_0_FLASH_16Mx16_Mem_A_pin<24> LOC=R23 | IOSTANDARD = LVCMOS25;
+Net fpga_0_FLASH_16Mx16_Mem_A_pin<23> LOC=P26 | IOSTANDARD = LVCMOS25;
+Net fpga_0_FLASH_16Mx16_Mem_A_pin<22> LOC=P24 | IOSTANDARD = LVCMOS25;
+Net fpga_0_FLASH_16Mx16_Mem_A_pin<21> LOC=R21 | IOSTANDARD = LVCMOS25;
+Net fpga_0_FLASH_16Mx16_Mem_A_pin<20> LOC=R20 | IOSTANDARD = LVCMOS25;
+Net fpga_0_FLASH_16Mx16_Mem_A_pin<19> LOC=P22 | IOSTANDARD = LVCMOS25;
+Net fpga_0_FLASH_16Mx16_Mem_A_pin<18> LOC=P21 | IOSTANDARD = LVCMOS25;
+Net fpga_0_FLASH_16Mx16_Mem_A_pin<17> LOC=R19 | IOSTANDARD = LVCMOS25;
+Net fpga_0_FLASH_16Mx16_Mem_A_pin<16> LOC=R18 | IOSTANDARD = LVCMOS25;
+Net fpga_0_FLASH_16Mx16_Mem_A_pin<15> LOC=N24 | IOSTANDARD = LVCMOS25;
+Net fpga_0_FLASH_16Mx16_Mem_A_pin<14> LOC=N23 | IOSTANDARD = LVCMOS25;
+Net fpga_0_FLASH_16Mx16_Mem_A_pin<13> LOC=P19 | IOSTANDARD = LVCMOS25;
+Net fpga_0_FLASH_16Mx16_Mem_A_pin<12> LOC=P17 | IOSTANDARD = LVCMOS25;
+Net fpga_0_FLASH_16Mx16_Mem_A_pin<11> LOC=N22 | IOSTANDARD = LVCMOS25;
+Net fpga_0_FLASH_16Mx16_Mem_A_pin<10> LOC=N21 | IOSTANDARD = LVCMOS25;
+Net fpga_0_FLASH_16Mx16_Mem_A_pin<9> LOC=N20 | IOSTANDARD = LVCMOS25;
+Net fpga_0_FLASH_16Mx16_Mem_A_pin<8> LOC=N19 | IOSTANDARD = LVCMOS25;
+Net fpga_0_FLASH_16Mx16_Mem_A_pin<7> LOC=L24 | IOSTANDARD = LVCMOS25;
+Net fpga_0_FLASH_16Mx16_Mem_A_pin<6> LOC=L23 | IOSTANDARD = LVCMOS25;
+Net fpga_0_FLASH_16Mx16_Mem_CEN_pin LOC=AB9 | IOSTANDARD = LVCMOS25;
+Net fpga_0_FLASH_16Mx16_Mem_OEN_pin LOC=W26 | IOSTANDARD = LVCMOS25;
+Net fpga_0_FLASH_16Mx16_Mem_WEN_pin LOC=AA25 | IOSTANDARD = LVCMOS25;
+Net fpga_0_FLASH_16Mx16_Mem_DQ_pin<15> LOC=AD23 | IOSTANDARD = LVCMOS25;
+Net fpga_0_FLASH_16Mx16_Mem_DQ_pin<14> LOC=V18 | IOSTANDARD = LVCMOS25;
+Net fpga_0_FLASH_16Mx16_Mem_DQ_pin<13> LOC=W19 | IOSTANDARD = LVCMOS25;
+Net fpga_0_FLASH_16Mx16_Mem_DQ_pin<12> LOC=AD6 | IOSTANDARD = LVCMOS25;
+Net fpga_0_FLASH_16Mx16_Mem_DQ_pin<11> LOC=AF6 | IOSTANDARD = LVCMOS25;
+Net fpga_0_FLASH_16Mx16_Mem_DQ_pin<10> LOC=W8 | IOSTANDARD = LVCMOS25;
+Net fpga_0_FLASH_16Mx16_Mem_DQ_pin<9> LOC=W7 | IOSTANDARD = LVCMOS25;
+Net fpga_0_FLASH_16Mx16_Mem_DQ_pin<8> LOC=AA10 | IOSTANDARD = LVCMOS25;
+Net fpga_0_FLASH_16Mx16_Mem_DQ_pin<7> LOC=AF3 | IOSTANDARD = LVCMOS25;
+Net fpga_0_FLASH_16Mx16_Mem_DQ_pin<6> LOC=AA11 | IOSTANDARD = LVCMOS25;
+Net fpga_0_FLASH_16Mx16_Mem_DQ_pin<5> LOC=N18 | IOSTANDARD = LVCMOS25;
+Net fpga_0_FLASH_16Mx16_Mem_DQ_pin<4> LOC=AD5 | IOSTANDARD = LVCMOS25;
+Net fpga_0_FLASH_16Mx16_Mem_DQ_pin<3> LOC=Y20 | IOSTANDARD = LVCMOS25;
+Net fpga_0_FLASH_16Mx16_Mem_DQ_pin<2> LOC=AF22 | IOSTANDARD = LVCMOS25;
+Net fpga_0_FLASH_16Mx16_Mem_DQ_pin<1> LOC=AB14 | IOSTANDARD = LVCMOS25;
+Net fpga_0_FLASH_16Mx16_Mem_DQ_pin<0> LOC=W25 | IOSTANDARD = LVCMOS25;
+Net fpga_0_FLASH_16Mx16_MEM_RPN_pin LOC=AA9 | IOSTANDARD = LVCMOS25;
+Net fpga_0_FLASH_16Mx16_FLASH_BYTE_pin LOC=AA26 | IOSTANDARD = LVCMOS25;
+
+# DRAM memory controller
+Net fpga_0_MCB_DDR3_mcbx_dram_addr_pin<0> IOSTANDARD = SSTL15_II;
+Net fpga_0_MCB_DDR3_mcbx_dram_addr_pin<1> IOSTANDARD = SSTL15_II;
+Net fpga_0_MCB_DDR3_mcbx_dram_addr_pin<2> IOSTANDARD = SSTL15_II;
+Net fpga_0_MCB_DDR3_mcbx_dram_addr_pin<3> IOSTANDARD = SSTL15_II;
+Net fpga_0_MCB_DDR3_mcbx_dram_addr_pin<4> IOSTANDARD = SSTL15_II;
+Net fpga_0_MCB_DDR3_mcbx_dram_addr_pin<5> IOSTANDARD = SSTL15_II;
+Net fpga_0_MCB_DDR3_mcbx_dram_addr_pin<6> IOSTANDARD = SSTL15_II;
+Net fpga_0_MCB_DDR3_mcbx_dram_addr_pin<7> IOSTANDARD = SSTL15_II;
+Net fpga_0_MCB_DDR3_mcbx_dram_addr_pin<8> IOSTANDARD = SSTL15_II;
+Net fpga_0_MCB_DDR3_mcbx_dram_addr_pin<9> IOSTANDARD = SSTL15_II;
+Net fpga_0_MCB_DDR3_mcbx_dram_addr_pin<10> IOSTANDARD = SSTL15_II;
+Net fpga_0_MCB_DDR3_mcbx_dram_addr_pin<11> IOSTANDARD = SSTL15_II;
+Net fpga_0_MCB_DDR3_mcbx_dram_addr_pin<12> IOSTANDARD = SSTL15_II;
+Net fpga_0_MCB_DDR3_mcbx_dram_ba_pin<0> IOSTANDARD = SSTL15_II;
+Net fpga_0_MCB_DDR3_mcbx_dram_ba_pin<1> IOSTANDARD = SSTL15_II;
+Net fpga_0_MCB_DDR3_mcbx_dram_ba_pin<2> IOSTANDARD = SSTL15_II;
+Net fpga_0_MCB_DDR3_mcbx_dram_ras_n_pin IOSTANDARD = SSTL15_II;
+Net fpga_0_MCB_DDR3_mcbx_dram_cas_n_pin IOSTANDARD = SSTL15_II;
+Net fpga_0_MCB_DDR3_mcbx_dram_we_n_pin IOSTANDARD = SSTL15_II;
+Net fpga_0_MCB_DDR3_mcbx_dram_cke_pin IOSTANDARD = SSTL15_II;
+Net fpga_0_MCB_DDR3_mcbx_dram_clk_pin IOSTANDARD = DIFF_SSTL15_II;
+Net fpga_0_MCB_DDR3_mcbx_dram_clk_n_pin IOSTANDARD = DIFF_SSTL15_II;
+Net fpga_0_MCB_DDR3_mcbx_dram_dq_pin<0> IOSTANDARD = SSTL15_II;
+Net fpga_0_MCB_DDR3_mcbx_dram_dq_pin<1> IOSTANDARD = SSTL15_II;
+Net fpga_0_MCB_DDR3_mcbx_dram_dq_pin<2> IOSTANDARD = SSTL15_II;
+Net fpga_0_MCB_DDR3_mcbx_dram_dq_pin<3> IOSTANDARD = SSTL15_II;
+Net fpga_0_MCB_DDR3_mcbx_dram_dq_pin<4> IOSTANDARD = SSTL15_II;
+Net fpga_0_MCB_DDR3_mcbx_dram_dq_pin<5> IOSTANDARD = SSTL15_II;
+Net fpga_0_MCB_DDR3_mcbx_dram_dq_pin<6> IOSTANDARD = SSTL15_II;
+Net fpga_0_MCB_DDR3_mcbx_dram_dq_pin<7> IOSTANDARD = SSTL15_II;
+Net fpga_0_MCB_DDR3_mcbx_dram_dq_pin<8> IOSTANDARD = SSTL15_II;
+Net fpga_0_MCB_DDR3_mcbx_dram_dq_pin<9> IOSTANDARD = SSTL15_II;
+Net fpga_0_MCB_DDR3_mcbx_dram_dq_pin<10> IOSTANDARD = SSTL15_II;
+Net fpga_0_MCB_DDR3_mcbx_dram_dq_pin<11> IOSTANDARD = SSTL15_II;
+Net fpga_0_MCB_DDR3_mcbx_dram_dq_pin<12> IOSTANDARD = SSTL15_II;
+Net fpga_0_MCB_DDR3_mcbx_dram_dq_pin<13> IOSTANDARD = SSTL15_II;
+Net fpga_0_MCB_DDR3_mcbx_dram_dq_pin<14> IOSTANDARD = SSTL15_II;
+Net fpga_0_MCB_DDR3_mcbx_dram_dq_pin<15> IOSTANDARD = SSTL15_II;
+Net fpga_0_MCB_DDR3_mcbx_dram_dqs_pin IOSTANDARD = DIFF_SSTL15_II;
+Net fpga_0_MCB_DDR3_mcbx_dram_dqs_n_pin IOSTANDARD = DIFF_SSTL15_II;
+Net fpga_0_MCB_DDR3_mcbx_dram_udqs_pin IOSTANDARD = DIFF_SSTL15_II;
+Net fpga_0_MCB_DDR3_mcbx_dram_udqs_n_pin IOSTANDARD = DIFF_SSTL15_II;
+Net fpga_0_MCB_DDR3_mcbx_dram_udm_pin IOSTANDARD = SSTL15_II;
+Net fpga_0_MCB_DDR3_mcbx_dram_ldm_pin IOSTANDARD = SSTL15_II;
+Net fpga_0_MCB_DDR3_mcbx_dram_odt_pin IOSTANDARD = SSTL15_II;
+Net fpga_0_MCB_DDR3_mcbx_dram_ddr3_rst_pin IOSTANDARD = SSTL15_II;
+Net fpga_0_MCB_DDR3_rzq_pin LOC = M4;
+Net fpga_0_MCB_DDR3_zio_pin LOC = H6;
+Net fpga_0_clk_1_sys_clk_pin TNM_NET = sys_clk_pin;
+TIMESPEC TS_sys_clk_pin = PERIOD sys_clk_pin 100000 kHz;
+Net fpga_0_clk_1_sys_clk_pin TNM_NET = sys_clk_pin  |  LOC=U23 | IOSTANDARD = LVCMOS25;
+Net fpga_0_rst_1_sys_rst_pin TIG;
+Net fpga_0_rst_1_sys_rst_pin LOC=M19 | IOSTANDARD = LVCMOS33;
+
+Net sys_bus_reset TIG;
+
+# Node Switches
+Net fpga_0_Node_Switches_GPIO_IO_I_pin<0> LOC=K21 | IOSTANDARD = LVCMOS33;
+Net fpga_0_Node_Switches_GPIO_IO_I_pin<1> LOC=G23 | IOSTANDARD = LVCMOS33;
+Net fpga_0_Node_Switches_GPIO_IO_I_pin<2> LOC=G24 | IOSTANDARD = LVCMOS33;
+Net fpga_0_Node_Switches_GPIO_IO_I_pin<3> LOC=J20 | IOSTANDARD = LVCMOS33;
+Net fpga_0_Node_Switches_GPIO_IO_I_pin<4> LOC=J22 | IOSTANDARD = LVCMOS33;
+Net fpga_0_Node_Switches_GPIO_IO_I_pin<5> LOC=E24 | IOSTANDARD = LVCMOS33;
+Net fpga_0_Node_Switches_GPIO_IO_I_pin<6> LOC=E23 | IOSTANDARD = LVCMOS33;
+Net fpga_0_Node_Switches_GPIO_IO_I_pin<7> LOC=K22 | IOSTANDARD = LVCMOS33;
+
+######################################
+## PORT IO
+# Output LEDs (connected to the 8 LEDs on the lx150t)
+Net plb_powerlink_0_pio_portio_pin<0> LOC = M18 | IOSTANDARD = LVCMOS33 | TIG;
+Net plb_powerlink_0_pio_portio_pin<1> LOC = L19 | IOSTANDARD = LVCMOS33 | TIG;
+Net plb_powerlink_0_pio_portio_pin<2> LOC = M21 | IOSTANDARD = LVCMOS33 | TIG;
+Net plb_powerlink_0_pio_portio_pin<3> LOC = F22 | IOSTANDARD = LVCMOS33 | TIG;
+Net plb_powerlink_0_pio_portio_pin<4> LOC = H22 | IOSTANDARD = LVCMOS33 | TIG;
+Net plb_powerlink_0_pio_portio_pin<5> LOC = C25 | IOSTANDARD = LVCMOS33 | TIG;
+Net plb_powerlink_0_pio_portio_pin<6> LOC = C26 | IOSTANDARD = LVCMOS33 | TIG;
+Net plb_powerlink_0_pio_portio_pin<7> LOC = F23 | IOSTANDARD = LVCMOS33 | TIG;
+
+# Output PINs (connected to: FMC J2 with FMC XM105 Debug Card (Connector J1))
+Net plb_powerlink_0_pio_portio_pin<8> LOC = AE13 | IOSTANDARD = LVCMOS25 | TIG; #Connector J1: Pin1
+Net plb_powerlink_0_pio_portio_pin<9> LOC = W16 | IOSTANDARD = LVCMOS25 | TIG;
+Net plb_powerlink_0_pio_portio_pin<10> LOC = AF13 | IOSTANDARD = LVCMOS25 | TIG;
+Net plb_powerlink_0_pio_portio_pin<11> LOC = Y16 | IOSTANDARD = LVCMOS25 | TIG;
+Net plb_powerlink_0_pio_portio_pin<12> LOC = V11 | IOSTANDARD = LVCMOS25 | TIG;
+Net plb_powerlink_0_pio_portio_pin<13> LOC = U13 | IOSTANDARD = LVCMOS25 | TIG;
+Net plb_powerlink_0_pio_portio_pin<14> LOC = V10 | IOSTANDARD = LVCMOS25 | TIG;
+Net plb_powerlink_0_pio_portio_pin<15> LOC = V13 | IOSTANDARD = LVCMOS25 | TIG; #Connector J1: Pin8
+
+# Input PINs (connected to the 3 Push Buttons on the lx150t)
+Net plb_powerlink_0_pio_portio_pin<16> LOC = L20 | PULLUP | IOSTANDARD = LVCMOS33 | TIG;
+Net plb_powerlink_0_pio_portio_pin<17> LOC = L21 | PULLUP | IOSTANDARD = LVCMOS33 | TIG;
+Net plb_powerlink_0_pio_portio_pin<18> LOC = H20 | PULLUP | IOSTANDARD = LVCMOS33 | TIG;
+# Input PINs (connected to: FMC J2 with FMC XM105 Debug Card (Connector J1))
+Net plb_powerlink_0_pio_portio_pin<19> LOC = AB13 | IOSTANDARD = LVCMOS25 | TIG; #Connector J1: Pin9
+Net plb_powerlink_0_pio_portio_pin<20> LOC = W17 | IOSTANDARD = LVCMOS25 | TIG;
+Net plb_powerlink_0_pio_portio_pin<21> LOC = AA13 | IOSTANDARD = LVCMOS25 | TIG;
+Net plb_powerlink_0_pio_portio_pin<22> LOC = W18 | IOSTANDARD = LVCMOS25 | TIG;
+Net plb_powerlink_0_pio_portio_pin<23> LOC = Y21 | IOSTANDARD = LVCMOS25 | TIG; #Connector J1: Pin13
+
+# Output PINs (connected to: FMC J2 with FMC XM105 Debug Card (Connector J1))
+Net plb_powerlink_0_pio_portio_pin<24> LOC = AA18 | IOSTANDARD = LVCMOS25 | TIG; #Connector J1: Pin17
+Net plb_powerlink_0_pio_portio_pin<25> LOC = Y15 | IOSTANDARD = LVCMOS25 | TIG;
+Net plb_powerlink_0_pio_portio_pin<26> LOC = AB17 | IOSTANDARD = LVCMOS25 | TIG;
+Net plb_powerlink_0_pio_portio_pin<27> LOC = AA16 | IOSTANDARD = LVCMOS25 | TIG;
+Net plb_powerlink_0_pio_portio_pin<28> LOC = Y12 | IOSTANDARD = LVCMOS25 | TIG;
+Net plb_powerlink_0_pio_portio_pin<29> LOC = U15 | IOSTANDARD = LVCMOS25 | TIG;
+Net plb_powerlink_0_pio_portio_pin<30> LOC = AA12 | IOSTANDARD = LVCMOS25 | TIG;
+Net plb_powerlink_0_pio_portio_pin<31> LOC = V16 | IOSTANDARD = LVCMOS25 | TIG; #Connector J1: Pin24
+
+## PORT IO
+######################################
+
+######################################
+## FMC (1)
+
+#### LEDs
+NET "POWERLINK_LED_GPIO_pin<0>" LOC = "H9" | IOSTANDARD = LVCMOS25;
+NET "POWERLINK_LED_GPIO_pin<1>" LOC = "E12" | IOSTANDARD = LVCMOS25;
+
+#### PHY 1 (FMC-ISMNET J2)
+NET plb_powerlink_0_phyMii0_TxClk_pin LOC = "E13";
+NET plb_powerlink_0_phyMii0_TxEn_pin LOC = "C5";
+NET plb_powerlink_0_phyMii0_TxDat_pin<3> LOC = "E8";
+NET plb_powerlink_0_phyMii0_TxDat_pin<2> LOC = "F6";
+NET plb_powerlink_0_phyMii0_TxDat_pin<1> LOC = "D5";
+NET plb_powerlink_0_phyMii0_TxDat_pin<0> LOC = "F5";
+#NET phy0_Mii_TxEr_pin LOC = "";
+NET plb_powerlink_0_phyMii0_RxClk_pin LOC = "C13";
+NET plb_powerlink_0_phyMii0_RxDv_pin LOC = "B21" | PULLDOWN;
+NET plb_powerlink_0_phyMii0_RxDat_pin<3> LOC = "G8" | PULLDOWN;
+NET plb_powerlink_0_phyMii0_RxDat_pin<2> LOC = "G12" | PULLUP;
+NET plb_powerlink_0_phyMii0_RxDat_pin<1> LOC = "F9";
+NET plb_powerlink_0_phyMii0_RxDat_pin<0> LOC = "F7";
+NET plb_powerlink_0_phyMii0_RxEr_pin LOC = "E14" | PULLUP;
+#NET phy0_Mii_Crs_pin LOC = "F14";
+#NET phy0_Mii_Col_pin LOC = "";
+
+###PHY1 MII
+#NET phy0_pwdn_pin LOC = "A12" | TIG;
+NET plb_powerlink_0_phy0_SMIDat_pin LOC = "J16";
+NET plb_powerlink_0_phy0_SMIClk_pin LOC = "J17";
+NET plb_powerlink_0_phy0_Rst_n_pin LOC = "H12" | TIG;
+NET plb_powerlink_0_phy0_link_pin LOC = "C21";
+
+
+#### PHY 2 (FMC-ISMNET J6)
+NET plb_powerlink_0_phyMii1_TxClk_pin LOC = "B12";
+NET plb_powerlink_0_phyMii1_TxEn_pin LOC = "F11";
+NET plb_powerlink_0_phyMii1_TxDat_pin<3> LOC = "E10";
+NET plb_powerlink_0_phyMii1_TxDat_pin<2> LOC = "F10";
+NET plb_powerlink_0_phyMii1_TxDat_pin<1> LOC = "G11";
+NET plb_powerlink_0_phyMii1_TxDat_pin<0> LOC = "J11";
+#NET plb_powerlink_0_phyMii1_TxEr_pin LOC = "";
+NET plb_powerlink_0_phyMii1_RxClk_pin LOC = "B14";
+NET plb_powerlink_0_phyMii1_RxDv_pin LOC = "F19" | PULLDOWN;
+NET plb_powerlink_0_phyMii1_RxDat_pin<3> LOC = "F18" | PULLUP;
+NET plb_powerlink_0_phyMii1_RxDat_pin<2> LOC = "E18" | PULLDOWN;
+NET plb_powerlink_0_phyMii1_RxDat_pin<1> LOC = "F16";
+NET plb_powerlink_0_phyMii1_RxDat_pin<0> LOC = "B22";
+NET plb_powerlink_0_phyMii1_RxEr_pin LOC = "G16" | PULLUP;
+#NET phy1_Mii_Crs_pin LOC = "E20";
+#NET phy1_Mii_Col_pin LOC = "";
+
+###PHY2 MII
+#NET phy1_pwdn_pin LOC = "A22" | TIG;
+NET plb_powerlink_0_phy1_SMIDat_pin LOC = "F20";
+NET plb_powerlink_0_phy1_SMIClk_pin LOC = "G19";
+NET plb_powerlink_0_phy1_Rst_n_pin LOC = "H17" | TIG;
+NET plb_powerlink_0_phy1_link_pin LOC = "F12";
+
+
+## FMC (1)
+######################################
+
+######################################
+## FMC (2)
+
+NET BENCHMARK_PIO_GPIO_IO_O_pin<0> LOC = "AA17" | TIG;
+NET BENCHMARK_PIO_GPIO_IO_O_pin<1> LOC = "AB24" | TIG;
+NET BENCHMARK_PIO_GPIO_IO_O_pin<2> LOC = "AC23" | TIG;
+NET BENCHMARK_PIO_GPIO_IO_O_pin<3> LOC = "AB26" | TIG;
+NET BENCHMARK_PIO_GPIO_IO_O_pin<4> LOC = "U24" | TIG;
+NET BENCHMARK_PIO_GPIO_IO_O_pin<5> LOC = "V23" | TIG;
+NET BENCHMARK_PIO_GPIO_IO_O_pin<6> LOC = "R26" | TIG;
+NET BENCHMARK_PIO_GPIO_IO_O_pin<7> LOC = "W24" | TIG;
+NET BENCHMARK_PIO_GPIO_IO_O_pin<8> LOC = "T19" | TIG;
+NET BENCHMARK_PIO_GPIO_IO_O_pin<9> LOC = "AE25" | TIG;
+NET BENCHMARK_PIO_GPIO_IO_O_pin<10> LOC = "T20" | TIG;
+NET BENCHMARK_PIO_GPIO_IO_O_pin<11> LOC = "AE26" | TIG;
+NET BENCHMARK_PIO_GPIO_IO_O_pin<12> LOC = "AC5" | TIG;
+NET BENCHMARK_PIO_GPIO_IO_O_pin<13> LOC = "Y24" | TIG;
+NET BENCHMARK_PIO_GPIO_IO_O_pin<14> LOC = "Y11" | TIG;
+NET BENCHMARK_PIO_GPIO_IO_O_pin<15> LOC = "Y26" | TIG;
+
+## FMC (2)
+######################################
+
+
+################################################################################
+# TIMING CONSTRAINTS
+## Clock groups
+### PLB and MAC clock
+NET "clk_100_0000MHzPLL1" TNM = "PLB_CLK_GRP";
+NET "clk_50_0000MHzPLL1" TNM = "MAC_CLK_GRP";
+
+### PHY0 clock
+NET "plb_powerlink_0_phyMii0_RxClk_pin" TNM_NET = "PHY0_RXCLK_GRP";
+TIMESPEC "TS_RXCLK0" = PERIOD "PHY0_RXCLK_GRP" 40 ns HIGH 20 ns;
+NET "plb_powerlink_0_phyMii0_TxClk_pin" TNM_NET = "PHY0_TXCLK_GRP";
+TIMESPEC "TS_TXCLK0" = PERIOD "PHY0_TXCLK_GRP" 40 ns HIGH 20 ns;
+
+### PHY1 clock
+NET "plb_powerlink_0_phyMii1_RxClk_pin" TNM_NET = "PHY1_RXCLK_GRP";
+TIMESPEC "TS_RXCLK1" = PERIOD "PHY1_RXCLK_GRP" 40 ns HIGH 20 ns;
+NET "plb_powerlink_0_phyMii1_TxClk_pin" TNM_NET = "PHY1_TXCLK_GRP";
+TIMESPEC "TS_TXCLK1" = PERIOD "PHY1_TXCLK_GRP" 40 ns HIGH 20 ns;
+
+#### ICAP clock
+NET "clk_4_0000MHz" TNM = "ICAP_CLK_GRP";
+
+### cut path
+#### PLB <--> ICAP
+TIMESPEC TS_PLB_ICAP_TIG = FROM "PLB_CLK_GRP" TO "ICAP_CLK_GRP" TIG;
+TIMESPEC TS_ICAP_PLB_TIG = FROM "ICAP_CLK_GRP" TO "PLB_CLK_GRP" TIG;
+
+### PLB <--> MAC
+TIMESPEC TS_PLB_MAC_TIG = FROM "PLB_CLK_GRP" TO "MAC_CLK_GRP" TIG;
+TIMESPEC TS_MAC_PLB_TIG = FROM "MAC_CLK_GRP" TO "PLB_CLK_GRP" TIG;
+
+### MAC <--> PHY0
+TIMESPEC TS_PLB_PHY0TX_TIG = FROM "MAC_CLK_GRP" TO "PHY0_TXCLK_GRP" TIG;
+TIMESPEC TS_PHY0TX_PLB_TIG = FROM "PHY0_TXCLK_GRP" TO "MAC_CLK_GRP" TIG;
+TIMESPEC TS_PLB_PHY0RX_TIG = FROM "MAC_CLK_GRP" TO "PHY0_RXCLK_GRP" TIG;
+TIMESPEC TS_PHY0RX_PLB_TIG = FROM "PHY0_RXCLK_GRP" TO "MAC_CLK_GRP" TIG;
+
+### MAC <--> PHY1
+TIMESPEC TS_PLB_PHY1TX_TIG = FROM "MAC_CLK_GRP" TO "PHY1_TXCLK_GRP" TIG;
+TIMESPEC TS_PHY1TX_PLB_TIG = FROM "PHY1_TXCLK_GRP" TO "MAC_CLK_GRP" TIG;
+TIMESPEC TS_PLB_PHY1RX_TIG = FROM "MAC_CLK_GRP" TO "PHY1_RXCLK_GRP" TIG;
+TIMESPEC TS_PHY1RX_PLB_TIG = FROM "PHY1_RXCLK_GRP" TO "MAC_CLK_GRP" TIG;
+
+## I/O
+### PHY0
+#### T = 40 ns , tco = 10..30 ns => valid window of 10 ns before/after edge
+OFFSET = IN 10 ns VALID 10 ns BEFORE "plb_powerlink_0_phyMii0_RxClk_pin";
+#### T = 40 ns , tsu = 10 ns , th = 0 => T-tsu ns after edge
+OFFSET = OUT 30 ns AFTER "plb_powerlink_0_phyMii0_TxClk_pin";
+
+### PHY1
+#### T = 40 ns , tco = 10..30 ns => valid window of 10 ns before/after edge
+OFFSET = IN 10 ns VALID 10 ns BEFORE "plb_powerlink_0_phyMii1_RxClk_pin";
+#### T = 40 ns , tsu = 10 ns , th = 0 => T-tsu ns after edge
+OFFSET = OUT 30 ns AFTER "plb_powerlink_0_phyMii1_TxClk_pin";
+################################################################################
+
+

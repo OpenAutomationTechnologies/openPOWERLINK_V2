@@ -1,4 +1,0 @@
--g TdoPin:PULLNONE
--g StartUpClk:JTAGCLK
-#add other options here.
--g UnusedPin:PULLUP
