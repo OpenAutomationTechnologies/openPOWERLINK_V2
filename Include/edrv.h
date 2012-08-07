@@ -152,6 +152,7 @@ struct _tEdrvTxBuffer
 {
     unsigned int    m_uiTxMsgLen;           // IN: length of message to be send (set for each transmit call)
     DWORD           m_dwTimeOffsetNs;       // IN: delay to a previous frame after which this frame will be transmitted
+    DWORD           m_dwTimeOffsetAbsTk;    // IN: absolute time when frame will be transmitted (in MAC ticks)
     tEdrvTxHandler  m_pfnTxHandler;         // IN: special Tx callback function
     // ----------------------
     union
