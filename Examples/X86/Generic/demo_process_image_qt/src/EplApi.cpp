@@ -92,6 +92,7 @@
 /* global variables */
 CONST BYTE abMacAddr[] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 static char * pszCdcFilename_g = "mnobd.cdc";
+static char   devName_g[256];
 
 /******************************************************************************/
 /* class declarations */
@@ -125,7 +126,7 @@ EplApi::EplApi(MainWindow *pMainWindow_p, unsigned int uiNodeId_p, QString devNa
     EplOutput*          pEplOutput;
     EplInput*           pEplInput;
     EplCnState*         pEplCnState;
-    char                devName[256];
+
 
     pEplState = pMainWindow_p->getEplStateWidget();
     pEplOutput = pMainWindow_p->getEplOutputWidget();
@@ -211,9 +212,9 @@ EplApi::EplApi(MainWindow *pMainWindow_p, unsigned int uiNodeId_p, QString devNa
 
 #ifdef CONFIG_POWERLINK_USERSTACK
     // Copy the selected interface string to a local variable
-    strcpy(devName, devName_p.toStdString().c_str());
-    
-    EplApiInitParam.m_HwParam.m_pszDevName = devName;
+    strcpy(devName_g, devName_p.toStdString().c_str());
+
+    EplApiInitParam.m_HwParam.m_pszDevName = devName_g;
     EplApiInitParam.m_pfnObdInitRam = EplObdInitRam;
     EplApiInitParam.m_pfnCbSync = pEplDataInOutThread->getSyncCbFunc();
 #else
