@@ -96,10 +96,10 @@ tEplKernel PUBLIC EplEventkAddInstance(void);
 tEplKernel PUBLIC EplEventkDelInstance(void);
 
 // Kernelthread that dispatches events in kernelspace
-tEplKernel PUBLIC EplEventkProcess(tEplEvent * pEvent_p);
+tEplKernel PUBLIC EplEventkProcess(tEplEvent * pEvent_p) SECTION_EVENTK_PROCESS;
 
 // post events from kernelspace
-tEplKernel PUBLIC EplEventkPost(tEplEvent * pEvent_p);
+tEplKernel PUBLIC EplEventkPost(tEplEvent * pEvent_p) SECTION_EVENTK_POST;
 
 // post errorevents from kernelspace
 tEplKernel PUBLIC EplEventkPostError(tEplEventSource EventSource_p,

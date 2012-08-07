@@ -344,6 +344,13 @@
             #undef  INLINE_ENABLED
             #undef  INLINE_FUNCTION_DEF
         #endif
+
+        #include <section-nios2.h>
+    #endif
+
+    #if (DEV_SYSTEM == _DEV_MICROBLAZE_BIG_ \
+        || DEV_SYSTEM == _DEV_MICROBLAZE_LITTLE_)
+        #include <section-microblaze.h>
     #endif
 
 // ------------------ WIN32 ---------------------------------------------
@@ -472,6 +479,8 @@
     #define __func__ __FUNCTION__
 
 #endif
+
+#include <section-default.h>
 
 //---------------------------------------------------------------------------
 //  definitions of basic types
