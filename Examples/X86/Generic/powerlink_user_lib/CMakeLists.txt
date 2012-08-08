@@ -126,7 +126,6 @@ SET (LIB_SOURCES ${LIB_SOURCES}
                  ${POWERLINK_SOURCE_DIR}/EplStack/EplDebug.c
                  ${POWERLINK_SOURCE_DIR}/EplStack/EplObd.c
                  ${POWERLINK_SOURCE_DIR}/EplStack/EplApiProcessImage.c
-                 ${POWERLINK_SOURCE_DIR}/Edrv/EdrvCyclic.c
                  ${POWERLINK_SOURCE_DIR}/EplStack/amix86.c
                  ${POWERLINK_SOURCE_DIR}/SharedBuff/SharedBuff.c
                  ${POWERLINK_SOURCE_DIR}/Edrv/EdrvCyclic.c

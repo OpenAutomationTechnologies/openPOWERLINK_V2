@@ -2025,6 +2025,7 @@ tEplApiEventArg     EventArg;
         default:
         {
             TRACE0("EplApiCbNmtStateChange(): unhandled NMT state\n");
+            break;
         }
     }
 
