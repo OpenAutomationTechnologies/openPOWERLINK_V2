@@ -1,11 +1,12 @@
 /**
 ********************************************************************************
-\file       Cmp_Lcd.c
+\file       systemComponents.c
 
-\brief      Generic lcd functions for the TERASIC board
+\brief      Module which contains of processor specific functions
+            (nios ii version)
 
-Application of the directIO example which starts the openPOWERLINK stack and
-implements AppCbSync and AppCbEvent.
+Provides all functions which are platform dependent for the application of the
+directIO example.
 
 Copyright (c) 2012, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2012, SYSTEC electronik GmbH
@@ -35,14 +36,21 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *******************************************************************************/
 
+
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <unistd.h> // for usleep()
-#include <string.h>
-#include <io.h>
-#include "system.h"
-#include "lcd.h"
+
+#include "systemComponents.h"
+
+#include "altera_avalon_pio_regs.h"
+#include "alt_types.h"
+#include "nios2.h"
+#include <sys/alt_cache.h>
+
+#ifdef NODE_SWITCH_SPI_BASE
+#include "altera_avalon_spi_regs.h"
+#endif
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -85,86 +93,108 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //            P U B L I C   F U N C T I O N S                                 //
 //============================================================================//
 
+//------------------------------------------------------------------------------
+/**
+\brief               init the processor peripheral
 
-#ifdef LCD_BASE  // LCD module present
+Flush the instruction and data cache and reset the leds.
+*/
+//------------------------------------------------------------------------------
+void SysComp_initPeripheral(void)
+{
+    alt_icache_flush_all();
+    alt_dcache_flush_all();
+
+    SysComp_setPowerlinkStatus(0xff);
+}
+
 
 //------------------------------------------------------------------------------
 /**
-\brief               Init the LCD display
+\brief               free the processor cache
 
-Writes init parameters to the LCD display
+Flush and disable the instruction and data cache.
 */
 //------------------------------------------------------------------------------
-void LCD_Init()
+void SysComp_freeProcessorCache(void)
 {
-  lcd_write_cmd(LCD_BASE,0x38);
-  usleep(2000);
-  lcd_write_cmd(LCD_BASE,0x0C);
-  usleep(2000);
-  lcd_write_cmd(LCD_BASE,0x01);
-  usleep(2000);
-  lcd_write_cmd(LCD_BASE,0x06);
-  usleep(2000);
-  lcd_write_cmd(LCD_BASE,0x80);
-  usleep(2000);
+    alt_icache_flush_all();
+    alt_dcache_flush_all();
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief               Clear the LCD display
+\brief               enable global interrupts
 
-Writes clear command to the LCD display
+Dummy function on Nios II as interrupts are enabled by default
 */
 //------------------------------------------------------------------------------
-void LCD_Clear()
+void SysComp_enableInterrupts(void)
 {
-  lcd_write_cmd(LCD_BASE,0x01);
-  usleep(2000);
+    //no interrupt enable needed on nios2 (fallthrough)
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief               Print text to the LCD display
+\brief              read the node ID from the available peripheral
 
-Writes text to the LCD display
+This function reads the node id from the given board peripheral. If the board
+is not supporting node switches zero is returned.
 
-\param               Text                                 The text to print
+\return             nodeId
+\retval             [1-239]         the given node id
 */
 //------------------------------------------------------------------------------
-void LCD_Show_Text(char* Text)
+BYTE SysComp_getNodeId(void)
 {
-  int i;
-  for(i=0;i<strlen(Text);i++)
-  {
-    lcd_write_data(LCD_BASE,Text[i]);
-    usleep(2000);
-  }
+    BYTE nodeId = 0;
+
+    /* read port configuration input pins */
+#ifdef NODE_SWITCH_BASE
+    nodeId = IORD_ALTERA_AVALON_PIO_DATA(NODE_SWITCH_BASE);
+#endif
+
+#ifdef NODE_SWITCH_SPI_BASE
+    // read node-ID from hex switch on baseboard, which is connected via SPI shift register
+    IOWR_ALTERA_AVALON_SPI_TXDATA(NODE_SWITCH_BASE, 0xFF);   // generate pulse for latching inputs
+    while ((IORD_ALTERA_AVALON_SPI_STATUS(NODE_SWITCH_BASE) & ALTERA_AVALON_SPI_STATUS_RRDY_MSK) == 0)
+        ;
+
+    nodeId = IORD_ALTERA_AVALON_SPI_RXDATA(NODE_SWITCH_BASE);
+#endif
+
+    return nodeId;
+}
+
+
+//------------------------------------------------------------------------------
+/**
+\brief              set the powerlink led
+
+This function sets the powerlink status or error led.
+
+\param              bBitNum_p       powerlink status (1: state; 2: error)
+*/
+//------------------------------------------------------------------------------
+void SysComp_setPowerlinkStatus(BYTE bBitNum_p)
+{
+    #ifdef STATUS_LEDS_BASE
+        IOWR_ALTERA_AVALON_PIO_SET_BITS(STATUS_LEDS_BASE, bBitNum_p);
+    #endif
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief               Change to line one
+\brief             reset the powerlink led
 
-Changes to line one of the LCD display
+This function resets the powerlink status or error led.
+
+\param             bBitNum_p       powerlink status (1: state; 2: error)
 */
 //------------------------------------------------------------------------------
-void LCD_Line1()
+void SysComp_resetPowerlinkStatus(BYTE bBitNum_p)
 {
-  lcd_write_cmd(LCD_BASE,0x80);
-  usleep(2000);
+    #ifdef STATUS_LEDS_BASE
+    IOWR_ALTERA_AVALON_PIO_CLEAR_BITS(STATUS_LEDS_BASE, bBitNum_p);
+    #endif
 }
-
-//------------------------------------------------------------------------------
-/**
-\brief               Change to line two
-
-Changes to line two of the LCD display
-*/
-//------------------------------------------------------------------------------
-void LCD_Line2()
-{
-  lcd_write_cmd(LCD_BASE,0xC0);
-  usleep(2000);
-}
-
-#endif // LCD_BASE

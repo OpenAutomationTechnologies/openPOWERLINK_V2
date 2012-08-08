@@ -2,10 +2,10 @@
 ********************************************************************************
 \file       Cmp_Lcd.h
 
-\brief      Generic lcd functions for the TERASIC board
+\brief      Non generic lcd functions for the TERASIC board
 
-Application of the directIO example which starts the openPOWERLINK stack and
-implements AppCbSync and AppCbEvent.
+Provides all functions which are platform dependent for the application of the
+directIO example.
 
 Copyright (c) 2012, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2012, SYSTEC electronik GmbH
@@ -35,21 +35,18 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *******************************************************************************/
 
-#ifndef _INC_LCD_H_
-#define _INC_LCD_H_
+#ifndef _INC_CMP_LCD_H_
+#define _INC_CMP_LCD_H_
 
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
+#include "EplNmt.h"
+#include "EplErrDef.h"
 
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-
-#define lcd_write_cmd(base, data)                     IOWR(base, 0, data)
-#define lcd_read_cmd(base)                            IORD(base, 1)
-#define lcd_write_data(base, data)                    IOWR(base, 2, data)
-#define lcd_read_data(base)                           IORD(base, 3)
 
 //------------------------------------------------------------------------------
 // typedef
@@ -59,10 +56,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // function prototypes
 //------------------------------------------------------------------------------
 
-void  LCD_Init();
-void  LCD_Clear();
-void  LCD_Show_Text(char* Text);
-void  LCD_Line1();
-void  LCD_Line2();
+void SysComp_LcdInit(void);
+void SysComp_LcdSetText(char* Text);
+tEplKernel SysComp_LcdSetLine(int LineNum_p);
+void SysComp_LcdClear(void);
+void SysComp_LcdTest(void);
 
-#endif /* _INC_LCD_H_ */
+void SysComp_LcdPrintState(tEplNmtState NmtState_p);
+void SysComp_LcdPrintNodeInfo (WORD wNodeId_p);
+
+#endif /* _INC_CMP_LCD_H_ */

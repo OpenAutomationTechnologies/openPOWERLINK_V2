@@ -1,126 +1,115 @@
-/****************************************************************************
-  (c) SYSTEC electronic GmbH, D-07973 Greiz, August-Bebel-Str. 29
-      www.systec-electronic.com
-  (c) Bernecker + Rainer Industrie-Elektronik Ges.m.b.H.
-      A-5142 Eggelsberg, B&R Strasse 1
-      www.br-automation.com
+/**
+********************************************************************************
+\file       demo_main.c
 
-  Project:      openPOWERLINK
+\brief      Main module of the directIO user example
 
-  Description:  main module of digital I/O user interface
+Application of the directIO example which starts the openPOWERLINK stack and
+implements AppCbSync and AppCbEvent.
 
-  License:
+Copyright (c) 2012, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2012, SYSTEC electronik GmbH
+Copyright (c) 2012, Kalycito Infotech Private Ltd.
+All rights reserved.
 
-    Redistribution and use in source and binary forms, with or without
-    modification, are permitted provided that the following conditions
-    are met:
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+    * Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above copyright
+      notice, this list of conditions and the following disclaimer in the
+      documentation and/or other materials provided with the distribution.
+    * Neither the name of the copyright holders nor the
+      names of its contributors may be used to endorse or promote products
+      derived from this software without specific prior written permission.
 
-    1. Redistributions of source code must retain the above copyright
-       notice, this list of conditions and the following disclaimer.
-
-    2. Redistributions in binary form must reproduce the above copyright
-       notice, this list of conditions and the following disclaimer in the
-       documentation and/or other materials provided with the distribution.
-
-    3. Neither the name of SYSTEC electronic GmbH nor the names of its
-       contributors may be used to endorse or promote products derived
-       from this software without prior written permission. For written
-       permission, please contact info@systec-electronic.com.
-
-    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-    LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-    FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-    COPYRIGHT HOLDERS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-    INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-    BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-    LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-    CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-    LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-    ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-    POSSIBILITY OF SUCH DAMAGE.
-
-    Severability Clause:
-
-        If a provision of this License is or becomes illegal, invalid or
-        unenforceable in any jurisdiction, that shall not affect:
-        1. the validity or enforceability in that jurisdiction of any other
-           provision of this License; or
-        2. the validity or enforceability in other jurisdictions of that or
-           any other provision of this License.
-
-  -------------------------------------------------------------------------
-
-                $RCSfile$
-
-                $Author$
-
-                $Revision$  $Date$
-
-                $State$
-
-                Build Environment:
-                    GCC V3.4
-
-****************************************************************************/
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL COPYRIGHT HOLDERS BE LIABLE FOR ANY
+DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*******************************************************************************/
 
 
-/******************************************************************************/
-/* includes */
+//------------------------------------------------------------------------------
+// includes
+//------------------------------------------------------------------------------
 #include "Epl.h"
 
 #ifdef __NIOS2__
-#include "system.h"
-#include "altera_avalon_pio_regs.h"
-#include "alt_types.h"
-#include "nios2.h"
-#include <sys/alt_cache.h>
-#ifdef NODE_SWITCH_SPI_BASE
-#include "altera_avalon_spi_regs.h"
+#include <unistd.h>
+#elif defined(__MICROBLAZE__)
+#include "xilinx_usleep.h"
 #endif
-#endif // __NIOS2__
+
+#include "systemComponents.h"
 
 #ifdef LCD_BASE
-#include "lcd.h"
+#include "Cmp_Lcd.h"
 #endif
 
 
-/******************************************************************************/
-/* defines */
-#if !defined(NODE_SWITCH_PIO_BASE) && !defined(NODE_SWITCH_SPI_BASE)
-#define SET_NODE_ID_PER_SW //apply this define if no node switches are connected.
- #warning No Node ID module present in SOPC. Node ID can only be set by SW!
-#endif
+//============================================================================//
+//            G L O B A L   D E F I N I T I O N S                             //
+//============================================================================//
 
-#define NODEID      0x01 // should be NOT 0xF0 (=MN) in case of CN
+//------------------------------------------------------------------------------
+// const defines
+//------------------------------------------------------------------------------
 
-#define CYCLE_LEN   1000 // [us]
-#define MAC_ADDR    0x00, 0x12, 0x34, 0x56, 0x78, 0x9A
-#define IP_ADDR     0xc0a86401  // 192.168.100.1 // don't care the last byte!
-#define SUBNET_MASK 0xFFFFFF00  // 255.255.255.0
+//------------------------------------------------------------------------------
+// module global vars
+//------------------------------------------------------------------------------
 
-#define LATCHED_IOPORT_BASE (void*) POWERLINK_0_SMP_BASE
-#define LATCHED_IOPORT_CFG    (void*) (LATCHED_IOPORT_BASE + 4)
-
+//------------------------------------------------------------------------------
+// global function prototypes
+//------------------------------------------------------------------------------
 
 // This function is the entry point for your object dictionary. It is defined
 // in OBJDICT.C by define EPL_OBD_INIT_RAM_NAME. Use this function name to define
 // this function prototype here. If you want to use more than one Epl
 // instances then the function name of each object dictionary has to differ.
-
 tEplKernel PUBLIC  EplObdInitRam (tEplObdInitParam MEM* pInitParam_p);
-
 
 tEplKernel PUBLIC AppCbSync(void);
 tEplKernel PUBLIC AppCbEvent(
-    tEplApiEventType        EventType_p,   // IN: event type (enum)
-    tEplApiEventArg*        pEventArg_p,   // IN: event argument (union)
+    tEplApiEventType        EventType_p,
+    tEplApiEventArg*        pEventArg_p,
     void GENERIC*           pUserArg_p);
 
-#ifdef LCD_BASE
-void LCD_printState(tEplNmtState NmtState_p);
-void LCD_printNodeInfo (WORD wNodeId_p);
+//============================================================================//
+//            P R I V A T E   D E F I N I T I O N S                           //
+//============================================================================//
 
+//------------------------------------------------------------------------------
+// const defines
+//------------------------------------------------------------------------------
+#define NODEID      0x01    ///< This node id is overwritten when the dip switches are != 0!
+                            ///< Additionally this should be NOT 0xF0 (=MN) in case of CN
+
+#define CYCLE_LEN   1000        ///< lenght of the cycle [us]
+#define MAC_ADDR    0x00, 0x12, 0x34, 0x56, 0x78, NODEID  ///< MAC address of the CN
+#define IP_ADDR     0xc0a86401  ///< IP-Address 192.168.100.1 (don't care the last byte!)
+#define SUBNET_MASK 0xFFFFFF00  ///< The subnet mask (255.255.255.0)
+
+//------------------------------------------------------------------------------
+// local types
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// local vars
+//------------------------------------------------------------------------------
+static BYTE        portIsOutput[4];
+static BYTE        digitalIn[4];
+static BYTE        digitalOut[4];
+static BOOL        fShutdown_l = FALSE;
+
+#ifdef LCD_BASE
 static char aStrNmtState_l[9][17] = {"INVALID         ",
                                      "OFF             ",
                                      "INITIALISATION  ",
@@ -132,232 +121,130 @@ static char aStrNmtState_l[9][17] = {"INVALID         ",
                                      "OPERATIONAL     "};
 #endif
 
-BYTE        portIsOutput[4];
-BYTE        digitalIn[4];
-BYTE        digitalOut[4];
+//------------------------------------------------------------------------------
+// local function prototypes
+//------------------------------------------------------------------------------
 
-static BOOL     fShutdown_l = FALSE;
+static int openPowerlink(BYTE bNodeId_p);
+static void InitPortConfiguration (BYTE *p_portIsOutput);
 
-
-
-/******************************************************************************/
-/* forward declarations */
-int openPowerlink(WORD wNodeId_p);
-void InitPortConfiguration (BYTE *p_portIsOutput);
-WORD GetNodeId (void);
+//============================================================================//
+//            P U B L I C   F U N C T I O N S                                 //
+//============================================================================//
 
 
+//------------------------------------------------------------------------------
 /**
-********************************************************************************
-\brief    main function of digital I/O interface
+\brief               Entry point of the program
 
-*******************************************************************************/
+main function of the directIO example which inits the peripheral reads the node
+ID and calls openPowerlink.
+
+\return              exist status
+\retval              0                           returns 0 after successfull exit
+*/
+//------------------------------------------------------------------------------
 int main (void)
 {
-    WORD    wNodeId;
-    int     iCnt = 0;
+    WORD    bNodeId;        ///< nodeID of the CN
 
-    alt_icache_flush_all();
-    alt_dcache_flush_all();
+    SysComp_initPeripheral();
 
 
 #ifdef LCD_BASE
-    LCD_Test();
+    SysComp_LcdTest();
 #endif
 
-    PRINTF("\n\nDigital I/O interface is running...\n");
-    PRINTF("starting openPowerlink...\n\n");
+    PRINTF0("\n\nDigital I/O interface is running...\n");
+    PRINTF0("starting openPowerlink...\n\n");
 
-    wNodeId = GetNodeId();
-#ifdef LCD_BASE
-    LCD_printNodeInfo(wNodeId);
-#endif
-
-    while (1) {
-        if (openPowerlink(wNodeId) != 0) {
-            PRINTF("openPowerlink was shut down because of an error\n");
-            break;
-        } else {
-            PRINTF("openPowerlink was shut down, restart...\n\n");
-        }
-        /* wait some time until we restart the stack */
-        for (iCnt=0; iCnt<1000000; iCnt++);
+    if((bNodeId = SysComp_getNodeId()) == 0)
+    {
+        bNodeId = NODEID;
     }
 
-    PRINTF1("shut down NIOS II...\n%c", 4);
+#ifdef LCD_BASE
+    SysComp_LcdPrintNodeInfo(bNodeId);
+#endif
+
+    while (1)
+    {
+        if (openPowerlink(bNodeId) != 0)
+        {
+            PRINTF0("openPowerlink was shut down because of an error\n");
+            break;
+        } else
+        {
+            PRINTF0("openPowerlink was shut down, restart...\n\n");
+        }
+        /* wait some time until we restart the stack */
+        usleep(1000000);
+    }
+
+    PRINTF1("shut down processor...\n%c", 4);
+
+    SysComp_freeProcessorCache();
 
     return 0;
 }
 
+//------------------------------------------------------------------------------
 /**
-********************************************************************************
-\brief    main function of digital I/O interface
+\brief               AppCbEvent
 
-*******************************************************************************/
-int openPowerlink(WORD wNodeId_p)
-{
-    DWORD                       ip = IP_ADDR; // ip address
+event callback function called by EPL API layer within user part (low priority).
 
-    const BYTE                  abMacAddr[] = {MAC_ADDR};
-    static tEplApiInitParam     EplApiInitParam; //epl init parameter
-    // needed for process var
-    tEplObdSize                 ObdSize;
-    tEplKernel                  EplRet;
-    unsigned int                uiVarEntries;
+\param               EventType_p                  event type
+\param               pEventArg_p                  pointer to union, which describes
+                                                  the event in detail
+\param               pUserArg_p                   user specific argument
 
-    fShutdown_l = FALSE;
-
-    /* initialize port configuration */
-    InitPortConfiguration(portIsOutput);
-
-    /* setup the POWERLINK stack */
-
-    // calc the IP address with the nodeid
-    ip &= 0xFFFFFF00; //dump the last byte
-    ip |= GetNodeId(); // and mask it with the node id
-
-    // set EPL init parameters
-    EplApiInitParam.m_uiSizeOfStruct = sizeof (EplApiInitParam);
-    EPL_MEMCPY(EplApiInitParam.m_abMacAddress, abMacAddr, sizeof(EplApiInitParam.m_abMacAddress));
-    EplApiInitParam.m_uiNodeId = wNodeId_p;
-    EplApiInitParam.m_dwIpAddress = ip;
-    EplApiInitParam.m_uiIsochrTxMaxPayload = 36;
-    EplApiInitParam.m_uiIsochrRxMaxPayload = 36;
-    EplApiInitParam.m_dwPresMaxLatency = 2000;
-    EplApiInitParam.m_dwAsndMaxLatency = 2000;
-    EplApiInitParam.m_fAsyncOnly = FALSE;
-    EplApiInitParam.m_dwFeatureFlags = -1;
-    EplApiInitParam.m_dwCycleLen = CYCLE_LEN;
-    EplApiInitParam.m_uiPreqActPayloadLimit = 36;
-    EplApiInitParam.m_uiPresActPayloadLimit = 36;
-    EplApiInitParam.m_uiMultiplCycleCnt = 0;
-    EplApiInitParam.m_uiAsyncMtu = 300;
-    EplApiInitParam.m_uiPrescaler = 2;
-    EplApiInitParam.m_dwLossOfFrameTolerance = 5000000;
-    EplApiInitParam.m_dwAsyncSlotTimeout = 3000000;
-    EplApiInitParam.m_dwWaitSocPreq = 0;
-    EplApiInitParam.m_dwDeviceType = -1;
-    EplApiInitParam.m_dwVendorId = -1;
-    EplApiInitParam.m_dwProductCode = -1;
-    EplApiInitParam.m_dwRevisionNumber = -1;
-    EplApiInitParam.m_dwSerialNumber = -1;
-    EplApiInitParam.m_dwApplicationSwDate = 0;
-    EplApiInitParam.m_dwApplicationSwTime = 0;
-    EplApiInitParam.m_dwSubnetMask = SUBNET_MASK;
-    EplApiInitParam.m_dwDefaultGateway = 0;
-    EplApiInitParam.m_pfnCbEvent = AppCbEvent;
-    EplApiInitParam.m_pfnCbSync  = AppCbSync;
-    EplApiInitParam.m_pfnObdInitRam = EplObdInitRam;
-
-    PRINTF1("\nNode ID is set to: %d\n", EplApiInitParam.m_uiNodeId);
-
-    /************************/
-    /* initialize POWERLINK stack */
-    PRINTF("init POWERLINK stack:\n");
-    EplRet = EplApiInitialize(&EplApiInitParam);
-    if(EplRet != kEplSuccessful) {
-        PRINTF1("init POWERLINK Stack... error 0x%X\n\n", EplRet);
-        goto Exit;
-    }
-    PRINTF("init POWERLINK Stack...ok\n\n");
-
-    /**********************************************************/
-    /* link process variables used by CN to object dictionary */
-    PRINTF("linking process vars:\n");
-
-    ObdSize = sizeof(digitalIn[0]);
-    uiVarEntries = 4;
-    EplRet = EplApiLinkObject(0x6000, digitalIn, &uiVarEntries, &ObdSize, 0x01);
-    if (EplRet != kEplSuccessful)
-    {
-        printf("linking process vars... error\n\n");
-        goto ExitShutdown;
-    }
-
-    ObdSize = sizeof(digitalOut[0]);
-    uiVarEntries = 4;
-    EplRet = EplApiLinkObject(0x6200, digitalOut, &uiVarEntries, &ObdSize, 0x01);
-    if (EplRet != kEplSuccessful)
-    {
-        printf("linking process vars... error\n\n");
-        goto ExitShutdown;
-    }
-
-    PRINTF("linking process vars... ok\n\n");
-
-    // start the POWERLINK stack
-    PRINTF("start EPL Stack...\n");
-    EplRet = EplApiExecNmtCommand(kEplNmtEventSwReset);
-    if (EplRet != kEplSuccessful) {
-        PRINTF("start EPL Stack... error\n\n");
-        goto ExitShutdown;
-    }
-
-    /*Start POWERLINK Stack*/
-    PRINTF("start POWERLINK Stack... ok\n\n");
-
-    PRINTF("Digital I/O interface with openPOWERLINK is ready!\n\n");
-
-#ifdef STATUS_LED_PIO_BASE
-    IOWR_ALTERA_AVALON_PIO_DATA(STATUS_LED_PIO_BASE, 0xFF);
-#endif
-
-    while(1)
-    {
-        EplApiProcess();
-        if (fShutdown_l == TRUE)
-            break;
-    }
-
-ExitShutdown:
-    PRINTF("Shutdown EPL Stack\n");
-    EplApiShutdown(); //shutdown node
-
-Exit:
-    return EplRet;
-}
-
-/**
-********************************************************************************
-\brief    event callback function called by EPL API layer
-
-AppCbEvent() is the event callback function called by EPL API layer within
-the user part (low priority).
-
-
-\param    EventType_p             event type (IN)
-\param    pEventArg_p             pointer to union, which describes the event in
-                                detail (IN)
-\param    pUserArg_p              user specific argument
-
-\return error code (tEplKernel)
-\retval    kEplSuccessful        no error
-\retval    kEplReject             reject further processing
-\retval    otherwise             post error event to API layer
-*******************************************************************************/
+\return              tEplKernel
+\retval              kEplSuccessful               no error
+\retval              kEplReject                   reject further processing
+\retval              otherwise                    post error event to API layer
+*/
+//------------------------------------------------------------------------------
 tEplKernel PUBLIC AppCbEvent(tEplApiEventType EventType_p,
                              tEplApiEventArg* pEventArg_p, void GENERIC* pUserArg_p)
 {
     tEplKernel          EplRet = kEplSuccessful;
+    BYTE                bPwlState;      ///< state of the CN (operational = high)
 
-    // check if NMT_GS_OFF is reached
+    /* check if NMT_GS_OFF is reached */
     switch (EventType_p)
     {
         case kEplApiEventNmtStateChange:
         {
 #ifdef LCD_BASE
-            LCD_printState(pEventArg_p->m_NmtStateChange.m_NewNmtState);
+            SysComp_LcdPrintState(pEventArg_p->m_NmtStateChange.m_NewNmtState);
 #endif
+
+#ifdef LATCHED_IOPORT_CFG
+            if (pEventArg_p->m_NmtStateChange.m_NewNmtState != kEplNmtCsOperational)
+            {
+                bPwlState = 0x0;
+                memcpy(LATCHED_IOPORT_CFG+3,(BYTE *)&bPwlState,1);    // Set PortIO operational pin to low
+            } else
+            {
+                /* reached operational state */
+                bPwlState = 0x80;
+                memcpy(LATCHED_IOPORT_CFG+3,(BYTE *)&bPwlState,1);    // Set PortIO operational pin to high
+            }
+#endif //LATCHED_IOPORT_CFG
+
             switch (pEventArg_p->m_NmtStateChange.m_NewNmtState)
             {
                 case kEplNmtGsOff:
-                {   // NMT state machine was shut down,
-                    // because of critical EPL stack error
-                    // -> also shut down EplApiProcess() and main()
+                {
+                    /* NMT state machine was shut down,
+                       because of critical EPL stack error
+                       -> also shut down EplApiProcess() and main() */
                     EplRet = kEplShutdown;
                     fShutdown_l = TRUE;
 
-                    PRINTF2("%s(kEplNmtGsOff) originating event = 0x%X\n", __func__, pEventArg_p->m_NmtStateChange.m_NmtEvent);
+                    PRINTF2("%s(kEplNmtGsOff) originating event = 0x%X\n", __func__,
+                            pEventArg_p->m_NmtStateChange.m_NmtEvent);
                     break;
                 }
 
@@ -396,31 +283,36 @@ tEplKernel PUBLIC AppCbEvent(tEplApiEventType EventType_p,
 
         case kEplApiEventCriticalError:
         {
-            // set error LED
-            IOWR_ALTERA_AVALON_PIO_SET_BITS(STATUS_LED_PIO_BASE, 2);
-            // fall through
+            /* set error LED */
+#ifdef STATUS_LEDS_BASE
+            SysComp_setPowerlinkStatus(0x2);
+#endif
+            /* fall through */
         }
         case kEplApiEventWarning:
-        {   // error or warning occurred within the stack or the application
-            // on error the API layer stops the NMT state machine
+        {
+            /* error or warning occurred within the stack or the application
+               on error the API layer stops the NMT state machine */
             PRINTF3("%s(Err/Warn): Source=%02X EplError=0x%03X",
                     __func__,
                     pEventArg_p->m_InternalError.m_EventSource,
                     pEventArg_p->m_InternalError.m_EplError);
-            // check additional argument
+            /* check additional argument */
             switch (pEventArg_p->m_InternalError.m_EventSource)
             {
                 case kEplEventSourceEventk:
                 case kEplEventSourceEventu:
-                {   // error occurred within event processing
-                    // either in kernel or in user part
+                {
+                    /* error occurred within event processing
+                       either in kernel or in user part */
                     PRINTF1(" OrgSource=%02X\n", pEventArg_p->m_InternalError.m_Arg.m_EventSource);
                     break;
                 }
 
                 case kEplEventSourceDllk:
-                {   // error occurred within the data link layer (e.g. interrupt processing)
-                    // the DWORD argument contains the DLL state and the NMT event
+                {
+                    /* error occurred within the data link layer (e.g. interrupt processing)
+                       the DWORD argument contains the DLL state and the NMT event */
                     PRINTF1(" val=%lX\n", pEventArg_p->m_InternalError.m_Arg.m_dwArg);
                     break;
                 }
@@ -433,45 +325,57 @@ tEplKernel PUBLIC AppCbEvent(tEplApiEventType EventType_p,
             }
             break;
         }
-
+        case kEplApiEventHistoryEntry:
+        {
+            /* new history entry */
+            PRINTF("%s(HistoryEntry): Type=0x%04X Code=0x%04X (0x%02X %02X %02X %02X %02X %02X %02X %02X)\n",
+                    __func__,
+                    pEventArg_p->m_ErrHistoryEntry.m_wEntryType,
+                    pEventArg_p->m_ErrHistoryEntry.m_wErrorCode,
+                    (WORD) pEventArg_p->m_ErrHistoryEntry.m_abAddInfo[0],
+                    (WORD) pEventArg_p->m_ErrHistoryEntry.m_abAddInfo[1],
+                    (WORD) pEventArg_p->m_ErrHistoryEntry.m_abAddInfo[2],
+                    (WORD) pEventArg_p->m_ErrHistoryEntry.m_abAddInfo[3],
+                    (WORD) pEventArg_p->m_ErrHistoryEntry.m_abAddInfo[4],
+                    (WORD) pEventArg_p->m_ErrHistoryEntry.m_abAddInfo[5],
+                    (WORD) pEventArg_p->m_ErrHistoryEntry.m_abAddInfo[6],
+                    (WORD) pEventArg_p->m_ErrHistoryEntry.m_abAddInfo[7]);
+            break;
+        }
         case kEplApiEventLed:
-        {   // status or error LED shall be changed
-
+        {
+            /* status or error LED shall be changed */
+#ifdef STATUS_LEDS_BASE
             switch (pEventArg_p->m_Led.m_LedType)
             {
-#ifdef STATUS_LED_PIO_BASE
                 case kEplLedTypeStatus:
                 {
                     if (pEventArg_p->m_Led.m_fOn != FALSE)
                     {
-                        IOWR_ALTERA_AVALON_PIO_CLEAR_BITS(STATUS_LED_PIO_BASE, 1);
+                        SysComp_resetPowerlinkStatus(0x1);
                     }
                     else
                     {
-                        IOWR_ALTERA_AVALON_PIO_SET_BITS(STATUS_LED_PIO_BASE, 1);
+                        SysComp_setPowerlinkStatus(0x1);
                     }
                     break;
-
                 }
-#endif
-
-#ifdef STATUS_LED_PIO_BASE
                 case kEplLedTypeError:
                 {
                     if (pEventArg_p->m_Led.m_fOn != FALSE)
                     {
-                        IOWR_ALTERA_AVALON_PIO_CLEAR_BITS(STATUS_LED_PIO_BASE, 2);
+                        SysComp_resetPowerlinkStatus(0x2);
                     }
                     else
                     {
-                        IOWR_ALTERA_AVALON_PIO_SET_BITS(STATUS_LED_PIO_BASE, 2);
+                        SysComp_setPowerlinkStatus(0x2);
                     }
                     break;
                 }
-#endif
                 default:
                     break;
             }
+#endif
             break;
         }
 
@@ -487,33 +391,32 @@ tEplKernel PUBLIC AppCbEvent(tEplApiEventType EventType_p,
     return EplRet;
 }
 
+//------------------------------------------------------------------------------
 /**
-********************************************************************************
-\brief    sync event callback function called by event module
+\brief               AppCbSync
 
-AppCbSync() implements the event callback function called by event module
-within kernel part (high priority). This function sets the outputs, reads the
-inputs and runs the control loop.
+sync event callback function called by event module within kernel part
+(high priority).
+This function sets the outputs, reads the inputs and runs the control loop.
 
-\return    error code (tEplKernel)
-
-\retval    kEplSuccessful            no error
-\retval    otherwise                post error event to API layer
-*******************************************************************************/
+\return              tEplKernel
+\retval              kEplSuccessful              no error
+\retval              otherwise                   post error event to API layer
+*/
+//------------------------------------------------------------------------------
 tEplKernel PUBLIC AppCbSync(void)
 {
-    tEplKernel         EplRet = kEplSuccessful;
-    register int    iCnt;
-    DWORD            ports; //<<< 4 byte input or output ports
+    tEplKernel        EplRet = kEplSuccessful;
+    register int      iCnt;
+    DWORD             ports; ///< 4 byte input or output ports
     DWORD*            ulDigInputs = LATCHED_IOPORT_BASE;
     DWORD*            ulDigOutputs = LATCHED_IOPORT_BASE;
 
     /* read digital input ports */
-    ports = *ulDigInputs;
+    ports = AmiGetDwordFromLe((BYTE*) ulDigInputs);;
 
     for (iCnt = 0; iCnt <= 3; iCnt++)
     {
-
         if (portIsOutput[iCnt])
         {
             /* configured as output -> overwrite invalid input values with RPDO mapped variables */
@@ -527,33 +430,178 @@ tEplKernel PUBLIC AppCbSync(void)
     }
 
     /* write digital output ports */
-    *ulDigOutputs = ports;
+    AmiSetDwordToLe((BYTE*)ulDigOutputs, ports);
 
     return EplRet;
 }
 
+//============================================================================//
+//            P R I V A T E   F U N C T I O N S                               //
+//============================================================================//
+
+//------------------------------------------------------------------------------
 /**
-********************************************************************************
-\brief    init port configuration
+\brief               openPOWERLINK function
 
-InitPortConfiguration() reads the port configuration inputs. The port
-configuration inputs are connected to general purpose I/O pins IO3V3[16..12].
-The read port configuration if stored at the port configuration outputs to
-set up the input/output selection logic.
+Init the openPOWERLINK stack, link digitalIn/Out objects and perform a reset
+communcation command.
 
-\param    portIsOutput        pointer to array where output flags are stored
-*******************************************************************************/
-void InitPortConfiguration (BYTE *p_portIsOutput)
+\param               bNodeId_p                   NodeID of the CN
+
+\return              tEplKernel
+\retval              kEplSuccessful              successfull exit
+\retval              otherwise                   post error event and exit
+*/
+//------------------------------------------------------------------------------
+static int openPowerlink(BYTE bNodeId_p)
 {
-    register int    iCnt;
-    volatile BYTE    portconf;
-    unsigned int    direction = 0;
+    DWORD                       ip = IP_ADDR;          ///< ip address
+    const BYTE                  abMacAddr[] = {MAC_ADDR};
+    static tEplApiInitParam     EplApiInitParam;       ///< epl init parameter
+    tEplObdSize                 ObdSize;               ///< needed for process var
+    tEplKernel                  EplRet;
+    unsigned int                uiVarEntries;
+
+    fShutdown_l = FALSE;
+
+    /* initialize port configuration */
+    InitPortConfiguration(portIsOutput);
+
+    /* setup the POWERLINK stack */
+
+    /* calc the IP address with the nodeid */
+    ip &= 0xFFFFFF00; //dump the last byte
+    ip |= bNodeId_p; // and mask it with the node id
+
+    /* set EPL init parameters */
+    EplApiInitParam.m_uiSizeOfStruct = sizeof (EplApiInitParam);
+    EPL_MEMCPY(EplApiInitParam.m_abMacAddress, abMacAddr, sizeof(EplApiInitParam.m_abMacAddress));
+    EplApiInitParam.m_abMacAddress[5] = bNodeId_p;
+    EplApiInitParam.m_uiNodeId = bNodeId_p;
+    EplApiInitParam.m_dwIpAddress = ip;
+    EplApiInitParam.m_uiIsochrTxMaxPayload = 36;
+    EplApiInitParam.m_uiIsochrRxMaxPayload = 36;
+    EplApiInitParam.m_dwPresMaxLatency = 2000;
+    EplApiInitParam.m_dwAsndMaxLatency = 2000;
+    EplApiInitParam.m_fAsyncOnly = FALSE;
+    EplApiInitParam.m_dwFeatureFlags = -1;
+    EplApiInitParam.m_dwCycleLen = CYCLE_LEN;
+    EplApiInitParam.m_uiPreqActPayloadLimit = 36;
+    EplApiInitParam.m_uiPresActPayloadLimit = 36;
+    EplApiInitParam.m_uiMultiplCycleCnt = 0;
+    EplApiInitParam.m_uiAsyncMtu = 300;
+    EplApiInitParam.m_uiPrescaler = 2;
+    EplApiInitParam.m_dwLossOfFrameTolerance = 5000000;
+    EplApiInitParam.m_dwAsyncSlotTimeout = 3000000;
+    EplApiInitParam.m_dwWaitSocPreq = 0;
+    EplApiInitParam.m_dwDeviceType = -1;
+    EplApiInitParam.m_dwVendorId = -1;
+    EplApiInitParam.m_dwProductCode = -1;
+    EplApiInitParam.m_dwRevisionNumber = -1;
+    EplApiInitParam.m_dwSerialNumber = -1;
+    EplApiInitParam.m_dwApplicationSwDate = 0;
+    EplApiInitParam.m_dwApplicationSwTime = 0;
+    EplApiInitParam.m_dwSubnetMask = SUBNET_MASK;
+    EplApiInitParam.m_dwDefaultGateway = 0;
+    EplApiInitParam.m_pfnCbEvent = AppCbEvent;
+    EplApiInitParam.m_pfnCbSync  = AppCbSync;
+    EplApiInitParam.m_pfnObdInitRam = EplObdInitRam;
+
+    PRINTF1("\nNode ID is set to: %d\n", EplApiInitParam.m_uiNodeId);
+
+    /* initialize POWERLINK stack */
+    PRINTF("init POWERLINK stack:\n");
+    EplRet = EplApiInitialize(&EplApiInitParam);
+    if(EplRet != kEplSuccessful)
+    {
+        PRINTF1("init POWERLINK Stack... error 0x%X\n\n", EplRet);
+        goto Exit;
+    }
+    PRINTF("init POWERLINK Stack...ok\n\n");
+
+    /* link process variables used by CN to object dictionary */
+    PRINTF("linking process vars:\n");
+
+    ObdSize = sizeof(digitalIn[0]);
+    uiVarEntries = 4;
+    EplRet = EplApiLinkObject(0x6000, digitalIn, &uiVarEntries, &ObdSize, 0x01);
+    if (EplRet != kEplSuccessful)
+    {
+        printf("linking process vars... error\n\n");
+        goto ExitShutdown;
+    }
+
+    ObdSize = sizeof(digitalOut[0]);
+    uiVarEntries = 4;
+    EplRet = EplApiLinkObject(0x6200, digitalOut, &uiVarEntries, &ObdSize, 0x01);
+    if (EplRet != kEplSuccessful)
+    {
+        printf("linking process vars... error\n\n");
+        goto ExitShutdown;
+    }
+
+    PRINTF("linking process vars... ok\n\n");
+
+    /* start the POWERLINK stack */
+    PRINTF("start EPL Stack...\n");
+    EplRet = EplApiExecNmtCommand(kEplNmtEventSwReset);
+    if (EplRet != kEplSuccessful)
+    {
+        PRINTF("start EPL Stack... error\n\n");
+        goto ExitShutdown;
+    }
+
+    /* Start POWERLINK Stack */
+    PRINTF0("start POWERLINK Stack... ok\n\n");
+
+    PRINTF0("Digital I/O interface with openPowerlink is ready!\n\n");
+
+#ifdef STATUS_LEDS_BASE
+    SysComp_setPowerlinkStatus(0xff);
+#endif
+
+    SysComp_enableInterrupts();
+
+    while(1)
+    {
+        EplApiProcess();
+        if (fShutdown_l == TRUE)
+        {
+            break;
+        }
+    }
+
+ExitShutdown:
+    PRINTF0("Shutdown EPL Stack\n");
+    EplApiShutdown();       // shutdown node
+
+Exit:
+    return EplRet;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief               openPOWERLINK function
+
+InitPortConfiguration() reads the port configuration inputs. The port configuration
+inputs are connected to general purpose I/O pins IO3V3[16..12].
+The read port configuration if stored at the port configuration outputs to set up
+the input/output selection logic.
+
+\param               p_portIsOutput              direction of port IO
+*/
+//------------------------------------------------------------------------------
+static void InitPortConfiguration (BYTE *p_portIsOutput)
+{
+    register int     iCnt;
+    volatile BYTE    portconf;          ///< direction of each byte in portio
+    unsigned int     direction = 0;
 
     /* read port configuration input pins */
     memcpy((BYTE *) &portconf, LATCHED_IOPORT_CFG, 1);
     portconf = (~portconf) & 0x0f;
 
-    PRINTF1("\nPort configuration register value = %#1X \n", portconf);
+    PRINTF1("\nPort configuration register value = 0x%1X\n", portconf);
 
     for (iCnt = 0; iCnt <= 3; iCnt++)
     {
@@ -569,88 +617,4 @@ void InitPortConfiguration (BYTE *p_portIsOutput)
         }
     }
 }
-
-/**
-********************************************************************************
-\brief    get node ID
-
-GetNodeId() reads the node switches connected to the node switch inputs and
-returns the node ID.
-
-\retval    nodeID        the node ID which was read
-*******************************************************************************/
-WORD GetNodeId (void)
-{
-    WORD     nodeId;
-
-#ifdef NODE_SWITCH_PIO_BASE
-    /* read port configuration input pins */
-    nodeId = IORD_ALTERA_AVALON_PIO_DATA(NODE_SWITCH_PIO_BASE);
-#endif
-
-#ifdef NODE_SWITCH_SPI_BASE
-    // read node-ID from hex switch on baseboard, which is connected via SPI shift register
-    IOWR_ALTERA_AVALON_SPI_TXDATA(NODE_SWITCH_SPI_BASE, 0xFF);   // generate pulse for latching inputs
-    while ((IORD_ALTERA_AVALON_SPI_STATUS(NODE_SWITCH_SPI_BASE) & ALTERA_AVALON_SPI_STATUS_RRDY_MSK) == 0)
-    {   // wait
-    }
-    nodeId = IORD_ALTERA_AVALON_SPI_RXDATA(NODE_SWITCH_SPI_BASE);
-#endif
-
-#ifdef SET_NODE_ID_PER_SW
-    /* overwrite node ID */
-    nodeId = NODEID;  ///< Fixed for debugging as long as no node switches are connected!
-#endif
-
-    return nodeId;
-}
-
-#ifdef LCD_BASE
-/**
-********************************************************************************
-\brief  writes NMT state to LCD display
-\param  NmtState_p  IN: current state machine value
-*******************************************************************************/
-void LCD_printState(tEplNmtState NmtState_p)
-{
-    LCD_Line2();
-    switch (NmtState_p)
-    {
-        case kEplNmtGsOff               : LCD_Show_Text(aStrNmtState_l[1]); break;
-        case kEplNmtGsInitialising      : LCD_Show_Text(aStrNmtState_l[2]); break;
-        case kEplNmtGsResetApplication  : LCD_Show_Text(aStrNmtState_l[2]); break;
-        case kEplNmtGsResetCommunication: LCD_Show_Text(aStrNmtState_l[2]); break;
-        case kEplNmtGsResetConfiguration: LCD_Show_Text(aStrNmtState_l[2]); break;
-        case kEplNmtCsNotActive         : LCD_Show_Text(aStrNmtState_l[3]); break;
-        case kEplNmtCsPreOperational1   : LCD_Show_Text(aStrNmtState_l[5]); break;
-        case kEplNmtCsStopped           : LCD_Show_Text(aStrNmtState_l[0]); break;
-        case kEplNmtCsPreOperational2   : LCD_Show_Text(aStrNmtState_l[6]); break;
-        case kEplNmtCsReadyToOperate    : LCD_Show_Text(aStrNmtState_l[7]); break;
-        case kEplNmtCsOperational       : LCD_Show_Text(aStrNmtState_l[8]); break;
-        case kEplNmtCsBasicEthernet     : LCD_Show_Text(aStrNmtState_l[4]); break;
-        default:
-        LCD_Show_Text(aStrNmtState_l[0]);
-        break;
-    }
-}
-
-/**
-********************************************************************************
-\brief    print node info on LCD
-
-GetNodeId() reads the node switches connected to the node switch inputs and
-returns the node ID.
-
-\retval    nodeID        the node ID which was read
-*******************************************************************************/
-void LCD_printNodeInfo (WORD wNodeId_p)
-{
-    char TextNodeID[17];
-
-    sprintf(TextNodeID, "Node/ID:0x%02X", wNodeId_p);
-
-    LCD_Clear();
-    LCD_Show_Text(TextNodeID);
-}
-#endif
 

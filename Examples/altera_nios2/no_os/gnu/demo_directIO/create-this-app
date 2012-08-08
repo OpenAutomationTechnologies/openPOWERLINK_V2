@@ -3,7 +3,7 @@
 # This script creates the openPOWERLINK demo CN application in this directory.
 
 if [ -z "$SOPC_DIR" ]; then
-SOPC_DIR=../../../EBV_DBC3C40/design_nios2_openmac/
+SOPC_DIR=../../../EBV_DBC3C40/design_nios2_directIO/
 fi
 
 SOPC_DIR=`readlink -n -f ${SOPC_DIR}`
@@ -34,10 +34,13 @@ CFLAGS="-D${DBG_MODE} -DDEF_DEBUG_LVL=0xEC000000L"
 
 SRCFILES="demo_main.c \
 lcd.c \
+Cmp_Lcd.c \
+systemComponents.c \
 ${MAINPATH}/Edrv/openmac/source/EdrvOpenMac.c \
 ${MAINPATH}/Edrv/openmac/source/EplTimerSynck_OpenMac.c \
 ${MAINPATH}/Edrv/openmac/source/EplTgtTimeStamp_OpenMac.c \
 ${MAINPATH}/Edrv/openmac/source/omethlib.c ${MAINPATH}/Edrv/openmac/source/omethlibint.c \
+${MAINPATH}/Edrv/openmac/source/omethlib_phycfg_generic.c \
 ${MAINPATH}/EplStack/EplDllk.c ${MAINPATH}/EplStack/EplDllkCal.c \
 ${MAINPATH}/EplStack/EplDlluCal.c \
 ${MAINPATH}/EplStack/EplLedu.c \
