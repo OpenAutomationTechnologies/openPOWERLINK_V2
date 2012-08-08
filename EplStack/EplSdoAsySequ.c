@@ -2215,13 +2215,13 @@ tEplAsySdoConHistory*   pHistory;
         // store size
         pHistory->m_auiFrameSize[pHistory->m_bWrite] = uiSize_p;
 
-        // decrement number of free bufferentries
+        // decrement number of free buffer entries
         pHistory->m_bFreeEntries--;
 
-        // increment writeindex
+        // increment write index
         pHistory->m_bWrite++;
 
-        // check if write-index run over array-boarder
+        // check if write-index ran over array-border
         if(pHistory->m_bWrite == EPL_SDO_HISTORY_SIZE)
         {
             pHistory->m_bWrite = 0;

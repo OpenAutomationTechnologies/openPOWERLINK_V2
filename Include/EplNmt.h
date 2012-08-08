@@ -103,7 +103,7 @@
 // higher byte  = 1)
 // the super-states are not mentioned in this
 // enum because they are no real states
-// --> there are masks defined to indentify the
+// --> there are masks defined to identify the
 // super-states
 
 typedef enum

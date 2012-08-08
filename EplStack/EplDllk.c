@@ -3161,7 +3161,7 @@ tEplKernel      Ret = kEplSuccessful;
     // clear the asynchronous queues
     Ret = EplDllkCalAsyncClearQueues();
 
-    // reset cycle counter (everytime a SoA is triggerd in PreOp1 the counter is incremented
+    // reset cycle counter (every time a SoA is triggered in PreOp1 the counter is incremented
     // and when it reaches EPL_C_DLL_PREOP1_START_CYCLES the SoA may contain invitations)
     EplDllkInstance_g.m_uiCycleCount = 0;
 

@@ -549,7 +549,7 @@ int  main (int argc, char **argv)
     }
 
     printf("\n-------------------------------\n");
-    printf("Press Esc to leave the programm\n");
+    printf("Press Esc to leave the program\n");
     printf("Press r to reset the node\n");
     printf("-------------------------------\n\n");
     // wait for key hit

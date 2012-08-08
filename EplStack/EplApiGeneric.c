@@ -1999,7 +1999,7 @@ BYTE                bTemp;
         goto Exit;
     }
 
-    // d.k. There is no dependance between FeatureFlags and async-only CN
+    // d.k. There is no dependence between FeatureFlags and async-only CN
     DllConfigParam.m_fAsyncOnly = EplApiInstance_g.m_InitParam.m_fAsyncOnly;
 
     // 0x1C14: DLL_LossOfFrameTolerance_U32 in [ns]

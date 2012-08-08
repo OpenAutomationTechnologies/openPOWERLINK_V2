@@ -78,7 +78,7 @@
 //---------------------------------------------------------------------------
 
 #define EPL_C_ADR_BROADCAST         0xFF // EPL broadcast address
-#define EPL_C_ADR_DIAG_DEF_NODE_ID  0xFD // EPL default address of dignostic device
+#define EPL_C_ADR_DIAG_DEF_NODE_ID  0xFD // EPL default address of diagnostic device
 #define EPL_C_ADR_DUMMY_NODE_ID     0xFC // EPL dummy node address
 #define EPL_C_ADR_INVALID           0x00 // invalid EPL address
 #define EPL_C_ADR_MN_DEF_NODE_ID    0xF0 // EPL default address of MN

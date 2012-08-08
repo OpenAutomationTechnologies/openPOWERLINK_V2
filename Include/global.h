@@ -12,7 +12,7 @@
     11.04.2003   f.j. Ergaenzung fuer Mitsubishi NC30 Compiler
     17.06.2003   -rs  Definition von Basistypen in <#ifndef _WINDEF_> gesetzt
     16.04.2004   r.d. Ergaenzung fuer Borland C++ Builder
-    30.08.2004   -rs  TRACE5 eingef�gt
+    30.08.2004   -rs  TRACE5 eingefuegt
     23.12.2005   d.k. Definitions for IAR compiler
 
     $Id$
