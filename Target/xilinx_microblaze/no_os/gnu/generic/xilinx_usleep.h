@@ -69,9 +69,7 @@
 #ifndef XILINX_SLEEP_H_
 #define XILINX_SLEEP_H_
 
-#include "xparameters.h"
 #include "global.h"
-
 
 void usleep(DWORD time);
 
