@@ -325,62 +325,62 @@
 #endif
 
 /*
-#define EPL_D_CFG_ConfigManager_BOOL // Ability of a MN node to perform Configuration Manager functions BOOLEAN O - N -
-#define EPL_D_CFM_VerifyConf_BOOL   // Support of objects CFM_VerifyConfiguration_REC, CFM_ExpConfDateList_AU32, CFM_ExpConfTimeList_AU32 BOOLEAN O O N N
-#define EPL_D_CFM_VerifyConfId_BOOL // Support of objects CFM_VerifyConfiguration_REC.ConfId_U32 and CFM_ExpConfIdList_AU32 BOOLEAN O O N N
-#define EPL_D_DLL_CNFeatureIsochr_BOOL // CN’s ability to perform isochronous functions BOOLEAN - O - Y
-#define EPL_D_DLL_CNFeatureMultiplex_BOOL // node’s ability to perform control of multiplexed isochronous communication BOOLEAN - O - N
-#define EPL_D_DLL_FeatureCN_BOOL // node’s ability to perform CN functions BOOLEAN O O Y Y
-#define EPL_D_DLL_FeatureMN_BOOL // node’s ability to perform MN functions BOOLEAN M O - N
-#define EPL_D_DLL_MNFeatureMultiplex_BOOL // MN’s ability to perform control of multiplexed isochronous communication BOOLEAN O - Y -
-#define EPL_D_DLL_MNFeaturePResTx_BOOL // MN’s ability to transmit PRes BOOLEAN O - Y -
-#define EPL_D_NMT_ASndRxMaxPayload_U16 // size of ASnd frame receive buffer UNSIGNED16 M M - -
-#define EPL_D_NMT_ASndTxMaxPayload_U16 // size of ASnd frame transmit buffer UNSIGNED16 M M - -
-#define EPL_D_NMT_CNASnd2SoC_U32 // minimum delay between end of reception of ASnd and start of reception of SoC UNSIGNED32 - M - -
-#define EPL_D_NMT_CNASndMaxLatency_U32 // delay between end of SoA reception and start of ASnd transmission UNSIGNED32 - M - -
-#define EPL_D_NMT_CNPResMaxLatency_U32 // delay between end of PReq reception and start of PRes transmission UNSIGNED32 - M - -
-#define EPL_D_NMT_CNSoC2PReq_U32 // CN SoC handling maximum time, a subsequent PReq won’t be handled before SoC handling was finished UNSIGNED32 - M - -
-#define EPL_D_NMT_DeviceType_U32 // Device Type ID UNSIGNED32 M M - -
-#define EPL_D_NMT_EPLVers_U8 EPL // Version implemented by the device UNSIGNED8 M M - -
-#define EPL_D_NMT_ExtStateCmd_BOOL // abitilty to support Extended NMT State Commands BOOLEAN O O Y Y
-#define EPL_D_NMT_InfoSvc_BOOL // ability to support NMT Info Services BOOLEAN O - Y -
-#define EPL_D_NMT_InterfaceAddr_Xh_OSTR // Physical Address of Interface No. Xh OCTET_STRING M M - -
-#define EPL_D_NMT_InterfaceDescr_Xh_VSTR // Description text of Interface No. Xh VISIBLE_STRINGM M - -
-#define EPL_D_NMT_InterfaceMtu_Xh_U32 // MTU of Interface No. Xh UNSIGNED32 M M - -
-#define EPL_D_NMT_InterfaceType_Xh_U8 // Type of Interface No. Xh UNSIGNED8 M M - -
-#define EPL_D_NMT_IsochrRxMaxPayload_U16 // size of isochronous frame receive buffer UNSIGNED16 M M - -
-#define EPL_D_NMT_IsochrTxMaxPayload_U16 // size of isochronous frame transmit buffer UNSIGNED16 M M - -
-#define EPL_D_NMT_ManufactDevName_VS // Manufacturer Device Name VISIBLE_STRING O O - -
-#define EPL_D_NMT_ManufactHwVers_VS // Manufacturer HW version VISIBLE_STRING O O - -
-#define EPL_D_NMT_ManufactSwVers_VS // Manufacturer SW version VISIBLE_STRING O O - -
-#define EPL_D_NMT_MaxCNNodeID_U8 // maximum Node ID available for regular CNs the entry provides an upper limit to the NodeID available for cross traffic PDO reception from a regular CN UNSIGNED8 O O 239 239
-#define EPL_D_NMT_MaxCNNumber_U8 // maximum number of supported regular CNs in the Node ID range 1 .. 239 UNSIGNED8 O O 239 239
-#define EPL_D_NMT_MaxHeartbeats_U8 // number of guard channels UNSIGNED8 O O 254 254
-#define EPL_D_NMT_MNASnd2SoC_U32 // minimum delay between end of reception of ASnd and start of transmission of SoC UNSIGNED32 M - - -
-#define EPL_D_NMT_MNMultiplCycMax_U8 // maximum number of EPL cycles per multiplexed cycle UNSIGNED8 O - 0 -
-#define EPL_D_NMT_MNPRes2PReq_U32 // delay between end of PRes reception and start of PReq transmission UNSIGNED32 M - - -
-#define EPL_D_NMT_MNPRes2PRes_U32 // delay between end of reception of PRes from CNn and start of transmission of PRes by MN UNSIGNED32 M - - -
-#define EPL_D_NMT_MNPResRx2SoA_U32 // delay between end of reception of PRes from CNn and start of transmission of SoA by MN UNSIGNED32 M - - -
-#define EPL_D_NMT_MNPResTx2SoA_U32 // delay between end of PRes transmission by MN and start of transmission of SoA by MN UNSIGNED32 M - - -
-#define EPL_D_NMT_MNSoA2ASndTx_U32 // delay between end of transmission of SoA and start of transmission of ASnd by MN UNSIGNED32 M - - -
-#define EPL_D_NMT_MNSoC2PReq_U32 // MN minimum delay between end of SoC transmission and start of PReq transmission UNSIGNED32 M - - -
-#define EPL_D_NMT_NMTSvcViaUDPIP_BOOL // Ability of a node to perform NMT services via UDP/IP BOOLEAN O - Y -
-#define EPL_D_NMT_NodeIDByHW_BOOL // Ability of a node to support NodeID setup by HW BOOLEAN O O Y Y
-#define EPL_D_NMT_NodeIDBySW_BOOL // Ability of a node to support NodeID setup by SW BOOLEAN O O N N
-#define EPL_D_NMT_ProductCode_U32 // Identity Object Product Code UNSIGNED32 M M - -
-#define EPL_D_NMT_RevisionNo_U32 // Identity Object Revision Number UNSIGNED32 M M - -
-#define EPL_D_NMT_SerialNo_U32 // Identity Object Serial Number UNSIGNED32 M M - -
-#define EPL_D_NMT_SimpleBoot_BOOL // Ability of a MN node to perform Simple Boot Process, if not set Indivual Boot Process shall be proviced BOOLEAN M - - -
-#define EPL_D_NMT_VendorID_U32 // Identity Object Vendor ID UNSIGNED32 M M - -
-#define EPL_D_NWL_Forward_BOOL // Ability of node to forward datagrams BOOLEAN O O N N
-#define EPL_D_NWL_IPSupport_BOOL // Ability of the node cummunicate via IP BOOLEAN - - Y Y
-#define EPL_D_PDO_DynamicMapping_BOOL // Ability of a node to perform dynamic PDO mapping BOOLEAN O O Y Y
-#define EPL_D_PDO_MaxDescrMem_U32 // maximum cumulative memory consumption of TPDO and RPDO describing objects in byte UNSIGNED32 O O MAX_U32 MAX_U32
-#define EPL_D_PDO_RPDOMaxMem_U32 // Maximum memory available for RPDO data per EPL cycle in byte UNSIGNED32 O O MAX_U32 MAX_U32
-#define EPL_D_PDO_TPDOMaxMem_U32 // Maximum memory available for TPDO data per EPL cycle in byte UNSIGNED32 O O MAX_U32 MAX_U32
-#define EPL_D_SDO_ViaASnd_BOOL // Ability of a CN to perform SDO transfer by EPL ASnd BOOLEAN - M - -
-#define EPL_D_SDO_ViaPDO_BOOL // Ability of a node to perform SDO transfer by PDO BOOLEAN O O N N
-#define EPL_D_SDO_ViaUDPIP_BOOL // Ability of a CN to perform SDO transfer by UDP/IP BOOLEAN - M - -
+#define EPL_D_CFG_ConfigManager_BOOL        // Ability of a MN node to perform Configuration Manager functions BOOLEAN O - N -
+#define EPL_D_CFM_VerifyConf_BOOL           // Support of objects CFM_VerifyConfiguration_REC, CFM_ExpConfDateList_AU32, CFM_ExpConfTimeList_AU32 BOOLEAN O O N N
+#define EPL_D_CFM_VerifyConfId_BOOL         // Support of objects CFM_VerifyConfiguration_REC.ConfId_U32 and CFM_ExpConfIdList_AU32 BOOLEAN O O N N
+#define EPL_D_DLL_CNFeatureIsochr_BOOL      // CN's ability to perform isochronous functions BOOLEAN - O - Y
+#define EPL_D_DLL_CNFeatureMultiplex_BOOL   // Node has ability to perform control of multiplexed isochronous communication BOOLEAN - O - N
+#define EPL_D_DLL_FeatureCN_BOOL            // Node has ability to perform CN functions BOOLEAN O O Y Y
+#define EPL_D_DLL_FeatureMN_BOOL            // Node has ability to perform MN functions BOOLEAN M O - N
+#define EPL_D_DLL_MNFeatureMultiplex_BOOL   // MN's ability to perform control of multiplexed isochronous communication BOOLEAN O - Y -
+#define EPL_D_DLL_MNFeaturePResTx_BOOL      // MN's ability to transmit PRes BOOLEAN O - Y -
+#define EPL_D_NMT_ASndRxMaxPayload_U16      // size of ASnd frame receive buffer UNSIGNED16 M M - -
+#define EPL_D_NMT_ASndTxMaxPayload_U16      // size of ASnd frame transmit buffer UNSIGNED16 M M - -
+#define EPL_D_NMT_CNASnd2SoC_U32            // minimum delay between end of reception of ASnd and start of reception of SoC UNSIGNED32 - M - -
+#define EPL_D_NMT_CNASndMaxLatency_U32      // delay between end of SoA reception and start of ASnd transmission UNSIGNED32 - M - -
+#define EPL_D_NMT_CNPResMaxLatency_U32      // delay between end of PReq reception and start of PRes transmission UNSIGNED32 - M - -
+#define EPL_D_NMT_CNSoC2PReq_U32            // CN SoC handling maximum time, a subsequent PReq won't be handled before SoC handling was finished UNSIGNED32 - M - -
+#define EPL_D_NMT_DeviceType_U32            // Device Type ID UNSIGNED32 M M - -
+#define EPL_D_NMT_EPLVers_U8 EPL            // Version implemented by the device UNSIGNED8 M M - -
+#define EPL_D_NMT_ExtStateCmd_BOOL          // ability to support Extended NMT State Commands BOOLEAN O O Y Y
+#define EPL_D_NMT_InfoSvc_BOOL              // ability to support NMT Info Services BOOLEAN O - Y -
+#define EPL_D_NMT_InterfaceAddr_Xh_OSTR     // Physical Address of Interface No. Xh OCTET_STRING M M - -
+#define EPL_D_NMT_InterfaceDescr_Xh_VSTR    // Description text of Interface No. Xh VISIBLE_STRINGM M - -
+#define EPL_D_NMT_InterfaceMtu_Xh_U32       // MTU of Interface No. Xh UNSIGNED32 M M - -
+#define EPL_D_NMT_InterfaceType_Xh_U8       // Type of Interface No. Xh UNSIGNED8 M M - -
+#define EPL_D_NMT_IsochrRxMaxPayload_U16    // size of isochronous frame receive buffer UNSIGNED16 M M - -
+#define EPL_D_NMT_IsochrTxMaxPayload_U16    // size of isochronous frame transmit buffer UNSIGNED16 M M - -
+#define EPL_D_NMT_ManufactDevName_VS        // Manufacturer Device Name VISIBLE_STRING O O - -
+#define EPL_D_NMT_ManufactHwVers_VS         // Manufacturer HW version VISIBLE_STRING O O - -
+#define EPL_D_NMT_ManufactSwVers_VS         // Manufacturer SW version VISIBLE_STRING O O - -
+#define EPL_D_NMT_MaxCNNodeID_U8            // maximum Node ID available for regular CNs the entry provides an upper limit to the NodeID available for cross traffic PDO reception from a regular CN UNSIGNED8 O O 239 239
+#define EPL_D_NMT_MaxCNNumber_U8            // maximum number of supported regular CNs in the Node ID range 1 .. 239 UNSIGNED8 O O 239 239
+#define EPL_D_NMT_MaxHeartbeats_U8          // number of guard channels UNSIGNED8 O O 254 254
+#define EPL_D_NMT_MNASnd2SoC_U32            // minimum delay between end of reception of ASnd and start of transmission of SoC UNSIGNED32 M - - -
+#define EPL_D_NMT_MNMultiplCycMax_U8        // maximum number of EPL cycles per multiplexed cycle UNSIGNED8 O - 0 -
+#define EPL_D_NMT_MNPRes2PReq_U32           // delay between end of PRes reception and start of PReq transmission UNSIGNED32 M - - -
+#define EPL_D_NMT_MNPRes2PRes_U32           // delay between end of reception of PRes from CNn and start of transmission of PRes by MN UNSIGNED32 M - - -
+#define EPL_D_NMT_MNPResRx2SoA_U32          // delay between end of reception of PRes from CNn and start of transmission of SoA by MN UNSIGNED32 M - - -
+#define EPL_D_NMT_MNPResTx2SoA_U32          // delay between end of PRes transmission by MN and start of transmission of SoA by MN UNSIGNED32 M - - -
+#define EPL_D_NMT_MNSoA2ASndTx_U32          // delay between end of transmission of SoA and start of transmission of ASnd by MN UNSIGNED32 M - - -
+#define EPL_D_NMT_MNSoC2PReq_U32            // MN minimum delay between end of SoC transmission and start of PReq transmission UNSIGNED32 M - - -
+#define EPL_D_NMT_NMTSvcViaUDPIP_BOOL       // Ability of a node to perform NMT services via UDP/IP BOOLEAN O - Y -
+#define EPL_D_NMT_NodeIDByHW_BOOL           // Ability of a node to support NodeID setup by HW BOOLEAN O O Y Y
+#define EPL_D_NMT_NodeIDBySW_BOOL           // Ability of a node to support NodeID setup by SW BOOLEAN O O N N
+#define EPL_D_NMT_ProductCode_U32           // Identity Object Product Code UNSIGNED32 M M - -
+#define EPL_D_NMT_RevisionNo_U32            // Identity Object Revision Number UNSIGNED32 M M - -
+#define EPL_D_NMT_SerialNo_U32              // Identity Object Serial Number UNSIGNED32 M M - -
+#define EPL_D_NMT_SimpleBoot_BOOL           // Ability of a MN node to perform Simple Boot Process, if not set Individual Boot Process shall be provided BOOLEAN M - - -
+#define EPL_D_NMT_VendorID_U32              // Identity Object Vendor ID UNSIGNED32 M M - -
+#define EPL_D_NWL_Forward_BOOL              // Ability of node to forward datagrams BOOLEAN O O N N
+#define EPL_D_NWL_IPSupport_BOOL            // Ability of the node communicate via IP BOOLEAN - - Y Y
+#define EPL_D_PDO_DynamicMapping_BOOL       // Ability of a node to perform dynamic PDO mapping BOOLEAN O O Y Y
+#define EPL_D_PDO_MaxDescrMem_U32           // maximum cumulative memory consumption of TPDO and RPDO describing objects in byte UNSIGNED32 O O MAX_U32 MAX_U32
+#define EPL_D_PDO_RPDOMaxMem_U32            // Maximum memory available for RPDO data per EPL cycle in byte UNSIGNED32 O O MAX_U32 MAX_U32
+#define EPL_D_PDO_TPDOMaxMem_U32            // Maximum memory available for TPDO data per EPL cycle in byte UNSIGNED32 O O MAX_U32 MAX_U32
+#define EPL_D_SDO_ViaASnd_BOOL              // Ability of a CN to perform SDO transfer by EPL ASnd BOOLEAN - M - -
+#define EPL_D_SDO_ViaPDO_BOOL               // Ability of a node to perform SDO transfer by PDO BOOLEAN O O N N
+#define EPL_D_SDO_ViaUDPIP_BOOL             // Ability of a CN to perform SDO transfer by UDP/IP BOOLEAN - M - -
 */
 
 // Emergency error codes

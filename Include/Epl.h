@@ -142,7 +142,6 @@ typedef enum
     kEplApiEventLed            = 0x70,    // m_Led
     kEplApiEventCfmProgress    = 0x71,    // m_CfmProgress
     kEplApiEventCfmResult      = 0x72,    // m_CfmResult
-
 } tEplApiEventType;
 
 

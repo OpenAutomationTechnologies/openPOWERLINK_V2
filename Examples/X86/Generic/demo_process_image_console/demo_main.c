@@ -221,20 +221,20 @@ static void printlog(char *fmt, ...)
     va_list             arglist;
     time_t              timeStamp;
     struct tm           timeVal;
-	struct tm           *p_timeVal;
+    struct tm           *p_timeVal;
     char                timeStr[20];
 
     time(&timeStamp);
 
 #if (TARGET_SYSTEM == _LINUX_)
     localtime_r(&timeStamp, &timeVal);
-	strftime(timeStr, 20, "%Y/%m/%d %H:%M:%S", &timeVal);
+    strftime(timeStr, 20, "%Y/%m/%d %H:%M:%S", &timeVal);
 #else
-	p_timeVal = localtime(&timeStamp);
-	strftime(timeStr, 20, "%Y/%m/%d %H:%M:%S", p_timeVal);
+    p_timeVal = localtime(&timeStamp);
+    strftime(timeStr, 20, "%Y/%m/%d %H:%M:%S", p_timeVal);
 #endif
 
-	fprintf (stderr, "%s - ", timeStr);
+    fprintf (stderr, "%s - ", timeStr);
     va_start(arglist, fmt);
     vfprintf(stderr, fmt, arglist);
     va_end(arglist);
@@ -266,7 +266,7 @@ int  main (int argc, char **argv)
 
 #ifdef CONFIG_POWERLINK_USERSTACK
 #if (TARGET_SYSTEM == _LINUX_)
-	struct sched_param          schedParam;
+    struct sched_param          schedParam;
 #endif
 
     // variables for Pcap
@@ -304,7 +304,7 @@ int  main (int argc, char **argv)
 #ifdef CONFIG_POWERLINK_USERSTACK
 
 #if (TARGET_SYSTEM == _LINUX_)
-	/* adjust process priority */
+    /* adjust process priority */
     if (nice (-20) == -1)         // push nice level in case we have no RTPreempt
     {
         EPL_DBGLVL_ERROR_TRACE2("%s() couldn't set nice value! (%s)\n", __func__, strerror(errno));
@@ -332,7 +332,7 @@ int  main (int argc, char **argv)
 
 #elif (TARGET_SYSTEM == _WIN32_)
 
-	// activate realtime priority class
+    // activate realtime priority class
     SetPriorityClass(GetCurrentProcess(), REALTIME_PRIORITY_CLASS);
     // lower the priority of this thread
     SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_IDLE);
@@ -358,7 +358,7 @@ int  main (int argc, char **argv)
 
 #ifdef CONFIG_POWERLINK_USERSTACK
 
-	/* Retrieve the device list on the local machine */
+    /* Retrieve the device list on the local machine */
     if (pcap_findalldevs(&alldevs, sErr_Msg) == -1)
     {
         fprintf(stderr, "Error in pcap_findalldevs: %s\n", sErr_Msg);
@@ -370,7 +370,7 @@ int  main (int argc, char **argv)
     PRINTF0("List of Ethernet Cards Found in this System: \n");
     PRINTF0("--------------------------------------------------\n");
 
-	 /* Print the list */
+     /* Print the list */
     for (seldev = alldevs; seldev != NULL; seldev = seldev->next)
     {
         PRINTF1("%d. ", ++i);
@@ -385,16 +385,16 @@ int  main (int argc, char **argv)
         }
     }
 
-	if (i == 0)
+    if (i == 0)
     {
         PRINTF0("\nNo interfaces found! Make sure WinPcap is installed.\n");
         EplRet = kEplNoResource;
         goto Exit;
     }
 
-	PRINTF0("--------------------------------------------------\n");
+    PRINTF0("--------------------------------------------------\n");
     PRINTF1("Select the interface to be used for POWERLINK (1-%d):",i);
-	if (scanf("%d", &inum) == EOF)
+    if (scanf("%d", &inum) == EOF)
     {
         pcap_freealldevs(alldevs);
         EplRet = kEplNoResource;
@@ -410,14 +410,14 @@ int  main (int argc, char **argv)
         goto Exit;
     }
 
-	/* Jump to the selected adapter */
+    /* Jump to the selected adapter */
     for (seldev = alldevs, i = 0;
          i < (inum - 1);
          seldev = seldev->next, i++)
     {   // do nothing
     }
 
-	strncpy(devName, seldev->name, 127);
+    strncpy(devName, seldev->name, 127);
     // pass selected device name to Edrv
     EplApiInitParam.m_HwParam.m_pszDevName = devName;
 
@@ -598,7 +598,7 @@ ExitShutdown:
     // so the processing of POWERLINK frames stops
     EplRet = EplApiExecNmtCommand(kEplNmtEventSwitchOff);
 
-	// delete process image
+    // delete process image
     EplRet = EplApiProcessImageFree();
 
     // delete instance for all modules
@@ -653,7 +653,7 @@ tEplKernel PUBLIC AppCbEvent
     tEplKernel          EplRet = kEplSuccessful;
     UINT                uiVarLen;
 
-	UNUSED_PARAMETER(pUserArg_p);
+    UNUSED_PARAMETER(pUserArg_p);
 
     // check if NMT_GS_OFF is reached
     switch (EventType_p)
