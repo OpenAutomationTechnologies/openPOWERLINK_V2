@@ -64,7 +64,8 @@
 //=========================================================================//
 // Type definitions                                                        //
 //=========================================================================//
-typedef struct {
+typedef struct
+{
     tEplNmtState        m_nmtState;
     char                *m_sNmtState;
 } tNmtStateInfo;
@@ -81,7 +82,8 @@ static char *eplInvalidStr_g = "INVALID";
 // module global vars
 //---------------------------------------------------------------------------
 // text strings for POWERLINK events
-static char *eplEvtStr_g[] = {
+static char *eplEvtStr_g[] =
+{
     "NmtEventNoEvent",              //
     "NmtEventDllMePres",            //
     "NmtEventDllMePresTimeout",     //
@@ -132,7 +134,8 @@ static char *eplEvtStr_g[] = {
 };
 
 // text strings for POWERLINK event sources
-static char    *eplEvtSrcStr_g[] = {
+static char    *eplEvtSrcStr_g[] =
+{
     "0",                        // reserved
 
     // kernelspace modules
@@ -167,7 +170,8 @@ static char    *eplEvtSrcStr_g[] = {
 };
 
 // text strings for POWERLINK event sinks
-static char * eplEvtSinkStr_g[] = {
+static char * eplEvtSinkStr_g[] =
+{
     "EventSinkSync",
     "EventSinkNmtk",
     "EventSinkDllk",
@@ -186,7 +190,8 @@ static char * eplEvtSinkStr_g[] = {
 };
 
 // text strings for POWERLINK event types
-static char *eplEvtTypeStr_g[] = {
+static char *eplEvtTypeStr_g[] =
+{
     "0",                                // reserved
     "EventTypeNmtEvent",                // NMT event
     "EventTypePdoRx",                   // PDO frame received event (PRes/PReq)

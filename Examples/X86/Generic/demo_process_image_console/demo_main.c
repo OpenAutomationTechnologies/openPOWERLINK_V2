@@ -643,11 +643,12 @@ Exit:
 //
 //---------------------------------------------------------------------------
 
-tEplKernel PUBLIC AppCbEvent(
+tEplKernel PUBLIC AppCbEvent
+(
     tEplApiEventType        EventType_p,   // IN: event type (enum)
     tEplApiEventArg*        pEventArg_p,   // IN: event argument (union)
-    void GENERIC*           pUserArg_p)    //__attribute((unused))
-
+    void GENERIC*           pUserArg_p    //__attribute((unused))
+)
 {
     tEplKernel          EplRet = kEplSuccessful;
     UINT                uiVarLen;
