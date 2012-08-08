@@ -1,0 +1,73 @@
+#  (c) Bernecker + Rainer Industrie-Elektronik Ges.m.b.H.
+#      A-5142 Eggelsberg, B&R Strasse 1
+#      www.br-automation.com
+#
+# Project       : POWERLINK Xilinx Examples
+# Module        : build system settings file
+# Autor         : mairt
+# Date          : 13.02.2012
+# File          : Makefile
+# contents      : Settings file for the build system
+################################################################################
+
+##################################
+#Path to the openPOWERLINK root directory
+STACK_ROOT=../../../../..
+
+##################################
+#Path to the XPS project
+#XPS_DIR=../../../avnet_lx150t/design_microblaze_directIO-plb
+XPS_DIR=../../../avnet_lx150t/design_microblaze_directIO-axi
+#XPS_DIR=../../../avnet_lx9/design_microblaze_directIO-plb
+#XPS_DIR=../../../avnet_lx9/design_microblaze_directIO-axi
+
+##################################
+# Board name: [lx150t, lx9]
+BOARD_NAME=lx150t
+
+##################################
+# Bus interface: [plb, axi]
+# Note: This sets correct endian and linker script
+BUS_INTERFACE=axi
+
+##################################
+# Processor name: [pcp]
+PROCESSOR_NAME=pcp
+
+##################################
+# Processor features: (more information in the "Embedded Systems Tools Reference Manual")
+# Processor endian: [ -mlittle-endian (axi bus), -mbig-endian (plb bus)]
+# Hardware multiplier: [ -mno-xl-soft-mul = available, -mxl-soft-mul = not available ]
+# Hardware divider: [ -mno-xl-soft-div = available, -mxl-soft-div = not available ]
+# Barel shifter: [ -mno-xl-barrel-shift = available, -mxl-barrel-shift = not available ]
+# Pattern compare instructions: [-mno-xl-pattern-compare = don't use them, -mxl-pattern-compare = use them ]
+########
+# Bootstrap option: [-xl-mode-bootstrap = needed when a bootloader is used]
+PROC_FEATURES=-mcpu=v8.20.a -mno-xl-pattern-compare -mxl-soft-mul -mxl-soft-div
+
+##################################
+#Debug Level
+# DBG_MODE = [_DEBUG=debug enabled, NDEBUG=debug disabled]
+DBG_MODE=_DEBUG
+
+# DEF_DEBUG_LVL = [
+# 0x00000100L DEBUG_LVL_09 (= DEBUG_LVL_CNAPI_FUNC)
+# 0x00000200L DEBUG_LVL_10 (= DEBUG_LVL_CNAPI_ERR)
+# 0x00000400L DEBUG_LVL_11 (= DEBUG_LVL_CNAPI_INFO)
+# 0x00000800L DEBUG_LVL_12 (= DEBUG_LVL_CNAPI_SPI)
+# 0x00001000L DEBUG_LVL_13 (= DEBUG_LVL_CNAPI_ASYNC_INFO)
+# 0x00002000L DEBUG_LVL_14 (= DEBUG_LVL_DEFAULT_OBD_ACC)
+# 0x00004000L DEBUG_LVL_15 (= DEBUG_LVL_FWUPDATE)
+# 0x00008000L DEBUG_LVL_16 (= DEBUG_LVL_CNAPI_PDO)
+# 0x00010000L DEBUG_LVL_17 (= DEBUG_LVL_CNAPI_EVENT)
+# 0x20000000L DEBUG_LVL_ASSERT
+# 0x40000000L DEBUG_LVL_ERROR
+# 0x80000000L DEBUG_LVL_ALWAYS ]
+DEF_DEBUG_LVL=0xEC000600L
+
+##################################
+#Compile options
+# Note: This also influences the fill level of the internal memory
+#      (set this to -O3 to get the best speed)
+OPT_LEVEL=-O3
+
