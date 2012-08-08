@@ -116,6 +116,24 @@
         #define BENCHMARK_MODULES           0x00000000
     #endif
 
+#elif (TARGET_SYSTEM == _NO_OS_) && ((DEV_SYSTEM == _DEV_MICROBLAZE_BIG) || \
+      (DEV_SYSTEM == _DEV_MICROBLAZE_LITTLE))
+
+    #include "xparameters.h"
+
+    #ifdef XPAR_BENCHMARK_PIO_BASEADDR
+        #include "xgpio_l.h"
+
+        #define BENCHMARK_SET(x)    XGpio_WriteReg(XPAR_BENCHMARK_PIO_BASEADDR, 0, \
+                                    XGpio_ReadReg(XPAR_BENCHMARK_PIO_BASEADDR, 0) | (1<<x))
+        #define BENCHMARK_RESET(x)  XGpio_WriteReg(XPAR_BENCHMARK_PIO_BASEADDR, 0, \
+                                    XGpio_ReadReg(XPAR_BENCHMARK_PIO_BASEADDR, 0) & ~(1<<x))
+        #define BENCHMARK_TOGGLE(x) XGpio_WriteReg(XPAR_BENCHMARK_PIO_BASEADDR, 0, \
+                                    XGpio_ReadReg(XPAR_BENCHMARK_PIO_BASEADDR, 0) ^ (1<<x))
+    #else
+        #undef BENCHMARK_MODULES
+        #define BENCHMARK_MODULES           0x00000000
+    #endif
 #else
     // disable Benchmarking
     #undef BENCHMARK_MODULES
