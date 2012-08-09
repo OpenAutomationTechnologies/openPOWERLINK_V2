@@ -76,9 +76,16 @@ typedef struct
     char                *m_sApiEvent;
 } tApiEventInfo;
 
+typedef struct
+{
+    tEplKernel          m_Key;
+    char                *m_sName;
+} tEplDebugEplKernelInfo;
+
 //=========================================================================//
 // Module global vars                                                      //
 //=========================================================================//
+
 static char *eplInvalidStr_g = "INVALID";
 
 // text strings for POWERLINK events
@@ -266,7 +273,149 @@ static tApiEventInfo ApiEventInfo_g[] =
     { kEplApiEventLed,              "LED event"                         },
     { kEplApiEventCfmProgress,      "CFM progress"                      },
     { kEplApiEventCfmResult,        "CFM result"                        },
-//    { kEplApiEventReceivedPres,     "Received PRes frame"               },
+};
+
+// text strings for values of type tEplKernel
+static tEplDebugEplKernelInfo EplKernelInfo_g[] =
+{
+    { kEplSuccessful,                   "kEplSuccessful"                },
+    { kEplIllegalInstance,              "kEplIllegalInstance"           },
+    { kEplInvalidInstanceParam,         "kEplInvalidInstanceParam"      },
+    { kEplNoFreeInstance,               "kEplNoFreeInstance"            },
+    { kEplWrongSignature,               "kEplWrongSignature"            },
+    { kEplInvalidOperation,             "kEplInvalidOperation"          },
+    { kEplInvalidNodeId,                "kEplInvalidNodeId"             },
+    { kEplNoResource,                   "kEplNoResource"                },
+    { kEplShutdown,                     "kEplShutdown"                  },
+    { kEplReject,                       "kEplReject"                    },
+    { kEplRetry,                        "kEplRetry"                     },
+    { kEplInvalidEvent,                 "kEplInvalidEvent"              },
+
+    { kEplEdrvNoFreeTxDesc,             "kEplEdrvNoFreeTxDesc"          },
+    { kEplEdrvInvalidCycleLen,          "kEplEdrvInvalidCycleLen"       },
+    { kEplEdrvInitError,                "kEplEdrvInitError"             },
+    { kEplEdrvNoFreeBufEntry,           "kEplEdrvNoFreeBufEntry"        },
+    { kEplEdrvBufNotExisting,           "kEplEdrvBufNotExisting"        },
+    { kEplEdrvInvalidRxBuf,             "kEplEdrvInvalidRxBuf"          },
+    { kEplEdrvInvalidParam,             "kEplEdrvInvalidParam"          },
+    { kEplEdrvNextTxListNotEmpty,       "kEplEdrvNextTxListNotEmpty"    },
+    { kEplEdrvCurTxListEmpty,           "kEplEdrvCurTxListEmpty"        },
+    { kEplEdrvTxListNotFinishedYet,      "kEplEdrvTxListNotFinishedYet" },
+
+    { kEplDllOutOfMemory,               "kEplDllOutOfMemory"            },
+    { kEplDllIllegalHdl,                "kEplDllIllegalHdl"             },
+    { kEplDllCbAsyncRegistered,         "kEplDllCbAsyncRegistered"      },
+    { kEplDllAsyncSyncReqFull,          "kEplDllAsyncSyncReqFull"       },
+    { kEplDllAsyncTxBufferEmpty,        "kEplDllAsyncTxBufferEmpty"     },
+    { kEplDllAsyncTxBufferFull,         "kEplDllAsyncTxBufferFull"      },
+    { kEplDllNoNodeInfo,                "kEplDllNoNodeInfo"             },
+    { kEplDllInvalidParam,              "kEplDllInvalidParam"           },
+    { kEplDllInvalidAsndServiceId,      "kEplDllInvalidAsndServiceId"   },
+    { kEplDllTxBufNotReady,             "kEplDllTxBufNotReady"          },
+    { kEplDllTxFrameInvalid,            "kEplDllTxFrameInvalid"         },
+
+    { kEplObdIllegalPart,               "kEplObdIllegalPart"            },
+    { kEplObdIndexNotExist,             "kEplObdIndexNotExist"          },
+    { kEplObdSubindexNotExist,          "kEplObdSubindexNotExist"       },
+    { kEplObdReadViolation,             "kEplObdReadViolation"          },
+    { kEplObdWriteViolation,            "kEplObdWriteViolation"         },
+    { kEplObdAccessViolation,           "kEplObdAccessViolation"        },
+    { kEplObdUnknownObjectType,         "kEplObdUnknownObjectType"      },
+    { kEplObdVarEntryNotExist,          "kEplObdVarEntryNotExist"       },
+    { kEplObdValueTooLow,               "kEplObdValueTooLow"            },
+    { kEplObdValueTooHigh,              "kEplObdValueTooHigh"           },
+    { kEplObdValueLengthError,          "kEplObdValueLengthError"       },
+    { kEplObdErrnoSet,                  "kEplObdErrnoSet"               },
+    { kEplObdInvalidDcf,                "kEplObdInvalidDcf"             },
+    { kEplObdOutOfMemory,               "kEplObdOutOfMemory"            },
+    { kEplObdNoConfigData,              "kEplObdNoConfigData"           },
+
+    { kEplNmtUnknownCommand,            "kEplNmtUnknownCommand"         },
+    { kEplNmtInvalidFramePointer,       "kEplNmtInvalidFramePointer"    },
+    { kEplNmtInvalidEvent,              "kEplNmtInvalidEvent"           },
+    { kEplNmtInvalidState,              "kEplNmtInvalidState"           },
+    { kEplNmtInvalidParam,              "kEplNmtInvalidParam"           },
+    { kEplNmtSyncReqRejected,           "kEplNmtSyncReqRejected"        },
+
+    { kEplSdoUdpMissCb,                 "kEplSdoUdpMissCb"              },
+    { kEplSdoUdpNoSocket,               "kEplSdoUdpNoSocket"            },
+    { kEplSdoUdpSocketError,            "kEplSdoUdpSocketError"         },
+    { kEplSdoUdpThreadError,            "kEplSdoUdpThreadError"         },
+    { kEplSdoUdpNoFreeHandle,           "kEplSdoUdpNoFreeHandle"        },
+    { kEplSdoUdpSendError,              "kEplSdoUdpSendError"           },
+    { kEplSdoUdpInvalidHdl,             "kEplSdoUdpInvalidHdl"          },
+
+    { kEplSdoSeqMissCb,                 "kEplSdoSeqMissCb"              },
+    { kEplSdoSeqNoFreeHandle,           "kEplSdoSeqNoFreeHandle"        },
+    { kEplSdoSeqInvalidHdl,             "kEplSdoSeqInvalidHdl"          },
+    { kEplSdoSeqUnsupportedProt,        "kEplSdoSeqUnsupportedProt"     },
+    { kEplSdoSeqNoFreeHistory,          "kEplSdoSeqNoFreeHistory"       },
+    { kEplSdoSeqFrameSizeError,         "kEplSdoSeqFrameSizeError"      },
+    { kEplSdoSeqRequestAckNeeded,       "kEplSdoSeqRequestAckNeeded"    },
+
+    { kEplSdoSeqInvalidFrame,           "kEplSdoSeqInvalidFrame"        },
+    { kEplSdoSeqConnectionBusy,         "kEplSdoSeqConnectionBusy"      },
+    { kEplSdoSeqInvalidEvent,           "kEplSdoSeqInvalidEvent"        },
+
+    { kEplSdoComUnsupportedProt,        "kEplSdoComUnsupportedProt"     },
+    { kEplSdoComNoFreeHandle,           "kEplSdoComNoFreeHandle"        },
+    { kEplSdoComInvalidServiceType,     "kEplSdoComInvalidServiceType"  },
+    { kEplSdoComInvalidHandle,          "kEplSdoComInvalidHandle"       },
+    { kEplSdoComInvalidSendType,        "kEplSdoComInvalidSendType"     },
+    { kEplSdoComNotResponsible,         "kEplSdoComNotResponsible"      },
+    { kEplSdoComHandleExists,           "kEplSdoComHandleExists"        },
+    { kEplSdoComHandleBusy,             "kEplSdoComHandleBusy"          },
+    { kEplSdoComInvalidParam,           "kEplSdoComInvalidParam"        },
+
+    { kEplEventUnknownSink,             "kEplEventUnknownSink"          },
+    { kEplEventPostError,               "kEplEventPostError"            },
+    { kEplEventReadError,               "kEplEventReadError"            },
+    { kEplEventWrongSize,               "kEplEventWrongSize"            },
+
+    { kEplTimerInvalidHandle,           "kEplTimerInvalidHandle"        },
+    { kEplTimerNoTimerCreated,          "kEplTimerNoTimerCreated"       },
+    { kEplTimerThreadError,             "kEplTimerThreadError"          },
+
+    { kEplSdoAsndInvalidNodeId,         "kEplSdoAsndInvalidNodeId"      },
+    { kEplSdoAsndNoFreeHandle,          "kEplSdoAsndNoFreeHandle"       },
+    { kEplSdoAsndInvalidHandle,         "kEplSdoAsndInvalidHandle"      },
+
+    { kEplPdoNotExist,                  "kEplPdoNotExist"               },
+    { kEplPdoLengthExceeded,            "kEplPdoLengthExceeded"         },
+    { kEplPdoGranularityMismatch,       "kEplPdoGranularityMismatch"    },
+    { kEplPdoInitError,                 "kEplPdoInitError"              },
+    { kEplPdoConfWhileEnabled,          "kEplPdoConfWhileEnabled"       },
+    { kEplPdoErrorMapp,                 "kEplPdoErrorMapp"              },
+    { kEplPdoVarNotFound,               "kEplPdoVarNotFound"            },
+    { kEplPdoVarNotMappable,            "kEplPdoVarNotMappable"         },
+
+    { kEplPdoSizeMismatch,              "kEplPdoSizeMismatch"           },
+    { kEplPdoTooManyTxPdos,             "kEplPdoTooManyTxPdos"          },
+    { kEplPdoInvalidObjIndex,           "kEplPdoInvalidObjIndex"        },
+    { kEplPdoTooManyPdos,               "kEplPdoTooManyPdos"            },
+
+    { kEplCfmConfigError,               "kEplCfmConfigError"            },
+    { kEplCfmSdocTimeOutError,          "kEplCfmSdocTimeOutError"       },
+    { kEplCfmInvalidDcf,                "kEplCfmInvalidDcf"             },
+    { kEplCfmUnsupportedDcf,            "kEplCfmUnsupportedDcf"         },
+    { kEplCfmConfigWithErrors,          "kEplCfmConfigWithErrors"       },
+    { kEplCfmNoFreeConfig,              "kEplCfmNoFreeConfig"           },
+    { kEplCfmNoConfigData,              "kEplCfmNoConfigData"           },
+    { kEplCfmUnsuppDatatypeDcf,         "kEplCfmUnsuppDatatypeDcf"      },
+
+    { kEplApiTaskDeferred,              "kEplApiTaskDeferred"           },
+    { kEplApiInvalidParam,              "kEplApiInvalidParam"           },
+    { kEplApiNoObdInitRam,              "kEplApiNoObdInitRam"           },
+    { kEplApiSdoBusyIntern,             "kEplApiSdoBusyIntern"          },
+    { kEplApiPIAlreadyAllocated,        "kEplApiPIAlreadyAllocated"     },
+    { kEplApiPIOutOfMemory,             "kEplApiPIOutOfMemory"          },
+    { kEplApiPISizeExceeded,            "kEplApiPISizeExceeded"         },
+    { kEplApiPINotAllocated,            "kEplApiPINotAllocated"         },
+    { kEplApiPIJobQueueFull,            "kEplApiPIJobQueueFull"         },
+    { kEplApiPIJobQueueEmpty,           "kEplApiPIJobQueueEmpty"        },
+    { kEplApiPIInvalidJobSize,          "kEplApiPIInvalidJobSize"       },
+    { kEplApiPIInvalidPIPointer,        "kEplApiPIInvalidPIPointer"     },
+    { kEplApiPINonBlockingNotSupp,      "kEplApiPINonBlockingNotSupp"   },
 };
 
 // text strings for NMT node events
@@ -303,6 +452,14 @@ static char *EplSdoComConStateStr_g[] =
     "Finished",                 // 0x04
     "LowerLayerAbort",          // 0x05
 };
+
+
+//=========================================================================//
+// Module internal prototypes                                              //
+//=========================================================================//
+
+static int  EplDebugCompareApiEvent( const void *pvKey, const void *pvArray );
+static int  EplDebugCompareEplKernel( const void *pvKey, const void *pvArray );
 
 //=========================================================================//
 //                                                                         //
@@ -422,35 +579,6 @@ char *EplGetNmtStateStr(tEplNmtState nmtState_p)
 
 //---------------------------------------------------------------------------
 //
-// Function:    EplDebugCompareApiEvent()
-//
-// Description: Compare two API events. Used by EplGetApiEventStr's bsearch().
-//
-// Parameters:  Key (element to search), Array
-//
-// Returns:     -1, 0, or 1 if event id is smaller, equal or greater
-//
-//---------------------------------------------------------------------------
-static int
-EplDebugCompareApiEvent( const void *pvEventKey, const void *pvEventArray )
-{
-    tApiEventInfo    *pEventKey  = (tApiEventInfo *) pvEventKey;
-    tApiEventInfo    *pEventArry = (tApiEventInfo *) pvEventArray;
-
-    if( pEventKey->m_ApiEvent < pEventArry->m_ApiEvent )
-    {
-        return  -1;
-    }
-    else if( pEventKey->m_ApiEvent > pEventArry->m_ApiEvent )
-    {
-        return  1;
-    }
-
-    return 0;
-}
-
-//---------------------------------------------------------------------------
-//
 // Function:    EplGetApiEventStr()
 //
 // Description: returns the string of the specified API event
@@ -558,3 +686,104 @@ char *EplGetSdoComConStateStr( tEplSdoComConState SdoComConState_p )
         return  EplSdoComConStateStr_g[ SdoComConState_p ];
     }
 }
+
+//---------------------------------------------------------------------------
+//
+// Function:    EplGetEplKernelStr()
+//
+// Description: Return a string describing a given entry of type tEplKernel.
+//
+// Parameters:  Parameter of type tEplKernel
+//
+// Returns:     Pointer to string with human readable description of given parameter
+//              Pointer to a default string if the parameter could not be found
+//
+//---------------------------------------------------------------------------
+char *EplGetEplKernelStr( tEplKernel EplKernel_p )
+{
+    tEplDebugEplKernelInfo   *pEntry;
+    tEplDebugEplKernelInfo   Key;
+
+    // Init
+    Key.m_Key  = EplKernel_p;
+
+    // Search element
+    pEntry   = bsearch( &Key,
+                        EplKernelInfo_g,
+                        tabentries(EplKernelInfo_g),
+                        sizeof(Key),
+                        EplDebugCompareEplKernel);
+
+    // Check result
+    if( NULL != pEntry )
+    {
+        return  pEntry->m_sName;
+    }
+
+    return eplInvalidStr_g;
+}
+
+//=========================================================================//
+//                                                                         //
+//          P R I V A T E   D E F I N I T I O N S                          //
+//                                                                         //
+//=========================================================================//
+
+//---------------------------------------------------------------------------
+//
+// Function:    EplDebugCompareApiEvent()
+//
+// Description: Compare two API events. Used by EplGetApiEventStr's bsearch().
+//
+// Parameters:  Key (element to search), Array
+//
+// Returns:     -1, 0, or 1 if event id is smaller, equal or greater
+//
+//---------------------------------------------------------------------------
+static int
+EplDebugCompareApiEvent( const void *pvKey, const void *pvArray )
+{
+    tApiEventInfo    *pKey      = (tApiEventInfo *) pvKey;
+    tApiEventInfo    *pArray    = (tApiEventInfo *) pvArray;
+
+    if( pKey->m_ApiEvent < pArray->m_ApiEvent )
+    {
+        return  -1;
+    }
+    else if( pKey->m_ApiEvent > pArray->m_ApiEvent )
+    {
+        return  1;
+    }
+
+    return 0;
+}
+
+//---------------------------------------------------------------------------
+//
+// Function:    EplDebugCompareEplKernel()
+//
+// Description: Compare two values of type tEplKernel. Used by EplGetEplKernelStr's bsearch().
+//
+// Parameters:  Key (element to search), Array
+//
+// Returns:     -1, 0, or 1 if event id is smaller, equal or greater
+//
+//---------------------------------------------------------------------------
+static int
+EplDebugCompareEplKernel( const void *pvKey, const void *pvArray )
+{
+    tEplDebugEplKernelInfo    *pKey     = (tEplDebugEplKernelInfo *) pvKey;
+    tEplDebugEplKernelInfo    *pArray   = (tEplDebugEplKernelInfo *) pvArray;
+
+    if( pKey->m_Key < pArray->m_Key )
+    {
+        return  -1;
+    }
+    else if( pKey->m_Key > pArray->m_Key )
+    {
+        return  1;
+    }
+
+    return 0;
+}
+
