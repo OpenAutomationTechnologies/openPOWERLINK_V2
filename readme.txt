@@ -69,7 +69,7 @@ X86 PC with Linux or Windows operating system
   CMake is used as a cross-platform build system.
 
   On Linux, these demo applications can be configured to use either
-  a pcap based stack that is located in user space, or to use a 
+  a pcap based stack that is located in user space, or to use a
   stack that is located in kernel space.
   Detailed documentation for Linux can be found in Documentation/linux-x86.txt
 
@@ -87,7 +87,7 @@ X86 PC with Linux or Windows operating system
   Requirements:   WinPcap  http://www.winpcap.org
                   CMake    http://www.cmake.org
                   Qt       http://qt.nokia.com/
-  
+
 Freescale ColdFire MCF5484 (SYSTEC Development Board for ECUcore-5484)
 with Linux operating system (see section 3.2 for requirements)
   * simple CN demo which controls the LEDs and reads the pushbuttons on the devboard:
@@ -102,10 +102,15 @@ Hilscher netX-500 (Evaluation board Hilscher NXEB 500-HMI)
 Atmel AT91RM9200 with Davicom DM9003 under Linux
   = Examples\at91rm9200\Linux\gnu\demo_mn_dm9003_kernel
 
-Altera Cyclone III on EBV DBC3C40 Development Board or SYS TEC ECUcore-EP3C Development Board
-with Nios II Soft-CPU and openMAC
+Altera Cyclone III on EBV DBC3C40, SYS TEC ECUcore-EP3C or TERASIC DE2-115
+Development Board with Nios II Soft-CPU and POWERLINK IP-Core.
   * CN demo which controls the LEDs and reads the pushbuttons on the devboard:
-    = Examples\altera_nios2\no_os\gnu\demo_cn_3r1tpdo
+    = Examples\altera_nios2\no_os\gnu\demo_directIO
+
+Xilinx Spartan 6 on Industrial Ethernet Kit (IEK, LX150t) or MicroBoard (micro, LX9)
+with Microblaze Soft-CPU and POWERLINK IP-Core.
+  * CN demo which controls the LEDs and reads the pushbuttons on the devboard:
+    = Examples\xilinx_microblaze\no_os\gnu\demo_directIO
 
 3.1. Requirements for X86 Linux demos
 -------------------------------------
@@ -125,8 +130,17 @@ Detailed documentation is located in Documentation/vxworks.txt
 - SYSTEC Developmentboard for ECUcore-5484
 - Host PC with Linux
 
+3.4. Requirements for Altera demos
+-------------------------------------
 
-3.4. Steps to build and execute the demo application for the MCF5484
+Detailed documentation is located in Documentation/altera.txt
+
+3.5. Requirements for Xilinx demos
+-------------------------------------
+
+Detailed documentation is located in Documentation/xilinx.txt
+
+3.6. Steps to build and execute the demo application for the MCF5484
 --------------------------------------------------------------------
 
 1.  Setup build environment on the host computer

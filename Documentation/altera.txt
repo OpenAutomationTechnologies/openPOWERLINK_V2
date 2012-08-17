@@ -1,0 +1,208 @@
+  (c) SYSTEC electronic GmbH, D-07973 Greiz, August-Bebel-Str. 29
+      www.systec-electronic.com
+  (c) Bernecker + Rainer Industrie-Elektronik Ges.m.b.H.
+      A-5142 Eggelsberg, B&R Strasse 1
+      www.br-automation.com
+
+
+    openPOWERLINK on Altera Nios II for SYSTEC ECUcore-EP3C,
+                TERASIC_DE2-115 and EBV DBC3C40
+    =========================================================
+
+1 Introduction
+--------------
+
+  This file contains documentation for the openPOWERLINK stack on Altera NiosII.
+  It uses the POWERLINK IP-Core which consists of a optimized MAC for POWERLINK
+  (openMAC) and a hub for daisy chaining several controled nodes.
+
+Contents
+---------
+
+- FPGA design with Nios II CPU and POWERLINK IP-Core.
+- Latched I/0 Ports: 4 x 8Bit - plus latch signal.
+  Direction (input or output) can be defined by configuration-pin level.
+
+Performance Data
+-----------------
+
+- Minimum cycle length: 400 µs
+- PReq-PRes Latency: 1 µs
+- Process data: 4 bytes input and 4 bytes output.
+- There is 1 RPDOs and 1 TPDO available. Cross-traffic is disabled.
+
+Requirements
+-------------
+
+- Development Board TERASIC_DE2-115 (INK Board), SYSTEC ECUcore-EP3C or
+  EBV DBC3C40.
+
+- USB-Blaster for programming the SYSTEC ECUcore-EP3C and the EBV DBC3C40 board.
+
+- Altera Quartus II v10.1 SP1 or newer (Web Edition is also possible)
+  and Altera Nios II Embedded Design Suite v10.1 SP1 or newer.
+  ( https://www.altera.com/download/archives/arc-index.jsp or
+    ftp://ftp.altera.com/outgoing/release/ )
+
+- Experiences with this development environment is required.
+
+- POWERLINK network as described in main readme.txt
+  or alternatively a POWERLINK network with Configuration Manager.
+  The corresponding XDD for this node can be found in the subdirectory
+  ObjDicts\CiA401_CN of the openPOWERLINK main directory.
+
+Hardware Setup
+---------------
+
+1. Setup for the TERASIC_DE2-115 (INK).
+    a. Download the user guide for the board from:
+       http://www.terasic.com.tw/cgi-bin/page/archive.pl?Language=English&CategoryNo=139&No=502&PartNo=4
+    b. Set the jumpers JP1, JP2, JP3, JP6 and JP7.
+    c. Set switch SW 19 to “Run”.
+    d. The jumpers for SPI should not be set, since you will run the directIO
+       example, so leave them aside.
+    e. Connect the USB-Blaster to your PC via USB-cable.
+    f. Connect one Ethernet port of the INK-board to a POWERLINK MN
+       with the delivered cables.
+    g. Set the POWERLINK Node ID to '1': Push SW 10 to upper position.
+    h. Switch on the board with the Power button (SW 18).
+
+2. Setup for the EBV DBC3C40.
+    a. Connect the USB-Blaster to the JTAG port of the board
+    b. Connect one Ethernet port of the EBV board to a POWERLINK MN
+       with the delivered cables.
+    c. To power-up the board use the 24V I/O power supply.
+       Note: Take care that you don't use the 12V power adapter in combination
+             with the 24V I/O power supply.
+
+3. Setup for the SYSTEC ECUcore-EP3C.
+    a. Details for the setup of this board is available on:
+    http://www.systec-electronic.com/uploads/be/36/be36d3caf3ff425f0e6bdadfc6c01aaa/L-1266d_02_DevelopmentBoard-ECUcore-EP3C.pdf
+
+How to build the binaries
+---------------------------
+
+Steps 1-7 are only necessary if you want to change the FPGA design.
+Otherwise you can use the supplied SOF file and go directly to step 8.
+
+1. Open the Quartus project file nios_openMac.qpf with Altera Quartus II
+   according to the board you want to use.
+
+2. Open the SOPC Builder via menu "Tools" -> "SOPC Builder".
+
+3. Add the IP-Core search path in "Tools" -> "Options" -> "IP Search Path"
+  (e.g. $STACK_ROOT/Examples/altera_nios2/ipcore/**/*)
+
+4. Press the button "Generate" in the SOPC Builder to regenerate the Nios II
+   system.
+
+5. Close the SOPC Builder when the generation has finished (shown as information
+   output).
+
+6. A message window will pop up. Choose "Update: All symbols or blocks in this
+   file".
+
+7. Start the compilation in the Quartus II window via menu
+   "Processing" -> "Start Compilation".
+   Choose "Yes" for saving all changed files.
+
+8. Open "Nios II Command Shell"
+
+9. Use the design with the supplied demo projects in the openPOWERLINK
+   subdirectory Examples\altera_nios2\no_os\gnu\demo_directIO.
+
+   Therefore, execute the following command in the "Nios II Command Shell"
+   before calling create-this-app to set the SOPC_DIR.
+
+    $ export SOPC_DIR=../../../SYSTEC_ECUcore-EP3C/design_nios2_directIO
+    or
+    $ export SOPC_DIR=../../../TERASIC_DE2-115/design_nios2_directIO
+    or
+    $ export SOPC_DIR=../../../EBV_DBC3C40/design_nios2_directIO
+
+10. Run script create-this-app to create the Makefile for
+    the demo application and the necessary BSP.
+    (This step is only necessary once)
+
+    $ ./create-this-app
+
+11. Run make to build the ELF file after changing the sources.
+    (The script create-this-app will do this automatically)
+
+    $ make
+
+12. Rebuild the Makefile for the demo application and the
+    BSP, if the Nios II Design was changed inside the SOPC Builder.
+
+    $ ./create-this-app --rebuild
+
+
+How to run the demo
+--------------------
+
+1. Setup the POWERLINK network as described in main readme.txt located in
+   openPOWERLINK main directory.
+
+2. Program SOF file with Quartus II Programmer into FPGA.
+   It is located in the following subdirectory of openPOWERLINK
+   main directory:
+   /Examples/altera_nios2/EBV_DBC3C40/design_nios2_directIO/nios_openMac.sof
+   or
+   /Examples/altera_nios2/TERASIC_DE2-115/design_nios2_directIO/nios_openMac.sof
+   or
+   /Examples/altera_nios2/SYSTEC_ECUcore-EP3C/design_nios2_directIO/nios_openMac.sof
+
+
+3. Download the ELF file to the target:
+
+    $ cd Examples/altera_nios2/no_os/gnu/demo_directIO
+    $ make download-elf
+
+4. Enjoy the running POWERLINK network.
+
+
+How to import the project into Nios II IDE for debugging purposes
+------------------------------------------------------------------
+
+Requirement: Steps in the previous section "How to build the binary" are
+completed.
+
+1. Start the "Nios II IDE"
+
+2. Select menu "File" -> "Import..."
+
+3. Select the import source "Altera Nios II" ->
+   "Existing Nios II software build tools project or folder into workspace"
+
+4. Browse to the main directory of openPOWERLINK
+   (via the button "Browse...")
+
+5. Press the button "Finish".
+
+6. Select menu "File" -> "Import..."
+
+7. Select the import source "Altera Nios II" ->
+   "Existing Nios II software build tools project or folder into workspace"
+
+8. Browse to the subdirectory
+   Examples\altera_nios2\no_os\gnu\demo_directIO
+   of openPOWERLINK (via the button "Browse...")
+
+9. Press the button "Finish".
+
+How to write the program to local flash
+-----------------------------------------
+
+Requirement: Steps in the previous section "How to build the binary" are
+completed.
+
+1. After successfully building the design use the makefile to program the
+   flash:
+
+    $ make program-epcs
+
+Troubleshooting
+-----------------
+
+1. It is adviced to clean all generated files after switching from one demo to
+   the other.
