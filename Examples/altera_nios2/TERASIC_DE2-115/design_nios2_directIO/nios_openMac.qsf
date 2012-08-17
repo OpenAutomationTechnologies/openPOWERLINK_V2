@@ -226,7 +226,7 @@ set_location_assignment PIN_AG25 -to SW_BENCHMARK_OUT[4]
 set_location_assignment PIN_AD25 -to SW_BENCHMARK_OUT[5]
 set_location_assignment PIN_AH25 -to SW_BENCHMARK_OUT[6]
 set_location_assignment PIN_AE25 -to SW_BENCHMARK_OUT[7]
-set_global_assignment -name ENABLE_LOGIC_ANALYZER_INTERFACE ON
+set_global_assignment -name ENABLE_LOGIC_ANALYZER_INTERFACE OFF
 set_global_assignment -name USE_LOGIC_ANALYZER_INTERFACE_FILE benchmark.lai
 set_location_assignment PIN_AG22 -to altera_reserved_lai_0_0
 set_location_assignment PIN_AE24 -to altera_reserved_lai_0_1
@@ -258,12 +258,12 @@ set_global_assignment -name OUTPUT_IO_TIMING_FAR_END_VMEAS "HALF SIGNAL SWING" -
 set_location_assignment PIN_C24 -to PHY1_RXER
 set_location_assignment PIN_D18 -to PHY0_RXER
 set_global_assignment -name MISC_FILE "c:/Work/RepositoryWORK/openPOWERLINK_CNDK/fpga/altera/TERASIC_DE2-115/ink_pcp_DirectIO/nios_openMac.dpf"
-set_global_assignment -name SDC_FILE POWERLINK/sdc/PLK_MII_base.sdc
-set_global_assignment -name VHDL_FILE sevsegEncode.vhd
-set_global_assignment -name BDF_FILE nios_pll.bdf
-set_global_assignment -name QIP_FILE niosII_openMac.qip
 set_global_assignment -name OPTIMIZE_HOLD_TIMING "ALL PATHS"
 set_global_assignment -name FITTER_EFFORT "STANDARD FIT"
 set_global_assignment -name MISC_FILE "C:/mairt/workspace/openPOWERLINK_CNDK_mairt/fpga/altera/TERASIC_DE2-115/ink_pcp_DirectIO/nios_openMac.dpf"
 set_global_assignment -name MISC_FILE "C:/mairt/workspace/openPOWERLINK_mairt/Examples/altera_nios2/TERASIC_DE2-115/design_nios2_directIO/nios_openMac.dpf"
+set_global_assignment -name SDC_FILE PLK_MII_base.sdc
+set_global_assignment -name VHDL_FILE sevsegEncode.vhd
+set_global_assignment -name BDF_FILE nios_pll.bdf
+set_global_assignment -name QIP_FILE niosII_openMac.qip
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top

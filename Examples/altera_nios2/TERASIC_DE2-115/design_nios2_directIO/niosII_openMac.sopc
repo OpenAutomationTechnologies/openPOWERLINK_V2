@@ -335,6 +335,19 @@
          type = "long";
       }
    }
+   element tc_i_mem_pcp.s1
+   {
+      datum _lockedAddress
+      {
+         value = "1";
+         type = "boolean";
+      }
+      datum baseAddress
+      {
+         value = "33554432";
+         type = "long";
+      }
+   }
    element system_timer.s1
    {
       datum _lockedAddress
@@ -345,6 +358,14 @@
       datum baseAddress
       {
          value = "2304";
+         type = "long";
+      }
+   }
+   element benchmark_pio.s1
+   {
+      datum baseAddress
+      {
+         value = "2368";
          type = "long";
       }
    }
@@ -361,14 +382,6 @@
          type = "long";
       }
    }
-   element node_switch_pio.s1
-   {
-      datum baseAddress
-      {
-         value = "2400";
-         type = "long";
-      }
-   }
    element clock_crossing_0.s1
    {
       datum _lockedAddress
@@ -382,16 +395,11 @@
          type = "long";
       }
    }
-   element tc_i_mem_pcp.s1
+   element node_switch_pio.s1
    {
-      datum _lockedAddress
-      {
-         value = "1";
-         type = "boolean";
-      }
       datum baseAddress
       {
-         value = "33554432";
+         value = "2400";
          type = "long";
       }
    }
@@ -400,14 +408,6 @@
       datum baseAddress
       {
          value = "2336";
-         type = "long";
-      }
-   }
-   element benchmark_pio.s1
-   {
-      datum baseAddress
-      {
-         value = "2368";
          type = "long";
       }
    }
@@ -530,7 +530,7 @@
  <parameter name="projectName" value="nios_openMac.qpf" />
  <parameter name="sopcBorderPoints" value="true" />
  <parameter name="systemHash" value="12885099046" />
- <parameter name="timeStamp" value="1328195516817" />
+ <parameter name="timeStamp" value="1344416199571" />
  <module kind="clock_source" version="10.1" enabled="1" name="clk_0">
   <parameter name="clockFrequency" value="50000000" />
   <parameter name="clockFrequencyKnown" value="true" />
