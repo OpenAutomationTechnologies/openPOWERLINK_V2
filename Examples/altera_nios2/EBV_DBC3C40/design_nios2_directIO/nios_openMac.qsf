@@ -366,7 +366,6 @@ set_location_assignment PIN_G10 -to node_switch[3]
 set_location_assignment PIN_G9 -to node_switch[2]
 set_location_assignment PIN_H8 -to node_switch[1]
 set_location_assignment PIN_J8 -to node_switch[0]
-set_global_assignment -name FITTER_AUTO_EFFORT_DESIRED_SLACK_MARGIN "1 ns"
 set_global_assignment -name SYNCHRONIZER_IDENTIFICATION AUTO
 set_global_assignment -name STRATIXIII_UPDATE_MODE REMOTE
 set_global_assignment -name ON_CHIP_BITSTREAM_DECOMPRESSION OFF
@@ -380,9 +379,12 @@ set_location_assignment PIN_V14 -to phy0_link
 set_location_assignment PIN_AA19 -to phy0_rx_err
 set_location_assignment PIN_V12 -to phy1_link
 set_location_assignment PIN_AA15 -to phy1_rx_err
-set_global_assignment -name SDC_FILE POWERLINK/sdc/PLK_RMII_base.sdc
+set_global_assignment -name MISC_FILE "C:/mairt/workspace/openPOWERLINK_mairt/Examples/altera_nios2/EBV_DBC3C40/design_nios2_directIO/nios_openMac.dpf"
+set_global_assignment -name SDC_FILE PLK_RMII_base.sdc
 set_global_assignment -name VHDL_FILE sevsegEncode.vhd
 set_global_assignment -name BDF_FILE nios_pll.bdf
 set_global_assignment -name QIP_FILE niosII_openMac.qip
-set_global_assignment -name MISC_FILE "C:/mairt/workspace/openPOWERLINK_mairt/Examples/altera_nios2/EBV_DBC3C40/design_nios2_directIO/nios_openMac.dpf"
+set_global_assignment -name OPTIMIZE_HOLD_TIMING "ALL PATHS"
+set_global_assignment -name OPTIMIZE_POWER_DURING_FITTING "EXTRA EFFORT"
+set_global_assignment -name FITTER_EFFORT "STANDARD FIT"
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top

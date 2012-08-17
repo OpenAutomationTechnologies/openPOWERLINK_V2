@@ -10,9 +10,9 @@
 set ext_clk				ext_clk
 set clk50 				inst|the_altpll_0|sd1|pll7|clk[0]
 set clkPcp				inst|the_altpll_0|sd1|pll7|clk[1]
-set clk25				inst|the_altpll_0|sd1|pll7|clk[2]
+set clk100				inst|the_altpll_0|sd1|pll7|clk[2]
 set clkAp				inst|the_altpll_0|sd1|pll7|clk[3]
-set clkAp_SDRAM		inst|the_altpll_0|sd1|pll7|clk[4]
+set clk25				inst|the_altpll_0|sd1|pll7|clk[4]
 
 ## define which clock drives SRAM controller
 set clkSRAM		$clkPcp
@@ -44,10 +44,13 @@ create_generated_clock -source $clk50 -name CLK50_virt
 create_generated_clock -source $clkSRAM -name CLKSRAM_virt
 
 # define clock groups
-set clkGroup	[format "%s %s %s %s" $clk50 $clkPcp CLKSRAM_virt CLK50_virt]
+## clock group A includes openMAC + RMII phys
+set clkGroupA	[format "%s %s %s" $clk50 $clk100 CLK50_virt]
+## clock group B includes Nios II + SRAM
+set clkGroupB	[format "%s %s" $clkPcp CLKSRAM_virt]
 
-
-set_clock_groups -asynchronous 	-group $clkGroup \
+set_clock_groups -asynchronous 	-group $clkGroupA \
+											-group $clkGroupB \
 											-group $clkAp \
 											-group $clk25 \
 											-group $ext_clk
@@ -139,8 +142,8 @@ set_false_path -from [get_ports phy?_link] -to [get_registers *]
 ## multicycle
 ## Note: TX signals are latched at falling edge of 100 MHz signal
 ### from FPGA to PHY
-set_multicycle_path -from [get_clocks $clkPcp] -to [get_ports {phy?_tx_en phy?_tx_d[*]}] -setup -start 2
-set_multicycle_path -from [get_clocks $clkPcp] -to [get_ports {phy?_tx_en phy?_tx_d[*]}] -hold -start 1
+set_multicycle_path -from [get_clocks $clk100] -to [get_ports {phy?_tx_en phy?_tx_d[*]}] -setup -start 2
+set_multicycle_path -from [get_clocks $clk100] -to [get_ports {phy?_tx_en phy?_tx_d[*]}] -hold -start 1
 # ----------------------------------------------------------------------------------
 
 # ----------------------------------------------------------------------------------
