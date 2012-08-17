@@ -228,6 +228,27 @@
          type = "int";
       }
    }
+   element status_led_pio.s1
+   {
+      datum baseAddress
+      {
+         value = "32";
+         type = "long";
+      }
+   }
+   element onchip_memory_0.s1
+   {
+      datum _lockedAddress
+      {
+         value = "0";
+         type = "boolean";
+      }
+      datum baseAddress
+      {
+         value = "16384";
+         type = "long";
+      }
+   }
    element system_timer.s1
    {
       datum _lockedAddress
@@ -254,32 +275,11 @@
          type = "long";
       }
    }
-   element status_led_pio.s1
-   {
-      datum baseAddress
-      {
-         value = "32";
-         type = "long";
-      }
-   }
    element clock_crossing_0.s1
    {
       datum baseAddress
       {
          value = "33554432";
-         type = "long";
-      }
-   }
-   element onchip_memory_0.s1
-   {
-      datum _lockedAddress
-      {
-         value = "0";
-         type = "boolean";
-      }
-      datum baseAddress
-      {
-         value = "16384";
          type = "long";
       }
    }
@@ -342,15 +342,15 @@
  <parameter name="maxAdditionalLatency" value="0" />
  <parameter name="projectName" value="nios_openMac.qpf" />
  <parameter name="sopcBorderPoints" value="true" />
- <parameter name="systemHash" value="-4937300332" />
- <parameter name="timeStamp" value="1333626948594" />
- <module kind="clock_source" version="11.0" enabled="1" name="clkpcp">
+ <parameter name="systemHash" value="-8844953763" />
+ <parameter name="timeStamp" value="1344424785627" />
+ <module kind="clock_source" version="10.1" enabled="1" name="clkpcp">
   <parameter name="clockFrequency" value="100000000" />
   <parameter name="clockFrequencyKnown" value="true" />
   <parameter name="inputClockFrequency" value="0" />
   <parameter name="resetSynchronousEdges" value="NONE" />
  </module>
- <module kind="altera_nios2" version="11.0" enabled="1" name="pcp_cpu">
+ <module kind="altera_nios2" version="10.1" enabled="1" name="pcp_cpu">
   <parameter name="userDefinedSettings" value="" />
   <parameter name="tightlyCoupledInstructionMaster3MapParam" value="" />
   <parameter name="tightlyCoupledInstructionMaster3AddrWidth" value="1" />
@@ -454,7 +454,7 @@
  </module>
  <module
    kind="altera_avalon_tri_state_bridge"
-   version="11.0"
+   version="10.1"
    enabled="1"
    name="tri_state_bridge_0">
   <parameter name="registerIncomingSignals" value="false" />
@@ -465,11 +465,10 @@
  </module>
  <module
    kind="altera_avalon_onchip_memory2"
-   version="11.0"
+   version="10.1"
    enabled="1"
    name="onchip_memory_0">
   <parameter name="allowInSystemMemoryContentEditor" value="false" />
-  <parameter name="autoInitializationFileName" value="onchip_memory_0" />
   <parameter name="blockType" value="AUTO" />
   <parameter name="dataWidth" value="32" />
   <parameter name="deviceFamily" value="Cyclone III" />
@@ -480,8 +479,6 @@
   <parameter name="memorySize" value="1024" />
   <parameter name="readDuringWriteMode" value="DONT_CARE" />
   <parameter name="simAllowMRAMContentsFile" value="false" />
-  <parameter name="simMemInitOnlyFilename" value="0" />
-  <parameter name="singleClockOperation" value="false" />
   <parameter name="slave1Latency" value="1" />
   <parameter name="slave2Latency" value="1" />
   <parameter name="useNonDefaultInitFile" value="false" />
@@ -490,7 +487,7 @@
  </module>
  <module
    kind="altera_avalon_jtag_uart"
-   version="11.0"
+   version="10.1"
    enabled="1"
    name="jtag_uart_0">
   <parameter name="allowMultipleConnections" value="false" />
@@ -507,7 +504,7 @@
  </module>
  <module
    kind="altera_avalon_pio"
-   version="11.0"
+   version="10.1"
    enabled="1"
    name="benchmark_pio">
   <parameter name="bitClearingEdgeCapReg" value="false" />
@@ -525,7 +522,7 @@
  </module>
  <module
    kind="altera_avalon_timer"
-   version="11.0"
+   version="10.1"
    enabled="1"
    name="system_timer">
   <parameter name="alwaysRun" value="true" />
@@ -541,7 +538,7 @@
  </module>
  <module
    kind="altera_avalon_pio"
-   version="11.0"
+   version="10.1"
    enabled="1"
    name="status_led_pio">
   <parameter name="bitClearingEdgeCapReg" value="false" />
@@ -559,7 +556,7 @@
  </module>
  <module
    kind="altera_avalon_clock_crossing"
-   version="11.0"
+   version="10.1"
    enabled="1"
    name="clock_crossing_0">
   <parameter name="dataWidth" value="32" />
@@ -574,7 +571,7 @@
  </module>
  <module
    kind="altera_avalon_epcs_flash_controller"
-   version="11.0"
+   version="10.1"
    enabled="1"
    name="epcs_flash_controller_0">
   <parameter name="autoSelectASMIAtom" value="true" />
@@ -583,7 +580,7 @@
  </module>
  <module
    kind="altera_avalon_spi"
-   version="11.0"
+   version="10.1"
    enabled="1"
    name="node_switch_spi">
   <parameter name="clockPhase" value="0" />
@@ -637,7 +634,7 @@
   <parameter name="AUTO_CLKMASTER_CLOCK_RATE" value="100000000" />
   <parameter name="AUTO_CLKPKT_CLOCK_RATE" value="100000000" />
  </module>
- <module kind="clock_source" version="11.0" enabled="1" name="clk50">
+ <module kind="clock_source" version="10.1" enabled="1" name="clk50">
   <parameter name="clockFrequency" value="50000000" />
   <parameter name="clockFrequencyKnown" value="true" />
   <parameter name="inputClockFrequency" value="0" />
@@ -645,7 +642,7 @@
  </module>
  <connection
    kind="avalon"
-   version="11.0"
+   version="10.1"
    start="pcp_cpu.instruction_master"
    end="pcp_cpu.jtag_debug_module">
   <parameter name="arbitrationPriority" value="1" />
@@ -653,7 +650,7 @@
  </connection>
  <connection
    kind="avalon"
-   version="11.0"
+   version="10.1"
    start="pcp_cpu.data_master"
    end="pcp_cpu.jtag_debug_module">
   <parameter name="arbitrationPriority" value="1" />
@@ -661,7 +658,7 @@
  </connection>
  <connection
    kind="avalon"
-   version="11.0"
+   version="10.1"
    start="pcp_cpu.data_master"
    end="onchip_memory_0.s1">
   <parameter name="arbitrationPriority" value="1" />
@@ -669,14 +666,14 @@
  </connection>
  <connection
    kind="interrupt"
-   version="11.0"
+   version="10.1"
    start="pcp_cpu.d_irq"
    end="jtag_uart_0.irq">
   <parameter name="irqNumber" value="5" />
  </connection>
  <connection
    kind="avalon"
-   version="11.0"
+   version="10.1"
    start="pcp_cpu.instruction_master"
    end="onchip_memory_0.s1">
   <parameter name="arbitrationPriority" value="1" />
@@ -684,7 +681,7 @@
  </connection>
  <connection
    kind="avalon_tristate"
-   version="11.0"
+   version="10.1"
    start="tri_state_bridge_0.tristate_master"
    end="SRAM_0.avalon_tristate_slave">
   <parameter name="arbitrationPriority" value="1" />
@@ -692,7 +689,7 @@
  </connection>
  <connection
    kind="avalon"
-   version="11.0"
+   version="10.1"
    start="pcp_cpu.instruction_master"
    end="tri_state_bridge_0.avalon_slave">
   <parameter name="arbitrationPriority" value="1" />
@@ -700,7 +697,7 @@
  </connection>
  <connection
    kind="avalon"
-   version="11.0"
+   version="10.1"
    start="pcp_cpu.data_master"
    end="tri_state_bridge_0.avalon_slave">
   <parameter name="arbitrationPriority" value="1" />
@@ -708,14 +705,14 @@
  </connection>
  <connection
    kind="interrupt"
-   version="11.0"
+   version="10.1"
    start="pcp_cpu.d_irq"
    end="system_timer.irq">
   <parameter name="irqNumber" value="3" />
  </connection>
  <connection
    kind="avalon"
-   version="11.0"
+   version="10.1"
    start="pcp_cpu.data_master"
    end="clock_crossing_0.s1">
   <parameter name="arbitrationPriority" value="1" />
@@ -723,7 +720,7 @@
  </connection>
  <connection
    kind="avalon"
-   version="11.0"
+   version="10.1"
    start="clock_crossing_0.m1"
    end="benchmark_pio.s1">
   <parameter name="arbitrationPriority" value="1" />
@@ -731,7 +728,7 @@
  </connection>
  <connection
    kind="avalon"
-   version="11.0"
+   version="10.1"
    start="clock_crossing_0.m1"
    end="status_led_pio.s1">
   <parameter name="arbitrationPriority" value="1" />
@@ -739,7 +736,7 @@
  </connection>
  <connection
    kind="avalon"
-   version="11.0"
+   version="10.1"
    start="clock_crossing_0.m1"
    end="system_timer.s1">
   <parameter name="arbitrationPriority" value="1" />
@@ -747,7 +744,7 @@
  </connection>
  <connection
    kind="avalon"
-   version="11.0"
+   version="10.1"
    start="clock_crossing_0.m1"
    end="jtag_uart_0.avalon_jtag_slave">
   <parameter name="arbitrationPriority" value="1" />
@@ -755,21 +752,21 @@
  </connection>
  <connection
    kind="interrupt"
-   version="11.0"
+   version="10.1"
    start="pcp_cpu.d_irq"
    end="epcs_flash_controller_0.irq">
   <parameter name="irqNumber" value="6" />
  </connection>
  <connection
    kind="interrupt"
-   version="11.0"
+   version="10.1"
    start="pcp_cpu.d_irq"
    end="node_switch_spi.irq">
   <parameter name="irqNumber" value="7" />
  </connection>
  <connection
    kind="avalon"
-   version="11.0"
+   version="10.1"
    start="clock_crossing_0.m1"
    end="node_switch_spi.spi_control_port">
   <parameter name="arbitrationPriority" value="1" />
@@ -777,21 +774,21 @@
  </connection>
  <connection
    kind="interrupt"
-   version="11.0"
+   version="10.1"
    start="pcp_cpu.d_irq"
    end="powerlink_0.MACCMP_IRQ">
   <parameter name="irqNumber" value="0" />
  </connection>
  <connection
    kind="interrupt"
-   version="11.0"
+   version="10.1"
    start="pcp_cpu.d_irq"
    end="powerlink_0.MAC_IRQ">
   <parameter name="irqNumber" value="1" />
  </connection>
  <connection
    kind="avalon"
-   version="11.0"
+   version="10.1"
    start="pcp_cpu.data_master"
    end="powerlink_0.MAC_BUF">
   <parameter name="arbitrationPriority" value="1" />
@@ -799,7 +796,7 @@
  </connection>
  <connection
    kind="avalon"
-   version="11.0"
+   version="10.1"
    start="pcp_cpu.data_master"
    end="powerlink_0.SMP">
   <parameter name="arbitrationPriority" value="1" />
@@ -807,7 +804,7 @@
  </connection>
  <connection
    kind="avalon"
-   version="11.0"
+   version="10.1"
    start="powerlink_0.MAC_DMA"
    end="tri_state_bridge_0.avalon_slave">
   <parameter name="arbitrationPriority" value="1" />
@@ -815,7 +812,7 @@
  </connection>
  <connection
    kind="avalon"
-   version="11.0"
+   version="10.1"
    start="clock_crossing_0.m1"
    end="powerlink_0.MAC_CMP">
   <parameter name="arbitrationPriority" value="1" />
@@ -823,7 +820,7 @@
  </connection>
  <connection
    kind="avalon"
-   version="11.0"
+   version="10.1"
    start="clock_crossing_0.m1"
    end="powerlink_0.MAC_REG">
   <parameter name="arbitrationPriority" value="1" />
@@ -831,7 +828,7 @@
  </connection>
  <connection
    kind="avalon"
-   version="11.0"
+   version="10.1"
    start="pcp_cpu.instruction_master"
    end="clock_crossing_0.s1">
   <parameter name="arbitrationPriority" value="1" />
@@ -839,7 +836,7 @@
  </connection>
  <connection
    kind="avalon"
-   version="11.0"
+   version="10.1"
    start="clock_crossing_0.m1"
    end="epcs_flash_controller_0.epcs_control_port">
   <parameter name="arbitrationPriority" value="1" />
@@ -847,66 +844,66 @@
  </connection>
  <connection
    kind="clock"
-   version="11.0"
+   version="10.1"
    start="clk50.clk"
    end="onchip_memory_0.clk1" />
- <connection kind="clock" version="11.0" start="clk50.clk" end="jtag_uart_0.clk" />
- <connection kind="clock" version="11.0" start="clk50.clk" end="benchmark_pio.clk" />
- <connection kind="clock" version="11.0" start="clk50.clk" end="system_timer.clk" />
+ <connection kind="clock" version="10.1" start="clk50.clk" end="jtag_uart_0.clk" />
+ <connection kind="clock" version="10.1" start="clk50.clk" end="benchmark_pio.clk" />
+ <connection kind="clock" version="10.1" start="clk50.clk" end="system_timer.clk" />
  <connection
    kind="clock"
-   version="11.0"
+   version="10.1"
    start="clk50.clk"
    end="status_led_pio.clk" />
  <connection
    kind="clock"
-   version="11.0"
+   version="10.1"
    start="clk50.clk"
    end="clock_crossing_0.clk_m1" />
  <connection
    kind="clock"
-   version="11.0"
+   version="10.1"
    start="clk50.clk"
    end="node_switch_spi.clk" />
  <connection
    kind="clock"
-   version="11.0"
+   version="10.1"
    start="clk50.clk"
    end="powerlink_0.clk50meg" />
- <connection kind="clock" version="11.0" start="clkpcp.clk" end="pcp_cpu.clk" />
+ <connection kind="clock" version="10.1" start="clkpcp.clk" end="pcp_cpu.clk" />
  <connection
    kind="clock"
-   version="11.0"
+   version="10.1"
    start="clkpcp.clk"
    end="tri_state_bridge_0.clk" />
  <connection
    kind="clock"
-   version="11.0"
+   version="10.1"
    start="clk50.clk"
    end="epcs_flash_controller_0.clk" />
  <connection
    kind="clock"
-   version="11.0"
+   version="10.1"
    start="clkpcp.clk"
    end="powerlink_0.clkEth" />
  <connection
    kind="clock"
-   version="11.0"
+   version="10.1"
    start="clkpcp.clk"
    end="powerlink_0.clkPkt" />
  <connection
    kind="clock"
-   version="11.0"
+   version="10.1"
    start="clkpcp.clk"
    end="powerlink_0.clkMaster" />
  <connection
    kind="clock"
-   version="11.0"
+   version="10.1"
    start="clkpcp.clk"
    end="powerlink_0.pcp_clk" />
  <connection
    kind="clock"
-   version="11.0"
+   version="10.1"
    start="clkpcp.clk"
    end="clock_crossing_0.clk_s1" />
 </system>

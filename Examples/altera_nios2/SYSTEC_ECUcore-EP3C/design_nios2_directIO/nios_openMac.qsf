@@ -41,7 +41,7 @@
 # ========================
 set_global_assignment -name ORIGINAL_QUARTUS_VERSION 8.1
 set_global_assignment -name PROJECT_CREATION_TIME_DATE "11:25:58  APRIL 07, 2009"
-set_global_assignment -name LAST_QUARTUS_VERSION "11.0 SP1"
+set_global_assignment -name LAST_QUARTUS_VERSION "10.1 SP1"
 
 # Pin & Location Assignments
 # ==========================
@@ -126,7 +126,7 @@ set_global_assignment -name PARTITION_COLOR 16764057 -section_id Top
 # --------------------
 
 set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT -section_id Top
-set_global_assignment -name ENABLE_SIGNALTAP ON
+set_global_assignment -name ENABLE_SIGNALTAP OFF
 set_global_assignment -name USE_SIGNALTAP_FILE stp1.stp
 set_global_assignment -name CYCLONEII_OPTIMIZATION_TECHNIQUE AREA
 set_global_assignment -name MISC_FILE nios_openMac.dpf
@@ -365,13 +365,13 @@ set_location_assignment PIN_M10 -to fHex_CLK_out
 set_location_assignment PIN_T14 -to fHex_PL_out
 set_location_assignment PIN_N11 -to fHex_MRST_in
 set_location_assignment PIN_F3 -to vPCB_in[0]
-set_global_assignment -name SDC_FILE POWERLINK/sdc/PLK_RMII_base.sdc
-set_global_assignment -name BDF_FILE nios_pll.bdf
-set_global_assignment -name QIP_FILE altpll0.qip
-set_global_assignment -name QIP_FILE niosII_openMac.qip
 set_global_assignment -name TIMEQUEST_MULTICORNER_ANALYSIS ON
 set_global_assignment -name SYNCHRONIZER_IDENTIFICATION AUTO
 set_global_assignment -name TIMEQUEST_DO_CCPP_REMOVAL ON
 set_global_assignment -name OPTIMIZE_MULTI_CORNER_TIMING ON
 set_global_assignment -name FITTER_EFFORT "STANDARD FIT"
+set_global_assignment -name SDC_FILE PLK_RMII_base.sdc
+set_global_assignment -name BDF_FILE nios_pll.bdf
+set_global_assignment -name QIP_FILE altpll0.qip
+set_global_assignment -name QIP_FILE niosII_openMac.qip
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
