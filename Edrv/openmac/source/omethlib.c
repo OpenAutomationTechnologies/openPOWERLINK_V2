@@ -128,11 +128,18 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     12.09.2011  zelenkaj    bugfix      - phyId on little endian incorrect
     03.11.2011  zelenkaj                - reverted previous Microblaze changes, since hw
                                           supports endian correctly
+    11.04.2012  zelenkaj    bugfix      - search for phys starting with addr 1
+                                        - added MICREL KSZ8051RNL support
+    21.05.2012  muelhausens bugfix      - phyId on little endian==0 fix
+    04.06.2012  zelenkaj    feature     - added omethPhyCfgUser
+                                        - moved KSZ8051RNL for BeMicro support to
+                                          omethlib_phycfg module
 
 ----------------------------------------------------------------------------*/
 
 #include <omethlib.h>
 #include <omethlibint.h>
+#include <omethlib_phycfg.h>
 #include <string.h>                // used functions: memcpy, memset
 #include <stdlib.h>                // used functions: calloc
 #include <omethlib_target.h>       // target specific defines (BIG/LITTLE endian)
@@ -169,6 +176,8 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define MICREL_KS8721_PHY_ID        0x22161
 #define    MICREL_KS8721_IPG        40            // due to phy runtime of 460ns the ipg can be reduced to 40 (40+2*460 = 960 ... minimum ipg)
 
+#define MICREL_KSZ8051RNL_PHY_ID    0x22155
+#define    MICREL_KSZ8051RNL_IPG    ~0    //TODO: measure IPG and compensate
 //IPG compensation valid for EBV DBC3C40 with two National phys...
 #define NATIONAL_DP83640_PHY_ID     0x20005CE
 #define NATIONAL_DP83640_IPG        ~0    //TODO: measure IPG and compensate
@@ -178,8 +187,6 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 #define PHY_MICREL_REG1F_NOAUTOMDIX  0x2000
-
-
 
 #define SMSC_LAN8700                 0x7C0C
 
@@ -228,6 +235,8 @@ static ometh_internal_typ    omethInternal;    // driver internal data
     #define OMETH_MAX_RETRY    0
 #endif
 
+#define OMETH_NO_RETRY     1
+
 //*************************************************************************************
 //    Begin of OMETH_TRANSMIT / Macro for omethTransmitXX()
 //*************************************************************************************
@@ -254,7 +263,14 @@ static ometh_internal_typ    omethInternal;    // driver internal data
     hEth->cntTxQueueIn++;                                                                           \
     hEth->pTxNext[TX_QUEUE_INDEX] = pInfo->pNext;    /* switch to next info structure    */         \
                                                                                                     \
-    pDesc->flags.byte.low    = OMETH_MAX_RETRY;                                                     \
+    if(addFlags == FLAGS1_START_TIME) /* in case of Time-Triggered TX no retry */                   \
+    {                                                                                               \
+        pDesc->flags.byte.low    = OMETH_NO_RETRY;                                                  \
+    }                                                                                               \
+    else                                                                                            \
+    {                                                                                               \
+        pDesc->flags.byte.low    = OMETH_MAX_RETRY;                                                 \
+    }                                                                                               \
     pDesc->flags.byte.high    = pInfo->flags1 | addFlags;    /* set flag to start transmitter */    \
                                                                                                     \
     return len                                                                                      \
@@ -270,7 +286,7 @@ static ometh_internal_typ    omethInternal;    // driver internal data
 // use assert-calls
 //
 //*************************************************************************************
-#ifndef __ASSERT_H__    // if assert.h is not defined ...
+#ifndef assert    // if assert.h is not defined ...
 //    #define assert(x)    do{(x);}while(0)
     #define assert(x)
 #endif
@@ -542,13 +558,13 @@ static OMETH_H        omethCreateInt
 
         // get phy IDs (Reg 2 and 3) to 32Bit var phyId
         // note: big endian reads reg 2 first, otherwise reg 3 is read first
-#if OMETH_HW_MODE == 1 //little
+#if OMETH_HW_MODE == 0 //little
         omethPhyRead(hEth, 0, 3, &data);
 #else //big
         omethPhyRead(hEth, 0, 2, &data);
 #endif
         phyId = data;
-#if OMETH_HW_MODE == 1 //little
+#if OMETH_HW_MODE == 0 //little
         omethPhyRead(hEth, 0, 2, &data);
 #else //big
         omethPhyRead(hEth, 0, 3, &data);
@@ -556,7 +572,6 @@ static OMETH_H        omethCreateInt
         phyId |= ((unsigned long)data << 16);
         phyId = phyId >> 4;    // remove revision number
     }
-
 
     // check if there is a special response IPG to be set
     i = ~0;
@@ -578,6 +593,8 @@ static OMETH_H        omethCreateInt
         if(phyId==NATIONAL_DP83640_PHY_ID) i = NATIONAL_DP83640_IPG;
         //e.g. TERASIC DE2-115 (Cyclone 4)
         else if(phyId==MARVELL_88E1111_PHY_ID) i = MARVELL_88E1111_IPG;
+        //e.g. ARROW BeMicro
+        else if(phyId==MICREL_KSZ8051RNL_PHY_ID) i = MICREL_KSZ8051RNL_IPG;
         //...add more if needed
     }
 
@@ -852,6 +869,12 @@ static OMETH_H        omethCreateInt
     //---------------------------------  allocate phy register memory -------------------------------
     hEth->pPhyReg = calloc(hEth->phyCount, sizeof(*hEth->pPhyReg));
     if(hEth->pPhyReg == 0) return hEth;
+
+    //--------------------------------- call user's phy cfg -----------------------------------------
+    if(omethPhyCfgUser(hEth) != 0)
+    {
+        return hEth;
+    }
 
     #if (OMETH_ENABLE_SOFT_IRQ==1)
         hEth->pFctSoftIrq = &soft_irq_dummy;    // set dummy function for Soft-IRQ

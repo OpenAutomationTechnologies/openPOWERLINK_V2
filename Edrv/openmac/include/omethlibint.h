@@ -61,8 +61,8 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //-------------------- filter entry type (for 1 byte) --------------------
 typedef struct
 {
-    unsigned char mask;
     unsigned char value;
+    unsigned char mask;
 }ometh_filter_entry_typ;
 
 //-------------------- filter type --------------------
@@ -73,15 +73,15 @@ typedef struct
 typedef struct
 {
     ometh_filter_entry_typ    b[OMETH_FILTER_LEN];    // 31 filter entries
-    unsigned char            commandHigh;
     unsigned char            command;    // command register
+    unsigned char            commandHigh;
 }ometh_filter_typ;
 
 typedef struct
 {
     ometh_filter_entry_typ    b[OMETH_XFILTER_LEN];    // 17 filter entries
-    unsigned char            reserve;
     unsigned char            command;    // command register
+    unsigned char            reserve;
 }ometh_xfilter_typ;
 
 #define CMD_FILTER_SYNC    0x10    // this is a sync filter
@@ -96,8 +96,8 @@ typedef struct
 //-------------------- rx/tx descriptor --------------------
 typedef struct
 {
-    unsigned char    high;
     unsigned char    low;
+    unsigned char    high;
 }ometh_desc_flags_bytes;
 
 typedef union    // descriptor status
@@ -108,15 +108,8 @@ typedef union    // descriptor status
 
 typedef struct
 {
-#if OMETH_HW_MODE==0
     ometh_desc_flags_union    flags;
     unsigned short            len;        // number of bytes
-#endif
-#if OMETH_HW_MODE==1
-    unsigned short            len;        // number of bytes
-    ometh_desc_flags_union    flags;
-#endif
-
     unsigned long    pData;        // ptr to data
     unsigned long    txStart;    // tx start time
     unsigned long    time;        // time stamp
@@ -234,18 +227,10 @@ struct OMETH_FILTER
 
 typedef struct
 {
-#if OMETH_HW_MODE==0
     unsigned short    value;            // read/write port
     unsigned short    setBit;            // set single bits in status register
     unsigned short    clrBit;            // clear single bits in status register
     unsigned short    setDescriptor;    // set descriptor index
-#endif
-#if OMETH_HW_MODE==1
-    unsigned short    setBit;            // set single bits in status register
-    unsigned short    value;            // read/write port
-    unsigned short    setDescriptor;    // set descriptor index
-    unsigned short    clrBit;            // clear single bits in status register
-#endif
 }ometh_status_typ;                    // mac rx/tx status registers
 
 typedef struct

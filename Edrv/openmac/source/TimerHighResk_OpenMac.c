@@ -70,13 +70,28 @@
 #include "kernel/EplTimerHighResk.h"
 #include "Benchmark.h"
 
-#include <omethlib.h>
+#include "omethlib.h"
+#ifdef __NIOS2__
+#include "system.h"
 #include <sys/alt_irq.h>
 #include <alt_types.h>
 #include <io.h>
+#elif defined(__MICROBLAZE__)
+#include "xparameters.h"
+#include "xil_io.h"
+#include "xintc_l.h"
+#else
+#error
+#endif
 
-#ifdef CPU_UTIL
-#include "cpuUtil.h"
+#ifdef __NIOS2__
+#define THRK_RD32(base, offset)             IORD_32DIRECT(base, offset)
+#define THRK_WR32(base, offset, write)      IOWR_32DIRECT(base, offset, write)
+#elif defined(__MICROBLAZE__)
+#define THRK_RD32(base, offset)             Xil_In32((base+offset))
+#define THRK_WR32(base, offset, write)      Xil_Out32((base+offset), write)
+#else
+#error "Configuration unknown!"
 #endif
 
 
@@ -101,14 +116,34 @@
 #define TIMERCMP_REG_OFF_STATUS     4
 #define TIMERCMP_REG_OFF_TIME_VAL   0
 
-#ifdef __POWERLINK
-#define HIGHRES_TIMER_IRQ           POWERLINK_0_MAC_CMP_IRQ
-#define HIGHRES_TIMER_IRQ_IC_ID     POWERLINK_0_MAC_CMP_IRQ_INTERRUPT_CONTROLLER_ID
-#define HIGHRES_TIMER_BASE          POWERLINK_0_MAC_CMP_BASE
-#elif defined(__OPENMAC)
-#define HIGHRES_TIMER_IRQ           OPENMAC_0_CMP_IRQ
-#define HIGHRES_TIMER_IRQ_IC_ID     OPENMAC_0_CMP_IRQ_INTERRUPT_CONTROLLER_ID
-#define HIGHRES_TIMER_BASE          OPENMAC_0_CMP_BASE
+//--- set the system's base addresses ---
+#if defined(__NIOS2__)
+
+//POWERLINK IP-Core in "pcp_0" subsystem
+#if defined(PCP_0_POWERLINK_0_MAC_REG_BASE)
+#include "EdrvOpenMac_qsys.h"
+
+//POWERLINK IP-Core in SOPC
+#elif defined(POWERLINK_0_MAC_REG_BASE)
+#include "EdrvOpenMac_sopc.h"
+
+#else
+#error "POWERLINK IP-Core is not found in Nios II (sub-)system!"
+#endif
+
+#elif defined(__MICROBLAZE__)
+
+//POWERLINK IP-Core with PLB
+#if defined(POWERLINK_USES_PLB_BUS)
+#include "EdrvOpenMac_plb.h"
+
+#elif defined(POWERLINK_USES_AXI_BUS)
+#include "EdrvOpenMac_axi.h"
+
+#else
+#error "POWERLINK IP-Core is not found in Microblaze system!"
+#endif
+
 #else
 #error "Configuration unknown!"
 #endif
@@ -212,11 +247,23 @@ tEplKernel      Ret;
     EplTimerHighReskCompareInterruptDisable();
     EplTimerHighReskSetCompareValue( 0 );
 
-    if (alt_irq_register(HIGHRES_TIMER_IRQ, NULL, EplTimerHighReskInterruptHandler))
+#ifdef __NIOS2__
+    if (alt_ic_isr_register(HIGHRES_TIMER_IRQ_IC_ID, HIGHRES_TIMER_IRQ,
+            EplTimerHighReskInterruptHandler, NULL, NULL))
     {
         Ret = kEplNoResource;
     }
+#elif defined(__MICROBLAZE__)
+    {
+        DWORD curIntEn = THRK_RD32(EPL_TIMER_INTC_BASE, XIN_IER_OFFSET);
 
+        XIntc_RegisterHandler(EPL_TIMER_INTC_BASE, HIGHRES_TIMER_IRQ,
+                (XInterruptHandler)EplTimerHighReskInterruptHandler, (void*)NULL);
+        XIntc_EnableIntr(EPL_TIMER_INTC_BASE, HIGHRES_TIMER_IRQ_MASK | curIntEn);
+    }
+#else
+#error"Configuration unknown!"
+#endif
     return Ret;
 
 }
@@ -244,7 +291,15 @@ tEplKernel  Ret = kEplSuccessful;
     EplTimerHighReskCompareInterruptDisable();
     EplTimerHighReskSetCompareValue( 0 );
 
-    alt_irq_register(HIGHRES_TIMER_IRQ, NULL, NULL);
+#ifdef __NIOS2__
+    alt_ic_isr_register(HIGHRES_TIMER_IRQ_IC_ID, HIGHRES_TIMER_IRQ,
+            NULL, NULL, NULL);
+#elif defined(__MICROBLAZE__)
+    XIntc_RegisterHandler(EPL_TIMER_INTC_BASE, HIGHRES_TIMER_IRQ,
+            (XInterruptHandler)NULL, (void*)NULL);
+#else
+#error "Configuration unknown!"
+#endif
 
     EPL_MEMSET(&EplTimerHighReskInstance_l, 0, sizeof (EplTimerHighReskInstance_l));
 
@@ -441,22 +496,22 @@ Exit:
 
 static inline void EplTimerHighReskCompareInterruptDisable (void)
 {
-    IOWR_32DIRECT(HIGHRES_TIMER_BASE, TIMERCMP_REG_OFF_CTRL, 0 );
+    THRK_WR32(HIGHRES_TIMER_BASE, TIMERCMP_REG_OFF_CTRL, 0 );
 }
 
 static inline void EplTimerHighReskCompareInterruptEnable (void)
 {
-    IOWR_32DIRECT( HIGHRES_TIMER_BASE, TIMERCMP_REG_OFF_CTRL, 1 );
+    THRK_WR32( HIGHRES_TIMER_BASE, TIMERCMP_REG_OFF_CTRL, 1 );
 }
 
 static inline void EplTimerHighReskSetCompareValue (DWORD dwVal)
 {
-    IOWR_32DIRECT( HIGHRES_TIMER_BASE, TIMERCMP_REG_OFF_CMP_VAL, dwVal );
+    THRK_WR32( HIGHRES_TIMER_BASE, TIMERCMP_REG_OFF_CMP_VAL, dwVal );
 }
 
 static inline DWORD EplTimerHighReskGetTimeValue (void)
 {
-    return IORD_32DIRECT( HIGHRES_TIMER_BASE, TIMERCMP_REG_OFF_TIME_VAL );
+    return THRK_RD32( HIGHRES_TIMER_BASE, TIMERCMP_REG_OFF_TIME_VAL );
 }
 
 static void EplTimerHighReskInterruptHandler (void* pArg_p
@@ -467,10 +522,6 @@ static void EplTimerHighReskInterruptHandler (void* pArg_p
 {
 
     BENCHMARK_MOD_24_SET(4);
-
-#ifdef CPU_UTIL
-    isrcall_cpuutil();
-#endif
 
     EplTimerHighReskSetCompareValue(0);
     EplTimerHighReskCompareInterruptDisable();

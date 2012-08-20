@@ -111,29 +111,38 @@
 #define EPL_TIMER_SYNC_SECOND_LOSS_OF_SYNC      FALSE
 #endif
 
-#ifdef __NIOS2__
-#ifdef __POWERLINK
-#define EPL_TIMER_SYNC_BASE         POWERLINK_0_MAC_CMP_BASE //from system.h
-#define EPL_TIMER_SYNC_IRQ          POWERLINK_0_MAC_CMP_IRQ
-#define EPL_TIMER_SYNC_IRQ_IC_ID    POWERLINK_0_MAC_CMP_IRQ_INTERRUPT_CONTROLLER_ID
-#if POWERLINK_0_MAC_CMP_TIMESYNCHW != FALSE
-    #define EPL_TIMER_USE_COMPARE_PDI_INT
-#endif
-#elif defined(__OPENMAC)
-#define EPL_TIMER_SYNC_BASE         OPENMAC_0_CMP_BASE //from system.h
-#define EPL_TIMER_SYNC_IRQ          OPENMAC_0_CMP_IRQ
-#define EPL_TIMER_SYNC_IRQ_IC_ID    OPENMAC_0_CMP_IRQ_INTERRUPT_CONTROLLER_ID
+//--- set the system's base addresses ---
+#if defined(__NIOS2__)
+
+//POWERLINK IP-Core in "pcp_0" subsystem
+#if defined(PCP_0_POWERLINK_0_MAC_REG_BASE)
+#include "EdrvOpenMac_qsys.h"
+
+//POWERLINK IP-Core in SOPC
+#elif defined(POWERLINK_0_MAC_REG_BASE)
+#include "EdrvOpenMac_sopc.h"
+
 #else
-#error "Configuration unknown!"
+#error "POWERLINK IP-Core is not found in Nios II (sub-)system!"
 #endif
+
 #elif defined(__MICROBLAZE__)
-#define EPL_TIMER_INTC_BASE        XPAR_PCP_INTC_BASEADDR
-#define EPL_TIMER_SYNC_BASE        XPAR_PLB_POWERLINK_0_MAC_CMP_BASEADDR
-#define EPL_TIMER_SYNC_IRQ        XPAR_PCP_INTC_PLB_POWERLINK_0_TCP_IRQ_INTR
-#define EPL_TIMER_SYNC_IRQ_MASK    XPAR_PLB_POWERLINK_0_TCP_IRQ_MASK
+
+//POWERLINK IP-Core with PLB
+#if defined(POWERLINK_USES_PLB_BUS)
+#include "EdrvOpenMac_plb.h"
+
+#elif defined(POWERLINK_USES_AXI_BUS)
+#include "EdrvOpenMac_axi.h"
+
+#else
+#error "POWERLINK IP-Core is not found in Microblaze system!"
+#endif
+
 #else
 #error "Configuration unknown!"
 #endif
+
 
 /***************************************************************************/
 /*                                                                         */
@@ -673,6 +682,8 @@ void PUBLIC EplTimerSynckCompareTogPdiIntEnable (DWORD wSyncIntCycle_p)
     EplTimerSynckInstance_l.m_wCompareTogPdiIntEnabled = TRUE;
     EplTimerSynckInstance_l.m_wSyncIntCycle = wSyncIntCycle_p;
     EplTimerSynckInstance_l.m_wCycleCnt = 0;
+
+    EplTimerSynckDrvCompareTogPdiInterruptEnable();
 }
 
 //---------------------------------------------------------------------------
@@ -691,6 +702,8 @@ void PUBLIC EplTimerSynckCompareTogPdiIntDisable (void)
     EplTimerSynckInstance_l.m_wCompareTogPdiIntEnabled = FALSE;
     EplTimerSynckInstance_l.m_wSyncIntCycle = 0;
     EplTimerSynckInstance_l.m_wCycleCnt = 0;
+
+    EplTimerSynckDrvCompareTogPdiInterruptDisable();
 }
 #endif //EPL_TIMER_USE_COMPARE_PDI_INT
 
@@ -901,7 +914,7 @@ DWORD   dwNextAbsoluteTime;
 
 static inline unsigned int EplTimerSynckDrvFindShortestTimer(void);
 
-static void EplTimerSynckDrvConfigureShortestTimer(void);
+static void EplTimerSynckDrvConfigureShortestTimer(BOOL bToggleInt_p);
 
 
 
@@ -921,7 +934,7 @@ tEplTimerSynckTimerInfo*    pTimerInfo;
     pTimerInfo->m_dwAbsoluteTime = dwAbsoluteTime_p;
     pTimerInfo->m_fEnabled = TRUE;
 
-    EplTimerSynckDrvConfigureShortestTimer();
+    EplTimerSynckDrvConfigureShortestTimer(TRUE);
 
 Exit:
     return Ret;
@@ -958,7 +971,7 @@ tEplTimerSynckTimerInfo*    pTimerInfo;
     *pdwAbsoluteTime_p = pTimerInfo->m_dwAbsoluteTime;
     pTimerInfo->m_fEnabled = TRUE;
 
-    EplTimerSynckDrvConfigureShortestTimer();
+    EplTimerSynckDrvConfigureShortestTimer(TRUE);
 
 Exit:
     return Ret;
@@ -981,7 +994,7 @@ tEplTimerSynckTimerInfo*    pTimerInfo;
     pTimerInfo = &EplTimerSynckInstance_l.m_aTimerInfo[uiTimerHdl_p];
     pTimerInfo->m_fEnabled = FALSE;
 
-    EplTimerSynckDrvConfigureShortestTimer();
+    EplTimerSynckDrvConfigureShortestTimer(TRUE);
 
 Exit:
     return Ret;
@@ -1018,7 +1031,7 @@ DWORD                       dwAbsoluteTime = 0;
 }
 
 
-static void EplTimerSynckDrvConfigureShortestTimer(void)
+static void EplTimerSynckDrvConfigureShortestTimer(BOOL bToggleInt_p)
 {
 unsigned int                uiNextTimerHdl;
 tEplTimerSynckTimerInfo*    pTimerInfo;
@@ -1026,9 +1039,6 @@ DWORD                       dwTargetAbsoluteTime;
 DWORD                       dwCurrentTime;
 
     EplTimerSynckDrvCompareInterruptDisable();
-#ifdef EPL_TIMER_USE_COMPARE_PDI_INT
-    EplTimerSynckDrvCompareTogPdiInterruptDisable();
-#endif //EPL_TIMER_USE_COMPARE_PDI_INT
 
     uiNextTimerHdl = EplTimerSynckDrvFindShortestTimer();
     if (uiNextTimerHdl != TIMER_HDL_INVALID)
@@ -1045,14 +1055,15 @@ DWORD                       dwCurrentTime;
         }
 
         EplTimerSynckDrvSetCompareValue(dwTargetAbsoluteTime);
+
 #ifdef EPL_TIMER_USE_COMPARE_PDI_INT
-        if(EplTimerSynckInstance_l.m_wCompareTogPdiIntEnabled == TRUE )
+        if(EplTimerSynckInstance_l.m_wCompareTogPdiIntEnabled == TRUE && bToggleInt_p == TRUE)
         {
-            if ((EplTimerSynckInstance_l.m_wCycleCnt % EplTimerSynckInstance_l.m_wSyncIntCycle) == 0)
+            if ((EplTimerSynckInstance_l.m_wCycleCnt == EplTimerSynckInstance_l.m_wSyncIntCycle))
             {
-                EplTimerSynckDrvSetCompareTogPdiValue( dwTargetAbsoluteTime + EplTimerSynckInstance_l.m_dwAdvanceShift - EplTimerSynckInstance_l.m_dwConfiguredTimeDiff );
+                EplTimerSynckDrvSetCompareTogPdiValue( dwTargetAbsoluteTime + EplTimerSynckInstance_l.m_dwAdvanceShift);
                 // enable compare pdi interrupt
-                EplTimerSynckDrvCompareTogPdiInterruptEnable();
+                EplTimerSynckInstance_l.m_wCycleCnt = 0;
             }
         }
 #endif //EPL_TIMER_USE_COMPARE_PDI_INT
@@ -1066,7 +1077,6 @@ DWORD                       dwCurrentTime;
 
         EplTimerSynckInstance_l.m_uiActiveTimerHdl = TIMER_HDL_INVALID;
     }
-
 }
 
 
@@ -1208,7 +1218,7 @@ unsigned int                uiNextTimerHdl;
         }
     }
 
-    EplTimerSynckDrvConfigureShortestTimer();
+    EplTimerSynckDrvConfigureShortestTimer(FALSE);
 
     BENCHMARK_MOD_24_RESET(4);
     return;

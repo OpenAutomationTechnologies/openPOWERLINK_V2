@@ -43,19 +43,13 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *    Target specific defines for the module omethLib
  *
  *  - OMETH_HW_MODE must be defined to select the hardware mode
- *    0: big endian        (tested on Xilinx Microblaze CPU)
- *    1: little endian    (tested on Altera Nios II CPU)
+ *    1: big endian        (tested on Xilinx Microblaze CPU)
+ *    0: little endian    (tested on Altera Nios II CPU)
  *
  *    - OMETH_MAKE_NONCACHABLE(ptr)
  *      Defines a function to make a ptr noncachable
  *      (Important for processors with enabled data cache)
  *
- * History:
- *
- *    11.10.2004    enzinger    created
- *  26.03.2009  zelenkaj    revised
- *    25.01.2010    zelenkaj    added Nios II uncache data
- *    07.09.2011    zelenkaj    added Microblaze (PLB) handling
  *
  ******************************************************************************/
 
@@ -64,7 +58,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #if defined(__NIOS2__)
     // Nios II is little endian
-    #define OMETH_HW_MODE                    1
+    #define OMETH_HW_MODE                    0
     //---------------------------------------------------------
     // borrowed from Altera Nios II Toolchain
     //  alt_remap_uncached.c
@@ -77,11 +71,22 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         #endif
     //
     //---------------------------------------------------------
-    #define OMETH_MAKE_NONCACHABLE(ptr)        (volatile void*)(((unsigned long)ptr)|NIOS2_BYPASS_DCACHE_MASK);
+    #define OMETH_MAKE_NONCACHABLE(ptr)        (void*)(((unsigned long)ptr)|NIOS2_BYPASS_DCACHE_MASK);
 #elif defined(__MICROBLAZE__)
+
+#include "xparameters.h"
+
+#ifndef XPAR_MICROBLAZE_ENDIANNESS
+    #error "XPAR_MICROBLAZE_ENDIANNESS not defined in xparameters.h!"
+#endif
+
+#if XPAR_MICROBLAZE_ENDIANNESS == 0
     // Microblaze is big endian (with PLB)
-    //FIXME: Is Microblaze big endian with AXI!?!?!?
-    #define OMETH_HW_MODE                    0
+    #define OMETH_HW_MODE                    1
+#else
+    // Microblaze is little endian (with AXI)
+    #define OMETH_HW_MODE                     0
+#endif
     #define OMETH_MAKE_NONCACHABLE(ptr)     (ptr)
 #else
     #error "Host CPU is unknown, set OMETH_HW_MODE and OMETH_MAKE_NONCACHABLE!"
