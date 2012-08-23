@@ -265,7 +265,7 @@ typedef struct
     tEdrvTxBuffer*      m_pTxBuffer;        // Buffers for Tx-Frames
     unsigned int        m_uiMaxTxFrames;
     BYTE                m_bFlag1;           // Flag 1 with EN, EC for PRes, StatusRes
-    BYTE                m_bMnFlag1;         // Flag 1 with EA, ER from PReq, SoA of MN
+    BYTE                m_bMnFlag1;         // Flag 1 with MS, EA, ER from PReq, SoA of MN
     BYTE                m_bFlag2;           // Flag 2 with PR and RS for PRes, StatusRes, IdentRes
     BYTE                m_bUpdateTxFrame;
     unsigned int        m_uiUsedPresFilterCount;
@@ -4170,11 +4170,12 @@ BYTE            bFlag1;
 #endif
 #endif
 
-        // save EA flag
+        // update only EA and MS flag
         bFlag1 = AmiGetByteFromLe(&pFrame->m_Data.m_Preq.m_le_bFlag1);
+
         EplDllkInstance_g.m_bMnFlag1 =
-            (EplDllkInstance_g.m_bMnFlag1 & ~EPL_FRAME_FLAG1_EA)
-            | (bFlag1 & EPL_FRAME_FLAG1_EA);
+            (EplDllkInstance_g.m_bMnFlag1 & ~(EPL_FRAME_FLAG1_EA | EPL_FRAME_FLAG1_MS)) // preserve all flags except EA and MS
+            | (bFlag1 & (EPL_FRAME_FLAG1_EA | EPL_FRAME_FLAG1_MS));                     // set EA and MS flag
 
         // inform PDO module
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOK)) != 0)
@@ -4766,9 +4767,11 @@ BYTE            bFlag1;
                         goto Exit;
                     }
                 }
-                // save flag 1 from MN for Status request response cycle
+                // update (only) EA and ER flag from MN for Status request response cycle
                 // $$$ d.k. only in PreOp1 and when async-only or not accessed isochronously
-                EplDllkInstance_g.m_bMnFlag1 = bFlag1;
+                EplDllkInstance_g.m_bMnFlag1 =
+                        (EplDllkInstance_g.m_bMnFlag1 & ~(EPL_FRAME_FLAG1_EA | EPL_FRAME_FLAG1_ER)) // preserve all flags except EA and ER
+                        | (bFlag1 & (EPL_FRAME_FLAG1_EA | EPL_FRAME_FLAG1_ER));                     // set EA and ER flag
                 goto Exit;
             }
 
@@ -6009,7 +6012,8 @@ BYTE            bFlag1;
     // get RD flag
     bFlag1 = AmiGetByteFromLe(&pTxFrame->m_Data.m_Pres.m_le_bFlag1) & EPL_FRAME_FLAG1_RD;
 
-    if (EplDllkInstance_g.m_DllConfigParam.m_uiMultiplCycleCnt > 0)
+    if ( (EplDllkInstance_g.m_DllConfigParam.m_uiMultiplCycleCnt > 0)
+         && (EplDllkInstance_g.m_bMnFlag1 & EPL_FRAME_FLAG1_MS)      ) // MS flag set in PReq
     {   // set MS flag, because PRes will be sent multiplexed with other CNs
         bFlag1 |= EPL_FRAME_FLAG1_MS;
     }
