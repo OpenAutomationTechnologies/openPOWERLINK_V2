@@ -144,6 +144,7 @@ struct _tShbCirBuff
     unsigned long          m_ulDataReadable;    // buffer size with readable (complete written) data
     unsigned long          m_ulBlocksReadable;  // number of readable (complete written) data blocks
     tShbCirSigHndlrNewData m_pfnSigHndlrNewData;// application handler to signal new data
+    void                  *m_pSigHndlrArg;      // application handler argument (optional)
     unsigned int           m_fBufferLocked;     // TRUE if buffer is locked (because of pending reset request)
     tShbCirSigHndlrReset   m_pfnSigHndlrReset;  // application handler to signal buffer reset is done
     tShbInstance*          m_pShbInstSlave;     // slave instance
@@ -1287,7 +1288,7 @@ Exit:
 
 INLINE_FUNCTION tShbError  ShbCirConnectMaster (
     tShbInstance pShbInstance_p,
-    tShbCirSigHndlrNewData pfnSignalHandlerNewData_p,
+    tShbCirSigHndlrNewData pfnSignalHandlerNewData_p, void *pArg_p,
     tShbInstance pShbInstanceMaster_p,
     tShbPriority ShbPriority_p)
 {
@@ -1329,6 +1330,7 @@ tShbError      ShbError;
         }
 
         pShbCirBuff->m_pfnSigHndlrNewData = pfnSignalHandlerNewData_p;
+        pShbCirBuff->m_pSigHndlrArg = pArg_p;
         ShbError = ShbCirLinkSlave(ShbCirGetBuffer(pShbInstanceMaster_p), pShbInstance_p, ShbPriority_p);
     }
     else
@@ -1337,7 +1339,7 @@ tShbError      ShbError;
         ShbError = ShbCirUnlinkSlave(ShbCirGetBuffer(pShbInstanceMaster_p), pShbInstance_p);
         if (pShbCirBuff->m_pfnSigHndlrNewData != NULL)
         {
-            pShbCirBuff->m_pfnSigHndlrNewData (pShbInstance_p, 0);
+            pShbCirBuff->m_pfnSigHndlrNewData (pShbInstance_p, 0, NULL);
         }
         pShbCirBuff->m_pfnSigHndlrNewData = NULL;
     }
@@ -1357,7 +1359,7 @@ Exit:
 
 INLINE_FUNCTION tShbError  ShbCirSetSignalHandlerNewData (
     tShbInstance pShbInstance_p,
-    tShbCirSigHndlrNewData pfnSignalHandlerNewData_p,
+    tShbCirSigHndlrNewData pfnSignalHandlerNewData_p, void* pArg_p,
     tShbPriority ShbPriority_p)
 {
 
@@ -1393,6 +1395,7 @@ tShbError     ShbError;
         }
 
         pShbCirBuff->m_pfnSigHndlrNewData = pfnSignalHandlerNewData_p;
+        pShbCirBuff->m_pSigHndlrArg = pArg_p;
         ShbError = ShbIpcStartSignalingNewData (pShbInstance_p, ShbCirSignalHandlerNewData, ShbPriority_p);
     }
     else
@@ -1401,7 +1404,7 @@ tShbError     ShbError;
         ShbError = ShbIpcStopSignalingNewData (pShbInstance_p);
         if (pShbCirBuff->m_pfnSigHndlrNewData != NULL)
         {
-            pShbCirBuff->m_pfnSigHndlrNewData (pShbInstance_p, 0);
+            pShbCirBuff->m_pfnSigHndlrNewData (pShbInstance_p, 0, NULL);
         }
         pShbCirBuff->m_pfnSigHndlrNewData = NULL;
     }
@@ -2042,7 +2045,8 @@ int            fCallAgain = FALSE;
         ShbError = ShbCirGetReadDataSize (pShbInstance_p, &ulDataSize);
         if ((ulDataSize > 0) && (ShbError == kShbOk))
         {
-            pShbCirBuff->m_pfnSigHndlrNewData (pShbInstance_p, ulDataSize);
+            pShbCirBuff->m_pfnSigHndlrNewData (pShbInstance_p, ulDataSize,
+                    pShbCirBuff->m_pSigHndlrArg);
         }
 
         ShbError = ShbCirGetReadBlockCount (pShbInstance_p, &ulBlockCount);

@@ -303,8 +303,20 @@
 #define EPL_VETH_NAME       "epl"   // name of net device in Linux
 #endif
 
-#ifndef EPL_EVENT_USE_KERNEL_QUEUE
-#define EPL_EVENT_USE_KERNEL_QUEUE          TRUE
+#ifndef EPL_EVENT_KINT_QUEUE
+#define EPL_EVENT_KINT_QUEUE                EPL_QUEUE_SHB
+#endif
+
+#ifndef EPL_EVENT_K2U_QUEUE
+#define EPL_EVENT_K2U_QUEUE                 EPL_QUEUE_SHB
+#endif
+
+#ifndef EPL_EVENT_UINT_QUEUE
+#define EPL_EVENT_UINT_QUEUE                EPL_QUEUE_SHB
+#endif
+
+#ifndef EPL_EVENT_U2K_QUEUE
+#define EPL_EVENT_U2K_QUEUE                 EPL_QUEUE_SHB
 #endif
 
 #ifndef EPL_USE_SHAREDBUFF

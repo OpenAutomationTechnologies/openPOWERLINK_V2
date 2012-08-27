@@ -127,6 +127,7 @@ SET (LIB_SOURCES ${LIB_SOURCES}
                  ${POWERLINK_SOURCE_DIR}/EplStack/EplObd.c
                  ${POWERLINK_SOURCE_DIR}/EplStack/EplApiProcessImage.c
                  ${POWERLINK_SOURCE_DIR}/EplStack/common/dll/dllcal-shb.c
+                 ${POWERLINK_SOURCE_DIR}/EplStack/EplEventShb.c
                  ${POWERLINK_SOURCE_DIR}/EplStack/amix86.c
                  ${POWERLINK_SOURCE_DIR}/SharedBuff/SharedBuff.c
                  ${POWERLINK_SOURCE_DIR}/Edrv/EdrvCyclic.c
@@ -156,6 +157,7 @@ SET (LIB_SOURCES_KERNEL ${LIB_SOURCES_KERNEL}
                         ${POWERLINK_SOURCE_DIR}/EplStack/EplDllk.c
                         ${POWERLINK_SOURCE_DIR}/EplStack/kernel/dll/dllkcal.c
                         ${POWERLINK_SOURCE_DIR}/EplStack/EplEventk.c
+                        ${POWERLINK_SOURCE_DIR}/EplStack/EplEventkCal.c
                         ${POWERLINK_SOURCE_DIR}/EplStack/EplNmtk.c
                         ${POWERLINK_SOURCE_DIR}/EplStack/EplNmtkCal.c
                         ${POWERLINK_SOURCE_DIR}/EplStack/EplPdok.c
@@ -169,6 +171,7 @@ SET (LIB_SOURCES_KERNEL ${LIB_SOURCES_KERNEL}
 SET (LIB_SOURCES_USER ${LIB_SOURCES_USER}
                       ${POWERLINK_SOURCE_DIR}/EplStack/user/dll/dllucal.c
                       ${POWERLINK_SOURCE_DIR}/EplStack/EplEventu.c
+                      ${POWERLINK_SOURCE_DIR}/EplStack/EplEventuCal.c
                       ${POWERLINK_SOURCE_DIR}/EplStack/EplNmtu.c
                       ${POWERLINK_SOURCE_DIR}/EplStack/EplNmtuCal.c
                       ${POWERLINK_SOURCE_DIR}/EplStack/EplNmtCnu.c
@@ -199,6 +202,7 @@ SET (LIB_HEADERS ${LIB_HEADERS}
                  ${POWERLINK_SOURCE_DIR}/Include/dllcal.h
                  ${POWERLINK_SOURCE_DIR}/Include/EplErrDef.h
                  ${POWERLINK_SOURCE_DIR}/Include/EplEvent.h
+                 ${POWERLINK_SOURCE_DIR}/Include/EplEventShb.h
                  ${POWERLINK_SOURCE_DIR}/Include/EplFrame.h
                  ${POWERLINK_SOURCE_DIR}/Include/EplInc.h
                  ${POWERLINK_SOURCE_DIR}/Include/EplInstDef.h
@@ -226,6 +230,7 @@ SET (LIB_HEADERS_KERNEL ${LIB_HEADERS_KERNEL}
                         ${POWERLINK_SOURCE_DIR}/Include/kernel/EplDllkTgt.h
                         ${POWERLINK_SOURCE_DIR}/Include/kernel/EplErrorHandlerk.h
                         ${POWERLINK_SOURCE_DIR}/Include/kernel/EplEventk.h
+                        ${POWERLINK_SOURCE_DIR}/Include/kernel/EplEventkCal.h
                         ${POWERLINK_SOURCE_DIR}/Include/kernel/EplNmtk.h
                         ${POWERLINK_SOURCE_DIR}/Include/kernel/EplNmtkCal.h
                         ${POWERLINK_SOURCE_DIR}/Include/kernel/EplObdk.h
@@ -243,6 +248,7 @@ SET (LIB_HEADERS_USER ${LIB_HEADERS_USER}
                       ${POWERLINK_SOURCE_DIR}/Include/user/EplDllu.h
                       ${POWERLINK_SOURCE_DIR}/Include/user/dllucal.h
                       ${POWERLINK_SOURCE_DIR}/Include/user/EplEventu.h
+                      ${POWERLINK_SOURCE_DIR}/Include/user/EplEventuCal.h
                       ${POWERLINK_SOURCE_DIR}/Include/user/EplIdentu.h
                       ${POWERLINK_SOURCE_DIR}/Include/user/EplLedu.h
                       ${POWERLINK_SOURCE_DIR}/Include/user/EplNmtCnu.h

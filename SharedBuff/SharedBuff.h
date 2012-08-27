@@ -109,7 +109,7 @@ typedef struct
 typedef void*  tShbInstance;
 
 
-typedef void  (*tShbCirSigHndlrNewData)  (tShbInstance pShbInstance_p, unsigned long ulDataBlockSize_p);
+typedef void  (*tShbCirSigHndlrNewData)  (tShbInstance pShbInstance_p, unsigned long ulDataBlockSize_p, void *pArg_p);
 typedef void  (*tShbCirSigHndlrReset)    (tShbInstance pShbInstance_p, unsigned int fTimeOutMs_p);
 
 
@@ -149,8 +149,8 @@ tShbError  ShbCirWriteDataChunk          (tShbInstance pShbInstance_p, tShbCirCh
 tShbError  ShbCirReadDataBlock           (tShbInstance pShbInstance_p, void* pDstDataBlock_p, unsigned long ulRdBuffSize_p, unsigned long* pulDataBlockSize_p);
 tShbError  ShbCirGetReadDataSize         (tShbInstance pShbInstance_p, unsigned long* pulDataBlockSize_p);
 tShbError  ShbCirGetReadBlockCount       (tShbInstance pShbInstance_p, unsigned long* pulDataBlockCount_p);
-tShbError  ShbCirSetSignalHandlerNewData (tShbInstance pShbInstance_p, tShbCirSigHndlrNewData pfnShbSignalHandlerNewData_p, tShbPriority ShbPriority_p);
-tShbError  ShbCirConnectMaster           (tShbInstance pShbInstance_p, tShbCirSigHndlrNewData pfnShbSignalHandlerNewData_p, tShbInstance pShbInstanceMaster_p, tShbPriority ShbPriority_p);
+tShbError  ShbCirSetSignalHandlerNewData (tShbInstance pShbInstance_p, tShbCirSigHndlrNewData pfnShbSignalHandlerNewData_p, void *pArg_p, tShbPriority ShbPriority_p);
+tShbError  ShbCirConnectMaster           (tShbInstance pShbInstance_p, tShbCirSigHndlrNewData pfnShbSignalHandlerNewData_p, void *pArg_p, tShbInstance pShbInstanceMaster_p, tShbPriority ShbPriority_p);
 
 #endif
 
