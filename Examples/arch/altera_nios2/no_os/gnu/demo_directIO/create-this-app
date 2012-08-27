@@ -92,6 +92,8 @@ ${MAINPATH}/EplStack/user/dll/dllucal.c \
 ${MAINPATH}/EplStack/common/dll/dllcal-direct.c \
 ${MAINPATH}/EplStack/EplLedu.c \
 ${MAINPATH}/EplStack/EplEventk.c ${MAINPATH}/EplStack/EplEventu.c \
+${MAINPATH}/EplStack/EplEventkCal.c ${MAINPATH}/EplStack/EplEventuCal.c \
+${MAINPATH}/EplStack/EplEventDirect.c ${MAINPATH}/EplStack/EplEventShb.c \
 ${MAINPATH}/EplStack/EplNmtk.c \
 ${MAINPATH}/EplStack/EplNmtu.c ${MAINPATH}/EplStack/EplNmtCnu.c \
 ${MAINPATH}/EplStack/EplPdok.c ${MAINPATH}/EplStack/EplPdokCal.c \

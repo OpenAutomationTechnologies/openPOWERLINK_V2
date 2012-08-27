@@ -24,6 +24,8 @@ MODULEOBJS	= demo_main.o \
 			  $(MAINPATH)/EplStack/common/dll/dllcal-shb.o \
 			  $(MAINPATH)/EplStack/EplLedu.o \
 			  $(MAINPATH)/EplStack/EplEventk.o $(MAINPATH)/EplStack/EplEventu.o \
+			  ${MAINPATH}/EplStack/EplEventkCal.c ${MAINPATH}/EplStack/EplEventuCal.c \
+			  ${MAINPATH}/EplStack/EplEventShb.c \			  			  
 			  $(MAINPATH)/EplStack/EplNmtk.o $(MAINPATH)/EplStack/EplNmtkCal.o \
 			  $(MAINPATH)/EplStack/EplNmtu.o $(MAINPATH)/EplStack/EplNmtuCal.o $(MAINPATH)/EplStack/EplNmtCnu.o \
 			  $(MAINPATH)/EplStack/EplPdok.o $(MAINPATH)/EplStack/EplPdokCal.o \

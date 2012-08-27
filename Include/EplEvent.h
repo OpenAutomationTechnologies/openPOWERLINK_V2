@@ -95,6 +95,11 @@
 #define EPL_EVENT_SIZE_SHB_KERNEL_INTERNAL  32768   // 32 kByte
 #endif
 
+#define EPL_EVENT_NAME_SHB_USER_INTERNAL    "ShbUserInternal"
+#ifndef EPL_EVENT_SIZE_SHB_USER_INTERNAL
+#define EPL_EVENT_SIZE_SHB_USER_INTERNAL    32768   // 32 kByte
+#endif
+
 
 // max size of event argument
 #ifndef EPL_MAX_EVENT_ARG_SIZE
@@ -249,6 +254,21 @@ typedef enum
 
 } tEplEventSource;
 
+/**
+\brief enumerator for Queue
+
+This enumerator identifies an event queue instance in order to differ between
+layer queues (kernel-to-user or user-to-kernel) and layer-internal queues
+(kernel- or user-internal).
+*/
+typedef enum
+{
+    kEplEventQueueK2U           = 0x01, ///< kernel-to-user queue
+    kEplEventQueueKInt          = 0x02, ///< kernel-internal queue
+    kEplEventQueueU2K           = 0x03, ///< user-to-kernel queue
+    kEplEventQueueUInt          = 0x04, ///< user-internal queue
+
+} tEplEventQueue;
 
 // structure of EPL event (element order must not be changed!)
 typedef struct
@@ -309,12 +329,37 @@ typedef struct
 
 } tEplErrorHandlerkEvent;
 
-
 // callback function to get informed about sync event
 typedef tEplKernel (PUBLIC* tEplSyncCb) (void);
 
-// callback function for generic events
+/**
+\brief callback for event post
+
+This callback is used to call event processing over the module boundaries.
+e.g. EplEventkCal -> EplEventkProcess
+*/
 typedef tEplKernel (PUBLIC* tEplProcessEventCb) (tEplEvent* pEplEvent_p);
+
+/**
+\brief callback for event error post
+
+This callback is used to call error event posting over the module boundaries.
+e.g. EplEventkCal -> EplEventkPostError
+*/
+typedef tEplKernel (PUBLIC* tEplPostErrorEventCb)
+        (tEplEventSource EventSource_p,
+        tEplKernel EplError_p,
+        unsigned int uiArgSize_p,
+        void *pArg_p);
+
+/**
+\brief structure for Event queue instance
+
+The EventQueueInstance is used to identify the abstracted queue instance in
+EplEvent*Cal. The queue itself is defined by its implementation (e.g. DIRECT or
+SHB)
+*/
+typedef void* tEplEventQueueInstance;
 
 //---------------------------------------------------------------------------
 // function prototypes

@@ -25,6 +25,8 @@ MODULEOBJS	= $(MAINPATH)/Edrv/netx_ethhub/source/EdrvNetx.o $(MAINPATH)/Edrv/Edr
 			  $(MAINPATH)/EplStack/user/dll/dllucal.o \
 			  $(MAINPATH)/EplStack/common/dll/dllcal-shb.o \
 			  $(MAINPATH)/EplStack/EplEventk.o $(MAINPATH)/EplStack/EplEventu.o \
+			  ${MAINPATH}/EplStack/EplEventkCal.c ${MAINPATH}/EplStack/EplEventuCal.c \
+			  ${MAINPATH}/EplStack/EplEventShb.c \			  
 			  $(MAINPATH)/EplStack/EplNmtk.o $(MAINPATH)/EplStack/EplNmtkCal.o \
 			  $(MAINPATH)/EplStack/EplNmtu.o $(MAINPATH)/EplStack/EplNmtuCal.o $(MAINPATH)/EplStack/EplNmtCnu.o \
 			  $(MAINPATH)/EplStack/EplNmtMnu.o $(MAINPATH)/EplStack/EplIdentu.o $(MAINPATH)/EplStack/EplStatusu.o \

@@ -80,6 +80,10 @@ ${STACK_ROOT}/EplStack/common/dll/dllcal-direct.c \
 ${STACK_ROOT}/EplStack/EplLedu.c \
 ${STACK_ROOT}/EplStack/EplEventk.c \
 ${STACK_ROOT}/EplStack/EplEventu.c \
+${STACK_ROOT}/EplStack/EplEventkCal.c \
+${STACK_ROOT}/EplStack/EplEventuCal.c \
+${STACK_ROOT}/EplStack/EplEventShb.c \			  
+${STACK_ROOT}/EplStack/EplEventDirect.c \
 ${STACK_ROOT}/EplStack/EplNmtk.c \
 ${STACK_ROOT}/EplStack/EplNmtu.c \
 ${STACK_ROOT}/EplStack/EplNmtCnu.c \

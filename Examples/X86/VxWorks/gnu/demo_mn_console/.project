@@ -90,6 +90,21 @@
 			<location>OPENPOWERLINK_DIR/EplStack/EplEventu.c</location>
 		</link>
 		<link>
+			<name>EplEventkCal.c</name>
+			<type>1</type>
+			<location>OPENPOWERLINK_DIR/EplStack/EplEventkCal.c</location>
+		</link>
+		<link>
+			<name>EplEventuCal.c</name>
+			<type>1</type>
+			<location>OPENPOWERLINK_DIR/EplStack/EplEventuCal.c</location>
+		</link>
+		<link>
+			<name>EplEventShb.c</name>
+			<type>1</type>
+			<location>OPENPOWERLINK_DIR/EplStack/EplEventShb.c</location>
+		</link>
+		<link>
 			<name>EplNmtCnu.c</name>
 			<type>1</type>
 			<location>OPENPOWERLINK_DIR/EplStack/EplNmtCnu.c</location>
