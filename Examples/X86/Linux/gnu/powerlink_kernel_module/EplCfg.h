@@ -47,25 +47,6 @@
         2. the validity or enforceability in other jurisdictions of that or
            any other provision of this License.
 
-  -------------------------------------------------------------------------
-
-                $RCSfile$
-
-                $Author$
-
-                $Revision$
-
-                $State$
-
-                Build Environment:
-                    ...
-
-  -------------------------------------------------------------------------
-
-  Revision History:
-
-  2006/06/06    k.t.: Start of Implementation
-
 ****************************************************************************/
 
 #ifndef _EPLCFG_H_
@@ -74,7 +55,7 @@
 // =========================================================================
 // generic defines which for whole EPL Stack
 // =========================================================================
-#define EPL_USE_DELETEINST_FUNC TRUE
+#define EPL_USE_DELETEINST_FUNC         TRUE
 
 // needed to support datatypes over 32 bit by global.h
 #define USE_VAR64
@@ -92,20 +73,20 @@
 
 // use no FIFOs, make direct calls
 //#define EPL_USE_SHAREDBUFF   FALSE
+
 #ifndef BENCHMARK_MODULES
-#define BENCHMARK_MODULES       0 //0xEE800042L
+#define BENCHMARK_MODULES               0 //0xEE800042L
 #endif
 
 // Default debug level:
 // Only debug traces of these modules will be compiled which flags are set in define DEF_DEBUG_LVL.
 #ifndef DEF_DEBUG_LVL
-#define DEF_DEBUG_LVL           0xEC000080L
+#define DEF_DEBUG_LVL                   (0xC00000000L)
 #endif
-//   EPL_DBGLVL_OBD         =   0x00000004L
-// * EPL_DBGLVL_ASSERT      =   0x20000000L
-// * EPL_DBGLVL_ERROR       =   0x40000000L
-// * EPL_DBGLVL_ALWAYS      =   0x80000000L
 
+//#define EPL_DBGLVL_ASSERT               DEBUG_LVL_ASSERT    // 0x20000000L
+//#define EPL_DBGLVL_ERROR                DEBUG_LVL_ERROR     // 0x40000000L
+//#define EPL_DBGLVL_ALWAYS               DEBUG_LVL_ALWAYS    // 0x80000000L
 
 // enable CFM module depending on CONFIG_CFM
 #ifdef CONFIG_CFM
@@ -116,10 +97,10 @@
 
 // EPL_MODULE_INTEGRATION defines all modules which are included in
 // EPL application. Please add or delete modules for your application.
-#define EPL_MODULE_INTEGRATION EPL_MODULE_OBDK \
+#ifdef CONFIG_MN
+#define EPL_MODULE_INTEGRATION (EPL_MODULE_OBDK \
                                | EPL_MODULE_PDOK \
                                | EPL_MODULE_PDOU \
-                               | EPL_MODULE_NMT_MN \
                                | EPL_MODULE_SDOS \
                                | EPL_MODULE_SDOC \
                                | EPL_MODULE_SDO_ASND \
@@ -130,32 +111,46 @@
                                | EPL_MODULE_DLLK \
                                | EPL_MODULE_DLLU \
                                | EPL_MODULE_CFM_CONFIG \
-                               | EPL_MODULE_VETH
-//                               | EPL_MODULE_OBDU
+                               | EPL_MODULE_NMT_MN \
+                               | EPL_MODULE_VETH)
+
+#else
+
+#define EPL_MODULE_INTEGRATION (EPL_MODULE_OBDK \
+                               | EPL_MODULE_PDOK \
+                               | EPL_MODULE_PDOU \
+                               | EPL_MODULE_SDOS \
+                               | EPL_MODULE_SDOC \
+                               | EPL_MODULE_SDO_ASND \
+                               | EPL_MODULE_SDO_UDP \
+                               | EPL_MODULE_NMT_CN \
+                               | EPL_MODULE_NMTU \
+                               | EPL_MODULE_NMTK \
+                               | EPL_MODULE_DLLK \
+                               | EPL_MODULE_DLLU \
+                               | EPL_MODULE_VETH)
+
+#endif // CONFIG_MN
 
 // =========================================================================
 // EPL ethernet driver (Edrv) specific defines
 // =========================================================================
 
 // switch this define to TRUE if Edrv supports fast tx frames
-#define EDRV_FAST_TXFRAMES              FALSE
-//#define EDRV_FAST_TXFRAMES              TRUE
+#define EDRV_FAST_TXFRAMES                  FALSE
 
 // switch this define to TRUE if Edrv supports early receive interrupts
-#define EDRV_EARLY_RX_INT               FALSE
-//#define EDRV_EARLY_RX_INT               TRUE
+#define EDRV_EARLY_RX_INT                   FALSE
 
 // enables setting of several port pins for benchmarking purposes
-#define EDRV_BENCHMARK                  FALSE
-//#define EDRV_BENCHMARK                  TRUE // MCF_GPIO_PODR_PCIBR
+#define EDRV_BENCHMARK                      FALSE
 
 // Call Tx handler (i.e. EplDllCbFrameTransmitted()) already if DMA has finished,
 // otherwise call the Tx handler if frame was actually transmitted over ethernet.
-#define EDRV_DMA_TX_HANDLER             FALSE
-//#define EDRV_DMA_TX_HANDLER             TRUE
+#define EDRV_DMA_TX_HANDLER                 FALSE
 
 // number of used ethernet controller
-//#define EDRV_USED_ETH_CTRL              1
+//#define EDRV_USED_ETH_CTRL                1
 
 // increase the number of Tx buffers, because we are master
 // and need one Tx buffer for each PReq and CN
@@ -172,21 +167,40 @@
 
 // switch this define to TRUE if Edrv supports fast tx frames
 // and DLL shall pass PRes as ready to Edrv after SoC
-#define EPL_DLL_PRES_READY_AFTER_SOC    FALSE
-//#define EPL_DLL_PRES_READY_AFTER_SOC    TRUE
+#define EPL_DLL_PRES_READY_AFTER_SOC        FALSE
 
 // switch this define to TRUE if Edrv supports fast tx frames
 // and DLL shall pass PRes as ready to Edrv after SoA
-#define EPL_DLL_PRES_READY_AFTER_SOA    FALSE
-//#define EPL_DLL_PRES_READY_AFTER_SOA    TRUE
+#define EPL_DLL_PRES_READY_AFTER_SOA        FALSE
+
+#ifdef CONFIG_MN
+
+// activate PResChaining support on MN
+#define EPL_DLL_PRES_CHAINING_MN            TRUE
+
+// CN supports PRes Chaining
+#define EPL_DLL_PRES_CHAINING_CN            FALSE
+
+#else
+
+// activate PResChaining support on MN
+#define EPL_DLL_PRES_CHAINING_MN            FALSE
+
+// CN supports PRes Chaining
+#define EPL_DLL_PRES_CHAINING_CN            FALSE
+
+// negative time shift of isochronous task in relation to SoC
+#define EPL_DLL_SOC_SYNC_SHIFT_US           150
+
+#define EPL_DLL_PROCESS_SYNC                EPL_DLL_PROCESS_SYNC_ON_SOC
+
+#define EDRV_AUTO_RESPONSE_DELAY            TRUE
+#endif
 
 #if (CONFIG_EDRV == 8139) || (CONFIG_EDRV == 8255)
 // Disable deferred release of rx-buffers until Edrv8139/Edrv8255x supports it
 #define EPL_DLL_DISABLE_DEFERRED_RXFRAME_RELEASE    TRUE
 #endif
-
-// activate PResChaining support on MN
-#define EPL_DLL_PRES_CHAINING_MN        TRUE
 
 // =========================================================================
 // OBD specific defines
@@ -195,17 +209,16 @@
 // switch this define to TRUE if Epl should compare object range
 // automaticly
 #define EPL_OBD_CHECK_OBJECT_RANGE          FALSE
-//#define EPL_OBD_CHECK_OBJECT_RANGE          TRUE
 
 // set this define to TRUE if there are strings or domains in OD, which
 // may be changed in object size and/or object data pointer by its object
 // callback function (called event kObdEvWrStringDomain)
-//#define EPL_OBD_USE_STRING_DOMAIN_IN_RAM    FALSE
 #define EPL_OBD_USE_STRING_DOMAIN_IN_RAM    TRUE
 
 #define EPL_OBD_USE_VARIABLE_SUBINDEX_TAB   TRUE
 
 #ifdef CONFIG_CFM
+
 #define EPL_OBD_USE_LOAD_CONCISEDCF         TRUE
 #define EPL_OBD_DEF_CONCISEDCF_FILENAME     "mnobd.cdc"
 
@@ -219,7 +232,18 @@
 #define EPL_OBD_INCLUDE_A000_TO_DEVICE_PART TRUE
 #endif
 
-#endif
+#else // CONFIG_CFM
+
+#define EPL_OBD_USE_LOAD_CONCISEDCF         FALSE
+#define EPL_CFM_CONFIGURE_CYCLE_LENGTH      FALSE
+#define EPL_OBD_INCLUDE_A000_TO_DEVICE_PART FALSE
+
+#endif // CONFIG_CFM
+
+// configure whether OD access events shall be forwarded
+// to user callback function.
+// Because of reentrancy for local OD accesses, this has to be disabled
+#define EPL_API_OBD_FORWARD_EVENT       FALSE
 
 // =========================================================================
 // Timer module specific defines
@@ -227,38 +251,19 @@
 
 // if TRUE the high resolution timer module will be used
 #define EPL_TIMER_USE_HIGHRES               TRUE
-//#define EPL_TIMER_USE_HIGHRES              FALSE
-
-// =========================================================================
-// EPL API layer specific defines
-// =========================================================================
-
-// size of static input process image
-// set to 0 to disable static process image
-// it shall not exceed 252 and be a multiple of 4
-#define EPL_API_PROCESS_IMAGE_SIZE_IN       16
-
-// size of static output process image
-// set to 0 to disable static process image
-// it shall not exceed 252 and be a multiple of 4
-#define EPL_API_PROCESS_IMAGE_SIZE_OUT      16
-
-
-// configure whether OD access events shall be forwarded
-// to user callback function.
-// Because of reentrancy for local OD accesses, this has to be disabled
-#define EPL_API_OBD_FORWARD_EVENT       FALSE
-
 
 // =========================================================================
 // SDO module specific defines
 // =========================================================================
 
-// increase the number of SDO channels, because we are master
-#define EPL_SDO_MAX_CONNECTION_ASND 100
-#define EPL_MAX_SDO_SEQ_CON         100
-#define EPL_MAX_SDO_COM_CON         100
-#define EPL_SDO_MAX_CONNECTION_UDP  50
+#ifdef CONFIG_MN
 
+// increase the number of SDO channels, because we are master
+#define EPL_SDO_MAX_CONNECTION_ASND         100
+#define EPL_MAX_SDO_SEQ_CON                 100
+#define EPL_MAX_SDO_COM_CON                 100
+#define EPL_SDO_MAX_CONNECTION_UDP          50
+
+#endif
 
 #endif //_EPLCFG_H_

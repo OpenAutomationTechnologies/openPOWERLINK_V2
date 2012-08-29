@@ -57,16 +57,19 @@ IF (UNIX)
     ADD_DEFINITIONS(-Wall -Wextra -pedantic -std=c99 -pthread -D_GNU_SOURCE -D_POSIX_C_SOURCE=200112L)
 ELSEIF (WIN32)
     ADD_DEFINITIONS(-D_CONSOLE -DWPCAP -DHAVE_REMOTE)
-ENDIF ()
+ENDIF (UNIX)
 
-# Select object dictionary	
-SET(OBJDICT CiA302-4_MN)
+# Select object dictionary
+IF(CFG_POWERLINK_MN)
+    SET(OBJDICT CiA302-4_MN)
+ELSE(CFG_POWERLINK_MN)
+    SET(OBJDICT CiA401_CN)
+ENDIF(CFG_POWERLINK_MN)
 
 #
 # Configure depending selected mode
 #
 IF(CFG_POWERLINK_MN)
-
     SET(LIB_SOURCES ${LIB_SOURCES}
                     ${POWERLINK_SOURCE_DIR}/EplStack/EplObdCdc.c
         )
@@ -78,8 +81,6 @@ IF(CFG_POWERLINK_MN)
         )
 
     ADD_DEFINITIONS(-DCONFIG_CFM -DCONFIG_OPENCONFIGURATOR_MAPPING -DCONFIG_MN)
-ELSE(CFG_POWERLINK_MN)
-    MESSAGE (FATAL_ERROR "The library can currently only build for MN!")
 ENDIF(CFG_POWERLINK_MN)
 
 #

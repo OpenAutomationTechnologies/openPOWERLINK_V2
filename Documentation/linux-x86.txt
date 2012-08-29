@@ -171,6 +171,14 @@ openPOWERLINK on Linux x86
   It is located in: 
   Examples/X86/Generic/demo_mn_console 
 
+5.4 Console CN demo
+  This demo implements a POWERLINK CN digital I/O node according to CiA401
+  profile. It is implemented as console application. This demo can be used
+  either with the kernel-based stack or with the userspace stack.
+
+  It is located in:
+  Examples/X86/Generic/demo_cn_console 
+
 6 Building
 ----------
 
