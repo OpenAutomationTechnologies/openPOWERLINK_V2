@@ -280,7 +280,9 @@ typedef struct
 
     tEdrvFilter         m_aFilter[EPL_DLLK_FILTER_COUNT];
 
+#if EPL_NMT_MAX_NODE_ID > 0
     tEplDllkNodeInfo    m_aNodeInfo[EPL_NMT_MAX_NODE_ID];
+#endif
 
     BYTE                m_bCurTxBufferOffsetIdentRes;
     BYTE                m_bCurTxBufferOffsetStatusRes;
@@ -1948,6 +1950,7 @@ tEplDllkNodeInfo*   pIntNodeInfo;
         }
 
         uiHandle = EPL_DLLK_FILTER_PRES;
+#if EPL_NMT_MAX_NODE_ID > 0
         for (uiIndex = 0, pIntNodeInfo = &EplDllkInstance_g.m_aNodeInfo[0];
              uiIndex < tabentries (EplDllkInstance_g.m_aNodeInfo);
              uiIndex++, pIntNodeInfo++)
@@ -1965,6 +1968,7 @@ tEplDllkNodeInfo*   pIntNodeInfo;
                 }
             }
         }
+#endif
 #endif
 
 #if (EPL_DLL_PROCESS_SYNC == EPL_DLL_PROCESS_SYNC_ON_TIMER)
@@ -2148,6 +2152,7 @@ unsigned int    uiHandle;
     else
 #endif // (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
     {
+#if EPL_NMT_MAX_NODE_ID > 0
         for (uiIndex = 0; uiIndex < tabentries (EplDllkInstance_g.m_aNodeInfo); uiIndex++)
         {
             // disable PReq and PRes for this node
@@ -2156,6 +2161,7 @@ unsigned int    uiHandle;
             EplDllkInstance_g.m_aNodeInfo[uiIndex].m_wPreqPayloadLimit = 0;
 #endif
         }
+#endif
     }
 
     // deregister multicast MACs in ethernet driver
