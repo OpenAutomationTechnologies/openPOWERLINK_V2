@@ -265,10 +265,6 @@ int  main (int argc, char **argv)
     char                        cKey = 0;
 
 #ifdef CONFIG_POWERLINK_USERSTACK
-#if (TARGET_SYSTEM == _LINUX_)
-    struct sched_param          schedParam;
-#endif
-
     // variables for Pcap
     char                        sErr_Msg[ PCAP_ERRBUF_SIZE ];
     char                        devName[128];
@@ -304,6 +300,8 @@ int  main (int argc, char **argv)
 #ifdef CONFIG_POWERLINK_USERSTACK
 
 #if (TARGET_SYSTEM == _LINUX_)
+    struct sched_param          schedParam;
+
     /* adjust process priority */
     if (nice (-20) == -1)         // push nice level in case we have no RTPreempt
     {
@@ -315,17 +313,6 @@ int  main (int argc, char **argv)
         EPL_DBGLVL_ERROR_TRACE2("%s() couldn't set thread scheduling parameters! %d\n",
                 __func__, schedParam.__sched_priority);
     }
-
-#ifdef SET_CPU_AFFINITY
-    {
-        /* binds all openPOWERLINK threads to the first CPU core */
-        cpu_set_t                   affinity;
-
-        CPU_ZERO(&affinity);
-        CPU_SET(0, &affinity);
-        sched_setaffinity(0, sizeof(cpu_set_t), &affinity);
-    }
-#endif
 
     /* Initialize target specific stuff */
     EplTgtInit();
@@ -340,6 +327,20 @@ int  main (int argc, char **argv)
 #endif // (TARGET_SYSTEM == _WIN32_)
 
 #endif // CONFIG_POWERLINK_USERSTACK
+
+#if (TARGET_SYSTEM == _LINUX_)
+#ifdef SET_CPU_AFFINITY
+    {
+        /* binds all openPOWERLINK threads to the second CPU core */
+        cpu_set_t                   affinity;
+
+        CPU_ZERO(&affinity);
+        CPU_SET(1, &affinity);
+        sched_setaffinity(0, sizeof(cpu_set_t), &affinity);
+    }
+#endif
+#endif
+
 
     /* Enabling ftrace for debugging */
     FTRACE_OPEN();

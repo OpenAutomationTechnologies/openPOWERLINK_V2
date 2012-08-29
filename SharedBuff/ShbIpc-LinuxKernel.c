@@ -647,6 +647,8 @@ tShbError       ShbError;
                                                   pShbInstance_p,
                                                   "ShbND%p", pShbInstance_p);
 
+    set_cpus_allowed(pShbMemInst->m_tThreadNewDataId, cpumask_of_cpu(1));
+
 Exit:
     return ShbError;
 
@@ -888,7 +890,7 @@ int             fCallAgain;
 
     set_user_nice(current, pShbMemInst->m_lThreadNewDataNice);
 
-#ifdef CONFIG_PREEMPT_RT
+#if defined(CONFIG_PREEMPT_RT_FULL) || defined(CONFIG_PREEMPT_RT)
     if (pShbMemInst->m_lThreadNewDataNice == -20) // highest priority
     {
     struct sched_param  rt_prio;

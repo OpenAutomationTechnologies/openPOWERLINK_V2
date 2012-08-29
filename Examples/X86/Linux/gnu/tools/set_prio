@@ -23,6 +23,10 @@ else
     interface=$1
 fi
 
+###############################################################################
+# Get Main kernel version
+KERNEL_MAIN=`uname -r | cut -f1 -d.`
+
 echo -n "Check if high resolution timer support is available..."
 
 cat /proc/timer_list | grep 'hres_active.*1' > /dev/null
@@ -35,7 +39,7 @@ if [ "$?" -ne "0" ] ; then
   echo
   echo "The EPL module is and will not be loaded!"
   echo
-  
+
   exit
 else
   echo "  OK"
@@ -57,11 +61,16 @@ echo "Setting thread priorities..."
 echo
 
 # Set real-time priority openPOWERLINK dependant threads
-chrt -f -p 80 `ps -C sirq-hrtimer/0 -o pid --no-headers`
-chrt -f -p 80 `ps -C sirq-hrtimer/1 -o pid --no-headers`
-chrt -f -p 70 `ps -C \`ps -e -o comm |grep ^irq/.*${interface}\$\` -o pid --no-headers` 
-chrt -f -p 60 `ps -C sirq-net-rx/0 -o pid --no-headers` 
-chrt -f -p 60 `ps -C sirq-net-rx/1 -o pid --no-headers`
+if [ "$KERNEL_MAIN" = "2" ] ; then
+    chrt -f -p 80 `ps -C sirq-hrtimer/1 -o pid --no-headers`
+    chrt -f -p 70 `ps -C \`ps -e -o comm |grep ^irq/.*${interface}\$\` -o pid --no-headers`
+    chrt -f -p 60 `ps -C sirq-net-rx/1 -o pid --no-headers`
+else
+    chrt -f -p 96 `ps -C ksoftirqd/1 -o pid --no-headers`
+    chrt -f -p 97 `ps -C \`ps -e -o comm |grep ^irq/.*${interface}\$\` -o pid --no-headers`
+    taskset -p 2 `ps -C \`ps -e -o comm |grep ^irq/.*${interface}\$\` -o pid --no-headers`
+fi
+
 
 exit 0
 

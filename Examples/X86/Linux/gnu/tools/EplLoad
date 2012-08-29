@@ -106,11 +106,26 @@ do
 done
 
 ###############################################################################
+# Get Main kernel version
+KERNEL_MAIN=`uname -r | cut -f1 -d.`
+
+###############################################################################
 # Used by udev rule to set priority
 if [ "$setprio" = "true" ] ; then
-    # Set real-time priority -81 for Ethernet ISR thread
-    chrt -f -p 80 `ps -C \`ps -e -o comm |grep ^irq/.*epl\$\` -o pid --no-headers`
-    exit
+    if [ "$KERNEL_MAIN" = "2" ] ; then
+        # Set real-time priority -98 for Ethernet ISR thread
+        chrt -f -p 97 `ps -C \`ps -e -o comm |grep ^irq/.*epl\$\` -o pid --no-headers`
+        # Bind thread to second core
+        taskset -p 2 `ps -C \`ps -e -o comm |grep ^irq/.*epl*\$\` -o pid --no-headers`
+        # Bind epl interrupts to second core
+        echo 2 > /proc/irq/`cat /proc/interrupts | grep epl | cut -f1 -d: -s | sed 's/^ *//'`/smp_affinity
+        exit
+    else
+        # Set real-time priority -81 for Ethernet ISR thread and pin it to second cpu
+        chrt -f -p 80 `ps -C \`ps -e -o comm |grep ^irq/.*epl\$\` -o pid --no-headers`
+        taskset -p 2 `ps -C \`ps -e -o comm |grep ^irq/.*epl*\$\` -o pid --no-headers`
+        exit
+    fi
 fi
 
 ###############################################################################
@@ -246,20 +261,36 @@ else
     fi
 fi
 
-# Set real-time priority -82 for hrtimer thread
-# We only have to set hrtimer thread for core 0 because the stack
-# binds to the first core!
-numproc=`ps aux | grep -c "sirq-hrtimer/0"`
-if [ $numproc -gt 1 ] ; then
-    echo Adjusting priority of hrtimer thread
-    chrt -f -p 81 `ps -C sirq-hrtimer/0 -o pid --no-headers`
+if [ "$KERNEL_MAIN" = "2" ] ; then
+    # Set real-time priority -82 for hrtimer thread
+    # We only have to set hrtimer thread for core 1 because the stack
+    # binds to the second core!
+    numproc=`ps aux | grep -c "sirq-hrtimer/1"`
+    if [ $numproc -gt 1 ] ; then
+        echo Adjusting priority of hrtimer thread
+        chrt -f -p 81 `ps -C sirq-hrtimer/1 -o pid --no-headers`
+    fi
+else
+    # Set real-time priority -97 for softirq thread
+    # We only have to set hrtimer thread for core 1 because the stack
+    # binds to the second core!
+    numproc=`ps aux | grep -c "ksoftirqd/1"`
+    if [ $numproc -gt 1 ] ; then
+        echo Adjusting priority of softirq thread
+        chrt -f -p 98 `ps -C ksoftirqd/1 -o pid --no-headers`
+    fi
 fi
 
 # For kernel-queue shared-buffer thread, priority -80 is set in ShbIpc-LinuxKernel.c
 
 # For Ethernet ISR thread, priority -81 is set (for kernel stack module by udev rule!)
 if [ "$isndemo" -eq "0" ] ; then
-    chrt -f -p 80 `ps -C \`ps -e -o comm |grep ^irq/.*epl*\$\` -o pid --no-headers`
+    if [ "KERNEL_MAIN" = "2" ] ; then
+        chrt -f -p 80 `ps -C \`ps -e -o comm |grep ^irq/.*epl*\$\` -o pid --no-headers`
+    else
+        chrt -f -p 97 `ps -C \`ps -e -o comm |grep ^irq/.*epl*\$\` -o pid --no-headers`
+        taskset -p 2 `ps -C \`ps -e -o comm |grep ^irq/.*epl*\$\` -o pid --no-headers`
+    fi
 fi
 
 # Enable tracing

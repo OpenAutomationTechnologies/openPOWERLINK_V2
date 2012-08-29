@@ -71,6 +71,26 @@ openPOWERLINK on Linux x86
    Examples/X86/Linux/gnu/tools/set_prio. It increases the thread priorities of
    the high resolution timer and of the Ethernet IRQ threads.
 
+   Kernel 3.x
+   The behaviour of a 3.X real-time kernel changed. Splitted softirq threads
+   are no longer available. To get a good real-time behaviour the following
+   steps have to be made:
+   1. A multicore processor is required for these optimizations!
+   2. Ensure that the following configuration options are set for your
+      real-time kernel:
+      CONFIG_RT_GROUP_SCHED is not set
+      CONFIG_RCU_BOOST=y
+      CONFIG_RCU_BOOST_PRIO=99
+   3. Isolate the second core of the multi-core processor to be used
+      exclusively for openPOWERLINK by specifying the kernel-commandline parameter
+      isolcpus=1
+   4. Set the default interrupt affinity to all other cores, e.g. for a
+      dual-core system to core 0 by setting the kernel-commandline parameter
+      irqaffinity=0
+   5. Disable IRQ balancing by disable irqbalance. This depends on your
+      Linux distribution. For example in Ubuntu edit /etc/default/irqbalance
+
+
 2.4 Libraries and Tools
 
 2.4.1 CMake
@@ -114,7 +134,7 @@ openPOWERLINK on Linux x86
   - userspace library
 
 3.1 Linux kernel-based stack
-  
+
   The openPOWERLINK stack may be implemented as Linux kernel module. This
   solution provides the best performance, but is limited to the available
   openPOWERLINK network drivers.
@@ -135,8 +155,8 @@ openPOWERLINK on Linux x86
 4 Tools
 -------
   There are some shellscripts used for loading POWERLINK modules, setting
-  thread priorities etc. 
-  
+  thread priorities etc.
+
   These tools are located in:
   Examples/X86/Linux/gnu/tools
 
@@ -261,7 +281,7 @@ openPOWERLINK on Linux x86
 6.3 Out-of-Source Builds
   CMake support out-of-source builds. Therefore, all generated files are located
   in a seperate build directory which keeps your sources clean. It is recommended
-  to use a separate build directory for building the openPOWERLINK stack and the 
+  to use a separate build directory for building the openPOWERLINK stack and the
   demo applications.
 
 6.4 Build Instructions
@@ -281,7 +301,7 @@ openPOWERLINK on Linux x86
 
      If using the cmake-gui, the build options are selected in the GUI. After
 	 setting the desired options press "Configure". New options might appear
-	 according to the current selection. New options will be marked in red. 
+	 according to the current selection. New options will be marked in red.
 	 Further configuration settings may be changed and accepted by pressing
 	 "Configure" again. If there are no red-marked options, "Generate" writes
 	 the build files (Unix Makefiles).
@@ -353,4 +373,5 @@ openPOWERLINK on Linux x86
 
     Be sure that the pcap library is installed and you are running the demo
     as root.
+
 
