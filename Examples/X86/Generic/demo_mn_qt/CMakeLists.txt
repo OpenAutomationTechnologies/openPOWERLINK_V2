@@ -54,9 +54,9 @@ FIND_PACKAGE(Qt4 REQUIRED)
 SET(OBJDICT CiA302-4_MN)
 
 IF (WIN32)
-	# additional compiler flags
-	ADD_DEFINITIONS(-D_CONSOLE -DWPCAP -DHAVE_REMOTE)
-	ADD_DEFINITIONS(-DCONFIG_POWERLINK_USERSTACK)
+    # additional compiler flags
+    ADD_DEFINITIONS(-D_CONSOLE -DWPCAP -DHAVE_REMOTE)
+    ADD_DEFINITIONS(-DCONFIG_POWERLINK_USERSTACK)
 ENDIF (WIN32)
 
 # additional include directories
@@ -80,7 +80,7 @@ SET(DEMO_SOURCES src/EplApi.cpp
                  ${POWERLINK_SOURCE_DIR}/ObjDicts/${OBJDICT}/EplApiProcessImageSetup.c
     )
 
-# The TRACE macros need trace.c on the Windows platform                 
+# The TRACE macros need trace.c on the Windows platform
 IF (WIN32)
     SET(DEMO_SOURCES ${DEMO_SOURCES}
                      ${POWERLINK_SOURCE_DIR}/EplStack/trace.c
@@ -88,7 +88,7 @@ IF (WIN32)
 ENDIF (WIN32)
 
 SET(DEMO_RESOURCES resources/Resources.qrc)
-                 
+
 SET(DEMO_HEADERS include/EplApi.h
                  include/EplCnState.h
                  include/EplDataInOutThread.h
@@ -101,17 +101,15 @@ SET(DEMO_HEADERS include/EplApi.h
                  include/NodeState.h
     )
 
-IF (UNIX)
-    IF (CFG_KERNEL_STACK)
-        SET(DEMO_SOURCES ${DEMO_SOURCES}
-                         ${POWERLINK_SOURCE_DIR}/EplStack/EplApiLinuxUser.c)
-    ELSE (CFG_KERNEL_STACK)
-        SET(DEMO_SOURCES ${DEMO_SOURCES}
-                     src/InterfaceSelectDialog.cpp)
-        SET(DEMO_HEADERS ${DEMO_HEADERS}
-                     include/InterfaceSelectDialog.h)
-    ENDIF (CFG_KERNEL_STACK)
-ENDIF (UNIX)
+IF (CFG_KERNEL_STACK)
+    SET(DEMO_SOURCES ${DEMO_SOURCES}
+                     ${POWERLINK_SOURCE_DIR}/EplStack/EplApiLinuxUser.c)
+ELSE (CFG_KERNEL_STACK)
+    SET(DEMO_SOURCES ${DEMO_SOURCES}
+                 src/InterfaceSelectDialog.cpp)
+    SET(DEMO_HEADERS ${DEMO_HEADERS}
+                 include/InterfaceSelectDialog.h)
+ENDIF (CFG_KERNEL_STACK)
 
 INCLUDE(${QT_USE_FILE})
 ADD_DEFINITIONS(${QT_DEFINITIONS})
@@ -133,7 +131,6 @@ IF (CFG_KERNEL_STACK)
 ELSE (CFG_KERNEL_STACK)
     INCLUDE_DIRECTORIES(${USERLIB_INCLUDE_DIR})
     ADD_DEFINITIONS(-DCONFIG_POWERLINK_USERSTACK)
-    MESSAGE("User Stack")
 ENDIF (CFG_KERNEL_STACK)
 
 # Setup QT4 Wrappers
@@ -168,7 +165,7 @@ IF (UNIX)
         TARGET_LINK_LIBRARIES(demo_mn_qt powerlink pcap pthread rt ${QT_LIBRARIES})
     ELSE(NOT CFG_KERNEL_STACK)
         TARGET_LINK_LIBRARIES(demo_mn_qt ${QT_LIBRARIES})
-    ENDIF (NOT CFG_KERNEL_STACK)  
+    ENDIF (NOT CFG_KERNEL_STACK)
 ELSEIF(WIN32)
     TARGET_LINK_LIBRARIES(demo_mn_qt openPOWERLINK wpcap iphlpapi ${QT_LIBRARIES})
 ENDIF (UNIX)
