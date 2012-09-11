@@ -293,6 +293,16 @@ typedef union
 #define max(a,b)            (((a) > (b)) ? (a) : (b))
 #endif
 
+// The EPL_STATIC_ASSERT macro can be used for static assertions.
+//
+// Example usage: EPL_STATIC_ASSERT( sizeof(WORD) == 2 )
+//
+// For a detailed explanation on this topic, and the macro used here,
+// see http://en.wikipedia.org/wiki/Assertion_(computing)#Static_assertions
+//
+#ifndef EPL_STATIC_ASSERT
+#define EPL_STATIC_ASSERT(cond) switch(0){case 0:case cond:;}
+#endif
 
 //---------------------------------------------------------------------------
 // const defines
