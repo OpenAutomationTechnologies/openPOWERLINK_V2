@@ -2680,6 +2680,8 @@ unsigned int    uiNextTxBufferOffset = EplDllkInstance_g.m_bCurTxBufferOffsetCyc
     unsigned int        uiIndex = 0;
     DWORD               dwNextTimeOffsetNs = 0;
     DWORD               dwAccFrameLenNs = 0;
+    BOOL                fEnableInvitation;
+    unsigned int        uiSoaIndex;
 
         pTxBuffer = &EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_SOC + uiNextTxBufferOffset];
         pTxBuffer->m_dwTimeOffsetNs = dwNextTimeOffsetNs;
@@ -2822,11 +2824,16 @@ unsigned int    uiNextTxBufferOffset = EplDllkInstance_g.m_bCurTxBufferOffsetCyc
         //          currently, EplDllkProcessSync is not called in PreOp1
         Ret = EplDllkUpdateFrameSoa(pTxBuffer, NmtState_p, TRUE, EplDllkInstance_g.m_bSyncLastSoaReq);
         EplDllkInstance_g.m_ppTxBufferList[uiIndex] = pTxBuffer;
+        //store SoA index
+        uiSoaIndex = uiIndex;
         uiIndex++;
 
         // check if we are invited in SoA
         if (EplDllkInstance_g.m_auiLastTargetNodeId[EplDllkInstance_g.m_bSyncLastSoaReq] == EplDllkInstance_g.m_DllConfigParam.m_uiNodeId)
         {
+            //disable invitation per default
+            fEnableInvitation = FALSE;
+
             switch (EplDllkInstance_g.m_aLastReqServiceId[EplDllkInstance_g.m_bSyncLastSoaReq])
             {
                 case kEplDllReqServiceStatus:
@@ -2836,6 +2843,9 @@ unsigned int    uiNextTxBufferOffset = EplDllkInstance_g.m_bCurTxBufferOffsetCyc
                     {   // StatusRes does exist
                         EplDllkInstance_g.m_ppTxBufferList[uiIndex] = pTxBuffer;
                         uiIndex++;
+
+                        //TX buffer is ready, invitation enabled
+                        fEnableInvitation = TRUE;
 
                         TGT_DBG_SIGNAL_TRACE_POINT(8);
                     }
@@ -2850,6 +2860,9 @@ unsigned int    uiNextTxBufferOffset = EplDllkInstance_g.m_bCurTxBufferOffsetCyc
                     {   // IdentRes does exist
                         EplDllkInstance_g.m_ppTxBufferList[uiIndex] = pTxBuffer;
                         uiIndex++;
+
+                        //TX buffer is ready, invitation enabled
+                        fEnableInvitation = TRUE;
 
                         TGT_DBG_SIGNAL_TRACE_POINT(7);
                     }
@@ -2868,6 +2881,9 @@ unsigned int    uiNextTxBufferOffset = EplDllkInstance_g.m_bCurTxBufferOffsetCyc
                             EplDllkInstance_g.m_ppTxBufferList[uiIndex] = pTxBuffer;
                             uiIndex++;
                             EplDllkInstance_g.m_bCurTxBufferOffsetNmtReq ^= 1;
+
+                            //TX buffer is ready, invitation enabled
+                            fEnableInvitation = TRUE;
                         }
                     }
 
@@ -2885,6 +2901,9 @@ unsigned int    uiNextTxBufferOffset = EplDllkInstance_g.m_bCurTxBufferOffsetCyc
                             EplDllkInstance_g.m_ppTxBufferList[uiIndex] = pTxBuffer;
                             uiIndex++;
                             EplDllkInstance_g.m_bCurTxBufferOffsetNonEpl ^= 1;
+
+                            //TX buffer is ready, invitation enabled
+                            fEnableInvitation = TRUE;
                         }
                     }
 
@@ -2897,8 +2916,23 @@ unsigned int    uiNextTxBufferOffset = EplDllkInstance_g.m_bCurTxBufferOffsetCyc
                 }
             }
 
-            // ASnd frame will be sent, remove the request
-            EplDllkInstance_g.m_aLastReqServiceId[EplDllkInstance_g.m_bSyncLastSoaReq] = kEplDllReqServiceNo;
+            //is invitation allowed?
+            if(fEnableInvitation == FALSE)
+            {
+                tEplFrame *pTxFrame = (tEplFrame *)
+                    EplDllkInstance_g.m_ppTxBufferList[uiSoaIndex]->m_pbBuffer;
+
+                //reset invitation
+                AmiSetByteToLe(&pTxFrame->m_Data.m_Soa.m_le_bReqServiceId,
+                        kEplDllReqServiceNo);
+                AmiSetByteToLe(&pTxFrame->m_Data.m_Soa.m_le_bReqServiceTarget,
+                        EPL_C_ADR_INVALID);
+            }
+            else
+            {
+                // Asnd frame will be sent, remove the request
+                EplDllkInstance_g.m_aLastReqServiceId[EplDllkInstance_g.m_bSyncLastSoaReq] = kEplDllReqServiceNo;
+            }
         }
 
         // set last list element to NULL
