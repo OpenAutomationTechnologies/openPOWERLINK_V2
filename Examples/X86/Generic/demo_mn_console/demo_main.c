@@ -733,14 +733,20 @@ tEplKernel PUBLIC AppCbEvent
         {   // error or warning occurred within the stack or the application
             // on error the API layer stops the NMT state machine
 
-            printlog("%s(Err/Warn): Source=%02X EplError=0x%03X",
-                                __func__,
-                                pEventArg_p->m_InternalError.m_EventSource,
-                                pEventArg_p->m_InternalError.m_EplError);
-            FTRACE_MARKER("%s(Err/Warn): Source=%02X EplError=0x%03X",
-                                __func__,
-                                pEventArg_p->m_InternalError.m_EventSource,
-                                pEventArg_p->m_InternalError.m_EplError);
+            printlog( "%s(Err/Warn): Source = %s (%02X) EplError = %s (0x%03X)\n",
+                        __func__,
+                        EplGetEventSourceStr(pEventArg_p->m_InternalError.m_EventSource),
+                        pEventArg_p->m_InternalError.m_EventSource,
+                        EplGetEplKernelStr(pEventArg_p->m_InternalError.m_EplError),
+                        pEventArg_p->m_InternalError.m_EplError
+                        );
+            FTRACE_MARKER("%s(Err/Warn): Source = %s (%02X) EplError = %s (0x%03X)\n",
+                        __func__,
+                        EplGetEventSourceStr(pEventArg_p->m_InternalError.m_EventSource),
+                        pEventArg_p->m_InternalError.m_EventSource,
+                        EplGetEplKernelStr(pEventArg_p->m_InternalError.m_EplError),
+                        pEventArg_p->m_InternalError.m_EplError
+                        );
             // check additional argument
             switch (pEventArg_p->m_InternalError.m_EventSource)
             {
@@ -748,16 +754,18 @@ tEplKernel PUBLIC AppCbEvent
                 case kEplEventSourceEventu:
                 {   // error occurred within event processing
                     // either in kernel or in user part
-                    printlog(" OrgSource=%02X\n", pEventArg_p->m_InternalError.m_Arg.m_EventSource);
-                    FTRACE_MARKER(" OrgSource=%02X\n", pEventArg_p->m_InternalError.m_Arg.m_EventSource);
+                    printlog(" OrgSource = %s %02X\n",  EplGetEventSourceStr(pEventArg_p->m_InternalError.m_Arg.m_EventSource),
+                                                        pEventArg_p->m_InternalError.m_Arg.m_EventSource);
+                    FTRACE_MARKER(" OrgSource = %s %02X\n",     EplGetEventSourceStr(pEventArg_p->m_InternalError.m_Arg.m_EventSource),
+                                                                pEventArg_p->m_InternalError.m_Arg.m_EventSource);
                     break;
                 }
 
                 case kEplEventSourceDllk:
                 {   // error occurred within the data link layer (e.g. interrupt processing)
                     // the DWORD argument contains the DLL state and the NMT event
-                    printlog(" val=%X\n", pEventArg_p->m_InternalError.m_Arg.m_dwArg);
-                    FTRACE_MARKER(" val=%X\n", pEventArg_p->m_InternalError.m_Arg.m_dwArg);
+                    printlog(" val = %X\n", pEventArg_p->m_InternalError.m_Arg.m_dwArg);
+                    FTRACE_MARKER(" val = %X\n", pEventArg_p->m_InternalError.m_Arg.m_dwArg);
                     break;
                 }
 
