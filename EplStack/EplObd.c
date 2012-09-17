@@ -3114,7 +3114,7 @@ CONST void*                 pDefault;
 tEplObdSize                 ObjSize;
 tEplKernel                  Ret;
 tEplObdCbStoreParam MEM     CbStore;
-tEplObdVarEntry MEM*        pVarEntry;
+tEplObdVarEntry MEM*        pVarEntry = NULL;
 
     ASSERT (pObdEnty_p != NULL);
 
