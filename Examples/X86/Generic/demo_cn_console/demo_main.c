@@ -690,9 +690,11 @@ tEplKernel PUBLIC AppCbEvent(
                 case kEplNmtCsBasicEthernet:
                 case kEplNmtMsBasicEthernet:
                 case kEplNmtGsResetCommunication:
-                    PRINTF("%s(0x%X) originating event = 0x%X\n",
+                    PRINTF("%s/kEplApiEventNmtStateChange: State = %s (0x%X), Originating event = %s (0x%X)\n",
                             __func__,
+                            EplGetNmtStateStr(pEventArg_p->m_NmtStateChange.m_NewNmtState),
                             pEventArg_p->m_NmtStateChange.m_NewNmtState,
+                            EplGetNmtEventStr(pEventArg_p->m_NmtStateChange.m_NmtEvent),
                             pEventArg_p->m_NmtStateChange.m_NmtEvent);
                     break;
 
