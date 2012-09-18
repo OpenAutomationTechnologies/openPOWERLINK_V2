@@ -337,6 +337,15 @@
 
     #define UNUSED_PARAMETER(par)
 
+    #if (DEV_SYSTEM == _DEV_NIOS2_)
+        #if !defined(__OPTIMIZE__)
+             //restore default: disable inlining if optimization is disabled
+            #define INLINE_FUNCTION
+            #undef  INLINE_ENABLED
+            #undef  INLINE_FUNCTION_DEF
+        #endif
+    #endif
+
 // ------------------ WIN32 ---------------------------------------------
 #elif (TARGET_SYSTEM == _WIN32_)
 
