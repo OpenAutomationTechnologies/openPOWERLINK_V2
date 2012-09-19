@@ -469,7 +469,7 @@ static int openPowerlink(BYTE bNodeId_p)
     EplApiInitParam.m_uiNodeId = bNodeId_p;
     EplApiInitParam.m_dwIpAddress = ip;
     EplApiInitParam.m_uiIsochrTxMaxPayload = 36;
-    EplApiInitParam.m_uiIsochrRxMaxPayload = 36;
+    EplApiInitParam.m_uiIsochrRxMaxPayload = 1490;
     EplApiInitParam.m_dwPresMaxLatency = 2000;
     EplApiInitParam.m_dwAsndMaxLatency = 2000;
     EplApiInitParam.m_fAsyncOnly = FALSE;
@@ -480,7 +480,7 @@ static int openPowerlink(BYTE bNodeId_p)
     EplApiInitParam.m_uiMultiplCycleCnt = 0;
     EplApiInitParam.m_uiAsyncMtu = 300;
     EplApiInitParam.m_uiPrescaler = 2;
-    EplApiInitParam.m_dwLossOfFrameTolerance = 5000000;
+    EplApiInitParam.m_dwLossOfFrameTolerance = 100000;
     EplApiInitParam.m_dwAsyncSlotTimeout = 3000000;
     EplApiInitParam.m_dwWaitSocPreq = 0;
     EplApiInitParam.m_dwDeviceType = -1;
