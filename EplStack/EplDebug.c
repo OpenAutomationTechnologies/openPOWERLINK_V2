@@ -82,6 +82,12 @@ typedef struct
     char                *m_sName;
 } tEplDebugEplKernelInfo;
 
+typedef struct
+{
+    WORD                m_Key;
+    char                *m_sName;
+} tEplEmergErrCodeInfo;
+
 //=========================================================================//
 // Module global vars                                                      //
 //=========================================================================//
@@ -418,6 +424,69 @@ static tEplDebugEplKernelInfo EplKernelInfo_g[] =
     { kEplApiPINonBlockingNotSupp,      "kEplApiPINonBlockingNotSupp"   },
 };
 
+static const tEplEmergErrCodeInfo   EplEmergErrCodeInfo_g[] =
+{
+    { EPL_E_NO_ERROR,                    "EPL_E_NO_ERROR"               },
+
+    // 0xFxxx manufacturer specific error codes
+    { EPL_E_NMT_NO_IDENT_RES,            "EPL_E_NMT_NO_IDENT_RES"       },
+    { EPL_E_NMT_NO_STATUS_RES,           "EPL_E_NMT_NO_STATUS_RES"      },
+
+    // 0x816x HW errors
+    { EPL_E_DLL_BAD_PHYS_MODE,           "EPL_E_DLL_BAD_PHYS_MODE"      },
+    { EPL_E_DLL_COLLISION,               "EPL_E_DLL_COLLISION"          },
+    { EPL_E_DLL_COLLISION_TH,            "EPL_E_DLL_COLLISION_TH"       },
+    { EPL_E_DLL_CRC_TH,                  "EPL_E_DLL_CRC_TH "            },
+    { EPL_E_DLL_LOSS_OF_LINK,            "EPL_E_DLL_LOSS_OF_LINK",      },
+    { EPL_E_DLL_MAC_BUFFER,              "EPL_E_DLL_MAC_BUFFER",        },
+
+    // 0x82xx Protocol errors
+    { EPL_E_DLL_ADDRESS_CONFLICT,        "EPL_E_DLL_ADDRESS_CONFLICT"   },
+    { EPL_E_DLL_MULTIPLE_MN,             "EPL_E_DLL_MULTIPLE_MN"        },
+
+    // 0x821x Frame size errors
+    { EPL_E_PDO_SHORT_RX,                "EPL_E_PDO_SHORT_RX"           },
+    { EPL_E_PDO_MAP_VERS,                "EPL_E_PDO_MAP_VERS"           },
+    { EPL_E_NMT_ASND_MTU_DIF,            "EPL_E_NMT_ASND_MTU_DIF"       },
+    { EPL_E_NMT_ASND_MTU_LIM,            "EPL_E_NMT_ASND_MTU_LIM"       },
+    { EPL_E_NMT_ASND_TX_LIM,             "EPL_E_NMT_ASND_TX_LIM"        },
+
+    // 0x823x Timing errors
+    { EPL_E_NMT_CYCLE_LEN,               "EPL_E_NMT_CYCLE_LEN"          },
+    { EPL_E_DLL_CYCLE_EXCEED,            "EPL_E_DLL_CYCLE_EXCEED"       },
+    { EPL_E_DLL_CYCLE_EXCEED_TH,         "EPL_E_DLL_CYCLE_EXCEED_TH"    },
+    { EPL_E_NMT_IDLE_LIM,                "EPL_E_NMT_IDLE_LIM"           },
+    { EPL_E_DLL_JITTER_TH,               "EPL_E_DLL_JITTER_TH"          },
+    { EPL_E_DLL_LATE_PRES_TH,            "EPL_E_DLL_LATE_PRES_TH"       },
+    { EPL_E_NMT_PREQ_CN,                 "EPL_E_NMT_PREQ_CN"            },
+    { EPL_E_NMT_PREQ_LIM,                "EPL_E_NMT_PREQ_LIM"           },
+    { EPL_E_NMT_PRES_CN,                 "EPL_E_NMT_PRES_CN"            },
+    { EPL_E_NMT_PRES_RX_LIM,             "EPL_E_NMT_PRES_RX_LIM"        },
+    { EPL_E_NMT_PRES_TX_LIM,             "EPL_E_NMT_PRES_TX_LIM"        },
+
+    // 0x824x Frame errors
+    { EPL_E_DLL_INVALID_FORMAT,          "EPL_E_DLL_INVALID_FORMAT"     },
+    { EPL_E_DLL_LOSS_PREQ_TH,            "EPL_E_DLL_LOSS_PREQ_TH"       },
+    { EPL_E_DLL_LOSS_PRES_TH,            "EPL_E_DLL_LOSS_PRES_TH"       },
+    { EPL_E_DLL_LOSS_SOA_TH,             "EPL_E_DLL_LOSS_SOA_TH"        },
+    { EPL_E_DLL_LOSS_SOC_TH,             "EPL_E_DLL_LOSS_SOC_TH"        },
+
+    // 0x84xx BootUp Errors
+    { EPL_E_NMT_BA1,                     "EPL_E_NMT_BA1"                },
+    { EPL_E_NMT_BA1_NO_MN_SUPPORT,       "EPL_E_NMT_BA1_NO_MN_SUPPORT"  },
+    { EPL_E_NMT_BPO1,                    "EPL_E_NMT_BPO1"               },
+    { EPL_E_NMT_BPO1_GET_IDENT,          "EPL_E_NMT_BPO1_GET_IDENT"     },
+    { EPL_E_NMT_BPO1_DEVICE_TYPE,        "EPL_E_NMT_BPO1_DEVICE_TYPE"   },
+    { EPL_E_NMT_BPO1_VENDOR_ID,          "EPL_E_NMT_BPO1_VENDOR_ID"     },
+    { EPL_E_NMT_BPO1_PRODUCT_CODE,       "EPL_E_NMT_BPO1_PRODUCT_CODE"  },
+    { EPL_E_NMT_BPO1_REVISION_NO,        "EPL_E_NMT_BPO1_REVISION_NO"   },
+    { EPL_E_NMT_BPO1_SERIAL_NO,          "EPL_E_NMT_BPO1_SERIAL_NO"     },
+    { EPL_E_NMT_BPO1_CF_VERIFY,          "EPL_E_NMT_BPO1_CF_VERIFY"     },
+    { EPL_E_NMT_BPO2,                    "EPL_E_NMT_BPO2"               },
+    { EPL_E_NMT_BRO,                     "EPL_E_NMT_BRO"                },
+    { EPL_E_NMT_WRONG_STATE,             "EPL_E_NMT_WRONG_STATE"        },
+};
+
 // text strings for NMT node events
 static char *EplNmtNodeEvtTypeStr_g[] =
 {
@@ -460,6 +529,7 @@ static char *EplSdoComConStateStr_g[] =
 
 static int  EplDebugCompareApiEvent( const void *pvKey, const void *pvArray );
 static int  EplDebugCompareEplKernel( const void *pvKey, const void *pvArray );
+static int  EplDebugCompareEmergErrCode( const void *pvKey, const void *pvArray );
 
 //=========================================================================//
 //                                                                         //
@@ -723,6 +793,43 @@ char *EplGetEplKernelStr( tEplKernel EplKernel_p )
     return eplInvalidStr_g;
 }
 
+//---------------------------------------------------------------------------
+//
+// Function:    EplGetEmergErrCodeStr()
+//
+// Description: Return a string describing a given entry of type
+//              emergency error code.
+//
+// Parameters:  Parameter of type emergency error code
+//
+// Returns:     Pointer to string with human readable description of given parameter
+//              Pointer to a default string if the parameter could not be found
+//
+//---------------------------------------------------------------------------
+const char *EplGetEmergErrCodeStr( WORD EmergErrCode_p )
+{
+    tEplEmergErrCodeInfo   *pEntry;
+    tEplEmergErrCodeInfo   Key;
+
+    // Init
+    Key.m_Key  = EmergErrCode_p;
+
+    // Search element
+    pEntry   = bsearch( &Key,
+                        EplEmergErrCodeInfo_g,
+                        tabentries(EplEmergErrCodeInfo_g),
+                        sizeof(Key),
+                        EplDebugCompareEmergErrCode);
+
+    // Check result
+    if( NULL != pEntry )
+    {
+        return  pEntry->m_sName;
+    }
+
+    return eplInvalidStr_g;
+}
+
 //=========================================================================//
 //                                                                         //
 //          P R I V A T E   D E F I N I T I O N S                          //
@@ -774,6 +881,36 @@ EplDebugCompareEplKernel( const void *pvKey, const void *pvArray )
 {
     tEplDebugEplKernelInfo    *pKey     = (tEplDebugEplKernelInfo *) pvKey;
     tEplDebugEplKernelInfo    *pArray   = (tEplDebugEplKernelInfo *) pvArray;
+
+    if( pKey->m_Key < pArray->m_Key )
+    {
+        return  -1;
+    }
+    else if( pKey->m_Key > pArray->m_Key )
+    {
+        return  1;
+    }
+
+    return 0;
+}
+
+//---------------------------------------------------------------------------
+//
+// Function:    EplDebugCompareEmergErrCode()
+//
+// Description: Compare two values of type emergency error code.
+//              Used by EplGetEmergErrCodeStr's bsearch().
+//
+// Parameters:  Key (element to search), Array
+//
+// Returns:     -1, 0, or 1 if event id is smaller, equal or greater
+//
+//---------------------------------------------------------------------------
+static int
+EplDebugCompareEmergErrCode( const void *pvKey, const void *pvArray )
+{
+    tEplEmergErrCodeInfo    *pKey     = (tEplEmergErrCodeInfo *) pvKey;
+    tEplEmergErrCodeInfo    *pArray   = (tEplEmergErrCodeInfo *) pvArray;
 
     if( pKey->m_Key < pArray->m_Key )
     {

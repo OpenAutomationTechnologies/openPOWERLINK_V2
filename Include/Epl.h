@@ -414,6 +414,7 @@ EPLDLLEXPORT char *EplGetNmtNodeEventTypeStr( tEplNmtNodeEvent NodeEventType_p )
 EPLDLLEXPORT char *EplGetNmtBootEventTypeStr( tEplNmtBootEvent BootEventType_p );
 EPLDLLEXPORT char *EplGetSdoComConStateStr( tEplSdoComConState SdoComConState_p );
 EPLDLLEXPORT char *EplGetEplKernelStr( tEplKernel EplKernel_p );
+EPLDLLEXPORT const char *EplGetEmergErrCodeStr( WORD EmergErrCode_p );
 
 #ifdef __cplusplus
     }
