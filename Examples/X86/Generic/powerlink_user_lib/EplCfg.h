@@ -52,6 +52,8 @@
 #ifndef _EPLCFG_H_
 #define _EPLCFG_H_
 
+#include "global.h"
+
 #if (TARGET_SYSTEM == _LINUX_)
 /* assure that system priorities of hrtimer and net-rx kernel threads are set appropriate */
 #define EPL_THREAD_PRIORITY_HIGH        75
