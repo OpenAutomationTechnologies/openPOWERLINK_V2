@@ -15,7 +15,7 @@ fi
 
 # process arguments
 SKIP_MAKE=
-NO_OPT=
+DEBUG=
 while [ $# -gt 0 ]
 do
   case "$1" in
@@ -27,7 +27,7 @@ do
           rm -f ./public.mk ./settings.bsp
           ;;
       --debug)
-          NO_OPT=1
+          DEBUG=1
           ;;
       *)
           NIOS2_BSP_ARGS="$NIOS2_BSP_ARGS $1"
@@ -36,8 +36,9 @@ do
   shift
 done
 
-if [ -z "$NO_OPT" ]; then
-    NIOS2_BSP_ARGS="${NIOS2_BSP_ARGS} --set hal.make.bsp_cflags_optimization -O2"
+if [ -z "$DEBUG" ]; then
+    # release build: increase opt level, disable prints
+    NIOS2_BSP_ARGS="${NIOS2_BSP_ARGS} --set hal.make.bsp_cflags_optimization -O3 --set hal.stdout none --set hal.stderr none"
 fi
 
 # Run nios2-bsp utility to create a hal BSP in this directory
@@ -49,6 +50,7 @@ $cmd || {
     echo "$cmd failed"
     exit 1
 }
+
 if [ -z "$SKIP_MAKE" ]; then
 	echo "create-this-bsp: Running make"
 	make

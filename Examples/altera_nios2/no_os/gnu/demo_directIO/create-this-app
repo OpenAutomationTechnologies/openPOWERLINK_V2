@@ -10,6 +10,47 @@ SOPC_DIR=`readlink -n -f ${SOPC_DIR}`
 
 export SOPC_DIR
 
+# save arguments for passing to create-this-bsp
+SAVE_ARGS=$@
+
+
+# process arguments
+SKIP_MAKE=
+REBUILD=
+DEBUG=
+while [ $# -gt 0 ]
+do
+  case "$1" in
+      # Don't run make if create-this-app script is called with --no-make arg
+      --no-make)
+          SKIP_MAKE=1
+          ;;
+      --rebuild)
+          rm -f ./Makefile ${BSP_DIR}/settings.bsp
+          REBUILD=1
+          ;;
+      --debug)
+          DEBUG=1
+          ;;
+      --help)
+          echo "Usage: ${0} [OPTION]"
+          echo
+          echo "  --rebuild      recreates the Makefile and the BSP"
+          echo "  --debug        disables compiler optimization"
+          echo "                 disables all prints to jtag_uart_0"
+          echo "  --no-make      do not run make at the end of this script"
+          echo
+          echo "Optionally, export environment variable SOPC_DIR,"
+          echo "which should point to the Quartus project the application is build for."
+          echo "Currently, SOPC_DIR=${SOPC_DIR}"
+          echo
+          exit 1
+          ;;
+  esac
+  shift
+done
+
+# set needed path variables
 BSP_DIR=./bsp
 MAINPATH=../../../../..
 #MAINDIR=$(pwd)/${MAINPATH}
@@ -21,9 +62,12 @@ ${MAINDIR}/SharedBuff \
 ${MAINDIR}/ObjDicts/CiA401_CN \
 ${MAINDIR}/Target/altera_nios2/no_os/gnu/include"
 
-#           Select here between debug and release settings
-DBG_MODE=NDEBUG
-#DBG_MODE=_DEBUG
+# set DBG_MODE according to user args
+if [ -z "$DEBUG" ]; then
+    DBG_MODE=NDEBUG
+else
+    DBG_MODE=_DEBUG
+fi
 
 #MODFLAGS=-D$(DBG_MODE)
 #MODFLAGS=-D${DBG_MODE} -D_DBG_TRACE_POINTS_ -DDEF_DEBUG_LVL=0xEC000040L
@@ -87,47 +131,8 @@ then
     exit 1
 fi
 
-# save arguments for passing to create-this-bsp
-SAVE_ARGS=$@
-
-
-# process arguments
-SKIP_MAKE=
-REBUILD=
-NO_OPT=
-while [ $# -gt 0 ]
-do
-  case "$1" in
-      # Don't run make if create-this-app script is called with --no-make arg
-      --no-make)
-          SKIP_MAKE=1
-          ;;
-      --rebuild)
-          rm -f ./Makefile
-          REBUILD=1
-          ;;
-      --debug)
-          NO_OPT=1
-          ;;
-      --help)
-          echo "Usage: ${0} [OPTION]"
-          echo
-          echo "  --rebuild      recreates the Makefile and the BSP"
-          echo "  --debug        disables compiler optimization"
-          echo "  --no-make      do not run make at the end of this script"
-          echo
-          echo "Optionally, export environment variable SOPC_DIR,"
-          echo "which should point to the Quartus project the application is build for."
-          echo "Currently, SOPC_DIR=${SOPC_DIR}"
-          echo
-          exit 1
-          ;;
-  esac
-  shift
-done
-
-if [ -z "$NO_OPT" ]; then
-    NIOS2_APP_GEN_ARGS="${NIOS2_APP_GEN_ARGS} --set APP_CFLAGS_OPTIMIZATION -O2"
+if [ -z "$DEBUG" ]; then
+    NIOS2_APP_GEN_ARGS="${NIOS2_APP_GEN_ARGS} --set APP_CFLAGS_OPTIMIZATION -O3"
 fi
 
 # Also make sure that the APP has not been created already.  Check for
@@ -206,12 +211,15 @@ if [ -z "$SKIP_MAKE" ]; then
     echo "    1. Make sure the board is connected to the system."
     echo "    2. Run 'nios2-configure-sof -C $SOPC_DIR'"
     echo "       to configure the FPGA with the hardware design."
-    echo "    3. If you have a stdio device, run 'nios2-terminal' in a different shell."
+    echo "    3. If you have a stdio device and generated with --debug," 
+    echo "       run 'nios2-terminal' in a different shell."
     echo "    4. Run 'make download-elf' from the application directory."
     echo
     echo "To debug the application:"
+    echo "    Execute this script with argument --debug"
     echo "    Import the project into Nios II IDE."
-    echo "    Refer to Nios II IDE Documentation or readme.txt for more information."
+    echo "    Refer to Nios II IDE Documentation or Documentation/altera.txt"
+    echo "    for more information."
     echo
     echo "To burn FPGA hardware design and application into the serial flash (EPCS):"
     echo "    Run 'make program-epcs' from the application directory."
