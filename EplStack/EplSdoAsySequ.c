@@ -70,7 +70,6 @@
 
 #include "user/EplSdoAsySequ.h"
 
-
 #if ((((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDO_UDP)) == 0) &&\
      (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDO_ASND)) == 0)   )
 
@@ -112,6 +111,8 @@
 
 // mask to get scon and rcon
 #define EPL_ASY_SDO_CON_MASK        0x03
+
+#define EPL_ASY_SDO_MAX_SEQU_TIMEOUT_MS     86400000       // [ms], 86400000 ms = 1 day
 
 //---------------------------------------------------------------------------
 // local types
@@ -174,6 +175,8 @@ typedef struct
     tEplAsySdoSeqCon    m_AsySdoConnection[EPL_MAX_SDO_SEQ_CON];
     tEplSdoComReceiveCb m_fpSdoComReceiveCb;
     tEplSdoComConCb     m_fpSdoComConCb;
+
+    DWORD               m_SdoSequTimeout;
 
 #if defined(WIN32) || defined(_WIN32)
     LPCRITICAL_SECTION  m_pCriticalSection;
@@ -307,7 +310,7 @@ tEplKernel  Ret;
 tEplKernel PUBLIC EplSdoAsySeqAddInstance (tEplSdoComReceiveCb fpSdoComCb_p,
                                    tEplSdoComConCb fpSdoComConCb_p)
 {
-tEplKernel  Ret;
+    tEplKernel      Ret;
 
     Ret = kEplSuccessful;
 
@@ -365,7 +368,7 @@ tEplKernel  Ret;
     }
 #endif
 
-
+    AsySdoSequInstance_g.m_SdoSequTimeout   = EPL_SEQ_DEFAULT_TIMEOUT;
 
 Exit:
     return Ret;
@@ -824,6 +827,25 @@ Exit:
 
 }
 
+//---------------------------------------------------------------------------
+//
+// Function:    EplSdoAsySeqSetTimeout
+//
+// Description: Set new SDO sequence layer timeout
+//
+// Parameters:  Timeout_p ... New timeout [ms]
+//
+// Returns:     tEplKernel = errorcode
+//
+//---------------------------------------------------------------------------
+tEplKernel PUBLIC EplSdoAsySeqSetTimeout( DWORD Timeout_p )
+{
+    // Adopt new SDO sequence layer timeout (truncated to an upper bound)
+    AsySdoSequInstance_g.m_SdoSequTimeout   = min(Timeout_p, EPL_ASY_SDO_MAX_SEQU_TIMEOUT_MS);
+
+    return  kEplSuccessful;
+}
+
 //=========================================================================//
 //                                                                         //
 //          P R I V A T E   F U N C T I O N S                              //
@@ -929,7 +951,7 @@ unsigned int        uiFreeEntries;
 
                     // set timer
                     Ret = EplSdoAsySeqSetTimer(pAsySdoSeqCon,
-                                                EPL_SEQ_DEFAULT_TIMEOUT);
+                            AsySdoSequInstance_g.m_SdoSequTimeout);
 
                     break;
                 }
@@ -968,7 +990,7 @@ unsigned int        uiFreeEntries;
 
                         // set timer
                         Ret = EplSdoAsySeqSetTimer(pAsySdoSeqCon,
-                                                EPL_SEQ_DEFAULT_TIMEOUT);
+                                AsySdoSequInstance_g.m_SdoSequTimeout);
                     }
                     else
                     {   // error -> close
@@ -1040,7 +1062,7 @@ unsigned int        uiFreeEntries;
 
                         // set timer
                         Ret = EplSdoAsySeqSetTimer(pAsySdoSeqCon,
-                                                EPL_SEQ_DEFAULT_TIMEOUT);
+                                AsySdoSequInstance_g.m_SdoSequTimeout);
 
                     }
                     // check if scon == 1 and rcon == 0, i.e. other side wants me to be server
@@ -1066,7 +1088,7 @@ unsigned int        uiFreeEntries;
 
                         // set timer
                         Ret = EplSdoAsySeqSetTimer(pAsySdoSeqCon,
-                                                EPL_SEQ_DEFAULT_TIMEOUT);
+                                AsySdoSequInstance_g.m_SdoSequTimeout);
                     }
                     else
                     {   // error -> Close
@@ -1163,7 +1185,7 @@ unsigned int        uiFreeEntries;
 
                         // set timer
                         Ret = EplSdoAsySeqSetTimer(pAsySdoSeqCon,
-                                                EPL_SEQ_DEFAULT_TIMEOUT);
+                                AsySdoSequInstance_g.m_SdoSequTimeout);
 
                         // call Command Layer Cb
                         AsySdoSequInstance_g.m_fpSdoComConCb(SdoSeqConHdl,
@@ -1190,7 +1212,7 @@ unsigned int        uiFreeEntries;
                         }
                         // set timer
                         Ret = EplSdoAsySeqSetTimer(pAsySdoSeqCon,
-                                                EPL_SEQ_DEFAULT_TIMEOUT);
+                                AsySdoSequInstance_g.m_SdoSequTimeout);
                         // change state to kEplAsySdoStateInit3
                         pAsySdoSeqCon->m_SdoState = kEplAsySdoStateInit3;
 
@@ -1277,7 +1299,7 @@ unsigned int        uiFreeEntries;
 
                         // set timer
                         Ret = EplSdoAsySeqSetTimer(pAsySdoSeqCon,
-                                                EPL_SEQ_DEFAULT_TIMEOUT);
+                                AsySdoSequInstance_g.m_SdoSequTimeout);
                         // call Command Layer Cb
                         AsySdoSequInstance_g.m_fpSdoComConCb(SdoSeqConHdl,
                                                         kAsySdoConStateConnected);
@@ -1312,7 +1334,7 @@ unsigned int        uiFreeEntries;
 
                         // set timer
                         Ret = EplSdoAsySeqSetTimer(pAsySdoSeqCon,
-                                                EPL_SEQ_DEFAULT_TIMEOUT);
+                                AsySdoSequInstance_g.m_SdoSequTimeout);
 
                         // call Command Layer Cb
                         AsySdoSequInstance_g.m_fpSdoComConCb(SdoSeqConHdl,
@@ -1385,7 +1407,7 @@ unsigned int        uiFreeEntries;
                 {
                     // set timer
                     Ret = EplSdoAsySeqSetTimer(pAsySdoSeqCon,
-                                            EPL_SEQ_DEFAULT_TIMEOUT);
+                            AsySdoSequInstance_g.m_SdoSequTimeout);
                     // check if data frame or ack
                     if(pData_p == NULL)
                     {   // send ack
@@ -1438,7 +1460,7 @@ unsigned int        uiFreeEntries;
 
                     // set timer
                     Ret = EplSdoAsySeqSetTimer(pAsySdoSeqCon,
-                                            EPL_SEQ_DEFAULT_TIMEOUT);
+                            AsySdoSequInstance_g.m_SdoSequTimeout);
                     // check scon
                     switch (bSendSeqNumCon & EPL_ASY_SDO_CON_MASK)
                     {
@@ -1629,7 +1651,7 @@ unsigned int        uiFreeEntries;
 
                         // set timer
                         Ret = EplSdoAsySeqSetTimer(pAsySdoSeqCon,
-                                                EPL_SEQ_DEFAULT_TIMEOUT);
+                                AsySdoSequInstance_g.m_SdoSequTimeout);
 
                         // read first frame from history
                         Ret = EplSdoAsyReadFromHistory(pAsySdoSeqCon,
@@ -1696,7 +1718,7 @@ unsigned int        uiFreeEntries;
 
             // set timer
             Ret = EplSdoAsySeqSetTimer(pAsySdoSeqCon,
-                                        EPL_SEQ_DEFAULT_TIMEOUT);
+                    AsySdoSequInstance_g.m_SdoSequTimeout);
 
             //TODO: retry of acknowledge
             if(Event_p == kAsySdoSeqEventFrameRec)

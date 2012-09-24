@@ -112,7 +112,7 @@ tEplKernel PUBLIC EplSdoAsySeqProcessEvent(tEplEvent* pEvent_p);
 
 tEplKernel PUBLIC EplSdoAsySeqDelCon(tEplSdoSeqConHdl SdoSeqConHdl_p);
 
-
+tEplKernel PUBLIC EplSdoAsySeqSetTimeout( DWORD Timeout_p );
 
 
 
