@@ -90,25 +90,22 @@ Otherwise you can use the supplied SOF file and go directly to step 8.
 
 2. Open the SOPC Builder via menu "Tools" -> "SOPC Builder".
 
-3. Add the IP-Core search path in "Tools" -> "Options" -> "IP Search Path"
-  (e.g. $STACK_ROOT/Examples/altera_nios2/ipcore/**/*)
-
-4. Press the button "Generate" in the SOPC Builder to regenerate the Nios II
+3. Press the button "Generate" in the SOPC Builder to regenerate the Nios II
    system.
 
-5. Close the SOPC Builder when the generation has finished (shown as information
+4. Close the SOPC Builder when the generation has finished (shown as information
    output).
 
-6. A message window will pop up. Choose "Update: All symbols or blocks in this
+5. A message window will pop up. Choose "Update: All symbols or blocks in this
    file".
 
-7. Start the compilation in the Quartus II window via menu
+6. Start the compilation in the Quartus II window via menu
    "Processing" -> "Start Compilation".
    Choose "Yes" for saving all changed files.
 
-8. Open "Nios II Command Shell"
+7. Open "Nios II Command Shell"
 
-9. Use the design with the supplied demo projects in the openPOWERLINK
+8. Use the design with the supplied demo projects in the openPOWERLINK
    subdirectory Examples\altera_nios2\no_os\gnu\demo_directIO.
 
    Therefore, execute the following command in the "Nios II Command Shell"
@@ -120,18 +117,18 @@ Otherwise you can use the supplied SOF file and go directly to step 8.
     or
     $ export SOPC_DIR=../../../EBV_DBC3C40/design_nios2_directIO
 
-10. Run script create-this-app to create the Makefile for
-    the demo application and the necessary BSP.
-    (This step is only necessary once)
+9. Run script create-this-app to create the Makefile for
+   the demo application and the necessary BSP.
+   (This step is only necessary once)
 
     $ ./create-this-app
 
-11. Run make to build the ELF file after changing the sources.
+10. Run make to build the ELF file after changing the sources.
     (The script create-this-app will do this automatically)
 
     $ make
 
-12. Rebuild the Makefile for the demo application and the
+11. Rebuild the Makefile for the demo application and the
     BSP, if the Nios II Design was changed inside the SOPC Builder.
 
     $ ./create-this-app --rebuild
