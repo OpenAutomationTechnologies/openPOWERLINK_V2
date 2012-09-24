@@ -274,13 +274,13 @@ int             iRet = 0;
             Ret = kEplNoResource;
         }
 
-        printf("EplApiShutdown(): calling close(%d) ...\n", EplApiInstance_g.m_hDrvInst);
+        PRINTF("EplApiShutdown(): calling close(%d) ...\n", EplApiInstance_g.m_hDrvInst);
         iRet = close (EplApiInstance_g.m_hDrvInst);
         EplApiInstance_g.m_hDrvInst = -1;
         if (iRet != 0)
         {
             iRet = errno;
-            printf("EplApiShutdown(): close() -> %d\n", iRet);
+            PRINTF("EplApiShutdown(): close() -> %d\n", iRet);
             Ret = kEplNoResource;
         }
     }

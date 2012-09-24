@@ -940,7 +940,7 @@ unsigned int        uiFreeEntries;
                 case kAsySdoSeqEventFrameRec:
                 {
 
-                    PRINTF3("%s scon=%u rcon=%u\n",
+                    DEBUG_LVL_25_TRACE3("%s scon=%u rcon=%u\n",
                             __func__,
                             pRecFrame_p->m_le_bSendSeqNumCon,
                             pRecFrame_p->m_le_bRecSeqNumCon);
@@ -1467,7 +1467,7 @@ unsigned int        uiFreeEntries;
                                                     kAsySdoConStateTransferAbort);
 
                             // restart immediately with initialization request
-                            PRINTF0("EplSdoAsySequ: Reinit immediately\n");
+                            DEBUG_LVL_25_TRACE0("EplSdoAsySequ: Reinit immediately\n");
                             Ret = kEplRetry;
                             break;
                         }
@@ -1692,7 +1692,7 @@ unsigned int        uiFreeEntries;
         // wait for Acknowledge (history buffer full)
         case kEplAsySdoStateWaitAck:
         {
-            PRINTF0("EplSdoAsySequ: StateWaitAck\n");
+            DEBUG_LVL_25_TRACE0("EplSdoAsySequ: StateWaitAck\n");
 
             // set timer
             Ret = EplSdoAsySeqSetTimer(pAsySdoSeqCon,

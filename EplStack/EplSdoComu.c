@@ -2253,6 +2253,7 @@ BYTE            bFlag;
             Ret = EplSdoAsySeqSendData(pSdoComCon_p->m_SdoSeqConHdl,
                                                 uiSizeOfFrame,
                                                 pFrame);
+            DEBUG_LVL_25_TRACE0("ERROR: SDO Aborted!\n");
             break;
         }
     } // end of switch(SendType_p)
@@ -2261,6 +2262,7 @@ Exit:
     return Ret;
 }
 #endif
+
 //---------------------------------------------------------------------------
 //
 // Function:        EplSdoComServerInitWriteByIndex
@@ -3042,7 +3044,7 @@ unsigned int    uiSizeOfFrame;
                                         pFrame);
             if (Ret == kEplSdoSeqConnectionBusy)
             {
-                PRINTF2("%s tried to send abort 0x%lX while connection is already closed\n",
+                DEBUG_LVL_25_TRACE2("%s tried to send abort 0x%lX while connection is already closed\n",
                     __func__, (unsigned long) dwAbortCode_p);
                 Ret = kEplSuccessful;
             }
