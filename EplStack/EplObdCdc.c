@@ -383,7 +383,6 @@ BYTE*       pbBuffer;
             pbBuffer = pCdcInfo_p->m_pbCurBuffer;
             do
             {
-                // warning C4267: 'Funktion': Konvertierung von 'size_t' nach 'unsigned int', Datenverlust möglich
                 iReadSize = read(pCdcInfo_p->m_Handle.m_hCdcFile, pbBuffer, iBufferSize);
                 if (iReadSize <= 0)
                 {
