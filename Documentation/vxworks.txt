@@ -205,7 +205,7 @@ openPOWERLINK on VxWorks
 6 Available demo applications
 --------------------------------------------------------------------------------
 
-6.1 demo_process_image_console
+6.1 demo_mn_console
 ------------------------------
   This demo implements a POWERLINK managing node (MN) using the configuration
   manager (CFM) to initialize the controlled nodes. It uses the demo system
@@ -213,7 +213,7 @@ openPOWERLINK on VxWorks
   CfmProjects/Linux_Demo_3CN.
 
   It is located in:
-  Examples/X86/VxWorks/gnu/demo_process_image_console
+  Examples/X86/VxWorks/gnu/demo_mn_console
 
 
 7 Running openPOWERLINK on VxWorks

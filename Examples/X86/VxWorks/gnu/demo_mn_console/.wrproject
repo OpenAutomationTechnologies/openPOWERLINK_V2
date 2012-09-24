@@ -156,14 +156,14 @@
         </mapAttribute>
     </attributes>
     <buildtargets>
-        <buildtarget buildtool="Linker" name="demo_process_image_console" passed="false" targetname="demo_process_image_console">
+        <buildtarget buildtool="Linker" name="demo_mn_console" passed="false" targetname="demo_mn_console">
             <contents>
-                <buildtargetreference name="/demo_process_image_console/demo_process_image_console_partialImage"/>
+                <buildtargetreference name="/demo_mn_console/demo_mn_console_partialImage"/>
             </contents>
         </buildtarget>
-        <buildtarget buildtool="Partial Image Linker" name="demo_process_image_console_partialImage" passed="true" targetname="demo_process_image_console_partialImage">
+        <buildtarget buildtool="Partial Image Linker" name="demo_mn_console_partialImage" passed="true" targetname="demo_mn_console_partialImage">
             <contents>
-                <folder name="/demo_process_image_console" recursive="true"/>
+                <folder name="/demo_mn_console" recursive="true"/>
             </contents>
         </buildtarget>
     </buildtargets>
