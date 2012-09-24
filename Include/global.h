@@ -1,50 +1,89 @@
 /****************************************************************************
 
-    global project definition file
+  (c) SYSTEC electronic GmbH, D-07973 Greiz, August-Bebel-Str. 29
+      www.systec-electronic.com
 
-    12.06.1998   -rs
-    11.02.2002   r.d. Erweiterungen, Ergaenzungen
-    20.08.2002   SYS TEC electronic -as
-                 Definition Schluesselwort 'GENERIC'
-                 fuer das Erzeugen von Generic Pointer
-    28.08.2002   r.d. erweiterter SYS TEC Debug Code
-    16.09.2002   r.d. komplette Uebersetzung in Englisch
-    11.04.2003   f.j. Ergaenzung fuer Mitsubishi NC30 Compiler
-    17.06.2003   -rs  Definition von Basistypen in <#ifndef _WINDEF_> gesetzt
-    16.04.2004   r.d. Ergaenzung fuer Borland C++ Builder
-    30.08.2004   -rs  TRACE5 eingefuegt
-    23.12.2005   d.k. Definitions for IAR compiler
+  (c) Bernecker + Rainer Ges.m.b.H.,  B&R Strasse 1, 5142 Eggelsberg, Austria
+      www.br-automation.com
 
-    $Id$
+  Project:      openPOWERLINK
+
+  Description:  global include file
+
+  License:
+
+    Redistribution and use in source and binary forms, with or without
+    modification, are permitted provided that the following conditions
+    are met:
+
+    1. Redistributions of source code must retain the above copyright
+       notice, this list of conditions and the following disclaimer.
+
+    2. Redistributions in binary form must reproduce the above copyright
+       notice, this list of conditions and the following disclaimer in the
+       documentation and/or other materials provided with the distribution.
+
+    3. Neither the name of the copyright holder nor the names of its
+       contributors may be used to endorse or promote products derived
+       from this software without prior written permission. For written
+       permission, please contact info@systec-electronic.com.
+
+    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+    LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+    FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+    COPYRIGHT HOLDERS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+    INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+    BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+    LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+    CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+    LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+    ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+    POSSIBILITY OF SUCH DAMAGE.
+
+    Severability Clause:
+
+        If a provision of this License is or becomes illegal, invalid or
+        unenforceable in any jurisdiction, that shall not affect:
+        1. the validity or enforceability in that jurisdiction of any other
+           provision of this License; or
+        2. the validity or enforceability in other jurisdictions of that or
+           any other provision of this License.
 
 ****************************************************************************/
 
 #ifndef _GLOBAL_H_
 #define _GLOBAL_H_
 
-
 //---------------------------------------------------------------------------
 //  elements of defines for development system
 //---------------------------------------------------------------------------
 
 // these defines are necessary to check some of characteristics of the development system
-#define _DEV_BIGEND_            0x80000000L     // big endian (motorolla format)
-#define _DEV_DSP_               0x40000000L     // DSP which implements sizeof(BYTE)=1 and sizeof(WORD)=1 with 16bit and sizeof(DWORD)=2 with 32bit
-#define _DEV_ALIGNMENT_4_       0x00400000L     //                  the CPU needs alignment of 4 bytes
-#define _DEV_ONLY_INT_MAIN_     0x00004000L     //                  the compiler needs "int main(int)" instead of "void main(void)"
-#define _DEV_COMMA_EXT_         0x00002000L     //                  support of last comma in struct predefinition
-#define _DEV_64BIT_SUPPORT_     0x00001000L     //                  support of 64 bit operations
-#define _DEV_BIT64_             0x00000400L     // count of bits:   64 bit
-#define _DEV_BIT32_             0x00000300L     //                  32 bit
-#define _DEV_BIT16_             0x00000200L     //                  16 bit
-#define _DEV_BIT8_              0x00000100L     //                  8 bit
-#define _DEV_GNUC_MICROBLAZE    0x00000020L     //                  Xilinx Microblaze GCC //not present in altera but needed
-#define _DEV_GNUC_NIOS2_        0x0000001FL     //                  Altera Nios II GCC
-#define _DEV_GNUC_X86_          0x00000017L     //                  GNU for I386
-#define _DEV_GNUC_CF_           0x00000014L     //                  GNU for Coldfire
-#define _DEV_MSEVC_             0x00000012L     //                  Microsoft embedded Visual C/C++
-#define _DEV_LINUX_GCC_         0x0000000AL     //                  Linux GNU Compiler gcc
-#define _DEV_MSVC32_            0x00000000L     //                  Microsoft Visual C/C++
+
+// endianness
+#define _DEV_BIGEND_            0x80000000L     // big endian (motorola format)
+
+// alignment
+#define _DEV_ALIGNMENT_4_       0x00400000L     // the CPU needs alignment of 4 bytes
+
+// add support
+#define _DEV_ONLY_INT_MAIN_     0x00004000L     // the compiler needs "int main(int)" instead of "void main(void)"
+#define _DEV_COMMA_EXT_         0x00002000L     // support of last comma in struct predefinition
+#define _DEV_64BIT_SUPPORT_     0x00001000L     // support of 64 bit operations
+
+// count of bits:
+#define _DEV_BIT64_             0x00000400L     // 64 bit
+#define _DEV_BIT32_             0x00000300L     // 32 bit
+
+// compilers
+#define _DEV_GNUC_MICROBLAZE_   0x00000020L     // Xilinx Microblaze GCC
+#define _DEV_GNUC_NIOS2_        0x0000001FL     // Altera Nios II GCC
+#define _DEV_GNUC_X86_          0x00000017L     // GNU for I386
+#define _DEV_GNUC_CF_           0x00000014L     // GNU for Coldfire
+#define _DEV_MSEVC_             0x00000012L     // Microsoft embedded Visual C/C++#define _DEV_GNUC_ARM7_         0x0000000EL     // GNU Compiler gcc for ARM7
+#define _DEV_LINUX_GCC_         0x0000000AL     // Linux GNU Compiler gcc
+#define _DEV_MSVC32_            0x00000000L     // Microsoft Visual C/C++
 
 // these defines can be used to mask previous elements
 #define _DEV_MASK_COMPILER      0x000000FFL
@@ -52,14 +91,12 @@
 #define _DEV_MASK_ADDSUPPORT    0x0000F000L
 #define _DEV_MASK_ALIGNMENT     0x00F00000L
 
-
 //---------------------------------------------------------------------------
 //  defines for development system (DEV_SYSTEM) including previous elements
 //---------------------------------------------------------------------------
-
 #define _DEV_WIN32_             (_DEV_BIT32_ | _DEV_MSVC32_                   | _DEV_64BIT_SUPPORT_ | _DEV_COMMA_EXT_)
-#define _DEV_LINUX_             (_DEV_BIT32_ | _DEV_LINUX_GCC_                | _DEV_64BIT_SUPPORT_ | _DEV_COMMA_EXT_)
 #define _DEV_WIN_CE_            (_DEV_BIT32_ | _DEV_MSEVC_                    | _DEV_64BIT_SUPPORT_ | _DEV_COMMA_EXT_)
+#define _DEV_LINUX_             (_DEV_BIT32_ | _DEV_LINUX_GCC_                | _DEV_64BIT_SUPPORT_ | _DEV_COMMA_EXT_)
 #define _DEV_GNU_CF548X_        (_DEV_BIT32_ | _DEV_GNUC_CF_   | _DEV_BIGEND_ | _DEV_64BIT_SUPPORT_ | _DEV_COMMA_EXT_)
 #define _DEV_GNU_I386_          (_DEV_BIT32_ | _DEV_GNUC_X86_                 | _DEV_64BIT_SUPPORT_ | _DEV_COMMA_EXT_ | _DEV_ONLY_INT_MAIN_)
 #define _DEV_NIOS2_             (_DEV_BIT32_ | _DEV_GNUC_NIOS2_               | _DEV_64BIT_SUPPORT_ | _DEV_COMMA_EXT_ | _DEV_ONLY_INT_MAIN_ | _DEV_ALIGNMENT_4_ )
@@ -68,11 +105,9 @@
 
 
 //---------------------------------------------------------------------------
-//  usefull macros
+//  useful macros
 //---------------------------------------------------------------------------
-
-#define CHECK_IF_ONLY_INT_MAIN()    ((DEV_SYSTEM & _DEV_ONLY_INT_MAIN_) != 0)
-#define CHECK_MEMORY_ALINMENT()     ((DEV_SYSTEM & _DEV_MASK_ALIGNMENT) != 0)
+#define CHECK_MEMORY_ALIGNMENT()     ((DEV_SYSTEM & _DEV_MASK_ALIGNMENT) != 0)
 #define CHECK_IF_BIG_ENDIAN()       ((DEV_SYSTEM & _DEV_BIGEND_) != 0)
 
 
@@ -97,15 +132,81 @@
 #undef  INLINE_ENABLED              // disable actual inlining of functions
 #undef  INLINE_FUNCTION_DEF         // disable inlining for all compilers per default
 
+//---------------------------------------------------------------------------
+//  check for used compiler
+//---------------------------------------------------------------------------
+#if defined (__GNUC__)
+
+    // GNU C compiler supports function inlining
+    #define INLINE_FUNCTION_DEF extern inline
+
+    // to actually enable inlining just include the following three lines
+    // #undef INLINE_FUNCTION
+    // #define INLINE_FUNCTION     INLINE_FUNCTION_DEF
+    // #define INLINE_ENABLED      TRUE
+
+    // ------------------ definition target system --------------------------
+    #if defined (LINUX) || defined (__linux__)
+        #define TARGET_SYSTEM   _LINUX_     // Linux definition
+        #define DEV_SYSTEM      _DEV_LINUX_
+
+    #elif defined (GNU_CF548X)
+        #define TARGET_SYSTEM   _NO_OS_
+        #define DEV_SYSTEM      _DEV_GNU_CF548X_
+
+    #elif defined (__NIOS2__)
+        #define TARGET_SYSTEM   _NO_OS_
+        #define DEV_SYSTEM      _DEV_NIOS2_
+
+    #elif defined (__MICROBLAZE__)
+        #define TARGET_SYSTEM   _NO_OS_
+        #define DEV_SYSTEM      _DEV_MICROBLAZE_
+
+    #elif defined (__VXWORKS__)
+        #define TARGET_SYSTEM   _VXWORKS_
+        #define DEV_SYSTEM      _DEV_VXWORKS_
+
+    #else
+        #error 'ERROR: TARGET_SYSTEM / DEV_SYSTEM not found!'
+    #endif
+
+    #ifndef NO_QWORD
+    #ifndef QWORD
+        #define QWORD long long int
+    #endif
+    #endif
+
+#elif defined(_MSC_VER)
+
+    #if _MSC_VER < 1400         // requires visual studio 2005 or higher
+        #error 'ERROR: Microsoft Visual Studio 2005 or higher is needed!'
+    #endif
+
+    // ------------------ definition target system --------------------------
+    #if defined(_WIN32)
+        #define TARGET_SYSTEM   _WIN32_     // WIN32 definition
+        #define DEV_SYSTEM      _DEV_WIN32_
+    #elif defined (_WIN32_WCE)
+        #define TARGET_SYSTEM   _WINCE_
+        #define DEV_SYSTEM      _DEV_WIN_CE_
+    #else
+        #error 'ERROR: TARGET_SYSTEM / DEV_SYSTEM not found!'
+    #endif
+
+    #define __func__ __FUNCTION__
+
+#endif /*#elif defined (_MSC_VER) */
 
 //---------------------------------------------------------------------------
-//  definitions for VxWorks
+//  TARGET_SYSTEM specific definitions
 //---------------------------------------------------------------------------
 
-#if defined(__GNUC__) && defined (__VXWORKS__)
+// ------------------ GNUC for Linux ----------------------------------------
+#if (TARGET_SYSTEM == _LINUX_)
 
-    #define TARGET_SYSTEM           _VXWORKS_
-    #define DEV_SYSTEM              _DEV_VXWORKS_
+    #ifndef __KERNEL__
+        #include <string.h>
+    #endif
 
     #define ROM_INIT                // variables will be initialized directly in ROM (means no copy from RAM in startup)
     #define ROM                     // code or variables mapped to ROM (i.e. flash)
@@ -133,9 +234,48 @@
 
     #define LARGE
 
-    #ifndef QWORD
-        #define QWORD long long
+    #define REENTRANT
+    #define PUBLIC
+
+    #ifndef NDEBUG
+        #ifndef __KERNEL__
+            #include <stdio.h>              // prototype printf() (for TRACE)
+            #define TRACE  printf
+        #else
+            #define TRACE  printk
+        #endif
     #endif
+
+    #define UNUSED_PARAMETER(par)
+
+// ------------------ GNUC for VxWorks ---------------------------------------
+#elif (TARGET_SYSTEM == _VXWORKS_)
+
+    #define ROM_INIT                // variables will be initialized directly in ROM (means no copy from RAM in startup)
+    #define ROM                     // code or variables mapped to ROM (i.e. flash)
+                                    // usage: CONST BYTE ROM foo = 0x00;
+    #define HWACC                   // hardware access through external memory (i.e. CAN)
+
+    // These types can be adjusted by users to match application requirements. The goal is to
+    // minimize code memory and maximize speed.
+    #define GENERIC                 // generic pointer to point to application data
+                                    // Variables with this attribute can be located in external
+                                    // or internal data memory.
+    #define MEM                     // Memory attribute to optimize speed and code of pointer access.
+
+    #ifndef NEAR
+        #define NEAR                // variables mapped to internal data storage location
+    #endif
+
+    #ifndef FAR
+        #define FAR                 // variables mapped to external data storage location
+    #endif
+
+    #ifndef CONST
+        #define CONST const         // variables mapped to ROM (i.e. flash)
+    #endif
+
+    #define LARGE
 
     #define REENTRANT
     #define PUBLIC
@@ -147,160 +287,125 @@
 
     #define UNUSED_PARAMETER(par)
 
-//---------------------------------------------------------------------------
-//  definitions for Motorola PowerPC family 5x5 (555/565)
-//  definitions Linux-PC
-//---------------------------------------------------------------------------
+// ------------------ GNU without OS ---------------------------------------
+#elif (TARGET_SYSTEM == _NO_OS_)
 
-#elif defined (__GNUC__)
+    #define ROM_INIT                // variables will be initialized directly in ROM (means no copy from RAM in startup)
+    #define ROM                     // code or variables mapped to ROM (i.e. flash)
+                                    // usage: CONST BYTE ROM foo = 0x00;
+    #define HWACC                   // hardware access through external memory (i.e. CAN)
 
-    #if defined (LINUX) || defined (linux) || defined (__linux__)
-        #define LINUX_SYSTEM            // define 'LINUX_SYSTEM' uniform for all Linux based systems
-        // r.d.: We will need an other solution here! There are two sections here which do check the preproc-definitions:
-        //     LINUX and __linux__ . The first one was Linux for PC, the second one is this section for embedded Linux (MCF5xxx).
-        //     But Linux for PC does not need the definitions for embedded Linux.
+    // These types can be adjusted by users to match application requirements. The goal is to
+    // minimize code memory and maximize speed.
+    #define GENERIC                 // generic pointer to point to application data
+                                    // Variables with this attribute can be located in external
+                                    // or internal data memory.
+    #define MEM                     // Memory attribute to optimize speed and code of pointer access.
+
+    #ifndef NEAR
+        #define NEAR                // variables mapped to internal data storage location
     #endif
 
-    // GNU C compiler supports function inlining
-    #define INLINE_FUNCTION_DEF extern inline
-
-    // to actually enable inlining just include the following three lines
-    // #undef INLINE_FUNCTION
-    // #define INLINE_FUNCTION     INLINE_FUNCTION_DEF
-    // #define INLINE_ENABLED      TRUE
-
-    #if defined (LINUX) || defined (__linux__)
-        #define TARGET_SYSTEM       _LINUX_     // Linux definition
-        #define DEV_SYSTEM          _DEV_LINUX_
-
-    #elif defined (GNU_CF548X)
-        #define TARGET_SYSTEM       _NO_OS_
-        #define DEV_SYSTEM          _DEV_GNU_CF548X_
-
-    #elif defined (__NIOS2__)
-        #define TARGET_SYSTEM       _NO_OS_
-        #define DEV_SYSTEM          _DEV_NIOS2_
-
-    #elif defined (__MICROBLAZE__)
-        #define TARGET_SYSTEM       _NO_OS_
-        #define DEV_SYSTEM          _DEV_MICROBLAZE_
-
-    #else
-        #error 'ERROR: DEV_SYSTEM not found!'
+    #ifndef FAR
+        #define FAR                 // variables mapped to external data storage location
     #endif
 
-    #ifndef NO_QWORD
-    #ifndef QWORD
-        #define QWORD long long int
-    #endif
+    #ifndef CONST
+        #define CONST const         // variables mapped to ROM (i.e. flash)
     #endif
 
-    // ------------------ GNUC for I386 ---------------------------------------------
+    #define LARGE
 
-    #if (TARGET_SYSTEM == _LINUX_) || (TARGET_SYSTEM == _ECOSPRO_)
+    #define REENTRANT
+    #define PUBLIC
 
-        #ifndef __KERNEL__
-            #include <string.h>
-        #endif
-
-        #define ROM_INIT                // variables will be initialized directly in ROM (means no copy from RAM in startup)
-        #define ROM                     // code or variables mapped to ROM (i.e. flash)
-                                        // usage: CONST BYTE ROM foo = 0x00;
-        #define HWACC                   // hardware access through external memory (i.e. CAN)
-
-        // These types can be adjusted by users to match application requirements. The goal is to
-        // minimize code memory and maximize speed.
-        #define GENERIC                 // generic pointer to point to application data
-                                        // Variables with this attribute can be located in external
-                                        // or internal data memory.
-        #define MEM                     // Memory attribute to optimize speed and code of pointer access.
-
-        #ifndef NEAR
-            #define NEAR                // variables mapped to internal data storage location
-        #endif
-
-        #ifndef FAR
-            #define FAR                 // variables mapped to external data storage location
-        #endif
-
-        #ifndef CONST
-            #define CONST const         // variables mapped to ROM (i.e. flash)
-        #endif
-
-        #define LARGE
-
-        #define REENTRANT
-        #define PUBLIC
-
-        #ifndef NDEBUG
-            #ifndef __KERNEL__
-                #include <stdio.h>              // prototype printf() (for TRACE)
-                #define TRACE  printf
-            #else
-                #define TRACE  printk
-            #endif
-        #endif
-
-        #define UNUSED_PARAMETER(par)
-
-    #endif
-
-    // ------------------ GNU without OS ---------------------------------------------
-
-    #if (TARGET_SYSTEM == _NO_OS_)
-
-        #define ROM_INIT                // variables will be initialized directly in ROM (means no copy from RAM in startup)
-        #define ROM                     // code or variables mapped to ROM (i.e. flash)
-                                        // usage: CONST BYTE ROM foo = 0x00;
-        #define HWACC                   // hardware access through external memory (i.e. CAN)
-
-        // These types can be adjusted by users to match application requirements. The goal is to
-        // minimize code memory and maximize speed.
-        #define GENERIC                 // generic pointer to point to application data
-                                        // Variables with this attribute can be located in external
-                                        // or internal data memory.
-        #define MEM                     // Memory attribute to optimize speed and code of pointer access.
-
-        #ifndef NEAR
-            #define NEAR                // variables mapped to internal data storage location
-        #endif
-
-        #ifndef FAR
-            #define FAR                 // variables mapped to external data storage location
-        #endif
-
-        #ifndef CONST
-            #define CONST const         // variables mapped to ROM (i.e. flash)
-        #endif
-
-        #define LARGE
-
-        #define REENTRANT
-        #define PUBLIC
-
-        #ifndef NDEBUG
+    #ifndef NDEBUG
 //            #include "xuartdrv.h"
-            #include <stdio.h>              // prototype printf() (for TRACE)
-            #define TRACE  printf
+        #include <stdio.h>              // prototype printf() (for TRACE)
+        #define TRACE  printf
 //            #define TRACE  mprintf
 //            #ifndef TRACE
 //                #define TRACE trace
 //                void trace (char *fmt, ...);
 //            #endif
-        #endif
-
-        #define UNUSED_PARAMETER(par)
-
     #endif
 
-//---------------------------------------------------------------------------
-// definitions for WinCE
-//---------------------------------------------------------------------------
-#elif defined (_WIN32_WCE)
+    #define UNUSED_PARAMETER(par)
 
-    // ------------------ definition target system --------------------------
-    #define TARGET_SYSTEM           _WINCE_
-    #define DEV_SYSTEM              _DEV_WIN_CE_
+// ------------------ WIN32 ---------------------------------------------
+#elif (TARGET_SYSTEM == _WIN32_)
+
+    #define ROM_INIT                // variables will be initialized directly in ROM (means no copy from RAM in startup)
+    #define ROM                     // code or variables mapped to ROM (i.e. flash)
+                                    // usage: CONST BYTE ROM foo = 0x00;
+    #define HWACC                   // hardware access through external memory (i.e. CAN)
+
+    // These types can be adjusted by users to match application requirements. The goal is to
+    // minimize code memory and maximize speed.
+    #define GENERIC                 // generic pointer to point to application data
+                                    // Variables with this attribute can be located in external
+                                    // or internal data memory.
+    #define MEM                     // Memory attribute to optimize speed and code of pointer access.
+
+    #ifndef NEAR
+        #define NEAR                // variables mapped to internal data storage location
+    #endif
+
+    #ifndef FAR
+        #define FAR                 // variables mapped to external data storage location
+    #endif
+
+    #ifndef CONST
+        #define CONST const         // variables mapped to ROM (i.e. flash)
+    #endif
+
+    #define LARGE
+
+    #define REENTRANT
+    #define PUBLIC __stdcall
+
+    #ifndef NO_QWORD
+    #ifndef QWORD
+      //#define QWORD long long int // MSVC .NET can use "long long int" too (like GNU)
+        #define QWORD __int64
+    #endif
+    #endif
+
+    #ifndef NDEBUG
+        #ifndef TRACE
+            #define TRACE trace
+            #ifdef __cplusplus
+                extern "C"
+                {
+            #endif
+                void trace (const char *fmt, ...);
+            #ifdef __cplusplus
+                }
+            #endif
+        #endif
+    #endif
+
+    #define UNUSED_PARAMETER(par) par
+
+    // MS Visual C++ compiler supports function inlining
+    #define INLINE_FUNCTION_DEF __forceinline
+
+    // Redefine TRUE/FALSE if necessary
+    #ifdef FALSE
+    #undef FALSE
+    #endif
+    #define FALSE 0
+    #ifdef TRUE
+    #undef TRUE
+    #endif
+    #define TRUE 1
+
+    // to actually enable inlining just include the following two lines
+    // #define INLINE_FUNCTION     INLINE_FUNCTION_DEF
+    // #define INLINE_ENABLED      TRUE
+
+// ------------------ WINCE ---------------------------------------------
+#elif (TARGET_SYSTEM == _WINCE_)
 
     #define ROM_INIT                // variables will be initialized directly in ROM (means no copy from RAM in startup)
     #define ROM                     // code or variables mapped to ROM (i.e. flash)
@@ -345,7 +450,7 @@
     #ifndef NDEBUG
         #ifndef TRACE
             #define TRACE printf
-//            void trace (char *fmt, ...);
+    //            void trace (char *fmt, ...);
         #endif
     #endif
 
@@ -353,100 +458,7 @@
 
     #define __func__ __FUNCTION__
 
-#else   // ===> PC MS Visual C/C++
-
-    // ------------------ definition target system --------------------------
-
-    #ifdef _WIN32
-        #define TARGET_SYSTEM   _WIN32_     // WIN32 definition
-        #define DEV_SYSTEM      _DEV_WIN32_
-    #else
-        #define TARGET_SYSTEM   _WIN16_     // WIN16 definition
-        #define DEV_SYSTEM      _DEV_WIN16_
-    #endif
-
-
-
-    #define __func__ __FUNCTION__
-
-
-    // ------------------ WIN32 ---------------------------------------------
-
-   #if (TARGET_SYSTEM == _WIN32_)
-
-        #define ROM_INIT                // variables will be initialized directly in ROM (means no copy from RAM in startup)
-        #define ROM                     // code or variables mapped to ROM (i.e. flash)
-                                        // usage: CONST BYTE ROM foo = 0x00;
-        #define HWACC                   // hardware access through external memory (i.e. CAN)
-
-        // These types can be adjusted by users to match application requirements. The goal is to
-        // minimize code memory and maximize speed.
-        #define GENERIC                 // generic pointer to point to application data
-                                        // Variables with this attribute can be located in external
-                                        // or internal data memory.
-        #define MEM                     // Memory attribute to optimize speed and code of pointer access.
-
-        #ifndef NEAR
-            #define NEAR                // variables mapped to internal data storage location
-        #endif
-
-        #ifndef FAR
-            #define FAR                 // variables mapped to external data storage location
-        #endif
-
-        #ifndef CONST
-            #define CONST const         // variables mapped to ROM (i.e. flash)
-        #endif
-
-        #define LARGE
-
-        #define REENTRANT
-        #define PUBLIC __stdcall
-
-        #ifndef NO_QWORD
-        #ifndef QWORD
-          //#define QWORD long long int // MSVC .NET can use "long long int" too (like GNU)
-            #define QWORD __int64
-        #endif
-        #endif
-
-        #ifndef NDEBUG
-            #ifndef TRACE
-                #define TRACE trace
-                #ifdef __cplusplus
-                    extern "C"
-                    {
-                #endif
-                    void trace (const char *fmt, ...);
-                #ifdef __cplusplus
-                    }
-                #endif
-            #endif
-        #endif
-
-        #define UNUSED_PARAMETER(par) par
-
-        // MS Visual C++ compiler supports function inlining
-        #define INLINE_FUNCTION_DEF __forceinline
-
-		// Redefine TRUE/FALSE if necessary
-		#ifdef FALSE
-		#undef FALSE
-		#endif
-		#define FALSE 0
-		#ifdef TRUE
-		#undef TRUE
-		#endif
-		#define TRUE 1
-
-        // to actually enable inlining just include the following two lines
-        // #define INLINE_FUNCTION     INLINE_FUNCTION_DEF
-        // #define INLINE_ENABLED      TRUE
-
-    #endif
-
-#endif  // ===> PC
-
+#endif
 
 //---------------------------------------------------------------------------
 //  definitions of basic types
@@ -483,7 +495,6 @@
         #define ULONGLONG unsigned long long int
     #endif
 
-
     // --- logic types ---
     #ifndef BYTE
         #define BYTE unsigned char
@@ -505,7 +516,6 @@
         #define BOOL unsigned char
     #endif
 
-
     // --- alias types ---
     #ifndef TRUE
         #define TRUE  0xFF
@@ -520,7 +530,6 @@
     #endif
 
 #endif
-
 
 #ifndef _TIME_OF_DAY_DEFINED_
 
@@ -644,9 +653,6 @@
         #define ASSERTMSG(expr,string)
     #endif
 #endif
-
-
-
 
 //---------------------------------------------------------------------------
 
