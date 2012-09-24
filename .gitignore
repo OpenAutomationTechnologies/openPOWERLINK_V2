@@ -1,2 +1,7 @@
 .settings
-build
+build*
+.project
+.cproject
+*~
+*.orig
+*.bak
