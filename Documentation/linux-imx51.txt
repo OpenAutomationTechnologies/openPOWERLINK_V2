@@ -116,14 +116,14 @@ openPOWERLINK under Linux on Freescale i.MX51 ARM
   It is located in:
   Examples/X86/Linux/gnu/demo_kernel
 
-5.2 QT demo with process image
+5.2 QT MN demo
   This QT demo implements a POWERLINK managing node (MN) using the configuration
   manager (CFM) to initialize the controlled nodes. It uses a network configuration
   created with the openCONFIGURATOR tool. This demo can be used either with
   the kernel based stack or with the userspace stack.
 
   It is found in:
-  Examples/X86/Generic/demo_process_image_qt
+  Examples/X86/Generic/demo_mn_qt
 
 5.3 Console MN demo
   This demo also implements a POWERLINK MN with CFM. It is implemented as
@@ -218,7 +218,7 @@ openPOWERLINK under Linux on Freescale i.MX51 ARM
 
                         Requires: CFG_POWERLINK_CFM, CFG_POWERLINK_PROCESS_IMAGE
 
-  CFG_X86_LINUX_DEMO_PROCESS_IMAGE_QT
+  CFG_X86_DEMO_MN_QT
                         If enabled the process image based QT application
                         will be compiled. It can be used either with the kernel
                         stack or with the userspace stack.
@@ -292,8 +292,8 @@ openPOWERLINK under Linux on Freescale i.MX51 ARM
          Select CFG_KERNEL_STACK
          Set CFG_POWERLINK_EDRV to "8139"
          Select CFG_POWERLINK_PROCESS_IMAGE
-         Select CFG_X86_DEMO_PROCESS_IMAGE_QT
-         Select CFG_X86_DEMO_PROCESS_IMAGE_CONSOLE
+         Select CFG_X86_DEMO_MN_QT
+         Select CFG_X86_DEMO_MN_CONSOLE
 
      For building the QT demo application it is required to build a kernel module, too.
          As the preinstalled kernel headers do not match the used Linux kernel, this module
@@ -308,7 +308,7 @@ openPOWERLINK under Linux on Freescale i.MX51 ARM
      To install the compiled files to the configured installation directory, type:
      > make install
 
-     Copy the QT demo (demo_pi_qt) and the CDC file (mnobd.cdc) to the home folder.
+     Copy the QT demo (demo_mn_qt) and the CDC file (mnobd.cdc) to the home folder.
 
   B  Customized Linux Kernel
 
@@ -389,6 +389,6 @@ openPOWERLINK under Linux on Freescale i.MX51 ARM
      > sudo insmod powerlinkfec.ko cdc=/home/lucid/mnobd.cdc
 
   2. Starting the QT Demo
-     > sudo ./demo_pi_qt
+     > sudo ./demo_mn_qt
      Press "Start POWERLINK"
 

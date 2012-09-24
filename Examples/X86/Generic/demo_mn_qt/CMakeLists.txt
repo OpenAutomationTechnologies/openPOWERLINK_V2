@@ -153,7 +153,7 @@ IF (WIN32)
     SOURCE_GROUP("Header Files" FILES ${DEMO_HEADERS})
 ENDIF (WIN32)
 
-ADD_EXECUTABLE(demo_pi_qt ${DEMO_SOURCES}
+ADD_EXECUTABLE(demo_mn_qt ${DEMO_SOURCES}
                           ${DEMO_HEADERS}
                           ${DEMO_HEADERS_MOC}
                           ${DEMO_FORMS_HEADERS}
@@ -161,21 +161,21 @@ ADD_EXECUTABLE(demo_pi_qt ${DEMO_SOURCES}
 )
 
 IF (WIN32)
-    TARGET_LINK_LIBRARIES(demo_pi_qt openPOWERLINK wpcap iphlpapi ${QT_LIBRARIES})
+    TARGET_LINK_LIBRARIES(demo_mn_qt openPOWERLINK wpcap iphlpapi ${QT_LIBRARIES})
 ELSEIF(UNIX)
-    TARGET_LINK_LIBRARIES(demo_pi_qt ${QT_LIBRARIES})
+    TARGET_LINK_LIBRARIES(demo_mn_qt ${QT_LIBRARIES})
 
     IF (NOT CFG_KERNEL_STACK)
-        TARGET_LINK_LIBRARIES(demo_pi_qt powerlink pcap pthread rt)  
+        TARGET_LINK_LIBRARIES(demo_mn_qt powerlink pcap pthread rt)  
     ENDIF (NOT CFG_KERNEL_STACK)  
 ENDIF (WIN32)
 
 
-SET_PROPERTY(TARGET demo_pi_qt
+SET_PROPERTY(TARGET demo_mn_qt
              PROPERTY COMPILE_DEFINITIONS_DEBUG DEBUG;DEF_DEBUG_LVL=${CFG_DEBUG_LVL})
 
 # add installation rules
-INSTALL(TARGETS demo_pi_qt RUNTIME DESTINATION bin)
+INSTALL(TARGETS demo_mn_qt RUNTIME DESTINATION bin)
 INSTALL(FILES mnobd.cdc DESTINATION bin)
 
 IF (WIN32)

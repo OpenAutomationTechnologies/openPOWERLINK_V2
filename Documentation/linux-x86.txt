@@ -153,14 +153,14 @@ openPOWERLINK on Linux x86
   It is located in:
   Examples/X86/Linux/gnu/demo_kernel
 
-5.2 QT demo with process image
+5.2 QT MN demo
   This QT demo implements a POWERLINK managing node (MN) using the configuration
   manager (CFM) to initialize the controlled nodes. It uses a network configuration
   created with the openCONFIGURATOR tool. This demo can be used either with
   the kernel based stack or with the userspace stack.
   
   It is found in: 
-  Examples/X86/Generic/demo_process_image_qt
+  Examples/X86/Generic/demo_mn_qt
 
 5.3 Console MN demo
   This demo also implements a POWERLINK MN with CFM. It is implemented as
@@ -254,7 +254,7 @@ openPOWERLINK on Linux x86
 						
                         Requires: CFG_POWERLINK_CFM, CFG_POWERLINK_PROCESS_IMAGE
 
-  CFG_X86_LINUX_DEMO_PROCESS_IMAGE_QT
+  CFG_X86_DEMO_MN_QT
                         If enabled the process image based QT application
                         will be compiled. It can be used either with the kernel
                         stack or with the userspace stack.
@@ -339,7 +339,7 @@ openPOWERLINK on Linux x86
   start it:
 
   > cd bin
-  > ./demo_pi_qt
+  > ./demo_mn_qt
 
 7.2.2 Demo uses userspace stack
   If the demo application is configured and linked with the userspace stack you
@@ -347,7 +347,7 @@ openPOWERLINK on Linux x86
   available in the current directory:
 
   > cd bin
-  > sudo ./demo_pi_qt
+  > sudo ./demo_mn_qt
 
   If you are using a real-time kernel you should adjust thread priorities using
   the delivered script set_prio before starting the application. To be able to

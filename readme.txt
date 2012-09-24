@@ -63,7 +63,7 @@ X86 PC with Linux or Windows operating system
   * MN demo application using a console based interface
     = Examples\X86\Generic\demo_mn_console
   * MN demo application using a Qt based interface
-    = Examples\X86\Generic\demo_process_image_qt
+    = Examples\X86\Generic\demo_mn_qt
 
   These demo applications can be built for both Linux and Windows.
   CMake is used as a cross-platform build system.

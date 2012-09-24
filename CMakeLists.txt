@@ -84,7 +84,7 @@ CMAKE_DEPENDENT_OPTION (CFG_X86_DEMO_MN_CONSOLE "Build process image based conso
                         "CFG_POWERLINK_PROCESS_IMAGE" OFF)
 
 IF (QT4_FOUND)
-    CMAKE_DEPENDENT_OPTION (CFG_X86_DEMO_PROCESS_IMAGE_QT "Build process image based QT demo application" OFF
+    CMAKE_DEPENDENT_OPTION (CFG_X86_DEMO_MN_QT "Build process image based QT demo application" OFF
                             "CFG_POWERLINK_PROCESS_IMAGE" OFF)
 ENDIF (QT4_FOUND)
 
@@ -129,9 +129,9 @@ IF (CFG_X86_DEMO_MN_CONSOLE)
 ENDIF (CFG_X86_DEMO_MN_CONSOLE)
 
 # Add subdirectory of process image based QT demo application
-IF (CFG_X86_DEMO_PROCESS_IMAGE_QT)
-    ADD_SUBDIRECTORY(Examples/X86/Generic/demo_process_image_qt)
-ENDIF (CFG_X86_DEMO_PROCESS_IMAGE_QT)
+IF (CFG_X86_DEMO_MN_QT)
+    ADD_SUBDIRECTORY(Examples/X86/Generic/demo_mn_qt)
+ENDIF (CFG_X86_DEMO_MN_QT)
 
 # Linux specific part
 IF(UNIX)

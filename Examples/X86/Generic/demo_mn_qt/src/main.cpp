@@ -3,7 +3,7 @@
 
   \file           main.cpp
 
-  \brief          main module of the QT demo application
+  \brief          main module of the QT MN demo application
 
   (c) SYSTEC electronic GmbH, D-07973 Greiz, August-Bebel-Str. 29
       www.systec-electronic.com
