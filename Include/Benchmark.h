@@ -116,8 +116,8 @@
         #define BENCHMARK_MODULES           0x00000000
     #endif
 
-#elif (TARGET_SYSTEM == _NO_OS_) && ((DEV_SYSTEM == _DEV_MICROBLAZE_BIG) || \
-      (DEV_SYSTEM == _DEV_MICROBLAZE_LITTLE))
+#elif (TARGET_SYSTEM == _NO_OS_) && ((DEV_SYSTEM == _DEV_MICROBLAZE_BIG_) || \
+      (DEV_SYSTEM == _DEV_MICROBLAZE_LITTLE_))
 
     #include "xparameters.h"
 
