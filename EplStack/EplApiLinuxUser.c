@@ -75,6 +75,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stddef.h>
 #include <sys/ioctl.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -132,6 +133,8 @@
 // const defines
 //---------------------------------------------------------------------------
 
+#define EPL_API_LINUX_USER_BUF_SIZE         EPL_C_DLL_MAX_ASYNC_MTU     // Ensure user buffer is large enough for all events
+
 //---------------------------------------------------------------------------
 // local types
 //---------------------------------------------------------------------------
@@ -144,6 +147,7 @@ typedef struct
     tEplLinEvent        m_Event;
     int                 m_hDrvInst;           // driver file descriptior
 
+    BYTE                m_abUserBuf[ EPL_API_LINUX_USER_BUF_SIZE ];
 } tEplApiInstance;
 
 //---------------------------------------------------------------------------
@@ -705,10 +709,12 @@ int             hFdTracingEnabled;
     hFdTracingEnabled = open("/sys/kernel/debug/tracing/tracing_enabled", O_WRONLY, 0666);
 #endif
 
-    EplApiInstance_g.m_Event.m_pEventArg = &EplApiInstance_g.m_EventArg;
-    EplApiInstance_g.m_Event.m_pEventType = &EplApiInstance_g.m_EventType;
-    EplApiInstance_g.m_Event.m_uiEventArgSize = sizeof (EplApiInstance_g.m_EventArg);
-    EplApiInstance_g.m_Event.m_RetCbEvent = kEplSuccessful;
+    EplApiInstance_g.m_Event.m_pEventArg        = &EplApiInstance_g.m_EventArg;
+    EplApiInstance_g.m_Event.m_pEventType       = &EplApiInstance_g.m_EventType;
+    EplApiInstance_g.m_Event.m_uiEventArgSize   = sizeof (EplApiInstance_g.m_EventArg);
+    EplApiInstance_g.m_Event.m_RetCbEvent       = kEplSuccessful;
+    EplApiInstance_g.m_Event.m_pUserBuf         = EplApiInstance_g.m_abUserBuf;
+    EplApiInstance_g.m_Event.m_UserBufSize      = sizeof(EplApiInstance_g.m_abUserBuf);
 
     while (1)
     {
@@ -1030,6 +1036,98 @@ tEplKernel PUBLIC EplApiGetIdentResponse(
     *ppIdentResponse_p  = NULL;
 
     return  kEplInvalidOperation;
+}
+
+// ----------------------------------------------------------------------------
+//
+// Function:    EplApiSendAsndFrame()
+//
+// Description: Send a generic Asnd frame
+//
+// Parameters:  bDstNodeId_p            = Node ID of destination node
+//              pAsndFrame_p            = Pointer to Asnd frame that should be sent
+//              uiAsndSize_p            = Size of Asnd frame (service ID + payload)
+//
+// Return:      tEplKernel              = error code
+//
+// ----------------------------------------------------------------------------
+tEplKernel PUBLIC EplApiSendAsndFrame
+(
+    BYTE            bDstNodeId_p,
+    tEplAsndFrame   *pAsndFrame_p,
+    size_t          uiAsndSize_p
+)
+{
+    tEplKernel          Ret  = kEplSuccessful;
+    tEplLinSendAsnd     Par;
+    int                 iRet;
+
+    // Check for valid frame size
+    // The size of the full POWERLINK frame is limited by the MTU of the network.
+    // The maximum payload size is smaller by the payload offset + 1
+    // (plus 1 to compensate that offsets start at zero).
+    if( uiAsndSize_p > (EPL_C_DLL_MAX_ASYNC_MTU - (offsetof(tEplFrame, m_Data)+1) ) )
+    {
+        return kEplApiInvalidParam;
+    }
+
+    Par.m_bDstNodeId    = bDstNodeId_p;
+    Par.m_pAsndFrame    = pAsndFrame_p;
+    Par.m_uiAsndSize    = uiAsndSize_p;
+
+    // forward request to Linux kernel module
+    iRet = ioctl (EplApiInstance_g.m_hDrvInst, EPLLIN_CMD_SEND_ASND, (unsigned long)&Par);
+    if (iRet < 0)
+    {
+        Ret = kEplNoResource;
+    }
+    else
+    {
+        Ret = (tEplKernel)iRet;
+    }
+
+    return Ret;
+}
+
+// ----------------------------------------------------------------------------
+//
+// Function:    EplApiSetAsndForward()
+//
+// Description: Enable or disable the forwarding of received Asnd frames
+//              Asnd frames from the DLL to the application.
+//
+// Parameters:  bServiceId_p            = The Asnd service ID which should be configured
+//              FilterType_p            = Specifies which types of Asnd frames should
+//                                        be received (none, unicast, all)
+//
+// Return:      tEplKernel              = error code
+//
+// ----------------------------------------------------------------------------
+tEplKernel PUBLIC EplApiSetAsndForward
+(
+    BYTE                bServiceId_p,
+    tEplApiAsndFilter   FilterType_p
+)
+{
+    tEplKernel          Ret = kEplSuccessful;
+    tEplLinAsndForward  Par;
+    int                 iRet;
+
+    Par.m_bServiceId    = bServiceId_p;
+    Par.m_FilterType    = FilterType_p;
+
+    // forward request to Linux kernel module
+    iRet = ioctl (EplApiInstance_g.m_hDrvInst, EPLLIN_CMD_SET_ASND_FORWARD, (unsigned long)&Par);
+    if (iRet < 0)
+    {
+        Ret = kEplNoResource;
+    }
+    else
+    {
+        Ret = (tEplKernel)iRet;
+    }
+
+    return Ret;
 }
 
 //=========================================================================//

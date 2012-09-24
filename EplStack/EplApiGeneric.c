@@ -88,6 +88,8 @@
 #include "user/EplTimeru.h"
 #include "user/EplCfmu.h"
 
+#include <stddef.h>
+
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_VETH)) != 0)
 #include "kernel/VirtualEthernet.h"
 #endif
@@ -235,6 +237,8 @@ static tEplKernel PUBLIC  EplApiCbLedStateChange(tEplLedType LedType_p,
 static tEplKernel PUBLIC  EplApiCbCfmEventCnProgress(tEplCfmEventCnProgress* pEventCnProgress_p);
 static tEplKernel PUBLIC  EplApiCbCfmEventCnResult(unsigned int uiNodeId_p, tEplNmtNodeCommand NodeCommand_p);
 #endif
+
+static tEplKernel PUBLIC EplApiCbReceivedAsnd(tEplFrameInfo *pFrameInfo_p);
 
 // OD initialization function (implemented in Objdict.c)
 //tEplKernel PUBLIC  EplObdInitRam (tEplObdInitParam MEM* pInitParam_p);
@@ -1187,6 +1191,103 @@ tEplKernel      Ret = kEplSuccessful;
     return Ret;
 }
 
+// ----------------------------------------------------------------------------
+//
+// Function:    EplApiSendAsndFrame()
+//
+// Description: Send a generic Asnd frame
+//
+// Parameters:  bDstNodeId_p            = Node ID of destination node
+//              pAsndFrame_p            = Pointer to Asnd frame that should be sent
+//              uiAsndSize_p            = Size of Asnd frame (service ID + payload)
+//
+// Return:      tEplKernel              = error code
+//
+// ----------------------------------------------------------------------------
+tEplKernel PUBLIC EplApiSendAsndFrame
+(
+    BYTE            bDstNodeId_p,
+    tEplAsndFrame   *pAsndFrame_p,
+    size_t          uiAsndSize_p
+)
+{
+    tEplKernel      Ret;
+    tEplFrameInfo   FrameInfo;
+    BYTE            Buffer[EPL_C_DLL_MAX_ASYNC_MTU];
+
+    // Calculate size of frame (Asnd data + header)
+    FrameInfo.m_uiFrameSize = uiAsndSize_p + offsetof(tEplFrame, m_Data);
+
+    // Check for correct input
+    if
+    (
+        ( pAsndFrame_p              == NULL             )  ||
+        ( FrameInfo.m_uiFrameSize   >= sizeof(Buffer)   )
+    )
+    {
+        return  kEplReject;
+    }
+
+    // Calculate size of frame (Asnd data + header)
+    FrameInfo.m_uiFrameSize = uiAsndSize_p + offsetof(tEplFrame, m_Data);
+    FrameInfo.m_pFrame      = (tEplFrame *) Buffer;
+
+    // Copy Asnd data
+    EPL_MEMSET( FrameInfo.m_pFrame, 0x00, FrameInfo.m_uiFrameSize );
+    EPL_MEMCPY( &FrameInfo.m_pFrame->m_Data.m_Asnd, pAsndFrame_p, uiAsndSize_p );
+
+    // Fill in additional data (SrcNodeId is filled by DLL if it is set to 0)
+    AmiSetByteToLe( &FrameInfo.m_pFrame->m_le_bMessageType, (BYTE) kEplMsgTypeAsnd  );
+    AmiSetByteToLe( &FrameInfo.m_pFrame->m_le_bDstNodeId,   (BYTE) bDstNodeId_p     );
+    AmiSetByteToLe( &FrameInfo.m_pFrame->m_le_bSrcNodeId,   (BYTE) 0                );
+
+    // Request frame transmission
+    Ret = EplDlluCalAsyncSend( &FrameInfo, kEplDllAsyncReqPrioGeneric);
+
+    return Ret;
+}
+
+// ----------------------------------------------------------------------------
+//
+// Function:    EplApiSetAsndForward()
+//
+// Description: Enable or disable the forwarding of received Asnd frames
+//              Asnd frames from the DLL to the application.
+//
+// Parameters:  bServiceId_p            = The Asnd service ID which should be configured
+//              FilterType_p            = Specifies which types of Asnd frames should
+//                                        be received (none, unicast, all)
+//
+// Return:      tEplKernel              = error code
+//
+// ----------------------------------------------------------------------------
+tEplKernel PUBLIC EplApiSetAsndForward
+(
+    BYTE                bServiceId_p,
+    tEplApiAsndFilter   FilterType_p
+)
+{
+    tEplKernel          Ret;
+    tEplDllAsndFilter   DllFilter;
+
+    // Map API filter types to stack internal filter types
+    switch( FilterType_p )
+    {
+        case kEplApiAsndFilterLocal:    DllFilter   = kEplDllAsndFilterLocal;
+                                        break;
+
+        case kEplApiAsndFilterAny:      DllFilter   = kEplDllAsndFilterAny;
+                                        break;
+
+        default:
+        case kEplApiAsndFilterNone:     DllFilter   = kEplDllAsndFilterNone;
+                                        break;
+    }
+
+    Ret = EplDlluCalRegAsndService( bServiceId_p, EplApiCbReceivedAsnd, DllFilter);
+
+    return Ret;
+}
 
 // ----------------------------------------------------------------------------
 //
@@ -2744,6 +2845,51 @@ Exit:
 
 #endif
 
+//---------------------------------------------------------------------------
+//
+// Function:    EplApiCbReceivedAsnd
+//
+// Description: Callback to handle received Asnd frames.
+//              Frames will be forwarded to the application layer.
+//
+// Parameters:  pFrameInfo_p    Pointer to structure with information
+//                              about the received frame
+//
+// Returns:     tEplKernel
+//---------------------------------------------------------------------------
+static tEplKernel PUBLIC EplApiCbReceivedAsnd
+(
+    tEplFrameInfo *pFrameInfo_p
+)
+{
+    tEplKernel          Ret = kEplSuccessful;
+    unsigned int        uiAsndOffset;
+    tEplApiEventArg     ApiEventArg;
+    tEplApiEventType    EventType;
+
+    // Check for correct input
+    uiAsndOffset    = offsetof(tEplFrame, m_Data.m_Asnd);
+
+    if
+    (
+        ( pFrameInfo_p->m_uiFrameSize    <= uiAsndOffset + 1        ) ||
+        ( pFrameInfo_p->m_uiFrameSize    >  EPL_C_DLL_MAX_ASYNC_MTU )
+    )
+    {
+        return kEplReject;
+    }
+
+    // Forward received ASnd frame
+    ApiEventArg.m_RcvAsnd.m_pFrame      = pFrameInfo_p->m_pFrame;
+    ApiEventArg.m_RcvAsnd.m_FrameSize   = pFrameInfo_p->m_uiFrameSize;
+
+    EventType = kEplApiEventReceivedAsnd;
+
+    // call user callback
+    Ret = EplApiInstance_g.m_InitParam.m_pfnCbEvent(EventType, &ApiEventArg, EplApiInstance_g.m_InitParam.m_pEventUserArg);
+
+    return Ret;
+}
 
 // EOF
 

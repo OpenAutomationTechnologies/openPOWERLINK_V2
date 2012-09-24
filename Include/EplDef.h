@@ -146,10 +146,18 @@
 #define EPL_DLL_DISABLE_DEFERRED_RXFRAME_RELEASE   FALSE
 #endif
 
-#if (EPL_DLL_PRES_CHAINING_CN == FALSE) && (EPL_DLL_PRES_CHAINING_MN == FALSE)
-  #define EPL_C_DLL_MAX_ASND_SERVICE_IDS  5   // see tEplDllAsndServiceId in EplDll.h
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0 )
+    // MN should support generic Asnd frames, thus the maximum ID
+    // is set to a large value
+    #define EPL_C_DLL_MAX_ASND_SERVICE_IDS  253
 #else
-  #define EPL_C_DLL_MAX_ASND_SERVICE_IDS  6
+    // CN is usually low on resources, thus the maximum ID is
+    // set as low as possible
+    #if (EPL_DLL_PRES_CHAINING_CN == FALSE)
+      #define EPL_C_DLL_MAX_ASND_SERVICE_IDS  5   // see tEplDllAsndServiceId in EplDll.h
+    #else
+      #define EPL_C_DLL_MAX_ASND_SERVICE_IDS  6
+    #endif
 #endif
 
 #if (EPL_DLL_PRES_CHAINING_CN != FALSE)

@@ -103,7 +103,8 @@
 #define EPLLIN_CMD_PI_EXCHANGE              _IOW ('=', 16, tEplApiProcessImageCopyJob)
 #define EPLLIN_CMD_PI_LINKOBJECT            _IOWR('=', 17, tEplLinProcessImageLinkObject)
 #define EPLLIN_CMD_SET_CDC_FILENAME         _IOW ('=', 18, tEplLinCdcFilename)
-
+#define EPLLIN_CMD_SEND_ASND                _IOW ('=', 19, tEplLinSendAsnd)
+#define EPLLIN_CMD_SET_ASND_FORWARD         _IOW ('=', 20, tEplLinAsndForward)
 
 //---------------------------------------------------------------------------
 // typedef
@@ -115,7 +116,8 @@ typedef struct
     tEplApiEventArg*    m_pEventArg;
     tEplApiEventType*   m_pEventType;
     tEplKernel          m_RetCbEvent;
-
+    BYTE                *m_pUserBuf;
+    size_t              m_UserBufSize;
 } tEplLinEvent;
 
 typedef struct
@@ -175,6 +177,20 @@ typedef struct
 
 } tEplLinCdcFilename;
 
+typedef struct
+{
+    BYTE                m_bDstNodeId;
+    tEplAsndFrame       *m_pAsndFrame;
+    size_t              m_uiAsndSize;
+}
+tEplLinSendAsnd;
+
+typedef struct
+{
+    BYTE                m_bServiceId;
+    tEplApiAsndFilter   m_FilterType;
+}
+tEplLinAsndForward;
 
 //---------------------------------------------------------------------------
 // function prototypes

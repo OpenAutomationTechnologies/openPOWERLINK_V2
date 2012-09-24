@@ -154,6 +154,9 @@ MODULE_LICENSE("Dual BSD/GPL");
 #define EPL_STATE_RUNNING       3
 #define EPL_STATE_SHUTDOWN      4
 
+#define EPL_API_LINUX_KERNEL_BUF_SIZE         EPL_C_DLL_MAX_ASYNC_MTU     // Ensure buffer is large enough for all events
+
+
 
 //---------------------------------------------------------------------------
 //  Global variables
@@ -177,6 +180,8 @@ static atomic_t             AtomicSyncState_g = ATOMIC_INIT(EVENT_STATE_INIT);
 #if (EPL_OBD_USE_LOAD_CONCISEDCF != FALSE)
 static char                 szCdcFilename_g[PATH_MAX];
 #endif
+
+static BYTE                 m_abKernelBuf_g[ EPL_API_LINUX_KERNEL_BUF_SIZE ];
 
 
 //---------------------------------------------------------------------------
@@ -1036,6 +1041,34 @@ int  iRet;
                 goto Exit;
             }
 
+            // Special handling for "Received Asnd"-events
+            // The frame is forwarded to user space in a separate user space buffer
+            switch( EventType_g )
+            {
+                case kEplApiEventReceivedAsnd:
+                {
+                    size_t  CopySize;
+
+                    CopySize    = min(pEventArg_g->m_RcvAsnd.m_FrameSize, Event.m_UserBufSize);
+
+                    // Copy Asnd frame to user buffer
+                    iErr = copy_to_user(Event.m_pUserBuf, pEventArg_g->m_RcvAsnd.m_pFrame, CopySize);
+                    if (iErr != 0)
+                    {   // not all data could be copied
+                        iRet = -EIO;
+                        goto Exit;
+                    }
+
+                    Event.m_pEventArg->m_RcvAsnd.m_pFrame   = (tEplFrame *) Event.m_pUserBuf;
+
+                    break;
+                }
+                default:
+                {
+                    break;
+                }
+            }
+
             // return to EplApiProcess(), which will call the application's event callback function
             iRet = 0;
 
@@ -1290,6 +1323,55 @@ int  iRet;
         }
 #endif
 
+        // ----------------------------------------------------------
+        case EPLLIN_CMD_SEND_ASND:
+        {
+            tEplLinSendAsnd  Par;
+
+            iErr = copy_from_user(&Par, (const void*)ulArg_p, sizeof (Par));
+            if (iErr != 0)
+            {
+                iRet = -EIO;
+                goto Exit;
+            }
+
+            // Validate input
+            if( Par.m_uiAsndSize >= sizeof(m_abKernelBuf_g))
+            {
+                return -1;
+            }
+
+            iErr = copy_from_user( m_abKernelBuf_g, (const void*)Par.m_pAsndFrame, Par.m_uiAsndSize);
+            if (iErr != 0)
+            {
+                iRet = -EIO;
+                goto Exit;
+            }
+
+            EplRet  = EplApiSendAsndFrame( Par.m_bDstNodeId, (tEplAsndFrame *)m_abKernelBuf_g, Par.m_uiAsndSize );
+
+            iRet = (int) EplRet;
+            break;
+        }
+
+
+        // ----------------------------------------------------------
+        case EPLLIN_CMD_SET_ASND_FORWARD:
+        {
+            tEplLinAsndForward  Par;
+
+            iErr = copy_from_user(&Par, (const void*)ulArg_p, sizeof (Par));
+            if (iErr != 0)
+            {
+                iRet = -EIO;
+                goto Exit;
+            }
+
+            EplRet = EplApiSetAsndForward( Par.m_bServiceId, Par.m_FilterType );
+
+            iRet = (int) EplRet;
+            break;
+        }
 
         // ----------------------------------------------------------
         default:
