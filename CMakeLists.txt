@@ -94,8 +94,6 @@ IF (UNIX)
     SET(CFG_POWERLINK_EDRV "82573" CACHE STRING "Valid drivers are 8139, 82573, 8255x, Fec")
     OPTION (CFG_KERNEL_STACK "Use POWERLINK kernel based stack (if OFF, userspace library will be used!)" OFF)
     OPTION (CFG_X86_LINUX_DEMO_KERNEL "Build Linux kernel based demo application" OFF)
-    CMAKE_DEPENDENT_OPTION (CFG_X86_LINUX_DEMO_QT "Build Linux QT demo application" OFF
-                            "NOT CFG_POWERLINK_PROCESS_IMAGE;CFG_KERNEL_STACK" OFF)
 ENDIF (UNIX)
 
 # additional Windows settings
@@ -146,9 +144,4 @@ IF(UNIX)
     IF (CFG_X86_LINUX_DEMO_KERNEL)
         ADD_SUBDIRECTORY(Examples/X86/Linux/gnu/demo_kernel)
     ENDIF (CFG_X86_LINUX_DEMO_KERNEL)
-
-    # Add subdirectory of QT demo application
-    IF (CFG_X86_LINUX_DEMO_QT)
-        ADD_SUBDIRECTORY(Examples/X86/Linux/gnu/demo_qt)
-    ENDIF (CFG_X86_LINUX_DEMO_QT)
 ENDIF(UNIX)

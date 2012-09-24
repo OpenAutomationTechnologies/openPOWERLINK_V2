@@ -153,14 +153,7 @@ openPOWERLINK on Linux x86
   It is located in:
   Examples/X86/Linux/gnu/demo_kernel
 
-5.2 QT demo
-  The QT demo is a simple QT demo application which can be used together
-  with the openPOWERLINK kernel module.
-  
-  It can be found in:
-  Examples/X86/Linux/gnu/demo_qt
-
-5.3 QT demo with process image
+5.2 QT demo with process image
   This QT demo implements a POWERLINK managing node (MN) using the configuration
   manager (CFM) to initialize the controlled nodes. It uses a network configuration
   created with the openCONFIGURATOR tool. This demo can be used either with
@@ -169,7 +162,7 @@ openPOWERLINK on Linux x86
   It is found in: 
   Examples/X86/Generic/demo_process_image_qt
 
-5.4 Console demo with process image
+5.3 Console demo with process image
   This demo also implements a POWERLINK MN with CFM. It is implemented as
   console application and is intended to machines where no graphical user
   interface is available. This demo can be used either with the kernel-based
@@ -265,14 +258,8 @@ openPOWERLINK on Linux x86
                         If enabled the process image based QT application
                         will be compiled. It can be used either with the kernel
                         stack or with the userspace stack.
-						
-                        Requires: CFG_POWERLINK_CFM, CFG_POWERLINK_PROCESS_IMAGE
 
-  CFG_X86_LINUX_DEMO_QT
-                        If enabled the standard QT application will be compiled.
-                        It can only be used with the kernel stack.
-                        This option is not allowed if CFG_POWERLINK_PROCESS_IMAGE
-						is enabled!
+                        Requires: CFG_POWERLINK_CFM, CFG_POWERLINK_PROCESS_IMAGE
 
   CMAKE_INSTALL_PREFIX  Specifies the installation directory where your files
                         will be installed. Default directory is:
