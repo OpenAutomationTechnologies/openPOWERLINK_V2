@@ -272,14 +272,6 @@ int openPowerlinkInit (char *pszEthName, unsigned int uiDevNumber)
     EplApiInitParam.m_uiSyncNodeId = EPL_C_ADR_SYNC_ON_SOA; // for fSyncOnPrcNode==TRUE, this means last PRC node
     EplApiInitParam.m_fSyncOnPrcNode = TRUE;
 
-    // currently unset parameters left at default value 0
-    //EplApiInitParam.m_qwVendorSpecificExt1;
-    //EplApiInitParam.m_dwVerifyConfigurationDate; // CFM_VerifyConfiguration_REC.ConfDate_U32
-    //EplApiInitParam.m_dwVerifyConfigurationTime; // CFM_VerifyConfiguration_REC.ConfTime_U32
-    //EplApiInitParam.m_dwApplicationSwDate;       // PDL_LocVerApplSw_REC.ApplSwDate_U32 on programmable device or date portion of NMT_ManufactSwVers_VS on non-programmable device
-    //EplApiInitParam.m_dwApplicationSwTime;       // PDL_LocVerApplSw_REC.ApplSwTime_U32 on programmable device or time portion of NMT_ManufactSwVers_VS on non-programmable device
-    //EplApiInitParam.m_abVendorSpecificExt2[48];
-
     // set callback functions
     EplApiInitParam.m_pfnCbEvent = AppCbEvent;
     EplApiInitParam.m_pfnCbSync  = AppCbSync;
