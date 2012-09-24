@@ -6,7 +6,7 @@
 #     B&R Strasse 1, A-5142 Eggelsberg
 #     www.br-automation.com
 #
-# Description: cmake file of userspace console demo application
+# Description: cmake file of CiA 302 MN console demo application
 #
 # License:
 #
@@ -21,7 +21,7 @@
 #      notice, this list of conditions and the following disclaimer in the
 #      documentation and/or other materials provided with the distribution.
 #
-#   3. Neither the name of copyright holders nor the names of its
+#   3. Neither the name of the copyright holders nor the names of its
 #      contributors may be used to endorse or promote products derived
 #      from this software without prior written permission. For written
 #      permission, please contact office@br-automation.com.
@@ -118,23 +118,23 @@ IF (WIN32)
 ENDIF (WIN32)
 
 
-ADD_EXECUTABLE(demo_pi_console ${DEMO_SOURCES})
+ADD_EXECUTABLE(demo_mn_console ${DEMO_SOURCES})
 
-SET_PROPERTY(TARGET demo_pi_console
+SET_PROPERTY(TARGET demo_mn_console
              PROPERTY COMPILE_DEFINITIONS_DEBUG DEBUG;DEF_DEBUG_LVL=${CFG_DEBUG_LVL})
 
 IF (UNIX)
     IF (NOT CFG_KERNEL_STACK)
-        TARGET_LINK_LIBRARIES(demo_pi_console powerlink pcap pthread rt)
+        TARGET_LINK_LIBRARIES(demo_mn_console powerlink pcap pthread rt)
     ELSE (NOT CFG_KERNEL_STACK)
-        TARGET_LINK_LIBRARIES(demo_pi_console pthread rt)
+        TARGET_LINK_LIBRARIES(demo_mn_console pthread rt)
     ENDIF (NOT CFG_KERNEL_STACK)
 ELSEIF (WIN32)
-    TARGET_LINK_LIBRARIES(demo_pi_console openPOWERLINK wpcap iphlpapi)
+    TARGET_LINK_LIBRARIES(demo_mn_console openPOWERLINK wpcap iphlpapi)
 ENDIF ()
 
 # add installation rules
-INSTALL(TARGETS demo_pi_console RUNTIME DESTINATION bin)
+INSTALL(TARGETS demo_mn_console RUNTIME DESTINATION bin)
 INSTALL(FILES mnobd.cdc DESTINATION bin)
 
 IF (UNIX)

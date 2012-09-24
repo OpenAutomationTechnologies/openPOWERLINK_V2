@@ -125,14 +125,14 @@ openPOWERLINK under Linux on Freescale i.MX51 ARM
   It is found in:
   Examples/X86/Generic/demo_process_image_qt
 
-5.3 Console demo with process image
+5.3 Console MN demo
   This demo also implements a POWERLINK MN with CFM. It is implemented as
   console application and is intended to machines where no graphical user
   interface is available. This demo can be used either with the kernel-based
   stack or with the userspace stack.
 
   It is located in:
-  Examples/X86/Generic/demo_process_image_console
+  Examples/X86/Generic/demo_mn_console
 
 
 6 Building
@@ -211,8 +211,8 @@ openPOWERLINK under Linux on Freescale i.MX51 ARM
                         It cannot be used if CFG_POWERLINK_PROCESS_IMAGE is
                         enabled!
 
-  CFG_X86_LINUX_DEMO_PROCESS_IMAGE_CONSOLE
-                        If enabled the process image based console application
+  CFG_X86_DEMO_MN_CONSOLE
+                        If enabled the MN console application
                         will be compiled. It can be used either with the kernel
                         stack or with the userspace stack.
 

@@ -61,7 +61,7 @@
 X86 PC with Linux or Windows operating system
 
   * MN demo application using a console based interface
-    = Examples\X86\Generic\demo_process_image_console
+    = Examples\X86\Generic\demo_mn_console
   * MN demo application using a Qt based interface
     = Examples\X86\Generic\demo_process_image_qt
 

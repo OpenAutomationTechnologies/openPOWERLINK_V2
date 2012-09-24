@@ -9,7 +9,7 @@
 
   Project:      openPOWERLINK
 
-  Description:  openPOWERLINK process image console demo application
+  Description:  openPOWERLINK MN console demo application
 
   License:
 
@@ -350,7 +350,7 @@ int  main (int argc, char **argv)
                              syscall(SYS_gettid));
                              */
     printf("----------------------------------------------------\n");
-    printf("openPOWERLINK console process image DEMO application\n");
+    printf("openPOWERLINK console MN DEMO application\n");
     printf("----------------------------------------------------\n");
 
     EPL_MEMSET(&EplApiInitParam, 0, sizeof (EplApiInitParam));
@@ -387,7 +387,7 @@ int  main (int argc, char **argv)
 
     if (i == 0)
     {
-        PRINTF0("\nNo interfaces found! Make sure WinPcap is installed.\n");
+        PRINTF0("\nNo interfaces found! Make sure pcap library is installed.\n");
         EplRet = kEplNoResource;
         goto Exit;
     }

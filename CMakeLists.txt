@@ -80,7 +80,7 @@ SET(CFG_DEBUG_LVL "0xEC000000L" CACHE STRING "Debug Level for debug output")
 OPTION (CFG_POWERLINK_CFM "Use POWERLINK configuration manager (CFM)" ON)
 OPTION (CFG_POWERLINK_PROCESS_IMAGE "Use process image to transfer synchronous data between stack and application" ON)
 
-CMAKE_DEPENDENT_OPTION (CFG_X86_DEMO_PROCESS_IMAGE_CONSOLE "Build process image based console demo application" ON
+CMAKE_DEPENDENT_OPTION (CFG_X86_DEMO_MN_CONSOLE "Build process image based console demo application" ON
                         "CFG_POWERLINK_PROCESS_IMAGE" OFF)
 
 IF (QT4_FOUND)
@@ -124,9 +124,9 @@ IF (NOT CFG_KERNEL_STACK)
 ENDIF (NOT CFG_KERNEL_STACK)
 
 # Add subdirectory of process image based console demo application
-IF (CFG_X86_DEMO_PROCESS_IMAGE_CONSOLE)
-    ADD_SUBDIRECTORY(Examples/X86/Generic/demo_process_image_console)
-ENDIF (CFG_X86_DEMO_PROCESS_IMAGE_CONSOLE)
+IF (CFG_X86_DEMO_MN_CONSOLE)
+    ADD_SUBDIRECTORY(Examples/X86/Generic/demo_mn_console)
+ENDIF (CFG_X86_DEMO_MN_CONSOLE)
 
 # Add subdirectory of process image based QT demo application
 IF (CFG_X86_DEMO_PROCESS_IMAGE_QT)
