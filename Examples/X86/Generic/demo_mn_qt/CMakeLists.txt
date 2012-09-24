@@ -65,6 +65,7 @@ IF (UNIX)
     SET(KERNELMOD_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../../X86/Linux/gnu/powerlink_kernel_module)
 ENDIF (UNIX)
 
+# set sources of POWERLINK application
 SET(DEMO_SOURCES src/EplApi.cpp
                  src/EplCnState.cpp
                  src/EplDataInOutThread.cpp
@@ -85,6 +86,8 @@ IF (WIN32)
                      ${POWERLINK_SOURCE_DIR}/EplStack/trace.c
        )
 ENDIF (WIN32)
+
+SET(DEMO_RESOURCES resources/Resources.qrc)
                  
 SET(DEMO_HEADERS include/EplApi.h
                  include/EplCnState.h
@@ -98,26 +101,22 @@ SET(DEMO_HEADERS include/EplApi.h
                  include/NodeState.h
     )
 
-SET(DEMO_RESOURCES resources/Resources.qrc)
-
-IF (CFG_KERNEL_STACK)
-    IF (UNIX)
+IF (UNIX)
+    IF (CFG_KERNEL_STACK)
         SET(DEMO_SOURCES ${DEMO_SOURCES}
                          ${POWERLINK_SOURCE_DIR}/EplStack/EplApiLinuxUser.c)
-    ENDIF (UNIX)
-ELSE (CFG_KERNEL_STACK)
-    SET(DEMO_SOURCES ${DEMO_SOURCES}
+    ELSE (CFG_KERNEL_STACK)
+        SET(DEMO_SOURCES ${DEMO_SOURCES}
                      src/InterfaceSelectDialog.cpp)
-	SET(DEMO_HEADERS ${DEMO_HEADERS}
-                     include/InterfaceSelectDialog.h)      
-ENDIF (CFG_KERNEL_STACK)                 
-
+        SET(DEMO_HEADERS ${DEMO_HEADERS}
+                     include/InterfaceSelectDialog.h)
+    ENDIF (CFG_KERNEL_STACK)
+ENDIF (UNIX)
 
 INCLUDE(${QT_USE_FILE})
 ADD_DEFINITIONS(${QT_DEFINITIONS})
 
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/include
-                    ${POWERLINK_INCLUDE_DIR}
                     ${CMAKE_CURRENT_BINARY_DIR}
 )
 
@@ -125,7 +124,7 @@ IF (WIN32)
     INCLUDE_DIRECTORIES(${POWERLINK_SOURCE_DIR}/Target/X86/Windows/WpdPack/Include)
 ENDIF (WIN32)
 
-ADD_DEFINITIONS(-DCONFIG_CFM -DCONFIG_OPENCONFIGURATOR_MAPPING)
+ADD_DEFINITIONS(-DCONFIG_CFM -DCONFIG_OPENCONFIGURATOR_MAPPING -DCONFIG_MN)
 
 # Configure depending on using usermode stack or kernel stack
 IF (CFG_KERNEL_STACK)
@@ -133,8 +132,9 @@ IF (CFG_KERNEL_STACK)
     ADD_DEFINITIONS(-DCONFIG_POWERLINK_KERNELSTACK)
 ELSE (CFG_KERNEL_STACK)
     INCLUDE_DIRECTORIES(${USERLIB_INCLUDE_DIR})
-    ADD_DEFINITIONS(-DCONFIG_POWERLINK_USERSTACK) 
-ENDIF (CFG_KERNEL_STACK)      
+    ADD_DEFINITIONS(-DCONFIG_POWERLINK_USERSTACK)
+    MESSAGE("User Stack")
+ENDIF (CFG_KERNEL_STACK)
 
 # Setup QT4 Wrappers
 QT4_WRAP_CPP(DEMO_HEADERS_MOC ${DEMO_HEADERS})
@@ -160,31 +160,31 @@ ADD_EXECUTABLE(demo_mn_qt ${DEMO_SOURCES}
                           ${DEMO_RESOURCES_RCC}
 )
 
-IF (WIN32)
-    TARGET_LINK_LIBRARIES(demo_mn_qt openPOWERLINK wpcap iphlpapi ${QT_LIBRARIES})
-ELSEIF(UNIX)
-    TARGET_LINK_LIBRARIES(demo_mn_qt ${QT_LIBRARIES})
-
-    IF (NOT CFG_KERNEL_STACK)
-        TARGET_LINK_LIBRARIES(demo_mn_qt powerlink pcap pthread rt)  
-    ENDIF (NOT CFG_KERNEL_STACK)  
-ENDIF (WIN32)
-
-
 SET_PROPERTY(TARGET demo_mn_qt
              PROPERTY COMPILE_DEFINITIONS_DEBUG DEBUG;DEF_DEBUG_LVL=${CFG_DEBUG_LVL})
+
+IF (UNIX)
+    IF (NOT CFG_KERNEL_STACK)
+        TARGET_LINK_LIBRARIES(demo_mn_qt powerlink pcap pthread rt ${QT_LIBRARIES})
+    ELSE(NOT CFG_KERNEL_STACK)
+        TARGET_LINK_LIBRARIES(demo_mn_qt ${QT_LIBRARIES})
+    ENDIF (NOT CFG_KERNEL_STACK)  
+ELSEIF(WIN32)
+    TARGET_LINK_LIBRARIES(demo_mn_qt openPOWERLINK wpcap iphlpapi ${QT_LIBRARIES})
+ENDIF (UNIX)
 
 # add installation rules
 INSTALL(TARGETS demo_mn_qt RUNTIME DESTINATION bin)
 INSTALL(FILES mnobd.cdc DESTINATION bin)
 
-IF (WIN32)
+IF (UNIX)
+    IF (NOT CFG_KERNEL_STACK)
+        INSTALL(PROGRAMS ${CMAKE_CURRENT_SOURCE_DIR}/../../Linux/gnu/tools/set_prio DESTINATION bin)
+    ENDIF (NOT CFG_KERNEL_STACK)
+ELSEIF (WIN32)
     INSTALL(FILES ${QT_BINARY_DIR}/QtCore4.dll DESTINATION bin)
     INSTALL(FILES ${QT_BINARY_DIR}/QtGui4.dll DESTINATION bin)
     INSTALL(FILES ${QT_BINARY_DIR}/QtCored4.dll DESTINATION bin)
     INSTALL(FILES ${QT_BINARY_DIR}/QtGuid4.dll DESTINATION bin)
-ELSEIF (UNIX)
-    IF (NOT CFG_KERNEL_STACK)
-        INSTALL(PROGRAMS ${CMAKE_CURRENT_SOURCE_DIR}/../../Linux/gnu/tools/set_prio DESTINATION bin)
-    ENDIF (NOT CFG_KERNEL_STACK)
-ENDIF (WIN32)
+ENDIF (UNIX)
+

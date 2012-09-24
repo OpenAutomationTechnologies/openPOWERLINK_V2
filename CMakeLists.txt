@@ -54,7 +54,7 @@ IF (WIN32)
     # ensure working support of VS.NET 2010
     CMAKE_MINIMUM_REQUIRED (VERSION 2.8.4)
 ELSE (WIN32)
-    CMAKE_MINIMUM_REQUIRED (VERSION 2.6)
+    CMAKE_MINIMUM_REQUIRED (VERSION 2.8.0)
 ENDIF (WIN32)
 
 PROJECT (openPOWERLINK C CXX)
@@ -76,25 +76,32 @@ FIND_PACKAGE(Qt4 QUIET)
 ###############################################################################
 #SET(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/bin)
 
+OPTION (CFG_POWERLINK_MN "Compile openPOWERLINK MN (Otherwise CN)" ON)
 SET(CFG_DEBUG_LVL "0xEC000000L" CACHE STRING "Debug Level for debug output")
-OPTION (CFG_POWERLINK_CFM "Use POWERLINK configuration manager (CFM)" ON)
-OPTION (CFG_POWERLINK_PROCESS_IMAGE "Use process image to transfer synchronous data between stack and application" ON)
 
 CMAKE_DEPENDENT_OPTION (CFG_X86_DEMO_MN_CONSOLE "Build process image based console demo application" ON
-                        "CFG_POWERLINK_PROCESS_IMAGE" OFF)
+                        "CFG_POWERLINK_MN" OFF)
 
-IF (QT4_FOUND)
-    CMAKE_DEPENDENT_OPTION (CFG_X86_DEMO_MN_QT "Build process image based QT demo application" OFF
-                            "CFG_POWERLINK_PROCESS_IMAGE" OFF)
-ENDIF (QT4_FOUND)
+CMAKE_DEPENDENT_OPTION (CFG_X86_DEMO_MN_QT "Build process image based QT demo application" OFF
+                        "CFG_POWERLINK_MN;QT4_FOUND" OFF)
+
+CMAKE_DEPENDENT_OPTION (CFG_X86_DEMO_LINUX_KERNEL "Build Linux kernel based demo application (DEPRECATED)" OFF
+                        "CFG_KERNEL_STACK;CFG_POWERLINK_MN" OFF)
+
+IF (UNIX)
+    SET (CFG_KERNEL_STACK OFF CACHE BOOL "Use POWERLINK kernel based stack (if OFF, userspace library will be used!)" )
+ENDIF (UNIX)
 
 # additional Linux settings
-IF (UNIX)
+IF (CFG_KERNEL_STACK)
     SET(CFG_KERNEL_DIR "" CACHE PATH "Select the kernel directory to be used, if not specified, system kernel dir will be used!")
     SET(CFG_POWERLINK_EDRV "82573" CACHE STRING "Valid drivers are 8139, 82573, 8255x, Fec")
-    OPTION (CFG_KERNEL_STACK "Use POWERLINK kernel based stack (if OFF, userspace library will be used!)" OFF)
-    OPTION (CFG_X86_LINUX_DEMO_KERNEL "Build Linux kernel based demo application" OFF)
-ENDIF (UNIX)
+    SET_PROPERTY(CACHE CFG_POWERLINK_EDRV PROPERTY STRINGS 8139 82573 8255x Fec)
+
+ELSE (CFG_KERNEL_STACK)
+    UNSET (CFG_KERNEL_DIR CACHE)
+    UNSET (CFG_POWERLINK_EDRV CACHE)
+ENDIF (CFG_KERNEL_STACK)
 
 # additional Windows settings
 IF (WIN32)
@@ -123,12 +130,12 @@ IF (NOT CFG_KERNEL_STACK)
     ADD_SUBDIRECTORY(Examples/X86/Generic/powerlink_user_lib)
 ENDIF (NOT CFG_KERNEL_STACK)
 
-# Add subdirectory of process image based console demo application
+# Add subdirectory of MN console demo application
 IF (CFG_X86_DEMO_MN_CONSOLE)
     ADD_SUBDIRECTORY(Examples/X86/Generic/demo_mn_console)
 ENDIF (CFG_X86_DEMO_MN_CONSOLE)
 
-# Add subdirectory of process image based QT demo application
+# Add subdirectory of MN QT demo application
 IF (CFG_X86_DEMO_MN_QT)
     ADD_SUBDIRECTORY(Examples/X86/Generic/demo_mn_qt)
 ENDIF (CFG_X86_DEMO_MN_QT)
@@ -141,7 +148,8 @@ IF(UNIX)
     ENDIF (CFG_KERNEL_STACK)
 
     # Add subdirectory of kernel demo application
-    IF (CFG_X86_LINUX_DEMO_KERNEL)
+    IF (CFG_X86_DEMO_LINUX_KERNEL)
         ADD_SUBDIRECTORY(Examples/X86/Linux/gnu/demo_kernel)
-    ENDIF (CFG_X86_LINUX_DEMO_KERNEL)
+    ENDIF (CFG_X86_DEMO_LINUX_KERNEL)
+
 ENDIF(UNIX)

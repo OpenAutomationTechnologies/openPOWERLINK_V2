@@ -76,7 +76,7 @@ openPOWERLINK on Linux x86
 2.4.1 CMake
    For building the openPOWERLINK stack and demo applications the Open Source
    cross-platform build tool CMake is used (http://www.cmake.org). CMake
-   version V2.6 or higher is required.
+   version V2.8 or higher is required.
 
 2.4.2 libpcap library
   In order to use the userspace POWERLINK stack the libpcap library is needed
@@ -130,7 +130,7 @@ openPOWERLINK on Linux x86
   driver.
 
   The userspace stack is located in: 
-  Examples/X86/Linux/gnu/powerlink_user_lib
+  Examples/X86/Linux/Generic/powerlink_user_lib
 
 4 Tools
 -------
@@ -175,7 +175,7 @@ openPOWERLINK on Linux x86
 ----------
 
 6.1 CMake
-  For building openPOWELRINK on Linux the build utility CMake
+  For building openPOWERLINK on Linux the build utility CMake
   (http://www.cmake.org/) is used. CMake controls the software
   compilation process using simple platform and compiler independent
   configuration files. Depending on the architecture different build
@@ -206,41 +206,21 @@ openPOWERLINK on Linux x86
 
   CFG_KERNEL_DIR        The directory where the kernel sources used for building
                         the kernel modules are located. If it is not set the
-						sources of the running kernel will be used:
+                        sources of the running kernel will be used:
                         /lib/modules/$(shell uname -r)/build
 
   CFG_KERNEL_STACK      Determines whether kernel stack or usermode stack are
                         compiled. If enabled, kernel stack will be compiled.
 
-  CFG_POWERLINK_CFM     If enabled, the POWERLINK stack will be compiled with
-                        configuration manager (CFM). The configuration manager
-                        is used to configure the CNs on the network.
-                        (For additional information on the CFM see chapter 6.7
-                        of EPSG Draft Standard 301, Ethernet POWERLINK,
-                        Communication Profile Specification)
-
-                        CFM must be enabled in order to use the process image
-                        based demos.
+  CFG_POWERLINK_MN      If enabled, the POWERLINK stack will be compiled with
+                        MN functionality otherwise it will be compiled to be
+                        used with CN nodes.
 
   CFG_POWERLINK_EDRV    Selects the Ethernet driver used for the kernel based
                         stack and demos. Valid options are:
                         8139:   Realtek 8139 based network interface cards
                         82573:  Intel 82573 based network interface cards
-
-  CFG_POWERLINK_PROCESS_IMAGE
-                        If enabled, the process image functions are compiled
-                        into the stack. Instead of using single variables and
-                        linking them to the object dictionary a whole process
-                        image could be mapped. Process images are required if
-                        configurations created by openCONFIGURATOR should be
-                        used. openCONFIGURATOR provides the header file xap.h 
-                        which defines the structure of the process image. It
-                        contains all synchronous data fields supported by the
-                        configured CNs.
-
-                        Process images must be enabled for using the process
-                        image demo applications. The kernel based demos and
-                        the standard QT demo do not use process images!                                                                 
+                        8255x:	Intel 8255x 100MBit based network interface cards
 
   CFG_X86_LINUX_DEMO_KERNEL
                         If enabled the kernel demo will be compiled.
@@ -248,18 +228,18 @@ openPOWERLINK on Linux x86
                         enabled!
 
   CFG_X86_DEMO_MN_CONSOLE
-                        If enabled the process image based console application
+                        If enabled the MN console application
                         will be compiled. It can be used either with the kernel
                         stack or with the userspace stack.
-						
-                        Requires: CFG_POWERLINK_CFM, CFG_POWERLINK_PROCESS_IMAGE
+
+                        Requires: CFG_POWERLINK_MN
 
   CFG_X86_DEMO_MN_QT
-                        If enabled the process image based QT application
+                        If enabled the MN QT application
                         will be compiled. It can be used either with the kernel
                         stack or with the userspace stack.
 
-                        Requires: CFG_POWERLINK_CFM, CFG_POWERLINK_PROCESS_IMAGE
+                        Requires: CFG_POWERLINK_MN
 
   CMAKE_INSTALL_PREFIX  Specifies the installation directory where your files
                         will be installed. Default directory is:

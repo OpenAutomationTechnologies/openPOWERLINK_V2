@@ -38,7 +38,7 @@ openPOWERLINK under Linux on Freescale i.MX51 ARM
 2.4.1 CMake
   For building the openPOWERLINK stack and demo applications the Open Source
   cross-platform build tool CMake is used (http://www.cmake.org). CMake
-  version V2.6 or higher is required.
+  version V2.8 or higher is required.
 
 2.4.2 LTIB
   The LTIB (Linux Target Image Builder) can be used to build BSPs (Board Support
@@ -121,7 +121,7 @@ openPOWERLINK under Linux on Freescale i.MX51 ARM
   manager (CFM) to initialize the controlled nodes. It uses a network configuration
   created with the openCONFIGURATOR tool. This demo can be used either with
   the kernel based stack or with the userspace stack.
-
+  
   It is found in:
   Examples/X86/Generic/demo_mn_qt
 
@@ -133,7 +133,6 @@ openPOWERLINK under Linux on Freescale i.MX51 ARM
 
   It is located in:
   Examples/X86/Generic/demo_mn_console
-
 
 6 Building
 ----------
