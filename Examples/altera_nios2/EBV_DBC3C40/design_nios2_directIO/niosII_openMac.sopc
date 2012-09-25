@@ -301,19 +301,6 @@
          type = "boolean";
       }
    }
-   element system_timer.s1
-   {
-      datum _lockedAddress
-      {
-         value = "0";
-         type = "boolean";
-      }
-      datum baseAddress
-      {
-         value = "2304";
-         type = "long";
-      }
-   }
    element clock_crossing_0.s1
    {
       datum _lockedAddress
@@ -324,6 +311,32 @@
       datum baseAddress
       {
          value = "0";
+         type = "long";
+      }
+   }
+   element remote_update_cycloneiii_0.s1
+   {
+      datum _lockedAddress
+      {
+         value = "1";
+         type = "boolean";
+      }
+      datum baseAddress
+      {
+         value = "2048";
+         type = "long";
+      }
+   }
+   element system_timer.s1
+   {
+      datum _lockedAddress
+      {
+         value = "0";
+         type = "boolean";
+      }
+      datum baseAddress
+      {
+         value = "2304";
          type = "long";
       }
    }
@@ -340,19 +353,6 @@
       datum baseAddress
       {
          value = "2336";
-         type = "long";
-      }
-   }
-   element remote_update_cycloneiii_0.s1
-   {
-      datum _lockedAddress
-      {
-         value = "1";
-         type = "boolean";
-      }
-      datum baseAddress
-      {
-         value = "2048";
          type = "long";
       }
    }
@@ -475,7 +475,7 @@
  <parameter name="projectName" value="nios_openMac.qpf" />
  <parameter name="sopcBorderPoints" value="true" />
  <parameter name="systemHash" value="2612709267" />
- <parameter name="timeStamp" value="1344423753053" />
+ <parameter name="timeStamp" value="1346938394030" />
  <module kind="clock_source" version="10.1" enabled="1" name="clk_0">
   <parameter name="clockFrequency" value="50000000" />
   <parameter name="clockFrequencyKnown" value="true" />
@@ -885,7 +885,7 @@
   <parameter name="clockFrequency" value="25000000" />
   <parameter name="AUTO_DEVICE_FAMILY" value="Cyclone III" />
  </module>
- <module kind="powerlink" version="2.0" enabled="1" name="powerlink_0">
+ <module kind="powerlink" version="0.2.5" enabled="1" name="powerlink_0">
   <parameter name="expertMode" value="false" />
   <parameter name="clkRateEth" value="100000000" />
   <parameter name="clkRate50" value="50000000" />

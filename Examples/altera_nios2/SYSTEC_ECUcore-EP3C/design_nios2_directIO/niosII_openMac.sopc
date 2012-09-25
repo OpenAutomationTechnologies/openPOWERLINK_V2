@@ -228,11 +228,11 @@
          type = "int";
       }
    }
-   element status_led_pio.s1
+   element clock_crossing_0.s1
    {
       datum baseAddress
       {
-         value = "32";
+         value = "33554432";
          type = "long";
       }
    }
@@ -275,11 +275,11 @@
          type = "long";
       }
    }
-   element clock_crossing_0.s1
+   element status_led_pio.s1
    {
       datum baseAddress
       {
-         value = "33554432";
+         value = "32";
          type = "long";
       }
    }
@@ -343,7 +343,7 @@
  <parameter name="projectName" value="nios_openMac.qpf" />
  <parameter name="sopcBorderPoints" value="true" />
  <parameter name="systemHash" value="-8844953763" />
- <parameter name="timeStamp" value="1344424785627" />
+ <parameter name="timeStamp" value="1346939080078" />
  <module kind="clock_source" version="10.1" enabled="1" name="clkpcp">
   <parameter name="clockFrequency" value="100000000" />
   <parameter name="clockFrequencyKnown" value="true" />
@@ -597,7 +597,7 @@
   <parameter name="targetClockRate" value="500000" />
   <parameter name="targetSlaveSelectToSClkDelay" value="0.0" />
  </module>
- <module kind="powerlink" version="2.0" enabled="1" name="powerlink_0">
+ <module kind="powerlink" version="0.2.5" enabled="1" name="powerlink_0">
   <parameter name="expertMode" value="true" />
   <parameter name="clkRateEth" value="100000000" />
   <parameter name="clkRate50" value="50000000" />
