@@ -147,15 +147,15 @@ CFLAGS += ${INCLUDES}
 
 .PHONY:	header
 header:
-	@echo
+	@echo ""
 	@echo "================================================================================"
 	@echo " Direct IO - Build System (Xilinx)"
 	@echo "================================================================================"
-	@echo
+	@echo ""
 	@echo " Copyright (c) 2012 B&R"
 	@echo " Version $(VERSION)"
 	@echo "================================================================================"
-	@echo
+	@echo ""
 	@echo "Write 'make all' to generate the bitstream and Direct I/O software example"
 	@echo ""
 	@echo "Write 'make application' to generate the Direct I/O software example"
@@ -255,6 +255,7 @@ clean_sw:
 clean_hw:
 	-@echo "Cleaning bitstream parts..."
 	$(MAKE) -C $(XPS_DIR) -f system.make clean
+	-${RM} -rf $(XPS_DIR)/system.make
 	-@echo ' '
 
 

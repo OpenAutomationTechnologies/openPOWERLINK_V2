@@ -39,6 +39,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
+
 #include "Epl.h"
 
 #ifdef __NIOS2__
@@ -108,18 +109,6 @@ static BYTE        portIsOutput[4];
 static BYTE        digitalIn[4];
 static BYTE        digitalOut[4];
 static BOOL        fShutdown_l = FALSE;
-
-#ifdef LCD_BASE
-static char aStrNmtState_l[9][17] = {"INVALID         ",
-                                     "OFF             ",
-                                     "INITIALISATION  ",
-                                     "NOT ACTIVE      ",
-                                     "BASIC ETHERNET  ",
-                                     "PRE_OP1         ",
-                                     "PRE_OP2         ",
-                                     "READY_TO_OP     ",
-                                     "OPERATIONAL     "};
-#endif
 
 //------------------------------------------------------------------------------
 // local function prototypes
