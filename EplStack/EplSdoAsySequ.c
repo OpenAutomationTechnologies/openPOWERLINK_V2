@@ -112,7 +112,7 @@
 // mask to get scon and rcon
 #define EPL_ASY_SDO_CON_MASK        0x03
 
-#define EPL_ASY_SDO_MAX_SEQU_TIMEOUT_MS     86400000       // [ms], 86400000 ms = 1 day
+const DWORD EPL_ASY_SDO_MAX_SEQU_TIMEOUT_MS = (DWORD) 86400000UL;       // [ms], 86400000 ms = 1 day
 
 //---------------------------------------------------------------------------
 // local types
