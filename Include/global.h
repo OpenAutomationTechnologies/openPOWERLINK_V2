@@ -245,10 +245,12 @@
     #ifndef NDEBUG
         #ifndef __KERNEL__
             #include <stdio.h>              // prototype printf() (for TRACE)
-            #define TRACE  printf
+            #define TRACE(...)  printf(__VA_ARGS__)
         #else
-            #define TRACE  printk
+            #define TRACE(...)  printk(__VA_ARGS__)
         #endif
+    #else
+            #define TRACE(...)
     #endif
 
     #define UNUSED_PARAMETER(par)
@@ -287,7 +289,9 @@
 
     #ifndef NDEBUG
         #include <stdio.h>              // prototype printf() (for TRACE)
-        #define TRACE  printf
+        #define TRACE(...)  printf(__VA_ARGS__)
+    #else
+        #define TRACE(...)
     #endif
 
     #define UNUSED_PARAMETER(par)
@@ -325,14 +329,10 @@
     #define PUBLIC
 
     #ifndef NDEBUG
-//            #include "xuartdrv.h"
         #include <stdio.h>              // prototype printf() (for TRACE)
-        #define TRACE  printf
-//            #define TRACE  mprintf
-//            #ifndef TRACE
-//                #define TRACE trace
-//                void trace (char *fmt, ...);
-//            #endif
+        #define TRACE(...)  printf(__VA_ARGS__)
+    #else
+        #define TRACE(...)
     #endif
 
     #define UNUSED_PARAMETER(par)
@@ -377,17 +377,17 @@
     #endif
 
     #ifndef NDEBUG
-        #ifndef TRACE
-            #define TRACE trace
-            #ifdef __cplusplus
-                extern "C"
-                {
-            #endif
-                void trace (const char *fmt, ...);
-            #ifdef __cplusplus
-                }
-            #endif
+        #define TRACE(...) trace(__VA_ARGS__)
+        #ifdef __cplusplus
+            extern "C"
+            {
         #endif
+            void trace (const char *fmt, ...);
+        #ifdef __cplusplus
+            }
+        #endif
+    #else
+        #define TRACE(...)
     #endif
 
     #define UNUSED_PARAMETER(par) par
@@ -453,10 +453,9 @@
     #endif
 
     #ifndef NDEBUG
-        #ifndef TRACE
-            #define TRACE printf
-    //            void trace (char *fmt, ...);
-        #endif
+        #define TRACE(...) printf(__VA_ARGS__)
+    #else
+        #define TRACE(...)
     #endif
 
     #define UNUSED_PARAMETER(par)
@@ -549,83 +548,6 @@
 
 #endif
 
-
-//---------------------------------------------------------------------------
-//  Definition von TRACE
-//---------------------------------------------------------------------------
-
-#ifndef NDEBUG
-
-    #ifndef TRACE
-        #define TRACE
-    #endif
-
-    #ifndef TRACE0
-        #define TRACE0(p0)                      TRACE(p0)
-    #endif
-
-    #ifndef TRACE1
-        #define TRACE1(p0, p1)                  TRACE(p0, p1)
-    #endif
-
-    #ifndef TRACE2
-        #define TRACE2(p0, p1, p2)              TRACE(p0, p1, p2)
-    #endif
-
-    #ifndef TRACE3
-        #define TRACE3(p0, p1, p2, p3)          TRACE(p0, p1, p2, p3)
-    #endif
-
-    #ifndef TRACE4
-        #define TRACE4(p0, p1, p2, p3, p4)      TRACE(p0, p1, p2, p3, p4)
-    #endif
-
-    #ifndef TRACE5
-        #define TRACE5(p0, p1, p2, p3, p4, p5)  TRACE(p0, p1, p2, p3, p4, p5)
-    #endif
-
-    #ifndef TRACE6
-        #define TRACE6(p0, p1, p2, p3, p4, p5, p6)  TRACE(p0, p1, p2, p3, p4, p5, p6)
-    #endif
-
-#else
-
-    #ifndef TRACE
-        #define TRACE
-    #endif
-
-    #ifndef TRACE0
-        #define TRACE0(p0)
-    #endif
-
-    #ifndef TRACE1
-        #define TRACE1(p0, p1)
-    #endif
-
-    #ifndef TRACE2
-        #define TRACE2(p0, p1, p2)
-    #endif
-
-    #ifndef TRACE3
-        #define TRACE3(p0, p1, p2, p3)
-    #endif
-
-    #ifndef TRACE4
-        #define TRACE4(p0, p1, p2, p3, p4)
-    #endif
-
-    #ifndef TRACE5
-        #define TRACE5(p0, p1, p2, p3, p4, p5)
-    #endif
-
-    #ifndef TRACE6
-        #define TRACE6(p0, p1, p2, p3, p4, p5, p6)
-    #endif
-
-#endif
-
-
-
 //---------------------------------------------------------------------------
 //  definition of ASSERT
 //---------------------------------------------------------------------------
@@ -652,7 +574,7 @@
     #ifndef NDEBUG
 
             #define ASSERTMSG(expr,string)  if (!(expr)) { \
-                                                PRINTF0 ("Assertion failed: " string);\
+                                                PRINTF ("Assertion failed: " string);\
                                                 for ( ; ; );}
     #else
         #define ASSERTMSG(expr,string)

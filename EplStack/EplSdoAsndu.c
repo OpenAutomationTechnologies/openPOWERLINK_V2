@@ -490,7 +490,7 @@ tEplFrame*      pFrame;
         }
         else
         {
-            EPL_DBGLVL_SDO_TRACE0("EplSdoAsnduCb(): no free handle\n");
+            EPL_DBGLVL_SDO_TRACE("EplSdoAsnduCb(): no free handle\n");
             goto Exit;
         }
     }

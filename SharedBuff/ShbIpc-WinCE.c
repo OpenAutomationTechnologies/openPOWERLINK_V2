@@ -599,7 +599,7 @@ HANDLE  hEventNewData;
 BOOL    fRes;
 
 
-    // TRACE0("\nShbIpcSignalNewData(): enter\n");
+    // TRACE("\nShbIpcSignalNewData(): enter\n");
 
     if (pShbInstance_p == NULL)
     {
@@ -615,7 +615,7 @@ BOOL    fRes;
     if (hEventNewData != INVALID_HANDLE_VALUE)
     {
         fRes = SetEvent (hEventNewData);
-        // TRACE1("\nShbIpcSignalNewData(): EventNewData set (Result=%d)\n", (int)fRes);
+        // TRACE("\nShbIpcSignalNewData(): EventNewData set (Result=%d)\n", (int)fRes);
         ASSERT( fRes );
     }
 
@@ -624,7 +624,7 @@ BOOL    fRes;
         return ShbIpcSignalNewData(pShbMemHeader->m_pShbInstMaster);
     }
 
-    // TRACE0("\nShbIpcSignalNewData(): leave\n");
+    // TRACE("\nShbIpcSignalNewData(): leave\n");
     return (kShbOk);
 
 }
@@ -671,7 +671,7 @@ tShbError     ShbError;
 
             case WAIT_TIMEOUT:
             {
-                TRACE0("\nShbIpcEnterAtomicSection(): WAIT_TIMEOUT");
+                TRACE("\nShbIpcEnterAtomicSection(): WAIT_TIMEOUT");
                 ASSERT(0);
                 ShbError = kShbBufferInvalid;
                 break;
@@ -679,7 +679,7 @@ tShbError     ShbError;
 
             case WAIT_ABANDONED:
             {
-                TRACE0("\nShbIpcEnterAtomicSection(): WAIT_ABANDONED");
+                TRACE("\nShbIpcEnterAtomicSection(): WAIT_ABANDONED");
                 ASSERT(0);
                 ShbError = kShbBufferInvalid;
                 break;
@@ -687,7 +687,7 @@ tShbError     ShbError;
 
             case WAIT_FAILED:
             {
-                TRACE1("\nShbIpcEnterAtomicSection(): WAIT_FAILED -> LastError=%ld", GetLastError());
+                TRACE("\nShbIpcEnterAtomicSection(): WAIT_FAILED -> LastError=%ld", GetLastError());
                 ASSERT(0);
                 ShbError = kShbBufferInvalid;
                 break;
@@ -695,7 +695,7 @@ tShbError     ShbError;
 
             default:
             {
-                TRACE1("\nShbIpcEnterAtomicSection(): unknown error -> LastError=%ld", GetLastError());
+                TRACE("\nShbIpcEnterAtomicSection(): unknown error -> LastError=%ld", GetLastError());
                 ASSERT(0);
                 ShbError = kShbBufferInvalid;
                 break;
@@ -929,7 +929,7 @@ DWORD         dwWaitResult;
     if ( (hEventTermRequ != INVALID_HANDLE_VALUE) &&
          (hEventTermResp != INVALID_HANDLE_VALUE)  )
     {
-        TRACE0("\nShbIpcStopSignalingNewData(): enter wait state");
+        TRACE("\nShbIpcStopSignalingNewData(): enter wait state");
         //dwWaitResult = SignalObjectAndWait (hEventTermRequ,         // HANDLE hObjectToSignal
         //                                    hEventTermResp,         // HANDLE hObjectToWaitOn
         //                                    TIMEOUT_TERM_THREAD,    // DWORD dwMilliseconds
@@ -940,18 +940,18 @@ DWORD         dwWaitResult;
 		dwWaitResult = WaitForSingleObject(  hEventTermResp,
 											 TIMEOUT_TERM_THREAD );
 
-        TRACE0("\nShbIpcStopSignalingNewData(): wait state leaved: ---> ");
+        TRACE("\nShbIpcStopSignalingNewData(): wait state leaved: ---> ");
         switch (dwWaitResult)
         {
             case WAIT_OBJECT_0 + 0:     // event "new data signaling thread terminated"
             {
-                TRACE0("Event = WAIT_OBJECT_0+0");
+                TRACE("Event = WAIT_OBJECT_0+0");
                 break;
             }
 
             default:
             {
-                TRACE0("Unhandled Event");
+                TRACE("Unhandled Event");
                 ASSERT(0);
                 break;
             }
@@ -1067,7 +1067,7 @@ HANDLE  hEventJobReady;
 BOOL    fRes;
 
 
-    // TRACE0("\nShbIpcSignalJobReady(): enter\n");
+    // TRACE("\nShbIpcSignalJobReady(): enter\n");
 
     if (pShbInstance_p == NULL)
     {
@@ -1082,11 +1082,11 @@ BOOL    fRes;
     if (hEventJobReady != INVALID_HANDLE_VALUE)
     {
         fRes = SetEvent (hEventJobReady);
-        // TRACE1("\nShbIpcSignalJobReady(): EventJobReady set (Result=%d)\n", (int)fRes);
+        // TRACE("\nShbIpcSignalJobReady(): EventJobReady set (Result=%d)\n", (int)fRes);
         ASSERT( fRes );
     }
 
-    // TRACE0("\nShbIpcSignalJobReady(): leave\n");
+    // TRACE("\nShbIpcSignalJobReady(): leave\n");
     return (kShbOk);
 
 }
@@ -1259,7 +1259,7 @@ BOOL          fTermRequ;
 int           fCallAgain;
 
 
-    TRACE1("\nShbIpcThreadSignalNewData(): SignalThread started (pShbInstance=0x%p)\n", pvThreadParam_p);
+    TRACE("\nShbIpcThreadSignalNewData(): SignalThread started (pShbInstance=0x%p)\n", pvThreadParam_p);
 
     pShbInstance = (tShbMemInst*)pvThreadParam_p;
     pShbMemInst  = ShbIpcGetShbMemInst (pShbInstance);
@@ -1270,20 +1270,20 @@ int           fCallAgain;
         ASSERT((pShbMemInst->m_ahEventNewData[0] != INVALID_HANDLE_VALUE) && (pShbMemInst->m_ahEventNewData[0] != NULL));
         ASSERT((pShbMemInst->m_ahEventNewData[1] != INVALID_HANDLE_VALUE) && (pShbMemInst->m_ahEventNewData[1] != NULL));
 
-        TRACE0("\nShbIpcThreadSignalNewData(): enter wait state");
+        TRACE("\nShbIpcThreadSignalNewData(): enter wait state");
         dwWaitResult = WaitForMultipleObjects (2,                               // DWORD nCount
                                                pShbMemInst->m_ahEventNewData,   // const HANDLE* lpHandles
                                                FALSE,                           // BOOL bWaitAll
                                                INFINITE);                       // DWORD dwMilliseconds
-        TRACE0("\nShbIpcThreadSignalNewData(): wait state leaved: ---> ");
+        TRACE("\nShbIpcThreadSignalNewData(): wait state leaved: ---> ");
         switch (dwWaitResult)
         {
             case WAIT_OBJECT_0 + 0:     // event "new data"
             {
-                TRACE0("Event = WAIT_OBJECT_0+0");
+                TRACE("Event = WAIT_OBJECT_0+0");
                 if (pShbMemInst->m_pfnSigHndlrNewData != NULL)
                 {
-                    TRACE0("\nShbIpcThreadSignalNewData(): calling SignalHandlerNewData");
+                    TRACE("\nShbIpcThreadSignalNewData(): calling SignalHandlerNewData");
                     do
                     {
                         fCallAgain = pShbMemInst->m_pfnSigHndlrNewData (pShbInstance);
@@ -1297,14 +1297,14 @@ int           fCallAgain;
 
             case WAIT_OBJECT_0 + 1:     // event "terminate"
             {
-                TRACE0("Event = WAIT_OBJECT_0+1");
+                TRACE("Event = WAIT_OBJECT_0+1");
                 fTermRequ = TRUE;
                 break;
             }
 
             default:
             {
-                TRACE0("Unhandled Event");
+                TRACE("Unhandled Event");
                 ASSERT(0);
                 fTermRequ = TRUE;
                 break;
@@ -1319,7 +1319,7 @@ int           fCallAgain;
         SetEvent (pShbMemInst->m_ahEventNewData[IDX_EVENT_TERM_RESP]);
     }
 
-    TRACE1("\nShbIpcThreadSignalNewData(): SignalThread terminated (pShbInstance=0x%p)\n", pShbInstance);
+    TRACE("\nShbIpcThreadSignalNewData(): SignalThread terminated (pShbInstance=0x%p)\n", pShbInstance);
 
     //ExitThread (0);
 return 0;
@@ -1342,7 +1342,7 @@ DWORD          dwWaitResult;
 unsigned int   fTimeOut;
 
 
-    TRACE1("\nShbIpcThreadSignalJobReady(): SignalThread started (pShbInstance=0x%p)\n", pvThreadParam_p);
+    TRACE("\nShbIpcThreadSignalJobReady(): SignalThread started (pShbInstance=0x%p)\n", pvThreadParam_p);
 
 
     pShbInstance = (tShbInstance*)pvThreadParam_p;
@@ -1360,22 +1360,22 @@ unsigned int   fTimeOut;
 
     ASSERT((pShbMemInst->m_hEventJobReady != INVALID_HANDLE_VALUE) && (pShbMemInst->m_hEventJobReady != NULL));
 
-    TRACE0("\nShbIpcThreadSignalJobReady(): enter wait state");
+    TRACE("\nShbIpcThreadSignalJobReady(): enter wait state");
     dwWaitResult = WaitForSingleObject (pShbMemInst->m_hEventJobReady,          // HANDLE hHandle
                                         ulTimeOutMs);                             // DWORD dwMilliseconds
-    TRACE0("\nShbIpcThreadSignalJobReady(): wait state leaved: ---> ");
+    TRACE("\nShbIpcThreadSignalJobReady(): wait state leaved: ---> ");
     switch (dwWaitResult)
     {
         case WAIT_OBJECT_0 + 0:     // event "new data"
         {
-            TRACE0("Event = WAIT_OBJECT_0+0");
+            TRACE("Event = WAIT_OBJECT_0+0");
             fTimeOut = FALSE;
             break;
         }
 
         case WAIT_TIMEOUT:
         {
-            TRACE0("\nEvent = WAIT_TIMEOUT");
+            TRACE("\nEvent = WAIT_TIMEOUT");
             fTimeOut = TRUE;
             // ASSERT(0);
             break;
@@ -1383,7 +1383,7 @@ unsigned int   fTimeOut;
 
         default:
         {
-            TRACE0("Unhandled Event");
+            TRACE("Unhandled Event");
             fTimeOut = TRUE;
             ASSERT(0);
             break;
@@ -1393,7 +1393,7 @@ unsigned int   fTimeOut;
 
     if (pShbMemInst->m_pfnSigHndlrJobReady != NULL)
     {
-        TRACE0("\nShbIpcThreadSignalJobReady(): calling SignalHandlerJobReady");
+        TRACE("\nShbIpcThreadSignalJobReady(): calling SignalHandlerJobReady");
         pShbMemInst->m_pfnSigHndlrJobReady (pShbInstance, fTimeOut);
     }
 
@@ -1402,7 +1402,7 @@ unsigned int   fTimeOut;
     pShbMemInst->m_pfnSigHndlrJobReady = NULL;
 
 
-    TRACE1("\nShbIpcThreadSignalJobReady(): SignalThread terminated (pShbInstance=0x%p)\n", pShbInstance);
+    TRACE("\nShbIpcThreadSignalJobReady(): SignalThread terminated (pShbInstance=0x%p)\n", pShbInstance);
 
     //ExitThread (0);
 return 0;

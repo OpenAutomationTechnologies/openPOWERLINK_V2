@@ -99,7 +99,7 @@ int hrtimer_init(int iCbPrio_p, int iCbStackSize_p)
     /* create semaphore for callback signaling */
     if ((timerData_g.m_signalSem = semBCreate(SEM_Q_FIFO, SEM_EMPTY)) == NULL)
     {
-        EPL_DBGLVL_ERROR_TRACE1(
+        EPL_DBGLVL_ERROR_TRACE(
          "%s() Couldn't create binary semaphore for timer signalling!\n",
          __func__);
         return kHrtimerReturnError;
@@ -115,7 +115,7 @@ int hrtimer_init(int iCbPrio_p, int iCbStackSize_p)
                                              0, 0, 0, 0, 0, 0, 0, 0, 0, 0))
                                 == ERROR)
     {
-        EPL_DBGLVL_ERROR_TRACE1 ("%s() Couldn't create timer task!\n",
+        EPL_DBGLVL_ERROR_TRACE ("%s() Couldn't create timer task!\n",
                                  __func__);
         semDelete(timerData_g.m_signalSem);
         return kHrtimerReturnError;

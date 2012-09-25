@@ -426,7 +426,7 @@ unsigned long       ulThreadId;
     if (SdoUdpInstance_g.m_UdpSocket == INVALID_SOCKET)
     {
         Ret = kEplSdoUdpNoSocket;
-        EPL_DBGLVL_SDO_TRACE0("EplSdoUdpuConfig: socket() failed\n");
+        EPL_DBGLVL_SDO_TRACE("EplSdoUdpuConfig: socket() failed\n");
         goto Exit;
     }
 
@@ -438,7 +438,7 @@ unsigned long       ulThreadId;
     if (iError < 0)
     {
         //iError = WSAGetLastError();
-        EPL_DBGLVL_SDO_TRACE1("EplSdoUdpuConfig: bind() finished with %i\n", iError);
+        EPL_DBGLVL_SDO_TRACE("EplSdoUdpuConfig: bind() finished with %i\n", iError);
         Ret = kEplSdoUdpNoSocket;
         goto Exit;
     }
@@ -618,7 +618,7 @@ struct sockaddr_in  Addr;
                 sizeof(struct sockaddr_in));                  // sizeof targetadress
     if(iError < 0)
     {
-        EPL_DBGLVL_SDO_TRACE1("EplSdoUdpuSendData: sendto() finished with %i\n", iError);
+        EPL_DBGLVL_SDO_TRACE("EplSdoUdpuSendData: sendto() finished with %i\n", iError);
         Ret = kEplSdoUdpSendError;
         goto Exit;
     }
@@ -794,7 +794,7 @@ tEplSdoConHdl       SdoConHdl;
                             (iError - 4));
                     if (Ret != kEplSuccessful)
                     {
-                        PRINTF4("%s new con: ip=%lX, port=%u, Ret=0x%X\n",
+                        PRINTF("%s new con: ip=%lX, port=%u, Ret=0x%X\n",
                                 __func__,
                                 (unsigned long) ntohl(pInstance->m_aSdoAbsUdpConnection[iFreeEntry].m_ulIpAddr),
                                 ntohs((unsigned short) pInstance->m_aSdoAbsUdpConnection[iFreeEntry].m_uiPort),
@@ -803,7 +803,7 @@ tEplSdoConHdl       SdoConHdl;
                 }
                 else
                 {
-                    EPL_DBGLVL_SDO_TRACE0("Error in EplSdoUdpThread() no free handle\n");
+                    EPL_DBGLVL_SDO_TRACE("Error in EplSdoUdpThread() no free handle\n");
 #if (TARGET_SYSTEM == _WIN32_)
     // leave critical section for process function
     LeaveCriticalSection(SdoUdpInstance_g.m_pCriticalSection);
@@ -828,7 +828,7 @@ tEplSdoConHdl       SdoConHdl;
                         (iError - 4));
                 if (Ret != kEplSuccessful)
                 {
-                    PRINTF4("%s known con: ip=%lX, port=%u, Ret=0x%X\n",
+                    PRINTF("%s known con: ip=%lX, port=%u, Ret=0x%X\n",
                             __func__,
                             (unsigned long) ntohl(pInstance->m_aSdoAbsUdpConnection[iCount].m_ulIpAddr),
                             ntohs((unsigned short) pInstance->m_aSdoAbsUdpConnection[iCount].m_uiPort),

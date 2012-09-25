@@ -339,7 +339,7 @@ BOOL                fLinProcInit =FALSE;
     EplRet = EplLinProcInit();
     if (EplRet != kEplSuccessful)
     {
-        PRINTF0("EplLinProcInit failed!\n");
+        PRINTF("EplLinProcInit failed!\n");
         goto Exit;
     }
     fLinProcInit = TRUE;
@@ -348,7 +348,7 @@ BOOL                fLinProcInit =FALSE;
     EplRet = EplApiInitialize(&EplApiInitParam);
     if(EplRet != kEplSuccessful)
     {
-        PRINTF0("EplApiInitialize failed!\n");
+        PRINTF("EplApiInitialize failed!\n");
         goto Exit;
     }
     fApiInit = TRUE;
@@ -359,9 +359,9 @@ BOOL                fLinProcInit =FALSE;
         goto Exit;
     }
 
-    PRINTF0("Initializing process image...\n");
-    PRINTF1("Size of input process image: %ld\n", sizeof(AppProcessImageIn_g));
-    PRINTF1("Size of output process image: %ld\n", sizeof (AppProcessImageOut_g));
+    PRINTF("Initializing process image...\n");
+    PRINTF("Size of input process image: %ld\n", sizeof(AppProcessImageIn_g));
+    PRINTF("Size of output process image: %ld\n", sizeof (AppProcessImageOut_g));
 
     AppProcessImageCopyJob_g.m_fNonBlocking = FALSE;
     AppProcessImageCopyJob_g.m_uiPriority = 0;
@@ -389,7 +389,7 @@ BOOL                fLinProcInit =FALSE;
     atomic_set(&AtomicShutdown_g, FALSE);
 
 Exit:
-    PRINTF1("EplLinInit(): returns 0x%X\n", EplRet);
+    PRINTF("EplLinInit(): returns 0x%X\n", EplRet);
     if (EplRet != kEplSuccessful)
     {
         if (fApiInit != FALSE)
@@ -443,11 +443,11 @@ tEplKernel          EplRet;
 
     // delete instance for all modules
     EplRet = EplApiShutdown();
-    PRINTF1("EplApiShutdown():  0x%X\n", EplRet);
+    PRINTF("EplApiShutdown():  0x%X\n", EplRet);
 
     // deinitialize proc fs
     EplRet = EplLinProcFree();
-    PRINTF1("EplLinProcFree():        0x%X\n", EplRet);
+    PRINTF("EplLinProcFree():        0x%X\n", EplRet);
 
     if (IS_FD_VALID(hAppFdTracingEnabled_g))
     {
@@ -504,7 +504,7 @@ tEplKernel          EplRet = kEplSuccessful;
                     // -> also shut down EplApiProcess() and main()
                     EplRet = kEplShutdown;
 
-                    PRINTF2("%s(kEplNmtGsOff) originating event = 0x%X\n", __func__, pEventArg_p->m_NmtStateChange.m_NmtEvent);
+                    PRINTF("%s(kEplNmtGsOff) originating event = 0x%X\n", __func__, pEventArg_p->m_NmtStateChange.m_NmtEvent);
 
                     // wake up EplLinExit()
                     atomic_set(&AtomicShutdown_g, TRUE);
@@ -528,7 +528,7 @@ tEplKernel          EplRet = kEplSuccessful;
 
                 case kEplNmtMsPreOperational1:
                 {
-                    PRINTF4("%s(0x%X -> 0x%X) originating event = 0x%X\n",
+                    PRINTF("%s(0x%X -> 0x%X) originating event = 0x%X\n",
                             __func__,
                            pEventArg_p->m_NmtStateChange.m_OldNmtState,
                            pEventArg_p->m_NmtStateChange.m_NewNmtState,
@@ -566,7 +566,7 @@ tEplKernel          EplRet = kEplSuccessful;
         {   // error or warning occurred within the stack or the application
             // on error the API layer stops the NMT state machine
 
-            PRINTF3("%s(Err/Warn): Source=%02X EplError=0x%03X",
+            PRINTF("%s(Err/Warn): Source=%02X EplError=0x%03X",
                     __func__,
                     pEventArg_p->m_InternalError.m_EventSource,
                     pEventArg_p->m_InternalError.m_EplError);
@@ -577,14 +577,14 @@ tEplKernel          EplRet = kEplSuccessful;
                 case kEplEventSourceEventu:
                 {   // error occurred within event processing
                     // either in kernel or in user part
-                    PRINTF1(" OrgSource=%02X\n", pEventArg_p->m_InternalError.m_Arg.m_EventSource);
+                    PRINTF(" OrgSource=%02X\n", pEventArg_p->m_InternalError.m_Arg.m_EventSource);
                     break;
                 }
 
                 case kEplEventSourceDllk:
                 {   // error occurred within the data link layer (e.g. interrupt processing)
                     // the DWORD argument contains the DLL state and the NMT event
-                    PRINTF1(" val=%lX\n", (ULONG) pEventArg_p->m_InternalError.m_Arg.m_dwArg);
+                    PRINTF(" val=%lX\n", (ULONG) pEventArg_p->m_InternalError.m_Arg.m_dwArg);
                     break;
                 }
 
@@ -592,13 +592,13 @@ tEplKernel          EplRet = kEplSuccessful;
                 case kEplEventSourceObdu:
                 {   // error occurred within OBD module
                     // either in kernel or in user part
-                    PRINTF2(" Object=0x%04X/%u\n", pEventArg_p->m_InternalError.m_Arg.m_ObdError.m_uiIndex, pEventArg_p->m_InternalError.m_Arg.m_ObdError.m_uiSubIndex);
+                    PRINTF(" Object=0x%04X/%u\n", pEventArg_p->m_InternalError.m_Arg.m_ObdError.m_uiIndex, pEventArg_p->m_InternalError.m_Arg.m_ObdError.m_uiSubIndex);
                     break;
                 }
 
                 default:
                 {
-                    PRINTF0("\n");
+                    PRINTF("\n");
                     break;
                 }
             }
@@ -645,31 +645,31 @@ tEplKernel          EplRet = kEplSuccessful;
             {
                 case kEplNmtNodeEventCheckConf:
                 {
-                    PRINTF2("%s(Node=0x%X, CheckConf)\n", __func__, pEventArg_p->m_Node.m_uiNodeId);
+                    PRINTF("%s(Node=0x%X, CheckConf)\n", __func__, pEventArg_p->m_Node.m_uiNodeId);
                     break;
                 }
 
                 case kEplNmtNodeEventUpdateConf:
                 {
-                    PRINTF2("%s(Node=0x%X, UpdateConf)\n", __func__, pEventArg_p->m_Node.m_uiNodeId);
+                    PRINTF("%s(Node=0x%X, UpdateConf)\n", __func__, pEventArg_p->m_Node.m_uiNodeId);
                     break;
                 }
 
                 case kEplNmtNodeEventNmtState:
                 {
-                    PRINTF3("%s(Node=0x%X, NmtState=0x%X)\n", __func__, pEventArg_p->m_Node.m_uiNodeId, pEventArg_p->m_Node.m_NmtState);
+                    PRINTF("%s(Node=0x%X, NmtState=0x%X)\n", __func__, pEventArg_p->m_Node.m_uiNodeId, pEventArg_p->m_Node.m_NmtState);
                     break;
                 }
 
                 case kEplNmtNodeEventError:
                 {
-                    PRINTF3("%s(Node=0x%X, Error=0x%X)\n", __func__, pEventArg_p->m_Node.m_uiNodeId, pEventArg_p->m_Node.m_wErrorCode);
+                    PRINTF("%s(Node=0x%X, Error=0x%X)\n", __func__, pEventArg_p->m_Node.m_uiNodeId, pEventArg_p->m_Node.m_wErrorCode);
                     break;
                 }
 
                 case kEplNmtNodeEventFound:
                 {
-                    PRINTF2("%s(Node=0x%X, Found)\n", __func__, pEventArg_p->m_Node.m_uiNodeId);
+                    PRINTF("%s(Node=0x%X, Found)\n", __func__, pEventArg_p->m_Node.m_uiNodeId);
                     break;
                 }
 
@@ -684,17 +684,17 @@ tEplKernel          EplRet = kEplSuccessful;
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_CFM)) != 0)
         case kEplApiEventCfmProgress:
         {
-            PRINTF4("%s(Node=0x%X, CFM-Progress: Object 0x%X/%u, ", __func__, pEventArg_p->m_CfmProgress.m_uiNodeId, pEventArg_p->m_CfmProgress.m_uiObjectIndex, pEventArg_p->m_CfmProgress.m_uiObjectSubIndex);
-            PRINTF2("%lu/%lu Bytes", (ULONG) pEventArg_p->m_CfmProgress.m_dwBytesDownloaded, (ULONG) pEventArg_p->m_CfmProgress.m_dwTotalNumberOfBytes);
+            PRINTF("%s(Node=0x%X, CFM-Progress: Object 0x%X/%u, ", __func__, pEventArg_p->m_CfmProgress.m_uiNodeId, pEventArg_p->m_CfmProgress.m_uiObjectIndex, pEventArg_p->m_CfmProgress.m_uiObjectSubIndex);
+            PRINTF("%lu/%lu Bytes", (ULONG) pEventArg_p->m_CfmProgress.m_dwBytesDownloaded, (ULONG) pEventArg_p->m_CfmProgress.m_dwTotalNumberOfBytes);
             if ((pEventArg_p->m_CfmProgress.m_dwSdoAbortCode != 0)
                 || (pEventArg_p->m_CfmProgress.m_EplError != kEplSuccessful))
             {
-                PRINTF2(" -> SDO Abort=0x%lX, Error=0x%X)\n", (unsigned long) pEventArg_p->m_CfmProgress.m_dwSdoAbortCode,
+                PRINTF(" -> SDO Abort=0x%lX, Error=0x%X)\n", (unsigned long) pEventArg_p->m_CfmProgress.m_dwSdoAbortCode,
                                                               pEventArg_p->m_CfmProgress.m_EplError);
             }
             else
             {
-                PRINTF0(")\n");
+                PRINTF(")\n");
             }
             break;
         }
@@ -705,31 +705,31 @@ tEplKernel          EplRet = kEplSuccessful;
             {
                 case kEplNmtNodeCommandConfOk:
                 {
-                    PRINTF2("%s(Node=0x%X, ConfOk)\n", __func__, pEventArg_p->m_CfmResult.m_uiNodeId);
+                    PRINTF("%s(Node=0x%X, ConfOk)\n", __func__, pEventArg_p->m_CfmResult.m_uiNodeId);
                     break;
                 }
 
                 case kEplNmtNodeCommandConfErr:
                 {
-                    PRINTF2("%s(Node=0x%X, ConfErr)\n", __func__, pEventArg_p->m_CfmResult.m_uiNodeId);
+                    PRINTF("%s(Node=0x%X, ConfErr)\n", __func__, pEventArg_p->m_CfmResult.m_uiNodeId);
                     break;
                 }
 
                 case kEplNmtNodeCommandConfReset:
                 {
-                    PRINTF2("%s(Node=0x%X, ConfReset)\n", __func__, pEventArg_p->m_CfmResult.m_uiNodeId);
+                    PRINTF("%s(Node=0x%X, ConfReset)\n", __func__, pEventArg_p->m_CfmResult.m_uiNodeId);
                     break;
                 }
 
                 case kEplNmtNodeCommandConfRestored:
                 {
-                    PRINTF2("%s(Node=0x%X, ConfRestored)\n", __func__, pEventArg_p->m_CfmResult.m_uiNodeId);
+                    PRINTF("%s(Node=0x%X, ConfRestored)\n", __func__, pEventArg_p->m_CfmResult.m_uiNodeId);
                     break;
                 }
 
                 default:
                 {
-                    PRINTF3("%s(Node=0x%X, CfmResult=0x%X)\n", __func__, pEventArg_p->m_CfmResult.m_uiNodeId, pEventArg_p->m_CfmResult.m_NodeCommand);
+                    PRINTF("%s(Node=0x%X, CfmResult=0x%X)\n", __func__, pEventArg_p->m_CfmResult.m_uiNodeId, pEventArg_p->m_CfmResult.m_NodeCommand);
                     break;
                 }
             }

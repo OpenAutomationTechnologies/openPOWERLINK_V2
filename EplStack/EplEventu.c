@@ -234,7 +234,7 @@ unsigned int    fShbNewCreated;
                                   &fShbNewCreated);
     if(ShbError != kShbOk)
     {
-        EPL_DBGLVL_EVENTK_TRACE1("EplEventuAddInstance(): ShbCirAllocBuffer(K2U) -> 0x%X\n", ShbError);
+        EPL_DBGLVL_EVENTK_TRACE("EplEventuAddInstance(): ShbCirAllocBuffer(K2U) -> 0x%X\n", ShbError);
         Ret = kEplNoResource;
         goto Exit;
     }
@@ -248,7 +248,7 @@ unsigned int    fShbNewCreated;
                                   &fShbNewCreated);
     if(ShbError != kShbOk)
     {
-        EPL_DBGLVL_EVENTK_TRACE1("EplEventuAddInstance(): ShbCirAllocBuffer(U2K) -> 0x%X\n", ShbError);
+        EPL_DBGLVL_EVENTK_TRACE("EplEventuAddInstance(): ShbCirAllocBuffer(U2K) -> 0x%X\n", ShbError);
         Ret = kEplNoResource;
         goto Exit;
     }
@@ -260,7 +260,7 @@ unsigned int    fShbNewCreated;
                                     kShbPriorityNormal);
     if(ShbError != kShbOk)
     {
-        EPL_DBGLVL_EVENTK_TRACE1("EplEventuAddInstance(): ShbCirSetSignalHandlerNewData(K2U) -> 0x%X\n", ShbError);
+        EPL_DBGLVL_EVENTK_TRACE("EplEventuAddInstance(): ShbCirSetSignalHandlerNewData(K2U) -> 0x%X\n", ShbError);
         Ret = kEplNoResource;
         goto Exit;
     }
@@ -305,7 +305,7 @@ tShbError       ShbError;
                                     kShbPriorityNormal);
     if(ShbError != kShbOk)
     {
-        EPL_DBGLVL_EVENTK_TRACE1("EplEventuDelInstance(): ShbCirSetSignalHandlerNewData(K2U) -> 0x%X\n", ShbError);
+        EPL_DBGLVL_EVENTK_TRACE("EplEventuDelInstance(): ShbCirSetSignalHandlerNewData(K2U) -> 0x%X\n", ShbError);
         Ret = kEplNoResource;
     }
 
@@ -314,7 +314,7 @@ tShbError       ShbError;
     ShbError = ShbCirReleaseBuffer (EplEventuInstance_g.m_pShbUserToKernelInstance);
     if((ShbError != kShbOk) && (ShbError != kShbMemUsedByOtherProcs))
     {
-        EPL_DBGLVL_EVENTK_TRACE1("EplEventuDelInstance(): ShbCirReleaseBuffer(U2K) -> 0x%X\n", ShbError);
+        EPL_DBGLVL_EVENTK_TRACE("EplEventuDelInstance(): ShbCirReleaseBuffer(U2K) -> 0x%X\n", ShbError);
         Ret = kEplNoResource;
     }
     else
@@ -327,7 +327,7 @@ tShbError       ShbError;
     ShbError = ShbCirReleaseBuffer (EplEventuInstance_g.m_pShbKernelToUserInstance);
     if((ShbError != kShbOk) && (ShbError != kShbMemUsedByOtherProcs))
     {
-        EPL_DBGLVL_EVENTK_TRACE1("EplEventuDelInstance(): ShbCirReleaseBuffer(K2U) -> 0x%X\n", ShbError);
+        EPL_DBGLVL_EVENTK_TRACE("EplEventuDelInstance(): ShbCirReleaseBuffer(K2U) -> 0x%X\n", ShbError);
         Ret = kEplNoResource;
     }
     else
@@ -577,7 +577,7 @@ unsigned int    fBufferCompleted;
                                    ulDataSize);
             if (ShbError != kShbOk)
             {
-                EPL_DBGLVL_EVENTK_TRACE1("EplEventuPost(): ShbCirAllocDataBlock(U2K) -> 0x%X\n", ShbError);
+                EPL_DBGLVL_EVENTK_TRACE("EplEventuPost(): ShbCirAllocDataBlock(U2K) -> 0x%X\n", ShbError);
                 Ret = kEplEventPostError;
                 goto Exit;
             }
@@ -588,7 +588,7 @@ unsigned int    fBufferCompleted;
                                    &fBufferCompleted);
             if (ShbError != kShbOk)
             {
-                EPL_DBGLVL_EVENTK_TRACE1("EplEventuPost(): ShbCirWriteDataChunk(U2K) -> 0x%X\n", ShbError);
+                EPL_DBGLVL_EVENTK_TRACE("EplEventuPost(): ShbCirWriteDataChunk(U2K) -> 0x%X\n", ShbError);
                 Ret = kEplEventPostError;
                 goto Exit;
             }
@@ -601,7 +601,7 @@ unsigned int    fBufferCompleted;
                                        &fBufferCompleted);
                 if ((ShbError != kShbOk) || (fBufferCompleted == FALSE))
                 {
-                    EPL_DBGLVL_EVENTK_TRACE1("EplEventuPost(): ShbCirWriteDataChunk2(U2K) -> 0x%X\n", ShbError);
+                    EPL_DBGLVL_EVENTK_TRACE("EplEventuPost(): ShbCirWriteDataChunk2(U2K) -> 0x%X\n", ShbError);
                     Ret = kEplEventPostError;
                     goto Exit;
                 }
@@ -635,7 +635,7 @@ unsigned int    fBufferCompleted;
                                    ulDataSize);
             if(ShbError != kShbOk)
             {
-                EPL_DBGLVL_EVENTK_TRACE1("EplEventuPost(): ShbCirAllocDataBlock(K2U) -> 0x%X\n", ShbError);
+                EPL_DBGLVL_EVENTK_TRACE("EplEventuPost(): ShbCirAllocDataBlock(K2U) -> 0x%X\n", ShbError);
                 Ret = kEplEventPostError;
                 goto Exit;
             }
@@ -646,7 +646,7 @@ unsigned int    fBufferCompleted;
                                    &fBufferCompleted);
             if(ShbError != kShbOk)
             {
-                EPL_DBGLVL_EVENTK_TRACE1("EplEventuPost(): ShbCirWriteDataChunk(K2U) -> 0x%X\n", ShbError);
+                EPL_DBGLVL_EVENTK_TRACE("EplEventuPost(): ShbCirWriteDataChunk(K2U) -> 0x%X\n", ShbError);
                 Ret = kEplEventPostError;
                 goto Exit;
             }
@@ -659,7 +659,7 @@ unsigned int    fBufferCompleted;
                                        &fBufferCompleted);
                 if ((ShbError != kShbOk) || (fBufferCompleted == FALSE))
                 {
-                    EPL_DBGLVL_EVENTK_TRACE1("EplEventuPost(): ShbCirWriteDataChunk2(K2U) -> 0x%X\n", ShbError);
+                    EPL_DBGLVL_EVENTK_TRACE("EplEventuPost(): ShbCirWriteDataChunk2(K2U) -> 0x%X\n", ShbError);
                     Ret = kEplEventPostError;
                     goto Exit;
                 }

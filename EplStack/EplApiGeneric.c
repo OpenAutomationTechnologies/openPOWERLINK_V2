@@ -564,34 +564,34 @@ tEplKernel      Ret = kEplSuccessful;
     // deinitialize EplCfmu module
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_CFM)) != 0)
     Ret = EplCfmuDelInstance();
-//    PRINTF1("EplCfmuDelInstance():    0x%X\n", Ret);
+//    PRINTF("EplCfmuDelInstance():    0x%X\n", Ret);
 #endif
 
     // deinitialize EplSdoCom module
 #if ((((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOS)) != 0) || \
      (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOC)) != 0))
     Ret = EplSdoComDelInstance();
-//    PRINTF1("EplSdoComDelInstance():  0x%X\n", Ret);
+//    PRINTF("EplSdoComDelInstance():  0x%X\n", Ret);
 #endif
 
     // deinitialize EplLedu module
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_LEDU)) != 0)
     Ret = EplLeduDelInstance();
-//    PRINTF1("EplLeduDelInstance():    0x%X\n", Ret);
+//    PRINTF("EplLeduDelInstance():    0x%X\n", Ret);
 #endif
 
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
     // deinitialize EplNmtMnu module
     Ret = EplNmtMnuDelInstance();
-//    PRINTF1("EplNmtMnuDelInstance():  0x%X\n", Ret);
+//    PRINTF("EplNmtMnuDelInstance():  0x%X\n", Ret);
 
     // deinitialize EplIdentu module
     Ret = EplIdentuDelInstance();
-//    PRINTF1("EplIdentuDelInstance():  0x%X\n", Ret);
+//    PRINTF("EplIdentuDelInstance():  0x%X\n", Ret);
 
     // deinitialize EplStatusu module
     Ret = EplStatusuDelInstance();
-//    PRINTF1("EplStatusuDelInstance():  0x%X\n", Ret);
+//    PRINTF("EplStatusuDelInstance():  0x%X\n", Ret);
 #endif
 
 #if EPL_NMTMNU_PRES_CHAINING_MN != FALSE
@@ -602,26 +602,26 @@ tEplKernel      Ret = kEplSuccessful;
     // deinitialize EplNmtCnu module
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_CN)) != 0)
     Ret = EplNmtCnuDelInstance();
-//    PRINTF1("EplNmtCnuDelInstance():  0x%X\n", Ret);
+//    PRINTF("EplNmtCnuDelInstance():  0x%X\n", Ret);
 #endif
 
     // deinitialize EplNmtu module
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMTU)) != 0)
     Ret = EplNmtuDelInstance();
-//    PRINTF1("EplNmtuDelInstance():    0x%X\n", Ret);
+//    PRINTF("EplNmtuDelInstance():    0x%X\n", Ret);
 #endif
 
     // deinitialize EplPdou module
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOU)) != 0)
     Ret = EplPdouDelInstance();
-//    PRINTF1("EplPdouDelInstance():    0x%X\n", Ret);
+//    PRINTF("EplPdouDelInstance():    0x%X\n", Ret);
     Ret = EplPdouCalDelInstance();
 #endif
 
     // deinitialize EplPdok module
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOK)) != 0)
     Ret = EplPdokDelInstance();
-//    PRINTF1("EplPdokDelInstance():    0x%X\n", Ret);
+//    PRINTF("EplPdokDelInstance():    0x%X\n", Ret);
     Ret = EplPdokCalDelInstance();
 #endif
 
@@ -633,37 +633,37 @@ tEplKernel      Ret = kEplSuccessful;
     // deinitialize EplDlluCal module
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLU)) != 0)
     Ret = EplDlluCalDelInstance();
-//    PRINTF1("EplDlluCalDelInstance(): 0x%X\n", Ret);
+//    PRINTF("EplDlluCalDelInstance(): 0x%X\n", Ret);
 
 #endif
 
     // deinitialize EplTimeru module
     Ret = EplTimeruDelInstance();
-//    PRINTF1("EplTimeruDelInstance():  0x%X\n", Ret);
+//    PRINTF("EplTimeruDelInstance():  0x%X\n", Ret);
 
     // deinitialize EplEventu module
     Ret = EplEventuDelInstance();
-//    PRINTF1("EplEventuDelInstance():  0x%X\n", Ret);
+//    PRINTF("EplEventuDelInstance():  0x%X\n", Ret);
 
     // deinitialize EplNmtk module
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMTK)) != 0)
     Ret = EplNmtkDelInstance();
-//    PRINTF1("EplNmtkDelInstance():    0x%X\n", Ret);
+//    PRINTF("EplNmtkDelInstance():    0x%X\n", Ret);
 #endif
 
     // deinitialize EplDllk module
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLK)) != 0)
     Ret = EplDllkDelInstance();
-//    PRINTF1("EplDllkDelInstance():    0x%X\n", Ret);
+//    PRINTF("EplDllkDelInstance():    0x%X\n", Ret);
 
     // deinitialize EplDllkCal module
     Ret = EplDllkCalDelInstance();
-//    PRINTF1("EplDllkCalDelInstance(): 0x%X\n", Ret);
+//    PRINTF("EplDllkCalDelInstance(): 0x%X\n", Ret);
 #endif
 
     // deinitialize EplEventk module
     Ret = EplEventkDelInstance();
-//    PRINTF1("EplEventkDelInstance():  0x%X\n", Ret);
+//    PRINTF("EplEventkDelInstance():  0x%X\n", Ret);
 
 #if EPL_USE_SHAREDBUFF != FALSE
     ShbExit();
@@ -2024,7 +2024,7 @@ tEplApiEventArg     EventArg;
 
         default:
         {
-            TRACE0("EplApiCbNmtStateChange(): unhandled NMT state\n");
+            TRACE("EplApiCbNmtStateChange(): unhandled NMT state\n");
             break;
         }
     }

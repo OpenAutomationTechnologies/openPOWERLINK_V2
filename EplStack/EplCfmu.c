@@ -340,7 +340,7 @@ BOOL                fDoUpdate = FALSE;
         pNodeInfo->m_SdoComConHdl = ~0U;
         if (Ret != kEplSuccessful)
         {
-            EPL_DBGLVL_CFM_TRACE0("SDO Free Error!\n");
+            EPL_DBGLVL_CFM_TRACE("SDO Free Error!\n");
             goto Exit;
         }
 
@@ -397,13 +397,13 @@ BOOL                fDoUpdate = FALSE;
         Ret = EplObduReadEntry(0x1F26, uiNodeId_p, &dwExpConfDate, &ObdSize);
         if (Ret != kEplSuccessful)
         {
-            EPL_DBGLVL_CFM_TRACE2("CN%x Error Reading 0x1F26 returns 0x%X\n", uiNodeId_p, Ret);
+            EPL_DBGLVL_CFM_TRACE("CN%x Error Reading 0x1F26 returns 0x%X\n", uiNodeId_p, Ret);
         }
         ObdSize = sizeof (dwExpConfTime);
         Ret = EplObduReadEntry(0x1F27, uiNodeId_p, &dwExpConfTime, &ObdSize);
         if (Ret != kEplSuccessful)
         {
-            EPL_DBGLVL_CFM_TRACE2("CN%x Error Reading 0x1F27 returns 0x%X\n", uiNodeId_p, Ret);
+            EPL_DBGLVL_CFM_TRACE("CN%x Error Reading 0x1F27 returns 0x%X\n", uiNodeId_p, Ret);
         }
         if ((dwExpConfDate != 0)
             || (dwExpConfTime != 0))
@@ -419,7 +419,7 @@ BOOL                fDoUpdate = FALSE;
         EplIdentuGetIdentResponse(uiNodeId_p, &pIdentResponse);
         if (pIdentResponse == NULL)
         {
-            EPL_DBGLVL_CFM_TRACE1("CN%x Ident Response is NULL\n", uiNodeId_p);
+            EPL_DBGLVL_CFM_TRACE("CN%x Ident Response is NULL\n", uiNodeId_p);
             Ret = kEplInvalidNodeId;
             goto Exit;
         }
@@ -430,7 +430,7 @@ BOOL                fDoUpdate = FALSE;
     Ret = EplObduReadEntryToLe(0x1006, 0x00, &EplCfmuInstance_g.m_le_dwCycleLength, &ObdSize);
     if (Ret != kEplSuccessful)
     {   // local OD access failed
-        EPL_DBGLVL_CFM_TRACE1("Local OBD read failed %d\n", Ret);
+        EPL_DBGLVL_CFM_TRACE("Local OBD read failed %d\n", Ret);
         goto Exit;
     }
 #endif
@@ -444,7 +444,7 @@ BOOL                fDoUpdate = FALSE;
         pNodeInfo->m_CfmState = kEplCfmuStateIdle;
 
         // current version is already available on the CN, no need to write new values, we can continue
-        EPL_DBGLVL_CFM_TRACE1("CN%x - Cfg Upto Date\n", uiNodeId_p);
+        EPL_DBGLVL_CFM_TRACE("CN%x - Cfg Upto Date\n", uiNodeId_p);
 
         Ret = EplCfmuDownloadCycleLength(pNodeInfo);
         if (Ret == kEplReject)
@@ -469,8 +469,8 @@ BOOL                fDoUpdate = FALSE;
         pNodeInfo->m_EventCnProgress.m_dwTotalNumberOfBytes += sizeof (dw_le_Signature);
         AmiSetDwordToLe(&dw_le_Signature, 0x64616F6C);
         //Restore Default Parameters
-        EPL_DBGLVL_CFM_TRACE3("CN%x - Cfg Mismatch | MN Expects: %lx-%lx ", uiNodeId_p, dwExpConfDate, dwExpConfTime);
-        EPL_DBGLVL_CFM_TRACE2("CN Has: %lx-%lx. Restoring Default...\n", AmiGetDwordFromLe(&pIdentResponse->m_le_dwVerifyConfigurationDate), AmiGetDwordFromLe(&pIdentResponse->m_le_dwVerifyConfigurationTime));
+        EPL_DBGLVL_CFM_TRACE("CN%x - Cfg Mismatch | MN Expects: %lx-%lx ", uiNodeId_p, dwExpConfDate, dwExpConfTime);
+        EPL_DBGLVL_CFM_TRACE("CN Has: %lx-%lx. Restoring Default...\n", AmiGetDwordFromLe(&pIdentResponse->m_le_dwVerifyConfigurationDate), AmiGetDwordFromLe(&pIdentResponse->m_le_dwVerifyConfigurationTime));
 
         pNodeInfo->m_EventCnProgress.m_uiObjectIndex = 0x1011;
         pNodeInfo->m_EventCnProgress.m_uiObjectSubIndex = 0x01;
@@ -482,7 +482,7 @@ BOOL                fDoUpdate = FALSE;
         else
         {
             // error occurred
-            EPL_DBGLVL_CFM_TRACE1("CfmCbEvent(Node): EplCfmuSdoWriteObject() returned 0x%02X\n", Ret);
+            EPL_DBGLVL_CFM_TRACE("CfmCbEvent(Node): EplCfmuSdoWriteObject() returned 0x%02X\n", Ret);
         }
     }
 
@@ -702,7 +702,7 @@ tEplKernel      Ret = kEplSuccessful;
         pNodeInfo_p->m_SdoComConHdl = ~0U;
         if (Ret != kEplSuccessful)
         {
-            EPL_DBGLVL_CFM_TRACE0("SDO Free Error!\n");
+            EPL_DBGLVL_CFM_TRACE("SDO Free Error!\n");
             goto Exit;
         }
     }
@@ -797,7 +797,7 @@ tEplCfmuNodeInfo*   pNodeInfo = pSdoComFinished_p->m_pUserArg;
         {
             if (pSdoComFinished_p->m_SdoComConState == kEplSdoComTransferFinished)
             {   // configuration successfully restored
-                EPL_DBGLVL_CFM_TRACE1("\nCN%x - Restore Complete. Resetting Node...\n", pNodeInfo->m_EventCnProgress.m_uiNodeId);
+                EPL_DBGLVL_CFM_TRACE("\nCN%x - Restore Complete. Resetting Node...\n", pNodeInfo->m_EventCnProgress.m_uiNodeId);
 
                 // send NMT command reset node to activate the original configuration
                 Ret = EplCfmuFinishConfig(pNodeInfo, kEplNmtNodeCommandConfRestored);
@@ -869,7 +869,7 @@ tEplKernel      Ret = kEplSuccessful;
     }
     else
     {
-        EPL_DBGLVL_CFM_TRACE2("CN%x Writing 0x1006 returns 0x%X\n", pNodeInfo_p->m_EventCnProgress.m_uiNodeId, Ret);
+        EPL_DBGLVL_CFM_TRACE("CN%x Writing 0x1006 returns 0x%X\n", pNodeInfo_p->m_EventCnProgress.m_uiNodeId, Ret);
     }
 #endif
 
@@ -1045,7 +1045,7 @@ tEplSdoComTransParamByIndex TransParamByIndex;
         pNodeInfo_p->m_SdoComConHdl = ~0U;
         if (Ret != kEplSuccessful)
         {
-            EPL_DBGLVL_CFM_TRACE0("SDO Free Error!\n");
+            EPL_DBGLVL_CFM_TRACE("SDO Free Error!\n");
             goto Exit;
         }
 

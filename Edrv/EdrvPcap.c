@@ -388,7 +388,7 @@ tEplKernel EdrvSendTxMsg(tEdrvTxBuffer *pBuffer_p)
 tEplKernel  Ret = kEplSuccessful;
 int         iRet;
 
-//    TRACE4("%s: TxB=%p (%02X), last TxB=%p\n", __func__, pBuffer_p, (UINT)pBuffer_p->m_pbBuffer[5], EdrvInstance_l.m_pTransmittedTxBufferLastEntry);
+//    TRACE("%s: TxB=%p (%02X), last TxB=%p\n", __func__, pBuffer_p, (UINT)pBuffer_p->m_pbBuffer[5], EdrvInstance_l.m_pTransmittedTxBufferLastEntry);
 
     if (pBuffer_p->m_BufferNumber.m_pVal != NULL)
     {
@@ -412,7 +412,7 @@ int         iRet;
     iRet = pcap_sendpacket(EdrvInstance_l.m_pPcap, pBuffer_p->m_pbBuffer, (int) pBuffer_p->m_uiTxMsgLen);
     if  (iRet != 0)
     {
-        PRINTF3("%s pcap_sendpacket returned %d (%s)\n", __func__, iRet, pcap_geterr(EdrvInstance_l.m_pPcap));
+        PRINTF("%s pcap_sendpacket returned %d (%s)\n", __func__, iRet, pcap_geterr(EdrvInstance_l.m_pPcap));
         Ret = kEplInvalidOperation;
     }
 
@@ -588,7 +588,7 @@ tEdrvRxBuffer   RxBuffer;
         {
         tEdrvTxBuffer* pTxBuffer = pInstance->m_pTransmittedTxBufferFirstEntry;
 
-//            TRACE5("%s: (%02X) first TxB=%p (%02X), last TxB=%p\n", __func__, (UINT)pkt_data[5], pTxBuffer, (UINT)pTxBuffer->m_pbBuffer[5], EdrvInstance_l.m_pTransmittedTxBufferLastEntry);
+//            TRACE("%s: (%02X) first TxB=%p (%02X), last TxB=%p\n", __func__, (UINT)pkt_data[5], pTxBuffer, (UINT)pTxBuffer->m_pbBuffer[5], EdrvInstance_l.m_pTransmittedTxBufferLastEntry);
 
             if (pTxBuffer->m_pbBuffer != NULL)
             {

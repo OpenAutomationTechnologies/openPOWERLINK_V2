@@ -306,7 +306,7 @@ void                    *pSharedMem=NULL;
 struct sShbMemTable     *psMemTableElement;
 
 
-    DEBUG_LVL_29_TRACE0("ShbIpcAllocBuffer \n");
+    DEBUG_LVL_29_TRACE("ShbIpcAllocBuffer \n");
     ulShMemSize      = ulBufferSize_p + sizeof(tShbMemHeader);
 
     //create Buffer ID
@@ -321,8 +321,8 @@ struct sShbMemTable     *psMemTableElement;
 #endif
 
     iBufferId=ulCrc32;
-    DEBUG_LVL_29_TRACE2("ShbIpcAllocBuffer BufferSize:%d sizeof(tShb..):%d\n",ulBufferSize_p,sizeof(tShbMemHeader));
-    DEBUG_LVL_29_TRACE2("ShbIpcAllocBuffer BufferId:%d MemSize:%d\n",iBufferId,ulShMemSize);
+    DEBUG_LVL_29_TRACE("ShbIpcAllocBuffer BufferSize:%d sizeof(tShb..):%d\n",ulBufferSize_p,sizeof(tShbMemHeader));
+    DEBUG_LVL_29_TRACE("ShbIpcAllocBuffer BufferId:%d MemSize:%d\n",iBufferId,ulShMemSize);
     //---------------------------------------------------------------
     // (1) open an existing or create a new shared memory
     //---------------------------------------------------------------
@@ -332,7 +332,7 @@ struct sShbMemTable     *psMemTableElement;
         //Buffer already exists
         fShMemNewCreated=FALSE;
         pSharedMem = psMemTableElement->m_pBuffer;
-        DEBUG_LVL_29_TRACE1("ShbIpcAllocBuffer attach Buffer at:%p Id:%d\n",pSharedMem);
+        DEBUG_LVL_29_TRACE("ShbIpcAllocBuffer attach Buffer at:%p Id:%d\n",pSharedMem);
         uiFirstProcess=1;
     }
     else
@@ -341,14 +341,14 @@ struct sShbMemTable     *psMemTableElement;
         fShMemNewCreated = TRUE;
         uiFirstProcess=0;
         pSharedMem = kmalloc(ulShMemSize,GFP_KERNEL);
-        DEBUG_LVL_29_TRACE2("ShbIpcAllocBuffer Create New Buffer at:%p Id:%d\n",pSharedMem,iBufferId);
+        DEBUG_LVL_29_TRACE("ShbIpcAllocBuffer Create New Buffer at:%p Id:%d\n",pSharedMem,iBufferId);
         if (pSharedMem == NULL)
         {
             //unable to create mem
             ShbError = kShbOutOfMem;
             goto Exit;
         }
-        DEBUG_LVL_29_TRACE0("ShbIpcAllocBuffer create semas\n");
+        DEBUG_LVL_29_TRACE("ShbIpcAllocBuffer create semas\n");
         // append Element to Mem Table
         psMemTableElement = kmalloc(sizeof(struct sShbMemTable),GFP_KERNEL);
         psMemTableElement->m_iBufferId = iBufferId;
@@ -357,13 +357,13 @@ struct sShbMemTable     *psMemTableElement;
         ShbIpcAppendListElement (psMemTableElement);
     }
 
-    DEBUG_LVL_29_TRACE0("ShbIpcAllocBuffer update header\n");
+    DEBUG_LVL_29_TRACE("ShbIpcAllocBuffer update header\n");
     //update header
     pShbMemHeader = (tShbMemHeader*)pSharedMem;
-    DEBUG_LVL_29_TRACE1("ShbIpcAllocBuffer 0 pShbMemHeader->m_ulShMemSize: %d\n",pShbMemHeader->m_ulShMemSize);
+    DEBUG_LVL_29_TRACE("ShbIpcAllocBuffer 0 pShbMemHeader->m_ulShMemSize: %d\n",pShbMemHeader->m_ulShMemSize);
     // allocate a memory block from process specific mempool to save
     // process local information to administrate/manage the shared buffer
-    DEBUG_LVL_29_TRACE0("ShbIpcAllocBuffer alloc private mem\n");
+    DEBUG_LVL_29_TRACE("ShbIpcAllocBuffer alloc private mem\n");
     pShbMemInst = (tShbMemInst*) ShbIpcAllocPrivateMem (sizeof(tShbMemInst));
     if (pShbMemInst == NULL)
     {
@@ -434,7 +434,7 @@ tShbMemHeader*  pShbMemHeader;
 tShbError       ShbError;
 tShbError       ShbError2;
 
-    DEBUG_LVL_26_TRACE1("ShbIpcReleaseBuffer(%p)\n", pShbInstance_p);
+    DEBUG_LVL_26_TRACE("ShbIpcReleaseBuffer(%p)\n", pShbInstance_p);
     if (pShbInstance_p == NULL)
     {
         return (kShbOk);
@@ -487,7 +487,7 @@ tShbMemHeader*  pShbMemHeader;
     pShbMemHeader = ShbIpcGetShbMemHeader (ShbIpcGetShbMemInst (pShbInstance_p));
     //set semaphore
     pShbMemHeader->m_fNewData = TRUE;
-    DEBUG_LVL_29_TRACE0("ShbIpcSignalNewData set Sem -> New Data\n");
+    DEBUG_LVL_29_TRACE("ShbIpcSignalNewData set Sem -> New Data\n");
 
     wake_up(&pShbMemHeader->m_WaitQueueNewData);
 
@@ -523,7 +523,7 @@ tShbError       ShbError = kShbOk;
         ShbError = kShbInvalidArg;
         goto Exit;
     }
-    DEBUG_LVL_29_TRACE0("enter atomic\n");
+    DEBUG_LVL_29_TRACE("enter atomic\n");
     pShbMemInst   = ShbIpcGetShbMemInst   (pShbInstance_p);
     pShbMemHeader = ShbIpcGetShbMemHeader (pShbMemInst);
 
@@ -560,7 +560,7 @@ tShbError       ShbError = kShbOk;
     spin_unlock_irqrestore(&pShbMemHeader->m_SpinlockBuffAccess, pShbMemInst->m_ulFlagsBuffAccess);
 
 Exit:
-    DEBUG_LVL_29_TRACE0("Leave Atomic \n");
+    DEBUG_LVL_29_TRACE("Leave Atomic \n");
     return ShbError;
 
 }
@@ -606,7 +606,7 @@ tShbMemInst*    pShbMemInst;
 tShbMemHeader*  pShbMemHeader;
 tShbError       ShbError;
 
-    DEBUG_LVL_29_TRACE0("------->ShbIpcStartSignalingNewData\n");
+    DEBUG_LVL_29_TRACE("------->ShbIpcStartSignalingNewData\n");
     if ((pShbInstance_p == NULL) || (pfnSignalHandlerNewData_p == NULL))
     {
         return (kShbInvalidArg);
@@ -622,7 +622,7 @@ tShbError       ShbError;
         ShbError = kShbAlreadySignaling;
         goto Exit;
     }
-    DEBUG_LVL_26_TRACE2("ShbIpcStartSignalingNewData(%p) m_pfnSigHndlrNewData = %p\n", pShbInstance_p, pfnSignalHandlerNewData_p);
+    DEBUG_LVL_26_TRACE("ShbIpcStartSignalingNewData(%p) m_pfnSigHndlrNewData = %p\n", pShbInstance_p, pfnSignalHandlerNewData_p);
     pShbMemInst->m_pfnSigHndlrNewData = pfnSignalHandlerNewData_p;
     pShbMemHeader->m_fNewData = FALSE;
 
@@ -667,7 +667,7 @@ tShbMemInst*    pShbMemInst;
 tShbMemHeader*  pShbMemHeader;
 tShbError       ShbError;
 
-    DEBUG_LVL_29_TRACE0("------->ShbIpcStopSignalingNewData\n");
+    DEBUG_LVL_29_TRACE("------->ShbIpcStopSignalingNewData\n");
     if (pShbInstance_p == NULL)
     {
         return (kShbInvalidArg);
@@ -676,7 +676,7 @@ tShbError       ShbError;
     pShbMemInst = ShbIpcGetShbMemInst (pShbInstance_p);
     pShbMemHeader = ShbIpcGetShbMemHeader (pShbMemInst);
 
-    DEBUG_LVL_26_TRACE2("ShbIpcStopSignalingNewData(%p) pfnSignHndlrNewData=%p\n", pShbInstance_p, pShbMemInst->m_pfnSigHndlrNewData);
+    DEBUG_LVL_26_TRACE("ShbIpcStopSignalingNewData(%p) pfnSignHndlrNewData=%p\n", pShbInstance_p, pShbMemInst->m_pfnSigHndlrNewData);
     if (pShbMemInst->m_pfnSigHndlrNewData != NULL)
     {   // signal handler was set before
         kthread_stop(pShbMemInst->m_tThreadNewDataId);
@@ -742,7 +742,7 @@ INLINE_FUNCTION tShbError  ShbIpcSignalJobReady (
 tShbMemHeader*  pShbMemHeader;
 
 
-    DEBUG_LVL_29_TRACE0("ShbIpcSignalJobReady\n");
+    DEBUG_LVL_29_TRACE("ShbIpcSignalJobReady\n");
     if (pShbInstance_p == NULL)
     {
         return (kShbInvalidArg);
@@ -750,7 +750,7 @@ tShbMemHeader*  pShbMemHeader;
     pShbMemHeader = ShbIpcGetShbMemHeader (ShbIpcGetShbMemInst (pShbInstance_p));
     //set semaphore
     pShbMemHeader->m_fJobReady = TRUE;
-    DEBUG_LVL_29_TRACE0("ShbIpcSignalJobReady set Sem -> Job Ready \n");
+    DEBUG_LVL_29_TRACE("ShbIpcSignalJobReady set Sem -> Job Ready \n");
 
     wake_up(&pShbMemHeader->m_WaitQueueJobReady);
     return (kShbOk);
@@ -856,7 +856,7 @@ static void*  ShbIpcAllocPrivateMem (unsigned long ulMemSize_p)
 tShbError       ShbError;
 void*           pMem;
 
-    DEBUG_LVL_29_TRACE0("ShbIpcAllocPrivateMem \n");
+    DEBUG_LVL_29_TRACE("ShbIpcAllocPrivateMem \n");
     //get private mem
     pMem = kmalloc(ulMemSize_p, GFP_KERNEL);
     if (pMem == NULL)
@@ -886,7 +886,7 @@ int             fCallAgain;
     pShbMemInst  = ShbIpcGetShbMemInst (pShbInstance);
     pShbMemHeader = ShbIpcGetShbMemHeader (pShbMemInst);
 
-    DEBUG_LVL_26_TRACE1("ShbIpcThreadSignalNewData(%p)\n",pvThreadParam_p);
+    DEBUG_LVL_26_TRACE("ShbIpcThreadSignalNewData(%p)\n",pvThreadParam_p);
 
     set_user_nice(current, pShbMemInst->m_lThreadNewDataNice);
 
@@ -899,7 +899,7 @@ int             fCallAgain;
     }
 #endif
 
-//            DEBUG_LVL_29_TRACE1("ShbIpcThreadSignalNewData wait for New Data Sem %p\n",pShbMemInst->m_pSemNewData);
+//            DEBUG_LVL_29_TRACE("ShbIpcThreadSignalNewData wait for New Data Sem %p\n",pShbMemInst->m_pSemNewData);
     while (!kthread_should_stop())
     {
         wait_event_interruptible(pShbMemHeader->m_WaitQueueNewData,
@@ -918,7 +918,7 @@ int             fCallAgain;
         }
     }
 
-    DEBUG_LVL_29_TRACE0("ShbIpcThreadSignalNewData terminated \n");
+    DEBUG_LVL_29_TRACE("ShbIpcThreadSignalNewData terminated \n");
 
     return 0;
 }
@@ -941,7 +941,7 @@ int             iRetVal=-1;
     pShbMemInst  = ShbIpcGetShbMemInst (pShbInstance);
     pShbMemHeader = ShbIpcGetShbMemHeader (pShbMemInst);
 
-    DEBUG_LVL_29_TRACE0("ShbIpcThreadSignalJobReady wait for job ready Sem\n");
+    DEBUG_LVL_29_TRACE("ShbIpcThreadSignalJobReady wait for job ready Sem\n");
     if (pShbMemInst->m_ulTimeOutMsJobReady != 0)
     {
         lTimeOutJiffies = (long) pShbMemInst->m_ulTimeOutMsJobReady / (1000 / HZ);
@@ -984,7 +984,7 @@ int             iRetVal=-1;
         up(&pShbMemInst->m_SemaphoreStopThreadJobReady);
     }
 
-    DEBUG_LVL_29_TRACE0("ShbIpcThreadSignalJobReady terminated\n");
+    DEBUG_LVL_29_TRACE("ShbIpcThreadSignalJobReady terminated\n");
 
     return 0;
 }

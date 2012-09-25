@@ -1582,7 +1582,7 @@ tEplEventNmtStateChange NmtStateChange;
 
         default:
         {
-            //DEBUG_EPL_DBGLVL_NMTK_TRACE0(EPL_DBGLVL_NMT ,"Error in EplNmtProcess: Unknown NMT-State");
+            //DEBUG_EPL_DBGLVL_NMTK_TRACE(EPL_DBGLVL_NMT ,"Error in EplNmtProcess: Unknown NMT-State");
             //EPL_MCO_GLB_VAR(m_NmtState) = kEplNmtGsResetApplication;
             Ret = kEplNmtInvalidState;
             goto Exit;
@@ -1595,7 +1595,7 @@ tEplEventNmtStateChange NmtStateChange;
     {
         EPL_NMTK_DBG_POST_TRACE_VALUE(NmtEvent, OldNmtState, EPL_MCO_GLB_VAR(m_NmtState));
 
-        EPL_DBGLVL_NMTK_TRACE2("EplNmtkProcess(NMT-Event = 0x%04X): New NMT-State = 0x%03X\n", NmtEvent, NmtStateChange.m_NewNmtState);
+        EPL_DBGLVL_NMTK_TRACE("EplNmtkProcess(NMT-Event = 0x%04X): New NMT-State = 0x%03X\n", NmtEvent, NmtStateChange.m_NewNmtState);
 
         NmtStateChange.m_NewNmtState = EPL_MCO_GLB_VAR(m_NmtState);
         NmtStateChange.m_OldNmtState = OldNmtState;

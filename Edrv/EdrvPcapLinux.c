@@ -263,7 +263,7 @@ tEplKernel EdrvInit(tEdrvInitParam *pEdrvInitParam_p)
 
     if ( EdrvInstance_l.m_pPcap == NULL )
     {
-        EPL_DBGLVL_ERROR_TRACE2("%s() Error!! Can't open pcap: %s\n", __func__,
+        EPL_DBGLVL_ERROR_TRACE("%s() Error!! Can't open pcap: %s\n", __func__,
                                 sErr_Msg);
         Ret = kEplEdrvInitError;
         goto Exit;
@@ -271,21 +271,21 @@ tEplKernel EdrvInit(tEdrvInitParam *pEdrvInitParam_p)
 
     if (pcap_setdirection(EdrvInstance_l.m_pPcap, PCAP_D_OUT) < 0)
     {
-        EPL_DBGLVL_ERROR_TRACE1("%s() couldn't set PCAP direction\n", __func__);
+        EPL_DBGLVL_ERROR_TRACE("%s() couldn't set PCAP direction\n", __func__);
         Ret = kEplEdrvInitError;
         goto Exit;
     }
 
     if (pthread_mutex_init(&EdrvInstance_l.m_mutex, NULL) != 0)
     {
-        EPL_DBGLVL_ERROR_TRACE1("%s() couldn't init mutex\n", __func__);
+        EPL_DBGLVL_ERROR_TRACE("%s() couldn't init mutex\n", __func__);
         Ret = kEplEdrvInitError;
         goto Exit;
     }
 
     if (sem_init(&EdrvInstance_l.m_syncSem, 0, 0) != 0)
     {
-        EPL_DBGLVL_ERROR_TRACE1("%s() couldn't init semaphore\n", __func__);
+        EPL_DBGLVL_ERROR_TRACE("%s() couldn't init semaphore\n", __func__);
         Ret = kEplEdrvInitError;
         goto Exit;
     }
@@ -293,7 +293,7 @@ tEplKernel EdrvInit(tEdrvInitParam *pEdrvInitParam_p)
     if (pthread_create(&EdrvInstance_l.m_hThread, NULL,
                        EdrvWorkerThread,  &EdrvInstance_l) != 0)
     {
-        EPL_DBGLVL_ERROR_TRACE1("%s() Couldn't create worker thread!\n", __func__);
+        EPL_DBGLVL_ERROR_TRACE("%s() Couldn't create worker thread!\n", __func__);
         Ret = kEplEdrvInitError;
         goto Exit;
     }
@@ -301,7 +301,7 @@ tEplKernel EdrvInit(tEdrvInitParam *pEdrvInitParam_p)
     schedParam.__sched_priority = EPL_THREAD_PRIORITY_MEDIUM;
     if (pthread_setschedparam(EdrvInstance_l.m_hThread, SCHED_FIFO, &schedParam) != 0)
     {
-        EPL_DBGLVL_ERROR_TRACE1("%s() couldn't set thread scheduling parameters!\n",
+        EPL_DBGLVL_ERROR_TRACE("%s() couldn't set thread scheduling parameters!\n",
                                 __func__);
     }
 
@@ -390,7 +390,7 @@ tEplKernel EdrvSendTxMsg(tEdrvTxBuffer *pBuffer_p)
                                (int) pBuffer_p->m_uiTxMsgLen);
         if  (iRet != 0)
         {
-            EPL_DBGLVL_EDRV_TRACE3("%s() pcap_sendpacket returned %d (%s)\n",
+            EPL_DBGLVL_EDRV_TRACE("%s() pcap_sendpacket returned %d (%s)\n",
                     __func__, iRet, pcap_geterr(EdrvInstance_l.m_pPcap));
             Ret = kEplInvalidOperation;
         }
@@ -625,7 +625,7 @@ static void * EdrvWorkerThread(void *pArgument_p)
     tEdrvInstance*  pInstance = (tEdrvInstance *)pArgument_p;
     char sErr_Msg[ PCAP_ERRBUF_SIZE ];
 
-    EPL_DBGLVL_EDRV_TRACE2("%s(): ThreadId:%ld\n", __func__, syscall(SYS_gettid));
+    EPL_DBGLVL_EDRV_TRACE("%s(): ThreadId:%ld\n", __func__, syscall(SYS_gettid));
 
     pInstance->m_pPcapThread =
         pcap_open_live (pInstance->m_initParam.m_HwParam.m_pszDevName,
@@ -636,14 +636,14 @@ static void * EdrvWorkerThread(void *pArgument_p)
 
    if (pInstance->m_pPcapThread == NULL)
    {
-       EPL_DBGLVL_ERROR_TRACE2("%s() Error!! Can't open pcap: %s\n", __func__,
+       EPL_DBGLVL_ERROR_TRACE("%s() Error!! Can't open pcap: %s\n", __func__,
                                sErr_Msg);
        return NULL;
    }
 
    if (pcap_setdirection(pInstance->m_pPcapThread, PCAP_D_INOUT) < 0)
    {
-       EPL_DBGLVL_ERROR_TRACE1("%s() couldn't set PCAP direction1\n", __func__);
+       EPL_DBGLVL_ERROR_TRACE("%s() couldn't set PCAP direction1\n", __func__);
    }
 
    /* signal that thread is successfully started */
@@ -654,19 +654,19 @@ static void * EdrvWorkerThread(void *pArgument_p)
    switch( PcapRet )
    {
        case 0:
-           EPL_DBGLVL_ERROR_TRACE1("%s(): pcap_loop ended because 'cnt' is exhausted.\n", __func__);
+           EPL_DBGLVL_ERROR_TRACE("%s(): pcap_loop ended because 'cnt' is exhausted.\n", __func__);
            break;
 
        case -1:
-           EPL_DBGLVL_ERROR_TRACE1("%s(): pcap_loop ended because of an error!\n", __func__);
+           EPL_DBGLVL_ERROR_TRACE("%s(): pcap_loop ended because of an error!\n", __func__);
            break;
 
        case -2:
-           EPL_DBGLVL_ERROR_TRACE1("%s(): pcap_loop ended normally.\n", __func__);
+           EPL_DBGLVL_ERROR_TRACE("%s(): pcap_loop ended normally.\n", __func__);
            break;
 
        default:
-           EPL_DBGLVL_ERROR_TRACE1("%s(): pcap_loop ended (unknown return value).\n", __func__);
+           EPL_DBGLVL_ERROR_TRACE("%s(): pcap_loop ended (unknown return value).\n", __func__);
            break;
    }
 

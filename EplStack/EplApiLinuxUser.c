@@ -210,15 +210,15 @@ int          iRet;
     EplApiInstance_g.m_hDrvInst = -1;
 
     // open driver
-    TRACE1("EPL: Try to open driver '%s'\n", pszDrvName);
+    TRACE("EPL: Try to open driver '%s'\n", pszDrvName);
     EplApiInstance_g.m_hDrvInst = open (pszDrvName, O_RDWR);
     if (EplApiInstance_g.m_hDrvInst > -1)
     {
-        TRACE2("EPL: open '%s' successful -> hDrvInst=%d\n", pszDrvName, EplApiInstance_g.m_hDrvInst);
+        TRACE("EPL: open '%s' successful -> hDrvInst=%d\n", pszDrvName, EplApiInstance_g.m_hDrvInst);
     }
     else
     {
-        TRACE1("EPL: ERROR: Can't open '%s'\n", pszDrvName);
+        TRACE("EPL: ERROR: Can't open '%s'\n", pszDrvName);
         Ret = kEplNoResource;
         goto Exit;
     }

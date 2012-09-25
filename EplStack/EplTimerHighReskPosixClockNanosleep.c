@@ -211,7 +211,7 @@ tEplKernel PUBLIC EplTimerHighReskAddInstance(void)
 
         if (sem_init(&pTimerInfo->m_syncSem, 0, 0) != 0)
         {
-            EPL_DBGLVL_ERROR_TRACE1("%s() Couldn't init semaphore!\n", __func__);
+            EPL_DBGLVL_ERROR_TRACE("%s() Couldn't init semaphore!\n", __func__);
             Ret = kEplNoResource;
             goto Exit;
         }
@@ -227,7 +227,7 @@ tEplKernel PUBLIC EplTimerHighReskAddInstance(void)
         schedParam.__sched_priority = EPL_THREAD_PRIORITY_HIGH;
         if (pthread_setschedparam(pTimerInfo->m_timerThread, SCHED_FIFO, &schedParam) != 0)
         {
-            EPL_DBGLVL_ERROR_TRACE1("%s() Couldn't set thread scheduling parameters!\n", __func__);
+            EPL_DBGLVL_ERROR_TRACE("%s() Couldn't set thread scheduling parameters!\n", __func__);
             Ret = kEplNoResource;
             sem_destroy(&pTimerInfo->m_syncSem);
             pthread_cancel(pTimerInfo->m_timerThread);
@@ -314,7 +314,7 @@ tEplKernel PUBLIC EplTimerHighReskModifyTimerNs(tEplTimerHdl*     pTimerHdl_p,
     tEplTimerHighReskTimerInfo*  pTimerInfo;
 
     /*
-    EPL_DBGLVL_TIMERH_TRACE3("%s() pTimerHdl_p=%08x/%08x\n",
+    EPL_DBGLVL_TIMERH_TRACE("%s() pTimerHdl_p=%08x/%08x\n",
       __func__, (unsigned int)pTimerHdl_p,(unsigned int)*pTimerHdl_p);
     */
 
@@ -486,8 +486,8 @@ static void * EplTimerHighReskProcessThread(void *pArgument_p)
     struct timespec                     debugtime;
 #endif
 
-    EPL_DBGLVL_TIMERH_TRACE1("%s(): ThreadId:%ld\n", __func__, syscall(SYS_gettid));
-    EPL_DBGLVL_TIMERH_TRACE1("%s(): timer:%lx\n", __func__, (unsigned long)pArgument_p);
+    EPL_DBGLVL_TIMERH_TRACE("%s(): ThreadId:%ld\n", __func__, syscall(SYS_gettid));
+    EPL_DBGLVL_TIMERH_TRACE("%s(): timer:%lx\n", __func__, (unsigned long)pArgument_p);
 
     /* thread parameter contains the address of the timer information structure */
     pTimerInfo = &EplTimerHighReskInstance_l.m_aTimerInfo[(int)pArgument_p];
@@ -501,7 +501,7 @@ static void * EplTimerHighReskProcessThread(void *pArgument_p)
         /* check if thread should terminate */
         if (pTimerInfo->m_fTerminate)
         {
-            EPL_DBGLVL_TIMERH_TRACE1("%s() Exiting signal received!\n", __func__);
+            EPL_DBGLVL_TIMERH_TRACE("%s() Exiting signal received!\n", __func__);
             break;
         }
         else
@@ -523,7 +523,7 @@ static void * EplTimerHighReskProcessThread(void *pArgument_p)
                 iRet = clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &timeout, NULL);
                 if (iRet < 0)
                 {
-                    EPL_DBGLVL_ERROR_TRACE1("%s(): Error in clock_nanosleep!\n",
+                    EPL_DBGLVL_ERROR_TRACE("%s(): Error in clock_nanosleep!\n",
                                             __func__);
                     /* todo how to signal that timeout wasn't correct? */
                 }
@@ -537,13 +537,13 @@ static void * EplTimerHighReskProcessThread(void *pArgument_p)
                               debugtime.tv_nsec);
                 if (debugtime.tv_nsec > pTimerInfo->m_maxLatency)
                 {
-                    EPL_DBGLVL_TIMERH_TRACE2("%s() Timer elapsed: max latency=%ld ns\n",
+                    EPL_DBGLVL_TIMERH_TRACE("%s() Timer elapsed: max latency=%ld ns\n",
                                              __func__, debugtime.tv_nsec);
                     pTimerInfo->m_maxLatency = debugtime.tv_nsec;
                 }
                 if (timeout.tv_nsec < pTimerInfo->m_minLatency)
                 {
-                    EPL_DBGLVL_TIMERH_TRACE2("%s() Timer elapsed: min latency=%ld ns\n",
+                    EPL_DBGLVL_TIMERH_TRACE("%s() Timer elapsed: min latency=%ld ns\n",
                                              __func__, debugtime.tv_nsec);
                     pTimerInfo->m_minLatency = debugtime.tv_nsec;
                 }

@@ -300,12 +300,12 @@ int  main (int argc, char **argv)
     /* adjust process priority */
     if (nice (-20) == -1)         // push nice level in case we have no RTPreempt
     {
-        EPL_DBGLVL_ERROR_TRACE2("%s() couldn't set nice value! (%s)\n", __func__, strerror(errno));
+        EPL_DBGLVL_ERROR_TRACE("%s() couldn't set nice value! (%s)\n", __func__, strerror(errno));
     }
     schedParam.__sched_priority = MAIN_THREAD_PRIORITY;
     if (pthread_setschedparam(pthread_self(), SCHED_RR, &schedParam) != 0)
     {
-        EPL_DBGLVL_ERROR_TRACE2("%s() couldn't set thread scheduling parameters! %d\n",
+        EPL_DBGLVL_ERROR_TRACE("%s() couldn't set thread scheduling parameters! %d\n",
                 __func__, schedParam.__sched_priority);
     }
 
@@ -339,7 +339,7 @@ int  main (int argc, char **argv)
     FTRACE_ENABLE(TRUE);
 
     /*
-    EPL_DBGLVL_ALWAYS_TRACE2("%s(): Main Thread Id:%ld\n", __func__,
+    EPL_DBGLVL_ALWAYS_TRACE("%s(): Main Thread Id:%ld\n", __func__,
                              syscall(SYS_gettid));
                              */
     printf("----------------------------------------------------\n");
@@ -359,44 +359,44 @@ int  main (int argc, char **argv)
         goto Exit;
     }
 
-    PRINTF0("--------------------------------------------------\n");
-    PRINTF0("List of Ethernet Cards Found in this System: \n");
-    PRINTF0("--------------------------------------------------\n");
+    PRINTF("--------------------------------------------------\n");
+    PRINTF("List of Ethernet Cards Found in this System: \n");
+    PRINTF("--------------------------------------------------\n");
 
     /* Print the list */
     for (seldev = alldevs; seldev != NULL; seldev = seldev->next)
     {
-        PRINTF1("%d. ", ++i);
+        PRINTF("%d. ", ++i);
 
         if (seldev->description)
         {
-            PRINTF2("%s\n      %s\n", seldev->description, seldev->name);
+            PRINTF("%s\n      %s\n", seldev->description, seldev->name);
         }
         else
         {
-            PRINTF1("%s\n", seldev->name);
+            PRINTF("%s\n", seldev->name);
         }
     }
 
     if (i == 0)
     {
-        PRINTF0("\nNo interfaces found! Make sure WinPcap is installed.\n");
+        PRINTF("\nNo interfaces found! Make sure WinPcap is installed.\n");
         EplRet = kEplNoResource;
         goto Exit;
     }
 
-    PRINTF0("--------------------------------------------------\n");
-    PRINTF1("Select the interface to be used for POWERLINK (1-%d):",i);
+    PRINTF("--------------------------------------------------\n");
+    PRINTF("Select the interface to be used for POWERLINK (1-%d):",i);
     if (scanf("%d", &inum) == EOF)
     {
         pcap_freealldevs(alldevs);
         EplRet = kEplNoResource;
         goto Exit;
     }
-    PRINTF0("--------------------------------------------------\n");
+    PRINTF("--------------------------------------------------\n");
     if ((inum < 1) || (inum > i))
     {
-        PRINTF0("\nInterface number out of range.\n");
+        PRINTF("\nInterface number out of range.\n");
         /* Free the device list */
         pcap_freealldevs(alldevs);
         EplRet = kEplNoResource;
@@ -628,10 +628,10 @@ ExitShutdown:
     EplRet = EplApiShutdown();
 
 Exit:
-    PRINTF1("main(): returns 0x%X\n", EplRet);
+    PRINTF("main(): returns 0x%X\n", EplRet);
 
 #if (TARGET_SYSTEM == _WIN32_)
-    PRINTF0("Press Enter to quit!\n");
+    PRINTF("Press Enter to quit!\n");
     EplTgtGetch();
 #endif
 
@@ -690,7 +690,7 @@ tEplKernel PUBLIC AppCbEvent(
                 case kEplNmtCsBasicEthernet:
                 case kEplNmtMsBasicEthernet:
                 case kEplNmtGsResetCommunication:
-                    PRINTF3("%s(0x%X) originating event = 0x%X\n",
+                    PRINTF("%s(0x%X) originating event = 0x%X\n",
                             __func__,
                             pEventArg_p->m_NmtStateChange.m_NewNmtState,
                             pEventArg_p->m_NmtStateChange.m_NmtEvent);

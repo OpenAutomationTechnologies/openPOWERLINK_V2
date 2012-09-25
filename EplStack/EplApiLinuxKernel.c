@@ -309,8 +309,8 @@ int  iRet;
 int  nMinorNumber;
 #endif
 
-    TRACE0("EPL: + EplLinInit...\n");
-    TRACE2("EPL:   Driver build: %s / %s\n", __DATE__, __TIME__);
+    TRACE("EPL: + EplLinInit...\n");
+    TRACE("EPL:   Driver build: %s / %s\n", __DATE__, __TIME__);
 
     iRet = 0;
 
@@ -328,7 +328,7 @@ int  nMinorNumber;
     iErr = misc_register(&EplLinMiscDevice_g);
     if (iErr == 0)
     {
-        TRACE1("EPL:   Misc device '%s' created successfully.\n", EPLLIN_DEV_NAME);
+        TRACE("EPL:   Misc device '%s' created successfully.\n", EPLLIN_DEV_NAME);
     }
     else
     {
@@ -349,7 +349,7 @@ int  nMinorNumber;
 
 Exit:
 
-    TRACE1("EPL: - EplLinInit (iRet=%d)\n", iRet);
+    TRACE("EPL: - EplLinInit (iRet=%d)\n", iRet);
     return (iRet);
 
 }
@@ -367,20 +367,20 @@ static void  __exit  EplLinExit (void)
 
 tEplKernel          EplRet;
 
-    TRACE0("EPL: + EplLinExit...\n");
+    TRACE("EPL: + EplLinExit...\n");
 
     // deinitialize proc fs
     EplRet = EplLinProcFree();
-    TRACE1("EplLinProcFree():        0x%X\n", EplRet);
+    TRACE("EplLinProcFree():        0x%X\n", EplRet);
 
     // deregister misc device
     misc_deregister(&EplLinMiscDevice_g);
 
 
-    TRACE1("EPL:   Driver '%s' removed.\n", EPLLIN_DRV_NAME);
+    TRACE("EPL:   Driver '%s' removed.\n", EPLLIN_DRV_NAME);
 
 
-    TRACE0("EPL: - EplLinExit\n");
+    TRACE("EPL: - EplLinExit\n");
 
 }
 
@@ -400,7 +400,7 @@ static int  EplLinOpen (
 int  iRet;
 
 
-    TRACE0("EPL: + EplLinOpen...\n");
+    TRACE("EPL: + EplLinOpen...\n");
 
     MOD_INC_USE_COUNT;
 
@@ -423,7 +423,7 @@ int  iRet;
         iRet = 0;
     }
 
-    TRACE1("EPL: - EplLinOpen (iRet=%d)\n", iRet);
+    TRACE("EPL: - EplLinOpen (iRet=%d)\n", iRet);
     return (iRet);
 
 }
@@ -445,7 +445,7 @@ tEplKernel          EplRet = kEplSuccessful;
 int  iRet;
 
 
-    TRACE0("EPL: + EplLinRelease...\n");
+    TRACE("EPL: + EplLinRelease...\n");
 
     if (uiEplState_g != EPL_STATE_NOTINIT)
     {
@@ -464,7 +464,7 @@ int  iRet;
 
             if (EplRet == kEplSuccessful)
             {
-                TRACE0("EPL:   waiting for NMT_GS_OFF\n");
+                TRACE("EPL:   waiting for NMT_GS_OFF\n");
                 wait_event_interruptible(WaitQueueRelease_g,
                                             (uiEplState_g == EPL_STATE_SHUTDOWN));
                 // $$$ d.k.: What if waiting was interrupted by signal?
@@ -472,7 +472,7 @@ int  iRet;
             }
             else
             {   // post NmtEventSwitchOff failed
-                TRACE0("EPL:   event post failed\n");
+                TRACE("EPL:   event post failed\n");
             }
 
         }
@@ -480,7 +480,7 @@ int  iRet;
         // free process image
         EplApiProcessImageFree();
 
-        TRACE0("EPL:   call EplApiShutdown()\n");
+        TRACE("EPL:   call EplApiShutdown()\n");
         // EPL stack can be safely shut down
         // delete instance for all EPL modules
         EplRet = EplApiShutdown();
@@ -494,7 +494,7 @@ int  iRet;
     MOD_DEC_USE_COUNT;
 
 
-    TRACE1("EPL: - EplLinRelease (iRet=%d)\n", iRet);
+    TRACE("EPL: - EplLinRelease (iRet=%d)\n", iRet);
     return (iRet);
 
 }
@@ -517,14 +517,14 @@ static ssize_t  EplLinRead (
 int  iRet;
 
 
-    TRACE0("EPL: + EplLinRead...\n");
+    TRACE("EPL: + EplLinRead...\n");
 
 
-    TRACE0("EPL:   Sorry, this operation isn't supported.\n");
+    TRACE("EPL:   Sorry, this operation isn't supported.\n");
     iRet = -EINVAL;
 
 
-    TRACE1("EPL: - EplLinRead (iRet=%d)\n", iRet);
+    TRACE("EPL: - EplLinRead (iRet=%d)\n", iRet);
     return (iRet);
 
 }
@@ -547,14 +547,14 @@ static ssize_t  EplLinWrite (
 int  iRet;
 
 
-    TRACE0("EPL: + EplLinWrite...\n");
+    TRACE("EPL: + EplLinWrite...\n");
 
 
-    TRACE0("EPL:   Sorry, this operation isn't supported.\n");
+    TRACE("EPL:   Sorry, this operation isn't supported.\n");
     iRet = -EINVAL;
 
 
-    TRACE1("EPL: - EplLinWrite (iRet=%d)\n", iRet);
+    TRACE("EPL: - EplLinWrite (iRet=%d)\n", iRet);
     return (iRet);
 
 }
@@ -586,7 +586,7 @@ int  iErr;
 int  iRet;
 
 
-//    TRACE1("EPL: + EplLinIoctl (uiIoctlCmd_p=%d)...\n", uiIoctlCmd_p);
+//    TRACE("EPL: + EplLinIoctl (uiIoctlCmd_p=%d)...\n", uiIoctlCmd_p);
 
 
     iRet = -EINVAL;
@@ -628,7 +628,7 @@ int  iRet;
         case EPLLIN_CMD_SHUTDOWN:
         {   // shutdown the threads
 
-            TRACE0("EPL: + EPLLIN_CMD_SHUTDOWN\n");
+            TRACE("EPL: + EPLLIN_CMD_SHUTDOWN\n");
             // pass control to sync kernel thread, but signal termination
             atomic_set(&AtomicSyncState_g, EVENT_STATE_TERM);
             wake_up_interruptible(&WaitQueueCbSync_g);
@@ -648,7 +648,7 @@ int  iRet;
             // free process image which unlocks any blocking threads of application
             EplApiProcessImageFree();
 
-            TRACE0("EPL: - EPLLIN_CMD_SHUTDOWN\n");
+            TRACE("EPL: - EPLLIN_CMD_SHUTDOWN\n");
             iRet = 0;
             break;
         }
@@ -971,7 +971,7 @@ int  iRet;
                 atomic_set(&AtomicEventState_g, EVENT_STATE_TERM);
                 wake_up_interruptible(&WaitQueueCbEvent_g);
                 // exit with error -> EplApiProcess() will leave the infinite loop
-                TRACE0("EPL:   EPLLIN_CMD_GET_EVENT set term\n");
+                TRACE("EPL:   EPLLIN_CMD_GET_EVENT set term\n");
                 iRet = 1;
                 goto Exit;
             }
@@ -989,7 +989,7 @@ int  iRet;
                 atomic_set(&AtomicEventState_g, EVENT_STATE_TERM);
                 wake_up_interruptible(&WaitQueueCbEvent_g);
                 // exit with this error -> EplApiProcess() will leave the infinite loop
-                TRACE1("EPL:   EPLLIN_CMD_GET_EVENT iErr=%d\n",iErr);
+                TRACE("EPL:   EPLLIN_CMD_GET_EVENT iErr=%d\n",iErr);
                 iRet = iErr;
                 goto Exit;
             }
@@ -998,7 +998,7 @@ int  iRet;
                 // pass control to event queue kernel thread, but signal termination
                 wake_up_interruptible(&WaitQueueCbEvent_g);
                 // exit with this error -> EplApiProcess() will leave the infinite loop
-                TRACE0("EPL:   EPLLIN_CMD_GET_EVENT term is set\n");
+                TRACE("EPL:   EPLLIN_CMD_GET_EVENT term is set\n");
                 iRet = 1;
                 goto Exit;
             }
@@ -1117,7 +1117,7 @@ int  iRet;
                 atomic_set(&AtomicSyncState_g, EVENT_STATE_TERM);
                 wake_up_interruptible(&WaitQueueCbSync_g);
                 // exit with this error -> application will leave the infinite loop
-                TRACE1("EPL:   EPLLIN_CMD_PI_IN iErr=%d\n", iErr);
+                TRACE("EPL:   EPLLIN_CMD_PI_IN iErr=%d\n", iErr);
                 iRet = iErr;
                 goto Exit;
             }
@@ -1126,7 +1126,7 @@ int  iRet;
                 // pass control to sync kernel thread, but signal termination
                 wake_up_interruptible(&WaitQueueCbSync_g);
                 // exit with this error -> application will leave the infinite loop
-                TRACE0("EPL:   EPLLIN_CMD_PI_IN TERM is set\n");
+                TRACE("EPL:   EPLLIN_CMD_PI_IN TERM is set\n");
                 iRet = 1;
                 goto Exit;
             }
@@ -1383,7 +1383,7 @@ int  iRet;
 
 Exit:
 
-//    TRACE1("EPL: - EplLinIoctl (iRet=%d)\n", iRet);
+//    TRACE("EPL: - EplLinIoctl (iRet=%d)\n", iRet);
     return (iRet);
 
 }
@@ -1423,7 +1423,7 @@ int  iErr;
     if ((iErr != 0) || (atomic_read(&AtomicEventState_g) == EVENT_STATE_TERM))
     {   // waiting was interrupted by signal
         EplRet = kEplShutdown;
-        TRACE0("EPL:   EplLinCbEvent() TERM is set while waiting for ioctl\n");
+        TRACE("EPL:   EplLinCbEvent() TERM is set while waiting for ioctl\n");
         goto LeaveCriticalSection;
     }
 
@@ -1443,7 +1443,7 @@ int  iErr;
     if ((iErr != 0) || (atomic_read(&AtomicEventState_g) == EVENT_STATE_TERM))
     {   // waiting was interrupted by signal
         EplRet = kEplShutdown;
-        TRACE0("EPL:   EplLinCbEvent() TERM is set while waiting for completion\n");
+        TRACE("EPL:   EplLinCbEvent() TERM is set while waiting for completion\n");
         goto LeaveCriticalSection;
     }
 
@@ -1460,7 +1460,7 @@ Exit:
     {
         if (pEventArg_p->m_NmtStateChange.m_NewNmtState == kEplNmtGsOff)
         {   // NMT state machine was shut down
-            TRACE0("EPL:   EplLinCbEvent(NMT_GS_OFF)\n");
+            TRACE("EPL:   EplLinCbEvent(NMT_GS_OFF)\n");
             uiEplState_g = EPL_STATE_SHUTDOWN;
 //            atomic_set(&AtomicEventState_g, EVENT_STATE_TERM);
 //            wake_up_interruptible(&WaitQueueProcess_g);

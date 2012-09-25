@@ -474,27 +474,27 @@ int         iResult;
     iResult = platform_driver_register(&EdrvDriver);
     if (iResult != 0)
     {
-        PRINTF2("%s pci_register_driver failed with %d\n", __func__, iResult);
+        PRINTF("%s pci_register_driver failed with %d\n", __func__, iResult);
         Ret = kEplNoResource;
         goto Exit;
     }
 
     if (EdrvInstance_l.m_pDev == NULL)
     {
-        PRINTF1("%s m_pDev=NULL\n", __func__);
+        PRINTF("%s m_pDev=NULL\n", __func__);
         Ret = kEplNoResource;
         goto Exit;
     }
 
 /*
     // read MAC address from controller
-    PRINTF1("%s local MAC = ", __func__);
+    PRINTF("%s local MAC = ", __func__);
     for (iResult = 0; iResult < 6; iResult++)
     {
         pEdrvInitParam_p->m_abMyMacAddr[iResult] = EDRV_REGB_READ((EDRV_REGDW_IDR0 + iResult));
-        PRINTF1("%02X ", (unsigned int)pEdrvInitParam_p->m_abMyMacAddr[iResult]);
+        PRINTF("%02X ", (unsigned int)pEdrvInitParam_p->m_abMyMacAddr[iResult]);
     }
-    PRINTF0("\n");
+    PRINTF("\n");
 */
 
 Exit:
@@ -520,7 +520,7 @@ tEplKernel EdrvShutdown(void)
 {
 
     // unregister platform driver
-    PRINTF1("%s calling platform_driver_unregister()\n", __func__);
+    PRINTF("%s calling platform_driver_unregister()\n", __func__);
     platform_driver_unregister (&EdrvDriver);
 
     return kEplSuccessful;
@@ -563,18 +563,18 @@ BYTE        bOffset;
     bOffset = (bHash >> 3);
     bData = EDRV_REGB_READ(EDRV_REGB_MAR + bOffset);
 
-    PRINTF4("%s MAR[%u] %02X | %02X\n", __func__, (WORD) bOffset, (WORD) bData,1 << (bHash & 0x07));
+    PRINTF("%s MAR[%u] %02X | %02X\n", __func__, (WORD) bOffset, (WORD) bData,1 << (bHash & 0x07));
 
     bData |= 1 << (bHash & 0x07);
     EDRV_REGB_WRITE(EDRV_REGB_MAR + bOffset, bData);
 
 /*
-    PRINTF1("%s", __func__);
+    PRINTF("%s", __func__);
     for (bOffset = 0; bOffset < 8; bOffset++)
     {
-        PRINTF1(" %02X", EDRV_REGB_READ(EDRV_REGB_MAR + bOffset));
+        PRINTF(" %02X", EDRV_REGB_READ(EDRV_REGB_MAR + bOffset));
     }
-    PRINTF0("\n");
+    PRINTF("\n");
 */
     return Ret;
 }
@@ -959,7 +959,7 @@ int             iHandled = IRQ_HANDLED;
 
         if (EdrvInstance_l.m_pbRxBuf == NULL)
         {
-            PRINTF1("%s Rx buffers currently not allocated\n", __func__);
+            PRINTF("%s Rx buffers currently not allocated\n", __func__);
             goto Exit;
         }
 
@@ -1017,7 +1017,7 @@ int             iHandled = IRQ_HANDLED;
                 RxBuffer.m_uiRxMsgLen = uiLength - ETH_CRC_SIZE;
                 RxBuffer.m_pbBuffer = pbRxBuf;
 
-//                PRINTF0("R");
+//                PRINTF("R");
                 EDRV_COUNT_RX;
 
                 // call Rx handler of Data link layer
@@ -1068,37 +1068,37 @@ struct resource* pResource;
 
     if (EdrvInstance_l.m_pDev != NULL)
     {   // Edrv is already connected to a PCI device
-        PRINTF2("%s device %s discarded\n", __func__, pPlatformDev_p->name);
+        PRINTF("%s device %s discarded\n", __func__, pPlatformDev_p->name);
         iResult = -ENODEV;
         goto Exit;
     }
 
     EdrvInstance_l.m_pDev = pPlatformDev_p;
 
-    PRINTF1("%s get resource IOMEM... ", __func__);
+    PRINTF("%s get resource IOMEM... ", __func__);
     pResource = platform_get_resource(pPlatformDev_p, IORESOURCE_MEM, 0);
     if (pResource == NULL)
     {
-        PRINTF0("FAILED\n");
+        PRINTF("FAILED\n");
         iResult = -ENODEV;
         goto Exit;
     }
     else
     {
-        PRINTF0("OK\n");
+        PRINTF("OK\n");
     }
 
-    PRINTF1("%s ioremap... ", __func__);
+    PRINTF("%s ioremap... ", __func__);
     EdrvInstance_l.m_pIoAddr = ioremap (pResource->start, 0x08);
     if (EdrvInstance_l.m_pIoAddr == NULL)
     {   // remap of controller's register space failed
-        PRINTF0("FAILED\n");
+        PRINTF("FAILED\n");
         iResult = -EIO;
         goto Exit;
     }
     else
     {
-        PRINTF0("OK\n");
+        PRINTF("OK\n");
     }
 
     // check Vendor and Product ID
@@ -1107,21 +1107,21 @@ struct resource* pResource;
     dwTemp |= EDRV_REGB_READ(EDRV_REGB_PIDL) << 16;
     dwTemp |= EDRV_REGB_READ(EDRV_REGB_PIDH) << 24;
 
-    PRINTF2("%s check device ID (%X)... ", __func__, EDRV_REGB_ID_DM9003);
+    PRINTF("%s check device ID (%X)... ", __func__, EDRV_REGB_ID_DM9003);
     if (dwTemp != EDRV_REGB_ID_DM9003)
     {   // device is not supported by this driver
-        PRINTF0("FAILED\n");
-        PRINTF2("%s device ID %lX not supported\n", __func__, dwTemp);
+        PRINTF("FAILED\n");
+        PRINTF("%s device ID %lX not supported\n", __func__, dwTemp);
         iResult = -ENODEV;
         goto Exit;
     }
     else
     {
-        PRINTF0("OK\n");
+        PRINTF("OK\n");
     }
 
     // reset switch
-    PRINTF1("%s reset switch... ", __func__);
+    PRINTF("%s reset switch... ", __func__);
     EDRV_REGB_WRITE(EDRV_REGB_SWITCHCR, EDRV_REGB_SWITCHCR_RST_SW);
 
     // wait until reset has finished
@@ -1134,11 +1134,11 @@ struct resource* pResource;
 
         schedule_timeout(10);
     }
-    PRINTF0("Done\n");
+    PRINTF("Done\n");
 
 
     // reset controller
-    PRINTF1("%s reset controller... ", __func__);
+    PRINTF("%s reset controller... ", __func__);
     EDRV_REGB_WRITE(EDRV_REGB_NCR, EDRV_REGB_NCR_RST);
 
     // wait until reset has finished
@@ -1151,16 +1151,16 @@ struct resource* pResource;
 
         schedule_timeout(10);
     }
-    PRINTF0("Done\n");
+    PRINTF("Done\n");
 
     // disable interrupts
-    PRINTF1("%s disable interrupts\n", __func__);
+    PRINTF("%s disable interrupts\n", __func__);
     EDRV_REGB_WRITE(EDRV_REGB_IMR, 0);
     // acknowledge all pending interrupts
     EDRV_REGB_WRITE(EDRV_REGB_ISR, (EDRV_REGB_READ(EDRV_REGB_ISR) & ~EDRV_REGB_INT_IO_8BIT));
 
     // install interrupt handler
-    PRINTF1("%s install interrupt handler... ", __func__);
+    PRINTF("%s install interrupt handler... ", __func__);
     iResult = request_irq(platform_get_irq(pPlatformDev_p, 0),
                           TgtEthIsr,
                           IRQF_SHARED, //IRQF_NODELAY,
@@ -1168,30 +1168,30 @@ struct resource* pResource;
                           pPlatformDev_p);
     if (iResult != 0)
     {
-        PRINTF0("FAILED\n");
+        PRINTF("FAILED\n");
         goto Exit;
     }
     else
     {
-        PRINTF0("OK\n");
+        PRINTF("OK\n");
     }
 
     // allocate Rx buffer
-    PRINTF1("%s allocate Rx buffer... ", __func__);
+    PRINTF("%s allocate Rx buffer... ", __func__);
     EdrvInstance_l.m_pbRxBuf = EPL_MALLOC(EDRV_MAX_FRAME_SIZE);
     if (EdrvInstance_l.m_pbRxBuf == NULL)
     {
-        PRINTF0("FAILED\n");
+        PRINTF("FAILED\n");
         iResult = -ENOMEM;
         goto Exit;
     }
     else
     {
-        PRINTF0("OK\n");
+        PRINTF("OK\n");
     }
 
     // reset PHYs
-    PRINTF1("%s reset PHYs... ", __func__);
+    PRINTF("%s reset PHYs... ", __func__);
     for (iIndex = 0; iIndex < EDRV_PHY_PORT_COUNT; iIndex++)
     {
         EdrvPhyWrite(iIndex, 0x00, 0x8000);
@@ -1209,10 +1209,10 @@ struct resource* pResource;
             schedule_timeout(10);
         }
     }
-    PRINTF0("Done\n");
+    PRINTF("Done\n");
 
     // enable Rx flow control
-    PRINTF1("%s enable Rx flow control\n", __func__);
+    PRINTF("%s enable Rx flow control\n", __func__);
     EDRV_REGB_WRITE(EDRV_REGB_FCR, EDRV_REGB_FCR_FLOW_EN);
 
     // set MAC address
@@ -1232,12 +1232,12 @@ struct resource* pResource;
 /*
     {
         BYTE abBroadcast[] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
-        PRINTF2("%s broadcast hash: %02X\n", __func__, (WORD) EdrvCalcHash(abBroadcast));
+        PRINTF("%s broadcast hash: %02X\n", __func__, (WORD) EdrvCalcHash(abBroadcast));
     }
 */
 
     #if EDRV_ENABLE_PORT0_SNIFFER != FALSE
-    PRINTF1("%s set port 0 as sniffer port... ", __func__);
+    PRINTF("%s set port 0 as sniffer port... ", __func__);
     EDRV_REGB_WRITE(EDRV_REGB_SWITCHCR,
         ((EDRV_REGB_READ(EDRV_REGB_SWITCHCR) & ~EDRV_REGB_SWITCHCR_SNF_PORT_MASK) | EDRV_REGB_SWITCHCR_AGE_64SEC));
     /* forward RX_MONI and TX_MONI for port 0 to sniffer port */
@@ -1249,17 +1249,17 @@ struct resource* pResource;
     #endif
 
     // enable receiver
-    PRINTF1("%s enable Rx\n", __func__);
+    PRINTF("%s enable Rx\n", __func__);
     EDRV_REGB_WRITE(EDRV_REGB_RCR, EDRV_REGB_RCR_DEF);
 
     // enable interrupts
-    PRINTF1("%s enable interrupts\n", __func__);
+    PRINTF("%s enable interrupts\n", __func__);
     EDRV_REGB_WRITE(EDRV_REGB_IMR, EDRV_REGB_INT_MASK_DEF);
 
     spin_lock_init(&EdrvInstance_l.m_TxSpinlock);
 
 Exit:
-    PRINTF2("%s finished with %d\n", __func__, iResult);
+    PRINTF("%s finished with %d\n", __func__, iResult);
     return iResult;
 }
 
@@ -1366,7 +1366,7 @@ BYTE bHash;
         }
     }
 
-//    PRINTF1("MyCRC = 0x%08lX\n", dwCrc);
+//    PRINTF("MyCRC = 0x%08lX\n", dwCrc);
     bHash = (BYTE)(dwCrc & 0x3f);
 
     return bHash;

@@ -789,7 +789,7 @@ DWORD            udwNextTimerIrqNs = EdrvCyclicInstance_l.m_dwCycleLenUs * 1000U
 
     if (Ret != kEplSuccessful)
     {
-        PRINTF2("%s: EplTimerHighReskModifyTimerNs ret=0x%X\n", __func__, Ret);
+        PRINTF("%s: EplTimerHighReskModifyTimerNs ret=0x%X\n", __func__, Ret);
         goto Exit;
     }
 
@@ -829,7 +829,7 @@ tEplKernel      Ret;
 
     if (Ret != kEplSuccessful)
     {
-        PRINTF2("%s: EplTimerHighReskModifyTimerNs ret=0x%X\n", __func__, Ret);
+        PRINTF("%s: EplTimerHighReskModifyTimerNs ret=0x%X\n", __func__, Ret);
         goto Exit;
     }
 

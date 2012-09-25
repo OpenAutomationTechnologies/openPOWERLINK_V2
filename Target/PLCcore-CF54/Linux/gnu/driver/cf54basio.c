@@ -540,8 +540,8 @@ int  iRet;
 #endif
 
 
-    TRACE0("IODRV: + cf54basio#PLCcoreCF54DrvInit...\n");
-    TRACE2("IODRV:   Driver build: %s / %s\n", __DATE__, __TIME__);
+    TRACE("IODRV: + cf54basio#PLCcoreCF54DrvInit...\n");
+    TRACE("IODRV:   Driver build: %s / %s\n", __DATE__, __TIME__);
 
     iRet = 0;
 
@@ -549,33 +549,33 @@ int  iRet;
     // register character device handler
     #ifdef _CFG_DYNMAJOR_
     {
-        TRACE3("IODRV:   Installing Driver '%s', Version %u.%02u...\n", DRV_NAME, DRV_VER_MAIN, DRV_VER_REL);
-        TRACE0("IODRV:   (using dynamic major number assignment)\n");
+        TRACE("IODRV:   Installing Driver '%s', Version %u.%02u...\n", DRV_NAME, DRV_VER_MAIN, DRV_VER_REL);
+        TRACE("IODRV:   (using dynamic major number assignment)\n");
         nDrvMajorNumber_g = register_chrdev (0, DRV_NAME, &PLCcoreCF54DrvFileOps_g);
         if (nDrvMajorNumber_g != 0)
         {
-            TRACE2("IODRV:   Driver '%s' installed successful, assigned MajorNumber=%d\n", DRV_NAME, nDrvMajorNumber_g);
+            TRACE("IODRV:   Driver '%s' installed successful, assigned MajorNumber=%d\n", DRV_NAME, nDrvMajorNumber_g);
         }
         else
         {
-            TRACE1("IODRV:   ERROR: Driver '%s' is unable to get a free MajorNumber!\n", DRV_NAME);
+            TRACE("IODRV:   ERROR: Driver '%s' is unable to get a free MajorNumber!\n", DRV_NAME);
             iRet = -EIO;
             goto Exit;
         }
     }
     #else
     {
-        TRACE4("IODRV:   Installing Driver '%s', Version %u.%02u, MajorNumber=%d...\n", DRV_NAME, DRV_VER_MAIN, DRV_VER_REL, DRV_MAJOR);
-        TRACE0("IODRV:   (using static major number assignment)\n");
+        TRACE("IODRV:   Installing Driver '%s', Version %u.%02u, MajorNumber=%d...\n", DRV_NAME, DRV_VER_MAIN, DRV_VER_REL, DRV_MAJOR);
+        TRACE("IODRV:   (using static major number assignment)\n");
         nDrvMajorNumber_g = DRV_MAJOR;
         iErr = register_chrdev (nDrvMajorNumber_g, DRV_NAME, &PLCcoreCF54DrvFileOps_g);
         if (iErr == 0)
         {
-            TRACE1("IODRV:   Driver '%s' installed successful.\n", DRV_NAME);
+            TRACE("IODRV:   Driver '%s' installed successful.\n", DRV_NAME);
         }
         else
         {
-            TRACE2("IODRV:   ERROR: Driver '%s' is unable to register MajorNumber %d!\n", DRV_NAME, nDrvMajorNumber_g);
+            TRACE("IODRV:   ERROR: Driver '%s' is unable to register MajorNumber %d!\n", DRV_NAME, nDrvMajorNumber_g);
             iRet = -EIO;
             goto Exit;
         }
@@ -587,15 +587,15 @@ int  iRet;
     #ifdef _CFG_DEVFS_
     {
         nMinorNumber = 0;
-        TRACE1("IODRV:   Creating device node '/dev/%s'...\n", DEV_NAME);
+        TRACE("IODRV:   Creating device node '/dev/%s'...\n", DEV_NAME);
         iErr = devfs_mk_cdev (MKDEV(nDrvMajorNumber_g, nMinorNumber), S_IFCHR | S_IRUGO | S_IWUGO, DEV_NAME);
         if (iErr == 0)
         {
-            TRACE1("IODRV:   Device node '/dev/%s' created successful.\n", DEV_NAME);
+            TRACE("IODRV:   Device node '/dev/%s' created successful.\n", DEV_NAME);
         }
         else
         {
-            TRACE1("IODRV:   ERROR: unable to create device node '/dev/%s'\n", DEV_NAME);
+            TRACE("IODRV:   ERROR: unable to create device node '/dev/%s'\n", DEV_NAME);
             iRet = -EIO;
             goto Exit;
         }
@@ -610,7 +610,7 @@ int  iRet;
         char  szDevName[32];
 
         nMinorNumber = 0;
-        TRACE1("IODRV:   Creating device node '/proc/%s'...\n", DEV_NAME);
+        TRACE("IODRV:   Creating device node '/proc/%s'...\n", DEV_NAME);
 
         snprintf (szDevName, sizeof(szDevName), "%s", DEV_NAME);
         pProcDirEntry = create_proc_entry (szDevName, S_IRUGO, NULL);
@@ -620,11 +620,11 @@ int  iRet;
             pProcDirEntry->write_proc = PLCcoreCF54DrvProcWrite;
             pProcDirEntry->data       = (void*) (DWORD)nMinorNumber;
 
-            TRACE1("IODRV:   Device node '/proc/%s' created successful.\n", DEV_NAME);
+            TRACE("IODRV:   Device node '/proc/%s' created successful.\n", DEV_NAME);
         }
         else
         {
-            TRACE1("IODRV:   ERROR: unable to create device node '/proc/%s\n", DEV_NAME);
+            TRACE("IODRV:   ERROR: unable to create device node '/proc/%s\n", DEV_NAME);
             iRet = -EIO;
             goto Exit;
         }
@@ -643,7 +643,7 @@ int  iRet;
 
 Exit:
 
-    TRACE1("IODRV: - cf54basio#PLCcoreCF54DrvInit (iRet=%d)\n", iRet);
+    TRACE("IODRV: - cf54basio#PLCcoreCF54DrvInit (iRet=%d)\n", iRet);
     return (iRet);
 
 }
@@ -664,7 +664,7 @@ static void  __exit  PLCcoreCF54DrvExit (void)
 #endif
 
 
-    TRACE0("IODRV: + cf54basio#PLCcoreCF54DrvExit...\n");
+    TRACE("IODRV: + cf54basio#PLCcoreCF54DrvExit...\n");
 
 
     // clear all output lines
@@ -684,7 +684,7 @@ static void  __exit  PLCcoreCF54DrvExit (void)
     {
         nMinorNumber = 0;
         devfs_remove (DEV_NAME);
-        TRACE1("IODRV:   Device node '/dev/%s' removed.\n", DEV_NAME);
+        TRACE("IODRV:   Device node '/dev/%s' removed.\n", DEV_NAME);
     }
     #endif
 
@@ -697,17 +697,17 @@ static void  __exit  PLCcoreCF54DrvExit (void)
         nMinorNumber = 0;
         snprintf (szDevName, sizeof(szDevName), "%s", DEV_NAME);
         remove_proc_entry (szDevName, NULL);
-        TRACE1("IODRV:   Device node '/proc/%s' removed.\n", DEV_NAME);
+        TRACE("IODRV:   Device node '/proc/%s' removed.\n", DEV_NAME);
     }
     #endif
 
 
     // unregister character device handler
     unregister_chrdev (nDrvMajorNumber_g, DRV_NAME);
-    TRACE1("IODRV:   Driver '%s' removed.\n", DRV_NAME);
+    TRACE("IODRV:   Driver '%s' removed.\n", DRV_NAME);
 
 
-    TRACE0("IODRV: - cf54basio#PLCcoreCF54DrvExit\n");
+    TRACE("IODRV: - cf54basio#PLCcoreCF54DrvExit\n");
 
 }
 
@@ -727,7 +727,7 @@ static int  PLCcoreCF54DrvOpen (
 int  iRet;
 
 
-    TRACE0("IODRV: + cf54basio#PLCcoreCF54DrvOpen...\n");
+    TRACE("IODRV: + cf54basio#PLCcoreCF54DrvOpen...\n");
 
     MOD_INC_USE_COUNT;
 
@@ -737,7 +737,7 @@ int  iRet;
 
 
 
-    TRACE1("IODRV: - cf54basio#PLCcoreCF54DrvOpen (iRet=%d)\n", iRet);
+    TRACE("IODRV: - cf54basio#PLCcoreCF54DrvOpen (iRet=%d)\n", iRet);
     return (iRet);
 
 }
@@ -758,7 +758,7 @@ static int  PLCcoreCF54DrvRelease (
 int  iRet;
 
 
-    TRACE0("IODRV: + cf54basio#PLCcoreCF54DrvRelease...\n");
+    TRACE("IODRV: + cf54basio#PLCcoreCF54DrvRelease...\n");
 
     iRet = 0;
 
@@ -768,7 +768,7 @@ int  iRet;
     return 0;
 
 
-    TRACE1("IODRV: - cf54basio#PLCcoreCF54DrvRelease (iRet=%d)\n", iRet);
+    TRACE("IODRV: - cf54basio#PLCcoreCF54DrvRelease (iRet=%d)\n", iRet);
     return (iRet);
 
 }
@@ -791,14 +791,14 @@ static ssize_t  PLCcoreCF54DrvRead (
 int  iRet;
 
 
-    TRACE0("IODRV: + cf54basio#PLCcoreCF54DrvRead...\n");
+    TRACE("IODRV: + cf54basio#PLCcoreCF54DrvRead...\n");
 
 
-    TRACE0("IODRV:   Sorry, this operation isn't supported.\n");
+    TRACE("IODRV:   Sorry, this operation isn't supported.\n");
     iRet = -EINVAL;
 
 
-    TRACE1("IODRV: - cf54basio#PLCcoreCF54DrvRead (iRet=%d)\n", iRet);
+    TRACE("IODRV: - cf54basio#PLCcoreCF54DrvRead (iRet=%d)\n", iRet);
     return (iRet);
 
 }
@@ -821,14 +821,14 @@ static ssize_t  PLCcoreCF54DrvWrite (
 int  iRet;
 
 
-    TRACE0("IODRV: + cf54basio#PLCcoreCF54DrvWrite...\n");
+    TRACE("IODRV: + cf54basio#PLCcoreCF54DrvWrite...\n");
 
 
-    TRACE0("IODRV:   Sorry, this operation isn't supported.\n");
+    TRACE("IODRV:   Sorry, this operation isn't supported.\n");
     iRet = -EINVAL;
 
 
-    TRACE1("IODRV: - cf54basio#PLCcoreCF54DrvWrite (iRet=%d)\n", iRet);
+    TRACE("IODRV: - cf54basio#PLCcoreCF54DrvWrite (iRet=%d)\n", iRet);
     return (iRet);
 
 }
@@ -852,7 +852,7 @@ int  iErr;
 int  iRet;
 
 
-    TRACE1("IODRV: + cf54basio#PLCcoreCF54DrvIoctl (uiIoctlCmd_p=%d)...\n", uiIoctlCmd_p);
+    TRACE("IODRV: + cf54basio#PLCcoreCF54DrvIoctl (uiIoctlCmd_p=%d)...\n", uiIoctlCmd_p);
 
 
     iRet = -EINVAL;
@@ -1034,7 +1034,7 @@ int  iRet;
 
 Exit:
 
-    TRACE1("IODRV: - cf54basio#PLCcoreCF54DrvIoctl (iRet=%d)\n", iRet);
+    TRACE("IODRV: - cf54basio#PLCcoreCF54DrvIoctl (iRet=%d)\n", iRet);
     return (iRet);
 
 }
@@ -1063,7 +1063,7 @@ BYTE   bCpuPldType;
 int    iRet;
 
 
-    TRACE0("IODRV: + cf54basio#PLCcoreCF54DrvInitHardware...\n");
+    TRACE("IODRV: + cf54basio#PLCcoreCF54DrvInitHardware...\n");
 
     iRet = CF54DRV_RES_OK;
 
@@ -1090,28 +1090,28 @@ int    iRet;
     MCF_CSMRn(1) = 1;
 
     // allocate hardware ressource for CS1 (PLD)
-    TRACE2("IODRV:   CS1: request_mem_region(dwIoBase=0x%08lX, dwIoSize=%lu)...\n", dwIoBase, dwIoSize);
+    TRACE("IODRV:   CS1: request_mem_region(dwIoBase=0x%08lX, dwIoSize=%lu)...\n", dwIoBase, dwIoSize);
     pCS1Ressource_g = request_mem_region (dwIoBase, dwIoSize, szCS1ResName_g);
-    TRACE1("IODRV:   pCS1Ressource = 0x%08lX\n", (DWORD)pCS1Ressource_g);
+    TRACE("IODRV:   pCS1Ressource = 0x%08lX\n", (DWORD)pCS1Ressource_g);
     if (pCS1Ressource_g == NULL)
     {
-        TRACE0("IODRV:   ERROR: Can't request memory region\n");
+        TRACE("IODRV:   ERROR: Can't request memory region\n");
         iRet = -EIO;
         goto Exit;
     }
 
-    TRACE1("IODRV:       Name  = '%s'\n",           pCS1Ressource_g->name);
-    TRACE1("IODRV:       Start = 0x%08lX\n", (DWORD)pCS1Ressource_g->start);
-    TRACE1("IODRV:       End   = 0x%08lX\n", (DWORD)pCS1Ressource_g->end);
-    TRACE1("IODRV:       Flags = 0x%08lX\n", (DWORD)pCS1Ressource_g->flags);
+    TRACE("IODRV:       Name  = '%s'\n",           pCS1Ressource_g->name);
+    TRACE("IODRV:       Start = 0x%08lX\n", (DWORD)pCS1Ressource_g->start);
+    TRACE("IODRV:       End   = 0x%08lX\n", (DWORD)pCS1Ressource_g->end);
+    TRACE("IODRV:       Flags = 0x%08lX\n", (DWORD)pCS1Ressource_g->flags);
 
     // get virtual pointer for access to this hardware ressource
-    TRACE2("IODRV:   ioremap(dwIoBase=0x%08lX, dwIoSize=%lu)...\n", pCS1Ressource_g->start, pCS1Ressource_g->end - pCS1Ressource_g->start + 1);
+    TRACE("IODRV:   ioremap(dwIoBase=0x%08lX, dwIoSize=%lu)...\n", pCS1Ressource_g->start, pCS1Ressource_g->end - pCS1Ressource_g->start + 1);
     pCS1BaseAddr_g = ioremap_nocache (pCS1Ressource_g->start, pCS1Ressource_g->end - pCS1Ressource_g->start);
-    TRACE1("IODRV:   pCS1BaseAddr = 0x%08lX\n", (DWORD)pCS1BaseAddr_g);
+    TRACE("IODRV:   pCS1BaseAddr = 0x%08lX\n", (DWORD)pCS1BaseAddr_g);
     if (pCS1BaseAddr_g == NULL)
     {
-        TRACE0("IODRV:   ERROR: Can't request virtual pointer for hardware access\n");
+        TRACE("IODRV:   ERROR: Can't request virtual pointer for hardware access\n");
         iRet = -EIO;
         goto Exit;
     }
@@ -1124,7 +1124,7 @@ int    iRet;
     if (bCpuPldType != PLC_CORE_PLD_TYPE_ID)
     {
         printk("\n\npc5484drv - ERROR: Wrong PLD Type ID (expected=0x%02X, found=0x%02X)\n", PLC_CORE_PLD_TYPE_ID, (WORD)bCpuPldType);
-//        TRACE2("IODRV:   ERROR: Wrong PLD Type ID (expected=0x%02X, found=0x%02X)\n", PLC_CORE_PLD_TYPE_ID, (WORD)bCpuPldType);
+//        TRACE("IODRV:   ERROR: Wrong PLD Type ID (expected=0x%02X, found=0x%02X)\n", PLC_CORE_PLD_TYPE_ID, (WORD)bCpuPldType);
 
         printk("pc5484drv Reg0 = 0x%lX, Reg1 = 0x%lX, Reg2 = 0x%lX, Reg3 = 0x%lX\n",
                 PLD_Read(0x0),
@@ -1154,28 +1154,28 @@ int    iRet;
     MCF_CSMRn(3) = 1;       // dwIoSize;
 
     // allocate hardware ressource for CS3 (memory mapped I/O periphery)
-    TRACE2("IODRV:   CS3: request_mem_region(dwIoBase=0x%08lX, dwIoSize=%lu)...\n", dwIoBase, dwIoSize);
+    TRACE("IODRV:   CS3: request_mem_region(dwIoBase=0x%08lX, dwIoSize=%lu)...\n", dwIoBase, dwIoSize);
     pCS3Ressource_g = request_mem_region (dwIoBase, dwIoSize, szCS3ResName_g);
-    TRACE1("IODRV:   pCS3Ressource = 0x%08lX\n", (DWORD)pCS3Ressource_g);
+    TRACE("IODRV:   pCS3Ressource = 0x%08lX\n", (DWORD)pCS3Ressource_g);
     if (pCS3Ressource_g == NULL)
     {
-        TRACE0("IODRV:   ERROR: Can't request memory region\n");
+        TRACE("IODRV:   ERROR: Can't request memory region\n");
         iRet = -EIO;
         goto Exit;
     }
 
-    TRACE1("IODRV:       Name  = '%s'\n",           pCS3Ressource_g->name);
-    TRACE1("IODRV:       Start = 0x%08lX\n", (DWORD)pCS3Ressource_g->start);
-    TRACE1("IODRV:       End   = 0x%08lX\n", (DWORD)pCS3Ressource_g->end);
-    TRACE1("IODRV:       Flags = 0x%08lX\n", (DWORD)pCS3Ressource_g->flags);
+    TRACE("IODRV:       Name  = '%s'\n",           pCS3Ressource_g->name);
+    TRACE("IODRV:       Start = 0x%08lX\n", (DWORD)pCS3Ressource_g->start);
+    TRACE("IODRV:       End   = 0x%08lX\n", (DWORD)pCS3Ressource_g->end);
+    TRACE("IODRV:       Flags = 0x%08lX\n", (DWORD)pCS3Ressource_g->flags);
 
     // get virtual pointer for access to this hardware ressource
-    TRACE2("IODRV:   ioremap(dwIoBase=0x%08lX, dwIoSize=%lu)...\n", pCS3Ressource_g->start, pCS3Ressource_g->end - pCS3Ressource_g->start + 1);
+    TRACE("IODRV:   ioremap(dwIoBase=0x%08lX, dwIoSize=%lu)...\n", pCS3Ressource_g->start, pCS3Ressource_g->end - pCS3Ressource_g->start + 1);
     pCS3BaseAddr_g = ioremap_nocache (pCS3Ressource_g->start, pCS3Ressource_g->end - pCS3Ressource_g->start);
-    TRACE1("IODRV:   pCS1BaseAddr = 0x%08lX\n", (DWORD)pCS3BaseAddr_g);
+    TRACE("IODRV:   pCS1BaseAddr = 0x%08lX\n", (DWORD)pCS3BaseAddr_g);
     if (pCS3BaseAddr_g == NULL)
     {
-        TRACE0("IODRV:   ERROR: Can't request virtual pointer for hardware access\n");
+        TRACE("IODRV:   ERROR: Can't request virtual pointer for hardware access\n");
         iRet = -EIO;
         goto Exit;
     }
@@ -1188,7 +1188,7 @@ int    iRet;
     if (uiPldVer_l > 0)
     {
         // -------- Inputs --------
-        TRACE0("IODRV:   Configure inputs...\n");
+        TRACE("IODRV:   Configure inputs...\n");
         // (DI0 [Btn S0]):  PLD -> select DI function in PLC configuration register
         // (DI8):           PLD -> select DI function in PLC configuration register
         // (DI9):           PLD -> select DI function in PLC configuration register
@@ -1264,7 +1264,7 @@ int    iRet;
     if (uiPldVer_l > 0)
     {
         // -------- Outputs --------
-        TRACE0("IODRV:   Configure outputs...\n");
+        TRACE("IODRV:   Configure outputs...\n");
         // (DO0 [Btn S0]):  PLD -> nothing to do here
         // (DO8):           PLD -> nothing to do here
         // (DO9):           PLD -> nothing to do here
@@ -1274,13 +1274,13 @@ int    iRet;
         // (DO20):          PLD -> nothing to do here
         // (DO21):          PLD -> nothing to do here
         dwIoData = 0x00000000;              // set data bits to off
-        TRACE1("IODRV:   [PLD_REG_DO_STATE]   = 0x%08lX\n", dwIoData);
+        TRACE("IODRV:   [PLD_REG_DO_STATE]   = 0x%08lX\n", dwIoData);
         PLD_Write (PLD_REG_DO_STATE, dwIoData);
 
         PLD_Write (PLD_REG_DO_FUNC, 0x00000000);
 
         dwIoData = 0x003FFF01;              // enable outputs
-        TRACE1("IODRV:   [PLD_REG_DO_ENABLE]  = 0x%08lX\n", dwIoData);
+        TRACE("IODRV:   [PLD_REG_DO_ENABLE]  = 0x%08lX\n", dwIoData);
         PLD_Write (PLD_REG_DO_ENABLE, dwIoData);
     }
 
@@ -1346,30 +1346,30 @@ int    iRet;
     MCF_CSMRn(1) = 1;       // dwIoSize;
 
     // allocate hardware ressource for CS1
-    TRACE2("IODRV:   CS1: request_mem_region(dwIoBase=0x%08lX, dwIoSize=%lu)...\n", dwIoBase, dwIoSize);
+    TRACE("IODRV:   CS1: request_mem_region(dwIoBase=0x%08lX, dwIoSize=%lu)...\n", dwIoBase, dwIoSize);
     pCS1Ressource_g = request_mem_region (dwIoBase, dwIoSize, szCS1ResName_g);
-    TRACE1("IODRV:   pCS1Ressource = 0x%08lX\n", (DWORD)pCS1Ressource_g);
+    TRACE("IODRV:   pCS1Ressource = 0x%08lX\n", (DWORD)pCS1Ressource_g);
     if (pCS1Ressource_g == NULL)
     {
-        TRACE0("IODRV:   ERROR: Can't request memory region\n");
+        TRACE("IODRV:   ERROR: Can't request memory region\n");
         iRet = -EIO;
         goto Exit;
     }
 
-    TRACE1("IODRV:       Name  = '%s'\n",           pCS1Ressource_g->name);
-    TRACE1("IODRV:       Start = 0x%08lX\n", (DWORD)pCS1Ressource_g->start);
-    TRACE1("IODRV:       End   = 0x%08lX\n", (DWORD)pCS1Ressource_g->end);
-    TRACE1("IODRV:       Flags = 0x%08lX\n", (DWORD)pCS1Ressource_g->flags);
+    TRACE("IODRV:       Name  = '%s'\n",           pCS1Ressource_g->name);
+    TRACE("IODRV:       Start = 0x%08lX\n", (DWORD)pCS1Ressource_g->start);
+    TRACE("IODRV:       End   = 0x%08lX\n", (DWORD)pCS1Ressource_g->end);
+    TRACE("IODRV:       Flags = 0x%08lX\n", (DWORD)pCS1Ressource_g->flags);
 
 
     // get virtual pointer for access to this hardware ressource
-    TRACE2("IODRV:   ioremap(dwIoBase=0x%08lX, dwIoSize=%lu)...\n", pCS1Ressource_g->start, pCS1Ressource_g->end - pCS1Ressource_g->start + 1);
+    TRACE("IODRV:   ioremap(dwIoBase=0x%08lX, dwIoSize=%lu)...\n", pCS1Ressource_g->start, pCS1Ressource_g->end - pCS1Ressource_g->start + 1);
     // $$$$$$ hier besser <ioremap_nocache> statt "einfachem" <ioremap> ???
     pCS1BaseAddr_g = ioremap (pCS1Ressource_g->start, pCS1Ressource_g->end - pCS1Ressource_g->start);
-    TRACE1("IODRV:   pCS1BaseAddr = 0x%08lX\n", (DWORD)pCS1BaseAddr_g);
+    TRACE("IODRV:   pCS1BaseAddr = 0x%08lX\n", (DWORD)pCS1BaseAddr_g);
     if (pCS1BaseAddr_g == NULL)
     {
-        TRACE0("IODRV:   ERROR: Can't request virtual pointer for hardware access\n");
+        TRACE("IODRV:   ERROR: Can't request virtual pointer for hardware access\n");
         iRet = -EIO;
         goto Exit;
     }
@@ -1386,30 +1386,30 @@ int    iRet;
     MCF_CSMRn(3) = 1;       // dwIoSize;
 
     // allocate hardware ressource for CS3
-    TRACE2("IODRV:   CS3: request_mem_region(dwIoBase=0x%08lX, dwIoSize=%lu)...\n", dwIoBase, dwIoSize);
+    TRACE("IODRV:   CS3: request_mem_region(dwIoBase=0x%08lX, dwIoSize=%lu)...\n", dwIoBase, dwIoSize);
     pCS3Ressource_g = request_mem_region (dwIoBase, dwIoSize, szCS3ResName_g);
-    TRACE1("IODRV:   pCS3Ressource = 0x%08lX\n", (DWORD)pCS3Ressource_g);
+    TRACE("IODRV:   pCS3Ressource = 0x%08lX\n", (DWORD)pCS3Ressource_g);
     if (pCS3Ressource_g == NULL)
     {
-        TRACE0("IODRV:   ERROR: Can't request memory region\n");
+        TRACE("IODRV:   ERROR: Can't request memory region\n");
         iRet = -EIO;
         goto Exit;
     }
 
-    TRACE1("IODRV:       Name  = '%s'\n",           pCS3Ressource_g->name);
-    TRACE1("IODRV:       Start = 0x%08lX\n", (DWORD)pCS3Ressource_g->start);
-    TRACE1("IODRV:       End   = 0x%08lX\n", (DWORD)pCS3Ressource_g->end);
-    TRACE1("IODRV:       Flags = 0x%08lX\n", (DWORD)pCS3Ressource_g->flags);
+    TRACE("IODRV:       Name  = '%s'\n",           pCS3Ressource_g->name);
+    TRACE("IODRV:       Start = 0x%08lX\n", (DWORD)pCS3Ressource_g->start);
+    TRACE("IODRV:       End   = 0x%08lX\n", (DWORD)pCS3Ressource_g->end);
+    TRACE("IODRV:       Flags = 0x%08lX\n", (DWORD)pCS3Ressource_g->flags);
 
 
     // get virtual pointer for access to this hardware ressource
-    TRACE2("IODRV:   ioremap(dwIoBase=0x%08lX, dwIoSize=%lu)...\n", pCS3Ressource_g->start, pCS3Ressource_g->end - pCS3Ressource_g->start + 1);
+    TRACE("IODRV:   ioremap(dwIoBase=0x%08lX, dwIoSize=%lu)...\n", pCS3Ressource_g->start, pCS3Ressource_g->end - pCS3Ressource_g->start + 1);
     // $$$$$$ hier besser <ioremap_nocache> statt "einfachem" <ioremap> ???
     pCS3BaseAddr_g = ioremap (pCS3Ressource_g->start, pCS3Ressource_g->end - pCS3Ressource_g->start);
-    TRACE1("IODRV:   pCS1BaseAddr = 0x%08lX\n", (DWORD)pCS3BaseAddr_g);
+    TRACE("IODRV:   pCS1BaseAddr = 0x%08lX\n", (DWORD)pCS3BaseAddr_g);
     if (pCS3BaseAddr_g == NULL)
     {
-        TRACE0("IODRV:   ERROR: Can't request virtual pointer for hardware access\n");
+        TRACE("IODRV:   ERROR: Can't request virtual pointer for hardware access\n");
         iRet = -EIO;
         goto Exit;
     }
@@ -1417,7 +1417,7 @@ int    iRet;
 
 Exit:
 
-    TRACE1("IODRV: - cf54basio#PLCcoreCF54DrvInitHardware (iRet=%d)\n", iRet);
+    TRACE("IODRV: - cf54basio#PLCcoreCF54DrvInitHardware (iRet=%d)\n", iRet);
     return (iRet);
 
 }
@@ -1434,7 +1434,7 @@ static  int  PLCcoreCF54DrvReleaseHardware (void)
 int  iRet;
 
 
-    TRACE0("IODRV: + cf54basio#PLCcoreCF54DrvReleaseHardware...\n");
+    TRACE("IODRV: + cf54basio#PLCcoreCF54DrvReleaseHardware...\n");
 
     iRet = CF54DRV_RES_OK;
 
@@ -1442,11 +1442,11 @@ int  iRet;
     // release ressources for IO periphery at CS1
     if (pCS1Ressource_g != NULL)
     {
-        TRACE0("IODRV:   release ressource for:\n");
-        TRACE1("IODRV:       Name  = '%s'\n",           pCS1Ressource_g->name);
-        TRACE1("IODRV:       Start = 0x%08lX\n", (DWORD)pCS1Ressource_g->start);
-        TRACE1("IODRV:       End   = 0x%08lX\n", (DWORD)pCS1Ressource_g->end);
-        TRACE1("IODRV:       Flags = 0x%08lX\n", (DWORD)pCS1Ressource_g->flags);
+        TRACE("IODRV:   release ressource for:\n");
+        TRACE("IODRV:       Name  = '%s'\n",           pCS1Ressource_g->name);
+        TRACE("IODRV:       Start = 0x%08lX\n", (DWORD)pCS1Ressource_g->start);
+        TRACE("IODRV:       End   = 0x%08lX\n", (DWORD)pCS1Ressource_g->end);
+        TRACE("IODRV:       Flags = 0x%08lX\n", (DWORD)pCS1Ressource_g->flags);
 
         release_mem_region (pCS1Ressource_g->start, pCS1Ressource_g->end - pCS1Ressource_g->start + 1);
         pCS1Ressource_g = NULL;
@@ -1456,18 +1456,18 @@ int  iRet;
     // release ressources for IO periphery at CS3
     if (pCS3Ressource_g != NULL)
     {
-        TRACE0("IODRV:   release ressource for:\n");
-        TRACE1("IODRV:       Name  = '%s'\n",           pCS3Ressource_g->name);
-        TRACE1("IODRV:       Start = 0x%08lX\n", (DWORD)pCS3Ressource_g->start);
-        TRACE1("IODRV:       End   = 0x%08lX\n", (DWORD)pCS3Ressource_g->end);
-        TRACE1("IODRV:       Flags = 0x%08lX\n", (DWORD)pCS3Ressource_g->flags);
+        TRACE("IODRV:   release ressource for:\n");
+        TRACE("IODRV:       Name  = '%s'\n",           pCS3Ressource_g->name);
+        TRACE("IODRV:       Start = 0x%08lX\n", (DWORD)pCS3Ressource_g->start);
+        TRACE("IODRV:       End   = 0x%08lX\n", (DWORD)pCS3Ressource_g->end);
+        TRACE("IODRV:       Flags = 0x%08lX\n", (DWORD)pCS3Ressource_g->flags);
 
         release_mem_region (pCS3Ressource_g->start, pCS3Ressource_g->end - pCS3Ressource_g->start + 1);
         pCS3Ressource_g = NULL;
     }
 
 
-    TRACE1("IODRV: - cf54basio#PLCcoreCF54DrvReleaseHardware (iRet=%d)\n", iRet);
+    TRACE("IODRV: - cf54basio#PLCcoreCF54DrvReleaseHardware (iRet=%d)\n", iRet);
     return (iRet);
 
 }
@@ -1485,7 +1485,7 @@ tCF54DigiOut  DoData;
 int           iRet;
 
 
-    TRACE0("IODRV: + cf54basio#PLCcoreCF54DrvClearOutputs...\n");
+    TRACE("IODRV: + cf54basio#PLCcoreCF54DrvClearOutputs...\n");
 
     iRet = CF54DRV_RES_OK;
 
@@ -1500,7 +1500,7 @@ int           iRet;
     PLCcoreCF54DrvCmdSetErrLED (OFF);
 
 
-    TRACE1("IODRV: - cf54basio#PLCcoreCF54DrvClearOutputs (iRet=%d)\n", iRet);
+    TRACE("IODRV: - cf54basio#PLCcoreCF54DrvClearOutputs (iRet=%d)\n", iRet);
     return (iRet);
 
 }
@@ -1519,7 +1519,7 @@ WORD  wDrvVer;
 int   iRet;
 
 
-    TRACE0("IODRV: + cf54basio#PLCcoreCF54DrvCmdInitialize...\n");
+    TRACE("IODRV: + cf54basio#PLCcoreCF54DrvCmdInitialize...\n");
 
 
     PLCcoreCF54DrvClearOutputs();
@@ -1530,7 +1530,7 @@ int   iRet;
     iRet = CF54DRV_RES_OK;
 
 
-    TRACE2("IODRV: - cf54basio#PLCcoreCF54DrvCmdInitialize (iRet=%d, wDrvVer=0x%04X)\n", iRet, wDrvVer);
+    TRACE("IODRV: - cf54basio#PLCcoreCF54DrvCmdInitialize (iRet=%d, wDrvVer=0x%04X)\n", iRet, wDrvVer);
     return (iRet);
 
 }
@@ -1548,14 +1548,14 @@ int  PLCcoreCF54DrvCmdShutdown (void)
 int  iRet;
 
 
-    TRACE0("IODRV: + cf54basio#PLCcoreCF54DrvCmdShutdown...\n");
+    TRACE("IODRV: + cf54basio#PLCcoreCF54DrvCmdShutdown...\n");
 
 
     PLCcoreCF54DrvClearOutputs();
     iRet = CF54DRV_RES_OK;
 
 
-    TRACE1("IODRV: - cf54basio#PLCcoreCF54DrvCmdShutdown (iRet=%d)\n", iRet);
+    TRACE("IODRV: - cf54basio#PLCcoreCF54DrvCmdShutdown (iRet=%d)\n", iRet);
     return (iRet);
 
 }
@@ -1581,13 +1581,13 @@ WORD   wCfgDriver;
 int    iRet;
 
 
-    TRACE0("IODRV: + cf54basio#PLCcoreCF54DrvCmdGetHardwareInfo...\n");
+    TRACE("IODRV: + cf54basio#PLCcoreCF54DrvCmdGetHardwareInfo...\n");
 
 
     //---------------------------------------------------------------
     #if (PCB_VER == 4160-0)
     {
-        TRACE0("IODRV:   ERROR: real I/O access not implemented!\n");
+        TRACE("IODRV:   ERROR: real I/O access not implemented!\n");
 
         bIoHwId    = 0x00;
         wCfgDriver = 0;
@@ -1653,7 +1653,7 @@ int    iRet;
             bCpuPcbRevision =  (BYTE) ((dwIoData & 0x000F0000) >> 16);
             bCpuPcbHwId     =  (BYTE) ((dwIoData & 0x00F00000) >> 20);
 
-            TRACE1("IODRV:   [PLD_REG_VERSION] = 0x%08lX\n", dwIoData);
+            TRACE("IODRV:   [PLD_REG_VERSION] = 0x%08lX\n", dwIoData);
 
 
             dwIoData   = *(volatile DWORD*)pCS3BaseAddr_g;
@@ -1690,7 +1690,7 @@ int    iRet;
 
 
 
-    TRACE1("IODRV: - cf54basio#PLCcoreCF54DrvCmdGetHardwareInfo (iRet=%d)\n", iRet);
+    TRACE("IODRV: - cf54basio#PLCcoreCF54DrvCmdGetHardwareInfo (iRet=%d)\n", iRet);
     return (iRet);
 
 }
@@ -1716,7 +1716,7 @@ int  PLCcoreCF54DrvCmdSetRunLED (
 int  iRet;
 
 
-    TRACE1("IODRV: + cf54basio#PLCcoreCF54DrvCmdSetRunLED (bState_p=%d)...\n", (int)(bState_p & 0x01));
+    TRACE("IODRV: + cf54basio#PLCcoreCF54DrvCmdSetRunLED (bState_p=%d)...\n", (int)(bState_p & 0x01));
 
 
     if (bState_p & 0x01)
@@ -1731,7 +1731,7 @@ int  iRet;
     iRet = CF54DRV_RES_OK;
 
 
-    TRACE1("IODRV: - cf54basio#PLCcoreCF54DrvCmdSetRunLED (iRet=%d)\n", iRet);
+    TRACE("IODRV: - cf54basio#PLCcoreCF54DrvCmdSetRunLED (iRet=%d)\n", iRet);
     return (iRet);
 
 }
@@ -1749,7 +1749,7 @@ int  PLCcoreCF54DrvCmdSetErrLED (
 int  iRet;
 
 
-    TRACE1("IODRV: + cf54basio#PLCcoreCF54DrvCmdSetErrLED (bState_p=%d)...\n", (int)(bState_p & 0x01));
+    TRACE("IODRV: + cf54basio#PLCcoreCF54DrvCmdSetErrLED (bState_p=%d)...\n", (int)(bState_p & 0x01));
 
 
     if (bState_p & 0x01)
@@ -1764,7 +1764,7 @@ int  iRet;
     iRet = CF54DRV_RES_OK;
 
 
-    TRACE1("IODRV: - cf54basio#PLCcoreCF54DrvCmdErrRunLED (iRet=%d)\n", iRet);
+    TRACE("IODRV: - cf54basio#PLCcoreCF54DrvCmdErrRunLED (iRet=%d)\n", iRet);
     return (iRet);
 
 }
@@ -1785,7 +1785,7 @@ DWORD  dwTmp;
 int    iRet;
 
 
-    TRACE0("IODRV: + cf54basio#PLCcoreCF54DrvCmdGetRSMSwitch...\n");
+    TRACE("IODRV: + cf54basio#PLCcoreCF54DrvCmdGetRSMSwitch...\n");
 
 
     // read switch (until 4158.2/3)
@@ -1911,7 +1911,7 @@ int    iRet;
     {
         // read switch (since 4158.5)
         dwIoData = PLD_Read (PLD_REG_AUX);
-        TRACE1("IODRV:   [PLD_REG_AUX] = 0x%08lX\n", dwIoData);
+        TRACE("IODRV:   [PLD_REG_AUX] = 0x%08lX\n", dwIoData);
 
 
         // decode switch position
@@ -1944,7 +1944,7 @@ Exit:
     iRet = CF54DRV_RES_OK;
 
 
-    TRACE2("IODRV: - cf54basio#PLCcoreCF54DrvCmdGetRSMSwitch (iRet=%d, bRSMSwitch=0x%02X)\n", iRet, (WORD)bLastRSMSwitch_l);
+    TRACE("IODRV: - cf54basio#PLCcoreCF54DrvCmdGetRSMSwitch (iRet=%d, bRSMSwitch=0x%02X)\n", iRet, (WORD)bLastRSMSwitch_l);
     return (iRet);
 
 }
@@ -1963,14 +1963,14 @@ BYTE   bHexSwitch;
 int    iRet;
 
 
-    TRACE0("IODRV: + cf54basio#PLCcoreCF54DrvCmdGetHexSwitch...\n");
+    TRACE("IODRV: + cf54basio#PLCcoreCF54DrvCmdGetHexSwitch...\n");
 
 
     //---------------------------------------------------------------
     #if (PCB_VER == 4160-0)
     {
         // HexNumber
-        TRACE0("IODRV:   ERROR: real I/O access not implemented!\n");
+        TRACE("IODRV:   ERROR: real I/O access not implemented!\n");
         bHexSwitch = CF54_DRV_DEFAULT_HEX_NUM;
         iRet = CF54DRV_RES_NOT_IMPLEMENTED;
     }
@@ -1992,7 +1992,7 @@ int    iRet;
     *pbHexSwitch_p = bHexSwitch;
 
 
-    TRACE2("IODRV: - cf54basio#PLCcoreCF54DrvCmdGetHexSwitch (iRet=%d, bHexSwitch=0x%02X)\n", iRet, (WORD)bHexSwitch);
+    TRACE("IODRV: - cf54basio#PLCcoreCF54DrvCmdGetHexSwitch (iRet=%d, bHexSwitch=0x%02X)\n", iRet, (WORD)bHexSwitch);
     return (iRet);
 
 }
@@ -2012,7 +2012,7 @@ DWORD  dwTmp;
 int    iRet;
 
 
-    TRACE0("IODRV: + cf54basio#PLCcoreCF54DrvCmdGetDipSwitch...\n");
+    TRACE("IODRV: + cf54basio#PLCcoreCF54DrvCmdGetDipSwitch...\n");
 
 
     //---------------------------------------------------------------
@@ -2040,7 +2040,7 @@ int    iRet;
     iRet = CF54DRV_RES_OK;
 
 
-    TRACE2("IODRV: - cf54basio#PLCcoreCF54DrvCmdGetDipSwitch (iRet=%d, bDipSwitch=0x%02X)\n", iRet, (WORD)bDipSwitch);
+    TRACE("IODRV: - cf54basio#PLCcoreCF54DrvCmdGetDipSwitch (iRet=%d, bDipSwitch=0x%02X)\n", iRet, (WORD)bDipSwitch);
     return (iRet);
 
 }
@@ -2066,7 +2066,7 @@ int  PLCcoreCF54DrvCmdGetDigiIn (
 int    iRet;
 
 
-    TRACE0("IODRV: + cf54basio#PLCcoreCF54DrvCmdGetDigiIn...\n");
+    TRACE("IODRV: + cf54basio#PLCcoreCF54DrvCmdGetDigiIn...\n");
 
 
     pDiData_p->m_bDiByte0 = 0;
@@ -2205,7 +2205,7 @@ int    iRet;
     iRet = CF54DRV_RES_OK;
 
 
-    TRACE2("IODRV: - cf54basio#PLCcoreCF54DrvCmdGetDigiIn (iRet=%d, bInValue=0x%02X)\n", iRet, (WORD)bInValue);
+    TRACE("IODRV: - cf54basio#PLCcoreCF54DrvCmdGetDigiIn (iRet=%d, bInValue=0x%02X)\n", iRet, (WORD)bInValue);
     return (iRet);
 
 }
@@ -2223,7 +2223,7 @@ int  PLCcoreCF54DrvCmdSetDigiOut (
 int  iRet;
 
 
-    TRACE0("IODRV: + cf54basio#PLCcoreCF54DrvCmdSetDigiOut...\n");
+    TRACE("IODRV: + cf54basio#PLCcoreCF54DrvCmdSetDigiOut...\n");
 
 
     //---------------------------------------------------------------
@@ -2317,7 +2317,7 @@ int  iRet;
     iRet = CF54DRV_RES_OK;
 
 
-    TRACE1("IODRV: - cf54basio#PLCcoreCF54DrvCmdSetDigiOut (iRet=%d)\n", iRet);
+    TRACE("IODRV: - cf54basio#PLCcoreCF54DrvCmdSetDigiOut (iRet=%d)\n", iRet);
     return (iRet);
 
 }
@@ -2370,8 +2370,8 @@ DWORD       dwReg0;
 DWORD       dwReg1;
 
 
-    TRACE2("IODRV: + cf54basio#PLCcoreCF54DrvProcRead (Offset_p=%d, nBufferSize_p=%d)...\n", (int)Offset_p, nBufferSize_p);
-    TRACE3("IODRV: Parameters: pcBuffer_p=0x%08lX, *ppcStart_p=0x%08lX, *pEof_p=%d\n", (DWORD)pcBuffer_p, (DWORD)*ppcStart_p, *pEof_p);
+    TRACE("IODRV: + cf54basio#PLCcoreCF54DrvProcRead (Offset_p=%d, nBufferSize_p=%d)...\n", (int)Offset_p, nBufferSize_p);
+    TRACE("IODRV: Parameters: pcBuffer_p=0x%08lX, *ppcStart_p=0x%08lX, *pEof_p=%d\n", (DWORD)pcBuffer_p, (DWORD)*ppcStart_p, *pEof_p);
 
 
     nSize = 0;
@@ -2459,7 +2459,7 @@ DWORD       dwReg1;
 
     *pEof_p = Eof;
 
-    TRACE2("IODRV: - cf54basio#PLCcoreCF54DrvProcRead (nSize=%d, *pEof_p=%d)\n", nSize, *pEof_p);
+    TRACE("IODRV: - cf54basio#PLCcoreCF54DrvProcRead (nSize=%d, *pEof_p=%d)\n", nSize, *pEof_p);
 
     return (nSize);
 

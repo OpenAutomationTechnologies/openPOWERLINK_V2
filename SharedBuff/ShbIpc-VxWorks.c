@@ -248,7 +248,7 @@ tShbError ShbIpcAllocBuffer (ULONG ulBufferSize_p, const char* pszBufferID_p,
     //create Buffer Key
     uiBufferKey = ShbIpcCrc32GetCrc(pszBufferID_p);
 
-    EPL_DBGLVL_SHB_TRACE4("%s() Allocate %lu Bytes, sBufferID:%s BufferKey:%08x\n",
+    EPL_DBGLVL_SHB_TRACE("%s() Allocate %lu Bytes, sBufferID:%s BufferKey:%08x\n",
     		          __func__, ulShMemSize, pszBufferID_p, (key_t)uiBufferKey);
     //---------------------------------------------------------------
     // (1) open an existing or create a new shared memory
@@ -261,20 +261,20 @@ tShbError ShbIpcAllocBuffer (ULONG ulBufferSize_p, const char* pszBufferID_p,
         if ((pShbMemHeader = ShbIpcAlloc(uiBufferKey, ulShMemSize)) == NULL)
         {
             //unable to create mem
-            EPL_DBGLVL_ERROR_TRACE1("%s() Shared memory allocation error!\n",
+            EPL_DBGLVL_ERROR_TRACE("%s() Shared memory allocation error!\n",
                                     __func__);
             ShbError = kShbOutOfMem;
             goto Exit;
         }
         else
         {
-            EPL_DBGLVL_SHB_TRACE4("%s() Shared memory allocated, Addr:%p Key:%08x size:%ld\n",
+            EPL_DBGLVL_SHB_TRACE("%s() Shared memory allocated, Addr:%p Key:%08x size:%ld\n",
             		__func__, (void *)pShbMemHeader, uiBufferKey, ulShMemSize);
         }
     }
     else
     {
-        EPL_DBGLVL_SHB_TRACE4("%s() Attached to shared memory, Addr:%p Key:%08x size:%ld\n",
+        EPL_DBGLVL_SHB_TRACE("%s() Attached to shared memory, Addr:%p Key:%08x size:%ld\n",
         		     __func__, (void *)pShbMemHeader, uiBufferKey, ulShMemSize);
         fShbNewCreated = FALSE;
     }
@@ -288,7 +288,7 @@ tShbError ShbIpcAllocBuffer (ULONG ulBufferSize_p, const char* pszBufferID_p,
     if ((pShbMemInst = (tShbMemInst*)ShbIpcAllocPrivateMem(sizeof(tShbMemInst)))
     		 == NULL)
     {
-        EPL_DBGLVL_ERROR_TRACE1("%s() Couldn't alloc private mem!\n", __func__);
+        EPL_DBGLVL_ERROR_TRACE("%s() Couldn't alloc private mem!\n", __func__);
         ShbError = kShbOutOfMem;
         goto Exit;
     }
@@ -355,7 +355,7 @@ tShbError ShbIpcAllocBuffer (ULONG ulBufferSize_p, const char* pszBufferID_p,
         //    shared memory region itself
         if (pShbMemHeader->m_uiBufferKey != uiBufferKey)
         {
-            EPL_DBGLVL_ERROR_TRACE3("%s() Shared Mem mismatch buffer key %x:%x!\n",
+            EPL_DBGLVL_ERROR_TRACE("%s() Shared Mem mismatch buffer key %x:%x!\n",
             		__func__, uiBufferKey, pShbMemHeader->m_uiBufferKey);
             ShbError = kShbOpenMismatch;
             goto Exit;
@@ -365,7 +365,7 @@ tShbError ShbIpcAllocBuffer (ULONG ulBufferSize_p, const char* pszBufferID_p,
         //       pShbMemHeader->m_ulShMemSize, ulShMemSize);
         if (pShbMemHeader->m_ulShMemSize != ulShMemSize)
         {
-            EPL_DBGLVL_ERROR_TRACE3("%s() Shared Mem mismatch size! %ld:%ld\n",
+            EPL_DBGLVL_ERROR_TRACE("%s() Shared Mem mismatch size! %ld:%ld\n",
             		      __func__, ulShMemSize, pShbMemHeader->m_ulShMemSize);
             ShbError = kShbOpenMismatch;
             goto Exit;
@@ -376,7 +376,7 @@ tShbError ShbIpcAllocBuffer (ULONG ulBufferSize_p, const char* pszBufferID_p,
 Exit:
     if (ShbError != kShbOk)
     {
-        EPL_DBGLVL_ERROR_TRACE2("%s() allocating shared buf failed!\n (%d)",
+        EPL_DBGLVL_ERROR_TRACE("%s() allocating shared buf failed!\n (%d)",
         		                __func__, ShbError);
         if (pShbMemInst != NULL)
         {
@@ -418,7 +418,7 @@ tShbError  ShbIpcReleaseBuffer (tShbInstance pShbInstance_p)
     pShbMemInst = ShbIpcGetShbMemInst(pShbInstance_p);
     pShbMemHeader = ShbIpcGetShbMemHeader(pShbInstance_p);
 
-    EPL_DBGLVL_SHB_TRACE3("%s() pShbInstance=%p pShbMemHeader=%p\n", __func__,
+    EPL_DBGLVL_SHB_TRACE("%s() pShbInstance=%p pShbMemHeader=%p\n", __func__,
     		              (void *)pShbInstance_p, (void *)pShbMemHeader);
 
     // stop threads in any case, because they are bound to that specific instance
@@ -428,7 +428,7 @@ tShbError  ShbIpcReleaseBuffer (tShbInstance pShbInstance_p)
 
     if(pShbMemHeader->m_ulRefCount == 0)
     {
-        EPL_DBGLVL_SHB_TRACE1("%s() refCount = 0,  destroy shared mem\n",
+        EPL_DBGLVL_SHB_TRACE("%s() refCount = 0,  destroy shared mem\n",
         		             __func__);
         //delete semaphores
         semDelete(pShbMemHeader->m_mutexBuffAccess);
@@ -443,7 +443,7 @@ tShbError  ShbIpcReleaseBuffer (tShbInstance pShbInstance_p)
     }
     else
     {
-        EPL_DBGLVL_SHB_TRACE1("%s() refCount > 0, detach from shared mem\n",
+        EPL_DBGLVL_SHB_TRACE("%s() refCount > 0, detach from shared mem\n",
         		             __func__);
         ShbError = kShbMemUsedByOtherProcs;
     }
@@ -594,7 +594,7 @@ tShbError  ShbIpcStartSignalingNewData(tShbInstance pShbInstance_p,
         (pShbMemInst->m_pfnSigHndlrNewData != NULL))
     {
         ShbError = kShbAlreadySignaling;
-        EPL_DBGLVL_ERROR_TRACE1("%s() Thread already started!\n", __func__);
+        EPL_DBGLVL_ERROR_TRACE("%s() Thread already started!\n", __func__);
         goto Exit;
     }
 
@@ -670,7 +670,7 @@ tShbError ShbIpcStopSignalingNewData(tShbInstance pShbInstance_p)
     		          TIMEOUT_WAITING_THREAD);
     if (iRetVal == ERROR)
     {
-        EPL_DBGLVL_ERROR_TRACE3("%s() Stop Sem TIMEOUT %d (%s)\n", __func__,
+        EPL_DBGLVL_ERROR_TRACE("%s() Stop Sem TIMEOUT %d (%s)\n", __func__,
         		                iRetVal, strerror(errno));
     }
 
@@ -709,7 +709,7 @@ tShbError ShbIpcSignalNewData(tShbInstance pShbInstance_p)
     //set semaphore
     if (semGive(pShbMemHeader->m_semNewData) < 0)
     {
-        EPL_DBGLVL_ERROR_TRACE2("%s() sem_post failed! (%s)\n", __func__,
+        EPL_DBGLVL_ERROR_TRACE("%s() sem_post failed! (%s)\n", __func__,
         		                strerror(errno));
     }
 
@@ -976,7 +976,7 @@ int ShbIpcThreadSignalJobReady (int pvThreadParam_p)
     INT                 iRetVal;
     UINT                fTimeOut;
 
-    EPL_DBGLVL_SHB_TRACE1("%s(): ThreadId:%ld\n", __func__);
+    EPL_DBGLVL_SHB_TRACE("%s(): ThreadId:%ld\n", __func__);
 
     pShbInstance = (tShbMemInst*)pvThreadParam_p;
     pShbMemInst = ShbIpcGetShbMemInst (pShbInstance);

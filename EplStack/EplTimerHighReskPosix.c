@@ -205,7 +205,7 @@ tEplKernel PUBLIC EplTimerHighReskAddInstance(void)
     schedParam.__sched_priority = EPL_THREAD_PRIORITY_HIGH;
     if (pthread_setschedparam(EplTimerHighReskInstance_l.m_thread, SCHED_FIFO, &schedParam) != 0)
     {
-        EPL_DBGLVL_ERROR_TRACE1("%s() Couldn't set thread scheduling parameters!\n", __func__);
+        EPL_DBGLVL_ERROR_TRACE("%s() Couldn't set thread scheduling parameters!\n", __func__);
         Ret = kEplNoResource;
         pthread_cancel(EplTimerHighReskInstance_l.m_thread);
         goto Exit;
@@ -243,10 +243,10 @@ tEplKernel PUBLIC EplTimerHighReskDelInstance(void)
     /* send exit signal to thread */
     pthread_cancel(EplTimerHighReskInstance_l.m_thread);
     /* wait until thread terminates */
-    EPL_DBGLVL_TIMERH_TRACE1("%s() Waiting for thread to exit...\n", __func__);
+    EPL_DBGLVL_TIMERH_TRACE("%s() Waiting for thread to exit...\n", __func__);
 
     pthread_join(EplTimerHighReskInstance_l.m_thread, NULL);
-    EPL_DBGLVL_TIMERH_TRACE1("%s() Thread exited!\n", __func__);
+    EPL_DBGLVL_TIMERH_TRACE("%s() Thread exited!\n", __func__);
 
     return Ret;
 }
@@ -287,7 +287,7 @@ tEplKernel PUBLIC EplTimerHighReskModifyTimerNs(tEplTimerHdl*     pTimerHdl_p,
     // check pointer to handle
     if(pTimerHdl_p == NULL)
     {
-        EPL_DBGLVL_ERROR_TRACE1("%s() Invalid timer handle\n", __func__);
+        EPL_DBGLVL_ERROR_TRACE("%s() Invalid timer handle\n", __func__);
         Ret = kEplTimerInvalidHandle;
         goto Exit;
     }
@@ -305,7 +305,7 @@ tEplKernel PUBLIC EplTimerHighReskModifyTimerNs(tEplTimerHdl*     pTimerHdl_p,
         }
         if (uiIndex >= TIMER_COUNT)
         {   // no free structure found
-            EPL_DBGLVL_ERROR_TRACE2("%s() Invalid timer index:%d\n", __func__, uiIndex);
+            EPL_DBGLVL_ERROR_TRACE("%s() Invalid timer index:%d\n", __func__, uiIndex);
             Ret = kEplTimerNoTimerCreated;
             goto Exit;
         }
@@ -317,7 +317,7 @@ tEplKernel PUBLIC EplTimerHighReskModifyTimerNs(tEplTimerHdl*     pTimerHdl_p,
         uiIndex = HDL_TO_IDX(*pTimerHdl_p);
         if (uiIndex >= TIMER_COUNT)
         {   // invalid handle
-            EPL_DBGLVL_ERROR_TRACE2("%s() Invalid timer index:%d\n", __func__, uiIndex);
+            EPL_DBGLVL_ERROR_TRACE("%s() Invalid timer index:%d\n", __func__, uiIndex);
             Ret = kEplTimerInvalidHandle;
             goto Exit;
         }
@@ -376,7 +376,7 @@ tEplKernel PUBLIC EplTimerHighReskModifyTimerNs(tEplTimerHdl*     pTimerHdl_p,
     }
 
     /*
-    EPL_DBGLVL_TIMERH_TRACE4("%s() timer:%lx timeout=%ld:%ld\n", __func__,
+    EPL_DBGLVL_TIMERH_TRACE("%s() timer:%lx timeout=%ld:%ld\n", __func__,
            pTimerInfo->m_EventArg.m_TimerHdl,
            RelTime.it_value.tv_sec, RelTime.it_value.tv_nsec);
            */
@@ -406,7 +406,7 @@ tEplKernel PUBLIC EplTimerHighReskDeleteTimer(tEplTimerHdl* pTimerHdl_p)
     tEplTimerHighReskTimerInfo* pTimerInfo;
     struct itimerspec           RelTime;
 
-    EPL_DBGLVL_TIMERH_TRACE2("%s() Deleting timer:%lx\n", __func__, *pTimerHdl_p);
+    EPL_DBGLVL_TIMERH_TRACE("%s() Deleting timer:%lx\n", __func__, *pTimerHdl_p);
 
     // check pointer to handle
     if(pTimerHdl_p == NULL)
@@ -475,7 +475,7 @@ static void * EplTimerHighReskProcessThread(void *pParm_p __attribute((unused)))
     sigset_t                            awaitedSignal;
     siginfo_t                           signalInfo;
 
-    EPL_DBGLVL_TIMERH_TRACE2("%s(): ThreadId:%ld\n", __func__, syscall(SYS_gettid));
+    EPL_DBGLVL_TIMERH_TRACE("%s(): ThreadId:%ld\n", __func__, syscall(SYS_gettid));
 
     sigemptyset(&awaitedSignal);
     sigaddset(&awaitedSignal, SIGHIGHRES);
@@ -495,7 +495,7 @@ static void * EplTimerHighReskProcessThread(void *pParm_p __attribute((unused)))
         }
     }
 
-    EPL_DBGLVL_TIMERH_TRACE1("%s() Exiting!\n", __func__);
+    EPL_DBGLVL_TIMERH_TRACE("%s() Exiting!\n", __func__);
 
     return NULL;
 }

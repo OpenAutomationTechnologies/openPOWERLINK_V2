@@ -167,7 +167,7 @@ tEplKernel PUBLIC EplTimeruAddInstance()
 
     if (pthread_mutex_init(&EplTimeruInstance_g.m_Mutex, NULL) != 0)
     {
-        EPL_DBGLVL_ERROR_TRACE1("%s() couldn't init mutex!\n", __func__);
+        EPL_DBGLVL_ERROR_TRACE("%s() couldn't init mutex!\n", __func__);
         Ret = kEplNoResource;
         goto Exit;
     }
@@ -175,7 +175,7 @@ tEplKernel PUBLIC EplTimeruAddInstance()
     if ((iRetVal = pthread_create(&EplTimeruInstance_g.m_hProcessThread, NULL,
                        EplTimeruProcessThread,  &EplTimeruInstance_g)) != 0)
     {
-        EPL_DBGLVL_ERROR_TRACE2("%s() couldn't create timer thread! (%d)\n",
+        EPL_DBGLVL_ERROR_TRACE("%s() couldn't create timer thread! (%d)\n",
                                 __func__, iRetVal);
         Ret = kEplNoResource;
         pthread_mutex_destroy(&EplTimeruInstance_g.m_Mutex);
@@ -186,7 +186,7 @@ tEplKernel PUBLIC EplTimeruAddInstance()
     if (pthread_setschedparam(EplTimeruInstance_g.m_hProcessThread, SCHED_RR,
                               &schedParam) != 0)
     {
-        EPL_DBGLVL_ERROR_TRACE1("%s() couldn't set thread scheduling parameters!\n",
+        EPL_DBGLVL_ERROR_TRACE("%s() couldn't set thread scheduling parameters!\n",
                                 __func__);
     }
 
@@ -214,11 +214,11 @@ tEplKernel PUBLIC EplTimeruDelInstance(void)
 
     /* cancel thread */
     pthread_cancel(EplTimeruInstance_g.m_hProcessThread);
-    EPL_DBGLVL_TIMERU_TRACE1("%s() Waiting for thread to exit...\n", __func__);
+    EPL_DBGLVL_TIMERU_TRACE("%s() Waiting for thread to exit...\n", __func__);
 
     /* wait for thread to terminate */
     pthread_join(EplTimeruInstance_g.m_hProcessThread, NULL);
-    EPL_DBGLVL_TIMERU_TRACE1("%s()Thread exited\n", __func__);
+    EPL_DBGLVL_TIMERU_TRACE("%s()Thread exited\n", __func__);
 
     /* free up timer list */
     EplTimeruResetTimerList();
@@ -299,7 +299,7 @@ tEplKernel PUBLIC EplTimeruSetTimerMs(tEplTimerHdl*     pTimerHdl_p,
     sev.sigev_value.sival_ptr = &pData->m_Timer;
     if (timer_create(CLOCK_MONOTONIC, &sev, &pData->m_Timer) == -1)
     {
-        EPL_DBGLVL_ERROR_TRACE1("%s() Error creating timer!\n", __func__);
+        EPL_DBGLVL_ERROR_TRACE("%s() Error creating timer!\n", __func__);
         EPL_FREE(pData);
         Ret = kEplNoResource;
         goto Exit;
@@ -317,7 +317,7 @@ tEplKernel PUBLIC EplTimeruSetTimerMs(tEplTimerHdl*     pTimerHdl_p,
     }
 
     /*
-    EPL_DBGLVL_TIMERU_TRACE4("%s() Set timer: %p, ulTime_p=%ld\n",
+    EPL_DBGLVL_TIMERU_TRACE("%s() Set timer: %p, ulTime_p=%ld\n",
                              __func__, (void *)pData, ulTime_p);
     */
 
@@ -326,7 +326,7 @@ tEplKernel PUBLIC EplTimeruSetTimerMs(tEplTimerHdl*     pTimerHdl_p,
 
     if (timer_settime(pData->m_Timer, 0, &RelTime, &CurTime) < 0)
     {
-        EPL_DBGLVL_ERROR_TRACE1("%s() Error timer_settime!\n", __func__);
+        EPL_DBGLVL_ERROR_TRACE("%s() Error timer_settime!\n", __func__);
         Ret = kEplTimerNoTimerCreated;
         goto Exit;
     }
@@ -383,7 +383,7 @@ tEplKernel PUBLIC EplTimeruModifyTimerMs(tEplTimerHdl*     pTimerHdl_p,
     }
 
     /*
-    EPL_DBGLVL_TIMERU_TRACE3("%s() Modify timer:%08x ulTime_p=%ld\n",
+    EPL_DBGLVL_TIMERU_TRACE("%s() Modify timer:%08x ulTime_p=%ld\n",
                              __func__, *pTimerHdl_p, ulTime_p);
     */
 
@@ -391,7 +391,7 @@ tEplKernel PUBLIC EplTimeruModifyTimerMs(tEplTimerHdl*     pTimerHdl_p,
     RelTime.it_interval.tv_nsec = 0;
     if (timer_settime(pData->m_Timer, 0, &RelTime, &CurTime) != 0)
     {
-        EPL_DBGLVL_ERROR_TRACE1("%s() Error timer_settime!\n", __func__);
+        EPL_DBGLVL_ERROR_TRACE("%s() Error timer_settime!\n", __func__);
         Ret = kEplTimerNoTimerCreated;
         goto Exit;
     }
@@ -516,7 +516,7 @@ static void * EplTimeruProcessThread(void *pArgument_p __attribute((unused)))
     sigset_t        awaitedSignal;
     siginfo_t       signalInfo;
 
-    EPL_DBGLVL_TIMERU_TRACE2("%s() ThreadId:%d\n", __func__, syscall(SYS_gettid));
+    EPL_DBGLVL_TIMERU_TRACE("%s() ThreadId:%d\n", __func__, syscall(SYS_gettid));
 
     sigemptyset(&awaitedSignal);
     sigaddset(&awaitedSignal, SIGRTMIN);
@@ -533,7 +533,7 @@ static void * EplTimeruProcessThread(void *pArgument_p __attribute((unused)))
         }
     }
 
-    EPL_DBGLVL_TIMERU_TRACE1("%s() Exiting!\n", __func__);
+    EPL_DBGLVL_TIMERU_TRACE("%s() Exiting!\n", __func__);
     return NULL;
 }
 

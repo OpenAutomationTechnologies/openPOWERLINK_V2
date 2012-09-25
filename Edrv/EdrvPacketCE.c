@@ -417,7 +417,7 @@ tEplKernel Ret = kEplSuccessful;
 PACKET m_TxPacket;
 int         iRet;
 
-//    TRACE4("%s: TxB=%p (%02X), last TxB=%p\n", __func__, pBuffer_p, (UINT)pBuffer_p->m_pbBuffer[5], EdrvInstance_l.m_pTransmittedTxBufferLastEntry);
+//    TRACE("%s: TxB=%p (%02X), last TxB=%p\n", __func__, pBuffer_p, (UINT)pBuffer_p->m_pbBuffer[5], EdrvInstance_l.m_pTransmittedTxBufferLastEntry);
 
     if (pBuffer_p->m_BufferNumber.m_pVal != NULL)
     {
@@ -445,7 +445,7 @@ int         iRet;
 	iRet = PacketSendPacket(m_lpAdapter,&m_TxPacket,0); 
     if(!iRet)
     {
-        PRINTF3("%s PacketSendPacket returned %d (%d)\n", __func__, iRet, PacketGetLastError());
+        PRINTF("%s PacketSendPacket returned %d (%d)\n", __func__, iRet, PacketGetLastError());
         Ret = kEplInvalidOperation;
     }
 
@@ -620,7 +620,7 @@ tEdrvRxBuffer   RxBuffer;
         {
         tEdrvTxBuffer* pTxBuffer = pInstance->m_pTransmittedTxBufferFirstEntry;
 
-//            TRACE5("%s: (%02X) first TxB=%p (%02X), last TxB=%p\n", __func__, (UINT)pkt_data[5], pTxBuffer, (UINT)pTxBuffer->m_pbBuffer[5], EdrvInstance_l.m_pTransmittedTxBufferLastEntry);
+//            TRACE("%s: (%02X) first TxB=%p (%02X), last TxB=%p\n", __func__, (UINT)pkt_data[5], pTxBuffer, (UINT)pTxBuffer->m_pbBuffer[5], EdrvInstance_l.m_pTransmittedTxBufferLastEntry);
 
             if (memcmp(pkt_data, pTxBuffer->m_pbBuffer, 6) == 0)
             {

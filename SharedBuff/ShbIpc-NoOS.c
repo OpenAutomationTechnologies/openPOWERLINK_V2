@@ -307,7 +307,7 @@ void                    *pSharedMem=NULL;
 struct sShbMemTable     *psMemTableElement;
 unsigned long           aulCrcTable[256];
 
-    DEBUG_LVL_29_TRACE0("ShbIpcAllocBuffer \n");
+    DEBUG_LVL_29_TRACE("ShbIpcAllocBuffer \n");
     if (ShbTgtIsInterruptContext())
     {
         ShbError = kShbInterruptContextNotAllowed;
@@ -321,8 +321,8 @@ unsigned long           aulCrcTable[256];
     ulCrc32 = ShbIpcCrc32GetCrc(pszBufferID_p, aulCrcTable);
 
     iBufferId=ulCrc32;
-    DEBUG_LVL_29_TRACE2("ShbIpcAllocBuffer BufferSize:%d sizeof(tShb..):%d\n",ulBufferSize_p,sizeof(tShbMemHeader));
-    DEBUG_LVL_29_TRACE2("ShbIpcAllocBuffer BufferId:%d MemSize:%d\n",iBufferId,ulShMemSize);
+    DEBUG_LVL_29_TRACE("ShbIpcAllocBuffer BufferSize:%d sizeof(tShb..):%d\n",ulBufferSize_p,sizeof(tShbMemHeader));
+    DEBUG_LVL_29_TRACE("ShbIpcAllocBuffer BufferId:%d MemSize:%d\n",iBufferId,ulShMemSize);
     //---------------------------------------------------------------
     // (1) open an existing or create a new shared memory
     //---------------------------------------------------------------
@@ -332,7 +332,7 @@ unsigned long           aulCrcTable[256];
         //Buffer already exists
         fShMemNewCreated=FALSE;
         pSharedMem = psMemTableElement->m_pBuffer;
-        DEBUG_LVL_29_TRACE2("ShbIpcAllocBuffer attach Buffer at:%p Id:%d\n",pSharedMem, iBufferId);
+        DEBUG_LVL_29_TRACE("ShbIpcAllocBuffer attach Buffer at:%p Id:%d\n",pSharedMem, iBufferId);
         uiFirstProcess=1;
     }
     else
@@ -341,7 +341,7 @@ unsigned long           aulCrcTable[256];
         fShMemNewCreated = TRUE;
         uiFirstProcess=0;
         pSharedMem = malloc(ulShMemSize);
-        DEBUG_LVL_29_TRACE2("ShbIpcAllocBuffer Create New Buffer at:%p Id:%d\n",pSharedMem,iBufferId);
+        DEBUG_LVL_29_TRACE("ShbIpcAllocBuffer Create New Buffer at:%p Id:%d\n",pSharedMem,iBufferId);
         if (pSharedMem == NULL)
         {
             //unable to create mem
@@ -356,14 +356,14 @@ unsigned long           aulCrcTable[256];
         ShbIpcAppendListElement (psMemTableElement);
     }
 
-    DEBUG_LVL_29_TRACE0("ShbIpcAllocBuffer update header\n");
+    DEBUG_LVL_29_TRACE("ShbIpcAllocBuffer update header\n");
     //update header
     pShbMemHeader = (tShbMemHeader*)pSharedMem;
 
-    DEBUG_LVL_29_TRACE1("ShbIpcAllocBuffer 0 pShbMemHeader->m_ulShMemSize: %d\n",pShbMemHeader->m_ulShMemSize);
+    DEBUG_LVL_29_TRACE("ShbIpcAllocBuffer 0 pShbMemHeader->m_ulShMemSize: %d\n",pShbMemHeader->m_ulShMemSize);
     // allocate a memory block for instance local information
     // to administrate/manage the shared buffer
-    DEBUG_LVL_29_TRACE0("ShbIpcAllocBuffer alloc private mem\n");
+    DEBUG_LVL_29_TRACE("ShbIpcAllocBuffer alloc private mem\n");
 
     pShbMemInst = (tShbMemInst*) malloc(sizeof(tShbMemInst));
     if (pShbMemInst == NULL)
@@ -430,7 +430,7 @@ tShbMemInst**   ppShbMemInst;
 tShbMemHeader*  pShbMemHeader;
 tShbError       ShbError;
 
-    DEBUG_LVL_26_TRACE1("ShbIpcReleaseBuffer(%p)\n", pShbInstance_p);
+    DEBUG_LVL_26_TRACE("ShbIpcReleaseBuffer(%p)\n", pShbInstance_p);
     if (ShbTgtIsInterruptContext())
     {
         return (kShbInterruptContextNotAllowed);
@@ -505,7 +505,7 @@ tShbMemHeader*  pShbMemHeader;
     pShbMemHeader = ShbIpcGetShbMemHeader (ShbIpcGetShbMemInst (pShbInstance_p));
     //set semaphore
     pShbMemHeader->m_fNewData = TRUE;
-    DEBUG_LVL_29_TRACE0("ShbIpcSignalNewData set Sem -> New Data\n");
+    DEBUG_LVL_29_TRACE("ShbIpcSignalNewData set Sem -> New Data\n");
 
     if (pShbMemHeader->m_pShbInstMaster != NULL)
     {
@@ -629,7 +629,7 @@ tShbMemInst**   ppShbMemInst;
 tShbMemHeader*  pShbMemHeader;
 tShbError       ShbError;
 
-    DEBUG_LVL_29_TRACE0("------->ShbIpcStartSignalingNewData\n");
+    DEBUG_LVL_29_TRACE("------->ShbIpcStartSignalingNewData\n");
     if (ShbTgtIsInterruptContext())
     {
         return (kShbInterruptContextNotAllowed);
@@ -649,7 +649,7 @@ tShbError       ShbError;
         ShbError = kShbAlreadySignaling;
         goto Exit;
     }
-    DEBUG_LVL_26_TRACE2("ShbIpcStartSignalingNewData(%p) m_pfnSigHndlrNewData = %p\n", pShbInstance_p, pfnSignalHandlerNewData_p);
+    DEBUG_LVL_26_TRACE("ShbIpcStartSignalingNewData(%p) m_pfnSigHndlrNewData = %p\n", pShbInstance_p, pfnSignalHandlerNewData_p);
     pShbMemInst->m_pfnSigHndlrNewData = pfnSignalHandlerNewData_p;
     pShbMemInst->m_PriorityNewData = ShbPriority_p;
     pShbMemHeader->m_fNewData = FALSE;
@@ -687,7 +687,7 @@ tShbMemInst**   ppShbMemInst;
 tShbMemHeader*  pShbMemHeader;
 tShbError       ShbError;
 
-    DEBUG_LVL_29_TRACE0("------->ShbIpcStopSignalingNewData\n");
+    DEBUG_LVL_29_TRACE("------->ShbIpcStopSignalingNewData\n");
     if (ShbTgtIsInterruptContext())
     {
         return (kShbInterruptContextNotAllowed);
@@ -701,7 +701,7 @@ tShbError       ShbError;
     pShbMemInst = ShbIpcGetShbMemInst (pShbInstance_p);
     pShbMemHeader = ShbIpcGetShbMemHeader (pShbMemInst);
 
-    DEBUG_LVL_26_TRACE2("ShbIpcStopSignalingNewData(%p) pfnSignHndlrNewData=%p\n", pShbInstance_p, pShbMemInst->m_pfnSigHndlrNewData);
+    DEBUG_LVL_26_TRACE("ShbIpcStopSignalingNewData(%p) pfnSignHndlrNewData=%p\n", pShbInstance_p, pShbMemInst->m_pfnSigHndlrNewData);
     if (pShbMemInst->m_pfnSigHndlrNewData != NULL)
     {   // signal handler was set before
         // remove pShbMemInst from NewData process list
@@ -796,7 +796,7 @@ INLINE_FUNCTION tShbError  ShbIpcSignalJobReady (
 {
 tShbMemHeader*  pShbMemHeader;
 
-    DEBUG_LVL_29_TRACE0("ShbIpcSignalJobReady\n");
+    DEBUG_LVL_29_TRACE("ShbIpcSignalJobReady\n");
     if (pShbInstance_p == NULL)
     {
         return (kShbInvalidArg);
@@ -804,7 +804,7 @@ tShbMemHeader*  pShbMemHeader;
     pShbMemHeader = ShbIpcGetShbMemHeader (ShbIpcGetShbMemInst (pShbInstance_p));
     //set semaphore
     pShbMemHeader->m_fJobReady = TRUE;
-    DEBUG_LVL_29_TRACE0("ShbIpcSignalJobReady set Sem -> Job Ready \n");
+    DEBUG_LVL_29_TRACE("ShbIpcSignalJobReady set Sem -> Job Ready \n");
 
     return (kShbOk);
 }

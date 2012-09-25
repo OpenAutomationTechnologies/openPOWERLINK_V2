@@ -310,7 +310,7 @@ tEplKernel      Ret = kEplSuccessful;
 tShbError       ShbError;
 unsigned int    fShbNewCreated;
 
-    TRACE5("%s: Alloc(%u, %u, %u, %u)\n",
+    TRACE("%s: Alloc(%u, %u, %u, %u)\n",
           __func__,
           uiSizeProcessImageIn_p,
           uiSizeProcessImageOut_p,
@@ -340,7 +340,7 @@ unsigned int    fShbNewCreated;
     }
     EplApiProcessImageInstance_g.m_Out.m_uiSize = uiSizeProcessImageOut_p;
 
-    TRACE5("%s: Alloc(%p, %u, %p, %u)\n",
+    TRACE("%s: Alloc(%p, %u, %p, %u)\n",
           __func__,
           EplApiProcessImageInstance_g.m_In.m_pImage,
           EplApiProcessImageInstance_g.m_In.m_uiSize,

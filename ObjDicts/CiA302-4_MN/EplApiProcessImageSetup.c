@@ -298,7 +298,7 @@ unsigned int    uiVarEntries;
         }
         if (Ret != kEplSuccessful)
         {
-            TRACE2("EplApiProcessImageLinkObject returned: %xh for index %xh\n", Ret, uiObjIndexStart_p);
+            TRACE("EplApiProcessImageLinkObject returned: %xh for index %xh\n", Ret, uiObjIndexStart_p);
             goto Exit;
         }
     }

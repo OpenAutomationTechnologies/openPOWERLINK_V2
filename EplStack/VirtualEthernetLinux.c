@@ -181,7 +181,7 @@ tEplKernel  Ret = kEplSuccessful;
     // register callback function in DLL
     Ret = EplDllkRegAsyncHandler(VEthRecvFrame);
 
-    EPL_DBGLVL_VETH_TRACE1("VEthOpen: EplDllkRegAsyncHandler returned 0x%02X\n", Ret);
+    EPL_DBGLVL_VETH_TRACE("VEthOpen: EplDllkRegAsyncHandler returned 0x%02X\n", Ret);
 
     return 0;
 }
@@ -190,7 +190,7 @@ static int VEthClose(struct net_device *pNetDevice_p)
 {
 tEplKernel  Ret = kEplSuccessful;
 
-    EPL_DBGLVL_VETH_TRACE0("VEthClose\n");
+    EPL_DBGLVL_VETH_TRACE("VEthClose\n");
 
     Ret = EplDllkDeregAsyncHandler(VEthRecvFrame);
 
@@ -218,13 +218,13 @@ tEplFrameInfo   FrameInfo;
     Ret = EplDllkCalAsyncSend(&FrameInfo, kEplDllAsyncReqPrioGeneric);
     if (Ret != kEplSuccessful)
     {
-        EPL_DBGLVL_VETH_TRACE1("VEthXmit: EplDllkCalAsyncSend returned 0x%02X\n", Ret);
+        EPL_DBGLVL_VETH_TRACE("VEthXmit: EplDllkCalAsyncSend returned 0x%02X\n", Ret);
         netif_stop_queue(pNetDevice_p);
         goto Exit;
     }
     else
     {
-        EPL_DBGLVL_VETH_TRACE0("VEthXmit: frame passed to DLL\n");
+        EPL_DBGLVL_VETH_TRACE("VEthXmit: frame passed to DLL\n");
         dev_kfree_skb(pSkb_p);
 
         //set stats for the device
@@ -240,7 +240,7 @@ Exit:
 
 static struct net_device_stats* VEthGetStats(struct net_device *pNetDevice_p)
 {
-    EPL_DBGLVL_VETH_TRACE0("VEthGetStats\n");
+    EPL_DBGLVL_VETH_TRACE("VEthGetStats\n");
 
 	return netdev_priv(pNetDevice_p);
 }
@@ -249,7 +249,7 @@ static struct net_device_stats* VEthGetStats(struct net_device *pNetDevice_p)
 
 static void VEthTimeout(struct net_device *pNetDevice_p)
 {
-    EPL_DBGLVL_VETH_TRACE0("VEthTimeout(\n");
+    EPL_DBGLVL_VETH_TRACE("VEthTimeout(\n");
 
     // $$$ d.k.: move to extra function, which is called by DLL when new space is available in TxFifo
     if (netif_queue_stopped (pNetDevice_p))
@@ -267,7 +267,7 @@ tEplKernel  Ret = kEplSuccessful;
     struct net_device_stats* pStats = netdev_priv(pNetDevice);
     struct sk_buff *pSkb;
 
-    EPL_DBGLVL_VETH_TRACE1("VEthRecvFrame: FrameSize=%u\n", pFrameInfo_p->m_uiFrameSize);
+    EPL_DBGLVL_VETH_TRACE("VEthRecvFrame: FrameSize=%u\n", pFrameInfo_p->m_uiFrameSize);
 
     pSkb = dev_alloc_skb(pFrameInfo_p->m_uiFrameSize + 2);
     if (pSkb == NULL)
@@ -287,7 +287,7 @@ tEplKernel  Ret = kEplSuccessful;
     // call netif_rx with skb
     netif_rx(pSkb);
 
-    EPL_DBGLVL_VETH_TRACE1("VEthRecvFrame: SrcMAC=0x%llx\n", AmiGetQword48FromBe(pFrameInfo_p->m_pFrame->m_be_abSrcMac));
+    EPL_DBGLVL_VETH_TRACE("VEthRecvFrame: SrcMAC=0x%llx\n", AmiGetQword48FromBe(pFrameInfo_p->m_pFrame->m_be_abSrcMac));
 
     // update receive statistics
     pStats->rx_packets++;
@@ -345,11 +345,11 @@ tEplKernel  Ret = kEplSuccessful;
     //register VEth to the network subsystem
     if (register_netdev(pVEthNetDevice_g))
     {
-        EPL_DBGLVL_VETH_TRACE0("VEthAddInstance: Could not register VEth...\n");
+        EPL_DBGLVL_VETH_TRACE("VEthAddInstance: Could not register VEth...\n");
     }
     else
     {
-        EPL_DBGLVL_VETH_TRACE0("VEthAddInstance: Register VEth successfull...\n");
+        EPL_DBGLVL_VETH_TRACE("VEthAddInstance: Register VEth successfull...\n");
     }
 
 Exit:

@@ -3994,7 +3994,7 @@ TGT_DLLK_DECLARE_FLAGS
 
     if (AmiGetWordFromBe(&pFrame->m_be_wEtherType) != EPL_C_DLL_ETHERTYPE_EPL)
     {   // non-EPL frame
-        //TRACE2("EplDllkCbFrameReceived: pfnCbAsync=0x%p SrcMAC=0x%llx\n", EplDllkInstance_g.m_pfnCbAsync, AmiGetQword48FromBe(pFrame->m_be_abSrcMac));
+        //TRACE("EplDllkCbFrameReceived: pfnCbAsync=0x%p SrcMAC=0x%llx\n", EplDllkInstance_g.m_pfnCbAsync, AmiGetQword48FromBe(pFrame->m_be_abSrcMac));
         if (EplDllkInstance_g.m_pfnCbAsync != NULL)
         {   // handler for async frames is registered
             EplDllkInstance_g.m_pfnCbAsync(&FrameInfo);
@@ -5259,7 +5259,7 @@ TGT_DLLK_DECLARE_FLAGS
             Event.m_EventType = kEplEventTypeNmtMnuNmtCmdSent;
             Event.m_uiSize = pTxBuffer_p->m_uiTxMsgLen;
             Event.m_pArg = pTxFrame;
-//            PRINTF4("%s TxB=%p, TxF=%p, s=%u\n", __func__, pTxBuffer_p, Event.m_pArg, Event.m_uiSize);
+//            PRINTF("%s TxB=%p, TxF=%p, s=%u\n", __func__, pTxBuffer_p, Event.m_pArg, Event.m_uiSize);
             Ret = EplEventkPost(&Event);
             if (Ret != kEplSuccessful)
             {

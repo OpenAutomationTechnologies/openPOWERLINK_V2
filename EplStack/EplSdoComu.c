@@ -914,7 +914,7 @@ tEplKernel       Ret;
                                    kEplSdoComConEventRec,
                                    pAsySdoCom_p);
 
-    EPL_DBGLVL_SDO_TRACE3("EplSdoComReceiveCb SdoSeqConHdl: 0x%X, First Byte of pAsySdoCom_p: 0x%02X, uiDataSize_p: 0x%04X\n", SdoSeqConHdl_p, (WORD)pAsySdoCom_p->m_le_abCommandData[0], uiDataSize_p);
+    EPL_DBGLVL_SDO_TRACE("EplSdoComReceiveCb SdoSeqConHdl: 0x%X, First Byte of pAsySdoCom_p: 0x%02X, uiDataSize_p: 0x%04X\n", SdoSeqConHdl_p, (WORD)pAsySdoCom_p->m_le_abCommandData[0], uiDataSize_p);
 
     return Ret;
 }
@@ -951,7 +951,7 @@ tEplSdoComConEvent  SdoComConEvent = kEplSdoComConEventSendFirst;
     {
         case kAsySdoConStateConnected:
         {
-            EPL_DBGLVL_SDO_TRACE0("Connection established\n");
+            EPL_DBGLVL_SDO_TRACE("Connection established\n");
             SdoComConEvent = kEplSdoComConEventConEstablished;
             // start transmission if needed
             break;
@@ -959,7 +959,7 @@ tEplSdoComConEvent  SdoComConEvent = kEplSdoComConEventSendFirst;
 
         case kAsySdoConStateInitError:
         {
-            EPL_DBGLVL_SDO_TRACE0("Error during initialisation\n");
+            EPL_DBGLVL_SDO_TRACE("Error during initialisation\n");
             SdoComConEvent = kEplSdoComConEventInitError;
             // inform app about error and close sequence layer handle
             break;
@@ -967,7 +967,7 @@ tEplSdoComConEvent  SdoComConEvent = kEplSdoComConEventSendFirst;
 
         case kAsySdoConStateConClosed:
         {
-            EPL_DBGLVL_SDO_TRACE0("Connection closed\n");
+            EPL_DBGLVL_SDO_TRACE("Connection closed\n");
             SdoComConEvent = kEplSdoComConEventConClosed;
             // close sequence layer handle
             break;
@@ -975,7 +975,7 @@ tEplSdoComConEvent  SdoComConEvent = kEplSdoComConEventSendFirst;
 
         case kAsySdoConStateAckReceived:
         {
-            EPL_DBGLVL_SDO_TRACE0("Acknowledge received\n");
+            EPL_DBGLVL_SDO_TRACE("Acknowledge received\n");
             SdoComConEvent = kEplSdoComConEventAckReceived;
             // continue transmission
             break;
@@ -983,7 +983,7 @@ tEplSdoComConEvent  SdoComConEvent = kEplSdoComConEventSendFirst;
 
         case kAsySdoConStateFrameSended:
         {
-            EPL_DBGLVL_SDO_TRACE0("One Frame sent\n");
+            EPL_DBGLVL_SDO_TRACE("One Frame sent\n");
             SdoComConEvent = kEplSdoComConEventFrameSended;
             // to continue transmission
             break;
@@ -992,7 +992,7 @@ tEplSdoComConEvent  SdoComConEvent = kEplSdoComConEventSendFirst;
 
         case kAsySdoConStateTimeout:
         {
-            EPL_DBGLVL_SDO_TRACE0("Timeout\n");
+            EPL_DBGLVL_SDO_TRACE("Timeout\n");
             SdoComConEvent = kEplSdoComConEventTimeout;
             // close sequence layer handle
             break;
@@ -1001,7 +1001,7 @@ tEplSdoComConEvent  SdoComConEvent = kEplSdoComConEventSendFirst;
 
         case kAsySdoConStateTransferAbort:
         {
-            EPL_DBGLVL_SDO_TRACE0("Transfer aborted\n");
+            EPL_DBGLVL_SDO_TRACE("Transfer aborted\n");
             SdoComConEvent = kEplSdoComConEventTransferAbort;
             // inform higher layer if necessary,
             // but do not close sequence layer handle
@@ -1127,7 +1127,7 @@ unsigned int        uiSize;
 #if defined(WIN32) || defined(_WIN32)
     // enter  critical section for process function
     EnterCriticalSection(SdoComInstance_g.m_pCriticalSection);
-    EPL_DBGLVL_SDO_TRACE0("\n\tEnterCiticalSection EplSdoComProcessIntern\n\n");
+    EPL_DBGLVL_SDO_TRACE("\n\tEnterCiticalSection EplSdoComProcessIntern\n\n");
 #endif
 
     Ret = kEplSuccessful;
@@ -1891,7 +1891,7 @@ Exit:
 
 #if defined(WIN32) || defined(_WIN32)
     // leave critical section for process function
-    EPL_DBGLVL_SDO_TRACE0("\n\tLeaveCriticalSection EplSdoComProcessIntern\n\n");
+    EPL_DBGLVL_SDO_TRACE("\n\tLeaveCriticalSection EplSdoComProcessIntern\n\n");
     LeaveCriticalSection(SdoComInstance_g.m_pCriticalSection);
 
 #endif
@@ -2253,7 +2253,7 @@ BYTE            bFlag;
             Ret = EplSdoAsySeqSendData(pSdoComCon_p->m_SdoSeqConHdl,
                                                 uiSizeOfFrame,
                                                 pFrame);
-            DEBUG_LVL_25_TRACE0("ERROR: SDO Aborted!\n");
+            DEBUG_LVL_25_TRACE("ERROR: SDO Aborted!\n");
             break;
         }
     } // end of switch(SendType_p)
@@ -3044,7 +3044,7 @@ unsigned int    uiSizeOfFrame;
                                         pFrame);
             if (Ret == kEplSdoSeqConnectionBusy)
             {
-                DEBUG_LVL_25_TRACE2("%s tried to send abort 0x%lX while connection is already closed\n",
+                DEBUG_LVL_25_TRACE("%s tried to send abort 0x%lX while connection is already closed\n",
                     __func__, (unsigned long) dwAbortCode_p);
                 Ret = kEplSuccessful;
             }

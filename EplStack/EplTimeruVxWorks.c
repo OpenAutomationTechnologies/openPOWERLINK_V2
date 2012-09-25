@@ -313,7 +313,7 @@ tEplKernel PUBLIC EplTimeruSetTimerMs(  tEplTimerHdl*   pTimerHdl_p,
 
     if (hrtimer_create(CLOCK_MONOTONIC, &sig, &pData->m_timer) != 0)
     {
-        EPL_DBGLVL_ERROR_TRACE1("%s() Error hrtimer_create!\n", __func__);
+        EPL_DBGLVL_ERROR_TRACE("%s() Error hrtimer_create!\n", __func__);
         Ret = kEplNoResource;
         goto Exit;
     }
@@ -332,12 +332,12 @@ tEplKernel PUBLIC EplTimeruSetTimerMs(  tEplTimerHdl*   pTimerHdl_p,
     RelTime.it_interval.tv_sec = 0;
     RelTime.it_interval.tv_nsec = 0;
 
-    EPL_DBGLVL_TIMERU_TRACE3("%s() Set timer:%08x ulTime_p=%ld\n",
+    EPL_DBGLVL_TIMERU_TRACE("%s() Set timer:%08x ulTime_p=%ld\n",
                              __func__, *pData, ulTime_p);
 
     if (hrtimer_settime(pData->m_timer, 0, &RelTime, NULL) < 0)
     {
-        EPL_DBGLVL_ERROR_TRACE1("%s() Error hrtimer_settime!\n", __func__);
+        EPL_DBGLVL_ERROR_TRACE("%s() Error hrtimer_settime!\n", __func__);
         Ret = kEplTimerNoTimerCreated;
         goto Exit;
     }
@@ -394,7 +394,7 @@ tEplKernel PUBLIC EplTimeruModifyTimerMs(tEplTimerHdl*    pTimerHdl_p,
         RelTime.it_value.tv_nsec = ulTime_p * 1000000;
     }
 
-    EPL_DBGLVL_TIMERU_TRACE3("%s() Modify timer:%08x ulTime_p=%ld\n",
+    EPL_DBGLVL_TIMERU_TRACE("%s() Modify timer:%08x ulTime_p=%ld\n",
                              __func__, *pTimerHdl_p, ulTime_p);
 
     RelTime.it_interval.tv_sec = 0;
@@ -402,7 +402,7 @@ tEplKernel PUBLIC EplTimeruModifyTimerMs(tEplTimerHdl*    pTimerHdl_p,
 
     if (hrtimer_settime(pData->m_timer, 0, &RelTime, NULL) != 0)
     {
-        EPL_DBGLVL_ERROR_TRACE1("%s() Error timer_settime!\n", __func__);
+        EPL_DBGLVL_ERROR_TRACE("%s() Error timer_settime!\n", __func__);
         Ret = kEplTimerNoTimerCreated;
         goto Exit;
     }

@@ -369,7 +369,7 @@ tEplKernel  Ret;
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
                             Ret = EplNmtuNmtEvent(kEplNmtEventEnterMsNotActive);
 #else
-                            TRACE0("EplNmtuProcess(): no MN functionality implemented\n");
+                            TRACE("EplNmtuProcess(): no MN functionality implemented\n");
 #endif
                         }
                         else
@@ -603,7 +603,7 @@ tEplKernel  Ret;
                     default:
                     {
                         Ret = kEplNmtInvalidState;
-                        TRACE1("EplNmtuProcess(): unhandled NMT state 0x%X\n", pNmtStateChange->m_NewNmtState);
+                        TRACE("EplNmtuProcess(): unhandled NMT state 0x%X\n", pNmtStateChange->m_NewNmtState);
                     }
                 }
             }
@@ -613,7 +613,7 @@ tEplKernel  Ret;
                 Ret = kEplSuccessful;
             }
 
-            EPL_DBGLVL_NMTU_TRACE0("EplNmtuProcessEvent(): NMT-State-Maschine announce change of NMT State\n");
+            EPL_DBGLVL_NMTU_TRACE("EplNmtuProcessEvent(): NMT-State-Maschine announce change of NMT State\n");
             break;
         }
 

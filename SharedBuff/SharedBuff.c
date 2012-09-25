@@ -1439,12 +1439,12 @@ unsigned long     ulRdIndex;
 tShbError         ShbError;
 
 
-    TRACE0("\n\n##### Circular Shared Buffer #####\n");
+    TRACE("\n\n##### Circular Shared Buffer #####\n");
 
     // check arguments
     if (pShbInstance_p == NULL)
     {
-        TRACE1("\nERROR: invalid buffer address (0x%p)\n", pShbInstance_p);
+        TRACE("\nERROR: invalid buffer address (0x%p)\n", pShbInstance_p);
         ShbError = kShbInvalidArg;
         goto Exit;
     }
@@ -1466,23 +1466,23 @@ tShbError         ShbError;
 
     ShbIpcEnterAtomicSection (pShbInstance_p);
     {
-        TRACE1("\nBuffer Address:   0x%p\n",       pShbCirBuff);
+        TRACE("\nBuffer Address:   0x%p\n",       pShbCirBuff);
 
-        TRACE0("\nHeader Info:");
-        TRACE2("\nMagigID:          '%s' (%08lX)", szMagigID, pShbCirBuff->m_ShbCirMagicID);
-        TRACE1("\nBufferTotalSize:  %4lu [Bytes]", pShbCirBuff->m_ulBufferTotalSize);
-        TRACE1("\nBufferDataSize:   %4lu [Bytes]", pShbCirBuff->m_ulBufferDataSize);
-        TRACE1("\nWrIndex:          %4lu",         pShbCirBuff->m_ulWrIndex);
-        TRACE1("\nRdIndex:          %4lu",         pShbCirBuff->m_ulRdIndex);
-        TRACE1("\nNumOfWriteJobs:   %4lu",         pShbCirBuff->m_ulNumOfWriteJobs);
-        TRACE1("\nDataInUse:        %4lu [Bytes]", pShbCirBuff->m_ulDataInUse);
-        TRACE1("\nDataApended:      %4lu [Bytes]", pShbCirBuff->m_ulDataApended);
-        TRACE1("\nBlocksApended:    %4lu",         pShbCirBuff->m_ulBlocksApended);
-        TRACE1("\nDataReadable:     %4lu [Bytes]", pShbCirBuff->m_ulDataReadable);
-        TRACE1("\nBlocksReadable:   %4lu",         pShbCirBuff->m_ulBlocksReadable);
-        TRACE1("\nSigHndlrNewData:  %p",           pShbCirBuff->m_pfnSigHndlrNewData);
-        TRACE1("\nBufferLocked:     %d",           pShbCirBuff->m_fBufferLocked);
-        TRACE1("\nSigHndlrReset:    %p",           pShbCirBuff->m_pfnSigHndlrReset);
+        TRACE("\nHeader Info:");
+        TRACE("\nMagigID:          '%s' (%08lX)", szMagigID, pShbCirBuff->m_ShbCirMagicID);
+        TRACE("\nBufferTotalSize:  %4lu [Bytes]", pShbCirBuff->m_ulBufferTotalSize);
+        TRACE("\nBufferDataSize:   %4lu [Bytes]", pShbCirBuff->m_ulBufferDataSize);
+        TRACE("\nWrIndex:          %4lu",         pShbCirBuff->m_ulWrIndex);
+        TRACE("\nRdIndex:          %4lu",         pShbCirBuff->m_ulRdIndex);
+        TRACE("\nNumOfWriteJobs:   %4lu",         pShbCirBuff->m_ulNumOfWriteJobs);
+        TRACE("\nDataInUse:        %4lu [Bytes]", pShbCirBuff->m_ulDataInUse);
+        TRACE("\nDataApended:      %4lu [Bytes]", pShbCirBuff->m_ulDataApended);
+        TRACE("\nBlocksApended:    %4lu",         pShbCirBuff->m_ulBlocksApended);
+        TRACE("\nDataReadable:     %4lu [Bytes]", pShbCirBuff->m_ulDataReadable);
+        TRACE("\nBlocksReadable:   %4lu",         pShbCirBuff->m_ulBlocksReadable);
+        TRACE("\nSigHndlrNewData:  %p",           pShbCirBuff->m_pfnSigHndlrNewData);
+        TRACE("\nBufferLocked:     %d",           pShbCirBuff->m_fBufferLocked);
+        TRACE("\nSigHndlrReset:    %p",           pShbCirBuff->m_pfnSigHndlrReset);
 
         ShbTraceDump (&pShbCirBuff->m_Data, pShbCirBuff->m_ulBufferDataSize,
                       0x00000000L, "\nData Area:");
@@ -1494,7 +1494,7 @@ tShbError         ShbError;
 
         while (ulDataReadable > 0)
         {
-            TRACE1("\n\n--- Block #%u ---", nBlockCount);
+            TRACE("\n\n--- Block #%u ---", nBlockCount);
 
             // get pointer to start of data area and current read index
             pShbCirDataPtr = &pShbCirBuff->m_Data;      // ptr to start of data area
@@ -1509,9 +1509,9 @@ tShbError         ShbError;
             ulDataSize  = ShbCirBlockSize.m_uiFullBlockSize - ShbCirBlockSize.m_uiAlignFillBytes;
             ulDataSize -= sizeof(tShbCirBlockSize);
 
-            TRACE1("\nFull Data Size:       %4u [Bytes] (incl. header and alignment fill bytes)", ShbCirBlockSize.m_uiFullBlockSize);
-            TRACE1("\nUser Data Size:       %4lu [Bytes]", ulDataSize);
-            TRACE1("\nAlignment Fill Bytes: %4u [Bytes]", ShbCirBlockSize.m_uiAlignFillBytes);
+            TRACE("\nFull Data Size:       %4u [Bytes] (incl. header and alignment fill bytes)", ShbCirBlockSize.m_uiFullBlockSize);
+            TRACE("\nUser Data Size:       %4lu [Bytes]", ulDataSize);
+            TRACE("\nAlignment Fill Bytes: %4u [Bytes]", ShbCirBlockSize.m_uiAlignFillBytes);
 
 
             if (ulRdIndex + ulDataSize <= pShbCirBuff->m_ulBufferDataSize)
@@ -1858,12 +1858,12 @@ char          szMagigID[sizeof(SBL_MAGIC_ID)+1];
 tShbError     ShbError;
 
 
-    TRACE0("\n\n##### Linear Shared Buffer #####\n");
+    TRACE("\n\n##### Linear Shared Buffer #####\n");
 
     // check arguments
     if (pShbInstance_p == NULL)
     {
-        TRACE1("\nERROR: invalid buffer address (0x%p)\n", pShbInstance_p);
+        TRACE("\nERROR: invalid buffer address (0x%p)\n", pShbInstance_p);
         ShbError = kShbInvalidArg;
         goto Exit;
     }
@@ -1885,12 +1885,12 @@ tShbError     ShbError;
 
     ShbIpcEnterAtomicSection (pShbInstance_p);
     {
-        TRACE1("\nBuffer Address:   0x%p\n", pShbLinBuff);
+        TRACE("\nBuffer Address:   0x%p\n", pShbLinBuff);
 
-        TRACE0("\nHeader Info:");
-        TRACE2("\nMagigID:          '%s' (%08X)", szMagigID, pShbLinBuff->m_ShbLinMagicID);
-        TRACE1("\nBufferTotalSize:  %4lu [Bytes]", pShbLinBuff->m_ulBufferTotalSize);
-        TRACE1("\nBufferDataSize:   %4lu [Bytes]", pShbLinBuff->m_ulBufferDataSize);
+        TRACE("\nHeader Info:");
+        TRACE("\nMagigID:          '%s' (%08X)", szMagigID, pShbLinBuff->m_ShbLinMagicID);
+        TRACE("\nBufferTotalSize:  %4lu [Bytes]", pShbLinBuff->m_ulBufferTotalSize);
+        TRACE("\nBufferDataSize:   %4lu [Bytes]", pShbLinBuff->m_ulBufferDataSize);
 
         ShbTraceDump (&pShbLinBuff->m_Data, pShbLinBuff->m_ulBufferDataSize,
                       0x00000000L, "\nData Area:");
@@ -1936,27 +1936,27 @@ int                   nCol;
 
     if (pszInfoText_p != NULL)
     {
-        TRACE1("%s", pszInfoText_p);
+        TRACE("%s", pszInfoText_p);
     }
 
     // dump buffer contents
     for (nRow=0; ; nRow++)
     {
-        TRACE1("\n%08lX:   ", (unsigned long)(nRow*0x10) + ulAddrOffset_p);
+        TRACE("\n%08lX:   ", (unsigned long)(nRow*0x10) + ulAddrOffset_p);
 
         for (nCol=0; nCol<16; nCol++)
         {
             if ((unsigned long)nCol < ulBuffSize)
             {
-                TRACE1("%02X ", (unsigned int)*(pabBuffData+nCol));
+                TRACE("%02X ", (unsigned int)*(pabBuffData+nCol));
             }
             else
             {
-                TRACE0("   ");
+                TRACE("   ");
             }
         }
 
-        TRACE0(" ");
+        TRACE(" ");
 
         for (nCol=0; nCol<16; nCol++)
         {
@@ -1965,16 +1965,16 @@ int                   nCol;
             {
                 if ((bData >= 0x20) && (bData < 0x7F))
                 {
-                    TRACE1("%c", bData);
+                    TRACE("%c", bData);
                 }
                 else
                 {
-                    TRACE0(".");
+                    TRACE(".");
                 }
             }
             else
             {
-                TRACE0(" ");
+                TRACE(" ");
             }
         }
 

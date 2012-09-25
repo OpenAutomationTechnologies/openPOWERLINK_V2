@@ -311,7 +311,7 @@ unsigned long           aulCrcTable[256] ;
 tShbMemKernelUser       *pShbMemKernelUser = malloc(sizeof(tShbMemKernelUser));
 
     ulShMemSize      = ulBufferSize_p + sizeof(tShbMemHeader);
-    TRACE1("ulShMemSize  %u\n",ulShMemSize);
+    TRACE("ulShMemSize  %u\n",ulShMemSize);
 
 
     //check if user- or kernelspace mem
@@ -330,12 +330,12 @@ tShbMemKernelUser       *pShbMemKernelUser = malloc(sizeof(tShbMemKernelUser));
     ShbIpcCrc32GenTable(aulCrcTable);
     ulCrc32=ShbIpcCrc32GetCrc(pszBufferID_p,aulCrcTable);
     iBufferKey=(int)ulCrc32;
-    TRACE2("ShbIpcAllocBuffer BufferSize:%d sizeof(tShb..):%d\n",ulBufferSize_p,sizeof(tShbMemHeader));
-    TRACE2("ShbIpcAllocBuffer BufferId:%d MemSize:%d\n",iBufferKey,ulShMemSize);
+    TRACE("ShbIpcAllocBuffer BufferSize:%d sizeof(tShb..):%d\n",ulBufferSize_p,sizeof(tShbMemHeader));
+    TRACE("ShbIpcAllocBuffer BufferId:%d MemSize:%d\n",iBufferKey,ulShMemSize);
 
     if (iUserSpaceMem==0)
     {
-        TRACE0("UserSpaceMem\n");
+        TRACE("UserSpaceMem\n");
         //UserSpaceMem
 
 
@@ -345,7 +345,7 @@ tShbMemKernelUser       *pShbMemKernelUser = malloc(sizeof(tShbMemKernelUser));
         // try to create an shared memory
 
         iBufferId=shmget(iBufferKey,ulShMemSize,0666|IPC_CREAT|IPC_EXCL);
-        TRACE2("iBufferId:%d iBufferKey:%d\n",iBufferId,iBufferKey);
+        TRACE("iBufferId:%d iBufferKey:%d\n",iBufferId,iBufferKey);
         if (iBufferId==-1)
         {
             // a shared memory already exis, get buffer id
@@ -442,7 +442,7 @@ tShbMemKernelUser       *pShbMemKernelUser = malloc(sizeof(tShbMemKernelUser));
             // process has only attached to it
             // -> check and update existing header information inside the
             //    shared memory region itself
-            TRACE2("MEM %d %d \n",pShbMemHeader->m_ulShMemSize, ulShMemSize);
+            TRACE("MEM %d %d \n",pShbMemHeader->m_ulShMemSize, ulShMemSize);
             if (pShbMemHeader->m_ulShMemSize != ulShMemSize)
             {
                 ShbError = kShbOpenMismatch;
@@ -464,7 +464,7 @@ tShbMemKernelUser       *pShbMemKernelUser = malloc(sizeof(tShbMemKernelUser));
     else
     {
         //KernelSpaceMem
-        TRACE0("KernelSpaceMem\n");
+        TRACE("KernelSpaceMem\n");
         //---------------------------------------------------------------
         // (1) open an existing or create a new shared memory
         //---------------------------------------------------------------
@@ -474,7 +474,7 @@ tShbMemKernelUser       *pShbMemKernelUser = malloc(sizeof(tShbMemKernelUser));
         iFdMemDevice=open("/dev/ShbMemDev0", O_RDWR);
         if (iFdMemDevice<0)
         {
-            TRACE0("ShbIpcAllocBuffer open error\n");
+            TRACE("ShbIpcAllocBuffer open error\n");
             perror("ShbIpcAllocBuffer\n");
             ShbError = kShbUnableOpenMemDevice;
             goto ExitKernelSpaceMem;
@@ -485,14 +485,14 @@ tShbMemKernelUser       *pShbMemKernelUser = malloc(sizeof(tShbMemKernelUser));
         if (iRetValue==0)
         {
             // a shared memory already exist
-            TRACE0("ShbIpcAllocBuffer a shared memory already exist\n");
+            TRACE("ShbIpcAllocBuffer a shared memory already exist\n");
             pShbMemKernelUser->m_iBufferId=iBufferKey;
             //check if buffer also allready mapped
             if (ShbIpcFindListElementMappedBuffers(iBufferKey)==0)
             {
                 //Buffer is allready mapped
                 //get pointer to the shared mem
-                TRACE0("ShbIpcAllocBuffer Buffer is allready mapped\n");
+                TRACE("ShbIpcAllocBuffer Buffer is allready mapped\n");
                 pShbMemKernelUser->m_iBufferId=iBufferKey;
                 ioctl(iFdMemDevice,IOCTL_GET_MEM_POINTER,pShbMemKernelUser);
                 pSharedMem=pShbMemKernelUser->m_pBuffer;
@@ -501,16 +501,16 @@ tShbMemKernelUser       *pShbMemKernelUser = malloc(sizeof(tShbMemKernelUser));
             else
             {
                 //Buffer has to map
-                TRACE0("ShbIpcAllocBuffer Buffer has to map\n");
+                TRACE("ShbIpcAllocBuffer Buffer has to map\n");
                 //map to the shared mem
                 //pSharedMem=mmap(0,ulShMemSize, PROT_READ|PROT_WRITE, MAP_SHARED|MAP_LOCKED,iFdMemDevice,(64*1024));
                 pSharedMem=mmap(0,ulShMemSize, PROT_READ|PROT_WRITE, MAP_SHARED|MAP_LOCKED,iFdMemDevice,0);
-                TRACE1("ShbIpcAllocBuffer mmaped at: %p \n",pSharedMem);
+                TRACE("ShbIpcAllocBuffer mmaped at: %p \n",pSharedMem);
                 psNewMappedBuffersElement=malloc(sizeof(struct sMappedBuffers));
                 psNewMappedBuffersElement->m_iBufferId=iBufferKey;
                 //Append buffer element to list
                 ShbIpcAppendListElementMappedBuffers(psNewMappedBuffersElement);
-                TRACE0("ShbIpcAllocBuffer Buffer appended to list\n");
+                TRACE("ShbIpcAllocBuffer Buffer appended to list\n");
                 uiFirstProcess=2;
             }
 
@@ -525,7 +525,7 @@ tShbMemKernelUser       *pShbMemKernelUser = malloc(sizeof(tShbMemKernelUser));
 
         if (iRetValue==1)
         {
-            TRACE0("ShbIpcAllocBuffer a shared memory is new created\n");
+            TRACE("ShbIpcAllocBuffer a shared memory is new created\n");
             //shared memory is new created
             uiFirstProcess=0;
             fShMemNewCreated=TRUE;
@@ -535,12 +535,12 @@ tShbMemKernelUser       *pShbMemKernelUser = malloc(sizeof(tShbMemKernelUser));
             if (pSharedMem==-1)
             {
                 //unable to set map
-                TRACE0("ShbIpcAllocBuffer mmap error\n");
+                TRACE("ShbIpcAllocBuffer mmap error\n");
                 perror("ShbIpcAllocBuffer mmap\n");
                 ShbError = kShbOutOfMem;
                 goto ExitKernelSpaceMem;
             }
-            TRACE1("ShbIpcAllocBuffer mmaped at: %p \n",pSharedMem);
+            TRACE("ShbIpcAllocBuffer mmaped at: %p \n",pSharedMem);
             //Append buffer element to list
             psNewMappedBuffersElement=malloc(sizeof(struct sMappedBuffers));
             psNewMappedBuffersElement->m_iBufferId=iBufferKey;
@@ -551,13 +551,13 @@ tShbMemKernelUser       *pShbMemKernelUser = malloc(sizeof(tShbMemKernelUser));
         if (pSharedMem==NULL)
         {
             //unable to create mem
-            TRACE0("ShbIpcAllocBuffer unable to create mem\n");
+            TRACE("ShbIpcAllocBuffer unable to create mem\n");
             ShbError = kShbOutOfMem;
             goto ExitKernelSpaceMem;
         }
         //update header
         pShbMemHeader = (tShbMemHeader*)pSharedMem;
-        TRACE2("ShbIpcAllocBuffer Mem Size: %d %d \n",pShbMemHeader->m_ulShMemSize, ulShMemSize);
+        TRACE("ShbIpcAllocBuffer Mem Size: %d %d \n",pShbMemHeader->m_ulShMemSize, ulShMemSize);
         // allocate a memory block from process specific mempool to save
         // process local information to administrate/manage the shared buffer
         pShbMemInst = (tShbMemInst*) ShbIpcAllocPrivateMem (sizeof(tShbMemInst),iBufferKey,&iBufferId_p);
@@ -614,7 +614,7 @@ tShbMemKernelUser       *pShbMemKernelUser = malloc(sizeof(tShbMemKernelUser));
         pShbMemInst->m_pSemNewData                              = pShbMemKernelUser->m_pSemNewData;
         pShbMemInst->m_pSemJobReady                             = pShbMemKernelUser->m_pSemJobReady;
         pShbMemInst->m_pSemStopSignalingNewData                 = pShbMemKernelUser->m_pSemStopSignalingNewData;
-        TRACE1("SEMBUFFACCESS %p\n",pShbMemInst->m_pSemBuffAccess);
+        TRACE("SEMBUFFACCESS %p\n",pShbMemInst->m_pSemBuffAccess);
         pShbMemInst->m_iUserSpaceMem=1;
         ShbError         = kShbOk;
 
@@ -627,7 +627,7 @@ tShbMemKernelUser       *pShbMemKernelUser = malloc(sizeof(tShbMemKernelUser));
             pShbMemHeader->m_ulShMemSize = ulShMemSize;
             pShbMemHeader->m_ulRefCount  = 1;
             pShbMemHeader->m_iBufferId=iBufferId_p;
-            TRACE2("ShbIpcAllocBuffer Mem Size New Created: %d %d \n",pShbMemHeader->m_ulShMemSize, ulShMemSize);
+            TRACE("ShbIpcAllocBuffer Mem Size New Created: %d %d \n",pShbMemHeader->m_ulShMemSize, ulShMemSize);
         }
         else
         {
@@ -635,7 +635,7 @@ tShbMemKernelUser       *pShbMemKernelUser = malloc(sizeof(tShbMemKernelUser));
             // process has only attached to it
             // -> check and update existing header information inside the
             //    shared memory region itself
-            TRACE2("ShbIpcAllocBuffer MEM %d %d \n",pShbMemHeader->m_ulShMemSize, ulShMemSize);
+            TRACE("ShbIpcAllocBuffer MEM %d %d \n",pShbMemHeader->m_ulShMemSize, ulShMemSize);
             if (pShbMemHeader->m_ulShMemSize < ulShMemSize)
             {
                 ShbError = kShbOpenMismatch;
@@ -648,7 +648,7 @@ tShbMemKernelUser       *pShbMemKernelUser = malloc(sizeof(tShbMemKernelUser));
         *pfShbNewCreated_p = fShMemNewCreated;
         *ppShbInstance_p   = pShbInstance;
         close(iFdMemDevice);
-        TRACE0("ShbIpcAllocBuffer exit\n");
+        TRACE("ShbIpcAllocBuffer exit\n");
         return (ShbError);
     }//end KernelSpaceMem
 }
@@ -671,7 +671,7 @@ tShbMemKernelUser   *pShbMemKernelUser;
 int                 iRetVal=-1;
 int                 iFdMemDevice;
 
-    TRACE0("ShbIpcReleaseBuffer \n");
+    TRACE("ShbIpcReleaseBuffer \n");
     if (pShbInstance_p == NULL)
     {
         return (kShbInvalidArg);
@@ -691,7 +691,7 @@ int                 iFdMemDevice;
 
     if(pShbMemHeader->m_ulRefCount==0)
     {
-        TRACE0("----->ShbIpcReleaseBuffer ShbIpcStopSignalingNewData\n");
+        TRACE("----->ShbIpcReleaseBuffer ShbIpcStopSignalingNewData\n");
         //ShbError2 = ShbIpcStopSignalingNewData (pShbInstance_p);
 
     }
@@ -707,7 +707,7 @@ int                 iFdMemDevice;
 
         if(pShbMemHeader->m_ulRefCount==0)
         {
-            TRACE0("ShbIpcReleaseBuffer destroy shared mem\n");
+            TRACE("ShbIpcReleaseBuffer destroy shared mem\n");
             //destroy Buffer
             shmctl(iBufferId,IPC_RMID,0);
             //delete semaphores
@@ -734,7 +734,7 @@ int                 iFdMemDevice;
         iFdMemDevice=open("/dev/ShbMemDev0", O_RDWR);
         if (iFdMemDevice<0)
         {
-            TRACE0("ShbIpcReleaseBuffer open error\n");
+            TRACE("ShbIpcReleaseBuffer open error\n");
             perror("ShbIpcReleaseBuffer\n");
             ShbError = kShbUnableOpenMemDevice;
             return ShbError;
@@ -814,7 +814,7 @@ struct sembuf       sSemBuf[1];
                 {
                     nanosleep(&sDelay,NULL);
                     iTimeOut++;
-                    TRACE0("---->nanosleep<----\n");
+                    TRACE("---->nanosleep<----\n");
                 }
             }
         }
@@ -822,17 +822,17 @@ struct sembuf       sSemBuf[1];
 
         if (iRetVal==0)
         {
-            TRACE0("ShbIpcEnterAtomicSection Enter Atomic ok\n");
+            TRACE("ShbIpcEnterAtomicSection Enter Atomic ok\n");
             ShbError = kShbOk;
         }
         else
         {
-            TRACE1("ShbIpcEnterAtomicSection Enter Atomic not ok %d\n",iRetVal);
+            TRACE("ShbIpcEnterAtomicSection Enter Atomic not ok %d\n",iRetVal);
             perror("perror: ");
             ShbError = kShbBufferInvalid;
         }
 
-        TRACE0("ShbIpcEnterAtomicSection Leave Atomic\n");
+        TRACE("ShbIpcEnterAtomicSection Leave Atomic\n");
         return (kShbOk);
     }
 //#######################################################################
@@ -842,12 +842,12 @@ struct sembuf       sSemBuf[1];
     {
         //KernelSpace Mem
         pShbMemKernelUser = malloc(sizeof(tShbMemKernelUser));
-        TRACE0("ShbIpcEnterAtomicSection: Enter Atomic Kernel\n");
+        TRACE("ShbIpcEnterAtomicSection: Enter Atomic Kernel\n");
         //open mem device
         iFdMemDevice=open(MEM_DEV_NAME, O_RDWR);
         if (iFdMemDevice<0)
         {
-            TRACE0("ShbIpcEnterAtomicSection open error\n");
+            TRACE("ShbIpcEnterAtomicSection open error\n");
             perror("ShbIpcEnterAtomicSectionr\n");
             ShbError = kShbUnableOpenMemDevice;
             return ShbError;
@@ -859,12 +859,12 @@ struct sembuf       sSemBuf[1];
 
         if (iRetVal==0)
         {
-            TRACE0("ShbIpcEnterAtomicSection Got Sem Kernel\n");
+            TRACE("ShbIpcEnterAtomicSection Got Sem Kernel\n");
             ShbError = kShbOk;
         }
         else
         {
-            TRACE0("ShbIpcEnterAtomicSection Enter Atomic not ok Kernel\n");
+            TRACE("ShbIpcEnterAtomicSection Enter Atomic not ok Kernel\n");
             ShbError = kShbBufferInvalid;
         }
         close(iFdMemDevice);
@@ -907,7 +907,7 @@ struct sembuf       sSemBuf[1];
         sSemBuf[0].sem_flg=SEM_UNDO;
         iSemBuffAccessId= pShbMemInst->m_iSemBuffAccessId;
         ShbError = kShbOk;
-        TRACE0("Leave Atomic User\n");
+        TRACE("Leave Atomic User\n");
         if (iSemBuffAccessId != -1)
         {
             semctl(iSemBuffAccessId,0,SETVAL,1);
@@ -926,12 +926,12 @@ struct sembuf       sSemBuf[1];
     {
         //KernelSpace Mem
         pShbMemKernelUser = malloc(sizeof(tShbMemKernelUser));
-        TRACE0("ShbIpcEnterAtomicSection: Leave Atomic Kernel\n");
+        TRACE("ShbIpcEnterAtomicSection: Leave Atomic Kernel\n");
         //open mem device
         iFdMemDevice=open(MEM_DEV_NAME, O_RDWR);
         if (iFdMemDevice<0)
         {
-            TRACE0("ShbIpcLeaveAtomicSection open error\n");
+            TRACE("ShbIpcLeaveAtomicSection open error\n");
             perror("ShbIpcLeaveAtomicSectionr\n");
             ShbError = kShbUnableOpenMemDevice;
             return ShbError;
@@ -942,12 +942,12 @@ struct sembuf       sSemBuf[1];
 
         if (iRetVal==0)
         {
-            TRACE0("ShbIpcLeaveAtomicSection Put Sem ok\n");
+            TRACE("ShbIpcLeaveAtomicSection Put Sem ok\n");
             ShbError = kShbOk;
         }
         else
         {
-            TRACE1("ShbIpcLeaveAtomicSection  not ok %d\n",iRetVal);
+            TRACE("ShbIpcLeaveAtomicSection  not ok %d\n",iRetVal);
             ShbError = kShbBufferInvalid;
         }
         close(iFdMemDevice);
@@ -1037,7 +1037,7 @@ tShbError           ShbError;
         sSemBufNewData[0].sem_flg=SEM_UNDO;
         sDelay.tv_sec=0;
         sDelay.tv_nsec=1000000;
-        TRACE0("------->ShbIpcStopSignalingNewData\n");
+        TRACE("------->ShbIpcStopSignalingNewData\n");
 
         pShbMemInst = ShbIpcGetShbMemInst (pShbInstance_p);
         iSemNewDataId=pShbMemInst->m_iSemNewDataId;
@@ -1057,18 +1057,18 @@ tShbError           ShbError;
                 {
                     nanosleep(&sDelay,NULL);
                     iTimeOut++;
-                    //TRACE0("---->nanosleep<----\n");
+                    //TRACE("---->nanosleep<----\n");
                 }
             }
         }
 
         if (iRetVal==0)
         {
-            TRACE0("Stop Sem recived\n");
+            TRACE("Stop Sem recived\n");
         }
         else
         {
-            TRACE1("Stop Sem TIMEOUT %d\n",iRetVal);
+            TRACE("Stop Sem TIMEOUT %d\n",iRetVal);
             perror("perror: ");
         }
     }
@@ -1080,17 +1080,17 @@ tShbError           ShbError;
         //KernelSpace Mem
         pShbMemKernelUser = malloc(sizeof(tShbMemKernelUser));
 
-        TRACE0("Stop signaling of new data Kernel\n");
+        TRACE("Stop signaling of new data Kernel\n");
         //open mem device
         iFdMemDevice=open("/dev/ShbMemDev0", O_RDWR);
         if (iFdMemDevice<0)
         {
-            TRACE0("Stop signaling of new data open error\n");
+            TRACE("Stop signaling of new data open error\n");
             perror("Stop signaling of new data\n");
             ShbError = kShbUnableOpenMemDevice;
             return ShbError;
         }
-        TRACE0("------->ShbIpcStopSignalingNewData Kernel\n");
+        TRACE("------->ShbIpcStopSignalingNewData Kernel\n");
         //set termination flag
         pShbMemInst->m_iThreadTermFlag =1;
         //set semaphore new data
@@ -1103,11 +1103,11 @@ tShbError           ShbError;
         iRetVal=ioctl(iFdMemDevice,IOCTL_GET_SEM_TIMEOUT,pShbMemKernelUser);
         if (iRetVal==0)
         {
-            TRACE0("Stop Sem recived\n");
+            TRACE("Stop Sem recived\n");
         }
         else
         {
-            TRACE1("Stop Sem TIMEOUT %d\n",iRetVal);
+            TRACE("Stop Sem TIMEOUT %d\n",iRetVal);
         }
         close(iFdMemDevice);
         free(pShbMemKernelUser);
@@ -1135,7 +1135,7 @@ struct sembuf       sSemBuf[1];
     sSemBuf[0].sem_num=0;
     sSemBuf[0].sem_op=1;
     sSemBuf[0].sem_flg=SEM_UNDO;
-    TRACE0("ShbIpcSignalNewData\n");
+    TRACE("ShbIpcSignalNewData\n");
     if (pShbInstance_p == NULL)
     {
             return (kShbInvalidArg);
@@ -1151,7 +1151,7 @@ struct sembuf       sSemBuf[1];
         if (iSemNewDataId!=-1)
         {
             //set semaphore
-            TRACE0("ShbIpcSignalNewData set Sem -> New Data 1 \n");
+            TRACE("ShbIpcSignalNewData set Sem -> New Data 1 \n");
             semctl(iSemNewDataId,0,SETVAL,1);
             //semop(iSemNewDataId,sSemBuf,1);
         }
@@ -1163,12 +1163,12 @@ struct sembuf       sSemBuf[1];
     {
         //KernelSpace Mem
         pShbMemKernelUser = malloc(sizeof(tShbMemKernelUser));
-        TRACE0("Signal new data Kernel\n");
+        TRACE("Signal new data Kernel\n");
         //open mem device
         iFdMemDevice=open("/dev/ShbMemDev0", O_RDWR);
         if (iFdMemDevice<0)
         {
-            TRACE0("Signal new data open error\n");
+            TRACE("Signal new data open error\n");
             perror("Signal new data data\n");
             ShbError = kShbUnableOpenMemDevice;
             return ShbError;
@@ -1241,7 +1241,7 @@ struct sembuf       sSemBuf[1];
     sSemBuf[0].sem_num=0;
     sSemBuf[0].sem_op=1;
     sSemBuf[0].sem_flg=SEM_UNDO;
-    TRACE0("ShbIpcSignalJobReady\n");
+    TRACE("ShbIpcSignalJobReady\n");
     if (pShbInstance_p == NULL)
     {
         return (kShbInvalidArg);
@@ -1258,7 +1258,7 @@ struct sembuf       sSemBuf[1];
         if (iSemJobReadyId!=-1)
         {
             //set semaphore
-            TRACE0("ShbIpcSignalJobReady set Sem -> Job Ready  \n");
+            TRACE("ShbIpcSignalJobReady set Sem -> Job Ready  \n");
             semctl(iSemJobReadyId,0,SETVAL,1);
             //semop(iSemJobReadyId,sSemBuf,1);
         }
@@ -1270,12 +1270,12 @@ struct sembuf       sSemBuf[1];
     {
         //KernelSpace Mem
         pShbMemKernelUser = malloc(sizeof(tShbMemKernelUser));
-        TRACE0("Signal new data Kernel\n");
+        TRACE("Signal new data Kernel\n");
         //open mem device
         iFdMemDevice=open(MEM_DEV_NAME, O_RDWR);
         if (iFdMemDevice<0)
         {
-            TRACE0("Signal new data open error\n");
+            TRACE("Signal new data open error\n");
             perror("Signal new data data\n");
             ShbError = kShbUnableOpenMemDevice;
             return ShbError;
@@ -1446,22 +1446,22 @@ struct sembuf       sSemBufStopSignaling[1];
 
         do
         {
-            TRACE0("ShbIpcThreadSignalNewData wait for New Data Sem: \n");
+            TRACE("ShbIpcThreadSignalNewData wait for New Data Sem: \n");
             semctl(iSemNewDataId,0,GETVAL,0);
             //wait for new data semaphore
             semop(iSemNewDataId,sSemBuf,1);
-            TRACE0("ShbIpcThreadSignalNewData New Data Sem\n");
+            TRACE("ShbIpcThreadSignalNewData New Data Sem\n");
             //check terminate flag
             if (pShbMemInst->m_iThreadTermFlag==0)
             {
                 //call Rx Handler
-                TRACE0("ShbIpcThreadSignalNewData call Rx Handler\n");
+                TRACE("ShbIpcThreadSignalNewData call Rx Handler\n");
                 pShbMemInst->m_pfnSigHndlrNewData(pShbInstance);
             }
             else
             {
                 //terminate thread
-                TRACE0("Terminate ShbIpcThreadSignalNewData\n");
+                TRACE("Terminate ShbIpcThreadSignalNewData\n");
 
             }
         }while(pShbMemInst->m_iThreadTermFlag==0);
@@ -1476,22 +1476,22 @@ struct sembuf       sSemBufStopSignaling[1];
     {
         //KernelSpace Mem
         pShbMemKernelUser = malloc(sizeof(tShbMemKernelUser));
-        TRACE0("Signal new data Kernel\n");
+        TRACE("Signal new data Kernel\n");
         //open mem device
         iFdMemDevice=open("/dev/ShbMemDev0", O_RDWR);
         if (iFdMemDevice<0)
         {
-            TRACE0("Signal new data open error\n");
+            TRACE("Signal new data open error\n");
             perror("Signal new data data\n");
         }
         do
         {
-            TRACE0("ShbIpcThreadSignalNewData wait for New Data Sem Kernel\n");
+            TRACE("ShbIpcThreadSignalNewData wait for New Data Sem Kernel\n");
             //wait for new data semaphore
             pShbMemKernelUser->m_pSemGeneric=pShbMemInst->m_pSemNewData;
             pShbMemKernelUser->m_ulTimeOut=TIMEOUT_ENTER_ATOMIC_KERNEL;
             iRetVal=ioctl(iFdMemDevice,IOCTL_GET_SEM_TIMEOUT,pShbMemKernelUser);
-            TRACE1("ShbIpcThreadSignalNewData Got New Data Sem Kernel iRetVal: %d\n",iRetVal);
+            TRACE("ShbIpcThreadSignalNewData Got New Data Sem Kernel iRetVal: %d\n",iRetVal);
             //check terminate flag
             if (pShbMemInst->m_iThreadTermFlag==0)
             {
@@ -1504,7 +1504,7 @@ struct sembuf       sSemBufStopSignaling[1];
             else
             {
                 //terminate thread
-                TRACE0("Terminate ShbIpcThreadSignalNewData Kernel\n");
+                TRACE("Terminate ShbIpcThreadSignalNewData Kernel\n");
             }
         }while(pShbMemInst->m_iThreadTermFlag==0);
         //set sem thread terminated
@@ -1550,7 +1550,7 @@ struct timespec     sDelay;
         sSemBuf[0].sem_num=0;
         sSemBuf[0].sem_op=-1;
         sSemBuf[0].sem_flg=IPC_NOWAIT;
-        TRACE0("ShbIpcThreadSignalJobReady wait for job ready Sem \n");
+        TRACE("ShbIpcThreadSignalJobReady wait for job ready Sem \n");
         if (pShbMemInst->m_ulTimeOutMsJobReady != 0)
         {
             ulTimeOut = pShbMemInst->m_ulTimeOutMsJobReady;
@@ -1570,7 +1570,7 @@ struct timespec     sDelay;
                 {
                     nanosleep(&sDelay,NULL);
                     iTimeOut++;
-                    //TRACE0("---->nanosleep<----\n");
+                    //TRACE("---->nanosleep<----\n");
                 }
             }
         }
@@ -1597,12 +1597,12 @@ struct timespec     sDelay;
     {
         //KernelSpace Mem
         pShbMemKernelUser = malloc(sizeof(tShbMemKernelUser));
-        TRACE0("Signal new data Kernel\n");
+        TRACE("Signal new data Kernel\n");
         //open mem device
         iFdMemDevice=open("/dev/ShbMemDev0", O_RDWR);
         if (iFdMemDevice<0)
         {
-            TRACE0("Signal new data open error\n");
+            TRACE("Signal new data open error\n");
             perror("Signal new data data\n");
         }
         //wait for job ready semaphore

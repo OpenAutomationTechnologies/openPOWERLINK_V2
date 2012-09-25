@@ -646,7 +646,7 @@ tEplNmtMnuNodeInfo* pNodeInfo;
     }
 #endif
 
-    EPL_DBGLVL_NMTMN_TRACE2("NMTCmd(%02X->%02X)\n", NmtCommand_p, uiNodeId_p);
+    EPL_DBGLVL_NMTMN_TRACE("NMTCmd(%02X->%02X)\n", NmtCommand_p, uiNodeId_p);
 
 #if EPL_NMTMNU_PRES_CHAINING_MN != FALSE
     if (pNodeInfo->m_dwNodeCfg & EPL_NODEASSIGN_PRES_CHAINING)
@@ -1247,7 +1247,7 @@ tEplKernel PUBLIC EplNmtMnuCbNmtStateChange(tEplEventNmtStateChange NmtStateChan
 
         default:
         {
-//            TRACE0("EplNmtMnuCbNmtStateChange(): unhandled NMT state\n");
+//            TRACE("EplNmtMnuCbNmtStateChange(): unhandled NMT state\n");
         }
     }
 
@@ -3094,7 +3094,7 @@ tEplTimerArg        TimerArg;
 
         case kEplNmtMnuIntNodeEventTimerIdentReq:
         {
-            EPL_DBGLVL_NMTMN_TRACE1("TimerStatReq->IdentReq(%02X)\n", uiNodeId_p);
+            EPL_DBGLVL_NMTMN_TRACE("TimerStatReq->IdentReq(%02X)\n", uiNodeId_p);
             // trigger IdentRequest again
             Ret = EplIdentuRequestIdentResponse(uiNodeId_p, EplNmtMnuCbIdentResponse);
             if (Ret != kEplSuccessful)
@@ -3124,7 +3124,7 @@ tEplTimerArg        TimerArg;
 
         case kEplNmtMnuIntNodeEventTimerStatReq:
         {
-            EPL_DBGLVL_NMTMN_TRACE1("TimerStatReq->StatReq(%02X)\n", uiNodeId_p);
+            EPL_DBGLVL_NMTMN_TRACE("TimerStatReq->StatReq(%02X)\n", uiNodeId_p);
             // request next StatusResponse
             Ret = EplStatusuRequestStatusResponse(uiNodeId_p, EplNmtMnuCbStatusResponse);
             if (Ret != kEplSuccessful)

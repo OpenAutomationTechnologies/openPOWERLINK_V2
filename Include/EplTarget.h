@@ -101,18 +101,11 @@
 //    #define EPL_MALLOC(siz)             malloc((size_t)(siz))
 //    #define EPL_FREE(ptr)               free((void *)ptr)
 
-    #ifndef PRINTF0
-        void trace (const char* fmt, ...);
-        #ifdef _CONSOLE // use standard printf in console applications
-            #define PRINTF                      printf
-        #else           // use trace for output in debug window in Windows applications
-            #define PRINTF                      TRACE
-        #endif
-        #define PRINTF0(arg)                PRINTF(arg)
-        #define PRINTF1(arg,p1)             PRINTF(arg,p1)
-        #define PRINTF2(arg,p1,p2)          PRINTF(arg,p1,p2)
-        #define PRINTF3(arg,p1,p2,p3)       PRINTF(arg,p1,p2,p3)
-        #define PRINTF4(arg,p1,p2,p3,p4)    PRINTF(arg,p1,p2,p3,p4)
+    void trace (const char* fmt, ...);
+    #ifdef _CONSOLE // use standard printf in console applications
+        #define PRINTF(...)                      printf(__VA_ARGS__)
+    #else           // use trace for output in debug window in Windows applications
+        #define PRINTF(...)                      TRACE(__VA_ARGS__)
     #endif
 
     #ifdef ASSERTMSG
@@ -125,21 +118,8 @@
 
 #elif (TARGET_SYSTEM == _WINCE_)
 
-    #ifndef PRINTF0
-        void trace (const char* fmt, ...);
-        #define PRINTF                      TRACE
-        #define PRINTF0(arg)                TRACE0(arg)
-        #define PRINTF1(arg,p1)             TRACE1(arg,p1)
-        #define PRINTF2(arg,p1,p2)          TRACE2(arg,p1,p2)
-        #define PRINTF3(arg,p1,p2,p3)       TRACE3(arg,p1,p2,p3)
-        #define PRINTF4(arg,p1,p2,p3,p4)    TRACE4(arg,p1,p2,p3,p4)
-        //#define PRINTF                      printf
-        //#define PRINTF0(arg)                PRINTF(arg)
-        //#define PRINTF1(arg,p1)             PRINTF(arg,p1)
-        //#define PRINTF2(arg,p1,p2)          PRINTF(arg,p1,p2)
-        //#define PRINTF3(arg,p1,p2,p3)       PRINTF(arg,p1,p2,p3)
-        //#define PRINTF4(arg,p1,p2,p3,p4)    PRINTF(arg,p1,p2,p3,p4)
-    #endif
+    void trace (const char* fmt, ...);
+    #define PRINTF(...)                 TRACE(__VA_ARGS__)
 
     #ifdef ASSERTMSG
         #undef ASSERTMSG
@@ -157,20 +137,11 @@
     #include <stdio.h>
     #include <string.h>
 
-    #ifndef PRINTF0
-        #define PRINTF                      printf
-        #define PRINTF0(arg)                PRINTF(arg)
-        #define PRINTF1(arg,p1)             PRINTF(arg,p1)
-        #define PRINTF2(arg,p1,p2)          PRINTF(arg,p1,p2)
-        #define PRINTF3(arg,p1,p2,p3)       PRINTF(arg,p1,p2,p3)
-        #define PRINTF4(arg,p1,p2,p3,p4)    PRINTF(arg,p1,p2,p3,p4)
-        //#define PRINTF                      TRACE
-        //#define PRINTF0(arg)                TRACE0(arg)
-        //#define PRINTF1(arg,p1)             TRACE1(arg,p1)
-        //#define PRINTF2(arg,p1,p2)          TRACE2(arg,p1,p2)
-        //#define PRINTF3(arg,p1,p2,p3)       TRACE3(arg,p1,p2,p3)
-        //#define PRINTF4(arg,p1,p2,p3,p4)    TRACE4(arg,p1,p2,p3,p4)
-    #endif
+    #ifndef NDEBUG
+        #define PRINTF(...)                 printf(__VA_ARGS__)
+    #else // !NDEBUG
+        #define PRINTF(...)
+    #endif // !NDEBUG
 
     #if EPL_USE_SHAREDBUFF != FALSE
         #define EplTgtGetTickCountMs        ShbTgtGetTickCountMs
@@ -203,17 +174,10 @@
         #define EPL_FREE(ptr)               kfree(ptr)
     #endif
 
-    #ifndef PRINTF0
-        #ifdef __KERNEL__
-            #define PRINTF                      printk
-        #else
-            #define PRINTF                      printf
-        #endif
-        #define PRINTF0(arg)                PRINTF(arg)
-        #define PRINTF1(arg,p1)             PRINTF(arg,p1)
-        #define PRINTF2(arg,p1,p2)          PRINTF(arg,p1,p2)
-        #define PRINTF3(arg,p1,p2,p3)       PRINTF(arg,p1,p2,p3)
-        #define PRINTF4(arg,p1,p2,p3,p4)    PRINTF(arg,p1,p2,p3,p4)
+    #ifdef __KERNEL__
+        #define PRINTF(...)                 printk(__VA_ARGS__)
+    #else
+        #define PRINTF(...)                 printf(__VA_ARGS__)
     #endif
 
 #elif (TARGET_SYSTEM == _VXWORKS_)
@@ -221,14 +185,7 @@
     #include <stdio.h>
     #include <string.h>
 
-    #ifndef PRINTF0
-        #define PRINTF                      printf
-        #define PRINTF0(arg)                PRINTF(arg)
-        #define PRINTF1(arg,p1)             PRINTF(arg,p1)
-        #define PRINTF2(arg,p1,p2)          PRINTF(arg,p1,p2)
-        #define PRINTF3(arg,p1,p2,p3)       PRINTF(arg,p1,p2,p3)
-        #define PRINTF4(arg,p1,p2,p3,p4)    PRINTF(arg,p1,p2,p3,p4)
-    #endif
+    #define PRINTF(...)                      printf(__VA_ARGS__)
 
 #endif
 

@@ -139,7 +139,7 @@ WORD         wDrvVer;
 int          iRet;
 
 
-    TRACE0("\nIOSTB: + cf54drv#CF54Initialize...\n");
+    TRACE("\nIOSTB: + cf54drv#CF54Initialize...\n");
 
 
     pszDrvName = SYSTEC_CF54DRV_NAME_DEV;
@@ -150,15 +150,15 @@ int          iRet;
 
 
     // open driver
-    TRACE1("IOSTB:   Try to open driver '%s'\n", pszDrvName);
+    TRACE("IOSTB:   Try to open driver '%s'\n", pszDrvName);
     hDrvInst_l = open (pszDrvName, O_RDWR);
     if (hDrvInst_l > -1)
     {
-        TRACE2("IOSTB:   open '%s' successful -> hDrvInst=%d\n", pszDrvName, hDrvInst_l);
+        TRACE("IOSTB:   open '%s' successful -> hDrvInst=%d\n", pszDrvName, hDrvInst_l);
     }
     else
     {
-        TRACE1("IOSTB:   ERROR: Can't open '%s'\n", pszDrvName);
+        TRACE("IOSTB:   ERROR: Can't open '%s'\n", pszDrvName);
         goto Exit;
     }
 
@@ -169,7 +169,7 @@ int          iRet;
 
 Exit:
 
-    TRACE2("IOSTB: - cf54drv#CF54Initialize (iRet=%d, wDrvVer=0x%04X)\n\n", iRet, wDrvVer);
+    TRACE("IOSTB: - cf54drv#CF54Initialize (iRet=%d, wDrvVer=0x%04X)\n\n", iRet, wDrvVer);
     return (wDrvVer);
 
 }
@@ -186,7 +186,7 @@ void  PUBLIC  CF54ShutDown (void)
 int  iRet;
 
 
-    TRACE0("\nIOSTB: + cf54drv#CF54ShutDown...\n");
+    TRACE("\nIOSTB: + cf54drv#CF54ShutDown...\n");
 
 
     // release hardware
@@ -200,7 +200,7 @@ int  iRet;
     }
 
 
-    TRACE1("IOSTB: - cf54drv#CF54ShutDown (iRet=%d)\n\n", iRet);
+    TRACE("IOSTB: - cf54drv#CF54ShutDown (iRet=%d)\n\n", iRet);
     return;
 
 }
@@ -218,11 +218,11 @@ void  PUBLIC  CF54GetHardwareInfo (
 int  iRet;
 
 
-    TRACE0("\nIOSTB: + cf54drv#CF54GetHardwareInfo...\n");
+    TRACE("\nIOSTB: + cf54drv#CF54GetHardwareInfo...\n");
 
     iRet = ioctl (hDrvInst_l, CF54DRV_CMD_GET_HARDWARE_INFO, pHwInfo_p);
 
-    TRACE1("IOSTB: - cf54drv#CF54GetHardwareInfo (iRet=%d)\n\n", iRet);
+    TRACE("IOSTB: - cf54drv#CF54GetHardwareInfo (iRet=%d)\n\n", iRet);
     return;
 
 }
@@ -240,11 +240,11 @@ void  PUBLIC  CF54SetRunLed (
 int  iRet;
 
 
-    TRACE0("\nIOSTB: + cf54drv#CF54SetRunLed...\n");
+    TRACE("\nIOSTB: + cf54drv#CF54SetRunLed...\n");
 
     iRet = ioctl (hDrvInst_l, CF54DRV_CMD_SET_RUN_LED, bState_p);
 
-    TRACE1("IOSTB: - cf54drv#CF54SetRunLed (iRet=%d)\n\n", iRet);
+    TRACE("IOSTB: - cf54drv#CF54SetRunLed (iRet=%d)\n\n", iRet);
     return;
 
 }
@@ -262,11 +262,11 @@ void  PUBLIC  CF54SetErrLed (
 int  iRet;
 
 
-    TRACE0("\nIOSTB: + cf54drv#CF54SetErrLed...\n");
+    TRACE("\nIOSTB: + cf54drv#CF54SetErrLed...\n");
 
     iRet = ioctl (hDrvInst_l, CF54DRV_CMD_SET_ERR_LED, bState_p);
 
-    TRACE1("IOSTB: - cf54drv#CF54SetErrLed (iRet=%d)\n\n", iRet);
+    TRACE("IOSTB: - cf54drv#CF54SetErrLed (iRet=%d)\n\n", iRet);
     return;
 
 }
@@ -284,11 +284,11 @@ BYTE  bRSMSwitch;
 int   iRet;
 
 
-    TRACE0("\nIOSTB: + cf54drv#CF54GetRSMSwitch...\n");
+    TRACE("\nIOSTB: + cf54drv#CF54GetRSMSwitch...\n");
 
     iRet = ioctl (hDrvInst_l, CF54DRV_CMD_GET_RSM_SWITCH, &bRSMSwitch);
 
-    TRACE2("IOSTB: - cf54drv#CF54GetRSMSwitch (iRet=%d, bRSMSwitch=0x%02X)\n\n", iRet, (WORD)bRSMSwitch);
+    TRACE("IOSTB: - cf54drv#CF54GetRSMSwitch (iRet=%d, bRSMSwitch=0x%02X)\n\n", iRet, (WORD)bRSMSwitch);
     return (bRSMSwitch);
 
 }
@@ -306,11 +306,11 @@ BYTE  bHexSwitch;
 int   iRet;
 
 
-    TRACE0("\nIOSTB: + cf54drv#CF54GetHexSwitch...\n");
+    TRACE("\nIOSTB: + cf54drv#CF54GetHexSwitch...\n");
 
     iRet = ioctl (hDrvInst_l, CF54DRV_CMD_GET_HEX_SWITCH, &bHexSwitch);
 
-    TRACE2("IOSTB: - cf54drv#CF54GetHexSwitch (iRet=%d, bHexSwitch=0x%02X)\n\n", iRet, (WORD)bHexSwitch);
+    TRACE("IOSTB: - cf54drv#CF54GetHexSwitch (iRet=%d, bHexSwitch=0x%02X)\n\n", iRet, (WORD)bHexSwitch);
     return (bHexSwitch);
 
 }
@@ -328,11 +328,11 @@ BYTE  bDipSwitch;
 int   iRet;
 
 
-    TRACE0("\nIOSTB: + cf54drv#CF54GetDipSwitch...\n");
+    TRACE("\nIOSTB: + cf54drv#CF54GetDipSwitch...\n");
 
     iRet = ioctl (hDrvInst_l, CF54DRV_CMD_GET_DIP_SWITCH, &bDipSwitch);
 
-    TRACE2("IOSTB: - cf54drv#CF54GetDipSwitch (iRet=%d, bDipSwitch=0x%02X)\n\n", iRet, (WORD)bDipSwitch);
+    TRACE("IOSTB: - cf54drv#CF54GetDipSwitch (iRet=%d, bDipSwitch=0x%02X)\n\n", iRet, (WORD)bDipSwitch);
     return (bDipSwitch);
 
 }
@@ -350,11 +350,11 @@ void  PUBLIC  CF54GetDigiIn (
 int  iRet;
 
 
-    TRACE0("\nIOSTB: + cf54drv#CF54GetDigiIn...\n");
+    TRACE("\nIOSTB: + cf54drv#CF54GetDigiIn...\n");
 
     iRet = ioctl (hDrvInst_l, CF54DRV_CMD_GET_DIGI_IN, pDiData_p);
 
-    TRACE1("IOSTB: - cf54drv#CF54GetDigiIn (iRet=%d)\n\n", iRet);
+    TRACE("IOSTB: - cf54drv#CF54GetDigiIn (iRet=%d)\n\n", iRet);
     return;
 
 }
@@ -372,11 +372,11 @@ void  PUBLIC  CF54SetDigiOut (
 int  iRet;
 
 
-    TRACE0("\nIOSTB: + cf54drv#CF54SetDigiOut...\n");
+    TRACE("\nIOSTB: + cf54drv#CF54SetDigiOut...\n");
 
     iRet = ioctl (hDrvInst_l, CF54DRV_CMD_SET_DIGI_OUT, pDoData_p);
 
-    TRACE1("IOSTB: - cf54drv#CF54SetDigiOut (iRet=%d)\n\n", iRet);
+    TRACE("IOSTB: - cf54drv#CF54SetDigiOut (iRet=%d)\n\n", iRet);
     return;
 
 }
