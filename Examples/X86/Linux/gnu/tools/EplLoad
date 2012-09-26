@@ -285,7 +285,7 @@ fi
 
 # For Ethernet ISR thread, priority -81 is set (for kernel stack module by udev rule!)
 if [ "$isndemo" -eq "0" ] ; then
-    if [ "KERNEL_MAIN" = "2" ] ; then
+    if [ "$KERNEL_MAIN" = "2" ] ; then
         chrt -f -p 80 `ps -C \`ps -e -o comm |grep ^irq/.*epl*\$\` -o pid --no-headers`
     else
         chrt -f -p 97 `ps -C \`ps -e -o comm |grep ^irq/.*epl*\$\` -o pid --no-headers`
