@@ -58,6 +58,7 @@
 // Includes                                                                //
 //=========================================================================//
 #include "Epl.h"
+#include "global.h"
 #include "EplNmt.h"
 #include <stdlib.h>
 
@@ -547,7 +548,7 @@ static int  EplDebugCompareEmergErrCode( const void *pvKey, const void *pvArray 
 //
 // Returns:     event string
 //---------------------------------------------------------------------------
-char *EplGetNmtEventStr(tEplNmtEvent nmtEvent_p)
+char * PUBLIC EplGetNmtEventStr(tEplNmtEvent nmtEvent_p)
 {
     if (nmtEvent_p >= tabentries(eplEvtStr_g))
     {
@@ -569,7 +570,7 @@ char *EplGetNmtEventStr(tEplNmtEvent nmtEvent_p)
 //
 // Returns:     event source string
 //---------------------------------------------------------------------------
-char *EplGetEventSourceStr(tEplEventSource eventSrc_p)
+char * PUBLIC EplGetEventSourceStr(tEplEventSource eventSrc_p)
 {
     if (eventSrc_p >= tabentries(eplEvtSrcStr_g))
     {
@@ -591,7 +592,7 @@ char *EplGetEventSourceStr(tEplEventSource eventSrc_p)
 //
 // Returns:     event sink string
 //---------------------------------------------------------------------------
-char *EplGetEventSinkStr(tEplEventSink eventSink_p)
+char * PUBLIC EplGetEventSinkStr(tEplEventSink eventSink_p)
 {
     if (eventSink_p >= tabentries(eplEvtSinkStr_g))
     {
@@ -613,7 +614,7 @@ char *EplGetEventSinkStr(tEplEventSink eventSink_p)
 //
 // Returns:     event type string
 //---------------------------------------------------------------------------
-char *EplGetEventTypeStr(tEplEventType eventType_p)
+char * PUBLIC EplGetEventTypeStr(tEplEventType eventType_p)
 {
     if (eventType_p >= tabentries(eplEvtTypeStr_g))
     {
@@ -635,7 +636,7 @@ char *EplGetEventTypeStr(tEplEventType eventType_p)
 //
 // Returns:     NMT state string
 //---------------------------------------------------------------------------
-char *EplGetNmtStateStr(tEplNmtState nmtState_p)
+char * PUBLIC EplGetNmtStateStr(tEplNmtState nmtState_p)
 {
     unsigned int         i;
 
@@ -662,7 +663,7 @@ char *EplGetNmtStateStr(tEplNmtState nmtState_p)
 //              eplInvalidStr_g if not found
 //
 //---------------------------------------------------------------------------
-char *EplGetApiEventStr( tEplApiEventType ApiEvent_p)
+char * PUBLIC EplGetApiEventStr( tEplApiEventType ApiEvent_p)
 {
     tApiEventInfo   *pApiEventInfo;
     tApiEventInfo   Key;
@@ -697,7 +698,7 @@ char *EplGetApiEventStr( tEplApiEventType ApiEvent_p)
 //              eplInvalidStr_g if not found
 //
 //---------------------------------------------------------------------------
-char *EplGetNmtNodeEventTypeStr( tEplNmtNodeEvent NodeEventType_p )
+char * PUBLIC EplGetNmtNodeEventTypeStr( tEplNmtNodeEvent NodeEventType_p )
 {
     if( NodeEventType_p >= tabentries(EplNmtNodeEvtTypeStr_g) )
     {
@@ -721,7 +722,7 @@ char *EplGetNmtNodeEventTypeStr( tEplNmtNodeEvent NodeEventType_p )
 //              eplInvalidStr_g if not found
 //
 //---------------------------------------------------------------------------
-char *EplGetNmtBootEventTypeStr( tEplNmtBootEvent BootEventType_p )
+char * PUBLIC EplGetNmtBootEventTypeStr( tEplNmtBootEvent BootEventType_p )
 {
     if( BootEventType_p >= tabentries(EplNmtBootEvtTypeStr_g) )
     {
@@ -745,7 +746,7 @@ char *EplGetNmtBootEventTypeStr( tEplNmtBootEvent BootEventType_p )
 //              eplInvalidStr_g if not found
 //
 //---------------------------------------------------------------------------
-char *EplGetSdoComConStateStr( tEplSdoComConState SdoComConState_p )
+char * PUBLIC EplGetSdoComConStateStr( tEplSdoComConState SdoComConState_p )
 {
     if( SdoComConState_p >= tabentries(EplSdoComConStateStr_g) )
     {
@@ -769,7 +770,7 @@ char *EplGetSdoComConStateStr( tEplSdoComConState SdoComConState_p )
 //              Pointer to a default string if the parameter could not be found
 //
 //---------------------------------------------------------------------------
-char *EplGetEplKernelStr( tEplKernel EplKernel_p )
+char * PUBLIC EplGetEplKernelStr( tEplKernel EplKernel_p )
 {
     tEplDebugEplKernelInfo   *pEntry;
     tEplDebugEplKernelInfo   Key;
@@ -806,7 +807,7 @@ char *EplGetEplKernelStr( tEplKernel EplKernel_p )
 //              Pointer to a default string if the parameter could not be found
 //
 //---------------------------------------------------------------------------
-const char *EplGetEmergErrCodeStr( WORD EmergErrCode_p )
+const char * PUBLIC EplGetEmergErrCodeStr( WORD EmergErrCode_p )
 {
     tEplEmergErrCodeInfo   *pEntry;
     tEplEmergErrCodeInfo   Key;
