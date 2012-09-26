@@ -835,7 +835,10 @@ tEplKernel PUBLIC AppCbEvent
 
                 case kEplNmtNodeEventError:
                 {
-                    printlog("%s(Node=0x%X, Error=0x%X)\n", __func__, pEventArg_p->m_Node.m_uiNodeId, pEventArg_p->m_Node.m_wErrorCode);
+                    printlog("%s (Node=0x%X): Error = %s (0x%.4X)\n", __func__,
+                            pEventArg_p->m_Node.m_uiNodeId,
+                            EplGetEmergErrCodeStr(pEventArg_p->m_Node.m_wErrorCode),
+                            pEventArg_p->m_Node.m_wErrorCode);
 
                     break;
                 }

@@ -417,8 +417,9 @@ tEplKernel PUBLIC AppCbEvent(tEplApiEventType EventType_p,
                 case kEplNmtNodeEventError:
                 {
                     pEplProcessThread_g->sigNodeStatus(pEventArg_p->m_Node.m_uiNodeId, -1);
-                    printf("AppCbEvent(Node 0x%X): ErrorCode: 0x%04hX\n",
+                    printf("AppCbEvent (Node=0x%X): Error = %s (0x%.4X)\n",
                             pEventArg_p->m_Node.m_uiNodeId,
+                            EplGetEmergErrCodeStr(pEventArg_p->m_Node.m_wErrorCode),
                             pEventArg_p->m_Node.m_wErrorCode);
                     break;
                 }
