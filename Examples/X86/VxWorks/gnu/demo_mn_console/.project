@@ -205,6 +205,11 @@
 			<location>OPENPOWERLINK_DIR/EplStack/amix86.c</location>
 		</link>
 		<link>
+			<name>EplDebug.c</name>
+			<type>1</type>
+			<location>OPENPOWERLINK_DIR/EplStack/EplDebug.c</location>
+		</link>
+		<link>
 			<name>hpetTimer.c</name>
 			<type>1</type>
 			<location>OPENPOWERLINK_DIR/Target/generic/VxWorks/hrtimer/hpetTimer.c</location>
