@@ -366,6 +366,8 @@ typedef union
 #define EPL_DBGLVL_TIMERH_TRACE        DEBUG_LVL_10_TRACE
 
 //...
+#define EPL_DBGLVL_PDO                  DEBUG_LVL_24        // 0x00800000
+#define EPL_DBGLVL_PDO_TRACE           DEBUG_LVL_24_TRACE
 
 #define EPL_DBGLVL_SDO                  DEBUG_LVL_25        // 0x01000000
 #define EPL_DBGLVL_SDO_TRACE           DEBUG_LVL_25_TRACE
