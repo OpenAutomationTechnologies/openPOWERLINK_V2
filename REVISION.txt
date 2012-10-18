@@ -858,3 +858,98 @@ Fellow worker:    Daniel Krüger (d.k.)
                                 with the new POWERLINK IP-core
                     (Daniel Krueger)
 
+2012-03-21 V1.8.2   - [TASK] Set PRes RD Flag to 1 even if payload is 0
+                    (Michael Hogger)
+
+2012-04-26 V1.8.2   - [FIX] Invalid state change of CN after "NMT_StopNode" command.
+                    (Michael Hogger)
+
+2012-07-03 V1.8.2   - Linux EplLoad script: fix error message
+                    (Daniel Krueger)
+
+2012-07-11 V1.8.2   - [Feature] Transmit SoC relative time by MN.
+                    (Wolfgang Wallner)
+
+2012-07-11 V1.8.2   - [FIX] Fix Linux x86 documentation
+                    (Josef Baumgartner)
+
+2012-08-07 V1.8.2   - [FIX] X86 QT demo application: Ethernet device name has to be stored
+                      in global variable.
+                    (Josef Baumgartner)
+
+2012-08-08 V1.8.2   - [FIX] Fix typos.
+                    - [TASK] Apply Allman-style.
+                    - [TASK] Improve simple formating issues.
+                    (Wolfgang Wallner)
+
+2012-08-07 V1.8.2   - [FEATURE] Add absolute time field to TX buffer for openMAC
+                      (delete duplicate edrv.h from openMAC driver directory).
+                    (Joerg Zelenka)
+
+2012-08-08 V1.8.2   - [TASK] Create documentation for Altera and Xilinx, change global readme.txt
+                    - [FIX] Add Xilinx support into Benchmark.h
+                    - [FIX] Enhance xilinx usleep to be more accurate
+                    - [FIX] Update EdrvOpenmac
+                    - [FEATURE] Update Altera POWERLINK IP-Core to version 0.2.5
+                      and move it to common directory for all demo project.
+                      Refer to this directory via .ipx files.
+                      Update and rebuild corresponding demo projects.
+                    - [FEATURE] Update Xilinx POWERLINK IP-Core and move it to common directory
+                      for all demo project. Update corresponding demo projects.
+                    (Thomas Mair)
+
+2012-08-09 V1.8.2   - [TASK] Improve EplDebug to provide a function for values of type tEplKernel.
+                    - [TASK] Use new EplDebug functions in CN and MN demo applications.
+                    - [TASK] Add a function to the EplDebug module for emergency error code
+                    - [FIX] Add PUBLIC macro to EplDebug functions
+                    - [TASK] Use EplDebug function for emergency error codes in MN demos
+                    (Wolfgang Wallner)
+
+2012-08-23 V1.8.2   - [FIX] Incorrect multiplexed (MS) flag in PRes
+                    (Josef Baumgartner)
+
+2012-08-29 V1.8.2   - [FIX] Dllk: Avoid zero sized array for CNs
+                      (Fix compile errors when EPL_NMT_MAX_NODE_ID is 0)
+                    - [FEATURE] Add X86 CN demo application
+                    - [TASK] Add support for Linux 3.x kernel
+                    (Josef Baumgartner)
+
+2012-09-10 V1.8.2   - [FIX] fix CMakeLists.txt for QT MN app
+                    (Josef Baumgartner)
+
+2012-09-17 V1.8.2   - [FIX] Prevent compile warning in EplObd.c
+                    (Thomas Mair)
+
+2012-09-19 V1.8.2   - [FIX] Update CN OD default values to fit to openCONFORMANCE test
+                    (Thomas Mair)
+
+2012-09-24 V1.8.2   - [FIX] Obd/SdoSequ: Implement object 0x1300 (SDO Sequence layer timeout)
+                    (Wolfgang Wallner)
+
+2012-09-24 V1.8.2   - [FIX] Replace "printf" with appropriate makros to prevent SDO delay issues
+                    - [TASK] Remove reference to unused target system in EplObdCdc.c
+                    - [TASK] Remove comment which shows Visual C warning in EplObdCdc.c
+                    - [TASK] Remove unused architectures from global.h
+                    - [TASK] Cleanup global.h
+                    - [FIX] Fix Xilinx DEV_SYSTEM definitions
+                    - [TASK] Add additional files to .gitignore
+                    - [TASK] Remove Linux demo_qt application
+                    - [TASK] Rename generic demo_process_image_console to demo_mn_console
+                    - [TASK] Rename demo_process_image_qt to demo_mn_qt
+                    - [TASK] Rename VxWorks demo_process_image_console to demo_mn_console
+                    - [TASK] Simplify configuration options in CMake
+                    - [TASK] Add some cleanups in demo_mn_console and demo_kernel
+                    (Josef Baumgartner)
+
+2012-09-24 V1.8.2   - [FEATURE] Add generic Asnd API
+                    (Wolfgang Wallner)
+
+2012-09-25 V1.8.2   - [TASK] use variadic macros for PRINTF/TRACE macros
+                    (Josef Baumgartner)
+
+2012-09-26 V1.8.2   - [FIX] Add mapping objects for 40 CNs to the CiA302-4_MN OD and XDD
+                    (Wolfgang Seiss)
+
+2012-10-15 V1.8.2   - [FIX] Remove PRes frame size check for node running as CN
+                    (Michael Hogger)
+
