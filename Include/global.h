@@ -253,7 +253,7 @@
             #define TRACE(...)
     #endif
 
-    #define UNUSED_PARAMETER(par)
+    #define UNUSED_PARAMETER(par)   (void)par
 
 // ------------------ GNUC for VxWorks ---------------------------------------
 #elif (TARGET_SYSTEM == _VXWORKS_)
@@ -294,7 +294,7 @@
         #define TRACE(...)
     #endif
 
-    #define UNUSED_PARAMETER(par)
+    #define UNUSED_PARAMETER(par)   (void)par
 
 // ------------------ GNU without OS ---------------------------------------
 #elif (TARGET_SYSTEM == _NO_OS_)
@@ -335,7 +335,7 @@
         #define TRACE(...)
     #endif
 
-    #define UNUSED_PARAMETER(par)
+    #define UNUSED_PARAMETER(par)   (void)par
 
     #if (DEV_SYSTEM == _DEV_NIOS2_)
         #if !defined(__OPTIMIZE__)
@@ -399,7 +399,7 @@
         #define TRACE(...)
     #endif
 
-    #define UNUSED_PARAMETER(par) par
+    #define UNUSED_PARAMETER(par) (void)par
 
     // MS Visual C++ compiler supports function inlining
     #define INLINE_FUNCTION_DEF __forceinline
@@ -467,7 +467,7 @@
         #define TRACE(...)
     #endif
 
-    #define UNUSED_PARAMETER(par)
+    #define UNUSED_PARAMETER(par)   (void)par
 
     #define __func__ __FUNCTION__
 
