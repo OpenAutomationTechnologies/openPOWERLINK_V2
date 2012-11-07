@@ -86,17 +86,17 @@ How to build the binaries
    Path' to the POWERLINK IP-Core (ipcore) directory.
 
    Edit -> Preferences -> Application -> Global Peripheral Repository Search
-   Path (e.g: $STACK_ROOT/Examples/xilinx_microblaze/ipcore)
+   Path (e.g: $STACK_ROOT/fpga/xilinx/ipcore)
 
 2. Open 'ISE Design Suite [64,32] Bit Command Prompt' depending on your
    platform.
 
 3. Go to this subdirectory of openPOWERLINK:
 
-    $ cd Examples/xilinx_microblaze/no_os/gnu/demo_cn_digitalio
+    $ cd Examples/arch/xilinx_microblaze/no_os/gnu/demo_cn_digitalio
 
 4. Edit the following parameters in file makefile.settings:
-   XPS_DIR=../../../[avnet_lx150t,avnet_lx9]/design_microblaze_directIO-[plb,axi]
+   XPS_DIR=$STACK_ROOT/fpga/xilinx/boards/[avnet_lx150t,avnet_lx9]/design_microblaze_directIO-[plb,axi]
    BOARD_NAME=[lx150t,lx9]
    BUS_INTERFACE=[plb,axi]
 
@@ -145,7 +145,7 @@ How to import the project into the SDK for debugging purposes
    Import -> C/C++ -> Existing Code As Makefile Project
 
    Project Name: demo_directIO
-   Code Location: $STACK_ROOT/Examples/xilinx_microblaze/no_os/gnu/demo_cn_digitalio
+   Code Location: $STACK_ROOT/Examples/arch/xilinx_microblaze/no_os/gnu/demo_cn_digitalio
    Language: C
    Compiler: Xilinx Microblaze GNU Toolchain
 
@@ -153,12 +153,12 @@ How to import the project into the SDK for debugging purposes
    File -> New -> Xilinx Hardware Platform Specification
 
    Set the 'Target Hardware Specification' to
-   $STACK_ROOT/Examples/xilinx_microblaze/avnet_lx[150t,lx9]/design_microblaze_directIO-[plb,axi]/SDK/SDK_Export/hw
+   $STACK_ROOT/fpga/xilinx/boards/avnet_lx[150t,lx9]/design_microblaze_directIO-[plb,axi]/SDK/SDK_Export/hw
 
 4. Set the Repository Search Path with:
 
    Xilinx Tools -> Repositories -> Local Repositories
-   (e.g: $STACK_ROOT/Examples/xilinx_microblaze/ipcore)
+   (e.g: $STACK_ROOT/fpga/xilinx/ipcore)
 
 5. Create a new Board Support Package with:
    File -> New -> Xilinx Board Support Package

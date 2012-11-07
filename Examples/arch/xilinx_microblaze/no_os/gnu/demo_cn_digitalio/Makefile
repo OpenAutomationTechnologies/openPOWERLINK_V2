@@ -14,12 +14,12 @@ VERSION = 0.3
 
 include makefile.settings
 
-APP_DIR=${STACK_ROOT}/Examples/xilinx_microblaze/no_os/gnu/demo_cn_digitalio
+APP_DIR=${STACK_ROOT}/Examples/arch/xilinx_microblaze/no_os/gnu/demo_cn_digitalio
 OBJDICT_DIR=${STACK_ROOT}/ObjDicts/CiA401_CN
 EDRV_DIR=${STACK_ROOT}/Edrv/openmac
 TARGET_DIR=${STACK_ROOT}/Target/xilinx_microblaze/no_os/gnu/generic
 
-IP_CORE_REPO=${STACK_ROOT}/Examples/xilinx_microblaze/ipcore
+IP_CORE_REPO=${STACK_ROOT}/fpga/xilinx/ipcore
 
 HW_SPEC=$(XPS_DIR)/SDK/SDK_Export/hw
 BSP_PATH=$(APP_DIR)
