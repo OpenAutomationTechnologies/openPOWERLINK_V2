@@ -12,14 +12,14 @@
 
 ##################################
 #Path to the openPOWERLINK root directory
-STACK_ROOT=../../../../..
+STACK_ROOT=../../../../../..
 
 ##################################
 #Path to the XPS project
-#XPS_DIR=../../../avnet_lx150t/design_microblaze_directIO-plb
-XPS_DIR=../../../avnet_lx150t/design_microblaze_directIO-axi
-#XPS_DIR=../../../avnet_lx9/design_microblaze_directIO-plb
-#XPS_DIR=../../../avnet_lx9/design_microblaze_directIO-axi
+#XPS_DIR=${STACK_ROOT}/fpga/xilinx/boards/avnet_lx150t/design_microblaze_directIO-plb
+XPS_DIR=${STACK_ROOT}/fpga/xilinx/boards/avnet_lx150t/design_microblaze_directIO-axi
+#XPS_DIR=${STACK_ROOT}/fpga/xilinx/boards/avnet_lx9/design_microblaze_directIO-plb
+#XPS_DIR=${STACK_ROOT}/fpga/xilinx/boards/avnet_lx9/design_microblaze_directIO-axi
 
 ##################################
 # Board name: [lx150t, lx9]
