@@ -61,8 +61,7 @@ INCLUDES="${MAINDIR}/Include \
 ${MAINDIR}/Edrv/openmac/include \
 $(pwd) \
 ${MAINDIR}/SharedBuff \
-${MAINDIR}/ObjDicts/CiA401_CN \
-${MAINDIR}/Target/altera_nios2/no_os/gnu/generic"
+${MAINDIR}/ObjDicts/CiA401_CN"
 
 # set DBG_MODE according to user args
 if [ -z "$DEBUG" ]; then

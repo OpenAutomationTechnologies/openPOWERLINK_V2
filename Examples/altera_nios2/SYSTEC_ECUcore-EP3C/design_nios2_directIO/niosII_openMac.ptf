@@ -1884,7 +1884,7 @@ SYSTEM niosII_openMac
                }
             }
          }
-         contents_info = "";
+         contents_info = "QUARTUS_PROJECT_DIR/onchip_memory_0.hex 1352708579 ";
       }
       SIMULATION 
       {
@@ -3976,7 +3976,7 @@ SYSTEM niosII_openMac
             PORT m_address
             {
                type = "address";
-               width = "30";
+               width = "32";
                direction = "output";
                Is_Enabled = "1";
             }
@@ -4012,7 +4012,7 @@ SYSTEM niosII_openMac
             Do_Stream_Writes = "0";
             Max_Address_Width = "32";
             Data_Width = "16";
-            Address_Width = "30";
+            Address_Width = "32";
             Maximum_Burst_Size = "4";
             Register_Incoming_Signals = "0";
             Register_Outgoing_Signals = "0";
@@ -4265,7 +4265,7 @@ SYSTEM niosII_openMac
       class = "no_legacy_module";
       class_version = "7.08101";
       gtf_class_name = "powerlink";
-      gtf_class_version = "0.2.5";
+      gtf_class_version = "0.2.7";
       SYSTEM_BUILDER_INFO 
       {
          Do_Not_Generate = "1";
@@ -4283,7 +4283,7 @@ SYSTEM niosII_openMac
       }
       HDL_INFO 
       {
-         Simulation_HDL_Files = "C:/mairt/workspace/openPOWERLINK_mairt/Examples/altera_nios2/ipcore/powerlink/src/powerlink.vhd,C:/mairt/workspace/openPOWERLINK_mairt/Examples/altera_nios2/ipcore/powerlink/src/pdi.vhd,C:/mairt/workspace/openPOWERLINK_mairt/Examples/altera_nios2/ipcore/powerlink/src/pdi_par.vhd,C:/mairt/workspace/openPOWERLINK_mairt/Examples/altera_nios2/ipcore/powerlink/src/pdi_dpr_Altera.vhd,C:/mairt/workspace/openPOWERLINK_mairt/Examples/altera_nios2/ipcore/powerlink/src/pdi_tripleVBufLogic.vhd,C:/mairt/workspace/openPOWERLINK_mairt/Examples/altera_nios2/ipcore/powerlink/src/pdi_apIrqGen.vhd,C:/mairt/workspace/openPOWERLINK_mairt/Examples/altera_nios2/ipcore/powerlink/src/pdi_controlStatusReg.vhd,C:/mairt/workspace/openPOWERLINK_mairt/Examples/altera_nios2/ipcore/powerlink/src/pdi_event.vhd,C:/mairt/workspace/openPOWERLINK_mairt/Examples/altera_nios2/ipcore/powerlink/src/pdi_led.vhd,C:/mairt/workspace/openPOWERLINK_mairt/Examples/altera_nios2/ipcore/powerlink/src/pdi_simpleReg.vhd,C:/mairt/workspace/openPOWERLINK_mairt/Examples/altera_nios2/ipcore/powerlink/src/openFILTER.vhd,C:/mairt/workspace/openPOWERLINK_mairt/Examples/altera_nios2/ipcore/powerlink/src/openHUB.vhd,C:/mairt/workspace/openPOWERLINK_mairt/Examples/altera_nios2/ipcore/powerlink/src/openMAC.vhd,C:/mairt/workspace/openPOWERLINK_mairt/Examples/altera_nios2/ipcore/powerlink/src/openMAC_Ethernet.vhd,C:/mairt/workspace/openPOWERLINK_mairt/Examples/altera_nios2/ipcore/powerlink/src/openMAC_cmp.vhd,C:/mairt/workspace/openPOWERLINK_mairt/Examples/altera_nios2/ipcore/powerlink/src/openMAC_phyAct.vhd,C:/mairt/workspace/openPOWERLINK_mairt/Examples/altera_nios2/ipcore/powerlink/src/openMAC_DPR_Altera.vhd,C:/mairt/workspace/openPOWERLINK_mairt/Examples/altera_nios2/ipcore/powerlink/src/openMAC_DMAFifo_Altera.vhd,C:/mairt/workspace/openPOWERLINK_mairt/Examples/altera_nios2/ipcore/powerlink/src/openMAC_DMAmaster.vhd,C:/mairt/workspace/openPOWERLINK_mairt/Examples/altera_nios2/ipcore/powerlink/src/openMAC_DMAmaster/dma_handler.vhd,C:/mairt/workspace/openPOWERLINK_mairt/Examples/altera_nios2/ipcore/powerlink/src/openMAC_DMAmaster/master_handler.vhd,C:/mairt/workspace/openPOWERLINK_mairt/Examples/altera_nios2/ipcore/powerlink/src/openMAC_PHYMI.vhd,C:/mairt/workspace/openPOWERLINK_mairt/Examples/altera_nios2/ipcore/powerlink/src/openMAC_rmii2mii.vhd,C:/mairt/workspace/openPOWERLINK_mairt/Examples/altera_nios2/ipcore/powerlink/src/portio.vhd,C:/mairt/workspace/openPOWERLINK_mairt/Examples/altera_nios2/ipcore/powerlink/src/portio_cnt.vhd,C:/mairt/workspace/openPOWERLINK_mairt/Examples/altera_nios2/ipcore/powerlink/src/spi.vhd,C:/mairt/workspace/openPOWERLINK_mairt/Examples/altera_nios2/ipcore/powerlink/src/spi_sreg.vhd,C:/mairt/workspace/openPOWERLINK_mairt/Examples/altera_nios2/ipcore/powerlink/src/pdi_spi.vhd,C:/mairt/workspace/openPOWERLINK_mairt/Examples/altera_nios2/ipcore/powerlink/src/lib/addr_decoder.vhd,C:/mairt/workspace/openPOWERLINK_mairt/Examples/altera_nios2/ipcore/powerlink/src/lib/edgedet.vhd,C:/mairt/workspace/openPOWERLINK_mairt/Examples/altera_nios2/ipcore/powerlink/src/lib/req_ack.vhd,C:/mairt/workspace/openPOWERLINK_mairt/Examples/altera_nios2/ipcore/powerlink/src/lib/sync.vhd,C:/mairt/workspace/openPOWERLINK_mairt/Examples/altera_nios2/ipcore/powerlink/src/lib/slow2fastSync.vhd,C:/mairt/workspace/openPOWERLINK_mairt/Examples/altera_nios2/ipcore/powerlink/src/lib/memMap.vhd,__PROJECT_DIRECTORY__/powerlink_0.vhd";
+         Simulation_HDL_Files = "C:/WORK/repo/openPOWERLINK/Examples/altera_nios2/ipcore/powerlink/src/powerlink.vhd,C:/WORK/repo/openPOWERLINK/Examples/altera_nios2/ipcore/powerlink/src/pdi.vhd,C:/WORK/repo/openPOWERLINK/Examples/altera_nios2/ipcore/powerlink/src/pdi_par.vhd,C:/WORK/repo/openPOWERLINK/Examples/altera_nios2/ipcore/powerlink/src/pdi_dpr_Altera.vhd,C:/WORK/repo/openPOWERLINK/Examples/altera_nios2/ipcore/powerlink/src/pdi_tripleVBufLogic.vhd,C:/WORK/repo/openPOWERLINK/Examples/altera_nios2/ipcore/powerlink/src/pdi_apIrqGen.vhd,C:/WORK/repo/openPOWERLINK/Examples/altera_nios2/ipcore/powerlink/src/pdi_controlStatusReg.vhd,C:/WORK/repo/openPOWERLINK/Examples/altera_nios2/ipcore/powerlink/src/pdi_event.vhd,C:/WORK/repo/openPOWERLINK/Examples/altera_nios2/ipcore/powerlink/src/pdi_led.vhd,C:/WORK/repo/openPOWERLINK/Examples/altera_nios2/ipcore/powerlink/src/pdi_simpleReg.vhd,C:/WORK/repo/openPOWERLINK/Examples/altera_nios2/ipcore/powerlink/src/openFILTER.vhd,C:/WORK/repo/openPOWERLINK/Examples/altera_nios2/ipcore/powerlink/src/openHUB.vhd,C:/WORK/repo/openPOWERLINK/Examples/altera_nios2/ipcore/powerlink/src/openMAC.vhd,C:/WORK/repo/openPOWERLINK/Examples/altera_nios2/ipcore/powerlink/src/openMAC_Ethernet.vhd,C:/WORK/repo/openPOWERLINK/Examples/altera_nios2/ipcore/powerlink/src/openMAC_cmp.vhd,C:/WORK/repo/openPOWERLINK/Examples/altera_nios2/ipcore/powerlink/src/openMAC_phyAct.vhd,C:/WORK/repo/openPOWERLINK/Examples/altera_nios2/ipcore/powerlink/src/openMAC_DPR_Altera.vhd,C:/WORK/repo/openPOWERLINK/Examples/altera_nios2/ipcore/powerlink/src/openMAC_DMAFifo_Altera.vhd,C:/WORK/repo/openPOWERLINK/Examples/altera_nios2/ipcore/powerlink/src/openMAC_DMAmaster.vhd,C:/WORK/repo/openPOWERLINK/Examples/altera_nios2/ipcore/powerlink/src/openMAC_DMAmaster/dma_handler.vhd,C:/WORK/repo/openPOWERLINK/Examples/altera_nios2/ipcore/powerlink/src/openMAC_DMAmaster/master_handler.vhd,C:/WORK/repo/openPOWERLINK/Examples/altera_nios2/ipcore/powerlink/src/openMAC_PHYMI.vhd,C:/WORK/repo/openPOWERLINK/Examples/altera_nios2/ipcore/powerlink/src/openMAC_rmii2mii.vhd,C:/WORK/repo/openPOWERLINK/Examples/altera_nios2/ipcore/powerlink/src/portio.vhd,C:/WORK/repo/openPOWERLINK/Examples/altera_nios2/ipcore/powerlink/src/portio_cnt.vhd,C:/WORK/repo/openPOWERLINK/Examples/altera_nios2/ipcore/powerlink/src/spi.vhd,C:/WORK/repo/openPOWERLINK/Examples/altera_nios2/ipcore/powerlink/src/spi_sreg.vhd,C:/WORK/repo/openPOWERLINK/Examples/altera_nios2/ipcore/powerlink/src/pdi_spi.vhd,C:/WORK/repo/openPOWERLINK/Examples/altera_nios2/ipcore/powerlink/src/lib/addr_decoder.vhd,C:/WORK/repo/openPOWERLINK/Examples/altera_nios2/ipcore/powerlink/src/lib/edgedet.vhd,C:/WORK/repo/openPOWERLINK/Examples/altera_nios2/ipcore/powerlink/src/lib/req_ack.vhd,C:/WORK/repo/openPOWERLINK/Examples/altera_nios2/ipcore/powerlink/src/lib/sync.vhd,C:/WORK/repo/openPOWERLINK/Examples/altera_nios2/ipcore/powerlink/src/lib/slow2fastSync.vhd,C:/WORK/repo/openPOWERLINK/Examples/altera_nios2/ipcore/powerlink/src/lib/memMap.vhd,__PROJECT_DIRECTORY__/powerlink_0.vhd";
       }
       WIZARD_SCRIPT_ARGUMENTS 
       {
@@ -4291,15 +4291,16 @@ SYSTEM niosII_openMac
          CONFIGAPENDIAN = "0";
          DMAOBSERV = "FALSE";
          EVENT = "TRUE";
-         FPGAREV = "2";
          LEDGADGET = "TRUE";
          MACBUFSIZE = "6896";
          MACRXBUFFERS = "16";
          MACRXBUFSIZE = "0";
          MACTXBUFFERS = "12";
          MACTXBUFSIZE = "6896";
+         PCPSYSID = "1";
          PDIASYNCBUFSIZE1 = "1514";
          PDIASYNCBUFSIZE2 = "1514";
+         PDIREV = "3";
          PDIRPDOBUFSIZE0 = "20";
          PDIRPDOBUFSIZE1 = "0";
          PDIRPDOBUFSIZE2 = "0";
@@ -4308,6 +4309,7 @@ SYSTEM niosII_openMac
          PDITPDOS = "1";
          PHYCNT = "2";
          PKTLOC = "1";
+         PLKCOREREV = "\"0.2.6\"";
          TIMESYNCHW = "FALSE";
       }
    }
