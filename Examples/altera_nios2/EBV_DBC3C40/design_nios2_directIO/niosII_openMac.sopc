@@ -301,7 +301,7 @@
          type = "boolean";
       }
    }
-   element clock_crossing_0.s1
+   element tc_i_mem_pcp.s1
    {
       datum _lockedAddress
       {
@@ -310,20 +310,7 @@
       }
       datum baseAddress
       {
-         value = "0";
-         type = "long";
-      }
-   }
-   element remote_update_cycloneiii_0.s1
-   {
-      datum _lockedAddress
-      {
-         value = "1";
-         type = "boolean";
-      }
-      datum baseAddress
-      {
-         value = "2048";
+         value = "33554432";
          type = "long";
       }
    }
@@ -340,14 +327,6 @@
          type = "long";
       }
    }
-   element node_switch_pio.s1
-   {
-      datum baseAddress
-      {
-         value = "2368";
-         type = "long";
-      }
-   }
    element status_led_pio.s1
    {
       datum baseAddress
@@ -356,7 +335,15 @@
          type = "long";
       }
    }
-   element tc_i_mem_pcp.s1
+   element node_switch_pio.s1
+   {
+      datum baseAddress
+      {
+         value = "2368";
+         type = "long";
+      }
+   }
+   element remote_update_cycloneiii_0.s1
    {
       datum _lockedAddress
       {
@@ -365,7 +352,20 @@
       }
       datum baseAddress
       {
-         value = "33554432";
+         value = "2048";
+         type = "long";
+      }
+   }
+   element clock_crossing_0.s1
+   {
+      datum _lockedAddress
+      {
+         value = "1";
+         type = "boolean";
+      }
+      datum baseAddress
+      {
+         value = "0";
          type = "long";
       }
    }
@@ -474,8 +474,8 @@
  <parameter name="maxAdditionalLatency" value="0" />
  <parameter name="projectName" value="nios_openMac.qpf" />
  <parameter name="sopcBorderPoints" value="true" />
- <parameter name="systemHash" value="2612709267" />
- <parameter name="timeStamp" value="1346938394030" />
+ <parameter name="systemHash" value="1832930702" />
+ <parameter name="timeStamp" value="1352705216408" />
  <module kind="clock_source" version="10.1" enabled="1" name="clk_0">
   <parameter name="clockFrequency" value="50000000" />
   <parameter name="clockFrequencyKnown" value="true" />
@@ -885,7 +885,8 @@
   <parameter name="clockFrequency" value="25000000" />
   <parameter name="AUTO_DEVICE_FAMILY" value="Cyclone III" />
  </module>
- <module kind="powerlink" version="0.2.5" enabled="1" name="powerlink_0">
+ <module kind="powerlink" version="0.2.7" enabled="1" name="powerlink_0">
+  <parameter name="pcpSysId" value="1" />
   <parameter name="expertMode" value="false" />
   <parameter name="clkRateEth" value="100000000" />
   <parameter name="clkRate50" value="50000000" />

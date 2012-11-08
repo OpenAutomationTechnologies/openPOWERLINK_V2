@@ -228,27 +228,6 @@
          type = "int";
       }
    }
-   element clock_crossing_0.s1
-   {
-      datum baseAddress
-      {
-         value = "33554432";
-         type = "long";
-      }
-   }
-   element onchip_memory_0.s1
-   {
-      datum _lockedAddress
-      {
-         value = "0";
-         type = "boolean";
-      }
-      datum baseAddress
-      {
-         value = "16384";
-         type = "long";
-      }
-   }
    element system_timer.s1
    {
       datum _lockedAddress
@@ -275,11 +254,32 @@
          type = "long";
       }
    }
+   element clock_crossing_0.s1
+   {
+      datum baseAddress
+      {
+         value = "33554432";
+         type = "long";
+      }
+   }
    element status_led_pio.s1
    {
       datum baseAddress
       {
          value = "32";
+         type = "long";
+      }
+   }
+   element onchip_memory_0.s1
+   {
+      datum _lockedAddress
+      {
+         value = "0";
+         type = "boolean";
+      }
+      datum baseAddress
+      {
+         value = "16384";
          type = "long";
       }
    }
@@ -342,8 +342,8 @@
  <parameter name="maxAdditionalLatency" value="0" />
  <parameter name="projectName" value="nios_openMac.qpf" />
  <parameter name="sopcBorderPoints" value="true" />
- <parameter name="systemHash" value="-8844953763" />
- <parameter name="timeStamp" value="1346939080078" />
+ <parameter name="systemHash" value="-9624732328" />
+ <parameter name="timeStamp" value="1352708476705" />
  <module kind="clock_source" version="10.1" enabled="1" name="clkpcp">
   <parameter name="clockFrequency" value="100000000" />
   <parameter name="clockFrequencyKnown" value="true" />
@@ -597,7 +597,8 @@
   <parameter name="targetClockRate" value="500000" />
   <parameter name="targetSlaveSelectToSClkDelay" value="0.0" />
  </module>
- <module kind="powerlink" version="0.2.5" enabled="1" name="powerlink_0">
+ <module kind="powerlink" version="0.2.7" enabled="1" name="powerlink_0">
+  <parameter name="pcpSysId" value="1" />
   <parameter name="expertMode" value="true" />
   <parameter name="clkRateEth" value="100000000" />
   <parameter name="clkRate50" value="50000000" />
