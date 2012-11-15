@@ -711,7 +711,8 @@ static OMETH_H        omethCreateInt
     else if(hEth->config.pktLoc == OMETH_PKT_LOC_HEAP)
     {
         //use heap
-        pByte = OMETH_MAKE_NONCACHABLE(calloc(hEth->config.rxBuffers * len ,1));
+        pByte = (unsigned char*)
+                OMETH_UNCACHED_MALLOC(hEth->config.rxBuffers * len);
 
         //store tx buffer address equ. rx buffer -> tx is handled by user!
         hEth->pTxBufBase = pByte;
@@ -1496,7 +1497,7 @@ OMETH_HOOK_H    omethHookCreate
         else if(hEth->config.pktLoc == OMETH_PKT_LOC_HEAP)
         {
             //pool has to be allocated in heap, since RX packets are stored there
-            pBuf = (ometh_buf_typ*)OMETH_MAKE_NONCACHABLE(calloc(len * maxPending, 1));
+            pBuf = (ometh_buf_typ*)OMETH_UNCACHED_MALLOC(len * maxPending);
         }
         else
         {
@@ -2024,7 +2025,7 @@ ometh_packet_typ    *omethResponseSet
         if(len > pDesc->len) pDesc->len = len;
 
         // overtake buffer to descriptor
-        pDesc->pData    = (unsigned long)&pPacket->data | chgIndexHighBit[newChgIndex];
+        pDesc->pData    = (unsigned long)&pPacket->data; // | chgIndexHighBit[newChgIndex];
     }
     else    // x-filter
     {
@@ -2510,7 +2511,7 @@ int                omethDestroy
         else if(hEth->config.pktLoc == OMETH_PKT_LOC_HEAP)
         {
             //frame buffer pool is in heap, so free it...
-            freePtr(hHook->pRxBufBase);    // free frame buffers allocated from the hooks
+            OMETH_UNCACHED_FREE(hHook->pRxBufBase);    // free frame buffers allocated from the hooks
         }
         else
         {
@@ -2532,10 +2533,11 @@ int                omethDestroy
     freePtr(hEth->pPhyReg);        // free phy register image
     if(hEth->config.pktLoc == OMETH_PKT_LOC_HEAP)
     {
-        freePtr(hEth->pRxBufBase);    // free allocated rx-buffers
+        OMETH_UNCACHED_FREE(hEth->pRxBufBase);    // free allocated rx-buffers
     }
     freePtr(hEth->pRxInfo);        // free rx/tx info list
-    freePtr(hEth->pTxInfo);
+    freePtr(hEth->pTxInfo[0]);
+    freePtr(hEth->pTxInfo[1]);
     freePtr(hEth);                // free instance
 
     return 0;

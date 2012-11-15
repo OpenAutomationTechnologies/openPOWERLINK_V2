@@ -132,6 +132,7 @@ typedef struct OMETH_HOOK*        OMETH_HOOK_H;    // handle for client hook
 typedef struct OMETH_FILTER*    OMETH_FILTER_H;    // handle for receive filter
 
 #include <omethlib_target.h>    // target specific defines (BIG/LITTLE endian)
+#include "global.h"
 
 #define OMETH_MAC_TYPE_01        0x01    // 16 filters,16 rx,16 tx
 
@@ -1237,7 +1238,7 @@ ometh_stat_typ    *omethStatistics
 void            omethRxIrqHandler
 (
  OMETH_H        hEth        /* handle of ethernet driver, see omethCreate() */
-);
+) SECTION_OMETHLIB_RX_IRQ_HDL;
 
 /*****************************************************************************
 *
@@ -1257,7 +1258,7 @@ void            omethRxIrqHandler
 void            omethTxIrqHandler
 (
  OMETH_H        hEth        /* handle of ethernet driver, see omethCreate() */
-);
+) SECTION_OMETHLIB_TX_IRQ_HDL;
 
 /*****************************************************************************
 *

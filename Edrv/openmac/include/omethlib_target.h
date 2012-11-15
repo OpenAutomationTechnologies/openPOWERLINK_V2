@@ -57,6 +57,8 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define __OMETHLIB_TARGET_H__
 
 #if defined(__NIOS2__)
+    #include <sys/alt_cache.h>
+
     // Nios II is little endian
     #define OMETH_HW_MODE                    0
     //---------------------------------------------------------
@@ -72,6 +74,14 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     //
     //---------------------------------------------------------
     #define OMETH_MAKE_NONCACHABLE(ptr)        (void*)(((unsigned long)ptr)|NIOS2_BYPASS_DCACHE_MASK);
+    #define OMETH_UNCACHED_MALLOC(size)        alt_uncached_malloc(size)
+    #define OMETH_UNCACHED_FREE(ptr)           alt_uncached_free(ptr)
+
+    //---------------------------------------------------------
+    // include section header file for special functions in
+    // tightly-coupled memory
+    #include <section_nios2.h>
+
 #elif defined(__MICROBLAZE__)
 
 #include "xparameters.h"
@@ -88,11 +98,25 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     #define OMETH_HW_MODE                     0
 #endif
     #define OMETH_MAKE_NONCACHABLE(ptr)     (ptr)
+    #define OMETH_UNCACHED_MALLOC(size)     malloc(size)
+    #define OMETH_UNCACHED_FREE(ptr)        free(ptr)
+
+    //---------------------------------------------------------
+    // include section header file for special functions in
+    // local memory
+    #include <section_microblaze.h>
+
 #else
     #error "Host CPU is unknown, set OMETH_HW_MODE and OMETH_MAKE_NONCACHABLE!"
     #define OMETH_HW_MODE                    0
     #define OMETH_MAKE_NONCACHABLE(ptr)     (ptr)
+    #define OMETH_UNCACHED_MALLOC(size)     malloc(size)
+    #define OMETH_UNCACHED_FREE(ptr)        free(ptr)
 #endif
+
+    //---------------------------------------------------------
+    // include section header file with null macros
+    #include <section_null.h>
 
 #endif
 
