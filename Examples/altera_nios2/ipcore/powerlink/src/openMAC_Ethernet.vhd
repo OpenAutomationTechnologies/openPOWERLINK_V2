@@ -162,7 +162,7 @@ entity openmac_ethernet is
        t_irq : out std_logic;
        t_tog : out std_logic;
        t_waitrequest : out std_logic;
-       m_address : out std_logic_vector(29 downto 0);
+       m_address : out std_logic_vector(dma_highadr_g downto 0);
        m_burstcount : out std_logic_vector(m_burstcount_width_g-1 downto 0);
        m_burstcounter : out std_logic_vector(m_burstcount_width_g-1 downto 0);
        m_byteenable : out std_logic_vector(m_data_width_g/8-1 downto 0);
@@ -1174,7 +1174,7 @@ begin
          dma_req_rd => dma_req_read,
          dma_req_wr => dma_req_write,
          dma_wr_err => dma_wr_err,
-         m_address => m_address( 29 downto 0 ),
+         m_address => m_address( dma_highadr_g downto 0 ),
          m_burstcount => m_burstcount( m_burstcount_width_g-1 downto 0 ),
          m_burstcounter => m_burstcounter( m_burstcount_width_g-1 downto 0 ),
          m_byteenable => m_byteenable( m_data_width_g/8-1 downto 0 ),

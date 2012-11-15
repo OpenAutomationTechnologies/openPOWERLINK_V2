@@ -47,11 +47,14 @@ package Global is
 
     constant cActivated : std_logic := '1';
     constant cInactivated : std_logic := '0';
-    
+
     constant cnActivated : std_logic := '0';
     constant cnInactivated : std_logic := '1';
-    
+
     function LogDualis(cNumber : natural) return natural;
+
+    function MAX (a : natural; b : natural) return natural;
+    function MIN (a : natural; b : natural) return natural;
 
 end Global;
 
@@ -67,4 +70,32 @@ package body Global is
         end loop;
         return vResult;
     end LogDualis;
+
+    function MAX (a : natural; b : natural) return natural is
+        variable vRes : natural;
+    begin
+        
+        if a > b then
+            vRes := a;
+        else
+            vRes := b;
+        end if;
+        
+        return vRes;
+        
+    end function;
+
+    function MIN (a : natural; b : natural) return natural is
+        variable vRes : natural;
+    begin
+        
+        if a < b then
+            vRes := a;
+        else
+            vRes := b;
+        end if;
+        
+        return vRes;
+        
+    end function;
 end Global;

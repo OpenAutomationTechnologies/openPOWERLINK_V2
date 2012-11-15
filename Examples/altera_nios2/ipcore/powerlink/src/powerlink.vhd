@@ -76,6 +76,7 @@
 -- 2012-01-09   V1.09   zelenkaj    Added ap_syncIrq for external AP
 -- 2012-01-26   V1.10   zelenkaj    Added generic for SMI generation and one SMI ports
 --                                  Omit hwacc options, since we are fast enough!
+-- 2012-08-03   V1.11   zelenkaj    add pcp sys id
 ------------------------------------------------------------------------------------------------------------------------
 
 library ieee;
@@ -128,6 +129,7 @@ entity powerlink is
 		iAsyBuf1Size_g				:		integer 							:= 100;
 		iAsyBuf2Size_g				:		integer 							:= 100;
 		iPdiRev_g					:		integer								:= 16#55AA#;
+        pcpSysId                    :       integer                             := 1;
 	-- 8/16bit PARALLEL PDI GENERICS
 		papDataWidth_g				:		integer 							:= 8;
 		papLowAct_g					:		boolean								:= false;
@@ -186,7 +188,7 @@ entity powerlink is
 		m_read						: OUT   STD_LOGIC := '0';
 		m_write						: OUT   STD_LOGIC := '0';
 		m_byteenable	            : OUT   STD_LOGIC_VECTOR(m_data_width_g/8-1 DOWNTO 0) := (others => '0');
-        m_address                   : OUT   STD_LOGIC_VECTOR(29 DOWNTO 0) := (others => '0');
+        m_address                   : OUT   STD_LOGIC_VECTOR(31 DOWNTO 0) := (others => '0');
         m_writedata                 : OUT   STD_LOGIC_VECTOR(m_data_width_g-1 DOWNTO 0) := (others => '0');
         m_readdata                  : IN    STD_LOGIC_VECTOR(m_data_width_g-1 DOWNTO 0) := (others => '0');
         m_waitrequest               : IN    STD_LOGIC;
@@ -402,6 +404,7 @@ begin
 			generic map (
 				genOnePdiClkDomain_g		=> genOnePdiClkDomain_g,
 				iPdiRev_g					=> iPdiRev_g,
+                pcpSysId                    => pcpSysId,
 				iRpdos_g					=> iRpdos_g,
 				iTpdos_g					=> iTpdos_g,
 				genABuf1_g					=> genABuf1_g,
@@ -529,6 +532,7 @@ begin
 			generic map (
 				genOnePdiClkDomain_g		=> genOnePdiClkDomain_g,
 				iPdiRev_g					=> iPdiRev_g,
+                pcpSysId                    => pcpSysId,
 				iRpdos_g					=> iRpdos_g,
 				iTpdos_g					=> iTpdos_g,
 				genABuf1_g					=> genABuf1_g,
@@ -647,6 +651,7 @@ begin
 			generic map (
 				genOnePdiClkDomain_g		=> genOnePdiClkDomain_g,
 				iPdiRev_g					=> iPdiRev_g,
+                pcpSysId                    => pcpSysId,
 				iRpdos_g					=> iRpdos_g,
 				iTpdos_g					=> iTpdos_g,
 				genABuf1_g					=> genABuf1_g,

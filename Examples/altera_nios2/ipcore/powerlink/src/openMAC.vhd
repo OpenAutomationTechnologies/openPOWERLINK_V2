@@ -533,7 +533,7 @@ RamH:	ENTITY	work.Dpr_16_16
 			
 pTxSm: PROCESS( Rst, Clk, Dsm, 
 				Tx_On, TX_OWN, Retry_Cnt, Ext_Tx, Tx_Wait,
-				Tx_Sync, Sm_Tx, F_End, Tx_Col, Ext_Ack, Tx_Del, Tx_Beg )
+				Tx_Sync, Sm_Tx, F_End, Tx_Col, Ext_Ack, Tx_Del, Tx_Beg, Tx_Half, Tx_Del_End )
 BEGIN
 
 		
