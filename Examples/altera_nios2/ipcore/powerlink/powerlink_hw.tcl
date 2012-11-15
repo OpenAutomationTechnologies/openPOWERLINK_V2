@@ -115,13 +115,15 @@
 #-- 2012-04-02  V1.36   zelenkaj    vhdl file names case sensitive
 #-- 2012-05-22  V1.37   zelenkaj    Fix DPRAM size allocation
 #-- 2012-06-14  V1.38   zelenkaj    RX buffer number has to be set by user for openMAC only in any case
+#-- 2012-08-03  V1.39   zelenkaj    revised PDI REV
+#--                                 added PCPSYSID
 #------------------------------------------------------------------------------------------------------------------------
 
 package require -exact sopc 10.1
 
 set_module_property DESCRIPTION "POWERLINK IP-core"
 set_module_property NAME powerlink
-set_module_property VERSION 0.2.5
+set_module_property VERSION 0.2.7
 set_module_property INTERNAL false
 set_module_property GROUP "Interface Protocols/Ethernet"
 set_module_property AUTHOR "Michael Hogger and Joerg Zelenka"
@@ -177,11 +179,29 @@ add_file "mif/pdi_dpr.mif" {SYNTHESIS SIMULATION}
 set_module_property VALIDATION_CALLBACK my_validation_callback
 set_module_property ELABORATION_CALLBACK my_elaboration_callback
 
-#FPGA REVISION
+#PDI REVISION
 add_parameter iPdiRev_g INTEGER 0x0000
 set_parameter_property iPdiRev_g HDL_PARAMETER true
+set_parameter_property iPdiRev_g ALLOWED_RANGES 0:65535
 set_parameter_property iPdiRev_g VISIBLE false
 set_parameter_property iPdiRev_g DERIVED TRUE
+
+#PCP SYSTEM ID
+add_parameter pcpSysId INTEGER 1
+set_parameter_property pcpSysId HDL_PARAMETER true
+set_parameter_property pcpSysId ALLOWED_RANGES 0:65535
+set_parameter_property pcpSysId VISIBLE false
+set_parameter_property pcpSysId DISPLAY_NAME "Set PCP SYSTEM ID"
+set_parameter_property pcpSysId DESCRIPTION "User option to prevent incompatibility between AP software and PCP system."
+
+#CORE REVISION
+add_parameter plkCoreRev STRING "0"
+set_parameter_property plkCoreRev HDL_PARAMETER false
+set_parameter_property plkCoreRev VISIBLE false
+set_parameter_property plkCoreRev ENABLED false
+set_parameter_property plkCoreRev DERIVED TRUE
+set_parameter_property plkCoreRev DISPLAY_NAME "Core Revision"
+set_parameter_property plkCoreRev DESCRIPTION "Core Revision is used to find HW/SW mismatch."
 
 #parameters
 add_parameter expertMode BOOLEAN false
@@ -580,6 +600,11 @@ set_parameter_property pioValLen_g VISIBLE false
 set_parameter_property pioValLen_g DERIVED TRUE
 
 proc my_validation_callback {} {
+# REVISION NUMBERS #
+    set PDI_REV_VAL 3
+    set PLK_REV_VAL \"[get_module_property VERSION]\"
+# REVISION NUMBERS #
+    
 #do some preparation stuff
 	set configPowerlink 			[get_parameter_value configPowerlink]
 	set configApInterface 			[get_parameter_value configApInterface]
@@ -634,10 +659,14 @@ proc my_validation_callback {} {
 	if {$expert} {
         set macTxBurstSize [get_parameter_value macTxBurstSize]
     	set macRxBurstSize [get_parameter_value macRxBurstSize]
+        set pcpSysId [get_parameter_value pcpSysId]
+        set_parameter_property plkCoreRev VISIBLE true
     } else {
         #no expert mode set them to one per default
         set macTxBurstSize 1
         set macRxBurstSize 1
+        set pcpSysId 1
+        set_parameter_property plkCoreRev VISIBLE false
     }
 	
 	#burst size setting allowed?!
@@ -795,6 +824,7 @@ proc my_validation_callback {} {
 	set_parameter_property macRxBuf VISIBLE false
 	set_parameter_property hwSupportSyncIrq VISIBLE false
 	set_parameter_property enDmaObserver VISIBLE false
+    set_parameter_property pcpSysId VISIBLE false
 	
 	set_parameter_property mac2phys VISIBLE true
     set_parameter_property macGen2ndSmi VISIBLE false
@@ -854,6 +884,7 @@ proc my_validation_callback {} {
             #in case of expert mode event hw support can be set
 		    set_parameter_property genEvent VISIBLE true
             set_parameter_value genEvent_g $genEvent
+            set_parameter_property pcpSysId VISIBLE true
             if {$genEvent} {
             } else {
                 send_message warning "Event Hardware Support is mandatory for CN API library!"
@@ -862,6 +893,7 @@ proc my_validation_callback {} {
             #no expert mode => TRUE!
             set_parameter_property genEvent VISIBLE false
             set_parameter_value genEvent_g true
+            set_parameter_property pcpSysId VISIBLE false
         }
 		#AP can be big or little endian - allow choice
 		set_parameter_property configApEndian VISIBLE true
@@ -1182,10 +1214,8 @@ proc my_validation_callback {} {
 		send_message error "error 0x03"
 	}
 	
-	#####################################
-	# here set the PDI revision number  #
-	set_parameter_value iPdiRev_g 2
-	#####################################
+	set_parameter_value iPdiRev_g $PDI_REV_VAL
+    set_parameter_value plkCoreRev $PLK_REV_VAL
 	
 	# here you can change manually to use only one PDI Clk domain
 	set_parameter_value genOnePdiClkDomain_g false
@@ -1197,9 +1227,12 @@ proc my_validation_callback {} {
 	set_module_assignment embeddedsw.CMacro.MACTXBUFFERS			$macTxBuffers
 	set_module_assignment embeddedsw.CMacro.PDIRPDOS				$rpdos
 	set_module_assignment embeddedsw.CMacro.PDITPDOS				$tpdos
-	set_module_assignment embeddedsw.CMacro.FPGAREV					[get_parameter_value iPdiRev_g]
+	set_module_assignment embeddedsw.CMacro.PDIREV					[get_parameter_value iPdiRev_g]
     
     set_module_assignment embeddedsw.CMacro.PDITPDOBUFSIZE0         $tpdo0size
+    
+    set_module_assignment embeddedsw.CMacro.PCPSYSID                $pcpSysId
+    set_module_assignment embeddedsw.CMacro.PLKCOREREV              [get_parameter_value plkCoreRev]
     
     # set RPDO buffer size to zero if disabled
     if {$rpdos < 1} {
@@ -1221,6 +1254,7 @@ proc my_validation_callback {} {
 #display
 add_display_item "Block Diagram" id0 icon img/block_diagram.png
 add_display_item "General Settings" expertMode PARAMETER
+add_display_item "General Settings" plkCoreRev PARAMETER
 add_display_item "General Settings" configPowerlink PARAMETER
 add_display_item "Process Data Interface Settings" configApInterface PARAMETER
 add_display_item "Process Data Interface Settings" configApParallelInterface PARAMETER
@@ -1235,6 +1269,7 @@ add_display_item "Process Data Interface Settings" validAssertDuration PARAMETER
 add_display_item "Process Data Interface Settings" hwSupportSyncIrq PARAMETER
 add_display_item "Process Data Interface Settings" genLedGadget PARAMETER
 add_display_item "Process Data Interface Settings" genEvent PARAMETER
+add_display_item "Process Data Interface Settings" pcpSysId PARAMETER
 add_display_item "Receive Process Data" rpdoNum PARAMETER
 add_display_item "Transmit Process Data" tpdoNum PARAMETER
 add_display_item "Transmit Process Data" tpdo0size PARAMETER
@@ -1463,7 +1498,7 @@ set_interface_property MAC_DMA ENABLED false
 add_interface_port MAC_DMA m_read read Output 1
 add_interface_port MAC_DMA m_write write Output 1
 add_interface_port MAC_DMA m_byteenable byteenable Output 2
-add_interface_port MAC_DMA m_address address Output 30
+add_interface_port MAC_DMA m_address address Output 32
 add_interface_port MAC_DMA m_writedata writedata Output 16
 add_interface_port MAC_DMA m_readdata readdata Input 16
 add_interface_port MAC_DMA m_waitrequest waitrequest Input 1

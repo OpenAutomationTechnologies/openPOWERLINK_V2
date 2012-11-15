@@ -60,3 +60,14 @@ Revision History
 30.07.2012  V0.2.5      [FIX] confusion of EDRV_MAX_AUTO_RESPONSES and EDRV_MAX_FILTERS
                         [FIX] parallel interface address hold workaround
                         
+06.09.2012  V0.2.6      [TASK] add phycfg for INK DE2-115 board for proper configuration (MII)
+                        [FEATURE] add macro for placing functions in fast memory
+                        [TASK] add PCP SYS ID and IP core revision number
+                        [FIX] EDRVCYC_NEG_SHIFT_US can be set in EplCfg.h
+
+08.11.2012  V0.2.7      [FIX] Inconsistent PDI memory when DPR larger than 2 kB
+                        [FIX] X: BRAM size has to be power of 2
+                        [FIX] address offset calculator in pdi.vhd uses EXT() function
+                        [FIX] Memory leak in omethlib
+                        [FIX] timesync hang when using windows MN
+                        [TASK] enhanced DMA master path to 32 bit address width

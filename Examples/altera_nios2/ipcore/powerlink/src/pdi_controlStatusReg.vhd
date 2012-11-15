@@ -41,6 +41,7 @@
 -- 2011-11-29	V0.03	zelenkaj	led and event is optional
 -- 2011-12-20	V0.04	zelenkaj	changed 2xbuf switch source to ap irq
 -- 2012-01-26   V0.05   zelenkaj    en-/disable double buffer with genTimeSync_g
+-- 2012-08-03   V0.06   zelenkaj    add pcp sys id
 ------------------------------------------------------------------------------------------------------------------------
 LIBRARY ieee;
 USE ieee.std_logic_1164.all;
@@ -63,6 +64,7 @@ entity pdiControlStatusReg is
 			---constant values
 			magicNumber					: 		std_Logic_vector(31 downto 0) := (others => '0');
 			pdiRev						: 		std_logic_vector(15 downto 0) := (others => '0');
+            pcpSysId                    :       std_logic_vector(15 downto 0) := (others => '0');
 			tPdoBuffer					: 		std_logic_vector(31 downto 0) := (others => '0');
 			rPdo0Buffer					: 		std_logic_vector(31 downto 0) := (others => '0');
 			rPdo1Buffer					: 		std_logic_vector(31 downto 0) := (others => '0');
@@ -274,7 +276,7 @@ begin
 	--non dpr read
 	with conv_integer(addr)*4 select
 		nonDprDout <=	magicNumber 					when 16#00#,
-						(x"0000" & pdiRev) 				when 16#04#,
+						(pcpSysId & pdiRev) 			when 16#04#,
 						--STORED IN DPR 				when 16#08#,
 						--STORED IN DPR 				when 16#0C#,
 						--STORED IN DPR 				when 16#10#,
