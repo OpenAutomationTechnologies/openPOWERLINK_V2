@@ -23,10 +23,12 @@ ExternalMemSim: 0
 UcfFile: data/system.ucf
 EnableParTimingError: 1
 ShowLicenseDialog: 1
-LockAddr: MCB_DDR3,C_S0_AXI_BASEADDR
-LockAddr: axi_powerlink_0,C_S_AXI_MAC_PKT_BASEADDR
 LockAddr: boot_i_bram_ctrl,C_BASEADDR
 LockAddr: boot_d_bram_ctrl,C_BASEADDR
+LockAddr: pcp_i_bram_ctrl,C_BASEADDR
+LockAddr: pcp_d_bram_ctrl,C_BASEADDR
+LockAddr: MCB_DDR3,C_S0_AXI_BASEADDR
+LockAddr: Linear_Flash,C_S_AXI_MEM0_BASEADDR
 ICacheAddr: MCB_DDR3,C_S0_AXI_BASEADDR
 ICacheAddr: MCB_DDR3,C_S1_AXI_BASEADDR
 ICacheAddr: MCB_DDR3,C_S2_AXI_BASEADDR

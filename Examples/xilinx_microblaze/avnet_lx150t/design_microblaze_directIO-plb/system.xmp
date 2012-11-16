@@ -23,10 +23,12 @@ ExternalMemSim: 0
 UcfFile: data/system.ucf
 EnableParTimingError: 1
 ShowLicenseDialog: 1
-LockAddr: MCB_DDR3,C_MPMC_BASEADDR
-LockAddr: plb_powerlink_0,C_MAC_PKT_BASEADDR
 LockAddr: boot_ilmb_cntlr,C_BASEADDR
 LockAddr: boot_dlmb_cntlr,C_BASEADDR
+LockAddr: pcp_ilmb_cntlr,C_BASEADDR
+LockAddr: pcp_dlmb_cntlr,C_BASEADDR
+LockAddr: MCB_DDR3,C_MPMC_BASEADDR
+LockAddr: Linear_Flash,C_MEM0_BASEADDR
 Processor: pcp
 ElfImp: 
 ElfSim: 

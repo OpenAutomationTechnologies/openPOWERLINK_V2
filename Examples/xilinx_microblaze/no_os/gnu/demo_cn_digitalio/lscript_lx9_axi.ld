@@ -19,7 +19,7 @@ MEMORY
 {
    pcp_i_bram_ctrl_pcp_d_bram_ctrl : ORIGIN = 0x00004000, LENGTH = 0x00002000
    boot_i_bram_ctrl_boot_d_bram_ctrl : ORIGIN = 0x00000050, LENGTH = 0x00003FB0
-   MCB3_LPDDR_S0_AXI_BASEADDR : ORIGIN = 0x20000000, LENGTH = 0x04000000
+   MCB3_LPDDR_S0_AXI_BASEADDR : ORIGIN = 0x10000000, LENGTH = 0x04000000
 }
 
 /* Specify the default entry point to the program */
