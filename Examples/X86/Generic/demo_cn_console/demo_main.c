@@ -380,7 +380,7 @@ int  main (int argc, char **argv)
 
     if (i == 0)
     {
-        PRINTF("\nNo interfaces found! Make sure WinPcap is installed.\n");
+        PRINTF("\nNo interfaces found! Make sure pcap library is installed.\n");
         EplRet = kEplNoResource;
         goto Exit;
     }
