@@ -20,7 +20,7 @@ MEMORY
    pcp_ilmb_cntlr_pcp_dlmb_cntlr : ORIGIN = 0x00002000, LENGTH = 0x00002000
    boot_ilmb_cntlr_boot_dlmb_cntlr : ORIGIN = 0x00000050, LENGTH = 0x00001FB0
    MCB_DDR3_MPMC_BASEADDR : ORIGIN = 0x10000000, LENGTH = 0x08000000
-   Linear_Flash_MEM0_BASEADDR : ORIGIN = 0x82000000, LENGTH = 0x02000000
+   Linear_Flash_MEM0_BASEADDR : ORIGIN = 0x20000000, LENGTH = 0x02000000
 }
 
 /* Specify the default entry point to the program */
