@@ -104,7 +104,10 @@ ${MAINPATH}/EplStack/EplPdou.c ${MAINPATH}/EplStack/EplPdouCal.c \
 ${MAINPATH}/EplStack/EplObd.c \
 ${MAINPATH}/EplStack/EplSdoComu.c ${MAINPATH}/EplStack/EplSdoAsySequ.c ${MAINPATH}/EplStack/EplSdoAsndu.c \
 ${MAINPATH}/EplStack/EplTimeruGeneric.c \
-${MAINPATH}/EplStack/EplErrorHandlerk.c \
+${MAINPATH}/EplStack/kernel/errhnd/errhndk.c \
+${MAINPATH}/EplStack/user/errhnd/errhndu.c \
+${MAINPATH}/EplStack/kernel/errhnd/errhndkcal-local.c \
+${MAINPATH}/EplStack/user/errhnd/errhnducal-local.c \
 ${MAINPATH}/EplStack/EplApiGeneric.c \
 ${MAINPATH}/ObjDicts/CiA401_CN/Objdict.c \
 ${MAINPATH}/EplStack/amiarm.c \

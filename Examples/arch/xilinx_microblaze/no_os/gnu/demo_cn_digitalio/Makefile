@@ -101,7 +101,10 @@ ${STACK_ROOT}/EplStack/EplSdoComu.c \
 ${STACK_ROOT}/EplStack/EplSdoAsySequ.c \
 ${STACK_ROOT}/EplStack/EplSdoAsndu.c \
 ${STACK_ROOT}/EplStack/EplTimeruGeneric.c \
-${STACK_ROOT}/EplStack/EplErrorHandlerk.c \
+${STACK_ROOT}/EplStack/kernel/errhnd/errhndk.c \
+${STACK_ROOT}/EplStack/user/errhnd/errhndu.c \
+${STACK_ROOT}/EplStack/kernel/errhnd/errhndkcal-local.c \
+${STACK_ROOT}/EplStack/user/errhnd/errhnducal-local.c \
 ${STACK_ROOT}/EplStack/EplApiGeneric.c \
 ${TARGET_DIR}/ShbTarget_Microblaze.c \
 ${TARGET_DIR}/xilinx_irq.c \

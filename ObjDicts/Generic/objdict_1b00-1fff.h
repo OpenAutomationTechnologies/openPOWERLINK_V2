@@ -4,7 +4,7 @@
 
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
         // Object 1C00h: DLL_MNCRCError_REC
-        EPL_OBD_BEGIN_INDEX_RAM(0x1C00, 0x04, NULL)
+        EPL_OBD_BEGIN_INDEX_RAM(0x1C00, 0x04, errhndu_cbObdAccess)
             EPL_OBD_SUBINDEX_RAM_VAR(0x1C00, 0x00, kEplObdTypUInt8, kEplObdAccConst, tEplObdUnsigned8, NumberOfEntries, 0x03)
             EPL_OBD_SUBINDEX_RAM_USERDEF_NOINIT(0x1C00, 0x01, kEplObdTypUInt32, kEplObdAccRW, tEplObdUnsigned32, CumulativeCnt_U32)
             EPL_OBD_SUBINDEX_RAM_USERDEF(0x1C00, 0x02, kEplObdTypUInt32, kEplObdAccR, tEplObdUnsigned32, ThresholdCnt_U32, 0x0)
@@ -12,7 +12,7 @@
         EPL_OBD_END_INDEX(0x1C00)
 
         // Object 1C02h: DLL_MNCycTimeExceed_REC
-        EPL_OBD_BEGIN_INDEX_RAM(0x1C02, 0x04, NULL)
+        EPL_OBD_BEGIN_INDEX_RAM(0x1C02, 0x04, errhndu_cbObdAccess)
             EPL_OBD_SUBINDEX_RAM_VAR(0x1C02, 0x00, kEplObdTypUInt8, kEplObdAccConst, tEplObdUnsigned8, NumberOfEntries, 0x03)
             EPL_OBD_SUBINDEX_RAM_USERDEF_NOINIT(0x1C02, 0x01, kEplObdTypUInt32, kEplObdAccRW, tEplObdUnsigned32, CumulativeCnt_U32)
             EPL_OBD_SUBINDEX_RAM_USERDEF(0x1C02, 0x02, kEplObdTypUInt32, kEplObdAccR, tEplObdUnsigned32, ThresholdCnt_U32, 0x0)
@@ -20,17 +20,17 @@
         EPL_OBD_END_INDEX(0x1C02)
 
         // Object 1C07h: DLL_MNCNLossPResCumCnt_AU32
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY_NOINIT(0x1C07, 254, NULL, kEplObdTypUInt32, kEplObdAccRW, tEplObdUnsigned32, DLL_MNCNLossPResCumCnt_AU32)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY_NOINIT(0x1C07, 254, errhndu_mnCnLossPresCbObdAccess, kEplObdTypUInt32, kEplObdAccRW, tEplObdUnsigned32, DLL_MNCNLossPResCumCnt_AU32)
 
         // Object 1C08h: DLL_MNCNLossPResThrCnt_AU32
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY(0x1C08, 254, NULL, kEplObdTypUInt32, kEplObdAccR, tEplObdUnsigned32, DLL_MNCNLossPResThrCnt_AU32, 0)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY(0x1C08, 254, errhndu_mnCnLossPresCbObdAccess, kEplObdTypUInt32, kEplObdAccR, tEplObdUnsigned32, DLL_MNCNLossPResThrCnt_AU32, 0)
 
         // Object 1C09h: DLL_MNCNLossPResThreshold_AU32
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY(0x1C09, 254, NULL, kEplObdTypUInt32, kEplObdAccSRW, tEplObdUnsigned32, DLL_MNCNLossPResThreshold_AU32, 15)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY(0x1C09, 254, errhndu_mnCnLossPresCbObdAccess, kEplObdTypUInt32, kEplObdAccSRW, tEplObdUnsigned32, DLL_MNCNLossPResThreshold_AU32, 15)
 #endif
 
         // Object 1C0Bh: DLL_CNLossSoC_REC
-        EPL_OBD_BEGIN_INDEX_RAM(0x1C0B, 0x04, NULL)
+        EPL_OBD_BEGIN_INDEX_RAM(0x1C0B, 0x04, errhndu_cbObdAccess)
             EPL_OBD_SUBINDEX_RAM_VAR(0x1C0B, 0x00, kEplObdTypUInt8, kEplObdAccConst, tEplObdUnsigned8, NumberOfEntries, 3)
             EPL_OBD_SUBINDEX_RAM_USERDEF_NOINIT(0x1C0B, 0x01, kEplObdTypUInt32, kEplObdAccRW, tEplObdUnsigned32, CumulativeCnt_U32)
             EPL_OBD_SUBINDEX_RAM_USERDEF(0x1C0B, 0x02, kEplObdTypUInt32, kEplObdAccR, tEplObdUnsigned32, ThresholdCnt_U32, 0)
@@ -38,7 +38,7 @@
         EPL_OBD_END_INDEX(0x1C0B)
 
         // Object 1C0Dh: DLL_CNLossPReq_REC
-        EPL_OBD_BEGIN_INDEX_RAM(0x1C0D, 0x04, NULL)
+        EPL_OBD_BEGIN_INDEX_RAM(0x1C0D, 0x04, errhndu_cbObdAccess)
             EPL_OBD_SUBINDEX_RAM_VAR(0x1C0D, 0x00, kEplObdTypUInt8, kEplObdAccConst, tEplObdUnsigned8, NumberOfEntries, 3)
             EPL_OBD_SUBINDEX_RAM_USERDEF_NOINIT(0x1C0D, 0x01, kEplObdTypUInt32, kEplObdAccRW, tEplObdUnsigned32, CumulativeCnt_U32)
             EPL_OBD_SUBINDEX_RAM_USERDEF(0x1C0D, 0x02, kEplObdTypUInt32, kEplObdAccR, tEplObdUnsigned32, ThresholdCnt_U32, 0)
@@ -46,7 +46,7 @@
         EPL_OBD_END_INDEX(0x1C0D)
 
         // Object 1C0Fh: DLL_CNCRCError_REC
-        EPL_OBD_BEGIN_INDEX_RAM(0x1C0F, 0x04, NULL)
+        EPL_OBD_BEGIN_INDEX_RAM(0x1C0F, 0x04, errhndu_cbObdAccess)
             EPL_OBD_SUBINDEX_RAM_VAR(0x1C0F, 0x00, kEplObdTypUInt8, kEplObdAccConst, tEplObdUnsigned8, NumberOfEntries, 3)
             EPL_OBD_SUBINDEX_RAM_USERDEF_NOINIT(0x1C0F, 0x01, kEplObdTypUInt32, kEplObdAccRW, tEplObdUnsigned32, CumulativeCnt_U32)
             EPL_OBD_SUBINDEX_RAM_USERDEF(0x1C0F, 0x02, kEplObdTypUInt32, kEplObdAccR, tEplObdUnsigned32, ThresholdCnt_U32, 0)

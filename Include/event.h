@@ -254,7 +254,7 @@ typedef struct
     UINT                m_uiNodeId;             ///< Node ID
     tEplNmtState        m_NmtState;             ///< NMT state
     tEplKernel          m_EplError;             ///< Error code
-} tEplErrorHandlerkEvent;
+} tErrHndkEvent;
 
 /**
 \brief  callback function to get informed about sync event

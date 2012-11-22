@@ -75,10 +75,25 @@
 			<location>OPENPOWERLINK_DIR/EplStack/common/dll/dllcal-shb.c</location>
 		</link>
 		<link>
-			<name>EplErrorHandlerk.c</name>
+			<name>errhndk.c</name>
 			<type>1</type>
-			<location>OPENPOWERLINK_DIR/EplStack/EplErrorHandlerk.c</location>
+			<location>OPENPOWERLINK_DIR/EplStack/kernel/errhnd/errhndk.c</location>
 		</link>
+        <link>
+                <name>errhndu.c</name>
+                <type>1</type>
+                <location>OPENPOWERLINK_DIR/EplStack/user/errhnd/errhndu.c</location>
+        </link>
+        <link>
+                <name>errhndkcal-local.c</name>
+                <type>1</type>
+                <location>OPENPOWERLINK_DIR/EplStack/kernel/errhnd/errhndkcal-local.c</location>
+        </link>
+        <link>
+                <name>errhnducal-local.c</name>
+                <type>1</type>
+                <location>OPENPOWERLINK_DIR/EplStack/user/errhnd/errhnducal-local.c</location>
+        </link>
 		<link>
 			<name>eventk.c</name>
 			<type>1</type>

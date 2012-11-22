@@ -71,7 +71,7 @@
 #include "kernel/EplDllk.h"
 #include "kernel/dllkcal.h"
 #include "kernel/eventk.h"
-#include "kernel/EplErrorHandlerk.h"
+#include "kernel/errhndk.h"
 #include "EplNmt.h"
 #include "edrv.h"
 #include "Benchmark.h"
@@ -2606,7 +2606,7 @@ tEdrvTxBuffer*  pTxBuffer;
         }
     }
 
-    Ret = EplErrorHandlerkCycleFinished((NmtState_p >= kEplNmtMsNotActive));
+    Ret = errhndk_decrementCounters((NmtState_p >= kEplNmtMsNotActive));
 
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
 #if EPL_DLL_DISABLE_EDRV_CYCLIC == FALSE
@@ -3278,7 +3278,7 @@ Exit:
 static tEplKernel EplDllkChangeState(tEplNmtEvent NmtEvent_p, tEplNmtState NmtState_p)
 {
 tEplKernel              Ret = kEplSuccessful;
-tEplErrorHandlerkEvent  DllEvent;
+tErrHndkEvent  DllEvent;
 
     DllEvent.m_ulDllErrorEvents = 0;
     DllEvent.m_uiNodeId = 0;
@@ -3924,7 +3924,7 @@ tEplErrorHandlerkEvent  DllEvent;
 
     if (DllEvent.m_ulDllErrorEvents != 0)
     {   // error event set -> post it to error handler
-        Ret = EplErrorHandlerkPostError(&DllEvent);
+        Ret = errhndk_postError(&DllEvent);
     }
 
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
@@ -4242,12 +4242,12 @@ BYTE            bFlag1;
                  > pFrameInfo_p->m_uiFrameSize)
                  || (pFrameInfo_p->m_uiFrameSize > (EplDllkInstance_g.m_DllConfigParam.m_uiPreqActPayloadLimit + EPL_FRAME_OFFSET_PDO_PAYLOAD)))
             {   // format error
-            tEplErrorHandlerkEvent  DllEvent;
+            tErrHndkEvent  DllEvent;
 
                 DllEvent.m_ulDllErrorEvents = EPL_DLL_ERR_INVALID_FORMAT;
                 DllEvent.m_uiNodeId = AmiGetByteFromLe(&pFrame->m_le_bSrcNodeId);
                 DllEvent.m_NmtState = NmtState_p;
-                Ret = EplErrorHandlerkPostError(&DllEvent);
+                Ret = errhndk_postError(&DllEvent);
                 if (Ret != kEplSuccessful)
                 {
                     goto Exit;
@@ -4520,7 +4520,7 @@ tEplDllkNodeInfo*   pIntNodeInfo = NULL;
 #endif
             )
         {   // format error
-        tEplErrorHandlerkEvent  DllEvent;
+        tErrHndkEvent  DllEvent;
 
 #if EPL_NMT_MAX_NODE_ID > 0
             if (pIntNodeInfo->m_wPresPayloadLimit > 0)
@@ -4530,7 +4530,7 @@ tEplDllkNodeInfo*   pIntNodeInfo = NULL;
                 DllEvent.m_ulDllErrorEvents = EPL_DLL_ERR_INVALID_FORMAT;
                 DllEvent.m_uiNodeId = uiNodeId;
                 DllEvent.m_NmtState = NmtState_p;
-                Ret = EplErrorHandlerkPostError(&DllEvent);
+                Ret = errhndk_postError(&DllEvent);
                 if (Ret != kEplSuccessful)
                 {
                     goto Exit;
@@ -4606,11 +4606,11 @@ tEplEvent           Event;
     {
         if (pIntNodeInfo->m_fSoftDelete == FALSE)
         {   // normal isochronous CN
-        tEplErrorHandlerkEvent  DllEvent;
+        tErrHndkEvent  DllEvent;
 
             DllEvent.m_ulDllErrorEvents = EPL_DLL_ERR_MN_CN_LOSS_PRES;
             DllEvent.m_uiNodeId = pIntNodeInfo->m_uiNodeId;
-            Ret = EplErrorHandlerkPostError(&DllEvent);
+            Ret = errhndk_postError(&DllEvent);
             if (Ret != kEplSuccessful)
             {
                 goto Exit;
@@ -5835,14 +5835,14 @@ TGT_DLLK_DECLARE_FLAGS
         case kEplEdrvTxListNotFinishedYet:
         case kEplEdrvNoFreeTxDesc:
         {
-        tEplErrorHandlerkEvent  DllEvent;
+        tErrHndkEvent  DllEvent;
 
             DllEvent.m_ulDllErrorEvents = EPL_DLL_ERR_MN_CYCTIMEEXCEED;
             DllEvent.m_uiNodeId = uiHandle;
             DllEvent.m_NmtState = NmtState;
             DllEvent.m_EplError = ErrorCode_p;
 
-            Ret = EplErrorHandlerkPostError(&DllEvent);
+            Ret = errhndk_postError(&DllEvent);
 
             break;
         }
@@ -7082,7 +7082,7 @@ tEplFrame*          pTxFrame;
         }
 #endif
 
-        Ret = EplErrorHandlerkResetCnError(pIntNodeInfo_p->m_uiNodeId);
+        Ret = errhndk_resetCnError(pIntNodeInfo_p->m_uiNodeId);
     }
 
     // initialize elements of internal node info structure

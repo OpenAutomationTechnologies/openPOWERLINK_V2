@@ -92,6 +92,23 @@
 // default subindex for NodeIDByHW_BOOL
 #define EPL_OBD_NODE_ID_HWBOOL_SUBINDEX     0x02
 
+//------------------------------------------------------------------------------
+// object IDs of error handling objects
+#define OID_DLL_MN_CRCERROR_REC                     0x1C00
+#define OID_DLL_MN_CYCTIME_EXCEED_REC               0x1C02
+#define OID_DLL_CN_LOSSSOC_REC                      0x1C0B
+#define OID_DLL_CN_LOSSPREQ_REC                     0x1C0D
+#define OID_DLL_CN_CRCERROR_REC                     0x1C0F
+
+#define SUBIDX_DLL_ERROR_CUM_CNT                    1
+#define SUBIDX_DLL_ERROR_THR_CNT                    2
+#define SUBIDX_DLL_ERROR_THRESHOLD                  3
+
+#define NUM_DLL_MNCN_LOSSPRES_OBJS                  254
+#define OID_DLL_MNCN_LOSSPRES_CUMCNT_AU32           0x1C07
+#define OID_DLL_MNCN_LOSSPRES_THRCNT_AU32           0x1C08
+#define OID_DLL_MNCN_LOSSPRES_THRESHOLD_AU32        0x1C09
+
 // ============================================================================
 // enums
 // ============================================================================
