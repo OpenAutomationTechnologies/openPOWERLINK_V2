@@ -70,7 +70,6 @@
 
 #include "Epl.h"
 #include "kernel/EplDllk.h"
-#include "kernel/EplErrorHandlerk.h"
 #include "kernel/eventk.h"
 #include "kernel/EplNmtk.h"
 #include "kernel/EplObdk.h"
@@ -87,6 +86,10 @@
 #include "user/EplStatusu.h"
 #include "user/EplTimeru.h"
 #include "user/EplCfmu.h"
+
+#include "errhnd.h"
+#include "kernel/errhndk.h"
+#include "user/errhndu.h"
 
 #include <stddef.h>
 
@@ -359,8 +362,14 @@ tEplDllkInitParam   DllkInitParam;
 
     EplDllkRegSyncHandler(EplApiInstance_g.m_InitParam.m_pfnCbSync);
 
-    // initialize EplErrorHandlerk module
-    Ret = EplErrorHandlerkInit();
+    // initialize error handler module
+    Ret = errhndk_init();
+    if (Ret != kEplSuccessful)
+    {
+        goto Exit;
+    }
+
+    Ret = errhndu_init();
     if (Ret != kEplSuccessful)
     {
         goto Exit;

@@ -36,7 +36,10 @@ MODULEOBJS	= demo_main.o \
 			  $(MAINPATH)/EplStack/EplObd.o \
 			  $(MAINPATH)/EplStack/EplSdoUdpu.o $(MAINPATH)/EplStack/EplSdoComu.o $(MAINPATH)/EplStack/EplSdoAsySequ.o $(MAINPATH)/EplStack/EplSdoAsndu.o \
 			  $(MAINPATH)/EplStack/EplTimeruLinuxKernel.o \
-			  $(MAINPATH)/EplStack/EplErrorHandlerk.o \
+			  $(MAINPATH)/EplStack/kernel/errhnd/errhndk.o \
+			  $(MAINPATH)/EplStack/user/errhnd/errhndu.o \
+			  $(MAINPATH)/EplStack/kernel/errhnd/errhndkcal-local.o \
+			  $(MAINPATH)/EplStack/user/errhnd/errhnducal-local.o \
 			  $(MAINPATH)/EplStack/EplApiGeneric.o \
 			  $(MAINPATH)/ObjDicts/Api_CN/Objdict.o \
 			  $(MAINPATH)/EplStack/amibe.o \

@@ -52,7 +52,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <kernel/EplNmtk.h>
 #include <kernel/EplDllk.h>
 #include <kernel/dllkcal.h>
-#include <kernel/EplErrorHandlerk.h>
+#include <kernel/errhndk.h>
 #include <Benchmark.h>
 
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOK)) != 0)
@@ -118,7 +118,7 @@ static tEventDispatchEntry eventDispatchTbl_l[] =
     { kEplEventSinkNmtk,        kEplEventSourceDllk,        handleNmtEventinDll },
     { kEplEventSinkDllk,        kEplEventSourceDllk,        EplDllkProcess },
     { kEplEventSinkDllkCal,     kEplEventSourceDllk,        dllkcal_process },
-    { kEplEventSinkErrk,        kEplEventSourceErrk,        EplErrorHandlerkProcess },
+    { kEplEventSinkErrk,        kEplEventSourceErrk,        errhndk_process },
 #else
     { kEplEventSinkDllk,        kEplEventSourceDllk,        NULL },
     { kEplEventSinkDllkCal,     kEplEventSourceDllk,        NULL },
