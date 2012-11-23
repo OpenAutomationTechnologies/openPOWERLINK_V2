@@ -60,19 +60,19 @@
 			<location>OPENPOWERLINK_DIR/EplStack/EplDllk.c</location>
 		</link>
 		<link>
-			<name>EplDllkCal.c</name>
+			<name>dllkcal.c</name>
 			<type>1</type>
-			<location>OPENPOWERLINK_DIR/EplStack/EplDllkCal.c</location>
+			<location>OPENPOWERLINK_DIR/EplStack/kernel/dll/dllkcal.c</location>
 		</link>
 		<link>
-			<name>EplDlluCal.c</name>
+			<name>dllucal.c</name>
 			<type>1</type>
-			<location>OPENPOWERLINK_DIR/EplStack/EplDlluCal.c</location>
+			<location>OPENPOWERLINK_DIR/EplStack/user/dll/dllucal.c</location>
 		</link>
 		<link>
-			<name>EplDllCalShb.c</name>
+			<name>dllcal-shb.c</name>
 			<type>1</type>
-			<location>OPENPOWERLINK_DIR/EplStack/EplDllCalShb.c</location>
+			<location>OPENPOWERLINK_DIR/EplStack/common/dll/dllcal-shb.c</location>
 		</link>
 		<link>
 			<name>EplErrorHandlerk.c</name>

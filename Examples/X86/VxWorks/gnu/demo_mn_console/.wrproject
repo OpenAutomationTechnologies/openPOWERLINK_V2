@@ -18,6 +18,7 @@
                 <stringAttribute value="-I$(PRJ_ROOT_DIR)"/>
                 <stringAttribute value="-I$(PRJ_ROOT_DIR)/../../../../../Include"/>
                 <stringAttribute value="-I$(PRJ_ROOT_DIR)/../../../../../SharedBuff"/>
+                <stringAttribute value="-I$(PRJ_ROOT_DIR)/../../../../../EplStack"/>
                 <stringAttribute value="-I$(WIND_BASE)/target/h"/>
             </listAttribute>
             <listAttribute key="BLD::Info|Incl|SIMLINUXgnu">

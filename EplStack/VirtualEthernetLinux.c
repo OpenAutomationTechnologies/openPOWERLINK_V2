@@ -96,7 +96,7 @@
 #include <linux/skbuff.h>  /* for struct sk_buff */
 
 #include "kernel/VirtualEthernet.h"
-#include "kernel/EplDllkCal.h"
+#include "kernel/dllkcal.h"
 #include "kernel/EplDllk.h"
 
 

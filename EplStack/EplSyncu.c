@@ -69,7 +69,7 @@
 ****************************************************************************/
 
 #include "user/EplSyncu.h"
-#include "user/EplDlluCal.h"
+#include "user/dllucal.h"
 
 #if EPL_DLL_PRES_CHAINING_MN != FALSE
 

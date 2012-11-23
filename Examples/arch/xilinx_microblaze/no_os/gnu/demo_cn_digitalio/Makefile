@@ -58,6 +58,7 @@ INCLUDES=-I${APP_DIR}\
 -I${STACK_ROOT}/Include/kernel \
 -I${STACK_ROOT}/SharedBuff \
 -I${STACK_ROOT}/ObjDicts \
+-I${STACK_ROOT}/EplStack \
 -I${OBJDICT_DIR} \
 -I${PROCESSOR_NAME}/include \
 -I${TARGET_DIR}
@@ -73,8 +74,9 @@ ${EDRV_DIR}/source/omethlib.c \
 ${EDRV_DIR}/source/omethlibint.c \
 ${EDRV_DIR}/source/omethlib_phycfg_generic.c \
 ${STACK_ROOT}/EplStack/EplDllk.c \
-${STACK_ROOT}/EplStack/EplDllkCal.c \
-${STACK_ROOT}/EplStack/EplDlluCal.c \
+${STACK_ROOT}/EplStack/kernel/dll/dllkcal.c \
+${STACK_ROOT}/EplStack/user/dll/dllucal.c \
+${STACK_ROOT}/EplStack/common/dll/dllcal-direct.c \
 ${STACK_ROOT}/EplStack/EplLedu.c \
 ${STACK_ROOT}/EplStack/EplEventk.c \
 ${STACK_ROOT}/EplStack/EplEventu.c \

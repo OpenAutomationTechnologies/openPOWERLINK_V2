@@ -61,6 +61,7 @@ INCLUDES="${MAINDIR}/Include \
 ${MAINDIR}/Edrv/openmac/include \
 $(pwd) \
 ${MAINDIR}/SharedBuff \
+${MAINDIR}/EplStack \
 ${MAINDIR}/ObjDicts/CiA401_CN"
 
 # set DBG_MODE according to user args
@@ -86,9 +87,9 @@ ${MAINPATH}/Edrv/openmac/source/EplTimerSynck_OpenMac.c \
 ${MAINPATH}/Edrv/openmac/source/EplTgtTimeStamp_OpenMac.c \
 ${MAINPATH}/Edrv/openmac/source/omethlib.c ${MAINPATH}/Edrv/openmac/source/omethlibint.c \
 ${MAINPATH}/Edrv/openmac/source/omethlib_phycfg_generic.c \
-${MAINPATH}/EplStack/EplDllk.c ${MAINPATH}/EplStack/EplDllkCal.c \
-${MAINPATH}/EplStack/EplDlluCal.c \
-${MAINPATH}/EplStack/EplDllCalDirect.c \
+${MAINPATH}/EplStack/EplDllk.c ${MAINPATH}/EplStack/kernel/dll/dllkcal.c \
+${MAINPATH}/EplStack/user/dll/dllucal.c \
+${MAINPATH}/EplStack/common/dll/dllcal-direct.c \
 ${MAINPATH}/EplStack/EplLedu.c \
 ${MAINPATH}/EplStack/EplEventk.c ${MAINPATH}/EplStack/EplEventu.c \
 ${MAINPATH}/EplStack/EplNmtk.c \

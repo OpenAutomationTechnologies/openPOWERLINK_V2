@@ -38,8 +38,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include "EplDllCalDirect.h"
-#include "EplDllCal.h"
+#include "dllcal-direct.h"
+#include <dllcal.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //

@@ -68,20 +68,20 @@
 
 ****************************************************************************/
 
-#include "kernel/EplDllkCal.h"
+#include "kernel/dllkcal.h"
 #include "kernel/EplDllk.h"
 #include "kernel/EplEventk.h"
-#include "EplDllCal.h"
+#include "dllcal.h"
 
 #if EPL_DLLCAL_TX_GEN_QUEUE == EPL_QUEUE_DIRECT || \
     EPL_DLLCAL_TX_NMT_QUEUE == EPL_QUEUE_DIRECT
-#include "EplDllCalDirect.h"
+#include "common/dll/dllcal-direct.h"
 #endif
 #if EPL_DLLCAL_TX_GEN_QUEUE == EPL_QUEUE_SHB || \
     EPL_DLLCAL_TX_NMT_QUEUE == EPL_QUEUE_SHB || \
     (EPL_DLLCAL_TX_SYNC_QUEUE == EPL_QUEUE_SHB && \
             EPL_DLL_PRES_CHAINING_MN != FALSE)
-#include "EplDllCalShb.h"
+#include "common/dll/dllcal-shb.h"
 #endif
 #if EPL_DLLCAL_TX_GEN_QUEUE == EPL_QUEUE_HOSTINTERFACE || \
     EPL_DLLCAL_TX_NMT_QUEUE == EPL_QUEUE_HOSTINTERFACE || \

@@ -43,7 +43,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include "EplDll.h"
-#include "EplDllCal.h"
+#include "dllcal.h"
 
 //------------------------------------------------------------------------------
 // const defines

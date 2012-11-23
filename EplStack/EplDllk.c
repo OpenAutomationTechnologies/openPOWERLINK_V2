@@ -69,7 +69,7 @@
 ****************************************************************************/
 
 #include "kernel/EplDllk.h"
-#include "kernel/EplDllkCal.h"
+#include "kernel/dllkcal.h"
 #include "kernel/EplEventk.h"
 #include "kernel/EplErrorHandlerk.h"
 #include "EplNmt.h"
