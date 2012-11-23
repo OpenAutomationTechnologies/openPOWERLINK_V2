@@ -73,13 +73,21 @@
 
 #include "EplDllCal.h"
 
-// include only if direct call between user- and kernelspace is enabled
-#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLK)) != 0)
-#include "kernel/EplDllkCal.h"
+#if EPL_DLLCAL_TX_GEN_QUEUE == EPL_QUEUE_DIRECT || \
+    EPL_DLLCAL_TX_NMT_QUEUE == EPL_QUEUE_DIRECT
+#include "EplDllCalDirect.h"
 #endif
-
-#if EPL_USE_SHAREDBUFF != FALSE
-#include "SharedBuff.h"
+#if EPL_DLLCAL_TX_GEN_QUEUE == EPL_QUEUE_SHB || \
+    EPL_DLLCAL_TX_NMT_QUEUE == EPL_QUEUE_SHB || \
+    (EPL_DLLCAL_TX_SYNC_QUEUE == EPL_QUEUE_SHB && \
+            EPL_DLL_PRES_CHAINING_MN != FALSE)
+#include "EplDllCalShb.h"
+#endif
+#if EPL_DLLCAL_TX_GEN_QUEUE == EPL_QUEUE_HOSTINTERFACE || \
+    EPL_DLLCAL_TX_NMT_QUEUE == EPL_QUEUE_HOSTINTERFACE || \
+    (EPL_DLLCAL_TX_SYNC_QUEUE == EPL_QUEUE_HOSTINTERFACE && \
+            EPL_DLL_PRES_CHAINING_MN != FALSE)
+#error "Host interface not yet supported!"
 #endif
 
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLU)) != 0)
@@ -97,8 +105,9 @@
 //---------------------------------------------------------------------------
 
 #if (EPL_DLL_PRES_CHAINING_MN != FALSE) \
-    && (EPL_USE_SHAREDBUFF == FALSE)
-#error "DLLCal module needs SharedBuffer for PRC MN"
+    && (EPL_DLLCAL_TX_SYNC_QUEUE != EPL_QUEUE_SHB) \
+    && (EPL_DLLCAL_TX_SYNC_QUEUE != EPL_QUEUE_HOSTINTERFACE)
+#error "DLLCal module does not support direct calls with PRC MN"
 #endif
 
 
@@ -147,9 +156,15 @@ typedef struct
 {
     tEplDlluCbAsnd  m_apfnDlluCbAsnd[EPL_DLL_MAX_ASND_SERVICE_ID];
 
+    tEplDllCalQueueInstance     DllCalQueueTxNmt_m;
+        ///< Dll Cal Queue instance for NMT priority
+    tEplDllCalQueueInstance     DllCalQueueTxGen_m;
+        ///< Dll Cal Queue instance for Generic priority
+
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0) \
     && (EPL_DLL_PRES_CHAINING_MN != FALSE)
-    tShbInstance    m_ShbInstanceTxSync;   // FIFO for SyncRequests
+    tEplDllCalQueueInstance     DllCalQueueTxSync_m;
+        ///< Dll Cal Queue instance for Sync Request
 #endif
 
 } tEplDlluCalInstance;
@@ -192,25 +207,52 @@ static tEplKernel EplDlluCalSetAsndServiceIdFilter(tEplDllAsndServiceId ServiceI
 tEplKernel EplDlluCalAddInstance(void)
 {
 tEplKernel      Ret = kEplSuccessful;
-#if EPL_DLL_PRES_CHAINING_MN != FALSE
-tShbError       ShbError;
-unsigned int    fShbNewCreated;
-#endif
 
     // reset instance structure
     EPL_MEMSET(&EplDlluCalInstance_g, 0, sizeof (EplDlluCalInstance_g));
 
-#if EPL_DLL_PRES_CHAINING_MN != FALSE
-    ShbError = ShbCirAllocBuffer (EPL_DLLCAL_BUFFER_SIZE_TX_SYNC, EPL_DLLCAL_BUFFER_ID_TX_SYNC,
-        &EplDlluCalInstance_g.m_ShbInstanceTxSync, &fShbNewCreated);
-    // returns kShbOk, kShbOpenMismatch, kShbOutOfMem or kShbInvalidArg
+#if EPL_DLLCAL_TX_NMT_QUEUE == EPL_QUEUE_DIRECT
+    Ret = EplDllCalDirectAddInstance(&EplDlluCalInstance_g.DllCalQueueTxNmt_m,
+            kEplDllCalQueueTxNmt);
+#elif EPL_DLLCAL_TX_NMT_QUEUE == EPL_QUEUE_SHB
+    Ret = EplDllCalShbAddInstance(&EplDlluCalInstance_g.DllCalQueueTxNmt_m,
+            kEplDllCalQueueTxNmt);
+#elif EPL_DLLCAL_TX_NMT_QUEUE == EPL_QUEUE_HOSTINTERFACE
 
-    if (ShbError != kShbOk)
-    {
-        Ret = kEplNoResource;
-    }
 #endif
+    if(Ret != kEplSuccessful)
+    {
+        goto Exit;
+    }
 
+#if EPL_DLLCAL_TX_GEN_QUEUE == EPL_QUEUE_DIRECT
+    Ret = EplDllCalDirectAddInstance(&EplDlluCalInstance_g.DllCalQueueTxGen_m,
+            kEplDllCalQueueTxGen);
+#elif EPL_DLLCAL_TX_GEN_QUEUE == EPL_QUEUE_SHB
+    Ret = EplDllCalShbAddInstance(&EplDlluCalInstance_g.DllCalQueueTxGen_m,
+            kEplDllCalQueueTxGen);
+#elif EPL_DLLCAL_TX_GEN_QUEUE == EPL_QUEUE_HOSTINTERFACE
+
+#endif
+    if(Ret != kEplSuccessful)
+    {
+        goto Exit;
+    }
+
+#if EPL_DLL_PRES_CHAINING_MN != FALSE
+#if EPL_DLLCAL_TX_SYNC_QUEUE == EPL_QUEUE_SHB
+    Ret = EplDllCalShbAddInstance(&EplDlluCalInstance_g.DllCalQueueTxSync_m,
+            kEplDllCalQueueTxSync);
+#elif EPL_DLLCAL_TX_SYNC_QUEUE == EPL_QUEUE_HOSTINTERFACE
+
+#endif
+#endif
+    if(Ret != kEplSuccessful)
+    {
+        goto Exit;
+    }
+
+Exit:
     return Ret;
 }
 
@@ -232,20 +274,47 @@ unsigned int    fShbNewCreated;
 tEplKernel EplDlluCalDelInstance(void)
 {
 tEplKernel      Ret = kEplSuccessful;
-#if EPL_DLL_PRES_CHAINING_MN != FALSE
-tShbError       ShbError;
 
-    ShbError = ShbCirReleaseBuffer (EplDlluCalInstance_g.m_ShbInstanceTxSync);
-    if (ShbError != kShbOk)
+#if EPL_DLLCAL_TX_NMT_QUEUE == EPL_QUEUE_DIRECT
+    Ret = EplDllCalDirectDelInstance(EplDlluCalInstance_g.DllCalQueueTxNmt_m);
+#elif EPL_DLLCAL_TX_NMT_QUEUE == EPL_QUEUE_SHB
+    Ret = EplDllCalShbDelInstance(EplDlluCalInstance_g.DllCalQueueTxNmt_m);
+#elif EPL_DLLCAL_TX_NMT_QUEUE == EPL_QUEUE_HOSTINTERFACE
+
+#endif
+    if(Ret != kEplSuccessful)
     {
-        Ret = kEplNoResource;
+        goto Exit;
     }
-    EplDlluCalInstance_g.m_ShbInstanceTxSync = NULL;
+
+#if EPL_DLLCAL_TX_GEN_QUEUE == EPL_QUEUE_DIRECT
+    Ret = EplDllCalDirectDelInstance(EplDlluCalInstance_g.DllCalQueueTxGen_m);
+#elif EPL_DLLCAL_TX_GEN_QUEUE == EPL_QUEUE_SHB
+    Ret = EplDllCalShbDelInstance(EplDlluCalInstance_g.DllCalQueueTxGen_m);
+#elif EPL_DLLCAL_TX_GEN_QUEUE == EPL_QUEUE_HOSTINTERFACE
+
+#endif
+    if(Ret != kEplSuccessful)
+    {
+        goto Exit;
+    }
+
+#if EPL_DLL_PRES_CHAINING_MN != FALSE
+#if EPL_DLLCAL_TX_SYNC_QUEUE == EPL_QUEUE_SHB
+    Ret = EplDllCalShbDelInstance(EplDlluCalInstance_g.DllCalQueueTxSync_m);
+#elif EPL_DLLCAL_TX_SYNC_QUEUE == EPL_QUEUE_HOSTINTERFACE
+
+#endif
+    if(Ret != kEplSuccessful)
+    {
+        goto Exit;
+    }
 #endif
 
     // reset instance structure
     EPL_MEMSET(&EplDlluCalInstance_g, 0, sizeof (EplDlluCalInstance_g));
 
+Exit:
     return Ret;
 }
 
@@ -398,7 +467,6 @@ tEplKernel  Ret = kEplSuccessful;
 
         // set filter in DLL module in kernel part
         Ret = EplDlluCalSetAsndServiceIdFilter(ServiceId_p, Filter_p);
-
     }
     else
     {
@@ -429,13 +497,56 @@ tEplKernel  Ret = kEplSuccessful;
 tEplKernel EplDlluCalAsyncSend(tEplFrameInfo * pFrameInfo_p, tEplDllAsyncReqPriority Priority_p)
 {
 tEplKernel  Ret = kEplSuccessful;
+tEplEvent   Event;
 
-#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLK)) != 0)
-    Ret = EplDllkCalAsyncSend(pFrameInfo_p, Priority_p);
-#else
-    Ret = kEplSuccessful;
+    switch (Priority_p)
+    {
+        case kEplDllAsyncReqPrioNmt:
+#if EPL_DLLCAL_TX_NMT_QUEUE == EPL_QUEUE_DIRECT
+            Ret = EplDllCalDirectInsertDataBlock(
+                    EplDlluCalInstance_g.DllCalQueueTxNmt_m,
+                    (BYTE*)pFrameInfo_p->m_pFrame,
+                    &(pFrameInfo_p->m_uiFrameSize));
+#elif EPL_DLLCAL_TX_NMT_QUEUE == EPL_QUEUE_SHB
+            Ret = EplDllCalShbInsertDataBlock(
+                    EplDlluCalInstance_g.DllCalQueueTxNmt_m,
+                    (BYTE*)pFrameInfo_p->m_pFrame,
+                    &(pFrameInfo_p->m_uiFrameSize));
+#elif EPL_DLLCAL_TX_NMT_QUEUE == EPL_QUEUE_HOSTINTERFACE
+
 #endif
+            break;
 
+        default:
+#if EPL_DLLCAL_TX_GEN_QUEUE == EPL_QUEUE_DIRECT
+            Ret = EplDllCalDirectInsertDataBlock(
+                    EplDlluCalInstance_g.DllCalQueueTxGen_m,
+                    (BYTE*)pFrameInfo_p->m_pFrame,
+                    &(pFrameInfo_p->m_uiFrameSize));
+#elif EPL_DLLCAL_TX_GEN_QUEUE == EPL_QUEUE_SHB
+            Ret = EplDllCalShbInsertDataBlock(
+                    EplDlluCalInstance_g.DllCalQueueTxGen_m,
+                    (BYTE*)pFrameInfo_p->m_pFrame,
+                    &(pFrameInfo_p->m_uiFrameSize));
+#elif EPL_DLLCAL_TX_GEN_QUEUE == EPL_QUEUE_HOSTINTERFACE
+
+#endif
+            break;
+    }
+
+    if(Ret != kEplSuccessful)
+    {
+        goto Exit;
+    }
+
+    // post event to DLL
+    Event.m_EventSink = kEplEventSinkDllk;
+    Event.m_EventType = kEplEventTypeDllkFillTx;
+    EPL_MEMSET(&Event.m_NetTime, 0x00, sizeof(Event.m_NetTime));
+    Event.m_pArg = &Priority_p;
+    Event.m_uiSize = sizeof(Priority_p);
+    Ret = EplEventuPost(&Event);
+Exit:
     return Ret;
 }
 
@@ -516,15 +627,14 @@ Exit:
 tEplKernel EplDlluCalIssueSyncRequest(tEplDllSyncRequest* pSyncRequest_p, unsigned int uiSize_p)
 {
 tEplKernel  Ret = kEplSuccessful;
-tShbError   ShbError;
 
-    ShbError = ShbCirWriteDataBlock(EplDlluCalInstance_g.m_ShbInstanceTxSync, pSyncRequest_p, uiSize_p);
-    if (ShbError != kShbOk)
-    {
-        Ret = kEplDllAsyncSyncReqFull;
-    }
+#if EPL_DLLCAL_TX_SYNC_QUEUE == EPL_QUEUE_SHB
+    Ret = EplDllCalShbInsertDataBlock(EplDlluCalInstance_g.DllCalQueueTxSync_m,
+            (BYTE*)pSyncRequest_p, &uiSize_p);
+#elif EPL_DLLCAL_TX_SYNC_QUEUE == EPL_QUEUE_HOSTINTERFACE
 
-//Exit:
+#endif
+
     return Ret;
 }
 #endif
@@ -626,40 +736,6 @@ tEplEvent   Event;
 }
 
 #endif
-
-/*
-//---------------------------------------------------------------------------
-//
-// Function:    EplDlluCalSoftDeleteNode()
-//
-// Description: removes the specified node softly from the isochronous phase.
-//
-// Parameters:  uiNodeId_p              = node ID
-//
-// Returns:     tEplKernel              = error code
-//
-//
-// State:
-//
-//---------------------------------------------------------------------------
-
-tEplKernel EplDlluCalSoftDeleteNode(unsigned int uiNodeId_p)
-{
-tEplKernel  Ret = kEplSuccessful;
-tEplEvent   Event;
-
-    Event.m_EventSink = kEplEventSinkDllkCal;
-    Event.m_EventType = kEplEventTypeDllkSoftDelNode;
-    Event.m_pArg = &uiNodeId_p;
-    Event.m_uiSize = sizeof (uiNodeId_p);
-
-    Ret = EplEventuPost(&Event);
-
-    return Ret;
-}
-*/
-
-
 
 //=========================================================================//
 //                                                                         //

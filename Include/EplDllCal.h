@@ -128,6 +128,29 @@ typedef struct
 
 } tEplDllCalIssueRequest;
 
+/**
+\brief enumerator for Queue
+
+This enumerator identifies DLLCal queue instance in order to differ between
+the queues.
+*/
+typedef enum
+{
+    kEplDllCalQueueTxNmt        = 0x01, ///< TX NMT queue
+    kEplDllCalQueueTxGen        = 0x02, ///< TX Generic queue
+    kEplDllCalQueueTxSync       = 0x03, ///< Tx Sync queue
+
+} tEplDllCalQueue;
+
+/**
+\brief type for DLL CAL queue instance
+
+The DllCalQueueInstance is used to identify the abstracted queue instance in
+EplDll*Cal. The queue itself is defined by its implementation (e.g. DIRECT or
+SHB)
+*/
+typedef void* tEplDllCalQueueInstance;
+
 //---------------------------------------------------------------------------
 // function prototypes
 //---------------------------------------------------------------------------

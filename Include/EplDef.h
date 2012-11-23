@@ -311,6 +311,28 @@
 #define EPL_USE_SHAREDBUFF                  TRUE
 #endif
 
+#ifndef EPL_DLLCAL_TX_NMT_QUEUE
+#define EPL_DLLCAL_TX_NMT_QUEUE             EPL_QUEUE_SHB
+#endif
+
+#ifndef EPL_DLLCAL_TX_GEN_QUEUE
+#define EPL_DLLCAL_TX_GEN_QUEUE             EPL_QUEUE_SHB
+#endif
+
+#ifndef EPL_DLLCAL_TX_SYNC_QUEUE
+#define EPL_DLLCAL_TX_SYNC_QUEUE            EPL_QUEUE_SHB
+#endif
+
+#if ((EPL_EVENT_USE_KERNEL_QUEUE == TRUE) || \
+     (EPL_DLLCAL_TX_NMT_QUEUE == EPL_QUEUE_SHB) || \
+     (EPL_DLLCAL_TX_GEN_QUEUE == EPL_QUEUE_SHB) || \
+     ((EPL_DLLCAL_TX_SYNC_QUEUE == EPL_QUEUE_SHB) && \
+      (EPL_DLL_PRES_CHAINING_MN != FALSE)) \
+    )
+#undef EPL_USE_SHAREDBUFF
+#define EPL_USE_SHAREDBUFF                  TRUE
+#endif
+
 // rough approximation of max. number of timer entries for module EplTimeruGeneric
 #ifndef EPL_TIMERU_MAX_ENTRIES
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)

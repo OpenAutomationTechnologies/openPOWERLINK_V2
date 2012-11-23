@@ -127,6 +127,13 @@
 #define EPL_MODULE_LEDU        0x00020000L // LED user part module
 #define EPL_MODULE_GW309ASCII  0x00040000L // ASCII Gateway according to CiA309 part 3
 
+// define for event queue implementation
+// These constants determine the implementation of the event queues
+// Use this constants for EPL_***_QUEUE constants
+#define EPL_QUEUE_DIRECT              1
+#define EPL_QUEUE_SHB                 2
+#define EPL_QUEUE_HOSTINTERFACE       3   //use special host interface
+
 #include "EplCfg.h"     // EPL configuration file (configuration from application)
 
 #include "global.h"     // global definitions

@@ -71,10 +71,23 @@
 #include "kernel/EplDllkCal.h"
 #include "kernel/EplDllk.h"
 #include "kernel/EplEventk.h"
-
 #include "EplDllCal.h"
-#if EPL_USE_SHAREDBUFF != FALSE
-#include "SharedBuff.h"
+
+#if EPL_DLLCAL_TX_GEN_QUEUE == EPL_QUEUE_DIRECT || \
+    EPL_DLLCAL_TX_NMT_QUEUE == EPL_QUEUE_DIRECT
+#include "EplDllCalDirect.h"
+#endif
+#if EPL_DLLCAL_TX_GEN_QUEUE == EPL_QUEUE_SHB || \
+    EPL_DLLCAL_TX_NMT_QUEUE == EPL_QUEUE_SHB || \
+    (EPL_DLLCAL_TX_SYNC_QUEUE == EPL_QUEUE_SHB && \
+            EPL_DLL_PRES_CHAINING_MN != FALSE)
+#include "EplDllCalShb.h"
+#endif
+#if EPL_DLLCAL_TX_GEN_QUEUE == EPL_QUEUE_HOSTINTERFACE || \
+    EPL_DLLCAL_TX_NMT_QUEUE == EPL_QUEUE_HOSTINTERFACE || \
+    (EPL_DLLCAL_TX_SYNC_QUEUE == EPL_QUEUE_HOSTINTERFACE && \
+            EPL_DLL_PRES_CHAINING_MN != FALSE)
+#error "Host interface not yet supported!"
 #endif
 
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLK)) != 0)
@@ -91,8 +104,9 @@
 //---------------------------------------------------------------------------
 
 #if (EPL_DLL_PRES_CHAINING_MN != FALSE) \
-    && (EPL_USE_SHAREDBUFF == FALSE)
-#error "DLLCal module needs SharedBuffer for PRC MN"
+    && (EPL_DLLCAL_TX_SYNC_QUEUE != EPL_QUEUE_SHB) \
+    && (EPL_DLLCAL_TX_SYNC_QUEUE != EPL_QUEUE_HOSTINTERFACE)
+#error "DLLCal module does not support direct calls with PRC MN"
 #endif
 
 
@@ -122,7 +136,6 @@
 //
 /***************************************************************************/
 
-
 //=========================================================================//
 //                                                                         //
 //          P R I V A T E   D E F I N I T I O N S                          //
@@ -145,15 +158,14 @@
 
 typedef struct
 {
-#if EPL_USE_SHAREDBUFF != FALSE
-//    tShbInstance    m_ShbInstanceRx;      // FIFO for Rx ASnd frames
-    tShbInstance    m_ShbInstanceTxNmt;   // FIFO for Tx frames with NMT request priority
-    tShbInstance    m_ShbInstanceTxGen;   // FIFO for Tx frames with generic priority
-#else
-    unsigned int    m_uiFrameSizeNmt;
-    BYTE            m_abFrameNmt[1500];
-    unsigned int    m_uiFrameSizeGen;
-    BYTE            m_abFrameGen[1500];
+      tEplDllCalQueueInstance     DllCalQueueTxNmt_m;
+          ///< Dll Cal Queue instance for NMT priority
+      tEplDllCalQueueInstance     DllCalQueueTxGen_m;
+          ///< Dll Cal Queue instance for Generic priority
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0) \
+    && (EPL_DLL_PRES_CHAINING_MN != FALSE)
+    tEplDllCalQueueInstance     DllCalQueueTxSync_m;
+        ///< Dll Cal Queue instance for Sync Request
 #endif
 
     tEplDllkCalStatistics   m_Statistics;
@@ -174,10 +186,6 @@ typedef struct
         // second 254 entries represent the NMT requests of the corresponding node
     unsigned int    m_uiNextQueueCnRequest;
     unsigned int    m_uiNextRequestQueue;
-
-#if EPL_DLL_PRES_CHAINING_MN != FALSE
-    tShbInstance    m_ShbInstanceTxSync;   // FIFO for SyncRequests
-#endif
 
 #endif
 
@@ -220,44 +228,52 @@ static tEplDllkCalInstance     EplDllkCalInstance_g;
 tEplKernel EplDllkCalAddInstance(void)
 {
 tEplKernel      Ret = kEplSuccessful;
-#if EPL_USE_SHAREDBUFF != FALSE
-tShbError       ShbError;
-unsigned int    fShbNewCreated;
 
-    ShbError = ShbCirAllocBuffer (EPL_DLLCAL_BUFFER_SIZE_TX_NMT, EPL_DLLCAL_BUFFER_ID_TX_NMT,
-        &EplDllkCalInstance_g.m_ShbInstanceTxNmt, &fShbNewCreated);
-    // returns kShbOk, kShbOpenMismatch, kShbOutOfMem or kShbInvalidArg
+    // reset instance structure
+    EPL_MEMSET(&EplDllkCalInstance_g, 0, sizeof (EplDllkCalInstance_g));
 
-    if (ShbError != kShbOk)
+#if EPL_DLLCAL_TX_NMT_QUEUE == EPL_QUEUE_DIRECT
+    Ret = EplDllCalDirectAddInstance(&EplDllkCalInstance_g.DllCalQueueTxNmt_m,
+            kEplDllCalQueueTxNmt);
+#elif EPL_DLLCAL_TX_NMT_QUEUE == EPL_QUEUE_SHB
+    Ret = EplDllCalShbAddInstance(&EplDllkCalInstance_g.DllCalQueueTxNmt_m,
+            kEplDllCalQueueTxNmt);
+#elif EPL_DLLCAL_TX_NMT_QUEUE == EPL_QUEUE_HOSTINTERFACE
+
+#endif
+    if(Ret != kEplSuccessful)
     {
-        Ret = kEplNoResource;
+        goto Exit;
     }
 
-    ShbError = ShbCirAllocBuffer (EPL_DLLCAL_BUFFER_SIZE_TX_GEN, EPL_DLLCAL_BUFFER_ID_TX_GEN,
-        &EplDllkCalInstance_g.m_ShbInstanceTxGen, &fShbNewCreated);
-    // returns kShbOk, kShbOpenMismatch, kShbOutOfMem or kShbInvalidArg
+#if EPL_DLLCAL_TX_GEN_QUEUE == EPL_QUEUE_DIRECT
+    Ret = EplDllCalDirectAddInstance(&EplDllkCalInstance_g.DllCalQueueTxGen_m,
+            kEplDllCalQueueTxGen);
+#elif EPL_DLLCAL_TX_GEN_QUEUE == EPL_QUEUE_SHB
+    Ret = EplDllCalShbAddInstance(&EplDllkCalInstance_g.DllCalQueueTxGen_m,
+            kEplDllCalQueueTxGen);
+#elif EPL_DLLCAL_TX_GEN_QUEUE == EPL_QUEUE_HOSTINTERFACE
 
-    if (ShbError != kShbOk)
+#endif
+    if(Ret != kEplSuccessful)
     {
-        Ret = kEplNoResource;
+        goto Exit;
     }
 
 #if EPL_DLL_PRES_CHAINING_MN != FALSE
-    ShbError = ShbCirAllocBuffer (EPL_DLLCAL_BUFFER_SIZE_TX_SYNC, EPL_DLLCAL_BUFFER_ID_TX_SYNC,
-        &EplDllkCalInstance_g.m_ShbInstanceTxSync, &fShbNewCreated);
-    // returns kShbOk, kShbOpenMismatch, kShbOutOfMem or kShbInvalidArg
+#if EPL_DLLCAL_TX_SYNC_QUEUE == EPL_QUEUE_SHB
+    Ret = EplDllCalShbAddInstance(&EplDllkCalInstance_g.DllCalQueueTxSync_m,
+            kEplDllCalQueueTxSync);
+#elif EPL_DLLCAL_TX_SYNC_QUEUE == EPL_QUEUE_HOSTINTERFACE
 
-    if (ShbError != kShbOk)
+#endif
+#endif
+    if(Ret != kEplSuccessful)
     {
-        Ret = kEplNoResource;
+        goto Exit;
     }
-#endif
 
-#else
-    EplDllkCalInstance_g.m_uiFrameSizeNmt = 0;
-    EplDllkCalInstance_g.m_uiFrameSizeGen = 0;
-#endif
-
+Exit:
     return Ret;
 }
 
@@ -279,37 +295,47 @@ unsigned int    fShbNewCreated;
 tEplKernel EplDllkCalDelInstance(void)
 {
 tEplKernel      Ret = kEplSuccessful;
-#if EPL_USE_SHAREDBUFF != FALSE
-tShbError       ShbError;
 
-    ShbError = ShbCirReleaseBuffer (EplDllkCalInstance_g.m_ShbInstanceTxNmt);
-    if (ShbError != kShbOk)
-    {
-        Ret = kEplNoResource;
-    }
-    EplDllkCalInstance_g.m_ShbInstanceTxNmt = NULL;
+#if EPL_DLLCAL_TX_NMT_QUEUE == EPL_QUEUE_DIRECT
+    Ret = EplDllCalDirectDelInstance(EplDllkCalInstance_g.DllCalQueueTxNmt_m);
+#elif EPL_DLLCAL_TX_NMT_QUEUE == EPL_QUEUE_SHB
+    Ret = EplDllCalShbDelInstance(EplDllkCalInstance_g.DllCalQueueTxNmt_m);
+#elif EPL_DLLCAL_TX_NMT_QUEUE == EPL_QUEUE_HOSTINTERFACE
 
-    ShbError = ShbCirReleaseBuffer (EplDllkCalInstance_g.m_ShbInstanceTxGen);
-    if (ShbError != kShbOk)
+#endif
+    if(Ret != kEplSuccessful)
     {
-        Ret = kEplNoResource;
+        goto Exit;
     }
-    EplDllkCalInstance_g.m_ShbInstanceTxGen = NULL;
+
+#if EPL_DLLCAL_TX_GEN_QUEUE == EPL_QUEUE_DIRECT
+    Ret = EplDllCalDirectDelInstance(EplDllkCalInstance_g.DllCalQueueTxGen_m);
+#elif EPL_DLLCAL_TX_GEN_QUEUE == EPL_QUEUE_SHB
+    Ret = EplDllCalShbDelInstance(EplDllkCalInstance_g.DllCalQueueTxGen_m);
+#elif EPL_DLLCAL_TX_GEN_QUEUE == EPL_QUEUE_HOSTINTERFACE
+
+#endif
+    if(Ret != kEplSuccessful)
+    {
+        goto Exit;
+    }
 
 #if EPL_DLL_PRES_CHAINING_MN != FALSE
-    ShbError = ShbCirReleaseBuffer (EplDllkCalInstance_g.m_ShbInstanceTxSync);
-    if (ShbError != kShbOk)
+#if EPL_DLLCAL_TX_SYNC_QUEUE == EPL_QUEUE_SHB
+    Ret = EplDllCalShbDelInstance(EplDllkCalInstance_g.DllCalQueueTxSync_m);
+#elif EPL_DLLCAL_TX_SYNC_QUEUE == EPL_QUEUE_HOSTINTERFACE
+
+#endif
+    if(Ret != kEplSuccessful)
     {
-        Ret = kEplNoResource;
+        goto Exit;
     }
-    EplDllkCalInstance_g.m_ShbInstanceTxSync = NULL;
 #endif
 
-#else
-    EplDllkCalInstance_g.m_uiFrameSizeNmt = 0;
-    EplDllkCalInstance_g.m_uiFrameSizeGen = 0;
-#endif
+    // reset instance structure
+    EPL_MEMSET(&EplDllkCalInstance_g, 0, sizeof (EplDllkCalInstance_g));
 
+Exit:
     return Ret;
 }
 
@@ -439,18 +465,20 @@ tEplKernel      Ret = kEplSuccessful;
 tEplKernel EplDllkCalAsyncGetTxCount(tEplDllAsyncReqPriority * pPriority_p, unsigned int * puiCount_p)
 {
 tEplKernel  Ret = kEplSuccessful;
-#if EPL_USE_SHAREDBUFF != FALSE
-tShbError       ShbError;
-unsigned long   ulFrameCount;
+unsigned long ulFrameCount;
 
-    // get frame count of Tx FIFO with NMT request priority
-    ShbError = ShbCirGetReadBlockCount (EplDllkCalInstance_g.m_ShbInstanceTxNmt, &ulFrameCount);
-    // returns kShbOk, kShbInvalidArg
+#if EPL_DLLCAL_TX_NMT_QUEUE == EPL_QUEUE_DIRECT
+    Ret = EplDllCalDirectGetDataBlockCount(
+            EplDllkCalInstance_g.DllCalQueueTxNmt_m, &ulFrameCount);
+#elif EPL_DLLCAL_TX_NMT_QUEUE == EPL_QUEUE_SHB
+    Ret = EplDllCalShbGetDataBlockCount(EplDllkCalInstance_g.DllCalQueueTxNmt_m,
+            &ulFrameCount);
+#elif EPL_DLLCAL_TX_NMT_QUEUE == EPL_QUEUE_HOSTINTERFACE
 
-    // error handling
-    if (ShbError != kShbOk)
+#endif
+
+    if(Ret != kEplSuccessful)
     {
-        Ret = kEplNoResource;
         goto Exit;
     }
 
@@ -466,14 +494,18 @@ unsigned long   ulFrameCount;
         goto Exit;
     }
 
-    // get frame count of Tx FIFO with generic priority
-    ShbError = ShbCirGetReadBlockCount (EplDllkCalInstance_g.m_ShbInstanceTxGen, &ulFrameCount);
-    // returns kShbOk, kShbInvalidArg
+#if EPL_DLLCAL_TX_GEN_QUEUE == EPL_QUEUE_DIRECT
+    Ret = EplDllCalDirectGetDataBlockCount(
+            EplDllkCalInstance_g.DllCalQueueTxGen_m, &ulFrameCount);
+#elif EPL_DLLCAL_TX_GEN_QUEUE == EPL_QUEUE_SHB
+    Ret = EplDllCalShbGetDataBlockCount(EplDllkCalInstance_g.DllCalQueueTxGen_m,
+            &ulFrameCount);
+#elif EPL_DLLCAL_TX_GEN_QUEUE == EPL_QUEUE_HOSTINTERFACE
 
-    // error handling
-    if (ShbError != kShbOk)
+#endif
+
+    if(Ret != kEplSuccessful)
     {
-        Ret = kEplNoResource;
         goto Exit;
     }
 
@@ -486,24 +518,6 @@ unsigned long   ulFrameCount;
     *puiCount_p = (unsigned int) ulFrameCount;
 
 Exit:
-#else
-    if (EplDllkCalInstance_g.m_uiFrameSizeNmt > 0)
-    {
-        *pPriority_p = kEplDllAsyncReqPrioNmt;
-        *puiCount_p = 1;
-    }
-    else if (EplDllkCalInstance_g.m_uiFrameSizeGen > 0)
-    {
-        *pPriority_p = kEplDllAsyncReqPrioGeneric;
-        *puiCount_p = 1;
-    }
-    else
-    {
-        *pPriority_p = kEplDllAsyncReqPrioGeneric;
-        *puiCount_p = 0;
-    }
-#endif
-
     return Ret;
 }
 
@@ -528,58 +542,37 @@ Exit:
 tEplKernel EplDllkCalAsyncGetTxFrame(void * pFrame_p, unsigned int * puiFrameSize_p, tEplDllAsyncReqPriority Priority_p)
 {
 tEplKernel      Ret = kEplSuccessful;
-#if EPL_USE_SHAREDBUFF != FALSE
-tShbError       ShbError;
-unsigned long   ulFrameSize;
+
 
     switch (Priority_p)
     {
         case kEplDllAsyncReqPrioNmt:    // NMT request priority
-            ShbError = ShbCirReadDataBlock (EplDllkCalInstance_g.m_ShbInstanceTxNmt, (BYTE *) pFrame_p, *puiFrameSize_p, &ulFrameSize);
-            // returns kShbOk, kShbDataTruncated, kShbInvalidArg, kShbNoReadableData
-            break;
-
-        default:    // generic priority
-            ShbError = ShbCirReadDataBlock (EplDllkCalInstance_g.m_ShbInstanceTxGen, (BYTE *) pFrame_p, *puiFrameSize_p, &ulFrameSize);
-            // returns kShbOk, kShbDataTruncated, kShbInvalidArg, kShbNoReadableData
-            break;
-
-    }
-
-    // error handling
-    if (ShbError != kShbOk)
-    {
-        if (ShbError == kShbNoReadableData)
-        {
-            Ret = kEplDllAsyncTxBufferEmpty;
-        }
-        else
-        {   // other error
-            Ret = kEplNoResource;
-        }
-        goto Exit;
-    }
-
-    *puiFrameSize_p = (unsigned int) ulFrameSize;
-
-Exit:
-#else
-    switch (Priority_p)
-    {
-        case kEplDllAsyncReqPrioNmt:    // NMT request priority
-            *puiFrameSize_p = min(*puiFrameSize_p, EplDllkCalInstance_g.m_uiFrameSizeNmt);
-            EPL_MEMCPY(pFrame_p, EplDllkCalInstance_g.m_abFrameNmt, *puiFrameSize_p);
-            EplDllkCalInstance_g.m_uiFrameSizeNmt = 0;
-            break;
-
-        default:    // generic priority
-            *puiFrameSize_p = min(*puiFrameSize_p, EplDllkCalInstance_g.m_uiFrameSizeGen);
-            EPL_MEMCPY(pFrame_p, EplDllkCalInstance_g.m_abFrameGen, *puiFrameSize_p);
-            EplDllkCalInstance_g.m_uiFrameSizeGen = 0;
-            break;
-    }
+#if EPL_DLLCAL_TX_NMT_QUEUE == EPL_QUEUE_DIRECT
+            Ret = EplDllCalDirectGetDataBlock(
+                    EplDllkCalInstance_g.DllCalQueueTxNmt_m,
+                    (BYTE*) pFrame_p, puiFrameSize_p);
+#elif EPL_DLLCAL_TX_NMT_QUEUE == EPL_QUEUE_SHB
+            Ret = EplDllCalShbGetDataBlock(
+                    EplDllkCalInstance_g.DllCalQueueTxNmt_m,
+                    (BYTE*) pFrame_p, puiFrameSize_p);
+#elif EPL_DLLCAL_TX_NMT_QUEUE == EPL_QUEUE_HOSTINTERFACE
 
 #endif
+            break;
+        default:    // generic priority
+#if EPL_DLLCAL_TX_GEN_QUEUE == EPL_QUEUE_DIRECT
+            Ret = EplDllCalDirectGetDataBlock(
+                    EplDllkCalInstance_g.DllCalQueueTxGen_m,
+                    (BYTE*) pFrame_p, puiFrameSize_p);
+#elif EPL_DLLCAL_TX_GEN_QUEUE == EPL_QUEUE_SHB
+            Ret = EplDllCalShbGetDataBlock(
+                    EplDllkCalInstance_g.DllCalQueueTxGen_m,
+                    (BYTE*) pFrame_p, puiFrameSize_p);
+#elif EPL_DLLCAL_TX_GEN_QUEUE == EPL_QUEUE_HOSTINTERFACE
+
+#endif
+            break;
+    }
 
     return Ret;
 }
@@ -643,77 +636,48 @@ tEplEvent   Event;
 
 tEplKernel EplDllkCalAsyncSend(tEplFrameInfo * pFrameInfo_p, tEplDllAsyncReqPriority Priority_p)
 {
-tEplKernel  Ret = kEplSuccessful;
-tEplEvent       Event;
-#if EPL_USE_SHAREDBUFF != FALSE
-tShbError   ShbError;
+tEplKernel Ret = kEplSuccessful;
+tEplEvent Event;
 
     switch (Priority_p)
     {
         case kEplDllAsyncReqPrioNmt:    // NMT request priority
-            ShbError = ShbCirWriteDataBlock (EplDllkCalInstance_g.m_ShbInstanceTxNmt, pFrameInfo_p->m_pFrame, pFrameInfo_p->m_uiFrameSize);
-            // returns kShbOk, kShbExceedDataSizeLimit, kShbBufferFull, kShbInvalidArg
-            break;
-
-        default:    // generic priority
-            ShbError = ShbCirWriteDataBlock (EplDllkCalInstance_g.m_ShbInstanceTxGen, pFrameInfo_p->m_pFrame, pFrameInfo_p->m_uiFrameSize);
-            // returns kShbOk, kShbExceedDataSizeLimit, kShbBufferFull, kShbInvalidArg
-            break;
-
-    }
-
-    // error handling
-    switch (ShbError)
-    {
-        case kShbOk:
-            break;
-
-        case kShbExceedDataSizeLimit:
-            Ret = kEplDllAsyncTxBufferFull;
-            break;
-
-        case kShbBufferFull:
-            Ret = kEplDllAsyncTxBufferFull;
-            break;
-
-        case kShbInvalidArg:
-        default:
-            Ret = kEplNoResource;
-            break;
-    }
-
-#else
-
-    switch (Priority_p)
-    {
-        case kEplDllAsyncReqPrioNmt:    // NMT request priority
-            if (EplDllkCalInstance_g.m_uiFrameSizeNmt == 0)
-            {
-                EPL_MEMCPY(EplDllkCalInstance_g.m_abFrameNmt, pFrameInfo_p->m_pFrame, pFrameInfo_p->m_uiFrameSize);
-                EplDllkCalInstance_g.m_uiFrameSizeNmt = pFrameInfo_p->m_uiFrameSize;
-            }
-            else
-            {
-                Ret = kEplDllAsyncTxBufferFull;
-                goto Exit;
-            }
-            break;
-
-        default:    // generic priority
-            if (EplDllkCalInstance_g.m_uiFrameSizeGen == 0)
-            {
-                EPL_MEMCPY(EplDllkCalInstance_g.m_abFrameGen, pFrameInfo_p->m_pFrame, pFrameInfo_p->m_uiFrameSize);
-                EplDllkCalInstance_g.m_uiFrameSizeGen = pFrameInfo_p->m_uiFrameSize;
-            }
-            else
-            {
-                Ret = kEplDllAsyncTxBufferFull;
-                goto Exit;
-            }
-            break;
-    }
+#if EPL_DLLCAL_TX_NMT_QUEUE == EPL_QUEUE_DIRECT
+            Ret = EplDllCalDirectInsertDataBlock(
+                    EplDllkCalInstance_g.DllCalQueueTxNmt_m,
+                    (BYTE*)pFrameInfo_p->m_pFrame,
+                    &(pFrameInfo_p->m_uiFrameSize));
+#elif EPL_DLLCAL_TX_NMT_QUEUE == EPL_QUEUE_SHB
+            Ret = EplDllCalShbInsertDataBlock(
+                    EplDllkCalInstance_g.DllCalQueueTxNmt_m,
+                    (BYTE*)pFrameInfo_p->m_pFrame,
+                    &(pFrameInfo_p->m_uiFrameSize));
+#elif EPL_DLLCAL_TX_NMT_QUEUE == EPL_QUEUE_HOSTINTERFACE
 
 #endif
+            break;
+
+        default:    // generic priority
+#if EPL_DLLCAL_TX_GEN_QUEUE == EPL_QUEUE_DIRECT
+            Ret = EplDllCalDirectInsertDataBlock(
+                    EplDllkCalInstance_g.DllCalQueueTxGen_m,
+                    (BYTE*)pFrameInfo_p->m_pFrame,
+                    &(pFrameInfo_p->m_uiFrameSize));
+#elif EPL_DLLCAL_TX_GEN_QUEUE == EPL_QUEUE_SHB
+            Ret = EplDllCalShbInsertDataBlock(
+                    EplDllkCalInstance_g.DllCalQueueTxGen_m,
+                    (BYTE*)pFrameInfo_p->m_pFrame,
+                    &(pFrameInfo_p->m_uiFrameSize));
+#elif EPL_DLLCAL_TX_GEN_QUEUE == EPL_QUEUE_HOSTINTERFACE
+
+#endif
+            break;
+    }
+
+    if(Ret != kEplSuccessful)
+    {
+        goto Exit;
+    }
 
     // post event to DLL
     Event.m_EventSink = kEplEventSinkDllk;
@@ -723,10 +687,7 @@ tShbError   ShbError;
     Event.m_uiSize = sizeof(Priority_p);
     Ret = EplEventkPost(&Event);
 
-#if EPL_USE_SHAREDBUFF == FALSE
 Exit:
-#endif
-
     return Ret;
 }
 
@@ -749,18 +710,29 @@ Exit:
 tEplKernel EplDllkCalAsyncClearBuffer(void)
 {
 tEplKernel  Ret = kEplSuccessful;
-#if EPL_USE_SHAREDBUFF != FALSE
-tShbError   ShbError;
 
-    ShbError = ShbCirResetBuffer (EplDllkCalInstance_g.m_ShbInstanceTxNmt, 1000, NULL);
-    ShbError = ShbCirResetBuffer (EplDllkCalInstance_g.m_ShbInstanceTxGen, 1000, NULL);
+    //Ret is ignored
+#if EPL_DLLCAL_TX_NMT_QUEUE == EPL_QUEUE_DIRECT
+    Ret = EplDllCalDirectResetDataBlockQueue(
+            EplDllkCalInstance_g.DllCalQueueTxNmt_m);
+#elif EPL_DLLCAL_TX_NMT_QUEUE == EPL_QUEUE_SHB
+    Ret = EplDllCalShbResetDataBlockQueue(
+            EplDllkCalInstance_g.DllCalQueueTxNmt_m, 1000);
+#elif EPL_DLLCAL_TX_NMT_QUEUE == EPL_QUEUE_HOSTINTERFACE
 
-#else
-    EplDllkCalInstance_g.m_uiFrameSizeNmt = 0;
-    EplDllkCalInstance_g.m_uiFrameSizeGen = 0;
 #endif
 
-//    EPL_MEMSET(&EplDllkCalInstance_g.m_Statistics, 0, sizeof (tEplDllkCalStatistics));
+    //Ret is ignored
+#if EPL_DLLCAL_TX_GEN_QUEUE == EPL_QUEUE_DIRECT
+    Ret = EplDllCalDirectResetDataBlockQueue(
+            EplDllkCalInstance_g.DllCalQueueTxGen_m);
+#elif EPL_DLLCAL_TX_GEN_QUEUE == EPL_QUEUE_SHB
+    Ret = EplDllCalShbResetDataBlockQueue(
+            EplDllkCalInstance_g.DllCalQueueTxGen_m, 1000);
+#elif EPL_DLLCAL_TX_GEN_QUEUE == EPL_QUEUE_HOSTINTERFACE
+
+#endif
+
     return Ret;
 }
 
@@ -785,9 +757,14 @@ tEplKernel EplDllkCalAsyncClearQueues(void)
 {
 tEplKernel  Ret = kEplSuccessful;
 #if EPL_DLL_PRES_CHAINING_MN != FALSE
-tShbError   ShbError;
+    //Ret is ignored
+#if EPL_DLLCAL_TX_SYNC_QUEUE == EPL_QUEUE_SHB
+    Ret = EplDllCalShbResetDataBlockQueue(
+            EplDllkCalInstance_g.DllCalQueueTxSync_m, 1000);
+#elif EPL_DLLCAL_TX_SYNC_QUEUE == EPL_QUEUE_HOSTINTERFACE
 
-    ShbError = ShbCirResetBuffer (EplDllkCalInstance_g.m_ShbInstanceTxSync, 1000, NULL);
+#endif
+
 #endif
 
     // clear MN asynchronous queues
@@ -821,30 +798,27 @@ tShbError   ShbError;
 tEplKernel EplDllkCalGetStatistics(tEplDllkCalStatistics ** ppStatistics)
 {
 tEplKernel  Ret = kEplSuccessful;
-#if EPL_USE_SHAREDBUFF != FALSE
-tShbError   ShbError;
 
-    ShbError = ShbCirGetReadBlockCount (EplDllkCalInstance_g.m_ShbInstanceTxNmt, &EplDllkCalInstance_g.m_Statistics.m_ulCurTxFrameCountNmt);
-    ShbError = ShbCirGetReadBlockCount (EplDllkCalInstance_g.m_ShbInstanceTxGen, &EplDllkCalInstance_g.m_Statistics.m_ulCurTxFrameCountGen);
-//    ShbError = ShbCirGetReadBlockCount (EplDllkCalInstance_g.m_ShbInstanceRx, &EplDllkCalInstance_g.m_Statistics.m_ulCurRxFrameCount);
+    //Ret is ignored
+#if EPL_DLLCAL_TX_NMT_QUEUE == EPL_QUEUE_DIRECT
+    Ret = EplDllCalDirectGetDataBlockCount(EplDllkCalInstance_g.DllCalQueueTxNmt_m,
+            &EplDllkCalInstance_g.m_Statistics.m_ulCurTxFrameCountNmt);
+#elif EPL_DLLCAL_TX_NMT_QUEUE == EPL_QUEUE_SHB
+    Ret = EplDllCalShbGetDataBlockCount(EplDllkCalInstance_g.DllCalQueueTxNmt_m,
+            &EplDllkCalInstance_g.m_Statistics.m_ulCurTxFrameCountNmt);
+#elif EPL_DLLCAL_TX_NMT_QUEUE == EPL_QUEUE_HOSTINTERFACE
 
-#else
-    if (EplDllkCalInstance_g.m_uiFrameSizeNmt > 0)
-    {
-        EplDllkCalInstance_g.m_Statistics.m_ulCurTxFrameCountNmt = 1;
-    }
-    else
-    {
-        EplDllkCalInstance_g.m_Statistics.m_ulCurTxFrameCountNmt = 0;
-    }
-    if (EplDllkCalInstance_g.m_uiFrameSizeGen > 0)
-    {
-        EplDllkCalInstance_g.m_Statistics.m_ulCurTxFrameCountGen = 1;
-    }
-    else
-    {
-        EplDllkCalInstance_g.m_Statistics.m_ulCurTxFrameCountGen = 0;
-    }
+#endif
+
+    //Ret is ignored
+#if EPL_DLLCAL_TX_GEN_QUEUE == EPL_QUEUE_DIRECT
+    Ret = EplDllCalDirectGetDataBlockCount(EplDllkCalInstance_g.DllCalQueueTxGen_m,
+            &EplDllkCalInstance_g.m_Statistics.m_ulCurTxFrameCountGen);
+#elif EPL_DLLCAL_TX_GEN_QUEUE == EPL_QUEUE_SHB
+    Ret = EplDllCalShbGetDataBlockCount(EplDllkCalInstance_g.DllCalQueueTxGen_m,
+            &EplDllkCalInstance_g.m_Statistics.m_ulCurTxFrameCountGen);
+#elif EPL_DLLCAL_TX_GEN_QUEUE == EPL_QUEUE_HOSTINTERFACE
+
 #endif
 
     *ppStatistics = &EplDllkCalInstance_g.m_Statistics;
@@ -1066,28 +1040,36 @@ unsigned int    uiCount;
             case 5:
             {   // MnSyncReq
             unsigned long       ulSyncReqCount = 0;
-            unsigned long       ulSyncReqSize = 0;
+            unsigned int        uiSyncReqSize = 0;
             tEplDllSyncRequest  SyncRequest;
-            tShbError           ShbError;
 
                 // next queue will be CnGenReq queue
                 EplDllkCalInstance_g.m_uiNextRequestQueue = 0;
-                ShbError = ShbCirGetReadBlockCount(EplDllkCalInstance_g.m_ShbInstanceTxSync, &ulSyncReqCount);
-                if (ShbError != kShbOk)
+#if EPL_DLLCAL_TX_SYNC_QUEUE == EPL_QUEUE_SHB
+                Ret = EplDllCalShbGetDataBlockCount(EplDllkCalInstance_g.DllCalQueueTxSync_m, &ulSyncReqCount);
+#elif EPL_DLLCAL_TX_SYNC_QUEUE == EPL_QUEUE_HOSTINTERFACE
+
+#endif
+
+                if(Ret != kEplSuccessful)
                 {
-                    Ret = kEplNoResource;
                     goto Exit;
                 }
                 if (ulSyncReqCount > 0)
                 {
-                    ShbError = ShbCirReadDataBlock (EplDllkCalInstance_g.m_ShbInstanceTxSync, (BYTE *) &SyncRequest, sizeof (SyncRequest), &ulSyncReqSize);
-                    if (ShbError != kShbOk)
+                    uiSyncReqSize = sizeof(SyncRequest);
+#if EPL_DLLCAL_TX_SYNC_QUEUE == EPL_QUEUE_SHB
+                    Ret = EplDllCalShbGetDataBlock(EplDllkCalInstance_g.DllCalQueueTxSync_m, (BYTE *)&SyncRequest, &uiSyncReqSize);
+#elif EPL_DLLCAL_TX_SYNC_QUEUE == EPL_QUEUE_HOSTINTERFACE
+
+#endif
+
+                    if(Ret != kEplSuccessful)
                     {
-                        Ret = kEplNoResource;
                         goto Exit;
                     }
 
-                    if (ulSyncReqSize > memberoffs(tEplDllSyncRequest, m_dwSyncControl))
+                    if (uiSyncReqSize > memberoffs(tEplDllSyncRequest, m_dwSyncControl))
                     {
                         AmiSetDwordToLe(&pSoaPayload_p->m_SyncRequest.m_le_dwSyncControl, SyncRequest.m_dwSyncControl);
                         if ((SyncRequest.m_dwSyncControl & EPL_SYNC_PRES_MODE_SET) != 0)
@@ -1117,11 +1099,11 @@ unsigned int    uiCount;
                             }
                         }
                     }
-                    if (ulSyncReqSize > memberoffs(tEplDllSyncRequest, m_dwPResTimeFirst))
+                    if (uiSyncReqSize > memberoffs(tEplDllSyncRequest, m_dwPResTimeFirst))
                     {
                         AmiSetDwordToLe(&pSoaPayload_p->m_SyncRequest.m_le_dwPResTimeFirst, SyncRequest.m_dwPResTimeFirst);
                     }
-                    if (ulSyncReqSize > memberoffs(tEplDllSyncRequest, m_dwPResFallBackTimeout))
+                    if (uiSyncReqSize > memberoffs(tEplDllSyncRequest, m_dwPResFallBackTimeout))
                     {
                         AmiSetDwordToLe(&pSoaPayload_p->m_SyncRequest.m_le_dwPResFallBackTimeout, SyncRequest.m_dwPResFallBackTimeout);
                     }
@@ -1210,76 +1192,6 @@ Exit:
 //          P R I V A T E   F U N C T I O N S                              //
 //                                                                         //
 //=========================================================================//
-
-//---------------------------------------------------------------------------
-//  Callback handler for new data signaling
-//---------------------------------------------------------------------------
-
-#if EPL_USE_SHAREDBUFF != FALSE
-/*static void  EplDllkCalTxNmtSignalHandler (
-    tShbInstance pShbRxInstance_p,
-    unsigned long ulDataSize_p)
-{
-tEplKernel      Ret = kEplSuccessful;
-tEplEvent       Event;
-tEplDllAsyncReqPriority Priority;
-#if EPL_USE_SHAREDBUFF != FALSE
-tShbError   ShbError;
-unsigned long   ulBlockCount;
-
-
-    ShbError = ShbCirGetReadBlockCount (EplDllkCalInstance_g.m_ShbInstanceTxNmt, &ulBlockCount);
-    if (ulBlockCount > EplDllkCalInstance_g.m_Statistics.m_ulMaxTxFrameCountNmt)
-    {
-        EplDllkCalInstance_g.m_Statistics.m_ulMaxTxFrameCountNmt = ulBlockCount;
-    }
-
-#endif
-
-    // post event to DLL
-    Priority = kEplDllAsyncReqPrioNmt;
-    Event.m_EventSink = kEplEventSinkDllk;
-    Event.m_EventType = kEplEventTypeDllkFillTx;
-    EPL_MEMSET(&Event.m_NetTime, 0x00, sizeof(Event.m_NetTime));
-    Event.m_pArg = &Priority;
-    Event.m_uiSize = sizeof(Priority);
-    Ret = EplEventkPost(&Event);
-
-}
-
-static void  EplDllkCalTxGenSignalHandler (
-    tShbInstance pShbRxInstance_p,
-    unsigned long ulDataSize_p)
-{
-tEplKernel      Ret = kEplSuccessful;
-tEplEvent       Event;
-tEplDllAsyncReqPriority Priority;
-#if EPL_USE_SHAREDBUFF != FALSE
-tShbError   ShbError;
-unsigned long   ulBlockCount;
-
-
-    ShbError = ShbCirGetReadBlockCount (EplDllkCalInstance_g.m_ShbInstanceTxGen, &ulBlockCount);
-    if (ulBlockCount > EplDllkCalInstance_g.m_Statistics.m_ulMaxTxFrameCountGen)
-    {
-        EplDllkCalInstance_g.m_Statistics.m_ulMaxTxFrameCountGen = ulBlockCount;
-    }
-
-#endif
-
-    // post event to DLL
-    Priority = kEplDllAsyncReqPrioGeneric;
-    Event.m_EventSink = kEplEventSinkDllk;
-    Event.m_EventType = kEplEventTypeDllkFillTx;
-    EPL_MEMSET(&Event.m_NetTime, 0x00, sizeof(Event.m_NetTime));
-    Event.m_pArg = &Priority;
-    Event.m_uiSize = sizeof(Priority);
-    Ret = EplEventkPost(&Event);
-
-}
-*/
-#endif
-
 
 #endif // #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLK)) != 0)
 
