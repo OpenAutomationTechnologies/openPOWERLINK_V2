@@ -15,13 +15,15 @@ INCLUDES	:= -I$(MAINDIR)/Include \
 			  -I$(src) \
 			  -I$(MAINDIR)/Target/PLCcore-CF54/Linux/gnu/generic \
 			  -I$(MAINDIR)/SharedBuff \
+			  -I$(MAINDIR)/EplStack \			  
 			  -I$(MAINDIR)/ObjDicts/Api_CN
 
 # object files for kernel object with relative paths
 MODULEOBJS	= $(MAINPATH)/Edrv/netx_ethhub/source/EdrvNetx.o $(MAINPATH)/Edrv/EdrvCyclic.o \
 			  demo_main.o \
-			  $(MAINPATH)/EplStack/EplDllk.o $(MAINPATH)/EplStack/EplDllkCal.o \
-			  $(MAINPATH)/EplStack/EplDlluCal.o \
+			  $(MAINPATH)/EplStack/EplDllk.o $(MAINPATH)/EplStack/kernel/dll/dllkcal.o \
+			  $(MAINPATH)/EplStack/user/dll/dllucal.o \
+			  $(MAINPATH)/EplStack/common/dll/dllcal-shb.o \
 			  $(MAINPATH)/EplStack/EplEventk.o $(MAINPATH)/EplStack/EplEventu.o \
 			  $(MAINPATH)/EplStack/EplNmtk.o $(MAINPATH)/EplStack/EplNmtkCal.o \
 			  $(MAINPATH)/EplStack/EplNmtu.o $(MAINPATH)/EplStack/EplNmtuCal.o $(MAINPATH)/EplStack/EplNmtCnu.o \

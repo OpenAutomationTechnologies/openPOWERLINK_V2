@@ -74,7 +74,7 @@
 #include "user/EplNmtMnu.h"
 #endif
 
-#include "kernel/EplDllkCal.h"
+#include "kernel/dllkcal.h"
 #include "edrv.h"
 
 //#include <linux/config.h>

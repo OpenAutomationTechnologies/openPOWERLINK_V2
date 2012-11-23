@@ -14,12 +14,14 @@ INCLUDES	:= -I$(MAINDIR)/Include \
 			  -I$(MAINDIR)/Target/PLCcore-CF54/Linux/gnu/generic \
 			  -I$(MAINDIR)/Target/PLCcore-CF54/Linux/gnu/driver \
 			  -I$(MAINDIR)/SharedBuff \
+			  -I$(MAINDIR)/EplStack \			  
 			  -I$(MAINDIR)/ObjDicts/Api_CN
 
 MODULEOBJS	= demo_main.o \
 			  $(MAINPATH)/Edrv/fec_548x/net/fec.o $(MAINPATH)/Edrv/fec_548x/net/ks8721.o $(MAINPATH)/Edrv/fec_548x/net/ksz8893.o \
-			  $(MAINPATH)/EplStack/EplDllk.o $(MAINPATH)/EplStack/EplDllkCal.o \
-			  $(MAINPATH)/EplStack/EplDlluCal.o \
+			  $(MAINPATH)/EplStack/EplDllk.o $(MAINPATH)/EplStack/kernel/dll/dllkcal.o \
+			  $(MAINPATH)/EplStack/user/dll/dllucal.o \
+			  $(MAINPATH)/EplStack/common/dll/dllcal-shb.o \
 			  $(MAINPATH)/EplStack/EplLedu.o \
 			  $(MAINPATH)/EplStack/EplEventk.o $(MAINPATH)/EplStack/EplEventu.o \
 			  $(MAINPATH)/EplStack/EplNmtk.o $(MAINPATH)/EplStack/EplNmtkCal.o \

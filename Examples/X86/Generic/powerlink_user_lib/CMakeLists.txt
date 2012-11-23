@@ -126,7 +126,7 @@ SET (LIB_SOURCES ${LIB_SOURCES}
                  ${POWERLINK_SOURCE_DIR}/EplStack/EplDebug.c
                  ${POWERLINK_SOURCE_DIR}/EplStack/EplObd.c
                  ${POWERLINK_SOURCE_DIR}/EplStack/EplApiProcessImage.c
-                 ${POWERLINK_SOURCE_DIR}/EplStack/EplDllCalShb.c
+                 ${POWERLINK_SOURCE_DIR}/EplStack/common/dll/dllcal-shb.c
                  ${POWERLINK_SOURCE_DIR}/EplStack/amix86.c
                  ${POWERLINK_SOURCE_DIR}/SharedBuff/SharedBuff.c
                  ${POWERLINK_SOURCE_DIR}/Edrv/EdrvCyclic.c
@@ -154,7 +154,7 @@ ENDIF ()
 #
 SET (LIB_SOURCES_KERNEL ${LIB_SOURCES_KERNEL}
                         ${POWERLINK_SOURCE_DIR}/EplStack/EplDllk.c
-                        ${POWERLINK_SOURCE_DIR}/EplStack/EplDllkCal.c
+                        ${POWERLINK_SOURCE_DIR}/EplStack/kernel/dll/dllkcal.c
                         ${POWERLINK_SOURCE_DIR}/EplStack/EplEventk.c
                         ${POWERLINK_SOURCE_DIR}/EplStack/EplNmtk.c
                         ${POWERLINK_SOURCE_DIR}/EplStack/EplNmtkCal.c
@@ -167,7 +167,7 @@ SET (LIB_SOURCES_KERNEL ${LIB_SOURCES_KERNEL}
 # set user part sources of POWERLINK library
 #
 SET (LIB_SOURCES_USER ${LIB_SOURCES_USER}
-                      ${POWERLINK_SOURCE_DIR}/EplStack/EplDlluCal.c
+                      ${POWERLINK_SOURCE_DIR}/EplStack/user/dll/dllucal.c
                       ${POWERLINK_SOURCE_DIR}/EplStack/EplEventu.c
                       ${POWERLINK_SOURCE_DIR}/EplStack/EplNmtu.c
                       ${POWERLINK_SOURCE_DIR}/EplStack/EplNmtuCal.c
@@ -196,8 +196,7 @@ SET (LIB_HEADERS ${LIB_HEADERS}
                  ${POWERLINK_SOURCE_DIR}/Include/EplCfm.h
                  ${POWERLINK_SOURCE_DIR}/Include/EplDef.h
                  ${POWERLINK_SOURCE_DIR}/Include/EplDll.h
-                 ${POWERLINK_SOURCE_DIR}/Include/EplDllCal.h
-                 ${POWERLINK_SOURCE_DIR}/Include/EplDllCalShb.h
+                 ${POWERLINK_SOURCE_DIR}/Include/dllcal.h
                  ${POWERLINK_SOURCE_DIR}/Include/EplErrDef.h
                  ${POWERLINK_SOURCE_DIR}/Include/EplEvent.h
                  ${POWERLINK_SOURCE_DIR}/Include/EplFrame.h
@@ -223,7 +222,7 @@ SET (LIB_HEADERS ${LIB_HEADERS}
 #
 SET (LIB_HEADERS_KERNEL ${LIB_HEADERS_KERNEL}
                         ${POWERLINK_SOURCE_DIR}/Include/kernel/EplDllk.h
-                        ${POWERLINK_SOURCE_DIR}/Include/kernel/EplDllkCal.h
+                        ${POWERLINK_SOURCE_DIR}/Include/kernel/dllkcal.h
                         ${POWERLINK_SOURCE_DIR}/Include/kernel/EplDllkTgt.h
                         ${POWERLINK_SOURCE_DIR}/Include/kernel/EplErrorHandlerk.h
                         ${POWERLINK_SOURCE_DIR}/Include/kernel/EplEventk.h
@@ -242,7 +241,7 @@ SET (LIB_HEADERS_KERNEL ${LIB_HEADERS_KERNEL}
 #
 SET (LIB_HEADERS_USER ${LIB_HEADERS_USER}
                       ${POWERLINK_SOURCE_DIR}/Include/user/EplDllu.h
-                      ${POWERLINK_SOURCE_DIR}/Include/user/EplDlluCal.h
+                      ${POWERLINK_SOURCE_DIR}/Include/user/dllucal.h
                       ${POWERLINK_SOURCE_DIR}/Include/user/EplEventu.h
                       ${POWERLINK_SOURCE_DIR}/Include/user/EplIdentu.h
                       ${POWERLINK_SOURCE_DIR}/Include/user/EplLedu.h
@@ -284,6 +283,7 @@ SOURCE_GROUP("Object Dictionary" FILES ${LIB_OBJDICT})
 INCLUDE_DIRECTORIES(
     .
     ${POWERLINK_SOURCE_DIR}/ObjDicts/${OBJDICT}
+    ${POWERLINK_SOURCE_DIR}/EplStack
 )
 
 IF (WIN32)

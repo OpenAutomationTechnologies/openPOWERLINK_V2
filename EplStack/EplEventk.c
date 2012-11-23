@@ -71,7 +71,7 @@
 #include "kernel/EplEventk.h"
 #include "kernel/EplNmtk.h"
 #include "kernel/EplDllk.h"
-#include "kernel/EplDllkCal.h"
+#include "kernel/dllkcal.h"
 #include "kernel/EplErrorHandlerk.h"
 #include "Benchmark.h"
 

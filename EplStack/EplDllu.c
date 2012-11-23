@@ -69,7 +69,7 @@
 ****************************************************************************/
 
 #include "user/EplDllu.h"
-#include "user/EplDlluCal.h"
+#include "user/dllucal.h"
 
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLU)) != 0)
 /***************************************************************************/
