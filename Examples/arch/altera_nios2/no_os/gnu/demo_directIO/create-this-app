@@ -88,6 +88,7 @@ ${MAINPATH}/Edrv/openmac/source/omethlib.c ${MAINPATH}/Edrv/openmac/source/ometh
 ${MAINPATH}/Edrv/openmac/source/omethlib_phycfg_generic.c \
 ${MAINPATH}/EplStack/EplDllk.c ${MAINPATH}/EplStack/EplDllkCal.c \
 ${MAINPATH}/EplStack/EplDlluCal.c \
+${MAINPATH}/EplStack/EplDllCalDirect.c \
 ${MAINPATH}/EplStack/EplLedu.c \
 ${MAINPATH}/EplStack/EplEventk.c ${MAINPATH}/EplStack/EplEventu.c \
 ${MAINPATH}/EplStack/EplNmtk.c \

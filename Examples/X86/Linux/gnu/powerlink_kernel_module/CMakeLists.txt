@@ -127,6 +127,7 @@ SET(MODULE_SOURCE_FILES
     ${POWERLINK_SOURCE_DIR}/EplStack/EplDllk.c
     ${POWERLINK_SOURCE_DIR}/EplStack/EplDllkCal.c
     ${POWERLINK_SOURCE_DIR}/EplStack/EplDlluCal.c
+    ${POWERLINK_SOURCE_DIR}/EplStack/EplDllCalShb.c
     ${POWERLINK_SOURCE_DIR}/EplStack/EplEventk.c
     ${POWERLINK_SOURCE_DIR}/EplStack/EplEventu.c
     ${POWERLINK_SOURCE_DIR}/EplStack/EplNmtk.c

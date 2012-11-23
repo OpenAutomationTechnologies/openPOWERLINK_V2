@@ -70,6 +70,11 @@
 			<location>OPENPOWERLINK_DIR/EplStack/EplDlluCal.c</location>
 		</link>
 		<link>
+			<name>EplDllCalShb.c</name>
+			<type>1</type>
+			<location>OPENPOWERLINK_DIR/EplStack/EplDllCalShb.c</location>
+		</link>
+		<link>
 			<name>EplErrorHandlerk.c</name>
 			<type>1</type>
 			<location>OPENPOWERLINK_DIR/EplStack/EplErrorHandlerk.c</location>

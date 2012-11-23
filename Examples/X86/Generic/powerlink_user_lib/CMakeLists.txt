@@ -126,6 +126,7 @@ SET (LIB_SOURCES ${LIB_SOURCES}
                  ${POWERLINK_SOURCE_DIR}/EplStack/EplDebug.c
                  ${POWERLINK_SOURCE_DIR}/EplStack/EplObd.c
                  ${POWERLINK_SOURCE_DIR}/EplStack/EplApiProcessImage.c
+                 ${POWERLINK_SOURCE_DIR}/EplStack/EplDllCalShb.c
                  ${POWERLINK_SOURCE_DIR}/EplStack/amix86.c
                  ${POWERLINK_SOURCE_DIR}/SharedBuff/SharedBuff.c
                  ${POWERLINK_SOURCE_DIR}/Edrv/EdrvCyclic.c
@@ -196,6 +197,7 @@ SET (LIB_HEADERS ${LIB_HEADERS}
                  ${POWERLINK_SOURCE_DIR}/Include/EplDef.h
                  ${POWERLINK_SOURCE_DIR}/Include/EplDll.h
                  ${POWERLINK_SOURCE_DIR}/Include/EplDllCal.h
+                 ${POWERLINK_SOURCE_DIR}/Include/EplDllCalShb.h
                  ${POWERLINK_SOURCE_DIR}/Include/EplErrDef.h
                  ${POWERLINK_SOURCE_DIR}/Include/EplEvent.h
                  ${POWERLINK_SOURCE_DIR}/Include/EplFrame.h
