@@ -367,7 +367,7 @@ tEplDllkInitParam   DllkInitParam;
     }
 
     // initialize EplDllkCal module
-    Ret = EplDllkCalAddInstance();
+    Ret = dllkcal_init();
     if (Ret != kEplSuccessful)
     {
         goto Exit;
@@ -383,7 +383,7 @@ tEplDllkInitParam   DllkInitParam;
 
     // initialize EplDlluCal module
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLU)) != 0)
-    Ret = EplDlluCalAddInstance();
+    Ret = dllucal_init();
     if (Ret != kEplSuccessful)
     {
         goto Exit;
@@ -632,7 +632,7 @@ tEplKernel      Ret = kEplSuccessful;
 
     // deinitialize EplDlluCal module
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLU)) != 0)
-    Ret = EplDlluCalDelInstance();
+    Ret = dllucal_exit();
 //    PRINTF("EplDlluCalDelInstance(): 0x%X\n", Ret);
 
 #endif
@@ -657,7 +657,7 @@ tEplKernel      Ret = kEplSuccessful;
 //    PRINTF("EplDllkDelInstance():    0x%X\n", Ret);
 
     // deinitialize EplDllkCal module
-    Ret = EplDllkCalDelInstance();
+    Ret = dllkcal_exit();
 //    PRINTF("EplDllkCalDelInstance(): 0x%X\n", Ret);
 #endif
 
@@ -1242,7 +1242,7 @@ tEplKernel PUBLIC EplApiSendAsndFrame
     AmiSetByteToLe( &FrameInfo.m_pFrame->m_le_bSrcNodeId,   (BYTE) 0                );
 
     // Request frame transmission
-    Ret = EplDlluCalAsyncSend( &FrameInfo, kEplDllAsyncReqPrioGeneric);
+    Ret = dllucal_sendAsyncFrame( &FrameInfo, kEplDllAsyncReqPrioGeneric);
 
     return Ret;
 }
@@ -1284,7 +1284,7 @@ tEplKernel PUBLIC EplApiSetAsndForward
                                         break;
     }
 
-    Ret = EplDlluCalRegAsndService( bServiceId_p, EplApiCbReceivedAsnd, DllFilter);
+    Ret = dllucal_regAsndService( bServiceId_p, EplApiCbReceivedAsnd, DllFilter);
 
     return Ret;
 }
@@ -2220,7 +2220,7 @@ BYTE                bTemp;
     DllConfigParam.m_uiSyncNodeId = EplApiInstance_g.m_InitParam.m_uiSyncNodeId;
 
     DllConfigParam.m_uiSizeOfStruct = sizeof (DllConfigParam);
-    Ret = EplDlluCalConfig(&DllConfigParam);
+    Ret = dllucal_config(&DllConfigParam);
     if(Ret != kEplSuccessful)
     {
         goto Exit;
@@ -2313,7 +2313,7 @@ BYTE                bTemp;
         EPL_MEMCPY(&DllIdentParam.m_abVendorSpecificExt2[0], &EplApiInstance_g.m_InitParam.m_abVendorSpecificExt2[0], sizeof (DllIdentParam.m_abVendorSpecificExt2));
 
         DllIdentParam.m_uiSizeOfStruct = sizeof (DllIdentParam);
-        Ret = EplDlluCalSetIdentity(&DllIdentParam);
+        Ret = dllucal_setIdentity(&DllIdentParam);
         if(Ret != kEplSuccessful)
         {
             goto Exit;

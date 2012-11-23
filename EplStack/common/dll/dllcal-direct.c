@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   EplDllCalDirect.c
+\file   dllCal-direct.c
 
 \brief  source file for DLL CAL direct call module
 
@@ -8,8 +8,6 @@ This DLL CAL queue implementation applies a single buffer for each queue
 instance.
 
 Copyright (c) 2012, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
-Copyright (c) 2012, SYSTEC electronik GmbH
-Copyright (c) 2012, Kalycito Infotech Private Ltd.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -38,7 +36,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include "dllcal-direct.h"
 #include <dllcal.h>
 
 //============================================================================//
@@ -48,12 +45,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#define EPL_DLLCALDIRECT_TXBUF_SIZE     EPL_C_IP_MAX_MTU
-    ///< TX buffer size
-#define EPL_DLLCALDIRECT_TXBUF_EMPTY    0
-    ///< TX buffer marked as empty
-#define EPL_DLLCALDIRECT_TXBUF_FILLING  1
-    ///< TX buffer makred as being filled
+#define EPL_DLLCALDIRECT_TXBUF_SIZE     EPL_C_IP_MAX_MTU    ///< TX buffer size
+#define EPL_DLLCALDIRECT_TXBUF_EMPTY    0                   ///< TX buffer marked as empty
+#define EPL_DLLCALDIRECT_TXBUF_FILLING  1                   ///< TX buffer makred as being filled
 
 //------------------------------------------------------------------------------
 // module global vars
@@ -74,34 +68,46 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local types
 //------------------------------------------------------------------------------
+
 /**
 \brief DLL CAL direct call instance type
 
 The EventDirectInstance is used for every event queue using the direct call
 event posting.
 */
-typedef struct _tEplDllCalDirectInstance
+typedef struct sDllCalDirectInstance
 {
-    tEplDllCalQueue             DllCalQueue_m;
-        ///< DLL CAL queue
-    unsigned int                uiFrameSize_m;
-        ///< size of frame in frame buffer (empty if zero)
-    BYTE                        abFrameBuffer_m[EPL_DLLCALDIRECT_TXBUF_SIZE];
-        ///< frame buffer
-    struct tEplDllCalDirectInstance *pNext_m;
-        ///< pointer to next instance in direct module
-} tEplDllCalDirectInstance;
+    tDllCalQueue        dllCalQueue;            ///< DLL CAL queue
+    UINT                frameSize;              ///< size of frame in frame buffer (empty if zero)
+    BYTE                aFrameBuffer[EPL_DLLCALDIRECT_TXBUF_SIZE];   ///< frame buffer
+    struct sDllCalDirectInstance *pNext;   ///< pointer to next instance in direct module
+} tDllCalDirectInstance;
 
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
-
-static tEplDllCalDirectInstance *pDllCalQueueHead_l = NULL;
-    ///< pointer to the head of Dll Cal queue instances
+static tDllCalDirectInstance* pDllCalQueueHead_l = NULL; ///< pointer to the head of Dll Cal queue instances
 
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
+static tEplKernel addInstance(tDllCalQueueInstance* ppDllCalQueue_p, tDllCalQueue DllCalQueue_p);
+static tEplKernel delInstance(tDllCalQueueInstance pDllCalQueue_p);
+static tEplKernel insertDataBlock(tDllCalQueueInstance pDllCalQueue_p, BYTE *pData_p, UINT* pDataSize_p);
+static tEplKernel getDataBlock(tDllCalQueueInstance pDllCalQueue_p, BYTE *pData_p, UINT* pDataSize_p);
+static tEplKernel getDataBlockCount(tDllCalQueueInstance pDllCalQueue_p, ULONG* pDataBlockCount_p);
+static tEplKernel resetDataBlockQueue(tDllCalQueueInstance pDllCalQueue_p, ULONG timeOutMs_p);
+
+/* define external function interface */
+static tDllCalFuncIntf funcintf_l =
+{
+    addInstance,
+    delInstance,
+    insertDataBlock,
+    getDataBlock,
+    getDataBlockCount,
+    resetDataBlockQueue
+};
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -109,25 +115,44 @@ static tEplDllCalDirectInstance *pDllCalQueueHead_l = NULL;
 
 //------------------------------------------------------------------------------
 /**
-\brief    add direct call DLL CAL instance
+\brief	Return pointer to function interface
+
+This function returns a pointer to the function interface structure which
+is used to access the dllcal functions of the direct call implementation.
+
+\return Returns a pointer to the local function interface
+*/
+//------------------------------------------------------------------------------
+tDllCalFuncIntf* dllcaldirect_getInterface(void)
+{
+    return &funcintf_l;
+}
+
+//============================================================================//
+//            P R I V A T E   F U N C T I O N S                               //
+//============================================================================//
+
+//------------------------------------------------------------------------------
+/**
+\brief    Add direct call DLL CAL instance
 
 Add a direct call instance for TX packet forwarding in DLL CAL
 
-\param  ppDllCalQueue_p         double-pointer to DllCal Queue instance
-\param  DllCalQueue_p           parameter that determines the queue
+\param  ppDllCalQueue_p         Double-pointer to DllCal Queue instance
+\param  DllCalQueue_p           Parameter that determines the queue
 
-\return tEplKernel
+\return Returns an error code
 \retval kEplSuccessful          if function executes correctly
 \retval other                   error
 */
 //------------------------------------------------------------------------------
-tEplKernel EplDllCalDirectAddInstance (tEplDllCalQueueInstance *ppDllCalQueue_p,
-        tEplDllCalQueue DllCalQueue_p)
+static tEplKernel addInstance (tDllCalQueueInstance *ppDllCalQueue_p,
+                               tDllCalQueue dllCalQueue_p)
 {
-    tEplKernel Ret = kEplSuccessful;
-    tEplDllCalDirectInstance *pSearch;
-    tEplDllCalDirectInstance *pDllCalDirectInstance;
-    BOOL fInstanceFound;
+    tEplKernel                  ret = kEplSuccessful;
+    tDllCalDirectInstance*      pSearch;
+    tDllCalDirectInstance*      pDllCalDirectInstance;
+    BOOL                        fInstanceFound;
 
     //go through linked list and search for already available instance
     pSearch = pDllCalQueueHead_l;
@@ -135,33 +160,33 @@ tEplKernel EplDllCalDirectAddInstance (tEplDllCalQueueInstance *ppDllCalQueue_p,
 
     while(pSearch != NULL)
     {
-        if(pSearch->DllCalQueue_m == DllCalQueue_p)
+        if(pSearch->dllCalQueue == dllCalQueue_p)
         {
             //instance already exists
             fInstanceFound = TRUE;
             break;
         }
 
-        if(pSearch->pNext_m == NULL)
+        if(pSearch->pNext == NULL)
         {
             //reached tail of linked list
             break;
         }
 
         //get next linked list member
-        pSearch = (tEplDllCalDirectInstance*)pSearch->pNext_m;
+        pSearch = (tDllCalDirectInstance*)pSearch->pNext;
     }
 
     //no instance was found
     if(!fInstanceFound)
     {
         //create new instance
-        pDllCalDirectInstance = (tEplDllCalDirectInstance *)
-                EPL_MALLOC(sizeof(tEplDllCalDirectInstance));
+        pDllCalDirectInstance =
+             (tDllCalDirectInstance *)EPL_MALLOC(sizeof(tDllCalDirectInstance));
 
         if(pDllCalDirectInstance == NULL)
         {
-            Ret = kEplNoResource;
+            ret = kEplNoResource;
             goto Exit;
         }
 
@@ -173,18 +198,17 @@ tEplKernel EplDllCalDirectAddInstance (tEplDllCalQueueInstance *ppDllCalQueue_p,
         else
         {
             //insert new instance at tail of linked list
-            pSearch->pNext_m =
-                    (struct tEplDllCalDirectInstance*)pDllCalDirectInstance;
+            pSearch->pNext = (struct tDllCalDirectInstance*)pDllCalDirectInstance;
         }
 
         //set new instance next to NULL
-        pDllCalDirectInstance->pNext_m = NULL;
+        pDllCalDirectInstance->pNext = NULL;
 
         //store parameters in instance
-        pDllCalDirectInstance->DllCalQueue_m = DllCalQueue_p;
+        pDllCalDirectInstance->dllCalQueue = dllCalQueue_p;
 
         //reset TX buffer
-        pDllCalDirectInstance->uiFrameSize_m = EPL_DLLCALDIRECT_TXBUF_EMPTY;
+        pDllCalDirectInstance->frameSize = EPL_DLLCALDIRECT_TXBUF_EMPTY;
     }
     else
     {
@@ -193,33 +217,32 @@ tEplKernel EplDllCalDirectAddInstance (tEplDllCalQueueInstance *ppDllCalQueue_p,
     }
 
     //return pointer to created or found instance
-    *ppDllCalQueue_p = (tEplDllCalQueueInstance*)pDllCalDirectInstance;
+    *ppDllCalQueue_p = (tDllCalQueueInstance*)pDllCalDirectInstance;
 
 Exit:
-    return Ret;
+    return ret;
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief    delete direct call DLL CAL instance
+\brief    Delete direct call DLL CAL instance
 
-Delete the direct call instance
+Delete the direct call instance.
 
-\param  pDllCalQueue_p          pointer to DllCal Queue instance
+\param  pDllCalQueue_p          Pointer to DllCal Queue instance
 
-\return tEplKernel
+\return Returns an error code
 \retval kEplSuccessful          if function executes correctly
 \retval other                   error
 */
 //------------------------------------------------------------------------------
-tEplKernel EplDllCalDirectDelInstance (tEplDllCalQueueInstance pDllCalQueue_p)
+static tEplKernel delInstance (tDllCalQueueInstance pDllCalQueue_p)
 {
-    tEplKernel Ret = kEplSuccessful;
-    tEplDllCalDirectInstance *pDllCalDirectInstance =
-            (tEplDllCalDirectInstance*)pDllCalQueue_p;
-    tEplDllCalDirectInstance *pSearch;
-    tEplDllCalDirectInstance *pPrev;
-    BOOL fInstanceFound;
+    tDllCalDirectInstance*      pDllCalDirectInstance =
+                                    (tDllCalDirectInstance*)pDllCalQueue_p;
+    tDllCalDirectInstance*      pSearch;
+    tDllCalDirectInstance*      pPrev;
+    BOOL                        fInstanceFound;
 
     //start at head of linked list
     pSearch = pPrev = pDllCalQueueHead_l;
@@ -238,7 +261,7 @@ tEplKernel EplDllCalDirectDelInstance (tEplDllCalQueueInstance pDllCalQueue_p)
         pPrev = pSearch;
 
         //get next linked list member
-        pSearch = (tEplDllCalDirectInstance*)pSearch->pNext_m;
+        pSearch = (tDllCalDirectInstance*)pSearch->pNext;
     }
 
     if(fInstanceFound)
@@ -246,204 +269,197 @@ tEplKernel EplDllCalDirectDelInstance (tEplDllCalQueueInstance pDllCalQueue_p)
         if(pSearch == pDllCalQueueHead_l)
         {
             //head is freed
-            pDllCalQueueHead_l = (tEplDllCalDirectInstance*)pSearch->pNext_m;
+            pDllCalQueueHead_l = (tDllCalDirectInstance*)pSearch->pNext;
         }
         else
         {
             //bypass found member
-            pPrev->pNext_m = pSearch->pNext_m;
+            pPrev->pNext = pSearch->pNext;
         }
 
         //free found member instance
         EPL_FREE(pSearch);
     }
 
-    return Ret;
+    return kEplSuccessful;
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief    insert data block into direct call instance
+\brief    Insert data block into direct call instance
 
 Inserts a data block into the direct call instance. The data block can be of
 any type (e.g. TX packet).
 
-\param  pDllCalQueue_p          pointer to DllCal Queue instance
-\param  pData_p                 pointer to the data block to be insert
-\param  puiDataSize             pointer to the size of the data block to be
+\param  pDllCalQueue_p          Pointer to DllCal Queue instance
+\param  pData_p                 Pointer to the data block to be insert
+\param  pDataSize               Pointer to the size of the data block to be
                                 insert
 
-\return tEplKernel
+\return Returns an error code
 \retval kEplSuccessful          if function executes correctly
 \retval other                   error
 */
 //------------------------------------------------------------------------------
-tEplKernel EplDllCalDirectInsertDataBlock (tEplDllCalQueueInstance pDllCalQueue_p,
-        BYTE *pData_p, unsigned int *puiDataSize_p)
+static tEplKernel insertDataBlock (tDllCalQueueInstance pDllCalQueue_p,
+                                   BYTE *pData_p, UINT *pDataSize_p)
 {
-    tEplKernel Ret = kEplSuccessful;
-    tEplDllCalDirectInstance *pDllCalDirectInstance =
-            (tEplDllCalDirectInstance*)pDllCalQueue_p;
+    tEplKernel                  ret = kEplSuccessful;
+    tDllCalDirectInstance*      pDllCalDirectInstance =
+                                    (tDllCalDirectInstance*)pDllCalQueue_p;
 
     if(pDllCalDirectInstance == NULL)
     {
-        Ret = kEplInvalidInstanceParam;
+        ret = kEplInvalidInstanceParam;
         goto Exit;
     }
 
-    if(pDllCalDirectInstance->uiFrameSize_m != EPL_DLLCALDIRECT_TXBUF_EMPTY)
+    if(pDllCalDirectInstance->frameSize != EPL_DLLCALDIRECT_TXBUF_EMPTY)
     {
         //TX buffer is not free
-        Ret = kEplDllAsyncTxBufferFull;
+        ret = kEplDllAsyncTxBufferFull;
         goto Exit;
     }
 
     //mark buffer that it is being filled
-    pDllCalDirectInstance->uiFrameSize_m = EPL_DLLCALDIRECT_TXBUF_FILLING;
+    pDllCalDirectInstance->frameSize = EPL_DLLCALDIRECT_TXBUF_FILLING;
 
-    EPL_MEMCPY(pDllCalDirectInstance->abFrameBuffer_m, pData_p, *puiDataSize_p);
+    EPL_MEMCPY(pDllCalDirectInstance->aFrameBuffer, pData_p, *pDataSize_p);
 
     //mark buffer that it is filled, with the size of the frame
-    pDllCalDirectInstance->uiFrameSize_m = *puiDataSize_p;
+    pDllCalDirectInstance->frameSize = *pDataSize_p;
 
 Exit:
-    return Ret;
+    return ret;
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief    get data block from direct call instance
+\brief    Get data block from direct call instance
 
 Gets a data block from the direct call instance. The data block can be of any
 type (e.g. TX packet).
 
-\param  pDllCalQueue_p          pointer to DllCal Queue instance
-\param  pData_p                 pointer to data buffer
-\param  puiDataSize             pointer to the size of the data buffer
+\param  pDllCalQueue_p          Pointer to DllCal Queue instance
+\param  pData_p                 Pointer to data buffer
+\param  pDataSize_p             Pointer to the size of the data buffer
                                 (will be replaced with actual data block size)
 
-\return tEplKernel
+\return Returns an error code
 \retval kEplSuccessful          if function executes correctly
 \retval other                   error
 */
 //------------------------------------------------------------------------------
-tEplKernel EplDllCalDirectGetDataBlock (tEplDllCalQueueInstance pDllCalQueue_p,
-        BYTE *pData_p, unsigned int *puiDataSize)
+static tEplKernel getDataBlock (tDllCalQueueInstance pDllCalQueue_p,
+                                BYTE *pData_p, UINT *pDataSize_p)
 {
-    tEplKernel Ret = kEplSuccessful;
-    tEplDllCalDirectInstance *pDllCalDirectInstance =
-            (tEplDllCalDirectInstance*)pDllCalQueue_p;
+    tEplKernel                  ret = kEplSuccessful;
+    tDllCalDirectInstance*      pDllCalDirectInstance =
+                                    (tDllCalDirectInstance*)pDllCalQueue_p;
 
     if(pDllCalDirectInstance == NULL)
     {
-        Ret = kEplInvalidInstanceParam;
+        ret = kEplInvalidInstanceParam;
         goto Exit;
     }
 
-    if(pDllCalDirectInstance->uiFrameSize_m == EPL_DLLCALDIRECT_TXBUF_EMPTY ||
-       pDllCalDirectInstance->uiFrameSize_m == EPL_DLLCALDIRECT_TXBUF_FILLING)
+    if(pDllCalDirectInstance->frameSize == EPL_DLLCALDIRECT_TXBUF_EMPTY ||
+       pDllCalDirectInstance->frameSize == EPL_DLLCALDIRECT_TXBUF_FILLING)
     {
         //TX buffer is empty or not ready
-        Ret = kEplDllAsyncTxBufferEmpty;
+        ret = kEplDllAsyncTxBufferEmpty;
         goto Exit;
     }
 
-    if(pDllCalDirectInstance->uiFrameSize_m > *puiDataSize)
+    if(pDllCalDirectInstance->frameSize > *pDataSize_p)
     {
         //provided data buffer is too small
-        Ret = kEplNoResource;
+        ret = kEplNoResource;
         goto Exit;
     }
 
-    EPL_MEMCPY(pData_p, pDllCalDirectInstance->abFrameBuffer_m,
-            pDllCalDirectInstance->uiFrameSize_m);
+    EPL_MEMCPY(pData_p, pDllCalDirectInstance->aFrameBuffer,
+            pDllCalDirectInstance->frameSize);
 
     //return frame size
-    *puiDataSize = pDllCalDirectInstance->uiFrameSize_m;
+    *pDataSize_p = pDllCalDirectInstance->frameSize;
 
     //mark buffer is empty
-    pDllCalDirectInstance->uiFrameSize_m = EPL_DLLCALDIRECT_TXBUF_EMPTY;
+    pDllCalDirectInstance->frameSize = EPL_DLLCALDIRECT_TXBUF_EMPTY;
 
 Exit:
-    return Ret;
+    return ret;
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief    get data block count from direct call instance
+\brief    Get data block count from direct call instance
 
-Returns the data block counter
+Returns the data block counter.
 
-\param  pDllCalQueue_p          pointer to DllCal Queue instance
-\param  pulDataBlockCount       pointer which returns the data block count
+\param  pDllCalQueue_p          Pointer to DllCal Queue instance
+\param  pDataBlockCount         Pointer which returns the data block count
 
-\return tEplKernel
+\return Returns an error code
 \retval kEplSuccessful          if function executes correctly
 \retval other                   error
 */
 //------------------------------------------------------------------------------
-tEplKernel EplDllCalDirectGetDataBlockCount (
-        tEplDllCalQueueInstance pDllCalQueue_p,
-        unsigned long *pulDataBlockCount)
+static tEplKernel getDataBlockCount (tDllCalQueueInstance pDllCalQueue_p,
+                                     ULONG* pDataBlockCount_p)
 {
-    tEplKernel Ret = kEplSuccessful;
-    tEplDllCalDirectInstance *pDllCalDirectInstance =
-            (tEplDllCalDirectInstance*)pDllCalQueue_p;
+    tDllCalDirectInstance*  pDllCalDirectInstance =
+                                (tDllCalDirectInstance*)pDllCalQueue_p;
 
     if(pDllCalDirectInstance == NULL)
     {
-        Ret = kEplInvalidInstanceParam;
-        goto Exit;
+        return kEplInvalidInstanceParam;
     }
 
-    if(pDllCalDirectInstance->uiFrameSize_m == EPL_DLLCALDIRECT_TXBUF_EMPTY ||
-       pDllCalDirectInstance->uiFrameSize_m == EPL_DLLCALDIRECT_TXBUF_FILLING)
+    if(pDllCalDirectInstance->frameSize == EPL_DLLCALDIRECT_TXBUF_EMPTY ||
+       pDllCalDirectInstance->frameSize == EPL_DLLCALDIRECT_TXBUF_FILLING)
     {
-        *pulDataBlockCount = 0;
+        *pDataBlockCount_p = 0;
     }
     else
     {
-        *pulDataBlockCount = 1;
+        *pDataBlockCount_p = 1;
     }
 
-Exit:
-    return Ret;
+    return kEplSuccessful;
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief    reset direct call insatnce
+\brief    Reset direct call insatnce
 
 Resets the direct call instance
 
-\param  pDllCalQueue_p          pointer to DllCal Queue instance
+\param  pDllCalQueue_p          Pointer to DllCal Queue instance
 
-\return tEplKernel
+\return Returns an error code
 \retval kEplSuccessful          if function executes correctly
 \retval other                   error
 */
 //------------------------------------------------------------------------------
-tEplKernel EplDllCalDirectResetDataBlockQueue (
-        tEplDllCalQueueInstance pDllCalQueue_p)
+static tEplKernel resetDataBlockQueue (tDllCalQueueInstance pDllCalQueue_p,
+                                       ULONG timeOutMs_p)
 {
-    tEplKernel Ret = kEplSuccessful;
-    tEplDllCalDirectInstance *pDllCalDirectInstance =
-            (tEplDllCalDirectInstance*)pDllCalQueue_p;
+    tDllCalDirectInstance*  pDllCalDirectInstance =
+                                (tDllCalDirectInstance*)pDllCalQueue_p;
+
+    UNUSED_PARAMETER(timeOutMs_p);
 
     if(pDllCalDirectInstance == NULL)
     {
-        Ret = kEplInvalidInstanceParam;
-        goto Exit;
+        return kEplInvalidInstanceParam;
     }
 
     //empty the buffer
-    pDllCalDirectInstance->uiFrameSize_m = EPL_DLLCALDIRECT_TXBUF_EMPTY;
+    pDllCalDirectInstance->frameSize = EPL_DLLCALDIRECT_TXBUF_EMPTY;
 
-Exit:
-    return Ret;
+    return kEplSuccessful;
 }
 
-//============================================================================//
-//            P R I V A T E   F U N C T I O N S                               //
-//============================================================================//
+
 

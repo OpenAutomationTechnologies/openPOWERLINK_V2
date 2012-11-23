@@ -202,7 +202,7 @@ tEplKernel  Ret;
     }
 
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLU)) != 0)
-    Ret = EplDlluCalRegAsndService(kEplDllAsndSdo,
+    Ret = dllucal_regAsndService(kEplDllAsndSdo,
                                    EplSdoAsnduCb,
                                    kEplDllAsndFilterLocal);
 #endif
@@ -236,7 +236,7 @@ tEplKernel  Ret;
 
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLU)) != 0)
     // deregister callback function from DLL
-    Ret = EplDlluCalRegAsndService(kEplDllAsndSdo,
+    Ret = dllucal_regAsndService(kEplDllAsndSdo,
                                    NULL,
                                    kEplDllAsndFilterNone);
 #endif
@@ -374,7 +374,7 @@ tEplFrameInfo   FrameInfo;
     FrameInfo.m_uiFrameSize = dwDataSize_p;
     FrameInfo.m_pFrame = pSrcData_p;
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLU)) != 0)
-    Ret = EplDlluCalAsyncSend(&FrameInfo,kEplDllAsyncReqPrioGeneric);
+    Ret = dllucal_sendAsyncFrame(&FrameInfo,kEplDllAsyncReqPrioGeneric);
     if (Ret == kEplDllAsyncTxBufferFull)
     {   // ignore TxBufferFull errors
         Ret = kEplSuccessful;

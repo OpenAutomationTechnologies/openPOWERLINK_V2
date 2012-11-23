@@ -1,16 +1,14 @@
 /**
 ********************************************************************************
-\file   EplDllCalShb.c
+\file   dllcal-shb.c
 
-\brief  source file for DLL CAL Shared Buffer module
+\brief  Source file for DLL CAL Shared Buffer module
 
 This DLL CAL queue implementation applies the shared buffer for TX packet
 forwarding.
 The shared buffer is available for different architectures (e.g. NoOS).
 
 Copyright (c) 2012, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
-Copyright (c) 2012, SYSTEC electronik GmbH
-Copyright (c) 2012, Kalycito Infotech Private Ltd.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -39,12 +37,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include "dllcal-shb.h"
-#include "dllcal.h"
-
-#include "SharedBuff.h"
-
-
+#include <dllcal.h>
+#include <SharedBuff.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -73,6 +67,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local types
 //------------------------------------------------------------------------------
+
 /**
 \brief DLL CAL shared buffer instance type
 
@@ -81,11 +76,9 @@ event posting.
 */
 typedef struct
 {
-    tEplDllCalQueue         DllCalQueue_m;
-        ///< DLL CAL queue
-    tShbInstance            pShbInstance_m;
-        ///< shared buffer instance
-} tEplDllCalShbInstance;
+    tDllCalQueue        dllCalQueue;        ///< DLL CAL queue
+    tShbInstance        pShbInstance;       ///< shared buffer instance
+} tDllCalShbInstance;
 
 //------------------------------------------------------------------------------
 // local vars
@@ -95,314 +88,340 @@ typedef struct
 // local function prototypes
 //------------------------------------------------------------------------------
 
+//------------------------------------------------------------------------------
+// local function prototypes
+//------------------------------------------------------------------------------
+static tEplKernel addInstance(tDllCalQueueInstance* ppDllCalQueue_p, tDllCalQueue DllCalQueue_p);
+static tEplKernel delInstance(tDllCalQueueInstance pDllCalQueue_p);
+static tEplKernel insertDataBlock(tDllCalQueueInstance pDllCalQueue_p, BYTE *pData_p, UINT* pDataSize_p);
+static tEplKernel getDataBlock(tDllCalQueueInstance pDllCalQueue_p, BYTE *pData_p, UINT* pDataSize_p);
+static tEplKernel getDataBlockCount(tDllCalQueueInstance pDllCalQueue_p, ULONG* pDataBlockCount_p);
+static tEplKernel resetDataBlockQueue(tDllCalQueueInstance pDllCalQueue_p, ULONG timeOutMs_p);
+
+/* define external function interface */
+static tDllCalFuncIntf funcintf_l =
+{
+    addInstance,
+    delInstance,
+    insertDataBlock,
+    getDataBlock,
+    getDataBlockCount,
+    resetDataBlockQueue
+};
+
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
 //============================================================================//
 
 //------------------------------------------------------------------------------
 /**
-\brief    add shared buffer DLL CAL instance
+\brief  Return pointer to function interface
+
+This function returns a pointer to the function interface structure which
+is used to access the dllcal functions of the shared buffer implementation.
+
+\return Returns a pointer to the local function interface
+*/
+//------------------------------------------------------------------------------
+tDllCalFuncIntf* dllcalshb_getInterface(void)
+{
+    return &funcintf_l;
+}
+
+//============================================================================//
+//            P R I V A T E   F U N C T I O N S                               //
+//============================================================================//
+
+//------------------------------------------------------------------------------
+/**
+\brief    Add shared buffer DLL CAL instance
 
 Add a shared buffer instance for TX packet forwarding in DLL CAL
 
 \param  ppDllCalQueue_p         double-pointer to DllCal Queue instance
-\param  DllCalQueue_p           parameter that determines the queue
+\param  dllCalQueue_p           parameter that determines the queue
 
-\return tEplKernel
+\return Returns an error code
 \retval kEplSuccessful          if function executes correctly
 \retval other                   error
 */
 //------------------------------------------------------------------------------
-tEplKernel EplDllCalShbAddInstance (tEplDllCalQueueInstance *ppDllCalQueue_p,
-        tEplDllCalQueue DllCalQueue_p)
+static tEplKernel addInstance(tDllCalQueueInstance *ppDllCalQueue_p,
+                              tDllCalQueue dllCalQueue_p)
 {
-    tEplKernel Ret = kEplSuccessful;
-    tShbError ShbError = kShbOk;
-    tEplDllCalShbInstance *pDllCalShbInstance;
-    unsigned int fShbNewCreated;
+    tEplKernel                  ret = kEplSuccessful;
+    tShbError                   shbError = kShbOk;
+    tDllCalShbInstance*         pDllCalShbInstance;
+    UINT                        fShbNewCreated;
 
-    pDllCalShbInstance = (tEplDllCalShbInstance *)
-            EPL_MALLOC(sizeof(tEplDllCalShbInstance));
+    pDllCalShbInstance = (tDllCalShbInstance *) EPL_MALLOC(sizeof(tDllCalShbInstance));
 
     if(pDllCalShbInstance == NULL)
     {
-        Ret = kEplNoResource;
+        ret = kEplNoResource;
         goto Exit;
     }
 
     //store parameters in instance
-    pDllCalShbInstance->DllCalQueue_m = DllCalQueue_p;
-
+    pDllCalShbInstance->dllCalQueue = dllCalQueue_p;
     //initialize shared buffer
-    switch(pDllCalShbInstance->DllCalQueue_m)
+    switch(pDllCalShbInstance->dllCalQueue)
     {
-        case kEplDllCalQueueTxGen:
-            ShbError = ShbCirAllocBuffer(
-                    EPL_DLLCAL_BUFFER_SIZE_TX_GEN,
-                    EPL_DLLCAL_BUFFER_ID_TX_GEN,
-                    &pDllCalShbInstance->pShbInstance_m,
-                    &fShbNewCreated);
+        case kDllCalQueueTxGen:
+            shbError = ShbCirAllocBuffer(DLLCAL_BUFFER_SIZE_TX_GEN,
+                                         DLLCAL_BUFFER_ID_TX_GEN,
+                                         &pDllCalShbInstance->pShbInstance,
+                                         &fShbNewCreated);
             break;
-        case kEplDllCalQueueTxNmt:
-            ShbError = ShbCirAllocBuffer(
-                    EPL_DLLCAL_BUFFER_SIZE_TX_NMT,
-                    EPL_DLLCAL_BUFFER_ID_TX_NMT,
-                    &pDllCalShbInstance->pShbInstance_m,
-                    &fShbNewCreated);
+
+        case kDllCalQueueTxNmt:
+            shbError = ShbCirAllocBuffer(DLLCAL_BUFFER_SIZE_TX_NMT,
+                                         DLLCAL_BUFFER_ID_TX_NMT,
+                                         &pDllCalShbInstance->pShbInstance,
+                                         &fShbNewCreated);
             break;
-        case kEplDllCalQueueTxSync:
-            ShbError = ShbCirAllocBuffer(
-                    EPL_DLLCAL_BUFFER_SIZE_TX_SYNC,
-                    EPL_DLLCAL_BUFFER_ID_TX_SYNC,
-                    &pDllCalShbInstance->pShbInstance_m,
-                    &fShbNewCreated);
+
+        case kDllCalQueueTxSync:
+            shbError = ShbCirAllocBuffer(DLLCAL_BUFFER_SIZE_TX_SYNC,
+                                         DLLCAL_BUFFER_ID_TX_SYNC,
+                                         &pDllCalShbInstance->pShbInstance,
+                                         &fShbNewCreated);
             break;
+
         default:
-            Ret = kEplInvalidInstanceParam;
+            ret = kEplInvalidInstanceParam;
             break;
     }
 
-    if(ShbError != kShbOk)
+    if(shbError != kShbOk)
     {
-        Ret = kEplNoResource;
+        ret = kEplNoResource;
         goto Exit;
     }
 
-    *ppDllCalQueue_p = (tEplDllCalQueueInstance*)pDllCalShbInstance;
+    *ppDllCalQueue_p = (tDllCalQueueInstance*)pDllCalShbInstance;
 
 Exit:
-    return Ret;
+    return ret;
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief    delete shared buffer DLL CAL instance
+\brief    Delete shared buffer DLL CAL instance
 
-Delete the shared buffer instance
+Delete the shared buffer instance.
 
-\param  pDllCalQueue_p          pointer to DllCal Queue instance
+\param  pDllCalQueue_p          Pointer to DllCal Queue instance
 
-\return tEplKernel
+\return Returns an error code
 \retval kEplSuccessful          if function executes correctly
 \retval other                   error
 */
 //------------------------------------------------------------------------------
-tEplKernel EplDllCalShbDelInstance (tEplDllCalQueueInstance pDllCalQueue_p)
+static tEplKernel delInstance(tDllCalQueueInstance pDllCalQueue_p)
 {
-    tEplKernel Ret = kEplSuccessful;
-    tShbError ShbError;
-    tEplDllCalShbInstance *pDllCalShbInstance =
-            (tEplDllCalShbInstance*)pDllCalQueue_p;
+    tShbError               shbError;
+    tDllCalShbInstance*     pDllCalShbInstance =
+                                    (tDllCalShbInstance*)pDllCalQueue_p;
 
-    //free shared buffer
-    ShbError = ShbCirReleaseBuffer(pDllCalShbInstance->pShbInstance_m);
-
-    if(ShbError != kShbOk)
+    shbError = ShbCirReleaseBuffer(pDllCalShbInstance->pShbInstance);
+    if(shbError != kShbOk)
     {
-        Ret = kEplNoResource;
-        goto Exit;
+        return kEplNoResource;
     }
 
     //free dllcal shb instance
     EPL_FREE(pDllCalShbInstance);
 
-Exit:
-    return Ret;
+    return kEplSuccessful;
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief    insert data block into shared buffer
+\brief    Insert data block into shared buffer
 
 Inserts a data block into the shared buffer instance. The data block can be of
 any type (e.g. TX packet).
 
-\param  pDllCalQueue_p          pointer to DllCal Queue instance
-\param  pData_p                 pointer to the data block to be insert
-\param  puiDataSize             pointer to the size of the data block to be
+\param  pDllCalQueue_p          Pointer to DllCal Queue instance
+\param  pData_p                 Pointer to the data block to be insert
+\param  pDataSize_p             Pointer to the size of the data block to be
                                 insert
 
-\return tEplKernel
+\return Returns an error code
 \retval kEplSuccessful          if function executes correctly
 \retval other                   error
 */
 //------------------------------------------------------------------------------
-tEplKernel EplDllCalShbInsertDataBlock (tEplDllCalQueueInstance pDllCalQueue_p,
-        BYTE *pData_p, unsigned int *puiDataSize)
+static tEplKernel insertDataBlock (tDllCalQueueInstance pDllCalQueue_p,
+                                   BYTE *pData_p, UINT *pDataSize_p)
 {
-    tEplKernel Ret = kEplSuccessful;
-    tShbError ShbError;
-    tEplDllCalShbInstance *pDllCalShbInstance =
-            (tEplDllCalShbInstance*)pDllCalQueue_p;
+    tEplKernel                  ret = kEplSuccessful;
+    tShbError                   shbError;
+    tDllCalShbInstance*         pDllCalShbInstance =
+                                            (tDllCalShbInstance*)pDllCalQueue_p;
 
     if(pDllCalShbInstance == NULL)
     {
-        Ret = kEplInvalidInstanceParam;
+        ret = kEplInvalidInstanceParam;
         goto Exit;
     }
 
-    ShbError = ShbCirWriteDataBlock(pDllCalShbInstance->pShbInstance_m,
-            pData_p, *puiDataSize);
+    shbError = ShbCirWriteDataBlock(pDllCalShbInstance->pShbInstance,
+            pData_p, *pDataSize_p);
 
     // error handling
-    switch (ShbError)
+    switch (shbError)
     {
         case kShbOk:
             break;
 
         case kShbExceedDataSizeLimit:
         case kShbBufferFull:
-            Ret = kEplDllAsyncTxBufferFull;
+            ret = kEplDllAsyncTxBufferFull;
             break;
 
         case kShbInvalidArg:
         default:
-            Ret = kEplNoResource;
+            ret = kEplNoResource;
             break;
     }
 
 Exit:
-    return Ret;
+    return ret;
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief    get data block from shared buffer
+\brief    Get data block from shared buffer
 
 Gets a data block from the shared buffer instance. The data block can be of any
 type (e.g. TX packet).
 
-\param  pDllCalQueue_p          pointer to DllCal Queue instance
-\param  pData_p                 pointer to data buffer
-\param  puiDataSize             pointer to the size of the data buffer
+\param  pDllCalQueue_p          Pointer to DllCal Queue instance
+\param  pData_p                 Pointer to data buffer
+\param  pDataSize_p             Pointer to the size of the data buffer
                                 (will be replaced with actual data block size)
 
-\return tEplKernel
+\return Returns an error code
 \retval kEplSuccessful          if function executes correctly
 \retval other                   error
 */
 //------------------------------------------------------------------------------
-tEplKernel EplDllCalShbGetDataBlock (tEplDllCalQueueInstance pDllCalQueue_p,
-        BYTE *pData_p, unsigned int *puiDataSize)
+static tEplKernel getDataBlock (tDllCalQueueInstance pDllCalQueue_p,
+                                BYTE *pData_p, UINT *pDataSize_p)
 {
-    tEplKernel Ret = kEplSuccessful;
-    tShbError ShbError;
-    tEplDllCalShbInstance *pDllCalShbInstance =
-            (tEplDllCalShbInstance*)pDllCalQueue_p;
-    unsigned long ulActualDataSize;
+    tEplKernel              ret = kEplSuccessful;
+    tShbError               shbError;
+    tDllCalShbInstance*     pDllCalShbInstance =
+                                            (tDllCalShbInstance*)pDllCalQueue_p;
+    ULONG                   actualDataSize;
 
     if(pDllCalShbInstance == NULL)
     {
-        Ret = kEplInvalidInstanceParam;
+        ret = kEplInvalidInstanceParam;
         goto Exit;
     }
 
-    ShbError = ShbCirReadDataBlock(pDllCalShbInstance->pShbInstance_m,
-            (void*)pData_p, (unsigned long)*puiDataSize, &ulActualDataSize);
-
-    if(ShbError != kShbOk)
+    shbError = ShbCirReadDataBlock(pDllCalShbInstance->pShbInstance,
+                                   (void*)pData_p, (unsigned long)*pDataSize_p,
+                                   &actualDataSize);
+    if(shbError != kShbOk)
     {
-        if(ShbError == kShbNoReadableData)
+        if(shbError == kShbNoReadableData)
         {
-            Ret = kEplDllAsyncTxBufferEmpty;
+            ret = kEplDllAsyncTxBufferEmpty;
         }
         else
         {
-            Ret = kEplNoResource;
+            ret = kEplNoResource;
         }
 
         goto Exit;
     }
 
-    *puiDataSize = (unsigned int)ulActualDataSize;
+    *pDataSize_p = (UINT)actualDataSize;
 
 Exit:
-    return Ret;
+    return ret;
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief    get data block count from shared buffer
+\brief  Get data block count from shared buffer
 
-Returns the data block counter
+Returns the data block counter.
 
-\param  pDllCalQueue_p          pointer to DllCal Queue instance
-\param  pulDataBlockCount       pointer which returns the data block count
+\param  pDllCalQueue_p          Pointer to DllCal Queue instance
+\param  pDataBlockCount_p       Pointer which returns the data block count
 
-\return tEplKernel
+\return Returns an error code
 \retval kEplSuccessful          if function executes correctly
 \retval other                   error
 */
 //------------------------------------------------------------------------------
-tEplKernel EplDllCalShbGetDataBlockCount (
-        tEplDllCalQueueInstance pDllCalQueue_p,
-        unsigned long *pulDataBlockCount)
+static tEplKernel getDataBlockCount(tDllCalQueueInstance pDllCalQueue_p,
+                                    ULONG* pDataBlockCount_p)
 {
-    tEplKernel Ret = kEplSuccessful;
-    tShbError ShbError;
-    tEplDllCalShbInstance *pDllCalShbInstance =
-            (tEplDllCalShbInstance*)pDllCalQueue_p;
+    tEplKernel              ret = kEplSuccessful;
+    tShbError               shbError;
+    tDllCalShbInstance*     pDllCalShbInstance =
+                                        (tDllCalShbInstance*)pDllCalQueue_p;
 
     if(pDllCalShbInstance == NULL)
     {
-        Ret = kEplInvalidInstanceParam;
+        ret = kEplInvalidInstanceParam;
         goto Exit;
     }
 
-    ShbError = ShbCirGetReadBlockCount(pDllCalShbInstance->pShbInstance_m,
-            pulDataBlockCount);
-
-    if(ShbError != kShbOk)
+    shbError = ShbCirGetReadBlockCount(pDllCalShbInstance->pShbInstance,
+                                       pDataBlockCount_p);
+    if(shbError != kShbOk)
     {
-        Ret = kEplNoResource;
+        ret = kEplNoResource;
     }
 
 Exit:
-    return Ret;
+    return ret;
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief    reset shared buffer
+\brief    Reset shared buffer
 
 Resets the shared buffer instance after a given timeout.
 
-\param  pDllCalQueue_p          pointer to DllCal Queue instance
-\param  ulTimeOutMs_p           timeout before buffer reset is done
+\param  pDllCalQueue_p          pPinter to DllCal Queue instance
+\param  timeOutMs_p             Timeout before buffer reset is done
 
-\return tEplKernel
+\return Returns an error code
 \retval kEplSuccessful          if function executes correctly
 \retval other                   error
 */
 //------------------------------------------------------------------------------
-tEplKernel EplDllCalShbResetDataBlockQueue (
-        tEplDllCalQueueInstance pDllCalQueue_p,
-        unsigned long ulTimeOutMs_p)
+static tEplKernel resetDataBlockQueue(tDllCalQueueInstance pDllCalQueue_p,
+                                           ULONG timeOutMs_p)
 {
-    tEplKernel Ret = kEplSuccessful;
-    tShbError ShbError;
-    tEplDllCalShbInstance *pDllCalShbInstance =
-            (tEplDllCalShbInstance*)pDllCalQueue_p;
+    tEplKernel              ret = kEplSuccessful;
+    tShbError               shbError;
+    tDllCalShbInstance*     pDllCalShbInstance =
+                                        (tDllCalShbInstance*)pDllCalQueue_p;
 
     if(pDllCalShbInstance == NULL)
     {
-        Ret = kEplInvalidInstanceParam;
+        ret = kEplInvalidInstanceParam;
         goto Exit;
     }
 
-    ShbError = ShbCirResetBuffer(pDllCalShbInstance->pShbInstance_m,
-            ulTimeOutMs_p, NULL);
-
-    if(ShbError != kShbOk)
+    shbError = ShbCirResetBuffer(pDllCalShbInstance->pShbInstance,
+                                 timeOutMs_p, NULL);
+    if(shbError != kShbOk)
     {
-        Ret = kEplNoResource;
+        ret = kEplNoResource;
     }
 
 Exit:
-    return Ret;
+    return ret;
 }
 
-//============================================================================//
-//            P R I V A T E   F U N C T I O N S                               //
-//============================================================================//
 

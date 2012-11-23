@@ -204,7 +204,7 @@ tEplKernel Ret;
     EPL_MEMSET(&EplStatusuInstance_g, 0, sizeof (EplStatusuInstance_g));
 
     // register StatusResponse callback function
-    Ret = EplDlluCalRegAsndService(kEplDllAsndStatusResponse, EplStatusuCbStatusResponse, kEplDllAsndFilterAny);
+    Ret = dllucal_regAsndService(kEplDllAsndStatusResponse, EplStatusuCbStatusResponse, kEplDllAsndFilterAny);
 
     return Ret;
 
@@ -236,7 +236,7 @@ tEplKernel  Ret;
     Ret = kEplSuccessful;
 
     // deregister StatusResponse callback function
-    Ret = EplDlluCalRegAsndService(kEplDllAsndStatusResponse, NULL, kEplDllAsndFilterNone);
+    Ret = dllucal_regAsndService(kEplDllAsndStatusResponse, NULL, kEplDllAsndFilterNone);
 
     return Ret;
 
@@ -299,7 +299,7 @@ tEplKernel  Ret;
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
     if (uiNodeId_p == 0)
     {   // issue request for local node
-        Ret = EplDlluCalIssueRequest(kEplDllReqServiceStatus, 0x00, 0xFF);
+        Ret = dllucal_issueRequest(kEplDllReqServiceStatus, 0x00, 0xFF);
         goto Exit;
     }
 #endif
@@ -316,7 +316,7 @@ tEplKernel  Ret;
         else
         {
             EplStatusuInstance_g.m_apfnCbResponse[uiNodeId_p] = pfnCbResponse_p;
-            Ret = EplDlluCalIssueRequest(kEplDllReqServiceStatus, (uiNodeId_p + 1), 0xFF);
+            Ret = dllucal_issueRequest(kEplDllReqServiceStatus, (uiNodeId_p + 1), 0xFF);
         }
 #else
         Ret = kEplInvalidOperation;

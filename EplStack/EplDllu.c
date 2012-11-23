@@ -307,7 +307,7 @@ tEplKernel EplDlluAsyncSend(tEplFrameInfo * pFrameInfo_p, tEplDllAsyncReqPriorit
 {
 tEplKernel  Ret = kEplSuccessful;
 
-    Ret = EplDlluCalAsyncSend(pFrameInfo_p, Priority_p);
+    Ret = dllucal_sendAsyncFrame(pFrameInfo_p, Priority_p);
 
     return Ret;
 }

@@ -1,136 +1,114 @@
-/****************************************************************************
+/**
+********************************************************************************
+\file   dllkcal.h
 
-  (c) SYSTEC electronic GmbH, D-07973 Greiz, August-Bebel-Str. 29
-      www.systec-electronic.com
+\brief  Definitions for kernel DLL CAL module
 
-  Project:      openPOWERLINK
+This file contains definitions for the kernel DLL CAL module
 
-  Description:  include file for kernelspace DLL Communication Abstraction Layer module
+Copyright (c) 2012, SYSTEC electronik GmbH
+Copyright (c) 2012, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+All rights reserved.
 
-  License:
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+    * Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above copyright
+      notice, this list of conditions and the following disclaimer in the
+      documentation and/or other materials provided with the distribution.
+    * Neither the name of the copyright holders nor the
+      names of its contributors may be used to endorse or promote products
+      derived from this software without specific prior written permission.
 
-    Redistribution and use in source and binary forms, with or without
-    modification, are permitted provided that the following conditions
-    are met:
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL COPYRIGHT HOLDERS BE LIABLE FOR ANY
+DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*******************************************************************************/
 
-    1. Redistributions of source code must retain the above copyright
-       notice, this list of conditions and the following disclaimer.
+#ifndef _INC_dllkcal_H_
+#define _INC_dllkcal_H_
 
-    2. Redistributions in binary form must reproduce the above copyright
-       notice, this list of conditions and the following disclaimer in the
-       documentation and/or other materials provided with the distribution.
+//------------------------------------------------------------------------------
+// includes
+//------------------------------------------------------------------------------
+#include <EplDll.h>
+#include <EplEvent.h>
 
-    3. Neither the name of SYSTEC electronic GmbH nor the names of its
-       contributors may be used to endorse or promote products derived
-       from this software without prior written permission. For written
-       permission, please contact info@systec-electronic.com.
-
-    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-    LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-    FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-    COPYRIGHT HOLDERS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-    INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-    BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-    LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-    CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-    LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-    ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-    POSSIBILITY OF SUCH DAMAGE.
-
-    Severability Clause:
-
-        If a provision of this License is or becomes illegal, invalid or
-        unenforceable in any jurisdiction, that shall not affect:
-        1. the validity or enforceability in that jurisdiction of any other
-           provision of this License; or
-        2. the validity or enforceability in other jurisdictions of that or
-           any other provision of this License.
-
-  -------------------------------------------------------------------------
-
-                $RCSfile$
-
-                $Author$
-
-                $Revision$  $Date$
-
-                $State$
-
-                Build Environment:
-                    GCC V3.4
-
-  -------------------------------------------------------------------------
-
-  Revision History:
-
-  2006/06/13 d.k.:   start of the implementation, version 1.00
-
-
-****************************************************************************/
-
-#ifndef _EPL_DLLKCAL_H_
-#define _EPL_DLLKCAL_H_
-
-#include "EplDll.h"
-#include "EplEvent.h"
-
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // const defines
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // typedef
-//---------------------------------------------------------------------------
-
+//------------------------------------------------------------------------------
 typedef struct
 {
-    unsigned long   m_ulCurTxFrameCountGen;
-    unsigned long   m_ulCurTxFrameCountNmt;
-    unsigned long   m_ulCurRxFrameCount;
-    unsigned long   m_ulMaxTxFrameCountGen;
-    unsigned long   m_ulMaxTxFrameCountNmt;
-    unsigned long   m_ulMaxRxFrameCount;
+    ULONG       curTxFrameCountGen;
+    ULONG       curTxFrameCountNmt;
+    ULONG       curRxFrameCount;
+    ULONG       maxTxFrameCountGen;
+    ULONG       maxTxFrameCountNmt;
+    ULONG       maxRxFrameCount;
+} tDllkCalStatistics;
 
-} tEplDllkCalStatistics;
-
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // function prototypes
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
-#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLK)) != 0)
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-tEplKernel EplDllkCalAddInstance(void);
+tEplKernel dllkcal_init(void);
 
-tEplKernel EplDllkCalDelInstance(void);
+tEplKernel dllkcal_exit(void);
 
-tEplKernel EplDllkCalAsyncGetTxCount(tEplDllAsyncReqPriority * pPriority_p, unsigned int * puiCount_p);
-tEplKernel EplDllkCalAsyncGetTxFrame(void * pFrame_p, unsigned int * puiFrameSize_p, tEplDllAsyncReqPriority Priority_p);
+tEplKernel dllkcal_getAsyncTxCount(tEplDllAsyncReqPriority* pPriority_p,
+                                   UINT *pCount_p);
+
+tEplKernel dllkcal_getAsyncTxFrame(void* pFrame_p, UINT* pFrameSize_p,
+                                   tEplDllAsyncReqPriority priority_p);
+
 // only frames with registered AsndServiceIds are passed to CAL
-tEplKernel EplDllkCalAsyncFrameReceived(tEplFrameInfo * pFrameInfo_p);
+tEplKernel dllkcal_asyncFrameReceived(tEplFrameInfo* pFrameInfo_p);
 
-tEplKernel EplDllkCalAsyncSend(tEplFrameInfo * pFrameInfo_p, tEplDllAsyncReqPriority Priority_p);
+tEplKernel dllkcal_sendAsyncFrame(tEplFrameInfo* pFrameInfo_p,
+                                  tEplDllAsyncReqPriority priority_p);
 
-tEplKernel EplDllkCalAsyncClearBuffer(void);
+tEplKernel dllkcal_clearAsyncBuffer(void);
 
-tEplKernel EplDllkCalGetStatistics(tEplDllkCalStatistics ** ppStatistics);
+tEplKernel dllkcal_getStatistics(tDllkCalStatistics** ppStatistics);
 
-tEplKernel EplDllkCalProcess(tEplEvent * pEvent_p);
+tEplKernel dllkcal_process(tEplEvent* pEvent_p);
 
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
 
-tEplKernel EplDllkCalAsyncClearQueues(void);
+tEplKernel dllkcal_clearAsyncQueues(void);
 
-tEplKernel EplDllkCalIssueRequest(tEplDllReqServiceId Service_p, unsigned int uiNodeId_p, BYTE bSoaFlag1_p);
+tEplKernel dllkcal_issueRequest(tEplDllReqServiceId service_p, UINT nodeId_p,
+                                BYTE soaFlag1_p);
 
-tEplKernel EplDllkCalAsyncGetSoaRequest(tEplDllReqServiceId* pReqServiceId_p, unsigned int* puiNodeId_p, tEplSoaPayload* pSoaPayload_p);
+tEplKernel dllkcal_getSoaRequest(tEplDllReqServiceId* pReqServiceId_p,
+                                 UINT* pNodeId_p, tEplSoaPayload* pSoaPayload_p);
 
-tEplKernel EplDllkCalAsyncSetPendingRequests(unsigned int uiNodeId_p, tEplDllAsyncReqPriority AsyncReqPrio_p, unsigned int uiCount_p);
+tEplKernel dllkcal_setAsyncPendingRequests(UINT nodeId_p, tEplDllAsyncReqPriority asyncReqPrio_p,
+                                           UINT count_p);
 
 #endif //(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
 
-#endif // #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLK)) != 0)
 
-#endif  // #ifndef _EPL_DLLKCAL_H_
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* _INC_dllkcal_H_ */
 
 
