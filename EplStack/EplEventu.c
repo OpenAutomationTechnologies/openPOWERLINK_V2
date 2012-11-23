@@ -469,7 +469,7 @@ tEplEventSource         EventSource;
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLU)) != 0)
         case kEplEventSinkDlluCal:
         {
-            Ret = EplDlluCalProcess(pEvent_p);
+            Ret = dllucal_process(pEvent_p);
             if ((Ret != kEplSuccessful) && (Ret != kEplShutdown))
             {
                 EventSource = kEplEventSourceDllu;

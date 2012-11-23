@@ -1992,7 +1992,7 @@ tEplDllkNodeInfo*   pIntNodeInfo;
     }
 
     // clear all asynchronous buffers
-    Ret = EplDllkCalAsyncClearBuffer();
+    Ret = dllkcal_clearAsyncBuffer();
     if (Ret != kEplSuccessful)
     {
         goto Exit;
@@ -3046,7 +3046,7 @@ unsigned int    uiFilterEntry;
             // set max buffer size as input parameter
             uiFrameSize = pTxBuffer->m_uiMaxBufferLen;
             // copy frame from shared loop buffer to Tx buffer
-            Ret = EplDllkCalAsyncGetTxFrame(
+            Ret = dllkcal_getAsyncTxFrame(
             pTxBuffer->m_pbBuffer, &uiFrameSize, AsyncReqPriority_p);
             if (Ret == kEplSuccessful)
             {
@@ -3136,7 +3136,7 @@ unsigned int    uiFilterEntry;
     else
     {
         // update Flag 2 (PR, RS)
-        Ret = EplDllkCalAsyncGetTxCount(&AsyncReqPriority_p, &uiFrameCount);
+        Ret = dllkcal_getAsyncTxCount(&AsyncReqPriority_p, &uiFrameCount);
         if (AsyncReqPriority_p == kEplDllAsyncReqPrioNmt)
         {   // non-empty FIFO with hightest priority is for NMT requests
             if (EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_NMTREQ + EplDllkInstance_g.m_bCurTxBufferOffsetNmtReq].m_uiTxMsgLen > EPL_DLLK_BUFLEN_EMPTY)
@@ -3209,7 +3209,7 @@ tEplKernel      Ret = kEplSuccessful;
     // it is issued by NMT MN module, when PreOp1 is entered
 
     // clear the asynchronous queues
-    Ret = EplDllkCalAsyncClearQueues();
+    Ret = dllkcal_clearAsyncQueues();
 
     // reset cycle counter (every time a SoA is triggered in PreOp1 the counter is incremented
     // and when it reaches EPL_C_DLL_PREOP1_START_CYCLES the SoA may contain invitations)
@@ -4446,7 +4446,7 @@ tEplDllkNodeInfo*   pIntNodeInfo = NULL;
 
         // forward Flag2 to asynchronous scheduler
         bFlag1 = AmiGetByteFromLe(&pFrame->m_Data.m_Asnd.m_Payload.m_StatusResponse.m_le_bFlag2);
-        Ret = EplDllkCalAsyncSetPendingRequests(uiNodeId,
+        Ret = dllkcal_setAsyncPendingRequests(uiNodeId,
             ((tEplDllAsyncReqPriority) ((bFlag1 & EPL_FRAME_FLAG2_PR) >> EPL_FRAME_FLAG2_PR_SHIFT)),
             (bFlag1 & EPL_FRAME_FLAG2_RS));
         if (Ret != kEplSuccessful)
@@ -5151,7 +5151,7 @@ unsigned int    uiNodeId;
 
                 // forward Flag2 to asynchronous scheduler
                 bFlag1 = AmiGetByteFromLe(&pFrame->m_Data.m_Asnd.m_Payload.m_StatusResponse.m_le_bFlag2);
-                Ret = EplDllkCalAsyncSetPendingRequests(uiNodeId,
+                Ret = dllkcal_setAsyncPendingRequests(uiNodeId,
                     ((tEplDllAsyncReqPriority) ((bFlag1 & EPL_FRAME_FLAG2_PR) >> EPL_FRAME_FLAG2_PR_SHIFT)),
                     (bFlag1 & EPL_FRAME_FLAG2_RS));
                 if (Ret != kEplSuccessful)
@@ -5217,7 +5217,7 @@ unsigned int    uiNodeId;
         if (EplDllkInstance_g.m_aAsndFilter[uiAsndServiceId] == kEplDllAsndFilterAny)
         {   // ASnd service ID is registered
             // forward frame via async receive FIFO to userspace
-            Ret = EplDllkCalAsyncFrameReceived(pFrameInfo_p);
+            Ret = dllkcal_asyncFrameReceived(pFrameInfo_p);
             if (Ret != kEplSuccessful)
             {
                 goto Exit;
@@ -5231,7 +5231,7 @@ unsigned int    uiNodeId;
                 || (uiNodeId == EPL_C_ADR_BROADCAST))
             {   // ASnd frame is intended for us
                 // forward frame via async receive FIFO to userspace
-                Ret = EplDllkCalAsyncFrameReceived(pFrameInfo_p);
+                Ret = dllkcal_asyncFrameReceived(pFrameInfo_p);
                 if (Ret != kEplSuccessful)
                 {
                     goto Exit;
@@ -7414,7 +7414,7 @@ tEplDllkNodeInfo*   pNodeInfo;
         {
             EplDllkInstance_g.m_aLastReqServiceId[bCurReq_p] = kEplDllReqServiceUnspecified;
         }
-        Ret = EplDllkCalAsyncGetSoaRequest(&EplDllkInstance_g.m_aLastReqServiceId[bCurReq_p],
+        Ret = dllkcal_getSoaRequest(&EplDllkInstance_g.m_aLastReqServiceId[bCurReq_p],
                                            &EplDllkInstance_g.m_auiLastTargetNodeId[bCurReq_p],
                                            &pTxFrame->m_Data.m_Soa.m_Payload);
         if (Ret != kEplSuccessful)
@@ -7693,7 +7693,7 @@ tEplFrameInfo   FrameInfo;
                 FrameInfo.m_pFrame = pFrame;
                 FrameInfo.m_uiFrameSize = 18;   // empty non existing ASnd frame
                 // forward frame via async receive FIFO to userspace
-                Ret = EplDllkCalAsyncFrameReceived(&FrameInfo);
+                Ret = dllkcal_asyncFrameReceived(&FrameInfo);
             }
             break;
         default:

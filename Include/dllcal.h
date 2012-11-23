@@ -1,83 +1,51 @@
-/****************************************************************************
+/**
+********************************************************************************
+\file   dllcal.h
 
-  (c) SYSTEC electronic GmbH, D-07973 Greiz, August-Bebel-Str. 29
-      www.systec-electronic.com
+\brief  Definitions for DLL CAL module
 
-  Project:      openPOWERLINK
+The file contains definitions for the DLL CAL module
 
-  Description:  include file for DLL Communication Abstraction Layer module
+Copyright (c) 2012, SYSTEC electronik GmbH
+Copyright (c) 2012, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+All rights reserved.
 
-  License:
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+    * Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above copyright
+      notice, this list of conditions and the following disclaimer in the
+      documentation and/or other materials provided with the distribution.
+    * Neither the name of the copyright holders nor the
+      names of its contributors may be used to endorse or promote products
+      derived from this software without specific prior written permission.
 
-    Redistribution and use in source and binary forms, with or without
-    modification, are permitted provided that the following conditions
-    are met:
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL COPYRIGHT HOLDERS BE LIABLE FOR ANY
+DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*******************************************************************************/
 
-    1. Redistributions of source code must retain the above copyright
-       notice, this list of conditions and the following disclaimer.
+#ifndef _INC_dllcal_H_
+#define _INC_dllcal_H_
 
-    2. Redistributions in binary form must reproduce the above copyright
-       notice, this list of conditions and the following disclaimer in the
-       documentation and/or other materials provided with the distribution.
+//------------------------------------------------------------------------------
+// includes
+//------------------------------------------------------------------------------
+#include <EplDll.h>
 
-    3. Neither the name of SYSTEC electronic GmbH nor the names of its
-       contributors may be used to endorse or promote products derived
-       from this software without prior written permission. For written
-       permission, please contact info@systec-electronic.com.
-
-    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-    LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-    FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-    COPYRIGHT HOLDERS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-    INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-    BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-    LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-    CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-    LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-    ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-    POSSIBILITY OF SUCH DAMAGE.
-
-    Severability Clause:
-
-        If a provision of this License is or becomes illegal, invalid or
-        unenforceable in any jurisdiction, that shall not affect:
-        1. the validity or enforceability in that jurisdiction of any other
-           provision of this License; or
-        2. the validity or enforceability in other jurisdictions of that or
-           any other provision of this License.
-
-  -------------------------------------------------------------------------
-
-                $RCSfile$
-
-                $Author$
-
-                $Revision$  $Date$
-
-                $State$
-
-                Build Environment:
-                    GCC V3.4
-
-  -------------------------------------------------------------------------
-
-  Revision History:
-
-  2006/06/20 d.k.:   start of the implementation, version 1.00
-
-
-****************************************************************************/
-
-#ifndef _EPL_DLLCAL_H_
-#define _EPL_DLLCAL_H_
-
-
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // const defines
-//---------------------------------------------------------------------------
-
-/*#ifndef EPL_DLLCAL_BUFFER_ID_RX
+//------------------------------------------------------------------------------
+/*
+#ifndef EPL_DLLCAL_BUFFER_ID_RX
 #define EPL_DLLCAL_BUFFER_ID_RX    "EplSblDllCalRx"
 #endif
 
@@ -85,48 +53,80 @@
 #define EPL_DLLCAL_BUFFER_SIZE_RX  32767
 #endif
 */
-#ifndef EPL_DLLCAL_BUFFER_ID_TX_NMT
-#define EPL_DLLCAL_BUFFER_ID_TX_NMT     "EplSblDllCalTxNmt"
+
+#ifndef DLLCAL_BUFFER_ID_TX_NMT
+#define DLLCAL_BUFFER_ID_TX_NMT     "EplSblDllCalTxNmt"
 #endif
 
-#ifndef EPL_DLLCAL_BUFFER_SIZE_TX_NMT
-#define EPL_DLLCAL_BUFFER_SIZE_TX_NMT   32767
+#ifndef DLLCAL_BUFFER_SIZE_TX_NMT
+#define DLLCAL_BUFFER_SIZE_TX_NMT   32767
 #endif
 
-#ifndef EPL_DLLCAL_BUFFER_ID_TX_GEN
-#define EPL_DLLCAL_BUFFER_ID_TX_GEN     "EplSblDllCalTxGen"
+#ifndef DLLCAL_BUFFER_ID_TX_GEN
+#define DLLCAL_BUFFER_ID_TX_GEN     "EplSblDllCalTxGen"
 #endif
 
-#ifndef EPL_DLLCAL_BUFFER_SIZE_TX_GEN
-#define EPL_DLLCAL_BUFFER_SIZE_TX_GEN   32767
+#ifndef DLLCAL_BUFFER_SIZE_TX_GEN
+#define DLLCAL_BUFFER_SIZE_TX_GEN   32767
 #endif
 
-#ifndef EPL_DLLCAL_BUFFER_ID_TX_SYNC
-#define EPL_DLLCAL_BUFFER_ID_TX_SYNC    "EplSblDllCalTxSync"
+#ifndef DLLCAL_BUFFER_ID_TX_SYNC
+#define DLLCAL_BUFFER_ID_TX_SYNC    "EplSblDllCalTxSync"
 #endif
 
-#ifndef EPL_DLLCAL_BUFFER_SIZE_TX_SYNC
-#define EPL_DLLCAL_BUFFER_SIZE_TX_SYNC  8192
+#ifndef DLLCAL_BUFFER_SIZE_TX_SYNC
+#define DLLCAL_BUFFER_SIZE_TX_SYNC  8192
 #endif
 
-//---------------------------------------------------------------------------
+/* setup interface getting function for TX NMT queue */
+#if (EPL_DLLCAL_TX_NMT_QUEUE == EPL_QUEUE_DIRECT)
+#define GET_TX_NMT_INTERFACE dllcaldirect_getInterface
+#elif (EPL_DLLCAL_TX_NMT_QUEUE == EPL_QUEUE_SHB)
+#define GET_TX_NMT_INTERFACE dllcalshb_getInterface
+#elif (EPL_DLLCAL_TX_NMT_QUEUE == EPL_QUEUE_HOSTINTERFACE)
+#define GET_TX_NMT_INTERFACE dllcalhostif_getInterface
+#else
+#error "Unsupported TX_NMT_QUEUE"
+#endif
+
+/* setup interface getting function for TX GEN queue */
+#if (EPL_DLLCAL_TX_NMT_QUEUE == EPL_QUEUE_DIRECT)
+#define GET_TX_GEN_INTERFACE dllcaldirect_getInterface
+#elif (EPL_DLLCAL_TX_NMT_QUEUE == EPL_QUEUE_SHB)
+#define GET_TX_GEN_INTERFACE dllcalshb_getInterface
+#elif (EPL_DLLCAL_TX_NMT_QUEUE == EPL_QUEUE_HOSTINTERFACE)
+#define GET_TX_GEN_INTERFACE dllcalhostif_getInterface
+#else
+#error "Unsupported TX_GEN_QUEUE"
+#endif
+
+/* setup interface getting function for TX SYNC queue */
+#if (EPL_DLLCAL_TX_NMT_QUEUE == EPL_QUEUE_DIRECT)
+#define GET_TX_SYNC_INTERFACE dllcaldirect_getInterface
+#elif (EPL_DLLCAL_TX_NMT_QUEUE == EPL_QUEUE_SHB)
+#define GET_TX_SYNC_INTERFACE dllcalshb_getInterface
+#elif (EPL_DLLCAL_TX_NMT_QUEUE == EPL_QUEUE_HOSTINTERFACE)
+#define GET_TX_SYNC_INTERFACE dllcalhostif_getInterface
+#else
+#error "Unsupported TX_SYNC_QUEUE"
+#endif
+
+
+//------------------------------------------------------------------------------
 // typedef
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+typedef struct
+{
+    tEplDllAsndServiceId    serviceId;
+    tEplDllAsndFilter       filter;
+} tDllCalAsndServiceIdFilter;
 
 typedef struct
 {
-    tEplDllAsndServiceId    m_ServiceId;
-    tEplDllAsndFilter       m_Filter;
-
-} tEplDllCalAsndServiceIdFilter;
-
-typedef struct
-{
-    tEplDllReqServiceId     m_Service;
-    unsigned int            m_uiNodeId;
-    BYTE                    m_bSoaFlag1;
-
-} tEplDllCalIssueRequest;
+    tEplDllReqServiceId     service;
+    UINT                    nodeId;
+    BYTE                    soaFlag1;
+} tDllCalIssueRequest;
 
 /**
 \brief enumerator for Queue
@@ -136,11 +136,10 @@ the queues.
 */
 typedef enum
 {
-    kEplDllCalQueueTxNmt        = 0x01, ///< TX NMT queue
-    kEplDllCalQueueTxGen        = 0x02, ///< TX Generic queue
-    kEplDllCalQueueTxSync       = 0x03, ///< Tx Sync queue
-
-} tEplDllCalQueue;
+    kDllCalQueueTxNmt        = 0x01, ///< TX NMT queue
+    kDllCalQueueTxGen        = 0x02, ///< TX Generic queue
+    kDllCalQueueTxSync       = 0x03, ///< Tx Sync queue
+} tDllCalQueue;
 
 /**
 \brief type for DLL CAL queue instance
@@ -149,14 +148,34 @@ The DllCalQueueInstance is used to identify the abstracted queue instance in
 EplDll*Cal. The queue itself is defined by its implementation (e.g. DIRECT or
 SHB)
 */
-typedef void* tEplDllCalQueueInstance;
+typedef void* tDllCalQueueInstance;
 
-//---------------------------------------------------------------------------
+
+typedef struct
+{
+    tEplKernel (* pfnAddInstance)(tDllCalQueueInstance* ppDllCalQueue_p, tDllCalQueue DllCalQueue_p);
+    tEplKernel (* pfnDelInstance)(tDllCalQueueInstance pDllCalQueue_p);
+    tEplKernel (* pfnInsertDataBlock)(tDllCalQueueInstance pDllCalQueue_p, BYTE *pData_p, UINT* pDataSize_p);
+    tEplKernel (* pfnGetDataBlock)(tDllCalQueueInstance pDllCalQueue_p, BYTE *pData_p, UINT* pDataSize_p);
+    tEplKernel (* pfnGetDataBlockCount)(tDllCalQueueInstance pDllCalQueue_p, ULONG* pDataBlockCount_p);
+    tEplKernel (* pfnResetDataBlockQueue)(tDllCalQueueInstance pDllCalQueue_p, ULONG timeOutMs_p);
+} tDllCalFuncIntf;
+
+//------------------------------------------------------------------------------
 // function prototypes
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
+tDllCalFuncIntf* dllcaldirect_getInterface(void);
+tDllCalFuncIntf* dllcalshb_getInterface(void);
 
-#endif  // #ifndef _EPL_DLLKCAL_H_
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* _INC_dllcal_H_ */
 
 

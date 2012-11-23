@@ -178,7 +178,7 @@ tEplKernel Ret;
 
     // register callback-function for NMT-commands
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLU)) != 0)
-    Ret = EplDlluCalRegAsndService(kEplDllAsndNmtCommand,
+    Ret = dllucal_regAsndService(kEplDllAsndNmtCommand,
                                    EplNmtCnuCommandCb,
                                    kEplDllAsndFilterLocal);
 #endif
@@ -213,7 +213,7 @@ tEplKernel Ret;
 
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLU)) != 0)
     // deregister callback function from DLL
-    Ret = EplDlluCalRegAsndService(kEplDllAsndNmtCommand,
+    Ret = dllucal_regAsndService(kEplDllAsndNmtCommand,
                                    NULL,
                                    kEplDllAsndFilterNone);
 #endif
@@ -271,7 +271,7 @@ tEplFrame       NmtRequestFrame;
 
     // send NMT-Request
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLU)) != 0)
-    Ret = EplDlluCalAsyncSend(&NmtRequestFrameInfo,    // pointer to frameinfo
+    Ret = dllucal_sendAsyncFrame(&NmtRequestFrameInfo,    // pointer to frameinfo
                            kEplDllAsyncReqPrioNmt); // priority
 #endif
 

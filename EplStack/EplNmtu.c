@@ -762,7 +762,7 @@ BYTE            bCount;
             }
 #endif // (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
 
-            Ret = EplDlluCalConfigNode(&DllNodeInfo);
+            Ret = dllucal_configNode(&DllNodeInfo);
             if (Ret != kEplSuccessful)
             {
                 goto Exit;

@@ -511,7 +511,7 @@ tEplEventSource         EventSource;
         case kEplEventSinkDllkCal:
         {
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLK)) != 0)
-            Ret = EplDllkCalProcess(pEvent_p);
+            Ret = dllkcal_process(pEvent_p);
             if ((Ret != kEplSuccessful) && (Ret != kEplShutdown))
             {
                 EventSource = kEplEventSourceDllk;

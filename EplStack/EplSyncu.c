@@ -198,7 +198,7 @@ tEplKernel Ret;
     EPL_MEMSET(&EplSyncuInstance_g, 0, sizeof (EplSyncuInstance_g));
 
     // register SyncResponse callback function
-    Ret = EplDlluCalRegAsndService(kEplDllAsndSyncResponse, EplSyncuCbSyncResponse, kEplDllAsndFilterAny);
+    Ret = dllucal_regAsndService(kEplDllAsndSyncResponse, EplSyncuCbSyncResponse, kEplDllAsndFilterAny);
 
     return Ret;
 }
@@ -225,7 +225,7 @@ tEplKernel  Ret;
     Ret = kEplSuccessful;
 
     // deregister SyncResponse callback function
-    Ret = EplDlluCalRegAsndService(kEplDllAsndSyncResponse, NULL, kEplDllAsndFilterNone);
+    Ret = dllucal_regAsndService(kEplDllAsndSyncResponse, NULL, kEplDllAsndFilterNone);
 
     return Ret;
 }
@@ -304,7 +304,7 @@ unsigned int    uiNodeId;
         else
         {
             EplSyncuInstance_g.m_apfnCbResponse[uiNodeId] = pfnCbResponse_p;
-            Ret = EplDlluCalIssueSyncRequest(pSyncRequestData_p, uiSize_p);
+            Ret = dllucal_issueSyncRequest(pSyncRequestData_p, uiSize_p);
         }
     }
     else

@@ -444,7 +444,7 @@ tEplKernel Ret;
     EplNmtMnuInstance_g.m_ulStatusRequestDelay = 5000L;
 
     // register NmtMnResponse callback function
-    Ret = EplDlluCalRegAsndService(kEplDllAsndNmtRequest, EplNmtMnuCbNmtRequest, kEplDllAsndFilterLocal);
+    Ret = dllucal_regAsndService(kEplDllAsndNmtRequest, EplNmtMnuCbNmtRequest, kEplDllAsndFilterLocal);
 
 #if EPL_NMTMNU_PRES_CHAINING_MN != FALSE
     EplNmtMnuInstance_g.m_dwPrcPResTimeFirstCorrectionNs =  50;
@@ -482,7 +482,7 @@ tEplKernel  Ret;
     Ret = kEplSuccessful;
 
     // deregister NmtMnResponse callback function
-    Ret = EplDlluCalRegAsndService(kEplDllAsndNmtRequest, NULL, kEplDllAsndFilterNone);
+    Ret = dllucal_regAsndService(kEplDllAsndNmtRequest, NULL, kEplDllAsndFilterNone);
 
     Ret = EplNmtMnuReset();
 
@@ -639,7 +639,7 @@ tEplNmtMnuNodeInfo* pNodeInfo;
 
     // send NMT-Request
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLU)) != 0)
-    Ret = EplDlluCalAsyncSend(&FrameInfo, kEplDllAsyncReqPrioNmt);
+    Ret = dllucal_sendAsyncFrame(&FrameInfo, kEplDllAsyncReqPrioNmt);
     if (Ret != kEplSuccessful)
     {
         goto Exit;
@@ -702,7 +702,7 @@ tEplNmtMnuNodeInfo* pNodeInfo;
     if (uiNodeId_p != EPL_C_ADR_BROADCAST)
     {
         NodeOpParam.m_uiNodeId = uiNodeId_p;
-        Ret = EplDlluCalDeleteNode(&NodeOpParam);
+        Ret = dllucal_deleteNode(&NodeOpParam);
     }
     else
     {   // do it for all active CNs
@@ -711,7 +711,7 @@ tEplNmtMnuNodeInfo* pNodeInfo;
             if ((EPL_NMTMNU_GET_NODEINFO(uiNodeId_p)->m_dwNodeCfg & (EPL_NODEASSIGN_NODE_IS_CN | EPL_NODEASSIGN_NODE_EXISTS)) != 0)
             {
                 NodeOpParam.m_uiNodeId = uiNodeId_p;
-                Ret = EplDlluCalDeleteNode(&NodeOpParam);
+                Ret = dllucal_deleteNode(&NodeOpParam);
             }
         }
     }
@@ -2037,7 +2037,7 @@ tEplNmtMnuNodeInfo* pNodeInfo;
             NodeOpParam.m_OpNodeType = kEplDllNodeOpTypeIsochronous;
             NodeOpParam.m_uiNodeId = uiNodeId_p;
 
-            Ret = EplDlluCalAddNode(&NodeOpParam);
+            Ret = dllucal_addNode(&NodeOpParam);
             goto Exit;
         }
 #if EPL_NMTMNU_PRES_CHAINING_MN != FALSE
@@ -3853,7 +3853,7 @@ DWORD               dwPResMnTimeoutNs;
         DllNodeInfo.m_dwPresTimeoutNs              = dwPResMnTimeoutNs;
         DllNodeInfo.m_uiNodeId                     = EPL_C_ADR_MN_DEF_NODE_ID;
 
-        Ret = EplDlluCalConfigNode(&DllNodeInfo);
+        Ret = dllucal_configNode(&DllNodeInfo);
         if (Ret != kEplSuccessful)
         {
             goto Exit;
