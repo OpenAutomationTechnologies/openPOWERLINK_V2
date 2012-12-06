@@ -72,7 +72,7 @@
 #ifndef _EPL_ERRORHANDLERK_H_
 #define _EPL_ERRORHANDLERK_H_
 
-#include "EplEvent.h"
+#include "event.h"
 
 //---------------------------------------------------------------------------
 // const defines

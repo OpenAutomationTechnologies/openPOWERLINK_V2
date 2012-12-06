@@ -73,7 +73,7 @@
 #define _EPLTIMERU_H_
 
 #include "EplTimer.h"
-#include "user/EplEventu.h"
+#include "user/eventu.h"
 
 
 //---------------------------------------------------------------------------

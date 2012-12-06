@@ -70,7 +70,7 @@
 
 #include "kernel/EplErrorHandlerk.h"
 #include "EplNmt.h"
-#include "kernel/EplEventk.h"
+#include "kernel/eventk.h"
 #include "kernel/EplObdk.h"         // function prototyps of the EplOBD-Modul
 #include "kernel/EplDllk.h"
 #include "Benchmark.h"

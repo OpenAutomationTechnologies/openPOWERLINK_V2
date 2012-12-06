@@ -69,8 +69,8 @@
 
 ****************************************************************************/
 
-#ifndef _EPL_EVENT_H_
-#define _EPL_EVENT_H_
+#ifndef _EVENT_H_
+#define _EVENT_H_
 
 #include "EplInc.h"
 #include "EplNmt.h"
@@ -367,6 +367,6 @@ typedef void* tEplEventQueueInstance;
 
 
 
-#endif  // #ifndef _EPL_EVENT_H_
+#endif  // #ifndef _EVENT_H_
 
 

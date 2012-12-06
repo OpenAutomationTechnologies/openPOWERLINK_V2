@@ -40,7 +40,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <kernel/dllkcal.h>
 #include <kernel/EplDllk.h>
 
-#include <kernel/EplEventk.h>
+#include <kernel/eventk.h>
 
 #if (EPL_DLL_PRES_CHAINING_MN != FALSE) \
     && (EPL_DLLCAL_TX_SYNC_QUEUE != EPL_QUEUE_SHB) \

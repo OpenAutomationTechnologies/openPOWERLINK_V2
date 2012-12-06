@@ -1,11 +1,11 @@
 /**
 ********************************************************************************
-\file   EplEventkCal.h
+\file   event-direct.h
 
-\brief  include file for kernel event cal
+\brief  include file for direct event posting
 
-The kernel event CAL builds the interface between the kernel event and the
-event queue implementations.
+This event queue implementation applies direct calls, hence, an event posted
+is processed in the same context.
 
 Copyright (c) 2012, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2012, SYSTEC electronik GmbH
@@ -35,13 +35,13 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *******************************************************************************/
 
-#ifndef _INC_EPLEVENTKCAL_H_
-#define _INC_EPLEVENTKCAL_H_
+#ifndef _INC_EVENTDIRECT_H_
+#define _INC_EVENTDIRECT_H_
 
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include "EplEvent.h"
+#include "event.h"
 
 //------------------------------------------------------------------------------
 // const defines
@@ -59,16 +59,16 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 extern "C" {
 #endif
 
-tEplKernel PUBLIC EplEventkCalAddInstance (void);
+tEplKernel EplEventDirectAddInstance (tEplEventQueueInstance *ppEventQueue_p,
+        tEplEventQueue EventQueue_p, BOOL fProcessThreadSafe_p);
 
-tEplKernel PUBLIC EplEventkCalDelInstance (void);
+tEplKernel EplEventDirectDelInstance (tEplEventQueueInstance pEventQueue_p);
 
-tEplKernel PUBLIC EplEventkCalPost (tEplEvent *pEvent_p);
-
-tEplKernel PUBLIC EplEventkCalRxHandler (tEplEvent *pEvent_p);
+tEplKernel EplEventDirectPost (tEplEventQueueInstance pEventQueue_p,
+        tEplEvent *pEvent_p);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* _INC_EPLEVENTKCAL_H_ */
+#endif /* _INC_EVENTDIRECT_H_ */

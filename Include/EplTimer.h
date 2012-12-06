@@ -73,7 +73,7 @@
 #define _EPLTIMER_H_
 
 #include "EplInc.h"
-#include "EplEvent.h"
+#include "event.h"
 
 
 //---------------------------------------------------------------------------

@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   EplEventuCal.c
+\file   eventucal.c
 
 \brief  source file for Epl-Userspace-Event-Cal-Module
 
@@ -41,19 +41,19 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include "user/EplEventu.h"
-#include "user/EplEventuCal.h"
+#include "user/eventu.h"
+#include "user/eventucal.h"
 #include "Benchmark.h"
 
 #if EPL_EVENT_U2K_QUEUE == EPL_QUEUE_DIRECT || \
     EPL_EVENT_UINT_QUEUE == EPL_QUEUE_DIRECT || \
     EPL_EVENT_K2U_QUEUE == EPL_QUEUE_DIRECT
-#include "EplEventDirect.h"
+#include "event-direct.h"
 #endif
 #if EPL_EVENT_U2K_QUEUE == EPL_QUEUE_SHB || \
     EPL_EVENT_UINT_QUEUE == EPL_QUEUE_SHB || \
     EPL_EVENT_K2U_QUEUE == EPL_QUEUE_SHB
-#include "EplEventShb.h"
+#include "event-shb.h"
 #endif
 #if EPL_EVENT_U2K_QUEUE == EPL_QUEUE_HOSTINTERFACE || \
     EPL_EVENT_UINT_QUEUE == EPL_QUEUE_HOSTINTERFACE || \

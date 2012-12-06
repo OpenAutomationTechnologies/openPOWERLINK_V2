@@ -38,7 +38,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #include <dllcal.h>
 #include <user/dllucal.h>
-#include <user/EplEventu.h>
+#include <user/eventu.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //

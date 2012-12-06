@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   EplEventk.c
+\file   eventk.c
 
 \brief  source file for Epl-Kernelspace-Event-Module
 
@@ -37,8 +37,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include "kernel/EplEventk.h"
-#include "kernel/EplEventkCal.h"
+#include "kernel/eventk.h"
+#include "kernel/eventkcal.h"
 #include "kernel/EplNmtk.h"
 #include "kernel/EplDllk.h"
 #include "kernel/dllkcal.h"

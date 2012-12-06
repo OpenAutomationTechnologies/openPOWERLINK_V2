@@ -1,10 +1,10 @@
 /**
 ********************************************************************************
-\file   EplEventuCal.h
+\file   eventkcal.h
 
-\brief  include file for user event cal
+\brief  include file for kernel event cal
 
-The user event CAL builds the interface between the user event and the
+The kernel event CAL builds the interface between the kernel event and the
 event queue implementations.
 
 Copyright (c) 2012, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
@@ -35,13 +35,13 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *******************************************************************************/
 
-#ifndef _INC_EPLEVENTUCAL_H_
-#define _INC_EPLEVENTUCAL_H_
+#ifndef _INC_EVENTKCAL_H_
+#define _INC_EVENTKCAL_H_
 
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include "EplEvent.h"
+#include "event.h"
 
 //------------------------------------------------------------------------------
 // const defines
@@ -59,16 +59,16 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 extern "C" {
 #endif
 
-tEplKernel PUBLIC EplEventuCalAddInstance (void);
+tEplKernel PUBLIC EplEventkCalAddInstance (void);
 
-tEplKernel PUBLIC EplEventuCalDelInstance (void);
+tEplKernel PUBLIC EplEventkCalDelInstance (void);
 
-tEplKernel PUBLIC EplEventuCalPost (tEplEvent *pEvent_p);
+tEplKernel PUBLIC EplEventkCalPost (tEplEvent *pEvent_p);
 
-tEplKernel PUBLIC EplEventuCalRxHandler (tEplEvent *pEvent_p);
+tEplKernel PUBLIC EplEventkCalRxHandler (tEplEvent *pEvent_p);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* _INC_EPLEVENTUCAL_H_ */
+#endif /* _INC_EVENTKCAL_H_ */

@@ -73,7 +73,7 @@
 #define _EPL_DLLK_H_
 
 #include "EplDll.h"
-#include "EplEvent.h"
+#include "event.h"
 
 //---------------------------------------------------------------------------
 // const defines
