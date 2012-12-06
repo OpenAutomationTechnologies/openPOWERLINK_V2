@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   EplEventDirect.c
+\file   eventcal-direct.c
 
 \brief  source file for direct event posting
 
@@ -38,9 +38,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include "EplEventDirect.h"
-#include "kernel/EplEventkCal.h"
-#include "user/EplEventuCal.h"
+#include "event-direct.h"
+#include "kernel/eventkcal.h"
+#include "user/eventucal.h"
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //

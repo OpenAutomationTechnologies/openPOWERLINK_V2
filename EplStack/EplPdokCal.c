@@ -71,7 +71,7 @@
 #include "kernel/EplPdokCal.h"
 #include "kernel/EplPdok.h"
 #include "kernel/EplDllk.h"
-#include "kernel/EplEventk.h"
+#include "kernel/eventk.h"
 
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOK)) != 0)
 

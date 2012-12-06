@@ -70,7 +70,7 @@
 
 #include "Epl.h"
 #include "kernel/EplDllk.h"
-#include "kernel/EplEventk.h"
+#include "kernel/eventk.h"
 
 #if (TARGET_SYSTEM == _LINUX_) && defined(__KERNEL__)
 #include <asm/uaccess.h>

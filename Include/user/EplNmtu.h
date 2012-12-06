@@ -73,7 +73,7 @@
 #define _EPLNMTU_H_
 
 #include "EplNmt.h"
-#include "user/EplEventu.h"
+#include "user/eventu.h"
 
 
 //---------------------------------------------------------------------------

@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   EplEventu.c
+\file   eventu.c
 
 \brief  source file for Epl-Userspace-Event-Module
 
@@ -37,8 +37,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include "user/EplEventu.h"
-#include "user/EplEventuCal.h"
+#include "user/eventu.h"
+#include "user/eventucal.h"
 #include "user/EplNmtu.h"
 #include "user/EplNmtMnu.h"
 #include "user/EplSdoAsySequ.h"

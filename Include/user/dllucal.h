@@ -40,7 +40,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <EplDll.h>
-#include <EplEvent.h>
+#include <event.h>
 
 //------------------------------------------------------------------------------
 // const defines

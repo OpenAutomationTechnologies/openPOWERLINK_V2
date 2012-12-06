@@ -80,29 +80,29 @@
 			<location>OPENPOWERLINK_DIR/EplStack/EplErrorHandlerk.c</location>
 		</link>
 		<link>
-			<name>EplEventk.c</name>
+			<name>eventk.c</name>
 			<type>1</type>
-			<location>OPENPOWERLINK_DIR/EplStack/EplEventk.c</location>
+			<location>OPENPOWERLINK_DIR/EplStack/kernel/event/eventk.c</location>
 		</link>
 		<link>
-			<name>EplEventu.c</name>
+			<name>eventu.c</name>
 			<type>1</type>
-			<location>OPENPOWERLINK_DIR/EplStack/EplEventu.c</location>
+			<location>OPENPOWERLINK_DIR/EplStack/user/event/eventu.c</location>
 		</link>
 		<link>
-			<name>EplEventkCal.c</name>
+			<name>eventkcal.c</name>
 			<type>1</type>
-			<location>OPENPOWERLINK_DIR/EplStack/EplEventkCal.c</location>
+			<location>OPENPOWERLINK_DIR/EplStack/kernel/event/eventkcal.c</location>
 		</link>
 		<link>
-			<name>EplEventuCal.c</name>
+			<name>eventucal.c</name>
 			<type>1</type>
-			<location>OPENPOWERLINK_DIR/EplStack/EplEventuCal.c</location>
+			<location>OPENPOWERLINK_DIR/EplStack/user/event/eventucal.c</location>
 		</link>
 		<link>
-			<name>EplEventShb.c</name>
+			<name>eventcal-shb.c</name>
 			<type>1</type>
-			<location>OPENPOWERLINK_DIR/EplStack/EplEventShb.c</location>
+			<location>OPENPOWERLINK_DIR/EplStack/common/event/eventcal-shb.c</location>
 		</link>
 		<link>
 			<name>EplNmtCnu.c</name>

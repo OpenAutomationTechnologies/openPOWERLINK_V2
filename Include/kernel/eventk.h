@@ -69,11 +69,10 @@
 
 ****************************************************************************/
 
-#ifndef _EPL_EVENTU_H_
-#define _EPL_EVENTU_H_
+#ifndef _EVENTK_H_
+#define _EVENTK_H_
 
-#include "EplEvent.h"
-
+#include "event.h"
 
 //---------------------------------------------------------------------------
 // const defines
@@ -83,33 +82,33 @@
 // typedef
 //---------------------------------------------------------------------------
 
-
 //---------------------------------------------------------------------------
 // function prototypes
 //---------------------------------------------------------------------------
+
 // init function
-tEplKernel PUBLIC EplEventuInit(tEplProcessEventCb pfnApiProcessEventCb_p);
+tEplKernel PUBLIC EplEventkInit(void);
 
 // add instance
-tEplKernel PUBLIC EplEventuAddInstance(tEplProcessEventCb pfnApiProcessEventCb_p);
+tEplKernel PUBLIC EplEventkAddInstance(void);
 
 // delete instance
-tEplKernel PUBLIC EplEventuDelInstance(void);
+tEplKernel PUBLIC EplEventkDelInstance(void);
 
-// Task that dispatches events in userspace
-tEplKernel PUBLIC EplEventuProcess(tEplEvent * pEvent_p);
+// Kernelthread that dispatches events in kernelspace
+tEplKernel PUBLIC EplEventkProcess(tEplEvent * pEvent_p) SECTION_EVENTK_PROCESS;
 
-// post events from userspace
-tEplKernel PUBLIC EplEventuPost(tEplEvent * pEvent_p);
+// post events from kernelspace
+tEplKernel PUBLIC EplEventkPost(tEplEvent * pEvent_p) SECTION_EVENTK_POST;
 
-// post errorevents from userspace
-tEplKernel PUBLIC EplEventuPostError(tEplEventSource EventSource_p,
+// post errorevents from kernelspace
+tEplKernel PUBLIC EplEventkPostError(tEplEventSource EventSource_p,
                                      tEplKernel      EplError_p,
                                      unsigned int    uiArgSize_p,
                                      void*           pArg_p);
 
 
 
-#endif  // #ifndef _EPL_EVENTU_H_
+#endif  // #ifndef _EVENTK_H_
 
 

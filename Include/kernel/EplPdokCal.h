@@ -73,7 +73,7 @@
 #define _EPL_PDOKCAL_H_
 
 #include "EplInc.h"
-#include "EplEvent.h"
+#include "event.h"
 //#include "EplPdo.h"
 
 //---------------------------------------------------------------------------

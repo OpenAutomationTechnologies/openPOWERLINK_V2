@@ -69,7 +69,7 @@
 ****************************************************************************/
 
 #include "kernel/EplPdok.h"
-#include "kernel/EplEventk.h"
+#include "kernel/eventk.h"
 #include "EplObd.h"
 #include "kernel/EplDllk.h"
 #include "Benchmark.h"

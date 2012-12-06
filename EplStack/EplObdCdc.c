@@ -77,7 +77,7 @@
 #include "EplObd.h"
 #include "EplObdCdc.h"
 #include "kernel/EplObdk.h"
-#include "user/EplEventu.h"
+#include "user/eventu.h"
 
 #if (EPL_OBD_USE_LOAD_CONCISEDCF != FALSE)
 

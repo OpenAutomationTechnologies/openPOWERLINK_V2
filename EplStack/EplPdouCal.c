@@ -69,7 +69,7 @@
 ****************************************************************************/
 
 #include "user/EplPdouCal.h"
-#include "user/EplEventu.h"
+#include "user/eventu.h"
 
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOU)) != 0)
 

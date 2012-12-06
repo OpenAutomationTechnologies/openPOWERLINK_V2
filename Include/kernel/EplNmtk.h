@@ -73,7 +73,7 @@
 #define _EPLNMTK_H_
 
 #include "EplNmt.h"
-#include "kernel/EplEventk.h"
+#include "kernel/eventk.h"
 
 
 //---------------------------------------------------------------------------

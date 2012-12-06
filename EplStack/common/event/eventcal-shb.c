@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   EplEventShb.c
+\file   eventcal-shb.c
 
 \brief  source file for shared buffer event posting
 
@@ -38,9 +38,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include "EplEventShb.h"
-#include "kernel/EplEventkCal.h"
-#include "user/EplEventuCal.h"
+#include "event-shb.h"
+#include "kernel/eventkcal.h"
+#include "user/eventucal.h"
 
 #include "SharedBuff.h"
 

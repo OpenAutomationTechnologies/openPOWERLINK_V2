@@ -1,11 +1,11 @@
 /**
 ********************************************************************************
-\file   EplEventShb.h
+\file   eventucal.h
 
-\brief  include file for shared buffer event posting
+\brief  include file for user event cal
 
-This event queue implementation applies the shared buffer for event forwarding.
-The shared buffer is available for different architectures (e.g. NoOS).
+The user event CAL builds the interface between the user event and the
+event queue implementations.
 
 Copyright (c) 2012, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2012, SYSTEC electronik GmbH
@@ -35,13 +35,13 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *******************************************************************************/
 
-#ifndef _INC_EPLEVENTSHB_H_
-#define _INC_EPLEVENTSHB_H_
+#ifndef _INC_EVENTUCAL_H_
+#define _INC_EVENTUCAL_H_
 
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include "EplEvent.h"
+#include "event.h"
 
 //------------------------------------------------------------------------------
 // const defines
@@ -59,18 +59,16 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 extern "C" {
 #endif
 
-tEplKernel EplEventShbAddInstance (tEplEventQueueInstance *ppEventQueue_p,
-        tEplEventQueue EventQueue_p,
-        tEplProcessEventCb pfnProcessEventCb_p,
-        tEplPostErrorEventCb pfnPostErrorEventCb_p);
+tEplKernel PUBLIC EplEventuCalAddInstance (void);
 
-tEplKernel EplEventShbDelInstance (tEplEventQueueInstance pEventQueue_p);
+tEplKernel PUBLIC EplEventuCalDelInstance (void);
 
-tEplKernel EplEventShbPost (tEplEventQueueInstance pEventQueue_p,
-        tEplEvent *pEvent_p);
+tEplKernel PUBLIC EplEventuCalPost (tEplEvent *pEvent_p);
+
+tEplKernel PUBLIC EplEventuCalRxHandler (tEplEvent *pEvent_p);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* _INC_EPLEVENTSHB_H_ */
+#endif /* _INC_EVENTUCAL_H_ */

@@ -1,11 +1,11 @@
 /**
 ********************************************************************************
-\file   EplEventDirect.h
+\file   event-shb.h
 
-\brief  include file for direct event posting
+\brief  include file for shared buffer event posting
 
-This event queue implementation applies direct calls, hence, an event posted
-is processed in the same context.
+This event queue implementation applies the shared buffer for event forwarding.
+The shared buffer is available for different architectures (e.g. NoOS).
 
 Copyright (c) 2012, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2012, SYSTEC electronik GmbH
@@ -35,13 +35,13 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *******************************************************************************/
 
-#ifndef _INC_EPLEVENTDIRECT_H_
-#define _INC_EPLEVENTDIRECT_H_
+#ifndef _INC_EVENTSHB_H_
+#define _INC_EVENTSHB_H_
 
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include "EplEvent.h"
+#include "event.h"
 
 //------------------------------------------------------------------------------
 // const defines
@@ -59,16 +59,18 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 extern "C" {
 #endif
 
-tEplKernel EplEventDirectAddInstance (tEplEventQueueInstance *ppEventQueue_p,
-        tEplEventQueue EventQueue_p, BOOL fProcessThreadSafe_p);
+tEplKernel EplEventShbAddInstance (tEplEventQueueInstance *ppEventQueue_p,
+        tEplEventQueue EventQueue_p,
+        tEplProcessEventCb pfnProcessEventCb_p,
+        tEplPostErrorEventCb pfnPostErrorEventCb_p);
 
-tEplKernel EplEventDirectDelInstance (tEplEventQueueInstance pEventQueue_p);
+tEplKernel EplEventShbDelInstance (tEplEventQueueInstance pEventQueue_p);
 
-tEplKernel EplEventDirectPost (tEplEventQueueInstance pEventQueue_p,
+tEplKernel EplEventShbPost (tEplEventQueueInstance pEventQueue_p,
         tEplEvent *pEvent_p);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* _INC_EPLEVENTDIRECT_H_ */
+#endif /* _INC_EVENTSHB_H_ */
