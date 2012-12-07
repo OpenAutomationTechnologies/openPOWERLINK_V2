@@ -1,0 +1,40 @@
+/**
+********************************************************************************
+
+\mainpage
+
+This is the openPOWERLINK stack software users manual.
+
+- \subpage readme
+- \subpage intro
+- \subpage build-and-run
+
+*******************************************************************************/
+
+
+/**
+*******************************************************************************
+\page build-and-run Building and Running openPOWERLINK
+
+openPOWERLINK is supported on several platforms and operating systems.
+- \subpage vxworks
+- \subpage linux-x86
+- \subpage altera
+- \subpage xilinx
+- \subpage other-platforms
+- \subpage porting-guide
+
+The following section contains information on building and running openPOWERLINK.
+- \subpage cmake
+
+*******************************************************************************/
+
+
+/**
+********************************************************************************
+\page stack Software Architecture
+
+- \subpage software-architecture
+
+*******************************************************************************/
+
