@@ -1,0 +1,41 @@
+/* The standard CSS for doxygen */
+
+h1,h2,h3,h4,h5 {
+        color: #333377;
+}
+
+h1 {
+        color: black;
+        font-size: 1.6em;
+        padding-top: 15px;
+        padding-bottom: 3px;
+        border-bottom: 2px solid black;
+}
+
+h2 {
+        padding-top: 15px;
+        padding-bottom: 3px;
+        border-bottom: 1px solid #555599;
+}
+
+h3 {
+        padding-bottom: 3px;
+        border-bottom: 1px solid #ddddff;
+}
+
+h4 {
+        margin-bottom: 5px;
+}
+
+pre.fragment {
+        font-size: 0.85em;
+}
+
+code {
+        font-size: 0.85em;
+}
+
+p.startli {
+        padding-bottom: 3px;
+        margin-bottom: 3px;
+}
