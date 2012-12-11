@@ -221,7 +221,7 @@ tEplEvent   Event;
     Event.m_pArg = pAllocationParam_p;
     Event.m_uiSize = sizeof (*pAllocationParam_p);
 
-    Ret = EplEventuPost(&Event);
+    Ret = eventu_postEvent(&Event);
 
     return Ret;
 }
@@ -254,7 +254,7 @@ unsigned int    uiSize;
              + (pChannelConf_p->m_PdoChannel.m_uiMappObjectCount * sizeof (pChannelConf_p->m_aMappObject[0]));
     Event.m_uiSize = uiSize;
 
-    Ret = EplEventuPost(&Event);
+    Ret = eventu_postEvent(&Event);
 
     return Ret;
 }

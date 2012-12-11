@@ -105,6 +105,21 @@
 			<location>OPENPOWERLINK_DIR/EplStack/common/event/eventcal-shb.c</location>
 		</link>
 		<link>
+			<name>eventucal-shb.c</name>
+			<type>1</type>
+			<location>OPENPOWERLINK_DIR/EplStack/user/event/eventucal-shb.c</location>
+		</link>
+		<link>
+			<name>eventkcal-shb.c</name>
+			<type>1</type>
+			<location>OPENPOWERLINK_DIR/EplStack/kernel/event/eventkcal-shb.c</location>
+		</link>
+		<link>
+			<name>event.c</name>
+			<type>1</type>
+			<location>OPENPOWERLINK_DIR/EplStack/common/event/event.c</location>
+		</link>
+		<link>
 			<name>EplNmtCnu.c</name>
 			<type>1</type>
 			<location>OPENPOWERLINK_DIR/EplStack/EplNmtCnu.c</location>

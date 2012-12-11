@@ -2,17 +2,28 @@
 ********************************************************************************
 \file   eventkcal.c
 
-\brief  source file for Epl-Kernelspace-Event-Cal-Module
+\brief  Source file for kernel event CAL module
 
-The kernel event CAL builds the interface between the kernel event and the
-event queue implementations. It determines the event forwarding (e.g. kernel
-event posted in user layer is forwarded by user-to-kernel queue)
-Note that the defines EPL_EVENT_K2U_QUEUE, EPL_EVENT_KINT_QUEUE and
-EPL_EVENT_U2K_QUEUE determine the kernel event implementation!
+The kernel event CAL module builds the interface between the kernel event
+module and the different event queue implementations.
 
+The kernel event CAL module produces events in the kernel-to-user (K2U) and
+kernel-internal (KInt) queue. It consumes events from the kernel-internal (KInt)
+and the user-to-kernel (U2K) queue.
+
+For each queue a different implementation could be used. The event queue
+instances of the used queues and the function interface are stored in the
+CALs instance variable.
+
+Which queue implementation is used is configured at compile time by the
+following macros:
+\li EPL_EVENT_K2U_QUEUE
+\li EPL_EVENT_KINT_QUEUE
+\li EPL_EVENT_U2K_QUEUE
+*******************************************************************************/
+
+/*------------------------------------------------------------------------------
 Copyright (c) 2012, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
-Copyright (c) 2012, SYSTEC electronik GmbH
-Copyright (c) 2012, Kalycito Infotech Private Ltd.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -36,30 +47,15 @@ LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
 ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*******************************************************************************/
+------------------------------------------------------------------------------*/
 
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include "kernel/eventk.h"
-#include "kernel/eventkcal.h"
-#include "Benchmark.h"
-
-#if EPL_EVENT_K2U_QUEUE == EPL_QUEUE_DIRECT || \
-    EPL_EVENT_KINT_QUEUE == EPL_QUEUE_DIRECT || \
-    EPL_EVENT_U2K_QUEUE == EPL_QUEUE_DIRECT
-#include "event-direct.h"
-#endif
-#if EPL_EVENT_K2U_QUEUE == EPL_QUEUE_SHB || \
-    EPL_EVENT_KINT_QUEUE == EPL_QUEUE_SHB || \
-    EPL_EVENT_U2K_QUEUE == EPL_QUEUE_SHB
-#include "event-shb.h"
-#endif
-#if EPL_EVENT_K2U_QUEUE == EPL_QUEUE_HOSTINTERFACE || \
-    EPL_EVENT_KINT_QUEUE == EPL_QUEUE_HOSTINTERFACE || \
-    EPL_EVENT_U2K_QUEUE == EPL_QUEUE_HOSTINTERFACE
-#error
-#endif
+#include <eventcal.h>
+#include <kernel/eventk.h>
+#include <kernel/eventkcal.h>
+#include <Benchmark.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -68,6 +64,18 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
+
+// Macros for function pointer interface
+#define ADD_U2K_INSTANCE    instance_l.pUserToKernelFuncs->pfnAddInstance
+#define DEL_U2K_INSTANCE    instance_l.pUserToKernelFuncs->pfnDelInstance
+
+#define ADD_KINT_INSTANCE   instance_l.pKernelInternalFuncs->pfnAddInstance
+#define DEL_KINT_INSTANCE   instance_l.pKernelInternalFuncs->pfnDelInstance
+#define POST_KINT_EVENT     instance_l.pKernelInternalFuncs->pfnPostEvent
+
+#define ADD_K2U_INSTANCE    instance_l.pKernelToUserFuncs->pfnAddInstance
+#define DEL_K2U_INSTANCE    instance_l.pKernelToUserFuncs->pfnDelInstance
+#define POST_K2U_EVENT      instance_l.pKernelToUserFuncs->pfnPostEvent
 
 //------------------------------------------------------------------------------
 // module global vars
@@ -88,29 +96,27 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local types
 //------------------------------------------------------------------------------
-/**
-\brief Event kernel instance type
 
-The EventkCal produces events in the kernel-to-user (K2U) and kernel-internal
-(KInt) queue. It consumes events from the kernel-internal and the
-user-to-kernel (U2K) queue.
-The event queue instances are stored in the cal and are used when calling
-the event queue implementations (e.g. DIRECT or SHB).
+/**
+\brief Kernel event CAL instance type
+
+The structure contains all necessary information needed by the kernel event
+CAL module.
 */
-typedef struct _EplEventkCalInstance
+typedef struct
 {
-    tEplEventQueueInstance  EventQueueK2U_m;
-    ///< event queue instance of kernel to user queue
-    tEplEventQueueInstance  EventQueueU2K_m;
-    ///< event queue instance of user to kernel queue
-    tEplEventQueueInstance  EventQueueKInt_m;
-    ///< event queue instance of kernel internal queue
-} tEplEventkCalInstance;
+    tEventQueueInstPtr      pK2UInstance;           ///< Pointer to event queue instance of kernel to user queue
+    tEventQueueInstPtr      pU2KInstance;           ///< Pointer to event queue instance of user to kernel queue
+    tEventQueueInstPtr      pKIntInstance;          ///< Pointer to event queue instance of kernel internal queue
+    tEventCalFuncIntf*      pUserToKernelFuncs;     ///< Pointer to function interface for user-to-kernel queue
+    tEventCalFuncIntf*      pKernelInternalFuncs;   ///< Pointer to function interface for kernel-internal queue
+    tEventCalFuncIntf*      pKernelToUserFuncs;     ///< Pointer to function interface for kernel-to-user queue
+} tEventkCalInstance;
 
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
-static tEplEventkCalInstance EplEventkCalInstance_g; ///< Event kernel instance
+static tEventkCalInstance   instance_l;             ///< Instance variable of kernel event CAL module
 
 //------------------------------------------------------------------------------
 // local function prototypes
@@ -122,136 +128,97 @@ static tEplEventkCalInstance EplEventkCalInstance_g; ///< Event kernel instance
 
 //------------------------------------------------------------------------------
 /**
-\brief    Kernel cal event add instance
+\brief    Initialize kernel event CAL module
 
-Add kernel event cal.
+The function initializes the kernel event CAL module. Depending on the
+configuration it gets the function pointer interface of the used queue
+implementations and calls the appropriate init functions.
 
-\return tEplKernel
-\retval kEplSuccessful          if function executes correctly
-\retval other                   error
+\return The function returns a tEplKernel error code.
+\retval kEplSuccessful          If function executes correctly
+\retval other error codes       If an error occurred
 */
 //------------------------------------------------------------------------------
-tEplKernel PUBLIC EplEventkCalAddInstance (void)
+tEplKernel eventkcal_init (void)
 {
-    tEplKernel Ret = kEplSuccessful;
+    tEplKernel      ret = kEplSuccessful;
 
-    EPL_MEMSET(&EplEventkCalInstance_g, 0, sizeof(tEplEventkCalInstance));
+    EPL_MEMSET(&instance_l, 0, sizeof(tEventkCalInstance));
 
-    //initialize kernel to user event queue
-#if EPL_EVENT_K2U_QUEUE == EPL_QUEUE_DIRECT
-    Ret = EplEventDirectAddInstance(&EplEventkCalInstance_g.EventQueueK2U_m,
-            kEplEventQueueK2U, FALSE);
-#elif EPL_EVENT_K2U_QUEUE == EPL_QUEUE_SHB
-    Ret = EplEventShbAddInstance(&EplEventkCalInstance_g.EventQueueK2U_m,
-            kEplEventQueueK2U, NULL, NULL);
-#elif EPL_EVENT_K2U_QUEUE == EPL_QUEUE_HOSTINTERFACE
-#error
-#endif
-    if(Ret != kEplSuccessful)
+    /* get function interface of the different queues */
+    instance_l.pUserToKernelFuncs = GET_EVENTK_U2K_INTERFACE();
+    instance_l.pKernelInternalFuncs = GET_EVENTK_KINT_INTERFACE();
+    instance_l.pKernelToUserFuncs = GET_EVENTK_K2U_INTERFACE();
+
+    ret = ADD_K2U_INSTANCE(&instance_l.pK2UInstance, kEventQueueK2U);
+    if(ret  != kEplSuccessful)
     {
         goto Exit;
     }
 
-    //initialize kernel internal event queue
-#if EPL_EVENT_KINT_QUEUE == EPL_QUEUE_DIRECT
-    Ret = EplEventDirectAddInstance(&EplEventkCalInstance_g.EventQueueKInt_m,
-            kEplEventQueueKInt, TRUE);
-#elif EPL_EVENT_KINT_QUEUE == EPL_QUEUE_SHB
-    Ret = EplEventShbAddInstance(&EplEventkCalInstance_g.EventQueueKInt_m,
-            kEplEventQueueKInt, EplEventkCalRxHandler, EplEventkPostError);
-#elif EPL_EVENT_KINT_QUEUE == EPL_QUEUE_HOSTINTERFACE
-#error
-#endif
-    if(Ret != kEplSuccessful)
+    ret = ADD_KINT_INSTANCE(&instance_l.pKIntInstance, kEventQueueKInt);
+    if(ret != kEplSuccessful)
     {
         goto Exit;
     }
 
-    //initialize user to kernel queue
-#if EPL_EVENT_U2K_QUEUE == EPL_QUEUE_DIRECT
-    //no add instance necessary for direct calls!
-#elif EPL_EVENT_U2K_QUEUE == EPL_QUEUE_SHB
-    //kernel events from user layer are posted to kernel internal queue
-    Ret = EplEventShbAddInstance(&EplEventkCalInstance_g.EventQueueU2K_m,
-            kEplEventQueueU2K, EplEventkCalPost, EplEventkPostError);
-#elif EPL_EVENT_U2K_QUEUE == EPL_QUEUE_HOSTINTERFACE
-#error
-#endif
+    ret = ADD_U2K_INSTANCE(&instance_l.pU2KInstance, kEventQueueU2K);
 
 Exit:
-    return Ret;
+    return ret;
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief    Kernel cal event delete instance
+\brief    Cleanup kernel event CAL module
 
-Delete kernel event cal.
+The function cleans up the kernel event CAL module. For cleanup it calls the exit
+functions of the queue implementations for each used queue.
 
-\return tEplKernel
-\retval kEplSuccessful          if function executes correctly
-\retval other                   error
+\return The function returns a tEplKernel error code.
+\retval kEplSuccessful          If function executes correctly
+\retval other error codes       If an error occurred
 */
 //------------------------------------------------------------------------------
-tEplKernel PUBLIC EplEventkCalDelInstance (void)
+tEplKernel eventkcal_exit (void)
 {
-    tEplKernel Ret = kEplSuccessful;
+    DEL_K2U_INSTANCE(instance_l.pK2UInstance);
+    instance_l.pK2UInstance = NULL;
 
-#if EPL_EVENT_K2U_QUEUE == EPL_QUEUE_DIRECT
-    Ret = EplEventDirectDelInstance(EplEventkCalInstance_g.EventQueueK2U_m);
-#elif EPL_EVENT_K2U_QUEUE == EPL_QUEUE_SHB
-    Ret = EplEventShbDelInstance(EplEventkCalInstance_g.EventQueueK2U_m);
-#elif EPL_EVENT_K2U_QUEUE == EPL_QUEUE_HOSTINTERFACE
-#error
-#endif
-    if(Ret != kEplSuccessful)
-    {
-        goto Exit;
-    }
+    DEL_KINT_INSTANCE(instance_l.pKIntInstance);
+    instance_l.pKIntInstance = NULL;
 
-#if EPL_EVENT_KINT_QUEUE == EPL_QUEUE_DIRECT
-    Ret = EplEventDirectDelInstance(EplEventkCalInstance_g.EventQueueKInt_m);
-#elif EPL_EVENT_KINT_QUEUE == EPL_QUEUE_SHB
-    Ret = EplEventShbDelInstance(EplEventkCalInstance_g.EventQueueKInt_m);
-#elif EPL_EVENT_KINT_QUEUE == EPL_QUEUE_HOSTINTERFACE
-#error
-#endif
+    DEL_U2K_INSTANCE(instance_l.pU2KInstance);
+    instance_l.pU2KInstance = NULL;
 
-#if EPL_EVENT_U2K_QUEUE == EPL_QUEUE_DIRECT
-    //no del instance necessary for direct calls!
-#elif EPL_EVENT_U2K_QUEUE == EPL_QUEUE_SHB
-    Ret = EplEventShbDelInstance(EplEventkCalInstance_g.EventQueueU2K_m);
-#elif EPL_EVENT_U2K_QUEUE == EPL_QUEUE_HOSTINTERFACE
-#error
-#endif
-Exit:
-    return Ret;
+    return kEplSuccessful;
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief    Kernel cal event post
+\brief    Post kernel event
 
-This function determines the event's sink and posts it to the corresponding
-event queue.
+This function posts a event to a queue. It is called from the generic kernel
+event post function in the event handler. Depending on the sink the appropriate
+queue post function is called.
 
-\param  pEvent_p                event posted by kernel
+\param  pEvent_p                Event to be posted.
 
-\return tEplKernel
-\retval kEplSuccessful          if function executes correctly
-\retval other                   error
+\return The function returns a tEplKernel error code.
+\retval kEplSuccessful          If function executes correctly
+\retval other error codes       If an error occurred
 */
 //------------------------------------------------------------------------------
-tEplKernel PUBLIC EplEventkCalPost (tEplEvent *pEvent_p)
+tEplKernel eventkcal_postEvent (tEplEvent *pEvent_p)
 {
-    tEplKernel Ret = kEplSuccessful;
+    tEplKernel      ret = kEplSuccessful;
 
     BENCHMARK_MOD_27_SET(2);
 
     // split event post to user internal and user to kernel
     switch(pEvent_p->m_EventSink)
     {
-        // userspace modules
+        // user layer modules
         case kEplEventSinkNmtMnu:
         case kEplEventSinkNmtu:
         case kEplEventSinkSdoAsySeq:
@@ -259,20 +226,10 @@ tEplKernel PUBLIC EplEventkCalPost (tEplEvent *pEvent_p)
         case kEplEventSinkDlluCal:
         case kEplEventSinkErru:
         case kEplEventSinkLedu:
-        {
-#if EPL_EVENT_K2U_QUEUE == EPL_QUEUE_DIRECT
-            Ret = EplEventDirectPost(EplEventkCalInstance_g.EventQueueK2U_m,
-                    pEvent_p);
-#elif EPL_EVENT_K2U_QUEUE == EPL_QUEUE_SHB
-            Ret = EplEventShbPost(EplEventkCalInstance_g.EventQueueK2U_m,
-                    pEvent_p);
-#elif EPL_EVENT_K2U_QUEUE == EPL_QUEUE_HOSTINTERFACE
-#error
-#endif
+            ret = POST_K2U_EVENT(instance_l.pK2UInstance, pEvent_p);
             break;
-        }
 
-        // kernelspace modules
+        // kernel layer modules
         case kEplEventSinkSync:
         case kEplEventSinkNmtk:
         case kEplEventSinkDllk:
@@ -280,58 +237,46 @@ tEplKernel PUBLIC EplEventkCalPost (tEplEvent *pEvent_p)
         case kEplEventSinkPdok:
         case kEplEventSinkPdokCal:
         case kEplEventSinkErrk:
-        {
-#if EPL_EVENT_KINT_QUEUE == EPL_QUEUE_DIRECT
-            Ret = EplEventDirectPost(EplEventkCalInstance_g.EventQueueKInt_m,
-                    pEvent_p);
-#elif EPL_EVENT_KINT_QUEUE == EPL_QUEUE_SHB
-            Ret = EplEventShbPost(EplEventkCalInstance_g.EventQueueKInt_m,
-                    pEvent_p);
-#elif EPL_EVENT_KINT_QUEUE == EPL_QUEUE_HOSTINTERFACE
-#error
-#endif
+            ret = POST_KINT_EVENT(instance_l.pKIntInstance, pEvent_p);
             break;
-        }
 
         default:
-        {
-            Ret = kEplEventUnknownSink;
-        }
-
-
-    }// end of switch(pEvent_p->m_EventSink)
+            ret = kEplEventUnknownSink;
+            break;
+    }
 
     BENCHMARK_MOD_27_RESET(2);
 
-    return Ret;
+    return ret;
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief    Kernel cal event receive handler
+\brief    Kernel event CAL receive handler
 
 This is the event receive function for events posted to the kernel layer.
 
-\param  pEvent_p                event posted by user
+\param  pEvent_p                Received event to be processed.
 
-\return tEplKernel
-\retval kEplSuccessful          if function executes correctly
-\retval other                   error
+\return The function returns a tEplKernel error code.
+\retval kEplSuccessful          If function executes correctly
+\retval other error codes       If an error occurred
 */
 //------------------------------------------------------------------------------
-tEplKernel PUBLIC EplEventkCalRxHandler (tEplEvent *pEvent_p)
+tEplKernel eventkcal_rxHandler (tEplEvent *pEvent_p)
 {
-    tEplKernel Ret = kEplSuccessful;
+    tEplKernel ret = kEplSuccessful;
 
     BENCHMARK_MOD_27_SET(4);
 
-    Ret = EplEventkProcess(pEvent_p);
+    ret = eventk_process(pEvent_p);
 
     BENCHMARK_MOD_27_RESET(4);
 
-    return Ret;
+    return ret;
 }
 
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
 //============================================================================//
+

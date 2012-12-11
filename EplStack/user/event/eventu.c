@@ -2,13 +2,23 @@
 ********************************************************************************
 \file   eventu.c
 
-\brief  source file for Epl-Userspace-Event-Module
+\brief  Source file for user event module
 
-This is the highest abstraction of the user event module.
+This file contains the source code of the user event module. It provides the
+interface for posting events to other user modules. For the receive side it
+contains a general receive handler which will be executed when an event is
+posted to the user layer. The event handler examines the event and calls
+the handler of the module which is specified by the sink argument.
 
+To be independent of a specific event queue implementation it uses its
+communication abstraction layer (CAL) for posting and receiving events to/from
+different event queues.
+
+*******************************************************************************/
+
+/*------------------------------------------------------------------------------
+Copyright (c) 2012, SYSTEC electronic GmbH
 Copyright (c) 2012, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
-Copyright (c) 2012, SYSTEC electronik GmbH
-Copyright (c) 2012, Kalycito Infotech Private Ltd.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -32,20 +42,21 @@ LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
 ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*******************************************************************************/
+------------------------------------------------------------------------------*/
 
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include "user/eventu.h"
-#include "user/eventucal.h"
-#include "user/EplNmtu.h"
-#include "user/EplNmtMnu.h"
-#include "user/EplSdoAsySequ.h"
-#include "user/dllucal.h"
-#include "user/EplLedu.h"
-#include "Benchmark.h"
+#include <user/eventu.h>
+#include <user/eventucal.h>
+#include <user/EplNmtu.h>
+#include <user/EplNmtMnu.h>
+#include <user/EplSdoAsySequ.h>
+#include <user/dllucal.h>
+#include <user/EplLedu.h>
+#include <Benchmark.h>
 
+#include "common/event/event.h"
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -74,25 +85,60 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local types
 //------------------------------------------------------------------------------
+
 /**
 \brief Event user instance type
 
 The user event instance holds the Api process callback function pointer.
 */
-typedef struct _tEplEventuInstance
+typedef struct
 {
-    tEplProcessEventCb  m_pfnApiProcessEventCb;
-                                        ///< callback for generic api events
-} tEplEventuInstance;
-
-//------------------------------------------------------------------------------
-// local vars
-//------------------------------------------------------------------------------
-static tEplEventuInstance EplEventuInstance_g;
+    tEplProcessEventCb      pfnApiProcessEventCb;  ///< callback for generic api events
+} tEventuInstance;
 
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
+static tEplKernel callApiEventCb (tEplEvent* pEvent_p);
+
+//------------------------------------------------------------------------------
+// local vars
+//------------------------------------------------------------------------------
+static tEventuInstance              instance_l;
+
+/**
+\brief  Event dispatch table
+
+The following table defines the event handlers to be used for the specific
+event sinks.
+*/
+static tEventDispatchEntry eventDispatchTbl_l[] =
+{
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMTU)) != 0)
+    { kEplEventSinkNmtu,        kEplEventSourceNmtu,        EplNmtuProcessEvent },
+#endif
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
+    { kEplEventSinkNmtMnu,      kEplEventSourceNmtMnu,      EplNmtMnuProcessEvent },
+#endif
+#if ((((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOC)) != 0)   \
+     || (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOS)) != 0))
+    { kEplEventSinkSdoAsySeq,   kEplEventSourceSdoAsySeq,   EplSdoAsySeqProcessEvent },
+#endif
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_LEDU)) != 0)
+    { kEplEventSinkLedu,        kEplEventSourceLedu,        EplLeduProcessEvent },
+#else
+    { kEplEventSinkLedu,        kEplEventSourceLedu,        NULL },
+#endif
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLU)) != 0)
+    { kEplEventSinkDlluCal,     kEplEventSourceDllu,        dllucal_process },
+#endif
+// jba check why this was originally commented out --> no user error handler?
+//    { kEplEventSinkErru,        kEplEventSourceErru,        EplErruProcess },
+    { kEplEventSinkErru,        kEplEventSourceErru,        NULL },
+    { kEplEventSinkApi,         kEplEventSourceEplApi,      callApiEventCb },
+    { kEplEventSinkInvalid,     kEplEventSourceInvalid,     NULL }
+};
+
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -100,312 +146,184 @@ static tEplEventuInstance EplEventuInstance_g;
 
 //------------------------------------------------------------------------------
 /**
-\brief    User event initialization
+\brief    Initialize user event module
 
-Initialize the user event module.
+The function initializes the user event module. It is also responsible to call
+the init function of it's CAL module.
 
-\param  pfnApiProcessEventCb_p  function pointer to generic event callback
+\param  pfnApiProcessEventCb_p  Function pointer to generic event callback function.
 
-\return tEplKernel
-\retval kEplSuccessful          if function executes correctly
-\retval other                   error
+\return The function returns a tEplKernel error code.
+\retval kEplSuccessful          If function executes correctly
+\retval other error codes       If an error occurred
 */
 //------------------------------------------------------------------------------
-tEplKernel PUBLIC EplEventuInit (tEplProcessEventCb pfnApiProcessEventCb_p)
+tEplKernel eventu_init(tEplProcessEventCb pfnApiProcessEventCb_p)
 {
-    tEplKernel Ret = kEplSuccessful;
+    tEplKernel ret = kEplSuccessful;
 
-    Ret = EplEventuAddInstance(pfnApiProcessEventCb_p);
+    instance_l.pfnApiProcessEventCb = pfnApiProcessEventCb_p;
 
-    return Ret;
+    ret = eventucal_init();
+
+    return ret;
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief    User event add instance
+\brief    Cleanup user event module
 
-Add user event module.
+This function cleans up the user event module.
 
-\return tEplKernel
-\retval kEplSuccessful          if function executes correctly
-\retval other                   error
+\return The function returns a tEplKernel error code.
+\retval kEplSuccessful          If function executes correctly
+\retval other error codes       If an error occurred
 */
 //------------------------------------------------------------------------------
-tEplKernel PUBLIC EplEventuAddInstance (
-        tEplProcessEventCb pfnApiProcessEventCb_p)
+tEplKernel eventu_exit(void)
 {
-    tEplKernel Ret = kEplSuccessful;
+    tEplKernel ret = kEplSuccessful;
 
-    // init instance variables
-    EplEventuInstance_g.m_pfnApiProcessEventCb = pfnApiProcessEventCb_p;
+    ret = eventucal_exit();
 
-    Ret = EplEventuCalAddInstance();
-
-    return Ret;
+    return ret;
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief    User event delete instance
+\brief    User event handler
 
-Delete user event module.
+This function processes events posted to the user layer. It examines the
+sink and forwards the events by calling the event process function of the
+specific module
 
-\return tEplKernel
-\retval kEplSuccessful          if function executes correctly
-\retval other                   error
+\param  pEvent_p                Received event.
+
+\return The function returns a tEplKernel error code.
+\retval kEplSuccessful          If function executes correctly
+\retval other error codes       If an error occurred
 */
 //------------------------------------------------------------------------------
-tEplKernel PUBLIC EplEventuDelInstance (void)
+tEplKernel eventu_process (tEplEvent *pEvent_p)
 {
-    tEplKernel Ret = kEplSuccessful;
+    tEplKernel              ret = kEplSuccessful;
+    tEplEventSource         eventSource;
+    tEplProcessEventCb      pfnEventHandler;
+    tEventDispatchEntry*    pDispatchEntry;
 
-    Ret = EplEventuCalDelInstance();
-
-    return Ret;
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief    User thread that dispatches user events
-
-Process events posted to the user layer from the EventuCal.
-
-\param  pEvent_p                user event
-
-\return tEplKernel
-\retval kEplSuccessful          if function executes correctly
-\retval other                   error
-*/
-//------------------------------------------------------------------------------
-tEplKernel PUBLIC EplEventuProcess (tEplEvent *pEvent_p)
-{
-    tEplKernel Ret = kEplSuccessful;
-    tEplEventSource EventSource;
-
-    // check m_EventSink
-    switch(pEvent_p->m_EventSink)
+    pDispatchEntry = &eventDispatchTbl_l[0];
+    ret = event_getHandlerForSink(&pDispatchEntry, pEvent_p->m_EventSink,
+                                  &pfnEventHandler, &eventSource);
+    if (ret == kEplEventUnknownSink)
     {
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMTU)) != 0)
-        // NMT-User-Module
-        case kEplEventSinkNmtu:
+        // Unknown sink, provide error event to API layer
+        eventu_postError(kEplEventSourceEventu, ret, sizeof(pEvent_p->m_EventSink),
+                        &pEvent_p->m_EventSink);
+    }
+    else
+    {
+        if (pfnEventHandler != NULL)
         {
-            Ret = EplNmtuProcessEvent(pEvent_p);
-            if ((Ret != kEplSuccessful) && (Ret != kEplShutdown))
+            ret = pfnEventHandler(pEvent_p);
+            if ((ret != kEplSuccessful) && (ret != kEplShutdown))
             {
-                EventSource = kEplEventSourceNmtu;
-
-                // Error event for API layer
-                EplEventuPostError(kEplEventSourceEventu,
-                                Ret,
-                                sizeof(EventSource),
-                                &EventSource);
+                // forward error event to API layer
+                eventu_postError(kEplEventSourceEventu, ret,  sizeof(eventSource),
+                                &eventSource);
             }
-            break;
         }
-#endif
-
-#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
-        // NMT-MN-User-Module
-        case kEplEventSinkNmtMnu:
-        {
-            Ret = EplNmtMnuProcessEvent(pEvent_p);
-            if ((Ret != kEplSuccessful) && (Ret != kEplShutdown))
-            {
-                EventSource = kEplEventSourceNmtMnu;
-
-                // Error event for API layer
-                EplEventuPostError(kEplEventSourceEventu,
-                                Ret,
-                                sizeof(EventSource),
-                                &EventSource);
-            }
-            break;
-        }
-#endif
-
-#if ((((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOC)) != 0)   \
-     || (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOS)) != 0))
-        // events for asynchronous SDO Sequence Layer
-        case kEplEventSinkSdoAsySeq:
-        {
-            Ret = EplSdoAsySeqProcessEvent(pEvent_p);
-            if ((Ret != kEplSuccessful) && (Ret != kEplShutdown))
-            {
-                EventSource = kEplEventSourceSdoAsySeq;
-
-                // Error event for API layer
-                EplEventuPostError(kEplEventSourceEventu,
-                                Ret,
-                                sizeof(EventSource),
-                                &EventSource);
-            }
-            break;
-        }
-#endif
-
-        // LED user part module
-        case kEplEventSinkLedu:
-        {
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_LEDU)) != 0)
-            Ret = EplLeduProcessEvent(pEvent_p);
-            if ((Ret != kEplSuccessful) && (Ret != kEplShutdown))
-            {
-                EventSource = kEplEventSourceLedu;
-
-                // Error event for API layer
-                EplEventuPostError(kEplEventSourceEventu,
-                                Ret,
-                                sizeof(EventSource),
-                                &EventSource);
-            }
-#endif
-            break;
-        }
-
-        // event for EPL api
-        case kEplEventSinkApi:
-        {
-            if (EplEventuInstance_g.m_pfnApiProcessEventCb != NULL)
-            {
-                Ret = EplEventuInstance_g.m_pfnApiProcessEventCb(pEvent_p);
-                if ((Ret != kEplSuccessful) && (Ret != kEplShutdown))
-                {
-                    EventSource = kEplEventSourceEplApi;
-
-                    // Error event for API layer
-                    EplEventuPostError(kEplEventSourceEventu,
-                                    Ret,
-                                    sizeof(EventSource),
-                                    &EventSource);
-                }
-            }
-            break;
-
-        }
-
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLU)) != 0)
-        case kEplEventSinkDlluCal:
-        {
-            Ret = dllucal_process(pEvent_p);
-            if ((Ret != kEplSuccessful) && (Ret != kEplShutdown))
-            {
-                EventSource = kEplEventSourceDllu;
-
-                // Error event for API layer
-                EplEventuPostError(kEplEventSourceEventu,
-                                Ret,
-                                sizeof(EventSource),
-                                &EventSource);
-            }
-            break;
-
-        }
-#endif
-
-        case kEplEventSinkErru:
-        {
-            /*
-            Ret = EplErruProcess(pEvent_p);
-            if ((Ret != kEplSuccessful) && (Ret != kEplShutdown))
-            {
-                EventSource = kEplEventSourceErru;
-
-                // Error event for API layer
-                EplEventuPostError(kEplEventSourceEventu,
-                                Ret,
-                                sizeof(EventSource),
-                                &EventSource);
-            }
-            */
-            break;
-
-        }
-
-        // unknown sink
-        default:
-        {
-            Ret = kEplEventUnknownSink;
-
-            // Error event for API layer
-            EplEventuPostError(kEplEventSourceEventu,
-                            Ret,
-                            sizeof(pEvent_p->m_EventSink),
-                            &pEvent_p->m_EventSink);
-        }
-
-    } // end of switch(pEvent_p->m_EventSink)
-
-    return Ret;
+    }
+    return ret;
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief    User event process
+\brief    Post user event
 
-This function posts an event to the EventuCal.
+This function posts an event to a queue. It calls the post function of the
+CAL module which distributes the event to the suitable event queue.
 
-\param  pEvent_p                event posted by user
+\param  pEvent_p                Event to be posted.
 
-\return tEplKernel
-\retval kEplSuccessful          if function executes correctly
-\retval other                   error
+\return The function returns a tEplKernel error code.
+\retval kEplSuccessful          If function executes correctly
+\retval other error codes       If an error occurred
 */
 //------------------------------------------------------------------------------
-tEplKernel PUBLIC EplEventuPost (tEplEvent *pEvent_p)
+tEplKernel eventu_postEvent (tEplEvent *pEvent_p)
 {
-    tEplKernel Ret = kEplSuccessful;
+    tEplKernel ret = kEplSuccessful;
 
-    Ret = EplEventuCalPost(pEvent_p);
+    ret = eventucal_postEvent(pEvent_p);
 
-    return Ret;
+    return ret;
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief    post error by user
+\brief    Post an error event
 
-This function posts an error to the Api.
+This function posts an error event to the API module.
 
-\param  EventSource_p           source that posts the error
-\param  EplError_p              error code
-\param  uiArgSize_p             size of error argument
-\param  pArg_p                  error argument
+\param  eventSource_p           Source that caused the error
+\param  error_p                 Error code
+\param  argSize_p               Size of error argument
+\param  pArg_p                  Error argument
 
-\return tEplKernel
-\retval kEplSuccessful          if function executes correctly
-\retval other                   error
+\return The function returns a tEplKernel error code.
+\retval kEplSuccessful          If function executes correctly
+\retval other error codes       If an error occurred
 */
 //------------------------------------------------------------------------------
-tEplKernel PUBLIC EplEventuPostError (tEplEventSource EventSource_p,
-        tEplKernel EplError_p,
-        unsigned int uiArgSize_p,
-        void *pArg_p)
+tEplKernel eventu_postError (tEplEventSource eventSource_p,  tEplKernel error_p,
+                             UINT argSize_p, void* pArg_p)
 {
-    tEplKernel Ret;
-    tEplEventError EventError;
-    tEplEvent EplEvent;
+    tEplKernel          ret;
+    tEplEventError      eventError;
+    tEplEvent           event;
 
-    Ret = kEplSuccessful;
+    ret = kEplSuccessful;
 
     // create argument
-    EventError.m_EventSource = EventSource_p;
-    EventError.m_EplError = EplError_p;
-    uiArgSize_p = (unsigned int) min ((size_t) uiArgSize_p, sizeof (EventError.m_Arg));
-    EPL_MEMCPY(&EventError.m_Arg, pArg_p, uiArgSize_p);
+    eventError.m_EventSource = eventSource_p;
+    eventError.m_EplError = error_p;
+    argSize_p = (UINT) min ((size_t) argSize_p, sizeof (eventError.m_Arg));
+    EPL_MEMCPY(&eventError.m_Arg, pArg_p, argSize_p);
 
     // create event
-    EplEvent.m_EventType = kEplEventTypeError;
-    EplEvent.m_EventSink = kEplEventSinkApi;
-    EPL_MEMSET(&EplEvent.m_NetTime, 0x00, sizeof(EplEvent.m_NetTime));
-    EplEvent.m_uiSize = (memberoffs (tEplEventError, m_Arg) + uiArgSize_p);
-    EplEvent.m_pArg = &EventError;
+    event.m_EventType = kEplEventTypeError;
+    event.m_EventSink = kEplEventSinkApi;
+    EPL_MEMSET(&event.m_NetTime, 0x00, sizeof(event.m_NetTime));
+    event.m_uiSize = (memberoffs (tEplEventError, m_Arg) + argSize_p);
+    event.m_pArg = &eventError;
 
-    // post errorevent
-    Ret = EplEventuPost(&EplEvent);
+    ret = eventu_postEvent(&event);
 
-    return Ret;
+    return ret;
 }
 
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
 //============================================================================//
+
+//------------------------------------------------------------------------------
+/**
+\brief	API event callback wrapper
+
+This function implements an API event handler wrapper. It determines if
+an API event callback was registered and calls it.
+
+\param  pEvent_p            Pointer to event.
+
+\return The function returns a tEplKernel error code.
+*/
+//------------------------------------------------------------------------------
+static tEplKernel callApiEventCb (tEplEvent* pEvent_p)
+{
+    if (instance_l.pfnApiProcessEventCb != NULL)
+    {
+        return instance_l.pfnApiProcessEventCb(pEvent_p);
+    }
+    return kEplEventPostError;
+}
+

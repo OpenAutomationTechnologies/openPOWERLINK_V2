@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   eventcal-direct.c
+\file   eventucal-direct.c
 
 \brief  source file for direct event posting
 
@@ -11,7 +11,7 @@ is processed in the same context.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2012, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
-All rights reserved
+All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
@@ -34,12 +34,15 @@ LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
 ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*******************************************************************************/
+------------------------------------------------------------------------------*/
+
 
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
 #include <eventcal.h>
+#include <user/eventucal.h>
+#include <kernel/eventkcal.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -68,20 +71,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local types
 //------------------------------------------------------------------------------
-/**
-\brief event direct instance type
-
-The EventDirectInstance is used for every event queue using the direct call
-event posting.
-Note: The member fProcessThreadSafe determines if the event posting
-is performed thread safe.
-*/
-typedef struct
-{
-    tEventQueue         eventQueue;         ///< event queue
-    tEplProcessEventCb  pfnProcessEventCb;  ///< event process callback
-    BOOL                fProcessThreadSafe; ///< thread-safe event process
-} tEventDirectInstance;
 
 //------------------------------------------------------------------------------
 // local vars
@@ -90,6 +79,18 @@ typedef struct
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
+static tEplKernel addInstance(tEventQueueInstPtr *ppEventQueueInst_p,
+                              tEventQueue eventQueue_p);
+static tEplKernel delInstance (tEventQueueInstPtr pEventQueueInst_p);
+static tEplKernel postEvent (tEventQueueInstPtr pEventQueue_p, tEplEvent *pEvent_p);
+
+/* define external function interface */
+static tEventCalFuncIntf funcintf_l =
+{
+    addInstance,
+    delInstance,
+    postEvent,
+};
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -97,40 +98,74 @@ typedef struct
 
 //------------------------------------------------------------------------------
 /**
-\brief    Add a direct call event CAL instance
+\brief  Return pointer to function interface
 
-The function adds a direct call event CAL instance.
+This function returns a pointer to the function interface structure which
+is used to access the dllcal functions of the direct call implementation.
+
+\return Returns a pointer to the local function interface
+*/
+//------------------------------------------------------------------------------
+tEventCalFuncIntf* eventucaldirect_getInterface(void)
+{
+    return &funcintf_l;
+}
+
+//============================================================================//
+//            P R I V A T E   F U N C T I O N S                               //
+//============================================================================//
+
+
+//------------------------------------------------------------------------------
+/**
+\brief    Add instance of direct call event CAL in user layer
+
+The function adds a new instance of the direct call event CAL interface at
+the user layer.
 
 \param  ppEventQueueInst_p      Pointer to store event queue instance
-\param  eventQueue_p            Event queue to be add
-\param  pfnProcessEventCb_p     Pointer to process callback function
-\param  fProcessThreadSafe_p    Queue should post events thread-safe
+\param  eventQueue_p            Event queue of this instance
 
 \return The function returns a tEplKernel error code.
 \retval kEplSuccessful          If function executes correctly
 \retval other error codes       If an error occurred
 */
 //------------------------------------------------------------------------------
-tEplKernel eventcaldirect_addInstance(tEventQueueInstPtr *ppEventQueueInst_p,
-                              tEventQueue eventQueue_p,
-                              tEplProcessEventCb pfnProcessEventCb_p,
-                              BOOL fProcessThreadSafe_p)
+static tEplKernel addInstance(tEventQueueInstPtr *ppEventQueueInst_p,
+                              tEventQueue eventQueue_p)
 {
     tEplKernel              ret = kEplSuccessful;
-    tEventDirectInstance*   pInstance;
+    BOOL                    fProcessThreadSafe;
+    tEplProcessEventCb      pfnProcessEventCb;
 
-    pInstance = (tEventDirectInstance*) EPL_MALLOC(sizeof(tEventDirectInstance));
-    if(pInstance == NULL)
+    //set parameters depending on event queue
+    switch(eventQueue_p)
     {
-        ret = kEplNoResource;
-        goto Exit;
+        case kEventQueueUInt:
+            pfnProcessEventCb = eventucal_rxHandler;
+            fProcessThreadSafe = FALSE;
+            break;
+
+        case kEventQueueU2K:
+            pfnProcessEventCb = eventkcal_rxHandler;
+            fProcessThreadSafe = TRUE;
+            break;
+
+        case kEventQueueK2U:
+            // we don't use this queue but calling init is ok,
+            // therefore it is no error
+            ret = kEplSuccessful;
+            goto Exit;
+            break;
+
+        default:
+            ret = kEplInvalidInstanceParam;
+            goto Exit;
+            break;
     }
 
-    pInstance->eventQueue = eventQueue_p;
-    pInstance->pfnProcessEventCb = pfnProcessEventCb_p;
-    pInstance->fProcessThreadSafe = fProcessThreadSafe_p;
-
-    *ppEventQueueInst_p = (tEventQueueInstPtr*)pInstance;
+    ret = eventcaldirect_addInstance(ppEventQueueInst_p, eventQueue_p,
+                                     pfnProcessEventCb, fProcessThreadSafe);
 
 Exit:
     return ret;
@@ -138,37 +173,25 @@ Exit:
 
 //------------------------------------------------------------------------------
 /**
-\brief    Delete a direct call event CAL instance
+\brief    Delet event CAL instance
 
-The function deletes an direct call event CAL instance.
+The function deletes an event CAL instance.
 
 \param  pEventQueueInst_p           pointer to event queue instance
 
 \return Returns always kEplSuccessful
 */
 //------------------------------------------------------------------------------
-tEplKernel eventcaldirect_delInstance (tEventQueueInstPtr pEventQueueInst_p)
+static tEplKernel delInstance (tEventQueueInstPtr pEventQueueInst_p)
 {
-    tEventDirectInstance*   pInstance = (tEventDirectInstance*)pEventQueueInst_p;
-
-    if (pInstance == NULL)
-        return kEplSuccessful;
-
-    //set callback NULL
-    pInstance->pfnProcessEventCb = NULL;
-
-    //finally free the event instance
-    EPL_FREE(pInstance);
-
-    return kEplSuccessful;
+    return eventcaldirect_delInstance(pEventQueueInst_p);
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief    Post event
+\brief    Post event using direct calls
 
-This function posts an event to the provided queue instance. If enabled
-the posting is done thread safe.
+This function posts an event to the provided queue instance.
 
 \param  pEventQueue_p           Pointer to event queue instance
 \param  pEvent_p                Pointer to event
@@ -178,40 +201,7 @@ the posting is done thread safe.
 \retval other error codes       If an error occurred
 */
 //------------------------------------------------------------------------------
-tEplKernel eventcaldirect_postEvent (tEventQueueInstPtr pEventQueue_p, tEplEvent *pEvent_p)
+static tEplKernel postEvent (tEventQueueInstPtr pEventQueue_p, tEplEvent *pEvent_p)
 {
-    tEplKernel          ret = kEplSuccessful;
-    tEventDirectInstance *pInstance = (tEventDirectInstance*)pEventQueue_p;
-
-    if(pInstance == NULL)
-    {
-        ret = kEplInvalidInstanceParam;
-        goto Exit;
-    }
-
-    if(pInstance->pfnProcessEventCb == NULL)
-    {
-        ret = kEplInvalidInstanceParam;
-        goto Exit;
-    }
-
-    if(pInstance->fProcessThreadSafe)
-    {
-        EplTgtEnableGlobalInterrupt(FALSE);
-    }
-
-    ret = pInstance->pfnProcessEventCb(pEvent_p);
-
-    if(pInstance->fProcessThreadSafe)
-        {
-            EplTgtEnableGlobalInterrupt(TRUE);
-        }
-
-Exit:
-    return ret;
+    return eventcaldirect_postEvent(pEventQueue_p, pEvent_p);
 }
-
-//============================================================================//
-//            P R I V A T E   F U N C T I O N S                               //
-//============================================================================//
-

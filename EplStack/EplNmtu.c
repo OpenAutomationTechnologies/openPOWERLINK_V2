@@ -240,7 +240,7 @@ tEplEvent   Event;
     Event.m_pArg = &NmtEvent_p;
     Event.m_uiSize = sizeof(NmtEvent_p);
 
-    Ret = EplEventuPost(&Event);
+    Ret = eventu_postEvent(&Event);
 
 
     return Ret;

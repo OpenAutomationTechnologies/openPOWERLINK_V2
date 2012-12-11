@@ -323,14 +323,14 @@ tEplDllkInitParam   DllkInitParam;
 #endif
 
     // initialize EplEventk module
-    Ret = EplEventkInit();
+    Ret = eventk_init();
     if (Ret != kEplSuccessful)
     {
         goto Exit;
     }
 
     // initialize EplEventu module
-    Ret = EplEventuInit(EplApiProcessEvent);
+    Ret = eventu_init(EplApiProcessEvent);
     if (Ret != kEplSuccessful)
     {
         goto Exit;
@@ -642,7 +642,7 @@ tEplKernel      Ret = kEplSuccessful;
 //    PRINTF("EplTimeruDelInstance():  0x%X\n", Ret);
 
     // deinitialize EplEventu module
-    Ret = EplEventuDelInstance();
+    Ret = eventu_exit();
 //    PRINTF("EplEventuDelInstance():  0x%X\n", Ret);
 
     // deinitialize EplNmtk module
@@ -662,7 +662,7 @@ tEplKernel      Ret = kEplSuccessful;
 #endif
 
     // deinitialize EplEventk module
-    Ret = EplEventkDelInstance();
+    Ret = eventk_exit();
 //    PRINTF("EplEventkDelInstance():  0x%X\n", Ret);
 
 #if EPL_USE_SHAREDBUFF != FALSE
@@ -1315,7 +1315,7 @@ tEplEvent   Event;
     Event.m_pArg = &pUserArg_p;
     Event.m_uiSize = sizeof (pUserArg_p);
 
-    Ret = EplEventuPost(&Event);
+    Ret = eventu_postEvent(&Event);
 
     return Ret;
 }

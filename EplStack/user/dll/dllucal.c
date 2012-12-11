@@ -247,7 +247,7 @@ tEplKernel dllucal_config(tEplDllConfigParam * pDllConfigParam_p)
     event.m_EventType = kEplEventTypeDllkConfig;
     event.m_pArg = pDllConfigParam_p;
     event.m_uiSize = sizeof (*pDllConfigParam_p);
-    ret = EplEventuPost(&event);
+    ret = eventu_postEvent(&event);
 
     return ret;
 }
@@ -273,7 +273,7 @@ tEplKernel dllucal_setIdentity(tEplDllIdentParam * pDllIdentParam_p)
     event.m_EventType = kEplEventTypeDllkIdentity;
     event.m_pArg = pDllIdentParam_p;
     event.m_uiSize = sizeof (*pDllIdentParam_p);
-    ret = EplEventuPost(&event);
+    ret = eventu_postEvent(&event);
     return ret;
 }
 
@@ -364,7 +364,7 @@ tEplKernel dllucal_sendAsyncFrame(tEplFrameInfo * pFrameInfo_p,
     EPL_MEMSET(&event.m_NetTime, 0x00, sizeof(event.m_NetTime));
     event.m_pArg = &priority_p;
     event.m_uiSize = sizeof(priority_p);
-    ret = EplEventuPost(&event);
+    ret = eventu_postEvent(&event);
 Exit:
     return ret;
 }
@@ -404,7 +404,7 @@ tEplKernel dllucal_issueRequest(tEplDllReqServiceId service_p, UINT nodeId_p,
             issueReq.soaFlag1 = soaFlag1_p;
             event.m_pArg = &issueReq;
             event.m_uiSize = sizeof (issueReq);
-            ret = EplEventuPost(&event);
+            ret = eventu_postEvent(&event);
             break;
 
         default:
@@ -464,7 +464,7 @@ tEplKernel dllucal_configNode(tEplDllNodeInfo* pNodeInfo_p)
     event.m_pArg = pNodeInfo_p;
     event.m_uiSize = sizeof (*pNodeInfo_p);
 
-    ret = EplEventuPost(&event);
+    ret = eventu_postEvent(&event);
 
     return ret;
 }
@@ -492,7 +492,7 @@ tEplKernel dllucal_addNode(tEplDllNodeOpParam* pNodeOpParam_p)
     event.m_pArg = pNodeOpParam_p;
     event.m_uiSize = sizeof (*pNodeOpParam_p);
 
-    ret = EplEventuPost(&event);
+    ret = eventu_postEvent(&event);
 
     return ret;
 }
@@ -520,7 +520,7 @@ tEplKernel dllucal_deleteNode(tEplDllNodeOpParam* pNodeOpParam_p)
     event.m_pArg = pNodeOpParam_p;
     event.m_uiSize = sizeof (*pNodeOpParam_p);
 
-    ret = EplEventuPost(&event);
+    ret = eventu_postEvent(&event);
 
     return ret;
 }
@@ -556,7 +556,7 @@ static tEplKernel SetAsndServiceIdFilter(tEplDllAsndServiceId serviceId_p,
     servFilter.filter = filter_p;
     event.m_pArg = &servFilter;
     event.m_uiSize = sizeof (servFilter);
-    ret = EplEventuPost(&event);
+    ret = eventu_postEvent(&event);
 
     return ret;
 }

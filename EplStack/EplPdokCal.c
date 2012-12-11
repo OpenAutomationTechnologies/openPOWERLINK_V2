@@ -311,7 +311,7 @@ tEplEvent       Event;
     Event.m_uiSize = AmiGetWordFromLe(&pFrameInfo_p->m_pFrame->m_Data.m_Pres.m_le_wSize) + EPL_FRAME_OFFSET_PDO_PAYLOAD; // pFrameInfo_p->m_uiFrameSize;
     Event.m_pArg = pFrameInfo_p->m_pFrame;
 #endif
-    Ret = EplEventkPost(&Event);
+    Ret = eventk_postEvent(&Event);
 #if EPL_DLL_DISABLE_DEFERRED_RXFRAME_RELEASE == FALSE
     if (Ret == kEplSuccessful)
     {

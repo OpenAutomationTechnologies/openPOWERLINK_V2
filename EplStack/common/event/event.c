@@ -1,17 +1,18 @@
 /**
 ********************************************************************************
-\file   eventcal-direct.c
+\file   event.c
 
-\brief  source file for direct event posting
+\brief  Source file for general functions used by event handler modules
 
-This event queue implementation applies direct calls, hence, an event posted
-is processed in the same context.
+This file contains general functions used by the user and kernel event
+handler modules.
 
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
+Copyright (c) 2012, SYSTEC electronic GmbH
 Copyright (c) 2012, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
-All rights reserved
+All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
@@ -34,12 +35,12 @@ LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
 ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*******************************************************************************/
+------------------------------------------------------------------------------*/
 
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <eventcal.h>
+#include <event.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -68,27 +69,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local types
 //------------------------------------------------------------------------------
-/**
-\brief event direct instance type
 
-The EventDirectInstance is used for every event queue using the direct call
-event posting.
-Note: The member fProcessThreadSafe determines if the event posting
-is performed thread safe.
-*/
-typedef struct
-{
-    tEventQueue         eventQueue;         ///< event queue
-    tEplProcessEventCb  pfnProcessEventCb;  ///< event process callback
-    BOOL                fProcessThreadSafe; ///< thread-safe event process
-} tEventDirectInstance;
-
-//------------------------------------------------------------------------------
-// local vars
-//------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
 // local function prototypes
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// local vars
 //------------------------------------------------------------------------------
 
 //============================================================================//
@@ -97,119 +85,46 @@ typedef struct
 
 //------------------------------------------------------------------------------
 /**
-\brief    Add a direct call event CAL instance
+\brief  Finds the appropriate event handler for a specific sink
 
-The function adds a direct call event CAL instance.
+The function searches the event dispatch table for the appropriate event
+handler for the specified sink. It returns the pointer to the event handler
+and the corresponding event source.
 
-\param  ppEventQueueInst_p      Pointer to store event queue instance
-\param  eventQueue_p            Event queue to be add
-\param  pfnProcessEventCb_p     Pointer to process callback function
-\param  fProcessThreadSafe_p    Queue should post events thread-safe
-
-\return The function returns a tEplKernel error code.
-\retval kEplSuccessful          If function executes correctly
-\retval other error codes       If an error occurred
-*/
-//------------------------------------------------------------------------------
-tEplKernel eventcaldirect_addInstance(tEventQueueInstPtr *ppEventQueueInst_p,
-                              tEventQueue eventQueue_p,
-                              tEplProcessEventCb pfnProcessEventCb_p,
-                              BOOL fProcessThreadSafe_p)
-{
-    tEplKernel              ret = kEplSuccessful;
-    tEventDirectInstance*   pInstance;
-
-    pInstance = (tEventDirectInstance*) EPL_MALLOC(sizeof(tEventDirectInstance));
-    if(pInstance == NULL)
-    {
-        ret = kEplNoResource;
-        goto Exit;
-    }
-
-    pInstance->eventQueue = eventQueue_p;
-    pInstance->pfnProcessEventCb = pfnProcessEventCb_p;
-    pInstance->fProcessThreadSafe = fProcessThreadSafe_p;
-
-    *ppEventQueueInst_p = (tEventQueueInstPtr*)pInstance;
-
-Exit:
-    return ret;
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief    Delete a direct call event CAL instance
-
-The function deletes an direct call event CAL instance.
-
-\param  pEventQueueInst_p           pointer to event queue instance
-
-\return Returns always kEplSuccessful
-*/
-//------------------------------------------------------------------------------
-tEplKernel eventcaldirect_delInstance (tEventQueueInstPtr pEventQueueInst_p)
-{
-    tEventDirectInstance*   pInstance = (tEventDirectInstance*)pEventQueueInst_p;
-
-    if (pInstance == NULL)
-        return kEplSuccessful;
-
-    //set callback NULL
-    pInstance->pfnProcessEventCb = NULL;
-
-    //finally free the event instance
-    EPL_FREE(pInstance);
-
-    return kEplSuccessful;
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief    Post event
-
-This function posts an event to the provided queue instance. If enabled
-the posting is done thread safe.
-
-\param  pEventQueue_p           Pointer to event queue instance
-\param  pEvent_p                Pointer to event
+\param  ppDispatchEntry_p   Pointer to dispatch entry pointer.
+\param  sink_p              Event sink to search for.
+\param  ppfnEventHandler_p  Pointer to store event handler function pointer.
+\param  pEventSource_p      Pointer to store the corresponding event source.
 
 \return The function returns a tEplKernel error code.
-\retval kEplSuccessful          If function executes correctly
-\retval other error codes       If an error occurred
+\retval kEplSuccessful          If the event sink was found.
+\retval kEplEventUnknownSink    IF the event sink was not found.
 */
 //------------------------------------------------------------------------------
-tEplKernel eventcaldirect_postEvent (tEventQueueInstPtr pEventQueue_p, tEplEvent *pEvent_p)
+tEplKernel event_getHandlerForSink(tEventDispatchEntry** ppDispatchEntry_p,
+                                   tEplEventSink sink_p,
+                                   tEplProcessEventCb* ppfnEventHandler_p,
+                                   tEplEventSource* pEventSource_p)
 {
-    tEplKernel          ret = kEplSuccessful;
-    tEventDirectInstance *pInstance = (tEventDirectInstance*)pEventQueue_p;
+    tEplKernel              ret = kEplEventUnknownSink;
 
-    if(pInstance == NULL)
+    while ((*ppDispatchEntry_p)->sink != kEplEventSinkInvalid)
     {
-        ret = kEplInvalidInstanceParam;
-        goto Exit;
-    }
-
-    if(pInstance->pfnProcessEventCb == NULL)
-    {
-        ret = kEplInvalidInstanceParam;
-        goto Exit;
-    }
-
-    if(pInstance->fProcessThreadSafe)
-    {
-        EplTgtEnableGlobalInterrupt(FALSE);
-    }
-
-    ret = pInstance->pfnProcessEventCb(pEvent_p);
-
-    if(pInstance->fProcessThreadSafe)
+        if (sink_p == (*ppDispatchEntry_p)->sink)
         {
-            EplTgtEnableGlobalInterrupt(TRUE);
+            *pEventSource_p = (*ppDispatchEntry_p)->source;
+            *ppfnEventHandler_p = (*ppDispatchEntry_p)->pfnEventHandler;
+            (*ppDispatchEntry_p)++;
+            ret = kEplSuccessful;
+            break;
         }
+        (*ppDispatchEntry_p)++;
+    }
 
-Exit:
+
     return ret;
 }
+
 
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //

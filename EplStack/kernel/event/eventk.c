@@ -2,13 +2,23 @@
 ********************************************************************************
 \file   eventk.c
 
-\brief  source file for Epl-Kernelspace-Event-Module
+\brief  Source file for kernel event module
 
-This is the highest abstraction of the kernel event module.
+This file contains the source code of the kernel event module. It provides the
+interface for posting events to other kernel modules. For the receive side it
+contains a general receive handler which will be executed when an event is
+posted to the kernel layer. The event handler examines the event and calls
+the handler of the module which is specified by the sink argument.
 
+To be independent of a specific event queue implementation it uses its
+communication abstraction layer (CAL) for posting and receiving events to/from
+different event queues.
+
+*******************************************************************************/
+
+/*------------------------------------------------------------------------------
+Copyright (c) 2012, SYSTEC electronic GmbH
 Copyright (c) 2012, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
-Copyright (c) 2012, SYSTEC electronik GmbH
-Copyright (c) 2012, Kalycito Infotech Private Ltd.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -32,24 +42,25 @@ LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
 ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*******************************************************************************/
+------------------------------------------------------------------------------*/
 
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include "kernel/eventk.h"
-#include "kernel/eventkcal.h"
-#include "kernel/EplNmtk.h"
-#include "kernel/EplDllk.h"
-#include "kernel/dllkcal.h"
-#include "kernel/EplErrorHandlerk.h"
-#include "Benchmark.h"
+#include <kernel/eventk.h>
+#include <kernel/eventkcal.h>
+#include <kernel/EplNmtk.h>
+#include <kernel/EplDllk.h>
+#include <kernel/dllkcal.h>
+#include <kernel/EplErrorHandlerk.h>
+#include <Benchmark.h>
 
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOK)) != 0)
-#include "kernel/EplPdok.h"
-#include "kernel/EplPdokCal.h"
+#include <kernel/EplPdok.h>
+#include <kernel/EplPdokCal.h>
 #endif
 
+#include "common/event/event.h"
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -80,12 +91,43 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
+// local function prototypes
+//------------------------------------------------------------------------------
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLK)) != 0)
+static tEplKernel handleNmtEventinDll(tEplEvent* pEvent_p);
+#endif
+
+//------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
 
-//------------------------------------------------------------------------------
-// local function prototypes
-//------------------------------------------------------------------------------
+/**
+\brief  Event dispatch table
+
+The following table defines the event handlers to be used for the specific
+event sinks.
+*/
+static tEventDispatchEntry eventDispatchTbl_l[] =
+{
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMTK)) != 0)
+    { kEplEventSinkNmtk,        kEplEventSourceNmtk,        EplNmtkProcess },
+#else
+    { kEplEventSinkNmtk,        kEplEventSourceNmtk,        NULL },
+#endif
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLK)) != 0)
+    { kEplEventSinkNmtk,        kEplEventSourceDllk,        handleNmtEventinDll },
+    { kEplEventSinkDllk,        kEplEventSourceDllk,        EplDllkProcess },
+    { kEplEventSinkDllkCal,     kEplEventSourceDllk,        dllkcal_process },
+    { kEplEventSinkErrk,        kEplEventSourceErrk,        EplErrorHandlerkProcess },
+#else
+    { kEplEventSinkDllk,        kEplEventSourceDllk,        NULL },
+    { kEplEventSinkDllkCal,     kEplEventSourceDllk,        NULL },
+#endif
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOK)) != 0)
+    { kEplEventSinkPdokCal,     kEplEventSourcePdok,        EplPdokCalProcess },
+#endif
+    { kEplEventSinkInvalid,     kEplEventSourceInvalid,     NULL }
+};
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -93,292 +135,210 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 //------------------------------------------------------------------------------
 /**
-\brief    Kernel event initialization
+\brief    Initialize kernel event module
 
-Initialize the kernel event module.
+The function initializes the kernel event module. It is also responsible to call
+the init function of it's CAL module.
 
-\return tEplKernel
-\retval kEplSuccessful          if function executes correctly
-\retval other                   error
+\return The function returns a tEplKernel error code.
+\retval kEplSuccessful          If function executes correctly
+\retval other error codes       If an error occurred
 */
 //------------------------------------------------------------------------------
-tEplKernel PUBLIC EplEventkInit (void)
+tEplKernel eventk_init (void)
 {
-    tEplKernel Ret = kEplSuccessful;
+    tEplKernel  ret = kEplSuccessful;
 
-    Ret = EplEventkAddInstance();
+    ret = eventkcal_init();
 
-    return Ret;
+    return ret;
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief    Kernel event add instance
+\brief    Cleanup kernel event module
 
-Add kernel event module.
+This function cleans up the kernel event module.
 
-\return tEplKernel
-\retval kEplSuccessful          if function executes correctly
-\retval other                   error
+\return The function returns a tEplKernel error code.
+\retval kEplSuccessful          If function executes correctly
+\retval other error codes       If an error occurred
 */
 //------------------------------------------------------------------------------
-tEplKernel PUBLIC EplEventkAddInstance (void)
+tEplKernel eventk_exit (void)
 {
-    tEplKernel Ret = kEplSuccessful;
+    tEplKernel      ret = kEplSuccessful;
 
-    Ret = EplEventkCalAddInstance();
+    ret = eventkcal_exit();
 
-    return Ret;
+    return ret;
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief    Kernel event delete instance
+\brief    Kernel event handler
 
-Delete kernel event module.
+This function processes events posted to the kernel layer. It examines the
+sink and forwards the events by calling the event process function of the
+specific module.
 
-\return tEplKernel
-\retval kEplSuccessful          if function executes correctly
-\retval other                   error
+\param  pEvent_p                Received event.
+
+\return The function returns a tEplKernel error code.
+\retval kEplSuccessful          If function executes correctly
+\retval other error codes       If an error occurred
 */
 //------------------------------------------------------------------------------
-tEplKernel PUBLIC EplEventkDelInstance (void)
+tEplKernel eventk_process (tEplEvent *pEvent_p)
 {
-    tEplKernel Ret = kEplSuccessful;
+    tEplKernel              ret = kEplSuccessful;
+    tEplEventSource         eventSource;
+    tEplProcessEventCb      pfnEventHandler;
+    BOOL                    fStop = FALSE;
+    BOOL                    fAlreadyHandled = FALSE;
+    tEventDispatchEntry*    pDispatchEntry;
 
-    Ret = EplEventkCalDelInstance();
-
-    return Ret;
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief    Kernel thread that dispatches kernel events
-
-Process events posted to the kernel layer from the EventkCal.
-
-\param  pEvent_p                kernel event
-
-\return tEplKernel
-\retval kEplSuccessful          if function executes correctly
-\retval other                   error
-*/
-//------------------------------------------------------------------------------
-tEplKernel PUBLIC EplEventkProcess (tEplEvent *pEvent_p)
-{
-    tEplKernel Ret = kEplSuccessful;
-    tEplEventSource EventSource;
-
-    // check m_EventSink
-    switch(pEvent_p->m_EventSink)
+    pDispatchEntry = &eventDispatchTbl_l[0];
+    while (!fStop)
     {
-        // NMT-Kernel-Modul
-        case kEplEventSinkNmtk:
+        ret = event_getHandlerForSink(&pDispatchEntry, pEvent_p->m_EventSink,
+                                      &pfnEventHandler, &eventSource);
+        if (ret == kEplEventUnknownSink)
         {
-#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMTK)) != 0)
-            Ret = EplNmtkProcess(pEvent_p);
-            if ((Ret != kEplSuccessful) && (Ret != kEplShutdown))
-            {
-                EventSource = kEplEventSourceNmtk;
-
-                // Error event for API layer
-                EplEventkPostError(kEplEventSourceEventk,
-                                Ret,
-                                sizeof(EventSource),
-                                &EventSource);
-            }
-#endif
-            BENCHMARK_MOD_27_RESET(0);
-#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLK)) != 0)
-            if ((pEvent_p->m_EventType == kEplEventTypeNmtEvent)
-                && (*((tEplNmtEvent*)pEvent_p->m_pArg) == kEplNmtEventDllCeSoa))
-            {
-
-                BENCHMARK_MOD_27_SET(0);
-
-#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLK)) != 0)
-                // forward SoA event to DLLk module for cycle preprocessing
-                Ret = EplDllkProcess(pEvent_p);
-                if ((Ret != kEplSuccessful) && (Ret != kEplShutdown))
+                if (!fAlreadyHandled)
                 {
-                    EventSource = kEplEventSourceDllk;
-
-                    // Error event for API layer
-                    EplEventkPostError(kEplEventSourceEventk,
-                                    Ret,
-                                    sizeof(EventSource),
-                                    &EventSource);
+                    // Unknown sink, provide error event to API layer
+                    eventk_postError(kEplEventSourceEventk, ret,
+                                     sizeof(pEvent_p->m_EventSink),
+                                     &pEvent_p->m_EventSink);
                 }
-#endif
-                BENCHMARK_MOD_27_RESET(0);
-
-            }
-#endif
-            break;
+                else
+                {
+                    ret = kEplSuccessful;
+                }
+                fStop = TRUE;
         }
-
-        // events for Dllk module
-        case kEplEventSinkDllk:
+        else
         {
-#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLK)) != 0)
-            Ret = EplDllkProcess(pEvent_p);
-            if ((Ret != kEplSuccessful) && (Ret != kEplShutdown))
+            if (pfnEventHandler != NULL)
             {
-                EventSource = kEplEventSourceDllk;
-
-                // Error event for API layer
-                EplEventkPostError(kEplEventSourceEventk,
-                                Ret,
-                                sizeof(EventSource),
-                                &EventSource);
+                ret = pfnEventHandler(pEvent_p);
+                if ((ret != kEplSuccessful) && (ret != kEplShutdown))
+                {
+                    // forward error event to API layer
+                    eventk_postError(kEplEventSourceEventk, ret,
+                                     sizeof(eventSource),
+                                      &eventSource);
+                }
             }
-#endif
-            break;
+            fAlreadyHandled = TRUE;
         }
+    }
 
-        // events for DllkCal module
-        case kEplEventSinkDllkCal:
-        {
-#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLK)) != 0)
-            Ret = dllkcal_process(pEvent_p);
-            if ((Ret != kEplSuccessful) && (Ret != kEplShutdown))
-            {
-                EventSource = kEplEventSourceDllk;
-
-                // Error event for API layer
-                EplEventkPostError(kEplEventSourceEventk,
-                                Ret,
-                                sizeof(EventSource),
-                                &EventSource);
-            }
-#endif
-            break;
-        }
-
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOK)) != 0)
-        // events for PDO CAL module
-        case kEplEventSinkPdokCal:
-        {
-            Ret = EplPdokCalProcess(pEvent_p);
-            if ((Ret != kEplSuccessful) && (Ret != kEplShutdown))
-            {
-                EventSource = kEplEventSourcePdok;
-
-                // Error event for API layer
-                EplEventkPostError(kEplEventSourceEventk,
-                                Ret,
-                                sizeof(EventSource),
-                                &EventSource);
-            }
-            break;
-        }
-#endif
-
-#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLK)) != 0)
-        // events for Error handler module
-        case kEplEventSinkErrk:
-        {
-            // only call error handler if DLL is present
-            Ret = EplErrorHandlerkProcess(pEvent_p);
-            if ((Ret != kEplSuccessful) && (Ret != kEplShutdown))
-            {
-                EventSource = kEplEventSourceErrk;
-
-                // Error event for API layer
-                EplEventkPostError(kEplEventSourceEventk,
-                                Ret,
-                                sizeof(EventSource),
-                                &EventSource);
-            }
-            break;
-        }
-#endif
-
-        // unknown sink
-        default:
-        {
-            Ret = kEplEventUnknownSink;
-
-            // Error event for API layer
-            EplEventkPostError(kEplEventSourceEventk,
-                            Ret,
-                            sizeof(pEvent_p->m_EventSink),
-                            &pEvent_p->m_EventSink);
-        }
-
-    } // end of switch(pEvent_p->m_EventSink)
-
-    return Ret;
+    return ret;
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief    Kernel event post
+\brief    Post kernel event
 
-This function posts an event to the EventkCal.
+This function posts an event to a queue. It calls the post function of the
+CAL module which distributes the event to the suitable event queue.
 
-\param  pEvent_p                event posted by kernel
+\param  pEvent_p                Event to be posted.
 
-\return tEplKernel
-\retval kEplSuccessful          if function executes correctly
-\retval other                   error
+\return The function returns a tEplKernel error code.
+\retval kEplSuccessful          If function executes correctly
+\retval other error codes       If an error occurred
 */
 //------------------------------------------------------------------------------
-tEplKernel PUBLIC EplEventkPost (tEplEvent *pEvent_p)
+tEplKernel eventk_postEvent (tEplEvent *pEvent_p)
 {
     tEplKernel Ret = kEplSuccessful;
 
-    Ret = EplEventkCalPost(pEvent_p);
+    Ret = eventkcal_postEvent(pEvent_p);
 
     return Ret;
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief    post error by kernel
+\brief    Post an error event
 
-This function posts an error to the Api.
+This function posts an error event to the API module.
 
-\param  EventSource_p           source that posts the error
-\param  EplError_p              error code
-\param  uiArgSize_p             size of error argument
-\param  pArg_p                  error argument
+\param  eventSource_p           Source that caused the error
+\param  eplError_p              Error code
+\param  argSize_p               Size of error argument
+\param  pArg_p                  Error argument
 
-\return tEplKernel
-\retval kEplSuccessful          if function executes correctly
-\retval other                   error
+\return The function returns a tEplKernel error code.
+\retval kEplSuccessful          If function executes correctly
+\retval other error codes       If an error occurred
 */
 //------------------------------------------------------------------------------
-tEplKernel PUBLIC EplEventkPostError (tEplEventSource EventSource_p,
-        tEplKernel EplError_p,
-        unsigned int uiArgSize_p,
-        void *pArg_p)
+tEplKernel eventk_postError (tEplEventSource eventSource_p, tEplKernel eplError_p,
+                             UINT argSize_p, void *pArg_p)
 {
-    tEplKernel Ret;
-    tEplEventError EventError;
-    tEplEvent EplEvent;
+    tEplKernel          ret;
+    tEplEventError      eventError;
+    tEplEvent           eplEvent;
 
-    Ret = kEplSuccessful;
+    ret = kEplSuccessful;
 
     // create argument
-    EventError.m_EventSource = EventSource_p;
-    EventError.m_EplError = EplError_p;
-    uiArgSize_p = (unsigned int) min ((size_t) uiArgSize_p, sizeof (EventError.m_Arg));
-    EPL_MEMCPY(&EventError.m_Arg, pArg_p, uiArgSize_p);
+    eventError.m_EventSource = eventSource_p;
+    eventError.m_EplError = eplError_p;
+    argSize_p = (UINT) min ((size_t) argSize_p, sizeof (eventError.m_Arg));
+    EPL_MEMCPY(&eventError.m_Arg, pArg_p, argSize_p);
 
     // create event
-    EplEvent.m_EventType = kEplEventTypeError;
-    EplEvent.m_EventSink = kEplEventSinkApi;
-    EPL_MEMSET(&EplEvent.m_NetTime, 0x00, sizeof(EplEvent.m_NetTime));
-    EplEvent.m_uiSize = (memberoffs (tEplEventError, m_Arg) + uiArgSize_p);
-    EplEvent.m_pArg = &EventError;
+    eplEvent.m_EventType = kEplEventTypeError;
+    eplEvent.m_EventSink = kEplEventSinkApi;
+    EPL_MEMSET(&eplEvent.m_NetTime, 0x00, sizeof(eplEvent.m_NetTime));
+    eplEvent.m_uiSize = (memberoffs (tEplEventError, m_Arg) + argSize_p);
+    eplEvent.m_pArg = &eventError;
 
-    // post errorevent
-    Ret = EplEventkPost(&EplEvent);
+    ret = eventk_postEvent(&eplEvent);
 
-    return Ret;
+    return ret;
 }
 
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
 //============================================================================//
+
+#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLK)) != 0)
+//------------------------------------------------------------------------------
+/**
+\brief  Handle NMT event in DLL
+
+This function dispatches NMT events which need also be handled by DLL to
+the DLLk module.
+
+\param  pEvent_p                Event to process.
+
+\return The function returns a tEplKernel error code.
+\retval kEplSuccessful          If function executes correctly
+\retval other error codes       If an error occurred
+*/
+//------------------------------------------------------------------------------
+static tEplKernel handleNmtEventinDll(tEplEvent* pEvent_p)
+{
+    tEplKernel          ret = kEplSuccessful;
+
+    BENCHMARK_MOD_27_RESET(0);
+
+    if ((pEvent_p->m_EventType == kEplEventTypeNmtEvent) &&
+        (*((tEplNmtEvent*)pEvent_p->m_pArg) == kEplNmtEventDllCeSoa))
+    {
+        BENCHMARK_MOD_27_SET(0);
+        // forward SoA event to DLLk module for cycle preprocessing
+        ret = EplDllkProcess(pEvent_p);
+
+        BENCHMARK_MOD_27_RESET(0);
+    }
+
+    return ret;
+}
+#endif

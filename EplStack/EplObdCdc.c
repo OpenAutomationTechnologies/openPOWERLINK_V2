@@ -263,7 +263,7 @@ DWORD           dwErrno;
     if (!IS_FD_VALID(CdcInfo.m_Handle.m_hCdcFile))
     {   // error occurred
         dwErrno = (DWORD) errno;
-        Ret = EplEventuPostError(kEplEventSourceObdu, kEplObdErrnoSet, sizeof (dwErrno), &dwErrno);
+        Ret = eventu_postError(kEplEventSourceObdu, kEplObdErrnoSet, sizeof (dwErrno), &dwErrno);
         goto Exit;
     }
 
@@ -312,7 +312,7 @@ tEplObdCdcInfo  CdcInfo;
     CdcInfo.m_Handle.m_pbNextBuffer = pbCdc_p;
     if (CdcInfo.m_Handle.m_pbNextBuffer == NULL)
     {   // error occurred
-        Ret = EplEventuPostError(kEplEventSourceObdu, kEplObdInvalidDcf, 0, NULL);
+        Ret = eventu_postError(kEplEventSourceObdu, kEplObdInvalidDcf, 0, NULL);
         goto Exit;
     }
 
@@ -370,7 +370,7 @@ BYTE*       pbBuffer;
                 pCdcInfo_p->m_pbCurBuffer = EPL_MALLOC(iBufferSize);
                 if (pCdcInfo_p->m_pbCurBuffer == NULL)
                 {
-                    Ret = EplEventuPostError(kEplEventSourceObdu, kEplObdOutOfMemory, 0, NULL);
+                    Ret = eventu_postError(kEplEventSourceObdu, kEplObdOutOfMemory, 0, NULL);
                     if (Ret != kEplSuccessful)
                     {
                         goto Exit;
@@ -386,7 +386,7 @@ BYTE*       pbBuffer;
                 iReadSize = read(pCdcInfo_p->m_Handle.m_hCdcFile, pbBuffer, iBufferSize);
                 if (iReadSize <= 0)
                 {
-                    Ret = EplEventuPostError(kEplEventSourceObdu, kEplObdInvalidDcf, 0, NULL);
+                    Ret = eventu_postError(kEplEventSourceObdu, kEplObdInvalidDcf, 0, NULL);
                     if (Ret != kEplSuccessful)
                     {
                         goto Exit;
@@ -406,7 +406,7 @@ BYTE*       pbBuffer;
         {
             if (pCdcInfo_p->m_iBufferSize < iBufferSize)
             {
-                Ret = EplEventuPostError(kEplEventSourceObdu, kEplObdInvalidDcf, 0, NULL);
+                Ret = eventu_postError(kEplEventSourceObdu, kEplObdInvalidDcf, 0, NULL);
                 if (Ret != kEplSuccessful)
                 {
                     goto Exit;
@@ -458,7 +458,7 @@ size_t          iCurDataSize;
 
     if (dwEntriesRemaining == 0)
     {
-        Ret = EplEventuPostError(kEplEventSourceObdu, kEplObdNoConfigData, 0, NULL);
+        Ret = eventu_postError(kEplEventSourceObdu, kEplObdNoConfigData, 0, NULL);
         goto Exit;
     }
 
@@ -491,7 +491,7 @@ size_t          iCurDataSize;
             ObdError.m_uiSubIndex = uiObjectSubIndex;
 
             EPL_DBGLVL_OBD_TRACE("%s: Writing object 0x%04X/%u to local OBD failed with 0x%02X\n", __func__, uiObjectIndex, uiObjectSubIndex, Ret);
-            Ret = EplEventuPostError(kEplEventSourceObdu, Ret, sizeof (ObdError), &ObdError);
+            Ret = eventu_postError(kEplEventSourceObdu, Ret, sizeof (ObdError), &ObdError);
             if (Ret != kEplSuccessful)
             {
                 goto Exit;

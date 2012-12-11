@@ -244,7 +244,7 @@ tEplKernel              Ret;
     EPL_MEMSET(&Event.m_NetTime, 0x00, sizeof(Event.m_NetTime));
     Event.m_pArg = &NmtStateChange;
     Event.m_uiSize = sizeof(NmtStateChange);
-    Ret = EplEventkPost(&Event);
+    Ret = eventk_postEvent(&Event);
 */
     return Ret;
 }
@@ -1615,7 +1615,7 @@ tEplEventNmtStateChange NmtStateChange;
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLK)) != 0)
         Ret = EplDllkProcess(&Event);
 #else
-        Ret = EplEventkPost(&Event);
+        Ret = eventk_postEvent(&Event);
 #endif
         if (Ret != kEplSuccessful)
         {
@@ -1624,7 +1624,7 @@ tEplEventNmtStateChange NmtStateChange;
 
         // inform higher layer about state change
         Event.m_EventSink = kEplEventSinkNmtu;
-        Ret = EplEventkPost(&Event);
+        Ret = eventk_postEvent(&Event);
     }
 
 Exit:
