@@ -89,6 +89,9 @@ CMAKE_DEPENDENT_OPTION (CFG_X86_DEMO_CN_CONSOLE "Build CN console demo applicati
 CMAKE_DEPENDENT_OPTION (CFG_X86_DEMO_LINUX_KERNEL "Build Linux kernel based demo application (DEPRECATED)" OFF
                         "CFG_KERNEL_STACK;CFG_POWERLINK_MN" OFF)
 
+CMAKE_DEPENDENT_OPTION (CFG_BUILD_UNITTESTS "Build all unittests and include the necessary switches" OFF
+                        "UNIX" OFF)
+
 IF (UNIX)
     SET (CFG_KERNEL_STACK OFF CACHE BOOL "Use POWERLINK kernel based stack (if OFF, userspace library will be used!)" )
 ENDIF (UNIX)
@@ -159,3 +162,9 @@ IF(UNIX)
     ENDIF (CFG_X86_DEMO_LINUX_KERNEL)
 
 ENDIF(UNIX)
+
+# Unit tests
+IF(CFG_BUILD_UNITTESTS)
+  ENABLE_TESTING()
+  ADD_SUBDIRECTORY(unittests)
+ENDIF(CFG_BUILD_UNITTESTS)
