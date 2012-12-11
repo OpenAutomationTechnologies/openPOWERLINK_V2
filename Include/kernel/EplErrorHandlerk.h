@@ -78,6 +78,26 @@
 // const defines
 //---------------------------------------------------------------------------
 
+#define EPL_DLL_ERR_MN_CRC              0x00000001L  ///< object 0x1C00
+#define EPL_DLL_ERR_MN_COLLISION        0x00000002L  ///< object 0x1C01
+#define EPL_DLL_ERR_MN_CYCTIMEEXCEED    0x00000004L  ///< object 0x1C02
+#define EPL_DLL_ERR_MN_LOSS_LINK        0x00000008L  ///< object 0x1C03
+#define EPL_DLL_ERR_MN_CN_LATE_PRES     0x00000010L  ///< objects 0x1C04-0x1C06
+#define EPL_DLL_ERR_MN_CN_LOSS_PRES     0x00000080L  ///< objects 0x1C07-0x1C09
+#define EPL_DLL_ERR_CN_COLLISION        0x00000400L  ///< object 0x1C0A
+#define EPL_DLL_ERR_CN_LOSS_SOC         0x00000800L  ///< object 0x1C0B
+#define EPL_DLL_ERR_CN_LOSS_SOA         0x00001000L  ///< object 0x1C0C
+#define EPL_DLL_ERR_CN_LOSS_PREQ        0x00002000L  ///< object 0x1C0D
+#define EPL_DLL_ERR_CN_RECVD_PREQ       0x00004000L  ///< decrement object 0x1C0D/2
+#define EPL_DLL_ERR_CN_SOC_JITTER       0x00008000L  ///< object 0x1C0E
+#define EPL_DLL_ERR_CN_CRC              0x00010000L  ///< object 0x1C0F
+#define EPL_DLL_ERR_CN_LOSS_LINK        0x00020000L  ///< object 0x1C10
+#define EPL_DLL_ERR_MN_LOSS_STATRES     0x00040000L  ///< objects 0x1C15-0x1C17 (should be operated by NmtMnu module)
+#define EPL_DLL_ERR_BAD_PHYS_MODE       0x00080000L  ///< no object
+#define EPL_DLL_ERR_MAC_BUFFER          0x00100000L  ///< no object (NMT_GT6)
+#define EPL_DLL_ERR_INVALID_FORMAT      0x00200000L  ///< no object (NMT_GT6)
+#define EPL_DLL_ERR_ADDRESS_CONFLICT    0x00400000L  ///< no object (remove CN from configuration)
+
 //---------------------------------------------------------------------------
 // typedef
 //---------------------------------------------------------------------------

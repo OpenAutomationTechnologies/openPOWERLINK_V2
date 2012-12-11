@@ -3804,7 +3804,7 @@ tEplErrorHandlerkEvent  DllEvent;
                                 // $$$ d.k. set Event.m_NetTime to current time
                                 Event.m_uiSize = sizeof (NodeOpParam);
                                 Event.m_pArg = &NodeOpParam;
-                                Ret = EplEventkPost(&Event);
+                                Ret = eventk_postEvent(&Event);
                                 if (Ret != kEplSuccessful)
                                 {
                                     goto Exit;
@@ -4134,7 +4134,7 @@ TGT_DLLK_DECLARE_FLAGS
             Event.m_EventType = kEplEventTypeNmtEvent;
             Event.m_uiSize = sizeof (NmtEvent);
             Event.m_pArg = &NmtEvent;
-            Ret = EplEventkPost(&Event);
+            Ret = eventk_postEvent(&Event);
         }
     }
 
@@ -4148,7 +4148,7 @@ Exit:
         dwArg = EplDllkInstance_g.m_DllState | (NmtEvent << 8);
 
         // Error event for API layer
-        Ret = EplEventkPostError(kEplEventSourceDllk,
+        Ret = eventk_postError(kEplEventSourceDllk,
                         Ret,
                         sizeof(dwArg),
                         &dwArg);
@@ -4484,7 +4484,7 @@ tEplDllkNodeInfo*   pIntNodeInfo = NULL;
                 Event.m_uiSize = sizeof (NodeOpParam);
                 Event.m_pArg = &NodeOpParam;
             }
-            Ret = EplEventkPost(&Event);
+            Ret = eventk_postEvent(&Event);
             if (Ret != kEplSuccessful)
             {
                 goto Exit;
@@ -4628,7 +4628,7 @@ tEplEvent           Event;
             // $$$ d.k. set Event.m_NetTime to current time
             Event.m_uiSize = sizeof (NodeOpParam);
             Event.m_pArg = &NodeOpParam;
-            Ret = EplEventkPost(&Event);
+            Ret = eventk_postEvent(&Event);
             if (Ret != kEplSuccessful)
             {
                 goto Exit;
@@ -5300,7 +5300,7 @@ TGT_DLLK_DECLARE_FLAGS
             Event.m_uiSize = pTxBuffer_p->m_uiTxMsgLen;
             Event.m_pArg = pTxFrame;
 //            PRINTF("%s TxB=%p, TxF=%p, s=%u\n", __func__, pTxBuffer_p, Event.m_pArg, Event.m_uiSize);
-            Ret = EplEventkPost(&Event);
+            Ret = eventk_postEvent(&Event);
             if (Ret != kEplSuccessful)
             {
                 goto Exit;
@@ -5320,7 +5320,7 @@ TGT_DLLK_DECLARE_FLAGS
     EPL_MEMSET(&Event.m_NetTime, 0x00, sizeof(Event.m_NetTime));
     Event.m_pArg = &Priority;
     Event.m_uiSize = sizeof(Priority);
-    Ret = EplEventkPost(&Event);
+    Ret = eventk_postEvent(&Event);
     if (Ret != kEplSuccessful)
     {
         goto Exit;
@@ -5336,7 +5336,7 @@ Exit:
         dwArg = EplDllkInstance_g.m_DllState | (uiHandle << 16);
 
         // Error event for API layer
-        Ret = EplEventkPostError(kEplEventSourceDllk,
+        Ret = eventk_postError(kEplEventSourceDllk,
                         Ret,
                         sizeof(dwArg),
                         &dwArg);
@@ -5392,7 +5392,7 @@ TGT_DLLK_DECLARE_FLAGS
     EPL_MEMSET(&Event.m_NetTime, 0x00, sizeof(Event.m_NetTime));
     Event.m_pArg = &Priority;
     Event.m_uiSize = sizeof(Priority);
-    Ret = EplEventkPost(&Event);
+    Ret = eventk_postEvent(&Event);
 
 Exit:
     if (Ret != kEplSuccessful)
@@ -5404,7 +5404,7 @@ Exit:
         dwArg = EplDllkInstance_g.m_DllState | (uiHandle << 16);
 
         // Error event for API layer
-        Ret = EplEventkPostError(kEplEventSourceDllk,
+        Ret = eventk_postError(kEplEventSourceDllk,
                         Ret,
                         sizeof(dwArg),
                         &dwArg);
@@ -5488,7 +5488,7 @@ Exit:
         dwArg = EplDllkInstance_g.m_DllState | (uiHandle << 16);
 
         // Error event for API layer
-        Ret = EplEventkPostError(kEplEventSourceDllk,
+        Ret = eventk_postError(kEplEventSourceDllk,
                         Ret,
                         sizeof(dwArg),
                         &dwArg);
@@ -5680,7 +5680,7 @@ Exit:
         dwArg = EplDllkInstance_g.m_DllState | (uiHandle << 16);
 
         // Error event for API layer
-        Ret = EplEventkPostError(kEplEventSourceDllk,
+        Ret = eventk_postError(kEplEventSourceDllk,
                         Ret,
                         sizeof(dwArg),
                         &dwArg);
@@ -5773,7 +5773,7 @@ Exit:
         dwArg = EplDllkInstance_g.m_DllState | (uiHandle << 16);
 
         // Error event for API layer
-        Ret = EplEventkPostError(kEplEventSourceDllk,
+        Ret = eventk_postError(kEplEventSourceDllk,
                         Ret,
                         sizeof(dwArg),
                         &dwArg);
@@ -5852,7 +5852,7 @@ TGT_DLLK_DECLARE_FLAGS
             dwArg = EplDllkInstance_g.m_DllState | (uiHandle << 16);
 
             // Error event for API layer
-            Ret = EplEventkPostError(kEplEventSourceDllk,
+            Ret = eventk_postError(kEplEventSourceDllk,
                             ErrorCode_p,
                             sizeof(dwArg),
                             &dwArg);
@@ -5891,7 +5891,7 @@ tEplEvent               Event;
     Event.m_EventType = EventType_p;
     Event.m_uiSize = 0;
     Event.m_pArg = NULL;
-    Ret = EplEventkPost(&Event);
+    Ret = eventk_postEvent(&Event);
 
     return Ret;
 
@@ -6629,7 +6629,7 @@ Exit:
         dwArg = EplDllkInstance_g.m_DllState | (kEplNmtEventDllCeFrameTimeout << 8);
 
         // Error event for API layer
-        Ret = EplEventkPostError(kEplEventSourceDllk,
+        Ret = eventk_postError(kEplEventSourceDllk,
                         Ret,
                         sizeof(dwArg),
                         &dwArg);
@@ -6716,7 +6716,7 @@ Exit:
         dwArg = EplDllkInstance_g.m_DllState | (kEplNmtEventDllCeFrameTimeout << 8);
 
         // Error event for API layer
-        Ret = EplEventkPostError(kEplEventSourceDllk,
+        Ret = eventk_postError(kEplEventSourceDllk,
                         Ret,
                         sizeof(dwArg),
                         &dwArg);
@@ -7067,7 +7067,7 @@ tEplFrame*          pTxFrame;
             Event.m_EventType = kEplEventTypeNmtMnuNodeAdded;
             Event.m_uiSize = sizeof (pIntNodeInfo_p->m_uiNodeId);
             Event.m_pArg = &pIntNodeInfo_p->m_uiNodeId;
-            Ret = EplEventkPost(&Event);
+            Ret = eventk_postEvent(&Event);
             if (Ret != kEplSuccessful)
             {
                 goto Exit;
@@ -7217,7 +7217,7 @@ Exit:
         dwArg = EplDllkInstance_g.m_DllState | (kEplNmtEventDllMeSocTrig << 8);
 
         // Error event for API layer
-        Ret = EplEventkPostError(kEplEventSourceDllk,
+        Ret = eventk_postError(kEplEventSourceDllk,
                         Ret,
                         sizeof(dwArg),
                         &dwArg);
@@ -7298,7 +7298,7 @@ Exit:
         dwArg = EplDllkInstance_g.m_DllState | (kEplNmtEventDllMeSocTrig << 8);
 
         // Error event for API layer
-        Ret = EplEventkPostError(kEplEventSourceDllk,
+        Ret = eventk_postError(kEplEventSourceDllk,
                         Ret,
                         sizeof(dwArg),
                         &dwArg);
@@ -7362,7 +7362,7 @@ Exit:
         dwArg = EplDllkInstance_g.m_DllState | (kEplNmtEventDllMePresTimeout << 8);
 
         // Error event for API layer
-        Ret = EplEventkPostError(kEplEventSourceDllk,
+        Ret = eventk_postError(kEplEventSourceDllk,
                         Ret,
                         sizeof(dwArg),
                         &dwArg);
@@ -7569,7 +7569,7 @@ tEplFrame*      pTxFrame;
         if (EplDllkInstance_g.m_DllConfigParam.m_uiSyncNodeId == EPL_C_ADR_SYNC_ON_SOC)
         {
             // trigger synchronous task on SoC
-            Ret = EplDllkPostEvent(kEplEventTypeSync);
+            Ret = EplDllkPostEvent(kEventTypeSync);
         }
     }
 
@@ -7888,7 +7888,7 @@ Exit:
         dwArg = EplDllkInstance_g.m_DllState | (kEplNmtEventDllCeFrameTimeout << 8);
 
         // Error event for API layer
-        Ret = EplEventkPostError(kEplEventSourceDllk,
+        Ret = eventk_postError(kEplEventSourceDllk,
                         Ret,
                         sizeof(dwArg),
                         &dwArg);

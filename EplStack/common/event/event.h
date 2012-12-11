@@ -1,15 +1,16 @@
 /**
 ********************************************************************************
-\file   event-direct.h
+\file   event.h
 
-\brief  include file for direct event posting
+\brief  Internal header file for event module
 
-This event queue implementation applies direct calls, hence, an event posted
-is processed in the same context.
+This file contains internal definitions of the event module.
 
+*******************************************************************************/
+
+/*------------------------------------------------------------------------------
+Copyright (c) 2012, SYSTEC electronic GmbH
 Copyright (c) 2012, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
-Copyright (c) 2012, SYSTEC electronik GmbH
-Copyright (c) 2012, Kalycito Infotech Private Ltd.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -33,22 +34,19 @@ LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
 ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*******************************************************************************/
+------------------------------------------------------------------------------*/
 
-#ifndef _INC_EVENTDIRECT_H_
-#define _INC_EVENTDIRECT_H_
+#ifndef _INC_event_event_H_
+#define _INC_event_event_H_
 
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include "event.h"
+#include <EplInc.h>
+#include <event.h>
 
 //------------------------------------------------------------------------------
 // const defines
-//------------------------------------------------------------------------------
-
-//------------------------------------------------------------------------------
-// typedef
 //------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
@@ -59,16 +57,15 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 extern "C" {
 #endif
 
-tEplKernel EplEventDirectAddInstance (tEplEventQueueInstance *ppEventQueue_p,
-        tEplEventQueue EventQueue_p, BOOL fProcessThreadSafe_p);
-
-tEplKernel EplEventDirectDelInstance (tEplEventQueueInstance pEventQueue_p);
-
-tEplKernel EplEventDirectPost (tEplEventQueueInstance pEventQueue_p,
-        tEplEvent *pEvent_p);
+tEplKernel event_getHandlerForSink(tEventDispatchEntry** ppDispatchEntry_p,
+                                   tEplEventSink sink_p,
+                                   tEplProcessEventCb* ppfnEventHandler_p,
+                                   tEplEventSource* pEventSource_p);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* _INC_EVENTDIRECT_H_ */
+#endif /* _INC_event_event_H_ */
+
+

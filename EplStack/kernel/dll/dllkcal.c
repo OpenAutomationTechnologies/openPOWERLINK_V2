@@ -415,7 +415,7 @@ tEplKernel dllkcal_asyncFrameReceived(tEplFrameInfo* pFrameInfo_p)
     event.m_pArg = pFrameInfo_p->m_pFrame;
     event.m_uiSize = pFrameInfo_p->m_uiFrameSize;
 
-    ret = EplEventkPost(&event);
+    ret = eventk_postEvent(&event);
     if (ret != kEplSuccessful)
     {
         instance_l.statistics.curRxFrameCount++;
@@ -475,7 +475,7 @@ tEplKernel dllkcal_sendAsyncFrame(tEplFrameInfo* pFrameInfo_p,
     EPL_MEMSET(&event.m_NetTime, 0x00, sizeof(event.m_NetTime));
     event.m_pArg = &priority_p;
     event.m_uiSize = sizeof(priority_p);
-    ret = EplEventkPost(&event);
+    ret = eventk_postEvent(&event);
 
 Exit:
     return ret;

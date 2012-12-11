@@ -2,14 +2,17 @@
 ********************************************************************************
 \file   eventkcal.h
 
-\brief  include file for kernel event cal
+\brief  Include file for kernel event CAL module
 
-The kernel event CAL builds the interface between the kernel event and the
-event queue implementations.
+This file contains definitions for the kernel event CAL module. The kernel event
+CAL builds the interface between the user event and the event queue
+implementations.
 
+*******************************************************************************/
+
+/*------------------------------------------------------------------------------
+Copyright (c) 2012, SYSTEC electronic GmbH
 Copyright (c) 2012, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
-Copyright (c) 2012, SYSTEC electronik GmbH
-Copyright (c) 2012, Kalycito Infotech Private Ltd.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -33,19 +36,70 @@ LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
 ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*******************************************************************************/
+------------------------------------------------------------------------------*/
 
-#ifndef _INC_EVENTKCAL_H_
-#define _INC_EVENTKCAL_H_
+#ifndef _INC_eventkcal_H_
+#define _INC_eventkcal_H_
 
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include "event.h"
+#include <event.h>
+#include <eventcal.h>
+#include <kernel/eventk.h>
 
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
+
+/*
+The following macros define the kernel event CAL interface getter functions for
+the different event queues depending on the used queue.
+*/
+
+/* setup interface getting function for user to kernel queue */
+#if (EPL_EVENT_U2K_QUEUE == EPL_QUEUE_DIRECT)
+#define GET_EVENTK_U2K_INTERFACE eventkcaldirect_getInterface
+#elif (EPL_EVENT_U2K_QUEUE == EPL_QUEUE_SHB)
+#define GET_EVENTK_U2K_INTERFACE eventkcalshb_getInterface
+#elif (EPL_EVENT_U2K_QUEUE == EPL_QUEUE_HOSTINTERFACE)
+#define GET_EVENTK_U2K_INTERFACE eventkcalhostif_getInterface
+#else
+#error "Unsupported user-to-kernel queue"
+#endif
+
+/* setup interface getting function for user internal queue */
+#if (EPL_EVENT_UINT_QUEUE == EPL_QUEUE_DIRECT)
+#define GET_EVENTK_UINT_INTERFACE eventkcaldirect_getInterface
+#elif (EPL_EVENT_UINT_QUEUE == EPL_QUEUE_SHB)
+#define GET_EVENTK_UINT_INTERFACE eventkcalshb_getInterface
+#elif (EPL_EVENT_UINT_QUEUE == EPL_QUEUE_HOSTINTERFACE)
+#define GET_EVENTK_UINT_INTERFACE eventkcalhostif_getInterface
+#else
+#error "Unsupported user internal queue"
+#endif
+
+/* setup interface getting function for kernel to user queue */
+#if (EPL_EVENT_K2U_QUEUE == EPL_QUEUE_DIRECT)
+#define GET_EVENTK_K2U_INTERFACE eventkcaldirect_getInterface
+#elif (EPL_EVENT_K2U_QUEUE == EPL_QUEUE_SHB)
+#define GET_EVENTK_K2U_INTERFACE eventkcalshb_getInterface
+#elif (EPL_EVENT_K2U_QUEUE == EPL_QUEUE_HOSTINTERFACE)
+#define GET_EVENTK_K2U_INTERFACE eventkcalhostif_getInterface
+#else
+#error "Unsupported kernel-to-user queue"
+#endif
+
+/* setup interface getting function for kernel internal queue */
+#if (EPL_EVENT_KINT_QUEUE == EPL_QUEUE_DIRECT)
+#define GET_EVENTK_KINT_INTERFACE eventkcaldirect_getInterface
+#elif (EPL_EVENT_KINT_QUEUE == EPL_QUEUE_SHB)
+#define GET_EVENTK_KINT_INTERFACE eventkcalshb_getInterface
+#elif (EPL_EVENT_KINT_QUEUE == EPL_QUEUE_HOSTINTERFACE)
+#define GET_EVENTK_KINT_INTERFACE eventkcalhostif_getInterface
+#else
+#error "Unsupported kernel internal queue"
+#endif
 
 //------------------------------------------------------------------------------
 // typedef
@@ -59,16 +113,17 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 extern "C" {
 #endif
 
-tEplKernel PUBLIC EplEventkCalAddInstance (void);
+tEplKernel eventkcal_init (void);
+tEplKernel eventkcal_exit (void);
+tEplKernel eventkcal_postEvent (tEplEvent *pEvent_p);
+tEplKernel eventkcal_rxHandler (tEplEvent *pEvent_p);
 
-tEplKernel PUBLIC EplEventkCalDelInstance (void);
-
-tEplKernel PUBLIC EplEventkCalPost (tEplEvent *pEvent_p);
-
-tEplKernel PUBLIC EplEventkCalRxHandler (tEplEvent *pEvent_p);
+/* interface getter functions for the different implementations */
+tEventCalFuncIntf* eventkcaldirect_getInterface(void);
+tEventCalFuncIntf* eventkcalshb_getInterface(void);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* _INC_EVENTKCAL_H_ */
+#endif /* _INC_eventkcal_H_ */

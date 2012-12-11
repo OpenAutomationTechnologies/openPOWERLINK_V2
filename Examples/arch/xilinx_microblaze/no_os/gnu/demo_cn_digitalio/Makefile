@@ -84,6 +84,11 @@ ${STACK_ROOT}/EplStack/kernel/event/eventkcal.c \
 ${STACK_ROOT}/EplStack/user/event/eventucal.c \
 ${STACK_ROOT}/EplStack/common/event/eventcal-shb.c \
 ${STACK_ROOT}/EplStack/common/event/eventcal-direct.c \
+${STACK_ROOT}/EplStack/kernel/event/eventkcal-shb.c \
+${STACK_ROOT}/EplStack/kernel/event/eventkcal-direct.c \
+${STACK_ROOT}/EplStack/user/event/eventucal-shb.c \
+${STACK_ROOT}/EplStack/user/event/eventucal-direct.c \
+${STACK_ROOT}/EplStack/common/event/event.c \
 ${STACK_ROOT}/EplStack/EplNmtk.c \
 ${STACK_ROOT}/EplStack/EplNmtu.c \
 ${STACK_ROOT}/EplStack/EplNmtCnu.c \

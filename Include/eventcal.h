@@ -1,15 +1,16 @@
 /**
 ********************************************************************************
-\file   event-shb.h
+\file   eventcal.h
 
-\brief  include file for shared buffer event posting
+\brief  Definitions for event CAL module
 
-This event queue implementation applies the shared buffer for event forwarding.
-The shared buffer is available for different architectures (e.g. NoOS).
+The file contains definitions for the event CAL module.
 
+*******************************************************************************/
+
+/*------------------------------------------------------------------------------
+Copyright (c) 2012, SYSTEC electronic GmbH
 Copyright (c) 2012, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
-Copyright (c) 2012, SYSTEC electronik GmbH
-Copyright (c) 2012, Kalycito Infotech Private Ltd.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -33,15 +34,15 @@ LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
 ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*******************************************************************************/
+------------------------------------------------------------------------------*/
 
-#ifndef _INC_EVENTSHB_H_
-#define _INC_EVENTSHB_H_
+#ifndef _INC_eventcal_H_
+#define _INC_eventcal_H_
 
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include "event.h"
+#include <event.h>
 
 //------------------------------------------------------------------------------
 // const defines
@@ -51,6 +52,21 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // typedef
 //------------------------------------------------------------------------------
 
+/**
+\brief Event CAL function interface structure
+
+This struct defines the function interface of a event CAL module. The functions
+are defines as static functions and a variable of this type provides the
+function pointers to other modules.
+*/
+typedef struct
+{
+    tEplKernel (* pfnAddInstance)(tEventQueueInstPtr *ppEventQueueInst_p,
+                                  tEventQueue eventQueue_p);
+    tEplKernel (* pfnDelInstance)(tEventQueueInstPtr pEventQueue_p);
+    tEplKernel (* pfnPostEvent)(tEventQueueInstPtr pEventQueue_p, tEplEvent *pEvent_p);
+} tEventCalFuncIntf;
+
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
@@ -59,18 +75,24 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 extern "C" {
 #endif
 
-tEplKernel EplEventShbAddInstance (tEplEventQueueInstance *ppEventQueue_p,
-        tEplEventQueue EventQueue_p,
-        tEplProcessEventCb pfnProcessEventCb_p,
-        tEplPostErrorEventCb pfnPostErrorEventCb_p);
+// event CAL function prototypes of the shared buffer implementation
+tEplKernel   eventcalshb_addInstance(tEventQueueInstPtr *ppEventQueueInst_p,
+                              tEventQueue eventQueue_p, tEplProcessEventCb pfnProcessEventCb,
+                              tEplPostErrorEventCb pfnPostErrorEventCb);
+tEplKernel   eventcalshb_delInstance (tEventQueueInstPtr pEventQueueInst_p);
+tEplKernel   eventcalshb_postEvent (tEventQueueInstPtr pEventQueue_p, tEplEvent *pEvent_p);
 
-tEplKernel EplEventShbDelInstance (tEplEventQueueInstance pEventQueue_p);
-
-tEplKernel EplEventShbPost (tEplEventQueueInstance pEventQueue_p,
-        tEplEvent *pEvent_p);
+// event CAL functions prototypes of the direct call implementation
+tEplKernel   eventcaldirect_addInstance(tEventQueueInstPtr *ppEventQueueInst_p,
+                              tEventQueue eventQueue_p, tEplProcessEventCb pfnProcessEventCb,
+                              BOOL fProcessThreadSafe_p);
+tEplKernel   eventcaldirect_delInstance (tEventQueueInstPtr pEventQueueInst_p);
+tEplKernel   eventcaldirect_postEvent (tEventQueueInstPtr pEventQueue_p, tEplEvent *pEvent_p);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* _INC_EVENTSHB_H_ */
+#endif /* _INC_eventcal_H_ */
+
+

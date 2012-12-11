@@ -401,7 +401,7 @@ tEplNmtEvent            NmtEvent;
                         Event.m_EventType = kEplEventTypeNmtEvent;
                         Event.m_pArg = &NmtEvent;
                         Event.m_uiSize = sizeof (NmtEvent);
-                        Ret = EplEventkPost(&Event);
+                        Ret = eventk_postEvent(&Event);
                     }
                     EplErrorHandlerkInstance_g.m_ulDllErrorEvents |=
                         EPL_DLL_ERR_CN_LOSS_SOC;
@@ -437,7 +437,7 @@ tEplNmtEvent            NmtEvent;
                         Event.m_EventType = kEplEventTypeNmtEvent;
                         Event.m_pArg = &NmtEvent;
                         Event.m_uiSize = sizeof (NmtEvent);
-                        Ret = EplEventkPost(&Event);
+                        Ret = eventk_postEvent(&Event);
                     }
                 }
             }
@@ -478,7 +478,7 @@ tEplNmtEvent            NmtEvent;
                         Event.m_EventType = kEplEventTypeNmtEvent;
                         Event.m_pArg = &NmtEvent;
                         Event.m_uiSize = sizeof (NmtEvent);
-                        Ret = EplEventkPost(&Event);
+                        Ret = eventk_postEvent(&Event);
                     }
                     EplErrorHandlerkInstance_g.m_ulDllErrorEvents |=
                         EPL_DLL_ERR_CN_CRC;
@@ -521,7 +521,7 @@ tEplNmtEvent            NmtEvent;
                         Event.m_EventType = kEplEventTypeHeartbeat;
                         Event.m_uiSize = sizeof (HeartbeatEvent);
                         Event.m_pArg = &HeartbeatEvent;
-                        Ret = EplEventkPost(&Event);
+                        Ret = eventk_postEvent(&Event);
                     }
                     // $$$ and else should lead to InternComError
                 }
@@ -534,7 +534,7 @@ tEplNmtEvent            NmtEvent;
                     Event.m_EventType = kEplEventTypeNmtEvent;
                     Event.m_pArg = &NmtEvent;
                     Event.m_uiSize = sizeof (NmtEvent);
-                    Ret = EplEventkPost(&Event);
+                    Ret = eventk_postEvent(&Event);
                 }
             }
 
@@ -566,7 +566,7 @@ tEplNmtEvent            NmtEvent;
                         Event.m_EventType = kEplEventTypeNmtEvent;
                         Event.m_pArg = &NmtEvent;
                         Event.m_uiSize = sizeof (NmtEvent);
-                        Ret = EplEventkPost(&Event);
+                        Ret = eventk_postEvent(&Event);
                     }
                     EplErrorHandlerkInstance_g.m_ulDllErrorEvents |=
                         EPL_DLL_ERR_MN_CRC;
@@ -601,7 +601,7 @@ tEplNmtEvent            NmtEvent;
                         Event.m_EventType = kEplEventTypeNmtEvent;
                         Event.m_pArg = &NmtEvent;
                         Event.m_uiSize = sizeof (NmtEvent);
-                        Ret = EplEventkPost(&Event);
+                        Ret = eventk_postEvent(&Event);
                     }
                     else
                     {   // generate error history entry E_DLL_CYCLE_EXCEED
@@ -668,7 +668,7 @@ tEplNmtEvent            NmtEvent;
                                 Event.m_EventType = kEplEventTypeHeartbeat;
                                 Event.m_uiSize = sizeof (HeartbeatEvent);
                                 Event.m_pArg = &HeartbeatEvent;
-                                Ret = EplEventkPost(&Event);
+                                Ret = eventk_postEvent(&Event);
                             }
                             else
                             {
@@ -848,7 +848,7 @@ tEplEvent               Event;
     Event.m_EventType = kEplEventTypeDllError;
     Event.m_uiSize = sizeof (*pDllEvent_p);
     Event.m_pArg = pDllEvent_p;
-    Ret = EplEventkPost(&Event);
+    Ret = eventk_postEvent(&Event);
 
     return Ret;
 
@@ -883,7 +883,7 @@ tEplEvent               Event;
     Event.m_EventType = kEplEventTypeHistoryEntry;
     Event.m_uiSize = sizeof (*pHistoryEntry_p);
     Event.m_pArg = pHistoryEntry_p;
-    Ret = EplEventkPost(&Event);
+    Ret = eventk_postEvent(&Event);
 
     return Ret;
 

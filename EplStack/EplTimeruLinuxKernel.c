@@ -482,7 +482,7 @@ tEplTimerEventArg   TimerEventArg;
     EplEvent.m_pArg = &TimerEventArg;
     EplEvent.m_uiSize = sizeof(TimerEventArg);
 
-    Ret = EplEventuPost(&EplEvent);
+    Ret = eventu_postEvent(&EplEvent);
 
     // d.k. do not free memory, user has to call EplTimeruDeleteTimer()
     //kfree(pData);

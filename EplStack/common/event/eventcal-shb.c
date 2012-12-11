@@ -7,9 +7,10 @@
 This event queue implementation applies the shared buffer for event forwarding.
 The shared buffer is available for different architectures (e.g. NoOS).
 
+*******************************************************************************/
+
+/*------------------------------------------------------------------------------
 Copyright (c) 2012, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
-Copyright (c) 2012, SYSTEC electronik GmbH
-Copyright (c) 2012, Kalycito Infotech Private Ltd.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -38,11 +39,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include "event-shb.h"
-#include "kernel/eventkcal.h"
-#include "user/eventucal.h"
+#include <EplInc.h>
 
-#include "SharedBuff.h"
+#include <eventcal.h>
+
+#include <SharedBuff.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -67,6 +68,26 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
+// name and size of event queues
+#define EPL_EVENT_NAME_SHB_KERNEL_TO_USER   "ShbKernelToUser"
+#ifndef EPL_EVENT_SIZE_SHB_KERNEL_TO_USER
+#define EPL_EVENT_SIZE_SHB_KERNEL_TO_USER   32768   // 32 kByte
+#endif
+
+#define EPL_EVENT_NAME_SHB_USER_TO_KERNEL   "ShbUserToKernel"
+#ifndef EPL_EVENT_SIZE_SHB_USER_TO_KERNEL
+#define EPL_EVENT_SIZE_SHB_USER_TO_KERNEL   32768   // 32 kByte
+#endif
+
+#define EPL_EVENT_NAME_SHB_KERNEL_INTERNAL  "ShbKernelInternal"
+#ifndef EPL_EVENT_SIZE_SHB_KERNEL_INTERNAL
+#define EPL_EVENT_SIZE_SHB_KERNEL_INTERNAL  32768   // 32 kByte
+#endif
+
+#define EPL_EVENT_NAME_SHB_USER_INTERNAL    "ShbUserInternal"
+#ifndef EPL_EVENT_SIZE_SHB_USER_INTERNAL
+#define EPL_EVENT_SIZE_SHB_USER_INTERNAL    32768   // 32 kByte
+#endif
 
 //------------------------------------------------------------------------------
 // local types
@@ -81,18 +102,13 @@ shared buffer.
 */
 typedef struct
 {
-    tEplEventQueue          EventQueue;
-        ///< event queue
-    tEplProcessEventCb      pfnProcessEventCb_m;
-        ///< event process callback
-    tEplPostErrorEventCb    pfnPostErrorEventCb_p;
-        ///< post error event callback
-    tShbInstance            pShbInstance_m;
-        ///< shared buffer instance
-    BYTE                    abRxBuffer_m[sizeof(tEplEvent) +
-                                     EPL_MAX_EVENT_ARG_SIZE];
-        ///< event receive buffer
-} tEplEventShbInstance;
+    tEventQueue             eventQueue;                 ///< event queue
+    tEplProcessEventCb      pfnProcessEventCb;          ///< event process callback
+    tEplPostErrorEventCb    pfnPostErrorEventCb;        ///< post error event callback
+    tShbInstance            pShbInstance;               ///< shared buffer instance
+    BYTE                    abRxBuffer[sizeof(tEplEvent) +
+                                     EPL_MAX_EVENT_ARG_SIZE]; ///< event receive buffer
+} tEventShbInstance;
 
 //------------------------------------------------------------------------------
 // local vars
@@ -101,8 +117,7 @@ typedef struct
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static void  EplEventRxSignalHandlerCb (tShbInstance pShbRxInstance_p,
-        unsigned long ulDataSize_p, void *pArg_p);
+static void  rxSignalHandlerCb (tShbInstance pShbRxInstance_p, ULONG dataSize_p, void *pArg_p);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -123,92 +138,88 @@ Add a queue instance that uses shared buffer posting.
 \retval other                   error
 */
 //------------------------------------------------------------------------------
-tEplKernel EplEventShbAddInstance (tEplEventQueueInstance *ppEventQueue_p,
-        tEplEventQueue EventQueue_p,
-        tEplProcessEventCb pfnProcessEventCb_p,
-        tEplPostErrorEventCb pfnPostErrorEventCb_p)
+tEplKernel eventcalshb_addInstance(tEventQueueInstPtr *ppEventQueueInst_p,
+                                   tEventQueue eventQueue_p,
+                                   tEplProcessEventCb pfnProcessEventCb,
+                                   tEplPostErrorEventCb pfnPostErrorEventCb)
 {
-    tEplKernel Ret = kEplSuccessful;
-    tShbError ShbError;
-    tEplEventShbInstance *pEventShbInstance;
-    unsigned int fShbNewCreated;
+    tEplKernel          ret = kEplSuccessful;
+    tShbError           shbError;
+    tEventShbInstance*  pInstance;
+    UINT                fShbNewCreated;
 
-    pEventShbInstance = (tEplEventShbInstance*)
-            EPL_MALLOC(sizeof(tEplEventShbInstance));
-
-    if(pEventShbInstance == NULL)
+    pInstance = (tEventShbInstance*)EPL_MALLOC(sizeof(tEventShbInstance));
+    if(pInstance == NULL)
     {
-        Ret = kEplNoResource;
+        ret = kEplNoResource;
         goto Exit;
     }
 
     //store parameters in instance
-    pEventShbInstance->EventQueue = EventQueue_p;
-    pEventShbInstance->pfnProcessEventCb_m = pfnProcessEventCb_p;
-    pEventShbInstance->pfnPostErrorEventCb_p = pfnPostErrorEventCb_p;
+    pInstance->eventQueue = eventQueue_p;
+    pInstance->pfnProcessEventCb = pfnProcessEventCb;
+    pInstance->pfnPostErrorEventCb = pfnPostErrorEventCb;
 
     //initialize shared buffer
-    switch(pEventShbInstance->EventQueue)
+    switch(pInstance->eventQueue)
     {
-        case kEplEventQueueK2U :
-            ShbError = ShbCirAllocBuffer(
-                    EPL_EVENT_SIZE_SHB_KERNEL_TO_USER,
-                    EPL_EVENT_NAME_SHB_KERNEL_TO_USER,
-                    &pEventShbInstance->pShbInstance_m,
-                    &fShbNewCreated);
+        case kEventQueueK2U:
+            shbError = ShbCirAllocBuffer(EPL_EVENT_SIZE_SHB_KERNEL_TO_USER,
+                                         EPL_EVENT_NAME_SHB_KERNEL_TO_USER,
+                                         &pInstance->pShbInstance,
+                                         &fShbNewCreated);
             break;
-        case kEplEventQueueUInt :
-            ShbError = ShbCirAllocBuffer(
-                    EPL_EVENT_SIZE_SHB_USER_INTERNAL,
-                    EPL_EVENT_NAME_SHB_USER_INTERNAL,
-                    &pEventShbInstance->pShbInstance_m,
-                    &fShbNewCreated);
+
+        case kEventQueueUInt:
+            shbError = ShbCirAllocBuffer(EPL_EVENT_SIZE_SHB_USER_INTERNAL,
+                                         EPL_EVENT_NAME_SHB_USER_INTERNAL,
+                                         &pInstance->pShbInstance,
+                                         &fShbNewCreated);
             break;
-        case kEplEventQueueKInt :
-            ShbError = ShbCirAllocBuffer(
-                    EPL_EVENT_SIZE_SHB_KERNEL_INTERNAL,
-                    EPL_EVENT_NAME_SHB_KERNEL_INTERNAL,
-                    &pEventShbInstance->pShbInstance_m,
-                    &fShbNewCreated);
+
+        case kEventQueueKInt:
+            shbError = ShbCirAllocBuffer(EPL_EVENT_SIZE_SHB_KERNEL_INTERNAL,
+                                         EPL_EVENT_NAME_SHB_KERNEL_INTERNAL,
+                                         &pInstance->pShbInstance,
+                                         &fShbNewCreated);
             break;
-        case kEplEventQueueU2K :
-            ShbError = ShbCirAllocBuffer(
-                    EPL_EVENT_SIZE_SHB_USER_TO_KERNEL,
-                    EPL_EVENT_NAME_SHB_USER_TO_KERNEL,
-                    &pEventShbInstance->pShbInstance_m,
-                    &fShbNewCreated);
+
+        case kEventQueueU2K:
+            shbError = ShbCirAllocBuffer(EPL_EVENT_SIZE_SHB_USER_TO_KERNEL,
+                                         EPL_EVENT_NAME_SHB_USER_TO_KERNEL,
+                                         &pInstance->pShbInstance,
+                                         &fShbNewCreated);
             break;
+
         default:
-            Ret = kEplInvalidInstanceParam;
+            ret = kEplInvalidInstanceParam;
             goto Exit;
             break;
     }
 
-    if(ShbError != kShbOk)
+    if(shbError != kShbOk)
     {
-        Ret = kEplNoResource;
+        ret = kEplNoResource;
         goto Exit;
     }
 
     //register shared buffer callback
-    if(pfnProcessEventCb_p != NULL)
+    if(pInstance->pfnProcessEventCb != NULL)
     {
-        ShbError = ShbCirSetSignalHandlerNewData(
-                pEventShbInstance->pShbInstance_m,
-                EplEventRxSignalHandlerCb, (void*) pEventShbInstance,
-                kShbPriorityNormal);
-
-        if(ShbError != kShbOk)
+        shbError = ShbCirSetSignalHandlerNewData(pInstance->pShbInstance,
+                                                 rxSignalHandlerCb, (void*) pInstance,
+                                                 kShbPriorityNormal);
+        if(shbError != kShbOk)
         {
-            Ret = kEplNoResource;
+            ret = kEplNoResource;
             goto Exit;
         }
     }
 
-    *ppEventQueue_p = (tEplEventShbInstance*)pEventShbInstance;
+    *ppEventQueueInst_p = (tEventShbInstance*)pInstance;
 
 Exit:
-    return Ret;
+    return ret;
 }
 
 //------------------------------------------------------------------------------
@@ -224,42 +235,38 @@ Delete shared buffer posting queue instance.
 \retval other                   error
 */
 //------------------------------------------------------------------------------
-tEplKernel EplEventShbDelInstance (tEplEventQueueInstance pEventQueue_p)
+tEplKernel eventcalshb_delInstance (tEventQueueInstPtr pEventQueueInst_p)
 {
-    tEplKernel Ret = kEplSuccessful;
-    tShbError ShbError;
-    tEplEventShbInstance *pEventShbInstance =
-            (tEplEventShbInstance*)pEventQueue_p;
+    tEplKernel          ret = kEplSuccessful;
+    tShbError           shbError;
+    tEventShbInstance*  pEventShbInstance = (tEventShbInstance*)pEventQueueInst_p;
+
+    if (pEventShbInstance == NULL)
+        return kEplSuccessful;
 
     //set shared buffer callback to NULL
-    if(pEventShbInstance->pfnProcessEventCb_m != NULL)
+    if(pEventShbInstance->pfnProcessEventCb != NULL)
     {
-        ShbError = ShbCirSetSignalHandlerNewData(
-                pEventShbInstance->pShbInstance_m,
-                NULL, NULL,
-                kShbPriorityNormal);
-
-        if(ShbError != kShbOk)
+        shbError = ShbCirSetSignalHandlerNewData(pEventShbInstance->pShbInstance,
+                                                 NULL, NULL, kShbPriorityNormal);
+        if(shbError != kShbOk)
         {
-            Ret = kEplNoResource;
-            goto Exit;
+            TRACE ("%s() ShbCirSetSignalHandlerNewData() failed with %d\n",
+                   __func__, shbError);
         }
     }
 
     //free shared buffer
-    ShbError = ShbCirReleaseBuffer(pEventShbInstance->pShbInstance_m);
-
-    if(ShbError != kShbOk)
-    {
-        Ret = kEplNoResource;
-        goto Exit;
+    shbError = ShbCirReleaseBuffer(pEventShbInstance->pShbInstance);
+    if(shbError != kShbOk)
+    {;
+        TRACE ("%s() ShbCirReleaseBuffer() failed with %d\n", __func__, shbError);
     }
 
     //finally free the event instance
     EPL_FREE(pEventShbInstance);
 
-Exit:
-    return Ret;
+    return ret;
 }
 
 //------------------------------------------------------------------------------
@@ -276,65 +283,54 @@ This function posts an event to the provided queue instance.
 \retval other                   error
 */
 //------------------------------------------------------------------------------
-tEplKernel EplEventShbPost (tEplEventQueueInstance pEventQueue_p,
-        tEplEvent *pEvent_p)
+tEplKernel eventcalshb_postEvent (tEventQueueInstPtr pEventQueue_p, tEplEvent *pEvent_p)
 {
-    tEplKernel Ret = kEplSuccessful;
-    tEplEventShbInstance *pEventShbInstance =
-            (tEplEventShbInstance*)pEventQueue_p;
-
-    tShbError ShbError;
-    tShbCirChunk ShbCirChunk;
-    unsigned long ulDataSize;
-    unsigned int fBufferCompleted;
+    tEplKernel          ret = kEplSuccessful;
+    tEventShbInstance*  pEventShbInstance = (tEventShbInstance*)pEventQueue_p;
+    tShbError           shbError;
+    tShbCirChunk        shbCirChunk;
+    ULONG               dataSize;
+    UINT                fBufferCompleted;
 
     if(pEventShbInstance == NULL)
     {
-        Ret = kEplInvalidInstanceParam;
+        ret = kEplInvalidInstanceParam;
         goto Exit;
     }
 
     // 2006/08/03 d.k.: Event and argument are posted as separate
     // chunks to the event queue.
-    ulDataSize = sizeof(tEplEvent) + ((pEvent_p->m_pArg != NULL) ?
-            pEvent_p->m_uiSize : 0);
+    dataSize = sizeof(tEplEvent) + ((pEvent_p->m_pArg != NULL) ? pEvent_p->m_uiSize : 0);
 
-    ShbError = ShbCirAllocDataBlock(pEventShbInstance->pShbInstance_m,
-                           &ShbCirChunk,
-                           ulDataSize);
-    if(ShbError != kShbOk)
+    shbError = ShbCirAllocDataBlock(pEventShbInstance->pShbInstance, &shbCirChunk,
+                                    dataSize);
+    if(shbError != kShbOk)
     {
-        Ret = kEplEventPostError;
+        ret = kEplEventPostError;
         goto Exit;
     }
-    ShbError = ShbCirWriteDataChunk(pEventShbInstance->pShbInstance_m,
-                           &ShbCirChunk,
-                           pEvent_p,
-                           sizeof (tEplEvent),
-                           &fBufferCompleted);
-    if(ShbError != kShbOk)
+    shbError = ShbCirWriteDataChunk(pEventShbInstance->pShbInstance, &shbCirChunk,
+                                    pEvent_p, sizeof (tEplEvent), &fBufferCompleted);
+    if(shbError != kShbOk)
     {
-        Ret = kEplEventPostError;
+        ret = kEplEventPostError;
         goto Exit;
     }
 
     if (fBufferCompleted == FALSE)
     {
-        ShbError = ShbCirWriteDataChunk(pEventShbInstance->pShbInstance_m,
-                               &ShbCirChunk,
-                               pEvent_p->m_pArg,
-                               (unsigned long) pEvent_p->m_uiSize,
-                               &fBufferCompleted);
-
-        if ((ShbError != kShbOk) || (fBufferCompleted == FALSE))
+        shbError = ShbCirWriteDataChunk(pEventShbInstance->pShbInstance, &shbCirChunk,
+                                        pEvent_p->m_pArg, (ULONG)pEvent_p->m_uiSize,
+                                        &fBufferCompleted);
+        if ((shbError != kShbOk) || (fBufferCompleted == FALSE))
         {
-            Ret = kEplEventPostError;
+            ret = kEplEventPostError;
             goto Exit;
         }
     }
 
 Exit:
-    return Ret;
+    return ret;
 }
 
 //============================================================================//
@@ -357,29 +353,26 @@ data is copied from the shared buffer to the queue instance RX buffer.
 \retval other                   error
 */
 //------------------------------------------------------------------------------
-static void EplEventRxSignalHandlerCb (tShbInstance pShbRxInstance_p,
-        unsigned long ulDataSize_p, void *pArg_p)
+static void rxSignalHandlerCb (tShbInstance pShbRxInstance_p, ULONG dataSize_p,
+                               void *pArg_p)
 {
-    tShbError ShbError;
-    tEplEventShbInstance *pEventShbInstance = (tEplEventShbInstance*)pArg_p;
-
-    tEplEvent *pEplEvent;
-    BYTE* pabDataBuffer = pEventShbInstance->abRxBuffer_m;
+    tShbError           shbError;
+    tEventShbInstance*  pEventShbInstance = (tEventShbInstance*)pArg_p;
+    tEplEvent*          pEplEvent;
+    BYTE*               pDataBuffer = pEventShbInstance->abRxBuffer;
 
     // copy data from event queue
-    ShbError = ShbCirReadDataBlock (pShbRxInstance_p,
-                            pabDataBuffer,
-                            sizeof(pEventShbInstance->abRxBuffer_m),
-                            &ulDataSize_p);
-
-    if(ShbError != kShbOk)
+    shbError = ShbCirReadDataBlock (pShbRxInstance_p, pDataBuffer,
+                                    sizeof(pEventShbInstance->abRxBuffer),
+                                    &dataSize_p);
+    if(shbError != kShbOk)
     {
         //post error
-        if(pEventShbInstance->pfnPostErrorEventCb_p != NULL)
+        if(pEventShbInstance->pfnPostErrorEventCb != NULL)
         {
-            pEventShbInstance->pfnPostErrorEventCb_p(
+            pEventShbInstance->pfnPostErrorEventCb(
                     kEplEventSourceEventk, kEplEventReadError,
-                    sizeof (ShbError), &ShbError);
+                    sizeof (shbError), &shbError);
         }
         //note: If callback is invalid, no error is posted!
 
@@ -387,13 +380,13 @@ static void EplEventRxSignalHandlerCb (tShbInstance pShbRxInstance_p,
     }
 
     // resolve the pointer to the event structure
-    pEplEvent = (tEplEvent *) pabDataBuffer;
+    pEplEvent = (tEplEvent *) pDataBuffer;
     // set Datasize
-    pEplEvent->m_uiSize = (ulDataSize_p - sizeof(tEplEvent));
+    pEplEvent->m_uiSize = (dataSize_p - sizeof(tEplEvent));
     if(pEplEvent->m_uiSize > 0)
     {
         // set pointer to argument
-        pEplEvent->m_pArg = &pabDataBuffer[sizeof(tEplEvent)];
+        pEplEvent->m_pArg = &pDataBuffer[sizeof(tEplEvent)];
     }
     else
     {
@@ -401,7 +394,7 @@ static void EplEventRxSignalHandlerCb (tShbInstance pShbRxInstance_p,
         pEplEvent->m_pArg = NULL;
     }
 
-    pEventShbInstance->pfnProcessEventCb_m(pEplEvent);
+    pEventShbInstance->pfnProcessEventCb(pEplEvent);
 
 Exit:
     return;

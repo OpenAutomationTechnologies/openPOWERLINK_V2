@@ -127,6 +127,7 @@ SET (LIB_SOURCES ${LIB_SOURCES}
                  ${POWERLINK_SOURCE_DIR}/EplStack/EplObd.c
                  ${POWERLINK_SOURCE_DIR}/EplStack/EplApiProcessImage.c
                  ${POWERLINK_SOURCE_DIR}/EplStack/common/dll/dllcal-shb.c
+                 ${POWERLINK_SOURCE_DIR}/EplStack/common/event/event.c
                  ${POWERLINK_SOURCE_DIR}/EplStack/common/event/eventcal-shb.c
                  ${POWERLINK_SOURCE_DIR}/EplStack/amix86.c
                  ${POWERLINK_SOURCE_DIR}/SharedBuff/SharedBuff.c
@@ -158,6 +159,8 @@ SET (LIB_SOURCES_KERNEL ${LIB_SOURCES_KERNEL}
                         ${POWERLINK_SOURCE_DIR}/EplStack/kernel/dll/dllkcal.c
                         ${POWERLINK_SOURCE_DIR}/EplStack/kernel/event/eventk.c
                         ${POWERLINK_SOURCE_DIR}/EplStack/kernel/event/eventkcal.c
+                        ${POWERLINK_SOURCE_DIR}/EplStack/kernel/event/eventkcal-shb.c
+                        ${POWERLINK_SOURCE_DIR}/EplStack/kernel/event/eventkcal-direct.c
                         ${POWERLINK_SOURCE_DIR}/EplStack/EplNmtk.c
                         ${POWERLINK_SOURCE_DIR}/EplStack/EplNmtkCal.c
                         ${POWERLINK_SOURCE_DIR}/EplStack/EplPdok.c
@@ -172,6 +175,8 @@ SET (LIB_SOURCES_USER ${LIB_SOURCES_USER}
                       ${POWERLINK_SOURCE_DIR}/EplStack/user/dll/dllucal.c
                       ${POWERLINK_SOURCE_DIR}/EplStack/user/event/eventu.c
                       ${POWERLINK_SOURCE_DIR}/EplStack/user/event/eventucal.c
+                      ${POWERLINK_SOURCE_DIR}/EplStack/user/event/eventucal-shb.c
+                      ${POWERLINK_SOURCE_DIR}/EplStack/user/event/eventucal-direct.c
                       ${POWERLINK_SOURCE_DIR}/EplStack/EplNmtu.c
                       ${POWERLINK_SOURCE_DIR}/EplStack/EplNmtuCal.c
                       ${POWERLINK_SOURCE_DIR}/EplStack/EplNmtCnu.c
@@ -202,7 +207,7 @@ SET (LIB_HEADERS ${LIB_HEADERS}
                  ${POWERLINK_SOURCE_DIR}/Include/dllcal.h
                  ${POWERLINK_SOURCE_DIR}/Include/EplErrDef.h
                  ${POWERLINK_SOURCE_DIR}/Include/event.h
-                 ${POWERLINK_SOURCE_DIR}/Include/event-shb.h
+                 ${POWERLINK_SOURCE_DIR}/Include/eventcal.h
                  ${POWERLINK_SOURCE_DIR}/Include/EplFrame.h
                  ${POWERLINK_SOURCE_DIR}/Include/EplInc.h
                  ${POWERLINK_SOURCE_DIR}/Include/EplInstDef.h

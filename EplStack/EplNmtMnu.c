@@ -940,7 +940,7 @@ tEplEvent           Event;
     EPL_MEMSET(&Event.m_NetTime, 0x00, sizeof(Event.m_NetTime));
     Event.m_pArg = &NodeCmd;
     Event.m_uiSize = sizeof (NodeCmd);
-    Ret = EplEventuPost(&Event);
+    Ret = eventu_postEvent(&Event);
     if (Ret != kEplSuccessful)
     {
         goto Exit;
@@ -1156,7 +1156,7 @@ tEplKernel PUBLIC EplNmtMnuCbNmtStateChange(tEplEventNmtStateChange NmtStateChan
             EPL_MEMSET(&Event.m_NetTime, 0x00, sizeof(Event.m_NetTime));
             Event.m_pArg = NULL;
             Event.m_uiSize = 0;
-            Ret = EplEventuPost(&Event);
+            Ret = eventu_postEvent(&Event);
             if (Ret != kEplSuccessful)
             {
                 break;
@@ -1467,7 +1467,7 @@ tEplKernel      Ret;
 
             if (pEvent_p->m_uiSize < EPL_C_DLL_MINSIZE_NMTCMD)
             {
-                Ret = EplEventuPostError(kEplEventSourceNmtMnu, kEplNmtInvalidFramePointer, sizeof (pEvent_p->m_uiSize), &pEvent_p->m_uiSize);
+                Ret = eventu_postError(kEplEventSourceNmtMnu, kEplNmtInvalidFramePointer, sizeof (pEvent_p->m_uiSize), &pEvent_p->m_uiSize);
                 break;
             }
 

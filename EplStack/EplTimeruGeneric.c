@@ -372,7 +372,7 @@ tEplKernel          Ret;
         EplEvent.m_pArg = &TimerEventArg;
         EplEvent.m_uiSize = sizeof(TimerEventArg);
 
-        Ret = EplEventuPost(&EplEvent);
+        Ret = eventu_postEvent(&EplEvent);
     }
 
     return Ret;

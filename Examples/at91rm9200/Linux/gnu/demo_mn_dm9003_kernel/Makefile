@@ -26,6 +26,9 @@ MODULEOBJS	= demo_main.o \
 			  $(MAINPATH)/EplStack/kernel/event/eventk.o $(MAINPATH)/EplStack/user/event/eventu.o \
 			  ${MAINPATH}/EplStack/kernel/event/eventkcal.c ${MAINPATH}/EplStack/user/event/eventucal.c \
 			  ${MAINPATH}/EplStack/common/event/eventcal-shb.c \
+			  ${MAINPATH}/EplStack/user/event/eventucal-shb.c \
+			  ${MAINPATH}/EplStack/kernel/event/eventkcal-shb.c \
+			  ${MAINPATH}/EplStack/common/event/event.c \
 			  $(MAINPATH)/EplStack/EplNmtk.o $(MAINPATH)/EplStack/EplNmtkCal.o \
 			  $(MAINPATH)/EplStack/EplNmtu.o $(MAINPATH)/EplStack/EplNmtuCal.o $(MAINPATH)/EplStack/EplNmtCnu.o \
 			  $(MAINPATH)/EplStack/EplNmtMnu.o $(MAINPATH)/EplStack/EplIdentu.o $(MAINPATH)/EplStack/EplStatusu.o \

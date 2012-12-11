@@ -527,7 +527,7 @@ static void EplTimeruCbMs(ULONG ulParameter_p)
     EplEvent.m_pArg = &TimerEventArg;
     EplEvent.m_uiSize = sizeof(TimerEventArg);
 
-    Ret = EplEventuPost(&EplEvent);
+    Ret = eventu_postEvent(&EplEvent);
 }
 
 //------------------------------------------------------------------------------

@@ -127,6 +127,9 @@ SET(MODULE_SOURCE_FILES
     ${POWERLINK_SOURCE_DIR}/EplStack/kernel/event/eventkcal.c
     ${POWERLINK_SOURCE_DIR}/EplStack/user/event/eventucal.c
     ${POWERLINK_SOURCE_DIR}/EplStack/common/event/eventcal-shb.c
+    ${POWERLINK_SOURCE_DIR}/EplStack/user/event/eventucal-shb.c
+    ${POWERLINK_SOURCE_DIR}/EplStack/kernel/event/eventkcal-shb.c
+    ${POWERLINK_SOURCE_DIR}/EplStack/common/event/event.c
     ${POWERLINK_SOURCE_DIR}/EplStack/EplNmtk.c
     ${POWERLINK_SOURCE_DIR}/EplStack/EplNmtkCal.c
     ${POWERLINK_SOURCE_DIR}/EplStack/EplNmtu.c

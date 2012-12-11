@@ -94,6 +94,9 @@ ${MAINPATH}/EplStack/EplLedu.c \
 ${MAINPATH}/EplStack/kernel/event/eventk.c ${MAINPATH}/EplStack/user/event/eventu.c \
 ${MAINPATH}/EplStack/kernel/event/eventkcal.c ${MAINPATH}/EplStack/user/event/eventucal.c \
 ${MAINPATH}/EplStack/common/event/eventcal-direct.c ${MAINPATH}/EplStack/common/event/eventcal-shb.c \
+${MAINPATH}/EplStack/user/event/eventucal-direct.c ${MAINPATH}/EplStack/user/event/eventucal-shb.c \
+${MAINPATH}/EplStack/kernel/event/eventkcal-direct.c ${MAINPATH}/EplStack/kernel/event/eventkcal-shb.c \
+${MAINPATH}/EplStack/common/event/event.c \
 ${MAINPATH}/EplStack/EplNmtk.c \
 ${MAINPATH}/EplStack/EplNmtu.c ${MAINPATH}/EplStack/EplNmtCnu.c \
 ${MAINPATH}/EplStack/EplPdok.c ${MAINPATH}/EplStack/EplPdokCal.c \
