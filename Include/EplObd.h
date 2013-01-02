@@ -135,6 +135,7 @@ typedef enum
     kEplObdEvPreWrite              = 0x02,    // before writing an object                               source data buffer from caller
     kEplObdEvPostWrite             = 0x03,    // after writing an object                                destination data buffer in OD
 //    kEplObdEvAbortSdo              = 0x05     // after an abort of an SDO transfer
+    kEplObdEvPostDefault           = 0x08,    // after setting default values                           data buffer in OD
 
 } tEplObdEvent;
 

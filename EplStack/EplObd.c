@@ -188,6 +188,9 @@ static void EplObdCopyObjectData (
                         tEplObdSize     ObjSize_p,
                         tEplObdType     ObjType_p);
 
+static tEplKernel EplObdCallPostDefault (void *pData_p, tEplObdEntryPtr pObdEntry_p,
+                                         tEplObdSubEntryPtr pSubIndex_p);
+
 static void * EplObdGetObjectDataPtrIntern (tEplObdSubEntryPtr pSubindexEntry_p);
 
 static tEplKernel EplObdIsNumericalIntern(tEplObdSubEntryPtr pObdSubEntry_p,
@@ -3275,10 +3278,13 @@ tEplObdVarEntry MEM*        pVarEntry = NULL;
 
                         // 09-dec-2004 r.d.: optimization! the same code for kEplObdDirRestore and kEplObdDirLoad
                         //                   is replaced to function ObdCopyObjectData() with a new parameter.
-
-
                         // restore object data for init phase
+
                         EplObdCopyObjectData (pDstData, pDefault, ObjSize, pSubIndex->m_Type);
+
+                        // execute post default event
+                        EplObdCallPostDefault (pDstData, pObdEnty_p, pSubIndex);
+
                         break;
 
                     // --------------------------------------------------------------------------
@@ -3287,6 +3293,9 @@ tEplObdVarEntry MEM*        pVarEntry = NULL;
 
                         // restore object data for init phase
                         EplObdCopyObjectData (pDstData, pDefault, ObjSize, pSubIndex->m_Type);
+
+                        // execute post default event
+                        EplObdCallPostDefault (pDstData, pObdEnty_p, pSubIndex);
 
                         // no break !! because callback function has to be called too.
 
@@ -3460,6 +3469,32 @@ tEplObdSize StrSize = 0;
 
 }
 
+// ----------------------------------------------------------------------------
+// Function:    EplObdCallPostDefault()
+//
+// Description: calls the callback function with post callback event
+//
+// Parameters:  pDstData_p              = data pointer
+//              pObdEntry_p             = pointer to obd entry
+//              pSubIndex_p             = pointer to obd subentry
+//
+// Returns:     tEplKernel              = error code
+// ----------------------------------------------------------------------------
+static tEplKernel EplObdCallPostDefault (void *pData_p, tEplObdEntryPtr pObdEntry_p,
+                                         tEplObdSubEntryPtr pSubIndex_p)
+{
+    tEplKernel          ret;
+    tEplObdCbParam      cbParam;
+
+    cbParam.m_uiIndex    = pObdEntry_p->m_uiIndex;
+    cbParam.m_uiSubIndex = pSubIndex_p->m_uiSubIndex;
+    cbParam.m_pArg     = pData_p;
+    cbParam.m_ObdEvent = kEplObdEvPostDefault;
+    ret = EplObdCallObjectCallback (EPL_MCO_INSTANCE_PTR_ pObdEntry_p->m_fpCallback,
+                                    &cbParam);
+
+    return ret;
+}
 
 //---------------------------------------------------------------------------
 //
