@@ -5,7 +5,7 @@
 
   Project:      openPOWERLINK
 
-  Description:  include file for user PDO Communication Abstraction Layer module
+  Description:  include file for userspace PDO module
 
   License:
 
@@ -58,22 +58,22 @@
                 $State$
 
                 Build Environment:
-                    GCC V3.4
 
   -------------------------------------------------------------------------
 
   Revision History:
 
-  2009/09/03 d.k.:   start of the implementation, version 1.00
+  2006/05/22 d.k.:   start of the implementation, version 1.00
 
 
 ****************************************************************************/
 
-#ifndef _EPL_PDOUCAL_H_
-#define _EPL_PDOUCAL_H_
+#ifndef _EPL_PDOU_H_
+#define _EPL_PDOU_H_
 
-#include "EplInc.h"
-#include "EplPdo.h"
+#include "pdo.h"
+#include "EplNmt.h"
+
 
 //---------------------------------------------------------------------------
 // const defines
@@ -89,16 +89,19 @@
 // function prototypes
 //---------------------------------------------------------------------------
 
-tEplKernel EplPdouCalAddInstance(void);
+tEplKernel EplPdouAddInstance(void);
 
-tEplKernel EplPdouCalDelInstance(void);
+tEplKernel EplPdouDelInstance(void);
 
-tEplKernel EplPdouCalAlloc(tEplPdoAllocationParam* pAllocationParam_p);
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOU)) != 0)
+EPLDLLEXPORT tEplKernel PUBLIC EplPdouCbObdAccess(tEplObdCbParam MEM* pParam_p);
+#else
+#define EplPdouCbObdAccess		NULL
+#endif
 
-tEplKernel EplPdouCalConfigureChannel(tEplPdoChannelConf* pChannelConf_p);
+tEplKernel PUBLIC EplPdouCbNmtStateChange(tEplEventNmtStateChange NmtStateChange_p);
 
 
-
-#endif  // #ifndef _EPL_PDOUCAL_H_
+#endif  // #ifndef _EPL_PDOU_H_
 
 

@@ -35,9 +35,9 @@
 			<location>OPENPOWERLINK_DIR/EplStack/EplApiGeneric.c</location>
 		</link>
 		<link>
-			<name>EplApiProcessImage.c</name>
+			<name>processimage.c</name>
 			<type>1</type>
-			<location>OPENPOWERLINK_DIR/EplStack/EplApiProcessImage.c</location>
+			<location>OPENPOWERLINK_DIR/EplStack/user/api/processimage.c</location>
 		</link>
 		<link>
 			<name>EplApiProcessImageSetup.c</name>
@@ -180,24 +180,24 @@
 			<location>OPENPOWERLINK_DIR/EplStack/EplObdCdc.c</location>
 		</link>
 		<link>
-			<name>EplPdok.c</name>
+			<name>pdok.c</name>
 			<type>1</type>
-			<location>OPENPOWERLINK_DIR/EplStack/EplPdok.c</location>
+			<location>OPENPOWERLINK_DIR/EplStack/kernel/pdo/pdok.c</location>
 		</link>
 		<link>
-			<name>EplPdokCal.c</name>
+			<name>pdokcal.c</name>
 			<type>1</type>
-			<location>OPENPOWERLINK_DIR/EplStack/EplPdokCal.c</location>
+			<location>OPENPOWERLINK_DIR/EplStack/kernel/pdo/pdokcal.c</location>
 		</link>
 		<link>
-			<name>EplPdou.c</name>
+			<name>pdou.c</name>
 			<type>1</type>
-			<location>OPENPOWERLINK_DIR/EplStack/EplPdou.c</location>
+			<location>OPENPOWERLINK_DIR/EplStack/user/pdo/pdou.c</location>
 		</link>
 		<link>
-			<name>EplPdouCal.c</name>
+			<name>pdoucal.c</name>
 			<type>1</type>
-			<location>OPENPOWERLINK_DIR/EplStack/EplPdouCal.c</location>
+			<location>OPENPOWERLINK_DIR/EplStack/user/pdo/pdoucal.c</location>
 		</link>
 		<link>
 			<name>EplSdoAsndu.c</name>

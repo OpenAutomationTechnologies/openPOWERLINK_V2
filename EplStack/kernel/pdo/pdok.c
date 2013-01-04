@@ -68,7 +68,7 @@
 
 ****************************************************************************/
 
-#include "kernel/EplPdok.h"
+#include "kernel/pdok.h"
 #include "kernel/eventk.h"
 #include "EplObd.h"
 #include "kernel/EplDllk.h"

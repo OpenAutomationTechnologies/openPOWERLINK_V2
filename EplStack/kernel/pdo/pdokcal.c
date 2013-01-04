@@ -5,7 +5,7 @@
 
   Project:      openPOWERLINK
 
-  Description:  source file for user PDO Communication Abstraction Layer module
+  Description:  source file for kernel PDO Communication Abstraction Layer module
 
   License:
 
@@ -64,14 +64,16 @@
 
   Revision History:
 
-  2009/09/03 d.k.:   start of the implementation, version 1.00
+  2006/06/27 d.k.:   start of the implementation, version 1.00
 
 ****************************************************************************/
 
-#include "user/EplPdouCal.h"
-#include "user/eventu.h"
+#include "kernel/pdokcal.h"
+#include "kernel/pdok.h"
+#include "kernel/EplDllk.h"
+#include "kernel/eventk.h"
 
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOU)) != 0)
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOK)) != 0)
 
 
 /***************************************************************************/
@@ -102,7 +104,7 @@
 /***************************************************************************/
 /*                                                                         */
 /*                                                                         */
-/*          C L A S S  EplPdouCal                                          */
+/*          C L A S S  EplPdokCal                                          */
 /*                                                                         */
 /*                                                                         */
 /***************************************************************************/
@@ -131,18 +133,20 @@
 typedef struct
 {
 
-} tEplPdouCalInstance;
+} tEplPdokCalInstance;
 */
 
 //---------------------------------------------------------------------------
 // local vars
 //---------------------------------------------------------------------------
 
-//static tEplPdouCalInstance  EplPdouCalInstance_g;
+//static tEplPdokCalInstance  EplPdokCalInstance_g;
 
 //---------------------------------------------------------------------------
 // local function prototypes
 //---------------------------------------------------------------------------
+
+static tEplKernel EplPdokCalCbProcessRpdo(tEplFrameInfo * pFrameInfo_p);
 
 
 //=========================================================================//
@@ -153,7 +157,7 @@ typedef struct
 
 //---------------------------------------------------------------------------
 //
-// Function:    EplPdouCalAddInstance()
+// Function:    EplPdokCalAddInstance()
 //
 // Description: add and initialize new instance of EPL stack
 //
@@ -166,17 +170,20 @@ typedef struct
 //
 //---------------------------------------------------------------------------
 
-tEplKernel EplPdouCalAddInstance(void)
+tEplKernel EplPdokCalAddInstance(void)
 {
+tEplKernel      Ret = kEplSuccessful;
 
-//    EPL_MEMSET(&EplPdouCalInstance_g, 0, sizeof(EplPdouCalInstance_g));
+//    EPL_MEMSET(&EplPdokCalInstance_g, 0, sizeof(EplPdokCalInstance_g));
 
-    return kEplSuccessful;
+    Ret = EplDllkRegRpdoHandler(EplPdokCalCbProcessRpdo);
+
+    return Ret;
 }
 
 //---------------------------------------------------------------------------
 //
-// Function:    EplPdouCalDelInstance()
+// Function:    EplPdokCalDelInstance()
 //
 // Description: deletes an instance of EPL stack
 //
@@ -189,7 +196,7 @@ tEplKernel EplPdouCalAddInstance(void)
 //
 //---------------------------------------------------------------------------
 
-tEplKernel EplPdouCalDelInstance(void)
+tEplKernel EplPdokCalDelInstance(void)
 {
 
     return kEplSuccessful;
@@ -198,41 +205,11 @@ tEplKernel EplPdouCalDelInstance(void)
 
 //---------------------------------------------------------------------------
 //
-// Function:    EplPdouCalAlloc()
+// Function:    EplPdokCalProcess
 //
-// Description: This function allocates memory for PDOs according to the specified parameter.
+// Description: This function processes events from PdouCal module.
 //
-// Parameters:  pAllocationParam_p      =
-//
-// Returns:     tEplKernel              = error code
-//
-//
-// State:
-//
-//---------------------------------------------------------------------------
-
-tEplKernel EplPdouCalAlloc(tEplPdoAllocationParam* pAllocationParam_p)
-{
-tEplKernel  Ret = kEplSuccessful;
-tEplEvent   Event;
-
-    Event.m_EventSink = kEplEventSinkPdokCal;
-    Event.m_EventType = kEplEventTypePdokAlloc;
-    Event.m_pArg = pAllocationParam_p;
-    Event.m_uiSize = sizeof (*pAllocationParam_p);
-
-    Ret = eventu_postEvent(&Event);
-
-    return Ret;
-}
-
-//---------------------------------------------------------------------------
-//
-// Function:    EplPdouCalConfigureChannel()
-//
-// Description: This function configures the specified PDO channel.
-//
-// Parameters:  pChannelConf_p          = PDO channel configuration
+// Parameters:  pEvent_p                = pointer to event structure
 //
 // Returns:     tEplKernel              = error code
 //
@@ -241,20 +218,55 @@ tEplEvent   Event;
 //
 //---------------------------------------------------------------------------
 
-tEplKernel EplPdouCalConfigureChannel(tEplPdoChannelConf* pChannelConf_p)
+tEplKernel EplPdokCalProcess(tEplEvent * pEvent_p)
 {
 tEplKernel      Ret = kEplSuccessful;
-tEplEvent       Event;
-unsigned int    uiSize;
 
-    Event.m_EventSink = kEplEventSinkPdokCal;
-    Event.m_EventType = kEplEventTypePdokConfig;
-    Event.m_pArg = pChannelConf_p;
-    uiSize = memberoffs(tEplPdoChannelConf, m_aMappObject)
-             + (pChannelConf_p->m_PdoChannel.m_uiMappObjectCount * sizeof (pChannelConf_p->m_aMappObject[0]));
-    Event.m_uiSize = uiSize;
+    switch (pEvent_p->m_EventType)
+    {
+        case kEplEventTypePdokAlloc:
+        {
+        tEplPdoAllocationParam* pAllocationParam;
 
-    Ret = eventu_postEvent(&Event);
+            pAllocationParam = (tEplPdoAllocationParam*) pEvent_p->m_pArg;
+            Ret = EplPdokAlloc(pAllocationParam);
+            break;
+        }
+
+        case kEplEventTypePdokConfig:
+        {
+        tEplPdoChannelConf* pChannelConf;
+
+            pChannelConf = (tEplPdoChannelConf*) pEvent_p->m_pArg;
+            Ret = EplPdokConfigureChannel(pChannelConf);
+            break;
+        }
+
+        case kEplEventTypePdoRx:  // RPDO received
+        {
+#if EPL_DLL_DISABLE_DEFERRED_RXFRAME_RELEASE == FALSE
+        tEplFrameInfo*  pFrameInfo;
+
+            pFrameInfo = (tEplFrameInfo *) pEvent_p->m_pArg;
+
+            Ret = EplPdokPdoDecode(pFrameInfo->m_pFrame, pFrameInfo->m_uiFrameSize);
+#else
+        tEplFrame*  pFrame;
+
+            pFrame = (tEplFrame *) pEvent_p->m_pArg;
+
+            Ret = EplPdokPdoDecode(pFrame, pEvent_p->m_uiSize);
+#endif
+
+            break;
+        }
+
+        default:
+        {
+            Ret = kEplInvalidEvent;
+            break;
+        }
+    }
 
     return Ret;
 }
@@ -268,21 +280,48 @@ unsigned int    uiSize;
 
 //---------------------------------------------------------------------------
 //
-// Function:
+// Function:    EplPdokCalCbProcessRpdo
 //
-// Description:
+// Description: This function is called by DLL if PRes or PReq frame was
+//              received. It posts the frame to the event queue.
+//              It is called in states NMT_CS_READY_TO_OPERATE and NMT_CS_OPERATIONAL.
+//              The passed PDO needs not to be valid.
 //
+// Parameters:  pFrameInfo_p            = pointer to frame info structure
 //
-//
-// Parameters:
-//
-//
-// Returns:
+// Returns:     tEplKernel              = error code
 //
 //
 // State:
 //
 //---------------------------------------------------------------------------
+
+static tEplKernel EplPdokCalCbProcessRpdo(tEplFrameInfo * pFrameInfo_p)
+{
+tEplKernel      Ret = kEplSuccessful;
+tEplEvent       Event;
+
+    Event.m_EventSink = kEplEventSinkPdokCal;
+    Event.m_EventType = kEplEventTypePdoRx;
+#if EPL_DLL_DISABLE_DEFERRED_RXFRAME_RELEASE == FALSE
+    Event.m_uiSize    = sizeof(tEplFrameInfo);
+    Event.m_pArg      = pFrameInfo_p;
+#else
+    // limit copied data to size of PDO (because from some CNs the frame is larger than necessary)
+    Event.m_uiSize = AmiGetWordFromLe(&pFrameInfo_p->m_pFrame->m_Data.m_Pres.m_le_wSize) + EPL_FRAME_OFFSET_PDO_PAYLOAD; // pFrameInfo_p->m_uiFrameSize;
+    Event.m_pArg = pFrameInfo_p->m_pFrame;
+#endif
+    Ret = eventk_postEvent(&Event);
+#if EPL_DLL_DISABLE_DEFERRED_RXFRAME_RELEASE == FALSE
+    if (Ret == kEplSuccessful)
+    {
+        Ret = kEplReject; // Reject release of rx buffer
+    }
+#endif
+
+    return Ret;
+}
+
 
 #endif
 

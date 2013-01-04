@@ -56,8 +56,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <Benchmark.h>
 
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOK)) != 0)
-#include <kernel/EplPdok.h>
-#include <kernel/EplPdokCal.h>
+#include <kernel/pdok.h>
+#include <kernel/pdokcal.h>
 #endif
 
 #include "common/event/event.h"

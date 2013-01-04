@@ -32,8 +32,8 @@ MODULEOBJS	= demo_main.o \
 			  $(MAINPATH)/EplStack/EplNmtk.o $(MAINPATH)/EplStack/EplNmtkCal.o \
 			  $(MAINPATH)/EplStack/EplNmtu.o $(MAINPATH)/EplStack/EplNmtuCal.o $(MAINPATH)/EplStack/EplNmtCnu.o \
 			  $(MAINPATH)/EplStack/EplNmtMnu.o $(MAINPATH)/EplStack/EplIdentu.o $(MAINPATH)/EplStack/EplStatusu.o \
-			  $(MAINPATH)/EplStack/EplPdok.o $(MAINPATH)/EplStack/EplPdokCal.o \
-			  $(MAINPATH)/EplStack/EplPdou.o $(MAINPATH)/EplStack/EplPdouCal.o \
+			  $(MAINPATH)/EplStack/kernel/pdo/pdok.o $(MAINPATH)/EplStack/kernel/pdo/pdokcal.o \
+			  $(MAINPATH)/EplStack/user/pdo/pdou.o $(MAINPATH)/EplStack/user/pdo/pdoucal.o \
 			  $(MAINPATH)/EplStack/EplObd.o \
 			  $(MAINPATH)/EplStack/EplSdoUdpu.o $(MAINPATH)/EplStack/EplSdoComu.o $(MAINPATH)/EplStack/EplSdoAsySequ.o $(MAINPATH)/EplStack/EplSdoAsndu.o \
 			  $(MAINPATH)/EplStack/EplTimeruLinuxKernel.o \

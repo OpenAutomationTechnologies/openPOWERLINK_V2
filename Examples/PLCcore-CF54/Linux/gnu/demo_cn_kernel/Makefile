@@ -31,8 +31,8 @@ MODULEOBJS	= demo_main.o \
 			  ${MAINPATH}/EplStack/common/event/event.c \
 			  $(MAINPATH)/EplStack/EplNmtk.o $(MAINPATH)/EplStack/EplNmtkCal.o \
 			  $(MAINPATH)/EplStack/EplNmtu.o $(MAINPATH)/EplStack/EplNmtuCal.o $(MAINPATH)/EplStack/EplNmtCnu.o \
-			  $(MAINPATH)/EplStack/EplPdok.o $(MAINPATH)/EplStack/EplPdokCal.o \
-			  $(MAINPATH)/EplStack/EplPdou.o $(MAINPATH)/EplStack/EplPdouCal.o \
+			  $(MAINPATH)/EplStack/kernel/pdo/pdok.o $(MAINPATH)/EplStack/kernel/pdo/pdokcal.o \
+			  $(MAINPATH)/EplStack/user/pdo/pdou.o $(MAINPATH)/EplStack/user/pdo/pdoucal.o \
 			  $(MAINPATH)/EplStack/EplObd.o \
 			  $(MAINPATH)/EplStack/EplSdoUdpu.o $(MAINPATH)/EplStack/EplSdoComu.o $(MAINPATH)/EplStack/EplSdoAsySequ.o $(MAINPATH)/EplStack/EplSdoAsndu.o \
 			  $(MAINPATH)/EplStack/EplTimeruLinuxKernel.o \
