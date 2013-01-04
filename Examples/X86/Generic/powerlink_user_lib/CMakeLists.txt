@@ -125,7 +125,7 @@ SET (LIB_SOURCES ${LIB_SOURCES}
                  ${POWERLINK_SOURCE_DIR}/EplStack/EplApiGeneric.c
                  ${POWERLINK_SOURCE_DIR}/EplStack/EplDebug.c
                  ${POWERLINK_SOURCE_DIR}/EplStack/EplObd.c
-                 ${POWERLINK_SOURCE_DIR}/EplStack/EplApiProcessImage.c
+                 ${POWERLINK_SOURCE_DIR}/EplStack/user/api/processimage.c
                  ${POWERLINK_SOURCE_DIR}/EplStack/common/dll/dllcal-shb.c
                  ${POWERLINK_SOURCE_DIR}/EplStack/common/event/event.c
                  ${POWERLINK_SOURCE_DIR}/EplStack/common/event/eventcal-shb.c
@@ -163,8 +163,8 @@ SET (LIB_SOURCES_KERNEL ${LIB_SOURCES_KERNEL}
                         ${POWERLINK_SOURCE_DIR}/EplStack/kernel/event/eventkcal-direct.c
                         ${POWERLINK_SOURCE_DIR}/EplStack/EplNmtk.c
                         ${POWERLINK_SOURCE_DIR}/EplStack/EplNmtkCal.c
-                        ${POWERLINK_SOURCE_DIR}/EplStack/EplPdok.c
-                        ${POWERLINK_SOURCE_DIR}/EplStack/EplPdokCal.c
+                        ${POWERLINK_SOURCE_DIR}/EplStack/kernel/pdo/pdok.c
+                        ${POWERLINK_SOURCE_DIR}/EplStack/kernel/pdo/pdokcal.c
                         ${POWERLINK_SOURCE_DIR}/EplStack/kernel/errhnd/errhndk.c
                         ${POWERLINK_SOURCE_DIR}/EplStack/kernel/errhnd/errhndkcal-shb.c
     )
@@ -185,8 +185,8 @@ SET (LIB_SOURCES_USER ${LIB_SOURCES_USER}
                       ${POWERLINK_SOURCE_DIR}/EplStack/EplIdentu.c
                       ${POWERLINK_SOURCE_DIR}/EplStack/EplStatusu.c
                       ${POWERLINK_SOURCE_DIR}/EplStack/EplSyncu.c
-                      ${POWERLINK_SOURCE_DIR}/EplStack/EplPdou.c
-                      ${POWERLINK_SOURCE_DIR}/EplStack/EplPdouCal.c
+                      ${POWERLINK_SOURCE_DIR}/EplStack/user/pdo/pdou.c
+                      ${POWERLINK_SOURCE_DIR}/EplStack/user/pdo/pdoucal.c
                       ${POWERLINK_SOURCE_DIR}/EplStack/EplSdoComu.c
                       ${POWERLINK_SOURCE_DIR}/EplStack/EplSdoAsySequ.c
                       ${POWERLINK_SOURCE_DIR}/EplStack/EplSdoAsndu.c
@@ -218,7 +218,7 @@ SET (LIB_HEADERS ${LIB_HEADERS}
                  ${POWERLINK_SOURCE_DIR}/Include/EplObd.h
                  ${POWERLINK_SOURCE_DIR}/Include/EplObdMacro.h
                  ${POWERLINK_SOURCE_DIR}/Include/EplObjDef.h
-                 ${POWERLINK_SOURCE_DIR}/Include/EplPdo.h
+                 ${POWERLINK_SOURCE_DIR}/Include/pdo.h
                  ${POWERLINK_SOURCE_DIR}/Include/EplSdo.h
                  ${POWERLINK_SOURCE_DIR}/Include/EplSdoAc.h
                  ${POWERLINK_SOURCE_DIR}/Include/EplTarget.h
@@ -244,8 +244,8 @@ SET (LIB_HEADERS_KERNEL ${LIB_HEADERS_KERNEL}
                         ${POWERLINK_SOURCE_DIR}/Include/kernel/EplNmtkCal.h
                         ${POWERLINK_SOURCE_DIR}/Include/kernel/EplObdk.h
                         ${POWERLINK_SOURCE_DIR}/Include/kernel/EplObdkCal.h
-                        ${POWERLINK_SOURCE_DIR}/Include/kernel/EplPdok.h
-                        ${POWERLINK_SOURCE_DIR}/Include/kernel/EplPdokCal.h
+                        ${POWERLINK_SOURCE_DIR}/Include/kernel/pdok.h
+                        ${POWERLINK_SOURCE_DIR}/Include/kernel/pdokcal.h
                         ${POWERLINK_SOURCE_DIR}/Include/kernel/EplTimerHighResk.h
                         ${POWERLINK_SOURCE_DIR}/Include/kernel/EplTimerk.h
     )
@@ -267,8 +267,8 @@ SET (LIB_HEADERS_USER ${LIB_HEADERS_USER}
                       ${POWERLINK_SOURCE_DIR}/Include/user/EplNmtuCal.h
                       ${POWERLINK_SOURCE_DIR}/Include/user/EplObdu.h
                       ${POWERLINK_SOURCE_DIR}/Include/user/EplObduCal.h
-                      ${POWERLINK_SOURCE_DIR}/Include/user/EplPdou.h
-                      ${POWERLINK_SOURCE_DIR}/Include/user/EplPdouCal.h
+                      ${POWERLINK_SOURCE_DIR}/Include/user/pdou.h
+                      ${POWERLINK_SOURCE_DIR}/Include/user/pdoucal.h
                       ${POWERLINK_SOURCE_DIR}/Include/user/EplSdoAsndu.h
                       ${POWERLINK_SOURCE_DIR}/Include/user/EplSdoAsySequ.h
                       ${POWERLINK_SOURCE_DIR}/Include/user/EplSdoComu.h

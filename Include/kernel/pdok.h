@@ -5,7 +5,7 @@
 
   Project:      openPOWERLINK
 
-  Description:  include file for userspace PDO module
+  Description:  include file for kernel PDO module
 
   License:
 
@@ -58,6 +58,7 @@
                 $State$
 
                 Build Environment:
+                    GCC V3.4
 
   -------------------------------------------------------------------------
 
@@ -68,12 +69,12 @@
 
 ****************************************************************************/
 
-#ifndef _EPL_PDOU_H_
-#define _EPL_PDOU_H_
+#ifndef _EPL_PDOK_H_
+#define _EPL_PDOK_H_
 
-#include "EplPdo.h"
-#include "EplNmt.h"
-
+#include "pdo.h"
+#include "EplFrame.h"
+#include "EplDll.h"
 
 //---------------------------------------------------------------------------
 // const defines
@@ -89,19 +90,20 @@
 // function prototypes
 //---------------------------------------------------------------------------
 
-tEplKernel EplPdouAddInstance(void);
+tEplKernel EplPdokPdoDecode(tEplFrame* pFrame_p,
+                            unsigned int uiFrameSize_p) SECTION_PDOK_PDO_DECODE;
 
-tEplKernel EplPdouDelInstance(void);
+tEplKernel EplPdokAddInstance(void);
 
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOU)) != 0)
-EPLDLLEXPORT tEplKernel PUBLIC EplPdouCbObdAccess(tEplObdCbParam MEM* pParam_p);
-#else
-#define EplPdouCbObdAccess		NULL
-#endif
-
-tEplKernel PUBLIC EplPdouCbNmtStateChange(tEplEventNmtStateChange NmtStateChange_p);
+tEplKernel EplPdokDelInstance(void);
 
 
-#endif  // #ifndef _EPL_PDOU_H_
+tEplKernel EplPdokAlloc(tEplPdoAllocationParam* pAllocationParam_p);
+
+tEplKernel EplPdokConfigureChannel(tEplPdoChannelConf* pChannelConf_p);
+
+
+
+#endif  // #ifndef _EPL_PDOK_H_
 
 

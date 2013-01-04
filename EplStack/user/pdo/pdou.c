@@ -73,11 +73,11 @@
 ****************************************************************************/
 
 #include "EplInc.h"
-#include "user/EplPdouCal.h"
+#include "user/pdoucal.h"
 #include "user/EplObdu.h"
-#include "user/EplPdou.h"
+#include "user/pdou.h"
 #include "EplSdoAc.h"
-#include "EplPdo.h"
+#include "pdo.h"
 
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOU)) != 0)
 

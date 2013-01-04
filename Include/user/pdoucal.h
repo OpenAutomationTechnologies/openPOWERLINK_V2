@@ -5,7 +5,7 @@
 
   Project:      openPOWERLINK
 
-  Description:  include file for kernel PDO module
+  Description:  include file for user PDO Communication Abstraction Layer module
 
   License:
 
@@ -64,17 +64,16 @@
 
   Revision History:
 
-  2006/05/22 d.k.:   start of the implementation, version 1.00
+  2009/09/03 d.k.:   start of the implementation, version 1.00
 
 
 ****************************************************************************/
 
-#ifndef _EPL_PDOK_H_
-#define _EPL_PDOK_H_
+#ifndef _EPL_PDOUCAL_H_
+#define _EPL_PDOUCAL_H_
 
-#include "EplPdo.h"
-#include "EplFrame.h"
-#include "EplDll.h"
+#include "EplInc.h"
+#include "pdo.h"
 
 //---------------------------------------------------------------------------
 // const defines
@@ -90,20 +89,16 @@
 // function prototypes
 //---------------------------------------------------------------------------
 
-tEplKernel EplPdokPdoDecode(tEplFrame* pFrame_p,
-                            unsigned int uiFrameSize_p) SECTION_PDOK_PDO_DECODE;
+tEplKernel EplPdouCalAddInstance(void);
 
-tEplKernel EplPdokAddInstance(void);
+tEplKernel EplPdouCalDelInstance(void);
 
-tEplKernel EplPdokDelInstance(void);
+tEplKernel EplPdouCalAlloc(tEplPdoAllocationParam* pAllocationParam_p);
 
-
-tEplKernel EplPdokAlloc(tEplPdoAllocationParam* pAllocationParam_p);
-
-tEplKernel EplPdokConfigureChannel(tEplPdoChannelConf* pChannelConf_p);
+tEplKernel EplPdouCalConfigureChannel(tEplPdoChannelConf* pChannelConf_p);
 
 
 
-#endif  // #ifndef _EPL_PDOK_H_
+#endif  // #ifndef _EPL_PDOUCAL_H_
 
 

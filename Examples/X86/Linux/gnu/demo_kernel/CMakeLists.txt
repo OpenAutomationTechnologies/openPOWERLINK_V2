@@ -140,10 +140,10 @@ SET(MODULE_SOURCE_FILES
     ${POWERLINK_SOURCE_DIR}/EplStack/EplNmtMnu.c
     ${POWERLINK_SOURCE_DIR}/EplStack/EplIdentu.c
     ${POWERLINK_SOURCE_DIR}/EplStack/EplStatusu.c
-    ${POWERLINK_SOURCE_DIR}/EplStack/EplPdok.c
-    ${POWERLINK_SOURCE_DIR}/EplStack/EplPdokCal.c
-    ${POWERLINK_SOURCE_DIR}/EplStack/EplPdou.c
-    ${POWERLINK_SOURCE_DIR}/EplStack/EplPdouCal.c
+    ${POWERLINK_SOURCE_DIR}/EplStack/kernel/pdo/pdok.c
+    ${POWERLINK_SOURCE_DIR}/EplStack/kernel/pdo/pdokcal.c
+    ${POWERLINK_SOURCE_DIR}/EplStack/user/pdo/pdou.c
+    ${POWERLINK_SOURCE_DIR}/EplStack/user/pdo/pdoucal.c
     ${POWERLINK_SOURCE_DIR}/EplStack/EplObd.c
     ${POWERLINK_SOURCE_DIR}/EplStack/EplSdoUdpu.c
     ${POWERLINK_SOURCE_DIR}/EplStack/EplSdoComu.c
@@ -156,7 +156,7 @@ SET(MODULE_SOURCE_FILES
     ${POWERLINK_SOURCE_DIR}/EplStack/kernel/errhnd/errhndkcal-local.c
     ${POWERLINK_SOURCE_DIR}/EplStack/user/errhnd/errhnducal-local.c
     ${POWERLINK_SOURCE_DIR}/EplStack/EplApiGeneric.c
-    ${POWERLINK_SOURCE_DIR}/EplStack/EplApiProcessImage.c
+    ${POWERLINK_SOURCE_DIR}/EplStack/user/api/processimage.c
     ${POWERLINK_SOURCE_DIR}/EplStack/VirtualEthernetLinux.c
     ${POWERLINK_SOURCE_DIR}/EplStack/SocketLinuxKernel.c
     ${POWERLINK_SOURCE_DIR}/EplStack/PosixFileLinuxKernel.c

@@ -74,9 +74,9 @@
 #include "kernel/EplNmtk.h"
 #include "kernel/EplObdk.h"
 #include "kernel/dllkcal.h"
-#include "kernel/EplPdokCal.h"
-#include "user/EplPdouCal.h"
-#include "user/EplPdou.h"
+#include "kernel/pdokcal.h"
+#include "user/pdoucal.h"
+#include "user/pdou.h"
 #include "user/dllucal.h"
 #include "user/EplLedu.h"
 #include "user/EplNmtCnu.h"
@@ -98,7 +98,7 @@
 #endif
 
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOK)) != 0)
-#include "kernel/EplPdok.h"
+#include "kernel/pdok.h"
 #endif
 
 #if EPL_USE_SHAREDBUFF != FALSE
