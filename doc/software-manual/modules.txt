@@ -1,0 +1,79 @@
+//==============================================================================
+//==============================================================================
+/**
+\defgroup user_layer openPOWERLINK User Layer
+*/
+//==============================================================================
+//==============================================================================
+
+//==============================================================================
+/**
+\defgroup module_pdou User layer PDO module (pdou)
+
+The user PDO module is responsible for exchanging process image data with the
+application using the process image API. Transmit data will be encoded to the
+configured PDOs and transfered to the kernel layer. Receive data will be
+received from the kernel layer and transfered to the application using the
+process image module.
+
+For communication with the kernel PDO module the user PDO communication
+abstraction layer (PDO CAL) is used.
+
+\see module_pdok
+
+\ingroup user_layer
+*/
+
+//==============================================================================
+/**
+\defgroup module_pdoucal User PDO CAL module (pdoucal)
+
+The user PDO CAL module provides the communication abstraction layer (CAL)
+for the user PDO module. The CAL module provides a communication mechanism
+for the user layer PDO module. Multiple implementations for this communication
+could be implemented. Currently the following implementations are available:
+\li Shared Buffers - \ref pdoucal-shb.c
+
+\see module_pdou
+\see module_pdok
+\see module_pdokcal
+
+\ingroup user_layer
+*/
+
+//==============================================================================
+//==============================================================================
+/**
+\defgroup kernel_layer openPOWERLINK Kernel Layer
+*/
+//==============================================================================
+//==============================================================================
+
+//==============================================================================
+/**
+\defgroup module_pdok Kernel PDO module (pdok)
+
+The kernel PDO module is module responsible for the handling of process data
+objects (PDO) in the openPOWERLINK kernel layer. It is responsible for
+communication with the data link layer (DLL) to transfer PDOs on the network.
+It communicates with the user layer PDO module through its communication
+abstraction layer module (PDO CAL).
+
+\see module_pdou
+\see module_pdokcal
+
+\ingroup kernel_layer
+*/
+
+//==============================================================================
+/**
+\defgroup module_pdokcal Kernel PDO CAL module (pdokcal)
+
+The kernel PDO CAL module provides the communication abstraction layer (CAL)
+for the kernel PDO module.
+
+\see module_pdou
+\see module_pdok
+
+\ingroup kernel_layer
+*/
