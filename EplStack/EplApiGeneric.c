@@ -411,13 +411,13 @@ tEplDllkInitParam   DllkInitParam;
 
     // initialize EplPdok module
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOK)) != 0)
-    Ret = EplPdokAddInstance();
+    Ret = pdok_init();
     if (Ret != kEplSuccessful)
     {
         goto Exit;
     }
 
-    Ret = EplPdokCalAddInstance();
+    Ret = pdokcal_init();
     if (Ret != kEplSuccessful)
     {
         goto Exit;
@@ -427,13 +427,13 @@ tEplDllkInitParam   DllkInitParam;
 
     // initialize EplPdou module
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOU)) != 0)
-    Ret = EplPdouCalAddInstance();
+    Ret = pdoucal_init();
     if (Ret != kEplSuccessful)
     {
         goto Exit;
     }
 
-    Ret = EplPdouAddInstance();
+    Ret = pdou_init();
     if (Ret != kEplSuccessful)
     {
         goto Exit;
@@ -622,16 +622,16 @@ tEplKernel      Ret = kEplSuccessful;
 
     // deinitialize EplPdou module
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOU)) != 0)
-    Ret = EplPdouDelInstance();
+    Ret = pdou_exit();
 //    PRINTF("EplPdouDelInstance():    0x%X\n", Ret);
-    Ret = EplPdouCalDelInstance();
+    Ret = pdoucal_exit();
 #endif
 
     // deinitialize EplPdok module
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOK)) != 0)
-    Ret = EplPdokDelInstance();
+    Ret = pdok_exit();
 //    PRINTF("EplPdokDelInstance():    0x%X\n", Ret);
-    Ret = EplPdokCalDelInstance();
+    Ret = pdokcal_exit();
 #endif
 
     // deinitialize Virtual Ethernet Driver
@@ -778,6 +778,7 @@ tEplKernel      RetCode = kEplSuccessful;
         if ((RetCode != kEplSuccessful) || (bIndexEntries == 0x00) )
         {
             // Object doesn't exist or invalid entry number
+            TRACE("%s() Object %04x not existing\n", __func__, uiObjIndex_p);
             RetCode = kEplObdIndexNotExist;
             goto Exit;
         }
@@ -2049,7 +2050,7 @@ tEplApiEventArg     EventArg;
 
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOU)) != 0)
     // forward event to Pdou module
-    Ret = EplPdouCbNmtStateChange(NmtStateChange_p);
+    Ret = pdou_cbNmtStateChange(NmtStateChange_p);
     if (Ret != kEplSuccessful)
     {
         goto Exit;

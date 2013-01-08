@@ -283,7 +283,7 @@ unsigned int    uiVarEntries;
         uiObjIndexStart_p++, uiOffsetPI_p += EntrySize_p * uiSubindexCountPerIndex_p)
     {
         uiVarEntries = uiSubindexCountPerIndex_p;
-        Ret = EplApiProcessImageLinkObject(
+        Ret = api_processImageLinkObject(
 						uiObjIndexStart_p,
 						1,
                         uiOffsetPI_p,

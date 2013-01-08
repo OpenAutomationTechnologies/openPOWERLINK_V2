@@ -379,20 +379,18 @@ EPLDLLEXPORT tEplKernel PUBLIC EplApiSetCdcBuffer(BYTE* pbCdc_p, unsigned int ui
 EPLDLLEXPORT tEplKernel PUBLIC EplApiSetCdcFilename(char* pszCdcFilename_p);
 
 #if 0
-EPLDLLEXPORT tEplKernel PUBLIC EplApiProcessImageExchangeIn(tEplApiProcessImage* pPI_p);
-EPLDLLEXPORT tEplKernel PUBLIC EplApiProcessImageExchangeOut(tEplApiProcessImage* pPI_p);
+EPLDLLEXPORT tEplKernel PUBLIC api_processImageExchangeIn(tEplApiProcessImage* pPI_p);
+EPLDLLEXPORT tEplKernel PUBLIC api_processImageExchangeOut(tEplApiProcessImage* pPI_p);
 #endif
 
 // functions for process image are implemented in separate file
-EPLDLLEXPORT tEplKernel PUBLIC EplApiProcessImageAlloc(
+EPLDLLEXPORT tEplKernel PUBLIC api_processImageAlloc(
     unsigned int uiSizeProcessImageIn_p,
-    unsigned int uiSizeProcessImageOut_p,
-    unsigned int uiQueueEntriesLo_p,
-    unsigned int uiQueueEntriesHi_p);
-EPLDLLEXPORT tEplKernel PUBLIC EplApiProcessImageFree(void);
-EPLDLLEXPORT tEplKernel PUBLIC EplApiProcessImageExchange(
-    tEplApiProcessImageCopyJob* pCopyJob_p);
-EPLDLLEXPORT tEplKernel PUBLIC EplApiProcessImageLinkObject(
+    unsigned int uiSizeProcessImageOut_p);
+EPLDLLEXPORT tEplKernel PUBLIC api_processImageFree(void);
+EPLDLLEXPORT tEplKernel PUBLIC api_processImageExchangeOut(void);
+EPLDLLEXPORT tEplKernel api_processImageExchangeIn(void);
+EPLDLLEXPORT tEplKernel PUBLIC api_processImageLinkObject(
     unsigned int    uiObjIndex_p,
     unsigned int    uiFirstSubindex_p,
     unsigned int    uiOffsetPI_p,
@@ -402,6 +400,9 @@ EPLDLLEXPORT tEplKernel PUBLIC EplApiProcessImageLinkObject(
 
 // objdict specific setup function
 EPLDLLEXPORT tEplKernel PUBLIC EplApiProcessImageSetup(void);
+
+EPLDLLEXPORT void *api_processImageGetInputImage(void);
+EPLDLLEXPORT void *api_processImageGetOutputImage(void);
 
 // functions for getting cleartext values of stack states and events
 EPLDLLEXPORT char * PUBLIC EplGetNmtEventStr(tEplNmtEvent nmtEvent_p);

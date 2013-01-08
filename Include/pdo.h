@@ -1,188 +1,193 @@
-/****************************************************************************
+/**
+********************************************************************************
+\file   pdo.h
 
-  (c) SYSTEC electronic GmbH, D-07973 Greiz, August-Bebel-Str. 29
-      www.systec-electronic.com
+\brief  Include file for PDO module
 
-  Project:      openPOWERLINK
+*******************************************************************************/
 
-  Description:  include file for PDO module
+/*------------------------------------------------------------------------------
+Copyright (c) 2012, SYSTEC electronic GmbH
+Copyright (c) 2012, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+All rights reserved.
 
-  License:
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+    * Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above copyright
+      notice, this list of conditions and the following disclaimer in the
+      documentation and/or other materials provided with the distribution.
+    * Neither the name of the copyright holders nor the
+      names of its contributors may be used to endorse or promote products
+      derived from this software without specific prior written permission.
 
-    Redistribution and use in source and binary forms, with or without
-    modification, are permitted provided that the following conditions
-    are met:
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL COPYRIGHT HOLDERS BE LIABLE FOR ANY
+DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+------------------------------------------------------------------------------*/
 
-    1. Redistributions of source code must retain the above copyright
-       notice, this list of conditions and the following disclaimer.
+#ifndef _INC_pdo_H_
+#define _INC_pdo_H_
 
-    2. Redistributions in binary form must reproduce the above copyright
-       notice, this list of conditions and the following disclaimer in the
-       documentation and/or other materials provided with the distribution.
+//------------------------------------------------------------------------------
+// includes
+//------------------------------------------------------------------------------
+#include <EplInc.h>
 
-    3. Neither the name of SYSTEC electronic GmbH nor the names of its
-       contributors may be used to endorse or promote products derived
-       from this software without prior written permission. For written
-       permission, please contact info@systec-electronic.com.
-
-    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-    LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-    FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-    COPYRIGHT HOLDERS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-    INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-    BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-    LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-    CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-    LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-    ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-    POSSIBILITY OF SUCH DAMAGE.
-
-    Severability Clause:
-
-        If a provision of this License is or becomes illegal, invalid or
-        unenforceable in any jurisdiction, that shall not affect:
-        1. the validity or enforceability in that jurisdiction of any other
-           provision of this License; or
-        2. the validity or enforceability in other jurisdictions of that or
-           any other provision of this License.
-
-  -------------------------------------------------------------------------
-
-                $RCSfile$
-
-                $Author$
-
-                $Revision$  $Date$
-
-                $State$
-
-                Build Environment:
-                    GCC V3.4
-
-  -------------------------------------------------------------------------
-
-  Revision History:
-
-  2006/05/22 d.k.:   start of the implementation, version 1.00
-
-
-****************************************************************************/
-
-#ifndef _EPL_PDO_H_
-#define _EPL_PDO_H_
-
-#include "EplInc.h"
-
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // const defines
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+#define PDO_SHB_BUF_ID                  "PdoMem"
+#define PDO_SYNC_BSDSEM                 "/semPdoSync"
+
+// PDO mapping related OD defines
+#define PDOU_OBD_IDX_RX_COMM_PARAM      0x1400
+#define PDOU_OBD_IDX_RX_MAPP_PARAM      0x1600
+#define PDOU_OBD_IDX_TX_COMM_PARAM      0x1800
+#define PDOU_OBD_IDX_TX_MAPP_PARAM      0x1A00
+#define PDOU_OBD_IDX_MAPP_PARAM         0x0200
+#define PDOU_OBD_IDX_MASK               0xFF00
+#define PDOU_PDO_ID_MASK                0x00FF
+
+#define PDOU_MAX_PDO_OBJECTS            256
+#define PDO_MAX_PDO_CHANNELS            256
+
 
 // invalid PDO-NodeId
-#define EPL_PDO_INVALID_NODE_ID     0xFF
+#define PDO_INVALID_NODE_ID             0xFF
 // NodeId for PReq RPDO
-#define EPL_PDO_PREQ_NODE_ID        0x00
+#define PDO_PREQ_NODE_ID                0x00
 // NodeId for PRes TPDO
-#define EPL_PDO_PRES_NODE_ID        0x00
+#define PDO_PRES_NODE_ID                0x00
 
-#define EPL_PDO_COMMUNICATION_PROFILE_START 0x1000
+#define PDO_COMMUNICATION_PROFILE_START 0x1000
 
-#if EPL_D_PDO_RPDOChannelObjects_U8 > EPL_D_PDO_TPDOChannelObjects_U8
-#define EPL_PDO_CHANNEL_OBJECT_COUNT    EPL_D_PDO_RPDOChannelObjects_U8
-#else
-#define EPL_PDO_CHANNEL_OBJECT_COUNT    EPL_D_PDO_TPDOChannelObjects_U8
-#endif
+#define PDO_MAPPOBJECT_IS_NUMERIC(pPdoMappObject_p) \
+            (pPdoMappObject_p->byteSizeOrType < PDO_COMMUNICATION_PROFILE_START)
 
+#define PDO_MAPPOBJECT_GET_VAR(pPdoMappObject_p) \
+            pPdoMappObject_p->pVar
 
-#define EPL_PDO_MAPPOBJECT_IS_NUMERIC(pPdoMappObject_p) \
-            (pPdoMappObject_p->m_wByteSizeOrType < EPL_PDO_COMMUNICATION_PROFILE_START)
+#define PDO_MAPPOBJECT_SET_VAR(pPdoMappObject_p, pVar_p) \
+            (pPdoMappObject_p->pVar = pVar_p)
 
-#define EPL_PDO_MAPPOBJECT_GET_VAR(pPdoMappObject_p) \
-            pPdoMappObject_p->m_pVar
+#define PDO_MAPPOBJECT_GET_BITOFFSET(pPdoMappObject_p) \
+            pPdoMappObject_p->bitOffset
 
-#define EPL_PDO_MAPPOBJECT_SET_VAR(pPdoMappObject_p, pVar_p) \
-            (pPdoMappObject_p->m_pVar = pVar_p)
+#define PDO_MAPPOBJECT_SET_BITOFFSET(pPdoMappObject_p, wBitOffset_p) \
+            (pPdoMappObject_p->bitOffset = wBitOffset_p)
 
-#define EPL_PDO_MAPPOBJECT_GET_BITOFFSET(pPdoMappObject_p) \
-            pPdoMappObject_p->m_wBitOffset
+#define PDO_MAPPOBJECT_GET_BYTESIZE(pPdoMappObject_p) \
+            (pPdoMappObject_p->byteSizeOrType - PDO_COMMUNICATION_PROFILE_START)
 
-#define EPL_PDO_MAPPOBJECT_SET_BITOFFSET(pPdoMappObject_p, wBitOffset_p) \
-            (pPdoMappObject_p->m_wBitOffset = wBitOffset_p)
+#define PDO_MAPPOBJECT_GET_TYPE(pPdoMappObject_p) \
+            ((tEplObdType) pPdoMappObject_p->byteSizeOrType)
 
-#define EPL_PDO_MAPPOBJECT_GET_BYTESIZE(pPdoMappObject_p) \
-            (pPdoMappObject_p->m_wByteSizeOrType - EPL_PDO_COMMUNICATION_PROFILE_START)
-
-#define EPL_PDO_MAPPOBJECT_GET_TYPE(pPdoMappObject_p) \
-            ((tEplObdType) pPdoMappObject_p->m_wByteSizeOrType)
-
-#define EPL_PDO_MAPPOBJECT_SET_BYTESIZE_OR_TYPE(pPdoMappObject_p, wByteSize_p, ObdType_p) \
+#define PDO_MAPPOBJECT_SET_BYTESIZE_OR_TYPE(pPdoMappObject_p, wByteSize_p, ObdType_p) \
             if ((ObdType_p == kEplObdTypVString) || (ObdType_p == kEplObdTypOString) || (ObdType_p == kEplObdTypDomain)) \
             { \
-                pPdoMappObject_p->m_wByteSizeOrType = wByteSize_p + EPL_PDO_COMMUNICATION_PROFILE_START; \
+                pPdoMappObject_p->byteSizeOrType = wByteSize_p + PDO_COMMUNICATION_PROFILE_START; \
             } \
             else \
             { \
-                pPdoMappObject_p->m_wByteSizeOrType = ObdType_p; \
+                pPdoMappObject_p->byteSizeOrType = ObdType_p; \
             }
 
-
-
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // typedef
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
-// d.k. optimization idea: use bit-field for WORDs and BOOL.
-//      This will not be portable, because only unsigned int is allowed for bit-fields
-//      and unsigned int has only 16 bit width on 16 bit CPUs.
+/**
+\brief PDO allocation param structure
 
+This structure specifies a PDO allocation parameter. It saves information about
+the number of used PDO channels.
+*/
 typedef struct
 {
-    void*               m_pVar;
-    WORD                m_wBitOffset;   // in Bits
-    WORD                m_wByteSizeOrType;
-
-} tEplPdoMappObject;
+    UINT                rxPdoChannelCount;      ///< max. number of RPDO channels
+    UINT                txPdoChannelCount;      ///< max. number of TPDO channels
+} tPdoAllocationParam;
 
 
+/**
+\brief PDO mapping object
+
+This structure structure specifies a PDO mapping object.
+*/
 typedef struct
 {
-    unsigned int        m_uiNodeId;
-    // 0xFF=invalid; RPDO: 0x00=PReq, localNodeId=PRes, remoteNodeId=PRes;
-    //               TPDO: 0x00=PRes, MN: CnNodeId=PReq
+    void*               pVar;                   ///< Pointer to PDO data
+    UINT16              bitOffset;              ///< Frame offset in bits
+    UINT16              byteSizeOrType;         ///< The size of the data in bytes
+} tPdoMappObject;
 
-    WORD                m_wPdoSize;
-    BYTE                m_bMappingVersion;
-    unsigned int        m_uiMappObjectCount;    // actual number of used mapped objects
+/**
+\brief PDO channel
 
-} tEplPdoChannel;
-
-
+This structure structure specifies a PDO channel. The PDO channel contains all
+information needed to transfer the PDO on the network.
+*/
 typedef struct
 {
-    // m_fTx and m_uiChannelId form the unique key
-    unsigned int        m_uiChannelId;
-    BOOL                m_fTx;              // TRUE = TPDO, FALSE = RPDO
+    /** The node ID for this PDO
+    0xFF = invalid; RPDO: 0x00=PReq, localNodeId=PRes, remoteNodeId=PRes;
+    TPDO: 0x00=PRes, MN: CnNodeId=PReq
+    */
+    UINT                nodeId;
+    void *              pVar;                   ///< Pointer to frame data
+    WORD                pdoSize;                ///< Size of this PDO
+    BYTE                mappingVersion;         ///< The mapping version of this PDO
+    unsigned int        mappObjectCount;        ///< The actual number of used mapped objects
+} tPdoChannel;
 
-    tEplPdoChannel      m_PdoChannel;
+/**
+\brief PDO channel configuration
 
-    tEplPdoMappObject   m_aMappObject[EPL_PDO_CHANNEL_OBJECT_COUNT];
-
-} tEplPdoChannelConf;
-
-
+This structure structure specifies a PDO channel configuration. It is used to
+exchange PDO channel information between the user and the kernel layer.
+*/
 typedef struct
 {
-    unsigned int        m_uiRxPdoChannelCount;  // max. number of RPDO channels
-    unsigned int        m_uiTxPdoChannelCount;  // max. number of TPDO channels
+    UINT                channelId;              ///< ID of the PDO channel
+    BOOL                fTx;                    ///< Flag determines the direction. TRUE = TPDO, FALSE = RPDO
+    tPdoChannel         pdoChannel;             ///< The PDO channel itself
+} tPdoChannelConf;
 
-} tEplPdoAllocationParam;
+/**
+\brief PDO channel setup
+
+This structure structure specifies a PDO channel setup. It is basic structure
+used to manage the complete setup of PDO channels.
+*/
+typedef struct
+{
+    tPdoAllocationParam allocation;             ///< Number of used PDO channels
+    tPdoChannel*        pRxPdoChannel;          ///< Pointer to RXPDO channel table
+    tPdoChannel*        pTxPdoChannel;          ///< Pointer to TXPDO channel table
+} tPdoChannelSetup;
 
 
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // function prototypes
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-#endif  // #ifndef _EPL_PDO_H_
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* _INC_pdo_H_ */
 
 
