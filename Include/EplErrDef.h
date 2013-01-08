@@ -91,6 +91,7 @@ typedef enum
     kEplReject                  = 0x000A,       // reject the subsequent command
     kEplRetry                   = 0x000B,       // retry this command
     kEplInvalidEvent            = 0x000C,       // invalid event was posted to process function
+    kEplGeneralError            = 0x000D,       // general error
 
     // area for EDRV module 0x0010 - 0x001F
     kEplEdrvNoFreeTxDesc        = 0x0011,       // no free Tx descriptor available

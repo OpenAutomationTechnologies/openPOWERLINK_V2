@@ -1,16 +1,16 @@
 /**
 ********************************************************************************
-\file   pdokcal.c
+\file   pdoucalsync-bsdsem.c
 
-\brief  Implementation of kernel PDO CAL module
+\brief  Sync implementation for the PDO user CAL module using BSD semaphores
 
-This file contains the implementation of the kernel PDO CAL module.
+This file contains a sync implementation for the PDU user CAL module. It
+uses BSD semaphores for synchronisation.
 
-\ingroup module_pdokcal
+\ingroup module_pdoucal
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2012, SYSTEC electronic GmbH
 Copyright (c) 2012, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
@@ -40,11 +40,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include "kernel/pdokcal.h"
-#include <kernel/pdok.h>
-#include "kernel/EplDllk.h"
-#include "kernel/eventk.h"
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <semaphore.h>
 
+#include <EplInc.h>
+#include <pdo.h>
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
 //============================================================================//
@@ -61,6 +62,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // global function prototypes
 //------------------------------------------------------------------------------
 
+
 //============================================================================//
 //            P R I V A T E   D E F I N I T I O N S                           //
 //============================================================================//
@@ -76,12 +78,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
+static sem_t*           syncSem_l;
 
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static tEplKernel cbProcessRpdo(tEplFrameInfo * pFrameInfo_p);
-
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -89,150 +90,74 @@ static tEplKernel cbProcessRpdo(tEplFrameInfo * pFrameInfo_p);
 
 //------------------------------------------------------------------------------
 /**
-\brief	Initialize the PDO kernel CAL module
+\brief  Initialize PDO user CAL sync module
 
-The function initializes the PDO user CAL module.
-
-\return The function returns a tEplKernel error code.
-
-\ingroup module_pdokcal
-*/
-//------------------------------------------------------------------------------
-tEplKernel pdokcal_init(void)
-{
-    tEplKernel      Ret = kEplSuccessful;
-
-    if ((Ret = pdokcal_initSync()) != kEplSuccessful)
-        return Ret;
-
-    Ret = EplDllkRegRpdoHandler(cbProcessRpdo);
-
-    return Ret;
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief  Cleanup PDO kernel CAL module
-
-The function deinitializes the PDO kernel CAL module.
+The function initializes the PDO user CAL sync module
 
 \return The function returns a tEplKernel error code.
-
-\ingroup module_pdokcal
 */
 //------------------------------------------------------------------------------
-tEplKernel pdokcal_exit(void)
+tEplKernel pdoucal_initSync(void)
 {
-    pdokcal_exitSync();
+    if ((syncSem_l = sem_open(PDO_SYNC_BSDSEM, O_CREAT, S_IRWXG, 1)) == SEM_FAILED)
+    {
+        TRACE ("%s() creating sem failed!\n", __func__);
+        return kEplNoResource;
+    }
     return kEplSuccessful;
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief  Process events from PdouCal module.
+\brief  Cleanup PDO user CAL sync module
 
-\param  pEvent_p                Pointer to event structure
+The function cleans up the PDO user CAL sync module
+*/
+//------------------------------------------------------------------------------
+void pdoucal_exitSync(void)
+{
+    sem_close(syncSem_l);
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Wait for a sync event
+
+The function waits for a sync event.
+
+\param  timeout_p       Specifies a timeout in microseconds. If 0 it waits
+                        forever.
 
 \return The function returns a tEplKernel error code.
-
-\ingroup module_pdokcal
-**/
+\retval kEplSuccessful      Successfully received sync event
+\retval kEplGeneralError    Error while waiting on sync event
+*/
 //------------------------------------------------------------------------------
-tEplKernel pdokcal_process(tEplEvent * pEvent_p)
+tEplKernel pdoucal_waitSyncEvent(ULONG timeout_p)
 {
-    tEplKernel                  Ret = kEplSuccessful;
+    int                 semRet;
 
-    switch (pEvent_p->m_EventType)
+    if (timeout_p != 0)
     {
-        case kEplEventTypePdokAlloc:
-            {
-                tPdoAllocationParam* pAllocationParam;
-                pAllocationParam = (tPdoAllocationParam*) pEvent_p->m_pArg;
-                Ret = pdok_allocChannelMem(pAllocationParam);
-            }
-            break;
+        struct timespec     semTimeout;
 
-        case kEplEventTypePdokConfig:
-            {
-                tPdoChannelConf* pChannelConf;
-                pChannelConf = (tPdoChannelConf*) pEvent_p->m_pArg;
-                Ret = pdok_configureChannel(pChannelConf);
-            }
-            break;
+        semTimeout.tv_sec = 0;
+        semTimeout.tv_nsec = timeout_p * 1000;
 
-        case kEplEventTypePdokSetupPdoBuf:
-            {
-                Ret = pdok_setupPdoBuffers();
-            }
-            break;
-
-        case kEplEventTypePdoRx:
-            {
-#if EPL_DLL_DISABLE_DEFERRED_RXFRAME_RELEASE == FALSE
-                tEplFrameInfo*  pFrameInfo;
-                pFrameInfo = (tEplFrameInfo *) pEvent_p->m_pArg;
-                Ret = pdok_processRxPdo(pFrameInfo->m_pFrame, pFrameInfo->m_uiFrameSize);
-#else
-                tEplFrame*  pFrame;
-
-                pFrame = (tEplFrame *) pEvent_p->m_pArg;
-
-                Ret = pdok_processRxPdo(pFrame, pEvent_p->m_uiSize);
-#endif
-            }
-            break;
-
-        default:
-            Ret = kEplInvalidEvent;
-            break;
+        semRet = sem_timedwait(syncSem_l, &semTimeout);
     }
-    return Ret;
+    else
+    {
+        semRet = sem_wait(syncSem_l);
+    }
+
+    if (semRet == 0)
+        return kEplSuccessful;
+    else
+        return kEplGeneralError;
 }
 
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
 //============================================================================//
-/// \name Private Functions
-/// \{
-
-//------------------------------------------------------------------------------
-/**
-\brief  Process received PDO
-
-This function is called by DLL if PRes or PReq frame was received. It posts
-the frame to the event queue. It is called in states NMT_CS_READY_TO_OPERATE
-and NMT_CS_OPERATIONAL. The passed PDO needs not to be valid.
-
-\param  pFrameInfo_p            pointer to frame info structure
-
-\return The function returns a tEplKernel error code.
-**/
-//------------------------------------------------------------------------------
-static tEplKernel cbProcessRpdo(tEplFrameInfo * pFrameInfo_p)
-{
-    tEplKernel      ret = kEplSuccessful;
-    tEplEvent       event;
-
-    event.m_EventSink = kEplEventSinkPdokCal;
-    event.m_EventType = kEplEventTypePdoRx;
-#if EPL_DLL_DISABLE_DEFERRED_RXFRAME_RELEASE == FALSE
-    event.m_uiSize    = sizeof(tEplFrameInfo);
-    event.m_pArg      = pFrameInfo_p;
-#else
-    // limit copied data to size of PDO (because from some CNs the frame is larger than necessary)
-    event.m_uiSize = AmiGetWordFromLe(&pFrameInfo_p->m_pFrame->m_Data.m_Pres.m_le_wSize) + EPL_FRAME_OFFSET_PDO_PAYLOAD; // pFrameInfo_p->m_uiFrameSize;
-    event.m_pArg = pFrameInfo_p->m_pFrame;
-#endif
-    ret = eventk_postEvent(&event);
-#if EPL_DLL_DISABLE_DEFERRED_RXFRAME_RELEASE == FALSE
-    if (ret == kEplSuccessful)
-    {
-        ret = kEplReject; // Reject release of rx buffer
-    }
-#endif
-
-    return ret;
-}
-
-///\}
 

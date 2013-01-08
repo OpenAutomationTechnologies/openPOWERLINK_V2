@@ -124,7 +124,7 @@ static tEventDispatchEntry eventDispatchTbl_l[] =
     { kEplEventSinkDllkCal,     kEplEventSourceDllk,        NULL },
 #endif
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOK)) != 0)
-    { kEplEventSinkPdokCal,     kEplEventSourcePdok,        EplPdokCalProcess },
+    { kEplEventSinkPdokCal,     kEplEventSourcePdok,        pdokcal_process },
 #endif
     { kEplEventSinkInvalid,     kEplEventSourceInvalid,     NULL }
 };
