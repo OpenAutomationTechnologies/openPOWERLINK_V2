@@ -114,7 +114,7 @@ tEplKernel PUBLIC AppCbEvent(tEplApiEventType EventType_p,
                     // -> also shut down EplApiProcess()
                     EplRet = kEplShutdown;
                     // and unblock DataInDataOutThread
-                    EplApiProcessImageFree();
+                    api_processImageFree();
 
                     printf("AppCbEvent(kEplNmtGsOff) originating event = 0x%X\n",
                            pEventArg_p->m_NmtStateChange.m_NmtEvent);

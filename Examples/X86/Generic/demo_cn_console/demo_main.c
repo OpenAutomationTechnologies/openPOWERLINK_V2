@@ -155,9 +155,8 @@ static unsigned int uiCycleLen_g = 0;
 static char *pLogFile_g = NULL;
 
 /* process image */
-static PI_IN AppProcessImageIn_g;           // input process image
-static PI_OUT AppProcessImageOut_g;         // output process image
-static tEplApiProcessImageCopyJob AppProcessImageCopyJob_g;
+static PI_IN* pProcessImageIn_l;
+static PI_OUT* pProcessImageOut_l;
 
 /* application variables */
 BYTE    digitalIn_g;                        // 8 bit digital input
@@ -505,30 +504,24 @@ int  main (int argc, char **argv)
     /**********************************************************/
     /* Allocate process image */
     printf("Initializing process image...\n");
-    printf("Size of input process image: %ld\n", sizeof(AppProcessImageIn_g));
-    printf("Size of output process image: %ld\n", sizeof (AppProcessImageOut_g));
-    AppProcessImageCopyJob_g.m_fNonBlocking = FALSE;
-    AppProcessImageCopyJob_g.m_uiPriority = 0;
-    AppProcessImageCopyJob_g.m_In.m_pPart = &AppProcessImageIn_g;
-    AppProcessImageCopyJob_g.m_In.m_uiOffset = 0;
-    AppProcessImageCopyJob_g.m_In.m_uiSize = sizeof (AppProcessImageIn_g);
-    AppProcessImageCopyJob_g.m_Out.m_pPart = &AppProcessImageOut_g;
-    AppProcessImageCopyJob_g.m_Out.m_uiOffset = 0;
-    AppProcessImageCopyJob_g.m_Out.m_uiSize = sizeof (AppProcessImageOut_g);
-
-    EplRet = EplApiProcessImageAlloc(sizeof (AppProcessImageIn_g), sizeof (AppProcessImageOut_g), 2, 2);
+    printf("Size of input process image: %ld\n", sizeof(PI_IN));
+    printf("Size of output process image: %ld\n", sizeof (PI_OUT));
+    EplRet = api_processImageAlloc(sizeof(PI_IN), sizeof(PI_OUT));
     if (EplRet != kEplSuccessful)
     {
         goto Exit;
     }
 
+    pProcessImageIn_l = api_processImageGetInputImage();
+    pProcessImageOut_l = api_processImageGetOutputImage();
+
     /**********************************************************/
     /* link process variables used by CN to object dictionary */
     printf("linking process image vars:\n");
 
-    ObdSize = sizeof(AppProcessImageIn_g.digitalIn);
+    ObdSize = sizeof(pProcessImageIn_l->digitalIn);
     uiVarEntries = 1;
-    EplRet = EplApiProcessImageLinkObject(0x6000, 0x01,
+    EplRet = api_processImageLinkObject(0x6000, 0x01,
              offsetof(PI_IN, digitalIn), FALSE, ObdSize, &uiVarEntries);
     if (EplRet != kEplSuccessful)
     {
@@ -536,9 +529,9 @@ int  main (int argc, char **argv)
         goto ExitShutdown;
     }
 
-    ObdSize = sizeof(AppProcessImageOut_g.digitalOut);
+    ObdSize = sizeof(pProcessImageOut_l->digitalOut);
     uiVarEntries = 1;
-    EplRet = EplApiProcessImageLinkObject(0x6200, 0x01,
+    EplRet = api_processImageLinkObject(0x6200, 0x01,
              offsetof(PI_OUT, digitalOut), TRUE, ObdSize, &uiVarEntries);
     if (EplRet != kEplSuccessful)
     {
@@ -661,7 +654,7 @@ tEplKernel PUBLIC AppCbEvent(
     void GENERIC*           pUserArg_p)    //__attribute((unused))
 
 {
-//UNUSED_PARAMETER(pUserArg_p);
+    UNUSED_PARAMETER(pUserArg_p);
 
     tEplKernel          EplRet = kEplSuccessful;
 
@@ -791,17 +784,19 @@ tEplKernel PUBLIC AppCbSync(void)
 {
     tEplKernel      EplRet = kEplSuccessful;
 
-    EplRet = EplApiProcessImageExchange(&AppProcessImageCopyJob_g);
+    EplRet = api_processImageExchangeOut();
     if (EplRet != kEplSuccessful)
     {
         return EplRet;
     }
 
     /* read input image - digital outputs */
-    digitalOut_g = AppProcessImageOut_g.digitalOut;
+    digitalOut_g = pProcessImageOut_l->digitalOut;
 
     /* setup output image - digital inputs */
-    AppProcessImageIn_g.digitalIn = digitalIn_g;
+    pProcessImageIn_l->digitalIn = digitalIn_g;
+
+    EplRet = api_processImageExchangeIn();
 
     return EplRet;
 }
