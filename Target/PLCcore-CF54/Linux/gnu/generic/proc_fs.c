@@ -250,7 +250,7 @@ static  int  EplLinProcRead (
 int                     nSize;
 static int              Eof;
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLK)) != 0)
-tEplDllkCalStatistics*  pDllkCalStats;
+tDllkCalStatistics*  pDllkCalStats;
 #endif
 #if (EDRV_CYCLIC_USE_DIAGNOSTICS != FALSE)
 tEdrvCyclicDiagnostics* pEdrvCyclicDiag;
