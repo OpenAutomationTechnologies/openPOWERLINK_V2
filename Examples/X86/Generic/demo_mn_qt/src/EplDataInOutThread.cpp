@@ -76,9 +76,9 @@ EplDataInOutThread    *pEplDataInOutThread_g;
 static int iUsedNodeIds_g[] = {1, 32, 110, 0};
 
 /* process images, structures defined in xap.h from openCONFIGURATOR */
-static PI_IN                    PiIn_g;
-static PI_OUT                   PiOut_g;
-tEplApiProcessImageCopyJob      PICopyJob_g;
+static PI_IN* pProcessImageIn_l;
+static PI_OUT* pProcessImageOut_l;
+
 
 /******************************************************************************/
 /* global functions */
@@ -98,7 +98,7 @@ tEplKernel PUBLIC AppCbSync(void)
     tEplKernel          EplRet;
     int                 i;
 
-    EplRet = EplApiProcessImageExchange(&PICopyJob_g);
+    EplRet = api_processImageExchangeOut();
     if (EplRet != kEplSuccessful)
     {
         return EplRet;
@@ -106,9 +106,9 @@ tEplKernel PUBLIC AppCbSync(void)
 
     pEplDataInOutThread_g->m_uiCnt++;
 
-    pEplDataInOutThread_g->m_uiInput[0] = PiOut_g.CN1_M00_Digital_Input_8_Bit_Byte_1;
-    pEplDataInOutThread_g->m_uiInput[1] = PiOut_g.CN32_M00_Digital_Input_8_Bit_Byte_1;
-    pEplDataInOutThread_g->m_uiInput[2] = PiOut_g.CN110_M00_Digital_Input_8_Bit_Byte_1;
+    pEplDataInOutThread_g->m_uiInput[0] = pProcessImageOut_l->CN1_M00_Digital_Input_8_Bit_Byte_1;
+    pEplDataInOutThread_g->m_uiInput[1] = pProcessImageOut_l->CN32_M00_Digital_Input_8_Bit_Byte_1;
+    pEplDataInOutThread_g->m_uiInput[2] = pProcessImageOut_l->CN110_M00_Digital_Input_8_Bit_Byte_1;
 
     for (i = 0; (i < MAX_NODES) && (iUsedNodeIds_g[i] != 0); i++)
     {
@@ -156,9 +156,11 @@ tEplKernel PUBLIC AppCbSync(void)
         }
     }
 
-    PiIn_g.CN1_M00_Digital_Ouput_8_Bit_Byte_1 = pEplDataInOutThread_g->m_uiLeds[0];
-    PiIn_g.CN32_M00_Digital_Ouput_8_Bit_Byte_1 = pEplDataInOutThread_g->m_uiLeds[1];
-    PiIn_g.CN110_M00_Digital_Ouput_8_Bit_Byte_1 = pEplDataInOutThread_g->m_uiLeds[2];
+    pProcessImageIn_l->CN1_M00_Digital_Ouput_8_Bit_Byte_1 = pEplDataInOutThread_g->m_uiLeds[0];
+    pProcessImageIn_l->CN32_M00_Digital_Ouput_8_Bit_Byte_1 = pEplDataInOutThread_g->m_uiLeds[1];
+    pProcessImageIn_l->CN110_M00_Digital_Ouput_8_Bit_Byte_1 = pEplDataInOutThread_g->m_uiLeds[2];
+
+    EplRet = api_processImageExchangeIn();
 
     return EplRet;
 }
@@ -175,20 +177,6 @@ Constructs an EplDataInOutThread object.
 EplDataInOutThread::EplDataInOutThread()
 {
     int         i;
-
-    memset(&PiIn_g, 0, sizeof (PiIn_g));
-    memset(&PiOut_g, 0,  sizeof (PiOut_g));
-
-    /* setup process image copy job */
-    PICopyJob_g.m_In.m_pPart      = &PiIn_g;
-    PICopyJob_g.m_In.m_uiOffset   = 0;
-    PICopyJob_g.m_In.m_uiSize     = sizeof (PiIn_g);
-    PICopyJob_g.m_Out.m_pPart     = &PiOut_g;
-    PICopyJob_g.m_Out.m_uiOffset  = 0;
-    PICopyJob_g.m_Out.m_uiSize    = sizeof (PiOut_g);
-    PICopyJob_g.m_uiPriority      = 0;
-    PICopyJob_g.m_fNonBlocking    = FALSE;
-
     /* initialize all application variables */
     for (i = 0; (i < MAX_NODES) && (iUsedNodeIds_g[i] != 0); i++)
     {
@@ -216,12 +204,15 @@ tEplKernel EplDataInOutThread::SetupProcessImage()
 {
 tEplKernel          EplRet;
 
-    EplRet = EplApiProcessImageAlloc(sizeof (PiIn_g), sizeof (PiOut_g), 2 , 2);
+    EplRet = api_processImageAlloc(sizeof(PI_IN), sizeof(PI_OUT));
     if (EplRet != kEplSuccessful)
     {
         printf("EplApiProcessImageAlloc():  0x%X\n", EplRet);
         goto Exit;
     }
+
+    pProcessImageIn_l = (PI_IN *)api_processImageGetInputImage();
+    pProcessImageOut_l = (PI_OUT *)api_processImageGetOutputImage();
 
     EplRet = EplApiProcessImageSetup();
     if (EplRet != kEplSuccessful)

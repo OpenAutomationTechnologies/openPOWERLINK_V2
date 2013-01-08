@@ -281,7 +281,7 @@ EplApi::~EplApi()
 
     EplRet = EplApiExecNmtCommand(kEplNmtEventSwitchOff);
     pEplProcessThread->waitForNmtStateOff();
-    EplRet = EplApiProcessImageFree();
+    EplRet = api_processImageFree();
     EplRet = EplApiShutdown();
 }
 
