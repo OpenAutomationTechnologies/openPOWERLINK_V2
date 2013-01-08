@@ -29,12 +29,3 @@ The following section contains information on building and running openPOWERLINK
 
 *******************************************************************************/
 
-
-/**
-********************************************************************************
-\page stack Software Architecture
-
-- \subpage software-architecture
-
-*******************************************************************************/
-
