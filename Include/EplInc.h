@@ -188,6 +188,69 @@ typedef union
 // macros
 // -------------------------------------------------------------------------
 
+/*
+Create macros which determine which module should be inlcuded. The macros are
+created depending on the macro EPL_MODULE_INTEGRATION.
+
+All conditional in the code which contain references to EPL_MODULE_INTEGRATION
+should be replaced by the following macros. Using this macro results in
+simpler conditional statements.
+*/
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_OBDK)) != 0)
+#define CONFIG_INCLUDE_OBDK
+#endif
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOK)) != 0)
+#define CONFIG_INCLUDE_PDOK
+#endif
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
+#define CONFIG_INCLUDE_NMT_MN
+#endif
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOS)) != 0)
+#define CONFIG_INCLUDE_SDOS
+#endif
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOC)) != 0)
+#define CONFIG_INCLUDE_SDOC
+#endif
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDO_ASND)) != 0)
+#define CONFIG_INCLUDE_SDO_ASND
+#endif
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDO_UDP)) != 0)
+#define CONFIG_INCLUDE_SDO_UDP
+#endif
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDO_PDO)) != 0)
+#define CONFIG_INCLUDE_SDO_PDO
+#endif
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMTU)) != 0)
+#define CONFIG_INCLUDE_NMTU
+#endif
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMTK)) != 0)
+#define CONFIG_INCLUDE_NMTK
+#endif
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLK)) != 0)
+#define CONFIG_INCLUDE_DLLK
+#endif
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLU)) != 0)
+#define CONFIG_INCLUDE_DLLU
+#endif
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_OBDU)) != 0)
+#define CONFIG_INCLUDE_OBDU
+#endif
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_CFM)) != 0)
+#define CONFIG_INCLUDE_CFM
+#endif
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_VETH)) != 0)
+#define CONFIG_INCLUDE_VETH
+#endif
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOU)) != 0)
+#define CONFIG_INCLUDE_PDOU
+#endif
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_LEDU)) != 0)
+#define CONFIG_INCLUDE_LEDU
+#endif
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_GW309ASCII)) != 0)
+#define CONFIG_INCLUDE_GW309ASCII
+#endif
+
 #define EPL_SPEC_VERSION                    0x20    // Ethernet POWERLINK V 2.0
 #define EPL_STACK_VERSION(ver,rev,rel)      (((((DWORD)(ver)) & 0xFF)<<24)|((((DWORD)(rev))&0xFF)<<16)|(((DWORD)(rel))&0xFFFF))
 #define EPL_OBJ1018_VERSION(ver,rev,rel)    ((((DWORD)(ver))<<16) |(((DWORD)(rev))&0xFFFF))
