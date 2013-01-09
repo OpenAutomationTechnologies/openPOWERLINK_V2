@@ -2,12 +2,13 @@
 ********************************************************************************
 \file   errhndk.c
 
-\brief  Kernel part of error handler module
+\brief  Implementation of kernel error handler module
 
 This module implements the kernel part of the error handler module.
 It is responsible for handling errors and incrementing the appropriate
 error counters.
 
+\ingroup module_errhndk
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
@@ -59,9 +60,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#define EPL_ERRORHANDLERK_CN_LOSS_PRES_EVENT_NONE   0   // not occurred
-#define EPL_ERRORHANDLERK_CN_LOSS_PRES_EVENT_OCC    1   // occurred
-#define EPL_ERRORHANDLERK_CN_LOSS_PRES_EVENT_THR    2   // threshold exceeded
+#define ERRORHANDLERK_CN_LOSS_PRES_EVENT_NONE   0   // error not occurred
+#define ERRORHANDLERK_CN_LOSS_PRES_EVENT_OCC    1   // occurred
+#define ERRORHANDLERK_CN_LOSS_PRES_EVENT_THR    2   // threshold exceeded
 
 //------------------------------------------------------------------------------
 // module global vars
@@ -112,7 +113,7 @@ static void       decrementCnCounters(void);
 static tEplKernel postHistoryEntryEvent(tEplErrHistoryEntry* pHistoryEntry_p);
 static tEplKernel handleDllErrors(tEplEvent *pEvent_p);
 
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
+#ifdef CONFIG_INCLUDE_NMT_MN
 static tEplKernel decrementMnCounters(void);
 #endif
 
@@ -128,6 +129,8 @@ static tEplKernel decrementMnCounters(void);
 The function initializes the kernel error handler module.
 
 \return Returns a tEplKernel error code.
+
+\ingroup module_errhndk
 */
 //------------------------------------------------------------------------------
 tEplKernel errhndk_init(void)
@@ -148,6 +151,8 @@ tEplKernel errhndk_init(void)
 The function shuts down the kernel error handler module.
 
 \return Returns always kEplSuccessful
+
+\ingroup module_errhndk
 */
 //------------------------------------------------------------------------------
 tEplKernel errhndk_exit()
@@ -170,6 +175,8 @@ It will be called by the DLL.
 \return Returns a tEplKernel error code
 \retval kEplSuccessful      Event was successfully handled
 \retval kEplInvalidEvent    An invalid event was supplied
+
+\ingroup module_errhndk
 */
 //------------------------------------------------------------------------------
 tEplKernel errhndk_process(tEplEvent* pEvent_p)
@@ -202,11 +209,13 @@ of each cycle.
 \param  fMN_p               Flag determines if node is running as MN
 
 \return Returns always kEplSuccessful
+
+\ingroup module_errhndk
 */
 //------------------------------------------------------------------------------
 tEplKernel errhndk_decrementCounters(BOOL fMN_p)
 {
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
+#ifdef CONFIG_INCLUDE_NMT_MN
     if (fMN_p != FALSE)
     {   // local node is MN -> decrement MN threshold counters
         decrementMnCounters();
@@ -236,6 +245,8 @@ to other modules which need to post error events to the error handler.
 \param  pErrEvent_p         Pointer to error event which should be posted
 
 \return Returns error code provided by eventk_postEvent()
+
+\ingroup module_errhndk
 */
 //------------------------------------------------------------------------------
 tEplKernel errhndk_postError(tErrHndkEvent* pErrEvent_p)
@@ -253,16 +264,18 @@ tEplKernel errhndk_postError(tErrHndkEvent* pErrEvent_p)
 }
 
 
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
+#ifdef CONFIG_INCLUDE_NMT_MN
 //------------------------------------------------------------------------------
 /**
 \brief    Reset error flag for specified CN
 
 The function resets the error flag for the specified CN.
 
-\param  uiNodeId_p          Node ID of CN for which error flag will be reseted
+\param  nodeId_p            Node ID of CN for which error flag will be reseted
 
 \return Returns always kEplSuccessful
+
+\ingroup module_errhndk
 */
 //------------------------------------------------------------------------------
 
@@ -275,7 +288,7 @@ tEplKernel errhndk_resetCnError(UINT nodeId_p)
     if (nodeIdx >= NUM_DLL_MNCN_LOSSPRES_OBJS)
         return kEplInvalidNodeId;
 
-    instance_l.aMnCnLossPresEvent[nodeIdx] = EPL_ERRORHANDLERK_CN_LOSS_PRES_EVENT_NONE;
+    instance_l.aMnCnLossPresEvent[nodeIdx] = ERRORHANDLERK_CN_LOSS_PRES_EVENT_NONE;
     return kEplSuccessful;
 }
 #endif
@@ -283,8 +296,11 @@ tEplKernel errhndk_resetCnError(UINT nodeId_p)
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
 //============================================================================//
+/// \name Private Functions
+/// \{
 
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
+
+#ifdef CONFIG_INCLUDE_NMT_MN
 //------------------------------------------------------------------------------
 /**
 \brief    Decrement MN error counters
@@ -314,7 +330,7 @@ static tEplKernel decrementMnCounters(void)
         if (nodeIdx < NUM_DLL_MNCN_LOSSPRES_OBJS)
         {
             if  (instance_l.aMnCnLossPresEvent[nodeIdx] ==
-                 EPL_ERRORHANDLERK_CN_LOSS_PRES_EVENT_NONE)
+                 ERRORHANDLERK_CN_LOSS_PRES_EVENT_NONE)
             {
                 errhndkcal_getMnCnLossPresThresholdCnt(nodeIdx, &thresholdCnt);
                 if (thresholdCnt > 0)
@@ -326,10 +342,10 @@ static tEplKernel decrementMnCounters(void)
             else
             {
                 if (instance_l.aMnCnLossPresEvent[nodeIdx] ==
-                     EPL_ERRORHANDLERK_CN_LOSS_PRES_EVENT_OCC)
+                     ERRORHANDLERK_CN_LOSS_PRES_EVENT_OCC)
                 {
                     instance_l.aMnCnLossPresEvent[nodeIdx] =
-                                          EPL_ERRORHANDLERK_CN_LOSS_PRES_EVENT_NONE;
+                                          ERRORHANDLERK_CN_LOSS_PRES_EVENT_NONE;
                 }
             }
         }
@@ -602,7 +618,7 @@ static tEplKernel handleInvalidFormat(tEplEvent *pEvent_p)
 
     BENCHMARK_MOD_02_TOGGLE(7);
 
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
+#ifdef CONFIG_INCLUDE_NMT_MN
     if (pErrorHandlerEvent->m_NmtState >= kEplNmtMsNotActive)
     {   // MN is active
         if (pErrorHandlerEvent->m_uiNodeId != 0)
@@ -634,7 +650,7 @@ static tEplKernel handleInvalidFormat(tEplEvent *pEvent_p)
     return kEplSuccessful;
 }
 
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
+#ifdef CONFIG_INCLUDE_NMT_MN
 //------------------------------------------------------------------------------
 /**
 \brief    Handle a MN CRC error
@@ -775,7 +791,7 @@ static tEplKernel handleMnCnLossPres(tEplEvent *pEvent_p)
                                     &thresholdCnt, &threshold);
 
     if  (instance_l.aMnCnLossPresEvent[nodeIdx] !=
-                                  EPL_ERRORHANDLERK_CN_LOSS_PRES_EVENT_NONE)
+                                  ERRORHANDLERK_CN_LOSS_PRES_EVENT_NONE)
         return kEplSuccessful;
 
     cumulativeCnt++;
@@ -788,7 +804,7 @@ static tEplKernel handleMnCnLossPres(tEplEvent *pEvent_p)
         if (thresholdCnt >= threshold)
         {
             instance_l.aMnCnLossPresEvent[nodeIdx] =
-                            EPL_ERRORHANDLERK_CN_LOSS_PRES_EVENT_THR;
+                            ERRORHANDLERK_CN_LOSS_PRES_EVENT_THR;
 
             ret = generateHistoryEntryNodeId(EPL_E_DLL_LOSS_PRES_TH,
                                              pEvent_p->m_NetTime,
@@ -813,14 +829,14 @@ static tEplKernel handleMnCnLossPres(tEplEvent *pEvent_p)
         else
         {
             instance_l.aMnCnLossPresEvent[nodeIdx] =
-                            EPL_ERRORHANDLERK_CN_LOSS_PRES_EVENT_OCC;
+                            ERRORHANDLERK_CN_LOSS_PRES_EVENT_OCC;
         }
     }
     errhndkcal_setMnCnLossPresCounters(nodeIdx, cumulativeCnt, thresholdCnt);
     return kEplSuccessful;
 }
 
-#endif // ((EPL_MODULE_INTEGRATION & EPL_MODULE_NMT_MN) != 0)
+#endif
 
 //------------------------------------------------------------------------------
 /**
@@ -857,7 +873,7 @@ static tEplKernel handleDllErrors(tEplEvent *pEvent_p)
     if (ret != kEplSuccessful)
         return ret;
 
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
+#ifdef CONFIG_INCLUDE_NMT_MN
     ret = handleMnCrc(pEvent_p);
     if (ret != kEplSuccessful)
         return ret;
@@ -1051,3 +1067,4 @@ static tEplKernel postNmtEvent(tEplNmtEvent nmtEvent_p)
     return ret;
 }
 
+/// \}

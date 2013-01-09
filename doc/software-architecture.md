@@ -8,13 +8,21 @@ stack.
 
 ## openPOWERLINK User Layer
 
-### Modules
+### Error handler
+- \ref module_errhndu
+- \ref module_errhnducal
+
+### PDO
 - \ref module_pdou
 - \ref module_pdoucal
 
 
 ## openPOWERLINK Kernel Layer
 
-### Modules
+### Error handler
+- \ref module_errhndk
+- \ref module_errhndkcal
+
+### PDO
 - \ref module_pdok
 - \ref module_pdokcal

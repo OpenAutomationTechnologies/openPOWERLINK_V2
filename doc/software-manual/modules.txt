@@ -8,6 +8,35 @@
 
 //==============================================================================
 /**
+\defgroup module_errhndu User error handler module (errhndu)
+
+The user error handler module implements the parts of the error handler located
+in the user layer. The user layer parts are responsible to synchronize the
+error counters and threshold located in the kernel with the appropriate objects
+in the object dictionary.
+
+\see module_errhndk
+\see module_errhnducal
+
+\ingroup user_layer
+*/
+
+//==============================================================================
+/**
+\defgroup module_errhnducal User error handler CAL module (errhnducal)
+
+This module implements the CAL for the user POWERLINK error handler. It is
+responsible for transfer of error handler information with the kernel layer.
+There may be different implementations of the CAL layer using different
+communication mechanisms.
+
+\see module_errhndu
+
+\ingroup user_layer
+*/
+
+//==============================================================================
+/**
 \defgroup module_pdou User layer PDO module (pdou)
 
 The user PDO module is responsible for exchanging process image data with the
@@ -48,6 +77,33 @@ could be implemented. Currently the following implementations are available:
 */
 //==============================================================================
 //==============================================================================
+
+//==============================================================================
+/**
+\defgroup module_errhndk Kernel error handler module (errhndk)
+
+The kernel error handler module implements the POWERLINK error handler. It is
+used to manage the POWERLINK error counters.
+
+\see module_errhndu
+\see module_errhndkcal
+
+\ingroup kernel_layer
+*/
+
+//==============================================================================
+/**
+\defgroup module_errhndkcal Kernel error handler CAL module (errhndkcal)
+
+This module implements the CAL for the kernel POWERLINK error handler. It is
+responsible for transfer of error handler information with the user layer.
+There may be different implementations of the CAL layer using different
+communication mechanisms.
+
+\see module_errhndk
+
+\ingroup kernel_layer
+*/
 
 //==============================================================================
 /**

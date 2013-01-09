@@ -2,9 +2,9 @@
 ********************************************************************************
 \file   errhndu.c
 
-\brief  User part of error handler module
+\brief  Implementation of user part of error handler module
 
-This module implements the user part of the error handler module.It is
+This file implements the user part of the error handler module.It is
 responsible for linking the POWERLINK error counters into the object
 dictionary. It contains object callback function which are responsible
 to read values from kernel layer when reading the object or writing them
@@ -12,6 +12,7 @@ into kernel layer after writing the object. The communication with the
 kernel part of the error handler is implemented by a error handler CAL
 module.
 
+\ingroup module_errhndu
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
@@ -44,8 +45,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include "EplNmt.h"
-#include "Benchmark.h"
+#include <EplNmt.h>
+#include <Benchmark.h>
 #include <EplObd.h>
 #include <kernel/EplObdk.h>
 
@@ -86,7 +87,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 The structure defines the instance variables of the user error handler.
 */
-
 typedef struct
 {
     tErrHndObjects      errorObjects;       ///< Contains the supported error objects
@@ -102,7 +102,7 @@ static tErrHnduInstance        instance_l;
 //------------------------------------------------------------------------------
 static tEplKernel linkErrorCounter(tErrorObject* pErrorCounter_p, UINT index_p);
 
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
+#ifdef CONFIG_INCLUDE_NMT_MN
 static tEplKernel checkErrorObject(UINT index_p, BYTE *pEntries_p);
 static tEplKernel linkMnCnLossPresErrors(tErrHndObjects* pError_p);
 #endif
@@ -118,6 +118,8 @@ static tEplKernel linkMnCnLossPresErrors(tErrHndObjects* pError_p);
 The function initializes the user error handler module.
 
 \return Returns a tEplKernel error code.
+
+\ingroup module_errhndu
 */
 //------------------------------------------------------------------------------
 tEplKernel PUBLIC errhndu_init(void)
@@ -149,7 +151,7 @@ tEplKernel PUBLIC errhndu_init(void)
         goto Exit;
     }
 
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
+#ifdef INCLUDE_NMT_MN
     ret = linkErrorCounter(&instance_l.errorObjects.mnCrcErr, OID_DLL_MN_CRCERROR_REC);
     if (ret != kEplSuccessful)
     {
@@ -185,6 +187,8 @@ Exit:
 The function shuts down the user error handler module.
 
 \return Returns a tEplKernel error code.
+
+\ingroup module_errhndu
 */
 //------------------------------------------------------------------------------
 tEplKernel PUBLIC errhndu_exit()
@@ -245,6 +249,7 @@ tEplKernel PUBLIC errhndu_cbObdAccess(tEplObdCbParam MEM* pParam_p)
     return kEplSuccessful;
 }
 
+#ifdef CONFIG_INCLUDE_NMT_MN
 //------------------------------------------------------------------------------
 /**
 \brief    Loss of PRes error handler OD callback function
@@ -259,6 +264,8 @@ PreRead objects.
 \param  pParam_p            OD callback parameter
 
 \return Returns always kEplSuccessful
+
+\ingroup module_errhndu
 */
 //------------------------------------------------------------------------------
 tEplKernel PUBLIC errhndu_mnCnLossPresCbObdAccess(tEplObdCbParam MEM* pParam_p)
@@ -305,6 +312,7 @@ tEplKernel PUBLIC errhndu_mnCnLossPresCbObdAccess(tEplObdCbParam MEM* pParam_p)
     }
     return ret;
 }
+#endif
 
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
@@ -321,6 +329,8 @@ directory entry.
 \param  index_p             OD index
 
 \return Returns a tEplKernel error code.
+
+\ingroup module_errhndu
 */
 //------------------------------------------------------------------------------
 static tEplKernel linkErrorCounter(tErrorObject* pErrorCounter_p, UINT index_p)
@@ -350,7 +360,7 @@ static tEplKernel linkErrorCounter(tErrorObject* pErrorCounter_p, UINT index_p)
     return ret;
 }
 
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
+#ifdef INCLUDE_NMT_MN
 //------------------------------------------------------------------------------
 /**
 \brief    check if error object exists in OD
@@ -365,6 +375,8 @@ dictionary.
 \return Returns a tEplKernel error code.
 \retval kEplSuccessful          If object exists
 \retval kEplObdIndexNotExist    IF index does not exist
+
+\ingroup module_errhndu
 */
 //------------------------------------------------------------------------------
 static tEplKernel checkErrorObject(UINT index_p, BYTE *pEntries_p)
@@ -397,6 +409,8 @@ subindexes for each node ID.
 \param  pError_p            Pointer to error handler object data.
 
 \return Returns a tEplKernel error code.
+
+\ingroup module_errhndu
 */
 //------------------------------------------------------------------------------
 static tEplKernel linkMnCnLossPresErrors(tErrHndObjects* pError_p)
@@ -459,5 +473,5 @@ static tEplKernel linkMnCnLossPresErrors(tErrHndObjects* pError_p)
     return ret;
 }
 
-#endif //(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
+#endif
 

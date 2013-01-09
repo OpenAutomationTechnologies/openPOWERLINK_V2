@@ -2,12 +2,13 @@
 ********************************************************************************
 \file   errhnducal-shb.c
 
-\brief  User CAL module for error handler
+\brief  Implementation of user CAL module for error handler
 
 This module implements the user layer CAL functions of the error handler.
 This implementation uses linear shared buffers provided by the shared buffer
 module to share the error objects between user and kernel part.
 
+\ingroup module_errhnducal
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
@@ -76,16 +77,23 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local types
 //------------------------------------------------------------------------------
+
+/**
+\brief Instance of shared buffer implementation of error handler CAL
+
+This structure implements the instance variable of the shared buffer
+implementation of the user error handler CAL moduel.
+*/
 typedef struct {
-    tShbInstance                shbInstance;            ///< shared buffer instance for shared mem
-    tErrHndObjects              errorObjects;
+    tShbInstance                shbInstance;            ///< Shared buffer instance for the used shared buffer
+    tErrHndObjects              errorObjects;           ///< Error objects
 } tErrShbInstance;
 
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
 static tErrShbInstance          instance_l;             ///< shared buffer instance for shared mem
-static BOOL                     fInitialized_l = FALSE;
+static BOOL                     fInitialized_l = FALSE; ///< Flag determines if module is initialized
 static tErrHndObjects           *pLocalObjects_l;       ///< pointer to user error objects
 
 //------------------------------------------------------------------------------
@@ -105,6 +113,8 @@ The function initializes the user layer CAL module of the error handler.
 \param  pLocalObjects_p         Pointer to local error objects
 
 \return Always returns kEplSuccessful
+
+\ingroup module_errhnducal
 */
 //------------------------------------------------------------------------------
 tEplKernel errhnducal_init (tErrHndObjects *pLocalObjects_p)
@@ -155,6 +165,7 @@ tEplKernel errhnducal_init (tErrHndObjects *pLocalObjects_p)
 The function is used to deinitialize and shutdown the user layer
 CAL module of the error handler.
 
+\ingroup module_errhnducal
 */
 //------------------------------------------------------------------------------
 void errhnducal_exit (void)
@@ -178,6 +189,8 @@ by user and kernel modules.
 \param  pParam_p            Pointer to object in error handlers memory space
 
 \return Returns a tEplKernel error code.
+
+\ingroup module_errhnducal
 */
 //------------------------------------------------------------------------------
 tEplKernel errhnducal_writeErrorObject(UINT index_p, UINT subIndex_p, UINT32 *pParam_p)
@@ -205,6 +218,8 @@ by user and kernel modules.
 \param  pParam_p            Pointer to object in error handlers memory space
 
 \return Returns a tEplKernel error code.
+
+\ingroup module_errhnducal
 */
 //------------------------------------------------------------------------------
 tEplKernel errhnducal_readErrorObject(UINT index_p, UINT subIndex_p, UINT32 * pParam_p)

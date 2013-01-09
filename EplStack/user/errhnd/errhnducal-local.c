@@ -2,7 +2,7 @@
 ********************************************************************************
 \file   errhnducal-local.c
 
-\brief  User CAL module for error handler
+\brief  Implementation of user CAL module for error handler
 
 This module implements the user layer CAL functions of the error handler.
 This implementation uses a global variable which will be referenced from user
@@ -11,6 +11,7 @@ in the same domain and global variables could be shared. It has to be used
 together with errhndkcal-local.c which provides the global variable to store
 the error objects!
 
+\ingroup module_errhnducal
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
@@ -102,6 +103,8 @@ The function initializes the user layer CAL module of the error handler.
 \param  pLocalObjects_p         Pointer to local error objects
 
 \return Always returns kEplSuccessful
+
+\ingroup module_errhnducal
 */
 //------------------------------------------------------------------------------
 tEplKernel errhnducal_init (tErrHndObjects *pLocalObjects_p)
@@ -117,6 +120,7 @@ tEplKernel errhnducal_init (tErrHndObjects *pLocalObjects_p)
 The function is used to deinitialize and shutdown the user layer
 CAL module of the error handler.
 
+\ingroup module_errhnducal
 */
 //------------------------------------------------------------------------------
 void errhnducal_exit (void)
@@ -136,6 +140,8 @@ by user and kernel modules.
 \param  pParam_p            Pointer to object in error handlers memory space
 
 \return Returns a tEplKernel error code.
+
+\ingroup module_errhnducal
 */
 //------------------------------------------------------------------------------
 tEplKernel errhnducal_writeErrorObject(UINT index_p, UINT subIndex_p,
@@ -164,6 +170,8 @@ by user and kernel modules.
 \param  pParam_p            Pointer to object in error handlers memory space
 
 \return Returns a tEplKernel error code.
+
+\ingroup module_errhnducal
 */
 //------------------------------------------------------------------------------
 tEplKernel errhnducal_readErrorObject(UINT index_p, UINT subIndex_p,
