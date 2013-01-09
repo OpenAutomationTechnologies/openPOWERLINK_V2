@@ -96,11 +96,11 @@ Otherwise you can use the supplied SOF file and go directly to step 8.
    subdirectory `Examples\arch\altera_nios2\no_os\gnu\demo_directIO`.
    Therefore, execute the following command in the "Nios II Command Shell"
    before calling create-this-app to set the `SOPC_DIR`.
-   `$ export SOPC_DIR=../../../../../../fpga/altera/boards/SYSTEC_ECUcore-EP3C/design_nios2_directIO`\n
+   `$ export SOPC_DIR=../../../../../../fpga/boards/altera/SYSTEC_ECUcore-EP3C/design_nios2_directIO`\n
    or\n
-   `$ export SOPC_DIR=../../../../../../fpga/altera/boards/TERASIC_DE2-115/design_nios2_directIO`\n
+   `$ export SOPC_DIR=../../../../../../fpga/boards/altera/TERASIC_DE2-115/design_nios2_directIO`\n
    or\n
-   `$ export SOPC_DIR=../../../../../../fpga/altera/boards/EBV_DBC3C40/design_nios2_directIO`\n
+   `$ export SOPC_DIR=../../../../../../fpga/boards/altera/EBV_DBC3C40/design_nios2_directIO`\n
 9. Run script `create-this-app` to create the Makefile for the demo application
    and the necessary BSP. (This step is only necessary once)\n
    `$ ./create-this-app`
@@ -118,11 +118,11 @@ Otherwise you can use the supplied SOF file and go directly to step 8.
 2. Program SOF file with Quartus II Programmer into FPGA.
    It is located in the following subdirectory of openPOWERLINK
    main directory:\n
-   `/fpga/altera/boards/EBV_DBC3C40/design_nios2_directIO/nios_openMac.sof`\n
+   `/fpga/boards/altera/EBV_DBC3C40/design_nios2_directIO/nios_openMac.sof`\n
    or\n
-   `/fpga/altera/boards/TERASIC_DE2-115/design_nios2_directIO/nios_openMac.sof`\n
+   `/fpga/boards/altera/TERASIC_DE2-115/design_nios2_directIO/nios_openMac.sof`\n
    or\n
-   `/fpga/altera/boards/SYSTEC_ECUcore-EP3C/design_nios2_directIO/nios_openMac.sof`\n
+   `/fpga/boards/altera/SYSTEC_ECUcore-EP3C/design_nios2_directIO/nios_openMac.sof`\n
 3. Download the ELF file to the target:\n
    `$ cd Examples/arch/altera_nios2/no_os/gnu/demo_directIO`\n
    `$ make download-elf`\n

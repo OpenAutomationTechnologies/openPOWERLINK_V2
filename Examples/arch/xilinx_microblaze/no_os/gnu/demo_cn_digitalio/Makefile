@@ -19,7 +19,7 @@ OBJDICT_DIR=${STACK_ROOT}/ObjDicts/CiA401_CN
 EDRV_DIR=${STACK_ROOT}/Edrv/openmac
 TARGET_DIR=${STACK_ROOT}/Target/xilinx_microblaze/no_os/gnu/generic
 
-IP_CORE_REPO=${STACK_ROOT}/fpga/xilinx/ipcore
+IP_CORE_REPO=${STACK_ROOT}/fpga/ipcore/xilinx
 
 HW_SPEC=$(XPS_DIR)/SDK/SDK_Export/hw
 BSP_PATH=$(APP_DIR)
