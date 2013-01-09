@@ -72,13 +72,13 @@ for POWERLINK (openMAC) and a hub for daisy chaining several controlled nodes.
 1. Open the Xilinx Platform Studio (XPS) and set the 'Global Repository Search
    Path' to the POWERLINK IP-Core (ipcore) directory.\n
    `Edit` -> `Preferences` -> `Application` -> `Global Peripheral Repository Search`\n
-   Path (e.g: $STACK_ROOT/fpga/xilinx/ipcore)
+   Path (e.g: $STACK_ROOT/fpga/ipcore/xilinx)
 2. Open 'ISE Design Suite [64,32] Bit Command Prompt' depending on your
    platform.
 3. Go to this subdirectory of openPOWERLINK:\n
    `$ cd Examples/arch/xilinx_microblaze/no_os/gnu/demo_cn_digitalio`
 4. Edit the following parameters in file makefile.settings:\n
-   `XPS_DIR=$STACK_ROOT/fpga/xilinx/boards/[avnet_lx150t,avnet_lx9]/design_microblaze_directIO-[plb,axi]`\n
+   `XPS_DIR=$STACK_ROOT/fpga/boards/xilinx/[avnet_lx150t,avnet_lx9]/design_microblaze_directIO-[plb,axi]`\n
    `BOARD_NAME=[lx150t,lx9]`\n
    `BUS_INTERFACE=[plb,axi]`
 5. Run `make all` to generate the bitstream and build the ELF file (directIO.elf).\n
@@ -115,10 +115,10 @@ for POWERLINK (openMAC) and a hub for daisy chaining several controlled nodes.
 3. Create a new Hardware platform with:\n
    `File` -> `New` -> `Xilinx Hardware Platform Specification`\n
    Set the 'Target Hardware Specification' to\n
-   `$STACK_ROOT/fpga/xilinx/boards/avnet_lx[150t,lx9]/design_microblaze_directIO-[plb,axi]/SDK/SDK_Export/hw`
+   `$STACK_ROOT/fpga/boards/xilinx/avnet_lx[150t,lx9]/design_microblaze_directIO-[plb,axi]/SDK/SDK_Export/hw`
 4. Set the Repository Search Path with:\n
    `Xilinx Tools` -> `Repositories` -> `Local Repositories`\n
-   (e.g: $STACK_ROOT/fpga/xilinx/ipcore)
+   (e.g: $STACK_ROOT/fpga/ipcore/xilinx)
 5. Create a new Board Support Package with:\n
    `File` -> `New` -> `Xilinx Board Support Package`\n
    Select the previously created hardware platform as a reference.

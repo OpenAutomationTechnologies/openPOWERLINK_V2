@@ -16,10 +16,10 @@ STACK_ROOT=../../../../../..
 
 ##################################
 #Path to the XPS project
-#XPS_DIR=${STACK_ROOT}/fpga/xilinx/boards/avnet_lx150t/design_microblaze_directIO-plb
-XPS_DIR=${STACK_ROOT}/fpga/xilinx/boards/avnet_lx150t/design_microblaze_directIO-axi
-#XPS_DIR=${STACK_ROOT}/fpga/xilinx/boards/avnet_lx9/design_microblaze_directIO-plb
-#XPS_DIR=${STACK_ROOT}/fpga/xilinx/boards/avnet_lx9/design_microblaze_directIO-axi
+#XPS_DIR=${STACK_ROOT}/fpga/boards/xilinx/avnet_lx150t/design_microblaze_directIO-plb
+XPS_DIR=${STACK_ROOT}/fpga/boards/xilinx/avnet_lx150t/design_microblaze_directIO-axi
+#XPS_DIR=${STACK_ROOT}/fpga/boards/xilinx/avnet_lx9/design_microblaze_directIO-plb
+#XPS_DIR=${STACK_ROOT}/fpga/boards/xilinx/avnet_lx9/design_microblaze_directIO-axi
 
 ##################################
 # Board name: [lx150t, lx9]
