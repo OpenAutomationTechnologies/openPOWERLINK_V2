@@ -105,13 +105,13 @@ tEplKernel dllkcal_process(tEplEvent* pEvent_p)
     return kEplSuccessful;
 }
 
-tEplKernel EplErrorHandlerkProcess(tEplEvent* pEvent_p)
+tEplKernel errhndk_process(tEplEvent* pEvent_p)
 {
     UNUSED_PARAMETER(pEvent_p);
     return kEplSuccessful;
 }
 
-tEplKernel EplPdokCalProcess(tEplEvent* pEvent_p)
+tEplKernel pdokcal_process(tEplEvent* pEvent_p)
 {
     UNUSED_PARAMETER(pEvent_p);
     return kEplSuccessful;
