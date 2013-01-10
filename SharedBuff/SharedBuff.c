@@ -1402,10 +1402,6 @@ tShbError     ShbError;
     {
         // remove existing signal handler
         ShbError = ShbIpcStopSignalingNewData (pShbInstance_p);
-        if (pShbCirBuff->m_pfnSigHndlrNewData != NULL)
-        {
-            pShbCirBuff->m_pfnSigHndlrNewData (pShbInstance_p, 0, NULL);
-        }
         pShbCirBuff->m_pfnSigHndlrNewData = NULL;
     }
 
