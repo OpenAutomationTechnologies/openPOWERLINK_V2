@@ -7,20 +7,7 @@
 The user event CAL module builds the interface between the user event
 module and the different event queue implementations.
 
-The user event CAL module produces events in the user-to-kernel (U2K) and
-user-internal (UInt) queue. It consumes events from the user-internal (UInt)
-and the kernel-to-user (K2U) queue.
-
-For each queue a different implementation could be used. The event queue
-instances of the used queues and the function interface are stored in the
-CALs instance variable.
-
-Which queue implementation is used is configured at compile time by the
-following macros:
-\li EPL_EVENT_K2U_QUEUE
-\li EPL_EVENT_UINT_QUEUE
-\li EPL_EVENT_U2K_QUEUE
-
+\ingroup module_eventucal
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
@@ -50,7 +37,6 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
 
 //------------------------------------------------------------------------------
 // includes
@@ -143,6 +129,8 @@ implementations and calls the appropriate init functions.
 \return The function returns a tEplKernel error code.
 \retval kEplSuccessful          If function executes correctly
 \retval other error codes       If an error occurred
+
+\ingroup module_eventucal
 */
 //------------------------------------------------------------------------------
 tEplKernel eventucal_init(void)
@@ -180,6 +168,8 @@ functions of the queue implementations for each used queue.
 \return The function returns a tEplKernel error code.
 \retval kEplSuccessful          If function executes correctly
 \retval other error codes       If an error occurred
+
+\ingroup module_eventucal
 */
 //------------------------------------------------------------------------------
 tEplKernel eventucal_exit (void)
@@ -206,6 +196,8 @@ queue post function is called.
 \return The function returns a tEplKernel error code.
 \retval kEplSuccessful          If function executes correctly
 \retval other error codes       If an error occurred
+
+\ingroup module_eventucal
 */
 //------------------------------------------------------------------------------
 tEplKernel eventucal_postEvent(tEplEvent *pEvent_p)
@@ -261,6 +253,8 @@ This is the event receive function for events posted to the user layer.
 \return The function returns a tEplKernel error code.
 \retval kEplSuccessful          If function executes correctly
 \retval other error codes       If an error occurred
+
+\ingroup module_eventucal
 */
 //------------------------------------------------------------------------------
 tEplKernel eventucal_rxHandler(tEplEvent *pEvent_p)

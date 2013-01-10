@@ -37,6 +37,51 @@ communication mechanisms.
 
 //==============================================================================
 /**
+\defgroup module_eventu User event handler module (eventu)
+
+The user event handler module provides the interface for posting events to
+other user and kernel modules. For the receive side it contains a general
+receive handler which will be executed when an event is posted to the user
+layer. The event handler examines the event and calls the handler of the module
+which is specified by the sink argument.
+
+To be independent of a specific event queue implementation it uses its
+communication abstraction layer (CAL) for posting and receiving events to/from
+different event queues.
+
+\see module_eventucal
+
+\ingroup user_layer
+*/
+
+//==============================================================================
+/**
+\defgroup module_eventucal User event handler CAL module (eventucal)
+
+The user event CAL module builds the interface between the user event
+module and the different event queue implementations.
+
+The user event CAL module produces events in the user-to-kernel (U2K) and
+user-internal (UInt) queue. It consumes events from the user-internal (UInt)
+and the kernel-to-user (K2U) queue.
+
+For each queue a different implementation could be used. The event queue
+instances of the used queues and the function interface are stored in the
+CALs instance variable.
+
+Which queue implementation is used is configured at compile time by the
+following macros:
+\li EPL_EVENT_K2U_QUEUE
+\li EPL_EVENT_UINT_QUEUE
+\li EPL_EVENT_U2K_QUEUE
+
+\see module_eventu
+
+\ingroup user_layer
+*/
+
+//==============================================================================
+/**
 \defgroup module_pdou User layer PDO module (pdou)
 
 The user PDO module is responsible for exchanging process image data with the
@@ -107,6 +152,52 @@ communication mechanisms.
 
 //==============================================================================
 /**
+\defgroup module_eventk Kernel event handler module (eventk)
+
+The kernel event handler provides the interface for posting events to other
+kernel modules. For the receive side it contains a general receive handler
+which will be executed when an event is posted to the kernel layer. The event
+handler examines the event and calls the handler of the module which is
+specified by the sink argument.
+
+To be independent of a specific event queue implementation it uses its
+communication abstraction layer (CAL) for posting and receiving events to/from
+different event queues.
+
+\see module_eventkcal
+
+\ingroup kernel_layer
+*/
+
+//==============================================================================
+/**
+\defgroup module_eventkcal Kernel event handler CAL module (eventkcal)
+
+The kernel event CAL module builds the interface between the kernel event
+module and the different event queue implementations.
+
+The kernel event CAL module produces events in the kernel-to-user (K2U) and
+kernel-internal (KInt) queue. It consumes events from the kernel-internal (KInt)
+and the user-to-kernel (U2K) queue.
+
+For each queue a different implementation could be used. The event queue
+instances of the used queues and the function interface are stored in the
+CALs instance variable.
+
+Which queue implementation is used is configured at compile time by the
+following macros:
+\li EPL_EVENT_K2U_QUEUE
+\li EPL_EVENT_KINT_QUEUE
+\li EPL_EVENT_U2K_QUEUE
+
+\see module_eventk
+
+\ingroup kernel_layer
+*/
+
+
+//==============================================================================
+/**
 \defgroup module_pdok Kernel PDO module (pdok)
 
 The kernel PDO module is module responsible for the handling of process data
@@ -133,3 +224,40 @@ for the kernel PDO module.
 
 \ingroup kernel_layer
 */
+
+//==============================================================================
+//==============================================================================
+/**
+\defgroup modules_common Common Software Modules
+*/
+//==============================================================================
+//==============================================================================
+
+//==============================================================================
+/**
+\defgroup module_event Common event handler module (event)
+
+This module provides common functionality for both the user and kernel layer
+event modules.
+
+\see module_eventk
+\see module_eventu
+
+\ingroup modules_common
+*/
+
+//==============================================================================
+/**
+\defgroup module_eventcal Common event handler CAL module (eventcal)
+
+This module provides common functionality for both the user and kernel layer
+event CAL modules.
+
+\see module_eventkcal
+\see module_eventucal
+
+\ingroup modules_common
+*/
+
+
+

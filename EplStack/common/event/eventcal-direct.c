@@ -2,11 +2,12 @@
 ********************************************************************************
 \file   eventcal-direct.c
 
-\brief  source file for direct event posting
+\brief  Direct call implementation of event CAL module
 
 This event queue implementation applies direct calls, hence, an event posted
 is processed in the same context.
 
+\ingroup module_eventcal
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
@@ -109,6 +110,8 @@ The function adds a direct call event CAL instance.
 \return The function returns a tEplKernel error code.
 \retval kEplSuccessful          If function executes correctly
 \retval other error codes       If an error occurred
+
+\ingroup module_eventcal
 */
 //------------------------------------------------------------------------------
 tEplKernel eventcaldirect_addInstance(tEventQueueInstPtr *ppEventQueueInst_p,
@@ -145,6 +148,8 @@ The function deletes an direct call event CAL instance.
 \param  pEventQueueInst_p           pointer to event queue instance
 
 \return Returns always kEplSuccessful
+
+\ingroup module_eventcal
 */
 //------------------------------------------------------------------------------
 tEplKernel eventcaldirect_delInstance (tEventQueueInstPtr pEventQueueInst_p)
@@ -176,6 +181,8 @@ the posting is done thread safe.
 \return The function returns a tEplKernel error code.
 \retval kEplSuccessful          If function executes correctly
 \retval other error codes       If an error occurred
+
+\ingroup module_eventcal
 */
 //------------------------------------------------------------------------------
 tEplKernel eventcaldirect_postEvent (tEventQueueInstPtr pEventQueue_p, tEplEvent *pEvent_p)

@@ -7,6 +7,14 @@
 This event queue implementation applies direct calls, hence, an event posted
 is processed in the same context.
 
+The only public function provided is eventkcaldirect_getInterface(). This
+function returns a set of function pointers which is provided to use this CAL
+implementation from eventkcal.c.
+
+The real functionality of the direct call implementation is separated in
+the common part to be used by both user and kernel layer modules.
+
+\ingroup module_eventkcal
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
@@ -104,6 +112,8 @@ This function returns a pointer to the function interface structure which
 is used to access the dllcal functions of the direct call implementation.
 
 \return Returns a pointer to the local function interface
+
+\ingroup module_eventkcal
 */
 //------------------------------------------------------------------------------
 tEventCalFuncIntf* eventkcaldirect_getInterface(void)
@@ -114,6 +124,8 @@ tEventCalFuncIntf* eventkcaldirect_getInterface(void)
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
 //============================================================================//
+/// \name Private Functions
+/// \{
 
 //------------------------------------------------------------------------------
 /**
@@ -205,3 +217,4 @@ static tEplKernel postEvent (tEventQueueInstPtr pEventQueue_p, tEplEvent *pEvent
 {
     return eventcaldirect_postEvent(pEventQueue_p, pEvent_p);
 }
+/// \}

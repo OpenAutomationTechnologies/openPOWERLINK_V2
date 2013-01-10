@@ -7,6 +7,7 @@
 This file contains general functions used by the user and kernel event
 handler modules.
 
+\ingroup module_event
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
@@ -99,6 +100,8 @@ and the corresponding event source.
 \return The function returns a tEplKernel error code.
 \retval kEplSuccessful          If the event sink was found.
 \retval kEplEventUnknownSink    IF the event sink was not found.
+
+\ingroup module_event
 */
 //------------------------------------------------------------------------------
 tEplKernel event_getHandlerForSink(tEventDispatchEntry** ppDispatchEntry_p,
