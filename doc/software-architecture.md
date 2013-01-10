@@ -19,10 +19,17 @@ stack.
 
 ## openPOWERLINK Kernel Layer
 
-### Error handler
+### Error Handler
 - \ref module_errhndk
 - \ref module_errhndkcal
 
 ### PDO
 - \ref module_pdok
 - \ref module_pdokcal
+
+## Common Modules
+
+### Event Handler
+-\ref module_event
+-\ref module_eventcal
+

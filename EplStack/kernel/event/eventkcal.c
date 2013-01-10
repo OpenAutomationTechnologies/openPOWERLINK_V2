@@ -4,22 +4,12 @@
 
 \brief  Source file for kernel event CAL module
 
-The kernel event CAL module builds the interface between the kernel event
-module and the different event queue implementations.
+This file contains the general interface for the kernel event handlers CAL
+module. For each queue a different implementation could be used. Therefore
+a set of function pointers to the real implementation is stored in the
+instance variable of the module.
 
-The kernel event CAL module produces events in the kernel-to-user (K2U) and
-kernel-internal (KInt) queue. It consumes events from the kernel-internal (KInt)
-and the user-to-kernel (U2K) queue.
-
-For each queue a different implementation could be used. The event queue
-instances of the used queues and the function interface are stored in the
-CALs instance variable.
-
-Which queue implementation is used is configured at compile time by the
-following macros:
-\li EPL_EVENT_K2U_QUEUE
-\li EPL_EVENT_KINT_QUEUE
-\li EPL_EVENT_U2K_QUEUE
+\ingroup module_eventkcal
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
@@ -137,6 +127,8 @@ implementations and calls the appropriate init functions.
 \return The function returns a tEplKernel error code.
 \retval kEplSuccessful          If function executes correctly
 \retval other error codes       If an error occurred
+
+\ingroup module_eventkcal
 */
 //------------------------------------------------------------------------------
 tEplKernel eventkcal_init (void)
@@ -178,6 +170,8 @@ functions of the queue implementations for each used queue.
 \return The function returns a tEplKernel error code.
 \retval kEplSuccessful          If function executes correctly
 \retval other error codes       If an error occurred
+
+\ingroup module_eventkcal
 */
 //------------------------------------------------------------------------------
 tEplKernel eventkcal_exit (void)
@@ -207,6 +201,8 @@ queue post function is called.
 \return The function returns a tEplKernel error code.
 \retval kEplSuccessful          If function executes correctly
 \retval other error codes       If an error occurred
+
+\ingroup module_eventkcal
 */
 //------------------------------------------------------------------------------
 tEplKernel eventkcal_postEvent (tEplEvent *pEvent_p)
@@ -261,6 +257,8 @@ This is the event receive function for events posted to the kernel layer.
 \return The function returns a tEplKernel error code.
 \retval kEplSuccessful          If function executes correctly
 \retval other error codes       If an error occurred
+
+\ingroup module_eventkcal
 */
 //------------------------------------------------------------------------------
 tEplKernel eventkcal_rxHandler (tEplEvent *pEvent_p)

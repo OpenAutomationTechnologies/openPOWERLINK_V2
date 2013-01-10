@@ -5,15 +5,9 @@
 \brief  Source file for kernel event module
 
 This file contains the source code of the kernel event module. It provides the
-interface for posting events to other kernel modules. For the receive side it
-contains a general receive handler which will be executed when an event is
-posted to the kernel layer. The event handler examines the event and calls
-the handler of the module which is specified by the sink argument.
+interface for posting events to other kernel modules.
 
-To be independent of a specific event queue implementation it uses its
-communication abstraction layer (CAL) for posting and receiving events to/from
-different event queues.
-
+\ingroup module_eventk
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
@@ -109,12 +103,12 @@ event sinks.
 */
 static tEventDispatchEntry eventDispatchTbl_l[] =
 {
-#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMTK)) != 0)
+#if defined(CONFIG_INCLUDE_NMTK)
     { kEplEventSinkNmtk,        kEplEventSourceNmtk,        EplNmtkProcess },
 #else
     { kEplEventSinkNmtk,        kEplEventSourceNmtk,        NULL },
 #endif
-#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLK)) != 0)
+#if defined(CONFIG_INCLUDE_DLLK)
     { kEplEventSinkNmtk,        kEplEventSourceDllk,        handleNmtEventinDll },
     { kEplEventSinkDllk,        kEplEventSourceDllk,        EplDllkProcess },
     { kEplEventSinkDllkCal,     kEplEventSourceDllk,        dllkcal_process },
@@ -123,7 +117,7 @@ static tEventDispatchEntry eventDispatchTbl_l[] =
     { kEplEventSinkDllk,        kEplEventSourceDllk,        NULL },
     { kEplEventSinkDllkCal,     kEplEventSourceDllk,        NULL },
 #endif
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOK)) != 0)
+#if defined(CONFIG_INCLUDE_PDOK)
     { kEplEventSinkPdokCal,     kEplEventSourcePdok,        pdokcal_process },
 #endif
     { kEplEventSinkInvalid,     kEplEventSourceInvalid,     NULL }
@@ -143,6 +137,8 @@ the init function of it's CAL module.
 \return The function returns a tEplKernel error code.
 \retval kEplSuccessful          If function executes correctly
 \retval other error codes       If an error occurred
+
+\ingroup module_eventk
 */
 //------------------------------------------------------------------------------
 tEplKernel eventk_init (void)
@@ -163,6 +159,8 @@ This function cleans up the kernel event module.
 \return The function returns a tEplKernel error code.
 \retval kEplSuccessful          If function executes correctly
 \retval other error codes       If an error occurred
+
+\ingroup module_eventk
 */
 //------------------------------------------------------------------------------
 tEplKernel eventk_exit (void)
@@ -187,6 +185,8 @@ specific module.
 \return The function returns a tEplKernel error code.
 \retval kEplSuccessful          If function executes correctly
 \retval other error codes       If an error occurred
+
+\ingroup module_eventk
 */
 //------------------------------------------------------------------------------
 tEplKernel eventk_process (tEplEvent *pEvent_p)
@@ -250,6 +250,8 @@ CAL module which distributes the event to the suitable event queue.
 \return The function returns a tEplKernel error code.
 \retval kEplSuccessful          If function executes correctly
 \retval other error codes       If an error occurred
+
+\ingroup module_eventk
 */
 //------------------------------------------------------------------------------
 tEplKernel eventk_postEvent (tEplEvent *pEvent_p)
@@ -275,6 +277,8 @@ This function posts an error event to the API module.
 \return The function returns a tEplKernel error code.
 \retval kEplSuccessful          If function executes correctly
 \retval other error codes       If an error occurred
+
+\ingroup module_eventk
 */
 //------------------------------------------------------------------------------
 tEplKernel eventk_postError (tEplEventSource eventSource_p, tEplKernel eplError_p,
@@ -307,8 +311,11 @@ tEplKernel eventk_postError (tEplEventSource eventSource_p, tEplKernel eplError_
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
 //============================================================================//
+/// \name Private Functions
+/// \{
 
-#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLK)) != 0)
+
+#ifdef CONFIG_INCLUDE_DLLK
 //------------------------------------------------------------------------------
 /**
 \brief  Handle NMT event in DLL
@@ -342,3 +349,5 @@ static tEplKernel handleNmtEventinDll(tEplEvent* pEvent_p)
     return ret;
 }
 #endif
+
+/// \}

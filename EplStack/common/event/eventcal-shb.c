@@ -2,11 +2,12 @@
 ********************************************************************************
 \file   eventcal-shb.c
 
-\brief  source file for shared buffer event posting
+\brief  Shared buffer implementation of event CAL module
 
 This event queue implementation applies the shared buffer for event forwarding.
 The shared buffer is available for different architectures (e.g. NoOS).
 
+\ingroup module_eventcal
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
@@ -102,12 +103,12 @@ shared buffer.
 */
 typedef struct
 {
-    tEventQueue             eventQueue;                 ///< event queue
-    tEplProcessEventCb      pfnProcessEventCb;          ///< event process callback
-    tEplPostErrorEventCb    pfnPostErrorEventCb;        ///< post error event callback
-    tShbInstance            pShbInstance;               ///< shared buffer instance
+    tEventQueue             eventQueue;                 ///< Event queue
+    tEplProcessEventCb      pfnProcessEventCb;          ///< Event process callback
+    tEplPostErrorEventCb    pfnPostErrorEventCb;        ///< Post error event callback
+    tShbInstance            pShbInstance;               ///< Shared buffer instance
     BYTE                    abRxBuffer[sizeof(tEplEvent) +
-                                     EPL_MAX_EVENT_ARG_SIZE]; ///< event receive buffer
+                                     EPL_MAX_EVENT_ARG_SIZE]; ///< Event receive buffer
 } tEventShbInstance;
 
 //------------------------------------------------------------------------------
@@ -133,9 +134,11 @@ Add a queue instance that uses shared buffer posting.
 \param  EventQueue_p            event queue to be add
 \param  pfnProcessEventCb_p     callback to event process
 
-\return tEplKernel
+\return The function returns a tEplKernel error code.
 \retval kEplSuccessful          if function executes correctly
 \retval other                   error
+
+\ingroup module_eventcal
 */
 //------------------------------------------------------------------------------
 tEplKernel eventcalshb_addInstance(tEventQueueInstPtr *ppEventQueueInst_p,
@@ -230,9 +233,11 @@ Delete shared buffer posting queue instance.
 
 \param  pEventQueue_p           pointer to event queue instance
 
-\return tEplKernel
+\return The function returns a tEplKernel error code.
 \retval kEplSuccessful          if function executes correctly
 \retval other                   error
+
+\ingroup module_eventcal
 */
 //------------------------------------------------------------------------------
 tEplKernel eventcalshb_delInstance (tEventQueueInstPtr pEventQueueInst_p)
@@ -259,7 +264,7 @@ tEplKernel eventcalshb_delInstance (tEventQueueInstPtr pEventQueueInst_p)
     //free shared buffer
     shbError = ShbCirReleaseBuffer(pEventShbInstance->pShbInstance);
     if(shbError != kShbOk)
-    {;
+    {
         TRACE ("%s() ShbCirReleaseBuffer() failed with %d\n", __func__, shbError);
     }
 
@@ -278,9 +283,11 @@ This function posts an event to the provided queue instance.
 \param  pEventQueue_p           pointer to event queue instance
 \param  pEventQueue_p           pointer to event
 
-\return tEplKernel
+\return The function returns a tEplKernel error code.
 \retval kEplSuccessful          if function executes correctly
 \retval other                   error
+
+\ingroup module_eventcal
 */
 //------------------------------------------------------------------------------
 tEplKernel eventcalshb_postEvent (tEventQueueInstPtr pEventQueue_p, tEplEvent *pEvent_p)
@@ -336,6 +343,8 @@ Exit:
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
 //============================================================================//
+/// \name Private Functions
+/// \{
 
 //------------------------------------------------------------------------------
 /**
@@ -348,7 +357,7 @@ data is copied from the shared buffer to the queue instance RX buffer.
 \param  ulDataSize_p            size of received data
 \param  pArg_p                  argument of receive function (EventShbInstance)
 
-\return tEplKernel
+\return The function returns a tEplKernel error code.
 \retval kEplSuccessful          if function executes correctly
 \retval other                   error
 */
@@ -359,7 +368,12 @@ static void rxSignalHandlerCb (tShbInstance pShbRxInstance_p, ULONG dataSize_p,
     tShbError           shbError;
     tEventShbInstance*  pEventShbInstance = (tEventShbInstance*)pArg_p;
     tEplEvent*          pEplEvent;
-    BYTE*               pDataBuffer = pEventShbInstance->abRxBuffer;
+    BYTE*               pDataBuffer;
+
+    if (pArg_p == NULL)
+        return;
+
+    pDataBuffer = pEventShbInstance->abRxBuffer;
 
     // copy data from event queue
     shbError = ShbCirReadDataBlock (pShbRxInstance_p, pDataBuffer,
@@ -399,3 +413,4 @@ static void rxSignalHandlerCb (tShbInstance pShbRxInstance_p, ULONG dataSize_p,
 Exit:
     return;
 }
+/// \}

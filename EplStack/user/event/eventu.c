@@ -5,15 +5,9 @@
 \brief  Source file for user event module
 
 This file contains the source code of the user event module. It provides the
-interface for posting events to other user modules. For the receive side it
-contains a general receive handler which will be executed when an event is
-posted to the user layer. The event handler examines the event and calls
-the handler of the module which is specified by the sink argument.
+interface for posting and receiving events to/from other user modules.
 
-To be independent of a specific event queue implementation it uses its
-communication abstraction layer (CAL) for posting and receiving events to/from
-different event queues.
-
+\ingroup module_eventu
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
@@ -93,7 +87,7 @@ The user event instance holds the Api process callback function pointer.
 */
 typedef struct
 {
-    tEplProcessEventCb      pfnApiProcessEventCb;  ///< callback for generic api events
+    tEplProcessEventCb      pfnApiProcessEventCb;  ///< Callback for generic api events
 } tEventuInstance;
 
 //------------------------------------------------------------------------------
@@ -114,26 +108,23 @@ event sinks.
 */
 static tEventDispatchEntry eventDispatchTbl_l[] =
 {
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMTU)) != 0)
+#if defined (CONFIG_INCLUDE_NMTU)
     { kEplEventSinkNmtu,        kEplEventSourceNmtu,        EplNmtuProcessEvent },
 #endif
-#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
+#if defined (CONFIG_INCLUDE_NMT_MN)
     { kEplEventSinkNmtMnu,      kEplEventSourceNmtMnu,      EplNmtMnuProcessEvent },
 #endif
-#if ((((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOC)) != 0)   \
-     || (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOS)) != 0))
+#if defined (CONFIG_INCLUDE_SDOC) || defined(CONFIG_INCLUDE_SDOS)
     { kEplEventSinkSdoAsySeq,   kEplEventSourceSdoAsySeq,   EplSdoAsySeqProcessEvent },
 #endif
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_LEDU)) != 0)
+#if defined (CONFIG_INCLUDE_LEDU)
     { kEplEventSinkLedu,        kEplEventSourceLedu,        EplLeduProcessEvent },
 #else
     { kEplEventSinkLedu,        kEplEventSourceLedu,        NULL },
 #endif
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLU)) != 0)
+#if defined (CONFIG_INCLUDE_DLLU)
     { kEplEventSinkDlluCal,     kEplEventSourceDllu,        dllucal_process },
 #endif
-// jba check why this was originally commented out --> no user error handler?
-//    { kEplEventSinkErru,        kEplEventSourceErru,        EplErruProcess },
     { kEplEventSinkErru,        kEplEventSourceErru,        NULL },
     { kEplEventSinkApi,         kEplEventSourceEplApi,      callApiEventCb },
     { kEplEventSinkInvalid,     kEplEventSourceInvalid,     NULL }
@@ -156,6 +147,8 @@ the init function of it's CAL module.
 \return The function returns a tEplKernel error code.
 \retval kEplSuccessful          If function executes correctly
 \retval other error codes       If an error occurred
+
+\ingroup module_eventu
 */
 //------------------------------------------------------------------------------
 tEplKernel eventu_init(tEplProcessEventCb pfnApiProcessEventCb_p)
@@ -178,6 +171,8 @@ This function cleans up the user event module.
 \return The function returns a tEplKernel error code.
 \retval kEplSuccessful          If function executes correctly
 \retval other error codes       If an error occurred
+
+\ingroup module_eventu
 */
 //------------------------------------------------------------------------------
 tEplKernel eventu_exit(void)
@@ -202,6 +197,8 @@ specific module
 \return The function returns a tEplKernel error code.
 \retval kEplSuccessful          If function executes correctly
 \retval other error codes       If an error occurred
+
+\ingroup module_eventu
 */
 //------------------------------------------------------------------------------
 tEplKernel eventu_process (tEplEvent *pEvent_p)
@@ -248,6 +245,8 @@ CAL module which distributes the event to the suitable event queue.
 \return The function returns a tEplKernel error code.
 \retval kEplSuccessful          If function executes correctly
 \retval other error codes       If an error occurred
+
+\ingroup module_eventu
 */
 //------------------------------------------------------------------------------
 tEplKernel eventu_postEvent (tEplEvent *pEvent_p)
@@ -273,6 +272,8 @@ This function posts an error event to the API module.
 \return The function returns a tEplKernel error code.
 \retval kEplSuccessful          If function executes correctly
 \retval other error codes       If an error occurred
+
+\ingroup module_eventu
 */
 //------------------------------------------------------------------------------
 tEplKernel eventu_postError (tEplEventSource eventSource_p,  tEplKernel error_p,
@@ -305,6 +306,8 @@ tEplKernel eventu_postError (tEplEventSource eventSource_p,  tEplKernel error_p,
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
 //============================================================================//
+/// \name Private Functions
+/// \{
 
 //------------------------------------------------------------------------------
 /**
@@ -326,4 +329,6 @@ static tEplKernel callApiEventCb (tEplEvent* pEvent_p)
     }
     return kEplEventPostError;
 }
+/// \}
+
 
