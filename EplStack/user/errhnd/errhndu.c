@@ -151,7 +151,7 @@ tEplKernel PUBLIC errhndu_init(void)
         goto Exit;
     }
 
-#ifdef INCLUDE_NMT_MN
+#ifdef CONFIG_INCLUDE_NMT_MN
     ret = linkErrorCounter(&instance_l.errorObjects.mnCrcErr, OID_DLL_MN_CRCERROR_REC);
     if (ret != kEplSuccessful)
     {
@@ -360,7 +360,7 @@ static tEplKernel linkErrorCounter(tErrorObject* pErrorCounter_p, UINT index_p)
     return ret;
 }
 
-#ifdef INCLUDE_NMT_MN
+#ifdef CONFIG_INCLUDE_NMT_MN
 //------------------------------------------------------------------------------
 /**
 \brief    check if error object exists in OD

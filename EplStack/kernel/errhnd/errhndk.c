@@ -157,10 +157,8 @@ The function shuts down the kernel error handler module.
 //------------------------------------------------------------------------------
 tEplKernel errhndk_exit()
 {
-    tEplKernel      ret;
-
-    ret = kEplSuccessful;
-    return ret;
+    errhndkcal_exit();
+    return kEplSuccessful;
 }
 
 //------------------------------------------------------------------------------
