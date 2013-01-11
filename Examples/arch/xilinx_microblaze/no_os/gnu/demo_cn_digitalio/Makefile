@@ -94,8 +94,12 @@ ${STACK_ROOT}/EplStack/EplNmtu.c \
 ${STACK_ROOT}/EplStack/EplNmtCnu.c \
 ${STACK_ROOT}/EplStack/kernel/pdo/pdok.c \
 ${STACK_ROOT}/EplStack/kernel/pdo/pdokcal.c \
+${STACK_ROOT}/EplStack/kernel/pdo/pdokcal-local.c \
+${STACK_ROOT}/EplStack/kernel/pdo/pdokcalsync-null.c \
 ${STACK_ROOT}/EplStack/user/pdo/pdou.c \
 ${STACK_ROOT}/EplStack/user/pdo/pdoucal.c \
+${STACK_ROOT}/EplStack/user/pdo/pdoucal-local.c \
+${STACK_ROOT}/EplStack/user/pdo/pdoucalsync-null.c \
 ${STACK_ROOT}/EplStack/EplObd.c \
 ${STACK_ROOT}/EplStack/EplSdoComu.c \
 ${STACK_ROOT}/EplStack/EplSdoAsySequ.c \
@@ -106,6 +110,7 @@ ${STACK_ROOT}/EplStack/user/errhnd/errhndu.c \
 ${STACK_ROOT}/EplStack/kernel/errhnd/errhndkcal-local.c \
 ${STACK_ROOT}/EplStack/user/errhnd/errhnducal-local.c \
 ${STACK_ROOT}/EplStack/EplApiGeneric.c \
+${STACK_ROOT}/EplStack/user/api/processimage.c \
 ${TARGET_DIR}/ShbTarget_Microblaze.c \
 ${TARGET_DIR}/xilinx_irq.c \
 ${TARGET_DIR}/xilinx_usleep.c \

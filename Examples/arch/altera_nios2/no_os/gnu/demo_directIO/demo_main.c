@@ -400,6 +400,12 @@ tEplKernel PUBLIC AppCbSync(void)
     DWORD*            ulDigInputs = LATCHED_IOPORT_BASE;
     DWORD*            ulDigOutputs = LATCHED_IOPORT_BASE;
 
+    EplRet = api_processImageExchangeOut();
+    if (EplRet != kEplSuccessful)
+    {
+        return EplRet;
+    }
+
     /* read digital input ports */
     ports = AmiGetDwordFromLe((BYTE*) ulDigInputs);;
 
@@ -419,6 +425,8 @@ tEplKernel PUBLIC AppCbSync(void)
 
     /* write digital output ports */
     AmiSetDwordToLe((BYTE*)ulDigOutputs, ports);
+
+    EplRet = api_processImageExchangeIn();
 
     return EplRet;
 }
