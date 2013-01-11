@@ -100,7 +100,9 @@ ${MAINPATH}/EplStack/common/event/event.c \
 ${MAINPATH}/EplStack/EplNmtk.c \
 ${MAINPATH}/EplStack/EplNmtu.c ${MAINPATH}/EplStack/EplNmtCnu.c \
 ${MAINPATH}/EplStack/kernel/pdo/pdok.c ${MAINPATH}/EplStack/kernel/pdo/pdokcal.c \
+${MAINPATH}/EplStack/kernel/pdo/pdokcal-local.c ${MAINPATH}/EplStack/kernel/pdo/pdokcalsync-null.c \
 ${MAINPATH}/EplStack/user/pdo/pdou.c ${MAINPATH}/EplStack/user/pdo/pdoucal.c \
+${MAINPATH}/EplStack/user/pdo/pdoucal-local.c ${MAINPATH}/EplStack/user/pdo/pdoucalsync-null.c \
 ${MAINPATH}/EplStack/EplObd.c \
 ${MAINPATH}/EplStack/EplSdoComu.c ${MAINPATH}/EplStack/EplSdoAsySequ.c ${MAINPATH}/EplStack/EplSdoAsndu.c \
 ${MAINPATH}/EplStack/EplTimeruGeneric.c \
@@ -109,6 +111,7 @@ ${MAINPATH}/EplStack/user/errhnd/errhndu.c \
 ${MAINPATH}/EplStack/kernel/errhnd/errhndkcal-local.c \
 ${MAINPATH}/EplStack/user/errhnd/errhnducal-local.c \
 ${MAINPATH}/EplStack/EplApiGeneric.c \
+${MAINPATH}/EplStack/user/api/processimage.c \
 ${MAINPATH}/ObjDicts/CiA401_CN/Objdict.c \
 ${MAINPATH}/EplStack/amiarm.c \
 ${MAINPATH}/Target/altera_nios2/no_os/gnu/generic/ShbTarget_Nios2.c \
