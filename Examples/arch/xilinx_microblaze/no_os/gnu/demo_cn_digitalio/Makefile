@@ -180,6 +180,7 @@ header:
 	@echo "Write 'make application' to generate the Direct I/O software example"
 	@echo "Write 'make bitstream' to generate the bitstream"
 	@echo ""
+	@echo "Write 'make download-all' to download the bitstream and the .elf file to the target"
 	@echo "Write 'make download-bits' to download the bitstream to the target"
 	@echo "Write 'make download-elf' to download the .elf file to the target"
 	@echo ""
@@ -298,6 +299,9 @@ bitstream: $(XPS_DIR)/system.make $(XPS_DIR)/implementation/system.bit $(HW_SPEC
 ####################################################
 # D O W N L O A D
 ####################################################
+.PHONY: download-all
+download-all: download-bits download-elf
+
 .PHONY: download-bits
 download-bits: $(XPS_DIR)/system.make
 	$(MAKE) -C $(XPS_DIR) -f system.make download
