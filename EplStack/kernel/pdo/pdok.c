@@ -128,6 +128,11 @@ tEplKernel pdok_init(void)
 
     EPL_MEMSET(&pdokInstance_g, 0, sizeof(pdokInstance_g));
 
+    if ((ret = pdokcal_init()) != kEplSuccessful)
+    {
+        return ret;
+    }
+
     ret = EplDllkRegTpdoHandler(cbProcessTpdo);
 
     return ret;
@@ -148,6 +153,7 @@ tEplKernel pdok_exit(void)
 {
     pdokcal_cleanupPdoMem(pdokInstance_g.pPdoMem);
     pdok_deAllocChannelMem();
+    pdokcal_exit();
     return kEplSuccessful;
 }
 

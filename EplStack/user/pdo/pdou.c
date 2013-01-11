@@ -158,7 +158,7 @@ tEplKernel pdou_init(void)
     pdouInstance_g.fAllocated = FALSE;
     pdouInstance_g.fRunning = FALSE;
 
-    return kEplSuccessful;
+    return pdoucal_init();
 }
 
 //------------------------------------------------------------------------------
@@ -174,7 +174,7 @@ The function cleans up the PDO user module.
 //------------------------------------------------------------------------------
 tEplKernel pdou_exit(void)
 {
-    return kEplSuccessful;
+    return pdoucal_exit();
 }
 
 //------------------------------------------------------------------------------
