@@ -416,29 +416,15 @@ tEplDllkInitParam   DllkInitParam;
     {
         goto Exit;
     }
-
-    Ret = pdokcal_init();
-    if (Ret != kEplSuccessful)
-    {
-        goto Exit;
-    }
-
 #endif
 
     // initialize EplPdou module
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOU)) != 0)
-    Ret = pdoucal_init();
-    if (Ret != kEplSuccessful)
-    {
-        goto Exit;
-    }
-
     Ret = pdou_init();
     if (Ret != kEplSuccessful)
     {
         goto Exit;
     }
-
 #endif
 
     // initialize EplNmtCnu module
