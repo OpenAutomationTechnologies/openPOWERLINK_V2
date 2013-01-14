@@ -193,6 +193,7 @@ The function shuts down the user error handler module.
 //------------------------------------------------------------------------------
 tEplKernel PUBLIC errhndu_exit()
 {
+    errhnducal_exit();
     return kEplSuccessful;
 }
 
