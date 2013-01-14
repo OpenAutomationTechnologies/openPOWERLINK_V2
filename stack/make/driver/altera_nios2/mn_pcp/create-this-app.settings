@@ -1,0 +1,97 @@
+################################################################################
+#  (c) Bernecker + Rainer Industrie-Elektronik Ges.m.b.H.
+#      A-5142 Eggelsberg, B&R Strasse 1
+#      www.br-automation.com
+################################################################################
+
+################################################################################
+# Define optimization level and debugging mode.
+# Note: Optimization level recommended -O2
+#       In order to see prints in stdo DBG_MODE=_DEBUG
+#       For release DBG_MODE=NDEBUG
+
+##################################
+# Settings for Debugging
+#DBG_MODE=_DEBUG
+#OPT_LEVEL=-O0
+
+##################################
+# Settings for Debugging with optimized compilation
+DBG_MODE=_DEBUG
+OPT_LEVEL=-O2
+
+##################################
+# Settings for Release
+#DBG_MODE=NDEBUG
+#OPT_LEVEL=-O2
+
+##################################
+# DEF_DEBUG_LVL = [
+# 0x20000000L DEBUG_LVL_ASSERT
+# 0x40000000L DEBUG_LVL_ERROR
+# 0x80000000L DEBUG_LVL_ALWAYS ]
+DEF_DEBUG_LVL=0xEC000000L
+
+################################################################################
+
+##################################
+# Name of M9K for tightly-coupled memory
+TC_I_MEM=pcp_0_tc_i_mem
+
+##################################
+# Relative path to SOPC file
+SOPC_DIR=../../../../../fpga/boards/altera/TERASIC_DE2-115/mn_dual_nios2/
+
+##################################
+# Relative path to openPOWERLINK root directory
+STACKROOT_DIR=../../../../..
+
+##################################
+# Relative path to bsp
+BSP_DIR=./bsp
+
+##################################
+# Include path
+INCLUDES=". \
+${STACKROOT_DIR}/include \
+${STACKROOT_DIR}/libs/omethlib \
+${STACKROOT_DIR}/libs/hostif \
+${STACKROOT_DIR}/stack/include/target/openmac \
+${STACKROOT_DIR}/stack/src"
+
+##################################
+# Source files
+SRCFILES="daemon.c \
+${STACKROOT_DIR}/libs/ami/amiarm.c \
+${STACKROOT_DIR}/libs/hostif/hostiflib.c \
+${STACKROOT_DIR}/libs/hostif/hostiflib_l.c \
+${STACKROOT_DIR}/libs/hostif/lfqueue.c \
+${STACKROOT_DIR}/libs/hostif/linmem.c \
+${STACKROOT_DIR}/libs/omethlib/omethlib.c \
+${STACKROOT_DIR}/libs/omethlib/omethlibint.c \
+${STACKROOT_DIR}/libs/omethlib/omethlib_phycfg_generic.c \
+${STACKROOT_DIR}/stack/src/arch/altera_nios2/target-nios2.c \
+${STACKROOT_DIR}/stack/src/common/dll/dllcal-hostif.c \
+${STACKROOT_DIR}/stack/src/common/event/event.c \
+${STACKROOT_DIR}/stack/src/common/event/eventcal-direct.c \
+${STACKROOT_DIR}/stack/src/common/event/eventcal-hostif.c \
+${STACKROOT_DIR}/stack/src/common/errstring.c \
+${STACKROOT_DIR}/stack/src/kernel/ctrl/ctrlk.c \
+${STACKROOT_DIR}/stack/src/kernel/ctrl/ctrlkcal-hostif.c \
+${STACKROOT_DIR}/stack/src/kernel/dll/dllk.c \
+${STACKROOT_DIR}/stack/src/kernel/dll/dllkcal.c \
+${STACKROOT_DIR}/stack/src/kernel/edrv/edrvcyclic-openmac.c \
+${STACKROOT_DIR}/stack/src/kernel/edrv/edrv-openmac.c \
+${STACKROOT_DIR}/stack/src/kernel/errhnd/errhndk.c \
+${STACKROOT_DIR}/stack/src/kernel/errhnd/errhndkcal-hostif.c \
+${STACKROOT_DIR}/stack/src/kernel/event/eventk.c \
+${STACKROOT_DIR}/stack/src/kernel/event/eventkcal.c \
+${STACKROOT_DIR}/stack/src/kernel/event/eventkcal-direct.c \
+${STACKROOT_DIR}/stack/src/kernel/event/eventkcal-hostif.c \
+${STACKROOT_DIR}/stack/src/kernel/hrtimer/hrtimer-openmac.c \
+${STACKROOT_DIR}/stack/src/kernel/nmt/nmtk.c \
+${STACKROOT_DIR}/stack/src/kernel/pdo/pdok.c \
+${STACKROOT_DIR}/stack/src/kernel/pdo/pdokcal.c \
+${STACKROOT_DIR}/stack/src/kernel/pdo/pdokcal-hostif.c \
+${STACKROOT_DIR}/stack/src/kernel/pdo/pdokcalsync-hostif.c \
+${STACKROOT_DIR}/stack/src/kernel/timestamp/timestamp-openmac.c"
