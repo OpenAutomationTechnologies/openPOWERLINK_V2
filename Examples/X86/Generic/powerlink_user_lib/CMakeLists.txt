@@ -247,7 +247,6 @@ SET (LIB_HEADERS_KERNEL ${LIB_HEADERS_KERNEL}
                         ${POWERLINK_SOURCE_DIR}/Include/kernel/EplNmtk.h
                         ${POWERLINK_SOURCE_DIR}/Include/kernel/EplNmtkCal.h
                         ${POWERLINK_SOURCE_DIR}/Include/kernel/EplObdk.h
-                        ${POWERLINK_SOURCE_DIR}/Include/kernel/EplObdkCal.h
                         ${POWERLINK_SOURCE_DIR}/Include/kernel/pdok.h
                         ${POWERLINK_SOURCE_DIR}/Include/kernel/pdokcal.h
                         ${POWERLINK_SOURCE_DIR}/Include/kernel/EplTimerHighResk.h
