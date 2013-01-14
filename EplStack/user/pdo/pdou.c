@@ -98,6 +98,7 @@ typedef struct
     tPdoMappObject*         paTxObject;                 ///< Pointer to TX channel objects
     BOOL                    fAllocated;                 ///< Flag determines if PDOs are allocated
     BOOL                    fRunning;                   ///< Flag determines if PDO engine is running
+    BYTE*                   pPdoMem;                    ///< pointer to PDO memory
 } tPdouInstance;
 
 //------------------------------------------------------------------------------
@@ -174,6 +175,7 @@ The function cleans up the PDO user module.
 //------------------------------------------------------------------------------
 tEplKernel pdou_exit(void)
 {
+    pdoucal_cleanupPdoMem(pdouInstance_g.pPdoMem);
     return pdoucal_exit();
 }
 
@@ -1373,7 +1375,7 @@ tEplKernel setupPdoBuffers(void)
     UINT                    channelId;
     tPdoChannel*            pPdoChannel;
 
-    ret = pdoucal_initPdoMem(&pdouInstance_g.pdoChannels, NULL);
+    ret = pdoucal_initPdoMem(&pdouInstance_g.pdoChannels, &pdouInstance_g.pPdoMem);
     if (ret != kEplSuccessful)
         return ret;
 
