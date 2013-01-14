@@ -1,0 +1,22 @@
+#32 to 16 bit converter
+#read 32bit: RDd 00000000
+#write 32bit: WRd 00000000 12345678
+#read 16bit: RDw 00000000
+#write 16bit: WRw 00000000 1234
+#read 8bit: RDb 00000000
+#write 8bit: WRb 00000000 XX34
+#
+#jumpe equal: JEw 00000000 1234
+#
+#nop: NP
+#
+# 32 bit
+WRd 00000C00 1234ABCD
+RDd 00000C00
+# 16 bit (L)
+WRw 00000C00 12341234
+RDd 00000C00
+# 16 bit (H)
+WRw 00000C02 ABCDABCD
+RDd 00000C02
+
