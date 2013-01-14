@@ -1,0 +1,327 @@
+<sld_project_info>
+  <file_info>
+    <file checksum="0x011517B5" device="EP4CE115F29C7" path="POWERLINK_MN.sof" usercode="0xFFFFFFFF"/>
+  </file_info>
+  <hub_info ir_width="8" node_count="5"/>
+  <node_info>
+    <node hpath="top_mn:inst|top_mn_pcp_0:pcp_0|top_mn_pcp_0_cpu_0:cpu_0|top_mn_pcp_0_cpu_0_nios2_oci:the_top_mn_pcp_0_cpu_0_nios2_oci|top_mn_pcp_0_cpu_0_jtag_debug_module_wrapper:the_top_mn_pcp_0_cpu_0_jtag_debug_module_wrapper|sld_virtual_jtag_basic:top_mn_pcp_0_cpu_0_jtag_debug_module_phy|sld_virtual_jtag_impl:sld_virtual_jtag_impl_inst" instance_id="0" mfg_id="70" node_id="34" sld_node_info="0x19104600" version="3">
+      <parameters>
+        <parameter name="sld_mfg_id" type="dec" value="70"/>
+        <parameter name="sld_type_id" type="dec" value="34"/>
+        <parameter name="sld_version" type="dec" value="3"/>
+        <parameter name="sld_instance_index" type="dec" value="0"/>
+        <parameter name="sld_auto_instance_index" type="string" value="YES"/>
+        <parameter name="sld_ir_width" type="dec" value="2"/>
+        <parameter name="SLD_NODE_INFO" type="dec" value="420496896"/>
+      </parameters>
+      <inputs>
+        <port name="usr_tdo" source="top_mn:inst|top_mn_pcp_0:pcp_0|top_mn_pcp_0_cpu_0:cpu_0|top_mn_pcp_0_cpu_0_nios2_oci:the_top_mn_pcp_0_cpu_0_nios2_oci|top_mn_pcp_0_cpu_0_jtag_debug_module_wrapper:the_top_mn_pcp_0_cpu_0_jtag_debug_module_wrapper|sld_virtual_jtag_basic:top_mn_pcp_0_cpu_0_jtag_debug_module_phy|tdo"/>
+        <port name="usr_ir_out[0]" source="top_mn:inst|top_mn_pcp_0:pcp_0|top_mn_pcp_0_cpu_0:cpu_0|top_mn_pcp_0_cpu_0_nios2_oci:the_top_mn_pcp_0_cpu_0_nios2_oci|top_mn_pcp_0_cpu_0_jtag_debug_module_wrapper:the_top_mn_pcp_0_cpu_0_jtag_debug_module_wrapper|sld_virtual_jtag_basic:top_mn_pcp_0_cpu_0_jtag_debug_module_phy|ir_out[0]"/>
+        <port name="usr_ir_out[1]" source="top_mn:inst|top_mn_pcp_0:pcp_0|top_mn_pcp_0_cpu_0:cpu_0|top_mn_pcp_0_cpu_0_nios2_oci:the_top_mn_pcp_0_cpu_0_nios2_oci|top_mn_pcp_0_cpu_0_jtag_debug_module_wrapper:the_top_mn_pcp_0_cpu_0_jtag_debug_module_wrapper|sld_virtual_jtag_basic:top_mn_pcp_0_cpu_0_jtag_debug_module_phy|ir_out[1]"/>
+        <port name="jtag.bp.inst_pcp_0_cpu_0_the_top_mn_pcp_0_cpu_0_nios2_oci_the_top_mn_pcp_0_cpu_0_jtag_debug_module_wrapper_top_mn_pcp_0_cpu_0_jtag_debug_module_phy_sld_virtual_jtag_impl_inst_raw_tck" source="jtag.bp.inst_pcp_0_cpu_0_the_top_mn_pcp_0_cpu_0_nios2_oci_the_top_mn_pcp_0_cpu_0_jtag_debug_module_wrapper_top_mn_pcp_0_cpu_0_jtag_debug_module_phy_sld_virtual_jtag_impl_inst_raw_tck"/>
+        <port name="jtag.bp.inst_pcp_0_cpu_0_the_top_mn_pcp_0_cpu_0_nios2_oci_the_top_mn_pcp_0_cpu_0_jtag_debug_module_wrapper_top_mn_pcp_0_cpu_0_jtag_debug_module_phy_sld_virtual_jtag_impl_inst_raw_tms" source="jtag.bp.inst_pcp_0_cpu_0_the_top_mn_pcp_0_cpu_0_nios2_oci_the_top_mn_pcp_0_cpu_0_jtag_debug_module_wrapper_top_mn_pcp_0_cpu_0_jtag_debug_module_phy_sld_virtual_jtag_impl_inst_raw_tms"/>
+        <port name="jtag.bp.inst_pcp_0_cpu_0_the_top_mn_pcp_0_cpu_0_nios2_oci_the_top_mn_pcp_0_cpu_0_jtag_debug_module_wrapper_top_mn_pcp_0_cpu_0_jtag_debug_module_phy_sld_virtual_jtag_impl_inst_tdi" source="jtag.bp.inst_pcp_0_cpu_0_the_top_mn_pcp_0_cpu_0_nios2_oci_the_top_mn_pcp_0_cpu_0_jtag_debug_module_wrapper_top_mn_pcp_0_cpu_0_jtag_debug_module_phy_sld_virtual_jtag_impl_inst_tdi"/>
+        <port name="jtag.bp.inst_pcp_0_cpu_0_the_top_mn_pcp_0_cpu_0_nios2_oci_the_top_mn_pcp_0_cpu_0_jtag_debug_module_wrapper_top_mn_pcp_0_cpu_0_jtag_debug_module_phy_sld_virtual_jtag_impl_inst_jtag_state_tlr" source="jtag.bp.inst_pcp_0_cpu_0_the_top_mn_pcp_0_cpu_0_nios2_oci_the_top_mn_pcp_0_cpu_0_jtag_debug_module_wrapper_top_mn_pcp_0_cpu_0_jtag_debug_module_phy_sld_virtual_jtag_impl_inst_jtag_state_tlr"/>
+        <port name="jtag.bp.inst_pcp_0_cpu_0_the_top_mn_pcp_0_cpu_0_nios2_oci_the_top_mn_pcp_0_cpu_0_jtag_debug_module_wrapper_top_mn_pcp_0_cpu_0_jtag_debug_module_phy_sld_virtual_jtag_impl_inst_jtag_state_rti" source="jtag.bp.inst_pcp_0_cpu_0_the_top_mn_pcp_0_cpu_0_nios2_oci_the_top_mn_pcp_0_cpu_0_jtag_debug_module_wrapper_top_mn_pcp_0_cpu_0_jtag_debug_module_phy_sld_virtual_jtag_impl_inst_jtag_state_rti"/>
+        <port name="jtag.bp.inst_pcp_0_cpu_0_the_top_mn_pcp_0_cpu_0_nios2_oci_the_top_mn_pcp_0_cpu_0_jtag_debug_module_wrapper_top_mn_pcp_0_cpu_0_jtag_debug_module_phy_sld_virtual_jtag_impl_inst_jtag_state_sdrs" source="jtag.bp.inst_pcp_0_cpu_0_the_top_mn_pcp_0_cpu_0_nios2_oci_the_top_mn_pcp_0_cpu_0_jtag_debug_module_wrapper_top_mn_pcp_0_cpu_0_jtag_debug_module_phy_sld_virtual_jtag_impl_inst_jtag_state_sdrs"/>
+        <port name="jtag.bp.inst_pcp_0_cpu_0_the_top_mn_pcp_0_cpu_0_nios2_oci_the_top_mn_pcp_0_cpu_0_jtag_debug_module_wrapper_top_mn_pcp_0_cpu_0_jtag_debug_module_phy_sld_virtual_jtag_impl_inst_jtag_state_cdr" source="jtag.bp.inst_pcp_0_cpu_0_the_top_mn_pcp_0_cpu_0_nios2_oci_the_top_mn_pcp_0_cpu_0_jtag_debug_module_wrapper_top_mn_pcp_0_cpu_0_jtag_debug_module_phy_sld_virtual_jtag_impl_inst_jtag_state_cdr"/>
+        <port name="jtag.bp.inst_pcp_0_cpu_0_the_top_mn_pcp_0_cpu_0_nios2_oci_the_top_mn_pcp_0_cpu_0_jtag_debug_module_wrapper_top_mn_pcp_0_cpu_0_jtag_debug_module_phy_sld_virtual_jtag_impl_inst_jtag_state_sdr" source="jtag.bp.inst_pcp_0_cpu_0_the_top_mn_pcp_0_cpu_0_nios2_oci_the_top_mn_pcp_0_cpu_0_jtag_debug_module_wrapper_top_mn_pcp_0_cpu_0_jtag_debug_module_phy_sld_virtual_jtag_impl_inst_jtag_state_sdr"/>
+        <port name="jtag.bp.inst_pcp_0_cpu_0_the_top_mn_pcp_0_cpu_0_nios2_oci_the_top_mn_pcp_0_cpu_0_jtag_debug_module_wrapper_top_mn_pcp_0_cpu_0_jtag_debug_module_phy_sld_virtual_jtag_impl_inst_jtag_state_e1dr" source="jtag.bp.inst_pcp_0_cpu_0_the_top_mn_pcp_0_cpu_0_nios2_oci_the_top_mn_pcp_0_cpu_0_jtag_debug_module_wrapper_top_mn_pcp_0_cpu_0_jtag_debug_module_phy_sld_virtual_jtag_impl_inst_jtag_state_e1dr"/>
+        <port name="jtag.bp.inst_pcp_0_cpu_0_the_top_mn_pcp_0_cpu_0_nios2_oci_the_top_mn_pcp_0_cpu_0_jtag_debug_module_wrapper_top_mn_pcp_0_cpu_0_jtag_debug_module_phy_sld_virtual_jtag_impl_inst_jtag_state_pdr" source="jtag.bp.inst_pcp_0_cpu_0_the_top_mn_pcp_0_cpu_0_nios2_oci_the_top_mn_pcp_0_cpu_0_jtag_debug_module_wrapper_top_mn_pcp_0_cpu_0_jtag_debug_module_phy_sld_virtual_jtag_impl_inst_jtag_state_pdr"/>
+        <port name="jtag.bp.inst_pcp_0_cpu_0_the_top_mn_pcp_0_cpu_0_nios2_oci_the_top_mn_pcp_0_cpu_0_jtag_debug_module_wrapper_top_mn_pcp_0_cpu_0_jtag_debug_module_phy_sld_virtual_jtag_impl_inst_jtag_state_e2dr" source="jtag.bp.inst_pcp_0_cpu_0_the_top_mn_pcp_0_cpu_0_nios2_oci_the_top_mn_pcp_0_cpu_0_jtag_debug_module_wrapper_top_mn_pcp_0_cpu_0_jtag_debug_module_phy_sld_virtual_jtag_impl_inst_jtag_state_e2dr"/>
+        <port name="jtag.bp.inst_pcp_0_cpu_0_the_top_mn_pcp_0_cpu_0_nios2_oci_the_top_mn_pcp_0_cpu_0_jtag_debug_module_wrapper_top_mn_pcp_0_cpu_0_jtag_debug_module_phy_sld_virtual_jtag_impl_inst_jtag_state_udr" source="jtag.bp.inst_pcp_0_cpu_0_the_top_mn_pcp_0_cpu_0_nios2_oci_the_top_mn_pcp_0_cpu_0_jtag_debug_module_wrapper_top_mn_pcp_0_cpu_0_jtag_debug_module_phy_sld_virtual_jtag_impl_inst_jtag_state_udr"/>
+        <port name="jtag.bp.inst_pcp_0_cpu_0_the_top_mn_pcp_0_cpu_0_nios2_oci_the_top_mn_pcp_0_cpu_0_jtag_debug_module_wrapper_top_mn_pcp_0_cpu_0_jtag_debug_module_phy_sld_virtual_jtag_impl_inst_jtag_state_sirs" source="jtag.bp.inst_pcp_0_cpu_0_the_top_mn_pcp_0_cpu_0_nios2_oci_the_top_mn_pcp_0_cpu_0_jtag_debug_module_wrapper_top_mn_pcp_0_cpu_0_jtag_debug_module_phy_sld_virtual_jtag_impl_inst_jtag_state_sirs"/>
+        <port name="jtag.bp.inst_pcp_0_cpu_0_the_top_mn_pcp_0_cpu_0_nios2_oci_the_top_mn_pcp_0_cpu_0_jtag_debug_module_wrapper_top_mn_pcp_0_cpu_0_jtag_debug_module_phy_sld_virtual_jtag_impl_inst_jtag_state_cir" source="jtag.bp.inst_pcp_0_cpu_0_the_top_mn_pcp_0_cpu_0_nios2_oci_the_top_mn_pcp_0_cpu_0_jtag_debug_module_wrapper_top_mn_pcp_0_cpu_0_jtag_debug_module_phy_sld_virtual_jtag_impl_inst_jtag_state_cir"/>
+        <port name="jtag.bp.inst_pcp_0_cpu_0_the_top_mn_pcp_0_cpu_0_nios2_oci_the_top_mn_pcp_0_cpu_0_jtag_debug_module_wrapper_top_mn_pcp_0_cpu_0_jtag_debug_module_phy_sld_virtual_jtag_impl_inst_jtag_state_sir" source="jtag.bp.inst_pcp_0_cpu_0_the_top_mn_pcp_0_cpu_0_nios2_oci_the_top_mn_pcp_0_cpu_0_jtag_debug_module_wrapper_top_mn_pcp_0_cpu_0_jtag_debug_module_phy_sld_virtual_jtag_impl_inst_jtag_state_sir"/>
+        <port name="jtag.bp.inst_pcp_0_cpu_0_the_top_mn_pcp_0_cpu_0_nios2_oci_the_top_mn_pcp_0_cpu_0_jtag_debug_module_wrapper_top_mn_pcp_0_cpu_0_jtag_debug_module_phy_sld_virtual_jtag_impl_inst_jtag_state_e1ir" source="jtag.bp.inst_pcp_0_cpu_0_the_top_mn_pcp_0_cpu_0_nios2_oci_the_top_mn_pcp_0_cpu_0_jtag_debug_module_wrapper_top_mn_pcp_0_cpu_0_jtag_debug_module_phy_sld_virtual_jtag_impl_inst_jtag_state_e1ir"/>
+        <port name="jtag.bp.inst_pcp_0_cpu_0_the_top_mn_pcp_0_cpu_0_nios2_oci_the_top_mn_pcp_0_cpu_0_jtag_debug_module_wrapper_top_mn_pcp_0_cpu_0_jtag_debug_module_phy_sld_virtual_jtag_impl_inst_jtag_state_pir" source="jtag.bp.inst_pcp_0_cpu_0_the_top_mn_pcp_0_cpu_0_nios2_oci_the_top_mn_pcp_0_cpu_0_jtag_debug_module_wrapper_top_mn_pcp_0_cpu_0_jtag_debug_module_phy_sld_virtual_jtag_impl_inst_jtag_state_pir"/>
+        <port name="jtag.bp.inst_pcp_0_cpu_0_the_top_mn_pcp_0_cpu_0_nios2_oci_the_top_mn_pcp_0_cpu_0_jtag_debug_module_wrapper_top_mn_pcp_0_cpu_0_jtag_debug_module_phy_sld_virtual_jtag_impl_inst_jtag_state_e2ir" source="jtag.bp.inst_pcp_0_cpu_0_the_top_mn_pcp_0_cpu_0_nios2_oci_the_top_mn_pcp_0_cpu_0_jtag_debug_module_wrapper_top_mn_pcp_0_cpu_0_jtag_debug_module_phy_sld_virtual_jtag_impl_inst_jtag_state_e2ir"/>
+        <port name="jtag.bp.inst_pcp_0_cpu_0_the_top_mn_pcp_0_cpu_0_nios2_oci_the_top_mn_pcp_0_cpu_0_jtag_debug_module_wrapper_top_mn_pcp_0_cpu_0_jtag_debug_module_phy_sld_virtual_jtag_impl_inst_jtag_state_uir" source="jtag.bp.inst_pcp_0_cpu_0_the_top_mn_pcp_0_cpu_0_nios2_oci_the_top_mn_pcp_0_cpu_0_jtag_debug_module_wrapper_top_mn_pcp_0_cpu_0_jtag_debug_module_phy_sld_virtual_jtag_impl_inst_jtag_state_uir"/>
+        <port name="jtag.bp.inst_pcp_0_cpu_0_the_top_mn_pcp_0_cpu_0_nios2_oci_the_top_mn_pcp_0_cpu_0_jtag_debug_module_wrapper_top_mn_pcp_0_cpu_0_jtag_debug_module_phy_sld_virtual_jtag_impl_inst_usr1" source="jtag.bp.inst_pcp_0_cpu_0_the_top_mn_pcp_0_cpu_0_nios2_oci_the_top_mn_pcp_0_cpu_0_jtag_debug_module_wrapper_top_mn_pcp_0_cpu_0_jtag_debug_module_phy_sld_virtual_jtag_impl_inst_usr1"/>
+        <port name="jtag.bp.inst_pcp_0_cpu_0_the_top_mn_pcp_0_cpu_0_nios2_oci_the_top_mn_pcp_0_cpu_0_jtag_debug_module_wrapper_top_mn_pcp_0_cpu_0_jtag_debug_module_phy_sld_virtual_jtag_impl_inst_clr" source="jtag.bp.inst_pcp_0_cpu_0_the_top_mn_pcp_0_cpu_0_nios2_oci_the_top_mn_pcp_0_cpu_0_jtag_debug_module_wrapper_top_mn_pcp_0_cpu_0_jtag_debug_module_phy_sld_virtual_jtag_impl_inst_clr"/>
+        <port name="jtag.bp.inst_pcp_0_cpu_0_the_top_mn_pcp_0_cpu_0_nios2_oci_the_top_mn_pcp_0_cpu_0_jtag_debug_module_wrapper_top_mn_pcp_0_cpu_0_jtag_debug_module_phy_sld_virtual_jtag_impl_inst_ena" source="jtag.bp.inst_pcp_0_cpu_0_the_top_mn_pcp_0_cpu_0_nios2_oci_the_top_mn_pcp_0_cpu_0_jtag_debug_module_wrapper_top_mn_pcp_0_cpu_0_jtag_debug_module_phy_sld_virtual_jtag_impl_inst_ena"/>
+        <port name="jtag.bp.inst_pcp_0_cpu_0_the_top_mn_pcp_0_cpu_0_nios2_oci_the_top_mn_pcp_0_cpu_0_jtag_debug_module_wrapper_top_mn_pcp_0_cpu_0_jtag_debug_module_phy_sld_virtual_jtag_impl_inst_ir_in_0_" source="jtag.bp.inst_pcp_0_cpu_0_the_top_mn_pcp_0_cpu_0_nios2_oci_the_top_mn_pcp_0_cpu_0_jtag_debug_module_wrapper_top_mn_pcp_0_cpu_0_jtag_debug_module_phy_sld_virtual_jtag_impl_inst_ir_in_0_"/>
+        <port name="jtag.bp.inst_pcp_0_cpu_0_the_top_mn_pcp_0_cpu_0_nios2_oci_the_top_mn_pcp_0_cpu_0_jtag_debug_module_wrapper_top_mn_pcp_0_cpu_0_jtag_debug_module_phy_sld_virtual_jtag_impl_inst_ir_in_1_" source="jtag.bp.inst_pcp_0_cpu_0_the_top_mn_pcp_0_cpu_0_nios2_oci_the_top_mn_pcp_0_cpu_0_jtag_debug_module_wrapper_top_mn_pcp_0_cpu_0_jtag_debug_module_phy_sld_virtual_jtag_impl_inst_ir_in_1_"/>
+      </inputs>
+      <outputs>
+        <port name="usr_tck"/>
+        <port name="usr_tdi"/>
+        <port name="usr_ir_in[0]"/>
+        <port name="usr_ir_in[1]"/>
+        <port name="usr_virtual_state_cdr"/>
+        <port name="usr_virtual_state_sdr"/>
+        <port name="usr_virtual_state_e1dr"/>
+        <port name="usr_virtual_state_pdr"/>
+        <port name="usr_virtual_state_e2dr"/>
+        <port name="usr_virtual_state_udr"/>
+        <port name="usr_virtual_state_cir"/>
+        <port name="usr_virtual_state_uir"/>
+        <port name="usr_tms"/>
+        <port name="usr_jtag_state_tlr"/>
+        <port name="usr_jtag_state_rti"/>
+        <port name="usr_jtag_state_sdrs"/>
+        <port name="usr_jtag_state_cdr"/>
+        <port name="usr_jtag_state_sdr"/>
+        <port name="usr_jtag_state_e1dr"/>
+        <port name="usr_jtag_state_pdr"/>
+        <port name="usr_jtag_state_e2dr"/>
+        <port name="usr_jtag_state_udr"/>
+        <port name="usr_jtag_state_sirs"/>
+        <port name="usr_jtag_state_cir"/>
+        <port name="usr_jtag_state_sir"/>
+        <port name="usr_jtag_state_e1ir"/>
+        <port name="usr_jtag_state_pir"/>
+        <port name="usr_jtag_state_e2ir"/>
+        <port name="usr_jtag_state_uir"/>
+        <port name="jtag.bp.inst_pcp_0_cpu_0_the_top_mn_pcp_0_cpu_0_nios2_oci_the_top_mn_pcp_0_cpu_0_jtag_debug_module_wrapper_top_mn_pcp_0_cpu_0_jtag_debug_module_phy_sld_virtual_jtag_impl_inst_tdo"/>
+        <port name="jtag.bp.inst_pcp_0_cpu_0_the_top_mn_pcp_0_cpu_0_nios2_oci_the_top_mn_pcp_0_cpu_0_jtag_debug_module_wrapper_top_mn_pcp_0_cpu_0_jtag_debug_module_phy_sld_virtual_jtag_impl_inst_ir_out_0_"/>
+        <port name="jtag.bp.inst_pcp_0_cpu_0_the_top_mn_pcp_0_cpu_0_nios2_oci_the_top_mn_pcp_0_cpu_0_jtag_debug_module_wrapper_top_mn_pcp_0_cpu_0_jtag_debug_module_phy_sld_virtual_jtag_impl_inst_ir_out_1_"/>
+      </outputs>
+    </node>
+    <node hpath="top_mn:inst|top_mn_pcp_0:pcp_0|top_mn_pcp_0_jtag_uart_0:jtag_uart_0|alt_jtag_atlantic:top_mn_pcp_0_jtag_uart_0_alt_jtag_atlantic" instance_id="0" mfg_id="110" node_id="128" sld_node_info="0xC006E00" version="1">
+      <parameters>
+        <parameter name="INSTANCE_ID" type="dec" value="0"/>
+        <parameter name="SLD_NODE_INFO" type="ubin" value="00001100000000000110111000000000"/>
+        <parameter name="SLD_AUTO_INSTANCE_INDEX" type="string" value="YES"/>
+        <parameter name="LOG2_TXFIFO_DEPTH" type="dec" value="6"/>
+        <parameter name="LOG2_RXFIFO_DEPTH" type="dec" value="6"/>
+        <parameter name="RESERVED" type="dec" value="0"/>
+        <parameter name="DATA_WIDTH" type="dec" value="8"/>
+        <parameter name="NODE_IR_WIDTH" type="dec" value="1"/>
+        <parameter name="SCAN_LENGTH" type="dec" value="11"/>
+      </parameters>
+      <inputs>
+        <port name="clk" source="top_mn:inst|top_mn_pcp_0:pcp_0|top_mn_pcp_0_jtag_uart_0:jtag_uart_0|clk"/>
+        <port name="rst_n" source="top_mn:inst|top_mn_pcp_0:pcp_0|top_mn_pcp_0_jtag_uart_0:jtag_uart_0|rst_n"/>
+        <port name="r_val" source="top_mn:inst|top_mn_pcp_0:pcp_0|top_mn_pcp_0_jtag_uart_0:jtag_uart_0|r_val"/>
+        <port name="r_dat[0]" source="top_mn:inst|top_mn_pcp_0:pcp_0|top_mn_pcp_0_jtag_uart_0:jtag_uart_0|top_mn_pcp_0_jtag_uart_0_scfifo_w:the_top_mn_pcp_0_jtag_uart_0_scfifo_w|r_dat[0]"/>
+        <port name="r_dat[1]" source="top_mn:inst|top_mn_pcp_0:pcp_0|top_mn_pcp_0_jtag_uart_0:jtag_uart_0|top_mn_pcp_0_jtag_uart_0_scfifo_w:the_top_mn_pcp_0_jtag_uart_0_scfifo_w|r_dat[1]"/>
+        <port name="r_dat[2]" source="top_mn:inst|top_mn_pcp_0:pcp_0|top_mn_pcp_0_jtag_uart_0:jtag_uart_0|top_mn_pcp_0_jtag_uart_0_scfifo_w:the_top_mn_pcp_0_jtag_uart_0_scfifo_w|r_dat[2]"/>
+        <port name="r_dat[3]" source="top_mn:inst|top_mn_pcp_0:pcp_0|top_mn_pcp_0_jtag_uart_0:jtag_uart_0|top_mn_pcp_0_jtag_uart_0_scfifo_w:the_top_mn_pcp_0_jtag_uart_0_scfifo_w|r_dat[3]"/>
+        <port name="r_dat[4]" source="top_mn:inst|top_mn_pcp_0:pcp_0|top_mn_pcp_0_jtag_uart_0:jtag_uart_0|top_mn_pcp_0_jtag_uart_0_scfifo_w:the_top_mn_pcp_0_jtag_uart_0_scfifo_w|r_dat[4]"/>
+        <port name="r_dat[5]" source="top_mn:inst|top_mn_pcp_0:pcp_0|top_mn_pcp_0_jtag_uart_0:jtag_uart_0|top_mn_pcp_0_jtag_uart_0_scfifo_w:the_top_mn_pcp_0_jtag_uart_0_scfifo_w|r_dat[5]"/>
+        <port name="r_dat[6]" source="top_mn:inst|top_mn_pcp_0:pcp_0|top_mn_pcp_0_jtag_uart_0:jtag_uart_0|top_mn_pcp_0_jtag_uart_0_scfifo_w:the_top_mn_pcp_0_jtag_uart_0_scfifo_w|r_dat[6]"/>
+        <port name="r_dat[7]" source="top_mn:inst|top_mn_pcp_0:pcp_0|top_mn_pcp_0_jtag_uart_0:jtag_uart_0|top_mn_pcp_0_jtag_uart_0_scfifo_w:the_top_mn_pcp_0_jtag_uart_0_scfifo_w|r_dat[7]"/>
+        <port name="t_dav" source="top_mn:inst|top_mn_pcp_0:pcp_0|top_mn_pcp_0_jtag_uart_0:jtag_uart_0|t_dav"/>
+        <port name="jtag.bp.inst_pcp_0_jtag_uart_0_top_mn_pcp_0_jtag_uart_0_alt_jtag_atlantic_raw_tck" source="jtag.bp.inst_pcp_0_jtag_uart_0_top_mn_pcp_0_jtag_uart_0_alt_jtag_atlantic_raw_tck"/>
+        <port name="jtag.bp.inst_pcp_0_jtag_uart_0_top_mn_pcp_0_jtag_uart_0_alt_jtag_atlantic_tck" source="jtag.bp.inst_pcp_0_jtag_uart_0_top_mn_pcp_0_jtag_uart_0_alt_jtag_atlantic_tck"/>
+        <port name="jtag.bp.inst_pcp_0_jtag_uart_0_top_mn_pcp_0_jtag_uart_0_alt_jtag_atlantic_tdi" source="jtag.bp.inst_pcp_0_jtag_uart_0_top_mn_pcp_0_jtag_uart_0_alt_jtag_atlantic_tdi"/>
+        <port name="jtag.bp.inst_pcp_0_jtag_uart_0_top_mn_pcp_0_jtag_uart_0_alt_jtag_atlantic_rti" source="jtag.bp.inst_pcp_0_jtag_uart_0_top_mn_pcp_0_jtag_uart_0_alt_jtag_atlantic_rti"/>
+        <port name="jtag.bp.inst_pcp_0_jtag_uart_0_top_mn_pcp_0_jtag_uart_0_alt_jtag_atlantic_shift" source="jtag.bp.inst_pcp_0_jtag_uart_0_top_mn_pcp_0_jtag_uart_0_alt_jtag_atlantic_shift"/>
+        <port name="jtag.bp.inst_pcp_0_jtag_uart_0_top_mn_pcp_0_jtag_uart_0_alt_jtag_atlantic_update" source="jtag.bp.inst_pcp_0_jtag_uart_0_top_mn_pcp_0_jtag_uart_0_alt_jtag_atlantic_update"/>
+        <port name="jtag.bp.inst_pcp_0_jtag_uart_0_top_mn_pcp_0_jtag_uart_0_alt_jtag_atlantic_usr1" source="jtag.bp.inst_pcp_0_jtag_uart_0_top_mn_pcp_0_jtag_uart_0_alt_jtag_atlantic_usr1"/>
+        <port name="jtag.bp.inst_pcp_0_jtag_uart_0_top_mn_pcp_0_jtag_uart_0_alt_jtag_atlantic_clr" source="jtag.bp.inst_pcp_0_jtag_uart_0_top_mn_pcp_0_jtag_uart_0_alt_jtag_atlantic_clr"/>
+        <port name="jtag.bp.inst_pcp_0_jtag_uart_0_top_mn_pcp_0_jtag_uart_0_alt_jtag_atlantic_ena" source="jtag.bp.inst_pcp_0_jtag_uart_0_top_mn_pcp_0_jtag_uart_0_alt_jtag_atlantic_ena"/>
+        <port name="jtag.bp.inst_pcp_0_jtag_uart_0_top_mn_pcp_0_jtag_uart_0_alt_jtag_atlantic_ir_in_0_" source="jtag.bp.inst_pcp_0_jtag_uart_0_top_mn_pcp_0_jtag_uart_0_alt_jtag_atlantic_ir_in_0_"/>
+        <port name="jtag.bp.inst_pcp_0_jtag_uart_0_top_mn_pcp_0_jtag_uart_0_alt_jtag_atlantic_jtag_state_cdr" source="jtag.bp.inst_pcp_0_jtag_uart_0_top_mn_pcp_0_jtag_uart_0_alt_jtag_atlantic_jtag_state_cdr"/>
+        <port name="jtag.bp.inst_pcp_0_jtag_uart_0_top_mn_pcp_0_jtag_uart_0_alt_jtag_atlantic_jtag_state_sdr" source="jtag.bp.inst_pcp_0_jtag_uart_0_top_mn_pcp_0_jtag_uart_0_alt_jtag_atlantic_jtag_state_sdr"/>
+        <port name="jtag.bp.inst_pcp_0_jtag_uart_0_top_mn_pcp_0_jtag_uart_0_alt_jtag_atlantic_jtag_state_udr" source="jtag.bp.inst_pcp_0_jtag_uart_0_top_mn_pcp_0_jtag_uart_0_alt_jtag_atlantic_jtag_state_udr"/>
+      </inputs>
+      <outputs>
+        <port name="r_ena"/>
+        <port name="r_ena"/>
+        <port name="t_ena"/>
+        <port name="t_ena"/>
+        <port name="t_dat[0]"/>
+        <port name="t_dat[1]"/>
+        <port name="t_dat[2]"/>
+        <port name="t_dat[3]"/>
+        <port name="t_dat[4]"/>
+        <port name="t_dat[5]"/>
+        <port name="t_dat[6]"/>
+        <port name="t_dat[7]"/>
+        <port name="t_pause"/>
+        <port name="t_pause"/>
+        <port name="jtag.bp.inst_pcp_0_jtag_uart_0_top_mn_pcp_0_jtag_uart_0_alt_jtag_atlantic_tdo"/>
+        <port name="jtag.bp.inst_pcp_0_jtag_uart_0_top_mn_pcp_0_jtag_uart_0_alt_jtag_atlantic_irq"/>
+        <port name="jtag.bp.inst_pcp_0_jtag_uart_0_top_mn_pcp_0_jtag_uart_0_alt_jtag_atlantic_ir_out_0_"/>
+      </outputs>
+    </node>
+    <node hpath="top_mn:inst|top_mn_host_0:host_0|top_mn_host_0_cpu_0:cpu_0|top_mn_host_0_cpu_0_nios2_oci:the_top_mn_host_0_cpu_0_nios2_oci|top_mn_host_0_cpu_0_jtag_debug_module_wrapper:the_top_mn_host_0_cpu_0_jtag_debug_module_wrapper|sld_virtual_jtag_basic:top_mn_host_0_cpu_0_jtag_debug_module_phy|sld_virtual_jtag_impl:sld_virtual_jtag_impl_inst" instance_id="1" mfg_id="70" node_id="34" sld_node_info="0x19104601" version="3">
+      <parameters>
+        <parameter name="sld_mfg_id" type="dec" value="70"/>
+        <parameter name="sld_type_id" type="dec" value="34"/>
+        <parameter name="sld_version" type="dec" value="3"/>
+        <parameter name="sld_instance_index" type="dec" value="0"/>
+        <parameter name="sld_auto_instance_index" type="string" value="YES"/>
+        <parameter name="sld_ir_width" type="dec" value="2"/>
+        <parameter name="SLD_NODE_INFO" type="dec" value="420496896"/>
+      </parameters>
+      <inputs>
+        <port name="usr_tdo" source="top_mn:inst|top_mn_host_0:host_0|top_mn_host_0_cpu_0:cpu_0|top_mn_host_0_cpu_0_nios2_oci:the_top_mn_host_0_cpu_0_nios2_oci|top_mn_host_0_cpu_0_jtag_debug_module_wrapper:the_top_mn_host_0_cpu_0_jtag_debug_module_wrapper|sld_virtual_jtag_basic:top_mn_host_0_cpu_0_jtag_debug_module_phy|tdo"/>
+        <port name="usr_ir_out[0]" source="top_mn:inst|top_mn_host_0:host_0|top_mn_host_0_cpu_0:cpu_0|top_mn_host_0_cpu_0_nios2_oci:the_top_mn_host_0_cpu_0_nios2_oci|top_mn_host_0_cpu_0_jtag_debug_module_wrapper:the_top_mn_host_0_cpu_0_jtag_debug_module_wrapper|sld_virtual_jtag_basic:top_mn_host_0_cpu_0_jtag_debug_module_phy|ir_out[0]"/>
+        <port name="usr_ir_out[1]" source="top_mn:inst|top_mn_host_0:host_0|top_mn_host_0_cpu_0:cpu_0|top_mn_host_0_cpu_0_nios2_oci:the_top_mn_host_0_cpu_0_nios2_oci|top_mn_host_0_cpu_0_jtag_debug_module_wrapper:the_top_mn_host_0_cpu_0_jtag_debug_module_wrapper|sld_virtual_jtag_basic:top_mn_host_0_cpu_0_jtag_debug_module_phy|ir_out[1]"/>
+        <port name="jtag.bp.inst_host_0_cpu_0_the_top_mn_host_0_cpu_0_nios2_oci_the_top_mn_host_0_cpu_0_jtag_debug_module_wrapper_top_mn_host_0_cpu_0_jtag_debug_module_phy_sld_virtual_jtag_impl_inst_raw_tck" source="jtag.bp.inst_host_0_cpu_0_the_top_mn_host_0_cpu_0_nios2_oci_the_top_mn_host_0_cpu_0_jtag_debug_module_wrapper_top_mn_host_0_cpu_0_jtag_debug_module_phy_sld_virtual_jtag_impl_inst_raw_tck"/>
+        <port name="jtag.bp.inst_host_0_cpu_0_the_top_mn_host_0_cpu_0_nios2_oci_the_top_mn_host_0_cpu_0_jtag_debug_module_wrapper_top_mn_host_0_cpu_0_jtag_debug_module_phy_sld_virtual_jtag_impl_inst_raw_tms" source="jtag.bp.inst_host_0_cpu_0_the_top_mn_host_0_cpu_0_nios2_oci_the_top_mn_host_0_cpu_0_jtag_debug_module_wrapper_top_mn_host_0_cpu_0_jtag_debug_module_phy_sld_virtual_jtag_impl_inst_raw_tms"/>
+        <port name="jtag.bp.inst_host_0_cpu_0_the_top_mn_host_0_cpu_0_nios2_oci_the_top_mn_host_0_cpu_0_jtag_debug_module_wrapper_top_mn_host_0_cpu_0_jtag_debug_module_phy_sld_virtual_jtag_impl_inst_tdi" source="jtag.bp.inst_host_0_cpu_0_the_top_mn_host_0_cpu_0_nios2_oci_the_top_mn_host_0_cpu_0_jtag_debug_module_wrapper_top_mn_host_0_cpu_0_jtag_debug_module_phy_sld_virtual_jtag_impl_inst_tdi"/>
+        <port name="jtag.bp.inst_host_0_cpu_0_the_top_mn_host_0_cpu_0_nios2_oci_the_top_mn_host_0_cpu_0_jtag_debug_module_wrapper_top_mn_host_0_cpu_0_jtag_debug_module_phy_sld_virtual_jtag_impl_inst_jtag_state_tlr" source="jtag.bp.inst_host_0_cpu_0_the_top_mn_host_0_cpu_0_nios2_oci_the_top_mn_host_0_cpu_0_jtag_debug_module_wrapper_top_mn_host_0_cpu_0_jtag_debug_module_phy_sld_virtual_jtag_impl_inst_jtag_state_tlr"/>
+        <port name="jtag.bp.inst_host_0_cpu_0_the_top_mn_host_0_cpu_0_nios2_oci_the_top_mn_host_0_cpu_0_jtag_debug_module_wrapper_top_mn_host_0_cpu_0_jtag_debug_module_phy_sld_virtual_jtag_impl_inst_jtag_state_rti" source="jtag.bp.inst_host_0_cpu_0_the_top_mn_host_0_cpu_0_nios2_oci_the_top_mn_host_0_cpu_0_jtag_debug_module_wrapper_top_mn_host_0_cpu_0_jtag_debug_module_phy_sld_virtual_jtag_impl_inst_jtag_state_rti"/>
+        <port name="jtag.bp.inst_host_0_cpu_0_the_top_mn_host_0_cpu_0_nios2_oci_the_top_mn_host_0_cpu_0_jtag_debug_module_wrapper_top_mn_host_0_cpu_0_jtag_debug_module_phy_sld_virtual_jtag_impl_inst_jtag_state_sdrs" source="jtag.bp.inst_host_0_cpu_0_the_top_mn_host_0_cpu_0_nios2_oci_the_top_mn_host_0_cpu_0_jtag_debug_module_wrapper_top_mn_host_0_cpu_0_jtag_debug_module_phy_sld_virtual_jtag_impl_inst_jtag_state_sdrs"/>
+        <port name="jtag.bp.inst_host_0_cpu_0_the_top_mn_host_0_cpu_0_nios2_oci_the_top_mn_host_0_cpu_0_jtag_debug_module_wrapper_top_mn_host_0_cpu_0_jtag_debug_module_phy_sld_virtual_jtag_impl_inst_jtag_state_cdr" source="jtag.bp.inst_host_0_cpu_0_the_top_mn_host_0_cpu_0_nios2_oci_the_top_mn_host_0_cpu_0_jtag_debug_module_wrapper_top_mn_host_0_cpu_0_jtag_debug_module_phy_sld_virtual_jtag_impl_inst_jtag_state_cdr"/>
+        <port name="jtag.bp.inst_host_0_cpu_0_the_top_mn_host_0_cpu_0_nios2_oci_the_top_mn_host_0_cpu_0_jtag_debug_module_wrapper_top_mn_host_0_cpu_0_jtag_debug_module_phy_sld_virtual_jtag_impl_inst_jtag_state_sdr" source="jtag.bp.inst_host_0_cpu_0_the_top_mn_host_0_cpu_0_nios2_oci_the_top_mn_host_0_cpu_0_jtag_debug_module_wrapper_top_mn_host_0_cpu_0_jtag_debug_module_phy_sld_virtual_jtag_impl_inst_jtag_state_sdr"/>
+        <port name="jtag.bp.inst_host_0_cpu_0_the_top_mn_host_0_cpu_0_nios2_oci_the_top_mn_host_0_cpu_0_jtag_debug_module_wrapper_top_mn_host_0_cpu_0_jtag_debug_module_phy_sld_virtual_jtag_impl_inst_jtag_state_e1dr" source="jtag.bp.inst_host_0_cpu_0_the_top_mn_host_0_cpu_0_nios2_oci_the_top_mn_host_0_cpu_0_jtag_debug_module_wrapper_top_mn_host_0_cpu_0_jtag_debug_module_phy_sld_virtual_jtag_impl_inst_jtag_state_e1dr"/>
+        <port name="jtag.bp.inst_host_0_cpu_0_the_top_mn_host_0_cpu_0_nios2_oci_the_top_mn_host_0_cpu_0_jtag_debug_module_wrapper_top_mn_host_0_cpu_0_jtag_debug_module_phy_sld_virtual_jtag_impl_inst_jtag_state_pdr" source="jtag.bp.inst_host_0_cpu_0_the_top_mn_host_0_cpu_0_nios2_oci_the_top_mn_host_0_cpu_0_jtag_debug_module_wrapper_top_mn_host_0_cpu_0_jtag_debug_module_phy_sld_virtual_jtag_impl_inst_jtag_state_pdr"/>
+        <port name="jtag.bp.inst_host_0_cpu_0_the_top_mn_host_0_cpu_0_nios2_oci_the_top_mn_host_0_cpu_0_jtag_debug_module_wrapper_top_mn_host_0_cpu_0_jtag_debug_module_phy_sld_virtual_jtag_impl_inst_jtag_state_e2dr" source="jtag.bp.inst_host_0_cpu_0_the_top_mn_host_0_cpu_0_nios2_oci_the_top_mn_host_0_cpu_0_jtag_debug_module_wrapper_top_mn_host_0_cpu_0_jtag_debug_module_phy_sld_virtual_jtag_impl_inst_jtag_state_e2dr"/>
+        <port name="jtag.bp.inst_host_0_cpu_0_the_top_mn_host_0_cpu_0_nios2_oci_the_top_mn_host_0_cpu_0_jtag_debug_module_wrapper_top_mn_host_0_cpu_0_jtag_debug_module_phy_sld_virtual_jtag_impl_inst_jtag_state_udr" source="jtag.bp.inst_host_0_cpu_0_the_top_mn_host_0_cpu_0_nios2_oci_the_top_mn_host_0_cpu_0_jtag_debug_module_wrapper_top_mn_host_0_cpu_0_jtag_debug_module_phy_sld_virtual_jtag_impl_inst_jtag_state_udr"/>
+        <port name="jtag.bp.inst_host_0_cpu_0_the_top_mn_host_0_cpu_0_nios2_oci_the_top_mn_host_0_cpu_0_jtag_debug_module_wrapper_top_mn_host_0_cpu_0_jtag_debug_module_phy_sld_virtual_jtag_impl_inst_jtag_state_sirs" source="jtag.bp.inst_host_0_cpu_0_the_top_mn_host_0_cpu_0_nios2_oci_the_top_mn_host_0_cpu_0_jtag_debug_module_wrapper_top_mn_host_0_cpu_0_jtag_debug_module_phy_sld_virtual_jtag_impl_inst_jtag_state_sirs"/>
+        <port name="jtag.bp.inst_host_0_cpu_0_the_top_mn_host_0_cpu_0_nios2_oci_the_top_mn_host_0_cpu_0_jtag_debug_module_wrapper_top_mn_host_0_cpu_0_jtag_debug_module_phy_sld_virtual_jtag_impl_inst_jtag_state_cir" source="jtag.bp.inst_host_0_cpu_0_the_top_mn_host_0_cpu_0_nios2_oci_the_top_mn_host_0_cpu_0_jtag_debug_module_wrapper_top_mn_host_0_cpu_0_jtag_debug_module_phy_sld_virtual_jtag_impl_inst_jtag_state_cir"/>
+        <port name="jtag.bp.inst_host_0_cpu_0_the_top_mn_host_0_cpu_0_nios2_oci_the_top_mn_host_0_cpu_0_jtag_debug_module_wrapper_top_mn_host_0_cpu_0_jtag_debug_module_phy_sld_virtual_jtag_impl_inst_jtag_state_sir" source="jtag.bp.inst_host_0_cpu_0_the_top_mn_host_0_cpu_0_nios2_oci_the_top_mn_host_0_cpu_0_jtag_debug_module_wrapper_top_mn_host_0_cpu_0_jtag_debug_module_phy_sld_virtual_jtag_impl_inst_jtag_state_sir"/>
+        <port name="jtag.bp.inst_host_0_cpu_0_the_top_mn_host_0_cpu_0_nios2_oci_the_top_mn_host_0_cpu_0_jtag_debug_module_wrapper_top_mn_host_0_cpu_0_jtag_debug_module_phy_sld_virtual_jtag_impl_inst_jtag_state_e1ir" source="jtag.bp.inst_host_0_cpu_0_the_top_mn_host_0_cpu_0_nios2_oci_the_top_mn_host_0_cpu_0_jtag_debug_module_wrapper_top_mn_host_0_cpu_0_jtag_debug_module_phy_sld_virtual_jtag_impl_inst_jtag_state_e1ir"/>
+        <port name="jtag.bp.inst_host_0_cpu_0_the_top_mn_host_0_cpu_0_nios2_oci_the_top_mn_host_0_cpu_0_jtag_debug_module_wrapper_top_mn_host_0_cpu_0_jtag_debug_module_phy_sld_virtual_jtag_impl_inst_jtag_state_pir" source="jtag.bp.inst_host_0_cpu_0_the_top_mn_host_0_cpu_0_nios2_oci_the_top_mn_host_0_cpu_0_jtag_debug_module_wrapper_top_mn_host_0_cpu_0_jtag_debug_module_phy_sld_virtual_jtag_impl_inst_jtag_state_pir"/>
+        <port name="jtag.bp.inst_host_0_cpu_0_the_top_mn_host_0_cpu_0_nios2_oci_the_top_mn_host_0_cpu_0_jtag_debug_module_wrapper_top_mn_host_0_cpu_0_jtag_debug_module_phy_sld_virtual_jtag_impl_inst_jtag_state_e2ir" source="jtag.bp.inst_host_0_cpu_0_the_top_mn_host_0_cpu_0_nios2_oci_the_top_mn_host_0_cpu_0_jtag_debug_module_wrapper_top_mn_host_0_cpu_0_jtag_debug_module_phy_sld_virtual_jtag_impl_inst_jtag_state_e2ir"/>
+        <port name="jtag.bp.inst_host_0_cpu_0_the_top_mn_host_0_cpu_0_nios2_oci_the_top_mn_host_0_cpu_0_jtag_debug_module_wrapper_top_mn_host_0_cpu_0_jtag_debug_module_phy_sld_virtual_jtag_impl_inst_jtag_state_uir" source="jtag.bp.inst_host_0_cpu_0_the_top_mn_host_0_cpu_0_nios2_oci_the_top_mn_host_0_cpu_0_jtag_debug_module_wrapper_top_mn_host_0_cpu_0_jtag_debug_module_phy_sld_virtual_jtag_impl_inst_jtag_state_uir"/>
+        <port name="jtag.bp.inst_host_0_cpu_0_the_top_mn_host_0_cpu_0_nios2_oci_the_top_mn_host_0_cpu_0_jtag_debug_module_wrapper_top_mn_host_0_cpu_0_jtag_debug_module_phy_sld_virtual_jtag_impl_inst_usr1" source="jtag.bp.inst_host_0_cpu_0_the_top_mn_host_0_cpu_0_nios2_oci_the_top_mn_host_0_cpu_0_jtag_debug_module_wrapper_top_mn_host_0_cpu_0_jtag_debug_module_phy_sld_virtual_jtag_impl_inst_usr1"/>
+        <port name="jtag.bp.inst_host_0_cpu_0_the_top_mn_host_0_cpu_0_nios2_oci_the_top_mn_host_0_cpu_0_jtag_debug_module_wrapper_top_mn_host_0_cpu_0_jtag_debug_module_phy_sld_virtual_jtag_impl_inst_clr" source="jtag.bp.inst_host_0_cpu_0_the_top_mn_host_0_cpu_0_nios2_oci_the_top_mn_host_0_cpu_0_jtag_debug_module_wrapper_top_mn_host_0_cpu_0_jtag_debug_module_phy_sld_virtual_jtag_impl_inst_clr"/>
+        <port name="jtag.bp.inst_host_0_cpu_0_the_top_mn_host_0_cpu_0_nios2_oci_the_top_mn_host_0_cpu_0_jtag_debug_module_wrapper_top_mn_host_0_cpu_0_jtag_debug_module_phy_sld_virtual_jtag_impl_inst_ena" source="jtag.bp.inst_host_0_cpu_0_the_top_mn_host_0_cpu_0_nios2_oci_the_top_mn_host_0_cpu_0_jtag_debug_module_wrapper_top_mn_host_0_cpu_0_jtag_debug_module_phy_sld_virtual_jtag_impl_inst_ena"/>
+        <port name="jtag.bp.inst_host_0_cpu_0_the_top_mn_host_0_cpu_0_nios2_oci_the_top_mn_host_0_cpu_0_jtag_debug_module_wrapper_top_mn_host_0_cpu_0_jtag_debug_module_phy_sld_virtual_jtag_impl_inst_ir_in_0_" source="jtag.bp.inst_host_0_cpu_0_the_top_mn_host_0_cpu_0_nios2_oci_the_top_mn_host_0_cpu_0_jtag_debug_module_wrapper_top_mn_host_0_cpu_0_jtag_debug_module_phy_sld_virtual_jtag_impl_inst_ir_in_0_"/>
+        <port name="jtag.bp.inst_host_0_cpu_0_the_top_mn_host_0_cpu_0_nios2_oci_the_top_mn_host_0_cpu_0_jtag_debug_module_wrapper_top_mn_host_0_cpu_0_jtag_debug_module_phy_sld_virtual_jtag_impl_inst_ir_in_1_" source="jtag.bp.inst_host_0_cpu_0_the_top_mn_host_0_cpu_0_nios2_oci_the_top_mn_host_0_cpu_0_jtag_debug_module_wrapper_top_mn_host_0_cpu_0_jtag_debug_module_phy_sld_virtual_jtag_impl_inst_ir_in_1_"/>
+      </inputs>
+      <outputs>
+        <port name="usr_tck"/>
+        <port name="usr_tdi"/>
+        <port name="usr_ir_in[0]"/>
+        <port name="usr_ir_in[1]"/>
+        <port name="usr_virtual_state_cdr"/>
+        <port name="usr_virtual_state_sdr"/>
+        <port name="usr_virtual_state_e1dr"/>
+        <port name="usr_virtual_state_pdr"/>
+        <port name="usr_virtual_state_e2dr"/>
+        <port name="usr_virtual_state_udr"/>
+        <port name="usr_virtual_state_cir"/>
+        <port name="usr_virtual_state_uir"/>
+        <port name="usr_tms"/>
+        <port name="usr_jtag_state_tlr"/>
+        <port name="usr_jtag_state_rti"/>
+        <port name="usr_jtag_state_sdrs"/>
+        <port name="usr_jtag_state_cdr"/>
+        <port name="usr_jtag_state_sdr"/>
+        <port name="usr_jtag_state_e1dr"/>
+        <port name="usr_jtag_state_pdr"/>
+        <port name="usr_jtag_state_e2dr"/>
+        <port name="usr_jtag_state_udr"/>
+        <port name="usr_jtag_state_sirs"/>
+        <port name="usr_jtag_state_cir"/>
+        <port name="usr_jtag_state_sir"/>
+        <port name="usr_jtag_state_e1ir"/>
+        <port name="usr_jtag_state_pir"/>
+        <port name="usr_jtag_state_e2ir"/>
+        <port name="usr_jtag_state_uir"/>
+        <port name="jtag.bp.inst_host_0_cpu_0_the_top_mn_host_0_cpu_0_nios2_oci_the_top_mn_host_0_cpu_0_jtag_debug_module_wrapper_top_mn_host_0_cpu_0_jtag_debug_module_phy_sld_virtual_jtag_impl_inst_tdo"/>
+        <port name="jtag.bp.inst_host_0_cpu_0_the_top_mn_host_0_cpu_0_nios2_oci_the_top_mn_host_0_cpu_0_jtag_debug_module_wrapper_top_mn_host_0_cpu_0_jtag_debug_module_phy_sld_virtual_jtag_impl_inst_ir_out_0_"/>
+        <port name="jtag.bp.inst_host_0_cpu_0_the_top_mn_host_0_cpu_0_nios2_oci_the_top_mn_host_0_cpu_0_jtag_debug_module_wrapper_top_mn_host_0_cpu_0_jtag_debug_module_phy_sld_virtual_jtag_impl_inst_ir_out_1_"/>
+      </outputs>
+    </node>
+    <node hpath="top_mn:inst|top_mn_host_0:host_0|top_mn_pcp_0_jtag_uart_0:jtag_uart_0|alt_jtag_atlantic:top_mn_pcp_0_jtag_uart_0_alt_jtag_atlantic" instance_id="1" mfg_id="110" node_id="128" sld_node_info="0xC006E01" version="1">
+      <parameters>
+        <parameter name="INSTANCE_ID" type="dec" value="0"/>
+        <parameter name="SLD_NODE_INFO" type="ubin" value="00001100000000000110111000000000"/>
+        <parameter name="SLD_AUTO_INSTANCE_INDEX" type="string" value="YES"/>
+        <parameter name="LOG2_TXFIFO_DEPTH" type="dec" value="6"/>
+        <parameter name="LOG2_RXFIFO_DEPTH" type="dec" value="6"/>
+        <parameter name="RESERVED" type="dec" value="0"/>
+        <parameter name="DATA_WIDTH" type="dec" value="8"/>
+        <parameter name="NODE_IR_WIDTH" type="dec" value="1"/>
+        <parameter name="SCAN_LENGTH" type="dec" value="11"/>
+      </parameters>
+      <inputs>
+        <port name="clk" source="top_mn:inst|top_mn_host_0:host_0|top_mn_pcp_0_jtag_uart_0:jtag_uart_0|clk"/>
+        <port name="rst_n" source="top_mn:inst|top_mn_host_0:host_0|top_mn_pcp_0_jtag_uart_0:jtag_uart_0|rst_n"/>
+        <port name="r_val" source="top_mn:inst|top_mn_host_0:host_0|top_mn_pcp_0_jtag_uart_0:jtag_uart_0|r_val"/>
+        <port name="r_dat[0]" source="top_mn:inst|top_mn_host_0:host_0|top_mn_pcp_0_jtag_uart_0:jtag_uart_0|top_mn_pcp_0_jtag_uart_0_scfifo_w:the_top_mn_pcp_0_jtag_uart_0_scfifo_w|r_dat[0]"/>
+        <port name="r_dat[1]" source="top_mn:inst|top_mn_host_0:host_0|top_mn_pcp_0_jtag_uart_0:jtag_uart_0|top_mn_pcp_0_jtag_uart_0_scfifo_w:the_top_mn_pcp_0_jtag_uart_0_scfifo_w|r_dat[1]"/>
+        <port name="r_dat[2]" source="top_mn:inst|top_mn_host_0:host_0|top_mn_pcp_0_jtag_uart_0:jtag_uart_0|top_mn_pcp_0_jtag_uart_0_scfifo_w:the_top_mn_pcp_0_jtag_uart_0_scfifo_w|r_dat[2]"/>
+        <port name="r_dat[3]" source="top_mn:inst|top_mn_host_0:host_0|top_mn_pcp_0_jtag_uart_0:jtag_uart_0|top_mn_pcp_0_jtag_uart_0_scfifo_w:the_top_mn_pcp_0_jtag_uart_0_scfifo_w|r_dat[3]"/>
+        <port name="r_dat[4]" source="top_mn:inst|top_mn_host_0:host_0|top_mn_pcp_0_jtag_uart_0:jtag_uart_0|top_mn_pcp_0_jtag_uart_0_scfifo_w:the_top_mn_pcp_0_jtag_uart_0_scfifo_w|r_dat[4]"/>
+        <port name="r_dat[5]" source="top_mn:inst|top_mn_host_0:host_0|top_mn_pcp_0_jtag_uart_0:jtag_uart_0|top_mn_pcp_0_jtag_uart_0_scfifo_w:the_top_mn_pcp_0_jtag_uart_0_scfifo_w|r_dat[5]"/>
+        <port name="r_dat[6]" source="top_mn:inst|top_mn_host_0:host_0|top_mn_pcp_0_jtag_uart_0:jtag_uart_0|top_mn_pcp_0_jtag_uart_0_scfifo_w:the_top_mn_pcp_0_jtag_uart_0_scfifo_w|r_dat[6]"/>
+        <port name="r_dat[7]" source="top_mn:inst|top_mn_host_0:host_0|top_mn_pcp_0_jtag_uart_0:jtag_uart_0|top_mn_pcp_0_jtag_uart_0_scfifo_w:the_top_mn_pcp_0_jtag_uart_0_scfifo_w|r_dat[7]"/>
+        <port name="t_dav" source="top_mn:inst|top_mn_host_0:host_0|top_mn_pcp_0_jtag_uart_0:jtag_uart_0|t_dav"/>
+        <port name="jtag.bp.inst_host_0_jtag_uart_0_top_mn_pcp_0_jtag_uart_0_alt_jtag_atlantic_raw_tck" source="jtag.bp.inst_host_0_jtag_uart_0_top_mn_pcp_0_jtag_uart_0_alt_jtag_atlantic_raw_tck"/>
+        <port name="jtag.bp.inst_host_0_jtag_uart_0_top_mn_pcp_0_jtag_uart_0_alt_jtag_atlantic_tck" source="jtag.bp.inst_host_0_jtag_uart_0_top_mn_pcp_0_jtag_uart_0_alt_jtag_atlantic_tck"/>
+        <port name="jtag.bp.inst_host_0_jtag_uart_0_top_mn_pcp_0_jtag_uart_0_alt_jtag_atlantic_tdi" source="jtag.bp.inst_host_0_jtag_uart_0_top_mn_pcp_0_jtag_uart_0_alt_jtag_atlantic_tdi"/>
+        <port name="jtag.bp.inst_host_0_jtag_uart_0_top_mn_pcp_0_jtag_uart_0_alt_jtag_atlantic_rti" source="jtag.bp.inst_host_0_jtag_uart_0_top_mn_pcp_0_jtag_uart_0_alt_jtag_atlantic_rti"/>
+        <port name="jtag.bp.inst_host_0_jtag_uart_0_top_mn_pcp_0_jtag_uart_0_alt_jtag_atlantic_shift" source="jtag.bp.inst_host_0_jtag_uart_0_top_mn_pcp_0_jtag_uart_0_alt_jtag_atlantic_shift"/>
+        <port name="jtag.bp.inst_host_0_jtag_uart_0_top_mn_pcp_0_jtag_uart_0_alt_jtag_atlantic_update" source="jtag.bp.inst_host_0_jtag_uart_0_top_mn_pcp_0_jtag_uart_0_alt_jtag_atlantic_update"/>
+        <port name="jtag.bp.inst_host_0_jtag_uart_0_top_mn_pcp_0_jtag_uart_0_alt_jtag_atlantic_usr1" source="jtag.bp.inst_host_0_jtag_uart_0_top_mn_pcp_0_jtag_uart_0_alt_jtag_atlantic_usr1"/>
+        <port name="jtag.bp.inst_host_0_jtag_uart_0_top_mn_pcp_0_jtag_uart_0_alt_jtag_atlantic_clr" source="jtag.bp.inst_host_0_jtag_uart_0_top_mn_pcp_0_jtag_uart_0_alt_jtag_atlantic_clr"/>
+        <port name="jtag.bp.inst_host_0_jtag_uart_0_top_mn_pcp_0_jtag_uart_0_alt_jtag_atlantic_ena" source="jtag.bp.inst_host_0_jtag_uart_0_top_mn_pcp_0_jtag_uart_0_alt_jtag_atlantic_ena"/>
+        <port name="jtag.bp.inst_host_0_jtag_uart_0_top_mn_pcp_0_jtag_uart_0_alt_jtag_atlantic_ir_in_0_" source="jtag.bp.inst_host_0_jtag_uart_0_top_mn_pcp_0_jtag_uart_0_alt_jtag_atlantic_ir_in_0_"/>
+        <port name="jtag.bp.inst_host_0_jtag_uart_0_top_mn_pcp_0_jtag_uart_0_alt_jtag_atlantic_jtag_state_cdr" source="jtag.bp.inst_host_0_jtag_uart_0_top_mn_pcp_0_jtag_uart_0_alt_jtag_atlantic_jtag_state_cdr"/>
+        <port name="jtag.bp.inst_host_0_jtag_uart_0_top_mn_pcp_0_jtag_uart_0_alt_jtag_atlantic_jtag_state_sdr" source="jtag.bp.inst_host_0_jtag_uart_0_top_mn_pcp_0_jtag_uart_0_alt_jtag_atlantic_jtag_state_sdr"/>
+        <port name="jtag.bp.inst_host_0_jtag_uart_0_top_mn_pcp_0_jtag_uart_0_alt_jtag_atlantic_jtag_state_udr" source="jtag.bp.inst_host_0_jtag_uart_0_top_mn_pcp_0_jtag_uart_0_alt_jtag_atlantic_jtag_state_udr"/>
+      </inputs>
+      <outputs>
+        <port name="r_ena"/>
+        <port name="r_ena"/>
+        <port name="t_ena"/>
+        <port name="t_ena"/>
+        <port name="t_dat[0]"/>
+        <port name="t_dat[1]"/>
+        <port name="t_dat[2]"/>
+        <port name="t_dat[3]"/>
+        <port name="t_dat[4]"/>
+        <port name="t_dat[5]"/>
+        <port name="t_dat[6]"/>
+        <port name="t_dat[7]"/>
+        <port name="t_pause"/>
+        <port name="t_pause"/>
+        <port name="jtag.bp.inst_host_0_jtag_uart_0_top_mn_pcp_0_jtag_uart_0_alt_jtag_atlantic_tdo"/>
+        <port name="jtag.bp.inst_host_0_jtag_uart_0_top_mn_pcp_0_jtag_uart_0_alt_jtag_atlantic_irq"/>
+        <port name="jtag.bp.inst_host_0_jtag_uart_0_top_mn_pcp_0_jtag_uart_0_alt_jtag_atlantic_ir_out_0_"/>
+      </outputs>
+    </node>
+    <node hpath="sld_signaltap:auto_signaltap_0" instance_id="0" mfg_id="110" node_id="0" sld_node_info="0x30006E00" version="6">
+      <parameters>
+        <parameter name="lpm_type" type="string" value="sld_signaltap"/>
+        <parameter name="sld_node_info" type="unknown" value="805334528"/>
+        <parameter name="SLD_IP_VERSION" type="dec" value="6"/>
+        <parameter name="SLD_IP_MINOR_VERSION" type="dec" value="0"/>
+        <parameter name="SLD_COMMON_IP_VERSION" type="dec" value="0"/>
+        <parameter name="sld_data_bits" type="unknown" value="20"/>
+        <parameter name="sld_trigger_bits" type="unknown" value="20"/>
+        <parameter name="SLD_NODE_CRC_BITS" type="dec" value="32"/>
+        <parameter name="sld_node_crc_hiword" type="unknown" value="15474"/>
+        <parameter name="sld_node_crc_loword" type="unknown" value="58891"/>
+        <parameter name="SLD_INCREMENTAL_ROUTING" type="dec" value="0"/>
+        <parameter name="sld_sample_depth" type="unknown" value="131072"/>
+        <parameter name="sld_segment_size" type="unknown" value="131072"/>
+        <parameter name="SLD_RAM_BLOCK_TYPE" type="string" value="AUTO"/>
+        <parameter name="sld_state_bits" type="unknown" value="11"/>
+        <parameter name="sld_buffer_full_stop" type="unknown" value="1"/>
+        <parameter name="SLD_MEM_ADDRESS_BITS" type="dec" value="7"/>
+        <parameter name="SLD_DATA_BIT_CNTR_BITS" type="dec" value="4"/>
+        <parameter name="sld_trigger_level" type="unknown" value="1"/>
+        <parameter name="sld_trigger_in_enabled" type="unknown" value="0"/>
+        <parameter name="sld_advanced_trigger_entity" type="unknown" value="basic,1,"/>
+        <parameter name="sld_trigger_level_pipeline" type="unknown" value="1"/>
+        <parameter name="sld_enable_advanced_trigger" type="unknown" value="0"/>
+        <parameter name="SLD_ADVANCED_TRIGGER_1" type="string" value="NONE"/>
+        <parameter name="SLD_ADVANCED_TRIGGER_2" type="string" value="NONE"/>
+        <parameter name="SLD_ADVANCED_TRIGGER_3" type="string" value="NONE"/>
+        <parameter name="SLD_ADVANCED_TRIGGER_4" type="string" value="NONE"/>
+        <parameter name="SLD_ADVANCED_TRIGGER_5" type="string" value="NONE"/>
+        <parameter name="SLD_ADVANCED_TRIGGER_6" type="string" value="NONE"/>
+        <parameter name="SLD_ADVANCED_TRIGGER_7" type="string" value="NONE"/>
+        <parameter name="SLD_ADVANCED_TRIGGER_8" type="string" value="NONE"/>
+        <parameter name="SLD_ADVANCED_TRIGGER_9" type="string" value="NONE"/>
+        <parameter name="SLD_ADVANCED_TRIGGER_10" type="string" value="NONE"/>
+        <parameter name="sld_inversion_mask_length" type="unknown" value="91"/>
+        <parameter name="sld_inversion_mask" type="unknown" value="0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"/>
+        <parameter name="sld_power_up_trigger" type="unknown" value="0"/>
+        <parameter name="SLD_STATE_FLOW_MGR_ENTITY" type="string" value="state_flow_mgr_entity.vhd"/>
+        <parameter name="sld_state_flow_use_generated" type="unknown" value="0"/>
+        <parameter name="sld_current_resource_width" type="unknown" value="1"/>
+        <parameter name="sld_attribute_mem_mode" type="unknown" value="OFF"/>
+        <parameter name="SLD_STORAGE_QUALIFIER_BITS" type="dec" value="1"/>
+        <parameter name="SLD_STORAGE_QUALIFIER_GAP_RECORD" type="dec" value="0"/>
+        <parameter name="SLD_STORAGE_QUALIFIER_MODE" type="string" value="OFF"/>
+        <parameter name="SLD_STORAGE_QUALIFIER_ENABLE_ADVANCED_CONDITION" type="dec" value="0"/>
+        <parameter name="sld_storage_qualifier_inversion_mask_length" type="unknown" value="0"/>
+        <parameter name="SLD_STORAGE_QUALIFIER_ADVANCED_CONDITION_ENTITY" type="string" value="basic"/>
+        <parameter name="SLD_STORAGE_QUALIFIER_PIPELINE" type="dec" value="0"/>
+      </parameters>
+      <inputs/>
+      <outputs/>
+    </node>
+  </node_info>
+</sld_project_info>
