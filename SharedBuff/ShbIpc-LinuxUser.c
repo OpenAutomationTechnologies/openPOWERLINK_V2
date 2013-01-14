@@ -254,6 +254,7 @@ tShbError  ShbIpcAllocBuffer (ULONG ulBufferSize_p, const char* pszBufferID_p,
     unsigned int            fShMemNewCreated=FALSE;
     void                    *pSharedMem=NULL;
     char                    semName[256];
+    struct shmid_ds         shminfo;
 
     ulShMemSize = ulBufferSize_p + sizeof(tShbMemHeader);
     ShbError = kShbOk;
@@ -279,11 +280,23 @@ tShbError  ShbIpcAllocBuffer (ULONG ulBufferSize_p, const char* pszBufferID_p,
         EPL_DBGLVL_SHB_TRACE("          iBufferId:%08x iBufferKey:%08x\n", iBufferId, iBufferKey);
         if (iBufferId == -1)
         {
-            EPL_DBGLVL_ERROR_TRACE ("%s() Allocate private memory failed!\n", __func__);
+            EPL_DBGLVL_ERROR_TRACE ("%s() Allocate memory failed!\n", __func__);
             ShbError = kShbOutOfMem;
             goto Exit;
         }
-        fShMemNewCreated = FALSE;
+
+        if (shmctl(iBufferId, IPC_STAT, &shminfo) != -1)
+        {
+            if (shminfo.shm_nattch == 0)
+                fShMemNewCreated = TRUE;
+            else
+                fShMemNewCreated = FALSE;
+        }
+        else
+        {
+            ShbError = kShbOutOfMem;
+            goto Exit;
+        }
     }
     else
     {
