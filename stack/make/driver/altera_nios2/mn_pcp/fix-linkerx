@@ -1,0 +1,6 @@
+#!/bin/bash
+#
+#workaround for linker.x issue
+
+LINKER_X_DIR=bsp
+sed -i 's/AT ( LOADADDR (.rodata) + SIZEOF (.rodata)+ SIZEOF (.rwdata) )/AT ( LOADADDR (.rodata) + SIZEOF (.rodata) )/g' $LINKER_X_DIR/linker.x
