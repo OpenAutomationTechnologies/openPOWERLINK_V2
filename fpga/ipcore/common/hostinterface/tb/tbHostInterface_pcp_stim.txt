@@ -1,0 +1,83 @@
+#status control register tb
+# PCP
+
+#check magic
+JEd 00000000 504C4B00
+
+#read version
+JEd 00000004 010203FF
+
+#check node id for F0
+JEb 0000020C XXXXXXF0
+
+#wait for command
+JEw 00000204 XXXX0001
+###############################################
+
+#set led (but PCP has only R0!)
+WRw 00000210 xxxx0003
+
+#set error counter base
+WRd 00000400 00010000
+JEd 00000400 00010000
+
+#set tx nmt base
+WRd 00000404 00020000
+JEd 00000404 00020000
+
+#set tx gen base
+WRd 00000408 00030000
+JEd 00000408 00030000
+
+#set tx sync base
+WRd 0000040C 00040000
+JEd 0000040C 00040000
+
+#set tx veth base
+WRd 00000410 00050000
+JEd 00000410 00050000
+
+#set rx veth base
+WRd 00000414 00060000
+JEd 00000414 00060000
+
+#set k2u base
+WRd 00000418 00070000
+JEd 00000418 00070000
+
+#set u2k base
+WRd 0000041C 00080000
+JEd 0000041C 00080000
+
+#set tpdo base
+WRd 00000420 00090000
+JEd 00000420 00090000
+
+#enable bridge
+WRw 00000200 XXXX0001
+
+#set rpdo base
+WRd 00000424 000A0000
+JEd 00000424 000A0000
+
+#set state
+WRw 00000206 0001XXXX
+
+#wait for command
+JEw 00000204 XXXX0002
+###############################################
+
+#set some irq
+WRw 00000306 0002XXXX
+
+#set state
+WRw 00000206 0002XXXX
+
+#wait for command
+JEw 00000204 XXXX0003
+###############################################
+
+#do something here...
+
+#set state
+WRw 00000206 0003XXXX

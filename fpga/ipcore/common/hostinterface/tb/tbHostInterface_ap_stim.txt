@@ -1,0 +1,131 @@
+#status control register tb
+# AP
+
+#check magic
+JEd 00000000 504C4B00
+
+#read version
+RDd 00000004
+
+#check node id for F0
+JEb 0000020C XXXXXXF0
+
+#set led
+WRw 00000210 xxxx0001
+
+#do some invalid access
+WRd 00008000 DEADC0DE
+WRw 00008000 DEADDEAD
+RDd 00008000
+RDw 00008000
+
+#write command
+WRw 00000204 XXXX0001
+###############################################
+
+#wait for state
+JEw 00000206 0001XXXX
+
+#set led
+WRw 00000210 xxxx0002
+
+#set dyn buf 0 base
+WRd 00000400 00001000
+JEd 00000400 00001000
+
+#set dyn buf 1 base
+WRd 00000404 00002000
+JEd 00000404 00002000
+
+#write to 0800
+WRd 00000800 08001234
+#write to 1000
+WRd 00001000 10001234
+#write to 1800
+WRd 00001800 18001234
+#write to 2800
+WRd 00002800 28001234
+#write to 3800
+WRd 00003800 38001234
+#write to 4800
+WRd 00004800 48001234
+#write to 5800
+WRd 00005800 58001234
+#write to 6800
+WRd 00006800 68001234
+#write to 7000
+WRd 00007000 70001234
+#write to 9000
+WRd 00009000 90001234
+#write to B000
+WRd 0000B000 B0001234
+#write to E000
+WRd 0000E000 E0001234
+
+#read from 0800
+RDd 00000800 08001234
+#read from 1000
+RDd 00001000 10001234
+#read from 1800
+JEd 00001800 18001234
+#read from 2800
+JEd 00002800 28001234
+#read from 3800
+JEd 00003800 38001234
+#read from 4800
+JEd 00004800 48001234
+#read from 5800
+JEd 00005800 58001234
+#read from 6800
+JEd 00006800 68001234
+#read from 7000
+JEd 00007000 70001234
+#read from 9000
+JEd 00009000 90001234
+#read from B000
+JEd 0000B000 B0001234
+#read from E000
+JEd 0000E000 E0001234
+
+#write to reserved
+WRd 00014000 14141234
+
+#read from reserved
+RDd 00014000
+
+#ack all irqs
+WRw 00000306 000FXXXX
+
+#enable irq
+WRw 00000300 XXXX000F
+WRw 00000304 XXXX0001
+
+#write command
+WRw 00000204 XXXX0002
+###############################################
+
+#wait for state
+JEw 00000206 0002XXXX
+
+#wait for irq
+JEw 00000302 0003XXXX
+
+#ack irqs
+WRw 00000306 000FXXXX
+
+#wait for sync irq only
+JEw 00000302 0001XXXX
+
+#ack irq
+WRw 00000306 000FXXXX
+
+#disable irq
+WRw 00000300 XXXX0000
+WRw 00000304 XXXX0000
+
+#write command
+WRw 00000204 XXXX0003
+###############################################
+
+#wait for state
+JEw 00000206 0003XXXX
