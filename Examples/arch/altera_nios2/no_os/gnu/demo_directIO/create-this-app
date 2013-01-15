@@ -5,7 +5,7 @@
 TC_I_MEM=tc_i_mem_pcp
 
 if [ -z "$SOPC_DIR" ]; then
-SOPC_DIR=../../../../../../fpga/boards/altera/EBV_DBC3C40/design_nios2_directIO/
+SOPC_DIR=../../../../../../fpga/boards/altera/TERASIC_DE2-115/design_nios2_directIO
 fi
 
 SOPC_DIR=`readlink -n -f ${SOPC_DIR}`

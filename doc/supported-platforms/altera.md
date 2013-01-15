@@ -22,10 +22,9 @@ This file contains documentation for the openPOWERLINK stack on Altera NiosII.
 
 ## Requirements
 
-- Development Board TERASIC_DE2-115 (INK Board), SYSTEC ECUcore-EP3C or
-  EBV DBC3C40.
+- Development Board TERASIC_DE2-115 (INK Board) or SYSTEC ECUcore-EP3C.
 
-- USB-Blaster for programming the SYSTEC ECUcore-EP3C and the EBV DBC3C40 board.
+- USB-Blaster for programming the SYSTEC ECUcore-EP3C.
 
 - Altera Quartus II v10.1 SP1 or newer (Web Edition is also possible)
   and Altera Nios II Embedded Design Suite v10.1 SP1 or newer.
@@ -61,15 +60,6 @@ This file contains documentation for the openPOWERLINK stack on Altera NiosII.
   
   * Switch on the board with the Power button (SW 18).
     
-- Setup for the EBV DBC3C40.
-  * Connect the USB-Blaster to the JTAG port of the board
-  
-  * Connect one Ethernet port of the EBV board to a POWERLINK MN
-    with the delivered cables.
-    
-  * To power-up the board use the 24V I/O power supply.
-    Note: Take care that you don't use the 12V power adapter in combination
-          with the 24V I/O power supply.
 
 - Setup for the SYSTEC ECUcore-EP3C.
   * Details for the setup of this board is available on the
@@ -99,8 +89,6 @@ Otherwise you can use the supplied SOF file and go directly to step 8.
    `$ export SOPC_DIR=../../../../../../fpga/boards/altera/SYSTEC_ECUcore-EP3C/design_nios2_directIO`\n
    or\n
    `$ export SOPC_DIR=../../../../../../fpga/boards/altera/TERASIC_DE2-115/design_nios2_directIO`\n
-   or\n
-   `$ export SOPC_DIR=../../../../../../fpga/boards/altera/EBV_DBC3C40/design_nios2_directIO`\n
 9. Run script `create-this-app` to create the Makefile for the demo application
    and the necessary BSP. (This step is only necessary once)\n
    `$ ./create-this-app`
@@ -118,8 +106,6 @@ Otherwise you can use the supplied SOF file and go directly to step 8.
 2. Program SOF file with Quartus II Programmer into FPGA.
    It is located in the following subdirectory of openPOWERLINK
    main directory:\n
-   `/fpga/boards/altera/EBV_DBC3C40/design_nios2_directIO/nios_openMac.sof`\n
-   or\n
    `/fpga/boards/altera/TERASIC_DE2-115/design_nios2_directIO/nios_openMac.sof`\n
    or\n
    `/fpga/boards/altera/SYSTEC_ECUcore-EP3C/design_nios2_directIO/nios_openMac.sof`\n
