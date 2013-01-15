@@ -138,7 +138,7 @@ set_false_path -from [get_registers *] -to [get_ports PHY0_RESET_n]
 set_false_path -from [get_registers *] -to [get_ports PHY0_MDC]
 set_false_path -from [get_registers *] -to [get_ports PHY0_MDIO]
 set_false_path -from [get_ports PHY0_MDIO] -to [get_registers *]
-set_false_path -from [get_ports PHY0_LINK] -to [get_registers *]
+#set_false_path -from [get_ports PHY0_LINK] -to [get_registers *]
 set_false_path -from [get_ports PHY0_RXER] -to [get_registers *]
 
 ##PHY1
@@ -160,7 +160,7 @@ set_false_path -from [get_registers *] -to [get_ports PHY1_RESET_n]
 set_false_path -from [get_registers *] -to [get_ports PHY1_MDC]
 set_false_path -from [get_registers *] -to [get_ports PHY1_MDIO]
 set_false_path -from [get_ports PHY1_MDIO] -to [get_registers *]
-set_false_path -from [get_ports PHY1_LINK] -to [get_registers *]
+#set_false_path -from [get_ports PHY1_LINK] -to [get_registers *]
 set_false_path -from [get_ports PHY1_RXER] -to [get_registers *]
 
 # ----------------------------------------------------------------------------------
