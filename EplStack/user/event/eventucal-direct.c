@@ -42,7 +42,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #include <eventcal.h>
 #include <user/eventucal.h>
+#if (EPL_EVENT_U2K_QUEUE == EPL_QUEUE_DIRECT)
 #include <kernel/eventkcal.h>
+#endif
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -146,10 +148,12 @@ static tEplKernel addInstance(tEventQueueInstPtr *ppEventQueueInst_p,
             fProcessThreadSafe = FALSE;
             break;
 
+#if (EPL_EVENT_U2K_QUEUE == EPL_QUEUE_DIRECT)
         case kEventQueueU2K:
             pfnProcessEventCb = eventkcal_rxHandler;
             fProcessThreadSafe = TRUE;
             break;
+#endif
 
         case kEventQueueK2U:
             // we don't use this queue but calling init is ok,
