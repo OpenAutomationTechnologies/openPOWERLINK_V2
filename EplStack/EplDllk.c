@@ -500,6 +500,7 @@ static tEplKernel PUBLIC EplDllkCbCnPResFallBackTimeout(void);
 
 #endif
 
+static tEplKernel controlPdokcalSync(BOOL fEnable_p);
 
 //=========================================================================//
 //                                                                         //
@@ -2251,6 +2252,13 @@ tEplKernel      Ret = kEplSuccessful;
             }
 #endif
 
+            /// deactivate sync generation
+            Ret = controlPdokcalSync(FALSE);
+            if (Ret != kEplSuccessful)
+            {
+                goto Exit;
+            }
+
 #if (EPL_DLL_PROCESS_SYNC == EPL_DLL_PROCESS_SYNC_ON_TIMER)
             Ret = EplTimerSynckStopSync();
             if (Ret != kEplSuccessful)
@@ -2386,6 +2394,13 @@ tEplKernel      Ret = kEplSuccessful;
             }
 #endif
 
+            /// deactivate sync generation
+            Ret = controlPdokcalSync(FALSE);
+            if (Ret != kEplSuccessful)
+            {
+                goto Exit;
+            }
+
 #if (EPL_DLL_DISABLE_EDRV_CYCLIC == FALSE)
             Ret = EdrvCyclicStopCycle();
             if (Ret != kEplSuccessful)
@@ -2407,13 +2422,21 @@ tEplKernel      Ret = kEplSuccessful;
             break;
         }
 
-        case kEplNmtMsPreOperational2:
         case kEplNmtMsReadyToOperate:
+#endif // (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
+        case kEplNmtCsReadyToOperate:
+            /// activate sync generation
+            Ret = controlPdokcalSync(TRUE);
+            if (Ret != kEplSuccessful)
+            {
+                goto Exit;
+            }
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
+        case kEplNmtMsPreOperational2:
         case kEplNmtMsOperational:
 #endif // (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
-
         case kEplNmtCsOperational:
-        case kEplNmtCsReadyToOperate:
+
         {
             // signal update of IdentRes and StatusRes on SoA
             EplDllkInstance_g.m_bUpdateTxFrame = EPL_DLLK_UPDATE_BOTH;
@@ -7901,6 +7924,20 @@ Exit:
 #endif
 
 #endif // #if EPL_DLL_PRES_CHAINING_CN != FALSE
+
+static tEplKernel controlPdokcalSync (BOOL fEnable_p)
+{
+    tEplEvent event;
+    BOOL fEnable = fEnable_p;
+
+    event.m_EventSink = kEplEventSinkPdokCal;
+    event.m_EventType = kEplEventTypePdokControlSync;
+    event.m_pArg = &fEnable;
+    event.m_uiSize = sizeof(fEnable);
+
+    return eventk_postEvent(&event);
+
+}
 
 #endif // #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLK)) != 0)
 // EOF

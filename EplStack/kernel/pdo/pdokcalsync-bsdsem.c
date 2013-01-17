@@ -144,6 +144,25 @@ tEplKernel pdokcal_sendSyncEvent(void)
     return kEplSuccessful;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Enable sync events
+
+The function enables sync events
+
+\param  fEnable_p               enable/disable sync event
+
+\return The function returns a tEplKernel error code.
+
+\ingroup module_pdokcal
+*/
+//------------------------------------------------------------------------------
+tEplKernel pdokcal_controlSync(BOOL fEnable_p)
+{
+    UNUSED_PARAMETER(fEnable_p);
+    return kEplSuccessful;
+}
+
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
 //============================================================================//

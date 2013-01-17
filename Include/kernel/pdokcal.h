@@ -83,6 +83,8 @@ tEplKernel pdokcal_initSync(void);
 
 void pdokcal_exitSync(void);
 
+tEplKernel pdokcal_controlSync(BOOL fEnable_p);
+
 tEplKernel pdokcal_sendSyncEvent(void);
 
 #ifdef __cplusplus

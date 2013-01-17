@@ -182,6 +182,10 @@ tEplKernel pdokcal_process(tEplEvent * pEvent_p)
             }
             break;
 
+        case kEplEventTypePdokControlSync:
+            Ret = pdokcal_controlSync(*((BOOL*)pEvent_p->m_pArg));
+            break;
+
         default:
             Ret = kEplInvalidEvent;
             break;
