@@ -96,7 +96,8 @@ typedef enum
     kEplEventTypeNmtMnuNodeCmd  = 0x22, ///< trigger NMT node command (arg is pointer to tEplNmtMnuNodeCmd)
     kEplEventTypeGw309AsciiReq  = 0x23, ///< GW309ASCII request (arg is pointer to pointer of tEplGw309AsciiRequest)
     kEplEventTypeNmtMnuNodeAdded = 0x24, ///< node was added to isochronous phase by DLL (arg is pointer to unsigned int containing the node-ID)
-    kEplEventTypePdokSetupPdoBuf = 0x25  ///< dealloc PDOs
+    kEplEventTypePdokSetupPdoBuf = 0x25,  ///< dealloc PDOs
+    kEplEventTypePdokControlSync = 0x26 ///< enable/disable the pdokcal sync trigger (arg is pointer to BOOL)
 
 } tEplEventType;
 
