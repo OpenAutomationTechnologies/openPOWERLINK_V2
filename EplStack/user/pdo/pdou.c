@@ -148,18 +148,20 @@ static tEplKernel   copyVarFromPdo(BYTE* pPayload_p, tPdoMappObject* pMappObject
 
 The function initializes the PDO user module.
 
+\param  pfnSyncCb_p             function that is called in case of sync event
+
 \return The function returns a tEplKernel error code.
 
 \ingroup module_pdou
 **/
 //------------------------------------------------------------------------------
-tEplKernel pdou_init(void)
+tEplKernel pdou_init(tEplSyncCb pfnSyncCb_p)
 {
     EPL_MEMSET(&pdouInstance_g, 0, sizeof(pdouInstance_g));
     pdouInstance_g.fAllocated = FALSE;
     pdouInstance_g.fRunning = FALSE;
 
-    return pdoucal_init();
+    return pdoucal_init(pfnSyncCb_p);
 }
 
 //------------------------------------------------------------------------------

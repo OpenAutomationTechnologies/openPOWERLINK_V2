@@ -41,6 +41,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #include <EplInc.h>
 #include <pdo.h>
+#include <user/pdoucal.h>
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
 //============================================================================//
@@ -88,11 +89,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 The function initializes the PDO user CAL sync module
 
+\param  pfnSyncCb_p             function that is called in case of sync event
+
 \return The function returns a tEplKernel error code.
 */
 //------------------------------------------------------------------------------
-tEplKernel pdoucal_initSync(void)
+tEplKernel pdoucal_initSync(tEplSyncCb pfnSyncCb_p)
 {
+    UNUSED_PARAMETER(pfnSyncCb_p);
     return kEplSuccessful;
 }
 

@@ -42,6 +42,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #include <EplInc.h>
 #include <pdo.h>
+#include <event.h>
 
 //------------------------------------------------------------------------------
 // const defines
@@ -59,7 +60,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 extern "C" {
 #endif
 
-tEplKernel pdoucal_init(void);
+tEplKernel pdoucal_init(tEplSyncCb pfnSyncCb_p);
 
 tEplKernel pdoucal_exit(void);
 
@@ -83,7 +84,7 @@ tEplKernel pdoucal_setTxPdo(BYTE *pPayload_p, BYTE* pPdo_p,  WORD pdoSize_p);
 tEplKernel pdoucal_getRxPdo(BYTE** ppPdo_p, BYTE* pPayload_p, WORD pdoSize_p);
 
 // PDO sync functions
-tEplKernel pdoucal_initSync(void);
+tEplKernel pdoucal_initSync(tEplSyncCb pfnSyncCb_p);
 
 void pdoucal_exitSync(void);
 
