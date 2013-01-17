@@ -59,7 +59,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 extern "C" {
 #endif
 
-tEplKernel pdou_init(void);
+tEplKernel pdou_init(tEplSyncCb pfnSyncCb_p);
 
 tEplKernel pdou_exit(void);
 

@@ -420,7 +420,7 @@ tEplDllkInitParam   DllkInitParam;
 
     // initialize EplPdou module
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOU)) != 0)
-    Ret = pdou_init();
+    Ret = pdou_init(EplApiInstance_g.m_InitParam.m_pfnCbSync);
     if (Ret != kEplSuccessful)
     {
         goto Exit;

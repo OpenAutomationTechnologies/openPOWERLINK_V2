@@ -90,14 +90,16 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 The function initializes the PDO user CAL module.
 
+\param  pfnSyncCb_p             function that is called in case of sync event
+
 \return The function returns a tEplKernel error code.
 
 \ingroup module_pdoucal
 */
 //------------------------------------------------------------------------------
-tEplKernel pdoucal_init(void)
+tEplKernel pdoucal_init(tEplSyncCb pfnSyncCb_p)
 {
-    return pdoucal_initSync();
+    return pdoucal_initSync(pfnSyncCb_p);
 }
 
 //------------------------------------------------------------------------------
