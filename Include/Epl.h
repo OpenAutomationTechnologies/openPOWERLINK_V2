@@ -290,6 +290,38 @@ typedef struct
 
 } tEplApiProcessImageCopyJob;
 
+typedef struct
+{
+    tEplApiInitParam    m_InitParam;
+
+#if (EPL_OBD_USE_LOAD_CONCISEDCF != FALSE)
+    BYTE*               m_pbCdc;
+    unsigned int        m_uiCdcSize;
+    char*               m_pszCdcFilename;
+#endif
+
+} tEplApiInstance;
+
+typedef struct {
+    tEplKernel (PUBLIC* pfnCbCnCheckEvent)  (tEplNmtEvent NmtEvent_p);
+
+    tEplKernel (PUBLIC* pfnCbNmtStateChange)(tEplEventNmtStateChange NmtStateChange_p);
+
+    tEplKernel (PUBLIC* pfnCbNodeEvent)     (unsigned int uiNodeId_p, tEplNmtNodeEvent NodeEvent_p,
+                                            tEplNmtState NmtState_p, WORD wErrorCode_p,
+                                            BOOL fMandatory_p);
+
+    tEplKernel (PUBLIC* pfnCbBootEvent)     (tEplNmtBootEvent BootEvent_p, tEplNmtState NmtState_p,
+                                            WORD wErrorCode_p);
+
+    tEplKernel (PUBLIC* pfnCbCfmProgress)   (tEplCfmEventCnProgress* pEventCnProgress_p);
+
+    tEplKernel (PUBLIC* pfnCbCfmResult)     (unsigned int uiNodeId_p, tEplNmtNodeCommand NodeCommand_p);
+
+    tEplKernel (PUBLIC* pfnCbProcessEvent)  (tEplEvent* pEplEvent_p);
+
+    tEplKernel (PUBLIC* pfnCbLedStateChange)(tEplLedType LedType_p, BOOL fOn_p);
+} tEplApiCbFuncs;
 
 //---------------------------------------------------------------------------
 // function prototypes
@@ -405,12 +437,12 @@ EPLDLLEXPORT char * PUBLIC EplGetEventTypeStr(tEplEventType eventType_p);
 EPLDLLEXPORT char * PUBLIC EplGetEventSourceStr(tEplEventSource eventSrc_p);
 EPLDLLEXPORT char * PUBLIC EplGetEventSinkStr(tEplEventSink eventSink_p);
 EPLDLLEXPORT char * PUBLIC EplGetNmtStateStr(tEplNmtState nmtState_p);
-EPLDLLEXPORT char * PUBLIC EplGetApiEventStr( tEplApiEventType ApiEvent_p);
-EPLDLLEXPORT char * PUBLIC EplGetNmtNodeEventTypeStr( tEplNmtNodeEvent NodeEventType_p );
-EPLDLLEXPORT char * PUBLIC EplGetNmtBootEventTypeStr( tEplNmtBootEvent BootEventType_p );
-EPLDLLEXPORT char * PUBLIC EplGetSdoComConStateStr( tEplSdoComConState SdoComConState_p );
-EPLDLLEXPORT char * PUBLIC EplGetEplKernelStr( tEplKernel EplKernel_p );
-EPLDLLEXPORT const char * PUBLIC EplGetEmergErrCodeStr( WORD EmergErrCode_p );
+EPLDLLEXPORT char * PUBLIC EplGetApiEventStr(tEplApiEventType ApiEvent_p);
+EPLDLLEXPORT char * PUBLIC EplGetNmtNodeEventTypeStr(tEplNmtNodeEvent NodeEventType_p);
+EPLDLLEXPORT char * PUBLIC EplGetNmtBootEventTypeStr(tEplNmtBootEvent BootEventType_p);
+EPLDLLEXPORT char * PUBLIC EplGetSdoComConStateStr(tEplSdoComConState SdoComConState_p);
+EPLDLLEXPORT char * PUBLIC EplGetEplKernelStr(tEplKernel EplKernel_p);
+EPLDLLEXPORT const char * PUBLIC EplGetEmergErrCodeStr( WORD EmergErrCode_p);
 
 #ifdef __cplusplus
     }

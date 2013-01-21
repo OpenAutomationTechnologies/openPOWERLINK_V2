@@ -87,12 +87,12 @@
 #include "user/EplTimeru.h"
 #include "user/EplCfmu.h"
 
-#include "errhnd.h"
-#include "kernel/errhndk.h"
-#include "user/errhndu.h"
+#include <user/ctrlu.h>
+#include <errhnd.h>
+#include <kernel/errhndk.h>
+#include <user/errhndu.h>
 
 #include <stddef.h>
-
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_VETH)) != 0)
 #include "kernel/VirtualEthernet.h"
 #endif
@@ -170,18 +170,6 @@
 //---------------------------------------------------------------------------
 // local types
 //---------------------------------------------------------------------------
-
-typedef struct
-{
-    tEplApiInitParam    m_InitParam;
-
-#if (EPL_OBD_USE_LOAD_CONCISEDCF != FALSE)
-    BYTE*               m_pbCdc;
-    unsigned int        m_uiCdcSize;
-    char*               m_pszCdcFilename;
-#endif
-
-} tEplApiInstance;
 
 //---------------------------------------------------------------------------
 // local vars
@@ -271,263 +259,30 @@ static tEplKernel PUBLIC EplApiCbReceivedAsnd(tEplFrameInfo *pFrameInfo_p);
 // State:
 //
 //---------------------------------------------------------------------------
-
 tEplKernel PUBLIC EplApiInitialize(tEplApiInitParam * pInitParam_p)
 {
-tEplKernel          Ret = kEplSuccessful;
-tEplObdInitParam    ObdInitParam;
-tEplDllkInitParam   DllkInitParam;
-#if EPL_USE_SHAREDBUFF != FALSE
-    tShbError           ShbError;
+    tEplKernel          ret;
+    tEplApiCbFuncs      cbFuncs;
+
+    cbFuncs.pfnCbCnCheckEvent = EplApiCbCnCheckEvent;
+    cbFuncs.pfnCbNmtStateChange = EplApiCbNmtStateChange;
+    cbFuncs.pfnCbBootEvent = EplApiCbBootEvent;
+    cbFuncs.pfnCbProcessEvent = EplApiProcessEvent;
+#if defined(CONFIG_INCLUDE_CFM)
+    cbFuncs.pfnCbCfmProgress = EplApiCbCfmEventCnProgress;
+    cbFuncs.pfnCbCfmResult = EplApiCbCfmEventCnResult;
 #endif
-
-    // reset instance structure
-    EPL_MEMSET(&EplApiInstance_g, 0, sizeof (EplApiInstance_g));
-
-    EPL_MEMCPY(&EplApiInstance_g.m_InitParam, pInitParam_p, min(sizeof (tEplApiInitParam), (size_t) pInitParam_p->m_uiSizeOfStruct));
-
-    // check event callback function pointer
-    if (EplApiInstance_g.m_InitParam.m_pfnCbEvent == NULL)
-    {   // application must always have an event callback function
-        Ret = kEplApiInvalidParam;
-        goto Exit;
-    }
-
-#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_OBDK)) != 0)
-    // init OD
-    //Ret = EplObdInitRam(&ObdInitParam);
-    if (EplApiInstance_g.m_InitParam.m_pfnObdInitRam == NULL)
-    {
-        Ret = kEplApiNoObdInitRam;
-        goto Exit;
-    }
-
-    Ret = EplApiInstance_g.m_InitParam.m_pfnObdInitRam(&ObdInitParam);
-    if (Ret != kEplSuccessful)
-    {
-        goto Exit;
-    }
-
-    // initialize EplObd module
-    Ret = EplObdInit(&ObdInitParam);
-    if (Ret != kEplSuccessful)
-    {
-        goto Exit;
-    }
+#if defined(CONFIG_INCLUDE_NMT_MN)
+    cbFuncs.pfnCbNodeEvent = EplApiCbNodeEvent;
 #endif
-
-#if EPL_USE_SHAREDBUFF != FALSE
-    ShbError = ShbInit();
-    if (ShbError != kShbOk)
-    {
-        Ret = kEplNoResource;
-        goto Exit;
-    }
+#if defined(CONFIG_INCLUDE_LEDU)
+    cbFuncs.pfnCbLedStateChange = EplApiCbLedStateChange;
 #endif
+    if ((ret = ctrlu_init()) != kEplSuccessful)
+        return ret;
 
-    // initialize EplEventk module
-    Ret = eventk_init();
-    if (Ret != kEplSuccessful)
-    {
-        goto Exit;
-    }
-
-    // initialize EplEventu module
-    Ret = eventu_init(EplApiProcessEvent);
-    if (Ret != kEplSuccessful)
-    {
-        goto Exit;
-    }
-
-    // initialize EplNmtk module before DLL
-#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMTK)) != 0)
-    Ret = EplNmtkInit();
-    if (Ret != kEplSuccessful)
-    {
-        goto Exit;
-    }
-#endif
-
-    // initialize EplDllk module
-#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLK)) != 0)
-    EPL_MEMCPY(DllkInitParam.m_be_abLocalMac, EplApiInstance_g.m_InitParam.m_abMacAddress, 6);
-    DllkInitParam.m_HwParam = EplApiInstance_g.m_InitParam.m_HwParam;
-    Ret = EplDllkAddInstance(&DllkInitParam);
-    if (Ret != kEplSuccessful)
-    {
-        goto Exit;
-    }
-    // copy MAC address back to instance structure
-    EPL_MEMCPY(EplApiInstance_g.m_InitParam.m_abMacAddress, DllkInitParam.m_be_abLocalMac, 6);
-
-    EplDllkRegSyncHandler(EplApiInstance_g.m_InitParam.m_pfnCbSync);
-
-    // initialize error handler module
-    Ret = errhndk_init();
-    if (Ret != kEplSuccessful)
-    {
-        goto Exit;
-    }
-
-    Ret = errhndu_init();
-    if (Ret != kEplSuccessful)
-    {
-        goto Exit;
-    }
-
-    // initialize EplDllkCal module
-    Ret = dllkcal_init();
-    if (Ret != kEplSuccessful)
-    {
-        goto Exit;
-    }
-#endif
-
-    // init EplTimeru module
-    Ret = EplTimeruInit();
-    if (Ret != kEplSuccessful)
-    {
-        goto Exit;
-    }
-
-    // initialize EplDlluCal module
-#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLU)) != 0)
-    Ret = dllucal_init();
-    if (Ret != kEplSuccessful)
-    {
-        goto Exit;
-    }
-
-#endif
-
-    // initialize Virtual Ethernet Driver
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_VETH)) != 0)
-    Ret = VEthAddInstance(EplApiInstance_g.m_InitParam.m_abMacAddress);
-    if (Ret != kEplSuccessful)
-    {
-        goto Exit;
-    }
-#endif
-
-    // initialize EplPdok module
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOK)) != 0)
-    Ret = pdok_init();
-    if (Ret != kEplSuccessful)
-    {
-        goto Exit;
-    }
-#endif
-
-    // initialize EplPdou module
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOU)) != 0)
-    Ret = pdou_init(EplApiInstance_g.m_InitParam.m_pfnCbSync);
-    if (Ret != kEplSuccessful)
-    {
-        goto Exit;
-    }
-#endif
-
-    // initialize EplNmtCnu module
-#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_CN)) != 0)
-    Ret = EplNmtCnuAddInstance(EplApiInstance_g.m_InitParam.m_uiNodeId);
-    if (Ret != kEplSuccessful)
-    {
-        goto Exit;
-    }
-
-    Ret = EplNmtCnuRegisterCheckEventCb(EplApiCbCnCheckEvent);
-    if (Ret != kEplSuccessful)
-    {
-        goto Exit;
-    }
-#endif
-
-    // initialize EplNmtu module
-#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMTU)) != 0)
-    Ret = EplNmtuInit();
-    if (Ret != kEplSuccessful)
-    {
-        goto Exit;
-    }
-
-    // register NMT event callback function
-    Ret = EplNmtuRegisterStateChangeCb(EplApiCbNmtStateChange);
-    if (Ret != kEplSuccessful)
-    {
-        goto Exit;
-    }
-#endif
-
-#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
-    // initialize EplNmtMnu module
-    Ret = EplNmtMnuInit(EplApiCbNodeEvent, EplApiCbBootEvent);
-    if (Ret != kEplSuccessful)
-    {
-        goto Exit;
-    }
-
-    // initialize EplIdentu module
-    Ret = EplIdentuInit();
-    if (Ret != kEplSuccessful)
-    {
-        goto Exit;
-    }
-
-    // initialize EplStatusu module
-    Ret = EplStatusuInit();
-    if (Ret != kEplSuccessful)
-    {
-        goto Exit;
-    }
-
-#if EPL_NMTMNU_PRES_CHAINING_MN != FALSE
-    // initialize EplSyncu module
-    Ret = EplSyncuInit();
-    if (Ret != kEplSuccessful)
-    {
-        goto Exit;
-    }
-#endif
-
-#endif
-
-    // initialize EplLedu module
-#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_LEDU)) != 0)
-    Ret = EplLeduInit(EplApiCbLedStateChange);
-    if (Ret != kEplSuccessful)
-    {
-        goto Exit;
-    }
-#endif
-
-    // init SDO module
-#if ((((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOS)) != 0) || \
-     (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOC)) != 0))
-    // init sdo command layer
-    Ret = EplSdoComInit();
-    if (Ret != kEplSuccessful)
-    {
-        goto Exit;
-    }
-#endif
-
-    // initialize EplCfmu module
-#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_CFM)) != 0)
-    Ret = EplCfmuAddInstance(EplApiCbCfmEventCnProgress, EplApiCbCfmEventCnResult);
-    if (Ret != kEplSuccessful)
-    {
-        goto Exit;
-    }
-#endif
-
-    // the application must start NMT state machine
-    // via EplApiExecNmtCommand(kEplNmtEventSwReset)
-    // and thereby the whole EPL stack
-
-Exit:
-    return Ret;
+    return ctrlu_initStack(pInitParam_p, &EplApiInstance_g, &cbFuncs);
 }
-
 
 //---------------------------------------------------------------------------
 //
@@ -543,133 +298,15 @@ Exit:
 // State:
 //
 //---------------------------------------------------------------------------
-
 tEplKernel PUBLIC EplApiShutdown(void)
 {
-tEplKernel      Ret = kEplSuccessful;
+    tEplKernel          ret;
 
-    // $$$ d.k.: check if NMT state is NMT_GS_OFF
+    ret = ctrlu_shutdownStack();
+    ctrlu_exit();
 
-    // $$$ d.k.: maybe delete event queues at first, but this implies that
-    //           no other module must not use the event queues for communication
-    //           during shutdown.
-
-    // delete instance for all modules
-
-    // deinitialize EplCfmu module
-#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_CFM)) != 0)
-    Ret = EplCfmuDelInstance();
-//    PRINTF("EplCfmuDelInstance():    0x%X\n", Ret);
-#endif
-
-    // deinitialize EplSdoCom module
-#if ((((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOS)) != 0) || \
-     (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOC)) != 0))
-    Ret = EplSdoComDelInstance();
-//    PRINTF("EplSdoComDelInstance():  0x%X\n", Ret);
-#endif
-
-    // deinitialize EplLedu module
-#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_LEDU)) != 0)
-    Ret = EplLeduDelInstance();
-//    PRINTF("EplLeduDelInstance():    0x%X\n", Ret);
-#endif
-
-#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
-    // deinitialize EplNmtMnu module
-    Ret = EplNmtMnuDelInstance();
-//    PRINTF("EplNmtMnuDelInstance():  0x%X\n", Ret);
-
-    // deinitialize EplIdentu module
-    Ret = EplIdentuDelInstance();
-//    PRINTF("EplIdentuDelInstance():  0x%X\n", Ret);
-
-    // deinitialize EplStatusu module
-    Ret = EplStatusuDelInstance();
-//    PRINTF("EplStatusuDelInstance():  0x%X\n", Ret);
-#endif
-
-#if EPL_NMTMNU_PRES_CHAINING_MN != FALSE
-    // deinitialize Sync module
-    Ret = EplSyncuDelInstance();
-#endif
-
-    // deinitialize EplNmtCnu module
-#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_CN)) != 0)
-    Ret = EplNmtCnuDelInstance();
-//    PRINTF("EplNmtCnuDelInstance():  0x%X\n", Ret);
-#endif
-
-    // deinitialize EplNmtu module
-#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMTU)) != 0)
-    Ret = EplNmtuDelInstance();
-//    PRINTF("EplNmtuDelInstance():    0x%X\n", Ret);
-#endif
-
-    // deinitialize EplPdou module
-#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOU)) != 0)
-    Ret = pdou_exit();
-//    PRINTF("EplPdouDelInstance():    0x%X\n", Ret);
-    Ret = pdoucal_exit();
-#endif
-
-    // deinitialize EplPdok module
-#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOK)) != 0)
-    Ret = pdok_exit();
-//    PRINTF("EplPdokDelInstance():    0x%X\n", Ret);
-    Ret = pdokcal_exit();
-#endif
-
-    // deinitialize Virtual Ethernet Driver
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_VETH)) != 0)
-    Ret = VEthDelInstance();
-#endif
-
-    // deinitialize EplDlluCal module
-#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLU)) != 0)
-    Ret = dllucal_exit();
-//    PRINTF("EplDlluCalDelInstance(): 0x%X\n", Ret);
-
-#endif
-
-    // deinitialize EplTimeru module
-    Ret = EplTimeruDelInstance();
-//    PRINTF("EplTimeruDelInstance():  0x%X\n", Ret);
-
-    // deinitialize EplEventu module
-    Ret = eventu_exit();
-//    PRINTF("EplEventuDelInstance():  0x%X\n", Ret);
-
-    // deinitialize EplNmtk module
-#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMTK)) != 0)
-    Ret = EplNmtkDelInstance();
-//    PRINTF("EplNmtkDelInstance():    0x%X\n", Ret);
-#endif
-
-    // deinitialize EplDllk module
-#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLK)) != 0)
-    Ret = EplDllkDelInstance();
-//    PRINTF("EplDllkDelInstance():    0x%X\n", Ret);
-
-    // deinitialize EplDllkCal module
-    Ret = dllkcal_exit();
-//    PRINTF("EplDllkCalDelInstance(): 0x%X\n", Ret);
-#endif
-
-    // deinitialize EplEventk module
-    Ret = eventk_exit();
-//    PRINTF("EplEventkDelInstance():  0x%X\n", Ret);
-
-#if EPL_USE_SHAREDBUFF != FALSE
-    ShbExit();
-#endif
-
-    // deinitialize Obd module
-    Ret = EplObdDeleteInstance();
-
-    return Ret;
+    return ret;
 }
-
 
 //----------------------------------------------------------------------------
 // Function:    EplApiExecNmtCommand()
@@ -1639,8 +1276,6 @@ Exit:
     return Ret;
 }
 
-
-
 //---------------------------------------------------------------------------
 //
 // Function:    EplApiProcess
@@ -1679,14 +1314,11 @@ Exit:
     return Ret;
 }
 
-
-
 //=========================================================================//
 //                                                                         //
 //          P R I V A T E   F U N C T I O N S                              //
 //                                                                         //
 //=========================================================================//
-
 
 //---------------------------------------------------------------------------
 //
@@ -1703,8 +1335,7 @@ Exit:
 //
 //---------------------------------------------------------------------------
 
-static tEplKernel PUBLIC EplApiProcessEvent(
-            tEplEvent* pEplEvent_p)
+static tEplKernel PUBLIC EplApiProcessEvent(tEplEvent* pEplEvent_p)
 {
 tEplKernel          Ret;
 tEplEventError*     pEventError;
@@ -1786,7 +1417,6 @@ tEplApiEventType    EventType;
 Exit:
     return Ret;
 }
-
 
 //---------------------------------------------------------------------------
 //
