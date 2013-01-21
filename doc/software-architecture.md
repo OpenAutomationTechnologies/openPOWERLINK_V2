@@ -16,6 +16,8 @@ stack.
 - \ref module_pdou
 - \ref module_pdoucal
 
+### Control
+-\ref module_ctrlu
 
 ## openPOWERLINK Kernel Layer
 
@@ -26,6 +28,10 @@ stack.
 ### PDO
 - \ref module_pdok
 - \ref module_pdokcal
+
+### Control
+- \ref module_ctrlk
+
 
 ## Common Modules
 

@@ -8,6 +8,34 @@
 
 //==============================================================================
 /**
+\defgroup module_ctrlu User control module (ctrlu)
+
+The user control module is the module responsible for startup and shutdown
+of the stack. It communicates whith the kernel control module by its CAL layer.
+
+\see module_ctrlk
+\see module_ctrlucal
+
+\ingroup user_layer
+*/
+
+//==============================================================================
+/**
+\defgroup module_ctrlucal User control CAL module (ctrlucal)
+
+The user control CAL module provides the communciation abstraction layer (CAL)
+for the user control module to be able to communicate with the kernel stack.
+Different CAL module implementations are available:
+\li Shared memory block implementation \ref ctrlucal-mem.c
+\li Direct call implementation \ref ctrlucal-direct.c
+
+\see module_ctrlu
+
+\ingroup user_layer
+*/
+
+//==============================================================================
+/**
 \defgroup module_errhndu User error handler module (errhndu)
 
 The user error handler module implements the parts of the error handler located
@@ -122,6 +150,36 @@ could be implemented. Currently the following implementations are available:
 */
 //==============================================================================
 //==============================================================================
+
+//==============================================================================
+/**
+\defgroup module_ctrlk Kernel control module (ctrlk)
+
+The kernel control module is used to for controling the startup and shutdown
+of the kernel stack. It will be controled by the user stack and receives its
+commands through its communication abstraction layer (CAL). Additionally it
+provides status information to the user stack.
+
+\see module_ctrlu
+\see module_ctrlkcal
+
+\ingroup kernel_layer
+*/
+
+//==============================================================================
+/**
+\defgroup module_ctrlkcal Kernel control CAL module (ctrlkcal)
+
+The kernel control CAL module provides the communciation abstraction layer (CAL)
+for the kernel control module to be able to communicate with the user stack.
+Different CAL module implementations are available:
+\li Shared memory block implementation \ref ctrlkcal-mem.c
+\li Direct call implementation \ref ctrlkcal-direct.c
+
+\see module_ctrlk
+
+\ingroup kernel_layer
+*/
 
 //==============================================================================
 /**
@@ -255,6 +313,19 @@ event CAL modules.
 
 \see module_eventkcal
 \see module_eventucal
+
+\ingroup modules_common
+*/
+
+//==============================================================================
+/**
+\defgroup module_ctrlcal Common control CAL module (ctrlcal)
+
+The module provides common functionality for both the user and kernel layer
+control CAL modules.
+
+\see module_ctrlkcal
+\see module_ctrlucal
 
 \ingroup modules_common
 */
