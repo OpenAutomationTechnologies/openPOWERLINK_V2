@@ -90,6 +90,8 @@ void pdoucal_exitSync(void);
 
 tEplKernel pdoucal_waitSyncEvent(ULONG timeout_p);
 
+tEplKernel pdoucal_callSyncCb(void);
+
 #ifdef __cplusplus
 }
 #endif

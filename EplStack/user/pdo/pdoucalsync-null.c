@@ -74,6 +74,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
+static tEplSyncCb   pfnSyncCb_l;
 
 //------------------------------------------------------------------------------
 // local function prototypes
@@ -96,7 +97,7 @@ The function initializes the PDO user CAL sync module
 //------------------------------------------------------------------------------
 tEplKernel pdoucal_initSync(tEplSyncCb pfnSyncCb_p)
 {
-    UNUSED_PARAMETER(pfnSyncCb_p);
+    pfnSyncCb_l = pfnSyncCb_p;
     return kEplSuccessful;
 }
 
@@ -131,6 +132,25 @@ tEplKernel pdoucal_waitSyncEvent(ULONG timeout_p)
 
     return kEplSuccessful;
 }
+
+//------------------------------------------------------------------------------
+/**
+\brief  Call sync callback function
+
+The function calls the registered sync callback function
+
+\return The function returns a tEplKernel error code.
+*/
+//------------------------------------------------------------------------------
+tEplKernel pdoucal_callSyncCb(void)
+{
+    if (pfnSyncCb_l != NULL)
+    {
+        return pfnSyncCb_l();
+    }
+    return kEplSuccessful;
+}
+
 
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
