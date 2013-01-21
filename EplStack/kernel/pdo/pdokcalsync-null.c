@@ -62,7 +62,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // global function prototypes
 //------------------------------------------------------------------------------
-
+extern tEplKernel pdoucal_callSyncCb(void);
 
 //============================================================================//
 //            P R I V A T E   D E F I N I T I O N S                           //
@@ -131,7 +131,7 @@ The function sends a sync event
 //------------------------------------------------------------------------------
 tEplKernel pdokcal_sendSyncEvent(void)
 {
-    return kEplSuccessful;
+    return pdoucal_callSyncCb();
 }
 
 //------------------------------------------------------------------------------
