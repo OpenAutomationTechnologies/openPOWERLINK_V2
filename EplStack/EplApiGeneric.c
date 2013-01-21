@@ -1314,6 +1314,24 @@ Exit:
     return Ret;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief Check if kernel stack is alive
+
+The function checks if the kernel part of the stack is alive.
+
+\return Returns the status of the kernel stack.
+\retval TRUE        If the kernel stack is alive.
+\retval FALSE       IF the kernel stack is dead.
+
+\ingroup module_api
+*/
+//------------------------------------------------------------------------------
+BOOL PUBLIC api_checkKernelStack(void)
+{
+    return ctrlu_checkKernelStack();
+}
+
 //=========================================================================//
 //                                                                         //
 //          P R I V A T E   F U N C T I O N S                              //

@@ -431,6 +431,8 @@ EPLDLLEXPORT tEplKernel PUBLIC EplApiProcessImageSetup(void);
 EPLDLLEXPORT void * PUBLIC api_processImageGetInputImage(void);
 EPLDLLEXPORT void * PUBLIC api_processImageGetOutputImage(void);
 
+EPLDLLEXPORT BOOL PUBLIC api_checkKernelStack(void);
+
 // functions for getting cleartext values of stack states and events
 EPLDLLEXPORT char * PUBLIC EplGetNmtEventStr(tEplNmtEvent nmtEvent_p);
 EPLDLLEXPORT char * PUBLIC EplGetEventTypeStr(tEplEventType eventType_p);
