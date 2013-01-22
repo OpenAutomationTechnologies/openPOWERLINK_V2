@@ -127,9 +127,8 @@ static UINT uiCycleLen_g = CYCLE_LEN;
 /* process image stuff */
 #include "xap.h"
 
-static PI_IN AppProcessImageIn_g;
-static PI_OUT AppProcessImageOut_g;
-static tEplApiProcessImageCopyJob AppProcessImageCopyJob_g;
+static PI_IN* pProcessImageIn_l;
+static PI_OUT* pProcessImageOut_l;
 
 /*----------------------------------------------------------------------------*/
 /* application defines and variables */
@@ -310,23 +309,17 @@ int openPowerlinkInit (char *pszEthName, unsigned int uiDevNumber)
 
     // initialize process image
     printf("Initializing process image...\n");
-    printf("Size of input process image: %ld\n", sizeof(AppProcessImageIn_g));
-    printf("Size of output process image: %ld\n", sizeof (AppProcessImageOut_g));
-    AppProcessImageCopyJob_g.m_fNonBlocking = FALSE;
-    AppProcessImageCopyJob_g.m_uiPriority = 0;
-    AppProcessImageCopyJob_g.m_In.m_pPart = &AppProcessImageIn_g;
-    AppProcessImageCopyJob_g.m_In.m_uiOffset = 0;
-    AppProcessImageCopyJob_g.m_In.m_uiSize = sizeof (AppProcessImageIn_g);
-    AppProcessImageCopyJob_g.m_Out.m_pPart = &AppProcessImageOut_g;
-    AppProcessImageCopyJob_g.m_Out.m_uiOffset = 0;
-    AppProcessImageCopyJob_g.m_Out.m_uiSize = sizeof (AppProcessImageOut_g);
+    printf("Size of input process image: %ld\n", sizeof(PI_IN));
+    printf("Size of output process image: %ld\n", sizeof (PI_OUT));
 
-    EplRet = EplApiProcessImageAlloc(sizeof (AppProcessImageIn_g),
-                                     sizeof (AppProcessImageOut_g), 2, 2);
+    EplRet = api_processImageAlloc(sizeof(PI_IN), sizeof(PI_OUT));
     if (EplRet != kEplSuccessful)
     {
         goto Exit;
     }
+
+    pProcessImageIn_l = api_processImageGetInputImage();
+    pProcessImageOut_l = api_processImageGetOutputImage();
 
     EplRet = EplApiProcessImageSetup();
     if (EplRet != kEplSuccessful)
@@ -383,7 +376,7 @@ void openPowerlinkExit (void)
     taskDelay (sysClkRateGet());
     fOpenPowerlinkIsRunning_g = FALSE;
 
-    EplApiProcessImageFree();
+    api_processImageFree();
 
     // delete instance for all modules
     EplRet = EplApiShutdown();
@@ -809,7 +802,7 @@ tEplKernel PUBLIC AppCbSync(void)
     tEplKernel          EplRet;
     int                 i;
 
-    EplRet = EplApiProcessImageExchange(&AppProcessImageCopyJob_g);
+    EplRet = api_processImageExchangeOut();
     if (EplRet != kEplSuccessful)
     {
         return EplRet;
@@ -817,9 +810,9 @@ tEplKernel PUBLIC AppCbSync(void)
 
     uiCnt_g++;
 
-    nodeVar_g[0].m_uiInput = AppProcessImageOut_g.CN1_M00_Digital_Input_8_Bit_Byte_1;
-    nodeVar_g[1].m_uiInput = AppProcessImageOut_g.CN32_M00_Digital_Input_8_Bit_Byte_1;
-    nodeVar_g[2].m_uiInput = AppProcessImageOut_g.CN110_M00_Digital_Input_8_Bit_Byte_1;
+    nodeVar_g[0].m_uiInput = pProcessImageOut_l->CN1_M00_Digital_Input_8_Bit_Byte_1;
+    nodeVar_g[1].m_uiInput = pProcessImageOut_l->CN32_M00_Digital_Input_8_Bit_Byte_1;
+    nodeVar_g[2].m_uiInput = pProcessImageOut_l->CN110_M00_Digital_Input_8_Bit_Byte_1;
 
     for (i = 0; (i < MAX_NODES) && (iUsedNodeIds_g[i] != 0); i++)
     {
@@ -865,9 +858,9 @@ tEplKernel PUBLIC AppCbSync(void)
         }
     }
 
-    AppProcessImageIn_g.CN1_M00_Digital_Ouput_8_Bit_Byte_1 = nodeVar_g[0].m_uiLeds;
-    AppProcessImageIn_g.CN32_M00_Digital_Ouput_8_Bit_Byte_1 = nodeVar_g[1].m_uiLeds;
-    AppProcessImageIn_g.CN110_M00_Digital_Ouput_8_Bit_Byte_1 = nodeVar_g[2].m_uiLeds;
+    pProcessImageIn_l->CN1_M00_Digital_Ouput_8_Bit_Byte_1 = nodeVar_g[0].m_uiLeds;
+    pProcessImageIn_l->CN32_M00_Digital_Ouput_8_Bit_Byte_1 = nodeVar_g[1].m_uiLeds;
+    pProcessImageIn_l->CN110_M00_Digital_Ouput_8_Bit_Byte_1 = nodeVar_g[2].m_uiLeds;
 
     return EplRet;
 }

@@ -60,6 +60,26 @@
 			<location>OPENPOWERLINK_DIR/EplStack/EplDllk.c</location>
 		</link>
 		<link>
+			<name>ctrlu.c</name>
+			<type>1</type>
+			<location>OPENPOWERLINK_DIR/EplStack/user/ctrl/ctrlu.c</location>
+		</link>
+		<link>
+			<name>ctrlucal-direct.c</name>
+			<type>1</type>
+			<location>OPENPOWERLINK_DIR/EplStack/user/ctrl/ctrlucal-direct.c</location>
+		</link>
+		<link>
+			<name>ctrlk.c</name>
+			<type>1</type>
+			<location>OPENPOWERLINK_DIR/EplStack/kernel/ctrl/ctrlk.c</location>
+		</link>
+		<link>
+			<name>ctrlkcal-direct.c</name>
+			<type>1</type>
+			<location>OPENPOWERLINK_DIR/EplStack/kernel/ctrl/ctrlkcal-direct.c</location>
+		</link>
+		<link>
 			<name>dllkcal.c</name>
 			<type>1</type>
 			<location>OPENPOWERLINK_DIR/EplStack/kernel/dll/dllkcal.c</location>
@@ -79,21 +99,21 @@
 			<type>1</type>
 			<location>OPENPOWERLINK_DIR/EplStack/kernel/errhnd/errhndk.c</location>
 		</link>
-        <link>
-                <name>errhndu.c</name>
-                <type>1</type>
-                <location>OPENPOWERLINK_DIR/EplStack/user/errhnd/errhndu.c</location>
-        </link>
-        <link>
-                <name>errhndkcal-local.c</name>
-                <type>1</type>
-                <location>OPENPOWERLINK_DIR/EplStack/kernel/errhnd/errhndkcal-local.c</location>
-        </link>
-        <link>
-                <name>errhnducal-local.c</name>
-                <type>1</type>
-                <location>OPENPOWERLINK_DIR/EplStack/user/errhnd/errhnducal-local.c</location>
-        </link>
+		<link>
+			<name>errhndu.c</name>
+			<type>1</type>
+			<location>OPENPOWERLINK_DIR/EplStack/user/errhnd/errhndu.c</location>
+		</link>
+		<link>
+			<name>errhndkcal-local.c</name>
+			<type>1</type>
+			<location>OPENPOWERLINK_DIR/EplStack/kernel/errhnd/errhndkcal-local.c</location>
+		</link>
+		<link>
+			<name>errhnducal-local.c</name>
+			<type>1</type>
+			<location>OPENPOWERLINK_DIR/EplStack/user/errhnd/errhnducal-local.c</location>
+		</link>
 		<link>
 			<name>eventk.c</name>
 			<type>1</type>
@@ -190,6 +210,16 @@
 			<location>OPENPOWERLINK_DIR/EplStack/kernel/pdo/pdokcal.c</location>
 		</link>
 		<link>
+			<name>pdokcal-local.c</name>
+			<type>1</type>
+			<location>OPENPOWERLINK_DIR/EplStack/kernel/pdo/pdokcal-local.c</location>
+		</link>
+		<link>
+			<name>pdokcalsync-null.c</name>
+			<type>1</type>
+			<location>OPENPOWERLINK_DIR/EplStack/kernel/pdo/pdokcalsync-null.c</location>
+		</link>
+		<link>
 			<name>pdou.c</name>
 			<type>1</type>
 			<location>OPENPOWERLINK_DIR/EplStack/user/pdo/pdou.c</location>
@@ -198,6 +228,16 @@
 			<name>pdoucal.c</name>
 			<type>1</type>
 			<location>OPENPOWERLINK_DIR/EplStack/user/pdo/pdoucal.c</location>
+		</link>
+		<link>
+			<name>pdoucal-local.c</name>
+			<type>1</type>
+			<location>OPENPOWERLINK_DIR/EplStack/user/pdo/pdoucal-local.c</location>
+		</link>
+		<link>
+			<name>pdoucalsync-null.c</name>
+			<type>1</type>
+			<location>OPENPOWERLINK_DIR/EplStack/user/pdo/pdoucalsync-null.c</location>
 		</link>
 		<link>
 			<name>EplSdoAsndu.c</name>
