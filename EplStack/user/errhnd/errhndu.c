@@ -122,7 +122,7 @@ The function initializes the user error handler module.
 \ingroup module_errhndu
 */
 //------------------------------------------------------------------------------
-tEplKernel PUBLIC errhndu_init(void)
+tEplKernel errhndu_init(void)
 {
     tEplKernel      ret;
 
@@ -191,7 +191,7 @@ The function shuts down the user error handler module.
 \ingroup module_errhndu
 */
 //------------------------------------------------------------------------------
-tEplKernel PUBLIC errhndu_exit()
+tEplKernel errhndu_exit()
 {
     errhnducal_exit();
     return kEplSuccessful;
@@ -211,7 +211,7 @@ PreRead events.
 \return Returns always kEplSuccessful
 */
 //------------------------------------------------------------------------------
-tEplKernel PUBLIC errhndu_cbObdAccess(tEplObdCbParam MEM* pParam_p)
+tEplKernel errhndu_cbObdAccess(tEplObdCbParam MEM* pParam_p)
 {
     switch (pParam_p->m_ObdEvent)
     {
@@ -269,7 +269,7 @@ PreRead objects.
 \ingroup module_errhndu
 */
 //------------------------------------------------------------------------------
-tEplKernel PUBLIC errhndu_mnCnLossPresCbObdAccess(tEplObdCbParam MEM* pParam_p)
+tEplKernel errhndu_mnCnLossPresCbObdAccess(tEplObdCbParam MEM* pParam_p)
 {
     tEplKernel          ret = kEplSuccessful;
 
