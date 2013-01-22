@@ -255,7 +255,7 @@ The function exchanges the input process image.
 \return The function returns a tEplKernel error code.
 */
 //------------------------------------------------------------------------------
-tEplKernel api_processImageExchangeIn(void)
+tEplKernel PUBLIC api_processImageExchangeIn(void)
 {
     tEplKernel      ret;
 
@@ -272,7 +272,7 @@ The function exchanges the output process image.
 \return The function returns a tEplKernel error code.
 */
 //------------------------------------------------------------------------------
-tEplKernel api_processImageExchangeOut(void)
+tEplKernel PUBLIC api_processImageExchangeOut(void)
 {
     tEplKernel      ret;
 
@@ -289,7 +289,7 @@ The function returns the pointer to the input process image.
 \return The function returns a tEplKernel error code.
 */
 //------------------------------------------------------------------------------
-void *api_processImageGetInputImage(void)
+void * PUBLIC api_processImageGetInputImage(void)
 {
     return instance_l.m_In.m_pImage;
 }
@@ -303,7 +303,7 @@ The function returns the pointer to the output process image.
 \return The function returns a tEplKernel error code.
 */
 //------------------------------------------------------------------------------
-void *api_processImageGetOutputImage(void)
+void * PUBLIC api_processImageGetOutputImage(void)
 {
     return instance_l.m_Out.m_pImage;
 }
