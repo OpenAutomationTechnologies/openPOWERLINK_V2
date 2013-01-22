@@ -100,10 +100,14 @@ ENDIF ()
 IF (UNIX)
     SET(LIB_SOURCES ${LIB_SOURCES}
                     ${POWERLINK_SOURCE_DIR}/Edrv/EdrvPcapLinux.c
+                    ${POWERLINK_SOURCE_DIR}/EplStack/kernel/pdo/pdokcalsync-bsdsem.c
+                    ${POWERLINK_SOURCE_DIR}/EplStack/user/pdo/pdoucalsync-bsdsem.c
         )
 ELSEIF (WIN32)
     SET(LIB_SOURCES ${LIB_SOURCES}
                     ${POWERLINK_SOURCE_DIR}/Edrv/EdrvPcap.c
+                    ${POWERLINK_SOURCE_DIR}/EplStack/kernel/pdo/pdokcalsync-null.c
+                    ${POWERLINK_SOURCE_DIR}/EplStack/user/pdo/pdoucalsync-null.c
         )
 ENDIF ()
 
@@ -160,13 +164,11 @@ SET (LIB_SOURCES_KERNEL ${LIB_SOURCES_KERNEL}
                         ${POWERLINK_SOURCE_DIR}/EplStack/kernel/event/eventk.c
                         ${POWERLINK_SOURCE_DIR}/EplStack/kernel/event/eventkcal.c
                         ${POWERLINK_SOURCE_DIR}/EplStack/kernel/event/eventkcal-shb.c
-                        ${POWERLINK_SOURCE_DIR}/EplStack/kernel/event/eventkcal-direct.c
                         ${POWERLINK_SOURCE_DIR}/EplStack/EplNmtk.c
                         ${POWERLINK_SOURCE_DIR}/EplStack/EplNmtkCal.c
                         ${POWERLINK_SOURCE_DIR}/EplStack/kernel/pdo/pdok.c
                         ${POWERLINK_SOURCE_DIR}/EplStack/kernel/pdo/pdokcal.c
                         ${POWERLINK_SOURCE_DIR}/EplStack/kernel/pdo/pdokcal-shb.c
-                        ${POWERLINK_SOURCE_DIR}/EplStack/kernel/pdo/pdokcalsync-bsdsem.c
                         ${POWERLINK_SOURCE_DIR}/EplStack/kernel/errhnd/errhndk.c
                         ${POWERLINK_SOURCE_DIR}/EplStack/kernel/errhnd/errhndkcal-shb.c
     )
@@ -179,7 +181,6 @@ SET (LIB_SOURCES_USER ${LIB_SOURCES_USER}
                       ${POWERLINK_SOURCE_DIR}/EplStack/user/event/eventu.c
                       ${POWERLINK_SOURCE_DIR}/EplStack/user/event/eventucal.c
                       ${POWERLINK_SOURCE_DIR}/EplStack/user/event/eventucal-shb.c
-                      ${POWERLINK_SOURCE_DIR}/EplStack/user/event/eventucal-direct.c
                       ${POWERLINK_SOURCE_DIR}/EplStack/EplNmtu.c
                       ${POWERLINK_SOURCE_DIR}/EplStack/EplNmtuCal.c
                       ${POWERLINK_SOURCE_DIR}/EplStack/EplNmtCnu.c
@@ -190,7 +191,6 @@ SET (LIB_SOURCES_USER ${LIB_SOURCES_USER}
                       ${POWERLINK_SOURCE_DIR}/EplStack/user/pdo/pdou.c
                       ${POWERLINK_SOURCE_DIR}/EplStack/user/pdo/pdoucal.c
                       ${POWERLINK_SOURCE_DIR}/EplStack/user/pdo/pdoucal-shb.c
-                      ${POWERLINK_SOURCE_DIR}/EplStack/user/pdo/pdoucalsync-bsdsem.c
                       ${POWERLINK_SOURCE_DIR}/EplStack/EplSdoComu.c
                       ${POWERLINK_SOURCE_DIR}/EplStack/EplSdoAsySequ.c
                       ${POWERLINK_SOURCE_DIR}/EplStack/EplSdoAsndu.c
