@@ -139,7 +139,7 @@ static void  EplTimeruLeaveCriticalSection (int nType_p);
 static DWORD EplTimeruGetTickCountMs (void);
 
 #if (TARGET_SYSTEM == _WIN32_ || TARGET_SYSTEM == _WINCE_ )
-static DWORD PUBLIC EplTimeruProcessThread (LPVOID lpParameter);
+static DWORD WINAPI EplTimeruProcessThread (LPVOID lpParameter);
 #endif
 
 
@@ -669,7 +669,7 @@ static void EplTimeruLeaveCriticalSection (int nType_p)
 //  Thread for processing the timer list when using an operating system
 //---------------------------------------------------------------------------
 
-static DWORD PUBLIC EplTimeruProcessThread (LPVOID lpParameter)
+static DWORD WINAPI EplTimeruProcessThread (LPVOID lpParameter)
 {
 tTimerEntry*	pTimerEntry;
 DWORD			dwTimeoutMs;
