@@ -384,7 +384,7 @@ EPLDLLEXPORT tEplKernel PUBLIC api_processImageAlloc(
     unsigned int uiSizeProcessImageOut_p);
 EPLDLLEXPORT tEplKernel PUBLIC api_processImageFree(void);
 EPLDLLEXPORT tEplKernel PUBLIC api_processImageExchangeOut(void);
-EPLDLLEXPORT tEplKernel api_processImageExchangeIn(void);
+EPLDLLEXPORT tEplKernel PUBLIC api_processImageExchangeIn(void);
 EPLDLLEXPORT tEplKernel PUBLIC api_processImageLinkObject(
     unsigned int    uiObjIndex_p,
     unsigned int    uiFirstSubindex_p,
@@ -396,8 +396,8 @@ EPLDLLEXPORT tEplKernel PUBLIC api_processImageLinkObject(
 // objdict specific setup function
 EPLDLLEXPORT tEplKernel PUBLIC EplApiProcessImageSetup(void);
 
-EPLDLLEXPORT void *api_processImageGetInputImage(void);
-EPLDLLEXPORT void *api_processImageGetOutputImage(void);
+EPLDLLEXPORT void * PUBLIC api_processImageGetInputImage(void);
+EPLDLLEXPORT void * PUBLIC api_processImageGetOutputImage(void);
 
 // functions for getting cleartext values of stack states and events
 EPLDLLEXPORT char * PUBLIC EplGetNmtEventStr(tEplNmtEvent nmtEvent_p);
