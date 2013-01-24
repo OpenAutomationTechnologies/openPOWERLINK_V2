@@ -205,6 +205,9 @@ simpler conditional statements.
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
 #define CONFIG_INCLUDE_NMT_MN
 #endif
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_CN)) != 0)
+#define CONFIG_INCLUDE_NMT_CN
+#endif
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOS)) != 0)
 #define CONFIG_INCLUDE_SDOS
 #endif
