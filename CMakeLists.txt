@@ -131,34 +131,34 @@ SET(EDRV_SOURCE_DIR ${CMAKE_SOURCE_DIR}/Edrv)
 ###############################################################################
 # Add subdirectory of pcap based MN CFM library
 IF (NOT CFG_KERNEL_STACK)
-    ADD_SUBDIRECTORY(Examples/X86/Generic/powerlink_user_lib)
+    ADD_SUBDIRECTORY(EplStack/lib/libpowerlink)
 ENDIF (NOT CFG_KERNEL_STACK)
 
 # Add subdirectory of MN console demo application
 IF (CFG_X86_DEMO_MN_CONSOLE)
-    ADD_SUBDIRECTORY(Examples/X86/Generic/demo_mn_console)
+    ADD_SUBDIRECTORY(Examples/generic/demo_mn_console)
 ENDIF (CFG_X86_DEMO_MN_CONSOLE)
 
 # Add subdirectory of MN QT demo application
 IF (CFG_X86_DEMO_MN_QT)
-    ADD_SUBDIRECTORY(Examples/X86/Generic/demo_mn_qt)
+    ADD_SUBDIRECTORY(Examples/generic/demo_mn_qt)
 ENDIF (CFG_X86_DEMO_MN_QT)
 
 # Add subdirectory of CN console demo application
 IF (CFG_X86_DEMO_CN_CONSOLE)
-    ADD_SUBDIRECTORY(Examples/X86/Generic/demo_cn_console)
+    ADD_SUBDIRECTORY(Examples/generic/demo_cn_console)
 ENDIF (CFG_X86_DEMO_CN_CONSOLE)
 
 # Linux specific part
 IF(UNIX)
     # Add subdirectory of kernel module
     IF (CFG_KERNEL_STACK)
-        ADD_SUBDIRECTORY(Examples/X86/Linux/gnu/powerlink_kernel_module)
+        ADD_SUBDIRECTORY(EplStack/driver/linux/powerlink_kernel_module)
     ENDIF (CFG_KERNEL_STACK)
 
     # Add subdirectory of kernel demo application
     IF (CFG_X86_DEMO_LINUX_KERNEL)
-        ADD_SUBDIRECTORY(Examples/X86/Linux/gnu/demo_kernel)
+        ADD_SUBDIRECTORY(Examples/linux/demo_kernel)
     ENDIF (CFG_X86_DEMO_LINUX_KERNEL)
 
 ENDIF(UNIX)

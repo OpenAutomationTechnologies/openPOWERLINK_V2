@@ -6,7 +6,7 @@
 #     B&R Strasse 1, A-5142 Eggelsberg
 #     www.br-automation.com
 #
-# Description: cmake file of console CN demo application
+# Description: cmake file of CiA 302 MN console demo application
 #
 # License:
 #
@@ -50,7 +50,7 @@
 #
 ################################################################################
 
-SET(OBJDICT CiA401_CN)
+SET(OBJDICT CiA302-4_MN)
 
 #
 # additional compiler flags
@@ -62,26 +62,27 @@ ELSEIF (WIN32)
 ENDIF (UNIX)
 
 # additional include directories
-SET(USERLIB_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../powerlink_user_lib)
+SET(USERLIB_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/EplStack/lib/libpowerlink)
 IF (UNIX)
-    SET(KERNELMOD_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../../X86/Linux/gnu/powerlink_kernel_module)
+    SET(KERNELMOD_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/EplStack/driver/linux/powerlink_kernel_module)
 ENDIF (UNIX)
 
 # set sources of POWERLINK application
-SET (DEMO_CN_SOURCES demo_main.c
+SET (DEMO_SOURCES demo_main.c
+                  ${POWERLINK_SOURCE_DIR}/ObjDicts/${OBJDICT}/EplApiProcessImageSetup.c
                   ${POWERLINK_SOURCE_DIR}/EplStack/EplTgtConio.c
 )
 
 # The TRACE macros need trace.c on the Windows platform
 IF (WIN32)
-    SET(DEMO_CN_SOURCES ${DEMO_CN_SOURCES}
+    SET(DEMO_SOURCES ${DEMO_SOURCES}
                      ${POWERLINK_SOURCE_DIR}/EplStack/trace.c
        )
 ENDIF (WIN32)
 
 IF (UNIX)
     IF (CFG_KERNEL_STACK)
-        SET(DEMO_CN_SOURCES ${DEMO_CN_SOURCES}
+        SET(DEMO_SOURCES ${DEMO_SOURCES}
                          ${POWERLINK_SOURCE_DIR}/EplStack/EplDebug.c
                          ${POWERLINK_SOURCE_DIR}/EplStack/EplApiLinuxUser.c
             )
@@ -93,6 +94,8 @@ INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
 IF (WIN32)
     INCLUDE_DIRECTORIES(${POWERLINK_SOURCE_DIR}/Target/X86/Windows/WpdPack/Include)
 ENDIF (WIN32)
+
+ADD_DEFINITIONS(-DCONFIG_CFM -DCONFIG_OPENCONFIGURATOR_MAPPING -DCONFIG_MN)
 
 # Configure depending on using usermode stack or kernel stack
 IF (CFG_KERNEL_STACK)
@@ -110,30 +113,31 @@ IF (WIN32)
         LINK_DIRECTORIES(${POWERLINK_SOURCE_DIR}/Target/X86/Windows/WpdPack/Lib)
     ENDIF (CMAKE_CL_64)
 
-    SOURCE_GROUP("CN Demo Application" FILES ${DEMO_CN_SOURCES})
+    SOURCE_GROUP("Demo Application" FILES ${DEMO_SOURCES})
 ENDIF (WIN32)
 
-ADD_EXECUTABLE(demo_cn_console ${DEMO_CN_SOURCES})
+ADD_EXECUTABLE(demo_mn_console ${DEMO_SOURCES})
 
-SET_PROPERTY(TARGET demo_cn_console
+SET_PROPERTY(TARGET demo_mn_console
              PROPERTY COMPILE_DEFINITIONS_DEBUG DEBUG;DEF_DEBUG_LVL=${CFG_DEBUG_LVL})
 
 IF (UNIX)
     IF (NOT CFG_KERNEL_STACK)
-        TARGET_LINK_LIBRARIES(demo_cn_console powerlink pcap pthread rt)
+        TARGET_LINK_LIBRARIES(demo_mn_console powerlink pcap pthread rt)
     ELSE (NOT CFG_KERNEL_STACK)
-        TARGET_LINK_LIBRARIES(demo_cn_console pthread rt)
+        TARGET_LINK_LIBRARIES(demo_mn_console pthread rt)
     ENDIF (NOT CFG_KERNEL_STACK)
 ELSEIF (WIN32)
-    TARGET_LINK_LIBRARIES(demo_cn_console openPOWERLINK wpcap iphlpapi)
+    TARGET_LINK_LIBRARIES(demo_mn_console openPOWERLINK wpcap iphlpapi)
 ENDIF (UNIX)
 
 # add installation rules
-INSTALL(TARGETS demo_cn_console RUNTIME DESTINATION bin)
+INSTALL(TARGETS demo_mn_console RUNTIME DESTINATION bin)
+INSTALL(FILES mnobd.cdc DESTINATION bin)
 
 IF (UNIX)
     IF (NOT CFG_KERNEL_STACK)
-        INSTALL(PROGRAMS ${CMAKE_CURRENT_SOURCE_DIR}/../../Linux/gnu/tools/set_prio DESTINATION bin)
+        INSTALL(PROGRAMS ${CMAKE_SOURCE_DIR}/tools/linux/set_prio DESTINATION bin)
     ENDIF (NOT CFG_KERNEL_STACK)
 ENDIF (UNIX)
 
