@@ -110,6 +110,10 @@ ${STACK_ROOT}/EplStack/user/errhnd/errhndu.c \
 ${STACK_ROOT}/EplStack/kernel/errhnd/errhndkcal-local.c \
 ${STACK_ROOT}/EplStack/user/errhnd/errhnducal-local.c \
 ${STACK_ROOT}/EplStack/EplApiGeneric.c \
+${STACK_ROOT}/EplStack/kernel/ctrl/ctrlk.c \
+${STACK_ROOT}/EplStack/kernel/ctrl/ctrlkcal-direct.c \
+${STACK_ROOT}/EplStack/user/ctrl/ctrlu.c \
+${STACK_ROOT}/EplStack/user/ctrl/ctrlucal-direct.c \
 ${STACK_ROOT}/EplStack/user/api/processimage.c \
 ${TARGET_DIR}/ShbTarget_Microblaze.c \
 ${TARGET_DIR}/xilinx_irq.c \

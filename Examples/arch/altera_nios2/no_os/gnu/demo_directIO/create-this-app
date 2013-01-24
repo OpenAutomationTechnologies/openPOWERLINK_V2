@@ -111,6 +111,8 @@ ${MAINPATH}/EplStack/user/errhnd/errhndu.c \
 ${MAINPATH}/EplStack/kernel/errhnd/errhndkcal-local.c \
 ${MAINPATH}/EplStack/user/errhnd/errhnducal-local.c \
 ${MAINPATH}/EplStack/EplApiGeneric.c \
+${MAINPATH}/EplStack/kernel/ctrl/ctrlk.c ${MAINPATH}/EplStack/kernel/ctrl/ctrlkcal-direct.c \
+${MAINPATH}/EplStack/user/ctrl/ctrlu.c ${MAINPATH}/EplStack/user/ctrl/ctrlucal-direct.c \
 ${MAINPATH}/EplStack/user/api/processimage.c \
 ${MAINPATH}/ObjDicts/CiA401_CN/Objdict.c \
 ${MAINPATH}/EplStack/amiarm.c \
