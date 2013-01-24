@@ -6,7 +6,7 @@
 #     B&R Strasse 1, A-5142 Eggelsberg
 #     www.br-automation.com
 #
-# Description: cmake file of CiA 302 MN console demo application
+# Description: cmake file of CiA 302 MN QT demo application
 #
 # License:
 #
@@ -49,29 +49,36 @@
 #          any other provision of this License.
 #
 ################################################################################
+FIND_PACKAGE(Qt4 REQUIRED)
 
 SET(OBJDICT CiA302-4_MN)
 
-#
-# additional compiler flags
-#
-IF (UNIX)
-    ADD_DEFINITIONS(-Wall -Wextra -pedantic -std=c99 -pthread -D_GNU_SOURCE -D_POSIX_C_SOURCE=200112L)
-ELSEIF (WIN32)
+IF (WIN32)
+    # additional compiler flags
     ADD_DEFINITIONS(-D_CONSOLE -DWPCAP -DHAVE_REMOTE)
-ENDIF (UNIX)
+    ADD_DEFINITIONS(-DCONFIG_POWERLINK_USERSTACK)
+ENDIF (WIN32)
 
 # additional include directories
-SET(USERLIB_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../powerlink_user_lib)
+SET(USERLIB_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/EplStack/lib/libpowerlink)
 IF (UNIX)
-    SET(KERNELMOD_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../../X86/Linux/gnu/powerlink_kernel_module)
+    SET(KERNELMOD_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/EplStack/driver/linux/powerlink_kernel_module)
 ENDIF (UNIX)
 
 # set sources of POWERLINK application
-SET (DEMO_SOURCES demo_main.c
-                  ${POWERLINK_SOURCE_DIR}/ObjDicts/${OBJDICT}/EplApiProcessImageSetup.c
-                  ${POWERLINK_SOURCE_DIR}/EplStack/EplTgtConio.c
-)
+SET(DEMO_SOURCES src/EplApi.cpp
+                 src/EplCnState.cpp
+                 src/EplDataInOutThread.cpp
+                 src/EplInput.cpp
+                 src/EplOutput.cpp
+                 src/EplProcessThread.cpp
+                 src/EplState.cpp
+                 src/Leds.cpp
+                 src/main.cpp
+                 src/MainWindow.cpp
+                 src/NodeState.cpp
+                 ${POWERLINK_SOURCE_DIR}/ObjDicts/${OBJDICT}/EplApiProcessImageSetup.c
+    )
 
 # The TRACE macros need trace.c on the Windows platform
 IF (WIN32)
@@ -80,16 +87,36 @@ IF (WIN32)
        )
 ENDIF (WIN32)
 
-IF (UNIX)
-    IF (CFG_KERNEL_STACK)
-        SET(DEMO_SOURCES ${DEMO_SOURCES}
-                         ${POWERLINK_SOURCE_DIR}/EplStack/EplDebug.c
-                         ${POWERLINK_SOURCE_DIR}/EplStack/EplApiLinuxUser.c
-            )
-    ENDIF (CFG_KERNEL_STACK)
-ENDIF (UNIX)
+SET(DEMO_RESOURCES resources/Resources.qrc)
 
-INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
+SET(DEMO_HEADERS include/EplApi.h
+                 include/EplCnState.h
+                 include/EplDataInOutThread.h
+                 include/EplInput.h
+                 include/EplOutput.h
+                 include/EplProcessThread.h
+                 include/EplState.h
+                 include/Leds.h
+                 include/MainWindow.h
+                 include/NodeState.h
+    )
+
+IF (CFG_KERNEL_STACK)
+    SET(DEMO_SOURCES ${DEMO_SOURCES}
+                     ${POWERLINK_SOURCE_DIR}/EplStack/EplApiLinuxUser.c)
+ELSE (CFG_KERNEL_STACK)
+    SET(DEMO_SOURCES ${DEMO_SOURCES}
+                 src/InterfaceSelectDialog.cpp)
+    SET(DEMO_HEADERS ${DEMO_HEADERS}
+                 include/InterfaceSelectDialog.h)
+ENDIF (CFG_KERNEL_STACK)
+
+INCLUDE(${QT_USE_FILE})
+ADD_DEFINITIONS(${QT_DEFINITIONS})
+
+INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/include
+                    ${CMAKE_CURRENT_BINARY_DIR}
+)
 
 IF (WIN32)
     INCLUDE_DIRECTORIES(${POWERLINK_SOURCE_DIR}/Target/X86/Windows/WpdPack/Include)
@@ -106,6 +133,11 @@ ELSE (CFG_KERNEL_STACK)
     ADD_DEFINITIONS(-DCONFIG_POWERLINK_USERSTACK)
 ENDIF (CFG_KERNEL_STACK)
 
+# Setup QT4 Wrappers
+QT4_WRAP_CPP(DEMO_HEADERS_MOC ${DEMO_HEADERS})
+QT4_WRAP_UI(DEMO_FORMS_HEADERS ${DEMO_FORMS})
+QT4_ADD_RESOURCES(DEMO_RESOURCES_RCC ${DEMO_RESOURCES})
+
 IF (WIN32)
     IF (CMAKE_CL_64)
         LINK_DIRECTORIES(${POWERLINK_SOURCE_DIR}/Target/X86/Windows/WpdPack/Lib/x64)
@@ -113,31 +145,43 @@ IF (WIN32)
         LINK_DIRECTORIES(${POWERLINK_SOURCE_DIR}/Target/X86/Windows/WpdPack/Lib)
     ENDIF (CMAKE_CL_64)
 
-    SOURCE_GROUP("Demo Application" FILES ${DEMO_SOURCES})
+    SOURCE_GROUP("Source Files" FILES ${DEMO_SOURCES})
+    SOURCE_GROUP("QT-generated Files" FILES ${DEMO_HEADERS_MOC} ${DEMO_RESOURCES_RCC})
+    SOURCE_GROUP("Header Files" FILES ${DEMO_HEADERS})
 ENDIF (WIN32)
 
-ADD_EXECUTABLE(demo_mn_console ${DEMO_SOURCES})
+ADD_EXECUTABLE(demo_mn_qt ${DEMO_SOURCES}
+                          ${DEMO_HEADERS}
+                          ${DEMO_HEADERS_MOC}
+                          ${DEMO_FORMS_HEADERS}
+                          ${DEMO_RESOURCES_RCC}
+)
 
-SET_PROPERTY(TARGET demo_mn_console
+SET_PROPERTY(TARGET demo_mn_qt
              PROPERTY COMPILE_DEFINITIONS_DEBUG DEBUG;DEF_DEBUG_LVL=${CFG_DEBUG_LVL})
 
 IF (UNIX)
     IF (NOT CFG_KERNEL_STACK)
-        TARGET_LINK_LIBRARIES(demo_mn_console powerlink pcap pthread rt)
-    ELSE (NOT CFG_KERNEL_STACK)
-        TARGET_LINK_LIBRARIES(demo_mn_console pthread rt)
+        TARGET_LINK_LIBRARIES(demo_mn_qt powerlink pcap pthread rt ${QT_LIBRARIES})
+    ELSE(NOT CFG_KERNEL_STACK)
+        TARGET_LINK_LIBRARIES(demo_mn_qt ${QT_LIBRARIES})
     ENDIF (NOT CFG_KERNEL_STACK)
-ELSEIF (WIN32)
-    TARGET_LINK_LIBRARIES(demo_mn_console openPOWERLINK wpcap iphlpapi)
+ELSEIF(WIN32)
+    TARGET_LINK_LIBRARIES(demo_mn_qt openPOWERLINK wpcap iphlpapi ${QT_LIBRARIES})
 ENDIF (UNIX)
 
 # add installation rules
-INSTALL(TARGETS demo_mn_console RUNTIME DESTINATION bin)
+INSTALL(TARGETS demo_mn_qt RUNTIME DESTINATION bin)
 INSTALL(FILES mnobd.cdc DESTINATION bin)
 
 IF (UNIX)
     IF (NOT CFG_KERNEL_STACK)
-        INSTALL(PROGRAMS ${CMAKE_CURRENT_SOURCE_DIR}/../../Linux/gnu/tools/set_prio DESTINATION bin)
+        INSTALL(PROGRAMS ${CMAKE_SOURCE_DIR}/tools/linux/set_prio DESTINATION bin)
     ENDIF (NOT CFG_KERNEL_STACK)
+ELSEIF (WIN32)
+    INSTALL(FILES ${QT_BINARY_DIR}/QtCore4.dll DESTINATION bin)
+    INSTALL(FILES ${QT_BINARY_DIR}/QtGui4.dll DESTINATION bin)
+    INSTALL(FILES ${QT_BINARY_DIR}/QtCored4.dll DESTINATION bin)
+    INSTALL(FILES ${QT_BINARY_DIR}/QtGuid4.dll DESTINATION bin)
 ENDIF (UNIX)
 
