@@ -84,7 +84,6 @@
 #include "user/EplSdoComu.h"
 #include "user/EplIdentu.h"
 #include "user/EplStatusu.h"
-#include "user/EplTimeru.h"
 #include "user/EplCfmu.h"
 
 #include <user/ctrlu.h>
@@ -100,11 +99,6 @@
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOK)) != 0)
 #include "kernel/pdok.h"
 #endif
-
-#if EPL_USE_SHAREDBUFF != FALSE
-#include "SharedBuff.h"
-#endif
-
 
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_OBDK)) == 0)
 #error "EPL API layer needs EPL module OBDK!"
@@ -1295,23 +1289,7 @@ Exit:
 
 tEplKernel PUBLIC EplApiProcess(void)
 {
-tEplKernel Ret = kEplSuccessful;
-#if EPL_USE_SHAREDBUFF != FALSE
-tShbError  ShbError;
-
-    ShbError = ShbProcess();
-    if (ShbError != kShbOk)
-    {
-        Ret = kEplInvalidOperation;
-        goto Exit;
-    }
-#endif
-    Ret = EplTimeruProcess();
-
-#if EPL_USE_SHAREDBUFF != FALSE
-Exit:
-#endif
-    return Ret;
+    return ctrlu_processStack();
 }
 
 //------------------------------------------------------------------------------

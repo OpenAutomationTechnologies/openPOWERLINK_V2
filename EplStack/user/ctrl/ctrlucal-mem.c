@@ -123,6 +123,22 @@ void ctrlucal_exit (void)
 
 //------------------------------------------------------------------------------
 /**
+\brief  Process user control CAL module
+
+This function provides processing time for the CAL module.
+
+\return The function returns a tEplKernel error code.
+
+\ingroup module_ctrlucal
+*/
+//------------------------------------------------------------------------------
+tEplKernel ctrlucal_process (void)
+{
+    return kEplSuccessful;
+}
+
+//------------------------------------------------------------------------------
+/**
 \brief    Execute a ctrl command
 
 The function executes a control command in the kernel stack.
