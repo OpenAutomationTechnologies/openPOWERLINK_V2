@@ -63,6 +63,7 @@ extern "C" {
 
 tEplKernel ctrlkcal_init (void);
 void       ctrlkcal_exit (void);
+tEplKernel ctrlkcal_process (void);
 tEplKernel ctrlkcal_getCmd (tCtrlCmdType *pCmd_p);
 void       ctrlkcal_sendReturn(UINT16 retval_p);
 void       ctrlkcal_setStatus (UINT16 status_p);

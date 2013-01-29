@@ -213,6 +213,13 @@ BOOL ctrlk_process(void)
         }
     }
 
+    ret = ctrlkcal_process();
+    if(ret != kEplSuccessful)
+    {
+        EPL_DBGLVL_ERROR_TRACE("%s: CAL process returned with 0x%X\n", __func__, ret);
+        fExit = TRUE;
+    }
+
     return fExit;
 }
 
