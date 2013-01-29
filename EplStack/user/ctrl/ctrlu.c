@@ -485,7 +485,7 @@ BOOL ctrlu_checkKernelStack(void)
     else
     {
         instance_l.lastHeartbeat = heartbeat;
-        return TRUE;
+        return (ctrlucal_getStatus() == kCtrlStatusRunning);
     }
 }
 
