@@ -144,7 +144,9 @@ The function initializes the user control module.
 //------------------------------------------------------------------------------
 tEplKernel ctrlu_init(void)
 {
+#if EPL_USE_SHAREDBUFF != FALSE
     tShbError           shbError;
+#endif
     tEplKernel          ret;
 
     TRACE ("Initialize ctrl module ...\n");

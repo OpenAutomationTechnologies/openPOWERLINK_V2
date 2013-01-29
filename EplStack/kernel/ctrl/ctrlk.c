@@ -59,7 +59,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <kernel/VirtualEthernet.h>
 #endif
 
+#if EPL_USE_SHAREDBUFF != FALSE
 #include <SharedBuff.h>
+#endif
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -128,9 +130,9 @@ The function initializes the kernel control module.
 tEplKernel ctrlk_init(void)
 {
     tEplKernel      ret = kEplSuccessful;
+#if EPL_USE_SHAREDBUFF != FALSE
     tShbError       shbError;
 
-#if EPL_USE_SHAREDBUFF != FALSE
     shbError = ShbInit();
     if (shbError != kShbOk)
     {
