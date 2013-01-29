@@ -121,6 +121,22 @@ void ctrlkcal_exit (void)
 
 //------------------------------------------------------------------------------
 /**
+\brief  Process kernel control CAL module
+
+This function provides processing time for the CAL module.
+
+\return The function returns a tEplKernel error code.
+
+\ingroup module_ctrlkcal
+*/
+//------------------------------------------------------------------------------
+tEplKernel ctrlkcal_process (void)
+{
+    return kEplSuccessful;
+}
+
+//------------------------------------------------------------------------------
+/**
 \brief  Get control command
 
 The function reads a control command stored by the user in the control memory
