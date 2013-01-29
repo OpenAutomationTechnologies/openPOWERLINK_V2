@@ -67,6 +67,7 @@ tEplKernel ctrlu_initStack(tEplApiInitParam * pInitParam_p,
                            tEplApiInstance* pApiInstance_p,
                            tEplApiCbFuncs* pCbFuncs_p);
 tEplKernel ctrlu_shutdownStack(void);
+tEplKernel ctrlu_processStack(void);
 BOOL       ctrlu_checkKernelStack(void);
 
 #ifdef __cplusplus

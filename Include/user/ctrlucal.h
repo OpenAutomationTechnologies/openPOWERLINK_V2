@@ -62,6 +62,7 @@ extern "C" {
 
 tEplKernel ctrlucal_init (void);
 void       ctrlucal_exit (void);
+tEplKernel ctrlucal_process (void);
 UINT16     ctrlucal_getStatus (void);
 UINT16     ctrlucal_getHeartbeat (void);
 tEplKernel ctrlucal_executeCmd(tCtrlCmdType cmd_p);

@@ -428,6 +428,42 @@ tEplKernel ctrlu_shutdownStack(void)
 
 //------------------------------------------------------------------------------
 /**
+\brief  Process openPOWERLINK stack
+
+This function provides processing timing to several tasks in the openPOWERLINK
+stack.
+
+\return The function returns a tEplKernel error code.
+
+\ingroup module_ctrlu
+*/
+//------------------------------------------------------------------------------
+tEplKernel ctrlu_processStack(void)
+{
+tEplKernel Ret = kEplSuccessful;
+#if EPL_USE_SHAREDBUFF != FALSE
+tShbError  ShbError;
+
+    ShbError = ShbProcess();
+    if (ShbError != kShbOk)
+    {
+        Ret = kEplInvalidOperation;
+        goto Exit;
+    }
+#endif
+
+    Ret = ctrlucal_process();
+    if(Ret != kEplSuccessful)
+        goto Exit;
+
+    Ret = EplTimeruProcess();
+
+Exit:
+    return Ret;
+}
+
+//------------------------------------------------------------------------------
+/**
 \brief  Check if kernel stack is running
 
 The function checks if the kernel stack is still running.
