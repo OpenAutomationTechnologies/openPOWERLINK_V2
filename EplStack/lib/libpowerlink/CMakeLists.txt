@@ -170,6 +170,7 @@ SET (LIB_SOURCES_KERNEL ${LIB_SOURCES_KERNEL}
                         ${POWERLINK_SOURCE_DIR}/EplStack/kernel/pdo/pdok.c
                         ${POWERLINK_SOURCE_DIR}/EplStack/kernel/pdo/pdokcal.c
                         ${POWERLINK_SOURCE_DIR}/EplStack/kernel/pdo/pdokcal-shb.c
+                        ${POWERLINK_SOURCE_DIR}/EplStack/kernel/pdo/pdokcalsync-null.c
                         ${POWERLINK_SOURCE_DIR}/EplStack/kernel/errhnd/errhndk.c
                         ${POWERLINK_SOURCE_DIR}/EplStack/kernel/errhnd/errhndkcal-shb.c
                         ${POWERLINK_SOURCE_DIR}/EplStack/kernel/ctrl/ctrlk.c
@@ -194,6 +195,7 @@ SET (LIB_SOURCES_USER ${LIB_SOURCES_USER}
                       ${POWERLINK_SOURCE_DIR}/EplStack/user/pdo/pdou.c
                       ${POWERLINK_SOURCE_DIR}/EplStack/user/pdo/pdoucal.c
                       ${POWERLINK_SOURCE_DIR}/EplStack/user/pdo/pdoucal-shb.c
+                      ${POWERLINK_SOURCE_DIR}/EplStack/user/pdo/pdoucalsync-null.c
                       ${POWERLINK_SOURCE_DIR}/EplStack/EplSdoComu.c
                       ${POWERLINK_SOURCE_DIR}/EplStack/EplSdoAsySequ.c
                       ${POWERLINK_SOURCE_DIR}/EplStack/EplSdoAsndu.c
