@@ -51,75 +51,73 @@ BITSTREAM= download
 
 ##################################
 # Include directory
-INCLUDES=-I${APP_DIR}\
--I${EDRV_DIR}/include \
--I${STACK_ROOT}/Include \
--I${STACK_ROOT}/Include/user \
--I${STACK_ROOT}/Include/kernel \
--I${STACK_ROOT}/SharedBuff \
--I${STACK_ROOT}/ObjDicts \
--I${STACK_ROOT}/EplStack \
--I${OBJDICT_DIR} \
--I${PROCESSOR_NAME}/include \
--I${TARGET_DIR}
+INCLUDES=-I${APP_DIR} \
+-I${STACK_ROOT}/include \
+-I${STACK_ROOT}/libs/omethlib \
+-I${STACK_ROOT}/libs/sharedbuff \
+-I${STACK_ROOT}/objdicts/CiA401_CN \
+-I${STACK_ROOT}/stack/include/target/openmac \
+-I${STACK_ROOT}/stack/src \
+-I${STACK_ROOT}/stack/src/arch/xilinx_microblaze \
+-I${PROCESSOR_NAME}/include
 
 ##################################
 # Source files
 SRCFILES=${APP_DIR}/demo_main.c \
-${OBJDICT_DIR}/Objdict.c \
-${EDRV_DIR}/source/EdrvOpenMac.c \
-${EDRV_DIR}/source/EplTimerSynck_OpenMac.c \
-${EDRV_DIR}/source/EplTgtTimeStamp_OpenMac.c \
-${EDRV_DIR}/source/omethlib.c \
-${EDRV_DIR}/source/omethlibint.c \
-${EDRV_DIR}/source/omethlib_phycfg_generic.c \
-${STACK_ROOT}/EplStack/EplDllk.c \
-${STACK_ROOT}/EplStack/kernel/dll/dllkcal.c \
-${STACK_ROOT}/EplStack/user/dll/dllucal.c \
-${STACK_ROOT}/EplStack/common/dll/dllcal-direct.c \
-${STACK_ROOT}/EplStack/EplLedu.c \
-${STACK_ROOT}/EplStack/kernel/event/eventk.c \
-${STACK_ROOT}/EplStack/user/event/eventu.c \
-${STACK_ROOT}/EplStack/kernel/event/eventkcal.c \
-${STACK_ROOT}/EplStack/user/event/eventucal.c \
-${STACK_ROOT}/EplStack/common/event/eventcal-shb.c \
-${STACK_ROOT}/EplStack/common/event/eventcal-direct.c \
-${STACK_ROOT}/EplStack/kernel/event/eventkcal-shb.c \
-${STACK_ROOT}/EplStack/kernel/event/eventkcal-direct.c \
-${STACK_ROOT}/EplStack/user/event/eventucal-shb.c \
-${STACK_ROOT}/EplStack/user/event/eventucal-direct.c \
-${STACK_ROOT}/EplStack/common/event/event.c \
-${STACK_ROOT}/EplStack/EplNmtk.c \
-${STACK_ROOT}/EplStack/EplNmtu.c \
-${STACK_ROOT}/EplStack/EplNmtCnu.c \
-${STACK_ROOT}/EplStack/kernel/pdo/pdok.c \
-${STACK_ROOT}/EplStack/kernel/pdo/pdokcal.c \
-${STACK_ROOT}/EplStack/kernel/pdo/pdokcal-local.c \
-${STACK_ROOT}/EplStack/kernel/pdo/pdokcalsync-null.c \
-${STACK_ROOT}/EplStack/user/pdo/pdou.c \
-${STACK_ROOT}/EplStack/user/pdo/pdoucal.c \
-${STACK_ROOT}/EplStack/user/pdo/pdoucal-local.c \
-${STACK_ROOT}/EplStack/user/pdo/pdoucalsync-null.c \
-${STACK_ROOT}/EplStack/EplObd.c \
-${STACK_ROOT}/EplStack/EplSdoComu.c \
-${STACK_ROOT}/EplStack/EplSdoAsySequ.c \
-${STACK_ROOT}/EplStack/EplSdoAsndu.c \
-${STACK_ROOT}/EplStack/EplTimeruGeneric.c \
-${STACK_ROOT}/EplStack/kernel/errhnd/errhndk.c \
-${STACK_ROOT}/EplStack/user/errhnd/errhndu.c \
-${STACK_ROOT}/EplStack/kernel/errhnd/errhndkcal-local.c \
-${STACK_ROOT}/EplStack/user/errhnd/errhnducal-local.c \
-${STACK_ROOT}/EplStack/EplApiGeneric.c \
-${STACK_ROOT}/EplStack/kernel/ctrl/ctrlk.c \
-${STACK_ROOT}/EplStack/kernel/ctrl/ctrlkcal-direct.c \
-${STACK_ROOT}/EplStack/user/ctrl/ctrlu.c \
-${STACK_ROOT}/EplStack/user/ctrl/ctrlucal-direct.c \
-${STACK_ROOT}/EplStack/user/api/processimage.c \
-${TARGET_DIR}/ShbTarget_Microblaze.c \
-${TARGET_DIR}/xilinx_irq.c \
-${TARGET_DIR}/xilinx_usleep.c \
-${STACK_ROOT}/SharedBuff/SharedBuff.c \
-${STACK_ROOT}/SharedBuff/ShbIpc-NoOS.c \
+${STACK_ROOT}/libs/omethlib/omethlib.c \
+${STACK_ROOT}/libs/omethlib/omethlibint.c \
+${STACK_ROOT}/libs/omethlib/omethlib_phycfg_generic.c \
+${STACK_ROOT}/libs/sharedbuff/SharedBuff.c \
+${STACK_ROOT}/libs/sharedbuff/ShbIpc-NoOS.c \
+${STACK_ROOT}/libs/sharedbuff/ShbTarget_Microblaze.c \
+${STACK_ROOT}/objdicts/CiA401_CN/Objdict.c \
+${STACK_ROOT}/stack/src/common/dll/dllcal-direct.c \
+${STACK_ROOT}/stack/src/common/event/event.c \
+${STACK_ROOT}/stack/src/common/event/eventcal-direct.c \
+${STACK_ROOT}/stack/src/common/event/eventcal-shb.c \
+${STACK_ROOT}/stack/src/common/timer/timer-generic.c \
+${STACK_ROOT}/stack/src/kernel/ctrl/ctrlk.c \
+${STACK_ROOT}/stack/src/kernel/ctrl/ctrlkcal-direct.c \
+${STACK_ROOT}/stack/src/kernel/dll/dllk.c \
+${STACK_ROOT}/stack/src/kernel/dll/dllkcal.c \
+${STACK_ROOT}/stack/src/kernel/edrv/edrv-openmac.c \
+${STACK_ROOT}/stack/src/kernel/errhnd/errhndk.c \
+${STACK_ROOT}/stack/src/kernel/errhnd/errhndkcal-local.c \
+${STACK_ROOT}/stack/src/kernel/event/eventk.c \
+${STACK_ROOT}/stack/src/kernel/event/eventkcal.c \
+${STACK_ROOT}/stack/src/kernel/event/eventkcal-direct.c \
+${STACK_ROOT}/stack/src/kernel/event/eventkcal-shb.c \
+${STACK_ROOT}/stack/src/kernel/hrtimer/hrtimersync-openmac.c \
+${STACK_ROOT}/stack/src/kernel/nmt/nmtk.c \
+${STACK_ROOT}/stack/src/kernel/pdo/pdok.c \
+${STACK_ROOT}/stack/src/kernel/pdo/pdokcal.c \
+${STACK_ROOT}/stack/src/kernel/pdo/pdokcal-local.c \
+${STACK_ROOT}/stack/src/kernel/pdo/pdokcalsync-null.c \
+${STACK_ROOT}/stack/src/kernel/timestamp/timestamp-openmac.c \
+${STACK_ROOT}/stack/src/user/api/generic.c \
+${STACK_ROOT}/stack/src/user/api/processimage.c \
+${STACK_ROOT}/stack/src/user/ctrl/ctrlu.c \
+${STACK_ROOT}/stack/src/user/ctrl/ctrlucal-direct.c \
+${STACK_ROOT}/stack/src/user/dll/dllucal.c \
+${STACK_ROOT}/stack/src/user/errhnd/errhndu.c \
+${STACK_ROOT}/stack/src/user/errhnd/errhnducal-local.c \
+${STACK_ROOT}/stack/src/user/event/eventu.c \
+${STACK_ROOT}/stack/src/user/event/eventucal.c \
+${STACK_ROOT}/stack/src/user/event/eventucal-direct.c \
+${STACK_ROOT}/stack/src/user/event/eventucal-shb.c \
+${STACK_ROOT}/stack/src/user/nmt/nmtu.c \
+${STACK_ROOT}/stack/src/user/nmt/nmtcnu.c \
+${STACK_ROOT}/stack/src/user/obd/obd.c \
+${STACK_ROOT}/stack/src/user/pdo/pdou.c \
+${STACK_ROOT}/stack/src/user/pdo/pdoucal.c \
+${STACK_ROOT}/stack/src/user/pdo/pdoucal-local.c \
+${STACK_ROOT}/stack/src/user/pdo/pdoucalsync-null.c \
+${STACK_ROOT}/stack/src/user/sdo/sdo-asndu.c \
+${STACK_ROOT}/stack/src/user/sdo/sdo-asysequ.c \
+${STACK_ROOT}/stack/src/user/sdo/sdo-comu.c \
+${STACK_ROOT}/stack/src/user/ledu.c \
+${STACK_ROOT}/stack/src/arch/xilinx_microblaze/xilinx_irq.c \
+${STACK_ROOT}/stack/src/arch/xilinx_microblaze/xilinx_usleep.c \
 ${APP_DIR}/systemComponents.c
 
 LIBRARIES = libxil.a
@@ -149,10 +147,10 @@ endif
 # set endian according to bus interface
 ifeq ($(BUS_INTERFACE),axi)
 	PROC_FEATURES+= -mlittle-endian
-	SRCFILES+= ${STACK_ROOT}/EplStack/amiarm.c
+	SRCFILES+= ${STACK_ROOT}/libs/ami/amiarm.c
 else
 	PROC_FEATURES+= -mbig-endian
-	SRCFILES+= ${STACK_ROOT}/EplStack/amibe.c
+	SRCFILES+= ${STACK_ROOT}/libs/ami/amibe.c
 endif
 
 ###################################

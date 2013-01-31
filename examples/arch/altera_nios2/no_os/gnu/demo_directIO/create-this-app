@@ -55,14 +55,6 @@ done
 # set needed path variables
 BSP_DIR=./bsp
 MAINPATH=../../../../../..
-#MAINDIR=$(pwd)/${MAINPATH}
-MAINDIR=${MAINPATH}
-INCLUDES="${MAINDIR}/Include \
-${MAINDIR}/Edrv/openmac/include \
-$(pwd) \
-${MAINDIR}/SharedBuff \
-${MAINDIR}/EplStack \
-${MAINDIR}/ObjDicts/CiA401_CN"
 
 # set DBG_MODE according to user args
 if [ -z "$DEBUG" ]; then
@@ -78,46 +70,72 @@ CFLAGS="-D${DBG_MODE} -DDEF_DEBUG_LVL=0xEC000000L"
 
 #EXTRA_CFLAGS = -Wa,-alhs $(INCLUDES) $(MODFLAGS)
 
-SRCFILES="demo_main.c \
+INCLUDES=". \
+${MAINPATH}/include \
+${MAINPATH}/libs/omethlib \
+${MAINPATH}/libs/sharedbuff \
+${MAINPATH}/objdicts/CiA401_CN \
+${MAINPATH}/stack/include/target/openmac \
+${MAINPATH}/stack/src"
+
+SRCFILES="${MAINPATH}/libs/ami/amiarm.c \
+${MAINPATH}/libs/omethlib/omethlib.c \
+${MAINPATH}/libs/omethlib/omethlibint.c \
+${MAINPATH}/libs/omethlib/omethlib_phycfg_generic.c \
+${MAINPATH}/libs/sharedbuff/SharedBuff.c \
+${MAINPATH}/libs/sharedbuff/ShbIpc-NoOS.c \
+${MAINPATH}/libs/sharedbuff/ShbTarget_Nios2.c \
+${MAINPATH}/objdicts/CiA401_CN/Objdict.c \
+${MAINPATH}/stack/src/common/dll/dllcal-direct.c \
+${MAINPATH}/stack/src/common/event/event.c \
+${MAINPATH}/stack/src/common/event/eventcal-direct.c \
+${MAINPATH}/stack/src/common/event/eventcal-shb.c \
+${MAINPATH}/stack/src/common/timer/timer-generic.c \
+${MAINPATH}/stack/src/kernel/ctrl/ctrlk.c \
+${MAINPATH}/stack/src/kernel/ctrl/ctrlkcal-direct.c \
+${MAINPATH}/stack/src/kernel/dll/dllk.c \
+${MAINPATH}/stack/src/kernel/dll/dllkcal.c \
+${MAINPATH}/stack/src/kernel/edrv/edrv-openmac.c \
+${MAINPATH}/stack/src/kernel/errhnd/errhndk.c \
+${MAINPATH}/stack/src/kernel/errhnd/errhndkcal-local.c \
+${MAINPATH}/stack/src/kernel/event/eventk.c \
+${MAINPATH}/stack/src/kernel/event/eventkcal.c \
+${MAINPATH}/stack/src/kernel/event/eventkcal-direct.c \
+${MAINPATH}/stack/src/kernel/event/eventkcal-shb.c \
+${MAINPATH}/stack/src/kernel/hrtimer/hrtimersync-openmac.c \
+${MAINPATH}/stack/src/kernel/nmt/nmtk.c \
+${MAINPATH}/stack/src/kernel/pdo/pdok.c \
+${MAINPATH}/stack/src/kernel/pdo/pdokcal.c \
+${MAINPATH}/stack/src/kernel/pdo/pdokcal-local.c \
+${MAINPATH}/stack/src/kernel/pdo/pdokcalsync-null.c \
+${MAINPATH}/stack/src/kernel/timestamp/timestamp-openmac.c \
+${MAINPATH}/stack/src/user/api/generic.c \
+${MAINPATH}/stack/src/user/api/processimage.c \
+${MAINPATH}/stack/src/user/ctrl/ctrlu.c \
+${MAINPATH}/stack/src/user/ctrl/ctrlucal-direct.c \
+${MAINPATH}/stack/src/user/dll/dllucal.c \
+${MAINPATH}/stack/src/user/errhnd/errhndu.c \
+${MAINPATH}/stack/src/user/errhnd/errhnducal-local.c \
+${MAINPATH}/stack/src/user/event/eventu.c \
+${MAINPATH}/stack/src/user/event/eventucal.c \
+${MAINPATH}/stack/src/user/event/eventucal-direct.c \
+${MAINPATH}/stack/src/user/event/eventucal-shb.c \
+${MAINPATH}/stack/src/user/nmt/nmtu.c \
+${MAINPATH}/stack/src/user/nmt/nmtcnu.c \
+${MAINPATH}/stack/src/user/obd/obd.c \
+${MAINPATH}/stack/src/user/pdo/pdou.c \
+${MAINPATH}/stack/src/user/pdo/pdoucal.c \
+${MAINPATH}/stack/src/user/pdo/pdoucal-local.c \
+${MAINPATH}/stack/src/user/pdo/pdoucalsync-null.c \
+${MAINPATH}/stack/src/user/sdo/sdo-asndu.c \
+${MAINPATH}/stack/src/user/sdo/sdo-asysequ.c \
+${MAINPATH}/stack/src/user/sdo/sdo-comu.c \
+${MAINPATH}/stack/src/user/ledu.c \
+demo_main.c \
 lcd.c \
 Cmp_Lcd.c \
-systemComponents.c \
-${MAINPATH}/Edrv/openmac/source/EdrvOpenMac.c \
-${MAINPATH}/Edrv/openmac/source/EplTimerSynck_OpenMac.c \
-${MAINPATH}/Edrv/openmac/source/EplTgtTimeStamp_OpenMac.c \
-${MAINPATH}/Edrv/openmac/source/omethlib.c ${MAINPATH}/Edrv/openmac/source/omethlibint.c \
-${MAINPATH}/Edrv/openmac/source/omethlib_phycfg_generic.c \
-${MAINPATH}/EplStack/EplDllk.c ${MAINPATH}/EplStack/kernel/dll/dllkcal.c \
-${MAINPATH}/EplStack/user/dll/dllucal.c \
-${MAINPATH}/EplStack/common/dll/dllcal-direct.c \
-${MAINPATH}/EplStack/EplLedu.c \
-${MAINPATH}/EplStack/kernel/event/eventk.c ${MAINPATH}/EplStack/user/event/eventu.c \
-${MAINPATH}/EplStack/kernel/event/eventkcal.c ${MAINPATH}/EplStack/user/event/eventucal.c \
-${MAINPATH}/EplStack/common/event/eventcal-direct.c ${MAINPATH}/EplStack/common/event/eventcal-shb.c \
-${MAINPATH}/EplStack/user/event/eventucal-direct.c ${MAINPATH}/EplStack/user/event/eventucal-shb.c \
-${MAINPATH}/EplStack/kernel/event/eventkcal-direct.c ${MAINPATH}/EplStack/kernel/event/eventkcal-shb.c \
-${MAINPATH}/EplStack/common/event/event.c \
-${MAINPATH}/EplStack/EplNmtk.c \
-${MAINPATH}/EplStack/EplNmtu.c ${MAINPATH}/EplStack/EplNmtCnu.c \
-${MAINPATH}/EplStack/kernel/pdo/pdok.c ${MAINPATH}/EplStack/kernel/pdo/pdokcal.c \
-${MAINPATH}/EplStack/kernel/pdo/pdokcal-local.c ${MAINPATH}/EplStack/kernel/pdo/pdokcalsync-null.c \
-${MAINPATH}/EplStack/user/pdo/pdou.c ${MAINPATH}/EplStack/user/pdo/pdoucal.c \
-${MAINPATH}/EplStack/user/pdo/pdoucal-local.c ${MAINPATH}/EplStack/user/pdo/pdoucalsync-null.c \
-${MAINPATH}/EplStack/EplObd.c \
-${MAINPATH}/EplStack/EplSdoComu.c ${MAINPATH}/EplStack/EplSdoAsySequ.c ${MAINPATH}/EplStack/EplSdoAsndu.c \
-${MAINPATH}/EplStack/EplTimeruGeneric.c \
-${MAINPATH}/EplStack/kernel/errhnd/errhndk.c \
-${MAINPATH}/EplStack/user/errhnd/errhndu.c \
-${MAINPATH}/EplStack/kernel/errhnd/errhndkcal-local.c \
-${MAINPATH}/EplStack/user/errhnd/errhnducal-local.c \
-${MAINPATH}/EplStack/EplApiGeneric.c \
-${MAINPATH}/EplStack/kernel/ctrl/ctrlk.c ${MAINPATH}/EplStack/kernel/ctrl/ctrlkcal-direct.c \
-${MAINPATH}/EplStack/user/ctrl/ctrlu.c ${MAINPATH}/EplStack/user/ctrl/ctrlucal-direct.c \
-${MAINPATH}/EplStack/user/api/processimage.c \
-${MAINPATH}/ObjDicts/CiA401_CN/Objdict.c \
-${MAINPATH}/EplStack/amiarm.c \
-${MAINPATH}/Target/altera_nios2/no_os/gnu/generic/ShbTarget_Nios2.c \
-${MAINPATH}/SharedBuff/SharedBuff.c ${MAINPATH}/SharedBuff/ShbIpc-NoOS.c"
+systemComponents.c"
+
 
 # work-around for bug in Nios2 EDS V9.0
 cmd="nios2-app-generate-makefile --bsp-dir $BSP_DIR --version"
