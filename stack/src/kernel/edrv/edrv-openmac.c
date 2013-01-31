@@ -87,7 +87,7 @@
 #endif
 #include "omethlib.h"   // openMAC header
 
-#include "EplTgtTimeStamp_openMac.h"
+#include "timestamp_openmac.h"
 
 //comment the following lines to disable feature
 //#define EDRV_DEBUG        //debugging information forwarded to stdout
@@ -108,11 +108,11 @@
 
 //POWERLINK IP-Core in "pcp_0" subsystem
 #if defined(PCP_0_POWERLINK_0_MAC_REG_BASE)
-#include "EdrvOpenMac_qsys.h"
+#include "edrv-openmac_qsys.h"
 
 //POWERLINK IP-Core in SOPC
 #elif defined(POWERLINK_0_MAC_REG_BASE)
-#include "EdrvOpenMac_sopc.h"
+#include "edrv-openmac_sopc.h"
 
 #else
 #error "POWERLINK IP-Core is not found in Nios II (sub-)system!"
@@ -122,10 +122,10 @@
 
 //POWERLINK IP-Core with PLB
 #if defined(POWERLINK_USES_PLB_BUS)
-#include "EdrvOpenMac_plb.h"
+#include "edrv-openmac_plb.h"
 
 #elif defined(POWERLINK_USES_AXI_BUS)
-#include "EdrvOpenMac_axi.h"
+#include "edrv-openmac_axi.h"
 
 #else
 #error "POWERLINK IP-Core is not found in Microblaze system!"

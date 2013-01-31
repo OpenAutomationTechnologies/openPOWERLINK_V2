@@ -66,7 +66,7 @@
 ****************************************************************************/
 
 #include "EplInc.h"
-#include "EplTgtTimeStamp_openMac.h"
+#include "timestamp_openmac.h"
 
 #include "omethlib.h"
 
