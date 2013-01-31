@@ -71,13 +71,13 @@ ENDIF(CFG_POWERLINK_MN)
 #
 IF(CFG_POWERLINK_MN)
     SET(LIB_SOURCES ${LIB_SOURCES}
-                    ${POWERLINK_SOURCE_DIR}/EplStack/EplObdCdc.c
+                    ${USER_SOURCE_DIR}/obd/obdcdc.c
         )
     SET (LIB_SOURCES_USER ${LIB_SOURCES_USER}
-                          ${POWERLINK_SOURCE_DIR}/EplStack/EplCfmu.c
+                          ${USER_SOURCE_DIR}/cfmu.c
         )
     SET (LIB_HEADERS_USER ${LIB_HEADERS_USER}
-                          ${POWERLINK_SOURCE_DIR}/Include/user/EplCfmu.h
+                          ${USER_INCLUDE_DIR}/EplCfmu.h
         )
 
     ADD_DEFINITIONS(-DCONFIG_CFM -DCONFIG_OPENCONFIGURATOR_MAPPING -DCONFIG_MN)
@@ -99,15 +99,11 @@ ENDIF ()
 #
 IF (UNIX)
     SET(LIB_SOURCES ${LIB_SOURCES}
-                    ${POWERLINK_SOURCE_DIR}/Edrv/EdrvPcapLinux.c
-                    ${POWERLINK_SOURCE_DIR}/EplStack/kernel/pdo/pdokcalsync-bsdsem.c
-                    ${POWERLINK_SOURCE_DIR}/EplStack/user/pdo/pdoucalsync-bsdsem.c
+                    ${EDRV_SOURCE_DIR}/edrv-pcap_linux.c
         )
 ELSEIF (WIN32)
     SET(LIB_SOURCES ${LIB_SOURCES}
-                    ${POWERLINK_SOURCE_DIR}/Edrv/EdrvPcap.c
-                    ${POWERLINK_SOURCE_DIR}/EplStack/kernel/pdo/pdokcalsync-null.c
-                    ${POWERLINK_SOURCE_DIR}/EplStack/user/pdo/pdoucalsync-null.c
+                    ${EDRV_SOURCE_DIR}/edrv-pcap.c
         )
 ENDIF ()
 
@@ -115,44 +111,44 @@ ENDIF ()
 # setup object dictionary to use
 #
 SET(LIB_OBJDICT ${LIB_OBJDICT}
-                ${POWERLINK_SOURCE_DIR}/ObjDicts/${OBJDICT}/Objdict.c
-                ${POWERLINK_SOURCE_DIR}/ObjDicts/${OBJDICT}/objdict.h
-                ${POWERLINK_SOURCE_DIR}/ObjDicts/${OBJDICT}/obdcfg.h
-                ${POWERLINK_SOURCE_DIR}/ObjDicts/Generic/objdict_1000-13ff.h
-                ${POWERLINK_SOURCE_DIR}/ObjDicts/Generic/objdict_1b00-1fff.h
+                ${OBJDICT_DIR}/${OBJDICT}/Objdict.c
+                ${OBJDICT_DIR}/${OBJDICT}/objdict.h
+                ${OBJDICT_DIR}/${OBJDICT}/obdcfg.h
+                ${OBJDICT_DIR}/generic/objdict_1000-13ff.h
+                ${OBJDICT_DIR}/generic/objdict_1b00-1fff.h
     )
 
 #
 # set general sources of POWERLINK library
 #
 SET (LIB_SOURCES ${LIB_SOURCES}
-                 ${POWERLINK_SOURCE_DIR}/EplStack/EplApiGeneric.c
-                 ${POWERLINK_SOURCE_DIR}/EplStack/EplDebug.c
-                 ${POWERLINK_SOURCE_DIR}/EplStack/EplObd.c
-                 ${POWERLINK_SOURCE_DIR}/EplStack/user/api/processimage.c
-                 ${POWERLINK_SOURCE_DIR}/EplStack/common/dll/dllcal-shb.c
-                 ${POWERLINK_SOURCE_DIR}/EplStack/common/event/event.c
-                 ${POWERLINK_SOURCE_DIR}/EplStack/common/event/eventcal-shb.c
-                 ${POWERLINK_SOURCE_DIR}/EplStack/amix86.c
-                 ${POWERLINK_SOURCE_DIR}/SharedBuff/SharedBuff.c
-                 ${POWERLINK_SOURCE_DIR}/Edrv/EdrvCyclic.c
+                 ${USER_SOURCE_DIR}/api/generic.c
+                 ${USER_SOURCE_DIR}/api/processimage.c
+                 ${COMMON_SOURCE_DIR}/debug.c
+                 ${USER_SOURCE_DIR}/obd/obd.c
+                 ${COMMON_SOURCE_DIR}/dll/dllcal-shb.c
+                 ${COMMON_SOURCE_DIR}/event/event.c
+                 ${COMMON_SOURCE_DIR}/event/eventcal-shb.c
+                 ${LIB_SOURCE_DIR}/ami/amix86.c
+                 ${LIB_SOURCE_DIR}/sharedbuff/SharedBuff.c
+                 ${EDRV_SOURCE_DIR}/edrvcyclic.c
     )
     
 
 IF (UNIX)
     SET (LIB_SOURCES ${LIB_SOURCES}
-                     ${POWERLINK_SOURCE_DIR}/EplStack/EplSdoUdpu.c
-                     ${POWERLINK_SOURCE_DIR}/EplStack/EplTimeruLinuxUser.c
-                     ${POWERLINK_SOURCE_DIR}/EplStack/EplTimerHighReskPosix.c
-                     ${POWERLINK_SOURCE_DIR}/SharedBuff/ShbIpc-LinuxPthreads.c
-                     ${POWERLINK_SOURCE_DIR}/Target/X86/Linux/gnu/generic/ftraceDebug.c
-                     ${POWERLINK_SOURCE_DIR}/Target/X86/Linux/gnu/generic/EplTgtInitPosix.c
+                     ${USER_SOURCE_DIR}/sdo/sdo-udpu.c
+                     ${COMMON_SOURCE_DIR}/timer/timer-linuxuser.c
+                     ${KERNEL_SOURCE_DIR}/hrtimer/hrtimer-posix.c
+                     ${LIB_SOURCE_DIR}/sharedbuff/ShbIpc-LinuxPthreads.c
+                     ${ARCH_SOURCE_DIR}/linux/ftrace-debug.c
+                     ${ARCH_SOURCE_DIR}/linux/targetinit-posix.c
         )
 ELSEIF (WIN32)
     SET (LIB_SOURCES ${LIB_SOURCES}
-                     ${POWERLINK_SOURCE_DIR}/EplStack/EplTimeruGeneric.c
-                     ${POWERLINK_SOURCE_DIR}/SharedBuff/ShbIpc-Win32.c
-                     ${POWERLINK_SOURCE_DIR}/EplStack/trace.c
+                     ${COMMON_SOURCE_DIR}/timer/timer-generic.c
+                     ${LIB_SOURCE_DIR}/sharedbuff/ShbIpc-Win32.c
+                     ${LIB_SOURCE_DIR}/misc/trace.c
         )
 ENDIF ()
 
@@ -160,49 +156,49 @@ ENDIF ()
 # set kernel part sources of POWERLINK library
 #
 SET (LIB_SOURCES_KERNEL ${LIB_SOURCES_KERNEL}
-                        ${POWERLINK_SOURCE_DIR}/EplStack/EplDllk.c
-                        ${POWERLINK_SOURCE_DIR}/EplStack/kernel/dll/dllkcal.c
-                        ${POWERLINK_SOURCE_DIR}/EplStack/kernel/event/eventk.c
-                        ${POWERLINK_SOURCE_DIR}/EplStack/kernel/event/eventkcal.c
-                        ${POWERLINK_SOURCE_DIR}/EplStack/kernel/event/eventkcal-shb.c
-                        ${POWERLINK_SOURCE_DIR}/EplStack/EplNmtk.c
-                        ${POWERLINK_SOURCE_DIR}/EplStack/EplNmtkCal.c
-                        ${POWERLINK_SOURCE_DIR}/EplStack/kernel/pdo/pdok.c
-                        ${POWERLINK_SOURCE_DIR}/EplStack/kernel/pdo/pdokcal.c
-                        ${POWERLINK_SOURCE_DIR}/EplStack/kernel/pdo/pdokcal-shb.c
-                        ${POWERLINK_SOURCE_DIR}/EplStack/kernel/pdo/pdokcalsync-null.c
-                        ${POWERLINK_SOURCE_DIR}/EplStack/kernel/errhnd/errhndk.c
-                        ${POWERLINK_SOURCE_DIR}/EplStack/kernel/errhnd/errhndkcal-shb.c
-                        ${POWERLINK_SOURCE_DIR}/EplStack/kernel/ctrl/ctrlk.c
-                        ${POWERLINK_SOURCE_DIR}/EplStack/kernel/ctrl/ctrlkcal-direct.c
+                        ${KERNEL_SOURCE_DIR}/dll/dllk.c
+                        ${KERNEL_SOURCE_DIR}/dll/dllkcal.c
+                        ${KERNEL_SOURCE_DIR}/event/eventk.c
+                        ${KERNEL_SOURCE_DIR}/event/eventkcal.c
+                        ${KERNEL_SOURCE_DIR}/event/eventkcal-shb.c
+                        ${KERNEL_SOURCE_DIR}/nmt/nmtk.c
+                        ${KERNEL_SOURCE_DIR}/nmt/nmtkcal.c
+                        ${KERNEL_SOURCE_DIR}/pdo/pdok.c
+                        ${KERNEL_SOURCE_DIR}/pdo/pdokcal.c
+                        ${KERNEL_SOURCE_DIR}/pdo/pdokcal-shb.c
+                        ${KERNEL_SOURCE_DIR}/pdo/pdokcalsync-null.c
+                        ${KERNEL_SOURCE_DIR}/errhnd/errhndk.c
+                        ${KERNEL_SOURCE_DIR}/errhnd/errhndkcal-shb.c
+                        ${KERNEL_SOURCE_DIR}/ctrl/ctrlk.c
+                        ${KERNEL_SOURCE_DIR}/ctrl/ctrlkcal-direct.c
     )
 
 #
 # set user part sources of POWERLINK library
 #
 SET (LIB_SOURCES_USER ${LIB_SOURCES_USER}
-                      ${POWERLINK_SOURCE_DIR}/EplStack/user/dll/dllucal.c
-                      ${POWERLINK_SOURCE_DIR}/EplStack/user/event/eventu.c
-                      ${POWERLINK_SOURCE_DIR}/EplStack/user/event/eventucal.c
-                      ${POWERLINK_SOURCE_DIR}/EplStack/user/event/eventucal-shb.c
-                      ${POWERLINK_SOURCE_DIR}/EplStack/EplNmtu.c
-                      ${POWERLINK_SOURCE_DIR}/EplStack/EplNmtuCal.c
-                      ${POWERLINK_SOURCE_DIR}/EplStack/EplNmtCnu.c
-                      ${POWERLINK_SOURCE_DIR}/EplStack/EplNmtMnu.c
-                      ${POWERLINK_SOURCE_DIR}/EplStack/EplIdentu.c
-                      ${POWERLINK_SOURCE_DIR}/EplStack/EplStatusu.c
-                      ${POWERLINK_SOURCE_DIR}/EplStack/EplSyncu.c
-                      ${POWERLINK_SOURCE_DIR}/EplStack/user/pdo/pdou.c
-                      ${POWERLINK_SOURCE_DIR}/EplStack/user/pdo/pdoucal.c
-                      ${POWERLINK_SOURCE_DIR}/EplStack/user/pdo/pdoucal-shb.c
-                      ${POWERLINK_SOURCE_DIR}/EplStack/user/pdo/pdoucalsync-null.c
-                      ${POWERLINK_SOURCE_DIR}/EplStack/EplSdoComu.c
-                      ${POWERLINK_SOURCE_DIR}/EplStack/EplSdoAsySequ.c
-                      ${POWERLINK_SOURCE_DIR}/EplStack/EplSdoAsndu.c
-                      ${POWERLINK_SOURCE_DIR}/EplStack/user/errhnd/errhndu.c
-                      ${POWERLINK_SOURCE_DIR}/EplStack/user/errhnd/errhnducal-shb.c
-                      ${POWERLINK_SOURCE_DIR}/EplStack/user/ctrl/ctrlu.c
-                      ${POWERLINK_SOURCE_DIR}/EplStack/user/ctrl/ctrlucal-direct.c
+                      ${USER_SOURCE_DIR}/dll/dllucal.c
+                      ${USER_SOURCE_DIR}/event/eventu.c
+                      ${USER_SOURCE_DIR}/event/eventucal.c
+                      ${USER_SOURCE_DIR}/event/eventucal-shb.c
+                      ${USER_SOURCE_DIR}/nmt/nmtu.c
+                      ${USER_SOURCE_DIR}/nmt/nmtucal.c
+                      ${USER_SOURCE_DIR}/nmt/nmtcnu.c
+                      ${USER_SOURCE_DIR}/nmt/nmtmnu.c
+                      ${USER_SOURCE_DIR}/nmt/identu.c
+                      ${USER_SOURCE_DIR}/nmt/statusu.c
+                      ${USER_SOURCE_DIR}/nmt/syncu.c
+                      ${USER_SOURCE_DIR}/pdo/pdou.c
+                      ${USER_SOURCE_DIR}/pdo/pdoucal.c
+                      ${USER_SOURCE_DIR}/pdo/pdoucal-shb.c
+                      ${USER_SOURCE_DIR}/pdo/pdoucalsync-null.c
+                      ${USER_SOURCE_DIR}/sdo/sdo-comu.c
+                      ${USER_SOURCE_DIR}/sdo/sdo-asysequ.c
+                      ${USER_SOURCE_DIR}/sdo/sdo-asndu.c
+                      ${USER_SOURCE_DIR}/errhnd/errhndu.c
+                      ${USER_SOURCE_DIR}/errhnd/errhnducal-shb.c
+                      ${USER_SOURCE_DIR}/ctrl/ctrlu.c
+                      ${USER_SOURCE_DIR}/ctrl/ctrlucal-direct.c
     )
 
 #
@@ -210,92 +206,92 @@ SET (LIB_SOURCES_USER ${LIB_SOURCES_USER}
 #
 SET (LIB_HEADERS ${LIB_HEADERS}
                  ./EplCfg.h
-                 ${POWERLINK_SOURCE_DIR}/Include/Benchmark.h
-                 ${POWERLINK_SOURCE_DIR}/Include/Debug.h
-                 ${POWERLINK_SOURCE_DIR}/Include/edrv.h
-                 ${POWERLINK_SOURCE_DIR}/Include/Epl.h
-                 ${POWERLINK_SOURCE_DIR}/Include/EplAmi.h
-                 ${POWERLINK_SOURCE_DIR}/Include/EplCfm.h
-                 ${POWERLINK_SOURCE_DIR}/Include/EplDef.h
-                 ${POWERLINK_SOURCE_DIR}/Include/EplDll.h
-                 ${POWERLINK_SOURCE_DIR}/Include/dllcal.h
-                 ${POWERLINK_SOURCE_DIR}/Include/EplErrDef.h
-                 ${POWERLINK_SOURCE_DIR}/Include/event.h
-                 ${POWERLINK_SOURCE_DIR}/Include/eventcal.h
-                 ${POWERLINK_SOURCE_DIR}/Include/EplFrame.h
-                 ${POWERLINK_SOURCE_DIR}/Include/EplInc.h
-                 ${POWERLINK_SOURCE_DIR}/Include/EplInstDef.h
-                 ${POWERLINK_SOURCE_DIR}/Include/EplNmt.h
-                 ${POWERLINK_SOURCE_DIR}/Include/EplObd.h
-                 ${POWERLINK_SOURCE_DIR}/Include/EplObdMacro.h
-                 ${POWERLINK_SOURCE_DIR}/Include/EplObjDef.h
-                 ${POWERLINK_SOURCE_DIR}/Include/pdo.h
-                 ${POWERLINK_SOURCE_DIR}/Include/EplSdo.h
-                 ${POWERLINK_SOURCE_DIR}/Include/EplSdoAc.h
-                 ${POWERLINK_SOURCE_DIR}/Include/EplTarget.h
-                 ${POWERLINK_SOURCE_DIR}/Include/EplTimer.h
-                 ${POWERLINK_SOURCE_DIR}/Include/EplVersion.h
-                 ${POWERLINK_SOURCE_DIR}/Include/global.h
-                 ${POWERLINK_SOURCE_DIR}/Include/errhnd.h
-                 ${POWERLINK_SOURCE_DIR}/Include/ctrl.h
-                 ${POWERLINK_SOURCE_DIR}/Include/ctrlcal.h
-                 ${POWERLINK_SOURCE_DIR}/SharedBuff/SharedBuff.h
-                 ${POWERLINK_SOURCE_DIR}/SharedBuff/ShbIpc.h
+                 ${POWERLINK_INCLUDE_DIR}/Benchmark.h
+                 ${POWERLINK_INCLUDE_DIR}/Debug.h
+                 ${POWERLINK_INCLUDE_DIR}/edrv.h
+                 ${POWERLINK_INCLUDE_DIR}/Epl.h
+                 ${POWERLINK_INCLUDE_DIR}/EplAmi.h
+                 ${POWERLINK_INCLUDE_DIR}/EplCfm.h
+                 ${POWERLINK_INCLUDE_DIR}/EplDef.h
+                 ${POWERLINK_INCLUDE_DIR}/EplDll.h
+                 ${POWERLINK_INCLUDE_DIR}/dllcal.h
+                 ${POWERLINK_INCLUDE_DIR}/EplErrDef.h
+                 ${POWERLINK_INCLUDE_DIR}/event.h
+                 ${POWERLINK_INCLUDE_DIR}/eventcal.h
+                 ${POWERLINK_INCLUDE_DIR}/EplFrame.h
+                 ${POWERLINK_INCLUDE_DIR}/EplInc.h
+                 ${POWERLINK_INCLUDE_DIR}/EplInstDef.h
+                 ${POWERLINK_INCLUDE_DIR}/EplNmt.h
+                 ${POWERLINK_INCLUDE_DIR}/EplObd.h
+                 ${POWERLINK_INCLUDE_DIR}/EplObdMacro.h
+                 ${POWERLINK_INCLUDE_DIR}/EplObjDef.h
+                 ${POWERLINK_INCLUDE_DIR}/pdo.h
+                 ${POWERLINK_INCLUDE_DIR}/EplSdo.h
+                 ${POWERLINK_INCLUDE_DIR}/EplSdoAc.h
+                 ${POWERLINK_INCLUDE_DIR}/EplTarget.h
+                 ${POWERLINK_INCLUDE_DIR}/EplTimer.h
+                 ${POWERLINK_INCLUDE_DIR}/EplVersion.h
+                 ${POWERLINK_INCLUDE_DIR}/global.h
+                 ${POWERLINK_INCLUDE_DIR}/errhnd.h
+                 ${POWERLINK_INCLUDE_DIR}/ctrl.h
+                 ${POWERLINK_INCLUDE_DIR}/ctrlcal.h
+                 ${LIB_SOURCE_DIR}/sharedbuff/SharedBuff.h
+                 ${LIB_SOURCE_DIR}/sharedbuff/ShbIpc.h
     )
 
 #
 # set kernel part header files of POWERLINK library
 #
 SET (LIB_HEADERS_KERNEL ${LIB_HEADERS_KERNEL}
-                        ${POWERLINK_SOURCE_DIR}/Include/kernel/EplDllk.h
-                        ${POWERLINK_SOURCE_DIR}/Include/kernel/dllkcal.h
-                        ${POWERLINK_SOURCE_DIR}/Include/kernel/EplDllkTgt.h
-                        ${POWERLINK_SOURCE_DIR}/Include/kernel/errhndk.h
-                        ${POWERLINK_SOURCE_DIR}/Include/kernel/ctrlk.h
-                        ${POWERLINK_SOURCE_DIR}/Include/kernel/ctrlkcal.h
-                        ${POWERLINK_SOURCE_DIR}/Include/kernel/eventk.h
-                        ${POWERLINK_SOURCE_DIR}/Include/kernel/eventkcal.h
-                        ${POWERLINK_SOURCE_DIR}/Include/kernel/EplNmtk.h
-                        ${POWERLINK_SOURCE_DIR}/Include/kernel/EplNmtkCal.h
-                        ${POWERLINK_SOURCE_DIR}/Include/kernel/EplObdk.h
-                        ${POWERLINK_SOURCE_DIR}/Include/kernel/pdok.h
-                        ${POWERLINK_SOURCE_DIR}/Include/kernel/pdokcal.h
-                        ${POWERLINK_SOURCE_DIR}/Include/kernel/EplTimerHighResk.h
-                        ${POWERLINK_SOURCE_DIR}/Include/kernel/EplTimerk.h
+                        ${KERNEL_INCLUDE_DIR}/EplDllk.h
+                        ${KERNEL_INCLUDE_DIR}/dllkcal.h
+                        ${KERNEL_INCLUDE_DIR}/EplDllkTgt.h
+                        ${KERNEL_INCLUDE_DIR}/errhndk.h
+                        ${KERNEL_INCLUDE_DIR}/ctrlk.h
+                        ${KERNEL_INCLUDE_DIR}/ctrlkcal.h
+                        ${KERNEL_INCLUDE_DIR}/eventk.h
+                        ${KERNEL_INCLUDE_DIR}/eventkcal.h
+                        ${KERNEL_INCLUDE_DIR}/EplNmtk.h
+                        ${KERNEL_INCLUDE_DIR}/EplNmtkCal.h
+                        ${KERNEL_INCLUDE_DIR}/EplObdk.h
+                        ${KERNEL_INCLUDE_DIR}/pdok.h
+                        ${KERNEL_INCLUDE_DIR}/pdokcal.h
+                        ${KERNEL_INCLUDE_DIR}/EplTimerHighResk.h
+                        ${KERNEL_INCLUDE_DIR}/EplTimerk.h
     )
 
 #
 # set user part header files of POWERLINK library
 #
 SET (LIB_HEADERS_USER ${LIB_HEADERS_USER}
-                      ${POWERLINK_SOURCE_DIR}/Include/user/EplDllu.h
-                      ${POWERLINK_SOURCE_DIR}/Include/user/dllucal.h
-                      ${POWERLINK_SOURCE_DIR}/Include/user/eventu.h
-                      ${POWERLINK_SOURCE_DIR}/Include/user/eventucal.h
-                      ${POWERLINK_SOURCE_DIR}/Include/user/errhndu.h
-                      ${POWERLINK_SOURCE_DIR}/Include/user/ctrlu.h
-                      ${POWERLINK_SOURCE_DIR}/Include/user/ctrlucal.h
-                      ${POWERLINK_SOURCE_DIR}/Include/user/EplIdentu.h
-                      ${POWERLINK_SOURCE_DIR}/Include/user/EplLedu.h
-                      ${POWERLINK_SOURCE_DIR}/Include/user/EplNmtCnu.h
-                      ${POWERLINK_SOURCE_DIR}/Include/user/EplNmtMnu.h
-                      ${POWERLINK_SOURCE_DIR}/Include/user/EplNmtu.h
-                      ${POWERLINK_SOURCE_DIR}/Include/user/EplNmtuCal.h
-                      ${POWERLINK_SOURCE_DIR}/Include/user/EplObdu.h
-                      ${POWERLINK_SOURCE_DIR}/Include/user/EplObduCal.h
-                      ${POWERLINK_SOURCE_DIR}/Include/user/pdou.h
-                      ${POWERLINK_SOURCE_DIR}/Include/user/pdoucal.h
-                      ${POWERLINK_SOURCE_DIR}/Include/user/EplSdoAsndu.h
-                      ${POWERLINK_SOURCE_DIR}/Include/user/EplSdoAsySequ.h
-                      ${POWERLINK_SOURCE_DIR}/Include/user/EplSdoComu.h
-                      ${POWERLINK_SOURCE_DIR}/Include/user/EplStatusu.h
-                      ${POWERLINK_SOURCE_DIR}/Include/user/EplTimeru.h
+                      ${USER_INCLUDE_DIR}/EplDllu.h
+                      ${USER_INCLUDE_DIR}/dllucal.h
+                      ${USER_INCLUDE_DIR}/eventu.h
+                      ${USER_INCLUDE_DIR}/eventucal.h
+                      ${USER_INCLUDE_DIR}/errhndu.h
+                      ${USER_INCLUDE_DIR}/ctrlu.h
+                      ${USER_INCLUDE_DIR}/ctrlucal.h
+                      ${USER_INCLUDE_DIR}/EplIdentu.h
+                      ${USER_INCLUDE_DIR}/EplLedu.h
+                      ${USER_INCLUDE_DIR}/EplNmtCnu.h
+                      ${USER_INCLUDE_DIR}/EplNmtMnu.h
+                      ${USER_INCLUDE_DIR}/EplNmtu.h
+                      ${USER_INCLUDE_DIR}/EplNmtuCal.h
+                      ${USER_INCLUDE_DIR}/EplObdu.h
+                      ${USER_INCLUDE_DIR}/EplObduCal.h
+                      ${USER_INCLUDE_DIR}/pdou.h
+                      ${USER_INCLUDE_DIR}/pdoucal.h
+                      ${USER_INCLUDE_DIR}/EplSdoAsndu.h
+                      ${USER_INCLUDE_DIR}/EplSdoAsySequ.h
+                      ${USER_INCLUDE_DIR}/EplSdoComu.h
+                      ${USER_INCLUDE_DIR}/EplStatusu.h
+                      ${USER_INCLUDE_DIR}/EplTimeru.h
     )
 
 IF (CMAKE_CL_64)
-    LINK_DIRECTORIES(${POWERLINK_SOURCE_DIR}/Target/X86/Windows/WpdPack/Lib/x64)
+    LINK_DIRECTORIES(${LIB_SOURCE_DIR}/pcap/windows/WpdPack/Lib/x64)
 ELSE (CMAKE_CL_64)
-    LINK_DIRECTORIES(${POWERLINK_SOURCE_DIR}/Target/X86/Windows/WpdPack/Lib)
+    LINK_DIRECTORIES(${LIB_SOURCE_DIR}/pcap/windows/WpdPack/Lib)
 ENDIF (CMAKE_CL_64)
 
 #
@@ -314,13 +310,13 @@ SOURCE_GROUP("Object Dictionary" FILES ${LIB_OBJDICT})
 #
 INCLUDE_DIRECTORIES(
     .
-    ${POWERLINK_SOURCE_DIR}/ObjDicts/${OBJDICT}
-    ${POWERLINK_SOURCE_DIR}/EplStack
+    ${OBJDICT_DIR}/${OBJDICT}
+    ${POWERLINK_SOURCE_DIR}
 )
 
 IF (WIN32)
     INCLUDE_DIRECTORIES(${INCLUDE_DIRECTORIES}
-                        ${POWERLINK_SOURCE_DIR}/Target/X86/Windows/WpdPack/Include
+                        ${LIB_SOURCE_DIR}/pcap/windows/WpdPack/Include
     )
 ENDIF (WIN32)
 
@@ -330,9 +326,9 @@ ENDIF (WIN32)
 #
 IF (WIN32)
     IF (CMAKE_CL_64)
-        LINK_DIRECTORIES(${POWERLINK_SOURCE_DIR}/Target/X86/Windows/WpdPack/Lib/x64)
+        LINK_DIRECTORIES(${LIB_SOURCE_DIR}/pcap/windows/WpdPack/Lib/x64)
     ELSE (CMAKE_CL_64)
-        LINK_DIRECTORIES(${POWERLINK_SOURCE_DIR}/Target/X86/Windows/WpdPack/Lib)
+        LINK_DIRECTORIES(${LIB_SOURCE_DIR}/pcap/windows/WpdPack/Lib)
     ENDIF (CMAKE_CL_64)
 ENDIF ()
 
@@ -343,7 +339,7 @@ IF (UNIX)
     ADD_LIBRARY(powerlink ${LIB_SOURCES} ${LIB_SOURCES_KERNEL} ${LIB_SOURCES_USER} ${LIB_HEADERS} ${LIB_HEADERS_KERNEL} ${LIB_HEADERS_USER} ${LIB_OBJDICT})
 
     SET_PROPERTY(TARGET powerlink
-                 PROPERTY COMPILE_DEFINITIONS_DEBUG DEBUG;DEF_DEBUG_LVL=${CFG_DEBUG_LVL})	
+                 PROPERTY COMPILE_DEFINITIONS_DEBUG DEBUG;DEF_DEBUG_LVL=${CFG_DEBUG_LVL})   
 ELSEIF (WIN32)
     ADD_LIBRARY(openPOWERLINK ${LIB_TYPE} ${LIB_SOURCES} ${LIB_SOURCES_KERNEL} ${LIB_SOURCES_USER} ${LIB_HEADERS} ${LIB_HEADERS_KERNEL} ${LIB_HEADERS_USER} ${LIB_OBJDICT})
 
