@@ -62,28 +62,27 @@ ELSEIF (WIN32)
 ENDIF (UNIX)
 
 # additional include directories
-SET(USERLIB_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/EplStack/lib/libpowerlink)
+SET(USERLIB_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/stack/make/lib/libpowerlink)
 IF (UNIX)
-    SET(KERNELMOD_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/EplStack/driver/linux/powerlink_kernel_module)
+    SET(KERNELMOD_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/stack/bin/driver/linux/powerlink_kernel_module)
 ENDIF (UNIX)
 
 # set sources of POWERLINK application
 SET (DEMO_CN_SOURCES demo_main.c
-                  ${POWERLINK_SOURCE_DIR}/EplStack/EplTgtConio.c
+                  ${LIB_SOURCE_DIR}/misc/conio.c
 )
 
 # The TRACE macros need trace.c on the Windows platform
 IF (WIN32)
     SET(DEMO_CN_SOURCES ${DEMO_CN_SOURCES}
-                     ${POWERLINK_SOURCE_DIR}/EplStack/trace.c
+                     ${LIB_SOURCE_DIR}/misc/trace.c
        )
 ENDIF (WIN32)
 
 IF (UNIX)
     IF (CFG_KERNEL_STACK)
         SET(DEMO_CN_SOURCES ${DEMO_CN_SOURCES}
-                         ${POWERLINK_SOURCE_DIR}/EplStack/EplDebug.c
-                         ${POWERLINK_SOURCE_DIR}/EplStack/EplApiLinuxUser.c
+                         ${COMMON_SOURCE_DIR}/debug.c
             )
     ENDIF (CFG_KERNEL_STACK)
 ENDIF (UNIX)
@@ -91,7 +90,7 @@ ENDIF (UNIX)
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
 
 IF (WIN32)
-    INCLUDE_DIRECTORIES(${POWERLINK_SOURCE_DIR}/Target/X86/Windows/WpdPack/Include)
+    INCLUDE_DIRECTORIES(${LIB_SOURCE_DIR}/pcap/windows/WpdPack/Include)
 ENDIF (WIN32)
 
 # Configure depending on using usermode stack or kernel stack
@@ -105,9 +104,9 @@ ENDIF (CFG_KERNEL_STACK)
 
 IF (WIN32)
     IF (CMAKE_CL_64)
-        LINK_DIRECTORIES(${POWERLINK_SOURCE_DIR}/Target/X86/Windows/WpdPack/Lib/x64)
+        LINK_DIRECTORIES(${LIB_SOURCE_DIR}/pcap/windows/WpdPack/Lib/x64)
     ELSE (CMAKE_CL_64)
-        LINK_DIRECTORIES(${POWERLINK_SOURCE_DIR}/Target/X86/Windows/WpdPack/Lib)
+        LINK_DIRECTORIES(${LIB_SOURCE_DIR}/pcap/windows/WpdPack/Lib)
     ENDIF (CMAKE_CL_64)
 
     SOURCE_GROUP("CN Demo Application" FILES ${DEMO_CN_SOURCES})
@@ -133,7 +132,7 @@ INSTALL(TARGETS demo_cn_console RUNTIME DESTINATION bin)
 
 IF (UNIX)
     IF (NOT CFG_KERNEL_STACK)
-        INSTALL(PROGRAMS ${CMAKE_SOURCE_DIR}/tools/linux/set_prio DESTINATION bin)
+        INSTALL(PROGRAMS ${TOOLS_DIR}/linux/set_prio DESTINATION bin)
     ENDIF (NOT CFG_KERNEL_STACK)
 ENDIF (UNIX)
 

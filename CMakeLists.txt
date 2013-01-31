@@ -116,49 +116,64 @@ ENDIF (WIN32)
 # Set global definitions
 ###############################################################################
 
+SET(POWERLINK_SOURCE_DIR ${CMAKE_SOURCE_DIR}/stack/src)
+SET(USER_SOURCE_DIR ${CMAKE_SOURCE_DIR}/stack/src/user)
+SET(KERNEL_SOURCE_DIR ${CMAKE_SOURCE_DIR}/stack/src/kernel)
+SET(COMMON_SOURCE_DIR ${CMAKE_SOURCE_DIR}/stack/src/common)
+SET(ARCH_SOURCE_DIR ${CMAKE_SOURCE_DIR}/stack/src/arch)
+SET(EDRV_SOURCE_DIR ${CMAKE_SOURCE_DIR}/stack/src/kernel/edrv)
+SET(LIB_SOURCE_DIR ${CMAKE_SOURCE_DIR}/libs)
+
+SET(OBJDICT_DIR ${CMAKE_SOURCE_DIR}/objdicts)
+
+SET(POWERLINK_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/include)
+SET(USER_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/include/user)
+SET(KERNEL_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/include/kernel)
+
+SET(TOOLS_DIR ${CMAKE_SOURCE_DIR}/tools)
+
 # set global include directories
 INCLUDE_DIRECTORIES (
-    ${openPOWERLINK_SOURCE_DIR}/Include
-    ${openPOWERLINK_SOURCE_DIR}/SharedBuff
+    ${POWERLINK_INCLUDE_DIR}
+    ${POWERLINK_SOURCE_DIR}
+    ${LIB_SOURCE_DIR}/sharedbuff
+    ${LIB_SOURCE_DIR}/ami
 )
 
-SET(POWERLINK_SOURCE_DIR ${CMAKE_SOURCE_DIR})
-SET(POWERLINK_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/Include)
-SET(EDRV_SOURCE_DIR ${CMAKE_SOURCE_DIR}/Edrv)
 
 ###############################################################################
 # Examples
 ###############################################################################
 # Add subdirectory of pcap based MN CFM library
 IF (NOT CFG_KERNEL_STACK)
-    ADD_SUBDIRECTORY(EplStack/lib/libpowerlink)
+    ADD_SUBDIRECTORY(stack/make/lib/libpowerlink)
 ENDIF (NOT CFG_KERNEL_STACK)
 
 # Add subdirectory of MN console demo application
 IF (CFG_X86_DEMO_MN_CONSOLE)
-    ADD_SUBDIRECTORY(Examples/generic/demo_mn_console)
+    ADD_SUBDIRECTORY(examples/generic/demo_mn_console)
 ENDIF (CFG_X86_DEMO_MN_CONSOLE)
 
 # Add subdirectory of MN QT demo application
 IF (CFG_X86_DEMO_MN_QT)
-    ADD_SUBDIRECTORY(Examples/generic/demo_mn_qt)
+    ADD_SUBDIRECTORY(examples/generic/demo_mn_qt)
 ENDIF (CFG_X86_DEMO_MN_QT)
 
 # Add subdirectory of CN console demo application
 IF (CFG_X86_DEMO_CN_CONSOLE)
-    ADD_SUBDIRECTORY(Examples/generic/demo_cn_console)
+    ADD_SUBDIRECTORY(examples/generic/demo_cn_console)
 ENDIF (CFG_X86_DEMO_CN_CONSOLE)
 
 # Linux specific part
 IF(UNIX)
     # Add subdirectory of kernel module
     IF (CFG_KERNEL_STACK)
-        ADD_SUBDIRECTORY(EplStack/driver/linux/powerlink_kernel_module)
+        ADD_SUBDIRECTORY(stack/make/driver/linux/powerlink_kernel_module)
     ENDIF (CFG_KERNEL_STACK)
 
     # Add subdirectory of kernel demo application
     IF (CFG_X86_DEMO_LINUX_KERNEL)
-        ADD_SUBDIRECTORY(Examples/linux/demo_kernel)
+        ADD_SUBDIRECTORY(examples/arch/linux/demo_kernel)
     ENDIF (CFG_X86_DEMO_LINUX_KERNEL)
 
 ENDIF(UNIX)

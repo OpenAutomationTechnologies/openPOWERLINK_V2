@@ -60,9 +60,9 @@ IF (WIN32)
 ENDIF (WIN32)
 
 # additional include directories
-SET(USERLIB_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/EplStack/lib/libpowerlink)
+SET(USERLIB_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/stack/make/lib/libpowerlink)
 IF (UNIX)
-    SET(KERNELMOD_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/EplStack/driver/linux/powerlink_kernel_module)
+    SET(KERNELMOD_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/stack/make/driver/linux/powerlink_kernel_module)
 ENDIF (UNIX)
 
 # set sources of POWERLINK application
@@ -77,13 +77,13 @@ SET(DEMO_SOURCES src/EplApi.cpp
                  src/main.cpp
                  src/MainWindow.cpp
                  src/NodeState.cpp
-                 ${POWERLINK_SOURCE_DIR}/ObjDicts/${OBJDICT}/EplApiProcessImageSetup.c
+                 ${OBJDICT_DIR}/${OBJDICT}/EplApiProcessImageSetup.c
     )
 
 # The TRACE macros need trace.c on the Windows platform
 IF (WIN32)
     SET(DEMO_SOURCES ${DEMO_SOURCES}
-                     ${POWERLINK_SOURCE_DIR}/EplStack/trace.c
+                     ${LIB_SOURCE_DIR}/misc/trace.c
        )
 ENDIF (WIN32)
 
@@ -102,8 +102,6 @@ SET(DEMO_HEADERS include/EplApi.h
     )
 
 IF (CFG_KERNEL_STACK)
-    SET(DEMO_SOURCES ${DEMO_SOURCES}
-                     ${POWERLINK_SOURCE_DIR}/EplStack/EplApiLinuxUser.c)
 ELSE (CFG_KERNEL_STACK)
     SET(DEMO_SOURCES ${DEMO_SOURCES}
                  src/InterfaceSelectDialog.cpp)
@@ -119,7 +117,7 @@ INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
 IF (WIN32)
-    INCLUDE_DIRECTORIES(${POWERLINK_SOURCE_DIR}/Target/X86/Windows/WpdPack/Include)
+    INCLUDE_DIRECTORIES(${LIB_SOURCE_DIR}/pcap/windows/WpdPack/Include)
 ENDIF (WIN32)
 
 ADD_DEFINITIONS(-DCONFIG_CFM -DCONFIG_OPENCONFIGURATOR_MAPPING -DCONFIG_MN)
@@ -140,9 +138,9 @@ QT4_ADD_RESOURCES(DEMO_RESOURCES_RCC ${DEMO_RESOURCES})
 
 IF (WIN32)
     IF (CMAKE_CL_64)
-        LINK_DIRECTORIES(${POWERLINK_SOURCE_DIR}/Target/X86/Windows/WpdPack/Lib/x64)
+        LINK_DIRECTORIES(${LIB_SOURCE_DIR}/pcap/windows/WpdPack/Lib/x64)
     ELSE (CMAKE_CL_64)
-        LINK_DIRECTORIES(${POWERLINK_SOURCE_DIR}/Target/X86/Windows/WpdPack/Lib)
+        LINK_DIRECTORIES(${LIB_SOURCE_DIR}/pcap/windows/WpdPack/Lib)
     ENDIF (CMAKE_CL_64)
 
     SOURCE_GROUP("Source Files" FILES ${DEMO_SOURCES})
@@ -176,7 +174,7 @@ INSTALL(FILES mnobd.cdc DESTINATION bin)
 
 IF (UNIX)
     IF (NOT CFG_KERNEL_STACK)
-        INSTALL(PROGRAMS ${CMAKE_SOURCE_DIR}/tools/linux/set_prio DESTINATION bin)
+        INSTALL(PROGRAMS ${TOOLS_DIR}/linux/set_prio DESTINATION bin)
     ENDIF (NOT CFG_KERNEL_STACK)
 ELSEIF (WIN32)
     INSTALL(FILES ${QT_BINARY_DIR}/QtCore4.dll DESTINATION bin)

@@ -10,7 +10,7 @@ EPL_OBD_BEGIN ()
 
     EPL_OBD_BEGIN_PART_GENERIC ()
 
-        #include "../Generic/objdict_1000-13ff.h"
+        #include "../generic/objdict_1000-13ff.h"
 
         // Object 1400h: PDO_RxCommParam_00h_REC
         EPL_OBD_BEGIN_INDEX_RAM(0x1400, 0x03, pdou_cbObdAccess)
@@ -160,7 +160,7 @@ EPL_OBD_BEGIN ()
             EPL_OBD_SUBINDEX_RAM_VAR(0x1A00, 0x19, kEplObdTypUInt64, kEplObdAccRW, tEplObdUnsigned64, ObjectMapping, 0x00LL)
         EPL_OBD_END_INDEX(0x1A00)
 
-        #include "../Generic/objdict_1b00-1fff.h"
+        #include "../generic/objdict_1b00-1fff.h"
 
     EPL_OBD_END_PART ()
 

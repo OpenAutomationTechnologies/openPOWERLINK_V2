@@ -9,7 +9,7 @@ EPL_OBD_BEGIN ()
 
     EPL_OBD_BEGIN_PART_GENERIC ()
 
-        #include "../Generic/objdict_1000-13ff.h"
+        #include "../generic/objdict_1000-13ff.h"
 
 
         // Object 1400h: PDO_RxCommParam_00h_REC
@@ -6113,7 +6113,7 @@ EPL_OBD_BEGIN ()
 #endif
 
 
-        #include "../Generic/objdict_1b00-1fff.h"
+        #include "../generic/objdict_1b00-1fff.h"
 
     EPL_OBD_END_PART ()
 

@@ -113,7 +113,7 @@
         #define INLINE_FUNCTION     INLINE_FUNCTION_DEF
         #define INLINE_ENABLED      TRUE
         #define EPL_AMI_INLINED
-        #include "../EplStack/amix86.c"
+        #include "amix86.c"
     #endif
 
 #elif (TARGET_SYSTEM == _LINUX_)
@@ -123,7 +123,7 @@
             #define INLINE_FUNCTION     INLINE_FUNCTION_DEF
             #define INLINE_ENABLED      TRUE
             #define EPL_AMI_INLINED
-            #include "../EplStack/amibe.c"
+            #include "amibe.c"
         #endif
     #endif
 /*
