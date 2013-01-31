@@ -862,6 +862,8 @@ tEplKernel PUBLIC AppCbSync(void)
     pProcessImageIn_l->CN32_M00_Digital_Ouput_8_Bit_Byte_1 = nodeVar_g[1].m_uiLeds;
     pProcessImageIn_l->CN110_M00_Digital_Ouput_8_Bit_Byte_1 = nodeVar_g[2].m_uiLeds;
 
+    EplRet = api_processImageExchangeIn();
+
     return EplRet;
 }
 
