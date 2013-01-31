@@ -654,9 +654,9 @@ tEplKernel PUBLIC AppCbEvent(
     void GENERIC*           pUserArg_p)    //__attribute((unused))
 
 {
-    UNUSED_PARAMETER(pUserArg_p);
-
     tEplKernel          EplRet = kEplSuccessful;
+
+    UNUSED_PARAMETER(pUserArg_p);
 
     // check if NMT_GS_OFF is reached
     switch (EventType_p)
