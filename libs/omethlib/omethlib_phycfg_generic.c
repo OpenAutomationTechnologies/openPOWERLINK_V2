@@ -41,9 +41,9 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  State:     -
 ------------------------------------------------------------------------------*/
 
-#include <omethlib.h>
-#include <omethlibint.h>
-#include <omethlib_phycfg.h>
+#include "omethlib.h"
+#include "omethlibint.h"
+#include "omethlib_phycfg.h"
 
 //-------------------------------------------------------------------------
 // Add your defines below this line

@@ -57,8 +57,8 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     24.10.2010    zelenkaj    added rx/tx buffer bases into eth drv instance
 ----------------------------------------------------------------------------*/
 
-#include <omethlib.h>
-#include <omethlibint.h>
+#include "omethlib.h"
+#include "omethlibint.h"
 #include <string.h>                // used functions: memcpy, memset
 #include <stdlib.h>                // used functions: calloc
 
