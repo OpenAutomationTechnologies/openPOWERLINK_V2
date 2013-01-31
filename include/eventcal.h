@@ -82,6 +82,13 @@ tEplKernel   eventcalshb_addInstance(tEventQueueInstPtr *ppEventQueueInst_p,
 tEplKernel   eventcalshb_delInstance (tEventQueueInstPtr pEventQueueInst_p);
 tEplKernel   eventcalshb_postEvent (tEventQueueInstPtr pEventQueue_p, tEplEvent *pEvent_p);
 
+// event CAL function prototypes of the host interface implementation
+tEplKernel   eventcalhostif_addInstance(tEventQueueInstPtr *ppEventQueueInst_p,
+                              tEventQueue eventQueue_p, tEplProcessEventCb pfnProcessEventCb,
+                              tEplPostErrorEventCb pfnPostErrorEventCb);
+tEplKernel   eventcalhostif_delInstance (tEventQueueInstPtr pEventQueueInst_p);
+tEplKernel   eventcalhostif_postEvent (tEventQueueInstPtr pEventQueue_p, tEplEvent *pEvent_p);
+
 // event CAL functions prototypes of the direct call implementation
 tEplKernel   eventcaldirect_addInstance(tEventQueueInstPtr *ppEventQueueInst_p,
                               tEventQueue eventQueue_p, tEplProcessEventCb pfnProcessEventCb,
