@@ -131,6 +131,10 @@
     #define O_BINARY 0
 #endif
 
+#if (TARGET_SYSTEM == _NO_OS_ && DEV_SYSTEM == _DEV_NIOS2_)
+#define O_BINARY 0 //FIXME: If file system is used, you have to fix that!
+#endif
+
 #ifndef FD_TYPE
 #define FD_TYPE     int
 #endif
