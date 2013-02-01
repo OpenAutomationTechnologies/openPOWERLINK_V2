@@ -1,0 +1,11 @@
+#!/bin/bash
+#
+# This script converts a cdc file to a text file that can be included in C.
+# example: unsigned char aCdcBuffer[] = { #include "mnobd.txt" };
+
+awk '{split($0, a, "")
+for(n=0;n<256;n++)ord[sprintf("%c",n)]=n
+for(i = 1; i <= length(a); i++) 
+{printf "0x%02x", ord[a[i]]
+printf(", ")}
+printf("0x0a,\n")}' mnobd.cdc > mnobd.txt

@@ -1,0 +1,13 @@
+drivers
+HAL
+obj
+*.bak
+*.c
+*.a
+*.h
+*.html
+*.x
+Makefile
+*.mk
+*.gdb
+*.bsp

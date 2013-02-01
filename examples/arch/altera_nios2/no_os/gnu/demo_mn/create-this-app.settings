@@ -1,0 +1,107 @@
+################################################################################
+#  (c) Bernecker + Rainer Industrie-Elektronik Ges.m.b.H.
+#      A-5142 Eggelsberg, B&R Strasse 1
+#      www.br-automation.com
+################################################################################
+
+################################################################################
+# Define optimization level and debugging mode.
+# Note: Optimization level recommended -O2
+#       In order to see prints in stdo DBG_MODE=_DEBUG
+#       For release DBG_MODE=NDEBUG
+
+##################################
+# Settings for Debugging
+#DBG_MODE=_DEBUG
+#OPT_LEVEL=-O0
+
+##################################
+# Settings for Debugging with optimized compilation
+DBG_MODE=_DEBUG
+OPT_LEVEL=-O2
+
+##################################
+# Settings for Release
+#DBG_MODE=NDEBUG
+#OPT_LEVEL=-O2
+
+##################################
+# DEF_DEBUG_LVL = [
+# 0x20000000L DEBUG_LVL_ASSERT
+# 0x40000000L DEBUG_LVL_ERROR
+# 0x80000000L DEBUG_LVL_ALWAYS ]
+DEF_DEBUG_LVL=0xEC000000L
+
+################################################################################
+
+##################################
+# Name of M9K for tightly-coupled memory
+TC_I_MEM=host_0_tc_i_mem
+
+##################################
+# Relative path to openPOWERLINK root directory
+STACKROOT_DIR=../../../../../..
+
+##################################
+# Relative path to bsp
+BSP_DIR=./bsp
+
+##################################
+# Relative path to SOPC file
+SOPC_DIR=${STACKROOT_DIR}/fpga/boards/altera/TERASIC_DE2-115/mn_dual_nios2/
+
+##################################
+# Include path
+INCLUDES=". \
+${STACKROOT_DIR}/include \
+${STACKROOT_DIR}/libs/hostif \
+${STACKROOT_DIR}/objdicts/CiA302-4_MN \
+${STACKROOT_DIR}/stack/src"
+
+##################################
+# Source files
+SRCFILES="demo_main.c \
+${STACKROOT_DIR}/libs/ami/amiarm.c \
+${STACKROOT_DIR}/libs/hostif/hostiflib.c \
+${STACKROOT_DIR}/libs/hostif/hostiflib_l.c \
+${STACKROOT_DIR}/libs/hostif/lfqueue.c \
+${STACKROOT_DIR}/libs/hostif/linmem.c \
+${STACKROOT_DIR}/libs/misc/conio-nios2.c \
+${STACKROOT_DIR}/objdicts/CiA302-4_MN/EplApiProcessImageSetup.c \
+${STACKROOT_DIR}/objdicts/CiA302-4_MN/Objdict.c \
+${STACKROOT_DIR}/stack/src/arch/altera_nios2/target-nios2.c \
+${STACKROOT_DIR}/stack/src/common/dll/dllcal-hostif.c \
+${STACKROOT_DIR}/stack/src/common/event/event.c \
+${STACKROOT_DIR}/stack/src/common/event/eventcal-direct.c \
+${STACKROOT_DIR}/stack/src/common/event/eventcal-hostif.c \
+${STACKROOT_DIR}/stack/src/common/timer/timer-generic.c \
+${STACKROOT_DIR}/stack/src/common/debug.c \
+${STACKROOT_DIR}/stack/src/common/errstring.c \
+${STACKROOT_DIR}/stack/src/user/api/generic.c \
+${STACKROOT_DIR}/stack/src/user/api/processimage.c \
+${STACKROOT_DIR}/stack/src/user/ctrl/ctrlu.c \
+${STACKROOT_DIR}/stack/src/user/ctrl/ctrlucal-hostif.c \
+${STACKROOT_DIR}/stack/src/user/dll/dllucal.c \
+${STACKROOT_DIR}/stack/src/user/errhnd/errhndu.c \
+${STACKROOT_DIR}/stack/src/user/errhnd/errhnducal-hostif.c \
+${STACKROOT_DIR}/stack/src/user/event/eventu.c \
+${STACKROOT_DIR}/stack/src/user/event/eventucal.c \
+${STACKROOT_DIR}/stack/src/user/event/eventucal-direct.c \
+${STACKROOT_DIR}/stack/src/user/event/eventucal-hostif.c \
+${STACKROOT_DIR}/stack/src/user/nmt/identu.c \
+${STACKROOT_DIR}/stack/src/user/nmt/nmtcnu.c \
+${STACKROOT_DIR}/stack/src/user/nmt/nmtmnu.c \
+${STACKROOT_DIR}/stack/src/user/nmt/nmtu.c \
+${STACKROOT_DIR}/stack/src/user/nmt/statusu.c \
+${STACKROOT_DIR}/stack/src/user/nmt/syncu.c \
+${STACKROOT_DIR}/stack/src/user/obd/obd.c \
+${STACKROOT_DIR}/stack/src/user/obd/obdcdc.c \
+${STACKROOT_DIR}/stack/src/user/pdo/pdou.c \
+${STACKROOT_DIR}/stack/src/user/pdo/pdoucal.c \
+${STACKROOT_DIR}/stack/src/user/pdo/pdoucal-hostif.c \
+${STACKROOT_DIR}/stack/src/user/pdo/pdoucalsync-hostif.c \
+${STACKROOT_DIR}/stack/src/user/sdo/sdo-asndu.c \
+${STACKROOT_DIR}/stack/src/user/sdo/sdo-asysequ.c \
+${STACKROOT_DIR}/stack/src/user/sdo/sdo-comu.c \
+${STACKROOT_DIR}/stack/src/user/cfmu.c \
+${STACKROOT_DIR}/stack/src/user/ledu.c"
