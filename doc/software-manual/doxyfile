@@ -675,9 +675,7 @@ WARN_LOGFILE           =
 # directories like "/usr/src/myproject". Separate the files or directories 
 # with spaces.
 
-INPUT                  = ../../EplStack/user \
-                         ../../EplStack/kernel \
-                         ../introduction.md \
+INPUT                  = ../../stack/src \
                          mainpage.txt \
                          modules.txt \
                          ../cmake.md \
@@ -689,8 +687,8 @@ INPUT                  = ../../EplStack/user \
                          ../supported-platforms/xilinx.md \
                          ../supported-platforms/other-platforms.md \
                          ../porting-guide.md \
-                         ../../Include \
-                         ../../EplStack/common
+                         ../introduction.md \
+                         ../../include
 
 # This tag can be used to specify the character encoding of the source files 
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding, which is 
