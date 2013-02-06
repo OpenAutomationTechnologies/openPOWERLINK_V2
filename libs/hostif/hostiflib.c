@@ -525,13 +525,6 @@ tHostifReturn hostif_create (tHostifConfig *pConfig_p, tHostifInstance *ppInstan
 
     if(pHostif->config.ProcInstance == kHostifProcHost)
     {
-        Ret = controlIrqMaster(pHostif, TRUE);
-
-        if(Ret != kHostifSuccessful)
-        {
-            goto Exit;
-        }
-
         // register isr in system
         if(HOSTIF_IRQ_REG(hostifIrqHandler, (void*)pHostif))
         {
@@ -592,9 +585,6 @@ tHostifReturn hostif_delete (tHostifInstance pInstance_p)
 
         // degister isr in system (ignore ret)
         HOSTIF_IRQ_REG(NULL, NULL);
-
-        //deactivate master irq (ignore ret)
-        Ret = controlIrqMaster(pHostif, FALSE);
     }
 
     // delete instance in instance array
@@ -2142,12 +2132,13 @@ static void hostifIrqHandler (void *pArg_p)
     {
         mask = 1 << i;
 
-        if((pendings & mask) && (pHostif->apfnIrqCb[i] != NULL))
-        {
+        //ack irq source first
+        if(pendings & mask)
             hostif_ackIrq(pHostif->pBase, mask);
 
+        //then try to execute the callback
+        if(pHostif->apfnIrqCb[i] != NULL)
             pHostif->apfnIrqCb[i](pArg_p);
-        }
     }
 
 Exit:
