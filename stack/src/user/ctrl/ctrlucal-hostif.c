@@ -82,6 +82,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 typedef struct
 {
     tHostifInstance     hifInstance;
+    BOOL                fIrqMasterEnable;
 } tCtrluCalInstance;
 //------------------------------------------------------------------------------
 // local vars
@@ -125,6 +126,16 @@ tEplKernel ctrlucal_init(void)
         return kEplNoResource;
     }
 
+    //disable master irq
+    instance_l.fIrqMasterEnable = FALSE;
+
+    hifRet = hostif_irqMasterEnable(instance_l.hifInstance, instance_l.fIrqMasterEnable);
+    if(hifRet != kHostifSuccessful)
+    {
+        EPL_DBGLVL_ERROR_TRACE ("Could not disable Master Irq (0x%X)\n", hifRet);
+        return kEplNoResource;
+    }
+
     return kEplSuccessful;
 }
 
@@ -140,6 +151,13 @@ The function cleans-up the user control CAL module.
 void ctrlucal_exit (void)
 {
     tHostifReturn hifRet;
+
+    //disable master irq
+    instance_l.fIrqMasterEnable = FALSE;
+
+    hifRet = hostif_irqMasterEnable(instance_l.hifInstance, instance_l.fIrqMasterEnable);
+    if(hifRet != kHostifSuccessful)
+        EPL_DBGLVL_ERROR_TRACE ("Could not disable Master Irq (0x%X)\n", hifRet);
 
     hifRet = hostif_delete(instance_l.hifInstance);
     if(hifRet != kHostifSuccessful)
@@ -160,6 +178,19 @@ This function provides processing time for the CAL module.
 tEplKernel ctrlucal_process (void)
 {
     tHostifReturn hifRet;
+
+    if(instance_l.fIrqMasterEnable == FALSE)
+    {
+        //enable master irq
+        instance_l.fIrqMasterEnable = TRUE;
+
+        hifRet = hostif_irqMasterEnable(instance_l.hifInstance, instance_l.fIrqMasterEnable);
+        if(hifRet != kHostifSuccessful)
+        {
+            EPL_DBGLVL_ERROR_TRACE ("Could not enable Master Irq (0x%X)\n", hifRet);
+            return kEplNoResource;
+        }
+    }
 
     hifRet = hostif_process(instance_l.hifInstance);
     if(hifRet != kHostifSuccessful)
