@@ -204,6 +204,7 @@
 									<listOptionValue builtIn="false" value="../../../../../../libs/omethlib"/>
 									<listOptionValue builtIn="false" value="../../../../../../stack/include/target/openmac"/>
 									<listOptionValue builtIn="false" value="../../../../../../stack/src"/>
+									<listOptionValue builtIn="false" value=".././"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.cygwin.1744642638" superClass="cdt.managedbuild.tool.gnu.c.compiler.input.cygwin"/>
 							</tool>
