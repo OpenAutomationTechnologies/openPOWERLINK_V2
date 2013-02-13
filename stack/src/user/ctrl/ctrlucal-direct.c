@@ -217,7 +217,7 @@ The function reads the heartbeat genereated by the kernel stack.
 //------------------------------------------------------------------------------
 UINT16 ctrlucal_getHeartbeat (void)
 {
-    return dummyHeartbeat_l++;
+    return ++dummyHeartbeat_l;
 }
 
 //------------------------------------------------------------------------------
