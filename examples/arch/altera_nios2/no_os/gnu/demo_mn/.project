@@ -124,9 +124,9 @@
             <locationURI>OPLK_LOC/libs/hostif/linmem.c</locationURI>
         </link>
         <link>
-            <name>conio-nios2.c</name>
+            <name>trace-printf.c</name>
             <type>1</type>
-            <locationURI>OPLK_LOC/libs/misc/conio-nios2.c</locationURI>
+            <locationURI>OPLK_LOC/libs/trace/trace-printf.c</locationURI>
         </link>
         <link>
             <name>EplApiProcessImageSetup.c</name>

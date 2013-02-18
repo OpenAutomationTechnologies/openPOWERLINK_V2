@@ -42,7 +42,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <sys/alt_cache.h>
 
 #include <Epl.h>
-#include <EplTgtConio.h>
 
 #include "xap.h"
 
