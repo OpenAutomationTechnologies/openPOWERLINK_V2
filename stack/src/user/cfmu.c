@@ -49,6 +49,7 @@
            any other provision of this License.
 
 ****************************************************************************/
+#include <limits.h>
 
 #include "EplInc.h"
 
@@ -257,7 +258,7 @@ tEplCfmuNodeInfo*   pNodeInfo;
         pNodeInfo = EPL_CFMU_GET_NODEINFO(uiNodeId);
         if (pNodeInfo != NULL)
         {
-            if (pNodeInfo->m_SdoComConHdl != ~0)
+            if (pNodeInfo->m_SdoComConHdl != UINT_MAX)
             {
                 Ret = EplSdoComSdoAbort(pNodeInfo->m_SdoComConHdl, EPL_SDOAC_DATA_NOT_TRANSF_DUE_DEVICE_STATE);
             }
@@ -337,7 +338,7 @@ BOOL                fDoUpdate = FALSE;
 
         // close connection
         Ret = EplSdoComUndefineCon(pNodeInfo->m_SdoComConHdl);
-        pNodeInfo->m_SdoComConHdl = ~0U;
+        pNodeInfo->m_SdoComConHdl = UINT_MAX;
         if (Ret != kEplSuccessful)
         {
             EPL_DBGLVL_CFM_TRACE("SDO Free Error!\n");
@@ -564,7 +565,7 @@ BYTE*                   pbBuffer;
     // abort any running SDO transfer
     pNodeInfo = EPL_CFMU_GET_NODEINFO(pParam_p->m_uiSubIndex);
     if ((pNodeInfo != NULL)
-        && (pNodeInfo->m_SdoComConHdl != ~0))
+        && (pNodeInfo->m_SdoComConHdl != UINT_MAX))
     {
         Ret = EplSdoComSdoAbort(pNodeInfo->m_SdoComConHdl, EPL_SDOAC_DATA_NOT_TRANSF_DUE_DEVICE_STATE);
     }
@@ -642,7 +643,7 @@ tEplCfmuNodeInfo*   pNodeInfo = NULL;
     pNodeInfo = EPL_MALLOC(sizeof (*pNodeInfo));
     EPL_MEMSET(pNodeInfo, 0, sizeof (*pNodeInfo));
     pNodeInfo->m_EventCnProgress.m_uiNodeId = uiNodeId_p;
-    pNodeInfo->m_SdoComConHdl = ~0U;
+    pNodeInfo->m_SdoComConHdl = UINT_MAX;
 
     EPL_CFMU_GET_NODEINFO(uiNodeId_p) = pNodeInfo;
 
@@ -696,10 +697,10 @@ static tEplKernel EplCfmuFinishConfig(tEplCfmuNodeInfo* pNodeInfo_p, tEplNmtComm
 {
 tEplKernel      Ret = kEplSuccessful;
 
-    if (pNodeInfo_p->m_SdoComConHdl != ~0U)
+    if (pNodeInfo_p->m_SdoComConHdl != UINT_MAX)
     {
         Ret = EplSdoComUndefineCon(pNodeInfo_p->m_SdoComConHdl);
-        pNodeInfo_p->m_SdoComConHdl = ~0U;
+        pNodeInfo_p->m_SdoComConHdl = UINT_MAX;
         if (Ret != kEplSuccessful)
         {
             EPL_DBGLVL_CFM_TRACE("SDO Free Error!\n");
@@ -1008,7 +1009,7 @@ tEplSdoComTransParamByIndex TransParamByIndex;
         goto Exit;
     }
 
-    if (pNodeInfo_p->m_SdoComConHdl == ~0)
+    if (pNodeInfo_p->m_SdoComConHdl == UINT_MAX)
     {
         // init command layer connection
         Ret = EplSdoComDefineCon(&pNodeInfo_p->m_SdoComConHdl,
@@ -1042,7 +1043,7 @@ tEplSdoComTransParamByIndex TransParamByIndex;
     {
         // close connection
         Ret = EplSdoComUndefineCon(pNodeInfo_p->m_SdoComConHdl);
-        pNodeInfo_p->m_SdoComConHdl = ~0U;
+        pNodeInfo_p->m_SdoComConHdl = UINT_MAX;
         if (Ret != kEplSuccessful)
         {
             EPL_DBGLVL_CFM_TRACE("SDO Free Error!\n");

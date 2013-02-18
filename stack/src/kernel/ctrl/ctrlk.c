@@ -274,6 +274,8 @@ tEplKernel ctrlk_executeCmd(tCtrlCmdType cmd_p, tEplKernel* pRet_p, UINT16* pSta
         default:
             TRACE ("Unknown command\n");
             ret = kEplGeneralError;
+            status = kCtrlStatusUnavailable;
+            fExit = TRUE;
             break;
     }
 

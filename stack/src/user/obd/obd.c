@@ -3116,17 +3116,23 @@ void MEM*                   pDstData;
 CONST void*                 pDefault;
 tEplObdSize                 ObjSize;
 tEplKernel                  Ret;
-tEplObdCbStoreParam MEM     CbStore;
 tEplObdVarEntry MEM*        pVarEntry = NULL;
+
+#if (EPL_OBD_USE_STORE_RESTORE != FALSE)
+tEplObdCbStoreParam MEM     CbStore;
+#else
+UNUSED_PARAMETER(CurrentOdPart_p);
+#endif
 
     ASSERT (pObdEnty_p != NULL);
 
     Ret = kEplSuccessful;
-
+#if (EPL_OBD_USE_STORE_RESTORE != FALSE)
     // prepare structure for STORE RESTORE callback function
     CbStore.m_bCurrentOdPart = (BYTE) CurrentOdPart_p;
     CbStore.m_pData          = NULL;
     CbStore.m_ObjSize        = 0;
+#endif
 
     // command of first action depends on direction to access
     #if (EPL_OBD_USE_STORE_RESTORE != FALSE)

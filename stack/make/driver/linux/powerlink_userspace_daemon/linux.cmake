@@ -30,7 +30,7 @@
 ################################################################################
 
 ADD_DEFINITIONS(-Wall -Wextra -pedantic -std=c99 -pthread -D_GNU_SOURCE
-                -D_POSIX_C_SOURCE=200112L)
+                -D_POSIX_C_SOURCE=200112L -fno-strict-aliasing)
 
 SET (DAEMON_ARCH_SOURCES
      ${LIB_SOURCE_DIR}/console/console-linux.c

@@ -294,13 +294,17 @@ tEplKernel PUBLIC EplStatusuRequestStatusResponse(
 {
 tEplKernel  Ret;
 
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) == 0)
+    UNUSED_PARAMETER(pfnCbResponse_p);
+#endif
+
     Ret = kEplSuccessful;
 
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
     if (uiNodeId_p == 0)
     {   // issue request for local node
         Ret = dllucal_issueRequest(kEplDllReqServiceStatus, 0x00, 0xFF);
-        goto Exit;
+        return Ret;
     }
 #endif
 
@@ -327,7 +331,6 @@ tEplKernel  Ret;
         Ret = kEplInvalidNodeId;
     }
 
-Exit:
     return Ret;
 
 }

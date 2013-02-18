@@ -582,7 +582,6 @@ tShbError  ShbIpcStartSignalingNewData(tShbInstance pShbInstance_p,
                                        tShbPriority ShbPriority_p)
 {
     tShbMemInst*        pShbMemInst;
-    tShbMemHeader*      pShbMemHeader;
     tShbError           ShbError;
     struct sched_param  schedParam;
     INT                 iSchedPriority;
@@ -593,7 +592,6 @@ tShbError  ShbIpcStartSignalingNewData(tShbInstance pShbInstance_p,
     }
 
     pShbMemInst   = ShbIpcGetShbMemInst   (pShbInstance_p);
-    pShbMemHeader = ShbIpcGetShbMemHeader (pShbInstance_p);
     ShbError = kShbOk;
 
     if ((pShbMemInst->m_fNewDataThreadStarted) ||
@@ -761,7 +759,6 @@ tShbError ShbIpcStartSignalingJobReady(tShbInstance pShbInstance_p,
                                        tSigHndlrJobReady pfnSignalHandlerJobReady_p)
 {
     tShbMemInst*    pShbMemInst;
-    tShbMemHeader*  pShbMemHeader;
     tShbError       ShbError;
     struct sched_param  schedParam;
 
@@ -771,7 +768,6 @@ tShbError ShbIpcStartSignalingJobReady(tShbInstance pShbInstance_p,
     }
 
     pShbMemInst   = ShbIpcGetShbMemInst   (pShbInstance_p);
-    pShbMemHeader = ShbIpcGetShbMemHeader (pShbInstance_p);
     ShbError = kShbOk;
 
     if ((pShbMemInst->m_fJobReadyThreadStarted) ||
@@ -818,7 +814,6 @@ Exit:
 //------------------------------------------------------------------------------
 tShbError ShbIpcSignalJobReady(tShbInstance pShbInstance_p)
 {
-    tShbMemInst*        pShbMemInst;
     tShbMemHeader*      pShbMemHeader;
     tShbError           ShbError;
 
@@ -828,7 +823,6 @@ tShbError ShbIpcSignalJobReady(tShbInstance pShbInstance_p)
     }
 
     ShbError = kShbOk;
-    pShbMemInst = ShbIpcGetShbMemInst (pShbInstance_p);
     pShbMemHeader = ShbIpcGetShbMemHeader (pShbInstance_p);
 
     //set semaphore

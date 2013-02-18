@@ -168,7 +168,7 @@ The function implements the synchronous data handler.
 //------------------------------------------------------------------------------
 tEplKernel processSync(void)
 {
-    tEplKernel          ret;
+    tEplKernel          ret = kEplSuccessful;
     int                 i;
 
     if (api_waitSyncEvent(100000) != kEplSuccessful)
@@ -257,8 +257,8 @@ static tEplKernel initProcessImage(void)
     tEplKernel      ret = kEplSuccessful;
 
     printf("Initializing process image...\n");
-    printf("Size of input process image: %ld\n", sizeof(PI_IN));
-    printf("Size of output process image: %ld\n", sizeof (PI_OUT));
+    printf("Size of input process image: %d\n", (UINT32)sizeof(PI_IN));
+    printf("Size of output process image: %d\n", (UINT32)sizeof (PI_OUT));
     ret = api_processImageAlloc(sizeof(PI_IN), sizeof(PI_OUT));
     if (ret != kEplSuccessful)
     {

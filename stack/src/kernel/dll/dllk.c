@@ -345,7 +345,7 @@ static tEplDllkInstance     EplDllkInstance_g;
 
 static tEdrvTxBuffer        aEplDllkTxBuffer_l[EPL_DLLK_TXFRAME_COUNT];
 
-TGT_DLLK_DECLARE_CRITICAL_SECTION;
+TGT_DLLK_DECLARE_CRITICAL_SECTION
 
 
 //---------------------------------------------------------------------------
@@ -1530,8 +1530,13 @@ tEplKernel      Ret = kEplSuccessful;
 unsigned int    uiHandle;
 unsigned int    uiFrameSize;
 BYTE            abMulticastMac[6];
+
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
 unsigned int        uiIndex;
 tEplDllkNodeInfo*   pIntNodeInfo;
+#else
+    UNUSED_PARAMETER(NmtState_p);
+#endif
 
     // initialize flags for PRes and StatusRes (leave Flag 1 unchanged)
     EplDllkInstance_g.m_bMnFlag1 = 0;
@@ -2026,9 +2031,11 @@ static tEplKernel EplDllkProcessDestroy(tEplNmtState OldNmtState_p)
 {
 tEplKernel      Ret = kEplSuccessful;
 BYTE            abMulticastMac[6];
-unsigned int    uiIndex;
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
 unsigned int    uiHandle;
+unsigned int    uiIndex;
+#else
+    UNUSED_PARAMETER(OldNmtState_p);
 #endif
 
     // remove all filters from Edrv
@@ -7509,15 +7516,12 @@ static tEplKernel EplDllkMnSendSoa(tEplNmtState NmtState_p,
 {
 tEplKernel      Ret = kEplSuccessful;
 tEdrvTxBuffer  *pTxBuffer = NULL;
-tEplFrame      *pTxFrame;
 
     *pDllStateProposed_p = kEplDllMsNonCyclic;
 
     pTxBuffer = &EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_SOA];
     if (pTxBuffer->m_pbBuffer != NULL)
     {   // SoA does exist
-        pTxFrame = (tEplFrame *) pTxBuffer->m_pbBuffer;
-
         Ret = EplDllkUpdateFrameSoa(pTxBuffer, NmtState_p, fEnableInvitation_p, EplDllkInstance_g.m_bCurLastSoaReq);
         if (Ret != kEplSuccessful)
         {

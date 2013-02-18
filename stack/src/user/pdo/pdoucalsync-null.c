@@ -129,6 +129,7 @@ The function waits for a sync event.
 //------------------------------------------------------------------------------
 tEplKernel pdoucal_waitSyncEvent(ULONG timeout_p)
 {
+    UNUSED_PARAMETER(timeout_p);
 
     return kEplSuccessful;
 }
