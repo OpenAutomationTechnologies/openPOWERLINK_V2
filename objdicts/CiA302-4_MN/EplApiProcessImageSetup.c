@@ -284,8 +284,8 @@ unsigned int    uiVarEntries;
     {
         uiVarEntries = uiSubindexCountPerIndex_p;
         Ret = api_processImageLinkObject(
-						uiObjIndexStart_p,
-						1,
+                        uiObjIndexStart_p,
+                        1,
                         uiOffsetPI_p,
                         fOutputPI_p,
                         EntrySize_p,
@@ -298,7 +298,6 @@ unsigned int    uiVarEntries;
         }
         if (Ret != kEplSuccessful)
         {
-            TRACE("EplApiProcessImageLinkObject returned: %xh for index %xh\n", Ret, uiObjIndexStart_p);
             goto Exit;
         }
     }
