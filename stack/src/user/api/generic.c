@@ -92,6 +92,7 @@
 #include <user/errhndu.h>
 
 #include <stddef.h>
+
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_VETH)) != 0)
 #include "kernel/VirtualEthernet.h"
 #endif
@@ -1310,6 +1311,24 @@ BOOL PUBLIC api_checkKernelStack(void)
     return ctrlu_checkKernelStack();
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief Wait for sync event
+
+The function waits for a sync event.
+
+\param  timeout_p       Time to wait for event
+
+\return The function returns a tEplKernel error code.
+
+\ingroup module_api
+*/
+//------------------------------------------------------------------------------
+tEplKernel PUBLIC api_waitSyncEvent(ULONG timeout_p)
+{
+    return pdoucal_waitSyncEvent(timeout_p);
+}
+
 //=========================================================================//
 //                                                                         //
 //          P R I V A T E   F U N C T I O N S                              //
@@ -2513,6 +2532,7 @@ static tEplKernel PUBLIC EplApiCbReceivedAsnd
 
     return Ret;
 }
+
 
 // EOF
 
