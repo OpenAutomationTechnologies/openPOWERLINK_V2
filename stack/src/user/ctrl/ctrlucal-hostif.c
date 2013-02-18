@@ -42,7 +42,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #include <unistd.h>
 
-#include <EplTgtConio.h>
+#include <Epl.h>
+#include <EplTarget.h>
 #include <ctrl.h>
 #include <ctrlcal.h>
 #include <user/ctrlucal.h>
@@ -74,7 +75,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // const defines
 //------------------------------------------------------------------------------
 #define CMD_TIMEOUT_SEC     20 // command timeout in seconds
-#define CMD_TIMEOUT_SLEEP() EplTgtMilliSleep(1000) // sleep for command timeout
 
 //------------------------------------------------------------------------------
 // local types
@@ -228,7 +228,7 @@ tEplKernel ctrlucal_executeCmd(tCtrlCmdType cmd_p)
     /* wait for response */
     for (timeout = 0; timeout < CMD_TIMEOUT_SEC; timeout++)
     {
-        CMD_TIMEOUT_SLEEP();
+        target_msleep(1000U);
 
         hifret = hostif_getCommand(instance_l.hifInstance, &hifcmd);
         if(hifret != kHostifSuccessful)
@@ -298,7 +298,7 @@ tEplKernel ctrlucal_checkKernelStack(void)
                 if(timeout == 0)
                     TRACE("-> Wait for Kernel Stack\n");
 
-                CMD_TIMEOUT_SLEEP();
+                target_msleep(1000U);
 
                 if(timeout++ >= CMD_TIMEOUT_SEC)
                 {
