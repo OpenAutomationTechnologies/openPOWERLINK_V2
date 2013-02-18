@@ -1,0 +1,10 @@
+/**
+********************************************************************************
+\mainpage
+
+This is the manual of the openPOWERLINK QT MN demo application.
+
+The application implements a MN node which communicates with several digital I/O
+CN nodes.
+*******************************************************************************/
+
