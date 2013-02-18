@@ -43,7 +43,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <unistd.h>
 #include <stddef.h>
 
-#include <EplTgtConio.h>
+#include <Epl.h>
+#include <EplTarget.h>
 #include <ctrl.h>
 #include <ctrlcal.h>
 #include <ctrlcal-mem.h>
@@ -165,7 +166,7 @@ tEplKernel ctrlucal_executeCmd(tCtrlCmdType cmd_p)
     /* wait for response */
     for (timeout = 0; timeout < CMD_TIMEOUT_CNT; timeout++)
     {
-        EplTgtMilliSleep(10);
+        target_msleep(10);
         ctrlcal_readData(&ctrlCmd, offsetof(tCtrlBuf, ctrlCmd), sizeof(tCtrlCmd));
         if (ctrlCmd.cmd == 0)
         {
@@ -222,7 +223,7 @@ tEplKernel ctrlucal_checkKernelStack(void)
                 break;
             }
 
-            EplTgtMilliSleep(1000);
+            target_msleep(1000);
 
             kernelStatus = ctrlucal_getStatus();
             if (kernelStatus != kCtrlStatusReady)
