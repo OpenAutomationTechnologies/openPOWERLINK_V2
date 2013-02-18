@@ -92,6 +92,7 @@
 #include <user/errhndu.h>
 
 #include <stddef.h>
+#include <limits.h>
 
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_VETH)) != 0)
 #include "kernel/VirtualEthernet.h"
@@ -2028,14 +2029,14 @@ BYTE                bTemp;
         goto Exit;
     }
 
-    if (EplApiInstance_g.m_InitParam.m_dwCycleLen != ~0UL)
+    if (EplApiInstance_g.m_InitParam.m_dwCycleLen != UINT_MAX)
     {
         Ret = EplObdWriteEntry(0x1006, 0,
                         &EplApiInstance_g.m_InitParam.m_dwCycleLen,
                         4);
     }
 
-    if (EplApiInstance_g.m_InitParam.m_dwLossOfFrameTolerance != ~0UL)
+    if (EplApiInstance_g.m_InitParam.m_dwLossOfFrameTolerance != UINT_MAX)
     {
         Ret = EplObdWriteEntry(0x1C14, 0,
                         &EplApiInstance_g.m_InitParam.m_dwLossOfFrameTolerance,
@@ -2043,7 +2044,7 @@ BYTE                bTemp;
     }
 
     // d.k. There is no dependance between FeatureFlags and async-only CN.
-    if (EplApiInstance_g.m_InitParam.m_dwFeatureFlags != ~0UL)
+    if (EplApiInstance_g.m_InitParam.m_dwFeatureFlags != UINT_MAX)
     {
         Ret = EplObdWriteEntry(0x1F82, 0,
                                &EplApiInstance_g.m_InitParam.m_dwFeatureFlags,
@@ -2095,14 +2096,14 @@ BYTE                bTemp;
     }
 
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
-    if (EplApiInstance_g.m_InitParam.m_dwWaitSocPreq != ~0UL)
+    if (EplApiInstance_g.m_InitParam.m_dwWaitSocPreq != UINT_MAX)
     {
         Ret = EplObdWriteEntry(0x1F8A, 1,
                                &EplApiInstance_g.m_InitParam.m_dwWaitSocPreq,
                                4);
     }
 
-    if ((EplApiInstance_g.m_InitParam.m_dwAsyncSlotTimeout != 0) && (EplApiInstance_g.m_InitParam.m_dwAsyncSlotTimeout != ~0UL))
+    if ((EplApiInstance_g.m_InitParam.m_dwAsyncSlotTimeout != 0) && (EplApiInstance_g.m_InitParam.m_dwAsyncSlotTimeout != UINT_MAX))
     {
         Ret = EplObdWriteEntry(0x1F8A, 2,
                             &EplApiInstance_g.m_InitParam.m_dwAsyncSlotTimeout,
@@ -2111,35 +2112,35 @@ BYTE                bTemp;
 #endif
 
     // configure Identity
-    if (EplApiInstance_g.m_InitParam.m_dwDeviceType != ~0UL)
+    if (EplApiInstance_g.m_InitParam.m_dwDeviceType != UINT_MAX)
     {
         Ret = EplObdWriteEntry(0x1000, 0,
                                &EplApiInstance_g.m_InitParam.m_dwDeviceType,
                                4);
     }
 
-    if (EplApiInstance_g.m_InitParam.m_dwVendorId != ~0UL)
+    if (EplApiInstance_g.m_InitParam.m_dwVendorId != UINT_MAX)
     {
         Ret = EplObdWriteEntry(0x1018, 1,
                                &EplApiInstance_g.m_InitParam.m_dwVendorId,
                                4);
     }
 
-    if (EplApiInstance_g.m_InitParam.m_dwProductCode != ~0UL)
+    if (EplApiInstance_g.m_InitParam.m_dwProductCode != UINT_MAX)
     {
         Ret = EplObdWriteEntry(0x1018, 2,
                                &EplApiInstance_g.m_InitParam.m_dwProductCode,
                                4);
     }
 
-    if (EplApiInstance_g.m_InitParam.m_dwRevisionNumber != ~0UL)
+    if (EplApiInstance_g.m_InitParam.m_dwRevisionNumber != UINT_MAX)
     {
         Ret = EplObdWriteEntry(0x1018, 3,
                                &EplApiInstance_g.m_InitParam.m_dwRevisionNumber,
                                4);
     }
 
-    if (EplApiInstance_g.m_InitParam.m_dwSerialNumber != ~0UL)
+    if (EplApiInstance_g.m_InitParam.m_dwSerialNumber != UINT_MAX)
     {
         Ret = EplObdWriteEntry(0x1018, 4,
                                &EplApiInstance_g.m_InitParam.m_dwSerialNumber,

@@ -52,6 +52,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <stdio.h>
 #include <string.h>
+#include <limits.h>
 
 #if (TARGET_SYSTEM == _LINUX_)
     #include <netinet/in.h>
@@ -180,13 +181,12 @@ Api::Api(MainWindow *pMainWindow_p, UINT nodeId_p, QString devName_p)
     EPL_MEMSET(&initParam, 0, sizeof (initParam));
     initParam.m_uiSizeOfStruct = sizeof (initParam);
 
-
     initParam.m_uiNodeId = nodeId_p;
     initParam.m_dwIpAddress = (IP_ADDR & 0xFFFFFF00) | initParam.m_uiNodeId;
 
     initParam.m_fAsyncOnly = FALSE;
 
-    initParam.m_dwFeatureFlags = -1;
+    initParam.m_dwFeatureFlags = UINT_MAX;
     initParam.m_dwCycleLen = CYCLE_LEN;           // required for error detection
     initParam.m_uiIsochrTxMaxPayload = 256;       // const
     initParam.m_uiIsochrRxMaxPayload = 256;       // const
@@ -200,11 +200,11 @@ Api::Api(MainWindow *pMainWindow_p, UINT nodeId_p, QString devName_p)
     initParam.m_dwLossOfFrameTolerance = 500000;
     initParam.m_dwAsyncSlotTimeout = 3000000;
     initParam.m_dwWaitSocPreq = 150000;
-    initParam.m_dwDeviceType = -1;                // NMT_DeviceType_U32
-    initParam.m_dwVendorId = -1;                  // NMT_IdentityObject_REC.VendorId_U32
-    initParam.m_dwProductCode = -1;               // NMT_IdentityObject_REC.ProductCode_U32
-    initParam.m_dwRevisionNumber = -1;            // NMT_IdentityObject_REC.RevisionNo_U32
-    initParam.m_dwSerialNumber = -1;              // NMT_IdentityObject_REC.SerialNo_U32
+    initParam.m_dwDeviceType = UINT_MAX;          // NMT_DeviceType_U32
+    initParam.m_dwVendorId = UINT_MAX;            // NMT_IdentityObject_REC.VendorId_U32
+    initParam.m_dwProductCode = UINT_MAX;         // NMT_IdentityObject_REC.ProductCode_U32
+    initParam.m_dwRevisionNumber = UINT_MAX;      // NMT_IdentityObject_REC.RevisionNo_U32
+    initParam.m_dwSerialNumber = UINT_MAX;        // NMT_IdentityObject_REC.SerialNo_U32
 
     initParam.m_dwSubnetMask = SUBNET_MASK;
     initParam.m_dwDefaultGateway = 0;

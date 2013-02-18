@@ -104,10 +104,8 @@ static tErrHndkInstance instance_l;
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static tEplKernel postHeartbeatEvent(UINT nodeId_p, tEplNmtState state_p, UINT16 errorCode_p);
 static tEplKernel postNmtEvent(tEplNmtEvent nmtEvent_p);
 static tEplKernel generateHistoryEntry(UINT16 errorCode_p, tEplNetTime netTime_p);
-static tEplKernel generateHistoryEntryWithError(UINT16 errorCode_p, tEplNetTime netTime_p, UINT16 eplError_p);
 static tEplKernel generateHistoryEntryNodeId(UINT16 errorCode_p, tEplNetTime netTime_p, UINT nodeId_p);
 static void       decrementCnCounters(void);
 static tEplKernel postHistoryEntryEvent(tEplErrHistoryEntry* pHistoryEntry_p);
@@ -115,6 +113,8 @@ static tEplKernel handleDllErrors(tEplEvent *pEvent_p);
 
 #ifdef CONFIG_INCLUDE_NMT_MN
 static tEplKernel decrementMnCounters(void);
+static tEplKernel postHeartbeatEvent(UINT nodeId_p, tEplNmtState state_p, UINT16 errorCode_p);
+static tEplKernel generateHistoryEntryWithError(UINT16 errorCode_p, tEplNetTime netTime_p, UINT16 eplError_p);
 #endif
 
 //============================================================================//
@@ -888,6 +888,7 @@ static tEplKernel handleDllErrors(tEplEvent *pEvent_p)
     return ret;
 }
 
+#ifdef CONFIG_INCLUDE_NMT_MN
 //------------------------------------------------------------------------------
 /**
 \brief    Post a heartbeat event
@@ -918,6 +919,7 @@ static tEplKernel postHeartbeatEvent(UINT nodeId_p, tEplNmtState state_p,
     ret = eventk_postEvent(&event);
     return ret;
 }
+#endif
 
 //------------------------------------------------------------------------------
 /**
@@ -1006,6 +1008,7 @@ static tEplKernel generateHistoryEntryNodeId(UINT16 errorCode_p,
     return ret;
 }
 
+#ifdef CONFIG_INCLUDE_NMT_MN
 //------------------------------------------------------------------------------
 /**
 \brief    Generate a history entry containing an error flag
@@ -1038,6 +1041,7 @@ static tEplKernel generateHistoryEntryWithError(UINT16 errorCode_p,
     ret = postHistoryEntryEvent(&historyEntry);
     return ret;
 }
+#endif
 
 //------------------------------------------------------------------------------
 /**

@@ -267,15 +267,15 @@ tEplKernel  Ret;
 tEplKernel PUBLIC EplIdentuReset()
 {
 tEplKernel  Ret;
-int         iIndex;
+UINT        index;
 
     Ret = kEplSuccessful;
 
-    for (iIndex = 0; iIndex < tabentries (EplIdentuInstance_g.m_apIdentResponse); iIndex++)
+    for (index = 0; index < tabentries (EplIdentuInstance_g.m_apIdentResponse); index++)
     {
-        if (EplIdentuInstance_g.m_apIdentResponse[iIndex] != NULL)
+        if (EplIdentuInstance_g.m_apIdentResponse[index] != NULL)
         {   // free memory
-            EPL_FREE(EplIdentuInstance_g.m_apIdentResponse[iIndex]);
+            EPL_FREE(EplIdentuInstance_g.m_apIdentResponse[index]);
         }
     }
 
@@ -357,13 +357,17 @@ tEplKernel PUBLIC EplIdentuRequestIdentResponse(
 {
 tEplKernel  Ret;
 
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) == 0)
+    UNUSED_PARAMETER(pfnCbResponse_p);
+#endif
+
     Ret = kEplSuccessful;
 
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
     if (uiNodeId_p == 0)
     {   // issue request for local node
         Ret = dllucal_issueRequest(kEplDllReqServiceIdent, 0x00, 0xFF);
-        goto Exit;
+        return Ret;
     }
 #endif
 
@@ -390,7 +394,6 @@ tEplKernel  Ret;
         Ret = kEplInvalidNodeId;
     }
 
-Exit:
     return Ret;
 
 }

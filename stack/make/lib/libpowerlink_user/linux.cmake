@@ -29,7 +29,8 @@
 ################################################################################
 
 
-ADD_DEFINITIONS(-Wall -Wextra -pedantic -std=c99 -pthread -D_GNU_SOURCE -D_POSIX_C_SOURCE=200112L)
+ADD_DEFINITIONS(-Wall -Wextra -pedantic -std=c99 -pthread -D_GNU_SOURCE -D_POSIX_C_SOURCE=200112L
+                -fno-strict-aliasing)
 
 SET(LIB_ARCH_SOURCES ${USER_SOURCE_DIR}/pdo/pdoucalsync-bsdsem.c
                      ${USER_SOURCE_DIR}/sdo/sdo-udpu.c

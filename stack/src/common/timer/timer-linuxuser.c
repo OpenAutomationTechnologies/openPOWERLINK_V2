@@ -551,7 +551,6 @@ static void * EplTimeruProcessThread(void *pArgument_p __attribute((unused)))
 //---------------------------------------------------------------------------
 static void PUBLIC EplTimeruCbMs(ULONG ulParameter_p)
 {
-    tEplKernel          Ret = kEplSuccessful;
     tEplTimeruData*     pData;
     tEplEvent           EplEvent;
     tEplTimerEventArg   TimerEventArg;
@@ -569,7 +568,7 @@ static void PUBLIC EplTimeruCbMs(ULONG ulParameter_p)
     EplEvent.m_pArg = &TimerEventArg;
     EplEvent.m_uiSize = sizeof(TimerEventArg);
 
-    Ret = eventu_postEvent(&EplEvent);
+    eventu_postEvent(&EplEvent);
 }
 
 //------------------------------------------------------------------------------

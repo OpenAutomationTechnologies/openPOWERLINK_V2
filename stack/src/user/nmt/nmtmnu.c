@@ -3621,15 +3621,15 @@ Exit:
 static tEplKernel EplNmtMnuReset(void)
 {
 tEplKernel  Ret;
-int         iIndex;
+UINT        index;
 
     Ret = EplTimeruDeleteTimer(&EplNmtMnuInstance_g.m_TimerHdlNmtState);
 
-    for (iIndex = 1; iIndex <= tabentries (EplNmtMnuInstance_g.m_aNodeInfo); iIndex++)
+    for (index = 1; index <= tabentries (EplNmtMnuInstance_g.m_aNodeInfo); index++)
     {
         // delete timer handles
-        Ret = EplTimeruDeleteTimer(&EPL_NMTMNU_GET_NODEINFO(iIndex)->m_TimerHdlStatReq);
-        Ret = EplTimeruDeleteTimer(&EPL_NMTMNU_GET_NODEINFO(iIndex)->m_TimerHdlLonger);
+        Ret = EplTimeruDeleteTimer(&EPL_NMTMNU_GET_NODEINFO(index)->m_TimerHdlStatReq);
+        Ret = EplTimeruDeleteTimer(&EPL_NMTMNU_GET_NODEINFO(index)->m_TimerHdlLonger);
     }
 
 #if EPL_NMTMNU_PRES_CHAINING_MN != FALSE
@@ -3847,8 +3847,9 @@ DWORD               dwPResMnTimeoutNs;
 
     if (EplNmtMnuInstance_g.m_dwPrcPResMnTimeoutNs < dwPResMnTimeoutNs)
     {
-    tEplDllNodeInfo DllNodeInfo = {0};
+    tEplDllNodeInfo DllNodeInfo;
 
+        EPL_MEMSET(&DllNodeInfo, 0, sizeof(tEplDllNodeInfo));
         EplNmtMnuInstance_g.m_dwPrcPResMnTimeoutNs = dwPResMnTimeoutNs;
         DllNodeInfo.m_dwPresTimeoutNs              = dwPResMnTimeoutNs;
         DllNodeInfo.m_uiNodeId                     = EPL_C_ADR_MN_DEF_NODE_ID;

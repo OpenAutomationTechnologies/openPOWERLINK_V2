@@ -264,6 +264,8 @@ tShbError  ShbIpcAllocBuffer (ULONG ulBufferSize_p, const char* pszBufferID_p,
     iBufferKey = (int)ulCrc32;
     EPL_DBGLVL_SHB_TRACE("%s(): Name:%s Key:%08x Size:%d\n",
                           __func__, pszBufferID_p, iBufferKey, ulBufferSize_p);
+    pShbMemInst = NULL;
+    pShbMemHeader = NULL;
 
     //---------------------------------------------------------------
     // (1) open an existing or create a new shared memory

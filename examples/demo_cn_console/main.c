@@ -50,12 +50,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #include <Epl.h>
 #include <stdio.h>
-#include <getopt/getopt.h>
+#include <limits.h>
 
 #include <app.h>
 #include <system/system.h>
-#include <EplTarget.h>
+#include <getopt/getopt.h>
 #include <console/console.h>
+#include <EplTarget.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -213,7 +214,7 @@ static tEplKernel initPowerlink(UINT32 cycleLen_p, const BYTE* macAddr_p, UINT32
 
     initParam.m_fAsyncOnly = FALSE;
 
-    initParam.m_dwFeatureFlags            = -1;
+    initParam.m_dwFeatureFlags            = UINT_MAX;
     initParam.m_dwCycleLen                = cycleLen_p;       // required for error detection
     initParam.m_uiIsochrTxMaxPayload      = 36;               // const
     initParam.m_uiIsochrRxMaxPayload      = 36;               // const
@@ -227,11 +228,11 @@ static tEplKernel initPowerlink(UINT32 cycleLen_p, const BYTE* macAddr_p, UINT32
     initParam.m_dwLossOfFrameTolerance    = 500000;
     initParam.m_dwAsyncSlotTimeout        = 3000000;
     initParam.m_dwWaitSocPreq             = 150000;
-    initParam.m_dwDeviceType              = -1;               // NMT_DeviceType_U32
-    initParam.m_dwVendorId                = -1;               // NMT_IdentityObject_REC.VendorId_U32
-    initParam.m_dwProductCode             = -1;               // NMT_IdentityObject_REC.ProductCode_U32
-    initParam.m_dwRevisionNumber          = -1;               // NMT_IdentityObject_REC.RevisionNo_U32
-    initParam.m_dwSerialNumber            = -1;               // NMT_IdentityObject_REC.SerialNo_U32
+    initParam.m_dwDeviceType              = UINT_MAX;               // NMT_DeviceType_U32
+    initParam.m_dwVendorId                = UINT_MAX;               // NMT_IdentityObject_REC.VendorId_U32
+    initParam.m_dwProductCode             = UINT_MAX;               // NMT_IdentityObject_REC.ProductCode_U32
+    initParam.m_dwRevisionNumber          = UINT_MAX;               // NMT_IdentityObject_REC.RevisionNo_U32
+    initParam.m_dwSerialNumber            = UINT_MAX;               // NMT_IdentityObject_REC.SerialNo_U32
     initParam.m_dwApplicationSwDate       = 0;
     initParam.m_dwApplicationSwTime       = 0;
 

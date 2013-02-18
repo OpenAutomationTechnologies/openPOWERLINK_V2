@@ -29,7 +29,7 @@
 ################################################################################
 
 ADD_DEFINITIONS(-Wall -Wextra -pedantic -std=c99 -pthread -D_GNU_SOURCE
-                -D_POSIX_C_SOURCE=200112L)
+                -D_POSIX_C_SOURCE=200112L -fno-strict-aliasing)
 
 SET (LIB_ARCH_SOURCES
      ${LIB_ARCH_SOURCES}

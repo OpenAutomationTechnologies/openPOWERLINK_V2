@@ -211,7 +211,7 @@ static tEplKernel initPowerlink(UINT32 cycleLen_p, const BYTE* macAddr_p)
 
     initParam.m_fAsyncOnly = FALSE;
 
-    initParam.m_dwFeatureFlags            = -1;
+    initParam.m_dwFeatureFlags            = UINT_MAX;
     initParam.m_dwCycleLen                = cycleLen_p;       // required for error detection
     initParam.m_uiIsochrTxMaxPayload      = 256;              // const
     initParam.m_uiIsochrRxMaxPayload      = 256;              // const

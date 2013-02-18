@@ -87,10 +87,10 @@
 #include <linux/spinlock.h>
 
 #define TGT_DLLK_DECLARE_CRITICAL_SECTION \
-        DEFINE_SPINLOCK(TgtDllkCriticalSection_l);
+        DEFINE_SPINLOCK(TgtDllkCriticalSection_l)
 
 #define TGT_DLLK_DECLARE_FLAGS \
-        unsigned long ulTgtDllkFlags;
+        unsigned long ulTgtDllkFlags
 
 #define TGT_DLLK_ENTER_CRITICAL_SECTION() \
     spin_lock_irqsave(&TgtDllkCriticalSection_l, ulTgtDllkFlags)

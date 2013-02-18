@@ -153,7 +153,7 @@ static void *EdrvWorkerThread(void *);
 //
 // Returns:             void
 //---------------------------------------------------------------------------
-static void getMacAdrs(char *ifName, BYTE *macAdrs)
+static void getMacAdrs(const char *ifName, BYTE *macAdrs)
 {
     int    fd;
     struct ifreq ifr;
@@ -179,7 +179,7 @@ static void getMacAdrs(char *ifName, BYTE *macAdrs)
 //
 // Returns:             TRUE if link is up or FALSE otherwise
 //---------------------------------------------------------------------------
-static int getLinkStatus(char *ifName)
+static int getLinkStatus(const char *ifName)
 {
     BOOL            fRunning;
     struct ifreq    ethreq;

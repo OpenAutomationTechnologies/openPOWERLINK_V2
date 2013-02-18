@@ -483,11 +483,7 @@
     #endif
 
     #ifndef DWORD
-        #if defined (__LP64__) || defined (_LP64)
-            #define DWORD unsigned int
-        #else
-            #define DWORD unsigned long int
-        #endif
+        #define DWORD unsigned int
     #endif
 
     #ifndef BOOL

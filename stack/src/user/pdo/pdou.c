@@ -555,6 +555,8 @@ static tEplKernel setupTxPdoChannelTables(
                sizeof (pdouInstance_g.aPdoIdToChannelIdTx));
 #endif
 
+    abChannelIdToPdoIdTx_p[0] = 0;
+
     // Loops through TX Mapping objects (0x1800)
     for (pdoId = 0, commParamIndex = PDOU_OBD_IDX_TX_COMM_PARAM;
         pdoId < PDOU_MAX_PDO_OBJECTS;
@@ -774,7 +776,7 @@ The functions checks and configures all PDOs for a single direction.
 static tEplKernel checkAndConfigurePdos(UINT16 mappParamIndex_p, UINT channelCount_p,
                                         BYTE *pChannelToPdoTable_p, UINT32 *pAbortCode_p)
 {
-    tEplKernel          ret;
+    tEplKernel          ret = kEplSuccessful;
     UINT                index;
     tEplObdSize         obdSize;
     BYTE                mappObjectCount;
