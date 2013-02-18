@@ -71,7 +71,6 @@
 ****************************************************************************/
 
 #define _CRT_NONSTDC_NO_WARNINGS    // for MSVC 2005 or higher
-#define _CRT_SECURE_NO_WARNINGS     // for MSVC 2005 or higher
 
 #include "EplInc.h"
 #include "EplObd.h"
