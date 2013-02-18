@@ -1,54 +1,33 @@
 ################################################################################
 #
-# Project: openPOWERLINK
+# Main CMake file of openPOWERLINK stack
 #
-# (c) Bernecker + Rainer Industrie-Elektronik Ges.m.b.H.
-#     B&R Strasse 1, A-5142 Eggelsberg
-#     www.br-automation.com
+# Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+# All rights reserved.
 #
-# Description: Main cmake file of openPOWERLINK stack
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+#     * Redistributions of source code must retain the above copyright
+#       notice, this list of conditions and the following disclaimer.
+#     * Redistributions in binary form must reproduce the above copyright
+#       notice, this list of conditions and the following disclaimer in the
+#       documentation and/or other materials provided with the distribution.
+#     * Neither the name of the copyright holders nor the
+#       names of its contributors may be used to endorse or promote products
+#       derived from this software without specific prior written permission.
 #
-# License:
-#
-#   Redistribution and use in source and binary forms, with or without
-#   modification, are permitted provided that the following conditions
-#   are met:
-#
-#   1. Redistributions of source code must retain the above copyright
-#      notice, this list of conditions and the following disclaimer.
-#
-#   2. Redistributions in binary form must reproduce the above copyright
-#      notice, this list of conditions and the following disclaimer in the
-#      documentation and/or other materials provided with the distribution.
-#
-#   3. Neither the name of the copyright holders nor the names of its
-#      contributors may be used to endorse or promote products derived
-#      from this software without prior written permission. For written
-#      permission, please contact office@br-automation.com.
-#
-#   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-#   "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-#   LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-#   FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-#   COPYRIGHT HOLDERS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-#   INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-#   BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-#   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-#   CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-#   LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-#   ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-#   POSSIBILITY OF SUCH DAMAGE.
-#
-#   Severability Clause:
-#
-#       If a provision of this License is or becomes illegal, invalid or
-#       unenforceable in any jurisdiction, that shall not affect:
-#       1. the validity or enforceability in that jurisdiction of any other
-#          provision of this License; or
-#       2. the validity or enforceability in other jurisdictions of that or
-#          any other provision of this License.
-#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+# ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+# WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+# DISCLAIMED. IN NO EVENT SHALL COPYRIGHT HOLDERS BE LIABLE FOR ANY
+# DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+# (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+# LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+# ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+# SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ################################################################################
+
 
 IF (WIN32)
     # ensure working support of VS.NET 2010
@@ -76,46 +55,28 @@ FIND_PACKAGE(Qt4 QUIET)
 ###############################################################################
 #SET(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/bin)
 
+IF(NOT CMAKE_BUILD_TYPE)
+  SET(CMAKE_BUILD_TYPE Release CACHE STRING
+      "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel."
+      FORCE)
+ENDIF(NOT CMAKE_BUILD_TYPE)
+
 OPTION (CFG_POWERLINK_MN "Compile openPOWERLINK MN (Otherwise CN)" ON)
 SET(CFG_DEBUG_LVL "0xEC000000L" CACHE STRING "Debug Level for debug output")
 
-CMAKE_DEPENDENT_OPTION (CFG_X86_DEMO_MN_CONSOLE "Build process image based console demo application" ON
+CMAKE_DEPENDENT_OPTION (CFG_DEMO_MN_CONSOLE "Build process image based console demo application" ON
                         "CFG_POWERLINK_MN" OFF)
-CMAKE_DEPENDENT_OPTION (CFG_X86_DEMO_MN_QT "Build process image based QT demo application" OFF
+CMAKE_DEPENDENT_OPTION (CFG_DEMO_MN_QT "Build process image based QT demo application" OFF
                         "CFG_POWERLINK_MN;QT4_FOUND" OFF)
-CMAKE_DEPENDENT_OPTION (CFG_X86_DEMO_CN_CONSOLE "Build CN console demo application" ON
+CMAKE_DEPENDENT_OPTION (CFG_DEMO_CN_CONSOLE "Build CN console demo application" ON
                         "NOT CFG_POWERLINK_MN" OFF)
-
-CMAKE_DEPENDENT_OPTION (CFG_X86_DEMO_LINUX_KERNEL "Build Linux kernel based demo application (DEPRECATED)" OFF
-                        "CFG_KERNEL_STACK;CFG_POWERLINK_MN" OFF)
 
 CMAKE_DEPENDENT_OPTION (CFG_BUILD_UNITTESTS "Build all unittests and include the necessary switches" OFF
                         "UNIX" OFF)
 
-IF (UNIX)
-    SET (CFG_KERNEL_STACK OFF CACHE BOOL "Use POWERLINK kernel based stack (if OFF, userspace library will be used!)" )
-ENDIF (UNIX)
-
-# additional Linux settings
-IF (CFG_KERNEL_STACK)
-    SET(CFG_KERNEL_DIR "" CACHE PATH "Select the kernel directory to be used, if not specified, system kernel dir will be used!")
-    SET(CFG_POWERLINK_EDRV "82573" CACHE STRING "Valid drivers are 8139, 82573, 8255x, Fec")
-    SET_PROPERTY(CACHE CFG_POWERLINK_EDRV PROPERTY STRINGS 8139 82573 8255x Fec)
-
-ELSE (CFG_KERNEL_STACK)
-    UNSET (CFG_KERNEL_DIR CACHE)
-    UNSET (CFG_POWERLINK_EDRV CACHE)
-ENDIF (CFG_KERNEL_STACK)
-
-# additional Windows settings
-IF (WIN32)
-    OPTION (CFG_X86_WINDOWS_DLL "Build Windows POWERLINK library as DLL" ON)
-ENDIF (WIN32)
-
 ###############################################################################
 # Set global definitions
 ###############################################################################
-
 SET(POWERLINK_SOURCE_DIR ${CMAKE_SOURCE_DIR}/stack/src)
 SET(USER_SOURCE_DIR ${CMAKE_SOURCE_DIR}/stack/src/user)
 SET(KERNEL_SOURCE_DIR ${CMAKE_SOURCE_DIR}/stack/src/kernel)
@@ -125,6 +86,9 @@ SET(EDRV_SOURCE_DIR ${CMAKE_SOURCE_DIR}/stack/src/kernel/edrv)
 SET(LIB_SOURCE_DIR ${CMAKE_SOURCE_DIR}/libs)
 
 SET(OBJDICT_DIR ${CMAKE_SOURCE_DIR}/objdicts)
+
+SET (DEMO_DIR ${CMAKE_SOURCE_DIR}/examples)
+SET (DEMO_COMMON_DIR ${CMAKE_SOURCE_DIR}/examples/common)
 
 SET(POWERLINK_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/include)
 SET(USER_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/include/user)
@@ -138,47 +102,40 @@ INCLUDE_DIRECTORIES (
     ${POWERLINK_SOURCE_DIR}
     ${LIB_SOURCE_DIR}/sharedbuff
     ${LIB_SOURCE_DIR}/ami
+    ${LIB_SOURCE_DIR}
 )
+
+# setup architecture specific configuration
+IF (UNIX)
+    INCLUDE (cmake/configure-linux.cmake)
+ENDIF (UNIX)
+
+IF (WIN32)
+    INCLUDE (cmake/configure-windows.cmake)
+ENDIF (WIN32)
 
 
 ###############################################################################
 # Examples
 ###############################################################################
-# Add subdirectory of pcap based MN CFM library
-IF (NOT CFG_KERNEL_STACK)
-    ADD_SUBDIRECTORY(stack/make/lib/libpowerlink)
-ENDIF (NOT CFG_KERNEL_STACK)
-
 # Add subdirectory of MN console demo application
-IF (CFG_X86_DEMO_MN_CONSOLE)
-    ADD_SUBDIRECTORY(examples/generic/demo_mn_console)
-ENDIF (CFG_X86_DEMO_MN_CONSOLE)
+IF (CFG_DEMO_MN_CONSOLE)
+    ADD_SUBDIRECTORY(examples/demo_mn_console)
+ENDIF (CFG_DEMO_MN_CONSOLE)
 
 # Add subdirectory of MN QT demo application
-IF (CFG_X86_DEMO_MN_QT)
-    ADD_SUBDIRECTORY(examples/generic/demo_mn_qt)
-ENDIF (CFG_X86_DEMO_MN_QT)
+IF (CFG_DEMO_MN_QT)
+    ADD_SUBDIRECTORY(examples/demo_mn_qt)
+ENDIF (CFG_DEMO_MN_QT)
 
 # Add subdirectory of CN console demo application
-IF (CFG_X86_DEMO_CN_CONSOLE)
-    ADD_SUBDIRECTORY(examples/generic/demo_cn_console)
-ENDIF (CFG_X86_DEMO_CN_CONSOLE)
+IF (CFG_DEMO_CN_CONSOLE)
+    ADD_SUBDIRECTORY(examples/demo_cn_console)
+ENDIF (CFG_DEMO_CN_CONSOLE)
 
-# Linux specific part
-IF(UNIX)
-    # Add subdirectory of kernel module
-    IF (CFG_KERNEL_STACK)
-        ADD_SUBDIRECTORY(stack/make/driver/linux/powerlink_kernel_module)
-    ENDIF (CFG_KERNEL_STACK)
-
-    # Add subdirectory of kernel demo application
-    IF (CFG_X86_DEMO_LINUX_KERNEL)
-        ADD_SUBDIRECTORY(examples/arch/linux/demo_kernel)
-    ENDIF (CFG_X86_DEMO_LINUX_KERNEL)
-
-ENDIF(UNIX)
-
+###############################################################################
 # Unit tests
+###############################################################################
 IF(CFG_BUILD_UNITTESTS)
   ENABLE_TESTING()
   ADD_SUBDIRECTORY(unittests)
