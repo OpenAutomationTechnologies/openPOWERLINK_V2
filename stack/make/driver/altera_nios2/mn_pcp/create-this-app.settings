@@ -70,6 +70,7 @@ ${STACKROOT_DIR}/libs/hostif/linmem.c \
 ${STACKROOT_DIR}/libs/omethlib/omethlib.c \
 ${STACKROOT_DIR}/libs/omethlib/omethlibint.c \
 ${STACKROOT_DIR}/libs/omethlib/omethlib_phycfg_generic.c \
+${STACKROOT_DIR}/libs/trace/trace-printf.c \
 ${STACKROOT_DIR}/stack/src/arch/altera_nios2/target-nios2.c \
 ${STACKROOT_DIR}/stack/src/common/dll/dllcal-hostif.c \
 ${STACKROOT_DIR}/stack/src/common/event/event.c \
