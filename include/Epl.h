@@ -446,6 +446,11 @@ EPLDLLEXPORT char * PUBLIC EplGetSdoComConStateStr(tEplSdoComConState SdoComConS
 EPLDLLEXPORT char * PUBLIC EplGetEplKernelStr(tEplKernel EplKernel_p);
 EPLDLLEXPORT const char * PUBLIC EplGetEmergErrCodeStr( WORD EmergErrCode_p);
 
+
+EPLDLLEXPORT tEplKernel target_init(void);
+EPLDLLEXPORT tEplKernel target_cleanup(void);
+EPLDLLEXPORT void target_msleep(UINT32 milliSeconds_p);
+
 #ifdef __cplusplus
     }
 #endif
