@@ -247,9 +247,6 @@ void  PUBLIC EplTgtTimeStampCopy       (tEplTgtTimeStamp* pTimeStampDest_p,
 void  PUBLIC EplTgtTimeStampFree       (tEplTgtTimeStamp* pTimeStamp_p);
 tEplTgtTimeStamp* PUBLIC EplTgtTimeStampAlloc (void);
 
-tEplKernel PUBLIC EplTgtInit(void);
-tEplKernel PUBLIC EplTgtCleanup(void);
-
 #ifdef __cplusplus
 }  // extern "C"
 #endif

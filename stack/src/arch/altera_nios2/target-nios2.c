@@ -51,6 +51,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
+#define TGTCONIO_MS_IN_US(x)    (x*1000U)
 
 //------------------------------------------------------------------------------
 // module global vars
@@ -166,6 +167,52 @@ BYTE PUBLIC EplTgtIsInterruptContext (void)
     {
         return FALSE;
     }
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Initialize target specific stuff
+
+The function initialize target specific stuff which is needed to run the
+openPOWERLINK stack.
+
+\return The function returns a tEplKernel error code.
+*/
+//------------------------------------------------------------------------------
+tEplKernel target_init(void)
+{
+    return kEplSuccessful;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Cleanup target specific stuff
+
+The function cleans-up target specific stuff.
+
+\return The function returns a tEplKernel error code.
+*/
+//------------------------------------------------------------------------------
+tEplKernel target_cleanup(void)
+{
+    return kEplSuccessful;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief Sleep for the specified number of milliseconds
+
+The function makes the calling thread sleep until the number of specified
+milliseconds have elapsed.
+
+\param  mseconds_p              Number of milliseconds to sleep
+
+\ingroup module_target
+*/
+//------------------------------------------------------------------------------
+void target_msleep (unsigned int milliSecond_p)
+{
+    usleep(TGTCONIO_MS_IN_US(milliSecond_p));
 }
 
 //============================================================================//
