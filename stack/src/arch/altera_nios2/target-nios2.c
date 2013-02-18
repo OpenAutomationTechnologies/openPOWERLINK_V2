@@ -41,8 +41,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <global.h>
+#include <unistd.h>
 #include <sys/alt_irq.h>
 #include <sys/alt_alarm.h>
+#include <Epl.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
