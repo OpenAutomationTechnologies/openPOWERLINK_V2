@@ -44,7 +44,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <stddef.h>
 
 #include <ctrl.h>
-#include <EplTgtConio.h>
+#include <EplTarget.h>
 #include <kernel/ctrlk.h>
 
 //============================================================================//

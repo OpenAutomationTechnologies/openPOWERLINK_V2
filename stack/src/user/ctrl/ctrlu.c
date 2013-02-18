@@ -58,7 +58,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <user/EplStatusu.h>
 #include <user/EplTimeru.h>
 #include <user/EplCfmu.h>
-#include <EplTgtConio.h>
+#include <EplTarget.h>
 
 #include <ctrl.h>
 #include <user/ctrlucal.h>
