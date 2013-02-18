@@ -242,17 +242,6 @@
     #define REENTRANT
     #define PUBLIC
 
-    #ifndef NDEBUG
-        #ifndef __KERNEL__
-            #include <stdio.h>              // prototype printf() (for TRACE)
-            #define TRACE(...)  printf(__VA_ARGS__)
-        #else
-            #define TRACE(...)  printk(__VA_ARGS__)
-        #endif
-    #else
-            #define TRACE(...)
-    #endif
-
     #define UNUSED_PARAMETER(par)   (void)par
 
 // ------------------ GNUC for VxWorks ---------------------------------------
@@ -287,13 +276,6 @@
     #define REENTRANT
     #define PUBLIC
 
-    #ifndef NDEBUG
-        #include <stdio.h>              // prototype printf() (for TRACE)
-        #define TRACE(...)  printf(__VA_ARGS__)
-    #else
-        #define TRACE(...)
-    #endif
-
     #define UNUSED_PARAMETER(par)   (void)par
 
 // ------------------ GNU without OS ---------------------------------------
@@ -327,13 +309,6 @@
 
     #define REENTRANT
     #define PUBLIC
-
-    #ifndef NDEBUG
-        #include <stdio.h>              // prototype printf() (for TRACE)
-        #define TRACE(...)  printf(__VA_ARGS__)
-    #else
-        #define TRACE(...)
-    #endif
 
     #define UNUSED_PARAMETER(par)   (void)par
 
@@ -391,20 +366,6 @@
       //#define QWORD long long int // MSVC .NET can use "long long int" too (like GNU)
         #define QWORD __int64
     #endif
-    #endif
-
-    #ifndef NDEBUG
-        #define TRACE(...) trace(__VA_ARGS__)
-        #ifdef __cplusplus
-            extern "C"
-            {
-        #endif
-            void trace (const char *fmt, ...);
-        #ifdef __cplusplus
-            }
-        #endif
-    #else
-        #define TRACE(...)
     #endif
 
     #define UNUSED_PARAMETER(par) (void)par
@@ -467,12 +428,6 @@
 
     #ifdef ASSERTMSG
         #undef ASSERTMSG
-    #endif
-
-    #ifndef NDEBUG
-        #define TRACE(...) printf(__VA_ARGS__)
-    #else
-        #define TRACE(...)
     #endif
 
     #define UNUSED_PARAMETER(par)   (void)par
@@ -598,6 +553,23 @@
 
     #define _TIME_OF_DAY_DEFINED_
 
+#endif
+
+//---------------------------------------------------------------------------
+//  definition of TRACE
+//---------------------------------------------------------------------------
+#ifndef NDEBUG
+    #define TRACE(...) trace(__VA_ARGS__)
+    #ifdef __cplusplus
+        extern "C"
+        {
+    #endif
+        void trace (const char *fmt, ...);
+    #ifdef __cplusplus
+        }
+    #endif
+#else
+    #define TRACE(...)
 #endif
 
 //---------------------------------------------------------------------------
