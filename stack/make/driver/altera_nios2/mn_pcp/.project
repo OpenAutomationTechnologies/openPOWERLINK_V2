@@ -104,6 +104,11 @@
 			<locationURI>OPLK_LOC/libs/ami/amiarm.c</locationURI>
 		</link>
 		<link>
+			<name>trace-printf.c</name>
+			<type>1</type>
+			<locationURI>OPLK_LOC/libs/trace/trace-printf.c</locationURI>
+		</link>
+		<link>
 			<name>ctrlk.c</name>
 			<type>1</type>
 			<locationURI>OPLK_LOC/stack/src/kernel/ctrl/ctrlk.c</locationURI>
