@@ -62,12 +62,59 @@
          type = "boolean";
       }
    }
+   element hostinterface_0.host
+   {
+      datum _lockedAddress
+      {
+         value = "1";
+         type = "boolean";
+      }
+      datum baseAddress
+      {
+         value = "0";
+         type = "String";
+      }
+   }
    element host_0
    {
       datum _sortIndex
       {
          value = "3";
          type = "int";
+      }
+   }
+   element pcp_0.hostif_to_pcp_bridge_s0
+   {
+      datum _lockedAddress
+      {
+         value = "1";
+         type = "boolean";
+      }
+      datum baseAddress
+      {
+         value = "0";
+         type = "String";
+      }
+   }
+   element hostinterface_0
+   {
+      datum _sortIndex
+      {
+         value = "4";
+         type = "int";
+      }
+   }
+   element hostinterface_0.pcp
+   {
+      datum _lockedAddress
+      {
+         value = "1";
+         type = "boolean";
+      }
+      datum baseAddress
+      {
+         value = "0";
+         type = "String";
       }
    }
    element pcp_0
@@ -93,7 +140,7 @@
  <parameter name="projectName" value="POWERLINK_MN.qpf" />
  <parameter name="sopcBorderPoints" value="false" />
  <parameter name="systemHash" value="1" />
- <parameter name="timeStamp" value="1359129368028" />
+ <parameter name="timeStamp" value="1362729530140" />
  <parameter name="useTestBenchNamingPattern" value="false" />
  <instanceScript></instanceScript>
  <interface name="clk" internal="clk_0.clk_in" type="clock" dir="end" />
@@ -202,13 +249,13 @@
    internal="host_0.led_status_error_pio_external_connection"
    type="conduit"
    dir="end" />
- <module kind="clock_source" version="12.0" enabled="1" name="clk_0">
+ <module kind="clock_source" version="12.1" enabled="1" name="clk_0">
   <parameter name="clockFrequency" value="50000000" />
   <parameter name="clockFrequencyKnown" value="true" />
   <parameter name="inputClockFrequency" value="0" />
   <parameter name="resetSynchronousEdges" value="NONE" />
  </module>
- <module kind="altpll" version="12.0" enabled="1" name="altpll_0">
+ <module kind="altpll" version="12.1" enabled="1" name="altpll_0">
   <parameter name="HIDDEN_CUSTOM_ELABORATION">altpll_avalon_elaboration</parameter>
   <parameter name="HIDDEN_CUSTOM_POST_EDIT">altpll_avalon_post_edit</parameter>
   <parameter name="INTENDED_DEVICE_FAMILY" value="Cyclone IV E" />
@@ -377,73 +424,131 @@
  </module>
  <module kind="sub_pcp" version="1.0" enabled="1" name="pcp_0">
   <parameter name="AUTO_GENERATION_ID" value="0" />
-  <parameter name="AUTO_UNIQUE_ID" value="top_mn_pcp_0" />
+  <parameter name="AUTO_UNIQUE_ID" value="$${FILENAME}_pcp_0" />
   <parameter name="AUTO_DEVICE_FAMILY" value="Cyclone IV E" />
+  <parameter name="AUTO_DEVICE" value="EP4CE115F29C7" />
   <parameter name="AUTO_CLK50_CLOCK_RATE" value="50000000" />
-  <parameter name="AUTO_CLK50_CLOCK_DOMAIN" value="1" />
-  <parameter name="AUTO_CLK50_RESET_DOMAIN" value="1" />
+  <parameter name="AUTO_CLK50_CLOCK_DOMAIN" value="4" />
+  <parameter name="AUTO_CLK50_RESET_DOMAIN" value="4" />
   <parameter name="AUTO_CLK100_CLOCK_RATE" value="100000000" />
-  <parameter name="AUTO_CLK100_CLOCK_DOMAIN" value="2" />
-  <parameter name="AUTO_CLK100_RESET_DOMAIN" value="2" />
+  <parameter name="AUTO_CLK100_CLOCK_DOMAIN" value="5" />
+  <parameter name="AUTO_CLK100_RESET_DOMAIN" value="5" />
  </module>
  <module kind="sub_host" version="1.0" enabled="1" name="host_0">
   <parameter name="AUTO_GENERATION_ID" value="0" />
-  <parameter name="AUTO_UNIQUE_ID" value="top_mn_host_0" />
+  <parameter name="AUTO_UNIQUE_ID" value="$${FILENAME}_host_0" />
   <parameter name="AUTO_DEVICE_FAMILY" value="Cyclone IV E" />
+  <parameter name="AUTO_DEVICE" value="EP4CE115F29C7" />
   <parameter name="AUTO_CLK100_CLOCK_RATE" value="100000000" />
-  <parameter name="AUTO_CLK100_CLOCK_DOMAIN" value="2" />
-  <parameter name="AUTO_CLK100_RESET_DOMAIN" value="2" />
+  <parameter name="AUTO_CLK100_CLOCK_DOMAIN" value="5" />
+  <parameter name="AUTO_CLK100_RESET_DOMAIN" value="5" />
   <parameter name="AUTO_CLK50_CLOCK_RATE" value="50000000" />
-  <parameter name="AUTO_CLK50_CLOCK_DOMAIN" value="1" />
-  <parameter name="AUTO_CLK50_RESET_DOMAIN" value="1" />
+  <parameter name="AUTO_CLK50_CLOCK_DOMAIN" value="4" />
+  <parameter name="AUTO_CLK50_RESET_DOMAIN" value="4" />
+ </module>
+ <module
+   kind="hostinterface"
+   version="0.0.1"
+   enabled="1"
+   name="hostinterface_0">
+  <parameter name="sys_uniqueId" value="0" />
+  <parameter name="gui_interfaceTyp" value="0" />
+  <parameter name="gui_parallelMltplx" value="0" />
+  <parameter name="gui_parallelDwidth" value="16" />
+  <parameter name="gui_sizeDynBuf0" value="2" />
+  <parameter name="gui_sizeDynBuf1" value="2" />
+  <parameter name="gui_sizeErrorCnter" value="3108" />
+  <parameter name="gui_sizeTxNmtQ" value="2" />
+  <parameter name="gui_sizeTxGenQ" value="2" />
+  <parameter name="gui_sizeTxSyncQ" value="2" />
+  <parameter name="gui_sizeTxVethQ" value="2" />
+  <parameter name="gui_sizeRxVethQ" value="1" />
+  <parameter name="gui_sizeK2UQ" value="8" />
+  <parameter name="gui_sizeU2KQ" value="8" />
+  <parameter name="gui_sizeTpdo" value="1024" />
+  <parameter name="gui_sizeRpdo" value="1024" />
+  <parameter name="AUTO_C0_CLOCK_RATE" value="100000000" />
  </module>
  <connection
    kind="clock"
-   version="12.0"
+   version="12.1"
    start="clk_0.clk"
    end="altpll_0.inclk_interface" />
  <connection
    kind="reset"
-   version="12.0"
+   version="12.1"
    start="clk_0.clk_reset"
    end="altpll_0.inclk_interface_reset" />
- <connection kind="clock" version="12.0" start="altpll_0.c0" end="pcp_0.clk50" />
- <connection kind="clock" version="12.0" start="altpll_0.c2" end="pcp_0.clk100" />
+ <connection kind="clock" version="12.1" start="altpll_0.c0" end="pcp_0.clk50" />
+ <connection kind="clock" version="12.1" start="altpll_0.c2" end="pcp_0.clk100" />
  <connection
    kind="reset"
-   version="12.0"
+   version="12.1"
    start="clk_0.clk_reset"
    end="pcp_0.rst_clk50" />
  <connection
    kind="reset"
-   version="12.0"
+   version="12.1"
    start="clk_0.clk_reset"
    end="pcp_0.rst_clk100" />
- <connection kind="clock" version="12.0" start="altpll_0.c0" end="host_0.clk50" />
- <connection kind="clock" version="12.0" start="altpll_0.c2" end="host_0.clk100" />
+ <connection kind="clock" version="12.1" start="altpll_0.c0" end="host_0.clk50" />
+ <connection kind="clock" version="12.1" start="altpll_0.c2" end="host_0.clk100" />
  <connection
    kind="reset"
-   version="12.0"
+   version="12.1"
    start="clk_0.clk_reset"
    end="host_0.rst_clk100" />
  <connection
    kind="reset"
-   version="12.0"
+   version="12.1"
    start="clk_0.clk_reset"
    end="host_0.rst_clk50" />
  <connection
+   kind="clock"
+   version="12.1"
+   start="altpll_0.c2"
+   end="hostinterface_0.c0" />
+ <connection
    kind="avalon"
-   version="12.0"
+   version="12.1"
+   start="hostinterface_0.hostBridge"
+   end="pcp_0.hostif_to_pcp_bridge_s0">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0000" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="12.1"
+   start="pcp_0.pcp_to_hostif_bridge_m0"
+   end="hostinterface_0.pcp">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0000" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="12.1"
    start="host_0.host_interface"
-   end="pcp_0.hostinterface_0_host">
+   end="hostinterface_0.host">
   <parameter name="arbitrationPriority" value="1" />
   <parameter name="baseAddress" value="0x0000" />
  </connection>
  <connection
    kind="interrupt"
-   version="12.0"
-   start="host_0.irq_bridge_0_receiver_irq"
-   end="pcp_0.hostinterface_0_irqout">
+   version="12.1"
+   start="hostinterface_0.irqSync"
+   end="pcp_0.sync_irq_bridge_0_sender0_irq">
   <parameter name="irqNumber" value="0" />
  </connection>
+ <connection
+   kind="interrupt"
+   version="12.1"
+   start="host_0.irq_bridge_0_receiver_irq"
+   end="hostinterface_0.irqOut">
+  <parameter name="irqNumber" value="0" />
+ </connection>
+ <connection
+   kind="reset"
+   version="12.1"
+   start="clk_0.clk_reset"
+   end="hostinterface_0.r0" />
 </system>

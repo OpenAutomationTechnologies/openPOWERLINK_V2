@@ -1,6 +1,9 @@
 <sld_project_info>
+  <project>
+    <hash md5_digest_80b="ad74208c0ddffa51cc1c"/>
+  </project>
   <file_info>
-    <file checksum="0x011517B5" device="EP4CE115F29C7" path="POWERLINK_MN.sof" usercode="0xFFFFFFFF"/>
+    <file checksum="0x01159C8E" device="EP4CE115F29C7" path="POWERLINK_MN.sof" usercode="0xFFFFFFFF"/>
   </file_info>
   <hub_info ir_width="8" node_count="5"/>
   <node_info>
@@ -324,4 +327,12 @@
       <outputs/>
     </node>
   </node_info>
+  <sld_infos>
+    <sld_info hpath="top_mn:inst" name="inst">
+      <assignment_values>
+        <assignment_value text="QSYS_NAME top_mn HAS_SOPCINFO 1 GENERATION_ID 1362729706"/>
+      </assignment_values>
+      <parameters/>
+    </sld_info>
+  </sld_infos>
 </sld_project_info>
