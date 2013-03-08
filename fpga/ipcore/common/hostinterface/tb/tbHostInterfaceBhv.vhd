@@ -112,38 +112,38 @@ component hostInterface
        gVersionRevision : natural := 255
   );
   port (
-       avm_hostBridge_readdata : in std_logic_vector(31 downto 0);
-       avm_hostBridge_waitrequest : in std_logic;
-       avs_host_address : in std_logic_vector(16 downto 2);
-       avs_host_byteenable : in std_logic_vector(3 downto 0);
-       avs_host_read : in std_logic;
-       avs_host_write : in std_logic;
-       avs_host_writedata : in std_logic_vector(31 downto 0);
-       avs_pcp_address : in std_logic_vector(10 downto 2);
-       avs_pcp_byteenable : in std_logic_vector(3 downto 0);
-       avs_pcp_read : in std_logic;
-       avs_pcp_write : in std_logic;
-       avs_pcp_writedata : in std_logic_vector(31 downto 0);
-       coe_ExtSync_exsync : in std_logic;
-       coe_Gpio_gpin : in std_logic_vector(15 downto 0);
-       coe_NodeId_nodeid : in std_logic_vector(7 downto 0);
-       csi_c0_clock : in std_logic;
-       inr_irqSync_irq : in std_logic;
-       rsi_r0_reset : in std_logic;
-       avm_hostBridge_address : out std_logic_vector(29 downto 0);
-       avm_hostBridge_byteenable : out std_logic_vector(3 downto 0);
-       avm_hostBridge_read : out std_logic;
-       avm_hostBridge_write : out std_logic;
-       avm_hostBridge_writedata : out std_logic_vector(31 downto 0);
-       avs_host_readdata : out std_logic_vector(31 downto 0);
-       avs_host_waitrequest : out std_logic;
-       avs_pcp_readdata : out std_logic_vector(31 downto 0);
-       avs_pcp_waitrequest : out std_logic;
-       coe_Gpio_gpout : out std_logic_vector(15 downto 0);
-       coe_PlkLed_lederr : out std_logic;
-       coe_PlkLed_ledst : out std_logic;
-       ins_irqOut_irq : out std_logic
+       iHostBridgeReaddata : in std_logic_vector(31 downto 0);
+       iHostBridgeWaitrequest : in std_logic;
+       iHostAddress : in std_logic_vector(16 downto 2);
+       iHostByteenable : in std_logic_vector(3 downto 0);
+       iHostRead : in std_logic;
+       iHostWrite : in std_logic;
+       iHostWritedata : in std_logic_vector(31 downto 0);
+       iPcpAddress : in std_logic_vector(10 downto 2);
+       iPcpByteenable : in std_logic_vector(3 downto 0);
+       iPcpRead : in std_logic;
+       iPcpWrite : in std_logic;
+       iPcpWritedata : in std_logic_vector(31 downto 0);
+       oHostBridgeAddress : out std_logic_vector(29 downto 0);
+       oHostBridgeByteenable : out std_logic_vector(3 downto 0);
+       oHostBridgeRead : out std_logic;
+       oHostBridgeWrite : out std_logic;
+       oHostBridgeWritedata : out std_logic_vector(31 downto 0);
+       oHostReaddata : out std_logic_vector(31 downto 0);
+       oHostWaitrequest : out std_logic;
+       oPcpReaddata : out std_logic_vector(31 downto 0);
+       oPcpWaitrequest : out std_logic;
+       
+       iIrqExtSync : in std_logic;
+       iNodeId : in std_logic_vector(7 downto 0);
+       iClk : in std_logic;
+       iIrqIntSync : in std_logic;
+       iRst : in std_logic;
+       oPlkLedError : out std_logic;
+       oPlkLedStatus : out std_logic;
+       oIrq : out std_logic
   );
+  
 end component;
 component pdi_dpr
   generic(
@@ -205,46 +205,44 @@ constant GND_CONSTANT   : std_logic := '0';
 
 ---- Signal declarations used on the diagram ----
 
-signal avm_hostBridge_read : std_logic;
+signal oHostBridgeRead : std_logic;
 signal avm_hostBridge_ready : std_logic;
 signal avm_hostBridge_sel : std_logic;
-signal avm_hostBridge_waitrequest : std_logic;
-signal avm_hostBridge_write : std_logic;
-signal avs_host_read : std_logic;
-signal avs_host_waitrequest : std_logic;
-signal avs_host_write : std_logic;
-signal avs_pcp_read : std_logic;
-signal avs_pcp_waitrequest : std_logic;
-signal avs_pcp_write : std_logic;
+signal iHostBridgeWaitrequest : std_logic;
+signal oHostBridgeWrite : std_logic;
+signal iHostRead : std_logic;
+signal oHostWaitrequest : std_logic;
+signal iHostWrite : std_logic;
+signal iPcpRead : std_logic;
+signal oPcpWaitrequest : std_logic;
+signal iPcpWrite : std_logic;
 signal clk : std_logic;
-signal coe_ExtSync_exsync : std_logic;
-signal coe_PlkLed_lederr : std_logic;
-signal coe_PlkLed_ledst : std_logic;
+signal iIrqExtSync : std_logic;
+signal oPlkLedError : std_logic;
+signal oPlkLedStatus : std_logic;
 signal done : std_logic;
 signal GND : std_logic;
 signal hostAck : std_logic;
 signal hostDone : std_logic;
-signal inr_irqSync_irq : std_logic;
-signal ins_irqOut_irq : std_logic;
+signal iIrqIntSync : std_logic;
+signal oIrq : std_logic;
 signal pcpAck : std_logic;
 signal pcpDone : std_logic;
 signal rst : std_logic;
 signal VCC : std_logic;
-signal avm_hostBridge_address : std_logic_vector (29 downto 0);
-signal avm_hostBridge_byteenable : std_logic_vector (3 downto 0);
-signal avm_hostBridge_readdata : std_logic_vector (31 downto 0);
-signal avm_hostBridge_writedata : std_logic_vector (31 downto 0);
-signal avs_host_address : std_logic_vector (16 downto 0);
-signal avs_host_byteenable : std_logic_vector (3 downto 0);
-signal avs_host_readdata : std_logic_vector (31 downto 0);
-signal avs_host_writedata : std_logic_vector (31 downto 0);
-signal avs_pcp_address : std_logic_vector (10 downto 0);
-signal avs_pcp_byteenable : std_logic_vector (3 downto 0);
-signal avs_pcp_readdata : std_logic_vector (31 downto 0);
-signal avs_pcp_writedata : std_logic_vector (31 downto 0);
-signal coe_Gpio_gpin : std_logic_vector (15 downto 0);
-signal coe_Gpio_gpout : std_logic_vector (15 downto 0);
-signal coe_NodeId_nodeid : std_logic_vector (7 downto 0);
+signal oHostBridgeAddress : std_logic_vector (29 downto 0);
+signal oHostBridgeByteenable : std_logic_vector (3 downto 0);
+signal iHostBridgeReaddata : std_logic_vector (31 downto 0);
+signal oHostBridgeWritedata : std_logic_vector (31 downto 0);
+signal iHostAddress : std_logic_vector (16 downto 0);
+signal iHostByteenable : std_logic_vector (3 downto 0);
+signal oHostReaddata : std_logic_vector (31 downto 0);
+signal iHostWritedata : std_logic_vector (31 downto 0);
+signal iPcpAddress : std_logic_vector (10 downto 0);
+signal iPcpByteenable : std_logic_vector (3 downto 0);
+signal oPcpReaddata : std_logic_vector (31 downto 0);
+signal iPcpWritedata : std_logic_vector (31 downto 0);
+signal iNodeId : std_logic_vector (7 downto 0);
 signal counter : std_logic_vector (7 downto 0);
 
 begin
@@ -266,13 +264,11 @@ begin
 
 end process;
 
-inr_irqSync_irq <= '1' when unsigned(counter) = 10 else '0';
+iIrqIntSync <= '1' when unsigned(counter) = 10 else '0';
 
-coe_ExtSync_exsync <= '0';
+iIrqExtSync <= '0';
 
-coe_NodeId_nodeid <= x"F0";
-
-coe_Gpio_gpin <= x"ABCD";
+iNodeId <= x"F0";
 
 ----  Component instantiations  ----
 
@@ -297,59 +293,34 @@ DUT : hostInterface
        gVersionRevision => cVersionRevision
   )
   port map(
-       avs_host_address(2) => avs_host_address(2),
-       avs_host_address(3) => avs_host_address(3),
-       avs_host_address(4) => avs_host_address(4),
-       avs_host_address(5) => avs_host_address(5),
-       avs_host_address(6) => avs_host_address(6),
-       avs_host_address(7) => avs_host_address(7),
-       avs_host_address(8) => avs_host_address(8),
-       avs_host_address(9) => avs_host_address(9),
-       avs_host_address(10) => avs_host_address(10),
-       avs_host_address(11) => avs_host_address(11),
-       avs_host_address(12) => avs_host_address(12),
-       avs_host_address(13) => avs_host_address(13),
-       avs_host_address(14) => avs_host_address(14),
-       avs_host_address(15) => avs_host_address(15),
-       avs_host_address(16) => avs_host_address(16),
-       avs_pcp_address(2) => avs_pcp_address(2),
-       avs_pcp_address(3) => avs_pcp_address(3),
-       avs_pcp_address(4) => avs_pcp_address(4),
-       avs_pcp_address(5) => avs_pcp_address(5),
-       avs_pcp_address(6) => avs_pcp_address(6),
-       avs_pcp_address(7) => avs_pcp_address(7),
-       avs_pcp_address(8) => avs_pcp_address(8),
-       avs_pcp_address(9) => avs_pcp_address(9),
-       avs_pcp_address(10) => avs_pcp_address(10),
-       avm_hostBridge_address => avm_hostBridge_address,
-       avm_hostBridge_byteenable => avm_hostBridge_byteenable,
-       avm_hostBridge_read => avm_hostBridge_read,
-       avm_hostBridge_readdata => avm_hostBridge_readdata,
-       avm_hostBridge_waitrequest => avm_hostBridge_waitrequest,
-       avm_hostBridge_write => avm_hostBridge_write,
-       avm_hostBridge_writedata => avm_hostBridge_writedata,
-       avs_host_byteenable => avs_host_byteenable,
-       avs_host_read => avs_host_read,
-       avs_host_readdata => avs_host_readdata,
-       avs_host_waitrequest => avs_host_waitrequest,
-       avs_host_write => avs_host_write,
-       avs_host_writedata => avs_host_writedata,
-       avs_pcp_byteenable => avs_pcp_byteenable,
-       avs_pcp_read => avs_pcp_read,
-       avs_pcp_readdata => avs_pcp_readdata,
-       avs_pcp_waitrequest => avs_pcp_waitrequest,
-       avs_pcp_write => avs_pcp_write,
-       avs_pcp_writedata => avs_pcp_writedata,
-       coe_ExtSync_exsync => coe_ExtSync_exsync,
-       coe_Gpio_gpin => coe_Gpio_gpin,
-       coe_Gpio_gpout => coe_Gpio_gpout,
-       coe_NodeId_nodeid => coe_NodeId_nodeid,
-       coe_PlkLed_lederr => coe_PlkLed_lederr,
-       coe_PlkLed_ledst => coe_PlkLed_ledst,
-       csi_c0_clock => clk,
-       inr_irqSync_irq => inr_irqSync_irq,
-       ins_irqOut_irq => ins_irqOut_irq,
-       rsi_r0_reset => rst
+       iHostAddress => iHostAddress,
+       oHostBridgeAddress => oHostBridgeAddress,
+       oHostBridgeByteenable => oHostBridgeByteenable,
+       oHostBridgeRead => oHostBridgeRead,
+       iHostBridgeReaddata => iHostBridgeReaddata,
+       iHostBridgeWaitrequest => iHostBridgeWaitrequest,
+       oHostBridgeWrite => oHostBridgeWrite,
+       oHostBridgeWritedata => oHostBridgeWritedata,
+       iHostByteenable => iHostByteenable,
+       iHostRead => iHostRead,
+       oHostReaddata => oHostReaddata,
+       oHostWaitrequest => oHostWaitrequest,
+       iHostWrite => iHostWrite,
+       iHostWritedata => iHostWritedata,
+       iPcpByteenable => iPcpByteenable,
+       iPcpRead => iPcpRead,
+       oPcpReaddata => oPcpReaddata,
+       oPcpWaitrequest => oPcpWaitrequest,
+       iPcpWrite => iPcpWrite,
+       iPcpWritedata => iPcpWritedata,
+       iIrqExtSync => iIrqExtSync,
+       iNodeId => iNodeId,
+       oPlkLedError => oPlkLedError,
+       oPlkLedStatus => oPlkLedStatus,
+       iClk => clk,
+       iIrqIntSync => iIrqIntSync,
+       oIrq => oIrq,
+       iRst => rst
   );
 
 RAM : pdi_dpr
@@ -358,16 +329,16 @@ RAM : pdi_dpr
        NUM_WORDS => 2**21
   )
   port map(
-       address_a => avm_hostBridge_address( 22 downto 2 ),
-       address_b => avm_hostBridge_address( 22 downto 2 ),
-       byteena_a => avm_hostBridge_byteenable,
-       byteena_b => avm_hostBridge_byteenable,
+       address_a => oHostBridgeAddress( 22 downto 2 ),
+       address_b => oHostBridgeAddress( 22 downto 2 ),
+       byteena_a => oHostBridgeByteenable,
+       byteena_b => oHostBridgeByteenable,
        clock_a => clk,
        clock_b => clk,
-       data_a => avm_hostBridge_writedata,
-       data_b => avm_hostBridge_writedata,
-       q_a => avm_hostBridge_readdata,
-       wren_a => avm_hostBridge_write,
+       data_a => oHostBridgeWritedata,
+       data_b => oHostBridgeWritedata,
+       q_a => iHostBridgeReaddata,
+       wren_a => oHostBridgeWrite,
        wren_b => GND
   );
 
@@ -395,15 +366,15 @@ U2 : enableGen
        onEnable => rst
   );
 
-hostAck <= not(avs_host_waitrequest);
+hostAck <= not(oHostWaitrequest);
 
 done <= hostDone and pcpDone;
 
-pcpAck <= not(avs_pcp_waitrequest);
+pcpAck <= not(oPcpWaitrequest);
 
-avm_hostBridge_sel <= avm_hostBridge_write or avm_hostBridge_read;
+avm_hostBridge_sel <= oHostBridgeWrite or oHostBridgeRead;
 
-avm_hostBridge_waitrequest <= not(avm_hostBridge_ready);
+iHostBridgeWaitrequest <= not(avm_hostBridge_ready);
 
 host : busMaster
   generic map (
@@ -415,14 +386,14 @@ host : busMaster
        iAck => hostAck,
        iClk => clk,
        iEnable => VCC,
-       iReaddata => avs_host_readdata( 31 downto 0 ),
+       iReaddata => oHostReaddata( 31 downto 0 ),
        iRst => rst,
-       oAddress => avs_host_address( 16 downto 0 ),
-       oByteenable => avs_host_byteenable( 3 downto 0 ),
+       oAddress => iHostAddress( 16 downto 0 ),
+       oByteenable => iHostByteenable( 3 downto 0 ),
        oDone => hostDone,
-       oRead => avs_host_read,
-       oWrite => avs_host_write,
-       oWritedata => avs_host_writedata( 31 downto 0 )
+       oRead => iHostRead,
+       oWrite => iHostWrite,
+       oWritedata => iHostWritedata( 31 downto 0 )
   );
 
 pcp : busMaster
@@ -435,14 +406,14 @@ pcp : busMaster
        iAck => pcpAck,
        iClk => clk,
        iEnable => VCC,
-       iReaddata => avs_pcp_readdata( 31 downto 0 ),
+       iReaddata => oPcpReaddata( 31 downto 0 ),
        iRst => rst,
-       oAddress => avs_pcp_address( 10 downto 0 ),
-       oByteenable => avs_pcp_byteenable( 3 downto 0 ),
+       oAddress => iPcpAddress( 10 downto 0 ),
+       oByteenable => iPcpByteenable( 3 downto 0 ),
        oDone => pcpDone,
-       oRead => avs_pcp_read,
-       oWrite => avs_pcp_write,
-       oWritedata => avs_pcp_writedata( 31 downto 0 )
+       oRead => iPcpRead,
+       oWrite => iPcpWrite,
+       oWritedata => iPcpWritedata( 31 downto 0 )
   );
 
 

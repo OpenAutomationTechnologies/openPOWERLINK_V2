@@ -59,10 +59,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // const defines
 //------------------------------------------------------------------------------
 
-#if defined(PCP_0_HOSTINTERFACE_0_BASE)
+#if defined(HOSTINTERFACE_0_BASE)
 
-#define HOSTIF_PCP_BASE             PCP_0_HOSTINTERFACE_0_BASE
-#define HOSTIF_HOST_BASE            PCP_0_HOSTINTERFACE_0_BASE
+#define HOSTIF_PCP_BASE             HOSTINTERFACE_0_BASE
+#define HOSTIF_HOST_BASE            HOSTINTERFACE_0_BASE
 
 #define HOSTIF_IRQ_IC_ID            0 //FIXME: obtain from system.h
 #define HOSTIF_IRQ                  0 //FIXME: obtain from system.h
@@ -72,6 +72,15 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /* If one Nios II does Pcp and Host (makes no sense, but why not?) */
 #define HOSTIF_PCP_BASE             PCP_0_HOSTINTERFACE_0_PCP_BASE
 #define HOSTIF_HOST_BASE            PCP_0_HOSTINTERFACE_0_HOST_BASE
+
+#else
+
+#warning "Host Interface base is assumed! Set the correct address!"
+
+#define HOSTIF_PCP_BASE             0x10000000
+#define HOSTIF_HOST_BASE            0x10000000
+#define HOSTIF_IRQ_IC_ID            0
+#define HOSTIF_IRQ                  0
 
 #endif
 

@@ -89,66 +89,66 @@ entity hostInterface is
         );
     port (
         --! Clock Source input
-        csi_c0_clock : in std_logic;
+        iClk : in std_logic;
         --! Reset Source input
-        rsi_r0_reset : in std_logic;
-        -- Avalon Memory Mapped Slave for Host
-        --! Avalon-MM slave host address
-        avs_host_address : in std_logic_vector(16 downto 2);
-        --! Avalon-MM slave host byteenable
-        avs_host_byteenable : in std_logic_vector(3 downto 0);
-        --! Avalon-MM slave host read
-        avs_host_read : in std_logic;
-        --! Avalon-MM slave host readdata
-        avs_host_readdata : out std_logic_vector(31 downto 0);
-        --! Avalon-MM slave host write
-        avs_host_write : in std_logic;
-        --! Avalon-MM slave host writedata
-        avs_host_writedata : in std_logic_vector(31 downto 0);
-        --! Avalon-MM slave host waitrequest
-        avs_host_waitrequest : out std_logic;
-        -- Avalon Memory Mapped Slave for PCP
-        --! Avalon-MM slave pcp address
-        avs_pcp_address : in std_logic_vector(10 downto 2);
-        --! Avalon-MM slave pcp byteenable
-        avs_pcp_byteenable : in std_logic_vector(3 downto 0);
-        --! Avalon-MM slave pcp read
-        avs_pcp_read : in std_logic;
-        --! Avalon-MM slave pcp readdata
-        avs_pcp_readdata : out std_logic_vector(31 downto 0);
-        --! Avalon-MM slave pcp write
-        avs_pcp_write : in std_logic;
-        --! Avalon-MM slave pcp writedata
-        avs_pcp_writedata : in std_logic_vector(31 downto 0);
-        --! Avalon-MM slave pcp waitrequest
-        avs_pcp_waitrequest : out std_logic;
-        -- Avalon Memory Mapped Master for Host via Magic Bridge
-        --! Avalon-MM master hostBridge address
-        avm_hostBridge_address : out std_logic_vector(29 downto 0);
-        --! Avalon-MM master hostBridge byteenable
-        avm_hostBridge_byteenable : out std_logic_vector(3 downto 0);
-        --! Avalon-MM master hostBridge read
-        avm_hostBridge_read : out std_logic;
-        --! Avalon-MM master hostBridge readdata
-        avm_hostBridge_readdata : in std_logic_vector(31 downto 0);
-        --! Avalon-MM master hostBridge write
-        avm_hostBridge_write : out std_logic;
-        --! Avalon-MM master hostBridge writedata
-        avm_hostBridge_writedata : out std_logic_vector(31 downto 0);
-        --! Avalon-MM master hostBridge waitrequest
-        avm_hostBridge_waitrequest : in std_logic;
-        --! Interrupt receiver
-        inr_irqSync_irq : in std_logic;
-        --! Interrupt sender
-        ins_irqOut_irq : out std_logic;
-        --! External Sync Source
-        coe_ExtSync_exsync : in std_logic;
+        iRst : in std_logic;
+        -- Memory Mapped Slave for Host
+        --! MM slave host address
+        iHostAddress : in std_logic_vector(16 downto 2);
+        --! MM slave host byteenable
+        iHostByteenable : in std_logic_vector(3 downto 0);
+        --! MM slave host read
+        iHostRead : in std_logic;
+        --! MM slave host readdata
+        oHostReaddata : out std_logic_vector(31 downto 0);
+        --! MM slave host write
+        iHostWrite : in std_logic;
+        --! MM slave host writedata
+        iHostWritedata : in std_logic_vector(31 downto 0);
+        --! MM slave host waitrequest
+        oHostWaitrequest : out std_logic;
+        -- Memory Mapped Slave for PCP
+        --! MM slave pcp address
+        iPcpAddress : in std_logic_vector(10 downto 2);
+        --! MM slave pcp byteenable
+        iPcpByteenable : in std_logic_vector(3 downto 0);
+        --! MM slave pcp read
+        iPcpRead : in std_logic;
+        --! MM slave pcp readdata
+        oPcpReaddata : out std_logic_vector(31 downto 0);
+        --! MM slave pcp write
+        iPcpWrite : in std_logic;
+        --! MM slave pcp writedata
+        iPcpWritedata : in std_logic_vector(31 downto 0);
+        --! MM slave pcp waitrequest
+        oPcpWaitrequest : out std_logic;
+        -- Memory Mapped Master for Host via Magic Bridge
+        --! MM master hostBridge address
+        oHostBridgeAddress : out std_logic_vector(29 downto 0);
+        --! MM master hostBridge byteenable
+        oHostBridgeByteenable : out std_logic_vector(3 downto 0);
+        --! MM master hostBridge read
+        oHostBridgeRead : out std_logic;
+        --! MM master hostBridge readdata
+        iHostBridgeReaddata : in std_logic_vector(31 downto 0);
+        --! MM master hostBridge write
+        oHostBridgeWrite : out std_logic;
+        --! MM master hostBridge writedata
+        oHostBridgeWritedata : out std_logic_vector(31 downto 0);
+        --! MM master hostBridge waitrequest
+        iHostBridgeWaitrequest : in std_logic;
+        --! Interrupt internal sync signal (from openMAC)
+        iIrqIntSync : in std_logic;
+        --! External sync source
+        iIrqExtSync : in std_logic;
+        --! Interrupt output signal
+        oIrq : out std_logic;
         --! Node Id
-        coe_NodeId_nodeid : in std_logic_vector(7 downto 0);
+        iNodeId : in std_logic_vector(7 downto 0);
         --! POWERLINK Error LED
-        coe_PlkLed_lederr : out std_logic;
+        oPlkLedError : out std_logic;
         --! POWERLINK Status LED
-        coe_PlkLed_ledst : out std_logic
+        oPlkLedStatus : out std_logic
         );
 end hostInterface;
 
@@ -310,7 +310,7 @@ architecture Rtl of hostInterface is
     signal statCtrlWaitrequest : std_logic;
 
     --! readdata from status/control
-    signal statCtrlReaddata : std_logic_vector(avs_host_readdata'range);
+    signal statCtrlReaddata : std_logic_vector(oHostReaddata'range);
 
     --! bridge select output
     signal bridgeSelOut : std_logic;
@@ -319,8 +319,8 @@ architecture Rtl of hostInterface is
     signal statCtrlLed : std_logic_vector(1 downto 0);
 
     --! Avalon master needs byte addresses - localy dword is used
-    signal avm_hostBridge_address_dword : std_logic_vector
-    (avm_hostBridge_address'length-1 downto 2);
+    signal hostBridgeAddress_dword : std_logic_vector
+    (oHostBridgeAddress'length-1 downto 2);
 
     -- base set signals
     --! BaseSet Write
@@ -328,11 +328,11 @@ architecture Rtl of hostInterface is
 
     --! BaseSet Writedata
     signal baseSetWritedata : std_logic_vector
-    (avm_hostBridge_address_dword'range);
+    (hostBridgeAddress_dword'range);
 
     --! BaseSet Readdata
     signal baseSetReaddata : std_logic_vector
-    (avm_hostBridge_address_dword'range);
+    (hostBridgeAddress_dword'range);
 
     --! BaseSet Address
     signal baseSetAddress : std_logic_vector
@@ -374,17 +374,17 @@ architecture Rtl of hostInterface is
 
     --! bridge read path
     signal bridgeReady : std_logic;
-    signal bridgeReaddata : std_logic_vector(avm_hostBridge_readdata'range);
+    signal bridgeReaddata : std_logic_vector(iHostBridgeReaddata'range);
 
 begin
 
     --! select status/control registers if host address is below 2 kB
-    statCtrlSel <= cActivated when avs_host_address < cBaseAddressArray(0)(avs_host_address'range) else
+    statCtrlSel <= cActivated when iHostAddress < cBaseAddressArray(0)(iHostAddress'range) else 
     cInactivated;
 
     --! select invalid address
-    invalidSel <= cActivated when avs_host_address >=
-    cBaseAddressArray(cBaseAddressArrayCount-1)(avs_host_address'range) else
+    invalidSel <= cActivated when iHostAddress >= 
+    cBaseAddressArray(cBaseAddressArrayCount-1)(iHostAddress'range) else
     cInactivated;
 
     --! bridge is selected if status/control registers are not accessed
@@ -394,24 +394,24 @@ begin
     cActivated;
 
     --! create write and read strobe for status/control registers
-    statCtrlWrite <= avs_host_write and statCtrlSel;
-    statCtrlRead <= avs_host_read and statCtrlSel;
+    statCtrlWrite <= iHostWrite and statCtrlSel;
+    statCtrlRead <= iHostRead and statCtrlSel;
 
     --! host waitrequest from status/control, bridge or invalid
-    avs_host_waitrequest <=
+    oHostWaitrequest <= 
     statCtrlWaitrequest when statCtrlSel = cActivated else
     cInactivated when bridgeEnable = cInactivated else
     not bridgeReady when bridgeSel = cActivated else
     not invalidSel;
 
     --! host readdata from status/control or bridge
-    avs_host_readdata <=
+    oHostReaddata <= 
     bridgeReaddata when bridgeSel = cActivated else
     statCtrlReaddata when statCtrlSel = cActivated else
     (others => cInactivated);
 
     --! select external sync if enabled, otherwise rx irq signal
-    syncSig <= inr_irqSync_irq when extSyncEnable /= cActivated else
+    syncSig <= iIrqIntSync when extSyncEnable /= cActivated else
                 extSync_rising when extSyncConfig = cExtSyncEdgeRis else
                 extSync_falling when extSyncConfig = cExtSyncEdgeFal else
                 extSync_any when extSyncConfig = cExtSyncEdgeAny else
@@ -420,9 +420,9 @@ begin
     --! The synchronizer which protects us from crazy effects!
     theSynchronizer : sync
     port map(
-        clk => csi_c0_clock,
-        rst => rsi_r0_reset,
-        din => coe_ExtSync_exsync,
+        clk => iClk,
+        rst => iRst,
+        din => iIrqExtSync,
         dout => extSync_sync
         );
 
@@ -433,8 +433,8 @@ begin
         rising => extSync_rising,
         falling => extSync_falling,
         any => extSync_any,
-        clk => csi_c0_clock,
-        rst => rsi_r0_reset
+        clk => iClk,
+        rst => iRst
         );
 
     --! The Magic Bridge
@@ -444,11 +444,11 @@ begin
         gBaseAddressArray       => cBaseAddressArray
         )
     port map(
-        iClk                    => csi_c0_clock,
-        iRst                    => rsi_r0_reset,
-        iBridgeAddress          => avs_host_address,
+        iClk                    => iClk,
+        iRst                    => iRst,
+        iBridgeAddress          => iHostAddress,
         iBridgeSelect           => bridgeSel,
-        oBridgeAddress          => avm_hostBridge_address_dword,
+        oBridgeAddress          => hostBridgeAddress_dword,
         oBridgeSelectAny        => bridgeSelOut,
         oBridgeSelect           => open,
         iBaseSetWrite           => baseSetWrite,
@@ -457,44 +457,44 @@ begin
         oBaseSetData            => baseSetReaddata
         );
 
-    process(csi_c0_clock)
+    process(iClk)
     begin
-        if rising_edge(csi_c0_clock) then
-            if rsi_r0_reset = cActivated then
-                avm_hostBridge_write <= cInactivated;
-                avm_hostBridge_read <= cInactivated;
-                avm_hostBridge_writedata <= (others => cInactivated);
-                avm_hostBridge_byteenable <= (others => cInactivated);
-                avm_hostBridge_address <= (others => cInactivated);
+        if rising_edge(iClk) then
+            if iRst = cActivated then
+                oHostBridgeWrite <= cInactivated;
+                oHostBridgeRead <= cInactivated;
+                oHostBridgeWritedata <= (others => cInactivated);
+                oHostBridgeByteenable <= (others => cInactivated);
+                oHostBridgeAddress <= (others => cInactivated);
                 bridgeReaddata <= (others => cInactivated);
                 bridgeReady <= cInactivated;
             else
                 --! generate hostBridge write and read strobes
-                if bridgeSelOut = cActivated and
-                    avm_hostBridge_waitrequest = cActivated and
+                if bridgeSelOut = cActivated and 
+                    iHostBridgeWaitrequest = cActivated and 
                     bridgeReady = cInactivated then
                     --! if bridge is busy forward requests
-                    avm_hostBridge_write <= avs_host_write;
-                    avm_hostBridge_read <= avs_host_read;
+                    oHostBridgeWrite <= iHostWrite;
+                    oHostBridgeRead <= iHostRead;
                 else
-                    avm_hostBridge_write <= cInactivated;
-                    avm_hostBridge_read <= cInactivated;
+                    oHostBridgeWrite <= cInactivated;
+                    oHostBridgeRead <= cInactivated;
                 end if;
 
                 --! bridge writedata from host
-                avm_hostBridge_writedata <= avs_host_writedata;
+                oHostBridgeWritedata <= iHostWritedata;
 
                 --! bridge byteenable from host
-                avm_hostBridge_byteenable <= avs_host_byteenable;
+                oHostBridgeByteenable <= iHostByteenable;
 
                 --! bridge byte addressing
-                avm_hostBridge_address <= avm_hostBridge_address_dword & "00";
+                oHostBridgeAddress <= hostBridgeAddress_dword & "00";
 
                 --! bridge readdata
-                bridgeReaddata <= avm_hostBridge_readdata;
+                bridgeReaddata <= iHostBridgeReaddata;
 
                 --! bridge waitrequest
-                bridgeReady <= not avm_hostBridge_waitrequest;
+                bridgeReady <= not iHostBridgeWaitrequest;
 
             end if;
         end if;
@@ -507,11 +507,11 @@ begin
         gIrqSourceCount         => cIrqSourceCount
         )
     port map(
-        iClk                    => csi_c0_clock,
-        iRst                    => rsi_r0_reset,
+        iClk                    => iClk,
+        iRst                    => iRst,
         iSync                   => syncSig,
         iIrqSource              => irqSourceSet,
-        oIrq                    => ins_irqOut_irq,
+        oIrq                    => oIrq,
         iIrqMasterEnable        => irqMasterEnable,
         iIrqSourceEnable        => irqSourceEnable,
         iIrqAcknowledge         => irqAcknowledge,
@@ -532,22 +532,22 @@ begin
         gIrqSourceCount         => cIrqSourceCount
         )
     port map(
-        iClk                    => csi_c0_clock,
-        iRst                    => rsi_r0_reset,
+        iClk                    => iClk,
+        iRst                    => iRst,
         iHostRead               => statCtrlRead,
         iHostWrite              => statCtrlWrite,
-        iHostByteenable         => avs_host_byteenable,
-        iHostAddress            => avs_host_address(10 downto 2),
+        iHostByteenable         => iHostByteenable,
+        iHostAddress            => iHostAddress(10 downto 2),
         oHostReaddata           => statCtrlReaddata,
-        iHostWritedata          => avs_host_writedata,
+        iHostWritedata          => iHostWritedata,
         oHostWaitrequest        => statCtrlWaitrequest,
-        iPcpRead                => avs_pcp_read,
-        iPcpWrite               => avs_pcp_write,
-        iPcpByteenable          => avs_pcp_byteenable,
-        iPcpAddress             => avs_pcp_address,
-        oPcpReaddata            => avs_pcp_readdata,
-        iPcpWritedata           => avs_pcp_writedata,
-        oPcpWaitrequest         => avs_pcp_waitrequest,
+        iPcpRead                => iPcpRead,
+        iPcpWrite               => iPcpWrite,
+        iPcpByteenable          => iPcpByteenable,
+        iPcpAddress             => iPcpAddress,
+        oPcpReaddata            => oPcpReaddata,
+        iPcpWritedata           => iPcpWritedata,
+        oPcpWaitrequest         => oPcpWaitrequest,
         oBaseSetWrite           => baseSetWrite,
         oBaseSetAddress         => baseSetAddress,
         iBaseSetData            => baseSetReaddata,
@@ -559,13 +559,13 @@ begin
         iIrqPending             => irqSourcePending,
         oExtSyncEnable          => extSyncEnable,
         oExtSyncConfig          => extSyncConfig,
-        iNodeId                 => coe_NodeId_nodeid,
+        iNodeId                 => iNodeId,
         oPLed                   => statCtrlLed,
         oBridgeEnable           => bridgeEnable
         );
 
-    coe_PlkLed_ledst <= statCtrlLed(0);
+    oPlkLedStatus <= statCtrlLed(0);
 
-    coe_PlkLed_lederr <= statCtrlLed(1);
+    oPlkLedError <= statCtrlLed(1);
 
 end Rtl;
