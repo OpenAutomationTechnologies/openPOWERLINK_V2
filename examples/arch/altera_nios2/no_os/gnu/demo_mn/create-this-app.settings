@@ -48,7 +48,8 @@ BSP_DIR=./bsp
 
 ##################################
 # Relative path to SOPC file
-SOPC_DIR=${STACKROOT_DIR}/fpga/boards/altera/TERASIC_DE2-115/mn_dual_nios2/
+#SOPC_DIR=${STACKROOT_DIR}/fpga/boards/altera/TERASIC_DE2-115/mn_dual_nios2/
+SOPC_DIR=${STACKROOT_DIR}/fpga/boards/altera/TERASIC_DE2-115/mn_par_host/
 
 ##################################
 # Include path
