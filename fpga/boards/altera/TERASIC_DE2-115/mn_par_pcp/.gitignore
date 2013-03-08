@@ -1,0 +1,16 @@
+.qsys_edit/
+db/
+incremental_db/
+top_mn/
+*.bak
+*.bsf
+*.done
+*.html
+*.pin
+*.qws
+*.rpt
+*.smsg
+*.sof
+*.sopcinfo
+*.summary
+*.txt
