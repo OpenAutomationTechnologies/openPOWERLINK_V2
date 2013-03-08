@@ -102,6 +102,8 @@ architecture Rtl of irqGen is
     --! interrupt source store
     signal irqSourceStore, irqSourceStore_next  : std_logic_vector
     (gIrqSourceCount downto 1);
+    --! unregistered irq out signal
+    signal unregIrq, irq_reg : std_logic;
 
 begin
 
@@ -124,12 +126,16 @@ begin
             if iRst = cActivated then
                 irqRegLatch <= (others => cInactivated);
                 irqSourceStore <= (others => cInactivated);
+                irq_reg <= cInactivated;
             else
                 irqRegLatch <= irqRegLatch_next;
                 irqSourceStore <= irqSourceStore_next;
+                irq_reg <= unregIrq;
             end if;
         end if;
     end process;
+
+    oIrq <= irq_reg;
 
     --! irq register control
     combIrqRegCont : process(
@@ -186,7 +192,7 @@ begin
 
     begin
         --default
-        oIrq <= cInactivated;
+        unregIrq <= cInactivated;
 
         --! the master enable overrules everything
         if iIrqMasterEnable = cActivated then
@@ -199,7 +205,7 @@ begin
             end loop;
 
             --! variable holds irq state
-            oIrq <= vTmp;
+            unregIrq <= vTmp;
         end if;
     end process;
 
