@@ -70,7 +70,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 const BYTE aMacAddr_g[] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 static BOOL fGsOff_l;
-static char* pszCdcFilename_g = "mnobd.cdc";
 
 //------------------------------------------------------------------------------
 // global function prototypes
@@ -81,7 +80,7 @@ tEplKernel selectPcapDevice(char *pDevName_p);
 
 int getopt(int, char * const [], const char *);
 
-void initEvents (UINT* pCycle_p, BOOL* pfGsOff_p);
+void initEvents (BOOL* pfGsOff_p);
 tEplKernel PUBLIC EplObdInitRam (tEplObdInitParam MEM* pIniEPL_C_ADR_INVALIDtParam_p);
 tEplKernel PUBLIC processEvents(tEplApiEventType EventType_p, tEplApiEventArg* pEventArg_p, void GENERIC* pUserArg_p);
 
@@ -98,7 +97,7 @@ tEplKernel PUBLIC processEvents(tEplApiEventType EventType_p, tEplApiEventArg* p
 //------------------------------------------------------------------------------
 typedef struct
 {
-    UINT32      cycleLen;
+    char        cdcFile[256];
     char*       pLogFile;
 } tOptions;
 
@@ -110,7 +109,8 @@ typedef struct
 // local function prototypes
 //------------------------------------------------------------------------------
 static int getOptions(int argc_p, char **argv_p, tOptions* pOpts_p);
-static tEplKernel initPowerlink(UINT32 cycleLen_p, const BYTE* macAddr_p);
+static tEplKernel initPowerlink(UINT32 cycleLen_p, char *pszCdcFileName_p,
+                                const BYTE* macAddr_p);
 static void loopMain(void);
 static void shutdownPowerlink(void);
 
@@ -145,13 +145,13 @@ int main(int argc, char **argv)
         return 0;
     }
 
-    initEvents(&opts.cycleLen, &fGsOff_l);
+    initEvents(&fGsOff_l);
 
     printf("----------------------------------------------------\n");
     printf("openPOWERLINK console MN DEMO application\n");
     printf("----------------------------------------------------\n");
 
-    if ((ret = initPowerlink(opts.cycleLen, aMacAddr_g)) != kEplSuccessful)
+    if ((ret = initPowerlink(CYCLE_LEN, opts.cdcFile, aMacAddr_g)) != kEplSuccessful)
         goto Exit;
 
     if((ret = initApp()) != kEplSuccessful)
@@ -185,7 +185,8 @@ The function initializes the openPOWERLINK stack.
 \return The function returns a tEplKernel error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel initPowerlink(UINT32 cycleLen_p, const BYTE* macAddr_p)
+static tEplKernel initPowerlink(UINT32 cycleLen_p, char *pszCdcFileName_p,
+                                const BYTE* macAddr_p)
 {
     tEplKernel                  ret = kEplSuccessful;
     static tEplApiInitParam     initParam;
@@ -256,7 +257,7 @@ static tEplKernel initPowerlink(UINT32 cycleLen_p, const BYTE* macAddr_p)
         return ret;
     }
 
-    ret = EplApiSetCdcFilename(pszCdcFilename_g);
+    ret = EplApiSetCdcFilename(pszCdcFileName_p);
     if(ret != kEplSuccessful)
     {
         printf("EplApiSetCdcFilename() failed (Error:0x%x!\n", ret);
@@ -405,7 +406,7 @@ static int getOptions(int argc_p, char **argv_p, tOptions* pOpts_p)
     int                         opt;
 
     /* setup default parameters */
-    pOpts_p->cycleLen = CYCLE_LEN;
+    strncpy (pOpts_p->cdcFile, "mnobd.cdc", 256);
     pOpts_p->pLogFile = NULL;
 
     /* get command line parameters */
@@ -414,7 +415,7 @@ static int getOptions(int argc_p, char **argv_p, tOptions* pOpts_p)
         switch (opt)
         {
         case 'c':
-            pOpts_p->cycleLen = strtoul(optarg, NULL, 10);
+            strncpy (pOpts_p->cdcFile, optarg, 256);
             break;
 
         case 'l':

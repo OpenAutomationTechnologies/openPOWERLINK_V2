@@ -55,7 +55,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // module global vars
 //------------------------------------------------------------------------------
-static UINT32*  pCycle_l;
 static BOOL*    pfGsOff_l;
 
 //------------------------------------------------------------------------------
@@ -97,7 +96,7 @@ static tEplKernel processNodeEvent(tEplApiEventType EventType_p,
                                    tEplApiEventArg* pEventArg_p,
                                    void GENERIC* pUserArg_p);
 
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_CFM)) != 0)
+#ifdef CONFIG_INCLUDE_CFM
 static tEplKernel processCfmProgressEvent(tEplApiEventType EventType_p,
                                           tEplApiEventArg* pEventArg_p,
                                           void GENERIC* pUserArg_p);
@@ -105,9 +104,8 @@ static tEplKernel processCfmProgressEvent(tEplApiEventType EventType_p,
 static tEplKernel processCfmResultEvent(tEplApiEventType EventType_p,
                                         tEplApiEventArg* pEventArg_p,
                                         void GENERIC* pUserArg_p);
-#endif
-
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_CFM)) == 0)
+#else
+static tEplKernel setDefaultNodeAssignment(void);
 static tEplKernel processSdoEvent(tEplApiEventType EventType_p,
                                   tEplApiEventArg* pEventArg_p,
                                   void GENERIC* pUserArg_p);
@@ -131,9 +129,8 @@ The function initializes the applications event module
 */
 //------------------------------------------------------------------------------
 
-void initEvents (UINT* pCycle_p, BOOL* pfGsOff_p)
+void initEvents (BOOL* pfGsOff_p)
 {
-    pCycle_l = pCycle_p;
     pfGsOff_l = pfGsOff_p;
 }
 
@@ -180,7 +177,7 @@ tEplKernel PUBLIC processEvents(tEplApiEventType EventType_p,
             ret = processNodeEvent(EventType_p, pEventArg_p, pUserArg_p);
             break;
 
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_CFM)) != 0)
+#ifdef CONFIG_INCLUDE_CFM
         case kEplApiEventCfmProgress:
             ret = processCfmProgressEvent(EventType_p, pEventArg_p, pUserArg_p);
             break;
@@ -188,9 +185,7 @@ tEplKernel PUBLIC processEvents(tEplApiEventType EventType_p,
         case kEplApiEventCfmResult:
             ret = processCfmResultEvent(EventType_p, pEventArg_p, pUserArg_p);
             break;
-#endif
-
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_CFM)) == 0)
+#else
         // Configuration Manager is not available,
         // so process SDO events
         case kEplApiEventSdo:
@@ -227,14 +222,13 @@ static tEplKernel processStateChangeEvent(tEplApiEventType EventType_p,
                                           tEplApiEventArg* pEventArg_p,
                                           void GENERIC* pUserArg_p)
 {
-    UINT                        varLen;
     tEplKernel                  ret = kEplSuccessful;
     tEplEventNmtStateChange*    pNmtStateChange = &pEventArg_p->m_NmtStateChange;
 
     UNUSED_PARAMETER(EventType_p);
     UNUSED_PARAMETER(pUserArg_p);
 
-    if (pCycle_l == NULL)
+    if (pfGsOff_l == NULL)
     {
         console_printlog("Applications event module isn't initialized!\n");
         return kEplGeneralError;
@@ -257,7 +251,7 @@ static tEplKernel processStateChangeEvent(tEplApiEventType EventType_p,
             break;
 
         case kEplNmtGsResetCommunication:
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_CFM)) == 0)
+#ifndef CONFIG_INCLUDE_CFM
             ret = setDefaultNodeAssignment();
 #endif
             console_printlog("StateChangeEvent(0x%X) originating event = 0x%X (%s)\n",
@@ -267,15 +261,6 @@ static tEplKernel processStateChangeEvent(tEplApiEventType EventType_p,
             break;
 
         case kEplNmtGsResetConfiguration:
-            if (*pCycle_l != 0)
-            {
-                ret = EplApiWriteLocalObject(0x1006, 0x00, pCycle_l, sizeof(UINT32));
-            }
-            else
-            {
-                varLen = sizeof(UINT32);
-                EplApiReadLocalObject(0x1006, 0x00, pCycle_l, &varLen);
-            }
             console_printlog("StateChangeEvent(0x%X) originating event = 0x%X (%s)\n",
                    pNmtStateChange->m_NewNmtState,
                    pNmtStateChange->m_NmtEvent,
@@ -470,7 +455,7 @@ static tEplKernel processNodeEvent(tEplApiEventType EventType_p,
     return kEplSuccessful;
 }
 
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_CFM)) != 0)
+#ifdef CONFIG_INCLUDE_CFM
 //------------------------------------------------------------------------------
 /**
 \brief  Process CFM progress events
@@ -562,9 +547,9 @@ static tEplKernel processCfmResultEvent(tEplApiEventType EventType_p,
     }
     return kEplSuccessful;
 }
-#endif
 
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_CFM)) == 0)
+#else
+
 //------------------------------------------------------------------------------
 /**
 \brief  Process SDO events
@@ -635,6 +620,7 @@ static tEplKernel setDefaultNodeAssignment(void)
 
     nodeAssignment = (EPL_NODEASSIGN_MN_PRES | EPL_NODEASSIGN_NODE_EXISTS);    // 0x00010001L
     ret = EplApiWriteLocalObject(0x1F81, 0xF0, &nodeAssignment, sizeof (nodeAssignment));
+    return ret;
 }
 #endif
 
