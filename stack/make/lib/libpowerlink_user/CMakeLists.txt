@@ -84,7 +84,6 @@ SET (LIB_SOURCES
      ${COMMON_SOURCE_DIR}/event/eventcal-shb.c
      ${LIB_SOURCE_DIR}/ami/amix86.c
      ${LIB_SOURCE_DIR}/sharedbuff/SharedBuff.c
-     ${EDRV_SOURCE_DIR}/edrvcyclic.c
      )
 
 #
