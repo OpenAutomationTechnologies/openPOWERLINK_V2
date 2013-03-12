@@ -41,6 +41,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #include <EplInc.h>
 #include <pdo.h>
+#include <kernel/pdokcal.h>
 
 #include <hostiflib.h>
 
