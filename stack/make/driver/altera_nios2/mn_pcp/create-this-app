@@ -30,6 +30,11 @@ echo "Define tightly-coupled memory in create-this-app.settings!"
 exit 1
 fi
 
+if [ -z "$PLK_NODE_IS" ]; then
+echo "Define kind of POWERLINK node (MN/CN) in create-this-app.settings!"
+exit 1
+fi
+
 SOPC_DIR=`readlink -n -f ${SOPC_DIR}`
 
 # export variables needed by create-this-bsp
@@ -37,6 +42,7 @@ export SOPC_DIR
 export OPT_LEVEL
 export DBG_MODE
 export TC_I_MEM
+export PLK_NODE_IS
 
 # save arguments for passing to create-this-bsp
 SAVE_ARGS=$@
@@ -71,7 +77,7 @@ do
   shift
 done
 
-CFLAGS="-D${DBG_MODE} -DDEF_DEBUG_LVL=${DEF_DEBUG_LVL}"
+CFLAGS="-D${DBG_MODE} -DDEF_DEBUG_LVL=${DEF_DEBUG_LVL} -D${PLK_NODE_IS}"
 
 if [ -n "${COMSPEC}" ]; then
 # Under Windows we need double quotes, but not under Linux

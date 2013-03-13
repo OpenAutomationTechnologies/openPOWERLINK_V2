@@ -17,13 +17,13 @@
 
 ##################################
 # Settings for Debugging with optimized compilation
-DBG_MODE=_DEBUG
-OPT_LEVEL=-O2
+#DBG_MODE=_DEBUG
+#OPT_LEVEL=-O2
 
 ##################################
 # Settings for Release
-#DBG_MODE=NDEBUG
-#OPT_LEVEL=-O2
+DBG_MODE=NDEBUG
+OPT_LEVEL=-O2
 
 ##################################
 # DEF_DEBUG_LVL = [
@@ -37,6 +37,11 @@ DEF_DEBUG_LVL=0xEC000000L
 ##################################
 # Name of M9K for tightly-coupled memory
 TC_I_MEM=pcp_0_tc_i_mem
+
+##################################
+# SW is for MN/CN?
+PLK_NODE_IS=CONFIG_MN
+#PLK_NODE_IS=CONFIG_CN
 
 ##################################
 # Relative path to SOPC file
