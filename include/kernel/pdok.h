@@ -59,7 +59,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 extern "C" {
 #endif
 
-tEplKernel pdok_processRxPdo(tEplFrame* pFrame_p, UINT frameSize_p);
+tEplKernel pdok_processRxPdo(tEplFrame* pFrame_p, UINT frameSize_p) SECTION_PDOK_PROCESS_RPDO;
 
 tEplKernel pdok_init(void);
 

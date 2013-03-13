@@ -187,7 +187,7 @@ static void EplTimerHighReskInterruptHandler (void* pArg_p
 #ifndef ALT_ENHANCED_INTERRUPT_API_PRESENT
         , DWORD dwInt_p
 #endif
-        );
+        ) SECTION_HRTIMER_IRQ_HDL;
 
 
 //=========================================================================//

@@ -87,14 +87,14 @@ tEplKernel   eventcalhostif_addInstance(tEventQueueInstPtr *ppEventQueueInst_p,
                               tEventQueue eventQueue_p, tEplProcessEventCb pfnProcessEventCb,
                               tEplPostErrorEventCb pfnPostErrorEventCb);
 tEplKernel   eventcalhostif_delInstance (tEventQueueInstPtr pEventQueueInst_p);
-tEplKernel   eventcalhostif_postEvent (tEventQueueInstPtr pEventQueue_p, tEplEvent *pEvent_p);
+tEplKernel   eventcalhostif_postEvent (tEventQueueInstPtr pEventQueue_p, tEplEvent *pEvent_p) SECTION_EVENTCAL_HOSTIF_POST;
 
 // event CAL functions prototypes of the direct call implementation
 tEplKernel   eventcaldirect_addInstance(tEventQueueInstPtr *ppEventQueueInst_p,
                               tEventQueue eventQueue_p, tEplProcessEventCb pfnProcessEventCb,
                               BOOL fProcessThreadSafe_p);
 tEplKernel   eventcaldirect_delInstance (tEventQueueInstPtr pEventQueueInst_p);
-tEplKernel   eventcaldirect_postEvent (tEventQueueInstPtr pEventQueue_p, tEplEvent *pEvent_p);
+tEplKernel   eventcaldirect_postEvent (tEventQueueInstPtr pEventQueue_p, tEplEvent *pEvent_p) SECTION_EVENTCAL_DIRECT_POST;
 
 #ifdef __cplusplus
 }

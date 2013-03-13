@@ -97,7 +97,7 @@ tEplKernel PUBLIC EplTimerHighReskModifyTimerNs(tEplTimerHdl*     pTimerHdl_p,
                                     unsigned long long  ullTimeNs_p,
                                     tEplTimerkCallback  pfnCallback_p,
                                     unsigned long       ulArgument_p,
-                                    BOOL                fContinuously_p);
+                                    BOOL                fContinuously_p) SECTION_HRTIMER_MODTIMER;
 
 tEplKernel PUBLIC EplTimerHighReskDeleteTimer(tEplTimerHdl*     pTimerHdl_p);
 
