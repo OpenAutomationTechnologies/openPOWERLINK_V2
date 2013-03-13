@@ -97,7 +97,7 @@ typedef struct
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static void rxSignalHandlerCb (void *pArg_p);
+static void rxSignalHandlerCb (void *pArg_p) SECTION_EVENTCAL_HOSTIF_RXHDL;
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //

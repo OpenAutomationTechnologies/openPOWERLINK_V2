@@ -151,7 +151,7 @@ tEplKernel EplDllkConfig(tEplDllConfigParam * pDllConfigParam_p);
 tEplKernel EplDllkSetIdentity(tEplDllIdentParam * pDllIdentParam_p);
 
 // process internal events and do work that cannot be done in interrupt-context
-tEplKernel EplDllkProcess(tEplEvent * pEvent_p);
+tEplKernel EplDllkProcess(tEplEvent * pEvent_p) SECTION_DLLK_PROCESS;
 
 // registers handler for non-EPL frames (used by Virtual Ethernet driver)
 tEplKernel EplDllkRegAsyncHandler(tEplDllkCbAsync pfnDllkCbAsync_p);

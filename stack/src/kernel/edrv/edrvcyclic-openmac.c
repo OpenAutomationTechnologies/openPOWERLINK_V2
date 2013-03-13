@@ -193,7 +193,7 @@ typedef struct
 //---------------------------------------------------------------------------
 
 
-static tEplKernel EdrvCyclicCbTimerCycle(tEplTimerEventArg* pEventArg_p);
+static tEplKernel EdrvCyclicCbTimerCycle(tEplTimerEventArg* pEventArg_p) SECTION_EDRVCYC_TIMER_CB;
 
 static tEplKernel EdrvCyclicProcessTxBufferList(void);
 

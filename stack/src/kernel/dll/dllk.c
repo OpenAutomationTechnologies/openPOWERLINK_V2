@@ -365,10 +365,10 @@ static tEplKernel EplDllkProcessNmtStateChange(tEplNmtState NewNmtState_p, tEplN
 static tEplKernel EplDllkProcessNmtEvent(tEplEvent * pEvent_p);
 
 // process the CycleFinish event
-static tEplKernel EplDllkProcessCycleFinish(tEplNmtState NmtState_p);
+static tEplKernel EplDllkProcessCycleFinish(tEplNmtState NmtState_p) SECTION_DLLK_PROCESS_CYCFIN;
 
 // process the Sync event
-static tEplKernel EplDllkProcessSync(tEplNmtState NmtState_p);
+static tEplKernel EplDllkProcessSync(tEplNmtState NmtState_p) SECTION_DLLK_PROCESS_SYNC;
 
 // process the FillTx event
 static tEplKernel EplDllkProcessFillTx(tEplDllAsyncReqPriority AsyncReqPriority_p, tEplNmtState NmtState_p);

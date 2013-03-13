@@ -115,8 +115,8 @@ extern "C" {
 
 tEplKernel eventkcal_init (void);
 tEplKernel eventkcal_exit (void);
-tEplKernel eventkcal_postEvent (tEplEvent *pEvent_p);
-tEplKernel eventkcal_rxHandler (tEplEvent *pEvent_p);
+tEplKernel eventkcal_postEvent (tEplEvent *pEvent_p) SECTION_EVENTKCAL_POST;
+tEplKernel eventkcal_rxHandler (tEplEvent *pEvent_p) SECTION_EVENTKCAL_RXHDL;
 
 /* interface getter functions for the different implementations */
 tEventCalFuncIntf* eventkcaldirect_getInterface(void);

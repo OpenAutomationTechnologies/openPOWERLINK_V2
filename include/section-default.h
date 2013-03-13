@@ -53,17 +53,38 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     #ifndef SECTION_PDOK_PROCESS_TPDO_CB
         #define SECTION_PDOK_PROCESS_TPDO_CB
     #endif
-    #ifndef SECTION_PDOK_ENCODE_TPDO_CB
-        #define SECTION_PDOK_ENCODE_TPDO_CB
+    #ifndef SECTION_PDOKCAL_READ_TPDO
+        #define SECTION_PDOKCAL_READ_TPDO
     #endif
-    #ifndef SECTION_PDOK_PDO_DECODE
-        #define SECTION_PDOK_PDO_DECODE
+    #ifndef SECTION_PDOK_PROCESS_RPDO
+        #define SECTION_PDOK_PROCESS_RPDO
+    #endif
+    #ifndef SECTION_PDOKCAL_WRITE_RPDO
+        #define SECTION_PDOKCAL_WRITE_RPDO
+    #endif
+    #ifndef SECTION_EVENT_GET_HDL_FOR_SINK
+        #define SECTION_EVENT_GET_HDL_FOR_SINK
     #endif
     #ifndef SECTION_EVENTK_PROCESS
         #define SECTION_EVENTK_PROCESS
     #endif
+    #ifndef SECTION_EVENTKCAL_RXHDL
+        #define SECTION_EVENTKCAL_RXHDL
+    #endif
     #ifndef SECTION_EVENTK_POST
         #define SECTION_EVENTK_POST
+    #endif
+    #ifndef SECTION_EVENTKCAL_POST
+        #define SECTION_EVENTKCAL_POST
+    #endif
+    #ifndef SECTION_EVENTCAL_DIRECT_POST
+        #define SECTION_EVENTCAL_DIRECT_POST
+    #endif
+    #ifndef SECTION_EVENTCAL_HOSTIF_POST
+        #define SECTION_EVENTCAL_HOSTIF_POST
+    #endif
+    #ifndef SECTION_EVENTCAL_HOSTIF_RXHDL
+        #define SECTION_EVENTCAL_HOSTIF_RXHDL
     #endif
     #ifndef SECTION_OMETHLIB_RX_IRQ_HDL
         #define SECTION_OMETHLIB_RX_IRQ_HDL
@@ -76,6 +97,36 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     #endif
     #ifndef SECTION_EDRVOPENMAC_IRQ_HDL
         #define SECTION_EDRVOPENMAC_IRQ_HDL
+    #endif
+    #ifndef SECTION_EDRVCYC_TIMER_CB
+        #define SECTION_EDRVCYC_TIMER_CB
+    #endif
+    #ifndef SECTION_HRTIMER_IRQ_HDL
+        #define SECTION_HRTIMER_IRQ_HDL
+    #endif
+    #ifndef SECTION_HRTIMER_MODTIMER
+        #define SECTION_HRTIMER_MODTIMER
+    #endif
+    #ifndef SECTION_DLLK_PROCESS
+        #define SECTION_DLLK_PROCESS
+    #endif
+    #ifndef SECTION_DLLK_PROCESS_CYCFIN
+        #define SECTION_DLLK_PROCESS_CYCFIN
+    #endif
+    #ifndef SECTION_DLLK_PROCESS_SYNC
+        #define SECTION_DLLK_PROCESS_SYNC
+    #endif
+    #ifndef SECTION_DLLKCAL_GETSOAREQ
+        #define SECTION_DLLKCAL_GETSOAREQ
+    #endif
+    #ifndef SECTION_ERRHNDK_DECRCNTERS
+        #define SECTION_ERRHNDK_DECRCNTERS
+    #endif
+    #ifndef SECTION_ERRHNDKCAL_GETMNCNT
+        #define SECTION_ERRHNDKCAL_GETMNCNT
+    #endif
+    #ifndef SECTION_ERRHNDKCAL_SETMNCNT
+        #define SECTION_ERRHNDKCAL_SETMNCNT
     #endif
     #ifndef SECTION_MAIN_APP_CB_SYNC
         #define SECTION_MAIN_APP_CB_SYNC

@@ -93,7 +93,7 @@ tEplKernel errhndk_process(tEplEvent* pEvent_p);
 tEplKernel errhndk_postError(tErrHndkEvent* pDllEvent_p);
 
 // cycle finished (decrement threshold counters)
-tEplKernel errhndk_decrementCounters(BOOL fMN_p);
+tEplKernel errhndk_decrementCounters(BOOL fMN_p) SECTION_ERRHNDK_DECRCNTERS;
 
 // reset error flag for the specified CN
 tEplKernel errhndk_resetCnError(UINT nodeId_p);

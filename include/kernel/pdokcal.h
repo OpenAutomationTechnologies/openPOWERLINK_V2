@@ -72,9 +72,9 @@ void pdokcal_cleanupPdoMem(BYTE* pMem_p);
 
 BYTE *pdokcal_allocatePdoMem(BOOL fTxPdo_p, UINT channelId);
 
-tEplKernel pdokcal_writeRxPdo(BYTE* pPdo_p, BYTE *pPayload_p, UINT16 pdoSize_p);
+tEplKernel pdokcal_writeRxPdo(BYTE* pPdo_p, BYTE *pPayload_p, UINT16 pdoSize_p) SECTION_PDOKCAL_WRITE_RPDO;
 
-tEplKernel pdokcal_readTxPdo(BYTE* pPdo_p, BYTE* pPayload_p, UINT16 pdoSize_p);
+tEplKernel pdokcal_readTxPdo(BYTE* pPdo_p, BYTE* pPayload_p, UINT16 pdoSize_p) SECTION_PDOKCAL_READ_TPDO;
 
 BYTE *pdokcal_getPdoPointer(BOOL fTxPdo_p, UINT offset_p, UINT16 pdoSize_p);
 
