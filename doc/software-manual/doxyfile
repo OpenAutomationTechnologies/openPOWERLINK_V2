@@ -683,7 +683,8 @@ INPUT                  = ../../stack/src \
                          ../supported-platforms/vxworks.md \
                          ../software-architecture.md \
                          ../../readme.md \
-                         ../supported-platforms/altera.md \
+                         ../supported-platforms/altera-mn.md \
+                         ../supported-platforms/altera-cn.md \
                          ../supported-platforms/xilinx.md \
                          ../supported-platforms/other-platforms.md \
                          ../porting-guide.md \

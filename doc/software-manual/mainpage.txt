@@ -29,3 +29,14 @@ The following section contains information on building and running openPOWERLINK
 
 *******************************************************************************/
 
+/**
+*******************************************************************************
+\page altera openPOWERLINK on Altera Nios
+
+openPOWERLINK is supported on Altera Nios II softcore processor
+as Managing Node or Controlled Node.
+- \subpage altera-mn
+- \subpage altera-cn
+
+*******************************************************************************/
+

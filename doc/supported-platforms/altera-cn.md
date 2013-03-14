@@ -1,5 +1,5 @@
-openPOWERLINK on Altera Nios {#altera}
-============================
+Altera Nios II Controlled Node {#altera-cn}
+==============================
 
 ## Introduction
 
