@@ -54,6 +54,8 @@ entity registerFile is
         iRst        :   in std_logic;
         iWriteA     :   in std_logic;
         iWriteB     :   in std_logic;
+        iByteenableA:   in std_logic_vector;
+        iByteenableB:   in std_logic_vector;
         iAddrA      :   in std_logic_vector(LogDualis(gRegCount)-1 downto 0);
         iAddrB      :   in std_logic_vector(LogDualis(gRegCount)-1 downto 0);
         iWritedataA :   in std_logic_vector;
@@ -64,6 +66,7 @@ entity registerFile is
 end registerFile;
 
 architecture Rtl of registerFile is
+    constant cByte : natural := 8;
     type tRegSet is
     array (natural range <>) of std_logic_vector(iWritedataA'range);
 
@@ -87,23 +90,46 @@ begin
     --write data into Register File with respect to address
     --note: a overrules b
     regFileWrite : process(
-        iWriteA, iWriteB, iAddrA, iAddrB, iWritedataA, iWritedataB, regFile)
+        iWriteA, iWriteB, iAddrA, iAddrB, 
+        iByteenableA, iByteenableB,
+        iWritedataA, iWritedataB, regFile)
+
+        variable vWritedata : std_logic_vector(iWritedataA'range);
     begin
         --default
         regFile_next <= regFile;
+        vWritedata := (others => cInactivated);
 
         if iWriteB = cActivated then
-            --write to address
-            for i in regFile'range loop
-                regFile_next(to_integer(unsigned(iAddrB))) <= iWritedataB;
+            --read out register content first
+            vWritedata := regFile(to_integer(unsigned(iAddrB)));
+
+            --then consider byteenable
+            for i in iWritedataB'range loop
+                if iByteenableB(i/cByte) = cActivated then
+                    --if byte is enabled assign it
+                    vWritedata(i) := iWritedataB(i);
+                end if;
             end loop;
+
+            --write to address the masked writedata
+            regFile_next(to_integer(unsigned(iAddrB))) <= vWritedata;
         end if;
 
         if iWriteA = cActivated then
-            --write to address
-            for i in regFile'range loop
-                regFile_next(to_integer(unsigned(iAddrA))) <= iWritedataA;
+            --read out register content first
+            vWritedata := regFile(to_integer(unsigned(iAddrA)));
+
+            --then consider byteenable
+            for i in iWritedataA'range loop
+                if iByteenableA(i/cByte) = cActivated then
+                    --if byte is enabled assign it
+                    vWritedata(i) := iWritedataA(i);
+                end if;
             end loop;
+
+            --write to address the masked writedata
+            regFile_next(to_integer(unsigned(iAddrA))) <= vWritedata;
         end if;
     end process;
 
