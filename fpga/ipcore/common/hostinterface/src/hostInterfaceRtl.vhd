@@ -168,6 +168,7 @@ architecture Rtl of hostInterface is
             oBridgeSelectAny : out STD_LOGIC;
             oBridgeSelect : out STD_LOGIC_VECTOR(gAddressSpaceCount-1 downto 0);
             iBaseSetWrite : in STD_LOGIC;
+            iBaseSetByteenable : in std_logic_vector;
             iBaseSetAddress : in STD_LOGIC_VECTOR(LogDualis(gAddressSpaceCount)-1 downto 0);
             iBaseSetData : in STD_LOGIC_VECTOR;
             oBaseSetData : out STD_LOGIC_VECTOR);
@@ -202,6 +203,7 @@ architecture Rtl of hostInterface is
             oPcpReaddata : out STD_LOGIC_VECTOR(cDword-1 downto 0);
             iPcpWritedata : in STD_LOGIC_VECTOR(cDword-1 downto 0);
             oPcpWaitrequest : out STD_LOGIC;
+            oBaseSetByteenable : out std_logic_vector;
             oBaseSetWrite : out STD_LOGIC;
             oBaseSetAddress : out STD_LOGIC_VECTOR(LogDualis(gHostBaseSet+gPcpBaseSet)+2-1 downto 2);
             iBaseSetData : in STD_LOGIC_VECTOR;
@@ -325,6 +327,9 @@ architecture Rtl of hostInterface is
     -- base set signals
     --! BaseSet Write
     signal baseSetWrite : std_logic;
+
+    --! BaseSet byteenable
+    signal baseSetByteenable : std_logic_vector(3 downto 0);
 
     --! BaseSet Writedata
     signal baseSetWritedata : std_logic_vector
@@ -452,6 +457,7 @@ begin
         oBridgeSelectAny        => bridgeSelOut,
         oBridgeSelect           => open,
         iBaseSetWrite           => baseSetWrite,
+        iBaseSetByteenable      => baseSetByteenable,
         iBaseSetAddress         => baseSetAddress,
         iBaseSetData            => baseSetWritedata,
         oBaseSetData            => baseSetReaddata
@@ -549,6 +555,7 @@ begin
         iPcpWritedata           => iPcpWritedata,
         oPcpWaitrequest         => oPcpWaitrequest,
         oBaseSetWrite           => baseSetWrite,
+        oBaseSetByteenable      => baseSetByteenable,
         oBaseSetAddress         => baseSetAddress,
         iBaseSetData            => baseSetReaddata,
         oBaseSetData            => baseSetWritedata,

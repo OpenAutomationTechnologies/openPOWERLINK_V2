@@ -109,6 +109,8 @@ entity statusControlReg is
         -- BaseSet link
         --! BaseSet write strob
         oBaseSetWrite : out std_logic;
+        --! BaseSet byteenable
+        oBaseSetByteenable : out std_logic_vector;
         --! BaseSet address bus
         oBaseSetAddress : out std_logic_vector
         (LogDualis(gHostBaseSet+gPcpBaseSet)+2-1 downto 2);
@@ -295,6 +297,11 @@ begin
     pcpBaseSetData when pcpBaseSetWrite = cActivated else
     pcpBaseSetData when pcpBaseSetRead = cActivated else
     hostBaseSetData;
+
+    oBaseSetByteenable <=
+    iPcpByteenable when pcpBaseSetWrite = cActivated else
+    iPcpByteenable when pcpBaseSetRead = cActivated else
+    iHostByteenable;
 
     oBaseSetAddress <=
     std_logic_vector(unsigned(iPcpAddress(oBaseSetAddress'range))+gHostBaseSet)

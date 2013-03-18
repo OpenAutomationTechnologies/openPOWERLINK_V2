@@ -92,6 +92,8 @@ entity magicBridge is
         -- BaseSet Memory Mapped Write Bus
         --! BaseSet write strob
         iBaseSetWrite       : in    std_logic;
+        --! BaseSet byteenable
+        iBaseSetByteenable  : in    std_logic_vector;
         --! BaseSet address bus
         iBaseSetAddress     : in    std_logic_vector
         (LogDualis(gAddressSpaceCount)-1 downto 0);
@@ -146,6 +148,8 @@ architecture Rtl of magicBridge is
             iRst : in STD_LOGIC;
             iWriteA : in STD_LOGIC;
             iWriteB : in STD_LOGIC;
+            iByteenableA:   in std_logic_vector;
+            iByteenableB:   in std_logic_vector;
             iAddrA : in STD_LOGIC_VECTOR(LogDualis(gRegCount)-1 downto 0);
             iAddrB : in STD_LOGIC_VECTOR(LogDualis(gRegCount)-1 downto 0);
             iWritedataA : in STD_LOGIC_VECTOR;
@@ -166,6 +170,8 @@ architecture Rtl of magicBridge is
         oData : out STD_LOGIC_VECTOR);
     end component;
 
+    constant cByteenableAllZero : std_logic_vector(iBaseSetByteenable'range) :=
+    (others => cInactivated);
 
     constant cBaseAddressArrayStd   : std_logic_vector
     ((gAddressSpaceCount+1)*cArrayStd32ElementSize-1 downto 0) :=
@@ -250,6 +256,8 @@ begin
         iRst => iRst,
         iWriteA => iBaseSetWrite,
         iWriteB => cInactivated, --! write port B unused
+        iByteenableA => iBaseSetByteenable,
+        iByteenableB => cByteenableAllZero,
         iAddrA => iBaseSetAddress,
         iAddrB => addrDecSelBinary,
         iWritedataA => iBaseSetData,
