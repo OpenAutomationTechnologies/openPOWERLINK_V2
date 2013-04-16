@@ -66,7 +66,7 @@ Steps 1-5 are only necessary if you want to change the FPGA designs. Otherwise y
 6. Open "Nios II Command Shell"
 7. There are two software designs available in the openPOWERLINK subdirectory \n
    `/stack/make/driver/altera_nios2/mn_pcp` (for the Pcp) and \n
-   `examples/arch/altera_nios2/no_os/gnu/demo_mn (for the host)`. \n
+   `Examples/arch/altera_nios2/no_os/gnu/demo_mn (for the host)`. \n
    Change to each of the directories and open the create-this-app.settings file.
    Make sure that the SOPC_DIR variable is set to the board design of your choice. \n
    If you want to run the single FPGA solution set `SOPC_DIR=../../../../../fpga/boards/altera/TERASIC_DE2-115/mn_dual_nios2/` \n
@@ -89,8 +89,12 @@ Steps 1-5 are only necessary if you want to change the FPGA designs. Otherwise y
    `/fpga/boards/altera/TERASIC_DE2-115/mn_par_host/POWERLINK_MN.sof`
 2. Download the ELF file to the target:
    Always follow the sequence by downloading the Pcp ELF file first, afterwards the host ELF. \n
-   In the "Nios II Command Shell" enter \n
-   `$ make download-elf`
+   For the two FPGA demo enter in both directories in the "Nios II Command Shell" \n
+   `$ make download-elf` \n
+   For the single FPGA demo enter in the pcp directory in the "Nios II Command Shell" \n
+   `$ nios2-download -i 0 epl.elf --go` \n
+   For the host enter in the host directory in the "Nios II Command Shell" \n
+   `$ nios2-download -i 1 epl.elf --go` \n
 3. Enjoy the running POWERLINK network.
 
 ## How to import the project into Nios II Software Build Tools for Eclipse for debugging purposes
@@ -100,7 +104,7 @@ Requirement: Steps in the previous section *How to build the binary* are complet
 1. Start the Nios II Software Build Tools for Eclipse
 2. Select menu *File -> Import...*
 3. Select the import source *General* -> *Existing Projects into Workspace*
-4. Browse to `examples/arch/altera_nios/no_os/gnu/demo_mn` (via the button *Browse...*)
+4. Browse to `Examples/arch/altera_nios2/no_os/gnu/demo_mn` (via the button *Browse...*)
 5. Press the button *Finish*.
 6. Browse to `stack/make/driver/altera_nios2/mn_pcp` (via the button *Browse...*)
 7. Press the button *Finish*.
