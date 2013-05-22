@@ -1531,10 +1531,11 @@ unsigned int    uiHandle;
 unsigned int    uiFrameSize;
 BYTE            abMulticastMac[6];
 
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
+#if EPL_NMT_MAX_NODE_ID > 0
 unsigned int        uiIndex;
 tEplDllkNodeInfo*   pIntNodeInfo;
-#else
+#endif
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) == 0)
     UNUSED_PARAMETER(NmtState_p);
 #endif
 
@@ -2031,9 +2032,11 @@ static tEplKernel EplDllkProcessDestroy(tEplNmtState OldNmtState_p)
 {
 tEplKernel      Ret = kEplSuccessful;
 BYTE            abMulticastMac[6];
+#if EPL_NMT_MAX_NODE_ID > 0
+unsigned int    uiIndex;
+#endif
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
 unsigned int    uiHandle;
-unsigned int    uiIndex;
 #else
     UNUSED_PARAMETER(OldNmtState_p);
 #endif
