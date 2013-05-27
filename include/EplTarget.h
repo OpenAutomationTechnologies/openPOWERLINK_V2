@@ -94,6 +94,7 @@
     #include <stdio.h>
 
     #include <string.h>
+    #include <Windows.h>
 
 //    #define EPL_MEMCPY(dst,src,siz)     memcpy((void*)(dst),(const void*)(src),(size_t)(siz));
 //    #define EPL_MEMSET(dst,val,siz)     memset((void*)(dst),(int)(val),(size_t)(siz));
@@ -115,6 +116,10 @@
     #define ASSERTMSG(expr,string)  if (!(expr)) { \
                                         MessageBox (NULL, string, "Assertion failed", MB_OK | MB_ICONERROR); \
                                         exit (-1);}
+
+    #define ATOMIC_T    ULONG
+    #define ATOMIC_EXCHANGE(address, newval, oldval) \
+                oldval = InterlockedExchange(address, newval);
 
 #elif (TARGET_SYSTEM == _WINCE_)
 
@@ -179,6 +184,10 @@
     #else
         #define PRINTF(...)                 printf(__VA_ARGS__)
     #endif
+
+    #define ATOMIC_T    UINT8
+    #define ATOMIC_EXCHANGE(address, newval, oldval) \
+        oldval = __sync_lock_test_and_set(address, newval);
 
 #elif (TARGET_SYSTEM == _VXWORKS_)
     #include <stdlib.h>
