@@ -1,70 +1,76 @@
-/*******************************************************************************
 
-  File:         EplDebug.c
+/**
+********************************************************************************
+\file   debug.c
 
-  (c) Bernecker + Rainer Ges.m.b.H.,  B&R Strasse 1, 5142 Eggelsberg, Austria
-      www.br-automation.com
+\brief  Additional openPOWERLINK debugging functions
 
-  Project:      openPOWERLINK
+This file contains additional openPOWERLINK debugging functions.
 
-  Author:       Josef Baumgartner
-
-  Description:  additional openPOWERLINK debugging functions
-
-  License:
-
-    Redistribution and use in source and binary forms, with or without
-    modification, are permitted provided that the following conditions
-    are met:
-
-    1. Redistributions of source code must retain the above copyright
-       notice, this list of conditions and the following disclaimer.
-
-    2. Redistributions in binary form must reproduce the above copyright
-       notice, this list of conditions and the following disclaimer in the
-       documentation and/or other materials provided with the distribution.
-
-    3. Neither the name of Bernecker + Rainer Ges.m.b.H nor the names of its
-       contributors may be used to endorse or promote products derived
-       from this software without prior written permission. For written
-       permission, please contact office@br-automation.com.
-
-    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-    LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-    FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-    COPYRIGHT HOLDERS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-    INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-    BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-    LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-    CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-    LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-    ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-    POSSIBILITY OF SUCH DAMAGE.
-
-    Severability Clause:
-
-        If a provision of this License is or becomes illegal, invalid or
-        unenforceable in any jurisdiction, that shall not affect:
-        1. the validity or enforceability in that jurisdiction of any other
-           provision of this License; or
-        2. the validity or enforceability in other jurisdictions of that or
-           any other provision of this License.
-
+\ingroup module_event
 *******************************************************************************/
 
+/*------------------------------------------------------------------------------
+Copyright (c) 2012-2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+All rights reserved.
 
-//=========================================================================//
-// Includes                                                                //
-//=========================================================================//
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+    * Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above copyright
+      notice, this list of conditions and the following disclaimer in the
+      documentation and/or other materials provided with the distribution.
+    * Neither the name of the copyright holders nor the
+      names of its contributors may be used to endorse or promote products
+      derived from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL COPYRIGHT HOLDERS BE LIABLE FOR ANY
+DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+------------------------------------------------------------------------------*/
+
+//------------------------------------------------------------------------------
+// includes
+//------------------------------------------------------------------------------
 #include "Epl.h"
 #include "global.h"
 #include "EplNmt.h"
-#include <stdlib.h>
 
-//=========================================================================//
-// Type definitions                                                        //
-//=========================================================================//
+//============================================================================//
+//            G L O B A L   D E F I N I T I O N S                             //
+//============================================================================//
+
+//------------------------------------------------------------------------------
+// const defines
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// module global vars
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// global function prototypes
+//------------------------------------------------------------------------------
+
+//============================================================================//
+//            P R I V A T E   D E F I N I T I O N S                           //
+//============================================================================//
+
+//------------------------------------------------------------------------------
+// const defines
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// local types
+//------------------------------------------------------------------------------
 typedef struct
 {
     tEplNmtState        m_nmtState;
@@ -89,9 +95,13 @@ typedef struct
     char                *m_sName;
 } tEplEmergErrCodeInfo;
 
-//=========================================================================//
-// Module global vars                                                      //
-//=========================================================================//
+//------------------------------------------------------------------------------
+// local function prototypes
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// local vars
+//------------------------------------------------------------------------------
 
 static char *eplInvalidStr_g = "INVALID";
 
@@ -239,7 +249,7 @@ static char *eplEvtTypeStr_g[] =
     "EventTypePdokConfig",              // configure PDO channel
     "EventTypeNmtMnuNodeCmd",           // trigger NMT node command
     "EventTypeGw309AsciiReq",           // GW309ASCII request
-    "EventTypeNmtMnuNodeAdded",         // node was added to isochronous phase by DLL
+    "EventTypeNmtMnuNodeAdded"          // node was added to isochronous phase by DLL
 };
 
 // text strings for POWERLINK states
@@ -524,31 +534,24 @@ static char *EplSdoComConStateStr_g[] =
 };
 
 
-//=========================================================================//
-// Module internal prototypes                                              //
-//=========================================================================//
+//============================================================================//
+//            P U B L I C   F U N C T I O N S                                 //
+//============================================================================//
 
-static int  EplDebugCompareApiEvent( const void *pvKey, const void *pvArray );
-static int  EplDebugCompareEplKernel( const void *pvKey, const void *pvArray );
-static int  EplDebugCompareEmergErrCode( const void *pvKey, const void *pvArray );
+//------------------------------------------------------------------------------
+/**
+\brief  Return the string of the specified event
 
-//=========================================================================//
-//                                                                         //
-//          P U B L I C   F U N C T I O N S                                //
-//                                                                         //
-//=========================================================================//
+The function returns the string describing the specified event.
 
-//---------------------------------------------------------------------------
-//
-// Function:    EplGetNmtEventStr()
-//
-// Description: returns the string of the specified event
-//
-// Parameters:  nmtEvent_p            event
-//
-// Returns:     event string
-//---------------------------------------------------------------------------
-char * PUBLIC EplGetNmtEventStr(tEplNmtEvent nmtEvent_p)
+\param  nmtEvent_p          Event to print
+
+\return The function returns a string describing the specified event.
+
+\ingroup module_debug
+*/
+//------------------------------------------------------------------------------
+char* EplGetNmtEventStr(tEplNmtEvent nmtEvent_p)
 {
     if (nmtEvent_p >= tabentries(eplEvtStr_g))
     {
@@ -560,17 +563,20 @@ char * PUBLIC EplGetNmtEventStr(tEplNmtEvent nmtEvent_p)
     }
 }
 
-//---------------------------------------------------------------------------
-//
-// Function:    EplGetEventSourceStr()
-//
-// Description: returns the string of the specified event source
-//
-// Parameters:  eventSrc_p            event source
-//
-// Returns:     event source string
-//---------------------------------------------------------------------------
-char * PUBLIC EplGetEventSourceStr(tEplEventSource eventSrc_p)
+//------------------------------------------------------------------------------
+/**
+\brief  Return the string of the specified event source
+
+The function returns the string describing the specified event source.
+
+\param  eventSrc_p          Event source to print
+
+\return The function returns a string describing the specified event source.
+
+\ingroup module_debug
+*/
+//------------------------------------------------------------------------------
+char* EplGetEventSourceStr(tEplEventSource eventSrc_p)
 {
     if (eventSrc_p >= tabentries(eplEvtSrcStr_g))
     {
@@ -582,17 +588,20 @@ char * PUBLIC EplGetEventSourceStr(tEplEventSource eventSrc_p)
     }
 }
 
-//---------------------------------------------------------------------------
-//
-// Function:    EplGetEventSinkStr()
-//
-// Description: returns the string of the specified event sink
-//
-// Parameters:  eventSink_p            event sink
-//
-// Returns:     event sink string
-//---------------------------------------------------------------------------
-char * PUBLIC EplGetEventSinkStr(tEplEventSink eventSink_p)
+//------------------------------------------------------------------------------
+/**
+\brief  Return the string of the specified event sink
+
+The function returns the string describing the specified event sink.
+
+\param  eventSink_p         Event sink to print
+
+\return The function returns a string describing the specified event sink.
+
+\ingroup module_debug
+*/
+//------------------------------------------------------------------------------
+char* EplGetEventSinkStr(tEplEventSink eventSink_p)
 {
     if (eventSink_p >= tabentries(eplEvtSinkStr_g))
     {
@@ -604,17 +613,20 @@ char * PUBLIC EplGetEventSinkStr(tEplEventSink eventSink_p)
     }
 }
 
-//---------------------------------------------------------------------------
-//
-// Function:    EplGetEventTypeStr()
-//
-// Description: returns the string of the specified event type
-//
-// Parameters:  eventType_p            event type
-//
-// Returns:     event type string
-//---------------------------------------------------------------------------
-char * PUBLIC EplGetEventTypeStr(tEplEventType eventType_p)
+//------------------------------------------------------------------------------
+/**
+\brief  Return the string of the specified event type
+
+The function returns the string describing the specified event type.
+
+\param  eventType_p         Event type to print
+
+\return The function returns a string describing the specified event type.
+
+\ingroup module_debug
+*/
+//------------------------------------------------------------------------------
+char* EplGetEventTypeStr(tEplEventType eventType_p)
 {
     if (eventType_p >= tabentries(eplEvtTypeStr_g))
     {
@@ -626,17 +638,20 @@ char * PUBLIC EplGetEventTypeStr(tEplEventType eventType_p)
     }
 }
 
-//---------------------------------------------------------------------------
-//
-// Function:    EplGetNmtStateStr()
-//
-// Description: returns the string of the specified NMT state
-//
-// Parameters:  nmtState_p            NMT state
-//
-// Returns:     NMT state string
-//---------------------------------------------------------------------------
-char * PUBLIC EplGetNmtStateStr(tEplNmtState nmtState_p)
+//------------------------------------------------------------------------------
+/**
+\brief  Return the string of the specified NMT state
+
+The function returns the string describing the specified NMT state.
+
+\param  nmtState_p         NMT state to print
+
+\return The function returns a string describing the specified NMT state.
+
+\ingroup module_debug
+*/
+//------------------------------------------------------------------------------
+char* EplGetNmtStateStr(tEplNmtState nmtState_p)
 {
     unsigned int         i;
 
@@ -648,57 +663,45 @@ char * PUBLIC EplGetNmtStateStr(tEplNmtState nmtState_p)
     return eplInvalidStr_g;
 }
 
-//---------------------------------------------------------------------------
-//
-// Function:    EplGetApiEventStr()
-//
-// Description: returns the string of the specified API event
-//
-//              The function uses stdlib's bsearch() to shorten
-//              the average search time.
-//
-// Parameters:  ApiEvent_p            API event to translate
-//
-// Returns:     String describing the API event, if found
-//              eplInvalidStr_g if not found
-//
-//---------------------------------------------------------------------------
-char * PUBLIC EplGetApiEventStr( tEplApiEventType ApiEvent_p)
+//------------------------------------------------------------------------------
+/**
+\brief  Return the string of the specified API event
+
+The function returns the string describing the specified API event.
+
+\param  ApiEvent_p         API event to print
+
+\return The function returns a string describing the specified API event.
+
+\ingroup module_debug
+*/
+//------------------------------------------------------------------------------
+char* EplGetApiEventStr(tEplApiEventType ApiEvent_p)
 {
-    tApiEventInfo   *pApiEventInfo;
-    tApiEventInfo   Key;
+    UINT        i;
 
-    // Init
-    Key.m_ApiEvent  = ApiEvent_p;
-
-    // Search element
-    pApiEventInfo   = bsearch(  &Key, ApiEventInfo_g,
-                                tabentries(ApiEventInfo_g),
-                                sizeof(Key),
-                                EplDebugCompareApiEvent);
-
-    // Check result
-    if( NULL != pApiEventInfo )
+    for (i = 0; i < tabentries(ApiEventInfo_g); i++)
     {
-        return  pApiEventInfo->m_sApiEvent;
+        if (ApiEventInfo_g[i].m_ApiEvent == ApiEvent_p)
+            return (ApiEventInfo_g[i].m_sApiEvent);
     }
-
     return eplInvalidStr_g;
 }
 
-//---------------------------------------------------------------------------
-//
-// Function:    EplGetNmtNodeEventTypeStr()
-//
-// Description: returns the string of the specified NMT node event
-//
-// Parameters:  NodeEventType_p        Type of NMT node event
-//
-// Returns:     event type string if found
-//              eplInvalidStr_g if not found
-//
-//---------------------------------------------------------------------------
-char * PUBLIC EplGetNmtNodeEventTypeStr( tEplNmtNodeEvent NodeEventType_p )
+//------------------------------------------------------------------------------
+/**
+\brief  Return the string of the specified NMT node event
+
+The function returns the string describing the specified NMT node event.
+
+\param  NodeEventType_p         NMT node event to print
+
+\return The function returns a string describing the specified NMT node event.
+
+\ingroup module_debug
+*/
+//------------------------------------------------------------------------------
+char* EplGetNmtNodeEventTypeStr(tEplNmtNodeEvent NodeEventType_p )
 {
     if( NodeEventType_p >= tabentries(EplNmtNodeEvtTypeStr_g) )
     {
@@ -710,19 +713,20 @@ char * PUBLIC EplGetNmtNodeEventTypeStr( tEplNmtNodeEvent NodeEventType_p )
     }
 }
 
-//---------------------------------------------------------------------------
-//
-// Function:    EplGetNmtBootEventTypeStr()
-//
-// Description: returns the string of the specified NMT boot event
-//
-// Parameters:  NodeEventType_p        Type of NMT boot event
-//
-// Returns:     event type string if found
-//              eplInvalidStr_g if not found
-//
-//---------------------------------------------------------------------------
-char * PUBLIC EplGetNmtBootEventTypeStr( tEplNmtBootEvent BootEventType_p )
+//------------------------------------------------------------------------------
+/**
+\brief  Return the string of the specified NMT boot event
+
+The function returns the string describing the specified NMT boot event.
+
+\param  BootEventType_p         NMT boot event to print
+
+\return The function returns a string describing the specified NMT boot event.
+
+\ingroup module_debug
+*/
+//------------------------------------------------------------------------------
+char* EplGetNmtBootEventTypeStr(tEplNmtBootEvent BootEventType_p )
 {
     if( BootEventType_p >= tabentries(EplNmtBootEvtTypeStr_g) )
     {
@@ -734,19 +738,22 @@ char * PUBLIC EplGetNmtBootEventTypeStr( tEplNmtBootEvent BootEventType_p )
     }
 }
 
-//---------------------------------------------------------------------------
-//
-// Function:    EplGetSdoComConStateStr
-//
-// Description: returns the string of the specified SDO command connection state
-//
-// Parameters:  SdoComConState_p        SDO comand layer connection state
-//
-// Returns:     SDO command connection state string if found
-//              eplInvalidStr_g if not found
-//
-//---------------------------------------------------------------------------
-char * PUBLIC EplGetSdoComConStateStr( tEplSdoComConState SdoComConState_p )
+//------------------------------------------------------------------------------
+/**
+\brief  Return the string of the specified SDO command connection state
+
+The function returns the string describing the specified SDO command connection
+state.
+
+\param  SdoComConState_p         SDO command connection state to print
+
+\return The function returns a string describing the specified SDO command
+connection state.
+
+\ingroup module_debug
+*/
+//------------------------------------------------------------------------------
+char* EplGetSdoComConStateStr(tEplSdoComConState SdoComConState_p )
 {
     if( SdoComConState_p >= tabentries(EplSdoComConStateStr_g) )
     {
@@ -758,170 +765,55 @@ char * PUBLIC EplGetSdoComConStateStr( tEplSdoComConState SdoComConState_p )
     }
 }
 
-//---------------------------------------------------------------------------
-//
-// Function:    EplGetEplKernelStr()
-//
-// Description: Return a string describing a given entry of type tEplKernel.
-//
-// Parameters:  Parameter of type tEplKernel
-//
-// Returns:     Pointer to string with human readable description of given parameter
-//              Pointer to a default string if the parameter could not be found
-//
-//---------------------------------------------------------------------------
-char * PUBLIC EplGetEplKernelStr( tEplKernel EplKernel_p )
+//------------------------------------------------------------------------------
+/**
+\brief  Return the string of the specified SDO command connection state
+
+The function returns the string describing the given entry of type tEplKernel.
+
+\param  EplKernel_p         tEplKernel value to print
+
+\return The function returns a string describing the specified tEplKernel type.
+
+\ingroup module_debug
+*/
+//------------------------------------------------------------------------------
+char* EplGetEplKernelStr(tEplKernel EplKernel_p)
 {
-    tEplDebugEplKernelInfo   *pEntry;
-    tEplDebugEplKernelInfo   Key;
+    UINT        i;
 
-    // Init
-    Key.m_Key  = EplKernel_p;
-
-    // Search element
-    pEntry   = bsearch( &Key,
-                        EplKernelInfo_g,
-                        tabentries(EplKernelInfo_g),
-                        sizeof(Key),
-                        EplDebugCompareEplKernel);
-
-    // Check result
-    if( NULL != pEntry )
+    for (i = 0; i < tabentries(EplKernelInfo_g); i++)
     {
-        return  pEntry->m_sName;
+        if (EplKernelInfo_g[i].m_Key == EplKernel_p)
+            return (EplKernelInfo_g[i].m_sName);
     }
-
     return eplInvalidStr_g;
 }
 
-//---------------------------------------------------------------------------
-//
-// Function:    EplGetEmergErrCodeStr()
-//
-// Description: Return a string describing a given entry of type
-//              emergency error code.
-//
-// Parameters:  Parameter of type emergency error code
-//
-// Returns:     Pointer to string with human readable description of given parameter
-//              Pointer to a default string if the parameter could not be found
-//
-//---------------------------------------------------------------------------
-const char * PUBLIC EplGetEmergErrCodeStr( WORD EmergErrCode_p )
+//------------------------------------------------------------------------------
+/**
+\brief  Return the string describing the specified emergency error code
+
+The function returns the string describing the specified emergency error code.
+
+\param  EmergErrCode_p       emergency error code value to print
+
+\return The function returns a string describing the specified emergency error
+code.
+
+\ingroup module_debug
+*/
+//------------------------------------------------------------------------------
+const char* EplGetEmergErrCodeStr(WORD EmergErrCode_p)
 {
-    tEplEmergErrCodeInfo   *pEntry;
-    tEplEmergErrCodeInfo   Key;
 
-    // Init
-    Key.m_Key  = EmergErrCode_p;
+    UINT        i;
 
-    // Search element
-    pEntry   = bsearch( &Key,
-                        EplEmergErrCodeInfo_g,
-                        tabentries(EplEmergErrCodeInfo_g),
-                        sizeof(Key),
-                        EplDebugCompareEmergErrCode);
-
-    // Check result
-    if( NULL != pEntry )
+    for (i = 0; i < tabentries(EplEmergErrCodeInfo_g); i++)
     {
-        return  pEntry->m_sName;
+        if (EplEmergErrCodeInfo_g[i].m_Key == EmergErrCode_p)
+            return (EplEmergErrCodeInfo_g[i].m_sName);
     }
-
     return eplInvalidStr_g;
-}
-
-//=========================================================================//
-//                                                                         //
-//          P R I V A T E   D E F I N I T I O N S                          //
-//                                                                         //
-//=========================================================================//
-
-//---------------------------------------------------------------------------
-//
-// Function:    EplDebugCompareApiEvent()
-//
-// Description: Compare two API events. Used by EplGetApiEventStr's bsearch().
-//
-// Parameters:  Key (element to search), Array
-//
-// Returns:     -1, 0, or 1 if event id is smaller, equal or greater
-//
-//---------------------------------------------------------------------------
-static int
-EplDebugCompareApiEvent( const void *pvKey, const void *pvArray )
-{
-    tApiEventInfo    *pKey      = (tApiEventInfo *) pvKey;
-    tApiEventInfo    *pArray    = (tApiEventInfo *) pvArray;
-
-    if( pKey->m_ApiEvent < pArray->m_ApiEvent )
-    {
-        return  -1;
-    }
-    else if( pKey->m_ApiEvent > pArray->m_ApiEvent )
-    {
-        return  1;
-    }
-
-    return 0;
-}
-
-//---------------------------------------------------------------------------
-//
-// Function:    EplDebugCompareEplKernel()
-//
-// Description: Compare two values of type tEplKernel. Used by EplGetEplKernelStr's bsearch().
-//
-// Parameters:  Key (element to search), Array
-//
-// Returns:     -1, 0, or 1 if event id is smaller, equal or greater
-//
-//---------------------------------------------------------------------------
-static int
-EplDebugCompareEplKernel( const void *pvKey, const void *pvArray )
-{
-    tEplDebugEplKernelInfo    *pKey     = (tEplDebugEplKernelInfo *) pvKey;
-    tEplDebugEplKernelInfo    *pArray   = (tEplDebugEplKernelInfo *) pvArray;
-
-    if( pKey->m_Key < pArray->m_Key )
-    {
-        return  -1;
-    }
-    else if( pKey->m_Key > pArray->m_Key )
-    {
-        return  1;
-    }
-
-    return 0;
-}
-
-//---------------------------------------------------------------------------
-//
-// Function:    EplDebugCompareEmergErrCode()
-//
-// Description: Compare two values of type emergency error code.
-//              Used by EplGetEmergErrCodeStr's bsearch().
-//
-// Parameters:  Key (element to search), Array
-//
-// Returns:     -1, 0, or 1 if event id is smaller, equal or greater
-//
-//---------------------------------------------------------------------------
-static int
-EplDebugCompareEmergErrCode( const void *pvKey, const void *pvArray )
-{
-    tEplEmergErrCodeInfo    *pKey     = (tEplEmergErrCodeInfo *) pvKey;
-    tEplEmergErrCodeInfo    *pArray   = (tEplEmergErrCodeInfo *) pvArray;
-
-    if( pKey->m_Key < pArray->m_Key )
-    {
-        return  -1;
-    }
-    else if( pKey->m_Key > pArray->m_Key )
-    {
-        return  1;
-    }
-
-    return 0;
 }
 
