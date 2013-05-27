@@ -1,17 +1,20 @@
 /**
 ********************************************************************************
-\file   pdoucal.c
+\file   pdokcalsync-linuxkernel.c
 
-\brief  Generic functions of user PDO CAL module
+\brief  PDO CAL kernel sync module using the openPOWERLINK Linux kernel driver
 
-This file contains the generic functions of the user PDO CAL module.
+This file contains an implementation for the kernel PDO CAL sync module which
+uses the openPOWERLINK Linux kernel driver interface..
 
-\ingroup module_pdoucal
+The sync module is responsible to notify the user layer that new PDO data
+could be transfered.
+
+\ingroup module_pdokcal
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2012, SYSTEC electronic GmbH
-Copyright (c) 2012, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -40,9 +43,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <user/pdoucal.h>
-#include <user/eventu.h>
-#include <SharedBuff.h>
+#include <EplInc.h>
+#include <pdo.h>
+
+#include <linux/slab.h>
+#include <linux/sched.h>
+#include <linux/wait.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -60,6 +66,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // global function prototypes
 //------------------------------------------------------------------------------
 
+
 //============================================================================//
 //            P R I V A T E   D E F I N I T I O N S                           //
 //============================================================================//
@@ -71,10 +78,17 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local types
 //------------------------------------------------------------------------------
+typedef struct
+{
+    wait_queue_head_t       syncWaitQueue;
+    BOOL                    fSync;
+    BOOL                    fInitialized;
+} tPdokCalSyncInstance;
 
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
+static tPdokCalSyncInstance     instance_l;             ///< Instance variable of kernel PDOKCAL sync module
 
 //------------------------------------------------------------------------------
 // local function prototypes
@@ -86,136 +100,108 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 //------------------------------------------------------------------------------
 /**
-\brief  Initialize PDO user CAL module
+\brief  Initialize kernel PDO CAL sync module
 
-The function initializes the PDO user CAL module.
-
-\param  pfnSyncCb_p             function that is called in case of sync event
+The function initializes the kernel PDO CAL sync module.
 
 \return The function returns a tEplKernel error code.
 
-\ingroup module_pdoucal
+\ingroup module_pdokcal
 */
 //------------------------------------------------------------------------------
-tEplKernel pdoucal_init(tEplSyncCb pfnSyncCb_p)
+tEplKernel pdokcal_initSync(void)
 {
-    tEplKernel      ret;
+    EPL_MEMSET(&instance_l, 0, sizeof(tPdokCalSyncInstance));
 
-    if ((ret = pdoucal_openMem()) != kEplSuccessful)
-        return ret;
+    init_waitqueue_head(&instance_l.syncWaitQueue);
+    instance_l.fInitialized = TRUE;
 
-    return pdoucal_initSync(pfnSyncCb_p);
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief  Cleanup PDO user CAL module
-
-The function cleans up the PDO user CAL module.
-
-\return The function returns a tEplKernel error code.
-
-\ingroup module_pdoucal
-*/
-//------------------------------------------------------------------------------
-tEplKernel pdoucal_exit(void)
-{
-    pdoucal_closeMem();
-    pdoucal_exitSync();
     return kEplSuccessful;
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief  Allocate memory for PDO channels in Pdok
+\brief  Cleanup PDO CAL sync module
 
-This function allocates memory for PDOs according to the specified parameter
-in the Pdok module by sending the appropriate event to Pdok.
+The function cleans up the PDO CAL sync module
 
-\param  pAllocationParam_p      Allocation parameters containing info
-                                needed for memory allocation.
-
-\return The function returns a tEplKernel error code.
-
-\ingroup module_pdoucal
+\ingroup module_pdokcal
 */
 //------------------------------------------------------------------------------
-tEplKernel pdoucal_postPdokChannelAlloc(tPdoAllocationParam* pAllocationParam_p)
+void pdokcal_exitSync(void)
 {
-    tEplKernel  Ret = kEplSuccessful;
-    tEplEvent   Event;
-
-    Event.m_EventSink = kEplEventSinkPdokCal;
-    Event.m_EventType = kEplEventTypePdokAlloc;
-    Event.m_pArg = pAllocationParam_p;
-    Event.m_uiSize = sizeof (*pAllocationParam_p);
-
-    Ret = eventu_postEvent(&Event);
-
-    return Ret;
+    instance_l.fInitialized = FALSE;
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief  Send channel configuration to kernel PDO module
+\brief  Send a sync event
 
-The function configures the specified PDO channel in the kernel by sending a
-kEplEventTypePdokConfig to the kernel PDO module.
-
-\param  pChannelConf_p          PDO channel configuration.
+The function sends a sync event
 
 \return The function returns a tEplKernel error code.
 
-\ingroup module_pdoucal
+\ingroup module_pdokcal
 */
 //------------------------------------------------------------------------------
-tEplKernel pdoucal_postConfigureChannel(tPdoChannelConf* pChannelConf_p)
+tEplKernel pdokcal_sendSyncEvent(void)
 {
-    tEplKernel      ret = kEplSuccessful;
-    tEplEvent       Event;
-
-    Event.m_EventSink = kEplEventSinkPdokCal;
-    Event.m_EventType = kEplEventTypePdokConfig;
-    Event.m_pArg = pChannelConf_p;
-    Event.m_uiSize = sizeof(tPdoChannelConf);
-    ret = eventu_postEvent(&Event);
-
-    return ret;
+    if (instance_l.fInitialized)
+    {
+        instance_l.fSync = TRUE;
+        wake_up_interruptible(&instance_l.syncWaitQueue);
+    }
+    return kEplSuccessful;
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief  Send PDO buffer setup to kernel PDO module
+\brief  Wait for a sync event
 
-The function sends the PDO buffer setup to the kernel PDO module by posting
-a kEplEventTypePdokSetupPdoBuf event.
-
-\param  rxPdoMemSize_p          Size of RX PDO buffers.
-\param  txPdoMemSize_p          Size of TX PDO buffers.
+The function waits for a sync event
 
 \return The function returns a tEplKernel error code.
 
-\ingroup module_pdoucal
+\ingroup module_pdokcal
 */
 //------------------------------------------------------------------------------
-tEplKernel pdoucal_postSetupPdoBuffers(size_t rxPdoMemSize_p, size_t txPdoMemSize_p)
+tEplKernel pdokcal_waitSyncEvent(void)
 {
-    tEplKernel      Ret = kEplSuccessful;
-    tEplEvent       Event;
-    tPdoMemSize     pdoMemSize;
+    int                 ret;
+    int                 timeout = 1000 * HZ / 1000;
 
-    pdoMemSize.rxPdoMemSize = rxPdoMemSize_p;
-    pdoMemSize.txPdoMemSize = txPdoMemSize_p;
-    Event.m_EventSink = kEplEventSinkPdokCal;
-    Event.m_EventType = kEplEventTypePdokSetupPdoBuf;
-    Event.m_pArg = &pdoMemSize;
-    Event.m_uiSize = sizeof(tPdoMemSize);
-    Ret = eventu_postEvent(&Event);
+    if (!instance_l.fInitialized)
+        return kEplNoResource;
 
-    return Ret;
+    ret = wait_event_interruptible_timeout(instance_l.syncWaitQueue,
+                                           instance_l.fSync == TRUE, timeout);
+    if (ret == 0)
+        return kEplRetry;
+
+    instance_l.fSync = FALSE;
+    return kEplSuccessful;
+}
+
+
+//------------------------------------------------------------------------------
+/**
+\brief  Enable sync events
+
+The function enables sync events
+
+\param  fEnable_p               enable/disable sync event
+
+\return The function returns a tEplKernel error code.
+
+\ingroup module_pdokcal
+*/
+//------------------------------------------------------------------------------
+tEplKernel pdokcal_controlSync(BOOL fEnable_p)
+{
+    UNUSED_PARAMETER(fEnable_p);
+    return kEplSuccessful;
 }
 
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
 //============================================================================//
-

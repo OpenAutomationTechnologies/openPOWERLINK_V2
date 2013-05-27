@@ -111,19 +111,24 @@ static UINT setupPdoMemInfo(tPdoChannelSetup* pPdoChannels_p, BOOL fTxPdo_p);
 The function initializes the memory used to store PDO buffers.
 
 \param  pPdoChannels            Pointer to PDO channel configuration.
-\param  ppMem_p                 Pointer to store pointer to allocated memory.
+\param  rxPdoMemSize_p          Size of RX PDO buffers.
+\param  txPdoMemSize_p          Size of TX PDO buffers.
 
 \return The function returns a tEplKernel error code.
 
 \ingroup module_pdoucal
 */
 //------------------------------------------------------------------------------
-tEplKernel pdoucal_initPdoMem(tPdoChannelSetup* pPdoChannels, BYTE** ppMem_p)
+tEplKernel pdoucal_initPdoMem(tPdoChannelSetup* pPdoChannels_p, size_t rxPdoMemSize_p,
+                              size_t txPdoMemSize_p)
 {
     tHostifReturn hifRet;
     tHostifInstance pHifInstance = hostif_getInstance(kHostifProcHost);
     UINT tpdoSize = setupPdoMemInfo(pPdoChannels, TRUE);
     UINT rpdoSize = setupPdoMemInfo(pPdoChannels, FALSE);
+
+    UNUSED_PARAMETER(rxPdoMemSize_p);
+    UNUSED_PARAMETER(txPdoMemSize_p);
 
     if(pHifInstance == NULL)
         return kEplNoResource;
@@ -184,13 +189,6 @@ tEplKernel pdoucal_initPdoMem(tPdoChannelSetup* pPdoChannels, BYTE** ppMem_p)
         }
     }
 
-    // for reads and writes the offset is used.
-    // Therefore we return 0 so that addresses are equal to offsets.
-    if (ppMem_p != NULL)
-    {
-        *ppMem_p = NULL;
-    }
-
     return kEplSuccessful;
 }
 
@@ -200,17 +198,13 @@ tEplKernel pdoucal_initPdoMem(tPdoChannelSetup* pPdoChannels, BYTE** ppMem_p)
 
 The function cleans the memory allocated for PDO buffers.
 
-\param  pMem_p                  Pointer to allocated memory.
-
 \ingroup module_pdoucal
 */
 //------------------------------------------------------------------------------
-void pdoucal_cleanupPdoMem(BYTE* pMem_p)
+void pdoucal_cleanupPdoMem(void)
 {
 
     tHostifReturn   hifret;
-
-    UNUSED_PARAMETER(pMem_p);
 
     hifret = hostif_limDelete(limRpdo_l.pInstance);
 
@@ -233,42 +227,11 @@ void pdoucal_cleanupPdoMem(BYTE* pMem_p)
 
 //------------------------------------------------------------------------------
 /**
-\brief  Allocate PDO memory buffer
-
-The function allocates a buffer to store a PDO and returns the pointer to it.
-
-\param  fTxPdo_p                Determines if TXPDO or RXPDO buffer should be
-                                allocated. Is TRUE for TXPDO.
-\param  channelId               The PDO channel ID for which to allocate the
-                                buffer.
-
-\return Returns the address of the allocated PDO buffer.
-
-\ingroup module_pdoucal
-*/
-//------------------------------------------------------------------------------
-BYTE *pdoucal_allocatePdoMem(BOOL fTxPdo_p, UINT channelId)
-{
-    if (fTxPdo_p)
-    {
-        return (BYTE *)txChannelSetup[channelId].channelOffset;
-    }
-    else
-    {
-        return (BYTE *)rxChannelSetup[channelId].channelOffset;
-    }
-}
-
-
-//------------------------------------------------------------------------------
-/**
 \brief  Get Address of PDO buffer
 
 The function returns the address of the PDO buffer specified.
 
-\param  fTxPdo_p                Determines if TXPDO or RXPDO buffer should be
-                                allocated. Is TRUE for TXPDO.
-\param  channelId               The PDO channel ID for which to allocate the
+\param  channelId_p             The PDO channel ID for which to allocate the
                                 buffer.
 
 \return Returns the address of the specified PDO buffer.
@@ -276,22 +239,13 @@ The function returns the address of the PDO buffer specified.
 \ingroup module_pdoucal
 */
 //------------------------------------------------------------------------------
-BYTE *pdoucal_getPdoAdrs(BOOL fTxPdo_p, UINT channelId)
+BYTE *pdoucal_getTxPdoAdrs(UINT channelId_p)
 {
     ULONG           offset;
 
-    if (fTxPdo_p)
-    {
-        offset = txChannelSetup[channelId].channelOffset;
-        return &limTpdo_l.pBase[offset];
-    }
-    else
-    {
-        offset = rxChannelSetup[channelId].channelOffset;
-        return &limRpdo_l.pBase[offset];
-    }
+    offset = txChannelSetup[channelId].channelOffset;
+    return &limTpdo_l.pBase[offset];
 }
-
 
 //------------------------------------------------------------------------------
 /**
@@ -308,7 +262,7 @@ The function writes a TXPDO to the PDO buffer.
 \ingroup module_pdoucal
 */
 //------------------------------------------------------------------------------
-tEplKernel pdoucal_setTxPdo(BYTE *pPayload_p, BYTE* pPdo_p,  WORD pdoSize_p)
+tEplKernel pdoucal_setTxPdo(UINT channelId_p, BYTE* pPdo_p,  WORD pdoSize_p)
 {
     return kEplSuccessful;
 }
@@ -328,13 +282,14 @@ The function reads a RXPDO from the PDO buffer.
 \ingroup module_pdoucal
 */
 //------------------------------------------------------------------------------
+tEplKernel pdoucal_getRxPdo(BYTE** ppPdo_p, UINT channelId_p, WORD pdoSize_p)
 tEplKernel pdoucal_getRxPdo(BYTE** ppPdo_p, BYTE* pPayload_p, WORD pdoSize_p)
 {
     ULONG           offset;
 
     // offsets are used to access the buffer. As the base address was set
     // to 0 in PdokCal_AllocatePdoMem() the pointer is the same as the offset.
-    offset = (ULONG)pPayload_p;
+    offset = rxChannelSetup[channelId_p].channelOffset;
 
     *ppPdo_p = &limRpdo_l.pBase[offset];
 

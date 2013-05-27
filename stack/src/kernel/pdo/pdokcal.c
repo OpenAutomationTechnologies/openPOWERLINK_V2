@@ -102,6 +102,9 @@ tEplKernel pdokcal_init(void)
 {
     tEplKernel      Ret = kEplSuccessful;
 
+    if ((Ret = pdokcal_openMem()) != kEplSuccessful)
+        return Ret;
+
     if ((Ret = pdokcal_initSync()) != kEplSuccessful)
         return Ret;
 
@@ -124,6 +127,7 @@ The function deinitializes the PDO kernel CAL module.
 tEplKernel pdokcal_exit(void)
 {
     pdokcal_exitSync();
+    pdokcal_closeMem();
     return kEplSuccessful;
 }
 
@@ -162,7 +166,10 @@ tEplKernel pdokcal_process(tEplEvent * pEvent_p)
 
         case kEplEventTypePdokSetupPdoBuf:
             {
-                Ret = pdok_setupPdoBuffers();
+                tPdoMemSize*     pPdoMemSize;
+                pPdoMemSize = (tPdoMemSize*)pEvent_p->m_pArg;
+                Ret = pdok_setupPdoBuffers(pPdoMemSize->rxPdoMemSize,
+                                           pPdoMemSize->txPdoMemSize);
             }
             break;
 

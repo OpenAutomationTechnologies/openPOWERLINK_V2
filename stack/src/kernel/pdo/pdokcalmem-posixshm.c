@@ -1,17 +1,18 @@
 /**
 ********************************************************************************
-\file   pdoucal.c
+\file   pdokcalmem-posixshm.c
 
-\brief  Generic functions of user PDO CAL module
+\brief  PDO kernel CAL shared-memory module using Posix shared memory
 
-This file contains the generic functions of the user PDO CAL module.
+This file contains an implementation for the kernel PDO CAL shared-memroy module
+which uses Posix shared-memory. The shared memory is used to transfer PDO data
+between user and kernel layer.
 
-\ingroup module_pdoucal
+\ingroup module_pdokcal
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2012, SYSTEC electronic GmbH
-Copyright (c) 2012, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -36,13 +37,18 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <user/pdoucal.h>
-#include <user/eventu.h>
-#include <SharedBuff.h>
+#include <EplInc.h>
+#include <pdo.h>
+#include <kernel/pdokcal.h>
+
+#include <sys/mman.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <sys/types.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -60,6 +66,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // global function prototypes
 //------------------------------------------------------------------------------
 
+
 //============================================================================//
 //            P R I V A T E   D E F I N I T I O N S                           //
 //============================================================================//
@@ -75,6 +82,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
+static int                  fd_l;
 
 //------------------------------------------------------------------------------
 // local function prototypes
@@ -86,136 +94,109 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 //------------------------------------------------------------------------------
 /**
-\brief  Initialize PDO user CAL module
+\brief  Open PDO shared memory
 
-The function initializes the PDO user CAL module.
+The function performs all actions needed to setup the shared memory at
+starting of the stack.
 
-\param  pfnSyncCb_p             function that is called in case of sync event
-
-\return The function returns a tEplKernel error code.
-
-\ingroup module_pdoucal
-*/
-//------------------------------------------------------------------------------
-tEplKernel pdoucal_init(tEplSyncCb pfnSyncCb_p)
-{
-    tEplKernel      ret;
-
-    if ((ret = pdoucal_openMem()) != kEplSuccessful)
-        return ret;
-
-    return pdoucal_initSync(pfnSyncCb_p);
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief  Cleanup PDO user CAL module
-
-The function cleans up the PDO user CAL module.
+For the Posix shared-memory implementation it opens the shared memory segment.
 
 \return The function returns a tEplKernel error code.
 
-\ingroup module_pdoucal
+\ingroup module_pdokcal
 */
 //------------------------------------------------------------------------------
-tEplKernel pdoucal_exit(void)
+tEplKernel pdokcal_openMem(void)
 {
-    pdoucal_closeMem();
-    pdoucal_exitSync();
+    if ((fd_l = shm_open(PDO_SHMEM_NAME, O_RDWR | O_CREAT, 0)) == -1)
+    {
+        return kEplNoResource;
+    }
     return kEplSuccessful;
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief  Allocate memory for PDO channels in Pdok
+\brief  Close PDO shared memory
 
-This function allocates memory for PDOs according to the specified parameter
-in the Pdok module by sending the appropriate event to Pdok.
+The function performs all actions needed to cleanup the shared memory at
+shutdown.
 
-\param  pAllocationParam_p      Allocation parameters containing info
-                                needed for memory allocation.
+For the Posix shared-memory implementation it unlinks the shared memory segment.
 
 \return The function returns a tEplKernel error code.
 
-\ingroup module_pdoucal
+\ingroup module_pdokcal
 */
 //------------------------------------------------------------------------------
-tEplKernel pdoucal_postPdokChannelAlloc(tPdoAllocationParam* pAllocationParam_p)
+tEplKernel pdokcal_closeMem(void)
 {
-    tEplKernel  Ret = kEplSuccessful;
-    tEplEvent   Event;
-
-    Event.m_EventSink = kEplEventSinkPdokCal;
-    Event.m_EventType = kEplEventTypePdokAlloc;
-    Event.m_pArg = pAllocationParam_p;
-    Event.m_uiSize = sizeof (*pAllocationParam_p);
-
-    Ret = eventu_postEvent(&Event);
-
-    return Ret;
+    shm_unlink(PDO_SHMEM_NAME);
+    return kEplSuccessful;
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief  Send channel configuration to kernel PDO module
+\brief  Allocate PDO shared memory
 
-The function configures the specified PDO channel in the kernel by sending a
-kEplEventTypePdokConfig to the kernel PDO module.
+The function allocates shared memory for the kernel needed to transfer the PDOs.
 
-\param  pChannelConf_p          PDO channel configuration.
+\param  memSize_p               Size of PDO memory
+\param  ppPdoMem_p              Pointer to store the PDO memory pointer.
 
 \return The function returns a tEplKernel error code.
 
-\ingroup module_pdoucal
+\ingroup module_pdokcal
 */
 //------------------------------------------------------------------------------
-tEplKernel pdoucal_postConfigureChannel(tPdoChannelConf* pChannelConf_p)
+tEplKernel pdokcal_allocateMem(size_t memSize_p, BYTE** ppPdoMem_p)
 {
-    tEplKernel      ret = kEplSuccessful;
-    tEplEvent       Event;
+    TRACE ("%s()\n", __func__);
+    ftruncate(fd_l, memSize_p);
+    *ppPdoMem_p = mmap(NULL, memSize_p, PROT_READ | PROT_WRITE, MAP_SHARED, fd_l, 0);
+    if (*ppPdoMem_p == MAP_FAILED)
+    {
+        TRACE ("%s() mmap failed!}n", __func__);
+        *ppPdoMem_p = NULL;
+        return kEplNoResource;
+    }
 
-    Event.m_EventSink = kEplEventSinkPdokCal;
-    Event.m_EventType = kEplEventTypePdokConfig;
-    Event.m_pArg = pChannelConf_p;
-    Event.m_uiSize = sizeof(tPdoChannelConf);
-    ret = eventu_postEvent(&Event);
-
-    return ret;
+    TRACE ("%s() Allocated memory for PDO at %p size:%d\n", __func__, *ppPdoMem_p, memSize_p);
+    return kEplSuccessful;
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief  Send PDO buffer setup to kernel PDO module
+\brief  Free PDO shared memory
 
-The function sends the PDO buffer setup to the kernel PDO module by posting
-a kEplEventTypePdokSetupPdoBuf event.
+The function frees shared memory which was allocated in the kernel layer for
+transfering the PDOs.
 
-\param  rxPdoMemSize_p          Size of RX PDO buffers.
-\param  txPdoMemSize_p          Size of TX PDO buffers.
+\param  pMem_p                  Pointer to the shared memory segment.
+\param  memSize_p               Size of PDO memory
 
 \return The function returns a tEplKernel error code.
 
-\ingroup module_pdoucal
+\ingroup module_pdokcal
 */
 //------------------------------------------------------------------------------
-tEplKernel pdoucal_postSetupPdoBuffers(size_t rxPdoMemSize_p, size_t txPdoMemSize_p)
+tEplKernel pdokcal_freeMem(BYTE* pMem_p, size_t memSize_p)
 {
-    tEplKernel      Ret = kEplSuccessful;
-    tEplEvent       Event;
-    tPdoMemSize     pdoMemSize;
+    TRACE ("%s()\n", __func__);
 
-    pdoMemSize.rxPdoMemSize = rxPdoMemSize_p;
-    pdoMemSize.txPdoMemSize = txPdoMemSize_p;
-    Event.m_EventSink = kEplEventSinkPdokCal;
-    Event.m_EventType = kEplEventTypePdokSetupPdoBuf;
-    Event.m_pArg = &pdoMemSize;
-    Event.m_uiSize = sizeof(tPdoMemSize);
-    Ret = eventu_postEvent(&Event);
-
-    return Ret;
+    if (munmap(pMem_p, memSize_p) != 0)
+    {
+        TRACE ("%s() munmap failed!\n", __func__);
+        return kEplGeneralError;
+    }
+    return kEplSuccessful;
 }
 
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
 //============================================================================//
+/// \name Private Functions
+/// \{
+
+///\}
 

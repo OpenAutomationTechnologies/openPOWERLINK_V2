@@ -1,16 +1,16 @@
 /**
 ********************************************************************************
-\file   pdoucal.c
+\file   pdoucalsync-ioctl.c
 
-\brief  Generic functions of user PDO CAL module
+\brief  Sync implementation for the PDO user CAL module using Linux ioctl
 
-This file contains the generic functions of the user PDO CAL module.
+This file contains a sync implementation for the PDU user CAL module. It
+uses a Linux ioctl call for synchronisation.
 
 \ingroup module_pdoucal
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2012, SYSTEC electronic GmbH
 Copyright (c) 2012, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
@@ -40,9 +40,17 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <sys/ioctl.h>
+#include <time.h>
+
+#include <EplInc.h>
+#include <pdo.h>
 #include <user/pdoucal.h>
-#include <user/eventu.h>
-#include <SharedBuff.h>
+#include <user/ctrlucal.h>
+
+#include <powerlink-module.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -60,6 +68,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // global function prototypes
 //------------------------------------------------------------------------------
 
+
 //============================================================================//
 //            P R I V A T E   D E F I N I T I O N S                           //
 //============================================================================//
@@ -75,6 +84,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
+static int              fd_l;
 
 //------------------------------------------------------------------------------
 // local function prototypes
@@ -86,133 +96,58 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 //------------------------------------------------------------------------------
 /**
-\brief  Initialize PDO user CAL module
+\brief  Initialize PDO user CAL sync module
 
-The function initializes the PDO user CAL module.
+The function initializes the PDO user CAL sync module
 
 \param  pfnSyncCb_p             function that is called in case of sync event
 
 \return The function returns a tEplKernel error code.
-
-\ingroup module_pdoucal
 */
 //------------------------------------------------------------------------------
-tEplKernel pdoucal_init(tEplSyncCb pfnSyncCb_p)
+tEplKernel pdoucal_initSync(tEplSyncCb pfnSyncCb_p)
 {
-    tEplKernel      ret;
+    UNUSED_PARAMETER(pfnSyncCb_p);
 
-    if ((ret = pdoucal_openMem()) != kEplSuccessful)
-        return ret;
-
-    return pdoucal_initSync(pfnSyncCb_p);
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief  Cleanup PDO user CAL module
-
-The function cleans up the PDO user CAL module.
-
-\return The function returns a tEplKernel error code.
-
-\ingroup module_pdoucal
-*/
-//------------------------------------------------------------------------------
-tEplKernel pdoucal_exit(void)
-{
-    pdoucal_closeMem();
-    pdoucal_exitSync();
+    fd_l = ctrlucal_getFd();
     return kEplSuccessful;
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief  Allocate memory for PDO channels in Pdok
+\brief  Cleanup PDO user CAL sync module
 
-This function allocates memory for PDOs according to the specified parameter
-in the Pdok module by sending the appropriate event to Pdok.
-
-\param  pAllocationParam_p      Allocation parameters containing info
-                                needed for memory allocation.
-
-\return The function returns a tEplKernel error code.
-
-\ingroup module_pdoucal
+The function cleans up the PDO user CAL sync module
 */
 //------------------------------------------------------------------------------
-tEplKernel pdoucal_postPdokChannelAlloc(tPdoAllocationParam* pAllocationParam_p)
+void pdoucal_exitSync(void)
 {
-    tEplKernel  Ret = kEplSuccessful;
-    tEplEvent   Event;
-
-    Event.m_EventSink = kEplEventSinkPdokCal;
-    Event.m_EventType = kEplEventTypePdokAlloc;
-    Event.m_pArg = pAllocationParam_p;
-    Event.m_uiSize = sizeof (*pAllocationParam_p);
-
-    Ret = eventu_postEvent(&Event);
-
-    return Ret;
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief  Send channel configuration to kernel PDO module
+\brief  Wait for a sync event
 
-The function configures the specified PDO channel in the kernel by sending a
-kEplEventTypePdokConfig to the kernel PDO module.
+The function waits for a sync event.
 
-\param  pChannelConf_p          PDO channel configuration.
-
-\return The function returns a tEplKernel error code.
-
-\ingroup module_pdoucal
-*/
-//------------------------------------------------------------------------------
-tEplKernel pdoucal_postConfigureChannel(tPdoChannelConf* pChannelConf_p)
-{
-    tEplKernel      ret = kEplSuccessful;
-    tEplEvent       Event;
-
-    Event.m_EventSink = kEplEventSinkPdokCal;
-    Event.m_EventType = kEplEventTypePdokConfig;
-    Event.m_pArg = pChannelConf_p;
-    Event.m_uiSize = sizeof(tPdoChannelConf);
-    ret = eventu_postEvent(&Event);
-
-    return ret;
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief  Send PDO buffer setup to kernel PDO module
-
-The function sends the PDO buffer setup to the kernel PDO module by posting
-a kEplEventTypePdokSetupPdoBuf event.
-
-\param  rxPdoMemSize_p          Size of RX PDO buffers.
-\param  txPdoMemSize_p          Size of TX PDO buffers.
+\param  timeout_p       Specifies a timeout in microseconds. If 0 it waits
+                        forever.
 
 \return The function returns a tEplKernel error code.
-
-\ingroup module_pdoucal
+\retval kEplSuccessful      Successfully received sync event
+\retval kEplGeneralError    Error while waiting on sync event
 */
 //------------------------------------------------------------------------------
-tEplKernel pdoucal_postSetupPdoBuffers(size_t rxPdoMemSize_p, size_t txPdoMemSize_p)
+tEplKernel pdoucal_waitSyncEvent(ULONG timeout_p)
 {
-    tEplKernel      Ret = kEplSuccessful;
-    tEplEvent       Event;
-    tPdoMemSize     pdoMemSize;
+    int         ret;
 
-    pdoMemSize.rxPdoMemSize = rxPdoMemSize_p;
-    pdoMemSize.txPdoMemSize = txPdoMemSize_p;
-    Event.m_EventSink = kEplEventSinkPdokCal;
-    Event.m_EventType = kEplEventTypePdokSetupPdoBuf;
-    Event.m_pArg = &pdoMemSize;
-    Event.m_uiSize = sizeof(tPdoMemSize);
-    Ret = eventu_postEvent(&Event);
-
-    return Ret;
+    ret = ioctl(fd_l, PLK_CMD_PDO_SYNC, timeout_p);
+    if (ret == 0)
+    {
+        return kEplSuccessful;
+    }
+    return kEplGeneralError;
 }
 
 //============================================================================//

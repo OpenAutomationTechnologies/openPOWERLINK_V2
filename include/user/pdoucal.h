@@ -61,35 +61,30 @@ extern "C" {
 #endif
 
 tEplKernel pdoucal_init(tEplSyncCb pfnSyncCb_p);
-
 tEplKernel pdoucal_exit(void);
 
 tEplKernel pdoucal_postPdokChannelAlloc(tPdoAllocationParam* pAllocationParam_p);
-
 tEplKernel pdoucal_postConfigureChannel(tPdoChannelConf* pChannelConf_p);
-
-tEplKernel pdoucal_postSetupPdoBuffers(void);
+tEplKernel pdoucal_postSetupPdoBuffers(size_t rxPdoMemSize_p, size_t txPdoMemSize_p);
 
 // PDO memory functions
-tEplKernel pdoucal_initPdoMem(tPdoChannelSetup* pPdoChannels, BYTE** ppMem_p);
+tEplKernel pdoucal_openMem(void);
+tEplKernel pdoucal_closeMem(void);
+tEplKernel pdoucal_allocateMem(size_t memSize_p, BYTE** pPdoMem_p);
+tEplKernel pdoucal_freeMem(BYTE* pMem_p, size_t memSize_p);
 
-void pdoucal_cleanupPdoMem(BYTE* pMem_p);
-
-BYTE *pdoucal_allocatePdoMem(BOOL fTxPdo_p, UINT channelId);
-
-BYTE *pdoucal_getPdoAdrs(BOOL fTxPdo_p, UINT channelId);
-
-tEplKernel pdoucal_setTxPdo(BYTE *pPayload_p, BYTE* pPdo_p,  WORD pdoSize_p);
-
-tEplKernel pdoucal_getRxPdo(BYTE** ppPdo_p, BYTE* pPayload_p, WORD pdoSize_p);
+//PDO buffer functions
+tEplKernel pdoucal_initPdoMem(tPdoChannelSetup* pPdoChannels_p, size_t rxPdoMemSize_p,
+                              size_t txPdoMemSize_p);
+void       pdoucal_cleanupPdoMem(void);
+BYTE*      pdoucal_getTxPdoAdrs(UINT channelId_p);
+tEplKernel pdoucal_setTxPdo(UINT channelId_p, BYTE* pPdo_p,  WORD pdoSize_p);
+tEplKernel pdoucal_getRxPdo(BYTE** ppPdo_p, UINT channelId_p, WORD pdoSize_p);
 
 // PDO sync functions
 tEplKernel pdoucal_initSync(tEplSyncCb pfnSyncCb_p);
-
-void pdoucal_exitSync(void);
-
+void       pdoucal_exitSync(void);
 tEplKernel pdoucal_waitSyncEvent(ULONG timeout_p);
-
 tEplKernel pdoucal_callSyncCb(void);
 
 #ifdef __cplusplus

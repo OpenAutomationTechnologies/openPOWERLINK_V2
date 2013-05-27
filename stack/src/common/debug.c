@@ -249,7 +249,9 @@ static char *eplEvtTypeStr_g[] =
     "EventTypePdokConfig",              // configure PDO channel
     "EventTypeNmtMnuNodeCmd",           // trigger NMT node command
     "EventTypeGw309AsciiReq",           // GW309ASCII request
-    "EventTypeNmtMnuNodeAdded"          // node was added to isochronous phase by DLL
+    "EventTypeNmtMnuNodeAdded",         // node was added to isochronous phase by DLL
+    "EventTypePdokSetupPdoBuf",         // dealloc PDOs
+    "EventTypePdokControlSync"          // enable/disable the pdokcal sync trigger (arg is pointer to BOOL)
 };
 
 // text strings for POWERLINK states
