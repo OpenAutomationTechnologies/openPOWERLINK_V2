@@ -69,6 +69,7 @@ tEplKernel ctrlucal_executeCmd(tCtrlCmdType cmd_p);
 tEplKernel ctrlucal_checkKernelStack(void);
 void       ctrlucal_storeInitParam(tCtrlInitParam* pInitParam_p);
 tEplKernel ctrlucal_readInitParam(tCtrlInitParam* pInitParam_p);
+int        ctrlucal_getFd(void);
 
 #ifdef __cplusplus
 }
