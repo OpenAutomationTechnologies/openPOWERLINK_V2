@@ -78,11 +78,9 @@ SET (LIB_SOURCES
      ${USER_SOURCE_DIR}/api/processimage.c
      ${COMMON_SOURCE_DIR}/debug.c
      ${USER_SOURCE_DIR}/obd/obd.c
-     ${COMMON_SOURCE_DIR}/dll/dllcal-shb.c
      ${COMMON_SOURCE_DIR}/event/event.c
-     ${COMMON_SOURCE_DIR}/event/eventcal-shb.c
      ${LIB_SOURCE_DIR}/ami/amix86.c
-     ${LIB_SOURCE_DIR}/sharedbuff/SharedBuff.c
+     ${LIB_SOURCE_DIR}/circbuf/circbuffer.c
      ${EDRV_SOURCE_DIR}/edrvcyclic.c
      )
 
@@ -93,17 +91,17 @@ SET (LIB_KERNEL_SOURCES
      ${LIB_KERNEL_SOURCES}
      ${KERNEL_SOURCE_DIR}/dll/dllk.c
      ${KERNEL_SOURCE_DIR}/dll/dllkcal.c
+     ${KERNEL_SOURCE_DIR}/dll/dllkcal-circbuf.c
      ${KERNEL_SOURCE_DIR}/event/eventk.c
-     ${KERNEL_SOURCE_DIR}/event/eventkcal.c
-     ${KERNEL_SOURCE_DIR}/event/eventkcal-shb.c
      ${KERNEL_SOURCE_DIR}/nmt/nmtk.c
      ${KERNEL_SOURCE_DIR}/nmt/nmtkcal.c
      ${KERNEL_SOURCE_DIR}/pdo/pdok.c
      ${KERNEL_SOURCE_DIR}/pdo/pdokcal.c
-     ${KERNEL_SOURCE_DIR}/pdo/pdokcal-shb.c
+     ${KERNEL_SOURCE_DIR}/pdo/pdokcal-triplebufshm.c
+     ${KERNEL_SOURCE_DIR}/pdo/pdokcalmem-local.c
      ${KERNEL_SOURCE_DIR}/pdo/pdokcalsync-null.c
      ${KERNEL_SOURCE_DIR}/errhnd/errhndk.c
-     ${KERNEL_SOURCE_DIR}/errhnd/errhndkcal-shb.c
+     ${KERNEL_SOURCE_DIR}/errhnd/errhndkcal-local.c
      ${KERNEL_SOURCE_DIR}/ctrl/ctrlk.c
      ${KERNEL_SOURCE_DIR}/ctrl/ctrlkcal-direct.c
      )
@@ -114,9 +112,8 @@ SET (LIB_KERNEL_SOURCES
 SET (LIB_USER_SOURCES
      ${LIB_USER_SOURCES}
      ${USER_SOURCE_DIR}/dll/dllucal.c
+     ${USER_SOURCE_DIR}/dll/dllucal-circbuf.c
      ${USER_SOURCE_DIR}/event/eventu.c
-     ${USER_SOURCE_DIR}/event/eventucal.c
-     ${USER_SOURCE_DIR}/event/eventucal-shb.c
      ${USER_SOURCE_DIR}/nmt/nmtu.c
      ${USER_SOURCE_DIR}/nmt/nmtucal.c
      ${USER_SOURCE_DIR}/nmt/nmtcnu.c
@@ -126,13 +123,14 @@ SET (LIB_USER_SOURCES
      ${USER_SOURCE_DIR}/nmt/syncu.c
      ${USER_SOURCE_DIR}/pdo/pdou.c
      ${USER_SOURCE_DIR}/pdo/pdoucal.c
-     ${USER_SOURCE_DIR}/pdo/pdoucal-shb.c
+     ${USER_SOURCE_DIR}/pdo/pdoucal-triplebufshm.c
+     ${USER_SOURCE_DIR}/pdo/pdoucalmem-local.c
      ${USER_SOURCE_DIR}/pdo/pdoucalsync-null.c
      ${USER_SOURCE_DIR}/sdo/sdo-comu.c
      ${USER_SOURCE_DIR}/sdo/sdo-asysequ.c
      ${USER_SOURCE_DIR}/sdo/sdo-asndu.c
      ${USER_SOURCE_DIR}/errhnd/errhndu.c
-     ${USER_SOURCE_DIR}/errhnd/errhnducal-shb.c
+     ${USER_SOURCE_DIR}/errhnd/errhnducal-local.c
      ${USER_SOURCE_DIR}/ctrl/ctrlu.c
      ${USER_SOURCE_DIR}/ctrl/ctrlucal-direct.c
      )
@@ -172,8 +170,8 @@ SET (LIB_HEADERS
      ${POWERLINK_INCLUDE_DIR}/errhnd.h
      ${POWERLINK_INCLUDE_DIR}/ctrl.h
      ${POWERLINK_INCLUDE_DIR}/ctrlcal.h
-     ${LIB_SOURCE_DIR}/sharedbuff/SharedBuff.h
-     ${LIB_SOURCE_DIR}/sharedbuff/ShbIpc.h
+     ${LIB_SOURCE_DIR}/circbuf/circbuffer.h
+     ${LIB_SOURCE_DIR}/circbuf/circbuf-arch.h
      )
 
 #
@@ -207,6 +205,7 @@ SET (LIB_USER_HEADERS
      ${USER_INCLUDE_DIR}/dllucal.h
      ${USER_INCLUDE_DIR}/eventu.h
      ${USER_INCLUDE_DIR}/eventucal.h
+     ${USER_INCLUDE_DIR}/eventucalintf.h
      ${USER_INCLUDE_DIR}/errhndu.h
      ${USER_INCLUDE_DIR}/ctrlu.h
      ${USER_INCLUDE_DIR}/ctrlucal.h

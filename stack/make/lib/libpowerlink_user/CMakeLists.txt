@@ -78,12 +78,9 @@ SET (LIB_SOURCES
      ${USER_SOURCE_DIR}/api/processimage.c
      ${COMMON_SOURCE_DIR}/debug.c
      ${USER_SOURCE_DIR}/obd/obd.c
-     ${COMMON_SOURCE_DIR}/dll/dllcal-shb.c
-     ${COMMON_SOURCE_DIR}/ctrl/ctrlcal-shb.c
      ${COMMON_SOURCE_DIR}/event/event.c
-     ${COMMON_SOURCE_DIR}/event/eventcal-shb.c
      ${LIB_SOURCE_DIR}/ami/amix86.c
-     ${LIB_SOURCE_DIR}/sharedbuff/SharedBuff.c
+     ${LIB_SOURCE_DIR}/circbuf/circbuffer.c
      )
 
 #
@@ -93,8 +90,6 @@ SET (LIB_USER_SOURCES
      ${LIB_USER_SOURCES}
      ${USER_SOURCE_DIR}/dll/dllucal.c
      ${USER_SOURCE_DIR}/event/eventu.c
-     ${USER_SOURCE_DIR}/event/eventucal.c
-     ${USER_SOURCE_DIR}/event/eventucal-shb.c
      ${USER_SOURCE_DIR}/nmt/nmtu.c
      ${USER_SOURCE_DIR}/nmt/nmtucal.c
      ${USER_SOURCE_DIR}/nmt/nmtcnu.c
@@ -104,14 +99,13 @@ SET (LIB_USER_SOURCES
      ${USER_SOURCE_DIR}/nmt/syncu.c
      ${USER_SOURCE_DIR}/pdo/pdou.c
      ${USER_SOURCE_DIR}/pdo/pdoucal.c
-     ${USER_SOURCE_DIR}/pdo/pdoucal-shb.c
+     ${USER_SOURCE_DIR}/pdo/pdoucal-triplebufshm.c
      ${USER_SOURCE_DIR}/sdo/sdo-comu.c
      ${USER_SOURCE_DIR}/sdo/sdo-asysequ.c
      ${USER_SOURCE_DIR}/sdo/sdo-asndu.c
      ${USER_SOURCE_DIR}/errhnd/errhndu.c
-     ${USER_SOURCE_DIR}/errhnd/errhnducal-shb.c
      ${USER_SOURCE_DIR}/ctrl/ctrlu.c
-     ${USER_SOURCE_DIR}/ctrl/ctrlucal-mem.c
+     #${USER_SOURCE_DIR}/event/eventucal.c
      )
 
 #
