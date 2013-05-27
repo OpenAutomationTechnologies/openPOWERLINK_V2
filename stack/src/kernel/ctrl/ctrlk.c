@@ -369,6 +369,12 @@ static tEplKernel initStack(void)
         return ret;
 #endif
 
+    // initialize Virtual Ethernet Driver
+#if defined(CONFIG_INCLUDE_VETH)
+    if ((ret = VEthAddInstance(instance_l.initParam.aMacAddress)) != kEplSuccessful)
+    return ret;
+#endif
+
     ret = errhndk_init();
 
     return ret;
@@ -385,6 +391,11 @@ The function cleans up the kernel stack modules
 //------------------------------------------------------------------------------
 static tEplKernel shutdownStack(void)
 {
+
+#if defined(CONFIG_INCLUDE_VETH)
+    VEthDelInstance();
+#endif
+
 #if defined(CONFIG_INCLUDE_PDOK)
     pdok_exit();
 #endif
