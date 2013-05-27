@@ -133,6 +133,8 @@
 #define EPL_QUEUE_DIRECT              1
 #define EPL_QUEUE_SHB                 2
 #define EPL_QUEUE_HOSTINTERFACE       3   //use special host interface
+#define EPL_QUEUE_IOCTL               4
+#define EPL_QUEUE_CIRCBUF             5
 
 #include "EplCfg.h"     // EPL configuration file (configuration from application)
 
@@ -365,6 +367,17 @@ simpler conditional statements.
 #ifndef max
 #define max(a,b)            (((a) > (b)) ? (a) : (b))
 #endif
+
+/* macro for adding two timespec values */
+#define TIMESPECADD(vvp, uvp)                                           \
+        {                                                               \
+                (vvp)->tv_sec += (uvp)->tv_sec;                         \
+                (vvp)->tv_nsec += (uvp)->tv_nsec;                       \
+                if ((vvp)->tv_nsec >= 1000000000) {                     \
+                        (vvp)->tv_sec++;                                \
+                        (vvp)->tv_nsec -= 1000000000;                   \
+                }                                                       \
+        }
 
 // The EPL_STATIC_ASSERT macro can be used for static assertions.
 //
