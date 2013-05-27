@@ -253,14 +253,14 @@ static tEplKernel initPowerlink(UINT32 cycleLen_p, char *pszCdcFileName_p,
     ret = EplApiInitialize(&initParam);
     if(ret != kEplSuccessful)
     {
-        printf("EplApiInitialize() failed (Error:0x%x!\n", ret);
+        printf("EplApiInitialize() failed (Error:0x%x!)\n", ret);
         return ret;
     }
 
     ret = EplApiSetCdcFilename(pszCdcFileName_p);
     if(ret != kEplSuccessful)
     {
-        printf("EplApiSetCdcFilename() failed (Error:0x%x!\n", ret);
+        printf("EplApiSetCdcFilename() failed (Error:0x%x!)\n", ret);
         return ret;
     }
 
@@ -429,6 +429,5 @@ static int getOptions(int argc_p, char **argv_p, tOptions* pOpts_p)
     }
     return 0;
 }
-
 
 ///\}
