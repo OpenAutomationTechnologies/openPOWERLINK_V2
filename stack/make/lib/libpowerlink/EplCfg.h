@@ -63,6 +63,9 @@
 #undef FTRACE_DEBUG
 #endif // (TARGET_SYSTEM == _LINUX_)
 
+#define CONFIG_DLLCAL_QUEUE                 EPL_QUEUE_CIRCBUF
+#define EPL_USE_SHAREDBUFF                  FALSE
+
 // =========================================================================
 // generic defines which for whole EPL Stack
 // =========================================================================

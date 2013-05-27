@@ -37,9 +37,13 @@ SET (LIB_ARCH_SOURCES
      ${USER_SOURCE_DIR}/sdo/sdo-udpu.c
      ${COMMON_SOURCE_DIR}/timer/timer-linuxuser.c
      ${KERNEL_SOURCE_DIR}/hrtimer/hrtimer-posix.c
-     ${LIB_SOURCE_DIR}/sharedbuff/ShbIpc-LinuxPthreads.c
+     ${LIB_SOURCE_DIR}/circbuf/circbuf-linuxshm.c
      ${ARCH_SOURCE_DIR}/linux/ftrace-debug.c
      ${ARCH_SOURCE_DIR}/linux/target-linux.c
      ${LIB_SOURCE_DIR}/trace/trace-printf.c
+     ${USER_SOURCE_DIR}/event/eventucal-linux.c
+     ${USER_SOURCE_DIR}/event/eventucalintf-circbuf.c
+     ${KERNEL_SOURCE_DIR}/event/eventkcal-linux.c
+     ${KERNEL_SOURCE_DIR}/event/eventkcalintf-circbuf.c
      )
 

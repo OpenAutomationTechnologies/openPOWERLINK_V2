@@ -37,6 +37,15 @@ SET (LIB_ARCH_SOURCES
      ${COMMON_SOURCE_DIR}/timer/timer-generic.c
      ${LIB_SOURCE_DIR}/sharedbuff/ShbIpc-Win32.c
      ${LIB_SOURCE_DIR}/trace/trace-windows.c
+     ${LIB_SOURCE_DIR}/sharedbuff/SharedBuff.c
+     ${LIB_SOURCE_DIR}/circbuf/circbuf-win32shm.c
+     ${COMMON_SOURCE_DIR}/dll/dllcal-shb.c
+     ${USER_SOURCE_DIR}/ctrl/ctrlucal-mem.c
+     ${USER_SOURCE_DIR}/event/eventucal-shb.c
+     ${USER_SOURCE_DIR}/errhnd/errhnducal-shb.c
+     ${COMMON_SOURCE_DIR}/ctrl/ctrlcal-shb.c
+     ${COMMON_SOURCE_DIR}/event/eventcal-shb.c
+     ${USER_SOURCE_DIR}/pdo/pdoucal-shb.c
      ${USER_SOURCE_DIR}/pdo/pdoucalsync-null.c # replace by correct version
      )
 
