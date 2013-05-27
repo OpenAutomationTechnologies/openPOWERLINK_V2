@@ -37,7 +37,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
+#include <linux/kernel.h>
+#include <linux/version.h>
+
+#if (LINUX_VERSION_CODE > KERNEL_VERSION(2,6,36))
 #include <linux/printk.h>
+#endif
+
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -60,5 +66,4 @@ void trace (const char *fmt, ...)
     vprintk (fmt, argptr);
     va_end   (argptr);
 }
-
 
