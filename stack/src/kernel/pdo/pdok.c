@@ -92,7 +92,6 @@ typedef struct
 {
     tPdoChannelSetup        pdoChannels;        ///< PDO channel setup
     BOOL                    fRunning;           ///< Flag determines if PDO engine is running
-    BYTE*                   pPdoMem;            ///< pointer to PDO memory
 }tPdokInstance;
 
 //------------------------------------------------------------------------------
@@ -151,8 +150,10 @@ The function cleans up the PDO kernel module.
 //------------------------------------------------------------------------------
 tEplKernel pdok_exit(void)
 {
-    pdokcal_cleanupPdoMem(pdokInstance_g.pPdoMem);
+    pdokInstance_g.fRunning = FALSE;
+    EplDllkRegTpdoHandler(NULL);
     pdok_deAllocChannelMem();
+    pdokcal_cleanupPdoMem();
     pdokcal_exit();
     return kEplSuccessful;
 }
@@ -450,15 +451,13 @@ tEplKernel pdok_processRxPdo(tEplFrame* pFrame_p, UINT frameSize_p)
                 goto Exit;
             }
 
-    #if 0
-            TRACE ("%s()\n", __func__);
-            TRACE ("ChannelId: %d\n", channelId);
-            TRACE ("NodeId: %d\n", nodeId);
-            TRACE ("MapObjectCount: %d\n", pPdoChannel->mappObjectCount);
-            TRACE ("PdoSize: %d\n", pPdoChannel->pdoSize);
-    #endif
+            /*
+            TRACE ("%s() Channel:%d Node:%d MapObjectCnt:%d PdoSize:%d\n",
+                   __func__, channelId, nodeId, pPdoChannel->mappObjectCount,
+                   pPdoChannel->pdoSize);
+            */
 
-            pdokcal_writeRxPdo(pPdoChannel->pVar,
+            pdokcal_writeRxPdo(channelId,
                               &pFrame_p->m_Data.m_Pres.m_le_abPayload[0],
                               pPdoChannel->pdoSize);
 
@@ -482,36 +481,23 @@ Exit:
 
 The function sets up the memory used to store PDO frames.
 
+\param  rxPdoMemSize_p      Size of RX PDO buffers.
+\param  txPdoMemSize_p      Size of TX PDO buffers.
+
 \return The function returns a tEplKernel error code.
 
 \ingroup module_pdok
 */
 //------------------------------------------------------------------------------
-tEplKernel pdok_setupPdoBuffers(void)
+tEplKernel pdok_setupPdoBuffers(size_t rxPdoMemSize_p, size_t txPdoMemSize_p)
 {
     tEplKernel              ret;
-    UINT                    channelId;
-    tPdoChannel*            pPdoChannel;
 
-    ret = pdokcal_initPdoMem(&pdokInstance_g.pdoChannels, &pdokInstance_g.pPdoMem);
+    ret = pdokcal_initPdoMem(&pdokInstance_g.pdoChannels, rxPdoMemSize_p,
+                             txPdoMemSize_p);
     if (ret != kEplSuccessful)
         return ret;
 
-    // calculate pointers for TPDOs
-    for (channelId = 0, pPdoChannel = &pdokInstance_g.pdoChannels.pTxPdoChannel[0];
-         channelId < pdokInstance_g.pdoChannels.allocation.txPdoChannelCount;
-         channelId++, pPdoChannel++)
-    {
-        pPdoChannel->pVar = pdokcal_allocatePdoMem(TRUE, channelId);
-    }
-
-    // calculate pointers for RPDOs
-    for (channelId = 0, pPdoChannel = &pdokInstance_g.pdoChannels.pRxPdoChannel[0];
-         channelId < pdokInstance_g.pdoChannels.allocation.rxPdoChannelCount;
-         channelId++, pPdoChannel++)
-    {
-        pPdoChannel->pVar = pdokcal_allocatePdoMem(FALSE, channelId);
-    }
     pdokInstance_g.fRunning = TRUE;
 
     return kEplSuccessful;
@@ -578,7 +564,7 @@ static void disablePdoChannels(tPdoChannel *pPdoChannel_p, UINT channelCnt_p)
     for (index = 0; index < channelCnt_p; index++)
     {
         pPdoChannel_p[index].nodeId = PDO_INVALID_NODE_ID;
-        pPdoChannel_p[index].pVar = NULL;
+        //pPdoChannel_p[index].pVar = NULL;
     }
 }
 
@@ -631,13 +617,6 @@ static tEplKernel copyTxPdo(tEplFrame* pFrame_p, UINT frameSize_p, BOOL fReadyFl
             {
                 continue;
             }
-    #if 0
-            TRACE ("%s()\n", __func__);
-            TRACE ("ChannelId: %d\n", channelId);
-            TRACE ("NodeId: %d\n", nodeId);
-            TRACE ("MapObjectCount: %d\n", pPdoChannel->mappObjectCount);
-            TRACE ("PdoSize: %d\n", pPdoChannel->pdoSize);
-    #endif
 
             // valid TPDO found
             if ((unsigned int)(pPdoChannel->pdoSize + 24) > frameSize_p)
@@ -646,10 +625,15 @@ static tEplKernel copyTxPdo(tEplFrame* pFrame_p, UINT frameSize_p, BOOL fReadyFl
                 break;
             }
 
+            /*
+            TRACE ("%s() Channel:%d Node:%d MapObjectCnt:%d PdoSize:%d\n",
+                __func__, channelId, nodeId, pPdoChannel->mappObjectCount, pPdoChannel->pdoSize);
+            */
+
             // set PDO version in frame
             AmiSetByteToLe(&pFrame_p->m_Data.m_Pres.m_le_bPdoVersion, pPdoChannel->mappingVersion);
 
-            pdokcal_readTxPdo(pPdoChannel->pVar, &pFrame_p->m_Data.m_Pres.m_le_abPayload[0],
+            pdokcal_readTxPdo(channelId, &pFrame_p->m_Data.m_Pres.m_le_abPayload[0],
                               pPdoChannel->pdoSize);
 
             // set PDO size in frame

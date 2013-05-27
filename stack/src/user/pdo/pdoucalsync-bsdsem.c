@@ -56,16 +56,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-/* macro for adding timespec values */
-#define timespecadd(vvp, uvp)                                           \
-        {                                                               \
-                (vvp)->tv_sec += (uvp)->tv_sec;                         \
-                (vvp)->tv_nsec += (uvp)->tv_nsec;                       \
-                if ((vvp)->tv_nsec >= 1000000000) {                     \
-                        (vvp)->tv_sec++;                                \
-                        (vvp)->tv_nsec -= 1000000000;                   \
-                }                                                       \
-        }
 
 //------------------------------------------------------------------------------
 // module global vars
@@ -169,7 +159,7 @@ tEplKernel pdoucal_waitSyncEvent(ULONG timeout_p)
             semTimeout.tv_nsec = timeout_p * 1000;
         }
         clock_gettime(CLOCK_REALTIME, &currentTime);
-        timespecadd(&semTimeout, &currentTime);
+        TIMESPECADD(&semTimeout, &currentTime);
         semRet = sem_timedwait(syncSem_l, &semTimeout);
     }
     else

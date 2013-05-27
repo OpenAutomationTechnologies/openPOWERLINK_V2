@@ -98,7 +98,7 @@ typedef struct
     tPdoMappObject*         paTxObject;                 ///< Pointer to TX channel objects
     BOOL                    fAllocated;                 ///< Flag determines if PDOs are allocated
     BOOL                    fRunning;                   ///< Flag determines if PDO engine is running
-    BYTE*                   pPdoMem;                    ///< pointer to PDO memory
+    //BYTE*                   pPdoMem;                    ///< pointer to PDO memory
 } tPdouInstance;
 
 //------------------------------------------------------------------------------
@@ -114,6 +114,7 @@ static tEplKernel   setupRxPdoChannelTables(BYTE abChannelIdToPdoIdRx_p[EPL_D_PD
 static tEplKernel   setupTxPdoChannelTables(BYTE abChannelIdToPdoIdTx_p[EPL_D_PDO_TPDOChannels_U16],
                                           UINT* pCountChannelIdTx_p);
 static tEplKernel   allocatePdoChannels(tPdoAllocationParam* pAllocationParam_p);
+static tEplKernel   freePdoChannels(void);
 static tEplKernel   configureAllPdos(void);
 static tEplKernel   checkAndConfigurePdos(UINT16 mappParamIndex_p, UINT channelCount_p,
                                           BYTE *pChannelToPdoTable_p, UINT32 *pAbortCode_p);
@@ -134,7 +135,8 @@ static tEplKernel   configurePdoChannel(tPdoChannelConf* pChannelConf_p);
 static tEplKernel   getMaxPdoSize(BYTE nodeId_p, BOOL fTxPdo_p,
                          UINT16 *pMaxPdoSize_p, UINT32* pAbortCode_p);
 static tEplKernel   getPdoChannelId(UINT pdoId_p, BOOL fTxPdo_p, UINT *pChannelId_p);
-static tEplKernel   setupPdoBuffers(void);
+static UINT         calcPdoMemSize(tPdoChannelSetup* pPdoChannels_p, size_t* pRxPdoMemSize_p,
+                                   size_t* pTxPdoMemSize_p);
 static tEplKernel   copyVarToPdo(BYTE* pPayload_p, tPdoMappObject* pMappObject_p);
 static tEplKernel   copyVarFromPdo(BYTE* pPayload_p, tPdoMappObject* pMappObject_p);
 
@@ -177,7 +179,9 @@ The function cleans up the PDO user module.
 //------------------------------------------------------------------------------
 tEplKernel pdou_exit(void)
 {
-    pdoucal_cleanupPdoMem(pdouInstance_g.pPdoMem);
+    pdouInstance_g.fRunning = FALSE;
+    freePdoChannels();
+    pdoucal_cleanupPdoMem();
     return pdoucal_exit();
 }
 
@@ -350,18 +354,14 @@ tEplKernel pdou_copyRxPdoToPi (void)
     {
         pPdoChannel = &pdouInstance_g.pdoChannels.pRxPdoChannel[channelId];
 
-#if 0
-        printf ("\nPDO channel %d\n", channelId);
-        printf ("Node ID: %d\n", pPdoChannel->nodeId);
-        printf ("pVar: %p\n", pPdoChannel->pVar);
-#endif
-
         if (pPdoChannel->nodeId == PDO_INVALID_NODE_ID)
         {
             continue;
         }
 
-        Ret = pdoucal_getRxPdo(&pPdo, pPdoChannel->pVar, pPdoChannel->pdoSize);
+        Ret = pdoucal_getRxPdo(&pPdo, channelId, pPdoChannel->pdoSize);
+
+        //TRACE ("%s() Channel:%d Node:%d pPdo:%p\n", __func__, channelId, pPdoChannel->nodeId, pPdo);
 
         for (mappObjectCount = pPdoChannel->mappObjectCount,
              pMappObject = pdouInstance_g.paRxObject + (channelId * EPL_D_PDO_RPDOChannelObjects_U8);
@@ -418,7 +418,8 @@ tEplKernel pdou_copyTxPdoFromPi (void)
             continue;
         }
 
-        pPdo = pdoucal_getPdoAdrs(TRUE, channelId);
+        pPdo = pdoucal_getTxPdoAdrs(channelId);
+        //TRACE ("%s() pPdo: %p\n", __func__, pPdo);
 
         for (mappObjectCount = pPdoChannel->mappObjectCount,
              pMappObject = pdouInstance_g.paTxObject + (channelId * EPL_D_PDO_TPDOChannelObjects_U8);
@@ -433,7 +434,7 @@ tEplKernel pdou_copyTxPdoFromPi (void)
         }
 
         // send PDO data to kernel layer
-        ret = pdoucal_setTxPdo(pPdoChannel->pVar, pPdo, pPdoChannel->pdoSize);
+        ret = pdoucal_setTxPdo(channelId, pPdo, pPdoChannel->pdoSize);
     }
 
     return ret;
@@ -591,6 +592,7 @@ static tEplKernel setupTxPdoChannelTables(
     }
     *pCountChannelIdTx_p = channelCount;
 
+    TRACE ("%s() TX channel count: %d\n", __func__, channelCount);
     return kEplSuccessful;
 }
 
@@ -705,6 +707,47 @@ Exit:
     return ret;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Allocate memory for PDO channels
+
+This function allocates memory for PDOs channels
+
+\param  pAllocationParam_p      Pointer to allocation parameters.
+
+\return The function returns a tEplKernel error code.
+**/
+//------------------------------------------------------------------------------
+static tEplKernel freePdoChannels(void)
+{
+    tEplKernel      ret = kEplSuccessful;
+
+    if (pdouInstance_g.pdoChannels.pRxPdoChannel != NULL)
+    {
+        EPL_FREE(pdouInstance_g.pdoChannels.pRxPdoChannel);
+        pdouInstance_g.pdoChannels.pRxPdoChannel = NULL;
+    }
+
+    if (pdouInstance_g.paRxObject != NULL)
+    {
+        EPL_FREE(pdouInstance_g.paRxObject);
+        pdouInstance_g.paRxObject = NULL;
+    }
+
+    if (pdouInstance_g.pdoChannels.pTxPdoChannel != NULL)
+    {
+        EPL_FREE(pdouInstance_g.pdoChannels.pTxPdoChannel);
+        pdouInstance_g.pdoChannels.pTxPdoChannel = NULL;
+    }
+
+    if (pdouInstance_g.paTxObject != NULL)
+    {
+        EPL_FREE(pdouInstance_g.paTxObject);
+        pdouInstance_g.paTxObject = NULL;
+    }
+
+    return ret;
+}
 
 
 //------------------------------------------------------------------------------
@@ -723,6 +766,8 @@ static tEplKernel configureAllPdos(void)
     BYTE                    aChannelIdToPdoIdTx[EPL_D_PDO_TPDOChannels_U16];
     tPdoAllocationParam     allocParam;
     DWORD                   dwAbortCode = 0;
+    size_t                  txPdoMemSize;
+    size_t                  rxPdoMemSize;
 
     ret = setupRxPdoChannelTables(aChannelIdToPdoIdRx, &allocParam.rxPdoChannelCount);
     if (ret != kEplSuccessful)
@@ -752,8 +797,14 @@ static tEplKernel configureAllPdos(void)
     if (ret != kEplSuccessful)
         goto Exit;
 
-    setupPdoBuffers();
-    pdoucal_postSetupPdoBuffers();
+    calcPdoMemSize(&pdouInstance_g.pdoChannels, &rxPdoMemSize, &txPdoMemSize);
+    pdoucal_postSetupPdoBuffers(rxPdoMemSize, txPdoMemSize);
+
+    // TODO how to be sure that kernel is read before starting??
+    target_msleep(500);
+
+    ret = pdoucal_initPdoMem(&pdouInstance_g.pdoChannels, rxPdoMemSize,
+                             txPdoMemSize);
 
 Exit:
     return ret;
@@ -1366,44 +1417,6 @@ static void decodeObjectMapping(QWORD objectMapping_p, UINT* pIndex_p,
 
 //------------------------------------------------------------------------------
 /**
-\brief  setup PDO buffers
-
-The function sets up the memory used to store PDO frames.
-
-\return The function returns a tEplKernel error code.
-*/
-//------------------------------------------------------------------------------
-tEplKernel setupPdoBuffers(void)
-{
-    tEplKernel              ret;
-    UINT                    channelId;
-    tPdoChannel*            pPdoChannel;
-
-    ret = pdoucal_initPdoMem(&pdouInstance_g.pdoChannels, &pdouInstance_g.pPdoMem);
-    if (ret != kEplSuccessful)
-        return ret;
-
-    // calculate pointers for TPDOs
-    for (channelId = 0, pPdoChannel = &pdouInstance_g.pdoChannels.pTxPdoChannel[0];
-         channelId < pdouInstance_g.pdoChannels.allocation.txPdoChannelCount;
-         channelId++, pPdoChannel++)
-    {
-        pPdoChannel->pVar = pdoucal_allocatePdoMem(TRUE, channelId);
-    }
-
-    // calculate pointers for RPDOs
-    for (channelId = 0, pPdoChannel = &pdouInstance_g.pdoChannels.pRxPdoChannel[0];
-         channelId < pdouInstance_g.pdoChannels.allocation.rxPdoChannelCount;
-         channelId++, pPdoChannel++)
-    {
-        pPdoChannel->pVar = pdoucal_allocatePdoMem(FALSE, channelId);
-    }
-
-    return kEplSuccessful;
-}
-
-//------------------------------------------------------------------------------
-/**
 \brief  Copy variable to PDO
 
 This function copies a variable specified by the mapping object to the PDO
@@ -1595,6 +1608,50 @@ static tEplKernel copyVarFromPdo(BYTE* pPayload_p, tPdoMappObject* pMappObject_p
             break;
     }
     return Ret;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Calculate PDO memory size
+
+The function calculates the size needed for the PDO memory.
+
+\param  pPdoChannels_p      Pointer to PDO channel setup.
+\param  pRxPdoMemSize_p     Pointer to store size of RX PDO buffers.
+\param  pTxPdoMemSize_p     Pointer to store size of TX PDO buffers.
+
+\return The function returns the size of the used PDO memory
+*/
+//------------------------------------------------------------------------------
+static UINT calcPdoMemSize(tPdoChannelSetup* pPdoChannels_p, size_t* pRxPdoMemSize_p,
+                           size_t* pTxPdoMemSize_p)
+{
+    UINT                channelId;
+    size_t              rxSize;
+    size_t              txSize;
+    tPdoChannel*        pPdoChannel;
+
+    rxSize = 0;
+    for (channelId = 0, pPdoChannel = pPdoChannels_p->pRxPdoChannel;
+         channelId < pPdoChannels_p->allocation.rxPdoChannelCount;
+         channelId++, pPdoChannel++)
+    {
+        rxSize += pPdoChannel->pdoSize;
+    }
+    if (pRxPdoMemSize_p != NULL)
+        *pRxPdoMemSize_p = rxSize;
+
+    txSize = 0;
+    for (channelId = 0, pPdoChannel = pPdoChannels_p->pTxPdoChannel;
+         channelId < pPdoChannels_p->allocation.txPdoChannelCount;
+         channelId++, pPdoChannel++)
+    {
+        txSize += pPdoChannel->pdoSize;
+    }
+    if (pTxPdoMemSize_p != NULL)
+        *pTxPdoMemSize_p = txSize;
+
+    return rxSize + txSize;
 }
 
 ///\}

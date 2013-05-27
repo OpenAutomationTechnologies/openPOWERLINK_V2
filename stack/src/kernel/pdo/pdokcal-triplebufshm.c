@@ -1,17 +1,25 @@
 /**
 ********************************************************************************
-\file   pdokcal-local.c
+\file   pdokcal-tripleBufShm.c
 
-\brief  Local implementation for kernel PDO CAL module
+\brief  Shared memory triple buffer implementation for kernel PDO CAL module
 
-This file contains an implementation for the kernel PDO CAL module which has to
-be used for single process solutions.
+This file contains an implementation for the kernel PDO CAL module which uses
+a shared memory region between user and kernel layer. PDOs are transfered
+through triple buffering between the layers. Therefore, reads and writes to
+the PDOs can occur completely asynchronously.
+
+This file contains no specific shared memory implementation. This is encapsulated
+in the pdokcalmem-XX.c modules.
+
+A critical part is when switching the buffers. To implement safe operation
+without locking, the buffer switching has to be performed in an atomic operation.
 
 \ingroup module_pdokcal
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2012, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -41,6 +49,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #include <EplInc.h>
 #include <pdo.h>
+#include <kernel/pdokcal.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -53,9 +62,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // module global vars
 //------------------------------------------------------------------------------
-extern BOOL fPdou_bufCreated_g;
-extern BYTE *pPdou_bufBase_g;
-extern UINT pdou_bufSize_g;
 
 //------------------------------------------------------------------------------
 // global function prototypes
@@ -73,22 +79,18 @@ extern UINT pdou_bufSize_g;
 //------------------------------------------------------------------------------
 // local types
 //------------------------------------------------------------------------------
-typedef struct
-{
-    ULONG       channelOffset;
-    UINT        channelSize;
-} tChannelSetup;
 
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
-static tChannelSetup    rxChannelSetup[EPL_D_PDO_RPDOChannels_U16];
-static tChannelSetup    txChannelSetup[EPL_D_PDO_TPDOChannels_U16];
+static tPdoMemRegion*       pPdoMem_l;
+static size_t               pdoMemRegionSize_l;
+static BYTE*                pTripleBuf_l[3];
 
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static UINT setupPdoMemInfo(tPdoChannelSetup* pPdoChannels_p);
+static void setupPdoMemInfo(tPdoChannelSetup* pPdoChannels_p, tPdoMemRegion* pPdoMemRegion_p);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -96,28 +98,61 @@ static UINT setupPdoMemInfo(tPdoChannelSetup* pPdoChannels_p);
 
 //------------------------------------------------------------------------------
 /**
-\brief	Initialize PDO memory
+\brief  Get address of PDO memory reagion
+
+The function returns the address of the PDO memory region.
+
+\return Returns the address of the PDO memory region.
+
+\ingroup module_pdokcal
+*/
+//------------------------------------------------------------------------------
+BYTE * pdokcal_getPdoMemRegion(void)
+{
+    return (BYTE *)pPdoMem_l;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Initialize PDO memory
 
 The function initializes the memory needed to transfer PDOs.
 
-\param  pPdoChannels        Pointer to PDO channel configuration
-\param  ppMem_p             Pointer to store the PDO memory pointer.
+\param  pPdoChannels        Pointer to PDO channel configuration.
+\param  rxPdoMemSize_p      Size of RX PDO buffers.
+\param  txPdoMemSize_p      Size of TX PDO buffers.
 
 \return The function returns a tEplKernel error code.
 
 \ingroup module_pdokcal
 */
 //------------------------------------------------------------------------------
-tEplKernel pdokcal_initPdoMem(tPdoChannelSetup* pPdoChannels, BYTE** ppMem_p)
+tEplKernel pdokcal_initPdoMem(tPdoChannelSetup* pPdoChannels, size_t rxPdoMemSize_p,
+                              size_t txPdoMemSize_p)
 {
-    setupPdoMemInfo(pPdoChannels);
+    size_t  pdoMemSize;
 
-    // for reads and writes the offset is used.
-    // Therefore we return 0 so that addresses are equal to offsets.
-    if (ppMem_p != NULL)
+    pdoMemSize = txPdoMemSize_p + rxPdoMemSize_p;
+
+    if (pPdoMem_l != NULL)
+        pdokcal_freeMem((BYTE*)pPdoMem_l, pdoMemRegionSize_l);
+
+    pdoMemRegionSize_l = (pdoMemSize * 3) + sizeof(tPdoMemRegion);
+    if (pdokcal_allocateMem(pdoMemRegionSize_l, (BYTE**)&pPdoMem_l) != kEplSuccessful)
     {
-        *ppMem_p = NULL;
+        return kEplNoResource;
     }
+
+    pTripleBuf_l[0] = (BYTE *)pPdoMem_l + sizeof(tPdoMemRegion);
+    pTripleBuf_l[1] = pTripleBuf_l[0] + pdoMemSize;
+    pTripleBuf_l[2] = pTripleBuf_l[1] + pdoMemSize;
+
+    TRACE ("%s() PdoMem:%p size:%d Triple buffers at: %p/%p/%p\n", __func__,
+           pPdoMem_l, pdoMemRegionSize_l,
+           pTripleBuf_l[0], pTripleBuf_l[1], pTripleBuf_l[2]);
+
+    memset (pPdoMem_l, 0, pdoMemRegionSize_l);
+    setupPdoMemInfo(pPdoChannels, pPdoMem_l);
 
     return kEplSuccessful;
 }
@@ -128,53 +163,30 @@ tEplKernel pdokcal_initPdoMem(tPdoChannelSetup* pPdoChannels, BYTE** ppMem_p)
 
 The function cleans the memory allocated for PDO buffers.
 
-\param  pMem_p                  Pointer to allocated memory.
-
 \ingroup module_pdokcal
 */
 //------------------------------------------------------------------------------
-void pdokcal_cleanupPdoMem(BYTE* pMem_p)
+void pdokcal_cleanupPdoMem(void)
 {
-    UNUSED_PARAMETER(pMem_p);
+    TRACE("%s()\n", __func__);
 
-    // in pdoucal-local the memory is freed, so we are done here
+    if (pPdoMem_l != NULL)
+        pdokcal_freeMem((BYTE *)pPdoMem_l, pdoMemRegionSize_l);
+
+    pPdoMem_l = NULL;
+    pdoMemRegionSize_l = 0;
+    pTripleBuf_l[0] = NULL;
+    pTripleBuf_l[1] = NULL;
+    pTripleBuf_l[2] = NULL;
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief  Allocate PDO memory buffer
-
-The function allocates a buffer to store a PDO and returns the pointer to it.
-
-\param  fTxPdo_p                Determines if TXPDO or RXPDO buffer should be
-                                allocated. Is TRUE for TXPDO.
-\param  channelId               The PDO channel ID for which to allocate the
-                                buffer.
-
-\return Returns the address of the allocated PDO buffer.
-
-\ingroup module_pdokcal
-*/
-//------------------------------------------------------------------------------
-BYTE *pdokcal_allocatePdoMem(BOOL fTxPdo_p, UINT channelId)
-{
-    if (fTxPdo_p)
-    {
-        return (BYTE *)txChannelSetup[channelId].channelOffset;
-    }
-    else
-    {
-        return (BYTE *)rxChannelSetup[channelId].channelOffset;
-    }
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief	Write RXPDO to PDO memory
+\brief  Write RXPDO to PDO memory
 
 The function writes a received RXPDO into the PDO memory range.
 
-\param  pPdo_p                  Pointer where to store the PDO in PDO memory.
+\param  channelId_p             Channel ID of PDO to write.
 \param  pPayload_p              Pointer to received PDO payload.
 \param  pdoSize_p               Size of received PDO.
 
@@ -183,35 +195,36 @@ The function writes a received RXPDO into the PDO memory range.
 \ingroup module_pdokcal
 */
 //------------------------------------------------------------------------------
-tEplKernel pdokcal_writeRxPdo(BYTE* pPdo_p, BYTE *pPayload_p, UINT16 pdoSize_p)
+tEplKernel pdokcal_writeRxPdo(UINT channelId_p, BYTE *pPayload_p, UINT16 pdoSize_p)
 {
-    ULONG           offset;
+    BYTE*           pPdo;
+    ATOMIC_T        temp;
 
-    // offsets are used to access the buffer. As the base address was set
-    // to 0 in PdokCal_AllocatePdoMem() the pointer is the same as the offset.
-    offset = (ULONG)pPdo_p;
+    pPdo = pTripleBuf_l[pPdoMem_l->rxChannelInfo[channelId_p].writeBuf] +
+           pPdoMem_l->rxChannelInfo[channelId_p].channelOffset;
+    //TRACE ("%s() chan:%d wi:%d\n", __func__, channelId_p, pPdoMem_l->rxChannelInfo[channelId_p].writeBuf);
 
-    if (fPdou_bufCreated_g != FALSE)
-    {
-        EPL_MEMCPY(&pPdou_bufBase_g[offset], pPayload_p, pdoSize_p);
-    }
-    else
-    {
-        EPL_DBGLVL_ERROR_TRACE("%s() Error writing to shared memory\n",
-                               __func__);
-    }
+    memcpy(pPdo, pPayload_p, pdoSize_p);
 
+    temp = pPdoMem_l->rxChannelInfo[channelId_p].writeBuf;
+    ATOMIC_EXCHANGE(&pPdoMem_l->rxChannelInfo[channelId_p].cleanBuf,
+                    temp,
+                    pPdoMem_l->rxChannelInfo[channelId_p].writeBuf);
+
+    pPdoMem_l->rxChannelInfo[channelId_p].newData = 1;
+
+    //TRACE ("%s() chan:%d new wi:%d\n", __func__, channelId_p, pPdoMem_l->rxChannelInfo[channelId_p].writeBuf);
     //TRACE ("%s() *pPayload_p:%02x\n", __func__, *pPayload_p);
     return kEplSuccessful;
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief	Read TXPDO from PDO memory
+\brief  Read TXPDO from PDO memory
 
-The function reads a TXPDO to be sent into the PDO memory range.
+The function reads a TXPDO to be sent from the PDO memory range.
 
-\param  pPdo_p                  Pointer where to read the PDO in PDO memory.
+\param  channelId_p             Channel ID of PDO to read.
 \param  pPayload_p              Pointer to PDO payload which will be transmitted.
 \param  pdoSize_p               Size of PDO to be transmitted.
 
@@ -220,26 +233,27 @@ The function reads a TXPDO to be sent into the PDO memory range.
 \ingroup module_pdokcal
 */
 //------------------------------------------------------------------------------
-tEplKernel pdokcal_readTxPdo(BYTE* pPdo_p, BYTE* pPayload_p, UINT16 pdoSize_p)
+tEplKernel pdokcal_readTxPdo(UINT channelId_p, BYTE* pPayload_p, UINT16 pdoSize_p)
 {
-    ULONG           offset;
+    BYTE*           pPdo;
+    ATOMIC_T        readBuf;
 
-    // offsets are used to access the buffer. As the base address was set
-    // to 0 in PdokCal_AllocatePdoMem() the pointer is the same as the offset.
-    offset = (ULONG)pPdo_p;
-
-    //TRACE ("%s() size:%d\n", __func__, pdoSize_p);
-
-    if (fPdou_bufCreated_g != FALSE)
+    if (pPdoMem_l->txChannelInfo[channelId_p].newData)
     {
-        EPL_MEMCPY(pPayload_p, &pPdou_bufBase_g[offset], pdoSize_p);
+        readBuf = pPdoMem_l->txChannelInfo[channelId_p].readBuf;
+        ATOMIC_EXCHANGE(&pPdoMem_l->txChannelInfo[channelId_p].cleanBuf,
+                        readBuf,
+                        pPdoMem_l->txChannelInfo[channelId_p].readBuf);
+        pPdoMem_l->txChannelInfo[channelId_p].newData = 0;
     }
-    else
-    {
-        EPL_DBGLVL_ERROR_TRACE("%s() Error reading from shared memory\n",
-                             __func__);
-    }
-    //TRACE ("%s() offset:%d *pPayload:%02x\n", __func__, ulOffset, *pPayload_p);
+
+    /*TRACE ("%s() pPdo_p:%p pPayload:%p size:%d value:%d\n", __func__,
+            pPdo_p, pPayload_p, pdoSize_p, *pPdo_p);*/
+    //TRACE ("%s() chan:%d ri:%d\n", __func__, channelId_p, pPdoMem_l->txChannelInfo[channelId_p].readBuf);
+    pPdo =  pTripleBuf_l[pPdoMem_l->txChannelInfo[channelId_p].readBuf] +
+            pPdoMem_l->txChannelInfo[channelId_p].channelOffset;
+
+    memcpy (pPayload_p, pPdo, pdoSize_p);
 
     return kEplSuccessful;
 }
@@ -249,7 +263,6 @@ tEplKernel pdokcal_readTxPdo(BYTE* pPdo_p, BYTE* pPayload_p, UINT16 pdoSize_p)
 //============================================================================//
 /// \name Private Functions
 /// \{
-
 //------------------------------------------------------------------------------
 /**
 \brief  Setup PDO memory info
@@ -258,26 +271,28 @@ The function sets up the PDO memory info. For each channel the offset in the
 shared buffer and the size is stored.
 
 \param  pPdoChannels_p      Pointer to PDO channel setup.
+\param  pPdoMemReagion_p    Pointer to shared PDO memory region.
 
 \return The function returns the size of the used PDO memory
 */
 //------------------------------------------------------------------------------
-static UINT setupPdoMemInfo(tPdoChannelSetup* pPdoChannels_p)
+static void setupPdoMemInfo(tPdoChannelSetup* pPdoChannels_p, tPdoMemRegion* pPdoMemRegion_p)
 {
     UINT                channelId;
     UINT                offset;
     tPdoChannel*        pPdoChannel;
 
-    //TRACE ("-->%s()\n", __func__);
     offset = 0;
     for (channelId = 0, pPdoChannel = pPdoChannels_p->pRxPdoChannel;
          channelId < pPdoChannels_p->allocation.rxPdoChannelCount;
          channelId++, pPdoChannel++)
     {
-        //TRACE ("RX Channel: %d\n", channelId);
-        //TRACE ("size: %d\n", pPdoChannel->pdoSize);
-        rxChannelSetup[channelId].channelOffset = offset;
-        rxChannelSetup[channelId].channelSize = pPdoChannel->pdoSize;
+        //TRACE ("RPDO %d at offset:%d\n", channelId, offset);
+        pPdoMemRegion_p->rxChannelInfo[channelId].channelOffset = offset;
+        pPdoMemRegion_p->rxChannelInfo[channelId].readBuf = 0;
+        pPdoMemRegion_p->rxChannelInfo[channelId].writeBuf = 1;
+        pPdoMemRegion_p->rxChannelInfo[channelId].cleanBuf = 2;
+        pPdoMemRegion_p->rxChannelInfo[channelId].newData = 0;
         offset += pPdoChannel->pdoSize;
     }
 
@@ -285,13 +300,15 @@ static UINT setupPdoMemInfo(tPdoChannelSetup* pPdoChannels_p)
          channelId < pPdoChannels_p->allocation.txPdoChannelCount;
          channelId++, pPdoChannel++)
     {
-        //TRACE ("TX Channel: %d\n", channelId);
-        //TRACE ("size: %d\n", pPdoChannel->pdoSize);
-        txChannelSetup[channelId].channelOffset = offset;
-        txChannelSetup[channelId].channelSize = pPdoChannel->pdoSize;
+        //TRACE ("TPDO %d at offset:%d\n", channelId, offset);
+        pPdoMemRegion_p->txChannelInfo[channelId].channelOffset = offset;
+        pPdoMemRegion_p->txChannelInfo[channelId].readBuf = 0;
+        pPdoMemRegion_p->txChannelInfo[channelId].writeBuf = 1;
+        pPdoMemRegion_p->txChannelInfo[channelId].cleanBuf = 2;
+        pPdoMemRegion_p->txChannelInfo[channelId].newData = 0;
         offset += pPdoChannel->pdoSize;
     }
-    return offset;
+    pPdoMemRegion_p->pdoMemSize = offset;
 }
-
 ///\}
+

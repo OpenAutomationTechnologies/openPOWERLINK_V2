@@ -47,6 +47,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #define PDO_SHB_BUF_ID                  "PdoMem"
 #define PDO_SYNC_BSDSEM                 "/semPdoSync"
+#define PDO_SHMEM_NAME                  "/podShm"
+
+#define PDO_MAX_ALLOC_SIZE      239 * 2 * 1500      //jba replace with a clean solution
 
 // PDO mapping related OD defines
 #define PDOU_OBD_IDX_RX_COMM_PARAM      0x1400
@@ -117,7 +120,6 @@ typedef struct
     UINT                txPdoChannelCount;      ///< max. number of TPDO channels
 } tPdoAllocationParam;
 
-
 /**
 \brief PDO mapping object
 
@@ -175,6 +177,30 @@ typedef struct
     tPdoChannel*        pTxPdoChannel;          ///< Pointer to TXPDO channel table
 } tPdoChannelSetup;
 
+
+typedef struct
+{
+    ULONG       channelOffset;
+    ATOMIC_T    readBuf;
+    ATOMIC_T    writeBuf;
+    ATOMIC_T    cleanBuf;
+    UINT8       newData;
+} tPdoBufferInfo;
+
+typedef struct
+{
+    UINT16              valid;
+    size_t              pdoMemSize;
+    tPdoBufferInfo      rxChannelInfo[EPL_D_PDO_RPDOChannels_U16];
+    tPdoBufferInfo      txChannelInfo[EPL_D_PDO_TPDOChannels_U16];
+} tPdoMemRegion;
+
+
+typedef struct
+{
+    size_t      rxPdoMemSize;
+    size_t      txPdoMemSize;
+} tPdoMemSize;
 
 //------------------------------------------------------------------------------
 // function prototypes

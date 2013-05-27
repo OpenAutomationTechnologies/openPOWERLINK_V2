@@ -60,19 +60,12 @@ extern "C" {
 #endif
 
 tEplKernel pdok_processRxPdo(tEplFrame* pFrame_p, UINT frameSize_p) SECTION_PDOK_PROCESS_RPDO;
-
 tEplKernel pdok_init(void);
-
 tEplKernel pdok_exit(void);
-
 tEplKernel pdok_deAllocChannelMem(void);
-
 tEplKernel pdok_allocChannelMem(tPdoAllocationParam* pAllocationParam_p);
-
 tEplKernel pdok_configureChannel(tPdoChannelConf* pChannelConf_p);
-
-tEplKernel pdok_setupPdoBuffers(void);
-
+tEplKernel pdok_setupPdoBuffers(size_t rxPdoMemSize_p, size_t txPdoMemSize_p);
 tEplKernel pdok_sendSyncEvent(void);
 
 #ifdef __cplusplus
