@@ -551,6 +551,10 @@
 
 #endif
 
+/* some standard function pointer types */
+typedef void (*VOIDFUNCPTR)(void);
+typedef int (*INTFUNCPTR)(void);
+
 //---------------------------------------------------------------------------
 //  definition of TRACE
 //---------------------------------------------------------------------------
