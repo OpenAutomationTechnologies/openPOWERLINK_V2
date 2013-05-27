@@ -49,29 +49,24 @@ SET (DAEMON_MAIN_SOURCES
 
 SET (DAEMON_COMMON_SOURCES
      ${COMMON_SOURCE_DIR}/debug.c
-     ${COMMON_SOURCE_DIR}/dll/dllcal-shb.c
-     ${COMMON_SOURCE_DIR}/ctrl/ctrlcal-shb.c
      ${COMMON_SOURCE_DIR}/event/event.c
-     ${COMMON_SOURCE_DIR}/event/eventcal-shb.c
      ${LIB_SOURCE_DIR}/ami/amix86.c
-     ${LIB_SOURCE_DIR}/sharedbuff/SharedBuff.c
-     ${LIB_SOURCE_DIR}/trace/trace-printf.c
+     ${LIB_SOURCE_DIR}/circbuf/circbuffer.c
      ${EDRV_SOURCE_DIR}/edrvcyclic.c
      )
 
 SET (DAEMON_KERNEL_SOURCES
      ${KERNEL_SOURCE_DIR}/dll/dllk.c
      ${KERNEL_SOURCE_DIR}/dll/dllkcal.c
+     ${KERNEL_SOURCE_DIR}/dll/dllkcal-circbuf.c
      ${KERNEL_SOURCE_DIR}/event/eventk.c
-     ${KERNEL_SOURCE_DIR}/event/eventkcal.c
-     ${KERNEL_SOURCE_DIR}/event/eventkcal-shb.c
      ${KERNEL_SOURCE_DIR}/nmt/nmtk.c
      ${KERNEL_SOURCE_DIR}/nmt/nmtkcal.c
      ${KERNEL_SOURCE_DIR}/pdo/pdok.c
      ${KERNEL_SOURCE_DIR}/pdo/pdokcal.c
-     ${KERNEL_SOURCE_DIR}/pdo/pdokcal-shb.c
+     ${KERNEL_SOURCE_DIR}/pdo/pdokcal-triplebufshm.c
      ${KERNEL_SOURCE_DIR}/errhnd/errhndk.c
-     ${KERNEL_SOURCE_DIR}/errhnd/errhndkcal-shb.c
+     ${KERNEL_SOURCE_DIR}/errhnd/errhndkcal-posixshm.c
      ${KERNEL_SOURCE_DIR}/ctrl/ctrlk.c
      ${KERNEL_SOURCE_DIR}/ctrl/ctrlkcal-mem.c
      )
