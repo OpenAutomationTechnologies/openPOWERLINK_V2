@@ -63,10 +63,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <ctrl.h>
 #include <user/ctrlucal.h>
 
-#if defined(CONFIG_INCLUDE_VETH)
-#include <kernel/VirtualEthernet.h>
-#endif
-
 #if defined(CONFIG_INCLUDE_PDOK)
 #include <kernel/pdok.h>
 #endif
@@ -247,14 +243,6 @@ tEplKernel ctrlu_initStack(tEplApiInitParam * pInitParam_p,
     if ((ret = initObd(pApiInstance_p)) != kEplSuccessful)
         goto Exit;
 
-    TRACE ("Initialize Eventu module...\n");
-    if ((ret = eventu_init(pCbFuncs_p->pfnCbProcessEvent)) != kEplSuccessful)
-        goto Exit;
-
-    TRACE ("Initialize Timeru module...\n");
-    if ((ret = EplTimeruInit()) != kEplSuccessful)
-        goto Exit;
-
     TRACE ("Initializing kernel modules ...\n");
     EPL_MEMCPY (ctrlParam.aMacAddress, pApiInstance_p->m_InitParam.m_abMacAddress, 6);
     strncpy(ctrlParam.szEthDevName, pApiInstance_p->m_InitParam.m_HwParam.m_pszDevName, 127);
@@ -272,6 +260,14 @@ tEplKernel ctrlu_initStack(tEplApiInitParam * pInitParam_p,
     }
 
     EPL_MEMCPY (pApiInstance_p->m_InitParam.m_abMacAddress, ctrlParam.aMacAddress, 6);
+
+    TRACE ("Initialize Eventu module...\n");
+    if ((ret = eventu_init(pCbFuncs_p->pfnCbProcessEvent)) != kEplSuccessful)
+        goto Exit;
+
+    TRACE ("Initialize Timeru module...\n");
+    if ((ret = EplTimeruInit()) != kEplSuccessful)
+        goto Exit;
 
     TRACE ("initialize error handler user module...\n");
     ret = errhndu_init();
@@ -354,6 +350,9 @@ tEplKernel ctrlu_shutdownStack(void)
 {
     tEplKernel      ret = kEplSuccessful;
 
+    ret = eventu_exit();
+    TRACE("eventu_exit():  0x%X\n", ret);
+
 #if defined(CONFIG_INCLUDE_CFM)
     ret = EplCfmuDelInstance();
     TRACE("EplCfmuDelInstance():    0x%X\n", ret);
@@ -400,10 +399,6 @@ tEplKernel ctrlu_shutdownStack(void)
     TRACE("pdou_exit():    0x%X\n", ret);
 #endif
 
-#if defined(CONFIG_INCLUDE_VETH)
-    ret = VEthDelInstance();
-#endif
-
 #if defined(CONFIG_INCLUDE_DLLU)
     ret = dllucal_exit();
     TRACE("dllucal_exit(): 0x%X\n", ret);
@@ -417,9 +412,6 @@ tEplKernel ctrlu_shutdownStack(void)
 
     ret = ctrlucal_executeCmd(kCtrlCleanupStack);
     TRACE("shoutdown kernel modules():  0x%X\n", ret);
-
-    ret = eventu_exit();
-    TRACE("eventu_exit():  0x%X\n", ret);
 
     ret = EplObdDeleteInstance();
 
@@ -480,6 +472,7 @@ BOOL ctrlu_checkKernelStack(void)
     heartbeat = ctrlucal_getHeartbeat();
     if (heartbeat == instance_l.lastHeartbeat)
     {
+        TRACE("heartbeat:%d instance_l.lastHeartbeat:%d\n", heartbeat, instance_l.lastHeartbeat);
         return FALSE;
     }
     else

@@ -136,17 +136,19 @@ tEplKernel ctrlk_init(void)
     shbError = ShbInit();
     if (shbError != kShbOk)
     {
+        EPL_DBGLVL_ERROR_TRACE("ShbInit failed!\n");
         return kEplNoResource;
     }
 #endif
 
     if ((ret = ctrlkcal_init()) != kEplSuccessful)
     {
+        EPL_DBGLVL_ERROR_TRACE("ctrlkcal_init failed!\n");
         goto ExitCleanup;
     }
 
     // initialize heartbeat counter
-    instance_l.heartbeat = 0;
+    instance_l.heartbeat = 1;
 
     return kEplSuccessful;
 
@@ -199,7 +201,7 @@ BOOL ctrlk_process(void)
 
     if (ctrlkcal_getCmd(&cmd) != kEplSuccessful)
     {
-        TRACE ("%s: error getting command!\n", __func__);
+        EPL_DBGLVL_ERROR_TRACE ("%s: error getting command!\n", __func__);
         return FALSE;
     }
 
