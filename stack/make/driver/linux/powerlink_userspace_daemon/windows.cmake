@@ -40,6 +40,8 @@ SET (DAEMON_ARCH_SOURCES
      ${COMMON_SOURCE_DIR}/timer/timer-generic.c
      ${LIB_SOURCE_DIR}/sharedbuff/ShbIpc-Win32.c
      ${LIB_SOURCE_DIR}/misc/trace.c
+     ${KERNEL_SOURCE_DIR}/event/eventkcal.c
+     ${KERNEL_SOURCE_DIR}/event/eventkcal-shb.c
      )
 
 INCLUDE_DIRECTORIES(${POWERLINK_SOURCE_DIR}/Target/X86/Windows/WpdPack/Include)
