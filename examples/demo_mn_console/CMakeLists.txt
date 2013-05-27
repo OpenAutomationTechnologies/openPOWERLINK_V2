@@ -35,7 +35,6 @@ SET (DEMO_SOURCES
      main.c
      app.c
      event.c
-     ${DEMO_COMMON_DIR}/pcap-console.c
      ${LIB_SOURCE_DIR}/console/printlog.c
      ${LIB_SOURCE_DIR}/getopt/getopt.c
      ${OBJDICT_DIR}/${OBJDICT}/EplApiProcessImageSetup.c
@@ -44,9 +43,10 @@ SET (DEMO_SOURCES
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
 INCLUDE_DIRECTORIES(${DEMO_COMMON_DIR})
 
-# PCAP is used for directlink of userspace daemon
+# PCAP is used for directlink or userspace daemon
 IF (CFG_KERNEL_STACK_DIRECTLINK OR CFG_KERNEL_STACK_USERSPACE_DAEMON)
     ADD_DEFINITIONS(-DCONFIG_USE_PCAP)
+    SET (DEMO_SOURCES ${DEMO_SOURCES} ${DEMO_COMMON_DIR}/pcap-console.c)
 ENDIF (CFG_KERNEL_STACK_DIRECTLINK OR CFG_KERNEL_STACK_USERSPACE_DAEMON)
 
 IF (CFG_KERNEL_STACK_DIRECTLINK)
