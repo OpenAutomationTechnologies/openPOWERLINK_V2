@@ -49,8 +49,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <user/dllucal.h>
 #include <user/EplLedu.h>
 #include <Benchmark.h>
+#include <Epl.h>
 
 #include "common/event/event.h"
+
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -253,8 +255,35 @@ tEplKernel eventu_postEvent (tEplEvent *pEvent_p)
 {
     tEplKernel ret = kEplSuccessful;
 
-    ret = eventucal_postEvent(pEvent_p);
+    // split event post to user internal and user to kernel
+    switch(pEvent_p->m_EventSink)
+    {
+        // kernel layer modules
+        case kEplEventSinkSync:
+        case kEplEventSinkNmtk:
+        case kEplEventSinkDllk:
+        case kEplEventSinkDllkCal:
+        case kEplEventSinkPdok:
+        case kEplEventSinkPdokCal:
+        case kEplEventSinkErrk:
+            ret = eventucal_postKernelEvent(pEvent_p);
+            break;
 
+        // user layer modules
+        case kEplEventSinkNmtMnu:
+        case kEplEventSinkNmtu:
+        case kEplEventSinkSdoAsySeq:
+        case kEplEventSinkApi:
+        case kEplEventSinkDlluCal:
+        case kEplEventSinkErru:
+        case kEplEventSinkLedu:
+            ret = eventucal_postUserEvent(pEvent_p);
+            break;
+
+        default:
+            ret = kEplEventUnknownSink;
+            break;
+    }
     return ret;
 }
 

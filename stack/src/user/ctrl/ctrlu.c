@@ -58,6 +58,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <user/EplStatusu.h>
 #include <user/EplTimeru.h>
 #include <user/EplCfmu.h>
+#include <user/eventucal.h>
 #include <EplTarget.h>
 
 #include <ctrl.h>
@@ -443,6 +444,8 @@ tShbError  ShbError;
         goto Exit;
     }
 #endif
+
+    eventucal_process();
 
     Ret = ctrlucal_process();
     if(Ret != kEplSuccessful)

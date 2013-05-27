@@ -1,17 +1,15 @@
 /**
 ********************************************************************************
-\file   eventucal.h
+\file   eventkcalintf.h
 
-\brief  Include file for user event CAL module
+\brief  Include file for kernel event CAL module interfaces
 
-This file contains definitions for the user event CAL module. The user event
-CAL builds the interface between the user event and the event queue
-implementations.
+This file contains definitions for the kernel event CAL module. The kernel event
+CAL builds the interface between the event and the event queue implementations.
 
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2012, SYSTEC electronic GmbH
 Copyright (c) 2012, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
@@ -38,15 +36,16 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_eventucal_H_
-#define _INC_eventucal_H_
+#ifndef _INC_eventkcalintf_H_
+#define _INC_eventkcalintf_H_
 
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
 #include <event.h>
 #include <eventcal.h>
-#include <user/eventu.h>
+#include <kernel/eventk.h>
+#include <kernel/eventkcal.h>
 
 //------------------------------------------------------------------------------
 // const defines
@@ -64,14 +63,18 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 extern "C" {
 #endif
 
-tEplKernel eventucal_init (void);
-tEplKernel eventucal_exit (void);
-tEplKernel eventucal_postKernelEvent (tEplEvent *pEvent_p);
-tEplKernel eventucal_postUserEvent(tEplEvent *pEvent_p);
-void       eventucal_process(void);
+
+/* circular buffer event interface */
+tEplKernel eventkcal_initQueueCircbuf(tEventQueue eventQueue_p);
+tEplKernel eventkcal_exitQueueCircbuf (tEventQueue eventQueue_p);
+tEplKernel eventkcal_postEventCircbuf (tEventQueue eventQueue_p, tEplEvent *pEvent_p);
+tEplKernel eventkcal_processEventCircbuf(tEventQueue eventQueue_p);
+tEplKernel eventkcal_getEventCircbuf(tEventQueue eventQueue_p, BYTE* pDataBuffer_p, size_t* pReadSize_p);
+UINT       eventkcal_getEventCountCircbuf(tEventQueue eventQueue_p);
+tEplKernel eventkcal_setSignalingCircbuf(tEventQueue eventQueue_p, VOIDFUNCPTR pfnSignalCb_p);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* _INC_eventucal_H_ */
+#endif /* _INC_eventkcalintf_H_ */
