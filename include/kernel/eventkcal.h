@@ -52,55 +52,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // const defines
 //------------------------------------------------------------------------------
 
-/*
-The following macros define the kernel event CAL interface getter functions for
-the different event queues depending on the used queue.
-*/
-
-/* setup interface getting function for user to kernel queue */
-#if (EPL_EVENT_U2K_QUEUE == EPL_QUEUE_DIRECT)
-#define GET_EVENTK_U2K_INTERFACE eventkcaldirect_getInterface
-#elif (EPL_EVENT_U2K_QUEUE == EPL_QUEUE_SHB)
-#define GET_EVENTK_U2K_INTERFACE eventkcalshb_getInterface
-#elif (EPL_EVENT_U2K_QUEUE == EPL_QUEUE_HOSTINTERFACE)
-#define GET_EVENTK_U2K_INTERFACE eventkcalhostif_getInterface
-#else
-#error "Unsupported user-to-kernel queue"
-#endif
-
-/* setup interface getting function for user internal queue */
-#if (EPL_EVENT_UINT_QUEUE == EPL_QUEUE_DIRECT)
-#define GET_EVENTK_UINT_INTERFACE eventkcaldirect_getInterface
-#elif (EPL_EVENT_UINT_QUEUE == EPL_QUEUE_SHB)
-#define GET_EVENTK_UINT_INTERFACE eventkcalshb_getInterface
-#elif (EPL_EVENT_UINT_QUEUE == EPL_QUEUE_HOSTINTERFACE)
-#define GET_EVENTK_UINT_INTERFACE eventkcalhostif_getInterface
-#else
-#error "Unsupported user internal queue"
-#endif
-
-/* setup interface getting function for kernel to user queue */
-#if (EPL_EVENT_K2U_QUEUE == EPL_QUEUE_DIRECT)
-#define GET_EVENTK_K2U_INTERFACE eventkcaldirect_getInterface
-#elif (EPL_EVENT_K2U_QUEUE == EPL_QUEUE_SHB)
-#define GET_EVENTK_K2U_INTERFACE eventkcalshb_getInterface
-#elif (EPL_EVENT_K2U_QUEUE == EPL_QUEUE_HOSTINTERFACE)
-#define GET_EVENTK_K2U_INTERFACE eventkcalhostif_getInterface
-#else
-#error "Unsupported kernel-to-user queue"
-#endif
-
-/* setup interface getting function for kernel internal queue */
-#if (EPL_EVENT_KINT_QUEUE == EPL_QUEUE_DIRECT)
-#define GET_EVENTK_KINT_INTERFACE eventkcaldirect_getInterface
-#elif (EPL_EVENT_KINT_QUEUE == EPL_QUEUE_SHB)
-#define GET_EVENTK_KINT_INTERFACE eventkcalshb_getInterface
-#elif (EPL_EVENT_KINT_QUEUE == EPL_QUEUE_HOSTINTERFACE)
-#define GET_EVENTK_KINT_INTERFACE eventkcalhostif_getInterface
-#else
-#error "Unsupported kernel internal queue"
-#endif
-
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
@@ -115,12 +66,13 @@ extern "C" {
 
 tEplKernel eventkcal_init (void);
 tEplKernel eventkcal_exit (void);
-tEplKernel eventkcal_postEvent (tEplEvent *pEvent_p) SECTION_EVENTKCAL_POST;
+tEplKernel eventkcal_postUserEvent (tEplEvent *pEvent_p) SECTION_EVENTKCAL_POST;
+tEplKernel eventkcal_postKernelEvent (tEplEvent *pEvent_p) SECTION_EVENTKCAL_POST;
 tEplKernel eventkcal_rxHandler (tEplEvent *pEvent_p) SECTION_EVENTKCAL_RXHDL;
 
-/* interface getter functions for the different implementations */
-tEventCalFuncIntf* eventkcaldirect_getInterface(void);
-tEventCalFuncIntf* eventkcalshb_getInterface(void);
+/* functions used in eventkcal-linuxkernel.c */
+int        eventkcal_postEventFromUser (unsigned long arg);
+int        eventkcal_getEventForUser(unsigned long arg);
 
 #ifdef __cplusplus
 }

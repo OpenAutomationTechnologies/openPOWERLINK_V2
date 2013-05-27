@@ -174,10 +174,11 @@ layer queues (kernel-to-user or user-to-kernel) and layer-internal queues
 */
 typedef enum
 {
-    kEventQueueK2U              = 0x01, ///< kernel-to-user queue
-    kEventQueueKInt             = 0x02, ///< kernel-internal queue
-    kEventQueueU2K              = 0x03, ///< user-to-kernel queue
-    kEventQueueUInt             = 0x04, ///< user-internal queue
+    kEventQueueK2U              = 0x00, ///< kernel-to-user queue
+    kEventQueueKInt             = 0x01, ///< kernel-internal queue
+    kEventQueueU2K              = 0x02, ///< user-to-kernel queue
+    kEventQueueUInt             = 0x03, ///< user-internal queue
+    kEventQueueNum              = 0x04  ///< maximum number of queues
 } tEventQueue;
 
 

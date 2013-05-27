@@ -52,6 +52,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // typedef
 //------------------------------------------------------------------------------
 
+
 /**
 \brief Event CAL function interface structure
 
@@ -95,6 +96,14 @@ tEplKernel   eventcaldirect_addInstance(tEventQueueInstPtr *ppEventQueueInst_p,
                               BOOL fProcessThreadSafe_p);
 tEplKernel   eventcaldirect_delInstance (tEventQueueInstPtr pEventQueueInst_p);
 tEplKernel   eventcaldirect_postEvent (tEventQueueInstPtr pEventQueue_p, tEplEvent *pEvent_p) SECTION_EVENTCAL_DIRECT_POST;
+
+// event CAL functions prototypes of the direct call implementation
+tEplKernel   eventcalioctl_addInstance(tEventQueueInstPtr *ppEventQueueInst_p,
+                              tEventQueue eventQueue_p, tEplProcessEventCb pfnProcessEventCb,
+                              BOOL fProcessThreadSafe_p);
+tEplKernel   eventcalioctl_delInstance (tEventQueueInstPtr pEventQueueInst_p);
+tEplKernel   eventcalioctl_postEvent (tEventQueueInstPtr pEventQueue_p, tEplEvent *pEvent_p);
+
 
 #ifdef __cplusplus
 }

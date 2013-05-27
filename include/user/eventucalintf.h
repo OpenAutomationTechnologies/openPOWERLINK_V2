@@ -1,8 +1,8 @@
 /**
 ********************************************************************************
-\file   eventucal.h
+\file   eventucalintf.h
 
-\brief  Include file for user event CAL module
+\brief  Include file for user event CAL module interfaces
 
 This file contains definitions for the user event CAL module. The user event
 CAL builds the interface between the user event and the event queue
@@ -11,7 +11,6 @@ implementations.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2012, SYSTEC electronic GmbH
 Copyright (c) 2012, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
@@ -38,8 +37,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_eventucal_H_
-#define _INC_eventucal_H_
+#ifndef _INC_eventucalintf_H_
+#define _INC_eventucalintf_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -47,6 +46,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <event.h>
 #include <eventcal.h>
 #include <user/eventu.h>
+#include <user/eventucal.h>
 
 //------------------------------------------------------------------------------
 // const defines
@@ -64,14 +64,25 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 extern "C" {
 #endif
 
-tEplKernel eventucal_init (void);
-tEplKernel eventucal_exit (void);
-tEplKernel eventucal_postKernelEvent (tEplEvent *pEvent_p);
-tEplKernel eventucal_postUserEvent(tEplEvent *pEvent_p);
-void       eventucal_process(void);
+/* hostif event interface */
+tEplKernel eventucal_initQueueHostif(tEventQueue eventQueue_p);
+tEplKernel eventucal_exitQueueHostif(tEventQueue eventQueue_p);
+tEplKernel eventucal_postEventHostif(tEventQueue eventQueue_p, tEplEvent *pEvent_p);
+tEplKernel eventucal_processEventHostif(tEventQueue eventQueue_p);
+UINT       eventucal_getEventCountHostif(tEventQueue eventQueue_p);
+tEplKernel eventucal_setSignalingHostif(tEventQueue eventQueue_p, VOIDFUNCPTR pfnSignalCb_p);
+
+/* circular buffer event interface */
+tEplKernel eventucal_initQueueCircbuf(tEventQueue eventQueue_p);
+tEplKernel eventucal_exitQueueCircbuf(tEventQueue eventQueue_p);
+tEplKernel eventucal_postEventCircbuf(tEventQueue eventQueue_p, tEplEvent *pEvent_p);
+tEplKernel eventucal_processEventCircbuf(tEventQueue eventQueue_p);
+UINT       eventucal_getEventCountCircbuf(tEventQueue eventQueue_p);
+tEplKernel eventucal_setSignalingCircbuf(tEventQueue eventQueue_p, VOIDFUNCPTR pfnSignalCb_p);
+
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* _INC_eventucal_H_ */
+#endif /* _INC_eventucalintf_H_ */

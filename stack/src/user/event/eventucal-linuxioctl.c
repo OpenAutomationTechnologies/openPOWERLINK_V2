@@ -1,17 +1,15 @@
 /**
 ********************************************************************************
-\file   eventucal.c
+\file   eventucal-linuxioctl.c
 
-\brief  Source file for user event CAL module
+\brief  User event CAL module using ioctl calls on Linux
 
-The user event CAL module builds the interface between the user event
-module and the different event queue implementations.
+This user event CAL module implementation uses ioctl calls on Linux.
 
 \ingroup module_eventucal
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2012, SYSTEC electronic GmbH
 Copyright (c) 2012, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
@@ -38,13 +36,20 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
+
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
 #include <eventcal.h>
-#include <user/eventu.h>
 #include <user/eventucal.h>
-#include <Benchmark.h>
+
+#include <pthread.h>
+
+#include <powerlink-module.h>
+#include <sys/ioctl.h>
+
+#include <unistd.h> //sleep
+#include <user/ctrlucal.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -54,20 +59,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // const defines
 //------------------------------------------------------------------------------
 
-// Macros for function pointer interface
-#define ADD_U2K_INSTANCE    instance_l.pUserToKernelFuncs->pfnAddInstance
-#define DEL_U2K_INSTANCE    instance_l.pUserToKernelFuncs->pfnDelInstance
-#define POST_U2K_EVENT      instance_l.pUserToKernelFuncs->pfnPostEvent
-#define GET_U2K_QUEUE_TYPE  instance_l.pUserToKernelFuncs->pfnGetQueueType
-
-#define ADD_UINT_INSTANCE   instance_l.pUserInternalFuncs->pfnAddInstance
-#define DEL_UINT_INSTANCE   instance_l.pUserInternalFuncs->pfnDelInstance
-#define POST_UINT_EVENT     instance_l.pUserInternalFuncs->pfnPostEvent
-#define GET_UINT_QUEUE_TYPE instance_l.pUserInternalFuncs->pfnGetQueueType
-
-#define ADD_K2U_INSTANCE    instance_l.pKernelToUserFuncs->pfnAddInstance
-#define DEL_K2U_INSTANCE    instance_l.pKernelToUserFuncs->pfnDelInstance
-#define GET_K2U_QUEUE_TYPE  instance_l.pKernelToUserFuncs->pfnGetQueueType
+#define USER_EVENT_THREAD_PRIORITY      20
 
 //------------------------------------------------------------------------------
 // module global vars
@@ -97,12 +89,9 @@ CAL module.
 */
 typedef struct
 {
-    tEventQueueInstPtr      pU2KInstance;       ///< Pointer to event queue instance of user-to-kernel queue
-    tEventQueueInstPtr      pK2UInstance;       ///< Pointer to event queue instance of kernel-to-user queue
-    tEventQueueInstPtr      pUIntInstance;      ///< Pointer to event queue instance of user-internal queue
-    tEventCalFuncIntf*      pUserToKernelFuncs; ///< Pointer to function interface for user-to-kernel queue
-    tEventCalFuncIntf*      pUserInternalFuncs; ///< Pointer to function interface for user-internal queue
-    tEventCalFuncIntf*      pKernelToUserFuncs; ///< Pointer to function interface for kernel-to-user queue
+    int                 fd;
+    pthread_t           threadId;
+    BOOL                fStopThread;
 } tEventuCalInstance;
 
 //------------------------------------------------------------------------------
@@ -113,6 +102,8 @@ static tEventuCalInstance    instance_l;
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
+static void *eventThread (void * arg_p);
+static tEplKernel postEvent(tEplEvent *pEvent_p);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -136,23 +127,24 @@ implementations and calls the appropriate init functions.
 tEplKernel eventucal_init(void)
 {
     tEplKernel          ret = kEplSuccessful;
+    struct sched_param  schedParam;
 
     EPL_MEMSET(&instance_l, 0, sizeof(tEventuCalInstance));
 
-    /* get function interface of the different queues */
-    instance_l.pUserToKernelFuncs = GET_EVENTU_U2K_INTERFACE();
-    instance_l.pUserInternalFuncs = GET_EVENTU_UINT_INTERFACE();
-    instance_l.pKernelToUserFuncs = GET_EVENTU_K2U_INTERFACE();
+    instance_l.fd = ctrlucal_getFd();
+    instance_l.fStopThread = FALSE;
 
-    ret = ADD_U2K_INSTANCE(&instance_l.pU2KInstance, kEventQueueU2K);
-    if (ret != kEplSuccessful)
+    //create thread for signaling new data
+    if (pthread_create(&instance_l.threadId, NULL, eventThread, NULL) != 0)
+    {
         goto Exit;
-
-    ret = ADD_UINT_INSTANCE(&instance_l.pUIntInstance, kEventQueueUInt);
-    if (ret != kEplSuccessful)
-        goto Exit;
-
-    ret = ADD_K2U_INSTANCE(&instance_l.pK2UInstance, kEventQueueK2U);
+    }
+    schedParam.__sched_priority = USER_EVENT_THREAD_PRIORITY;
+    if (pthread_setschedparam(instance_l.threadId, SCHED_FIFO, &schedParam) != 0)
+    {
+        EPL_DBGLVL_ERROR_TRACE("%s(): couldn't set thread scheduling parameters! %d\n",
+               __func__, schedParam.__sched_priority);
+    }
 
 Exit:
     return ret;
@@ -174,11 +166,18 @@ functions of the queue implementations for each used queue.
 //------------------------------------------------------------------------------
 tEplKernel eventucal_exit (void)
 {
-    DEL_U2K_INSTANCE(instance_l.pU2KInstance);
+    UINT            i = 0;
 
-    DEL_UINT_INSTANCE(instance_l.pUIntInstance);
-
-    DEL_K2U_INSTANCE(instance_l.pK2UInstance);
+    instance_l.fStopThread = TRUE;
+    while (instance_l.fStopThread == TRUE)
+    {
+        target_msleep(10);
+        if (i++ > 1000)
+        {
+            TRACE("Event Thread is not terminating, continue shutdown...!\n");
+            break;
+        }
+    }
 
     return kEplSuccessful;
 }
@@ -200,55 +199,20 @@ queue post function is called.
 \ingroup module_eventucal
 */
 //------------------------------------------------------------------------------
-tEplKernel eventucal_postEvent(tEplEvent *pEvent_p)
+tEplKernel eventucal_postUserEvent(tEplEvent *pEvent_p)
 {
-    tEplKernel ret = kEplSuccessful;
-
-    BENCHMARK_MOD_28_SET(3);
-
-    // split event post to user internal and user to kernel
-    switch(pEvent_p->m_EventSink)
-    {
-        // kernel layer modules
-        case kEplEventSinkSync:
-        case kEplEventSinkNmtk:
-        case kEplEventSinkDllk:
-        case kEplEventSinkDllkCal:
-        case kEplEventSinkPdok:
-        case kEplEventSinkPdokCal:
-        case kEplEventSinkErrk:
-            ret = POST_U2K_EVENT(instance_l.pU2KInstance, pEvent_p);
-            break;
-
-        // user layer modules
-        case kEplEventSinkNmtMnu:
-        case kEplEventSinkNmtu:
-        case kEplEventSinkSdoAsySeq:
-        case kEplEventSinkApi:
-        case kEplEventSinkDlluCal:
-        case kEplEventSinkErru:
-        case kEplEventSinkLedu:
-            ret = POST_UINT_EVENT(instance_l.pUIntInstance, pEvent_p);
-            break;
-
-        default:
-            ret = kEplEventUnknownSink;
-            break;
-
-    }
-
-    BENCHMARK_MOD_28_RESET(3);
-
-    return ret;
+    return postEvent(pEvent_p);
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief    User event CAL receive handler
+\brief    Post kernel event
 
-This is the event receive function for events posted to the user layer.
+This function posts a event to a queue. It is called from the generic user
+event post function in the event handler. Depending on the sink the appropriate
+queue post function is called.
 
-\param  pEvent_p                Received event to be processed.
+\param  pEvent_p                Event to be posted.
 
 \return The function returns a tEplKernel error code.
 \retval kEplSuccessful          If function executes correctly
@@ -257,19 +221,96 @@ This is the event receive function for events posted to the user layer.
 \ingroup module_eventucal
 */
 //------------------------------------------------------------------------------
-tEplKernel eventucal_rxHandler(tEplEvent *pEvent_p)
+tEplKernel eventucal_postKernelEvent(tEplEvent *pEvent_p)
 {
-    tEplKernel Ret = kEplSuccessful;
+    return postEvent(pEvent_p);
+}
 
-    BENCHMARK_MOD_28_SET(5);
+//------------------------------------------------------------------------------
+/**
+\brief  Process function of user CAL module
 
-    Ret = eventu_process(pEvent_p);
-
-    BENCHMARK_MOD_28_RESET(5);
-
-    return Ret;
+This function will be called by the systems process function.
+*/
+//------------------------------------------------------------------------------
+void eventucal_process(void)
+{
+    // Nothing to do, because we use threads
 }
 
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
 //============================================================================//
+
+//------------------------------------------------------------------------------
+/**
+\brief    Post event
+
+This function posts a event to a queue. It is called from the generic user
+event post function in the event handler. Depending on the sink the appropriate
+queue post function is called.
+
+\param  pEvent_p                Event to be posted.
+
+\return The function returns a tEplKernel error code.
+\retval kEplSuccessful          If function executes correctly
+\retval other error codes       If an error occurred
+*/
+//------------------------------------------------------------------------------
+static tEplKernel postEvent(tEplEvent *pEvent_p)
+{
+    int             ioctlret;
+
+    /*TRACE("%s() Event type:%s(%d) sink:%s(%d) size:%d!\n", __func__,
+           EplGetEventTypeStr(pEvent_p->m_EventType), pEvent_p->m_EventType,
+           EplGetEventSinkStr(pEvent_p->m_EventSink), pEvent_p->m_EventSink,
+           pEvent_p->m_uiSize);*/
+
+    ioctlret = ioctl (instance_l.fd, PLK_CMD_POST_EVENT, pEvent_p);
+    if (ioctlret != 0)
+        return kEplNoResource;
+
+    return kEplSuccessful;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief    Event thread function
+
+This function implements the event thread.
+
+\param  arg_p                Thread argument.
+
+*/
+//------------------------------------------------------------------------------
+static void *eventThread (void * arg_p)
+{
+    tEplEvent*  pEvent;
+    int         ret;
+    char        eventBuf[sizeof(tEplEvent) + EPL_MAX_EVENT_ARG_SIZE];
+
+    UNUSED_PARAMETER(arg_p);
+
+    pEvent = (tEplEvent*)eventBuf;
+
+    while (!instance_l.fStopThread)
+    {
+        ret = ioctl(instance_l.fd, PLK_CMD_GET_EVENT, eventBuf);
+        if (ret == 0)
+        {
+            /*TRACE ("%s() User: got event type:%d(%s) sink:%d(%s)\n", __func__,
+                    pEvent->m_EventType, EplGetEventTypeStr(pEvent->m_EventType),
+                    pEvent->m_EventSink, EplGetEventSinkStr(pEvent->m_EventSink));*/
+            if (pEvent->m_uiSize != 0)
+                pEvent->m_pArg = (char *)pEvent + sizeof(tEplEvent);
+
+            ret = eventu_process(pEvent);
+        }
+        /*else
+            TRACE("%s() ret = %d\n", __func__, ret);*/
+    }
+    instance_l.fStopThread = FALSE;
+
+    return NULL;
+}
+

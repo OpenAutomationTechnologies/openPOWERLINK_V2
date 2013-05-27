@@ -256,11 +256,36 @@ CAL module which distributes the event to the suitable event queue.
 //------------------------------------------------------------------------------
 tEplKernel eventk_postEvent (tEplEvent *pEvent_p)
 {
-    tEplKernel Ret = kEplSuccessful;
+    tEplKernel ret = kEplSuccessful;
 
-    Ret = eventkcal_postEvent(pEvent_p);
+    switch(pEvent_p->m_EventSink)
+    {
+        case kEplEventSinkNmtMnu:
+        case kEplEventSinkNmtu:
+        case kEplEventSinkSdoAsySeq:
+        case kEplEventSinkApi:
+        case kEplEventSinkDlluCal:
+        case kEplEventSinkErru:
+        case kEplEventSinkLedu:
+            ret = eventkcal_postUserEvent(pEvent_p);
+            break;
 
-    return Ret;
+        case kEplEventSinkSync:
+        case kEplEventSinkNmtk:
+        case kEplEventSinkDllk:
+        case kEplEventSinkDllkCal:
+        case kEplEventSinkPdok:
+        case kEplEventSinkPdokCal:
+        case kEplEventSinkErrk:
+            ret = eventkcal_postKernelEvent(pEvent_p);
+            break;
+
+        default:
+            ret = kEplEventUnknownSink;
+            break;
+    }
+
+    return ret;
 }
 
 //------------------------------------------------------------------------------
