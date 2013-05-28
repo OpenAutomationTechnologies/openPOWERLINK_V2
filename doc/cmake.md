@@ -23,11 +23,11 @@ There are three possible ways for configuring your build options
 
   This is the most comfortable way for configuring the build options. cmake-gui
   is a graphical user interface for CMake.
-  
+
 * `ccmake`
 
   ccmake is a curses based user interface for cmake.
-  
+
 * `cmake -i`
 
   If cmake is called with option -i you can interactively select your build
@@ -44,16 +44,28 @@ The following build configuration options are available:
 - **CFG_POWERLINK_MN**
 
   If enabled, the POWERLINK stack will be compiled with MN functionality otherwise
-  it will be compiled to be used with CN nodes.
+  it will be compiled only with CN functionality.
 
-- **CFG_X86_DEMO_MN_CONSOLE**
+- **CFG_DEMO_MN_CONSOLE**
 
-  If enabled the MN console application will be compiled. It can be used either
-  with the kernel stack or with the userspace stack.
+  If enabled the MN console application will be compiled.
 
   Requires: *CFG_POWERLINK_MN*
 
-- **CFG_X86_DEMO_MN_QT**
+- **CFG_DEMO_CN_CONSOLE**
+
+  If enabled the CN console application will be compiled.
+
+  Requires: *CFG_POWERLINK_MN = OFF*
+
+- **CFG_DEMO_MN_CONSOLE_USE_SYNCTHREAD**
+
+  If enabled the MN console application starts a separate thread for
+  the synchronous (PDO) data handling.
+
+  Requires: *CFG_DEMO_MN_CONSOLE*
+
+- **CFG_DEMO_MN_QT**
 
   If enabled the MN QT application will be compiled. It can be used either with
   the kernel stack or with the userspace stack.
@@ -72,34 +84,62 @@ The following build configuration options are available:
   If the build type debug is specified, the code is compiled with debugging
   options.
 
+- **CFG_BUILD_UNITTESTS**
+
+  If enabled, the unit tests will be compiled.
+
 ### Linux Configuration Options
 
+- **CFG_BUILD_KERNEL_STACK**
+
+  Determines how to build the kernel stack. The following options are available:
+  - Link to Application
+
+    The openPOWERLINK kernel part will be directly linked to the user part and
+    application. libpcap will be used as ethernet driver.
+
+  - Linux Userspace Daemon
+
+    The openPOWERLINK kernel part will be compiled as a separate userspace process.
+    libpcap will be used as ethernet driver.
+
+  - Linux Kernel Module
+
+    The openPOWERLINK kernel part will be compiled as a Linux kernel module.
+    The configured Linux ethernet driver will be used.
+
 - **CFG_KERNEL_DIR**
-  
+
   The directory where the kernel sources used for building the kernel modules
   are located. If it is not set the sources of the running kernel will be used:
   `/lib/modules/$(shell uname -r)/build`
 
-- **CFG_KERNEL_STACK**
-
-  Determines whether kernel stack or usermode stack are compiled. If enabled,
-  kernel stack will be compiled.
+  Requires: *CFG_BUILD_KERNEL_STACK = Linux Kernel Module*
 
 - **CFG_POWERLINK_EDRV**
 
   Selects the Ethernet driver used for the kernel based stack and demos.
   Valid options are:
-  
+
   - **8139**:  Realtek 8139 based network interface cards
   - **82573**: Intel 82573 based network interface cards
   - **8255x**: Intel 8255x 100MBit based network interface cards
 
-- **CFG_X86_LINUX_DEMO_KERNEL**
+  Requires: *CFG_BUILD_KERNEL_STACK = Linux Kernel Module*
 
-  If enabled the kernel demo will be compiled.
+### Windows Configuration Options
+
+- **CFG_BUILD_KERNEL_STACK**
+
+  Determines how to build the kernel stack. The following options are available:
+  - Link to Application
+
+  The openPOWERLINK kernel part will be directly linked to the user part and
+  application. winpcap will be used as ethernet driver.
+
 
 ## Out-of-Source Builds
-  
+
 CMake support out-of-source builds. Therefore, all generated files are located
 in a seperate build directory which keeps your sources clean. It is recommended
 to use a separate build directory for building the openPOWERLINK stack and the
