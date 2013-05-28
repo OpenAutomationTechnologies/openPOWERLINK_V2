@@ -132,6 +132,9 @@
 
 #endif // CONFIG_MN
 
+#define CONFIG_DLLCAL_QUEUE                 EPL_QUEUE_CIRCBUF
+#define EPL_USE_SHAREDBUFF                  FALSE
+
 // =========================================================================
 // EPL ethernet driver (Edrv) specific defines
 // =========================================================================
