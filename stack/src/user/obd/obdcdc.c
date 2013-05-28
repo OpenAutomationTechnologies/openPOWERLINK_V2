@@ -80,14 +80,11 @@
 
 #if (EPL_OBD_USE_LOAD_CONCISEDCF != FALSE)
 
-#if !((TARGET_SYSTEM == _LINUX_) && \
-      (defined(__KERNEL__)))
 #include <sys/stat.h>
 #include <assert.h>
 #include <stdlib.h>
 #include <fcntl.h>
 #include <errno.h>
-#endif
 
 #if (TARGET_SYSTEM == _WIN32_)
 
@@ -101,17 +98,13 @@
 
 #elif (TARGET_SYSTEM == _LINUX_)
 
-    #ifdef __KERNEL__
-        #include <asm/io.h>
-        #include "PosixFileLinuxKernel.h"
-    #else
-        #include <unistd.h>
-        #include <sys/vfs.h>
-        #include <sys/types.h>
-        #include <sys/timeb.h>
-        #include <utime.h>
-        #include <limits.h>
-    #endif
+    #include <unistd.h>
+    #include <sys/vfs.h>
+    #include <sys/types.h>
+    #include <sys/timeb.h>
+    #include <utime.h>
+    #include <limits.h>
+
 #elif (TARGET_SYSTEM == _VXWORKS_)
         #include "ioLib.h"
 #endif
