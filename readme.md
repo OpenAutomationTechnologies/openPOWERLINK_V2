@@ -42,45 +42,33 @@ README - Quick Start Guide {#readme}
 
 - [X86 PC with Linux](\ref linux-x86) or [Windows operating system](\ref other-platforms)
   * MN demo application using a console based interface\n
-    = `Examples\X86\Generic\demo_mn_console`
+    = `examples/demo_mn_console`
   * CN demo application using a console based interface\n
-    = `Examples\X86\Generic\demo_cn_console`
+    = `examples/demo_cn_console`
   * MN demo application using a Qt based interface\n
-    = `Examples\X86\Generic\demo_mn_qt`
+    = `examples/demo_mn_qt`
 
   These demo applications can be built for both Linux and Windows.
   CMake is used as a cross-platform build system.
 
   On Linux, these demo applications can be configured to use either
-  a pcap based stack that is located in user space, or to use a
-  stack that is located in kernel space.
+  a pcap based kernel stack that is located in user space, or to use a
+  kernel stack that is located in kernel space.
 
   On Windows, these demo applications only support a pcap based stack in
   user space.
 
-- [Freescale ColdFire MCF5484](\ref other-platforms) (SYSTEC Development Board for ECUcore-5484)
-  with Linux operating system
-  * simple CN demo which controls the LEDs and reads the pushbuttons on the devboard:\n
-    = `Examples\PLCcore-CF54\Linux\gnu\demo_cn_kernel`
-  * simple CN and MN demo which controls the LEDs and reads the pushbuttons on the devboard
-    and drives a running light on other CNs if running as MN (node-ID 240/0xF0):\n
-    = `Examples\PLCcore-CF54\Linux\gnu\demo_mn_kernel`
-
-- [Hilscher netX-500](\ref other-platforms) (Evaluation board Hilscher NXEB 500-HMI)\n
-  = GPL-Addon Package: `Examples\netx500\Linux\gnu\demo_mn_kernel`
-
-- [Atmel AT91RM9200](\ref other-platforms) with Davicom DM9003 under Linux\n
-  = `Examples\at91rm9200\Linux\gnu\demo_mn_dm9003_kernel`
-
-- [Altera Cyclone III/IV](\ref altera) on EBV DBC3C40, SYS TEC ECUcore-EP3C or TERASIC DE2-115
+- [Altera Cyclone III/IV](\ref altera-cn \ref altera-mn) on EBV DBC3C40, SYS TEC ECUcore-EP3C or TERASIC DE2-115
   Development Board with Nios II Soft-CPU and POWERLINK IP-Core.
   * CN demo which controls the LEDs and reads the pushbuttons on the devboard:\n
-    = `Examples\altera_nios2\no_os\gnu\demo_directIO`
+    = `examples/arch/altera_nios2/no_os/gnu/demo_directIO`
+  * MN demo\n
+    = `examples/arch/altera_nios2/no_os/gnu/demo_mn`
 
 - [Xilinx Spartan 6](\ref xilinx) on Industrial Ethernet Kit (IEK, LX150t) or MicroBoard (micro, LX9)
   with Microblaze Soft-CPU and POWERLINK IP-Core.
   * CN demo which controls the LEDs and reads the pushbuttons on the devboard:\n
-    = `Examples\xilinx_microblaze\no_os\gnu\demo_directIO`
+    = `examples/arch/xilinx_microblaze/no_os/gnu/demo_cn_digitalio`
 
 ## Troubleshooting
 
