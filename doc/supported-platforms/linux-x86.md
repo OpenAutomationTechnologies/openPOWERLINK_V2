@@ -4,11 +4,6 @@ openPOWERLINK on Linux X86 {#linux-x86}
 ## Introduction
 
 This file contains documentation for the openPOWERLINK stack on Linux x86.
-The openPOWERLINK stack for Linux x86 is available in two different
-versions:
-
-- as Linux userspace library
-- as Linux kernel module
 
 ## Requirements
 
@@ -26,7 +21,8 @@ Linux x86.
 - Network controller card with Intel 82573L (or compatible) 1GBit Ethernet chip  
   For example:
   - B&R APC 810 Industrial PC on-board network chip (tested)
-  - Network controller card with Realtek RTL8139 Rev C or D chip  
+
+- Network controller card with Realtek RTL8139 Rev C or D chip  
     For example:
     - PCI network cards:
       * Zyxel FN312 (tested)
@@ -49,8 +45,7 @@ Linux x86.
     (for user-space stack version)
 
 ### Linux Kernel
-   - Linux kernel version 2.6.23 or later (last tested version 2.6.33)
-     with CONFIG_HIGH_RES_TIMERS enabled
+- Linux kernel version 2.6.23 or later with CONFIG_HIGH_RES_TIMERS enabled
      * this needs ACPI support, maybe you need to append "`highres=on`" or
        "`acpi=force`" to kernel command line for older BIOSes)
      * check `/proc/timer_list` if .`hres_active` is 1
@@ -63,21 +58,29 @@ For best performance and minimal jitter on the POWERLINK cycle a real-time
 Linux kernel is recommended. The RT-Preempt patch maintaind by Ingo Molnar
 provides the necessary real-time extensions (https://rt.wiki.kernel.org).
 
+Additional information on the Linux realtime kernel can be found on the
+OSADL home page (http://www.osadl.org).
+
 **Thread Priorities**  
 If using a real-time kernel, the real-time priorities of the necessary
 threads must be adjusted for deterministic POWERLINK behaviour.
-If you are using the kernel based stack, the EplLoad script coming along
+If you are using the kernel based stack, the plkload script coming along
 with the stack automatically carries out the required priority changes.
-For the userspace stack, a script setting the priorities is provided in
-Examples/X86/Linux/gnu/tools/set_prio. It increases the thread priorities of
-the high resolution timer and of the Ethernet IRQ threads.
+For the userspace stack, a script setting the prioritiess provided in
+tools/Linux/set_prio. It increases the priorities of the high resolution
+timer softirq thread (only on 2.6 kernels) and of the Ethernet IRQ thread.
 
 **Kernel 3.x**  
-The behaviour of a 3.X real-time kernel changed. Splitted softirq threads
-are no longer available. To get a good real-time behaviour the following
-steps have to be made:
+The behaviour of a 3.X real-time kernel changed. Split softirq threads
+are no longer available but there is a patch which implements split softirq
+locks. If you are using a 3.X real-time kernel you should ensure that this
+patch is included.
 
-* A multicore processor is required for these optimizations!
+For example: A current Linux version at writing of this document which
+includes the patch is v3.6.11.4-rt36.
+
+Additionally, the following steps could be made to improve the real-time
+behaviour on a _multicore_ processor:
 
 * Ensure that the following configuration options are set for your
   real-time kernel:
@@ -104,6 +107,8 @@ For building the openPOWERLINK stack and demo applications the Open Source
 cross-platform build tool CMake is used ([http://www.cmake.org]). CMake
 version V2.8 or higher is required.
 
+For a detailed description of the cmake options look at the [cmake documentation](\ref cmake).
+
 #### libpcap library
 In order to use the userspace POWERLINK stack the libpcap library is needed
 to access the Ethernet interface.
@@ -118,7 +123,7 @@ tool openCONFIGURATOR should be used. The tool is available as SourceForge
 project. [http://sourceforge.net/projects/openconf/](http://sourceforge.net/projects/openconf/)
 
 The openCONFIGURATOR projects used by the demo examples are found in the
-directory: *CfmProjects*.
+directory: *examples/openCONFIGURATOR_projects*.
 
 openCONFIGURATOR creates two file which are used by the openPOWERLINK stack
 and application:
@@ -130,44 +135,88 @@ and application:
 
 * `mnobd.cdc`  
   This file is used to configure the MN stack. It includes all
-                configuration data of the CNs and the network mapping
-				information. CN configuration is handled by the configuration
-				manager (CFM) module of the MN.
+  configuration data of the CNs and the network mapping
+  information. CN configuration is handled by the configuration
+  manager (CFM) module of the MN.
 
 
 ## openPOWERLINK Stack
 
-The openPOWERLINK stack for Linux x86 is available in two different
-versions:
+The openPOWERLINK stack is divided in a user- and a kernel part. Whereas in
+previous versions the whole stack runs in the same domain, the current stack
+could run in different domains. On a Linux x86 system the following configurations
+are possible:
 
-- kernel module
-- userspace library
+- Direct Link to Application  
+  The kernel part is directly linked to the user part and application into a
+  single executable. The stack uses the libpcap library for accessing the
+  ethernet device.
 
-### Linux kernel-based stack
+- Linux Userspace Daemon  
+  The kernel part is compiled as a separate process (daemon) which runs in
+  userspace. The stack uses the libpcap library for accessing the ethernet
+  device.
+
+- Linux Kernel Module  
+  The kernel part is compiled as a Linux kernel module. The kernel module
+  could be configured to use one of the available openPOWERLINK ethernet
+  drivers.
+
+### openPOWERLINK kernel stack
+
+#### Direct Link to Application
+
+If the openPOWERLINK stack is configured to be directly linked to the application
+there is no need of a separate stack daemon. The whole stack is compiled into
+the library libpowerlink.a. This library has to be linked by your application.
+
+#### Linux Userspace Daemon
+
+The kernel part of the stack is compiled as a separate userspace process. It
+uses the libpcap library for accessing the network interface and is therefore
+totally independant of the used network card and driver. Due to the usage of
+libpcap for accessing the ethernet device it cannot reach the performance
+of the kernel space stack!
+
+The Linux userspace daemon is located in: `stack/make/driver/linux/powerlink_userspace_daemon`
+
+#### Linux Kernel Module
 
 The openPOWERLINK stack may be implemented as Linux kernel module. This
 solution provides the best performance, but is limited to the available
 openPOWERLINK network drivers.
 
-The kernel based stack is located in: `Examples/X86/Linux/gnu/powerlink_kernel_module`
+The linux kernel module is located in: `stack/make/driver/linux/powerlink_kernel_module`
 
-### Linux userspace stack
+### openPOWERLINK stack library
 
-The Linux userspace implementation of the openPOWERLINK stack provides all
-functions for a software based POWERLINK solution running as Linux userspace
-application. The stack uses the libpcap library for accessing the network
-interface and is therefore totally independant of the used network card and
-driver.
+#### openPOWERLINK stack library - complete stack
 
-The userspace stack is located in: `Examples/X86/Linux/Generic/powerlink_user_lib`
+The openPOWERLINK stack library contains the whole openPOWERLINK stack. If you
+want to create an openPOWERLINK application which contains the stack in a
+single executable you only need to link your application to the openPOWERLINK
+stack library libpowerlink.a.
 
+In this case you are using the libpcap library to access the ethernet device.
+
+The openPOWERLINK stack library is located in: `stack/make/lib/libpowerlink`
+
+
+#### openPOWERLINK user part library - user part of stack
+
+If you are using a separated kernel stack (either user space daemon or kernel
+module) you need to link your application to the user part stack library
+(libpowerlink_user.a). Depending on the used kernel stack daemon it uses libpcap
+or a special openPOWERLINK ethernet driver to access the ethernet interface.
+
+The openPOWERLINK user part stack library is located in: `stack/make/lib/libpowerlink_user`
 
 ## Tools
 
 There are some shellscripts used for loading POWERLINK modules, setting
 thread priorities etc.
 
-These tools are located in: `Examples/X86/Linux/gnu/tools`
+These tools are located in: `tools/linux`
 
 
 ## Demo applications
@@ -176,38 +225,28 @@ There are several demo applications available. The POWERLINK demo applications
 are able to visualize the digital inputs of POWERLINK controlled nodes and are
 driving a running light on the CNs digital outputs.
 
-### Kernel demo
-
-The kernel demo is a simple demo application running together with the stack
-in kernel mode.
-  
-It is located in: `Examples/X86/Linux/gnu/demo_kernel`
-
 ### QT MN demo
   
 This QT demo implements a POWERLINK managing node (MN) using the configuration
 manager (CFM) to initialize the controlled nodes. It uses a network configuration
-created with the openCONFIGURATOR tool. This demo can be used either with
-the kernel based stack or with the userspace stack.
+created with the openCONFIGURATOR tool.
   
-It is found in:	`Examples/X86/Generic/demo_mn_qt`
+It is found in: `examples/demo_mn_qt`
 
 ### Console MN demo
 
 This demo also implements a POWERLINK MN with CFM. It is implemented as
 console application and is intended to machines where no graphical user
-interface is available. This demo can be used either with the kernel-based
-stack or with the userspace stack.
+interface is available.
 
-It is located in: `Examples/X86/Generic/demo_mn_console`
+It is located in: `examples/demo_mn_console`
 
 ### Console CN demo
   
 This demo implements a POWERLINK CN digital I/O node according to CiA401
-profile. It is implemented as console application. This demo can be used
-either with the kernel-based stack or with the userspace stack.
+profile. It is implemented as console application.
 
-It is located in: `Examples/X86/Generic/demo_cn_console`
+It is located in: `examples/demo_cn_console`
 
 
 ## Building
@@ -235,14 +274,14 @@ Follow the steps below to build the stack and demo applications:
       > cmake-gui .. (cmake -i .., ccmake ..)
 
   If using the cmake-gui, the build options are selected in the GUI. After
-  setting the desired options press "Configure". New options might appear
-  according to the current selection. New options will be marked in red.
+  setting the desired options press _Configure_. New options might appear
+  according to the current selection. New options will be marked in _red_.
   Further configuration settings may be changed and accepted by pressing
-  "Configure" again. If there are no red-marked options, "Generate" writes
+  _Configure_ again. If there are no red-marked options, _Generate_ writes
   the build files (Unix Makefiles).
   
 * Building
-  No we can build all necessary software modules by calling
+  No you can build all necessary software modules by calling
   
       > make
 
@@ -252,55 +291,63 @@ Follow the steps below to build the stack and demo applications:
       > make install
 
   The target files will be installed in the configured installation
-  directory. There, the stack and demos can be started.
+  directory (Default:bin). There, the stack and demos can be started.
 
 
 ## Running POWERLINK
 
-### Starting kernel modules
+### Starting the kernel module
 
-To start the POWERLINK kernel modules, the scripts EplLoad and EplUnload are
+To start the POWERLINK kernel modules, the scripts plkload and plkunload are
 used. The scripts will be installed in the installation directory. Additionally
-to inserting the kernel module they adjust priorities and unbind the network
-device from the standard driver. This allows the usage of the Ethernet card by
-openPOWERLINK.
+to inserting the kernel module the plkload script adjust priorities and unbinds
+the network device from the standard driver. This allows the usage of the Ethernet
+card by openPOWERLINK.
 
-It is recommended to use the scripts to start openPOWERLINK.
+It is recommended to use this script to start openPOWERLINK!
 
 For example:
-Start the kernel stack using the Intel 82573 network controller with a
-POWERLINK network configuration stored in mnobd.cdc file.
+Start the kernel stack using the Intel 82573 network controller:
 
     > cd bin
-    > sudo ./EplLoad -c mnobd.cdc powerlink82573.ko
+    > sudo ./plkload powerlink82573.ko
 
 To unload the kernel module:
     > cd bin
-    > sudo ./EplUnload powerlink82573.ko
+    > sudo ./plkunload powerlink82573.ko
+
+### Starting the userspace daemon
+
+If the stack is configured to use the Linux userspace daemon, you must start it
+before starting your application. The userspace daemon is started by the following
+command:
+
+    > cd bin
+    > sudo ./powerlink_mn_daemon
 
 ### Starting the demo application
 
-#### Demo uses kernel stack
+#### Demo uses separate kernel stack daemon
 
-If the demo application is configured to use the kernel stack you could simply
-start it:
+If the demo application is configured to use a seperately compiled kernel stack
+you have to ensure that the kernel stack daemon is running before you start your
+application. Then you could start it by:
 
     > cd bin
-    > ./demo_mn_qt
+    > sudo ./demo_mn_qt
 
-#### Demo uses userspace stack
+#### Demo is directly linked with the kernel stack
 
-If the demo application is configured and linked with the userspace stack you
-must have root access and ensure that the network configuration mnobd.cdc is
-available in the current directory:
+If the demo application is  linked with the complete openPOWERLINK stack, you
+could directly start it:
 
     > cd bin
     > sudo ./demo_mn_qt
 
 If you are using a real-time kernel you should adjust thread priorities using
-the delivered script set_prio before starting the application. To be able to
+the delivered script _set_prio_ before starting the application. To be able to
 increase the priority of the right ethernet interrupt thread, you have to
-specifcy the used ethernet interface.
+specifcy the used ethernet interface. For example:
 
     > cd bin
     > sudo ./set_prio eth1
@@ -319,15 +366,5 @@ specifcy the used ethernet interface.
 
 - Linux kernel space: Check the kernel log
       $ dmesg
-- Study the output of
-      $ cat /proc/epl
-- Try to reset the NMT state machine with
-      $ echo > /proc/epl
-  (Hint: /proc/epl executes the NMT events defined in enum tEplNmtEvent in
-  file Include/EplNmt.h like `$ echo 0x13 > /proc/epl` for NMT Reset Configuration)
-. If TCP/IP communication over the POWERLINK network does not work
-  check the configuration of the virtual network interface and the routing
-      $ ifconfig epl
-      $ netstat -r
 
 
