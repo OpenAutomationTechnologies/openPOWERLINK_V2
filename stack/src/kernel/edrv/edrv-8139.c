@@ -128,7 +128,7 @@
 
 #define EDRV_TX_BUFFER_SIZE     (EDRV_MAX_TX_BUFFERS * EDRV_MAX_FRAME_SIZE) // n * (MTU + 14 + 4)
 
-#define DRV_NAME                "epl"
+#define DRV_NAME                "plk"
 
 
 #define EDRV_REGW_INT_MASK      0x3C    // interrupt mask register

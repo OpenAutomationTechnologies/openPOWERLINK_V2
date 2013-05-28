@@ -146,7 +146,7 @@ Developer Manual.
 #define EDRV_RX_BUFFER_SIZE_SHIFT 11 // 2048 Byte
 #define EDRV_RX_BUFFER_SIZE (1 << EDRV_RX_BUFFER_SIZE_SHIFT)
 
-#define DRV_NAME "epl"
+#define DRV_NAME "plk"
 
 // 8255x hash defines - start
 /*

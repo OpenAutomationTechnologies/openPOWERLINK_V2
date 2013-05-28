@@ -300,7 +300,7 @@
 #endif
 
 #ifndef EPL_VETH_NAME
-#define EPL_VETH_NAME       "epl"   // name of net device in Linux
+#define EPL_VETH_NAME       "plk"   // name of net device in Linux
 #endif
 
 #ifndef EPL_EVENT_KINT_QUEUE
