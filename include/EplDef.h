@@ -369,6 +369,17 @@
 #define EDRV_AUTO_RESPONSE_DELAY            FALSE
 #endif
 
+
+// definitions for usage of circular buffer library
+
+// Circular buffer instances used in openPOWERLINK
+#define CIRCBUF_USER_TO_KERNEL_QUEUE    0
+#define CIRCBUF_KERNEL_TO_USER_QUEUE    1
+#define CIRCBUF_KERNEL_INTERNAL_QUEUE   2
+#define CIRCBUF_USER_INTERNAL_QUEUE     3
+#define CIRCBUF_DLLCAL_TXGEN            4
+#define CIRCBUF_DLLCAL_TXNMT            5
+#define CIRCBUF_DLLCAL_TXSYNC           6
 /*
 #define EPL_D_CFG_ConfigManager_BOOL        // Ability of a MN node to perform Configuration Manager functions BOOLEAN O - N -
 #define EPL_D_CFM_VerifyConf_BOOL           // Support of objects CFM_VerifyConfiguration_REC, CFM_ExpConfDateList_AU32, CFM_ExpConfTimeList_AU32 BOOLEAN O O N N
