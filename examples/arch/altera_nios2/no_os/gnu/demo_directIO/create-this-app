@@ -1,16 +1,48 @@
 #!/bin/bash
 #
-# This script creates the openPOWERLINK demo CN application in this directory.
+################################################################################
+#  (c) Bernecker + Rainer Industrie-Elektronik Ges.m.b.H.
+#      A-5142 Eggelsberg, B&R Strasse 1
+#      www.br-automation.com
+################################################################################
+#
+# This script creates the development environment for Altera Nios II Eclipse
 
-TC_I_MEM=tc_i_mem_pcp
+source create-this-app.settings
 
 if [ -z "$SOPC_DIR" ]; then
-SOPC_DIR=../../../../../../fpga/boards/altera/TERASIC_DE2-115/design_nios2_directIO
+echo "Define path to SOPC file in create-this-app.settings!"
+exit 1
+fi
+
+if [ -z "$OPT_LEVEL" ]; then
+echo "Define optimization level in create-this-app.settings!"
+exit 1
+fi
+
+if [ -z "$DBG_MODE" ]; then
+echo "Define debug mode in create-this-app.settings!"
+exit 1
+fi
+
+if [ -z "$TC_I_MEM" ]; then
+echo "Define tightly-coupled memory in create-this-app.settings!"
+exit 1
+fi
+
+if [ -z "$PLK_NODE_IS" ]; then
+echo "Define kind of POWERLINK node (MN/CN) in create-this-app.settings!"
+exit 1
 fi
 
 SOPC_DIR=`readlink -n -f ${SOPC_DIR}`
 
+# export variables needed by create-this-bsp
 export SOPC_DIR
+export OPT_LEVEL
+export DBG_MODE
+export TC_I_MEM
+export PLK_NODE_IS
 
 # save arguments for passing to create-this-bsp
 SAVE_ARGS=$@
@@ -19,7 +51,6 @@ SAVE_ARGS=$@
 # process arguments
 SKIP_MAKE=
 REBUILD=
-DEBUG=
 while [ $# -gt 0 ]
 do
   case "$1" in
@@ -31,20 +62,14 @@ do
           rm -f ./Makefile ${BSP_DIR}/settings.bsp
           REBUILD=1
           ;;
-      --debug)
-          DEBUG=1
-          ;;
       --help)
           echo "Usage: ${0} [OPTION]"
           echo
           echo "  --rebuild      recreates the Makefile and the BSP"
-          echo "  --debug        disables compiler optimization"
-          echo "                 disables all prints to jtag_uart_0"
           echo "  --no-make      do not run make at the end of this script"
           echo
-          echo "Optionally, export environment variable SOPC_DIR,"
-          echo "which should point to the Quartus project the application is build for."
-          echo "Currently, SOPC_DIR=${SOPC_DIR}"
+          echo " Configure the script in the file create-this-app.settings"
+          echo " according to your needs before running this script!"
           echo
           exit 1
           ;;
@@ -52,110 +77,21 @@ do
   shift
 done
 
-# set needed path variables
-BSP_DIR=./bsp
-MAINPATH=../../../../../..
+CFLAGS="-D${DBG_MODE} -DDEF_DEBUG_LVL=${DEF_DEBUG_LVL} -D${PLK_NODE_IS}"
 
-# set DBG_MODE according to user args
-if [ -z "$DEBUG" ]; then
-    DBG_MODE=NDEBUG
-else
-    DBG_MODE=_DEBUG
-fi
-
-#MODFLAGS=-D$(DBG_MODE)
-#MODFLAGS=-D${DBG_MODE} -D_DBG_TRACE_POINTS_ -DDEF_DEBUG_LVL=0xEC000040L
-#CFLAGS="-D${DBG_MODE} -D_DBG_TRACE_POINTS_ -DDEF_DEBUG_LVL=0xEC000000L"
-CFLAGS="-D${DBG_MODE} -DDEF_DEBUG_LVL=0xEC000000L"
-
-#EXTRA_CFLAGS = -Wa,-alhs $(INCLUDES) $(MODFLAGS)
-
-INCLUDES=". \
-${MAINPATH}/include \
-${MAINPATH}/libs/omethlib \
-${MAINPATH}/libs/sharedbuff \
-${MAINPATH}/objdicts/CiA401_CN \
-${MAINPATH}/stack/include/target/openmac \
-${MAINPATH}/stack/src"
-
-SRCFILES="${MAINPATH}/libs/ami/amiarm.c \
-${MAINPATH}/libs/omethlib/omethlib.c \
-${MAINPATH}/libs/omethlib/omethlibint.c \
-${MAINPATH}/libs/omethlib/omethlib_phycfg_generic.c \
-${MAINPATH}/libs/sharedbuff/SharedBuff.c \
-${MAINPATH}/libs/sharedbuff/ShbIpc-NoOS.c \
-${MAINPATH}/libs/sharedbuff/ShbTarget_Nios2.c \
-${MAINPATH}/objdicts/CiA401_CN/Objdict.c \
-${MAINPATH}/stack/src/common/dll/dllcal-direct.c \
-${MAINPATH}/stack/src/common/event/event.c \
-${MAINPATH}/stack/src/common/event/eventcal-direct.c \
-${MAINPATH}/stack/src/common/event/eventcal-shb.c \
-${MAINPATH}/stack/src/common/timer/timer-generic.c \
-${MAINPATH}/stack/src/kernel/ctrl/ctrlk.c \
-${MAINPATH}/stack/src/kernel/ctrl/ctrlkcal-direct.c \
-${MAINPATH}/stack/src/kernel/dll/dllk.c \
-${MAINPATH}/stack/src/kernel/dll/dllkcal.c \
-${MAINPATH}/stack/src/kernel/edrv/edrv-openmac.c \
-${MAINPATH}/stack/src/kernel/errhnd/errhndk.c \
-${MAINPATH}/stack/src/kernel/errhnd/errhndkcal-local.c \
-${MAINPATH}/stack/src/kernel/event/eventk.c \
-${MAINPATH}/stack/src/kernel/event/eventkcal.c \
-${MAINPATH}/stack/src/kernel/event/eventkcal-direct.c \
-${MAINPATH}/stack/src/kernel/event/eventkcal-shb.c \
-${MAINPATH}/stack/src/kernel/hrtimer/hrtimersync-openmac.c \
-${MAINPATH}/stack/src/kernel/nmt/nmtk.c \
-${MAINPATH}/stack/src/kernel/pdo/pdok.c \
-${MAINPATH}/stack/src/kernel/pdo/pdokcal.c \
-${MAINPATH}/stack/src/kernel/pdo/pdokcal-local.c \
-${MAINPATH}/stack/src/kernel/pdo/pdokcalsync-null.c \
-${MAINPATH}/stack/src/kernel/timestamp/timestamp-openmac.c \
-${MAINPATH}/stack/src/user/api/generic.c \
-${MAINPATH}/stack/src/user/api/processimage.c \
-${MAINPATH}/stack/src/user/ctrl/ctrlu.c \
-${MAINPATH}/stack/src/user/ctrl/ctrlucal-direct.c \
-${MAINPATH}/stack/src/user/dll/dllucal.c \
-${MAINPATH}/stack/src/user/errhnd/errhndu.c \
-${MAINPATH}/stack/src/user/errhnd/errhnducal-local.c \
-${MAINPATH}/stack/src/user/event/eventu.c \
-${MAINPATH}/stack/src/user/event/eventucal.c \
-${MAINPATH}/stack/src/user/event/eventucal-direct.c \
-${MAINPATH}/stack/src/user/event/eventucal-shb.c \
-${MAINPATH}/stack/src/user/nmt/nmtu.c \
-${MAINPATH}/stack/src/user/nmt/nmtcnu.c \
-${MAINPATH}/stack/src/user/obd/obd.c \
-${MAINPATH}/stack/src/user/pdo/pdou.c \
-${MAINPATH}/stack/src/user/pdo/pdoucal.c \
-${MAINPATH}/stack/src/user/pdo/pdoucal-local.c \
-${MAINPATH}/stack/src/user/pdo/pdoucalsync-null.c \
-${MAINPATH}/stack/src/user/sdo/sdo-asndu.c \
-${MAINPATH}/stack/src/user/sdo/sdo-asysequ.c \
-${MAINPATH}/stack/src/user/sdo/sdo-comu.c \
-${MAINPATH}/stack/src/user/ledu.c \
-demo_main.c \
-lcd.c \
-Cmp_Lcd.c \
-systemComponents.c"
-
-
-# work-around for bug in Nios2 EDS V9.0
-cmd="nios2-app-generate-makefile --bsp-dir $BSP_DIR --version"
-$cmd | grep "9.0" > /dev/null
-if [ "$?" == "0" ] ; then
-# V9.0 needs additional double quotes around the include directories
-INCLUDES=\"${INCLUDES}\"
-fi
 if [ -n "${COMSPEC}" ]; then
 # Under Windows we need double quotes, but not under Linux
 INCLUDES=\"${INCLUDES}\"
 CFLAGS=\"${CFLAGS}\"
 fi
 
-NIOS2_APP_GEN_ARGS="--elf-name epl.elf --set OBJDUMP_INCLUDE_SOURCE 1 \
+NIOS2_APP_GEN_ARGS="--elf-name cn_directIO.elf \
+--set OBJDUMP_INCLUDE_SOURCE 1 \
 --set CREATE_OBJDUMP 0 \
---set CFLAGS=${CFLAGS} --set APP_INCLUDE_DIRS=${INCLUDES} --src-files $SRCFILES"
-#--set APP_CFLAGS_DEBUG_LEVEL \
-
-#echo "${NIOS2_APP_GEN_ARGS}"
+--set CFLAGS=${CFLAGS} \
+--set APP_INCLUDE_DIRS=${INCLUDES} \
+--src-files $SRCFILES \
+--set APP_CFLAGS_OPTIMIZATION ${OPT_LEVEL}"
 
 # First, check to see if $SOPC_KIT_NIOS2 environmental variable is set.
 # This variable is required for the command line tools to execute correctly.
@@ -163,10 +99,6 @@ if [ -z $SOPC_KIT_NIOS2 ]
 then
     echo Required \$SOPC_KIT_NIOS2 Environmental Variable is not set!
     exit 1
-fi
-
-if [ -z "$DEBUG" ]; then
-    NIOS2_APP_GEN_ARGS="${NIOS2_APP_GEN_ARGS} --set APP_CFLAGS_OPTIMIZATION -O2"
 fi
 
 # Also make sure that the APP has not been created already.  Check for
@@ -195,6 +127,9 @@ if [ -n "$REBUILD" -o ! -f $BSP_DIR/public.mk ]; then
         exit 1
     }
     popd >> /dev/null
+
+    #workaround for linker.x issue
+    ./fix-linkerx
 fi
 
 # Set TCI memory size
@@ -227,15 +162,15 @@ SOF_FILE := $(wildcard $(QUARTUS_PROJECT_DIR)/*.sof)
 
 .PHONY : $(PROGRAM_EPCS_TARGET)
 $(PROGRAM_EPCS_TARGET) : $(ELF)
-	@$(ECHO) Info: Programming $(basename $@).flash
-	@if [ -n "$($(basename $@)_EPCS_FLAGS)" ]; \
-	then \
-		nios2-configure-sof $(DOWNLOAD_CABLE_FLAG) -C $(QUARTUS_PROJECT_DIR); \
-		sof2flash --epcs --input=$(SOF_FILE) --output=sof.flash; \
-		$(ELF2FLASH) --after=sof.flash --input=$(ELF) --outfile=$(basename $@)_after_sof.flash --sim_optimize=$(SIM_OPTIMIZE) $(elf2flash_extra_args); \
-		$(ECHO) $(FLASHPROG) $(SOPC_SYSID_FLAG) --epcs --base=$($(basename $@)_START) sof.flash $(basename $@)_after_sof.flash; \
-		$(FLASHPROG) $(DOWNLOAD_CABLE_FLAG) $(SOPC_SYSID_FLAG) --epcs --base=$($(basename $@)_START) -g --override=../generic/nios2-flash-override.txt sof.flash $(basename $@)_after_sof.flash; \
-	fi
+    @$(ECHO) Info: Programming $(basename $@).flash
+    @if [ -n "$($(basename $@)_EPCS_FLAGS)" ]; \
+    then \
+        nios2-configure-sof $(DOWNLOAD_CABLE_FLAG) -C $(QUARTUS_PROJECT_DIR); \
+        sof2flash --epcs --input=$(SOF_FILE) --output=sof.flash; \
+        $(ELF2FLASH) --after=sof.flash --input=$(ELF) --outfile=$(basename $@)_after_sof.flash --sim_optimize=$(SIM_OPTIMIZE) $(elf2flash_extra_args); \
+        $(ECHO) $(FLASHPROG) $(SOPC_SYSID_FLAG) --epcs --base=$($(basename $@)_START) sof.flash $(basename $@)_after_sof.flash; \
+        $(FLASHPROG) $(DOWNLOAD_CABLE_FLAG) $(SOPC_SYSID_FLAG) --epcs --base=$($(basename $@)_START) -g --override=../generic/nios2-flash-override.txt sof.flash $(basename $@)_after_sof.flash; \
+    fi
 
 Heredoc
 
@@ -253,7 +188,7 @@ if [ -z "$SKIP_MAKE" ]; then
     echo "    1. Make sure the board is connected to the system."
     echo "    2. Run 'nios2-configure-sof -C $SOPC_DIR'"
     echo "       to configure the FPGA with the hardware design."
-    echo "    3. If you have a stdio device and generated with --debug," 
+    echo "    3. If you have a stdio device and generated with --debug,"
     echo "       run 'nios2-terminal' in a different shell."
     echo "    4. Run 'make download-elf' from the application directory."
     echo
