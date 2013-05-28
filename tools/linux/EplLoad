@@ -59,8 +59,7 @@
 usage()
 {
     echo >&2 \
-    "usage: EplLoad [-h] [-c <cdcfile>] [-t <tracer>] [-s] <powerlink_module> [module args]\n" \
-    "-c, specify CDC file\n" \
+    "usage: EplLoad [-h] [-t <tracer>] [-s] <powerlink_module> [module args]\n" \
     "-s, set priority (used by udev rule)\n" \
     "-t, set ftrace tracer\n" \
     "-h, print usage\n"
@@ -83,11 +82,9 @@ loadfail()
 ###############################################################################
 # set defaults
 #
-cdcfile=
 module=
 setprio=false
 tracing=nop
-isndemo=0
 
 ###############################################################################
 # Read command line arguments
@@ -96,7 +93,6 @@ while [ $# -gt 0 ]
 do
     case "$1" in
         -s)     setprio=true;;
-        -c)     cdcfile=$2; shift;;
         -t)     tracing=$2; shift;;
         --)     shift; break;;
         -h)     usage ;;
@@ -112,20 +108,13 @@ KERNEL_MAIN=`uname -r | cut -f1 -d.`
 ###############################################################################
 # Used by udev rule to set priority
 if [ "$setprio" = "true" ] ; then
-    if [ "$KERNEL_MAIN" = "2" ] ; then
-        # Set real-time priority -98 for Ethernet ISR thread
-        chrt -f -p 97 `ps -C \`ps -e -o comm |grep ^irq/.*epl\$\` -o pid --no-headers`
-        # Bind thread to second core
-        taskset -p 2 `ps -C \`ps -e -o comm |grep ^irq/.*epl*\$\` -o pid --no-headers`
-        # Bind epl interrupts to second core
-        echo 2 > /proc/irq/`cat /proc/interrupts | grep epl | cut -f1 -d: -s | sed 's/^ *//'`/smp_affinity
-        exit
-    else
-        # Set real-time priority -81 for Ethernet ISR thread and pin it to second cpu
-        chrt -f -p 80 `ps -C \`ps -e -o comm |grep ^irq/.*epl\$\` -o pid --no-headers`
-        taskset -p 2 `ps -C \`ps -e -o comm |grep ^irq/.*epl*\$\` -o pid --no-headers`
-        exit
-    fi
+    # Set real-time priority -81 for Ethernet ISR thread
+    chrt -f -p 80 `ps -C \`ps -e -o comm |grep ^irq/.*plk\$\` -o pid --no-headers`
+    # Bind thread to second core
+    taskset -p 2 `ps -C \`ps -e -o comm |grep ^irq/.*plk*\$\` -o pid --no-headers`
+    # Bind powerlink interrupts to second core
+    echo 2 > /proc/irq/`cat /proc/interrupts | grep plk | cut -f1 -d: -s | sed 's/^ *//'`/smp_affinity
+    exit
 fi
 
 ###############################################################################
@@ -167,13 +156,6 @@ if [ ! -f  `dirname $0`/$module ] ; then
 fi
 
 module=`basename $module .ko`
-
-###############################################################################
-#
-# Check if it is a kernel module witch includes the demo application
-#
-echo "$module" | grep -q "demo"
-isndemo=$?
 
 ###############################################################################
 #
@@ -223,74 +205,35 @@ echo -n $pciid > /sys/bus/pci/drivers/${driver}/unbind
 ###############################################################################
 #
 # install special udev rule for kernel stack module (without demo!)
-if [ "$isndemo" -ne "0" ] ; then
-    if [ -d /etc/udev/rules.d ] ; then
-        EPLLOAD_PATH=`dirname $(readlink -f ${0})`
-        cat 50-openPOWERLINK.rules | sed "s#EPLLOAD_PATH#${EPLLOAD_PATH}#" > /etc/udev/rules.d/50-openPOWERLINK.rules
-        udevadm control --reload-rules
-    fi
+if [ -d /etc/udev/rules.d ] ; then
+    EPLLOAD_PATH=`dirname $(readlink -f ${0})`
+    cat 50-openPOWERLINK.rules | sed "s#EPLLOAD_PATH#${EPLLOAD_PATH}#" > /etc/udev/rules.d/50-openPOWERLINK.rules
+    udevadm control --reload-rules
 fi
 
-if [ -z $cdcfile ] ; then
-    echo "Loading POWERLINK module ..."
+echo "Loading POWERLINK module ..."
 
-    # invoke insmod with all arguments we got
-    # and use a pathname, as insmod doesn't look in . by default
-    /sbin/insmod `dirname $0`/$module.ko $*
-else
-    CDC_PATH=`readlink -f ${cdcfile}`
-    echo "Loading POWERLINK module with CDC=${CDC_PATH}..."
-
-    # invoke insmod with all arguments we got
-    # and use a pathname, as insmod doesn't look in . by default
-    /sbin/insmod `dirname $0`/$module.ko cdc="$CDC_PATH" $*
-fi
+# invoke insmod with all arguments we got
+# and use a pathname, as insmod doesn't look in . by default
+/sbin/insmod `dirname $0`/$module.ko $*
 
 if [ "$?" -ne "0" ] ; then
     echo " Loading of POWERLINK module failed"
     exit 1
 else
-    if [ "$isndemo" -ne "0" ] ; then
-        echo "POWERLINK module successfully loaded."
-        echo
-        echo "Please start the POWERLINK demo application."
-        echo
-    else
-        echo "POWERLINK demo application successfully loaded."
-        echo
-    fi
+    echo "POWERLINK module successfully loaded."
+    echo
+    echo "Please start the POWERLINK demo application."
+    echo
 fi
 
-if [ "$KERNEL_MAIN" = "2" ] ; then
-    # Set real-time priority -82 for hrtimer thread
-    # We only have to set hrtimer thread for core 1 because the stack
-    # binds to the second core!
-    numproc=`ps aux | grep -c "sirq-hrtimer/1"`
-    if [ $numproc -gt 1 ] ; then
-        echo Adjusting priority of hrtimer thread
-        chrt -f -p 81 `ps -C sirq-hrtimer/1 -o pid --no-headers`
-    fi
-else
-    # Set real-time priority -97 for softirq thread
-    # We only have to set hrtimer thread for core 1 because the stack
-    # binds to the second core!
-    numproc=`ps aux | grep -c "ksoftirqd/1"`
-    if [ $numproc -gt 1 ] ; then
-        echo Adjusting priority of softirq thread
-        chrt -f -p 98 `ps -C ksoftirqd/1 -o pid --no-headers`
-    fi
-fi
-
-# For kernel-queue shared-buffer thread, priority -80 is set in ShbIpc-LinuxKernel.c
-
-# For Ethernet ISR thread, priority -81 is set (for kernel stack module by udev rule!)
-if [ "$isndemo" -eq "0" ] ; then
-    if [ "$KERNEL_MAIN" = "2" ] ; then
-        chrt -f -p 80 `ps -C \`ps -e -o comm |grep ^irq/.*epl*\$\` -o pid --no-headers`
-    else
-        chrt -f -p 97 `ps -C \`ps -e -o comm |grep ^irq/.*epl*\$\` -o pid --no-headers`
-        taskset -p 2 `ps -C \`ps -e -o comm |grep ^irq/.*epl*\$\` -o pid --no-headers`
-    fi
+# Set real-time priority -82 for hrtimer thread if existing (only for 2.6.X realtime kernels)
+# We only have to set hrtimer thread for core 1 because the stack
+# binds to the second core!
+numproc=`ps aux | grep -c "sirq-hrtimer/1"`
+if [ $numproc -gt 1 ] ; then
+    echo Adjusting priority of hrtimer thread
+    chrt -f -p 81 `ps -C sirq-hrtimer/1 -o pid --no-headers`
 fi
 
 # Enable tracing

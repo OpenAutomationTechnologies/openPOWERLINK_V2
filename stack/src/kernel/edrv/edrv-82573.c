@@ -148,7 +148,7 @@
 #define EDRV_LINK_UP_TIMEOUT        3000 // ms
 
 
-#define DRV_NAME                "epl"
+#define DRV_NAME                "plk"
 
 // Tx descriptor definitions
 #define EDRV_TX_DESC_CMD_RS     0x08000000  // Report Status
