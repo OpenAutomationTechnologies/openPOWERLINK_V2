@@ -1,52 +1,34 @@
 ################################################################################
 #
-# Project: openPOWERLINK
+# \file CMakeLists.txt
 #
-# (c) Bernecker + Rainer Industrie-Elektronik Ges.m.b.H.
-#     B&R Strasse 1, A-5142 Eggelsberg
-#     www.br-automation.com
+# \brief cmake file for openPOWERLINK kernel stack (Linux kernel module)
 #
-# Description: cmake file for linux kernel module
+# Copyright (c) 2013, SYSTEC electronik GmbH
+# Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+# All rights reserved.
 #
-# License:
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+#     * Redistributions of source code must retain the above copyright
+#       notice, this list of conditions and the following disclaimer.
+#     * Redistributions in binary form must reproduce the above copyright
+#       notice, this list of conditions and the following disclaimer in the
+#       documentation and/or other materials provided with the distribution.
+#     * Neither the name of the copyright holders nor the
+#       names of its contributors may be used to endorse or promote products
+#       derived from this software without specific prior written permission.
 #
-#   Redistribution and use in source and binary forms, with or without
-#   modification, are permitted provided that the following conditions
-#   are met:
-#
-#   1. Redistributions of source code must retain the above copyright
-#      notice, this list of conditions and the following disclaimer.
-#
-#   2. Redistributions in binary form must reproduce the above copyright
-#      notice, this list of conditions and the following disclaimer in the
-#      documentation and/or other materials provided with the distribution.
-#
-#   3. Neither the name of copyright holders nor the names of its
-#      contributors may be used to endorse or promote products derived
-#      from this software without prior written permission. For written
-#      permission, please contact office@br-automation.com.
-#
-#   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-#   "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-#   LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-#   FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-#   COPYRIGHT HOLDERS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-#   INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-#   BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-#   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-#   CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-#   LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-#   ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-#   POSSIBILITY OF SUCH DAMAGE.
-#
-#   Severability Clause:
-#
-#       If a provision of this License is or becomes illegal, invalid or
-#       unenforceable in any jurisdiction, that shall not affect:
-#       1. the validity or enforceability in that jurisdiction of any other
-#          provision of this License; or
-#       2. the validity or enforceability in other jurisdictions of that or
-#          any other provision of this License.
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+# ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+# WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+# DISCLAIMED. IN NO EVENT SHALL COPYRIGHT HOLDERS BE LIABLE FOR ANY
+# DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+# (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+# LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+# ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+# SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 ################################################################################
 
@@ -57,30 +39,24 @@ IF(CFG_POWERLINK_EDRV STREQUAL "8139")
 
     SET(MODULE_NAME "powerlink8139")
     SET(MODULE_DEFS "${MODULE_DEFS} -DCONFIG_EDRV=8139")
-    SET(MODULE_SOURCE_FILES ${MODULE_SOURCE_FILES} ${POWERLINK_SOURCE_DIR}/Edrv/Edrv8139.c)
+    SET(MODULE_SOURCE_FILES ${MODULE_SOURCE_FILES} ${EDRV_SOURCE_DIR}/edrv-8139.c)
 
 ELSEIF(CFG_POWERLINK_EDRV STREQUAL "82573")
 
     SET(MODULE_NAME "powerlink82573")
     SET(MODULE_DEFS "${MODULE_DEFS} -DCONFIG_EDRV=82573")
-    SET(MODULE_SOURCE_FILES ${MODULE_SOURCE_FILES} ${POWERLINK_SOURCE_DIR}/Edrv/Edrv82573.c)
+    SET(MODULE_SOURCE_FILES ${MODULE_SOURCE_FILES} ${EDRV_SOURCE_DIR}/edrv-82573.c)
 
 ELSEIF(CFG_POWERLINK_EDRV STREQUAL "8255x")
 
     SET(MODULE_NAME "powerlink8255x")
     SET(MODULE_DEFS "${MODULE_DEFS} -DCONFIG_EDRV=8255")
-    SET(MODULE_SOURCE_FILES ${MODULE_SOURCE_FILES} ${POWERLINK_SOURCE_DIR}/Edrv/Edrv8255x.c)
-
-ELSEIF(CFG_POWERLINK_EDRV STREQUAL "Fec")
-
-    SET(MODULE_NAME "powerlinkfec")
-    SET(MODULE_DEFS "${MODULE_DEFS} -DCONFIG_EDRV=0")
-    SET(MODULE_SOURCE_FILES ${MODULE_SOURCE_FILES} ${POWERLINK_SOURCE_DIR}/Edrv/EdrvFec.c)
+    SET(MODULE_SOURCE_FILES ${MODULE_SOURCE_FILES} ${EDRV_SOURCE_DIR}/edrv-8255x.c)
 
 ELSE(CFG_POWERLINK_EDRV STREQUAL "8139")
 
     message(FATAL_ERROR
-            "No valid ethernet driver (8139, 82573, 8255x, Fec) was specified in CFG_POWERLINK_EDRV")
+            "No valid ethernet driver (8139, 82573, 8255x) was specified in CFG_POWERLINK_EDRV")
 
 ENDIF(CFG_POWERLINK_EDRV STREQUAL "8139")
 
@@ -88,16 +64,7 @@ ENDIF(CFG_POWERLINK_EDRV STREQUAL "8139")
 # Configure depending selected mode
 #
 IF(CFG_POWERLINK_MN)
-
     SET(MODULE_DEFS "${MODULE_DEFS} -DCONFIG_CFM -DCONFIG_OPENCONFIGURATOR_MAPPING -DCONFIG_MN")
-    SET(MODULE_SOURCE_FILES ${MODULE_SOURCE_FILES}
-                            ${POWERLINK_SOURCE_DIR}/EplStack/EplObdCdc.c
-                            ${POWERLINK_SOURCE_DIR}/EplStack/EplCfmu.c)
-
-    SET(OBJDICT CiA302-4_MN)
-
-ELSE(CFG_POWERLINK_MN)
-    SET(OBJDICT CiA401_CN)
 ENDIF(CFG_POWERLINK_MN)
 
 #
@@ -105,7 +72,7 @@ ENDIF(CFG_POWERLINK_MN)
 #
 IF(CMAKE_BUILD_TYPE STREQUAL Debug OR CMAKE_BUILD_TYPE STREQUAL DEBUG)
     SET(MODULE_DEFS "${MODULE_DEFS} -D_DEBUG")
-    SET(MODULE_DEFS "${MODULE_DEFS} -D_DBG_TRACE_POINTS_")
+    #SET(MODULE_DEFS "${MODULE_DEFS} -D_DBG_TRACE_POINTS_")
     SET(MODULE_DEFS "${MODULE_DEFS} -DDEF_DEBUG_LVL=${CFG_DEBUG_LVL}")
 ENDIF(CMAKE_BUILD_TYPE STREQUAL Debug OR CMAKE_BUILD_TYPE STREQUAL DEBUG)
 
@@ -114,76 +81,53 @@ ENDIF(CMAKE_BUILD_TYPE STREQUAL Debug OR CMAKE_BUILD_TYPE STREQUAL DEBUG)
 #
 SET(MODULE_INCLUDES "${MODULE_INCLUDES} -I${CMAKE_CURRENT_SOURCE_DIR}")
 SET(MODULE_INCLUDES "${MODULE_INCLUDES} -I${POWERLINK_INCLUDE_DIR}")
-SET(MODULE_INCLUDES "${MODULE_INCLUDES} -I${POWERLINK_SOURCE_DIR}/SharedBuff")
-SET(MODULE_INCLUDES "${MODULE_INCLUDES} -I${POWERLINK_SOURCE_DIR}/EplStack")
-SET(MODULE_INCLUDES "${MODULE_INCLUDES} -I${POWERLINK_SOURCE_DIR}/EplStack/kernel/errhnd")
-SET(MODULE_INCLUDES "${MODULE_INCLUDES} -I${POWERLINK_SOURCE_DIR}/EplStack/user/errhnd")
-SET(MODULE_INCLUDES "${MODULE_INCLUDES} -I${POWERLINK_SOURCE_DIR}/ObjDicts/${OBJDICT}")
-SET(MODULE_INCLUDES "${MODULE_INCLUDES} -I${POWERLINK_SOURCE_DIR}/Target/PLCcore-CF54/Linux/gnu/generic")
+SET(MODULE_INCLUDES "${MODULE_INCLUDES} -I${LIB_SOURCE_DIR}/circbuf")
+SET(MODULE_INCLUDES "${MODULE_INCLUDES} -I${POWERLINK_SOURCE_DIR}")
+SET(MODULE_INCLUDES "${MODULE_INCLUDES} -I${KERNEL_SOURCE_DIR}/errhnd")
+SET(MODULE_INCLUDES "${MODULE_INCLUDES} -I${STACK_INCLUDE_DIR}/target/linux")
 
 #
 # specifiy source files
 #
 SET(MODULE_SOURCE_FILES
     ${MODULE_SOURCE_FILES}
-    ${POWERLINK_SOURCE_DIR}/Edrv/EdrvCyclic.c
-    ${POWERLINK_SOURCE_DIR}/EplStack/EplDllk.c
-    ${POWERLINK_SOURCE_DIR}/EplStack/kernel/dll/dllkcal.c
-    ${POWERLINK_SOURCE_DIR}/EplStack/user/dll/dllucal.c
-    ${POWERLINK_SOURCE_DIR}/EplStack/common/dll/dllcal-shb.c
-    ${POWERLINK_SOURCE_DIR}/EplStack/kernel/event/eventk.c
-    ${POWERLINK_SOURCE_DIR}/EplStack/user/event/eventu.c
-    ${POWERLINK_SOURCE_DIR}/EplStack/kernel/event/eventkcal.c
-    ${POWERLINK_SOURCE_DIR}/EplStack/user/event/eventucal.c
-    ${POWERLINK_SOURCE_DIR}/EplStack/common/event/eventcal-shb.c
-    ${POWERLINK_SOURCE_DIR}/EplStack/user/event/eventucal-shb.c
-    ${POWERLINK_SOURCE_DIR}/EplStack/kernel/event/eventkcal-shb.c
-    ${POWERLINK_SOURCE_DIR}/EplStack/common/event/event.c
-    ${POWERLINK_SOURCE_DIR}/EplStack/EplNmtk.c
-    ${POWERLINK_SOURCE_DIR}/EplStack/EplNmtkCal.c
-    ${POWERLINK_SOURCE_DIR}/EplStack/EplNmtu.c
-    ${POWERLINK_SOURCE_DIR}/EplStack/EplNmtuCal.c
-    ${POWERLINK_SOURCE_DIR}/EplStack/EplNmtCnu.c
-    ${POWERLINK_SOURCE_DIR}/EplStack/EplNmtMnu.c
-    ${POWERLINK_SOURCE_DIR}/EplStack/EplIdentu.c
-    ${POWERLINK_SOURCE_DIR}/EplStack/EplStatusu.c
-    ${POWERLINK_SOURCE_DIR}/EplStack/kernel/pdo/pdok.c
-    ${POWERLINK_SOURCE_DIR}/EplStack/kernel/pdo/pdokcal.c
-    ${POWERLINK_SOURCE_DIR}/EplStack/user/pdo/pdou.c
-    ${POWERLINK_SOURCE_DIR}/EplStack/user/pdo/pdoucal.c
-    ${POWERLINK_SOURCE_DIR}/EplStack/EplObd.c
-    ${POWERLINK_SOURCE_DIR}/EplStack/EplSdoUdpu.c
-    ${POWERLINK_SOURCE_DIR}/EplStack/EplSdoComu.c
-    ${POWERLINK_SOURCE_DIR}/EplStack/EplSdoAsySequ.c
-    ${POWERLINK_SOURCE_DIR}/EplStack/EplSdoAsndu.c
-    ${POWERLINK_SOURCE_DIR}/EplStack/EplSyncu.c
-    ${POWERLINK_SOURCE_DIR}/EplStack/EplTimeruLinuxKernel.c
-    ${POWERLINK_SOURCE_DIR}/EplStack/kernel/errhnd/errhndk.c
-    ${POWERLINK_SOURCE_DIR}/EplStack/user/errhnd/errhndu.c
-    ${POWERLINK_SOURCE_DIR}/EplStack/kernel/errhnd/errhndkcal-shb.c
-    ${POWERLINK_SOURCE_DIR}/EplStack/user/errhnd/errhnducal-shb.c
-    ${POWERLINK_SOURCE_DIR}/EplStack/EplApiGeneric.c
-    ${POWERLINK_SOURCE_DIR}/EplStack/EplApiLinuxKernel.c
-    ${POWERLINK_SOURCE_DIR}/EplStack/user/api/processimage.c
-    ${POWERLINK_SOURCE_DIR}/EplStack/VirtualEthernetLinux.c
-    ${POWERLINK_SOURCE_DIR}/EplStack/SocketLinuxKernel.c
-    ${POWERLINK_SOURCE_DIR}/SharedBuff/SharedBuff.c
-    ${POWERLINK_SOURCE_DIR}/SharedBuff/ShbIpc-LinuxKernel.c
-    ${POWERLINK_SOURCE_DIR}/Target/X86/Linux/gnu/generic/TimerHighReskX86.c
-    ${POWERLINK_SOURCE_DIR}/Target/PLCcore-CF54/Linux/gnu/generic/proc_fs.c
-    ${POWERLINK_SOURCE_DIR}/ObjDicts/${OBJDICT}/Objdict.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/main.c
+    ${LIB_SOURCE_DIR}/trace/trace-printk.c
+    ${EDRV_SOURCE_DIR}/edrvcyclic.c
+    ${KERNEL_SOURCE_DIR}/ctrl/ctrlk.c
+    ${KERNEL_SOURCE_DIR}/ctrl/ctrlkcal-linuxkernel.c    
+    ${KERNEL_SOURCE_DIR}/dll/dllk.c
+    ${KERNEL_SOURCE_DIR}/dll/dllkcal.c
+    ${KERNEL_SOURCE_DIR}/dll/dllkcal-linuxkernel.c
+    ${KERNEL_SOURCE_DIR}/event/eventk.c
+    ${KERNEL_SOURCE_DIR}/event/eventkcal-linuxkernel.c
+    ${KERNEL_SOURCE_DIR}/event/eventkcalintf-circbuf.c
+    ${COMMON_SOURCE_DIR}/event/event.c
+    ${KERNEL_SOURCE_DIR}/nmt/nmtk.c
+    ${KERNEL_SOURCE_DIR}/nmt/nmtkcal.c
+    ${KERNEL_SOURCE_DIR}/pdo/pdok.c
+    ${KERNEL_SOURCE_DIR}/pdo/pdokcal.c
+    ${KERNEL_SOURCE_DIR}/pdo/pdokcal-triplebufshm.c
+    ${KERNEL_SOURCE_DIR}/pdo/pdokcalmem-linuxkernel.c
+    ${KERNEL_SOURCE_DIR}/pdo/pdokcalsync-linuxkernel.c
+    ${KERNEL_SOURCE_DIR}/errhnd/errhndk.c
+    ${KERNEL_SOURCE_DIR}/errhnd/errhndkcal-local.c
+    ${KERNEL_SOURCE_DIR}/veth/veth-linux.c
+    ${ARCH_SOURCE_DIR}/linux/SocketLinuxKernel.c
+    ${KERNEL_SOURCE_DIR}/hrtimer/hrtimer-linuxkernel.c
+    ${LIB_SOURCE_DIR}/circbuf/circbuffer.c
+    ${LIB_SOURCE_DIR}/circbuf/circbuf-linuxkernel.c
+    ${COMMON_SOURCE_DIR}/debug.c
 )
 
 IF (CMAKE_SYSTEM_PROCESSOR STREQUAL x86)
-    SET(MODULE_SOURCE_FILES ${MODULE_SOURCE_FILES} ${POWERLINK_SOURCE_DIR}/EplStack/amix86.c)
+    SET(MODULE_SOURCE_FILES ${MODULE_SOURCE_FILES} ${LIB_SOURCE_DIR}/ami/amix86.c)
 
-ELSEIF (   CMAKE_SYSTEM_PROCESSOR STREQUAL arm
-        OR CMAKE_SYSTEM_PROCESSOR STREQUAL armv7l)
-    SET(MODULE_SOURCE_FILES ${MODULE_SOURCE_FILES} ${POWERLINK_SOURCE_DIR}/EplStack/amiarm.c)
+ELSEIF (CMAKE_SYSTEM_PROCESSOR STREQUAL arm OR CMAKE_SYSTEM_PROCESSOR STREQUAL armv7l)
+   SET(MODULE_SOURCE_FILES ${MODULE_SOURCE_FILES} ${LIB_SOURCE_DIR}/ami/amiarm.c)
 
-ELSEIF (   CMAKE_SYSTEM_PROCESSOR STREQUAL i686
-	OR CMAKE_SYSTEM_PROCESSOR STREQUAL x86_64)
-    SET(MODULE_SOURCE_FILES ${MODULE_SOURCE_FILES} ${POWERLINK_SOURCE_DIR}/EplStack/amix86.c)
+ELSEIF (   CMAKE_SYSTEM_PROCESSOR STREQUAL i686 OR CMAKE_SYSTEM_PROCESSOR STREQUAL x86_64)
+    SET(MODULE_SOURCE_FILES ${MODULE_SOURCE_FILES} ${LIB_SOURCE_DIR}/ami/amix86.c)
 
 ELSE (CMAKE_SYSTEM_PROCESSOR STREQUAL x86)
     MESSAGE(FATAL_ERROR
@@ -207,11 +151,15 @@ ENDIF (CFG_KERNEL_DIR STREQUAL "")
 FOREACH(MODULE_SOURCE_FILE ${MODULE_SOURCE_FILES})
     GET_FILENAME_COMPONENT(MODULE_SOURCE_FILENAME ${MODULE_SOURCE_FILE} NAME)
     GET_FILENAME_COMPONENT(MODULE_SOURCE_BASENAME ${MODULE_SOURCE_FILE} NAME_WE)
-    CONFIGURE_FILE(${MODULE_SOURCE_FILE} ${MODULE_OUTPUT_DIR}/src/${MODULE_SOURCE_FILENAME} COPYONLY)
+    ADD_CUSTOM_COMMAND(OUTPUT ${MODULE_OUTPUT_DIR}/src/${MODULE_SOURCE_FILENAME}
+                       COMMAND ${CMAKE_COMMAND} -E make_directory ${MODULE_OUTPUT_DIR}/src
+                       COMMAND ${CMAKE_COMMAND} -E create_symlink ${MODULE_SOURCE_FILE} ${MODULE_OUTPUT_DIR}/src/${MODULE_SOURCE_FILENAME}
+                       )
     SET(MODULE_OBJS "${MODULE_OBJS} src/${MODULE_SOURCE_BASENAME}.o")
+    SET(MODULE_LINKED_SOURCE_FILES ${MODULE_LINKED_SOURCE_FILES} ${MODULE_OUTPUT_DIR}/src/${MODULE_SOURCE_FILENAME})
 ENDFOREACH(MODULE_SOURCE_FILE)
 
-CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/../tools/Kbuild.in ${MODULE_OUTPUT_DIR}/Kbuild)
+CONFIGURE_FILE(${TOOLS_DIR}/linux/Kbuild.in ${MODULE_OUTPUT_DIR}/Kbuild)
 
 IF(CMAKE_CROSSCOMPILING)
     IF(DEFINED MAKE_KERNEL_ARCH)
@@ -228,7 +176,7 @@ ADD_CUSTOM_COMMAND(
     OUTPUT ${MODULE_OUTPUT_DIR}/${MODULE_FILE}
     COMMAND ${CMAKE_MAKE_PROGRAM} ${MAKE_KERNEL_CROSSCOMPILING_PARAMS} -C ${KERNEL_DIR} M=${MODULE_OUTPUT_DIR} modules
     WORKING_DIRECTORY ${MODULE_OUTPUT_DIR}
-    DEPENDS ${MODULE_SOURCE_FILES} ${CMAKE_CURRENT_SOURCE_DIR}/../tools/Kbuild.in
+    DEPENDS ${MODULE_LINKED_SOURCE_FILES} ${TOOLS_DIR}/linux/Kbuild.in
     VERBATIM
 )
 
@@ -246,7 +194,7 @@ ADD_CUSTOM_TARGET(
 
 # add installation rules
 INSTALL(FILES ${MODULE_OUTPUT_DIR}/${MODULE_NAME}.ko DESTINATION bin)
-INSTALL(FILES ${CMAKE_CURRENT_SOURCE_DIR}/../tools/50-openPOWERLINK.rules DESTINATION bin)
-INSTALL(PROGRAMS ${CMAKE_CURRENT_SOURCE_DIR}/../tools/EplLoad DESTINATION bin)
-INSTALL(PROGRAMS ${CMAKE_CURRENT_SOURCE_DIR}/../tools/EplUnload DESTINATION bin)
-INSTALL(PROGRAMS ${CMAKE_CURRENT_SOURCE_DIR}/../tools/devices.txt DESTINATION bin)
+INSTALL(FILES ${TOOLS_DIR}/linux/50-openPOWERLINK.rules DESTINATION bin)
+INSTALL(PROGRAMS ${TOOLS_DIR}/linux/EplLoad DESTINATION bin)
+INSTALL(PROGRAMS ${TOOLS_DIR}/linux/EplUnload DESTINATION bin)
+INSTALL(PROGRAMS ${TOOLS_DIR}/linux/devices.txt DESTINATION bin)
