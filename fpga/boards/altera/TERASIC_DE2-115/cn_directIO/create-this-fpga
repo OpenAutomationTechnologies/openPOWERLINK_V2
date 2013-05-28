@@ -1,0 +1,11 @@
+#!/bin/sh
+# This script does the following steps:
+#  1. Generate the Qsys design "top_mn"
+#  2. Compile the Quartus II design
+ip-generate --outputdirectory=cn_directIO/synthesis/ \
+            --file-set=QUARTUS_SYNTH \
+            --reportfile=sopcinfo:cn_directIO.sopcinfo \
+            --reportfile=html:cn_directIO.html \
+            --reportfile=qip:cn_directIO/synthesis/cn_directIO.qip \
+            --component-file=cn_directIO.qsys
+quartus_cmd cn_directIO.qpf -c cn_directIO.qsf

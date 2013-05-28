@@ -1,0 +1,17 @@
+.qsys_edit/
+db/
+incremental_db/
+/cn_directIO
+/greybox_tmp
+/output_files
+*.bak
+*.bsf
+*.done
+*.html
+*.pin
+*.rpt
+*.sof
+*.smsg
+*.summary
+*.txt
+*.cmp
