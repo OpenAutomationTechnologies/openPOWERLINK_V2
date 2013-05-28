@@ -1,0 +1,129 @@
+################################################################################
+#  (c) Bernecker + Rainer Industrie-Elektronik Ges.m.b.H.
+#      A-5142 Eggelsberg, B&R Strasse 1
+#      www.br-automation.com
+################################################################################
+
+################################################################################
+# Define optimization level and debugging mode.
+# Note: Optimization level recommended -O2
+#       In order to see prints in stdo DBG_MODE=_DEBUG
+#       For release DBG_MODE=NDEBUG
+
+##################################
+# Settings for Debugging
+#DBG_MODE=_DEBUG
+#OPT_LEVEL=-O0
+
+##################################
+# Settings for Debugging with optimized compilation
+#DBG_MODE=_DEBUG
+#OPT_LEVEL=-O2
+
+##################################
+# Settings for Release
+DBG_MODE=NDEBUG
+OPT_LEVEL=-O2
+
+##################################
+# DEF_DEBUG_LVL = [
+# 0x20000000L DEBUG_LVL_ASSERT
+# 0x40000000L DEBUG_LVL_ERROR
+# 0x80000000L DEBUG_LVL_ALWAYS ]
+DEF_DEBUG_LVL=0xEC000000L
+
+################################################################################
+
+##################################
+# Name of M9K for tightly-coupled memory
+TC_I_MEM=pcp_0_tc_i_mem
+
+##################################
+# SW is for CN
+PLK_NODE_IS=CONFIG_CN
+
+##################################
+# Relative path to SOPC file
+SOPC_DIR=../../../../../../fpga/boards/altera/TERASIC_DE2-115/cn_directIO/
+#SOPC_DIR=../../../../../../fpga/boards/altera/SYSTEC_ECUcore-EP3C/design_nios2_directIO
+
+##################################
+# Relative path to openPOWERLINK root directory
+STACKROOT_DIR=../../../../../..
+
+##################################
+# Relative path to bsp
+BSP_DIR=./bsp
+
+##################################
+# Include path
+INCLUDES=". \
+${STACKROOT_DIR}/include \
+${STACKROOT_DIR}/libs/omethlib \
+${STACKROOT_DIR}/libs/circbuf \
+${STACKROOT_DIR}/stack/include/target/openmac \
+${STACKROOT_DIR}/objdicts/CiA401_CN \
+${STACKROOT_DIR}/stack/src"
+
+##################################
+# Source files
+SRCFILES="${STACKROOT_DIR}/libs/ami/amiarm.c \
+${STACKROOT_DIR}/libs/omethlib/omethlib.c \
+${STACKROOT_DIR}/libs/omethlib/omethlibint.c \
+${STACKROOT_DIR}/libs/omethlib/omethlib_phycfg_generic.c \
+${STACKROOT_DIR}/libs/circbuf/circbuffer.c \
+${STACKROOT_DIR}/libs/circbuf/circbuf-noos.c \
+${STACKROOT_DIR}/libs/trace/trace-printf.c \
+${STACKROOT_DIR}/objdicts/CiA401_CN/Objdict.c \
+${STACKROOT_DIR}/stack/src/arch/altera_nios2/target-nios2.c \
+${STACKROOT_DIR}/stack/src/common/debug.c \
+${STACKROOT_DIR}/stack/src/common/errstring.c \
+${STACKROOT_DIR}/stack/src/common/dll/dllcal-direct.c \
+${STACKROOT_DIR}/stack/src/common/event/event.c \
+${STACKROOT_DIR}/stack/src/common/timer/timer-generic.c \
+${STACKROOT_DIR}/stack/src/kernel/ctrl/ctrlk.c \
+${STACKROOT_DIR}/stack/src/kernel/ctrl/ctrlkcal-direct.c \
+${STACKROOT_DIR}/stack/src/kernel/dll/dllk.c \
+${STACKROOT_DIR}/stack/src/kernel/dll/dllkcal.c \
+${STACKROOT_DIR}/stack/src/kernel/dll/dllkcal-circbuf.c \
+${STACKROOT_DIR}/stack/src/kernel/edrv/edrv-openmac.c \
+${STACKROOT_DIR}/stack/src/kernel/errhnd/errhndk.c \
+${STACKROOT_DIR}/stack/src/kernel/errhnd/errhndkcal-local.c \
+${STACKROOT_DIR}/stack/src/kernel/event/eventk.c \
+${STACKROOT_DIR}/stack/src/kernel/event/eventkcalintf-circbuf.c \
+${STACKROOT_DIR}/stack/src/kernel/event/eventkcal-nooscircbuf.c \
+${STACKROOT_DIR}/stack/src/kernel/hrtimer/hrtimersync-openmac.c \
+${STACKROOT_DIR}/stack/src/kernel/nmt/nmtk.c \
+${STACKROOT_DIR}/stack/src/kernel/pdo/pdok.c \
+${STACKROOT_DIR}/stack/src/kernel/pdo/pdokcal.c \
+${STACKROOT_DIR}/stack/src/kernel/pdo/pdokcalmem-local.c \
+${STACKROOT_DIR}/stack/src/kernel/pdo/pdokcalsync-null.c \
+${STACKROOT_DIR}/stack/src/kernel/pdo/pdokcal-triplebufshm.c \
+${STACKROOT_DIR}/stack/src/kernel/timestamp/timestamp-openmac.c \
+${STACKROOT_DIR}/stack/src/user/api/generic.c \
+${STACKROOT_DIR}/stack/src/user/api/processimage.c \
+${STACKROOT_DIR}/stack/src/user/ctrl/ctrlu.c \
+${STACKROOT_DIR}/stack/src/user/ctrl/ctrlucal-direct.c \
+${STACKROOT_DIR}/stack/src/user/dll/dllucal.c \
+${STACKROOT_DIR}/stack/src/user/dll/dllucal-circbuf.c \
+${STACKROOT_DIR}/stack/src/user/errhnd/errhndu.c \
+${STACKROOT_DIR}/stack/src/user/errhnd/errhnducal-local.c \
+${STACKROOT_DIR}/stack/src/user/event/eventu.c \
+${STACKROOT_DIR}/stack/src/user/event/eventucalintf-circbuf.c \
+${STACKROOT_DIR}/stack/src/user/event/eventucal-nooscircbuf.c \
+${STACKROOT_DIR}/stack/src/user/nmt/nmtu.c \
+${STACKROOT_DIR}/stack/src/user/nmt/nmtcnu.c \
+${STACKROOT_DIR}/stack/src/user/obd/obd.c \
+${STACKROOT_DIR}/stack/src/user/pdo/pdou.c \
+${STACKROOT_DIR}/stack/src/user/pdo/pdoucal.c \
+${STACKROOT_DIR}/stack/src/user/pdo/pdoucalmem-local.c \
+${STACKROOT_DIR}/stack/src/user/pdo/pdoucalsync-null.c \
+${STACKROOT_DIR}/stack/src/user/pdo/pdoucal-triplebufshm.c \
+${STACKROOT_DIR}/stack/src/user/sdo/sdo-asndu.c \
+${STACKROOT_DIR}/stack/src/user/sdo/sdo-asysequ.c \
+${STACKROOT_DIR}/stack/src/user/sdo/sdo-comu.c \
+${STACKROOT_DIR}/stack/src/user/ledu.c \
+demo_main.c \
+lcd.c \
+Cmp_Lcd.c \
+systemComponents.c"
