@@ -1,0 +1,120 @@
+#!/bin/bash
+################################################################################
+#
+# \file  plkunload
+#
+# \brief Script to unload openPOWERLINK kernel module
+#
+# Copyright (c) 2013, SYSTEC electronik GmbH
+# Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+# All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+#     * Redistributions of source code must retain the above copyright
+#       notice, this list of conditions and the following disclaimer.
+#     * Redistributions in binary form must reproduce the above copyright
+#       notice, this list of conditions and the following disclaimer in the
+#       documentation and/or other materials provided with the distribution.
+#     * Neither the name of the copyright holders nor the
+#       names of its contributors may be used to endorse or promote products
+#       derived from this software without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+# ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+# WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+# DISCLAIMED. IN NO EVENT SHALL COPYRIGHT HOLDERS BE LIABLE FOR ANY
+# DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+# (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+# LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+# ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+# SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
+################################################################################
+
+###############################################################################
+# Print usage of script
+#
+usage()
+{
+    echo >&2 \
+    "usage: plkunload [-h] <powerlink module>\n" \
+    "-h, print usage\n"
+    exit 1
+}
+
+###############################################################################
+# set defaults
+#
+module=
+
+###############################################################################
+# Read command line arguments
+#
+while [ $# -gt 0 ]
+do
+    case "$1" in
+        --)     shift; break;;
+        -h)     usage ;;
+        -*|*)   module=$1; shift; break ;;
+    esac
+    shift
+done
+
+
+# invoke rmmod with all arguments we got
+echo removing module $module
+
+/sbin/rmmod $module $* || exit 1
+
+# Remove udev rule
+rm -f /etc/udev/rules.d/50-openPOWERLINK.rules
+udevadm control --reload-rules
+
+module=`basename $module .ko`
+
+###############################################################################
+#
+# Check if suitable ethernet card is available
+# If we find more than one ethernet card we provide a prompt to select one.
+#
+let i=0
+while read line; do
+    device=`echo $line | cut -f1 -d","`
+    devname=`echo $line | cut -f2 -d","`
+    driver=`echo $line | cut -f3 -d","`
+
+    if echo "$module" | grep -q "$device" ; then
+        lspci=`lspci | grep "${devname}"`
+        pciid=$(lspci | grep "${devname}" | awk "{printf \"0000:\"\$1}")
+        if [ ! -z "$lspci" ]; then
+            let i=i+1
+            echo "$i) $lspci"
+            if [ -z $devs ] ; then
+                devs="$pciid"
+                drivers="$driver"
+            else
+                devs="$devs,$pciid"
+                drivers="$drivers,$driver"
+            fi
+        fi
+    fi
+done < devices.txt
+
+if [ $i -gt 1 ] ; then
+    read -p "Please select the ethernet controller to use > " num
+elif [ $i -eq 1 ]; then
+    num=1
+elif [ $i -eq 0 ] ; then
+    echo "No valid network interface controller specified!"
+    usage
+    
+fi
+
+pciid=`echo $devs | cut -f$num -d","`
+driver=`echo $drivers | cut -f$num -d","`
+
+echo "rebinding PCI device $pciid to network driver"
+echo -n $pciid > /sys/bus/pci/drivers/${driver}/bind
+
