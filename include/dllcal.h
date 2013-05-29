@@ -78,39 +78,25 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define DLLCAL_BUFFER_SIZE_TX_SYNC  8192
 #endif
 
-/* setup interface getting function for TX NMT queue */
-#if (EPL_DLLCAL_TX_NMT_QUEUE == EPL_QUEUE_DIRECT)
-#define GET_TX_NMT_INTERFACE dllcaldirect_getInterface
-#elif (EPL_DLLCAL_TX_NMT_QUEUE == EPL_QUEUE_SHB)
-#define GET_TX_NMT_INTERFACE dllcalshb_getInterface
-#elif (EPL_DLLCAL_TX_NMT_QUEUE == EPL_QUEUE_HOSTINTERFACE)
-#define GET_TX_NMT_INTERFACE dllcalhostif_getInterface
+/* setup interface getting function for DLLCAL queue */
+#if (CONFIG_DLLCAL_QUEUE == EPL_QUEUE_DIRECT)
+#define GET_DLLKCAL_INTERFACE dllcaldirect_getInterface
+#define GET_DLLUCAL_INTERFACE dllcaldirect_getInterface
+#elif (CONFIG_DLLCAL_QUEUE == EPL_QUEUE_SHB)
+#define GET_DLLKCAL_INTERFACE dllcalshb_getInterface
+#define GET_DLLUCAL_INTERFACE dllcalshb_getInterface
+#elif (CONFIG_DLLCAL_QUEUE == EPL_QUEUE_HOSTINTERFACE)
+#define GET_DLLKCAL_INTERFACE dllcalhostif_getInterface
+#define GET_DLLUCAL_INTERFACE dllcalhostif_getInterface
+#elif (CONFIG_DLLCAL_QUEUE == EPL_QUEUE_IOCTL)
+#define GET_DLLKCAL_INTERFACE dllcalioctl_getInterface
+#define GET_DLLUCAL_INTERFACE dllcalioctl_getInterface
+#elif (CONFIG_DLLCAL_QUEUE == EPL_QUEUE_CIRCBUF)
+#define GET_DLLKCAL_INTERFACE dllkcalcircbuf_getInterface
+#define GET_DLLUCAL_INTERFACE dllucalcircbuf_getInterface
 #else
-#error "Unsupported TX_NMT_QUEUE"
+#error "Unsupported DLLCAL_QUEUE"
 #endif
-
-/* setup interface getting function for TX GEN queue */
-#if (EPL_DLLCAL_TX_NMT_QUEUE == EPL_QUEUE_DIRECT)
-#define GET_TX_GEN_INTERFACE dllcaldirect_getInterface
-#elif (EPL_DLLCAL_TX_NMT_QUEUE == EPL_QUEUE_SHB)
-#define GET_TX_GEN_INTERFACE dllcalshb_getInterface
-#elif (EPL_DLLCAL_TX_NMT_QUEUE == EPL_QUEUE_HOSTINTERFACE)
-#define GET_TX_GEN_INTERFACE dllcalhostif_getInterface
-#else
-#error "Unsupported TX_GEN_QUEUE"
-#endif
-
-/* setup interface getting function for TX SYNC queue */
-#if (EPL_DLLCAL_TX_NMT_QUEUE == EPL_QUEUE_DIRECT)
-#define GET_TX_SYNC_INTERFACE dllcaldirect_getInterface
-#elif (EPL_DLLCAL_TX_NMT_QUEUE == EPL_QUEUE_SHB)
-#define GET_TX_SYNC_INTERFACE dllcalshb_getInterface
-#elif (EPL_DLLCAL_TX_NMT_QUEUE == EPL_QUEUE_HOSTINTERFACE)
-#define GET_TX_SYNC_INTERFACE dllcalhostif_getInterface
-#else
-#error "Unsupported TX_SYNC_QUEUE"
-#endif
-
 
 //------------------------------------------------------------------------------
 // typedef
@@ -171,6 +157,9 @@ extern "C" {
 
 tDllCalFuncIntf* dllcaldirect_getInterface(void);
 tDllCalFuncIntf* dllcalshb_getInterface(void);
+tDllCalFuncIntf* dllcalioctl_getInterface(void);
+tDllCalFuncIntf* dllucalcircbuf_getInterface(void);
+tDllCalFuncIntf* dllkcalcircbuf_getInterface(void);
 
 #ifdef __cplusplus
 }

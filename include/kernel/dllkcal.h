@@ -40,6 +40,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <EplDll.h>
+#include <dllcal.h>
 #include <event.h>
 
 //------------------------------------------------------------------------------
@@ -80,8 +81,9 @@ tEplKernel dllkcal_getAsyncTxFrame(void* pFrame_p, UINT* pFrameSize_p,
 // only frames with registered AsndServiceIds are passed to CAL
 tEplKernel dllkcal_asyncFrameReceived(tEplFrameInfo* pFrameInfo_p);
 
-tEplKernel dllkcal_sendAsyncFrame(tEplFrameInfo* pFrameInfo_p,
-                                  tEplDllAsyncReqPriority priority_p);
+tEplKernel dllkcal_sendAsyncFrame(tEplFrameInfo* pFrameInfo_p, tEplDllAsyncReqPriority priority_p);
+
+tEplKernel dllkcal_writeAsyncFrame(tEplFrameInfo* pFrameInfo_p, tDllCalQueue dllQueue);
 
 tEplKernel dllkcal_clearAsyncBuffer(void);
 

@@ -95,12 +95,8 @@ The queue defines determine the stack's queues.
     ///< user-to-kernel queue implementation
 #define EPL_EVENT_KINT_QUEUE                EPL_QUEUE_DIRECT
     ///< kernel-internal queue implementation
-#define EPL_DLLCAL_TX_NMT_QUEUE             EPL_QUEUE_HOSTINTERFACE
-    ///< NMT TX queue implementation
-#define EPL_DLLCAL_TX_GEN_QUEUE             EPL_QUEUE_HOSTINTERFACE
-    ///< Generic TX queue implementation
-#define EPL_DLLCAL_TX_SYNC_QUEUE            EPL_QUEUE_HOSTINTERFACE
-    ///< Sync TX queue implementation
+#define CONFIG_DLLCAL_QUEUE                 EPL_QUEUE_HOSTINTERFACE
+    ///< DLLCAL queue implementation
 #define EPL_USE_SHAREDBUFF                  FALSE
     ///< disable shared buffer
 /**@}*/

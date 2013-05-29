@@ -47,9 +47,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#if (EPL_DLL_PRES_CHAINING_MN != FALSE) \
-    && (EPL_DLLCAL_TX_SYNC_QUEUE != EPL_QUEUE_SHB) \
-    && (EPL_DLLCAL_TX_SYNC_QUEUE != EPL_QUEUE_HOSTINTERFACE)
+#if (EPL_DLL_PRES_CHAINING_MN != FALSE) && (CONFIG_DLLCAL_QUEUE == EPL_QUEUE_DIRECT)
 #error "DLLCal module does not support direct calls with PRC MN"
 #endif
 
@@ -107,7 +105,7 @@ static tEplKernel SetAsndServiceIdFilter(tEplDllAsndServiceId ServiceId_p,
 
 //------------------------------------------------------------------------------
 /**
-\brief	Initialize User DLL CAL module
+\brief  Initialize User DLL CAL module
 
 This function initializes the user DLL CAL module.
 
@@ -121,10 +119,10 @@ tEplKernel dllucal_init(void)
     // reset instance structure
     EPL_MEMSET(&instance_l, 0, sizeof (instance_l));
 
-    instance_l.pTxNmtFuncs = GET_TX_NMT_INTERFACE();
-    instance_l.pTxGenFuncs = GET_TX_GEN_INTERFACE();
+    instance_l.pTxNmtFuncs = GET_DLLUCAL_INTERFACE();
+    instance_l.pTxGenFuncs = GET_DLLUCAL_INTERFACE();
 #if EPL_DLL_PRES_CHAINING_MN != FALSE
-    instance_l.pTxSyncFuncs = GET_TX_SYNC_INTERFACE();
+    instance_l.pTxSyncFuncs = GET_DLLUCAL_INTERFACE();
 #endif
 
     ret = instance_l.pTxNmtFuncs->pfnAddInstance(&instance_l.dllCalQueueTxNmt,
@@ -157,7 +155,7 @@ Exit:
 
 //------------------------------------------------------------------------------
 /**
-\brief	Cleanup User DLL CAL module
+\brief  Cleanup User DLL CAL module
 
 This function cleans up the user DLL CAL module
 
@@ -181,7 +179,7 @@ tEplKernel dllucal_exit(void)
 
 //------------------------------------------------------------------------------
 /**
-\brief	Process asynchronous frame event
+\brief  Process asynchronous frame event
 
 The function processes an asynchronous frame event
 
@@ -229,7 +227,7 @@ Exit:
 
 //------------------------------------------------------------------------------
 /**
-\brief	Configure DLL parameters
+\brief  Configure DLL parameters
 
 This function posts a DLL configuration event to the kernel DLL CAL module
 
@@ -254,7 +252,7 @@ tEplKernel dllucal_config(tEplDllConfigParam * pDllConfigParam_p)
 
 //------------------------------------------------------------------------------
 /**
-\brief	Configure identity of local node
+\brief  Configure identity of local node
 
 This function posts a dll identity event to the kernel DLL CAL module to
 configure the identity of a local node for IdentResponse.
@@ -279,7 +277,7 @@ tEplKernel dllucal_setIdentity(tEplDllIdentParam * pDllIdentParam_p)
 
 //------------------------------------------------------------------------------
 /**
-\brief	Register ASnd handler
+\brief  Register ASnd handler
 
 This function register the specified handler for the specified ASnd service
 ID with the specified node ID filter.
@@ -319,7 +317,7 @@ tEplKernel dllucal_regAsndService(tEplDllAsndServiceId serviceId_p,
 
 //------------------------------------------------------------------------------
 /**
-\brief	Send asynchronous frame
+\brief  Send asynchronous frame
 
 This function sends an asynchronous fram with the specified priority.
 
@@ -369,11 +367,10 @@ Exit:
     return ret;
 }
 
-
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
 //------------------------------------------------------------------------------
 /**
-\brief	Issue a StatusRequest or IdentRequest
+\brief  Issue a StatusRequest or IdentRequest
 
 This function issues a StatusRequest or an IdentRequest to the specified node.
 
@@ -444,7 +441,7 @@ tEplKernel dllucal_issueSyncRequest(tEplDllSyncRequest* pSyncRequest_p, UINT siz
 #if EPL_NMT_MAX_NODE_ID > 0
 //------------------------------------------------------------------------------
 /**
-\brief	Configure the specified node
+\brief  Configure the specified node
 
 The function configures the specified node by sending a
 kEplEventTypeDllkConfigNode event to the kernel DLL CAL module.
@@ -472,7 +469,7 @@ tEplKernel dllucal_configNode(tEplDllNodeInfo* pNodeInfo_p)
 
 //------------------------------------------------------------------------------
 /**
-\brief	Add a node to the isochronous phase
+\brief  Add a node to the isochronous phase
 
 The function adds a node to the isonchronous phase by sending a
 kEplEventTypeDllkAddNode event to the kernel DLL CAL module.
@@ -499,7 +496,7 @@ tEplKernel dllucal_addNode(tEplDllNodeOpParam* pNodeOpParam_p)
 
 //------------------------------------------------------------------------------
 /**
-\brief	Remove a node from the isochronous phase
+\brief  Remove a node from the isochronous phase
 
 The function removes the specified node from the isochronous phase by sending
 a kEplEventTypeDllkDelNode event to the kernel DLL CAL module.
@@ -533,7 +530,7 @@ tEplKernel dllucal_deleteNode(tEplDllNodeOpParam* pNodeOpParam_p)
 
 //------------------------------------------------------------------------------
 /**
-\brief	Forward filter event to kernel part
+\brief  Forward filter event to kernel part
 
 The function forwards a filter event to the kernel DLL CAL module.
 
