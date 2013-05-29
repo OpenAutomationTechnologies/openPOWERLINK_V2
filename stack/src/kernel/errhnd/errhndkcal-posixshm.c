@@ -1,19 +1,18 @@
 /**
 ********************************************************************************
-\file   errhndkcal-local.c
+\file   errhndkcal-posixshm.c
 
 \brief  Implementation of kernel CAL module for error handler
 
 This module implements the CAL functions in kernel layer for the error handler.
-This implementation uses a static variable which will be referenced from user
-and from kernel space. It can be used if the user and kernel part is running
-in the same domain and global variables could be shared.
+This implementation uses posix shared memory to share the error objects
+between user and kernel part.
 
 \ingroup module_errhndkcal
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2012, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -45,8 +44,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <EplInc.h>
 #include <event.h>
 #include <errhnd.h>
-
 #include "errhndkcal.h"
+
+#include <unistd.h>
+#include <sys/mman.h>
+#include <sys/types.h>
+#include <fcntl.h>           /* For O_* constants */
+#include <sys/stat.h>
+
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -55,11 +60,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
+#define ERRHND_SHM_NAME "/shmErrHnd"
 
 //------------------------------------------------------------------------------
 // module global vars
 //------------------------------------------------------------------------------
-tErrHndObjects              errhndk_errorObjects_g;
 
 //------------------------------------------------------------------------------
 // global function prototypes
@@ -81,6 +86,9 @@ tErrHndObjects              errhndk_errorObjects_g;
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
+static int                      fd_l;
+static tErrHndObjects*          pErrHndMem_l;
+static BOOL                     fCreator_l;
 
 //------------------------------------------------------------------------------
 // local function prototypes
@@ -103,6 +111,49 @@ The function initializes the user layer CAL module of the error handler.
 //------------------------------------------------------------------------------
 tEplKernel errhndkcal_init (void)
 {
+    struct stat             stat;
+
+    if (pErrHndMem_l != NULL)
+        return kEplNoFreeInstance;
+
+    if ((fd_l = shm_open(ERRHND_SHM_NAME, O_RDWR | O_CREAT, 0)) < 0)
+    {
+        TRACE("%s() shm_open failed!\n", __func__);
+        return kEplNoResource;
+    }
+
+    if (fstat(fd_l, &stat) != 0)
+    {
+        close (fd_l);
+        return kEplNoResource;
+    }
+
+    if (stat.st_size == 0)
+    {
+        if (ftruncate(fd_l, sizeof(tErrHndObjects)) == -1)
+        {
+            TRACE("%s() ftruncate failed!\n", __func__);
+            close (fd_l);
+            shm_unlink(ERRHND_SHM_NAME);
+            return kEplNoResource;
+        }
+        fCreator_l = TRUE;
+    }
+
+    pErrHndMem_l = mmap(NULL, sizeof(tErrHndObjects), PROT_READ | PROT_WRITE, MAP_SHARED, fd_l, 0);
+    if (pErrHndMem_l == MAP_FAILED)
+    {
+        TRACE("%s() mmap header failed!\n", __func__);
+        close (fd_l);
+        if (fCreator_l)
+            shm_unlink(ERRHND_SHM_NAME);
+        return kEplNoResource;
+    }
+
+    if (fCreator_l)
+    {
+        EPL_MEMSET(pErrHndMem_l, 0, sizeof(tErrHndObjects));
+    }
     return kEplSuccessful;
 }
 
@@ -118,21 +169,15 @@ CAL module of the error handler.
 //------------------------------------------------------------------------------
 void errhndkcal_exit (void)
 {
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief    get pointer to error handler objects
-
-The function returns a pointer to the memory block where the error handler
-objects are stored..
-
-\ingroup module_errhndkcal
-*/
-//------------------------------------------------------------------------------
-tErrHndObjects* errhndkcal_getMemPtr(void)
-{
-    return &errhndk_errorObjects_g;
+    if (pErrHndMem_l != NULL)
+    {
+        munmap(pErrHndMem_l, sizeof(tErrHndObjects));
+        close(fd_l);
+        if (fCreator_l)
+            shm_unlink(ERRHND_SHM_NAME);
+        fd_l = 0;
+        pErrHndMem_l = 0;
+    }
 }
 
 //------------------------------------------------------------------------------
@@ -153,9 +198,9 @@ tErrHndObjects* errhndkcal_getMemPtr(void)
 void errhndkcal_getCnLossSocError(UINT32 *pCumulativeCnt_p, UINT32 *pThresholdCnt_p,
                                 UINT32 *pThreshold_p)
 {
-    *pCumulativeCnt_p = errhndk_errorObjects_g.cnLossSoc.cumulativeCnt;
-    *pThresholdCnt_p = errhndk_errorObjects_g.cnLossSoc.thresholdCnt;
-    *pThreshold_p = errhndk_errorObjects_g.cnLossSoc.threshold;
+    *pCumulativeCnt_p = pErrHndMem_l->cnLossSoc.cumulativeCnt;
+    *pThresholdCnt_p = pErrHndMem_l->cnLossSoc.thresholdCnt;
+    *pThreshold_p = pErrHndMem_l->cnLossSoc.threshold;
 }
 
 //------------------------------------------------------------------------------
@@ -172,9 +217,9 @@ void errhndkcal_getCnLossSocError(UINT32 *pCumulativeCnt_p, UINT32 *pThresholdCn
 void errhndkcal_getCnLossPreqError(UINT32 *pCumulativeCnt_p, UINT32 *pThresholdCnt_p,
                                  UINT32 *pThreshold_p)
 {
-    *pCumulativeCnt_p = errhndk_errorObjects_g.cnLossPreq.cumulativeCnt;
-    *pThresholdCnt_p = errhndk_errorObjects_g.cnLossPreq.thresholdCnt;
-    *pThreshold_p = errhndk_errorObjects_g.cnLossPreq.threshold;
+    *pCumulativeCnt_p = pErrHndMem_l->cnLossPreq.cumulativeCnt;
+    *pThresholdCnt_p = pErrHndMem_l->cnLossPreq.thresholdCnt;
+    *pThreshold_p = pErrHndMem_l->cnLossPreq.threshold;
 }
 
 //------------------------------------------------------------------------------
@@ -192,9 +237,9 @@ void errhndkcal_getCnCrcError(UINT32 *pCumulativeCnt_p, UINT32 *pThresholdCnt_p,
                               UINT32 *pThreshold_p)
 
 {
-    *pCumulativeCnt_p = errhndk_errorObjects_g.cnCrcErr.cumulativeCnt;
-    *pThresholdCnt_p = errhndk_errorObjects_g.cnCrcErr.thresholdCnt;
-    *pThreshold_p = errhndk_errorObjects_g.cnCrcErr.threshold;
+    *pCumulativeCnt_p = pErrHndMem_l->cnCrcErr.cumulativeCnt;
+    *pThresholdCnt_p = pErrHndMem_l->cnCrcErr.thresholdCnt;
+    *pThreshold_p = pErrHndMem_l->cnCrcErr.threshold;
 }
 
 #ifdef CONFIG_INCLUDE_NMT_MN
@@ -212,9 +257,9 @@ void errhndkcal_getCnCrcError(UINT32 *pCumulativeCnt_p, UINT32 *pThresholdCnt_p,
 void errhndkcal_getMnCrcError(UINT32 *pCumulativeCnt_p, UINT32 *pThresholdCnt_p,
                               UINT32 *pThreshold_p)
 {
-    *pCumulativeCnt_p = errhndk_errorObjects_g.mnCrcErr.cumulativeCnt;
-    *pThresholdCnt_p = errhndk_errorObjects_g.mnCrcErr.thresholdCnt;
-    *pThreshold_p = errhndk_errorObjects_g.mnCrcErr.threshold;
+    *pCumulativeCnt_p = pErrHndMem_l->mnCrcErr.cumulativeCnt;
+    *pThresholdCnt_p = pErrHndMem_l->mnCrcErr.thresholdCnt;
+    *pThreshold_p = pErrHndMem_l->mnCrcErr.threshold;
 }
 
 //------------------------------------------------------------------------------
@@ -231,9 +276,9 @@ void errhndkcal_getMnCrcError(UINT32 *pCumulativeCnt_p, UINT32 *pThresholdCnt_p,
 void errhndkcal_getMnCycTimeExceedError(UINT32 *pCumulativeCnt_p,
                            UINT32 *pThresholdCnt_p, UINT32 *pThreshold_p)
 {
-    *pCumulativeCnt_p = errhndk_errorObjects_g.mnCycTimeExceed.cumulativeCnt;
-    *pThresholdCnt_p = errhndk_errorObjects_g.mnCycTimeExceed.thresholdCnt;
-    *pThreshold_p = errhndk_errorObjects_g.mnCycTimeExceed.threshold;
+    *pCumulativeCnt_p = pErrHndMem_l->mnCycTimeExceed.cumulativeCnt;
+    *pThresholdCnt_p = pErrHndMem_l->mnCycTimeExceed.thresholdCnt;
+    *pThreshold_p = pErrHndMem_l->mnCycTimeExceed.threshold;
 }
 
 //------------------------------------------------------------------------------
@@ -251,9 +296,9 @@ void errhndkcal_getMnCycTimeExceedError(UINT32 *pCumulativeCnt_p,
 void errhndkcal_getMnCnLossPresError(UINT nodeIdx_p, UINT32 *pCumulativeCnt_p,
                                 UINT32 *pThresholdCnt_p, UINT32 *pThreshold_p)
 {
-    *pCumulativeCnt_p = errhndk_errorObjects_g.aMnCnLossPres[nodeIdx_p].cumulativeCnt;
-    *pThresholdCnt_p = errhndk_errorObjects_g.aMnCnLossPres[nodeIdx_p].thresholdCnt;
-    *pThreshold_p = errhndk_errorObjects_g.aMnCnLossPres[nodeIdx_p].threshold;
+    *pCumulativeCnt_p = pErrHndMem_l->aMnCnLossPres[nodeIdx_p].cumulativeCnt;
+    *pThresholdCnt_p = pErrHndMem_l->aMnCnLossPres[nodeIdx_p].thresholdCnt;
+    *pThreshold_p = pErrHndMem_l->aMnCnLossPres[nodeIdx_p].threshold;
 }
 #endif
 
@@ -268,8 +313,9 @@ void errhndkcal_getMnCnLossPresError(UINT nodeIdx_p, UINT32 *pCumulativeCnt_p,
 //------------------------------------------------------------------------------
 void errhndkcal_getLossSocThresholdCnt(UINT32 *pThresholdCnt_p)
 {
-    *pThresholdCnt_p = errhndk_errorObjects_g.cnLossSoc.thresholdCnt;
+    *pThresholdCnt_p = pErrHndMem_l->cnLossSoc.thresholdCnt;
 }
+
 //------------------------------------------------------------------------------
 /**
 \brief  Get threshold counter for LosPreq error
@@ -281,7 +327,7 @@ void errhndkcal_getLossSocThresholdCnt(UINT32 *pThresholdCnt_p)
 //------------------------------------------------------------------------------
 void errhndkcal_getLossPreqThresholdCnt(UINT32 *pThresholdCnt_p)
 {
-    *pThresholdCnt_p = errhndk_errorObjects_g.cnLossPreq.thresholdCnt;
+    *pThresholdCnt_p = pErrHndMem_l->cnLossPreq.thresholdCnt;
 }
 //------------------------------------------------------------------------------
 /**
@@ -294,7 +340,7 @@ void errhndkcal_getLossPreqThresholdCnt(UINT32 *pThresholdCnt_p)
 //------------------------------------------------------------------------------
 void errhndkcal_getCnCrcThresholdCnt(UINT32 *pThresholdCnt_p)
 {
-    *pThresholdCnt_p = errhndk_errorObjects_g.cnCrcErr.thresholdCnt;
+    *pThresholdCnt_p = pErrHndMem_l->cnCrcErr.thresholdCnt;
 }
 
 #ifdef CONFIG_INCLUDE_NMT_MN
@@ -309,7 +355,7 @@ void errhndkcal_getCnCrcThresholdCnt(UINT32 *pThresholdCnt_p)
 //------------------------------------------------------------------------------
 void errhndkcal_getMnCrcThresholdCnt(UINT32 *pThresholdCnt_p)
 {
-    *pThresholdCnt_p = errhndk_errorObjects_g.mnCrcErr.thresholdCnt;
+    *pThresholdCnt_p = pErrHndMem_l->mnCrcErr.thresholdCnt;
 }
 //------------------------------------------------------------------------------
 /**
@@ -322,7 +368,7 @@ void errhndkcal_getMnCrcThresholdCnt(UINT32 *pThresholdCnt_p)
 //------------------------------------------------------------------------------
 void errhndkcal_getMnCycTimeExceedThresholdCnt(UINT32 *pThresholdCnt_p)
 {
-    *pThresholdCnt_p = errhndk_errorObjects_g.mnCycTimeExceed.thresholdCnt;
+    *pThresholdCnt_p = pErrHndMem_l->mnCycTimeExceed.thresholdCnt;
 }
 
 //------------------------------------------------------------------------------
@@ -337,7 +383,7 @@ void errhndkcal_getMnCycTimeExceedThresholdCnt(UINT32 *pThresholdCnt_p)
 //------------------------------------------------------------------------------
 void errhndkcal_getMnCnLossPresThresholdCnt(UINT nodeIdx_p, UINT32 *pThresholdCnt_p)
 {
-    *pThresholdCnt_p = errhndk_errorObjects_g.aMnCnLossPres[nodeIdx_p].thresholdCnt;
+    *pThresholdCnt_p = pErrHndMem_l->aMnCnLossPres[nodeIdx_p].thresholdCnt;
 }
 #endif
 
@@ -357,8 +403,8 @@ void errhndkcal_getMnCnLossPresThresholdCnt(UINT nodeIdx_p, UINT32 *pThresholdCn
 //------------------------------------------------------------------------------
 void errhndkcal_setCnLossSocCounters(UINT32 dwCumulativeCnt_p, UINT32 dwThresholdCnt_p)
 {
-    errhndk_errorObjects_g.cnLossSoc.cumulativeCnt = dwCumulativeCnt_p;
-    errhndk_errorObjects_g.cnLossSoc.thresholdCnt = dwThresholdCnt_p;
+    pErrHndMem_l->cnLossSoc.cumulativeCnt = dwCumulativeCnt_p;
+    pErrHndMem_l->cnLossSoc.thresholdCnt = dwThresholdCnt_p;
 }
 
 //------------------------------------------------------------------------------
@@ -373,8 +419,8 @@ void errhndkcal_setCnLossSocCounters(UINT32 dwCumulativeCnt_p, UINT32 dwThreshol
 //------------------------------------------------------------------------------
 void errhndkcal_setCnLossPreqCounters(UINT32 dwCumulativeCnt_p, UINT32 dwThresholdCnt_p)
 {
-    errhndk_errorObjects_g.cnLossPreq.cumulativeCnt = dwCumulativeCnt_p;
-    errhndk_errorObjects_g.cnLossPreq.thresholdCnt = dwThresholdCnt_p;
+    pErrHndMem_l->cnLossPreq.cumulativeCnt = dwCumulativeCnt_p;
+    pErrHndMem_l->cnLossPreq.thresholdCnt = dwThresholdCnt_p;
 }
 
 //------------------------------------------------------------------------------
@@ -389,8 +435,8 @@ void errhndkcal_setCnLossPreqCounters(UINT32 dwCumulativeCnt_p, UINT32 dwThresho
 //------------------------------------------------------------------------------
 void errhndkcal_setCnCrcCounters(UINT32 dwCumulativeCnt_p, UINT32 dwThresholdCnt_p)
 {
-    errhndk_errorObjects_g.cnCrcErr.cumulativeCnt = dwCumulativeCnt_p;
-    errhndk_errorObjects_g.cnCrcErr.thresholdCnt = dwThresholdCnt_p;
+    pErrHndMem_l->cnCrcErr.cumulativeCnt = dwCumulativeCnt_p;
+    pErrHndMem_l->cnCrcErr.thresholdCnt = dwThresholdCnt_p;
 }
 
 #ifdef CONFIG_INCLUDE_NMT_MN
@@ -406,8 +452,8 @@ void errhndkcal_setCnCrcCounters(UINT32 dwCumulativeCnt_p, UINT32 dwThresholdCnt
 //------------------------------------------------------------------------------
 void errhndkcal_setMnCrcCounters(UINT32 dwCumulativeCnt_p, UINT32 dwThresholdCnt_p)
 {
-    errhndk_errorObjects_g.mnCrcErr.cumulativeCnt = dwCumulativeCnt_p;
-    errhndk_errorObjects_g.mnCrcErr.thresholdCnt = dwThresholdCnt_p;
+    pErrHndMem_l->mnCrcErr.cumulativeCnt = dwCumulativeCnt_p;
+    pErrHndMem_l->mnCrcErr.thresholdCnt = dwThresholdCnt_p;
 }
 
 //------------------------------------------------------------------------------
@@ -422,15 +468,15 @@ void errhndkcal_setMnCrcCounters(UINT32 dwCumulativeCnt_p, UINT32 dwThresholdCnt
 //------------------------------------------------------------------------------
 void errhndkcal_setMnCycTimeExceedCounters(UINT32 dwCumulativeCnt_p, UINT32 dwThresholdCnt_p)
 {
-    errhndk_errorObjects_g.mnCycTimeExceed.cumulativeCnt = dwCumulativeCnt_p;
-    errhndk_errorObjects_g.mnCycTimeExceed.thresholdCnt = dwThresholdCnt_p;
+    pErrHndMem_l->mnCycTimeExceed.cumulativeCnt = dwCumulativeCnt_p;
+    pErrHndMem_l->mnCycTimeExceed.thresholdCnt = dwThresholdCnt_p;
 }
 
 //------------------------------------------------------------------------------
 /**
 \brief  Set error counters of MnCnLossPres error
 
-\param  nodeIdx_p             Index of node (node ID - 1)
+\param  nodeIdx_p               Index of node (node ID - 1)
 \param  dwCumulativeCnt_p       Cumulative counter to set
 \param  dwThresholdCnt_p        Threshold counter to set
 
@@ -440,8 +486,8 @@ void errhndkcal_setMnCycTimeExceedCounters(UINT32 dwCumulativeCnt_p, UINT32 dwTh
 void errhndkcal_setMnCnLossPresCounters(UINT nodeIdx_p, UINT32 dwCumulativeCnt_p,
                                         UINT32 dwThresholdCnt_p)
 {
-    errhndk_errorObjects_g.aMnCnLossPres[nodeIdx_p].cumulativeCnt = dwCumulativeCnt_p;
-    errhndk_errorObjects_g.aMnCnLossPres[nodeIdx_p].thresholdCnt = dwThresholdCnt_p;
+    pErrHndMem_l->aMnCnLossPres[nodeIdx_p].cumulativeCnt = dwCumulativeCnt_p;
+    pErrHndMem_l->aMnCnLossPres[nodeIdx_p].thresholdCnt = dwThresholdCnt_p;
 }
 #endif
 
@@ -456,7 +502,7 @@ void errhndkcal_setMnCnLossPresCounters(UINT nodeIdx_p, UINT32 dwCumulativeCnt_p
 //------------------------------------------------------------------------------
 void errhndkcal_setLossSocThresholdCnt(UINT32 dwThresholdCnt_p)
 {
-    errhndk_errorObjects_g.cnLossSoc.thresholdCnt = dwThresholdCnt_p;
+    pErrHndMem_l->cnLossSoc.thresholdCnt = dwThresholdCnt_p;
 }
 
 //------------------------------------------------------------------------------
@@ -470,7 +516,7 @@ void errhndkcal_setLossSocThresholdCnt(UINT32 dwThresholdCnt_p)
 //------------------------------------------------------------------------------
 void errhndkcal_setLossPreqThresholdCnt(UINT32 dwThresholdCnt_p)
 {
-    errhndk_errorObjects_g.cnLossPreq.thresholdCnt = dwThresholdCnt_p;
+    pErrHndMem_l->cnLossPreq.thresholdCnt = dwThresholdCnt_p;
 }
 
 //------------------------------------------------------------------------------
@@ -484,7 +530,7 @@ void errhndkcal_setLossPreqThresholdCnt(UINT32 dwThresholdCnt_p)
 //------------------------------------------------------------------------------
 void errhndkcal_setCnCrcThresholdCnt(UINT32 dwThresholdCnt_p)
 {
-    errhndk_errorObjects_g.cnCrcErr.thresholdCnt = dwThresholdCnt_p;
+    pErrHndMem_l->cnCrcErr.thresholdCnt = dwThresholdCnt_p;
 }
 
 #ifdef CONFIG_INCLUDE_NMT_MN
@@ -499,7 +545,7 @@ void errhndkcal_setCnCrcThresholdCnt(UINT32 dwThresholdCnt_p)
 //------------------------------------------------------------------------------
 void errhndkcal_setMnCrcThresholdCnt(UINT32 dwThresholdCnt_p)
 {
-    errhndk_errorObjects_g.mnCrcErr.thresholdCnt = dwThresholdCnt_p;
+    pErrHndMem_l->mnCrcErr.thresholdCnt = dwThresholdCnt_p;
 }
 
 //------------------------------------------------------------------------------
@@ -513,14 +559,14 @@ void errhndkcal_setMnCrcThresholdCnt(UINT32 dwThresholdCnt_p)
 //------------------------------------------------------------------------------
 void errhndkcal_setMnCycTimeExceedThresholdCnt(UINT32 dwThresholdCnt_p)
 {
-    errhndk_errorObjects_g.mnCycTimeExceed.thresholdCnt = dwThresholdCnt_p;
+    pErrHndMem_l->mnCycTimeExceed.thresholdCnt = dwThresholdCnt_p;
 }
 
 //------------------------------------------------------------------------------
 /**
 \brief  Set threshold counter of MnCnLossPres error
 
-\param  nodeIdx_p             Index of node (node ID - 1)
+\param  nodeIdx_p               Index of node (node ID - 1)
 \param  dwThresholdCnt_p        Threshold counter to set
 
 \ingroup module_errhndkcal
@@ -528,7 +574,7 @@ void errhndkcal_setMnCycTimeExceedThresholdCnt(UINT32 dwThresholdCnt_p)
 //------------------------------------------------------------------------------
 void errhndkcal_setMnCnLossPresThresholdCnt(UINT nodeIdx_p, UINT32 dwThresholdCnt_p)
 {
-    errhndk_errorObjects_g.aMnCnLossPres[nodeIdx_p].thresholdCnt = dwThresholdCnt_p;
+    pErrHndMem_l->aMnCnLossPres[nodeIdx_p].thresholdCnt = dwThresholdCnt_p;
 }
 #endif
 

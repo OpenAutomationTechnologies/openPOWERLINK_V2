@@ -1,17 +1,17 @@
 /**
 ********************************************************************************
-\file   errhnducal-shb.c
+\file   errhnducal-posixshm.c
 
 \brief  Implementation of user CAL module for error handler
 
 This module implements the user layer CAL functions of the error handler.
-This implementation uses linear shared buffers provided by the shared buffer
-module to share the error objects between user and kernel part.
+This implementation uses posix shared memory to share the error objects
+between user and kernel part.
 
 \ingroup module_errhnducal
 *******************************************************************************/
 /*------------------------------------------------------------------------------
-Copyright (c) 2012, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2012-2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -42,8 +42,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #include <EplInc.h>
 
-#include <SharedBuff.h>
 #include <errhnd.h>
+#include <unistd.h>
+#include <sys/mman.h>
+#include <sys/types.h>
+#include <fcntl.h>           /* For O_* constants */
+#include <sys/stat.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -72,29 +76,19 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
+#define ERRHND_SHM_NAME         "/shmErrHnd"
 
 //------------------------------------------------------------------------------
 // local types
 //------------------------------------------------------------------------------
 
-/**
-\brief Instance of shared buffer implementation of error handler CAL
-
-This structure implements the instance variable of the shared buffer
-implementation of the user error handler CAL moduel.
-*/
-typedef struct
-{
-    tShbInstance                shbInstance;            ///< Shared buffer instance for the used shared buffer
-    tErrHndObjects              errorObjects;           ///< Error objects
-} tErrShbInstance;
-
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
-static tErrShbInstance          instance_l;             ///< shared buffer instance for shared mem
-static BOOL                     fInitialized_l = FALSE; ///< Flag determines if module is initialized
 static tErrHndObjects           *pLocalObjects_l;       ///< pointer to user error objects
+static int                      fd_l;
+static BYTE*                    pErrHndMem_l;
+static BOOL                     fCreator_l;
 
 //------------------------------------------------------------------------------
 // local function prototypes
@@ -119,41 +113,50 @@ The function initializes the user layer CAL module of the error handler.
 //------------------------------------------------------------------------------
 tEplKernel errhnducal_init (tErrHndObjects *pLocalObjects_p)
 {
-    tShbError       shbError;
-    UINT            fCreated;
-
-    if (fInitialized_l)
-    {
-        return kEplNoFreeInstance;
-    }
+    struct stat             stat;
 
     pLocalObjects_l = pLocalObjects_p;
 
-    /* allocate linear shared buffer for error counters */
-    shbError = ShbLinAllocBuffer(sizeof(tErrHndObjects), ERRHND_SHB_ID,
-                                 &instance_l.shbInstance, &fCreated);
-    if (shbError != kShbOk)
+    if (pErrHndMem_l != NULL)
+        return kEplNoFreeInstance;
+
+    if ((fd_l = shm_open(ERRHND_SHM_NAME, O_RDWR | O_CREAT, 0)) < 0)
     {
+        EPL_DBGLVL_ERROR_TRACE("%s() shm_open failed!\n", __func__);
         return kEplNoResource;
     }
-    else
-    {
-        /* If the buffer is just created we have to initialize it */
-        if (fCreated)
-        {
-            EPL_MEMSET(&instance_l.errorObjects, 0, sizeof(tErrHndObjects));
 
-            shbError = ShbLinWriteDataBlock(instance_l.shbInstance,
-                                            0,
-                                            &instance_l.errorObjects,
-                                            sizeof(tErrHndObjects));
-            if (shbError != kShbOk)
-            {
-                ShbLinReleaseBuffer(instance_l.shbInstance);
-                return kEplNoResource;
-            }
+    if (fstat(fd_l, &stat) != 0)
+    {
+        close (fd_l);
+        return kEplNoResource;
+    }
+
+    if (stat.st_size == 0)
+    {
+        if (ftruncate(fd_l, sizeof(tErrHndObjects)) == -1)
+        {
+            EPL_DBGLVL_ERROR_TRACE("%s() ftruncate failed!\n", __func__);
+            close (fd_l);
+            shm_unlink(ERRHND_SHM_NAME);
+            return kEplNoResource;
         }
-        fInitialized_l = TRUE;
+        fCreator_l = TRUE;
+    }
+
+    pErrHndMem_l = mmap(NULL, sizeof(tErrHndObjects), PROT_READ | PROT_WRITE, MAP_SHARED, fd_l, 0);
+    if (pErrHndMem_l == MAP_FAILED)
+    {
+        EPL_DBGLVL_ERROR_TRACE("%s() mmap error handler objects failed!\n", __func__);
+        close (fd_l);
+        if (fCreator_l)
+            shm_unlink(ERRHND_SHM_NAME);
+        return kEplNoResource;
+    }
+
+    if (fCreator_l)
+    {
+        EPL_MEMSET(pErrHndMem_l, 0, sizeof(tErrHndObjects));
     }
     return kEplSuccessful;
 }
@@ -170,10 +173,14 @@ CAL module of the error handler.
 //------------------------------------------------------------------------------
 void errhnducal_exit (void)
 {
-    if (fInitialized_l)
+    if (pErrHndMem_l != NULL)
     {
-        ShbLinReleaseBuffer(instance_l.shbInstance);
-        fInitialized_l = FALSE;
+        munmap(pErrHndMem_l, sizeof(tErrHndObjects));
+        close(fd_l);
+        if (fCreator_l)
+            shm_unlink(ERRHND_SHM_NAME);
+        fd_l = 0;
+        pErrHndMem_l = 0;
     }
 }
 
@@ -201,8 +208,7 @@ tEplKernel errhnducal_writeErrorObject(UINT index_p, UINT subIndex_p, UINT32 *pP
     UNUSED_PARAMETER(subIndex_p);
 
     offset = (char *)pParam_p - (char *)pLocalObjects_l;
-
-    ShbLinWriteDataBlock(instance_l.shbInstance, offset, pParam_p, sizeof(UINT32));
+    *(UINT32*)(pErrHndMem_l + offset) = *pParam_p;
     return kEplSuccessful;
 }
 
@@ -222,7 +228,7 @@ by user and kernel modules.
 \ingroup module_errhnducal
 */
 //------------------------------------------------------------------------------
-tEplKernel errhnducal_readErrorObject(UINT index_p, UINT subIndex_p, UINT32 * pParam_p)
+tEplKernel errhnducal_readErrorObject(UINT index_p, UINT subIndex_p, UINT32* pParam_p)
 {
     UINT    offset;
 
@@ -230,10 +236,9 @@ tEplKernel errhnducal_readErrorObject(UINT index_p, UINT subIndex_p, UINT32 * pP
     UNUSED_PARAMETER(subIndex_p);
 
     offset = (char *)pParam_p - (char *)pLocalObjects_l;
-    ShbLinReadDataBlock(instance_l.shbInstance, pParam_p, offset, sizeof(UINT32));
+    *pParam_p = *(UINT32*)(pErrHndMem_l + offset);
     return kEplSuccessful;
 }
-
 
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //

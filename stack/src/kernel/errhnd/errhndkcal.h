@@ -43,6 +43,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <EplInc.h>
+#include <errhnd.h>
 
 //------------------------------------------------------------------------------
 // const defines
@@ -62,6 +63,7 @@ extern "C" {
 
 tEplKernel errhndkcal_init (void);
 void errhndkcal_exit (void);
+tErrHndObjects* errhndkcal_getMemPtr(void);
 
 /* Reading of error objects */
 void errhndkcal_getCnLossSocError(UINT32 *pCumulativeCnt_p, UINT32 *pThresholdCnt_p, UINT32 *pThreshold_p);
