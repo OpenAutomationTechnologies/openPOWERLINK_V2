@@ -42,9 +42,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <kernel/eventk.h>
 
-#if (EPL_DLL_PRES_CHAINING_MN != FALSE) \
-    && (EPL_DLLCAL_TX_SYNC_QUEUE != EPL_QUEUE_SHB) \
-    && (EPL_DLLCAL_TX_SYNC_QUEUE != EPL_QUEUE_HOSTINTERFACE)
+#if (EPL_DLL_PRES_CHAINING_MN != FALSE) && (CONFIG_DLLCAL_QUEUE == EPL_QUEUE_DIRECT)
 #error "DLLCal module does not support direct calls with PRC MN"
 #endif
 
@@ -156,16 +154,17 @@ tEplKernel dllkcal_init(void)
     // reset instance structure
     EPL_MEMSET(&instance_l, 0, sizeof (instance_l));
 
-    instance_l.pTxNmtFuncs = GET_TX_NMT_INTERFACE();
-    instance_l.pTxGenFuncs = GET_TX_GEN_INTERFACE();
+    instance_l.pTxNmtFuncs = GET_DLLKCAL_INTERFACE();
+    instance_l.pTxGenFuncs = GET_DLLKCAL_INTERFACE();
 #if EPL_DLL_PRES_CHAINING_MN != FALSE
-    instance_l.pTxSyncFuncs = GET_TX_SYNC_INTERFACE();
+    instance_l.pTxSyncFuncs = GET_DLLKCAL_INTERFACE();
 #endif
 
     ret = instance_l.pTxNmtFuncs->pfnAddInstance(&instance_l.dllCalQueueTxNmt,
                                                  kDllCalQueueTxNmt);
     if(ret != kEplSuccessful)
     {
+        EPL_DBGLVL_ERROR_TRACE ("%s() TxNmt failed\n", __func__);
         goto Exit;
     }
 
@@ -173,6 +172,7 @@ tEplKernel dllkcal_init(void)
                                                  kDllCalQueueTxGen);
     if(ret != kEplSuccessful)
     {
+        EPL_DBGLVL_ERROR_TRACE("%s() TxGen failed\n", __func__);
         goto Exit;
     }
 
@@ -181,6 +181,7 @@ tEplKernel dllkcal_init(void)
                                                   kDllCalQueueTxSync);
     if(ret != kEplSuccessful)
     {
+        EPL_DBGLVL_ERROR_TRACE("%s() TxSync failed\n", __func__);
         goto Exit;
     }
 #endif
@@ -430,13 +431,13 @@ tEplKernel dllkcal_asyncFrameReceived(tEplFrameInfo* pFrameInfo_p)
 
 //------------------------------------------------------------------------------
 /**
-\brief	Send an asynchronous frame
+\brief  Send an asynchronous frame
 
-The function puts the given frame into the transmit FIFO with the specified
+The function puts the given frame into the transmit queue with the specified
 priority.
 
 \param  pFrameInfo_p            Pointer to frame info structure
-\param  priority_p              Priority to send fram with.
+\param  priority_p              Priority to send frame with
 
 \return Returns an error code
 */
@@ -478,6 +479,52 @@ tEplKernel dllkcal_sendAsyncFrame(tEplFrameInfo* pFrameInfo_p,
     ret = eventk_postEvent(&event);
 
 Exit:
+    return ret;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Write an asynchronous frame into buffer
+
+The function writes the given frame into the specified dll CAL queue.
+
+\param  pFrameInfo_p            Pointer to frame info structure
+\param  dllQueue                DllCal Queue to use
+
+\return Returns an tEplKernel error code
+*/
+//------------------------------------------------------------------------------
+tEplKernel dllkcal_writeAsyncFrame(tEplFrameInfo* pFrameInfo_p, tDllCalQueue dllQueue)
+{
+    tEplKernel  ret = kEplSuccessful;
+
+    switch (dllQueue)
+    {
+        case kDllCalQueueTxNmt:    // NMT request priority
+            ret = instance_l.pTxNmtFuncs->pfnInsertDataBlock(
+                                        instance_l.dllCalQueueTxNmt,
+                                        (BYTE*)pFrameInfo_p->m_pFrame,
+                                        &(pFrameInfo_p->m_uiFrameSize));
+            break;
+
+        case kDllCalQueueTxGen:    // generic priority
+            ret = instance_l.pTxGenFuncs->pfnInsertDataBlock(
+                                        instance_l.dllCalQueueTxGen,
+                                        (BYTE*)pFrameInfo_p->m_pFrame,
+                                        &(pFrameInfo_p->m_uiFrameSize));
+            break;
+#if EPL_DLL_PRES_CHAINING_MN != FALSE
+        case kDllCalQueueTxSync:   // sync request priority
+            ret = instance_l.pTxGenFuncs->pfnInsertDataBlock(
+                                        instance_l.dllCalQueueTxSync,
+                                        (BYTE*)pFrameInfo_p->m_pFrame,
+                                        &(pFrameInfo_p->m_uiFrameSize));
+            break;
+#endif
+        default:
+            break;
+    }
+
     return ret;
 }
 
