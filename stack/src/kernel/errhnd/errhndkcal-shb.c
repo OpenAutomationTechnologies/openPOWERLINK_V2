@@ -172,6 +172,21 @@ void errhndkcal_exit (void)
 }
 
 //------------------------------------------------------------------------------
+/**
+\brief    get pointer to error handler objects
+
+The function returns a pointer to the memory block where the error handler
+objects are stored..
+
+\ingroup module_errhndkcal
+*/
+//------------------------------------------------------------------------------
+tErrHndObjects* errhndkcal_getMemPtr(void)
+{
+    return &instance_l.errorObjects;
+}
+
+//------------------------------------------------------------------------------
 // getters
 //------------------------------------------------------------------------------
 
