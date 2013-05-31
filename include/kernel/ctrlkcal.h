@@ -67,6 +67,7 @@ tEplKernel ctrlkcal_process (void);
 tEplKernel ctrlkcal_getCmd (tCtrlCmdType *pCmd_p);
 void       ctrlkcal_sendReturn(UINT16 retval_p);
 void       ctrlkcal_setStatus (UINT16 status_p);
+UINT16     ctrlkcal_getStatus (void);
 void       ctrlkcal_updateHeartbeat (UINT16 heartbeat_p);
 tEplKernel ctrlkcal_readInitParam(tCtrlInitParam* pInitParam_p);
 void       ctrlkcal_storeInitParam(tCtrlInitParam* pInitParam_p);

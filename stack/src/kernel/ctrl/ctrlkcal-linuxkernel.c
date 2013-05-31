@@ -57,7 +57,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // module global vars
 //------------------------------------------------------------------------------
 tCtrlInitParam      kernelInitParam_g;
-UINT16              heartbeat_g;
 UINT16              status_g;
 
 //------------------------------------------------------------------------------
@@ -103,7 +102,6 @@ implementation nothing has to be done!
 tEplKernel ctrlkcal_init (void)
 {
     status_g = kCtrlStatusReady;
-    heartbeat_g = 1;
     return kEplSuccessful;
 }
 
@@ -190,10 +188,6 @@ void ctrlkcal_sendReturn(UINT16 retval_p)
 
 The function stores the status of the kernel stack in the control memory block.
 
-\note The function is only implemented to provide the interface but is not used,
-      because in the direct implemtation the kernel and user stack are running
-      in the same instance.
-
 \param  status_p                Status to set.
 
 \ingroup module_ctrlkcal
@@ -204,12 +198,21 @@ void ctrlkcal_setStatus (UINT16 status_p)
     status_g = status_p;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Get the kernel stack status
 
+The function gets the status of the kernel stack.
+
+\return The function returns the status of the kernel stack.
+
+\ingroup module_ctrlkcal
+*/
+//------------------------------------------------------------------------------
 UINT16 ctrlkcal_getStatus (void)
 {
     return status_g;
 }
-
 
 //------------------------------------------------------------------------------
 /**
@@ -218,10 +221,6 @@ UINT16 ctrlkcal_getStatus (void)
 The function updates it's heartbeat counter in the control memory block which
 can be used by the user stack to detect if the kernel stack is still running.
 
-\note The function is only implemented to provide the interface but is not used,
-      because in the direct implemtation the kernel and user stack are running
-      in the same instance.
-
 \param  heartbeat_p         Heartbeat counter to store in the control memory
                             block.
 \ingroup module_ctrlkcal
@@ -229,12 +228,7 @@ can be used by the user stack to detect if the kernel stack is still running.
 //------------------------------------------------------------------------------
 void ctrlkcal_updateHeartbeat (UINT16 heartbeat_p)
 {
-    heartbeat_g = heartbeat_p;
-}
-
-UINT16 ctrlkcal_getHeartbeat (void)
-{
-    return heartbeat_g++;
+    // nothing to do
 }
 
 //------------------------------------------------------------------------------
