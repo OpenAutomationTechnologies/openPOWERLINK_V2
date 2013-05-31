@@ -313,6 +313,21 @@ void ctrlk_updateHeartbeat(void)
     ctrlkcal_updateHeartbeat(heartbeat);
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Get heartbeat counter
+
+The function returns the heartbeat counter.
+
+\return     Heartbeat counter
+
+\ingroup module_ctrlk
+*/
+//------------------------------------------------------------------------------
+UINT16 ctrlk_getHeartbeat(void)
+{
+    return instance_l.heartbeat;
+}
 
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //

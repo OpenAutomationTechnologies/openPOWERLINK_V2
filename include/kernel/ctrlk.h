@@ -66,6 +66,7 @@ BOOL       ctrlk_process(void);
 tEplKernel ctrlk_executeCmd(tCtrlCmdType cmd, tEplKernel* pRet_p, UINT16* pStatus_p,
                             BOOL* pfExit_p);
 void       ctrlk_updateHeartbeat(void);
+UINT16     ctrlk_getHeartbeat(void);
 
 #ifdef __cplusplus
 }
