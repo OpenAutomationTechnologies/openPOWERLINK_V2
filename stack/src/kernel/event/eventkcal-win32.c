@@ -43,6 +43,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <Epl.h>
 #include <eventcal.h>
 #include <kernel/eventkcal.h>
+#include <kernel/eventkcalintf.h>
 #include <circbuffer.h>
 
 #include <Windows.h>
@@ -121,7 +122,6 @@ The function initializes the kernel event CAL module on Windows.
 tEplKernel eventkcal_init (void)
 {
     tEplKernel      ret = kEplSuccessful;
-    tCircBufError   circError;
 
     EPL_MEMSET(&instance_l, 0, sizeof(tEventkCalInstance));
 
