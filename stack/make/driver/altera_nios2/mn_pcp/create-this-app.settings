@@ -80,8 +80,6 @@ ${STACKROOT_DIR}/libs/trace/trace-printf.c \
 ${STACKROOT_DIR}/stack/src/arch/altera_nios2/target-nios2.c \
 ${STACKROOT_DIR}/stack/src/common/dll/dllcal-hostif.c \
 ${STACKROOT_DIR}/stack/src/common/event/event.c \
-${STACKROOT_DIR}/stack/src/common/event/eventcal-direct.c \
-${STACKROOT_DIR}/stack/src/common/event/eventcal-hostif.c \
 ${STACKROOT_DIR}/stack/src/common/errstring.c \
 ${STACKROOT_DIR}/stack/src/kernel/ctrl/ctrlk.c \
 ${STACKROOT_DIR}/stack/src/kernel/ctrl/ctrlkcal-hostif.c \
@@ -92,13 +90,13 @@ ${STACKROOT_DIR}/stack/src/kernel/edrv/edrv-openmac.c \
 ${STACKROOT_DIR}/stack/src/kernel/errhnd/errhndk.c \
 ${STACKROOT_DIR}/stack/src/kernel/errhnd/errhndkcal-hostif.c \
 ${STACKROOT_DIR}/stack/src/kernel/event/eventk.c \
-${STACKROOT_DIR}/stack/src/kernel/event/eventkcal.c \
-${STACKROOT_DIR}/stack/src/kernel/event/eventkcal-direct.c \
-${STACKROOT_DIR}/stack/src/kernel/event/eventkcal-hostif.c \
+${STACKROOT_DIR}/stack/src/kernel/event/eventkcal-nooshostif.c \
+${STACKROOT_DIR}/stack/src/kernel/event/eventkcalintf-hostif.c \
 ${STACKROOT_DIR}/stack/src/kernel/hrtimer/hrtimer-openmac.c \
 ${STACKROOT_DIR}/stack/src/kernel/nmt/nmtk.c \
 ${STACKROOT_DIR}/stack/src/kernel/pdo/pdok.c \
 ${STACKROOT_DIR}/stack/src/kernel/pdo/pdokcal.c \
-${STACKROOT_DIR}/stack/src/kernel/pdo/pdokcal-hostif.c \
+${STACKROOT_DIR}/stack/src/kernel/pdo/pdokcal-triplebufshm.c \
+${STACKROOT_DIR}/stack/src/kernel/pdo/pdokcalmem-hostif.c \
 ${STACKROOT_DIR}/stack/src/kernel/pdo/pdokcalsync-hostif.c \
 ${STACKROOT_DIR}/stack/src/kernel/timestamp/timestamp-openmac.c"
