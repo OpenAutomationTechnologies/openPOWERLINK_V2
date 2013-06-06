@@ -153,6 +153,30 @@
         #define EplTgtEnableGlobalInterrupt ShbTgtEnableGlobalInterrupt
     #endif
 
+    #if (DEV_SYSTEM == _DEV_NIOS2_)
+        //FIXME jz Find way for atomic exchange!!!
+        // NOTE: THIS IS NO ATOMIC EXCHANGE!!!
+        #include <alt_types.h>
+        #include <io.h>
+
+        #define ATOMIC_T    alt_u8
+        #define ATOMIC_EXCHANGE(address, newval, oldval) \
+                                oldval = IORD(address, 0); \
+                                IOWR(address, 0, newval)
+    #endif
+
+    #if (DEV_SYSTEM == _DEV_MICROBLAZE_BIG_ \
+        || DEV_SYSTEM == _DEV_MICROBLAZE_LITTLE_)
+        //FIXME jz Find way for atomic exchange!!!
+        // NOTE: THIS IS NO ATOMIC EXCHANGE!!!
+        #include <xil_types.h>
+        #include <xil_io.h>
+
+        #define ATOMIC_T    u8
+        #define ATOMIC_EXCHANGE(address, newval, oldval) \
+                                oldval = Xil_In8(address); \
+                                Xil_Out8(address, newval)
+    #endif
 
 #elif (TARGET_SYSTEM == _LINUX_)
 
