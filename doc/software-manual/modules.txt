@@ -93,15 +93,9 @@ The user event CAL module produces events in the user-to-kernel (U2K) and
 user-internal (UInt) queue. It consumes events from the user-internal (UInt)
 and the kernel-to-user (K2U) queue.
 
-For each queue a different implementation could be used. The event queue
-instances of the used queues and the function interface are stored in the
-CALs instance variable.
-
-Which queue implementation is used is configured at compile time by the
-following macros:
-\li EPL_EVENT_K2U_QUEUE
-\li EPL_EVENT_UINT_QUEUE
-\li EPL_EVENT_U2K_QUEUE
+A unique implementation is required for every architecture. This implementation
+can use different interface modules (eventucalintf-XXX.c) to implement the event
+queues.
 
 \see module_eventu
 
@@ -238,15 +232,9 @@ The kernel event CAL module produces events in the kernel-to-user (K2U) and
 kernel-internal (KInt) queue. It consumes events from the kernel-internal (KInt)
 and the user-to-kernel (U2K) queue.
 
-For each queue a different implementation could be used. The event queue
-instances of the used queues and the function interface are stored in the
-CALs instance variable.
-
-Which queue implementation is used is configured at compile time by the
-following macros:
-\li EPL_EVENT_K2U_QUEUE
-\li EPL_EVENT_KINT_QUEUE
-\li EPL_EVENT_U2K_QUEUE
+A unique implementation is required for every architecture. This implementation
+can use different interface modules (eventkcalintf-XXX.c) to implement the event
+queues.
 
 \see module_eventk
 
