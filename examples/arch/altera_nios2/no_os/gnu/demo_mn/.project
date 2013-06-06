@@ -154,16 +154,6 @@
             <locationURI>OPLK_LOC/stack/src/common/event/event.c</locationURI>
         </link>
         <link>
-            <name>eventcal-direct.c</name>
-            <type>1</type>
-            <locationURI>OPLK_LOC/stack/src/common/event/eventcal-direct.c</locationURI>
-        </link>
-        <link>
-            <name>eventcal-hostif.c</name>
-            <type>1</type>
-            <locationURI>OPLK_LOC/stack/src/common/event/eventcal-hostif.c</locationURI>
-        </link>
-        <link>
             <name>timer-generic.c</name>
             <type>1</type>
             <locationURI>OPLK_LOC/stack/src/common/timer/timer-generic.c</locationURI>
@@ -219,19 +209,14 @@
             <locationURI>OPLK_LOC/stack/src/user/event/eventu.c</locationURI>
         </link>
         <link>
-            <name>eventucal.c</name>
+            <name>eventucal-nooshostif.c</name>
             <type>1</type>
-            <locationURI>OPLK_LOC/stack/src/user/event/eventucal.c</locationURI>
+            <locationURI>OPLK_LOC/stack/src/user/event/eventucal-nooshostif.c</locationURI>
         </link>
         <link>
-            <name>eventucal-direct.c</name>
+            <name>eventucalintf-hostif.c</name>
             <type>1</type>
-            <locationURI>OPLK_LOC/stack/src/user/event/eventucal-direct.c</locationURI>
-        </link>
-        <link>
-            <name>eventucal-hostif.c</name>
-            <type>1</type>
-            <locationURI>OPLK_LOC/stack/src/user/event/eventucal-hostif.c</locationURI>
+            <locationURI>OPLK_LOC/stack/src/user/event/eventucalintf-hostif.c</locationURI>
         </link>
         <link>
             <name>identu.c</name>
@@ -284,9 +269,14 @@
             <locationURI>OPLK_LOC/stack/src/user/pdo/pdoucal.c</locationURI>
         </link>
         <link>
-            <name>pdoucal-hostif.c</name>
+            <name>pdoucal-triplebufshm.c</name>
             <type>1</type>
-            <locationURI>OPLK_LOC/stack/src/user/pdo/pdoucal-hostif.c</locationURI>
+            <locationURI>OPLK_LOC/stack/src/user/pdo/pdoucal-triplebufshm.c</locationURI>
+        </link>
+        <link>
+            <name>pdoucalmem-hostif.c</name>
+            <type>1</type>
+            <locationURI>OPLK_LOC/stack/src/user/pdo/pdoucalmem-hostif.c</locationURI>
         </link>
         <link>
             <name>pdoucalsync-hostif.c</name>

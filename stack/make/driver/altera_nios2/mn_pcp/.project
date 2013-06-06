@@ -164,34 +164,19 @@
 			<locationURI>OPLK_LOC/stack/src/common/event/event.c</locationURI>
 		</link>
 		<link>
-			<name>eventcal-direct.c</name>
-			<type>1</type>
-			<locationURI>OPLK_LOC/stack/src/common/event/eventcal-direct.c</locationURI>
-		</link>
-		<link>
-			<name>eventcal-hostif.c</name>
-			<type>1</type>
-			<locationURI>OPLK_LOC/stack/src/common/event/eventcal-hostif.c</locationURI>
-		</link>
-		<link>
 			<name>eventk.c</name>
 			<type>1</type>
 			<locationURI>OPLK_LOC/stack/src/kernel/event/eventk.c</locationURI>
 		</link>
 		<link>
-			<name>eventkcal-direct.c</name>
+			<name>eventkcal-nooshostif.c</name>
 			<type>1</type>
-			<locationURI>OPLK_LOC/stack/src/kernel/event/eventkcal-direct.c</locationURI>
+			<locationURI>OPLK_LOC/stack/src/kernel/event/eventkcal-nooshostif.c</locationURI>
 		</link>
 		<link>
-			<name>eventkcal-hostif.c</name>
+			<name>eventkcalintf-hostif.c</name>
 			<type>1</type>
-			<locationURI>OPLK_LOC/stack/src/kernel/event/eventkcal-hostif.c</locationURI>
-		</link>
-		<link>
-			<name>eventkcal.c</name>
-			<type>1</type>
-			<locationURI>OPLK_LOC/stack/src/kernel/event/eventkcal.c</locationURI>
+			<locationURI>OPLK_LOC/stack/src/kernel/event/eventkcalintf-hostif.c</locationURI>
 		</link>
 		<link>
 			<name>hostiflib.c</name>
@@ -244,14 +229,19 @@
 			<locationURI>OPLK_LOC/stack/src/kernel/pdo/pdok.c</locationURI>
 		</link>
 		<link>
-			<name>pdokcal-hostif.c</name>
+			<name>pdokcalmem-hostif.c</name>
 			<type>1</type>
-			<locationURI>OPLK_LOC/stack/src/kernel/pdo/pdokcal-hostif.c</locationURI>
+			<locationURI>OPLK_LOC/stack/src/kernel/pdo/pdokcalmem-hostif.c</locationURI>
 		</link>
 		<link>
 			<name>pdokcal.c</name>
 			<type>1</type>
 			<locationURI>OPLK_LOC/stack/src/kernel/pdo/pdokcal.c</locationURI>
+		</link>
+        <link>
+			<name>pdokcal-triplebufshm.c</name>
+			<type>1</type>
+			<locationURI>OPLK_LOC/stack/src/kernel/pdo/pdokcal-triplebufshm.c</locationURI>
 		</link>
 		<link>
 			<name>pdokcalsync-hostif.c</name>
