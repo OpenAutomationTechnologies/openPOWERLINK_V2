@@ -80,7 +80,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static tEplKernel cbProcessRpdo(tEplFrameInfo * pFrameInfo_p);
+static tEplKernel cbProcessRpdo(tEplFrameInfo * pFrameInfo_p) SECTION_PDOK_PROCESS_RPDO;
 
 
 //============================================================================//
