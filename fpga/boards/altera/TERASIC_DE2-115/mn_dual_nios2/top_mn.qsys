@@ -140,7 +140,7 @@
  <parameter name="projectName" value="POWERLINK_MN.qpf" />
  <parameter name="sopcBorderPoints" value="false" />
  <parameter name="systemHash" value="1" />
- <parameter name="timeStamp" value="1362729530140" />
+ <parameter name="timeStamp" value="1370607718268" />
  <parameter name="useTestBenchNamingPattern" value="false" />
  <instanceScript></instanceScript>
  <interface name="clk" internal="clk_0.clk_in" type="clock" dir="end" />
@@ -466,7 +466,7 @@
   <parameter name="gui_sizeK2UQ" value="8" />
   <parameter name="gui_sizeU2KQ" value="8" />
   <parameter name="gui_sizeTpdo" value="1024" />
-  <parameter name="gui_sizeRpdo" value="1024" />
+  <parameter name="gui_sizeRpdo" value="10240" />
   <parameter name="AUTO_C0_CLOCK_RATE" value="100000000" />
  </module>
  <connection
