@@ -680,7 +680,7 @@ tHostifReturn hostif_process (tHostifInstance pInstance_p)
     // set process pointer to very first entry
     pQueueProcess = pHostif->aQueueProcessTable;
 
-    for(i = 0, iProcessed = 0; i < HOSTIF_QUEUE_COUNT; i++)
+    for(i = 0, iProcessed = 0; i < HOSTIF_QUEUE_COUNT; i++, pQueueProcess++)
     {
         if(pQueueProcess->pInstance == NULL)
             continue;
@@ -700,8 +700,6 @@ tHostifReturn hostif_process (tHostifInstance pInstance_p)
 
         if(++iProcessed >= pHostif->iQueueProcessEntries)
             break;
-
-        pQueueProcess++;
     }
 
     // add other resources to be processed here
