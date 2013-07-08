@@ -71,7 +71,7 @@
 #include "user/EplNmtMnu.h"
 #include "user/EplTimeru.h"
 #include "user/identu.h"
-#include "user/EplStatusu.h"
+#include "user/statusu.h"
 #include "user/EplObdu.h"
 #include "user/dllucal.h"
 #include "Benchmark.h"
@@ -800,7 +800,7 @@ tEplNmtState    NmtState;
 
             case kEplNmtCmdStatusResponse:
             {   // issue request for local node
-                Ret = EplStatusuRequestStatusResponse(0x00, NULL);
+                Ret = statusu_requestStatusResponse(0x00, NULL);
                 goto Exit;
             }
 
@@ -854,7 +854,7 @@ tEplNmtState    NmtState;
                     || (((pNodeInfo->m_dwNodeCfg & EPL_NODEASSIGN_ASYNCONLY_NODE) == 0)
                         && (pNodeInfo->m_NodeState == kEplNmtMnuNodeStateOperational)))
                 {
-                    Ret = EplStatusuRequestStatusResponse(uiNodeId_p, NULL);
+                    Ret = statusu_requestStatusResponse(uiNodeId_p, NULL);
                 }
                 goto Exit;
             }
@@ -1132,7 +1132,7 @@ tEplKernel PUBLIC EplNmtMnuCbNmtStateChange(tEplEventNmtStateChange NmtStateChan
 
             // reset IdentResponses and running IdentRequests and StatusRequests
             Ret = identu_reset();
-            Ret = EplStatusuReset();
+            Ret = statusu_reset();
 #if EPL_NMTMNU_PRES_CHAINING_MN != FALSE
             Ret = EplSyncuReset();
 #endif
@@ -2709,7 +2709,7 @@ tEplTimerArg        TimerArg;
             {   // No state monitor timer is required
                 // Request StatusResponse immediately,
                 // because we want a fast boot-up of CNs
-                Ret = EplStatusuRequestStatusResponse(uiNodeId_p, EplNmtMnuCbStatusResponse);
+                Ret = statusu_requestStatusResponse(uiNodeId_p, EplNmtMnuCbStatusResponse);
                 if (Ret != kEplSuccessful)
                 {
                     EPL_NMTMNU_DBG_POST_TRACE_VALUE(NodeEvent_p,
@@ -2944,7 +2944,7 @@ tEplTimerArg        TimerArg;
             if (NmtState == kEplNmtMsPreOperational1)
             {
                 // request next StatusResponse immediately
-                Ret = EplStatusuRequestStatusResponse(uiNodeId_p, EplNmtMnuCbStatusResponse);
+                Ret = statusu_requestStatusResponse(uiNodeId_p, EplNmtMnuCbStatusResponse);
                 if (Ret != kEplSuccessful)
                 {
                     EPL_NMTMNU_DBG_POST_TRACE_VALUE(NodeEvent_p,
@@ -3126,7 +3126,7 @@ tEplTimerArg        TimerArg;
         {
             EPL_DBGLVL_NMTMN_TRACE("TimerStatReq->StatReq(%02X)\n", uiNodeId_p);
             // request next StatusResponse
-            Ret = EplStatusuRequestStatusResponse(uiNodeId_p, EplNmtMnuCbStatusResponse);
+            Ret = statusu_requestStatusResponse(uiNodeId_p, EplNmtMnuCbStatusResponse);
             if (Ret != kEplSuccessful)
             {
                 EPL_NMTMNU_DBG_POST_TRACE_VALUE(NodeEvent_p,

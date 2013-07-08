@@ -55,7 +55,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <user/EplNmtMnu.h>
 #include <user/EplSdoComu.h>
 #include <user/identu.h>
-#include <user/EplStatusu.h>
+#include <user/statusu.h>
 #include <user/EplTimeru.h>
 #include <user/EplCfmu.h>
 #include <user/eventucal.h>
@@ -376,8 +376,8 @@ tEplKernel ctrlu_shutdownStack(void)
     ret = identu_delInstance();
     TRACE("identu_delInstance():  0x%X\n", ret);
 
-    ret = EplStatusuDelInstance();
-    TRACE("EplStatusuDelInstance():  0x%X\n", ret);
+    ret = statusu_delInstance();
+    TRACE("statusu_delInstance():  0x%X\n", ret);
 
 #if EPL_NMTMNU_PRES_CHAINING_MN != FALSE
     ret = EplSyncuDelInstance();
@@ -546,7 +546,7 @@ static tEplKernel initNmtu(tEplApiInstance* pApiInstance_p, tEplApiCbFuncs* pCbF
 
     // initialize EplStatusu module
     TRACE ("Initialize Statusu module...\n");
-    Ret = EplStatusuInit();
+    Ret = statusu_init();
     if (Ret != kEplSuccessful)
         goto Exit;
 

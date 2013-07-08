@@ -1,399 +1,291 @@
-/****************************************************************************
+/**
+********************************************************************************
+\file   statusu.c
 
-  (c) SYSTEC electronic GmbH, D-07973 Greiz, August-Bebel-Str. 29
-      www.systec-electronic.com
+\brief  Implementation of status module
 
-  Project:      openPOWERLINK
+This file contains the implementation of the status module.
 
-  Description:  source file for Statusu-Module
+\ingroup module_statusu
+*******************************************************************************/
 
-  License:
+/*------------------------------------------------------------------------------
+Copyright (c) 2013, SYSTEC electronic GmbH
+Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+All rights reserved.
 
-    Redistribution and use in source and binary forms, with or without
-    modification, are permitted provided that the following conditions
-    are met:
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+    * Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above copyright
+      notice, this list of conditions and the following disclaimer in the
+      documentation and/or other materials provided with the distribution.
+    * Neither the name of the copyright holders nor the
+      names of its contributors may be used to endorse or promote products
+      derived from this software without specific prior written permission.
 
-    1. Redistributions of source code must retain the above copyright
-       notice, this list of conditions and the following disclaimer.
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL COPYRIGHT HOLDERS BE LIABLE FOR ANY
+DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+------------------------------------------------------------------------------*/
 
-    2. Redistributions in binary form must reproduce the above copyright
-       notice, this list of conditions and the following disclaimer in the
-       documentation and/or other materials provided with the distribution.
-
-    3. Neither the name of SYSTEC electronic GmbH nor the names of its
-       contributors may be used to endorse or promote products derived
-       from this software without prior written permission. For written
-       permission, please contact info@systec-electronic.com.
-
-    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-    LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-    FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-    COPYRIGHT HOLDERS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-    INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-    BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-    LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-    CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-    LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-    ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-    POSSIBILITY OF SUCH DAMAGE.
-
-    Severability Clause:
-
-        If a provision of this License is or becomes illegal, invalid or
-        unenforceable in any jurisdiction, that shall not affect:
-        1. the validity or enforceability in that jurisdiction of any other
-           provision of this License; or
-        2. the validity or enforceability in other jurisdictions of that or
-           any other provision of this License.
-
-  -------------------------------------------------------------------------
-
-                $RCSfile$
-
-                $Author$
-
-                $Revision$  $Date$
-
-                $State$
-
-                Build Environment:
-                    GCC V3.4
-
-  -------------------------------------------------------------------------
-
-  Revision History:
-
-  2006/11/15 d.k.:   start of the implementation
-
-****************************************************************************/
-
-#include "user/EplStatusu.h"
+//------------------------------------------------------------------------------
+// includes
+//------------------------------------------------------------------------------
+#include "user/statusu.h"
 #include "user/dllucal.h"
 
-/***************************************************************************/
-/*                                                                         */
-/*                                                                         */
-/*          G L O B A L   D E F I N I T I O N S                            */
-/*                                                                         */
-/*                                                                         */
-/***************************************************************************/
+//============================================================================//
+//            G L O B A L   D E F I N I T I O N S                             //
+//============================================================================//
 
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // const defines
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
-//---------------------------------------------------------------------------
-// local types
-//---------------------------------------------------------------------------
-
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // module global vars
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
-//---------------------------------------------------------------------------
-// local function prototypes
-//---------------------------------------------------------------------------
-
-
-/***************************************************************************/
-/*                                                                         */
-/*                                                                         */
-/*          C L A S S  <xxxxx>                                             */
-/*                                                                         */
-/*                                                                         */
-/***************************************************************************/
-//
-// Description:
-//
-//
-/***************************************************************************/
+//------------------------------------------------------------------------------
+// global function prototypes
+//------------------------------------------------------------------------------
 
 
-//=========================================================================//
-//                                                                         //
-//          P R I V A T E   D E F I N I T I O N S                          //
-//                                                                         //
-//=========================================================================//
+//============================================================================//
+//            P R I V A T E   D E F I N I T I O N S                           //
+//============================================================================//
 
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // const defines
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // local types
-//---------------------------------------------------------------------------
-
+//------------------------------------------------------------------------------
 typedef struct
 {
-    tEplStatusuCbResponse m_apfnCbResponse[254];
+    tStatusuCbResponse      apfnCbResponse[254];
+} tStatusuInstance;
 
-} tEplStatusuInstance;
-
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // local vars
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+static tStatusuInstance   instance_g;
 
-static tEplStatusuInstance   EplStatusuInstance_g;
-
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // local function prototypes
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+static tEplKernel statusu_cbStatusResponse(tEplFrameInfo * pFrameInfo_p);
 
-static tEplKernel PUBLIC EplStatusuCbStatusResponse(tEplFrameInfo * pFrameInfo_p);
+//============================================================================//
+//            P U B L I C   F U N C T I O N S                                 //
+//============================================================================//
 
-//=========================================================================//
-//                                                                         //
-//          P U B L I C   F U N C T I O N S                                //
-//                                                                         //
-//=========================================================================//
+//------------------------------------------------------------------------------
+/**
+\brief  Init status module
 
-//---------------------------------------------------------------------------
-//
-// Function:    EplStatusuInit
-//
-// Description: init first instance of the module
-//
-//
-//
-// Parameters:
-//
-//
-// Returns:     tEplKernel  = errorcode
-//
-//
-// State:
-//
-//---------------------------------------------------------------------------
+The function initializes an instance of the status module
 
-tEplKernel PUBLIC EplStatusuInit()
+\return The function returns a tEplKernel error code.
+
+\ingroup module_statusu
+*/
+//------------------------------------------------------------------------------
+tEplKernel statusu_init(void)
 {
-tEplKernel Ret;
+    tEplKernel  ret;
 
-    Ret = EplStatusuAddInstance();
+    ret = statusu_addInstance();
 
-    return Ret;
+    return ret;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Add status module instance
 
-//---------------------------------------------------------------------------
-//
-// Function:    EplStatusuAddInstance
-//
-// Description: init other instances of the module
-//
-//
-//
-// Parameters:
-//
-//
-// Returns:     tEplKernel  = errorcode
-//
-//
-// State:
-//
-//---------------------------------------------------------------------------
+The function adds an status module instance
 
-tEplKernel PUBLIC EplStatusuAddInstance()
+\return The function returns a tEplKernel error code.
+
+\ingroup module_statusu
+*/
+//------------------------------------------------------------------------------
+tEplKernel statusu_addInstance(void)
 {
-tEplKernel Ret;
+    tEplKernel  ret = kEplSuccessful;
 
-    Ret = kEplSuccessful;
-
-    // reset instance structure
-    EPL_MEMSET(&EplStatusuInstance_g, 0, sizeof (EplStatusuInstance_g));
+    EPL_MEMSET(&instance_g, 0, sizeof (instance_g));
 
     // register StatusResponse callback function
-    Ret = dllucal_regAsndService(kEplDllAsndStatusResponse, EplStatusuCbStatusResponse, kEplDllAsndFilterAny);
+    ret = dllucal_regAsndService(kEplDllAsndStatusResponse, statusu_cbStatusResponse,
+                                 kEplDllAsndFilterAny);
 
-    return Ret;
+    return ret;
 
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Delete status module instance
 
-//---------------------------------------------------------------------------
-//
-// Function:    EplStatusuDelInstance
-//
-// Description: delete instance
-//
-//
-//
-// Parameters:
-//
-//
-// Returns:     tEplKernel  = errorcode
-//
-//
-// State:
-//
-//---------------------------------------------------------------------------
+The function deletes an status module instance
 
-tEplKernel PUBLIC EplStatusuDelInstance()
+\return The function returns a tEplKernel error code.
+
+\ingroup module_statusu
+*/
+//------------------------------------------------------------------------------
+tEplKernel statusu_delInstance(void)
 {
-tEplKernel  Ret;
-
-    Ret = kEplSuccessful;
+    tEplKernel  ret = kEplSuccessful;
 
     // deregister StatusResponse callback function
-    Ret = dllucal_regAsndService(kEplDllAsndStatusResponse, NULL, kEplDllAsndFilterNone);
-
-    return Ret;
-
+    ret = dllucal_regAsndService(kEplDllAsndStatusResponse, NULL, kEplDllAsndFilterNone);
+    return ret;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Reset status module instance
 
-//---------------------------------------------------------------------------
-//
-// Function:    EplStatusuReset
-//
-// Description: resets this instance
-//
-// Parameters:
-//
-// Returns:     tEplKernel  = errorcode
-//
-//
-// State:
-//
-//---------------------------------------------------------------------------
+The function resets an status module instance
 
-tEplKernel PUBLIC EplStatusuReset()
+\return The function returns a tEplKernel error code.
+
+\ingroup module_statusu
+*/
+//------------------------------------------------------------------------------
+tEplKernel statusu_reset(void)
 {
-tEplKernel  Ret;
-
-    Ret = kEplSuccessful;
-
     // reset instance structure
-    EPL_MEMSET(&EplStatusuInstance_g, 0, sizeof (EplStatusuInstance_g));
+    EPL_MEMSET(&instance_g, 0, sizeof(instance_g));
 
-    return Ret;
-
+    return kEplSuccessful;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Request StatusResponse
 
-//---------------------------------------------------------------------------
-//
-// Function:    EplStatusuRequestStatusResponse
-//
-// Description: returns the StatusResponse for the specified node.
-//
-// Parameters:  uiNodeId_p                  = IN: node ID
-//              pfnCbResponse_p             = IN: function pointer to callback function
-//                                            which will be called if StatusResponse is received
-//
-// Return:      tEplKernel                  = error code
-//
-// State:       not tested
-//
-//---------------------------------------------------------------------------
+The function requests the StatusResponse for a specified node.
 
-tEplKernel PUBLIC EplStatusuRequestStatusResponse(
-                                  unsigned int        uiNodeId_p,
-                                  tEplStatusuCbResponse pfnCbResponse_p)
+\param  nodeId_p            The Node ID to request the StatusResponse for.
+\param  pfnCbResponse_p     Function pointer to callback function which will
+                            be called if StatusResponse is received
+
+\return The function returns a tEplKernel error code.
+
+\ingroup module_statusu
+*/
+//------------------------------------------------------------------------------
+tEplKernel statusu_requestStatusResponse(UINT nodeId_p, tStatusuCbResponse pfnCbResponse_p)
 {
-tEplKernel  Ret;
+    tEplKernel          ret = kEplSuccessful;
 
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) == 0)
+#if !defined(CONFIG_INCLUDE_NMT_MN)
     UNUSED_PARAMETER(pfnCbResponse_p);
 #endif
 
-    Ret = kEplSuccessful;
-
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
-    if (uiNodeId_p == 0)
+#if defined(CONFIG_INCLUDE_NMT_MN)
+    if (nodeId_p == 0)
     {   // issue request for local node
-        Ret = dllucal_issueRequest(kEplDllReqServiceStatus, 0x00, 0xFF);
-        return Ret;
+        ret = dllucal_issueRequest(kEplDllReqServiceStatus, 0x00, 0xFF);
+        return ret;
     }
 #endif
 
     // decrement node ID, because array is zero based
-    uiNodeId_p--;
-    if (uiNodeId_p < tabentries (EplStatusuInstance_g.m_apfnCbResponse))
+    nodeId_p--;
+    if (nodeId_p < tabentries(instance_g.apfnCbResponse))
     {
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
-        if (EplStatusuInstance_g.m_apfnCbResponse[uiNodeId_p] != NULL)
+#if defined(CONFIG_INCLUDE_NMT_MN)
+        if (instance_g.apfnCbResponse[nodeId_p] != NULL)
         {   // request already issued (maybe by someone else)
-            Ret = kEplInvalidOperation;
+            ret = kEplInvalidOperation;
         }
         else
         {
-            EplStatusuInstance_g.m_apfnCbResponse[uiNodeId_p] = pfnCbResponse_p;
-            Ret = dllucal_issueRequest(kEplDllReqServiceStatus, (uiNodeId_p + 1), 0xFF);
+            instance_g.apfnCbResponse[nodeId_p] = pfnCbResponse_p;
+            ret = dllucal_issueRequest(kEplDllReqServiceStatus, (nodeId_p + 1), 0xFF);
         }
 #else
-        Ret = kEplInvalidOperation;
+        ret = kEplInvalidOperation;
 #endif
     }
     else
     {   // invalid node ID specified
-        Ret = kEplInvalidNodeId;
+        ret = kEplInvalidNodeId;
     }
 
-    return Ret;
-
+    return ret;
 }
 
+//============================================================================//
+//            P R I V A T E   F U N C T I O N S                               //
+//============================================================================//
+/// \name Private Functions
+/// \{
 
-//=========================================================================//
-//                                                                         //
-//          P R I V A T E   F U N C T I O N S                              //
-//                                                                         //
-//=========================================================================//
+//------------------------------------------------------------------------------
+/**
+\brief  Callback function for StatusResponse
 
-//---------------------------------------------------------------------------
-//
-// Function:    EplStatusuCbStatusResponse
-//
-// Description: callback funktion for StatusResponse
-//
-//
-//
-// Parameters:  pFrameInfo_p            = Frame with the StatusResponse
-//
-//
-// Returns:     tEplKernel              = error code
-//
-//
-// State:
-//
-//---------------------------------------------------------------------------
-static tEplKernel PUBLIC EplStatusuCbStatusResponse(tEplFrameInfo * pFrameInfo_p)
+The function implements the callback function which will be called when a
+StatusResponse is received.
+
+\param  pFrameInfo_p            Pointer to frame information structure describing
+                                the received StatusResponse frame.
+
+\return The function returns a tEplKernel error code.
+
+\ingroup module_statusu
+*/
+//------------------------------------------------------------------------------
+static tEplKernel statusu_cbStatusResponse(tEplFrameInfo * pFrameInfo_p)
 {
-tEplKernel      Ret = kEplSuccessful;
-unsigned int    uiNodeId;
-unsigned int    uiIndex;
-tEplStatusuCbResponse    pfnCbResponse;
+    tEplKernel          ret = kEplSuccessful;
+    UINT                nodeId;
+    UINT                index;
+    tStatusuCbResponse  pfnCbResponse;
 
-    uiNodeId = AmiGetByteFromLe(&pFrameInfo_p->m_pFrame->m_le_bSrcNodeId);
+    nodeId = AmiGetByteFromLe(&pFrameInfo_p->m_pFrame->m_le_bSrcNodeId);
+    index = nodeId - 1;
 
-    uiIndex = uiNodeId - 1;
-
-    if (uiIndex < tabentries (EplStatusuInstance_g.m_apfnCbResponse))
+    if (index < tabentries (instance_g.apfnCbResponse))
     {
         // memorize pointer to callback function
-        pfnCbResponse = EplStatusuInstance_g.m_apfnCbResponse[uiIndex];
+        pfnCbResponse = instance_g.apfnCbResponse[index];
         if (pfnCbResponse == NULL)
         {   // response was not requested
             goto Exit;
         }
         // reset callback function pointer so that caller may issue next request
-        EplStatusuInstance_g.m_apfnCbResponse[uiIndex] = NULL;
+        instance_g.apfnCbResponse[index] = NULL;
 
         if (pFrameInfo_p->m_uiFrameSize < EPL_C_DLL_MINSIZE_STATUSRES)
         {   // StatusResponse not received or it has invalid size
-            Ret = pfnCbResponse(uiNodeId, NULL);
+            ret = pfnCbResponse(nodeId, NULL);
         }
         else
         {   // StatusResponse received
-            Ret = pfnCbResponse(uiNodeId, &pFrameInfo_p->m_pFrame->m_Data.m_Asnd.m_Payload.m_StatusResponse);
+            ret = pfnCbResponse(nodeId, &pFrameInfo_p->m_pFrame->m_Data.m_Asnd.m_Payload.m_StatusResponse);
         }
     }
 
 Exit:
-    return Ret;
+    return ret;
 }
 
-// EOF
+///\}
 

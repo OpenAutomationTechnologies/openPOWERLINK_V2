@@ -148,6 +148,16 @@ IdentRequest/IdentResponse frames.
 */
 
 //==============================================================================
+/**
+\defgroup module_statusu User status module (statusu)
+
+The user status module provides the functions for handling
+StatusRequest/StatusResponse frames.
+
+\ingroup user_layer
+*/
+
+//==============================================================================
 //==============================================================================
 /**
 \defgroup kernel_layer openPOWERLINK Kernel Layer
