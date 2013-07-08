@@ -57,7 +57,7 @@
 
 #include "user/EplCfmu.h"
 #include "EplSdoAc.h"
-#include "user/EplIdentu.h"
+#include "user/identu.h"
 #include "user/EplObdu.h"
 #include "user/EplSdoComu.h"
 #include "user/EplNmtu.h"
@@ -417,7 +417,7 @@ BOOL                fDoUpdate = FALSE;
         {   // expected configuration date and time is not set
             fDoUpdate = TRUE;
         }
-        EplIdentuGetIdentResponse(uiNodeId_p, &pIdentResponse);
+        identu_getIdentResponse(uiNodeId_p, &pIdentResponse);
         if (pIdentResponse == NULL)
         {
             EPL_DBGLVL_CFM_TRACE("CN%x Ident Response is NULL\n", uiNodeId_p);
