@@ -1,517 +1,382 @@
-/****************************************************************************
+/**
+********************************************************************************
+\file   identu.c
 
-  (c) SYSTEC electronic GmbH, D-07973 Greiz, August-Bebel-Str. 29
-      www.systec-electronic.com
+\brief  Implementation of ident module
 
-  Project:      openPOWERLINK
+This file contains the implementation of the ident module.
 
-  Description:  source file for Identu-Module
+\ingroup module_identu
+*******************************************************************************/
 
-  License:
+/*------------------------------------------------------------------------------
+Copyright (c) 2012, SYSTEC electronic GmbH
+Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+All rights reserved.
 
-    Redistribution and use in source and binary forms, with or without
-    modification, are permitted provided that the following conditions
-    are met:
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+    * Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above copyright
+      notice, this list of conditions and the following disclaimer in the
+      documentation and/or other materials provided with the distribution.
+    * Neither the name of the copyright holders nor the
+      names of its contributors may be used to endorse or promote products
+      derived from this software without specific prior written permission.
 
-    1. Redistributions of source code must retain the above copyright
-       notice, this list of conditions and the following disclaimer.
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL COPYRIGHT HOLDERS BE LIABLE FOR ANY
+DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+------------------------------------------------------------------------------*/
 
-    2. Redistributions in binary form must reproduce the above copyright
-       notice, this list of conditions and the following disclaimer in the
-       documentation and/or other materials provided with the distribution.
-
-    3. Neither the name of SYSTEC electronic GmbH nor the names of its
-       contributors may be used to endorse or promote products derived
-       from this software without prior written permission. For written
-       permission, please contact info@systec-electronic.com.
-
-    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-    LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-    FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-    COPYRIGHT HOLDERS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-    INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-    BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-    LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-    CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-    LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-    ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-    POSSIBILITY OF SUCH DAMAGE.
-
-    Severability Clause:
-
-        If a provision of this License is or becomes illegal, invalid or
-        unenforceable in any jurisdiction, that shall not affect:
-        1. the validity or enforceability in that jurisdiction of any other
-           provision of this License; or
-        2. the validity or enforceability in other jurisdictions of that or
-           any other provision of this License.
-
-  -------------------------------------------------------------------------
-
-                $RCSfile$
-
-                $Author$
-
-                $Revision$  $Date$
-
-                $State$
-
-                Build Environment:
-                    GCC V3.4
-
-  -------------------------------------------------------------------------
-
-  Revision History:
-
-  2006/11/15 d.k.:   start of the implementation
-
-****************************************************************************/
-
-#include "user/EplIdentu.h"
+//------------------------------------------------------------------------------
+// includes
+//------------------------------------------------------------------------------
+#include "user/identu.h"
 #include "user/dllucal.h"
 
-/***************************************************************************/
-/*                                                                         */
-/*                                                                         */
-/*          G L O B A L   D E F I N I T I O N S                            */
-/*                                                                         */
-/*                                                                         */
-/***************************************************************************/
 
-//---------------------------------------------------------------------------
+//============================================================================//
+//            G L O B A L   D E F I N I T I O N S                             //
+//============================================================================//
+
+//------------------------------------------------------------------------------
 // const defines
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
-//---------------------------------------------------------------------------
-// local types
-//---------------------------------------------------------------------------
-
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // module global vars
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
-//---------------------------------------------------------------------------
-// local function prototypes
-//---------------------------------------------------------------------------
-
-
-/***************************************************************************/
-/*                                                                         */
-/*                                                                         */
-/*          C L A S S  <xxxxx>                                             */
-/*                                                                         */
-/*                                                                         */
-/***************************************************************************/
-//
-// Description:
-//
-//
-/***************************************************************************/
+//------------------------------------------------------------------------------
+// global function prototypes
+//------------------------------------------------------------------------------
 
 
-//=========================================================================//
-//                                                                         //
-//          P R I V A T E   D E F I N I T I O N S                          //
-//                                                                         //
-//=========================================================================//
+//============================================================================//
+//            P R I V A T E   D E F I N I T I O N S                           //
+//============================================================================//
 
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // const defines
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // local types
-//---------------------------------------------------------------------------
-
+//------------------------------------------------------------------------------
 typedef struct
 {
-    tEplIdentResponse*   m_apIdentResponse[254];    // the IdentResponse are managed dynamically
-    tEplIdentuCbResponse m_apfnCbResponse[254];
+    tEplIdentResponse*  apIdentResponse[254];    // the IdentResponse are managed dynamically
+    tIdentuCbResponse   apfnCbResponse[254];
+} tIdentuInstance;
 
-} tEplIdentuInstance;
-
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // local vars
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+static tIdentuInstance   instance_g;
 
-static tEplIdentuInstance   EplIdentuInstance_g;
-
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // local function prototypes
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+static tEplKernel   identu_cbIdentResponse(tEplFrameInfo * pFrameInfo_p);
 
-static tEplKernel PUBLIC EplIdentuCbIdentResponse(tEplFrameInfo * pFrameInfo_p);
+//============================================================================//
+//            P U B L I C   F U N C T I O N S                                 //
+//============================================================================//
 
-//=========================================================================//
-//                                                                         //
-//          P U B L I C   F U N C T I O N S                                //
-//                                                                         //
-//=========================================================================//
+//------------------------------------------------------------------------------
+/**
+\brief  Init ident module
 
-//---------------------------------------------------------------------------
-//
-// Function:    EplIdentuInit
-//
-// Description: init first instance of the module
-//
-//
-//
-// Parameters:
-//
-//
-// Returns:     tEplKernel  = errorcode
-//
-//
-// State:
-//
-//---------------------------------------------------------------------------
+The function initializes an instance of the ident module
 
-tEplKernel PUBLIC EplIdentuInit()
+\return The function returns a tEplKernel error code.
+
+\ingroup module_identu
+*/
+//------------------------------------------------------------------------------
+tEplKernel identu_init(void)
 {
-tEplKernel Ret;
-
-    Ret = EplIdentuAddInstance();
-
-    return Ret;
+    return identu_addInstance();
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Add ident module instance
 
-//---------------------------------------------------------------------------
-//
-// Function:    EplIdentuAddInstance
-//
-// Description: init other instances of the module
-//
-//
-//
-// Parameters:
-//
-//
-// Returns:     tEplKernel  = errorcode
-//
-//
-// State:
-//
-//---------------------------------------------------------------------------
+The function adds an ident module instance
 
-tEplKernel PUBLIC EplIdentuAddInstance()
+\return The function returns a tEplKernel error code.
+
+\ingroup module_identu
+*/
+//------------------------------------------------------------------------------
+tEplKernel identu_addInstance(void)
 {
-tEplKernel Ret;
+    tEplKernel ret = kEplSuccessful;
 
-    Ret = kEplSuccessful;
-
-    // reset instance structure
-    EPL_MEMSET(&EplIdentuInstance_g, 0, sizeof (EplIdentuInstance_g));
+    EPL_MEMSET(&instance_g, 0, sizeof(instance_g));
 
     // register IdentResponse callback function
-    Ret = dllucal_regAsndService(kEplDllAsndIdentResponse, EplIdentuCbIdentResponse, kEplDllAsndFilterAny);
-
-    return Ret;
-
+    ret = dllucal_regAsndService(kEplDllAsndIdentResponse, identu_cbIdentResponse,
+                                 kEplDllAsndFilterAny);
+    return ret;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Delete ident module instance
 
-//---------------------------------------------------------------------------
-//
-// Function:    EplIdentuDelInstance
-//
-// Description: delete instance
-//
-//
-//
-// Parameters:
-//
-//
-// Returns:     tEplKernel  = errorcode
-//
-//
-// State:
-//
-//---------------------------------------------------------------------------
+The function deletes an ident module instance
 
-tEplKernel PUBLIC EplIdentuDelInstance()
-{
-tEplKernel  Ret;
+\return The function returns a tEplKernel error code.
 
-    Ret = kEplSuccessful;
+\ingroup module_identu
+*/
+//------------------------------------------------------------------------------
+tEplKernel identu_delInstance(void)
+    {
+    tEplKernel  ret = kEplSuccessful;
 
     // deregister IdentResponse callback function
-    Ret = dllucal_regAsndService(kEplDllAsndIdentResponse, NULL, kEplDllAsndFilterNone);
+    dllucal_regAsndService(kEplDllAsndIdentResponse, NULL, kEplDllAsndFilterNone);
 
-    Ret = EplIdentuReset();
-
-    return Ret;
+    ret = identu_reset();
+    return ret;
 
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Reset ident module instance
 
-//---------------------------------------------------------------------------
-//
-// Function:    EplIdentuReset
-//
-// Description: resets this instance
-//
-//
-//
-// Parameters:
-//
-//
-// Returns:     tEplKernel  = errorcode
-//
-//
-// State:
-//
-//---------------------------------------------------------------------------
+The function resets an ident module instance
 
-tEplKernel PUBLIC EplIdentuReset()
+\return The function returns a tEplKernel error code.
+
+\ingroup module_identu
+*/
+//------------------------------------------------------------------------------
+tEplKernel identu_reset()
 {
-tEplKernel  Ret;
-UINT        index;
+    tEplKernel  ret;
+    UINT        index;
 
-    Ret = kEplSuccessful;
-
-    for (index = 0; index < tabentries (EplIdentuInstance_g.m_apIdentResponse); index++)
+    ret = kEplSuccessful;
+    for (index = 0; index < tabentries(instance_g.apIdentResponse); index++)
     {
-        if (EplIdentuInstance_g.m_apIdentResponse[index] != NULL)
-        {   // free memory
-            EPL_FREE(EplIdentuInstance_g.m_apIdentResponse[index]);
+        if (instance_g.apIdentResponse[index] != NULL)
+        {
+            EPL_FREE(instance_g.apIdentResponse[index]);
         }
     }
+    EPL_MEMSET(&instance_g, 0, sizeof (tIdentuInstance));
 
-    EPL_MEMSET(&EplIdentuInstance_g, 0, sizeof (EplIdentuInstance_g));
-
-    return Ret;
-
+    return ret;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Get ident response
 
-//---------------------------------------------------------------------------
-//
-// Function:    EplIdentuGetIdentResponse
-//
-// Description: returns the IdentResponse for the specified node.
-//
-// Parameters:  uiNodeId_p                  = IN: node ID
-//              ppIdentResponse_p           = OUT: pointer to pointer of IdentResponse
-//                                            equals NULL, if no IdentResponse available
-//
-// Return:      tEplKernel                  = error code
-//
-// State:       not tested
-//
-//---------------------------------------------------------------------------
+The function gets the IdentResponse for a specified node.
 
-tEplKernel PUBLIC EplIdentuGetIdentResponse(
-                                    unsigned int        uiNodeId_p,
-                                    tEplIdentResponse** ppIdentResponse_p)
+\param  nodeId_p            The Node ID to get the IdentResponse for.
+\param  ppIdentResponse_p   Pointer to store IdentResponse. NULL, if no IdentResponse
+                            is available
+
+\return The function returns a tEplKernel error code.
+
+\ingroup module_identu
+*/
+//------------------------------------------------------------------------------
+tEplKernel identu_getIdentResponse(UINT nodeId_p, tEplIdentResponse** ppIdentResponse_p)
 {
-    tEplKernel          Ret;
+    tEplKernel          ret = kEplSuccessful;
     tEplIdentResponse*  pIdentResponse;
 
-    Ret = kEplSuccessful;
-
     // decrement node ID, because array is zero based
-    uiNodeId_p--;
-    if (uiNodeId_p < tabentries (EplIdentuInstance_g.m_apIdentResponse))
+    nodeId_p--;
+    if (nodeId_p < tabentries(instance_g.apIdentResponse))
     {
-        pIdentResponse      = EplIdentuInstance_g.m_apIdentResponse[uiNodeId_p];
+        pIdentResponse      = instance_g.apIdentResponse[nodeId_p];
         *ppIdentResponse_p  = pIdentResponse;
 
         // Check if ident response is valid, adjust return value otherwise
         if( NULL == pIdentResponse )
-        {
-            Ret = kEplInvalidOperation;
-        }
+            ret = kEplInvalidOperation;
     }
     else
     {   // invalid node ID specified
         *ppIdentResponse_p = NULL;
-        Ret = kEplInvalidNodeId;
+        ret = kEplInvalidNodeId;
     }
-
-    return Ret;
+    return ret;
 
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Request ident response
 
-//---------------------------------------------------------------------------
-//
-// Function:    EplIdentuRequestIdentResponse
-//
-// Description: Requests the IdentResponse for the specified node.
-//
-// Parameters:  uiNodeId_p                  = IN: node ID
-//              pfnCbResponse_p             = IN: function pointer to callback function
-//                                            which will be called if IdentResponse is received
-//
-// Return:      tEplKernel                  = error code
-//
-// State:       not tested
-//
-//---------------------------------------------------------------------------
+The function requests the IdentResponse for a specified node.
 
-tEplKernel PUBLIC EplIdentuRequestIdentResponse(
-                                    unsigned int        uiNodeId_p,
-                                    tEplIdentuCbResponse pfnCbResponse_p)
+\param  nodeId_p            The Node ID to reqzest the IdentResponse for.
+\param  pfnCbResponse_p     Function pointer to callback function which will
+                            be called if IdentResponse is received
+
+\return The function returns a tEplKernel error code.
+
+\ingroup module_identu
+*/
+//------------------------------------------------------------------------------
+tEplKernel identu_requestIdentResponse(UINT nodeId_p, tIdentuCbResponse pfnCbResponse_p)
 {
-tEplKernel  Ret;
+    tEplKernel  ret = kEplSuccessful;
 
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) == 0)
+#if !defined(CONFIG_INCLUDE_NMT_MN)
     UNUSED_PARAMETER(pfnCbResponse_p);
 #endif
 
-    Ret = kEplSuccessful;
-
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
-    if (uiNodeId_p == 0)
+#if defined(CONFIG_INCLUDE_NMT_MN)
+    if (nodeId_p == 0)
     {   // issue request for local node
-        Ret = dllucal_issueRequest(kEplDllReqServiceIdent, 0x00, 0xFF);
-        return Ret;
+        ret = dllucal_issueRequest(kEplDllReqServiceIdent, 0x00, 0xFF);
+        return ret;
     }
 #endif
 
     // decrement node ID, because array is zero based
-    uiNodeId_p--;
-    if (uiNodeId_p < tabentries (EplIdentuInstance_g.m_apfnCbResponse))
+    nodeId_p--;
+    if (nodeId_p < tabentries(instance_g.apfnCbResponse))
     {
-#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
-        if (EplIdentuInstance_g.m_apfnCbResponse[uiNodeId_p] != NULL)
+#if defined(CONFIG_INCLUDE_NMT_MN)
+        if (instance_g.apfnCbResponse[nodeId_p] != NULL)
         {   // request already issued (maybe by someone else)
-            Ret = kEplInvalidOperation;
+            ret = kEplInvalidOperation;
         }
         else
         {
-            EplIdentuInstance_g.m_apfnCbResponse[uiNodeId_p] = pfnCbResponse_p;
-            Ret = dllucal_issueRequest(kEplDllReqServiceIdent, (uiNodeId_p + 1), 0xFF);
+            instance_g.apfnCbResponse[nodeId_p] = pfnCbResponse_p;
+            ret = dllucal_issueRequest(kEplDllReqServiceIdent, (nodeId_p + 1), 0xFF);
         }
 #else
-        Ret = kEplInvalidOperation;
+        ret = kEplInvalidOperation;
 #endif
     }
     else
-    {   // invalid node ID specified
-        Ret = kEplInvalidNodeId;
-    }
-
-    return Ret;
-
-}
-
-
-//---------------------------------------------------------------------------
-//
-// Function:    EplIdentuGetRunningRequests
-//
-// Description: returns a bit field with the running requests for node-ID 1-32
-//              just for debugging purposes
-//
-//
-// Parameters:
-//
-//
-// Returns:     tEplKernel  = errorcode
-//
-//
-// State:
-//
-//---------------------------------------------------------------------------
-
-EPLDLLEXPORT DWORD PUBLIC EplIdentuGetRunningRequests(void)
-{
-DWORD       dwReqs = 0;
-unsigned int    uiIndex;
-
-    for (uiIndex = 0; uiIndex < 32; uiIndex++)
     {
-        if (EplIdentuInstance_g.m_apfnCbResponse[uiIndex] != NULL)
-        {
-            dwReqs |= (1 << uiIndex);
-        }
+        ret = kEplInvalidNodeId;
     }
-
-    return dwReqs;
+    return ret;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Get running requests
 
-//=========================================================================//
-//                                                                         //
-//          P R I V A T E   F U N C T I O N S                              //
-//                                                                         //
-//=========================================================================//
+The function returns a bitfield with the running requests for debugging
+purpose.
 
-//---------------------------------------------------------------------------
-//
-// Function:    EplIdentuCbIdentResponse
-//
-// Description: callback funktion for IdentResponse
-//
-//
-//
-// Parameters:  pFrameInfo_p            = Frame with the IdentResponse
-//
-//
-// Returns:     tEplKernel              = error code
-//
-//
-// State:
-//
-//---------------------------------------------------------------------------
+\return The function returns a bitfield which includes the running requests for
+        node 1-32.
 
-static tEplKernel PUBLIC EplIdentuCbIdentResponse(tEplFrameInfo * pFrameInfo_p)
+\todo   Function is no longer exported! API must be enhanced to provide access
+        to this function! Should also be enhanced to support all CNs!
+
+\ingroup module_identu
+*/
+//------------------------------------------------------------------------------
+UINT32 identu_getRunningRequests(void)
 {
-tEplKernel      Ret = kEplSuccessful;
-unsigned int    uiNodeId;
-unsigned int    uiIndex;
-tEplIdentuCbResponse    pfnCbResponse;
+    UINT32      reqs = 0;
+    UINT        index;
 
-    uiNodeId = AmiGetByteFromLe(&pFrameInfo_p->m_pFrame->m_le_bSrcNodeId);
+    for (index = 0; index < 32; index++)
+    {
+        if (instance_g.apfnCbResponse[index] != NULL)
+            reqs |= (1 << index);
+    }
+    return reqs;
+}
 
-    uiIndex = uiNodeId - 1;
+//============================================================================//
+//            P R I V A T E   F U N C T I O N S                               //
+//============================================================================//
+/// \name Private Functions
+/// \{
 
-    if (uiIndex < tabentries (EplIdentuInstance_g.m_apfnCbResponse))
+//------------------------------------------------------------------------------
+/**
+\brief  Callback function for IdentResponse
+
+The function implements the callback function which will be called when a
+IdentResponse is received.
+
+\param  pFrameInfo_p            Pointer to frame information structure describing
+                                the received IdentResponse frame.
+
+\return The function returns a tEplKernel error code.
+
+\ingroup module_identu
+*/
+//------------------------------------------------------------------------------
+static tEplKernel identu_cbIdentResponse(tEplFrameInfo* pFrameInfo_p)
+{
+    tEplKernel              ret = kEplSuccessful;
+    UINT                    nodeId;
+    UINT                    index;
+    tIdentuCbResponse       pfnCbResponse;
+
+    nodeId = AmiGetByteFromLe(&pFrameInfo_p->m_pFrame->m_le_bSrcNodeId);
+    index = nodeId - 1;
+
+    if (index < tabentries(instance_g.apfnCbResponse))
     {
         // memorize pointer to callback function
-        pfnCbResponse = EplIdentuInstance_g.m_apfnCbResponse[uiIndex];
+        pfnCbResponse = instance_g.apfnCbResponse[index];
         // reset callback function pointer so that caller may issue next request immediately
-        EplIdentuInstance_g.m_apfnCbResponse[uiIndex] = NULL;
+        instance_g.apfnCbResponse[index] = NULL;
+
+        if (pfnCbResponse == NULL)
+            goto Exit;
 
         if (pFrameInfo_p->m_uiFrameSize < EPL_C_DLL_MINSIZE_IDENTRES)
         {   // IdentResponse not received or it has invalid size
-            if (pfnCbResponse == NULL)
-            {   // response was not requested
-                goto Exit;
-            }
-            Ret = pfnCbResponse(uiNodeId, NULL);
+            ret = pfnCbResponse(nodeId, NULL);
         }
         else
         {   // IdentResponse received
-            if (EplIdentuInstance_g.m_apIdentResponse[uiIndex] == NULL)
+            if (instance_g.apIdentResponse[index] == NULL)
             {   // memory for IdentResponse must be allocated
-                EplIdentuInstance_g.m_apIdentResponse[uiIndex] = EPL_MALLOC(sizeof (tEplIdentResponse));
-                if (EplIdentuInstance_g.m_apIdentResponse[uiIndex] == NULL)
+                instance_g.apIdentResponse[index] = EPL_MALLOC(sizeof(tEplIdentResponse));
+                if (instance_g.apIdentResponse[index] == NULL)
                 {   // malloc failed
-                    if (pfnCbResponse == NULL)
-                    {   // response was not requested
-                        goto Exit;
-                    }
-                    Ret = pfnCbResponse(uiNodeId, &pFrameInfo_p->m_pFrame->m_Data.m_Asnd.m_Payload.m_IdentResponse);
+                    ret = pfnCbResponse(nodeId,
+                                        &pFrameInfo_p->m_pFrame->m_Data.m_Asnd.m_Payload.m_IdentResponse);
                     goto Exit;
                 }
             }
+
             // copy IdentResponse to instance structure
-            EPL_MEMCPY(EplIdentuInstance_g.m_apIdentResponse[uiIndex], &pFrameInfo_p->m_pFrame->m_Data.m_Asnd.m_Payload.m_IdentResponse, sizeof(tEplIdentResponse));
-            if (pfnCbResponse == NULL)
-            {   // response was not requested
-                goto Exit;
-            }
-            Ret = pfnCbResponse(uiNodeId, EplIdentuInstance_g.m_apIdentResponse[uiIndex]);
+            EPL_MEMCPY(instance_g.apIdentResponse[index],
+                       &pFrameInfo_p->m_pFrame->m_Data.m_Asnd.m_Payload.m_IdentResponse,
+                       sizeof(tEplIdentResponse));
+            ret = pfnCbResponse(nodeId, instance_g.apIdentResponse[index]);
         }
     }
 
 Exit:
-    return Ret;
+    return ret;
 }
 
-// EOF
+///\}
 

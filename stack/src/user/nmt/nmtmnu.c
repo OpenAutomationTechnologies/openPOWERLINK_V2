@@ -70,7 +70,7 @@
 
 #include "user/EplNmtMnu.h"
 #include "user/EplTimeru.h"
-#include "user/EplIdentu.h"
+#include "user/identu.h"
 #include "user/EplStatusu.h"
 #include "user/EplObdu.h"
 #include "user/dllucal.h"
@@ -794,7 +794,7 @@ tEplNmtState    NmtState;
         {
             case kEplNmtCmdIdentResponse:
             {   // issue request for local node
-                Ret = EplIdentuRequestIdentResponse(0x00, NULL);
+                Ret = identu_requestIdentResponse(0x00, NULL);
                 goto Exit;
             }
 
@@ -840,7 +840,7 @@ tEplNmtState    NmtState;
                         && (pNodeInfo->m_NodeState != kEplNmtMnuNodeStateConfRestored)
                         && (pNodeInfo->m_NodeState != kEplNmtMnuNodeStateUnknown)))
                 {
-                    Ret = EplIdentuRequestIdentResponse(uiNodeId_p, NULL);
+                    Ret = identu_requestIdentResponse(uiNodeId_p, NULL);
                 }
                 goto Exit;
             }
@@ -1131,7 +1131,7 @@ tEplKernel PUBLIC EplNmtMnuCbNmtStateChange(tEplEventNmtStateChange NmtStateChan
 		BOOL			fNmtResetAllIssued = FALSE;
 
             // reset IdentResponses and running IdentRequests and StatusRequests
-            Ret = EplIdentuReset();
+            Ret = identu_reset();
             Ret = EplStatusuReset();
 #if EPL_NMTMNU_PRES_CHAINING_MN != FALSE
             Ret = EplSyncuReset();
@@ -2176,7 +2176,7 @@ tEplNmtMnuNodeInfo*	pNodeInfo;
 				if (fNmtResetAllIssued_p == FALSE)
 				{
 					// identify the node
-	                Ret = EplIdentuRequestIdentResponse(uiSubIndex, EplNmtMnuCbIdentResponse);
+	                Ret = identu_requestIdentResponse(uiSubIndex, EplNmtMnuCbIdentResponse);
 					if (Ret != kEplSuccessful)
 					{
 						goto Exit;
@@ -2915,7 +2915,7 @@ tEplTimerArg        TimerArg;
             }
             else
             {   // trigger IdentRequest immediately
-                Ret = EplIdentuRequestIdentResponse(uiNodeId_p, EplNmtMnuCbIdentResponse);
+                Ret = identu_requestIdentResponse(uiNodeId_p, EplNmtMnuCbIdentResponse);
             }
             break;
         }
@@ -3096,7 +3096,7 @@ tEplTimerArg        TimerArg;
         {
             EPL_DBGLVL_NMTMN_TRACE("TimerStatReq->IdentReq(%02X)\n", uiNodeId_p);
             // trigger IdentRequest again
-            Ret = EplIdentuRequestIdentResponse(uiNodeId_p, EplNmtMnuCbIdentResponse);
+            Ret = identu_requestIdentResponse(uiNodeId_p, EplNmtMnuCbIdentResponse);
             if (Ret != kEplSuccessful)
             {
                 EPL_NMTMNU_DBG_POST_TRACE_VALUE(NodeEvent_p,

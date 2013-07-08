@@ -82,7 +82,7 @@
 #include "user/EplNmtCnu.h"
 #include "user/EplNmtMnu.h"
 #include "user/EplSdoComu.h"
-#include "user/EplIdentu.h"
+#include "user/identu.h"
 #include "user/EplStatusu.h"
 #include "user/EplCfmu.h"
 
@@ -2232,7 +2232,7 @@ tEplKernel PUBLIC EplApiGetIdentResponse(
                                     unsigned int        uiNodeId_p,
                                     tEplIdentResponse** ppIdentResponse_p)
 {
-    return EplIdentuGetIdentResponse(uiNodeId_p, ppIdentResponse_p);
+    return identu_getIdentResponse(uiNodeId_p, ppIdentResponse_p);
 }
 #endif
 

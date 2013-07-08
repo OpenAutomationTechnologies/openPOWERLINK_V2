@@ -138,6 +138,16 @@ could be implemented. Currently the following implementations are available:
 */
 
 //==============================================================================
+/**
+\defgroup module_identu User ident module (identu)
+
+The user ident module provides the functions for handling
+IdentRequest/IdentResponse frames.
+
+\ingroup user_layer
+*/
+
+//==============================================================================
 //==============================================================================
 /**
 \defgroup kernel_layer openPOWERLINK Kernel Layer

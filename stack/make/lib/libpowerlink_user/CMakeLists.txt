@@ -159,7 +159,7 @@ SET (LIB_USER_HEADERS
      ${USER_INCLUDE_DIR}/errhndu.h
      ${USER_INCLUDE_DIR}/ctrlu.h
      ${USER_INCLUDE_DIR}/ctrlucal.h
-     ${USER_INCLUDE_DIR}/EplIdentu.h
+     ${USER_INCLUDE_DIR}/identu.h
      ${USER_INCLUDE_DIR}/EplLedu.h
      ${USER_INCLUDE_DIR}/EplNmtCnu.h
      ${USER_INCLUDE_DIR}/EplNmtMnu.h
