@@ -83,7 +83,7 @@
 #include "user/EplNmtMnu.h"
 #include "user/EplSdoComu.h"
 #include "user/identu.h"
-#include "user/EplStatusu.h"
+#include "user/statusu.h"
 #include "user/EplCfmu.h"
 
 #include <user/ctrlu.h>
