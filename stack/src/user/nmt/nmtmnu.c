@@ -98,8 +98,8 @@
 
 // TracePoint support for realtime-debugging
 #ifdef _DBG_TRACE_POINTS_
-    void  PUBLIC  TgtDbgSignalTracePoint (BYTE bTracePointNumber_p);
-    void  PUBLIC  TgtDbgPostTraceValue (DWORD dwTraceValue_p);
+    void  PUBLIC  TgtDbgSignalTracePoint (UINT8 bTracePointNumber_p);
+    void  PUBLIC  TgtDbgPostTraceValue (UINT32 dwTraceValue_p);
     #define TGT_DBG_SIGNAL_TRACE_POINT(p)   TgtDbgSignalTracePoint(p)
     #define TGT_DBG_POST_TRACE_VALUE(v)     TgtDbgPostTraceValue(v)
 #else
@@ -212,7 +212,7 @@
 
 typedef struct
 {
-    unsigned int        m_uiNodeId;
+    UINT                m_uiNodeId;
     tEplNmtNodeCommand  m_NodeCommand;
 
 } tEplNmtMnuNodeCmd;
@@ -257,12 +257,12 @@ typedef struct
     tEplTimerHdl        m_TimerHdlStatReq;  // timer to delay StatusRequests and IdentRequests
     tEplTimerHdl        m_TimerHdlLonger;   // 2nd timer for NMT command EnableReadyToOp and CheckCommunication
     tEplNmtMnuNodeState m_NodeState;    // internal node state (kind of sub state of NMT state)
-    DWORD               m_dwNodeCfg;    // subindex from 0x1F81
-    WORD                m_wFlags;       // node flags (see defines above)
+    UINT32              m_dwNodeCfg;    // subindex from 0x1F81
+    UINT16              m_wFlags;       // node flags (see defines above)
 #if EPL_NMTMNU_PRES_CHAINING_MN != FALSE
-    WORD                m_wPrcFlags;    // PRC specific node flags
-    DWORD               m_dwRelPropagationDelayNs;
-    DWORD               m_dwPResTimeFirstNs;
+    UINT16              m_wPrcFlags;    // PRC specific node flags
+    UINT32              m_dwRelPropagationDelayNs;
+    UINT32              m_dwPResTimeFirstNs;
 #endif
 } tEplNmtMnuNodeInfo;
 
@@ -271,19 +271,19 @@ typedef struct
 {
     tEplNmtMnuNodeInfo  m_aNodeInfo[EPL_NMT_MAX_NODE_ID];
     tEplTimerHdl        m_TimerHdlNmtState;     // timeout for stay in NMT state
-    unsigned int        m_uiMandatorySlaveCount;
-    unsigned int        m_uiSignalSlaveCount;
-    unsigned long       m_ulStatusRequestDelay; // in [ms] (object 0x1006 * EPL_C_NMT_STATREQ_CYCLE)
-    unsigned long       m_ulTimeoutReadyToOp;   // in [ms] (object 0x1F89/4)
-    unsigned long       m_ulTimeoutCheckCom;    // in [ms] (object 0x1006 * MultiplexedCycleCount)
-    WORD                m_wFlags;               // global flags
-    DWORD               m_dwNmtStartup;         // object 0x1F80 NMT_StartUp_U32
+    UINT                m_uiMandatorySlaveCount;
+    UINT                m_uiSignalSlaveCount;
+    ULONG               m_ulStatusRequestDelay; // in [ms] (object 0x1006 * EPL_C_NMT_STATREQ_CYCLE)
+    ULONG               m_ulTimeoutReadyToOp;   // in [ms] (object 0x1F89/4)
+    ULONG               m_ulTimeoutCheckCom;    // in [ms] (object 0x1006 * MultiplexedCycleCount)
+    UINT16              m_wFlags;               // global flags
+    UINT32              m_dwNmtStartup;         // object 0x1F80 NMT_StartUp_U32
     tEplNmtMnuCbNodeEvent m_pfnCbNodeEvent;
     tEplNmtMnuCbBootEvent m_pfnCbBootEvent;
 #if EPL_NMTMNU_PRES_CHAINING_MN != FALSE
-    DWORD               m_dwPrcPResMnTimeoutNs;
-    DWORD               m_dwPrcPResTimeFirstCorrectionNs;
-    DWORD               m_dwPrcPResTimeFirstNegOffsetNs;
+    UINT32              m_dwPrcPResMnTimeoutNs;
+    UINT32              m_dwPrcPResTimeFirstCorrectionNs;
+    UINT32              m_dwPrcPResTimeFirstNegOffsetNs;
 #endif
 } tEplNmtMnuInstance;
 
@@ -302,23 +302,23 @@ static tEplNmtMnuInstance   EplNmtMnuInstance_g;
 static tEplKernel PUBLIC EplNmtMnuCbNmtRequest(tEplFrameInfo * pFrameInfo_p);
 
 static tEplKernel PUBLIC EplNmtMnuCbIdentResponse(
-                                    unsigned int        uiNodeId_p,
+                                    UINT                uiNodeId_p,
                                     tEplIdentResponse*  pIdentResponse_p);
 
 static tEplKernel PUBLIC EplNmtMnuCbStatusResponse(
-                                    unsigned int        uiNodeId_p,
+                                    UINT                uiNodeId_p,
                                     tEplStatusResponse* pStatusResponse_p);
 
-static tEplKernel EplNmtMnuCbNodeAdded(unsigned int uiNodeId_p);
+static tEplKernel EplNmtMnuCbNodeAdded(UINT uiNodeId_p);
 
 static tEplKernel EplNmtMnuCheckNmtState(
-                                    unsigned int        uiNodeId_p,
+                                    UINT                uiNodeId_p,
                                     tEplNmtMnuNodeInfo* pNodeInfo_p,
                                     tEplNmtState        NodeNmtState_p,
-                                    WORD                wErrorCode_p,
+                                    UINT16              wErrorCode_p,
                                     tEplNmtState        LocalNmtState_p);
 
-static tEplKernel EplNmtMnuAddNodeIsochronous(unsigned int uiNodeId_p);
+static tEplKernel EplNmtMnuAddNodeIsochronous(UINT uiNodeId_p);
 
 static tEplKernel EplNmtMnuStartBootStep1(BOOL fNmtResetAllIssued_p);
 
@@ -326,42 +326,42 @@ static tEplKernel EplNmtMnuStartBootStep2(void);
 
 static tEplKernel EplNmtMnuStartCheckCom(void);
 
-static tEplKernel EplNmtMnuNodeBootStep2(unsigned int uiNodeId_p, tEplNmtMnuNodeInfo* pNodeInfo_p);
+static tEplKernel EplNmtMnuNodeBootStep2(UINT uiNodeId_p, tEplNmtMnuNodeInfo* pNodeInfo_p);
 
-static tEplKernel EplNmtMnuNodeCheckCom(unsigned int uiNodeId_p, tEplNmtMnuNodeInfo* pNodeInfo_p);
+static tEplKernel EplNmtMnuNodeCheckCom(UINT uiNodeId_p, tEplNmtMnuNodeInfo* pNodeInfo_p);
 
 static tEplKernel EplNmtMnuStartNodes(void);
 
 static tEplKernel EplNmtMnuProcessInternalEvent(
-                                    unsigned int        uiNodeId_p,
+                                    UINT                uiNodeId_p,
                                     tEplNmtState        NodeNmtState_p,
-                                    WORD                wErrorCode_p,
+                                    UINT16              wErrorCode_p,
                                     tEplNmtMnuIntNodeEvent NodeEvent_p);
 
 static tEplKernel EplNmtMnuReset(void);
 
 #if EPL_NMTMNU_PRES_CHAINING_MN != FALSE
 static tEplKernel EplNmtMnuPrcMeasure(void);
-static tEplKernel EplNmtMnuPrcCalculate(unsigned int uiNodeIdFirstNode_p);
-static tEplKernel EplNmtMnuPrcShift(unsigned int uiNodeIdPrevShift_p);
-static tEplKernel EplNmtMnuPrcAdd(unsigned int uiNodeIdPrevAdd_p);
-static tEplKernel EplNmtMnuPrcVerify(unsigned int uiNodeId);
+static tEplKernel EplNmtMnuPrcCalculate(UINT uiNodeIdFirstNode_p);
+static tEplKernel EplNmtMnuPrcShift(UINT uiNodeIdPrevShift_p);
+static tEplKernel EplNmtMnuPrcAdd(UINT uiNodeIdPrevAdd_p);
+static tEplKernel EplNmtMnuPrcVerify(UINT uiNodeId);
 
-static tEplKernel PUBLIC EplNmtMnuPrcCbSyncResMeasure(unsigned int, tEplSyncResponse*);
-static tEplKernel PUBLIC EplNmtMnuPrcCbSyncResShift(unsigned int, tEplSyncResponse*);
-static tEplKernel PUBLIC EplNmtMnuPrcCbSyncResAdd(unsigned int, tEplSyncResponse*);
-static tEplKernel PUBLIC EplNmtMnuPrcCbSyncResVerify(unsigned int, tEplSyncResponse*);
-static tEplKernel PUBLIC EplNmtMnuPrcCbSyncResNextAction(unsigned int, tEplSyncResponse*);
+static tEplKernel PUBLIC EplNmtMnuPrcCbSyncResMeasure(UINT, tEplSyncResponse*);
+static tEplKernel PUBLIC EplNmtMnuPrcCbSyncResShift(UINT, tEplSyncResponse*);
+static tEplKernel PUBLIC EplNmtMnuPrcCbSyncResAdd(UINT, tEplSyncResponse*);
+static tEplKernel PUBLIC EplNmtMnuPrcCbSyncResVerify(UINT, tEplSyncResponse*);
+static tEplKernel PUBLIC EplNmtMnuPrcCbSyncResNextAction(UINT, tEplSyncResponse*);
 
 static tEplKernel EplNmtMnuPrcCalcPResResponseTimeNs(
-                                    unsigned int    uiNodeId_p,
-                                    unsigned int    uiNodeIdPredNode_p,
-                                    DWORD*          pdwPResResponseTimeNs_p);
+                                    UINT            uiNodeId_p,
+                                    UINT            uiNodeIdPredNode_p,
+                                    UINT32*         pdwPResResponseTimeNs_p);
 static tEplKernel EplNmtMnuPrcCalcPResChainingSlotTimeNs(
-                                    unsigned int    uiNodeIdLastNode_p,
-                                    DWORD*          pdwPResChainingSlotTimeNs_p);
+                                    UINT            uiNodeIdLastNode_p,
+                                    UINT32*         pdwPResChainingSlotTimeNs_p);
 
-static tEplKernel EplNmtMnuPrcFindPredecessorNode(unsigned int uiNodeId_p);
+static tEplKernel EplNmtMnuPrcFindPredecessorNode(UINT uiNodeId_p);
 static void       EplNmtMnuPrcSyncError(tEplNmtMnuNodeInfo* pNodeInfo_p);
 static void       EplNmtMnuPrcSetFlagsNmtCommandReset(
                                         tEplNmtMnuNodeInfo* pNodeInfo_p,
@@ -506,14 +506,14 @@ tEplKernel  Ret;
 //
 //---------------------------------------------------------------------------
 
-tEplKernel EplNmtMnuSendNmtCommandEx(unsigned int uiNodeId_p,
+tEplKernel EplNmtMnuSendNmtCommandEx(UINT uiNodeId_p,
                                     tEplNmtCommand  NmtCommand_p,
                                     void* pNmtCommandData_p,
-                                    unsigned int uiDataSize_p)
+                                    UINT uiDataSize_p)
 {
 tEplKernel          Ret;
 tEplFrameInfo       FrameInfo;
-BYTE                abBuffer[EPL_C_DLL_MINSIZE_NMTCMDEXT];
+UINT8                abBuffer[EPL_C_DLL_MINSIZE_NMTCMDEXT];
 tEplFrame*          pFrame;
 tEplDllNodeOpParam  NodeOpParam;
 #if EPL_NMTMNU_PRES_CHAINING_MN != FALSE
@@ -562,7 +562,7 @@ tEplNmtMnuNodeInfo* pNodeInfo;
                 if (pNodeInfo->m_wFlags & EPL_NMTMNU_NODE_FLAG_ISOCHRON)
                 {   // PRes Chaining is enabled
                 tEplDllSyncRequest SyncReqData;
-                unsigned int       uiSize;
+                UINT               uiSize;
 
                     // Store NMT command for later execution
                     EplNmtMnuPrcSetFlagsNmtCommandReset(pNodeInfo, NmtCommand_p);
@@ -571,7 +571,7 @@ tEplNmtMnuNodeInfo* pNodeInfo;
                     SyncReqData.m_uiNodeId      = uiNodeId_p;
                     SyncReqData.m_dwSyncControl = EPL_SYNC_PRES_MODE_RESET |
                                                   EPL_SYNC_DEST_MAC_ADDRESS_VALID;
-                    uiSize = sizeof(unsigned int) + sizeof(DWORD);
+                    uiSize = sizeof(UINT) + sizeof(UINT32);
 
                     Ret = EplSyncuRequestSyncResponse(EplNmtMnuPrcCbSyncResNextAction, &SyncReqData, uiSize);
                     switch (Ret)
@@ -624,10 +624,10 @@ tEplNmtMnuNodeInfo* pNodeInfo;
     // build frame
     pFrame = (tEplFrame*) abBuffer;
     EPL_MEMSET(pFrame, 0x00, sizeof(abBuffer));
-    AmiSetByteToLe(&pFrame->m_le_bDstNodeId, (BYTE) uiNodeId_p);
-    AmiSetByteToLe(&pFrame->m_Data.m_Asnd.m_le_bServiceId, (BYTE) kEplDllAsndNmtCommand);
+    AmiSetByteToLe(&pFrame->m_le_bDstNodeId, (UINT8) uiNodeId_p);
+    AmiSetByteToLe(&pFrame->m_Data.m_Asnd.m_le_bServiceId, (UINT8) kEplDllAsndNmtCommand);
     AmiSetByteToLe(&pFrame->m_Data.m_Asnd.m_Payload.m_NmtCommandService.m_le_bNmtCommandId,
-        (BYTE)NmtCommand_p);
+        (UINT8)NmtCommand_p);
     if ((pNmtCommandData_p != NULL) && (uiDataSize_p > 0))
     {   // copy command data to frame
         EPL_MEMCPY(&pFrame->m_Data.m_Asnd.m_Payload.m_NmtCommandService.m_le_abNmtCommandData[0], pNmtCommandData_p, uiDataSize_p);
@@ -735,7 +735,7 @@ Exit:
 //
 //---------------------------------------------------------------------------
 
-tEplKernel EplNmtMnuSendNmtCommand(unsigned int uiNodeId_p,
+tEplKernel EplNmtMnuSendNmtCommand(UINT uiNodeId_p,
                                     tEplNmtCommand  NmtCommand_p)
 {
 tEplKernel      Ret = kEplSuccessful;
@@ -762,7 +762,7 @@ tEplKernel      Ret = kEplSuccessful;
 //
 //---------------------------------------------------------------------------
 
-tEplKernel EplNmtMnuRequestNmtCommand(unsigned int uiNodeId_p,
+tEplKernel EplNmtMnuRequestNmtCommand(UINT uiNodeId_p,
                                     tEplNmtCommand  NmtCommand_p)
 {
 tEplKernel      Ret = kEplSuccessful;
@@ -920,7 +920,7 @@ Exit:
 //
 //---------------------------------------------------------------------------
 
-tEplKernel EplNmtMnuTriggerStateChange(unsigned int uiNodeId_p,
+tEplKernel EplNmtMnuTriggerStateChange(UINT uiNodeId_p,
                                        tEplNmtNodeCommand  NodeCommand_p)
 {
 tEplKernel          Ret = kEplSuccessful;
@@ -969,10 +969,10 @@ Exit:
 tEplKernel PUBLIC EplNmtMnuCbNmtStateChange(tEplEventNmtStateChange NmtStateChange_p)
 {
     tEplKernel      Ret = kEplSuccessful;
-    BYTE            NewMnNmtState;
+    UINT8            NewMnNmtState;
 
     // Save new MN state in object 0x1F8E
-    NewMnNmtState   = (BYTE) NmtStateChange_p.m_NewNmtState;
+    NewMnNmtState   = (UINT8) NmtStateChange_p.m_NewNmtState;
 
     Ret = EplObdWriteEntry(0x1F8E, 240, &NewMnNmtState, 1);
     if(Ret != kEplSuccessful)
@@ -1007,7 +1007,7 @@ tEplKernel PUBLIC EplNmtMnuCbNmtStateChange(tEplEventNmtStateChange NmtStateChan
         // build the configuration with infos from OD
         case kEplNmtGsResetConfiguration:
         {
-        DWORD           dwTimeout;
+        UINT32          dwTimeout;
         tEplObdSize     ObdSize;
 
             // read object 0x1F80 NMT_StartUp_U32
@@ -1124,7 +1124,7 @@ tEplKernel PUBLIC EplNmtMnuCbNmtStateChange(tEplEventNmtStateChange NmtStateChan
         // node processes only async frames
         case kEplNmtMsPreOperational1:
         {
-        DWORD           dwTimeout;
+        UINT32          dwTimeout;
         tEplTimerArg    TimerArg;
         tEplObdSize     ObdSize;
         tEplEvent       Event;
@@ -1310,13 +1310,13 @@ tEplKernel      Ret;
         case kEplEventTypeTimer:
         {
         tEplTimerEventArg*  pTimerEventArg = (tEplTimerEventArg*)pEvent_p->m_pArg;
-        unsigned int        uiNodeId;
+        UINT                uiNodeId;
 
-            uiNodeId = (unsigned int) (pTimerEventArg->m_Arg.m_dwVal & EPL_NMTMNU_TIMERARG_NODE_MASK);
+            uiNodeId = (UINT) (pTimerEventArg->m_Arg.m_dwVal & EPL_NMTMNU_TIMERARG_NODE_MASK);
             if (uiNodeId != 0)
             {
             tEplObdSize         ObdSize;
-            BYTE                bNmtState;
+            UINT8                bNmtState;
             tEplNmtMnuNodeInfo* pNodeInfo;
 
                 pNodeInfo = EPL_NMTMNU_GET_NODEINFO(uiNodeId);
@@ -1330,7 +1330,7 @@ tEplKernel      Ret;
 
                 if ((pTimerEventArg->m_Arg.m_dwVal & EPL_NMTMNU_TIMERARG_IDENTREQ) != 0L)
                 {
-                    if ((DWORD)(pNodeInfo->m_wFlags & EPL_NMTMNU_NODE_FLAG_COUNT_STATREQ)
+                    if ((UINT32)(pNodeInfo->m_wFlags & EPL_NMTMNU_NODE_FLAG_COUNT_STATREQ)
                         != (pTimerEventArg->m_Arg.m_dwVal & EPL_NMTMNU_TIMERARG_COUNT_SR))
                     {   // this is an old (already deleted or modified) timer
                         // but not the current timer
@@ -1358,7 +1358,7 @@ tEplKernel      Ret;
 
                 else if ((pTimerEventArg->m_Arg.m_dwVal & EPL_NMTMNU_TIMERARG_STATREQ) != 0L)
                 {
-                    if ((DWORD)(pNodeInfo->m_wFlags & EPL_NMTMNU_NODE_FLAG_COUNT_STATREQ)
+                    if ((UINT32)(pNodeInfo->m_wFlags & EPL_NMTMNU_NODE_FLAG_COUNT_STATREQ)
                         != (pTimerEventArg->m_Arg.m_dwVal & EPL_NMTMNU_TIMERARG_COUNT_SR))
                     {   // this is an old (already deleted or modified) timer
                         // but not the current timer
@@ -1386,7 +1386,7 @@ tEplKernel      Ret;
 
                 else if ((pTimerEventArg->m_Arg.m_dwVal & EPL_NMTMNU_TIMERARG_STATE_MON) != 0L)
                 {
-                    if ((DWORD)(pNodeInfo->m_wFlags & EPL_NMTMNU_NODE_FLAG_COUNT_STATREQ)
+                    if ((UINT32)(pNodeInfo->m_wFlags & EPL_NMTMNU_NODE_FLAG_COUNT_STATREQ)
                         != (pTimerEventArg->m_Arg.m_dwVal & EPL_NMTMNU_TIMERARG_COUNT_SR))
                     {   // this is an old (already deleted or modified) timer
                         // but not the current timer
@@ -1414,7 +1414,7 @@ tEplKernel      Ret;
 
                 else if ((pTimerEventArg->m_Arg.m_dwVal & EPL_NMTMNU_TIMERARG_LONGER) != 0L)
                 {
-                    if ((DWORD)(pNodeInfo->m_wFlags & EPL_NMTMNU_NODE_FLAG_COUNT_LONGER)
+                    if ((UINT32)(pNodeInfo->m_wFlags & EPL_NMTMNU_NODE_FLAG_COUNT_LONGER)
                         != (pTimerEventArg->m_Arg.m_dwVal & EPL_NMTMNU_TIMERARG_COUNT_LO))
                     {   // this is an old (already deleted or modified) timer
                         // but not the current timer
@@ -1461,9 +1461,9 @@ tEplKernel      Ret;
         case kEplEventTypeNmtMnuNmtCmdSent:
         {
         tEplFrame* pFrame = (tEplFrame*)pEvent_p->m_pArg;
-        unsigned int        uiNodeId;
+        UINT                uiNodeId;
         tEplNmtCommand      NmtCommand;
-        BYTE                bNmtState;
+        UINT8                bNmtState;
 
             if (pEvent_p->m_uiSize < EPL_C_DLL_MINSIZE_NMTCMD)
             {
@@ -1477,28 +1477,28 @@ tEplKernel      Ret;
             switch (NmtCommand)
             {
                 case kEplNmtCmdStartNode:
-                    bNmtState = (BYTE) (kEplNmtCsOperational & 0xFF);
+                    bNmtState = (UINT8) (kEplNmtCsOperational & 0xFF);
                     break;
 
                 case kEplNmtCmdStopNode:
-                    bNmtState = (BYTE) (kEplNmtCsStopped & 0xFF);
+                    bNmtState = (UINT8) (kEplNmtCsStopped & 0xFF);
                     break;
 
                 case kEplNmtCmdEnterPreOperational2:
-                    bNmtState = (BYTE) (kEplNmtCsPreOperational2 & 0xFF);
+                    bNmtState = (UINT8) (kEplNmtCsPreOperational2 & 0xFF);
                     break;
 
                 case kEplNmtCmdEnableReadyToOperate:
                     // d.k. do not change expected node state, because of DS 1.0.0 7.3.1.2.1 Plain NMT State Command
                     //      and because node may not change NMT state within EPL_C_NMT_STATE_TOLERANCE
-                    bNmtState = (BYTE) (kEplNmtCsPreOperational2 & 0xFF);
+                    bNmtState = (UINT8) (kEplNmtCsPreOperational2 & 0xFF);
                     break;
 
                 case kEplNmtCmdResetNode:
                 case kEplNmtCmdResetCommunication:
                 case kEplNmtCmdResetConfiguration:
                 case kEplNmtCmdSwReset:
-                    bNmtState = (BYTE) (kEplNmtCsNotActive & 0xFF);
+                    bNmtState = (UINT8) (kEplNmtCsNotActive & 0xFF);
                     // EplNmtMnuProcessInternalEvent() sets internal node state to kEplNmtMnuNodeStateUnknown
                     // after next unresponded IdentRequest/StatusRequest
                     break;
@@ -1588,8 +1588,8 @@ tEplKernel      Ret;
         tEplNmtMnuNodeCmd*      pNodeCmd = (tEplNmtMnuNodeCmd*)pEvent_p->m_pArg;
         tEplNmtMnuIntNodeEvent  NodeEvent;
         tEplObdSize             ObdSize;
-        BYTE                    bNmtState;
-        WORD                    wErrorCode = EPL_E_NO_ERROR;
+        UINT8                    bNmtState;
+        UINT16                    wErrorCode = EPL_E_NO_ERROR;
 
             if ((pNodeCmd->m_uiNodeId == 0) || (pNodeCmd->m_uiNodeId >= EPL_C_ADR_BROADCAST))
             {
@@ -1653,9 +1653,9 @@ tEplKernel      Ret;
 
         case kEplEventTypeNmtMnuNodeAdded:
         {
-        unsigned int        uiNodeId;
+        UINT        uiNodeId;
 
-            uiNodeId = *((unsigned int*) pEvent_p->m_pArg);
+            uiNodeId = *((UINT*) pEvent_p->m_pArg);
 
             Ret = EplNmtMnuCbNodeAdded(uiNodeId);
             break;
@@ -1689,9 +1689,9 @@ Exit:
 //
 //---------------------------------------------------------------------------
 
-tEplKernel PUBLIC EplNmtMnuGetDiagnosticInfo(unsigned int* puiMandatorySlaveCount_p,
-                                             unsigned int* puiSignalSlaveCount_p,
-                                             WORD* pwFlags_p)
+tEplKernel PUBLIC EplNmtMnuGetDiagnosticInfo(UINT* puiMandatorySlaveCount_p,
+                                             UINT* puiSignalSlaveCount_p,
+                                             UINT16* pwFlags_p)
 {
 tEplKernel      Ret = kEplSuccessful;
 
@@ -1727,10 +1727,10 @@ Exit:
 //
 //---------------------------------------------------------------------------
 /*
-DWORD EplNmtMnuGetRunningTimerStatReq(void)
+UINT32EplNmtMnuGetRunningTimerStatReq(void)
 {
 tEplKernel      Ret = kEplSuccessful;
-unsigned int    uiIndex;
+UINT    uiIndex;
 tEplNmtMnuNodeInfo* pNodeInfo;
 
     pNodeInfo = EplNmtMnuInstance_g.m_aNodeInfo;
@@ -1812,7 +1812,7 @@ tEplKernel  Ret;
 static tEplKernel PUBLIC EplNmtMnuCbNmtRequest(tEplFrameInfo * pFrameInfo_p)
 {
 tEplKernel      Ret = kEplSuccessful;
-unsigned int    uiTargetNodeId;
+UINT            uiTargetNodeId;
 tEplNmtCommand  NmtCommand;
 tEplNmtRequestService*  pNmtRequestService;
 
@@ -1835,7 +1835,7 @@ tEplNmtRequestService*  pNmtRequestService;
                                      NmtCommand);
     if (Ret != kEplSuccessful)
     {   // error -> reply with kEplNmtCmdInvalidService
-    unsigned int uiSourceNodeId;
+    UINT uiSourceNodeId;
 
         uiSourceNodeId = AmiGetByteFromLe(
                 &pFrameInfo_p->m_pFrame->m_le_bSrcNodeId);
@@ -1864,7 +1864,7 @@ Exit:
 //---------------------------------------------------------------------------
 
 static tEplKernel PUBLIC EplNmtMnuCbIdentResponse(
-                                  unsigned int        uiNodeId_p,
+                                  UINT        uiNodeId_p,
                                   tEplIdentResponse* pIdentResponse_p)
 {
 tEplKernel      Ret = kEplSuccessful;
@@ -1879,8 +1879,8 @@ tEplKernel      Ret = kEplSuccessful;
     else
     {   // node answered IdentRequest
     tEplObdSize ObdSize;
-    DWORD       dwDevType;
-    WORD        wErrorCode = EPL_E_NO_ERROR;
+    UINT32      dwDevType;
+    UINT16        wErrorCode = EPL_E_NO_ERROR;
     tEplNmtState NmtState = (tEplNmtState) (AmiGetByteFromLe(&pIdentResponse_p->m_le_bNmtStatus) | EPL_NMT_TYPE_CS);
 
         // check IdentResponse $$$ move to ProcessIntern, because this function may be called also if CN
@@ -1929,7 +1929,7 @@ Exit:
 //---------------------------------------------------------------------------
 
 static tEplKernel PUBLIC EplNmtMnuCbStatusResponse(
-                                  unsigned int        uiNodeId_p,
+                                  UINT        uiNodeId_p,
                                   tEplStatusResponse* pStatusResponse_p)
 {
 tEplKernel      Ret = kEplSuccessful;
@@ -1967,7 +1967,7 @@ tEplKernel      Ret = kEplSuccessful;
 // State:
 //
 //---------------------------------------------------------------------------
-static tEplKernel EplNmtMnuCbNodeAdded(unsigned int uiNodeId_p)
+static tEplKernel EplNmtMnuCbNodeAdded(UINT uiNodeId_p)
 {
 tEplKernel          Ret;
 tEplNmtMnuNodeInfo* pNodeInfo;
@@ -2006,7 +2006,7 @@ tEplNmtMnuNodeInfo* pNodeInfo;
 //
 //---------------------------------------------------------------------------
 
-static tEplKernel EplNmtMnuAddNodeIsochronous(unsigned int uiNodeId_p)
+static tEplKernel EplNmtMnuAddNodeIsochronous(UINT uiNodeId_p)
 {
 tEplKernel          Ret;
 
@@ -2056,7 +2056,7 @@ tEplNmtMnuNodeInfo* pNodeInfo;
 
     if (EplNmtMnuInstance_g.m_wFlags & EPL_NMTMNU_FLAG_PRC_ADD_SCHEDULED)
     {
-    unsigned int    uiNodeId;
+    UINT            uiNodeId;
     BOOL            fInvalidateNext;
 
         fInvalidateNext = FALSE;
@@ -2124,9 +2124,9 @@ Exit:
 static tEplKernel EplNmtMnuStartBootStep1(BOOL fNmtResetAllIssued_p)
 {
 tEplKernel			Ret = kEplSuccessful;
-unsigned int		uiSubIndex;
-unsigned int		uiLocalNodeId;
-DWORD				dwNodeCfg;
+UINT		        uiSubIndex;
+UINT		        uiLocalNodeId;
+UINT32				dwNodeCfg;
 tEplObdSize			ObdSize;
 tEplNmtMnuNodeInfo*	pNodeInfo;
 
@@ -2229,10 +2229,10 @@ Exit:
 static tEplKernel EplNmtMnuStartBootStep2(void)
 {
 tEplKernel      Ret = kEplSuccessful;
-unsigned int    uiIndex;
+UINT            uiIndex;
 tEplNmtMnuNodeInfo* pNodeInfo;
 tEplObdSize     ObdSize;
-BYTE            bNmtState;
+UINT8            bNmtState;
 tEplNmtState    ExpNmtState;
 
     if ((EplNmtMnuInstance_g.m_wFlags & EPL_NMTMNU_FLAG_HALTED) == 0)
@@ -2277,7 +2277,7 @@ tEplNmtState    ExpNmtState;
             }
 
             // update object 0x1F8F NMT_MNNodeExpState_AU8 to PreOp2
-            bNmtState = (BYTE)(kEplNmtCsPreOperational2 & 0xFF);
+            bNmtState = (UINT8)(kEplNmtCsPreOperational2 & 0xFF);
             Ret = EplObduWriteEntry(0x1F8F, uiIndex, &bNmtState, 1);
             if (Ret != kEplSuccessful)
             {
@@ -2331,7 +2331,7 @@ Exit:
 //
 //---------------------------------------------------------------------------
 
-static tEplKernel EplNmtMnuNodeBootStep2(unsigned int uiNodeId_p, tEplNmtMnuNodeInfo* pNodeInfo_p)
+static tEplKernel EplNmtMnuNodeBootStep2(UINT uiNodeId_p, tEplNmtMnuNodeInfo* pNodeInfo_p)
 {
 tEplKernel          Ret;
 tEplTimerArg        TimerArg;
@@ -2340,7 +2340,7 @@ tEplTimerArg        TimerArg;
 
     if (pNodeInfo_p->m_dwNodeCfg & EPL_NODEASSIGN_ASYNCONLY_NODE)
     {   // node is async-only
-    BYTE            bNmtState;
+    UINT8            bNmtState;
     tEplNmtState    NmtState;
     tEplObdSize     ObdSize;
 
@@ -2411,7 +2411,7 @@ Exit:
 static tEplKernel EplNmtMnuStartCheckCom(void)
 {
 tEplKernel      Ret = kEplSuccessful;
-unsigned int    uiIndex;
+UINT            uiIndex;
 tEplNmtMnuNodeInfo* pNodeInfo;
 
 
@@ -2476,10 +2476,10 @@ Exit:
 //
 //---------------------------------------------------------------------------
 
-static tEplKernel EplNmtMnuNodeCheckCom(unsigned int uiNodeId_p, tEplNmtMnuNodeInfo* pNodeInfo_p)
+static tEplKernel EplNmtMnuNodeCheckCom(UINT uiNodeId_p, tEplNmtMnuNodeInfo* pNodeInfo_p)
 {
 tEplKernel      Ret = kEplSuccessful;
-DWORD           dwNodeCfg;
+UINT32          dwNodeCfg;
 tEplTimerArg    TimerArg;
 
     dwNodeCfg = pNodeInfo_p->m_dwNodeCfg;
@@ -2531,7 +2531,7 @@ tEplTimerArg    TimerArg;
 static tEplKernel EplNmtMnuStartNodes(void)
 {
 tEplKernel      Ret = kEplSuccessful;
-unsigned int    uiIndex;
+UINT            uiIndex;
 tEplNmtMnuNodeInfo* pNodeInfo;
 
 
@@ -2614,9 +2614,9 @@ Exit:
 //---------------------------------------------------------------------------
 
 static tEplKernel EplNmtMnuProcessInternalEvent(
-                                    unsigned int        uiNodeId_p,
+                                    UINT                uiNodeId_p,
                                     tEplNmtState        NodeNmtState_p,
-                                    WORD                wErrorCode_p,
+                                    UINT16                wErrorCode_p,
                                     tEplNmtMnuIntNodeEvent NodeEvent_p)
 {
 tEplKernel          Ret = kEplSuccessful;
@@ -2635,7 +2635,7 @@ tEplTimerArg        TimerArg;
     {
         case kEplNmtMnuIntNodeEventIdentResponse:
         {
-        BYTE    bNmtState;
+        UINT8    bNmtState;
 
             EPL_NMTMNU_DBG_POST_TRACE_VALUE(NodeEvent_p,
                                             uiNodeId_p,
@@ -2662,12 +2662,12 @@ tEplTimerArg        TimerArg;
                 }
 
                 // update object 0x1F8F NMT_MNNodeExpState_AU8 to PreOp1
-                bNmtState = (BYTE) (kEplNmtCsPreOperational1 & 0xFF);
+                bNmtState = (UINT8) (kEplNmtCsPreOperational1 & 0xFF);
             }
             else
             {   // MN is running full cycle
                 // update object 0x1F8F NMT_MNNodeExpState_AU8 to PreOp2
-                bNmtState = (BYTE) (kEplNmtCsPreOperational2 & 0xFF);
+                bNmtState = (UINT8) (kEplNmtCsPreOperational2 & 0xFF);
 
                 if (NodeNmtState_p == kEplNmtCsPreOperational1)
                 {   // The CN did not yet switch to PreOp2
@@ -3206,11 +3206,11 @@ tEplTimerArg        TimerArg;
 
         case kEplNmtMnuIntNodeEventNmtCmdSent:
         {
-        BYTE    bNmtState;
+        UINT8    bNmtState;
 
             // update expected NMT state with the one that results
             // from the sent NMT command
-            bNmtState = (BYTE) (NodeNmtState_p & 0xFF);
+            bNmtState = (UINT8) (NodeNmtState_p & 0xFF);
 
             // write object 0x1F8F NMT_MNNodeExpState_AU8
             Ret = EplObduWriteEntry(0x1F8F, uiNodeId_p, &bNmtState, 1);
@@ -3382,22 +3382,22 @@ Exit:
 //---------------------------------------------------------------------------
 
 static tEplKernel EplNmtMnuCheckNmtState(
-                                    unsigned int        uiNodeId_p,
+                                    UINT                uiNodeId_p,
                                     tEplNmtMnuNodeInfo* pNodeInfo_p,
                                     tEplNmtState        NodeNmtState_p,
-                                    WORD                wErrorCode_p,
+                                    UINT16                wErrorCode_p,
                                     tEplNmtState        LocalNmtState_p)
 {
 tEplKernel      Ret = kEplSuccessful;
 tEplKernel      RetUpdate = kEplSuccessful;
 tEplObdSize     ObdSize;
-BYTE            bNodeNmtState;
-BYTE            bExpNmtState;
-BYTE            bNmtStatePrev;
+UINT8            bNodeNmtState;
+UINT8            bExpNmtState;
+UINT8            bNmtStatePrev;
 tEplNmtState    ExpNmtState;
 
-    // compute BYTE of current NMT state
-    bNodeNmtState = ((BYTE) NodeNmtState_p & 0xFF);
+    // compute UINT8 of current NMT state
+    bNodeNmtState = ((UINT8) NodeNmtState_p & 0xFF);
 
     if (pNodeInfo_p->m_NodeState == kEplNmtMnuNodeStateUnknown)
     {   // CN is already in state unknown, which means that it got
@@ -3515,7 +3515,7 @@ tEplNmtState    ExpNmtState;
     }
     else if (ExpNmtState != NodeNmtState_p)
     {   // CN is not in expected NMT state
-    WORD wbeErrorCode;
+    UINT16 wbeErrorCode;
 
         if (wErrorCode_p == 0)
         {   // assume wrong NMT state error
@@ -3658,12 +3658,12 @@ UINT        index;
 static tEplKernel EplNmtMnuPrcMeasure(void)
 {
 tEplKernel          Ret;
-unsigned int        uiNodeId;
+UINT                uiNodeId;
 tEplNmtMnuNodeInfo* pNodeInfo;
 BOOL                fSyncReqSentToPredNode;
-unsigned int        uiNodeIdFirstNode;
-unsigned int        uiNodeIdPredNode;
-unsigned int        uiNodeIdPrevSyncReq;
+UINT        uiNodeIdFirstNode;
+UINT        uiNodeIdPredNode;
+UINT        uiNodeIdPrevSyncReq;
 
     Ret = kEplSuccessful;
 
@@ -3708,10 +3708,10 @@ unsigned int        uiNodeIdPrevSyncReq;
                 else
                 {   // Predecessor node exists
                 tEplDllSyncRequest SyncRequestData;
-                unsigned int       uiSize;
+                UINT               uiSize;
 
                     SyncRequestData.m_dwSyncControl = EPL_SYNC_DEST_MAC_ADDRESS_VALID;
-                    uiSize = sizeof(unsigned int) + sizeof(DWORD);
+                    uiSize = sizeof(UINT) + sizeof(UINT32);
 
                     if (fSyncReqSentToPredNode == FALSE)
                     {
@@ -3789,14 +3789,14 @@ Exit:
 //
 //---------------------------------------------------------------------------
 
-static tEplKernel EplNmtMnuPrcCalculate(unsigned int uiNodeIdFirstNode_p)
+static tEplKernel EplNmtMnuPrcCalculate(UINT uiNodeIdFirstNode_p)
 {
 tEplKernel          Ret;
-unsigned int        uiNodeId;
+UINT                uiNodeId;
 tEplNmtMnuNodeInfo* pNodeInfo;
-unsigned int        uiNodeIdPredNode;
-DWORD               dwPResResponseTimeNs;
-DWORD               dwPResMnTimeoutNs;
+UINT                uiNodeIdPredNode;
+UINT32              dwPResResponseTimeNs;
+UINT32              dwPResMnTimeoutNs;
 
     if (   (uiNodeIdFirstNode_p == EPL_C_ADR_INVALID)
         || (uiNodeIdFirstNode_p >= EPL_C_ADR_BROADCAST))
@@ -3886,12 +3886,12 @@ Exit:
 //---------------------------------------------------------------------------
 
 static tEplKernel EplNmtMnuPrcCalcPResResponseTimeNs(
-                                    unsigned int    uiNodeId_p,
-                                    unsigned int    uiNodeIdPredNode_p,
-                                    DWORD*          pdwPResResponseTimeNs_p)
+                                    UINT            uiNodeId_p,
+                                    UINT            uiNodeIdPredNode_p,
+                                    UINT32*          pdwPResResponseTimeNs_p)
 {
 tEplKernel          Ret;
-WORD                wPResPayloadLimitPredNode;
+UINT16                wPResPayloadLimitPredNode;
 tEplNmtMnuNodeInfo* pNodeInfoPredNode;
 tEplObdSize         ObdSize;
 
@@ -3965,13 +3965,13 @@ Exit:
 //---------------------------------------------------------------------------
 
 static tEplKernel EplNmtMnuPrcCalcPResChainingSlotTimeNs(
-                                    unsigned int    uiNodeIdLastNode_p,
-                                    DWORD*          pdwPResChainingSlotTimeNs_p)
+                                    UINT            uiNodeIdLastNode_p,
+                                    UINT32*          pdwPResChainingSlotTimeNs_p)
 {
 tEplKernel  Ret;
-WORD        wPResActPayloadLimit;
-WORD        wCnPReqPayloadLastNode;
-DWORD       dwCnResTimeoutLastNodeNs;
+UINT16        wPResActPayloadLimit;
+UINT16        wCnPReqPayloadLastNode;
+UINT32      dwCnResTimeoutLastNodeNs;
 tEplObdSize ObdSize;
 
     // read object 0x1F98 NMT_CycleTiming_REC
@@ -4034,16 +4034,16 @@ Exit:
 //
 // Parameters:  uiNodeId_p          = Node ID of addressed node
 //
-// Returns:     unsigned int        = Node ID of the predecessor node
+// Returns:     UINT        = Node ID of the predecessor node
 //                                    EPL_C_ADR_INVALID if no node was found
 //
 // State:
 //
 //---------------------------------------------------------------------------
 
-static tEplKernel EplNmtMnuPrcFindPredecessorNode(unsigned int uiNodeId_p)
+static tEplKernel EplNmtMnuPrcFindPredecessorNode(UINT uiNodeId_p)
 {
-unsigned int        uiNodeId;
+UINT                uiNodeId;
 tEplNmtMnuNodeInfo* pNodeInfo;
 
     for (uiNodeId = uiNodeId_p - 1; uiNodeId >= 1; uiNodeId--)
@@ -4082,13 +4082,13 @@ tEplNmtMnuNodeInfo* pNodeInfo;
 //---------------------------------------------------------------------------
 
 static tEplKernel PUBLIC EplNmtMnuPrcCbSyncResMeasure(
-                                  unsigned int          uiNodeId_p,
+                                  UINT                  uiNodeId_p,
                                   tEplSyncResponse*     pSyncResponse_p)
 {
 tEplKernel          Ret;
-unsigned int        uiNodeIdPredNode;
+UINT                uiNodeIdPredNode;
 tEplNmtMnuNodeInfo* pNodeInfo;
-DWORD               dwSyncNodeNumber;
+UINT32              dwSyncNodeNumber;
 
     pNodeInfo = EPL_NMTMNU_GET_NODEINFO(uiNodeId_p);
 
@@ -4169,13 +4169,13 @@ static void EplNmtMnuPrcSyncError(tEplNmtMnuNodeInfo* pNodeInfo_p)
 //
 //---------------------------------------------------------------------------
 
-static tEplKernel EplNmtMnuPrcShift(unsigned int uiNodeIdPrevShift_p)
+static tEplKernel EplNmtMnuPrcShift(UINT uiNodeIdPrevShift_p)
 {
 tEplKernel          Ret;
-unsigned int        uiNodeId;
+UINT                uiNodeId;
 tEplNmtMnuNodeInfo* pNodeInfo;
 tEplDllSyncRequest  SyncRequestData;
-unsigned int        uiSize;
+UINT                uiSize;
 
     Ret = kEplSuccessful;
 
@@ -4224,7 +4224,7 @@ unsigned int        uiSize;
     SyncRequestData.m_dwSyncControl   = EPL_SYNC_PRES_TIME_FIRST_VALID |
                                         EPL_SYNC_DEST_MAC_ADDRESS_VALID;
     SyncRequestData.m_dwPResTimeFirst = pNodeInfo->m_dwPResTimeFirstNs;
-    uiSize = sizeof(unsigned int) + 2*sizeof(DWORD);
+    uiSize = sizeof(UINT) + 2*sizeof(UINT32);
 
     Ret = EplSyncuRequestSyncResponse(EplNmtMnuPrcCbSyncResShift, &SyncRequestData, uiSize);
 
@@ -4249,7 +4249,7 @@ Exit:
 //---------------------------------------------------------------------------
 
 static tEplKernel PUBLIC EplNmtMnuPrcCbSyncResShift(
-                                  unsigned int          uiNodeId_p,
+                                  UINT                  uiNodeId_p,
                                   tEplSyncResponse*     pSyncResponse_p)
 {
 tEplKernel          Ret;
@@ -4293,16 +4293,16 @@ Exit:
 //
 //---------------------------------------------------------------------------
 
-static tEplKernel EplNmtMnuPrcAdd(unsigned int uiNodeIdPrevAdd_p)
+static tEplKernel EplNmtMnuPrcAdd(UINT uiNodeIdPrevAdd_p)
 {
 tEplKernel          Ret;
 tEplObdSize         ObdSize;
-DWORD               dwCycleLenUs;
-DWORD               dwCNLossOfSocToleranceNs;
-unsigned int        uiNodeId;
+UINT32              dwCycleLenUs;
+UINT32              dwCNLossOfSocToleranceNs;
+UINT                uiNodeId;
 tEplNmtMnuNodeInfo* pNodeInfo;
 tEplDllSyncRequest  SyncReqData;
-unsigned int        SyncReqNum;
+UINT                SyncReqNum;
 tEplNmtMnuNodeInfo* pNodeInfoLastSyncReq;
 
     Ret = kEplSuccessful;
@@ -4314,7 +4314,7 @@ tEplNmtMnuNodeInfo* pNodeInfoLastSyncReq;
                                   EPL_SYNC_DEST_MAC_ADDRESS_VALID;
 
     // read object 0x1006 NMT_CycleLen_U32
-    ObdSize = sizeof(DWORD);
+    ObdSize = sizeof(UINT32);
     Ret = EplObduReadEntry(0x1006, 0, &dwCycleLenUs, &ObdSize);
     if (Ret != kEplSuccessful)
     {
@@ -4415,7 +4415,7 @@ Exit:
 //---------------------------------------------------------------------------
 
 static tEplKernel PUBLIC EplNmtMnuPrcCbSyncResAdd(
-                                  unsigned int          uiNodeId_p,
+                                  UINT                  uiNodeId_p,
                                   tEplSyncResponse*     pSyncResponse_p)
 {
 tEplKernel          Ret;
@@ -4472,12 +4472,12 @@ Exit:
 //
 //---------------------------------------------------------------------------
 
-static tEplKernel EplNmtMnuPrcVerify(unsigned int uiNodeId_p)
+static tEplKernel EplNmtMnuPrcVerify(UINT uiNodeId_p)
 {
 tEplKernel          Ret;
 tEplNmtMnuNodeInfo* pNodeInfo;
 tEplDllSyncRequest  SyncReqData;
-unsigned int        uiSize;
+UINT                uiSize;
 
     Ret = kEplSuccessful;
 
@@ -4487,7 +4487,7 @@ unsigned int        uiSize;
     {
         SyncReqData.m_uiNodeId      = uiNodeId_p;
         SyncReqData.m_dwSyncControl = EPL_SYNC_DEST_MAC_ADDRESS_VALID;
-        uiSize = sizeof(unsigned int) + sizeof(DWORD);
+        uiSize = sizeof(UINT) + sizeof(UINT32);
 
         Ret = EplSyncuRequestSyncResponse(EplNmtMnuPrcCbSyncResVerify, &SyncReqData, uiSize);
     }
@@ -4517,12 +4517,12 @@ unsigned int        uiSize;
 //---------------------------------------------------------------------------
 
 static tEplKernel PUBLIC EplNmtMnuPrcCbSyncResVerify(
-                                  unsigned int          uiNodeId_p,
+                                  UINT                  uiNodeId_p,
                                   tEplSyncResponse*     pSyncResponse_p)
 {
 tEplKernel          Ret;
 tEplNmtMnuNodeInfo* pNodeInfo;
-DWORD               dwPResTimeFirstNs;
+UINT32              dwPResTimeFirstNs;
 
     pNodeInfo = EPL_NMTMNU_GET_NODEINFO(uiNodeId_p);
 
@@ -4573,7 +4573,7 @@ Exit:
 //---------------------------------------------------------------------------
 
 static tEplKernel PUBLIC EplNmtMnuPrcCbSyncResNextAction(
-                                  unsigned int          uiNodeId_p,
+                                  UINT                  uiNodeId_p,
                                   tEplSyncResponse*     pSyncResponse_p)
 {
 tEplKernel          Ret;
@@ -4705,7 +4705,7 @@ static void EplNmtMnuPrcSetFlagsNmtCommandReset(
                                         tEplNmtMnuNodeInfo* pNodeInfo_p,
                                         tEplNmtCommand      NmtCommand_p)
 {
-WORD wPrcFlagsReset;
+UINT16 wPrcFlagsReset;
 
     wPrcFlagsReset = pNodeInfo_p->m_wPrcFlags & EPL_NMTMNU_NODE_FLAG_PRC_RESET_MASK;
 
