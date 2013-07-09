@@ -80,7 +80,7 @@
 #include "user/dllucal.h"
 #include "user/EplLedu.h"
 #include "user/EplNmtCnu.h"
-#include "user/EplNmtMnu.h"
+#include "user/nmtmnu.h"
 #include "user/EplSdoComu.h"
 #include "user/identu.h"
 #include "user/statusu.h"
