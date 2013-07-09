@@ -59,7 +59,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#define CYCLE_LEN   50000
+#define CYCLE_LEN   UINT_MAX
 #define NODEID      0xF0                //=> MN
 #define IP_ADDR     0xc0a86401          // 192.168.100.1
 #define SUBNET_MASK 0xFFFFFF00          // 255.255.255.0
@@ -423,7 +423,7 @@ static int getOptions(int argc_p, char **argv_p, tOptions* pOpts_p)
             break;
 
         default: /* '?' */
-            printf ("Usage: %s [-c CYCLE_TIME] [-l LOGFILE]\n", argv_p[0]);
+            printf ("Usage: %s [-c CDC-FILE] [-l LOGFILE]\n", argv_p[0]);
             return -1;
         }
     }
