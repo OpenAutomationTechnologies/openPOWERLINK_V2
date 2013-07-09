@@ -102,7 +102,6 @@ typedef struct
 {
     UINT32   m_dwPrcPResTimeFirstCorrectionNs;
     UINT32   m_dwPrcPResTimeFirstNegOffsetNs;
-
 } tEplNmtMnuConfigParam;
 
 
