@@ -69,8 +69,8 @@
 
 ****************************************************************************/
 
-#ifndef _EPLNMTMNU_H_
-#define _EPLNMTMNU_H_
+#ifndef _NMTMNU_H_
+#define _NMTMNU_H_
 
 #include "EplNmtu.h"
 
@@ -146,6 +146,6 @@ tEplKernel PUBLIC EplNmtMnuPrcConfig(tEplNmtMnuConfigParam* pConfigParam_p);
 
 #endif
 
-#endif  // #ifndef _EPLNMTMNU_H_
+#endif  // #ifndef _NMTMNU_H_
 
 
