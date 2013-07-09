@@ -85,7 +85,7 @@
 //---------------------------------------------------------------------------
 
 typedef tEplKernel (PUBLIC * tEplNmtMnuCbNodeEvent) (
-    UINT uiNodeId_p,
+    UINT nodeId_p,
     tEplNmtNodeEvent NodeEvent_p,
     tEplNmtState NmtState_p,
     UINT16 wErrorCode_p,
@@ -100,8 +100,8 @@ typedef tEplKernel (PUBLIC * tEplNmtMnuCbBootEvent) (
 
 typedef struct
 {
-    UINT32   m_dwPrcPResTimeFirstCorrectionNs;
-    UINT32   m_dwPrcPResTimeFirstNegOffsetNs;
+    UINT32   prcPResTimeFirstCorrectionNs;
+    UINT32   prcPResTimeFirstNegOffsetNs;
 } tEplNmtMnuConfigParam;
 
 
@@ -122,22 +122,22 @@ tEplKernel EplNmtMnuDelInstance(void);
 EPLDLLEXPORT tEplKernel PUBLIC EplNmtMnuProcessEvent(
             tEplEvent* pEvent_p);
 
-tEplKernel EplNmtMnuSendNmtCommand(UINT uiNodeId_p,
-                                   tEplNmtCommand  NmtCommand_p);
+tEplKernel EplNmtMnuSendNmtCommand(UINT nodeId_p,
+                                   tEplNmtCommand  nmtCommand_p);
 
-tEplKernel EplNmtMnuRequestNmtCommand(UINT uiNodeId_p,
-                                    tEplNmtCommand  NmtCommand_p);
+tEplKernel EplNmtMnuRequestNmtCommand(UINT nodeId_p,
+                                    tEplNmtCommand  nmtCommand_p);
 
-tEplKernel EplNmtMnuTriggerStateChange(UINT uiNodeId_p,
-                                       tEplNmtNodeCommand  NodeCommand_p);
+tEplKernel EplNmtMnuTriggerStateChange(UINT nodeId_p,
+                                       tEplNmtNodeCommand  nodeCommand_p);
 
-tEplKernel PUBLIC EplNmtMnuCbNmtStateChange(tEplEventNmtStateChange NmtStateChange_p);
+tEplKernel PUBLIC EplNmtMnuCbNmtStateChange(tEplEventNmtStateChange nmtStateChange_p);
 
 tEplKernel PUBLIC EplNmtMnuCbCheckEvent(tEplNmtEvent NmtEvent_p);
 
-tEplKernel PUBLIC EplNmtMnuGetDiagnosticInfo(UINT* puiMandatorySlaveCount_p,
-                                             UINT* puiSignalSlaveCount_p,
-                                             UINT16* pwFlags_p);
+tEplKernel PUBLIC EplNmtMnuGetDiagnosticInfo(UINT* pMandatorySlaveCount_p,
+                                             UINT* pSignalSlaveCount_p,
+                                             UINT16* pflags_p);
 
 #if EPL_NMTMNU_PRES_CHAINING_MN != FALSE
 tEplKernel PUBLIC EplNmtMnuPrcConfig(tEplNmtMnuConfigParam* pConfigParam_p);
