@@ -299,73 +299,46 @@ static tNmtMnuInstance   nmtMnuInstance_g;
 // local function prototypes
 //---------------------------------------------------------------------------
 
-static tEplKernel EplNmtMnuCbNmtRequest(tEplFrameInfo * pFrameInfo_p);
-
-static tEplKernel EplNmtMnuCbIdentResponse(
-                                    UINT                nodeId_p,
-                                    tEplIdentResponse*  pIdentResponse_p);
-
-static tEplKernel EplNmtMnuCbStatusResponse(
-                                    UINT                nodeId_p,
-                                    tEplStatusResponse* pStatusResponse_p);
-
-static tEplKernel EplNmtMnuCbNodeAdded(UINT nodeId_p);
-
-static tEplKernel EplNmtMnuCheckNmtState(
-                                    UINT                nodeId_p,
-                                    tNmtMnuNodeInfo*    pNodeInfo_p,
-                                    tEplNmtState        nodeNmtState_p,
-                                    UINT16              errorCode_p,
-                                    tEplNmtState        localNmtState_p);
-
-static tEplKernel EplNmtMnuAddNodeIsochronous(UINT nodeId_p);
-
-static tEplKernel EplNmtMnuStartBootStep1(BOOL fNmtResetAllIssued_p);
-
-static tEplKernel EplNmtMnuStartBootStep2(void);
-
-static tEplKernel EplNmtMnuStartCheckCom(void);
-
-static tEplKernel EplNmtMnuNodeBootStep2(UINT nodeId_p, tNmtMnuNodeInfo* pNodeInfo_p);
-
-static tEplKernel EplNmtMnuNodeCheckCom(UINT nodeId_p, tNmtMnuNodeInfo* pNodeInfo_p);
-
-static tEplKernel EplNmtMnuStartNodes(void);
-
-static tEplKernel EplNmtMnuProcessInternalEvent(
-                                    UINT                nodeId_p,
-                                    tEplNmtState        nodeNmtState_p,
-                                    UINT16              errorCode_p,
-                                    tNmtMnuIntNodeEvent nodeEvent_p);
-
-static tEplKernel EplNmtMnuReset(void);
+static tEplKernel cbNmtRequest(tEplFrameInfo * pFrameInfo_p);
+static tEplKernel cbIdentResponse(UINT nodeId_p, tEplIdentResponse* pIdentResponse_p);
+static tEplKernel cbStatusResponse(UINT nodeId_p, tEplStatusResponse* pStatusResponse_p);
+static tEplKernel cbNodeAdded(UINT nodeId_p);
+static tEplKernel checkNmtState(UINT nodeId_p, tNmtMnuNodeInfo* pNodeInfo_p,
+                                tEplNmtState nodeNmtState_p, UINT16 errorCode_p,
+                                tEplNmtState localNmtState_p);
+static tEplKernel addNodeIsochronous(UINT nodeId_p);
+static tEplKernel startBootStep1(BOOL fNmtResetAllIssued_p);
+static tEplKernel startBootStep2(void);
+static tEplKernel startCheckCom(void);
+static tEplKernel nodeBootStep2(UINT nodeId_p, tNmtMnuNodeInfo* pNodeInfo_p);
+static tEplKernel nodeCheckCom(UINT nodeId_p, tNmtMnuNodeInfo* pNodeInfo_p);
+static tEplKernel startNodes(void);
+static tEplKernel processInternalEvent(UINT nodeId_p, tEplNmtState nodeNmtState_p,
+                                       UINT16 errorCode_p, tNmtMnuIntNodeEvent nodeEvent_p);
+static tEplKernel reset(void);
 
 #if EPL_NMTMNU_PRES_CHAINING_MN != FALSE
-static tEplKernel EplNmtMnuPrcMeasure(void);
-static tEplKernel EplNmtMnuPrcCalculate(UINT nodeIdFirstNode_p);
-static tEplKernel EplNmtMnuPrcShift(UINT nodeIdPrevShift_p);
-static tEplKernel EplNmtMnuPrcAdd(UINT nodeIdPrevAdd_p);
-static tEplKernel EplNmtMnuPrcVerify(UINT nodeId_p);
+static tEplKernel prcMeasure(void);
+static tEplKernel prcCalculate(UINT nodeIdFirstNode_p);
+static tEplKernel prcShift(UINT nodeIdPrevShift_p);
+static tEplKernel prcAdd(UINT nodeIdPrevAdd_p);
+static tEplKernel prcVerify(UINT nodeId_p);
 
-static tEplKernel EplNmtMnuPrcCbSyncResMeasure(UINT, tEplSyncResponse*);
-static tEplKernel EplNmtMnuPrcCbSyncResShift(UINT, tEplSyncResponse*);
-static tEplKernel EplNmtMnuPrcCbSyncResAdd(UINT, tEplSyncResponse*);
-static tEplKernel EplNmtMnuPrcCbSyncResVerify(UINT, tEplSyncResponse*);
-static tEplKernel EplNmtMnuPrcCbSyncResNextAction(UINT, tEplSyncResponse*);
+static tEplKernel prcCbSyncResMeasure(UINT, tEplSyncResponse*);
+static tEplKernel prcCbSyncResShift(UINT, tEplSyncResponse*);
+static tEplKernel prcCbSyncResAdd(UINT, tEplSyncResponse*);
+static tEplKernel prcCbSyncResVerify(UINT, tEplSyncResponse*);
+static tEplKernel prcCbSyncResNextAction(UINT, tEplSyncResponse*);
 
-static tEplKernel EplNmtMnuPrcCalcPResResponseTimeNs(
-                                    UINT            nodeId_p,
-                                    UINT            nodeIdPredNode_p,
-                                    UINT32*         pPResResponseTimeNs_p);
-static tEplKernel EplNmtMnuPrcCalcPResChainingSlotTimeNs(
-                                    UINT            nodeIdLastNode_p,
-                                    UINT32*         pPResChainingSlotTimeNs_p);
+static tEplKernel prcCalcPResResponseTimeNs(UINT nodeId_p, UINT nodeIdPredNode_p,
+                                            UINT32* pPResResponseTimeNs_p);
+static tEplKernel prcCalcPResChainingSlotTimeNs(UINT nodeIdLastNode_p,
+                                                UINT32* pPResChainingSlotTimeNs_p);
 
-static tEplKernel EplNmtMnuPrcFindPredecessorNode(UINT nodeId_p);
-static void       EplNmtMnuPrcSyncError(tNmtMnuNodeInfo* pNodeInfo_p);
-static void       EplNmtMnuPrcSetFlagsNmtCommandReset(
-                                        tNmtMnuNodeInfo* pNodeInfo_p,
-                                        tEplNmtCommand      nmtCommand_p);
+static tEplKernel prcFindPredecessorNode(UINT nodeId_p);
+static void       prcSyncError(tNmtMnuNodeInfo* pNodeInfo_p);
+static void       prcSetFlagsNmtCommandReset(tNmtMnuNodeInfo* pNodeInfo_p,
+                                             tEplNmtCommand nmtCommand_p);
 #endif
 
 
@@ -443,7 +416,7 @@ tEplKernel ret;
     nmtMnuInstance_g.statusRequestDelay = 5000L;
 
     // register NmtMnResponse callback function
-    ret = dllucal_regAsndService(kEplDllAsndNmtRequest, EplNmtMnuCbNmtRequest, kEplDllAsndFilterLocal);
+    ret = dllucal_regAsndService(kEplDllAsndNmtRequest, cbNmtRequest, kEplDllAsndFilterLocal);
 
 #if EPL_NMTMNU_PRES_CHAINING_MN != FALSE
     nmtMnuInstance_g.prcPResTimeFirstCorrectionNs =  50;
@@ -483,7 +456,7 @@ tEplKernel  ret;
     // deregister NmtMnResponse callback function
     ret = dllucal_regAsndService(kEplDllAsndNmtRequest, NULL, kEplDllAsndFilterNone);
 
-    ret = EplNmtMnuReset();
+    ret = reset();
 
     return ret;
 
@@ -562,7 +535,7 @@ tNmtMnuNodeInfo*    pNodeInfo;
                 UINT               uiSize;
 
                     // Store NMT command for later execution
-                    EplNmtMnuPrcSetFlagsNmtCommandReset(pNodeInfo, nmtCommand_p);
+                    prcSetFlagsNmtCommandReset(pNodeInfo, nmtCommand_p);
 
                     // Disable PRes Chaining
                     SyncReqData.m_uiNodeId      = nodeId_p;
@@ -570,7 +543,7 @@ tNmtMnuNodeInfo*    pNodeInfo;
                                                   EPL_SYNC_DEST_MAC_ADDRESS_VALID;
                     uiSize = sizeof(UINT) + sizeof(UINT32);
 
-                    ret = EplSyncuRequestSyncResponse(EplNmtMnuPrcCbSyncResNextAction, &SyncReqData, uiSize);
+                    ret = EplSyncuRequestSyncResponse(prcCbSyncResNextAction, &SyncReqData, uiSize);
                     switch (ret)
                     {
                         case kEplSuccessful:
@@ -602,7 +575,7 @@ tNmtMnuNodeInfo*    pNodeInfo;
                     // has not been received, yet.
 
                     // Set the current NMT command if it has higher priority than a present one.
-                    EplNmtMnuPrcSetFlagsNmtCommandReset(pNodeInfo, nmtCommand_p);
+                    prcSetFlagsNmtCommandReset(pNodeInfo, nmtCommand_p);
 
                     // Wait for the SyncRes
                     goto Exit;
@@ -690,7 +663,7 @@ tNmtMnuNodeInfo*    pNodeInfo;
 
     // The expected node state will be updated when the NMT command
     // was actually sent.
-    // See functions EplNmtMnuProcessInternalEvent(kNmtMnuIntNodeEventNmtCmdSent),
+    // See functions processInternalEvent(kNmtMnuIntNodeEventNmtCmdSent),
     // EplNmtMnuProcessEvent(kEplEventTypeNmtMnuNmtCmdSent).
 
     // remove CN from isochronous phase;
@@ -1134,11 +1107,11 @@ tEplKernel nmtmnu_cbNmtStateChange(tEplEventNmtStateChange nmtStateChange_p)
 #endif
 
             // reset timers
-            ret = EplNmtMnuReset();
+            ret = reset();
 
             // 2008/11/18 d.k. reset internal node info is not necessary,
             //                 because timer flags are important and other
-            //                 things are reset by EplNmtMnuStartBootStep1().
+            //                 things are reset by startBootStep1().
 /*
             EPL_MEMSET(nmtMnuInstance_g.aNodeInfo,
                        0,
@@ -1183,7 +1156,7 @@ tEplKernel nmtmnu_cbNmtStateChange(tEplEventNmtStateChange nmtStateChange_p)
             nmtMnuInstance_g.flags = 0;
 
             // start network scan
-            ret = EplNmtMnuStartBootStep1(fNmtResetAllIssued);
+            ret = startBootStep1(fNmtResetAllIssued);
 
             // start timer for 0x1F89/2 MNTimeoutPreOp1_U32
             ObdSize = sizeof (dwTimeout);
@@ -1209,7 +1182,7 @@ tEplKernel nmtmnu_cbNmtStateChange(tEplEventNmtStateChange nmtStateChange_p)
         // node processes isochronous and asynchronous frames
         case kEplNmtMsPreOperational2:
         {
-            ret = EplNmtMnuStartBootStep2();
+            ret = startBootStep2();
 
             // wait for NMT state change of CNs
             break;
@@ -1221,7 +1194,7 @@ tEplKernel nmtmnu_cbNmtStateChange(tEplEventNmtStateChange nmtStateChange_p)
             // check if PRes of CNs are OK
             // d.k. that means wait CycleLength * MultiplexCycleCount (i.e. start timer)
             //      because Dllk checks PRes of CNs automatically in ReadyToOp
-            ret = EplNmtMnuStartCheckCom();
+            ret = startCheckCom();
             break;
         }
 
@@ -1230,7 +1203,7 @@ tEplKernel nmtmnu_cbNmtStateChange(tEplEventNmtStateChange nmtStateChange_p)
         {
             // send StartNode to CNs
             // wait for NMT state change of CNs
-            ret = EplNmtMnuStartNodes();
+            ret = startNodes();
             break;
         }
 
@@ -1345,7 +1318,7 @@ tEplKernel      ret;
                                                      | ((pNodeInfo->flags & EPL_NMTMNU_NODE_FLAG_COUNT_STATREQ) >> 6)
                                                      | ((pTimerEventArg->m_Arg.m_dwVal & EPL_NMTMNU_TIMERARG_COUNT_SR) >> 8)));
 */
-                    ret = EplNmtMnuProcessInternalEvent(nodeId,
+                    ret = processInternalEvent(nodeId,
                                                         (tEplNmtState) (bNmtState | EPL_NMT_TYPE_CS),
                                                         EPL_E_NO_ERROR,
                                                         kNmtMnuIntNodeEventTimerIdentReq);
@@ -1373,7 +1346,7 @@ tEplKernel      ret;
                                                      | ((pNodeInfo->flags & EPL_NMTMNU_NODE_FLAG_COUNT_STATREQ) >> 6)
                                                      | ((pTimerEventArg->m_Arg.m_dwVal & EPL_NMTMNU_TIMERARG_COUNT_SR) >> 8)));
 */
-                    ret = EplNmtMnuProcessInternalEvent(nodeId,
+                    ret = processInternalEvent(nodeId,
                                                         (tEplNmtState) (bNmtState | EPL_NMT_TYPE_CS),
                                                         EPL_E_NO_ERROR,
                                                         kNmtMnuIntNodeEventTimerStatReq);
@@ -1401,7 +1374,7 @@ tEplKernel      ret;
                                                      | ((pNodeInfo->flags & EPL_NMTMNU_NODE_FLAG_COUNT_STATREQ) >> 6)
                                                      | ((pTimerEventArg->m_Arg.m_dwVal & EPL_NMTMNU_TIMERARG_COUNT_SR) >> 8)));
 */
-                    ret = EplNmtMnuProcessInternalEvent(nodeId,
+                    ret = processInternalEvent(nodeId,
                                                         (tEplNmtState) (bNmtState | EPL_NMT_TYPE_CS),
                                                         EPL_E_NO_ERROR,
                                                         kNmtMnuIntNodeEventTimerStateMon);
@@ -1429,7 +1402,7 @@ tEplKernel      ret;
                                                      | ((pNodeInfo->flags & EPL_NMTMNU_NODE_FLAG_COUNT_LONGER) >> 6)
                                                      | ((pTimerEventArg->m_Arg.m_dwVal & EPL_NMTMNU_TIMERARG_COUNT_LO) >> 8)));
 */
-                    ret = EplNmtMnuProcessInternalEvent(nodeId,
+                    ret = processInternalEvent(nodeId,
                                                         (tEplNmtState) (bNmtState | EPL_NMT_TYPE_CS),
                                                         EPL_E_NO_ERROR,
                                                         kNmtMnuIntNodeEventTimerLonger);
@@ -1446,7 +1419,7 @@ tEplKernel      ret;
         {
         tEplHeartbeatEvent* pHeartbeatEvent = (tEplHeartbeatEvent*)pEvent_p->m_pArg;
 
-            ret = EplNmtMnuProcessInternalEvent(pHeartbeatEvent->m_uiNodeId,
+            ret = processInternalEvent(pHeartbeatEvent->m_uiNodeId,
                                                 pHeartbeatEvent->m_NmtState,
                                                 pHeartbeatEvent->m_wErrorCode,
                                                 kNmtMnuIntNodeEventHeartbeat);
@@ -1494,7 +1467,7 @@ tEplKernel      ret;
                 case kEplNmtCmdResetConfiguration:
                 case kEplNmtCmdSwReset:
                     bNmtState = (UINT8) (kEplNmtCsNotActive & 0xFF);
-                    // EplNmtMnuProcessInternalEvent() sets internal node state to kNmtMnuNodeStateUnknown
+                    // processInternalEvent() sets internal node state to kNmtMnuNodeStateUnknown
                     // after next unresponded IdentRequest/StatusRequest
                     break;
 
@@ -1505,7 +1478,7 @@ tEplKernel      ret;
             // process as internal event which update expected NMT state in OD
             if (uiNodeId != EPL_C_ADR_BROADCAST)
             {
-                ret = EplNmtMnuProcessInternalEvent(uiNodeId,
+                ret = processInternalEvent(uiNodeId,
                                                     (tEplNmtState) (bNmtState | EPL_NMT_TYPE_CS),
                                                     0,
                                                     kNmtMnuIntNodeEventNmtCmdSent);
@@ -1518,7 +1491,7 @@ tEplKernel      ret;
                 {
                     if ((EPL_NMTMNU_GET_NODEINFO(uiNodeId)->nodeCfg & (EPL_NODEASSIGN_NODE_IS_CN | EPL_NODEASSIGN_NODE_EXISTS)) != 0)
                     {
-                        ret = EplNmtMnuProcessInternalEvent(uiNodeId,
+                        ret = processInternalEvent(uiNodeId,
                                                             (tEplNmtState) (bNmtState | EPL_NMT_TYPE_CS),
                                                             0,
                                                             kNmtMnuIntNodeEventNmtCmdSent);
@@ -1639,7 +1612,7 @@ tEplKernel      ret;
                 goto Exit;
             }
 
-            ret = EplNmtMnuProcessInternalEvent(pNodeCmd->nodeId,
+            ret = processInternalEvent(pNodeCmd->nodeId,
                                                 (tEplNmtState) (bNmtState | EPL_NMT_TYPE_CS),
                                                 wErrorCode,
                                                 NodeEvent);
@@ -1652,7 +1625,7 @@ tEplKernel      ret;
 
             uiNodeId = *((UINT*) pEvent_p->m_pArg);
 
-            ret = EplNmtMnuCbNodeAdded(uiNodeId);
+            ret = cbNodeAdded(uiNodeId);
             break;
         }
 
@@ -1736,7 +1709,7 @@ tNmtMnuNodeInfo* pNodeInfo;
             // reset flag "scanned once"
             pNodeInfo->flags &= ~EPL_NMTMNU_NODE_FLAG_SCANNED;
 
-            ret = EplNmtMnuNodeBootStep2(uiIndex, pNodeInfo);
+            ret = nodeBootStep2(uiIndex, pNodeInfo);
             if (ret != kEplSuccessful)
             {
                 goto Exit;
@@ -1792,7 +1765,7 @@ tEplKernel  ret;
 
 //---------------------------------------------------------------------------
 //
-// Function:    EplNmtMnuCbNmtRequest
+// Function:    cbNmtRequest
 //
 // Description: callback funktion for NmtRequest
 //
@@ -1804,7 +1777,7 @@ tEplKernel  ret;
 //
 //---------------------------------------------------------------------------
 
-static tEplKernel PUBLIC EplNmtMnuCbNmtRequest(tEplFrameInfo * pFrameInfo_p)
+static tEplKernel cbNmtRequest(tEplFrameInfo * pFrameInfo_p)
 {
 tEplKernel      ret = kEplSuccessful;
 UINT            targetNodeId;
@@ -1844,7 +1817,7 @@ Exit:
 
 //---------------------------------------------------------------------------
 //
-// Function:    EplNmtMnuCbIdentResponse
+// Function:    cbIdentResponse
 //
 // Description: callback funktion for IdentResponse
 //
@@ -1858,7 +1831,7 @@ Exit:
 //
 //---------------------------------------------------------------------------
 
-static tEplKernel PUBLIC EplNmtMnuCbIdentResponse(
+static tEplKernel PUBLIC cbIdentResponse(
                                   UINT        nodeId_p,
                                   tEplIdentResponse* pIdentResponse_p)
 {
@@ -1866,7 +1839,7 @@ tEplKernel      ret = kEplSuccessful;
 
     if (pIdentResponse_p == NULL)
     {   // node did not answer
-        ret = EplNmtMnuProcessInternalEvent(nodeId_p,
+        ret = processInternalEvent(nodeId_p,
                                             kEplNmtCsNotActive,
                                             EPL_E_NMT_NO_IDENT_RES, // was EPL_E_NO_ERROR
                                             kNmtMnuIntNodeEventNoIdentResponse);
@@ -1896,7 +1869,7 @@ tEplKernel      ret = kEplSuccessful;
             }
         }
 
-        ret = EplNmtMnuProcessInternalEvent(nodeId_p,
+        ret = processInternalEvent(nodeId_p,
                                             NmtState,
                                             wErrorCode,
                                             kNmtMnuIntNodeEventIdentResponse);
@@ -1909,7 +1882,7 @@ Exit:
 
 //---------------------------------------------------------------------------
 //
-// Function:    EplNmtMnuCbStatusResponse
+// Function:    cbStatusResponse
 //
 // Description: callback funktion for StatusResponse
 //
@@ -1923,7 +1896,7 @@ Exit:
 //
 //---------------------------------------------------------------------------
 
-static tEplKernel PUBLIC EplNmtMnuCbStatusResponse(
+static tEplKernel PUBLIC cbStatusResponse(
                                   UINT        nodeId_p,
                                   tEplStatusResponse* pStatusResponse_p)
 {
@@ -1931,14 +1904,14 @@ tEplKernel      ret = kEplSuccessful;
 
     if (pStatusResponse_p == NULL)
     {   // node did not answer
-        ret = EplNmtMnuProcessInternalEvent(nodeId_p,
+        ret = processInternalEvent(nodeId_p,
                                             kEplNmtCsNotActive,
                                             EPL_E_NMT_NO_STATUS_RES, // was EPL_E_NO_ERROR
                                             kNmtMnuIntNodeEventNoStatusResponse);
     }
     else
     {   // node answered StatusRequest
-        ret = EplNmtMnuProcessInternalEvent(nodeId_p,
+        ret = processInternalEvent(nodeId_p,
                                             (tEplNmtState) (AmiGetByteFromLe(&pStatusResponse_p->m_le_bNmtStatus) | EPL_NMT_TYPE_CS),
                                             EPL_E_NO_ERROR,
                                             kNmtMnuIntNodeEventStatusResponse);
@@ -1950,7 +1923,7 @@ tEplKernel      ret = kEplSuccessful;
 
 //---------------------------------------------------------------------------
 //
-// Function:    EplNmtMnuCbNodeAdded
+// Function:    cbNodeAdded
 //
 // Description: This function is called after the addressed node has been
 //              added in module Dllk.
@@ -1962,7 +1935,7 @@ tEplKernel      ret = kEplSuccessful;
 // State:
 //
 //---------------------------------------------------------------------------
-static tEplKernel EplNmtMnuCbNodeAdded(UINT nodeId_p)
+static tEplKernel cbNodeAdded(UINT nodeId_p)
 {
 tEplKernel          ret;
 tNmtMnuNodeInfo* pNodeInfo;
@@ -1979,7 +1952,7 @@ tNmtMnuNodeInfo* pNodeInfo;
         NmtState = EplNmtuGetNmtState();
         if (NmtState >= kEplNmtMsPreOperational2)
         {
-            ret = EplNmtMnuNodeBootStep2(nodeId_p, pNodeInfo);
+            ret = nodeBootStep2(nodeId_p, pNodeInfo);
         }
     }
 
@@ -1989,7 +1962,7 @@ tNmtMnuNodeInfo* pNodeInfo;
 
 //---------------------------------------------------------------------------
 //
-// Function:    EplNmtMnuAddNodeIsochronous
+// Function:    addNodeIsochronous
 //
 // Description: Adds the given node to the isochronous phase
 //
@@ -2001,7 +1974,7 @@ tNmtMnuNodeInfo* pNodeInfo;
 //
 //---------------------------------------------------------------------------
 
-static tEplKernel EplNmtMnuAddNodeIsochronous(UINT nodeId_p)
+static tEplKernel addNodeIsochronous(UINT nodeId_p)
 {
 tEplKernel          ret;
 
@@ -2092,7 +2065,7 @@ tNmtMnuNodeInfo* pNodeInfo;
 
         if (nmtMnuInstance_g.flags & EPL_NMTMNU_FLAG_PRC_ADD_IN_PROGRESS)
         {
-            ret = EplNmtMnuPrcMeasure();
+            ret = prcMeasure();
         }
     }
 #endif
@@ -2104,7 +2077,7 @@ Exit:
 
 //---------------------------------------------------------------------------
 //
-// Function:    EplNmtMnuStartBootStep1
+// Function:    startBootStep1
 //
 // Description: starts BootStep1
 //
@@ -2116,7 +2089,7 @@ Exit:
 //
 //---------------------------------------------------------------------------
 
-static tEplKernel EplNmtMnuStartBootStep1(BOOL fNmtResetAllIssued_p)
+static tEplKernel startBootStep1(BOOL fNmtResetAllIssued_p)
 {
 tEplKernel			ret = kEplSuccessful;
 UINT		        subIndex;
@@ -2171,7 +2144,7 @@ tNmtMnuNodeInfo*	pNodeInfo;
 				if (fNmtResetAllIssued_p == FALSE)
 				{
 					// identify the node
-	                ret = identu_requestIdentResponse(subIndex, EplNmtMnuCbIdentResponse);
+	                ret = identu_requestIdentResponse(subIndex, cbIdentResponse);
 					if (ret != kEplSuccessful)
 					{
 						goto Exit;
@@ -2194,7 +2167,7 @@ tNmtMnuNodeInfo*	pNodeInfo;
         {   // subindex of MN
             if ((nodeCfg & (EPL_NODEASSIGN_MN_PRES | EPL_NODEASSIGN_NODE_EXISTS)) != 0)
             {   // MN shall send PRes
-                ret = EplNmtMnuAddNodeIsochronous(localNodeId);
+                ret = addNodeIsochronous(localNodeId);
             }
         }
     }
@@ -2206,7 +2179,7 @@ Exit:
 
 //---------------------------------------------------------------------------
 //
-// Function:    EplNmtMnuStartBootStep2
+// Function:    startBootStep2
 //
 // Description: starts BootStep2.
 //              That means checking if a node has reached PreOp2 and
@@ -2221,7 +2194,7 @@ Exit:
 //
 //---------------------------------------------------------------------------
 
-static tEplKernel EplNmtMnuStartBootStep2(void)
+static tEplKernel startBootStep2(void)
 {
 tEplKernel      ret = kEplSuccessful;
 UINT            index;
@@ -2305,7 +2278,7 @@ Exit:
 
 //---------------------------------------------------------------------------
 //
-// Function:    EplNmtMnuNodeBootStep2
+// Function:    nodeBootStep2
 //
 // Description: starts BootStep2 for the specified node.
 //              This means checking whether the CN is in NMT state PreOp2
@@ -2326,7 +2299,7 @@ Exit:
 //
 //---------------------------------------------------------------------------
 
-static tEplKernel EplNmtMnuNodeBootStep2(UINT nodeId_p, tNmtMnuNodeInfo* pNodeInfo_p)
+static tEplKernel nodeBootStep2(UINT nodeId_p, tNmtMnuNodeInfo* pNodeInfo_p)
 {
 tEplKernel          ret;
 tEplTimerArg        timerArg;
@@ -2391,7 +2364,7 @@ Exit:
 
 //---------------------------------------------------------------------------
 //
-// Function:    EplNmtMnuStartCheckCom
+// Function:    startCheckCom
 //
 // Description: starts CheckCommunication
 //
@@ -2403,7 +2376,7 @@ Exit:
 //
 //---------------------------------------------------------------------------
 
-static tEplKernel EplNmtMnuStartCheckCom(void)
+static tEplKernel startCheckCom(void)
 {
 tEplKernel      ret = kEplSuccessful;
 UINT            index;
@@ -2423,7 +2396,7 @@ tNmtMnuNodeInfo* pNodeInfo;
         {
             if (pNodeInfo->nodeState == kNmtMnuNodeStateReadyToOp)
             {
-                ret = EplNmtMnuNodeCheckCom(index, pNodeInfo);
+                ret = nodeCheckCom(index, pNodeInfo);
                 if (ret == kEplReject)
                 {   // timer was started
                     // wait until it expires
@@ -2456,7 +2429,7 @@ Exit:
 
 //---------------------------------------------------------------------------
 //
-// Function:    EplNmtMnuNodeCheckCom
+// Function:    nodeCheckCom
 //
 // Description: checks communication of the specified node.
 //              That means wait some time and if no error occurred everything
@@ -2471,7 +2444,7 @@ Exit:
 //
 //---------------------------------------------------------------------------
 
-static tEplKernel EplNmtMnuNodeCheckCom(UINT nodeId_p, tNmtMnuNodeInfo* pNodeInfo_p)
+static tEplKernel nodeCheckCom(UINT nodeId_p, tNmtMnuNodeInfo* pNodeInfo_p)
 {
 tEplKernel      ret = kEplSuccessful;
 UINT32          nodeCfg;
@@ -2511,7 +2484,7 @@ tEplTimerArg    timerArg;
 
 //---------------------------------------------------------------------------
 //
-// Function:    EplNmtMnuStartNodes
+// Function:    startNodes
 //
 // Description: really starts all nodes which are ReadyToOp and CheckCom did not fail
 //
@@ -2523,7 +2496,7 @@ tEplTimerArg    timerArg;
 //
 //---------------------------------------------------------------------------
 
-static tEplKernel EplNmtMnuStartNodes(void)
+static tEplKernel startNodes(void)
 {
 tEplKernel      ret = kEplSuccessful;
 UINT            index;
@@ -2593,7 +2566,7 @@ Exit:
 
 //---------------------------------------------------------------------------
 //
-// Function:    EplNmtMnuProcessInternalEvent
+// Function:    processInternalEvent
 //
 // Description: processes internal node events
 //
@@ -2608,7 +2581,7 @@ Exit:
 //
 //---------------------------------------------------------------------------
 
-static tEplKernel EplNmtMnuProcessInternalEvent(
+static tEplKernel processInternalEvent(
                                     UINT                nodeId_p,
                                     tEplNmtState        nodeNmtState_p,
                                     UINT16                errorCode_p,
@@ -2690,7 +2663,7 @@ tEplTimerArg        timerArg;
             }
 
             // check NMT state of CN
-            ret = EplNmtMnuCheckNmtState(nodeId_p, pNodeInfo, nodeNmtState_p, errorCode_p, nmtState);
+            ret = checkNmtState(nodeId_p, pNodeInfo, nodeNmtState_p, errorCode_p, nmtState);
             if (ret != kEplSuccessful)
             {
                 if (ret == kEplReject)
@@ -2704,7 +2677,7 @@ tEplTimerArg        timerArg;
             {   // No state monitor timer is required
                 // Request StatusResponse immediately,
                 // because we want a fast boot-up of CNs
-                ret = statusu_requestStatusResponse(nodeId_p, EplNmtMnuCbStatusResponse);
+                ret = statusu_requestStatusResponse(nodeId_p, cbStatusResponse);
                 if (ret != kEplSuccessful)
                 {
                     EPL_NMTMNU_DBG_POST_TRACE_VALUE(nodeEvent_p,
@@ -2856,7 +2829,7 @@ tEplTimerArg        timerArg;
             else
             {
                 // put optional node to next step (BootStep2)
-                ret = EplNmtMnuNodeBootStep2(nodeId_p, pNodeInfo);
+                ret = nodeBootStep2(nodeId_p, pNodeInfo);
             }
             break;
         }
@@ -2878,7 +2851,7 @@ tEplTimerArg        timerArg;
             }
 
             // check NMT state of CN
-            ret = EplNmtMnuCheckNmtState(nodeId_p, pNodeInfo, nodeNmtState_p, errorCode_p, nmtState);
+            ret = checkNmtState(nodeId_p, pNodeInfo, nodeNmtState_p, errorCode_p, nmtState);
             if (ret == kEplReject)
             {
                 ret = kEplSuccessful;
@@ -2910,7 +2883,7 @@ tEplTimerArg        timerArg;
             }
             else
             {   // trigger IdentRequest immediately
-                ret = identu_requestIdentResponse(nodeId_p, EplNmtMnuCbIdentResponse);
+                ret = identu_requestIdentResponse(nodeId_p, cbIdentResponse);
             }
             break;
         }
@@ -2926,7 +2899,7 @@ tEplTimerArg        timerArg;
             }
 
             // check NMT state of CN
-            ret = EplNmtMnuCheckNmtState(nodeId_p, pNodeInfo, nodeNmtState_p, errorCode_p, nmtState);
+            ret = checkNmtState(nodeId_p, pNodeInfo, nodeNmtState_p, errorCode_p, nmtState);
             if (ret != kEplSuccessful)
             {
                 if (ret == kEplReject)
@@ -2939,7 +2912,7 @@ tEplTimerArg        timerArg;
             if (nmtState == kEplNmtMsPreOperational1)
             {
                 // request next StatusResponse immediately
-                ret = statusu_requestStatusResponse(nodeId_p, EplNmtMnuCbStatusResponse);
+                ret = statusu_requestStatusResponse(nodeId_p, cbStatusResponse);
                 if (ret != kEplSuccessful)
                 {
                     EPL_NMTMNU_DBG_POST_TRACE_VALUE(nodeEvent_p,
@@ -2982,7 +2955,7 @@ tEplTimerArg        timerArg;
             }
 */
             // check NMT state of CN
-            ret = EplNmtMnuCheckNmtState(nodeId_p, pNodeInfo, nodeNmtState_p, errorCode_p, nmtState);
+            ret = checkNmtState(nodeId_p, pNodeInfo, nodeNmtState_p, errorCode_p, nmtState);
             if (ret != kEplSuccessful)
             {
                 if (ret == kEplReject)
@@ -3006,7 +2979,7 @@ tEplTimerArg        timerArg;
             }
 
             // check NMT state of CN
-            ret = EplNmtMnuCheckNmtState(nodeId_p, pNodeInfo, kEplNmtCsNotActive, errorCode_p, nmtState);
+            ret = checkNmtState(nodeId_p, pNodeInfo, kEplNmtCsNotActive, errorCode_p, nmtState);
             if (ret != kEplSuccessful)
             {
                 if (ret == kEplReject)
@@ -3074,7 +3047,7 @@ tEplTimerArg        timerArg;
             }
 */
             // check NMT state of CN
-            ret = EplNmtMnuCheckNmtState(nodeId_p, pNodeInfo, nodeNmtState_p, errorCode_p, nmtState);
+            ret = checkNmtState(nodeId_p, pNodeInfo, nodeNmtState_p, errorCode_p, nmtState);
             if (ret != kEplSuccessful)
             {
                 if (ret == kEplReject)
@@ -3091,7 +3064,7 @@ tEplTimerArg        timerArg;
         {
             EPL_DBGLVL_NMTMN_TRACE("TimerStatReq->IdentReq(%02X)\n", nodeId_p);
             // trigger IdentRequest again
-            ret = identu_requestIdentResponse(nodeId_p, EplNmtMnuCbIdentResponse);
+            ret = identu_requestIdentResponse(nodeId_p, cbIdentResponse);
             if (ret != kEplSuccessful)
             {
                 EPL_NMTMNU_DBG_POST_TRACE_VALUE(nodeEvent_p,
@@ -3121,7 +3094,7 @@ tEplTimerArg        timerArg;
         {
             EPL_DBGLVL_NMTMN_TRACE("TimerStatReq->StatReq(%02X)\n", nodeId_p);
             // request next StatusResponse
-            ret = statusu_requestStatusResponse(nodeId_p, EplNmtMnuCbStatusResponse);
+            ret = statusu_requestStatusResponse(nodeId_p, cbStatusResponse);
             if (ret != kEplSuccessful)
             {
                 EPL_NMTMNU_DBG_POST_TRACE_VALUE(nodeEvent_p,
@@ -3148,7 +3121,7 @@ tEplTimerArg        timerArg;
                 {   // node should be ReadyToOp but it is not
 
                     // check NMT state which shall be intentionally wrong, so that ERROR_TREATMENT will be started
-                    ret = EplNmtMnuCheckNmtState(nodeId_p, pNodeInfo, kEplNmtCsNotActive, EPL_E_NMT_BPO2, nmtState);
+                    ret = checkNmtState(nodeId_p, pNodeInfo, kEplNmtCsNotActive, EPL_E_NMT_BPO2, nmtState);
                     if (ret != kEplSuccessful)
                     {
                         if (ret == kEplReject)
@@ -3359,7 +3332,7 @@ Exit:
 
 //---------------------------------------------------------------------------
 //
-// Function:    EplNmtMnuCheckNmtState
+// Function:    checkNmtState
 //
 // Description: checks the NMT state, i.e. evaluates it with object 0x1F8F
 //              NMT_MNNodeExpState_AU8 and updates object 0x1F8E
@@ -3376,7 +3349,7 @@ Exit:
 //
 //---------------------------------------------------------------------------
 
-static tEplKernel EplNmtMnuCheckNmtState(
+static tEplKernel checkNmtState(
                                     UINT                nodeId_p,
                                     tNmtMnuNodeInfo* pNodeInfo_p,
                                     tEplNmtState        nodeNmtState_p,
@@ -3436,12 +3409,12 @@ tEplNmtState    expNmtState;
                 if ((pNodeInfo_p->nodeState == kNmtMnuNodeStateConfigured) &&
                     (localNmtState_p >= kEplNmtMsPreOperational2))
                 {
-                    ret = EplNmtMnuNodeBootStep2(nodeId_p, pNodeInfo_p);
+                    ret = nodeBootStep2(nodeId_p, pNodeInfo_p);
                 }
             }
             else
             {   // add node to isochronous phase
-                ret = EplNmtMnuAddNodeIsochronous(nodeId_p);
+                ret = addNodeIsochronous(nodeId_p);
                 if (ret != kEplSuccessful)
                 {
                     goto Exit;
@@ -3473,7 +3446,7 @@ tEplNmtState    expNmtState;
         }
         if (localNmtState_p >= kEplNmtMsReadyToOperate)
         {   // start procedure CheckCommunication for this node
-            ret = EplNmtMnuNodeCheckCom(nodeId_p, pNodeInfo_p);
+            ret = nodeCheckCom(nodeId_p, pNodeInfo_p);
             if (ret != kEplSuccessful)
             {
                 goto ExitButUpdate;
@@ -3601,7 +3574,7 @@ Exit:
 
 //---------------------------------------------------------------------------
 //
-// Function:    EplNmtMnuReset
+// Function:    reset
 //
 // Description: reset internal structures, e.g. timers
 //
@@ -3613,7 +3586,7 @@ Exit:
 //
 //---------------------------------------------------------------------------
 
-static tEplKernel EplNmtMnuReset(void)
+static tEplKernel reset(void)
 {
 tEplKernel  ret;
 UINT        index;
@@ -3638,7 +3611,7 @@ UINT        index;
 #if EPL_NMTMNU_PRES_CHAINING_MN != FALSE
 //---------------------------------------------------------------------------
 //
-// Function:    EplNmtMnuPrcMeasure
+// Function:    prcMeasure
 //
 // Description: Perform measure phase of PRC node insertion
 //
@@ -3650,7 +3623,7 @@ UINT        index;
 //
 //---------------------------------------------------------------------------
 
-static tEplKernel EplNmtMnuPrcMeasure(void)
+static tEplKernel prcMeasure(void)
 {
 tEplKernel          ret;
 UINT                nodeId;
@@ -3712,7 +3685,7 @@ UINT        nodeIdPrevSyncReq;
                     {
                         SyncRequestData.m_uiNodeId = nodeIdPredNode;
 
-                        ret = EplSyncuRequestSyncResponse(EplNmtMnuPrcCbSyncResMeasure, &SyncRequestData, uiSize);
+                        ret = EplSyncuRequestSyncResponse(prcCbSyncResMeasure, &SyncRequestData, uiSize);
                         if (ret != kEplSuccessful)
                         {
                             goto Exit;
@@ -3721,7 +3694,7 @@ UINT        nodeIdPrevSyncReq;
 
                     SyncRequestData.m_uiNodeId = nodeId;
 
-                    ret = EplSyncuRequestSyncResponse(EplNmtMnuPrcCbSyncResMeasure, &SyncRequestData, uiSize);
+                    ret = EplSyncuRequestSyncResponse(prcCbSyncResMeasure, &SyncRequestData, uiSize);
                     if (ret != kEplSuccessful)
                     {
                         goto Exit;
@@ -3754,12 +3727,12 @@ UINT        nodeIdPrevSyncReq;
             nmtMnuInstance_g.flags &= ~EPL_NMTMNU_FLAG_PRC_ADD_IN_PROGRESS;
 
             // A new insertion process can be started
-            ret = EplNmtMnuAddNodeIsochronous(EPL_C_ADR_INVALID);
+            ret = addNodeIsochronous(EPL_C_ADR_INVALID);
         }
         else
         {
             // Prepare shift phase and add phase
-            ret = EplNmtMnuPrcCalculate(nodeIdFirstNode);
+            ret = prcCalculate(nodeIdFirstNode);
         }
     }
 
@@ -3770,7 +3743,7 @@ Exit:
 
 //---------------------------------------------------------------------------
 //
-// Function:    EplNmtMnuPrcCalculate
+// Function:    prcCalculate
 //
 // Description: Update calculation of PRes Response Times (CNs) and
 //              PRes Chaining Slot Time (MN).
@@ -3784,7 +3757,7 @@ Exit:
 //
 //---------------------------------------------------------------------------
 
-static tEplKernel EplNmtMnuPrcCalculate(UINT nodeIdFirstNode_p)
+static tEplKernel prcCalculate(UINT nodeIdFirstNode_p)
 {
 tEplKernel          ret;
 UINT                nodeId;
@@ -3814,7 +3787,7 @@ UINT32              pResMnTimeoutNs;
             && (   (pNodeInfo->flags & EPL_NMTMNU_NODE_FLAG_ISOCHRON)
                 || (pNodeInfo->prcFlags & EPL_NMTMNU_NODE_FLAG_PRC_ADD_IN_PROGRESS)))
         {
-            ret = EplNmtMnuPrcCalcPResResponseTimeNs(nodeId, nodeIdPredNode, &pResResponseTimeNs);
+            ret = prcCalcPResResponseTimeNs(nodeId, nodeIdPredNode, &pResResponseTimeNs);
             if (ret != kEplSuccessful)
             {
                 goto Exit;
@@ -3834,7 +3807,7 @@ UINT32              pResMnTimeoutNs;
         }
     }
 
-    ret = EplNmtMnuPrcCalcPResChainingSlotTimeNs(nodeIdPredNode, &pResMnTimeoutNs);
+    ret = prcCalcPResChainingSlotTimeNs(nodeIdPredNode, &pResMnTimeoutNs);
     if (ret != kEplSuccessful)
     {
         goto Exit;
@@ -3857,7 +3830,7 @@ UINT32              pResMnTimeoutNs;
     }
 
     // enter next phase
-    ret = EplNmtMnuPrcShift(EPL_C_ADR_INVALID);
+    ret = prcShift(EPL_C_ADR_INVALID);
 
 Exit:
     return ret;
@@ -3866,7 +3839,7 @@ Exit:
 
 //---------------------------------------------------------------------------
 //
-// Function:    EplNmtMnuPrcCalcPResResponseTimeNs
+// Function:    prcCalcPResResponseTimeNs
 //
 // Description: Calculate PRes Response Time of a node
 //
@@ -3880,7 +3853,7 @@ Exit:
 //
 //---------------------------------------------------------------------------
 
-static tEplKernel EplNmtMnuPrcCalcPResResponseTimeNs(
+static tEplKernel prcCalcPResResponseTimeNs(
                                     UINT            nodeId_p,
                                     UINT            nodeIdPredNode_p,
                                     UINT32*          pPResResponseTimeNs_p)
@@ -3894,7 +3867,7 @@ tEplObdSize         obdSize;
 
     if (nodeIdPredNode_p == EPL_C_ADR_INVALID)
     {   // no predecessor node passed
-        nodeIdPredNode_p = EplNmtMnuPrcFindPredecessorNode(nodeId_p);
+        nodeIdPredNode_p = prcFindPredecessorNode(nodeId_p);
 
         if (nodeIdPredNode_p == EPL_C_ADR_INVALID)
         {   // no predecessor node found
@@ -3947,7 +3920,7 @@ Exit:
 
 //---------------------------------------------------------------------------
 //
-// Function:    EplNmtMnuPrcCalcPResChainingSlotTimeNs
+// Function:    prcCalcPResChainingSlotTimeNs
 //
 // Description: Calculate PRes Chaining Slot Time
 //
@@ -3959,7 +3932,7 @@ Exit:
 //
 //---------------------------------------------------------------------------
 
-static tEplKernel EplNmtMnuPrcCalcPResChainingSlotTimeNs(
+static tEplKernel prcCalcPResChainingSlotTimeNs(
                                     UINT            nodeIdLastNode_p,
                                     UINT32*          pPResChainingSlotTimeNs_p)
 {
@@ -4021,7 +3994,7 @@ Exit:
 
 //---------------------------------------------------------------------------
 //
-// Function:    EplNmtMnuPrcFindPredecessorNode
+// Function:    prcFindPredecessorNode
 //
 // Description: Find the predecessor of the addressed node.
 //              The function processes only PRC nodes which are added
@@ -4036,7 +4009,7 @@ Exit:
 //
 //---------------------------------------------------------------------------
 
-static tEplKernel EplNmtMnuPrcFindPredecessorNode(UINT nodeId_p)
+static tEplKernel prcFindPredecessorNode(UINT nodeId_p)
 {
 UINT                nodeId;
 tNmtMnuNodeInfo* pNodeInfo;
@@ -4063,7 +4036,7 @@ tNmtMnuNodeInfo* pNodeInfo;
 
 //---------------------------------------------------------------------------
 //
-// Function:    EplNmtMnuPrcCbSyncResMeasure
+// Function:    prcCbSyncResMeasure
 //
 // Description: SyncRes call-back function after SyncReq for measurement
 //
@@ -4076,7 +4049,7 @@ tNmtMnuNodeInfo* pNodeInfo;
 //
 //---------------------------------------------------------------------------
 
-static tEplKernel PUBLIC EplNmtMnuPrcCbSyncResMeasure(
+static tEplKernel PUBLIC prcCbSyncResMeasure(
                                   UINT                  nodeId_p,
                                   tEplSyncResponse*     pSyncResponse_p)
 {
@@ -4089,7 +4062,7 @@ UINT32              syncNodeNumber;
 
     if (pSyncResponse_p == NULL)
     {   // SyncRes not received
-        EplNmtMnuPrcSyncError(pNodeInfo);
+        prcSyncError(pNodeInfo);
         goto Exit;
     }
 
@@ -4098,12 +4071,12 @@ UINT32              syncNodeNumber;
         goto Exit;
     }
 
-    nodeIdPredNode = EplNmtMnuPrcFindPredecessorNode(nodeId_p);
+    nodeIdPredNode = prcFindPredecessorNode(nodeId_p);
     syncNodeNumber = AmiGetDwordFromLe(&pSyncResponse_p->m_le_dwSyncNodeNumber);
 
     if (syncNodeNumber != nodeIdPredNode)
     {   // SyncNodeNumber does not match predecessor node
-        EplNmtMnuPrcSyncError(pNodeInfo);
+        prcSyncError(pNodeInfo);
         goto Exit;
     }
 
@@ -4114,7 +4087,7 @@ UINT32              syncNodeNumber;
     pNodeInfo->prcFlags &= ~EPL_NMTMNU_NODE_FLAG_PRC_SYNC_ERR;
 
 Exit:
-    ret = EplNmtMnuPrcCbSyncResNextAction(nodeId_p, pSyncResponse_p);
+    ret = prcCbSyncResNextAction(nodeId_p, pSyncResponse_p);
 
     return ret;
 }
@@ -4122,7 +4095,7 @@ Exit:
 
 //---------------------------------------------------------------------------
 //
-// Function:    EplNmtMnuPrcSyncError
+// Function:    prcSyncError
 //
 // Description: Sets the Sync Error flag and schedules reset node
 //              if required.
@@ -4135,7 +4108,7 @@ Exit:
 //
 //---------------------------------------------------------------------------
 
-static void EplNmtMnuPrcSyncError(tNmtMnuNodeInfo* pNodeInfo_p)
+static void prcSyncError(tNmtMnuNodeInfo* pNodeInfo_p)
 {
     if (pNodeInfo_p->prcFlags & EPL_NMTMNU_NODE_FLAG_PRC_SYNC_ERR)
     {   // Sync Error flag already set
@@ -4152,7 +4125,7 @@ static void EplNmtMnuPrcSyncError(tNmtMnuNodeInfo* pNodeInfo_p)
 
 //---------------------------------------------------------------------------
 //
-// Function:    EplNmtMnuPrcShift
+// Function:    prcShift
 //
 // Description: Perform shift phase of PRC node insertion
 //
@@ -4164,7 +4137,7 @@ static void EplNmtMnuPrcSyncError(tNmtMnuNodeInfo* pNodeInfo_p)
 //
 //---------------------------------------------------------------------------
 
-static tEplKernel EplNmtMnuPrcShift(UINT nodeIdPrevShift_p)
+static tEplKernel prcShift(UINT nodeIdPrevShift_p)
 {
 tEplKernel          ret;
 UINT                nodeId;
@@ -4207,7 +4180,7 @@ UINT                size;
     if (nodeId == 0)
     {   // No node requires shifting
         // Enter next phase
-        ret = EplNmtMnuPrcAdd(EPL_C_ADR_INVALID);
+        ret = prcAdd(EPL_C_ADR_INVALID);
         goto Exit;
     }
 
@@ -4221,7 +4194,7 @@ UINT                size;
     syncRequestData.m_dwPResTimeFirst = pNodeInfo->pResTimeFirstNs;
     size = sizeof(UINT) + 2*sizeof(UINT32);
 
-    ret = EplSyncuRequestSyncResponse(EplNmtMnuPrcCbSyncResShift, &syncRequestData, size);
+    ret = EplSyncuRequestSyncResponse(prcCbSyncResShift, &syncRequestData, size);
 
 Exit:
     return ret;
@@ -4230,7 +4203,7 @@ Exit:
 
 //---------------------------------------------------------------------------
 //
-// Function:    EplNmtMnuPrcCbSyncResShift
+// Function:    prcCbSyncResShift
 //
 // Description: SyncRes call-back function after SyncReq for shifting
 //
@@ -4243,7 +4216,7 @@ Exit:
 //
 //---------------------------------------------------------------------------
 
-static tEplKernel PUBLIC EplNmtMnuPrcCbSyncResShift(
+static tEplKernel PUBLIC prcCbSyncResShift(
                                   UINT                  nodeId_p,
                                   tEplSyncResponse*     pSyncResponse_p)
 {
@@ -4254,7 +4227,7 @@ tNmtMnuNodeInfo* pNodeInfo;
 
     if (pSyncResponse_p == NULL)
     {   // SyncRes not received
-        EplNmtMnuPrcSyncError(pNodeInfo);
+        prcSyncError(pNodeInfo);
         goto Exit;
     }
 
@@ -4268,7 +4241,7 @@ tNmtMnuNodeInfo* pNodeInfo;
     pNodeInfo->prcFlags |= EPL_NMTMNU_NODE_FLAG_PRC_VERIFY;
 
 Exit:
-    ret = EplNmtMnuPrcCbSyncResNextAction(nodeId_p, pSyncResponse_p);
+    ret = prcCbSyncResNextAction(nodeId_p, pSyncResponse_p);
 
     return ret;
 }
@@ -4276,7 +4249,7 @@ Exit:
 
 //---------------------------------------------------------------------------
 //
-// Function:    EplNmtMnuPrcAdd
+// Function:    prcAdd
 //
 // Description: Perform add phase of PRC node insertion
 //
@@ -4288,7 +4261,7 @@ Exit:
 //
 //---------------------------------------------------------------------------
 
-static tEplKernel EplNmtMnuPrcAdd(UINT nodeIdPrevAdd_p)
+static tEplKernel prcAdd(UINT nodeIdPrevAdd_p)
 {
 tEplKernel          ret;
 tEplObdSize         obdSize;
@@ -4344,7 +4317,7 @@ tNmtMnuNodeInfo* pNodeInfoLastSyncReq;
             syncReqData.m_uiNodeId        = nodeId;
             syncReqData.m_dwPResTimeFirst = pNodeInfo->pResTimeFirstNs;
 
-            ret = EplSyncuRequestSyncResponse(EplNmtMnuPrcCbSyncResAdd,
+            ret = EplSyncuRequestSyncResponse(prcCbSyncResAdd,
                                               &syncReqData,
                                               sizeof(syncReqData));
             if (ret != kEplSuccessful)
@@ -4386,7 +4359,7 @@ tNmtMnuNodeInfo* pNodeInfoLastSyncReq;
         nmtMnuInstance_g.flags &= ~EPL_NMTMNU_FLAG_PRC_ADD_IN_PROGRESS;
 
         // A new insertion process can be started
-        ret = EplNmtMnuAddNodeIsochronous(EPL_C_ADR_INVALID);
+        ret = addNodeIsochronous(EPL_C_ADR_INVALID);
     }
 
 Exit:
@@ -4396,7 +4369,7 @@ Exit:
 
 //---------------------------------------------------------------------------
 //
-// Function:    EplNmtMnuPrcCbSyncResAdd
+// Function:    prcCbSyncResAdd
 //
 // Description: SyncRes call-back function after SyncReq for insertion
 //
@@ -4409,7 +4382,7 @@ Exit:
 //
 //---------------------------------------------------------------------------
 
-static tEplKernel PUBLIC EplNmtMnuPrcCbSyncResAdd(
+static tEplKernel PUBLIC prcCbSyncResAdd(
                                   UINT                  nodeId_p,
                                   tEplSyncResponse*     pSyncResponse_p)
 {
@@ -4431,13 +4404,13 @@ tNmtMnuNodeInfo* pNodeInfo;
 
     // No additional node-added event is received for PRC nodes
     // thus the handler has to be called manually.
-    ret = EplNmtMnuCbNodeAdded(nodeId_p);
+    ret = cbNodeAdded(nodeId_p);
     if (ret != kEplSuccessful)
     {
         goto Exit;
     }
 
-    // Flag ISOCHRON has been set in EplNmtMnuCbNodeAdded,
+    // Flag ISOCHRON has been set in cbNodeAdded,
     // thus this flags are reset.
     pNodeInfo->prcFlags &= ~(EPL_NMTMNU_NODE_FLAG_PRC_ADD_IN_PROGRESS |
                                 EPL_NMTMNU_NODE_FLAG_PRC_ADD_SYNCREQ_SENT);
@@ -4446,7 +4419,7 @@ tNmtMnuNodeInfo* pNodeInfo;
     pNodeInfo->prcFlags |= EPL_NMTMNU_NODE_FLAG_PRC_VERIFY;
 
 NextAction:
-    ret = EplNmtMnuPrcCbSyncResNextAction(nodeId_p, pSyncResponse_p);
+    ret = prcCbSyncResNextAction(nodeId_p, pSyncResponse_p);
 
 Exit:
     return ret;
@@ -4455,7 +4428,7 @@ Exit:
 
 //---------------------------------------------------------------------------
 //
-// Function:    EplNmtMnuPrcVerify
+// Function:    prcVerify
 //
 // Description: Perform verify for phase shift and phase add
 //
@@ -4467,7 +4440,7 @@ Exit:
 //
 //---------------------------------------------------------------------------
 
-static tEplKernel EplNmtMnuPrcVerify(UINT nodeId_p)
+static tEplKernel prcVerify(UINT nodeId_p)
 {
 tEplKernel          ret;
 tNmtMnuNodeInfo* pNodeInfo;
@@ -4484,7 +4457,7 @@ UINT                size;
         syncReqData.m_dwSyncControl = EPL_SYNC_DEST_MAC_ADDRESS_VALID;
         size = sizeof(UINT) + sizeof(UINT32);
 
-        ret = EplSyncuRequestSyncResponse(EplNmtMnuPrcCbSyncResVerify, &syncReqData, size);
+        ret = EplSyncuRequestSyncResponse(prcCbSyncResVerify, &syncReqData, size);
     }
     else
     {   // Node has been removed by a reset-node NMT command
@@ -4498,7 +4471,7 @@ UINT                size;
 
 //---------------------------------------------------------------------------
 //
-// Function:    EplNmtMnuPrcCbSyncResVerify
+// Function:    prcCbSyncResVerify
 //
 // Description: SyncRes call-back function after SyncReq for verification
 //
@@ -4511,7 +4484,7 @@ UINT                size;
 //
 //---------------------------------------------------------------------------
 
-static tEplKernel PUBLIC EplNmtMnuPrcCbSyncResVerify(
+static tEplKernel PUBLIC prcCbSyncResVerify(
                                   UINT                  nodeId_p,
                                   tEplSyncResponse*     pSyncResponse_p)
 {
@@ -4523,7 +4496,7 @@ UINT32              pResTimeFirstNs;
 
     if (pSyncResponse_p == NULL)
     {   // SyncRes not received
-        EplNmtMnuPrcSyncError(pNodeInfo);
+        prcSyncError(pNodeInfo);
         goto Exit;
     }
 
@@ -4545,7 +4518,7 @@ UINT32              pResTimeFirstNs;
     pNodeInfo->prcFlags &= ~EPL_NMTMNU_NODE_FLAG_PRC_SYNC_ERR;
 
 Exit:
-    ret = EplNmtMnuPrcCbSyncResNextAction(nodeId_p, pSyncResponse_p);
+    ret = prcCbSyncResNextAction(nodeId_p, pSyncResponse_p);
 
     return ret;
 }
@@ -4553,7 +4526,7 @@ Exit:
 
 //---------------------------------------------------------------------------
 //
-// Function:    EplNmtMnuPrcCbSyncResNextAction
+// Function:    prcCbSyncResNextAction
 //
 // Description: SyncRes call-back function if no specific handling is required.
 //              The next-action node flags are evaluated.
@@ -4567,7 +4540,7 @@ Exit:
 //
 //---------------------------------------------------------------------------
 
-static tEplKernel PUBLIC EplNmtMnuPrcCbSyncResNextAction(
+static tEplKernel PUBLIC prcCbSyncResNextAction(
                                   UINT                  nodeId_p,
                                   tEplSyncResponse*     pSyncResponse_p)
 {
@@ -4635,14 +4608,14 @@ tEplNmtCommand      nmtCommand;
         case EPL_NMTMNU_NODE_FLAG_PRC_CALL_MEASURE:
         {
             pNodeInfo->prcFlags &= ~EPL_NMTMNU_NODE_FLAG_PRC_CALL_MASK;
-            ret = EplNmtMnuPrcMeasure();
+            ret = prcMeasure();
             goto Exit;
         }
 
         case EPL_NMTMNU_NODE_FLAG_PRC_CALL_SHIFT:
         {
             pNodeInfo->prcFlags &= ~EPL_NMTMNU_NODE_FLAG_PRC_CALL_MASK;
-            ret = EplNmtMnuPrcShift(nodeId_p);
+            ret = prcShift(nodeId_p);
             if (ret != kEplSuccessful)
             {
                 goto Exit;
@@ -4653,7 +4626,7 @@ tEplNmtCommand      nmtCommand;
         case EPL_NMTMNU_NODE_FLAG_PRC_CALL_ADD:
         {
             pNodeInfo->prcFlags &= ~EPL_NMTMNU_NODE_FLAG_PRC_CALL_MASK;
-            ret = EplNmtMnuPrcAdd(nodeId_p);
+            ret = prcAdd(nodeId_p);
             if (ret != kEplSuccessful)
             {
                 goto Exit;
@@ -4669,7 +4642,7 @@ tEplNmtCommand      nmtCommand;
 
     if (pNodeInfo->prcFlags & EPL_NMTMNU_NODE_FLAG_PRC_VERIFY)
     {
-        ret = EplNmtMnuPrcVerify(nodeId_p);
+        ret = prcVerify(nodeId_p);
     }
 
 Exit:
@@ -4696,7 +4669,7 @@ Exit:
 //
 //---------------------------------------------------------------------------
 
-static void EplNmtMnuPrcSetFlagsNmtCommandReset(
+static void prcSetFlagsNmtCommandReset(
                                         tNmtMnuNodeInfo* pNodeInfo_p,
                                         tEplNmtCommand      NmtCommand_p)
 {
