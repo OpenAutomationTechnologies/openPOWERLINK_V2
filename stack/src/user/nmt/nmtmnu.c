@@ -278,8 +278,8 @@ typedef struct
     ULONG               timeoutCheckCom;        // in [ms] (object 0x1006 * MultiplexedCycleCount)
     UINT16              flags;                  // global flags
     UINT32              nmtStartup;             // object 0x1F80 NMT_StartUp_U32
-    tEplNmtMnuCbNodeEvent pfnCbNodeEvent;
-    tEplNmtMnuCbBootEvent pfnCbBootEvent;
+    tNmtMnuCbNodeEvent  pfnCbNodeEvent;
+    tNmtMnuCbBootEvent  pfnCbBootEvent;
 #if EPL_NMTMNU_PRES_CHAINING_MN != FALSE
     UINT32              prcPResMnTimeoutNs;
     UINT32              prcPResTimeFirstCorrectionNs;
@@ -299,13 +299,13 @@ static tNmtMnuInstance   nmtMnuInstance_g;
 // local function prototypes
 //---------------------------------------------------------------------------
 
-static tEplKernel PUBLIC EplNmtMnuCbNmtRequest(tEplFrameInfo * pFrameInfo_p);
+static tEplKernel EplNmtMnuCbNmtRequest(tEplFrameInfo * pFrameInfo_p);
 
-static tEplKernel PUBLIC EplNmtMnuCbIdentResponse(
+static tEplKernel EplNmtMnuCbIdentResponse(
                                     UINT                nodeId_p,
                                     tEplIdentResponse*  pIdentResponse_p);
 
-static tEplKernel PUBLIC EplNmtMnuCbStatusResponse(
+static tEplKernel EplNmtMnuCbStatusResponse(
                                     UINT                nodeId_p,
                                     tEplStatusResponse* pStatusResponse_p);
 
@@ -347,11 +347,11 @@ static tEplKernel EplNmtMnuPrcShift(UINT nodeIdPrevShift_p);
 static tEplKernel EplNmtMnuPrcAdd(UINT nodeIdPrevAdd_p);
 static tEplKernel EplNmtMnuPrcVerify(UINT nodeId_p);
 
-static tEplKernel PUBLIC EplNmtMnuPrcCbSyncResMeasure(UINT, tEplSyncResponse*);
-static tEplKernel PUBLIC EplNmtMnuPrcCbSyncResShift(UINT, tEplSyncResponse*);
-static tEplKernel PUBLIC EplNmtMnuPrcCbSyncResAdd(UINT, tEplSyncResponse*);
-static tEplKernel PUBLIC EplNmtMnuPrcCbSyncResVerify(UINT, tEplSyncResponse*);
-static tEplKernel PUBLIC EplNmtMnuPrcCbSyncResNextAction(UINT, tEplSyncResponse*);
+static tEplKernel EplNmtMnuPrcCbSyncResMeasure(UINT, tEplSyncResponse*);
+static tEplKernel EplNmtMnuPrcCbSyncResShift(UINT, tEplSyncResponse*);
+static tEplKernel EplNmtMnuPrcCbSyncResAdd(UINT, tEplSyncResponse*);
+static tEplKernel EplNmtMnuPrcCbSyncResVerify(UINT, tEplSyncResponse*);
+static tEplKernel EplNmtMnuPrcCbSyncResNextAction(UINT, tEplSyncResponse*);
 
 static tEplKernel EplNmtMnuPrcCalcPResResponseTimeNs(
                                     UINT            nodeId_p,
@@ -393,12 +393,11 @@ static void       EplNmtMnuPrcSetFlagsNmtCommandReset(
 //
 //---------------------------------------------------------------------------
 
-tEplKernel EplNmtMnuInit(tEplNmtMnuCbNodeEvent pfnCbNodeEvent_p,
-                         tEplNmtMnuCbBootEvent pfnCbBootEvent_p)
+tEplKernel nmtmnu_init(tNmtMnuCbNodeEvent pfnCbNodeEvent_p, tNmtMnuCbBootEvent pfnCbBootEvent_p)
 {
 tEplKernel ret;
 
-    ret = EplNmtMnuAddInstance(pfnCbNodeEvent_p, pfnCbBootEvent_p);
+    ret = nmtmnu_addInstance(pfnCbNodeEvent_p, pfnCbBootEvent_p);
 
     return ret;
 }
@@ -422,8 +421,8 @@ tEplKernel ret;
 //
 //---------------------------------------------------------------------------
 
-tEplKernel EplNmtMnuAddInstance(tEplNmtMnuCbNodeEvent pfnCbNodeEvent_p,
-                                tEplNmtMnuCbBootEvent pfnCbBootEvent_p)
+tEplKernel nmtmnu_addInstance(tNmtMnuCbNodeEvent pfnCbNodeEvent_p,
+                                tNmtMnuCbBootEvent pfnCbBootEvent_p)
 {
 tEplKernel ret;
 
@@ -475,7 +474,7 @@ Exit:
 //
 //---------------------------------------------------------------------------
 
-tEplKernel EplNmtMnuDelInstance(void)
+tEplKernel nmtmnu_delInstance(void)
 {
 tEplKernel  ret;
 
@@ -506,10 +505,8 @@ tEplKernel  ret;
 //
 //---------------------------------------------------------------------------
 
-tEplKernel EplNmtMnuSendNmtCommandEx(UINT nodeId_p,
-                                    tEplNmtCommand  nmtCommand_p,
-                                    void* pNmtCommandData_p,
-                                    UINT uiDataSize_p)
+tEplKernel nmtmnu_sendNmtCommandEx(UINT nodeId_p, tEplNmtCommand nmtCommand_p,
+                                   void* pNmtCommandData_p, UINT uiDataSize_p)
 {
 tEplKernel          ret;
 tEplFrameInfo       frameInfo;
@@ -735,11 +732,11 @@ Exit:
 //
 //---------------------------------------------------------------------------
 
-tEplKernel EplNmtMnuSendNmtCommand(UINT nodeId_p, tEplNmtCommand  nmtCommand_p)
+tEplKernel nmtmnu_sendNmtCommand(UINT nodeId_p, tEplNmtCommand  nmtCommand_p)
 {
 tEplKernel      ret = kEplSuccessful;
 
-    ret = EplNmtMnuSendNmtCommandEx(nodeId_p, nmtCommand_p, NULL, 0);
+    ret = nmtmnu_sendNmtCommandEx(nodeId_p, nmtCommand_p, NULL, 0);
 
 //Exit:
     return ret;
@@ -761,7 +758,7 @@ tEplKernel      ret = kEplSuccessful;
 //
 //---------------------------------------------------------------------------
 
-tEplKernel EplNmtMnuRequestNmtCommand(UINT nodeId_p,
+tEplKernel nmtmnu_requestNmtCommand(UINT nodeId_p,
                                     tEplNmtCommand  nmtCommand_p)
 {
 tEplKernel      ret = kEplSuccessful;
@@ -898,7 +895,7 @@ tEplNmtState    nmtState;
     }
 
     // send command to remote node
-    ret = EplNmtMnuSendNmtCommand(nodeId_p, nmtCommand_p);
+    ret = nmtmnu_sendNmtCommand(nodeId_p, nmtCommand_p);
 
 Exit:
     return ret;
@@ -919,7 +916,7 @@ Exit:
 //
 //---------------------------------------------------------------------------
 
-tEplKernel EplNmtMnuTriggerStateChange(UINT nodeId_p,
+tEplKernel nmtmnu_triggerStateChange(UINT nodeId_p,
                                        tEplNmtNodeCommand  nodeCommand_p)
 {
 tEplKernel          ret = kEplSuccessful;
@@ -965,7 +962,7 @@ Exit:
 //
 //---------------------------------------------------------------------------
 
-tEplKernel PUBLIC EplNmtMnuCbNmtStateChange(tEplEventNmtStateChange nmtStateChange_p)
+tEplKernel nmtmnu_cbNmtStateChange(tEplEventNmtStateChange nmtStateChange_p)
 {
     tEplKernel      ret = kEplSuccessful;
     UINT8           newMnNmtState;
@@ -1174,7 +1171,7 @@ tEplKernel PUBLIC EplNmtMnuCbNmtStateChange(tEplEventNmtStateChange nmtStateChan
                                                 EPL_C_ADR_BROADCAST,
                                                 kEplNmtCmdResetNode);
 
-                ret = EplNmtMnuSendNmtCommand(EPL_C_ADR_BROADCAST, kEplNmtCmdResetNode);
+                ret = nmtmnu_sendNmtCommand(EPL_C_ADR_BROADCAST, kEplNmtCmdResetNode);
                 if (ret != kEplSuccessful)
                 {
                     break;
@@ -1271,7 +1268,7 @@ tEplKernel PUBLIC EplNmtMnuCbNmtStateChange(tEplEventNmtStateChange nmtStateChan
 //
 //---------------------------------------------------------------------------
 
-tEplKernel PUBLIC EplNmtMnuCbCheckEvent(tEplNmtEvent nmtEvent_p)
+tEplKernel nmtmnu_cbCheckEvent(tEplNmtEvent nmtEvent_p)
 {
 tEplKernel      ret = kEplSuccessful;
 
@@ -1294,9 +1291,8 @@ tEplKernel      ret = kEplSuccessful;
 // State:
 //
 //---------------------------------------------------------------------------
-
-EPLDLLEXPORT tEplKernel PUBLIC EplNmtMnuProcessEvent(
-            tEplEvent* pEvent_p)
+//jba why EPLDLLEXPORT
+EPLDLLEXPORT tEplKernel PUBLIC nmtmnu_processEvent(tEplEvent* pEvent_p)
 {
 tEplKernel      ret;
 
@@ -1688,9 +1684,9 @@ Exit:
 //
 //---------------------------------------------------------------------------
 
-tEplKernel PUBLIC EplNmtMnuGetDiagnosticInfo(UINT* pMandatorySlaveCount_p,
-                                             UINT* pSignalSlaveCount_p,
-                                             UINT16* pFlags_p)
+tEplKernel nmtmnu_getDiagnosticInfo(UINT* pMandatorySlaveCount_p,
+                                    UINT* pSignalSlaveCount_p,
+                                    UINT16* pFlags_p)
 {
 tEplKernel      ret = kEplSuccessful;
 
@@ -1726,7 +1722,7 @@ Exit:
 //
 //---------------------------------------------------------------------------
 /*
-UINT32EplNmtMnuGetRunningTimerStatReq(void)
+UINT32 nmtmnu_getRunningTimerStatReq(void)
 {
 tEplKernel      ret = kEplSuccessful;
 UINT    uiIndex;
@@ -1772,7 +1768,7 @@ Exit:
 //
 //---------------------------------------------------------------------------
 
-tEplKernel PUBLIC EplNmtMnuPrcConfig(tEplNmtMnuConfigParam* pConfigParam_p)
+tEplKernel nmtmnu_configPrc(tEplNmtMnuConfigParam* pConfigParam_p)
 {
 tEplKernel  ret;
 
@@ -1830,7 +1826,7 @@ tEplNmtRequestService*  pNmtRequestService;
     targetNodeId = AmiGetByteFromLe(
             &pNmtRequestService->m_le_bTargetNodeId);
 
-    ret = EplNmtMnuRequestNmtCommand(targetNodeId,
+    ret = nmtmnu_requestNmtCommand(targetNodeId,
                                      nmtCommand);
     if (ret != kEplSuccessful)
     {   // error -> reply with kEplNmtCmdInvalidService
@@ -1838,7 +1834,7 @@ tEplNmtRequestService*  pNmtRequestService;
 
         uiSourceNodeId = AmiGetByteFromLe(
                 &pFrameInfo_p->m_pFrame->m_le_bSrcNodeId);
-        ret = EplNmtMnuSendNmtCommand(uiSourceNodeId, kEplNmtCmdInvalidService);
+        ret = nmtmnu_sendNmtCommand(uiSourceNodeId, kEplNmtCmdInvalidService);
     }
 
 Exit:
@@ -2373,7 +2369,7 @@ tEplTimerArg        timerArg;
                                     nodeId_p,
                                     kEplNmtCmdEnableReadyToOperate);
 
-    ret = EplNmtMnuSendNmtCommand(nodeId_p, kEplNmtCmdEnableReadyToOperate);
+    ret = nmtmnu_sendNmtCommand(nodeId_p, kEplNmtCmdEnableReadyToOperate);
     if (ret != kEplSuccessful)
     {
         goto Exit;
@@ -2553,7 +2549,7 @@ tNmtMnuNodeInfo* pNodeInfo;
                                                     index,
                                                     kEplNmtCmdStartNode);
 
-                    ret = EplNmtMnuSendNmtCommand(index, kEplNmtCmdStartNode);
+                    ret = nmtmnu_sendNmtCommand(index, kEplNmtCmdStartNode);
                     if (ret != kEplSuccessful)
                     {
                         goto Exit;
@@ -2582,7 +2578,7 @@ tNmtMnuNodeInfo* pNodeInfo;
                                             EPL_C_ADR_BROADCAST,
                                             kEplNmtCmdStartNode);
 
-            ret = EplNmtMnuSendNmtCommand(EPL_C_ADR_BROADCAST, kEplNmtCmdStartNode);
+            ret = nmtmnu_sendNmtCommand(EPL_C_ADR_BROADCAST, kEplNmtCmdStartNode);
             if (ret != kEplSuccessful)
             {
                 goto Exit;
@@ -3039,7 +3035,7 @@ tEplTimerArg        timerArg;
                                             | kEplNmtCmdResetNode));
 
             // send NMT reset node to CN for activation of restored configuration
-            ret = EplNmtMnuSendNmtCommand(nodeId_p, kEplNmtCmdResetNode);
+            ret = nmtmnu_sendNmtCommand(nodeId_p, kEplNmtCmdResetNode);
 
             break;
         }
@@ -3061,7 +3057,7 @@ tEplTimerArg        timerArg;
                                             | kEplNmtCmdResetConfiguration));
 
             // send NMT reset configuration to CN for activation of configuration
-            ret = EplNmtMnuSendNmtCommand(nodeId_p, kEplNmtCmdResetConfiguration);
+            ret = nmtmnu_sendNmtCommand(nodeId_p, kEplNmtCmdResetConfiguration);
 
             break;
         }
@@ -3190,7 +3186,7 @@ tEplTimerArg        timerArg;
                                                         | kEplNmtCmdStartNode));
 
                         // start optional CN
-                        ret = EplNmtMnuSendNmtCommand(nodeId_p, kEplNmtCmdStartNode);
+                        ret = nmtmnu_sendNmtCommand(nodeId_p, kEplNmtCmdStartNode);
                     }
                     break;
                 }
@@ -3492,7 +3488,7 @@ tEplNmtState    expNmtState;
                                                 | kEplNmtCmdStartNode));
 
                 // immediately start optional CN, because communication is always OK (e.g. async-only CN)
-                ret = EplNmtMnuSendNmtCommand(nodeId_p, kEplNmtCmdStartNode);
+                ret = nmtmnu_sendNmtCommand(nodeId_p, kEplNmtCmdStartNode);
                 if (ret != kEplSuccessful)
                 {
                     goto Exit;
@@ -3559,7 +3555,7 @@ tEplNmtState    expNmtState;
         // reset CN
         // store error code in NMT command data for diagnostic purpose
         AmiSetWordToLe(&wbeErrorCode, errorCode_p);
-        ret = EplNmtMnuSendNmtCommandEx(nodeId_p, kEplNmtCmdResetNode, &wbeErrorCode, sizeof (wbeErrorCode));
+        ret = nmtmnu_sendNmtCommandEx(nodeId_p, kEplNmtCmdResetNode, &wbeErrorCode, sizeof (wbeErrorCode));
         if (ret == kEplSuccessful)
         {
             ret = kEplReject;
@@ -4627,7 +4623,7 @@ tEplNmtCommand      nmtCommand;
 
     if (nmtCommand != kEplNmtCmdInvalidService)
     {
-        ret = EplNmtMnuSendNmtCommand(nodeId_p, nmtCommand);
+        ret = nmtmnu_sendNmtCommand(nodeId_p, nmtCommand);
         if (ret != kEplSuccessful)
         {
             goto Exit;
