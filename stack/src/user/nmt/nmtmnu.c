@@ -1,73 +1,45 @@
-/****************************************************************************
+/**
+********************************************************************************
+\file   nmtmnu.c
 
-  (c) SYSTEC electronic GmbH, D-07973 Greiz, August-Bebel-Str. 29
-      www.systec-electronic.com
+\brief  Implementation of NMT MNU module
 
-  Project:      openPOWERLINK
+This file contains the implementation of the NMT MNU module.
 
-  Description:  source file for NMT-MN-Module
+\ingroup module_nmtmnu
+*******************************************************************************/
 
-  License:
+/*------------------------------------------------------------------------------
+Copyright (c) 2013, SYSTEC electronic GmbH
+Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+All rights reserved.
 
-    Redistribution and use in source and binary forms, with or without
-    modification, are permitted provided that the following conditions
-    are met:
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+    * Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above copyright
+      notice, this list of conditions and the following disclaimer in the
+      documentation and/or other materials provided with the distribution.
+    * Neither the name of the copyright holders nor the
+      names of its contributors may be used to endorse or promote products
+      derived from this software without specific prior written permission.
 
-    1. Redistributions of source code must retain the above copyright
-       notice, this list of conditions and the following disclaimer.
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL COPYRIGHT HOLDERS BE LIABLE FOR ANY
+DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+------------------------------------------------------------------------------*/
 
-    2. Redistributions in binary form must reproduce the above copyright
-       notice, this list of conditions and the following disclaimer in the
-       documentation and/or other materials provided with the distribution.
-
-    3. Neither the name of SYSTEC electronic GmbH nor the names of its
-       contributors may be used to endorse or promote products derived
-       from this software without prior written permission. For written
-       permission, please contact info@systec-electronic.com.
-
-    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-    LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-    FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-    COPYRIGHT HOLDERS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-    INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-    BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-    LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-    CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-    LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-    ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-    POSSIBILITY OF SUCH DAMAGE.
-
-    Severability Clause:
-
-        If a provision of this License is or becomes illegal, invalid or
-        unenforceable in any jurisdiction, that shall not affect:
-        1. the validity or enforceability in that jurisdiction of any other
-           provision of this License; or
-        2. the validity or enforceability in other jurisdictions of that or
-           any other provision of this License.
-
-  -------------------------------------------------------------------------
-
-                $RCSfile$
-
-                $Author$
-
-                $Revision$  $Date$
-
-                $State$
-
-                Build Environment:
-                    GCC V3.4
-
-  -------------------------------------------------------------------------
-
-  Revision History:
-
-  2006/06/09 k.t.:   start of the implementation
-
-****************************************************************************/
-
+//------------------------------------------------------------------------------
+// includes
+//------------------------------------------------------------------------------
 #include "user/nmtmnu.h"
 #include "user/EplTimeru.h"
 #include "user/identu.h"
@@ -86,15 +58,30 @@
 #error "EPL NmtMnu module needs EPL module OBDU or OBDK!"
 #endif
 
-//=========================================================================//
-//                                                                         //
-//          P R I V A T E   D E F I N I T I O N S                          //
-//                                                                         //
-//=========================================================================//
+//============================================================================//
+//            G L O B A L   D E F I N I T I O N S                             //
+//============================================================================//
 
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // const defines
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// module global vars
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// global function prototypes
+//------------------------------------------------------------------------------
+
+
+//============================================================================//
+//            P R I V A T E   D E F I N I T I O N S                           //
+//============================================================================//
+
+//------------------------------------------------------------------------------
+// const defines
+//------------------------------------------------------------------------------
 
 // TracePoint support for realtime-debugging
 #ifdef _DBG_TRACE_POINTS_
@@ -206,10 +193,9 @@
 // d.k. may be replaced by special (hash) function if node ID array is smaller than 254
 #define EPL_NMTMNU_GET_NODEINFO(nodeId_p) (&nmtMnuInstance_g.aNodeInfo[nodeId_p - 1])
 
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // local types
-//---------------------------------------------------------------------------
-
+//------------------------------------------------------------------------------
 typedef struct
 {
     UINT                nodeId;
@@ -287,18 +273,14 @@ typedef struct
 #endif
 } tNmtMnuInstance;
 
-
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // local vars
-//---------------------------------------------------------------------------
-
+//------------------------------------------------------------------------------
 static tNmtMnuInstance   nmtMnuInstance_g;
 
-
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // local function prototypes
-//---------------------------------------------------------------------------
-
+//------------------------------------------------------------------------------
 static tEplKernel cbNmtRequest(tEplFrameInfo * pFrameInfo_p);
 static tEplKernel cbIdentResponse(UINT nodeId_p, tEplIdentResponse* pIdentResponse_p);
 static tEplKernel cbStatusResponse(UINT nodeId_p, tEplStatusResponse* pStatusResponse_p);
@@ -341,31 +323,22 @@ static void       prcSetFlagsNmtCommandReset(tNmtMnuNodeInfo* pNodeInfo_p,
                                              tEplNmtCommand nmtCommand_p);
 #endif
 
+//============================================================================//
+//            P U B L I C   F U N C T I O N S                                 //
+//============================================================================//
 
-//=========================================================================//
-//                                                                         //
-//          P U B L I C   F U N C T I O N S                                //
-//                                                                         //
-//=========================================================================//
 
-//---------------------------------------------------------------------------
-//
-// Function:    EplNmtMnuInit
-//
-// Description: init first instance of the module
-//
-//
-//
-// Parameters:
-//
-//
-// Returns:     tEplKernel  = errorcode
-//
-//
-// State:
-//
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+/**
+\brief  Init nmtmnu module
 
+The function initializes an instance of the nmtmnu module
+
+\return The function returns a tEplKernel error code.
+
+\ingroup module_nmtmnu
+*/
+//------------------------------------------------------------------------------
 tEplKernel nmtmnu_init(tNmtMnuCbNodeEvent pfnCbNodeEvent_p, tNmtMnuCbBootEvent pfnCbBootEvent_p)
 {
 tEplKernel ret;
@@ -375,25 +348,17 @@ tEplKernel ret;
     return ret;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Add nmtmnu module instance
 
-//---------------------------------------------------------------------------
-//
-// Function:    EplNmtMnuAddInstance
-//
-// Description: init other instances of the module
-//
-//
-//
-// Parameters:
-//
-//
-// Returns:     tEplKernel  = errorcode
-//
-//
-// State:
-//
-//---------------------------------------------------------------------------
+The function adds a nmtmnu module instance.
 
+\return The function returns a tEplKernel error code.
+
+\ingroup module_nmtmnu
+*/
+//------------------------------------------------------------------------------
 tEplKernel nmtmnu_addInstance(tNmtMnuCbNodeEvent pfnCbNodeEvent_p,
                                 tNmtMnuCbBootEvent pfnCbBootEvent_p)
 {
@@ -428,25 +393,17 @@ Exit:
 
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Delete nmtmnu module instance
 
-//---------------------------------------------------------------------------
-//
-// Function:    EplNmtMnuDelInstance
-//
-// Description: delete instance
-//
-//
-//
-// Parameters:
-//
-//
-// Returns:     tEplKernel  = errorcode
-//
-//
-// State:
-//
-//---------------------------------------------------------------------------
+The function deletes an nmtmnu module instance.
 
+\return The function returns a tEplKernel error code.
+
+\ingroup module_nmtmnu
+*/
+//------------------------------------------------------------------------------
 tEplKernel nmtmnu_delInstance(void)
 {
 tEplKernel  ret;
@@ -462,22 +419,22 @@ tEplKernel  ret;
 
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Send extended NMT command
 
-//---------------------------------------------------------------------------
-//
-// Function:    EplNmtMnuSendNmtCommandEx
-//
-// Description: sends the specified NMT command to the specified node.
-//
-// Parameters:  nodeId_p              = node ID to which the NMT command will be sent
-//              NmtCommand_p            = NMT command
-//
-// Returns:     tEplKernel              = error code
-//
-// State:
-//
-//---------------------------------------------------------------------------
+The function sends a extended NMT command.
 
+\param  nodeId_p            Node ID to which the NMT command will be sent.
+\param  nmtCommand_p        NMT command to send.
+\param  pNmtCommandData_p   Pointer to additional NMT command data.
+\param  uiDataSize_p        Length of additional NMT command data.
+
+\return The function returns a tEplKernel error code.
+
+\ingroup module_nmtmnu
+*/
+//------------------------------------------------------------------------------
 tEplKernel nmtmnu_sendNmtCommandEx(UINT nodeId_p, tEplNmtCommand nmtCommand_p,
                                    void* pNmtCommandData_p, UINT uiDataSize_p)
 {
@@ -690,21 +647,20 @@ Exit:
     return ret;
 }
 
-//---------------------------------------------------------------------------
-//
-// Function:    EplNmtMnuSendNmtCommand
-//
-// Description: sends the specified NMT command to the specified node.
-//
-// Parameters:  nodeId_p              = node ID to which the NMT command will be sent
-//              NmtCommand_p            = NMT command
-//
-// Returns:     tEplKernel              = error code
-//
-// State:
-//
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+/**
+\brief  Send NMT command
 
+The function sends a NMT command.
+
+\param  nodeId_p            Node ID to which the NMT command will be sent.
+\param  nmtCommand_p        NMT command to send.
+
+\return The function returns a tEplKernel error code.
+
+\ingroup module_nmtmnu
+*/
+//------------------------------------------------------------------------------
 tEplKernel nmtmnu_sendNmtCommand(UINT nodeId_p, tEplNmtCommand  nmtCommand_p)
 {
 tEplKernel      ret = kEplSuccessful;
@@ -715,22 +671,21 @@ tEplKernel      ret = kEplSuccessful;
     return ret;
 }
 
-//---------------------------------------------------------------------------
-//
-// Function:    EplNmtMnuRequestNmtCommand
-//
-// Description: requests the specified NMT command for the specified node.
-//              It may also be applied to the local node.
-//
-// Parameters:  nodeId_p              = node ID to which the NMT command will be sent
-//              NmtCommand_p            = NMT command
-//
-// Returns:     tEplKernel              = error code
-//
-// State:
-//
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+/**
+\brief  Request NMT command
 
+The function requests the specified NMT command for the specified node. It may
+also be applied to the local node.
+
+\param  nodeId_p            Node ID for which the NMT command will be requested.
+\param  nmtCommand_p        NMT command to request.
+
+\return The function returns a tEplKernel error code.
+
+\ingroup module_nmtmnu
+*/
+//------------------------------------------------------------------------------
 tEplKernel nmtmnu_requestNmtCommand(UINT nodeId_p,
                                     tEplNmtCommand  nmtCommand_p)
 {
@@ -874,21 +829,21 @@ Exit:
     return ret;
 }
 
-//---------------------------------------------------------------------------
-//
-// Function:    EplNmtMnuTriggerStateChange
-//
-// Description: triggers the specified node command for the specified node.
-//
-// Parameters:  nodeId_p              = node ID for which the node command will be executed
-//              NodeCommand_p           = node command
-//
-// Returns:     tEplKernel              = error code
-//
-// State:
-//
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+/**
+\brief  Trigger NMT state change
 
+The function triggers a NMT state change by sending the specified node command
+to the specified node.
+
+\param  nodeId_p            Node ID to send the node command to.
+\param  nodeCommand_p       Node command to send.
+
+\return The function returns a tEplKernel error code.
+
+\ingroup module_nmtmnu
+*/
+//------------------------------------------------------------------------------
 tEplKernel nmtmnu_triggerStateChange(UINT nodeId_p,
                                        tEplNmtNodeCommand  nodeCommand_p)
 {
@@ -919,22 +874,19 @@ Exit:
     return ret;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Callback function for NMT state changes
 
-//---------------------------------------------------------------------------
-//
-// Function:    EplNmtMnuCbNmtStateChange
-//
-// Description: callback function for NMT state changes
-//
-// Parameters:  NmtStateChange_p        = NMT state change event
-//
-// Returns:     tEplKernel              = error code
-//
-//
-// State:
-//
-//---------------------------------------------------------------------------
+The function implements the callback function for NMT state changes
 
+\param  nmtStateChange_p    The received NMT state change event.
+
+\return The function returns a tEplKernel error code.
+
+\ingroup module_nmtmnu
+*/
+//------------------------------------------------------------------------------
 tEplKernel nmtmnu_cbNmtStateChange(tEplEventNmtStateChange nmtStateChange_p)
 {
     tEplKernel      ret = kEplSuccessful;
@@ -1223,24 +1175,23 @@ tEplKernel nmtmnu_cbNmtStateChange(tEplEventNmtStateChange nmtStateChange_p)
     return ret;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Callback function for NMT event checks
 
-//---------------------------------------------------------------------------
-//
-// Function:    EplNmtMnuCbCheckEvent
-//
-// Description: callback function for NMT events before they are actually executed.
-//              The EPL API layer must forward NMT events from NmtCnu module.
-//              This module will reject some NMT commands while MN.
-//
-// Parameters:  NmtEvent_p              = outstanding NMT event for approval
-//
-// Returns:     tEplKernel              = error code
-//                      kEplReject      = reject the NMT event
-//
-// State:
-//
-//---------------------------------------------------------------------------
+The function implements the callback function for NMT event checks. It
+checks events before they are actually executed. The openPOWERLINK API layer
+must forward NMT events from NmtCnu module.
 
+This module will reject some NMT commands while MN.
+
+\param  nmtEvent_p      The received NMT event.
+
+\return The function returns a tEplKernel error code.
+
+\ingroup module_nmtmnu
+*/
+//------------------------------------------------------------------------------
 tEplKernel nmtmnu_cbCheckEvent(tEplNmtEvent nmtEvent_p)
 {
 tEplKernel      ret = kEplSuccessful;
@@ -1250,22 +1201,20 @@ tEplKernel      ret = kEplSuccessful;
     return ret;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Callback function for NMT events
 
-//---------------------------------------------------------------------------
-//
-// Function:    EplNmtuProcessEvent
-//
-// Description: processes events from event queue
-//
-// Parameters:  pEvent_p        = pointer to event
-//
-// Returns:     tEplKernel      = errorcode
-//
-// State:
-//
-//---------------------------------------------------------------------------
-//jba why EPLDLLEXPORT
-EPLDLLEXPORT tEplKernel PUBLIC nmtmnu_processEvent(tEplEvent* pEvent_p)
+The function implements the callback function for NMT events.
+
+\param  pEvent_p            Pointer to the received NMT event.
+
+\return The function returns a tEplKernel error code.
+
+\ingroup module_nmtmnu
+*/
+//------------------------------------------------------------------------------
+tEplKernel nmtmnu_processEvent(tEplEvent* pEvent_p)
 {
 tEplKernel      ret;
 
@@ -1640,23 +1589,21 @@ Exit:
     return ret;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Get diagnostic info
 
-//---------------------------------------------------------------------------
-//
-// Function:    EplNmtMnuGetDiagnosticInfo
-//
-// Description: returns diagnostic information
-//
-// Parameters:  puiMandatorySlaveCount_p    = OUT: Mandatory Slave Count
-//              puiSignalSlaveCount_p       = OUT: Signal Slave Count
-//              pwFlags_p                   = OUT: Global flags
-//
-// Returns:     tEplKernel                  = error code
-//
-// State:
-//
-//---------------------------------------------------------------------------
+The function returns diagnostic information.
 
+\param  pMandatorySlaveCount_p  Pointer to store mandatory slave count.
+\param  pSignalSlaveCount_p     Pointer to store signal slave count.
+\param  pFlags_p                Pointer to store global flags.
+
+\return The function returns a tEplKernel error code.
+
+\ingroup module_nmtmnu
+*/
+//------------------------------------------------------------------------------
 tEplKernel nmtmnu_getDiagnosticInfo(UINT* pMandatorySlaveCount_p,
                                     UINT* pSignalSlaveCount_p,
                                     UINT16* pFlags_p)
@@ -1679,68 +1626,20 @@ Exit:
     return ret;
 }
 
-
-//---------------------------------------------------------------------------
-//
-// Function:    EplNmtMnuGetRunningTimerStatReq
-//
-// Description: returns a bit field with running StatReq timers
-//              just for debugging purposes
-//
-// Parameters:  (none)
-//
-// Returns:     tEplKernel              = error code
-//
-// State:
-//
-//---------------------------------------------------------------------------
-/*
-UINT32 nmtmnu_getRunningTimerStatReq(void)
-{
-tEplKernel      ret = kEplSuccessful;
-UINT    uiIndex;
-tNmtMnuNodeInfo* pNodeInfo;
-
-    pNodeInfo = nmtMnuInstance_g.aNodeInfo;
-    for (uiIndex = 1; uiIndex <= tabentries(nmtMnuInstance_g.aNodeInfo); uiIndex++, pNodeInfo++)
-    {
-        if (pNodeInfo->nodeState == kNmtMnuNodeStateConfigured)
-        {
-            // reset flag "scanned once"
-            pNodeInfo->flags &= ~EPL_NMTMNU_NODE_FLAG_SCANNED;
-
-            ret = nodeBootStep2(uiIndex, pNodeInfo);
-            if (ret != kEplSuccessful)
-            {
-                goto Exit;
-            }
-            nmtMnuInstance_g.signalSlaveCount++;
-            // signal slave counter shall be decremented if StatusRequest was sent once to a CN
-            // mandatory slave counter shall be decremented if mandatory CN is ReadyToOp
-        }
-    }
-
-Exit:
-    return ret;
-}
-*/
-
-
 #if EPL_NMTMNU_PRES_CHAINING_MN != FALSE
-//---------------------------------------------------------------------------
-//
-// Function:    EplNmtMnuPrcConfig
-//
-// Description: Configure PRes Chaining parameters
-//
-// Parameters:  void
-//
-// Returns:     tEplKernel              = error code
-//
-// State:
-//
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+/**
+\brief  Configure PRes chaining parameters
 
+The function configures the PRes chaining parameters
+
+\param  pConfigParam_p          PRes chaining parameters.
+
+\return The function returns a tEplKernel error code.
+
+\ingroup module_nmtmnu
+*/
+//------------------------------------------------------------------------------
 tEplKernel nmtmnu_configPrc(tEplNmtMnuConfigParam* pConfigParam_p)
 {
 tEplKernel  ret;
@@ -1756,27 +1655,23 @@ tEplKernel  ret;
 }
 #endif
 
+//============================================================================//
+//            P R I V A T E   F U N C T I O N S                               //
+//============================================================================//
+/// \name Private Functions
+/// \{
 
-//=========================================================================//
-//                                                                         //
-//          P R I V A T E   F U N C T I O N S                              //
-//                                                                         //
-//=========================================================================//
+//------------------------------------------------------------------------------
+/**
+\brief  Callback function for NMT requests
 
-//---------------------------------------------------------------------------
-//
-// Function:    cbNmtRequest
-//
-// Description: callback funktion for NmtRequest
-//
-// Parameters:  pFrameInfo_p            = Frame with the NmtRequest
-//
-// Returns:     tEplKernel              = error code
-//
-// State:
-//
-//---------------------------------------------------------------------------
+The function implements the callback function for NMT requests.
 
+\param  pFrameInfo_p        Pointer to NMT request frame information.
+
+\return The function returns a tEplKernel error code.
+*/
+//------------------------------------------------------------------------------
 static tEplKernel cbNmtRequest(tEplFrameInfo * pFrameInfo_p)
 {
 tEplKernel      ret = kEplSuccessful;
@@ -1814,23 +1709,19 @@ Exit:
     return ret;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Callback function for Ident responses
 
-//---------------------------------------------------------------------------
-//
-// Function:    cbIdentResponse
-//
-// Description: callback funktion for IdentResponse
-//
-// Parameters:  nodeId_p              = node ID for which IdentReponse was received
-//              pIdentResponse_p        = pointer to IdentResponse
-//                                        is NULL if node did not answer
-//
-// Returns:     tEplKernel              = error code
-//
-// State:
-//
-//---------------------------------------------------------------------------
+The function implements the callback function for Ident responses
 
+\param  nodeId_p            Node ID for which IdentResponse was received.
+\param  pFrameInfo_p        Pointer to IdentResponse. It is NULL if node did
+                            not answer.
+
+\return The function returns a tEplKernel error code.
+*/
+//------------------------------------------------------------------------------
 static tEplKernel PUBLIC cbIdentResponse(
                                   UINT        nodeId_p,
                                   tEplIdentResponse* pIdentResponse_p)
@@ -1879,23 +1770,19 @@ Exit:
     return ret;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Callback function for Status responses
 
-//---------------------------------------------------------------------------
-//
-// Function:    cbStatusResponse
-//
-// Description: callback funktion for StatusResponse
-//
-// Parameters:  nodeId_p              = node ID for which IdentReponse was received
-//              pIdentResponse_p        = pointer to IdentResponse
-//                                        is NULL if node did not answer
-//
-// Returns:     tEplKernel              = error code
-//
-// State:
-//
-//---------------------------------------------------------------------------
+The function implements the callback function for Status responses
 
+\param  nodeId_p            Node ID for which StatusResponse was received.
+\param  pFrameInfo_p        Pointer to StatusResponse. It is NULL if node did
+                            not answer.
+
+\return The function returns a tEplKernel error code.
+*/
+//------------------------------------------------------------------------------
 static tEplKernel PUBLIC cbStatusResponse(
                                   UINT        nodeId_p,
                                   tEplStatusResponse* pStatusResponse_p)
@@ -1920,21 +1807,18 @@ tEplKernel      ret = kEplSuccessful;
     return ret;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Callback function for added node events
 
-//---------------------------------------------------------------------------
-//
-// Function:    cbNodeAdded
-//
-// Description: This function is called after the addressed node has been
-//              added in module Dllk.
-//
-// Parameters:  nodeId_p                  = Node ID
-//
-// Returns:     tEplKernel                  = error code
-//
-// State:
-//
-//---------------------------------------------------------------------------
+The function implements the callback function for added node events. It is
+called after the addressed node has been added in module dllk.
+
+\param  nodeId_p            Node ID for which the event was received.
+
+\return The function returns a tEplKernel error code.
+*/
+//------------------------------------------------------------------------------
 static tEplKernel cbNodeAdded(UINT nodeId_p)
 {
 tEplKernel          ret;
@@ -1959,21 +1843,17 @@ tNmtMnuNodeInfo* pNodeInfo;
     return ret;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Add node into isochronous phase
 
-//---------------------------------------------------------------------------
-//
-// Function:    addNodeIsochronous
-//
-// Description: Adds the given node to the isochronous phase
-//
-// Parameters:  nodeId_p              = node ID of node which is to be added
-//
-// Returns:     tEplKernel              = error code
-//
-// State:
-//
-//---------------------------------------------------------------------------
+The function adds the specified node into the isochronous phase
 
+\param  nodeId_p            Node ID which will be added.
+
+\return The function returns a tEplKernel error code.
+*/
+//------------------------------------------------------------------------------
 static tEplKernel addNodeIsochronous(UINT nodeId_p)
 {
 tEplKernel          ret;
@@ -2074,21 +1954,17 @@ Exit:
     return ret;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Start BootStep1
 
-//---------------------------------------------------------------------------
-//
-// Function:    startBootStep1
-//
-// Description: starts BootStep1
-//
-// Parameters:  (none)
-//
-// Returns:     tEplKernel              = error code
-//
-// State:
-//
-//---------------------------------------------------------------------------
+The function starts the BootStep1.
 
+\param  fNmtResetAllIssued_p    Determines if all nodes should be reset.
+
+\return The function returns a tEplKernel error code.
+*/
+//------------------------------------------------------------------------------
 static tEplKernel startBootStep1(BOOL fNmtResetAllIssued_p)
 {
 tEplKernel			ret = kEplSuccessful;
@@ -2176,24 +2052,17 @@ Exit:
     return ret;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Start BootStep2
 
-//---------------------------------------------------------------------------
-//
-// Function:    startBootStep2
-//
-// Description: starts BootStep2.
-//              That means checking if a node has reached PreOp2 and
-//              has been added to the isochronous phase.
-//              If this is met, the NMT EnableReadyToOp command is sent.
-//
-// Parameters:  (none)
-//
-// Returns:     tEplKernel              = error code
-//
-// State:
-//
-//---------------------------------------------------------------------------
+The function starts the BootStep2. This means checking if a node has reached
+PreOp2 and has been added to the isochronous phase. If this is met, the
+NMT command EnableReadyToOp is sent.
 
+\return The function returns a tEplKernel error code.
+*/
+//------------------------------------------------------------------------------
 static tEplKernel startBootStep2(void)
 {
 tEplKernel      ret = kEplSuccessful;
@@ -2275,30 +2144,25 @@ Exit:
     return ret;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Start BootStep2 for specified node
 
-//---------------------------------------------------------------------------
-//
-// Function:    nodeBootStep2
-//
-// Description: starts BootStep2 for the specified node.
-//              This means checking whether the CN is in NMT state PreOp2
-//              and whether it has been added to the isochronous phase.
-//              If both checks pass, it gets the NMT command EnableReadyToOp.
-//              The CN must be in node state Configured, when it enters
-//              BootStep2. When BootStep2 finishes, the CN is in node state
-//              ReadyToOp.
-//              If TimeoutReadyToOp in object 0x1F89/5 is configured,
-//              TimerHdlLonger will be started with this timeout.
-//
-// Parameters:  nodeId_p              = node ID
-//              pNodeInfo_p             = pointer to internal node info structure
-//
-// Returns:     tEplKernel              = error code
-//
-// State:
-//
-//---------------------------------------------------------------------------
+The function starts BootStep2 for the specified node. This means checking
+whether the CN is in NMT state PreOp2 and whether it has been added to the
+isochronous phase. If both checks pass, it gets the NMT command EnableReadyToOp.
 
+The CN must be in node state Configured, when it enters BootStep2. When
+BootStep2 finishes, the CN is in node state ReadyToOp. If TimeoutReadyToOp
+in object 0x1F89/5 is configured, timerHdlLonger will be started with this
+timeout.
+
+\param  nodeId_p        Node ID for which to start BootStep2.
+\param  pNodeInfo_p     Pointer to node info structure of node.
+
+\return The function returns a tEplKernel error code.
+*/
+//------------------------------------------------------------------------------
 static tEplKernel nodeBootStep2(UINT nodeId_p, tNmtMnuNodeInfo* pNodeInfo_p)
 {
 tEplKernel          ret;
@@ -2361,21 +2225,15 @@ Exit:
     return ret;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Start CheckCommunication
 
-//---------------------------------------------------------------------------
-//
-// Function:    startCheckCom
-//
-// Description: starts CheckCommunication
-//
-// Parameters:  (none)
-//
-// Returns:     tEplKernel              = error code
-//
-// State:
-//
-//---------------------------------------------------------------------------
+The function starts CheckCommunication.
 
+\return The function returns a tEplKernel error code.
+*/
+//------------------------------------------------------------------------------
 static tEplKernel startCheckCom(void)
 {
 tEplKernel      ret = kEplSuccessful;
@@ -2426,24 +2284,19 @@ Exit:
     return ret;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Start CheckCommunication for the specified node
 
-//---------------------------------------------------------------------------
-//
-// Function:    nodeCheckCom
-//
-// Description: checks communication of the specified node.
-//              That means wait some time and if no error occurred everything
-//              is OK.
-//
-// Parameters:  nodeId_p              = node ID
-//              pNodeInfo_p             = pointer to internal node info structure
-//
-// Returns:     tEplKernel              = error code
-//
-// State:
-//
-//---------------------------------------------------------------------------
+The function starts CheckCommunication for the specified node. That means it
+waits some time and if no error occured everything is OK.
 
+\param  nodeId_p        Node ID for which to start CheckCommunication.
+\param  pNodeInfo_p     Pointer to node info structure of node.
+
+\return The function returns a tEplKernel error code.
+*/
+//------------------------------------------------------------------------------
 static tEplKernel nodeCheckCom(UINT nodeId_p, tNmtMnuNodeInfo* pNodeInfo_p)
 {
 tEplKernel      ret = kEplSuccessful;
@@ -2481,21 +2334,15 @@ tEplTimerArg    timerArg;
     return ret;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Start Nodes
 
-//---------------------------------------------------------------------------
-//
-// Function:    startNodes
-//
-// Description: really starts all nodes which are ReadyToOp and CheckCom did not fail
-//
-// Parameters:  (none)
-//
-// Returns:     tEplKernel              = error code
-//
-// State:
-//
-//---------------------------------------------------------------------------
+The function starts all nodes which are ReadyToOp and CheckCom did not fail.
 
+\return The function returns a tEplKernel error code.
+*/
+//------------------------------------------------------------------------------
 static tEplKernel startNodes(void)
 {
 tEplKernel      ret = kEplSuccessful;
@@ -2563,24 +2410,20 @@ Exit:
     return ret;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Process internal node events
 
-//---------------------------------------------------------------------------
-//
-// Function:    processInternalEvent
-//
-// Description: processes internal node events
-//
-// Parameters:  nodeId_p              = node ID
-//              nodeNmtState_p          = NMT state of CN
-//              nodeEvent_p             = occurred events
-//
-// Returns:     tEplKernel              = error code
-//
-//
-// State:
-//
-//---------------------------------------------------------------------------
+The function processes internal node events.
 
+\param  nodeId_p            Node ID to process.
+\param  nodeNmtState_p      NMT state of the node.
+\param  errorCode_p         Error codes.
+\param  nodeEvent_p         Occurred events.
+
+\return The function returns a tEplKernel error code.
+*/
+//------------------------------------------------------------------------------
 static tEplKernel processInternalEvent(
                                     UINT                nodeId_p,
                                     tEplNmtState        nodeNmtState_p,
@@ -3329,26 +3172,23 @@ Exit:
     return ret;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Check NMT state
 
-//---------------------------------------------------------------------------
-//
-// Function:    checkNmtState
-//
-// Description: checks the NMT state, i.e. evaluates it with object 0x1F8F
-//              NMT_MNNodeExpState_AU8 and updates object 0x1F8E
-//              NMT_MNNodeCurrState_AU8.
-//              It manipulates nodeState in internal node info structure.
-//
-// Parameters:  nodeId_p              = node ID
-//              nodeNmtState_p          = NMT state of CN
-//
-// Returns:     tEplKernel              = error code
-//                  kEplReject          = CN was in wrong state and has been reset
-//
-// State:
-//
-//---------------------------------------------------------------------------
+The function checks the NMT state, i.e. evaluates it with object 0x1F8F
+NMT_MNNodeExpState_AU8 and updates object 0x1F8E NMT_MNNodeCurrState_AU8.
+It manipulates the nodeState in the internal node info structure.
 
+\param  nodeId_p            Node ID to check.
+\param  pNodeInfo_p         Pointer to node information structure.
+\param  nodeNmtState_p      NMT state of the node.
+\param  errorCode_p         Error codes.
+\param  localNmtState_p     The local NMT state.
+
+\return The function returns a tEplKernel error code.
+*/
+//------------------------------------------------------------------------------
 static tEplKernel checkNmtState(
                                     UINT                nodeId_p,
                                     tNmtMnuNodeInfo* pNodeInfo_p,
@@ -3572,20 +3412,15 @@ Exit:
     return ret;
 }
 
-//---------------------------------------------------------------------------
-//
-// Function:    reset
-//
-// Description: reset internal structures, e.g. timers
-//
-// Parameters:  void
-//
-// Returns:     tEplKernel              = error code
-//
-// State:
-//
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+/**
+\brief  Reset internal structures
 
+The function resets the internal structures, e.g. timers.
+
+\return The function returns a tEplKernel error code.
+*/
+//------------------------------------------------------------------------------
 static tEplKernel reset(void)
 {
 tEplKernel  ret;
@@ -3609,20 +3444,15 @@ UINT        index;
 
 
 #if EPL_NMTMNU_PRES_CHAINING_MN != FALSE
-//---------------------------------------------------------------------------
-//
-// Function:    prcMeasure
-//
-// Description: Perform measure phase of PRC node insertion
-//
-// Parameters:  void
-//
-// Returns:     tEplKernel              = error code
-//
-// State:
-//
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+/**
+\brief  Perform measure phase of PRC node insertion
 
+The function performs the measure phase of a PRC node insertion
+
+\return The function returns a tEplKernel error code.
+*/
+//------------------------------------------------------------------------------
 static tEplKernel prcMeasure(void)
 {
 tEplKernel          ret;
@@ -3740,23 +3570,19 @@ Exit:
     return ret;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Calculation of PRes Chaining relevant times
 
-//---------------------------------------------------------------------------
-//
-// Function:    prcCalculate
-//
-// Description: Update calculation of PRes Response Times (CNs) and
-//              PRes Chaining Slot Time (MN).
-//
-// Parameters:  nodeIdFirstNode_p = Node ID of the first (lowest node ID)
-//                                    of nodes whose addition is in progress
-//
-// Returns:     tEplKernel          = error code
-//
-// State:
-//
-//---------------------------------------------------------------------------
+The function calculation of PRes Response Times (CNs) and PRes Chaining Slot
+Time (MN).
 
+\param  nodeIdFirstNode_p       Node ID of the first (lowest node ID) of nodes
+                                whose addition is in progress.
+
+\return The function returns a tEplKernel error code.
+*/
+//------------------------------------------------------------------------------
 static tEplKernel prcCalculate(UINT nodeIdFirstNode_p)
 {
 tEplKernel          ret;
@@ -3836,23 +3662,19 @@ Exit:
     return ret;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Calculation of PRes Response Time of a node
 
-//---------------------------------------------------------------------------
-//
-// Function:    prcCalcPResResponseTimeNs
-//
-// Description: Calculate PRes Response Time of a node
-//
-// Parameters:  nodeId_p              = IN:  Node ID
-//              nodeIdPredNode_p      = IN:  Node ID of the predecessor node
-//              pPResResponseTimeNs_p = OUT: PRes Response Time in ns
-//
-// Returns:     tEplKernel              = error code
-//
-// State:
-//
-//---------------------------------------------------------------------------
+The function calculates the PRes Response Time of the specified node.
 
+\param  nodeId_p                Node ID for which to calculate time.
+\param  nodeIdPredNode_p        Node ID of the predecessor node.
+\param  pPResResponseTimeNs_p   Pointer to store calculated time.
+
+\return The function returns a tEplKernel error code.
+*/
+//------------------------------------------------------------------------------
 static tEplKernel prcCalcPResResponseTimeNs(
                                     UINT            nodeId_p,
                                     UINT            nodeIdPredNode_p,
@@ -3917,21 +3739,18 @@ Exit:
     return ret;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Calculation of PRes chaining slot time
 
-//---------------------------------------------------------------------------
-//
-// Function:    prcCalcPResChainingSlotTimeNs
-//
-// Description: Calculate PRes Chaining Slot Time
-//
-// Parameters:  pPResChainingSlotTimeNs_p = OUT: PRes Chaining Slot Time in ns
-//
-// Returns:     tEplKernel                  = error code
-//
-// State:
-//
-//---------------------------------------------------------------------------
+The function calculates the PRes chaining slot time.
 
+\param  nodeIdLastNode_p            Node ID of the last node.
+\param  pPResChainingSlotTimeNs_p   Pointer to store calculated time.
+
+\return The function returns a tEplKernel error code.
+*/
+//------------------------------------------------------------------------------
 static tEplKernel prcCalcPResChainingSlotTimeNs(
                                     UINT            nodeIdLastNode_p,
                                     UINT32*          pPResChainingSlotTimeNs_p)
@@ -3991,25 +3810,21 @@ Exit:
     return ret;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Find predecessor node for PRC
 
-//---------------------------------------------------------------------------
-//
-// Function:    prcFindPredecessorNode
-//
-// Description: Find the predecessor of the addressed node.
-//              The function processes only PRC nodes which are added
-//              to the isochronous phase or whose addition is in progress.
-//
-// Parameters:  nodeId_p          = Node ID of addressed node
-//
-// Returns:     UINT        = Node ID of the predecessor node
-//                                    EPL_C_ADR_INVALID if no node was found
-//
-// State:
-//
-//---------------------------------------------------------------------------
+The function searches the predecessor of the addressed node. The function
+processes only PRC nodes which are added to the isochronous phase or whose
+addition is in progress.
 
-static tEplKernel prcFindPredecessorNode(UINT nodeId_p)
+\param  nodeId_p            Node ID of the processed node.
+
+\return The function returns the node ID of the predecessor node or
+        EPL_C_ADR_INVALID if no node was found.
+*/
+//------------------------------------------------------------------------------
+static UINT prcFindPredecessorNode(UINT nodeId_p)
 {
 UINT                nodeId;
 tNmtMnuNodeInfo* pNodeInfo;
@@ -4033,22 +3848,19 @@ tNmtMnuNodeInfo* pNodeInfo;
     return nodeId;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Callback function for sync response frames
 
-//---------------------------------------------------------------------------
-//
-// Function:    prcCbSyncResMeasure
-//
-// Description: SyncRes call-back function after SyncReq for measurement
-//
-// Parameters:  nodeId_p              = Source node ID
-//              pSyncResponse_p         = Pointer to payload of SyncRes frame
-//
-// Returns:     tEplKernel              = error code
-//
-// State:
-//
-//---------------------------------------------------------------------------
+The function implements the callback function for SyncRes frames after sending
+of SyncReq which is used for measurement.
 
+\param  nodeId_p          Node ID of the node.
+\param  pSyncResponse_p   Pointer to SyncResponse frame.
+
+\return The function returns a tEplKernel error code.
+*/
+//------------------------------------------------------------------------------
 static tEplKernel PUBLIC prcCbSyncResMeasure(
                                   UINT                  nodeId_p,
                                   tEplSyncResponse*     pSyncResponse_p)
@@ -4092,22 +3904,15 @@ Exit:
     return ret;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Set sync error flag
 
-//---------------------------------------------------------------------------
-//
-// Function:    prcSyncError
-//
-// Description: Sets the Sync Error flag and schedules reset node
-//              if required.
-//
-// Parameters:  pNodeInfo_p             = Pointer to NodeInfo
-//
-// Returns:     (none)
-//
-// State:
-//
-//---------------------------------------------------------------------------
+The function sets the Sync Error flag and schedules reset node if required.
 
+\param  pNodeInfo_p         Pointer to node information structure.
+*/
+//------------------------------------------------------------------------------
 static void prcSyncError(tNmtMnuNodeInfo* pNodeInfo_p)
 {
     if (pNodeInfo_p->prcFlags & EPL_NMTMNU_NODE_FLAG_PRC_SYNC_ERR)
@@ -4122,21 +3927,17 @@ static void prcSyncError(tNmtMnuNodeInfo* pNodeInfo_p)
     }
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Perform shift phase for PRC node insertion
 
-//---------------------------------------------------------------------------
-//
-// Function:    prcShift
-//
-// Description: Perform shift phase of PRC node insertion
-//
-// Parameters:  nodeIdPrevShift_p     = Node ID of previously shifted node
-//
-// Returns:     tEplKernel              = error code
-//
-// State:
-//
-//---------------------------------------------------------------------------
+The function performs the shift phase for PRC node insertion.
 
+\param  nodeIdPrevShift_p   Node ID of previously shifted node.
+
+\return The function returns a tEplKernel error code.
+*/
+//------------------------------------------------------------------------------
 static tEplKernel prcShift(UINT nodeIdPrevShift_p)
 {
 tEplKernel          ret;
@@ -4200,22 +4001,19 @@ Exit:
     return ret;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Callback function for Sync Response after shifting
 
-//---------------------------------------------------------------------------
-//
-// Function:    prcCbSyncResShift
-//
-// Description: SyncRes call-back function after SyncReq for shifting
-//
-// Parameters:  nodeId_p              = Source node ID
-//              pSyncResponse_p         = Pointer to payload of SyncRes frame
-//
-// Returns:     tEplKernel              = error code
-//
-// State:
-//
-//---------------------------------------------------------------------------
+The function performs the the callback function for SyncRes frames after sending
+of SyncReq which is used for shifting.
 
+\param  nodeId_p            Node ID of node.
+\param  pSyncResponse_p     Pointer to received SyncRes frame.
+
+\return The function returns a tEplKernel error code.
+*/
+//------------------------------------------------------------------------------
 static tEplKernel PUBLIC prcCbSyncResShift(
                                   UINT                  nodeId_p,
                                   tEplSyncResponse*     pSyncResponse_p)
@@ -4246,21 +4044,17 @@ Exit:
     return ret;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Perform add phase of PRC node insertion
 
-//---------------------------------------------------------------------------
-//
-// Function:    prcAdd
-//
-// Description: Perform add phase of PRC node insertion
-//
-// Parameters:  nodeIdPrevAdd_p       = Node ID of previously added node
-//
-// Returns:     tEplKernel              = error code
-//
-// State:
-//
-//---------------------------------------------------------------------------
+The function performs the add phase of a PRC node insertion.
 
+\param  nodeIdPrevAdd_p     Node ID of previously added node.
+
+\return The function returns a tEplKernel error code.
+*/
+//------------------------------------------------------------------------------
 static tEplKernel prcAdd(UINT nodeIdPrevAdd_p)
 {
 tEplKernel          ret;
@@ -4366,22 +4160,19 @@ Exit:
     return ret;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Callback function for Sync Response for insertion
 
-//---------------------------------------------------------------------------
-//
-// Function:    prcCbSyncResAdd
-//
-// Description: SyncRes call-back function after SyncReq for insertion
-//
-// Parameters:  nodeId_p              = Source node ID
-//              pSyncResponse_p         = Pointer to payload of SyncRes frame
-//
-// Returns:     tEplKernel              = error code
-//
-// State:
-//
-//---------------------------------------------------------------------------
+The function performs the the callback function for SyncRes frames after sending
+of SyncReq which is used for insertion.
 
+\param  nodeId_p            Node ID of node.
+\param  pSyncResponse_p     Pointer to received SyncRes frame.
+
+\return The function returns a tEplKernel error code.
+*/
+//------------------------------------------------------------------------------
 static tEplKernel PUBLIC prcCbSyncResAdd(
                                   UINT                  nodeId_p,
                                   tEplSyncResponse*     pSyncResponse_p)
@@ -4425,21 +4216,17 @@ Exit:
     return ret;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Perform verify
 
-//---------------------------------------------------------------------------
-//
-// Function:    prcVerify
-//
-// Description: Perform verify for phase shift and phase add
-//
-// Parameters:  void
-//
-// Returns:     tEplKernel              = error code
-//
-// State:
-//
-//---------------------------------------------------------------------------
+The function performs a verify for the phase shift and phase add.
 
+\param  nodeId_p     Node ID of node..
+
+\return The function returns a tEplKernel error code.
+*/
+//------------------------------------------------------------------------------
 static tEplKernel prcVerify(UINT nodeId_p)
 {
 tEplKernel          ret;
@@ -4468,23 +4255,20 @@ UINT                size;
     return ret;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Callback function for Sync Response for verification
 
-//---------------------------------------------------------------------------
-//
-// Function:    prcCbSyncResVerify
-//
-// Description: SyncRes call-back function after SyncReq for verification
-//
-// Parameters:  nodeId_p              = Source node ID
-//              pSyncResponse_p         = Pointer to payload of SyncRes frame
-//
-// Returns:     tEplKernel              = error code
-//
-// State:
-//
-//---------------------------------------------------------------------------
+The function performs the the callback function for SyncRes frames after sending
+of SyncReq which is used for verification.
 
-static tEplKernel PUBLIC prcCbSyncResVerify(
+\param  nodeId_p            Node ID of node.
+\param  pSyncResponse_p     Pointer to received SyncRes frame.
+
+\return The function returns a tEplKernel error code.
+*/
+//------------------------------------------------------------------------------
+static tEplKernel prcCbSyncResVerify(
                                   UINT                  nodeId_p,
                                   tEplSyncResponse*     pSyncResponse_p)
 {
@@ -4523,24 +4307,21 @@ Exit:
     return ret;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Callback function for Sync Response without action
 
-//---------------------------------------------------------------------------
-//
-// Function:    prcCbSyncResNextAction
-//
-// Description: SyncRes call-back function if no specific handling is required.
-//              The next-action node flags are evaluated.
-//
-// Parameters:  nodeId_p              = Source node ID
-//              pSyncResponse_p         = Pointer to payload of SyncRes frame
-//
-// Returns:     tEplKernel              = error code
-//
-// State:
-//
-//---------------------------------------------------------------------------
+The function performs the the callback function for SyncRes frames after sending
+of SyncReq which is used if no specific handling is required. The next-action
+node flags are evaluated.
 
-static tEplKernel PUBLIC prcCbSyncResNextAction(
+\param  nodeId_p            Node ID of node.
+\param  pSyncResponse_p     Pointer to received SyncRes frame.
+
+\return The function returns a tEplKernel error code.
+*/
+//------------------------------------------------------------------------------
+static tEplKernel prcCbSyncResNextAction(
                                   UINT                  nodeId_p,
                                   tEplSyncResponse*     pSyncResponse_p)
 {
@@ -4649,26 +4430,18 @@ Exit:
     return ret;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Set PRC reset flags
 
-//---------------------------------------------------------------------------
-//
-// Function:    EplNmtMnuPrcSetResetFlags
-//
-// Description: Before sending a reset-node NMT command PRes Chaining has to
-//              be disabled by sending an appropriate SyncReq. The requested
-//              NMT command is stored until the SyncRes returns.
-//              Commands of higher priority overwrite those of lower priority.
-//
-// Parameters:  pNodeInfo_p             = Pointer to NodeInfo structure
-//                                        of the addressed node
-//              NmtCommand_p            = NMT command
-//
-// Returns:     (none)
-//
-// State:
-//
-//---------------------------------------------------------------------------
+Before sending a reset-node NMT command, PRes Chaining has to be disabled by
+sending an appropriate SyncReq. The requested NMT command is stored until the
+SyncRes returns. Commands of higher priority overwrite those of lower priority.
 
+\param  pNodeInfo_p     Pointer to node information structure.
+\param  nmtCommand_p    NMT command.
+*/
+//------------------------------------------------------------------------------
 static void prcSetFlagsNmtCommandReset(
                                         tNmtMnuNodeInfo* pNodeInfo_p,
                                         tEplNmtCommand      NmtCommand_p)
@@ -4758,5 +4531,5 @@ UINT16 prcFlagsReset;
 
 #endif // #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
 
-// EOF
+///\}
 
