@@ -84,19 +84,12 @@
 // typedef
 //---------------------------------------------------------------------------
 
-typedef tEplKernel (PUBLIC * tEplNmtMnuCbNodeEvent) (
-    UINT nodeId_p,
-    tEplNmtNodeEvent NodeEvent_p,
-    tEplNmtState NmtState_p,
-    UINT16 wErrorCode_p,
-    BOOL fMandatory_p);
+typedef tEplKernel (*tNmtMnuCbNodeEvent) (UINT nodeId_p, tEplNmtNodeEvent NodeEvent_p,
+                                          tEplNmtState NmtState_p, UINT16 wErrorCode_p,
+                                          BOOL fMandatory_p);
 
-
-typedef tEplKernel (PUBLIC * tEplNmtMnuCbBootEvent) (
-    tEplNmtBootEvent BootEvent_p,
-    tEplNmtState NmtState_p,
-    UINT16 wErrorCode_p);
-
+typedef tEplKernel (*tNmtMnuCbBootEvent) (tEplNmtBootEvent BootEvent_p,
+                                          tEplNmtState NmtState_p, UINT16 wErrorCode_p);
 
 typedef struct
 {
@@ -111,36 +104,35 @@ typedef struct
 
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
 
-tEplKernel EplNmtMnuInit(tEplNmtMnuCbNodeEvent pfnCbNodeEvent_p,
-                         tEplNmtMnuCbBootEvent pfnCbBootEvent_p);
+tEplKernel nmtmnu_init(tNmtMnuCbNodeEvent pfnCbNodeEvent_p,
+                       tNmtMnuCbBootEvent pfnCbBootEvent_p);
 
-tEplKernel EplNmtMnuAddInstance(tEplNmtMnuCbNodeEvent pfnCbNodeEvent_p,
-                                tEplNmtMnuCbBootEvent pfnCbBootEvent_p);
+tEplKernel nmtmnu_addInstance(tNmtMnuCbNodeEvent pfnCbNodeEvent_p,
+                              tNmtMnuCbBootEvent pfnCbBootEvent_p);
 
-tEplKernel EplNmtMnuDelInstance(void);
+tEplKernel nmtmnu_delInstance(void);
 
-EPLDLLEXPORT tEplKernel PUBLIC EplNmtMnuProcessEvent(
-            tEplEvent* pEvent_p);
+EPLDLLEXPORT tEplKernel nmtmnu_processEvent(tEplEvent* pEvent_p);
 
-tEplKernel EplNmtMnuSendNmtCommand(UINT nodeId_p,
+tEplKernel nmtmnu_sendNmtCommand(UINT nodeId_p,
                                    tEplNmtCommand  nmtCommand_p);
 
-tEplKernel EplNmtMnuRequestNmtCommand(UINT nodeId_p,
+tEplKernel nmtmnu_requestNmtCommand(UINT nodeId_p,
                                     tEplNmtCommand  nmtCommand_p);
 
-tEplKernel EplNmtMnuTriggerStateChange(UINT nodeId_p,
+tEplKernel nmtmnu_triggerStateChange(UINT nodeId_p,
                                        tEplNmtNodeCommand  nodeCommand_p);
 
-tEplKernel PUBLIC EplNmtMnuCbNmtStateChange(tEplEventNmtStateChange nmtStateChange_p);
+tEplKernel nmtmnu_cbNmtStateChange(tEplEventNmtStateChange nmtStateChange_p);
 
-tEplKernel PUBLIC EplNmtMnuCbCheckEvent(tEplNmtEvent NmtEvent_p);
+tEplKernel nmtmnu_cbCheckEvent(tEplNmtEvent NmtEvent_p);
 
-tEplKernel PUBLIC EplNmtMnuGetDiagnosticInfo(UINT* pMandatorySlaveCount_p,
-                                             UINT* pSignalSlaveCount_p,
-                                             UINT16* pflags_p);
+tEplKernel nmtmnu_getDiagnosticInfo(UINT* pMandatorySlaveCount_p,
+                                    UINT* pSignalSlaveCount_p,
+                                    UINT16* pflags_p);
 
 #if EPL_NMTMNU_PRES_CHAINING_MN != FALSE
-tEplKernel PUBLIC EplNmtMnuPrcConfig(tEplNmtMnuConfigParam* pConfigParam_p);
+tEplKernel nmtmnu_configPrc(tEplNmtMnuConfigParam* pConfigParam_p);
 #endif
 
 #endif

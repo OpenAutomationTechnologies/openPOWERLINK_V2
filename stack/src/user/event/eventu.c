@@ -114,7 +114,7 @@ static tEventDispatchEntry eventDispatchTbl_l[] =
     { kEplEventSinkNmtu,        kEplEventSourceNmtu,        EplNmtuProcessEvent },
 #endif
 #if defined (CONFIG_INCLUDE_NMT_MN)
-    { kEplEventSinkNmtMnu,      kEplEventSourceNmtMnu,      EplNmtMnuProcessEvent },
+    { kEplEventSinkNmtMnu,      kEplEventSourceNmtMnu,      nmtmnu_processEvent },
 #endif
 #if defined (CONFIG_INCLUDE_SDOC) || defined(CONFIG_INCLUDE_SDOS)
     { kEplEventSinkSdoAsySeq,   kEplEventSourceSdoAsySeq,   EplSdoAsySeqProcessEvent },
