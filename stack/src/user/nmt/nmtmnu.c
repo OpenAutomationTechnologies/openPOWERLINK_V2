@@ -49,7 +49,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Benchmark.h"
 
 #if EPL_NMTMNU_PRES_CHAINING_MN != FALSE
-#include "user/EplSyncu.h"
+#include "user/syncu.h"
 #endif
 
 #if defined(CONFIG_INCLUDE_NMT_MN)
@@ -565,7 +565,7 @@ tEplKernel nmtmnu_sendNmtCommandEx(UINT nodeId_p, tEplNmtCommand nmtCommand_p,
                                                   EPL_SYNC_DEST_MAC_ADDRESS_VALID;
                     size = sizeof(UINT) + sizeof(UINT32);
 
-                    ret = EplSyncuRequestSyncResponse(prcCbSyncResNextAction, &SyncReqData, size);
+                    ret = syncu_requestSyncResponse(prcCbSyncResNextAction, &SyncReqData, size);
                     switch (ret)
                     {
                         case kEplSuccessful:
@@ -1779,7 +1779,7 @@ static tEplKernel doPreop1(tEplEventNmtStateChange nmtStateChange_p)
     ret = identu_reset();
     ret = statusu_reset();
 #if EPL_NMTMNU_PRES_CHAINING_MN != FALSE
-    ret = EplSyncuReset();
+    ret = syncu_reset();
 #endif
 
     // reset timers
@@ -3409,7 +3409,7 @@ static tEplKernel prcMeasure(void)
                     {
                         SyncRequestData.m_uiNodeId = nodeIdPredNode;
 
-                        ret = EplSyncuRequestSyncResponse(prcCbSyncResMeasure, &SyncRequestData, uiSize);
+                        ret = syncu_requestSyncResponse(prcCbSyncResMeasure, &SyncRequestData, uiSize);
                         if (ret != kEplSuccessful)
                         {
                             goto Exit;
@@ -3418,7 +3418,7 @@ static tEplKernel prcMeasure(void)
 
                     SyncRequestData.m_uiNodeId = nodeId;
 
-                    ret = EplSyncuRequestSyncResponse(prcCbSyncResMeasure, &SyncRequestData, uiSize);
+                    ret = syncu_requestSyncResponse(prcCbSyncResMeasure, &SyncRequestData, uiSize);
                     if (ret != kEplSuccessful)
                     {
                         goto Exit;
@@ -3848,7 +3848,7 @@ static tEplKernel prcShift(UINT nodeIdPrevShift_p)
                                         EPL_SYNC_DEST_MAC_ADDRESS_VALID;
     syncRequestData.m_dwPResTimeFirst = pNodeInfo->pResTimeFirstNs;
     size = sizeof(UINT) + 2*sizeof(UINT32);
-    ret = EplSyncuRequestSyncResponse(prcCbSyncResShift, &syncRequestData, size);
+    ret = syncu_requestSyncResponse(prcCbSyncResShift, &syncRequestData, size);
 
 Exit:
     return ret;
@@ -3951,7 +3951,7 @@ static tEplKernel prcAdd(UINT nodeIdPrevAdd_p)
             // Send SyncReq which starts PRes Chaining
             syncReqData.m_uiNodeId        = nodeId;
             syncReqData.m_dwPResTimeFirst = pNodeInfo->pResTimeFirstNs;
-            ret = EplSyncuRequestSyncResponse(prcCbSyncResAdd, &syncReqData, sizeof(syncReqData));
+            ret = syncu_requestSyncResponse(prcCbSyncResAdd, &syncReqData, sizeof(syncReqData));
             if (ret != kEplSuccessful)
                 goto Exit;
 
@@ -4066,7 +4066,7 @@ static tEplKernel prcVerify(UINT nodeId_p)
         syncReqData.m_uiNodeId      = nodeId_p;
         syncReqData.m_dwSyncControl = EPL_SYNC_DEST_MAC_ADDRESS_VALID;
         size = sizeof(UINT) + sizeof(UINT32);
-        ret = EplSyncuRequestSyncResponse(prcCbSyncResVerify, &syncReqData, size);
+        ret = syncu_requestSyncResponse(prcCbSyncResVerify, &syncReqData, size);
     }
     else
     {   // Node has been removed by a reset-node NMT command

@@ -111,7 +111,7 @@
 #endif
 
 #if EPL_NMTMNU_PRES_CHAINING_MN != FALSE
-#include "user/EplSyncu.h"
+#include "user/syncu.h"
 #endif
 
 /***************************************************************************/
