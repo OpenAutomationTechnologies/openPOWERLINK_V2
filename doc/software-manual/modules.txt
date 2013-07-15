@@ -168,6 +168,17 @@ StatusRequest/StatusResponse frames.
 */
 
 //==============================================================================
+/**
+\defgroup module_syncu User sync module (syncu)
+
+The user sync module provides the functions for handling
+SyncRequest/SyncResponse frames used by poll response chaining.
+
+\ingroup user_layer
+*/
+
+
+//==============================================================================
 //==============================================================================
 /**
 \defgroup kernel_layer openPOWERLINK Kernel Layer

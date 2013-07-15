@@ -1,379 +1,285 @@
-/****************************************************************************
+/**
+********************************************************************************
+\file   syncu.c
 
-  (c) SYSTEC electronic GmbH, D-07973 Greiz, August-Bebel-Str. 29
-      www.systec-electronic.com
+\brief  Implementation of user sync module
 
-  Project:      openPOWERLINK
+This file contains the implementation of the sync module which is responsible
+for handliny SyncReq/SyncResp frames used with poll response chaining.
 
-  Description:  source file for Syncu-Module
+\ingroup module_syncu
+*******************************************************************************/
 
-  License:
+/*------------------------------------------------------------------------------
+Copyright (c) 2013, SYSTEC electronic GmbH
+Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+All rights reserved.
 
-    Redistribution and use in source and binary forms, with or without
-    modification, are permitted provided that the following conditions
-    are met:
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+    * Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above copyright
+      notice, this list of conditions and the following disclaimer in the
+      documentation and/or other materials provided with the distribution.
+    * Neither the name of the copyright holders nor the
+      names of its contributors may be used to endorse or promote products
+      derived from this software without specific prior written permission.
 
-    1. Redistributions of source code must retain the above copyright
-       notice, this list of conditions and the following disclaimer.
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL COPYRIGHT HOLDERS BE LIABLE FOR ANY
+DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+------------------------------------------------------------------------------*/
 
-    2. Redistributions in binary form must reproduce the above copyright
-       notice, this list of conditions and the following disclaimer in the
-       documentation and/or other materials provided with the distribution.
-
-    3. Neither the name of SYSTEC electronic GmbH nor the names of its
-       contributors may be used to endorse or promote products derived
-       from this software without prior written permission. For written
-       permission, please contact info@systec-electronic.com.
-
-    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-    LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-    FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-    COPYRIGHT HOLDERS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-    INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-    BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-    LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-    CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-    LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-    ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-    POSSIBILITY OF SUCH DAMAGE.
-
-    Severability Clause:
-
-        If a provision of this License is or becomes illegal, invalid or
-        unenforceable in any jurisdiction, that shall not affect:
-        1. the validity or enforceability in that jurisdiction of any other
-           provision of this License; or
-        2. the validity or enforceability in other jurisdictions of that or
-           any other provision of this License.
-
-  -------------------------------------------------------------------------
-
-                $RCSfile$
-
-                $Author$
-
-                $Revision$  $Date$
-
-                $State$
-
-                Build Environment:
-                    GCC V3.4
-
-  -------------------------------------------------------------------------
-
-  Revision History:
-
-  2010-05-27 m.u.:   start of the implementation
-
-****************************************************************************/
-
-#include "user/EplSyncu.h"
+//------------------------------------------------------------------------------
+// includes
+//------------------------------------------------------------------------------
+#include "user/syncu.h"
 #include "user/dllucal.h"
 
 #if EPL_DLL_PRES_CHAINING_MN != FALSE
 
-/***************************************************************************/
-/*                                                                         */
-/*                                                                         */
-/*          G L O B A L   D E F I N I T I O N S                            */
-/*                                                                         */
-/*                                                                         */
-/***************************************************************************/
 
-//---------------------------------------------------------------------------
+//============================================================================//
+//            G L O B A L   D E F I N I T I O N S                             //
+//============================================================================//
+
+//------------------------------------------------------------------------------
 // const defines
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
-//---------------------------------------------------------------------------
-// local types
-//---------------------------------------------------------------------------
-
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // module global vars
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
-//---------------------------------------------------------------------------
-// local function prototypes
-//---------------------------------------------------------------------------
-
-
-/***************************************************************************/
-/*                                                                         */
-/*                                                                         */
-/*          C L A S S  <xxxxx>                                             */
-/*                                                                         */
-/*                                                                         */
-/***************************************************************************/
-//
-// Description:
-//
-//
-/***************************************************************************/
+//------------------------------------------------------------------------------
+// global function prototypes
+//------------------------------------------------------------------------------
 
 
-//=========================================================================//
-//                                                                         //
-//          P R I V A T E   D E F I N I T I O N S                          //
-//                                                                         //
-//=========================================================================//
+//============================================================================//
+//            P R I V A T E   D E F I N I T I O N S                           //
+//============================================================================//
 
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // const defines
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // local types
-//---------------------------------------------------------------------------
-
+//------------------------------------------------------------------------------
 typedef struct
 {
-    tEplSyncuCbResponse m_apfnCbResponse[254];
+    tSyncuCbResponse        apfnCbResponse[254];
+} tSyncuInstance;
 
-} tEplSyncuInstance;
-
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // local vars
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+static tSyncuInstance   syncuInstance_g;
 
-static tEplSyncuInstance   EplSyncuInstance_g;
-
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // local function prototypes
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+static tEplKernel syncu_cbSyncResponse(tEplFrameInfo * pFrameInfo_p);
 
-static tEplKernel PUBLIC EplSyncuCbSyncResponse(tEplFrameInfo * pFrameInfo_p);
+//============================================================================//
+//            P U B L I C   F U N C T I O N S                                 //
+//============================================================================//
 
-//=========================================================================//
-//                                                                         //
-//          P U B L I C   F U N C T I O N S                                //
-//                                                                         //
-//=========================================================================//
+//------------------------------------------------------------------------------
+/**
+\brief  Init sync module
 
-//---------------------------------------------------------------------------
-//
-// Function:    EplSyncuInit
-//
-// Description: init first instance of the module
-//
-// Parameters:
-//
-// Returns:     tEplKernel  = errorcode
-//
-// State:
-//
-//---------------------------------------------------------------------------
+The function initializes an instance of the sync module
 
-tEplKernel PUBLIC EplSyncuInit()
+\return The function returns a tEplKernel error code.
+
+\ingroup module_syncu
+*/
+//------------------------------------------------------------------------------
+tEplKernel syncu_init(void)
 {
-tEplKernel Ret;
-
-    Ret = EplSyncuAddInstance();
-
-    return Ret;
+    return syncu_addInstance();
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Add sync module instance
 
-//---------------------------------------------------------------------------
-//
-// Function:    EplSyncuAddInstance
-//
-// Description: init other instances of the module
-//
-// Parameters:
-//
-// Returns:     tEplKernel  = errorcode
-//
-// State:
-//
-//---------------------------------------------------------------------------
+The function adds a sync module instance
 
-tEplKernel PUBLIC EplSyncuAddInstance()
+\return The function returns a tEplKernel error code.
+
+\ingroup module_syncu
+*/
+//------------------------------------------------------------------------------
+tEplKernel syncu_addInstance(void)
 {
-tEplKernel Ret;
+    tEplKernel ret = kEplSuccessful;
 
-    Ret = kEplSuccessful;
+    EPL_MEMSET(&syncuInstance_g, 0, sizeof (syncuInstance_g));
+    ret = dllucal_regAsndService(kEplDllAsndSyncResponse, syncu_cbSyncResponse,
+                                 kEplDllAsndFilterAny);
 
-    // reset instance structure
-    EPL_MEMSET(&EplSyncuInstance_g, 0, sizeof (EplSyncuInstance_g));
-
-    // register SyncResponse callback function
-    Ret = dllucal_regAsndService(kEplDllAsndSyncResponse, EplSyncuCbSyncResponse, kEplDllAsndFilterAny);
-
-    return Ret;
+    return ret;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Delete sync module instance
 
-//---------------------------------------------------------------------------
-//
-// Function:    EplSyncuDelInstance
-//
-// Description: delete instance
-//
-// Parameters:
-//
-// Returns:     tEplKernel  = errorcode
-//
-// State:
-//
-//---------------------------------------------------------------------------
+The function deletes a sync module instance
 
-tEplKernel PUBLIC EplSyncuDelInstance()
+\return The function returns a tEplKernel error code.
+
+\ingroup module_syncu
+*/
+//------------------------------------------------------------------------------
+tEplKernel syncu_delInstance(void)
 {
-tEplKernel  Ret;
+    tEplKernel  ret;
 
-    Ret = kEplSuccessful;
-
-    // deregister SyncResponse callback function
-    Ret = dllucal_regAsndService(kEplDllAsndSyncResponse, NULL, kEplDllAsndFilterNone);
-
-    return Ret;
+    ret = dllucal_regAsndService(kEplDllAsndSyncResponse, NULL, kEplDllAsndFilterNone);
+    return ret;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Reset sync module instance
 
-//---------------------------------------------------------------------------
-//
-// Function:    EplSyncuReset
-//
-// Description: resets this instance
-//
-// Parameters:
-//
-// Returns:     tEplKernel  = errorcode
-//
-// State:
-//
-//---------------------------------------------------------------------------
+The function resets a sync module instance
 
-tEplKernel PUBLIC EplSyncuReset()
+\return The function returns a tEplKernel error code.
+
+\ingroup module_syncu
+*/
+//------------------------------------------------------------------------------
+tEplKernel syncu_reset(void)
 {
-tEplKernel  Ret;
-
-    Ret = kEplSuccessful;
-
-    // reset instance structure
-    EPL_MEMSET(&EplSyncuInstance_g, 0, sizeof (EplSyncuInstance_g));
-
-    return Ret;
+    EPL_MEMSET(&syncuInstance_g, 0, sizeof (syncuInstance_g));
+    return kEplSuccessful;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Request sync response
 
-//---------------------------------------------------------------------------
-//
-// Function:    EplSyncuRequestSyncResponse
-//
-// Description: returns the SyncResponse for the specified node.
-//
-// Parameters:  pfnCbResponse_p     = IN: function pointer to callback function
-//                                        which will be called if SyncResponse is received
-//              pSyncRequestData_p  = IN: pointer to SyncRequest data structure
-//              uiSize_p            = IN: only the first part of the SyncRequest
-//                                        data structure until size bytes is used
-//
-// Return:      tEplKernel                  = error code
-//
-// State:       not tested
-//
-//---------------------------------------------------------------------------
+The function requests the SyncResponse for a specified node.
 
-tEplKernel PUBLIC EplSyncuRequestSyncResponse(
-                                  tEplSyncuCbResponse pfnCbResponse_p,
-                                  tEplDllSyncRequest* pSyncRequestData_p,
-                                  unsigned int        uiSize_p)
+\param  pfnCbResponse_p     Function pointer to callback function which will
+                            be called if SyncResponse is received.
+\param  pSyncRequestData_p  Pointer to SyncRequest data structure
+\param  size_p              Size of the SyncRequest structure.
+
+\return The function returns a tEplKernel error code.
+
+\ingroup module_syncu
+*/
+//------------------------------------------------------------------------------
+tEplKernel  syncu_requestSyncResponse(tSyncuCbResponse pfnCbResponse_p,
+                                      tEplDllSyncRequest* pSyncRequestData_p,
+                                      UINT size_p)
 {
-tEplKernel      Ret;
-unsigned int    uiNodeId;
+    tEplKernel      ret;
+    UINT            nodeId;
 
-    Ret = kEplSuccessful;
-    uiNodeId = pSyncRequestData_p->m_uiNodeId;
+    ret = kEplSuccessful;
+    nodeId = pSyncRequestData_p->m_uiNodeId;
 
-    if (uiNodeId == 0)
+    if (nodeId == 0)
     {
-        Ret = kEplInvalidNodeId;
-        goto Exit;
+        return kEplInvalidNodeId;
     }
 
     // decrement node ID, because array is zero based
-    uiNodeId--;
-    if (uiNodeId < tabentries (EplSyncuInstance_g.m_apfnCbResponse))
+    nodeId--;
+    if (nodeId < tabentries (syncuInstance_g.apfnCbResponse))
     {
-        if (EplSyncuInstance_g.m_apfnCbResponse[uiNodeId] != NULL)
+        if (syncuInstance_g.apfnCbResponse[nodeId] != NULL)
         {   // request already issued (maybe by someone else)
-            Ret = kEplNmtSyncReqRejected;
+            ret = kEplNmtSyncReqRejected;
         }
         else
         {
-            EplSyncuInstance_g.m_apfnCbResponse[uiNodeId] = pfnCbResponse_p;
-            Ret = dllucal_issueSyncRequest(pSyncRequestData_p, uiSize_p);
+            syncuInstance_g.apfnCbResponse[nodeId] = pfnCbResponse_p;
+            ret = dllucal_issueSyncRequest(pSyncRequestData_p, size_p);
         }
     }
     else
-    {   // invalid node ID specified
-        Ret = kEplInvalidNodeId;
+    {
+        ret = kEplInvalidNodeId;
     }
 
-Exit:
-    return Ret;
+    return ret;
 }
 
+//============================================================================//
+//            P R I V A T E   F U N C T I O N S                               //
+//============================================================================//
+/// \name Private Functions
+/// \{
 
-//=========================================================================//
-//                                                                         //
-//          P R I V A T E   F U N C T I O N S                              //
-//                                                                         //
-//=========================================================================//
+//------------------------------------------------------------------------------
+/**
+\brief  Callback function for SyncResponse
 
-//---------------------------------------------------------------------------
-//
-// Function:    EplSyncuCbSyncResponse
-//
-// Description: callback funktion for SyncResponse
-//
-// Parameters:  pFrameInfo_p            = Frame with the SyncResponse
-//
-// Returns:     tEplKernel              = error code
-//
-// State:
-//
-//---------------------------------------------------------------------------
-static tEplKernel PUBLIC EplSyncuCbSyncResponse(tEplFrameInfo * pFrameInfo_p)
+The function implements the callback function which will be called when a
+SyncResponse is received.
+
+\param  pFrameInfo_p            Pointer to frame information structure describing
+                                the received SyncResponse frame.
+
+\return The function returns a tEplKernel error code.
+
+\ingroup module_identu
+*/
+//------------------------------------------------------------------------------
+static tEplKernel syncu_cbSyncResponse(tEplFrameInfo * pFrameInfo_p)
 {
-tEplKernel          Ret;
-unsigned int        uiNodeId;
-unsigned int        uiIndex;
-tEplSyncuCbResponse pfnCbResponse;
+    tEplKernel          ret;
+    UINT                nodeId;
+    UINT                index;
+    tSyncuCbResponse    pfnCbResponse;
 
-    Ret = kEplSuccessful;
+    ret = kEplSuccessful;
 
-    uiNodeId = AmiGetByteFromLe(&pFrameInfo_p->m_pFrame->m_le_bSrcNodeId);
-    uiIndex  = uiNodeId - 1;
+    nodeId = AmiGetByteFromLe(&pFrameInfo_p->m_pFrame->m_le_bSrcNodeId);
+    index  = nodeId - 1;
 
-    if (uiIndex < tabentries (EplSyncuInstance_g.m_apfnCbResponse))
+    if (index < tabentries (syncuInstance_g.apfnCbResponse))
     {
         // memorize pointer to callback function
-        pfnCbResponse = EplSyncuInstance_g.m_apfnCbResponse[uiIndex];
+        pfnCbResponse = syncuInstance_g.apfnCbResponse[index];
         if (pfnCbResponse == NULL)
         {   // response was not requested
-            goto Exit;
+            return ret;
         }
         // reset callback function pointer so that caller may issue next request
-        EplSyncuInstance_g.m_apfnCbResponse[uiIndex] = NULL;
+        syncuInstance_g.apfnCbResponse[index] = NULL;
 
         if (pFrameInfo_p->m_uiFrameSize < EPL_C_DLL_MINSIZE_SYNCRES)
         {   // SyncResponse not received or it has invalid size
-            Ret = pfnCbResponse(uiNodeId, NULL);
+            ret = pfnCbResponse(nodeId, NULL);
         }
         else
         {   // SyncResponse received
-            Ret = pfnCbResponse(uiNodeId, &pFrameInfo_p->m_pFrame->m_Data.m_Asnd.m_Payload.m_SyncResponse);
+            ret = pfnCbResponse(nodeId, &pFrameInfo_p->m_pFrame->m_Data.m_Asnd.m_Payload.m_SyncResponse);
         }
     }
-
-Exit:
-    return Ret;
+    return ret;
 }
+
+///\}
 
 #endif // EPL_DLL_PRES_CHAINING_MN != FALSE
 
-// EOF
+
 

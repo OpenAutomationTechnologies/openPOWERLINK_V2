@@ -77,7 +77,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 #if EPL_NMTMNU_PRES_CHAINING_MN != FALSE
-#include <user/EplSyncu.h>
+#include <user/syncu.h>
 #endif
 
 //============================================================================//
@@ -380,7 +380,7 @@ tEplKernel ctrlu_shutdownStack(void)
     TRACE("statusu_delInstance():  0x%X\n", ret);
 
 #if EPL_NMTMNU_PRES_CHAINING_MN != FALSE
-    ret = EplSyncuDelInstance();
+    ret = syncu_delInstance();
 #endif
 
 #endif
@@ -551,9 +551,9 @@ static tEplKernel initNmtu(tEplApiInstance* pApiInstance_p, tEplApiCbFuncs* pCbF
         goto Exit;
 
 #if EPL_NMTMNU_PRES_CHAINING_MN != FALSE
-    // initialize EplSyncu module
+    // initialize syncu module
     TRACE ("Initialize Syncu module...\n");
-    Ret = EplSyncuInit();
+    Ret = syncu_init();
     if (Ret != kEplSuccessful)
         goto Exit;
 #endif
