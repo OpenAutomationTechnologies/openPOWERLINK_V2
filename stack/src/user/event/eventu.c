@@ -44,7 +44,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <user/eventu.h>
 #include <user/eventucal.h>
 #include <user/EplNmtu.h>
-#include <user/EplNmtMnu.h>
+#include <user/nmtmnu.h>
 #include <user/EplSdoAsySequ.h>
 #include <user/dllucal.h>
 #include <user/EplLedu.h>
@@ -114,7 +114,7 @@ static tEventDispatchEntry eventDispatchTbl_l[] =
     { kEplEventSinkNmtu,        kEplEventSourceNmtu,        EplNmtuProcessEvent },
 #endif
 #if defined (CONFIG_INCLUDE_NMT_MN)
-    { kEplEventSinkNmtMnu,      kEplEventSourceNmtMnu,      EplNmtMnuProcessEvent },
+    { kEplEventSinkNmtMnu,      kEplEventSourceNmtMnu,      nmtmnu_processEvent },
 #endif
 #if defined (CONFIG_INCLUDE_SDOC) || defined(CONFIG_INCLUDE_SDOS)
     { kEplEventSinkSdoAsySeq,   kEplEventSourceSdoAsySeq,   EplSdoAsySeqProcessEvent },

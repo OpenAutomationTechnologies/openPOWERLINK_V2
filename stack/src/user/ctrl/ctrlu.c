@@ -52,7 +52,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <user/errhndu.h>
 #include <user/EplLedu.h>
 #include <user/EplNmtCnu.h>
-#include <user/EplNmtMnu.h>
+#include <user/nmtmnu.h>
 #include <user/EplSdoComu.h>
 #include <user/identu.h>
 #include <user/statusu.h>
@@ -370,7 +370,7 @@ tEplKernel ctrlu_shutdownStack(void)
 #endif
 
 #if defined(CONFIG_INCLUDE_NMT_MN)
-    ret = EplNmtMnuDelInstance();
+    ret = nmtmnu_delInstance();
     TRACE("EplNmtMnuDelInstance():  0x%X\n", ret);
 
     ret = identu_delInstance();
@@ -534,7 +534,7 @@ static tEplKernel initNmtu(tEplApiInstance* pApiInstance_p, tEplApiCbFuncs* pCbF
 #if defined(CONFIG_INCLUDE_NMT_MN)
     // initialize EplNmtMnu module
     TRACE ("Initialize NMT_MN module...\n");
-    Ret = EplNmtMnuInit(pCbFuncs_p->pfnCbNodeEvent, pCbFuncs_p->pfnCbBootEvent);
+    Ret = nmtmnu_init(pCbFuncs_p->pfnCbNodeEvent, pCbFuncs_p->pfnCbBootEvent);
     if (Ret != kEplSuccessful)
         goto Exit;
 
