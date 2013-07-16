@@ -79,7 +79,7 @@
 #include "user/pdou.h"
 #include "user/dllucal.h"
 #include "user/EplLedu.h"
-#include "user/EplNmtCnu.h"
+#include "user/nmtcnu.h"
 #include "user/nmtmnu.h"
 #include "user/EplSdoComu.h"
 #include "user/identu.h"
@@ -1243,7 +1243,7 @@ tEplApiEventArg     EventArg;
                 {   // local node is CN
                     // forward the command to the MN
                     // d.k. this is a manufacturer specific feature
-                    Ret = EplNmtCnuSendNmtRequest(bCmdTarget,
+                    Ret = nmtcnu_sendNmtRequest(bCmdTarget,
                                                   (tEplNmtCommand) bCmdId);
                 }
                 else
