@@ -80,7 +80,7 @@
 #include "user/dllucal.h"
 #include "user/EplLedu.h"
 #include "user/EplNmtCnu.h"
-#include "user/EplNmtMnu.h"
+#include "user/nmtmnu.h"
 #include "user/EplSdoComu.h"
 #include "user/identu.h"
 #include "user/statusu.h"
@@ -1014,7 +1014,7 @@ tEplKernel PUBLIC EplApiMnTriggerStateChange(unsigned int uiNodeId_p,
 {
 tEplKernel      Ret = kEplSuccessful;
 
-    Ret = EplNmtMnuTriggerStateChange(uiNodeId_p, NodeCommand_p);
+    Ret = nmtmnu_triggerStateChange(uiNodeId_p, NodeCommand_p);
 
     return Ret;
 }
@@ -1249,7 +1249,7 @@ tEplApiEventArg     EventArg;
                 else
                 {   // local node is MN
                     // directly execute the requested NMT command
-                    Ret = EplNmtMnuRequestNmtCommand(bCmdTarget,
+                    Ret = nmtmnu_requestNmtCommand(bCmdTarget,
                                                      (tEplNmtCommand) bCmdId);
                 }
                 if (Ret != kEplSuccessful)
@@ -1691,7 +1691,7 @@ tEplApiEventArg     EventArg;
 
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
     // forward event to NmtMn module
-    Ret = EplNmtMnuCbNmtStateChange(NmtStateChange_p);
+    Ret = nmtmnu_cbNmtStateChange(NmtStateChange_p);
     if (Ret != kEplSuccessful)
     {
         goto Exit;
@@ -2480,7 +2480,7 @@ tEplApiEventArg EventArg;
         goto Exit;
     }
 
-    Ret = EplNmtMnuTriggerStateChange(uiNodeId_p, NodeCommand_p);
+    Ret = nmtmnu_triggerStateChange(uiNodeId_p, NodeCommand_p);
 
 Exit:
     return Ret;
