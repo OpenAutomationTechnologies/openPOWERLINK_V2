@@ -51,7 +51,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <user/dllucal.h>
 #include <user/errhndu.h>
 #include <user/EplLedu.h>
-#include <user/EplNmtCnu.h>
+#include <user/nmtcnu.h>
 #include <user/nmtmnu.h>
 #include <user/EplSdoComu.h>
 #include <user/identu.h>
@@ -386,7 +386,7 @@ tEplKernel ctrlu_shutdownStack(void)
 #endif
 
 #if defined(CONFIG_INCLUDE_NMT_CN)
-    ret = EplNmtCnuDelInstance();
+    ret = nmtcnu_delInstance();
     TRACE("EplNmtCnuDelInstance():  0x%X\n", ret);
 #endif
 
@@ -507,11 +507,11 @@ static tEplKernel initNmtu(tEplApiInstance* pApiInstance_p, tEplApiCbFuncs* pCbF
     // initialize EplNmtCnu module
 #if defined(CONFIG_INCLUDE_NMT_CN)
     TRACE ("Initialize NMT_CN module...\n");
-    Ret = EplNmtCnuAddInstance(pApiInstance_p->m_InitParam.m_uiNodeId);
+    Ret = nmtcnu_addInstance(pApiInstance_p->m_InitParam.m_uiNodeId);
     if (Ret != kEplSuccessful)
         goto Exit;
 
-    Ret = EplNmtCnuRegisterCheckEventCb(pCbFuncs_p->pfnCbCnCheckEvent);
+    Ret = nmtcnu_registerCheckEventCb(pCbFuncs_p->pfnCbCnCheckEvent);
     if (Ret != kEplSuccessful)
         goto Exit;
 #else
