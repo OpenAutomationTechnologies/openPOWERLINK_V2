@@ -43,7 +43,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #include <user/eventu.h>
 #include <user/eventucal.h>
-#include <user/EplNmtu.h>
+#include <user/nmtu.h>
 #include <user/nmtmnu.h>
 #include <user/EplSdoAsySequ.h>
 #include <user/dllucal.h>
@@ -111,7 +111,7 @@ event sinks.
 static tEventDispatchEntry eventDispatchTbl_l[] =
 {
 #if defined (CONFIG_INCLUDE_NMTU)
-    { kEplEventSinkNmtu,        kEplEventSourceNmtu,        EplNmtuProcessEvent },
+    { kEplEventSinkNmtu,        kEplEventSourceNmtu,        nmtu_processEvent },
 #endif
 #if defined (CONFIG_INCLUDE_NMT_MN)
     { kEplEventSinkNmtMnu,      kEplEventSourceNmtMnu,      nmtmnu_processEvent },

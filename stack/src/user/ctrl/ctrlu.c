@@ -391,8 +391,8 @@ tEplKernel ctrlu_shutdownStack(void)
 #endif
 
 #if defined(CONFIG_INCLUDE_NMTU)
-    ret = EplNmtuDelInstance();
-    TRACE("EplNmtuDelInstance():    0x%X\n", ret);
+    ret = nmtu_delInstance();
+    TRACE("nmtu_delInstance():    0x%X\n", ret);
 #endif
 
 #if defined(CONFIG_INCLUDE_PDOU)
@@ -521,12 +521,12 @@ static tEplKernel initNmtu(tEplApiInstance* pApiInstance_p, tEplApiCbFuncs* pCbF
     // initialize EplNmtu module
 #if defined(CONFIG_INCLUDE_NMTU)
     TRACE ("Initialize NMTu module...\n");
-    Ret = EplNmtuInit();
+    Ret = nmtu_init();
     if (Ret != kEplSuccessful)
         goto Exit;
 
     // register NMT event callback function
-    Ret = EplNmtuRegisterStateChangeCb(pCbFuncs_p->pfnCbNmtStateChange);
+    Ret = nmtu_registerStateChangeCb(pCbFuncs_p->pfnCbNmtStateChange);
     if (Ret != kEplSuccessful)
         goto Exit;
 #endif

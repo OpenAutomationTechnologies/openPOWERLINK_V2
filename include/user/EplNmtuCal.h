@@ -73,7 +73,7 @@
 #ifndef _EPLNMTUCAL_H_
 #define _EPLNMTUCAL_H_
 
-#include "user/EplNmtu.h"
+#include "user/nmtu.h"
 #include "kernel/EplNmtk.h"
 
 
