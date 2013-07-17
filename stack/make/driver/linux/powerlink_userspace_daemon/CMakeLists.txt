@@ -61,7 +61,6 @@ SET (DAEMON_KERNEL_SOURCES
      ${KERNEL_SOURCE_DIR}/dll/dllkcal-circbuf.c
      ${KERNEL_SOURCE_DIR}/event/eventk.c
      ${KERNEL_SOURCE_DIR}/nmt/nmtk.c
-     ${KERNEL_SOURCE_DIR}/nmt/nmtkcal.c
      ${KERNEL_SOURCE_DIR}/pdo/pdok.c
      ${KERNEL_SOURCE_DIR}/pdo/pdokcal.c
      ${KERNEL_SOURCE_DIR}/pdo/pdokcal-triplebufshm.c
@@ -116,7 +115,6 @@ SET (DAEMON_KERNEL_HEADERS
      ${KERNEL_INCLUDE_DIR}/eventk.h
      ${KERNEL_INCLUDE_DIR}/eventkcal.h
      ${KERNEL_INCLUDE_DIR}/EplNmtk.h
-     ${KERNEL_INCLUDE_DIR}/EplNmtkCal.h
      ${KERNEL_INCLUDE_DIR}/EplObdk.h
      ${KERNEL_INCLUDE_DIR}/pdok.h
      ${KERNEL_INCLUDE_DIR}/pdokcal.h

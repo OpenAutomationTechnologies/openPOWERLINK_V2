@@ -175,19 +175,9 @@
 			<location>OPENPOWERLINK_DIR/stack/src/kernel/nmt/nmtk.c</location>
 		</link>
 		<link>
-			<name>nmtkcal.c</name>
-			<type>1</type>
-			<location>OPENPOWERLINK_DIR/stack/src/kernel/nmt/nmtkcal.c</location>
-		</link>
-		<link>
 			<name>nmtu.c</name>
 			<type>1</type>
 			<location>OPENPOWERLINK_DIR/stack/src/user/nmt/nmtu.c</location>
-		</link>
-		<link>
-			<name>nmtucal.c</name>
-			<type>1</type>
-			<location>OPENPOWERLINK_DIR/stack/src/user/nmt/nmtucal.c</location>
 		</link>
 		<link>
 			<name>obd.c</name>
