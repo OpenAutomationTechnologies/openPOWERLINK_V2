@@ -114,7 +114,7 @@ SET (DAEMON_KERNEL_HEADERS
      ${KERNEL_INCLUDE_DIR}/ctrlkcal.h
      ${KERNEL_INCLUDE_DIR}/eventk.h
      ${KERNEL_INCLUDE_DIR}/eventkcal.h
-     ${KERNEL_INCLUDE_DIR}/EplNmtk.h
+     ${KERNEL_INCLUDE_DIR}/nmtk.h
      ${KERNEL_INCLUDE_DIR}/EplObdk.h
      ${KERNEL_INCLUDE_DIR}/pdok.h
      ${KERNEL_INCLUDE_DIR}/pdokcal.h
