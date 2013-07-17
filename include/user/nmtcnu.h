@@ -42,7 +42,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include "user/EplNmtu.h"
+#include "user/nmtu.h"
 #include "EplDll.h"
 #include "EplFrame.h"
 
@@ -67,8 +67,8 @@ extern "C" {
 tEplKernel nmtcnu_init(UINT nodeId_p);
 tEplKernel nmtcnu_addInstance(UINT nodeId_p);
 tEplKernel nmtcnu_delInstance(void);
-tEplKernel nmtcnu_sendNmtRequest (UINT nodeId_p, tEplNmtCommand  nmtCommand_p);
-tEplKernel nmtcnu_registerCheckEventCb(tEplNmtuCheckEventCallback pfnEplNmtCheckEventCb_p);
+tEplKernel nmtcnu_sendNmtRequest (UINT nodeId_p, tNmtCommand  nmtCommand_p);
+tEplKernel nmtcnu_registerCheckEventCb(tNmtuCheckEventCallback pfnEplNmtCheckEventCb_p);
 
 #endif // #if defined(CONFIG_INCLUDE_NMT_CN)
 

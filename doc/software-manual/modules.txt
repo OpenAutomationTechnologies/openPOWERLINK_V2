@@ -136,6 +136,20 @@ could be implemented. Currently the following implementations are available:
 
 \ingroup user_layer
 */
+
+//==============================================================================
+/**
+\defgroup module_nmtu User NMT module (nmtu)
+
+The user NMT module provides the general network managemement functions (NMT)
+of the user layer.
+
+\see module_nmtmnu
+\see module_nmtcnu
+
+\ingroup user_layer
+*/
+
 //==============================================================================
 /**
 \defgroup module_nmtmnu User NMT-MN module (nmtmnu)

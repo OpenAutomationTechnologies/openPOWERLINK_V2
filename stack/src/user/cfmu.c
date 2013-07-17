@@ -60,7 +60,7 @@
 #include "user/identu.h"
 #include "user/EplObdu.h"
 #include "user/EplSdoComu.h"
-#include "user/EplNmtu.h"
+#include "user/nmtu.h"
 
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_OBDU)) == 0) && (EPL_OBD_USE_KERNEL == FALSE)
 #error "EPL CFM module needs EPL module OBDU or OBDK!"
@@ -693,7 +693,7 @@ tEplKernel      Ret = kEplSuccessful;
 //
 //-------------------------------------------------------------------------------------
 
-static tEplKernel EplCfmuFinishConfig(tEplCfmuNodeInfo* pNodeInfo_p, tEplNmtCommand NmtCommand_p)
+static tEplKernel EplCfmuFinishConfig(tEplCfmuNodeInfo* pNodeInfo_p, tNmtCommand NmtCommand_p)
 {
 tEplKernel      Ret = kEplSuccessful;
 
@@ -764,7 +764,7 @@ tEplCfmuNodeInfo*   pNodeInfo = pSdoComFinished_p->m_pUserArg;
 
         case kEplCfmuStateUpToDate:
         {
-        tEplNmtCommand NmtCommand;
+        tNmtCommand NmtCommand;
 
             if (pSdoComFinished_p->m_SdoComConState == kEplSdoComTransferFinished)
             {

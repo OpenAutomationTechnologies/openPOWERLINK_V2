@@ -334,7 +334,7 @@ static tEplKernel prcCalcPResChainingSlotTimeNs(UINT nodeIdLastNode_p,
 static tEplKernel prcFindPredecessorNode(UINT nodeId_p);
 static void       prcSyncError(tNmtMnuNodeInfo* pNodeInfo_p);
 static void       prcSetFlagsNmtCommandReset(tNmtMnuNodeInfo* pNodeInfo_p,
-                                             tEplNmtCommand nmtCommand_p);
+                                             tNmtCommand nmtCommand_p);
 #endif
 
 /* internal node event handler functions */
@@ -499,7 +499,7 @@ The function sends a extended NMT command.
 \ingroup module_nmtmnu
 */
 //------------------------------------------------------------------------------
-tEplKernel nmtmnu_sendNmtCommandEx(UINT nodeId_p, tEplNmtCommand nmtCommand_p,
+tEplKernel nmtmnu_sendNmtCommandEx(UINT nodeId_p, tNmtCommand nmtCommand_p,
                                    void* pNmtCommandData_p, UINT uiDataSize_p)
 {
     tEplKernel          ret;
@@ -537,11 +537,11 @@ tEplKernel nmtmnu_sendNmtCommandEx(UINT nodeId_p, tEplNmtCommand nmtCommand_p,
     {   // Node is a PRes Chaining node
         switch (nmtCommand_p)
         {
-            case kEplNmtCmdStopNode:
-            case kEplNmtCmdResetNode:
-            case kEplNmtCmdResetCommunication:
-            case kEplNmtCmdResetConfiguration:
-            case kEplNmtCmdSwReset:
+            case kNmtCmdStopNode:
+            case kNmtCmdResetNode:
+            case kNmtCmdResetCommunication:
+            case kNmtCmdResetConfiguration:
+            case kNmtCmdSwReset:
                 if (pNodeInfo->prcFlags & (NMTMNU_NODE_FLAG_PRC_ADD_SCHEDULED |
                                               NMTMNU_NODE_FLAG_PRC_ADD_IN_PROGRESS))
                 {   // For this node, addition to the isochronous phase is scheduled
@@ -644,23 +644,23 @@ tEplKernel nmtmnu_sendNmtCommandEx(UINT nodeId_p, tEplNmtCommand nmtCommand_p,
 
     switch (nmtCommand_p)
     {
-        case kEplNmtCmdStartNode:
-        case kEplNmtCmdEnterPreOperational2:
-        case kEplNmtCmdEnableReadyToOperate:
+        case kNmtCmdStartNode:
+        case kNmtCmdEnterPreOperational2:
+        case kNmtCmdEnableReadyToOperate:
             // nothing left to do,
             // because any further processing is done
             // when the NMT command is actually sent
             goto Exit;
 
-        case kEplNmtCmdStopNode:
+        case kNmtCmdStopNode:
             // remove CN from isochronous phase softly
             nodeOpParam.m_OpNodeType = kEplDllNodeOpTypeSoftDelete;
             break;
 
-        case kEplNmtCmdResetNode:
-        case kEplNmtCmdResetCommunication:
-        case kEplNmtCmdResetConfiguration:
-        case kEplNmtCmdSwReset:
+        case kNmtCmdResetNode:
+        case kNmtCmdResetCommunication:
+        case kNmtCmdResetConfiguration:
+        case kNmtCmdSwReset:
             // remove CN immediately from isochronous phase
             nodeOpParam.m_OpNodeType = kEplDllNodeOpTypeIsochronous;
             break;
@@ -712,7 +712,7 @@ The function sends a NMT command.
 \ingroup module_nmtmnu
 */
 //------------------------------------------------------------------------------
-tEplKernel nmtmnu_sendNmtCommand(UINT nodeId_p, tEplNmtCommand  nmtCommand_p)
+tEplKernel nmtmnu_sendNmtCommand(UINT nodeId_p, tNmtCommand  nmtCommand_p)
 {
     return nmtmnu_sendNmtCommandEx(nodeId_p, nmtCommand_p, NULL, 0);
 }
@@ -732,12 +732,12 @@ also be applied to the local node.
 \ingroup module_nmtmnu
 */
 //------------------------------------------------------------------------------
-tEplKernel nmtmnu_requestNmtCommand(UINT nodeId_p, tEplNmtCommand  nmtCommand_p)
+tEplKernel nmtmnu_requestNmtCommand(UINT nodeId_p, tNmtCommand  nmtCommand_p)
 {
     tEplKernel      ret = kEplSuccessful;
     tEplNmtState    nmtState;
 
-    nmtState = EplNmtuGetNmtState();
+    nmtState = nmtu_getNmtState();
     if (nmtState <= kEplNmtMsNotActive)
     {
         ret = kEplInvalidOperation;
@@ -757,24 +757,24 @@ tEplKernel nmtmnu_requestNmtCommand(UINT nodeId_p, tEplNmtCommand  nmtCommand_p)
     {   // apply command to local node-ID
         switch (nmtCommand_p)
         {
-            case kEplNmtCmdIdentResponse:
+            case kNmtCmdIdentResponse:
                 // issue request for local node
                 ret = identu_requestIdentResponse(0x00, NULL);
                 goto Exit;
 
-            case kEplNmtCmdStatusResponse:
+            case kNmtCmdStatusResponse:
                 // issue request for local node
                 ret = statusu_requestStatusResponse(0x00, NULL);
                 goto Exit;
 
-            case kEplNmtCmdResetNode:
-            case kEplNmtCmdResetCommunication:
-            case kEplNmtCmdResetConfiguration:
-            case kEplNmtCmdSwReset:
+            case kNmtCmdResetNode:
+            case kNmtCmdResetCommunication:
+            case kNmtCmdResetConfiguration:
+            case kNmtCmdSwReset:
                 nodeId_p = EPL_C_ADR_BROADCAST;
                 break;
 
-            case kEplNmtCmdInvalidService:
+            case kNmtCmdInvalidService:
             default:
                 ret = kEplObdAccessViolation;
                 goto Exit;
@@ -788,7 +788,7 @@ tEplKernel nmtmnu_requestNmtCommand(UINT nodeId_p, tEplNmtCommand  nmtCommand_p)
         pNodeInfo = NMTMNU_GET_NODEINFO(nodeId_p);
         switch (nmtCommand_p)
         {
-            case kEplNmtCmdIdentResponse:
+            case kNmtCmdIdentResponse:
                 // issue request for remote node
                 // if it is a non-existing node or no identrequest is running
                 if (((pNodeInfo->nodeCfg &
@@ -802,7 +802,7 @@ tEplKernel nmtmnu_requestNmtCommand(UINT nodeId_p, tEplNmtCommand  nmtCommand_p)
                 }
                 goto Exit;
 
-            case kEplNmtCmdStatusResponse:
+            case kNmtCmdStatusResponse:
                 // issue request for remote node
                 // if it is a non-existing node or operational and not async-only
                 if (((pNodeInfo->nodeCfg &
@@ -822,20 +822,20 @@ tEplKernel nmtmnu_requestNmtCommand(UINT nodeId_p, tEplNmtCommand  nmtCommand_p)
 
     switch (nmtCommand_p)
     {
-        case kEplNmtCmdResetNode:
-        case kEplNmtCmdResetCommunication:
-        case kEplNmtCmdResetConfiguration:
-        case kEplNmtCmdSwReset:
+        case kNmtCmdResetNode:
+        case kNmtCmdResetCommunication:
+        case kNmtCmdResetConfiguration:
+        case kNmtCmdSwReset:
             if (nodeId_p == EPL_C_ADR_BROADCAST)
             {   // memorize that this is a user requested reset
                 nmtMnuInstance_g.flags |= NMTMNU_FLAG_USER_RESET;
             }
             break;
 
-        case kEplNmtCmdStartNode:
-        case kEplNmtCmdStopNode:
-        case kEplNmtCmdEnterPreOperational2:
-        case kEplNmtCmdEnableReadyToOperate:
+        case kNmtCmdStartNode:
+        case kNmtCmdStopNode:
+        case kNmtCmdEnterPreOperational2:
+        case kNmtCmdEnableReadyToOperate:
         default:
             break;
     }
@@ -1173,7 +1173,7 @@ tEplKernel nmtmnu_processEvent(tEplEvent* pEvent_p)
             {
                 tEplFrame* pFrame = (tEplFrame*)pEvent_p->m_pArg;
                 UINT                uiNodeId;
-                tEplNmtCommand      NmtCommand;
+                tNmtCommand         NmtCommand;
                 UINT8                bNmtState;
 
                 if (pEvent_p->m_uiSize < EPL_C_DLL_MINSIZE_NMTCMD)
@@ -1183,32 +1183,32 @@ tEplKernel nmtmnu_processEvent(tEplEvent* pEvent_p)
                 }
 
                 uiNodeId = AmiGetByteFromLe(&pFrame->m_le_bDstNodeId);
-                NmtCommand = (tEplNmtCommand) AmiGetByteFromLe(&pFrame->m_Data.m_Asnd.m_Payload.m_NmtCommandService.m_le_bNmtCommandId);
+                NmtCommand = (tNmtCommand) AmiGetByteFromLe(&pFrame->m_Data.m_Asnd.m_Payload.m_NmtCommandService.m_le_bNmtCommandId);
 
                 switch (NmtCommand)
                 {
-                    case kEplNmtCmdStartNode:
+                    case kNmtCmdStartNode:
                         bNmtState = (UINT8) (kEplNmtCsOperational & 0xFF);
                         break;
 
-                    case kEplNmtCmdStopNode:
+                    case kNmtCmdStopNode:
                         bNmtState = (UINT8) (kEplNmtCsStopped & 0xFF);
                         break;
 
-                    case kEplNmtCmdEnterPreOperational2:
+                    case kNmtCmdEnterPreOperational2:
                         bNmtState = (UINT8) (kEplNmtCsPreOperational2 & 0xFF);
                         break;
 
-                    case kEplNmtCmdEnableReadyToOperate:
+                    case kNmtCmdEnableReadyToOperate:
                         // d.k. do not change expected node state, because of DS 1.0.0 7.3.1.2.1 Plain NMT State Command
                         //      and because node may not change NMT state within EPL_C_NMT_STATE_TOLERANCE
                         bNmtState = (UINT8) (kEplNmtCsPreOperational2 & 0xFF);
                         break;
 
-                    case kEplNmtCmdResetNode:
-                    case kEplNmtCmdResetCommunication:
-                    case kEplNmtCmdResetConfiguration:
-                    case kEplNmtCmdSwReset:
+                    case kNmtCmdResetNode:
+                    case kNmtCmdResetCommunication:
+                    case kNmtCmdResetConfiguration:
+                    case kNmtCmdSwReset:
                         bNmtState = (UINT8) (kEplNmtCsNotActive & 0xFF);
                         // processInternalEvent() sets internal node state to kNmtMnuNodeStateUnknown
                         // after next unresponded IdentRequest/StatusRequest
@@ -1246,27 +1246,27 @@ tEplKernel nmtmnu_processEvent(tEplEvent* pEvent_p)
 
                         switch (NmtCommand)
                         {
-                            case kEplNmtCmdResetNode:
+                            case kNmtCmdResetNode:
                                 NmtEvent = kEplNmtEventResetNode;
                                 break;
 
-                            case kEplNmtCmdResetCommunication:
+                            case kNmtCmdResetCommunication:
                                 NmtEvent = kEplNmtEventResetCom;
                                 break;
 
-                            case kEplNmtCmdResetConfiguration:
+                            case kNmtCmdResetConfiguration:
                                 NmtEvent = kEplNmtEventResetConfig;
                                 break;
 
-                            case kEplNmtCmdSwReset:
+                            case kNmtCmdSwReset:
                                 NmtEvent = kEplNmtEventSwReset;
                                 break;
 
-                            case kEplNmtCmdInvalidService:
+                            case kNmtCmdInvalidService:
                             default:    // actually no reset was requested
                                 goto Exit;
                         }
-                        ret = EplNmtuNmtEvent(NmtEvent);
+                        ret = nmtu_postNmtEvent(NmtEvent);
                         if (ret != kEplSuccessful)
                             goto Exit;
                     }
@@ -1417,7 +1417,7 @@ static tEplKernel cbNmtRequest(tEplFrameInfo * pFrameInfo_p)
 {
     tEplKernel              ret = kEplSuccessful;
     UINT                    targetNodeId;
-    tEplNmtCommand          nmtCommand;
+    tNmtCommand             nmtCommand;
     tEplNmtRequestService*  pNmtRequestService;
     UINT                    sourceNodeId;
 
@@ -1425,13 +1425,13 @@ static tEplKernel cbNmtRequest(tEplFrameInfo * pFrameInfo_p)
         return kEplNmtInvalidFramePointer;
 
     pNmtRequestService = &pFrameInfo_p->m_pFrame->m_Data.m_Asnd.m_Payload.m_NmtRequestService;
-    nmtCommand = (tEplNmtCommand)AmiGetByteFromLe(&pNmtRequestService->m_le_bNmtCommandId);
+    nmtCommand = (tNmtCommand)AmiGetByteFromLe(&pNmtRequestService->m_le_bNmtCommandId);
     targetNodeId = AmiGetByteFromLe(&pNmtRequestService->m_le_bTargetNodeId);
     ret = nmtmnu_requestNmtCommand(targetNodeId, nmtCommand);
     if (ret != kEplSuccessful)
-    {   // error -> reply with kEplNmtCmdInvalidService
+    {   // error -> reply with kNmtCmdInvalidService
         sourceNodeId = AmiGetByteFromLe(&pFrameInfo_p->m_pFrame->m_le_bSrcNodeId);
-        ret = nmtmnu_sendNmtCommand(sourceNodeId, kEplNmtCmdInvalidService);
+        ret = nmtmnu_sendNmtCommand(sourceNodeId, kNmtCmdInvalidService);
     }
     return ret;
 }
@@ -1544,7 +1544,7 @@ static tEplKernel cbNodeAdded(UINT nodeId_p)
 
     if (pNodeInfo->nodeState == kNmtMnuNodeStateConfigured)
     {
-        nmtState = EplNmtuGetNmtState();
+        nmtState = nmtu_getNmtState();
         if (nmtState >= kEplNmtMsPreOperational2)
         {
             ret = nodeBootStep2(nodeId_p, pNodeInfo);
@@ -1808,9 +1808,9 @@ static tEplKernel doPreop1(tEplEventNmtStateChange nmtStateChange_p)
         ((nmtMnuInstance_g.flags & NMTMNU_FLAG_USER_RESET) == 0))
     {
         BENCHMARK_MOD_07_TOGGLE(7);
-        NMTMNU_DBG_POST_TRACE_VALUE(0, EPL_C_ADR_BROADCAST, kEplNmtCmdResetNode);
+        NMTMNU_DBG_POST_TRACE_VALUE(0, EPL_C_ADR_BROADCAST, kNmtCmdResetNode);
 
-        ret = nmtmnu_sendNmtCommand(EPL_C_ADR_BROADCAST, kEplNmtCmdResetNode);
+        ret = nmtmnu_sendNmtCommand(EPL_C_ADR_BROADCAST, kNmtCmdResetNode);
         if (ret != kEplSuccessful)
             return ret;
 
@@ -1976,9 +1976,9 @@ static tEplKernel nodeBootStep2(UINT nodeId_p, tNmtMnuNodeInfo* pNodeInfo_p)
             goto Exit;
     }
 
-    NMTMNU_DBG_POST_TRACE_VALUE(0, nodeId_p, kEplNmtCmdEnableReadyToOperate);
+    NMTMNU_DBG_POST_TRACE_VALUE(0, nodeId_p, kNmtCmdEnableReadyToOperate);
 
-    ret = nmtmnu_sendNmtCommand(nodeId_p, kEplNmtCmdEnableReadyToOperate);
+    ret = nmtmnu_sendNmtCommand(nodeId_p, kNmtCmdEnableReadyToOperate);
     if (ret != kEplSuccessful)
         goto Exit;
 
@@ -2124,8 +2124,8 @@ static tEplKernel startNodes(void)
             {
                 if ((nmtMnuInstance_g.nmtStartup & EPL_NMTST_STARTALLNODES) == 0)
                 {
-                    NMTMNU_DBG_POST_TRACE_VALUE(0, index, kEplNmtCmdStartNode);
-                    ret = nmtmnu_sendNmtCommand(index, kEplNmtCmdStartNode);
+                    NMTMNU_DBG_POST_TRACE_VALUE(0, index, kNmtCmdStartNode);
+                    ret = nmtmnu_sendNmtCommand(index, kNmtCmdStartNode);
                     if (ret != kEplSuccessful)
                         goto Exit;
                 }
@@ -2148,8 +2148,8 @@ static tEplKernel startNodes(void)
 
         if ((nmtMnuInstance_g.nmtStartup & EPL_NMTST_STARTALLNODES) != 0)
         {
-            NMTMNU_DBG_POST_TRACE_VALUE(0, EPL_C_ADR_BROADCAST, kEplNmtCmdStartNode);
-            ret = nmtmnu_sendNmtCommand(EPL_C_ADR_BROADCAST, kEplNmtCmdStartNode);
+            NMTMNU_DBG_POST_TRACE_VALUE(0, EPL_C_ADR_BROADCAST, kNmtCmdStartNode);
+            ret = nmtmnu_sendNmtCommand(EPL_C_ADR_BROADCAST, kNmtCmdStartNode);
             if (ret != kEplSuccessful)
                 goto Exit;
         }
@@ -2660,10 +2660,10 @@ static INT processNodeEventExecResetNode(UINT nodeId_p, tEplNmtState nodeNmtStat
 
     pNodeInfo->nodeState = kNmtMnuNodeStateConfRestored;
     NMTMNU_DBG_POST_TRACE_VALUE(kNmtMnuIntNodeEventExecResetNode, nodeId_p,
-                                    (((nodeNmtState_p & 0xFF) << 8) | kEplNmtCmdResetNode));
+                                    (((nodeNmtState_p & 0xFF) << 8) | kNmtCmdResetNode));
 
     // send NMT reset node to CN for activation of restored configuration
-    *pRet_p = nmtmnu_sendNmtCommand(nodeId_p, kEplNmtCmdResetNode);
+    *pRet_p = nmtmnu_sendNmtCommand(nodeId_p, kNmtCmdResetNode);
 
     return 0;
 }
@@ -2705,10 +2705,10 @@ static INT processNodeEventExecResetConf(UINT nodeId_p, tEplNmtState nodeNmtStat
     pNodeInfo->nodeState = kNmtMnuNodeStateResetConf;
     NMTMNU_DBG_POST_TRACE_VALUE(nodeEvent_p, nodeId_p,
                                    (((nodeNmtState_p & 0xFF) << 8) |
-                                   kEplNmtCmdResetConfiguration));
+                                   kNmtCmdResetConfiguration));
 
     // send NMT reset configuration to CN for activation of configuration
-    *pRet_p = nmtmnu_sendNmtCommand(nodeId_p, kEplNmtCmdResetConfiguration);
+    *pRet_p = nmtmnu_sendNmtCommand(nodeId_p, kNmtCmdResetConfiguration);
 
     return 0;
 }
@@ -2917,10 +2917,10 @@ static INT processNodeEventTimerLonger(UINT nodeId_p, tEplNmtState nodeNmtState_
             if (nmtState_p != kEplNmtMsReadyToOperate)
             {
                 NMTMNU_DBG_POST_TRACE_VALUE(kNmtMnuIntNodeEventTimerLonger, nodeId_p,
-                                                (((nodeNmtState_p & 0xFF) << 8) | kEplNmtCmdStartNode));
+                                                (((nodeNmtState_p & 0xFF) << 8) | kNmtCmdStartNode));
 
                 // start optional CN
-                *pRet_p = nmtmnu_sendNmtCommand(nodeId_p, kEplNmtCmdStartNode);
+                *pRet_p = nmtmnu_sendNmtCommand(nodeId_p, kNmtCmdStartNode);
             }
             break;
 
@@ -3006,7 +3006,7 @@ static tEplKernel processInternalEvent(UINT nodeId_p, tEplNmtState nodeNmtState_
     tEplKernel          ret = kEplSuccessful;
     tEplNmtState        nmtState;
 
-    nmtState = EplNmtuGetNmtState();
+    nmtState = nmtu_getNmtState();
     if (nmtState <= kEplNmtMsNotActive)        // MN is not active
         goto Exit;
 
@@ -3035,7 +3035,7 @@ static tEplKernel processInternalEvent(UINT nodeId_p, tEplNmtState nodeNmtState_
                         break;
                     }
                     // enter PreOp2
-                    ret = EplNmtuNmtEvent(kEplNmtEventAllMandatoryCNIdent);
+                    ret = nmtu_postNmtEvent(kEplNmtEventAllMandatoryCNIdent);
                 }
                 break;
 
@@ -3055,7 +3055,7 @@ static tEplKernel processInternalEvent(UINT nodeId_p, tEplNmtState nodeNmtState_
                         break;
                     }
                     // enter ReadyToOp
-                    ret = EplNmtuNmtEvent(kEplNmtEventEnterReadyToOperate);
+                    ret = nmtu_postNmtEvent(kEplNmtEventEnterReadyToOperate);
                 }
                 break;
 
@@ -3075,7 +3075,7 @@ static tEplKernel processInternalEvent(UINT nodeId_p, tEplNmtState nodeNmtState_
                         break;
                     }
                     // enter Operational
-                    ret = EplNmtuNmtEvent(kEplNmtEventEnterMsOperational);
+                    ret = nmtu_postNmtEvent(kEplNmtEventEnterMsOperational);
                 }
                 break;
 
@@ -3214,10 +3214,10 @@ static tEplKernel checkNmtState(UINT nodeId_p, tNmtMnuNodeInfo* pNodeInfo_p,
             if ((localNmtState_p == kEplNmtMsOperational) && (pNodeInfo_p->nodeState == kNmtMnuNodeStateComChecked))
             {
                 NMTMNU_DBG_POST_TRACE_VALUE(0, nodeId_p,
-                                                (((nodeNmtState_p & 0xFF) << 8) | kEplNmtCmdStartNode));
+                                                (((nodeNmtState_p & 0xFF) << 8) | kNmtCmdStartNode));
 
                 // immediately start optional CN, because communication is always OK (e.g. async-only CN)
-                ret = nmtmnu_sendNmtCommand(nodeId_p, kEplNmtCmdStartNode);
+                ret = nmtmnu_sendNmtCommand(nodeId_p, kNmtCmdStartNode);
                 if (ret != kEplSuccessful)
                     goto Exit;
             }
@@ -3266,12 +3266,12 @@ static tEplKernel checkNmtState(UINT nodeId_p, tNmtMnuNodeInfo* pNodeInfo_p,
         if (ret != kEplSuccessful)
             goto ExitButUpdate;
 
-        NMTMNU_DBG_POST_TRACE_VALUE(0, nodeId_p, (((nodeNmtState_p & 0xFF) << 8) | kEplNmtCmdResetNode));
+        NMTMNU_DBG_POST_TRACE_VALUE(0, nodeId_p, (((nodeNmtState_p & 0xFF) << 8) | kNmtCmdResetNode));
 
         // reset CN
         // store error code in NMT command data for diagnostic purpose
         AmiSetWordToLe(&beErrorCode, errorCode_p);
-        ret = nmtmnu_sendNmtCommandEx(nodeId_p, kEplNmtCmdResetNode, &beErrorCode, sizeof (beErrorCode));
+        ret = nmtmnu_sendNmtCommandEx(nodeId_p, kNmtCmdResetNode, &beErrorCode, sizeof (beErrorCode));
         if (ret == kEplSuccessful)
             ret = kEplReject;
 
@@ -4144,7 +4144,7 @@ static tEplKernel prcCbSyncResNextAction(UINT nodeId_p, tEplSyncResponse* pSyncR
 {
     tEplKernel              ret;
     tNmtMnuNodeInfo*        pNodeInfo;
-    tEplNmtCommand          nmtCommand;
+    tNmtCommand             nmtCommand;
 
     UNUSED_PARAMETER(pSyncResponse_p);
     ret = kEplSuccessful;
@@ -4153,33 +4153,33 @@ static tEplKernel prcCbSyncResNextAction(UINT nodeId_p, tEplSyncResponse* pSyncR
     switch (pNodeInfo->prcFlags & NMTMNU_NODE_FLAG_PRC_RESET_MASK)
     {
         case NMTMNU_NODE_FLAG_PRC_STOP_NODE:
-            nmtCommand = kEplNmtCmdStopNode;
+            nmtCommand = kNmtCmdStopNode;
             break;
 
         case NMTMNU_NODE_FLAG_PRC_RESET_NODE:
-            nmtCommand = kEplNmtCmdResetNode;
+            nmtCommand = kNmtCmdResetNode;
             break;
 
         case NMTMNU_NODE_FLAG_PRC_RESET_COM:
-            nmtCommand = kEplNmtCmdResetCommunication;
+            nmtCommand = kNmtCmdResetCommunication;
             break;
 
         case NMTMNU_NODE_FLAG_PRC_RESET_CONF:
-            nmtCommand = kEplNmtCmdResetConfiguration;
+            nmtCommand = kNmtCmdResetConfiguration;
             break;
 
         case NMTMNU_NODE_FLAG_PRC_RESET_SW:
-            nmtCommand = kEplNmtCmdSwReset;
+            nmtCommand = kNmtCmdSwReset;
             break;
 
         default:
-            nmtCommand = kEplNmtCmdInvalidService;
+            nmtCommand = kNmtCmdInvalidService;
             break;
     }
 
     pNodeInfo->prcFlags &= ~NMTMNU_NODE_FLAG_PRC_RESET_MASK;
 
-    if (nmtCommand != kEplNmtCmdInvalidService)
+    if (nmtCommand != kNmtCmdInvalidService)
     {
         ret = nmtmnu_sendNmtCommand(nodeId_p, nmtCommand);
         if (ret != kEplSuccessful)
@@ -4232,7 +4232,7 @@ SyncRes returns. Commands of higher priority overwrite those of lower priority.
 */
 //------------------------------------------------------------------------------
 static void prcSetFlagsNmtCommandReset(tNmtMnuNodeInfo* pNodeInfo_p,
-                                       tEplNmtCommand nmtCommand_p)
+                                       tNmtCommand nmtCommand_p)
 {
     UINT16 prcFlagsReset;
 
@@ -4240,11 +4240,11 @@ static void prcSetFlagsNmtCommandReset(tNmtMnuNodeInfo* pNodeInfo_p,
 
     switch (nmtCommand_p)
     {
-        case kEplNmtCmdResetNode:
+        case kNmtCmdResetNode:
             prcFlagsReset = NMTMNU_NODE_FLAG_PRC_RESET_NODE;
             break;
 
-        case kEplNmtCmdResetCommunication:
+        case kNmtCmdResetCommunication:
             switch (prcFlagsReset)
             {
                 case NMTMNU_NODE_FLAG_PRC_RESET_CONF:
@@ -4259,7 +4259,7 @@ static void prcSetFlagsNmtCommandReset(tNmtMnuNodeInfo* pNodeInfo_p,
             }
             break;
 
-        case kEplNmtCmdResetConfiguration:
+        case kNmtCmdResetConfiguration:
             switch (prcFlagsReset)
             {
                 case NMTMNU_NODE_FLAG_PRC_RESET_SW:
@@ -4273,7 +4273,7 @@ static void prcSetFlagsNmtCommandReset(tNmtMnuNodeInfo* pNodeInfo_p,
             }
             break;
 
-        case kEplNmtCmdSwReset:
+        case kNmtCmdSwReset:
             switch (prcFlagsReset)
             {
                 case NMTMNU_NODE_FLAG_PRC_STOP_NODE:
@@ -4286,7 +4286,7 @@ static void prcSetFlagsNmtCommandReset(tNmtMnuNodeInfo* pNodeInfo_p,
             }
             break;
 
-        case kEplNmtCmdStopNode:
+        case kNmtCmdStopNode:
             if (prcFlagsReset == 0)
             {
                 prcFlagsReset = NMTMNU_NODE_FLAG_PRC_STOP_NODE;

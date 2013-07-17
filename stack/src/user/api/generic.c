@@ -324,7 +324,7 @@ tEplKernel PUBLIC EplApiExecNmtCommand(tEplNmtEvent NmtEvent_p)
 tEplKernel      Ret = kEplSuccessful;
 
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMTU)) != 0)
-    Ret = EplNmtuNmtEvent(NmtEvent_p);
+    Ret = nmtu_postNmtEvent(NmtEvent_p);
 #endif
 
     return Ret;
@@ -972,7 +972,7 @@ tEplNmtState            NmtState;
    {
         case kEplNmtEventEnableReadyToOperate:
         {
-            NmtState = EplNmtuGetNmtState();
+            NmtState = nmtu_getNmtState();
 
             // inform application
             Ret = EplApiCbBootEvent(kEplNmtBootEventEnableReadyToOp,
@@ -1155,13 +1155,13 @@ tEplApiEventArg     EventArg;
 
                 bNmtCommand = *((BYTE *) pParam_p->m_pArg);
                 // check value range
-                switch ((tEplNmtCommand)bNmtCommand)
+                switch ((tNmtCommand)bNmtCommand)
                 {
-                    case kEplNmtCmdResetNode:
-                    case kEplNmtCmdResetCommunication:
-                    case kEplNmtCmdResetConfiguration:
-                    case kEplNmtCmdSwReset:
-                    case kEplNmtCmdInvalidService:
+                    case kNmtCmdResetNode:
+                    case kNmtCmdResetCommunication:
+                    case kNmtCmdResetConfiguration:
+                    case kNmtCmdSwReset:
+                    case kNmtCmdInvalidService:
                         // valid command identifier specified
                         break;
 
@@ -1177,27 +1177,27 @@ tEplApiEventArg     EventArg;
 
                 bNmtCommand = *((BYTE *) pParam_p->m_pArg);
                 // check value range
-                switch ((tEplNmtCommand)bNmtCommand)
+                switch ((tNmtCommand)bNmtCommand)
                 {
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMTU)) != 0)
-                    case kEplNmtCmdResetNode:
-                        Ret = EplNmtuNmtEvent(kEplNmtEventResetNode);
+                    case kNmtCmdResetNode:
+                        Ret = nmtu_postNmtEvent(kEplNmtEventResetNode);
                         break;
 
-                    case kEplNmtCmdResetCommunication:
-                        Ret = EplNmtuNmtEvent(kEplNmtEventResetCom);
+                    case kNmtCmdResetCommunication:
+                        Ret = nmtu_postNmtEvent(kEplNmtEventResetCom);
                         break;
 
-                    case kEplNmtCmdResetConfiguration:
-                        Ret = EplNmtuNmtEvent(kEplNmtEventResetConfig);
+                    case kNmtCmdResetConfiguration:
+                        Ret = nmtu_postNmtEvent(kEplNmtEventResetConfig);
                         break;
 
-                    case kEplNmtCmdSwReset:
-                        Ret = EplNmtuNmtEvent(kEplNmtEventSwReset);
+                    case kNmtCmdSwReset:
+                        Ret = nmtu_postNmtEvent(kEplNmtEventSwReset);
                         break;
 #endif
 
-                    case kEplNmtCmdInvalidService:
+                    case kNmtCmdInvalidService:
                         break;
 
                     default:
@@ -1237,20 +1237,20 @@ tEplApiEventArg     EventArg;
                     goto Exit;
                 }
 
-                NmtState = EplNmtuGetNmtState();
+                NmtState = nmtu_getNmtState();
 
                 if (NmtState < kEplNmtMsNotActive)
                 {   // local node is CN
                     // forward the command to the MN
                     // d.k. this is a manufacturer specific feature
                     Ret = nmtcnu_sendNmtRequest(bCmdTarget,
-                                                  (tEplNmtCommand) bCmdId);
+                                                  (tNmtCommand) bCmdId);
                 }
                 else
                 {   // local node is MN
                     // directly execute the requested NMT command
                     Ret = nmtmnu_requestNmtCommand(bCmdTarget,
-                                                     (tEplNmtCommand) bCmdId);
+                                                     (tNmtCommand) bCmdId);
                 }
                 if (Ret != kEplSuccessful)
                 {
@@ -1375,7 +1375,7 @@ tEplApiEventType    EventType;
                 {
                     EventType = kEplApiEventCriticalError;
                     // halt the stack by entering NMT state Off
-                    Ret = EplNmtuNmtEvent(kEplNmtEventCriticalError);
+                    Ret = nmtu_postNmtEvent(kEplNmtEventCriticalError);
                     break;
                 }
 
@@ -1576,7 +1576,7 @@ tEplApiEventArg     EventArg;
         case kEplNmtCsNotActive:
         {
             // indicate completion of reset in NMT_ResetCmd_U8
-            bNmtState = (BYTE) kEplNmtCmdInvalidService;
+            bNmtState = (BYTE) kNmtCmdInvalidService;
             Ret = EplObdWriteEntry(0x1F9E, 0, &bNmtState, 1);
             if (Ret != kEplSuccessful)
             {

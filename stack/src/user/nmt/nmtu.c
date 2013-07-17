@@ -1,783 +1,698 @@
-/****************************************************************************
+/**
+********************************************************************************
+\file   nmtu.c
 
-  (c) SYSTEC electronic GmbH, D-07973 Greiz, August-Bebel-Str. 29
-      www.systec-electronic.com
+\brief  Implementation of NMT user module
 
-  Project:      openPOWERLINK
+This file contains the implementation of the NMT user module.
 
-  Description:  source file for NMT user part module
+\ingroup module_nmtu
+*******************************************************************************/
 
-  License:
+/*------------------------------------------------------------------------------
+Copyright (c) 2013, SYSTEC electronic GmbH
+Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+All rights reserved.
 
-    Redistribution and use in source and binary forms, with or without
-    modification, are permitted provided that the following conditions
-    are met:
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+    * Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above copyright
+      notice, this list of conditions and the following disclaimer in the
+      documentation and/or other materials provided with the distribution.
+    * Neither the name of the copyright holders nor the
+      names of its contributors may be used to endorse or promote products
+      derived from this software without specific prior written permission.
 
-    1. Redistributions of source code must retain the above copyright
-       notice, this list of conditions and the following disclaimer.
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL COPYRIGHT HOLDERS BE LIABLE FOR ANY
+DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+------------------------------------------------------------------------------*/
 
-    2. Redistributions in binary form must reproduce the above copyright
-       notice, this list of conditions and the following disclaimer in the
-       documentation and/or other materials provided with the distribution.
-
-    3. Neither the name of SYSTEC electronic GmbH nor the names of its
-       contributors may be used to endorse or promote products derived
-       from this software without prior written permission. For written
-       permission, please contact info@systec-electronic.com.
-
-    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-    LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-    FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-    COPYRIGHT HOLDERS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-    INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-    BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-    LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-    CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-    LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-    ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-    POSSIBILITY OF SUCH DAMAGE.
-
-    Severability Clause:
-
-        If a provision of this License is or becomes illegal, invalid or
-        unenforceable in any jurisdiction, that shall not affect:
-        1. the validity or enforceability in that jurisdiction of any other
-           provision of this License; or
-        2. the validity or enforceability in other jurisdictions of that or
-           any other provision of this License.
-
-  -------------------------------------------------------------------------
-
-                $RCSfile$
-
-                $Author$
-
-                $Revision$  $Date$
-
-                $State$
-
-                Build Environment:
-                    GCC V3.4
-
-  -------------------------------------------------------------------------
-
-  Revision History:
-
-  2006/06/09 k.t.:   start of the implementation
-
-****************************************************************************/
-
-
+//------------------------------------------------------------------------------
+// includes
+//------------------------------------------------------------------------------
 #include "EplInc.h"
-#include "user/EplNmtu.h"
+#include "user/nmtu.h"
 #include "user/EplObdu.h"
 #include "user/EplTimeru.h"
 #include "user/dllucal.h"
 
-#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMTU)) != 0)
+//============================================================================//
+//            G L O B A L   D E F I N I T I O N S                             //
+//============================================================================//
 
-/***************************************************************************/
-/*                                                                         */
-/*                                                                         */
-/*          G L O B A L   D E F I N I T I O N S                            */
-/*                                                                         */
-/*                                                                         */
-/***************************************************************************/
-
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // const defines
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+// module global vars
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// global function prototypes
+//------------------------------------------------------------------------------
+
+//============================================================================//
+//            P R I V A T E   D E F I N I T I O N S                           //
+//============================================================================//
+
+//------------------------------------------------------------------------------
+// const defines
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
 // local types
-//---------------------------------------------------------------------------
-
+//------------------------------------------------------------------------------
 typedef struct
 {
-    tEplNmtState                    m_LocalNmtState;
-    tEplNmtuStateChangeCallback     m_pfnNmtChangeCb;
-    tEplTimerHdl                    m_TimerHdl;
+    tEplNmtState                    localNmtState;
+    tNmtuStateChangeCallback        pfnNmtChangeCb;
+    tEplTimerHdl                    timerHdl;
+} tNmtuInstance;
 
-} tEplNmtuInstance;
+//------------------------------------------------------------------------------
+// local vars
+//------------------------------------------------------------------------------
+static tNmtuInstance        nmtuInstance_g;
 
-//---------------------------------------------------------------------------
-// module global vars
-//---------------------------------------------------------------------------
-
-static tEplNmtuInstance EplNmtuInstance_g;
-
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // local function prototypes
-//---------------------------------------------------------------------------
-
+//------------------------------------------------------------------------------
 #if EPL_NMT_MAX_NODE_ID > 0
-
-static tEplKernel EplNmtuConfigureDll(void);
-
+static tEplKernel configureDll(void);
 #endif
 
+static BOOL processGeneralStateChange(tEplNmtState newNmtState, tEplKernel* pRet_p);
+static BOOL processCnStateChange(tEplNmtState newNmtState, tEplKernel* pRet_p);
 
-//=========================================================================//
-//                                                                         //
-//          P U B L I C   F U N C T I O N S                                //
-//                                                                         //
-//=========================================================================//
+#if defined(CONFIG_INCLUDE_NMT_MN)
+static BOOL processMnStateChange(tEplNmtState newNmtState, tEplKernel* pRet_p);
+#endif
 
-//---------------------------------------------------------------------------
-//
-// Function:    EplNmtuInit
-//
-// Description: init first instance of the module
-//
-//
-//
-// Parameters:
-//
-//
-// Returns:     tEplKernel  = errorcode
-//
-//
-// State:
-//
-//---------------------------------------------------------------------------
-EPLDLLEXPORT tEplKernel PUBLIC EplNmtuInit()
+static tEplKernel setupNmtTimerEvent(UINT32 timeout_p, tEplNmtEvent event_p);
+
+//============================================================================//
+//            P U B L I C   F U N C T I O N S                                 //
+//============================================================================//
+
+//------------------------------------------------------------------------------
+/**
+\brief  Init NMT user module
+
+The function initializes an instance of the NMT user module
+
+\return The function returns a tEplKernel error code.
+
+\ingroup module_nmtu
+*/
+//------------------------------------------------------------------------------
+tEplKernel nmtu_init(void)
 {
-tEplKernel Ret;
-
-    Ret = EplNmtuAddInstance();
-
-    return Ret;
+    return nmtu_addInstance();
 }
 
-//---------------------------------------------------------------------------
-//
-// Function:    EplNmtuAddInstance
-//
-// Description: init other instances of the module
-//
-//
-//
-// Parameters:
-//
-//
-// Returns:     tEplKernel  = errorcode
-//
-//
-// State:
-//
-//---------------------------------------------------------------------------
-EPLDLLEXPORT tEplKernel PUBLIC EplNmtuAddInstance()
+//------------------------------------------------------------------------------
+/**
+\brief  Add NMT user module instance
+
+The function adds a NMT user module instance
+
+\return The function returns a tEplKernel error code.
+
+\ingroup module_nmtu
+*/
+//------------------------------------------------------------------------------
+tEplKernel nmtu_addInstance(void)
 {
-tEplKernel Ret;
-
-    Ret = kEplSuccessful;
-
-    EplNmtuInstance_g.m_pfnNmtChangeCb = NULL;
-
-    return Ret;
-
+    nmtuInstance_g.pfnNmtChangeCb = NULL;
+    return kEplSuccessful;
 }
 
-//---------------------------------------------------------------------------
-//
-// Function:    EplNmtuDelInstance
-//
-// Description: delete instance
-//
-//
-//
-// Parameters:
-//
-//
-// Returns:     tEplKernel  = errorcode
-//
-//
-// State:
-//
-//---------------------------------------------------------------------------
-EPLDLLEXPORT tEplKernel PUBLIC EplNmtuDelInstance()
+//------------------------------------------------------------------------------
+/**
+\brief  Delete NMT user module instance
+
+The function deletes a NMT user module instance
+
+\return The function returns a tEplKernel error code.
+
+\ingroup module_nmtu
+*/
+//------------------------------------------------------------------------------
+tEplKernel nmtu_delInstance(void)
 {
-tEplKernel Ret;
+    tEplKernel ret = kEplSuccessful;
 
-    Ret = kEplSuccessful;
+    nmtuInstance_g.pfnNmtChangeCb = NULL;
+    ret = EplTimeruDeleteTimer(&nmtuInstance_g.timerHdl);
 
-    EplNmtuInstance_g.m_pfnNmtChangeCb = NULL;
-
-    // delete timer
-    Ret = EplTimeruDeleteTimer(&EplNmtuInstance_g.m_TimerHdl);
-
-    return Ret;
-
+    return ret;
 }
 
-//---------------------------------------------------------------------------
-//
-// Function:    EplNmtuNmtEvent
-//
-// Description: sends the NMT-Event to the NMT-State-Maschine
-//
-//
-//
-// Parameters:  NmtEvent_p  = NMT-Event to send
-//
-//
-// Returns:     tEplKernel  = errorcode
-//
-//
-// State:
-//
-//---------------------------------------------------------------------------
-EPLDLLEXPORT tEplKernel PUBLIC EplNmtuNmtEvent(tEplNmtEvent NmtEvent_p)
+//------------------------------------------------------------------------------
+/**
+\brief  Post a NMT event
+
+The function posts a NMT event for the NMT kernel module.
+
+\param  nmtEvent_p      NMT event to post.
+
+\return The function returns a tEplKernel error code.
+
+\ingroup module_nmtu
+*/
+//------------------------------------------------------------------------------
+tEplKernel nmtu_postNmtEvent(tEplNmtEvent nmtEvent_p)
 {
-tEplKernel  Ret;
-tEplEvent   Event;
+    tEplKernel  ret;
+    tEplEvent   event;
 
-    Event.m_EventSink = kEplEventSinkNmtk;
-    Event.m_NetTime.m_dwNanoSec = 0;
-    Event.m_NetTime.m_dwSec = 0;
-    Event.m_EventType = kEplEventTypeNmtEvent;
-    Event.m_pArg = &NmtEvent_p;
-    Event.m_uiSize = sizeof(NmtEvent_p);
+    event.m_EventSink = kEplEventSinkNmtk;
+    event.m_NetTime.m_dwNanoSec = 0;
+    event.m_NetTime.m_dwSec = 0;
+    event.m_EventType = kEplEventTypeNmtEvent;
+    event.m_pArg = &nmtEvent_p;
+    event.m_uiSize = sizeof(nmtEvent_p);
 
-    Ret = eventu_postEvent(&Event);
+    ret = eventu_postEvent(&event);
 
-
-    return Ret;
+    return ret;
 }
 
-//---------------------------------------------------------------------------
-//
-// Function:    EplNmtuGetNmtState
-//
-// Description: returns the actuell NMT-State
-//
-//
-//
-// Parameters:
-//
-//
-// Returns:     tEplNmtState  = NMT-State
-//
-//
-// State:
-//
-//---------------------------------------------------------------------------
-EPLDLLEXPORT tEplNmtState PUBLIC EplNmtuGetNmtState()
+//------------------------------------------------------------------------------
+/**
+\brief  Get the NMT state
+
+The function returns the current NMT state of the node.
+
+\return The function returns the NMT state
+
+\ingroup module_nmtu
+*/
+//------------------------------------------------------------------------------
+tEplNmtState nmtu_getNmtState(void)
 {
-    return EplNmtuInstance_g.m_LocalNmtState;
+    return nmtuInstance_g.localNmtState;
 }
 
-//---------------------------------------------------------------------------
-//
-// Function:    EplNmtuProcessEvent
-//
-// Description: processes events from event queue
-//
-//
-//
-// Parameters:  pEplEvent_p =   pointer to event
-//
-//
-// Returns:     tEplKernel  = errorcode
-//
-//
-// State:
-//
-//---------------------------------------------------------------------------
-EPLDLLEXPORT tEplKernel PUBLIC EplNmtuProcessEvent(
-            tEplEvent* pEplEvent_p)
+//------------------------------------------------------------------------------
+/**
+\brief  Process a NMTu event
+
+The function processes events sent to the NMT user module.
+
+\param  pEvent_p            Pointer to event which should be processed.
+
+\return The function returns a tEplKernel error code.
+
+\ingroup module_nmtu
+*/
+//------------------------------------------------------------------------------
+tEplKernel nmtu_processEvent(tEplEvent* pEvent_p)
 {
-tEplKernel  Ret;
+    tEplKernel                  ret = kEplSuccessful;
+    tEplEventNmtStateChange*    pNmtStateChange;
 
-    Ret = kEplSuccessful;
-
-    // process event
-    switch(pEplEvent_p->m_EventType)
+    switch(pEvent_p->m_EventType)
     {
         // state change of NMT-Module
         case kEplEventTypeNmtStateChange:
-        {
-        tEplEventNmtStateChange* pNmtStateChange;
-
-            // delete timer
-            Ret = EplTimeruDeleteTimer(&EplNmtuInstance_g.m_TimerHdl);
-
-            pNmtStateChange = (tEplEventNmtStateChange*)pEplEvent_p->m_pArg;
-
-            EplNmtuInstance_g.m_LocalNmtState = pNmtStateChange->m_NewNmtState;
+            ret = EplTimeruDeleteTimer(&nmtuInstance_g.timerHdl);
+            pNmtStateChange = (tEplEventNmtStateChange*)pEvent_p->m_pArg;
+            nmtuInstance_g.localNmtState = pNmtStateChange->m_NewNmtState;
 
             // call cb-functions to inform higher layer
-            if(EplNmtuInstance_g.m_pfnNmtChangeCb != NULL)
+            if(nmtuInstance_g.pfnNmtChangeCb != NULL)
             {
-                Ret = EplNmtuInstance_g.m_pfnNmtChangeCb(*pNmtStateChange);
+                ret = nmtuInstance_g.pfnNmtChangeCb(*pNmtStateChange);
             }
 
-            if (Ret == kEplSuccessful)
-            {   // everything is OK, so switch to next state if necessary
-                switch (pNmtStateChange->m_NewNmtState)
+            if (ret == kEplSuccessful)
+            {
+                /* handle state changes, state machine is split in general, CN and
+                 * MN states. */
+                if (!processGeneralStateChange(pNmtStateChange->m_NewNmtState, &ret))
                 {
-                    // EPL stack is not running
-                    case kEplNmtGsOff:
-                        break;
-
-                    // first init of the hardware
-                    case kEplNmtGsInitialising:
+                    if (!processCnStateChange(pNmtStateChange->m_NewNmtState, &ret))
                     {
-                        Ret = EplNmtuNmtEvent(kEplNmtEventEnterResetApp);
-                        break;
-                    }
-
-                    // init of the manufacturer-specific profile area and the
-                    // standardised device profile area
-                    case kEplNmtGsResetApplication:
-                    {
-                        Ret = EplNmtuNmtEvent(kEplNmtEventEnterResetCom);
-                        break;
-                    }
-
-                    // init of the communication profile area
-                    case kEplNmtGsResetCommunication:
-                    {
-                        Ret = EplNmtuNmtEvent(kEplNmtEventEnterResetConfig);
-                        break;
-                    }
-
-                    // build the configuration with infos from OD
-                    case kEplNmtGsResetConfiguration:
-                    {
-                    unsigned int uiNodeId;
-
-#if EPL_NMT_MAX_NODE_ID > 0
-                        // configure the DLL (PReq/PRes payload limits and PRes timeout)
-                        Ret = EplNmtuConfigureDll();
-                        if (Ret != kEplSuccessful)
+#if defined(CONFIG_INCLUDE_NMT_MN)
+                        if (!processMnStateChange(pNmtStateChange->m_NewNmtState, &ret))
+#endif
                         {
-                            break;
+                            ret = kEplNmtInvalidState;
+                            TRACE("EplNmtuProcess(): unhandled NMT state 0x%X\n",
+                                  pNmtStateChange->m_NewNmtState);
                         }
-#endif // EPL_NMT_MAX_NODE_ID > 0
-
-                        // get node ID from OD
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_OBDU)) != 0) || (EPL_OBD_USE_KERNEL != FALSE)
-                        uiNodeId = EplObduGetNodeId(EPL_MCO_PTR_INSTANCE_PTR);
-#else
-                        uiNodeId = 0;
-#endif
-                        //check node ID if not should be master or slave
-                        if (uiNodeId == EPL_C_ADR_MN_DEF_NODE_ID)
-                        {   // node shall be MN
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
-                            Ret = EplNmtuNmtEvent(kEplNmtEventEnterMsNotActive);
-#else
-                            TRACE("EplNmtuProcess(): no MN functionality implemented\n");
-#endif
-                        }
-                        else
-                        {   // node shall be CN
-                            Ret = EplNmtuNmtEvent(kEplNmtEventEnterCsNotActive);
-                        }
-                        break;
-                    }
-
-                    //-----------------------------------------------------------
-                    // CN part of the state machine
-
-                    // node listens for EPL-Frames and check timeout
-                    case kEplNmtCsNotActive:
-                    {
-                    DWORD           dwBasicEthernetTimeout;
-                    tEplObdSize     ObdSize;
-                    tEplTimerArg    TimerArg;
-
-                        // create timer to switch automatically to BasicEthernet if no MN available in network
-
-                        // read NMT_CNBasicEthernetTimeout_U32 from OD
-                        ObdSize = sizeof(dwBasicEthernetTimeout);
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_OBDU)) != 0) || (EPL_OBD_USE_KERNEL != FALSE)
-                        Ret = EplObduReadEntry(EPL_MCO_PTR_INSTANCE_PTR_
-                                                0x1F99,
-                                                0x00,
-                                                &dwBasicEthernetTimeout,
-                                                &ObdSize);
-#else
-                        Ret = kEplObdIndexNotExist;
-#endif
-                        if (Ret != kEplSuccessful)
-                        {
-                            break;
-                        }
-                        if (dwBasicEthernetTimeout != 0)
-                        {   // BasicEthernet is enabled
-                            // convert us into ms
-                            dwBasicEthernetTimeout = dwBasicEthernetTimeout / 1000;
-                            if (dwBasicEthernetTimeout == 0)
-                            {   // timer was below one ms
-                                // set one ms
-                                dwBasicEthernetTimeout = 1;
-                            }
-                            TimerArg.m_EventSink = kEplEventSinkNmtk;
-                            TimerArg.m_Arg.m_dwVal = (DWORD) kEplNmtEventTimerBasicEthernet;
-                            Ret = EplTimeruModifyTimerMs(&EplNmtuInstance_g.m_TimerHdl, (unsigned long) dwBasicEthernetTimeout, TimerArg);
-                            // potential error is forwarded to event queue which generates error event
-                        }
-                        break;
-                    }
-
-                    // node processes only async frames
-                    case kEplNmtCsPreOperational1:
-                    {
-                        break;
-                    }
-
-                    // node processes isochronous and asynchronous frames
-                    case kEplNmtCsPreOperational2:
-                    {
-                        Ret = EplNmtuNmtEvent(kEplNmtEventEnterReadyToOperate);
-                        break;
-                    }
-
-                    // node should be configured and application is ready
-                    case kEplNmtCsReadyToOperate:
-                    {
-                        break;
-                    }
-
-                    // normal work state
-                    case kEplNmtCsOperational:
-                    {
-                        break;
-                    }
-
-                    // node stopped by MN
-                    // -> only process asynchronous frames
-                    case kEplNmtCsStopped:
-                    {
-                        break;
-                    }
-
-                    // no EPL cycle
-                    // -> normal ethernet communication
-                    case kEplNmtCsBasicEthernet:
-                    {
-                        break;
-                    }
-
-                    //-----------------------------------------------------------
-                    // MN part of the state machine
-
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
-                    // node listens for EPL-Frames and check timeout
-                    case kEplNmtMsNotActive:
-                    {
-                    DWORD           dwBasicEthernetTimeout;
-                    tEplObdSize     ObdSize;
-                    tEplTimerArg    TimerArg;
-
-                        // create timer to switch automatically to BasicEthernet/PreOp1 if no other MN active in network
-
-                        // check NMT_StartUp_U32.Bit13
-                        // read NMT_StartUp_U32 from OD
-                        ObdSize = sizeof(dwBasicEthernetTimeout);
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_OBDU)) != 0) || (EPL_OBD_USE_KERNEL != FALSE)
-                        Ret = EplObduReadEntry(EPL_MCO_PTR_INSTANCE_PTR_
-                                                0x1F80,
-                                                0x00,
-                                                &dwBasicEthernetTimeout,
-                                                &ObdSize);
-#else
-                        Ret = kEplObdIndexNotExist;
-#endif
-                        if(Ret != kEplSuccessful)
-                        {
-                            break;
-                        }
-
-                        if((dwBasicEthernetTimeout & EPL_NMTST_BASICETHERNET) == 0)
-                        {   // NMT_StartUp_U32.Bit13 == 0
-                            // new state PreOperational1
-                            TimerArg.m_Arg.m_dwVal = (DWORD) kEplNmtEventTimerMsPreOp1;
-                        }
-                        else
-                        {   // NMT_StartUp_U32.Bit13 == 1
-                            // new state BasicEthernet
-                            TimerArg.m_Arg.m_dwVal = (DWORD) kEplNmtEventTimerBasicEthernet;
-                        }
-
-                        // read NMT_BootTime_REC.MNWaitNotAct_U32 from OD
-                        ObdSize = sizeof(dwBasicEthernetTimeout);
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_OBDU)) != 0) || (EPL_OBD_USE_KERNEL != FALSE)
-                        Ret = EplObduReadEntry(EPL_MCO_PTR_INSTANCE_PTR_
-                                                0x1F89,
-                                                0x01,
-                                                &dwBasicEthernetTimeout,
-                                                &ObdSize);
-#else
-                        Ret = kEplObdIndexNotExist;
-#endif
-                        if(Ret != kEplSuccessful)
-                        {
-                            break;
-                        }
-                        // convert us into ms
-                        dwBasicEthernetTimeout = dwBasicEthernetTimeout / 1000;
-                        if (dwBasicEthernetTimeout == 0)
-                        {   // timer was below one ms
-                            // set one ms
-                            dwBasicEthernetTimeout = 1;
-                        }
-                        TimerArg.m_EventSink = kEplEventSinkNmtk;
-                        Ret = EplTimeruModifyTimerMs(&EplNmtuInstance_g.m_TimerHdl, (unsigned long) dwBasicEthernetTimeout, TimerArg);
-                        // potential error is forwarded to event queue which generates error event
-                        break;
-                    }
-
-                    // node processes only async frames
-                    case kEplNmtMsPreOperational1:
-                    {
-                    DWORD           dwBasicEthernetTimeout = 0;
-                    tEplObdSize     ObdSize;
-                    tEplTimerArg    TimerArg;
-
-                        // create timer to switch automatically to PreOp2 if MN identified all mandatory CNs
-
-                        // read NMT_BootTime_REC.MNWaitPreOp1_U32 from OD
-                        ObdSize = sizeof(dwBasicEthernetTimeout);
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_OBDU)) != 0) || (EPL_OBD_USE_KERNEL != FALSE)
-                        Ret = EplObduReadEntry(EPL_MCO_PTR_INSTANCE_PTR_
-                                                0x1F89,
-                                                0x03,
-                                                &dwBasicEthernetTimeout,
-                                                &ObdSize);
-                        if(Ret != kEplSuccessful)
-                        {
-                            // ignore error, because this timeout is optional
-                            dwBasicEthernetTimeout = 0;
-                        }
-#endif
-                        if (dwBasicEthernetTimeout == 0)
-                        {   // delay is deactivated
-                            // immediately post timer event
-                            Ret = EplNmtuNmtEvent(kEplNmtEventTimerMsPreOp2);
-                            break;
-                        }
-                        // convert us into ms
-                        dwBasicEthernetTimeout = dwBasicEthernetTimeout / 1000;
-                        if (dwBasicEthernetTimeout == 0)
-                        {   // timer was below one ms
-                            // set one ms
-                            dwBasicEthernetTimeout = 1;
-                        }
-                        TimerArg.m_EventSink = kEplEventSinkNmtk;
-                        TimerArg.m_Arg.m_dwVal = (DWORD) kEplNmtEventTimerMsPreOp2;
-                        Ret = EplTimeruModifyTimerMs(&EplNmtuInstance_g.m_TimerHdl, (unsigned long) dwBasicEthernetTimeout, TimerArg);
-                        // potential error is forwarded to event queue which generates error event
-                        break;
-                    }
-
-                    // node processes isochronous and asynchronous frames
-                    case kEplNmtMsPreOperational2:
-                    {
-                        break;
-                    }
-
-                    // node should be configured and application is ready
-                    case kEplNmtMsReadyToOperate:
-                    {
-                        break;
-                    }
-
-                    // normal work state
-                    case kEplNmtMsOperational:
-                    {
-                        break;
-                    }
-
-                    // no EPL cycle
-                    // -> normal ethernet communication
-                    case kEplNmtMsBasicEthernet:
-                    {
-                        break;
-                    }
-#endif // (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
-
-                    default:
-                    {
-                        Ret = kEplNmtInvalidState;
-                        TRACE("EplNmtuProcess(): unhandled NMT state 0x%X\n", pNmtStateChange->m_NewNmtState);
                     }
                 }
-            }
-            else if (Ret == kEplReject)
-            {   // application wants to change NMT state itself
-                // it's OK
-                Ret = kEplSuccessful;
-            }
 
+            }
+            else if (ret == kEplReject)
+            {   // application wants to change NMT state itself, it's OK
+                ret = kEplSuccessful;
+            }
             EPL_DBGLVL_NMTU_TRACE("EplNmtuProcessEvent(): NMT-State-Maschine announce change of NMT State\n");
             break;
-        }
 
         default:
-        {
-            Ret = kEplNmtInvalidEvent;
+            ret = kEplNmtInvalidEvent;
             break;
-        }
-
     }
-
-//Exit:
-    return Ret;
+    return ret;
 }
 
-//---------------------------------------------------------------------------
-//
-// Function:    EplNmtuRegisterStateChangeCb
-//
-// Description: register Callback-function go get informed about a
-//              NMT-Change-State-Event
-//
-//
-//
-// Parameters:  pfnEplNmtStateChangeCb_p = functionpointer
-//
-//
-// Returns:     tEplKernel  = errorcode
-//
-//
-// State:
-//
-//---------------------------------------------------------------------------
-EPLDLLEXPORT tEplKernel PUBLIC EplNmtuRegisterStateChangeCb(
-            tEplNmtuStateChangeCallback pfnEplNmtStateChangeCb_p)
+//------------------------------------------------------------------------------
+/**
+\brief  Register a NMT state change callback
+
+The function registers a callback function for NMT state change events.
+
+\param  pfnNmtStateChangeCb_p      Pointer to callback function
+
+\return The function returns a tEplKernel error code.
+
+\ingroup module_nmtu
+*/
+//------------------------------------------------------------------------------
+tEplKernel nmtu_registerStateChangeCb(tNmtuStateChangeCallback pfnNmtStateChangeCb_p)
 {
-tEplKernel Ret;
-
-    Ret = kEplSuccessful;
-
-    // save callback-function in modul global var
-    EplNmtuInstance_g.m_pfnNmtChangeCb = pfnEplNmtStateChangeCb_p;
-
-    return Ret;
-
+    nmtuInstance_g.pfnNmtChangeCb = pfnNmtStateChangeCb_p;
+    return kEplSuccessful;
 }
 
-//=========================================================================//
-//                                                                         //
-//          P R I V A T E   F U N C T I O N S                              //
-//                                                                         //
-//=========================================================================//
+//============================================================================//
+//            P R I V A T E   F U N C T I O N S                               //
+//============================================================================//
+/// \name Private Functions
+/// \{
 
 #if EPL_NMT_MAX_NODE_ID > 0
 
-//---------------------------------------------------------------------------
-//
-// Function:    EplNmtuConfigureDll
-//
-// Description: configures PReq/PRes payload limits and PRes timeouts in DLL
-//              for each active node in object 0x1F81.
-//
-// Parameters:  void
-//
-// Returns:     tEplKernel      = error code
-//
-// State:
-//
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+/**
+\brief  Configure DLL limits and timeouts
 
-static tEplKernel EplNmtuConfigureDll(void)
+The function configured PReq/PRes payload limits an PRes timeouts in the DLL
+for each active node in object 0x1F81.
+
+\return The function returns a tEplKernel error code.
+
+\ingroup module_nmtu
+*/
+//------------------------------------------------------------------------------
+static tEplKernel configureDll(void)
 {
-tEplKernel      Ret = kEplSuccessful;
-DWORD           dwNodeCfg;
-tEplObdSize     ObdSize;
-tEplDllNodeInfo DllNodeInfo;
-unsigned int    uiIndex;
-BYTE            bCount;
+    tEplKernel      ret = kEplSuccessful;
+    UINT32          nodeCfg;
+    tEplObdSize     obdSize;
+    tEplDllNodeInfo dllNodeInfo;
+    UINT            index;
+    UINT8           count;
 
     // read number of nodes from object 0x1F81/0
-    ObdSize = sizeof (bCount);
-    Ret = EplObduReadEntry(0x1F81, 0, &bCount, &ObdSize);
-    if ((Ret == kEplObdIndexNotExist) || (Ret == kEplObdSubindexNotExist))
+    obdSize = sizeof (count);
+    ret = EplObduReadEntry(0x1F81, 0, &count, &obdSize);
+    if ((ret == kEplObdIndexNotExist) || (ret == kEplObdSubindexNotExist))
     {
-        Ret = kEplSuccessful;
-        goto Exit;
+        return kEplSuccessful;
     }
-    else if (Ret != kEplSuccessful)
+    else if (ret != kEplSuccessful)
     {
-        goto Exit;
+        return ret;
     }
 
-    for (uiIndex = 1; uiIndex <= bCount; uiIndex++)
+    for (index = 1; index <= count; index++)
     {
-        ObdSize = sizeof (dwNodeCfg);
-        Ret = EplObduReadEntry(0x1F81, uiIndex, &dwNodeCfg, &ObdSize);
-        if (Ret == kEplObdSubindexNotExist)
+        obdSize = sizeof (nodeCfg);
+        ret = EplObduReadEntry(0x1F81, index, &nodeCfg, &obdSize);
+        if (ret == kEplObdSubindexNotExist)
         {   // not all subindexes of object 0x1F81 have to exist
             continue;
         }
-        else if (Ret != kEplSuccessful)
+        else if (ret != kEplSuccessful)
         {
-            goto Exit;
+            return ret;
         }
 
-        if ((dwNodeCfg & (EPL_NODEASSIGN_NODE_EXISTS | EPL_NODEASSIGN_ASYNCONLY_NODE)) == EPL_NODEASSIGN_NODE_EXISTS)
+        if ((nodeCfg & (EPL_NODEASSIGN_NODE_EXISTS | EPL_NODEASSIGN_ASYNCONLY_NODE)) == EPL_NODEASSIGN_NODE_EXISTS)
         {   // node exists and runs in isochronous phase
-            DllNodeInfo.m_uiNodeId = uiIndex;
+            dllNodeInfo.m_uiNodeId = index;
 
-            ObdSize = sizeof (DllNodeInfo.m_wPresPayloadLimit);
-            Ret = EplObduReadEntry(0x1F8D, uiIndex, &DllNodeInfo.m_wPresPayloadLimit, &ObdSize);
-            if ((Ret == kEplObdIndexNotExist) || (Ret == kEplObdSubindexNotExist))
+            obdSize = sizeof (dllNodeInfo.m_wPresPayloadLimit);
+            ret = EplObduReadEntry(0x1F8D, index, &dllNodeInfo.m_wPresPayloadLimit, &obdSize);
+            if ((ret == kEplObdIndexNotExist) || (ret == kEplObdSubindexNotExist))
             {
-                DllNodeInfo.m_wPresPayloadLimit = 0;
+                dllNodeInfo.m_wPresPayloadLimit = 0;
             }
-            else if (Ret != kEplSuccessful)
+            else if (ret != kEplSuccessful)
             {
-                goto Exit;
+                return ret;
             }
 
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
-            if ((dwNodeCfg & (EPL_NODEASSIGN_NODE_IS_CN
+#if defined(CONFIG_INCLUDE_NMT_MN)
+            if ((nodeCfg & (EPL_NODEASSIGN_NODE_IS_CN
 #if EPL_NMTMNU_PRES_CHAINING_MN != FALSE
-                                                        | EPL_NODEASSIGN_PRES_CHAINING
+                            | EPL_NODEASSIGN_PRES_CHAINING
 #endif
                     )) == EPL_NODEASSIGN_NODE_IS_CN)
             {   // node is CN
-                ObdSize = sizeof (DllNodeInfo.m_wPreqPayloadLimit);
-                Ret = EplObduReadEntry(0x1F8B, uiIndex, &DllNodeInfo.m_wPreqPayloadLimit, &ObdSize);
-                if (Ret != kEplSuccessful)
-                {
-                    goto Exit;
-                }
+                obdSize = sizeof (dllNodeInfo.m_wPreqPayloadLimit);
+                ret = EplObduReadEntry(0x1F8B, index, &dllNodeInfo.m_wPreqPayloadLimit, &obdSize);
+                if (ret != kEplSuccessful)
+                    return ret;
 
-                ObdSize = sizeof (DllNodeInfo.m_dwPresTimeoutNs);
-                Ret = EplObduReadEntry(0x1F92, uiIndex, &DllNodeInfo.m_dwPresTimeoutNs, &ObdSize);
-                if (Ret != kEplSuccessful)
-                {
-                    goto Exit;
-                }
+                obdSize = sizeof (dllNodeInfo.m_dwPresTimeoutNs);
+                ret = EplObduReadEntry(0x1F92, index, &dllNodeInfo.m_dwPresTimeoutNs, &obdSize);
+                if (ret != kEplSuccessful)
+                    return ret;
             }
             else
             {
-                DllNodeInfo.m_dwPresTimeoutNs = 0;
-                DllNodeInfo.m_wPreqPayloadLimit = 0;
+                dllNodeInfo.m_dwPresTimeoutNs = 0;
+                dllNodeInfo.m_wPreqPayloadLimit = 0;
             }
-#endif // (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
+#endif // if defined(INCLUDE_CONFIG_NMT_MN)
 
-            Ret = dllucal_configNode(&DllNodeInfo);
-            if (Ret != kEplSuccessful)
-            {
-                goto Exit;
-            }
+            ret = dllucal_configNode(&dllNodeInfo);
+            if (ret != kEplSuccessful)
+                return ret;
         }
     }
 
-Exit:
-    return Ret;
+    return ret;
 }
-
 #endif // EPL_NMT_MAX_NODE_ID > 0
 
-#endif // #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMTU)) != 0)
+//------------------------------------------------------------------------------
+/**
+\brief  Process a state change to a general NMT state
 
+The function processes a state change to a general NMT state.
 
-// EOF
+\param  newNmtState_p           New NMT state.
+\param  pRet_p                  Pointer to store tEplKernel return value.
+
+\return The function returns \b TRUE if a state was found or \b FALSE if the
+        state was not found.
+*/
+//------------------------------------------------------------------------------
+static BOOL processGeneralStateChange(tEplNmtState newNmtState, tEplKernel* pRet_p)
+{
+    tEplKernel          ret = kEplSuccessful;
+    UINT                nodeId;
+    BOOL                fHandled = TRUE;
+
+    switch (newNmtState)
+    {
+        // EPL stack is not running
+        case kEplNmtGsOff:
+            break;
+
+        // first init of the hardware
+        case kEplNmtGsInitialising:
+            ret = nmtu_postNmtEvent(kEplNmtEventEnterResetApp);
+            break;
+
+        // init of the manufacturer-specific profile area and the
+        // standardised device profile area
+        case kEplNmtGsResetApplication:
+            ret = nmtu_postNmtEvent(kEplNmtEventEnterResetCom);
+            break;
+
+        // init of the communication profile area
+        case kEplNmtGsResetCommunication:
+            ret = nmtu_postNmtEvent(kEplNmtEventEnterResetConfig);
+            break;
+
+        // build the configuration with infos from OD
+        case kEplNmtGsResetConfiguration:
+#if EPL_NMT_MAX_NODE_ID > 0
+            // configure the DLL (PReq/PRes payload limits and PRes timeout)
+            ret = configureDll();
+            if (ret != kEplSuccessful)
+            {
+                break;
+            }
+#endif // EPL_NMT_MAX_NODE_ID > 0
+
+            // get node ID from OD
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_OBDU)) != 0) || (EPL_OBD_USE_KERNEL != FALSE)
+            nodeId = EplObduGetNodeId(EPL_MCO_PTR_INSTANCE_PTR);
+#else
+            nodeId = 0;
+#endif
+            //check node ID if not should be master or slave
+            if (nodeId == EPL_C_ADR_MN_DEF_NODE_ID)
+            {   // node shall be MN
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
+                ret = nmtu_postNmtEvent(kEplNmtEventEnterMsNotActive);
+#else
+                TRACE("EplNmtuProcess(): no MN functionality implemented\n");
+#endif
+            }
+            else
+            {   // node shall be CN
+                ret = nmtu_postNmtEvent(kEplNmtEventEnterCsNotActive);
+            }
+            break;
+
+        default:
+            fHandled = FALSE;
+            break;
+    }
+
+    *pRet_p = ret;
+    return fHandled;
+}
+
+#if defined(CONFIG_INCLUDE_NMT_MN)
+//------------------------------------------------------------------------------
+/**
+\brief  Process a state change to a MN NMT state
+
+The function processes a state change to a MN NMT state.
+
+\param  newNmtState_p           New NMT state.
+\param  pRet_p                  Pointer to store tEplKernel return value.
+
+\return The function returns \b TRUE if a state was found or \b FALSE if the
+        state was not found.
+*/
+//------------------------------------------------------------------------------
+static BOOL processMnStateChange(tEplNmtState newNmtState, tEplKernel* pRet_p)
+{
+    tEplKernel          ret = kEplSuccessful;
+    BOOL                fHandled = TRUE;
+    UINT32              waitTime;
+    UINT32              startUp;
+    tEplNmtEvent        timerEvent;
+    tEplObdSize         obdSize;
+
+    switch (newNmtState)
+    {
+        // node listens for EPL-Frames and check timeout
+        case kEplNmtMsNotActive:
+            // create timer to switch automatically to BasicEthernet/PreOp1 if no other MN active in network
+            // check NMT_StartUp_U32.Bit13
+            obdSize = sizeof(startUp);
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_OBDU)) != 0) || (EPL_OBD_USE_KERNEL != FALSE)
+            ret = EplObduReadEntry(EPL_MCO_PTR_INSTANCE_PTR_
+                                    0x1F80, 0x00, &startUp,&obdSize);
+#else
+            ret = kEplObdIndexNotExist;
+#endif
+            if(ret != kEplSuccessful)
+                break;
+
+            if((startUp & EPL_NMTST_BASICETHERNET) == 0)
+            {   // NMT_StartUp_U32.Bit13 == 0 -> new state PreOperational1
+                timerEvent = kEplNmtEventTimerMsPreOp1;
+            }
+            else
+            {   // NMT_StartUp_U32.Bit13 == 1 -> new state BasicEthernet
+                timerEvent = kEplNmtEventTimerBasicEthernet;
+            }
+
+            // read NMT_BootTime_REC.MNWaitNotAct_U32 from OD
+            obdSize = sizeof(waitTime);
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_OBDU)) != 0) || (EPL_OBD_USE_KERNEL != FALSE)
+            ret = EplObduReadEntry(EPL_MCO_PTR_INSTANCE_PTR_
+                                    0x1F89, 0x01, &waitTime, &obdSize);
+#else
+            ret = kEplObdIndexNotExist;
+#endif
+            if (ret != kEplSuccessful)
+                break;
+
+            ret = setupNmtTimerEvent(waitTime, timerEvent);
+            // potential error is forwarded to event queue which generates error event
+            break;
+
+        // node processes only async frames
+        case kEplNmtMsPreOperational1:
+            // create timer to switch automatically to PreOp2 if MN identified all mandatory CNs
+
+            // read NMT_BootTime_REC.MNWaitPreOp1_U32 from OD
+            obdSize = sizeof(waitTime);
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_OBDU)) != 0) || (EPL_OBD_USE_KERNEL != FALSE)
+            ret = EplObduReadEntry(EPL_MCO_PTR_INSTANCE_PTR_
+                                    0x1F89, 0x03, &waitTime, &obdSize);
+            if(ret != kEplSuccessful)
+            {
+                // ignore error, because this timeout is optional
+                waitTime = 0;
+            }
+#endif
+            if (waitTime == 0)
+            {   // delay is deactivated, immediately post timer event
+                ret = nmtu_postNmtEvent(kEplNmtEventTimerMsPreOp2);
+            }
+            else
+            {
+                ret = setupNmtTimerEvent(waitTime, kEplNmtEventTimerMsPreOp2);
+            }
+            // potential error is forwarded to event queue which generates error event
+            break;
+
+        // node processes isochronous and asynchronous frames
+        case kEplNmtMsPreOperational2:
+            break;
+
+        // node should be configured and application is ready
+        case kEplNmtMsReadyToOperate:
+            break;
+
+        // normal work state
+        case kEplNmtMsOperational:
+            break;
+
+        // no EPL cycle
+        // -> normal ethernet communication
+        case kEplNmtMsBasicEthernet:
+            break;
+
+        default:
+            fHandled = FALSE;
+            break;
+    }
+    *pRet_p = ret;
+    return fHandled;
+}
+#endif // #if defined(CONFIG_INCLUDE_NMT_MN)
+
+//------------------------------------------------------------------------------
+/**
+\brief  Process a state change to a CN NMT state
+
+The function processes a state change to a CN NMT state.
+
+\param  newNmtState_p           New NMT state.
+\param  pRet_p                  Pointer to store tEplKernel return value.
+
+\return The function returns \b TRUE if a state was found or \b FALSE if the
+        state was not found.
+*/
+//------------------------------------------------------------------------------
+static BOOL processCnStateChange(tEplNmtState newNmtState, tEplKernel* pRet_p)
+{
+    tEplKernel          ret = kEplSuccessful;
+    BOOL                fHandled = TRUE;
+    UINT32              basicEthernetTimeout;
+    tEplObdSize         obdSize;
+
+    switch (newNmtState)
+    {
+        // node listens for EPL-Frames and check timeout
+        case kEplNmtCsNotActive:
+            // create timer to switch automatically to BasicEthernet if no MN available in network
+            // read NMT_CNBasicEthernetTimeout_U32 from OD
+            obdSize = sizeof(basicEthernetTimeout);
+#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_OBDU)) != 0) || (EPL_OBD_USE_KERNEL != FALSE)
+            ret = EplObduReadEntry(EPL_MCO_PTR_INSTANCE_PTR_
+                                   0x1F99, 0x00, &basicEthernetTimeout, &obdSize);
+#else
+            ret = kEplObdIndexNotExist;
+#endif
+            if (ret != kEplSuccessful)
+                break;
+
+            if (basicEthernetTimeout != 0)
+            {   // BasicEthernet is enabled
+                ret = setupNmtTimerEvent(basicEthernetTimeout, kEplNmtEventTimerBasicEthernet);
+                // potential error is forwarded to event queue which generates error event
+            }
+            break;
+
+        // node processes only async frames
+        case kEplNmtCsPreOperational1:
+            break;
+
+        // node processes isochronous and asynchronous frames
+        case kEplNmtCsPreOperational2:
+            ret = nmtu_postNmtEvent(kEplNmtEventEnterReadyToOperate);
+            break;
+
+        // node should be configured and application is ready
+        case kEplNmtCsReadyToOperate:
+            break;
+
+        // normal work state
+        case kEplNmtCsOperational:
+            break;
+
+        // node stopped by MN
+        // -> only process asynchronous frames
+        case kEplNmtCsStopped:
+            break;
+
+        // no EPL cycle
+        // -> normal ethernet communication
+        case kEplNmtCsBasicEthernet:
+            break;
+
+        default:
+            fHandled = FALSE;
+            break;
+    }
+    *pRet_p = ret;
+    return fHandled;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Setup a NMT timer event
+
+The function sets up a timer which posts a NMT Event.
+
+\param  timeout_p           Timeout to set in microseconds.
+\param  event_p             Event to post after timeout.
+
+\return The function returns a tEplKernel error code.
+*/
+//------------------------------------------------------------------------------
+static tEplKernel setupNmtTimerEvent(UINT32 timeout_p, tEplNmtEvent event_p)
+{
+    tEplKernel      ret;
+    tEplTimerArg    timerArg;
+
+    timeout_p = timeout_p / 1000; // convert us into ms
+    if (timeout_p == 0)  // timer was below one ms -> set one ms
+        timeout_p = 1;
+    timerArg.m_EventSink = kEplEventSinkNmtk;
+    timerArg.m_Arg.m_dwVal = (UINT32) event_p;
+    ret = EplTimeruModifyTimerMs(&nmtuInstance_g.timerHdl, (ULONG)timeout_p, timerArg);
+    return  ret;
+}
+
+///\}
 
