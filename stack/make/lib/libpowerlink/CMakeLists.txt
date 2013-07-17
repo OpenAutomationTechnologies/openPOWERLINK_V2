@@ -94,7 +94,6 @@ SET (LIB_KERNEL_SOURCES
      ${KERNEL_SOURCE_DIR}/dll/dllkcal-circbuf.c
      ${KERNEL_SOURCE_DIR}/event/eventk.c
      ${KERNEL_SOURCE_DIR}/nmt/nmtk.c
-     ${KERNEL_SOURCE_DIR}/nmt/nmtkcal.c
      ${KERNEL_SOURCE_DIR}/pdo/pdok.c
      ${KERNEL_SOURCE_DIR}/pdo/pdokcal.c
      ${KERNEL_SOURCE_DIR}/pdo/pdokcal-triplebufshm.c
@@ -115,7 +114,6 @@ SET (LIB_USER_SOURCES
      ${USER_SOURCE_DIR}/dll/dllucal-circbuf.c
      ${USER_SOURCE_DIR}/event/eventu.c
      ${USER_SOURCE_DIR}/nmt/nmtu.c
-     ${USER_SOURCE_DIR}/nmt/nmtucal.c
      ${USER_SOURCE_DIR}/nmt/nmtcnu.c
      ${USER_SOURCE_DIR}/nmt/nmtmnu.c
      ${USER_SOURCE_DIR}/nmt/identu.c
@@ -188,7 +186,6 @@ SET (LIB_KERNEL_HEADERS
      ${KERNEL_INCLUDE_DIR}/eventk.h
      ${KERNEL_INCLUDE_DIR}/eventkcal.h
      ${KERNEL_INCLUDE_DIR}/EplNmtk.h
-     ${KERNEL_INCLUDE_DIR}/EplNmtkCal.h
      ${KERNEL_INCLUDE_DIR}/EplObdk.h
      ${KERNEL_INCLUDE_DIR}/pdok.h
      ${KERNEL_INCLUDE_DIR}/pdokcal.h
@@ -214,7 +211,6 @@ SET (LIB_USER_HEADERS
      ${USER_INCLUDE_DIR}/nmtcnu.h
      ${USER_INCLUDE_DIR}/nmtmnu.h
      ${USER_INCLUDE_DIR}/nmtu.h
-     ${USER_INCLUDE_DIR}/EplNmtuCal.h
      ${USER_INCLUDE_DIR}/EplObdu.h
      ${USER_INCLUDE_DIR}/EplObduCal.h
      ${USER_INCLUDE_DIR}/pdou.h
