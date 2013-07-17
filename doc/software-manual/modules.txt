@@ -146,6 +146,7 @@ of the user layer.
 
 \see module_nmtmnu
 \see module_nmtcnu
+\see module_mntk
 
 \ingroup user_layer
 */
@@ -331,6 +332,19 @@ for the kernel PDO module.
 
 \see module_pdou
 \see module_pdok
+
+\ingroup kernel_layer
+*/
+
+//==============================================================================
+/**
+\defgroup module_nmtk Kernel NMT module (nmtk)
+
+The kernel NMT module provides the general network managemement functions (NMT)
+of the kernel layer. It implements the NMT state machine but it will be
+controlled by the user NMT module.
+
+\see module_nmtu
 
 \ingroup kernel_layer
 */

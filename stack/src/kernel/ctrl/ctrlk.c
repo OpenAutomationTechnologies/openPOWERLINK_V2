@@ -45,7 +45,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <kernel/EplDllk.h>
 #include <kernel/errhndk.h>
 #include <kernel/eventk.h>
-#include <kernel/EplNmtk.h>
+#include <kernel/nmtk.h>
 #include <kernel/EplObdk.h>
 #include <kernel/dllkcal.h>
 #include <kernel/pdokcal.h>
@@ -357,7 +357,7 @@ static tEplKernel initStack(void)
         return ret;
 
 #if defined(CONFIG_INCLUDE_NMTK)
-    if ((ret = EplNmtkInit()) != kEplSuccessful)
+    if ((ret = nmtk_init()) != kEplSuccessful)
         return ret;
 #endif
 
@@ -418,7 +418,7 @@ static tEplKernel shutdownStack(void)
 #endif
 
 #if defined(CONFIG_INCLUDE_NMTK)
-    EplNmtkDelInstance();
+    nmtk_delInstance();
 #endif
 
 #if defined(CONFIG_INCLUDE_DLLK)

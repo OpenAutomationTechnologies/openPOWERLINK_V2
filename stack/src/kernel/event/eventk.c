@@ -43,7 +43,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #include <kernel/eventk.h>
 #include <kernel/eventkcal.h>
-#include <kernel/EplNmtk.h>
+#include <kernel/nmtk.h>
 #include <kernel/EplDllk.h>
 #include <kernel/dllkcal.h>
 #include <kernel/errhndk.h>
@@ -104,7 +104,7 @@ event sinks.
 static tEventDispatchEntry eventDispatchTbl_l[] =
 {
 #if defined(CONFIG_INCLUDE_NMTK)
-    { kEplEventSinkNmtk,        kEplEventSourceNmtk,        EplNmtkProcess },
+    { kEplEventSinkNmtk,        kEplEventSourceNmtk,        nmtk_process },
 #else
     { kEplEventSinkNmtk,        kEplEventSourceNmtk,        NULL },
 #endif
