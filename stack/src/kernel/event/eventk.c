@@ -362,7 +362,7 @@ static tEplKernel handleNmtEventinDll(tEplEvent* pEvent_p)
     BENCHMARK_MOD_27_RESET(0);
 
     if ((pEvent_p->m_EventType == kEplEventTypeNmtEvent) &&
-        (*((tEplNmtEvent*)pEvent_p->m_pArg) == kEplNmtEventDllCeSoa))
+        (*((tNmtEvent*)pEvent_p->m_pArg) == kNmtEventDllCeSoa))
     {
         BENCHMARK_MOD_27_SET(0);
         // forward SoA event to DLLk module for cycle preprocessing

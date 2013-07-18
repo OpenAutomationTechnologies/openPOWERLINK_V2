@@ -9,7 +9,7 @@ This file contains the definitions for the identu modules.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2012, SYSTEC electronik GmbH
+Copyright (c) 2012, SYSTEC electronic GmbH
 Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 

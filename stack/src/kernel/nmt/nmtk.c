@@ -108,7 +108,7 @@ typedef enum
 //------------------------------------------------------------------------------
 // local types
 //------------------------------------------------------------------------------
-typedef tEplKernel (*tNmtkStateFunc)(tEplNmtEvent nmtEvent_p);
+typedef tEplKernel (*tNmtkStateFunc)(tNmtEvent nmtEvent_p);
 
 typedef struct
 {
@@ -122,7 +122,7 @@ typedef struct
 
 typedef struct
 {
-    tEplNmtState                nmtState;
+    tNmtState                   nmtState;
     tNmtkStateFunc              pfnState;
 } tNmtkStateTable;
 
@@ -134,53 +134,53 @@ tNmtkInstance               nmtkInstance_g;
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static tEplKernel doStateGsOff(tEplNmtEvent nmtEvent_p);
-static tEplKernel doStateGsInitialising(tEplNmtEvent nmtEvent_p);
-static tEplKernel doStateGsResetApplication(tEplNmtEvent nmtEvent_p);
-static tEplKernel doStateGsResetCommunication(tEplNmtEvent nmtEvent_p);
-static tEplKernel doStateGsResetConfiguration(tEplNmtEvent nmtEvent_p);
+static tEplKernel doStateGsOff(tNmtEvent nmtEvent_p);
+static tEplKernel doStateGsInitialising(tNmtEvent nmtEvent_p);
+static tEplKernel doStateGsResetApplication(tNmtEvent nmtEvent_p);
+static tEplKernel doStateGsResetCommunication(tNmtEvent nmtEvent_p);
+static tEplKernel doStateGsResetConfiguration(tNmtEvent nmtEvent_p);
 
-static tEplKernel doStateMsNotActive(tEplNmtEvent nmtEvent_p);
+static tEplKernel doStateMsNotActive(tNmtEvent nmtEvent_p);
 #if defined(CONFIG_INCLUDE_NMT_MN)
-static tEplKernel doStateMsPreOperational1(tEplNmtEvent nmtEvent_p);
-static tEplKernel doStateMsPreOperational2(tEplNmtEvent nmtEvent_p);
-static tEplKernel doStateMsReadyToOperate(tEplNmtEvent nmtEvent_p);
-static tEplKernel doStateMsOperational(tEplNmtEvent nmtEvent_p);
-static tEplKernel doStateMsBasicEthernet(tEplNmtEvent nmtEvent_p);
+static tEplKernel doStateMsPreOperational1(tNmtEvent nmtEvent_p);
+static tEplKernel doStateMsPreOperational2(tNmtEvent nmtEvent_p);
+static tEplKernel doStateMsReadyToOperate(tNmtEvent nmtEvent_p);
+static tEplKernel doStateMsOperational(tNmtEvent nmtEvent_p);
+static tEplKernel doStateMsBasicEthernet(tNmtEvent nmtEvent_p);
 #endif
 
-static tEplKernel doStateCsNotActive(tEplNmtEvent nmtEvent_p);
-static tEplKernel doStateCsBasicEthernet(tEplNmtEvent nmtEvent_p);
-static tEplKernel doStateCsPreOperational1(tEplNmtEvent nmtEvent_p);
-static tEplKernel doStateCsPreOperational2(tEplNmtEvent nmtEvent_p);
-static tEplKernel doStateCsReadyToOperate(tEplNmtEvent nmtEvent_p);
-static tEplKernel doStateCsOperational(tEplNmtEvent nmtEvent_p);
-static tEplKernel doStateCsStopped(tEplNmtEvent nmtEvent_p);
+static tEplKernel doStateCsNotActive(tNmtEvent nmtEvent_p);
+static tEplKernel doStateCsBasicEthernet(tNmtEvent nmtEvent_p);
+static tEplKernel doStateCsPreOperational1(tNmtEvent nmtEvent_p);
+static tEplKernel doStateCsPreOperational2(tNmtEvent nmtEvent_p);
+static tEplKernel doStateCsReadyToOperate(tNmtEvent nmtEvent_p);
+static tEplKernel doStateCsOperational(tNmtEvent nmtEvent_p);
+static tEplKernel doStateCsStopped(tNmtEvent nmtEvent_p);
 
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
 tNmtkStateTable             nmtkStates_g[] =
 {
-    { kEplNmtGsOff,                 doStateGsOff },
-    { kEplNmtGsInitialising,        doStateGsInitialising },
-    { kEplNmtGsResetApplication,    doStateGsResetApplication },
-    { kEplNmtGsResetCommunication,  doStateGsResetCommunication },
-    { kEplNmtGsResetConfiguration,  doStateGsResetConfiguration },
-    { kEplNmtCsNotActive,           doStateCsNotActive },
-    { kEplNmtCsPreOperational1,     doStateCsPreOperational1 },
-    { kEplNmtCsStopped,             doStateCsStopped },
-    { kEplNmtCsPreOperational2,     doStateCsPreOperational2 },
-    { kEplNmtCsReadyToOperate,      doStateCsReadyToOperate },
-    { kEplNmtCsOperational,         doStateCsOperational },
-    { kEplNmtCsBasicEthernet,       doStateCsBasicEthernet },
-    { kEplNmtMsNotActive,           doStateMsNotActive },
+    { kNmtGsOff,                 doStateGsOff },
+    { kNmtGsInitialising,        doStateGsInitialising },
+    { kNmtGsResetApplication,    doStateGsResetApplication },
+    { kNmtGsResetCommunication,  doStateGsResetCommunication },
+    { kNmtGsResetConfiguration,  doStateGsResetConfiguration },
+    { kNmtCsNotActive,           doStateCsNotActive },
+    { kNmtCsPreOperational1,     doStateCsPreOperational1 },
+    { kNmtCsStopped,             doStateCsStopped },
+    { kNmtCsPreOperational2,     doStateCsPreOperational2 },
+    { kNmtCsReadyToOperate,      doStateCsReadyToOperate },
+    { kNmtCsOperational,         doStateCsOperational },
+    { kNmtCsBasicEthernet,       doStateCsBasicEthernet },
+    { kNmtMsNotActive,           doStateMsNotActive },
 #if defined(CONFIG_INCLUDE_NMT_MN)
-    { kEplNmtMsPreOperational1,     doStateMsPreOperational1 },
-    { kEplNmtMsPreOperational2,     doStateMsPreOperational2 },
-    { kEplNmtMsReadyToOperate,      doStateMsReadyToOperate },
-    { kEplNmtMsOperational,         doStateMsOperational },
-    { kEplNmtMsBasicEthernet,       doStateMsBasicEthernet }
+    { kNmtMsPreOperational1,     doStateMsPreOperational1 },
+    { kNmtMsPreOperational2,     doStateMsPreOperational2 },
+    { kNmtMsReadyToOperate,      doStateMsReadyToOperate },
+    { kNmtMsOperational,         doStateMsOperational },
+    { kNmtMsBasicEthernet,       doStateMsBasicEthernet }
 #endif
 };
 
@@ -246,20 +246,20 @@ tEplKernel nmtk_process(tEplEvent* pEvent_p)
 {
     tEplKernel              ret;
     tNmtkStateIndexes       oldState;
-    tEplNmtEvent            nmtEvent;
+    tNmtEvent               nmtEvent;
     tEplEvent               event;
-    tEplEventNmtStateChange nmtStateChange;
+    tEventNmtStateChange    nmtStateChange;
 
     ret = kEplSuccessful;
 
     switch(pEvent_p->m_EventType)
     {
         case kEplEventTypeNmtEvent:
-            nmtEvent = *((tEplNmtEvent*)pEvent_p->m_pArg);
+            nmtEvent = *((tNmtEvent*)pEvent_p->m_pArg);
             break;
 
         case kEplEventTypeTimer:
-            nmtEvent = (tEplNmtEvent)((tEplTimerEventArg*)pEvent_p->m_pArg)->m_Arg.m_dwVal;
+            nmtEvent = (tNmtEvent)((tEplTimerEventArg*)pEvent_p->m_pArg)->m_Arg.m_dwVal;
             break;
 
         default:
@@ -281,9 +281,9 @@ tEplKernel nmtk_process(tEplEvent* pEvent_p)
         EPL_DBGLVL_NMTK_TRACE("EplNmtkProcess(NMT-event = 0x%04X): New NMT-State = 0x%03X\n",
                               nmtEvent, nmtkStates_g[nmtkInstance_g.stateIndex].nmtState);
 
-        nmtStateChange.m_NewNmtState = nmtkStates_g[nmtkInstance_g.stateIndex].nmtState;
-        nmtStateChange.m_OldNmtState = nmtkStates_g[oldState].nmtState;
-        nmtStateChange.m_NmtEvent = nmtEvent;
+        nmtStateChange.newNmtState = nmtkStates_g[nmtkInstance_g.stateIndex].nmtState;
+        nmtStateChange.oldNmtState = nmtkStates_g[oldState].nmtState;
+        nmtStateChange.nmtEvent = nmtEvent;
         event.m_EventType = kEplEventTypeNmtStateChange;
         EPL_MEMSET(&event.m_NetTime, 0x00, sizeof(event.m_NetTime));
         event.m_pArg = &nmtStateChange;
@@ -321,10 +321,10 @@ The function processes the NMT state GS_OFF.
 \return The function returns a tEplKernel error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel doStateGsOff(tEplNmtEvent nmtEvent_p)
+static tEplKernel doStateGsOff(tNmtEvent nmtEvent_p)
 {
-    if (nmtEvent_p == kEplNmtEventSwReset)
-    {   // NMT_GT8, NMT_GT1 -> new state kEplNmtGsInitialising
+    if (nmtEvent_p == kNmtEventSwReset)
+    {   // NMT_GT8, NMT_GT1 -> new state kNmtGsInitialising
         nmtkInstance_g.stateIndex = kNmtkGsInitialising;
     }
     return kEplSuccessful;
@@ -342,20 +342,20 @@ In this state the first init of the hardware will be done.
 \return The function returns a tEplKernel error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel doStateGsInitialising(tEplNmtEvent nmtEvent_p)
+static tEplKernel doStateGsInitialising(tNmtEvent nmtEvent_p)
 {
     switch(nmtEvent_p)
     {
         // 2006/07/31 d.k.: react also on NMT reset commands in ResetApp state
         // NMT Command SwitchOff
-        case kEplNmtEventCriticalError:
-        case kEplNmtEventSwitchOff:
+        case kNmtEventCriticalError:
+        case kNmtEventSwitchOff:
             // NMT_GT3
             nmtkInstance_g.stateIndex = kNmtkGsOff;
             break;
 
-        // new state kEplNmtGsResetApplication
-        case kEplNmtEventEnterResetApp:
+        // new state kNmtGsResetApplication
+        case kNmtEventEnterResetApp:
             // NMT_GT10
             nmtkInstance_g.stateIndex = kNmtkGsResetApplication;
             break;
@@ -379,29 +379,29 @@ and the standardised device profile area is done.
 \return The function returns a tEplKernel error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel doStateGsResetApplication(tEplNmtEvent nmtEvent_p)
+static tEplKernel doStateGsResetApplication(tNmtEvent nmtEvent_p)
 {
     switch(nmtEvent_p)
     {
         // 2006/07/31 d.k.: react also on NMT reset commands in ResetApp state
         // NMT Command SwitchOff
-        case kEplNmtEventCriticalError:
-        case kEplNmtEventSwitchOff:
+        case kNmtEventCriticalError:
+        case kNmtEventSwitchOff:
             // NMT_GT3
             nmtkInstance_g.stateIndex = kNmtkGsOff;
             break;
 
         // NMT Command SwReset
-        case kEplNmtEventSwReset:
+        case kNmtEventSwReset:
             // NMT_GT8
             nmtkInstance_g.stateIndex = kNmtkGsInitialising;
             break;
 
         // leave this state only if higher layer
         // say so
-        case kEplNmtEventEnterResetCom:
+        case kNmtEventEnterResetCom:
             // NMT_GT11
-            // new state kEplNmtGsResetCommunication
+            // new state kNmtGsResetCommunication
             nmtkInstance_g.stateIndex = kNmtkGsResetCommunication;
             break;
 
@@ -423,34 +423,34 @@ In this state the initialization of the communication profile area is done.
 \return The function returns a tEplKernel error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel doStateGsResetCommunication(tEplNmtEvent nmtEvent_p)
+static tEplKernel doStateGsResetCommunication(tNmtEvent nmtEvent_p)
 {
     switch(nmtEvent_p)
     {
         // 2006/07/31 d.k.: react also on NMT reset commands in ResetComm state
         // NMT Command SwitchOff
-        case kEplNmtEventCriticalError:
-        case kEplNmtEventSwitchOff:
+        case kNmtEventCriticalError:
+        case kNmtEventSwitchOff:
             // NMT_GT3
             nmtkInstance_g.stateIndex = kNmtkGsOff;
             break;
 
         // NMT Command SwReset
-        case kEplNmtEventSwReset:
+        case kNmtEventSwReset:
             // NMT_GT8
             nmtkInstance_g.stateIndex = kNmtkGsInitialising;
             break;
 
         // NMT Command ResetNode
-        case kEplNmtEventResetNode:
+        case kNmtEventResetNode:
             // NMT_GT4
             nmtkInstance_g.stateIndex = kNmtkGsResetApplication;
             break;
 
         // leave this state only if higher layer
         // say so
-        case kEplNmtEventEnterResetConfig:
-            // NMT_GT12 -> new state kEplNmtGsResetConfiguration
+        case kNmtEventEnterResetConfig:
+            // NMT_GT12 -> new state kNmtGsResetConfiguration
             nmtkInstance_g.stateIndex = kNmtkGsResetConfiguration;
             break;
 
@@ -472,7 +472,7 @@ In this state we build the configuration with infos from OD.
 \return The function returns a tEplKernel error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel doStateGsResetConfiguration(tEplNmtEvent nmtEvent_p)
+static tEplKernel doStateGsResetConfiguration(tNmtEvent nmtEvent_p)
 {
     // reset flags
     nmtkInstance_g.fEnableReadyToOperate = FALSE;
@@ -484,37 +484,37 @@ static tEplKernel doStateGsResetConfiguration(tEplNmtEvent nmtEvent_p)
     {
         // 2006/07/31 d.k.: react also on NMT reset commands in ResetConf state
         // NMT Command SwitchOff
-        case kEplNmtEventCriticalError:
-        case kEplNmtEventSwitchOff:
+        case kNmtEventCriticalError:
+        case kNmtEventSwitchOff:
             // NMT_GT3
             nmtkInstance_g.stateIndex = kNmtkGsOff;
             break;
 
         // NMT Command SwReset
-        case kEplNmtEventSwReset:
+        case kNmtEventSwReset:
             // NMT_GT8
             nmtkInstance_g.stateIndex = kNmtkGsInitialising;
             break;
 
         // NMT Command ResetNode
-        case kEplNmtEventResetNode:
+        case kNmtEventResetNode:
             // NMT_GT4
             nmtkInstance_g.stateIndex = kNmtkGsResetApplication;
             break;
 
         // NMT Command ResetCommunication
-        case kEplNmtEventResetCom:
+        case kNmtEventResetCom:
             // NMT_GT5
             nmtkInstance_g.stateIndex = kNmtkGsResetCommunication;
             break;
 
         // leave this state only if higher layer says so
-        case kEplNmtEventEnterCsNotActive:
+        case kNmtEventEnterCsNotActive:
             // Node should be CN (NMT_CT1)
             nmtkInstance_g.stateIndex = kNmtkCsNotActive;
             break;
 
-        case kEplNmtEventEnterMsNotActive:
+        case kNmtEventEnterMsNotActive:
             // Node should be MN (NMT_MT1)
 #if !defined(CONFIG_INCLUDE_NMT_MN)
                 // no MN functionality
@@ -543,51 +543,51 @@ In this state the node listens for EPL-Frames and checks timeout.
 \return The function returns a tEplKernel error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel doStateCsNotActive(tEplNmtEvent nmtEvent_p)
+static tEplKernel doStateCsNotActive(tNmtEvent nmtEvent_p)
 {
     switch(nmtEvent_p)
     {
         // 2006/07/31 d.k.: react also on NMT reset commands in NotActive state
         // NMT Command SwitchOff
-        case kEplNmtEventCriticalError:
-        case kEplNmtEventSwitchOff:
+        case kNmtEventCriticalError:
+        case kNmtEventSwitchOff:
             // NMT_GT3
             nmtkInstance_g.stateIndex = kNmtkGsOff;
             break;
 
         // NMT Command SwReset
-        case kEplNmtEventSwReset:
+        case kNmtEventSwReset:
             // NMT_GT8
             nmtkInstance_g.stateIndex = kNmtkGsInitialising;
             break;
 
         // NMT Command ResetNode
-        case kEplNmtEventResetNode:
+        case kNmtEventResetNode:
             // NMT_GT4
             nmtkInstance_g.stateIndex = kNmtkGsResetApplication;
             break;
 
         // NMT Command ResetCommunication or internal Communication error
-        case kEplNmtEventResetCom:          // NMT_GT5
-        case kEplNmtEventInternComError:    // NMT_GT6
+        case kNmtEventResetCom:          // NMT_GT5
+        case kNmtEventInternComError:    // NMT_GT6
             nmtkInstance_g.stateIndex = kNmtkGsResetCommunication;
             break;
 
         // NMT Command Reset Configuration
-        case kEplNmtEventResetConfig:
+        case kNmtEventResetConfig:
             // NMT_GT7
             nmtkInstance_g.stateIndex = kNmtkGsResetConfiguration;
             break;
 
         // see if SoA or SoC received
-        case kEplNmtEventDllCeSoc:
-        case kEplNmtEventDllCeSoa:
+        case kNmtEventDllCeSoc:
+        case kNmtEventDllCeSoa:
             // NMT_CT2 -> new state PRE_OPERATIONAL1
             nmtkInstance_g.stateIndex = kNmtkCsPreOperational1;
             break;
 
         // timeout for SoA and Soc
-        case kEplNmtEventTimerBasicEthernet:
+        case kNmtEventTimerBasicEthernet:
             // NMT_CT3 -> new state BASIC_ETHERNET
             nmtkInstance_g.stateIndex = kNmtkCsBasicEthernet;
             break;
@@ -610,44 +610,44 @@ In this state the node processes only async frames.
 \return The function returns a tEplKernel error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel doStateCsPreOperational1(tEplNmtEvent nmtEvent_p)
+static tEplKernel doStateCsPreOperational1(tNmtEvent nmtEvent_p)
 {
     switch(nmtEvent_p)
     {
         // NMT Command SwitchOff
-        case kEplNmtEventCriticalError:
-        case kEplNmtEventSwitchOff:
+        case kNmtEventCriticalError:
+        case kNmtEventSwitchOff:
             // NMT_GT3
             nmtkInstance_g.stateIndex = kNmtkGsOff;
             break;
 
         // NMT Command SwReset
-        case kEplNmtEventSwReset:
+        case kNmtEventSwReset:
             // NMT_GT8
             nmtkInstance_g.stateIndex = kNmtkGsInitialising;
             break;
 
         // NMT Command ResetNode
-        case kEplNmtEventResetNode:
+        case kNmtEventResetNode:
             // NMT_GT4
             nmtkInstance_g.stateIndex = kNmtkGsResetApplication;
             break;
 
         // NMT Command ResetCommunication
         // or internal Communication error
-        case kEplNmtEventResetCom:          // NMT_GT5
-        case kEplNmtEventInternComError:    // NMT_GT6
+        case kNmtEventResetCom:          // NMT_GT5
+        case kNmtEventInternComError:    // NMT_GT6
             nmtkInstance_g.stateIndex = kNmtkGsResetCommunication;
             break;
 
         // NMT Command Reset Configuration
-        case kEplNmtEventResetConfig:
+        case kNmtEventResetConfig:
             // NMT_GT7
             nmtkInstance_g.stateIndex = kNmtkGsResetConfiguration;
             break;
 
         // check if SoC received
-        case kEplNmtEventDllCeSoc:
+        case kNmtEventDllCeSoc:
             // NMT_CT4
             nmtkInstance_g.stateIndex = kNmtkCsPreOperational2;
             break;
@@ -670,44 +670,44 @@ In this state the node processes isochronous and asynchronous frames.
 \return The function returns a tEplKernel error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel doStateCsPreOperational2(tEplNmtEvent nmtEvent_p)
+static tEplKernel doStateCsPreOperational2(tNmtEvent nmtEvent_p)
 {
     switch(nmtEvent_p)
     {
         // NMT Command SwitchOff
-        case kEplNmtEventCriticalError:
-        case kEplNmtEventSwitchOff:
+        case kNmtEventCriticalError:
+        case kNmtEventSwitchOff:
             // NMT_GT3
             nmtkInstance_g.stateIndex = kNmtkGsOff;
             break;
 
         // NMT Command SwReset
-        case kEplNmtEventSwReset:
+        case kNmtEventSwReset:
             // NMT_GT8
             nmtkInstance_g.stateIndex = kNmtkGsInitialising;
             break;
 
         // NMT Command ResetNode
-        case kEplNmtEventResetNode:
+        case kNmtEventResetNode:
             // NMT_GT4
             nmtkInstance_g.stateIndex = kNmtkGsResetApplication;
             break;
 
         // NMT Command ResetCommunication
         // or internal Communication error
-        case kEplNmtEventResetCom:          // NMT_GT5
-        case kEplNmtEventInternComError:    // NMT_GT6
+        case kNmtEventResetCom:          // NMT_GT5
+        case kNmtEventInternComError:    // NMT_GT6
             nmtkInstance_g.stateIndex = kNmtkGsResetCommunication;
             break;
 
         // NMT Command Reset Configuration
-        case kEplNmtEventResetConfig:
+        case kNmtEventResetConfig:
             // NMT_GT7
             nmtkInstance_g.stateIndex = kNmtkGsResetConfiguration;
             break;
 
         // NMT Command StopNode
-        case kEplNmtEventStopNode:
+        case kNmtEventStopNode:
             // NMT_CT8 - reset flags
             nmtkInstance_g.fEnableReadyToOperate = FALSE;
             nmtkInstance_g.fAppReadyToOperate = FALSE;
@@ -715,7 +715,7 @@ static tEplKernel doStateCsPreOperational2(tEplNmtEvent nmtEvent_p)
             break;
 
         // error occurred
-        case kEplNmtEventNmtCycleError:
+        case kNmtEventNmtCycleError:
             // NMT_CT11 - reset flags
             nmtkInstance_g.fEnableReadyToOperate = FALSE;
             nmtkInstance_g.fAppReadyToOperate = FALSE;
@@ -723,7 +723,7 @@ static tEplKernel doStateCsPreOperational2(tEplNmtEvent nmtEvent_p)
             break;
 
         // check if application is ready to operate
-        case kEplNmtEventEnterReadyToOperate:
+        case kNmtEventEnterReadyToOperate:
             // check if command NMTEnableReadyToOperate from MN was received
             if(nmtkInstance_g.fEnableReadyToOperate == TRUE)
             {   // reset flags
@@ -739,7 +739,7 @@ static tEplKernel doStateCsPreOperational2(tEplNmtEvent nmtEvent_p)
             break;
 
         // NMT Commando EnableReadyToOperate
-        case kEplNmtEventEnableReadyToOperate:
+        case kNmtEventEnableReadyToOperate:
             // check if application is ready
             if(nmtkInstance_g.fAppReadyToOperate == TRUE)
             {   // reset flags
@@ -772,55 +772,55 @@ In this state the node should be configured and application is ready.
 \return The function returns a tEplKernel error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel doStateCsReadyToOperate(tEplNmtEvent nmtEvent_p)
+static tEplKernel doStateCsReadyToOperate(tNmtEvent nmtEvent_p)
 {
     switch(nmtEvent_p)
     {
         // NMT Command SwitchOff
-        case kEplNmtEventCriticalError:
-        case kEplNmtEventSwitchOff:
+        case kNmtEventCriticalError:
+        case kNmtEventSwitchOff:
             // NMT_GT3
             nmtkInstance_g.stateIndex = kNmtkGsOff;
             break;
 
         // NMT Command SwReset
-        case kEplNmtEventSwReset:
+        case kNmtEventSwReset:
             // NMT_GT8
             nmtkInstance_g.stateIndex = kNmtkGsInitialising;
             break;
 
         // NMT Command ResetNode
-        case kEplNmtEventResetNode:
+        case kNmtEventResetNode:
             // NMT_GT4
             nmtkInstance_g.stateIndex = kNmtkGsResetApplication;
             break;
 
         // NMT Command ResetCommunication or internal Communication error
-        case kEplNmtEventResetCom:          // NMT_GT5
-        case kEplNmtEventInternComError:    // NMT_GT6
+        case kNmtEventResetCom:          // NMT_GT5
+        case kNmtEventInternComError:    // NMT_GT6
             nmtkInstance_g.stateIndex = kNmtkGsResetCommunication;
             break;
 
         // NMT Command ResetConfiguration
-        case kEplNmtEventResetConfig:
+        case kNmtEventResetConfig:
             // NMT_GT7
             nmtkInstance_g.stateIndex = kNmtkGsResetConfiguration;
             break;
 
         // NMT Command StopNode
-        case kEplNmtEventStopNode:
+        case kNmtEventStopNode:
             // NMT_CT8
             nmtkInstance_g.stateIndex = kNmtkCsStopped;
             break;
 
         // error occurred
-        case kEplNmtEventNmtCycleError:
+        case kNmtEventNmtCycleError:
             // NMT_CT11
             nmtkInstance_g.stateIndex = kNmtkCsPreOperational1;
             break;
 
         // NMT Command StartNode
-        case kEplNmtEventStartNode:
+        case kNmtEventStartNode:
             // NMT_CT7
             nmtkInstance_g.stateIndex = kNmtkCsOperational;
             break;
@@ -843,55 +843,55 @@ This is the normal working state of a CN.
 \return The function returns a tEplKernel error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel doStateCsOperational(tEplNmtEvent nmtEvent_p)
+static tEplKernel doStateCsOperational(tNmtEvent nmtEvent_p)
 {
     switch(nmtEvent_p)
     {
         // NMT Command SwitchOff
-        case kEplNmtEventCriticalError:
-        case kEplNmtEventSwitchOff:
+        case kNmtEventCriticalError:
+        case kNmtEventSwitchOff:
             // NMT_GT3
             nmtkInstance_g.stateIndex = kNmtkGsOff;
             break;
 
         // NMT Command SwReset
-        case kEplNmtEventSwReset:
+        case kNmtEventSwReset:
             // NMT_GT8
             nmtkInstance_g.stateIndex = kNmtkGsInitialising;
             break;
 
         // NMT Command ResetNode
-        case kEplNmtEventResetNode:
+        case kNmtEventResetNode:
             // NMT_GT4
             nmtkInstance_g.stateIndex = kNmtkGsResetApplication;
             break;
 
         // NMT Command ResetCommunication or internal Communication error
-        case kEplNmtEventResetCom:          // NMT_GT5
-        case kEplNmtEventInternComError:    // NMT_GT6
+        case kNmtEventResetCom:          // NMT_GT5
+        case kNmtEventInternComError:    // NMT_GT6
             nmtkInstance_g.stateIndex = kNmtkGsResetCommunication;
             break;
 
         // NMT Command ResetConfiguration
-        case kEplNmtEventResetConfig:
+        case kNmtEventResetConfig:
             // NMT_GT7
             nmtkInstance_g.stateIndex = kNmtkGsResetConfiguration;
             break;
 
         // NMT Command StopNode
-        case kEplNmtEventStopNode:
+        case kNmtEventStopNode:
             // NMT_CT8
             nmtkInstance_g.stateIndex = kNmtkCsStopped;
             break;
 
         // NMT Command EnterPreOperational2
-        case kEplNmtEventEnterPreOperational2:
+        case kNmtEventEnterPreOperational2:
             // NMT_CT9
             nmtkInstance_g.stateIndex = kNmtkCsPreOperational2;
             break;
 
         // error occurred
-        case kEplNmtEventNmtCycleError:
+        case kNmtEventNmtCycleError:
             // NMT_CT11
             nmtkInstance_g.stateIndex = kNmtkCsPreOperational1;
             break;
@@ -915,50 +915,50 @@ frames.
 \return The function returns a tEplKernel error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel doStateCsStopped(tEplNmtEvent nmtEvent_p)
+static tEplKernel doStateCsStopped(tNmtEvent nmtEvent_p)
 {
     switch(nmtEvent_p)
     {
         // NMT Command SwitchOff
-        case kEplNmtEventCriticalError:
-        case kEplNmtEventSwitchOff:
+        case kNmtEventCriticalError:
+        case kNmtEventSwitchOff:
             // NMT_GT3
             nmtkInstance_g.stateIndex = kNmtkGsOff;
             break;
 
         // NMT Command SwReset
-        case kEplNmtEventSwReset:
+        case kNmtEventSwReset:
             // NMT_GT8
             nmtkInstance_g.stateIndex = kNmtkGsInitialising;
             break;
 
         // NMT Command ResetNode
-        case kEplNmtEventResetNode:
+        case kNmtEventResetNode:
             // NMT_GT4
             nmtkInstance_g.stateIndex = kNmtkGsResetApplication;
             break;
 
         // NMT Command ResetCommunication or internal Communication error
-        case kEplNmtEventResetCom:          // NMT_GT5
-        case kEplNmtEventInternComError:    // NMT_GT6
+        case kNmtEventResetCom:          // NMT_GT5
+        case kNmtEventInternComError:    // NMT_GT6
             nmtkInstance_g.stateIndex = kNmtkGsResetCommunication;
             break;
 
         // NMT Command ResetConfiguration
-        case kEplNmtEventResetConfig:
+        case kNmtEventResetConfig:
         {   // NMT_GT7
             nmtkInstance_g.stateIndex = kNmtkGsResetConfiguration;
             break;
         }
 
         // NMT Command EnterPreOperational2
-        case kEplNmtEventEnterPreOperational2:
+        case kNmtEventEnterPreOperational2:
             // NMT_CT10
             nmtkInstance_g.stateIndex = kNmtkCsPreOperational2;
             break;
 
         // error occurred
-        case kEplNmtEventNmtCycleError:
+        case kNmtEventNmtCycleError:
             // NMT_CT11
             nmtkInstance_g.stateIndex = kNmtkCsPreOperational1;
             break;
@@ -982,51 +982,51 @@ communication.
 \return The function returns a tEplKernel error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel doStateCsBasicEthernet(tEplNmtEvent nmtEvent_p)
+static tEplKernel doStateCsBasicEthernet(tNmtEvent nmtEvent_p)
 {
     switch(nmtEvent_p)
     {
         // NMT Command SwitchOff
-        case kEplNmtEventCriticalError:
-        case kEplNmtEventSwitchOff:
+        case kNmtEventCriticalError:
+        case kNmtEventSwitchOff:
             // NMT_GT3
             nmtkInstance_g.stateIndex = kNmtkGsOff;
             break;
 
         // NMT Command SwReset
-        case kEplNmtEventSwReset:
+        case kNmtEventSwReset:
             // NMT_GT8
             nmtkInstance_g.stateIndex = kNmtkGsInitialising;
             break;
 
         // NMT Command ResetNode
-        case kEplNmtEventResetNode:
+        case kNmtEventResetNode:
             // NMT_GT4
             nmtkInstance_g.stateIndex = kNmtkGsResetApplication;
             break;
 
         // NMT Command ResetCommunication or internal Communication error
-        case kEplNmtEventResetCom:          // NMT_GT5
-        case kEplNmtEventInternComError:    // NMT_GT6
+        case kNmtEventResetCom:          // NMT_GT5
+        case kNmtEventInternComError:    // NMT_GT6
             nmtkInstance_g.stateIndex = kNmtkGsResetCommunication;
             break;
 
         // NMT Command ResetConfiguration
-        case kEplNmtEventResetConfig:
+        case kNmtEventResetConfig:
             // NMT_GT7
             nmtkInstance_g.stateIndex = kNmtkGsResetConfiguration;
             break;
 
         // error occurred
         // d.k.: how does this error occur? on CRC errors
-/*      case kEplNmtEventNmtCycleError:
+/*      case kNmtEventNmtCycleError:
             nmtkInstance_g.stateIndex = kNmtkCsPreOperational1:
             break;
 */
-        case kEplNmtEventDllCeSoc:
-        case kEplNmtEventDllCePreq:
-        case kEplNmtEventDllCePres:
-        case kEplNmtEventDllCeSoa:
+        case kNmtEventDllCeSoc:
+        case kNmtEventDllCePreq:
+        case kNmtEventDllCePres:
+        case kNmtEventDllCeSoa:
             // NMT_CT12 - EPL frame on net -> stop any communication
             nmtkInstance_g.stateIndex = kNmtkCsPreOperational1;
             break;
@@ -1050,7 +1050,7 @@ the node goes to the next state.
 \return The function returns a tEplKernel error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel doStateMsNotActive(tEplNmtEvent nmtEvent_p)
+static tEplKernel doStateMsNotActive(tNmtEvent nmtEvent_p)
 {
 
 #if !defined(CONFIG_INCLUDE_NMT_MN)
@@ -1063,46 +1063,46 @@ static tEplKernel doStateMsNotActive(tEplNmtEvent nmtEvent_p)
     switch(nmtEvent_p)
     {
         // NMT Command SwitchOff
-        case kEplNmtEventCriticalError:
-        case kEplNmtEventSwitchOff:
+        case kNmtEventCriticalError:
+        case kNmtEventSwitchOff:
             // NMT_GT3
             nmtkInstance_g.stateIndex = kNmtkGsOff;
             break;
 
         // NMT Command SwReset
-        case kEplNmtEventSwReset:
+        case kNmtEventSwReset:
             // NMT_GT8
             nmtkInstance_g.stateIndex = kNmtkGsInitialising;
             break;
 
         // NMT Command ResetNode
-        case kEplNmtEventResetNode:
+        case kNmtEventResetNode:
             // NMT_GT4
             nmtkInstance_g.stateIndex = kNmtkGsResetApplication;
             break;
 
         // NMT Command ResetCommunication or internal Communication error
-        case kEplNmtEventResetCom:          // NMT_GT5
-        case kEplNmtEventInternComError:    // NMT_GT6
+        case kNmtEventResetCom:          // NMT_GT5
+        case kNmtEventInternComError:    // NMT_GT6
             nmtkInstance_g.stateIndex = kNmtkGsResetCommunication;
             break;
 
         // NMT Command ResetConfiguration
-        case kEplNmtEventResetConfig:
+        case kNmtEventResetConfig:
             // NMT_GT7
             nmtkInstance_g.stateIndex = kNmtkGsResetConfiguration;
             break;
 
         // EPL frames received
-        case kEplNmtEventDllCeSoc:
-        case kEplNmtEventDllCeSoa:
+        case kNmtEventDllCeSoc:
+        case kNmtEventDllCeSoa:
             // other MN in network
             // $$$ d.k.: generate error history entry
             nmtkInstance_g.fFrozen = TRUE;
             break;
 
         // timeout event
-        case kEplNmtEventTimerBasicEthernet:
+        case kNmtEventTimerBasicEthernet:
            // NMT_MT7
             if (nmtkInstance_g.fFrozen == FALSE)
             {   // new state BasicEthernet
@@ -1111,7 +1111,7 @@ static tEplKernel doStateMsNotActive(tEplNmtEvent nmtEvent_p)
             break;
 
         // timeout event
-        case kEplNmtEventTimerMsPreOp1:
+        case kNmtEventTimerMsPreOp1:
         {   // NMT_MT2
             if (nmtkInstance_g.fFrozen == FALSE)
             {   // new state PreOp1
@@ -1144,44 +1144,44 @@ In this state the MN processes the reduced POWERLINK cycle.
 \return The function returns a tEplKernel error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel doStateMsPreOperational1(tEplNmtEvent nmtEvent_p)
+static tEplKernel doStateMsPreOperational1(tNmtEvent nmtEvent_p)
 {
     switch(nmtEvent_p)
     {
         // NMT Command SwitchOff
-        case kEplNmtEventCriticalError:
-        case kEplNmtEventSwitchOff:
+        case kNmtEventCriticalError:
+        case kNmtEventSwitchOff:
             // NMT_GT3
             nmtkInstance_g.stateIndex = kNmtkGsOff;
             break;
 
         // NMT Command SwReset
-        case kEplNmtEventSwReset:
+        case kNmtEventSwReset:
             // NMT_GT8
             nmtkInstance_g.stateIndex = kNmtkGsInitialising;
             break;
 
         // NMT Command ResetNode
-        case kEplNmtEventResetNode:
+        case kNmtEventResetNode:
             // NMT_GT4
             nmtkInstance_g.stateIndex = kNmtkGsResetApplication;
             break;
 
         // NMT Command ResetCommunication or internal Communication error
-        case kEplNmtEventResetCom:          // NMT_GT5
-        case kEplNmtEventInternComError:    // NMT_GT6
+        case kNmtEventResetCom:          // NMT_GT5
+        case kNmtEventInternComError:    // NMT_GT6
             nmtkInstance_g.stateIndex = kNmtkGsResetCommunication;
             break;
 
         // NMT Command ResetConfiguration
-        case kEplNmtEventResetConfig:
+        case kNmtEventResetConfig:
             // NMT_GT7
             nmtkInstance_g.stateIndex = kNmtkGsResetConfiguration;
             break;
 
         // EPL frames received
-        case kEplNmtEventDllCeSoc:
-        case kEplNmtEventDllCeSoa:
+        case kNmtEventDllCeSoc:
+        case kNmtEventDllCeSoa:
             // other MN in network
             // $$$ d.k.: generate error history entry
             nmtkInstance_g.stateIndex = kNmtkGsResetCommunication;
@@ -1190,12 +1190,12 @@ static tEplKernel doStateMsPreOperational1(tEplNmtEvent nmtEvent_p)
         // error occurred
         // d.k. MSPreOp1->CSPreOp1: nonsense -> keep state
         /*
-        case kEplNmtEventNmtCycleError:
+        case kNmtEventNmtCycleError:
             nmtkInstance_g.stateIndex = kNmtkCsPreOperational1;
             break;
         */
 
-        case kEplNmtEventAllMandatoryCNIdent:
+        case kNmtEventAllMandatoryCNIdent:
             // all mandatory CN identified
             if (nmtkInstance_g.fTimerMsPreOp2 != FALSE)
             {   // NMT_MT3
@@ -1207,7 +1207,7 @@ static tEplKernel doStateMsPreOperational1(tEplNmtEvent nmtEvent_p)
             }
             break;
 
-        case kEplNmtEventTimerMsPreOp2:
+        case kNmtEventTimerMsPreOp2:
             // residence time for PreOp1 is elapsed
             if (nmtkInstance_g.fAllMandatoryCNIdent != FALSE)
             {   // NMT_MT3
@@ -1238,56 +1238,56 @@ In this state the MN processes the full POWERLINK cycle.
 \return The function returns a tEplKernel error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel doStateMsPreOperational2(tEplNmtEvent nmtEvent_p)
+static tEplKernel doStateMsPreOperational2(tNmtEvent nmtEvent_p)
 {
     switch(nmtEvent_p)
     {
         // NMT Command SwitchOff
-        case kEplNmtEventCriticalError:
-        case kEplNmtEventSwitchOff:
+        case kNmtEventCriticalError:
+        case kNmtEventSwitchOff:
             // NMT_GT3
             nmtkInstance_g.stateIndex = kNmtkGsOff;
             break;
 
         // NMT Command SwReset
-        case kEplNmtEventSwReset:
+        case kNmtEventSwReset:
             // NMT_GT8
             nmtkInstance_g.stateIndex = kNmtkGsInitialising;
             break;
 
         // NMT Command ResetNode
-        case kEplNmtEventResetNode:
+        case kNmtEventResetNode:
             // NMT_GT4
             nmtkInstance_g.stateIndex = kNmtkGsResetApplication;
             break;
 
         // NMT Command ResetCommunication or internal Communication error
-        case kEplNmtEventResetCom:          // NMT_GT5
-        case kEplNmtEventInternComError:    // NMT_GT6
+        case kNmtEventResetCom:          // NMT_GT5
+        case kNmtEventInternComError:    // NMT_GT6
             nmtkInstance_g.stateIndex = kNmtkGsResetCommunication;
             break;
 
         // NMT Command ResetConfiguration
-        case kEplNmtEventResetConfig:
+        case kNmtEventResetConfig:
             // NMT_GT7
             nmtkInstance_g.stateIndex = kNmtkGsResetConfiguration;
             break;
 
         // EPL frames received
-        case kEplNmtEventDllCeSoc:
-        case kEplNmtEventDllCeSoa:
+        case kNmtEventDllCeSoc:
+        case kNmtEventDllCeSoa:
             // other MN in network
             // $$$ d.k.: generate error history entry
             nmtkInstance_g.stateIndex = kNmtkGsResetCommunication;
             break;
 
         // error occurred
-        case kEplNmtEventNmtCycleError:
+        case kNmtEventNmtCycleError:
             // NMT_MT6
             nmtkInstance_g.stateIndex = kNmtkMsPreOperational1;
             break;
 
-        case kEplNmtEventEnterReadyToOperate:
+        case kNmtEventEnterReadyToOperate:
             // NMT_MT4
             nmtkInstance_g.stateIndex = kNmtkMsReadyToOperate;
             break;
@@ -1311,56 +1311,56 @@ POWERLINK cycle.
 \return The function returns a tEplKernel error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel doStateMsReadyToOperate(tEplNmtEvent nmtEvent_p)
+static tEplKernel doStateMsReadyToOperate(tNmtEvent nmtEvent_p)
 {
     switch(nmtEvent_p)
     {
         // NMT Command SwitchOff
-        case kEplNmtEventCriticalError:
-        case kEplNmtEventSwitchOff:
+        case kNmtEventCriticalError:
+        case kNmtEventSwitchOff:
             // NMT_GT3
             nmtkInstance_g.stateIndex = kNmtkGsOff;
             break;
 
         // NMT Command SwReset
-        case kEplNmtEventSwReset:
+        case kNmtEventSwReset:
             // NMT_GT8
             nmtkInstance_g.stateIndex = kNmtkGsInitialising;
             break;
 
         // NMT Command ResetNode
-        case kEplNmtEventResetNode:
+        case kNmtEventResetNode:
             // NMT_GT4
             nmtkInstance_g.stateIndex = kNmtkGsResetApplication;
             break;
 
         // NMT Command ResetCommunication or internal Communication error
-        case kEplNmtEventResetCom:          // NMT_GT5
-        case kEplNmtEventInternComError:    // NMT_GT6
+        case kNmtEventResetCom:          // NMT_GT5
+        case kNmtEventInternComError:    // NMT_GT6
             nmtkInstance_g.stateIndex = kNmtkGsResetCommunication;
             break;
 
         // NMT Command ResetConfiguration
-        case kEplNmtEventResetConfig:
+        case kNmtEventResetConfig:
             // NMT_GT7
             nmtkInstance_g.stateIndex = kNmtkGsResetConfiguration;
             break;
 
         // EPL frames received
-        case kEplNmtEventDllCeSoc:
-        case kEplNmtEventDllCeSoa:
+        case kNmtEventDllCeSoc:
+        case kNmtEventDllCeSoa:
             // other MN in network
             // $$$ d.k.: generate error history entry
             nmtkInstance_g.stateIndex = kNmtkGsResetCommunication;
             break;
 
         // error occurred
-        case kEplNmtEventNmtCycleError:
+        case kNmtEventNmtCycleError:
             // NMT_MT6
             nmtkInstance_g.stateIndex = kNmtkMsPreOperational1;
             break;
 
-        case kEplNmtEventEnterMsOperational:
+        case kNmtEventEnterMsOperational:
             // NMT_MT5
             nmtkInstance_g.stateIndex = kNmtkMsOperational;
             break;
@@ -1382,51 +1382,51 @@ This is the normal working state of a MN.
 \return The function returns a tEplKernel error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel doStateMsOperational(tEplNmtEvent nmtEvent_p)
+static tEplKernel doStateMsOperational(tNmtEvent nmtEvent_p)
 {
     switch(nmtEvent_p)
     {
         // NMT Command SwitchOff
-        case kEplNmtEventCriticalError:
-        case kEplNmtEventSwitchOff:
+        case kNmtEventCriticalError:
+        case kNmtEventSwitchOff:
             // NMT_GT3
             nmtkInstance_g.stateIndex = kNmtkGsOff;
             break;
 
         // NMT Command SwReset
-        case kEplNmtEventSwReset:
+        case kNmtEventSwReset:
             // NMT_GT8
             nmtkInstance_g.stateIndex = kNmtkGsInitialising;
             break;
 
         // NMT Command ResetNode
-        case kEplNmtEventResetNode:
+        case kNmtEventResetNode:
             // NMT_GT4
             nmtkInstance_g.stateIndex = kNmtkGsResetApplication;
             break;
 
         // NMT Command ResetCommunication or internal Communication error
-        case kEplNmtEventResetCom:          // NMT_GT5
-        case kEplNmtEventInternComError:    // NMT_GT6
+        case kNmtEventResetCom:          // NMT_GT5
+        case kNmtEventInternComError:    // NMT_GT6
             nmtkInstance_g.stateIndex = kNmtkGsResetCommunication;
             break;
 
         // NMT Command ResetConfiguration
-        case kEplNmtEventResetConfig:
+        case kNmtEventResetConfig:
             // NMT_GT7
             nmtkInstance_g.stateIndex = kNmtkGsResetConfiguration;
             break;
 
         // EPL frames received
-        case kEplNmtEventDllCeSoc:
-        case kEplNmtEventDllCeSoa:
+        case kNmtEventDllCeSoc:
+        case kNmtEventDllCeSoa:
             // other MN in network
             // $$$ d.k.: generate error history entry
             nmtkInstance_g.stateIndex = kNmtkGsResetCommunication;
             break;
 
         // error occurred
-        case kEplNmtEventNmtCycleError:
+        case kNmtEventNmtCycleError:
             // NMT_MT6
             nmtkInstance_g.stateIndex = kNmtkMsPreOperational1;
             break;
@@ -1449,44 +1449,44 @@ In this state the MN processes normal ethernet traffic.
 \return The function returns a tEplKernel error code.
 */
 //------------------------------------------------------------------------------
-tEplKernel doStateMsBasicEthernet(tEplNmtEvent nmtEvent_p)
+tEplKernel doStateMsBasicEthernet(tNmtEvent nmtEvent_p)
 {
     switch(nmtEvent_p)
     {
         // NMT Command SwitchOff
-        case kEplNmtEventCriticalError:
-        case kEplNmtEventSwitchOff:
+        case kNmtEventCriticalError:
+        case kNmtEventSwitchOff:
             // NMT_GT3
             nmtkInstance_g.stateIndex = kNmtkGsOff;
             break;
 
         // NMT Command SwReset
-        case kEplNmtEventSwReset:
+        case kNmtEventSwReset:
             // NMT_GT8
             nmtkInstance_g.stateIndex = kNmtkGsInitialising;
             break;
 
         // NMT Command ResetNode
-        case kEplNmtEventResetNode:
+        case kNmtEventResetNode:
             // NMT_GT4
             nmtkInstance_g.stateIndex = kNmtkGsResetApplication;
             break;
 
         // NMT Command ResetCommunication or internal Communication error
-        case kEplNmtEventResetCom:          // NMT_GT5
-        case kEplNmtEventInternComError:    // NMT_GT6
+        case kNmtEventResetCom:          // NMT_GT5
+        case kNmtEventInternComError:    // NMT_GT6
             nmtkInstance_g.stateIndex = kNmtkGsResetCommunication;
             break;
 
         // NMT Command ResetConfiguration
-        case kEplNmtEventResetConfig:
+        case kNmtEventResetConfig:
             // NMT_GT7
             nmtkInstance_g.stateIndex = kNmtkGsResetConfiguration;
             break;
 
         // EPL frames received
-        case kEplNmtEventDllCeSoc:
-        case kEplNmtEventDllCeSoa:
+        case kNmtEventDllCeSoc:
+        case kNmtEventDllCeSoa:
             // other MN in network
             // $$$ d.k.: generate error history entry
             nmtkInstance_g.stateIndex = kNmtkGsResetCommunication;
@@ -1494,7 +1494,7 @@ tEplKernel doStateMsBasicEthernet(tEplNmtEvent nmtEvent_p)
 
         // error occurred
         // d.k. BE->PreOp1 on cycle error? No
-/*      case kEplNmtEventNmtCycleError:
+/*      case kNmtEventNmtCycleError:
             nmtkInstance_g.stateIndex = kNmtkCsPreOperational1;
             break;
 */

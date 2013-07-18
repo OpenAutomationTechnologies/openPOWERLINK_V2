@@ -52,12 +52,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // typedef
 //------------------------------------------------------------------------------
 
-typedef tEplKernel (*tNmtMnuCbNodeEvent) (UINT nodeId_p, tEplNmtNodeEvent NodeEvent_p,
-                                          tEplNmtState NmtState_p, UINT16 wErrorCode_p,
+typedef tEplKernel (*tNmtMnuCbNodeEvent) (UINT nodeId_p, tNmtNodeEvent NodeEvent_p,
+                                          tNmtState NmtState_p, UINT16 wErrorCode_p,
                                           BOOL fMandatory_p);
 
-typedef tEplKernel (*tNmtMnuCbBootEvent) (tEplNmtBootEvent BootEvent_p,
-                                          tEplNmtState NmtState_p, UINT16 wErrorCode_p);
+typedef tEplKernel (*tNmtMnuCbBootEvent) (tNmtBootEvent BootEvent_p,
+                                          tNmtState NmtState_p, UINT16 wErrorCode_p);
 
 typedef struct
 {
@@ -81,9 +81,9 @@ tEplKernel nmtmnu_delInstance(void);
 tEplKernel nmtmnu_processEvent(tEplEvent* pEvent_p);
 tEplKernel nmtmnu_sendNmtCommand(UINT nodeId_p, tNmtCommand  nmtCommand_p);
 tEplKernel nmtmnu_requestNmtCommand(UINT nodeId_p, tNmtCommand nmtCommand_p);
-tEplKernel nmtmnu_triggerStateChange(UINT nodeId_p, tEplNmtNodeCommand nodeCommand_p);
-tEplKernel nmtmnu_cbNmtStateChange(tEplEventNmtStateChange nmtStateChange_p);
-tEplKernel nmtmnu_cbCheckEvent(tEplNmtEvent NmtEvent_p);
+tEplKernel nmtmnu_triggerStateChange(UINT nodeId_p, tNmtNodeCommand nodeCommand_p);
+tEplKernel nmtmnu_cbNmtStateChange(tEventNmtStateChange nmtStateChange_p);
+tEplKernel nmtmnu_cbCheckEvent(tNmtEvent NmtEvent_p);
 tEplKernel nmtmnu_getDiagnosticInfo(UINT* pMandatorySlaveCount_p, UINT* pSignalSlaveCount_p,
                                     UINT16* pflags_p);
 

@@ -74,7 +74,7 @@ public:
 
     void            run();
     void            sigEplStatus(int status_p);
-    void            sigNmtState(tEplNmtState State_p);
+    void            sigNmtState(tNmtState State_p);
     void            sigPrintLog(QString log_p);
     void            sigNodeAppeared(int nodeId_p) { emit nodeAppeared(nodeId_p); };
     void            sigNodeDisappeared(int nodeId_p) { emit nodeDisappeared(nodeId_p); };

@@ -196,21 +196,21 @@ tEplKernel pdou_exit(void)
 \ingroup module_pdou
 **/
 //------------------------------------------------------------------------------
-tEplKernel PUBLIC pdou_cbNmtStateChange(tEplEventNmtStateChange nmtStateChange_p)
+tEplKernel PUBLIC pdou_cbNmtStateChange(tEventNmtStateChange nmtStateChange_p)
 {
     tEplKernel      ret = kEplSuccessful;
 
-    switch (nmtStateChange_p.m_NewNmtState)
+    switch (nmtStateChange_p.newNmtState)
     {
-        case kEplNmtGsOff:
-        case kEplNmtGsInitialising:
-        case kEplNmtGsResetApplication:
-        case kEplNmtGsResetCommunication:
+        case kNmtGsOff:
+        case kNmtGsInitialising:
+        case kNmtGsResetApplication:
+        case kNmtGsResetCommunication:
             pdouInstance_g.fAllocated = FALSE;
             pdouInstance_g.fRunning = FALSE;
             break;
 
-        case kEplNmtGsResetConfiguration:
+        case kNmtGsResetConfiguration:
             pdouInstance_g.fAllocated = FALSE;
             pdouInstance_g.fRunning = FALSE;
 

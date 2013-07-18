@@ -75,7 +75,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 typedef struct
 {
-    tEplNmtState                    localNmtState;
+    tNmtState                       localNmtState;
     tNmtuStateChangeCallback        pfnNmtChangeCb;
     tEplTimerHdl                    timerHdl;
 } tNmtuInstance;
@@ -92,14 +92,14 @@ static tNmtuInstance        nmtuInstance_g;
 static tEplKernel configureDll(void);
 #endif
 
-static BOOL processGeneralStateChange(tEplNmtState newNmtState, tEplKernel* pRet_p);
-static BOOL processCnStateChange(tEplNmtState newNmtState, tEplKernel* pRet_p);
+static BOOL processGeneralStateChange(tNmtState newNmtState, tEplKernel* pRet_p);
+static BOOL processCnStateChange(tNmtState newNmtState, tEplKernel* pRet_p);
 
 #if defined(CONFIG_INCLUDE_NMT_MN)
-static BOOL processMnStateChange(tEplNmtState newNmtState, tEplKernel* pRet_p);
+static BOOL processMnStateChange(tNmtState newNmtState, tEplKernel* pRet_p);
 #endif
 
-static tEplKernel setupNmtTimerEvent(UINT32 timeout_p, tEplNmtEvent event_p);
+static tEplKernel setupNmtTimerEvent(UINT32 timeout_p, tNmtEvent event_p);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -172,7 +172,7 @@ The function posts a NMT event for the NMT kernel module.
 \ingroup module_nmtu
 */
 //------------------------------------------------------------------------------
-tEplKernel nmtu_postNmtEvent(tEplNmtEvent nmtEvent_p)
+tEplKernel nmtu_postNmtEvent(tNmtEvent nmtEvent_p)
 {
     tEplKernel  ret;
     tEplEvent   event;
@@ -200,7 +200,7 @@ The function returns the current NMT state of the node.
 \ingroup module_nmtu
 */
 //------------------------------------------------------------------------------
-tEplNmtState nmtu_getNmtState(void)
+tNmtState nmtu_getNmtState(void)
 {
     return nmtuInstance_g.localNmtState;
 }
@@ -221,15 +221,15 @@ The function processes events sent to the NMT user module.
 tEplKernel nmtu_processEvent(tEplEvent* pEvent_p)
 {
     tEplKernel                  ret = kEplSuccessful;
-    tEplEventNmtStateChange*    pNmtStateChange;
+    tEventNmtStateChange*       pNmtStateChange;
 
     switch(pEvent_p->m_EventType)
     {
         // state change of NMT-Module
         case kEplEventTypeNmtStateChange:
             ret = EplTimeruDeleteTimer(&nmtuInstance_g.timerHdl);
-            pNmtStateChange = (tEplEventNmtStateChange*)pEvent_p->m_pArg;
-            nmtuInstance_g.localNmtState = pNmtStateChange->m_NewNmtState;
+            pNmtStateChange = (tEventNmtStateChange*)pEvent_p->m_pArg;
+            nmtuInstance_g.localNmtState = pNmtStateChange->newNmtState;
 
             // call cb-functions to inform higher layer
             if(nmtuInstance_g.pfnNmtChangeCb != NULL)
@@ -241,17 +241,17 @@ tEplKernel nmtu_processEvent(tEplEvent* pEvent_p)
             {
                 /* handle state changes, state machine is split in general, CN and
                  * MN states. */
-                if (!processGeneralStateChange(pNmtStateChange->m_NewNmtState, &ret))
+                if (!processGeneralStateChange(pNmtStateChange->newNmtState, &ret))
                 {
-                    if (!processCnStateChange(pNmtStateChange->m_NewNmtState, &ret))
+                    if (!processCnStateChange(pNmtStateChange->newNmtState, &ret))
                     {
 #if defined(CONFIG_INCLUDE_NMT_MN)
-                        if (!processMnStateChange(pNmtStateChange->m_NewNmtState, &ret))
+                        if (!processMnStateChange(pNmtStateChange->newNmtState, &ret))
 #endif
                         {
                             ret = kEplNmtInvalidState;
                             TRACE("EplNmtuProcess(): unhandled NMT state 0x%X\n",
-                                  pNmtStateChange->m_NewNmtState);
+                                  pNmtStateChange->newNmtState);
                         }
                     }
                 }
@@ -406,7 +406,7 @@ The function processes a state change to a general NMT state.
         state was not found.
 */
 //------------------------------------------------------------------------------
-static BOOL processGeneralStateChange(tEplNmtState newNmtState, tEplKernel* pRet_p)
+static BOOL processGeneralStateChange(tNmtState newNmtState, tEplKernel* pRet_p)
 {
     tEplKernel          ret = kEplSuccessful;
     UINT                nodeId;
@@ -415,27 +415,27 @@ static BOOL processGeneralStateChange(tEplNmtState newNmtState, tEplKernel* pRet
     switch (newNmtState)
     {
         // EPL stack is not running
-        case kEplNmtGsOff:
+        case kNmtGsOff:
             break;
 
         // first init of the hardware
-        case kEplNmtGsInitialising:
-            ret = nmtu_postNmtEvent(kEplNmtEventEnterResetApp);
+        case kNmtGsInitialising:
+            ret = nmtu_postNmtEvent(kNmtEventEnterResetApp);
             break;
 
         // init of the manufacturer-specific profile area and the
         // standardised device profile area
-        case kEplNmtGsResetApplication:
-            ret = nmtu_postNmtEvent(kEplNmtEventEnterResetCom);
+        case kNmtGsResetApplication:
+            ret = nmtu_postNmtEvent(kNmtEventEnterResetCom);
             break;
 
         // init of the communication profile area
-        case kEplNmtGsResetCommunication:
-            ret = nmtu_postNmtEvent(kEplNmtEventEnterResetConfig);
+        case kNmtGsResetCommunication:
+            ret = nmtu_postNmtEvent(kNmtEventEnterResetConfig);
             break;
 
         // build the configuration with infos from OD
-        case kEplNmtGsResetConfiguration:
+        case kNmtGsResetConfiguration:
 #if EPL_NMT_MAX_NODE_ID > 0
             // configure the DLL (PReq/PRes payload limits and PRes timeout)
             ret = configureDll();
@@ -455,14 +455,14 @@ static BOOL processGeneralStateChange(tEplNmtState newNmtState, tEplKernel* pRet
             if (nodeId == EPL_C_ADR_MN_DEF_NODE_ID)
             {   // node shall be MN
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
-                ret = nmtu_postNmtEvent(kEplNmtEventEnterMsNotActive);
+                ret = nmtu_postNmtEvent(kNmtEventEnterMsNotActive);
 #else
                 TRACE("EplNmtuProcess(): no MN functionality implemented\n");
 #endif
             }
             else
             {   // node shall be CN
-                ret = nmtu_postNmtEvent(kEplNmtEventEnterCsNotActive);
+                ret = nmtu_postNmtEvent(kNmtEventEnterCsNotActive);
             }
             break;
 
@@ -489,19 +489,19 @@ The function processes a state change to a MN NMT state.
         state was not found.
 */
 //------------------------------------------------------------------------------
-static BOOL processMnStateChange(tEplNmtState newNmtState, tEplKernel* pRet_p)
+static BOOL processMnStateChange(tNmtState newNmtState, tEplKernel* pRet_p)
 {
     tEplKernel          ret = kEplSuccessful;
     BOOL                fHandled = TRUE;
     UINT32              waitTime;
     UINT32              startUp;
-    tEplNmtEvent        timerEvent;
+    tNmtEvent           timerEvent;
     tEplObdSize         obdSize;
 
     switch (newNmtState)
     {
         // node listens for EPL-Frames and check timeout
-        case kEplNmtMsNotActive:
+        case kNmtMsNotActive:
             // create timer to switch automatically to BasicEthernet/PreOp1 if no other MN active in network
             // check NMT_StartUp_U32.Bit13
             obdSize = sizeof(startUp);
@@ -516,11 +516,11 @@ static BOOL processMnStateChange(tEplNmtState newNmtState, tEplKernel* pRet_p)
 
             if((startUp & EPL_NMTST_BASICETHERNET) == 0)
             {   // NMT_StartUp_U32.Bit13 == 0 -> new state PreOperational1
-                timerEvent = kEplNmtEventTimerMsPreOp1;
+                timerEvent = kNmtEventTimerMsPreOp1;
             }
             else
             {   // NMT_StartUp_U32.Bit13 == 1 -> new state BasicEthernet
-                timerEvent = kEplNmtEventTimerBasicEthernet;
+                timerEvent = kNmtEventTimerBasicEthernet;
             }
 
             // read NMT_BootTime_REC.MNWaitNotAct_U32 from OD
@@ -539,7 +539,7 @@ static BOOL processMnStateChange(tEplNmtState newNmtState, tEplKernel* pRet_p)
             break;
 
         // node processes only async frames
-        case kEplNmtMsPreOperational1:
+        case kNmtMsPreOperational1:
             // create timer to switch automatically to PreOp2 if MN identified all mandatory CNs
 
             // read NMT_BootTime_REC.MNWaitPreOp1_U32 from OD
@@ -555,30 +555,30 @@ static BOOL processMnStateChange(tEplNmtState newNmtState, tEplKernel* pRet_p)
 #endif
             if (waitTime == 0)
             {   // delay is deactivated, immediately post timer event
-                ret = nmtu_postNmtEvent(kEplNmtEventTimerMsPreOp2);
+                ret = nmtu_postNmtEvent(kNmtEventTimerMsPreOp2);
             }
             else
             {
-                ret = setupNmtTimerEvent(waitTime, kEplNmtEventTimerMsPreOp2);
+                ret = setupNmtTimerEvent(waitTime, kNmtEventTimerMsPreOp2);
             }
             // potential error is forwarded to event queue which generates error event
             break;
 
         // node processes isochronous and asynchronous frames
-        case kEplNmtMsPreOperational2:
+        case kNmtMsPreOperational2:
             break;
 
         // node should be configured and application is ready
-        case kEplNmtMsReadyToOperate:
+        case kNmtMsReadyToOperate:
             break;
 
         // normal work state
-        case kEplNmtMsOperational:
+        case kNmtMsOperational:
             break;
 
         // no EPL cycle
         // -> normal ethernet communication
-        case kEplNmtMsBasicEthernet:
+        case kNmtMsBasicEthernet:
             break;
 
         default:
@@ -603,7 +603,7 @@ The function processes a state change to a CN NMT state.
         state was not found.
 */
 //------------------------------------------------------------------------------
-static BOOL processCnStateChange(tEplNmtState newNmtState, tEplKernel* pRet_p)
+static BOOL processCnStateChange(tNmtState newNmtState, tEplKernel* pRet_p)
 {
     tEplKernel          ret = kEplSuccessful;
     BOOL                fHandled = TRUE;
@@ -613,7 +613,7 @@ static BOOL processCnStateChange(tEplNmtState newNmtState, tEplKernel* pRet_p)
     switch (newNmtState)
     {
         // node listens for EPL-Frames and check timeout
-        case kEplNmtCsNotActive:
+        case kNmtCsNotActive:
             // create timer to switch automatically to BasicEthernet if no MN available in network
             // read NMT_CNBasicEthernetTimeout_U32 from OD
             obdSize = sizeof(basicEthernetTimeout);
@@ -628,36 +628,36 @@ static BOOL processCnStateChange(tEplNmtState newNmtState, tEplKernel* pRet_p)
 
             if (basicEthernetTimeout != 0)
             {   // BasicEthernet is enabled
-                ret = setupNmtTimerEvent(basicEthernetTimeout, kEplNmtEventTimerBasicEthernet);
+                ret = setupNmtTimerEvent(basicEthernetTimeout, kNmtEventTimerBasicEthernet);
                 // potential error is forwarded to event queue which generates error event
             }
             break;
 
         // node processes only async frames
-        case kEplNmtCsPreOperational1:
+        case kNmtCsPreOperational1:
             break;
 
         // node processes isochronous and asynchronous frames
-        case kEplNmtCsPreOperational2:
-            ret = nmtu_postNmtEvent(kEplNmtEventEnterReadyToOperate);
+        case kNmtCsPreOperational2:
+            ret = nmtu_postNmtEvent(kNmtEventEnterReadyToOperate);
             break;
 
         // node should be configured and application is ready
-        case kEplNmtCsReadyToOperate:
+        case kNmtCsReadyToOperate:
             break;
 
         // normal work state
-        case kEplNmtCsOperational:
+        case kNmtCsOperational:
             break;
 
         // node stopped by MN
         // -> only process asynchronous frames
-        case kEplNmtCsStopped:
+        case kNmtCsStopped:
             break;
 
         // no EPL cycle
         // -> normal ethernet communication
-        case kEplNmtCsBasicEthernet:
+        case kNmtCsBasicEthernet:
             break;
 
         default:
@@ -680,7 +680,7 @@ The function sets up a timer which posts a NMT Event.
 \return The function returns a tEplKernel error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel setupNmtTimerEvent(UINT32 timeout_p, tEplNmtEvent event_p)
+static tEplKernel setupNmtTimerEvent(UINT32 timeout_p, tNmtEvent event_p)
 {
     tEplKernel      ret;
     tEplTimerArg    timerArg;

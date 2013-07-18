@@ -42,7 +42,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include "EplNmt.h"
+#include "nmt.h"
 #include "user/eventu.h"
 
 //------------------------------------------------------------------------------
@@ -98,8 +98,8 @@ typedef enum
     kNmtCmdInvalidService            = 0xFF
 } tNmtCommand;
 
-typedef tEplKernel (*tNmtuStateChangeCallback) (tEplEventNmtStateChange  NmtStateChange_p);
-typedef tEplKernel (*tNmtuCheckEventCallback) (tEplNmtEvent  NmtEvent_p);
+typedef tEplKernel (*tNmtuStateChangeCallback) (tEventNmtStateChange  NmtStateChange_p);
+typedef tEplKernel (*tNmtuCheckEventCallback) (tNmtEvent  NmtEvent_p);
 
 //------------------------------------------------------------------------------
 // function prototypes
@@ -114,8 +114,8 @@ extern "C" {
 tEplKernel      nmtu_init(void);
 tEplKernel      nmtu_addInstance(void);
 tEplKernel      nmtu_delInstance(void);
-tEplKernel      nmtu_postNmtEvent(tEplNmtEvent nmtEvent_p);
-tEplNmtState    nmtu_getNmtState(void);
+tEplKernel      nmtu_postNmtEvent(tNmtEvent nmtEvent_p);
+tNmtState       nmtu_getNmtState(void);
 tEplKernel      nmtu_processEvent(tEplEvent* pEvent_p);
 tEplKernel      nmtu_registerStateChangeCb(tNmtuStateChangeCallback pfnNmtStateChangeCb_p);
 

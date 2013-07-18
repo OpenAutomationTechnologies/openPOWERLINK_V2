@@ -179,10 +179,10 @@ static tEplApiInstance  EplApiInstance_g;
 //---------------------------------------------------------------------------
 
 // EplNmtCnu check event callback function
-static tEplKernel PUBLIC EplApiCbCnCheckEvent(tEplNmtEvent NmtEvent_p);
+static tEplKernel PUBLIC EplApiCbCnCheckEvent(tNmtEvent NmtEvent_p);
 
 // NMT state change event callback function
-static tEplKernel PUBLIC EplApiCbNmtStateChange(tEplEventNmtStateChange NmtStateChange_p);
+static tEplKernel PUBLIC EplApiCbNmtStateChange(tEventNmtStateChange NmtStateChange_p);
 
 // update DLL configuration from OD
 static tEplKernel PUBLIC EplApiUpdateDllConfig(BOOL fUpdateIdentity_p);
@@ -204,14 +204,14 @@ static tEplKernel PUBLIC  EplApiCbSdoCon(tEplSdoComFinished* pSdoComFinished_p);
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
 // callback functions of NmtMnu module
 static tEplKernel PUBLIC  EplApiCbNodeEvent(unsigned int uiNodeId_p,
-                                            tEplNmtNodeEvent NodeEvent_p,
-                                            tEplNmtState NmtState_p,
+                                            tNmtNodeEvent NodeEvent_p,
+                                            tNmtState NmtState_p,
                                             WORD wErrorCode_p,
                                             BOOL fMandatory_p);
 #endif // (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
 
-static tEplKernel PUBLIC  EplApiCbBootEvent(tEplNmtBootEvent BootEvent_p,
-                                            tEplNmtState NmtState_p,
+static tEplKernel PUBLIC  EplApiCbBootEvent(tNmtBootEvent BootEvent_p,
+                                            tNmtState NmtState_p,
                                             WORD wErrorCode_p);
 
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_LEDU)) != 0)
@@ -222,7 +222,7 @@ static tEplKernel PUBLIC  EplApiCbLedStateChange(tEplLedType LedType_p,
 
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_CFM)) != 0)
 static tEplKernel PUBLIC  EplApiCbCfmEventCnProgress(tEplCfmEventCnProgress* pEventCnProgress_p);
-static tEplKernel PUBLIC  EplApiCbCfmEventCnResult(unsigned int uiNodeId_p, tEplNmtNodeCommand NodeCommand_p);
+static tEplKernel PUBLIC  EplApiCbCfmEventCnResult(unsigned int uiNodeId_p, tNmtNodeCommand NodeCommand_p);
 #endif
 
 static tEplKernel PUBLIC EplApiCbReceivedAsnd(tEplFrameInfo *pFrameInfo_p);
@@ -244,7 +244,7 @@ static tEplKernel PUBLIC EplApiCbReceivedAsnd(tEplFrameInfo *pFrameInfo_p);
 // Description: add and initialize new instance of EPL stack.
 //              After return from this function the application must start
 //              the NMT state machine via
-//              EplApiExecNmtCommand(kEplNmtEventSwReset)
+//              EplApiExecNmtCommand(kNmtEventSwReset)
 //              and thereby the whole EPL stack :-)
 //
 // Parameters:  pInitParam_p            = initialisation parameters
@@ -319,7 +319,7 @@ tEplKernel PUBLIC EplApiShutdown(void)
 // State:
 //----------------------------------------------------------------------------
 
-tEplKernel PUBLIC EplApiExecNmtCommand(tEplNmtEvent NmtEvent_p)
+tEplKernel PUBLIC EplApiExecNmtCommand(tNmtEvent NmtEvent_p)
 {
 tEplKernel      Ret = kEplSuccessful;
 
@@ -963,19 +963,19 @@ tEplEvent   Event;
 // State:
 //
 //---------------------------------------------------------------------------
-static tEplKernel PUBLIC EplApiCbCnCheckEvent(tEplNmtEvent NmtEvent_p)
+static tEplKernel PUBLIC EplApiCbCnCheckEvent(tNmtEvent NmtEvent_p)
 {
 tEplKernel              Ret = kEplSuccessful;
-tEplNmtState            NmtState;
+tNmtState               NmtState;
 
    switch (NmtEvent_p)
    {
-        case kEplNmtEventEnableReadyToOperate:
+        case kNmtEventEnableReadyToOperate:
         {
             NmtState = nmtu_getNmtState();
 
             // inform application
-            Ret = EplApiCbBootEvent(kEplNmtBootEventEnableReadyToOp,
+            Ret = EplApiCbBootEvent(kNmtBootEventEnableReadyToOp,
                                     NmtState,
                                     EPL_E_NO_ERROR);
             if (Ret != kEplSuccessful)
@@ -1010,7 +1010,7 @@ exit:
 // ----------------------------------------------------------------------------
 
 tEplKernel PUBLIC EplApiMnTriggerStateChange(unsigned int uiNodeId_p,
-                                             tEplNmtNodeCommand  NodeCommand_p)
+                                             tNmtNodeCommand  NodeCommand_p)
 {
 tEplKernel      Ret = kEplSuccessful;
 
@@ -1181,19 +1181,19 @@ tEplApiEventArg     EventArg;
                 {
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMTU)) != 0)
                     case kNmtCmdResetNode:
-                        Ret = nmtu_postNmtEvent(kEplNmtEventResetNode);
+                        Ret = nmtu_postNmtEvent(kNmtEventResetNode);
                         break;
 
                     case kNmtCmdResetCommunication:
-                        Ret = nmtu_postNmtEvent(kEplNmtEventResetCom);
+                        Ret = nmtu_postNmtEvent(kNmtEventResetCom);
                         break;
 
                     case kNmtCmdResetConfiguration:
-                        Ret = nmtu_postNmtEvent(kEplNmtEventResetConfig);
+                        Ret = nmtu_postNmtEvent(kNmtEventResetConfig);
                         break;
 
                     case kNmtCmdSwReset:
-                        Ret = nmtu_postNmtEvent(kEplNmtEventSwReset);
+                        Ret = nmtu_postNmtEvent(kNmtEventSwReset);
                         break;
 #endif
 
@@ -1219,7 +1219,7 @@ tEplApiEventArg     EventArg;
             BYTE        bCmdId;
             BYTE        bCmdTarget;
             tEplObdSize ObdSize;
-            tEplNmtState    NmtState;
+            tNmtState    NmtState;
 
                 ObdSize = sizeof (bCmdId);
                 Ret = EplObdReadEntry(0x1F9F, 2, &bCmdId, &ObdSize);
@@ -1239,7 +1239,7 @@ tEplApiEventArg     EventArg;
 
                 NmtState = nmtu_getNmtState();
 
-                if (NmtState < kEplNmtMsNotActive)
+                if (NmtState < kNmtMsNotActive)
                 {   // local node is CN
                     // forward the command to the MN
                     // d.k. this is a manufacturer specific feature
@@ -1375,7 +1375,7 @@ tEplApiEventType    EventType;
                 {
                     EventType = kEplApiEventCriticalError;
                     // halt the stack by entering NMT state Off
-                    Ret = nmtu_postNmtEvent(kEplNmtEventCriticalError);
+                    Ret = nmtu_postNmtEvent(kNmtEventCriticalError);
                     break;
                 }
 
@@ -1449,14 +1449,14 @@ Exit:
 //
 //---------------------------------------------------------------------------
 
-static tEplKernel PUBLIC EplApiCbNmtStateChange(tEplEventNmtStateChange NmtStateChange_p)
+static tEplKernel PUBLIC EplApiCbNmtStateChange(tEventNmtStateChange NmtStateChange_p)
 {
 tEplKernel          Ret = kEplSuccessful;
 BYTE                bNmtState;
 tEplApiEventArg     EventArg;
 
     // save NMT state in OD
-    bNmtState = (BYTE) NmtStateChange_p.m_NewNmtState;
+    bNmtState = (BYTE) NmtStateChange_p.newNmtState;
     Ret = EplObdWriteEntry(0x1F8C, 0, &bNmtState, 1);
     if(Ret != kEplSuccessful)
     {
@@ -1464,14 +1464,14 @@ tEplApiEventArg     EventArg;
     }
 
     // do work which must be done in that state
-    switch (NmtStateChange_p.m_NewNmtState)
+    switch (NmtStateChange_p.newNmtState)
     {
         // EPL stack is not running
-        case kEplNmtGsOff:
+        case kNmtGsOff:
             break;
 
         // first init of the hardware
-        case kEplNmtGsInitialising:
+        case kNmtGsInitialising:
 #if 0
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDO_UDP)) != 0)
             // configure SDO via UDP (i.e. bind it to the EPL ethernet interface)
@@ -1487,7 +1487,7 @@ tEplApiEventArg     EventArg;
 
         // init of the manufacturer-specific profile area and the
         // standardised device profile area
-        case kEplNmtGsResetApplication:
+        case kNmtGsResetApplication:
         {
             // reset application part of OD
             Ret = EplObdAccessOdPart(
@@ -1502,7 +1502,7 @@ tEplApiEventArg     EventArg;
         }
 
         // init of the communication profile area
-        case kEplNmtGsResetCommunication:
+        case kNmtGsResetCommunication:
         {
             // reset communication part of OD
             Ret = EplObdAccessOdPart(
@@ -1551,7 +1551,7 @@ tEplApiEventArg     EventArg;
         }
 
         // build the configuration with infos from OD
-        case kEplNmtGsResetConfiguration:
+        case kNmtGsResetConfiguration:
         {
 
             Ret = EplApiUpdateDllConfig(TRUE);
@@ -1573,7 +1573,7 @@ tEplApiEventArg     EventArg;
         // CN part of the state machine
 
         // node list for EPL-Frames and check timeout
-        case kEplNmtCsNotActive:
+        case kNmtCsNotActive:
         {
             // indicate completion of reset in NMT_ResetCmd_U8
             bNmtState = (BYTE) kNmtCmdInvalidService;
@@ -1587,39 +1587,39 @@ tEplApiEventArg     EventArg;
         }
 
         // node process only async frames
-        case kEplNmtCsPreOperational1:
+        case kNmtCsPreOperational1:
         {
             break;
         }
 
         // node process isochronous and asynchronous frames
-        case kEplNmtCsPreOperational2:
+        case kNmtCsPreOperational2:
         {
             break;
         }
 
         // node should be configured and application is ready
-        case kEplNmtCsReadyToOperate:
+        case kNmtCsReadyToOperate:
         {
             break;
         }
 
         // normal work state
-        case kEplNmtCsOperational:
+        case kNmtCsOperational:
         {
             break;
         }
 
         // node stopped by MN
         // -> only process asynchronous frames
-        case kEplNmtCsStopped:
+        case kNmtCsStopped:
         {
             break;
         }
 
         // no EPL cycle
         // -> normal ethernet communication
-        case kEplNmtCsBasicEthernet:
+        case kNmtCsBasicEthernet:
         {
             break;
         }
@@ -1628,38 +1628,38 @@ tEplApiEventArg     EventArg;
         // MN part of the state machine
 
         // node listens for EPL-Frames and check timeout
-        case kEplNmtMsNotActive:
+        case kNmtMsNotActive:
         {
             break;
         }
 
         // node processes only async frames
-        case kEplNmtMsPreOperational1:
+        case kNmtMsPreOperational1:
         {
             break;
         }
 
         // node processes isochronous and asynchronous frames
-        case kEplNmtMsPreOperational2:
+        case kNmtMsPreOperational2:
         {
             break;
         }
 
         // node should be configured and application is ready
-        case kEplNmtMsReadyToOperate:
+        case kNmtMsReadyToOperate:
         {
             break;
         }
 
         // normal work state
-        case kEplNmtMsOperational:
+        case kNmtMsOperational:
         {
             break;
         }
 
         // no EPL cycle
         // -> normal ethernet communication
-        case kEplNmtMsBasicEthernet:
+        case kNmtMsBasicEthernet:
         {
             break;
         }
@@ -2283,7 +2283,7 @@ tEplApiEventArg EventArg;
 // Parameters:  uiNodeId_p              = node ID of the CN
 //              NodeEvent_p             = event from the specified CN
 //              NmtState_p              = current NMT state of the CN
-//              wErrorCode_p            = EPL error code if NodeEvent_p==kEplNmtNodeEventError
+//              wErrorCode_p            = EPL error code if NodeEvent_p==kNmtNodeEventError
 //              fMandatory_p            = flag if CN is mandatory
 //
 // Returns:     tEplKernel              = error code
@@ -2294,8 +2294,8 @@ tEplApiEventArg EventArg;
 //---------------------------------------------------------------------------
 
 static tEplKernel PUBLIC  EplApiCbNodeEvent(unsigned int uiNodeId_p,
-                                            tEplNmtNodeEvent NodeEvent_p,
-                                            tEplNmtState NmtState_p,
+                                            tNmtNodeEvent NodeEvent_p,
+                                            tNmtState NmtState_p,
                                             WORD wErrorCode_p,
                                             BOOL fMandatory_p)
 {
@@ -2338,7 +2338,7 @@ Exit:
 //
 // Parameters:  BootEvent_p             = event from the boot-up process
 //              NmtState_p              = current local NMT state
-//              wErrorCode_p            = EPL error code if BootEvent_p==kEplNmtBootEventError
+//              wErrorCode_p            = EPL error code if BootEvent_p==kNmtBootEventError
 //
 // Returns:     tEplKernel              = error code
 //
@@ -2347,8 +2347,8 @@ Exit:
 //
 //---------------------------------------------------------------------------
 
-static tEplKernel PUBLIC  EplApiCbBootEvent(tEplNmtBootEvent BootEvent_p,
-                                            tEplNmtState NmtState_p,
+static tEplKernel PUBLIC  EplApiCbBootEvent(tNmtBootEvent BootEvent_p,
+                                            tNmtState NmtState_p,
                                             WORD wErrorCode_p)
 {
 tEplKernel Ret;
@@ -2460,7 +2460,7 @@ tEplApiEventArg EventArg;
 //
 //---------------------------------------------------------------------------
 
-static tEplKernel PUBLIC  EplApiCbCfmEventCnResult(unsigned int uiNodeId_p, tEplNmtNodeCommand NodeCommand_p)
+static tEplKernel PUBLIC  EplApiCbCfmEventCnResult(unsigned int uiNodeId_p, tNmtNodeCommand NodeCommand_p)
 {
 tEplKernel Ret;
 tEplApiEventArg EventArg;

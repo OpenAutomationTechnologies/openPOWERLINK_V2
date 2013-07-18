@@ -45,7 +45,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <EplNmt.h>
+#include <nmt.h>
 #include <Benchmark.h>
 #include <EplObd.h>
 #include <kernel/EplObdk.h>

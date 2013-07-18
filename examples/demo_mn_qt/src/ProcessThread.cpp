@@ -166,45 +166,45 @@ sigNmtState() signals the POWERLINK NMT state
 \param  State_p       POWERLINK NMT state
 */
 //------------------------------------------------------------------------------
-void ProcessThread::sigNmtState(tEplNmtState State_p)
+void ProcessThread::sigNmtState(tNmtState State_p)
 {
     QString strState;
 
     switch(State_p)
     {
-        case kEplNmtGsOff:
+        case kNmtGsOff:
             strState = "Off"; break;
-        case kEplNmtGsInitialising:
+        case kNmtGsInitialising:
             strState = "Initializing"; break;
-        case kEplNmtGsResetApplication:
+        case kNmtGsResetApplication:
             strState = "Reset Application"; break;
-        case kEplNmtGsResetCommunication:
+        case kNmtGsResetCommunication:
             strState = "Reset Communication"; break;
-        case kEplNmtGsResetConfiguration:
+        case kNmtGsResetConfiguration:
             strState = "Reset Configuration"; break;
-        case kEplNmtCsNotActive:
+        case kNmtCsNotActive:
             strState = "CN Not Active"; break;
-        case kEplNmtCsPreOperational1:
+        case kNmtCsPreOperational1:
             strState = "CN Pre-Operational 1"; break;
-        case kEplNmtCsPreOperational2:
+        case kNmtCsPreOperational2:
             strState = "CN Pre-Operational 2"; break;
-        case kEplNmtCsReadyToOperate:
+        case kNmtCsReadyToOperate:
             strState = "CN ReadyToOperate"; break;
-        case kEplNmtCsOperational:
+        case kNmtCsOperational:
             strState = "CN Operational"; break;
-        case kEplNmtCsBasicEthernet:
+        case kNmtCsBasicEthernet:
             strState = "CN Basic Ethernet"; break;
-        case kEplNmtMsNotActive:
+        case kNmtMsNotActive:
             strState = "MN Not Active"; break;
-        case kEplNmtMsPreOperational1:
+        case kNmtMsPreOperational1:
             strState = "MN Pre-Operational 1"; break;
-        case kEplNmtMsPreOperational2:
+        case kNmtMsPreOperational2:
             strState = "MN Pre-Operational 2"; break;
-        case kEplNmtMsReadyToOperate:
+        case kNmtMsReadyToOperate:
             strState = "MN ReadyToOperate"; break;
-        case kEplNmtMsOperational:
+        case kNmtMsOperational:
             strState = "MN Operational"; break;
-        case kEplNmtMsBasicEthernet:
+        case kNmtMsBasicEthernet:
             strState = "MN Basic Ethernet"; break;
         default:
             strState = "??? (0x";
@@ -341,7 +341,7 @@ tEplKernel ProcessThread::processStateChangeEvent(tEplApiEventType EventType_p,
                                           void GENERIC* pUserArg_p)
 {
     tEplKernel                  ret = kEplSuccessful;
-    tEplEventNmtStateChange*    pNmtStateChange = &pEventArg_p->m_NmtStateChange;
+    tEventNmtStateChange*       pNmtStateChange = &pEventArg_p->m_NmtStateChange;
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_CFM)) == 0)
     UINT                        varLen;
 #endif
@@ -351,12 +351,12 @@ tEplKernel ProcessThread::processStateChangeEvent(tEplApiEventType EventType_p,
     UNUSED_PARAMETER(EventType_p);
     UNUSED_PARAMETER(pUserArg_p);
 
-    sigNmtState(pNmtStateChange->m_NewNmtState);
-    string = EplGetNmtEventStr(pNmtStateChange->m_NmtEvent);
+    sigNmtState(pNmtStateChange->newNmtState);
+    string = EplGetNmtEventStr(pNmtStateChange->nmtEvent);
 
-    switch (pNmtStateChange->m_NewNmtState)
+    switch (pNmtStateChange->newNmtState)
     {
-        case kEplNmtGsOff:
+        case kNmtGsOff:
             pProcessThread_g->sigEplStatus(0);
 
             // NMT state machine was shut down,
@@ -367,24 +367,24 @@ tEplKernel ProcessThread::processStateChangeEvent(tEplApiEventType EventType_p,
             api_processImageFree(); //jba do we need it here?
 
             sigPrintLog(QString("StateChangeEvent(0x%1) originating event = 0x%2 (%3)")
-                     .arg(pNmtStateChange->m_NewNmtState, 0, 16, QLatin1Char('0'))
-                     .arg(pNmtStateChange->m_NmtEvent, 0, 16, QLatin1Char('0'))
-                     .arg(EplGetNmtEventStr(pNmtStateChange->m_NmtEvent)));
+                     .arg(pNmtStateChange->newNmtState, 0, 16, QLatin1Char('0'))
+                     .arg(pNmtStateChange->nmtEvent, 0, 16, QLatin1Char('0'))
+                     .arg(EplGetNmtEventStr(pNmtStateChange->nmtEvent)));
             reachedNmtStateOff();
             break;
 
-        case kEplNmtGsResetCommunication:
+        case kNmtGsResetCommunication:
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_CFM)) == 0)
             ret = setDefaultNodeAssignment();
 #endif
             pProcessThread_g->sigEplStatus(1);
             sigPrintLog(QString("StateChangeEvent(0x%1) originating event = 0x%2 (%3)")
-                     .arg(pNmtStateChange->m_NewNmtState, 4, 16, QLatin1Char('0'))
-                     .arg(pNmtStateChange->m_NmtEvent, 4, 16, QLatin1Char('0'))
-                     .arg(EplGetNmtEventStr(pNmtStateChange->m_NmtEvent)));
+                     .arg(pNmtStateChange->newNmtState, 4, 16, QLatin1Char('0'))
+                     .arg(pNmtStateChange->nmtEvent, 4, 16, QLatin1Char('0'))
+                     .arg(EplGetNmtEventStr(pNmtStateChange->nmtEvent)));
             break;
 
-        case kEplNmtGsResetConfiguration:
+        case kNmtGsResetConfiguration:
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_CFM)) == 0)
         // Configuration Manager is not available,
         // so fetch object 0x1006 NMT_CycleLen_U32 from local OD
@@ -400,36 +400,36 @@ tEplKernel ProcessThread::processStateChangeEvent(tEplApiEventType EventType_p,
 #endif
             sigEplStatus(1);
             sigPrintLog(QString("StateChangeEvent(0x%1) originating event = 0x%2 (%3)")
-                     .arg(pNmtStateChange->m_NewNmtState, 4, 16, QLatin1Char('0'))
-                     .arg(pNmtStateChange->m_NmtEvent, 4, 16, QLatin1Char('0'))
-                     .arg(EplGetNmtEventStr(pNmtStateChange->m_NmtEvent)));
+                     .arg(pNmtStateChange->newNmtState, 4, 16, QLatin1Char('0'))
+                     .arg(pNmtStateChange->nmtEvent, 4, 16, QLatin1Char('0'))
+                     .arg(EplGetNmtEventStr(pNmtStateChange->nmtEvent)));
             break;
 
-        case kEplNmtCsNotActive:
-        case kEplNmtMsNotActive:
-        case kEplNmtGsInitialising:
-        case kEplNmtGsResetApplication:
-        case kEplNmtCsPreOperational1:
-        case kEplNmtMsPreOperational1:
-        case kEplNmtCsPreOperational2:
-        case kEplNmtMsPreOperational2:
-        case kEplNmtCsReadyToOperate:
-        case kEplNmtMsReadyToOperate:
-        case kEplNmtCsBasicEthernet:
-        case kEplNmtMsBasicEthernet:
+        case kNmtCsNotActive:
+        case kNmtMsNotActive:
+        case kNmtGsInitialising:
+        case kNmtGsResetApplication:
+        case kNmtCsPreOperational1:
+        case kNmtMsPreOperational1:
+        case kNmtCsPreOperational2:
+        case kNmtMsPreOperational2:
+        case kNmtCsReadyToOperate:
+        case kNmtMsReadyToOperate:
+        case kNmtCsBasicEthernet:
+        case kNmtMsBasicEthernet:
             sigPrintLog(QString("StateChangeEvent(0x%1) originating event = 0x%2 (%3)")
-                     .arg(pNmtStateChange->m_NewNmtState, 4, 16, QLatin1Char('0'))
-                     .arg(pNmtStateChange->m_NmtEvent, 4, 16, QLatin1Char('0'))
-                     .arg(EplGetNmtEventStr(pNmtStateChange->m_NmtEvent)));
+                     .arg(pNmtStateChange->newNmtState, 4, 16, QLatin1Char('0'))
+                     .arg(pNmtStateChange->nmtEvent, 4, 16, QLatin1Char('0'))
+                     .arg(EplGetNmtEventStr(pNmtStateChange->nmtEvent)));
             sigEplStatus(1);
             break;
 
-        case kEplNmtCsOperational:
-        case kEplNmtMsOperational:
+        case kNmtCsOperational:
+        case kNmtMsOperational:
             sigPrintLog(QString("StateChangeEvent(0x%1) originating event = 0x%2 (%3)")
-                     .arg(pNmtStateChange->m_NewNmtState, 4, 16, QLatin1Char('0'))
-                     .arg(pNmtStateChange->m_NmtEvent, 4, 16, QLatin1Char('0'))
-                     .arg(EplGetNmtEventStr(pNmtStateChange->m_NmtEvent)));
+                     .arg(pNmtStateChange->newNmtState, 4, 16, QLatin1Char('0'))
+                     .arg(pNmtStateChange->nmtEvent, 4, 16, QLatin1Char('0'))
+                     .arg(EplGetNmtEventStr(pNmtStateChange->nmtEvent)));
             sigEplStatus(2);
             break;
 
@@ -558,7 +558,7 @@ tEplKernel ProcessThread::processNodeEvent(tEplApiEventType EventType_p,
     // check additional argument
     switch (pEventArg_p->m_Node.m_NodeEvent)
     {
-        case kEplNmtNodeEventCheckConf:
+        case kNmtNodeEventCheckConf:
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_CFM)) == 0)
             // Configuration Manager is not available,
             // so configure CycleLen (object 0x1006) on CN
@@ -600,47 +600,47 @@ tEplKernel ProcessThread::processNodeEvent(tEplApiEventType EventType_p,
                         .arg(pEventArg_p->m_Node.m_uiNodeId, 0, 10));
             break;
 
-        case kEplNmtNodeEventUpdateConf:
+        case kNmtNodeEventUpdateConf:
             sigPrintLog(QString("Node Event: (Node=%1, UpdateConf)")
                         .arg(pEventArg_p->m_Node.m_uiNodeId, 0, 10));
             break;
 
-        case kEplNmtNodeEventFound:
+        case kNmtNodeEventFound:
             pProcessThread_g->sigNodeAppeared(pEventArg_p->m_Node.m_uiNodeId);
             break;
 
-        case kEplNmtNodeEventNmtState:
+        case kNmtNodeEventNmtState:
             switch (pEventArg_p->m_Node.m_NmtState)
             {
-                case kEplNmtGsOff:
-                case kEplNmtGsInitialising:
-                case kEplNmtGsResetApplication:
-                case kEplNmtGsResetCommunication:
-                case kEplNmtGsResetConfiguration:
-                case kEplNmtCsNotActive:
+                case kNmtGsOff:
+                case kNmtGsInitialising:
+                case kNmtGsResetApplication:
+                case kNmtGsResetCommunication:
+                case kNmtGsResetConfiguration:
+                case kNmtCsNotActive:
                     pProcessThread_g->sigNodeDisappeared(pEventArg_p->m_Node.m_uiNodeId);
                     break;
 
-                case kEplNmtCsPreOperational1:
-                case kEplNmtCsPreOperational2:
-                case kEplNmtCsReadyToOperate:
+                case kNmtCsPreOperational1:
+                case kNmtCsPreOperational2:
+                case kNmtCsReadyToOperate:
                     pProcessThread_g->sigNodeAppeared(pEventArg_p->m_Node.m_uiNodeId);
                     pProcessThread_g->sigNodeStatus(pEventArg_p->m_Node.m_uiNodeId, 1);
                     break;
 
-                case kEplNmtCsOperational:
+                case kNmtCsOperational:
                     pProcessThread_g->sigNodeStatus(pEventArg_p->m_Node.m_uiNodeId, 2);
                     break;
 
-                case kEplNmtCsBasicEthernet:
-                case kEplNmtCsStopped:
+                case kNmtCsBasicEthernet:
+                case kNmtCsStopped:
                 default:
                     pProcessThread_g->sigNodeStatus(pEventArg_p->m_Node.m_uiNodeId, -1);
                     break;
             }
             break;
 
-        case kEplNmtNodeEventError:
+        case kNmtNodeEventError:
             pProcessThread_g->sigNodeStatus(pEventArg_p->m_Node.m_uiNodeId, -1);
             sigPrintLog(QString("AppCbEvent (Node=%1): Error = %2 (0x%3)")
                     .arg(pEventArg_p->m_Node.m_uiNodeId, 0, 10)
@@ -717,19 +717,19 @@ tEplKernel ProcessThread::processCfmResultEvent(tEplApiEventType EventType_p,
 
     switch (pCfmResult->m_NodeCommand)
     {
-        case kEplNmtNodeCommandConfOk:
+        case kNmtNodeCommandConfOk:
             sigPrintLog(QString("CFM Result: (Node=%1, ConfOk)").arg(pCfmResult->m_uiNodeId, 0, 10));
             break;
 
-        case kEplNmtNodeCommandConfErr:
+        case kNmtNodeCommandConfErr:
             sigPrintLog(QString("CFM Result: (Node=%1, ConfErr)").arg(pCfmResult->m_uiNodeId, 0, 10));
             break;
 
-        case kEplNmtNodeCommandConfReset:
+        case kNmtNodeCommandConfReset:
             sigPrintLog(QString("CFM Result: (Node=%1, ConfReset)").arg(pCfmResult->m_uiNodeId, 0, 10));
             break;
 
-        case kEplNmtNodeCommandConfRestored:
+        case kNmtNodeCommandConfRestored:
             sigPrintLog(QString("CFM Result: (Node=%1, ConfRestored)").arg(pCfmResult->m_uiNodeId, 0, 10));
             break;
 
@@ -773,11 +773,11 @@ tEplKernel ProcessThread::processSdoEvent(tEplApiEventType EventType_p,
 
     if (pSdo->m_SdoComConState == kEplSdoComTransferFinished)
     {   // continue boot-up of CN with NMT command Reset Configuration
-        ret = EplApiMnTriggerStateChange(pSdo->m_uiNodeId, kEplNmtNodeCommandConfReset);
+        ret = EplApiMnTriggerStateChange(pSdo->m_uiNodeId, kNmtNodeCommandConfReset);
     }
     else
     {   // indicate configuration error CN
-        ret = EplApiMnTriggerStateChange(pSdo->m_uiNodeId, kEplNmtNodeCommandConfErr);
+        ret = EplApiMnTriggerStateChange(pSdo->m_uiNodeId, kNmtNodeCommandConfErr);
     }
     return ret;
 }

@@ -74,7 +74,7 @@
 
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_CFM)) != 0)
 
-#include "EplNmt.h"
+#include "nmt.h"
 #include "EplCfm.h"
 
 /***************************************************************************/
@@ -99,7 +99,7 @@ typedef tEplKernel (PUBLIC* tEplCfmCbEventCnProgress)
 (tEplCfmEventCnProgress* pEventCnProgress_p);
 
 
-typedef tEplKernel (PUBLIC* tEplCfmCbEventCnResult) (unsigned int uiNodeId_p, tEplNmtNodeCommand NodeCommand_p);
+typedef tEplKernel (PUBLIC* tEplCfmCbEventCnResult) (unsigned int uiNodeId_p, tNmtNodeCommand NodeCommand_p);
 
 
 
@@ -111,7 +111,7 @@ tEplKernel EplCfmuAddInstance(tEplCfmCbEventCnProgress pfnCbEventCnProgress_p, t
 
 tEplKernel EplCfmuDelInstance(void);
 
-tEplKernel EplCfmuProcessNodeEvent(unsigned int uiNodeId_p, tEplNmtNodeEvent NodeEvent_p);
+tEplKernel EplCfmuProcessNodeEvent(unsigned int uiNodeId_p, tNmtNodeEvent NodeEvent_p);
 
 BOOL EplCfmuIsSdoRunning(unsigned int uiNodeId_p);
 
