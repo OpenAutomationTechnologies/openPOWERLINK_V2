@@ -328,7 +328,7 @@ int openPowerlinkInit (char *pszEthName, unsigned int uiDevNumber)
     }
 
     // start the NMT state machine
-    EplRet = EplApiExecNmtCommand(kEplNmtEventSwReset);
+    EplRet = EplApiExecNmtCommand(kNmtEventSwReset);
 
 Exit:
     PRINTF("%s(): returns 0x%X\n", __func__, EplRet);
@@ -370,7 +370,7 @@ void openPowerlinkExit (void)
 
     // halt the NMT state machine
     // so the processing of POWERLINK frames stops
-    EplRet = EplApiExecNmtCommand(kEplNmtEventSwitchOff);
+    EplRet = EplApiExecNmtCommand(kNmtEventSwitchOff);
 
     // wait until NMT state machine is shut down
     taskDelay (sysClkRateGet());
@@ -399,7 +399,7 @@ void openPowerlinkExit (void)
 // Returns:
 //    void
 //---------------------------------------------------------------------------
-void openPowerlinkSendNmt(tEplNmtEvent nmtCmd_p)
+void openPowerlinkSendNmt(tNmtEvent nmtCmd_p)
 {
     tEplKernel          EplRet;
 
@@ -453,24 +453,24 @@ tEplKernel          EplRet = kEplSuccessful;
     {
         case kEplApiEventNmtStateChange:
         {
-            switch (pEventArg_p->m_NmtStateChange.m_NewNmtState)
+            switch (pEventArg_p->m_NmtStateChange.newNmtState)
             {
-                case kEplNmtGsOff:
+                case kNmtGsOff:
                 {   // NMT state machine was shut down,
                     // because of user signal (CTRL-C) or critical EPL stack error
                     // -> also shut down EplApiProcess() and main()
                     EplRet = kEplShutdown;
 
-                    PRINTF("%s:kEplNmtGsOff originating event = 0x%X (%s)\n",
-                            __func__, pEventArg_p->m_NmtStateChange.m_NmtEvent,
-                            EplGetNmtEventStr(pEventArg_p->m_NmtStateChange.m_NmtEvent));
+                    PRINTF("%s:kNmtGsOff originating event = 0x%X (%s)\n",
+                            __func__, pEventArg_p->m_NmtStateChange.nmtEvent,
+                            EplGetNmtEventStr(pEventArg_p->m_NmtStateChange.nmtEvent));
                     // wake up EplLinExit()
                     /*atomic_set(&AtomicShutdown_g, TRUE);
                     wake_up_interruptible(&WaitQueueShutdown_g);*/
                     break;
                 }
 
-                case kEplNmtGsResetCommunication:
+                case kNmtGsResetCommunication:
                 {
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_CFM)) == 0)
                 DWORD   dwNodeAssignment;
@@ -497,7 +497,7 @@ tEplKernel          EplRet = kEplSuccessful;
 #endif
                 }
 
-                case kEplNmtGsResetConfiguration:
+                case kNmtGsResetConfiguration:
                 {
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_CFM)) != 0)
                     if (uiCycleLen_g != 0)
@@ -523,28 +523,28 @@ tEplKernel          EplRet = kEplSuccessful;
 #endif
                 }
 
-                case kEplNmtMsPreOperational1:
+                case kNmtMsPreOperational1:
                 {
                     PRINTF("%s(0x%X) originating event = 0x%X (%s)\n",
                             __func__,
-                           pEventArg_p->m_NmtStateChange.m_NewNmtState,
-                           pEventArg_p->m_NmtStateChange.m_NmtEvent,
-                           EplGetNmtEventStr(pEventArg_p->m_NmtStateChange.m_NmtEvent));
+                           pEventArg_p->m_NmtStateChange.newNmtState,
+                           pEventArg_p->m_NmtStateChange.nmtEvent,
+                           EplGetNmtEventStr(pEventArg_p->m_NmtStateChange.nmtEvent));
 
                     // continue
                 }
 
-                case kEplNmtGsInitialising:
-                case kEplNmtGsResetApplication:
-                case kEplNmtMsNotActive:
-                case kEplNmtCsNotActive:
-                case kEplNmtCsPreOperational1:
+                case kNmtGsInitialising:
+                case kNmtGsResetApplication:
+                case kNmtMsNotActive:
+                case kNmtCsNotActive:
+                case kNmtCsPreOperational1:
                 {
                     break;
                 }
 
-                case kEplNmtCsOperational:
-                case kEplNmtMsOperational:
+                case kNmtCsOperational:
+                case kNmtMsOperational:
                 {
                     break;
                 }
@@ -628,21 +628,21 @@ tEplKernel          EplRet = kEplSuccessful;
             // check additional argument
             switch (pEventArg_p->m_Node.m_NodeEvent)
             {
-                case kEplNmtNodeEventCheckConf:
+                case kNmtNodeEventCheckConf:
                 {
                     PRINTF("%s(Node=0x%X, CheckConf)\n", __func__,
                             pEventArg_p->m_Node.m_uiNodeId);
                     break;
                 }
 
-                case kEplNmtNodeEventUpdateConf:
+                case kNmtNodeEventUpdateConf:
                 {
                     PRINTF("%s(Node=0x%X, UpdateConf)\n", __func__,
                             pEventArg_p->m_Node.m_uiNodeId);
                     break;
                 }
 
-                case kEplNmtNodeEventNmtState:
+                case kNmtNodeEventNmtState:
                 {
                     PRINTF("%s(Node=0x%X, NmtState=0x%X)\n", __func__,
                             pEventArg_p->m_Node.m_uiNodeId,
@@ -650,7 +650,7 @@ tEplKernel          EplRet = kEplSuccessful;
                     break;
                 }
 
-                case kEplNmtNodeEventError:
+                case kNmtNodeEventError:
                 {
                     PRINTF("%s (Node=0x%X): Error = %s (0x%.4X)\n", __func__,
                             pEventArg_p->m_Node.m_uiNodeId,
@@ -659,7 +659,7 @@ tEplKernel          EplRet = kEplSuccessful;
                     break;
                 }
 
-                case kEplNmtNodeEventFound:
+                case kNmtNodeEventFound:
                 {
                     PRINTF("%s(Node=0x%X, Found)\n", __func__,
                             pEventArg_p->m_Node.m_uiNodeId);
@@ -702,28 +702,28 @@ tEplKernel          EplRet = kEplSuccessful;
         {
             switch (pEventArg_p->m_CfmResult.m_NodeCommand)
             {
-                case kEplNmtNodeCommandConfOk:
+                case kNmtNodeCommandConfOk:
                 {
                     PRINTF("%s(Node=0x%X, ConfOk)\n", __func__,
                             pEventArg_p->m_CfmResult.m_uiNodeId);
                     break;
                 }
 
-                case kEplNmtNodeCommandConfErr:
+                case kNmtNodeCommandConfErr:
                 {
                     PRINTF("%s(Node=0x%X, ConfErr)\n", __func__,
                             pEventArg_p->m_CfmResult.m_uiNodeId);
                     break;
                 }
 
-                case kEplNmtNodeCommandConfReset:
+                case kNmtNodeCommandConfReset:
                 {
                     PRINTF("%s(Node=0x%X, ConfReset)\n", __func__,
                             pEventArg_p->m_CfmResult.m_uiNodeId);
                     break;
                 }
 
-                case kEplNmtNodeCommandConfRestored:
+                case kNmtNodeCommandConfRestored:
                 {
                     PRINTF("%s(Node=0x%X, ConfRestored)\n", __func__,
                             pEventArg_p->m_CfmResult.m_uiNodeId);

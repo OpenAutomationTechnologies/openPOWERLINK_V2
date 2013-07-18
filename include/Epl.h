@@ -103,9 +103,9 @@ typedef enum
 typedef struct
 {
     unsigned int        m_uiNodeId;
-    tEplNmtState        m_NmtState;
-    tEplNmtNodeEvent    m_NodeEvent;
-    WORD                m_wErrorCode;   // EPL error code if m_NodeEvent == kEplNmtNodeEventError
+    tNmtState           m_NmtState;
+    tNmtNodeEvent       m_NodeEvent;
+    WORD                m_wErrorCode;   // EPL error code if m_NodeEvent == kNmtNodeEventError
     BOOL                m_fMandatory;
 
 } tEplApiEventNode;
@@ -113,9 +113,9 @@ typedef struct
 
 typedef struct
 {
-    tEplNmtState        m_NmtState;     // local NMT state
-    tEplNmtBootEvent    m_BootEvent;
-    WORD                m_wErrorCode;   // EPL error code if m_BootEvent == kEplNmtBootEventError
+    tNmtState           m_NmtState;     // local NMT state
+    tNmtBootEvent       m_BootEvent;
+    WORD                m_wErrorCode;   // EPL error code if m_BootEvent == kNmtBootEventError
 
 } tEplApiEventBoot;
 
@@ -131,7 +131,7 @@ typedef struct
 typedef struct
 {
     unsigned int        m_uiNodeId;
-    tEplNmtNodeCommand  m_NodeCommand;
+    tNmtNodeCommand     m_NodeCommand;
 
 } tEplApiEventCfmResult;
 
@@ -164,7 +164,7 @@ typedef enum
 typedef union
 {
     void*                   m_pUserArg;
-    tEplEventNmtStateChange m_NmtStateChange;
+    tEventNmtStateChange    m_NmtStateChange;
     tEplEventError          m_InternalError;
     tEplSdoComFinished      m_Sdo;
     tEplObdCbParam          m_ObdCbParam;
@@ -303,20 +303,20 @@ typedef struct
 } tEplApiInstance;
 
 typedef struct {
-    tEplKernel (PUBLIC* pfnCbCnCheckEvent)  (tEplNmtEvent NmtEvent_p);
+    tEplKernel (PUBLIC* pfnCbCnCheckEvent)  (tNmtEvent NmtEvent_p);
 
-    tEplKernel (PUBLIC* pfnCbNmtStateChange)(tEplEventNmtStateChange NmtStateChange_p);
+    tEplKernel (PUBLIC* pfnCbNmtStateChange)(tEventNmtStateChange NmtStateChange_p);
 
-    tEplKernel (PUBLIC* pfnCbNodeEvent)     (unsigned int uiNodeId_p, tEplNmtNodeEvent NodeEvent_p,
-                                            tEplNmtState NmtState_p, WORD wErrorCode_p,
+    tEplKernel (PUBLIC* pfnCbNodeEvent)     (unsigned int uiNodeId_p, tNmtNodeEvent NodeEvent_p,
+                                            tNmtState NmtState_p, WORD wErrorCode_p,
                                             BOOL fMandatory_p);
 
-    tEplKernel (PUBLIC* pfnCbBootEvent)     (tEplNmtBootEvent BootEvent_p, tEplNmtState NmtState_p,
+    tEplKernel (PUBLIC* pfnCbBootEvent)     (tNmtBootEvent BootEvent_p, tNmtState NmtState_p,
                                             WORD wErrorCode_p);
 
     tEplKernel (PUBLIC* pfnCbCfmProgress)   (tEplCfmEventCnProgress* pEventCnProgress_p);
 
-    tEplKernel (PUBLIC* pfnCbCfmResult)     (unsigned int uiNodeId_p, tEplNmtNodeCommand NodeCommand_p);
+    tEplKernel (PUBLIC* pfnCbCfmResult)     (unsigned int uiNodeId_p, tNmtNodeCommand NodeCommand_p);
 
     tEplKernel (PUBLIC* pfnCbProcessEvent)  (tEplEvent* pEplEvent_p);
 
@@ -378,7 +378,7 @@ EPLDLLEXPORT tEplKernel PUBLIC EplApiLinkObject( unsigned int    uiObjIndex_p,
                                     tEplObdSize*    pEntrySize_p,
                                     unsigned int    uiFirstSubindex_p);
 
-EPLDLLEXPORT tEplKernel PUBLIC EplApiExecNmtCommand(tEplNmtEvent NmtEvent_p);
+EPLDLLEXPORT tEplKernel PUBLIC EplApiExecNmtCommand(tNmtEvent NmtEvent_p);
 
 EPLDLLEXPORT tEplKernel PUBLIC EplApiProcess(void);
 
@@ -400,7 +400,7 @@ tEplKernel PUBLIC EplApiSetAsndForward
 
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
 EPLDLLEXPORT tEplKernel PUBLIC EplApiMnTriggerStateChange(unsigned int uiNodeId_p,
-                                             tEplNmtNodeCommand  NodeCommand_p);
+                                             tNmtNodeCommand  NodeCommand_p);
 #endif
 
 EPLDLLEXPORT tEplKernel PUBLIC EplApiGetIdentResponse(
@@ -435,14 +435,14 @@ EPLDLLEXPORT BOOL PUBLIC api_checkKernelStack(void);
 EPLDLLEXPORT tEplKernel PUBLIC api_waitSyncEvent(ULONG timeout_p);
 
 // functions for getting cleartext values of stack states and events
-EPLDLLEXPORT char* EplGetNmtEventStr(tEplNmtEvent nmtEvent_p);
+EPLDLLEXPORT char* EplGetNmtEventStr(tNmtEvent nmtEvent_p);
 EPLDLLEXPORT char* EplGetEventTypeStr(tEplEventType eventType_p);
 EPLDLLEXPORT char* EplGetEventSourceStr(tEplEventSource eventSrc_p);
 EPLDLLEXPORT char* EplGetEventSinkStr(tEplEventSink eventSink_p);
-EPLDLLEXPORT char* EplGetNmtStateStr(tEplNmtState nmtState_p);
+EPLDLLEXPORT char* EplGetNmtStateStr(tNmtState nmtState_p);
 EPLDLLEXPORT char* EplGetApiEventStr(tEplApiEventType ApiEvent_p);
-EPLDLLEXPORT char* EplGetNmtNodeEventTypeStr(tEplNmtNodeEvent NodeEventType_p);
-EPLDLLEXPORT char* EplGetNmtBootEventTypeStr(tEplNmtBootEvent BootEventType_p);
+EPLDLLEXPORT char* EplGetNmtNodeEventTypeStr(tNmtNodeEvent NodeEventType_p);
+EPLDLLEXPORT char* EplGetNmtBootEventTypeStr(tNmtBootEvent BootEventType_p);
 EPLDLLEXPORT char* EplGetSdoComConStateStr(tEplSdoComConState SdoComConState_p);
 EPLDLLEXPORT char* EplGetEplKernelStr(tEplKernel EplKernel_p);
 EPLDLLEXPORT const char* EplGetEmergErrCodeStr( WORD EmergErrCode_p);

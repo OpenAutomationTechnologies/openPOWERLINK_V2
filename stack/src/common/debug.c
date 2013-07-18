@@ -42,7 +42,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #include "Epl.h"
 #include "global.h"
-#include "EplNmt.h"
+#include "nmt.h"
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -73,7 +73,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 typedef struct
 {
-    tEplNmtState        m_nmtState;
+    tNmtState           m_nmtState;
     char                *m_sNmtState;
 } tNmtStateInfo;
 
@@ -257,24 +257,24 @@ static char *eplEvtTypeStr_g[] =
 // text strings for POWERLINK states
 static tNmtStateInfo nmtStateInfo_g[] =
 {
-    { kEplNmtGsOff,                 "NmtGsOff"                  },
-    { kEplNmtGsInitialising,        "NmtGsInitializing"         },
-    { kEplNmtGsResetApplication,    "NmtGsResetApplication"     },
-    { kEplNmtGsResetCommunication,  "NmtGsResetCommunication"   },
-    { kEplNmtGsResetConfiguration,  "NmtGsResetConfiguration"   },
-    { kEplNmtCsNotActive,           "NmtCsNotActive"            },
-    { kEplNmtCsPreOperational1,     "NmtCsPreOperational1"      },
-    { kEplNmtCsStopped,             "NmtCsStopped"              },
-    { kEplNmtCsPreOperational2,     "NmtCsPreOperational2"      },
-    { kEplNmtCsReadyToOperate,      "NmtCsReadyToOperate"       },
-    { kEplNmtCsOperational,         "NmtCsOperational"          },
-    { kEplNmtCsBasicEthernet,       "NmtCsBasicEthernet"        },
-    { kEplNmtMsNotActive,           "NmtMsNotActive"            },
-    { kEplNmtMsPreOperational1,     "NmtMsPreOperational1"      },
-    { kEplNmtMsPreOperational2,     "NmtMsPreOperational2"      },
-    { kEplNmtMsReadyToOperate,      "NmtMsReadyToOperate"       },
-    { kEplNmtMsOperational,         "NmtMsOperational"          },
-    { kEplNmtMsBasicEthernet,       "NmtMsBasicEthernet"        },
+    { kNmtGsOff,                 "NmtGsOff"                  },
+    { kNmtGsInitialising,        "NmtGsInitializing"         },
+    { kNmtGsResetApplication,    "NmtGsResetApplication"     },
+    { kNmtGsResetCommunication,  "NmtGsResetCommunication"   },
+    { kNmtGsResetConfiguration,  "NmtGsResetConfiguration"   },
+    { kNmtCsNotActive,           "NmtCsNotActive"            },
+    { kNmtCsPreOperational1,     "NmtCsPreOperational1"      },
+    { kNmtCsStopped,             "NmtCsStopped"              },
+    { kNmtCsPreOperational2,     "NmtCsPreOperational2"      },
+    { kNmtCsReadyToOperate,      "NmtCsReadyToOperate"       },
+    { kNmtCsOperational,         "NmtCsOperational"          },
+    { kNmtCsBasicEthernet,       "NmtCsBasicEthernet"        },
+    { kNmtMsNotActive,           "NmtMsNotActive"            },
+    { kNmtMsPreOperational1,     "NmtMsPreOperational1"      },
+    { kNmtMsPreOperational2,     "NmtMsPreOperational2"      },
+    { kNmtMsReadyToOperate,      "NmtMsReadyToOperate"       },
+    { kNmtMsOperational,         "NmtMsOperational"          },
+    { kNmtMsBasicEthernet,       "NmtMsBasicEthernet"        },
 };
 
 // text strings for API events
@@ -553,7 +553,7 @@ The function returns the string describing the specified event.
 \ingroup module_debug
 */
 //------------------------------------------------------------------------------
-char* EplGetNmtEventStr(tEplNmtEvent nmtEvent_p)
+char* EplGetNmtEventStr(tNmtEvent nmtEvent_p)
 {
     if (nmtEvent_p >= tabentries(eplEvtStr_g))
     {
@@ -653,7 +653,7 @@ The function returns the string describing the specified NMT state.
 \ingroup module_debug
 */
 //------------------------------------------------------------------------------
-char* EplGetNmtStateStr(tEplNmtState nmtState_p)
+char* EplGetNmtStateStr(tNmtState nmtState_p)
 {
     unsigned int         i;
 
@@ -703,7 +703,7 @@ The function returns the string describing the specified NMT node event.
 \ingroup module_debug
 */
 //------------------------------------------------------------------------------
-char* EplGetNmtNodeEventTypeStr(tEplNmtNodeEvent NodeEventType_p )
+char* EplGetNmtNodeEventTypeStr(tNmtNodeEvent NodeEventType_p )
 {
     if( NodeEventType_p >= tabentries(EplNmtNodeEvtTypeStr_g) )
     {
@@ -728,7 +728,7 @@ The function returns the string describing the specified NMT boot event.
 \ingroup module_debug
 */
 //------------------------------------------------------------------------------
-char* EplGetNmtBootEventTypeStr(tEplNmtBootEvent BootEventType_p )
+char* EplGetNmtBootEventTypeStr(tNmtBootEvent BootEventType_p )
 {
     if( BootEventType_p >= tabentries(EplNmtBootEvtTypeStr_g) )
     {

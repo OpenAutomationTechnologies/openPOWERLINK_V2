@@ -290,7 +290,7 @@ static void loopMain(void)
 #endif
 
     // start processing
-    ret = EplApiExecNmtCommand(kEplNmtEventSwReset);
+    ret = EplApiExecNmtCommand(kNmtEventSwReset);
     if (ret != kEplSuccessful)
     {
         return;
@@ -318,7 +318,7 @@ static void loopMain(void)
             {
                 case 'r':
                 {
-                    ret = EplApiExecNmtCommand(kEplNmtEventSwReset);
+                    ret = EplApiExecNmtCommand(kNmtEventSwReset);
                     if (ret != kEplSuccessful)
                     {
                         fExit = TRUE;
@@ -383,7 +383,7 @@ static void shutdownPowerlink(void)
     fGsOff_l = FALSE;
 
     // halt the NMT state machine so the processing of POWERLINK frames stops
-    EplApiExecNmtCommand(kEplNmtEventSwitchOff);
+    EplApiExecNmtCommand(kNmtEventSwitchOff);
 
     // small loop to implement timeout waiting for thread to terminate
     for (i = 0; i < 1000; i++)

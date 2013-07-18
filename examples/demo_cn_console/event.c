@@ -173,7 +173,7 @@ static tEplKernel processStateChangeEvent(tEplApiEventType EventType_p,
                                           void GENERIC* pUserArg_p)
 {
     tEplKernel                  ret = kEplSuccessful;
-    tEplEventNmtStateChange*    pNmtStateChange = &pEventArg_p->m_NmtStateChange;
+    tEventNmtStateChange*       pNmtStateChange = &pEventArg_p->m_NmtStateChange;
 
     UNUSED_PARAMETER(EventType_p);
     UNUSED_PARAMETER(pUserArg_p);
@@ -183,31 +183,31 @@ static tEplKernel processStateChangeEvent(tEplApiEventType EventType_p,
         return kEplGeneralError;
     }
 
-    switch (pNmtStateChange->m_NewNmtState)
+    switch (pNmtStateChange->newNmtState)
     {
-        case kEplNmtGsOff:
+        case kNmtGsOff:
             // NMT state machine was shut down,
             ret = kEplShutdown;
 
-            console_printlog("StateChangeEvent:kEplNmtGsOff originating event = 0x%X (%s)\n",
-                     pNmtStateChange->m_NmtEvent,
-                     EplGetNmtEventStr(pNmtStateChange->m_NmtEvent));
+            console_printlog("StateChangeEvent:kNmtGsOff originating event = 0x%X (%s)\n",
+                     pNmtStateChange->nmtEvent,
+                     EplGetNmtEventStr(pNmtStateChange->nmtEvent));
 
             // signal that stack is off
             *pfGsOff_l = FALSE;
             break;
 
-        case kEplNmtGsInitialising:
-        case kEplNmtGsResetApplication:
-        case kEplNmtGsResetConfiguration:
-        case kEplNmtGsResetCommunication:
-        case kEplNmtCsPreOperational1:
-        case kEplNmtCsPreOperational2:
-        case kEplNmtCsOperational:
+        case kNmtGsInitialising:
+        case kNmtGsResetApplication:
+        case kNmtGsResetConfiguration:
+        case kNmtGsResetCommunication:
+        case kNmtCsPreOperational1:
+        case kNmtCsPreOperational2:
+        case kNmtCsOperational:
             console_printlog("StateChangeEvent(0x%X) originating event = 0x%X (%s)\n",
-                   pNmtStateChange->m_NewNmtState,
-                   pNmtStateChange->m_NmtEvent,
-                   EplGetNmtEventStr(pNmtStateChange->m_NmtEvent));
+                   pNmtStateChange->newNmtState,
+                   pNmtStateChange->nmtEvent,
+                   EplGetNmtEventStr(pNmtStateChange->nmtEvent));
             break;
 
         default:

@@ -73,7 +73,7 @@
 #define _EPLLEDU_H_
 
 #include "EplLed.h"
-#include "EplNmt.h"
+#include "nmt.h"
 #include "user/eventu.h"
 
 
@@ -103,7 +103,7 @@ tEplKernel PUBLIC EplLeduAddInstance(tEplLeduStateChangeCallback pfnCbStateChang
 
 tEplKernel PUBLIC EplLeduDelInstance(void);
 
-tEplKernel PUBLIC EplLeduCbNmtStateChange(tEplEventNmtStateChange NmtStateChange_p);
+tEplKernel PUBLIC EplLeduCbNmtStateChange(tEventNmtStateChange NmtStateChange_p);
 
 tEplKernel PUBLIC EplLeduProcessEvent(
                                 tEplEvent* pEplEvent_p);

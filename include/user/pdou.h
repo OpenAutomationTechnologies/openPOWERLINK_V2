@@ -41,7 +41,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <pdo.h>
-#include <EplNmt.h>
+#include <nmt.h>
 
 //------------------------------------------------------------------------------
 // const defines
@@ -69,7 +69,7 @@ EPLDLLEXPORT tEplKernel PUBLIC pdou_cbObdAccess(tEplObdCbParam MEM* pParam_p);
 #define pdou_cbObdAccess        NULL
 #endif
 
-tEplKernel PUBLIC pdou_cbNmtStateChange(tEplEventNmtStateChange NmtStateChange_p);
+tEplKernel PUBLIC pdou_cbNmtStateChange(tEventNmtStateChange NmtStateChange_p);
 
 tEplKernel pdou_copyRxPdoToPi (void);
 tEplKernel pdou_copyTxPdoFromPi (void);

@@ -43,7 +43,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <EplInc.h>
-#include <EplNmt.h>
+#include <nmt.h>
 
 //------------------------------------------------------------------------------
 // const defines
@@ -65,7 +65,7 @@ This enumeration defines all valid event types.
 */
 typedef enum
 {
-    kEplEventTypeNmtEvent       = 0x01, ///< NMT event (arg is pointer to tEplNmtEvent)
+    kEplEventTypeNmtEvent       = 0x01, ///< NMT event (arg is pointer to tNmtEvent)
     kEplEventTypePdoRx          = 0x02, ///< PDO frame received event (PRes/PReq) (arg is pointer to tEplFrameInfo)
     kEplEventTypePdoTx          = 0x03, ///< PDO frame transmitted event (PRes/PReq) (arg is pointer to tEplFrameInfo)
     kEplEventTypePdoSoa         = 0x04, ///< SoA frame received event (isochronous phase completed) (arg is pointer to nothing)
@@ -77,7 +77,7 @@ typedef enum
     kEplEventTypeDllkFillTx     = 0x0A, ///< DLL kernel fill TxBuffer event (arg is pointer to tEplDllAsyncReqPriority)
     kEplEventTypeDllkPresReady  = 0x0B, ///< DLL kernel PRes ready event (arg is pointer to nothing)
     kEplEventTypeError          = 0x0C, ///< Error event for API layer (arg is pointer to tEplEventError)
-    kEplEventTypeNmtStateChange = 0x0D, ///< Indicate change of NMT-State (arg is pointer to tEplEventNmtStateChange)
+    kEplEventTypeNmtStateChange = 0x0D, ///< Indicate change of NMT-State (arg is pointer to tEventNmtStateChange)
     kEplEventTypeDllError       = 0x0E, ///< DLL error event for error handler (arg is pointer to tEplErrorHandlerkEvent)
     kEplEventTypeAsndRx         = 0x0F, ///< received ASnd frame for DLL user module (arg is pointer to tEplFrame)
     kEplEventTypeDllkServFilter = 0x10, ///< configure ServiceIdFilter (arg is pointer to tEplDllCalServiceIdFilter)
@@ -255,7 +255,7 @@ typedef struct
 {
     ULONG               m_ulDllErrorEvents;     ///< EPL_DLL_ERR_*
     UINT                m_uiNodeId;             ///< Node ID
-    tEplNmtState        m_NmtState;             ///< NMT state
+    tNmtState           m_NmtState;             ///< NMT state
     tEplKernel          m_EplError;             ///< Error code
 } tErrHndkEvent;
 

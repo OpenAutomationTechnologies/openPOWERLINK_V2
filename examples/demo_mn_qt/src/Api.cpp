@@ -257,7 +257,7 @@ Api::Api(MainWindow *pMainWindow_p, UINT nodeId_p, QString devName_p)
         goto Exit;
     }
     // start the EPL stack
-    ret = EplApiExecNmtCommand(kEplNmtEventSwReset);
+    ret = EplApiExecNmtCommand(kNmtEventSwReset);
 
     // start process thread
     pProcessThread->start();
@@ -282,7 +282,7 @@ Api::~Api()
 {
     tEplKernel          ret;
 
-    ret = EplApiExecNmtCommand(kEplNmtEventSwitchOff);
+    ret = EplApiExecNmtCommand(kNmtEventSwitchOff);
     pProcessThread->waitForNmtStateOff();
     ret = api_processImageFree();
     ret = EplApiShutdown();

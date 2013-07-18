@@ -208,7 +208,7 @@ user modules and communication with the kernel control module to initialize
 the kernel modules.
 
 After return from this function the application must start the NMT state
-machine via EplApiExecNmtCommand(kEplNmtEventSwReset) and thereby the whole
+machine via EplApiExecNmtCommand(kNmtEventSwReset) and thereby the whole
 openPOWERLINK stack.
 
 \param  pInitParam_p            Pointer to the initialization parameters
@@ -328,7 +328,7 @@ tEplKernel ctrlu_initStack(tEplApiInitParam * pInitParam_p,
 #endif
 
     // the application must start NMT state machine
-    // via EplApiExecNmtCommand(kEplNmtEventSwReset)
+    // via EplApiExecNmtCommand(kNmtEventSwReset)
     // and thereby the whole EPL stack
 
 Exit:

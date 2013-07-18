@@ -253,21 +253,21 @@ tEplKernel Ret;
 //
 //---------------------------------------------------------------------------
 
-tEplKernel PUBLIC EplLeduCbNmtStateChange(tEplEventNmtStateChange NmtStateChange_p)
+tEplKernel PUBLIC EplLeduCbNmtStateChange(tEventNmtStateChange NmtStateChange_p)
 {
 tEplKernel      Ret = kEplSuccessful;
 
     // activate status LED according to NMT state
-    switch (NmtStateChange_p.m_NewNmtState)
+    switch (NmtStateChange_p.newNmtState)
     {
         // status LED off
-        case kEplNmtGsOff:
-        case kEplNmtGsInitialising:
-        case kEplNmtGsResetApplication:
-        case kEplNmtGsResetCommunication:
-        case kEplNmtGsResetConfiguration:
-        case kEplNmtCsNotActive:
-        case kEplNmtMsNotActive:
+        case kNmtGsOff:
+        case kNmtGsInitialising:
+        case kNmtGsResetApplication:
+        case kNmtGsResetCommunication:
+        case kNmtGsResetConfiguration:
+        case kNmtCsNotActive:
+        case kNmtMsNotActive:
         {
             if (EplLeduInstance_g.m_StatusLedMode != kEplLeduModeOff)
             {   // state changed
@@ -279,32 +279,32 @@ tEplKernel      Ret = kEplSuccessful;
         }
 
         // status LED single flashing
-        case kEplNmtCsPreOperational1:
-        case kEplNmtMsPreOperational1:
+        case kNmtCsPreOperational1:
+        case kNmtMsPreOperational1:
         {
             Ret = EplLeduChangeMode(kEplLeduModeSingleFlash);
             break;
         }
 
         // status LED double flashing
-        case kEplNmtCsPreOperational2:
-        case kEplNmtMsPreOperational2:
+        case kNmtCsPreOperational2:
+        case kNmtMsPreOperational2:
         {
             Ret = EplLeduChangeMode(kEplLeduModeDoubleFlash);
             break;
         }
 
         // status LED triple flashing
-        case kEplNmtCsReadyToOperate:
-        case kEplNmtMsReadyToOperate:
+        case kNmtCsReadyToOperate:
+        case kNmtMsReadyToOperate:
         {
             Ret = EplLeduChangeMode(kEplLeduModeTripleFlash);
             break;
         }
 
         // status LED on
-        case kEplNmtCsOperational:
-        case kEplNmtMsOperational:
+        case kNmtCsOperational:
+        case kNmtMsOperational:
         {
             if (EplLeduInstance_g.m_StatusLedMode != kEplLeduModeOn)
             {   // state changed
@@ -316,15 +316,15 @@ tEplKernel      Ret = kEplSuccessful;
         }
 
         // status LED blinking
-        case kEplNmtCsStopped:
+        case kNmtCsStopped:
         {
             Ret = EplLeduChangeMode(kEplLeduModeBlinking);
             break;
         }
 
         // status LED flickering
-        case kEplNmtCsBasicEthernet:
-        case kEplNmtMsBasicEthernet:
+        case kNmtCsBasicEthernet:
+        case kNmtMsBasicEthernet:
         {
             Ret = EplLeduChangeMode(kEplLeduModeFlickering);
             break;
@@ -333,21 +333,21 @@ tEplKernel      Ret = kEplSuccessful;
     }
 
     // activate error LED according to NMT event
-    switch (NmtStateChange_p.m_NmtEvent)
+    switch (NmtStateChange_p.nmtEvent)
     {
         // error LED off
-        case kEplNmtEventSwReset:               // NMT_GT2
-        case kEplNmtEventStartNode:             // NMT_CT7
-        case kEplNmtEventTimerBasicEthernet:    // NMT_CT3
-        case kEplNmtEventEnterMsOperational:    // NMT_MT5
+        case kNmtEventSwReset:               // NMT_GT2
+        case kNmtEventStartNode:             // NMT_CT7
+        case kNmtEventTimerBasicEthernet:    // NMT_CT3
+        case kNmtEventEnterMsOperational:    // NMT_MT5
         {
             Ret = EplLeduCallStateChanged(kEplLedTypeError, FALSE);
             break;
         }
 
         // error LED on
-        case kEplNmtEventNmtCycleError:     // NMT_CT11, NMT_MT6
-        case kEplNmtEventInternComError:    // NMT_GT6
+        case kNmtEventNmtCycleError:     // NMT_CT11, NMT_MT6
+        case kNmtEventInternComError:    // NMT_GT6
         {
             Ret = EplLeduCallStateChanged(kEplLedTypeError, TRUE);
             break;

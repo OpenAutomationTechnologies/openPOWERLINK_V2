@@ -249,7 +249,7 @@ int  main (void)
     }
 
     // start processing
-    EplRet = EplApiExecNmtCommand(kEplNmtEventSwReset);
+    EplRet = EplApiExecNmtCommand(kNmtEventSwReset);
     if (EplRet != kEplSuccessful)
     {
         goto ExitShutdown;
@@ -276,7 +276,7 @@ int  main (void)
 ExitShutdown:
     // halt the NMT state machine
     // so the processing of POWERLINK frames stops
-    EplRet = EplApiExecNmtCommand(kEplNmtEventSwitchOff);
+    EplRet = EplApiExecNmtCommand(kNmtEventSwitchOff);
 
     // delete process image
     EplRet = api_processImageFree();
@@ -325,26 +325,26 @@ tEplKernel PUBLIC AppCbEvent (tEplApiEventType EventType_p,
     {
         case kEplApiEventNmtStateChange:
         {
-            switch (pEventArg_p->m_NmtStateChange.m_NewNmtState)
+            switch (pEventArg_p->m_NmtStateChange.newNmtState)
             {
-                case kEplNmtGsOff:
+                case kNmtGsOff:
                 {   // NMT state machine was shut down,
                     // because of user signal (CTRL-C) or critical EPL stack error
                     // -> also shut down EplApiProcess() and main()
                     EplRet = kEplShutdown;
                     fShutdown = TRUE;
 
-                    printf("Event:kEplNmtGsOff originating event = 0x%X (%s)\n", pEventArg_p->m_NmtStateChange.m_NmtEvent,
-                             EplGetNmtEventStr(pEventArg_p->m_NmtStateChange.m_NmtEvent));
+                    printf("Event:kNmtGsOff originating event = 0x%X (%s)\n", pEventArg_p->m_NmtStateChange.nmtEvent,
+                             EplGetNmtEventStr(pEventArg_p->m_NmtStateChange.nmtEvent));
                     break;
                 }
 
-                case kEplNmtGsResetCommunication:
+                case kNmtGsResetCommunication:
                 {
                     // continue
                 }
 
-                case kEplNmtGsResetConfiguration:
+                case kNmtGsResetConfiguration:
                 {
                     if (uiCycleLen_g != 0)
                     {
@@ -359,27 +359,27 @@ tEplKernel PUBLIC AppCbEvent (tEplApiEventType EventType_p,
                     // continue
                 }
 
-                case kEplNmtMsPreOperational1:
+                case kNmtMsPreOperational1:
                 {
                     printf("AppCbEvent(0x%X) originating event = 0x%X (%s)\n",
-                           pEventArg_p->m_NmtStateChange.m_NewNmtState,
-                           pEventArg_p->m_NmtStateChange.m_NmtEvent,
-                           EplGetNmtEventStr(pEventArg_p->m_NmtStateChange.m_NmtEvent));
+                           pEventArg_p->m_NmtStateChange.newNmtState,
+                           pEventArg_p->m_NmtStateChange.nmtEvent,
+                           EplGetNmtEventStr(pEventArg_p->m_NmtStateChange.nmtEvent));
 
                     // continue
                 }
 
-                case kEplNmtGsInitialising:
-                case kEplNmtGsResetApplication:
-                case kEplNmtMsNotActive:
-                case kEplNmtCsNotActive:
-                case kEplNmtCsPreOperational1:
+                case kNmtGsInitialising:
+                case kNmtGsResetApplication:
+                case kNmtMsNotActive:
+                case kNmtCsNotActive:
+                case kNmtCsPreOperational1:
                 {
                     break;
                 }
 
-                case kEplNmtCsOperational:
-                case kEplNmtMsOperational:
+                case kNmtCsOperational:
+                case kNmtMsOperational:
                 {
                     break;
                 }
@@ -457,26 +457,26 @@ tEplKernel PUBLIC AppCbEvent (tEplApiEventType EventType_p,
             // check additional argument
             switch (pEventArg_p->m_Node.m_NodeEvent)
             {
-                case kEplNmtNodeEventCheckConf:
+                case kNmtNodeEventCheckConf:
                 {
                     printf("%s(Node=0x%X, CheckConf)\n", __func__, pEventArg_p->m_Node.m_uiNodeId);
                     break;
                 }
 
-                case kEplNmtNodeEventUpdateConf:
+                case kNmtNodeEventUpdateConf:
                 {
                     printf("%s(Node=0x%X, UpdateConf)\n", __func__, pEventArg_p->m_Node.m_uiNodeId);
                     break;
                 }
 
-                case kEplNmtNodeEventNmtState:
+                case kNmtNodeEventNmtState:
                 {
                     printf("%s(Node=0x%X, NmtState=%s)\n", __func__, pEventArg_p->m_Node.m_uiNodeId, EplGetNmtStateStr(pEventArg_p->m_Node.m_NmtState));
 
                     break;
                 }
 
-                case kEplNmtNodeEventError:
+                case kNmtNodeEventError:
                 {
                     printf("%s (Node=0x%X): Error = %s (0x%.4X)\n", __func__,
                             pEventArg_p->m_Node.m_uiNodeId,
@@ -486,7 +486,7 @@ tEplKernel PUBLIC AppCbEvent (tEplApiEventType EventType_p,
                     break;
                 }
 
-                case kEplNmtNodeEventFound:
+                case kNmtNodeEventFound:
                 {
                     printf("%s(Node=0x%X, Found)\n", __func__, pEventArg_p->m_Node.m_uiNodeId);
 
@@ -525,25 +525,25 @@ tEplKernel PUBLIC AppCbEvent (tEplApiEventType EventType_p,
         {
             switch (pEventArg_p->m_CfmResult.m_NodeCommand)
             {
-                case kEplNmtNodeCommandConfOk:
+                case kNmtNodeCommandConfOk:
                 {
                     printf("%s(Node=0x%X, ConfOk)\n", __func__, pEventArg_p->m_CfmResult.m_uiNodeId);
                     break;
                 }
 
-                case kEplNmtNodeCommandConfErr:
+                case kNmtNodeCommandConfErr:
                 {
                     printf("%s(Node=0x%X, ConfErr)\n", __func__, pEventArg_p->m_CfmResult.m_uiNodeId);
                     break;
                 }
 
-                case kEplNmtNodeCommandConfReset:
+                case kNmtNodeCommandConfReset:
                 {
                     printf("%s(Node=0x%X, ConfReset)\n", __func__, pEventArg_p->m_CfmResult.m_uiNodeId);
                     break;
                 }
 
-                case kEplNmtNodeCommandConfRestored:
+                case kNmtNodeCommandConfRestored:
                 {
                     printf("%s(Node=0x%X, ConfRestored)\n", __func__, pEventArg_p->m_CfmResult.m_uiNodeId);
                     break;

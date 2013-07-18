@@ -206,11 +206,11 @@ tEplKernel PUBLIC AppCbEvent(tEplApiEventType EventType_p,
         case kEplApiEventNmtStateChange:
         {
 #ifdef LCD_BASE
-            SysComp_LcdPrintState(pEventArg_p->m_NmtStateChange.m_NewNmtState);
+            SysComp_LcdPrintState(pEventArg_p->m_NmtStateChange.newNmtState);
 #endif
 
 #ifdef LATCHED_IOPORT_CFG
-            if (pEventArg_p->m_NmtStateChange.m_NewNmtState != kEplNmtCsOperational)
+            if (pEventArg_p->m_NmtStateChange.newNmtState != kNmtCsOperational)
             {
                 bPwlState = 0x0;
                 memcpy(LATCHED_IOPORT_CFG+3,(BYTE *)&bPwlState,1);    // Set PortIO operational pin to low
@@ -222,9 +222,9 @@ tEplKernel PUBLIC AppCbEvent(tEplApiEventType EventType_p,
             }
 #endif //LATCHED_IOPORT_CFG
 
-            switch (pEventArg_p->m_NmtStateChange.m_NewNmtState)
+            switch (pEventArg_p->m_NmtStateChange.newNmtState)
             {
-                case kEplNmtGsOff:
+                case kNmtGsOff:
                 {
                     /* NMT state machine was shut down,
                        because of critical EPL stack error
@@ -232,33 +232,33 @@ tEplKernel PUBLIC AppCbEvent(tEplApiEventType EventType_p,
                     EplRet = kEplShutdown;
                     fShutdown_l = TRUE;
 
-                    PRINTF("%s(kEplNmtGsOff) originating event = 0x%X\n", __func__,
-                            pEventArg_p->m_NmtStateChange.m_NmtEvent);
+                    PRINTF("%s(kNmtGsOff) originating event = 0x%X\n", __func__,
+                            pEventArg_p->m_NmtStateChange.nmtEvent);
                     break;
                 }
 
-                case kEplNmtGsInitialising:
-                case kEplNmtGsResetApplication:
-                case kEplNmtGsResetConfiguration:
-                case kEplNmtCsPreOperational1:
-                case kEplNmtCsBasicEthernet:
-                case kEplNmtMsBasicEthernet:
-                case kEplNmtGsResetCommunication:
+                case kNmtGsInitialising:
+                case kNmtGsResetApplication:
+                case kNmtGsResetConfiguration:
+                case kNmtCsPreOperational1:
+                case kNmtCsBasicEthernet:
+                case kNmtMsBasicEthernet:
+                case kNmtGsResetCommunication:
                 {
                     PRINTF("%s(0x%X) originating event = 0x%X\n",
                             __func__,
-                            pEventArg_p->m_NmtStateChange.m_NewNmtState,
-                            pEventArg_p->m_NmtStateChange.m_NmtEvent);
+                            pEventArg_p->m_NmtStateChange.newNmtState,
+                            pEventArg_p->m_NmtStateChange.nmtEvent);
                     break;
                 }
 
-                case kEplNmtMsNotActive:
+                case kNmtMsNotActive:
                     break;
-                case kEplNmtCsNotActive:
+                case kNmtCsNotActive:
                     break;
-                case kEplNmtCsOperational:
+                case kNmtCsOperational:
                     break;
-                case kEplNmtMsOperational:
+                case kNmtMsOperational:
                     break;
 
                 default:
@@ -541,7 +541,7 @@ static int openPowerlink(BYTE bNodeId_p)
 
     /* start the POWERLINK stack */
     PRINTF("start EPL Stack...\n");
-    EplRet = EplApiExecNmtCommand(kEplNmtEventSwReset);
+    EplRet = EplApiExecNmtCommand(kNmtEventSwReset);
     if (EplRet != kEplSuccessful)
     {
         PRINTF("start EPL Stack... error\n\n");

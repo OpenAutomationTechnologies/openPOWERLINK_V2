@@ -253,9 +253,9 @@ The function processes NMT commands.
 static tEplKernel commandCb(tEplFrameInfo* pFrameInfo_p)
 {
     tEplKernel      ret = kEplSuccessful;
-    tNmtCommand  nmtCommand;
+    tNmtCommand     nmtCommand;
     BOOL            fNodeIdInList;
-    tEplNmtEvent    nmtEvent = kEplNmtEventNoEvent;
+    tNmtEvent       nmtEvent = kNmtEventNoEvent;
 
     if(pFrameInfo_p == NULL)
         return kEplNmtInvalidFramePointer;
@@ -266,35 +266,35 @@ static tEplKernel commandCb(tEplFrameInfo* pFrameInfo_p)
         //------------------------------------------------------------------------
         // plain NMT state commands
         case kNmtCmdStartNode:
-            nmtEvent = kEplNmtEventStartNode;
+            nmtEvent = kNmtEventStartNode;
             break;
 
         case kNmtCmdStopNode:
-            nmtEvent = kEplNmtEventStopNode;
+            nmtEvent = kNmtEventStopNode;
             break;
 
         case kNmtCmdEnterPreOperational2:
-            nmtEvent = kEplNmtEventEnterPreOperational2;
+            nmtEvent = kNmtEventEnterPreOperational2;
             break;
 
         case kNmtCmdEnableReadyToOperate:
-            nmtEvent = kEplNmtEventEnableReadyToOperate;
+            nmtEvent = kNmtEventEnableReadyToOperate;
             break;
 
         case kNmtCmdResetNode:
-            nmtEvent = kEplNmtEventResetNode;
+            nmtEvent = kNmtEventResetNode;
             break;
 
         case kNmtCmdResetCommunication:
-            nmtEvent = kEplNmtEventResetCom;
+            nmtEvent = kNmtEventResetCom;
             break;
 
         case kNmtCmdResetConfiguration:
-            nmtEvent = kEplNmtEventResetConfig;
+            nmtEvent = kNmtEventResetConfig;
             break;
 
         case kNmtCmdSwReset:
-            nmtEvent = kEplNmtEventSwReset;
+            nmtEvent = kNmtEventSwReset;
             break;
 
         //------------------------------------------------------------------------
@@ -305,7 +305,7 @@ static tEplKernel commandCb(tEplFrameInfo* pFrameInfo_p)
             if(fNodeIdInList != FALSE)
             {   // own nodeid in list
                 // send event to process command
-                nmtEvent = kEplNmtEventStartNode;
+                nmtEvent = kNmtEventStartNode;
             }
             break;
 
@@ -315,7 +315,7 @@ static tEplKernel commandCb(tEplFrameInfo* pFrameInfo_p)
             if(fNodeIdInList != FALSE)
             {   // own nodeid in list
                 // send event to process command
-                nmtEvent = kEplNmtEventStopNode;
+                nmtEvent = kNmtEventStopNode;
             }
             break;
 
@@ -325,7 +325,7 @@ static tEplKernel commandCb(tEplFrameInfo* pFrameInfo_p)
             if(fNodeIdInList != FALSE)
             {   // own nodeid in list
                 // send event to process command
-                nmtEvent = kEplNmtEventEnterPreOperational2;
+                nmtEvent = kNmtEventEnterPreOperational2;
             }
             break;
 
@@ -335,7 +335,7 @@ static tEplKernel commandCb(tEplFrameInfo* pFrameInfo_p)
             if(fNodeIdInList != FALSE)
             {   // own nodeid in list
                 // send event to process command
-                nmtEvent = kEplNmtEventEnableReadyToOperate;
+                nmtEvent = kNmtEventEnableReadyToOperate;
             }
             break;
 
@@ -345,7 +345,7 @@ static tEplKernel commandCb(tEplFrameInfo* pFrameInfo_p)
             if(fNodeIdInList != FALSE)
             {   // own nodeid in list
                 // send event to process command
-                nmtEvent = kEplNmtEventResetNode;
+                nmtEvent = kNmtEventResetNode;
             }
             break;
 
@@ -355,7 +355,7 @@ static tEplKernel commandCb(tEplFrameInfo* pFrameInfo_p)
             if(fNodeIdInList != FALSE)
             {   // own nodeid in list
                 // send event to process command
-                nmtEvent = kEplNmtEventResetCom;
+                nmtEvent = kNmtEventResetCom;
             }
             break;
 
@@ -365,7 +365,7 @@ static tEplKernel commandCb(tEplFrameInfo* pFrameInfo_p)
             if(fNodeIdInList != FALSE)
             {   // own nodeid in list
                 // send event to process command
-                nmtEvent = kEplNmtEventResetConfig;
+                nmtEvent = kNmtEventResetConfig;
             }
             break;
 
@@ -375,7 +375,7 @@ static tEplKernel commandCb(tEplFrameInfo* pFrameInfo_p)
             if(fNodeIdInList != FALSE)
             {   // own nodeid in list
                 // send event to process command
-                nmtEvent = kEplNmtEventSwReset;
+                nmtEvent = kNmtEventSwReset;
             }
             break;
 
@@ -432,7 +432,7 @@ static tEplKernel commandCb(tEplFrameInfo* pFrameInfo_p)
             break;
     } // end of switch(NmtCommand)
 
-    if (nmtEvent != kEplNmtEventNoEvent)
+    if (nmtEvent != kNmtEventNoEvent)
     {
         if (nmtCnuInstance_g.pfnCheckEventCb != NULL)
         {

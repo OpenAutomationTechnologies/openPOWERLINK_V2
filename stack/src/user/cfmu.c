@@ -302,7 +302,7 @@ tEplCfmuNodeInfo*   pNodeInfo;
 //
 //-------------------------------------------------------------------------------------
 
-tEplKernel EplCfmuProcessNodeEvent(unsigned int uiNodeId_p, tEplNmtNodeEvent NodeEvent_p)
+tEplKernel EplCfmuProcessNodeEvent(unsigned int uiNodeId_p, tNmtNodeEvent NodeEvent_p)
 {
 tEplKernel          Ret = kEplSuccessful;
 static DWORD        dw_le_Signature;
@@ -313,8 +313,8 @@ DWORD               dwExpConfDate = 0;
 tEplIdentResponse*  pIdentResponse = NULL;
 BOOL                fDoUpdate = FALSE;
 
-    if ((NodeEvent_p != kEplNmtNodeEventCheckConf)
-        && (NodeEvent_p != kEplNmtNodeEventUpdateConf))
+    if ((NodeEvent_p != kNmtNodeEventCheckConf)
+        && (NodeEvent_p != kNmtNodeEventUpdateConf))
     {
         goto Exit;
     }
@@ -437,7 +437,7 @@ BOOL                fDoUpdate = FALSE;
 #endif
 
     if ((pNodeInfo->m_dwEntriesRemaining == 0)
-        || ((NodeEvent_p != kEplNmtNodeEventUpdateConf)
+        || ((NodeEvent_p != kNmtNodeEventUpdateConf)
             && (fDoUpdate == FALSE)
             && ((AmiGetDwordFromLe(&pIdentResponse->m_le_dwVerifyConfigurationDate) == dwExpConfDate)
                 && (AmiGetDwordFromLe(&pIdentResponse->m_le_dwVerifyConfigurationTime) == dwExpConfTime))))
@@ -453,7 +453,7 @@ BOOL                fDoUpdate = FALSE;
             pNodeInfo->m_CfmState = kEplCfmuStateUpToDate;
         }
     }
-    else if (NodeEvent_p == kEplNmtNodeEventUpdateConf)
+    else if (NodeEvent_p == kNmtNodeEventUpdateConf)
     {
         pNodeInfo->m_CfmState = kEplCfmuStateDownload;
 
@@ -758,7 +758,7 @@ tEplCfmuNodeInfo*   pNodeInfo = pSdoComFinished_p->m_pUserArg;
     {
         case kEplCfmuStateIdle:
         {
-            Ret = EplCfmuFinishConfig(pNodeInfo, kEplNmtNodeCommandConfErr);
+            Ret = EplCfmuFinishConfig(pNodeInfo, kNmtNodeCommandConfErr);
             break;
         }
 
@@ -769,12 +769,12 @@ tEplCfmuNodeInfo*   pNodeInfo = pSdoComFinished_p->m_pUserArg;
             if (pSdoComFinished_p->m_SdoComConState == kEplSdoComTransferFinished)
             {
                 // continue boot-up of CN with NMT command Reset Configuration
-                NmtCommand = kEplNmtNodeCommandConfReset;
+                NmtCommand = kNmtNodeCommandConfReset;
             }
             else
             {
                 // indicate configuration error CN
-                NmtCommand = kEplNmtNodeCommandConfErr;
+                NmtCommand = kNmtNodeCommandConfErr;
             }
             Ret = EplCfmuFinishConfig(pNodeInfo, NmtCommand);
             break;
@@ -788,7 +788,7 @@ tEplCfmuNodeInfo*   pNodeInfo = pSdoComFinished_p->m_pUserArg;
             }
             else
             {   // configuration was not successful
-                Ret = EplCfmuFinishConfig(pNodeInfo, kEplNmtNodeCommandConfErr);
+                Ret = EplCfmuFinishConfig(pNodeInfo, kNmtNodeCommandConfErr);
             }
 
             break;
@@ -801,7 +801,7 @@ tEplCfmuNodeInfo*   pNodeInfo = pSdoComFinished_p->m_pUserArg;
                 EPL_DBGLVL_CFM_TRACE("\nCN%x - Restore Complete. Resetting Node...\n", pNodeInfo->m_EventCnProgress.m_uiNodeId);
 
                 // send NMT command reset node to activate the original configuration
-                Ret = EplCfmuFinishConfig(pNodeInfo, kEplNmtNodeCommandConfRestored);
+                Ret = EplCfmuFinishConfig(pNodeInfo, kNmtNodeCommandConfRestored);
             }
             else
             {   // restore configuration not available
@@ -823,7 +823,7 @@ tEplCfmuNodeInfo*   pNodeInfo = pSdoComFinished_p->m_pUserArg;
             }
             else
             {
-                Ret = EplCfmuFinishConfig(pNodeInfo, kEplNmtNodeCommandConfReset);
+                Ret = EplCfmuFinishConfig(pNodeInfo, kNmtNodeCommandConfReset);
             }
             break;
         }
@@ -911,7 +911,7 @@ static DWORD    dw_le_Signature;
             {
                 goto Exit;
             }
-            Ret = EplCfmuFinishConfig(pNodeInfo_p, kEplNmtNodeCommandConfErr);
+            Ret = EplCfmuFinishConfig(pNodeInfo_p, kNmtNodeCommandConfErr);
             goto Exit;
         }
 
@@ -933,7 +933,7 @@ static DWORD    dw_le_Signature;
             {
                 goto Exit;
             }
-            Ret = EplCfmuFinishConfig(pNodeInfo_p, kEplNmtNodeCommandConfErr);
+            Ret = EplCfmuFinishConfig(pNodeInfo_p, kNmtNodeCommandConfErr);
             goto Exit;
         }
 
@@ -971,7 +971,7 @@ static DWORD    dw_le_Signature;
             }
             else
             {
-                Ret = EplCfmuFinishConfig(pNodeInfo_p, kEplNmtNodeCommandConfReset);
+                Ret = EplCfmuFinishConfig(pNodeInfo_p, kNmtNodeCommandConfReset);
             }
         }
     }

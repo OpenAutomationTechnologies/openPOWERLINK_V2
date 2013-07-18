@@ -223,7 +223,7 @@ static tEplKernel processStateChangeEvent(tEplApiEventType EventType_p,
                                           void GENERIC* pUserArg_p)
 {
     tEplKernel                  ret = kEplSuccessful;
-    tEplEventNmtStateChange*    pNmtStateChange = &pEventArg_p->m_NmtStateChange;
+    tEventNmtStateChange*       pNmtStateChange = &pEventArg_p->m_NmtStateChange;
 
     UNUSED_PARAMETER(EventType_p);
     UNUSED_PARAMETER(pUserArg_p);
@@ -234,55 +234,55 @@ static tEplKernel processStateChangeEvent(tEplApiEventType EventType_p,
         return kEplGeneralError;
     }
 
-    switch (pNmtStateChange->m_NewNmtState)
+    switch (pNmtStateChange->newNmtState)
     {
-        case kEplNmtGsOff:
+        case kNmtGsOff:
            // NMT state machine was shut down,
             // because of user signal (CTRL-C) or critical EPL stack error
             // -> also shut down EplApiProcess() and main()
             ret = kEplShutdown;
 
-            console_printlog("StateChangeEvent:kEplNmtGsOff originating event = 0x%X (%s)\n",
-                     pNmtStateChange->m_NmtEvent,
-                     EplGetNmtEventStr(pNmtStateChange->m_NmtEvent));
+            console_printlog("StateChangeEvent:kNmtGsOff originating event = 0x%X (%s)\n",
+                     pNmtStateChange->nmtEvent,
+                     EplGetNmtEventStr(pNmtStateChange->nmtEvent));
 
             // signal that stack is off
             *pfGsOff_l = FALSE;
             break;
 
-        case kEplNmtGsResetCommunication:
+        case kNmtGsResetCommunication:
 #ifndef CONFIG_INCLUDE_CFM
             ret = setDefaultNodeAssignment();
 #endif
             console_printlog("StateChangeEvent(0x%X) originating event = 0x%X (%s)\n",
-                   pNmtStateChange->m_NewNmtState,
-                   pNmtStateChange->m_NmtEvent,
-                   EplGetNmtEventStr(pNmtStateChange->m_NmtEvent));
+                   pNmtStateChange->newNmtState,
+                   pNmtStateChange->nmtEvent,
+                   EplGetNmtEventStr(pNmtStateChange->nmtEvent));
             break;
 
-        case kEplNmtGsResetConfiguration:
+        case kNmtGsResetConfiguration:
             console_printlog("StateChangeEvent(0x%X) originating event = 0x%X (%s)\n",
-                   pNmtStateChange->m_NewNmtState,
-                   pNmtStateChange->m_NmtEvent,
-                   EplGetNmtEventStr(pNmtStateChange->m_NmtEvent));
+                   pNmtStateChange->newNmtState,
+                   pNmtStateChange->nmtEvent,
+                   EplGetNmtEventStr(pNmtStateChange->nmtEvent));
             break;
 
-        case kEplNmtCsNotActive:
-        case kEplNmtMsNotActive:
-        case kEplNmtGsInitialising:
-        case kEplNmtGsResetApplication:
-        case kEplNmtCsPreOperational1:
-        case kEplNmtMsPreOperational1:
-        case kEplNmtCsPreOperational2:
-        case kEplNmtMsPreOperational2:
-        case kEplNmtCsReadyToOperate:
-        case kEplNmtMsReadyToOperate:
-        case kEplNmtCsBasicEthernet:
-        case kEplNmtMsBasicEthernet:
+        case kNmtCsNotActive:
+        case kNmtMsNotActive:
+        case kNmtGsInitialising:
+        case kNmtGsResetApplication:
+        case kNmtCsPreOperational1:
+        case kNmtMsPreOperational1:
+        case kNmtCsPreOperational2:
+        case kNmtMsPreOperational2:
+        case kNmtCsReadyToOperate:
+        case kNmtMsReadyToOperate:
+        case kNmtCsBasicEthernet:
+        case kNmtMsBasicEthernet:
             console_printlog("StateChangeEvent(0x%X) originating event = 0x%X (%s)\n",
-                   pNmtStateChange->m_NewNmtState,
-                   pNmtStateChange->m_NmtEvent,
-                   EplGetNmtEventStr(pNmtStateChange->m_NmtEvent));
+                   pNmtStateChange->newNmtState,
+                   pNmtStateChange->nmtEvent,
+                   EplGetNmtEventStr(pNmtStateChange->nmtEvent));
 
             break;
 
@@ -424,28 +424,28 @@ static tEplKernel processNodeEvent(tEplApiEventType EventType_p,
     // check additional argument
     switch (pNode->m_NodeEvent)
     {
-        case kEplNmtNodeEventCheckConf:
+        case kNmtNodeEventCheckConf:
             console_printlog("NodeEvent: (Node=%u, CheckConf)\n", pNode->m_uiNodeId);
             break;
 
-        case kEplNmtNodeEventUpdateConf:
+        case kNmtNodeEventUpdateConf:
             console_printlog("NodeEvent: (Node=%u, UpdateConf)\n", pNode->m_uiNodeId);
             break;
 
-        case kEplNmtNodeEventNmtState:
+        case kNmtNodeEventNmtState:
             console_printlog("NodeEvent: (Node=%u, NmtState=%s)\n",
                      pNode->m_uiNodeId,
                      EplGetNmtStateStr(pNode->m_NmtState));
             break;
 
-        case kEplNmtNodeEventError:
+        case kNmtNodeEventError:
             console_printlog("NodeEvent: (Node=%u): Error=%s (0x%.4X)\n",
                     pNode->m_uiNodeId,
                     EplGetEmergErrCodeStr(pNode->m_wErrorCode),
                     pNode->m_wErrorCode);
             break;
 
-        case kEplNmtNodeEventFound:
+        case kNmtNodeEventFound:
             console_printlog("NodeEvent: (Node=%u, Found)\n", pNode->m_uiNodeId);
             break;
 
@@ -524,19 +524,19 @@ static tEplKernel processCfmResultEvent(tEplApiEventType EventType_p,
 
     switch (pCfmResult->m_NodeCommand)
     {
-        case kEplNmtNodeCommandConfOk:
+        case kNmtNodeCommandConfOk:
             console_printlog("CFM Result: (Node=%d, ConfOk)\n", pCfmResult->m_uiNodeId);
             break;
 
-        case kEplNmtNodeCommandConfErr:
+        case kNmtNodeCommandConfErr:
             console_printlog("CFM Result: (Node=%d, ConfErr)\n", pCfmResult->m_uiNodeId);
             break;
 
-        case kEplNmtNodeCommandConfReset:
+        case kNmtNodeCommandConfReset:
             console_printlog("CFM Result: (Node=%d, ConfReset)\n", pCfmResult->m_uiNodeId);
             break;
 
-        case kEplNmtNodeCommandConfRestored:
+        case kNmtNodeCommandConfRestored:
             console_printlog("CFM Result: (Node=%d, ConfRestored)\n", pCfmResult->m_uiNodeId);
             break;
 
@@ -581,11 +581,11 @@ static tEplKernel processSdoEvent(tEplApiEventType EventType_p,
 
     if (pSdo->m_SdoComConState == kEplSdoComTransferFinished)
     {   // continue boot-up of CN with NMT command Reset Configuration
-        ret = EplApiMnTriggerStateChange(pSdo->m_uiNodeId, kEplNmtNodeCommandConfReset);
+        ret = EplApiMnTriggerStateChange(pSdo->m_uiNodeId, kNmtNodeCommandConfReset);
     }
     else
     {   // indicate configuration error CN
-        ret = EplApiMnTriggerStateChange(pSdo->m_uiNodeId, kEplNmtNodeCommandConfErr);
+        ret = EplApiMnTriggerStateChange(pSdo->m_uiNodeId, kNmtNodeCommandConfErr);
     }
     return ret;
 }

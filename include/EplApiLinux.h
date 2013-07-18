@@ -92,7 +92,7 @@
 #define EPLLIN_CMD_WRITE_LOCAL_OBJECT       _IOW ('=',  5, tEplLinLocalObject)
 #define EPLLIN_CMD_READ_LOCAL_OBJECT        _IOWR('=',  6, tEplLinLocalObject)
 #define EPLLIN_CMD_FREE_SDO_CHANNEL         _IO  ('=',  7)  // ulArg_p ~ tEplSdoComConHdl
-#define EPLLIN_CMD_NMT_COMMAND              _IO  ('=',  8)  // ulArg_p ~ tEplNmtEvent
+#define EPLLIN_CMD_NMT_COMMAND              _IO  ('=',  8)  // ulArg_p ~ tNmtEvent
 #define EPLLIN_CMD_GET_EVENT                _IOWR('=',  9, tEplLinEvent)
 #define EPLLIN_CMD_MN_TRIGGER_STATE_CHANGE  _IOW ('=', 10, tEplLinNodeCmdObject)
 #define EPLLIN_CMD_PI_SETUP                 _IO  ('=', 11)
@@ -146,7 +146,7 @@ typedef struct
 typedef struct
 {
     unsigned int        m_uiNodeId;
-    tEplNmtNodeCommand  m_NodeCommand;
+    tNmtNodeCommand     m_NodeCommand;
 
 } tEplLinNodeCmdObject;
 

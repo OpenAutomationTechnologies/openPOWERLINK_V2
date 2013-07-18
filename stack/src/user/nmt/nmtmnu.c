@@ -198,7 +198,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 typedef struct
 {
     UINT                nodeId;
-    tEplNmtNodeCommand  nodeCommand;
+    tNmtNodeCommand     nodeCommand;
 } tNmtMnuNodeCmd;
 
 /*
@@ -236,8 +236,8 @@ typedef enum
     kNmtMnuNodeStateOperational             = 0x07, // CN is in NMT state OPERATIONAL
 } tNmtMnuNodeState;
 
-typedef INT (*tProcessNodeEventFunc)(UINT nodeId_p, tEplNmtState nodeNmtState_p,
-                                     tEplNmtState nmtState_p, UINT16 errorCode_p,
+typedef INT (*tProcessNodeEventFunc)(UINT nodeId_p, tNmtState nodeNmtState_p,
+                                     tNmtState nmtState_p, UINT16 errorCode_p,
                                      tEplKernel* pRet_p);
 
 /**
@@ -299,8 +299,8 @@ static tEplKernel cbIdentResponse(UINT nodeId_p, tEplIdentResponse* pIdentRespon
 static tEplKernel cbStatusResponse(UINT nodeId_p, tEplStatusResponse* pStatusResponse_p);
 static tEplKernel cbNodeAdded(UINT nodeId_p);
 static tEplKernel checkNmtState(UINT nodeId_p, tNmtMnuNodeInfo* pNodeInfo_p,
-                                tEplNmtState nodeNmtState_p, UINT16 errorCode_p,
-                                tEplNmtState localNmtState_p);
+                                tNmtState nodeNmtState_p, UINT16 errorCode_p,
+                                tNmtState localNmtState_p);
 static tEplKernel addNodeIsochronous(UINT nodeId_p);
 static tEplKernel startBootStep1(BOOL fNmtResetAllIssued_p);
 static tEplKernel startBootStep2(void);
@@ -308,8 +308,8 @@ static tEplKernel startCheckCom(void);
 static tEplKernel nodeBootStep2(UINT nodeId_p, tNmtMnuNodeInfo* pNodeInfo_p);
 static tEplKernel nodeCheckCom(UINT nodeId_p, tNmtMnuNodeInfo* pNodeInfo_p);
 static tEplKernel startNodes(void);
-static tEplKernel doPreop1(tEplEventNmtStateChange nmtStateChange_p);
-static tEplKernel processInternalEvent(UINT nodeId_p, tEplNmtState nodeNmtState_p,
+static tEplKernel doPreop1(tEventNmtStateChange nmtStateChange_p);
+static tEplKernel processInternalEvent(UINT nodeId_p, tNmtState nodeNmtState_p,
                                        UINT16 errorCode_p, tNmtMnuIntNodeEvent nodeEvent_p);
 static tEplKernel reset(void);
 
@@ -338,36 +338,36 @@ static void       prcSetFlagsNmtCommandReset(tNmtMnuNodeInfo* pNodeInfo_p,
 #endif
 
 /* internal node event handler functions */
-static INT processNodeEventNoIdentResponse (UINT nodeId_p, tEplNmtState nodeNmtState_p,
-                                            tEplNmtState nmtState_p, UINT16 errorCode_p, tEplKernel* pRet_p);
-static INT processNodeEventIdentResponse   (UINT nodeId_p, tEplNmtState nodeNmtState_p,
-                                            tEplNmtState nmtState_p, UINT16 errorCode_p, tEplKernel* pRet_p);
-static INT processNodeEventBoot            (UINT nodeId_p, tEplNmtState nodeNmtState_p,
-                                            tEplNmtState nmtState_p, UINT16 errorCode_p, tEplKernel* pRet_p);
-static INT processNodeEventExecResetConf   (UINT nodeId_p, tEplNmtState nodeNmtState_p,
-                                            tEplNmtState nmtState_p, UINT16 errorCode_p, tEplKernel* pRet_p);
-static INT processNodeEventExecResetNode   (UINT nodeId_p, tEplNmtState nodeNmtState_p,
-                                            tEplNmtState nmtState_p, UINT16 errorCode_p, tEplKernel* pRet_p);
-static INT processNodeEventConfigured      (UINT nodeId_p, tEplNmtState nodeNmtState_p,
-                                            tEplNmtState nmtState_p, UINT16 errorCode_p, tEplKernel* pRet_p);
-static INT processNodeEventNoStatusResponse(UINT nodeId_p, tEplNmtState nodeNmtState_p,
-                                            tEplNmtState nmtState_p, UINT16 errorCode_p, tEplKernel* pRet_p);
-static INT processNodeEventStatusResponse  (UINT nodeId_p, tEplNmtState nodeNmtState_p,
-                                            tEplNmtState nmtState_p, UINT16 errorCode_p, tEplKernel* pRet_p);
-static INT processNodeEventHeartbeat       (UINT nodeId_p, tEplNmtState nodeNmtState_p,
-                                            tEplNmtState nmtState_p, UINT16 errorCode_p, tEplKernel* pRet_p);
-static INT processNodeEventNmtCmdSent      (UINT nodeId_p, tEplNmtState nodeNmtState_p,
-                                            tEplNmtState nmtState_p, UINT16 errorCode_p, tEplKernel* pRet_p);
-static INT processNodeEventTimerIdentReq   (UINT nodeId_p, tEplNmtState nodeNmtState_p,
-                                            tEplNmtState nmtState_p, UINT16 errorCode_p, tEplKernel* pRet_p);
-static INT processNodeEventTimerStatReq    (UINT nodeId_p, tEplNmtState nodeNmtState_p,
-                                            tEplNmtState nmtState_p, UINT16 errorCode_p, tEplKernel* pRet_p);
-static INT processNodeEventTimerStateMon   (UINT nodeId_p, tEplNmtState nodeNmtState_p,
-                                            tEplNmtState nmtState_p, UINT16 errorCode_p, tEplKernel* pRet_p);
-static INT processNodeEventTimerLonger     (UINT nodeId_p, tEplNmtState nodeNmtState_p,
-                                            tEplNmtState nmtState_p, UINT16 errorCode_p, tEplKernel* pRet_p);
-static INT processNodeEventError           (UINT nodeId_p, tEplNmtState nodeNmtState_p,
-                                            tEplNmtState nmtState_p, UINT16 errorCode_p, tEplKernel* pRet_p);
+static INT processNodeEventNoIdentResponse (UINT nodeId_p, tNmtState nodeNmtState_p,
+                                            tNmtState nmtState_p, UINT16 errorCode_p, tEplKernel* pRet_p);
+static INT processNodeEventIdentResponse   (UINT nodeId_p, tNmtState nodeNmtState_p,
+                                            tNmtState nmtState_p, UINT16 errorCode_p, tEplKernel* pRet_p);
+static INT processNodeEventBoot            (UINT nodeId_p, tNmtState nodeNmtState_p,
+                                            tNmtState nmtState_p, UINT16 errorCode_p, tEplKernel* pRet_p);
+static INT processNodeEventExecResetConf   (UINT nodeId_p, tNmtState nodeNmtState_p,
+                                            tNmtState nmtState_p, UINT16 errorCode_p, tEplKernel* pRet_p);
+static INT processNodeEventExecResetNode   (UINT nodeId_p, tNmtState nodeNmtState_p,
+                                            tNmtState nmtState_p, UINT16 errorCode_p, tEplKernel* pRet_p);
+static INT processNodeEventConfigured      (UINT nodeId_p, tNmtState nodeNmtState_p,
+                                            tNmtState nmtState_p, UINT16 errorCode_p, tEplKernel* pRet_p);
+static INT processNodeEventNoStatusResponse(UINT nodeId_p, tNmtState nodeNmtState_p,
+                                            tNmtState nmtState_p, UINT16 errorCode_p, tEplKernel* pRet_p);
+static INT processNodeEventStatusResponse  (UINT nodeId_p, tNmtState nodeNmtState_p,
+                                            tNmtState nmtState_p, UINT16 errorCode_p, tEplKernel* pRet_p);
+static INT processNodeEventHeartbeat       (UINT nodeId_p, tNmtState nodeNmtState_p,
+                                            tNmtState nmtState_p, UINT16 errorCode_p, tEplKernel* pRet_p);
+static INT processNodeEventNmtCmdSent      (UINT nodeId_p, tNmtState nodeNmtState_p,
+                                            tNmtState nmtState_p, UINT16 errorCode_p, tEplKernel* pRet_p);
+static INT processNodeEventTimerIdentReq   (UINT nodeId_p, tNmtState nodeNmtState_p,
+                                            tNmtState nmtState_p, UINT16 errorCode_p, tEplKernel* pRet_p);
+static INT processNodeEventTimerStatReq    (UINT nodeId_p, tNmtState nodeNmtState_p,
+                                            tNmtState nmtState_p, UINT16 errorCode_p, tEplKernel* pRet_p);
+static INT processNodeEventTimerStateMon   (UINT nodeId_p, tNmtState nodeNmtState_p,
+                                            tNmtState nmtState_p, UINT16 errorCode_p, tEplKernel* pRet_p);
+static INT processNodeEventTimerLonger     (UINT nodeId_p, tNmtState nodeNmtState_p,
+                                            tNmtState nmtState_p, UINT16 errorCode_p, tEplKernel* pRet_p);
+static INT processNodeEventError           (UINT nodeId_p, tNmtState nodeNmtState_p,
+                                            tNmtState nmtState_p, UINT16 errorCode_p, tEplKernel* pRet_p);
 
 //------------------------------------------------------------------------------
 // local vars
@@ -735,10 +735,10 @@ also be applied to the local node.
 tEplKernel nmtmnu_requestNmtCommand(UINT nodeId_p, tNmtCommand  nmtCommand_p)
 {
     tEplKernel      ret = kEplSuccessful;
-    tEplNmtState    nmtState;
+    tNmtState       nmtState;
 
     nmtState = nmtu_getNmtState();
-    if (nmtState <= kEplNmtMsNotActive)
+    if (nmtState <= kNmtMsNotActive)
     {
         ret = kEplInvalidOperation;
         goto Exit;
@@ -861,8 +861,7 @@ to the specified node.
 \ingroup module_nmtmnu
 */
 //------------------------------------------------------------------------------
-tEplKernel nmtmnu_triggerStateChange(UINT nodeId_p,
-                                       tEplNmtNodeCommand  nodeCommand_p)
+tEplKernel nmtmnu_triggerStateChange(UINT nodeId_p, tNmtNodeCommand nodeCommand_p)
 {
     tEplKernel          ret = kEplSuccessful;
     tNmtMnuNodeCmd      nodeCmd;
@@ -896,22 +895,22 @@ The function implements the callback function for NMT state changes
 \ingroup module_nmtmnu
 */
 //------------------------------------------------------------------------------
-tEplKernel nmtmnu_cbNmtStateChange(tEplEventNmtStateChange nmtStateChange_p)
+tEplKernel nmtmnu_cbNmtStateChange(tEventNmtStateChange nmtStateChange_p)
 {
     tEplKernel      ret = kEplSuccessful;
     UINT8           newMnNmtState;
 
     // Save new MN state in object 0x1F8E
-    newMnNmtState   = (UINT8) nmtStateChange_p.m_NewNmtState;
+    newMnNmtState   = (UINT8) nmtStateChange_p.newNmtState;
     ret = EplObdWriteEntry(0x1F8E, 240, &newMnNmtState, 1);
     if(ret != kEplSuccessful)
         return  ret;
 
     // do work which must be done in that state
-    switch (nmtStateChange_p.m_NewNmtState)
+    switch (nmtStateChange_p.newNmtState)
     {
         // build the configuration with infos from OD
-        case kEplNmtGsResetConfiguration:
+        case kNmtGsResetConfiguration:
             {
                 UINT32          dwTimeout;
                 tEplObdSize     obdSize;
@@ -971,22 +970,22 @@ tEplKernel nmtmnu_cbNmtStateChange(tEplEventNmtStateChange nmtStateChange_p)
         // MN part of the state machine
 
         // node listens for EPL-Frames and check timeout
-        case kEplNmtMsNotActive:
+        case kNmtMsNotActive:
             break;
 
         // node processes only async frames
-        case kEplNmtMsPreOperational1:
+        case kNmtMsPreOperational1:
             ret = doPreop1(nmtStateChange_p);
             break;
 
         // node processes isochronous and asynchronous frames
-        case kEplNmtMsPreOperational2:
+        case kNmtMsPreOperational2:
             ret = startBootStep2();
             // wait for NMT state change of CNs
             break;
 
         // node should be configured and application is ready
-        case kEplNmtMsReadyToOperate:
+        case kNmtMsReadyToOperate:
             // check if PRes of CNs are OK
             // d.k. that means wait CycleLength * MultiplexCycleCount (i.e. start timer)
             //      because Dllk checks PRes of CNs automatically in ReadyToOp
@@ -994,7 +993,7 @@ tEplKernel nmtmnu_cbNmtStateChange(tEplEventNmtStateChange nmtStateChange_p)
             break;
 
         // normal work state
-        case kEplNmtMsOperational:
+        case kNmtMsOperational:
             // send StartNode to CNs
             // wait for NMT state change of CNs
             ret = startNodes();
@@ -1002,7 +1001,7 @@ tEplKernel nmtmnu_cbNmtStateChange(tEplEventNmtStateChange nmtStateChange_p)
 
         // no EPL cycle
         // -> normal ethernet communication
-        case kEplNmtMsBasicEthernet:
+        case kNmtMsBasicEthernet:
             break;
 
         default:
@@ -1028,7 +1027,7 @@ This module will reject some NMT commands while MN.
 \ingroup module_nmtmnu
 */
 //------------------------------------------------------------------------------
-tEplKernel nmtmnu_cbCheckEvent(tEplNmtEvent nmtEvent_p)
+tEplKernel nmtmnu_cbCheckEvent(tNmtEvent nmtEvent_p)
 {
     tEplKernel      ret = kEplSuccessful;
     UNUSED_PARAMETER(nmtEvent_p);
@@ -1090,7 +1089,7 @@ tEplKernel nmtmnu_processEvent(tEplEvent* pEvent_p)
                                                         ((pNodeInfo->nodeState << 8) | 0x80
                                                          | ((pNodeInfo->flags & NMTMNU_NODE_FLAG_COUNT_STATREQ) >> 6)
                                                          | ((pTimerEventArg->m_Arg.m_dwVal & NMTMNU_TIMERARG_COUNT_SR) >> 8)));*/
-                        ret = processInternalEvent(nodeId, (tEplNmtState) (bNmtState | EPL_NMT_TYPE_CS),
+                        ret = processInternalEvent(nodeId, (tNmtState) (bNmtState | NMT_TYPE_CS),
                                                    EPL_E_NO_ERROR, kNmtMnuIntNodeEventTimerIdentReq);
                     }
 
@@ -1110,7 +1109,7 @@ tEplKernel nmtmnu_processEvent(tEplEvent* pEvent_p)
                                                         ((pNodeInfo->nodeState << 8) | 0x80
                                                          | ((pNodeInfo->flags & NMTMNU_NODE_FLAG_COUNT_STATREQ) >> 6)
                                                          | ((pTimerEventArg->m_Arg.m_dwVal & NMTMNU_TIMERARG_COUNT_SR) >> 8))); */
-                        ret = processInternalEvent(nodeId, (tEplNmtState) (bNmtState | EPL_NMT_TYPE_CS),
+                        ret = processInternalEvent(nodeId, (tNmtState) (bNmtState | NMT_TYPE_CS),
                                                    EPL_E_NO_ERROR, kNmtMnuIntNodeEventTimerStatReq);
                     }
 
@@ -1130,7 +1129,7 @@ tEplKernel nmtmnu_processEvent(tEplEvent* pEvent_p)
                                                         ((pNodeInfo->nodeState << 8) | 0x80
                                                          | ((pNodeInfo->flags & NMTMNU_NODE_FLAG_COUNT_STATREQ) >> 6)
                                                          | ((pTimerEventArg->m_Arg.m_dwVal & NMTMNU_TIMERARG_COUNT_SR) >> 8))); */
-                        ret = processInternalEvent(nodeId, (tEplNmtState) (bNmtState | EPL_NMT_TYPE_CS),
+                        ret = processInternalEvent(nodeId, (tNmtState) (bNmtState | NMT_TYPE_CS),
                                                    EPL_E_NO_ERROR, kNmtMnuIntNodeEventTimerStateMon);
                     }
 
@@ -1150,7 +1149,7 @@ tEplKernel nmtmnu_processEvent(tEplEvent* pEvent_p)
                                                         ((pNodeInfo->nodeState << 8) | 0x80
                                                          | ((pNodeInfo->flags & NMTMNU_NODE_FLAG_COUNT_LONGER) >> 6)
                                                          | ((pTimerEventArg->m_Arg.m_dwVal & NMTMNU_TIMERARG_COUNT_LO) >> 8))); */
-                        ret = processInternalEvent(nodeId, (tEplNmtState) (bNmtState | EPL_NMT_TYPE_CS),
+                        ret = processInternalEvent(nodeId, (tNmtState) (bNmtState | NMT_TYPE_CS),
                                                    EPL_E_NO_ERROR, kNmtMnuIntNodeEventTimerLonger);
                     }
 
@@ -1163,9 +1162,9 @@ tEplKernel nmtmnu_processEvent(tEplEvent* pEvent_p)
 
         case kEplEventTypeHeartbeat:
             {
-                tEplHeartbeatEvent* pHeartbeatEvent = (tEplHeartbeatEvent*)pEvent_p->m_pArg;
-                ret = processInternalEvent(pHeartbeatEvent->m_uiNodeId, pHeartbeatEvent->m_NmtState,
-                                           pHeartbeatEvent->m_wErrorCode, kNmtMnuIntNodeEventHeartbeat);
+                tHeartbeatEvent* pHeartbeatEvent = (tHeartbeatEvent*)pEvent_p->m_pArg;
+                ret = processInternalEvent(pHeartbeatEvent->nodeId, pHeartbeatEvent->nmtState,
+                                           pHeartbeatEvent->errorCode, kNmtMnuIntNodeEventHeartbeat);
             }
             break;
 
@@ -1188,28 +1187,28 @@ tEplKernel nmtmnu_processEvent(tEplEvent* pEvent_p)
                 switch (NmtCommand)
                 {
                     case kNmtCmdStartNode:
-                        bNmtState = (UINT8) (kEplNmtCsOperational & 0xFF);
+                        bNmtState = (UINT8) (kNmtCsOperational & 0xFF);
                         break;
 
                     case kNmtCmdStopNode:
-                        bNmtState = (UINT8) (kEplNmtCsStopped & 0xFF);
+                        bNmtState = (UINT8) (kNmtCsStopped & 0xFF);
                         break;
 
                     case kNmtCmdEnterPreOperational2:
-                        bNmtState = (UINT8) (kEplNmtCsPreOperational2 & 0xFF);
+                        bNmtState = (UINT8) (kNmtCsPreOperational2 & 0xFF);
                         break;
 
                     case kNmtCmdEnableReadyToOperate:
                         // d.k. do not change expected node state, because of DS 1.0.0 7.3.1.2.1 Plain NMT State Command
                         //      and because node may not change NMT state within EPL_C_NMT_STATE_TOLERANCE
-                        bNmtState = (UINT8) (kEplNmtCsPreOperational2 & 0xFF);
+                        bNmtState = (UINT8) (kNmtCsPreOperational2 & 0xFF);
                         break;
 
                     case kNmtCmdResetNode:
                     case kNmtCmdResetCommunication:
                     case kNmtCmdResetConfiguration:
                     case kNmtCmdSwReset:
-                        bNmtState = (UINT8) (kEplNmtCsNotActive & 0xFF);
+                        bNmtState = (UINT8) (kNmtCsNotActive & 0xFF);
                         // processInternalEvent() sets internal node state to kNmtMnuNodeStateUnknown
                         // after next unresponded IdentRequest/StatusRequest
                         break;
@@ -1222,7 +1221,7 @@ tEplKernel nmtmnu_processEvent(tEplEvent* pEvent_p)
                 if (uiNodeId != EPL_C_ADR_BROADCAST)
                 {
                     ret = processInternalEvent(uiNodeId,
-                                                        (tEplNmtState) (bNmtState | EPL_NMT_TYPE_CS),
+                                                        (tNmtState) (bNmtState | NMT_TYPE_CS),
                                                         0,
                                                         kNmtMnuIntNodeEventNmtCmdSent);
 
@@ -1233,7 +1232,7 @@ tEplKernel nmtmnu_processEvent(tEplEvent* pEvent_p)
                     {
                         if ((NMTMNU_GET_NODEINFO(uiNodeId)->nodeCfg & (EPL_NODEASSIGN_NODE_IS_CN | EPL_NODEASSIGN_NODE_EXISTS)) != 0)
                         {
-                            ret = processInternalEvent(uiNodeId, (tEplNmtState) (bNmtState | EPL_NMT_TYPE_CS),
+                            ret = processInternalEvent(uiNodeId, (tNmtState) (bNmtState | NMT_TYPE_CS),
                                                        0, kNmtMnuIntNodeEventNmtCmdSent);
                             if (ret != kEplSuccessful)
                                 goto Exit;
@@ -1242,24 +1241,24 @@ tEplKernel nmtmnu_processEvent(tEplEvent* pEvent_p)
 
                     if ((nmtMnuInstance_g.flags & NMTMNU_FLAG_USER_RESET) != 0)
                     {   // user or diagnostic nodes requests a reset of the MN
-                        tEplNmtEvent    NmtEvent;
+                        tNmtEvent    NmtEvent;
 
                         switch (NmtCommand)
                         {
                             case kNmtCmdResetNode:
-                                NmtEvent = kEplNmtEventResetNode;
+                                NmtEvent = kNmtEventResetNode;
                                 break;
 
                             case kNmtCmdResetCommunication:
-                                NmtEvent = kEplNmtEventResetCom;
+                                NmtEvent = kNmtEventResetCom;
                                 break;
 
                             case kNmtCmdResetConfiguration:
-                                NmtEvent = kEplNmtEventResetConfig;
+                                NmtEvent = kNmtEventResetConfig;
                                 break;
 
                             case kNmtCmdSwReset:
-                                NmtEvent = kEplNmtEventSwReset;
+                                NmtEvent = kNmtEventSwReset;
                                 break;
 
                             case kNmtCmdInvalidService:
@@ -1290,24 +1289,24 @@ tEplKernel nmtmnu_processEvent(tEplEvent* pEvent_p)
 
                 switch (pNodeCmd->nodeCommand)
                 {
-                    case kEplNmtNodeCommandBoot:
+                    case kNmtNodeCommandBoot:
                         NodeEvent = kNmtMnuIntNodeEventBoot;
                         break;
 
-                    case kEplNmtNodeCommandConfOk:
+                    case kNmtNodeCommandConfOk:
                         NodeEvent = kNmtMnuIntNodeEventConfigured;
                         break;
 
-                    case kEplNmtNodeCommandConfErr:
+                    case kNmtNodeCommandConfErr:
                         NodeEvent = kNmtMnuIntNodeEventError;
                         wErrorCode = EPL_E_NMT_BPO1_CF_VERIFY;
                         break;
 
-                    case kEplNmtNodeCommandConfRestored:
+                    case kNmtNodeCommandConfRestored:
                         NodeEvent = kNmtMnuIntNodeEventExecResetNode;
                         break;
 
-                    case kEplNmtNodeCommandConfReset:
+                    case kNmtNodeCommandConfReset:
                         NodeEvent = kNmtMnuIntNodeEventExecResetConf;
                         break;
 
@@ -1323,7 +1322,7 @@ tEplKernel nmtmnu_processEvent(tEplEvent* pEvent_p)
                     goto Exit;
 
                 ret = processInternalEvent(pNodeCmd->nodeId,
-                                                    (tEplNmtState) (bNmtState | EPL_NMT_TYPE_CS),
+                                                    (tNmtState) (bNmtState | NMT_TYPE_CS),
                                                     wErrorCode,
                                                     NodeEvent);
             }
@@ -1455,17 +1454,17 @@ static tEplKernel PUBLIC cbIdentResponse(UINT nodeId_p, tEplIdentResponse* pIden
     tEplObdSize     obdSize;
     UINT32          dwDevType;
     UINT16          errorCode;
-    tEplNmtState    nmtState;
+    tNmtState       nmtState;
 
     if (pIdentResponse_p == NULL)
     {   // node did not answer
-        ret = processInternalEvent(nodeId_p, kEplNmtCsNotActive, EPL_E_NMT_NO_IDENT_RES, // was EPL_E_NO_ERROR
+        ret = processInternalEvent(nodeId_p, kNmtCsNotActive, EPL_E_NMT_NO_IDENT_RES, // was EPL_E_NO_ERROR
                                    kNmtMnuIntNodeEventNoIdentResponse);
     }
     else
     {   // node answered IdentRequest
         errorCode = EPL_E_NO_ERROR;
-        nmtState = (tEplNmtState)(AmiGetByteFromLe(&pIdentResponse_p->m_le_bNmtStatus) | EPL_NMT_TYPE_CS);
+        nmtState = (tNmtState)(AmiGetByteFromLe(&pIdentResponse_p->m_le_bNmtStatus) | NMT_TYPE_CS);
 
         // check IdentResponse $$$ move to ProcessIntern, because this function may be called also if CN
 
@@ -1479,7 +1478,7 @@ static tEplKernel PUBLIC cbIdentResponse(UINT nodeId_p, tEplIdentResponse* pIden
         {   // actually compare it with DeviceType from IdentResponse
             if (AmiGetDwordFromLe(&pIdentResponse_p->m_le_dwDeviceType) != dwDevType)
             {   // wrong DeviceType
-                nmtState = kEplNmtCsNotActive;
+                nmtState = kNmtCsNotActive;
                 errorCode = EPL_E_NMT_BPO1_DEVICE_TYPE;
             }
         }
@@ -1509,13 +1508,13 @@ static tEplKernel PUBLIC cbStatusResponse(UINT nodeId_p, tEplStatusResponse* pSt
 
     if (pStatusResponse_p == NULL)
     {   // node did not answer
-        ret = processInternalEvent(nodeId_p, kEplNmtCsNotActive, EPL_E_NMT_NO_STATUS_RES, // was EPL_E_NO_ERROR
+        ret = processInternalEvent(nodeId_p, kNmtCsNotActive, EPL_E_NMT_NO_STATUS_RES, // was EPL_E_NO_ERROR
                                    kNmtMnuIntNodeEventNoStatusResponse);
     }
     else
     {   // node answered StatusRequest
         ret = processInternalEvent(nodeId_p,
-                                   (tEplNmtState)(AmiGetByteFromLe(&pStatusResponse_p->m_le_bNmtStatus) | EPL_NMT_TYPE_CS),
+                                   (tNmtState)(AmiGetByteFromLe(&pStatusResponse_p->m_le_bNmtStatus) | NMT_TYPE_CS),
                                    EPL_E_NO_ERROR, kNmtMnuIntNodeEventStatusResponse);
     }
     return ret;
@@ -1537,7 +1536,7 @@ static tEplKernel cbNodeAdded(UINT nodeId_p)
 {
     tEplKernel          ret = kEplSuccessful;
     tNmtMnuNodeInfo*    pNodeInfo;
-    tEplNmtState        nmtState;
+    tNmtState           nmtState;
 
     pNodeInfo = NMTMNU_GET_NODEINFO(nodeId_p);
     pNodeInfo->flags |= NMTMNU_NODE_FLAG_ISOCHRON;
@@ -1545,7 +1544,7 @@ static tEplKernel cbNodeAdded(UINT nodeId_p)
     if (pNodeInfo->nodeState == kNmtMnuNodeStateConfigured)
     {
         nmtState = nmtu_getNmtState();
-        if (nmtState >= kEplNmtMsPreOperational2)
+        if (nmtState >= kNmtMsPreOperational2)
         {
             ret = nodeBootStep2(nodeId_p, pNodeInfo);
         }
@@ -1766,7 +1765,7 @@ The function handles the PreOperational1 state of the MN.
 \return The function returns a tEplKernel error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel doPreop1(tEplEventNmtStateChange nmtStateChange_p)
+static tEplKernel doPreop1(tEventNmtStateChange nmtStateChange_p)
 {
     UINT32          dwTimeout;
     tEplTimerArg    timerArg;
@@ -1804,7 +1803,7 @@ static tEplKernel doPreop1(tEplEventNmtStateChange nmtStateChange_p)
     // skip this step if we come directly from OPERATIONAL
     // or it was just done before, e.g. because of a ResetNode command
     // from a diagnostic node
-    if ((nmtStateChange_p.m_NmtEvent == kEplNmtEventTimerMsPreOp1) ||
+    if ((nmtStateChange_p.nmtEvent == kNmtEventTimerMsPreOp1) ||
         ((nmtMnuInstance_g.flags & NMTMNU_FLAG_USER_RESET) == 0))
     {
         BENCHMARK_MOD_07_TOGGLE(7);
@@ -1861,7 +1860,7 @@ static tEplKernel startBootStep2(void)
     tNmtMnuNodeInfo*    pNodeInfo;
     tEplObdSize         obdSize;
     UINT8               nmtState;
-    tEplNmtState        expNmtState;
+    tNmtState           expNmtState;
 
     if ((nmtMnuInstance_g.flags & NMTMNU_FLAG_HALTED) == 0)
     {   // boot process is not halted
@@ -1881,9 +1880,9 @@ static tEplKernel startBootStep2(void)
             goto Exit;
 
         // compute expected NMT state
-        expNmtState = (tEplNmtState) (nmtState | EPL_NMT_TYPE_CS);
+        expNmtState = (tNmtState) (nmtState | NMT_TYPE_CS);
 
-        if (expNmtState == kEplNmtCsPreOperational1)
+        if (expNmtState == kNmtCsPreOperational1)
         {
             tEplTimerArg    timerArg;
 
@@ -1901,7 +1900,7 @@ static tEplKernel startBootStep2(void)
                 goto Exit;
 
             // update object 0x1F8F NMT_MNNodeExpState_AU8 to PreOp2
-            nmtState = (UINT8)(kEplNmtCsPreOperational2 & 0xFF);
+            nmtState = (UINT8)(kNmtCsPreOperational2 & 0xFF);
             ret = EplObduWriteEntry(0x1F8F, index, &nmtState, 1);
             if (ret != kEplSuccessful)
                 goto Exit;
@@ -1951,7 +1950,7 @@ static tEplKernel nodeBootStep2(UINT nodeId_p, tNmtMnuNodeInfo* pNodeInfo_p)
     tEplKernel          ret = kEplSuccessful;
     tEplTimerArg        timerArg;
     UINT8               bNmtState;
-    tEplNmtState        nmtState;
+    tNmtState           nmtState;
     tEplObdSize         obdSize;
 
     if (pNodeInfo_p->nodeCfg & EPL_NODEASSIGN_ASYNCONLY_NODE)
@@ -1962,9 +1961,9 @@ static tEplKernel nodeBootStep2(UINT nodeId_p, tNmtMnuNodeInfo* pNodeInfo_p)
         if (ret != kEplSuccessful)
             goto Exit;
 
-        nmtState = (tEplNmtState) (bNmtState | EPL_NMT_TYPE_CS);
+        nmtState = (tNmtState) (bNmtState | NMT_TYPE_CS);
 
-        if (nmtState != kEplNmtCsPreOperational2)
+        if (nmtState != kNmtCsPreOperational2)
             goto Exit;
     }
     else
@@ -2174,7 +2173,7 @@ The function processes the internal node event kNmtMnuIntNodeEventIdentResponse.
         processing or -1 if it should exit.
 */
 //------------------------------------------------------------------------------
-static INT processNodeEventIdentResponse(UINT nodeId_p, tEplNmtState nodeNmtState_p, tEplNmtState nmtState_p,
+static INT processNodeEventIdentResponse(UINT nodeId_p, tNmtState nodeNmtState_p, tNmtState nmtState_p,
                                          UINT16 errorCode_p, tEplKernel* pRet_p)
 {
     UINT8               bNmtState;
@@ -2194,7 +2193,7 @@ static INT processNodeEventIdentResponse(UINT nodeId_p, tEplNmtState nodeNmtStat
                           NMTMNU_NODE_FLAG_NMT_CMD_ISSUED |
                           NMTMNU_NODE_FLAG_PREOP2_REACHED);
 
-    if (nmtState_p == kEplNmtMsPreOperational1)
+    if (nmtState_p == kNmtMsPreOperational1)
     {
         if ((pNodeInfo->flags & NMTMNU_NODE_FLAG_NOT_SCANNED) != 0)
         {   // decrement only signal slave count
@@ -2202,13 +2201,13 @@ static INT processNodeEventIdentResponse(UINT nodeId_p, tEplNmtState nodeNmtStat
             pNodeInfo->flags &= ~NMTMNU_NODE_FLAG_NOT_SCANNED;
         }
         // update object 0x1F8F NMT_MNNodeExpState_AU8 to PreOp1
-        bNmtState = (UINT8) (kEplNmtCsPreOperational1 & 0xFF);
+        bNmtState = (UINT8) (kNmtCsPreOperational1 & 0xFF);
     }
     else
     {   // MN is running full cycle
         // update object 0x1F8F NMT_MNNodeExpState_AU8 to PreOp2
-        bNmtState = (UINT8) (kEplNmtCsPreOperational2 & 0xFF);
-        if (nodeNmtState_p == kEplNmtCsPreOperational1)
+        bNmtState = (UINT8) (kNmtCsPreOperational2 & 0xFF);
+        if (nodeNmtState_p == kNmtCsPreOperational1)
         {   // The CN did not yet switch to PreOp2
             tEplTimerArg timerArg;
 
@@ -2263,7 +2262,7 @@ static INT processNodeEventIdentResponse(UINT nodeId_p, tEplNmtState nodeNmtStat
         (pNodeInfo->nodeState != kNmtMnuNodeStateConfRestored))
     {
         // inform application
-        *pRet_p = nmtMnuInstance_g.pfnCbNodeEvent(nodeId_p, kEplNmtNodeEventFound,
+        *pRet_p = nmtMnuInstance_g.pfnCbNodeEvent(nodeId_p, kNmtNodeEventFound,
                                               nodeNmtState_p, EPL_E_NO_ERROR,
                                               (pNodeInfo->nodeCfg & EPL_NODEASSIGN_MANDATORY_CN) != 0);
         if (*pRet_p == kEplReject)
@@ -2302,7 +2301,7 @@ The function processes the internal node event kNmtMnuIntNodeEventBoot.
         processing or -1 if it should exit.
 */
 //------------------------------------------------------------------------------
-static INT processNodeEventBoot(UINT nodeId_p, tEplNmtState nodeNmtState_p, tEplNmtState nmtState_p,
+static INT processNodeEventBoot(UINT nodeId_p, tNmtState nodeNmtState_p, tNmtState nmtState_p,
                                 UINT16 errorCode_p, tEplKernel* pRet_p)
 {
     tNmtMnuNodeInfo*    pNodeInfo;
@@ -2318,7 +2317,7 @@ static INT processNodeEventBoot(UINT nodeId_p, tEplNmtState nodeNmtState_p, tEpl
         // $$$ check software
         // check/start configuration
         // inform application
-        *pRet_p = nmtMnuInstance_g.pfnCbNodeEvent(nodeId_p, kEplNmtNodeEventCheckConf,
+        *pRet_p = nmtMnuInstance_g.pfnCbNodeEvent(nodeId_p, kNmtNodeEventCheckConf,
                                               nodeNmtState_p, EPL_E_NO_ERROR,
                                               (pNodeInfo->nodeCfg & EPL_NODEASSIGN_MANDATORY_CN) != 0);
         if (*pRet_p == kEplReject)
@@ -2339,7 +2338,7 @@ static INT processNodeEventBoot(UINT nodeId_p, tEplNmtState nodeNmtState_p, tEpl
     {
         // check/start configuration
         // inform application
-        *pRet_p = nmtMnuInstance_g.pfnCbNodeEvent(nodeId_p, kEplNmtNodeEventUpdateConf,
+        *pRet_p = nmtMnuInstance_g.pfnCbNodeEvent(nodeId_p, kNmtNodeEventUpdateConf,
                                               nodeNmtState_p, EPL_E_NO_ERROR,
                                               (pNodeInfo->nodeCfg & EPL_NODEASSIGN_MANDATORY_CN) != 0);
         if (*pRet_p == kEplReject)
@@ -2384,7 +2383,7 @@ The function processes the internal node event kNmtMnuIntNodeEventConfigured.
         processing or -1 if it should exit.
 */
 //------------------------------------------------------------------------------
-static INT processNodeEventConfigured(UINT nodeId_p, tEplNmtState nodeNmtState_p, tEplNmtState nmtState_p,
+static INT processNodeEventConfigured(UINT nodeId_p, tNmtState nodeNmtState_p, tNmtState nmtState_p,
                                       UINT16 errorCode_p, tEplKernel* pRet_p)
 {
     tNmtMnuNodeInfo*    pNodeInfo;
@@ -2402,7 +2401,7 @@ static INT processNodeEventConfigured(UINT nodeId_p, tEplNmtState nodeNmtState_p
     }
 
     pNodeInfo->nodeState = kNmtMnuNodeStateConfigured;
-    if (nmtState_p == kEplNmtMsPreOperational1)
+    if (nmtState_p == kNmtMsPreOperational1)
     {
         if ((pNodeInfo->nodeCfg & EPL_NODEASSIGN_MANDATORY_CN) != 0)
         {   // decrement mandatory CN counter
@@ -2433,7 +2432,7 @@ The function processes the internal node event kNmtMnuIntNodeEventNoIdentRespons
         processing or -1 if it should exit.
 */
 //------------------------------------------------------------------------------
-INT processNodeEventNoIdentResponse(UINT nodeId_p, tEplNmtState nodeNmtState_p, tEplNmtState nmtState_p,
+INT processNodeEventNoIdentResponse(UINT nodeId_p, tNmtState nodeNmtState_p, tNmtState nmtState_p,
                                     UINT16 errorCode_p, tEplKernel* pRet_p)
 {
     tEplTimerArg        timerArg;
@@ -2441,7 +2440,7 @@ INT processNodeEventNoIdentResponse(UINT nodeId_p, tEplNmtState nodeNmtState_p, 
 
     pNodeInfo = NMTMNU_GET_NODEINFO(nodeId_p);
 
-    if ((nmtState_p == kEplNmtMsPreOperational1) &&
+    if ((nmtState_p == kNmtMsPreOperational1) &&
         ((pNodeInfo->flags & NMTMNU_NODE_FLAG_NOT_SCANNED) != 0))
     {
         // decrement only signal slave count
@@ -2470,7 +2469,7 @@ INT processNodeEventNoIdentResponse(UINT nodeId_p, tEplNmtState nodeNmtState_p, 
     // $$$ d.k. check individual timeout 0x1F89/6 MNIdentificationTimeout_U32
     // if mandatory node and timeout elapsed -> halt boot procedure
     // trigger IdentRequest again (if >= PreOp2, after delay)
-    if (nmtState_p >= kEplNmtMsPreOperational2)
+    if (nmtState_p >= kNmtMsPreOperational2)
     {   // start timer
         NMTMNU_SET_FLAGS_TIMERARG_IDENTREQ(pNodeInfo, nodeId_p, timerArg);
         /* NMTMNU_DBG_POST_TRACE_VALUE(kNmtMnuIntNodeEventNoIdentResponse, nodeId_p,
@@ -2504,7 +2503,7 @@ The function processes the internal node event kNmtMnuIntNodeEventStatusResponse
         processing or -1 if it should exit.
 */
 //------------------------------------------------------------------------------
-static INT processNodeEventStatusResponse(UINT nodeId_p, tEplNmtState nodeNmtState_p, tEplNmtState nmtState_p,
+static INT processNodeEventStatusResponse(UINT nodeId_p, tNmtState nodeNmtState_p, tNmtState nmtState_p,
                                    UINT16 errorCode_p, tEplKernel* pRet_p)
 {
     tEplTimerArg        timerArg;
@@ -2512,7 +2511,7 @@ static INT processNodeEventStatusResponse(UINT nodeId_p, tEplNmtState nodeNmtSta
 
     pNodeInfo = NMTMNU_GET_NODEINFO(nodeId_p);
 
-    if ((nmtState_p >= kEplNmtMsPreOperational2) &&
+    if ((nmtState_p >= kNmtMsPreOperational2) &&
         ((pNodeInfo->flags & NMTMNU_NODE_FLAG_NOT_SCANNED) != 0))
     {
         // decrement only signal slave count if checked once for ReadyToOp, CheckCom, Operational
@@ -2529,7 +2528,7 @@ static INT processNodeEventStatusResponse(UINT nodeId_p, tEplNmtState nodeNmtSta
         return 0;
     }
 
-    if (nmtState_p == kEplNmtMsPreOperational1)
+    if (nmtState_p == kNmtMsPreOperational1)
     {
         // request next StatusResponse immediately
         *pRet_p = statusu_requestStatusResponse(nodeId_p, cbStatusResponse);
@@ -2570,7 +2569,7 @@ The function processes the internal node event kNmtMnuIntNodeEventNoStatusRespon
         processing or -1 if it should exit.
 */
 //------------------------------------------------------------------------------
-static INT processNodeEventNoStatusResponse(UINT nodeId_p, tEplNmtState nodeNmtState_p, tEplNmtState nmtState_p,
+static INT processNodeEventNoStatusResponse(UINT nodeId_p, tNmtState nodeNmtState_p, tNmtState nmtState_p,
                                      UINT16 errorCode_p, tEplKernel* pRet_p)
 {
     tNmtMnuNodeInfo*    pNodeInfo;
@@ -2601,7 +2600,7 @@ The function processes the internal node event kNmtMnuIntNodeEventError.
         processing or -1 if it should exit.
 */
 //------------------------------------------------------------------------------
-static INT processNodeEventError(UINT nodeId_p, tEplNmtState nodeNmtState_p, tEplNmtState nmtState_p,
+static INT processNodeEventError(UINT nodeId_p, tNmtState nodeNmtState_p, tNmtState nmtState_p,
                                  UINT16 errorCode_p, tEplKernel* pRet_p)
 {
     tNmtMnuNodeInfo*    pNodeInfo;
@@ -2610,7 +2609,7 @@ static INT processNodeEventError(UINT nodeId_p, tEplNmtState nodeNmtState_p, tEp
 
     pNodeInfo = NMTMNU_GET_NODEINFO(nodeId_p);
 
-    // currently only issued on kEplNmtNodeCommandConfErr
+    // currently only issued on kNmtNodeCommandConfErr
     if ((pNodeInfo->nodeState != kNmtMnuNodeStateIdentified) &&
         (pNodeInfo->nodeState != kNmtMnuNodeStateConfRestored))
     {   // wrong CN state, ignore event
@@ -2618,7 +2617,7 @@ static INT processNodeEventError(UINT nodeId_p, tEplNmtState nodeNmtState_p, tEp
     }
 
     // check NMT state of CN
-    *pRet_p = checkNmtState(nodeId_p, pNodeInfo, kEplNmtCsNotActive,
+    *pRet_p = checkNmtState(nodeId_p, pNodeInfo, kNmtCsNotActive,
                             errorCode_p, nmtState_p);
     if (*pRet_p == kEplReject)
         *pRet_p = kEplSuccessful;
@@ -2642,7 +2641,7 @@ The function processes the internal node event kNmtMnuIntNodeEventExecResetNode.
         processing or -1 if it should exit.
 */
 //------------------------------------------------------------------------------
-static INT processNodeEventExecResetNode(UINT nodeId_p, tEplNmtState nodeNmtState_p, tEplNmtState nmtState_p,
+static INT processNodeEventExecResetNode(UINT nodeId_p, tNmtState nodeNmtState_p, tNmtState nmtState_p,
                                          UINT16 errorCode_p, tEplKernel* pRet_p)
 {
     tNmtMnuNodeInfo*    pNodeInfo;
@@ -2684,7 +2683,7 @@ The function processes the internal node event kNmtMnuIntNodeEventExecResetConf.
         processing or -1 if it should exit.
 */
 //------------------------------------------------------------------------------
-static INT processNodeEventExecResetConf(UINT nodeId_p, tEplNmtState nodeNmtState_p, tEplNmtState nmtState_p,
+static INT processNodeEventExecResetConf(UINT nodeId_p, tNmtState nodeNmtState_p, tNmtState nmtState_p,
                                          UINT16 errorCode_p, tEplKernel* pRet_p)
 {
     tNmtMnuNodeInfo*    pNodeInfo;
@@ -2729,7 +2728,7 @@ The function processes the internal node event kNmtMnuIntNodeEventHeartbeat.
         processing or -1 if it should exit.
 */
 //------------------------------------------------------------------------------
-static INT processNodeEventHeartbeat(UINT nodeId_p, tEplNmtState nodeNmtState_p, tEplNmtState nmtState_p,
+static INT processNodeEventHeartbeat(UINT nodeId_p, tNmtState nodeNmtState_p, tNmtState nmtState_p,
                                      UINT16 errorCode_p, tEplKernel* pRet_p)
 {
     tNmtMnuNodeInfo*    pNodeInfo;
@@ -2760,7 +2759,7 @@ The function processes the internal node event kNmtMnuIntNodeEventTimerIdentReq.
         processing or -1 if it should exit.
 */
 //------------------------------------------------------------------------------
-static INT processNodeEventTimerIdentReq(UINT nodeId_p, tEplNmtState nodeNmtState_p, tEplNmtState nmtState_p,
+static INT processNodeEventTimerIdentReq(UINT nodeId_p, tNmtState nodeNmtState_p, tNmtState nmtState_p,
                                          UINT16 errorCode_p, tEplKernel* pRet_p)
 {
     UNUSED_PARAMETER(errorCode_p);
@@ -2799,7 +2798,7 @@ The function processes the internal node event kNmtMnuIntNodeEventTimerStatReq.
         processing or -1 if it should exit.
 */
 //------------------------------------------------------------------------------
-static INT processNodeEventTimerStatReq(UINT nodeId_p, tEplNmtState nodeNmtState_p, tEplNmtState nmtState_p,
+static INT processNodeEventTimerStatReq(UINT nodeId_p, tNmtState nodeNmtState_p, tNmtState nmtState_p,
                                         UINT16 errorCode_p, tEplKernel* pRet_p)
 {
     UNUSED_PARAMETER(errorCode_p);
@@ -2840,7 +2839,7 @@ The function processes the internal node event kNmtMnuIntNodeEventTimerStateMon.
         processing or -1 if it should exit.
 */
 //------------------------------------------------------------------------------
-static INT processNodeEventTimerStateMon(UINT nodeId_p, tEplNmtState nodeNmtState_p, tEplNmtState nmtState_p,
+static INT processNodeEventTimerStateMon(UINT nodeId_p, tNmtState nodeNmtState_p, tNmtState nmtState_p,
                                          UINT16 errorCode_p, tEplKernel* pRet_p)
 {
     tNmtMnuNodeInfo*    pNodeInfo;
@@ -2877,7 +2876,7 @@ The function processes the internal node event kNmtMnuIntNodeEventTimerLonger.
         processing or -1 if it should exit.
 */
 //------------------------------------------------------------------------------
-static INT processNodeEventTimerLonger(UINT nodeId_p, tEplNmtState nodeNmtState_p, tEplNmtState nmtState_p,
+static INT processNodeEventTimerLonger(UINT nodeId_p, tNmtState nodeNmtState_p, tNmtState nmtState_p,
                                        UINT16 errorCode_p, tEplKernel* pRet_p)
 {
     tNmtMnuNodeInfo*    pNodeInfo;
@@ -2892,7 +2891,7 @@ static INT processNodeEventTimerLonger(UINT nodeId_p, tEplNmtState nodeNmtState_
         case kNmtMnuNodeStateConfigured:
             // node should be ReadyToOp but it is not
             // check NMT state which shall be intentionally wrong, so that ERROR_TREATMENT will be started
-            *pRet_p = checkNmtState(nodeId_p, pNodeInfo, kEplNmtCsNotActive, EPL_E_NMT_BPO2, nmtState_p);
+            *pRet_p = checkNmtState(nodeId_p, pNodeInfo, kNmtCsNotActive, EPL_E_NMT_BPO2, nmtState_p);
             if (*pRet_p == kEplReject)
                 *pRet_p = kEplSuccessful;
             break;
@@ -2914,7 +2913,7 @@ static INT processNodeEventTimerLonger(UINT nodeId_p, tEplNmtState nodeNmtState_
                 nmtMnuInstance_g.mandatorySlaveCount--;
             }
 
-            if (nmtState_p != kEplNmtMsReadyToOperate)
+            if (nmtState_p != kNmtMsReadyToOperate)
             {
                 NMTMNU_DBG_POST_TRACE_VALUE(kNmtMnuIntNodeEventTimerLonger, nodeId_p,
                                                 (((nodeNmtState_p & 0xFF) << 8) | kNmtCmdStartNode));
@@ -2946,7 +2945,7 @@ The function processes the internal node event kNmtMnuIntNodeEventNmtCmdSent.
         processing or -1 if it should exit.
 */
 //------------------------------------------------------------------------------
-static INT processNodeEventNmtCmdSent(UINT nodeId_p, tEplNmtState nodeNmtState_p, tEplNmtState nmtState_p,
+static INT processNodeEventNmtCmdSent(UINT nodeId_p, tNmtState nodeNmtState_p, tNmtState nmtState_p,
                                       UINT16 errorCode_p, tEplKernel* pRet_p)
 {
     UINT8               bNmtState;
@@ -2967,7 +2966,7 @@ static INT processNodeEventNmtCmdSent(UINT nodeId_p, tEplNmtState nodeNmtState_p
     if (*pRet_p != kEplSuccessful)
         return -1;
 
-    if (nodeNmtState_p == kEplNmtCsNotActive)
+    if (nodeNmtState_p == kNmtCsNotActive)
     {   // restart processing with IdentRequest
         NMTMNU_SET_FLAGS_TIMERARG_IDENTREQ(pNodeInfo, nodeId_p, timerArg);
     }
@@ -3000,14 +2999,14 @@ The function processes internal node events.
 \return The function returns a tEplKernel error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel processInternalEvent(UINT nodeId_p, tEplNmtState nodeNmtState_p,
+static tEplKernel processInternalEvent(UINT nodeId_p, tNmtState nodeNmtState_p,
                                        UINT16 errorCode_p, tNmtMnuIntNodeEvent nodeEvent_p)
 {
     tEplKernel          ret = kEplSuccessful;
-    tEplNmtState        nmtState;
+    tNmtState           nmtState;
 
     nmtState = nmtu_getNmtState();
-    if (nmtState <= kEplNmtMsNotActive)        // MN is not active
+    if (nmtState <= kNmtMsNotActive)        // MN is not active
         goto Exit;
 
     // call internal node event handler
@@ -3019,13 +3018,13 @@ static tEplKernel processInternalEvent(UINT nodeId_p, tEplNmtState nodeNmtState_
     {   // boot process is not halted
         switch (nmtState)
         {
-            case kEplNmtMsPreOperational1:
+            case kNmtMsPreOperational1:
                 if ((nmtMnuInstance_g.signalSlaveCount == 0) &&
                     (nmtMnuInstance_g.mandatorySlaveCount == 0))
                 {   // all optional CNs scanned once and all mandatory CNs configured successfully
                     nmtMnuInstance_g.flags |= NMTMNU_FLAG_APP_INFORMED;
                     // inform application
-                    ret = nmtMnuInstance_g.pfnCbBootEvent(kEplNmtBootEventBootStep1Finish,
+                    ret = nmtMnuInstance_g.pfnCbBootEvent(kNmtBootEventBootStep1Finish,
                                                           nmtState, EPL_E_NO_ERROR);
                     if (ret != kEplSuccessful)
                     {
@@ -3035,17 +3034,17 @@ static tEplKernel processInternalEvent(UINT nodeId_p, tEplNmtState nodeNmtState_
                         break;
                     }
                     // enter PreOp2
-                    ret = nmtu_postNmtEvent(kEplNmtEventAllMandatoryCNIdent);
+                    ret = nmtu_postNmtEvent(kNmtEventAllMandatoryCNIdent);
                 }
                 break;
 
-            case kEplNmtMsPreOperational2:
+            case kNmtMsPreOperational2:
                 if ((nmtMnuInstance_g.signalSlaveCount == 0) &&
                     (nmtMnuInstance_g.mandatorySlaveCount == 0))
                 {   // all optional CNs checked once for ReadyToOp and all mandatory CNs are ReadyToOp
                     nmtMnuInstance_g.flags |= NMTMNU_FLAG_APP_INFORMED;
                     // inform application
-                    ret = nmtMnuInstance_g.pfnCbBootEvent(kEplNmtBootEventBootStep2Finish,
+                    ret = nmtMnuInstance_g.pfnCbBootEvent(kNmtBootEventBootStep2Finish,
                                                           nmtState, EPL_E_NO_ERROR);
                     if (ret != kEplSuccessful)
                     {
@@ -3055,17 +3054,17 @@ static tEplKernel processInternalEvent(UINT nodeId_p, tEplNmtState nodeNmtState_
                         break;
                     }
                     // enter ReadyToOp
-                    ret = nmtu_postNmtEvent(kEplNmtEventEnterReadyToOperate);
+                    ret = nmtu_postNmtEvent(kNmtEventEnterReadyToOperate);
                 }
                 break;
 
-            case kEplNmtMsReadyToOperate:
+            case kNmtMsReadyToOperate:
                 if ((nmtMnuInstance_g.signalSlaveCount == 0) &&
                     (nmtMnuInstance_g.mandatorySlaveCount == 0))
                 {   // all CNs checked for errorless communication
                     nmtMnuInstance_g.flags |= NMTMNU_FLAG_APP_INFORMED;
                     // inform application
-                    ret = nmtMnuInstance_g.pfnCbBootEvent(kEplNmtBootEventCheckComFinish,
+                    ret = nmtMnuInstance_g.pfnCbBootEvent(kNmtBootEventCheckComFinish,
                                                           nmtState, EPL_E_NO_ERROR);
                     if (ret != kEplSuccessful)
                     {
@@ -3075,17 +3074,17 @@ static tEplKernel processInternalEvent(UINT nodeId_p, tEplNmtState nodeNmtState_
                         break;
                     }
                     // enter Operational
-                    ret = nmtu_postNmtEvent(kEplNmtEventEnterMsOperational);
+                    ret = nmtu_postNmtEvent(kNmtEventEnterMsOperational);
                 }
                 break;
 
-            case kEplNmtMsOperational:
+            case kNmtMsOperational:
                 if ((nmtMnuInstance_g.signalSlaveCount == 0) &&
                     (nmtMnuInstance_g.mandatorySlaveCount == 0))
                 {   // all optional CNs scanned once and all mandatory CNs are OPERATIONAL
                     nmtMnuInstance_g.flags |= NMTMNU_FLAG_APP_INFORMED;
                     // inform application
-                    ret = nmtMnuInstance_g.pfnCbBootEvent(kEplNmtBootEventOperational,
+                    ret = nmtMnuInstance_g.pfnCbBootEvent(kNmtBootEventOperational,
                                                           nmtState, EPL_E_NO_ERROR);
                     if (ret != kEplSuccessful)
                     {
@@ -3124,8 +3123,8 @@ It manipulates the nodeState in the internal node info structure.
 */
 //------------------------------------------------------------------------------
 static tEplKernel checkNmtState(UINT nodeId_p, tNmtMnuNodeInfo* pNodeInfo_p,
-                                tEplNmtState nodeNmtState_p, UINT16 errorCode_p,
-                                tEplNmtState localNmtState_p)
+                                tNmtState nodeNmtState_p, UINT16 errorCode_p,
+                                tNmtState localNmtState_p)
 {
     tEplKernel      ret = kEplSuccessful;
     tEplKernel      retUpdate = kEplSuccessful;
@@ -3133,7 +3132,7 @@ static tEplKernel checkNmtState(UINT nodeId_p, tNmtMnuNodeInfo* pNodeInfo_p,
     UINT8           nodeNmtState;
     UINT8           bExpNmtState;
     UINT8           nmtStatePrev;
-    tEplNmtState    expNmtState;
+    tNmtState       expNmtState;
 
     // compute UINT8 of current NMT state
     nodeNmtState = ((UINT8) nodeNmtState_p & 0xFF);
@@ -3152,20 +3151,20 @@ static tEplKernel checkNmtState(UINT nodeId_p, tNmtMnuNodeInfo* pNodeInfo_p,
         goto Exit;
 
     // compute expected NMT state
-    expNmtState = (tEplNmtState) (bExpNmtState | EPL_NMT_TYPE_CS);
+    expNmtState = (tNmtState) (bExpNmtState | NMT_TYPE_CS);
 
-    if (expNmtState == kEplNmtCsNotActive)
+    if (expNmtState == kNmtCsNotActive)
     {   // ignore the current state, because the CN shall be not active
         ret = kEplReject;
         goto ExitButUpdate;
     }
-    else if ((expNmtState == kEplNmtCsStopped) && (nodeNmtState_p == kEplNmtCsStopped))
+    else if ((expNmtState == kNmtCsStopped) && (nodeNmtState_p == kNmtCsStopped))
     {
         // reset flags ISOCHRON and PREOP2_REACHED
         pNodeInfo_p->flags &= ~(NMTMNU_NODE_FLAG_ISOCHRON
                                  | NMTMNU_NODE_FLAG_PREOP2_REACHED);
     }
-    else if ((expNmtState == kEplNmtCsPreOperational2) && (nodeNmtState_p == kEplNmtCsPreOperational2))
+    else if ((expNmtState == kNmtCsPreOperational2) && (nodeNmtState_p == kNmtCsPreOperational2))
     {   // CN is PreOp2
         if ((pNodeInfo_p->flags & NMTMNU_NODE_FLAG_PREOP2_REACHED) == 0)
         {   // CN switched to PreOp2
@@ -3174,7 +3173,7 @@ static tEplKernel checkNmtState(UINT nodeId_p, tNmtMnuNodeInfo* pNodeInfo_p,
             if (pNodeInfo_p->nodeCfg & EPL_NODEASSIGN_ASYNCONLY_NODE)
             {
                 if ((pNodeInfo_p->nodeState == kNmtMnuNodeStateConfigured) &&
-                    (localNmtState_p >= kEplNmtMsPreOperational2))
+                    (localNmtState_p >= kNmtMsPreOperational2))
                 {
                     ret = nodeBootStep2(nodeId_p, pNodeInfo_p);
                 }
@@ -3187,7 +3186,7 @@ static tEplKernel checkNmtState(UINT nodeId_p, tNmtMnuNodeInfo* pNodeInfo_p,
             }
         }
     }
-    else if ((expNmtState == kEplNmtCsPreOperational2) && (nodeNmtState_p == kEplNmtCsReadyToOperate))
+    else if ((expNmtState == kNmtCsPreOperational2) && (nodeNmtState_p == kNmtCsReadyToOperate))
     {   // CN switched to ReadyToOp
         // delete timer for timeout handling
         ret = EplTimeruDeleteTimer(&pNodeInfo_p->timerHdlLonger);
@@ -3205,13 +3204,13 @@ static tEplKernel checkNmtState(UINT nodeId_p, tNmtMnuNodeInfo* pNodeInfo_p,
         {   // node is a mandatory CN -> decrement counter
             nmtMnuInstance_g.mandatorySlaveCount--;
         }
-        if (localNmtState_p >= kEplNmtMsReadyToOperate)
+        if (localNmtState_p >= kNmtMsReadyToOperate)
         {   // start procedure CheckCommunication for this node
             ret = nodeCheckCom(nodeId_p, pNodeInfo_p);
             if (ret != kEplSuccessful)
                 goto ExitButUpdate;
 
-            if ((localNmtState_p == kEplNmtMsOperational) && (pNodeInfo_p->nodeState == kNmtMnuNodeStateComChecked))
+            if ((localNmtState_p == kNmtMsOperational) && (pNodeInfo_p->nodeState == kNmtMnuNodeStateComChecked))
             {
                 NMTMNU_DBG_POST_TRACE_VALUE(0, nodeId_p,
                                                 (((nodeNmtState_p & 0xFF) << 8) | kNmtCmdStartNode));
@@ -3223,7 +3222,7 @@ static tEplKernel checkNmtState(UINT nodeId_p, tNmtMnuNodeInfo* pNodeInfo_p,
             }
         }
     }
-    else if ((pNodeInfo_p->nodeState == kNmtMnuNodeStateComChecked) && (nodeNmtState_p == kEplNmtCsOperational))
+    else if ((pNodeInfo_p->nodeState == kNmtMnuNodeStateComChecked) && (nodeNmtState_p == kNmtCsOperational))
     {   // CN switched to OPERATIONAL
         pNodeInfo_p->nodeState = kNmtMnuNodeStateOperational;
 
@@ -3260,7 +3259,7 @@ static tEplKernel checkNmtState(UINT nodeId_p, tNmtMnuNodeInfo* pNodeInfo_p,
         BENCHMARK_MOD_07_TOGGLE(7);
 
         // $$$ start ERROR_TREATMENT and inform application
-        ret = nmtMnuInstance_g.pfnCbNodeEvent(nodeId_p, kEplNmtNodeEventError,
+        ret = nmtMnuInstance_g.pfnCbNodeEvent(nodeId_p, kNmtNodeEventError,
                                               nodeNmtState_p, errorCode_p,
                                               (pNodeInfo_p->nodeCfg & EPL_NODEASSIGN_MANDATORY_CN) != 0);
         if (ret != kEplSuccessful)
@@ -3297,7 +3296,7 @@ ExitButUpdate:
             ret =retUpdate;
             goto Exit;
         }
-        retUpdate = nmtMnuInstance_g.pfnCbNodeEvent(nodeId_p, kEplNmtNodeEventNmtState,
+        retUpdate = nmtMnuInstance_g.pfnCbNodeEvent(nodeId_p, kNmtNodeEventNmtState,
                                                     nodeNmtState_p, errorCode_p,
                                                     (pNodeInfo_p->nodeCfg & EPL_NODEASSIGN_MANDATORY_CN) != 0);
         if (retUpdate != kEplSuccessful)

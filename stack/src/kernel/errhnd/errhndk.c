@@ -42,7 +42,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <EplNmt.h>
+#include <nmt.h>
 #include <Benchmark.h>
 #include <EplObd.h>
 #include <kernel/eventk.h>
@@ -104,7 +104,7 @@ static tErrHndkInstance instance_l;
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static tEplKernel postNmtEvent(tEplNmtEvent nmtEvent_p);
+static tEplKernel postNmtEvent(tNmtEvent nmtEvent_p);
 static tEplKernel generateHistoryEntry(UINT16 errorCode_p, tEplNetTime netTime_p);
 static tEplKernel generateHistoryEntryNodeId(UINT16 errorCode_p, tEplNetTime netTime_p, UINT nodeId_p);
 static void       decrementCnCounters(void);
@@ -113,7 +113,7 @@ static tEplKernel handleDllErrors(tEplEvent *pEvent_p);
 
 #ifdef CONFIG_INCLUDE_NMT_MN
 static tEplKernel decrementMnCounters(void);
-static tEplKernel postHeartbeatEvent(UINT nodeId_p, tEplNmtState state_p, UINT16 errorCode_p);
+static tEplKernel postHeartbeatEvent(UINT nodeId_p, tNmtState state_p, UINT16 errorCode_p);
 static tEplKernel generateHistoryEntryWithError(UINT16 errorCode_p, tEplNetTime netTime_p, UINT16 eplError_p);
 #endif
 
@@ -449,7 +449,7 @@ static tEplKernel handleCnLossSoc(tEplEvent *pEvent_p)
 
             BENCHMARK_MOD_02_TOGGLE(7);
 
-            postNmtEvent(kEplNmtEventNmtCycleError);
+            postNmtEvent(kNmtEventNmtCycleError);
         }
         instance_l.dllErrorEvents |= EPL_DLL_ERR_CN_LOSS_SOC;
     }
@@ -500,7 +500,7 @@ static tEplKernel handleCnLossPreq(tEplEvent *pEvent_p)
 
             BENCHMARK_MOD_02_TOGGLE(7);
 
-            postNmtEvent(kEplNmtEventNmtCycleError);
+            postNmtEvent(kNmtEventNmtCycleError);
         }
     }
     errhndkcal_setCnLossPreqCounters(cumulativeCnt, thresholdCnt);
@@ -577,7 +577,7 @@ static tEplKernel handleCnCrc(tEplEvent *pEvent_p)
 
             BENCHMARK_MOD_02_TOGGLE(7);
 
-            postNmtEvent(kEplNmtEventNmtCycleError);
+            postNmtEvent(kNmtEventNmtCycleError);
         }
         instance_l.dllErrorEvents |= EPL_DLL_ERR_CN_CRC;
     }
@@ -617,7 +617,7 @@ static tEplKernel handleInvalidFormat(tEplEvent *pEvent_p)
     BENCHMARK_MOD_02_TOGGLE(7);
 
 #ifdef CONFIG_INCLUDE_NMT_MN
-    if (pErrorHandlerEvent->m_NmtState >= kEplNmtMsNotActive)
+    if (pErrorHandlerEvent->m_NmtState >= kNmtMsNotActive)
     {   // MN is active
         if (pErrorHandlerEvent->m_uiNodeId != 0)
         {
@@ -631,18 +631,18 @@ static tEplKernel handleInvalidFormat(tEplEvent *pEvent_p)
             // inform NmtMnu module about state change, which shall send
             // NMT command ResetNode to this CN
             postHeartbeatEvent(pErrorHandlerEvent->m_uiNodeId,
-                               kEplNmtCsNotActive,
+                               kNmtCsNotActive,
                                EPL_E_DLL_INVALID_FORMAT);
         }
         // $$$ and else should lead to InternComError
     }
     else
     {
-        postNmtEvent(kEplNmtEventInternComError);
+        postNmtEvent(kNmtEventInternComError);
     }
 #else
     // CN is active
-    postNmtEvent(kEplNmtEventInternComError);
+    postNmtEvent(kNmtEventInternComError);
 #endif
 
     return kEplSuccessful;
@@ -687,7 +687,7 @@ static tEplKernel handleMnCrc(tEplEvent *pEvent_p)
                 errhndkcal_setMnCrcCounters(cumulativeCnt, thresholdCnt);
                 return ret;
             }
-            postNmtEvent(kEplNmtEventNmtCycleError);
+            postNmtEvent(kNmtEventNmtCycleError);
         }
         instance_l.dllErrorEvents |= EPL_DLL_ERR_MN_CRC;
     }
@@ -737,7 +737,7 @@ static tEplKernel handleMnCycTimeExceed(tEplEvent *pEvent_p)
                 errhndkcal_setMnCycTimeExceedCounters(thresholdCnt, cumulativeCnt);
                 return ret;
             }
-            postNmtEvent(kEplNmtEventNmtCycleError);
+            postNmtEvent(kNmtEventNmtCycleError);
         }
         else
         {
@@ -821,7 +821,7 @@ static tEplKernel handleMnCnLossPres(tEplEvent *pEvent_p)
 
             // inform NmtMnu module about state change, which shall send
             // NMT command ResetNode to this CN
-            postHeartbeatEvent(pErrorHandlerEvent->m_uiNodeId, kEplNmtCsNotActive,
+            postHeartbeatEvent(pErrorHandlerEvent->m_uiNodeId, kNmtCsNotActive,
                                EPL_E_DLL_LOSS_PRES_TH);
         }
         else
@@ -902,16 +902,16 @@ The function is used to post a heartbeat event to the NMT.
 \return Returns kEplSuccessful or error code
 */
 //------------------------------------------------------------------------------
-static tEplKernel postHeartbeatEvent(UINT nodeId_p, tEplNmtState state_p,
+static tEplKernel postHeartbeatEvent(UINT nodeId_p, tNmtState state_p,
                                     UINT16 errorCode_p)
 {
     tEplKernel              ret;
-    tEplHeartbeatEvent      heartbeatEvent;
+    tHeartbeatEvent         heartbeatEvent;
     tEplEvent               event;
 
-    heartbeatEvent.m_uiNodeId = nodeId_p;
-    heartbeatEvent.m_NmtState = state_p;
-    heartbeatEvent.m_wErrorCode = errorCode_p;
+    heartbeatEvent.nodeId = nodeId_p;
+    heartbeatEvent.nmtState = state_p;
+    heartbeatEvent.errorCode = errorCode_p;
     event.m_EventSink = kEplEventSinkNmtMnu;
     event.m_EventType = kEplEventTypeHeartbeat;
     event.m_uiSize = sizeof (heartbeatEvent);
@@ -1054,10 +1054,10 @@ The function posts a NMT event to the NMT.
 \return Returns kEplSuccessful or error code
 */
 //------------------------------------------------------------------------------
-static tEplKernel postNmtEvent(tEplNmtEvent nmtEvent_p)
+static tEplKernel postNmtEvent(tNmtEvent nmtEvent_p)
 {
     tEplKernel                  ret;
-    tEplNmtEvent                nmtEvent;
+    tNmtEvent                   nmtEvent;
     tEplEvent                   event;
 
     nmtEvent = nmtEvent_p;

@@ -106,7 +106,7 @@ struct _tEplDllkNodeInfo
     BYTE                        m_bSoaFlag1;
     BOOL                        m_fSoftDelete;          // delete node after error and ignore error
     WORD                        m_wPreqPayloadLimit;    // object 0x1F8B: NMT_MNPReqPayloadLimitList_AU16
-    tEplNmtState                m_NmtState;
+    tNmtState                   m_NmtState;
     unsigned long               m_ulDllErrorEvents;
     DWORD                       m_dwPresTimeoutNs;        // object 0x1F92: NMT_MNCNPResTimeout_AU32
     struct _tEdrvTxBuffer*      m_pPreqTxBuffer;

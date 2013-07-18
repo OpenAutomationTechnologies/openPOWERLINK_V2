@@ -41,7 +41,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include "EplNmt.h"
+#include "nmt.h"
 #include "EplErrDef.h"
 
 //------------------------------------------------------------------------------
@@ -62,7 +62,7 @@ tEplKernel SysComp_LcdSetLine(int LineNum_p);
 void SysComp_LcdClear(void);
 void SysComp_LcdTest(void);
 
-void SysComp_LcdPrintState(tEplNmtState NmtState_p);
+void SysComp_LcdPrintState(tNmtState NmtState_p);
 void SysComp_LcdPrintNodeInfo (WORD wNodeId_p);
 
 #endif /* _INC_CMP_LCD_H_ */

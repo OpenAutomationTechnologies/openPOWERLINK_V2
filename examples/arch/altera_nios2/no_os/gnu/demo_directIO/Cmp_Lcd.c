@@ -195,23 +195,23 @@ Write the current NMT state to line two of the LCD display
 \param               NmtState_p                  IN: current state machine value
 */
 //------------------------------------------------------------------------------
-void SysComp_LcdPrintState(tEplNmtState NmtState_p)
+void SysComp_LcdPrintState(tNmtState NmtState_p)
 {
     LCD_Line2();
     switch (NmtState_p)
     {
-        case kEplNmtGsOff               : LCD_Show_Text(aStrNmtState_l[1]); break;
-        case kEplNmtGsInitialising      : LCD_Show_Text(aStrNmtState_l[2]); break;
-        case kEplNmtGsResetApplication  : LCD_Show_Text(aStrNmtState_l[2]); break;
-        case kEplNmtGsResetCommunication: LCD_Show_Text(aStrNmtState_l[2]); break;
-        case kEplNmtGsResetConfiguration: LCD_Show_Text(aStrNmtState_l[2]); break;
-        case kEplNmtCsNotActive         : LCD_Show_Text(aStrNmtState_l[3]); break;
-        case kEplNmtCsPreOperational1   : LCD_Show_Text(aStrNmtState_l[5]); break;
-        case kEplNmtCsStopped           : LCD_Show_Text(aStrNmtState_l[9]); break;
-        case kEplNmtCsPreOperational2   : LCD_Show_Text(aStrNmtState_l[6]); break;
-        case kEplNmtCsReadyToOperate    : LCD_Show_Text(aStrNmtState_l[7]); break;
-        case kEplNmtCsOperational       : LCD_Show_Text(aStrNmtState_l[8]); break;
-        case kEplNmtCsBasicEthernet     : LCD_Show_Text(aStrNmtState_l[4]); break;
+        case kNmtGsOff               : LCD_Show_Text(aStrNmtState_l[1]); break;
+        case kNmtGsInitialising      : LCD_Show_Text(aStrNmtState_l[2]); break;
+        case kNmtGsResetApplication  : LCD_Show_Text(aStrNmtState_l[2]); break;
+        case kNmtGsResetCommunication: LCD_Show_Text(aStrNmtState_l[2]); break;
+        case kNmtGsResetConfiguration: LCD_Show_Text(aStrNmtState_l[2]); break;
+        case kNmtCsNotActive         : LCD_Show_Text(aStrNmtState_l[3]); break;
+        case kNmtCsPreOperational1   : LCD_Show_Text(aStrNmtState_l[5]); break;
+        case kNmtCsStopped           : LCD_Show_Text(aStrNmtState_l[9]); break;
+        case kNmtCsPreOperational2   : LCD_Show_Text(aStrNmtState_l[6]); break;
+        case kNmtCsReadyToOperate    : LCD_Show_Text(aStrNmtState_l[7]); break;
+        case kNmtCsOperational       : LCD_Show_Text(aStrNmtState_l[8]); break;
+        case kNmtCsBasicEthernet     : LCD_Show_Text(aStrNmtState_l[4]); break;
         default:
         LCD_Show_Text(aStrNmtState_l[0]);
         break;
