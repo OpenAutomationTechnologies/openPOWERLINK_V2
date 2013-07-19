@@ -246,7 +246,7 @@ tEplKernel dllkcal_process(tEplEvent* pEvent_p)
     {
         case kEplEventTypeDllkServFilter:
             pServFilter = (tDllCalAsndServiceIdFilter*) pEvent_p->m_pArg;
-            ret = EplDllkSetAsndServiceIdFilter(pServFilter->serviceId,
+            ret = dllk_setAsndServiceIdFilter(pServFilter->serviceId,
                                                 pServFilter->filter);
             break;
 
@@ -261,17 +261,17 @@ tEplKernel dllkcal_process(tEplEvent* pEvent_p)
 #if EPL_NMT_MAX_NODE_ID > 0
         case kEplEventTypeDllkConfigNode:
             pNodeInfo = (tEplDllNodeInfo*) pEvent_p->m_pArg;
-            ret = EplDllkConfigNode(pNodeInfo);
+            ret = dllk_configNode(pNodeInfo);
             break;
 
         case kEplEventTypeDllkAddNode:
             pNodeOpParam = (tEplDllNodeOpParam*) pEvent_p->m_pArg;
-            ret = EplDllkAddNode(pNodeOpParam);
+            ret = dllk_addNode(pNodeOpParam);
             break;
 
         case kEplEventTypeDllkDelNode:
             pNodeOpParam = (tEplDllNodeOpParam*) pEvent_p->m_pArg;
-            ret = EplDllkDeleteNode(pNodeOpParam);
+            ret = dllk_deleteNode(pNodeOpParam);
             break;
 #endif // EPL_NMT_MAX_NODE_ID > 0
 
@@ -281,7 +281,7 @@ tEplKernel dllkcal_process(tEplEvent* pEvent_p)
             {
                 pIdentParam->m_uiSizeOfStruct = pEvent_p->m_uiSize;
             }
-            ret = EplDllkSetIdentity(pIdentParam);
+            ret = dllk_setIdentity(pIdentParam);
             break;
 
         case kEplEventTypeDllkConfig:
@@ -290,7 +290,7 @@ tEplKernel dllkcal_process(tEplEvent* pEvent_p)
             {
                 pConfigParam->m_uiSizeOfStruct = pEvent_p->m_uiSize;
             }
-            ret = EplDllkConfig(pConfigParam);
+            ret = dllk_config(pConfigParam);
             break;
 
         default:
@@ -632,7 +632,7 @@ tEplKernel dllkcal_issueRequest(tEplDllReqServiceId service_p, UINT nodeId_p,
 
     if (soaFlag1_p != 0xFF)
     {
-        ret = EplDllkSetFlag1OfNode(nodeId_p, soaFlag1_p);
+        ret = dllk_setFlag1OfNode(nodeId_p, soaFlag1_p);
         if (ret != kEplSuccessful)
         {
             goto Exit;
@@ -1045,7 +1045,7 @@ static BOOL getMnSyncRequest(tEplDllReqServiceId* pReqServiceId_p, UINT* pNodeId
             {
                 nodeOpParam.m_OpNodeType = kEplDllNodeOpTypeIsochronous;
                 nodeOpParam.m_uiNodeId = syncRequest.m_uiNodeId;
-                ret = EplDllkAddNode(&nodeOpParam);
+                ret = dllk_addNode(&nodeOpParam);
                 if (ret != kEplSuccessful)
                 {
                     return TRUE;
@@ -1055,7 +1055,7 @@ static BOOL getMnSyncRequest(tEplDllReqServiceId* pReqServiceId_p, UINT* pNodeId
             {
                 nodeOpParam.m_OpNodeType = kEplDllNodeOpTypeIsochronous;
                 nodeOpParam.m_uiNodeId = syncRequest.m_uiNodeId;
-                ret = EplDllkDeleteNode(&nodeOpParam);
+                ret = dllk_deleteNode(&nodeOpParam);
                 if (ret != kEplSuccessful)
                 {
                     return TRUE;
@@ -1075,7 +1075,7 @@ static BOOL getMnSyncRequest(tEplDllReqServiceId* pReqServiceId_p, UINT* pNodeId
 
         if ((syncRequest.m_dwSyncControl & EPL_SYNC_DEST_MAC_ADDRESS_VALID) != 0)
         {
-            ret = EplDllkGetCnMacAddress(syncRequest.m_uiNodeId,
+            ret = dllk_getCnMacAddress(syncRequest.m_uiNodeId,
                             &pSoaPayload_p->m_SyncRequest.m_be_abDestMacAddress[0]);
             if (ret != kEplSuccessful)
             {

@@ -353,137 +353,137 @@ TGT_DLLK_DECLARE_CRITICAL_SECTION;
 //---------------------------------------------------------------------------
 
 // process the create event
-static tEplKernel EplDllkProcessCreate(tNmtState NmtState_p);
+static tEplKernel processCreate(tNmtState NmtState_p);
 
 // process the destroy event
-static tEplKernel EplDllkProcessDestroy(tNmtState OldNmtState_p);
+static tEplKernel processDestroy(tNmtState OldNmtState_p);
 
 // process NMT state changes
-static tEplKernel EplDllkProcessNmtStateChange(tNmtState NewNmtState_p, tNmtState OldNmtState_p);
+static tEplKernel processNmtStateChange(tNmtState NewNmtState_p, tNmtState OldNmtState_p);
 
 // process the NMT event
-static tEplKernel EplDllkProcessNmtEvent(tEplEvent * pEvent_p);
+static tEplKernel processNmtEvent(tEplEvent * pEvent_p);
 
 // process the CycleFinish event
-static tEplKernel EplDllkProcessCycleFinish(tNmtState NmtState_p) SECTION_DLLK_PROCESS_CYCFIN;
+static tEplKernel processCycleFinish(tNmtState NmtState_p) SECTION_DLLK_PROCESS_CYCFIN;
 
 // process the Sync event
-static tEplKernel EplDllkProcessSync(tNmtState NmtState_p) SECTION_DLLK_PROCESS_SYNC;
+static tEplKernel processSync(tNmtState NmtState_p) SECTION_DLLK_PROCESS_SYNC;
 
 // process the FillTx event
-static tEplKernel EplDllkProcessFillTx(tEplDllAsyncReqPriority AsyncReqPriority_p, tNmtState NmtState_p);
+static tEplKernel processFillTx(tEplDllAsyncReqPriority AsyncReqPriority_p, tNmtState NmtState_p);
 
 // change DLL state on event
-static tEplKernel EplDllkChangeState(tNmtEvent NmtEvent_p, tNmtState NmtState_p);
+static tEplKernel changeState(tNmtEvent NmtEvent_p, tNmtState NmtState_p);
 
 // called from EdrvInterruptHandler()
-static tEdrvReleaseRxBuffer EplDllkCbFrameReceived(tEdrvRxBuffer * pRxBuffer_p) SECTION_DLLK_FRAME_RCVD_CB;
+static tEdrvReleaseRxBuffer cbFrameReceived(tEdrvRxBuffer * pRxBuffer_p) SECTION_DLLK_FRAME_RCVD_CB;
 
-static tEplKernel EplDllkProcessReceivedPreq(tEplFrameInfo* pFrameInfo_p, tNmtState NmtState_p, tEdrvReleaseRxBuffer* pReleaseRxBuffer_p);
-static tEplKernel EplDllkProcessReceivedPres(tEplFrameInfo* pFrameInfo_p, tNmtState NmtState_p, tNmtEvent* pNmtEvent_p, tEdrvReleaseRxBuffer* pReleaseRxBuffer_p);
-static tEplKernel EplDllkProcessReceivedSoc(tEdrvRxBuffer* pRxBuffer_p, tNmtState NmtState_p);
-static tEplKernel EplDllkProcessReceivedSoa(tEdrvRxBuffer* pRxBuffer_p, tNmtState NmtState_p);
-static tEplKernel EplDllkProcessReceivedAsnd(tEplFrameInfo* pFrameInfo_p, tEdrvRxBuffer* pRxBuffer_p, tNmtState NmtState_p);
+static tEplKernel processReceivedPreq(tEplFrameInfo* pFrameInfo_p, tNmtState NmtState_p, tEdrvReleaseRxBuffer* pReleaseRxBuffer_p);
+static tEplKernel processReceivedPres(tEplFrameInfo* pFrameInfo_p, tNmtState NmtState_p, tNmtEvent* pNmtEvent_p, tEdrvReleaseRxBuffer* pReleaseRxBuffer_p);
+static tEplKernel processReceivedSoc(tEdrvRxBuffer* pRxBuffer_p, tNmtState NmtState_p);
+static tEplKernel processReceivedSoa(tEdrvRxBuffer* pRxBuffer_p, tNmtState NmtState_p);
+static tEplKernel processReceivedAsnd(tEplFrameInfo* pFrameInfo_p, tEdrvRxBuffer* pRxBuffer_p, tNmtState NmtState_p);
 
 // called from EdrvInterruptHandler()
-static void EplDllkCbTransmittedNmtReq(tEdrvTxBuffer * pTxBuffer_p);
-static void EplDllkCbTransmittedNonEpl(tEdrvTxBuffer * pTxBuffer_p);
+static void cbTransmittedNmtReq(tEdrvTxBuffer * pTxBuffer_p);
+static void cbTransmittedNonEpl(tEdrvTxBuffer * pTxBuffer_p);
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
-static void EplDllkCbTransmittedSoc(tEdrvTxBuffer * pTxBuffer_p);
-static void EplDllkCbTransmittedSoa(tEdrvTxBuffer * pTxBuffer_p);
+static void cbTransmittedSoc(tEdrvTxBuffer * pTxBuffer_p);
+static void cbTransmittedSoa(tEdrvTxBuffer * pTxBuffer_p);
 #if EPL_DLL_DISABLE_EDRV_CYCLIC == FALSE
-static tEplKernel EplDllkCbCyclicError(tEplKernel ErrorCode_p, tEdrvTxBuffer * pTxBuffer_p);
-static tEplKernel EplDllkCbMnSyncHandler(void);
+static tEplKernel cbCyclicError(tEplKernel ErrorCode_p, tEdrvTxBuffer * pTxBuffer_p);
+static tEplKernel cbMnSyncHandler(void);
 #else
-static void EplDllkCbTransmittedPreq(tEdrvTxBuffer * pTxBuffer_p);
+static void cbTransmittedPreq(tEdrvTxBuffer * pTxBuffer_p);
 #endif
 #endif
 
 // post event to DLL itself
-static tEplKernel EplDllkPostEvent(tEplEventType EventType_p);
+static tEplKernel postEvent(tEplEventType EventType_p);
 
 // forward RPDO to callback function
-static tEplKernel EplDllkForwardRpdo(tEplFrameInfo * pFrameInfo_p);
+static tEplKernel forwardRpdo(tEplFrameInfo * pFrameInfo_p);
 
 // forward TPDO to callback function
-static tEplKernel EplDllkProcessTpdo(tEplFrameInfo * pFrameInfo_p, BOOL fReadyFlag_p);
+static tEplKernel processTpdo(tEplFrameInfo * pFrameInfo_p, BOOL fReadyFlag_p);
 
 // update IdentRes frame
-static tEplKernel EplDllkUpdateFrameIdentRes(tEdrvTxBuffer* pTxBuffer_p, tNmtState NmtState_p);
+static tEplKernel updateFrameIdentRes(tEdrvTxBuffer* pTxBuffer_p, tNmtState NmtState_p);
 
 // update StatusRes frame
-static tEplKernel EplDllkUpdateFrameStatusRes(tEdrvTxBuffer* pTxBuffer_p, tNmtState NmtState_p);
+static tEplKernel updateFrameStatusRes(tEdrvTxBuffer* pTxBuffer_p, tNmtState NmtState_p);
 
 // update PRes frame
-static tEplKernel EplDllkUpdateFramePres(tEdrvTxBuffer* pTxBuffer_p, tNmtState NmtState_p);
+static tEplKernel updateFramePres(tEdrvTxBuffer* pTxBuffer_p, tNmtState NmtState_p);
 
 // creates the buffer for a Tx frame and registers it to the ethernet driver
-static tEplKernel EplDllkCreateTxFrame(unsigned int * puiHandle_p,
+static tEplKernel createTxFrame(unsigned int * puiHandle_p,
                                 unsigned int * puiFrameSize_p,
                                 tEplMsgType MsgType_p,
                                 tEplDllAsndServiceId ServiceId_p);
 
-static tEplKernel EplDllkDeleteTxFrame(unsigned int uiHandle_p);
+static tEplKernel deleteTxFrame(unsigned int uiHandle_p);
 
 // check frame and set missing information
-static tEplKernel EplDllkCheckFrame(tEplFrame * pFrame_p, unsigned int uiFrameSize_p);
+static tEplKernel checkFrame(tEplFrame * pFrame_p, unsigned int uiFrameSize_p);
 
 // called by high resolution timer module to monitor EPL cycle as CN
 #if EPL_TIMER_USE_HIGHRES != FALSE
-static tEplKernel PUBLIC EplDllkCbCnTimer(tEplTimerEventArg* pEventArg_p);
+static tEplKernel PUBLIC cbCnTimer(tEplTimerEventArg* pEventArg_p);
 #endif
 
 #if (EPL_DLL_PROCESS_SYNC == EPL_DLL_PROCESS_SYNC_ON_TIMER)
-static tEplKernel PUBLIC EplDllkCbCnTimerSync(void);
+static tEplKernel PUBLIC cbCnTimerSync(void);
 
-static tEplKernel PUBLIC EplDllkCbCnLossOfSync(void);
+static tEplKernel PUBLIC cbCnLossOfSync(void);
 #endif
 
 
 #if EPL_NMT_MAX_NODE_ID > 0
 
 // MN: returns internal node info structure
-static tEplDllkNodeInfo* EplDllkGetNodeInfo(unsigned int uiNodeId_p);
+static tEplDllkNodeInfo* getNodeInfo(unsigned int uiNodeId_p);
 
-static tEplKernel EplDllkAddNodeFilter(tEplDllkNodeInfo* pIntNodeInfo_p, tEplDllNodeOpType NodeOpType_p, BOOL fUpdateEdrv_p);
+static tEplKernel addNodeFilter(tEplDllkNodeInfo* pIntNodeInfo_p, tEplDllNodeOpType NodeOpType_p, BOOL fUpdateEdrv_p);
 
-static tEplKernel EplDllkDeleteNodeFilter(tEplDllkNodeInfo* pIntNodeInfo_p, tEplDllNodeOpType NodeOpType_p, BOOL fUpdateEdrv_p);
+static tEplKernel deleteNodeFilter(tEplDllkNodeInfo* pIntNodeInfo_p, tEplDllNodeOpType NodeOpType_p, BOOL fUpdateEdrv_p);
 
 #endif
 
 
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
 
-static tEplKernel EplDllkAddNodeIsochronous(tEplDllkNodeInfo* pIntNodeInfo_p);
+static tEplKernel addNodeIsochronous(tEplDllkNodeInfo* pIntNodeInfo_p);
 
-static tEplKernel EplDllkDeleteNodeIsochronous(tEplDllkNodeInfo* pIntNodeInfo_p);
+static tEplKernel deleteNodeIsochronous(tEplDllkNodeInfo* pIntNodeInfo_p);
 
-static tEplKernel EplDllkIssueLossOfPres(unsigned int uiNodeId_p);
+static tEplKernel issueLossOfPres(unsigned int uiNodeId_p);
 
 // process StartReducedCycle event
-static tEplKernel EplDllkProcessStartReducedCycle(tEplEvent * pEvent_p);
+static tEplKernel processStartReducedCycle(tEplEvent * pEvent_p);
 
 // update SoA frame
-static tEplKernel EplDllkUpdateFrameSoa(tEdrvTxBuffer* pTxBuffer_p, tNmtState NmtState_p, BOOL fEnableInvitation_p, BYTE bCurReq_p);
+static tEplKernel updateFrameSoa(tEdrvTxBuffer* pTxBuffer_p, tNmtState NmtState_p, BOOL fEnableInvitation_p, BYTE bCurReq_p);
 
 // transmit SoA
-static tEplKernel EplDllkMnSendSoa(tNmtState NmtState_p,
+static tEplKernel mnSendSoa(tNmtState NmtState_p,
                                    tEplDllState* pDllStateProposed_p,
                                    BOOL fEnableInvitation_p);
 
 #if EPL_DLL_DISABLE_EDRV_CYCLIC != FALSE
-static tEplKernel EplDllkMnSendSoc(void);
+static tEplKernel mnSendSoc(void);
 
-static tEplKernel EplDllkMnSendPreq(tNmtState NmtState_p,
+static tEplKernel mnSendPreq(tNmtState NmtState_p,
                                     tEplDllState* pDllStateProposed_p);
 #endif
 
-static tEplKernel EplDllkAsyncFrameNotReceived(tEplDllReqServiceId ReqServiceId_p, unsigned int uiNodeId_p);
+static tEplKernel asyncFrameNotReceived(tEplDllReqServiceId ReqServiceId_p, unsigned int uiNodeId_p);
 
-static tEplKernel PUBLIC EplDllkCbMnTimerCycle(tEplTimerEventArg* pEventArg_p);
+static tEplKernel PUBLIC cbMnTimerCycle(tEplTimerEventArg* pEventArg_p);
 
 #if EPL_DLL_DISABLE_EDRV_CYCLIC != FALSE
-static tEplKernel PUBLIC EplDllkCbMnTimerResponse(tEplTimerEventArg* pEventArg_p);
+static tEplKernel PUBLIC cbMnTimerResponse(tEplTimerEventArg* pEventArg_p);
 #endif
 
 #endif
@@ -491,11 +491,11 @@ static tEplKernel PUBLIC EplDllkCbMnTimerResponse(tEplTimerEventArg* pEventArg_p
 
 #if EPL_DLL_PRES_CHAINING_CN != FALSE
 
-static tEplKernel EplDllkPResChainingEnable (void);
-static tEplKernel EplDllkPResChainingDisable (void);
+static tEplKernel pResChainingEnable (void);
+static tEplKernel pResChainingDisable (void);
 
 #if (EPL_DLL_PROCESS_SYNC == EPL_DLL_PROCESS_SYNC_ON_TIMER)
-static tEplKernel PUBLIC EplDllkCbCnPResFallBackTimeout(void);
+static tEplKernel PUBLIC cbCnPResFallBackTimeout(void);
 #endif
 
 #endif
@@ -523,7 +523,7 @@ static tEplKernel controlPdokcalSync(BOOL fEnable_p);
 //
 //---------------------------------------------------------------------------
 
-tEplKernel EplDllkAddInstance(tEplDllkInitParam * pInitParam_p)
+tEplKernel dllk_addInstance(tEplDllkInitParam * pInitParam_p)
 {
 tEplKernel      Ret = kEplSuccessful;
 unsigned int    uiIndex;
@@ -547,20 +547,20 @@ tEdrvInitParam  EdrvInitParam;
         goto Exit;
     }
 
-    Ret = EplTimerSynckRegSyncHandler(EplDllkCbCnTimerSync);
+    Ret = EplTimerSynckRegSyncHandler(cbCnTimerSync);
     if (Ret != kEplSuccessful)
     {
         goto Exit;
     }
 
-    Ret = EplTimerSynckRegLossOfSyncHandler(EplDllkCbCnLossOfSync);
+    Ret = EplTimerSynckRegLossOfSyncHandler(cbCnLossOfSync);
     if (Ret != kEplSuccessful)
     {
         goto Exit;
     }
 
 #if EPL_DLL_PRES_CHAINING_CN != FALSE
-    Ret = EplTimerSynckRegLossOfSyncHandler2(EplDllkCbCnPResFallBackTimeout);
+    Ret = EplTimerSynckRegLossOfSyncHandler2(cbCnPResFallBackTimeout);
     if (Ret != kEplSuccessful)
     {
         goto Exit;
@@ -596,7 +596,7 @@ tEdrvInitParam  EdrvInitParam;
     // initialize Edrv
     EPL_MEMCPY(EdrvInitParam.m_abMyMacAddr, pInitParam_p->m_be_abLocalMac, 6);
     EdrvInitParam.m_HwParam = pInitParam_p->m_HwParam;
-    EdrvInitParam.m_pfnRxHandler = EplDllkCbFrameReceived;
+    EdrvInitParam.m_pfnRxHandler = cbFrameReceived;
 //    EdrvInitParam.m_pfnTxHandler = EplDllkCbFrameTransmitted;
     Ret = EdrvInit(&EdrvInitParam);
     if (Ret != kEplSuccessful)
@@ -623,7 +623,7 @@ tEdrvInitParam  EdrvInitParam;
         goto Exit;
     }
 
-    Ret = EdrvCyclicRegErrorHandler(EplDllkCbCyclicError);
+    Ret = EdrvCyclicRegErrorHandler(cbCyclicError);
     if (Ret != kEplSuccessful)
     {
         goto Exit;
@@ -656,7 +656,7 @@ Exit:
 //
 //---------------------------------------------------------------------------
 
-tEplKernel EplDllkDelInstance(void)
+tEplKernel dllk_delInstance(void)
 {
 tEplKernel      Ret = kEplSuccessful;
 
@@ -702,7 +702,7 @@ tEplKernel      Ret = kEplSuccessful;
 //
 //---------------------------------------------------------------------------
 
-tEplKernel EplDllkProcess(tEplEvent * pEvent_p)
+tEplKernel dllk_process(tEplEvent * pEvent_p)
 {
 tEplKernel                  Ret = kEplSuccessful;
 tEventNmtStateChange*       pNmtStateChange;
@@ -719,14 +719,14 @@ tNmtState       NmtState;
 
             pNmtStateChange = (tEventNmtStateChange*) pEvent_p->m_pArg;
 
-            Ret = EplDllkProcessNmtStateChange(pNmtStateChange->newNmtState, pNmtStateChange->oldNmtState);
+            Ret = processNmtStateChange(pNmtStateChange->newNmtState, pNmtStateChange->oldNmtState);
             break;
         }
 
         case kEplEventTypeNmtEvent:
         {
 
-            Ret = EplDllkProcessNmtEvent(pEvent_p);
+            Ret = processNmtEvent(pEvent_p);
 
             break;
         }
@@ -734,7 +734,7 @@ tNmtState       NmtState;
         case kEplEventTypeDllkFillTx:
         {
 
-            Ret = EplDllkProcessFillTx(*((tEplDllAsyncReqPriority*) pEvent_p->m_pArg), EplDllkInstance_g.m_NmtState);
+            Ret = processFillTx(*((tEplDllAsyncReqPriority*) pEvent_p->m_pArg), EplDllkInstance_g.m_NmtState);
 
             break;
         }
@@ -752,7 +752,7 @@ tNmtState       NmtState;
         case kEplEventTypeDllkCycleFinish:
         {
 
-            Ret = EplDllkProcessCycleFinish(EplDllkInstance_g.m_NmtState);
+            Ret = processCycleFinish(EplDllkInstance_g.m_NmtState);
 
             break;
         }
@@ -760,7 +760,7 @@ tNmtState       NmtState;
         case kEplEventTypeSync:
         {
 
-            Ret = EplDllkProcessSync(EplDllkInstance_g.m_NmtState);
+            Ret = processSync(EplDllkInstance_g.m_NmtState);
 
             break;
         }
@@ -769,7 +769,7 @@ tNmtState       NmtState;
         case kEplEventTypeDllkStartReducedCycle:
         {
 
-            Ret = EplDllkProcessStartReducedCycle(pEvent_p);
+            Ret = processStartReducedCycle(pEvent_p);
 
             break;
         }
@@ -838,7 +838,7 @@ tNmtState       NmtState;
 //
 //---------------------------------------------------------------------------
 
-tEplKernel EplDllkConfig(tEplDllConfigParam * pDllConfigParam_p)
+tEplKernel dllk_config(tEplDllConfigParam * pDllConfigParam_p)
 {
 tEplKernel      Ret = kEplSuccessful;
 tNmtState       NmtState;
@@ -904,7 +904,7 @@ tNmtState       NmtState;
 //
 //---------------------------------------------------------------------------
 
-tEplKernel EplDllkSetIdentity(tEplDllIdentParam * pDllIdentParam_p)
+tEplKernel dllk_setIdentity(tEplDllIdentParam * pDllIdentParam_p)
 {
 tEplKernel      Ret = kEplSuccessful;
 
@@ -935,7 +935,7 @@ tEplKernel      Ret = kEplSuccessful;
 //
 //---------------------------------------------------------------------------
 
-tEplKernel EplDllkRegAsyncHandler(tEplDllkCbAsync pfnDllkCbAsync_p)
+tEplKernel dllk_regAsyncHandler(tEplDllkCbAsync pfnDllkCbAsync_p)
 {
 tEplKernel  Ret = kEplSuccessful;
 
@@ -967,7 +967,7 @@ tEplKernel  Ret = kEplSuccessful;
 //
 //---------------------------------------------------------------------------
 
-tEplKernel EplDllkDeregAsyncHandler(tEplDllkCbAsync pfnDllkCbAsync_p)
+tEplKernel dllk_deregAsyncHandler(tEplDllkCbAsync pfnDllkCbAsync_p)
 {
 tEplKernel  Ret = kEplSuccessful;
 
@@ -1001,7 +1001,7 @@ tEplKernel  Ret = kEplSuccessful;
 //
 //---------------------------------------------------------------------------
 
-tEplSyncCb EplDllkRegSyncHandler(tEplSyncCb pfnCbSync_p)
+tEplSyncCb dllk_regSyncHandler(tEplSyncCb pfnCbSync_p)
 {
 tEplSyncCb  pfnCbOld;
 
@@ -1028,7 +1028,7 @@ tEplSyncCb  pfnCbOld;
 //
 //---------------------------------------------------------------------------
 
-tEplKernel EplDllkRegRpdoHandler(tEplDllkCbProcessRpdo pfnDllkCbProcessRpdo_p)
+tEplKernel dllk_regRpdoHandler(tEplDllkCbProcessRpdo pfnDllkCbProcessRpdo_p)
 {
 tEplKernel  Ret = kEplSuccessful;
 
@@ -1054,7 +1054,7 @@ tEplKernel  Ret = kEplSuccessful;
 //
 //---------------------------------------------------------------------------
 
-tEplKernel EplDllkRegTpdoHandler(tEplDllkCbProcessTpdo pfnDllkCbProcessTpdo_p)
+tEplKernel dllk_regTpdoHandler(tEplDllkCbProcessTpdo pfnDllkCbProcessTpdo_p)
 {
 tEplKernel  Ret = kEplSuccessful;
 
@@ -1082,7 +1082,7 @@ tEplKernel  Ret = kEplSuccessful;
 //
 //---------------------------------------------------------------------------
 
-tEplKernel EplDllkSetAsndServiceIdFilter(tEplDllAsndServiceId ServiceId_p, tEplDllAsndFilter Filter_p)
+tEplKernel dllk_setAsndServiceIdFilter(tEplDllAsndServiceId ServiceId_p, tEplDllAsndFilter Filter_p)
 {
 tEplKernel  Ret = kEplSuccessful;
 
@@ -1115,7 +1115,7 @@ tEplKernel  Ret = kEplSuccessful;
 //
 //---------------------------------------------------------------------------
 #if EPL_DLL_DISABLE_DEFERRED_RXFRAME_RELEASE == FALSE
-tEplKernel EplDllkReleaseRxFrame(tEplFrame* pFrame_p, unsigned int uiFrameSize_p)
+tEplKernel dllk_releaseRxFrame(tEplFrame* pFrame_p, unsigned int uiFrameSize_p)
 {
 tEplKernel      Ret;
 tEdrvRxBuffer   RxBuffer;
@@ -1147,7 +1147,7 @@ tEdrvRxBuffer   RxBuffer;
 //
 //---------------------------------------------------------------------------
 
-tEplKernel EplDllkConfigNode(tEplDllNodeInfo * pNodeInfo_p)
+tEplKernel dllk_configNode(tEplDllNodeInfo * pNodeInfo_p)
 {
 tEplKernel          Ret = kEplSuccessful;
 tEplDllkNodeInfo*   pIntNodeInfo;
@@ -1162,7 +1162,7 @@ tNmtState           NmtState;
         goto Exit;
     }
 
-    pIntNodeInfo = EplDllkGetNodeInfo(pNodeInfo_p->m_uiNodeId);
+    pIntNodeInfo = getNodeInfo(pNodeInfo_p->m_uiNodeId);
     if (pIntNodeInfo == NULL)
     {   // no node info structure available
         Ret = kEplDllNoNodeInfo;
@@ -1217,7 +1217,7 @@ Exit:
 //
 //---------------------------------------------------------------------------
 
-tEplKernel EplDllkAddNode(tEplDllNodeOpParam* pNodeOpParam_p)
+tEplKernel dllk_addNode(tEplDllNodeOpParam* pNodeOpParam_p)
 {
 tEplKernel          Ret = kEplSuccessful;
 tEplDllkNodeInfo*   pIntNodeInfo;
@@ -1225,7 +1225,7 @@ tNmtState           NmtState;
 
     NmtState = EplDllkInstance_g.m_NmtState;
 
-    pIntNodeInfo = EplDllkGetNodeInfo(pNodeOpParam_p->m_uiNodeId);
+    pIntNodeInfo = getNodeInfo(pNodeOpParam_p->m_uiNodeId);
     if (pIntNodeInfo == NULL)
     {   // no node info structure available
         Ret = kEplDllNoNodeInfo;
@@ -1243,7 +1243,7 @@ tNmtState           NmtState;
         {
             if (NmtState >= kNmtMsNotActive)
             {
-                Ret = EplDllkAddNodeIsochronous(pIntNodeInfo);
+                Ret = addNodeIsochronous(pIntNodeInfo);
             }
             else
             {
@@ -1263,7 +1263,7 @@ tNmtState           NmtState;
             {
                 fUpdateEdrv = TRUE;
             }
-            Ret = EplDllkAddNodeFilter(pIntNodeInfo, pNodeOpParam_p->m_OpNodeType, fUpdateEdrv);
+            Ret = addNodeFilter(pIntNodeInfo, pNodeOpParam_p->m_OpNodeType, fUpdateEdrv);
             break;
         }
 
@@ -1294,7 +1294,7 @@ Exit:
 //
 //---------------------------------------------------------------------------
 
-tEplKernel EplDllkDeleteNode(tEplDllNodeOpParam* pNodeOpParam_p)
+tEplKernel dllk_deleteNode(tEplDllNodeOpParam* pNodeOpParam_p)
 {
 tEplKernel          Ret = kEplSuccessful;
 tEplDllkNodeInfo*   pIntNodeInfo;
@@ -1321,7 +1321,7 @@ tNmtState           NmtState;
                      uiIndex < tabentries (EplDllkInstance_g.m_aNodeInfo);
                      uiIndex++, pIntNodeInfo++)
                 {
-                    Ret = EplDllkDeleteNodeFilter(pIntNodeInfo, pNodeOpParam_p->m_OpNodeType, fUpdateEdrv);
+                    Ret = deleteNodeFilter(pIntNodeInfo, pNodeOpParam_p->m_OpNodeType, fUpdateEdrv);
                 }
                 break;
             }
@@ -1335,7 +1335,7 @@ tNmtState           NmtState;
         goto Exit;
     }
 
-    pIntNodeInfo = EplDllkGetNodeInfo(pNodeOpParam_p->m_uiNodeId);
+    pIntNodeInfo = getNodeInfo(pNodeOpParam_p->m_uiNodeId);
     if (pIntNodeInfo == NULL)
     {   // no node info structure available
         Ret = kEplDllNoNodeInfo;
@@ -1353,7 +1353,7 @@ tNmtState           NmtState;
         {
             if (NmtState >= kNmtMsNotActive)
             {
-                Ret = EplDllkDeleteNodeIsochronous(pIntNodeInfo);
+                Ret = deleteNodeIsochronous(pIntNodeInfo);
             }
             else
             {
@@ -1380,7 +1380,7 @@ tNmtState           NmtState;
             {
                 fUpdateEdrv = TRUE;
             }
-            Ret = EplDllkDeleteNodeFilter(pIntNodeInfo, pNodeOpParam_p->m_OpNodeType, fUpdateEdrv);
+            Ret = deleteNodeFilter(pIntNodeInfo, pNodeOpParam_p->m_OpNodeType, fUpdateEdrv);
             break;
         }
 
@@ -1416,12 +1416,12 @@ Exit:
 //
 //---------------------------------------------------------------------------
 
-tEplKernel EplDllkSetFlag1OfNode(unsigned int uiNodeId_p, BYTE bSoaFlag1_p)
+tEplKernel dllk_setFlag1OfNode(unsigned int uiNodeId_p, BYTE bSoaFlag1_p)
 {
 tEplKernel          Ret = kEplSuccessful;
 tEplDllkNodeInfo*   pNodeInfo;
 
-    pNodeInfo = EplDllkGetNodeInfo(uiNodeId_p);
+    pNodeInfo = getNodeInfo(uiNodeId_p);
     if (pNodeInfo == NULL)
     {   // no node info structure available
         Ret = kEplDllNoNodeInfo;
@@ -1453,7 +1453,7 @@ Exit:
 //
 //---------------------------------------------------------------------------
 
-tEplKernel EplDllkGetCurrentCnNodeIdList(BYTE** ppbCnNodeIdList_p)
+tEplKernel dllk_getCurrentCnNodeIdList(BYTE** ppbCnNodeIdList_p)
 {
 tEplKernel          Ret = kEplSuccessful;
 
@@ -1480,12 +1480,12 @@ tEplKernel          Ret = kEplSuccessful;
 //---------------------------------------------------------------------------
 
 #if EPL_DLL_PRES_CHAINING_MN != FALSE
-tEplKernel EplDllkGetCnMacAddress(unsigned int uiNodeId_p, BYTE* pb_be_CnMacAddress_p)
+tEplKernel dllk_getCnMacAddress(unsigned int uiNodeId_p, BYTE* pb_be_CnMacAddress_p)
 {
 tEplKernel          Ret = kEplSuccessful;
 tEplDllkNodeInfo*   pNodeInfo;
 
-    pNodeInfo = EplDllkGetNodeInfo(uiNodeId_p);
+    pNodeInfo = getNodeInfo(uiNodeId_p);
     if (pNodeInfo == NULL)
     {   // no node info structure available
         Ret = kEplDllNoNodeInfo;
@@ -1524,7 +1524,7 @@ Exit:
 //
 //---------------------------------------------------------------------------
 
-static tEplKernel EplDllkProcessCreate(tNmtState NmtState_p)
+static tEplKernel processCreate(tNmtState NmtState_p)
 {
 tEplKernel      Ret = kEplSuccessful;
 unsigned int    uiHandle;
@@ -1555,7 +1555,7 @@ tEplDllkNodeInfo*   pIntNodeInfo;
 
     // IdentResponse
     uiFrameSize = EPL_C_DLL_MINSIZE_IDENTRES;
-    Ret = EplDllkCreateTxFrame(&uiHandle, &uiFrameSize, kEplMsgTypeAsnd, kEplDllAsndIdentResponse);
+    Ret = createTxFrame(&uiHandle, &uiFrameSize, kEplMsgTypeAsnd, kEplDllAsndIdentResponse);
     if (Ret != kEplSuccessful)
     {   // error occurred while registering Tx frame
         goto Exit;
@@ -1563,7 +1563,7 @@ tEplDllkNodeInfo*   pIntNodeInfo;
 
     // StatusResponse
     uiFrameSize = EPL_C_DLL_MINSIZE_STATUSRES;
-    Ret = EplDllkCreateTxFrame(&uiHandle, &uiFrameSize, kEplMsgTypeAsnd, kEplDllAsndStatusResponse);
+    Ret = createTxFrame(&uiHandle, &uiFrameSize, kEplMsgTypeAsnd, kEplDllAsndStatusResponse);
     if (Ret != kEplSuccessful)
     {   // error occurred while registering Tx frame
         goto Exit;
@@ -1572,7 +1572,7 @@ tEplDllkNodeInfo*   pIntNodeInfo;
 #if EPL_DLL_PRES_CHAINING_CN != FALSE
     // SyncResponse
     uiFrameSize = EPL_C_DLL_MINSIZE_SYNCRES;
-    Ret = EplDllkCreateTxFrame(&uiHandle, &uiFrameSize, kEplMsgTypeAsnd, kEplDllAsndSyncResponse);
+    Ret = createTxFrame(&uiHandle, &uiFrameSize, kEplMsgTypeAsnd, kEplDllAsndSyncResponse);
     if (Ret != kEplSuccessful)
     {   // error occurred while registering Tx frame
         goto Exit;
@@ -1585,7 +1585,7 @@ tEplDllkNodeInfo*   pIntNodeInfo;
     {   // it is not configured as async-only CN,
         // so take part in isochronous phase and register PRes frame
         uiFrameSize = EplDllkInstance_g.m_DllConfigParam.m_uiPresActPayloadLimit + EPL_FRAME_OFFSET_PDO_PAYLOAD;
-        Ret = EplDllkCreateTxFrame(&uiHandle, &uiFrameSize, kEplMsgTypePres, kEplDllAsndNotDefined);
+        Ret = createTxFrame(&uiHandle, &uiFrameSize, kEplMsgTypePres, kEplDllAsndNotDefined);
         if (Ret != kEplSuccessful)
         {   // error occurred while registering Tx frame
             goto Exit;
@@ -1596,37 +1596,37 @@ tEplDllkNodeInfo*   pIntNodeInfo;
     }
     else
     {   // it is an async-only CN
-        // fool EplDllkChangeState() to think that PRes was not expected
+        // fool changeState() to think that PRes was not expected
         EplDllkInstance_g.m_uiCycleCount = 1;
     }
 
     // NMT request
     uiFrameSize = EPL_C_IP_MAX_MTU;
-    Ret = EplDllkCreateTxFrame(&uiHandle, &uiFrameSize, kEplMsgTypeAsnd, kEplDllAsndNmtRequest);
+    Ret = createTxFrame(&uiHandle, &uiFrameSize, kEplMsgTypeAsnd, kEplDllAsndNmtRequest);
     if (Ret != kEplSuccessful)
     {   // error occurred while registering Tx frame
         goto Exit;
     }
     // mark Tx buffer as empty
     EplDllkInstance_g.m_pTxBuffer[uiHandle].m_uiTxMsgLen = EPL_DLLK_BUFLEN_EMPTY;
-    EplDllkInstance_g.m_pTxBuffer[uiHandle].m_pfnTxHandler = EplDllkCbTransmittedNmtReq;
+    EplDllkInstance_g.m_pTxBuffer[uiHandle].m_pfnTxHandler = cbTransmittedNmtReq;
     uiHandle++;
     EplDllkInstance_g.m_pTxBuffer[uiHandle].m_uiTxMsgLen = EPL_DLLK_BUFLEN_EMPTY;
-    EplDllkInstance_g.m_pTxBuffer[uiHandle].m_pfnTxHandler = EplDllkCbTransmittedNmtReq;
+    EplDllkInstance_g.m_pTxBuffer[uiHandle].m_pfnTxHandler = cbTransmittedNmtReq;
 
     // non-EPL frame
     uiFrameSize = EPL_C_IP_MAX_MTU;
-    Ret = EplDllkCreateTxFrame(&uiHandle, &uiFrameSize, kEplMsgTypeNonEpl, kEplDllAsndNotDefined);
+    Ret = createTxFrame(&uiHandle, &uiFrameSize, kEplMsgTypeNonEpl, kEplDllAsndNotDefined);
     if (Ret != kEplSuccessful)
     {   // error occurred while registering Tx frame
         goto Exit;
     }
     // mark Tx buffer as empty
     EplDllkInstance_g.m_pTxBuffer[uiHandle].m_uiTxMsgLen = EPL_DLLK_BUFLEN_EMPTY;
-    EplDllkInstance_g.m_pTxBuffer[uiHandle].m_pfnTxHandler = EplDllkCbTransmittedNonEpl;
+    EplDllkInstance_g.m_pTxBuffer[uiHandle].m_pfnTxHandler = cbTransmittedNonEpl;
     uiHandle++;
     EplDllkInstance_g.m_pTxBuffer[uiHandle].m_uiTxMsgLen = EPL_DLLK_BUFLEN_EMPTY;
-    EplDllkInstance_g.m_pTxBuffer[uiHandle].m_pfnTxHandler = EplDllkCbTransmittedNonEpl;
+    EplDllkInstance_g.m_pTxBuffer[uiHandle].m_pfnTxHandler = cbTransmittedNonEpl;
 
 
     // setup filter structure for Edrv
@@ -1793,25 +1793,25 @@ tEplDllkNodeInfo*   pIntNodeInfo;
 
         // SoC
         uiFrameSize = EPL_C_DLL_MINSIZE_SOC;
-        Ret = EplDllkCreateTxFrame(&uiHandle, &uiFrameSize, kEplMsgTypeSoc, kEplDllAsndNotDefined);
+        Ret = createTxFrame(&uiHandle, &uiFrameSize, kEplMsgTypeSoc, kEplDllAsndNotDefined);
         if (Ret != kEplSuccessful)
         {   // error occurred while registering Tx frame
             goto Exit;
         }
-        EplDllkInstance_g.m_pTxBuffer[uiHandle].m_pfnTxHandler = EplDllkCbTransmittedSoc;
+        EplDllkInstance_g.m_pTxBuffer[uiHandle].m_pfnTxHandler = cbTransmittedSoc;
         uiHandle++;
-        EplDllkInstance_g.m_pTxBuffer[uiHandle].m_pfnTxHandler = EplDllkCbTransmittedSoc;
+        EplDllkInstance_g.m_pTxBuffer[uiHandle].m_pfnTxHandler = cbTransmittedSoc;
 
         // SoA
         uiFrameSize = EPL_C_DLL_MINSIZE_SOA;
-        Ret = EplDllkCreateTxFrame(&uiHandle, &uiFrameSize, kEplMsgTypeSoa, kEplDllAsndNotDefined);
+        Ret = createTxFrame(&uiHandle, &uiFrameSize, kEplMsgTypeSoa, kEplDllAsndNotDefined);
         if (Ret != kEplSuccessful)
         {   // error occurred while registering Tx frame
             goto Exit;
         }
-        EplDllkInstance_g.m_pTxBuffer[uiHandle].m_pfnTxHandler = EplDllkCbTransmittedSoa;
+        EplDllkInstance_g.m_pTxBuffer[uiHandle].m_pfnTxHandler = cbTransmittedSoa;
         uiHandle++;
-        EplDllkInstance_g.m_pTxBuffer[uiHandle].m_pfnTxHandler = EplDllkCbTransmittedSoa;
+        EplDllkInstance_g.m_pTxBuffer[uiHandle].m_pfnTxHandler = cbTransmittedSoa;
 
         for (uiIndex = 0, pIntNodeInfo = &EplDllkInstance_g.m_aNodeInfo[0];
              uiIndex < tabentries (EplDllkInstance_g.m_aNodeInfo);
@@ -1822,15 +1822,15 @@ tEplDllkNodeInfo*   pIntNodeInfo;
                 uiCount++;
 
                 uiFrameSize = pIntNodeInfo->m_wPreqPayloadLimit + EPL_FRAME_OFFSET_PDO_PAYLOAD;
-                Ret = EplDllkCreateTxFrame(&uiHandle, &uiFrameSize, kEplMsgTypePreq, kEplDllAsndNotDefined);
+                Ret = createTxFrame(&uiHandle, &uiFrameSize, kEplMsgTypePreq, kEplDllAsndNotDefined);
                 if (Ret != kEplSuccessful)
                 {
                     goto Exit;
                 }
 #if (EPL_DLL_DISABLE_EDRV_CYCLIC != FALSE)
-                EplDllkInstance_g.m_pTxBuffer[uiHandle].m_pfnTxHandler = EplDllkCbTransmittedPreq;
+                EplDllkInstance_g.m_pTxBuffer[uiHandle].m_pfnTxHandler = cbTransmittedPreq;
                 uiHandle++;
-                EplDllkInstance_g.m_pTxBuffer[uiHandle].m_pfnTxHandler = EplDllkCbTransmittedPreq;
+                EplDllkInstance_g.m_pTxBuffer[uiHandle].m_pfnTxHandler = cbTransmittedPreq;
 #endif
                 pIntNodeInfo->m_pPreqTxBuffer = &EplDllkInstance_g.m_pTxBuffer[uiHandle];
 
@@ -1859,7 +1859,7 @@ tEplDllkNodeInfo*   pIntNodeInfo;
             goto Exit;
         }
 
-        Ret = EdrvCyclicRegSyncHandler(EplDllkCbMnSyncHandler);
+        Ret = EdrvCyclicRegSyncHandler(cbMnSyncHandler);
         if (Ret != kEplSuccessful)
         {
             goto Exit;
@@ -2028,7 +2028,7 @@ Exit:
 //
 //---------------------------------------------------------------------------
 
-static tEplKernel EplDllkProcessDestroy(tNmtState OldNmtState_p)
+static tEplKernel processDestroy(tNmtState OldNmtState_p)
 {
 tEplKernel      Ret = kEplSuccessful;
 BYTE            abMulticastMac[6];
@@ -2086,39 +2086,39 @@ unsigned int    uiHandle;
 #endif
 
     // delete Tx frames
-    Ret = EplDllkDeleteTxFrame(EPL_DLLK_TXFRAME_IDENTRES);
+    Ret = deleteTxFrame(EPL_DLLK_TXFRAME_IDENTRES);
     if (Ret != kEplSuccessful)
     {   // error occurred while deregistering Tx frame
         goto Exit;
     }
 
-    Ret = EplDllkDeleteTxFrame(EPL_DLLK_TXFRAME_STATUSRES);
+    Ret = deleteTxFrame(EPL_DLLK_TXFRAME_STATUSRES);
     if (Ret != kEplSuccessful)
     {   // error occurred while deregistering Tx frame
         goto Exit;
     }
 
-    Ret = EplDllkDeleteTxFrame(EPL_DLLK_TXFRAME_PRES);
+    Ret = deleteTxFrame(EPL_DLLK_TXFRAME_PRES);
     if (Ret != kEplSuccessful)
     {   // error occurred while deregistering Tx frame
         goto Exit;
     }
 
-    Ret = EplDllkDeleteTxFrame(EPL_DLLK_TXFRAME_NMTREQ);
+    Ret = deleteTxFrame(EPL_DLLK_TXFRAME_NMTREQ);
     if (Ret != kEplSuccessful)
     {   // error occurred while deregistering Tx frame
         goto Exit;
     }
 
 #if EPL_DLL_PRES_CHAINING_CN != FALSE
-    Ret = EplDllkDeleteTxFrame(EPL_DLLK_TXFRAME_SYNCRES);
+    Ret = deleteTxFrame(EPL_DLLK_TXFRAME_SYNCRES);
     if (Ret != kEplSuccessful)
     {   // error occurred while deregistering Tx frame
         goto Exit;
     }
 #endif
 
-    Ret = EplDllkDeleteTxFrame(EPL_DLLK_TXFRAME_NONEPL);
+    Ret = deleteTxFrame(EPL_DLLK_TXFRAME_NONEPL);
     if (Ret != kEplSuccessful)
     {   // error occurred while deregistering Tx frame
         goto Exit;
@@ -2128,13 +2128,13 @@ unsigned int    uiHandle;
     if (OldNmtState_p >= kNmtMsNotActive)
     {   // local node was MN
 
-        Ret = EplDllkDeleteTxFrame(EPL_DLLK_TXFRAME_SOC);
+        Ret = deleteTxFrame(EPL_DLLK_TXFRAME_SOC);
         if (Ret != kEplSuccessful)
         {   // error occurred while deregistering Tx frame
             goto Exit;
         }
 
-        Ret = EplDllkDeleteTxFrame(EPL_DLLK_TXFRAME_SOA);
+        Ret = deleteTxFrame(EPL_DLLK_TXFRAME_SOA);
         if (Ret != kEplSuccessful)
         {   // error occurred while deregistering Tx frame
             goto Exit;
@@ -2148,7 +2148,7 @@ unsigned int    uiHandle;
                 EplDllkInstance_g.m_aNodeInfo[uiIndex].m_pPreqTxBuffer = NULL;
                 if (uiHandle != EPL_DLLK_TXFRAME_PRES)
                 {
-                    Ret = EplDllkDeleteTxFrame(uiHandle);
+                    Ret = deleteTxFrame(uiHandle);
                     if (Ret != kEplSuccessful)
                     {   // error occurred while deregistering Tx frame
                         goto Exit;
@@ -2206,7 +2206,7 @@ Exit:
 //
 //---------------------------------------------------------------------------
 
-static tEplKernel EplDllkProcessNmtStateChange(tNmtState NewNmtState_p, tNmtState OldNmtState_p)
+static tEplKernel processNmtStateChange(tNmtState NewNmtState_p, tNmtState OldNmtState_p)
 {
 tEplKernel      Ret = kEplSuccessful;
 
@@ -2234,7 +2234,7 @@ tEplKernel      Ret = kEplSuccessful;
             if (OldNmtState_p > kNmtGsResetConfiguration)
             {
                 // deinitialize DLL and destroy frames
-                Ret = EplDllkProcessDestroy(OldNmtState_p);
+                Ret = processDestroy(OldNmtState_p);
             }
             break;
         }
@@ -2246,7 +2246,7 @@ tEplKernel      Ret = kEplSuccessful;
             if (OldNmtState_p <= kNmtGsResetConfiguration)
             {
                 // setup DLL and create frames
-                Ret = EplDllkProcessCreate(NewNmtState_p);
+                Ret = processCreate(NewNmtState_p);
             }
             break;
         }
@@ -2278,7 +2278,7 @@ tEplKernel      Ret = kEplSuccessful;
 #endif
 
 #if EPL_DLL_PRES_CHAINING_CN != FALSE
-            Ret = EplDllkPResChainingDisable();
+            Ret = pResChainingDisable();
             if (Ret != kEplSuccessful)
             {
                 goto Exit;
@@ -2286,14 +2286,14 @@ tEplKernel      Ret = kEplSuccessful;
 #endif
 
             // update IdentRes and StatusRes
-            Ret = EplDllkUpdateFrameStatusRes(&EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_STATUSRES + EplDllkInstance_g.m_bCurTxBufferOffsetStatusRes],
+            Ret = updateFrameStatusRes(&EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_STATUSRES + EplDllkInstance_g.m_bCurTxBufferOffsetStatusRes],
                                               NewNmtState_p);
             if (Ret != kEplSuccessful)
             {
                 goto Exit;
             }
 
-            Ret = EplDllkUpdateFrameIdentRes(&EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_IDENTRES + EplDllkInstance_g.m_bCurTxBufferOffsetIdentRes],
+            Ret = updateFrameIdentRes(&EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_IDENTRES + EplDllkInstance_g.m_bCurTxBufferOffsetIdentRes],
                                              NewNmtState_p);
             if (Ret != kEplSuccessful)
             {
@@ -2339,13 +2339,13 @@ tEplKernel      Ret = kEplSuccessful;
 #endif
 
             // update PRes (for sudden changes to PreOp2)
-            Ret = EplDllkUpdateFramePres(&EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_PRES + (EplDllkInstance_g.m_bCurTxBufferOffsetCycle ^ 1)],
+            Ret = updateFramePres(&EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_PRES + (EplDllkInstance_g.m_bCurTxBufferOffsetCycle ^ 1)],
                                          NewNmtState_p);
             if (Ret != kEplSuccessful)
             {
                 goto Exit;
             }
-            Ret = EplDllkUpdateFramePres(&EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_PRES + EplDllkInstance_g.m_bCurTxBufferOffsetCycle],
+            Ret = updateFramePres(&EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_PRES + EplDllkInstance_g.m_bCurTxBufferOffsetCycle],
                                          NewNmtState_p);
             if (Ret != kEplSuccessful)
             {
@@ -2420,13 +2420,13 @@ tEplKernel      Ret = kEplSuccessful;
 #endif
 
             // update IdentRes and StatusRes
-            Ret = EplDllkUpdateFrameIdentRes(&EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_IDENTRES + EplDllkInstance_g.m_bCurTxBufferOffsetIdentRes],
+            Ret = updateFrameIdentRes(&EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_IDENTRES + EplDllkInstance_g.m_bCurTxBufferOffsetIdentRes],
                                              NewNmtState_p);
             if (Ret != kEplSuccessful)
             {
                 goto Exit;
             }
-            Ret = EplDllkUpdateFrameStatusRes(&EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_STATUSRES + EplDllkInstance_g.m_bCurTxBufferOffsetStatusRes],
+            Ret = updateFrameStatusRes(&EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_STATUSRES + EplDllkInstance_g.m_bCurTxBufferOffsetStatusRes],
                                               NewNmtState_p);
 
             break;
@@ -2473,13 +2473,13 @@ tEplKernel      Ret = kEplSuccessful;
 #endif
 
             // update PRes
-            Ret = EplDllkUpdateFramePres(&EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_PRES + (EplDllkInstance_g.m_bCurTxBufferOffsetCycle ^ 1)],
+            Ret = updateFramePres(&EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_PRES + (EplDllkInstance_g.m_bCurTxBufferOffsetCycle ^ 1)],
                                          NewNmtState_p);
             if (Ret != kEplSuccessful)
             {
                 goto Exit;
             }
-            Ret = EplDllkUpdateFramePres(&EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_PRES + EplDllkInstance_g.m_bCurTxBufferOffsetCycle],
+            Ret = updateFramePres(&EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_PRES + EplDllkInstance_g.m_bCurTxBufferOffsetCycle],
                                          NewNmtState_p);
             if (Ret != kEplSuccessful)
             {
@@ -2494,7 +2494,7 @@ tEplKernel      Ret = kEplSuccessful;
         case kNmtCsBasicEthernet:
         {
             // Fill Async Tx Buffer, because state BasicEthernet was entered
-            Ret = EplDllkProcessFillTx(kEplDllAsyncReqPrioGeneric, NewNmtState_p);
+            Ret = processFillTx(kEplDllAsyncReqPrioGeneric, NewNmtState_p);
             if (Ret != kEplSuccessful)
             {
                 goto Exit;
@@ -2522,7 +2522,7 @@ Exit:
 
 //---------------------------------------------------------------------------
 //
-// Function:    EplDllkProcessNmtEvent
+// Function:    processNmtEvent
 //
 // Description: process the NMT event
 //
@@ -2535,7 +2535,7 @@ Exit:
 //
 //---------------------------------------------------------------------------
 
-static tEplKernel EplDllkProcessNmtEvent(tEplEvent * pEvent_p)
+static tEplKernel processNmtEvent(tEplEvent * pEvent_p)
 {
 tEplKernel      Ret = kEplSuccessful;
 tNmtEvent*      pNmtEvent;
@@ -2554,12 +2554,12 @@ tNmtState       NmtState;
             if (EplDllkInstance_g.m_DllState != kEplDllGsInit)
             {   // cyclic state is active, so preprocessing is necessary
 
-                Ret = EplDllkProcessSync(NmtState);
+                Ret = processSync(NmtState);
             }
 //            BENCHMARK_MOD_02_TOGGLE(7);
 #endif
 
-            Ret = EplDllkProcessCycleFinish(NmtState);
+            Ret = processCycleFinish(NmtState);
 
             break;
         }
@@ -2577,7 +2577,7 @@ tNmtState       NmtState;
 
 //---------------------------------------------------------------------------
 //
-// Function:    EplDllkProcessCycleFinish
+// Function:    processCycleFinish
 //
 // Description: process the CycleFinish event
 //
@@ -2590,7 +2590,7 @@ tNmtState       NmtState;
 //
 //---------------------------------------------------------------------------
 
-static tEplKernel EplDllkProcessCycleFinish(tNmtState NmtState_p)
+static tEplKernel processCycleFinish(tNmtState NmtState_p)
 {
 tEplKernel      Ret = kEplReject;
 tEdrvTxBuffer*  pTxBuffer;
@@ -2604,7 +2604,7 @@ tEdrvTxBuffer*  pTxBuffer;
             if (pTxBuffer->m_pbBuffer != NULL)
             {   // IdentRes does exist
 
-                Ret = EplDllkUpdateFrameIdentRes(pTxBuffer, NmtState_p);
+                Ret = updateFrameIdentRes(pTxBuffer, NmtState_p);
                 if (Ret != kEplSuccessful)
                 {
                     goto Exit;
@@ -2621,7 +2621,7 @@ tEdrvTxBuffer*  pTxBuffer;
             if (pTxBuffer->m_pbBuffer != NULL)
             {   // StatusRes does exist
 
-                Ret = EplDllkUpdateFrameStatusRes(pTxBuffer, NmtState_p);
+                Ret = updateFrameStatusRes(pTxBuffer, NmtState_p);
                 if (Ret != kEplSuccessful)
                 {
                     goto Exit;
@@ -2648,7 +2648,7 @@ tEdrvTxBuffer*  pTxBuffer;
         if (EplDllkInstance_g.m_DllConfigParam.m_uiSyncNodeId == EPL_C_ADR_SYNC_ON_SOC)
         {   // cyclic state is active, so preprocessing is necessary
 
-            Ret = EplDllkProcessSync(NmtState_p);
+            Ret = processSync(NmtState_p);
         }
     }
 #endif
@@ -2661,7 +2661,7 @@ Exit:
 
 //---------------------------------------------------------------------------
 //
-// Function:    EplDllkProcessSync
+// Function:    processSync
 //
 // Description: process the Sync event
 //
@@ -2674,7 +2674,7 @@ Exit:
 //
 //---------------------------------------------------------------------------
 
-static tEplKernel EplDllkProcessSync(tNmtState NmtState_p)
+static tEplKernel processSync(tNmtState NmtState_p)
 {
 tEplKernel      Ret = kEplReject;
 BOOL            fReadyFlag = FALSE;
@@ -2768,7 +2768,7 @@ unsigned int    uiNextTxBufferOffset = EplDllkInstance_g.m_bCurTxBufferOffsetCyc
                 // process TPDO
                 FrameInfo.m_pFrame = pTxFrame;
                 FrameInfo.m_uiFrameSize = pTxBuffer->m_uiTxMsgLen;
-                Ret = EplDllkProcessTpdo(&FrameInfo, fReadyFlag);
+                Ret = processTpdo(&FrameInfo, fReadyFlag);
                 if (Ret != kEplSuccessful)
                 {
                     goto Exit;
@@ -2854,8 +2854,8 @@ unsigned int    uiNextTxBufferOffset = EplDllkInstance_g.m_bCurTxBufferOffsetCyc
         }
 
         // $$$ d.k. fEnableInvitation_p = ((NmtState_p != kNmtMsPreOperational1) || (EplDllkInstance_g.m_uiCycleCount >= EPL_C_DLL_PREOP1_START_CYCLES))
-        //          currently, EplDllkProcessSync is not called in PreOp1
-        Ret = EplDllkUpdateFrameSoa(pTxBuffer, NmtState_p, TRUE, EplDllkInstance_g.m_bSyncLastSoaReq);
+        //          currently, processSync is not called in PreOp1
+        Ret = updateFrameSoa(pTxBuffer, NmtState_p, TRUE, EplDllkInstance_g.m_bSyncLastSoaReq);
         EplDllkInstance_g.m_ppTxBufferList[uiIndex] = pTxBuffer;
         //store SoA index
         uiSoaIndex = uiIndex;
@@ -2993,7 +2993,7 @@ unsigned int    uiNextTxBufferOffset = EplDllkInstance_g.m_bCurTxBufferOffsetCyc
             // process TPDO
             FrameInfo.m_pFrame = pTxFrame;
             FrameInfo.m_uiFrameSize = pTxBuffer->m_uiTxMsgLen;
-            Ret = EplDllkProcessTpdo(&FrameInfo, fReadyFlag);
+            Ret = processTpdo(&FrameInfo, fReadyFlag);
             if (Ret != kEplSuccessful)
             {
                 goto Exit;
@@ -3001,7 +3001,7 @@ unsigned int    uiNextTxBufferOffset = EplDllkInstance_g.m_bCurTxBufferOffsetCyc
 
 //                        BENCHMARK_MOD_02_TOGGLE(7);
 
-            Ret = EplDllkUpdateFramePres(pTxBuffer, NmtState_p);
+            Ret = updateFramePres(pTxBuffer, NmtState_p);
             if (Ret != kEplSuccessful)
             {
                 goto Exit;
@@ -3018,7 +3018,7 @@ Exit:
 }
 //---------------------------------------------------------------------------
 //
-// Function:    EplDllkProcessFillTx
+// Function:    processFillTx
 //
 // Description: process the FillTx event
 //
@@ -3031,7 +3031,7 @@ Exit:
 //
 //---------------------------------------------------------------------------
 
-static tEplKernel EplDllkProcessFillTx(tEplDllAsyncReqPriority AsyncReqPriority_p, tNmtState NmtState_p)
+static tEplKernel processFillTx(tEplDllAsyncReqPriority AsyncReqPriority_p, tNmtState NmtState_p)
 {
 tEplKernel      Ret = kEplSuccessful;
 tEplFrame*      pTxFrame;
@@ -3084,7 +3084,7 @@ unsigned int    uiFilterEntry;
             if (Ret == kEplSuccessful)
             {
                 pTxFrame = (tEplFrame *) pTxBuffer->m_pbBuffer;
-                Ret = EplDllkCheckFrame(pTxFrame, uiFrameSize);
+                Ret = checkFrame(pTxFrame, uiFrameSize);
 
                 // set buffer valid
                 pTxBuffer->m_uiTxMsgLen = uiFrameSize;
@@ -3218,7 +3218,7 @@ Exit:
 
 //---------------------------------------------------------------------------
 //
-// Function:    EplDllkProcessStartReducedCycle
+// Function:    processStartReducedCycle
 //
 // Description: process the StartReducedCycle event
 //
@@ -3232,7 +3232,7 @@ Exit:
 //---------------------------------------------------------------------------
 
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
-static tEplKernel EplDllkProcessStartReducedCycle(tEplEvent * pEvent_p)
+static tEplKernel processStartReducedCycle(tEplEvent * pEvent_p)
 {
 tEplKernel      Ret = kEplSuccessful;
 
@@ -3251,7 +3251,7 @@ tEplKernel      Ret = kEplSuccessful;
     // remove any CN from isochronous phase
     while (EplDllkInstance_g.m_pFirstNodeInfo != NULL)
     {
-        Ret = EplDllkDeleteNodeIsochronous(EplDllkInstance_g.m_pFirstNodeInfo);
+        Ret = deleteNodeIsochronous(EplDllkInstance_g.m_pFirstNodeInfo);
         if (Ret != kEplSuccessful)
         {
             goto Exit;
@@ -3261,7 +3261,7 @@ tEplKernel      Ret = kEplSuccessful;
 #if EPL_DLL_PRES_CHAINING_MN != FALSE
     while (EplDllkInstance_g.m_pFirstPrcNodeInfo != NULL)
     {
-        Ret = EplDllkDeleteNodeIsochronous(EplDllkInstance_g.m_pFirstPrcNodeInfo);
+        Ret = deleteNodeIsochronous(EplDllkInstance_g.m_pFirstPrcNodeInfo);
         if (Ret != kEplSuccessful)
         {
             goto Exit;
@@ -3270,7 +3270,7 @@ tEplKernel      Ret = kEplSuccessful;
 #endif
 
     // change state to NonCyclic,
-    // hence EplDllkChangeState() will not ignore the next call
+    // hence changeState() will not ignore the next call
     EplDllkInstance_g.m_DllState = kEplDllMsNonCyclic;
 
 #if EPL_TIMER_USE_HIGHRES != FALSE
@@ -3278,7 +3278,7 @@ tEplKernel      Ret = kEplSuccessful;
     {
         Ret = EplTimerHighReskModifyTimerNs(&EplDllkInstance_g.m_TimerHdlCycle,
             EplDllkInstance_g.m_DllConfigParam.m_dwAsyncSlotTimeout,
-            EplDllkCbMnTimerCycle,
+            cbMnTimerCycle,
             0L,
             FALSE);
     }
@@ -3295,7 +3295,7 @@ Exit:
 
 //---------------------------------------------------------------------------
 //
-// Function:    EplDllkChangeState
+// Function:    changeState
 //
 // Description: change DLL state on event and diagnose some communication errors
 //
@@ -3308,7 +3308,7 @@ Exit:
 //
 //---------------------------------------------------------------------------
 
-static tEplKernel EplDllkChangeState(tNmtEvent NmtEvent_p, tNmtState NmtState_p)
+static tEplKernel changeState(tNmtEvent NmtEvent_p, tNmtState NmtState_p)
 {
 tEplKernel              Ret = kEplSuccessful;
 tErrHndkEvent  DllEvent;
@@ -3647,7 +3647,7 @@ tErrHndkEvent  DllEvent;
                 {   // because of reduced EPL cycle SoA shall be triggered, not SoC
                 tEplDllState    DummyDllState;
 
-                    Ret = EplDllkAsyncFrameNotReceived(EplDllkInstance_g.m_aLastReqServiceId[EplDllkInstance_g.m_bCurLastSoaReq],
+                    Ret = asyncFrameNotReceived(EplDllkInstance_g.m_aLastReqServiceId[EplDllkInstance_g.m_bCurLastSoaReq],
                                                        EplDllkInstance_g.m_auiLastTargetNodeId[EplDllkInstance_g.m_bCurLastSoaReq]);
                     if (Ret != kEplSuccessful)
                     {
@@ -3660,7 +3660,7 @@ tErrHndkEvent  DllEvent;
                     //          otherwise.
 
                     // go ahead and send SoA
-                    Ret = EplDllkMnSendSoa(NmtState_p,
+                    Ret = mnSendSoa(NmtState_p,
                                            &DummyDllState,
                                            (EplDllkInstance_g.m_uiCycleCount >= EPL_C_DLL_PREOP1_START_CYCLES));
 
@@ -3738,7 +3738,7 @@ tErrHndkEvent  DllEvent;
 
                             // forward dummy SoA event to DLLk, ErrorHandler and PDO module
                             // to trigger preparation of first cycle
-                            Ret = EplDllkPostEvent(kEplEventTypeSync);
+                            Ret = postEvent(kEplEventTypeSync);
                             if (Ret != kEplSuccessful)
                             {
                                 goto Exit;
@@ -3748,7 +3748,7 @@ tErrHndkEvent  DllEvent;
 #if EPL_TIMER_USE_HIGHRES != FALSE
                             Ret = EplTimerHighReskModifyTimerNs(&EplDllkInstance_g.m_TimerHdlCycle,
                                 EplDllkInstance_g.m_ullFrameTimeout,
-                                EplDllkCbMnTimerCycle,
+                                cbMnTimerCycle,
                                 0L,
                                 TRUE);
                             if (Ret != kEplSuccessful)
@@ -3759,7 +3759,7 @@ tErrHndkEvent  DllEvent;
 
                             // forward dummy SoA event to DLLk, ErrorHandler and PDO module
                             // to trigger preparation of first cycle
-                            Ret = EplDllkPostEvent(kEplEventTypeDllkCycleFinish);
+                            Ret = postEvent(kEplEventTypeDllkCycleFinish);
                             if (Ret != kEplSuccessful)
                             {
                                 goto Exit;
@@ -3777,7 +3777,7 @@ tErrHndkEvent  DllEvent;
                         case kEplDllMsWaitSocTrig:
                         {
                             // send SoC
-                            Ret = EplDllkMnSendSoc();
+                            Ret = mnSendSoc();
                             if (Ret != kEplSuccessful)
                             {
                                 goto Exit;
@@ -3786,7 +3786,7 @@ tErrHndkEvent  DllEvent;
                             // if m_LastReqServiceId is still valid,
                             // SoA was not correctly answered
                             // and user part has to be informed
-                            Ret = EplDllkAsyncFrameNotReceived(EplDllkInstance_g.m_aLastReqServiceId[EplDllkInstance_g.m_bCurLastSoaReq],
+                            Ret = asyncFrameNotReceived(EplDllkInstance_g.m_aLastReqServiceId[EplDllkInstance_g.m_bCurLastSoaReq],
                                                                EplDllkInstance_g.m_auiLastTargetNodeId[EplDllkInstance_g.m_bCurLastSoaReq]);
                             if (Ret != kEplSuccessful)
                             {
@@ -3850,7 +3850,7 @@ tErrHndkEvent  DllEvent;
                         case kEplDllMsWaitPreqTrig:
                         {
                             // send next PReq
-                            Ret = EplDllkMnSendPreq(NmtState_p, &EplDllkInstance_g.m_DllState);
+                            Ret = mnSendPreq(NmtState_p, &EplDllkInstance_g.m_DllState);
                             if (Ret != kEplSuccessful)
                             {
                                 goto Exit;
@@ -3876,7 +3876,7 @@ tErrHndkEvent  DllEvent;
                         case kEplDllMsWaitPres:
                         {   // PRes received
                             // send next PReq
-                            Ret = EplDllkMnSendPreq(NmtState_p, &EplDllkInstance_g.m_DllState);
+                            Ret = mnSendPreq(NmtState_p, &EplDllkInstance_g.m_DllState);
                             if (Ret != kEplSuccessful)
                             {
                                 goto Exit;
@@ -3902,7 +3902,7 @@ tErrHndkEvent  DllEvent;
                         case kEplDllMsWaitSoaTrig:
                         {   // MN PRes sent
                             // send SoA
-                            Ret = EplDllkMnSendSoa(NmtState_p, &EplDllkInstance_g.m_DllState, TRUE);
+                            Ret = mnSendSoa(NmtState_p, &EplDllkInstance_g.m_DllState, TRUE);
                             if (Ret != kEplSuccessful)
                             {
                                 goto Exit;
@@ -3932,7 +3932,7 @@ tErrHndkEvent  DllEvent;
                 case kNmtEventDllMeAsndTimeout:
                 {   // SoC has been sent, so ASnd should have been received
                     // report if SoA was correctly answered
-                    Ret = EplDllkAsyncFrameNotReceived(EplDllkInstance_g.m_aLastReqServiceId[EplDllkInstance_g.m_bCurLastSoaReq],
+                    Ret = asyncFrameNotReceived(EplDllkInstance_g.m_aLastReqServiceId[EplDllkInstance_g.m_bCurLastSoaReq],
                                                        EplDllkInstance_g.m_auiLastTargetNodeId[EplDllkInstance_g.m_bCurLastSoaReq]);
                     // switch SoAReq buffer
                     EplDllkInstance_g.m_bCurLastSoaReq++;
@@ -3968,7 +3968,7 @@ Exit:
 
 //---------------------------------------------------------------------------
 //
-// Function:    EplDllkCbFrameReceived()
+// Function:    cbFrameReceived()
 //
 // Description: called from EdrvInterruptHandler()
 //
@@ -3981,7 +3981,7 @@ Exit:
 //
 //---------------------------------------------------------------------------
 
-static tEdrvReleaseRxBuffer EplDllkCbFrameReceived(tEdrvRxBuffer * pRxBuffer_p)
+static tEdrvReleaseRxBuffer cbFrameReceived(tEdrvRxBuffer * pRxBuffer_p)
 {
 tEdrvReleaseRxBuffer    ReleaseRxBuffer = kEdrvReleaseRxBufferImmediately;
 tEplKernel              Ret             = kEplSuccessful;
@@ -4061,7 +4061,7 @@ TGT_DLLK_DECLARE_FLAGS;
 
     if (AmiGetWordFromBe(&pFrame->m_be_wEtherType) != EPL_C_DLL_ETHERTYPE_EPL)
     {   // non-EPL frame
-        //TRACE("EplDllkCbFrameReceived: pfnCbAsync=0x%p SrcMAC=0x%llx\n", EplDllkInstance_g.m_pfnCbAsync, AmiGetQword48FromBe(pFrame->m_be_abSrcMac));
+        //TRACE("cbFrameReceived: pfnCbAsync=0x%p SrcMAC=0x%llx\n", EplDllkInstance_g.m_pfnCbAsync, AmiGetQword48FromBe(pFrame->m_be_abSrcMac));
         if (EplDllkInstance_g.m_pfnCbAsync != NULL)
         {   // handler for async frames is registered
             EplDllkInstance_g.m_pfnCbAsync(&FrameInfo);
@@ -4082,7 +4082,7 @@ TGT_DLLK_DECLARE_FLAGS;
             }
             NmtEvent = kNmtEventDllCePreq;
 
-            Ret = EplDllkProcessReceivedPreq(&FrameInfo, NmtState, &ReleaseRxBuffer);
+            Ret = processReceivedPreq(&FrameInfo, NmtState, &ReleaseRxBuffer);
             if (Ret != kEplSuccessful)
             {
                 goto Exit;
@@ -4094,7 +4094,7 @@ TGT_DLLK_DECLARE_FLAGS;
         case kEplMsgTypePres:
         {
 
-            Ret = EplDllkProcessReceivedPres(&FrameInfo, NmtState, &NmtEvent, &ReleaseRxBuffer);
+            Ret = processReceivedPres(&FrameInfo, NmtState, &NmtEvent, &ReleaseRxBuffer);
             if (Ret != kEplSuccessful)
             {
                 goto Exit;
@@ -4108,7 +4108,7 @@ TGT_DLLK_DECLARE_FLAGS;
             // SoC frame
             NmtEvent = kNmtEventDllCeSoc;
 
-            Ret = EplDllkProcessReceivedSoc(pRxBuffer_p, NmtState);
+            Ret = processReceivedSoc(pRxBuffer_p, NmtState);
             if (Ret != kEplSuccessful)
             {
                 goto Exit;
@@ -4122,7 +4122,7 @@ TGT_DLLK_DECLARE_FLAGS;
             // SoA frame
             NmtEvent = kNmtEventDllCeSoa;
 
-            Ret = EplDllkProcessReceivedSoa(pRxBuffer_p, NmtState);
+            Ret = processReceivedSoa(pRxBuffer_p, NmtState);
             if (Ret != kEplSuccessful)
             {
                 goto Exit;
@@ -4136,7 +4136,7 @@ TGT_DLLK_DECLARE_FLAGS;
             // ASnd frame
             NmtEvent = kNmtEventDllCeAsnd;
 
-            Ret = EplDllkProcessReceivedAsnd(&FrameInfo, pRxBuffer_p, NmtState);
+            Ret = processReceivedAsnd(&FrameInfo, pRxBuffer_p, NmtState);
             if (Ret != kEplSuccessful)
             {
                 goto Exit;
@@ -4153,7 +4153,7 @@ TGT_DLLK_DECLARE_FLAGS;
 
     if (NmtEvent != kNmtEventNoEvent)
     {   // event for DLL and NMT state machine generated
-        Ret = EplDllkChangeState(NmtEvent, NmtState);
+        Ret = changeState(NmtEvent, NmtState);
         if (Ret != kEplSuccessful)
         {
             goto Exit;
@@ -4196,9 +4196,9 @@ Exit:
 
 //---------------------------------------------------------------------------
 //
-// Function:    EplDllkProcessReceivedPreq()
+// Function:    processReceivedPreq()
 //
-// Description: called from EplDllkCbFrameReceived()
+// Description: called from cbFrameReceived()
 //
 // Parameters:  pFrameInfo_p            = [IN] Pointer to frame info structure
 //                                        of received frame
@@ -4212,7 +4212,7 @@ Exit:
 //
 //---------------------------------------------------------------------------
 
-static tEplKernel EplDllkProcessReceivedPreq(   tEplFrameInfo*          pFrameInfo_p,
+static tEplKernel processReceivedPreq(   tEplFrameInfo*          pFrameInfo_p,
                                                 tNmtState               NmtState_p,
                                                 tEdrvReleaseRxBuffer*   pReleaseRxBuffer_p)
 {
@@ -4289,7 +4289,7 @@ BYTE            bFlag1;
             }
 
             // forward PReq frame as RPDO to PDO module
-            Ret = EplDllkForwardRpdo(pFrameInfo_p);
+            Ret = forwardRpdo(pFrameInfo_p);
             if (Ret == kEplReject)
             {
                 *pReleaseRxBuffer_p = kEdrvReleaseRxBufferLater;
@@ -4319,9 +4319,9 @@ Exit:
 
 //---------------------------------------------------------------------------
 //
-// Function:    EplDllkProcessReceivedPres()
+// Function:    processReceivedPres()
 //
-// Description: called from EplDllkCbFrameReceived()
+// Description: called from cbFrameReceived()
 //
 // Parameters:  pFrameInfo_p            = [IN] Pointer to frame info structure
 //                                        of received frame
@@ -4336,7 +4336,7 @@ Exit:
 //
 //---------------------------------------------------------------------------
 
-static tEplKernel EplDllkProcessReceivedPres(   tEplFrameInfo*          pFrameInfo_p,
+static tEplKernel processReceivedPres(   tEplFrameInfo*          pFrameInfo_p,
                                                 tNmtState               NmtState_p,
                                                 tNmtEvent*              pNmtEvent_p,
                                                 tEdrvReleaseRxBuffer*   pReleaseRxBuffer_p)
@@ -4371,7 +4371,7 @@ tEplDllkNodeInfo*   pIntNodeInfo = NULL;
     {   // process PRes frames only in PreOp2, ReadyToOp and Op of CN
 
 #if EPL_NMT_MAX_NODE_ID > 0
-        pIntNodeInfo = EplDllkGetNodeInfo(uiNodeId);
+        pIntNodeInfo = getNodeInfo(uiNodeId);
         if (pIntNodeInfo == NULL)
         {   // no node info structure available
             Ret = kEplDllNoNodeInfo;
@@ -4415,14 +4415,14 @@ tEplDllkNodeInfo*   pIntNodeInfo = NULL;
 
                 for (pbCnNodeId-- ; bNextNodeIndex > 0; bNextNodeIndex--, pbCnNodeId--)
                 {   // issue error for each CN in list between last and current
-                    Ret = EplDllkIssueLossOfPres(*pbCnNodeId);
+                    Ret = issueLossOfPres(*pbCnNodeId);
                     if (Ret != kEplSuccessful)
                     {
                         goto Exit;
                     }
                 }
 
-                pIntNodeInfo = EplDllkGetNodeInfo(uiNodeId);
+                pIntNodeInfo = getNodeInfo(uiNodeId);
 
                 break;
             }
@@ -4451,7 +4451,7 @@ tEplDllkNodeInfo*   pIntNodeInfo = NULL;
                 && (EplDllkInstance_g.m_DllConfigParam.m_fSyncOnPrcNode != FALSE))
             {
                 EplDllkInstance_g.m_fSyncProcessed = TRUE;
-                Ret = EplDllkPostEvent(kEplEventTypeSync);
+                Ret = postEvent(kEplEventTypeSync);
                 if (Ret != kEplSuccessful)
                 {
                     goto Exit;
@@ -4470,7 +4470,7 @@ tEplDllkNodeInfo*   pIntNodeInfo = NULL;
             && (uiNodeId > EplDllkInstance_g.m_DllConfigParam.m_uiSyncNodeId))
         {
             EplDllkInstance_g.m_fSyncProcessed = TRUE;
-            Ret = EplDllkPostEvent(kEplEventTypeSync);
+            Ret = postEvent(kEplEventTypeSync);
             if (Ret != kEplSuccessful)
             {
                 goto Exit;
@@ -4530,7 +4530,7 @@ tEplDllkNodeInfo*   pIntNodeInfo = NULL;
 #endif
     else
     {   // ignore PRes, because it was received in wrong NMT state
-        // but execute EplDllkChangeState() and post event to NMT module
+        // but execute changeState() and post event to NMT module
         goto Exit;
     }
 
@@ -4577,7 +4577,7 @@ tEplDllkNodeInfo*   pIntNodeInfo = NULL;
             // reset RD flag and all other flags, but that does not matter, because they were processed above
             AmiSetByteToLe(&pFrame->m_Data.m_Pres.m_le_bFlag1, 0);
         }
-        Ret = EplDllkForwardRpdo(pFrameInfo_p);
+        Ret = forwardRpdo(pFrameInfo_p);
         if (Ret == kEplReject)
         {
             *pReleaseRxBuffer_p = kEdrvReleaseRxBufferLater;
@@ -4603,7 +4603,7 @@ tEplDllkNodeInfo*   pIntNodeInfo = NULL;
             (uiNodeId == EplDllkInstance_g.m_DllConfigParam.m_uiSyncNodeId))
         {
             EplDllkInstance_g.m_fSyncProcessed = TRUE;
-            Ret = EplDllkPostEvent(kEplEventTypeSync);
+            Ret = postEvent(kEplEventTypeSync);
         }
     }
 #endif
@@ -4615,7 +4615,7 @@ Exit:
 
 //---------------------------------------------------------------------------
 //
-// Function:    EplDllkIssueLossOfPres()
+// Function:    issueLossOfPres()
 //
 // Description: forwards this event to ErrorHandlerk module.
 //
@@ -4628,13 +4628,13 @@ Exit:
 //---------------------------------------------------------------------------
 
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
-static tEplKernel EplDllkIssueLossOfPres(unsigned int uiNodeId_p)
+static tEplKernel issueLossOfPres(unsigned int uiNodeId_p)
 {
 tEplKernel          Ret = kEplSuccessful;
 tEplDllkNodeInfo*   pIntNodeInfo;
 tEplEvent           Event;
 
-    pIntNodeInfo = EplDllkGetNodeInfo(uiNodeId_p);
+    pIntNodeInfo = getNodeInfo(uiNodeId_p);
     if (pIntNodeInfo != NULL)
     {
         if (pIntNodeInfo->m_fSoftDelete == FALSE)
@@ -4677,9 +4677,9 @@ Exit:
 
 //---------------------------------------------------------------------------
 //
-// Function:    EplDllkProcessReceivedSoc()
+// Function:    processReceivedSoc()
 //
-// Description: called from EplDllkCbFrameReceived()
+// Description: called from cbFrameReceived()
 //
 // Parameters:  pRxBuffer_p             = Edrv receive buffer structure
 //              NmtState_p              = current local NMT state
@@ -4690,7 +4690,7 @@ Exit:
 //
 //---------------------------------------------------------------------------
 
-static tEplKernel EplDllkProcessReceivedSoc(tEdrvRxBuffer* pRxBuffer_p, tNmtState NmtState_p)
+static tEplKernel processReceivedSoc(tEdrvRxBuffer* pRxBuffer_p, tNmtState NmtState_p)
 {
 tEplKernel      Ret = kEplSuccessful;
 #if EPL_DLL_PRES_READY_AFTER_SOC != FALSE
@@ -4727,7 +4727,7 @@ tEdrvTxBuffer*  pTxBuffer = NULL;
 
 #if (EPL_DLL_PROCESS_SYNC == EPL_DLL_PROCESS_SYNC_ON_SOC)
         // trigger synchronous task
-        Ret = EplDllkPostEvent(kEplEventTypeSync);
+        Ret = postEvent(kEplEventTypeSync);
         if (Ret != kEplSuccessful)
         {
             goto Exit;
@@ -4751,7 +4751,7 @@ tEdrvTxBuffer*  pTxBuffer = NULL;
 #if EPL_TIMER_USE_HIGHRES != FALSE
     if (EplDllkInstance_g.m_ullFrameTimeout != 0)
     {
-        Ret = EplTimerHighReskModifyTimerNs(&EplDllkInstance_g.m_TimerHdlCycle, EplDllkInstance_g.m_ullFrameTimeout, EplDllkCbCnTimer, 0L, FALSE);
+        Ret = EplTimerHighReskModifyTimerNs(&EplDllkInstance_g.m_TimerHdlCycle, EplDllkInstance_g.m_ullFrameTimeout, cbCnTimer, 0L, FALSE);
         if (Ret != kEplSuccessful)
         {
             goto Exit;
@@ -4766,9 +4766,9 @@ Exit:
 
 //---------------------------------------------------------------------------
 //
-// Function:    EplDllkProcessReceivedSoa()
+// Function:    processReceivedSoa()
 //
-// Description: called from EplDllkCbFrameReceived()
+// Description: called from cbFrameReceived()
 //
 // Parameters:  pRxBuffer_p             = Edrv receive buffer structure
 //              NmtState_p              = current local NMT state
@@ -4779,7 +4779,7 @@ Exit:
 //
 //---------------------------------------------------------------------------
 
-static tEplKernel EplDllkProcessReceivedSoa(tEdrvRxBuffer* pRxBuffer_p, tNmtState NmtState_p)
+static tEplKernel processReceivedSoa(tEdrvRxBuffer* pRxBuffer_p, tNmtState NmtState_p)
 {
 tEplKernel      Ret = kEplSuccessful;
 tEplFrame*      pFrame;
@@ -4850,7 +4850,7 @@ BYTE            bFlag1;
                     }
 
                     // signal update of StatusRes
-                    Ret = EplDllkPostEvent(kEplEventTypeDllkFlag1);
+                    Ret = postEvent(kEplEventTypeDllkFlag1);
                     if (Ret != kEplSuccessful)
                     {
                         goto Exit;
@@ -4993,7 +4993,7 @@ BYTE            bFlag1;
                     // PResModeReset overrules PResModeSet
                     dwSyncControl &= ~EPL_SYNC_PRES_MODE_SET;
 
-                    Ret = EplDllkPResChainingDisable();
+                    Ret = pResChainingDisable();
                     if (Ret != kEplSuccessful)
                     {
                         goto Exit;
@@ -5001,7 +5001,7 @@ BYTE            bFlag1;
                 }
                 else if (dwSyncControl & EPL_SYNC_PRES_MODE_SET)
                 {   // PRes Chaining is Enabled
-                    Ret = EplDllkPResChainingEnable();
+                    Ret = pResChainingEnable();
                     if (Ret != kEplSuccessful)
                     {
                         goto Exit;
@@ -5090,7 +5090,7 @@ BYTE            bFlag1;
 #if EPL_DLL_PRES_READY_AFTER_SOA != FALSE
     if (pTxBuffer == NULL)
     {   // signal process function readiness of PRes frame
-        Ret = EplDllkPostEvent(kEplEventTypeDllkPresReady);
+        Ret = postEvent(kEplEventTypeDllkPresReady);
         if (Ret != kEplSuccessful)
         {
             goto Exit;
@@ -5109,9 +5109,9 @@ Exit:
 
 //---------------------------------------------------------------------------
 //
-// Function:    EplDllkProcessReceivedAsnd()
+// Function:    processReceivedAsnd()
 //
-// Description: called from EplDllkCbFrameReceived()
+// Description: called from cbFrameReceived()
 //
 // Parameters:  pFrameInfo_p            = pointer to frame info structure of received frame
 //              NmtState_p              = current local NMT state
@@ -5122,7 +5122,7 @@ Exit:
 //
 //---------------------------------------------------------------------------
 
-static tEplKernel EplDllkProcessReceivedAsnd(tEplFrameInfo* pFrameInfo_p,
+static tEplKernel processReceivedAsnd(tEplFrameInfo* pFrameInfo_p,
                                              tEdrvRxBuffer* pRxBuffer_p,
                                              tNmtState      NmtState_p)
 {
@@ -5164,7 +5164,7 @@ unsigned int    uiNodeId;
                 {   // memorize MAC address of CN for PReq
                 tEplDllkNodeInfo*   pIntNodeInfo;
 
-                    pIntNodeInfo = EplDllkGetNodeInfo(uiNodeId);
+                    pIntNodeInfo = getNodeInfo(uiNodeId);
                     if (pIntNodeInfo == NULL)
                     {   // no node info structure available
                         Ret = kEplDllNoNodeInfo;
@@ -5293,7 +5293,7 @@ Exit:
 //
 //---------------------------------------------------------------------------
 
-static void EplDllkCbTransmittedNmtReq(tEdrvTxBuffer * pTxBuffer_p)
+static void cbTransmittedNmtReq(tEdrvTxBuffer * pTxBuffer_p)
 {
 tEplKernel      Ret = kEplSuccessful;
 tEplEvent       Event;
@@ -5396,7 +5396,7 @@ Exit:
 //
 //---------------------------------------------------------------------------
 
-static void EplDllkCbTransmittedNonEpl(tEdrvTxBuffer * pTxBuffer_p)
+static void cbTransmittedNonEpl(tEdrvTxBuffer * pTxBuffer_p)
 {
 tEplKernel      Ret = kEplSuccessful;
 tEplEvent       Event;
@@ -5466,7 +5466,7 @@ Exit:
 
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
 #if (EPL_DLL_DISABLE_EDRV_CYCLIC != FALSE)
-static void EplDllkCbTransmittedPreq(tEdrvTxBuffer * pTxBuffer_p)
+static void cbTransmittedPreq(tEdrvTxBuffer * pTxBuffer_p)
 {
 tEplKernel      Ret = kEplSuccessful;
 tNmtState       NmtState;
@@ -5493,7 +5493,7 @@ TGT_DLLK_DECLARE_FLAGS;
         {   // local node runs as MN in PREOP2
             if (pTxBuffer_p == &EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_PRES + EplDllkInstance_g.m_bCurTxBufferOffsetCycle])
             {   // own Pres on MN, trigger SoA
-                Ret = EplDllkChangeState(kNmtEventDllMeSoaTrig, NmtState);
+                Ret = changeState(kNmtEventDllMeSoaTrig, NmtState);
             }
             else // if (pTxBuffer_p->m_EplMsgType == kEplMsgTypePreq)
             {
@@ -5501,7 +5501,7 @@ TGT_DLLK_DECLARE_FLAGS;
 #if EPL_TIMER_USE_HIGHRES != FALSE
                 Ret = EplTimerHighReskModifyTimerNs(&EplDllkInstance_g.m_TimerHdlResponse,
                     EplDllkInstance_g.m_pCurNodeInfo->m_dwPresTimeoutNs,
-                    EplDllkCbMnTimerResponse,
+                    cbMnTimerResponse,
                     0L,
                     FALSE);
 #endif
@@ -5551,7 +5551,7 @@ Exit:
 //---------------------------------------------------------------------------
 
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
-static void EplDllkCbTransmittedSoa(tEdrvTxBuffer * pTxBuffer_p)
+static void cbTransmittedSoa(tEdrvTxBuffer * pTxBuffer_p)
 {
 tEplKernel      Ret = kEplSuccessful;
 tNmtState       NmtState;
@@ -5674,7 +5674,7 @@ TGT_DLLK_DECLARE_FLAGS;
     {
         Ret = EplTimerHighReskModifyTimerNs(&EplDllkInstance_g.m_TimerHdlCycle,
             EplDllkInstance_g.m_DllConfigParam.m_dwAsyncSlotTimeout,
-            EplDllkCbMnTimerCycle,
+            cbMnTimerCycle,
             0L,
             FALSE);
         if (Ret != kEplSuccessful)
@@ -5683,7 +5683,7 @@ TGT_DLLK_DECLARE_FLAGS;
         }
 
         // forward event to ErrorHandler and DLLk module
-        Ret = EplDllkPostEvent(kEplEventTypeDllkCycleFinish);
+        Ret = postEvent(kEplEventTypeDllkCycleFinish);
         if (Ret != kEplSuccessful)
         {
             goto Exit;
@@ -5696,7 +5696,7 @@ TGT_DLLK_DECLARE_FLAGS;
         && (EplDllkInstance_g.m_fSyncProcessed == FALSE))
     {   // cyclic state is active, so preprocessing is necessary
         EplDllkInstance_g.m_fSyncProcessed = TRUE;
-        Ret = EplDllkPostEvent(kEplEventTypeSync);
+        Ret = postEvent(kEplEventTypeSync);
         if (Ret != kEplSuccessful)
         {
             goto Exit;
@@ -5742,7 +5742,7 @@ Exit:
 //---------------------------------------------------------------------------
 
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
-static void EplDllkCbTransmittedSoc(tEdrvTxBuffer * pTxBuffer_p)
+static void cbTransmittedSoc(tEdrvTxBuffer * pTxBuffer_p)
 {
 tEplKernel      Ret = kEplSuccessful;
 tNmtState       NmtState;
@@ -5770,7 +5770,7 @@ TGT_DLLK_DECLARE_FLAGS;
         {   // start WaitSoCPReq Timer
             Ret = EplTimerHighReskModifyTimerNs(&EplDllkInstance_g.m_TimerHdlResponse,
                 EplDllkInstance_g.m_DllConfigParam.m_dwWaitSocPreq,
-                EplDllkCbMnTimerResponse,
+                cbMnTimerResponse,
                 0L,
                 FALSE);
             if (Ret != kEplSuccessful)
@@ -5781,7 +5781,7 @@ TGT_DLLK_DECLARE_FLAGS;
         else
 #endif
         {   // immediately send first PReq
-            Ret = EplDllkChangeState(kNmtEventDllMePresTimeout, NmtState);
+            Ret = changeState(kNmtEventDllMePresTimeout, NmtState);
             if (Ret != kEplSuccessful)
             {
                 goto Exit;
@@ -5789,7 +5789,7 @@ TGT_DLLK_DECLARE_FLAGS;
         }
     }
 #else
-    Ret = EplDllkChangeState(kNmtEventDllMeAsndTimeout, NmtState);
+    Ret = changeState(kNmtEventDllMeAsndTimeout, NmtState);
     if (Ret != kEplSuccessful)
     {
         goto Exit;
@@ -5821,7 +5821,7 @@ Exit:
 
 //---------------------------------------------------------------------------
 //
-// Function:    EplDllkCbCyclicError()
+// Function:    cbCyclicError()
 //
 // Description: called from EdrvInterruptHandler().
 //              It signals the transmission of the specified transmit buffer.
@@ -5836,7 +5836,7 @@ Exit:
 
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
 #if EPL_DLL_DISABLE_EDRV_CYCLIC == FALSE
-static tEplKernel EplDllkCbCyclicError(tEplKernel ErrorCode_p, tEdrvTxBuffer * pTxBuffer_p)
+static tEplKernel cbCyclicError(tEplKernel ErrorCode_p, tEdrvTxBuffer * pTxBuffer_p)
 {
 tEplKernel      Ret = kEplSuccessful;
 tNmtState       NmtState;
@@ -5904,7 +5904,7 @@ Exit:
 
 //---------------------------------------------------------------------------
 //
-// Function:    EplDllkPostEvent
+// Function:    postEvent
 //
 // Description: posts events to  DLL itself
 //
@@ -5915,7 +5915,7 @@ Exit:
 // State:
 //
 //---------------------------------------------------------------------------
-static tEplKernel EplDllkPostEvent(tEplEventType EventType_p)
+static tEplKernel postEvent(tEplEventType EventType_p)
 {
 tEplKernel              Ret;
 tEplEvent               Event;
@@ -5933,7 +5933,7 @@ tEplEvent               Event;
 
 //---------------------------------------------------------------------------
 //
-// Function:    EplDllkForwardRpdo
+// Function:    forwardRpdo
 //
 // Description: This function is called by DLL if PRes or PReq frame was
 //              received. It posts the frame to the event queue.
@@ -5949,7 +5949,7 @@ tEplEvent               Event;
 //
 //---------------------------------------------------------------------------
 
-static tEplKernel EplDllkForwardRpdo(tEplFrameInfo * pFrameInfo_p)
+static tEplKernel forwardRpdo(tEplFrameInfo * pFrameInfo_p)
 {
 tEplKernel      Ret = kEplSuccessful;
 
@@ -5964,7 +5964,7 @@ tEplKernel      Ret = kEplSuccessful;
 
 //---------------------------------------------------------------------------
 //
-// Function:    EplDllkProcessTpdo
+// Function:    processTpdo
 //
 // Description: This function forward the specified TPDO for processing to
 //              the registered callback function (i.e. to the PDO module).
@@ -5978,7 +5978,7 @@ tEplKernel      Ret = kEplSuccessful;
 //
 //---------------------------------------------------------------------------
 
-static tEplKernel EplDllkProcessTpdo(tEplFrameInfo * pFrameInfo_p, BOOL fReadyFlag_p)
+static tEplKernel processTpdo(tEplFrameInfo * pFrameInfo_p, BOOL fReadyFlag_p)
 {
 tEplKernel      Ret = kEplSuccessful;
 
@@ -5993,7 +5993,7 @@ tEplKernel      Ret = kEplSuccessful;
 
 //---------------------------------------------------------------------------
 //
-// Function:    EplDllkUpdateFrameIdentRes()
+// Function:    updateFrameIdentRes()
 //
 // Description: update IdentRes frame
 //
@@ -6007,7 +6007,7 @@ tEplKernel      Ret = kEplSuccessful;
 //
 //---------------------------------------------------------------------------
 
-static tEplKernel EplDllkUpdateFrameIdentRes(tEdrvTxBuffer* pTxBuffer_p, tNmtState NmtState_p)
+static tEplKernel updateFrameIdentRes(tEdrvTxBuffer* pTxBuffer_p, tNmtState NmtState_p)
 {
 tEplKernel      Ret = kEplSuccessful;
 tEplFrame*      pTxFrame;
@@ -6032,7 +6032,7 @@ tEplFrame*      pTxFrame;
 
 //---------------------------------------------------------------------------
 //
-// Function:    EplDllkUpdateFrameStatusRes()
+// Function:    updateFrameStatusRes()
 //
 // Description: update StatusRes frame
 //
@@ -6046,7 +6046,7 @@ tEplFrame*      pTxFrame;
 //
 //---------------------------------------------------------------------------
 
-static tEplKernel EplDllkUpdateFrameStatusRes(tEdrvTxBuffer* pTxBuffer_p, tNmtState NmtState_p)
+static tEplKernel updateFrameStatusRes(tEdrvTxBuffer* pTxBuffer_p, tNmtState NmtState_p)
 {
 tEplKernel      Ret = kEplSuccessful;
 tEplFrame*      pTxFrame;
@@ -6072,7 +6072,7 @@ tEplFrame*      pTxFrame;
 
 //---------------------------------------------------------------------------
 //
-// Function:    EplDllkUpdateFramePres()
+// Function:    updateFramePres()
 //
 // Description: update PRes frame
 //
@@ -6086,7 +6086,7 @@ tEplFrame*      pTxFrame;
 //
 //---------------------------------------------------------------------------
 
-static tEplKernel EplDllkUpdateFramePres(tEdrvTxBuffer* pTxBuffer_p, tNmtState NmtState_p)
+static tEplKernel updateFramePres(tEdrvTxBuffer* pTxBuffer_p, tNmtState NmtState_p)
 {
 tEplKernel      Ret = kEplSuccessful;
 tEplFrame*      pTxFrame;
@@ -6133,7 +6133,7 @@ BYTE            bFlag1;
 
 //---------------------------------------------------------------------------
 //
-// Function:    EplDllkCreateTxFrame
+// Function:    createTxFrame
 //
 // Description: creates the buffer for a Tx frame and registers it to the
 //              ethernet driver
@@ -6156,7 +6156,7 @@ BYTE            bFlag1;
 //
 //---------------------------------------------------------------------------
 
-static tEplKernel EplDllkCreateTxFrame (unsigned int * puiHandle_p,
+static tEplKernel createTxFrame (unsigned int * puiHandle_p,
                                  unsigned int * puiFrameSize_p,
                                  tEplMsgType MsgType_p,
                                  tEplDllAsndServiceId ServiceId_p)
@@ -6486,7 +6486,7 @@ Exit:
 
 //---------------------------------------------------------------------------
 //
-// Function:    EplDllkDeleteTxFrame
+// Function:    deleteTxFrame
 //
 // Description: deletes the buffer for a Tx frame and frees it in the
 //              ethernet driver
@@ -6500,7 +6500,7 @@ Exit:
 //
 //---------------------------------------------------------------------------
 
-static tEplKernel EplDllkDeleteTxFrame (unsigned int uiHandle_p)
+static tEplKernel deleteTxFrame (unsigned int uiHandle_p)
 {
 tEplKernel      Ret = kEplSuccessful;
 tEdrvTxBuffer*  pTxBuffer = NULL;
@@ -6536,7 +6536,7 @@ Exit:
 
 //---------------------------------------------------------------------------
 //
-// Function:    EplDllkCheckFrame()
+// Function:    checkFrame()
 //
 // Description: check frame and set missing information
 //
@@ -6550,7 +6550,7 @@ Exit:
 //
 //---------------------------------------------------------------------------
 
-static tEplKernel EplDllkCheckFrame(tEplFrame * pFrame_p, unsigned int uiFrameSize_p)
+static tEplKernel checkFrame(tEplFrame * pFrame_p, unsigned int uiFrameSize_p)
 {
 tEplMsgType     MsgType;
 WORD            wEtherType;
@@ -6603,7 +6603,7 @@ WORD            wEtherType;
 
 //---------------------------------------------------------------------------
 //
-// Function:    EplDllkCbCnTimer()
+// Function:    cbCnTimer()
 //
 // Description: called by timer module. It monitors the EPL cycle when it is a CN.
 //
@@ -6617,7 +6617,7 @@ WORD            wEtherType;
 //---------------------------------------------------------------------------
 
 #if EPL_TIMER_USE_HIGHRES != FALSE
-static tEplKernel PUBLIC EplDllkCbCnTimer(tEplTimerEventArg* pEventArg_p)
+static tEplKernel PUBLIC cbCnTimer(tEplTimerEventArg* pEventArg_p)
 {
 tEplKernel      Ret = kEplSuccessful;
 tNmtState       NmtState;
@@ -6639,14 +6639,14 @@ TGT_DLLK_DECLARE_FLAGS;
         goto Exit;
     }
 
-    Ret = EplDllkChangeState(kNmtEventDllCeFrameTimeout, NmtState);
+    Ret = changeState(kNmtEventDllCeFrameTimeout, NmtState);
     if (Ret != kEplSuccessful)
     {
         goto Exit;
     }
 
     // restart the timer to detect further loss of SoC
-    Ret = EplTimerHighReskModifyTimerNs(&EplDllkInstance_g.m_TimerHdlCycle, EplDllkInstance_g.m_DllConfigParam.m_dwCycleLen, EplDllkCbCnTimer, 0L, FALSE);
+    Ret = EplTimerHighReskModifyTimerNs(&EplDllkInstance_g.m_TimerHdlCycle, EplDllkInstance_g.m_DllConfigParam.m_dwCycleLen, cbCnTimer, 0L, FALSE);
     if (Ret != kEplSuccessful)
     {
         goto Exit;
@@ -6678,7 +6678,7 @@ Exit:
 #if (EPL_DLL_PROCESS_SYNC == EPL_DLL_PROCESS_SYNC_ON_TIMER)
 //---------------------------------------------------------------------------
 //
-// Function:    EplDllkCbCnTimerSync()
+// Function:    cbCnTimerSync()
 //
 // Description: called by timer sync module. It signals the Sync event.
 //
@@ -6691,12 +6691,12 @@ Exit:
 //
 //---------------------------------------------------------------------------
 
-static tEplKernel PUBLIC EplDllkCbCnTimerSync(void)
+static tEplKernel PUBLIC cbCnTimerSync(void)
 {
 tEplKernel      Ret = kEplSuccessful;
 
     // trigger synchronous task
-    Ret = EplDllkPostEvent(kEplEventTypeSync);
+    Ret = postEvent(kEplEventTypeSync);
 
     return Ret;
 }
@@ -6704,7 +6704,7 @@ tEplKernel      Ret = kEplSuccessful;
 
 //---------------------------------------------------------------------------
 //
-// Function:    EplDllkCbCnLossOfSync()
+// Function:    cbCnLossOfSync()
 //
 // Description: called by timer sync module. It signals that one Sync/SoC was lost.
 //
@@ -6717,7 +6717,7 @@ tEplKernel      Ret = kEplSuccessful;
 //
 //---------------------------------------------------------------------------
 
-static tEplKernel PUBLIC EplDllkCbCnLossOfSync(void)
+static tEplKernel PUBLIC cbCnLossOfSync(void)
 {
 tEplKernel      Ret = kEplSuccessful;
 tNmtState       NmtState;
@@ -6733,7 +6733,7 @@ TGT_DLLK_DECLARE_FLAGS;
         goto Exit;
     }
 
-    Ret = EplDllkChangeState(kNmtEventDllCeFrameTimeout, NmtState);
+    Ret = changeState(kNmtEventDllCeFrameTimeout, NmtState);
     if (Ret != kEplSuccessful)
     {
         goto Exit;
@@ -6766,7 +6766,7 @@ Exit:
 
 //---------------------------------------------------------------------------
 //
-// Function:    EplDllkGetNodeInfo()
+// Function:    getNodeInfo()
 //
 // Description: returns node info structure of the specified node.
 //
@@ -6779,7 +6779,7 @@ Exit:
 //
 //---------------------------------------------------------------------------
 
-static tEplDllkNodeInfo* EplDllkGetNodeInfo(unsigned int uiNodeId_p)
+static tEplDllkNodeInfo* getNodeInfo(unsigned int uiNodeId_p)
 {
     // $$$ d.k.: use hash algorithm to retrieve the appropriate node info structure
     //           if size of array is less than 254.
@@ -6797,7 +6797,7 @@ static tEplDllkNodeInfo* EplDllkGetNodeInfo(unsigned int uiNodeId_p)
 
 //---------------------------------------------------------------------------
 //
-// Function:    EplDllkAddNodeFilter()
+// Function:    addNodeFilter()
 //
 // Description: adds PRes filter for the specified node.
 //
@@ -6811,7 +6811,7 @@ static tEplDllkNodeInfo* EplDllkGetNodeInfo(unsigned int uiNodeId_p)
 //
 //---------------------------------------------------------------------------
 
-static tEplKernel EplDllkAddNodeFilter(tEplDllkNodeInfo* pIntNodeInfo_p, tEplDllNodeOpType NodeOpType_p, BOOL fUpdateEdrv_p)
+static tEplKernel addNodeFilter(tEplDllkNodeInfo* pIntNodeInfo_p, tEplDllNodeOpType NodeOpType_p, BOOL fUpdateEdrv_p)
 {
 tEplKernel      Ret = kEplSuccessful;
 BYTE            bPresFilterFlags = 0;
@@ -6892,7 +6892,7 @@ Exit:
 
 //---------------------------------------------------------------------------
 //
-// Function:    EplDllkDeleteNodeFilter()
+// Function:    deleteNodeFilter()
 //
 // Description: deletes PRes filter for the specified node.
 //
@@ -6906,7 +6906,7 @@ Exit:
 //
 //---------------------------------------------------------------------------
 
-static tEplKernel EplDllkDeleteNodeFilter(tEplDllkNodeInfo* pIntNodeInfo_p, tEplDllNodeOpType NodeOpType_p, BOOL fUpdateEdrv_p)
+static tEplKernel deleteNodeFilter(tEplDllkNodeInfo* pIntNodeInfo_p, tEplDllNodeOpType NodeOpType_p, BOOL fUpdateEdrv_p)
 {
 tEplKernel      Ret = kEplSuccessful;
 BYTE            bPresFilterFlags = 0;
@@ -6995,7 +6995,7 @@ Exit:
 
 //---------------------------------------------------------------------------
 //
-// Function:    EplDllkAddNodeIsochronous()
+// Function:    addNodeIsochronous()
 //
 // Description: adds the specified node to the isochronous phase.
 //
@@ -7008,7 +7008,7 @@ Exit:
 //
 //---------------------------------------------------------------------------
 
-static tEplKernel EplDllkAddNodeIsochronous(tEplDllkNodeInfo* pIntNodeInfo_p)
+static tEplKernel addNodeIsochronous(tEplDllkNodeInfo* pIntNodeInfo_p)
 {
 tEplKernel          Ret = kEplSuccessful;
 tEplDllkNodeInfo**  ppIntNodeInfo;
@@ -7134,7 +7134,7 @@ Exit:
 
 //---------------------------------------------------------------------------
 //
-// Function:    EplDllkDeleteNodeIsochronous()
+// Function:    deleteNodeIsochronous()
 //
 // Description: removes the specified node from the isochronous phase.
 //
@@ -7147,7 +7147,7 @@ Exit:
 //
 //---------------------------------------------------------------------------
 
-static tEplKernel EplDllkDeleteNodeIsochronous(tEplDllkNodeInfo* pIntNodeInfo_p)
+static tEplKernel deleteNodeIsochronous(tEplDllkNodeInfo* pIntNodeInfo_p)
 {
 tEplKernel          Ret = kEplSuccessful;
 tEplDllkNodeInfo**  ppIntNodeInfo;
@@ -7201,7 +7201,7 @@ Exit:
 
 //---------------------------------------------------------------------------
 //
-// Function:    EplDllkCbMnTimerCycle()
+// Function:    cbMnTimerCycle()
 //
 // Description: called by timer module. It triggers the SoC when it is a MN.
 //
@@ -7214,7 +7214,7 @@ Exit:
 //
 //---------------------------------------------------------------------------
 
-static tEplKernel PUBLIC EplDllkCbMnTimerCycle(tEplTimerEventArg* pEventArg_p)
+static tEplKernel PUBLIC cbMnTimerCycle(tEplTimerEventArg* pEventArg_p)
 {
 tEplKernel      Ret = kEplSuccessful;
 tNmtState       NmtState;
@@ -7238,7 +7238,7 @@ TGT_DLLK_DECLARE_FLAGS;
         goto Exit;
     }
 
-    Ret = EplDllkChangeState(kNmtEventDllMeSocTrig, NmtState);
+    Ret = changeState(kNmtEventDllMeSocTrig, NmtState);
 
 Exit:
     if (Ret != kEplSuccessful)
@@ -7264,7 +7264,7 @@ Exit:
 
 //---------------------------------------------------------------------------
 //
-// Function:    EplDllkCbMnSyncHandler()
+// Function:    cbMnSyncHandler()
 //
 // Description: called by EdrvCyclic module. It triggers the Sync event.
 //
@@ -7278,7 +7278,7 @@ Exit:
 //---------------------------------------------------------------------------
 
 #if EPL_DLL_DISABLE_EDRV_CYCLIC == FALSE
-static tEplKernel EplDllkCbMnSyncHandler(void)
+static tEplKernel cbMnSyncHandler(void)
 {
 tEplKernel      Ret = kEplSuccessful;
 tNmtState       NmtState;
@@ -7301,7 +7301,7 @@ TGT_DLLK_DECLARE_FLAGS;
     while (*pbCnNodeId != EPL_C_ADR_INVALID)
     {   // issue error for each CN in list which was not processed yet, i.e. PRes received
 
-        Ret = EplDllkIssueLossOfPres(*pbCnNodeId);
+        Ret = issueLossOfPres(*pbCnNodeId);
         if (Ret != kEplSuccessful)
         {
             goto Exit;
@@ -7319,7 +7319,7 @@ TGT_DLLK_DECLARE_FLAGS;
     EplDllkInstance_g.m_bCurTxBufferOffsetCycle ^= 1;
     EplDllkInstance_g.m_bCurNodeIndex = 0;
 
-    Ret = EplDllkPostEvent(kEplEventTypeDllkCycleFinish);
+    Ret = postEvent(kEplEventTypeDllkCycleFinish);
 
 Exit:
     if (Ret != kEplSuccessful)
@@ -7346,7 +7346,7 @@ Exit:
 
 //---------------------------------------------------------------------------
 //
-// Function:    EplDllkCbMnTimerResponse()
+// Function:    cbMnTimerResponse()
 //
 // Description: called by timer module. It monitors the PRes timeout.
 //
@@ -7359,7 +7359,7 @@ Exit:
 //
 //---------------------------------------------------------------------------
 #if EPL_DLL_DISABLE_EDRV_CYCLIC != FALSE
-static tEplKernel PUBLIC EplDllkCbMnTimerResponse(tEplTimerEventArg* pEventArg_p)
+static tEplKernel PUBLIC cbMnTimerResponse(tEplTimerEventArg* pEventArg_p)
 {
 tEplKernel      Ret = kEplSuccessful;
 tNmtState       NmtState;
@@ -7383,7 +7383,7 @@ TGT_DLLK_DECLARE_FLAGS;
         goto Exit;
     }
 
-    Ret = EplDllkChangeState(kNmtEventDllMePresTimeout, NmtState);
+    Ret = changeState(kNmtEventDllMePresTimeout, NmtState);
 
 Exit:
     if (Ret != kEplSuccessful)
@@ -7409,7 +7409,7 @@ Exit:
 
 //---------------------------------------------------------------------------
 //
-// Function:    EplDllkUpdateFrameSoa()
+// Function:    updateFrameSoa()
 //
 // Description: update SoA frame
 //
@@ -7425,7 +7425,7 @@ Exit:
 //
 //---------------------------------------------------------------------------
 
-static tEplKernel EplDllkUpdateFrameSoa(tEdrvTxBuffer* pTxBuffer_p, tNmtState NmtState_p, BOOL fEnableInvitation_p, BYTE bCurReq_p)
+static tEplKernel updateFrameSoa(tEdrvTxBuffer* pTxBuffer_p, tNmtState NmtState_p, BOOL fEnableInvitation_p, BYTE bCurReq_p)
 {
 tEplKernel          Ret = kEplSuccessful;
 tEplFrame*          pTxFrame;
@@ -7461,7 +7461,7 @@ tEplDllkNodeInfo*   pNodeInfo;
                 EplDllkInstance_g.m_auiLastTargetNodeId[bCurReq_p] = EplDllkInstance_g.m_DllConfigParam.m_uiNodeId;
             }
 
-            pNodeInfo = EplDllkGetNodeInfo(EplDllkInstance_g.m_auiLastTargetNodeId[bCurReq_p]);
+            pNodeInfo = getNodeInfo(EplDllkInstance_g.m_auiLastTargetNodeId[bCurReq_p]);
             if (pNodeInfo == NULL)
             {   // no node info structure available
                 Ret = kEplDllNoNodeInfo;
@@ -7497,7 +7497,7 @@ Exit:
 
 //---------------------------------------------------------------------------
 //
-// Function:    EplDllkMnSendSoa()
+// Function:    mnSendSoa()
 //
 // Description: it updates and transmits the SoA.
 //
@@ -7513,7 +7513,7 @@ Exit:
 //
 //---------------------------------------------------------------------------
 
-static tEplKernel EplDllkMnSendSoa(tNmtState NmtState_p,
+static tEplKernel mnSendSoa(tNmtState NmtState_p,
                                    tEplDllState* pDllStateProposed_p,
                                    BOOL fEnableInvitation_p)
 {
@@ -7525,7 +7525,7 @@ tEdrvTxBuffer  *pTxBuffer = NULL;
     pTxBuffer = &EplDllkInstance_g.m_pTxBuffer[EPL_DLLK_TXFRAME_SOA];
     if (pTxBuffer->m_pbBuffer != NULL)
     {   // SoA does exist
-        Ret = EplDllkUpdateFrameSoa(pTxBuffer, NmtState_p, fEnableInvitation_p, EplDllkInstance_g.m_bCurLastSoaReq);
+        Ret = updateFrameSoa(pTxBuffer, NmtState_p, fEnableInvitation_p, EplDllkInstance_g.m_bCurLastSoaReq);
         if (Ret != kEplSuccessful)
         {
             goto Exit;
@@ -7562,7 +7562,7 @@ Exit:
 
 //---------------------------------------------------------------------------
 //
-// Function:    EplDllkMnSendSoc()
+// Function:    mnSendSoc()
 //
 // Description: it updates and transmits the SoA.
 //
@@ -7576,7 +7576,7 @@ Exit:
 //---------------------------------------------------------------------------
 
 #if EPL_DLL_DISABLE_EDRV_CYCLIC != FALSE
-static tEplKernel EplDllkMnSendSoc(void)
+static tEplKernel mnSendSoc(void)
 {
 tEplKernel      Ret = kEplSuccessful;
 tEdrvTxBuffer*  pTxBuffer = NULL;
@@ -7599,7 +7599,7 @@ tEplFrame*      pTxFrame;
         if (EplDllkInstance_g.m_DllConfigParam.m_uiSyncNodeId == EPL_C_ADR_SYNC_ON_SOC)
         {
             // trigger synchronous task on SoC
-            Ret = EplDllkPostEvent(kEventTypeSync);
+            Ret = postEvent(kEventTypeSync);
         }
     }
 
@@ -7611,7 +7611,7 @@ Exit:
 
 //---------------------------------------------------------------------------
 //
-// Function:    EplDllkMnSendPreq()
+// Function:    mnSendPreq()
 //
 // Description: it updates and transmits the PReq for the next isochronous CN
 //              or own PRes if enabled.
@@ -7627,7 +7627,7 @@ Exit:
 //---------------------------------------------------------------------------
 
 #if EPL_DLL_DISABLE_EDRV_CYCLIC != FALSE
-static tEplKernel EplDllkMnSendPreq(tNmtState NmtState_p,
+static tEplKernel mnSendPreq(tNmtState NmtState_p,
                                     tEplDllState* pDllStateProposed_p)
 {
 tEplKernel      Ret = kEplSuccessful;
@@ -7648,7 +7648,7 @@ tEdrvTxBuffer  *pTxBuffer = NULL;
 
     if (EplDllkInstance_g.m_pCurNodeInfo == NULL)
     {   // last isochronous CN reached
-        Ret = EplDllkMnSendSoa(NmtState_p, pDllStateProposed_p, TRUE);
+        Ret = mnSendSoa(NmtState_p, pDllStateProposed_p, TRUE);
         goto Exit;
     }
     else
@@ -7681,7 +7681,7 @@ Exit:
 
 //---------------------------------------------------------------------------
 //
-// Function:    EplDllkAsyncFrameNotReceived()
+// Function:    asyncFrameNotReceived()
 //
 // Description: passes empty ASnd frame to receive FIFO.
 //              It will be called only for frames with registered AsndServiceIds
@@ -7696,7 +7696,7 @@ Exit:
 //
 //---------------------------------------------------------------------------
 
-static tEplKernel EplDllkAsyncFrameNotReceived(tEplDllReqServiceId ReqServiceId_p, unsigned int uiNodeId_p)
+static tEplKernel asyncFrameNotReceived(tEplDllReqServiceId ReqServiceId_p, unsigned int uiNodeId_p)
 {
 tEplKernel      Ret = kEplSuccessful;
 BYTE            abBuffer[18];
@@ -7742,7 +7742,7 @@ tEplFrameInfo   FrameInfo;
 
 //---------------------------------------------------------------------------
 //
-// Function:    EplDllkPResChainingEnable()
+// Function:    pResChainingEnable()
 //
 // Description: Enables PRes Chaining mode
 //
@@ -7755,7 +7755,7 @@ tEplFrameInfo   FrameInfo;
 //
 //---------------------------------------------------------------------------
 
-static tEplKernel EplDllkPResChainingEnable (void)
+static tEplKernel pResChainingEnable (void)
 {
 tEplKernel      Ret = kEplSuccessful;
 tEplFrame*      pTxFrameSyncRes;
@@ -7807,7 +7807,7 @@ Exit:
 
 //---------------------------------------------------------------------------
 //
-// Function:    EplDllkPResChainingDisable()
+// Function:    pResChainingDisable()
 //
 // Description: Disables PRes Chaining mode, thus restoring PReq/PRes mode
 //
@@ -7820,7 +7820,7 @@ Exit:
 //
 //---------------------------------------------------------------------------
 
-static tEplKernel EplDllkPResChainingDisable (void)
+static tEplKernel pResChainingDisable (void)
 {
 tEplKernel      Ret = kEplSuccessful;
 tEplFrame*      pTxFrameSyncRes;
@@ -7873,7 +7873,7 @@ Exit:
 
 //---------------------------------------------------------------------------
 //
-// Function:    EplDllkCbCnPResFallBackTimeout()
+// Function:    cbCnPResFallBackTimeout()
 //
 // Description: called by timer sync module. It signals that PResFallBackTimeout has triggered.
 //
@@ -7886,7 +7886,7 @@ Exit:
 //
 //---------------------------------------------------------------------------
 
-static tEplKernel PUBLIC EplDllkCbCnPResFallBackTimeout(void)
+static tEplKernel PUBLIC cbCnPResFallBackTimeout(void)
 {
 tEplKernel      Ret = kEplSuccessful;
 tNmtState       NmtState;
@@ -7902,7 +7902,7 @@ TGT_DLLK_DECLARE_FLAGS;
         goto Exit;
     }
 
-    Ret = EplDllkPResChainingDisable();
+    Ret = pResChainingDisable();
     if (Ret != kEplSuccessful)
     {
         goto Exit;

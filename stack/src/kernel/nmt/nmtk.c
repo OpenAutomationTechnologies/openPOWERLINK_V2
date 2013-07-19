@@ -291,7 +291,7 @@ tEplKernel nmtk_process(tEplEvent* pEvent_p)
 
         // inform DLLk module about state change
         event.m_EventSink = kEplEventSinkDllk;
-        ret = EplDllkProcess(&event);
+        ret = dllk_process(&event);
         if (ret != kEplSuccessful)
            return ret;
 

@@ -132,7 +132,7 @@ tEplKernel pdok_init(void)
         return ret;
     }
 
-    ret = EplDllkRegTpdoHandler(cbProcessTpdo);
+    ret = dllk_regTpdoHandler(cbProcessTpdo);
 
     return ret;
 }
@@ -151,7 +151,7 @@ The function cleans up the PDO kernel module.
 tEplKernel pdok_exit(void)
 {
     pdokInstance_g.fRunning = FALSE;
-    EplDllkRegTpdoHandler(NULL);
+    dllk_regTpdoHandler(NULL);
     pdok_deAllocChannelMem();
     pdokcal_cleanupPdoMem();
     pdokcal_exit();
@@ -178,7 +178,7 @@ tEplKernel pdok_deAllocChannelMem(void)
 
     NodeOpParam.m_OpNodeType = kEplDllNodeOpTypeFilterPdo;
     NodeOpParam.m_uiNodeId = EPL_C_ADR_BROADCAST;
-    Ret = EplDllkDeleteNode(&NodeOpParam);
+    Ret = dllk_deleteNode(&NodeOpParam);
     if (Ret != kEplSuccessful)
     {
         EPL_DBGLVL_PDO_TRACE("%s() EplDllkDeleteNode failed (%s)\n",
@@ -234,7 +234,7 @@ tEplKernel pdok_allocChannelMem(tPdoAllocationParam* pAllocationParam_p)
 
     nodeOpParam.m_OpNodeType = kEplDllNodeOpTypeFilterPdo;
     nodeOpParam.m_uiNodeId = EPL_C_ADR_BROADCAST;
-    ret = EplDllkDeleteNode(&nodeOpParam);
+    ret = dllk_deleteNode(&nodeOpParam);
     if (ret != kEplSuccessful)
     {
         goto Exit;
@@ -334,7 +334,7 @@ tEplKernel pdok_configureChannel(tPdoChannelConf* pChannelConf_p)
             && (pDestPdoChannel->nodeId != PDO_PREQ_NODE_ID))
         {   // disable old PRes filter in DLL
             NodeOpParam.m_uiNodeId = pDestPdoChannel->nodeId;
-            Ret = EplDllkDeleteNode(&NodeOpParam);
+            Ret = dllk_deleteNode(&NodeOpParam);
             if (Ret != kEplSuccessful)
             {
                 goto Exit;
@@ -351,7 +351,7 @@ tEplKernel pdok_configureChannel(tPdoChannelConf* pChannelConf_p)
             && (pDestPdoChannel->nodeId != PDO_PREQ_NODE_ID))
         {   // enable new PRes filter in DLL
             NodeOpParam.m_uiNodeId = pDestPdoChannel->nodeId;
-            Ret = EplDllkAddNode(&NodeOpParam);
+            Ret = dllk_addNode(&NodeOpParam);
             if (Ret != kEplSuccessful)
             {
                 goto Exit;
@@ -468,7 +468,7 @@ tEplKernel pdok_processRxPdo(tEplFrame* pFrame_p, UINT frameSize_p)
 
 Exit:
 #if EPL_DLL_DISABLE_DEFERRED_RXFRAME_RELEASE == FALSE
-    EplDllkReleaseRxFrame(pFrame_p, frameSize_p);
+    dllk_releaseRxFrame(pFrame_p, frameSize_p);
     // $$$ return value?
 #endif
 
