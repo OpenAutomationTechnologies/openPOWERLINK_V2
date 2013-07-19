@@ -315,7 +315,7 @@ static tEplKernel decrementMnCounters(void)
     UINT            nodeIdx;
     UINT32          thresholdCnt;
 
-    ret = EplDllkGetCurrentCnNodeIdList(&pCnNodeId);
+    ret = dllk_getCurrentCnNodeIdList(&pCnNodeId);
     if (ret != kEplSuccessful)
     {
         return ret;
@@ -626,7 +626,7 @@ static tEplKernel handleInvalidFormat(tEplEvent *pEvent_p)
             NodeOpParam.m_OpNodeType = kEplDllNodeOpTypeIsochronous;
             NodeOpParam.m_uiNodeId =pErrorHandlerEvent->m_uiNodeId;
             // remove node from isochronous phase
-            EplDllkDeleteNode(&NodeOpParam);
+            dllk_deleteNode(&NodeOpParam);
 
             // inform NmtMnu module about state change, which shall send
             // NMT command ResetNode to this CN
@@ -817,7 +817,7 @@ static tEplKernel handleMnCnLossPres(tEplEvent *pEvent_p)
             // remove node from isochronous phase
             nodeOpParam.m_OpNodeType = kEplDllNodeOpTypeIsochronous;
             nodeOpParam.m_uiNodeId = pErrorHandlerEvent->m_uiNodeId;
-            ret = EplDllkDeleteNode(&nodeOpParam);
+            ret = dllk_deleteNode(&nodeOpParam);
 
             // inform NmtMnu module about state change, which shall send
             // NMT command ResetNode to this CN

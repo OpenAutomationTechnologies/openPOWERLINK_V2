@@ -179,7 +179,7 @@ tEplKernel  Ret = kEplSuccessful;
     netif_start_queue(pNetDevice_p);
 
     // register callback function in DLL
-    Ret = EplDllkRegAsyncHandler(VEthRecvFrame);
+    Ret = dllk_regAsyncHandler(VEthRecvFrame);
 
     EPL_DBGLVL_VETH_TRACE("VEthOpen: EplDllkRegAsyncHandler returned 0x%02X\n", Ret);
 
@@ -192,7 +192,7 @@ tEplKernel  Ret = kEplSuccessful;
 
     EPL_DBGLVL_VETH_TRACE("VEthClose\n");
 
-    Ret = EplDllkDeregAsyncHandler(VEthRecvFrame);
+    Ret = dllk_deregAsyncHandler(VEthRecvFrame);
 
     //stop the interface queue for the network subsystem
     netif_stop_queue(pNetDevice_p);

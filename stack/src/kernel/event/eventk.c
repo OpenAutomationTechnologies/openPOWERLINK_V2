@@ -110,7 +110,7 @@ static tEventDispatchEntry eventDispatchTbl_l[] =
 #endif
 #if defined(CONFIG_INCLUDE_DLLK)
     { kEplEventSinkNmtk,        kEplEventSourceDllk,        handleNmtEventinDll },
-    { kEplEventSinkDllk,        kEplEventSourceDllk,        EplDllkProcess },
+    { kEplEventSinkDllk,        kEplEventSourceDllk,        dllk_process },
     { kEplEventSinkDllkCal,     kEplEventSourceDllk,        dllkcal_process },
     { kEplEventSinkErrk,        kEplEventSourceErrk,        errhndk_process },
 #else
@@ -366,7 +366,7 @@ static tEplKernel handleNmtEventinDll(tEplEvent* pEvent_p)
     {
         BENCHMARK_MOD_27_SET(0);
         // forward SoA event to DLLk module for cycle preprocessing
-        ret = EplDllkProcess(pEvent_p);
+        ret = dllk_process(pEvent_p);
 
         BENCHMARK_MOD_27_RESET(0);
     }

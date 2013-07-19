@@ -140,61 +140,61 @@ typedef tEplKernel (* tEplDllkCbProcessTpdo) (tEplFrameInfo * pFrameInfo_p, BOOL
 
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLK)) != 0)
 
-tEplKernel EplDllkAddInstance(tEplDllkInitParam * pInitParam_p);
+tEplKernel dllk_addInstance(tEplDllkInitParam * pInitParam_p);
 
-tEplKernel EplDllkDelInstance(void);
+tEplKernel dllk_delInstance(void);
 
 // called before NMT_GS_COMMUNICATING will be entered to configure fixed parameters
-tEplKernel EplDllkConfig(tEplDllConfigParam * pDllConfigParam_p);
+tEplKernel dllk_config(tEplDllConfigParam * pDllConfigParam_p);
 
 // set identity of local node (may be at any time, e.g. in case of hostname change)
-tEplKernel EplDllkSetIdentity(tEplDllIdentParam * pDllIdentParam_p);
+tEplKernel dllk_setIdentity(tEplDllIdentParam * pDllIdentParam_p);
 
 // process internal events and do work that cannot be done in interrupt-context
-tEplKernel EplDllkProcess(tEplEvent * pEvent_p) SECTION_DLLK_PROCESS;
+tEplKernel dllk_process(tEplEvent * pEvent_p) SECTION_DLLK_PROCESS;
 
 // registers handler for non-EPL frames (used by Virtual Ethernet driver)
-tEplKernel EplDllkRegAsyncHandler(tEplDllkCbAsync pfnDllkCbAsync_p);
+tEplKernel dllk_regAsyncHandler(tEplDllkCbAsync pfnDllkCbAsync_p);
 
 // deregisters handler for non-EPL frames
-tEplKernel EplDllkDeregAsyncHandler(tEplDllkCbAsync pfnDllkCbAsync_p);
+tEplKernel dllk_deregAsyncHandler(tEplDllkCbAsync pfnDllkCbAsync_p);
 
 // register C_DLL_MULTICAST_ASND in ethernet driver if any AsndServiceId is registered
-tEplKernel EplDllkSetAsndServiceIdFilter(tEplDllAsndServiceId ServiceId_p, tEplDllAsndFilter Filter_p);
+tEplKernel dllk_setAsndServiceIdFilter(tEplDllAsndServiceId ServiceId_p, tEplDllAsndFilter Filter_p);
 
 // registers handler for RPDOs frames
-tEplKernel EplDllkRegRpdoHandler(tEplDllkCbProcessRpdo pfnDllkCbProcessRpdo_p);
+tEplKernel dllk_regRpdoHandler(tEplDllkCbProcessRpdo pfnDllkCbProcessRpdo_p);
 
 // registers handler for TPDOs frames
-tEplKernel EplDllkRegTpdoHandler(tEplDllkCbProcessTpdo pfnDllkCbProcessTpdo_p);
+tEplKernel dllk_regTpdoHandler(tEplDllkCbProcessTpdo pfnDllkCbProcessTpdo_p);
 
 // registers handler for Sync event
-tEplSyncCb EplDllkRegSyncHandler(tEplSyncCb pfnCbSync_p);
+tEplSyncCb dllk_regSyncHandler(tEplSyncCb pfnCbSync_p);
 
 // Releases the rx buffer for the specified rx frame in Edrv
-tEplKernel EplDllkReleaseRxFrame(tEplFrame* pFrame_p, unsigned int uiFrameSize_p);
+tEplKernel dllk_releaseRxFrame(tEplFrame* pFrame_p, unsigned int uiFrameSize_p);
 
 
 #if EPL_NMT_MAX_NODE_ID > 0
 
-tEplKernel EplDllkConfigNode(tEplDllNodeInfo* pNodeInfo_p);
+tEplKernel dllk_configNode(tEplDllNodeInfo* pNodeInfo_p);
 
-tEplKernel EplDllkAddNode(tEplDllNodeOpParam* pNodeOpParam_p);
+tEplKernel dllk_addNode(tEplDllNodeOpParam* pNodeOpParam_p);
 
-tEplKernel EplDllkDeleteNode(tEplDllNodeOpParam* pNodeOpParam_p);
+tEplKernel dllk_deleteNode(tEplDllNodeOpParam* pNodeOpParam_p);
 
 #endif // EPL_NMT_MAX_NODE_ID > 0
 
 
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
 
-tEplKernel EplDllkSetFlag1OfNode(unsigned int uiNodeId_p, BYTE bSoaFlag1_p);
+tEplKernel dllk_setFlag1OfNode(unsigned int uiNodeId_p, BYTE bSoaFlag1_p);
 
-tEplKernel EplDllkGetCurrentCnNodeIdList(BYTE** ppbCnNodeIdList_p);
+tEplKernel dllk_getCurrentCnNodeIdList(BYTE** ppbCnNodeIdList_p);
 
 
 #if EPL_DLL_PRES_CHAINING_MN != FALSE
-tEplKernel EplDllkGetCnMacAddress(unsigned int uiNodeId_p, BYTE* pb_be_CnMacAddress_p);
+tEplKernel dllk_getCnMacAddress(unsigned int uiNodeId_p, BYTE* pb_be_CnMacAddress_p);
 #endif
 
 #endif // (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
