@@ -91,13 +91,13 @@
 // be adapted and tested.
 //#define TARGET_HARDWARE                 TGTHW_PC_WRAPP
 
-// use no FIFOs, make direct calls
-//#define EPL_USE_SHAREDBUFF   FALSE
+// don't use shared buff any more
+#define EPL_USE_SHAREDBUFF   FALSE
 
 // determine event queue implementation
 // -> internal and u2k queues: direct call
 // -> k2u queue: shared buffer
-#define EPL_EVENT_K2U_QUEUE             EPL_QUEUE_SHB
+#define EPL_EVENT_K2U_QUEUE             EPL_QUEUE_CIRCBUF
 #define EPL_EVENT_U2K_QUEUE             EPL_QUEUE_DIRECT
 #define EPL_EVENT_KINT_QUEUE            EPL_QUEUE_DIRECT
 #define EPL_EVENT_UINT_QUEUE            EPL_QUEUE_DIRECT
