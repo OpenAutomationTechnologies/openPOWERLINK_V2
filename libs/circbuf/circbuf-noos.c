@@ -230,7 +230,7 @@ The function enters a locked section of the circular buffer.
 void circbuf_lock(tCircBufInstance* pInstance_p)
 {
     UNUSED_PARAMETER(pInstance_p);
-    ShbTgtEnableGlobalInterrupt(FALSE);
+    EplTgtEnableGlobalInterrupt(FALSE);
 }
 
 //------------------------------------------------------------------------------
@@ -247,7 +247,7 @@ The function leaves a locked section of the circular buffer.
 void circbuf_unlock(tCircBufInstance* pInstance_p)
 {
     UNUSED_PARAMETER(pInstance_p);
-    ShbTgtEnableGlobalInterrupt(TRUE);
+    EplTgtEnableGlobalInterrupt(TRUE);
 }
 
 //============================================================================//
