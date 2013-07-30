@@ -63,6 +63,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 extern "C" {
 #endif
 
+/* host interface buffer event interface */
+tEplKernel eventkcal_initQueueHostif(tEventQueue eventQueue_p);
+tEplKernel eventkcal_exitQueueHostif (tEventQueue eventQueue_p);
+tEplKernel eventkcal_postEventHostif (tEventQueue eventQueue_p, tEplEvent *pEvent_p);
+tEplKernel eventkcal_processEventHostif(tEventQueue eventQueue_p);
+tEplKernel eventkcal_getEventHostif(tEventQueue eventQueue_p, BYTE* pDataBuffer_p, size_t* pReadSize_p);
+UINT       eventkcal_getEventCountHostif(tEventQueue eventQueue_p);
+tEplKernel eventkcal_setSignalingHostif(tEventQueue eventQueue_p, VOIDFUNCPTR pfnSignalCb_p);
 
 /* circular buffer event interface */
 tEplKernel eventkcal_initQueueCircbuf(tEventQueue eventQueue_p);
