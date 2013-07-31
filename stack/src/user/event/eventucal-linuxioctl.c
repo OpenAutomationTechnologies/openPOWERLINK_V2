@@ -40,7 +40,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <eventcal.h>
+
 #include <user/eventucal.h>
 
 #include <pthread.h>

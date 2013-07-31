@@ -44,7 +44,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <event.h>
-#include <eventcal.h>
+
 #include <user/eventu.h>
 #include <user/eventucal.h>
 

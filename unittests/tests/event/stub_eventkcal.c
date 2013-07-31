@@ -36,7 +36,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <eventcal.h>
+
 #include <kernel/eventk.h>
 #include <kernel/eventkcal.h>
 
