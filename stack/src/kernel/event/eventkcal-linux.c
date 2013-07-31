@@ -41,7 +41,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #include <EplInc.h>
 #include <Epl.h>
-#include <eventcal.h>
+
 #include <kernel/eventkcal.h>
 #include <kernel/eventkcalintf.h>
 
