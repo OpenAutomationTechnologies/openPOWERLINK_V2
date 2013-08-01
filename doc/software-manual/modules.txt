@@ -242,6 +242,17 @@ Different CAL module implementations are available:
 
 //==============================================================================
 /**
+\defgroup module_dllk Kernel DLL module (dllk)
+
+The kernel data link layer (DLL) module provides the data link layer of the
+openPOWERLINK stack. It implements the DLL state machine and all functions
+to create and process the POWERLINK cycle.
+
+\ingroup kernel_layer
+*/
+
+//==============================================================================
+/**
 \defgroup module_errhndk Kernel error handler module (errhndk)
 
 The kernel error handler module implements the POWERLINK error handler. It is
