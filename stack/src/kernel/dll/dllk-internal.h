@@ -44,7 +44,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 
-#include <kernel/EplDllk.h>
+#include <kernel/dllk.h>
 #include <kernel/dllkcal.h>
 #include <kernel/eventk.h>
 #include <kernel/errhndk.h>
@@ -52,14 +52,42 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <edrv.h>
 #include <Benchmark.h>
 
-//#if EPL_TIMER_USE_HIGHRES != FALSE
+#if EPL_TIMER_USE_HIGHRES != FALSE
 #include "kernel/EplTimerHighResk.h"
-//#endif
+#endif
 
-#include "kernel/EplDllkTgt.h"
+#include "kernel/dllktgt.h"
 
 #if (EPL_DLL_PROCESS_SYNC == EPL_DLL_PROCESS_SYNC_ON_TIMER)
 #include "kernel/EplTimerSynck.h"
+#endif
+
+
+//------------------------------------------------------------------------------
+// check for correct compilation options
+//------------------------------------------------------------------------------
+#if (EPL_DLL_PRES_READY_AFTER_SOA != FALSE) && (EPL_DLL_PRES_READY_AFTER_SOC != FALSE)
+#error "DLLK: select only one of EPL_DLL_PRES_READY_AFTER_SOA and EPL_DLL_PRES_READY_AFTER_SOC."
+#endif
+
+#if ((EPL_DLL_PRES_READY_AFTER_SOA != FALSE) || (EPL_DLL_PRES_READY_AFTER_SOC != FALSE)) &&  defined(CONFIG_INCLUDE_NMT_MN)
+#error "DLLK: currently, EPL_DLL_PRES_READY_AFTER_* is not supported if EPL_MODULE_NMT_MN is enabled."
+#endif
+
+#if (EDRV_FAST_TXFRAMES == FALSE) && ((EPL_DLL_PRES_READY_AFTER_SOA != FALSE) || (EPL_DLL_PRES_READY_AFTER_SOC != FALSE))
+#error "DLLK: EPL_DLL_PRES_READY_AFTER_* is enabled, but not EDRV_FAST_TXFRAMES."
+#endif
+
+#if defined(CONFIG_INCLUDE_NMT_MN) && (EPL_DLL_PRES_FILTER_COUNT == 0)
+#error "MN support needs EPL_DLL_PRES_FILTER_COUNT != 0"
+#endif
+
+#if (EPL_DLL_PRES_CHAINING_CN != FALSE) && (EDRV_AUTO_RESPONSE_DELAY == FALSE)
+#error "Ethernet driver support for auto-response delay is required for PRes Chaining."
+#endif
+
+#if (EPL_DLL_PRES_CHAINING_CN != FALSE) && (EPL_DLL_PROCESS_SYNC != EPL_DLL_PROCESS_SYNC_ON_TIMER)
+#error "PRes Chaining CN support requires EPL_DLL_PROCESS_SYNC == EPL_DLL_PROCESS_SYNC_ON_TIMER."
 #endif
 
 //------------------------------------------------------------------------------

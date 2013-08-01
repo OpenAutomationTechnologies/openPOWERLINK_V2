@@ -42,7 +42,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <Epl.h>
-#include <kernel/EplDllk.h>
+#include <kernel/dllk.h>
 #include <kernel/errhndk.h>
 #include <kernel/eventk.h>
 #include <kernel/nmtk.h>

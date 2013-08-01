@@ -97,7 +97,7 @@
 
 #include "kernel/VirtualEthernet.h"
 #include "kernel/dllkcal.h"
-#include "kernel/EplDllk.h"
+#include "kernel/dllk.h"
 
 
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_VETH)) != 0)
