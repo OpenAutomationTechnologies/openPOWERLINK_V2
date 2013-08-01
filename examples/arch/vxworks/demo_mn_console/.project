@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml	version="1.0"	encoding="UTF-8"?>
 <projectDescription>
 	<name>demo_mn_console</name>
 	<comment></comment>
@@ -58,6 +58,26 @@
 			<name>dllk.c</name>
 			<type>1</type>
 			<location>OPENPOWERLINK_DIR/stack/src/kernel/dll/dllk.c</location>
+		</link>
+		<link>
+			<name>dllkfilter.c</name>
+			<type>1</type>
+			<location>OPENPOWERLINK_DIR/stack/src/kernel/dll/dllkfilter.c</location>
+		</link>
+		<link>
+			<name>dllkstatemachine.c</name>
+			<type>1</type>
+			<location>OPENPOWERLINK_DIR/stack/src/kernel/dll/dllkstatemachine.c</location>
+		</link>
+		<link>
+			<name>dllkevent.c</name>
+			<type>1</type>
+			<location>OPENPOWERLINK_DIR/stack/src/kernel/dll/dllkevent.c</location>
+		</link>
+		<link>
+			<name>dllkframe.c</name>
+			<type>1</type>
+			<location>OPENPOWERLINK_DIR/stack/src/kernel/dll/dllkframe.c</location>
 		</link>
 		<link>
 			<name>ctrlu.c</name>

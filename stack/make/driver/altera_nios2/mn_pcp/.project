@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml	version="1.0"	encoding="UTF-8"?>
 <projectDescription>
 	<name>mn_pcp</name>
 	<comment></comment>
@@ -129,6 +129,26 @@
 			<locationURI>OPLK_LOC/stack/src/kernel/dll/dllk.c</locationURI>
 		</link>
 		<link>
+			<name>dllkfilter.c</name>
+			<type>1</type>
+			<locationURI>OPLK_LOC/stack/src/kernel/dll/dllkfilter.c</locationURI>
+		</link>
+		<link>
+			<name>dllkstatemachine.c</name>
+			<type>1</type>
+			<locationURI>OPLK_LOC/stack/src/kernel/dll/dllkstatemachine.c</locationURI>
+		</link>
+		<link>
+			<name>dllkevent.c</name>
+			<type>1</type>
+			<locationURI>OPLK_LOC/stack/src/kernel/dll/dllkevent.c</locationURI>
+		</link>
+		<link>
+			<name>dllkframe.c</name>
+			<type>1</type>
+			<locationURI>OPLK_LOC/stack/src/kernel/dll/dllkframe.c</locationURI>
+		</link>
+		<link>
 			<name>dllkcal.c</name>
 			<type>1</type>
 			<locationURI>OPLK_LOC/stack/src/kernel/dll/dllkcal.c</locationURI>
@@ -238,7 +258,7 @@
 			<type>1</type>
 			<locationURI>OPLK_LOC/stack/src/kernel/pdo/pdokcal.c</locationURI>
 		</link>
-        <link>
+		<link>
 			<name>pdokcal-triplebufshm.c</name>
 			<type>1</type>
 			<locationURI>OPLK_LOC/stack/src/kernel/pdo/pdokcal-triplebufshm.c</locationURI>

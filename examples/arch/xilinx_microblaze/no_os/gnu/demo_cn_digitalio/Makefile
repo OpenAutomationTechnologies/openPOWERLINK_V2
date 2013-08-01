@@ -79,6 +79,10 @@ ${STACK_ROOT}/stack/src/common/timer/timer-generic.c \
 ${STACK_ROOT}/stack/src/kernel/ctrl/ctrlk.c \
 ${STACK_ROOT}/stack/src/kernel/ctrl/ctrlkcal-direct.c \
 ${STACK_ROOT}/stack/src/kernel/dll/dllk.c \
+${STACK_ROOT}/stack/src/kernel/dll/dllkfilter.c \
+${STACK_ROOT}/stack/src/kernel/dll/dllkstatemachine.c \
+${STACK_ROOT}/stack/src/kernel/dll/dllkframe.c \
+${STACK_ROOT}/stack/src/kernel/dll/dllkevent.c \
 ${STACK_ROOT}/stack/src/kernel/dll/dllkcal.c \
 ${STACK_ROOT}/stack/src/kernel/dll/dllkcal-circbuf.c \
 ${STACK_ROOT}/stack/src/kernel/edrv/edrv-openmac.c \

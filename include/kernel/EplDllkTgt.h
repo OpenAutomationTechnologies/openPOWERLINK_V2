@@ -86,27 +86,28 @@
 
 #include <linux/spinlock.h>
 
+#define TGT_DLLK_DEFINE_CRITICAL_SECTION \
+        DEFINE_SPINLOCK(tgtDllkCriticalSection_l);
+
 #define TGT_DLLK_DECLARE_CRITICAL_SECTION \
-        DEFINE_SPINLOCK(TgtDllkCriticalSection_l)
+        extern spinlock_t tgtDllkCriticalSection_l;
 
 #define TGT_DLLK_DECLARE_FLAGS \
-        unsigned long ulTgtDllkFlags
+        ULONG   tgtDllkFlags;
 
 #define TGT_DLLK_ENTER_CRITICAL_SECTION() \
-    spin_lock_irqsave(&TgtDllkCriticalSection_l, ulTgtDllkFlags)
+        spin_lock_irqsave(&tgtDllkCriticalSection_l, tgtDllkFlags);
 
 #define TGT_DLLK_LEAVE_CRITICAL_SECTION() \
-    spin_unlock_irqrestore(&TgtDllkCriticalSection_l, ulTgtDllkFlags)
-
+        spin_unlock_irqrestore(&tgtDllkCriticalSection_l, tgtDllkFlags);
 
 
 #else   // all other targets do not need the critical section within DLL
 
+#define TGT_DLLK_DEFINE_CRITICAL_SECTION
 #define TGT_DLLK_DECLARE_CRITICAL_SECTION
 #define TGT_DLLK_DECLARE_FLAGS
-
 #define TGT_DLLK_ENTER_CRITICAL_SECTION()
-
 #define TGT_DLLK_LEAVE_CRITICAL_SECTION()
 
 

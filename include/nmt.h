@@ -73,6 +73,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 * higher byte  = 1). The super-states are not mentioned in this enum because
 * they are no real states --> there are masks defined to identify the
 * super-states.
+*
+* The order of the states is important as it is used in the source code to
+* determine several things:
+*
+* state > kMntGsResetConfiguration:  No reset state
+* state >= kNmtMsNotActive:          Node is running as MN
+* state < kNmtMsNotActive:           Node is running as CN
 */
 typedef enum
 {

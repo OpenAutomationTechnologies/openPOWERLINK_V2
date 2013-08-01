@@ -1,206 +1,159 @@
-/****************************************************************************
+/**
+********************************************************************************
+\file   dllk.h
 
-  (c) SYSTEC electronic GmbH, D-07973 Greiz, August-Bebel-Str. 29
-      www.systec-electronic.com
+\brief  Definitions for DLL kernel module
 
-  Project:      openPOWERLINK
+This file contains the definitions for the DLL kernel module.
 
-  Description:  include file for kernelspace DLL module
+*******************************************************************************/
 
-  License:
+/*------------------------------------------------------------------------------
+Copyright (c) 2013, SYSTEC electronic GmbH
+Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+All rights reserved.
 
-    Redistribution and use in source and binary forms, with or without
-    modification, are permitted provided that the following conditions
-    are met:
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+    * Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above copyright
+      notice, this list of conditions and the following disclaimer in the
+      documentation and/or other materials provided with the distribution.
+    * Neither the name of the copyright holders nor the
+      names of its contributors may be used to endorse or promote products
+      derived from this software without specific prior written permission.
 
-    1. Redistributions of source code must retain the above copyright
-       notice, this list of conditions and the following disclaimer.
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL COPYRIGHT HOLDERS BE LIABLE FOR ANY
+DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+------------------------------------------------------------------------------*/
 
-    2. Redistributions in binary form must reproduce the above copyright
-       notice, this list of conditions and the following disclaimer in the
-       documentation and/or other materials provided with the distribution.
+#ifndef _INC_dllk_H_
+#define _INC_dllk_H_
 
-    3. Neither the name of SYSTEC electronic GmbH nor the names of its
-       contributors may be used to endorse or promote products derived
-       from this software without prior written permission. For written
-       permission, please contact info@systec-electronic.com.
-
-    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-    LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-    FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-    COPYRIGHT HOLDERS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-    INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-    BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-    LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-    CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-    LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-    ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-    POSSIBILITY OF SUCH DAMAGE.
-
-    Severability Clause:
-
-        If a provision of this License is or becomes illegal, invalid or
-        unenforceable in any jurisdiction, that shall not affect:
-        1. the validity or enforceability in that jurisdiction of any other
-           provision of this License; or
-        2. the validity or enforceability in other jurisdictions of that or
-           any other provision of this License.
-
-  -------------------------------------------------------------------------
-
-                $RCSfile$
-
-                $Author$
-
-                $Revision$  $Date$
-
-                $State$
-
-                Build Environment:
-                    GCC V3.4
-
-  -------------------------------------------------------------------------
-
-  Revision History:
-
-  2006/06/08 d.k.:   start of the implementation, version 1.00
-
-
-****************************************************************************/
-
-#ifndef _EPL_DLLK_H_
-#define _EPL_DLLK_H_
-
+//------------------------------------------------------------------------------
+// includes
+//------------------------------------------------------------------------------
 #include "EplDll.h"
 #include "event.h"
+#include <edrv.h>
 
-//---------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
 // const defines
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
-
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // typedef
-//---------------------------------------------------------------------------
-
+//------------------------------------------------------------------------------
 typedef tEplKernel (* tEplDllkCbAsync) (tEplFrameInfo * pFrameInfo_p);
 
 typedef struct
 {
-    BYTE                m_be_abLocalMac[6];
-    tEplHwParam         m_HwParam;
-
-} tEplDllkInitParam;
+    UINT8               aLocalMac[6];
+    tEplHwParam         hwParam;
+} tDllkInitParam;
 
 // forward declaration
 struct _tEdrvTxBuffer;
 
-struct _tEplDllkNodeInfo
+struct _tDllkNodeInfo
 {
-    unsigned int                m_uiNodeId;
-    WORD                        m_wPresPayloadLimit;    // object 0x1F8D: NMT_PResPayloadLimitList_AU16
-    BYTE                        m_bPresFilterFlags;
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
-    BYTE                        m_be_abMacAddr[6];
-    BYTE                        m_bSoaFlag1;
-    BOOL                        m_fSoftDelete;          // delete node after error and ignore error
-    WORD                        m_wPreqPayloadLimit;    // object 0x1F8B: NMT_MNPReqPayloadLimitList_AU16
-    tNmtState                   m_NmtState;
-    unsigned long               m_ulDllErrorEvents;
-    DWORD                       m_dwPresTimeoutNs;        // object 0x1F92: NMT_MNCNPResTimeout_AU32
-    struct _tEdrvTxBuffer*      m_pPreqTxBuffer;
-    struct _tEplDllkNodeInfo*   m_pNextNodeInfo;
+    UINT                        nodeId;
+    UINT16                      presPayloadLimit;       // object 0x1F8D: NMT_PResPayloadLimitList_AU16
+    UINT8                       presFilterFlags;
+#if defined(CONFIG_INCLUDE_NMT_MN)
+    UINT8                       aMacAddr[6];
+    UINT8                       soaFlag1;
+    BOOL                        fSoftDelete;            // delete node after error and ignore error
+    UINT16                      preqPayloadLimit;       // object 0x1F8B: NMT_MNPReqPayloadLimitList_AU16
+    tNmtState                   nmtState;
+    ULONG                       dllErrorEvents;
+    UINT32                      presTimeoutNs;          // object 0x1F92: NMT_MNCNPResTimeout_AU32
+    struct _tEdrvTxBuffer*      pPreqTxBuffer;
+    struct _tDllkNodeInfo*      pNextNodeInfo;
 #endif
 
 };
-
-typedef struct _tEplDllkNodeInfo tEplDllkNodeInfo;
+typedef struct _tDllkNodeInfo tDllkNodeInfo;
 
 typedef struct
 {
-    DWORD   m_dwSyncControl;
-    DWORD   m_dwPResTimeFirstNs;
-    DWORD   m_dwPResTimeSecondNs;
-    DWORD   m_dwSyncMNDelayFirstNs;
-    DWORD   m_dwSyncMNDelaySecondNs;
-
-} tEplDllkPrcCycleTiming;
-
+    UINT32   syncControl;
+    UINT32   pResTimeFirstNs;
+    UINT32   pResTimeSecondNs;
+    UINT32   syncMNDelayFirstNs;
+    UINT32   syncMNDelaySecondNs;
+} tDllkPrcCycleTiming;
 
 // callback function for frame processing
-typedef tEplKernel (* tEplDllkCbProcessRpdo) (tEplFrameInfo * pFrameInfo_p);
+typedef tEplKernel (*tDllkCbProcessRpdo) (tEplFrameInfo * pFrameInfo_p);
+typedef tEplKernel (*tDllkCbProcessTpdo) (tEplFrameInfo * pFrameInfo_p, BOOL fReadyFlag_p);
 
-typedef tEplKernel (* tEplDllkCbProcessTpdo) (tEplFrameInfo * pFrameInfo_p, BOOL fReadyFlag_p);
+typedef enum
+{
+    kDllGsInit           = 0x00,    // MN/CN: initialisation (< PreOp2)
+    kDllCsWaitPreq       = 0x01,    // CN: wait for PReq frame
+    kDllCsWaitSoc        = 0x02,    // CN: wait for SoC frame
+    kDllCsWaitSoa        = 0x03,    // CN: wait for SoA frame
+    kDllMsNonCyclic      = 0x04,    // MN: reduced EPL cycle (PreOp1)
+    kDllMsWaitSocTrig    = 0x05,    // MN: wait for SoC trigger (cycle timer)
+    kDllMsWaitPreqTrig   = 0x06,    // MN: wait for (first) PReq trigger (WaitSoCPReq_U32)
+    kDllMsWaitPres       = 0x07,    // MN: wait for PRes frame from CN
+    kDllMsWaitSoaTrig    = 0x08,    // MN: wait for SoA trigger (PRes transmitted)
+    kDllMsWaitAsndTrig   = 0x09,    // MN: wait for ASnd trigger (SoA transmitted)
+    kDllMsWaitAsnd       = 0x0A,    // MN: wait for ASnd frame if SoA contained invitation
+} tDllState;
 
-
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // function prototypes
-//---------------------------------------------------------------------------
-
-#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLK)) != 0)
-
-tEplKernel dllk_addInstance(tEplDllkInitParam * pInitParam_p);
-
-tEplKernel dllk_delInstance(void);
-
-// called before NMT_GS_COMMUNICATING will be entered to configure fixed parameters
-tEplKernel dllk_config(tEplDllConfigParam * pDllConfigParam_p);
-
-// set identity of local node (may be at any time, e.g. in case of hostname change)
-tEplKernel dllk_setIdentity(tEplDllIdentParam * pDllIdentParam_p);
-
-// process internal events and do work that cannot be done in interrupt-context
-tEplKernel dllk_process(tEplEvent * pEvent_p) SECTION_DLLK_PROCESS;
-
-// registers handler for non-EPL frames (used by Virtual Ethernet driver)
-tEplKernel dllk_regAsyncHandler(tEplDllkCbAsync pfnDllkCbAsync_p);
-
-// deregisters handler for non-EPL frames
-tEplKernel dllk_deregAsyncHandler(tEplDllkCbAsync pfnDllkCbAsync_p);
-
-// register C_DLL_MULTICAST_ASND in ethernet driver if any AsndServiceId is registered
-tEplKernel dllk_setAsndServiceIdFilter(tEplDllAsndServiceId ServiceId_p, tEplDllAsndFilter Filter_p);
-
-// registers handler for RPDOs frames
-tEplKernel dllk_regRpdoHandler(tEplDllkCbProcessRpdo pfnDllkCbProcessRpdo_p);
-
-// registers handler for TPDOs frames
-tEplKernel dllk_regTpdoHandler(tEplDllkCbProcessTpdo pfnDllkCbProcessTpdo_p);
-
-// registers handler for Sync event
-tEplSyncCb dllk_regSyncHandler(tEplSyncCb pfnCbSync_p);
-
-// Releases the rx buffer for the specified rx frame in Edrv
-tEplKernel dllk_releaseRxFrame(tEplFrame* pFrame_p, unsigned int uiFrameSize_p);
-
-
-#if EPL_NMT_MAX_NODE_ID > 0
-
-tEplKernel dllk_configNode(tEplDllNodeInfo* pNodeInfo_p);
-
-tEplKernel dllk_addNode(tEplDllNodeOpParam* pNodeOpParam_p);
-
-tEplKernel dllk_deleteNode(tEplDllNodeOpParam* pNodeOpParam_p);
-
-#endif // EPL_NMT_MAX_NODE_ID > 0
-
-
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
-
-tEplKernel dllk_setFlag1OfNode(unsigned int uiNodeId_p, BYTE bSoaFlag1_p);
-
-tEplKernel dllk_getCurrentCnNodeIdList(BYTE** ppbCnNodeIdList_p);
-
-
-#if EPL_DLL_PRES_CHAINING_MN != FALSE
-tEplKernel dllk_getCnMacAddress(unsigned int uiNodeId_p, BYTE* pb_be_CnMacAddress_p);
+//------------------------------------------------------------------------------
+#ifdef __cplusplus
+extern "C" {
 #endif
 
-#endif // (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
+tEplKernel dllk_addInstance(tDllkInitParam* pInitParam_p);
+tEplKernel dllk_delInstance(void);
+tEplKernel dllk_config(tEplDllConfigParam * pDllConfigParam_p);
+tEplKernel dllk_setIdentity(tEplDllIdentParam * pDllIdentParam_p);
+tEplKernel dllk_process(tEplEvent * pEvent_p) SECTION_DLLK_PROCESS;
+tEplKernel dllk_regAsyncHandler(tEplDllkCbAsync pfnDllkCbAsync_p);
+tEplKernel dllk_deregAsyncHandler(tEplDllkCbAsync pfnDllkCbAsync_p);
+tEplKernel dllk_setAsndServiceIdFilter(tEplDllAsndServiceId ServiceId_p, tEplDllAsndFilter Filter_p);
+void       dllk_regRpdoHandler(tDllkCbProcessRpdo pfnDllkCbProcessRpdo_p);
+void       dllk_regTpdoHandler(tDllkCbProcessTpdo pfnDllkCbProcessTpdo_p);
+tEplSyncCb dllk_regSyncHandler(tEplSyncCb pfnCbSync_p);
+#if EPL_DLL_DISABLE_DEFERRED_RXFRAME_RELEASE == FALSE
+tEplKernel dllk_releaseRxFrame(tEplFrame* pFrame_p, UINT uiFrameSize_p);
+#endif
 
-#endif // (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLK)) != 0)
+#if EPL_NMT_MAX_NODE_ID > 0
+tEplKernel dllk_configNode(tEplDllNodeInfo* pNodeInfo_p);
+tEplKernel dllk_addNode(tEplDllNodeOpParam* pNodeOpParam_p);
+tEplKernel dllk_deleteNode(tEplDllNodeOpParam* pNodeOpParam_p);
+#endif // EPL_NMT_MAX_NODE_ID > 0
 
-#endif  // #ifndef _EPL_DLLK_H_
+#if defined(CONFIG_INCLUDE_NMT_MN)
+tEplKernel dllk_setFlag1OfNode(UINT nodeId_p, UINT8 soaFlag1_p);
+void       dllk_getCurrentCnNodeIdList(BYTE** ppbCnNodeIdList_p);
 
+#if EPL_DLL_PRES_CHAINING_MN != FALSE
+tEplKernel dllk_getCnMacAddress(UINT nodeId_p, UINT8* pCnMacAddress_p);
+#endif
+
+#endif
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif  // #ifndef _INC_dllk_H_
 

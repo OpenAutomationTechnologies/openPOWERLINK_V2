@@ -57,6 +57,10 @@ SET (DAEMON_COMMON_SOURCES
 
 SET (DAEMON_KERNEL_SOURCES
      ${KERNEL_SOURCE_DIR}/dll/dllk.c
+     ${KERNEL_SOURCE_DIR}/dll/dllkfilter.c
+     ${KERNEL_SOURCE_DIR}/dll/dllkstatemachine.c
+     ${KERNEL_SOURCE_DIR}/dll/dllkevent.c
+     ${KERNEL_SOURCE_DIR}/dll/dllkframe.c
      ${KERNEL_SOURCE_DIR}/dll/dllkcal.c
      ${KERNEL_SOURCE_DIR}/dll/dllkcal-circbuf.c
      ${KERNEL_SOURCE_DIR}/event/eventk.c

@@ -349,7 +349,7 @@ The function initializes the kernel stack modules.
 static tEplKernel initStack(void)
 {
     tEplKernel          ret;
-    tEplDllkInitParam   dllkInitParam;
+    tDllkInitParam      dllkInitParam;
 
     ctrlkcal_readInitParam(&instance_l.initParam);
 
@@ -362,16 +362,16 @@ static tEplKernel initStack(void)
 #endif
 
 #if defined(CONFIG_INCLUDE_DLLK)
-    EPL_MEMCPY(dllkInitParam.m_be_abLocalMac, instance_l.initParam.aMacAddress, 6);
-    dllkInitParam.m_HwParam.m_pszDevName = instance_l.initParam.szEthDevName;
-    dllkInitParam.m_HwParam.m_uiDevNumber = instance_l.initParam.ethDevNumber;
+    EPL_MEMCPY(dllkInitParam.aLocalMac, instance_l.initParam.aMacAddress, 6);
+    dllkInitParam.hwParam.m_pszDevName = instance_l.initParam.szEthDevName;
+    dllkInitParam.hwParam.m_uiDevNumber = instance_l.initParam.ethDevNumber;
 
     ret = dllk_addInstance(&dllkInitParam);
     if (ret != kEplSuccessful)
         return ret;
 
     // copy MAC address back to instance structure
-    EPL_MEMCPY(instance_l.initParam.aMacAddress, dllkInitParam.m_be_abLocalMac, 6);
+    EPL_MEMCPY(instance_l.initParam.aMacAddress, dllkInitParam.aLocalMac, 6);
     ctrlkcal_storeInitParam(&instance_l.initParam);
 
     dllk_regSyncHandler(pdok_sendSyncEvent);

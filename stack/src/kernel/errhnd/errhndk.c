@@ -310,16 +310,11 @@ The function decrements the error counters used by a MN node.
 //------------------------------------------------------------------------------
 static tEplKernel decrementMnCounters(void)
 {
-    tEplKernel      ret;
     BYTE*           pCnNodeId;
     UINT            nodeIdx;
     UINT32          thresholdCnt;
 
-    ret = dllk_getCurrentCnNodeIdList(&pCnNodeId);
-    if (ret != kEplSuccessful)
-    {
-        return ret;
-    }
+    dllk_getCurrentCnNodeIdList(&pCnNodeId);
 
     // iterate through node info structure list
     while (*pCnNodeId != EPL_C_ADR_INVALID)
