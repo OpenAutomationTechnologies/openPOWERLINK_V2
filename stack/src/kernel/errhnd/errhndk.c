@@ -46,7 +46,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <Benchmark.h>
 #include <EplObd.h>
 #include <kernel/eventk.h>
-#include <kernel/EplDllk.h>
+#include <kernel/dllk.h>
 
 #include <errhnd.h>
 #include <kernel/errhndk.h>

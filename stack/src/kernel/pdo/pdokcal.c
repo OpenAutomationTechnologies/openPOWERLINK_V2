@@ -42,7 +42,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #include "kernel/pdokcal.h"
 #include <kernel/pdok.h>
-#include "kernel/EplDllk.h"
+#include "kernel/dllk.h"
 #include "kernel/eventk.h"
 
 //============================================================================//

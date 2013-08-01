@@ -73,7 +73,6 @@
 #define _EPL_VETH_H_
 
 #include "EplInc.h"
-//#include "EplDllk.h"
 
 //---------------------------------------------------------------------------
 // const defines

@@ -44,7 +44,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <kernel/eventk.h>
 #include <kernel/eventkcal.h>
 #include <kernel/nmtk.h>
-#include <kernel/EplDllk.h>
+#include <kernel/dllk.h>
 #include <kernel/dllkcal.h>
 #include <kernel/errhndk.h>
 #include <Benchmark.h>

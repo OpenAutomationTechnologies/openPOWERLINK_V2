@@ -180,9 +180,9 @@ SET (LIB_HEADERS
 #
 SET (LIB_KERNEL_HEADERS
      ${LIB_KERNEL_HEADERS}
-     ${KERNEL_INCLUDE_DIR}/EplDllk.h
+     ${KERNEL_INCLUDE_DIR}/dllk.h
      ${KERNEL_INCLUDE_DIR}/dllkcal.h
-     ${KERNEL_INCLUDE_DIR}/EplDllkTgt.h
+     ${KERNEL_INCLUDE_DIR}/dllktgt.h
      ${KERNEL_INCLUDE_DIR}/errhndk.h
      ${KERNEL_INCLUDE_DIR}/ctrlk.h
      ${KERNEL_INCLUDE_DIR}/ctrlkcal.h

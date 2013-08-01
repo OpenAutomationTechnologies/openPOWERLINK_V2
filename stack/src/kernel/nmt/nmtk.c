@@ -42,7 +42,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #include "kernel/nmtk.h"
 #include "EplTimer.h"
-#include "kernel/EplDllk.h"
+#include "kernel/dllk.h"
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //

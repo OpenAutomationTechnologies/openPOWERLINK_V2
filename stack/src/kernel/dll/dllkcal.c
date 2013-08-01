@@ -38,7 +38,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #include <dllcal.h>
 #include <kernel/dllkcal.h>
-#include <kernel/EplDllk.h>
+#include <kernel/dllk.h>
 
 #include <kernel/eventk.h>
 
