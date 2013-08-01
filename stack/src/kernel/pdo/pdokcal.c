@@ -108,7 +108,7 @@ tEplKernel pdokcal_init(void)
     if ((Ret = pdokcal_initSync()) != kEplSuccessful)
         return Ret;
 
-    Ret = dllk_regRpdoHandler(cbProcessRpdo);
+    dllk_regRpdoHandler(cbProcessRpdo);
 
     return Ret;
 }

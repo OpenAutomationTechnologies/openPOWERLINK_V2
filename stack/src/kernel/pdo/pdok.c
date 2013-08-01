@@ -132,7 +132,7 @@ tEplKernel pdok_init(void)
         return ret;
     }
 
-    ret = dllk_regTpdoHandler(cbProcessTpdo);
+    dllk_regTpdoHandler(cbProcessTpdo);
 
     return ret;
 }
