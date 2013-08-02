@@ -42,7 +42,6 @@ set_global_assignment -name TOP_LEVEL_ENTITY toplevel
 set_global_assignment -name ORIGINAL_QUARTUS_VERSION "12.1 SP1"
 set_global_assignment -name PROJECT_CREATION_TIME_DATE "07:43:12  APRIL 26, 2013"
 set_global_assignment -name LAST_QUARTUS_VERSION "12.1 SP1"
-set_global_assignment -name PROJECT_OUTPUT_DIRECTORY output_files
 set_global_assignment -name MIN_CORE_JUNCTION_TEMP 0
 set_global_assignment -name MAX_CORE_JUNCTION_TEMP 85
 set_global_assignment -name DEVICE_FILTER_SPEED_GRADE 7
@@ -299,5 +298,5 @@ set_global_assignment -name VHDL_FILE toplevel.vhd
 set_global_assignment -name VHDL_FILE ipcore/altpll/altpll_inst.vhd
 set_global_assignment -name VHDL_FILE ipcore/sevsegEncode.vhd
 
-set_global_assignment -name QIP_FILE cn_directIO/synthesis/cn_directIO.qip
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
+set_global_assignment -name QIP_FILE cn_directIO/synthesis/cn_directIO.qip
