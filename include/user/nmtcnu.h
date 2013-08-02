@@ -43,7 +43,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include "user/nmtu.h"
-#include "EplDll.h"
+#include <dll.h>
 #include "EplFrame.h"
 
 //------------------------------------------------------------------------------

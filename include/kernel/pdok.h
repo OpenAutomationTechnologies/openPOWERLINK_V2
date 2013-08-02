@@ -39,7 +39,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <pdo.h>
 #include <EplFrame.h>
-#include <EplDll.h>
+#include <dll.h>
 
 //---------------------------------------------------------------------------
 // const defines
