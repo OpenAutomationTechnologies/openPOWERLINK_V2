@@ -1,11 +1,39 @@
 #!/bin/sh
 # This script does the following steps:
-#  1. Generate the Qsys design "top_mn"
+#  1. Generate the Qsys design
 #  2. Compile the Quartus II design
-ip-generate --outputdirectory=cn_directIO/synthesis/ \
+
+# Quartus Project name
+QUARTUS_PRJ=cn_directIO
+
+# Qsys toplevel name
+QSYS_PRJ=cn_directIO
+
+ip-generate --outputdirectory=${QSYS_PRJ}/synthesis/ \
             --file-set=QUARTUS_SYNTH \
-            --reportfile=sopcinfo:cn_directIO.sopcinfo \
-            --reportfile=html:cn_directIO.html \
-            --reportfile=qip:cn_directIO/synthesis/cn_directIO.qip \
-            --component-file=cn_directIO.qsys
-quartus_cmd cn_directIO.qpf -c cn_directIO.qsf
+            --reportfile=sopcinfo:${QSYS_PRJ}.sopcinfo \
+            --reportfile=html:${QSYS_PRJ}.html \
+            --reportfile=qip:${QSYS_PRJ}/synthesis/${QSYS_PRJ}.qip \
+            --component-file=${QSYS_PRJ}.qsys
+
+#check return
+if [ $? -ne 0 ]; then
+    exit 1
+fi
+
+#Workaround: Remove done file
+if [ -f ${QUARTUS_PRJ}.done ]
+then
+    rm ${QUARTUS_PRJ}.done
+fi
+
+quartus_cmd ${QUARTUS_PRJ}.qpf -c ${QUARTUS_PRJ}.qsf
+
+#Workaround: Quartus returned unsuccessful if done file doesn't exist
+if [ ! -f ${QUARTUS_PRJ}.done ]
+then
+    echo "Failed!"
+    exit 1
+fi
+
+exit 0
