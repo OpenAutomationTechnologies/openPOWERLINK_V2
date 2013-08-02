@@ -358,13 +358,13 @@ This function adds a PRes filter for the specified node.
 \return The function returns a pointer to the node Information of the node
 */
 //------------------------------------------------------------------------------
-tEplKernel dllk_addNodeFilter(tDllkNodeInfo* pIntNodeInfo_p, tEplDllNodeOpType NodeOpType_p,
+tEplKernel dllk_addNodeFilter(tDllkNodeInfo* pIntNodeInfo_p, tEplDllNodeOpType nodeOpType_p,
                               BOOL fUpdateEdrv_p)
 {
     tEplKernel      ret = kEplSuccessful;
     UINT8           presFilterFlags = 0;
 
-    switch (NodeOpType_p)
+    switch (nodeOpType_p)
     {
         case kEplDllNodeOpTypeFilterPdo:
             presFilterFlags = DLLK_FILTER_FLAG_PDO;
