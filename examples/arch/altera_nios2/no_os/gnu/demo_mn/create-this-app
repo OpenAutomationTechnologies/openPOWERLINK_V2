@@ -119,6 +119,7 @@ if [ -n "$REBUILD" -o ! -f $BSP_DIR/public.mk ]; then
     # Since BSP doesn't exist, create the BSP
     # Pass any command line arguments passed to this script to the BSP.
     pushd $BSP_DIR >> /dev/null
+    chmod +x create-this-bsp
     ./create-this-bsp $SAVE_ARGS || {
         echo "create-this-bsp failed"
         exit 1
@@ -126,6 +127,7 @@ if [ -n "$REBUILD" -o ! -f $BSP_DIR/public.mk ]; then
     popd >> /dev/null
 
     #workaround for linker.x issue
+    chmod +x fix-linkerx
     ./fix-linkerx
 fi
 
