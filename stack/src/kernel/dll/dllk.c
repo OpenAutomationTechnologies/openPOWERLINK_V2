@@ -737,6 +737,7 @@ void dllk_getCurrentCnNodeIdList(BYTE** ppbCnNodeIdList_p)
     *ppbCnNodeIdList_p = &dllkInstance_g.aCnNodeIdList[dllkInstance_g.curTxBufferOffsetCycle ^ 1][0];
 }
 
+#if (EPL_DLL_PRES_CHAINING_MN == TRUE)
 //------------------------------------------------------------------------------
 /**
 \brief  Get MAC address of the specified node
@@ -753,7 +754,6 @@ The function returns the MAC address of the specified node.
 \ingroup module_dllk
 */
 //------------------------------------------------------------------------------
-#if (EPL_DLL_PRES_CHAINING_MN == TRUE)
 tEplKernel dllk_getCnMacAddress(UINT nodeId_p, BYTE* pCnMacAddress_p)
 {
     tDllkNodeInfo*   pNodeInfo;
