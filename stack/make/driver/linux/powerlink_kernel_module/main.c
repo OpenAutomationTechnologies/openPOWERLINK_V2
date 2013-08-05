@@ -78,6 +78,11 @@ MODULE_LICENSE("Dual BSD/GPL");
 MODULE_AUTHOR("josef.baumgartner@br-automation.com");
 MODULE_DESCRIPTION("openPOWERLINK driver");
 
+// VM_RESERVED is removed in kernels > 3.7
+#ifndef VM_RESERVED
+#define  VM_RESERVED   (VM_DONTEXPAND | VM_DONTDUMP)
+#endif
+
 //------------------------------------------------------------------------------
 // module global vars
 //------------------------------------------------------------------------------
