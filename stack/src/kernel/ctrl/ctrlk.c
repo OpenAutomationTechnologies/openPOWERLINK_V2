@@ -56,7 +56,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <kernel/ctrlkcal.h>
 
 #if defined(CONFIG_INCLUDE_VETH)
-#include <kernel/VirtualEthernet.h>
+#include <kernel/veth.h>
 #endif
 
 #if EPL_USE_SHAREDBUFF != FALSE
@@ -388,7 +388,7 @@ static tEplKernel initStack(void)
 
     // initialize Virtual Ethernet Driver
 #if defined(CONFIG_INCLUDE_VETH)
-    if ((ret = VEthAddInstance(instance_l.initParam.aMacAddress)) != kEplSuccessful)
+    if ((ret = veth_addInstance(instance_l.initParam.aMacAddress)) != kEplSuccessful)
     return ret;
 #endif
 
@@ -410,7 +410,7 @@ static tEplKernel shutdownStack(void)
 {
 
 #if defined(CONFIG_INCLUDE_VETH)
-    VEthDelInstance();
+    veth_delInstance();
 #endif
 
 #if defined(CONFIG_INCLUDE_PDOK)
