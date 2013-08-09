@@ -361,6 +361,17 @@ controlled by the user NMT module.
 */
 
 //==============================================================================
+/**
+\defgroup module_veth Virtual Ethernet driver (veth)
+
+The virtual Ethernet driver provides a network interface which can be used
+by applications to send Ethernet packets on the POWERLINK network. The
+Ethernet packets will be transfered in the asynchronous phase of POWERLINK.
+
+\ingroup kernel_layer
+*/
+
+//==============================================================================
 //==============================================================================
 /**
 \defgroup modules_common Common Software Modules

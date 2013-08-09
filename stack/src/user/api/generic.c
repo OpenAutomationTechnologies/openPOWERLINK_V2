@@ -95,7 +95,7 @@
 #include <limits.h>
 
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_VETH)) != 0)
-#include "kernel/VirtualEthernet.h"
+#include <kernel/veth.h>
 #endif
 
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOK)) != 0)
@@ -1918,13 +1918,13 @@ BYTE                bTemp;
 
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_VETH)) != 0)
         // configure Virtual Ethernet Driver
-        Ret = VEthSetIpAddress(DllIdentParam.ipAddress, DllIdentParam.m_dwSubnetMask, (WORD) DllConfigParam.m_uiAsyncMtu);
+        Ret = veth_setIpAdrs(DllIdentParam.ipAddress, DllIdentParam.m_dwSubnetMask, (WORD) DllConfigParam.m_uiAsyncMtu);
         if(Ret != kEplSuccessful)
         {
             goto Exit;
         }
 
-        Ret = VEthSetDefaultGateway(DllIdentParam.m_dwDefaultGateway);
+        Ret = veth_setDefaultGateway(DllIdentParam.m_dwDefaultGateway);
         if(Ret != kEplSuccessful)
         {
             goto Exit;
