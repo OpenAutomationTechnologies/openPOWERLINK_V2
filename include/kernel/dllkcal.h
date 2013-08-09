@@ -72,18 +72,18 @@ tEplKernel dllkcal_init(void);
 
 tEplKernel dllkcal_exit(void);
 
-tEplKernel dllkcal_getAsyncTxCount(tEplDllAsyncReqPriority* pPriority_p,
+tEplKernel dllkcal_getAsyncTxCount(tDllAsyncReqPriority* pPriority_p,
                                    UINT *pCount_p);
 
 tEplKernel dllkcal_getAsyncTxFrame(void* pFrame_p, UINT* pFrameSize_p,
-                                   tEplDllAsyncReqPriority priority_p);
+                                   tDllAsyncReqPriority priority_p);
 
 // only frames with registered AsndServiceIds are passed to CAL
-tEplKernel dllkcal_asyncFrameReceived(tEplFrameInfo* pFrameInfo_p);
+tEplKernel dllkcal_asyncFrameReceived(tFrameInfo* pFrameInfo_p);
 
-tEplKernel dllkcal_sendAsyncFrame(tEplFrameInfo* pFrameInfo_p, tEplDllAsyncReqPriority priority_p);
+tEplKernel dllkcal_sendAsyncFrame(tFrameInfo* pFrameInfo_p, tDllAsyncReqPriority priority_p);
 
-tEplKernel dllkcal_writeAsyncFrame(tEplFrameInfo* pFrameInfo_p, tDllCalQueue dllQueue);
+tEplKernel dllkcal_writeAsyncFrame(tFrameInfo* pFrameInfo_p, tDllCalQueue dllQueue);
 
 tEplKernel dllkcal_clearAsyncBuffer(void);
 
@@ -95,13 +95,13 @@ tEplKernel dllkcal_process(tEplEvent* pEvent_p);
 
 tEplKernel dllkcal_clearAsyncQueues(void);
 
-tEplKernel dllkcal_issueRequest(tEplDllReqServiceId service_p, UINT nodeId_p,
+tEplKernel dllkcal_issueRequest(tDllReqServiceId service_p, UINT nodeId_p,
                                 BYTE soaFlag1_p);
 
-tEplKernel dllkcal_getSoaRequest(tEplDllReqServiceId* pReqServiceId_p,
+tEplKernel dllkcal_getSoaRequest(tDllReqServiceId* pReqServiceId_p,
                                  UINT* pNodeId_p, tEplSoaPayload* pSoaPayload_p) SECTION_DLLKCAL_GETSOAREQ;
 
-tEplKernel dllkcal_setAsyncPendingRequests(UINT nodeId_p, tEplDllAsyncReqPriority asyncReqPrio_p,
+tEplKernel dllkcal_setAsyncPendingRequests(UINT nodeId_p, tDllAsyncReqPriority asyncReqPrio_p,
                                            UINT count_p);
 
 #endif //(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)

@@ -84,7 +84,7 @@ static tStatusuInstance   instance_g;
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static tEplKernel statusu_cbStatusResponse(tEplFrameInfo * pFrameInfo_p);
+static tEplKernel statusu_cbStatusResponse(tFrameInfo * pFrameInfo_p);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -128,8 +128,8 @@ tEplKernel statusu_addInstance(void)
     EPL_MEMSET(&instance_g, 0, sizeof (instance_g));
 
     // register StatusResponse callback function
-    ret = dllucal_regAsndService(kEplDllAsndStatusResponse, statusu_cbStatusResponse,
-                                 kEplDllAsndFilterAny);
+    ret = dllucal_regAsndService(kDllAsndStatusResponse, statusu_cbStatusResponse,
+                                 kDllAsndFilterAny);
 
     return ret;
 
@@ -151,7 +151,7 @@ tEplKernel statusu_delInstance(void)
     tEplKernel  ret = kEplSuccessful;
 
     // deregister StatusResponse callback function
-    ret = dllucal_regAsndService(kEplDllAsndStatusResponse, NULL, kEplDllAsndFilterNone);
+    ret = dllucal_regAsndService(kDllAsndStatusResponse, NULL, kDllAsndFilterNone);
     return ret;
 }
 
@@ -200,7 +200,7 @@ tEplKernel statusu_requestStatusResponse(UINT nodeId_p, tStatusuCbResponse pfnCb
 #if defined(CONFIG_INCLUDE_NMT_MN)
     if (nodeId_p == 0)
     {   // issue request for local node
-        ret = dllucal_issueRequest(kEplDllReqServiceStatus, 0x00, 0xFF);
+        ret = dllucal_issueRequest(kDllReqServiceStatus, 0x00, 0xFF);
         return ret;
     }
 #endif
@@ -217,7 +217,7 @@ tEplKernel statusu_requestStatusResponse(UINT nodeId_p, tStatusuCbResponse pfnCb
         else
         {
             instance_g.apfnCbResponse[nodeId_p] = pfnCbResponse_p;
-            ret = dllucal_issueRequest(kEplDllReqServiceStatus, (nodeId_p + 1), 0xFF);
+            ret = dllucal_issueRequest(kDllReqServiceStatus, (nodeId_p + 1), 0xFF);
         }
 #else
         ret = kEplInvalidOperation;
@@ -252,14 +252,14 @@ StatusResponse is received.
 \ingroup module_statusu
 */
 //------------------------------------------------------------------------------
-static tEplKernel statusu_cbStatusResponse(tEplFrameInfo * pFrameInfo_p)
+static tEplKernel statusu_cbStatusResponse(tFrameInfo * pFrameInfo_p)
 {
     tEplKernel          ret = kEplSuccessful;
     UINT                nodeId;
     UINT                index;
     tStatusuCbResponse  pfnCbResponse;
 
-    nodeId = AmiGetByteFromLe(&pFrameInfo_p->m_pFrame->m_le_bSrcNodeId);
+    nodeId = AmiGetByteFromLe(&pFrameInfo_p->pFrame->m_le_bSrcNodeId);
     index = nodeId - 1;
 
     if (index < tabentries (instance_g.apfnCbResponse))
@@ -273,13 +273,13 @@ static tEplKernel statusu_cbStatusResponse(tEplFrameInfo * pFrameInfo_p)
         // reset callback function pointer so that caller may issue next request
         instance_g.apfnCbResponse[index] = NULL;
 
-        if (pFrameInfo_p->m_uiFrameSize < EPL_C_DLL_MINSIZE_STATUSRES)
+        if (pFrameInfo_p->frameSize < EPL_C_DLL_MINSIZE_STATUSRES)
         {   // StatusResponse not received or it has invalid size
             ret = pfnCbResponse(nodeId, NULL);
         }
         else
         {   // StatusResponse received
-            ret = pfnCbResponse(nodeId, &pFrameInfo_p->m_pFrame->m_Data.m_Asnd.m_Payload.m_StatusResponse);
+            ret = pfnCbResponse(nodeId, &pFrameInfo_p->pFrame->m_Data.m_Asnd.m_Payload.m_StatusResponse);
         }
     }
 

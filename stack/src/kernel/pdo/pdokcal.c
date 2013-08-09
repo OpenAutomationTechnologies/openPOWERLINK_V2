@@ -80,7 +80,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static tEplKernel cbProcessRpdo(tEplFrameInfo * pFrameInfo_p) SECTION_PDOK_PROCESS_RPDO;
+static tEplKernel cbProcessRpdo(tFrameInfo * pFrameInfo_p) SECTION_PDOK_PROCESS_RPDO;
 
 
 //============================================================================//
@@ -176,9 +176,9 @@ tEplKernel pdokcal_process(tEplEvent * pEvent_p)
         case kEplEventTypePdoRx:
             {
 #if EPL_DLL_DISABLE_DEFERRED_RXFRAME_RELEASE == FALSE
-                tEplFrameInfo*  pFrameInfo;
-                pFrameInfo = (tEplFrameInfo *) pEvent_p->m_pArg;
-                Ret = pdok_processRxPdo(pFrameInfo->m_pFrame, pFrameInfo->m_uiFrameSize);
+                tFrameInfo*  pFrameInfo;
+                pFrameInfo = (tFrameInfo *) pEvent_p->m_pArg;
+                Ret = pdok_processRxPdo(pFrameInfo->pFrame, pFrameInfo->frameSize);
 #else
                 tEplFrame*  pFrame;
 
@@ -219,7 +219,7 @@ and NMT_CS_OPERATIONAL. The passed PDO needs not to be valid.
 \return The function returns a tEplKernel error code.
 **/
 //------------------------------------------------------------------------------
-static tEplKernel cbProcessRpdo(tEplFrameInfo * pFrameInfo_p)
+static tEplKernel cbProcessRpdo(tFrameInfo * pFrameInfo_p)
 {
     tEplKernel      ret = kEplSuccessful;
     tEplEvent       event;
@@ -227,12 +227,12 @@ static tEplKernel cbProcessRpdo(tEplFrameInfo * pFrameInfo_p)
     event.m_EventSink = kEplEventSinkPdokCal;
     event.m_EventType = kEplEventTypePdoRx;
 #if EPL_DLL_DISABLE_DEFERRED_RXFRAME_RELEASE == FALSE
-    event.m_uiSize    = sizeof(tEplFrameInfo);
+    event.m_uiSize    = sizeof(tFrameInfo);
     event.m_pArg      = pFrameInfo_p;
 #else
     // limit copied data to size of PDO (because from some CNs the frame is larger than necessary)
-    event.m_uiSize = AmiGetWordFromLe(&pFrameInfo_p->m_pFrame->m_Data.m_Pres.m_le_wSize) + EPL_FRAME_OFFSET_PDO_PAYLOAD; // pFrameInfo_p->m_uiFrameSize;
-    event.m_pArg = pFrameInfo_p->m_pFrame;
+    event.m_uiSize = AmiGetWordFromLe(&pFrameInfo_p->pFrame->m_Data.m_Pres.m_le_wSize) + EPL_FRAME_OFFSET_PDO_PAYLOAD; // pFrameInfo_p->frameSize;
+    event.m_pArg = pFrameInfo_p->pFrame;
 #endif
     ret = eventk_postEvent(&event);
 #if EPL_DLL_DISABLE_DEFERRED_RXFRAME_RELEASE == FALSE

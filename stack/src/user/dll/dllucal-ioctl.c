@@ -81,7 +81,7 @@ event posting.
 typedef struct
 {
     tDllCalQueue                dllCalQueue;        ///< DLL CAL queue
-    tEplDllAsyncReqPriority     priority;           ///< Request priority
+    tDllAsyncReqPriority        priority;           ///< Request priority
     int                         fd;                 ///< File descriptor of openPOWERLINK driver
 } tDllCalIoctlInstance;
 
@@ -226,7 +226,7 @@ static tEplKernel insertDataBlock (tDllCalQueueInstance pDllCalQueue_p,
     ioctlAsyncFrame.size = *pDataSize_p;
     ioctlAsyncFrame.queue = pInstance->dllCalQueue;
     ioctlAsyncFrame.pData = pData_p;
-    //TRACE ("%s() send async frame: size:%d\n", __func__, pFrameInfo_p->m_uiFrameSize);
+    //TRACE ("%s() send async frame: size:%d\n", __func__, pFrameInfo_p->frameSize);
     ioctlRet = ioctl(pInstance->fd, PLK_CMD_DLLCAL_ASYNCSEND, (ULONG)&ioctlAsyncFrame);
     if (ioctlRet < 0)
         return kEplDllAsyncTxBufferFull;

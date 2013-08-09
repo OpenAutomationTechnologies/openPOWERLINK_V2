@@ -168,7 +168,7 @@ void  TgtDbgPostTraceValue (DWORD dwTraceValue_p);
 #define DLLK_UPDATE_STATUS              1   // StatusRes needs update
 #define DLLK_UPDATE_BOTH                2   // IdentRes and StatusRes need update
 
-// defines for tEplDllNodeInfo.m_bPresFilterFlags
+// defines for tDllNodeInfo.m_bPresFilterFlags
 #define DLLK_FILTER_FLAG_PDO            0x01    // PRes needed for RPDO
 #define DLLK_FILTER_FLAG_HB             0x02    // PRes needed for Heartbeat Consumer
 
@@ -187,14 +187,14 @@ typedef struct
     UINT8                   flag2;                          // Flag 2 with PR and RS for PRes, StatusRes, IdentRes
     UINT8                   updateTxFrame;
     UINT                    usedPresFilterCount;
-    tEplDllConfigParam      dllConfigParam;
-    tEplDllIdentParam       dllIdentParam;
+    tDllConfigParam         dllConfigParam;
+    tDllIdentParam          dllIdentParam;
     tDllState               dllState;
     tDllkCbProcessRpdo      pfnCbProcessRpdo;
     tDllkCbProcessTpdo      pfnCbProcessTpdo;
     tEplDllkCbAsync         pfnCbAsync;
     tEplSyncCb              pfnCbSync;
-    tEplDllAsndFilter       aAsndFilter[EPL_DLL_MAX_ASND_SERVICE_ID];
+    tDllAsndFilter          aAsndFilter[DLL_MAX_ASND_SERVICE_ID];
     tEdrvFilter             aFilter[DLLK_FILTER_COUNT];
 #if EPL_NMT_MAX_NODE_ID > 0
     tDllkNodeInfo           aNodeInfo[EPL_NMT_MAX_NODE_ID];
@@ -214,7 +214,7 @@ typedef struct
     UINT8                   curNodeIndex;
     tEdrvTxBuffer**         ppTxBufferList;
     UINT8                   syncLastSoaReq;
-    tEplDllReqServiceId     aLastReqServiceId[DLLK_SOAREQ_COUNT];
+    tDllReqServiceId        aLastReqServiceId[DLLK_SOAREQ_COUNT];
     UINT                    aLastTargetNodeId[DLLK_SOAREQ_COUNT];
     UINT8                   curLastSoaReq;
     BOOL                    fSyncProcessed;
@@ -271,15 +271,15 @@ tEplKernel dllk_updateFrameStatusRes(tEdrvTxBuffer* pTxBuffer_p, tNmtState NmtSt
 tEplKernel dllk_updateFramePres(tEdrvTxBuffer* pTxBuffer_p, tNmtState nmtState_p);
 tEplKernel dllk_checkFrame(tEplFrame * pFrame_p, UINT frameSize_p);
 tEplKernel dllk_createTxFrame(UINT* pHandle_p, UINT* pFrameSize_p,
-                              tEplMsgType msgType_p, tEplDllAsndServiceId serviceId_p);
+                              tEplMsgType msgType_p, tDllAsndServiceId serviceId_p);
 tEplKernel dllk_deleteTxFrame(UINT handle_p);
-tEplKernel dllk_processTpdo(tEplFrameInfo* pFrameInfo_p, BOOL fReadyFlag_p);
+tEplKernel dllk_processTpdo(tFrameInfo* pFrameInfo_p, BOOL fReadyFlag_p);
 #if defined(CONFIG_INCLUDE_NMT_MN)
 tEplKernel dllk_mnSendSoa(tNmtState nmtState_p, tDllState* pDllStateProposed_p,
                           BOOL fEnableInvitation_p);
 tEplKernel dllk_updateFrameSoa(tEdrvTxBuffer* pTxBuffer_p, tNmtState NmtState_p,
                                BOOL fEnableInvitation_p, BYTE curReq_p);
-tEplKernel dllk_asyncFrameNotReceived(tEplDllReqServiceId reqServiceId_p, UINT nodeId_p);
+tEplKernel dllk_asyncFrameNotReceived(tDllReqServiceId reqServiceId_p, UINT nodeId_p);
 #endif
 
 //------------------------------------------------------------------------------
@@ -305,8 +305,8 @@ void       dllk_setupSoaUnspecReqFilter(tEdrvFilter* pFilter_p, UINT nodeId_p, t
 void       dllk_setupPresFilter(tEdrvFilter* pFilter_p, BOOL fEnable_p);
 void       dllk_setupPreqFilter(tEdrvFilter* pFilter_p, UINT nodeId_p, tEdrvTxBuffer *pBuffer_p, UINT8* pMacAdrs_p);
 #if EPL_NMT_MAX_NODE_ID > 0
-tEplKernel dllk_addNodeFilter(tDllkNodeInfo* pIntNodeInfo_p, tEplDllNodeOpType NodeOpType_p, BOOL fUpdateEdrv_p);
-tEplKernel dllk_deleteNodeFilter(tDllkNodeInfo* pIntNodeInfo_p, tEplDllNodeOpType nodeOpType_p, BOOL fUpdateEdrv_p);
+tEplKernel dllk_addNodeFilter(tDllkNodeInfo* pIntNodeInfo_p, tDllNodeOpType NodeOpType_p, BOOL fUpdateEdrv_p);
+tEplKernel dllk_deleteNodeFilter(tDllkNodeInfo* pIntNodeInfo_p, tDllNodeOpType nodeOpType_p, BOOL fUpdateEdrv_p);
 #endif
 
 //------------------------------------------------------------------------------

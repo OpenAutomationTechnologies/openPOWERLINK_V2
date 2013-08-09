@@ -315,7 +315,7 @@ static tEplKernel configureDll(void)
     tEplKernel      ret = kEplSuccessful;
     UINT32          nodeCfg;
     tEplObdSize     obdSize;
-    tEplDllNodeInfo dllNodeInfo;
+    tDllNodeInfo    dllNodeInfo;
     UINT            index;
     UINT8           count;
 
@@ -346,13 +346,13 @@ static tEplKernel configureDll(void)
 
         if ((nodeCfg & (EPL_NODEASSIGN_NODE_EXISTS | EPL_NODEASSIGN_ASYNCONLY_NODE)) == EPL_NODEASSIGN_NODE_EXISTS)
         {   // node exists and runs in isochronous phase
-            dllNodeInfo.m_uiNodeId = index;
+            dllNodeInfo.nodeId = index;
 
-            obdSize = sizeof (dllNodeInfo.m_wPresPayloadLimit);
-            ret = EplObduReadEntry(0x1F8D, index, &dllNodeInfo.m_wPresPayloadLimit, &obdSize);
+            obdSize = sizeof (dllNodeInfo.presPayloadLimit);
+            ret = EplObduReadEntry(0x1F8D, index, &dllNodeInfo.presPayloadLimit, &obdSize);
             if ((ret == kEplObdIndexNotExist) || (ret == kEplObdSubindexNotExist))
             {
-                dllNodeInfo.m_wPresPayloadLimit = 0;
+                dllNodeInfo.presPayloadLimit = 0;
             }
             else if (ret != kEplSuccessful)
             {
@@ -366,20 +366,20 @@ static tEplKernel configureDll(void)
 #endif
                     )) == EPL_NODEASSIGN_NODE_IS_CN)
             {   // node is CN
-                obdSize = sizeof (dllNodeInfo.m_wPreqPayloadLimit);
-                ret = EplObduReadEntry(0x1F8B, index, &dllNodeInfo.m_wPreqPayloadLimit, &obdSize);
+                obdSize = sizeof (dllNodeInfo.preqPayloadLimit);
+                ret = EplObduReadEntry(0x1F8B, index, &dllNodeInfo.preqPayloadLimit, &obdSize);
                 if (ret != kEplSuccessful)
                     return ret;
 
-                obdSize = sizeof (dllNodeInfo.m_dwPresTimeoutNs);
-                ret = EplObduReadEntry(0x1F92, index, &dllNodeInfo.m_dwPresTimeoutNs, &obdSize);
+                obdSize = sizeof (dllNodeInfo.presTimeoutNs);
+                ret = EplObduReadEntry(0x1F92, index, &dllNodeInfo.presTimeoutNs, &obdSize);
                 if (ret != kEplSuccessful)
                     return ret;
             }
             else
             {
-                dllNodeInfo.m_dwPresTimeoutNs = 0;
-                dllNodeInfo.m_wPreqPayloadLimit = 0;
+                dllNodeInfo.presTimeoutNs = 0;
+                dllNodeInfo.preqPayloadLimit = 0;
             }
 #endif // if defined(INCLUDE_CONFIG_NMT_MN)
 

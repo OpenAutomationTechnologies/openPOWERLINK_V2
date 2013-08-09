@@ -637,7 +637,7 @@ static int sendAsyncFrame(unsigned long arg)
 {
     BYTE                *pBuf;
     tIoctlDllCalAsync   asyncFrameInfo;
-    tEplFrameInfo       frameInfo;
+    tFrameInfo          frameInfo;
     int                 order;
 
     order = get_order(EPL_C_DLL_MAX_ASYNC_MTU);
@@ -656,8 +656,8 @@ static int sendAsyncFrame(unsigned long arg)
     }
 
     //TRACE("%s() Received frame size:%d\n", __func__, asyncFrame.size);
-    frameInfo.m_pFrame = (tEplFrame *)pBuf;
-    frameInfo.m_uiFrameSize = asyncFrameInfo.size;
+    frameInfo.pFrame = (tEplFrame *)pBuf;
+    frameInfo.frameSize = asyncFrameInfo.size;
 
     dllkcal_writeAsyncFrame(&frameInfo, asyncFrameInfo.queue);
 

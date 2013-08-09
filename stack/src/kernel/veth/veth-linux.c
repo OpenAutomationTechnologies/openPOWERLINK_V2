@@ -142,7 +142,7 @@ static int VEthClose(struct net_device *pNetDevice_p);
 static int VEthXmit(struct sk_buff *pSkb_p, struct net_device *pNetDevice_p);
 static struct net_device_stats* VEthGetStats(struct net_device *pNetDevice_p);
 static void VEthTimeout(struct net_device *pNetDevice_p);
-static tEplKernel VEthRecvFrame(tEplFrameInfo * pFrameInfo_p);
+static tEplKernel VEthRecvFrame(tFrameInfo * pFrameInfo_p);
 
 
 //=========================================================================//
@@ -203,7 +203,7 @@ tEplKernel  Ret = kEplSuccessful;
 static int VEthXmit(struct sk_buff *pSkb_p, struct net_device *pNetDevice_p)
 {
 tEplKernel      Ret = kEplSuccessful;
-tEplFrameInfo   FrameInfo;
+tFrameInfo      FrameInfo;
 
     //transmit function
     struct net_device_stats* pStats = netdev_priv(pNetDevice_p);
@@ -211,11 +211,11 @@ tEplFrameInfo   FrameInfo;
     //save timestemp
     pNetDevice_p->trans_start = jiffies;
 
-    FrameInfo.m_pFrame = (tEplFrame *)pSkb_p->data;
-    FrameInfo.m_uiFrameSize = pSkb_p->len;
+    FrameInfo.pFrame = (tEplFrame *)pSkb_p->data;
+    FrameInfo.frameSize = pSkb_p->len;
 
     //call send fkt on DLL
-    Ret = dllkcal_sendAsyncFrame(&FrameInfo, kEplDllAsyncReqPrioGeneric);
+    Ret = dllkcal_sendAsyncFrame(&FrameInfo, kDllAsyncReqPrioGeneric);
     if (Ret != kEplSuccessful)
     {
         EPL_DBGLVL_VETH_TRACE("VEthXmit: dllkcal_sendAsyncFrame returned 0x%02X\n", Ret);
@@ -229,7 +229,7 @@ tEplFrameInfo   FrameInfo;
 
         //set stats for the device
         pStats->tx_packets++;
-        pStats->tx_bytes += FrameInfo.m_uiFrameSize;
+        pStats->tx_bytes += FrameInfo.frameSize;
     }
 
 Exit:
@@ -260,16 +260,16 @@ static void VEthTimeout(struct net_device *pNetDevice_p)
 
 
 
-static tEplKernel VEthRecvFrame(tEplFrameInfo * pFrameInfo_p)
+static tEplKernel VEthRecvFrame(tFrameInfo * pFrameInfo_p)
 {
 tEplKernel  Ret = kEplSuccessful;
     struct net_device* pNetDevice = pVEthNetDevice_g;
     struct net_device_stats* pStats = netdev_priv(pNetDevice);
     struct sk_buff *pSkb;
 
-    EPL_DBGLVL_VETH_TRACE("VEthRecvFrame: FrameSize=%u\n", pFrameInfo_p->m_uiFrameSize);
+    EPL_DBGLVL_VETH_TRACE("VEthRecvFrame: FrameSize=%u\n", pFrameInfo_p->frameSize);
 
-    pSkb = dev_alloc_skb(pFrameInfo_p->m_uiFrameSize + 2);
+    pSkb = dev_alloc_skb(pFrameInfo_p->frameSize + 2);
     if (pSkb == NULL)
     {
         pStats->rx_dropped++;
@@ -279,7 +279,7 @@ tEplKernel  Ret = kEplSuccessful;
 
     skb_reserve(pSkb, 2);
 
-    memcpy((void *)skb_put(pSkb, pFrameInfo_p->m_uiFrameSize), pFrameInfo_p->m_pFrame, pFrameInfo_p->m_uiFrameSize);
+    memcpy((void *)skb_put(pSkb, pFrameInfo_p->frameSize), pFrameInfo_p->pFrame, pFrameInfo_p->frameSize);
 
     pSkb->protocol = eth_type_trans(pSkb, pNetDevice);
     pSkb->ip_summed = CHECKSUM_UNNECESSARY;
@@ -287,11 +287,11 @@ tEplKernel  Ret = kEplSuccessful;
     // call netif_rx with skb
     netif_rx(pSkb);
 
-    EPL_DBGLVL_VETH_TRACE("VEthRecvFrame: SrcMAC=0x%llx\n", AmiGetQword48FromBe(pFrameInfo_p->m_pFrame->m_be_abSrcMac));
+    EPL_DBGLVL_VETH_TRACE("VEthRecvFrame: SrcMAC=0x%llx\n", AmiGetQword48FromBe(pFrameInfo_p->pFrame->m_be_abSrcMac));
 
     // update receive statistics
     pStats->rx_packets++;
-    pStats->rx_bytes += pFrameInfo_p->m_uiFrameSize;
+    pStats->rx_bytes += pFrameInfo_p->frameSize;
 
 Exit:
     return Ret;

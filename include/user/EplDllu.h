@@ -51,7 +51,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
-typedef tEplKernel (PUBLIC * tEplDlluCbAsnd) (tEplFrameInfo * pFrameInfo_p);
+typedef tEplKernel (PUBLIC * tEplDlluCbAsnd) (tFrameInfo * pFrameInfo_p);
 
 //------------------------------------------------------------------------------
 // function prototypes
@@ -63,9 +63,9 @@ extern "C" {
 
 tEplKernel dllu_addInstance(void);
 tEplKernel dllu_delInstance(void);
-tEplKernel dllu_regAsndService(tEplDllAsndServiceId ServiceId_p, tEplDlluCbAsnd pfnDlluCbAsnd_p, tEplDllAsndFilter Filter_p);
-tEplKernel dllu_asyncSend(tEplFrameInfo * pFrameInfo_p, tEplDllAsyncReqPriority Priority_p);
-tEplKernel dllu_process(tEplFrameInfo * pFrameInfo_p);
+tEplKernel dllu_regAsndService(tDllAsndServiceId ServiceId_p, tEplDlluCbAsnd pfnDlluCbAsnd_p, tDllAsndFilter Filter_p);
+tEplKernel dllu_asyncSend(tFrameInfo * pFrameInfo_p, tDllAsyncReqPriority Priority_p);
+tEplKernel dllu_process(tFrameInfo * pFrameInfo_p);
 
 #ifdef __cplusplus
 }

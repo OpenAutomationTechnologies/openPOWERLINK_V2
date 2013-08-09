@@ -86,7 +86,7 @@ static tIdentuInstance   instance_g;
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static tEplKernel   identu_cbIdentResponse(tEplFrameInfo * pFrameInfo_p);
+static tEplKernel   identu_cbIdentResponse(tFrameInfo * pFrameInfo_p);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -126,8 +126,8 @@ tEplKernel identu_addInstance(void)
     EPL_MEMSET(&instance_g, 0, sizeof(instance_g));
 
     // register IdentResponse callback function
-    ret = dllucal_regAsndService(kEplDllAsndIdentResponse, identu_cbIdentResponse,
-                                 kEplDllAsndFilterAny);
+    ret = dllucal_regAsndService(kDllAsndIdentResponse, identu_cbIdentResponse,
+                                 kDllAsndFilterAny);
     return ret;
 }
 
@@ -147,7 +147,7 @@ tEplKernel identu_delInstance(void)
     tEplKernel  ret = kEplSuccessful;
 
     // deregister IdentResponse callback function
-    dllucal_regAsndService(kEplDllAsndIdentResponse, NULL, kEplDllAsndFilterNone);
+    dllucal_regAsndService(kDllAsndIdentResponse, NULL, kDllAsndFilterNone);
 
     ret = identu_reset();
     return ret;
@@ -249,7 +249,7 @@ tEplKernel identu_requestIdentResponse(UINT nodeId_p, tIdentuCbResponse pfnCbRes
 #if defined(CONFIG_INCLUDE_NMT_MN)
     if (nodeId_p == 0)
     {   // issue request for local node
-        ret = dllucal_issueRequest(kEplDllReqServiceIdent, 0x00, 0xFF);
+        ret = dllucal_issueRequest(kDllReqServiceIdent, 0x00, 0xFF);
         return ret;
     }
 #endif
@@ -266,7 +266,7 @@ tEplKernel identu_requestIdentResponse(UINT nodeId_p, tIdentuCbResponse pfnCbRes
         else
         {
             instance_g.apfnCbResponse[nodeId_p] = pfnCbResponse_p;
-            ret = dllucal_issueRequest(kEplDllReqServiceIdent, (nodeId_p + 1), 0xFF);
+            ret = dllucal_issueRequest(kDllReqServiceIdent, (nodeId_p + 1), 0xFF);
         }
 #else
         ret = kEplInvalidOperation;
@@ -329,14 +329,14 @@ IdentResponse is received.
 \ingroup module_identu
 */
 //------------------------------------------------------------------------------
-static tEplKernel identu_cbIdentResponse(tEplFrameInfo* pFrameInfo_p)
+static tEplKernel identu_cbIdentResponse(tFrameInfo* pFrameInfo_p)
 {
     tEplKernel              ret = kEplSuccessful;
     UINT                    nodeId;
     UINT                    index;
     tIdentuCbResponse       pfnCbResponse;
 
-    nodeId = AmiGetByteFromLe(&pFrameInfo_p->m_pFrame->m_le_bSrcNodeId);
+    nodeId = AmiGetByteFromLe(&pFrameInfo_p->pFrame->m_le_bSrcNodeId);
     index = nodeId - 1;
 
     if (index < tabentries(instance_g.apfnCbResponse))
@@ -349,7 +349,7 @@ static tEplKernel identu_cbIdentResponse(tEplFrameInfo* pFrameInfo_p)
         if (pfnCbResponse == NULL)
             goto Exit;
 
-        if (pFrameInfo_p->m_uiFrameSize < EPL_C_DLL_MINSIZE_IDENTRES)
+        if (pFrameInfo_p->frameSize < EPL_C_DLL_MINSIZE_IDENTRES)
         {   // IdentResponse not received or it has invalid size
             ret = pfnCbResponse(nodeId, NULL);
         }
@@ -361,14 +361,14 @@ static tEplKernel identu_cbIdentResponse(tEplFrameInfo* pFrameInfo_p)
                 if (instance_g.apIdentResponse[index] == NULL)
                 {   // malloc failed
                     ret = pfnCbResponse(nodeId,
-                                        &pFrameInfo_p->m_pFrame->m_Data.m_Asnd.m_Payload.m_IdentResponse);
+                                        &pFrameInfo_p->pFrame->m_Data.m_Asnd.m_Payload.m_IdentResponse);
                     goto Exit;
                 }
             }
 
             // copy IdentResponse to instance structure
             EPL_MEMCPY(instance_g.apIdentResponse[index],
-                       &pFrameInfo_p->m_pFrame->m_Data.m_Asnd.m_Payload.m_IdentResponse,
+                       &pFrameInfo_p->pFrame->m_Data.m_Asnd.m_Payload.m_IdentResponse,
                        sizeof(tEplIdentResponse));
             ret = pfnCbResponse(nodeId, instance_g.apIdentResponse[index]);
         }

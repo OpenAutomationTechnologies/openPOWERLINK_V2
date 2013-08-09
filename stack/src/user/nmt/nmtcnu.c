@@ -88,9 +88,9 @@ static tNmtCnuInstance   nmtCnuInstance_g;
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static tNmtCommand   getNmtCommand(tEplFrameInfo * pFrameInfo_p);
+static tNmtCommand   getNmtCommand(tFrameInfo * pFrameInfo_p);
 static BOOL             checkNodeIdList(BYTE* pbNmtCommandDate_p);
-static tEplKernel       commandCb(tEplFrameInfo * pFrameInfo_p);
+static tEplKernel       commandCb(tFrameInfo * pFrameInfo_p);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -137,7 +137,7 @@ tEplKernel nmtcnu_addInstance(UINT nodeId_p)
 
     // register callback-function for NMT-commands
 #if defined(CONFIG_INCLUDE_DLLU)
-    ret = dllucal_regAsndService(kEplDllAsndNmtCommand, commandCb, kEplDllAsndFilterLocal);
+    ret = dllucal_regAsndService(kDllAsndNmtCommand, commandCb, kDllAsndFilterLocal);
 #endif
 
     return ret;
@@ -160,7 +160,7 @@ tEplKernel nmtcnu_delInstance(void)
 
 #if defined(CONFIG_INCLUDE_DLLU)
     // deregister callback function from DLL
-    ret = dllucal_regAsndService(kEplDllAsndNmtCommand, NULL, kEplDllAsndFilterNone);
+    ret = dllucal_regAsndService(kDllAsndNmtCommand, NULL, kDllAsndFilterNone);
 #endif
 
     return ret;
@@ -183,7 +183,7 @@ The function is used to send a NMT-Request to the MN.
 tEplKernel nmtcnu_sendNmtRequest(UINT nodeId_p, tNmtCommand nmtCommand_p)
 {
     tEplKernel      ret;
-    tEplFrameInfo   nmtRequestFrameInfo;
+    tFrameInfo      nmtRequestFrameInfo;
     tEplFrame       nmtRequestFrame;
 
     ret = kEplSuccessful;
@@ -194,7 +194,7 @@ tEplKernel nmtcnu_sendNmtRequest(UINT nodeId_p, tNmtCommand nmtCommand_p)
     AmiSetWordToBe(&nmtRequestFrame.m_be_wEtherType, EPL_C_DLL_ETHERTYPE_EPL);
     AmiSetByteToLe(&nmtRequestFrame.m_le_bDstNodeId, (BYTE) EPL_C_ADR_MN_DEF_NODE_ID); // node id of the MN
     AmiSetByteToLe(&nmtRequestFrame.m_le_bMessageType, (BYTE)kEplMsgTypeAsnd);
-    AmiSetByteToLe(&nmtRequestFrame.m_Data.m_Asnd.m_le_bServiceId, (BYTE) kEplDllAsndNmtRequest);
+    AmiSetByteToLe(&nmtRequestFrame.m_Data.m_Asnd.m_le_bServiceId, (BYTE) kDllAsndNmtRequest);
     AmiSetByteToLe(&nmtRequestFrame.m_Data.m_Asnd.m_Payload.m_NmtRequestService.m_le_bNmtCommandId,
         (BYTE)nmtCommand_p);
     AmiSetByteToLe(&nmtRequestFrame.m_Data.m_Asnd.m_Payload.m_NmtRequestService.m_le_bTargetNodeId,
@@ -202,12 +202,12 @@ tEplKernel nmtcnu_sendNmtRequest(UINT nodeId_p, tNmtCommand nmtCommand_p)
     EPL_MEMSET(&nmtRequestFrame.m_Data.m_Asnd.m_Payload.m_NmtRequestService.m_le_abNmtCommandData[0], 0x00, sizeof(nmtRequestFrame.m_Data.m_Asnd.m_Payload.m_NmtRequestService.m_le_abNmtCommandData));
 
     // build info-structure
-    nmtRequestFrameInfo.m_pFrame = &nmtRequestFrame;
-    nmtRequestFrameInfo.m_uiFrameSize = EPL_C_DLL_MINSIZE_NMTREQ; // sizeof(nmtRequestFrame);
+    nmtRequestFrameInfo.pFrame = &nmtRequestFrame;
+    nmtRequestFrameInfo.frameSize = EPL_C_DLL_MINSIZE_NMTREQ; // sizeof(nmtRequestFrame);
 
     // send NMT-Request
 #if defined(CONFIG_INCLUDE_DLLU)
-    ret = dllucal_sendAsyncFrame(&nmtRequestFrameInfo, kEplDllAsyncReqPrioNmt);
+    ret = dllucal_sendAsyncFrame(&nmtRequestFrameInfo, kDllAsyncReqPrioNmt);
 #endif
 
     return ret;
@@ -250,7 +250,7 @@ The function processes NMT commands.
 \return The function returns a tEplKernel error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel commandCb(tEplFrameInfo* pFrameInfo_p)
+static tEplKernel commandCb(tFrameInfo* pFrameInfo_p)
 {
     tEplKernel      ret = kEplSuccessful;
     tNmtCommand     nmtCommand;
@@ -301,7 +301,7 @@ static tEplKernel commandCb(tEplFrameInfo* pFrameInfo_p)
         // extended NMT state commands
         case kNmtCmdStartNodeEx:
             // check if own nodeid is in EPL node list
-            fNodeIdInList = checkNodeIdList(&(pFrameInfo_p->m_pFrame->m_Data.m_Asnd.m_Payload.m_NmtCommandService.m_le_abNmtCommandData[0]));
+            fNodeIdInList = checkNodeIdList(&(pFrameInfo_p->pFrame->m_Data.m_Asnd.m_Payload.m_NmtCommandService.m_le_abNmtCommandData[0]));
             if(fNodeIdInList != FALSE)
             {   // own nodeid in list
                 // send event to process command
@@ -311,7 +311,7 @@ static tEplKernel commandCb(tEplFrameInfo* pFrameInfo_p)
 
         case kNmtCmdStopNodeEx:
             // check if own nodeid is in EPL node list
-            fNodeIdInList = checkNodeIdList(&pFrameInfo_p->m_pFrame->m_Data.m_Asnd.m_Payload.m_NmtCommandService.m_le_abNmtCommandData[0]);
+            fNodeIdInList = checkNodeIdList(&pFrameInfo_p->pFrame->m_Data.m_Asnd.m_Payload.m_NmtCommandService.m_le_abNmtCommandData[0]);
             if(fNodeIdInList != FALSE)
             {   // own nodeid in list
                 // send event to process command
@@ -321,7 +321,7 @@ static tEplKernel commandCb(tEplFrameInfo* pFrameInfo_p)
 
         case kNmtCmdEnterPreOperational2Ex:
             // check if own nodeid is in EPL node list
-            fNodeIdInList = checkNodeIdList(&pFrameInfo_p->m_pFrame->m_Data.m_Asnd.m_Payload.m_NmtCommandService.m_le_abNmtCommandData[0]);
+            fNodeIdInList = checkNodeIdList(&pFrameInfo_p->pFrame->m_Data.m_Asnd.m_Payload.m_NmtCommandService.m_le_abNmtCommandData[0]);
             if(fNodeIdInList != FALSE)
             {   // own nodeid in list
                 // send event to process command
@@ -331,7 +331,7 @@ static tEplKernel commandCb(tEplFrameInfo* pFrameInfo_p)
 
         case kNmtCmdEnableReadyToOperateEx:
             // check if own nodeid is in EPL node list
-            fNodeIdInList = checkNodeIdList(&pFrameInfo_p->m_pFrame->m_Data.m_Asnd.m_Payload.m_NmtCommandService.m_le_abNmtCommandData[0]);
+            fNodeIdInList = checkNodeIdList(&pFrameInfo_p->pFrame->m_Data.m_Asnd.m_Payload.m_NmtCommandService.m_le_abNmtCommandData[0]);
             if(fNodeIdInList != FALSE)
             {   // own nodeid in list
                 // send event to process command
@@ -341,7 +341,7 @@ static tEplKernel commandCb(tEplFrameInfo* pFrameInfo_p)
 
         case kNmtCmdResetNodeEx:
             // check if own nodeid is in EPL node list
-            fNodeIdInList = checkNodeIdList(&pFrameInfo_p->m_pFrame->m_Data.m_Asnd.m_Payload.m_NmtCommandService.m_le_abNmtCommandData[0]);
+            fNodeIdInList = checkNodeIdList(&pFrameInfo_p->pFrame->m_Data.m_Asnd.m_Payload.m_NmtCommandService.m_le_abNmtCommandData[0]);
             if(fNodeIdInList != FALSE)
             {   // own nodeid in list
                 // send event to process command
@@ -351,7 +351,7 @@ static tEplKernel commandCb(tEplFrameInfo* pFrameInfo_p)
 
         case kNmtCmdResetCommunicationEx:
             // check if own nodeid is in EPL node list
-            fNodeIdInList = checkNodeIdList(&pFrameInfo_p->m_pFrame->m_Data.m_Asnd.m_Payload.m_NmtCommandService.m_le_abNmtCommandData[0]);
+            fNodeIdInList = checkNodeIdList(&pFrameInfo_p->pFrame->m_Data.m_Asnd.m_Payload.m_NmtCommandService.m_le_abNmtCommandData[0]);
             if(fNodeIdInList != FALSE)
             {   // own nodeid in list
                 // send event to process command
@@ -361,7 +361,7 @@ static tEplKernel commandCb(tEplFrameInfo* pFrameInfo_p)
 
         case kNmtCmdResetConfigurationEx:
             // check if own nodeid is in EPL node list
-            fNodeIdInList = checkNodeIdList(&pFrameInfo_p->m_pFrame->m_Data.m_Asnd.m_Payload.m_NmtCommandService.m_le_abNmtCommandData[0]);
+            fNodeIdInList = checkNodeIdList(&pFrameInfo_p->pFrame->m_Data.m_Asnd.m_Payload.m_NmtCommandService.m_le_abNmtCommandData[0]);
             if(fNodeIdInList != FALSE)
             {   // own nodeid in list
                 // send event to process command
@@ -371,7 +371,7 @@ static tEplKernel commandCb(tEplFrameInfo* pFrameInfo_p)
 
         case kNmtCmdSwResetEx:
             // check if own nodeid is in EPL node list
-            fNodeIdInList = checkNodeIdList(&pFrameInfo_p->m_pFrame->m_Data.m_Asnd.m_Payload.m_NmtCommandService.m_le_abNmtCommandData[0]);
+            fNodeIdInList = checkNodeIdList(&pFrameInfo_p->pFrame->m_Data.m_Asnd.m_Payload.m_NmtCommandService.m_le_abNmtCommandData[0]);
             if(fNodeIdInList != FALSE)
             {   // own nodeid in list
                 // send event to process command
@@ -465,12 +465,12 @@ The function extracts the nmt command from the frame.
 \return The function returns the extracted NMT command
 */
 //------------------------------------------------------------------------------
-static tNmtCommand getNmtCommand(tEplFrameInfo* pFrameInfo_p)
+static tNmtCommand getNmtCommand(tFrameInfo* pFrameInfo_p)
 {
     tNmtCommand          nmtCommand;
     tEplNmtCommandService*  pNmtCommandService;
 
-    pNmtCommandService = &pFrameInfo_p->m_pFrame->m_Data.m_Asnd.m_Payload.m_NmtCommandService;
+    pNmtCommandService = &pFrameInfo_p->pFrame->m_Data.m_Asnd.m_Payload.m_NmtCommandService;
     nmtCommand = (tNmtCommand)AmiGetByteFromLe(&pNmtCommandService->m_le_bNmtCommandId);
 
     return nmtCommand;

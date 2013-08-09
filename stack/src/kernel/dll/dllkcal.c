@@ -122,14 +122,14 @@ static tDllkCalInstance     instance_l;
 // local function prototypes
 //------------------------------------------------------------------------------
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
-static BOOL getCnGenRequest(tEplDllReqServiceId* pReqServiceId_p, UINT* pNodeId_p);
-static BOOL getCnNmtRequest(tEplDllReqServiceId* pReqServiceId_p, UINT* pNodeId_p);
-static BOOL getMnGenNmtRequest(tEplDllReqServiceId* pReqServiceId_p, UINT* pNodeId_p);
-static BOOL getMnIdentRequest(tEplDllReqServiceId* pReqServiceId_p, UINT* pNodeId_p);
-static BOOL getMnStatusRequest(tEplDllReqServiceId* pReqServiceId_p, UINT* pNodeId_p);
+static BOOL getCnGenRequest(tDllReqServiceId* pReqServiceId_p, UINT* pNodeId_p);
+static BOOL getCnNmtRequest(tDllReqServiceId* pReqServiceId_p, UINT* pNodeId_p);
+static BOOL getMnGenNmtRequest(tDllReqServiceId* pReqServiceId_p, UINT* pNodeId_p);
+static BOOL getMnIdentRequest(tDllReqServiceId* pReqServiceId_p, UINT* pNodeId_p);
+static BOOL getMnStatusRequest(tDllReqServiceId* pReqServiceId_p, UINT* pNodeId_p);
 
 #if (EPL_DLL_PRES_CHAINING_MN != FALSE)
-static BOOL getMnSyncRequest(tEplDllReqServiceId* pReqServiceId_p, UINT* pNodeId_p,
+static BOOL getMnSyncRequest(tDllReqServiceId* pReqServiceId_p, UINT* pNodeId_p,
                              tEplSoaPayload* pSoaPayload_p);
 #endif
 #endif
@@ -230,16 +230,16 @@ tEplKernel dllkcal_process(tEplEvent* pEvent_p)
 {
     tEplKernel                  ret = kEplSuccessful;
     tDllCalAsndServiceIdFilter* pServFilter;
-    tEplDllIdentParam*          pIdentParam;
-    tEplDllConfigParam*         pConfigParam;
+    tDllIdentParam*             pIdentParam;
+    tDllConfigParam*            pConfigParam;
 
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
     tDllCalIssueRequest*        pIssueReq;
 #endif
 
 #if EPL_NMT_MAX_NODE_ID > 0
-    tEplDllNodeInfo*            pNodeInfo;
-    tEplDllNodeOpParam*         pNodeOpParam;
+    tDllNodeInfo*               pNodeInfo;
+    tDllNodeOpParam*            pNodeOpParam;
 #endif
 
     switch (pEvent_p->m_EventType)
@@ -260,35 +260,35 @@ tEplKernel dllkcal_process(tEplEvent* pEvent_p)
 
 #if EPL_NMT_MAX_NODE_ID > 0
         case kEplEventTypeDllkConfigNode:
-            pNodeInfo = (tEplDllNodeInfo*) pEvent_p->m_pArg;
+            pNodeInfo = (tDllNodeInfo*) pEvent_p->m_pArg;
             ret = dllk_configNode(pNodeInfo);
             break;
 
         case kEplEventTypeDllkAddNode:
-            pNodeOpParam = (tEplDllNodeOpParam*) pEvent_p->m_pArg;
+            pNodeOpParam = (tDllNodeOpParam*) pEvent_p->m_pArg;
             ret = dllk_addNode(pNodeOpParam);
             break;
 
         case kEplEventTypeDllkDelNode:
-            pNodeOpParam = (tEplDllNodeOpParam*) pEvent_p->m_pArg;
+            pNodeOpParam = (tDllNodeOpParam*) pEvent_p->m_pArg;
             ret = dllk_deleteNode(pNodeOpParam);
             break;
 #endif // EPL_NMT_MAX_NODE_ID > 0
 
         case kEplEventTypeDllkIdentity:
-            pIdentParam = (tEplDllIdentParam*) pEvent_p->m_pArg;
-            if (pIdentParam->m_uiSizeOfStruct > pEvent_p->m_uiSize)
+            pIdentParam = (tDllIdentParam*) pEvent_p->m_pArg;
+            if (pIdentParam->sizeOfStruct > pEvent_p->m_uiSize)
             {
-                pIdentParam->m_uiSizeOfStruct = pEvent_p->m_uiSize;
+                pIdentParam->sizeOfStruct = pEvent_p->m_uiSize;
             }
             ret = dllk_setIdentity(pIdentParam);
             break;
 
         case kEplEventTypeDllkConfig:
-            pConfigParam = (tEplDllConfigParam*) pEvent_p->m_pArg;
-            if (pConfigParam->m_uiSizeOfStruct > pEvent_p->m_uiSize)
+            pConfigParam = (tDllConfigParam*) pEvent_p->m_pArg;
+            if (pConfigParam->sizeOfStruct > pEvent_p->m_uiSize)
             {
-                pConfigParam->m_uiSizeOfStruct = pEvent_p->m_uiSize;
+                pConfigParam->sizeOfStruct = pEvent_p->m_uiSize;
             }
             ret = dllk_config(pConfigParam);
             break;
@@ -313,7 +313,7 @@ This function returns the count of TX frames of the FIFO with highest priority.
 \return Returns an error code
 */
 //------------------------------------------------------------------------------
-tEplKernel dllkcal_getAsyncTxCount(tEplDllAsyncReqPriority* pPriority_p,
+tEplKernel dllkcal_getAsyncTxCount(tDllAsyncReqPriority* pPriority_p,
                                    UINT* pCount_p)
 {
     tEplKernel  ret = kEplSuccessful;
@@ -333,7 +333,7 @@ tEplKernel dllkcal_getAsyncTxCount(tEplDllAsyncReqPriority* pPriority_p,
 
     if (frameCount != 0)
     {   // NMT requests are in queue
-        *pPriority_p = kEplDllAsyncReqPrioNmt;
+        *pPriority_p = kDllAsyncReqPrioNmt;
         *pCount_p = (UINT) frameCount;
         goto Exit;
     }
@@ -350,7 +350,7 @@ tEplKernel dllkcal_getAsyncTxCount(tEplDllAsyncReqPriority* pPriority_p,
         instance_l.statistics.maxTxFrameCountGen = frameCount;
     }
 
-    *pPriority_p = kEplDllAsyncReqPrioGeneric;
+    *pPriority_p = kDllAsyncReqPrioGeneric;
     *pCount_p = (UINT) frameCount;
 
 Exit:
@@ -372,13 +372,13 @@ The function return TX frames form the specified FIFO.
 */
 //------------------------------------------------------------------------------
 tEplKernel dllkcal_getAsyncTxFrame(void* pFrame_p, UINT* pFrameSize_p,
-                                   tEplDllAsyncReqPriority priority_p)
+                                   tDllAsyncReqPriority priority_p)
 {
     tEplKernel      ret = kEplSuccessful;
 
     switch (priority_p)
     {
-        case kEplDllAsyncReqPrioNmt:    // NMT request priority
+        case kDllAsyncReqPrioNmt:    // NMT request priority
             ret = instance_l.pTxNmtFuncs->pfnGetDataBlock(
                                             instance_l.dllCalQueueTxNmt,
                                             (BYTE*) pFrame_p, pFrameSize_p);
@@ -406,15 +406,15 @@ only for frames with registered AsndServiceIds.
 \return Returns an error code
 */
 //------------------------------------------------------------------------------
-tEplKernel dllkcal_asyncFrameReceived(tEplFrameInfo* pFrameInfo_p)
+tEplKernel dllkcal_asyncFrameReceived(tFrameInfo* pFrameInfo_p)
 {
     tEplKernel  ret = kEplSuccessful;
     tEplEvent   event;
 
     event.m_EventSink = kEplEventSinkDlluCal;
     event.m_EventType = kEplEventTypeAsndRx;
-    event.m_pArg = pFrameInfo_p->m_pFrame;
-    event.m_uiSize = pFrameInfo_p->m_uiFrameSize;
+    event.m_pArg = pFrameInfo_p->pFrame;
+    event.m_uiSize = pFrameInfo_p->frameSize;
 
     ret = eventk_postEvent(&event);
     if (ret != kEplSuccessful)
@@ -442,26 +442,26 @@ priority.
 \return Returns an error code
 */
 //------------------------------------------------------------------------------
-tEplKernel dllkcal_sendAsyncFrame(tEplFrameInfo* pFrameInfo_p,
-                                  tEplDllAsyncReqPriority priority_p)
+tEplKernel dllkcal_sendAsyncFrame(tFrameInfo* pFrameInfo_p,
+                                  tDllAsyncReqPriority priority_p)
 {
     tEplKernel  ret = kEplSuccessful;
     tEplEvent   event;
 
     switch (priority_p)
     {
-        case kEplDllAsyncReqPrioNmt:    // NMT request priority
+        case kDllAsyncReqPrioNmt:    // NMT request priority
             ret = instance_l.pTxNmtFuncs->pfnInsertDataBlock(
                                         instance_l.dllCalQueueTxNmt,
-                                        (BYTE*)pFrameInfo_p->m_pFrame,
-                                        &(pFrameInfo_p->m_uiFrameSize));
+                                        (BYTE*)pFrameInfo_p->pFrame,
+                                        &(pFrameInfo_p->frameSize));
             break;
 
         default:    // generic priority
             ret = instance_l.pTxGenFuncs->pfnInsertDataBlock(
                                         instance_l.dllCalQueueTxGen,
-                                        (BYTE*)pFrameInfo_p->m_pFrame,
-                                        &(pFrameInfo_p->m_uiFrameSize));
+                                        (BYTE*)pFrameInfo_p->pFrame,
+                                        &(pFrameInfo_p->frameSize));
             break;
     }
 
@@ -494,7 +494,7 @@ The function writes the given frame into the specified dll CAL queue.
 \return Returns an tEplKernel error code
 */
 //------------------------------------------------------------------------------
-tEplKernel dllkcal_writeAsyncFrame(tEplFrameInfo* pFrameInfo_p, tDllCalQueue dllQueue)
+tEplKernel dllkcal_writeAsyncFrame(tFrameInfo* pFrameInfo_p, tDllCalQueue dllQueue)
 {
     tEplKernel  ret = kEplSuccessful;
 
@@ -503,22 +503,22 @@ tEplKernel dllkcal_writeAsyncFrame(tEplFrameInfo* pFrameInfo_p, tDllCalQueue dll
         case kDllCalQueueTxNmt:    // NMT request priority
             ret = instance_l.pTxNmtFuncs->pfnInsertDataBlock(
                                         instance_l.dllCalQueueTxNmt,
-                                        (BYTE*)pFrameInfo_p->m_pFrame,
-                                        &(pFrameInfo_p->m_uiFrameSize));
+                                        (BYTE*)pFrameInfo_p->pFrame,
+                                        &(pFrameInfo_p->frameSize));
             break;
 
         case kDllCalQueueTxGen:    // generic priority
             ret = instance_l.pTxGenFuncs->pfnInsertDataBlock(
                                         instance_l.dllCalQueueTxGen,
-                                        (BYTE*)pFrameInfo_p->m_pFrame,
-                                        &(pFrameInfo_p->m_uiFrameSize));
+                                        (BYTE*)pFrameInfo_p->pFrame,
+                                        &(pFrameInfo_p->frameSize));
             break;
 #if EPL_DLL_PRES_CHAINING_MN != FALSE
         case kDllCalQueueTxSync:   // sync request priority
             ret = instance_l.pTxGenFuncs->pfnInsertDataBlock(
                                         instance_l.dllCalQueueTxSync,
-                                        (BYTE*)pFrameInfo_p->m_pFrame,
-                                        &(pFrameInfo_p->m_uiFrameSize));
+                                        (BYTE*)pFrameInfo_p->pFrame,
+                                        &(pFrameInfo_p->frameSize));
             break;
 #endif
         default:
@@ -625,7 +625,7 @@ The function issues a StatusRequest or an IdentRequest to the specified node.
 \return Returns an error code
 */
 //------------------------------------------------------------------------------
-tEplKernel dllkcal_issueRequest(tEplDllReqServiceId service_p, UINT nodeId_p,
+tEplKernel dllkcal_issueRequest(tDllReqServiceId service_p, UINT nodeId_p,
                                   BYTE soaFlag1_p)
 {
     tEplKernel  ret = kEplSuccessful;
@@ -642,7 +642,7 @@ tEplKernel dllkcal_issueRequest(tEplDllReqServiceId service_p, UINT nodeId_p,
     // add node to appropriate request queue
     switch (service_p)
     {
-        case kEplDllReqServiceIdent:
+        case kDllReqServiceIdent:
             if (((instance_l.writeIdentReq + 1) % tabentries (instance_l.aQueueIdentReq))
                 == instance_l.readIdentReq)
             {   // queue is full
@@ -654,7 +654,7 @@ tEplKernel dllkcal_issueRequest(tEplDllReqServiceId service_p, UINT nodeId_p,
                 (instance_l.writeIdentReq + 1) % tabentries (instance_l.aQueueIdentReq);
             break;
 
-        case kEplDllReqServiceStatus:
+        case kDllReqServiceStatus:
             if (((instance_l.writeStatusReq + 1) % tabentries (instance_l.aQueueStatusReq))
                 == instance_l.readStatusReq)
             {   // queue is full
@@ -684,7 +684,7 @@ DLL module.
 
 \param  pReqServiceId_p         Pointer to the request service ID of available
                                 request for MN NMT or generic request queue
-                                (Flag2.PR) or kEplDllReqServiceNo if queues are
+                                (Flag2.PR) or kDllReqServiceNo if queues are
                                 emptry. The function store the next request at
                                 this location.
 \param  pNodeId_p               Pointer to store the node ID of the next request.
@@ -696,7 +696,7 @@ DLL module.
 \return Returns an error code.
 */
 //------------------------------------------------------------------------------
-tEplKernel dllkcal_getSoaRequest(tEplDllReqServiceId* pReqServiceId_p,
+tEplKernel dllkcal_getSoaRequest(tDllReqServiceId* pReqServiceId_p,
                                  UINT* pNodeId_p, tEplSoaPayload* pSoaPayload_p)
 {
     tEplKernel      ret = kEplSuccessful;
@@ -764,7 +764,7 @@ This will add the node to the asynchronous request scheduler.
 */
 //------------------------------------------------------------------------------
 tEplKernel dllkcal_setAsyncPendingRequests(UINT nodeId_p,
-                                           tEplDllAsyncReqPriority asyncReqPrio_p,
+                                           tDllAsyncReqPriority asyncReqPrio_p,
                                            UINT count_p)
 {
     tEplKernel  ret = kEplSuccessful;
@@ -772,7 +772,7 @@ tEplKernel dllkcal_setAsyncPendingRequests(UINT nodeId_p,
     // add node to appropriate request queue
     switch (asyncReqPrio_p)
     {
-        case kEplDllAsyncReqPrioNmt:
+        case kDllAsyncReqPrioNmt:
         {
             nodeId_p--;
             if (nodeId_p >= (tabentries (instance_l.aQueueCnRequests) / 2))
@@ -823,7 +823,7 @@ The function returns the next CN generic request.
 \retval FALSE       No request was found
 */
 //------------------------------------------------------------------------------
-static BOOL getCnGenRequest(tEplDllReqServiceId* pReqServiceId_p, UINT* pNodeId_p)
+static BOOL getCnGenRequest(tDllReqServiceId* pReqServiceId_p, UINT* pNodeId_p)
 {
     for (;instance_l.nextQueueCnRequest < (tabentries (instance_l.aQueueCnRequests) / 2);
         instance_l.nextQueueCnRequest++)
@@ -833,7 +833,7 @@ static BOOL getCnGenRequest(tEplDllReqServiceId* pReqServiceId_p, UINT* pNodeId_
             // remove one request from queue
             instance_l.aQueueCnRequests[instance_l.nextQueueCnRequest]--;
             *pNodeId_p = instance_l.nextQueueCnRequest + 1;
-            *pReqServiceId_p = kEplDllReqServiceUnspecified;
+            *pReqServiceId_p = kDllReqServiceUnspecified;
             instance_l.nextQueueCnRequest++;
             if (instance_l.nextQueueCnRequest >= (tabentries (instance_l.aQueueCnRequests) / 2))
             {   // last node reached
@@ -864,7 +864,7 @@ The function returns the next CN NMT request.
 \retval FALSE       No request was found
 */
 //------------------------------------------------------------------------------
-static BOOL getCnNmtRequest(tEplDllReqServiceId* pReqServiceId_p, UINT* pNodeId_p)
+static BOOL getCnNmtRequest(tDllReqServiceId* pReqServiceId_p, UINT* pNodeId_p)
 {
     for (;instance_l.nextQueueCnRequest < tabentries (instance_l.aQueueCnRequests);
         instance_l.nextQueueCnRequest++)
@@ -874,7 +874,7 @@ static BOOL getCnNmtRequest(tEplDllReqServiceId* pReqServiceId_p, UINT* pNodeId_
             // remove one request from queue
             instance_l.aQueueCnRequests[instance_l.nextQueueCnRequest]--;
             *pNodeId_p = instance_l.nextQueueCnRequest + 1 - (tabentries (instance_l.aQueueCnRequests) / 2);
-            *pReqServiceId_p = kEplDllReqServiceNmtRequest;
+            *pReqServiceId_p = kDllReqServiceNmtRequest;
             instance_l.nextQueueCnRequest++;
             if (instance_l.nextQueueCnRequest > tabentries (instance_l.aQueueCnRequests))
             {   // last node reached
@@ -909,12 +909,12 @@ The function returns the next MN Generic/NMT request.
 \retval FALSE       No request was found
 */
 //------------------------------------------------------------------------------
-static BOOL getMnGenNmtRequest(tEplDllReqServiceId* pReqServiceId_p, UINT* pNodeId_p)
+static BOOL getMnGenNmtRequest(tDllReqServiceId* pReqServiceId_p, UINT* pNodeId_p)
 {
     // MnNmtReq and MnGenReq
     // next queue will be MnIdentReq queue
     instance_l.nextRequestQueue = 3;
-    if (*pReqServiceId_p != kEplDllReqServiceNo)
+    if (*pReqServiceId_p != kDllReqServiceNo)
     {
         *pNodeId_p = EPL_C_ADR_INVALID;   // DLLk must exchange this with the actual node ID
         return TRUE;
@@ -937,7 +937,7 @@ The function returns the next MN ident request.
 \retval FALSE       No request was found
 */
 //------------------------------------------------------------------------------
-static BOOL getMnIdentRequest(tEplDllReqServiceId* pReqServiceId_p, UINT* pNodeId_p)
+static BOOL getMnIdentRequest(tDllReqServiceId* pReqServiceId_p, UINT* pNodeId_p)
 {
     // next queue will be MnStatusReq queue
     instance_l.nextRequestQueue = 4;
@@ -946,7 +946,7 @@ static BOOL getMnIdentRequest(tEplDllReqServiceId* pReqServiceId_p, UINT* pNodeI
         *pNodeId_p = instance_l.aQueueIdentReq[instance_l.readIdentReq];
         instance_l.readIdentReq =
             (instance_l.readIdentReq + 1) % tabentries (instance_l.aQueueIdentReq);
-        *pReqServiceId_p = kEplDllReqServiceIdent;
+        *pReqServiceId_p = kDllReqServiceIdent;
         return TRUE;
     }
     return FALSE;
@@ -967,7 +967,7 @@ The function returns the next MN status request.
 \retval FALSE       No request was found
 */
 //------------------------------------------------------------------------------
-static BOOL getMnStatusRequest(tEplDllReqServiceId* pReqServiceId_p, UINT* pNodeId_p)
+static BOOL getMnStatusRequest(tDllReqServiceId* pReqServiceId_p, UINT* pNodeId_p)
 {
 #if EPL_DLL_PRES_CHAINING_MN != FALSE
     // next queue will be MnSyncReq queue
@@ -981,7 +981,7 @@ static BOOL getMnStatusRequest(tEplDllReqServiceId* pReqServiceId_p, UINT* pNode
         *pNodeId_p = instance_l.aQueueStatusReq[instance_l.readStatusReq];
         instance_l.readStatusReq =
             (instance_l.readStatusReq + 1) % tabentries (instance_l.aQueueStatusReq);
-        *pReqServiceId_p = kEplDllReqServiceStatus;
+        *pReqServiceId_p = kDllReqServiceStatus;
         return TRUE;
     }
     return FALSE;
@@ -1009,14 +1009,14 @@ todo how to handle errors (ret != kEplSuccessful)? Is it sufficient that we
 \retval FALSE       No request was found
 */
 //------------------------------------------------------------------------------
-static BOOL getMnSyncRequest(tEplDllReqServiceId* pReqServiceId_p, UINT* pNodeId_p,
+static BOOL getMnSyncRequest(tDllReqServiceId* pReqServiceId_p, UINT* pNodeId_p,
                              tEplSoaPayload* pSoaPayload_p)
 {
     tEplKernel          ret;
     ULONG               syncReqCount = 0;
     UINT                syncReqSize = 0;
-    tEplDllSyncRequest  syncRequest;
-    tEplDllNodeOpParam  nodeOpParam;
+    tDllSyncRequest     syncRequest;
+    tDllNodeOpParam     nodeOpParam;
 
     // next queue will be CnGenReq queue
     instance_l.nextRequestQueue = 0;
@@ -1037,24 +1037,24 @@ static BOOL getMnSyncRequest(tEplDllReqServiceId* pReqServiceId_p, UINT* pNodeId
             return TRUE;
         }
 
-        if (syncReqSize > memberoffs(tEplDllSyncRequest, m_dwSyncControl))
+        if (syncReqSize > memberoffs(tDllSyncRequest, syncControl))
         {
             AmiSetDwordToLe(&pSoaPayload_p->m_SyncRequest.m_le_dwSyncControl,
-                            syncRequest.m_dwSyncControl);
-            if ((syncRequest.m_dwSyncControl & EPL_SYNC_PRES_MODE_SET) != 0)
+                            syncRequest.syncControl);
+            if ((syncRequest.syncControl & EPL_SYNC_PRES_MODE_SET) != 0)
             {
-                nodeOpParam.m_OpNodeType = kEplDllNodeOpTypeIsochronous;
-                nodeOpParam.m_uiNodeId = syncRequest.m_uiNodeId;
+                nodeOpParam.opNodeType = kDllNodeOpTypeIsochronous;
+                nodeOpParam.nodeId = syncRequest.nodeId;
                 ret = dllk_addNode(&nodeOpParam);
                 if (ret != kEplSuccessful)
                 {
                     return TRUE;
                 }
             }
-            if ((syncRequest.m_dwSyncControl & EPL_SYNC_PRES_MODE_RESET) != 0)
+            if ((syncRequest.syncControl & EPL_SYNC_PRES_MODE_RESET) != 0)
             {
-                nodeOpParam.m_OpNodeType = kEplDllNodeOpTypeIsochronous;
-                nodeOpParam.m_uiNodeId = syncRequest.m_uiNodeId;
+                nodeOpParam.opNodeType = kDllNodeOpTypeIsochronous;
+                nodeOpParam.nodeId = syncRequest.nodeId;
                 ret = dllk_deleteNode(&nodeOpParam);
                 if (ret != kEplSuccessful)
                 {
@@ -1062,20 +1062,20 @@ static BOOL getMnSyncRequest(tEplDllReqServiceId* pReqServiceId_p, UINT* pNodeId
                 }
             }
         }
-        if (syncReqSize > memberoffs(tEplDllSyncRequest, m_dwPResTimeFirst))
+        if (syncReqSize > memberoffs(tDllSyncRequest, pResTimeFirst))
         {
             AmiSetDwordToLe(&pSoaPayload_p->m_SyncRequest.m_le_dwPResTimeFirst,
-                            syncRequest.m_dwPResTimeFirst);
+                            syncRequest.pResTimeFirst);
         }
-        if (syncReqSize > memberoffs(tEplDllSyncRequest, m_dwPResFallBackTimeout))
+        if (syncReqSize > memberoffs(tDllSyncRequest, pResFallBackTimeout))
         {
             AmiSetDwordToLe(&pSoaPayload_p->m_SyncRequest.m_le_dwPResFallBackTimeout,
-                            syncRequest.m_dwPResFallBackTimeout);
+                            syncRequest.pResFallBackTimeout);
         }
 
-        if ((syncRequest.m_dwSyncControl & EPL_SYNC_DEST_MAC_ADDRESS_VALID) != 0)
+        if ((syncRequest.syncControl & EPL_SYNC_DEST_MAC_ADDRESS_VALID) != 0)
         {
-            ret = dllk_getCnMacAddress(syncRequest.m_uiNodeId,
+            ret = dllk_getCnMacAddress(syncRequest.nodeId,
                             &pSoaPayload_p->m_SyncRequest.m_be_abDestMacAddress[0]);
             if (ret != kEplSuccessful)
             {
@@ -1083,8 +1083,8 @@ static BOOL getMnSyncRequest(tEplDllReqServiceId* pReqServiceId_p, UINT* pNodeId
             }
         }
 
-        *pNodeId_p = syncRequest.m_uiNodeId;
-        *pReqServiceId_p = kEplDllReqServiceSync;
+        *pNodeId_p = syncRequest.nodeId;
+        *pReqServiceId_p = kDllReqServiceSync;
         return TRUE;
     }
     return FALSE;
