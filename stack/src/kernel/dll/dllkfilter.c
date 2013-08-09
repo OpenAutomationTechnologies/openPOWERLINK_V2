@@ -164,7 +164,7 @@ void dllk_setupSoaIdentReqFilter(tEdrvFilter* pFilter_p, UINT nodeId_p, tEdrvTxB
     AmiSetWordToBe      (&pFilter_p->m_abFilterMask[12],    0xFFFF);
     AmiSetByteToBe      (&pFilter_p->m_abFilterValue[14],   kEplMsgTypeSoa);
     AmiSetByteToBe      (&pFilter_p->m_abFilterMask[14],    0xFF);
-    AmiSetByteToBe      (&pFilter_p->m_abFilterValue[20],   kEplDllReqServiceIdent);
+    AmiSetByteToBe      (&pFilter_p->m_abFilterValue[20],   kDllReqServiceIdent);
     AmiSetByteToBe      (&pFilter_p->m_abFilterMask[20],    0xFF);
     AmiSetByteToBe      (&pFilter_p->m_abFilterValue[21],   (UINT8)nodeId_p);
     AmiSetByteToBe      (&pFilter_p->m_abFilterMask[21],    0xFF);
@@ -193,7 +193,7 @@ void dllk_setupSoaStatusReqFilter(tEdrvFilter* pFilter_p, UINT nodeId_p, tEdrvTx
     AmiSetWordToBe      (&pFilter_p->m_abFilterMask[12],    0xFFFF);
     AmiSetByteToBe      (&pFilter_p->m_abFilterValue[14],   kEplMsgTypeSoa);
     AmiSetByteToBe      (&pFilter_p->m_abFilterMask[14],    0xFF);
-    AmiSetByteToBe      (&pFilter_p->m_abFilterValue[20],   kEplDllReqServiceStatus);
+    AmiSetByteToBe      (&pFilter_p->m_abFilterValue[20],   kDllReqServiceStatus);
     AmiSetByteToBe      (&pFilter_p->m_abFilterMask[20],    0xFF);
     AmiSetByteToBe      (&pFilter_p->m_abFilterValue[21],   (UINT8)nodeId_p);
     AmiSetByteToBe      (&pFilter_p->m_abFilterMask[21],    0xFF);
@@ -222,7 +222,7 @@ void dllk_setupSoaNmtReqFilter(tEdrvFilter* pFilter_p, UINT nodeId_p, tEdrvTxBuf
     AmiSetWordToBe      (&pFilter_p->m_abFilterMask[12],    0xFFFF);
     AmiSetByteToBe      (&pFilter_p->m_abFilterValue[14],   kEplMsgTypeSoa);
     AmiSetByteToBe      (&pFilter_p->m_abFilterMask[14],    0xFF);
-    AmiSetByteToBe      (&pFilter_p->m_abFilterValue[20],   kEplDllReqServiceNmtRequest);
+    AmiSetByteToBe      (&pFilter_p->m_abFilterValue[20],   kDllReqServiceNmtRequest);
     AmiSetByteToBe      (&pFilter_p->m_abFilterMask[20],    0xFF);
     AmiSetByteToBe      (&pFilter_p->m_abFilterValue[21],   (UINT8)nodeId_p);
     AmiSetByteToBe      (&pFilter_p->m_abFilterMask[21],    0xFF);
@@ -253,7 +253,7 @@ void dllk_setupSoaSyncReqFilter(tEdrvFilter* pFilter_p, UINT nodeId_p, tEdrvTxBu
     AmiSetWordToBe      (&pFilter_p->m_abFilterMask[12],    0xFFFF);
     AmiSetByteToBe      (&pFilter_p->m_abFilterValue[14],   kEplMsgTypeSoa);
     AmiSetByteToBe      (&pFilter_p->m_abFilterMask[14],    0xFF);
-    AmiSetByteToBe      (&pFilter_p->m_abFilterValue[20],   kEplDllReqServiceSync);
+    AmiSetByteToBe      (&pFilter_p->m_abFilterValue[20],   kDllReqServiceSync);
     AmiSetByteToBe      (&pFilter_p->m_abFilterMask[20],    0xFF);
     AmiSetByteToBe      (&pFilter_p->m_abFilterValue[21],   (UINT8)nodeId_p);
     AmiSetByteToBe      (&pFilter_p->m_abFilterMask[21],    0xFF);
@@ -283,7 +283,7 @@ void dllk_setupSoaUnspecReqFilter(tEdrvFilter* pFilter_p, UINT nodeId_p, tEdrvTx
     AmiSetWordToBe      (&pFilter_p->m_abFilterMask[12],    0xFFFF);
     AmiSetByteToBe      (&pFilter_p->m_abFilterValue[14],   kEplMsgTypeSoa);
     AmiSetByteToBe      (&pFilter_p->m_abFilterMask[14],    0xFF);
-    AmiSetByteToBe      (&pFilter_p->m_abFilterValue[20],   kEplDllReqServiceUnspecified);
+    AmiSetByteToBe      (&pFilter_p->m_abFilterValue[20],   kDllReqServiceUnspecified);
     AmiSetByteToBe      (&pFilter_p->m_abFilterMask[20],    0xFF);
     AmiSetByteToBe      (&pFilter_p->m_abFilterValue[21],   (UINT8)nodeId_p);
     AmiSetByteToBe      (&pFilter_p->m_abFilterMask[21],    0xFF);
@@ -358,7 +358,7 @@ This function adds a PRes filter for the specified node.
 \return The function returns a pointer to the node Information of the node
 */
 //------------------------------------------------------------------------------
-tEplKernel dllk_addNodeFilter(tDllkNodeInfo* pIntNodeInfo_p, tEplDllNodeOpType nodeOpType_p,
+tEplKernel dllk_addNodeFilter(tDllkNodeInfo* pIntNodeInfo_p, tDllNodeOpType nodeOpType_p,
                               BOOL fUpdateEdrv_p)
 {
     tEplKernel      ret = kEplSuccessful;
@@ -366,11 +366,11 @@ tEplKernel dllk_addNodeFilter(tDllkNodeInfo* pIntNodeInfo_p, tEplDllNodeOpType n
 
     switch (nodeOpType_p)
     {
-        case kEplDllNodeOpTypeFilterPdo:
+        case kDllNodeOpTypeFilterPdo:
             presFilterFlags = DLLK_FILTER_FLAG_PDO;
             break;
 
-        case kEplDllNodeOpTypeFilterHeartbeat:
+        case kDllNodeOpTypeFilterHeartbeat:
             presFilterFlags = DLLK_FILTER_FLAG_HB;
             break;
 
@@ -434,7 +434,7 @@ This function deletes a PRes filter for the specified node.
 \return The function returns a pointer to the node Information of the node
 */
 //------------------------------------------------------------------------------
-tEplKernel dllk_deleteNodeFilter(tDllkNodeInfo* pIntNodeInfo_p, tEplDllNodeOpType nodeOpType_p,
+tEplKernel dllk_deleteNodeFilter(tDllkNodeInfo* pIntNodeInfo_p, tDllNodeOpType nodeOpType_p,
                                  BOOL fUpdateEdrv_p)
 {
     tEplKernel      ret = kEplSuccessful;
@@ -442,11 +442,11 @@ tEplKernel dllk_deleteNodeFilter(tDllkNodeInfo* pIntNodeInfo_p, tEplDllNodeOpTyp
 
     switch (nodeOpType_p)
     {
-        case kEplDllNodeOpTypeFilterPdo:
+        case kDllNodeOpTypeFilterPdo:
             bPresFilterFlags = DLLK_FILTER_FLAG_PDO;
             break;
 
-        case kEplDllNodeOpTypeFilterHeartbeat:
+        case kDllNodeOpTypeFilterHeartbeat:
             bPresFilterFlags = DLLK_FILTER_FLAG_HB;
             break;
 

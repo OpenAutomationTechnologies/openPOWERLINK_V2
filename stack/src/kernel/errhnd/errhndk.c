@@ -616,10 +616,10 @@ static tEplKernel handleInvalidFormat(tEplEvent *pEvent_p)
     {   // MN is active
         if (pErrorHandlerEvent->m_uiNodeId != 0)
         {
-            tEplDllNodeOpParam  NodeOpParam;
+            tDllNodeOpParam     NodeOpParam;
 
-            NodeOpParam.m_OpNodeType = kEplDllNodeOpTypeIsochronous;
-            NodeOpParam.m_uiNodeId =pErrorHandlerEvent->m_uiNodeId;
+            NodeOpParam.opNodeType = kDllNodeOpTypeIsochronous;
+            NodeOpParam.nodeId =pErrorHandlerEvent->m_uiNodeId;
             // remove node from isochronous phase
             dllk_deleteNode(&NodeOpParam);
 
@@ -768,7 +768,7 @@ static tEplKernel handleMnCnLossPres(tEplEvent *pEvent_p)
 {
     tEplKernel              ret;
     UINT                    nodeIdx;
-    tEplDllNodeOpParam      nodeOpParam;
+    tDllNodeOpParam         nodeOpParam;
     tErrHndkEvent*          pErrorHandlerEvent = (tErrHndkEvent*)pEvent_p->m_pArg;
     UINT32                  threshold, thresholdCnt, cumulativeCnt;
 
@@ -810,8 +810,8 @@ static tEplKernel handleMnCnLossPres(tEplEvent *pEvent_p)
             }
 
             // remove node from isochronous phase
-            nodeOpParam.m_OpNodeType = kEplDllNodeOpTypeIsochronous;
-            nodeOpParam.m_uiNodeId = pErrorHandlerEvent->m_uiNodeId;
+            nodeOpParam.opNodeType = kDllNodeOpTypeIsochronous;
+            nodeOpParam.nodeId = pErrorHandlerEvent->m_uiNodeId;
             ret = dllk_deleteNode(&nodeOpParam);
 
             // inform NmtMnu module about state change, which shall send

@@ -332,9 +332,9 @@ static tEplKernel processNmtMsFullCycle(tNmtState nmtState_p, tNmtEvent nmtEvent
     {
         case kNmtEventDllMeSocTrig:
             // update cycle counter
-            if (dllkInstance_g.dllConfigParam.m_uiMultiplCycleCnt > 0)
+            if (dllkInstance_g.dllConfigParam.multipleCycleCnt > 0)
             {   // multiplexed cycle active
-                dllkInstance_g.cycleCount = (dllkInstance_g.cycleCount + 1) % dllkInstance_g.dllConfigParam.m_uiMultiplCycleCnt;
+                dllkInstance_g.cycleCount = (dllkInstance_g.cycleCount + 1) % dllkInstance_g.dllConfigParam.multipleCycleCnt;
                 // $$$ check multiplexed cycle restart
                 //     -> toggle MC flag
                 //     -> change node linked list

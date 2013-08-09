@@ -154,7 +154,7 @@
     // CN is usually low on resources, thus the maximum ID is
     // set as low as possible
     #if (EPL_DLL_PRES_CHAINING_CN == FALSE)
-      #define EPL_C_DLL_MAX_ASND_SERVICE_IDS  5   // see tEplDllAsndServiceId in dll.h
+      #define EPL_C_DLL_MAX_ASND_SERVICE_IDS  5   // see tDllAsndServiceId in dll.h
     #else
       #define EPL_C_DLL_MAX_ASND_SERVICE_IDS  6
     #endif

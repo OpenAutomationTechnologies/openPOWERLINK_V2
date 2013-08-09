@@ -294,7 +294,7 @@ static tNmtMnuInstance   nmtMnuInstance_g;
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static tEplKernel cbNmtRequest(tEplFrameInfo * pFrameInfo_p);
+static tEplKernel cbNmtRequest(tFrameInfo * pFrameInfo_p);
 static tEplKernel cbIdentResponse(UINT nodeId_p, tEplIdentResponse* pIdentResponse_p);
 static tEplKernel cbStatusResponse(UINT nodeId_p, tEplStatusResponse* pStatusResponse_p);
 static tEplKernel cbNodeAdded(UINT nodeId_p);
@@ -452,7 +452,7 @@ tEplKernel nmtmnu_addInstance(tNmtMnuCbNodeEvent pfnCbNodeEvent_p,
     nmtMnuInstance_g.statusRequestDelay = 5000L;
 
     // register NmtMnResponse callback function
-    ret = dllucal_regAsndService(kEplDllAsndNmtRequest, cbNmtRequest, kEplDllAsndFilterLocal);
+    ret = dllucal_regAsndService(kDllAsndNmtRequest, cbNmtRequest, kDllAsndFilterLocal);
 
 #if EPL_NMTMNU_PRES_CHAINING_MN != FALSE
     nmtMnuInstance_g.prcPResTimeFirstCorrectionNs =  50;
@@ -478,7 +478,7 @@ tEplKernel nmtmnu_delInstance(void)
 {
     tEplKernel  ret = kEplSuccessful;
 
-    dllucal_regAsndService(kEplDllAsndNmtRequest, NULL, kEplDllAsndFilterNone);
+    dllucal_regAsndService(kDllAsndNmtRequest, NULL, kDllAsndFilterNone);
     ret = reset();
     return ret;
 }
@@ -503,10 +503,10 @@ tEplKernel nmtmnu_sendNmtCommandEx(UINT nodeId_p, tNmtCommand nmtCommand_p,
                                    void* pNmtCommandData_p, UINT uiDataSize_p)
 {
     tEplKernel          ret;
-    tEplFrameInfo       frameInfo;
+    tFrameInfo       frameInfo;
     UINT8               aBuffer[EPL_C_DLL_MINSIZE_NMTCMDEXT];
     tEplFrame*          pFrame;
-    tEplDllNodeOpParam  nodeOpParam;
+    tDllNodeOpParam     nodeOpParam;
 #if EPL_NMTMNU_PRES_CHAINING_MN != FALSE
     tNmtMnuNodeInfo*    pNodeInfo;
 #endif
@@ -553,15 +553,15 @@ tEplKernel nmtmnu_sendNmtCommandEx(UINT nodeId_p, tNmtCommand nmtCommand_p,
 
                 if (pNodeInfo->flags & NMTMNU_NODE_FLAG_ISOCHRON)
                 {   // PRes Chaining is enabled
-                    tEplDllSyncRequest SyncReqData;
+                    tDllSyncRequest    SyncReqData;
                     UINT               size;
 
                     // Store NMT command for later execution
                     prcSetFlagsNmtCommandReset(pNodeInfo, nmtCommand_p);
 
                     // Disable PRes Chaining
-                    SyncReqData.m_uiNodeId      = nodeId_p;
-                    SyncReqData.m_dwSyncControl = EPL_SYNC_PRES_MODE_RESET |
+                    SyncReqData.nodeId      = nodeId_p;
+                    SyncReqData.syncControl = EPL_SYNC_PRES_MODE_RESET |
                                                   EPL_SYNC_DEST_MAC_ADDRESS_VALID;
                     size = sizeof(UINT) + sizeof(UINT32);
 
@@ -611,7 +611,7 @@ tEplKernel nmtmnu_sendNmtCommandEx(UINT nodeId_p, tNmtCommand nmtCommand_p,
     pFrame = (tEplFrame*) aBuffer;
     EPL_MEMSET(pFrame, 0x00, sizeof(aBuffer));
     AmiSetByteToLe(&pFrame->m_le_bDstNodeId, (UINT8) nodeId_p);
-    AmiSetByteToLe(&pFrame->m_Data.m_Asnd.m_le_bServiceId, (UINT8) kEplDllAsndNmtCommand);
+    AmiSetByteToLe(&pFrame->m_Data.m_Asnd.m_le_bServiceId, (UINT8) kDllAsndNmtCommand);
     AmiSetByteToLe(&pFrame->m_Data.m_Asnd.m_Payload.m_NmtCommandService.m_le_bNmtCommandId,
         (UINT8)nmtCommand_p);
     if ((pNmtCommandData_p != NULL) && (uiDataSize_p > 0))
@@ -620,12 +620,12 @@ tEplKernel nmtmnu_sendNmtCommandEx(UINT nodeId_p, tNmtCommand nmtCommand_p,
     }
 
     // build info structure
-    frameInfo.m_pFrame = pFrame;
-    frameInfo.m_uiFrameSize = sizeof(aBuffer);
+    frameInfo.pFrame = pFrame;
+    frameInfo.frameSize = sizeof(aBuffer);
 
     // send NMT-Request
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLU)) != 0)
-    ret = dllucal_sendAsyncFrame(&frameInfo, kEplDllAsyncReqPrioNmt);
+    ret = dllucal_sendAsyncFrame(&frameInfo, kDllAsyncReqPrioNmt);
     if (ret != kEplSuccessful)
     {
         goto Exit;
@@ -654,7 +654,7 @@ tEplKernel nmtmnu_sendNmtCommandEx(UINT nodeId_p, tNmtCommand nmtCommand_p,
 
         case kNmtCmdStopNode:
             // remove CN from isochronous phase softly
-            nodeOpParam.m_OpNodeType = kEplDllNodeOpTypeSoftDelete;
+            nodeOpParam.opNodeType = kDllNodeOpTypeSoftDelete;
             break;
 
         case kNmtCmdResetNode:
@@ -662,7 +662,7 @@ tEplKernel nmtmnu_sendNmtCommandEx(UINT nodeId_p, tNmtCommand nmtCommand_p,
         case kNmtCmdResetConfiguration:
         case kNmtCmdSwReset:
             // remove CN immediately from isochronous phase
-            nodeOpParam.m_OpNodeType = kEplDllNodeOpTypeIsochronous;
+            nodeOpParam.opNodeType = kDllNodeOpTypeIsochronous;
             break;
 
         default:
@@ -679,7 +679,7 @@ tEplKernel nmtmnu_sendNmtCommandEx(UINT nodeId_p, tNmtCommand nmtCommand_p,
     // because it will be too late and may cause unwanted errors
     if (nodeId_p != EPL_C_ADR_BROADCAST)
     {
-        nodeOpParam.m_uiNodeId = nodeId_p;
+        nodeOpParam.nodeId = nodeId_p;
         ret = dllucal_deleteNode(&nodeOpParam);
     }
     else
@@ -688,7 +688,7 @@ tEplKernel nmtmnu_sendNmtCommandEx(UINT nodeId_p, tNmtCommand nmtCommand_p,
         {
             if ((NMTMNU_GET_NODEINFO(nodeId_p)->nodeCfg & (EPL_NODEASSIGN_NODE_IS_CN | EPL_NODEASSIGN_NODE_EXISTS)) != 0)
             {
-                nodeOpParam.m_uiNodeId = nodeId_p;
+                nodeOpParam.nodeId = nodeId_p;
                 ret = dllucal_deleteNode(&nodeOpParam);
             }
         }
@@ -1412,7 +1412,7 @@ The function implements the callback function for NMT requests.
 \return The function returns a tEplKernel error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel cbNmtRequest(tEplFrameInfo * pFrameInfo_p)
+static tEplKernel cbNmtRequest(tFrameInfo * pFrameInfo_p)
 {
     tEplKernel              ret = kEplSuccessful;
     UINT                    targetNodeId;
@@ -1420,16 +1420,16 @@ static tEplKernel cbNmtRequest(tEplFrameInfo * pFrameInfo_p)
     tEplNmtRequestService*  pNmtRequestService;
     UINT                    sourceNodeId;
 
-    if ((pFrameInfo_p == NULL) || (pFrameInfo_p->m_pFrame == NULL))
+    if ((pFrameInfo_p == NULL) || (pFrameInfo_p->pFrame == NULL))
         return kEplNmtInvalidFramePointer;
 
-    pNmtRequestService = &pFrameInfo_p->m_pFrame->m_Data.m_Asnd.m_Payload.m_NmtRequestService;
+    pNmtRequestService = &pFrameInfo_p->pFrame->m_Data.m_Asnd.m_Payload.m_NmtRequestService;
     nmtCommand = (tNmtCommand)AmiGetByteFromLe(&pNmtRequestService->m_le_bNmtCommandId);
     targetNodeId = AmiGetByteFromLe(&pNmtRequestService->m_le_bTargetNodeId);
     ret = nmtmnu_requestNmtCommand(targetNodeId, nmtCommand);
     if (ret != kEplSuccessful)
     {   // error -> reply with kNmtCmdInvalidService
-        sourceNodeId = AmiGetByteFromLe(&pFrameInfo_p->m_pFrame->m_le_bSrcNodeId);
+        sourceNodeId = AmiGetByteFromLe(&pFrameInfo_p->pFrame->m_le_bSrcNodeId);
         ret = nmtmnu_sendNmtCommand(sourceNodeId, kNmtCmdInvalidService);
     }
     return ret;
@@ -1590,10 +1590,10 @@ static tEplKernel addNodeIsochronous(UINT nodeId_p)
 #endif
 
         {   // node is added as PReq/PRes node
-        tEplDllNodeOpParam  NodeOpParam;
+        tDllNodeOpParam     NodeOpParam;
 
-            NodeOpParam.m_OpNodeType = kEplDllNodeOpTypeIsochronous;
-            NodeOpParam.m_uiNodeId = nodeId_p;
+            NodeOpParam.opNodeType = kDllNodeOpTypeIsochronous;
+            NodeOpParam.nodeId = nodeId_p;
             ret = dllucal_addNode(&NodeOpParam);
             goto Exit;
         }
@@ -3398,15 +3398,15 @@ static tEplKernel prcMeasure(void)
                 }
                 else
                 {   // Predecessor node exists
-                tEplDllSyncRequest SyncRequestData;
+                tDllSyncRequest    SyncRequestData;
                 UINT               uiSize;
 
-                    SyncRequestData.m_dwSyncControl = EPL_SYNC_DEST_MAC_ADDRESS_VALID;
+                    SyncRequestData.syncControl = EPL_SYNC_DEST_MAC_ADDRESS_VALID;
                     uiSize = sizeof(UINT) + sizeof(UINT32);
 
                     if (fSyncReqSentToPredNode == FALSE)
                     {
-                        SyncRequestData.m_uiNodeId = nodeIdPredNode;
+                        SyncRequestData.nodeId = nodeIdPredNode;
 
                         ret = syncu_requestSyncResponse(prcCbSyncResMeasure, &SyncRequestData, uiSize);
                         if (ret != kEplSuccessful)
@@ -3415,7 +3415,7 @@ static tEplKernel prcMeasure(void)
                         }
                     }
 
-                    SyncRequestData.m_uiNodeId = nodeId;
+                    SyncRequestData.nodeId = nodeId;
 
                     ret = syncu_requestSyncResponse(prcCbSyncResMeasure, &SyncRequestData, uiSize);
                     if (ret != kEplSuccessful)
@@ -3523,12 +3523,12 @@ static tEplKernel prcCalculate(UINT nodeIdFirstNode_p)
 
     if (nmtMnuInstance_g.prcPResMnTimeoutNs < pResMnTimeoutNs)
     {
-        tEplDllNodeInfo dllNodeInfo;
+        tDllNodeInfo    dllNodeInfo;
 
-        EPL_MEMSET(&dllNodeInfo, 0, sizeof(tEplDllNodeInfo));
+        EPL_MEMSET(&dllNodeInfo, 0, sizeof(tDllNodeInfo));
         nmtMnuInstance_g.prcPResMnTimeoutNs = pResMnTimeoutNs;
-        dllNodeInfo.m_dwPresTimeoutNs = pResMnTimeoutNs;
-        dllNodeInfo.m_uiNodeId = EPL_C_ADR_MN_DEF_NODE_ID;
+        dllNodeInfo.presTimeoutNs = pResMnTimeoutNs;
+        dllNodeInfo.nodeId = EPL_C_ADR_MN_DEF_NODE_ID;
         ret = dllucal_configNode(&dllNodeInfo);
         if (ret != kEplSuccessful)
             goto Exit;
@@ -3805,7 +3805,7 @@ static tEplKernel prcShift(UINT nodeIdPrevShift_p)
     tEplKernel          ret;
     UINT                nodeId;
     tNmtMnuNodeInfo*    pNodeInfo;
-    tEplDllSyncRequest  syncRequestData;
+    tDllSyncRequest     syncRequestData;
     UINT                size;
 
     ret = kEplSuccessful;
@@ -3842,10 +3842,10 @@ static tEplKernel prcShift(UINT nodeIdPrevShift_p)
     pNodeInfo->prcFlags |= NMTMNU_NODE_FLAG_PRC_CALL_SHIFT;
 
     // Send SyncReq
-    syncRequestData.m_uiNodeId        = nodeId;
-    syncRequestData.m_dwSyncControl   = EPL_SYNC_PRES_TIME_FIRST_VALID |
+    syncRequestData.nodeId        = nodeId;
+    syncRequestData.syncControl   = EPL_SYNC_PRES_TIME_FIRST_VALID |
                                         EPL_SYNC_DEST_MAC_ADDRESS_VALID;
-    syncRequestData.m_dwPResTimeFirst = pNodeInfo->pResTimeFirstNs;
+    syncRequestData.pResTimeFirst = pNodeInfo->pResTimeFirstNs;
     size = sizeof(UINT) + 2*sizeof(UINT32);
     ret = syncu_requestSyncResponse(prcCbSyncResShift, &syncRequestData, size);
 
@@ -3912,13 +3912,13 @@ static tEplKernel prcAdd(UINT nodeIdPrevAdd_p)
     UINT32              cNLossOfSocToleranceNs;
     UINT                nodeId;
     tNmtMnuNodeInfo*    pNodeInfo;
-    tEplDllSyncRequest  syncReqData;
+    tDllSyncRequest     syncReqData;
     UINT                syncReqNum;
     tNmtMnuNodeInfo*    pNodeInfoLastSyncReq;
 
     ret = kEplSuccessful;
     // prepare SyncReq
-    syncReqData.m_dwSyncControl = EPL_SYNC_PRES_MODE_SET |
+    syncReqData.syncControl = EPL_SYNC_PRES_MODE_SET |
                                   EPL_SYNC_PRES_TIME_FIRST_VALID |
                                   EPL_SYNC_PRES_FALL_BACK_TIMEOUT_VALID |
                                   EPL_SYNC_DEST_MAC_ADDRESS_VALID;
@@ -3934,7 +3934,7 @@ static tEplKernel prcAdd(UINT nodeIdPrevAdd_p)
     if (ret != kEplSuccessful)
         goto Exit;
 
-    syncReqData.m_dwPResFallBackTimeout = cycleLenUs * 1000 + cNLossOfSocToleranceNs;
+    syncReqData.pResFallBackTimeout = cycleLenUs * 1000 + cNLossOfSocToleranceNs;
     syncReqNum = 0;
     pNodeInfoLastSyncReq = NULL;
 
@@ -3948,8 +3948,8 @@ static tEplKernel prcAdd(UINT nodeIdPrevAdd_p)
         if (pNodeInfo->prcFlags & NMTMNU_NODE_FLAG_PRC_ADD_IN_PROGRESS)
         {
             // Send SyncReq which starts PRes Chaining
-            syncReqData.m_uiNodeId        = nodeId;
-            syncReqData.m_dwPResTimeFirst = pNodeInfo->pResTimeFirstNs;
+            syncReqData.nodeId        = nodeId;
+            syncReqData.pResTimeFirst = pNodeInfo->pResTimeFirstNs;
             ret = syncu_requestSyncResponse(prcCbSyncResAdd, &syncReqData, sizeof(syncReqData));
             if (ret != kEplSuccessful)
                 goto Exit;
@@ -4054,7 +4054,7 @@ static tEplKernel prcVerify(UINT nodeId_p)
 {
     tEplKernel              ret;
     tNmtMnuNodeInfo*        pNodeInfo;
-    tEplDllSyncRequest      syncReqData;
+    tDllSyncRequest         syncReqData;
     UINT                    size;
 
     ret = kEplSuccessful;
@@ -4062,8 +4062,8 @@ static tEplKernel prcVerify(UINT nodeId_p)
     pNodeInfo = NMTMNU_GET_NODEINFO(nodeId_p);
     if (pNodeInfo->flags & NMTMNU_NODE_FLAG_ISOCHRON)
     {
-        syncReqData.m_uiNodeId      = nodeId_p;
-        syncReqData.m_dwSyncControl = EPL_SYNC_DEST_MAC_ADDRESS_VALID;
+        syncReqData.nodeId      = nodeId_p;
+        syncReqData.syncControl = EPL_SYNC_DEST_MAC_ADDRESS_VALID;
         size = sizeof(UINT) + sizeof(UINT32);
         ret = syncu_requestSyncResponse(prcCbSyncResVerify, &syncReqData, size);
     }

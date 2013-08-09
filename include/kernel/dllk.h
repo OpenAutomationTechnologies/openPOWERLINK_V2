@@ -54,7 +54,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
-typedef tEplKernel (* tEplDllkCbAsync) (tEplFrameInfo * pFrameInfo_p);
+typedef tEplKernel (* tEplDllkCbAsync) (tFrameInfo * pFrameInfo_p);
 
 typedef struct
 {
@@ -95,8 +95,8 @@ typedef struct
 } tDllkPrcCycleTiming;
 
 // callback function for frame processing
-typedef tEplKernel (*tDllkCbProcessRpdo) (tEplFrameInfo * pFrameInfo_p);
-typedef tEplKernel (*tDllkCbProcessTpdo) (tEplFrameInfo * pFrameInfo_p, BOOL fReadyFlag_p);
+typedef tEplKernel (*tDllkCbProcessRpdo) (tFrameInfo * pFrameInfo_p);
+typedef tEplKernel (*tDllkCbProcessTpdo) (tFrameInfo * pFrameInfo_p, BOOL fReadyFlag_p);
 
 typedef enum
 {
@@ -122,12 +122,12 @@ extern "C" {
 
 tEplKernel dllk_addInstance(tDllkInitParam* pInitParam_p);
 tEplKernel dllk_delInstance(void);
-tEplKernel dllk_config(tEplDllConfigParam * pDllConfigParam_p);
-tEplKernel dllk_setIdentity(tEplDllIdentParam * pDllIdentParam_p);
+tEplKernel dllk_config(tDllConfigParam * pDllConfigParam_p);
+tEplKernel dllk_setIdentity(tDllIdentParam * pDllIdentParam_p);
 tEplKernel dllk_process(tEplEvent * pEvent_p) SECTION_DLLK_PROCESS;
 tEplKernel dllk_regAsyncHandler(tEplDllkCbAsync pfnDllkCbAsync_p);
 tEplKernel dllk_deregAsyncHandler(tEplDllkCbAsync pfnDllkCbAsync_p);
-tEplKernel dllk_setAsndServiceIdFilter(tEplDllAsndServiceId ServiceId_p, tEplDllAsndFilter Filter_p);
+tEplKernel dllk_setAsndServiceIdFilter(tDllAsndServiceId ServiceId_p, tDllAsndFilter Filter_p);
 void       dllk_regRpdoHandler(tDllkCbProcessRpdo pfnDllkCbProcessRpdo_p);
 void       dllk_regTpdoHandler(tDllkCbProcessTpdo pfnDllkCbProcessTpdo_p);
 tEplSyncCb dllk_regSyncHandler(tEplSyncCb pfnCbSync_p);
@@ -136,9 +136,9 @@ tEplKernel dllk_releaseRxFrame(tEplFrame* pFrame_p, UINT uiFrameSize_p);
 #endif
 
 #if EPL_NMT_MAX_NODE_ID > 0
-tEplKernel dllk_configNode(tEplDllNodeInfo* pNodeInfo_p);
-tEplKernel dllk_addNode(tEplDllNodeOpParam* pNodeOpParam_p);
-tEplKernel dllk_deleteNode(tEplDllNodeOpParam* pNodeOpParam_p);
+tEplKernel dllk_configNode(tDllNodeInfo* pNodeInfo_p);
+tEplKernel dllk_addNode(tDllNodeOpParam* pNodeOpParam_p);
+tEplKernel dllk_deleteNode(tDllNodeOpParam* pNodeOpParam_p);
 #endif // EPL_NMT_MAX_NODE_ID > 0
 
 #if defined(CONFIG_INCLUDE_NMT_MN)

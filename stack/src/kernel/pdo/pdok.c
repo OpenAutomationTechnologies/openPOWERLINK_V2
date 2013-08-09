@@ -102,7 +102,7 @@ static tPdokInstance  pdokInstance_g;
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static tEplKernel cbProcessTpdo(tEplFrameInfo * pFrameInfo_p, BOOL fReadyFlag_p) SECTION_PDOK_PROCESS_TPDO_CB;
+static tEplKernel cbProcessTpdo(tFrameInfo * pFrameInfo_p, BOOL fReadyFlag_p) SECTION_PDOK_PROCESS_TPDO_CB;
 static tEplKernel copyTxPdo(tEplFrame* pFrame_p, UINT frameSize_p, BOOL fReadyFlag_p);
 static void disablePdoChannels(tPdoChannel *pPdoChannel, UINT channelCnt);
 
@@ -174,10 +174,10 @@ tEplKernel pdok_deAllocChannelMem(void)
     tEplKernel      Ret = kEplSuccessful;
 
 #if EPL_NMT_MAX_NODE_ID > 0
-    tEplDllNodeOpParam  NodeOpParam;
+    tDllNodeOpParam     NodeOpParam;
 
-    NodeOpParam.m_OpNodeType = kEplDllNodeOpTypeFilterPdo;
-    NodeOpParam.m_uiNodeId = EPL_C_ADR_BROADCAST;
+    NodeOpParam.opNodeType = kDllNodeOpTypeFilterPdo;
+    NodeOpParam.nodeId = EPL_C_ADR_BROADCAST;
     Ret = dllk_deleteNode(&NodeOpParam);
     if (Ret != kEplSuccessful)
     {
@@ -230,10 +230,10 @@ tEplKernel pdok_allocChannelMem(tPdoAllocationParam* pAllocationParam_p)
     tEplKernel      ret = kEplSuccessful;
 
 #if EPL_NMT_MAX_NODE_ID > 0
-    tEplDllNodeOpParam  nodeOpParam;
+    tDllNodeOpParam     nodeOpParam;
 
-    nodeOpParam.m_OpNodeType = kEplDllNodeOpTypeFilterPdo;
-    nodeOpParam.m_uiNodeId = EPL_C_ADR_BROADCAST;
+    nodeOpParam.opNodeType = kDllNodeOpTypeFilterPdo;
+    nodeOpParam.nodeId = EPL_C_ADR_BROADCAST;
     ret = dllk_deleteNode(&nodeOpParam);
     if (ret != kEplSuccessful)
     {
@@ -317,8 +317,8 @@ tEplKernel pdok_configureChannel(tPdoChannelConf* pChannelConf_p)
     if (pChannelConf_p->fTx == FALSE)
     {   // RPDO
 #if EPL_NMT_MAX_NODE_ID > 0
-        tEplDllNodeOpParam  NodeOpParam;
-        NodeOpParam.m_OpNodeType = kEplDllNodeOpTypeFilterPdo;
+        tDllNodeOpParam     NodeOpParam;
+        NodeOpParam.opNodeType = kDllNodeOpTypeFilterPdo;
 #endif
 
         if (pChannelConf_p->channelId >= pdokInstance_g.pdoChannels.allocation.rxPdoChannelCount)
@@ -333,7 +333,7 @@ tEplKernel pdok_configureChannel(tPdoChannelConf* pChannelConf_p)
         if ((pDestPdoChannel->nodeId != PDO_INVALID_NODE_ID)
             && (pDestPdoChannel->nodeId != PDO_PREQ_NODE_ID))
         {   // disable old PRes filter in DLL
-            NodeOpParam.m_uiNodeId = pDestPdoChannel->nodeId;
+            NodeOpParam.nodeId = pDestPdoChannel->nodeId;
             Ret = dllk_deleteNode(&NodeOpParam);
             if (Ret != kEplSuccessful)
             {
@@ -350,7 +350,7 @@ tEplKernel pdok_configureChannel(tPdoChannelConf* pChannelConf_p)
         if ((pDestPdoChannel->nodeId != PDO_INVALID_NODE_ID)
             && (pDestPdoChannel->nodeId != PDO_PREQ_NODE_ID))
         {   // enable new PRes filter in DLL
-            NodeOpParam.m_uiNodeId = pDestPdoChannel->nodeId;
+            NodeOpParam.nodeId = pDestPdoChannel->nodeId;
             Ret = dllk_addNode(&NodeOpParam);
             if (Ret != kEplSuccessful)
             {
@@ -539,10 +539,10 @@ in NMT_CS_PRE_OPERATIONAL_2, NMT_CS_READY_TO_OPERATE and NMT_CS_OPERATIONAL.
 \return The function returns a tEplKernel error code.
 **/
 //------------------------------------------------------------------------------
-static tEplKernel cbProcessTpdo(tEplFrameInfo * pFrameInfo_p, BOOL fReadyFlag_p)
+static tEplKernel cbProcessTpdo(tFrameInfo * pFrameInfo_p, BOOL fReadyFlag_p)
 {
     tEplKernel      Ret = kEplSuccessful;
-    Ret = copyTxPdo(pFrameInfo_p->m_pFrame, pFrameInfo_p->m_uiFrameSize, fReadyFlag_p);
+    Ret = copyTxPdo(pFrameInfo_p->pFrame, pFrameInfo_p->frameSize, fReadyFlag_p);
     return Ret;
 }
 

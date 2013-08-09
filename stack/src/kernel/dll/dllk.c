@@ -232,7 +232,7 @@ NMT_GS_COMMUNICATING will be entered.
 \ingroup module_dllk
 */
 //------------------------------------------------------------------------------
-tEplKernel dllk_config(tEplDllConfigParam * pDllConfigParam_p)
+tEplKernel dllk_config(tDllConfigParam * pDllConfigParam_p)
 {
     tNmtState       nmtState;
     tEplKernel      ret = kEplSuccessful;
@@ -242,28 +242,28 @@ tEplKernel dllk_config(tEplDllConfigParam * pDllConfigParam_p)
     if (nmtState > kNmtGsResetConfiguration)
     {   // configuration updates are only allowed in state DLL_GS_INIT, except LossOfFrameTolerance,
         // because all other parameters are "valid on reset".
-        dllkInstance_g.dllConfigParam.m_dwLossOfFrameTolerance = pDllConfigParam_p->m_dwLossOfFrameTolerance;
+        dllkInstance_g.dllConfigParam.lossOfFrameTolerance = pDllConfigParam_p->lossOfFrameTolerance;
 
 #if (EPL_DLL_PROCESS_SYNC == EPL_DLL_PROCESS_SYNC_ON_TIMER)
-        ret = EplTimerSynckSetLossOfSyncToleranceNs(pDllConfigParam_p->m_dwLossOfFrameTolerance);
+        ret = EplTimerSynckSetLossOfSyncToleranceNs(pDllConfigParam_p->lossOfFrameTolerance);
 #endif
     }
     else
     {   // copy entire configuration to local storage,
         // because we are in state DLL_GS_INIT
         EPL_MEMCPY (&dllkInstance_g.dllConfigParam, pDllConfigParam_p,
-            (pDllConfigParam_p->m_uiSizeOfStruct < sizeof (tEplDllConfigParam) ?
-            pDllConfigParam_p->m_uiSizeOfStruct : sizeof (tEplDllConfigParam)));
+            (pDllConfigParam_p->sizeOfStruct < sizeof (tDllConfigParam) ?
+            pDllConfigParam_p->sizeOfStruct : sizeof (tDllConfigParam)));
     }
 
     if (nmtState < kNmtMsNotActive)
     {   // CN or NMT reset states are active, so we can calculate the frame timeout.
         // MN calculates on kEplEventTypeDllkCreate, its own frame timeout.
-        if ((dllkInstance_g.dllConfigParam.m_dwCycleLen != 0) &&
-            (dllkInstance_g.dllConfigParam.m_dwLossOfFrameTolerance != 0))
+        if ((dllkInstance_g.dllConfigParam.cycleLen != 0) &&
+            (dllkInstance_g.dllConfigParam.lossOfFrameTolerance != 0))
         {   // monitor EPL cycle, calculate frame timeout
-            dllkInstance_g.frameTimeout = (1000LL * ((UINT64)dllkInstance_g.dllConfigParam.m_dwCycleLen)) +
-                ((UINT64)dllkInstance_g.dllConfigParam.m_dwLossOfFrameTolerance);
+            dllkInstance_g.frameTimeout = (1000LL * ((UINT64)dllkInstance_g.dllConfigParam.cycleLen)) +
+                ((UINT64)dllkInstance_g.dllConfigParam.lossOfFrameTolerance);
         }
         else
         {
@@ -271,10 +271,10 @@ tEplKernel dllk_config(tEplDllConfigParam * pDllConfigParam_p)
         }
     }
 
-    if (dllkInstance_g.dllConfigParam.m_fAsyncOnly != FALSE)
+    if (dllkInstance_g.dllConfigParam.fAsyncOnly != FALSE)
     {   // it is configured as async-only CN
         // disable multiplexed cycle, that cycleCount will not be incremented spuriously on SoC
-        dllkInstance_g.dllConfigParam.m_uiMultiplCycleCnt = 0;
+        dllkInstance_g.dllConfigParam.multipleCycleCnt = 0;
     }
     return ret;
 }
@@ -293,11 +293,11 @@ case of hostname change).
 \ingroup module_dllk
 */
 //------------------------------------------------------------------------------
-tEplKernel dllk_setIdentity(tEplDllIdentParam * pDllIdentParam_p)
+tEplKernel dllk_setIdentity(tDllIdentParam * pDllIdentParam_p)
 {
     EPL_MEMCPY (&dllkInstance_g.dllIdentParam, pDllIdentParam_p,
-        (pDllIdentParam_p->m_uiSizeOfStruct < sizeof (tEplDllIdentParam) ?
-        pDllIdentParam_p->m_uiSizeOfStruct : sizeof (tEplDllIdentParam)));
+        (pDllIdentParam_p->sizeOfStruct < sizeof (tDllIdentParam) ?
+        pDllIdentParam_p->sizeOfStruct : sizeof (tDllIdentParam)));
 
     // $$$ if IdentResponse frame exists update it
     return kEplSuccessful;
@@ -443,8 +443,8 @@ It registers C_DLL_MULTICAST_ASND in Ethernet driver if any AsndServiceId is ope
 \ingroup module_dllk
 */
 //------------------------------------------------------------------------------
-tEplKernel dllk_setAsndServiceIdFilter(tEplDllAsndServiceId serviceId_p,
-                                       tEplDllAsndFilter filter_p)
+tEplKernel dllk_setAsndServiceIdFilter(tDllAsndServiceId serviceId_p,
+                                       tDllAsndFilter filter_p)
 {
     tEplKernel  ret = kEplSuccessful;
 
@@ -501,7 +501,7 @@ The function configures the specified node (e.g. payload limits and timeouts).
 \ingroup module_dllk
 */
 //------------------------------------------------------------------------------
-tEplKernel dllk_configNode(tEplDllNodeInfo * pNodeInfo_p)
+tEplKernel dllk_configNode(tDllNodeInfo * pNodeInfo_p)
 {
     tEplKernel          ret = kEplSuccessful;
     tDllkNodeInfo*      pIntNodeInfo;
@@ -510,29 +510,29 @@ tEplKernel dllk_configNode(tEplDllNodeInfo * pNodeInfo_p)
     nmtState = dllkInstance_g.nmtState;
 
     if ((nmtState > kNmtGsResetConfiguration) &&
-        (pNodeInfo_p->m_uiNodeId != dllkInstance_g.dllConfigParam.m_uiNodeId))
+        (pNodeInfo_p->nodeId != dllkInstance_g.dllConfigParam.nodeId))
     {   // configuration updates are only allowed in reset states
         return kEplInvalidOperation;
     }
 
-    pIntNodeInfo = dllk_getNodeInfo(pNodeInfo_p->m_uiNodeId);
+    pIntNodeInfo = dllk_getNodeInfo(pNodeInfo_p->nodeId);
     if (pIntNodeInfo == NULL)
     {   // no node info structure available
         return kEplDllNoNodeInfo;
     }
 
     // copy node configuration
-    if (pNodeInfo_p->m_wPresPayloadLimit > dllkInstance_g.dllConfigParam.m_uiIsochrRxMaxPayload)
-        pIntNodeInfo->presPayloadLimit = (UINT16)dllkInstance_g.dllConfigParam.m_uiIsochrRxMaxPayload;
+    if (pNodeInfo_p->presPayloadLimit > dllkInstance_g.dllConfigParam.isochrRxMaxPayload)
+        pIntNodeInfo->presPayloadLimit = (UINT16)dllkInstance_g.dllConfigParam.isochrRxMaxPayload;
     else
-        pIntNodeInfo->presPayloadLimit = pNodeInfo_p->m_wPresPayloadLimit;
+        pIntNodeInfo->presPayloadLimit = pNodeInfo_p->presPayloadLimit;
 
 #if defined(CONFIG_INCLUDE_NMT_MN)
-    pIntNodeInfo->presTimeoutNs = pNodeInfo_p->m_dwPresTimeoutNs;
-    if (pNodeInfo_p->m_wPreqPayloadLimit > dllkInstance_g.dllConfigParam.m_uiIsochrTxMaxPayload)
-        pIntNodeInfo->preqPayloadLimit = (UINT16)dllkInstance_g.dllConfigParam.m_uiIsochrTxMaxPayload;
+    pIntNodeInfo->presTimeoutNs = pNodeInfo_p->presTimeoutNs;
+    if (pNodeInfo_p->preqPayloadLimit > dllkInstance_g.dllConfigParam.isochrTxMaxPayload)
+        pIntNodeInfo->preqPayloadLimit = (UINT16)dllkInstance_g.dllConfigParam.isochrTxMaxPayload;
     else
-        pIntNodeInfo->preqPayloadLimit = pNodeInfo_p->m_wPreqPayloadLimit;
+        pIntNodeInfo->preqPayloadLimit = pNodeInfo_p->preqPayloadLimit;
 
     // initialize elements of internal node info structure
     pIntNodeInfo->soaFlag1 = 0;
@@ -557,7 +557,7 @@ The function adds the specified node into the isochronous phase.
 \ingroup module_dllk
 */
 //------------------------------------------------------------------------------
-tEplKernel dllk_addNode(tEplDllNodeOpParam* pNodeOpParam_p)
+tEplKernel dllk_addNode(tDllNodeOpParam* pNodeOpParam_p)
 {
     tEplKernel          ret = kEplSuccessful;
     tDllkNodeInfo*      pIntNodeInfo;
@@ -566,18 +566,18 @@ tEplKernel dllk_addNode(tEplDllNodeOpParam* pNodeOpParam_p)
 
     nmtState = dllkInstance_g.nmtState;
 
-    pIntNodeInfo = dllk_getNodeInfo(pNodeOpParam_p->m_uiNodeId);
+    pIntNodeInfo = dllk_getNodeInfo(pNodeOpParam_p->nodeId);
     if (pIntNodeInfo == NULL)
     {   // no node info structure available
         return kEplDllNoNodeInfo;
     }
 
-    DLLK_DBG_POST_TRACE_VALUE(kEplEventTypeDllkAddNode, pNodeOpParam_p->m_uiNodeId, 0);
+    DLLK_DBG_POST_TRACE_VALUE(kEplEventTypeDllkAddNode, pNodeOpParam_p->nodeId, 0);
 
-    switch (pNodeOpParam_p->m_OpNodeType)
+    switch (pNodeOpParam_p->opNodeType)
     {
 #if defined(CONFIG_INCLUDE_NMT_MN)
-        case kEplDllNodeOpTypeIsochronous:
+        case kDllNodeOpTypeIsochronous:
             if (nmtState >= kNmtMsNotActive)
                 ret = dllk_addNodeIsochronous(pIntNodeInfo);
             else
@@ -585,11 +585,11 @@ tEplKernel dllk_addNode(tEplDllNodeOpParam* pNodeOpParam_p)
             break;
 #endif
 
-        case kEplDllNodeOpTypeFilterPdo:
-        case kEplDllNodeOpTypeFilterHeartbeat:
+        case kDllNodeOpTypeFilterPdo:
+        case kDllNodeOpTypeFilterHeartbeat:
             if ((nmtState >= kNmtCsNotActive) && (nmtState < kNmtMsNotActive))
                 fUpdateEdrv = TRUE;
-            ret = dllk_addNodeFilter(pIntNodeInfo, pNodeOpParam_p->m_OpNodeType, fUpdateEdrv);
+            ret = dllk_addNodeFilter(pIntNodeInfo, pNodeOpParam_p->opNodeType, fUpdateEdrv);
             break;
 
         default:
@@ -613,7 +613,7 @@ The function deletes the specified node from the isochronous phase.
 \ingroup module_dllk
 */
 //------------------------------------------------------------------------------
-tEplKernel dllk_deleteNode(tEplDllNodeOpParam* pNodeOpParam_p)
+tEplKernel dllk_deleteNode(tDllNodeOpParam* pNodeOpParam_p)
 {
     tEplKernel          ret = kEplSuccessful;
     tDllkNodeInfo*      pIntNodeInfo;
@@ -623,12 +623,12 @@ tEplKernel dllk_deleteNode(tEplDllNodeOpParam* pNodeOpParam_p)
 
     nmtState = dllkInstance_g.nmtState;
 
-    if (pNodeOpParam_p->m_uiNodeId == EPL_C_ADR_BROADCAST)
+    if (pNodeOpParam_p->nodeId == EPL_C_ADR_BROADCAST)
     {
-        switch (pNodeOpParam_p->m_OpNodeType)
+        switch (pNodeOpParam_p->opNodeType)
         {
-            case kEplDllNodeOpTypeFilterPdo:
-            case kEplDllNodeOpTypeFilterHeartbeat:
+            case kDllNodeOpTypeFilterPdo:
+            case kDllNodeOpTypeFilterHeartbeat:
                 if ((nmtState >= kNmtCsNotActive) && (nmtState < kNmtMsNotActive))
                     fUpdateEdrv = TRUE;
 
@@ -636,7 +636,7 @@ tEplKernel dllk_deleteNode(tEplDllNodeOpParam* pNodeOpParam_p)
                      index < tabentries (dllkInstance_g.aNodeInfo);
                      index++, pIntNodeInfo++)
                 {
-                    ret = dllk_deleteNodeFilter(pIntNodeInfo, pNodeOpParam_p->m_OpNodeType, fUpdateEdrv);
+                    ret = dllk_deleteNodeFilter(pIntNodeInfo, pNodeOpParam_p->opNodeType, fUpdateEdrv);
                 }
                 break;
 
@@ -647,34 +647,34 @@ tEplKernel dllk_deleteNode(tEplDllNodeOpParam* pNodeOpParam_p)
         return ret;
     }
 
-    pIntNodeInfo = dllk_getNodeInfo(pNodeOpParam_p->m_uiNodeId);
+    pIntNodeInfo = dllk_getNodeInfo(pNodeOpParam_p->nodeId);
     if (pIntNodeInfo == NULL)
     {   // no node info structure available
         return kEplDllNoNodeInfo;
     }
 
-    DLLK_DBG_POST_TRACE_VALUE(kEplEventTypeDllkDelNode, pNodeOpParam_p->m_uiNodeId, 0);
+    DLLK_DBG_POST_TRACE_VALUE(kEplEventTypeDllkDelNode, pNodeOpParam_p->nodeId, 0);
 
-    switch (pNodeOpParam_p->m_OpNodeType)
+    switch (pNodeOpParam_p->opNodeType)
     {
 #if defined(CONFIG_INCLUDE_NMT_MN)
-        case kEplDllNodeOpTypeIsochronous:
+        case kDllNodeOpTypeIsochronous:
             if (nmtState >= kNmtMsNotActive)
                 ret = dllk_deleteNodeIsochronous(pIntNodeInfo);
             else
                 ret = kEplDllInvalidParam;
             break;
 
-        case kEplDllNodeOpTypeSoftDelete:
+        case kDllNodeOpTypeSoftDelete:
             pIntNodeInfo->fSoftDelete = TRUE;
             break;
 #endif
 
-        case kEplDllNodeOpTypeFilterPdo:
-        case kEplDllNodeOpTypeFilterHeartbeat:
+        case kDllNodeOpTypeFilterPdo:
+        case kDllNodeOpTypeFilterHeartbeat:
             if ((nmtState >= kNmtCsNotActive) && (nmtState < kNmtMsNotActive))
                 fUpdateEdrv = TRUE;
-            ret = dllk_deleteNodeFilter(pIntNodeInfo, pNodeOpParam_p->m_OpNodeType, fUpdateEdrv);
+            ret = dllk_deleteNodeFilter(pIntNodeInfo, pNodeOpParam_p->opNodeType, fUpdateEdrv);
             break;
 
         default:
@@ -985,7 +985,7 @@ tEplKernel dllk_cbCnTimer(tEplTimerEventArg* pEventArg_p)
 
     // restart the timer to detect further loss of SoC
     ret = EplTimerHighReskModifyTimerNs(&dllkInstance_g.timerHdlCycle,
-               dllkInstance_g.dllConfigParam.m_dwCycleLen, dllk_cbCnTimer, 0L, FALSE);
+               dllkInstance_g.dllConfigParam.cycleLen, dllk_cbCnTimer, 0L, FALSE);
     if (ret != kEplSuccessful)
         goto Exit;
 
@@ -1104,31 +1104,31 @@ tEplKernel dllk_setupLocalNode(tNmtState nmtState_p)
     /* register TxFrames in Edrv */
     // IdentResponse
     frameSize = EPL_C_DLL_MINSIZE_IDENTRES;
-    ret = dllk_createTxFrame(&handle, &frameSize, kEplMsgTypeAsnd, kEplDllAsndIdentResponse);
+    ret = dllk_createTxFrame(&handle, &frameSize, kEplMsgTypeAsnd, kDllAsndIdentResponse);
     if (ret != kEplSuccessful)
         return ret;
 
     // StatusResponse
     frameSize = EPL_C_DLL_MINSIZE_STATUSRES;
-    ret = dllk_createTxFrame(&handle, &frameSize, kEplMsgTypeAsnd, kEplDllAsndStatusResponse);
+    ret = dllk_createTxFrame(&handle, &frameSize, kEplMsgTypeAsnd, kDllAsndStatusResponse);
     if (ret != kEplSuccessful)
         return ret;
 
 #if EPL_DLL_PRES_CHAINING_CN != FALSE
     // SyncResponse
     frameSize = EPL_C_DLL_MINSIZE_SYNCRES;
-    ret = dllk_createTxFrame(&handle, &frameSize, kEplMsgTypeAsnd, kEplDllAsndSyncResponse);
+    ret = dllk_createTxFrame(&handle, &frameSize, kEplMsgTypeAsnd, kDllAsndSyncResponse);
     if (ret != kEplSuccessful)
         return ret;
 #endif
 
     // PRes
-    if ((dllkInstance_g.dllConfigParam.m_fAsyncOnly == FALSE) &&
-        (dllkInstance_g.dllConfigParam.m_uiPresActPayloadLimit >= 36))
+    if ((dllkInstance_g.dllConfigParam.fAsyncOnly == FALSE) &&
+        (dllkInstance_g.dllConfigParam.presActPayloadLimit >= 36))
     {   // it is not configured as async-only CN,
         // so take part in isochronous phase and register PRes frame
-        frameSize = dllkInstance_g.dllConfigParam.m_uiPresActPayloadLimit + EPL_FRAME_OFFSET_PDO_PAYLOAD;
-        ret = dllk_createTxFrame(&handle, &frameSize, kEplMsgTypePres, kEplDllAsndNotDefined);
+        frameSize = dllkInstance_g.dllConfigParam.presActPayloadLimit + EPL_FRAME_OFFSET_PDO_PAYLOAD;
+        ret = dllk_createTxFrame(&handle, &frameSize, kEplMsgTypePres, kDllAsndNotDefined);
         if (ret != kEplSuccessful)
             return ret;
 
@@ -1142,7 +1142,7 @@ tEplKernel dllk_setupLocalNode(tNmtState nmtState_p)
 
     // NMT request
     frameSize = EPL_C_IP_MAX_MTU;
-    ret = dllk_createTxFrame(&handle, &frameSize, kEplMsgTypeAsnd, kEplDllAsndNmtRequest);
+    ret = dllk_createTxFrame(&handle, &frameSize, kEplMsgTypeAsnd, kDllAsndNmtRequest);
     if (ret != kEplSuccessful)
         return ret;
     // mark Tx buffer as empty
@@ -1154,7 +1154,7 @@ tEplKernel dllk_setupLocalNode(tNmtState nmtState_p)
 
     // non-EPL frame
     frameSize = EPL_C_IP_MAX_MTU;
-    ret = dllk_createTxFrame(&handle, &frameSize, kEplMsgTypeNonEpl, kEplDllAsndNotDefined);
+    ret = dllk_createTxFrame(&handle, &frameSize, kEplMsgTypeNonEpl, kDllAsndNotDefined);
     if (ret != kEplSuccessful)
         return ret;
     // mark Tx buffer as empty
@@ -1171,21 +1171,21 @@ tEplKernel dllk_setupLocalNode(tNmtState nmtState_p)
     dllk_setupSocFilter(&dllkInstance_g.aFilter[DLLK_FILTER_SOC]);
     dllk_setupSoaFilter(&dllkInstance_g.aFilter[DLLK_FILTER_SOA]);
     dllk_setupSoaIdentReqFilter(&dllkInstance_g.aFilter[DLLK_FILTER_SOA_IDREQ],
-                                dllkInstance_g.dllConfigParam.m_uiNodeId,
+                                dllkInstance_g.dllConfigParam.nodeId,
                                 &dllkInstance_g.pTxBuffer[DLLK_TXFRAME_IDENTRES]);
     dllk_setupSoaStatusReqFilter(&dllkInstance_g.aFilter[DLLK_FILTER_SOA_STATREQ],
-                                 dllkInstance_g.dllConfigParam.m_uiNodeId,
+                                 dllkInstance_g.dllConfigParam.nodeId,
                                  &dllkInstance_g.pTxBuffer[DLLK_TXFRAME_STATUSRES]);
     dllk_setupSoaNmtReqFilter(&dllkInstance_g.aFilter[DLLK_FILTER_SOA_NMTREQ],
-                                 dllkInstance_g.dllConfigParam.m_uiNodeId,
+                                 dllkInstance_g.dllConfigParam.nodeId,
                                  &dllkInstance_g.pTxBuffer[DLLK_TXFRAME_NMTREQ]);
 #if EPL_DLL_PRES_CHAINING_CN != FALSE
     dllk_setupSoaSyncReqFilter(&dllkInstance_g.aFilter[DLLK_FILTER_SOA_SYNCREQ],
-                                 dllkInstance_g.dllConfigParam.m_uiNodeId,
+                                 dllkInstance_g.dllConfigParam.nodeId,
                                  &dllkInstance_g.pTxBuffer[DLLK_TXFRAME_SYNCRES]);
 #endif
     dllk_setupSoaNmtReqFilter(&dllkInstance_g.aFilter[DLLK_FILTER_SOA_NONEPL],
-                                 dllkInstance_g.dllConfigParam.m_uiNodeId,
+                                 dllkInstance_g.dllConfigParam.nodeId,
                                  &dllkInstance_g.pTxBuffer[DLLK_TXFRAME_NONEPL]);
 
     // register multicast MACs in ethernet driver
@@ -1248,7 +1248,7 @@ tEplKernel dllk_setupLocalNodeMn(void)
     /* register TxFrames in Edrv */
     // SoC
     frameSize = EPL_C_DLL_MINSIZE_SOC;
-    ret = dllk_createTxFrame(&handle, &frameSize, kEplMsgTypeSoc, kEplDllAsndNotDefined);
+    ret = dllk_createTxFrame(&handle, &frameSize, kEplMsgTypeSoc, kDllAsndNotDefined);
     if (ret != kEplSuccessful)
     {   // error occurred while registering Tx frame
         return ret;
@@ -1259,7 +1259,7 @@ tEplKernel dllk_setupLocalNodeMn(void)
 
     // SoA
     frameSize = EPL_C_DLL_MINSIZE_SOA;
-    ret = dllk_createTxFrame(&handle, &frameSize, kEplMsgTypeSoa, kEplDllAsndNotDefined);
+    ret = dllk_createTxFrame(&handle, &frameSize, kEplMsgTypeSoa, kDllAsndNotDefined);
     if (ret != kEplSuccessful)
     {   // error occurred while registering Tx frame
         return ret;
@@ -1277,7 +1277,7 @@ tEplKernel dllk_setupLocalNodeMn(void)
             count++;
 
             frameSize = pIntNodeInfo->preqPayloadLimit + EPL_FRAME_OFFSET_PDO_PAYLOAD;
-            ret = dllk_createTxFrame(&handle, &frameSize, kEplMsgTypePreq, kEplDllAsndNotDefined);
+            ret = dllk_createTxFrame(&handle, &frameSize, kEplMsgTypePreq, kDllAsndNotDefined);
             if (ret != kEplSuccessful)
                 return ret;
             pIntNodeInfo->pPreqTxBuffer = &dllkInstance_g.pTxBuffer[handle];
@@ -1294,7 +1294,7 @@ tEplKernel dllk_setupLocalNodeMn(void)
     if (ret != kEplSuccessful)
         return ret;
 
-    ret = EdrvCyclicSetCycleLenUs(dllkInstance_g.dllConfigParam.m_dwCycleLen);
+    ret = EdrvCyclicSetCycleLenUs(dllkInstance_g.dllConfigParam.cycleLen);
     if (ret != kEplSuccessful)
         return ret;
 
@@ -1302,7 +1302,7 @@ tEplKernel dllk_setupLocalNodeMn(void)
     if (ret != kEplSuccessful)
         return ret;
 
-    dllkInstance_g.frameTimeout = 1000LL * ((UINT64)dllkInstance_g.dllConfigParam.m_dwCycleLen);
+    dllkInstance_g.frameTimeout = 1000LL * ((UINT64)dllkInstance_g.dllConfigParam.cycleLen);
 
     dllk_setupPresFilter(&dllkInstance_g.aFilter[DLLK_FILTER_PRES], TRUE);
 
@@ -1333,7 +1333,7 @@ tEplKernel dllk_setupLocalNodeCn(void)
 #endif
 
     dllk_setupPreqFilter(&dllkInstance_g.aFilter[DLLK_FILTER_PREQ],
-                         dllkInstance_g.dllConfigParam.m_uiNodeId,
+                         dllkInstance_g.dllConfigParam.nodeId,
                          &dllkInstance_g.pTxBuffer[DLLK_TXFRAME_PRES],
                          &dllkInstance_g.aLocalMac[0]);
 
@@ -1371,11 +1371,11 @@ tEplKernel dllk_setupLocalNodeCn(void)
 #endif
 
 #if (EPL_DLL_PROCESS_SYNC == EPL_DLL_PROCESS_SYNC_ON_TIMER)
-    ret = EplTimerSynckSetCycleLenUs(dllkInstance_g.dllConfigParam.m_dwCycleLen);
+    ret = EplTimerSynckSetCycleLenUs(dllkInstance_g.dllConfigParam.cycleLen);
     if (ret != kEplSuccessful)
         return ret;
 
-    ret = EplTimerSynckSetLossOfSyncToleranceNs(dllkInstance_g.dllConfigParam.m_dwLossOfFrameTolerance);
+    ret = EplTimerSynckSetLossOfSyncToleranceNs(dllkInstance_g.dllConfigParam.lossOfFrameTolerance);
     if (ret != kEplSuccessful)
         return ret;
 #endif
@@ -1566,7 +1566,7 @@ tEplKernel dllk_addNodeIsochronous(tDllkNodeInfo* pIntNodeInfo_p)
     tDllkNodeInfo**     ppIntNodeInfo;
     tEplFrame*          pTxFrame;
 
-    if (pIntNodeInfo_p->nodeId == dllkInstance_g.dllConfigParam.m_uiNodeId)
+    if (pIntNodeInfo_p->nodeId == dllkInstance_g.dllConfigParam.nodeId)
     {   // we shall send PRes ourself
         // insert our node as first entry in the list
         ppIntNodeInfo = &dllkInstance_g.pFirstNodeInfo;
@@ -1601,7 +1601,7 @@ tEplKernel dllk_addNodeIsochronous(tDllkNodeInfo* pIntNodeInfo_p)
 
         while ((*ppIntNodeInfo != NULL) &&
                (((*ppIntNodeInfo)->nodeId < pIntNodeInfo_p->nodeId) ||
-               ((*ppIntNodeInfo)->nodeId == dllkInstance_g.dllConfigParam.m_uiNodeId)))
+               ((*ppIntNodeInfo)->nodeId == dllkInstance_g.dllConfigParam.nodeId)))
         {
             ppIntNodeInfo = &(*ppIntNodeInfo)->pNextNodeInfo;
         }
@@ -1792,7 +1792,7 @@ tEplKernel dllk_presChainingDisable (void)
         AmiSetByteToBe(&dllkInstance_g.aFilter[DLLK_FILTER_PREQ].m_abFilterValue[14],
                        kEplMsgTypePreq);
         AmiSetByteToBe(&dllkInstance_g.aFilter[DLLK_FILTER_PREQ].m_abFilterMask[15],
-                       (BYTE) dllkInstance_g.dllConfigParam.m_uiNodeId); // Set Dst Node ID
+                       (BYTE) dllkInstance_g.dllConfigParam.nodeId); // Set Dst Node ID
 
         // disable auto-response delay
         dllkInstance_g.pTxBuffer[DLLK_TXFRAME_PRES].m_dwTimeOffsetNs = 0;
@@ -1908,14 +1908,14 @@ tEplKernel dllk_setupAsyncPhase(tNmtState nmtState_p, UINT nextTxBufferOffset_p,
 
     // check if we are invited in SoA
     if (dllkInstance_g.aLastTargetNodeId[dllkInstance_g.syncLastSoaReq] ==
-                                       dllkInstance_g.dllConfigParam.m_uiNodeId)
+                                       dllkInstance_g.dllConfigParam.nodeId)
     {
         //disable invitation per default
         fEnableInvitation = FALSE;
 
         switch (dllkInstance_g.aLastReqServiceId[dllkInstance_g.syncLastSoaReq])
         {
-            case kEplDllReqServiceStatus:
+            case kDllReqServiceStatus:
                 // StatusRequest
                 pTxBuffer = &dllkInstance_g.pTxBuffer[DLLK_TXFRAME_STATUSRES +
                                                       dllkInstance_g.curTxBufferOffsetStatusRes];
@@ -1932,7 +1932,7 @@ tEplKernel dllk_setupAsyncPhase(tNmtState nmtState_p, UINT nextTxBufferOffset_p,
 
                 break;
 
-            case kEplDllReqServiceIdent:
+            case kDllReqServiceIdent:
                 // IdentRequest
                 pTxBuffer = &dllkInstance_g.pTxBuffer[DLLK_TXFRAME_IDENTRES +
                                                       dllkInstance_g.curTxBufferOffsetIdentRes];
@@ -1948,7 +1948,7 @@ tEplKernel dllk_setupAsyncPhase(tNmtState nmtState_p, UINT nextTxBufferOffset_p,
                 }
                 break;
 
-            case kEplDllReqServiceNmtRequest:
+            case kDllReqServiceNmtRequest:
                 // NmtRequest
                 pTxBuffer = &dllkInstance_g.pTxBuffer[DLLK_TXFRAME_NMTREQ +
                                                       dllkInstance_g.curTxBufferOffsetNmtReq];
@@ -1967,7 +1967,7 @@ tEplKernel dllk_setupAsyncPhase(tNmtState nmtState_p, UINT nextTxBufferOffset_p,
                 }
                 break;
 
-            case kEplDllReqServiceUnspecified:
+            case kDllReqServiceUnspecified:
                 // unspecified invite
                 pTxBuffer = &dllkInstance_g.pTxBuffer[DLLK_TXFRAME_NONEPL +
                                                       dllkInstance_g.curTxBufferOffsetNonEpl];
@@ -1998,14 +1998,14 @@ tEplKernel dllk_setupAsyncPhase(tNmtState nmtState_p, UINT nextTxBufferOffset_p,
 
             //reset invitation
             AmiSetByteToLe(&pTxFrame->m_Data.m_Soa.m_le_bReqServiceId,
-                    kEplDllReqServiceNo);
+                    kDllReqServiceNo);
             AmiSetByteToLe(&pTxFrame->m_Data.m_Soa.m_le_bReqServiceTarget,
                     EPL_C_ADR_INVALID);
         }
         else
         {
             // Asnd frame will be sent, remove the request
-            dllkInstance_g.aLastReqServiceId[dllkInstance_g.syncLastSoaReq] = kEplDllReqServiceNo;
+            dllkInstance_g.aLastReqServiceId[dllkInstance_g.syncLastSoaReq] = kDllReqServiceNo;
         }
     }
     return ret;
@@ -2037,14 +2037,14 @@ tEplKernel dllk_setupSyncPhase(tNmtState nmtState_p, BOOL fReadyFlag_p,
     UINT                nextTimeOffsetNs = 0;
     tEplFrame*          pTxFrame;
     tEdrvTxBuffer*      pTxBuffer;
-    tEplFrameInfo       FrameInfo;
+    tFrameInfo          FrameInfo;
     tDllkNodeInfo*      pIntNodeInfo;
     BYTE                flag1;
 
     // calculate WaitSoCPReq delay
-    if (dllkInstance_g.dllConfigParam.m_dwWaitSocPreq != 0)
+    if (dllkInstance_g.dllConfigParam.waitSocPreq != 0)
     {
-        *pNextTimeOffsetNs_p = dllkInstance_g.dllConfigParam.m_dwWaitSocPreq
+        *pNextTimeOffsetNs_p = dllkInstance_g.dllConfigParam.waitSocPreq
                             + EPL_C_DLL_T_PREAMBLE + EPL_C_DLL_T_MIN_FRAME + EPL_C_DLL_T_IFG;
     }
     else
@@ -2072,8 +2072,8 @@ tEplKernel dllk_setupSyncPhase(tNmtState nmtState_p, BOOL fReadyFlag_p,
             AmiSetByteToLe(&pTxFrame->m_Data.m_Preq.m_le_bFlag1, flag1);
 
             // process TPDO
-            FrameInfo.m_pFrame = pTxFrame;
-            FrameInfo.m_uiFrameSize = pTxBuffer->m_uiTxMsgLen;
+            FrameInfo.pFrame = pTxFrame;
+            FrameInfo.frameSize = pTxBuffer->m_uiTxMsgLen;
             ret = dllk_processTpdo(&FrameInfo, fReadyFlag_p);
             if (ret != kEplSuccessful)
                 return ret;

@@ -68,7 +68,7 @@ tEplKernel syncu_addInstance(void);
 tEplKernel syncu_delInstance(void);
 tEplKernel syncu_reset(void);
 tEplKernel syncu_requestSyncResponse(tSyncuCbResponse pfnCbResponse_p,
-                                     tEplDllSyncRequest* pSyncRequestData_p,
+                                     tDllSyncRequest* pSyncRequestData_p,
                                      UINT size_p);
 
 #ifdef __cplusplus

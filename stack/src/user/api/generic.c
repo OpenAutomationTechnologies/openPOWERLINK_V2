@@ -225,7 +225,7 @@ static tEplKernel PUBLIC  EplApiCbCfmEventCnProgress(tEplCfmEventCnProgress* pEv
 static tEplKernel PUBLIC  EplApiCbCfmEventCnResult(unsigned int uiNodeId_p, tNmtNodeCommand NodeCommand_p);
 #endif
 
-static tEplKernel PUBLIC EplApiCbReceivedAsnd(tEplFrameInfo *pFrameInfo_p);
+static tEplKernel PUBLIC EplApiCbReceivedAsnd(tFrameInfo *pFrameInfo_p);
 
 // OD initialization function (implemented in Objdict.c)
 //tEplKernel PUBLIC  EplObdInitRam (tEplObdInitParam MEM* pInitParam_p);
@@ -841,37 +841,37 @@ tEplKernel PUBLIC EplApiSendAsndFrame
 )
 {
     tEplKernel      Ret;
-    tEplFrameInfo   FrameInfo;
+    tFrameInfo   FrameInfo;
     BYTE            Buffer[EPL_C_DLL_MAX_ASYNC_MTU];
 
     // Calculate size of frame (Asnd data + header)
-    FrameInfo.m_uiFrameSize = uiAsndSize_p + offsetof(tEplFrame, m_Data);
+    FrameInfo.frameSize = uiAsndSize_p + offsetof(tEplFrame, m_Data);
 
     // Check for correct input
     if
     (
         ( pAsndFrame_p              == NULL             )  ||
-        ( FrameInfo.m_uiFrameSize   >= sizeof(Buffer)   )
+        ( FrameInfo.frameSize   >= sizeof(Buffer)   )
     )
     {
         return  kEplReject;
     }
 
     // Calculate size of frame (Asnd data + header)
-    FrameInfo.m_uiFrameSize = uiAsndSize_p + offsetof(tEplFrame, m_Data);
-    FrameInfo.m_pFrame      = (tEplFrame *) Buffer;
+    FrameInfo.frameSize = uiAsndSize_p + offsetof(tEplFrame, m_Data);
+    FrameInfo.pFrame      = (tEplFrame *) Buffer;
 
     // Copy Asnd data
-    EPL_MEMSET( FrameInfo.m_pFrame, 0x00, FrameInfo.m_uiFrameSize );
-    EPL_MEMCPY( &FrameInfo.m_pFrame->m_Data.m_Asnd, pAsndFrame_p, uiAsndSize_p );
+    EPL_MEMSET( FrameInfo.pFrame, 0x00, FrameInfo.frameSize );
+    EPL_MEMCPY( &FrameInfo.pFrame->m_Data.m_Asnd, pAsndFrame_p, uiAsndSize_p );
 
     // Fill in additional data (SrcNodeId is filled by DLL if it is set to 0)
-    AmiSetByteToLe( &FrameInfo.m_pFrame->m_le_bMessageType, (BYTE) kEplMsgTypeAsnd  );
-    AmiSetByteToLe( &FrameInfo.m_pFrame->m_le_bDstNodeId,   (BYTE) bDstNodeId_p     );
-    AmiSetByteToLe( &FrameInfo.m_pFrame->m_le_bSrcNodeId,   (BYTE) 0                );
+    AmiSetByteToLe( &FrameInfo.pFrame->m_le_bMessageType, (BYTE) kEplMsgTypeAsnd  );
+    AmiSetByteToLe( &FrameInfo.pFrame->m_le_bDstNodeId,   (BYTE) bDstNodeId_p     );
+    AmiSetByteToLe( &FrameInfo.pFrame->m_le_bSrcNodeId,   (BYTE) 0                );
 
     // Request frame transmission
-    Ret = dllucal_sendAsyncFrame( &FrameInfo, kEplDllAsyncReqPrioGeneric);
+    Ret = dllucal_sendAsyncFrame( &FrameInfo, kDllAsyncReqPrioGeneric);
 
     return Ret;
 }
@@ -897,19 +897,19 @@ tEplKernel PUBLIC EplApiSetAsndForward
 )
 {
     tEplKernel          Ret;
-    tEplDllAsndFilter   DllFilter;
+    tDllAsndFilter      DllFilter;
 
     // Map API filter types to stack internal filter types
     switch( FilterType_p )
     {
-        case kEplApiAsndFilterLocal:    DllFilter   = kEplDllAsndFilterLocal;
+        case kEplApiAsndFilterLocal:    DllFilter   = kDllAsndFilterLocal;
                                         break;
 
-        case kEplApiAsndFilterAny:      DllFilter   = kEplDllAsndFilterAny;
+        case kEplApiAsndFilterAny:      DllFilter   = kDllAsndFilterAny;
                                         break;
 
         default:
-        case kEplApiAsndFilterNone:     DllFilter   = kEplDllAsndFilterNone;
+        case kEplApiAsndFilterNone:     DllFilter   = kDllAsndFilterNone;
                                         break;
     }
 
@@ -1726,19 +1726,19 @@ Exit:
 static tEplKernel PUBLIC EplApiUpdateDllConfig(BOOL fUpdateIdentity_p)
 {
 tEplKernel          Ret = kEplSuccessful;
-tEplDllConfigParam  DllConfigParam;
-tEplDllIdentParam   DllIdentParam;
+tDllConfigParam     DllConfigParam;
+tDllIdentParam      DllIdentParam;
 tEplObdSize         ObdSize;
 WORD                wTemp;
 BYTE                bTemp;
 
     // configure Dll
     EPL_MEMSET(&DllConfigParam, 0, sizeof (DllConfigParam));
-    DllConfigParam.m_uiNodeId = EplObdGetNodeId();
+    DllConfigParam.nodeId = EplObdGetNodeId();
 
     // Cycle Length (0x1006: NMT_CycleLen_U32) in [us]
     ObdSize = 4;
-    Ret = EplObdReadEntry(0x1006, 0, &DllConfigParam.m_dwCycleLen, &ObdSize);
+    Ret = EplObdReadEntry(0x1006, 0, &DllConfigParam.cycleLen, &ObdSize);
     if(Ret != kEplSuccessful)
     {
         goto Exit;
@@ -1746,18 +1746,18 @@ BYTE                bTemp;
 
     // 0x1F82: NMT_FeatureFlags_U32
     ObdSize = 4;
-    Ret = EplObdReadEntry(0x1F82, 0, &DllConfigParam.m_dwFeatureFlags, &ObdSize);
+    Ret = EplObdReadEntry(0x1F82, 0, &DllConfigParam.featureFlags, &ObdSize);
     if(Ret != kEplSuccessful)
     {
         goto Exit;
     }
 
     // d.k. There is no dependence between FeatureFlags and async-only CN
-    DllConfigParam.m_fAsyncOnly = EplApiInstance_g.m_InitParam.m_fAsyncOnly;
+    DllConfigParam.fAsyncOnly = EplApiInstance_g.m_InitParam.m_fAsyncOnly;
 
     // 0x1C14: DLL_LossOfFrameTolerance_U32 in [ns]
     ObdSize = 4;
-    Ret = EplObdReadEntry(0x1C14, 0, &DllConfigParam.m_dwLossOfFrameTolerance, &ObdSize);
+    Ret = EplObdReadEntry(0x1C14, 0, &DllConfigParam.lossOfFrameTolerance, &ObdSize);
     if(Ret != kEplSuccessful)
     {
         goto Exit;
@@ -1771,7 +1771,7 @@ BYTE                bTemp;
     {
         goto Exit;
     }
-    DllConfigParam.m_uiIsochrTxMaxPayload = wTemp;
+    DllConfigParam.isochrTxMaxPayload = wTemp;
 
     // 0x1F98.2: IsochrRxMaxPayload_U16
     ObdSize = 2;
@@ -1780,11 +1780,11 @@ BYTE                bTemp;
     {
         goto Exit;
     }
-    DllConfigParam.m_uiIsochrRxMaxPayload = wTemp;
+    DllConfigParam.isochrRxMaxPayload = wTemp;
 
     // 0x1F98.3: PResMaxLatency_U32
     ObdSize = 4;
-    Ret = EplObdReadEntry(0x1F98, 3, &DllConfigParam.m_dwPresMaxLatency, &ObdSize);
+    Ret = EplObdReadEntry(0x1F98, 3, &DllConfigParam.presMaxLatency, &ObdSize);
     if(Ret != kEplSuccessful)
     {
         goto Exit;
@@ -1797,7 +1797,7 @@ BYTE                bTemp;
     {
         goto Exit;
     }
-    DllConfigParam.m_uiPreqActPayloadLimit = wTemp;
+    DllConfigParam.preqActPayloadLimit = wTemp;
 
     // 0x1F98.5: PResActPayloadLimit_U16
     ObdSize = 2;
@@ -1806,11 +1806,11 @@ BYTE                bTemp;
     {
         goto Exit;
     }
-    DllConfigParam.m_uiPresActPayloadLimit = wTemp;
+    DllConfigParam.presActPayloadLimit = wTemp;
 
     // 0x1F98.6: ASndMaxLatency_U32
     ObdSize = 4;
-    Ret = EplObdReadEntry(0x1F98, 6, &DllConfigParam.m_dwAsndMaxLatency, &ObdSize);
+    Ret = EplObdReadEntry(0x1F98, 6, &DllConfigParam.asndMaxLatency, &ObdSize);
     if(Ret != kEplSuccessful)
     {
         goto Exit;
@@ -1823,7 +1823,7 @@ BYTE                bTemp;
     {
         goto Exit;
     }
-    DllConfigParam.m_uiMultiplCycleCnt = bTemp;
+    DllConfigParam.multipleCycleCnt = bTemp;
 
     // 0x1F98.8: AsyncMTU_U16
     ObdSize = 2;
@@ -1832,14 +1832,14 @@ BYTE                bTemp;
     {
         goto Exit;
     }
-    DllConfigParam.m_uiAsyncMtu = wTemp;
+    DllConfigParam.asyncMtu = wTemp;
 
     // $$$ Prescaler
 
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
     // 0x1F8A.1: WaitSoCPReq_U32 in [ns]
     ObdSize = 4;
-    Ret = EplObdReadEntry(0x1F8A, 1, &DllConfigParam.m_dwWaitSocPreq, &ObdSize);
+    Ret = EplObdReadEntry(0x1F8A, 1, &DllConfigParam.waitSocPreq, &ObdSize);
     if(Ret != kEplSuccessful)
     {
         goto Exit;
@@ -1847,7 +1847,7 @@ BYTE                bTemp;
 
     // 0x1F8A.2: AsyncSlotTimeout_U32 in [ns] (optional)
     ObdSize = 4;
-    Ret = EplObdReadEntry(0x1F8A, 2, &DllConfigParam.m_dwAsyncSlotTimeout, &ObdSize);
+    Ret = EplObdReadEntry(0x1F8A, 2, &DllConfigParam.asyncSlotTimeout, &ObdSize);
 /*    if(Ret != kEplSuccessful)
     {
         goto Exit;
@@ -1855,13 +1855,13 @@ BYTE                bTemp;
 #endif
 
 #if EPL_DLL_PRES_CHAINING_CN != FALSE
-    DllConfigParam.m_dwSyncResLatency = EplApiInstance_g.m_InitParam.m_dwSyncResLatency;
+    DllConfigParam.syncResLatency = EplApiInstance_g.m_InitParam.m_dwSyncResLatency;
 #endif
 
-    DllConfigParam.m_fSyncOnPrcNode = EplApiInstance_g.m_InitParam.m_fSyncOnPrcNode;
-    DllConfigParam.m_uiSyncNodeId = EplApiInstance_g.m_InitParam.m_uiSyncNodeId;
+    DllConfigParam.fSyncOnPrcNode = EplApiInstance_g.m_InitParam.m_fSyncOnPrcNode;
+    DllConfigParam.syncNodeId = EplApiInstance_g.m_InitParam.m_uiSyncNodeId;
 
-    DllConfigParam.m_uiSizeOfStruct = sizeof (DllConfigParam);
+    DllConfigParam.sizeOfStruct = sizeof (DllConfigParam);
     Ret = dllucal_config(&DllConfigParam);
     if(Ret != kEplSuccessful)
     {
@@ -1874,51 +1874,51 @@ BYTE                bTemp;
         EPL_MEMSET(&DllIdentParam, 0, sizeof (DllIdentParam));
 
         ObdSize = 4;
-        Ret = EplObdReadEntry(0x1000, 0, &DllIdentParam.m_dwDeviceType, &ObdSize);
+        Ret = EplObdReadEntry(0x1000, 0, &DllIdentParam.deviceType, &ObdSize);
         if(Ret != kEplSuccessful)
         {
             goto Exit;
         }
 
         ObdSize = 4;
-        Ret = EplObdReadEntry(0x1018, 1, &DllIdentParam.m_dwVendorId, &ObdSize);
+        Ret = EplObdReadEntry(0x1018, 1, &DllIdentParam.vendorId, &ObdSize);
         if(Ret != kEplSuccessful)
         {
             goto Exit;
         }
         ObdSize = 4;
-        Ret = EplObdReadEntry(0x1018, 2, &DllIdentParam.m_dwProductCode, &ObdSize);
+        Ret = EplObdReadEntry(0x1018, 2, &DllIdentParam.productCode, &ObdSize);
         if(Ret != kEplSuccessful)
         {
             goto Exit;
         }
         ObdSize = 4;
-        Ret = EplObdReadEntry(0x1018, 3, &DllIdentParam.m_dwRevisionNumber, &ObdSize);
+        Ret = EplObdReadEntry(0x1018, 3, &DllIdentParam.revisionNumber, &ObdSize);
         if(Ret != kEplSuccessful)
         {
             goto Exit;
         }
         ObdSize = 4;
-        Ret = EplObdReadEntry(0x1018, 4, &DllIdentParam.m_dwSerialNumber, &ObdSize);
+        Ret = EplObdReadEntry(0x1018, 4, &DllIdentParam.serialNumber, &ObdSize);
         if(Ret != kEplSuccessful)
         {
             goto Exit;
         }
 
-        DllIdentParam.m_dwIpAddress = EplApiInstance_g.m_InitParam.m_dwIpAddress;
-        DllIdentParam.m_dwSubnetMask = EplApiInstance_g.m_InitParam.m_dwSubnetMask;
+        DllIdentParam.ipAddress = EplApiInstance_g.m_InitParam.m_dwIpAddress;
+        DllIdentParam.subnetMask = EplApiInstance_g.m_InitParam.m_dwSubnetMask;
 
-        ObdSize = sizeof (DllIdentParam.m_dwDefaultGateway);
-        Ret = EplObdReadEntry(0x1E40, 5, &DllIdentParam.m_dwDefaultGateway, &ObdSize);
+        ObdSize = sizeof (DllIdentParam.defaultGateway);
+        Ret = EplObdReadEntry(0x1E40, 5, &DllIdentParam.defaultGateway, &ObdSize);
         if (Ret != kEplSuccessful)
         {   // NWL_IpAddrTable_Xh_REC.DefaultGateway_IPAD seams to not exist,
             // so use the one supplied in the init parameter
-            DllIdentParam.m_dwDefaultGateway = EplApiInstance_g.m_InitParam.m_dwDefaultGateway;
+            DllIdentParam.defaultGateway = EplApiInstance_g.m_InitParam.m_dwDefaultGateway;
         }
 
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_VETH)) != 0)
         // configure Virtual Ethernet Driver
-        Ret = VEthSetIpAddress(DllIdentParam.m_dwIpAddress, DllIdentParam.m_dwSubnetMask, (WORD) DllConfigParam.m_uiAsyncMtu);
+        Ret = VEthSetIpAddress(DllIdentParam.ipAddress, DllIdentParam.m_dwSubnetMask, (WORD) DllConfigParam.m_uiAsyncMtu);
         if(Ret != kEplSuccessful)
         {
             goto Exit;
@@ -1931,30 +1931,30 @@ BYTE                bTemp;
         }
 #endif
 
-        ObdSize = sizeof (DllIdentParam.m_sHostname);
-        Ret = EplObdReadEntry(0x1F9A, 0, &DllIdentParam.m_sHostname[0], &ObdSize);
+        ObdSize = sizeof (DllIdentParam.sHostname);
+        Ret = EplObdReadEntry(0x1F9A, 0, &DllIdentParam.sHostname[0], &ObdSize);
         if (Ret != kEplSuccessful)
         {   // NMT_HostName_VSTR seams to not exist,
             // so use the one supplied in the init parameter
-            EPL_MEMCPY(DllIdentParam.m_sHostname, EplApiInstance_g.m_InitParam.m_sHostname, sizeof (DllIdentParam.m_sHostname));
+            EPL_MEMCPY(DllIdentParam.sHostname, EplApiInstance_g.m_InitParam.m_sHostname, sizeof (DllIdentParam.sHostname));
         }
 
         ObdSize = 4;
-        Ret = EplObdReadEntry(0x1020, 1, &DllIdentParam.m_dwVerifyConfigurationDate, &ObdSize);
+        Ret = EplObdReadEntry(0x1020, 1, &DllIdentParam.verifyConfigurationDate, &ObdSize);
         // ignore any error, because this object is optional
 
         ObdSize = 4;
-        Ret = EplObdReadEntry(0x1020, 2, &DllIdentParam.m_dwVerifyConfigurationTime, &ObdSize);
+        Ret = EplObdReadEntry(0x1020, 2, &DllIdentParam.verifyConfigurationTime, &ObdSize);
         // ignore any error, because this object is optional
 
-        DllIdentParam.m_dwApplicationSwDate = EplApiInstance_g.m_InitParam.m_dwApplicationSwDate;
-        DllIdentParam.m_dwApplicationSwTime = EplApiInstance_g.m_InitParam.m_dwApplicationSwTime;
+        DllIdentParam.applicationSwDate = EplApiInstance_g.m_InitParam.m_dwApplicationSwDate;
+        DllIdentParam.applicationSwTime = EplApiInstance_g.m_InitParam.m_dwApplicationSwTime;
 
-        DllIdentParam.m_qwVendorSpecificExt1 = EplApiInstance_g.m_InitParam.m_qwVendorSpecificExt1;
+        DllIdentParam.vendorSpecificExt1 = EplApiInstance_g.m_InitParam.m_qwVendorSpecificExt1;
 
-        EPL_MEMCPY(&DllIdentParam.m_abVendorSpecificExt2[0], &EplApiInstance_g.m_InitParam.m_abVendorSpecificExt2[0], sizeof (DllIdentParam.m_abVendorSpecificExt2));
+        EPL_MEMCPY(&DllIdentParam.aVendorSpecificExt2[0], &EplApiInstance_g.m_InitParam.m_abVendorSpecificExt2[0], sizeof (DllIdentParam.aVendorSpecificExt2));
 
-        DllIdentParam.m_uiSizeOfStruct = sizeof (DllIdentParam);
+        DllIdentParam.sizeOfStruct = sizeof (DllIdentParam);
         Ret = dllucal_setIdentity(&DllIdentParam);
         if(Ret != kEplSuccessful)
         {
@@ -2502,7 +2502,7 @@ Exit:
 //---------------------------------------------------------------------------
 static tEplKernel PUBLIC EplApiCbReceivedAsnd
 (
-    tEplFrameInfo *pFrameInfo_p
+    tFrameInfo *pFrameInfo_p
 )
 {
     tEplKernel          Ret = kEplSuccessful;
@@ -2515,16 +2515,16 @@ static tEplKernel PUBLIC EplApiCbReceivedAsnd
 
     if
     (
-        ( pFrameInfo_p->m_uiFrameSize    <= uiAsndOffset + 1        ) ||
-        ( pFrameInfo_p->m_uiFrameSize    >  EPL_C_DLL_MAX_ASYNC_MTU )
+        ( pFrameInfo_p->frameSize    <= uiAsndOffset + 1        ) ||
+        ( pFrameInfo_p->frameSize    >  EPL_C_DLL_MAX_ASYNC_MTU )
     )
     {
         return kEplReject;
     }
 
     // Forward received ASnd frame
-    ApiEventArg.m_RcvAsnd.m_pFrame      = pFrameInfo_p->m_pFrame;
-    ApiEventArg.m_RcvAsnd.m_FrameSize   = pFrameInfo_p->m_uiFrameSize;
+    ApiEventArg.m_RcvAsnd.m_pFrame      = pFrameInfo_p->pFrame;
+    ApiEventArg.m_RcvAsnd.m_FrameSize   = pFrameInfo_p->frameSize;
 
     EventType = kEplApiEventReceivedAsnd;
 

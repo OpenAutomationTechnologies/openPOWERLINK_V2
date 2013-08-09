@@ -88,7 +88,7 @@ static tSyncuInstance   syncuInstance_g;
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static tEplKernel syncu_cbSyncResponse(tEplFrameInfo * pFrameInfo_p);
+static tEplKernel syncu_cbSyncResponse(tFrameInfo * pFrameInfo_p);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -126,8 +126,8 @@ tEplKernel syncu_addInstance(void)
     tEplKernel ret = kEplSuccessful;
 
     EPL_MEMSET(&syncuInstance_g, 0, sizeof (syncuInstance_g));
-    ret = dllucal_regAsndService(kEplDllAsndSyncResponse, syncu_cbSyncResponse,
-                                 kEplDllAsndFilterAny);
+    ret = dllucal_regAsndService(kDllAsndSyncResponse, syncu_cbSyncResponse,
+                                 kDllAsndFilterAny);
 
     return ret;
 }
@@ -147,7 +147,7 @@ tEplKernel syncu_delInstance(void)
 {
     tEplKernel  ret;
 
-    ret = dllucal_regAsndService(kEplDllAsndSyncResponse, NULL, kEplDllAsndFilterNone);
+    ret = dllucal_regAsndService(kDllAsndSyncResponse, NULL, kDllAsndFilterNone);
     return ret;
 }
 
@@ -185,14 +185,14 @@ The function requests the SyncResponse for a specified node.
 */
 //------------------------------------------------------------------------------
 tEplKernel  syncu_requestSyncResponse(tSyncuCbResponse pfnCbResponse_p,
-                                      tEplDllSyncRequest* pSyncRequestData_p,
+                                      tDllSyncRequest* pSyncRequestData_p,
                                       UINT size_p)
 {
     tEplKernel      ret;
     UINT            nodeId;
 
     ret = kEplSuccessful;
-    nodeId = pSyncRequestData_p->m_uiNodeId;
+    nodeId = pSyncRequestData_p->nodeId;
 
     if (nodeId == 0)
     {
@@ -242,7 +242,7 @@ SyncResponse is received.
 \ingroup module_identu
 */
 //------------------------------------------------------------------------------
-static tEplKernel syncu_cbSyncResponse(tEplFrameInfo * pFrameInfo_p)
+static tEplKernel syncu_cbSyncResponse(tFrameInfo * pFrameInfo_p)
 {
     tEplKernel          ret;
     UINT                nodeId;
@@ -251,7 +251,7 @@ static tEplKernel syncu_cbSyncResponse(tEplFrameInfo * pFrameInfo_p)
 
     ret = kEplSuccessful;
 
-    nodeId = AmiGetByteFromLe(&pFrameInfo_p->m_pFrame->m_le_bSrcNodeId);
+    nodeId = AmiGetByteFromLe(&pFrameInfo_p->pFrame->m_le_bSrcNodeId);
     index  = nodeId - 1;
 
     if (index < tabentries (syncuInstance_g.apfnCbResponse))
@@ -265,13 +265,13 @@ static tEplKernel syncu_cbSyncResponse(tEplFrameInfo * pFrameInfo_p)
         // reset callback function pointer so that caller may issue next request
         syncuInstance_g.apfnCbResponse[index] = NULL;
 
-        if (pFrameInfo_p->m_uiFrameSize < EPL_C_DLL_MINSIZE_SYNCRES)
+        if (pFrameInfo_p->frameSize < EPL_C_DLL_MINSIZE_SYNCRES)
         {   // SyncResponse not received or it has invalid size
             ret = pfnCbResponse(nodeId, NULL);
         }
         else
         {   // SyncResponse received
-            ret = pfnCbResponse(nodeId, &pFrameInfo_p->m_pFrame->m_Data.m_Asnd.m_Payload.m_SyncResponse);
+            ret = pfnCbResponse(nodeId, &pFrameInfo_p->pFrame->m_Data.m_Asnd.m_Payload.m_SyncResponse);
         }
     }
     return ret;

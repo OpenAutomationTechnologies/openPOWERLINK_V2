@@ -49,7 +49,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
-typedef tEplKernel (PUBLIC * tEplDlluCbAsnd) (tEplFrameInfo * pFrameInfo_p);
+typedef tEplKernel (PUBLIC * tEplDlluCbAsnd) (tFrameInfo * pFrameInfo_p);
 
 //------------------------------------------------------------------------------
 // function prototypes
@@ -63,35 +63,35 @@ tEplKernel dllucal_init(void);
 
 tEplKernel dllucal_exit(void);
 
-tEplKernel dllucal_config(tEplDllConfigParam * pDllConfigParam_p);
+tEplKernel dllucal_config(tDllConfigParam * pDllConfigParam_p);
 
-tEplKernel dllucal_setIdentity(tEplDllIdentParam * pDllIdentParam_p);
+tEplKernel dllucal_setIdentity(tDllIdentParam * pDllIdentParam_p);
 
-tEplKernel dllucal_regAsndService(tEplDllAsndServiceId ServiceId_p,
+tEplKernel dllucal_regAsndService(tDllAsndServiceId ServiceId_p,
                                   tEplDlluCbAsnd pfnDlluCbAsnd_p,
-                                  tEplDllAsndFilter Filter_p);
+                                  tDllAsndFilter Filter_p);
 
-tEplKernel dllucal_sendAsyncFrame(tEplFrameInfo * pFrameInfo, tEplDllAsyncReqPriority Priority_p);
+tEplKernel dllucal_sendAsyncFrame(tFrameInfo * pFrameInfo, tDllAsyncReqPriority Priority_p);
 
 tEplKernel dllucal_process(tEplEvent * pEvent_p);
 
 
 #if EPL_NMT_MAX_NODE_ID > 0
 
-tEplKernel dllucal_configNode(tEplDllNodeInfo* pNodeInfo_p);
+tEplKernel dllucal_configNode(tDllNodeInfo* pNodeInfo_p);
 
-tEplKernel dllucal_addNode(tEplDllNodeOpParam* pNodeOpParam_p);
+tEplKernel dllucal_addNode(tDllNodeOpParam* pNodeOpParam_p);
 
-tEplKernel dllucal_deleteNode(tEplDllNodeOpParam* pNodeOpParam_p);
+tEplKernel dllucal_deleteNode(tDllNodeOpParam* pNodeOpParam_p);
 
 #endif
 
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
 
-tEplKernel dllucal_issueRequest(tEplDllReqServiceId Service_p, unsigned int uiNodeId_p, BYTE bSoaFlag1_p);
+tEplKernel dllucal_issueRequest(tDllReqServiceId Service_p, unsigned int uiNodeId_p, BYTE bSoaFlag1_p);
 
 #if EPL_DLL_PRES_CHAINING_MN != FALSE
-tEplKernel dllucal_issueSyncRequest(tEplDllSyncRequest* pSyncRequest_p, unsigned int uiSize_p);
+tEplKernel dllucal_issueSyncRequest(tDllSyncRequest* pSyncRequest_p, unsigned int uiSize_p);
 #endif
 
 #endif

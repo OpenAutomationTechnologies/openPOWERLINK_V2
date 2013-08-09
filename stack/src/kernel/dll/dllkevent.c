@@ -90,7 +90,7 @@ static tEplKernel processStartReducedCycle(void);
 #if EPL_DLL_PRES_READY_AFTER_SOA != FALSE
 static tEplKernel processPresReady(tNmtState nmtState_p);
 #endif
-static tEplKernel processFillTx(tEplDllAsyncReqPriority asyncReqPriority_p, tNmtState nmtState_p);
+static tEplKernel processFillTx(tDllAsyncReqPriority asyncReqPriority_p, tNmtState nmtState_p);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -128,7 +128,7 @@ tEplKernel dllk_process(tEplEvent* pEvent_p)
             break;
 
         case kEplEventTypeDllkFillTx:
-            ret = processFillTx(*((tEplDllAsyncReqPriority*)pEvent_p->m_pArg),
+            ret = processFillTx(*((tDllAsyncReqPriority*)pEvent_p->m_pArg),
                                 dllkInstance_g.nmtState);
             break;
 
@@ -186,7 +186,7 @@ tEplKernel dllk_issueLossOfPres(UINT nodeId_p)
     tEplKernel          ret = kEplSuccessful;
     tDllkNodeInfo*      pIntNodeInfo;
     tEplEvent           event;
-    tEplDllNodeOpParam  nodeOpParam;
+    tDllNodeOpParam     nodeOpParam;
 
     pIntNodeInfo = dllk_getNodeInfo(nodeId_p);
     if (pIntNodeInfo != NULL)
@@ -203,8 +203,8 @@ tEplKernel dllk_issueLossOfPres(UINT nodeId_p)
         }
         else
         {   // CN shall be deleted softly, so remove it now, without issuing any error
-            nodeOpParam.m_OpNodeType = kEplDllNodeOpTypeIsochronous;
-            nodeOpParam.m_uiNodeId = pIntNodeInfo->nodeId;
+            nodeOpParam.opNodeType = kDllNodeOpTypeIsochronous;
+            nodeOpParam.nodeId = pIntNodeInfo->nodeId;
 
             event.m_EventSink = kEplEventSinkDllkCal;
             event.m_EventType = kEplEventTypeDllkDelNode;
@@ -511,7 +511,7 @@ static tEplKernel processNmtStateChange(tNmtState newNmtState_p, tNmtState oldNm
         case kNmtMsBasicEthernet:
         case kNmtCsBasicEthernet:
             // Fill Async Tx Buffer, because state BasicEthernet was entered
-            ret = processFillTx(kEplDllAsyncReqPrioGeneric, newNmtState_p);
+            ret = processFillTx(kDllAsyncReqPrioGeneric, newNmtState_p);
             if (ret != kEplSuccessful)
                 return ret;
             break;
@@ -583,7 +583,7 @@ The function processes the fill TX event.
 \return The function returns a tEplKernel error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel processFillTx(tEplDllAsyncReqPriority asyncReqPriority_p, tNmtState nmtState_p)
+static tEplKernel processFillTx(tDllAsyncReqPriority asyncReqPriority_p, tNmtState nmtState_p)
 {
     tEplKernel      ret = kEplSuccessful;
     tEplFrame*      pTxFrame;
@@ -599,7 +599,7 @@ static tEplKernel processFillTx(tEplDllAsyncReqPriority asyncReqPriority_p, tNmt
     pTxFrame = NULL;
     switch (asyncReqPriority_p)
     {
-        case kEplDllAsyncReqPrioNmt:    // NMT request priority
+        case kDllAsyncReqPrioNmt:    // NMT request priority
             nextTxBufferOffset = dllkInstance_g.curTxBufferOffsetNmtReq;
             pTxBuffer = &dllkInstance_g.pTxBuffer[DLLK_TXFRAME_NMTREQ + nextTxBufferOffset];
 #if (EDRV_AUTO_RESPONSE != FALSE)
@@ -704,7 +704,7 @@ static tEplKernel processFillTx(tEplDllAsyncReqPriority asyncReqPriority_p, tNmt
     {
         // update Flag 2 (PR, RS)
         ret = dllkcal_getAsyncTxCount(&asyncReqPriority_p, &frameCount);
-        if (asyncReqPriority_p == kEplDllAsyncReqPrioNmt)
+        if (asyncReqPriority_p == kDllAsyncReqPrioNmt)
         {   // non-empty FIFO with hightest priority is for NMT requests
             if (dllkInstance_g.pTxBuffer[DLLK_TXFRAME_NMTREQ +
                                          dllkInstance_g.curTxBufferOffsetNmtReq].m_uiTxMsgLen > DLLK_BUFLEN_EMPTY)
@@ -720,7 +720,7 @@ static tEplKernel processFillTx(tEplDllAsyncReqPriority asyncReqPriority_p, tNmt
             {   // NMT request Tx buffer contains a frame
                 // use NMT request FIFO, because of higher priority
                 frameCount = 1;
-                asyncReqPriority_p = kEplDllAsyncReqPrioNmt;
+                asyncReqPriority_p = kDllAsyncReqPrioNmt;
             }
             else if (dllkInstance_g.pTxBuffer[DLLK_TXFRAME_NONEPL +
                                               dllkInstance_g.curTxBufferOffsetNonEpl].m_uiTxMsgLen > DLLK_BUFLEN_EMPTY)
@@ -803,7 +803,7 @@ static tEplKernel processCycleFinish(tNmtState nmtState_p)
 #if defined(CONFIG_INCLUDE_NMT_MN)
     if (dllkInstance_g.dllState > kDllMsNonCyclic)
     {
-        if (dllkInstance_g.dllConfigParam.m_uiSyncNodeId == EPL_C_ADR_SYNC_ON_SOC)
+        if (dllkInstance_g.dllConfigParam.syncNodeId == EPL_C_ADR_SYNC_ON_SOC)
         {   // cyclic state is active, so preprocessing is necessary
             ret = processSync(nmtState_p);
         }
@@ -875,7 +875,7 @@ static tEplKernel processSyncCn(tNmtState nmtState_p, BOOL fReadyFlag_p)
     tEplKernel          ret = kEplSuccessful;
     tEplFrame*          pTxFrame;
     tEdrvTxBuffer*      pTxBuffer;
-    tEplFrameInfo       FrameInfo;
+    tFrameInfo          FrameInfo;
     UINT                nextTxBufferOffset = dllkInstance_g.curTxBufferOffsetCycle ^ 1;
 
     // local node is CN, update only the PRes
@@ -887,8 +887,8 @@ static tEplKernel processSyncCn(tNmtState nmtState_p, BOOL fReadyFlag_p)
         if (nmtState_p != kNmtCsOperational)
             fReadyFlag_p = FALSE;
 
-        FrameInfo.m_pFrame = pTxFrame;
-        FrameInfo.m_uiFrameSize = pTxBuffer->m_uiTxMsgLen;
+        FrameInfo.pFrame = pTxFrame;
+        FrameInfo.frameSize = pTxBuffer->m_uiTxMsgLen;
         ret = dllk_processTpdo(&FrameInfo, fReadyFlag_p);
         if (ret != kEplSuccessful)
             return ret;
@@ -934,7 +934,7 @@ static tEplKernel processSyncMn(tNmtState nmtState_p, BOOL fReadyFlag_p)
 
     // Set SoC relative time
     AmiSetQword64ToLe( &pTxFrame->m_Data.m_Soc.m_le_RelativeTime, dllkInstance_g.relativeTime);
-    dllkInstance_g.relativeTime += dllkInstance_g.dllConfigParam.m_dwCycleLen;
+    dllkInstance_g.relativeTime += dllkInstance_g.dllConfigParam.cycleLen;
 
     if (dllkInstance_g.ppTxBufferList == NULL)
         return ret;
@@ -1053,10 +1053,10 @@ static tEplKernel processStartReducedCycle(void)
     dllkInstance_g.dllState = kDllMsNonCyclic;
 
 #if EPL_TIMER_USE_HIGHRES != FALSE
-    if (dllkInstance_g.dllConfigParam.m_dwAsyncSlotTimeout != 0)
+    if (dllkInstance_g.dllConfigParam.asyncSlotTimeout != 0)
     {
         ret = EplTimerHighReskModifyTimerNs(&dllkInstance_g.timerHdlCycle,
-                                            dllkInstance_g.dllConfigParam.m_dwAsyncSlotTimeout,
+                                            dllkInstance_g.dllConfigParam.asyncSlotTimeout,
                                             dllk_cbMnTimerCycle, 0L, FALSE);
     }
 #endif

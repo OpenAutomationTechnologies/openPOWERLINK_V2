@@ -103,13 +103,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 typedef struct
 {
-    tEplDllAsndServiceId    serviceId;
-    tEplDllAsndFilter       filter;
+    tDllAsndServiceId       serviceId;
+    tDllAsndFilter          filter;
 } tDllCalAsndServiceIdFilter;
 
 typedef struct
 {
-    tEplDllReqServiceId     service;
+    tDllReqServiceId        service;
     UINT                    nodeId;
     BYTE                    soaFlag1;
 } tDllCalIssueRequest;

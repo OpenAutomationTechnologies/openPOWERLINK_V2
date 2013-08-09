@@ -72,7 +72,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 typedef struct
 {
-    tEplDlluCbAsnd           apfnDlluCbAsnd[EPL_DLL_MAX_ASND_SERVICE_ID];
+    tEplDlluCbAsnd           apfnDlluCbAsnd[DLL_MAX_ASND_SERVICE_ID];
     tDllCalQueueInstance     dllCalQueueTxNmt;          ///< Dll Cal Queue instance for NMT priority
     tDllCalQueueInstance     dllCalQueueTxGen;          ///< Dll Cal Queue instance for Generic priority
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0) \
@@ -95,8 +95,8 @@ static tDlluCalInstance     instance_l;
 // local function prototypes
 //------------------------------------------------------------------------------
 
-static tEplKernel SetAsndServiceIdFilter(tEplDllAsndServiceId ServiceId_p,
-                                         tEplDllAsndFilter Filter_p);
+static tEplKernel SetAsndServiceIdFilter(tDllAsndServiceId ServiceId_p,
+                                         tDllAsndFilter Filter_p);
 
 
 //============================================================================//
@@ -193,22 +193,22 @@ tEplKernel dllucal_process(tEplEvent * pEvent_p)
     tEplKernel      ret = kEplSuccessful;
     tEplMsgType     msgType;
     UINT            asndServiceId;
-    tEplFrameInfo   frameInfo;
+    tFrameInfo      frameInfo;
 
     if (pEvent_p->m_EventType == kEplEventTypeAsndRx)
     {
-        frameInfo.m_pFrame = (tEplFrame*) pEvent_p->m_pArg;
-        frameInfo.m_uiFrameSize = pEvent_p->m_uiSize;
+        frameInfo.pFrame = (tEplFrame*) pEvent_p->m_pArg;
+        frameInfo.frameSize = pEvent_p->m_uiSize;
 
-        msgType = (tEplMsgType)AmiGetByteFromLe(&frameInfo.m_pFrame->m_le_bMessageType);
+        msgType = (tEplMsgType)AmiGetByteFromLe(&frameInfo.pFrame->m_le_bMessageType);
         if (msgType != kEplMsgTypeAsnd)
         {
             ret = kEplInvalidOperation;
             goto Exit;
         }
 
-        asndServiceId = (UINT) AmiGetByteFromLe(&frameInfo.m_pFrame->m_Data.m_Asnd.m_le_bServiceId);
-        if (asndServiceId < EPL_DLL_MAX_ASND_SERVICE_ID)
+        asndServiceId = (UINT) AmiGetByteFromLe(&frameInfo.pFrame->m_Data.m_Asnd.m_le_bServiceId);
+        if (asndServiceId < DLL_MAX_ASND_SERVICE_ID)
         {   // ASnd service ID is valid
             if (instance_l.apfnDlluCbAsnd[asndServiceId] != NULL)
             {   // handler was registered
@@ -236,7 +236,7 @@ This function posts a DLL configuration event to the kernel DLL CAL module
 \return Returns an error code
 */
 //------------------------------------------------------------------------------
-tEplKernel dllucal_config(tEplDllConfigParam * pDllConfigParam_p)
+tEplKernel dllucal_config(tDllConfigParam * pDllConfigParam_p)
 {
     tEplKernel  ret = kEplSuccessful;
     tEplEvent   event;
@@ -262,7 +262,7 @@ configure the identity of a local node for IdentResponse.
 \return Returns an error code
 */
 //------------------------------------------------------------------------------
-tEplKernel dllucal_setIdentity(tEplDllIdentParam * pDllIdentParam_p)
+tEplKernel dllucal_setIdentity(tDllIdentParam * pDllIdentParam_p)
 {
     tEplKernel  ret = kEplSuccessful;
     tEplEvent   event;
@@ -289,9 +289,9 @@ ID with the specified node ID filter.
 \return Returns an error code
 */
 //------------------------------------------------------------------------------
-tEplKernel dllucal_regAsndService(tEplDllAsndServiceId serviceId_p,
+tEplKernel dllucal_regAsndService(tDllAsndServiceId serviceId_p,
                                     tEplDlluCbAsnd pfnDlluCbAsnd_p,
-                                    tEplDllAsndFilter filter_p)
+                                    tDllAsndFilter filter_p)
 {
     tEplKernel  ret = kEplSuccessful;
 
@@ -302,7 +302,7 @@ tEplKernel dllucal_regAsndService(tEplDllAsndServiceId serviceId_p,
 
         if (pfnDlluCbAsnd_p == NULL)
         {   // close filter
-            filter_p = kEplDllAsndFilterNone;
+            filter_p = kDllAsndFilterNone;
         }
 
         // set filter in DLL module in kernel part
@@ -328,26 +328,26 @@ This function sends an asynchronous fram with the specified priority.
 \return Returns an error code
 */
 //------------------------------------------------------------------------------
-tEplKernel dllucal_sendAsyncFrame(tEplFrameInfo * pFrameInfo_p,
-                                  tEplDllAsyncReqPriority priority_p)
+tEplKernel dllucal_sendAsyncFrame(tFrameInfo * pFrameInfo_p,
+                                  tDllAsyncReqPriority priority_p)
 {
     tEplKernel  ret = kEplSuccessful;
     tEplEvent   event;
 
     switch (priority_p)
     {
-        case kEplDllAsyncReqPrioNmt:
+        case kDllAsyncReqPrioNmt:
             ret = instance_l.pTxNmtFuncs->pfnInsertDataBlock(
                                         instance_l.dllCalQueueTxNmt,
-                                        (BYTE*)pFrameInfo_p->m_pFrame,
-                                        &(pFrameInfo_p->m_uiFrameSize));
+                                        (BYTE*)pFrameInfo_p->pFrame,
+                                        &(pFrameInfo_p->frameSize));
             break;
 
         default:
             ret = instance_l.pTxGenFuncs->pfnInsertDataBlock(
                                         instance_l.dllCalQueueTxGen,
-                                        (BYTE*)pFrameInfo_p->m_pFrame,
-                                        &(pFrameInfo_p->m_uiFrameSize));
+                                        (BYTE*)pFrameInfo_p->pFrame,
+                                        &(pFrameInfo_p->frameSize));
             break;
     }
 
@@ -382,7 +382,7 @@ This function issues a StatusRequest or an IdentRequest to the specified node.
 \return Returns an error code.
 */
 //------------------------------------------------------------------------------
-tEplKernel dllucal_issueRequest(tEplDllReqServiceId service_p, UINT nodeId_p,
+tEplKernel dllucal_issueRequest(tDllReqServiceId service_p, UINT nodeId_p,
                                 BYTE soaFlag1_p)
 {
     tEplKernel          ret = kEplSuccessful;
@@ -392,8 +392,8 @@ tEplKernel dllucal_issueRequest(tEplDllReqServiceId service_p, UINT nodeId_p,
     // add node to appropriate request queue
     switch (service_p)
     {
-        case kEplDllReqServiceIdent:
-        case kEplDllReqServiceStatus:
+        case kDllReqServiceIdent:
+        case kDllReqServiceStatus:
             event.m_EventSink = kEplEventSinkDllkCal;
             event.m_EventType = kEplEventTypeDllkIssueReq;
             issueReq.service = service_p;
@@ -426,7 +426,7 @@ This function issues a SyncRequest or an IdentRequest to the specified node.
 */
 //------------------------------------------------------------------------------
 #if EPL_DLL_PRES_CHAINING_MN != FALSE
-tEplKernel dllucal_issueSyncRequest(tEplDllSyncRequest* pSyncRequest_p, UINT size_p)
+tEplKernel dllucal_issueSyncRequest(tDllSyncRequest* pSyncRequest_p, UINT size_p)
 {
     tEplKernel  ret = kEplSuccessful;
 
@@ -451,7 +451,7 @@ kEplEventTypeDllkConfigNode event to the kernel DLL CAL module.
 \return Returns an error code
 */
 //------------------------------------------------------------------------------
-tEplKernel dllucal_configNode(tEplDllNodeInfo* pNodeInfo_p)
+tEplKernel dllucal_configNode(tDllNodeInfo* pNodeInfo_p)
 {
     tEplKernel  ret = kEplSuccessful;
     tEplEvent   event;
@@ -479,7 +479,7 @@ kEplEventTypeDllkAddNode event to the kernel DLL CAL module.
 \return Returns an error code
 */
 //------------------------------------------------------------------------------
-tEplKernel dllucal_addNode(tEplDllNodeOpParam* pNodeOpParam_p)
+tEplKernel dllucal_addNode(tDllNodeOpParam* pNodeOpParam_p)
 {
     tEplKernel  ret = kEplSuccessful;
     tEplEvent   event;
@@ -507,7 +507,7 @@ a kEplEventTypeDllkDelNode event to the kernel DLL CAL module.
 
 */
 //------------------------------------------------------------------------------
-tEplKernel dllucal_deleteNode(tEplDllNodeOpParam* pNodeOpParam_p)
+tEplKernel dllucal_deleteNode(tDllNodeOpParam* pNodeOpParam_p)
 {
     tEplKernel  ret = kEplSuccessful;
     tEplEvent   event;
@@ -540,8 +540,8 @@ The function forwards a filter event to the kernel DLL CAL module.
 \return Returns an error code
 */
 //------------------------------------------------------------------------------
-static tEplKernel SetAsndServiceIdFilter(tEplDllAsndServiceId serviceId_p,
-                                         tEplDllAsndFilter filter_p)
+static tEplKernel SetAsndServiceIdFilter(tDllAsndServiceId serviceId_p,
+                                         tDllAsndFilter filter_p)
 {
     tEplKernel                  ret = kEplSuccessful;
     tEplEvent                   event;

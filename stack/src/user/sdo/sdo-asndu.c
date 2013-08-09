@@ -112,7 +112,7 @@ static tEplSdoAsndInstance  SdoAsndInstance_g;
 // local function prototypes
 //---------------------------------------------------------------------------
 
-tEplKernel PUBLIC EplSdoAsnduCb(tEplFrameInfo * pFrameInfo_p);
+tEplKernel PUBLIC EplSdoAsnduCb(tFrameInfo * pFrameInfo_p);
 
 /***************************************************************************/
 /*                                                                         */
@@ -202,9 +202,9 @@ tEplKernel  Ret;
     }
 
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLU)) != 0)
-    Ret = dllucal_regAsndService(kEplDllAsndSdo,
+    Ret = dllucal_regAsndService(kDllAsndSdo,
                                    EplSdoAsnduCb,
-                                   kEplDllAsndFilterLocal);
+                                   kDllAsndFilterLocal);
 #endif
 
     return Ret;
@@ -236,9 +236,9 @@ tEplKernel  Ret;
 
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLU)) != 0)
     // deregister callback function from DLL
-    Ret = dllucal_regAsndService(kEplDllAsndSdo,
+    Ret = dllucal_regAsndService(kDllAsndSdo,
                                    NULL,
-                                   kEplDllAsndFilterNone);
+                                   kDllAsndFilterNone);
 #endif
 
 return Ret;
@@ -345,7 +345,7 @@ tEplKernel PUBLIC EplSdoAsnduSendData(tEplSdoConHdl       SdoConHandle_p,
 {
 tEplKernel      Ret;
 unsigned int    uiArray;
-tEplFrameInfo   FrameInfo;
+tFrameInfo      FrameInfo;
 
     Ret = kEplSuccessful;
 
@@ -371,10 +371,10 @@ tEplFrameInfo   FrameInfo;
     dwDataSize_p += (DWORD) ((BYTE*) &pSrcData_p->m_Data.m_Asnd.m_Payload.m_SdoSequenceFrame - (BYTE*) pSrcData_p);
 
     // send function of DLL
-    FrameInfo.m_uiFrameSize = dwDataSize_p;
-    FrameInfo.m_pFrame = pSrcData_p;
+    FrameInfo.frameSize = dwDataSize_p;
+    FrameInfo.pFrame = pSrcData_p;
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLU)) != 0)
-    Ret = dllucal_sendAsyncFrame(&FrameInfo,kEplDllAsyncReqPrioGeneric);
+    Ret = dllucal_sendAsyncFrame(&FrameInfo,kDllAsyncReqPrioGeneric);
     if (Ret == kEplDllAsyncTxBufferFull)
     {   // ignore TxBufferFull errors
         Ret = kEplSuccessful;
@@ -448,7 +448,7 @@ Exit:
 // State:
 //
 //---------------------------------------------------------------------------
-tEplKernel PUBLIC EplSdoAsnduCb(tEplFrameInfo * pFrameInfo_p)
+tEplKernel PUBLIC EplSdoAsnduCb(tFrameInfo * pFrameInfo_p)
 {
 tEplKernel      Ret = kEplSuccessful;
 unsigned int    uiCount;
@@ -458,7 +458,7 @@ unsigned int    uiFreeEntry = 0xFFFF;
 tEplSdoConHdl   SdoConHdl;
 tEplFrame*      pFrame;
 
-    pFrame = pFrameInfo_p->m_pFrame;
+    pFrame = pFrameInfo_p->pFrame;
 
     uiNodeId = AmiGetByteFromLe(&pFrame->m_le_bSrcNodeId);
 
@@ -498,7 +498,7 @@ tEplFrame*      pFrame;
     {   // entry found or created
         SdoConHdl = (uiCount | EPL_SDO_ASND_HANDLE );
 
-        SdoAsndInstance_g.m_fpSdoAsySeqCb(SdoConHdl, &pFrame->m_Data.m_Asnd.m_Payload.m_SdoSequenceFrame, (pFrameInfo_p->m_uiFrameSize - 18));
+        SdoAsndInstance_g.m_fpSdoAsySeqCb(SdoConHdl, &pFrame->m_Data.m_Asnd.m_Payload.m_SdoSequenceFrame, (pFrameInfo_p->frameSize - 18));
     }
 
 Exit:

@@ -78,15 +78,15 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static tEplKernel processReceivedPreq(tEplFrameInfo* pFrameInfo_p, tNmtState nmtState_p,
+static tEplKernel processReceivedPreq(tFrameInfo* pFrameInfo_p, tNmtState nmtState_p,
                                       tEdrvReleaseRxBuffer* pReleaseRxBuffer_p);
-static tEplKernel processReceivedPres(tEplFrameInfo* pFrameInfo_p, tNmtState nmtState_p,
+static tEplKernel processReceivedPres(tFrameInfo* pFrameInfo_p, tNmtState nmtState_p,
                                       tNmtEvent* pNmtEvent_p, tEdrvReleaseRxBuffer* pReleaseRxBuffer_p);
 static tEplKernel processReceivedSoc(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtState_p);
 static tEplKernel processReceivedSoa(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtState_p);
-static tEplKernel processReceivedAsnd(tEplFrameInfo* pFrameInfo_p, tEdrvRxBuffer* pRxBuffer_p,
+static tEplKernel processReceivedAsnd(tFrameInfo* pFrameInfo_p, tEdrvRxBuffer* pRxBuffer_p,
                                       tNmtState nmtState_p);
-static tEplKernel forwardRpdo(tEplFrameInfo * pFrameInfo_p);
+static tEplKernel forwardRpdo(tFrameInfo * pFrameInfo_p);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -120,7 +120,7 @@ tEdrvReleaseRxBuffer dllk_processFrameReceived(tEdrvRxBuffer * pRxBuffer_p)
     tNmtEvent               nmtEvent        = kNmtEventNoEvent;
     tEplEvent               event;
     tEplFrame*              pFrame;
-    tEplFrameInfo           frameInfo;
+    tFrameInfo              frameInfo;
     tEplMsgType             msgType;
     TGT_DLLK_DECLARE_FLAGS
 
@@ -181,8 +181,8 @@ tEdrvReleaseRxBuffer dllk_processFrameReceived(tEdrvRxBuffer * pRxBuffer_p)
     }
 #endif
 
-    frameInfo.m_pFrame = pFrame;
-    frameInfo.m_uiFrameSize = pRxBuffer_p->m_uiRxMsgLen;
+    frameInfo.pFrame = pFrame;
+    frameInfo.frameSize = pRxBuffer_p->m_uiRxMsgLen;
 
     if (AmiGetWordFromBe(&pFrame->m_be_wEtherType) != EPL_C_DLL_ETHERTYPE_EPL)
     {   // non-EPL frame
@@ -198,7 +198,7 @@ tEdrvReleaseRxBuffer dllk_processFrameReceived(tEdrvRxBuffer * pRxBuffer_p)
     switch (msgType)
     {
         case kEplMsgTypePreq:
-            if (AmiGetByteFromLe(&pFrame->m_le_bDstNodeId) != dllkInstance_g.dllConfigParam.m_uiNodeId)
+            if (AmiGetByteFromLe(&pFrame->m_le_bDstNodeId) != dllkInstance_g.dllConfigParam.nodeId)
             {   // this PReq is not intended for us
                 goto Exit;
             }
@@ -289,7 +289,7 @@ void dllk_processTransmittedNmtReq(tEdrvTxBuffer * pTxBuffer_p)
 {
     tEplKernel              ret = kEplSuccessful;
     tEplEvent               event;
-    tEplDllAsyncReqPriority priority;
+    tDllAsyncReqPriority    priority;
     tNmtState               nmtState;
     UINT                    handle = DLLK_TXFRAME_NMTREQ;
     UINT32                  arg;
@@ -314,7 +314,7 @@ void dllk_processTransmittedNmtReq(tEdrvTxBuffer * pTxBuffer_p)
         // the NMT state change.
         pTxFrame = (tEplFrame *) pTxBuffer_p->m_pbBuffer;
         if ((AmiGetByteFromLe(&pTxFrame->m_le_bMessageType) == (UINT8) kEplMsgTypeAsnd) &&
-            (AmiGetByteFromLe(&pTxFrame->m_Data.m_Asnd.m_le_bServiceId) == (UINT8) kEplDllAsndNmtCommand))
+            (AmiGetByteFromLe(&pTxFrame->m_Data.m_Asnd.m_le_bServiceId) == (UINT8) kDllAsndNmtCommand))
         {   // post event directly to NmtMnu module
             event.m_EventSink = kEplEventSinkNmtMnu;
             event.m_EventType = kEplEventTypeNmtMnuNmtCmdSent;
@@ -333,7 +333,7 @@ void dllk_processTransmittedNmtReq(tEdrvTxBuffer * pTxBuffer_p)
     pTxBuffer_p->m_uiTxMsgLen = DLLK_BUFLEN_EMPTY;
 
     // post event to DLL
-    priority = kEplDllAsyncReqPrioNmt;
+    priority = kDllAsyncReqPrioNmt;
     event.m_EventSink = kEplEventSinkDllk;
     event.m_EventType = kEplEventTypeDllkFillTx;
     EPL_MEMSET(&event.m_NetTime, 0x00, sizeof(event.m_NetTime));
@@ -371,7 +371,7 @@ void dllk_processTransmittedNonEpl(tEdrvTxBuffer * pTxBuffer_p)
 {
     tEplKernel              ret = kEplSuccessful;
     tEplEvent               event;
-    tEplDllAsyncReqPriority priority;
+    tDllAsyncReqPriority    priority;
     tNmtState               nmtState;
     UINT                    handle = DLLK_TXFRAME_NONEPL;
     UINT32                  arg;
@@ -389,7 +389,7 @@ void dllk_processTransmittedNonEpl(tEdrvTxBuffer * pTxBuffer_p)
     pTxBuffer_p->m_uiTxMsgLen = DLLK_BUFLEN_EMPTY;
 
     // post event to DLL
-    priority = kEplDllAsyncReqPrioGeneric;
+    priority = kDllAsyncReqPrioGeneric;
     event.m_EventSink = kEplEventSinkDllk;
     event.m_EventType = kEplEventTypeDllkFillTx;
     EPL_MEMSET(&event.m_NetTime, 0x00, sizeof(event.m_NetTime));
@@ -489,11 +489,11 @@ void dllk_processTransmittedSoa(tEdrvTxBuffer * pTxBuffer_p)
     // check if we are invited
     // old handling only in PreOp1
     if ((dllkInstance_g.dllState == kDllMsNonCyclic) &&
-        (dllkInstance_g.aLastTargetNodeId[dllkInstance_g.curLastSoaReq] == dllkInstance_g.dllConfigParam.m_uiNodeId))
+        (dllkInstance_g.aLastTargetNodeId[dllkInstance_g.curLastSoaReq] == dllkInstance_g.dllConfigParam.nodeId))
     {
         switch (dllkInstance_g.aLastReqServiceId[dllkInstance_g.curLastSoaReq])
         {
-            case kEplDllReqServiceStatus:
+            case kDllReqServiceStatus:
                 if (dllkInstance_g.pTxBuffer[DLLK_TXFRAME_STATUSRES + dllkInstance_g.curTxBufferOffsetStatusRes].m_pbBuffer != NULL)
                 {   // StatusRes does exist
                     // send StatusRes
@@ -504,7 +504,7 @@ void dllk_processTransmittedSoa(tEdrvTxBuffer * pTxBuffer_p)
                 }
                 break;
 
-            case kEplDllReqServiceIdent:
+            case kDllReqServiceIdent:
                 if (dllkInstance_g.pTxBuffer[DLLK_TXFRAME_IDENTRES + dllkInstance_g.curTxBufferOffsetIdentRes].m_pbBuffer != NULL)
                 {   // IdentRes does exist
                     // send IdentRes
@@ -515,7 +515,7 @@ void dllk_processTransmittedSoa(tEdrvTxBuffer * pTxBuffer_p)
                 }
                 break;
 
-            case kEplDllReqServiceNmtRequest:
+            case kDllReqServiceNmtRequest:
                 if (dllkInstance_g.pTxBuffer[DLLK_TXFRAME_NMTREQ + dllkInstance_g.curTxBufferOffsetNmtReq].m_pbBuffer != NULL)
                 {   // NmtRequest does exist
                     // check if frame is not empty and not being filled
@@ -530,7 +530,7 @@ void dllk_processTransmittedSoa(tEdrvTxBuffer * pTxBuffer_p)
                 }
                 break;
 
-            case kEplDllReqServiceUnspecified:
+            case kDllReqServiceUnspecified:
                 if (dllkInstance_g.pTxBuffer[DLLK_TXFRAME_NONEPL + dllkInstance_g.curTxBufferOffsetNonEpl].m_pbBuffer != NULL)
                 {   // non-EPL frame does exist
                     // check if frame is not empty and not being filled
@@ -551,16 +551,16 @@ void dllk_processTransmittedSoa(tEdrvTxBuffer * pTxBuffer_p)
         }
 
         // ASnd frame was sent, remove the request
-        dllkInstance_g.aLastReqServiceId[dllkInstance_g.curLastSoaReq] = kEplDllReqServiceNo;
+        dllkInstance_g.aLastReqServiceId[dllkInstance_g.curLastSoaReq] = kDllReqServiceNo;
     }
 
     // reprogram timer in PREOP1
 #if EPL_TIMER_USE_HIGHRES != FALSE
     if ((dllkInstance_g.dllState == kDllMsNonCyclic) &&
-        (dllkInstance_g.dllConfigParam.m_dwAsyncSlotTimeout != 0))
+        (dllkInstance_g.dllConfigParam.asyncSlotTimeout != 0))
     {
         ret = EplTimerHighReskModifyTimerNs(&dllkInstance_g.timerHdlCycle,
-                                            dllkInstance_g.dllConfigParam.m_dwAsyncSlotTimeout,
+                                            dllkInstance_g.dllConfigParam.asyncSlotTimeout,
                                             dllk_cbMnTimerCycle, 0L, FALSE);
         if (ret != kEplSuccessful)
             goto Exit;
@@ -573,7 +573,7 @@ void dllk_processTransmittedSoa(tEdrvTxBuffer * pTxBuffer_p)
 #endif
 
     if ((dllkInstance_g.dllState > kDllMsNonCyclic) &&
-        (dllkInstance_g.dllConfigParam.m_uiSyncNodeId > EPL_C_ADR_SYNC_ON_SOC) &&
+        (dllkInstance_g.dllConfigParam.syncNodeId > EPL_C_ADR_SYNC_ON_SOC) &&
         (dllkInstance_g.fSyncProcessed == FALSE))
     {   // cyclic state is active, so preprocessing is necessary
         dllkInstance_g.fSyncProcessed = TRUE;
@@ -688,7 +688,7 @@ tEplKernel dllk_updateFramePres(tEdrvTxBuffer* pTxBuffer_p, tNmtState nmtState_p
     // get RD flag
     flag1 = AmiGetByteFromLe(&pTxFrame->m_Data.m_Pres.m_le_bFlag1) & EPL_FRAME_FLAG1_RD;
 
-    if ( (dllkInstance_g.dllConfigParam.m_uiMultiplCycleCnt > 0) &&
+    if ( (dllkInstance_g.dllConfigParam.multipleCycleCnt > 0) &&
          (dllkInstance_g.mnFlag1 & EPL_FRAME_FLAG1_MS) ) // MS flag set in PReq
     {   // set MS flag, because PRes will be sent multiplexed with other CNs
         flag1 |= EPL_FRAME_FLAG1_MS;
@@ -753,7 +753,7 @@ tEplKernel dllk_checkFrame(tEplFrame * pFrame_p, UINT frameSize_p)
         if (etherType == EPL_C_DLL_ETHERTYPE_EPL)
         {
             // source node ID
-            AmiSetByteToLe(&pFrame_p->m_le_bSrcNodeId, (BYTE) dllkInstance_g.dllConfigParam.m_uiNodeId);
+            AmiSetByteToLe(&pFrame_p->m_le_bSrcNodeId, (BYTE) dllkInstance_g.dllConfigParam.nodeId);
 
             // check message type
             MsgType = AmiGetByteFromLe(&pFrame_p->m_le_bMessageType);
@@ -804,10 +804,10 @@ tEplKernel dllk_mnSendSoa(tNmtState nmtState_p, tDllState* pDllStateProposed_p, 
         if (ret != kEplSuccessful)
             return ret;
 
-        if (dllkInstance_g.aLastReqServiceId[dllkInstance_g.curLastSoaReq] != kEplDllReqServiceNo)
+        if (dllkInstance_g.aLastReqServiceId[dllkInstance_g.curLastSoaReq] != kDllReqServiceNo)
         {   // asynchronous phase will be assigned to one node
             if (dllkInstance_g.aLastTargetNodeId[dllkInstance_g.curLastSoaReq] ==
-                                  dllkInstance_g.dllConfigParam.m_uiNodeId)
+                                  dllkInstance_g.dllConfigParam.nodeId)
             {   // d.k. DLL state WaitAsndTrig is not helpful;
                 //      so just step over to WaitSocTrig,
                 //      because own ASnd is sent automatically in CbFrameTransmitted() after SoA.
@@ -859,15 +859,15 @@ tEplKernel dllk_updateFrameSoa(tEdrvTxBuffer* pTxBuffer_p, tNmtState nmtState_p,
     {   // fetch target of asynchronous phase
         if (dllkInstance_g.flag2 == 0)
         {   // own queues are empty
-            dllkInstance_g.aLastReqServiceId[curReq_p] = kEplDllReqServiceNo;
+            dllkInstance_g.aLastReqServiceId[curReq_p] = kDllReqServiceNo;
         }
-        else if (((tEplDllAsyncReqPriority) (dllkInstance_g.flag2 >> EPL_FRAME_FLAG2_PR_SHIFT)) == kEplDllAsyncReqPrioNmt)
+        else if (((tDllAsyncReqPriority) (dllkInstance_g.flag2 >> EPL_FRAME_FLAG2_PR_SHIFT)) == kDllAsyncReqPrioNmt)
         {   // frames in own NMT request queue available
-            dllkInstance_g.aLastReqServiceId[curReq_p] = kEplDllReqServiceNmtRequest;
+            dllkInstance_g.aLastReqServiceId[curReq_p] = kDllReqServiceNmtRequest;
         }
         else
         {
-            dllkInstance_g.aLastReqServiceId[curReq_p] = kEplDllReqServiceUnspecified;
+            dllkInstance_g.aLastReqServiceId[curReq_p] = kDllReqServiceUnspecified;
         }
         ret = dllkcal_getSoaRequest(&dllkInstance_g.aLastReqServiceId[curReq_p],
                                            &dllkInstance_g.aLastTargetNodeId[curReq_p],
@@ -875,11 +875,11 @@ tEplKernel dllk_updateFrameSoa(tEdrvTxBuffer* pTxBuffer_p, tNmtState nmtState_p,
         if (ret != kEplSuccessful)
             return ret;
 
-        if (dllkInstance_g.aLastReqServiceId[curReq_p] != kEplDllReqServiceNo)
+        if (dllkInstance_g.aLastReqServiceId[curReq_p] != kDllReqServiceNo)
         {   // asynchronous phase will be assigned to one node
             if (dllkInstance_g.aLastTargetNodeId[curReq_p] == EPL_C_ADR_INVALID)
             {   // exchange invalid node ID with local node ID
-                dllkInstance_g.aLastTargetNodeId[curReq_p] = dllkInstance_g.dllConfigParam.m_uiNodeId;
+                dllkInstance_g.aLastTargetNodeId[curReq_p] = dllkInstance_g.dllConfigParam.nodeId;
             }
 
             pNodeInfo = dllk_getNodeInfo(dllkInstance_g.aLastTargetNodeId[curReq_p]);
@@ -900,7 +900,7 @@ tEplKernel dllk_updateFrameSoa(tEdrvTxBuffer* pTxBuffer_p, tNmtState nmtState_p,
     }
     else
     {   // invite nobody
-        dllkInstance_g.aLastReqServiceId[curReq_p] = kEplDllReqServiceNo;
+        dllkInstance_g.aLastReqServiceId[curReq_p] = kDllReqServiceNo;
         dllkInstance_g.aLastTargetNodeId[curReq_p] = EPL_C_ADR_INVALID;
     }
 
@@ -920,7 +920,7 @@ tEplKernel dllk_updateFrameSoa(tEdrvTxBuffer* pTxBuffer_p, tNmtState nmtState_p,
 \brief  Pass empty ASnd frame to receive FIFO.
 
 The function passes an empty ASnd frame to the receive FIFO. It will be called
-only for frames with registered AsndServiceIds (only kEplDllAsndFilterAny).
+only for frames with registered AsndServiceIds (only kDllAsndFilterAny).
 
 \param  reqServiceId_p  Requested service ID.
 \param  nodeId_p        Node ID.
@@ -929,30 +929,30 @@ only for frames with registered AsndServiceIds (only kEplDllAsndFilterAny).
 \return The function returns a tEplKernel error code.
 */
 //------------------------------------------------------------------------------
-tEplKernel dllk_asyncFrameNotReceived(tEplDllReqServiceId reqServiceId_p, UINT nodeId_p)
+tEplKernel dllk_asyncFrameNotReceived(tDllReqServiceId reqServiceId_p, UINT nodeId_p)
 {
     tEplKernel      Ret = kEplSuccessful;
     BYTE            abBuffer[18];
     tEplFrame*      pFrame = (tEplFrame*) abBuffer;
-    tEplFrameInfo   FrameInfo;
+    tFrameInfo      FrameInfo;
 
     // check if previous SoA invitation was not answered
     switch (reqServiceId_p)
     {
-        case kEplDllReqServiceIdent:
-        case kEplDllReqServiceStatus:
+        case kDllReqServiceIdent:
+        case kDllReqServiceStatus:
 #if (EPL_DLL_PRES_CHAINING_MN != FALSE)
-        case kEplDllReqServiceSync:
+        case kDllReqServiceSync:
 #endif
             // ASnd service registered?
-            if (dllkInstance_g.aAsndFilter[reqServiceId_p] == kEplDllAsndFilterAny)
+            if (dllkInstance_g.aAsndFilter[reqServiceId_p] == kDllAsndFilterAny)
             {   // ASnd service ID is registered
                 AmiSetByteToLe(&pFrame->m_le_bSrcNodeId, (BYTE) nodeId_p);
                 AmiSetByteToLe(&pFrame->m_le_bMessageType, (BYTE) kEplMsgTypeAsnd);
                 AmiSetByteToLe(&pFrame->m_Data.m_Asnd.m_le_bServiceId, (BYTE) reqServiceId_p);
 
-                FrameInfo.m_pFrame = pFrame;
-                FrameInfo.m_uiFrameSize = 18;   // empty non existing ASnd frame
+                FrameInfo.pFrame = pFrame;
+                FrameInfo.frameSize = 18;   // empty non existing ASnd frame
                 // forward frame via async receive FIFO to userspace
                 Ret = dllkcal_asyncFrameReceived(&FrameInfo);
             }
@@ -982,13 +982,13 @@ driver.
                             that is not possible an error will be generated.
 \param  msgType_p           The message type of the frame.
 \param  serviceId_p         The service ID in case of an ASnd frame. Otherwise
-                            kEplDllAsndNotDefined.
+                            kDllAsndNotDefined.
 
 \return The function returns a tEplKernel error code.
 */
 //------------------------------------------------------------------------------
 tEplKernel dllk_createTxFrame (UINT* pHandle_p, UINT* pFrameSize_p,
-                               tEplMsgType msgType_p, tEplDllAsndServiceId serviceId_p)
+                               tEplMsgType msgType_p, tDllAsndServiceId serviceId_p)
 {
     tEplKernel      ret = kEplSuccessful;
     tEplFrame*      pTxFrame;
@@ -1002,33 +1002,33 @@ tEplKernel dllk_createTxFrame (UINT* pHandle_p, UINT* pFrameSize_p,
             // search for fixed Tx buffers
             switch (serviceId_p)
             {
-                case kEplDllAsndIdentResponse:
+                case kDllAsndIdentResponse:
                     handle = DLLK_TXFRAME_IDENTRES;
                     break;
 
-                case kEplDllAsndStatusResponse:
+                case kDllAsndStatusResponse:
                     handle = DLLK_TXFRAME_STATUSRES;
                     break;
 
-                case kEplDllAsndNmtRequest:
-                case kEplDllAsndNmtCommand:
+                case kDllAsndNmtRequest:
+                case kDllAsndNmtCommand:
                     handle = DLLK_TXFRAME_NMTREQ;
                     break;
 
 #if EPL_DLL_PRES_CHAINING_CN != FALSE
-                case kEplDllAsndSyncResponse:
+                case kDllAsndSyncResponse:
                     handle = DLLK_TXFRAME_SYNCRES;
                     break;
 #endif
 
-                case kEplDllAsndNotDefined:
+                case kDllAsndNotDefined:
                     ret = kEplDllInvalidParam;
                     goto Exit;
                     break;
 
-                case kEplDllAsndSdo:
+                case kDllAsndSdo:
 #if (EPL_DLL_PRES_CHAINING_CN == FALSE) && (EPL_DLL_PRES_CHAINING_MN != FALSE)
-                case kEplDllAsndSyncResponse:
+                case kDllAsndSyncResponse:
 #endif
                     ret = kEplEdrvBufNotExisting;
                     goto Exit;
@@ -1117,7 +1117,7 @@ tEplKernel dllk_createTxFrame (UINT* pHandle_p, UINT* pFrameSize_p,
         if (msgType_p != kEplMsgTypeNonEpl)
         {   // fill out Frame only if it is an EPL frame
             AmiSetWordToBe(&pTxFrame->m_be_wEtherType, EPL_C_DLL_ETHERTYPE_EPL);
-            AmiSetByteToLe(&pTxFrame->m_le_bSrcNodeId, (BYTE) dllkInstance_g.dllConfigParam.m_uiNodeId);
+            AmiSetByteToLe(&pTxFrame->m_le_bSrcNodeId, (BYTE) dllkInstance_g.dllConfigParam.nodeId);
             EPL_MEMCPY(&pTxFrame->m_be_abSrcMac[0], &dllkInstance_g.aLocalMac[0], 6);
             switch (msgType_p)
             {
@@ -1127,64 +1127,64 @@ tEplKernel dllk_createTxFrame (UINT* pHandle_p, UINT* pFrameSize_p,
                     // destination node ID
                     switch (serviceId_p)
                     {
-                        case kEplDllAsndIdentResponse:
+                        case kDllAsndIdentResponse:
                             AmiSetByteToLe(&pTxFrame->m_Data.m_Asnd.m_Payload.m_IdentResponse.m_le_bEplProfileVersion,
                                            (UINT8) EPL_SPEC_VERSION);
                             AmiSetDwordToLe(&pTxFrame->m_Data.m_Asnd.m_Payload.m_IdentResponse.m_le_dwFeatureFlags,
-                                            dllkInstance_g.dllConfigParam.m_dwFeatureFlags);
+                                            dllkInstance_g.dllConfigParam.featureFlags);
                             AmiSetWordToLe(&pTxFrame->m_Data.m_Asnd.m_Payload.m_IdentResponse.m_le_wMtu,
-                                           (UINT16) dllkInstance_g.dllConfigParam.m_uiAsyncMtu);
+                                           (UINT16) dllkInstance_g.dllConfigParam.asyncMtu);
                             AmiSetWordToLe(&pTxFrame->m_Data.m_Asnd.m_Payload.m_IdentResponse.m_le_wPollInSize,
-                                           (UINT16)dllkInstance_g.dllConfigParam.m_uiPreqActPayloadLimit);
+                                           (UINT16)dllkInstance_g.dllConfigParam.preqActPayloadLimit);
                             AmiSetWordToLe(&pTxFrame->m_Data.m_Asnd.m_Payload.m_IdentResponse.m_le_wPollOutSize,
-                                           (UINT16)dllkInstance_g.dllConfigParam.m_uiPresActPayloadLimit);
+                                           (UINT16)dllkInstance_g.dllConfigParam.presActPayloadLimit);
                             AmiSetDwordToLe(&pTxFrame->m_Data.m_Asnd.m_Payload.m_IdentResponse.m_le_dwResponseTime,
-                                            dllkInstance_g.dllConfigParam.m_dwPresMaxLatency);
+                                            dllkInstance_g.dllConfigParam.presMaxLatency);
                             AmiSetDwordToLe(&pTxFrame->m_Data.m_Asnd.m_Payload.m_IdentResponse.m_le_dwDeviceType,
-                                            dllkInstance_g.dllIdentParam.m_dwDeviceType);
+                                            dllkInstance_g.dllIdentParam.deviceType);
                             AmiSetDwordToLe(&pTxFrame->m_Data.m_Asnd.m_Payload.m_IdentResponse.m_le_dwVendorId,
-                                            dllkInstance_g.dllIdentParam.m_dwVendorId);
+                                            dllkInstance_g.dllIdentParam.vendorId);
                             AmiSetDwordToLe(&pTxFrame->m_Data.m_Asnd.m_Payload.m_IdentResponse.m_le_dwProductCode,
-                                            dllkInstance_g.dllIdentParam.m_dwProductCode);
+                                            dllkInstance_g.dllIdentParam.productCode);
                             AmiSetDwordToLe(&pTxFrame->m_Data.m_Asnd.m_Payload.m_IdentResponse.m_le_dwRevisionNumber,
-                                            dllkInstance_g.dllIdentParam.m_dwRevisionNumber);
+                                            dllkInstance_g.dllIdentParam.revisionNumber);
                             AmiSetDwordToLe(&pTxFrame->m_Data.m_Asnd.m_Payload.m_IdentResponse.m_le_dwSerialNumber,
-                                            dllkInstance_g.dllIdentParam.m_dwSerialNumber);
+                                            dllkInstance_g.dllIdentParam.serialNumber);
                             AmiSetQword64ToLe(&pTxFrame->m_Data.m_Asnd.m_Payload.m_IdentResponse.m_le_qwVendorSpecificExt1,
-                                              dllkInstance_g.dllIdentParam.m_qwVendorSpecificExt1);
+                                              dllkInstance_g.dllIdentParam.vendorSpecificExt1);
                             AmiSetDwordToLe(&pTxFrame->m_Data.m_Asnd.m_Payload.m_IdentResponse.m_le_dwVerifyConfigurationDate,
-                                            dllkInstance_g.dllIdentParam.m_dwVerifyConfigurationDate);
+                                            dllkInstance_g.dllIdentParam.verifyConfigurationDate);
                             AmiSetDwordToLe(&pTxFrame->m_Data.m_Asnd.m_Payload.m_IdentResponse.m_le_dwVerifyConfigurationTime,
-                                            dllkInstance_g.dllIdentParam.m_dwVerifyConfigurationTime);
+                                            dllkInstance_g.dllIdentParam.verifyConfigurationTime);
                             AmiSetDwordToLe(&pTxFrame->m_Data.m_Asnd.m_Payload.m_IdentResponse.m_le_dwApplicationSwDate,
-                                            dllkInstance_g.dllIdentParam.m_dwApplicationSwDate);
+                                            dllkInstance_g.dllIdentParam.applicationSwDate);
                             AmiSetDwordToLe(&pTxFrame->m_Data.m_Asnd.m_Payload.m_IdentResponse.m_le_dwApplicationSwTime,
-                                            dllkInstance_g.dllIdentParam.m_dwApplicationSwTime);
+                                            dllkInstance_g.dllIdentParam.applicationSwTime);
                             AmiSetDwordToLe(&pTxFrame->m_Data.m_Asnd.m_Payload.m_IdentResponse.m_le_dwIpAddress,
-                                            dllkInstance_g.dllIdentParam.m_dwIpAddress);
+                                            dllkInstance_g.dllIdentParam.ipAddress);
                             AmiSetDwordToLe(&pTxFrame->m_Data.m_Asnd.m_Payload.m_IdentResponse.m_le_dwSubnetMask,
-                                            dllkInstance_g.dllIdentParam.m_dwSubnetMask);
+                                            dllkInstance_g.dllIdentParam.subnetMask);
                             AmiSetDwordToLe(&pTxFrame->m_Data.m_Asnd.m_Payload.m_IdentResponse.m_le_dwDefaultGateway,
-                                            dllkInstance_g.dllIdentParam.m_dwDefaultGateway);
+                                            dllkInstance_g.dllIdentParam.defaultGateway);
                             EPL_MEMCPY(&pTxFrame->m_Data.m_Asnd.m_Payload.m_IdentResponse.m_le_sHostname[0],
-                                       &dllkInstance_g.dllIdentParam.m_sHostname[0],
-                                       sizeof (dllkInstance_g.dllIdentParam.m_sHostname));
+                                       &dllkInstance_g.dllIdentParam.sHostname[0],
+                                       sizeof (dllkInstance_g.dllIdentParam.sHostname));
                             EPL_MEMCPY(&pTxFrame->m_Data.m_Asnd.m_Payload.m_IdentResponse.m_le_abVendorSpecificExt2[0],
-                                       &dllkInstance_g.dllIdentParam.m_abVendorSpecificExt2[0],
-                                       sizeof (dllkInstance_g.dllIdentParam.m_abVendorSpecificExt2));
+                                       &dllkInstance_g.dllIdentParam.aVendorSpecificExt2[0],
+                                       sizeof (dllkInstance_g.dllIdentParam.aVendorSpecificExt2));
                             // fall-through
 
-                        case kEplDllAsndStatusResponse:
+                        case kDllAsndStatusResponse:
                             // IdentResponses and StatusResponses are Broadcast
                             AmiSetByteToLe(&pTxFrame->m_le_bDstNodeId, (BYTE) EPL_C_ADR_BROADCAST);
                             break;
 
 #if EPL_DLL_PRES_CHAINING_CN != FALSE
-                        case kEplDllAsndSyncResponse:
+                        case kDllAsndSyncResponse:
                             // SyncRes destination node ID is MN node ID
                             AmiSetByteToLe(&pTxFrame->m_le_bDstNodeId, (BYTE) EPL_C_ADR_MN_DEF_NODE_ID);
                             AmiSetDwordToLe(&pTxFrame->m_Data.m_Asnd.m_Payload.m_SyncResponse.m_le_dwLatency,
-                                            dllkInstance_g.dllConfigParam.m_dwSyncResLatency);
+                                            dllkInstance_g.dllConfigParam.syncResLatency);
                             // SyncStatus: PResMode disabled / PResTimeFirst and PResTimeSecond invalid
                             // AmiSetDwordToLe(&pTxFrame->m_Data.m_Asnd.m_Payload.m_SyncResponse.m_le_dwSyncStatus, 0);
                             // init SyncNodeNumber
@@ -1294,7 +1294,7 @@ callback function (i.e. to the PDO module).
 \return The function returns a tEplKernel error code.
 */
 //------------------------------------------------------------------------------
-tEplKernel dllk_processTpdo(tEplFrameInfo * pFrameInfo_p, BOOL fReadyFlag_p)
+tEplKernel dllk_processTpdo(tFrameInfo * pFrameInfo_p, BOOL fReadyFlag_p)
 {
     tEplKernel      ret = kEplSuccessful;
 
@@ -1324,14 +1324,14 @@ The function processes a received PReq frame.
 \return The function returns a tEplKernel error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel processReceivedPreq(tEplFrameInfo* pFrameInfo_p, tNmtState nmtState_p,
+static tEplKernel processReceivedPreq(tFrameInfo* pFrameInfo_p, tNmtState nmtState_p,
                                       tEdrvReleaseRxBuffer* pReleaseRxBuffer_p)
 {
     tEplKernel      ret = kEplSuccessful;
     tEplFrame*      pFrame;
     BYTE            bFlag1;
 
-    pFrame = pFrameInfo_p->m_pFrame;
+    pFrame = pFrameInfo_p->pFrame;
 
     if (nmtState_p >= kNmtMsNotActive)
     {   // MN is active -> wrong msg type
@@ -1378,8 +1378,8 @@ static tEplKernel processReceivedPreq(tEplFrameInfo* pFrameInfo_p, tNmtState nmt
             }
 
             // compares real frame size and PDO size
-            if (((UINT) (AmiGetWordFromLe(&pFrame->m_Data.m_Preq.m_le_wSize) + EPL_FRAME_OFFSET_PDO_PAYLOAD) > pFrameInfo_p->m_uiFrameSize) ||
-                         (pFrameInfo_p->m_uiFrameSize > (dllkInstance_g.dllConfigParam.m_uiPreqActPayloadLimit + EPL_FRAME_OFFSET_PDO_PAYLOAD)))
+            if (((UINT) (AmiGetWordFromLe(&pFrame->m_Data.m_Preq.m_le_wSize) + EPL_FRAME_OFFSET_PDO_PAYLOAD) > pFrameInfo_p->frameSize) ||
+                         (pFrameInfo_p->frameSize > (dllkInstance_g.dllConfigParam.preqActPayloadLimit + EPL_FRAME_OFFSET_PDO_PAYLOAD)))
             {   // format error
                 tErrHndkEvent  dllEvent;
 
@@ -1432,7 +1432,7 @@ The function processes a received PRes frame.
 \return The function returns a tEplKernel error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel processReceivedPres(tEplFrameInfo* pFrameInfo_p, tNmtState nmtState_p,
+static tEplKernel processReceivedPres(tFrameInfo* pFrameInfo_p, tNmtState nmtState_p,
                                       tNmtEvent* pNmtEvent_p, tEdrvReleaseRxBuffer* pReleaseRxBuffer_p)
 {
     tEplKernel      ret = kEplSuccessful;
@@ -1443,7 +1443,7 @@ static tEplKernel processReceivedPres(tEplFrameInfo* pFrameInfo_p, tNmtState nmt
     tDllkNodeInfo*  pIntNodeInfo = NULL;
 #endif
 
-    pFrame = pFrameInfo_p->m_pFrame;
+    pFrame = pFrameInfo_p->pFrame;
     nodeId = AmiGetByteFromLe(&pFrame->m_le_bSrcNodeId);
 
 #if EPL_DLL_PRES_CHAINING_CN != FALSE
@@ -1519,9 +1519,9 @@ static tEplKernel processReceivedPres(tEplFrameInfo* pFrameInfo_p, tNmtState nmt
         {
             dllkInstance_g.fPrcSlotFinished = TRUE;
 
-            if ((dllkInstance_g.dllConfigParam.m_uiSyncNodeId > EPL_C_ADR_SYNC_ON_SOC)
+            if ((dllkInstance_g.dllConfigParam.syncNodeId > EPL_C_ADR_SYNC_ON_SOC)
                 && (dllkInstance_g.fSyncProcessed == FALSE)
-                && (dllkInstance_g.dllConfigParam.m_fSyncOnPrcNode != FALSE))
+                && (dllkInstance_g.dllConfigParam.fSyncOnPrcNode != FALSE))
             {
                 dllkInstance_g.fSyncProcessed = TRUE;
                 if ((ret = dllk_postEvent(kEplEventTypeSync)) != kEplSuccessful)
@@ -1531,12 +1531,12 @@ static tEplKernel processReceivedPres(tEplFrameInfo* pFrameInfo_p, tNmtState nmt
         else
 #endif
 
-        if ((dllkInstance_g.dllConfigParam.m_uiSyncNodeId > EPL_C_ADR_SYNC_ON_SOC)
+        if ((dllkInstance_g.dllConfigParam.syncNodeId > EPL_C_ADR_SYNC_ON_SOC)
             && (dllkInstance_g.fSyncProcessed == FALSE)
 #if EPL_DLL_PRES_CHAINING_MN != FALSE
-            && (dllkInstance_g.dllConfigParam.m_fSyncOnPrcNode != dllkInstance_g.fPrcSlotFinished)
+            && (dllkInstance_g.dllConfigParam.fSyncOnPrcNode != dllkInstance_g.fPrcSlotFinished)
 #endif
-            && (nodeId > dllkInstance_g.dllConfigParam.m_uiSyncNodeId))
+            && (nodeId > dllkInstance_g.dllConfigParam.syncNodeId))
         {
             dllkInstance_g.fSyncProcessed = TRUE;
             if ((ret = dllk_postEvent(kEplEventTypeSync)) != kEplSuccessful)
@@ -1546,7 +1546,7 @@ static tEplKernel processReceivedPres(tEplFrameInfo* pFrameInfo_p, tNmtState nmt
         // forward Flag2 to asynchronous scheduler
         flag1 = AmiGetByteFromLe(&pFrame->m_Data.m_Asnd.m_Payload.m_StatusResponse.m_le_bFlag2);
         ret = dllkcal_setAsyncPendingRequests(nodeId,
-            ((tEplDllAsyncReqPriority) ((flag1 & EPL_FRAME_FLAG2_PR) >> EPL_FRAME_FLAG2_PR_SHIFT)),
+            ((tDllAsyncReqPriority) ((flag1 & EPL_FRAME_FLAG2_PR) >> EPL_FRAME_FLAG2_PR_SHIFT)),
             (flag1 & EPL_FRAME_FLAG2_RS));
         if (ret != kEplSuccessful)
             goto Exit;
@@ -1569,10 +1569,10 @@ static tEplKernel processReceivedPres(tEplFrameInfo* pFrameInfo_p, tNmtState nmt
             }
             else
             {   // CN shall be deleted softly, so remove it now, without issuing any error
-                tEplDllNodeOpParam  nodeOpParam;
+                tDllNodeOpParam     nodeOpParam;
 
-                nodeOpParam.m_OpNodeType = kEplDllNodeOpTypeIsochronous;
-                nodeOpParam.m_uiNodeId = pIntNodeInfo->nodeId;
+                nodeOpParam.opNodeType = kDllNodeOpTypeIsochronous;
+                nodeOpParam.nodeId = pIntNodeInfo->nodeId;
 
                 event.m_EventSink = kEplEventSinkDllkCal;
                 event.m_EventType = kEplEventTypeDllkDelNode;
@@ -1602,11 +1602,11 @@ static tEplKernel processReceivedPres(tEplFrameInfo* pFrameInfo_p, tNmtState nmt
         // compare real frame size and PDO size?
         WORD wPresPayloadSize = AmiGetWordFromLe(&pFrame->m_Data.m_Pres.m_le_wSize);
 
-        if (((UINT) (wPresPayloadSize + EPL_FRAME_OFFSET_PDO_PAYLOAD) > pFrameInfo_p->m_uiFrameSize)
+        if (((UINT) (wPresPayloadSize + EPL_FRAME_OFFSET_PDO_PAYLOAD) > pFrameInfo_p->frameSize)
 #if EPL_NMT_MAX_NODE_ID > 0
             || (wPresPayloadSize > pIntNodeInfo->presPayloadLimit)
             || ((nmtState_p >= kNmtMsNotActive)
-                && (pFrameInfo_p->m_uiFrameSize >
+                && (pFrameInfo_p->frameSize >
                     (UINT) (pIntNodeInfo->presPayloadLimit + EPL_FRAME_OFFSET_PDO_PAYLOAD)))
 #endif
             )
@@ -1648,14 +1648,14 @@ static tEplKernel processReceivedPres(tEplFrameInfo* pFrameInfo_p, tNmtState nmt
 
 #if defined(CONFIG_INCLUDE_NMT_MN)
     if ((dllkInstance_g.dllState > kDllMsNonCyclic) &&
-        (dllkInstance_g.dllConfigParam.m_uiSyncNodeId > EPL_C_ADR_SYNC_ON_SOC) &&
+        (dllkInstance_g.dllConfigParam.syncNodeId > EPL_C_ADR_SYNC_ON_SOC) &&
         (dllkInstance_g.fSyncProcessed == FALSE))
     {   // check if Sync event needs to be triggered
         if (
 #if EPL_DLL_PRES_CHAINING_MN != FALSE
-            (dllkInstance_g.dllConfigParam.m_fSyncOnPrcNode != dllkInstance_g.fPrcSlotFinished) &&
+            (dllkInstance_g.dllConfigParam.fSyncOnPrcNode != dllkInstance_g.fPrcSlotFinished) &&
 #endif
-            (nodeId == dllkInstance_g.dllConfigParam.m_uiSyncNodeId))
+            (nodeId == dllkInstance_g.dllConfigParam.syncNodeId))
         {
             dllkInstance_g.fSyncProcessed = TRUE;
             ret = dllk_postEvent(kEplEventTypeSync);
@@ -1721,10 +1721,10 @@ static tEplKernel processReceivedSoc(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtSt
 #endif
 
         // update cycle counter
-        if (dllkInstance_g.dllConfigParam.m_uiMultiplCycleCnt > 0)
+        if (dllkInstance_g.dllConfigParam.multipleCycleCnt > 0)
         {   // multiplexed cycle active
             dllkInstance_g.cycleCount = (dllkInstance_g.cycleCount + 1) %
-                            dllkInstance_g.dllConfigParam.m_uiMultiplCycleCnt;
+                            dllkInstance_g.dllConfigParam.multipleCycleCnt;
         }
     }
 
@@ -1756,7 +1756,7 @@ static tEplKernel processReceivedSoa(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtSt
     tEplKernel          ret = kEplSuccessful;
     tEplFrame*          pFrame;
     tEdrvTxBuffer*      pTxBuffer = NULL;
-    tEplDllReqServiceId reqServiceId;
+    tDllReqServiceId reqServiceId;
     UINT                nodeId;
     UINT8               flag1;
 
@@ -1776,14 +1776,14 @@ static tEplKernel processReceivedSoa(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtSt
 
     // check TargetNodeId
     nodeId = AmiGetByteFromLe(&pFrame->m_Data.m_Soa.m_le_bReqServiceTarget);
-    if (nodeId == dllkInstance_g.dllConfigParam.m_uiNodeId)
+    if (nodeId == dllkInstance_g.dllConfigParam.nodeId)
     {   // local node is the target of the current request
 
         // check ServiceId
-        reqServiceId = (tEplDllReqServiceId) AmiGetByteFromLe(&pFrame->m_Data.m_Soa.m_le_bReqServiceId);
+        reqServiceId = (tDllReqServiceId) AmiGetByteFromLe(&pFrame->m_Data.m_Soa.m_le_bReqServiceId);
         switch (reqServiceId)
         {
-            case kEplDllReqServiceStatus:
+            case kDllReqServiceStatus:
                 // StatusRequest
 #if (EDRV_AUTO_RESPONSE == FALSE)
                 // Auto-response is not available
@@ -1833,7 +1833,7 @@ static tEplKernel processReceivedSoa(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtSt
                 goto Exit;
                 break;
 
-            case kEplDllReqServiceIdent:
+            case kDllReqServiceIdent:
                // IdentRequest
 #if (EDRV_AUTO_RESPONSE == FALSE)
                 // Auto-response is not available
@@ -1855,7 +1855,7 @@ static tEplKernel processReceivedSoa(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtSt
                 goto Exit;
                 break;
 
-            case kEplDllReqServiceNmtRequest:
+            case kDllReqServiceNmtRequest:
                 // NmtRequest
 #if (EDRV_AUTO_RESPONSE == FALSE)
                 // Auto-response is not available
@@ -1892,7 +1892,7 @@ static tEplKernel processReceivedSoa(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtSt
                 break;
 
 #if (EPL_DLL_PRES_CHAINING_CN != FALSE) || (EPL_DLL_PRES_CHAINING_MN != FALSE)
-            case kEplDllReqServiceSync:
+            case kDllReqServiceSync:
                 {
                 // SyncRequest
 #if EPL_DLL_PRES_CHAINING_CN != FALSE
@@ -1984,7 +1984,7 @@ static tEplKernel processReceivedSoa(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtSt
                 break;
 #endif
 
-            case kEplDllReqServiceUnspecified:
+            case kDllReqServiceUnspecified:
                 // unspecified invite
 #if (EDRV_AUTO_RESPONSE == FALSE)
                 // Auto-response is not available
@@ -2019,7 +2019,7 @@ static tEplKernel processReceivedSoa(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtSt
 #endif
                 break;
 
-            case kEplDllReqServiceNo:
+            case kDllReqServiceNo:
                 // no async service requested -> do nothing
                 goto Exit;
                 break;
@@ -2030,8 +2030,8 @@ static tEplKernel processReceivedSoa(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtSt
     else
     {   // other node is the target of the current request
         // check ServiceId
-        reqServiceId = (tEplDllReqServiceId) AmiGetByteFromLe(&pFrame->m_Data.m_Soa.m_le_bReqServiceId);
-        if (reqServiceId == kEplDllReqServiceSync)
+        reqServiceId = (tDllReqServiceId) AmiGetByteFromLe(&pFrame->m_Data.m_Soa.m_le_bReqServiceId);
+        if (reqServiceId == kDllReqServiceSync)
         {   // SyncRequest -> store node ID and TimeStamp
             dllkInstance_g.syncReqPrevNodeId = nodeId;
             EplTgtTimeStampCopy(dllkInstance_g.pSyncReqPrevTimeStamp, pRxBuffer_p->m_pTgtTimeStamp);
@@ -2067,7 +2067,7 @@ The function processes a received ASnd frame.
 \return The function returns a tEplKernel error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel processReceivedAsnd(tEplFrameInfo* pFrameInfo_p, tEdrvRxBuffer* pRxBuffer_p,
+static tEplKernel processReceivedAsnd(tFrameInfo* pFrameInfo_p, tEdrvRxBuffer* pRxBuffer_p,
                                       tNmtState nmtState_p)
 {
     tEplKernel      ret = kEplSuccessful;
@@ -2084,7 +2084,7 @@ static tEplKernel processReceivedAsnd(tEplFrameInfo* pFrameInfo_p, tEdrvRxBuffer
     UNUSED_PARAMETER(pRxBuffer_p);
 #endif
 
-    pFrame = pFrameInfo_p->m_pFrame;
+    pFrame = pFrameInfo_p->pFrame;
 
     // ASnd service registered?
     asndServiceId = (UINT)AmiGetByteFromLe(&pFrame->m_Data.m_Asnd.m_le_bServiceId);
@@ -2092,21 +2092,21 @@ static tEplKernel processReceivedAsnd(tEplFrameInfo* pFrameInfo_p, tEdrvRxBuffer
 #if defined(CONFIG_INCLUDE_NMT_MN)
     if (dllkInstance_g.dllState >= kDllMsNonCyclic)
     {
-        switch ((tEplDllAsndServiceId) asndServiceId)
+        switch ((tDllAsndServiceId) asndServiceId)
         {
-            case kEplDllAsndStatusResponse:
-            case kEplDllAsndIdentResponse:
+            case kDllAsndStatusResponse:
+            case kDllAsndIdentResponse:
 #if (EPL_DLL_PRES_CHAINING_MN != FALSE)
-            case kEplDllAsndSyncResponse:
+            case kDllAsndSyncResponse:
 #endif
                 nodeId = AmiGetByteFromLe(&pFrame->m_le_bSrcNodeId);
-                if ((dllkInstance_g.aLastReqServiceId[dllkInstance_g.curLastSoaReq] == ((tEplDllReqServiceId) asndServiceId)) &&
+                if ((dllkInstance_g.aLastReqServiceId[dllkInstance_g.curLastSoaReq] == ((tDllReqServiceId) asndServiceId)) &&
                     (nodeId == dllkInstance_g.aLastTargetNodeId[dllkInstance_g.curLastSoaReq]))
                 {   // mark request as responded
-                    dllkInstance_g.aLastReqServiceId[dllkInstance_g.curLastSoaReq] = kEplDllReqServiceNo;
+                    dllkInstance_g.aLastReqServiceId[dllkInstance_g.curLastSoaReq] = kDllReqServiceNo;
                 }
 
-                if (((tEplDllAsndServiceId) asndServiceId) == kEplDllAsndIdentResponse)
+                if (((tDllAsndServiceId) asndServiceId) == kDllAsndIdentResponse)
                 {   // memorize MAC address of CN for PReq
                     tDllkNodeInfo*   pIntNodeInfo;
 
@@ -2122,7 +2122,7 @@ static tEplKernel processReceivedAsnd(tEplFrameInfo* pFrameInfo_p, tEdrvRxBuffer
                     }
                 }
 #if (EPL_DLL_PRES_CHAINING_MN != FALSE)
-                else if (((tEplDllAsndServiceId) asndServiceId) == kEplDllAsndSyncResponse)
+                else if (((tDllAsndServiceId) asndServiceId) == kDllAsndSyncResponse)
                 {
                     break;
                 }
@@ -2130,7 +2130,7 @@ static tEplKernel processReceivedAsnd(tEplFrameInfo* pFrameInfo_p, tEdrvRxBuffer
                 // forward Flag2 to asynchronous scheduler
                 flag1 = AmiGetByteFromLe(&pFrame->m_Data.m_Asnd.m_Payload.m_StatusResponse.m_le_bFlag2);
                 ret = dllkcal_setAsyncPendingRequests(nodeId,
-                    ((tEplDllAsyncReqPriority) ((flag1 & EPL_FRAME_FLAG2_PR) >> EPL_FRAME_FLAG2_PR_SHIFT)),
+                    ((tDllAsyncReqPriority) ((flag1 & EPL_FRAME_FLAG2_PR) >> EPL_FRAME_FLAG2_PR_SHIFT)),
                     (flag1 & EPL_FRAME_FLAG2_RS));
                 if (ret != kEplSuccessful)
                     goto Exit;
@@ -2142,11 +2142,11 @@ static tEplKernel processReceivedAsnd(tEplFrameInfo* pFrameInfo_p, tEdrvRxBuffer
     }
 #endif
 
-    if (asndServiceId < EPL_DLL_MAX_ASND_SERVICE_ID)
+    if (asndServiceId < DLL_MAX_ASND_SERVICE_ID)
     {   // ASnd service ID is valid
 
 #if EPL_DLL_PRES_CHAINING_CN != FALSE
-        if (asndServiceId == kEplDllAsndSyncResponse)
+        if (asndServiceId == kDllAsndSyncResponse)
         {
             tEplFrame*  pTxFrameSyncRes;
 
@@ -2182,18 +2182,18 @@ static tEplKernel processReceivedAsnd(tEplFrameInfo* pFrameInfo_p, tEdrvRxBuffer
         }
 #endif
 
-        if (dllkInstance_g.aAsndFilter[asndServiceId] == kEplDllAsndFilterAny)
+        if (dllkInstance_g.aAsndFilter[asndServiceId] == kDllAsndFilterAny)
         {   // ASnd service ID is registered
             // forward frame via async receive FIFO to userspace
             ret = dllkcal_asyncFrameReceived(pFrameInfo_p);
             if (ret != kEplSuccessful)
                 goto Exit;
         }
-        else if (dllkInstance_g.aAsndFilter[asndServiceId] == kEplDllAsndFilterLocal)
+        else if (dllkInstance_g.aAsndFilter[asndServiceId] == kDllAsndFilterLocal)
         {   // ASnd service ID is registered, but only local node ID or broadcasts
             // shall be forwarded
             nodeId = AmiGetByteFromLe(&pFrame->m_le_bDstNodeId);
-            if ((nodeId == dllkInstance_g.dllConfigParam.m_uiNodeId) || (nodeId == EPL_C_ADR_BROADCAST))
+            if ((nodeId == dllkInstance_g.dllConfigParam.nodeId) || (nodeId == EPL_C_ADR_BROADCAST))
             {   // ASnd frame is intended for us
                 // forward frame via async receive FIFO to userspace
                 ret = dllkcal_asyncFrameReceived(pFrameInfo_p);
@@ -2220,7 +2220,7 @@ NMT_CS_OPERATIONAL. The passed PDO needs to be valid.
 \return The function returns a tEplKernel error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel forwardRpdo(tEplFrameInfo * pFrameInfo_p)
+static tEplKernel forwardRpdo(tFrameInfo * pFrameInfo_p)
 {
     tEplKernel      ret = kEplSuccessful;
 
