@@ -671,24 +671,24 @@ tEplKernel ProcessThread::processCfmProgressEvent(tEplApiEventType EventType_p,
                                           tEplApiEventArg* pEventArg_p,
                                           void GENERIC* pUserArg_p)
 {
-    tEplCfmEventCnProgress*     pCfmProgress = &pEventArg_p->m_CfmProgress;
+    tCfmEventCnProgress*     pCfmProgress = &pEventArg_p->m_CfmProgress;
 
     UNUSED_PARAMETER(EventType_p);
     UNUSED_PARAMETER(pUserArg_p);
 
     sigPrintLog(QString("CFM Progress: (Node=%1, CFM-Progress: Object 0x%2/%3,  %4/%5 Bytes")
-             .arg(pCfmProgress->m_uiNodeId, 0, 10)
-             .arg(pCfmProgress->m_uiObjectIndex, 4, 16, QLatin1Char('0'))
-             .arg(pCfmProgress->m_uiObjectSubIndex, 0, 10)
-             .arg((ULONG)pCfmProgress->m_dwBytesDownloaded, 0, 10)
-             .arg((ULONG)pCfmProgress->m_dwTotalNumberOfBytes, 0, 10));
+             .arg(pCfmProgress->nodeId, 0, 10)
+             .arg(pCfmProgress->objectIndex, 4, 16, QLatin1Char('0'))
+             .arg(pCfmProgress->objectSubIndex, 0, 10)
+             .arg((ULONG)pCfmProgress->bytesDownloaded, 0, 10)
+             .arg((ULONG)pCfmProgress->totalNumberOfBytes, 0, 10));
 
-    if ((pCfmProgress->m_dwSdoAbortCode != 0)
-        || (pCfmProgress->m_EplError != kEplSuccessful))
+    if ((pCfmProgress->sdoAbortCode != 0)
+        || (pCfmProgress->error != kEplSuccessful))
     {
         sigPrintLog(QString("             -> SDO Abort=0x%1, Error=0x%2)")
-                 .arg((ULONG) pCfmProgress->m_dwSdoAbortCode, 0, 16 , QLatin1Char('0'))
-                 .arg(pCfmProgress->m_EplError, 0, 16, QLatin1Char('0')));
+                 .arg((ULONG) pCfmProgress->sdoAbortCode, 0, 16 , QLatin1Char('0'))
+                 .arg(pCfmProgress->error, 0, 16, QLatin1Char('0')));
     }
     return kEplSuccessful;
 }

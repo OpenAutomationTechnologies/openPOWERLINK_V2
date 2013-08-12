@@ -473,25 +473,25 @@ static tEplKernel processCfmProgressEvent(tEplApiEventType EventType_p,
                                           tEplApiEventArg* pEventArg_p,
                                           void GENERIC* pUserArg_p)
 {
-    tEplCfmEventCnProgress*     pCfmProgress = &pEventArg_p->m_CfmProgress;
+    tCfmEventCnProgress*     pCfmProgress = &pEventArg_p->m_CfmProgress;
 
     UNUSED_PARAMETER(EventType_p);
     UNUSED_PARAMETER(pUserArg_p);
 
     console_printlog("CFM Progress: (Node=%u, CFM-Progress: Object 0x%X/%u, ",
-                                                 pCfmProgress->m_uiNodeId,
-                                                 pCfmProgress->m_uiObjectIndex,
-                                                 pCfmProgress->m_uiObjectSubIndex);
+                                                 pCfmProgress->nodeId,
+                                                 pCfmProgress->objectIndex,
+                                                 pCfmProgress->objectSubIndex);
 
-    console_printlogadd("%lu/%lu Bytes", (ULONG)pCfmProgress->m_dwBytesDownloaded,
-                            (ULONG)pCfmProgress->m_dwTotalNumberOfBytes);
+    console_printlogadd("%lu/%lu Bytes", (ULONG)pCfmProgress->bytesDownloaded,
+                            (ULONG)pCfmProgress->totalNumberOfBytes);
 
-    if ((pCfmProgress->m_dwSdoAbortCode != 0)
-        || (pCfmProgress->m_EplError != kEplSuccessful))
+    if ((pCfmProgress->sdoAbortCode != 0)
+        || (pCfmProgress->error != kEplSuccessful))
     {
         console_printlogadd(" -> SDO Abort=0x%lX, Error=0x%X)\n",
-               (ULONG) pCfmProgress->m_dwSdoAbortCode,
-               pCfmProgress->m_EplError);
+               (ULONG) pCfmProgress->sdoAbortCode,
+               pCfmProgress->error);
     }
     else
     {
