@@ -57,7 +57,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <user/identu.h>
 #include <user/statusu.h>
 #include <user/EplTimeru.h>
-#include <user/EplCfmu.h>
+#include <user/cfmu.h>
 #include <user/eventucal.h>
 #include <EplTarget.h>
 

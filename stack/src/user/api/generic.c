@@ -84,7 +84,7 @@
 #include "user/EplSdoComu.h"
 #include "user/identu.h"
 #include "user/statusu.h"
-#include "user/EplCfmu.h"
+#include "user/cfmu.h"
 
 #include <user/ctrlu.h>
 #include <errhnd.h>
