@@ -1,10 +1,10 @@
 /**
 ********************************************************************************
-\file   EplCfm.h
+\file   cfmu.h
 
-\brief  General include file for configuration file manager (CFM)
+\brief  Include file for configuration file manager (CFM) module
 
-This file contains global definitions for the CFM module.
+This file contains the definitions of the CFM module.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
@@ -35,14 +35,14 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_EplCfm_H_
-#define _INC_EplCfm_H_
+#ifndef _INC_EplCfmu_H_
+#define _INC_EplCfmu_H_
 
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <EplInc.h>
-#include <EplObd.h>
+#include <nmt.h>
+#include <cfm.h>
 
 //------------------------------------------------------------------------------
 // const defines
@@ -51,22 +51,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
-
-/**
-* \brief Structure for CFM CN progress event
-*
-* This structure contains all information of the CFMs CN progress event.
-*/
-typedef struct
-{
-    UINT                nodeId;                 ///< Node ID of the CN
-    UINT                objectIndex;            ///< Index of object to be written
-    UINT                objectSubIndex;         ///< Subindex of object to be written
-    UINT32              sdoAbortCode;           ///< SDO abort code
-    tEplKernel          error;                  ///< Error which occured
-    UINT32              totalNumberOfBytes;     ///< Total number of bytes to transfer
-    UINT32              bytesDownloaded;        ///< Number of already downloaded bytes
-} tCfmEventCnProgress;
+typedef tEplKernel (*tCfmCbEventCnProgress) (tCfmEventCnProgress* pEventCnProgress_p);
+typedef tEplKernel (*tCfmCbEventCnResult) (UINT nodeId_p, tNmtNodeCommand nodeCommand_p);
 
 //------------------------------------------------------------------------------
 // function prototypes
@@ -76,10 +62,15 @@ typedef struct
 extern "C" {
 #endif
 
-tEplKernel  cfmu_cbObdAccess(tEplObdCbParam MEM* pParam_p);
+tEplKernel  cfmu_init(tCfmCbEventCnProgress pfnCbEventCnProgress_p, tCfmCbEventCnResult pfnCbEventCnResult_p);
+tEplKernel  cfmu_exit(void);
+tEplKernel  cfmu_processNodeEvent(UINT nodeId_p, tNmtNodeEvent nodeEvent_p);
+BOOL        cfmu_isSdoRunning(UINT nodeId_p);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* _INC_EplCfm_H_ */
+#endif /* _INC_EplCfmu_H_ */
+
+

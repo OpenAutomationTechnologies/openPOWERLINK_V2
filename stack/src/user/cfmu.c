@@ -44,7 +44,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <limits.h>
 
 #include <EplInc.h>
-#include <user/EplCfmu.h>
+#include <user/cfmu.h>
 #include <EplSdoAc.h>
 #include <user/identu.h>
 #include <user/EplObdu.h>
