@@ -71,7 +71,7 @@
 #endif
 
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_CFM)) != 0)
-        EPL_OBD_RAM_INDEX_RAM_VARARRAY_NOINIT(0x1F22, EPL_NMT_MAX_NODE_ID, EplCfmuCbObdAccess, kEplObdTypDomain, kEplObdAccSRW, Domain, CFM_ConciseDcfList_ADOM)
+        EPL_OBD_RAM_INDEX_RAM_VARARRAY_NOINIT(0x1F22, EPL_NMT_MAX_NODE_ID, cfmu_cbObdAccess, kEplObdTypDomain, kEplObdAccSRW, Domain, CFM_ConciseDcfList_ADOM)
         EPL_OBD_RAM_INDEX_RAM_ARRAY(0x1F26, EPL_NMT_MAX_NODE_ID, NULL, kEplObdTypUInt32, kEplObdAccSRW, tEplObdUnsigned32, CFM_ExpConfDateList_AU32, 0)
         EPL_OBD_RAM_INDEX_RAM_ARRAY(0x1F27, EPL_NMT_MAX_NODE_ID, NULL, kEplObdTypUInt32, kEplObdAccSRW, tEplObdUnsigned32, CFM_ExpConfTimeList_AU32, 0)
 #endif

@@ -171,7 +171,7 @@ typedef union
     tEplApiEventNode        m_Node;
     tEplApiEventBoot        m_Boot;
     tEplApiEventLed         m_Led;
-    tEplCfmEventCnProgress  m_CfmProgress;
+    tCfmEventCnProgress     m_CfmProgress;
     tEplApiEventCfmResult   m_CfmResult;
     tEplErrHistoryEntry     m_ErrHistoryEntry;
     tEplApiEventRcvAsnd     m_RcvAsnd;
@@ -314,7 +314,7 @@ typedef struct {
     tEplKernel (PUBLIC* pfnCbBootEvent)     (tNmtBootEvent BootEvent_p, tNmtState NmtState_p,
                                             WORD wErrorCode_p);
 
-    tEplKernel (PUBLIC* pfnCbCfmProgress)   (tEplCfmEventCnProgress* pEventCnProgress_p);
+    tEplKernel (PUBLIC* pfnCbCfmProgress)   (tCfmEventCnProgress* pEventCnProgress_p);
 
     tEplKernel (PUBLIC* pfnCbCfmResult)     (unsigned int uiNodeId_p, tNmtNodeCommand NodeCommand_p);
 

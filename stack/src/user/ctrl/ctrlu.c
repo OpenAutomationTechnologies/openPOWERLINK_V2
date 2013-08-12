@@ -320,7 +320,7 @@ tEplKernel ctrlu_initStack(tEplApiInitParam * pInitParam_p,
 
 #if defined (CONFIG_INCLUDE_CFM)
     TRACE ("Initialize Cfm module...\n");
-    ret = EplCfmuAddInstance(pCbFuncs_p->pfnCbCfmProgress, pCbFuncs_p->pfnCbCfmResult);
+    ret = cfmu_init(pCbFuncs_p->pfnCbCfmProgress, pCbFuncs_p->pfnCbCfmResult);
     if (ret != kEplSuccessful)
     {
         goto Exit;
@@ -355,8 +355,8 @@ tEplKernel ctrlu_shutdownStack(void)
     TRACE("eventu_exit():  0x%X\n", ret);
 
 #if defined(CONFIG_INCLUDE_CFM)
-    ret = EplCfmuDelInstance();
-    TRACE("EplCfmuDelInstance():    0x%X\n", ret);
+    ret = cfmu_exit();
+    TRACE("cfmu_exit():    0x%X\n", ret);
 #endif
 
 #if defined(CONFIG_INCLUDE_SDOS) || defined(CONFIG_INCLUDE_SDOC)

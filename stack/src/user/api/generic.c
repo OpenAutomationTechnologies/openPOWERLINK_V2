@@ -221,7 +221,7 @@ static tEplKernel PUBLIC  EplApiCbLedStateChange(tEplLedType LedType_p,
 #endif
 
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_CFM)) != 0)
-static tEplKernel PUBLIC  EplApiCbCfmEventCnProgress(tEplCfmEventCnProgress* pEventCnProgress_p);
+static tEplKernel PUBLIC  EplApiCbCfmEventCnProgress(tCfmEventCnProgress* pEventCnProgress_p);
 static tEplKernel PUBLIC  EplApiCbCfmEventCnResult(unsigned int uiNodeId_p, tNmtNodeCommand NodeCommand_p);
 #endif
 
@@ -530,7 +530,7 @@ tEplKernel      Ret = kEplSuccessful;
         }
 
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_CFM)) != 0)
-        if (EplCfmuIsSdoRunning(uiNodeId_p))
+        if (cfmu_isSdoRunning(uiNodeId_p))
         {
             Ret = kEplApiSdoBusyIntern;
             goto Exit;
@@ -631,7 +631,7 @@ tEplKernel      Ret = kEplSuccessful;
         }
 
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_CFM)) != 0)
-        if (EplCfmuIsSdoRunning(uiNodeId_p))
+        if (cfmu_isSdoRunning(uiNodeId_p))
         {
             Ret = kEplApiSdoBusyIntern;
             goto Exit;
@@ -702,7 +702,7 @@ tEplKernel      Ret = kEplSuccessful;
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOC)) != 0)
 
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_CFM)) != 0)
-    if (EplCfmuIsSdoRunning(EplSdoComGetNodeId(SdoComConHdl_p)))
+    if (cfmu_isSdoRunning(EplSdoComGetNodeId(SdoComConHdl_p)))
     {
         Ret = kEplApiSdoBusyIntern;
     }
@@ -743,7 +743,7 @@ tEplKernel      Ret = kEplSuccessful;
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOC)) != 0)
 
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_CFM)) != 0)
-    if (EplCfmuIsSdoRunning(EplSdoComGetNodeId(SdoComConHdl_p)))
+    if (cfmu_isSdoRunning(EplSdoComGetNodeId(SdoComConHdl_p)))
     {
         Ret = kEplApiSdoBusyIntern;
     }
@@ -2320,7 +2320,7 @@ tEplApiEventArg EventArg;
     }
 
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_CFM)) != 0)
-    Ret = EplCfmuProcessNodeEvent(uiNodeId_p, NodeEvent_p);
+    Ret = cfmu_processNodeEvent(uiNodeId_p, NodeEvent_p);
 #endif
 
 Exit:
@@ -2427,7 +2427,7 @@ tEplApiEventArg EventArg;
 //
 //---------------------------------------------------------------------------
 
-static tEplKernel PUBLIC  EplApiCbCfmEventCnProgress(tEplCfmEventCnProgress* pEventCnProgress_p)
+static tEplKernel PUBLIC  EplApiCbCfmEventCnProgress(tCfmEventCnProgress* pEventCnProgress_p)
 {
 tEplKernel Ret;
 tEplApiEventArg EventArg;

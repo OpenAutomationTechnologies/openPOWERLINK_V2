@@ -678,18 +678,18 @@ tEplKernel          EplRet = kEplSuccessful;
         case kEplApiEventCfmProgress:
         {
             PRINTF("%s(Node=0x%X, CFM-Progress: Object 0x%X/%u, ",
-                    __func__, pEventArg_p->m_CfmProgress.m_uiNodeId,
-                    pEventArg_p->m_CfmProgress.m_uiObjectIndex,
-                    pEventArg_p->m_CfmProgress.m_uiObjectSubIndex);
+                    __func__, pEventArg_p->m_CfmProgress.nodeId,
+                    pEventArg_p->m_CfmProgress.objectIndex,
+                    pEventArg_p->m_CfmProgress.objectSubIndex);
             PRINTF("%lu/%lu Bytes",
-                    (ULONG) pEventArg_p->m_CfmProgress.m_dwBytesDownloaded,
-                    (ULONG) pEventArg_p->m_CfmProgress.m_dwTotalNumberOfBytes);
-            if ((pEventArg_p->m_CfmProgress.m_dwSdoAbortCode != 0)
-                || (pEventArg_p->m_CfmProgress.m_EplError != kEplSuccessful))
+                    (ULONG) pEventArg_p->m_CfmProgress.bytesDownloaded,
+                    (ULONG) pEventArg_p->m_CfmProgress.totalNumberOfBytes);
+            if ((pEventArg_p->m_CfmProgress.sdoAbortCode != 0)
+                || (pEventArg_p->m_CfmProgress.error != kEplSuccessful))
             {
                 PRINTF(" -> SDO Abort=0x%lX, Error=0x%X)\n",
-                        (unsigned long) pEventArg_p->m_CfmProgress.m_dwSdoAbortCode,
-                        pEventArg_p->m_CfmProgress.m_EplError);
+                        (unsigned long) pEventArg_p->m_CfmProgress.sdoAbortCode,
+                        pEventArg_p->m_CfmProgress.error);
             }
             else
             {

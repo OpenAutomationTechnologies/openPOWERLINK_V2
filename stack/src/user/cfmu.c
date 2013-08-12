@@ -1,1074 +1,921 @@
-/****************************************************************************
+/**
+********************************************************************************
+\file   cfmu.c
 
-  (c) Kalycito Infotech Private Limited
-  (c) SYSTEC electronic GmbH, D-07973 Greiz, August-Bebel-Str. 29
-      www.systec-electronic.com
+\brief  Implementation of configuration file manager (CFM) module
 
-  Project:      openPOWERLINK
+This file contains the implementation of the configuration file manager (CFM).
 
-  Description:  source file for Configuration Manager (CFM) module
+\ingroup module_cfmu
+*******************************************************************************/
 
-  License:
+/*------------------------------------------------------------------------------
+Copyright (c) 2013, SYSTEC electronic GmbH
+Copyright (c) 2013, Kalycito Infotech Private Ltd.All rights reserved.
+Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+All rights reserved.
 
-    Redistribution and use in source and binary forms, with or without
-    modification, are permitted provided that the following conditions
-    are met:
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+    * Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above copyright
+      notice, this list of conditions and the following disclaimer in the
+      documentation and/or other materials provided with the distribution.
+    * Neither the name of the copyright holders nor the
+      names of its contributors may be used to endorse or promote products
+      derived from this software without specific prior written permission.
 
-    1. Redistributions of source code must retain the above copyright
-       notice, this list of conditions and the following disclaimer.
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL COPYRIGHT HOLDERS BE LIABLE FOR ANY
+DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+------------------------------------------------------------------------------*/
 
-    2. Redistributions in binary form must reproduce the above copyright
-       notice, this list of conditions and the following disclaimer in the
-       documentation and/or other materials provided with the distribution.
-
-    3. Neither the name of Kalycito Infotech Private Limited nor the names of
-       its contributors may be used to endorse or promote products derived
-       from this software without prior written permission. For written
-       permission, please contact info@kalycito.com.
-
-    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-    LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-    FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-    COPYRIGHT HOLDERS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-    INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-    BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-    LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-    CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-    LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-    ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-    POSSIBILITY OF SUCH DAMAGE.
-
-    Severability Clause:
-
-        If a provision of this License is or becomes illegal, invalid or
-        unenforceable in any jurisdiction, that shall not affect:
-        1. the validity or enforceability in that jurisdiction of any other
-           provision of this License; or
-        2. the validity or enforceability in other jurisdictions of that or
-           any other provision of this License.
-
-****************************************************************************/
+//------------------------------------------------------------------------------
+// includes
+//------------------------------------------------------------------------------
 #include <limits.h>
 
-#include "EplInc.h"
-
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_CFM)) != 0)
-
-#include "user/EplCfmu.h"
-#include "EplSdoAc.h"
-#include "user/identu.h"
-#include "user/EplObdu.h"
-#include "user/EplSdoComu.h"
-#include "user/nmtu.h"
+#include <EplInc.h>
+#include <user/EplCfmu.h>
+#include <EplSdoAc.h>
+#include <user/identu.h>
+#include <user/EplObdu.h>
+#include <user/EplSdoComu.h>
+#include <user/nmtu.h>
 
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_OBDU)) == 0) && (EPL_OBD_USE_KERNEL == FALSE)
-#error "EPL CFM module needs EPL module OBDU or OBDK!"
+#error "CFM module needs openPOWERLINK module OBDU or OBDK!"
 #endif
 
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOC)) == 0)
-#error "EPL CFMu module needs EPL module SDO client!"
+#if !defined(CONFIG_INCLUDE_SDOC)
+#error "CFM module needs openPOWERLINK module SDO client!"
 #endif
 
 #if (EPL_OBD_USE_STRING_DOMAIN_IN_RAM == FALSE)
-#error "EPL CFMu module needs define EPL_OBD_USE_STRING_DOMAIN_IN_RAM == TRUE"
+#error "CFM module needs define EPL_OBD_USE_STRING_DOMAIN_IN_RAM == TRUE"
 #endif
 
-/***************************************************************************/
-/*                                                                         */
-/*                                                                         */
-/*          G L O B A L   D E F I N I T I O N S                            */
-/*                                                                         */
-/*                                                                         */
-/***************************************************************************/
+//============================================================================//
+//            G L O B A L   D E F I N I T I O N S                             //
+//============================================================================//
 
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // const defines
-//---------------------------------------------------------------------------
-
+//------------------------------------------------------------------------------
 #ifndef EPL_CFM_CONFIGURE_CYCLE_LENGTH
 #define EPL_CFM_CONFIGURE_CYCLE_LENGTH  FALSE
 #endif
 
 // return pointer to node info structure for specified node ID
 // d.k. may be replaced by special (hash) function if node ID array is smaller than 254
-#define EPL_CFMU_GET_NODEINFO(uiNodeId_p) (EplCfmuInstance_g.m_apNodeInfo[uiNodeId_p - 1])
+#define CFM_GET_NODEINFO(uiNodeId_p) (cfmInstance_g.apNodeInfo[uiNodeId_p - 1])
 
+//------------------------------------------------------------------------------
+// module global vars
+//------------------------------------------------------------------------------
 
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+// global function prototypes
+//------------------------------------------------------------------------------
+
+//============================================================================//
+//            P R I V A T E   D E F I N I T I O N S                           //
+//============================================================================//
+
+//------------------------------------------------------------------------------
+// const defines
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
 // local types
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
-//States in Configuration Manager (CFM)
+/**
+\brief Enumeration for CFM states
+
+The following enumeration lists all valid CFM states.
+*/
 typedef enum
 {
-    kEplCfmuStateIdle           = 0x00,
-    kEplCfmuStateWaitRestore,
-    kEplCfmuStateDownload,
-    kEplCfmuStateWaitStore,
-    kEplCfmuStateUpToDate,
-    kEplCfmuStateInternalAbort,
+    kCfmStateIdle           = 0x00,
+    kCfmStateWaitRestore,
+    kCfmStateDownload,
+    kCfmStateWaitStore,
+    kCfmStateUpToDate,
+    kCfmStateInternalAbort,
+} tCfmState;
 
-} tEplCfmuState;
+/**
+\brief CFM node information structure
 
+The following structure defines the node information that is needed by the
+configuration manager.
+*/
 typedef struct
 {
-    tEplCfmEventCnProgress  m_EventCnProgress;
-    BYTE*               m_pbObdBufferConciseDcf;
-    BYTE*               m_pbDataConciseDcf;
-    DWORD               m_dwBytesRemaining;
-    DWORD               m_dwEntriesRemaining;
-    tEplSdoComConHdl    m_SdoComConHdl;
-    tEplCfmuState       m_CfmState;
-    unsigned int        m_uiCurDataSize;
-    BOOL                m_fDoStore;
+    tCfmEventCnProgress     eventCnProgress;
+    UINT8*                  pObdBufferConciseDcf;
+    UINT8*                  pDataConciseDcf;
+    UINT32                  bytesRemaining;
+    UINT32                  entriesRemaining;
+    tEplSdoComConHdl        sdoComConHdl;
+    tCfmState               cfmState;
+    UINT                    curDataSize;
+    BOOL                    fDoStore;
+} tCfmNodeInfo;
 
-} tEplCfmuNodeInfo;
+/**
+\brief CFM instance
 
-
+The following structure defines the instance of the configuration manager.
+*/
 typedef struct
 {
-    tEplCfmuNodeInfo*   m_apNodeInfo[EPL_NMT_MAX_NODE_ID];
-    DWORD               m_le_dwDomainSizeNull;
+    tCfmNodeInfo*           apNodeInfo[EPL_NMT_MAX_NODE_ID];
+    UINT32                  leDomainSizeNull;
 #if (EPL_CFM_CONFIGURE_CYCLE_LENGTH != FALSE)
-    DWORD               m_le_dwCycleLength;
+    UINT32                  leCycleLength;
 #endif
+    tCfmCbEventCnProgress   pfnCbEventCnProgress;
+    tCfmCbEventCnResult     pfnCbEventCnResult;
+} tCfmInstance;
 
-    tEplCfmCbEventCnProgress    m_pfnCbEventCnProgress;
-    tEplCfmCbEventCnResult      m_pfnCbEventCnResult;
-
-} tEplCfmuInstance;
-
-
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // local vars
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+static tCfmInstance             cfmInstance_g;
 
-static tEplCfmuInstance  EplCfmuInstance_g;
-
-
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // local function prototypes
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
-static tEplCfmuNodeInfo* EplCfmuAllocNodeInfo(unsigned int uiNodeId_p);
+static tCfmNodeInfo* allocNodeInfo(UINT nodeId_p);
+static tEplKernel callCbProgress(tCfmNodeInfo* pNodeInfo_p);
+static tEplKernel downloadCycleLength(tCfmNodeInfo* pNodeInfo_p);
+static tEplKernel downloadObject(tCfmNodeInfo* pNodeInfo_p);
+static tEplKernel sdoWriteObject(tCfmNodeInfo* pNodeInfo_p, void* pLeSrcData_p, UINT size_p);
+static tEplKernel cbSdoCon(tEplSdoComFinished* pSdoComFinished_p);
 
-static tEplKernel EplCfmuCallCbProgress(tEplCfmuNodeInfo* pNodeInfo_p);
+//============================================================================//
+//            P U B L I C   F U N C T I O N S                                 //
+//============================================================================//
 
-static tEplKernel EplCfmuDownloadCycleLength(
-            tEplCfmuNodeInfo* pNodeInfo_p);
+//------------------------------------------------------------------------------
+/**
+\brief  Init CFM module
 
-static tEplKernel EplCfmuDownloadObject(
-            tEplCfmuNodeInfo* pNodeInfo_p);
+The function initializes the CFM module.
 
-static tEplKernel EplCfmuSdoWriteObject(
-            tEplCfmuNodeInfo* pNodeInfo_p,
-            void*             pSrcData_le_p,
-            unsigned int      uiSize_p);
+\return The function returns a tEplKernel error code.
 
-static tEplKernel PUBLIC  EplCfmuCbSdoCon(tEplSdoComFinished* pSdoComFinished_p);
-
-
-
-
-//=========================================================================//
-//                                                                         //
-//          P U B L I C   F U N C T I O N S                                //
-//                                                                         //
-//=========================================================================//
-
-//---------------------------------------------------------------------------
-//
-// Function:    EplCfmuAddInstance()
-//
-// Description: add and initialize new instance of the CFM module
-//
-// Parameters:  none
-//
-// Returns:     tEplKernel              = error code
-//
-//
-// State:
-//
-//---------------------------------------------------------------------------
-
-tEplKernel EplCfmuAddInstance(tEplCfmCbEventCnProgress pfnCbEventCnProgress_p, tEplCfmCbEventCnResult pfnCbEventCnResult_p)
+\ingroup module_cfmu
+*/
+//------------------------------------------------------------------------------
+tEplKernel cfmu_init(tCfmCbEventCnProgress pfnCbEventCnProgress_p,
+                     tCfmCbEventCnResult pfnCbEventCnResult_p)
 {
-tEplKernel      Ret = kEplSuccessful;
-unsigned int    uiSubindex;
-tEplVarParam    VarParam;
+    tEplKernel      ret = kEplSuccessful;
+    UINT            subindex;
+    tEplVarParam    varParam;
 
-    EPL_MEMSET(&EplCfmuInstance_g, 0, sizeof(EplCfmuInstance_g));
+    EPL_MEMSET(&cfmInstance_g, 0, sizeof(tCfmInstance));
 
-    EplCfmuInstance_g.m_pfnCbEventCnProgress = pfnCbEventCnProgress_p;
-    EplCfmuInstance_g.m_pfnCbEventCnResult = pfnCbEventCnResult_p;
+    cfmInstance_g.pfnCbEventCnProgress = pfnCbEventCnProgress_p;
+    cfmInstance_g.pfnCbEventCnResult = pfnCbEventCnResult_p;
 
     // link domain with 4 zero-bytes to object 0x1F22 CFM_ConciseDcfList_ADOM
-    VarParam.m_pData = &EplCfmuInstance_g.m_le_dwDomainSizeNull;
-    VarParam.m_Size = sizeof (EplCfmuInstance_g.m_le_dwDomainSizeNull);
-    VarParam.m_uiIndex = 0x1F22;
-    for (uiSubindex = 1; uiSubindex <= EPL_NMT_MAX_NODE_ID; uiSubindex++)
+    varParam.m_pData = &cfmInstance_g.leDomainSizeNull;
+    varParam.m_Size = sizeof(cfmInstance_g.leDomainSizeNull);
+    varParam.m_uiIndex = 0x1F22;    // CFM_ConciseDcfList_ADOM
+    for (subindex = 1; subindex <= EPL_NMT_MAX_NODE_ID; subindex++)
     {
-        VarParam.m_uiSubindex = uiSubindex;
-        VarParam.m_ValidFlag = kVarValidAll;
-        Ret = EplObdDefineVar(&VarParam);
-        if ((Ret != kEplSuccessful)
-            && (Ret != kEplObdIndexNotExist)
-            && (Ret != kEplObdSubindexNotExist))
+        varParam.m_uiSubindex = subindex;
+        varParam.m_ValidFlag = kVarValidAll;
+        ret = EplObdDefineVar(&varParam);
+        if ((ret != kEplSuccessful) &&
+            (ret != kEplObdIndexNotExist) &&
+            (ret != kEplObdSubindexNotExist))
         {
-            goto Exit;
+            return ret;
         }
     }
-    Ret = kEplSuccessful;
-
-Exit:
-    return Ret;
+    return kEplSuccessful;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Exit CFM module
 
-//---------------------------------------------------------------------------
-//
-// Function:    EplCfmuDelInstance()
-//
-// Description: deletes an instance of the CFM module
-//
-// Parameters:  none
-//
-// Returns:     tEplKernel              = error code
-//
-//
-// State:
-//
-//---------------------------------------------------------------------------
+The function deinitializes the CFM module.
 
-tEplKernel EplCfmuDelInstance(void)
+\return The function returns a tEplKernel error code.
+
+\ingroup module_cfmu
+*/
+//------------------------------------------------------------------------------
+tEplKernel cfmu_exit(void)
 {
-tEplKernel          Ret = kEplSuccessful;
-unsigned int        uiNodeId;
-tEplVarParam        VarParam;
-BYTE*               pbBuffer;
-tEplCfmuNodeInfo*   pNodeInfo;
+    UINT                nodeId;
+    tEplVarParam        varParam;
+    UINT8*              pBuffer;
+    tCfmNodeInfo*       pNodeInfo;
 
     // free domain for object 0x1F22 CFM_ConciseDcfList_ADOM
-    VarParam.m_pData = NULL;
-    VarParam.m_Size = 0;
-    VarParam.m_uiIndex = 0x1F22;
-    for (uiNodeId = 1; uiNodeId <= EPL_NMT_MAX_NODE_ID; uiNodeId++)
+    varParam.m_pData = NULL;
+    varParam.m_Size = 0;
+    varParam.m_uiIndex = 0x1F22;    //CFM_ConciseDcfList_ADOM
+    for (nodeId = 1; nodeId <= EPL_NMT_MAX_NODE_ID; nodeId++)
     {
-        pNodeInfo = EPL_CFMU_GET_NODEINFO(uiNodeId);
+        pNodeInfo = CFM_GET_NODEINFO(nodeId);
         if (pNodeInfo != NULL)
         {
-            if (pNodeInfo->m_SdoComConHdl != UINT_MAX)
+            if (pNodeInfo->sdoComConHdl != UINT_MAX)
             {
-                Ret = EplSdoComSdoAbort(pNodeInfo->m_SdoComConHdl, EPL_SDOAC_DATA_NOT_TRANSF_DUE_DEVICE_STATE);
+                EplSdoComSdoAbort(pNodeInfo->sdoComConHdl, EPL_SDOAC_DATA_NOT_TRANSF_DUE_DEVICE_STATE);
             }
 
-            pbBuffer = pNodeInfo->m_pbObdBufferConciseDcf;
-            if (pbBuffer != NULL)
+            pBuffer = pNodeInfo->pObdBufferConciseDcf;
+            if (pBuffer != NULL)
             {
-                VarParam.m_uiSubindex = uiNodeId;
-                VarParam.m_ValidFlag = kVarValidAll;
-                Ret = EplObdDefineVar(&VarParam);
+                varParam.m_uiSubindex = nodeId;
+                varParam.m_ValidFlag = kVarValidAll;
+                EplObdDefineVar(&varParam);
                 // ignore return code, because buffer has to be freed anyway
 
-                EPL_FREE(pbBuffer);
-                pNodeInfo->m_pbObdBufferConciseDcf = NULL;
+                EPL_FREE(pBuffer);
+                pNodeInfo->pObdBufferConciseDcf = NULL;
             }
             EPL_FREE(pNodeInfo);
-            EPL_CFMU_GET_NODEINFO(uiNodeId) = NULL;
+            CFM_GET_NODEINFO(nodeId) = NULL;
         }
     }
-    Ret = kEplSuccessful;
 
-//Exit:
-    return Ret;
+    return kEplSuccessful;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Process node event
 
-//-------------------------------------------------------------------------------------
-//
-// Function:    EplCfmuProcessNodeEvent
-//
-// Description: starts the configuration of the specified CN if data/time differs with local values.
-//
-// Parameters:  uiNodeId_p      = node-ID of CN
-//              NodeEvent_p     = node event of CN
-//
-// Returns:     kEplSuccessful  = configuration is OK -> continue boot process for this CN
-//              kEplReject      = defer further processing until configuration process has finished
-//              other error     = major error occurred
-//
-// State:
-//
-//-------------------------------------------------------------------------------------
+The function processes a node event. It starts configuration of the specified
+CN if configuration data and time differs with local values.
 
-tEplKernel EplCfmuProcessNodeEvent(unsigned int uiNodeId_p, tNmtNodeEvent NodeEvent_p)
+\param  nodeId_p        Node ID of node to configure.
+\param  nodeEvent_p     Node event to process.
+
+\return The function returns a tEplKernel error code.
+\retval kEplSuccessful  Configuration is OK -> continue boot process for this CN.
+\retval kEplReject      Defer further processing until configuration process has finished
+\retval other error     Major error occurred.
+
+\ingroup module_cfmu
+*/
+//------------------------------------------------------------------------------
+tEplKernel cfmu_processNodeEvent(UINT nodeId_p, tNmtNodeEvent nodeEvent_p)
 {
-tEplKernel          Ret = kEplSuccessful;
-static DWORD        dw_le_Signature;
-tEplCfmuNodeInfo*   pNodeInfo = NULL;
-tEplObdSize         ObdSize;
-DWORD               dwExpConfTime = 0;
-DWORD               dwExpConfDate = 0;
-tEplIdentResponse*  pIdentResponse = NULL;
-BOOL                fDoUpdate = FALSE;
+    tEplKernel          ret = kEplSuccessful;
+    static UINT32       leSignature;
+    tCfmNodeInfo*       pNodeInfo = NULL;
+    tEplObdSize         obdSize;
+    UINT32              expConfTime = 0;
+    UINT32              expConfDate = 0;
+    tEplIdentResponse*  pIdentResponse = NULL;
+    BOOL                fDoUpdate = FALSE;
 
-    if ((NodeEvent_p != kNmtNodeEventCheckConf)
-        && (NodeEvent_p != kNmtNodeEventUpdateConf))
-    {
-        goto Exit;
-    }
+    if ((nodeEvent_p != kNmtNodeEventCheckConf) && (nodeEvent_p != kNmtNodeEventUpdateConf))
+        return ret;
 
-    pNodeInfo = EplCfmuAllocNodeInfo(uiNodeId_p);
-    if (pNodeInfo == NULL)
-    {
-        Ret = kEplInvalidNodeId;
-        goto Exit;
-    }
+    if ((pNodeInfo = allocNodeInfo(nodeId_p)) == NULL)
+        return kEplInvalidNodeId;
 
-    if (pNodeInfo->m_CfmState != kEplCfmuStateIdle)
+    if (pNodeInfo->cfmState != kCfmStateIdle)
     {
         // send abort
-        pNodeInfo->m_CfmState = kEplCfmuStateInternalAbort;
-        Ret = EplSdoComSdoAbort(pNodeInfo->m_SdoComConHdl, EPL_SDOAC_DATA_NOT_TRANSF_DUE_LOCAL_CONTROL);
-        if (Ret != kEplSuccessful)
-        {
-            goto Exit;
-        }
+        pNodeInfo->cfmState = kCfmStateInternalAbort;
+        ret = EplSdoComSdoAbort(pNodeInfo->sdoComConHdl, EPL_SDOAC_DATA_NOT_TRANSF_DUE_LOCAL_CONTROL);
+        if (ret != kEplSuccessful)
+            return ret;
 
         // close connection
-        Ret = EplSdoComUndefineCon(pNodeInfo->m_SdoComConHdl);
-        pNodeInfo->m_SdoComConHdl = UINT_MAX;
-        if (Ret != kEplSuccessful)
+        ret = EplSdoComUndefineCon(pNodeInfo->sdoComConHdl);
+        pNodeInfo->sdoComConHdl = UINT_MAX;
+        if (ret != kEplSuccessful)
         {
             EPL_DBGLVL_CFM_TRACE("SDO Free Error!\n");
-            goto Exit;
+            return ret;
         }
-
     }
 
-    pNodeInfo->m_uiCurDataSize = 0;
+    pNodeInfo->curDataSize = 0;
 
     // fetch pointer to ConciseDCF from object 0x1F22
     // (this allows the application to link its own memory to this object)
-    pNodeInfo->m_pbDataConciseDcf = EplObduGetObjectDataPtr(0x1F22, uiNodeId_p);
-    if (pNodeInfo->m_pbDataConciseDcf == NULL)
-    {
-        Ret = kEplCfmNoConfigData;
-        goto Exit;
-    }
+    pNodeInfo->pDataConciseDcf = EplObduGetObjectDataPtr(0x1F22, nodeId_p);
+    if (pNodeInfo->pDataConciseDcf == NULL)
+        return kEplCfmNoConfigData;
 
-    ObdSize = EplObduGetDataSize(0x1F22, uiNodeId_p);
-    pNodeInfo->m_dwBytesRemaining = (DWORD) ObdSize;
-    pNodeInfo->m_EventCnProgress.m_dwTotalNumberOfBytes = pNodeInfo->m_dwBytesRemaining;
+    obdSize = EplObduGetDataSize(0x1F22, nodeId_p);
+    pNodeInfo->bytesRemaining = (UINT32) obdSize;
+    pNodeInfo->eventCnProgress.totalNumberOfBytes = pNodeInfo->bytesRemaining;
 #if (EPL_CFM_CONFIGURE_CYCLE_LENGTH != FALSE)
-    pNodeInfo->m_EventCnProgress.m_dwTotalNumberOfBytes += sizeof (DWORD);
+    pNodeInfo->eventCnProgress.totalNumberOfBytes += sizeof (UINT32);
 #endif
-    pNodeInfo->m_EventCnProgress.m_dwBytesDownloaded = 0;
-    if (ObdSize < sizeof (DWORD))
+    pNodeInfo->eventCnProgress.bytesDownloaded = 0;
+    if (obdSize < sizeof(UINT32))
     {
-        pNodeInfo->m_EventCnProgress.m_EplError = kEplCfmInvalidDcf;
-        Ret = EplCfmuCallCbProgress(pNodeInfo);
-        if (Ret != kEplSuccessful)
-        {
-            goto Exit;
-        }
-        Ret = pNodeInfo->m_EventCnProgress.m_EplError;
-        goto Exit;
+        pNodeInfo->eventCnProgress.error = kEplCfmInvalidDcf;
+        ret = callCbProgress(pNodeInfo);
+        if (ret != kEplSuccessful)
+            return ret;
+        return pNodeInfo->eventCnProgress.error;
     }
 
-    pNodeInfo->m_dwEntriesRemaining = AmiGetDwordFromLe(pNodeInfo->m_pbDataConciseDcf);
+    pNodeInfo->entriesRemaining = AmiGetDwordFromLe(pNodeInfo->pDataConciseDcf);
+    pNodeInfo->pDataConciseDcf += sizeof(UINT32);
+    pNodeInfo->bytesRemaining -= sizeof(UINT32);
+    pNodeInfo->eventCnProgress.bytesDownloaded += sizeof(UINT32);
 
-    pNodeInfo->m_pbDataConciseDcf += sizeof (DWORD);
-    pNodeInfo->m_dwBytesRemaining -= sizeof (DWORD);
-    pNodeInfo->m_EventCnProgress.m_dwBytesDownloaded += sizeof (DWORD);
-
-    if (pNodeInfo->m_dwEntriesRemaining == 0)
+    if (pNodeInfo->entriesRemaining == 0)
     {
-        pNodeInfo->m_EventCnProgress.m_EplError = kEplCfmNoConfigData;
-        Ret = EplCfmuCallCbProgress(pNodeInfo);
-        if (Ret != kEplSuccessful)
-        {
-            goto Exit;
-        }
+        pNodeInfo->eventCnProgress.error = kEplCfmNoConfigData;
+        ret = callCbProgress(pNodeInfo);
+        if (ret != kEplSuccessful)
+            return ret;
     }
     else
     {
-        ObdSize = sizeof (dwExpConfDate);
-        Ret = EplObduReadEntry(0x1F26, uiNodeId_p, &dwExpConfDate, &ObdSize);
-        if (Ret != kEplSuccessful)
+        obdSize = sizeof (expConfDate);
+        ret = EplObduReadEntry(0x1F26, nodeId_p, &expConfDate, &obdSize);
+        if (ret != kEplSuccessful)
         {
-            EPL_DBGLVL_CFM_TRACE("CN%x Error Reading 0x1F26 returns 0x%X\n", uiNodeId_p, Ret);
+            EPL_DBGLVL_CFM_TRACE("CN%x Error Reading 0x1F26 returns 0x%X\n", uiNodeId_p, ret);
         }
-        ObdSize = sizeof (dwExpConfTime);
-        Ret = EplObduReadEntry(0x1F27, uiNodeId_p, &dwExpConfTime, &ObdSize);
-        if (Ret != kEplSuccessful)
+        obdSize = sizeof (expConfTime);
+        ret = EplObduReadEntry(0x1F27, nodeId_p, &expConfTime, &obdSize);
+        if (ret != kEplSuccessful)
         {
-            EPL_DBGLVL_CFM_TRACE("CN%x Error Reading 0x1F27 returns 0x%X\n", uiNodeId_p, Ret);
+            EPL_DBGLVL_CFM_TRACE("CN%x Error Reading 0x1F27 returns 0x%X\n", uiNodeId_p, ret);
         }
-        if ((dwExpConfDate != 0)
-            || (dwExpConfTime != 0))
+        if ((expConfDate != 0) || (expConfTime != 0))
         {   // store configuration in CN at the end of the download,
             // because expected configuration date or time is set
-            pNodeInfo->m_fDoStore = TRUE;
-            pNodeInfo->m_EventCnProgress.m_dwTotalNumberOfBytes += sizeof (DWORD);
+            pNodeInfo->fDoStore = TRUE;
+            pNodeInfo->eventCnProgress.totalNumberOfBytes += sizeof (UINT32);
         }
         else
         {   // expected configuration date and time is not set
             fDoUpdate = TRUE;
         }
-        identu_getIdentResponse(uiNodeId_p, &pIdentResponse);
+        identu_getIdentResponse(nodeId_p, &pIdentResponse);
         if (pIdentResponse == NULL)
         {
             EPL_DBGLVL_CFM_TRACE("CN%x Ident Response is NULL\n", uiNodeId_p);
-            Ret = kEplInvalidNodeId;
-            goto Exit;
+            return kEplInvalidNodeId;
         }
     }
 
 #if (EPL_CFM_CONFIGURE_CYCLE_LENGTH != FALSE)
-    ObdSize = sizeof (EplCfmuInstance_g.m_le_dwCycleLength);
-    Ret = EplObduReadEntryToLe(0x1006, 0x00, &EplCfmuInstance_g.m_le_dwCycleLength, &ObdSize);
-    if (Ret != kEplSuccessful)
+    obdSize = sizeof(cfmInstance_g.leCycleLength);
+    ret = EplObduReadEntryToLe(0x1006, 0x00, &cfmInstance_g.leCycleLength, &obdSize);
+    if (ret != kEplSuccessful)
     {   // local OD access failed
-        EPL_DBGLVL_CFM_TRACE("Local OBD read failed %d\n", Ret);
-        goto Exit;
+        EPL_DBGLVL_CFM_TRACE("Local OBD read failed %d\n", ret);
+        return ret;
     }
 #endif
 
-    if ((pNodeInfo->m_dwEntriesRemaining == 0)
-        || ((NodeEvent_p != kNmtNodeEventUpdateConf)
-            && (fDoUpdate == FALSE)
-            && ((AmiGetDwordFromLe(&pIdentResponse->m_le_dwVerifyConfigurationDate) == dwExpConfDate)
-                && (AmiGetDwordFromLe(&pIdentResponse->m_le_dwVerifyConfigurationTime) == dwExpConfTime))))
+    if ((pNodeInfo->entriesRemaining == 0) ||
+        ((nodeEvent_p != kNmtNodeEventUpdateConf) && (fDoUpdate == FALSE) &&
+         ((AmiGetDwordFromLe(&pIdentResponse->m_le_dwVerifyConfigurationDate) == expConfDate) &&
+          (AmiGetDwordFromLe(&pIdentResponse->m_le_dwVerifyConfigurationTime) == expConfTime))))
     {
-        pNodeInfo->m_CfmState = kEplCfmuStateIdle;
+        pNodeInfo->cfmState = kCfmStateIdle;
 
         // current version is already available on the CN, no need to write new values, we can continue
-        EPL_DBGLVL_CFM_TRACE("CN%x - Cfg Upto Date\n", uiNodeId_p);
+        EPL_DBGLVL_CFM_TRACE("CN%x - Cfg Upto Date\n", nodeId_p);
 
-        Ret = EplCfmuDownloadCycleLength(pNodeInfo);
-        if (Ret == kEplReject)
+        ret = downloadCycleLength(pNodeInfo);
+        if (ret == kEplReject)
         {
-            pNodeInfo->m_CfmState = kEplCfmuStateUpToDate;
+            pNodeInfo->cfmState = kCfmStateUpToDate;
         }
     }
-    else if (NodeEvent_p == kNmtNodeEventUpdateConf)
+    else if (nodeEvent_p == kNmtNodeEventUpdateConf)
     {
-        pNodeInfo->m_CfmState = kEplCfmuStateDownload;
-
-        Ret = EplCfmuDownloadObject(pNodeInfo);
-        if (Ret == kEplSuccessful)
+        pNodeInfo->cfmState = kCfmStateDownload;
+        ret = downloadObject(pNodeInfo);
+        if (ret == kEplSuccessful)
         {   // SDO transfer started
-            Ret = kEplReject;
+            ret = kEplReject;
         }
     }
     else
     {
-        pNodeInfo->m_CfmState = kEplCfmuStateWaitRestore;
+        pNodeInfo->cfmState = kCfmStateWaitRestore;
 
-        pNodeInfo->m_EventCnProgress.m_dwTotalNumberOfBytes += sizeof (dw_le_Signature);
-        AmiSetDwordToLe(&dw_le_Signature, 0x64616F6C);
+        pNodeInfo->eventCnProgress.totalNumberOfBytes += sizeof(leSignature);
+        AmiSetDwordToLe(&leSignature, 0x64616F6C);
         //Restore Default Parameters
-        EPL_DBGLVL_CFM_TRACE("CN%x - Cfg Mismatch | MN Expects: %lx-%lx ", uiNodeId_p, dwExpConfDate, dwExpConfTime);
-        EPL_DBGLVL_CFM_TRACE("CN Has: %lx-%lx. Restoring Default...\n", AmiGetDwordFromLe(&pIdentResponse->m_le_dwVerifyConfigurationDate), AmiGetDwordFromLe(&pIdentResponse->m_le_dwVerifyConfigurationTime));
+        EPL_DBGLVL_CFM_TRACE("CN%x - Cfg Mismatch | MN Expects: %lx-%lx ", nodeId_p, expConfDate, expConfTime);
+        EPL_DBGLVL_CFM_TRACE("CN Has: %lx-%lx. Restoring Default...\n",
+                             AmiGetDwordFromLe(&pIdentResponse->m_le_dwVerifyConfigurationDate),
+                             AmiGetDwordFromLe(&pIdentResponse->m_le_dwVerifyConfigurationTime));
 
-        pNodeInfo->m_EventCnProgress.m_uiObjectIndex = 0x1011;
-        pNodeInfo->m_EventCnProgress.m_uiObjectSubIndex = 0x01;
-        Ret = EplCfmuSdoWriteObject(pNodeInfo, &dw_le_Signature, sizeof (dw_le_Signature));
-        if (Ret == kEplSuccessful)
+        pNodeInfo->eventCnProgress.objectIndex = 0x1011;
+        pNodeInfo->eventCnProgress.objectSubIndex = 0x01;
+        ret = sdoWriteObject(pNodeInfo, &leSignature, sizeof (leSignature));
+        if (ret == kEplSuccessful)
         {   // SDO transfer started
-            Ret = kEplReject;
+            ret = kEplReject;
         }
         else
         {
             // error occurred
-            EPL_DBGLVL_CFM_TRACE("CfmCbEvent(Node): EplCfmuSdoWriteObject() returned 0x%02X\n", Ret);
+            EPL_DBGLVL_CFM_TRACE("CfmCbEvent(Node): sdoWriteObject() returned 0x%02X\n", Ret);
         }
     }
-
-Exit:
-    return Ret;
+    return ret;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Determine if SDO is running
 
-//---------------------------------------------------------------------------
-//
-// Function:    EplCfmuIsSdoRunning
-//
-// Description: returns TRUE if a SDO is running for the specified node.
-//
-// Parameters:  uiNodeId_p              = node-ID
-//
-// Returns:     BOOL                    = TRUE, if SDO is running
-//                                        FALSE, otherwise
-//
-// State:
-//
-//---------------------------------------------------------------------------
+The function determines if the a SDO is running for the specified node.
 
-BOOL EplCfmuIsSdoRunning(unsigned int uiNodeId_p)
+\param  nodeId_p        Node ID of node to determine SDO state.
+
+\return The function returns TRUE if SDO is running and FALSE otherwise.
+
+\ingroup module_cfmu
+*/
+//------------------------------------------------------------------------------
+BOOL cfmu_isSdoRunning(UINT nodeId_p)
 {
-tEplCfmuNodeInfo*   pNodeInfo = NULL;
-BOOL                fSdoRunning = FALSE;
+    tCfmNodeInfo*       pNodeInfo = NULL;
 
-    if ((uiNodeId_p == 0)
-        || (uiNodeId_p > EPL_NMT_MAX_NODE_ID))
-    {
-        goto Exit;
-    }
-    pNodeInfo = EPL_CFMU_GET_NODEINFO(uiNodeId_p);
+    if ((nodeId_p == 0) || (nodeId_p > EPL_NMT_MAX_NODE_ID))
+        return FALSE;
+
+    pNodeInfo = CFM_GET_NODEINFO(nodeId_p);
     if (pNodeInfo == NULL)
-    {
-        goto Exit;
-    }
-    if (pNodeInfo->m_CfmState != kEplCfmuStateIdle)
-    {
-        fSdoRunning = TRUE;
-    }
+        return FALSE;
 
-Exit:
-    return fSdoRunning;
+    if (pNodeInfo->cfmState != kCfmStateIdle)
+        return TRUE;
+
+    return FALSE;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Callback function for OD accesses
 
-//---------------------------------------------------------------------------
-//
-// Function:    EplCfmuCbObdAccess
-//
-// Description: callback function for OD accesses
-//
-// Parameters:  pParam_p                = OBD parameter
-//
-// Returns:     tEplKernel              = error code
-//
-//
-// State:
-//
-//---------------------------------------------------------------------------
+The function implements the callback function which is called on OD accesses.
 
-tEplKernel PUBLIC EplCfmuCbObdAccess(tEplObdCbParam MEM* pParam_p)
+\param  pParam_p        OD callback parameter.
+
+\return The function returns a tEplKernel error code.
+
+\ingroup module_cfmu
+*/
+//------------------------------------------------------------------------------
+tEplKernel cfmu_cbObdAccess(tEplObdCbParam MEM* pParam_p)
 {
-tEplKernel          Ret = kEplSuccessful;
-tEplObdVStringDomain*   pMemVStringDomain;
-tEplCfmuNodeInfo*       pNodeInfo = NULL;
-BYTE*                   pbBuffer;
+    tEplKernel              ret = kEplSuccessful;
+    tEplObdVStringDomain*   pMemVStringDomain;
+    tCfmNodeInfo*           pNodeInfo = NULL;
+    UINT8*                  pBuffer;
 
     pParam_p->m_dwAbortCode = 0;
 
-    if ((pParam_p->m_uiIndex != 0x1F22)
-        || (pParam_p->m_ObdEvent != kEplObdEvWrStringDomain))
-    {
-        goto Exit;
-    }
+    if ((pParam_p->m_uiIndex != 0x1F22) || (pParam_p->m_ObdEvent != kEplObdEvWrStringDomain))
+        return ret;
 
     // abort any running SDO transfer
-    pNodeInfo = EPL_CFMU_GET_NODEINFO(pParam_p->m_uiSubIndex);
-    if ((pNodeInfo != NULL)
-        && (pNodeInfo->m_SdoComConHdl != UINT_MAX))
+    pNodeInfo = CFM_GET_NODEINFO(pParam_p->m_uiSubIndex);
+    if ((pNodeInfo != NULL) && (pNodeInfo->sdoComConHdl != UINT_MAX))
     {
-        Ret = EplSdoComSdoAbort(pNodeInfo->m_SdoComConHdl, EPL_SDOAC_DATA_NOT_TRANSF_DUE_DEVICE_STATE);
+        ret = EplSdoComSdoAbort(pNodeInfo->sdoComConHdl, EPL_SDOAC_DATA_NOT_TRANSF_DUE_DEVICE_STATE);
     }
 
     pMemVStringDomain = pParam_p->m_pArg;
-    if ((pMemVStringDomain->m_ObjSize != pMemVStringDomain->m_DownloadSize)
-        || (pMemVStringDomain->m_pData == NULL))
+    if ((pMemVStringDomain->m_ObjSize != pMemVStringDomain->m_DownloadSize) ||
+        (pMemVStringDomain->m_pData == NULL))
     {
-        pNodeInfo = EplCfmuAllocNodeInfo(pParam_p->m_uiSubIndex);
+        pNodeInfo = allocNodeInfo(pParam_p->m_uiSubIndex);
         if (pNodeInfo == NULL)
         {
             pParam_p->m_dwAbortCode = EPL_SDOAC_OUT_OF_MEMORY;
-            Ret = kEplNoResource;
-            goto Exit;
+            return kEplNoResource;
         }
 
-        pbBuffer = pNodeInfo->m_pbObdBufferConciseDcf;
-        if (pbBuffer != NULL)
+        pBuffer = pNodeInfo->pObdBufferConciseDcf;
+        if (pBuffer != NULL)
         {
-            EPL_FREE(pbBuffer);
-            pNodeInfo->m_pbObdBufferConciseDcf = NULL;
+            EPL_FREE(pBuffer);
+            pNodeInfo->pObdBufferConciseDcf = NULL;
         }
-        pbBuffer = EPL_MALLOC(pMemVStringDomain->m_DownloadSize);
-        if (pbBuffer == NULL)
+        pBuffer = EPL_MALLOC(pMemVStringDomain->m_DownloadSize);
+        if (pBuffer == NULL)
         {
             pParam_p->m_dwAbortCode = EPL_SDOAC_OUT_OF_MEMORY;
-            Ret = kEplNoResource;
-            goto Exit;
+            return kEplNoResource;
         }
-        pNodeInfo->m_pbObdBufferConciseDcf = pbBuffer;
-        pMemVStringDomain->m_pData = pbBuffer;
+        pNodeInfo->pObdBufferConciseDcf = pBuffer;
+        pMemVStringDomain->m_pData = pBuffer;
         pMemVStringDomain->m_ObjSize = pMemVStringDomain->m_DownloadSize;
     }
 
-Exit:
-    return Ret;
+    return ret;
 }
 
+//============================================================================//
+//            P R I V A T E   F U N C T I O N S                               //
+//============================================================================//
+/// \name Private Functions
+/// \{
 
+//------------------------------------------------------------------------------
+/**
+\brief  Allocate node information
 
-//=========================================================================//
-//                                                                         //
-//          P R I V A T E   F U N C T I O N S                              //
-//                                                                         //
-//=========================================================================//
+The function allocates a node info structure for the specified node.
 
-//-------------------------------------------------------------------------------------
-//
-// Function:    EplCfmuAllocNodeInfo
-//
-// Description: allocates a node-info structure for the specified node.
-//
-// Parameters:  uiNodeId_p          = node-ID for which the structure shall be allocated
-//
-// Returns:     tEplCfmuNodeInfo*   = pointer to node-info structure
-//
-// State:
-//
-//-------------------------------------------------------------------------------------
+\param  nodeId_p        Node ID for which to allocate the node info structure.
 
-static tEplCfmuNodeInfo* EplCfmuAllocNodeInfo(unsigned int uiNodeId_p)
+\return The function returns a pointer to the allocated node info structure.
+*/
+//------------------------------------------------------------------------------
+static tCfmNodeInfo* allocNodeInfo(UINT nodeId_p)
 {
-tEplCfmuNodeInfo*   pNodeInfo = NULL;
+    tCfmNodeInfo*   pNodeInfo = NULL;
 
-    if ((uiNodeId_p == 0)
-        || (uiNodeId_p > EPL_NMT_MAX_NODE_ID))
-    {
-        goto Exit;
-    }
-    pNodeInfo = EPL_CFMU_GET_NODEINFO(uiNodeId_p);
+    if ((nodeId_p == 0) || (nodeId_p > EPL_NMT_MAX_NODE_ID))
+        return NULL;
+
+    pNodeInfo = CFM_GET_NODEINFO(nodeId_p);
     if (pNodeInfo != NULL)
-    {
-        goto Exit;
-    }
-    pNodeInfo = EPL_MALLOC(sizeof (*pNodeInfo));
-    EPL_MEMSET(pNodeInfo, 0, sizeof (*pNodeInfo));
-    pNodeInfo->m_EventCnProgress.m_uiNodeId = uiNodeId_p;
-    pNodeInfo->m_SdoComConHdl = UINT_MAX;
+        return pNodeInfo;
 
-    EPL_CFMU_GET_NODEINFO(uiNodeId_p) = pNodeInfo;
+    pNodeInfo = EPL_MALLOC(sizeof(tCfmNodeInfo));
+    EPL_MEMSET(pNodeInfo, 0, sizeof(tCfmNodeInfo));
+    pNodeInfo->eventCnProgress.nodeId = nodeId_p;
+    pNodeInfo->sdoComConHdl = UINT_MAX;
 
-Exit:
+    CFM_GET_NODEINFO(nodeId_p) = pNodeInfo;
     return pNodeInfo;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Call progress callback function
 
-//-------------------------------------------------------------------------------------
-//
-// Function:    EplCfmuCallCbProgress
-//
-// Description: calls the event progress callback for the specified node.
-//
-// Parameters:  pNodeInfo_p         = pointer to internal node-info structure
-//
-// Returns:     void
-//
-// State:
-//
-//-------------------------------------------------------------------------------------
+The function calls the progress callback function of the specified node.
 
-static tEplKernel EplCfmuCallCbProgress(tEplCfmuNodeInfo* pNodeInfo_p)
+\param  pNodeInfo_p     Node info of the node to call the progress callback
+                        function.
+
+\return The function returns a tEplKernel error code.
+*/
+//------------------------------------------------------------------------------
+static tEplKernel callCbProgress(tCfmNodeInfo* pNodeInfo_p)
 {
-tEplKernel      Ret = kEplSuccessful;
+    tEplKernel      ret = kEplSuccessful;
 
-    if (EplCfmuInstance_g.m_pfnCbEventCnProgress != NULL)
+    if (cfmInstance_g.pfnCbEventCnProgress != NULL)
     {
-        Ret = EplCfmuInstance_g.m_pfnCbEventCnProgress(&pNodeInfo_p->m_EventCnProgress);
+        ret = cfmInstance_g.pfnCbEventCnProgress(&pNodeInfo_p->eventCnProgress);
     }
-
-    return Ret;
+    return ret;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Finish configuration by calling result callback function
 
-//-------------------------------------------------------------------------------------
-//
-// Function:    EplCfmuFinishConfig
-//
-// Description: calls the event progress callback for the specified node.
-//
-// Parameters:  pNodeInfo_p         = pointer to internal node-info structure
-//
-// Returns:     tEplKernel
-//
-// State:
-//
-//-------------------------------------------------------------------------------------
+The function calls the result callback function of the specified node.
 
-static tEplKernel EplCfmuFinishConfig(tEplCfmuNodeInfo* pNodeInfo_p, tNmtCommand NmtCommand_p)
+\param  pNodeInfo_p     Node info of the node to call the result callback function.
+\param  nmtCommand_p    NMT command to execute in the result callback function.
+
+\return The function returns a tEplKernel error code.
+*/
+//------------------------------------------------------------------------------
+static tEplKernel finishConfig(tCfmNodeInfo* pNodeInfo_p, tNmtCommand nmtCommand_p)
 {
-tEplKernel      Ret = kEplSuccessful;
+    tEplKernel      ret = kEplSuccessful;
 
-    if (pNodeInfo_p->m_SdoComConHdl != UINT_MAX)
+    if (pNodeInfo_p->sdoComConHdl != UINT_MAX)
     {
-        Ret = EplSdoComUndefineCon(pNodeInfo_p->m_SdoComConHdl);
-        pNodeInfo_p->m_SdoComConHdl = UINT_MAX;
-        if (Ret != kEplSuccessful)
+        ret = EplSdoComUndefineCon(pNodeInfo_p->sdoComConHdl);
+        pNodeInfo_p->sdoComConHdl = UINT_MAX;
+        if (ret != kEplSuccessful)
         {
             EPL_DBGLVL_CFM_TRACE("SDO Free Error!\n");
-            goto Exit;
+            return ret;
         }
     }
 
-    pNodeInfo_p->m_CfmState = kEplCfmuStateIdle;
-
-    if (EplCfmuInstance_g.m_pfnCbEventCnResult != NULL)
+    pNodeInfo_p->cfmState = kCfmStateIdle;
+    if (cfmInstance_g.pfnCbEventCnResult != NULL)
     {
-        Ret = EplCfmuInstance_g.m_pfnCbEventCnResult(pNodeInfo_p->m_EventCnProgress.m_uiNodeId, NmtCommand_p);
+        ret = cfmInstance_g.pfnCbEventCnResult(pNodeInfo_p->eventCnProgress.nodeId, nmtCommand_p);
     }
-
-Exit:
-    return Ret;
+    return ret;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  SDO finished callback function
 
-//-------------------------------------------------------------------------------------
-//
-// Function:    EplCfmuCbSdoCon
-//
-// Description: SDO finished callback.
-//
-// Parameters:  pSdoComFinished_p   = pointer to structure, which describes the
-//                                    the SDO event in detail
-//
-// Returns:     None
-//
-// State:
-//
-//-------------------------------------------------------------------------------------
+The function implements the callback function which is called when the SDO
+transfer is finished.
 
-static tEplKernel PUBLIC  EplCfmuCbSdoCon(tEplSdoComFinished* pSdoComFinished_p)
+\param  pSdoComFinished_p   Pointer to SDO COM finished structure.
+
+\return The function returns a tEplKernel error code.
+*/
+//------------------------------------------------------------------------------
+static tEplKernel cbSdoCon(tEplSdoComFinished* pSdoComFinished_p)
 {
-tEplKernel          Ret = kEplSuccessful;
-tEplCfmuNodeInfo*   pNodeInfo = pSdoComFinished_p->m_pUserArg;
+    tEplKernel          ret = kEplSuccessful;
+    tCfmNodeInfo*       pNodeInfo = pSdoComFinished_p->m_pUserArg;
+    tNmtCommand         nmtCommand;
 
     if (pNodeInfo == NULL)
-    {
         return kEplInvalidNodeId;
-    }
 
-    pNodeInfo->m_EventCnProgress.m_dwSdoAbortCode = pSdoComFinished_p->m_dwAbortCode;
-    pNodeInfo->m_EventCnProgress.m_dwBytesDownloaded += pSdoComFinished_p->m_uiTransferredByte;
+    pNodeInfo->eventCnProgress.sdoAbortCode = pSdoComFinished_p->m_dwAbortCode;
+    pNodeInfo->eventCnProgress.bytesDownloaded += pSdoComFinished_p->m_uiTransferredByte;
 
-    Ret = EplCfmuCallCbProgress(pNodeInfo);
-    if (Ret != kEplSuccessful)
+    if ((ret = callCbProgress(pNodeInfo)) != kEplSuccessful)
+        return ret;
+
+    switch (pNodeInfo->cfmState)
     {
-        goto Exit;
-    }
-
-    switch (pNodeInfo->m_CfmState)
-    {
-        case kEplCfmuStateIdle:
-        {
-            Ret = EplCfmuFinishConfig(pNodeInfo, kNmtNodeCommandConfErr);
+        case kCfmStateIdle:
+            ret = finishConfig(pNodeInfo, kNmtNodeCommandConfErr);
             break;
-        }
 
-        case kEplCfmuStateUpToDate:
-        {
-        tNmtCommand NmtCommand;
-
+        case kCfmStateUpToDate:
             if (pSdoComFinished_p->m_SdoComConState == kEplSdoComTransferFinished)
-            {
-                // continue boot-up of CN with NMT command Reset Configuration
-                NmtCommand = kNmtNodeCommandConfReset;
-            }
+                nmtCommand = kNmtNodeCommandConfReset;  // continue boot-up of CN with NMT command Reset Configuration
             else
-            {
-                // indicate configuration error CN
-                NmtCommand = kNmtNodeCommandConfErr;
-            }
-            Ret = EplCfmuFinishConfig(pNodeInfo, NmtCommand);
-            break;
-        }
+                nmtCommand = kNmtNodeCommandConfErr;   // indicate configuration error CN
 
-        case kEplCfmuStateDownload:
-        {
+            ret = finishConfig(pNodeInfo, nmtCommand);
+            break;
+
+        case kCfmStateDownload:
             if (pSdoComFinished_p->m_SdoComConState == kEplSdoComTransferFinished)
-            {
-                Ret = EplCfmuDownloadObject(pNodeInfo);
-            }
+                ret = downloadObject(pNodeInfo);
             else
-            {   // configuration was not successful
-                Ret = EplCfmuFinishConfig(pNodeInfo, kNmtNodeCommandConfErr);
-            }
-
+                ret = finishConfig(pNodeInfo, kNmtNodeCommandConfErr);      // configuration was not successful
             break;
-        }
 
-        case kEplCfmuStateWaitRestore:
-        {
+        case kCfmStateWaitRestore:
             if (pSdoComFinished_p->m_SdoComConState == kEplSdoComTransferFinished)
             {   // configuration successfully restored
-                EPL_DBGLVL_CFM_TRACE("\nCN%x - Restore Complete. Resetting Node...\n", pNodeInfo->m_EventCnProgress.m_uiNodeId);
-
+                EPL_DBGLVL_CFM_TRACE("\nCN%x - Restore Complete. Resetting Node...\n", pNodeInfo->eventCnProgress.m_uiNodeId);
                 // send NMT command reset node to activate the original configuration
-                Ret = EplCfmuFinishConfig(pNodeInfo, kNmtNodeCommandConfRestored);
+                ret = finishConfig(pNodeInfo, kNmtNodeCommandConfRestored);
             }
             else
             {   // restore configuration not available
                 // start downloading the ConciseDCF
-                pNodeInfo->m_CfmState = kEplCfmuStateDownload;
-                Ret = EplCfmuDownloadObject(pNodeInfo);
+                pNodeInfo->cfmState = kCfmStateDownload;
+                ret = downloadObject(pNodeInfo);
             }
-
             break;
-        }
 
-        case kEplCfmuStateWaitStore:
-        {
-            Ret = EplCfmuDownloadCycleLength(pNodeInfo);
-            if (Ret == kEplReject)
+        case kCfmStateWaitStore:
+            if ((ret = downloadCycleLength(pNodeInfo)) == kEplReject)
             {
-                pNodeInfo->m_CfmState = kEplCfmuStateUpToDate;
-                Ret = kEplSuccessful;
+                pNodeInfo->cfmState = kCfmStateUpToDate;
+                ret = kEplSuccessful;
             }
             else
             {
-                Ret = EplCfmuFinishConfig(pNodeInfo, kNmtNodeCommandConfReset);
+                ret = finishConfig(pNodeInfo, kNmtNodeCommandConfReset);
             }
             break;
-        }
 
-        case kEplCfmuStateInternalAbort:
-        {
+        case kCfmStateInternalAbort:
             // configuration was aborted
             break;
-        }
     }
 
-Exit:
-    return Ret;
+    return ret;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Download cycle length
 
-// ----------------------------------------------------------------------------
-//
-// Function:    EplCfmuDownloadCycleLength()
-//
-// Description: reads the specified entry from the OD of the specified node.
-//              If this node is a remote node, it performs a SDO transfer, which
-//              means this function returns kEplApiTaskDeferred and the application
-//              is informed via the event callback function when the task is completed.
-//
-// Parameters:  pNodeInfo_p         = pointer to internal node-info structure
-//
-// Return:      tEplKernel          = error code
-//
-// ----------------------------------------------------------------------------
+The function reads the specified entry from the OD of the specified node.
+If this node is a remote node, it performs a SDO transfer, which means this
+function returns kEplApiTaskDeferred and the application is informed via
+the event callback function when the task is completed.
 
-static tEplKernel EplCfmuDownloadCycleLength(
-            tEplCfmuNodeInfo* pNodeInfo_p)
+\param  pNodeInfo_p     Node info of the node for which to download the cycle
+                        length.
+
+\return The function returns a tEplKernel error code.
+*/
+//------------------------------------------------------------------------------
+static tEplKernel downloadCycleLength(tCfmNodeInfo* pNodeInfo_p)
 {
-tEplKernel      Ret = kEplSuccessful;
+    tEplKernel      ret = kEplSuccessful;
 
 #if (EPL_CFM_CONFIGURE_CYCLE_LENGTH != FALSE)
-    pNodeInfo_p->m_EventCnProgress.m_uiObjectIndex = 0x1006;
-    pNodeInfo_p->m_EventCnProgress.m_uiObjectSubIndex = 0x00;
-    Ret = EplCfmuSdoWriteObject(pNodeInfo_p, &EplCfmuInstance_g.m_le_dwCycleLength, sizeof (EplCfmuInstance_g.m_le_dwCycleLength));
-    if (Ret == kEplSuccessful)
+    pNodeInfo_p->eventCnProgress.objectIndex = 0x1006;
+    pNodeInfo_p->eventCnProgress.objectSubIndex = 0x00;
+
+    ret = sdoWriteObject(pNodeInfo_p, &cfmInstance_g.leCycleLength, sizeof(UINT32));
+    if (ret == kEplSuccessful)
     {   // SDO transfer started
-        Ret = kEplReject;
+        ret = kEplReject;
     }
     else
     {
-        EPL_DBGLVL_CFM_TRACE("CN%x Writing 0x1006 returns 0x%X\n", pNodeInfo_p->m_EventCnProgress.m_uiNodeId, Ret);
+        EPL_DBGLVL_CFM_TRACE("CN%x Writing 0x1006 returns 0x%X\n", pNodeInfo_p->eventCnProgress.nodeId, ret);
     }
 #endif
 
-    return Ret;
+    return ret;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Download object
 
-// ----------------------------------------------------------------------------
-//
-// Function:    EplCfmuDownloadObject()
-//
-// Description: downloads the next object from the ConciseDCF to the node.
-//
-// Parameters:  pNodeInfo_p         = pointer to internal node-info structure
-//
-// Return:      tEplKernel          = error code
-//
-// ----------------------------------------------------------------------------
+The function downloads the next object from the ConciseDCF to the specified
+node.
 
-static tEplKernel EplCfmuDownloadObject(
-            tEplCfmuNodeInfo* pNodeInfo_p)
+\param  pNodeInfo_p     Node info of the node for which to download the next
+                        object.
+
+\return The function returns a tEplKernel error code.
+*/
+//------------------------------------------------------------------------------
+static tEplKernel downloadObject(tCfmNodeInfo* pNodeInfo_p)
 {
-tEplKernel      Ret = kEplSuccessful;
-static DWORD    dw_le_Signature;
+    tEplKernel          ret = kEplSuccessful;
+    static UINT32       leSignature;
 
     // forward data pointer for last transfer
-    pNodeInfo_p->m_pbDataConciseDcf += pNodeInfo_p->m_uiCurDataSize;
-    pNodeInfo_p->m_dwBytesRemaining -= pNodeInfo_p->m_uiCurDataSize;
+    pNodeInfo_p->pDataConciseDcf += pNodeInfo_p->curDataSize;
+    pNodeInfo_p->bytesRemaining -= pNodeInfo_p->curDataSize;
 
-    if (pNodeInfo_p->m_dwEntriesRemaining > 0)
+    if (pNodeInfo_p->entriesRemaining > 0)
     {
-        if (pNodeInfo_p->m_dwBytesRemaining < EPL_CDC_OFFSET_DATA)
+        if (pNodeInfo_p->bytesRemaining < EPL_CDC_OFFSET_DATA)
         {
             // not enough bytes left in ConciseDCF
-            pNodeInfo_p->m_EventCnProgress.m_EplError = kEplCfmInvalidDcf;
-            Ret = EplCfmuCallCbProgress(pNodeInfo_p);
-            if (Ret != kEplSuccessful)
-            {
-                goto Exit;
-            }
-            Ret = EplCfmuFinishConfig(pNodeInfo_p, kNmtNodeCommandConfErr);
-            goto Exit;
+            pNodeInfo_p->eventCnProgress.error = kEplCfmInvalidDcf;
+            if ((ret = callCbProgress(pNodeInfo_p)) != kEplSuccessful)
+                return ret;
+            return finishConfig(pNodeInfo_p, kNmtNodeCommandConfErr);
         }
 
         // fetch next item from ConciseDCF
-        pNodeInfo_p->m_EventCnProgress.m_uiObjectIndex = AmiGetWordFromLe(&pNodeInfo_p->m_pbDataConciseDcf[EPL_CDC_OFFSET_INDEX]);
-        pNodeInfo_p->m_EventCnProgress.m_uiObjectSubIndex = AmiGetByteFromLe(&pNodeInfo_p->m_pbDataConciseDcf[EPL_CDC_OFFSET_SUBINDEX]);
-        pNodeInfo_p->m_uiCurDataSize = (unsigned int) AmiGetDwordFromLe(&pNodeInfo_p->m_pbDataConciseDcf[EPL_CDC_OFFSET_SIZE]);
-        pNodeInfo_p->m_pbDataConciseDcf += EPL_CDC_OFFSET_DATA;
-        pNodeInfo_p->m_dwBytesRemaining -= EPL_CDC_OFFSET_DATA;
-        pNodeInfo_p->m_EventCnProgress.m_dwBytesDownloaded += EPL_CDC_OFFSET_DATA;
+        pNodeInfo_p->eventCnProgress.objectIndex = AmiGetWordFromLe(&pNodeInfo_p->pDataConciseDcf[EPL_CDC_OFFSET_INDEX]);
+        pNodeInfo_p->eventCnProgress.objectSubIndex = AmiGetByteFromLe(&pNodeInfo_p->pDataConciseDcf[EPL_CDC_OFFSET_SUBINDEX]);
+        pNodeInfo_p->curDataSize = (UINT) AmiGetDwordFromLe(&pNodeInfo_p->pDataConciseDcf[EPL_CDC_OFFSET_SIZE]);
+        pNodeInfo_p->pDataConciseDcf += EPL_CDC_OFFSET_DATA;
+        pNodeInfo_p->bytesRemaining -= EPL_CDC_OFFSET_DATA;
+        pNodeInfo_p->eventCnProgress.bytesDownloaded += EPL_CDC_OFFSET_DATA;
 
-        if ((pNodeInfo_p->m_dwBytesRemaining < pNodeInfo_p->m_uiCurDataSize)
-            || (pNodeInfo_p->m_uiCurDataSize == 0))
+        if ((pNodeInfo_p->bytesRemaining < pNodeInfo_p->curDataSize) ||
+            (pNodeInfo_p->curDataSize == 0))
         {
             // not enough bytes left in ConciseDCF
-            pNodeInfo_p->m_EventCnProgress.m_EplError = kEplCfmInvalidDcf;
-            Ret = EplCfmuCallCbProgress(pNodeInfo_p);
-            if (Ret != kEplSuccessful)
-            {
-                goto Exit;
-            }
-            Ret = EplCfmuFinishConfig(pNodeInfo_p, kNmtNodeCommandConfErr);
-            goto Exit;
+            pNodeInfo_p->eventCnProgress.error = kEplCfmInvalidDcf;
+            if ((ret = callCbProgress(pNodeInfo_p)) != kEplSuccessful)
+                return ret;
+            return finishConfig(pNodeInfo_p, kNmtNodeCommandConfErr);
         }
 
-        pNodeInfo_p->m_dwEntriesRemaining--;
-
-        Ret = EplCfmuSdoWriteObject(pNodeInfo_p, pNodeInfo_p->m_pbDataConciseDcf, pNodeInfo_p->m_uiCurDataSize);
-        if (Ret != kEplSuccessful)
-        {
-            goto Exit;
-        }
+        pNodeInfo_p->entriesRemaining--;
+        ret = sdoWriteObject(pNodeInfo_p, pNodeInfo_p->pDataConciseDcf, pNodeInfo_p->curDataSize);
+        if (ret != kEplSuccessful)
+            return ret;
     }
     else
     {   // download finished
-
-        if (pNodeInfo_p->m_fDoStore != FALSE)
+        if (pNodeInfo_p->fDoStore != FALSE)
         {
             // store configuration into non-volatile memory
-            pNodeInfo_p->m_CfmState = kEplCfmuStateWaitStore;
-            AmiSetDwordToLe(&dw_le_Signature, 0x65766173);
-            pNodeInfo_p->m_EventCnProgress.m_uiObjectIndex = 0x1010;
-            pNodeInfo_p->m_EventCnProgress.m_uiObjectSubIndex = 0x01;
-            Ret = EplCfmuSdoWriteObject(pNodeInfo_p, &dw_le_Signature, sizeof (dw_le_Signature));
-            if (Ret != kEplSuccessful)
-            {
-                goto Exit;
-            }
+            pNodeInfo_p->cfmState = kCfmStateWaitStore;
+            AmiSetDwordToLe(&leSignature, 0x65766173);
+            pNodeInfo_p->eventCnProgress.objectIndex = 0x1010;
+            pNodeInfo_p->eventCnProgress.objectSubIndex = 0x01;
+            ret = sdoWriteObject(pNodeInfo_p, &leSignature, sizeof (leSignature));
+            if (ret != kEplSuccessful)
+                return ret;
         }
         else
         {
-            Ret = EplCfmuDownloadCycleLength(pNodeInfo_p);
-            if (Ret == kEplReject)
+            ret = downloadCycleLength(pNodeInfo_p);
+            if (ret == kEplReject)
             {
-                pNodeInfo_p->m_CfmState = kEplCfmuStateUpToDate;
-                Ret = kEplSuccessful;
+                pNodeInfo_p->cfmState = kCfmStateUpToDate;
+                return kEplSuccessful;
             }
             else
             {
-                Ret = EplCfmuFinishConfig(pNodeInfo_p, kNmtNodeCommandConfReset);
+                return finishConfig(pNodeInfo_p, kNmtNodeCommandConfReset);
             }
         }
     }
 
-Exit:
-    return Ret;
+    return ret;
 }
 
 
-// ----------------------------------------------------------------------------
-//
-// Function:    EplCfmuSdoWriteObject()
-//
-// Description: writes the specified entry to the OD of the specified node.
-//
-// Parameters:  pNodeInfo_p         = pointer to internal node-info structure
-//              pSrcData_le_p       = IN: pointer to data in little endian
-//              uiSize_p            = IN: size of data in bytes
-//
-// Return:      tEplKernel          = error code
-//
-// ----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+/**
+\brief  Write object by SDO transfer
 
-static tEplKernel EplCfmuSdoWriteObject(
-            tEplCfmuNodeInfo* pNodeInfo_p,
-            void*             pSrcData_le_p,
-            unsigned int      uiSize_p)
+The function writes the specified entry to the OD of the specified node.
+
+\param  pNodeInfo_p     Node info of the node to write.
+\param  pLeSrcData_p    Pointer to data in little endian byte order.
+\param  size_p          Size of data.
+
+\return The function returns a tEplKernel error code.
+*/
+//------------------------------------------------------------------------------
+static tEplKernel sdoWriteObject(tCfmNodeInfo* pNodeInfo_p, void* pLeSrcData_p, UINT size_p)
 {
-tEplKernel      Ret = kEplSuccessful;
-tEplSdoComTransParamByIndex TransParamByIndex;
+    tEplKernel                  ret = kEplSuccessful;
+    tEplSdoComTransParamByIndex transParamByIndex;
 
-    if ((pSrcData_le_p == NULL) || (uiSize_p == 0))
-    {
-        Ret = kEplApiInvalidParam;
-        goto Exit;
-    }
+    if ((pLeSrcData_p == NULL) || (size_p == 0))
+        return kEplApiInvalidParam;
 
-    if (pNodeInfo_p->m_SdoComConHdl == UINT_MAX)
+    if (pNodeInfo_p->sdoComConHdl == UINT_MAX)
     {
         // init command layer connection
-        Ret = EplSdoComDefineCon(&pNodeInfo_p->m_SdoComConHdl,
-                                 pNodeInfo_p->m_EventCnProgress.m_uiNodeId,
+        ret = EplSdoComDefineCon(&pNodeInfo_p->sdoComConHdl,
+                                 pNodeInfo_p->eventCnProgress.nodeId,
                                  kEplSdoTypeAsnd);
-        if ((Ret != kEplSuccessful) && (Ret != kEplSdoComHandleExists))
-        {
-            goto Exit;
-        }
+        if ((ret != kEplSuccessful) && (ret != kEplSdoComHandleExists))
+            return ret;
     }
 
-    TransParamByIndex.m_pData = pSrcData_le_p;
-    TransParamByIndex.m_SdoAccessType = kEplSdoAccessTypeWrite;
-    TransParamByIndex.m_SdoComConHdl = pNodeInfo_p->m_SdoComConHdl;
-    TransParamByIndex.m_uiDataSize = uiSize_p;
-    TransParamByIndex.m_uiIndex = pNodeInfo_p->m_EventCnProgress.m_uiObjectIndex;
-    TransParamByIndex.m_uiSubindex = pNodeInfo_p->m_EventCnProgress.m_uiObjectSubIndex;
-    TransParamByIndex.m_pfnSdoFinishedCb = EplCfmuCbSdoCon;
-    TransParamByIndex.m_pUserArg = pNodeInfo_p;
+    transParamByIndex.m_pData = pLeSrcData_p;
+    transParamByIndex.m_SdoAccessType = kEplSdoAccessTypeWrite;
+    transParamByIndex.m_SdoComConHdl = pNodeInfo_p->sdoComConHdl;
+    transParamByIndex.m_uiDataSize = size_p;
+    transParamByIndex.m_uiIndex = pNodeInfo_p->eventCnProgress.objectIndex;
+    transParamByIndex.m_uiSubindex = pNodeInfo_p->eventCnProgress.objectSubIndex;
+    transParamByIndex.m_pfnSdoFinishedCb = cbSdoCon;
+    transParamByIndex.m_pUserArg = pNodeInfo_p;
 
-    Ret = EplSdoComInitTransferByIndex(&TransParamByIndex);
-    if (Ret == kEplSdoComHandleBusy)
+    ret = EplSdoComInitTransferByIndex(&transParamByIndex);
+    if (ret == kEplSdoComHandleBusy)
     {
-        Ret = EplSdoComSdoAbort(pNodeInfo_p->m_SdoComConHdl, EPL_SDOAC_DATA_NOT_TRANSF_DUE_LOCAL_CONTROL);
-        if (Ret == kEplSuccessful)
+        ret = EplSdoComSdoAbort(pNodeInfo_p->sdoComConHdl, EPL_SDOAC_DATA_NOT_TRANSF_DUE_LOCAL_CONTROL);
+        if (ret == kEplSuccessful)
         {
-            Ret = EplSdoComInitTransferByIndex(&TransParamByIndex);
+            ret = EplSdoComInitTransferByIndex(&transParamByIndex);
         }
     }
-    else if (Ret == kEplSdoSeqConnectionBusy)
+    else if (ret == kEplSdoSeqConnectionBusy)
     {
         // close connection
-        Ret = EplSdoComUndefineCon(pNodeInfo_p->m_SdoComConHdl);
-        pNodeInfo_p->m_SdoComConHdl = UINT_MAX;
-        if (Ret != kEplSuccessful)
+        ret = EplSdoComUndefineCon(pNodeInfo_p->sdoComConHdl);
+        pNodeInfo_p->sdoComConHdl = UINT_MAX;
+        if (ret != kEplSuccessful)
         {
             EPL_DBGLVL_CFM_TRACE("SDO Free Error!\n");
-            goto Exit;
+            return ret;
         }
 
         // reinit command layer connection
-        Ret = EplSdoComDefineCon(&pNodeInfo_p->m_SdoComConHdl,
-                                 pNodeInfo_p->m_EventCnProgress.m_uiNodeId,
+        ret = EplSdoComDefineCon(&pNodeInfo_p->sdoComConHdl,
+                                 pNodeInfo_p->eventCnProgress.nodeId,
                                  kEplSdoTypeAsnd);
-        if ((Ret != kEplSuccessful) && (Ret != kEplSdoComHandleExists))
-        {
-            goto Exit;
-        }
+        if ((ret != kEplSuccessful) && (ret != kEplSdoComHandleExists))
+            return ret;
 
         // retry transfer
-        TransParamByIndex.m_SdoComConHdl = pNodeInfo_p->m_SdoComConHdl;
-        Ret = EplSdoComInitTransferByIndex(&TransParamByIndex);
+        transParamByIndex.m_SdoComConHdl = pNodeInfo_p->sdoComConHdl;
+        ret = EplSdoComInitTransferByIndex(&transParamByIndex);
     }
 
-Exit:
-    return Ret;
+    return ret;
 }
 
+///\}
 
-#endif // (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_CFM)) != 0)
-
-// EOF

@@ -201,6 +201,16 @@ SyncRequest/SyncResponse frames used by poll response chaining.
 \ingroup user_layer
 */
 
+//==============================================================================
+/**
+\defgroup module_cfmu Configuration manager module (cfmu)
+
+The configuration file manager (CFM) module is responsible for reading the
+CDC file and configure the CNs using SDO transfers.
+
+\ingroup user_layer
+*/
+
 
 //==============================================================================
 //==============================================================================
