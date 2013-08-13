@@ -50,7 +50,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <user/pdou.h>
 #include <user/dllucal.h>
 #include <user/errhndu.h>
-#include <user/EplLedu.h>
+#include <user/ledu.h>
 #include <user/nmtcnu.h>
 #include <user/nmtmnu.h>
 #include <user/EplSdoComu.h>
