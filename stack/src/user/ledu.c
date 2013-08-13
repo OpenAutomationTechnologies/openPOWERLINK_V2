@@ -41,7 +41,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <EplInc.h>
-#include <user/EplLedu.h>
+#include <user/ledu.h>
 #include <user/EplTimeru.h>
 
 //============================================================================//

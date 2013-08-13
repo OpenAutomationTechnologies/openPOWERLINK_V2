@@ -1,10 +1,10 @@
 /**
 ********************************************************************************
-\file   EplLed.h
+\file   ledu.h
 
 \brief  Definitions for user LED module
 
-This file contains definitions for the user LED module.
+This file contains definitions and declarations of the user LED module.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
@@ -35,12 +35,15 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_EplLed_H_
-#define _INC_EplLed_H_
+#ifndef _INC_ledu_H_
+#define _INC_ledu_H_
 
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
+#include <led.h>
+#include <nmt.h>
+#include <user/eventu.h>
 
 //------------------------------------------------------------------------------
 // const defines
@@ -49,17 +52,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
-
-/**
- * \brief   Valid LED types
- *
- * The structure defines all valid LED types used by POWERLINK.
- */
-typedef enum
-{
-    kLedTypeStatus   = 0x00,    ///< POWERLINK Status LED
-    kLedTypeError    = 0x01,    ///< POWERLINK Error LED
-} tLedType;
+typedef tEplKernel (*tLeduStateChangeCallback) (tLedType ledType_p, BOOL fOn_p);
 
 //------------------------------------------------------------------------------
 // function prototypes
@@ -69,10 +62,15 @@ typedef enum
 extern "C" {
 #endif
 
+tEplKernel ledu_init(tLeduStateChangeCallback pfnCbStateChange_p);
+tEplKernel ledu_addInstance(tLeduStateChangeCallback pfnCbStateChange_p);
+tEplKernel ledu_exit(void);
+tEplKernel ledu_cbNmtStateChange(tEventNmtStateChange nmtStateChange_p);
+tEplKernel ledu_processEvent(tEplEvent* pEplEvent_p);
+
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* _INC_EplLed_H_ */
-
+#endif /* _INC_ledu_H_ */
 
