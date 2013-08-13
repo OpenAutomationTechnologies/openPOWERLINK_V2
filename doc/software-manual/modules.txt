@@ -211,6 +211,16 @@ CDC file and configure the CNs using SDO transfers.
 \ingroup user_layer
 */
 
+//==============================================================================
+/**
+\defgroup module_ledu User LED module (ledu)
+
+The user LED module is responsible to control the POWERLIK status and error
+LEDs. Depending on the status of the stack the LEDs will be controlled.
+
+\ingroup user_layer
+*/
+
 
 //==============================================================================
 //==============================================================================

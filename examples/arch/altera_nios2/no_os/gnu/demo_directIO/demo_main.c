@@ -336,7 +336,7 @@ tEplKernel PUBLIC AppCbEvent(tEplApiEventType EventType_p,
 #ifdef STATUS_LEDS_BASE
             switch (pEventArg_p->m_Led.m_LedType)
             {
-                case kEplLedTypeStatus:
+                case kLedTypeStatus:
                 {
                     if (pEventArg_p->m_Led.m_fOn != FALSE)
                     {
@@ -348,7 +348,7 @@ tEplKernel PUBLIC AppCbEvent(tEplApiEventType EventType_p,
                     }
                     break;
                 }
-                case kEplLedTypeError:
+                case kLedTypeError:
                 {
                     if (pEventArg_p->m_Led.m_fOn != FALSE)
                     {

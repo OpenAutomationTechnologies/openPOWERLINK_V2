@@ -216,7 +216,7 @@ static tEplKernel PUBLIC  EplApiCbBootEvent(tNmtBootEvent BootEvent_p,
 
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_LEDU)) != 0)
 // callback function of Ledu module
-static tEplKernel PUBLIC  EplApiCbLedStateChange(tEplLedType LedType_p,
+static tEplKernel PUBLIC  EplApiCbLedStateChange(tLedType LedType_p,
                                                  BOOL fOn_p);
 #endif
 
@@ -1673,7 +1673,7 @@ tEplApiEventArg     EventArg;
 
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_LEDU)) != 0)
     // forward event to Led module
-    Ret = EplLeduCbNmtStateChange(NmtStateChange_p);
+    Ret = ledu_cbNmtStateChange(NmtStateChange_p);
     if (Ret != kEplSuccessful)
     {
         goto Exit;
@@ -2388,7 +2388,7 @@ tEplApiEventArg EventArg;
 //
 //---------------------------------------------------------------------------
 
-static tEplKernel PUBLIC  EplApiCbLedStateChange(tEplLedType LedType_p,
+static tEplKernel PUBLIC  EplApiCbLedStateChange(tLedType LedType_p,
                                                  BOOL fOn_p)
 {
 tEplKernel Ret;
