@@ -1,264 +1,197 @@
-/****************************************************************************
+/**
+********************************************************************************
+\file   ledu.c
 
-  (c) SYSTEC electronic GmbH, D-07973 Greiz, August-Bebel-Str. 29
-      www.systec-electronic.com
+\brief  Implementation of user LED module
 
-  Project:      openPOWERLINK
+This file contains the implementation of the user LED module.
 
-  Description:  source file for LED user part module.
+\ingroup module_ledu
+*******************************************************************************/
 
-  License:
+/*------------------------------------------------------------------------------
+Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2013, SYSTEC electronic GmbH
+All rights reserved.
 
-    Redistribution and use in source and binary forms, with or without
-    modification, are permitted provided that the following conditions
-    are met:
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+    * Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above copyright
+      notice, this list of conditions and the following disclaimer in the
+      documentation and/or other materials provided with the distribution.
+    * Neither the name of the copyright holders nor the
+      names of its contributors may be used to endorse or promote products
+      derived from this software without specific prior written permission.
 
-    1. Redistributions of source code must retain the above copyright
-       notice, this list of conditions and the following disclaimer.
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL COPYRIGHT HOLDERS BE LIABLE FOR ANY
+DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+------------------------------------------------------------------------------*/
 
-    2. Redistributions in binary form must reproduce the above copyright
-       notice, this list of conditions and the following disclaimer in the
-       documentation and/or other materials provided with the distribution.
+//------------------------------------------------------------------------------
+// includes
+//------------------------------------------------------------------------------
+#include <EplInc.h>
+#include <user/EplLedu.h>
+#include <user/EplTimeru.h>
 
-    3. Neither the name of SYSTEC electronic GmbH nor the names of its
-       contributors may be used to endorse or promote products derived
-       from this software without prior written permission. For written
-       permission, please contact info@systec-electronic.com.
+//============================================================================//
+//            G L O B A L   D E F I N I T I O N S                             //
+//============================================================================//
 
-    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-    LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-    FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-    COPYRIGHT HOLDERS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-    INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-    BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-    LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-    CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-    LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-    ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-    POSSIBILITY OF SUCH DAMAGE.
-
-    Severability Clause:
-
-        If a provision of this License is or becomes illegal, invalid or
-        unenforceable in any jurisdiction, that shall not affect:
-        1. the validity or enforceability in that jurisdiction of any other
-           provision of this License; or
-        2. the validity or enforceability in other jurisdictions of that or
-           any other provision of this License.
-
-  -------------------------------------------------------------------------
-
-                $RCSfile$
-
-                $Author$
-
-                $Revision$  $Date$
-
-                $State$
-
-                Build Environment:
-                    GCC V3.4
-
-  -------------------------------------------------------------------------
-
-  Revision History:
-
-  2006/06/09 k.t.:   start of the implementation
-
-****************************************************************************/
-
-#include "EplInc.h"
-#include "user/EplLedu.h"
-#include "user/EplTimeru.h"
-
-#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_LEDU)) != 0)
-
-/***************************************************************************/
-/*                                                                         */
-/*                                                                         */
-/*          G L O B A L   D E F I N I T I O N S                            */
-/*                                                                         */
-/*                                                                         */
-/***************************************************************************/
-
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // const defines
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
-#define EPL_LEDU_DURATION_FLICKERING    50      // [ms]
-#define EPL_LEDU_DURATION_BLINKING      200     // [ms]
-#define EPL_LEDU_DURATION_FLASH_ON      200     // [ms]
-#define EPL_LEDU_DURATION_FLASH_OFF     1000    // [ms]
+//------------------------------------------------------------------------------
+// module global vars
+//------------------------------------------------------------------------------
 
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+// global function prototypes
+//------------------------------------------------------------------------------
+
+
+//============================================================================//
+//            P R I V A T E   D E F I N I T I O N S                           //
+//============================================================================//
+
+//------------------------------------------------------------------------------
+// const defines
+//------------------------------------------------------------------------------
+#define LEDU_DURATION_FLICKERING    50      // [ms]
+#define LEDU_DURATION_BLINKING      200     // [ms]
+#define LEDU_DURATION_FLASH_ON      200     // [ms]
+#define LEDU_DURATION_FLASH_OFF     1000    // [ms]
+
+//------------------------------------------------------------------------------
 // local types
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
+/**
+ * \brief   Enumeration for valid LED modes
+ *
+ * The enumeration lists all valid LED modes.
+ */
 typedef enum
 {
-    kEplLeduModeInit        = 0x00,
-    kEplLeduModeOff         = 0x01,
-    kEplLeduModeOn          = 0x02,
-    kEplLeduModeFlickering  = 0x03,
-    kEplLeduModeBlinking    = 0x04,
-    kEplLeduModeSingleFlash = 0x05,
-    kEplLeduModeDoubleFlash = 0x06,
-    kEplLeduModeTripleFlash = 0x07,
+    kLeduModeInit           = 0x00,
+    kLeduModeOff            = 0x01,
+    kLeduModeOn             = 0x02,
+    kLeduModeFlickering     = 0x03,
+    kLeduModeBlinking       = 0x04,
+    kLeduModeSingleFlash    = 0x05,
+    kLeduModeDoubleFlash    = 0x06,
+    kLeduModeTripleFlash    = 0x07,
+} tLeduMode;
 
-} tEplLeduMode;
-
-
+/**
+ * \brief   User LED module instance
+ *
+ * The structure defines the instance data of the user LED module.
+ */
 typedef struct
 {
-    tEplTimerHdl                m_TimerHdlLedBlink; // timer for LED blinking
-    DWORD                       m_dwTimerArg;
-    tEplLeduStateChangeCallback m_pfnCbStateChange;
-    tEplLeduMode                m_StatusLedMode;
-    unsigned int                m_uiStatusLedState;
-        // 0 - long off (e.g. 50 ms while flickering, 200 ms while blinking and
-        //               1000 ms while flashing)
-        // 1 - on (odd number)
-        // 2 - short off (even number)
-
-} tEplLeduInstance;
-
-
-//---------------------------------------------------------------------------
-// module global vars
-//---------------------------------------------------------------------------
-
-static tEplLeduInstance   EplLeduInstance_g;
+    tEplTimerHdl                timerHdlLedBlink;       ///< Timer for LED blinking
+    UINT32                      timerArg;               ///< Argument for timer
+    tLeduStateChangeCallback    pfnCbStateChange;       ///< Function pointer to state change function.
+    tLeduMode                   statusLedMode;          ///< Mode of the status LED
+    /**
+     *  0 - long off (e.g. 50 ms while flickering, 200 ms while blinking and 1000 ms while flashing)
+     *  1 - on (odd number)
+     *  2 - short off (even number)
+     */
+    UINT                        statusLedState;         ///< State of the status LED
+} tLeduInstance;
 
 
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+// local vars
+//------------------------------------------------------------------------------
+static tLeduInstance   leduInstance_g;
+
+//------------------------------------------------------------------------------
 // local function prototypes
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+static tEplKernel callStateChanged(tLedType LedType_p, BOOL fOn_p);
+static tEplKernel changeMode(tLeduMode NewMode_p);
 
-static tEplKernel PUBLIC EplLeduCallStateChanged(
-            tEplLedType LedType_p, BOOL fOn_p);
+//============================================================================//
+//            P U B L I C   F U N C T I O N S                                 //
+//============================================================================//
 
-static tEplKernel PUBLIC EplLeduChangeMode(
-            tEplLeduMode NewMode_p);
+//------------------------------------------------------------------------------
+/**
+\brief  Initialize user LED module
 
+The function initializes the user LED module.
 
+\param  pfnCbStateChange_p      Pointer to callback function for LED state
+                                changes.
 
-//=========================================================================//
-//                                                                         //
-//          P U B L I C   F U N C T I O N S                                //
-//                                                                         //
-//=========================================================================//
+\return The function returns a tEplKernel error code.
 
-//---------------------------------------------------------------------------
-//
-// Function:    EplLeduInit
-//
-// Description: init the first instance of the module
-//
-// Parameters:  pfnCbStateChange_p  = callback function for LED state changes
-//
-// Returns:     tEplKernel = errorcode
-//
-//
-// State:
-//
-//---------------------------------------------------------------------------
-
-tEplKernel PUBLIC EplLeduInit(tEplLeduStateChangeCallback pfnCbStateChange_p)
+\ingroup module_ledu
+*/
+//------------------------------------------------------------------------------
+tEplKernel ledu_init(tLeduStateChangeCallback pfnCbStateChange_p)
 {
-tEplKernel Ret;
+    EPL_MEMSET(&leduInstance_g, 0, sizeof(tLeduInstance));
+    leduInstance_g.pfnCbStateChange = pfnCbStateChange_p;
 
-    Ret = EplLeduAddInstance(pfnCbStateChange_p);
-
-    return Ret;
+    return kEplSuccessful;
 }
 
-//---------------------------------------------------------------------------
-//
-// Function:    EplLeduAddInstance
-//
-// Description: init the add new instance of the module
-//
-// Parameters:  pfnCbStateChange_p  = callback function for LED state changes
-//
-// Returns:     tEplKernel = errorcode
-//
-//
-// State:
-//
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+/**
+\brief  Deinitialize user LED module
 
-tEplKernel PUBLIC EplLeduAddInstance(tEplLeduStateChangeCallback pfnCbStateChange_p)
+The function deinitializes the user LED module.
+
+\return The function returns a tEplKernel error code.
+
+\ingroup module_ledu
+*/
+//------------------------------------------------------------------------------
+tEplKernel ledu_exit(void)
 {
-tEplKernel Ret;
+    tEplKernel ret = kEplSuccessful;
 
-    Ret = kEplSuccessful;
+    ret = EplTimeruDeleteTimer(&leduInstance_g.timerHdlLedBlink);
+    EPL_MEMSET(&leduInstance_g, 0, sizeof(tLeduInstance));
 
-    // reset instance structure
-    EPL_MEMSET(&EplLeduInstance_g, 0, sizeof (EplLeduInstance_g));
-
-    // save callback function pointer
-    EplLeduInstance_g.m_pfnCbStateChange = pfnCbStateChange_p;
-
-
-
-    return Ret;
-
+    return ret;
 }
 
-//---------------------------------------------------------------------------
-//
-// Function:    EplLeduDelInstance
-//
-// Description: delete instance of the module
-//
-// Parameters:
-//
-//
-// Returns:     tEplKernel = errorcode
-//
-//
-// State:
-//
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+/**
+\brief  Callback function for NMT state changes
 
-tEplKernel PUBLIC EplLeduDelInstance(void)
+The function implements the LED modules callback function for NMT state
+changes.
+
+\param  nmtStateChange_p    NMT state change event.
+
+\return The function returns a tEplKernel error code.
+
+\ingroup module_ledu
+*/
+//------------------------------------------------------------------------------
+tEplKernel ledu_cbNmtStateChange(tEventNmtStateChange nmtStateChange_p)
 {
-tEplKernel Ret;
-
-    Ret = kEplSuccessful;
-
-    Ret = EplTimeruDeleteTimer(&EplLeduInstance_g.m_TimerHdlLedBlink);
-
-    // reset instance structure
-    EPL_MEMSET(&EplLeduInstance_g, 0, sizeof (EplLeduInstance_g));
-
-    return Ret;
-}
-
-
-
-//---------------------------------------------------------------------------
-//
-// Function:    EplLeduCbNmtStateChange
-//
-// Description: callback function for NMT state changes
-//
-// Parameters:  NmtStateChange_p        = NMT state change event
-//
-// Returns:     tEplKernel              = error code
-//
-//
-// State:
-//
-//---------------------------------------------------------------------------
-
-tEplKernel PUBLIC EplLeduCbNmtStateChange(tEventNmtStateChange NmtStateChange_p)
-{
-tEplKernel      Ret = kEplSuccessful;
+    tEplKernel      ret = kEplSuccessful;
 
     // activate status LED according to NMT state
-    switch (NmtStateChange_p.newNmtState)
+    switch (nmtStateChange_p.newNmtState)
     {
         // status LED off
         case kNmtGsOff:
@@ -268,414 +201,330 @@ tEplKernel      Ret = kEplSuccessful;
         case kNmtGsResetConfiguration:
         case kNmtCsNotActive:
         case kNmtMsNotActive:
-        {
-            if (EplLeduInstance_g.m_StatusLedMode != kEplLeduModeOff)
+            if (leduInstance_g.statusLedMode != kLeduModeOff)
             {   // state changed
-                EplLeduInstance_g.m_StatusLedMode = kEplLeduModeOff;
-                Ret = EplTimeruDeleteTimer(&EplLeduInstance_g.m_TimerHdlLedBlink);
-                Ret = EplLeduCallStateChanged(kEplLedTypeStatus, FALSE);
+                leduInstance_g.statusLedMode = kLeduModeOff;
+                ret = EplTimeruDeleteTimer(&leduInstance_g.timerHdlLedBlink);
+                ret = callStateChanged(kLedTypeStatus, FALSE);
             }
             break;
-        }
 
         // status LED single flashing
         case kNmtCsPreOperational1:
         case kNmtMsPreOperational1:
-        {
-            Ret = EplLeduChangeMode(kEplLeduModeSingleFlash);
+            ret = changeMode(kLeduModeSingleFlash);
             break;
-        }
 
         // status LED double flashing
         case kNmtCsPreOperational2:
         case kNmtMsPreOperational2:
-        {
-            Ret = EplLeduChangeMode(kEplLeduModeDoubleFlash);
+            ret = changeMode(kLeduModeDoubleFlash);
             break;
-        }
 
         // status LED triple flashing
         case kNmtCsReadyToOperate:
         case kNmtMsReadyToOperate:
-        {
-            Ret = EplLeduChangeMode(kEplLeduModeTripleFlash);
+            ret = changeMode(kLeduModeTripleFlash);
             break;
-        }
 
         // status LED on
         case kNmtCsOperational:
         case kNmtMsOperational:
-        {
-            if (EplLeduInstance_g.m_StatusLedMode != kEplLeduModeOn)
+            if (leduInstance_g.statusLedMode != kLeduModeOn)
             {   // state changed
-                EplLeduInstance_g.m_StatusLedMode = kEplLeduModeOn;
-                Ret = EplTimeruDeleteTimer(&EplLeduInstance_g.m_TimerHdlLedBlink);
-                Ret = EplLeduCallStateChanged(kEplLedTypeStatus, TRUE);
+                leduInstance_g.statusLedMode = kLeduModeOn;
+                ret = EplTimeruDeleteTimer(&leduInstance_g.timerHdlLedBlink);
+                ret = callStateChanged(kLedTypeStatus, TRUE);
             }
             break;
-        }
 
         // status LED blinking
         case kNmtCsStopped:
-        {
-            Ret = EplLeduChangeMode(kEplLeduModeBlinking);
+            ret = changeMode(kLeduModeBlinking);
             break;
-        }
 
         // status LED flickering
         case kNmtCsBasicEthernet:
         case kNmtMsBasicEthernet:
-        {
-            Ret = EplLeduChangeMode(kEplLeduModeFlickering);
+            ret = changeMode(kLeduModeFlickering);
             break;
-        }
-
     }
 
     // activate error LED according to NMT event
-    switch (NmtStateChange_p.nmtEvent)
+    switch (nmtStateChange_p.nmtEvent)
     {
         // error LED off
         case kNmtEventSwReset:               // NMT_GT2
         case kNmtEventStartNode:             // NMT_CT7
         case kNmtEventTimerBasicEthernet:    // NMT_CT3
         case kNmtEventEnterMsOperational:    // NMT_MT5
-        {
-            Ret = EplLeduCallStateChanged(kEplLedTypeError, FALSE);
+            ret = callStateChanged(kLedTypeError, FALSE);
             break;
-        }
 
         // error LED on
         case kNmtEventNmtCycleError:     // NMT_CT11, NMT_MT6
         case kNmtEventInternComError:    // NMT_GT6
-        {
-            Ret = EplLeduCallStateChanged(kEplLedTypeError, TRUE);
+            ret = callStateChanged(kLedTypeError, TRUE);
             break;
-        }
 
         default:
-        {   // do nothing
+            // do nothing
             break;
-        }
-
     }
 
-    return Ret;
+    return ret;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Process events
 
-//---------------------------------------------------------------------------
-//
-// Function:    EplLeduProcessEvent
-//
-// Description: processes events from event queue
-//
-// Parameters:  pEvent_p        = pointer to event
-//
-// Returns:     tEplKernel      = errorcode
-//
-// State:
-//
-//---------------------------------------------------------------------------
+The function implements the event handler of the LED module.
 
-tEplKernel PUBLIC EplLeduProcessEvent(
-            tEplEvent* pEvent_p)
+\param  pEvent_p        Event to process.
+
+\return The function returns a tEplKernel error code.
+
+\ingroup module_ledu
+*/
+//------------------------------------------------------------------------------
+tEplKernel ledu_processEvent(tEplEvent* pEvent_p)
 {
-tEplKernel      Ret;
-tEplTimerArg    TimerArg;
-DWORD           dwTimeout = 0;
-BOOL            fLedOn = FALSE;
+    tEplKernel          ret;
+    tEplTimerArg        timerArg;
+    UINT32              timeout = 0;
+    BOOL                fLedOn = FALSE;
+    tEplTimerEventArg*  pTimerEventArg;
 
-    Ret = kEplSuccessful;
+    ret = kEplSuccessful;
 
-    // process event
     switch(pEvent_p->m_EventType)
     {
         // timer event
         case kEplEventTypeTimer:
-        {
-        tEplTimerEventArg*  pTimerEventArg = (tEplTimerEventArg*)pEvent_p->m_pArg;
+            pTimerEventArg = (tEplTimerEventArg*)pEvent_p->m_pArg;
 
-            if (pTimerEventArg->m_Arg.m_dwVal != EplLeduInstance_g.m_dwTimerArg)
-            {   // zombie timer
-                // ignore it
+            if (pTimerEventArg->m_Arg.m_dwVal != leduInstance_g.timerArg)
+            {   // zombie timer, ignore it
                 break;
             }
 
-            // increment status LED state
-            EplLeduInstance_g.m_uiStatusLedState++;
+            leduInstance_g.statusLedState++;
 
             // select timeout and new LED state corresponding to mode
-            switch (EplLeduInstance_g.m_StatusLedMode)
+            switch (leduInstance_g.statusLedMode)
             {
-                case kEplLeduModeInit:
-                case kEplLeduModeOn:
-                case kEplLeduModeOff:
-                {   // should not occur
-                    goto Exit;
-                }
+                case kLeduModeInit:
+                case kLeduModeOn:
+                case kLeduModeOff:
+                    goto Exit;      // should not occur
+                    break;
 
-                case kEplLeduModeFlickering:
-                {
-                    if (EplLeduInstance_g.m_uiStatusLedState >= 2)
+                case kLeduModeFlickering:
+                    if (leduInstance_g.statusLedState >= 2)
                     {   // reset state
-                        EplLeduInstance_g.m_uiStatusLedState = 0;
+                        leduInstance_g.statusLedState = 0;
                         fLedOn = FALSE;
                     }
                     else
                     {
                         fLedOn = TRUE;
                     }
-
-                    dwTimeout = EPL_LEDU_DURATION_FLICKERING;
+                    timeout = LEDU_DURATION_FLICKERING;
                     break;
-                }
 
-                case kEplLeduModeBlinking:
-                {
-                    if (EplLeduInstance_g.m_uiStatusLedState >= 2)
+                case kLeduModeBlinking:
+                    if (leduInstance_g.statusLedState >= 2)
                     {   // reset state
-                        EplLeduInstance_g.m_uiStatusLedState = 0;
+                        leduInstance_g.statusLedState = 0;
                         fLedOn = FALSE;
                     }
                     else
                     {
                         fLedOn = TRUE;
                     }
+                    timeout = LEDU_DURATION_BLINKING;
 
-                    dwTimeout = EPL_LEDU_DURATION_BLINKING;
                     break;
-                }
 
-                case kEplLeduModeSingleFlash:
-                {
-                    if (EplLeduInstance_g.m_uiStatusLedState >= 2)
+                case kLeduModeSingleFlash:
+                    if (leduInstance_g.statusLedState >= 2)
                     {   // reset state
-                        EplLeduInstance_g.m_uiStatusLedState = 0;
-                        dwTimeout = EPL_LEDU_DURATION_FLASH_OFF;
+                        leduInstance_g.statusLedState = 0;
+                        timeout = LEDU_DURATION_FLASH_OFF;
                         fLedOn = FALSE;
                     }
                     else
                     {
-                        dwTimeout = EPL_LEDU_DURATION_FLASH_ON;
-                        fLedOn = ((EplLeduInstance_g.m_uiStatusLedState & 0x01) != 0x00)
+                        timeout = LEDU_DURATION_FLASH_ON;
+                        fLedOn = ((leduInstance_g.statusLedState & 0x01) != 0x00)
                             ? TRUE : FALSE;
                     }
-
                     break;
-                }
 
-                case kEplLeduModeDoubleFlash:
-                {
-                    if (EplLeduInstance_g.m_uiStatusLedState >= 4)
+                case kLeduModeDoubleFlash:
+                    if (leduInstance_g.statusLedState >= 4)
                     {   // reset state
-                        EplLeduInstance_g.m_uiStatusLedState = 0;
-                        dwTimeout = EPL_LEDU_DURATION_FLASH_OFF;
+                        leduInstance_g.statusLedState = 0;
+                        timeout = LEDU_DURATION_FLASH_OFF;
                         fLedOn = FALSE;
                     }
                     else
                     {
-                        dwTimeout = EPL_LEDU_DURATION_FLASH_ON;
-                        fLedOn = ((EplLeduInstance_g.m_uiStatusLedState & 0x01) != 0x00)
+                        timeout = LEDU_DURATION_FLASH_ON;
+                        fLedOn = ((leduInstance_g.statusLedState & 0x01) != 0x00)
                             ? TRUE : FALSE;
                     }
-
                     break;
-                }
 
-                case kEplLeduModeTripleFlash:
-                {
-                    if (EplLeduInstance_g.m_uiStatusLedState >= 6)
+                case kLeduModeTripleFlash:
+                    if (leduInstance_g.statusLedState >= 6)
                     {   // reset state
-                        EplLeduInstance_g.m_uiStatusLedState = 0;
-                        dwTimeout = EPL_LEDU_DURATION_FLASH_OFF;
+                        leduInstance_g.statusLedState = 0;
+                        timeout = LEDU_DURATION_FLASH_OFF;
                         fLedOn = FALSE;
                     }
                     else
                     {
-                        dwTimeout = EPL_LEDU_DURATION_FLASH_ON;
-                        fLedOn = ((EplLeduInstance_g.m_uiStatusLedState & 0x01) != 0x00)
+                        timeout = LEDU_DURATION_FLASH_ON;
+                        fLedOn = ((leduInstance_g.statusLedState & 0x01) != 0x00)
                             ? TRUE : FALSE;
                     }
-
                     break;
-                }
+
             }
 
             // create new timer
-            TimerArg.m_EventSink = kEplEventSinkLedu;
-            EplLeduInstance_g.m_dwTimerArg++;
-            TimerArg.m_Arg.m_dwVal = EplLeduInstance_g.m_dwTimerArg;
-            Ret = EplTimeruModifyTimerMs(&EplLeduInstance_g.m_TimerHdlLedBlink,
-                                         dwTimeout,
-                                         TimerArg);
+            timerArg.m_EventSink = kEplEventSinkLedu;
+            leduInstance_g.timerArg++;
+            timerArg.m_Arg.m_dwVal = leduInstance_g.timerArg;
+            ret = EplTimeruModifyTimerMs(&leduInstance_g.timerHdlLedBlink, timeout, timerArg);
 
             // call callback function
-            Ret = EplLeduCallStateChanged(kEplLedTypeStatus, fLedOn);
+            ret = callStateChanged(kLedTypeStatus, fLedOn);
 
             break;
-        }
 
         default:
-        {
-            Ret = kEplNmtInvalidEvent;
-        }
+            ret = kEplNmtInvalidEvent;
 
     }
 
 Exit:
-    return Ret;
+    return ret;
 }
 
 
+//============================================================================//
+//            P R I V A T E   F U N C T I O N S                               //
+//============================================================================//
+/// \name Private Functions
+/// \{
 
-//=========================================================================//
-//                                                                         //
-//          P R I V A T E   F U N C T I O N S                              //
-//                                                                         //
-//=========================================================================//
+//------------------------------------------------------------------------------
+/**
+\brief  Call state changed function
 
+The function calls the registered state change function
 
-//---------------------------------------------------------------------------
-//
-// Function:    EplLeduCallStateChanged
-//
-// Description: call the registered state change callback function
-//
-// Parameters:  LedType_p       = type of LED
-//              fOn_p           = state of LED
-//
-// Returns:     tEplKernel      = errorcode
-//
-// State:
-//
-//---------------------------------------------------------------------------
+\param  ledType_p           The type of LED.
+\param  fOn_p               The state of the LED.
 
-static tEplKernel PUBLIC EplLeduCallStateChanged(
-            tEplLedType LedType_p, BOOL fOn_p)
+\return The function returns a tEplKernel error code.
+*/
+//------------------------------------------------------------------------------
+static tEplKernel callStateChanged(tLedType ledType_p, BOOL fOn_p)
 {
-tEplKernel      Ret;
+    tEplKernel      ret = kEplSuccessful;
 
-    Ret = kEplSuccessful;
-
-    if (EplLeduInstance_g.m_pfnCbStateChange != NULL)
+    if (leduInstance_g.pfnCbStateChange != NULL)
     {
-        Ret = EplLeduInstance_g.m_pfnCbStateChange(LedType_p, fOn_p);
+        ret = leduInstance_g.pfnCbStateChange(ledType_p, fOn_p);
     }
-
-    return Ret;
+    return ret;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Change the LED mode
 
-//---------------------------------------------------------------------------
-//
-// Function:    EplLeduChangeMode
-//
-// Description: call the registered state change callback function
-//
-// Parameters:  LedType_p       = type of LED
-//              fOn_p           = state of LED
-//
-// Returns:     tEplKernel      = errorcode
-//
-// State:
-//
-//---------------------------------------------------------------------------
+The function changes the LED mode.
 
-static tEplKernel PUBLIC EplLeduChangeMode(
-            tEplLeduMode NewMode_p)
+\param  newMode_p           The new mode to set.
+
+\return The function returns a tEplKernel error code.
+*/
+//------------------------------------------------------------------------------
+static tEplKernel changeMode(tLeduMode newMode_p)
 {
-tEplKernel      Ret;
-tEplLeduMode    OldMode;
-tEplTimerArg    TimerArg;
-DWORD           dwTimeout;
-BOOL            fLedOn;
+    tEplKernel      ret;
+    tLeduMode       oldMode;
+    tEplTimerArg    timerArg;
+    UINT32          timeout;
+    BOOL            fLedOn;
 
-    Ret = kEplSuccessful;
+    ret = kEplSuccessful;
 
-    OldMode = EplLeduInstance_g.m_StatusLedMode;
+    oldMode = leduInstance_g.statusLedMode;
 
-    if (OldMode != NewMode_p)
-    {   // state changed
-        // save new mode
-        EplLeduInstance_g.m_StatusLedMode = NewMode_p;
+    if (oldMode != newMode_p)
+    {   // state changed -> save new mode
+        leduInstance_g.statusLedMode = newMode_p;
 
         // Where are we coming from?
-        if (OldMode == kEplLeduModeOff)
-        {   // status LED was off
-
-            // switch LED on
+        if (oldMode == kLeduModeOff)
+        {   // status LED was off -> switch LED on
             fLedOn = TRUE;
-            EplLeduInstance_g.m_uiStatusLedState = 0xFF;
+            leduInstance_g.statusLedState = 0xFF;
         }
-        else if (OldMode == kEplLeduModeOn)
-        {   // status LED was on
-
-            // switch LED off
+        else if (oldMode == kLeduModeOn)
+        {   // status LED was on -> switch LED off
             fLedOn = FALSE;
-            EplLeduInstance_g.m_uiStatusLedState = 0;
+            leduInstance_g.statusLedState = 0;
         }
         else
         {   // timer should be up and running
-            goto Exit;
+            return ret;
         }
 
         // select timeout corresponding to mode
-        switch (NewMode_p)
+        switch (newMode_p)
         {
-            default:
-            {   // should not occur
-                goto Exit;
-            }
-
-            case kEplLeduModeFlickering:
-            {
-                dwTimeout = EPL_LEDU_DURATION_FLICKERING;
+            case kLeduModeFlickering:
+                timeout = LEDU_DURATION_FLICKERING;
                 break;
-            }
 
-            case kEplLeduModeBlinking:
-            {
-                dwTimeout = EPL_LEDU_DURATION_BLINKING;
+            case kLeduModeBlinking:
+                timeout = LEDU_DURATION_BLINKING;
                 break;
-            }
 
-            case kEplLeduModeSingleFlash:
-            case kEplLeduModeDoubleFlash:
-            case kEplLeduModeTripleFlash:
-            {
+            case kLeduModeSingleFlash:
+            case kLeduModeDoubleFlash:
+            case kLeduModeTripleFlash:
                 if (fLedOn == FALSE)
-                {
-                    dwTimeout = EPL_LEDU_DURATION_FLASH_OFF;
-                }
+                    timeout = LEDU_DURATION_FLASH_OFF;
                 else
-                {
-                    dwTimeout = EPL_LEDU_DURATION_FLASH_ON;
-                }
-
+                    timeout = LEDU_DURATION_FLASH_ON;
                 break;
-            }
 
+            default:
+                return ret;      // should not occur
+                break;
         }
 
         // create new timer
-        TimerArg.m_EventSink = kEplEventSinkLedu;
-        EplLeduInstance_g.m_dwTimerArg++;
-        TimerArg.m_Arg.m_dwVal = EplLeduInstance_g.m_dwTimerArg;
-        Ret = EplTimeruModifyTimerMs(&EplLeduInstance_g.m_TimerHdlLedBlink,
-                                     dwTimeout,
-                                     TimerArg);
+        timerArg.m_EventSink = kEplEventSinkLedu;
+        leduInstance_g.timerArg++;
+        timerArg.m_Arg.m_dwVal = leduInstance_g.timerArg;
+        ret = EplTimeruModifyTimerMs(&leduInstance_g.timerHdlLedBlink,
+                                     timeout,
+                                     timerArg);
 
         // call callback function
-        Ret = EplLeduCallStateChanged(kEplLedTypeStatus, fLedOn);
+        ret = callStateChanged(kLedTypeStatus, fLedOn);
     }
-
-Exit:
-    return Ret;
+    return ret;
 }
 
-
-#endif // #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_LEDU)) != 0)
-
-// EOF
+///\}
 

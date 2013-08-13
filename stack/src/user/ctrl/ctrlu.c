@@ -301,7 +301,7 @@ tEplKernel ctrlu_initStack(tEplApiInitParam * pInitParam_p,
 #endif
 
 #if defined(CONFIG_INCLUDE_LEDU)
-    ret = EplLeduInit(pCbFuncs_p->pfnCbLedStateChange);
+    ret = ledu_init(pCbFuncs_p->pfnCbLedStateChange);
     if (ret != kEplSuccessful)
     {
         goto Exit;
@@ -365,8 +365,8 @@ tEplKernel ctrlu_shutdownStack(void)
 #endif
 
 #if defined(CONFIG_INCLUDE_LEDU)
-    ret = EplLeduDelInstance();
-    TRACE("EplLeduDelInstance():    0x%X\n", ret);
+    ret = ledu_exit();
+    TRACE("ledu_exit():    0x%X\n", ret);
 #endif
 
 #if defined(CONFIG_INCLUDE_NMT_MN)

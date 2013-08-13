@@ -120,7 +120,7 @@ static tEventDispatchEntry eventDispatchTbl_l[] =
     { kEplEventSinkSdoAsySeq,   kEplEventSourceSdoAsySeq,   EplSdoAsySeqProcessEvent },
 #endif
 #if defined (CONFIG_INCLUDE_LEDU)
-    { kEplEventSinkLedu,        kEplEventSourceLedu,        EplLeduProcessEvent },
+    { kEplEventSinkLedu,        kEplEventSourceLedu,        ledu_processEvent },
 #else
     { kEplEventSinkLedu,        kEplEventSourceLedu,        NULL },
 #endif

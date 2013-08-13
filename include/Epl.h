@@ -122,7 +122,7 @@ typedef struct
 
 typedef struct
 {
-    tEplLedType         m_LedType;      // type of the LED (e.g. Status or Error)
+    tLedType            m_LedType;      // type of the LED (e.g. Status or Error)
     BOOL                m_fOn;          // state of the LED (e.g. on or off)
 
 } tEplApiEventLed;
@@ -320,7 +320,7 @@ typedef struct {
 
     tEplKernel (PUBLIC* pfnCbProcessEvent)  (tEplEvent* pEplEvent_p);
 
-    tEplKernel (PUBLIC* pfnCbLedStateChange)(tEplLedType LedType_p, BOOL fOn_p);
+    tEplKernel (PUBLIC* pfnCbLedStateChange)(tLedType LedType_p, BOOL fOn_p);
 } tEplApiCbFuncs;
 
 //---------------------------------------------------------------------------
