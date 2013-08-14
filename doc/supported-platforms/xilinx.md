@@ -36,11 +36,10 @@ for POWERLINK (openMAC) and a hub for daisy chaining several controlled nodes.
 
 - Experiences with this development environment is required.
 
-- POWERLINK network as described in main readme.md.
-  or alternatively a POWERLINK network with Configuration Manager.
-  The corresponding XDD for this node can be found in the subdirectory
-  `ObjDicts\CiA401_CN` of the openPOWERLINK main directory.
-
+- POWERLINK network with managing node (MN)
+  * openPOWERLINK managing node, e.g. Linux
+  * B&R POWERLINK managing node
+  * other POWERLINK managing node
 
 # Hardware Setup {#sect_xilinx_hardware-setup}
 
@@ -91,8 +90,7 @@ for POWERLINK (openMAC) and a hub for daisy chaining several controlled nodes.
 
 # How to run the demo {#sect_xilinx_run}
 
-1. Setup the POWERLINK network as described in main readme located in
-   openPOWERLINK main directory.
+1. Setup the POWERLINK network.
 2. Run 'make download-bits' to download the bitstream to the target.\n
    `$ make download-bits`
 3. Run 'make download-elf' to download the software to the target.\n
@@ -153,7 +151,7 @@ new C project.
   * Inside the SDK use the `Xilinx Tools` -> `Flash Programmer` to write the
     software to the parallel flash.
   * Download the directIO.srec with the right offset to the parallel flash.
-  
+
 - Flash programming on the Microboard (LX9).
   * Generate the srec bootloader in SDK with:
     `File` -> `New` -> `Xilinx C Project (SREC bootloader)`
