@@ -1,11 +1,12 @@
 .qsys_edit/
 db/
 incremental_db/
-top_mn/
+mn_par_host/
 *.bak
 *.bsf
 *.done
 *.html
+*.jdi
 *.pin
 *.qws
 *.rpt
@@ -13,4 +14,5 @@ top_mn/
 *.sof
 *.sopcinfo
 *.summary
+*.pof
 *.txt

@@ -5,7 +5,7 @@
 # Note: Write into console "$ export QUARTUS_SKIP=1" to skip Quartus flow
 
 # Quartus Project name
-QUARTUS_PRJ=cn_directIO
+QUARTUS_PRJ=ink_de2-115
 
 # Qsys toplevel name
 QSYS_PRJ=cn_directIO
