@@ -44,123 +44,140 @@
 library ieee;
 use ieee.std_logic_1164.all;
 
-library work;
-
 entity toplevel is
     port (
         -- 50 MHZ CLK IN
-        EXT_CLK :  in  std_logic;
+        EXT_CLK         : in  std_logic;
         -- PHY0 Interface
-        PHY0_GXCLK :  out  std_logic;
-        PHY0_RXCLK :  in  std_logic;
-        PHY0_RXER :  in  std_logic;
-        PHY0_RXDV :  in  std_logic;
-        PHY0_RXD :  in  std_logic_vector(3 downto 0);
-        PHY0_TXCLK :  in  std_logic;
-        PHY0_TXER :  out  std_logic;
-        PHY0_TXEN :  out  std_logic;
-        PHY0_TXD :  out  std_logic_vector(3 downto 0);
-        PHY0_LINK :  in  std_logic;
-        PHY0_MDIO :  inout  std_logic;
-        PHY0_MDC :  out  std_logic;
-        PHY0_RESET_n :  out  std_logic;
+        PHY0_GXCLK      : out  std_logic;
+        PHY0_RXCLK      : in  std_logic;
+        PHY0_RXER       : in  std_logic;
+        PHY0_RXDV       : in  std_logic;
+        PHY0_RXD        : in  std_logic_vector(3 downto 0);
+        PHY0_TXCLK      : in  std_logic;
+        PHY0_TXER       : out  std_logic;
+        PHY0_TXEN       : out  std_logic;
+        PHY0_TXD        : out  std_logic_vector(3 downto 0);
+        PHY0_LINK       : in  std_logic;
+        PHY0_MDIO       : inout  std_logic;
+        PHY0_MDC        : out  std_logic;
+        PHY0_RESET_n    : out  std_logic;
         -- PHY1 Interface
-        PHY1_GXCLK :  out  std_logic;
-        PHY1_RXCLK :  in  std_logic;
-        PHY1_RXER :  in  std_logic;
-        PHY1_RXDV :  in  std_logic;
-        PHY1_RXD :  in  std_logic_vector(3 downto 0);
-        PHY1_TXCLK :  in  std_logic;
-        PHY1_TXER :  out  std_logic;
-        PHY1_TXEN :  out  std_logic;
-        PHY1_TXD :  out  std_logic_vector(3 downto 0);
-        PHY1_LINK :  in  std_logic;
-        PHY1_MDIO :  inout  std_logic;
-        PHY1_MDC :  out  std_logic;
-        PHY1_RESET_n :  out  std_logic;
+        PHY1_GXCLK      : out  std_logic;
+        PHY1_RXCLK      : in  std_logic;
+        PHY1_RXER       : in  std_logic;
+        PHY1_RXDV       : in  std_logic;
+        PHY1_RXD        : in  std_logic_vector(3 downto 0);
+        PHY1_TXCLK      : in  std_logic;
+        PHY1_TXER       : out  std_logic;
+        PHY1_TXEN       : out  std_logic;
+        PHY1_TXD        : out  std_logic_vector(3 downto 0);
+        PHY1_LINK       : in  std_logic;
+        PHY1_MDIO       : inout  std_logic;
+        PHY1_MDC        : out  std_logic;
+        PHY1_RESET_n    : out  std_logic;
         -- EPCS
-        EPCS_DCLK :  out  std_logic;
-        EPCS_SCE :  out  std_logic;
-        EPCS_SDO :  out  std_logic;
-        EPCS_DATA0 :  in  std_logic;
+        EPCS_DCLK       : out  std_logic;
+        EPCS_SCE        : out  std_logic;
+        EPCS_SDO        : out  std_logic;
+        EPCS_DATA0      : in  std_logic;
         -- 2 MB SRAM
-        SRAM_CE_n :  out  std_logic;
-        SRAM_OE_n :  out  std_logic;
-        SRAM_WE_n :  out  std_logic;
-        SRAM_ADDR :  out  std_logic_vector(20 downto 1);
-        SRAM_BE_n :  out  std_logic_vector(1 downto 0);
-        SRAM_DQ :  inout  std_logic_vector(15 downto 0);
+        SRAM_CE_n       : out  std_logic;
+        SRAM_OE_n       : out  std_logic;
+        SRAM_WE_n       : out  std_logic;
+        SRAM_ADDR       : out  std_logic_vector(20 downto 1);
+        SRAM_BE_n       : out  std_logic_vector(1 downto 0);
+        SRAM_DQ         : inout  std_logic_vector(15 downto 0);
         -- HOST Interface
-        HOSTIF_AD : inout std_logic_vector(15 downto 0);
-        HOSTIF_BE : in std_logic_vector(1 downto 0);
-        HOSTIF_CS_n : in std_logic;
-        HOSTIF_WR_n : in std_logic;
-        HOSTIF_RD_n : in std_logic;
-        HOSTIF_ALE_n : in std_logic;
-        HOSTIF_ACK_n : out std_logic;
-        HOSTIF_IRQ_n : out std_logic
+        HOSTIF_AD       : inout std_logic_vector(15 downto 0);
+        HOSTIF_BE       : in std_logic_vector(1 downto 0);
+        HOSTIF_CS_n     : in std_logic;
+        HOSTIF_WR_n     : in std_logic;
+        HOSTIF_RD_n     : in std_logic;
+        HOSTIF_ALE_n    : in std_logic;
+        HOSTIF_ACK_n    : out std_logic;
+        HOSTIF_IRQ_n    : out std_logic
     );
 end toplevel;
 
 architecture rtl of toplevel is
 
-    component top_mn is
+    component mn_par_pcp is
         port (
-            clk_clk                                               : in    std_logic                     := 'X';             -- clk
-            reset_reset_n                                         : in    std_logic                     := 'X';             -- reset_n
-            clk100sdram_clk                                       : out   std_logic;                                        -- clk
-            altpll_0_areset_conduit_export                        : in    std_logic                     := 'X';             -- export
-            altpll_0_locked_conduit_export                        : out   std_logic;                                        -- export
-            altpll_0_phasedone_conduit_export                     : out   std_logic;                                        -- export
-            pcp_0_tri_state_0_tcm_address_out                     : out   std_logic_vector(20 downto 0);                    -- tcm_address_out
-            pcp_0_tri_state_0_tcm_byteenable_n_out                : out   std_logic_vector(1 downto 0);                     -- tcm_byteenable_n_out
-            pcp_0_tri_state_0_tcm_read_n_out                      : out   std_logic;                                        -- tcm_read_n_out
-            pcp_0_tri_state_0_tcm_write_n_out                     : out   std_logic;                                        -- tcm_write_n_out
-            pcp_0_tri_state_0_tcm_data_out                        : inout std_logic_vector(15 downto 0) := (others => 'X'); -- tcm_data_out
-            pcp_0_tri_state_0_tcm_chipselect_n_out                : out   std_logic;                                        -- tcm_chipselect_n_out
-            pcp_0_benchmark_pio_external_connection_export        : out   std_logic_vector(7 downto 0);                     -- export
-            pcp_0_powerlink_0_phym0_SMIClk                        : out   std_logic;                                        -- SMIClk
-            pcp_0_powerlink_0_phym0_SMIDat                        : inout std_logic                     := 'X';             -- SMIDat
-            pcp_0_powerlink_0_phym0_Rst_n                         : out   std_logic;                                        -- Rst_n
-            pcp_0_powerlink_0_phym1_SMIClk                        : out   std_logic;                                        -- SMIClk
-            pcp_0_powerlink_0_phym1_SMIDat                        : inout std_logic                     := 'X';             -- SMIDat
-            pcp_0_powerlink_0_phym1_Rst_n                         : out   std_logic;                                        -- Rst_n
-            pcp_0_powerlink_0_mii0_phyMii0_TxClk                  : in    std_logic                     := 'X';             -- phyMii0_TxClk
-            pcp_0_powerlink_0_mii0_phyMii0_TxEn                   : out   std_logic;                                        -- phyMii0_TxEn
-            pcp_0_powerlink_0_mii0_phyMii0_TxEr                   : out   std_logic;                                        -- phyMii0_TxEr
-            pcp_0_powerlink_0_mii0_phyMii0_TxDat                  : out   std_logic_vector(3 downto 0);                     -- phyMii0_TxDat
-            pcp_0_powerlink_0_mii0_phyMii0_RxClk                  : in    std_logic                     := 'X';             -- phyMii0_RxClk
-            pcp_0_powerlink_0_mii0_phyMii0_RxDv                   : in    std_logic                     := 'X';             -- phyMii0_RxDv
-            pcp_0_powerlink_0_mii0_phyMii0_RxEr                   : in    std_logic                     := 'X';             -- phyMii0_RxEr
-            pcp_0_powerlink_0_mii0_phyMii0_RxDat                  : in    std_logic_vector(3 downto 0)  := (others => 'X'); -- phyMii0_RxDat
-            pcp_0_powerlink_0_mii0_phyMii1_RxEr                   : in    std_logic                     := 'X';             -- phyMii1_RxEr
-            pcp_0_powerlink_0_mii1_TxClk                          : in    std_logic                     := 'X';             -- TxClk
-            pcp_0_powerlink_0_mii1_TxEn                           : out   std_logic;                                        -- TxEn
-            pcp_0_powerlink_0_mii1_TxEr                           : out   std_logic;                                        -- TxEr
-            pcp_0_powerlink_0_mii1_TxDat                          : out   std_logic_vector(3 downto 0);                     -- TxDat
-            pcp_0_powerlink_0_mii1_RxClk                          : in    std_logic                     := 'X';             -- RxClk
-            pcp_0_powerlink_0_mii1_RxDv                           : in    std_logic                     := 'X';             -- RxDv
-            pcp_0_powerlink_0_mii1_RxDat                          : in    std_logic_vector(3 downto 0)  := (others => 'X'); -- RxDat
-            hostinterface_0_parhost_chipselect                    : in    std_logic                     := 'X';             -- chipselect
-            hostinterface_0_parhost_read                          : in    std_logic                     := 'X';             -- read
-            hostinterface_0_parhost_write                         : in    std_logic                     := 'X';             -- write
-            hostinterface_0_parhost_addressLatchEnable            : in    std_logic                     := 'X';             -- addressLatchEnable
-            hostinterface_0_parhost_acknowledge                   : out   std_logic;                                        -- acknowledge
-            hostinterface_0_parhost_byteenable                    : in    std_logic_vector(1 downto 0)  := (others => 'X'); -- byteenable
-            hostinterface_0_parhost_addressData                   : inout std_logic_vector(15 downto 0) := (others => 'X'); -- addressData
-            hostinterface_0_irqout_irq                            : out   std_logic                                         -- irq
+            clk25_clk                                   : in    std_logic;
+            clk50_clk                                   : in    std_logic                     := 'X';
+            clk100_clk                                  : in    std_logic;
+            reset_reset_n                               : in    std_logic                     := 'X';
+
+            tri_state_0_tcm_address_out                 : out   std_logic_vector(20 downto 0);
+            tri_state_0_tcm_byteenable_n_out            : out   std_logic_vector(1 downto 0);
+            tri_state_0_tcm_read_n_out                  : out   std_logic;
+            tri_state_0_tcm_write_n_out                 : out   std_logic;
+            tri_state_0_tcm_data_out                    : inout std_logic_vector(15 downto 0) := (others => 'X');
+            tri_state_0_tcm_chipselect_n_out            : out   std_logic;
+            pcp_0_benchmark_pio_export                  : out   std_logic_vector(7 downto 0);
+            powerlink_0_phym0_SMIClk                    : out   std_logic;
+            powerlink_0_phym0_SMIDat                    : inout std_logic                     := 'X';
+            powerlink_0_phym0_Rst_n                     : out   std_logic;
+            powerlink_0_phym1_SMIClk                    : out   std_logic;
+            powerlink_0_phym1_SMIDat                    : inout std_logic                     := 'X';
+            powerlink_0_phym1_Rst_n                     : out   std_logic;
+            powerlink_0_mii0_phyMii0_TxClk              : in    std_logic                     := 'X';
+            powerlink_0_mii0_phyMii0_TxEn               : out   std_logic;
+            powerlink_0_mii0_phyMii0_TxEr               : out   std_logic;
+            powerlink_0_mii0_phyMii0_TxDat              : out   std_logic_vector(3 downto 0);
+            powerlink_0_mii0_phyMii0_RxClk              : in    std_logic                     := 'X';
+            powerlink_0_mii0_phyMii0_RxDv               : in    std_logic                     := 'X';
+            powerlink_0_mii0_phyMii0_RxEr               : in    std_logic                     := 'X';
+            powerlink_0_mii0_phyMii0_RxDat              : in    std_logic_vector(3 downto 0)  := (others => 'X');
+            powerlink_0_mii0_phyMii1_RxEr               : in    std_logic                     := 'X';
+            powerlink_0_mii1_TxClk                      : in    std_logic                     := 'X';
+            powerlink_0_mii1_TxEn                       : out   std_logic;
+            powerlink_0_mii1_TxEr                       : out   std_logic;
+            powerlink_0_mii1_TxDat                      : out   std_logic_vector(3 downto 0);
+            powerlink_0_mii1_RxClk                      : in    std_logic                     := 'X';
+            powerlink_0_mii1_RxDv                       : in    std_logic                     := 'X';
+            powerlink_0_mii1_RxDat                      : in    std_logic_vector(3 downto 0)  := (others => 'X');
+            epcs_flash_dclk                             : out   std_logic;
+            epcs_flash_sce                              : out   std_logic;
+            epcs_flash_sdo                              : out   std_logic;
+            epcs_flash_data0                            : in    std_logic                     := 'X';
+            hostinterface_0_irqout_irq                  : out   std_logic;
+            hostinterface_0_parhost_chipselect          : in    std_logic                     := 'X';
+            hostinterface_0_parhost_read                : in    std_logic                     := 'X';
+            hostinterface_0_parhost_write               : in    std_logic                     := 'X';
+            hostinterface_0_parhost_addressLatchEnable  : in    std_logic                     := 'X';
+            hostinterface_0_parhost_acknowledge         : out   std_logic;
+            hostinterface_0_parhost_byteenable          : in    std_logic_vector(1 downto 0)  := (others => 'X');
+            hostinterface_0_parhost_addressData         : inout std_logic_vector(15 downto 0) := (others => 'X')
         );
-    end component top_mn;
+    end component mn_par_pcp;
 
-    signal pllLocked : std_logic;
-    signal sramAddr : std_logic_vector(SRAM_ADDR'high downto 0);
+    -- PLL component
+    component pll
+        port (
+            inclk0  : in std_logic;
+            c0      : out std_logic;
+            c1      : out std_logic;
+            c2      : out std_logic;
+            c3      : out std_logic;
+            locked  : out std_logic
+        );
+    end component;
 
-    signal hostif_cs : std_logic;
-    signal hostif_wr : std_logic;
-    signal hostif_rd : std_logic;
-    signal hostif_ale : std_logic;
-    signal hostif_ack : std_logic;
-    signal hostif_irq : std_logic;
+    signal clk25        : std_logic;
+    signal clk50        : std_logic;
+    signal clk100       : std_logic;
+    signal clk100_p     : std_logic;
+    signal pllLocked    : std_logic;
+    signal sramAddr     : std_logic_vector(SRAM_ADDR'high downto 0);
+
+    signal parHost_chipselect           : std_logic;
+    signal parHost_read                 : std_logic;
+    signal parHost_write                : std_logic;
+    signal parHost_addressLatchEnable   : std_logic;
+    signal parHost_acknowledge          : std_logic;
+    signal host_irq                     : std_logic;
 
 begin
 
@@ -169,62 +186,77 @@ begin
     PHY0_GXCLK <= '0';
     PHY1_GXCLK <= '0';
 
-    HOSTIF_ACK_n <= not hostif_ack;
-    HOSTIF_IRQ_n <= not hostif_irq;
-    hostif_cs <= not HOSTIF_CS_n;
-    hostif_wr <= not HOSTIF_WR_n;
-    hostif_rd <= not HOSTIF_RD_n;
-    hostif_ale <= not HOSTIF_ALE_n;
+    HOSTIF_ACK_n                <= not parHost_acknowledge;
+    HOSTIF_IRQ_n                <= not host_irq;
+    parHost_chipselect          <= not HOSTIF_CS_n;
+    parHost_write               <= not HOSTIF_WR_n;
+    parHost_read                <= not HOSTIF_RD_n;
+    parHost_addressLatchEnable  <= not HOSTIF_ALE_n;
 
-    inst : component top_mn
+    inst : component mn_par_pcp
         port map (
-            clk_clk                                                 => EXT_CLK,
-            altpll_0_areset_conduit_export                          => '0',
-            altpll_0_locked_conduit_export                          => pllLocked,
-            altpll_0_phasedone_conduit_export                       => open,
-            reset_reset_n                                           => pllLocked,
+            clk25_clk                                   => clk25,
+            clk50_clk                                   => clk50,
+            clk100_clk                                  => clk100,
+            reset_reset_n                               => pllLocked,
 
-            pcp_0_powerlink_0_mii0_phyMii0_TxClk                    => PHY0_TXCLK,
-            pcp_0_powerlink_0_mii0_phyMii0_TxEn                     => PHY0_TXEN,
-            pcp_0_powerlink_0_mii0_phyMii0_TxEr                     => PHY0_TXER,
-            pcp_0_powerlink_0_mii0_phyMii0_TxDat                    => PHY0_TXD,
-            pcp_0_powerlink_0_mii0_phyMii0_RxClk                    => PHY0_RXCLK,
-            pcp_0_powerlink_0_mii0_phyMii0_RxDv                     => PHY0_RXDV,
-            pcp_0_powerlink_0_mii0_phyMii0_RxEr                     => PHY0_RXER,
-            pcp_0_powerlink_0_mii0_phyMii0_RxDat                    => PHY0_RXD,
-            pcp_0_powerlink_0_phym0_SMIClk                          => PHY0_MDC,
-            pcp_0_powerlink_0_phym0_SMIDat                          => PHY0_MDIO,
-            pcp_0_powerlink_0_phym0_Rst_n                           => PHY0_RESET_n,
+            powerlink_0_mii0_phyMii0_TxClk              => PHY0_TXCLK,
+            powerlink_0_mii0_phyMii0_TxEn               => PHY0_TXEN,
+            powerlink_0_mii0_phyMii0_TxEr               => PHY0_TXER,
+            powerlink_0_mii0_phyMii0_TxDat              => PHY0_TXD,
+            powerlink_0_mii0_phyMii0_RxClk              => PHY0_RXCLK,
+            powerlink_0_mii0_phyMii0_RxDv               => PHY0_RXDV,
+            powerlink_0_mii0_phyMii0_RxEr               => PHY0_RXER,
+            powerlink_0_mii0_phyMii0_RxDat              => PHY0_RXD,
+            powerlink_0_phym0_SMIClk                    => PHY0_MDC,
+            powerlink_0_phym0_SMIDat                    => PHY0_MDIO,
+            powerlink_0_phym0_Rst_n                     => PHY0_RESET_n,
 
-            pcp_0_powerlink_0_mii1_TxClk                            => PHY1_TXCLK,
-            pcp_0_powerlink_0_mii1_TxEn                             => PHY1_TXEN,
-            pcp_0_powerlink_0_mii1_TxEr                             => PHY1_TXER,
-            pcp_0_powerlink_0_mii1_TxDat                            => PHY1_TXD,
-            pcp_0_powerlink_0_mii1_RxClk                            => PHY1_RXCLK,
-            pcp_0_powerlink_0_mii1_RxDv                             => PHY1_RXDV,
-            pcp_0_powerlink_0_mii1_RxDat                            => PHY1_RXD,
-            pcp_0_powerlink_0_mii0_phyMii1_RxEr                     => PHY1_RXER,
-            pcp_0_powerlink_0_phym1_SMIClk                          => PHY1_MDC,
-            pcp_0_powerlink_0_phym1_SMIDat                          => PHY1_MDIO,
-            pcp_0_powerlink_0_phym1_Rst_n                           => PHY1_RESET_n,
+            powerlink_0_mii1_TxClk                      => PHY1_TXCLK,
+            powerlink_0_mii1_TxEn                       => PHY1_TXEN,
+            powerlink_0_mii1_TxEr                       => PHY1_TXER,
+            powerlink_0_mii1_TxDat                      => PHY1_TXD,
+            powerlink_0_mii1_RxClk                      => PHY1_RXCLK,
+            powerlink_0_mii1_RxDv                       => PHY1_RXDV,
+            powerlink_0_mii1_RxDat                      => PHY1_RXD,
+            powerlink_0_mii0_phyMii1_RxEr               => PHY1_RXER,
+            powerlink_0_phym1_SMIClk                    => PHY1_MDC,
+            powerlink_0_phym1_SMIDat                    => PHY1_MDIO,
+            powerlink_0_phym1_Rst_n                     => PHY1_RESET_n,
 
-            pcp_0_tri_state_0_tcm_address_out                       => sramAddr,
-            pcp_0_tri_state_0_tcm_read_n_out                        => SRAM_OE_n,
-            pcp_0_tri_state_0_tcm_byteenable_n_out                  => SRAM_BE_n,
-            pcp_0_tri_state_0_tcm_write_n_out                       => SRAM_WE_n,
-            pcp_0_tri_state_0_tcm_data_out                          => SRAM_DQ,
-            pcp_0_tri_state_0_tcm_chipselect_n_out                  => SRAM_CE_n,
+            tri_state_0_tcm_address_out                 => sramAddr,
+            tri_state_0_tcm_read_n_out                  => SRAM_OE_n,
+            tri_state_0_tcm_byteenable_n_out            => SRAM_BE_n,
+            tri_state_0_tcm_write_n_out                 => SRAM_WE_n,
+            tri_state_0_tcm_data_out                    => SRAM_DQ,
+            tri_state_0_tcm_chipselect_n_out            => SRAM_CE_n,
 
-            pcp_0_benchmark_pio_external_connection_export          => open,
+            pcp_0_benchmark_pio_export                  => open,
 
-            hostinterface_0_parhost_chipselect                      => hostif_cs,
-            hostinterface_0_parhost_read                            => hostif_rd,
-            hostinterface_0_parhost_write                           => hostif_wr,
-            hostinterface_0_parhost_addressLatchEnable              => hostif_ale,
-            hostinterface_0_parhost_acknowledge                     => hostif_ack,
-            hostinterface_0_parhost_byteenable                      => HOSTIF_BE,
-            hostinterface_0_parhost_addressData                     => HOSTIF_AD,
-            hostinterface_0_irqout_irq                              => hostif_irq
+            epcs_flash_dclk                             => EPCS_DCLK,
+            epcs_flash_sce                              => EPCS_SCE,
+            epcs_flash_sdo                              => EPCS_SDO,
+            epcs_flash_data0                            => EPCS_DATA0,
+
+            hostinterface_0_irqout_irq                  => host_irq,
+            hostinterface_0_parhost_chipselect          => parHost_chipselect,
+            hostinterface_0_parhost_read                => parHost_read,
+            hostinterface_0_parhost_write               => parHost_write,
+            hostinterface_0_parhost_addressLatchEnable  => parHost_addressLatchEnable,
+            hostinterface_0_parhost_acknowledge         => parHost_acknowledge,
+            hostinterface_0_parhost_byteenable          => HOSTIF_BE,
+            hostinterface_0_parhost_addressData         => HOSTIF_AD
+        );
+
+    -- Pll Instance
+    pllInst : pll
+        port map (
+            inclk0  => EXT_CLK,
+            c0      => clk50,
+            c1      => clk100,
+            c2      => clk25,
+            c3      => open,
+            locked  => pllLocked
         );
 
 end rtl;

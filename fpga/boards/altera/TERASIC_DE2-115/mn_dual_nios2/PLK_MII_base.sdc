@@ -9,8 +9,8 @@
 ##  (under "Compilation Report" - "TimeQuest Timing Analyzer" - "Clocks")
 set ext_clk        EXT_CLK
 
-set clk50           inst|altpll_0|sd1|pll7|clk[0]
-set clk100          inst|altpll_0|sd1|pll7|clk[2]
+set clk50           pllInst|altpll_component|auto_generated|pll1|clk[0]
+set clk100          pllInst|altpll_component|auto_generated|pll1|clk[1]
 
 set p0TxClk         PHY0_TXCLK
 set p0RxClk         PHY0_RXCLK
@@ -184,16 +184,15 @@ set_false_path -from [get_registers *] -to [get_ports EPCS_SCE]
 set_false_path -from [get_registers *] -to [get_ports EPCS_SDO]
 set_false_path -from [get_ports EPCS_DATA0] -to [get_registers *]
 ###IOs
+set_false_path -from [get_registers *] -to [get_ports LEDG[*]]
+set_false_path -from [get_registers *] -to [get_ports LCD_*]
+set_false_path -from [get_registers *] -to [get_ports LCD_DQ[*]]
+set_false_path -from [get_ports LCD_DQ[*]] -to [get_registers *]
+set_false_path -from [get_registers *] -to [get_ports BENCHMARK[*]]
+set_false_path -from [get_registers *] -to [get_ports BENCHMARK_AP[*]]
 #### example for output: set_false_path -from [get_registers *] -to [get_ports LED[*]]
 #### example for input:  set_false_path -from [get_ports BUTTON[*]] -to [get_registers *]
 #############################################################
 # add here your slow IOs...
-set_false_path -from [get_ports KEY[*]] -to [get_registers *]
-set_false_path -from [get_ports SW[*]] -to [get_registers *]
-set_false_path -from [get_registers *] -to [get_ports LEDG[*]]
-set_false_path -from [get_registers *] -to [get_ports LEDR[*]]
-set_false_path -from [get_registers *] -to [get_ports LCD_*]
-set_false_path -from [get_registers *] -to [get_ports LCD_DATA[*]]
-set_false_path -from [get_ports LCD_DATA[*]] -to [get_registers *]
 #############################################################
 # ----------------------------------------------------------------------------------

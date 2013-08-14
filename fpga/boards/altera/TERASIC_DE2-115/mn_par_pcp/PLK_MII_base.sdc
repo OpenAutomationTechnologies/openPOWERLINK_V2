@@ -9,8 +9,8 @@
 ##  (under "Compilation Report" - "TimeQuest Timing Analyzer" - "Clocks")
 set ext_clk        EXT_CLK
 
-set clk50           inst|altpll_0|sd1|pll7|clk[0]
-set clk100          inst|altpll_0|sd1|pll7|clk[2]
+set clk50           pllInst|altpll_component|auto_generated|pll1|clk[0]
+set clk100          pllInst|altpll_component|auto_generated|pll1|clk[1]
 
 set p0TxClk         PHY0_TXCLK
 set p0RxClk         PHY0_RXCLK

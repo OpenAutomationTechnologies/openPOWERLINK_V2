@@ -1,6 +1,6 @@
 # -------------------------------------------------------------------------- #
 #
-# Copyright (C) 1991-2010 Altera Corporation
+# Copyright (C) 1991-2012 Altera Corporation
 # Your use of Altera Corporation's design tools, logic functions 
 # and other software and tools, and its AMPP partner logic 
 # functions, and any output files from any of the foregoing 
@@ -16,15 +16,15 @@
 #
 # -------------------------------------------------------------------------- #
 #
-# Quartus II
-# Version 10.0 Build 262 08/18/2010 Service Pack 1 SJ Full Version
-# Date created = 10:38:40  April 05, 2011
+# Quartus II 32-bit
+# Version 12.1 Build 243 01/31/2013 Service Pack 1 SJ Full Version
+# Date created = 07:43:12  April 26, 2013
 #
 # -------------------------------------------------------------------------- #
 
-QUARTUS_VERSION = "10.0"
-DATE = "10:38:40  April 05, 2011"
+QUARTUS_VERSION = "12.1"
+DATE = "07:43:12  April 26, 2013"
 
 # Revisions
 
-PROJECT_REVISION = "POWERLINK_MN"
+PROJECT_REVISION = "ink_de2-115"

@@ -44,228 +44,230 @@
 library ieee;
 use ieee.std_logic_1164.all;
 
-library work;
-
 entity toplevel is
     port (
         -- 50 MHZ CLK IN
-        EXT_CLK :  in  std_logic;
+        EXT_CLK         : in  std_logic;
         -- PHY0 Interface
-        PHY0_GXCLK :  out  std_logic;
-        PHY0_RXCLK :  in  std_logic;
-        PHY0_RXER :  in  std_logic;
-        PHY0_RXDV :  in  std_logic;
-        PHY0_RXD :  in  std_logic_vector(3 downto 0);
-        PHY0_TXCLK :  in  std_logic;
-        PHY0_TXER :  out  std_logic;
-        PHY0_TXEN :  out  std_logic;
-        PHY0_TXD :  out  std_logic_vector(3 downto 0);
-        PHY0_LINK :  in  std_logic;
-        PHY0_MDIO :  inout  std_logic;
-        PHY0_MDC :  out  std_logic;
-        PHY0_RESET_n :  out  std_logic;
+        PHY0_GXCLK      : out  std_logic;
+        PHY0_RXCLK      : in  std_logic;
+        PHY0_RXER       : in  std_logic;
+        PHY0_RXDV       : in  std_logic;
+        PHY0_RXD        : in  std_logic_vector(3 downto 0);
+        PHY0_TXCLK      : in  std_logic;
+        PHY0_TXER       : out  std_logic;
+        PHY0_TXEN       : out  std_logic;
+        PHY0_TXD        : out  std_logic_vector(3 downto 0);
+        PHY0_LINK       : in  std_logic;
+        PHY0_MDIO       : inout  std_logic;
+        PHY0_MDC        : out  std_logic;
+        PHY0_RESET_n    : out  std_logic;
         -- PHY1 Interface
-        PHY1_GXCLK :  out  std_logic;
-        PHY1_RXCLK :  in  std_logic;
-        PHY1_RXER :  in  std_logic;
-        PHY1_RXDV :  in  std_logic;
-        PHY1_RXD :  in  std_logic_vector(3 downto 0);
-        PHY1_TXCLK :  in  std_logic;
-        PHY1_TXER :  out  std_logic;
-        PHY1_TXEN :  out  std_logic;
-        PHY1_TXD :  out  std_logic_vector(3 downto 0);
-        PHY1_LINK :  in  std_logic;
-        PHY1_MDIO :  inout  std_logic;
-        PHY1_MDC :  out  std_logic;
-        PHY1_RESET_n :  out  std_logic;
+        PHY1_GXCLK      : out  std_logic;
+        PHY1_RXCLK      : in  std_logic;
+        PHY1_RXER       : in  std_logic;
+        PHY1_RXDV       : in  std_logic;
+        PHY1_RXD        : in  std_logic_vector(3 downto 0);
+        PHY1_TXCLK      : in  std_logic;
+        PHY1_TXER       : out  std_logic;
+        PHY1_TXEN       : out  std_logic;
+        PHY1_TXD        : out  std_logic_vector(3 downto 0);
+        PHY1_LINK       : in  std_logic;
+        PHY1_MDIO       : inout  std_logic;
+        PHY1_MDC        : out  std_logic;
+        PHY1_RESET_n    : out  std_logic;
         -- EPCS
-        EPCS_DCLK :  out  std_logic;
-        EPCS_SCE :  out  std_logic;
-        EPCS_SDO :  out  std_logic;
-        EPCS_DATA0 :  in  std_logic;
+        EPCS_DCLK       : out  std_logic;
+        EPCS_SCE        : out  std_logic;
+        EPCS_SDO        : out  std_logic;
+        EPCS_DATA0      : in  std_logic;
         -- 2 MB SRAM
-        SRAM_CE_n :  out  std_logic;
-        SRAM_OE_n :  out  std_logic;
-        SRAM_WE_n :  out  std_logic;
-        SRAM_ADDR :  out  std_logic_vector(20 downto 1);
-        SRAM_BE_n :  out  std_logic_vector(1 downto 0);
-        SRAM_DQ :  inout  std_logic_vector(15 downto 0);
+        SRAM_CE_n       : out  std_logic;
+        SRAM_OE_n       : out  std_logic;
+        SRAM_WE_n       : out  std_logic;
+        SRAM_ADDR       : out  std_logic_vector(20 downto 1);
+        SRAM_BE_n       : out  std_logic_vector(1 downto 0);
+        SRAM_DQ         : inout  std_logic_vector(15 downto 0);
         -- 64 MBx2 SDRAM
-        SDRAM_CLK :  out  std_logic;
-        SDRAM_CAS_n :  out  std_logic;
-        SDRAM_CKE :  out  std_logic;
-        SDRAM_CS_n :  out  std_logic;
-        SDRAM_RAS_n :  out  std_logic;
-        SDRAM_WE_n :  out  std_logic;
-        SDRAM_ADDR :  out  std_logic_vector(12 downto 0);
-        SDRAM_BA :  out  std_logic_vector(1 downto 0);
-        SDRAM_DQM :  out  std_logic_vector(3 downto 0);
-        SDRAM_DQ :  inout  std_logic_vector(31 downto 0);
-        -- KEY
-        KEY :  in  std_logic_vector(3 downto 0);
-        -- SW
-        SW :  in  std_logic_vector(7 downto 0);
+        SDRAM_CLK       : out  std_logic;
+        SDRAM_CAS_n     : out  std_logic;
+        SDRAM_CKE       : out  std_logic;
+        SDRAM_CS_n      : out  std_logic;
+        SDRAM_RAS_n     : out  std_logic;
+        SDRAM_WE_n      : out  std_logic;
+        SDRAM_ADDR      : out  std_logic_vector(12 downto 0);
+        SDRAM_BA        : out  std_logic_vector(1 downto 0);
+        SDRAM_DQM       : out  std_logic_vector(3 downto 0);
+        SDRAM_DQ        : inout  std_logic_vector(31 downto 0);
         -- LED green
-        LEDG :  out  std_logic_vector(1 downto 0);
-        -- LED red
-        LEDR :  out  std_logic_vector(3 downto 0);
+        LEDG            : out  std_logic_vector(1 downto 0);
         -- LCD
-        LCD_EN :  out  std_logic;
-        LCD_RS :  out  std_logic;
-        LCD_ON :  out  std_logic;
-        LCD_RW :  out  std_logic;
-        LCD_DATA :  inout  std_logic_vector(7 downto 0);
-        BENCHMARK_IO : out std_logic_vector(7 downto 0)
+        LCD_ON              : out std_logic;
+        LCD_BLON            : out std_logic;
+        LCD_DQ              : inout std_logic_vector(7 downto 0);
+        LCD_E               : out std_logic;
+        LCD_RS              : out std_logic;
+        LCD_RW              : out std_logic;
+        -- BENCHMARK
+        BENCHMARK           : out std_logic_vector(7 downto 0);
+        -- BENCHMARK_AP
+        BENCHMARK_AP        : out std_logic_vector(7 downto 0)
     );
 end toplevel;
 
 architecture rtl of toplevel is
 
-    component top_mn is
+    component mn_dual_nios2 is
         port (
-            clk_clk                                               : in    std_logic                     := 'X';             -- clk
-            reset_reset_n                                         : in    std_logic                     := 'X';             -- reset_n
-            clk100sdram_clk                                       : out   std_logic;                                        -- clk
-            altpll_0_areset_conduit_export                        : in    std_logic                     := 'X';             -- export
-            altpll_0_locked_conduit_export                        : out   std_logic;                                        -- export
-            altpll_0_phasedone_conduit_export                     : out   std_logic;                                        -- export
-            pcp_0_tri_state_0_tcm_address_out                     : out   std_logic_vector(20 downto 0);                    -- tcm_address_out
-            pcp_0_tri_state_0_tcm_byteenable_n_out                : out   std_logic_vector(1 downto 0);                     -- tcm_byteenable_n_out
-            pcp_0_tri_state_0_tcm_read_n_out                      : out   std_logic;                                        -- tcm_read_n_out
-            pcp_0_tri_state_0_tcm_write_n_out                     : out   std_logic;                                        -- tcm_write_n_out
-            pcp_0_tri_state_0_tcm_data_out                        : inout std_logic_vector(15 downto 0) := (others => 'X'); -- tcm_data_out
-            pcp_0_tri_state_0_tcm_chipselect_n_out                : out   std_logic;                                        -- tcm_chipselect_n_out
-            pcp_0_benchmark_pio_external_connection_export        : out   std_logic_vector(7 downto 0);                     -- export
-            pcp_0_powerlink_0_phym0_SMIClk                        : out   std_logic;                                        -- SMIClk
-            pcp_0_powerlink_0_phym0_SMIDat                        : inout std_logic                     := 'X';             -- SMIDat
-            pcp_0_powerlink_0_phym0_Rst_n                         : out   std_logic;                                        -- Rst_n
-            pcp_0_powerlink_0_phym1_SMIClk                        : out   std_logic;                                        -- SMIClk
-            pcp_0_powerlink_0_phym1_SMIDat                        : inout std_logic                     := 'X';             -- SMIDat
-            pcp_0_powerlink_0_phym1_Rst_n                         : out   std_logic;                                        -- Rst_n
-            pcp_0_powerlink_0_mii0_phyMii0_TxClk                  : in    std_logic                     := 'X';             -- phyMii0_TxClk
-            pcp_0_powerlink_0_mii0_phyMii0_TxEn                   : out   std_logic;                                        -- phyMii0_TxEn
-            pcp_0_powerlink_0_mii0_phyMii0_TxEr                   : out   std_logic;                                        -- phyMii0_TxEr
-            pcp_0_powerlink_0_mii0_phyMii0_TxDat                  : out   std_logic_vector(3 downto 0);                     -- phyMii0_TxDat
-            pcp_0_powerlink_0_mii0_phyMii0_RxClk                  : in    std_logic                     := 'X';             -- phyMii0_RxClk
-            pcp_0_powerlink_0_mii0_phyMii0_RxDv                   : in    std_logic                     := 'X';             -- phyMii0_RxDv
-            pcp_0_powerlink_0_mii0_phyMii0_RxEr                   : in    std_logic                     := 'X';             -- phyMii0_RxEr
-            pcp_0_powerlink_0_mii0_phyMii0_RxDat                  : in    std_logic_vector(3 downto 0)  := (others => 'X'); -- phyMii0_RxDat
-            pcp_0_powerlink_0_mii0_phyMii1_RxEr                   : in    std_logic                     := 'X';             -- phyMii1_RxEr
-            pcp_0_powerlink_0_mii1_TxClk                          : in    std_logic                     := 'X';             -- TxClk
-            pcp_0_powerlink_0_mii1_TxEn                           : out   std_logic;                                        -- TxEn
-            pcp_0_powerlink_0_mii1_TxEr                           : out   std_logic;                                        -- TxEr
-            pcp_0_powerlink_0_mii1_TxDat                          : out   std_logic_vector(3 downto 0);                     -- TxDat
-            pcp_0_powerlink_0_mii1_RxClk                          : in    std_logic                     := 'X';             -- RxClk
-            pcp_0_powerlink_0_mii1_RxDv                           : in    std_logic                     := 'X';             -- RxDv
-            pcp_0_powerlink_0_mii1_RxDat                          : in    std_logic_vector(3 downto 0)  := (others => 'X'); -- RxDat
-            host_0_benchmark_pio_external_connection_export       : out   std_logic_vector(7 downto 0);                     -- export
-            host_0_sw_pio_external_connection_export              : in    std_logic_vector(7 downto 0)  := (others => 'X'); -- export
-            host_0_key_pio_external_connection_export             : in    std_logic_vector(3 downto 0)  := (others => 'X'); -- export
-            host_0_led_pio_external_connection_export             : out   std_logic_vector(3 downto 0);                     -- export
-            host_0_led_status_error_pio_external_connection_export: out   std_logic_vector(1 downto 0);                     -- export
-            host_0_lcd_0_external_data                            : inout std_logic_vector(7 downto 0)  := (others => 'X'); -- data
-            host_0_lcd_0_external_E                               : out   std_logic;                                        -- E
-            host_0_lcd_0_external_RS                              : out   std_logic;                                        -- RS
-            host_0_lcd_0_external_RW                              : out   std_logic;                                        -- RW
-            host_0_epcs_flash_controller_0_external_dclk          : out   std_logic;                                        -- dclk
-            host_0_epcs_flash_controller_0_external_sce           : out   std_logic;                                        -- sce
-            host_0_epcs_flash_controller_0_external_sdo           : out   std_logic;                                        -- sdo
-            host_0_epcs_flash_controller_0_external_data0         : in    std_logic                     := 'X';             -- data0
-            host_0_sdram_0_wire_addr                              : out   std_logic_vector(12 downto 0);                    -- addr
-            host_0_sdram_0_wire_ba                                : out   std_logic_vector(1 downto 0);                     -- ba
-            host_0_sdram_0_wire_cas_n                             : out   std_logic;                                        -- cas_n
-            host_0_sdram_0_wire_cke                               : out   std_logic;                                        -- cke
-            host_0_sdram_0_wire_cs_n                              : out   std_logic;                                        -- cs_n
-            host_0_sdram_0_wire_dq                                : inout std_logic_vector(31 downto 0) := (others => 'X'); -- dq
-            host_0_sdram_0_wire_dqm                               : out   std_logic_vector(3 downto 0);                     -- dqm
-            host_0_sdram_0_wire_ras_n                             : out   std_logic;                                        -- ras_n
-            host_0_sdram_0_wire_we_n                              : out   std_logic                                         -- we_n
-        );
-    end component top_mn;
+            clk25_clk                           : in    std_logic;
+            clk50_clk                           : in    std_logic                     := 'X';
+            clk100_clk                          : in    std_logic;
+            reset_reset_n                       : in    std_logic                     := 'X';
 
-    signal pllLocked : std_logic;
-    signal sramAddr : std_logic_vector(SRAM_ADDR'high downto 0);
+            tri_state_0_tcm_address_out         : out   std_logic_vector(20 downto 0);
+            tri_state_0_tcm_byteenable_n_out    : out   std_logic_vector(1 downto 0);
+            tri_state_0_tcm_read_n_out          : out   std_logic;
+            tri_state_0_tcm_write_n_out         : out   std_logic;
+            tri_state_0_tcm_data_out            : inout std_logic_vector(15 downto 0) := (others => 'X');
+            tri_state_0_tcm_chipselect_n_out    : out   std_logic;
+            pcp_0_benchmark_pio_export          : out   std_logic_vector(7 downto 0);
+            powerlink_0_phym0_SMIClk            : out   std_logic;
+            powerlink_0_phym0_SMIDat            : inout std_logic                     := 'X';
+            powerlink_0_phym0_Rst_n             : out   std_logic;
+            powerlink_0_phym1_SMIClk            : out   std_logic;
+            powerlink_0_phym1_SMIDat            : inout std_logic                     := 'X';
+            powerlink_0_phym1_Rst_n             : out   std_logic;
+            powerlink_0_mii0_phyMii0_TxClk      : in    std_logic                     := 'X';
+            powerlink_0_mii0_phyMii0_TxEn       : out   std_logic;
+            powerlink_0_mii0_phyMii0_TxEr       : out   std_logic;
+            powerlink_0_mii0_phyMii0_TxDat      : out   std_logic_vector(3 downto 0);
+            powerlink_0_mii0_phyMii0_RxClk      : in    std_logic                     := 'X';
+            powerlink_0_mii0_phyMii0_RxDv       : in    std_logic                     := 'X';
+            powerlink_0_mii0_phyMii0_RxEr       : in    std_logic                     := 'X';
+            powerlink_0_mii0_phyMii0_RxDat      : in    std_logic_vector(3 downto 0)  := (others => 'X');
+            powerlink_0_mii0_phyMii1_RxEr       : in    std_logic                     := 'X';
+            powerlink_0_mii1_TxClk              : in    std_logic                     := 'X';
+            powerlink_0_mii1_TxEn               : out   std_logic;
+            powerlink_0_mii1_TxEr               : out   std_logic;
+            powerlink_0_mii1_TxDat              : out   std_logic_vector(3 downto 0);
+            powerlink_0_mii1_RxClk              : in    std_logic                     := 'X';
+            powerlink_0_mii1_RxDv               : in    std_logic                     := 'X';
+            powerlink_0_mii1_RxDat              : in    std_logic_vector(3 downto 0)  := (others => 'X');
+            host_0_benchmark_pio_export         : out   std_logic_vector(7 downto 0);
+            status_led_pio_export               : out   std_logic_vector(1 downto 0);
+            epcs_flash_dclk                     : out   std_logic;
+            epcs_flash_sce                      : out   std_logic;
+            epcs_flash_sdo                      : out   std_logic;
+            epcs_flash_data0                    : in    std_logic                     := 'X';
+            host_0_sdram_0_addr                 : out   std_logic_vector(12 downto 0);
+            host_0_sdram_0_ba                   : out   std_logic_vector(1 downto 0);
+            host_0_sdram_0_cas_n                : out   std_logic;
+            host_0_sdram_0_cke                  : out   std_logic;
+            host_0_sdram_0_cs_n                 : out   std_logic;
+            host_0_sdram_0_dq                   : inout std_logic_vector(31 downto 0) := (others => 'X');
+            host_0_sdram_0_dqm                  : out   std_logic_vector(3 downto 0);
+            host_0_sdram_0_ras_n                : out   std_logic;
+            host_0_sdram_0_we_n                 : out   std_logic
+        );
+    end component mn_dual_nios2;
+
+    -- PLL component
+    component pll
+        port (
+            inclk0  : in std_logic;
+            c0      : out std_logic;
+            c1      : out std_logic;
+            c2      : out std_logic;
+            c3      : out std_logic;
+            locked  : out std_logic
+        );
+    end component;
+
+    signal clk25        : std_logic;
+    signal clk50        : std_logic;
+    signal clk100       : std_logic;
+    signal clk100_p     : std_logic;
+    signal pllLocked    : std_logic;
+    signal sramAddr     : std_logic_vector(SRAM_ADDR'high downto 0);
 
 begin
-
-    LCD_ON <= '1';
 
     SRAM_ADDR <= sramAddr(SRAM_ADDR'range);
 
     PHY0_GXCLK <= '0';
     PHY1_GXCLK <= '0';
 
-    inst : component top_mn
+    SDRAM_CLK <= clk100_p;
+
+    inst : component mn_dual_nios2
         port map (
-            clk_clk                                                 => EXT_CLK,
-            altpll_0_areset_conduit_export                          => '0',
-            altpll_0_locked_conduit_export                          => pllLocked,
-            altpll_0_phasedone_conduit_export                       => open,
-            reset_reset_n                                           => pllLocked,
+            clk25_clk                           => clk25,
+            clk50_clk                           => clk50,
+            clk100_clk                          => clk100,
+            reset_reset_n                       => pllLocked,
 
-            pcp_0_powerlink_0_mii0_phyMii0_TxClk                    => PHY0_TXCLK,
-            pcp_0_powerlink_0_mii0_phyMii0_TxEn                     => PHY0_TXEN,
-            pcp_0_powerlink_0_mii0_phyMii0_TxEr                     => PHY0_TXER,
-            pcp_0_powerlink_0_mii0_phyMii0_TxDat                    => PHY0_TXD,
-            pcp_0_powerlink_0_mii0_phyMii0_RxClk                    => PHY0_RXCLK,
-            pcp_0_powerlink_0_mii0_phyMii0_RxDv                     => PHY0_RXDV,
-            pcp_0_powerlink_0_mii0_phyMii0_RxEr                     => PHY0_RXER,
-            pcp_0_powerlink_0_mii0_phyMii0_RxDat                    => PHY0_RXD,
-            pcp_0_powerlink_0_phym0_SMIClk                          => PHY0_MDC,
-            pcp_0_powerlink_0_phym0_SMIDat                          => PHY0_MDIO,
-            pcp_0_powerlink_0_phym0_Rst_n                           => PHY0_RESET_n,
+            powerlink_0_mii0_phyMii0_TxClk      => PHY0_TXCLK,
+            powerlink_0_mii0_phyMii0_TxEn       => PHY0_TXEN,
+            powerlink_0_mii0_phyMii0_TxEr       => PHY0_TXER,
+            powerlink_0_mii0_phyMii0_TxDat      => PHY0_TXD,
+            powerlink_0_mii0_phyMii0_RxClk      => PHY0_RXCLK,
+            powerlink_0_mii0_phyMii0_RxDv       => PHY0_RXDV,
+            powerlink_0_mii0_phyMii0_RxEr       => PHY0_RXER,
+            powerlink_0_mii0_phyMii0_RxDat      => PHY0_RXD,
+            powerlink_0_phym0_SMIClk            => PHY0_MDC,
+            powerlink_0_phym0_SMIDat            => PHY0_MDIO,
+            powerlink_0_phym0_Rst_n             => PHY0_RESET_n,
 
-            pcp_0_powerlink_0_mii1_TxClk                            => PHY1_TXCLK,
-            pcp_0_powerlink_0_mii1_TxEn                             => PHY1_TXEN,
-            pcp_0_powerlink_0_mii1_TxEr                             => PHY1_TXER,
-            pcp_0_powerlink_0_mii1_TxDat                            => PHY1_TXD,
-            pcp_0_powerlink_0_mii1_RxClk                            => PHY1_RXCLK,
-            pcp_0_powerlink_0_mii1_RxDv                             => PHY1_RXDV,
-            pcp_0_powerlink_0_mii1_RxDat                            => PHY1_RXD,
-            pcp_0_powerlink_0_mii0_phyMii1_RxEr                     => PHY1_RXER,
-            pcp_0_powerlink_0_phym1_SMIClk                          => PHY1_MDC,
-            pcp_0_powerlink_0_phym1_SMIDat                          => PHY1_MDIO,
-            pcp_0_powerlink_0_phym1_Rst_n                           => PHY1_RESET_n,
+            powerlink_0_mii1_TxClk              => PHY1_TXCLK,
+            powerlink_0_mii1_TxEn               => PHY1_TXEN,
+            powerlink_0_mii1_TxEr               => PHY1_TXER,
+            powerlink_0_mii1_TxDat              => PHY1_TXD,
+            powerlink_0_mii1_RxClk              => PHY1_RXCLK,
+            powerlink_0_mii1_RxDv               => PHY1_RXDV,
+            powerlink_0_mii1_RxDat              => PHY1_RXD,
+            powerlink_0_mii0_phyMii1_RxEr       => PHY1_RXER,
+            powerlink_0_phym1_SMIClk            => PHY1_MDC,
+            powerlink_0_phym1_SMIDat            => PHY1_MDIO,
+            powerlink_0_phym1_Rst_n             => PHY1_RESET_n,
 
-            pcp_0_tri_state_0_tcm_address_out                       => sramAddr,
-            pcp_0_tri_state_0_tcm_read_n_out                        => SRAM_OE_n,
-            pcp_0_tri_state_0_tcm_byteenable_n_out                  => SRAM_BE_n,
-            pcp_0_tri_state_0_tcm_write_n_out                       => SRAM_WE_n,
-            pcp_0_tri_state_0_tcm_data_out                          => SRAM_DQ,
-            pcp_0_tri_state_0_tcm_chipselect_n_out                  => SRAM_CE_n,
+            tri_state_0_tcm_address_out         => sramAddr,
+            tri_state_0_tcm_read_n_out          => SRAM_OE_n,
+            tri_state_0_tcm_byteenable_n_out    => SRAM_BE_n,
+            tri_state_0_tcm_write_n_out         => SRAM_WE_n,
+            tri_state_0_tcm_data_out            => SRAM_DQ,
+            tri_state_0_tcm_chipselect_n_out    => SRAM_CE_n,
 
-            pcp_0_benchmark_pio_external_connection_export          => BENCHMARK_IO,
+            pcp_0_benchmark_pio_export          => BENCHMARK,
 
-            host_0_led_status_error_pio_external_connection_export  => LEDG,
+            status_led_pio_export               => LEDG,
 
-            host_0_benchmark_pio_external_connection_export         => open,
+            host_0_benchmark_pio_export         => BENCHMARK_AP,
 
-            host_0_key_pio_external_connection_export               => KEY,
+            epcs_flash_dclk                     => EPCS_DCLK,
+            epcs_flash_sce                      => EPCS_SCE,
+            epcs_flash_sdo                      => EPCS_SDO,
+            epcs_flash_data0                    => EPCS_DATA0,
 
-            host_0_sw_pio_external_connection_export                => SW,
+            host_0_sdram_0_addr                 => SDRAM_ADDR,
+            host_0_sdram_0_ba                   => SDRAM_BA,
+            host_0_sdram_0_cas_n                => SDRAM_CAS_n,
+            host_0_sdram_0_cke                  => SDRAM_CKE,
+            host_0_sdram_0_cs_n                 => SDRAM_CS_n,
+            host_0_sdram_0_dq                   => SDRAM_DQ,
+            host_0_sdram_0_dqm                  => SDRAM_DQM,
+            host_0_sdram_0_ras_n                => SDRAM_RAS_n,
+            host_0_sdram_0_we_n                 => SDRAM_WE_n
+        );
 
-            host_0_led_pio_external_connection_export               => LEDR,
-
-            host_0_lcd_0_external_data                              => LCD_DATA,
-            host_0_lcd_0_external_E                                 => LCD_EN,
-            host_0_lcd_0_external_RS                                => LCD_RS,
-            host_0_lcd_0_external_RW                                => LCD_RW,
-
-            host_0_epcs_flash_controller_0_external_dclk            => EPCS_DCLK,
-            host_0_epcs_flash_controller_0_external_sce             => EPCS_SCE,
-            host_0_epcs_flash_controller_0_external_sdo             => EPCS_SDO,
-            host_0_epcs_flash_controller_0_external_data0           => EPCS_DATA0,
-
-            clk100sdram_clk                                         => SDRAM_CLK,
-            host_0_sdram_0_wire_addr                                => SDRAM_ADDR,
-            host_0_sdram_0_wire_ba                                  => SDRAM_BA,
-            host_0_sdram_0_wire_cas_n                               => SDRAM_CAS_n,
-            host_0_sdram_0_wire_cke                                 => SDRAM_CKE,
-            host_0_sdram_0_wire_cs_n                                => SDRAM_CS_n,
-            host_0_sdram_0_wire_dq                                  => SDRAM_DQ,
-            host_0_sdram_0_wire_dqm                                 => SDRAM_DQM,
-            host_0_sdram_0_wire_ras_n                               => SDRAM_RAS_n,
-            host_0_sdram_0_wire_we_n                                => SDRAM_WE_n
+    -- Pll Instance
+    pllInst : pll
+        port map (
+            inclk0  => EXT_CLK,
+            c0      => clk50,
+            c1      => clk100,
+            c2      => clk25,
+            c3      => clk100_p,
+            locked  => pllLocked
         );
 
 end rtl;

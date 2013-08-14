@@ -9,8 +9,9 @@
 ##  (under "Compilation Report" - "TimeQuest Timing Analyzer" - "Clocks")
 set ext_clk         EXT_CLK
 
-set clk50           inst|altpll_0|sd1|pll7|clk[0]
-set clk100          inst|altpll_0|sd1|pll7|clk[1]
+set clk50           pllInst|altpll_component|auto_generated|pll1|clk[0]
+set clk100          pllInst|altpll_component|auto_generated|pll1|clk[1]
+set clk25           pllInst|altpll_component|auto_generated|pll1|clk[2]
 
 set p0TxClk         PHY0_TXCLK
 set p0RxClk         PHY0_RXCLK
@@ -51,22 +52,25 @@ create_generated_clock -source $clkSRAM -name CLKSRAM_virt
 # ----------------------------------------------------------------------------------
 # sram (IS61WV102416BLL-10TLI)
 ## SRAM is driven by 100 MHz fsm.
-## Note: The SOPC inserts 2 write and 2 read cycles, thus, the SRAM "sees" 50 MHz!
-set sram_clk        50.0
-set sram_tper       [expr 1000.0 / $sram_clk]
+## Note: Qsys inserts 1 write and 2 read cycles, thus, the SRAM writes 
+##       with 100 MHz and read with 50 MHz cycles.
+set sram_clkRd      50.0
+set sram_clkWr      100.0
+set sram_tperRd     [expr 1000.0 / $sram_clkRd]
+set sram_tperWr     [expr 1000.0 / $sram_clkWr]
 ## delay Address Access Time (tAA) = 10.0 ns
 set sram_ddel       10.0
 ## pcb delay
 set sram_tpcb       0.1
 ## fpga settings...
-set sram_tco        5.5
-set sram_tsu        [expr $sram_tper - $sram_ddel - $sram_tco - 2*$sram_tpcb]
+set sram_tco        7.5
+set sram_tsu        [expr $sram_tperRd - $sram_ddel - $sram_tco - 2*$sram_tpcb]
 set sram_th         0.0
 set sram_tcom       0.0
 
-set sram_in_max [expr $sram_tper - $sram_tsu]
-set sram_in_min $sram_th
-set sram_out_max    [expr $sram_tper - $sram_tco]
+set sram_in_max     [expr $sram_tperRd - $sram_tsu]
+set sram_in_min     $sram_th
+set sram_out_max    [expr $sram_tperWr - $sram_tco]
 set sram_out_min    $sram_tcom
 
 ## TSU / TH
@@ -92,10 +96,10 @@ set_output_delay -clock CLKSRAM_virt -max $sram_out_max [get_ports SRAM_CE_n]
 set_output_delay -clock CLKSRAM_virt -min $sram_out_min [get_ports SRAM_CE_n]
 
 ## relax timing...
-## Note: Nios II is running with 90 MHz, but Tri-State-bridge reads with 45 MHz.
+## Note: Nios II is running with 100 MHz, but Tri-State-bridge reads with 50 MHz.
 ### from FPGA to SRAM
-set_multicycle_path -from [get_clocks $clkSRAM] -to [get_clocks CLKSRAM_virt] -setup -start 2
-set_multicycle_path -from [get_clocks $clkSRAM] -to [get_clocks CLKSRAM_virt] -hold -start 1
+#set_multicycle_path -from [get_clocks $clkSRAM] -to [get_clocks CLKSRAM_virt] -setup -start 2
+#set_multicycle_path -from [get_clocks $clkSRAM] -to [get_clocks CLKSRAM_virt] -hold -start 1
 ### from SRAM to FPGA
 set_multicycle_path -from [get_clocks CLKSRAM_virt] -to [get_clocks $clkSRAM] -setup -end 2
 set_multicycle_path -from [get_clocks CLKSRAM_virt] -to [get_clocks $clkSRAM] -hold -end 1
@@ -165,9 +169,9 @@ set_false_path -from [get_ports PHY1_RXER] -to [get_registers *]
 
 # ----------------------------------------------------------------------------------
 # Set clock groups (cut paths)
-# info :                                    -group $clk25 \ removed as no configurator is added..
 set_clock_groups -asynchronous  \
                                             -group $clk50 \
+                                            -group $clk25 \
                                             -group [format "%s %s" $clk100 CLKSRAM_virt] \
                                             -group [format "%s %s" phy0_rxclk phy0_vrxclk] \
                                             -group [format "%s %s" phy0_txclk phy0_vtxclk] \
@@ -186,16 +190,18 @@ set_false_path -from [get_registers *] -to [get_ports EPCS_SCE]
 set_false_path -from [get_registers *] -to [get_ports EPCS_SDO]
 set_false_path -from [get_ports EPCS_DATA0] -to [get_registers *]
 ###IOs
+set_false_path -from [get_ports NODE_SWITCH[*]] -to [get_registers *]
+set_false_path -from [get_registers *] -to [get_ports BENCHMARK[*]]
 #### example for output: set_false_path -from [get_registers *] -to [get_ports LED[*]]
 #### example for input:  set_false_path -from [get_ports BUTTON[*]] -to [get_registers *]
 #############################################################
 # add here your slow IOs...
 set_false_path -from [get_ports KEY[*]] -to [get_registers *]
-set_false_path -from [get_ports SW[*]] -to [get_registers *]
 set_false_path -from [get_registers *] -to [get_ports LEDG[*]]
 set_false_path -from [get_registers *] -to [get_ports LEDR[*]]
+set_false_path -from [get_registers *] -to [get_ports HEX?[*]]
 set_false_path -from [get_registers *] -to [get_ports LCD_*]
-set_false_path -from [get_registers *] -to [get_ports LCD_DATA[*]]
-set_false_path -from [get_ports LCD_DATA[*]] -to [get_registers *]
+set_false_path -from [get_registers *] -to [get_ports LCD_DQ[*]]
+set_false_path -from [get_ports LCD_DQ[*]] -to [get_registers *]
 #############################################################
 # ----------------------------------------------------------------------------------

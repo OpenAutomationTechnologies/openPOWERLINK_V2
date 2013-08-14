@@ -1,3 +1,4 @@
 <library>
     <path path="../../../../ipcore/**/*"/>
+    <path path="../../../../ipcore/altera/qsys/mn_host.qsys"/>
 </library>
