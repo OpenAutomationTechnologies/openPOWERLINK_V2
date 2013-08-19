@@ -2,6 +2,7 @@
 # This script does the following steps:
 #  1. Generate the Qsys design
 #  2. Compile the Quartus II design
+# Note: Write into console "$ export QUARTUS_SKIP=1" to skip Quartus flow
 
 # Quartus Project name
 QUARTUS_PRJ=POWERLINK_MN
@@ -21,19 +22,25 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-#Workaround: Remove done file
-if [ -f ${QUARTUS_PRJ}.done ]
+# Do Quartus flow if skip variable is empty
+if [ -z "${QUARTUS_SKIP}" ];
 then
-    rm ${QUARTUS_PRJ}.done
-fi
+    #Workaround: Remove done file
+    if [ -f ${QUARTUS_PRJ}.done ]
+    then
+        rm ${QUARTUS_PRJ}.done
+    fi
 
-quartus_cmd ${QUARTUS_PRJ}.qpf -c ${QUARTUS_PRJ}.qsf
+    quartus_cmd ${QUARTUS_PRJ}.qpf -c ${QUARTUS_PRJ}.qsf
 
-#Workaround: Quartus returned unsuccessful if done file doesn't exist
-if [ ! -f ${QUARTUS_PRJ}.done ]
-then
-    echo "Failed!"
-    exit 1
+    #Workaround: Quartus returned unsuccessful if done file doesn't exist
+    if [ ! -f ${QUARTUS_PRJ}.done ]
+    then
+        echo "Failed!"
+        exit 1
+    fi
+else
+    echo "INFO: Skipped Quartus compilation flow!"
 fi
 
 exit 0
