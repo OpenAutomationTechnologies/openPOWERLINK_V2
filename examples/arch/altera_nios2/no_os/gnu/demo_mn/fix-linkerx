@@ -3,4 +3,9 @@
 #workaround for linker.x issue
 
 LINKER_X_DIR=bsp
-sed -i 's/AT ( LOADADDR (.rodata) + SIZEOF (.rodata)+ SIZEOF (.rwdata) )/AT ( LOADADDR (.rodata) + SIZEOF (.rodata) )/g' $LINKER_X_DIR/linker.x
+LINKER_X_FILE=linker.x
+LINKER_X_PATH=$LINKER_X_DIR/$LINKER_X_FILE
+
+chmod u+rw $LINKER_X_PATH
+
+sed -i 's/AT ( LOADADDR (.rodata) + SIZEOF (.rodata)+ SIZEOF (.rwdata) )/AT ( LOADADDR (.rodata) + SIZEOF (.rodata) )/g' $LINKER_X_PATH
