@@ -377,8 +377,8 @@
   <parameter name="debug_jtagInstanceID" value="0" />
   <parameter name="resetOffset" value="0" />
   <parameter name="exceptionOffset" value="32" />
-  <parameter name="cpuID" value="1" />
-  <parameter name="cpuID_stored" value="1" />
+  <parameter name="cpuID" value="2" />
+  <parameter name="cpuID_stored" value="2" />
   <parameter name="breakOffset" value="32" />
   <parameter name="userDefinedSettings" value="" />
   <parameter name="resetSlave" value="tc_i_mem.s1" />
