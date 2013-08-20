@@ -1184,7 +1184,7 @@ tEplKernel dllk_setupLocalNode(tNmtState nmtState_p)
                                  dllkInstance_g.dllConfigParam.nodeId,
                                  &dllkInstance_g.pTxBuffer[DLLK_TXFRAME_SYNCRES]);
 #endif
-    dllk_setupSoaNmtReqFilter(&dllkInstance_g.aFilter[DLLK_FILTER_SOA_NONEPL],
+    dllk_setupSoaUnspecReqFilter(&dllkInstance_g.aFilter[DLLK_FILTER_SOA_NONEPL],
                                  dllkInstance_g.dllConfigParam.nodeId,
                                  &dllkInstance_g.pTxBuffer[DLLK_TXFRAME_NONEPL]);
 
