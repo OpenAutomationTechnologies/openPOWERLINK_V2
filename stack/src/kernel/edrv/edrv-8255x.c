@@ -1719,11 +1719,11 @@ tEplKernel Ret = kEplSuccessful;
 
      // check if user specified a MAC address
     //printk("%s check specified MAC address\n", __FUNCTION__);
-    if ((EdrvInstance_l.m_InitParam.m_abMyMacAddr[0] != 0) |
-        (EdrvInstance_l.m_InitParam.m_abMyMacAddr[1] != 0) |
-        (EdrvInstance_l.m_InitParam.m_abMyMacAddr[2] != 0) |
-        (EdrvInstance_l.m_InitParam.m_abMyMacAddr[3] != 0) |
-        (EdrvInstance_l.m_InitParam.m_abMyMacAddr[4] != 0) |
+    if ((EdrvInstance_l.m_InitParam.m_abMyMacAddr[0] != 0) ||
+        (EdrvInstance_l.m_InitParam.m_abMyMacAddr[1] != 0) ||
+        (EdrvInstance_l.m_InitParam.m_abMyMacAddr[2] != 0) ||
+        (EdrvInstance_l.m_InitParam.m_abMyMacAddr[3] != 0) ||
+        (EdrvInstance_l.m_InitParam.m_abMyMacAddr[4] != 0) ||
         (EdrvInstance_l.m_InitParam.m_abMyMacAddr[5] != 0) )
     { // write specified MAC address to controller
         dwTemp = 0;
