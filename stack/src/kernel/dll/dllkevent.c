@@ -472,7 +472,9 @@ static tEplKernel processNmtStateChange(tNmtState newNmtState_p, tNmtState oldNm
             /// activate sync generation
             if ((ret = controlPdokcalSync(TRUE)) != kEplSuccessful)
                 return ret;
-            break;
+
+            // NOTE: This fall through is intended since IdentRes and StatusRes
+            //       on SoA require update in ReadyToOperate state as well!
 
         case kNmtCsOperational:
             // signal update of IdentRes and StatusRes on SoA
