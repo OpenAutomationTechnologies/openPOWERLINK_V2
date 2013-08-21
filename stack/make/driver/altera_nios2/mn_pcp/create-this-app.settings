@@ -11,16 +11,6 @@
 #       For release DBG_MODE=NDEBUG
 
 ##################################
-# Settings for Debugging
-#DBG_MODE=_DEBUG
-#OPT_LEVEL=-O0
-
-##################################
-# Settings for Debugging with optimized compilation
-#DBG_MODE=_DEBUG
-#OPT_LEVEL=-O2
-
-##################################
 # Settings for Release
 DBG_MODE=NDEBUG
 OPT_LEVEL=-O2
