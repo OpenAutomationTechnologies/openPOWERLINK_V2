@@ -38,27 +38,45 @@ export OPT_LEVEL
 export DBG_MODE
 export TC_I_MEM
 
-# save arguments for passing to create-this-bsp
-SAVE_ARGS=$@
-
-
 # process arguments
 SKIP_MAKE=
 REBUILD=
+SAVE_ARGS=
 while [ $# -gt 0 ]
 do
   case "$1" in
       # Don't run make if create-this-app script is called with --no-make arg
       --no-make)
           SKIP_MAKE=1
+          SAVE_ARGS+="$1 "
           ;;
       --rebuild)
           rm -f ./Makefile ${BSP_DIR}/settings.bsp
           REBUILD=1
+          SAVE_ARGS+="$1 "
+          ;;
+      --debug)
+          DBG_MODE=_DEBUG
+          OPT_LEVEL=-O0
+          echo "INFO: Overwritten DBG_MODE to $DBG_MODE"
+          echo "INFO: Overwritten OPT_LEVEL to $OPT_LEVEL"
+          SAVE_ARGS+="$1 "
+          ;;
+      --print)
+          DBG_MODE=_DEBUG
+          echo "INFO: Overwritten DBG_MODE to $DBG_MODE"
+          ;;
+      --sopcdir)
+          shift
+          SOPC_DIR=$1
+          echo "INFO: Overwritten SOPC_DIR to $SOPC_DIR"
           ;;
       --help)
           echo "Usage: ${0} [OPTION]"
           echo
+          echo "  --debug        prepares environment for debugging"
+          echo "  --print        enables printouts to stdo"
+          echo "  --sopcdir PATH path to Quartus project"
           echo "  --rebuild      recreates the Makefile and the BSP"
           echo "  --no-make      do not run make at the end of this script"
           echo
