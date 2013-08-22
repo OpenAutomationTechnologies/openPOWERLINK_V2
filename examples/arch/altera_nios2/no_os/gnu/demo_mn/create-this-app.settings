@@ -25,6 +25,10 @@ DEF_DEBUG_LVL=0xEC000000L
 ################################################################################
 
 ##################################
+# FPGA download cable
+DOWNLOAD_CABLE="USB-Blaster [USB-0]"
+
+##################################
 # Name of M9K for tightly-coupled memory
 TC_I_MEM=host_0_tc_i_mem
 
