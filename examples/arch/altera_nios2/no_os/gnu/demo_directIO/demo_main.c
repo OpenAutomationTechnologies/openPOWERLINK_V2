@@ -104,7 +104,6 @@ tEplKernel PUBLIC AppCbEvent(
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
-static BYTE        portIsOutput[4];
 static BYTE        digitalIn[4];
 static BYTE        digitalOut[4];
 static BOOL        fShutdown_l = FALSE;
@@ -114,7 +113,6 @@ static BOOL        fShutdown_l = FALSE;
 //------------------------------------------------------------------------------
 
 static int openPowerlink(BYTE bNodeId_p);
-static void InitPortConfiguration (BYTE *p_portIsOutput);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -197,7 +195,6 @@ tEplKernel PUBLIC AppCbEvent(tEplApiEventType EventType_p,
                              tEplApiEventArg* pEventArg_p, void GENERIC* pUserArg_p)
 {
     tEplKernel          EplRet = kEplSuccessful;
-    BYTE                bPwlState;      ///< state of the CN (operational = high)
 
     /* check if NMT_GS_OFF is reached */
     switch (EventType_p)
@@ -207,19 +204,6 @@ tEplKernel PUBLIC AppCbEvent(tEplApiEventType EventType_p,
 #ifdef LCD_BASE
             SysComp_LcdPrintState(pEventArg_p->m_NmtStateChange.newNmtState);
 #endif
-
-#ifdef LATCHED_IOPORT_CFG
-            if (pEventArg_p->m_NmtStateChange.newNmtState != kNmtCsOperational)
-            {
-                bPwlState = 0x0;
-                memcpy(LATCHED_IOPORT_CFG+3,(BYTE *)&bPwlState,1);    // Set PortIO operational pin to low
-            } else
-            {
-                /* reached operational state */
-                bPwlState = 0x80;
-                memcpy(LATCHED_IOPORT_CFG+3,(BYTE *)&bPwlState,1);    // Set PortIO operational pin to high
-            }
-#endif //LATCHED_IOPORT_CFG
 
             switch (pEventArg_p->m_NmtStateChange.newNmtState)
             {
@@ -394,11 +378,10 @@ This function sets the outputs, reads the inputs and runs the control loop.
 //------------------------------------------------------------------------------
 tEplKernel PUBLIC AppCbSync(void)
 {
-    tEplKernel        EplRet = kEplSuccessful;
-    register int      iCnt;
-    DWORD             ports; ///< 4 byte input or output ports
-    DWORD*            ulDigInputs = LATCHED_IOPORT_BASE;
-    DWORD*            ulDigOutputs = LATCHED_IOPORT_BASE;
+    tEplKernel          EplRet = kEplSuccessful;
+    volatile UINT16*    pLedRed = (UINT16*)LEDR_PIO_BASE;
+    volatile UINT32*    pHex = (UINT32*)HEX_PIO_BASE;
+    volatile UINT8*     pKey = (UINT8*)KEY_PIO_BASE;
 
     EplRet = api_processImageExchangeOut();
     if (EplRet != kEplSuccessful)
@@ -406,25 +389,20 @@ tEplKernel PUBLIC AppCbSync(void)
         return EplRet;
     }
 
-    /* read digital input ports */
-    ports = AmiGetDwordFromLe((BYTE*) ulDigInputs);;
+    // Get inputs
+    digitalIn[0] = *pKey;
+    digitalIn[1] = 0;
+    digitalIn[2] = 0;
+    digitalIn[3] = 0;
 
-    for (iCnt = 0; iCnt <= 3; iCnt++)
-    {
-        if (portIsOutput[iCnt])
-        {
-            /* configured as output -> overwrite invalid input values with RPDO mapped variables */
-            ports = (ports & ~(0xff << (iCnt * 8))) | (digitalOut[iCnt] << (iCnt * 8));
-        }
-        else
-        {
-            /* configured as input -> store in TPDO mapped variable */
-            digitalIn[iCnt] = (ports >> (iCnt * 8)) & 0xff;
-        }
-    }
+    // Drive outputs
+    *pLedRed =  digitalOut[1] << 8 |
+                digitalOut[0];
 
-    /* write digital output ports */
-    AmiSetDwordToLe((BYTE*)ulDigOutputs, ports);
+    *pHex = digitalOut[3] << 24 |
+            digitalOut[2] << 16 |
+            digitalOut[1] <<  8 |
+            digitalOut[0];
 
     EplRet = api_processImageExchangeIn();
 
@@ -459,9 +437,6 @@ static int openPowerlink(BYTE bNodeId_p)
     unsigned int                uiVarEntries;
 
     fShutdown_l = FALSE;
-
-    /* initialize port configuration */
-    InitPortConfiguration(portIsOutput);
 
     /* setup the POWERLINK stack */
 
@@ -574,43 +549,3 @@ ExitShutdown:
 Exit:
     return EplRet;
 }
-
-//------------------------------------------------------------------------------
-/**
-\brief               openPOWERLINK function
-
-InitPortConfiguration() reads the port configuration inputs. The port configuration
-inputs are connected to general purpose I/O pins IO3V3[16..12].
-The read port configuration if stored at the port configuration outputs to set up
-the input/output selection logic.
-
-\param               p_portIsOutput              direction of port IO
-*/
-//------------------------------------------------------------------------------
-static void InitPortConfiguration (BYTE *p_portIsOutput)
-{
-    register int     iCnt;
-    volatile BYTE    portconf;          ///< direction of each byte in portio
-    unsigned int     direction = 0;
-
-    /* read port configuration input pins */
-    memcpy((BYTE *) &portconf, LATCHED_IOPORT_CFG, 1);
-    portconf = (~portconf) & 0x0f;
-
-    PRINTF("\nPort configuration register value = 0x%1X\n", portconf);
-
-    for (iCnt = 0; iCnt <= 3; iCnt++)
-    {
-        if (portconf & (1 << iCnt))
-        {
-            direction |= 0xff << (iCnt * 8);
-            p_portIsOutput[iCnt] = TRUE;
-        }
-        else
-        {
-            direction &= ~(0xff << (iCnt * 8));
-            p_portIsOutput[iCnt] = FALSE;
-        }
-    }
-}
-
