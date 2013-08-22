@@ -195,6 +195,40 @@ $(PROGRAM_EPCS_TARGET) : $(ELF)
 		$(FLASHPROG) --cpu_name=$(CPU_NAME) $(DOWNLOAD_CABLE_FLAG) $(SOPC_SYSID_FLAG) --epcs --base=$($(basename $@)_START) -g --override=../generic/nios2-flash-override.txt sof.flash $(basename $@)_after_sof.flash; \
 	fi
 
+# Rule for erasing the EPCS memory content
+.PHONY : erase-epcs
+erase-epcs:
+	@nios2-configure-sof $(DOWNLOAD_CABLE_FLAG) -C $(QUARTUS_PROJECT_DIR); \
+	$(ECHO) $(FLASHPROG) $(DOWNLOAD_CABLE_FLAG) $(SOPC_SYSID_FLAG) --epcs --base=$($(basename $(PROGRAM_EPCS_TARGET))_START) --accept-bad-sysid --erase-all; \
+	$(FLASHPROG) --cpu_name=$(CPU_NAME) $(DOWNLOAD_CABLE_FLAG) $(SOPC_SYSID_FLAG) --epcs --base=$($(basename $(PROGRAM_EPCS_TARGET))_START) --accept-bad-sysid --erase-all
+
+# Rule for downloading the FPGA bitstream to the target
+.PHONY : download-bits
+download-bits:
+	nios2-configure-sof $(DOWNLOAD_CABLE_FLAG) -C $(QUARTUS_PROJECT_DIR)
+
+# Rule for doing magic
+.PHONY: download-all
+download-all: download-bits download-elf
+
+# Rule to create fpga stuff with one command
+.PHONY: rebuild-fpga
+rebuild-fpga:
+	$(ECHO) "INFO: Change to $(QUARTUS_PROJECT_DIR) and run create-this-fpga."; \
+	pushd $(QUARTUS_PROJECT_DIR); \
+	./create-this-fpga; \
+	popd;
+
+# Rule to regenerate BSP after changes in Qsys
+.PHONY: rebuild-bsp
+rebuild-bsp:
+	$(ECHO) "INFO: Regenerate BSP."; \
+	nios2-bsp-generate-files --settings=$(BSP_ROOT_DIR)/settings.bsp --bsp-dir=$(BSP_ROOT_DIR)
+
+# Rule to regenerate FPGA files and update BSP in one
+.PHONY: fpga
+fpga: rebuild-fpga rebuild-bsp
+
 Heredoc
 
 # FIX CPU NAME ISSUE
@@ -213,17 +247,19 @@ if [ -z "$SKIP_MAKE" ]; then
     echo
     echo "To download and run the application:"
     echo "    1. Make sure the board is connected to the system."
-    echo "    2. Run 'nios2-configure-sof -C $SOPC_DIR'"
-    echo "       to configure the FPGA with the hardware design."
+    echo "    2. Run 'make download-bits' to configure the FPGA with the hardware design."
     echo "    3. If you have a stdio device and generated with --debug,"
     echo "       run 'nios2-terminal' in a different shell."
     echo "    4. Run 'make download-elf' from the application directory."
     echo
+    echo "    Note: Simply run 'make download-all' to download bits and elf in all."
+    echo
+    echo "To (re)create the FPGA configuration run 'make fpga'. This runs Qsys and "
+    echo "Quartus flow."
+    echo
     echo "To debug the application:"
     echo "    Execute this script with argument --debug"
     echo "    Import the project into Nios II IDE."
-    echo "    Refer to Nios II IDE Documentation or Documentation/altera.txt"
-    echo "    for more information."
     echo
     echo "To burn FPGA hardware design and application into the serial flash (EPCS):"
     echo "    Run 'make program-epcs' from the application directory."
