@@ -4,7 +4,13 @@
 
 BSP_TYPE=hal
 BSP_DIR=.
-NIOS2_BSP_ARGS="--set hal.sys_clk_timer pcp_0_timer_0 --cpu-name pcp_0_cpu_0 --set hal.linker.enable_alt_load_copy_exceptions false --set hal.enable_clean_exit false --set hal.enable_exit false"
+
+NIOS2_BSP_ARGS="\
+--set hal.sys_clk_timer pcp_0_timer_0 \
+--cpu-name ${QSYS_SUB}_${QSYS_SUB_CPU} \
+--set hal.linker.enable_alt_load_copy_exceptions false \
+--set hal.enable_clean_exit false \
+--set hal.enable_exit false"
 
 # process arguments
 SKIP_MAKE=
