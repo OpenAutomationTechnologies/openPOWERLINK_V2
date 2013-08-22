@@ -44,6 +44,7 @@ export TC_I_MEM
 SKIP_MAKE=
 REBUILD=
 SAVE_ARGS=
+DUAL_NIOS=
 while [ $# -gt 0 ]
 do
   case "$1" in
@@ -73,12 +74,17 @@ do
           SOPC_DIR=$1
           echo "INFO: Overwritten SOPC_DIR to $SOPC_DIR"
           ;;
+      --dual-nios)
+          DUAL_NIOS=1
+          echo "INFO: Prepare cable setup for single FPGA platform"
+          ;;
       --help)
           echo "Usage: ${0} [OPTION]"
           echo
           echo "  --debug        prepares environment for debugging"
           echo "  --print        enables printouts to stdo"
           echo "  --sopcdir PATH path to Quartus project"
+          echo "  --dual-nios    prepares cable setup for dual Nios design"
           echo "  --rebuild      recreates the Makefile and the BSP"
           echo "  --no-make      do not run make at the end of this script"
           echo
@@ -110,6 +116,13 @@ NIOS2_APP_GEN_ARGS="--elf-name epl.elf \
 --set APP_INCLUDE_DIRS=${INCLUDES} \
 --src-files $SRCFILES \
 --set APP_CFLAGS_OPTIMIZATION ${OPT_LEVEL}"
+
+# Check if we have NOT a dual nios design.
+# In this case the pcp and host fpga cable is determined by create-this-app.settings!
+if [ -z "$DUAL_NIOS" ];
+then
+    NIOS2_APP_GEN_ARGS+=" --set DOWNLOAD_CABLE ${DOWNLOAD_CABLE}"
+fi
 
 # First, check to see if $SOPC_KIT_NIOS2 environmental variable is set.
 # This variable is required for the command line tools to execute correctly.
