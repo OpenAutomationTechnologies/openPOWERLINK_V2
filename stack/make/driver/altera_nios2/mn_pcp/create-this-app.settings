@@ -29,6 +29,11 @@ DEF_DEBUG_LVL=0xEC000000L
 TC_I_MEM=pcp_0_tc_i_mem
 
 ##################################
+# Name of Qsys subsystem and CPU
+QSYS_SUB=pcp_0
+QSYS_SUB_CPU=cpu_0
+
+##################################
 # SW is for MN/CN?
 PLK_NODE_IS=CONFIG_MN
 #PLK_NODE_IS=CONFIG_CN

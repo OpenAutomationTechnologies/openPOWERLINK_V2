@@ -67,7 +67,7 @@
          type = "int";
       }
    }
-   element cpu_0
+   element cpu_1
    {
       datum _sortIndex
       {
@@ -101,7 +101,7 @@
          type = "boolean";
       }
    }
-   element cpu_0.jtag_debug_module
+   element cpu_1.jtag_debug_module
    {
       datum baseAddress
       {
@@ -120,6 +120,19 @@
       {
          value = "0";
          type = "boolean";
+      }
+   }
+   element clock_crossing_0.s0
+   {
+      datum _lockedAddress
+      {
+         value = "1";
+         type = "boolean";
+      }
+      datum baseAddress
+      {
+         value = "536870912";
+         type = "String";
       }
    }
    element fast_bridge.s0
@@ -143,7 +156,7 @@
          type = "String";
       }
    }
-   element clock_crossing_0.s0
+   element sdram_0.s1
    {
       datum _lockedAddress
       {
@@ -152,7 +165,15 @@
       }
       datum baseAddress
       {
-         value = "536870912";
+         value = "0";
+         type = "long";
+      }
+   }
+   element benchmark_pio.s1
+   {
+      datum baseAddress
+      {
+         value = "64";
          type = "String";
       }
    }
@@ -174,27 +195,6 @@
       datum baseAddress
       {
          value = "0";
-         type = "String";
-      }
-   }
-   element sdram_0.s1
-   {
-      datum _lockedAddress
-      {
-         value = "1";
-         type = "boolean";
-      }
-      datum baseAddress
-      {
-         value = "0";
-         type = "long";
-      }
-   }
-   element benchmark_pio.s1
-   {
-      datum baseAddress
-      {
-         value = "64";
          type = "String";
       }
    }
@@ -283,7 +283,7 @@
  <parameter name="projectName" value="" />
  <parameter name="sopcBorderPoints" value="false" />
  <parameter name="systemHash" value="1" />
- <parameter name="timeStamp" value="1376462858107" />
+ <parameter name="timeStamp" value="1377156982570" />
  <parameter name="useTestBenchNamingPattern" value="false" />
  <instanceScript></instanceScript>
  <interface name="clk100" internal="clk100.clk_in" type="clock" dir="end" />
@@ -327,7 +327,7 @@
   <parameter name="inputClockFrequency" value="0" />
   <parameter name="resetSynchronousEdges" value="NONE" />
  </module>
- <module kind="altera_nios2_qsys" version="12.1" enabled="1" name="cpu_0">
+ <module kind="altera_nios2_qsys" version="12.1" enabled="1" name="cpu_1">
   <parameter name="setting_showUnpublishedSettings" value="false" />
   <parameter name="setting_showInternalSettings" value="false" />
   <parameter name="setting_preciseSlaveAccessErrorException" value="false" />
@@ -384,7 +384,7 @@
   <parameter name="resetSlave" value="tc_i_mem.s1" />
   <parameter name="mmu_TLBMissExcSlave" value="" />
   <parameter name="exceptionSlave" value="tc_i_mem.s1" />
-  <parameter name="breakSlave">cpu_0.jtag_debug_module</parameter>
+  <parameter name="breakSlave">cpu_1.jtag_debug_module</parameter>
   <parameter name="setting_perfCounterWidth" value="32" />
   <parameter name="setting_interruptControllerType" value="Internal" />
   <parameter name="setting_branchPredictionType" value="Automatic" />
@@ -422,8 +422,8 @@
   <parameter name="tightlyCoupledInstructionMaster1AddrWidth" value="1" />
   <parameter name="tightlyCoupledInstructionMaster2AddrWidth" value="1" />
   <parameter name="tightlyCoupledInstructionMaster3AddrWidth" value="1" />
-  <parameter name="instSlaveMapParam"><![CDATA[<address-map><slave name='sdram_0.s1' start='0x0' end='0x8000000' /><slave name='cpu_0.jtag_debug_module' start='0x8002800' end='0x8003000' /></address-map>]]></parameter>
-  <parameter name="dataSlaveMapParam"><![CDATA[<address-map><slave name='sdram_0.s1' start='0x0' end='0x8000000' /><slave name='tc_i_mem.s2' start='0x8000000' end='0x8002000' /><slave name='cpu_0.jtag_debug_module' start='0x8002800' end='0x8003000' /><slave name='timer_0.s1' start='0x20000000' end='0x20000020' /><slave name='jtag_uart_0.avalon_jtag_slave' start='0x20000020' end='0x20000028' /><slave name='benchmark_pio.s1' start='0x20000040' end='0x20000060' /></address-map>]]></parameter>
+  <parameter name="instSlaveMapParam"><![CDATA[<address-map><slave name='sdram_0.s1' start='0x0' end='0x8000000' /><slave name='cpu_1.jtag_debug_module' start='0x8002800' end='0x8003000' /></address-map>]]></parameter>
+  <parameter name="dataSlaveMapParam"><![CDATA[<address-map><slave name='sdram_0.s1' start='0x0' end='0x8000000' /><slave name='tc_i_mem.s2' start='0x8000000' end='0x8002000' /><slave name='cpu_1.jtag_debug_module' start='0x8002800' end='0x8003000' /><slave name='timer_0.s1' start='0x20000000' end='0x20000020' /><slave name='jtag_uart_0.avalon_jtag_slave' start='0x20000020' end='0x20000028' /><slave name='benchmark_pio.s1' start='0x20000040' end='0x20000060' /></address-map>]]></parameter>
   <parameter name="clockFrequency" value="100000000" />
   <parameter name="deviceFamilyName" value="Cyclone IV E" />
   <parameter name="internalIrqMaskSystemInfo" value="7" />
@@ -604,26 +604,26 @@
  <connection
    kind="avalon"
    version="12.1"
-   start="cpu_0.instruction_master"
-   end="cpu_0.jtag_debug_module">
+   start="cpu_1.instruction_master"
+   end="cpu_1.jtag_debug_module">
   <parameter name="arbitrationPriority" value="1" />
   <parameter name="baseAddress" value="0x08002800" />
  </connection>
  <connection
    kind="avalon"
    version="12.1"
-   start="cpu_0.data_master"
-   end="cpu_0.jtag_debug_module">
+   start="cpu_1.data_master"
+   end="cpu_1.jtag_debug_module">
   <parameter name="arbitrationPriority" value="1" />
   <parameter name="baseAddress" value="0x08002800" />
  </connection>
- <connection kind="clock" version="12.1" start="clk100.clk" end="cpu_0.clk" />
+ <connection kind="clock" version="12.1" start="clk100.clk" end="cpu_1.clk" />
  <connection kind="clock" version="12.1" start="clk100.clk" end="tc_i_mem.clk1" />
  <connection kind="clock" version="12.1" start="clk100.clk" end="sdram_0.clk" />
  <connection
    kind="avalon"
    version="12.1"
-   start="cpu_0.data_master"
+   start="cpu_1.data_master"
    end="sdram_0.s1">
   <parameter name="arbitrationPriority" value="1" />
   <parameter name="baseAddress" value="0x0000" />
@@ -631,7 +631,7 @@
  <connection
    kind="avalon"
    version="12.1"
-   start="cpu_0.instruction_master"
+   start="cpu_1.instruction_master"
    end="sdram_0.s1">
   <parameter name="arbitrationPriority" value="1" />
   <parameter name="baseAddress" value="0x0000" />
@@ -649,7 +649,7 @@
  <connection
    kind="avalon"
    version="12.1"
-   start="cpu_0.data_master"
+   start="cpu_1.data_master"
    end="clock_crossing_0.s0">
   <parameter name="arbitrationPriority" value="1" />
   <parameter name="baseAddress" value="0x20000000" />
@@ -676,17 +676,17 @@
    kind="reset"
    version="12.1"
    start="clk100.clk_reset"
-   end="cpu_0.reset_n" />
+   end="cpu_1.reset_n" />
  <connection
    kind="reset"
    version="12.1"
    start="clk50.clk_reset"
-   end="cpu_0.reset_n" />
+   end="cpu_1.reset_n" />
  <connection
    kind="reset"
    version="12.1"
-   start="cpu_0.jtag_debug_module_reset"
-   end="cpu_0.reset_n" />
+   start="cpu_1.jtag_debug_module_reset"
+   end="cpu_1.reset_n" />
  <connection
    kind="reset"
    version="12.1"
@@ -700,7 +700,7 @@
  <connection
    kind="reset"
    version="12.1"
-   start="cpu_0.jtag_debug_module_reset"
+   start="cpu_1.jtag_debug_module_reset"
    end="tc_i_mem.reset1" />
  <connection
    kind="reset"
@@ -715,7 +715,7 @@
  <connection
    kind="reset"
    version="12.1"
-   start="cpu_0.jtag_debug_module_reset"
+   start="cpu_1.jtag_debug_module_reset"
    end="sdram_0.reset" />
  <connection
    kind="reset"
@@ -730,7 +730,7 @@
  <connection
    kind="reset"
    version="12.1"
-   start="cpu_0.jtag_debug_module_reset"
+   start="cpu_1.jtag_debug_module_reset"
    end="clock_crossing_0.m0_reset" />
  <connection
    kind="reset"
@@ -745,7 +745,7 @@
  <connection
    kind="reset"
    version="12.1"
-   start="cpu_0.jtag_debug_module_reset"
+   start="cpu_1.jtag_debug_module_reset"
    end="clock_crossing_0.s0_reset" />
  <connection
    kind="reset"
@@ -760,7 +760,7 @@
  <connection
    kind="reset"
    version="12.1"
-   start="cpu_0.jtag_debug_module_reset"
+   start="cpu_1.jtag_debug_module_reset"
    end="jtag_uart_0.reset" />
  <connection
    kind="reset"
@@ -775,15 +775,15 @@
  <connection
    kind="reset"
    version="12.1"
-   start="cpu_0.jtag_debug_module_reset"
+   start="cpu_1.jtag_debug_module_reset"
    end="timer_0.reset" />
- <connection kind="interrupt" version="12.1" start="cpu_0.d_irq" end="timer_0.irq">
+ <connection kind="interrupt" version="12.1" start="cpu_1.d_irq" end="timer_0.irq">
   <parameter name="irqNumber" value="1" />
  </connection>
  <connection
    kind="interrupt"
    version="12.1"
-   start="cpu_0.d_irq"
+   start="cpu_1.d_irq"
    end="jtag_uart_0.irq">
   <parameter name="irqNumber" value="2" />
  </connection>
@@ -801,13 +801,13 @@
  <connection
    kind="reset"
    version="12.1"
-   start="cpu_0.jtag_debug_module_reset"
+   start="cpu_1.jtag_debug_module_reset"
    end="tc_i_mem.reset2" />
  <connection kind="clock" version="12.1" start="clk100.clk" end="fast_bridge.clk" />
  <connection
    kind="avalon"
    version="12.1"
-   start="cpu_0.data_master"
+   start="cpu_1.data_master"
    end="fast_bridge.s0">
   <parameter name="arbitrationPriority" value="1" />
   <parameter name="baseAddress" value="0x10000000" />
@@ -825,13 +825,13 @@
  <connection
    kind="reset"
    version="12.1"
-   start="cpu_0.jtag_debug_module_reset"
+   start="cpu_1.jtag_debug_module_reset"
    end="fast_bridge.reset" />
  <connection kind="clock" version="12.1" start="clk100.clk" end="irq_bridge_0.clk" />
  <connection
    kind="interrupt"
    version="12.1"
-   start="cpu_0.d_irq"
+   start="cpu_1.d_irq"
    end="irq_bridge_0.sender0_irq">
   <parameter name="irqNumber" value="0" />
  </connection>
@@ -848,7 +848,7 @@
  <connection
    kind="reset"
    version="12.1"
-   start="cpu_0.jtag_debug_module_reset"
+   start="cpu_1.jtag_debug_module_reset"
    end="irq_bridge_0.clk_reset" />
  <connection kind="clock" version="12.1" start="clk50.clk" end="benchmark_pio.clk" />
  <connection
@@ -872,12 +872,12 @@
  <connection
    kind="reset"
    version="12.1"
-   start="cpu_0.jtag_debug_module_reset"
+   start="cpu_1.jtag_debug_module_reset"
    end="benchmark_pio.reset" />
  <connection
    kind="avalon"
    version="12.1"
-   start="cpu_0.data_master"
+   start="cpu_1.data_master"
    end="tc_i_mem.s2">
   <parameter name="arbitrationPriority" value="1" />
   <parameter name="baseAddress" value="0x08000000" />
@@ -885,7 +885,7 @@
  <connection
    kind="avalon"
    version="12.1"
-   start="cpu_0.tightly_coupled_instruction_master_0"
+   start="cpu_1.tightly_coupled_instruction_master_0"
    end="tc_i_mem.s1">
   <parameter name="arbitrationPriority" value="1" />
   <parameter name="baseAddress" value="0x08000000" />
@@ -912,6 +912,6 @@
  <connection
    kind="reset"
    version="12.1"
-   start="cpu_0.jtag_debug_module_reset"
+   start="cpu_1.jtag_debug_module_reset"
    end="slow_bridge.reset" />
 </system>
