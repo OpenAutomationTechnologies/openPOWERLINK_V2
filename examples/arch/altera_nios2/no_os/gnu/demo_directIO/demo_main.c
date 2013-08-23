@@ -50,7 +50,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "systemComponents.h"
 
 #ifdef LCD_BASE
-#include "Cmp_Lcd.h"
+#include <lcd.h>
 #endif
 
 
@@ -138,7 +138,7 @@ int main (void)
 
 
 #ifdef LCD_BASE
-    SysComp_LcdTest();
+    lcd_init();
 #endif
 
     PRINTF("\n\nDigital I/O interface is running...\n");
@@ -150,7 +150,7 @@ int main (void)
     }
 
 #ifdef LCD_BASE
-    SysComp_LcdPrintNodeInfo(bNodeId);
+    lcd_printNodeId(bNodeId);
 #endif
 
     while (1)
@@ -202,7 +202,7 @@ tEplKernel PUBLIC AppCbEvent(tEplApiEventType EventType_p,
         case kEplApiEventNmtStateChange:
         {
 #ifdef LCD_BASE
-            SysComp_LcdPrintState(pEventArg_p->m_NmtStateChange.newNmtState);
+            lcd_printNmtState(pEventArg_p->m_NmtStateChange.newNmtState);
 #endif
 
             switch (pEventArg_p->m_NmtStateChange.newNmtState)

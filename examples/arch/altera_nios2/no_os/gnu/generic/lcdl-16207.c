@@ -1,15 +1,17 @@
 /**
 ********************************************************************************
-\file       Cmp_Lcd.c
+\file       lcd-16207.c
 
-\brief      Generic lcd functions for the TERASIC board
+\brief      Lcd functions for Altera Avalon LCD IP-Core with HD44780
 
-Application of the directIO example which starts the openPOWERLINK stack and
-implements AppCbSync and AppCbEvent.
+This implementation uses the Altera Avalon Lcd 16207 IP-Core to handle the
+display controller HD44780 - available e.g. on the Terasic DE2-115 board.
+*******************************************************************************/
 
-Copyright (c) 2012, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
-Copyright (c) 2012, SYSTEC electronik GmbH
-Copyright (c) 2012, Kalycito Infotech Private Ltd.
+/*------------------------------------------------------------------------------
+Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2013, SYSTEC electronic GmbH
+Copyright (c) 2013, Kalycito Infotech Private Ltd.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -33,16 +35,18 @@ LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
 ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*******************************************************************************/
+------------------------------------------------------------------------------*/
 
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
 #include <unistd.h> // for usleep()
 #include <string.h>
-#include <io.h>
-#include "system.h"
-#include "lcd.h"
+
+#include <system.h>
+#include <altera_avalon_lcd_16207_regs.h>
+
+#include "lcdl.h"
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -51,6 +55,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
+#ifndef LCD_BASE
+#error "Rename the LCD component in QSYS/SOPC to 'lcd'!"
+#endif
 
 //------------------------------------------------------------------------------
 // module global vars
@@ -67,6 +74,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
+#define LCDL_COLUMN         16  ///< Column count
+#define LCDL_LINE           2   ///< Line count
+
+#define LCDL_WRCMD(data)    IOWR_ALTERA_AVALON_LCD_16207_COMMAND(LCD_BASE, data)
+#define LCDL_RDCMD()        IORD_ALTERA_AVALON_LCD_16207_STATUS(LCD_BASE)
+#define LCDL_WRDATA(data)   IOWR_ALTERA_AVALON_LCD_16207_DATA(LCD_BASE, data)
+#define LCDL_RDDATA()       IORD_ALTERA_AVALON_LCD_16207_DATA(LCD_BASE)
 
 //------------------------------------------------------------------------------
 // local types
@@ -85,86 +99,116 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //            P U B L I C   F U N C T I O N S                                 //
 //============================================================================//
 
-
-#ifdef LCD_BASE  // LCD module present
-
 //------------------------------------------------------------------------------
 /**
-\brief               Init the LCD display
+\brief  Initialize the Lcd
 
-Writes init parameters to the LCD display
+This function writes a sequence of initialization parameters to the Lcd.
 */
 //------------------------------------------------------------------------------
-void LCD_Init()
+int lcdl_init(void)
 {
-  lcd_write_cmd(LCD_BASE,0x38);
-  usleep(2000);
-  lcd_write_cmd(LCD_BASE,0x0C);
-  usleep(2000);
-  lcd_write_cmd(LCD_BASE,0x01);
-  usleep(2000);
-  lcd_write_cmd(LCD_BASE,0x06);
-  usleep(2000);
-  lcd_write_cmd(LCD_BASE,0x80);
-  usleep(2000);
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief               Clear the LCD display
-
-Writes clear command to the LCD display
-*/
-//------------------------------------------------------------------------------
-void LCD_Clear()
-{
-  lcd_write_cmd(LCD_BASE,0x01);
-  usleep(2000);
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief               Print text to the LCD display
-
-Writes text to the LCD display
-
-\param               Text                                 The text to print
-*/
-//------------------------------------------------------------------------------
-void LCD_Show_Text(char* Text)
-{
-  int i;
-  for(i=0;i<strlen(Text);i++)
-  {
-    lcd_write_data(LCD_BASE,Text[i]);
+    LCDL_WRCMD(0x38);
     usleep(2000);
-  }
+    LCDL_WRCMD(0x0C);
+    usleep(2000);
+    LCDL_WRCMD(0x01);
+    usleep(2000);
+    LCDL_WRCMD(0x06);
+    usleep(2000);
+    LCDL_WRCMD(0x80);
+    usleep(2000);
+
+    return 0;
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief               Change to line one
+\brief  Exit the Lcd instance
 
-Changes to line one of the LCD display
+This function exits the Lcd instance.
 */
 //------------------------------------------------------------------------------
-void LCD_Line1()
+void lcdl_exit(void)
 {
-  lcd_write_cmd(LCD_BASE,0x80);
-  usleep(2000);
+
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief               Change to line two
+\brief  Clear the Lcd
 
-Changes to line two of the LCD display
+This function clears all lines of the display.
 */
 //------------------------------------------------------------------------------
-void LCD_Line2()
+void lcdl_clear(void)
 {
-  lcd_write_cmd(LCD_BASE,0xC0);
-  usleep(2000);
+    LCDL_WRCMD(0x01);
+    usleep(2000);
 }
 
-#endif // LCD_BASE
+//------------------------------------------------------------------------------
+/**
+\brief  Change to specified line
+
+Changes to specified line of the Lcd
+
+\param  line_p      Specifies the line
+
+\return The function returns 0 if the line is changed successfully, -1 otherwise.
+*/
+//------------------------------------------------------------------------------
+int lcdl_changeToLine(unsigned int line_p)
+{
+    if(line_p > LCDL_LINE)
+        return -1;
+
+    switch(line_p)
+    {
+    case 1:
+        LCDL_WRCMD(0x80);
+        break;
+    case 2:
+        LCDL_WRCMD(0xC0);
+        break;
+    default:
+        break;
+    }
+
+    usleep(2000);
+    return 0;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Print text to the Lcd
+
+Writes text to the Lcd currently selected.
+
+\param  sText_p     The text to print
+*/
+//------------------------------------------------------------------------------
+void lcdl_printText(const char* sText_p)
+{
+    int i;
+    int length = strlen(sText_p);
+
+    // Longer text is cut due to column limitation!
+    for(i=0; i<LCDL_COLUMN; i++)
+    {
+        // Write blank if provided text is shorter than column count.
+        if(i<length)
+            LCDL_WRDATA(sText_p[i]);
+        else
+            LCDL_WRDATA(' ');
+
+        usleep(2000);
+    }
+}
+
+//============================================================================//
+//            P R I V A T E   F U N C T I O N S                               //
+//============================================================================//
+/// \name Private Functions
+/// \{
+///\}

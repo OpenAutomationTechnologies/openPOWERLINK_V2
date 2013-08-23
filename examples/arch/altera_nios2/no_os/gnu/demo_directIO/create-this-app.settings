@@ -55,6 +55,7 @@ BSP_DIR=./bsp
 ##################################
 # Include path
 INCLUDES=". \
+${STACKROOT_DIR}/examples/arch/altera_nios2/no_os/gnu/generic \
 ${STACKROOT_DIR}/include \
 ${STACKROOT_DIR}/libs/omethlib \
 ${STACKROOT_DIR}/libs/circbuf \
@@ -127,8 +128,8 @@ ${STACKROOT_DIR}/stack/src/user/sdo/sdo-asndu.c \
 ${STACKROOT_DIR}/stack/src/user/sdo/sdo-asysequ.c \
 ${STACKROOT_DIR}/stack/src/user/sdo/sdo-comu.c \
 ${STACKROOT_DIR}/stack/src/user/ledu.c \
+${STACKROOT_DIR}/examples/arch/altera_nios2/no_os/gnu/generic/lcd.c \
+${STACKROOT_DIR}/examples/arch/altera_nios2/no_os/gnu/generic/lcdl-16207.c \
 demo_main.c \
-lcd.c \
-Cmp_Lcd.c \
 systemComponents.c\
 "

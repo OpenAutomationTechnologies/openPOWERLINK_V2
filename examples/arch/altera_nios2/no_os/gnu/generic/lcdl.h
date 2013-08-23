@@ -1,15 +1,16 @@
 /**
 ********************************************************************************
-\file       Cmp_Lcd.h
+\file       lcd-l.h
 
-\brief      Non generic lcd functions for the TERASIC board
+\brief      Low-level interface for Lcd
 
-Provides all functions which are platform dependent for the application of the
-directIO example.
+This is the low-level interface definition for specific Lcds.
+*******************************************************************************/
 
-Copyright (c) 2012, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
-Copyright (c) 2012, SYSTEC electronik GmbH
-Copyright (c) 2012, Kalycito Infotech Private Ltd.
+/*------------------------------------------------------------------------------
+Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2013, SYSTEC electronic GmbH
+Copyright (c) 2013, Kalycito Infotech Private Ltd.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -33,16 +34,14 @@ LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
 ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*******************************************************************************/
+------------------------------------------------------------------------------*/
 
-#ifndef _INC_CMP_LCD_H_
-#define _INC_CMP_LCD_H_
+#ifndef _INC_lcdl_H_
+#define _INC_lcdl_H_
 
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include "nmt.h"
-#include "EplErrDef.h"
 
 //------------------------------------------------------------------------------
 // const defines
@@ -56,13 +55,18 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // function prototypes
 //------------------------------------------------------------------------------
 
-void SysComp_LcdInit(void);
-void SysComp_LcdSetText(char* Text);
-tEplKernel SysComp_LcdSetLine(int LineNum_p);
-void SysComp_LcdClear(void);
-void SysComp_LcdTest(void);
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-void SysComp_LcdPrintState(tNmtState NmtState_p);
-void SysComp_LcdPrintNodeInfo (WORD wNodeId_p);
+int lcdl_init(void);
+void lcdl_exit(void);
+void lcdl_clear(void);
+int lcdl_changeToLine(unsigned int line_p);
+void lcdl_printText(const char* pText_p);
 
-#endif /* _INC_CMP_LCD_H_ */
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* _INC_lcdl_H_ */
