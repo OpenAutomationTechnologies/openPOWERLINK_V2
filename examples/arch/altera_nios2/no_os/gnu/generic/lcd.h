@@ -1,15 +1,15 @@
 /**
 ********************************************************************************
-\file       Cmp_Lcd.h
+\file   lcd.h
 
-\brief      Generic lcd functions for the TERASIC board
+\brief  Generic Lcd interface
 
-Application of the directIO example which starts the openPOWERLINK stack and
-implements AppCbSync and AppCbEvent.
+*******************************************************************************/
 
-Copyright (c) 2012, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
-Copyright (c) 2012, SYSTEC electronik GmbH
-Copyright (c) 2012, Kalycito Infotech Private Ltd.
+/*------------------------------------------------------------------------------
+Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2013, SYSTEC electronic GmbH
+Copyright (c) 2013, Kalycito Infotech Private Ltd.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -33,23 +33,20 @@ LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
 ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*******************************************************************************/
+------------------------------------------------------------------------------*/
 
-#ifndef _INC_LCD_H_
-#define _INC_LCD_H_
+#ifndef _INC_lcd_H_
+#define _INC_lcd_H_
 
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
+#include <Epl.h>
+#include <global.h>
 
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-
-#define lcd_write_cmd(base, data)                     IOWR(base, 0, data)
-#define lcd_read_cmd(base)                            IORD(base, 1)
-#define lcd_write_data(base, data)                    IOWR(base, 2, data)
-#define lcd_read_data(base)                           IORD(base, 3)
 
 //------------------------------------------------------------------------------
 // typedef
@@ -59,10 +56,20 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // function prototypes
 //------------------------------------------------------------------------------
 
-void  LCD_Init();
-void  LCD_Clear();
-void  LCD_Show_Text(char* Text);
-void  LCD_Line1();
-void  LCD_Line2();
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-#endif /* _INC_LCD_H_ */
+tEplKernel lcd_init(void);
+void lcd_exit(void);
+
+void lcd_clear(void);
+void lcd_printText(char* sText_p, UINT line_p);
+void lcd_printNmtState(tNmtState nmtState_p);
+void lcd_printNodeId (WORD wNodeId_p);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* _INC_lcd_H_ */

@@ -411,12 +411,12 @@
 		<link>
 			<name>lcd.c</name>
 			<type>1</type>
-			<locationURI>OPLK_LOC/Examples/arch/altera_nios2/no_os/gnu/demo_directIO/lcd.c</locationURI>
+			<locationURI>OPLK_LOC/examples/arch/altera_nios2/no_os/gnu/generic/lcd.c</locationURI>
 		</link>
 		<link>
-			<name>Cmp_Lcd.c</name>
+			<name>lcdl-16207.c</name>
 			<type>1</type>
-			<locationURI>OPLK_LOC/Examples/arch/altera_nios2/no_os/gnu/demo_directIO/Cmp_Lcd.c</locationURI>
+			<locationURI>OPLK_LOC/examples/arch/altera_nios2/no_os/gnu/generic/lcdl-16207.c</locationURI>
 		</link>
 		<link>
 			<name>systemComponents.c</name>

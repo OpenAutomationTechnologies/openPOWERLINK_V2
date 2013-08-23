@@ -1,15 +1,16 @@
 /**
 ********************************************************************************
-\file       Cmp_Lcd.c
+\file   lcd.c
 
-\brief      Non generic lcd functions for the TERASIC board
+\brief  Generic Lcd interface
 
-Application of the directIO example which starts the openPOWERLINK stack and
-implements AppCbSync and AppCbEvent.
+The generic Lcd interface module enables to control any Lcd.
+*******************************************************************************/
 
-Copyright (c) 2012, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
-Copyright (c) 2012, SYSTEC electronik GmbH
-Copyright (c) 2012, Kalycito Infotech Private Ltd.
+/*------------------------------------------------------------------------------
+Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2013, SYSTEC electronic GmbH
+Copyright (c) 2013, Kalycito Infotech Private Ltd.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -33,18 +34,15 @@ LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
 ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*******************************************************************************/
-
+------------------------------------------------------------------------------*/
 
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include "Cmp_Lcd.h"
 #include "lcd.h"
-#include "system.h"
+#include "lcdl.h"
 
-
-#ifdef LCD_BASE // LCD module present
+#include <string.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -69,6 +67,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
+#define LCD_COLUMN  16  ///< Minimum line size needed
 
 //------------------------------------------------------------------------------
 // local types
@@ -78,165 +77,165 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // local vars
 //------------------------------------------------------------------------------
 
-static char aStrNmtState_l[10][17] = {"INVALID         ",
-                                     "OFF             ",
-                                     "INITIALISATION  ",
-                                     "NOT ACTIVE      ",
-                                     "BASIC ETHERNET  ",
-                                     "PRE_OP1         ",
-                                     "PRE_OP2         ",
-                                     "READY_TO_OP     ",
-                                     "OPERATIONAL     ",
-                                     "STOPPED         " };
+const char aStrNmtState_l[10][LCD_COLUMN+1] = {
+        "INVALID          ",
+        "OFF              ",
+        "INITIALISATION   ",
+        "NOT ACTIVE       ",
+        "BASIC ETHERNET   ",
+        "PRE_OP1          ",
+        "PRE_OP2          ",
+        "READY_TO_OP      ",
+        "OPERATIONAL      ",
+        "STOPPED          "
+};
 
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
 
-
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
 //============================================================================//
 
-
 //------------------------------------------------------------------------------
 /**
-\brief               Init the LCD display
+\brief  Initialize the Lcd
 
-Calls the generic init LCD function
+The function initializes the generic Lcd instance.
+
+\return The function returns a tEplKernel error code.
 */
 //------------------------------------------------------------------------------
-void SysComp_LcdInit(void)
+tEplKernel lcd_init(void)
 {
-    LCD_Init();
+    if(lcdl_init() != 0)
+        return kEplNoResource;
+
+    return kEplSuccessful;
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief               Clear the LCD display
+\brief  Exit the Lcd
 
-Calls the generic clear LCD function
+The function exits the generic Lcd instance.
 */
 //------------------------------------------------------------------------------
-void SysComp_LcdClear(void)
+void lcd_exit(void)
 {
-    LCD_Clear();
+    lcdl_exit();
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief               Write text to LCD display
+\brief  Clear the Lcd
 
-Passes the test to the generic print function which pints the test on the LCD
-
-\param               Text                  the text to be printed
+The function clears the display.
 */
 //------------------------------------------------------------------------------
-void SysComp_LcdSetText(char* Text)
+void lcd_clear(void)
 {
-    LCD_Show_Text(Text);
+    lcdl_clear();
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief               Change the line to write to
+\brief  Print text to Lcd
 
-Enables a switch from one line to the other
+The function prints the provided text to the specified line in the Lcd.
 
-\param               LineNum_p            Line number (1 = line one, 2 = line two)
+\param  sText_p     Text to be printed
+\param  line_p      Line to print the text in
 */
 //------------------------------------------------------------------------------
-tEplKernel SysComp_LcdSetLine(int LineNum_p)
+void lcd_printText(char* sText_p, UINT line_p)
 {
-    tEplKernel retval = kEplSuccessful;
+    if(lcdl_changeToLine(line_p) != 0)
+        return;
 
-    switch(LineNum_p)
+    lcdl_printText(sText_p);
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Print NMT state to Lcd
+
+The function prints the NMT state to the second line of the display.
+
+\param  nmtState_p  NMT state to be written
+*/
+//------------------------------------------------------------------------------
+void lcd_printNmtState(tNmtState nmtState_p)
+{
+    if(lcdl_changeToLine(2) != 0)
+        return;
+
+    switch (nmtState_p)
     {
-        case 1:
-            LCD_Line1();
-        break;
-        case 2:
-            LCD_Line2();
-        break;
+        case kNmtGsOff:
+            lcdl_printText(aStrNmtState_l[1]);
+            break;
+        case kNmtGsInitialising:
+        case kNmtGsResetApplication:
+        case kNmtGsResetCommunication:
+        case kNmtGsResetConfiguration:
+            lcdl_printText(aStrNmtState_l[2]);
+            break;
+        case kNmtCsNotActive:
+            lcdl_printText(aStrNmtState_l[3]);
+            break;
+        case kNmtCsBasicEthernet :
+            lcdl_printText(aStrNmtState_l[4]);
+            break;
+        case kNmtCsPreOperational1:
+            lcdl_printText(aStrNmtState_l[5]);
+            break;
+        case kNmtCsPreOperational2:
+            lcdl_printText(aStrNmtState_l[6]);
+            break;
+        case kNmtCsReadyToOperate:
+            lcdl_printText(aStrNmtState_l[7]);
+            break;
+        case kNmtCsOperational:
+            lcdl_printText(aStrNmtState_l[8]);
+            break;
+        case kNmtCsStopped:
+            lcdl_printText(aStrNmtState_l[9]);
+            break;
         default:
-            retval = kEplApiInvalidParam;
-    }
-
-    return retval;
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief               Test the LCD display
-
-Init the LCD display and write a test message to both lines of the display
-*/
-//------------------------------------------------------------------------------
-void SysComp_LcdTest(void)
-{
-  char Text1[16] = "POWERLINK SLAVE";   ///< text for line 1
-  char Text2[16] = "-- by B & R -- ";   ///< text for line 2
-  //  Initial LCD
-  LCD_Init();
-  //  Show Text to LCD
-  LCD_Show_Text(Text1);
-  //  Change Line2
-  LCD_Line2();
-  //  Show Text to LCD
-  LCD_Show_Text(Text2);
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief               Write NMT state to LCD display
-
-Write the current NMT state to line two of the LCD display
-
-\param               NmtState_p                  IN: current state machine value
-*/
-//------------------------------------------------------------------------------
-void SysComp_LcdPrintState(tNmtState NmtState_p)
-{
-    LCD_Line2();
-    switch (NmtState_p)
-    {
-        case kNmtGsOff               : LCD_Show_Text(aStrNmtState_l[1]); break;
-        case kNmtGsInitialising      : LCD_Show_Text(aStrNmtState_l[2]); break;
-        case kNmtGsResetApplication  : LCD_Show_Text(aStrNmtState_l[2]); break;
-        case kNmtGsResetCommunication: LCD_Show_Text(aStrNmtState_l[2]); break;
-        case kNmtGsResetConfiguration: LCD_Show_Text(aStrNmtState_l[2]); break;
-        case kNmtCsNotActive         : LCD_Show_Text(aStrNmtState_l[3]); break;
-        case kNmtCsPreOperational1   : LCD_Show_Text(aStrNmtState_l[5]); break;
-        case kNmtCsStopped           : LCD_Show_Text(aStrNmtState_l[9]); break;
-        case kNmtCsPreOperational2   : LCD_Show_Text(aStrNmtState_l[6]); break;
-        case kNmtCsReadyToOperate    : LCD_Show_Text(aStrNmtState_l[7]); break;
-        case kNmtCsOperational       : LCD_Show_Text(aStrNmtState_l[8]); break;
-        case kNmtCsBasicEthernet     : LCD_Show_Text(aStrNmtState_l[4]); break;
-        default:
-        LCD_Show_Text(aStrNmtState_l[0]);
-        break;
+            lcdl_printText(aStrNmtState_l[0]);
+            break;
     }
 
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief               Print node info on LCD
+\brief  Print node ID to Lcd
 
-Writes the node id to line one of the LCD display.
+The function prints the provided node ID to the first line of the display.
+In addition to the printed node ID 'MN' (=0xF0) or 'CN' is added.
 
-\param               nodeID                           the node ID which was read
+\param  nodeID      node ID to be written
 */
 //------------------------------------------------------------------------------
-void SysComp_LcdPrintNodeInfo (WORD wNodeId_p)
+void lcd_printNodeId (WORD wNodeId_p)
 {
-    char TextNodeID[17];
+    char TextNodeID[LCD_COLUMN+1];
 
-    sprintf(TextNodeID, "Node/ID:0x%02X", wNodeId_p);
+    sprintf(TextNodeID, "NodeID=0x%02X (%s)", wNodeId_p,
+            (wNodeId_p == EPL_C_ADR_MN_DEF_NODE_ID) ? "MN" : "CN");
 
-    LCD_Clear();
-    LCD_Show_Text(TextNodeID);
+    if(lcdl_changeToLine(1) != 0)
+        return;
 
+    lcdl_printText(TextNodeID);
 }
 
-#endif // LCD_BASE
+//============================================================================//
+//            P R I V A T E   F U N C T I O N S                               //
+//============================================================================//
+/// \name Private Functions
+/// \{
+///\}
