@@ -54,7 +54,7 @@ SET (LIB_ARCH_SOURCES
 ELSE (CFG_KERNEL_STACK_KERNEL_MODULE)
 SET (LIB_ARCH_SOURCES
      ${LIB_ARCH_SOURCES}
-     ${LIB_SOURCE_DIR}/circbuf/circbuf-linuxshm.c
+     ${LIB_SOURCE_DIR}/circbuf/circbuf-posixshm.c
      ${USER_SOURCE_DIR}/pdo/pdoucalmem-posixshm.c
      ${USER_SOURCE_DIR}/pdo/pdoucalsync-bsdsem.c
      ${USER_SOURCE_DIR}/dll/dllucal-circbuf.c
