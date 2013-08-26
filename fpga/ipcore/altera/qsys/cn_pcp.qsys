@@ -386,14 +386,14 @@
   <parameter name="allowMultipleConnections" value="false" />
   <parameter name="avalonSpec" value="2.0" />
   <parameter name="hubInstanceID" value="0" />
-  <parameter name="readBufferDepth" value="128" />
+  <parameter name="readBufferDepth" value="64" />
   <parameter name="readIRQThreshold" value="8" />
   <parameter name="simInputCharacterStream" value="" />
   <parameter name="simInteractiveOptions">INTERACTIVE_ASCII_OUTPUT</parameter>
   <parameter name="useRegistersForReadBuffer" value="false" />
   <parameter name="useRegistersForWriteBuffer" value="false" />
   <parameter name="useRelativePathForSimFile" value="false" />
-  <parameter name="writeBufferDepth" value="128" />
+  <parameter name="writeBufferDepth" value="64" />
   <parameter name="writeIRQThreshold" value="8" />
  </module>
  <module kind="altera_avalon_timer" version="12.1" enabled="1" name="timer_0">
