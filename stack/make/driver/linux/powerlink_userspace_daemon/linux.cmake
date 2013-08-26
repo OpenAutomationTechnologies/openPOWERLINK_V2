@@ -44,7 +44,7 @@ SET (DAEMON_ARCH_SOURCES
      ${KERNEL_SOURCE_DIR}/event/eventkcal-linux.c
      ${KERNEL_SOURCE_DIR}/event/eventkcalintf-circbuf.c
      ${COMMON_SOURCE_DIR}/ctrl/ctrlcal-posixshm.c
-     ${LIB_SOURCE_DIR}/circbuf/circbuf-linuxshm.c
+     ${LIB_SOURCE_DIR}/circbuf/circbuf-posixshm.c
      )
 
 SET (ARCH_LIBRARIES pcap pthread rt)

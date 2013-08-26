@@ -1,11 +1,11 @@
 /**
 ********************************************************************************
-\file   circbuf-linuxshm.c
+\file   circbuf-posixshm.c
 
-\brief  Circular buffer implementation for Linux using Posix shared memory
+\brief  Circular buffer implementation using Posix shared memory
 
 This file contains the architecture specific circular buffer functions
-using posix shared memory on Linux systems and BSD semaphores for locking.
+using posix shared memory and BSD semaphores for locking.
 
 \ingroup module_lib_circbuf
 *******************************************************************************/
