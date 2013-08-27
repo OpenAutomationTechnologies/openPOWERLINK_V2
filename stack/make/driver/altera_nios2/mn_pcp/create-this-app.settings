@@ -38,18 +38,20 @@ QSYS_SUB=pcp_0
 QSYS_SUB_CPU=cpu_0
 
 ##################################
+# Relative path to openPOWERLINK root directory
+# (Is converted to absolute)
+STACKROOT_REL_DIR=../../../../..
+STACKROOT_DIR=`readlink -n -f ${STACKROOT_REL_DIR}`
+
+##################################
 # SW is for MN/CN?
 PLK_NODE_IS=CONFIG_MN
 #PLK_NODE_IS=CONFIG_CN
 
 ##################################
 # Relative path to SOPC file
-#SOPC_DIR=../../../../../fpga/boards/altera/TERASIC_DE2-115/mn_dual_nios2/
-SOPC_DIR=../../../../../fpga/boards/altera/TERASIC_DE2-115/mn_par_pcp/
-
-##################################
-# Relative path to openPOWERLINK root directory
-STACKROOT_DIR=../../../../..
+#SOPC_DIR=${STACKROOT_DIR}/fpga/boards/altera/TERASIC_DE2-115/mn_dual_nios2/
+SOPC_DIR=${STACKROOT_DIR}/fpga/boards/altera/TERASIC_DE2-115/mn_par_pcp/
 
 ##################################
 # Relative path to bsp
@@ -66,7 +68,8 @@ ${STACKROOT_DIR}/stack/src"
 
 ##################################
 # Source files
-SRCFILES="daemon.c \
+SRCFILES="\
+daemon.c \
 ${STACKROOT_DIR}/libs/ami/amiarm.c \
 ${STACKROOT_DIR}/libs/hostif/hostiflib.c \
 ${STACKROOT_DIR}/libs/hostif/hostiflib_l.c \
@@ -102,4 +105,5 @@ ${STACKROOT_DIR}/stack/src/kernel/pdo/pdokcal.c \
 ${STACKROOT_DIR}/stack/src/kernel/pdo/pdokcal-triplebufshm.c \
 ${STACKROOT_DIR}/stack/src/kernel/pdo/pdokcalmem-hostif.c \
 ${STACKROOT_DIR}/stack/src/kernel/pdo/pdokcalsync-hostif.c \
-${STACKROOT_DIR}/stack/src/kernel/timestamp/timestamp-openmac.c"
+${STACKROOT_DIR}/stack/src/kernel/timestamp/timestamp-openmac.c \
+"

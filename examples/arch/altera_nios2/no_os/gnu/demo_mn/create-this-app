@@ -102,19 +102,13 @@ CFLAGS="-D${DBG_MODE} -DDEF_DEBUG_LVL=${DEF_DEBUG_LVL}"
 #workaround for global pointer error
 APP_CFLAGS_DEFINED_SYMBOLS="-G4"
 
-if [ -n "${COMSPEC}" ]; then
-# Under Windows we need double quotes, but not under Linux
-INCLUDES=\"${INCLUDES}\"
-CFLAGS=\"${CFLAGS}\"
-fi
-
 NIOS2_APP_GEN_ARGS="--elf-name epl.elf \
 --set QSYS_SUB_CPU $QSYS_SUB_CPU \
 --set OBJDUMP_INCLUDE_SOURCE 1 \
 --set CREATE_OBJDUMP 0 \
 --set CFLAGS=${CFLAGS} \
 --set APP_INCLUDE_DIRS=${INCLUDES} \
---src-files $SRCFILES \
+--src-files ${SRCFILES} \
 --set APP_CFLAGS_OPTIMIZATION ${OPT_LEVEL}"
 
 # Check if we have NOT a dual nios design.
