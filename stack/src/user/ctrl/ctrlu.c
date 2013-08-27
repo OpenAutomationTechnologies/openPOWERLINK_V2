@@ -414,6 +414,10 @@ tEplKernel ctrlu_shutdownStack(void)
     ret = ctrlucal_executeCmd(kCtrlCleanupStack);
     TRACE("shoutdown kernel modules():  0x%X\n", ret);
 
+#if (EPL_OBD_USE_LOAD_CONCISEDCF != FALSE)
+    obdcdc_exit();
+#endif
+
     ret = EplObdDeleteInstance();
 
     return ret;
@@ -593,6 +597,10 @@ static tEplKernel initObd(tEplApiInstance *pApiInstance_p)
     ret = EplObdInit(&ObdInitParam);
     if (ret != kEplSuccessful)
         return ret;
+#endif
+
+#if (EPL_OBD_USE_LOAD_CONCISEDCF != FALSE)
+    ret = obdcdc_init();
 #endif
 
     return ret;

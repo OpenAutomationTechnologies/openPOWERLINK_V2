@@ -1,82 +1,53 @@
-/****************************************************************************
+/**
+********************************************************************************
+\file   obdcdc.c
 
-  (c) SYSTEC electronic GmbH, D-07973 Greiz, August-Bebel-Str. 29
-      www.systec-electronic.com
+\brief  Implementation of OBD CDC functions
 
-  Project:      openPOWERLINK
+This file contains the functions for parsing a concise device configuration CDC
+and write the configured data into the object dictionary.
 
-  Description:  source file for OBD-CDC module
-                This module implements OBD import functionality
-                of ConciseDCF (CDC files).
+\ingroup module_obd
+*******************************************************************************/
 
-  License:
+/*------------------------------------------------------------------------------
+Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2013, SYSTEC electronic GmbH
+All rights reserved.
 
-    Redistribution and use in source and binary forms, with or without
-    modification, are permitted provided that the following conditions
-    are met:
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+    * Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above copyright
+      notice, this list of conditions and the following disclaimer in the
+      documentation and/or other materials provided with the distribution.
+    * Neither the name of the copyright holders nor the
+      names of its contributors may be used to endorse or promote products
+      derived from this software without specific prior written permission.
 
-    1. Redistributions of source code must retain the above copyright
-       notice, this list of conditions and the following disclaimer.
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL COPYRIGHT HOLDERS BE LIABLE FOR ANY
+DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+------------------------------------------------------------------------------*/
 
-    2. Redistributions in binary form must reproduce the above copyright
-       notice, this list of conditions and the following disclaimer in the
-       documentation and/or other materials provided with the distribution.
-
-    3. Neither the name of SYSTEC electronic GmbH nor the names of its
-       contributors may be used to endorse or promote products derived
-       from this software without prior written permission. For written
-       permission, please contact info@systec-electronic.com.
-
-    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-    LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-    FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-    COPYRIGHT HOLDERS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-    INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-    BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-    LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-    CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-    LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-    ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-    POSSIBILITY OF SUCH DAMAGE.
-
-    Severability Clause:
-
-        If a provision of this License is or becomes illegal, invalid or
-        unenforceable in any jurisdiction, that shall not affect:
-        1. the validity or enforceability in that jurisdiction of any other
-           provision of this License; or
-        2. the validity or enforceability in other jurisdictions of that or
-           any other provision of this License.
-
-  -------------------------------------------------------------------------
-
-                $RCSfile$
-
-                $Author$
-
-                $Revision$  $Date$
-
-                $State$
-
-                Build Environment:
-                    GCC V3.4
-
-  -------------------------------------------------------------------------
-
-  Revision History:
-
-  2010/01/08 d.k.:   start of the implementation, version 1.00
-
-****************************************************************************/
-
+//------------------------------------------------------------------------------
+// includes
+//------------------------------------------------------------------------------
 #define _CRT_NONSTDC_NO_WARNINGS    // for MSVC 2005 or higher
 
-#include "EplInc.h"
-#include "EplObd.h"
-#include "obdcdc.h"
-#include "kernel/EplObdk.h"
-#include "user/eventu.h"
+#include <EplInc.h>
+#include <EplObd.h>
+#include <obdcdc.h>
+#include <kernel/EplObdk.h>
+#include <user/eventu.h>
 
 #if (EPL_OBD_USE_LOAD_CONCISEDCF != FALSE)
 
@@ -109,6 +80,30 @@
         #include "ioLib.h"
 #endif
 
+//============================================================================//
+//            G L O B A L   D E F I N I T I O N S                             //
+//============================================================================//
+
+//------------------------------------------------------------------------------
+// const defines
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// module global vars
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// global function prototypes
+//------------------------------------------------------------------------------
+
+
+//============================================================================//
+//            P R I V A T E   D E F I N I T I O N S                           //
+//============================================================================//
+
+//------------------------------------------------------------------------------
+// const defines
+//------------------------------------------------------------------------------
 #if (TARGET_SYSTEM == _WIN32_)
 
     #define flush  _commit
@@ -119,8 +114,11 @@
     #define O_BINARY 0
     #define _MAX_PATH PATH_MAX
     #define flush  fsync
+
 #elif (TARGET_SYSTEM == _VXWORKS_)
+
     #define O_BINARY 0
+
 #endif
 
 #if (TARGET_SYSTEM == _NO_OS_ && DEV_SYSTEM == _DEV_NIOS2_)
@@ -135,374 +133,388 @@
 #define IS_FD_VALID(iFd_p)  ((iFd_p) >= 0)
 #endif
 
-
-/***************************************************************************/
-/*                                                                         */
-/*                                                                         */
-/*          G L O B A L   D E F I N I T I O N S                            */
-/*                                                                         */
-/*                                                                         */
-/***************************************************************************/
-
-//---------------------------------------------------------------------------
-// const defines
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // local types
-//---------------------------------------------------------------------------
-
-//---------------------------------------------------------------------------
-// module global vars
-//---------------------------------------------------------------------------
-
-//---------------------------------------------------------------------------
-// local function prototypes
-//---------------------------------------------------------------------------
-
-
-/***************************************************************************/
-/*                                                                         */
-/*                                                                         */
-/*          C L A S S  EplObdCdc                                           */
-/*                                                                         */
-/*                                                                         */
-/***************************************************************************/
-//
-// Description:
-//
-//
-/***************************************************************************/
-
-
-//=========================================================================//
-//                                                                         //
-//          P R I V A T E   D E F I N I T I O N S                          //
-//                                                                         //
-//=========================================================================//
-
-//---------------------------------------------------------------------------
-// const defines
-//---------------------------------------------------------------------------
-
-//---------------------------------------------------------------------------
-// local types
-//---------------------------------------------------------------------------
-
+//------------------------------------------------------------------------------
 typedef enum
 {
     kEplObdCdcTypeFile      = 0,
     kEplObdCdcTypeBuffer    = 1,
-
-} tEplObdCdcType;
-
+} tObdCdcType;
 
 typedef struct
 {
-    tEplObdCdcType  m_Type;
+    tObdCdcType         type;
     union
     {
-        FD_TYPE     m_hCdcFile;
-        BYTE*       m_pbNextBuffer;
-    } m_Handle;
-    size_t          m_iCdcSize;
-    size_t          m_iBufferSize;
-    BYTE*           m_pbCurBuffer;
+        FD_TYPE         fdCdcFile;
+        UINT8*          pNextBuffer;
+    } handle;
+    size_t              cdcSize;
+    size_t              bufferSize;
+    BYTE*               pCurBuffer;
+} tObdCdcInfo;
 
-} tEplObdCdcInfo;
+typedef struct
+{
+    UINT8*              pCdcBuffer;
+    unsigned int        cdcBufSize;
+    char*               pCdcFilename;
+} tObdCdcInstance;
 
-
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // local vars
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+static tObdCdcInstance         cdcInstance_l;
 
-
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // local function prototypes
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+static tEplKernel processCdc(tObdCdcInfo* pCdcInfo_p);
+static tEplKernel loadNextBuffer(tObdCdcInfo* pCdcInfo_p, size_t bufferSize);
+static tEplKernel loadCdcBuffer(UINT8* pCdc_p, size_t cdcSize_p);
+static tEplKernel loadCdcFile(char* pCdcFilename_p);
 
-static tEplKernel EplObdCdcProcess(tEplObdCdcInfo* pCdcInfo_p);
+//============================================================================//
+//            P U B L I C   F U N C T I O N S                                 //
+//============================================================================//
 
+//------------------------------------------------------------------------------
+/**
+\brief  Initialize OBD CDC module
 
+The function initializes the OBD CDC module.
 
-//=========================================================================//
-//                                                                         //
-//          P U B L I C   F U N C T I O N S                                //
-//                                                                         //
-//=========================================================================//
+\return The function returns a tEplKernel error code.
 
-//---------------------------------------------------------------------------
-//
-// Function:    EplObdCdcLoadFile()
-//
-// Description: loads the CDC file specified by the file name into the local OD.
-//
-// Parameters:  pszCdcFilename_p    = file name of the CDC file
-//
-// Returns:     tEplKernel          = error code
-//
-//
-// State:
-//
-//---------------------------------------------------------------------------
-
-tEplKernel EplObdCdcLoadFile(char* pszCdcFilename_p)
+\ingroup module_obd
+*/
+//------------------------------------------------------------------------------
+tEplKernel obdcdc_init(void)
 {
-tEplKernel      Ret = kEplSuccessful;
-tEplObdCdcInfo  CdcInfo;
-DWORD           dwErrno;
+    cdcInstance_l.pCdcFilename = NULL;
+    cdcInstance_l.pCdcBuffer = NULL;
+    cdcInstance_l.cdcBufSize = 0;
+    return kEplSuccessful;
+}
 
-    EPL_MEMSET(&CdcInfo, 0, sizeof (CdcInfo));
-    CdcInfo.m_Type = kEplObdCdcTypeFile;
-    CdcInfo.m_Handle.m_hCdcFile = open(pszCdcFilename_p, O_RDONLY | O_BINARY, 0666);
-    if (!IS_FD_VALID(CdcInfo.m_Handle.m_hCdcFile))
-    {   // error occurred
-        dwErrno = (DWORD) errno;
-        Ret = eventu_postError(kEplEventSourceObdu, kEplObdErrnoSet, sizeof (dwErrno), &dwErrno);
-        goto Exit;
-    }
+//------------------------------------------------------------------------------
+/**
+\brief  Exit OBD CDC module
 
-    CdcInfo.m_iCdcSize = lseek(CdcInfo.m_Handle.m_hCdcFile, 0, SEEK_END);
-    lseek(CdcInfo.m_Handle.m_hCdcFile, 0, SEEK_SET);
+The function exits and cleans up the OBD CDC module.
 
-    Ret = EplObdCdcProcess(&CdcInfo);
+\ingroup module_obd
+*/
+//------------------------------------------------------------------------------
+void obdcdc_exit(void)
+{
+    cdcInstance_l.pCdcFilename = NULL;
+    cdcInstance_l.pCdcBuffer = NULL;
+    cdcInstance_l.cdcBufSize = 0;
+}
 
-    if (CdcInfo.m_pbCurBuffer != NULL)
+//------------------------------------------------------------------------------
+/**
+\brief  Set the CDC filename
+
+The function sets the filename of the concise device configuration (CDC) file.
+
+\param  pCdcFilename_p      The filename of the CDC file to load.
+
+\ingroup module_obd
+*/
+//------------------------------------------------------------------------------
+void obdcdc_setFilename(char* pCdcFilename_p)
+{
+    cdcInstance_l.pCdcFilename = pCdcFilename_p;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Set the CDC buffer
+
+The function sets the buffer which contains the concise device description (CDC).
+
+\param  pCdc_p          Pointer to the buffer which contains the concise object
+                        definition.
+\param  cdcSize_p       Size of the buffer.
+
+\ingroup module_obd
+*/
+//------------------------------------------------------------------------------
+void obdcdc_setBuffer(UINT8* pCdc_p, size_t cdcSize_p)
+{
+    cdcInstance_l.pCdcBuffer = pCdc_p;
+    cdcInstance_l.cdcBufSize = cdcSize_p;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Load Concise Device Configuration
+
+The function loads the concise device configuration (CDC) and writes the
+contents into the object dictionary. Depending on the CDC type either a CDC
+file is parsed and loaded or a CDC buffer is parsed and loaded.
+
+\return The function returns a tEplKernel error code.
+
+\ingroup module_obd
+*/
+//------------------------------------------------------------------------------
+tEplKernel obdcdc_loadCdc(void)
+{
+    tEplKernel          ret;
+
+    if (cdcInstance_l.pCdcBuffer != NULL)
     {
-        EPL_FREE(CdcInfo.m_pbCurBuffer);
-        CdcInfo.m_pbCurBuffer = NULL;
-        CdcInfo.m_iBufferSize = 0;
+        ret = loadCdcBuffer(cdcInstance_l.pCdcBuffer, cdcInstance_l.cdcBufSize);
+    }
+    else if (cdcInstance_l.pCdcFilename != NULL)
+    {
+        ret = loadCdcFile(cdcInstance_l.pCdcFilename);
+    }
+    else
+    {
+        ret = kEplObdInvalidDcf;
     }
 
-    close(CdcInfo.m_Handle.m_hCdcFile);
+    if (ret == kEplReject)
+        ret = kEplSuccessful;
 
-Exit:
-    return Ret;
+    return ret;
 }
 
+//============================================================================//
+//            P R I V A T E   F U N C T I O N S                               //
+//============================================================================//
+/// \name Private Functions
+/// \{
 
-//---------------------------------------------------------------------------
-//
-// Function:    EplObdCdcLoadBuffer()
-//
-// Description: loads the CDC specified by the buffer into the local OD.
-//
-// Parameters:  pbCdc_p         = pointer to buffer containing the CDC
-//              uiCdcSize_p     = size of the CDC
-//
-// Returns:     tEplKernel      = error code
-//
-//
-// State:
-//
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+/**
+\brief  Load Concise Device Configuration file
 
-tEplKernel EplObdCdcLoadBuffer(BYTE* pbCdc_p, unsigned int uiCdcSize_p)
+The function loads the concise device configuration (CDC) from the specified
+buffer and writes its contents into the OD.
+
+\param  pCdcFilename_p  The filename of the CDC file to load.
+
+\return The function returns a tEplKernel error code.
+*/
+//------------------------------------------------------------------------------
+static tEplKernel loadCdcFile(char* pCdcFilename_p)
 {
-tEplKernel      Ret = kEplSuccessful;
-tEplObdCdcInfo  CdcInfo;
+    tEplKernel      ret = kEplSuccessful;
+    tObdCdcInfo     cdcInfo;
+    UINT32          error;
 
-    EPL_MEMSET(&CdcInfo, 0, sizeof (CdcInfo));
-    CdcInfo.m_Type = kEplObdCdcTypeBuffer;
-    CdcInfo.m_Handle.m_pbNextBuffer = pbCdc_p;
-    if (CdcInfo.m_Handle.m_pbNextBuffer == NULL)
+    EPL_MEMSET(&cdcInfo, 0, sizeof(tObdCdcInfo));
+    cdcInfo.type = kEplObdCdcTypeFile;
+    cdcInfo.handle.fdCdcFile = open(pCdcFilename_p, O_RDONLY | O_BINARY, 0666);
+    if (!IS_FD_VALID(cdcInfo.handle.fdCdcFile))
     {   // error occurred
-        Ret = eventu_postError(kEplEventSourceObdu, kEplObdInvalidDcf, 0, NULL);
+        errno = (UINT32)errno;
+        ret = eventu_postError(kEplEventSourceObdu, kEplObdErrnoSet, sizeof(UINT32), &error);
+        return ret;
+    }
+
+    cdcInfo.cdcSize = lseek(cdcInfo.handle.fdCdcFile, 0, SEEK_END);
+    lseek(cdcInfo.handle.fdCdcFile, 0, SEEK_SET);
+
+    ret = processCdc(&cdcInfo);
+
+    if (cdcInfo.pCurBuffer != NULL)
+    {
+        EPL_FREE(cdcInfo.pCurBuffer);
+        cdcInfo.pCurBuffer = NULL;
+        cdcInfo.bufferSize = 0;
+    }
+
+    close(cdcInfo.handle.fdCdcFile);
+
+    return ret;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Load Concise Device Configuration Buffer
+
+The function loads the concise device configuration (CDC) from the specified
+buffer and writes the contents into the OD.
+
+\param  pCdc_p          Pointer to the buffer which contains the concise object
+                        definition.
+\param  cdcSize_p       Size of the buffer.
+
+\return The function returns a tEplKernel error code.
+*/
+//------------------------------------------------------------------------------
+static tEplKernel loadCdcBuffer(UINT8* pCdc_p, size_t cdcSize_p)
+{
+    tEplKernel      ret = kEplSuccessful;
+    tObdCdcInfo     cdcInfo;
+
+    EPL_MEMSET(&cdcInfo, 0, sizeof(tObdCdcInfo));
+    cdcInfo.type = kEplObdCdcTypeBuffer;
+    cdcInfo.handle.pNextBuffer = pCdc_p;
+    if (cdcInfo.handle.pNextBuffer == NULL)
+    {   // error occurred
+        ret = eventu_postError(kEplEventSourceObdu, kEplObdInvalidDcf, 0, NULL);
         goto Exit;
     }
 
-    CdcInfo.m_iCdcSize = (size_t) uiCdcSize_p;
-    CdcInfo.m_iBufferSize = CdcInfo.m_iCdcSize;
+    cdcInfo.cdcSize = (size_t) cdcSize_p;
+    cdcInfo.bufferSize = cdcInfo.cdcSize;
 
-    Ret = EplObdCdcProcess(&CdcInfo);
+    ret = processCdc(&cdcInfo);
 
 Exit:
-    return Ret;
+    return ret;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Process Concise Device Configuration
 
+The function processes the concise device configuration and writes it into the
+OD.
 
-//=========================================================================//
-//                                                                         //
-//          P R I V A T E   F U N C T I O N S                              //
-//                                                                         //
-//=========================================================================//
+\param  pCdcInfo_p      Pointer to the CDC information.
 
-//---------------------------------------------------------------------------
-//
-// Function:    EplObdCdcLoadNextBuffer
-//
-// Description: loads the next part of the buffer
-//
-// Parameters:  pCdcInfo_p          = pointer to CDC info structure
-//              iBufferSize         = number of bytes to load
-//
-// Returns:     tEplKernel          = error code
-//
-//
-// State:
-//
-//---------------------------------------------------------------------------
-
-static tEplKernel EplObdCdcLoadNextBuffer(tEplObdCdcInfo* pCdcInfo_p, size_t iBufferSize)
+\return The function returns a tEplKernel error code.
+*/
+//------------------------------------------------------------------------------
+static tEplKernel processCdc(tObdCdcInfo* pCdcInfo_p)
 {
-tEplKernel  Ret = kEplSuccessful;
-int         iReadSize;
-BYTE*       pbBuffer;
+    tEplKernel      ret = kEplSuccessful;
+    UINT32          entriesRemaining;
+    UINT            objectIndex;
+    UINT            objectSubIndex;
+    size_t          curDataSize;
 
-    switch (pCdcInfo_p->m_Type)
+    if ((ret = loadNextBuffer(pCdcInfo_p, sizeof(UINT32)))  != kEplSuccessful)
+        return ret;
+
+    entriesRemaining = AmiGetDwordFromLe(pCdcInfo_p->pCurBuffer);
+
+    if (entriesRemaining == 0)
+    {
+        ret = eventu_postError(kEplEventSourceObdu, kEplObdNoConfigData, 0, NULL);
+        return ret;
+    }
+
+    for ( ; entriesRemaining != 0; entriesRemaining--)
+    {
+        if ((ret = loadNextBuffer(pCdcInfo_p, EPL_CDC_OFFSET_DATA))  != kEplSuccessful)
+            return ret;
+
+        objectIndex = AmiGetWordFromLe(&pCdcInfo_p->pCurBuffer[EPL_CDC_OFFSET_INDEX]);
+        objectSubIndex = AmiGetByteFromLe(&pCdcInfo_p->pCurBuffer[EPL_CDC_OFFSET_SUBINDEX]);
+        curDataSize = (size_t)AmiGetDwordFromLe(&pCdcInfo_p->pCurBuffer[EPL_CDC_OFFSET_SIZE]);
+
+        EPL_DBGLVL_OBD_TRACE("%s: Reading object 0x%04X/%u with size %u from CDC\n",
+                             __func__, objectIndex, objectSubIndex, curDataSize);
+        if ((ret = loadNextBuffer(pCdcInfo_p, curDataSize)) != kEplSuccessful)
+        {
+            EPL_DBGLVL_OBD_TRACE("%s: Reading the corresponding data from CDC failed with 0x%02X\n", __func__, ret);
+            return ret;
+        }
+
+        ret = EplObdWriteEntryFromLe(objectIndex, objectSubIndex, pCdcInfo_p->pCurBuffer,
+                                     (tEplObdSize) curDataSize);
+        if (ret != kEplSuccessful)
+        {
+            tEplEventObdError       obdError;
+
+            obdError.m_uiIndex = objectIndex;
+            obdError.m_uiSubIndex = objectSubIndex;
+
+            EPL_DBGLVL_OBD_TRACE("%s: Writing object 0x%04X/%u to local OBD failed with 0x%02X\n",
+                                 __func__, objectIndex, objectSubIndex, ret);
+            ret = eventu_postError(kEplEventSourceObdu, ret, sizeof(tEplEventObdError), &obdError);
+            if (ret != kEplSuccessful)
+                return ret;
+        }
+    }
+
+    return ret;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Load next CDC buffer
+
+The function loads the next buffer from the CDC
+
+\param  pCdcInfo_p      Pointer to the CDC information.
+\param  bufferSize      Size of the buffer.
+
+\return The function returns a tEplKernel error code.
+*/
+//------------------------------------------------------------------------------
+static tEplKernel loadNextBuffer(tObdCdcInfo* pCdcInfo_p, size_t bufferSize)
+{
+    tEplKernel  ret = kEplSuccessful;
+    int         readSize;
+    UINT8*      pBuffer;
+
+    switch (pCdcInfo_p->type)
     {
         case kEplObdCdcTypeFile:
-        {
-            if (pCdcInfo_p->m_iBufferSize < iBufferSize)
+            if (pCdcInfo_p->bufferSize < bufferSize)
             {
-                if (pCdcInfo_p->m_pbCurBuffer != NULL)
+                if (pCdcInfo_p->pCurBuffer != NULL)
                 {
-                    EPL_FREE(pCdcInfo_p->m_pbCurBuffer);
-                    pCdcInfo_p->m_pbCurBuffer = NULL;
-                    pCdcInfo_p->m_iBufferSize = 0;
+                    EPL_FREE(pCdcInfo_p->pCurBuffer);
+                    pCdcInfo_p->pCurBuffer = NULL;
+                    pCdcInfo_p->bufferSize = 0;
                 }
-                pCdcInfo_p->m_pbCurBuffer = EPL_MALLOC(iBufferSize);
-                if (pCdcInfo_p->m_pbCurBuffer == NULL)
+                pCdcInfo_p->pCurBuffer = EPL_MALLOC(bufferSize);
+                if (pCdcInfo_p->pCurBuffer == NULL)
                 {
-                    Ret = eventu_postError(kEplEventSourceObdu, kEplObdOutOfMemory, 0, NULL);
-                    if (Ret != kEplSuccessful)
-                    {
-                        goto Exit;
-                    }
-                    Ret = kEplReject;
-                    goto Exit;
+                    ret = eventu_postError(kEplEventSourceObdu, kEplObdOutOfMemory, 0, NULL);
+                    if (ret != kEplSuccessful)
+                        return ret;
+                    return kEplReject;
                 }
-                pCdcInfo_p->m_iBufferSize = iBufferSize;
+                pCdcInfo_p->bufferSize = bufferSize;
             }
-            pbBuffer = pCdcInfo_p->m_pbCurBuffer;
+            pBuffer = pCdcInfo_p->pCurBuffer;
             do
             {
-                iReadSize = read(pCdcInfo_p->m_Handle.m_hCdcFile, pbBuffer, iBufferSize);
-                if (iReadSize <= 0)
+                readSize = read(pCdcInfo_p->handle.fdCdcFile, pBuffer, bufferSize);
+                if (readSize <= 0)
                 {
-                    Ret = eventu_postError(kEplEventSourceObdu, kEplObdInvalidDcf, 0, NULL);
-                    if (Ret != kEplSuccessful)
-                    {
-                        goto Exit;
-                    }
-                    Ret = kEplReject;
-                    goto Exit;
+                    ret = eventu_postError(kEplEventSourceObdu, kEplObdInvalidDcf, 0, NULL);
+                    if (ret != kEplSuccessful)
+                        return ret;
+                    return kEplReject;
                 }
-                pbBuffer += iReadSize;
-                iBufferSize -= iReadSize;
-                pCdcInfo_p->m_iCdcSize -= iReadSize;
+                pBuffer += readSize;
+                bufferSize -= readSize;
+                pCdcInfo_p->cdcSize -= readSize;
             }
-            while (iBufferSize > 0);
+            while (bufferSize > 0);
             break;
-        }
 
         case kEplObdCdcTypeBuffer:
-        {
-            if (pCdcInfo_p->m_iBufferSize < iBufferSize)
+            if (pCdcInfo_p->bufferSize < bufferSize)
             {
-                Ret = eventu_postError(kEplEventSourceObdu, kEplObdInvalidDcf, 0, NULL);
-                if (Ret != kEplSuccessful)
-                {
-                    goto Exit;
-                }
-                Ret = kEplReject;
-                goto Exit;
+                ret = eventu_postError(kEplEventSourceObdu, kEplObdInvalidDcf, 0, NULL);
+                if (ret != kEplSuccessful)
+                    return ret;
+                return kEplReject;
             }
-            pCdcInfo_p->m_pbCurBuffer = pCdcInfo_p->m_Handle.m_pbNextBuffer;
-            pCdcInfo_p->m_Handle.m_pbNextBuffer += iBufferSize;
-            pCdcInfo_p->m_iBufferSize -= iBufferSize;
+            pCdcInfo_p->pCurBuffer = pCdcInfo_p->handle.pNextBuffer;
+            pCdcInfo_p->handle.pNextBuffer += bufferSize;
+            pCdcInfo_p->bufferSize -= bufferSize;
             break;
-        }
     }
 
-Exit:
-    return Ret;
+    return ret;
 }
 
-
-//---------------------------------------------------------------------------
-//
-// Function:    EplObdCdcProcess
-//
-// Description: processes the specified CDC
-//
-// Parameters:  pCdcInfo_p          = pointer to CDC info structure
-//
-// Returns:     tEplKernel          = error code
-//
-//
-// State:
-//
-//---------------------------------------------------------------------------
-
-static tEplKernel EplObdCdcProcess(tEplObdCdcInfo* pCdcInfo_p)
-{
-tEplKernel      Ret = kEplSuccessful;
-DWORD           dwEntriesRemaining;
-unsigned int    uiObjectIndex;
-unsigned int    uiObjectSubIndex;
-size_t          iCurDataSize;
-
-    Ret = EplObdCdcLoadNextBuffer(pCdcInfo_p, sizeof (DWORD));
-    if (Ret != kEplSuccessful)
-    {
-        goto Exit;
-    }
-    dwEntriesRemaining = AmiGetDwordFromLe(pCdcInfo_p->m_pbCurBuffer);
-
-    if (dwEntriesRemaining == 0)
-    {
-        Ret = eventu_postError(kEplEventSourceObdu, kEplObdNoConfigData, 0, NULL);
-        goto Exit;
-    }
-
-    for ( ; dwEntriesRemaining != 0; dwEntriesRemaining--)
-    {
-        Ret = EplObdCdcLoadNextBuffer(pCdcInfo_p, EPL_CDC_OFFSET_DATA);
-        if (Ret != kEplSuccessful)
-        {
-            goto Exit;
-        }
-
-        uiObjectIndex = AmiGetWordFromLe(&pCdcInfo_p->m_pbCurBuffer[EPL_CDC_OFFSET_INDEX]);
-        uiObjectSubIndex = AmiGetByteFromLe(&pCdcInfo_p->m_pbCurBuffer[EPL_CDC_OFFSET_SUBINDEX]);
-        iCurDataSize = (size_t) AmiGetDwordFromLe(&pCdcInfo_p->m_pbCurBuffer[EPL_CDC_OFFSET_SIZE]);
-
-        EPL_DBGLVL_OBD_TRACE("%s: Reading object 0x%04X/%u with size %u from CDC\n", __func__, uiObjectIndex, uiObjectSubIndex, iCurDataSize);
-        Ret = EplObdCdcLoadNextBuffer(pCdcInfo_p, iCurDataSize);
-        if (Ret != kEplSuccessful)
-        {
-            EPL_DBGLVL_OBD_TRACE("%s: Reading the corresponding data from CDC failed with 0x%02X\n", __func__, Ret);
-            goto Exit;
-        }
-
-        Ret = EplObdWriteEntryFromLe(uiObjectIndex, uiObjectSubIndex, pCdcInfo_p->m_pbCurBuffer, (tEplObdSize) iCurDataSize);
-        if (Ret != kEplSuccessful)
-        {
-        tEplEventObdError   ObdError;
-
-            ObdError.m_uiIndex = uiObjectIndex;
-            ObdError.m_uiSubIndex = uiObjectSubIndex;
-
-            EPL_DBGLVL_OBD_TRACE("%s: Writing object 0x%04X/%u to local OBD failed with 0x%02X\n", __func__, uiObjectIndex, uiObjectSubIndex, Ret);
-            Ret = eventu_postError(kEplEventSourceObdu, Ret, sizeof (ObdError), &ObdError);
-            if (Ret != kEplSuccessful)
-            {
-                goto Exit;
-            }
-        }
-    }
-
-Exit:
-    return Ret;
-}
-
-
-
+///\}
 
 #endif
-
-// EOF
-

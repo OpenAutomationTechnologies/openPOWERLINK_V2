@@ -294,12 +294,6 @@ typedef struct
 {
     tEplApiInitParam    m_InitParam;
 
-#if (EPL_OBD_USE_LOAD_CONCISEDCF != FALSE)
-    BYTE*               m_pbCdc;
-    unsigned int        m_uiCdcSize;
-    char*               m_pszCdcFilename;
-#endif
-
 } tEplApiInstance;
 
 typedef struct {
