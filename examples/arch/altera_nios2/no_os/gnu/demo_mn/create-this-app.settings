@@ -64,6 +64,8 @@ ${STACKROOT_DIR}/stack/src"
 # Source files
 SRCFILES="\
 demo_main.c \
+${STACKROOT_DIR}/examples/demo_mn_console/event.c \
+${STACKROOT_DIR}/libs/console/printlog.c \
 ${STACKROOT_DIR}/libs/ami/amiarm.c \
 ${STACKROOT_DIR}/libs/hostif/hostiflib.c \
 ${STACKROOT_DIR}/libs/hostif/hostiflib_l.c \

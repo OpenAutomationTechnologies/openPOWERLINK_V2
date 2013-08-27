@@ -60,6 +60,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // global function prototypes
 //------------------------------------------------------------------------------
+void initEvents (BOOL* pfGsOff_p);
+tEplKernel PUBLIC processEvents(tEplApiEventType EventType_p, tEplApiEventArg* pEventArg_p, void GENERIC* pUserArg_p);
 
 //============================================================================//
 //            P R I V A T E   D E F I N I T I O N S                           //
@@ -69,7 +71,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // const defines
 //------------------------------------------------------------------------------
 #define NODEID      0xF0                //=> MN
-#define CYCLE_LEN   1000                // us
+#define CYCLE_LEN   UINT_MAX
 #define IP_ADDR     0xc0a86401          // 192.168.100.1
 #define SUBNET_MASK 0xFFFFFF00          // 255.255.255.0
 #define HOSTNAME    "openPOWERLINK Stack    "
@@ -89,8 +91,7 @@ const BYTE abMacAddr[] = {0x00, 0x12, 0x34, 0x56, 0x78, NODEID};
 // local vars
 //------------------------------------------------------------------------------
 static unsigned int uiNodeId_g = EPL_C_ADR_INVALID;
-static unsigned int uiCycleLen_g = 0;
-static unsigned int uiCurCycleLen_g = 0;
+static unsigned int uiCycleLen_g = CYCLE_LEN;
 static BOOL fShutdown = FALSE;
 
 static PI_IN* pProcessImageIn_l;
@@ -125,8 +126,6 @@ static APP_NODE_VAR_T       nodeVar_g[MAX_NODES];
 // local function prototypes
 //------------------------------------------------------------------------------
 tEplKernel PUBLIC  EplObdInitRam (tEplObdInitParam MEM* pInitParam_p);
-tEplKernel PUBLIC AppCbEvent(tEplApiEventType EventType_p,
-        tEplApiEventArg* pEventArg_p, void GENERIC* pUserArg_p);
 tEplKernel PUBLIC AppCbSync(void);
 tEplKernel PUBLIC AppInit(void);
 
@@ -196,7 +195,7 @@ int  main (void)
     EplApiInitParam.m_fSyncOnPrcNode            = FALSE;
 
     // set callback functions
-    EplApiInitParam.m_pfnCbEvent = AppCbEvent;
+    EplApiInitParam.m_pfnCbEvent = processEvents;
     EplApiInitParam.m_pfnObdInitRam = EplObdInitRam;
     EplApiInitParam.m_pfnCbSync  = AppCbSync;
 
@@ -255,7 +254,7 @@ int  main (void)
         goto ExitShutdown;
     }
 
-    fShutdown = FALSE;
+    initEvents(&fShutdown);
 
     while(!fShutdown)
     {
@@ -296,275 +295,6 @@ Exit:
 //                                                                         //
 //=========================================================================//
 
-//------------------------------------------------------------------------------
-/**
-\brief    Application event callback
-
-The event callback function is called by the POWERLINK API in user part (low
-priority).
-
-\param  EventType_p             determines the type of event
-\param  pEventArg_p             reference to further details of the event
-\param  pUserArg_p              user specific argument
-
-\return The function returns a tEplKernel error code.
-
-\ingroup module_demo
-*/
-//------------------------------------------------------------------------------
-tEplKernel PUBLIC AppCbEvent (tEplApiEventType EventType_p,
-        tEplApiEventArg* pEventArg_p, void GENERIC* pUserArg_p)
-{
-    tEplKernel          EplRet = kEplSuccessful;
-    UINT                uiVarLen;
-
-    UNUSED_PARAMETER(pUserArg_p);
-
-    // check if NMT_GS_OFF is reached
-    switch (EventType_p)
-    {
-        case kEplApiEventNmtStateChange:
-        {
-            switch (pEventArg_p->m_NmtStateChange.newNmtState)
-            {
-                case kNmtGsOff:
-                {   // NMT state machine was shut down,
-                    // because of user signal (CTRL-C) or critical EPL stack error
-                    // -> also shut down EplApiProcess() and main()
-                    EplRet = kEplShutdown;
-                    fShutdown = TRUE;
-
-                    printf("Event:kNmtGsOff originating event = 0x%X (%s)\n", pEventArg_p->m_NmtStateChange.nmtEvent,
-                             EplGetNmtEventStr(pEventArg_p->m_NmtStateChange.nmtEvent));
-                    break;
-                }
-
-                case kNmtGsResetCommunication:
-                {
-                    // continue
-                }
-
-                case kNmtGsResetConfiguration:
-                {
-                    if (uiCycleLen_g != 0)
-                    {
-                        EplRet = EplApiWriteLocalObject(0x1006, 0x00, &uiCycleLen_g, sizeof (uiCycleLen_g));
-                        uiCurCycleLen_g = uiCycleLen_g;
-                    }
-                    else
-                    {
-                        uiVarLen = sizeof(uiCurCycleLen_g);
-                        EplApiReadLocalObject(0x1006, 0x00, &uiCurCycleLen_g, &uiVarLen);
-                    }
-                    // continue
-                }
-
-                case kNmtMsPreOperational1:
-                {
-                    printf("AppCbEvent(0x%X) originating event = 0x%X (%s)\n",
-                           pEventArg_p->m_NmtStateChange.newNmtState,
-                           pEventArg_p->m_NmtStateChange.nmtEvent,
-                           EplGetNmtEventStr(pEventArg_p->m_NmtStateChange.nmtEvent));
-
-                    // continue
-                }
-
-                case kNmtGsInitialising:
-                case kNmtGsResetApplication:
-                case kNmtMsNotActive:
-                case kNmtCsNotActive:
-                case kNmtCsPreOperational1:
-                {
-                    break;
-                }
-
-                case kNmtCsOperational:
-                case kNmtMsOperational:
-                {
-                    break;
-                }
-
-                default:
-                {
-                    break;
-                }
-            }
-
-            break;
-        }
-
-        case kEplApiEventCriticalError:
-        case kEplApiEventWarning:
-        {   // error or warning occurred within the stack or the application
-            // on error the API layer stops the NMT state machine
-
-            printf( "%s(Err/Warn): Source = %s (%02X) EplError = %s (0x%03X)\n",
-                        __func__,
-                        EplGetEventSourceStr(pEventArg_p->m_InternalError.m_EventSource),
-                        pEventArg_p->m_InternalError.m_EventSource,
-                        EplGetEplKernelStr(pEventArg_p->m_InternalError.m_EplError),
-                        pEventArg_p->m_InternalError.m_EplError
-                        );
-            // check additional argument
-            switch (pEventArg_p->m_InternalError.m_EventSource)
-            {
-                case kEplEventSourceEventk:
-                case kEplEventSourceEventu:
-                {   // error occurred within event processing
-                    // either in kernel or in user part
-                    printf(" OrgSource = %s %02X\n",  EplGetEventSourceStr(pEventArg_p->m_InternalError.m_Arg.m_EventSource),
-                                                        pEventArg_p->m_InternalError.m_Arg.m_EventSource);
-                    break;
-                }
-
-                case kEplEventSourceDllk:
-                {   // error occurred within the data link layer (e.g. interrupt processing)
-                    // the DWORD argument contains the DLL state and the NMT event
-                    printf(" val = %X\n", pEventArg_p->m_InternalError.m_Arg.m_dwArg);
-                    break;
-                }
-
-                default:
-                {
-                    printf("\n");
-                    break;
-                }
-            }
-            break;
-        }
-
-        case kEplApiEventHistoryEntry:
-        {   // new history entry
-
-            printf("%s(HistoryEntry): Type=0x%04X Code=0x%04X (0x%02X %02X %02X %02X %02X %02X %02X %02X)\n",
-                    __func__,
-                    pEventArg_p->m_ErrHistoryEntry.m_wEntryType,
-                    pEventArg_p->m_ErrHistoryEntry.m_wErrorCode,
-                    (WORD) pEventArg_p->m_ErrHistoryEntry.m_abAddInfo[0],
-                    (WORD) pEventArg_p->m_ErrHistoryEntry.m_abAddInfo[1],
-                    (WORD) pEventArg_p->m_ErrHistoryEntry.m_abAddInfo[2],
-                    (WORD) pEventArg_p->m_ErrHistoryEntry.m_abAddInfo[3],
-                    (WORD) pEventArg_p->m_ErrHistoryEntry.m_abAddInfo[4],
-                    (WORD) pEventArg_p->m_ErrHistoryEntry.m_abAddInfo[5],
-                    (WORD) pEventArg_p->m_ErrHistoryEntry.m_abAddInfo[6],
-                    (WORD) pEventArg_p->m_ErrHistoryEntry.m_abAddInfo[7]);
-            break;
-        }
-
-#ifdef CONFIG_INCLUDE_NMT_MN
-        case kEplApiEventNode:
-        {
-            // check additional argument
-            switch (pEventArg_p->m_Node.m_NodeEvent)
-            {
-                case kNmtNodeEventCheckConf:
-                {
-                    printf("%s(Node=0x%X, CheckConf)\n", __func__, pEventArg_p->m_Node.m_uiNodeId);
-                    break;
-                }
-
-                case kNmtNodeEventUpdateConf:
-                {
-                    printf("%s(Node=0x%X, UpdateConf)\n", __func__, pEventArg_p->m_Node.m_uiNodeId);
-                    break;
-                }
-
-                case kNmtNodeEventNmtState:
-                {
-                    printf("%s(Node=0x%X, NmtState=%s)\n", __func__, pEventArg_p->m_Node.m_uiNodeId, EplGetNmtStateStr(pEventArg_p->m_Node.m_NmtState));
-
-                    break;
-                }
-
-                case kNmtNodeEventError:
-                {
-                    printf("%s (Node=0x%X): Error = %s (0x%.4X)\n", __func__,
-                            pEventArg_p->m_Node.m_uiNodeId,
-                            EplGetEmergErrCodeStr(pEventArg_p->m_Node.m_wErrorCode),
-                            pEventArg_p->m_Node.m_wErrorCode);
-
-                    break;
-                }
-
-                case kNmtNodeEventFound:
-                {
-                    printf("%s(Node=0x%X, Found)\n", __func__, pEventArg_p->m_Node.m_uiNodeId);
-
-                    break;
-                }
-
-                default:
-                {
-                    break;
-                }
-            }
-            break;
-        }
-
-#endif
-
-#ifdef CONFIG_INCLUDE_CFM
-       case kEplApiEventCfmProgress:
-        {
-            printf("%s(Node=0x%X, CFM-Progress: Object 0x%X/%u, ", __func__, pEventArg_p->m_CfmProgress.nodeId, pEventArg_p->m_CfmProgress.objectIndex, pEventArg_p->m_CfmProgress.objectSubIndex);
-            printf("%lu/%lu Bytes", (ULONG) pEventArg_p->m_CfmProgress.bytesDownloaded, (ULONG) pEventArg_p->m_CfmProgress.totalNumberOfBytes);
-            if ((pEventArg_p->m_CfmProgress.sdoAbortCode != 0)
-                || (pEventArg_p->m_CfmProgress.error != kEplSuccessful))
-            {
-                printf(" -> SDO Abort=0x%lX, Error=0x%X)\n", (unsigned long) pEventArg_p->m_CfmProgress.sdoAbortCode,
-                                                              pEventArg_p->m_CfmProgress.error);
-            }
-            else
-            {
-                printf(")\n");
-            }
-            break;
-        }
-
-        case kEplApiEventCfmResult:
-        {
-            switch (pEventArg_p->m_CfmResult.m_NodeCommand)
-            {
-                case kNmtNodeCommandConfOk:
-                {
-                    printf("%s(Node=0x%X, ConfOk)\n", __func__, pEventArg_p->m_CfmResult.m_uiNodeId);
-                    break;
-                }
-
-                case kNmtNodeCommandConfErr:
-                {
-                    printf("%s(Node=0x%X, ConfErr)\n", __func__, pEventArg_p->m_CfmResult.m_uiNodeId);
-                    break;
-                }
-
-                case kNmtNodeCommandConfReset:
-                {
-                    printf("%s(Node=0x%X, ConfReset)\n", __func__, pEventArg_p->m_CfmResult.m_uiNodeId);
-                    break;
-                }
-
-                case kNmtNodeCommandConfRestored:
-                {
-                    printf("%s(Node=0x%X, ConfRestored)\n", __func__, pEventArg_p->m_CfmResult.m_uiNodeId);
-                    break;
-                }
-
-                default:
-                {
-                    printf("%s(Node=0x%X, CfmResult=0x%X)\n", __func__, pEventArg_p->m_CfmResult.m_uiNodeId, pEventArg_p->m_CfmResult.m_NodeCommand);
-                    break;
-                }
-            }
-            break;
-        }
-#endif
-
-        default:
-            break;
-    }
-
-    return EplRet;
-}
 //------------------------------------------------------------------------------
 /**
 \brief    Application initialization

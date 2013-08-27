@@ -104,6 +104,11 @@
 			<locationURI>OPLK_LOC/libs/ami/amiarm.c</locationURI>
 		</link>
 		<link>
+			<name>printlog.c</name>
+			<type>1</type>
+			<locationURI>OPLK_LOC/libs/console/printlog.c</locationURI>
+		</link>
+		<link>
 			<name>hostiflib.c</name>
 			<type>1</type>
 			<locationURI>OPLK_LOC/libs/hostif/hostiflib.c</locationURI>
@@ -307,6 +312,16 @@
 			<name>ledu.c</name>
 			<type>1</type>
 			<locationURI>OPLK_LOC/stack/src/user/ledu.c</locationURI>
+		</link>
+		<link>
+			<name>demo_mn_console</name>
+			<type>2</type>
+			<locationURI>OPLK_LOC/examples/demo_mn_console</locationURI>
+		</link>
+		<link>
+			<name>demo_mn_console/event.c</name>
+			<type>1</type>
+			<locationURI>OPLK_LOC/examples/demo_mn_console/event.c</locationURI>
 		</link>
 	</linkedResources>
 	<variableList>
