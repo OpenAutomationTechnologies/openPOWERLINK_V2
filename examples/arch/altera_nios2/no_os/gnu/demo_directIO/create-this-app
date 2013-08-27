@@ -99,19 +99,13 @@ done
 
 CFLAGS="-D${DBG_MODE} -DDEF_DEBUG_LVL=${DEF_DEBUG_LVL} -D${PLK_NODE_IS}"
 
-if [ -n "${COMSPEC}" ]; then
-# Under Windows we need double quotes, but not under Linux
-INCLUDES=\"${INCLUDES}\"
-CFLAGS=\"${CFLAGS}\"
-fi
-
 NIOS2_APP_GEN_ARGS="--elf-name cn_directIO.elf \
 --set QSYS_SUB_CPU $QSYS_SUB_CPU \
 --set OBJDUMP_INCLUDE_SOURCE 1 \
 --set CREATE_OBJDUMP 0 \
 --set CFLAGS=${CFLAGS} \
 --set APP_INCLUDE_DIRS=${INCLUDES} \
---src-files $SRCFILES \
+--src-files ${SRCFILES} \
 --set APP_CFLAGS_OPTIMIZATION ${OPT_LEVEL}"
 
 # First, check to see if $SOPC_KIT_NIOS2 environmental variable is set.

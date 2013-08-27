@@ -39,7 +39,9 @@ QSYS_SUB_CPU=cpu_1
 
 ##################################
 # Relative path to openPOWERLINK root directory
-STACKROOT_DIR=../../../../../..
+# (Is converted to absolute)
+STACKROOT_REL_DIR=../../../../../..
+STACKROOT_DIR=`readlink -n -f ${STACKROOT_REL_DIR}`
 
 ##################################
 # Relative path to bsp
@@ -60,7 +62,8 @@ ${STACKROOT_DIR}/stack/src"
 
 ##################################
 # Source files
-SRCFILES="demo_main.c \
+SRCFILES="\
+demo_main.c \
 ${STACKROOT_DIR}/libs/ami/amiarm.c \
 ${STACKROOT_DIR}/libs/hostif/hostiflib.c \
 ${STACKROOT_DIR}/libs/hostif/hostiflib_l.c \
@@ -102,4 +105,5 @@ ${STACKROOT_DIR}/stack/src/user/sdo/sdo-asndu.c \
 ${STACKROOT_DIR}/stack/src/user/sdo/sdo-asysequ.c \
 ${STACKROOT_DIR}/stack/src/user/sdo/sdo-comu.c \
 ${STACKROOT_DIR}/stack/src/user/cfmu.c \
-${STACKROOT_DIR}/stack/src/user/ledu.c"
+${STACKROOT_DIR}/stack/src/user/ledu.c \
+"
