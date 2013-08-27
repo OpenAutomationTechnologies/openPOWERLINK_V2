@@ -1043,9 +1043,7 @@ EPLDLLEXPORT tEplKernel PUBLIC EplApiSetCdcBuffer(BYTE* pbCdc_p, unsigned int ui
 {
 tEplKernel      Ret = kEplSuccessful;
 
-    EplApiInstance_g.m_pbCdc = pbCdc_p;
-    EplApiInstance_g.m_uiCdcSize = uiCdcSize_p;
-
+    obdcdc_setBuffer(pbCdc_p, uiCdcSize_p);
     return Ret;
 }
 
@@ -1069,8 +1067,7 @@ EPLDLLEXPORT tEplKernel PUBLIC EplApiSetCdcFilename(char* pszCdcFilename_p)
 {
 tEplKernel      Ret = kEplSuccessful;
 
-    EplApiInstance_g.m_pszCdcFilename = pszCdcFilename_p;
-
+    obdcdc_setFilename(pszCdcFilename_p);
     return Ret;
 }
 #endif // (EPL_OBD_USE_LOAD_CONCISEDCF != FALSE)
@@ -1522,30 +1519,11 @@ tEplApiEventArg     EventArg;
             }
 
 #if (EPL_OBD_USE_LOAD_CONCISEDCF != FALSE)
-            if (EplApiInstance_g.m_pbCdc != NULL)
-            {
-                Ret = EplObdCdcLoadBuffer(EplApiInstance_g.m_pbCdc, EplApiInstance_g.m_uiCdcSize);
-            }
-            else if (EplApiInstance_g.m_pszCdcFilename != NULL)
-            {
-                Ret = EplObdCdcLoadFile(EplApiInstance_g.m_pszCdcFilename);
-            }
-            else
-            {
-                Ret = EplObdCdcLoadFile(EPL_OBD_DEF_CONCISEDCF_FILENAME);
-            }
+            Ret = obdcdc_loadCdc();
             if (Ret != kEplSuccessful)
             {
-                if (Ret == kEplReject)
-                {
-                    Ret = kEplSuccessful;
-                }
-                else
-                {
-                    goto Exit;
-                }
+                goto Exit;
             }
-
 #endif
             break;
         }
