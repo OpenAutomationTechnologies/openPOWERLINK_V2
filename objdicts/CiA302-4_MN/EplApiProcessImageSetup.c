@@ -152,7 +152,7 @@ static tEplKernel EplApiProcessImageLinkRange(
 
 //---------------------------------------------------------------------------
 //
-// Function:    EplApiProcessImageSetup()
+// Function:    oplk_setupProcessImage()
 //
 // Description: sets up static process image
 //
@@ -165,7 +165,7 @@ static tEplKernel EplApiProcessImageLinkRange(
 //
 //---------------------------------------------------------------------------
 
-tEplKernel PUBLIC EplApiProcessImageSetup(void)
+tEplKernel PUBLIC oplk_setupProcessImage(void)
 {
 tEplKernel      Ret = kEplSuccessful;
 
@@ -255,7 +255,7 @@ Exit:
 
 //---------------------------------------------------------------------------
 //
-// Function:    EplApiProcessImageSetup()
+// Function:    oplk_setupProcessImage()
 //
 // Description: sets up static process image
 //
@@ -283,7 +283,7 @@ unsigned int    uiVarEntries;
         uiObjIndexStart_p++, uiOffsetPI_p += EntrySize_p * uiSubindexCountPerIndex_p)
     {
         uiVarEntries = uiSubindexCountPerIndex_p;
-        Ret = api_processImageLinkObject(
+        Ret = oplk_linkProcessImageObject(
                         uiObjIndexStart_p,
                         1,
                         uiOffsetPI_p,

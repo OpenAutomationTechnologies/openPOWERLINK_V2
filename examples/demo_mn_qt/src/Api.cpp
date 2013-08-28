@@ -231,7 +231,7 @@ Api::Api(MainWindow *pMainWindow_p, UINT nodeId_p, QString devName_p)
 #endif
 
     // init EPL
-    ret = EplApiInitialize(&initParam);
+    ret = oplk_init(&initParam);
     if(ret != kEplSuccessful)
     {
         QMessageBox::critical(0, "POWERLINK demo",
@@ -242,7 +242,7 @@ Api::Api(MainWindow *pMainWindow_p, UINT nodeId_p, QString devName_p)
         goto Exit;
     }
 
-    ret = EplApiSetCdcFilename(pszCdcFilename_g);
+    ret = oplk_setCdcFilename(pszCdcFilename_g);
     if(ret != kEplSuccessful)
     {
         goto Exit;
@@ -257,7 +257,7 @@ Api::Api(MainWindow *pMainWindow_p, UINT nodeId_p, QString devName_p)
         goto Exit;
     }
     // start the EPL stack
-    ret = EplApiExecNmtCommand(kNmtEventSwReset);
+    ret = oplk_execNmtCommand(kNmtEventSwReset);
 
     // start process thread
     pProcessThread->start();
@@ -282,10 +282,10 @@ Api::~Api()
 {
     tEplKernel          ret;
 
-    ret = EplApiExecNmtCommand(kNmtEventSwitchOff);
+    ret = oplk_execNmtCommand(kNmtEventSwitchOff);
     pProcessThread->waitForNmtStateOff();
-    ret = api_processImageFree();
-    ret = EplApiShutdown();
+    ret = oplk_freeProcessImage();
+    ret = oplk_shutdown();
 }
 
 /**

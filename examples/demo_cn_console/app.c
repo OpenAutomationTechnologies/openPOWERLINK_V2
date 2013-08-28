@@ -137,7 +137,7 @@ The function shut's down the synchronous data application
 //------------------------------------------------------------------------------
 void shutdownApp (void)
 {
-    api_processImageFree();
+    oplk_freeProcessImage();
 }
 
 //------------------------------------------------------------------------------
@@ -155,10 +155,10 @@ tEplKernel processSync(void)
 {
     tEplKernel      ret = kEplSuccessful;
 
-    if (api_waitSyncEvent(100000) != kEplSuccessful)
+    if (oplk_waitSyncEvent(100000) != kEplSuccessful)
         return ret;
 
-    ret = api_processImageExchangeOut();
+    ret = oplk_exchangeProcessImageOut();
     if (ret != kEplSuccessful)
         return ret;
 
@@ -168,7 +168,7 @@ tEplKernel processSync(void)
     /* setup output image - digital inputs */
     pProcessImageIn_l->digitalIn = digitalIn_g;
 
-    ret = api_processImageExchangeIn();
+    ret = oplk_exchangeProcessImageIn();
 
     return ret;
 }
@@ -302,21 +302,21 @@ static tEplKernel initProcessImage(void)
     printf("Initializing process image...\n");
     printf("Size of input process image: %ld\n", sizeof(PI_IN));
     printf("Size of output process image: %ld\n", sizeof (PI_OUT));
-    ret = api_processImageAlloc(sizeof(PI_IN), sizeof(PI_OUT));
+    ret = oplk_allocProcessImage(sizeof(PI_IN), sizeof(PI_OUT));
     if (ret != kEplSuccessful)
     {
         return ret;
     }
 
-    pProcessImageIn_l = api_processImageGetInputImage();
-    pProcessImageOut_l = api_processImageGetOutputImage();
+    pProcessImageIn_l = oplk_getProcessImageIn();
+    pProcessImageOut_l = oplk_getProcessImageOut();
 
     /* link process variables used by CN to object dictionary */
     printf("Linking process image vars:\n");
 
     obdSize = sizeof(pProcessImageIn_l->digitalIn);
     varEntries = 1;
-    ret = api_processImageLinkObject(0x6000, 0x01, offsetof(PI_IN, digitalIn),
+    ret = oplk_linkProcessImageObject(0x6000, 0x01, offsetof(PI_IN, digitalIn),
                                      FALSE, obdSize, &varEntries);
     if (ret != kEplSuccessful)
     {
@@ -326,7 +326,7 @@ static tEplKernel initProcessImage(void)
 
     obdSize = sizeof(pProcessImageOut_l->digitalOut);
     varEntries = 1;
-    ret = api_processImageLinkObject(0x6200, 0x01, offsetof(PI_OUT, digitalOut),
+    ret = oplk_linkProcessImageObject(0x6200, 0x01, offsetof(PI_OUT, digitalOut),
                                      TRUE, obdSize, &varEntries);
     if (ret != kEplSuccessful)
     {

@@ -1,215 +1,128 @@
-/****************************************************************************
+/**
+********************************************************************************
+\file   generic.c
 
-  (c) SYSTEC electronic GmbH, D-07973 Greiz, August-Bebel-Str. 29
-      www.systec-electronic.com
+\brief  Generic API function
 
-  Project:      openPOWERLINK
+This file contains the implementation of the generic API functions.
 
-  Description:  source file for generic EPL API module
+\ingroup module_api
+*******************************************************************************/
 
-  License:
+/*------------------------------------------------------------------------------
+Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2013, SYSTEC electronic GmbH
+All rights reserved.
 
-    Redistribution and use in source and binary forms, with or without
-    modification, are permitted provided that the following conditions
-    are met:
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+    * Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above copyright
+      notice, this list of conditions and the following disclaimer in the
+      documentation and/or other materials provided with the distribution.
+    * Neither the name of the copyright holders nor the
+      names of its contributors may be used to endorse or promote products
+      derived from this software without specific prior written permission.
 
-    1. Redistributions of source code must retain the above copyright
-       notice, this list of conditions and the following disclaimer.
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL COPYRIGHT HOLDERS BE LIABLE FOR ANY
+DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+------------------------------------------------------------------------------*/
 
-    2. Redistributions in binary form must reproduce the above copyright
-       notice, this list of conditions and the following disclaimer in the
-       documentation and/or other materials provided with the distribution.
+//------------------------------------------------------------------------------
+// includes
+//------------------------------------------------------------------------------
+#include <stddef.h>
+#include <limits.h>
 
-    3. Neither the name of SYSTEC electronic GmbH nor the names of its
-       contributors may be used to endorse or promote products derived
-       from this software without prior written permission. For written
-       permission, please contact info@systec-electronic.com.
+#include <Epl.h>
 
-    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-    LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-    FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-    COPYRIGHT HOLDERS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-    INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-    BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-    LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-    CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-    LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-    ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-    POSSIBILITY OF SUCH DAMAGE.
-
-    Severability Clause:
-
-        If a provision of this License is or becomes illegal, invalid or
-        unenforceable in any jurisdiction, that shall not affect:
-        1. the validity or enforceability in that jurisdiction of any other
-           provision of this License; or
-        2. the validity or enforceability in other jurisdictions of that or
-           any other provision of this License.
-
-  -------------------------------------------------------------------------
-
-                $RCSfile$
-
-                $Author$
-
-                $Revision$  $Date$
-
-                $State$
-
-                Build Environment:
-                    GCC V3.4
-
-  -------------------------------------------------------------------------
-
-  Revision History:
-
-  2006/09/05 d.k.:   start of the implementation, version 1.00
-
-****************************************************************************/
-
-#include "Epl.h"
-#include "kernel/dllk.h"
-#include "kernel/eventk.h"
-#include "kernel/nmtk.h"
-#include "kernel/EplObdk.h"
-#include "kernel/dllkcal.h"
-#include "kernel/pdokcal.h"
-#include "user/pdoucal.h"
-#include "user/pdou.h"
-#include "user/dllucal.h"
-#include "user/ledu.h"
-#include "user/nmtcnu.h"
-#include "user/nmtmnu.h"
-#include "user/EplSdoComu.h"
-#include "user/identu.h"
-#include "user/statusu.h"
-#include "user/cfmu.h"
-
+#include <user/pdoucal.h>
+#include <user/dllucal.h>
+#include <user/nmtcnu.h>
+#include <user/nmtmnu.h>
+#include <user/EplSdoComu.h>
+#include <user/identu.h>
+#include <user/cfmu.h>
 #include <user/ctrlu.h>
-#include <errhnd.h>
-#include <kernel/errhndk.h>
-#include <user/errhndu.h>
-
-
-
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_VETH)) != 0)
-#include <kernel/veth.h>
-#endif
-
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOK)) != 0)
-#include "kernel/pdok.h"
-#endif
-
-#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_OBDK)) == 0)
-#error "EPL API layer needs EPL module OBDK!"
-#endif
 
 #if (EPL_OBD_USE_LOAD_CONCISEDCF != FALSE)
 #include "obdcdc.h"
 #endif
 
-#if EPL_NMTMNU_PRES_CHAINING_MN != FALSE
-#include "user/syncu.h"
-#endif
+//============================================================================//
+//            G L O B A L   D E F I N I T I O N S                             //
+//============================================================================//
 
-/***************************************************************************/
-/*                                                                         */
-/*                                                                         */
-/*          G L O B A L   D E F I N I T I O N S                            */
-/*                                                                         */
-/*                                                                         */
-/***************************************************************************/
-
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // const defines
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
-//---------------------------------------------------------------------------
-// local types
-//---------------------------------------------------------------------------
-
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // module global vars
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
-//---------------------------------------------------------------------------
-// local function prototypes
-//---------------------------------------------------------------------------
-
-
-/***************************************************************************/
-/*                                                                         */
-/*                                                                         */
-/*          C L A S S  EplApi                                              */
-/*                                                                         */
-/*                                                                         */
-/***************************************************************************/
-//
-// Description:
-//
-//
-/***************************************************************************/
+//------------------------------------------------------------------------------
+// global function prototypes
+//------------------------------------------------------------------------------
 
 
-//=========================================================================//
-//                                                                         //
-//          P R I V A T E   D E F I N I T I O N S                          //
-//                                                                         //
-//=========================================================================//
+//============================================================================//
+//            P R I V A T E   D E F I N I T I O N S                           //
+//============================================================================//
 
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // const defines
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // local types
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // local vars
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
-
-
-
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // local function prototypes
-//---------------------------------------------------------------------------
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOC)) != 0)
-static tEplKernel EplApiCbSdoCon(tEplSdoComFinished* pSdoComFinished_p);            // callback function of SDO module
+//------------------------------------------------------------------------------
+
+#if defined(CONFIG_INCLUDE_SDOC)
+static tEplKernel cbSdoCon(tEplSdoComFinished* pSdoComFinished_p);
 #endif
-static tEplKernel EplApiCbReceivedAsnd(tFrameInfo *pFrameInfo_p);
+static tEplKernel cbReceivedAsnd(tFrameInfo *pFrameInfo_p);
 
-// OD initialization function (implemented in Objdict.c)
-//tEplKernel PUBLIC  EplObdInitRam (tEplObdInitParam MEM* pInitParam_p);
+//============================================================================//
+//            P U B L I C   F U N C T I O N S                                 //
+//============================================================================//
 
+//------------------------------------------------------------------------------
+/**
+\brief  Initialize the openPOWERLINK stack
 
-//=========================================================================//
-//                                                                         //
-//          P U B L I C   F U N C T I O N S                                //
-//                                                                         //
-//=========================================================================//
+The function initializes the openPOWERLINK stack. After the stack is initialized
+the application must start it by performing a software reset. This is done by
+sending the NMT event kNmtEventSwReset. The event can be sent by calling
+oplk_execNmtCommand(kNmtEventSwReset).
 
-//---------------------------------------------------------------------------
-//
-// Function:    EplApiInitialize()
-//
-// Description: add and initialize new instance of EPL stack.
-//              After return from this function the application must start
-//              the NMT state machine via
-//              EplApiExecNmtCommand(kNmtEventSwReset)
-//              and thereby the whole EPL stack :-)
-//
-// Parameters:  pInitParam_p            = initialisation parameters
-//
-// Returns:     tEplKernel              = error code
-//
-//
-// State:
-//
-//---------------------------------------------------------------------------
-tEplKernel PUBLIC EplApiInitialize(tEplApiInitParam * pInitParam_p)
+\param  pInitParam_p            Pointer to the init parameters. The init
+                                parameters must be set by the application.
+
+\return The function returns a tEplKernel error code.
+\retval kEplSuccessful          Stack was successfully initialized.
+
+\ingroup module_api
+*/
+//------------------------------------------------------------------------------
+tEplKernel oplk_init(tEplApiInitParam* pInitParam_p)
 {
     tEplKernel          ret;
 
@@ -219,21 +132,21 @@ tEplKernel PUBLIC EplApiInitialize(tEplApiInitParam * pInitParam_p)
     return ctrlu_initStack(pInitParam_p);
 }
 
-//---------------------------------------------------------------------------
-//
-// Function:    EplApiShutdown()
-//
-// Description: deletes an instance of EPL stack
-//
-// Parameters:  (none)
-//
-// Returns:     tEplKernel              = error code
-//
-//
-// State:
-//
-//---------------------------------------------------------------------------
-tEplKernel PUBLIC EplApiShutdown(void)
+//------------------------------------------------------------------------------
+/**
+\brief  Shutdown the openPOWERLINK stack
+
+The function shuts down the openPOWERLINK stack. Before shutting down the stack
+it should be stopped by sending the NMT command kNmtEventSwitchOff. The command
+can be sent by calling oplk_execNmtCommand(kNmtEventSwitchOff);
+
+\return The function returns a tEplKernel error code.
+\retval kEplSuccessful          Stack was successfully shut down.
+
+\ingroup module_api
+*/
+//------------------------------------------------------------------------------
+tEplKernel oplk_shutdown(void)
 {
     tEplKernel          ret;
 
@@ -243,340 +156,288 @@ tEplKernel PUBLIC EplApiShutdown(void)
     return ret;
 }
 
-//----------------------------------------------------------------------------
-// Function:    EplApiExecNmtCommand()
-//
-// Description: executes a NMT command, i.e. post the NMT command/event to the
-//              NMTk module. NMT commands which are not appropriate in the current
-//              NMT state are silently ignored. Please keep in mind that the
-//              NMT state may change until the NMT command is actually executed.
-//
-// Parameters:  NmtEvent_p              = NMT command/event
-//
-// Returns:     tEplKernel              = error code
-//
-// State:
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+/**
+\brief  Execute a NMT command
 
-tEplKernel PUBLIC EplApiExecNmtCommand(tNmtEvent NmtEvent_p)
+The function executes a NMT command, i.e. post the NMT event to the NMT module,
+NMT commands which are not appropriate in the current NMT state are silently
+ignored. Please keep in mind that the NMT state may change until the NMT command
+is actually executed.
+
+\param  nmtEvent_p              NMT command to send.
+
+\return The function returns a tEplKernel error code.
+
+\ingroup module_api
+*/
+//------------------------------------------------------------------------------
+tEplKernel oplk_execNmtCommand(tNmtEvent nmtEvent_p)
 {
-tEplKernel      Ret = kEplSuccessful;
+    tEplKernel      ret = kEplSuccessful;
 
-#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMTU)) != 0)
-    Ret = nmtu_postNmtEvent(NmtEvent_p);
+#if defined(CONFIG_INCLUDE_NMTU)
+    ret = nmtu_postNmtEvent(nmtEvent_p);
 #endif
-
-    return Ret;
+    return ret;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Link application variable into the OD
 
-//----------------------------------------------------------------------------
-// Function:    EplApiLinkObject()
-//
-// Description: Function maps array of application variables onto specified object in OD
-//
-// Parameters:  uiObjIndex_p            = Function maps variables for this object index
-//              pVar_p                  = Pointer to data memory area for the specified object
-//              puiVarEntries_p         = IN: pointer to number of entries to map
-//                                        OUT: pointer to number of actually used entries
-//              pEntrySize_p            = IN: pointer to size of one entry;
-//                                            if size is zero, the actual size will be read from OD
-//                                        OUT: pointer to entire size of all entries mapped
-//              uiFirstSubindex_p       = This is the first subindex to be mapped.
-//
-// Returns:     tEplKernel              = error code
-//
-// State:
-//----------------------------------------------------------------------------
+The function links an array of application variables onto the specified object
+in the object dictionary (OD).
 
-tEplKernel PUBLIC EplApiLinkObject( unsigned int    uiObjIndex_p,
-                                    void*           pVar_p,
-                                    unsigned int*   puiVarEntries_p,
-                                    tEplObdSize*    pEntrySize_p,
-                                    unsigned int    uiFirstSubindex_p)
+\param  objIndex_p          Object ID of object to link the variable to.
+\param  pVar_p              Pointer to the application variable that should be
+                            linked.
+\param  pVarEntries_p       Pointer to the number of entries to link. The function
+                            stores the number of actually used entries at this
+                            location.
+\param  pEntrySize_p        Pointer to the size of one entry. If the size is
+                            zero, the actual size will be read from the object
+                            dictionary. The function stores the entire size of
+                            all linked entries at this location.
+\param  firstSubindex_p     Specifies the first subindex to be linked.
+
+\return The function returns a tEplKernel error code.
+\retval kEplSuccessful          The variables are successfully linked to the
+                                object dictionary.
+\retval kEplObdIndexNotExist    The object index does not exist in the object
+                                dictionary.
+\retval kEplObdSubindexNotExist The subindex does not exist in the object
+                                dictionary.
+
+\ingroup module_api
+*/
+//------------------------------------------------------------------------------
+tEplKernel oplk_linkObject(UINT objIndex_p, void* pVar_p, UINT* pVarEntries_p,
+                           tEplObdSize* pEntrySize_p, UINT firstSubindex_p)
 {
-BYTE            bVarEntries;
-BYTE            bIndexEntries;
-BYTE MEM*       pbData;
-unsigned int    uiSubindex;
-tEplVarParam    VarParam;
-tEplObdSize     EntrySize;
-tEplObdSize     UsedSize;
+    UINT8           varEntries;
+    UINT8           indexEntries;
+    UINT8 MEM*      pData;
+    UINT            subindex;
+    tEplVarParam    varParam;
+    tEplObdSize     entrySize;
+    tEplObdSize     usedSize;
 
-tEplKernel      RetCode = kEplSuccessful;
+    tEplKernel      ret = kEplSuccessful;
 
-    if ((pVar_p == NULL)
-        || (puiVarEntries_p == NULL)
-        || (*puiVarEntries_p == 0)
-        || (pEntrySize_p == NULL))
-    {
-        RetCode = kEplApiInvalidParam;
-        goto Exit;
-    }
+    if ((pVar_p == NULL) || (pVarEntries_p == NULL) || (*pVarEntries_p == 0) || (pEntrySize_p == NULL))
+        return kEplApiInvalidParam;
 
-    pbData      = (BYTE MEM*) pVar_p;
-    bVarEntries = (BYTE) *puiVarEntries_p;
-    UsedSize    = 0;
+    pData      = (UINT8 MEM*) pVar_p;
+    varEntries = (UINT8)*pVarEntries_p;
+    usedSize   = 0;
 
-    // init VarParam structure with default values
-    VarParam.m_uiIndex    = uiObjIndex_p;
-    VarParam.m_ValidFlag  = kVarValidAll;
+    // init varParam structure with default values
+    varParam.m_uiIndex    = objIndex_p;
+    varParam.m_ValidFlag  = kVarValidAll;
 
-    if (uiFirstSubindex_p != 0)
+    if (firstSubindex_p != 0)
     {   // check if object exists by reading subindex 0x00,
         // because user wants to link a variable to a subindex unequal 0x00
         // read number of entries
-        EntrySize = (tEplObdSize)  sizeof(bIndexEntries);
-        RetCode = EplObdReadEntry (
-                                uiObjIndex_p,
-                                0x00,
-                                (void GENERIC*) &bIndexEntries,
-                                &EntrySize );
-
-        if ((RetCode != kEplSuccessful) || (bIndexEntries == 0x00) )
+        entrySize = (tEplObdSize)sizeof(indexEntries);
+        ret = EplObdReadEntry (objIndex_p, 0x00, (void GENERIC*) &indexEntries, &entrySize );
+        if ((ret != kEplSuccessful) || (indexEntries == 0x00))
         {
             // Object doesn't exist or invalid entry number
-            TRACE("%s() Object %04x not existing\n", __func__, uiObjIndex_p);
-            RetCode = kEplObdIndexNotExist;
-            goto Exit;
+            TRACE("%s() Object %04x not existing\n", __func__, objIndex_p);
+            return kEplObdIndexNotExist;
         }
     }
     else
-    {   // user wants to link a variable to subindex 0x00
-        // that's OK
-        bIndexEntries = 0;
+    {   // user wants to link a variable to subindex 0x00 -> that's OK
+        indexEntries = 0;
     }
 
-    // Correct number of entries if number read from OD is greater
-    // than the specified number.
+    // Correct number of entries if number read from OD is greater than the specified number.
     // This is done, so that we do not set more entries than subindexes the
     // object actually has.
-    if ((bIndexEntries > (bVarEntries + uiFirstSubindex_p - 1)) &&
-        (bVarEntries   != 0x00) )
+    if ((indexEntries > (varEntries + firstSubindex_p - 1)) && (varEntries != 0x00))
     {
-        bIndexEntries = (BYTE) (bVarEntries + uiFirstSubindex_p - 1);
+        indexEntries = (UINT8)(varEntries + firstSubindex_p - 1);
     }
 
     // map entries
-    for (uiSubindex = uiFirstSubindex_p; uiSubindex <= bIndexEntries; uiSubindex++)
+    for (subindex = firstSubindex_p; subindex <= indexEntries; subindex++)
     {
         // if passed entry size is 0, then get size from OD
         if (*pEntrySize_p == 0x00)
         {
-            // read entry size
-            EntrySize = EplObdGetDataSize(uiObjIndex_p, uiSubindex);
-
-            if (EntrySize == 0x00)
+            if ((entrySize = EplObdGetDataSize(objIndex_p, subindex)) == 0x00)
             {
                 // invalid entry size (maybe object doesn't exist or entry of type DOMAIN is empty)
-                RetCode = kEplObdSubindexNotExist;
-                break;
+                return kEplObdSubindexNotExist;
             }
         }
         else
         {   // use passed entry size
-            EntrySize = *pEntrySize_p;
+            entrySize = *pEntrySize_p;
         }
 
-        VarParam.m_uiSubindex = uiSubindex;
+        varParam.m_uiSubindex = subindex;
+        varParam.m_Size  = entrySize;
+        varParam.m_pData = pData;
 
-        // set pointer to user var
-        VarParam.m_Size  = EntrySize;
-        VarParam.m_pData = pbData;
+        usedSize += entrySize;
+        pData   += entrySize;
 
-        UsedSize += EntrySize;
-        pbData   += EntrySize;
-
-        RetCode = EplObdDefineVar(&VarParam);
-        if (RetCode != kEplSuccessful)
-        {
+        if ((ret = EplObdDefineVar(&varParam)) != kEplSuccessful)
             break;
-        }
     }
 
     // set number of mapped entries and entry size
-    *puiVarEntries_p = ((bIndexEntries - uiFirstSubindex_p) + 1);
-    *pEntrySize_p = UsedSize;
-
-
-Exit:
-
-    return (RetCode);
-
+    *pVarEntries_p = ((indexEntries - firstSubindex_p) + 1);
+    *pEntrySize_p = usedSize;
+    return ret;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Read entry from object dictionary
 
-// ----------------------------------------------------------------------------
-//
-// Function:    EplApiReadObject()
-//
-// Description: reads the specified entry from the OD of the specified node.
-//              If this node is a remote node, it performs a SDO transfer, which
-//              means this function returns kEplApiTaskDeferred and the application
-//              is informed via the event callback function when the task is completed.
-//
-// Parameters:  pSdoComConHdl_p         = INOUT: pointer to SDO connection handle (may be NULL in case of local OD access)
-//              uiNodeId_p              = IN: node ID (0 = itself)
-//              uiIndex_p               = IN: index of object in OD
-//              uiSubindex_p            = IN: sub-index of object in OD
-//              pDstData_le_p           = OUT: pointer to data in little endian
-//              puiSize_p               = INOUT: pointer to size of data
-//              SdoType_p               = IN: type of SDO transfer
-//              pUserArg_p              = IN: user-definable argument pointer,
-//                                            which will be passed to the event callback function
-//
-// Return:      tEplKernel              = error code
-//
-// ----------------------------------------------------------------------------
+The function reads the specified entry from the object dictionary of the specified
+node. If this node is a remote node, it performs a SDO transfer, which means this
+function returns kEplApiTaskDeferred and the application is informed via the
+event callback function when the task is completed.
 
-tEplKernel PUBLIC EplApiReadObject(
-            tEplSdoComConHdl* pSdoComConHdl_p,
-            unsigned int      uiNodeId_p,
-            unsigned int      uiIndex_p,
-            unsigned int      uiSubindex_p,
-            void*             pDstData_le_p,
-            unsigned int*     puiSize_p,
-            tEplSdoType       SdoType_p,
-            void*             pUserArg_p)
+\param  pSdoComConHdl_p     A pointer to the SDO connection handle. It may be
+                            NULL in case of local OD access.
+\param  nodeId_p            Node ID of the node to read. If node ID is 0 the
+                            local OD will be read.
+\param  index_p             The index of the object to read.
+\param  subindex_p          The subindex of the object to read.
+\param  pDstData_le_p       Pointer where to store the read data. The data is in
+                            little endian byte order.
+\param  pSize_p             Pointer to the size of the buffer. For local reads
+                            the function stores the size of the object at this
+                            location.
+\param  sdoType_p           The type of the SDO transfer (SDO over ASnd, SDO over
+                            UDP or SDO over PDO)
+\param  pUserArg_p          User defined argument which will be passed to the
+                            event callback function.
+
+\return The function returns a tEplKernel error code.
+
+\ingroup module_api
+*/
+//------------------------------------------------------------------------------
+tEplKernel oplk_readObject(tEplSdoComConHdl* pSdoComConHdl_p, UINT nodeId_p, UINT index_p,
+                           UINT subindex_p, void* pDstData_le_p, UINT* pSize_p,
+                           tEplSdoType sdoType_p, void* pUserArg_p)
 {
-tEplKernel      Ret = kEplSuccessful;
+    tEplKernel      ret = kEplSuccessful;
+    tEplObdSize     obdSize;
 
-    if ((uiIndex_p == 0) || (pDstData_le_p == NULL) || (puiSize_p == NULL) || (*puiSize_p == 0))
-    {
-        Ret = kEplApiInvalidParam;
-        goto Exit;
-    }
+    if ((index_p == 0) || (pDstData_le_p == NULL) || (pSize_p == NULL) || (*pSize_p == 0))
+        return kEplApiInvalidParam;
 
-    if (uiNodeId_p == 0
-        || uiNodeId_p == EplObdGetNodeId())
+    if (nodeId_p == 0 || nodeId_p == EplObdGetNodeId())
     {   // local OD access can be performed
-    tEplObdSize     ObdSize;
-
-        ObdSize = (tEplObdSize) *puiSize_p;
-        Ret = EplObdReadEntryToLe(uiIndex_p, uiSubindex_p, pDstData_le_p, &ObdSize);
-        *puiSize_p = (unsigned int) ObdSize;
+        obdSize = (tEplObdSize) *pSize_p;
+        ret = EplObdReadEntryToLe(index_p, subindex_p, pDstData_le_p, &obdSize);
+        *pSize_p = (UINT) obdSize;
     }
     else
     {   // perform SDO transfer
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOC)) != 0)
-    tEplSdoComTransParamByIndex TransParamByIndex;
+#if defined(CONFIG_INCLUDE_SDOC)
+        tEplSdoComTransParamByIndex transParamByIndex;
 
         // check if application provides space for handle
         if (pSdoComConHdl_p == NULL)
-        {
-            Ret = kEplApiInvalidParam;
-            goto Exit;
-        }
+            return kEplApiInvalidParam;
 
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_CFM)) != 0)
-        if (cfmu_isSdoRunning(uiNodeId_p))
-        {
-            Ret = kEplApiSdoBusyIntern;
-            goto Exit;
-        }
+#if defined(CONFIG_INCLUDE_CFM)
+        if (cfmu_isSdoRunning(nodeId_p))
+            return kEplApiSdoBusyIntern;
 #endif
 
         // init command layer connection
-        Ret = EplSdoComDefineCon(pSdoComConHdl_p,
-                                    uiNodeId_p,  // target node id
-                                    SdoType_p);    // SDO type
-        if ((Ret != kEplSuccessful) && (Ret != kEplSdoComHandleExists))
+        ret = EplSdoComDefineCon(pSdoComConHdl_p, nodeId_p, sdoType_p);
+        if ((ret != kEplSuccessful) && (ret != kEplSdoComHandleExists))
         {
-            goto Exit;
+            return ret;
         }
-        TransParamByIndex.m_pData = pDstData_le_p;
-        TransParamByIndex.m_SdoAccessType = kEplSdoAccessTypeRead;
-        TransParamByIndex.m_SdoComConHdl = *pSdoComConHdl_p;
-        TransParamByIndex.m_uiDataSize = *puiSize_p;
-        TransParamByIndex.m_uiIndex = uiIndex_p;
-        TransParamByIndex.m_uiSubindex = uiSubindex_p;
-        TransParamByIndex.m_pfnSdoFinishedCb = EplApiCbSdoCon;
-        TransParamByIndex.m_pUserArg = pUserArg_p;
 
-        Ret = EplSdoComInitTransferByIndex(&TransParamByIndex);
-        if (Ret != kEplSuccessful)
-        {
-            goto Exit;
-        }
-        Ret = kEplApiTaskDeferred;
+        transParamByIndex.m_pData = pDstData_le_p;
+        transParamByIndex.m_SdoAccessType = kEplSdoAccessTypeRead;
+        transParamByIndex.m_SdoComConHdl = *pSdoComConHdl_p;
+        transParamByIndex.m_uiDataSize = *pSize_p;
+        transParamByIndex.m_uiIndex = index_p;
+        transParamByIndex.m_uiSubindex = subindex_p;
+        transParamByIndex.m_pfnSdoFinishedCb = cbSdoCon;
+        transParamByIndex.m_pUserArg = pUserArg_p;
+
+        if ((ret = EplSdoComInitTransferByIndex(&transParamByIndex)) != kEplSuccessful)
+            return ret;
+
+        ret = kEplApiTaskDeferred;
 
 #else
-        Ret = kEplApiInvalidParam;
+        ret = kEplApiInvalidParam;
 #endif
     }
-
-Exit:
-    return Ret;
+    return ret;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Write entry to object dictionary
 
-// ----------------------------------------------------------------------------
-//
-// Function:    EplApiWriteObject()
-//
-// Description: writes the specified entry to the OD of the specified node.
-//              If this node is a remote node, it performs a SDO transfer, which
-//              means this function returns kEplApiTaskDeferred and the application
-//              is informed via the event callback function when the task is completed.
-//
-// Parameters:  pSdoComConHdl_p         = INOUT: pointer to SDO connection handle (may be NULL in case of local OD access)
-//              uiNodeId_p              = IN: node ID (0 = itself)
-//              uiIndex_p               = IN: index of object in OD
-//              uiSubindex_p            = IN: sub-index of object in OD
-//              pSrcData_le_p           = IN: pointer to data in little endian
-//              uiSize_p                = IN: size of data in bytes
-//              SdoType_p               = IN: type of SDO transfer
-//              pUserArg_p              = IN: user-definable argument pointer,
-//                                            which will be passed to the event callback function
-//
-// Return:      tEplKernel              = error code
-//
-// ----------------------------------------------------------------------------
+The function writes the specified entry to the object dictionary of the specified
+node. If this node is a remote node, it performs a SDO transfer, which means this
+function returns kEplApiTaskDeferred and the application is informed via the
+event callback function when the task is completed.
 
-tEplKernel PUBLIC EplApiWriteObject(
-            tEplSdoComConHdl* pSdoComConHdl_p,
-            unsigned int      uiNodeId_p,
-            unsigned int      uiIndex_p,
-            unsigned int      uiSubindex_p,
-            void*             pSrcData_le_p,
-            unsigned int      uiSize_p,
-            tEplSdoType       SdoType_p,
-            void*             pUserArg_p)
+\param  pSdoComConHdl_p     A pointer to the SDO connection handle. It may be
+                            NULL in case of local OD access.
+\param  nodeId_p            Node ID of the node to write. If node ID is 0 the
+                            local OD will be read.
+\param  index_p             The index of the object to write.
+\param  subindex_p          The subindex of the object to write.
+\param  pSrcData_le_p       Pointer to data. The data must be in little endian
+                            byte order.
+\param  size_p              Size of the data to write.
+\param  sdoType_p           The type of the SDO transfer (SDO over ASnd, SDO over
+                            UDP or SDO over PDO)
+\param  pUserArg_p          User defined argument which will be passed to the
+                            event callback function.
+
+\return The function returns a tEplKernel error code.
+
+\ingroup module_api
+*/
+//------------------------------------------------------------------------------
+tEplKernel oplk_writeObject(tEplSdoComConHdl* pSdoComConHdl_p, UINT nodeId_p, UINT index_p,
+                            UINT subindex_p, void* pSrcData_le_p, UINT size_p,
+                            tEplSdoType sdoType_p, void* pUserArg_p)
 {
-tEplKernel      Ret = kEplSuccessful;
+    tEplKernel      ret = kEplSuccessful;
 
-    if ((uiIndex_p == 0) || (pSrcData_le_p == NULL) || (uiSize_p == 0))
-    {
-        Ret = kEplApiInvalidParam;
-        goto Exit;
-    }
+    if ((index_p == 0) || (pSrcData_le_p == NULL) || (size_p == 0))
+        return kEplApiInvalidParam;
 
-    if (uiNodeId_p == 0
-        || uiNodeId_p == EplObdGetNodeId())
+    if (nodeId_p == 0 || nodeId_p == EplObdGetNodeId())
     {   // local OD access can be performed
-
-        Ret = EplObdWriteEntryFromLe(uiIndex_p, uiSubindex_p, pSrcData_le_p, uiSize_p);
+        ret = EplObdWriteEntryFromLe(index_p, subindex_p, pSrcData_le_p, size_p);
     }
     else
     {   // perform SDO transfer
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOC)) != 0)
-    tEplSdoComTransParamByIndex TransParamByIndex;
+#if defined(CONFIG_INCLUDE_SDOC)
+        tEplSdoComTransParamByIndex transParamByIndex;
 
         // check if application provides space for handle
         if (pSdoComConHdl_p == NULL)
-        {
-            Ret = kEplApiInvalidParam;
-            goto Exit;
-        }
+            return kEplApiInvalidParam;
 
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_CFM)) != 0)
-        if (cfmu_isSdoRunning(uiNodeId_p))
-        {
-            Ret = kEplApiSdoBusyIntern;
-            goto Exit;
-        }
+#if defined(CONFIG_INCLUDE_CFM)
+        if (cfmu_isSdoRunning(nodeId_p))
+            return kEplApiSdoBusyIntern;
 #endif
-
         // d.k.: How to recycle command layer connection?
         //       Try to redefine it, which will return kEplSdoComHandleExists
         //       and the existing command layer handle.
@@ -584,408 +445,373 @@ tEplKernel      Ret = kEplSuccessful;
         //       will return with error.
 
         // init command layer connection
-        Ret = EplSdoComDefineCon(pSdoComConHdl_p,
-                                    uiNodeId_p,  // target node id
-                                    SdoType_p);    // SDO type
-        if ((Ret != kEplSuccessful) && (Ret != kEplSdoComHandleExists))
-        {
-            goto Exit;
-        }
-        TransParamByIndex.m_pData = pSrcData_le_p;
-        TransParamByIndex.m_SdoAccessType = kEplSdoAccessTypeWrite;
-        TransParamByIndex.m_SdoComConHdl = *pSdoComConHdl_p;
-        TransParamByIndex.m_uiDataSize = uiSize_p;
-        TransParamByIndex.m_uiIndex = uiIndex_p;
-        TransParamByIndex.m_uiSubindex = uiSubindex_p;
-        TransParamByIndex.m_pfnSdoFinishedCb = EplApiCbSdoCon;
-        TransParamByIndex.m_pUserArg = pUserArg_p;
+        ret = EplSdoComDefineCon(pSdoComConHdl_p, nodeId_p, sdoType_p);
+        if ((ret != kEplSuccessful) && (ret != kEplSdoComHandleExists))
+            return ret;
 
-        Ret = EplSdoComInitTransferByIndex(&TransParamByIndex);
-        if (Ret != kEplSuccessful)
-        {
-            goto Exit;
-        }
-        Ret = kEplApiTaskDeferred;
+        transParamByIndex.m_pData = pSrcData_le_p;
+        transParamByIndex.m_SdoAccessType = kEplSdoAccessTypeWrite;
+        transParamByIndex.m_SdoComConHdl = *pSdoComConHdl_p;
+        transParamByIndex.m_uiDataSize = size_p;
+        transParamByIndex.m_uiIndex = index_p;
+        transParamByIndex.m_uiSubindex = subindex_p;
+        transParamByIndex.m_pfnSdoFinishedCb = cbSdoCon;
+        transParamByIndex.m_pUserArg = pUserArg_p;
+
+        if ((ret = EplSdoComInitTransferByIndex(&transParamByIndex)) != kEplSuccessful)
+            return ret;
+
+        ret = kEplApiTaskDeferred;
 
 #else
-        Ret = kEplApiInvalidParam;
+        ret = kEplApiInvalidParam;
 #endif
     }
-
-Exit:
-    return Ret;
+    return ret;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Free SDO channel
 
-// ----------------------------------------------------------------------------
-//
-// Function:    EplApiFreeSdoChannel()
-//
-// Description: frees the specified SDO channel.
-//              This function must be called when the SDO channel to a remote node
-//              is not needed anymore. This may be done in the event callback function
-//              when the last SDO transfer to a remote node has completed.
-//
-// Parameters:  SdoComConHdl_p          = IN: SDO connection handle which is not valid
-//                                        anymore after this call.
-//
-// Return:      tEplKernel              = error code
-//
-// ----------------------------------------------------------------------------
+The function frees the specified SDO channel. It must be called when the SDO
+channel to a remote node is not needed anymore. This may be done in the event
+callback function when the last SDO transfer to a remote node has completed.
 
-tEplKernel PUBLIC EplApiFreeSdoChannel(
-            tEplSdoComConHdl SdoComConHdl_p)
+\param  sdoComConHdl_p      The SDO connection handle.
+
+\return The function returns a tEplKernel error code.
+
+\ingroup module_api
+*/
+//------------------------------------------------------------------------------
+tEplKernel oplk_freeSdoChannel(tEplSdoComConHdl sdoComConHdl_p)
 {
-tEplKernel      Ret = kEplSuccessful;
+    tEplKernel      ret = kEplSuccessful;
 
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOC)) != 0)
+#if defined(CONFIG_INCLUDE_SDOC)
 
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_CFM)) != 0)
-    if (cfmu_isSdoRunning(EplSdoComGetNodeId(SdoComConHdl_p)))
+#if defined(CONFIG_INCLUDE_CFM)
+    if (cfmu_isSdoRunning(EplSdoComGetNodeId(sdoComConHdl_p)))
     {
-        Ret = kEplApiSdoBusyIntern;
+        ret = kEplApiSdoBusyIntern;
     }
     else
 #endif
     {
         // delete command layer connection
-        Ret = EplSdoComUndefineCon(SdoComConHdl_p);
+        ret = EplSdoComUndefineCon(sdoComConHdl_p);
     }
 #else
-    Ret = kEplApiInvalidParam;
+    ret = kEplApiInvalidParam;
 #endif
-
-    return Ret;
+    return ret;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Abort a SDO transfer
 
-// ----------------------------------------------------------------------------
-//
-// Function:    EplApiAbortSdo()
-//
-// Description: aborts the running SDO transfer on the specified SDO channel.
-//
-// Parameters:  SdoComConHdl_p          = IN: SDO connection handle
-//              dwAbortCode_p           = IN: SDO abort code which shall be send
-//                                        to the remote node.
-//
-// Return:      tEplKernel              = error code
-//
-// ----------------------------------------------------------------------------
+The function aborts the running SDO transfer on the specified SDO channel.
 
-tEplKernel PUBLIC EplApiAbortSdo(
-            tEplSdoComConHdl SdoComConHdl_p,
-            DWORD            dwAbortCode_p)
+\param  sdoComConHdl_p      The SDO connection handle.
+\param  abortCode_p         The abort code which shall be sent to the remote
+                            node.
+
+\return The function returns a tEplKernel error code.
+
+\ingroup module_api
+*/
+//------------------------------------------------------------------------------
+tEplKernel oplk_abortSdo(tEplSdoComConHdl sdoComConHdl_p, UINT32 abortCode_p)
 {
-tEplKernel      Ret = kEplSuccessful;
+    tEplKernel      ret = kEplSuccessful;
 
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOC)) != 0)
+#if defined(CONFIG_INCLUDE_SDOC)
 
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_CFM)) != 0)
-    if (cfmu_isSdoRunning(EplSdoComGetNodeId(SdoComConHdl_p)))
+#if defined(CONFIG_INCLUDE_CFM)
+    if (cfmu_isSdoRunning(EplSdoComGetNodeId(sdoComConHdl_p)))
     {
-        Ret = kEplApiSdoBusyIntern;
+        ret = kEplApiSdoBusyIntern;
     }
     else
 #endif
     {
-        Ret = EplSdoComSdoAbort(SdoComConHdl_p, dwAbortCode_p);
+        ret = EplSdoComSdoAbort(sdoComConHdl_p, abortCode_p);
     }
 #else
-    Ret = kEplApiInvalidParam;
+    ret = kEplApiInvalidParam;
 #endif
 
-    return Ret;
+    return ret;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Read entry from local object dictionary
 
-// ----------------------------------------------------------------------------
-//
-// Function:    EplApiReadLocalObject()
-//
-// Description: reads the specified entry from the local OD.
-//
-// Parameters:  uiIndex_p               = IN: index of object in OD
-//              uiSubindex_p            = IN: sub-index of object in OD
-//              pDstData_p              = OUT: pointer to data in platform byte order
-//              puiSize_p               = INOUT: pointer to size of data
-//
-// Return:      tEplKernel              = error code
-//
-// ----------------------------------------------------------------------------
+The function reads the specified entry from the local object dictionary.
 
-tEplKernel PUBLIC EplApiReadLocalObject(
-            unsigned int      uiIndex_p,
-            unsigned int      uiSubindex_p,
-            void*             pDstData_p,
-            unsigned int*     puiSize_p)
+\param  index_p             The index of the object to read.
+\param  subindex_p          The subindex of the object to read.
+\param  pDstData_p          Pointer where to store the read data. The data is in
+                            platform byte order.
+\param  pSize_p             Pointer to the size of the buffer. The function
+                            stores the size of the object at this location.
+
+\return The function returns a tEplKernel error code.
+
+\ingroup module_api
+*/
+//------------------------------------------------------------------------------
+tEplKernel oplk_readLocalObject(UINT index_p, UINT subindex_p, void* pDstData_p,
+                                UINT* pSize_p)
 {
-tEplKernel      Ret = kEplSuccessful;
-tEplObdSize     ObdSize;
+    tEplKernel      ret = kEplSuccessful;
+    tEplObdSize     obdSize;
 
-    ObdSize = (tEplObdSize) *puiSize_p;
-    Ret = EplObdReadEntry(uiIndex_p, uiSubindex_p, pDstData_p, &ObdSize);
-    *puiSize_p = (unsigned int) ObdSize;
+    obdSize = (tEplObdSize)*pSize_p;
+    ret = EplObdReadEntry(index_p, subindex_p, pDstData_p, &obdSize);
+    *pSize_p = (UINT)obdSize;
 
-    return Ret;
+    return ret;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Write entry to local object dictionary
 
-// ----------------------------------------------------------------------------
-//
-// Function:    EplApiWriteLocalObject()
-//
-// Description: writes the specified entry to the local OD.
-//
-// Parameters:  uiIndex_p               = IN: index of object in OD
-//              uiSubindex_p            = IN: sub-index of object in OD
-//              pSrcData_p              = IN: pointer to data in platform byte order
-//              uiSize_p                = IN: size of data in bytes
-//
-// Return:      tEplKernel              = error code
-//
-// ----------------------------------------------------------------------------
+The function writes the specified entry to the local object dictionary.
 
-tEplKernel PUBLIC EplApiWriteLocalObject(
-            unsigned int      uiIndex_p,
-            unsigned int      uiSubindex_p,
-            void*             pSrcData_p,
-            unsigned int      uiSize_p)
+\param  index_p             The index of the object to write.
+\param  subindex_p          The subindex of the object to write.
+\param  pSrcData_p          Pointer to data. The data must be in platform byte
+                            order.
+\param  size_p              Size of the data to write.
+
+\return The function returns a tEplKernel error code.
+
+\ingroup module_api
+*/
+//------------------------------------------------------------------------------
+tEplKernel oplk_writeLocalObject(UINT index_p, UINT subindex_p, void* pSrcData_p,
+                                        UINT size_p)
 {
-tEplKernel      Ret = kEplSuccessful;
-
-    Ret = EplObdWriteEntry(uiIndex_p, uiSubindex_p, pSrcData_p, (tEplObdSize) uiSize_p);
-
-    return Ret;
+    return EplObdWriteEntry(index_p, subindex_p, pSrcData_p, (tEplObdSize)size_p);
 }
 
-// ----------------------------------------------------------------------------
-//
-// Function:    EplApiSendAsndFrame()
-//
-// Description: Send a generic Asnd frame
-//
-// Parameters:  bDstNodeId_p            = Node ID of destination node
-//              pAsndFrame_p            = Pointer to Asnd frame that should be sent
-//              uiAsndSize_p            = Size of Asnd frame (service ID + payload)
-//
-// Return:      tEplKernel              = error code
-//
-// ----------------------------------------------------------------------------
-tEplKernel PUBLIC EplApiSendAsndFrame
-(
-    BYTE            bDstNodeId_p,
-    tEplAsndFrame   *pAsndFrame_p,
-    size_t          uiAsndSize_p
-)
+//------------------------------------------------------------------------------
+/**
+\brief  Send a generic ASnd frame
+
+The function sends a generic ASnd frame.
+
+\param  dstNodeId_p         Destination Node ID
+\param  pAsndFrame_p        Pointer to ASnd frame which should be sent.
+\param  asndSize_p          Size of ASnd frame to send. The size contains the
+                            service ID and the payload.
+
+\return The function returns a tEplKernel error code.
+
+\ingroup module_api
+*/
+//------------------------------------------------------------------------------
+tEplKernel oplk_sendAsndFrame(UINT8 dstNodeId_p, tEplAsndFrame *pAsndFrame_p,
+                              size_t asndSize_p)
 {
-    tEplKernel      Ret;
-    tFrameInfo   FrameInfo;
-    BYTE            Buffer[EPL_C_DLL_MAX_ASYNC_MTU];
+    tEplKernel      ret;
+    tFrameInfo      frameInfo;
+    BYTE            buffer[EPL_C_DLL_MAX_ASYNC_MTU];
 
     // Calculate size of frame (Asnd data + header)
-    FrameInfo.frameSize = uiAsndSize_p + offsetof(tEplFrame, m_Data);
+    frameInfo.frameSize = asndSize_p + offsetof(tEplFrame, m_Data);
 
     // Check for correct input
-    if
-    (
-        ( pAsndFrame_p              == NULL             )  ||
-        ( FrameInfo.frameSize   >= sizeof(Buffer)   )
-    )
-    {
+    if ((pAsndFrame_p == NULL) || (frameInfo.frameSize >= sizeof(buffer)))
         return  kEplReject;
-    }
 
     // Calculate size of frame (Asnd data + header)
-    FrameInfo.frameSize = uiAsndSize_p + offsetof(tEplFrame, m_Data);
-    FrameInfo.pFrame      = (tEplFrame *) Buffer;
+    frameInfo.frameSize = asndSize_p + offsetof(tEplFrame, m_Data);
+    frameInfo.pFrame = (tEplFrame *)buffer;
 
     // Copy Asnd data
-    EPL_MEMSET( FrameInfo.pFrame, 0x00, FrameInfo.frameSize );
-    EPL_MEMCPY( &FrameInfo.pFrame->m_Data.m_Asnd, pAsndFrame_p, uiAsndSize_p );
+    EPL_MEMSET(frameInfo.pFrame, 0x00, frameInfo.frameSize);
+    EPL_MEMCPY(&frameInfo.pFrame->m_Data.m_Asnd, pAsndFrame_p, asndSize_p);
 
     // Fill in additional data (SrcNodeId is filled by DLL if it is set to 0)
-    AmiSetByteToLe( &FrameInfo.pFrame->m_le_bMessageType, (BYTE) kEplMsgTypeAsnd  );
-    AmiSetByteToLe( &FrameInfo.pFrame->m_le_bDstNodeId,   (BYTE) bDstNodeId_p     );
-    AmiSetByteToLe( &FrameInfo.pFrame->m_le_bSrcNodeId,   (BYTE) 0                );
+    AmiSetByteToLe(&frameInfo.pFrame->m_le_bMessageType, (UINT8) kEplMsgTypeAsnd);
+    AmiSetByteToLe(&frameInfo.pFrame->m_le_bDstNodeId, (UINT8) dstNodeId_p );
+    AmiSetByteToLe(&frameInfo.pFrame->m_le_bSrcNodeId, (UINT8) 0);
 
     // Request frame transmission
-    Ret = dllucal_sendAsyncFrame( &FrameInfo, kDllAsyncReqPrioGeneric);
+    ret = dllucal_sendAsyncFrame(&frameInfo, kDllAsyncReqPrioGeneric);
 
-    return Ret;
+    return ret;
 }
 
-// ----------------------------------------------------------------------------
-//
-// Function:    EplApiSetAsndForward()
-//
-// Description: Enable or disable the forwarding of received Asnd frames
-//              Asnd frames from the DLL to the application.
-//
-// Parameters:  bServiceId_p            = The Asnd service ID which should be configured
-//              FilterType_p            = Specifies which types of Asnd frames should
-//                                        be received (none, unicast, all)
-//
-// Return:      tEplKernel              = error code
-//
-// ----------------------------------------------------------------------------
-tEplKernel PUBLIC EplApiSetAsndForward
-(
-    BYTE                bServiceId_p,
-    tEplApiAsndFilter   FilterType_p
-)
+//------------------------------------------------------------------------------
+/**
+\brief  Set forwarding of received ASnd frames
+
+The function enables or disables the forwarding of received ASnd frames
+ to the application.
+
+\param  serviceId_p         The ASnd service ID for which the forwarding will
+                            be set.
+\param  filterType_p        Specifies which types of ASnd frames should be
+                            received. Could be none, unicast or all frames.
+
+\return The function returns a tEplKernel error code.
+
+\ingroup module_api
+*/
+//------------------------------------------------------------------------------
+tEplKernel oplk_setAsndForward(UINT8 serviceId_p, tEplApiAsndFilter filterType_p)
 {
-    tEplKernel          Ret;
-    tDllAsndFilter      DllFilter;
+    tEplKernel          ret;
+    tDllAsndFilter      dllFilter;
 
     // Map API filter types to stack internal filter types
-    switch( FilterType_p )
+    switch(filterType_p)
     {
-        case kEplApiAsndFilterLocal:    DllFilter   = kDllAsndFilterLocal;
-                                        break;
+        case kEplApiAsndFilterLocal:
+            dllFilter = kDllAsndFilterLocal;
+            break;
 
-        case kEplApiAsndFilterAny:      DllFilter   = kDllAsndFilterAny;
-                                        break;
+        case kEplApiAsndFilterAny:
+            dllFilter = kDllAsndFilterAny;
+            break;
 
         default:
-        case kEplApiAsndFilterNone:     DllFilter   = kDllAsndFilterNone;
-                                        break;
+        case kEplApiAsndFilterNone:
+            dllFilter = kDllAsndFilterNone;
+            break;
     }
 
-    Ret = dllucal_regAsndService( bServiceId_p, EplApiCbReceivedAsnd, DllFilter);
+    ret = dllucal_regAsndService(serviceId_p, cbReceivedAsnd, dllFilter);
 
-    return Ret;
+    return ret;
 }
 
-// ----------------------------------------------------------------------------
-//
-// Function:    EplApiPostUserEvent()
-//
-// Description: post user-defined event to event processing thread,
-//              i.e. calls user event callback function with event kEplApiEventUserDef.
-//              This function is thread safe and is meant for synchronization.
-//
-// Parameters:  pUserArg_p              = IN: user-defined pointer
-//
-// Return:      tEplKernel              = error code
-//
-// ----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+/**
+\brief  Post user defined event
 
-tEplKernel PUBLIC EplApiPostUserEvent(void* pUserArg_p)
+The function posts user-defined events to event processing thread, i.e. calls
+user event callback function with event kEplApiEventUserDef. This function is
+thread safe and is meant for synchronization.
+
+\param  pUserArg_p          User defined pointer.
+
+\return The function returns a tEplKernel error code.
+
+\ingroup module_api
+*/
+//------------------------------------------------------------------------------
+tEplKernel oplk_postUserEvent(void* pUserArg_p)
 {
-tEplKernel  Ret;
-tEplEvent   Event;
+    tEplKernel  ret;
+    tEplEvent   event;
 
-    Event.m_EventSink = kEplEventSinkApi;
-    Event.m_NetTime.m_dwNanoSec = 0;
-    Event.m_NetTime.m_dwSec = 0;
-    Event.m_EventType = kEplEventTypeApiUserDef;
-    Event.m_pArg = &pUserArg_p;
-    Event.m_uiSize = sizeof (pUserArg_p);
+    event.m_EventSink = kEplEventSinkApi;
+    event.m_NetTime.m_dwNanoSec = 0;
+    event.m_NetTime.m_dwSec = 0;
+    event.m_EventType = kEplEventTypeApiUserDef;
+    event.m_pArg = &pUserArg_p;
+    event.m_uiSize = sizeof(pUserArg_p);
 
-    Ret = eventu_postEvent(&Event);
+    ret = eventu_postEvent(&event);
 
-    return Ret;
+    return ret;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Trigger NMT state change
 
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
-// ----------------------------------------------------------------------------
-//
-// Function:    EplApiMnTriggerStateChange()
-//
-// Description: triggers the specified node command for the specified node.
-//
-// Parameters:  uiNodeId_p              = node ID for which the node command will be executed
-//              NodeCommand_p           = node command
-//
-// Return:      tEplKernel              = error code
-//
-// ----------------------------------------------------------------------------
+The function triggers a NMT state change by sending the specified node command
+for the specified node.
 
-tEplKernel PUBLIC EplApiMnTriggerStateChange(unsigned int uiNodeId_p,
-                                             tNmtNodeCommand  NodeCommand_p)
+\param  nodeId_p            The Node ID for which the node command will be executed.
+\param  nodeCommand_p       The Node command to execute.
+
+\return The function returns a tEplKernel error code.
+
+\ingroup module_api
+*/
+//------------------------------------------------------------------------------
+tEplKernel oplk_triggerMnStateChange(UINT nodeId_p, tNmtNodeCommand nodeCommand_p)
 {
-tEplKernel      Ret = kEplSuccessful;
-
-    Ret = nmtmnu_triggerStateChange(uiNodeId_p, NodeCommand_p);
-
-    return Ret;
+#if defined(CONFIG_INCLUDE_NMT_MN)
+    return nmtmnu_triggerStateChange(nodeId_p, nodeCommand_p);
+#else
+    return kEplApiInvalidParam;
+#endif
 }
 
-#endif // (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
+//------------------------------------------------------------------------------
+/**
+\brief  Set CDC buffer
 
+The function sets the concise device description (CDC) buffer to be used by
+the stack to read the configuration.
 
+\param  pCdc_p          Pointer to the concise device description.
+\param  cdcSize_p       Size of the concise device description
+
+\return The function returns a tEplKernel error code.
+
+\ingroup module_api
+*/
+//------------------------------------------------------------------------------
+tEplKernel oplk_setCdcBuffer(BYTE* pCdc_p, UINT cdcSize_p)
+{
 #if (EPL_OBD_USE_LOAD_CONCISEDCF != FALSE)
-//---------------------------------------------------------------------------
-//
-// Function:    EplApiSetCdcBuffer
-//
-// Description: sets the buffer containing the ConciseDCF (CDC file)
-//
-// Parameters:  pbCdc_p                 = pointer to byte array containing the CDC
-//              uiCdcSize_p             = size of the buffer
-//
-// Returns:     tEplKernel              = error code
-//
-//
-// State:
-//
-//---------------------------------------------------------------------------
-
-EPLDLLEXPORT tEplKernel PUBLIC EplApiSetCdcBuffer(BYTE* pbCdc_p, unsigned int uiCdcSize_p)
-{
-tEplKernel      Ret = kEplSuccessful;
-
-    obdcdc_setBuffer(pbCdc_p, uiCdcSize_p);
-    return Ret;
+    obdcdc_setBuffer(pCdc_p, cdcSize_p);
+    return kEplSuccessful;
+#else
+    return kEplApiInvalidParam;
+#endif
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Set CDC filename
 
-//---------------------------------------------------------------------------
-//
-// Function:    EplApiSetCdcFilename
-//
-// Description: sets the file name of the ConciseDCF (CDC file)
-//
-// Parameters:  pszCdcFilename_p        = pointer to string with the CDC file name
-//
-// Returns:     tEplKernel              = error code
-//
-//
-// State:
-//
-//---------------------------------------------------------------------------
+The function sets the concise device description (CDC) file to be used by
+the stack to read the configuration.
 
-EPLDLLEXPORT tEplKernel PUBLIC EplApiSetCdcFilename(char* pszCdcFilename_p)
+\param  pCdcFilename_p  Filename to be used for reading the concise device
+                        description.
+
+\return The function returns a tEplKernel error code.
+
+\ingroup module_api
+*/
+//------------------------------------------------------------------------------
+tEplKernel oplk_setCdcFilename(char* pCdcFilename_p)
 {
-tEplKernel      Ret = kEplSuccessful;
-
-    obdcdc_setFilename(pszCdcFilename_p);
-    return Ret;
+#if (EPL_OBD_USE_LOAD_CONCISEDCF != FALSE)
+    obdcdc_setFilename(pCdcFilename_p);
+    return kEplSuccessful;
+#else
+    return kEplApiInvalidParam;
+#endif
 }
-#endif // (EPL_OBD_USE_LOAD_CONCISEDCF != FALSE)
 
+//------------------------------------------------------------------------------
+/**
+\brief  Stack process function
 
+The process function is used in single threaded environment e.g. without any OS.
+It gives processing time to several tasks in the openPOWERLINK stack.
 
-//---------------------------------------------------------------------------
-//
-// Function:    EplApiProcess
-//
-// Description: Process function for use in single threaded environment
-//              e.g. without any OS. It gives processing time to several
-//              tasks in the EPL stack.
-//
-// Parameters:  none
-//
-// Returns:     tEplKernel              = error code
-//
-//
-// State:
-//
-//---------------------------------------------------------------------------
+\return The function returns a tEplKernel error code.
 
-tEplKernel PUBLIC EplApiProcess(void)
+\ingroup module_api
+*/
+//------------------------------------------------------------------------------
+tEplKernel oplk_process(void)
 {
     return ctrlu_processStack();
 }
@@ -1003,7 +829,7 @@ The function checks if the kernel part of the stack is alive.
 \ingroup module_api
 */
 //------------------------------------------------------------------------------
-BOOL PUBLIC api_checkKernelStack(void)
+BOOL oplk_checkKernelStack(void)
 {
     return ctrlu_checkKernelStack();
 }
@@ -1021,117 +847,101 @@ The function waits for a sync event.
 \ingroup module_api
 */
 //------------------------------------------------------------------------------
-tEplKernel PUBLIC api_waitSyncEvent(ULONG timeout_p)
+tEplKernel oplk_waitSyncEvent(ULONG timeout_p)
 {
     return pdoucal_waitSyncEvent(timeout_p);
 }
 
-#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
-//---------------------------------------------------------------------------
-//
-// Function:    EplApiGetIdentResponse
-//
-// Description: returns the stored IdentResponse frame of the specified node.
-//
-// Parameters:  uiNodeId_p              = node-ID for which the IdentResponse shall be returned
-//              ppIdentResponse_p       = pointer to pointer to IdentResponse
-//
-// Returns:     tEplKernel              = error code
-//
-//
-// State:
-//
-//---------------------------------------------------------------------------
-tEplKernel PUBLIC EplApiGetIdentResponse(
-                                    unsigned int        uiNodeId_p,
-                                    tEplIdentResponse** ppIdentResponse_p)
+//------------------------------------------------------------------------------
+/**
+\brief  Get IdentResponse of node
+
+The function returns the stored IdentResponse frame of the specified node.
+
+\param  nodeId_p            Node ID of which to get the Ident Response frame.
+\param  ppIdentResponse_p   Pointer to store the address of the IdentResponse
+                            frame.
+
+\return The function returns a tEplKernel error code.
+
+\ingroup module_api
+*/
+//------------------------------------------------------------------------------
+tEplKernel oplk_getIdentResponse(UINT nodeId_p, tEplIdentResponse** ppIdentResponse_p)
 {
-    return identu_getIdentResponse(uiNodeId_p, ppIdentResponse_p);
+#if defined(CONFIG_INCLUDE_NMT_MN)
+    return identu_getIdentResponse(nodeId_p, ppIdentResponse_p);
+#else
+    return kEplApiInvalidParam;
+#endif
+}
+
+
+//============================================================================//
+//            P R I V A T E   F U N C T I O N S                               //
+//============================================================================//
+/// \name Private Functions
+/// \{
+
+//------------------------------------------------------------------------------
+/**
+\brief  Callback function for SDO transfers
+
+The function implements the callback function for SDO transfers. It will be
+registered for a SDO transfer. When it is called by the SDO stack it sends a
+SDO event to the application.
+
+\param  pSdoComFinished_p   SDO parameter.
+
+\return The function returns a tEplKernel error code.
+*/
+//------------------------------------------------------------------------------
+#if defined(CONFIG_INCLUDE_SDOC)
+static tEplKernel cbSdoCon(tEplSdoComFinished* pSdoComFinished_p)
+{
+    tEplKernel          ret = kEplSuccessful;
+    tEplApiEventArg     eventArg;
+
+    eventArg.m_Sdo = *pSdoComFinished_p;
+    ret = ctrlu_callUserEventCallback(kEplApiEventSdo, &eventArg);
+    return ret;
 }
 #endif
 
-//=========================================================================//
-//                                                                         //
-//          P R I V A T E   F U N C T I O N S                              //
-//                                                                         //
-//=========================================================================//
+//------------------------------------------------------------------------------
+/**
+\brief  Callback function for received ASnds
 
-//---------------------------------------------------------------------------
-//
-// Function:    EplApiCbSdoCon
-//
-// Description: callback function for SDO transfers
-//
-// Parameters:  pSdoComFinished_p       = SDO parameter
-//
-// Returns:     tEplKernel              = error code
-//
-//
-// State:
-//
-//---------------------------------------------------------------------------
+The function implements the callback function to handle received ASnd frames.
+Frames will be forwarded to the application by sending a user event.
 
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOC)) != 0)
-static tEplKernel PUBLIC  EplApiCbSdoCon(tEplSdoComFinished* pSdoComFinished_p)
+\param  pFrameInfo_p   Pointer to information about the received frame.
+
+\return The function returns a tEplKernel error code.
+*/
+//------------------------------------------------------------------------------
+static tEplKernel cbReceivedAsnd(tFrameInfo *pFrameInfo_p)
 {
-tEplKernel Ret;
-tEplApiEventArg EventArg;
-
-    Ret = kEplSuccessful;
-
-    // call user callback
-    EventArg.m_Sdo = *pSdoComFinished_p;
-    Ret = ctrlu_callUserEventCallback(kEplApiEventSdo, &EventArg);
-    return Ret;
-
-}
-#endif
-
-//---------------------------------------------------------------------------
-//
-// Function:    EplApiCbReceivedAsnd
-//
-// Description: Callback to handle received Asnd frames.
-//              Frames will be forwarded to the application layer.
-//
-// Parameters:  pFrameInfo_p    Pointer to structure with information
-//                              about the received frame
-//
-// Returns:     tEplKernel
-//---------------------------------------------------------------------------
-static tEplKernel PUBLIC EplApiCbReceivedAsnd
-(
-    tFrameInfo *pFrameInfo_p
-)
-{
-    tEplKernel          Ret = kEplSuccessful;
-    unsigned int        uiAsndOffset;
-    tEplApiEventArg     ApiEventArg;
-    tEplApiEventType    EventType;
+    tEplKernel              ret = kEplSuccessful;
+    UINT                    asndOffset;
+    tEplApiEventArg         apiEventArg;
+    tEplApiEventType        eventType;
 
     // Check for correct input
-    uiAsndOffset    = offsetof(tEplFrame, m_Data.m_Asnd);
+    asndOffset = offsetof(tEplFrame, m_Data.m_Asnd);
 
-    if
-    (
-        ( pFrameInfo_p->frameSize    <= uiAsndOffset + 1        ) ||
-        ( pFrameInfo_p->frameSize    >  EPL_C_DLL_MAX_ASYNC_MTU )
-    )
-    {
+    if ((pFrameInfo_p->frameSize <= asndOffset + 1) ||
+        (pFrameInfo_p->frameSize > EPL_C_DLL_MAX_ASYNC_MTU))
         return kEplReject;
-    }
 
     // Forward received ASnd frame
-    ApiEventArg.m_RcvAsnd.m_pFrame      = pFrameInfo_p->pFrame;
-    ApiEventArg.m_RcvAsnd.m_FrameSize   = pFrameInfo_p->frameSize;
+    apiEventArg.m_RcvAsnd.m_pFrame = pFrameInfo_p->pFrame;
+    apiEventArg.m_RcvAsnd.m_FrameSize = pFrameInfo_p->frameSize;
 
-    EventType = kEplApiEventReceivedAsnd;
-
-    // call user callback
-    Ret = ctrlu_callUserEventCallback(EventType, &ApiEventArg);
-
-    return Ret;
+    eventType = kEplApiEventReceivedAsnd;
+    ret = ctrlu_callUserEventCallback(eventType, &apiEventArg);
+    return ret;
 }
 
-// EOF
+/// \}
 

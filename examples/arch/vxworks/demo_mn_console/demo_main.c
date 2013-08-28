@@ -283,7 +283,7 @@ int openPowerlinkInit (char *pszEthName, unsigned int uiDevNumber)
             __DATE__, __TIME__);
 
     // initialize POWERLINK stack
-    EplRet = EplApiInitialize(&EplApiInitParam);
+    EplRet = oplk_init(&EplApiInitParam);
     if(EplRet != kEplSuccessful)
     {
         goto Exit;
@@ -291,7 +291,7 @@ int openPowerlinkInit (char *pszEthName, unsigned int uiDevNumber)
     fApiInit = TRUE;
 
     // set CDC filename
-    EplRet = EplApiSetCdcFilename(pszCdcFilename_g);
+    EplRet = oplk_setCdcFilename(pszCdcFilename_g);
     if(EplRet != kEplSuccessful)
     {
     	printf ("Error set cdc filename!\n");
@@ -312,23 +312,23 @@ int openPowerlinkInit (char *pszEthName, unsigned int uiDevNumber)
     printf("Size of input process image: %ld\n", sizeof(PI_IN));
     printf("Size of output process image: %ld\n", sizeof (PI_OUT));
 
-    EplRet = api_processImageAlloc(sizeof(PI_IN), sizeof(PI_OUT));
+    EplRet = oplk_allocProcessImage(sizeof(PI_IN), sizeof(PI_OUT));
     if (EplRet != kEplSuccessful)
     {
         goto Exit;
     }
 
-    pProcessImageIn_l = api_processImageGetInputImage();
-    pProcessImageOut_l = api_processImageGetOutputImage();
+    pProcessImageIn_l = oplk_getProcessImageIn();
+    pProcessImageOut_l = oplk_getProcessImageOut();
 
-    EplRet = EplApiProcessImageSetup();
+    EplRet = oplk_setupProcessImage();
     if (EplRet != kEplSuccessful)
     {
         goto Exit;
     }
 
     // start the NMT state machine
-    EplRet = EplApiExecNmtCommand(kNmtEventSwReset);
+    EplRet = oplk_execNmtCommand(kNmtEventSwReset);
 
 Exit:
     PRINTF("%s(): returns 0x%X\n", __func__, EplRet);
@@ -336,7 +336,7 @@ Exit:
     {
         if (fApiInit != FALSE)
         {
-            EplApiShutdown();
+            oplk_shutdown();
         }
 
         // Shutdown high-resolution timer library
@@ -370,17 +370,17 @@ void openPowerlinkExit (void)
 
     // halt the NMT state machine
     // so the processing of POWERLINK frames stops
-    EplRet = EplApiExecNmtCommand(kNmtEventSwitchOff);
+    EplRet = oplk_execNmtCommand(kNmtEventSwitchOff);
 
     // wait until NMT state machine is shut down
     taskDelay (sysClkRateGet());
     fOpenPowerlinkIsRunning_g = FALSE;
 
-    api_processImageFree();
+    oplk_freeProcessImage();
 
     // delete instance for all modules
-    EplRet = EplApiShutdown();
-    PRINTF("EplApiShutdown():  0x%X\n", EplRet);
+    EplRet = oplk_shutdown();
+    PRINTF("oplk_shutdown():  0x%X\n", EplRet);
 
     hrtimer_shutdown();
 
@@ -403,7 +403,7 @@ void openPowerlinkSendNmt(tNmtEvent nmtCmd_p)
 {
     tEplKernel          EplRet;
 
-    EplRet = EplApiExecNmtCommand(nmtCmd_p);
+    EplRet = oplk_execNmtCommand(nmtCmd_p);
     if (EplRet != kEplSuccessful)
     {
         PRINTF("Error sending NMT command %d\n", nmtCmd_p);
@@ -458,7 +458,7 @@ tEplKernel          EplRet = kEplSuccessful;
                 case kNmtGsOff:
                 {   // NMT state machine was shut down,
                     // because of user signal (CTRL-C) or critical EPL stack error
-                    // -> also shut down EplApiProcess() and main()
+                    // -> also shut down oplk_process() and main()
                     EplRet = kEplShutdown;
 
                     PRINTF("%s:kNmtGsOff originating event = 0x%X (%s)\n",
@@ -479,20 +479,20 @@ tEplKernel          EplRet = kEplSuccessful;
                     // TODO: setup your own network configuration here
                     dwNodeAssignment = (EPL_NODEASSIGN_NODE_IS_CN |
                                         EPL_NODEASSIGN_NODE_EXISTS); // 0x00000003L
-                    EplRet = EplApiWriteLocalObject(0x1F81, 0x01, &dwNodeAssignment,
+                    EplRet = oplk_writeLocalObject(0x1F81, 0x01, &dwNodeAssignment,
                                                     sizeof (dwNodeAssignment));
-                    EplRet = EplApiWriteLocalObject(0x1F81, 0x20, &dwNodeAssignment,
+                    EplRet = oplk_writeLocalObject(0x1F81, 0x20, &dwNodeAssignment,
                                                     sizeof (dwNodeAssignment));
-                    EplRet = EplApiWriteLocalObject(0x1F81, 0x6E, &dwNodeAssignment,
+                    EplRet = oplk_writeLocalObject(0x1F81, 0x6E, &dwNodeAssignment,
                                                     sizeof (dwNodeAssignment));
-                    EplRet = EplApiWriteLocalObject(0x1F81, 0xFE, &dwNodeAssignment,
+                    EplRet = oplk_writeLocalObject(0x1F81, 0xFE, &dwNodeAssignment,
                                                     sizeof (dwNodeAssignment));
 
                     // dwNodeAssignment |= EPL_NODEASSIGN_MANDATORY_CN;    // 0x0000000BL
-                    // EplRet = EplApiWriteLocalObject(0x1F81, 0x6E, &dwNodeAssignment, sizeof (dwNodeAssignment));
+                    // EplRet = oplk_writeLocalObject(0x1F81, 0x6E, &dwNodeAssignment, sizeof (dwNodeAssignment));
                     dwNodeAssignment = (EPL_NODEASSIGN_MN_PRES |
                                     EPL_NODEASSIGN_NODE_EXISTS);       // 0x00010001L
-                    EplRet = EplApiWriteLocalObject(0x1F81, 0xF0, &dwNodeAssignment,
+                    EplRet = oplk_writeLocalObject(0x1F81, 0xF0, &dwNodeAssignment,
                                                     sizeof (dwNodeAssignment));
 #endif
                 }
@@ -502,7 +502,7 @@ tEplKernel          EplRet = kEplSuccessful;
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_CFM)) != 0)
                     if (uiCycleLen_g != 0)
                     {
-                        EplRet = EplApiWriteLocalObject(0x1006, 0x00,
+                        EplRet = oplk_writeLocalObject(0x1006, 0x00,
                                                         &uiCycleLen_g,
                                                         sizeof (uiCycleLen_g));
                     }
@@ -513,7 +513,7 @@ tEplKernel          EplRet = kEplSuccessful;
                     // (in little endian byte order) for configuration of
                     // remote CN
                     uiSize = 4;
-                    EplRet = EplApiReadObject(NULL, 0, 0x1006, 0x00,
+                    EplRet = oplk_readObject(NULL, 0, 0x1006, 0x00,
                                               &dw_le_CycleLen_g, &uiSize,
                                               kEplSdoTypeAsnd, NULL);
                     if (EplRet != kEplSuccessful)
@@ -802,7 +802,7 @@ tEplKernel PUBLIC AppCbSync(void)
     tEplKernel          EplRet;
     int                 i;
 
-    EplRet = api_processImageExchangeOut();
+    EplRet = oplk_exchangeProcessImageOut();
     if (EplRet != kEplSuccessful)
     {
         return EplRet;
@@ -862,7 +862,7 @@ tEplKernel PUBLIC AppCbSync(void)
     pProcessImageIn_l->CN32_M00_Digital_Ouput_8_Bit_Byte_1 = nodeVar_g[1].m_uiLeds;
     pProcessImageIn_l->CN110_M00_Digital_Ouput_8_Bit_Byte_1 = nodeVar_g[2].m_uiLeds;
 
-    EplRet = api_processImageExchangeIn();
+    EplRet = oplk_exchangeProcessImageIn();
 
     return EplRet;
 }

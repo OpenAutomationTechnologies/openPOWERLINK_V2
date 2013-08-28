@@ -207,10 +207,10 @@ int  main (void)
 
     // initialize POWERLINK stack
     printf ("Initializing openPOWERLINK stack...\n");
-    EplRet = EplApiInitialize(&EplApiInitParam);
+    EplRet = oplk_init(&EplApiInitParam);
     if(EplRet != kEplSuccessful)
     {
-        printf("EplApiInitialize() failed (Error:0x%x!\n", EplRet);
+        printf("oplk_init() failed (Error:0x%x!\n", EplRet);
         goto Exit;
     }
 
@@ -223,7 +223,7 @@ int  main (void)
         goto Exit;
     }
 
-    EplRet = EplApiSetCdcBuffer(aCdcBuffer, sizeof(aCdcBuffer));
+    EplRet = oplk_setCdcBuffer(aCdcBuffer, sizeof(aCdcBuffer));
     if(EplRet != kEplSuccessful)
     {
         goto Exit;
@@ -232,23 +232,23 @@ int  main (void)
     printf("Initializing process image...\n");
     printf("Size of input process image: %ld\n", sizeof(PI_IN));
     printf("Size of output process image: %ld\n", sizeof (PI_OUT));
-    EplRet = api_processImageAlloc(sizeof(PI_IN), sizeof(PI_OUT));
+    EplRet = oplk_allocProcessImage(sizeof(PI_IN), sizeof(PI_OUT));
     if (EplRet != kEplSuccessful)
     {
         goto Exit;
     }
 
-    pProcessImageIn_l = api_processImageGetInputImage();
-    pProcessImageOut_l = api_processImageGetOutputImage();
+    pProcessImageIn_l = oplk_getProcessImageIn();
+    pProcessImageOut_l = oplk_getProcessImageOut();
 
-    EplRet = EplApiProcessImageSetup();
+    EplRet = oplk_setupProcessImage();
     if (EplRet != kEplSuccessful)
     {
         goto Exit;
     }
 
     // start processing
-    EplRet = EplApiExecNmtCommand(kNmtEventSwReset);
+    EplRet = oplk_execNmtCommand(kNmtEventSwReset);
     if (EplRet != kEplSuccessful)
     {
         goto ExitShutdown;
@@ -258,13 +258,13 @@ int  main (void)
 
     while(!fShutdown)
     {
-        if((EplRet = EplApiProcess()) != kEplSuccessful)
+        if((EplRet = oplk_process()) != kEplSuccessful)
             goto ExitShutdown;
 
         if(checkStack++ >= CHECK_KERNEL_TIMEOUT)
         {
             checkStack = 0;
-            if(!api_checkKernelStack())
+            if(!oplk_checkKernelStack())
             {
                 printf("Kernel is dead!\n");
                 fShutdown = TRUE;
@@ -275,13 +275,13 @@ int  main (void)
 ExitShutdown:
     // halt the NMT state machine
     // so the processing of POWERLINK frames stops
-    EplRet = EplApiExecNmtCommand(kNmtEventSwitchOff);
+    EplRet = oplk_execNmtCommand(kNmtEventSwitchOff);
 
     // delete process image
-    EplRet = api_processImageFree();
+    EplRet = oplk_freeProcessImage();
 
     // delete instance for all modules
-    EplRet = EplApiShutdown();
+    EplRet = oplk_shutdown();
 
 Exit:
     PRINTF("main(): returns 0x%X\n", EplRet);
@@ -297,6 +297,7 @@ Exit:
 
 //------------------------------------------------------------------------------
 /**
+
 \brief    Application initialization
 
 This function is called to initialize the application.
@@ -343,7 +344,7 @@ tEplKernel PUBLIC AppCbSync(void)
     tEplKernel          EplRet;
     int                 i;
 
-    EplRet = api_processImageExchangeOut();
+    EplRet = oplk_exchangeProcessImageOut();
     if (EplRet != kEplSuccessful)
     {
         return EplRet;
@@ -421,7 +422,7 @@ tEplKernel PUBLIC AppCbSync(void)
     pProcessImageIn_l->CN11_M00_Digital_Ouput_8_Bit_Byte_1 = nodeVar_g[10].m_uiLeds;
     pProcessImageIn_l->CN12_M00_Digital_Ouput_8_Bit_Byte_1 = nodeVar_g[11].m_uiLeds;
 
-    EplRet = api_processImageExchangeIn();
+    EplRet = oplk_exchangeProcessImageIn();
 
     return EplRet;
 }
