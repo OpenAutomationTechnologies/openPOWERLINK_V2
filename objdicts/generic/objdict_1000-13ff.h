@@ -47,7 +47,7 @@
         EPL_OBD_END_INDEX(0x1018)
 
         // Object 1020h: CFM_VerifyConfiguration_REC
-        EPL_OBD_BEGIN_INDEX_RAM(0x1020, 0x03, EplApiCbObdAccess)
+        EPL_OBD_BEGIN_INDEX_RAM(0x1020, 0x03, ctrlu_cbObdAccess)
             EPL_OBD_SUBINDEX_RAM_VAR(0x1020, 0x00, kEplObdTypUInt8, kEplObdAccConst, tEplObdUnsigned8, NumberOfEntries, 0x02)
             EPL_OBD_SUBINDEX_RAM_VAR(0x1020, 0x01, kEplObdTypUInt32, kEplObdAccSRW, tEplObdUnsigned32, ConfDate_U32, 0)
             EPL_OBD_SUBINDEX_RAM_VAR(0x1020, 0x02, kEplObdTypUInt32, kEplObdAccSRW, tEplObdUnsigned32, ConfTime_U32, 0)

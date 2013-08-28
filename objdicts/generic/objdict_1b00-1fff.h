@@ -54,13 +54,13 @@
         EPL_OBD_END_INDEX(0x1C0F)
 
         // Object 1C14h: DLL_LossOfSocTolerance_U32 in [ns]
-        EPL_OBD_BEGIN_INDEX_RAM(0x1C14, 0x01, EplApiCbObdAccess)
+        EPL_OBD_BEGIN_INDEX_RAM(0x1C14, 0x01, ctrlu_cbObdAccess)
             EPL_OBD_SUBINDEX_RAM_VAR(0x1C14, 0x00, kEplObdTypUInt32, kEplObdAccSRW, tEplObdUnsigned32, LossOfSocTolerance, 100000)
         EPL_OBD_END_INDEX(0x1C14)
 
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_VETH)) != 0)
         // Object 1E40h: NWL_IpAddrTable_0h_REC
-        EPL_OBD_BEGIN_INDEX_RAM(0x1E40, 0x06, EplApiCbObdAccess)
+        EPL_OBD_BEGIN_INDEX_RAM(0x1E40, 0x06, ctrlu_cbObdAccess)
             EPL_OBD_SUBINDEX_RAM_VAR(0x1E40, 0x00, kEplObdTypUInt8, kEplObdAccConst, tEplObdUnsigned8, NumberOfEntries, 0x05)
             EPL_OBD_SUBINDEX_RAM_VAR(0x1E40, 0x01, kEplObdTypUInt16, kEplObdAccR, tEplObdUnsigned16, IfIndex_U16, 0x01)
             EPL_OBD_SUBINDEX_RAM_VAR(0x1E40, 0x02, kEplObdTypUInt32, kEplObdAccR, tEplObdUnsigned32, Addr_IPAD, 0xC0A86401)
@@ -190,13 +190,13 @@
 #endif
 
         // Object 1F9Eh: NMT_ResetCmd_U8
-        EPL_OBD_BEGIN_INDEX_RAM(0x1F9E, 0x01, EplApiCbObdAccess)
+        EPL_OBD_BEGIN_INDEX_RAM(0x1F9E, 0x01, ctrlu_cbObdAccess)
             EPL_OBD_SUBINDEX_RAM_VAR(0x1F9E, 0x00, kEplObdTypUInt8, kEplObdAccRW, tEplObdUnsigned8, NMT_ResetCmd_U8, 0xFF)
         EPL_OBD_END_INDEX(0x1F9E)
 
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
         // Object 1F9Fh: NMT_RequestCmd_REC
-        EPL_OBD_BEGIN_INDEX_RAM(0x1F9F, 0x04, EplApiCbObdAccess)
+        EPL_OBD_BEGIN_INDEX_RAM(0x1F9F, 0x04, ctrlu_cbObdAccess)
             EPL_OBD_SUBINDEX_RAM_VAR(0x1F9F, 0x00, kEplObdTypUInt8, kEplObdAccConst, tEplObdUnsigned8, NumberOfEntries, 0x03)
             EPL_OBD_SUBINDEX_RAM_VAR(0x1F9F, 0x01, kEplObdTypBool, kEplObdAccRW, tEplObdBoolean, Release_BOOL, FALSE)
             EPL_OBD_SUBINDEX_RAM_VAR(0x1F9F, 0x02, kEplObdTypUInt8, kEplObdAccRW, tEplObdUnsigned8, CmdID_U8, 0xFF)
