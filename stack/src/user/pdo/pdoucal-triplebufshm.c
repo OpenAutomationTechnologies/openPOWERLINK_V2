@@ -144,6 +144,8 @@ tEplKernel pdoucal_initPdoMem(tPdoChannelSetup* pPdoChannels_p, size_t rxPdoMemS
     TRACE ("%s() Triple buffers at: %p/%p/%p\n", __func__,
             pTripleBuf_l[0], pTripleBuf_l[1], pTripleBuf_l[2]);
 
+    OPLK_ATOMIC_INIT(pPdoMem_l);
+
     return kEplSuccessful;
 }
 
@@ -182,8 +184,8 @@ The function returns the address of the TXPDO buffer specified.
 //------------------------------------------------------------------------------
 BYTE *pdoucal_getTxPdoAdrs(UINT channelId_p)
 {
-    ATOMIC_T    wi;
-    BYTE*       pPdo;
+    OPLK_ATOMIC_T    wi;
+    BYTE*            pPdo;
 
     wi = pPdoMem_l->txChannelInfo[channelId_p].writeBuf;
     //TRACE ("%s() channelId:%d wi:%d\n", __func__, channelId_p, wi);
@@ -208,7 +210,7 @@ The function writes a TXPDO to the PDO memory range.
 //------------------------------------------------------------------------------
 tEplKernel pdoucal_setTxPdo(UINT channelId_p, BYTE* pPdo_p,  WORD pdoSize_p)
 {
-    ATOMIC_T           temp;
+    OPLK_ATOMIC_T    temp;
 
     UNUSED_PARAMETER(pPdo_p);
     UNUSED_PARAMETER(pdoSize_p);
@@ -217,7 +219,7 @@ tEplKernel pdoucal_setTxPdo(UINT channelId_p, BYTE* pPdo_p,  WORD pdoSize_p)
 
     //shmWriterSpinlock(&pPdoMem_l->txSpinlock);
     temp = pPdoMem_l->txChannelInfo[channelId_p].writeBuf;
-    ATOMIC_EXCHANGE(&pPdoMem_l->txChannelInfo[channelId_p].cleanBuf,
+    OPLK_ATOMIC_EXCHANGE(&pPdoMem_l->txChannelInfo[channelId_p].cleanBuf,
                     temp,
                     pPdoMem_l->txChannelInfo[channelId_p].writeBuf);
     pPdoMem_l->txChannelInfo[channelId_p].newData = 1;
@@ -245,14 +247,14 @@ The function reads a RXPDO from the PDO buffer.
 //------------------------------------------------------------------------------
 tEplKernel pdoucal_getRxPdo(BYTE** ppPdo_p, UINT channelId_p, WORD pdoSize_p)
 {
-    ATOMIC_T           readBuf;
+    OPLK_ATOMIC_T    readBuf;
 
     UNUSED_PARAMETER(pdoSize_p);
 	
     if (pPdoMem_l->rxChannelInfo[channelId_p].newData)
     {
         readBuf = pPdoMem_l->rxChannelInfo[channelId_p].readBuf;
-        ATOMIC_EXCHANGE(&pPdoMem_l->rxChannelInfo[channelId_p].cleanBuf,
+        OPLK_ATOMIC_EXCHANGE(&pPdoMem_l->rxChannelInfo[channelId_p].cleanBuf,
                         readBuf,
                         pPdoMem_l->rxChannelInfo[channelId_p].readBuf);
         pPdoMem_l->rxChannelInfo[channelId_p].newData = 0;

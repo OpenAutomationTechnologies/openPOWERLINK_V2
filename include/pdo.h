@@ -180,11 +180,11 @@ typedef struct
 
 typedef struct
 {
-    ULONG       channelOffset;
-    ATOMIC_T    readBuf;
-    ATOMIC_T    writeBuf;
-    ATOMIC_T    cleanBuf;
-    UINT8       newData;
+    ULONG           channelOffset;
+    OPLK_ATOMIC_T   readBuf;
+    OPLK_ATOMIC_T   writeBuf;
+    OPLK_ATOMIC_T   cleanBuf;
+    UINT8           newData;
 } tPdoBufferInfo;
 
 typedef struct
@@ -193,6 +193,9 @@ typedef struct
     size_t              pdoMemSize;
     tPdoBufferInfo      rxChannelInfo[EPL_D_PDO_RPDOChannels_U16];
     tPdoBufferInfo      txChannelInfo[EPL_D_PDO_TPDOChannels_U16];
+#ifdef OPLK_LOCK_T
+    OPLK_LOCK_T         lock;
+#endif
 } tPdoMemRegion;
 
 

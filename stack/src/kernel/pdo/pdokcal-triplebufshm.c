@@ -154,6 +154,8 @@ tEplKernel pdokcal_initPdoMem(tPdoChannelSetup* pPdoChannels, size_t rxPdoMemSiz
     memset (pPdoMem_l, 0, pdoMemRegionSize_l);
     setupPdoMemInfo(pPdoChannels, pPdoMem_l);
 
+    OPLK_ATOMIC_INIT(pPdoMem_l);
+
     return kEplSuccessful;
 }
 
@@ -198,7 +200,7 @@ The function writes a received RXPDO into the PDO memory range.
 tEplKernel pdokcal_writeRxPdo(UINT channelId_p, BYTE *pPayload_p, UINT16 pdoSize_p)
 {
     BYTE*           pPdo;
-    ATOMIC_T        temp;
+    OPLK_ATOMIC_T   temp;
 
     pPdo = pTripleBuf_l[pPdoMem_l->rxChannelInfo[channelId_p].writeBuf] +
            pPdoMem_l->rxChannelInfo[channelId_p].channelOffset;
@@ -207,7 +209,7 @@ tEplKernel pdokcal_writeRxPdo(UINT channelId_p, BYTE *pPayload_p, UINT16 pdoSize
     memcpy(pPdo, pPayload_p, pdoSize_p);
 
     temp = pPdoMem_l->rxChannelInfo[channelId_p].writeBuf;
-    ATOMIC_EXCHANGE(&pPdoMem_l->rxChannelInfo[channelId_p].cleanBuf,
+    OPLK_ATOMIC_EXCHANGE(&pPdoMem_l->rxChannelInfo[channelId_p].cleanBuf,
                     temp,
                     pPdoMem_l->rxChannelInfo[channelId_p].writeBuf);
 
@@ -236,12 +238,12 @@ The function reads a TXPDO to be sent from the PDO memory range.
 tEplKernel pdokcal_readTxPdo(UINT channelId_p, BYTE* pPayload_p, UINT16 pdoSize_p)
 {
     BYTE*           pPdo;
-    ATOMIC_T        readBuf;
+    OPLK_ATOMIC_T   readBuf;
 
     if (pPdoMem_l->txChannelInfo[channelId_p].newData)
     {
         readBuf = pPdoMem_l->txChannelInfo[channelId_p].readBuf;
-        ATOMIC_EXCHANGE(&pPdoMem_l->txChannelInfo[channelId_p].cleanBuf,
+        OPLK_ATOMIC_EXCHANGE(&pPdoMem_l->txChannelInfo[channelId_p].cleanBuf,
                         readBuf,
                         pPdoMem_l->txChannelInfo[channelId_p].readBuf);
         pPdoMem_l->txChannelInfo[channelId_p].newData = 0;

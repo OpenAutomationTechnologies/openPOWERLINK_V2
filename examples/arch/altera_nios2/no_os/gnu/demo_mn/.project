@@ -149,6 +149,11 @@
 			<locationURI>OPLK_LOC/stack/src/arch/altera_nios2/target-nios2.c</locationURI>
 		</link>
 		<link>
+			<name>lock-dualprocnoos.c</name>
+			<type>1</type>
+			<locationURI>OPLK_LOC/stack/src/arch/altera_nios2/lock-dualprocnoos.c</locationURI>
+		</link>
+		<link>
 			<name>dllcal-hostif.c</name>
 			<type>1</type>
 			<locationURI>OPLK_LOC/stack/src/common/dll/dllcal-hostif.c</locationURI>
