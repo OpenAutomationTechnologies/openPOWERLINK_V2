@@ -118,7 +118,7 @@ tEplKernel DataInOutThread::processSync(void)
     tEplKernel          ret;
     int                 i;
 
-    ret = api_processImageExchangeOut();
+    ret = oplk_exchangeProcessImageOut();
     if (ret != kEplSuccessful)
     {
         return ret;
@@ -180,7 +180,7 @@ tEplKernel DataInOutThread::processSync(void)
     pProcessImageIn_l->CN32_M00_Digital_Ouput_8_Bit_Byte_1 = leds[1];
     pProcessImageIn_l->CN110_M00_Digital_Ouput_8_Bit_Byte_1 = leds[2];
 
-    ret = api_processImageExchangeIn();
+    ret = oplk_exchangeProcessImageIn();
 
     return ret;
 }
@@ -198,16 +198,16 @@ tEplKernel DataInOutThread::setupProcessImage()
 {
     tEplKernel          ret;
 
-    ret = api_processImageAlloc(sizeof(PI_IN), sizeof(PI_OUT));
+    ret = oplk_allocProcessImage(sizeof(PI_IN), sizeof(PI_OUT));
     if (ret != kEplSuccessful)
     {
         return ret;
     }
 
-    pProcessImageIn_l = (PI_IN *)api_processImageGetInputImage();
-    pProcessImageOut_l = (PI_OUT *)api_processImageGetOutputImage();
+    pProcessImageIn_l = (PI_IN *)oplk_getProcessImageIn();
+    pProcessImageOut_l = (PI_OUT *)oplk_getProcessImageOut();
 
-    ret = EplApiProcessImageSetup();
+    ret = oplk_setupProcessImage();
     if (ret != kEplSuccessful)
     {
         return ret;
@@ -257,7 +257,7 @@ void DataInOutThread::run()
 
     for (;;)
     {
-        api_waitSyncEvent(0);
+        oplk_waitSyncEvent(0);
         ret = processSync();
         if (ret != kEplSuccessful)
         {

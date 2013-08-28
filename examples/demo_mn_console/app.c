@@ -152,7 +152,7 @@ The function shut's down the synchronous data application
 //------------------------------------------------------------------------------
 void shutdownApp (void)
 {
-    api_processImageFree();
+    oplk_freeProcessImage();
 }
 
 //------------------------------------------------------------------------------
@@ -171,10 +171,10 @@ tEplKernel processSync(void)
     tEplKernel          ret = kEplSuccessful;
     int                 i;
 
-    if (api_waitSyncEvent(100000) != kEplSuccessful)
+    if (oplk_waitSyncEvent(100000) != kEplSuccessful)
         return ret;
 
-    ret = api_processImageExchangeOut();
+    ret = oplk_exchangeProcessImageOut();
     if (ret != kEplSuccessful)
         return ret;
 
@@ -232,7 +232,7 @@ tEplKernel processSync(void)
     pProcessImageIn_l->CN32_M00_Digital_Ouput_8_Bit_Byte_1 = nodeVar_l[1].leds;
     pProcessImageIn_l->CN110_M00_Digital_Ouput_8_Bit_Byte_1 = nodeVar_l[2].leds;
 
-    ret = api_processImageExchangeIn();
+    ret = oplk_exchangeProcessImageIn();
 
     return ret;
 }
@@ -259,16 +259,16 @@ static tEplKernel initProcessImage(void)
     printf("Initializing process image...\n");
     printf("Size of input process image: %d\n", (UINT32)sizeof(PI_IN));
     printf("Size of output process image: %d\n", (UINT32)sizeof (PI_OUT));
-    ret = api_processImageAlloc(sizeof(PI_IN), sizeof(PI_OUT));
+    ret = oplk_allocProcessImage(sizeof(PI_IN), sizeof(PI_OUT));
     if (ret != kEplSuccessful)
     {
         return ret;
     }
 
-    pProcessImageIn_l = api_processImageGetInputImage();
-    pProcessImageOut_l = api_processImageGetOutputImage();
+    pProcessImageIn_l = oplk_getProcessImageIn();
+    pProcessImageOut_l = oplk_getProcessImageOut();
 
-    ret = EplApiProcessImageSetup();
+    ret = oplk_setupProcessImage();
 
     return ret;
 }

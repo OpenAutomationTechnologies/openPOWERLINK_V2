@@ -228,7 +228,7 @@ tEplKernel PUBLIC AppCbEvent(tEplApiEventType EventType_p,
                 {
                     /* NMT state machine was shut down,
                        because of critical EPL stack error
-                       -> also shut down EplApiProcess() and main() */
+                       -> also shut down oplk_process() and main() */
                     EplRet = kEplShutdown;
                     fShutdown_l = TRUE;
 
@@ -401,7 +401,7 @@ tEplKernel PUBLIC AppCbSync(void)
     DWORD*            ulDigInputs = LATCHED_IOPORT_BASE;
     DWORD*            ulDigOutputs = LATCHED_IOPORT_BASE;
 
-    EplRet = api_processImageExchangeOut();
+    EplRet = oplk_exchangeProcessImageOut();
     if (EplRet != kEplSuccessful)
     {
         return EplRet;
@@ -427,7 +427,7 @@ tEplKernel PUBLIC AppCbSync(void)
     /* write digital output ports */
     AmiSetDwordToLe((BYTE*)ulDigOutputs, ports);
 
-    EplRet = api_processImageExchangeIn();
+    EplRet = oplk_exchangeProcessImageIn();
 
     return EplRet;
 }
@@ -508,7 +508,7 @@ static int openPowerlink(BYTE bNodeId_p)
 
     /* initialize POWERLINK stack */
     PRINTF("init POWERLINK stack:\n");
-    EplRet = EplApiInitialize(&EplApiInitParam);
+    EplRet = oplk_init(&EplApiInitParam);
     if(EplRet != kEplSuccessful)
     {
         PRINTF("init POWERLINK Stack... error 0x%X\n\n", EplRet);
@@ -521,7 +521,7 @@ static int openPowerlink(BYTE bNodeId_p)
 
     ObdSize = sizeof(digitalIn[0]);
     uiVarEntries = 4;
-    EplRet = EplApiLinkObject(0x6000, digitalIn, &uiVarEntries, &ObdSize, 0x01);
+    EplRet = oplk_linkObject(0x6000, digitalIn, &uiVarEntries, &ObdSize, 0x01);
     if (EplRet != kEplSuccessful)
     {
         printf("linking process vars... error\n\n");
@@ -530,7 +530,7 @@ static int openPowerlink(BYTE bNodeId_p)
 
     ObdSize = sizeof(digitalOut[0]);
     uiVarEntries = 4;
-    EplRet = EplApiLinkObject(0x6200, digitalOut, &uiVarEntries, &ObdSize, 0x01);
+    EplRet = oplk_linkObject(0x6200, digitalOut, &uiVarEntries, &ObdSize, 0x01);
     if (EplRet != kEplSuccessful)
     {
         printf("linking process vars... error\n\n");
@@ -541,7 +541,7 @@ static int openPowerlink(BYTE bNodeId_p)
 
     /* start the POWERLINK stack */
     PRINTF("start EPL Stack...\n");
-    EplRet = EplApiExecNmtCommand(kNmtEventSwReset);
+    EplRet = oplk_execNmtCommand(kNmtEventSwReset);
     if (EplRet != kEplSuccessful)
     {
         PRINTF("start EPL Stack... error\n\n");
@@ -561,7 +561,7 @@ static int openPowerlink(BYTE bNodeId_p)
 
     while(1)
     {
-        EplApiProcess();
+        oplk_process();
         if (fShutdown_l == TRUE)
         {
             break;
@@ -570,7 +570,7 @@ static int openPowerlink(BYTE bNodeId_p)
 
 ExitShutdown:
     PRINTF("Shutdown EPL Stack\n");
-    EplApiShutdown();       // shutdown node
+    oplk_shutdown();       // shutdown node
 
 Exit:
     return EplRet;

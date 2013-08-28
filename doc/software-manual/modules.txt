@@ -8,6 +8,17 @@
 
 //==============================================================================
 /**
+\defgroup module_api Application programming interface module (api)
+
+The API module implements the application programming interface of the
+openPOWERLINK stack. It provides all functions used by an application to
+interact with the openPOWERLINK stack.
+
+\ingroup user_layer
+*/
+
+//==============================================================================
+/**
 \defgroup module_ctrlu User control module (ctrlu)
 
 The user control module is the module responsible for startup and shutdown

@@ -254,10 +254,10 @@ static tEplKernel initPowerlink(UINT32 cycleLen_p, const BYTE* macAddr_p, UINT32
     initParam.m_pfnObdInitRam = EplObdInitRam;
 
     // initialize POWERLINK stack
-    ret = EplApiInitialize(&initParam);
+    ret = oplk_init(&initParam);
     if(ret != kEplSuccessful)
     {
-        printf("EplApiInitialize() failed (Error:0x%x!\n", ret);
+        printf("oplk_init() failed (Error:0x%x!\n", ret);
         return ret;
     }
 
@@ -290,7 +290,7 @@ static void loopMain(void)
 #endif
 
     // start processing
-    ret = EplApiExecNmtCommand(kNmtEventSwReset);
+    ret = oplk_execNmtCommand(kNmtEventSwReset);
     if (ret != kEplSuccessful)
     {
         return;
@@ -318,7 +318,7 @@ static void loopMain(void)
             {
                 case 'r':
                 {
-                    ret = EplApiExecNmtCommand(kNmtEventSwReset);
+                    ret = oplk_execNmtCommand(kNmtEventSwReset);
                     if (ret != kEplSuccessful)
                     {
                         fExit = TRUE;
@@ -348,7 +348,7 @@ static void loopMain(void)
             }
         }
 
-        if (api_checkKernelStack() == FALSE)
+        if (oplk_checkKernelStack() == FALSE)
         {
             fExit = TRUE;
             PRINTF("Kernel stack has gone! Exiting...\n");
@@ -383,7 +383,7 @@ static void shutdownPowerlink(void)
     fGsOff_l = FALSE;
 
     // halt the NMT state machine so the processing of POWERLINK frames stops
-    EplApiExecNmtCommand(kNmtEventSwitchOff);
+    oplk_execNmtCommand(kNmtEventSwitchOff);
 
     // small loop to implement timeout waiting for thread to terminate
     for (i = 0; i < 1000; i++)
@@ -394,7 +394,7 @@ static void shutdownPowerlink(void)
 
     printf ("Stack in State off ... Shutdown\n");
 
-    EplApiShutdown();
+    oplk_shutdown();
 
 }
 

@@ -239,7 +239,7 @@ static tEplKernel processStateChangeEvent(tEplApiEventType EventType_p,
         case kNmtGsOff:
            // NMT state machine was shut down,
             // because of user signal (CTRL-C) or critical EPL stack error
-            // -> also shut down EplApiProcess() and main()
+            // -> also shut down oplk_process() and main()
             ret = kEplShutdown;
 
             console_printlog("StateChangeEvent:kNmtGsOff originating event = 0x%X (%s)\n",
@@ -574,18 +574,18 @@ static tEplKernel processSdoEvent(tEplApiEventType EventType_p,
     UNUSED_PARAMETER(pUserArg_p);
 
     // SDO transfer finished
-    if ((ret = EplApiFreeSdoChannel(pSdo->m_SdoAccessType)) != kEplSuccessful)
+    if ((ret = oplk_freeSdoChannel(pSdo->m_SdoAccessType)) != kEplSuccessful)
     {
         return ret;
     }
 
     if (pSdo->m_SdoComConState == kEplSdoComTransferFinished)
     {   // continue boot-up of CN with NMT command Reset Configuration
-        ret = EplApiMnTriggerStateChange(pSdo->m_uiNodeId, kNmtNodeCommandConfReset);
+        ret = oplk_triggerMnStateChange(pSdo->m_uiNodeId, kNmtNodeCommandConfReset);
     }
     else
     {   // indicate configuration error CN
-        ret = EplApiMnTriggerStateChange(pSdo->m_uiNodeId, kNmtNodeCommandConfErr);
+        ret = oplk_triggerMnStateChange(pSdo->m_uiNodeId, kNmtNodeCommandConfErr);
     }
     return ret;
 }
@@ -606,20 +606,20 @@ static tEplKernel setDefaultNodeAssignment(void)
     DWORD       nodeAssignment;
 
     nodeAssignment = (EPL_NODEASSIGN_NODE_IS_CN | EPL_NODEASSIGN_NODE_EXISTS);    // 0x00000003L
-    ret = EplApiWriteLocalObject(0x1F81, 0x01, &nodeAssignment, sizeof (nodeAssignment));
-    ret = EplApiWriteLocalObject(0x1F81, 0x02, &nodeAssignment, sizeof (nodeAssignment));
-    ret = EplApiWriteLocalObject(0x1F81, 0x03, &nodeAssignment, sizeof (nodeAssignment));
-    ret = EplApiWriteLocalObject(0x1F81, 0x04, &nodeAssignment, sizeof (nodeAssignment));
-    ret = EplApiWriteLocalObject(0x1F81, 0x05, &nodeAssignment, sizeof (nodeAssignment));
-    ret = EplApiWriteLocalObject(0x1F81, 0x06, &nodeAssignment, sizeof (nodeAssignment));
-    ret = EplApiWriteLocalObject(0x1F81, 0x07, &nodeAssignment, sizeof (nodeAssignment));
-    ret = EplApiWriteLocalObject(0x1F81, 0x08, &nodeAssignment, sizeof (nodeAssignment));
-    ret = EplApiWriteLocalObject(0x1F81, 0x20, &nodeAssignment, sizeof (nodeAssignment));
-    ret = EplApiWriteLocalObject(0x1F81, 0xFE, &nodeAssignment, sizeof (nodeAssignment));
-    ret = EplApiWriteLocalObject(0x1F81, 0x6E, &nodeAssignment, sizeof (nodeAssignment));
+    ret = oplk_writeLocalObject(0x1F81, 0x01, &nodeAssignment, sizeof (nodeAssignment));
+    ret = oplk_writeLocalObject(0x1F81, 0x02, &nodeAssignment, sizeof (nodeAssignment));
+    ret = oplk_writeLocalObject(0x1F81, 0x03, &nodeAssignment, sizeof (nodeAssignment));
+    ret = oplk_writeLocalObject(0x1F81, 0x04, &nodeAssignment, sizeof (nodeAssignment));
+    ret = oplk_writeLocalObject(0x1F81, 0x05, &nodeAssignment, sizeof (nodeAssignment));
+    ret = oplk_writeLocalObject(0x1F81, 0x06, &nodeAssignment, sizeof (nodeAssignment));
+    ret = oplk_writeLocalObject(0x1F81, 0x07, &nodeAssignment, sizeof (nodeAssignment));
+    ret = oplk_writeLocalObject(0x1F81, 0x08, &nodeAssignment, sizeof (nodeAssignment));
+    ret = oplk_writeLocalObject(0x1F81, 0x20, &nodeAssignment, sizeof (nodeAssignment));
+    ret = oplk_writeLocalObject(0x1F81, 0xFE, &nodeAssignment, sizeof (nodeAssignment));
+    ret = oplk_writeLocalObject(0x1F81, 0x6E, &nodeAssignment, sizeof (nodeAssignment));
 
     nodeAssignment = (EPL_NODEASSIGN_MN_PRES | EPL_NODEASSIGN_NODE_EXISTS);    // 0x00010001L
-    ret = EplApiWriteLocalObject(0x1F81, 0xF0, &nodeAssignment, sizeof (nodeAssignment));
+    ret = oplk_writeLocalObject(0x1F81, 0xF0, &nodeAssignment, sizeof (nodeAssignment));
     return ret;
 }
 #endif

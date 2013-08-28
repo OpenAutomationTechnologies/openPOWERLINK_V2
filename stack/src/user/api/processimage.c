@@ -78,10 +78,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 typedef struct
 {
-    tEplApiProcessImage m_In;
-    tEplApiProcessImage m_Out;
-
-    //tEplSyncCb          m_pfnOrgCbSync;
+    tEplApiProcessImage     inputImage;
+    tEplApiProcessImage     outputImage;
 } tApiProcessImageInstance;
 
 //------------------------------------------------------------------------------
@@ -107,41 +105,42 @@ The function allocates the input and output process images
 \param  sizeProcessImageOut_p         Size for output process image
 
 \return The function returns a tEplKernel error code.
+
+\ingroup module_api
 */
 //------------------------------------------------------------------------------
-tEplKernel PUBLIC api_processImageAlloc(UINT sizeProcessImageIn_p, UINT sizeProcessImageOut_p)
+tEplKernel oplk_allocProcessImage(UINT sizeProcessImageIn_p, UINT sizeProcessImageOut_p)
 {
     tEplKernel      ret = kEplSuccessful;
 
     TRACE("%s(): Alloc(%u, %u)\n", __func__, sizeProcessImageIn_p,
                                    sizeProcessImageOut_p);
 
-    if ((instance_l.m_In.m_pImage != NULL)|| (instance_l.m_Out.m_pImage != NULL))
+    if ((instance_l.inputImage.m_pImage != NULL)|| (instance_l.outputImage.m_pImage != NULL))
     {
         ret = kEplApiPIAlreadyAllocated;
         goto Exit;
     }
 
-    instance_l.m_In.m_pImage = EPL_MALLOC(sizeProcessImageIn_p);
-    if (instance_l.m_In.m_pImage == NULL)
+    instance_l.inputImage.m_pImage = EPL_MALLOC(sizeProcessImageIn_p);
+    if (instance_l.inputImage.m_pImage == NULL)
     {
         ret = kEplApiPIOutOfMemory;
         goto Exit;
     }
-    instance_l.m_In.m_uiSize = sizeProcessImageIn_p;
+    instance_l.inputImage.m_uiSize = sizeProcessImageIn_p;
 
-    instance_l.m_Out.m_pImage = EPL_MALLOC(sizeProcessImageOut_p);
-    if (instance_l.m_Out.m_pImage == NULL)
+    instance_l.outputImage.m_pImage = EPL_MALLOC(sizeProcessImageOut_p);
+    if (instance_l.outputImage.m_pImage == NULL)
     {
         ret = kEplApiPIOutOfMemory;
         goto Exit;
     }
-    instance_l.m_Out.m_uiSize = sizeProcessImageOut_p;
+    instance_l.outputImage.m_uiSize = sizeProcessImageOut_p;
 
     TRACE("%s: Alloc(%p, %u, %p, %u)\n", __func__,
-          instance_l.m_In.m_pImage,  instance_l.m_In.m_uiSize,
-          instance_l.m_Out.m_pImage, instance_l.m_Out.m_uiSize);
-
+          instance_l.inputImage.m_pImage,  instance_l.inputImage.m_uiSize,
+          instance_l.outputImage.m_pImage, instance_l.outputImage.m_uiSize);
 
 Exit:
     return ret;
@@ -154,31 +153,32 @@ Exit:
 The function frees the allocated process images
 
 \return The function returns a tEplKernel error code.
+
+\ingroup module_api
 */
 //------------------------------------------------------------------------------
 
-tEplKernel PUBLIC api_processImageFree(void)
+tEplKernel oplk_freeProcessImage(void)
 {
     tEplKernel      Ret = kEplSuccessful;
 
-    if ((instance_l.m_In.m_pImage == NULL) &&
-        (instance_l.m_Out.m_pImage == NULL))
+    if ((instance_l.inputImage.m_pImage == NULL) &&
+        (instance_l.outputImage.m_pImage == NULL))
     {
         goto Exit;
     }
 
-    instance_l.m_In.m_uiSize = 0;
-    instance_l.m_Out.m_uiSize = 0;
+    instance_l.inputImage.m_uiSize = 0;
+    instance_l.outputImage.m_uiSize = 0;
 
-    EPL_FREE(instance_l.m_In.m_pImage);
-    instance_l.m_In.m_pImage = NULL;
-    EPL_FREE(instance_l.m_Out.m_pImage);
-    instance_l.m_Out.m_pImage = NULL;
+    EPL_FREE(instance_l.inputImage.m_pImage);
+    instance_l.inputImage.m_pImage = NULL;
+    EPL_FREE(instance_l.outputImage.m_pImage);
+    instance_l.outputImage.m_pImage = NULL;
 
 Exit:
     return Ret;
 }
-
 
 //------------------------------------------------------------------------------
 /**
@@ -200,12 +200,13 @@ The function links an object in the OD into a location in the process image.
                                 linked to the object dictionary.
 
 \return The function returns a tEplKernel error code.
+
+\ingroup module_api
 */
 //------------------------------------------------------------------------------
-
-tEplKernel PUBLIC api_processImageLinkObject(UINT objIndex_p, UINT firstSubindex_p,
-                                             UINT offsetPI_p, BOOL fOutputPI_p,
-                                             tEplObdSize entrySize_p, UINT* pVarEntries_p)
+tEplKernel oplk_linkProcessImageObject(UINT objIndex_p, UINT firstSubindex_p,
+                                       UINT offsetPI_p, BOOL fOutputPI_p,
+                                       tEplObdSize entrySize_p, UINT* pVarEntries_p)
 {
     tEplKernel      ret = kEplSuccessful;
     void*           pVar;
@@ -213,35 +214,35 @@ tEplKernel PUBLIC api_processImageLinkObject(UINT objIndex_p, UINT firstSubindex
     if (pVarEntries_p == NULL)
         return kEplApiInvalidParam;
 
-    if ((instance_l.m_In.m_pImage == NULL) || (instance_l.m_Out.m_pImage == NULL))
+    if ((instance_l.inputImage.m_pImage == NULL) || (instance_l.outputImage.m_pImage == NULL))
         return kEplApiPINotAllocated;
 
     if (fOutputPI_p)
     {
-        pVar = ((BYTE*) instance_l.m_Out.m_pImage) + offsetPI_p;
-        if ((offsetPI_p + entrySize_p) > instance_l.m_Out.m_uiSize)
+        pVar = ((BYTE*) instance_l.outputImage.m_pImage) + offsetPI_p;
+        if ((offsetPI_p + entrySize_p) > instance_l.outputImage.m_uiSize)
         {   // at least one entry should fit into the PI, but it doesn't
             return kEplApiPISizeExceeded;
         }
-        if ((offsetPI_p + (*pVarEntries_p * entrySize_p)) > instance_l.m_Out.m_uiSize)
+        if ((offsetPI_p + (*pVarEntries_p * entrySize_p)) > instance_l.outputImage.m_uiSize)
         {   // limit the number of entries
-            *pVarEntries_p = (instance_l.m_Out.m_uiSize - offsetPI_p) / entrySize_p;
+            *pVarEntries_p = (instance_l.outputImage.m_uiSize - offsetPI_p) / entrySize_p;
         }
     }
     else
     {
-        pVar = ((BYTE*) instance_l.m_In.m_pImage) + offsetPI_p;
-        if ((offsetPI_p + entrySize_p) > instance_l.m_In.m_uiSize)
+        pVar = ((BYTE*) instance_l.inputImage.m_pImage) + offsetPI_p;
+        if ((offsetPI_p + entrySize_p) > instance_l.inputImage.m_uiSize)
         {   // at least one entry should fit into the PI, but it doesn't
             return kEplApiPISizeExceeded;
         }
-        if ((offsetPI_p + (*pVarEntries_p * entrySize_p)) > instance_l.m_In.m_uiSize)
+        if ((offsetPI_p + (*pVarEntries_p * entrySize_p)) > instance_l.inputImage.m_uiSize)
         {   // limit the number of entries
-            *pVarEntries_p = (instance_l.m_In.m_uiSize - offsetPI_p) / entrySize_p;
+            *pVarEntries_p = (instance_l.inputImage.m_uiSize - offsetPI_p) / entrySize_p;
         }
     }
 
-    ret = EplApiLinkObject(objIndex_p, pVar, pVarEntries_p, &entrySize_p, firstSubindex_p);
+    ret = oplk_linkObject(objIndex_p, pVar, pVarEntries_p, &entrySize_p, firstSubindex_p);
 
     return ret;
 }
@@ -253,13 +254,19 @@ tEplKernel PUBLIC api_processImageLinkObject(UINT objIndex_p, UINT firstSubindex
 The function exchanges the input process image.
 
 \return The function returns a tEplKernel error code.
+
+\ingroup module_api
 */
 //------------------------------------------------------------------------------
-tEplKernel PUBLIC api_processImageExchangeIn(void)
+tEplKernel oplk_exchangeProcessImageIn(void)
 {
     tEplKernel      ret;
 
-    ret = pdou_copyTxPdoFromPi();
+    if (instance_l.inputImage.m_pImage != NULL)
+        ret = pdou_copyTxPdoFromPi();
+    else
+        ret = kEplApiPINotAllocated;
+
     return ret;
 }
 
@@ -270,13 +277,19 @@ tEplKernel PUBLIC api_processImageExchangeIn(void)
 The function exchanges the output process image.
 
 \return The function returns a tEplKernel error code.
+
+\ingroup module_api
 */
 //------------------------------------------------------------------------------
-tEplKernel PUBLIC api_processImageExchangeOut(void)
+tEplKernel oplk_exchangeProcessImageOut(void)
 {
     tEplKernel      ret;
 
-    ret = pdou_copyRxPdoToPi();
+    if (instance_l.outputImage.m_pImage != NULL)
+        ret = pdou_copyRxPdoToPi();
+    else
+        ret = kEplApiPINotAllocated;
+
     return ret;
 }
 
@@ -286,12 +299,14 @@ tEplKernel PUBLIC api_processImageExchangeOut(void)
 
 The function returns the pointer to the input process image.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a pointer to the input process image.
+
+\ingroup module_api
 */
 //------------------------------------------------------------------------------
-void * PUBLIC api_processImageGetInputImage(void)
+void* oplk_getProcessImageIn(void)
 {
-    return instance_l.m_In.m_pImage;
+    return instance_l.inputImage.m_pImage;
 }
 
 //------------------------------------------------------------------------------
@@ -300,12 +315,14 @@ void * PUBLIC api_processImageGetInputImage(void)
 
 The function returns the pointer to the output process image.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a pointer to the output process image.
+
+\ingroup module_api
 */
 //------------------------------------------------------------------------------
-void * PUBLIC api_processImageGetOutputImage(void)
+void* oplk_getProcessImageOut(void)
 {
-    return instance_l.m_Out.m_pImage;
+    return instance_l.outputImage.m_pImage;
 }
 
 
