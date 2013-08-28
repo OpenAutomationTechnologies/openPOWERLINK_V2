@@ -58,6 +58,7 @@ INCLUDES=". \
 ${STACKROOT_DIR}/include \
 ${STACKROOT_DIR}/libs/hostif \
 ${STACKROOT_DIR}/objdicts/CiA302-4_MN \
+${STACKROOT_DIR}/stack/src/arch/altera_nios2 \
 ${STACKROOT_DIR}/stack/src"
 
 ##################################
@@ -75,6 +76,7 @@ ${STACKROOT_DIR}/libs/trace/trace-printf.c \
 ${STACKROOT_DIR}/objdicts/CiA302-4_MN/EplApiProcessImageSetup.c \
 ${STACKROOT_DIR}/objdicts/CiA302-4_MN/Objdict.c \
 ${STACKROOT_DIR}/stack/src/arch/altera_nios2/target-nios2.c \
+${STACKROOT_DIR}/stack/src/arch/altera_nios2/lock-dualprocnoos.c \
 ${STACKROOT_DIR}/stack/src/common/dll/dllcal-hostif.c \
 ${STACKROOT_DIR}/stack/src/common/event/event.c \
 ${STACKROOT_DIR}/stack/src/common/timer/timer-generic.c \

@@ -274,6 +274,11 @@
 			<locationURI>OPLK_LOC/stack/src/arch/altera_nios2/target-nios2.c</locationURI>
 		</link>
 		<link>
+			<name>lock-dualprocnoos.c</name>
+			<type>1</type>
+			<locationURI>OPLK_LOC/stack/src/arch/altera_nios2/lock-dualprocnoos.c</locationURI>
+		</link>
+		<link>
 			<name>timestamp-openmac.c</name>
 			<type>1</type>
 			<locationURI>OPLK_LOC/stack/src/kernel/timestamp/timestamp-openmac.c</locationURI>

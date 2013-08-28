@@ -144,6 +144,11 @@
 			<locationURI>OPLK_LOC/stack/src/arch/altera_nios2/target-nios2.c</locationURI>
 		</link>
 		<link>
+			<name>lock-localnoos.c</name>
+			<type>1</type>
+			<locationURI>OPLK_LOC/stack/src/arch/altera_nios2/lock-localnoos.c</locationURI>
+		</link>
+		<link>
 			<name>debug.c</name>
 			<type>1</type>
 			<locationURI>OPLK_LOC/stack/src/common/debug.c</locationURI>
