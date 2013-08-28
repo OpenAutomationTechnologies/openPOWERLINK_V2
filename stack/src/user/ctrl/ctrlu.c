@@ -73,7 +73,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 #if (EPL_OBD_USE_LOAD_CONCISEDCF != FALSE)
-#include <EplObdCdc.h>
+#include <obdcdc.h>
 #endif
 
 #if EPL_NMTMNU_PRES_CHAINING_MN != FALSE
