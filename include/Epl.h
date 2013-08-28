@@ -290,33 +290,6 @@ typedef struct
 
 } tEplApiProcessImageCopyJob;
 
-typedef struct
-{
-    tEplApiInitParam    m_InitParam;
-
-} tEplApiInstance;
-
-typedef struct {
-    tEplKernel (PUBLIC* pfnCbCnCheckEvent)  (tNmtEvent NmtEvent_p);
-
-    tEplKernel (PUBLIC* pfnCbNmtStateChange)(tEventNmtStateChange NmtStateChange_p);
-
-    tEplKernel (PUBLIC* pfnCbNodeEvent)     (unsigned int uiNodeId_p, tNmtNodeEvent NodeEvent_p,
-                                            tNmtState NmtState_p, WORD wErrorCode_p,
-                                            BOOL fMandatory_p);
-
-    tEplKernel (PUBLIC* pfnCbBootEvent)     (tNmtBootEvent BootEvent_p, tNmtState NmtState_p,
-                                            WORD wErrorCode_p);
-
-    tEplKernel (PUBLIC* pfnCbCfmProgress)   (tCfmEventCnProgress* pEventCnProgress_p);
-
-    tEplKernel (PUBLIC* pfnCbCfmResult)     (unsigned int uiNodeId_p, tNmtNodeCommand NodeCommand_p);
-
-    tEplKernel (PUBLIC* pfnCbProcessEvent)  (tEplEvent* pEplEvent_p);
-
-    tEplKernel (PUBLIC* pfnCbLedStateChange)(tLedType LedType_p, BOOL fOn_p);
-} tEplApiCbFuncs;
-
 //---------------------------------------------------------------------------
 // function prototypes
 //---------------------------------------------------------------------------
@@ -363,8 +336,6 @@ EPLDLLEXPORT tEplKernel PUBLIC EplApiWriteLocalObject(
             unsigned int      uiSubindex_p,
             void*             pSrcData_p,
             unsigned int      uiSize_p);
-
-EPLDLLEXPORT tEplKernel PUBLIC EplApiCbObdAccess(tEplObdCbParam MEM* pParam_p);
 
 EPLDLLEXPORT tEplKernel PUBLIC EplApiLinkObject( unsigned int    uiObjIndex_p,
                                     void*           pVar_p,

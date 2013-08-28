@@ -2,14 +2,15 @@
 ********************************************************************************
 \file   ctrlu.h
 
-\brief  Definitions for user ctrl module
+\brief  Definitions for user control module
 
-This file contains the definitions for the user ctrl module.
+This file contains the definitions for the user control module.
 
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2012, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -63,12 +64,12 @@ extern "C" {
 
 tEplKernel ctrlu_init(void);
 void       ctrlu_exit(void);
-tEplKernel ctrlu_initStack(tEplApiInitParam * pInitParam_p,
-                           tEplApiInstance* pApiInstance_p,
-                           tEplApiCbFuncs* pCbFuncs_p);
+tEplKernel ctrlu_initStack(tEplApiInitParam * pInitParam_p);
 tEplKernel ctrlu_shutdownStack(void);
 tEplKernel ctrlu_processStack(void);
 BOOL       ctrlu_checkKernelStack(void);
+tEplKernel ctrlu_callUserEventCallback(tEplApiEventType eventType_p, tEplApiEventArg* pEventArg_p);
+tEplKernel ctrlu_cbObdAccess(tEplObdCbParam MEM* pParam_p);
 
 #ifdef __cplusplus
 }
