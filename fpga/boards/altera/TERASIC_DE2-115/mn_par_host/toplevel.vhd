@@ -116,7 +116,11 @@ architecture rtl of toplevel is
             multiplexedadbus_0_wr               : out   std_logic;
             multiplexedadbus_0_rd               : out   std_logic;
             multiplexedadbus_0_ack              : in    std_logic                     := 'X';
-            host_0_irq_irq                      : in    std_logic                     := 'X'
+            host_0_irq_irq                      : in    std_logic                     := 'X';
+            lcd_data                            : inout std_logic_vector(7 downto 0)  := (others => 'X');
+            lcd_E                               : out   std_logic;
+            lcd_RS                              : out   std_logic;
+            lcd_RW                              : out   std_logic
         );
     end component mn_par_host;
 
@@ -146,6 +150,9 @@ architecture rtl of toplevel is
     signal hostifIrq    : std_logic;
 
 begin
+
+    LCD_ON      <= '1';
+    LCD_BLON    <= '1';
 
     SDRAM_CLK <= clk100_p;
 
@@ -189,7 +196,12 @@ begin
             multiplexedadbus_0_wr           => hostifWr,
             multiplexedadbus_0_rd           => hostifRd,
             multiplexedadbus_0_ack          => hostifAck,
-            host_0_irq_irq                  => hostifIrq
+            host_0_irq_irq                  => hostifIrq,
+
+            lcd_data                        => LCD_DQ,
+            lcd_E                           => LCD_E,
+            lcd_RS                          => LCD_RS,
+            lcd_RW                          => LCD_RW
         );
 
     -- Pll Instance

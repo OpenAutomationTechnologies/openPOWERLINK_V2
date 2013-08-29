@@ -233,6 +233,27 @@ void lcd_printNodeId (WORD wNodeId_p)
     lcdl_printText(TextNodeID);
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Print error code to Lcd
+
+The function prints the provided error code to the second line of the display.
+
+\param  error_p     error code
+*/
+//------------------------------------------------------------------------------
+void lcd_printError (tEplKernel error_p)
+{
+    char TextError[LCD_COLUMN+1];
+
+    sprintf(TextError, "ERROR=0x%04X", error_p);
+
+    if(lcdl_changeToLine(2) != 0)
+        return;
+
+    lcdl_printText(TextError);
+}
+
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
 //============================================================================//

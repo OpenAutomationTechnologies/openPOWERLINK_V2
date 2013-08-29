@@ -49,6 +49,14 @@
          type = "String";
       }
    }
+   element lcd.control_slave
+   {
+      datum baseAddress
+      {
+         value = "4096";
+         type = "String";
+      }
+   }
    element epcs_flash_controller_0.epcs_control_port
    {
       datum baseAddress
@@ -102,6 +110,24 @@
       {
          value = "7";
          type = "int";
+      }
+   }
+   element lcd
+   {
+      datum _sortIndex
+      {
+         value = "11";
+         type = "int";
+      }
+      datum megawizard_uipreferences
+      {
+         value = "{output_language=VERILOG, output_directory=C:\\work\\repo\\openPOWERLINK\\fpga\\boards\\altera\\TERASIC_DE2-115\\mn_dual_nios2}";
+         type = "String";
+      }
+      datum sopceditor_expanded
+      {
+         value = "0";
+         type = "boolean";
       }
    }
    element hostinterface_0.pcp
@@ -213,7 +239,7 @@
  <parameter name="projectName" value="ink_de2-115.qpf" />
  <parameter name="sopcBorderPoints" value="false" />
  <parameter name="systemHash" value="1" />
- <parameter name="timeStamp" value="1376411025046" />
+ <parameter name="timeStamp" value="1377073102615" />
  <parameter name="useTestBenchNamingPattern" value="false" />
  <instanceScript></instanceScript>
  <interface name="clk50" internal="clk50.clk_in" type="clock" dir="end" />
@@ -270,6 +296,7 @@
    internal="tri_state_0.out"
    type="conduit"
    dir="end" />
+ <interface name="lcd" internal="lcd.external" type="conduit" dir="end" />
  <module kind="clock_source" version="12.1" enabled="1" name="clk50">
   <parameter name="clockFrequency" value="50000000" />
   <parameter name="clockFrequencyKnown" value="true" />
@@ -439,6 +466,7 @@
   <parameter name="AUTO_CLK_CLOCK_RATE" value="50000000" />
   <parameter name="AUTO_DEVICE_FAMILY" value="Cyclone IV E" />
  </module>
+ <module kind="altera_avalon_lcd_16207" version="12.1" enabled="1" name="lcd" />
  <connection
    kind="reset"
    version="12.1"
@@ -701,4 +729,16 @@
   <parameter name="arbitrationPriority" value="1" />
   <parameter name="baseAddress" value="0x0000" />
  </connection>
+ <connection kind="clock" version="12.1" start="clk50.clk" end="lcd.clk" />
+ <connection
+   kind="avalon"
+   version="12.1"
+   start="host_0.slow_bridge"
+   end="lcd.control_slave">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x1000" />
+ </connection>
+ <connection kind="reset" version="12.1" start="clk50.clk_reset" end="lcd.reset" />
+ <connection kind="reset" version="12.1" start="clk100.clk_reset" end="lcd.reset" />
+ <connection kind="reset" version="12.1" start="clk25.clk_reset" end="lcd.reset" />
 </system>

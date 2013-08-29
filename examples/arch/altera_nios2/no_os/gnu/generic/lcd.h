@@ -67,6 +67,7 @@ void lcd_clear(void);
 void lcd_printText(char* sText_p, UINT line_p);
 void lcd_printNmtState(tNmtState nmtState_p);
 void lcd_printNodeId (WORD wNodeId_p);
+void lcd_printError (tEplKernel error_p);
 
 #ifdef __cplusplus
 }

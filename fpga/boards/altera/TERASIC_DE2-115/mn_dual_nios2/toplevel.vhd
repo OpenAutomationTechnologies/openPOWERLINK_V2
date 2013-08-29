@@ -167,7 +167,11 @@ architecture rtl of toplevel is
             host_0_sdram_0_dq                   : inout std_logic_vector(31 downto 0) := (others => 'X');
             host_0_sdram_0_dqm                  : out   std_logic_vector(3 downto 0);
             host_0_sdram_0_ras_n                : out   std_logic;
-            host_0_sdram_0_we_n                 : out   std_logic
+            host_0_sdram_0_we_n                 : out   std_logic;
+            lcd_data                            : inout std_logic_vector(7 downto 0)  := (others => 'X');
+            lcd_E                               : out   std_logic;
+            lcd_RS                              : out   std_logic;
+            lcd_RW                              : out   std_logic
         );
     end component mn_dual_nios2;
 
@@ -196,6 +200,9 @@ begin
 
     PHY0_GXCLK <= '0';
     PHY1_GXCLK <= '0';
+
+    LCD_ON      <= '1';
+    LCD_BLON    <= '1';
 
     SDRAM_CLK <= clk100_p;
 
@@ -256,7 +263,12 @@ begin
             host_0_sdram_0_dq                   => SDRAM_DQ,
             host_0_sdram_0_dqm                  => SDRAM_DQM,
             host_0_sdram_0_ras_n                => SDRAM_RAS_n,
-            host_0_sdram_0_we_n                 => SDRAM_WE_n
+            host_0_sdram_0_we_n                 => SDRAM_WE_n,
+
+            lcd_data                            => LCD_DQ,
+            lcd_E                               => LCD_E,
+            lcd_RS                              => LCD_RS,
+            lcd_RW                              => LCD_RW
         );
 
     -- Pll Instance
