@@ -40,9 +40,9 @@
 			<location>OPENPOWERLINK_DIR/stack/src/user/api/processimage.c</location>
 		</link>
 		<link>
-			<name>EplApiProcessImageSetup.c</name>
+			<name>processimage-cia302.c</name>
 			<type>1</type>
-			<location>OPENPOWERLINK_DIR/objdicts/CiA302-4_MN/EplApiProcessImageSetup.c</location>
+			<location>OPENPOWERLINK_DIR/stack/src/user/api/processimage-cia302.c</location>
 		</link>
 		<link>
 			<name>cfmu.c</name>

@@ -73,7 +73,7 @@ ${STACKROOT_DIR}/libs/hostif/hostiflib_l.c \
 ${STACKROOT_DIR}/libs/hostif/lfqueue.c \
 ${STACKROOT_DIR}/libs/hostif/linmem.c \
 ${STACKROOT_DIR}/libs/trace/trace-printf.c \
-${STACKROOT_DIR}/objdicts/CiA302-4_MN/EplApiProcessImageSetup.c \
+${STACKROOT_DIR}/stack/src/user/api/processimage-cia302.c \
 ${STACKROOT_DIR}/objdicts/CiA302-4_MN/Objdict.c \
 ${STACKROOT_DIR}/stack/src/arch/altera_nios2/target-nios2.c \
 ${STACKROOT_DIR}/stack/src/arch/altera_nios2/lock-dualprocnoos.c \

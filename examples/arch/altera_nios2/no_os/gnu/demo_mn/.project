@@ -134,9 +134,9 @@
 			<locationURI>OPLK_LOC/libs/trace/trace-printf.c</locationURI>
 		</link>
 		<link>
-			<name>EplApiProcessImageSetup.c</name>
+			<name>processimage-cia302.c</name>
 			<type>1</type>
-			<locationURI>OPLK_LOC/objdicts/CiA302-4_MN/EplApiProcessImageSetup.c</locationURI>
+			<locationURI>OPLK_LOC/stack/src/user/api/processimage-cia302.c</locationURI>
 		</link>
 		<link>
 			<name>Objdict.c</name>
