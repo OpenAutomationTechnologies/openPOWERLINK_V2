@@ -200,6 +200,7 @@
 								</option>
 								<option id="gnu.c.compiler.option.include.paths.467157462" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="../../../../../../../include"/>
+									<listOptionValue builtIn="false" value="../generic"/>
 									<listOptionValue builtIn="false" value="../../../../../../../libs"/>
 									<listOptionValue builtIn="false" value="../../../../../../../libs/hostif"/>
 									<listOptionValue builtIn="false" value="../../../../../../../objdicts/CiA302-4_MN"/>
