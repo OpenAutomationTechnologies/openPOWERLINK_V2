@@ -37,7 +37,7 @@ SET (DEMO_SOURCES
      event.c
      ${LIB_SOURCE_DIR}/console/printlog.c
      ${LIB_SOURCE_DIR}/getopt/getopt.c
-     ${OBJDICT_DIR}/${OBJDICT}/EplApiProcessImageSetup.c
+     ${USER_SOURCE_DIR}/api/processimage-cia302.c
      )
 
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})

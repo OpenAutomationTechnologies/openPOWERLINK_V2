@@ -43,7 +43,7 @@ SET (DEMO_SOURCES
      src/State.cpp
      src/Leds.cpp
      src/NodeState.cpp
-     ${OBJDICT_DIR}/${OBJDICT}/EplApiProcessImageSetup.c
+     ${USER_SOURCE_DIR}/api/processimage-cia302.c
      ${LIB_SOURCE_DIR}/console/printlog.c
      )
 
