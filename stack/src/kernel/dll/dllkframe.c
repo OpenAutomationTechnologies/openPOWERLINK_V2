@@ -977,8 +977,8 @@ driver.
                             faster search for PReq buffers. The function stores
                             the handle to the new frame buffer at this location.
 \param  pFrameSize_p        Pointer to the size of the frame. The function stores
-                            the size of the new frame at this locaten. It is
-                            always equal or larget than the requested size. If
+                            the size of the new frame at this location. It is
+                            always equal or larger than the requested size. If
                             that is not possible an error will be generated.
 \param  msgType_p           The message type of the frame.
 \param  serviceId_p         The service ID in case of an ASnd frame. Otherwise
