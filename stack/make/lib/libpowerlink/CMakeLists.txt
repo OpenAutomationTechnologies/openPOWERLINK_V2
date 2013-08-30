@@ -42,6 +42,7 @@ IF(CFG_POWERLINK_MN)
     SET (LIB_SOURCES
          ${LIB_SOURCES}
          ${USER_SOURCE_DIR}/obd/obdcdc.c
+         ${USER_SOURCE_DIR}/api/processimage-cia302.c
          )
 
     SET (LIB_USER_SOURCES

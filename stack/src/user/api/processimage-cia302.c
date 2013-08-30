@@ -1,312 +1,201 @@
-/****************************************************************************
+/**
+********************************************************************************
+\file   processimagesetup-cia302.c
 
-  (c) SYSTEC electronic GmbH, D-07973 Greiz, August-Bebel-Str. 29
-      www.systec-electronic.com
+\brief  Process image setup function for CiA302-4
 
-  Project:      openPOWERLINK
+This file contains the implementation of the process image setup functions
+for the CiA profile 302-4.
 
-  Description:  source file for setting up the process image
+\ingroup module_api
+*******************************************************************************/
 
-  License:
+/*------------------------------------------------------------------------------
+Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2013, SYSTEC electronic GmbH
+All rights reserved.
 
-    Redistribution and use in source and binary forms, with or without
-    modification, are permitted provided that the following conditions
-    are met:
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+    * Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above copyright
+      notice, this list of conditions and the following disclaimer in the
+      documentation and/or other materials provided with the distribution.
+    * Neither the name of the copyright holders nor the
+      names of its contributors may be used to endorse or promote products
+      derived from this software without specific prior written permission.
 
-    1. Redistributions of source code must retain the above copyright
-       notice, this list of conditions and the following disclaimer.
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL COPYRIGHT HOLDERS BE LIABLE FOR ANY
+DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+------------------------------------------------------------------------------*/
 
-    2. Redistributions in binary form must reproduce the above copyright
-       notice, this list of conditions and the following disclaimer in the
-       documentation and/or other materials provided with the distribution.
+//------------------------------------------------------------------------------
+// includes
+//------------------------------------------------------------------------------
+#include <Epl.h>
 
-    3. Neither the name of SYSTEC electronic GmbH nor the names of its
-       contributors may be used to endorse or promote products derived
-       from this software without prior written permission. For written
-       permission, please contact info@systec-electronic.com.
+//============================================================================//
+//            G L O B A L   D E F I N I T I O N S                             //
+//============================================================================//
 
-    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-    LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-    FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-    COPYRIGHT HOLDERS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-    INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-    BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-    LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-    CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-    LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-    ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-    POSSIBILITY OF SUCH DAMAGE.
-
-    Severability Clause:
-
-        If a provision of this License is or becomes illegal, invalid or
-        unenforceable in any jurisdiction, that shall not affect:
-        1. the validity or enforceability in that jurisdiction of any other
-           provision of this License; or
-        2. the validity or enforceability in other jurisdictions of that or
-           any other provision of this License.
-
-  -------------------------------------------------------------------------
-
-                $RCSfile$
-
-                $Author$
-
-                $Revision$  $Date$
-
-                $State$
-
-                Build Environment:
-                    GCC V3.4
-
-  -------------------------------------------------------------------------
-
-  Revision History:
-
-  2006/10/10 d.k.:   start of the implementation, version 1.00
-
-****************************************************************************/
-
-#include "Epl.h"
-
-
-/***************************************************************************/
-/*                                                                         */
-/*                                                                         */
-/*          G L O B A L   D E F I N I T I O N S                            */
-/*                                                                         */
-/*                                                                         */
-/***************************************************************************/
-
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // const defines
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
-#define EPLAPI_PI_SUBINDEX_COUNT    252
+//------------------------------------------------------------------------------
+// module global vars
+//------------------------------------------------------------------------------
 
-//---------------------------------------------------------------------------
-// local types
-//---------------------------------------------------------------------------
-
-//---------------------------------------------------------------------------
-// modul globale vars
-//---------------------------------------------------------------------------
-
-//---------------------------------------------------------------------------
-// local function prototypes
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+// global function prototypes
+//------------------------------------------------------------------------------
 
 
-/***************************************************************************/
-/*                                                                         */
-/*                                                                         */
-/*          C L A S S  EplApi                                              */
-/*                                                                         */
-/*                                                                         */
-/***************************************************************************/
-//
-// Description:
-//
-//
-/***************************************************************************/
+//============================================================================//
+//            P R I V A T E   D E F I N I T I O N S                           //
+//============================================================================//
 
-
-//=========================================================================//
-//                                                                         //
-//          P R I V A T E   D E F I N I T I O N S                          //
-//                                                                         //
-//=========================================================================//
-
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // const defines
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+#define PI_SUBINDEX_COUNT    252
 
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // local types
-//---------------------------------------------------------------------------
-
-//---------------------------------------------------------------------------
-// local vars
-//---------------------------------------------------------------------------
-
-//---------------------------------------------------------------------------
-// local function prototypes
-//---------------------------------------------------------------------------
-
-static tEplKernel EplApiProcessImageLinkRange(
-    unsigned int    uiObjIndexStart_p,
-    unsigned int    uiObjIndexEnd_p,
-    unsigned int    uiOffsetPI_p,
-    BOOL            fOutputPI_p,
-    tEplObdSize     EntrySize_p,
-    unsigned int    uiSubindexCountPerIndex_p);
-
-
-//=========================================================================//
-//                                                                         //
-//          P U B L I C   F U N C T I O N S                                //
-//                                                                         //
-//=========================================================================//
-
-
-//---------------------------------------------------------------------------
-//
-// Function:    oplk_setupProcessImage()
-//
-// Description: sets up static process image
-//
-// Parameters:  (none)
-//
-// Returns:     tEplKernel              = error code
-//
-//
-// State:
-//
-//---------------------------------------------------------------------------
-
-tEplKernel PUBLIC oplk_setupProcessImage(void)
+//------------------------------------------------------------------------------
+typedef struct
 {
-tEplKernel      Ret = kEplSuccessful;
+    UINT            objIndexStart;
+    UINT            objIndexEnd;
+    UINT            offsetPI;
+    BOOL            fOutputPI;
+    tEplObdSize     entrySize;
+    UINT            subindexCountPerIndex;
+} tProcessImageLink;
 
-    Ret = EplApiProcessImageLinkRange(0xA000, 0xA00F, 0, FALSE, 1, EPLAPI_PI_SUBINDEX_COUNT);
-    if (Ret != kEplSuccessful)
+//------------------------------------------------------------------------------
+// local vars
+//------------------------------------------------------------------------------
+
+tProcessImageLink processImageLink_l[] =
+{
+//  IndexStart  IndexEnd  OffsetPI OutputPI  EntrySize  SubindexCount
+    { 0xA000,   0xA00F,     0,      FALSE,      1,      PI_SUBINDEX_COUNT },
+    { 0xA040,   0xA04F,     0,      FALSE,      1,      PI_SUBINDEX_COUNT },
+    { 0xA0C0,   0xA0C7,     0,      FALSE,      2,      PI_SUBINDEX_COUNT },
+    { 0xA100,   0xA107,     0,      FALSE,      2,      PI_SUBINDEX_COUNT },
+    { 0xA1C0,   0xA1C3,     0,      FALSE,      4,      PI_SUBINDEX_COUNT },
+    { 0xA200,   0xA203,     0,      FALSE,      4,      PI_SUBINDEX_COUNT },
+    { 0xA480,   0xA48F,     0,      TRUE,       1,      PI_SUBINDEX_COUNT },
+    { 0xA4C0,   0xA4CF,     0,      TRUE,       1,      PI_SUBINDEX_COUNT },
+    { 0xA540,   0xA547,     0,      TRUE,       2,      PI_SUBINDEX_COUNT },
+    { 0xA580,   0xA587,     0,      TRUE,       2,      PI_SUBINDEX_COUNT },
+    { 0xA640,   0xA643,     0,      TRUE,       4,      PI_SUBINDEX_COUNT },
+    { 0xA680,   0xA683,     0,      TRUE,       4,      PI_SUBINDEX_COUNT },
+};
+
+//------------------------------------------------------------------------------
+// local function prototypes
+//------------------------------------------------------------------------------
+static tEplKernel linkProcessImageRange(UINT objIndexStart_p, UINT objIndexEnd_p,
+                                        UINT offsetPI_p, BOOL fOutputPI_p, tEplObdSize entrySize_p,
+                                        UINT subindexCountPerIndex_p);
+
+//============================================================================//
+//            P U B L I C   F U N C T I O N S                                 //
+//============================================================================//
+
+//------------------------------------------------------------------------------
+/**
+\brief    Setup process image
+
+The function sets up a process image according to the CiA profile 302_4.
+
+\return The function returns a tEplKernel error code.
+
+\ingroup module_api
+*/
+//------------------------------------------------------------------------------
+tEplKernel oplk_setupProcessImage(void)
+{
+    tEplKernel                  ret = kEplSuccessful;
+    size_t                      i;
+    tProcessImageLink*          pLink;
+
+    pLink = processImageLink_l;
+
+    for (i = 0; i < tabentries(processImageLink_l); i++, pLink++)
     {
-        goto Exit;
+        ret = linkProcessImageRange(pLink->objIndexStart, pLink->objIndexEnd,
+                                    pLink->offsetPI, pLink->fOutputPI,
+                                    pLink->entrySize, pLink->subindexCountPerIndex);
+        if (ret != kEplSuccessful)
+            break;
     }
 
-    Ret = EplApiProcessImageLinkRange(0xA040, 0xA04F, 0, FALSE, 1, EPLAPI_PI_SUBINDEX_COUNT);
-    if (Ret != kEplSuccessful)
-    {
-        goto Exit;
-    }
-
-    Ret = EplApiProcessImageLinkRange(0xA0C0, 0xA0C7, 0, FALSE, 2, EPLAPI_PI_SUBINDEX_COUNT);
-    if (Ret != kEplSuccessful)
-    {
-        goto Exit;
-    }
-
-    Ret = EplApiProcessImageLinkRange(0xA100, 0xA107, 0, FALSE, 2, EPLAPI_PI_SUBINDEX_COUNT);
-    if (Ret != kEplSuccessful)
-    {
-        goto Exit;
-    }
-
-    Ret = EplApiProcessImageLinkRange(0xA1C0, 0xA1C3, 0, FALSE, 4, EPLAPI_PI_SUBINDEX_COUNT);
-    if (Ret != kEplSuccessful)
-    {
-        goto Exit;
-    }
-
-    Ret = EplApiProcessImageLinkRange(0xA200, 0xA203, 0, FALSE, 4, EPLAPI_PI_SUBINDEX_COUNT);
-    if (Ret != kEplSuccessful)
-    {
-        goto Exit;
-    }
-
-    Ret = EplApiProcessImageLinkRange(0xA480, 0xA48F, 0, TRUE, 1, EPLAPI_PI_SUBINDEX_COUNT);
-    if (Ret != kEplSuccessful)
-    {
-        goto Exit;
-    }
-
-    Ret = EplApiProcessImageLinkRange(0xA4C0, 0xA4CF, 0, TRUE, 1, EPLAPI_PI_SUBINDEX_COUNT);
-    if (Ret != kEplSuccessful)
-    {
-        goto Exit;
-    }
-
-    Ret = EplApiProcessImageLinkRange(0xA540, 0xA547, 0, TRUE, 2, EPLAPI_PI_SUBINDEX_COUNT);
-    if (Ret != kEplSuccessful)
-    {
-        goto Exit;
-    }
-
-    Ret = EplApiProcessImageLinkRange(0xA580, 0xA587, 0, TRUE, 2, EPLAPI_PI_SUBINDEX_COUNT);
-    if (Ret != kEplSuccessful)
-    {
-        goto Exit;
-    }
-
-    Ret = EplApiProcessImageLinkRange(0xA640, 0xA643, 0, TRUE, 4, EPLAPI_PI_SUBINDEX_COUNT);
-    if (Ret != kEplSuccessful)
-    {
-        goto Exit;
-    }
-
-    Ret = EplApiProcessImageLinkRange(0xA680, 0xA683, 0, TRUE, 4, EPLAPI_PI_SUBINDEX_COUNT);
-    if (Ret != kEplSuccessful)
-    {
-        goto Exit;
-    }
-
-Exit:
-    return Ret;
+    return ret;
 }
 
+//============================================================================//
+//            P R I V A T E   F U N C T I O N S                               //
+//============================================================================//
+/// \name Private Functions
+/// \{
 
+//------------------------------------------------------------------------------
+/**
+\brief    Link process image range
 
-//=========================================================================//
-//                                                                         //
-//          P R I V A T E   F U N C T I O N S                              //
-//                                                                         //
-//=========================================================================//
+The function links a range of variables to the object dictionary.
 
-//---------------------------------------------------------------------------
-//
-// Function:    oplk_setupProcessImage()
-//
-// Description: sets up static process image
-//
-// Parameters:  (none)
-//
-// Returns:     tEplKernel              = error code
-//
-//
-// State:
-//
-//---------------------------------------------------------------------------
+\param  objIndexStart_p     Start index of range to link.
+\param  objIndexEnd_P       End index of range to link.
+\param  offsetPi_p          Offset of range in the process image.
+\param  fOutputPI_p         Determines if input image or output image should
+                            be used: TRUE = output image, FALSE = imput image
+\param  entrySize_p         The size of one process variable.
+\param  subindexCountPerIndex_p Number of subindexes per index to be linked.
 
-static tEplKernel EplApiProcessImageLinkRange(
-    unsigned int    uiObjIndexStart_p,
-    unsigned int    uiObjIndexEnd_p,
-    unsigned int    uiOffsetPI_p,
-    BOOL            fOutputPI_p,
-    tEplObdSize     EntrySize_p,
-    unsigned int    uiSubindexCountPerIndex_p)
+\return The function returns a tEplKernel error code.
+*/
+//------------------------------------------------------------------------------
+static tEplKernel linkProcessImageRange(UINT objIndexStart_p, UINT objIndexEnd_p,
+                                        UINT offsetPI_p, BOOL fOutputPI_p,
+                                        tEplObdSize entrySize_p, UINT subindexCountPerIndex_p)
 {
-tEplKernel      Ret = kEplSuccessful;
-unsigned int    uiVarEntries;
+    tEplKernel      ret = kEplSuccessful;
+    UINT            varEntries;
 
-    for (; uiObjIndexStart_p <= uiObjIndexEnd_p;
-        uiObjIndexStart_p++, uiOffsetPI_p += EntrySize_p * uiSubindexCountPerIndex_p)
+    for (; objIndexStart_p <= objIndexEnd_p; objIndexStart_p++,
+                                             offsetPI_p += entrySize_p * subindexCountPerIndex_p)
     {
-        uiVarEntries = uiSubindexCountPerIndex_p;
-        Ret = oplk_linkProcessImageObject(
-                        uiObjIndexStart_p,
-                        1,
-                        uiOffsetPI_p,
-                        fOutputPI_p,
-                        EntrySize_p,
-                        &uiVarEntries);
-        if (((Ret == kEplSuccessful) && (uiVarEntries < uiSubindexCountPerIndex_p))
-            || (Ret == kEplApiPISizeExceeded))
+        varEntries = subindexCountPerIndex_p;
+        ret = oplk_linkProcessImageObject(objIndexStart_p, 1, offsetPI_p,
+                                          fOutputPI_p, entrySize_p, &varEntries);
+        if (((ret == kEplSuccessful) && (varEntries < subindexCountPerIndex_p)) ||
+            (ret == kEplApiPISizeExceeded))
         {
-            Ret = kEplSuccessful;
+            ret = kEplSuccessful;
             break;
         }
-        if (Ret != kEplSuccessful)
+        if (ret != kEplSuccessful)
         {
-            goto Exit;
+            TRACE("oplk_linkProcessImageObject returned: %xh for index %xh\n", ret, objIndexStart_p);
+            break;
         }
     }
 
-Exit:
-    return Ret;
+    return ret;
 }
 
-
-
-// EOF
+/// \}
 
