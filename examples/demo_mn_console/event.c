@@ -267,26 +267,20 @@ static tEplKernel processStateChangeEvent(tEplApiEventType EventType_p,
                    EplGetNmtEventStr(pNmtStateChange->nmtEvent));
             break;
 
-        case kNmtCsNotActive:
-        case kNmtMsNotActive:
         case kNmtGsInitialising:
-        case kNmtGsResetApplication:
-        case kNmtCsPreOperational1:
-        case kNmtMsPreOperational1:
-        case kNmtCsPreOperational2:
-        case kNmtMsPreOperational2:
-        case kNmtCsReadyToOperate:
+        case kNmtGsResetApplication:        // Implement
+        case kNmtMsNotActive:               // handling of
+        case kNmtMsPreOperational1:         // different
+        case kNmtMsPreOperational2:         // states here
         case kNmtMsReadyToOperate:
-        case kNmtCsBasicEthernet:
-        case kNmtMsBasicEthernet:
+        case kNmtMsOperational:
+        case kNmtMsBasicEthernet:           // no break
+
+        default:
             console_printlog("StateChangeEvent(0x%X) originating event = 0x%X (%s)\n",
                    pNmtStateChange->newNmtState,
                    pNmtStateChange->nmtEvent,
                    EplGetNmtEventStr(pNmtStateChange->nmtEvent));
-
-            break;
-
-        default:
             break;
     }
 

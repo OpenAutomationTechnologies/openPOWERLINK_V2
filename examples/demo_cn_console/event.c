@@ -201,16 +201,19 @@ static tEplKernel processStateChangeEvent(tEplApiEventType EventType_p,
         case kNmtGsResetApplication:
         case kNmtGsResetConfiguration:
         case kNmtGsResetCommunication:
-        case kNmtCsPreOperational1:
-        case kNmtCsPreOperational2:
+        case kNmtCsNotActive:               // Implement
+        case kNmtCsPreOperational1:         // handling of
+        case kNmtCsStopped:                 // different
+        case kNmtCsPreOperational2:         // states here
+        case kNmtCsReadyToOperate:
         case kNmtCsOperational:
+        case kNmtCsBasicEthernet:           // no break;
+
+        default:
             console_printlog("StateChangeEvent(0x%X) originating event = 0x%X (%s)\n",
                    pNmtStateChange->newNmtState,
                    pNmtStateChange->nmtEvent,
                    EplGetNmtEventStr(pNmtStateChange->nmtEvent));
-            break;
-
-        default:
             break;
     }
 
