@@ -61,7 +61,7 @@ extern "C" {
 
 tEplKernel pdokcal_init(void);
 tEplKernel pdokcal_exit(void);
-tEplKernel pdokcal_process(tEplEvent * pEvent_p);
+tEplKernel pdokcal_process(tEplEvent * pEvent_p) SECTION_PDOKCAL_PROCESS;
 
 // PDO memory functions
 tEplKernel pdokcal_openMem(void);
