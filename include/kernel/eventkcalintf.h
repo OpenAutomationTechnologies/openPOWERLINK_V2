@@ -66,7 +66,7 @@ extern "C" {
 /* host interface buffer event interface */
 tEplKernel eventkcal_initQueueHostif(tEventQueue eventQueue_p);
 tEplKernel eventkcal_exitQueueHostif (tEventQueue eventQueue_p);
-tEplKernel eventkcal_postEventHostif (tEventQueue eventQueue_p, tEplEvent *pEvent_p);
+tEplKernel eventkcal_postEventHostif (tEventQueue eventQueue_p, tEplEvent *pEvent_p) SECTION_EVENTKCAL_HOSTIF_POST;
 tEplKernel eventkcal_processEventHostif(tEventQueue eventQueue_p) SECTION_EVENTKCAL_HOSTIF_PROCESS;
 tEplKernel eventkcal_getEventHostif(tEventQueue eventQueue_p, BYTE* pDataBuffer_p, size_t* pReadSize_p);
 UINT       eventkcal_getEventCountHostif(tEventQueue eventQueue_p);
