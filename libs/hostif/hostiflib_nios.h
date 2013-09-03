@@ -120,6 +120,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define HOSTIF_IRQ_DISABLE()        \
     alt_ic_irq_disable(HOSTIF_IRQ_IC_ID, HOSTIF_IRQ)
 
+#define HOSTIF_INLINE inline
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------

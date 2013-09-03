@@ -217,27 +217,27 @@ typedef struct sQueue
 //------------------------------------------------------------------------------
 static void freePtr(void *p);
 
-static void getHwQueueBufferHeader (tQueue *pQueue_p);
-static tQueueState getHwQueueState (tQueue *pQueue_p);
-static void setHwQueueState (tQueue *pQueue_p, tQueueState State_p);
-static void setHwQueueWrite (tQueue *pQueue_p);
-static void setHwQueueRead (tQueue *pQueue_p);
-static void resetHwQueue (tQueue *pQueue_p);
+HOSTIF_INLINE static void getHwQueueBufferHeader (tQueue *pQueue_p);
+HOSTIF_INLINE static tQueueState getHwQueueState (tQueue *pQueue_p);
+HOSTIF_INLINE static void setHwQueueState (tQueue *pQueue_p, tQueueState State_p);
+HOSTIF_INLINE static void setHwQueueWrite (tQueue *pQueue_p);
+HOSTIF_INLINE static void setHwQueueRead (tQueue *pQueue_p);
+HOSTIF_INLINE static void resetHwQueue (tQueue *pQueue_p);
 
-static UINT16 getOffsetInCirBuffer (tQueue *pQueue_p, UINT16 index_p);
+HOSTIF_INLINE static UINT16 getOffsetInCirBuffer (tQueue *pQueue_p, UINT16 index_p);
 
-static BOOL checkMagicValid (tEntryHeader *pHeader_p);
-static BOOL checkPayloadFitable (tQueue *pQueue_p, UINT16 payloadSize_p);
-static BOOL checkQueueEmpty (tQueue *pQueue_p);
+HOSTIF_INLINE static BOOL checkMagicValid (tEntryHeader *pHeader_p);
+HOSTIF_INLINE static BOOL checkPayloadFitable (tQueue *pQueue_p, UINT16 payloadSize_p);
+HOSTIF_INLINE static BOOL checkQueueEmpty (tQueue *pQueue_p);
 
-static void writeHeader (tQueue *pQueue_p, tEntryHeader *pHeader_p);
-static void writeData (tQueue *pQueue_p, UINT8 *pData_p, UINT16 size_p);
-static void writeCirMemory (tQueue *pQueue_p, UINT16 offset_p,
+HOSTIF_INLINE static void writeHeader (tQueue *pQueue_p, tEntryHeader *pHeader_p);
+HOSTIF_INLINE static void writeData (tQueue *pQueue_p, UINT8 *pData_p, UINT16 size_p);
+HOSTIF_INLINE static void writeCirMemory (tQueue *pQueue_p, UINT16 offset_p,
         UINT8 *pSrc_p, UINT16 srcSpan_p);
 
-static void readHeader (tQueue *pQueue_p, tEntryHeader *pHeader_p);
-static void readData (tQueue *pQueue_p, UINT8 *pData_p, UINT16 size_p);
-static void readCirMemory (tQueue *pQueue_p, UINT16 offset_p,
+HOSTIF_INLINE static void readHeader (tQueue *pQueue_p, tEntryHeader *pHeader_p);
+HOSTIF_INLINE static void readData (tQueue *pQueue_p, UINT8 *pData_p, UINT16 size_p);
+HOSTIF_INLINE static void readCirMemory (tQueue *pQueue_p, UINT16 offset_p,
         UINT8 *pDst_p, UINT16 dstSpan_p);
 
 //============================================================================//
