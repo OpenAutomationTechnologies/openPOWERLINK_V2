@@ -45,6 +45,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <kernel/eventk.h>
 
+#ifdef CONFIG_INCLUDE_NMT_MN
+#include <circbuffer.h>
+#endif
+
 #if (EPL_DLL_PRES_CHAINING_MN != FALSE) && (CONFIG_DLLCAL_QUEUE == EPL_QUEUE_DIRECT)
 #error "DLLCal module does not support direct calls with PRC MN"
 #endif
@@ -107,10 +111,11 @@ typedef struct
     volatile UINT           writeStatusReq;
     volatile UINT           readStatusReq;
 
-    UINT                    aQueueCnRequests[254 * 2];
-    // first 254 entries represent the generic requests of the corresponding node
-    // second 254 entries represent the NMT requests of the corresponding node
-    UINT                    nextQueueCnRequest;
+    tCircBufInstance*       pQueueCnRequestNmt;
+    UINT                    aCnRequestCntNmt[254];
+    tCircBufInstance*       pQueueCnRequestGen;
+    UINT                    aCnRequestCntGen[254];
+
     UINT                    nextRequestQueue;
 #endif
 } tDllkCalInstance;
@@ -155,6 +160,9 @@ This function initializes the kernel DLL CAL module.
 tEplKernel dllkcal_init(void)
 {
     tEplKernel      ret = kEplSuccessful;
+#ifdef CONFIG_INCLUDE_NMT_MN
+    tCircBufError   circErr;
+#endif
 
     // reset instance structure
     EPL_MEMSET(&instance_l, 0, sizeof (instance_l));
@@ -191,6 +199,24 @@ tEplKernel dllkcal_init(void)
     }
 #endif
 
+#ifdef CONFIG_INCLUDE_NMT_MN
+    circErr = circbuf_alloc(CIRCBUF_DLLCAL_CN_REQ_NMT, DLLCAL_SIZE_CIRCBUF_CN_REQ_NMT,
+            &instance_l.pQueueCnRequestNmt);
+    if(circErr != kCircBufOk)
+    {
+        EPL_DBGLVL_ERROR_TRACE("%s() Allocate CIRCBUF_ASYNC_SCHED_NMT failed\n", __func__);
+        goto Exit;
+    }
+
+    circErr = circbuf_alloc(CIRCBUF_DLLCAL_CN_REQ_GEN, DLLCAL_SIZE_CIRCBUF_CN_REQ_GEN,
+            &instance_l.pQueueCnRequestGen);
+    if(circErr != kCircBufOk)
+    {
+        EPL_DBGLVL_ERROR_TRACE("%s() Allocate CIRCBUF_ASYNC_SCHED_GEN failed\n", __func__);
+        goto Exit;
+    }
+#endif
+
 Exit:
     return ret;
 }
@@ -209,6 +235,11 @@ This function cleans up the kernel DLL CAL module.
 tEplKernel dllkcal_exit(void)
 {
     tEplKernel      ret = kEplSuccessful;
+
+#ifdef CONFIG_INCLUDE_NMT_MN
+    circbuf_free(instance_l.pQueueCnRequestGen);
+    circbuf_free(instance_l.pQueueCnRequestNmt);
+#endif
 
     instance_l.pTxNmtFuncs->pfnDelInstance(instance_l.dllCalQueueTxNmt);
     instance_l.pTxGenFuncs->pfnDelInstance(instance_l.dllCalQueueTxGen);
@@ -595,12 +626,14 @@ tEplKernel dllkcal_clearAsyncQueues(void)
 #endif
 
     // clear MN asynchronous queues
-    instance_l.nextQueueCnRequest = 0;
     instance_l.nextRequestQueue = 0;
     instance_l.readIdentReq = 0;
     instance_l.writeIdentReq = 0;
     instance_l.readStatusReq = 0;
     instance_l.writeStatusReq = 0;
+
+    circbuf_reset(instance_l.pQueueCnRequestGen);
+    circbuf_reset(instance_l.pQueueCnRequestNmt);
 
     return ret;
 }
@@ -799,38 +832,39 @@ tEplKernel dllkcal_setAsyncPendingRequests(UINT nodeId_p,
                                            tDllAsyncReqPriority asyncReqPrio_p,
                                            UINT count_p)
 {
-    tEplKernel  ret = kEplSuccessful;
+    tEplKernel          ret = kEplSuccessful;
+    tCircBufError       err;
+    UINT*               pLocalRequestCnt;
+    tCircBufInstance*   pTargetQueue;
 
-    // add node to appropriate request queue
-    switch (asyncReqPrio_p)
+    // get local request count for the node and the target queue
+    switch(asyncReqPrio_p)
     {
         case kDllAsyncReqPrioNmt:
-        {
-            nodeId_p--;
-            if (nodeId_p >= (tabentries (instance_l.aQueueCnRequests) / 2))
-            {
-                ret = kEplDllInvalidParam;
-                goto Exit;
-            }
-            nodeId_p += tabentries (instance_l.aQueueCnRequests) / 2;
-            instance_l.aQueueCnRequests[nodeId_p] = count_p;
+            pLocalRequestCnt = &instance_l.aCnRequestCntNmt[nodeId_p-1];
+            pTargetQueue = instance_l.pQueueCnRequestNmt;
             break;
-        }
-
         default:
-        {
-            nodeId_p--;
-            if (nodeId_p >= (tabentries (instance_l.aQueueCnRequests) / 2))
-            {
-                ret = kEplDllInvalidParam;
-                goto Exit;
-            }
-            instance_l.aQueueCnRequests[nodeId_p] = count_p;
+            pLocalRequestCnt = &instance_l.aCnRequestCntGen[nodeId_p-1];
+            pTargetQueue = instance_l.pQueueCnRequestGen;
             break;
-        }
     }
 
-Exit:
+    // compare the node request count with the locally stored one
+    if(*pLocalRequestCnt < count_p)
+    {
+        // The node has added some requests, but post only one for fair
+        // scheduling among the other nodes.
+        err = circbuf_writeData(pTargetQueue, &nodeId_p, sizeof(nodeId_p));
+        if(err == kCircBufOk)
+            (*pLocalRequestCnt)++; // increment locally only by successful post
+    }
+    else
+    {
+        // the node's request count is equal or less the local one
+        *pLocalRequestCnt = count_p;
+    }
+
     return ret;
 }
 #endif //(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
@@ -857,28 +891,32 @@ The function returns the next CN generic request.
 //------------------------------------------------------------------------------
 static BOOL getCnGenRequest(tDllReqServiceId* pReqServiceId_p, UINT* pNodeId_p)
 {
-    for (;instance_l.nextQueueCnRequest < (tabentries (instance_l.aQueueCnRequests) / 2);
-        instance_l.nextQueueCnRequest++)
-    {
-        if (instance_l.aQueueCnRequests[instance_l.nextQueueCnRequest] > 0)
-        {   // non empty queue found
-            // remove one request from queue
-            instance_l.aQueueCnRequests[instance_l.nextQueueCnRequest]--;
-            *pNodeId_p = instance_l.nextQueueCnRequest + 1;
-            *pReqServiceId_p = kDllReqServiceUnspecified;
-            instance_l.nextQueueCnRequest++;
-            if (instance_l.nextQueueCnRequest >= (tabentries (instance_l.aQueueCnRequests) / 2))
-            {   // last node reached
-                // continue with CnNmtReq queue at next SoA
-                instance_l.nextRequestQueue = 1;
-            }
-            return TRUE;
-        }
-    }
-    // all CnGenReq queues are empty -> continue with CnNmtReq queue
+    tCircBufError   err;
+    UINT            rxNodeId;
+    size_t          size = sizeof(rxNodeId);
+
+    // next queue will be CnNmtReq queue
     instance_l.nextRequestQueue = 1;
 
-    return FALSE;
+    err = circbuf_readData(instance_l.pQueueCnRequestGen, &rxNodeId, size, &size);
+
+    switch(err)
+    {
+        case kCircBufOk:
+            if(instance_l.aCnRequestCntGen[rxNodeId-1] > 0)
+            {
+                *pNodeId_p = rxNodeId;
+                *pReqServiceId_p = kDllReqServiceUnspecified;
+
+                return TRUE;
+            }
+            // fall-trough
+
+        case kCircBufNoReadableData:
+        default:
+            // an empty or faulty queue has no requests
+            return FALSE;
+    }
 }
 
 //------------------------------------------------------------------------------
@@ -898,32 +936,32 @@ The function returns the next CN NMT request.
 //------------------------------------------------------------------------------
 static BOOL getCnNmtRequest(tDllReqServiceId* pReqServiceId_p, UINT* pNodeId_p)
 {
-    for (;instance_l.nextQueueCnRequest < tabentries (instance_l.aQueueCnRequests);
-        instance_l.nextQueueCnRequest++)
-    {
-        if (instance_l.aQueueCnRequests[instance_l.nextQueueCnRequest] > 0)
-        {   // non empty queue found
-            // remove one request from queue
-            instance_l.aQueueCnRequests[instance_l.nextQueueCnRequest]--;
-            *pNodeId_p = instance_l.nextQueueCnRequest + 1 - (tabentries (instance_l.aQueueCnRequests) / 2);
-            *pReqServiceId_p = kDllReqServiceNmtRequest;
-            instance_l.nextQueueCnRequest++;
-            if (instance_l.nextQueueCnRequest > tabentries (instance_l.aQueueCnRequests))
-            {   // last node reached
-                // restart CnGenReq queue
-                instance_l.nextQueueCnRequest = 0;
-                // continue with MnGenReq queue at next SoA
-                instance_l.nextRequestQueue = 2;
-            }
-            return TRUE;
-        }
-    }
-    // restart CnGenReq queue
-    instance_l.nextQueueCnRequest = 0;
-    // all CnNmtReq queues are empty -> continue with MnGenReq queue
+    tCircBufError   err;
+    UINT            rxNodeId;
+    size_t          size = sizeof(rxNodeId);
+
+    // next queue will be MnGenReq queue
     instance_l.nextRequestQueue = 2;
 
-    return FALSE;
+    err = circbuf_readData(instance_l.pQueueCnRequestNmt, &rxNodeId, size, &size);
+
+    switch(err)
+    {
+        case kCircBufOk:
+            if(instance_l.aCnRequestCntNmt[rxNodeId-1] > 0)
+            {
+                *pNodeId_p = rxNodeId;
+                *pReqServiceId_p = kDllReqServiceNmtRequest;
+
+                return TRUE;
+            }
+            // fall-trough
+
+        case kCircBufNoReadableData:
+        default:
+            // an empty or faulty queue has no requests
+            return FALSE;
+    }
 }
 
 //------------------------------------------------------------------------------

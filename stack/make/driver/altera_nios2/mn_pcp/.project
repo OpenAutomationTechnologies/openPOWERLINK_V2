@@ -244,6 +244,16 @@
 			<locationURI>OPLK_LOC/libs/omethlib/omethlibint.c</locationURI>
 		</link>
 		<link>
+			<name>circbuffer.c</name>
+			<type>1</type>
+			<locationURI>OPLK_LOC/libs/circbuf/circbuffer.c</locationURI>
+		</link>
+		<link>
+			<name>circbuf-noos.c</name>
+			<type>1</type>
+			<locationURI>OPLK_LOC/libs/circbuf/circbuf-noos.c</locationURI>
+		</link>
+		<link>
 			<name>pdok.c</name>
 			<type>1</type>
 			<locationURI>OPLK_LOC/stack/src/kernel/pdo/pdok.c</locationURI>
