@@ -370,7 +370,7 @@ static tHostifReturn allocateDynBuffers (tHostif *pHostif_p);
 static tHostifReturn freeDynBuffers (tHostif *pHostif_p);
 static tHostifReturn setDynBuffers (tHostif *pHostif_p);
 static tHostifReturn controlBridge (tHostif *pHostif_p, BOOL fEnable_p);
-static BOOL getBridgeEnabled (tHostif *pHostif_p);
+HOSTIF_INLINE static BOOL getBridgeEnabled (tHostif *pHostif_p);
 static tHostifReturn controlIrqMaster (tHostif *pHostif_p, BOOL fEnable_p);
 
 static tHostifReturn queueConfig (tHostif *pHostif_p,
