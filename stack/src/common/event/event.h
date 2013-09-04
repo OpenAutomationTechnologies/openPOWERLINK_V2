@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   event.h
+\file   event/event.h
 
 \brief  Internal header file for event module
 

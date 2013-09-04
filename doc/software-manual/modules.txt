@@ -138,8 +138,7 @@ abstraction layer (PDO CAL) is used.
 The user PDO CAL module provides the communication abstraction layer (CAL)
 for the user PDO module. The CAL module provides a communication mechanism
 for the user layer PDO module. Multiple implementations for this communication
-could be implemented. Currently the following implementations are available:
-\li Shared Buffers - \ref pdoucal-shb.c
+could be implemented.
 
 \see module_pdou
 \see module_pdok

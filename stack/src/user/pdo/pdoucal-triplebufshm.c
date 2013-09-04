@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   pdoucal-tripleBufShm.c
+\file   pdoucal-triplebufshm.c
 
 \brief  Shared memory triple buffer implementation for user PDO CAL module
 
@@ -101,7 +101,7 @@ static BYTE*                pTripleBuf_l[3];
 
 The function initializes the memory needed to transfer PDOs.
 
-\param  pPdoChannels            Pointer to PDO channel configuration.
+\param  pPdoChannels_p          Pointer to PDO channel configuration.
 \param  rxPdoMemSize_p          Size of RX PDO buffers.
 \param  txPdoMemSize_p          Size of TX PDO buffers.
 
@@ -250,7 +250,7 @@ tEplKernel pdoucal_getRxPdo(BYTE** ppPdo_p, UINT channelId_p, WORD pdoSize_p)
     OPLK_ATOMIC_T    readBuf;
 
     UNUSED_PARAMETER(pdoSize_p);
-	
+
     if (pPdoMem_l->rxChannelInfo[channelId_p].newData)
     {
         readBuf = pPdoMem_l->rxChannelInfo[channelId_p].readBuf;

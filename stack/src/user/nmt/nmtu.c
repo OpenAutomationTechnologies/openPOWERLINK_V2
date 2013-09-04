@@ -406,13 +406,13 @@ The function processes a state change to a general NMT state.
         state was not found.
 */
 //------------------------------------------------------------------------------
-static BOOL processGeneralStateChange(tNmtState newNmtState, tEplKernel* pRet_p)
+static BOOL processGeneralStateChange(tNmtState newNmtState_p, tEplKernel* pRet_p)
 {
     tEplKernel          ret = kEplSuccessful;
     UINT                nodeId;
     BOOL                fHandled = TRUE;
 
-    switch (newNmtState)
+    switch (newNmtState_p)
     {
         // EPL stack is not running
         case kNmtGsOff:
@@ -489,7 +489,7 @@ The function processes a state change to a MN NMT state.
         state was not found.
 */
 //------------------------------------------------------------------------------
-static BOOL processMnStateChange(tNmtState newNmtState, tEplKernel* pRet_p)
+static BOOL processMnStateChange(tNmtState newNmtState_p, tEplKernel* pRet_p)
 {
     tEplKernel          ret = kEplSuccessful;
     BOOL                fHandled = TRUE;
@@ -498,7 +498,7 @@ static BOOL processMnStateChange(tNmtState newNmtState, tEplKernel* pRet_p)
     tNmtEvent           timerEvent;
     tEplObdSize         obdSize;
 
-    switch (newNmtState)
+    switch (newNmtState_p)
     {
         // node listens for EPL-Frames and check timeout
         case kNmtMsNotActive:
@@ -603,14 +603,14 @@ The function processes a state change to a CN NMT state.
         state was not found.
 */
 //------------------------------------------------------------------------------
-static BOOL processCnStateChange(tNmtState newNmtState, tEplKernel* pRet_p)
+static BOOL processCnStateChange(tNmtState newNmtState_p, tEplKernel* pRet_p)
 {
     tEplKernel          ret = kEplSuccessful;
     BOOL                fHandled = TRUE;
     UINT32              basicEthernetTimeout;
     tEplObdSize         obdSize;
 
-    switch (newNmtState)
+    switch (newNmtState_p)
     {
         // node listens for EPL-Frames and check timeout
         case kNmtCsNotActive:

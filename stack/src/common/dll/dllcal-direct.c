@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   dllCal-direct.c
+\file   dllcal-direct.c
 
 \brief  source file for DLL CAL direct call module
 
@@ -139,7 +139,7 @@ tDllCalFuncIntf* dllcaldirect_getInterface(void)
 Add a direct call instance for TX packet forwarding in DLL CAL
 
 \param  ppDllCalQueue_p         Double-pointer to DllCal Queue instance
-\param  DllCalQueue_p           Parameter that determines the queue
+\param  dllCalQueue_p           Parameter that determines the queue
 
 \return Returns an error code
 \retval kEplSuccessful          if function executes correctly
@@ -291,10 +291,10 @@ static tEplKernel delInstance (tDllCalQueueInstance pDllCalQueue_p)
 Inserts a data block into the direct call instance. The data block can be of
 any type (e.g. TX packet).
 
-\param  pDllCalQueue_p          Pointer to DllCal Queue instance
-\param  pData_p                 Pointer to the data block to be insert
-\param  pDataSize               Pointer to the size of the data block to be
-                                insert
+\param  pDllCalQueue_p          Pointer to DllCal Queue instance.
+\param  pData_p                 Pointer to the data block to be inserted.
+\param  pDataSize_p             Pointer to the size of the data block to be
+                                inserted.
 
 \return Returns an error code
 \retval kEplSuccessful          if function executes correctly
@@ -398,7 +398,7 @@ Exit:
 Returns the data block counter.
 
 \param  pDllCalQueue_p          Pointer to DllCal Queue instance
-\param  pDataBlockCount         Pointer which returns the data block count
+\param  pDataBlockCount_p       Pointer which returns the data block count
 
 \return Returns an error code
 \retval kEplSuccessful          if function executes correctly
@@ -436,6 +436,7 @@ static tEplKernel getDataBlockCount (tDllCalQueueInstance pDllCalQueue_p,
 Resets the direct call instance
 
 \param  pDllCalQueue_p          Pointer to DllCal Queue instance
+\param  timeOutMs_p             Timeout in milliseconds.
 
 \return Returns an error code
 \retval kEplSuccessful          if function executes correctly

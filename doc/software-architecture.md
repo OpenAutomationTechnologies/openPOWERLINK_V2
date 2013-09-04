@@ -17,7 +17,7 @@ stack.
 - \ref module_pdoucal
 
 ### Control
--\ref module_ctrlu
+- \ref module_ctrlu
 
 ## openPOWERLINK Kernel Layer
 
@@ -36,6 +36,6 @@ stack.
 ## Common Modules
 
 ### Event Handler
--\ref module_event
--\ref module_eventcal
+- \ref module_event
+- \ref module_eventcal
 

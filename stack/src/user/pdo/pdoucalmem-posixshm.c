@@ -151,14 +151,14 @@ The function allocates shared memory for the user needed to transfer the PDOs.
 \ingroup module_pdokcal
 */
 //------------------------------------------------------------------------------
-tEplKernel pdoucal_allocateMem(size_t memSize_p, BYTE** pPdoMem_p)
+tEplKernel pdoucal_allocateMem(size_t memSize_p, BYTE** ppPdoMem_p)
 {
-    *pPdoMem_p = mmap(NULL, memSize_p, PROT_READ | PROT_WRITE, MAP_SHARED,
+    *ppPdoMem_p = mmap(NULL, memSize_p, PROT_READ | PROT_WRITE, MAP_SHARED,
                      fd_l, 0);
-    if (*pPdoMem_p == MAP_FAILED)
+    if (*ppPdoMem_p == MAP_FAILED)
     {
         TRACE ("%s() mmap failed!\n", __func__);
-        *pPdoMem_p = NULL;
+        *ppPdoMem_p = NULL;
         return kEplNoResource;
     }
     return kEplSuccessful;
