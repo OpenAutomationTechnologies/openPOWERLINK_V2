@@ -46,6 +46,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <unistd.h>
 #include <errno.h>
 #include <pthread.h>
+#include <signal.h>
 
 #include <Epl.h>
 
@@ -62,6 +63,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // module global vars
 //------------------------------------------------------------------------------
+static BOOL    fTermSignalReceived_g = FALSE;
 
 //------------------------------------------------------------------------------
 // global function prototypes
@@ -96,6 +98,8 @@ static tSyncThreadInstance      syncThreadInstance_l;
 void *powerlinkSyncThread(void * arg);
 #endif
 
+void system_handleTermSignal(int signum);
+
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
 //============================================================================//
@@ -125,6 +129,17 @@ int initSystem(void)
         EPL_DBGLVL_ERROR_TRACE("%s() couldn't set thread scheduling parameters! %d\n",
                 __func__, schedParam.__sched_priority);
     }
+
+    // Register termination handler for signals with termination semantics
+    struct sigaction new_action;
+
+    new_action.sa_handler = system_handleTermSignal;
+    (void) sigemptyset(&new_action.sa_mask);
+    new_action.sa_flags = 0;
+
+    (void) sigaction(SIGINT,  &new_action, NULL);    // Sent via CTRL-C
+    (void) sigaction(SIGTERM, &new_action, NULL);    // Generic signal used to cause program termination.
+    (void) sigaction(SIGQUIT, &new_action, NULL);    // Terminate because of abnormal condition
 
     /* Initialize target specific stuff */
     target_init();
@@ -187,6 +202,19 @@ void startSyncThread(tEplSyncCb pfnSync_p)
 }
 #endif
 
+//------------------------------------------------------------------------------
+/**
+\brief  Return true if a termination signal has been received
+
+The function can be used by the application to react on termination request.
+
+\ingroup module_app_common
+*/
+//------------------------------------------------------------------------------
+BOOL system_getTermSignalState(void)
+{
+    return fTermSignalReceived_g;
+}
 
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
@@ -215,6 +243,29 @@ void *powerlinkSyncThread(void* arg)
     return NULL;
 }
 #endif
+
+//------------------------------------------------------------------------------
+/**
+\brief  Handle termination requests
+
+This functions can be used to react on signals with termination semantics,
+and remembers in a flag that the user or the system asked to program to shut down.
+The application can than check this flag.
+*/
+//------------------------------------------------------------------------------
+void system_handleTermSignal(int signum)
+{
+    switch (signum)
+    {
+        case SIGINT:    // Signals with termination semantics
+        case SIGTERM:   // trigger a flag change
+        case SIGQUIT:   fTermSignalReceived_g = TRUE;
+                        break;
+
+        default:        // All other signals are ignored by this handler
+                        break;
+    }
+}
 
 ///\}
 

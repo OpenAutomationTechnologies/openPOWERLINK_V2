@@ -63,6 +63,7 @@ extern "C" {
 
 int initSystem(void);
 void shutdownSystem(void);
+BOOL system_getTermSignalState();
 
 #if defined(CONFIG_USE_SYNCTHREAD)
 void startSyncThread(tEplSyncCb pfnSync_p);

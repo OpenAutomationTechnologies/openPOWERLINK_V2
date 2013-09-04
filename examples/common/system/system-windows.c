@@ -140,6 +140,22 @@ void startSyncThread(tEplSyncCb pfnSync_p)
 }
 #endif
 
+
+//------------------------------------------------------------------------------
+/**
+\brief  Return true if a termination signal has been received
+
+The function can be used by the application to react on termination request.
+On Windows, this function only implemented as a stub.
+
+\ingroup module_app_common
+*/
+//------------------------------------------------------------------------------
+BOOL system_getTermSignalState(void)
+{
+    return FALSE;
+}
+
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
 //============================================================================//
