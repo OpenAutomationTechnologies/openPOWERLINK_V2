@@ -211,7 +211,7 @@ tEplKernel eventucal_exitQueueCircbuf (tEventQueue eventQueue_p)
 
 This function posts an event to the provided queue instance.
 
-\param  pEventQueue_p           Pointer to event queue instance
+\param  eventQueue_p            Event queue to which the event should be posted.
 \param  pEvent_p                Pointer to event
 
 \return The function returns a tEplKernel error code.

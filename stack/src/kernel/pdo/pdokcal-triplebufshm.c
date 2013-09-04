@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   pdokcal-tripleBufShm.c
+\file   pdokcal-triplebufshm.c
 
 \brief  Shared memory triple buffer implementation for kernel PDO CAL module
 
@@ -273,7 +273,7 @@ The function sets up the PDO memory info. For each channel the offset in the
 shared buffer and the size is stored.
 
 \param  pPdoChannels_p      Pointer to PDO channel setup.
-\param  pPdoMemReagion_p    Pointer to shared PDO memory region.
+\param  pPdoMemRegion_p     Pointer to shared PDO memory region.
 
 \return The function returns the size of the used PDO memory
 */

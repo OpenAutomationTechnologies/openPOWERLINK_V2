@@ -206,8 +206,8 @@ tEplKernel eventkcal_exitQueueHostif (tEventQueue eventQueue_p)
 
 This function posts an event to the specified host interface queue.
 
-\param  pEventQueue_p           Pointer to event queue instance
-\param  pEvent_p                Pointer to event
+\param  eventQueue_p            Event queue to which the event should be posted.
+\param  pEvent_p                Event to be posted.
 
 \return The function returns a tEplKernel error code.
 \retval kEplSuccessful          If function executes correctly

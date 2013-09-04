@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   event.h
+\file   include/event.h
 
 \brief  Header file for event module
 
@@ -261,8 +261,10 @@ typedef struct
 
 /**
 \brief  callback function to get informed about sync event
+
+\return The function returns a tEplKernel error code.
 */
-typedef tEplKernel (PUBLIC* tEplSyncCb) (void);
+typedef tEplKernel (*tEplSyncCb) (void);
 
 /**
 \brief callback for event post
@@ -271,16 +273,25 @@ This callback is used to call event processing over the module boundaries.
 e.g. EplEventkCal -> EplEventkProcess
 
 \param pEplEvent_p          Pointer to event which should be processed.
+
+\return The function returns a tEplKernel error code.
 */
-typedef tEplKernel (PUBLIC* tEplProcessEventCb) (tEplEvent* pEplEvent_p);
+typedef tEplKernel (*tEplProcessEventCb) (tEplEvent* pEplEvent_p);
 
 /**
 \brief callback for event error post
 
 This callback is used to call error event posting over the module boundaries.
 e.g. EplEventkCal -> eventk_postError
+
+\param  EventSource_p       Source of Event.
+\param  eplError_p          Error code.
+\param  argSize_p           Size of argument.
+\param  pArg_p              Pointer to argument.
+
+\return The function returns a tEplKernel error code.
 */
-typedef tEplKernel (PUBLIC* tEplPostErrorEventCb) (tEplEventSource EventSource_p, tEplKernel eplError_p, UINT argSize_p, void *pArg_p);
+typedef tEplKernel (*tEplPostErrorEventCb) (tEplEventSource EventSource_p, tEplKernel eplError_p, UINT argSize_p, void *pArg_p);
 
 /**
 \brief  event dispatch entry

@@ -168,7 +168,9 @@ void errhndkcal_exit (void)
 \brief    get pointer to error handler objects
 
 The function returns a pointer to the memory block where the error handler
-objects are stored..
+objects are stored.
+
+\return The function returns a pointer to the error handler objects.
 
 \ingroup module_errhndkcal
 */
@@ -273,18 +275,18 @@ void errhndkcal_getMnCycTimeExceedError(UINT32 *pCumulativeCnt_p,
 /**
 \brief  Get error objects for MNCNLossPres error
 
-\param  uiNodeIdx_p             Index of node (node ID - 1)
+\param  nodeIdx_p             Index of node (node ID - 1)
 \param  pCumulativeCnt_p      Pointer to store cumulative counter
 \param  pThresholdCnt_p       Pointer to store threshold counter
 \param  pThreshold_p          Pointer to store threshold
 */
 //------------------------------------------------------------------------------
-void errhndkcal_getMnCnLossPresError(UINT uiNodeIdx_p, UINT32 *pCumulativeCnt_p,
+void errhndkcal_getMnCnLossPresError(UINT nodeIdx_p, UINT32 *pCumulativeCnt_p,
                                 UINT32 *pThresholdCnt_p, UINT32 *pThreshold_p)
 {
-    *pCumulativeCnt_p = pErrHnd_l->aMnCnLossPres[uiNodeIdx_p].cumulativeCnt;
-    *pThresholdCnt_p = pErrHnd_l->aMnCnLossPres[uiNodeIdx_p].thresholdCnt;
-    *pThreshold_p = pErrHnd_l->aMnCnLossPres[uiNodeIdx_p].threshold;
+    *pCumulativeCnt_p = pErrHnd_l->aMnCnLossPres[nodeIdx_p].cumulativeCnt;
+    *pThresholdCnt_p = pErrHnd_l->aMnCnLossPres[nodeIdx_p].thresholdCnt;
+    *pThreshold_p = pErrHnd_l->aMnCnLossPres[nodeIdx_p].threshold;
 }
 #endif
 
@@ -350,13 +352,13 @@ void errhndkcal_getMnCycTimeExceedThresholdCnt(UINT32 *pThresholdCnt_p)
 /**
 \brief  Get threshold counter for MnCnLossPres error
 
-\param  uiNodeIdx_p             Index of node (node ID - 1)
+\param  nodeIdx_p             Index of node (node ID - 1)
 \param  pThresholdCnt_p       Pointer to store threshold counter
 */
 //------------------------------------------------------------------------------
-void errhndkcal_getMnCnLossPresThresholdCnt(UINT uiNodeIdx_p, UINT32 *pThresholdCnt_p)
+void errhndkcal_getMnCnLossPresThresholdCnt(UINT nodeIdx_p, UINT32 *pThresholdCnt_p)
 {
-    *pThresholdCnt_p = pErrHnd_l->aMnCnLossPres[uiNodeIdx_p].thresholdCnt;
+    *pThresholdCnt_p = pErrHnd_l->aMnCnLossPres[nodeIdx_p].thresholdCnt;
 }
 #endif
 
@@ -435,16 +437,16 @@ void errhndkcal_setMnCycTimeExceedCounters(UINT32 dwCumulativeCnt_p, UINT32 dwTh
 /**
 \brief  Set error counters of MnCnLossPres error
 
-\param  uiNodeIdx_p             Index of node (node ID - 1)
+\param  nodeIdx_p             Index of node (node ID - 1)
 \param  dwCumulativeCnt_p       Cumulative counter to set
 \param  dwThresholdCnt_p        Threshold counter to set
 */
 //------------------------------------------------------------------------------
-void errhndkcal_setMnCnLossPresCounters(UINT uiNodeIdx_p, UINT32 dwCumulativeCnt_p,
+void errhndkcal_setMnCnLossPresCounters(UINT nodeIdx_p, UINT32 dwCumulativeCnt_p,
                                         UINT32 dwThresholdCnt_p)
 {
-    pErrHnd_l->aMnCnLossPres[uiNodeIdx_p].cumulativeCnt = dwCumulativeCnt_p;
-    pErrHnd_l->aMnCnLossPres[uiNodeIdx_p].thresholdCnt = dwThresholdCnt_p;
+    pErrHnd_l->aMnCnLossPres[nodeIdx_p].cumulativeCnt = dwCumulativeCnt_p;
+    pErrHnd_l->aMnCnLossPres[nodeIdx_p].thresholdCnt = dwThresholdCnt_p;
 }
 #endif
 
@@ -513,13 +515,13 @@ void errhndkcal_setMnCycTimeExceedThresholdCnt(UINT32 dwThresholdCnt_p)
 /**
 \brief  Set threshold counter of MnCnLossPres error
 
-\param  uiNodeIdx_p             Index of node (node ID - 1)
+\param  nodeIdx_p             Index of node (node ID - 1)
 \param  dwThresholdCnt_p        Threshold counter to set
 */
 //------------------------------------------------------------------------------
-void errhndkcal_setMnCnLossPresThresholdCnt(UINT uiNodeIdx_p, UINT32 dwThresholdCnt_p)
+void errhndkcal_setMnCnLossPresThresholdCnt(UINT nodeIdx_p, UINT32 dwThresholdCnt_p)
 {
-    pErrHnd_l->aMnCnLossPres[uiNodeIdx_p].thresholdCnt = dwThresholdCnt_p;
+    pErrHnd_l->aMnCnLossPres[nodeIdx_p].thresholdCnt = dwThresholdCnt_p;
 }
 #endif
 

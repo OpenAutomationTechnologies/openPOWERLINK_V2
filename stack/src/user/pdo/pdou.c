@@ -187,16 +187,19 @@ tEplKernel pdou_exit(void)
 
 //------------------------------------------------------------------------------
 /**
-\brief  callback function for NMT state changes
+\brief  Callback function for NMT state changes
 
-\brief  nmtStateChange_p         NMT state change event
+The function implements the callback function which is called on NMT state
+changes.
+
+\param  nmtStateChange_p         NMT state change event.
 
 \return The function returns a tEplKernel error code.
 
 \ingroup module_pdou
 **/
 //------------------------------------------------------------------------------
-tEplKernel PUBLIC pdou_cbNmtStateChange(tEventNmtStateChange nmtStateChange_p)
+tEplKernel pdou_cbNmtStateChange(tEventNmtStateChange nmtStateChange_p)
 {
     tEplKernel      ret = kEplSuccessful;
 
@@ -235,9 +238,12 @@ Exit:
 
 //------------------------------------------------------------------------------
 /**
-\brief  callback function for OD accesses
+\brief  Callback function for OD accesses
 
-\brief  pParam_p                OBD parameter
+The function implements the callback function which is called when a object
+is accessed which belongs to the PDO module.
+
+\param  pParam_p                OBD parameter
 
 \return The function returns a tEplKernel error code.
 
@@ -711,9 +717,7 @@ Exit:
 /**
 \brief  Allocate memory for PDO channels
 
-This function allocates memory for PDOs channels
-
-\param  pAllocationParam_p      Pointer to allocation parameters.
+This function frees memory of PDOs channels
 
 \return The function returns a tEplKernel error code.
 **/

@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   dllu.h
+\file   EplDllu.h
 
 \brief  Definitions for DLL user module
 

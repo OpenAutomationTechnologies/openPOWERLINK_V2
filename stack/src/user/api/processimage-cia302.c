@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   processimagesetup-cia302.c
+\file   processimage-cia302.c
 
 \brief  Process image setup function for CiA302-4
 
@@ -158,8 +158,8 @@ tEplKernel oplk_setupProcessImage(void)
 The function links a range of variables to the object dictionary.
 
 \param  objIndexStart_p     Start index of range to link.
-\param  objIndexEnd_P       End index of range to link.
-\param  offsetPi_p          Offset of range in the process image.
+\param  objIndexEnd_p       End index of range to link.
+\param  offsetPI_p          Offset of range in the process image.
 \param  fOutputPI_p         Determines if input image or output image should
                             be used: TRUE = output image, FALSE = imput image
 \param  entrySize_p         The size of one process variable.

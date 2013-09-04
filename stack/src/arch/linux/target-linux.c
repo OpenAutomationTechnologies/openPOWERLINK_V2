@@ -97,7 +97,7 @@ tEplKernel target_cleanup(void)
 The function makes the calling thread sleep until the number of specified
 milliseconds have elapsed.
 
-\param  mseconds_p              Number of milliseconds to sleep
+\param  milliSeconds_p      Number of milliseconds to sleep
 
 \ingroup module_target
 */

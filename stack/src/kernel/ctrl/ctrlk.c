@@ -341,8 +341,6 @@ UINT16 ctrlk_getHeartbeat(void)
 
 The function initializes the kernel stack modules.
 
-\param  pInitParam_p        Pointer to stack initialization parameters.
-
 \return The function returns a tEplKernel error code.
 */
 //------------------------------------------------------------------------------

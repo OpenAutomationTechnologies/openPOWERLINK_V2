@@ -174,6 +174,11 @@ static tEplKernel cbSdoCon(tEplSdoComFinished* pSdoComFinished_p);
 
 The function initializes the CFM module.
 
+\param  pfnCbEventCnProgress_p      Pointer to callback function for CN progress
+                                    events.
+\param  pfnCbEventCnResult_p          Pointer to callback function for CN result
+                                    events.
+
 \return The function returns a tEplKernel error code.
 
 \ingroup module_cfmu

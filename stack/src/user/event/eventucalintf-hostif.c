@@ -210,7 +210,7 @@ tEplKernel eventucal_exitQueueHostif (tEventQueue eventQueue_p)
 
 This function posts an event to the specified hostif queue.
 
-\param  pEventQueue_p           Pointer to event queue instance
+\param  eventQueue_p            Event queue to post event.
 \param  pEvent_p                Pointer to event
 
 \return The function returns a tEplKernel error code.

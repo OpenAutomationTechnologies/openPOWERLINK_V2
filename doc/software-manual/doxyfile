@@ -1587,10 +1587,10 @@ SEARCH_INCLUDES        = YES
 # contain include files that are not input files but should be processed by 
 # the preprocessor.
 
-INCLUDE_PATH           = ../../Examples/X86/Generic/powerlink_user_lib \
-                         ../../SharedBuff \
-                         ../../Include \
-                         ../../ObjDicts/CiA302-4_MN
+INCLUDE_PATH           = ../../stack/make/lib/libpowerlink \
+                         ../../libs \
+                         ../../include \
+                         ../../objdicts/CiA302-4_MN
 
 # You can use the INCLUDE_FILE_PATTERNS tag to specify one or more wildcard 
 # patterns (like *.h and *.hpp) to filter out the header-files in the 
