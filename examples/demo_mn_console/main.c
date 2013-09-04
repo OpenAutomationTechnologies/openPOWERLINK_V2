@@ -332,6 +332,12 @@ static void loopMain(void)
             }
         }
 
+        if( system_getTermSignalState() == TRUE )
+        {
+            fExit = TRUE;
+            PRINTF("Received termination signal, exiting...\n");
+        }
+
         if (oplk_checkKernelStack() == FALSE)
         {
             fExit = TRUE;
