@@ -210,6 +210,7 @@ void ProcessThread::sigNmtState(tNmtState State_p)
             strState = "??? (0x";
             strState += QString::number(State_p, 16);
             strState += ")";
+            break;
     }
 
     emit nmtStateChanged(strState);
