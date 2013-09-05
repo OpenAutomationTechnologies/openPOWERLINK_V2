@@ -8,6 +8,7 @@ This is the openPOWERLINK stack software users manual.
 - \subpage readme
 - \subpage intro
 - \subpage build-and-run
+- \subpage page_coding
 
 *******************************************************************************/
 
