@@ -2,16 +2,12 @@
 ********************************************************************************
 \file   eventkcal-linuxkernel.c
 
-\brief  Source file for linux kernel event posting
+\brief  Kernel event CAL module for Linux kernelspace
 
-This event queue implementation applies the shared buffer for event forwarding.
+This file implements the kernel event handler CAL module for the Linux
+kernelspace platform. It uses the circular buffer interface for all event queues.
 
-The only public function provided is eventkcalshb_getInterface(). This
-function returns a set of function pointers which is provided to use this CAL
-implementation from eventkcal.c.
-
-The real functionality of the shb implementation is separated in
-the common part to be used by both user and kernel layer modules.
+\see eventkcalintf-circbuf.c
 
 \ingroup module_eventkcal
 *******************************************************************************/

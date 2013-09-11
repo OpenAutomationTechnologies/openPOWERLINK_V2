@@ -102,6 +102,8 @@ is specified by eventQueue_p.
 \return The function returns a tEplKernel error code.
 \retval kEplSuccessful          If function executes correctly
 \retval other error codes       If an error occurred
+
+\ingroup module_eventkcal
 */
 //------------------------------------------------------------------------------
 tEplKernel eventkcal_initQueueCircbuf(tEventQueue eventQueue_p)
@@ -183,6 +185,8 @@ specified by eventQueue_p.
 \return The function returns a tEplKernel error code.
 \retval kEplSuccessful          If function executes correctly
 \retval other error codes       If an error occurred
+
+\ingroup module_eventkcal
 */
 //------------------------------------------------------------------------------
 tEplKernel eventkcal_exitQueueCircbuf (tEventQueue eventQueue_p)
@@ -212,6 +216,8 @@ This function posts an event to the provided queue instance.
 \return The function returns a tEplKernel error code.
 \retval kEplSuccessful          If function executes correctly
 \retval other error codes       If an error occurred
+
+\ingroup module_eventkcal
 */
 //------------------------------------------------------------------------------
 tEplKernel eventkcal_postEventCircbuf (tEventQueue eventQueue_p, tEplEvent *pEvent_p)
@@ -260,6 +266,8 @@ by calling the event handlers process function.
 \return The function returns a tEplKernel error code.
 \retval kEplSuccessful          if function executes correctly
 \retval other                   error
+
+\ingroup module_eventkcal
 */
 //------------------------------------------------------------------------------
 tEplKernel eventkcal_processEventCircbuf(tEventQueue eventQueue_p)
@@ -330,6 +338,8 @@ at pDataBuffer_p.
 \return The function returns a tEplKernel error code.
 \retval kEplSuccessful          if function executes correctly
 \retval other                   error
+
+\ingroup module_eventkcal
 */
 //------------------------------------------------------------------------------
 tEplKernel eventkcal_getEventCircbuf(tEventQueue eventQueue_p, BYTE* pDataBuffer_p,
@@ -377,8 +387,9 @@ the circular buffer event queue.
 
 \param  eventQueue_p            Event queue to read the count from.
 
-
 \return The function returns the number of active events.
+
+\ingroup module_eventkcal
 */
 //------------------------------------------------------------------------------
 UINT eventkcal_getEventCountCircbuf(tEventQueue eventQueue_p)
@@ -409,6 +420,8 @@ queue.
 \param  pfnSignalCb_p           Pointer to signaling callback function.
 
 \return The function returns the number of active events.
+
+\ingroup module_eventkcal
 */
 //------------------------------------------------------------------------------
 

@@ -2,10 +2,13 @@
 ********************************************************************************
 \file   eventkcal-nooscircbuf.c
 
-\brief  Kernel event CAL module using circular buffers on NON-OS systems
+\brief  Kernel event CAL module for non-OS platform using circbuffer
 
-This kernel event CAL module implementation uses circular buffers and
-direct calls on NON-OS systems.
+This file implements the kernel event handler CAL module for a non-OS
+platform. It uses the circular buffer interface for the kernel-to-user
+event queue and direct calls for the kernel-internal queue.
+
+\see eventkcalintf-circbuf.c
 
 \ingroup module_eventkcal
 *******************************************************************************/
@@ -216,6 +219,8 @@ tEplKernel eventkcal_postUserEvent (tEplEvent *pEvent_p)
 \brief  Process function of kernel CAL module
 
 This function will be called by the systems process function.
+
+\ingroup module_eventkcal
 */
 //------------------------------------------------------------------------------
 void eventkcal_process(void)

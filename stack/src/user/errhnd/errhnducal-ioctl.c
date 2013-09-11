@@ -8,6 +8,10 @@ This module implements the user layer CAL functions of the error handler.
 This implementation uses Linux ioctl calls to share the error objects between
 user and kernel part.
 
+As the error counter objects are stored in the Linux kernel,
+the kernel part of the error handler CAL module can directly access them
+using errhndkcal-local.c and doesn't need an extra CAL module.
+
 \ingroup module_errhnducal
 *******************************************************************************/
 

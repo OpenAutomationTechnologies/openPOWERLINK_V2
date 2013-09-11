@@ -2,9 +2,13 @@
 ********************************************************************************
 \file   eventkcal-nooshostif.c
 
-\brief  Kernel event CAL module using the host interface with no OS
+\brief  Kernel event CAL module for non-OS platform using the host-interface
 
-This kernel event CAL module implementation uses host interface with no OS
+This file implements the kernel event handler CAL module for a non-OS
+platform. It uses the host interface library for the kernel-to-user /
+user-to-kernel event queues and direct calls for the kernel-internal queue.
+
+\see eventkcalintf-hostif.c
 
 \ingroup module_eventkcal
 *******************************************************************************/
@@ -215,6 +219,8 @@ tEplKernel eventkcal_postUserEvent (tEplEvent *pEvent_p)
 \brief  Process function of kernel CAL module
 
 This function will be called by the systems process function.
+
+\ingroup module_eventkcal
 */
 //------------------------------------------------------------------------------
 void eventkcal_process(void)

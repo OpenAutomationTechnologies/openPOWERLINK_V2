@@ -1,12 +1,13 @@
 /**
 ********************************************************************************
-\file   eventucalintf-circbuf.c
+\file   eventucalintf-hostif.c
 
-\brief  User event CAL interface module using circular buffers
+\brief  User event CAL interface module using the host interface
 
-This file implements a user event CAL interface module which is using
-circular buffers for communication.
+This file implements a kernel event CAL interface module which is using
+the host interface for communication.
 
+\ingroup module_eventucal
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
@@ -108,6 +109,8 @@ is specified by eventQueue_p.
 \return The function returns a tEplKernel error code.
 \retval kEplSuccessful          If function executes correctly
 \retval other error codes       If an error occurred
+
+\ingroup module_eventucal
 */
 //------------------------------------------------------------------------------
 tEplKernel eventucal_initQueueHostif(tEventQueue eventQueue_p)
@@ -177,6 +180,8 @@ specified by eventQueue_p.
 \return The function returns a tEplKernel error code.
 \retval kEplSuccessful          If function executes correctly
 \retval other error codes       If an error occurred
+
+\ingroup module_eventucal
 */
 //------------------------------------------------------------------------------
 tEplKernel eventucal_exitQueueHostif (tEventQueue eventQueue_p)
@@ -216,6 +221,8 @@ This function posts an event to the specified hostif queue.
 \return The function returns a tEplKernel error code.
 \retval kEplSuccessful          If function executes correctly
 \retval other error codes       If an error occurred
+
+\ingroup module_eventucal
 */
 //------------------------------------------------------------------------------
 tEplKernel eventucal_postEventHostif (tEventQueue eventQueue_p, tEplEvent *pEvent_p)
@@ -269,6 +276,8 @@ by calling the event handlers process function.
 \return The function returns a tEplKernel error code.
 \retval kEplSuccessful          if function executes correctly
 \retval other                   error
+
+\ingroup module_eventucal
 */
 //------------------------------------------------------------------------------
 tEplKernel eventucal_processEventHostif(tEventQueue eventQueue_p)
@@ -316,8 +325,9 @@ the circular buffer event queue.
 
 \param  eventQueue_p            Event queue to read the count from.
 
-
 \return The function returns the number of active events.
+
+\ingroup module_eventucal
 */
 //------------------------------------------------------------------------------
 UINT eventucal_getEventCountHostif(tEventQueue eventQueue_p)
@@ -346,6 +356,8 @@ queue.
 \param  pfnSignalCb_p           Pointer to signaling callback function.
 
 \return The function returns the number of active events.
+
+\ingroup module_eventucal
 */
 //------------------------------------------------------------------------------
 
@@ -368,6 +380,16 @@ tEplKernel eventucal_setSignalingHostif(tEventQueue eventQueue_p, VOIDFUNCPTR pf
 /// \name Private Functions
 /// \{
 
+//------------------------------------------------------------------------------
+/**
+\brief  Event handler callback function
+
+This function implements the callback function which should be called when
+receiving an event.
+
+\param  pArg_p                  EventQueue this event was received.
+*/
+//------------------------------------------------------------------------------
 static void rxSignalHandlerCb(void* pArg_p)
 {
     eventucal_processEventHostif((tEventQueue)pArg_p);
