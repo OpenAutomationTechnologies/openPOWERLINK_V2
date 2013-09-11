@@ -2,9 +2,12 @@
 ********************************************************************************
 \file   eventucal-win32.c
 
-\brief  User event CAL module implementation for Windows
+\brief  User event CAL module for Windows
 
-This file contains a user event CAL module implementation for Windows.
+This file implements the user event handler CAL module for the Windows
+platform. It uses the circular buffer interface for all event queues.
+
+\see eventucalintf-circbuf.c
 
 \ingroup module_eventucal
 *******************************************************************************/
@@ -119,7 +122,7 @@ implementations and calls the appropriate init functions.
 \retval kEplSuccessful          If function executes correctly
 \retval other error codes       If an error occurred
 
-\ingroup module_eventkcal
+\ingroup module_eventucal
 */
 //------------------------------------------------------------------------------
 tEplKernel eventucal_init (void)
@@ -188,7 +191,7 @@ functions of the queue implementations for each used queue.
 \retval kEplSuccessful          If function executes correctly
 \retval other error codes       If an error occurred
 
-\ingroup module_eventkcal
+\ingroup module_eventucal
 */
 //------------------------------------------------------------------------------
 tEplKernel eventucal_exit (void)
@@ -225,7 +228,7 @@ queue post function is called.
 \retval kEplSuccessful          If function executes correctly
 \retval other error codes       If an error occurred
 
-\ingroup module_eventkcal
+\ingroup module_eventucal
 */
 //------------------------------------------------------------------------------
 tEplKernel eventucal_postKernelEvent (tEplEvent *pEvent_p)
@@ -253,7 +256,7 @@ queue post function is called.
 \retval kEplSuccessful          If function executes correctly
 \retval other error codes       If an error occurred
 
-\ingroup module_eventkcal
+\ingroup module_eventucal
 */
 //------------------------------------------------------------------------------
 tEplKernel eventucal_postUserEvent (tEplEvent *pEvent_p)
@@ -273,6 +276,8 @@ tEplKernel eventucal_postUserEvent (tEplEvent *pEvent_p)
 \brief  Process function of user CAL module
 
 This function will be called by the systems process function.
+
+\ingroup module_eventucal
 */
 //------------------------------------------------------------------------------
 void eventucal_process(void)

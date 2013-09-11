@@ -6,6 +6,12 @@
 
 This user event CAL module implementation uses ioctl calls on Linux.
 
+\brief  User event CAL module for Linux user/kernelspace
+
+This file implements the user event handler CAL module for the Linux
+userspace platform. It uses the ioctl() calls to communicate with a kernel
+CAL module running in Linux kernelspace.
+
 \ingroup module_eventucal
 *******************************************************************************/
 
@@ -231,6 +237,8 @@ tEplKernel eventucal_postKernelEvent(tEplEvent *pEvent_p)
 \brief  Process function of user CAL module
 
 This function will be called by the systems process function.
+
+\ingroup module_eventucal
 */
 //------------------------------------------------------------------------------
 void eventucal_process(void)

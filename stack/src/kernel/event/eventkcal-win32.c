@@ -2,9 +2,12 @@
 ********************************************************************************
 \file   eventkcal-win32.c
 
-\brief  Kernel event CAL module using circular buffers on Windows
+\brief  Kernel event CAL module for Windows
 
-This kernel event CAL module implementation uses circular buffers on Windows.
+This file implements the kernel event handler CAL module for the Windows
+platform. It uses the circular buffer library for all event queues.
+
+\see eventkcalintf-circbuf.c
 
 \ingroup module_eventkcal
 *******************************************************************************/
@@ -258,6 +261,8 @@ tEplKernel eventkcal_postUserEvent (tEplEvent *pEvent_p)
 \brief  Process function of kernel CAL module
 
 This function will be called by the systems process function.
+
+\ingroup module_eventkcal
 */
 //------------------------------------------------------------------------------
 void eventkcal_process(void)

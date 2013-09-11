@@ -2,9 +2,12 @@
 ********************************************************************************
 \file   eventkcal-linux.c
 
-\brief  Kernel event CAL module using circular buffers on Linux
+\brief  Kernel event CAL module for Linux userspace
 
-This kernel event CAL module implementation uses circular buffers on Linux.
+This file implements the kernel event handler CAL module for the Linux
+userspace platform. It uses the circular buffer interface for all event queues.
+
+\see eventkcalintf-circbuf.c
 
 \ingroup module_eventkcal
 *******************************************************************************/
@@ -274,6 +277,8 @@ tEplKernel eventkcal_postUserEvent (tEplEvent *pEvent_p)
 \brief  Process function of kernel CAL module
 
 This function will be called by the systems process function.
+
+\ingroup module_eventkcal
 */
 //------------------------------------------------------------------------------
 void eventkcal_process(void)
