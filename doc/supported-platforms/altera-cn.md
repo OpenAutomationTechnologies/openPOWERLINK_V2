@@ -1,26 +1,28 @@
-Altera Nios II Controlled Node {#altera-cn}
-==============================
+openPOWERLINK CN on Altera Nios II {#page_platform_altera-cn}
+===================================
 
-## Introduction
+[TOC]
+
+# Introduction {#sect_altera-cn_introduction}
 
 This file contains documentation for the openPOWERLINK stack on Altera NiosII.
  It uses the POWERLINK IP-Core which consists of a optimized MAC for POWERLINK
 (openMAC) and a hub for daisy chaining several controled nodes.
 
-## Contents
+# Contents {#sect_altera-cn_contents}
 
 - FPGA design with Nios II CPU and POWERLINK IP-Core.
 - Latched I/0 Ports: 4 x 8Bit - plus latch signal.
   Direction (input or output) can be defined by configuration-pin level.
 
-## Performance Data
+# Performance Data
 
 - Minimum cycle length: 400 us
 - PReq-PRes Latency: 1 us
 - Process data: 4 bytes input and 4 bytes output.
 - There is 1 RPDOs and 1 TPDO available. Cross-traffic is disabled.
 
-## Requirements
+# Requirements {#sect_altera-cn_requirements}
 
 - Development Board TERASIC_DE2-115 (INK Board) or SYSTEC ECUcore-EP3C.
 
@@ -38,7 +40,7 @@ This file contains documentation for the openPOWERLINK stack on Altera NiosII.
   The corresponding XDD for this node can be found in the subdirectory
   ObjDicts/CiA401_CN of the openPOWERLINK main directory.
 
-## Hardware Setup
+# Hardware Setup {#sect_altera-cn_hardware}
 
 - Setup for the TERASIC_DE2-115 (INK).
   * Download the user guide for the board from the
@@ -65,7 +67,9 @@ This file contains documentation for the openPOWERLINK stack on Altera NiosII.
   * Details for the setup of this board is available on the
     [SYSTEC Website](http://www.systec-electronic.com/uploads/be/36/be36d3caf3ff425f0e6bdadfc6c01aaa/L-1266d_02_DevelopmentBoard-ECUcore-EP3C.pdf)
 
-## How to build the binaries for the SYSTEC ECUcore-EP3C
+# How to build the binaries  {#sect_altera-cn_build}
+
+## How to build the binaries for the SYSTEC ECUcore-EP3C 
 
 Steps 1-6 are only necessary if you want to change the FPGA design.
 Otherwise you can use the supplied SOF file and go directly to step 7.
@@ -129,7 +133,7 @@ Otherwise you can use the supplied SOF file and go directly to step 6.
     BSP and the ELF file, if the Nios II Design was changed inside the QSYS Builder.\n
     `$ ./create-this-app --rebuild`
 
-## How to run the demo
+# How to run the demo {#sect_altera-cn_run}
 
 1. Setup the POWERLINK network as described in main readme.txt located in
    openPOWERLINK main directory.
@@ -145,7 +149,7 @@ Otherwise you can use the supplied SOF file and go directly to step 6.
    `$ make download-elf`\n
 4. Enjoy the running POWERLINK network.
 
-## How to import the project into Nios II IDE for debugging purposes
+# How to import the project into Nios II IDE for debugging purposes  {#sect_altera-cn_import}
 
 Requirement: Steps in the previous section "How to build the binary" are
 completed.
@@ -158,7 +162,7 @@ completed.
    `openPOWERLINK_ROOT/Examples/altera_nios2/no_os/gnu/demo_directIO`
 5. Press the button `Finish`.
 
-## How to run or debug the project in the Nios II IDE
+# How to run or debug the project in the Nios II IDE  {#sect_altera-cn_debug}
 
 Requirement: Steps in the previous section "How to import the project into Nios II IDE for debugging purposes" are completed.
 1. Press button `Project` -> `Build All`
@@ -174,7 +178,7 @@ Requirement: Steps in the previous section "How to import the project into Nios 
 8. In the "Debugger" tab select the `Altera CDI GDB Debugger`.
 9. Press `Apply` and `Close`. Now it should be possible to do the step 2.
 
-## How to write the program to local flash
+# How to write the program to local flash  {#sect_altera-cn_flash}
 
 Requirement: Steps in the previous section _How to build the binary_ are
 completed.
@@ -183,7 +187,7 @@ completed.
    flash:\n
    `$ make program-epcs`
 
-## Troubleshooting
+# Troubleshooting {#sect_altera-cn_trouble}
 
 1. It is adviced to clean all generated files after switching from one demo to
    the other.

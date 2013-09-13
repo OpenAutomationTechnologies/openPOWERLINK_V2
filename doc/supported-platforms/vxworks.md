@@ -1,24 +1,26 @@
-openPOWERLINK on VxWorks {#vxworks}
+openPOWERLINK on VxWorks {#page_platform_vxworks}
 ========================
 
-## Introduction
+[TOC]
+
+# Introduction {#sect_vxworks_intro}
 
 This page contains documentation for the openPOWERLINK stack on VxWorks.
 
-## Requirements
+# Requirements {#sect_vxworks_requirements}
 
-### Operating System
+## Operating System
 The VxWorks version of the openPOWERLINK stack is implemented and tested on
 VxWorks Version 6.8.
 
-### Build Environment
+## Build Environment
 To build the openPOWERLINK stack on VxWorks the following build environment
 is required.
 
 - VxWorks 6.8 Development Environment with WindRiver Workbench 3.2
 - GNU C compiler for Intel X86 architecture
 
-### openCONFIGURATOR
+## openCONFIGURATOR
 For configuration of your POWERLINK network the Open Source configuration
 tool openCONFIGURATOR should be used. The tool is available as SourceForge
 project. (http://sourceforge.net/projects/openconf/)
@@ -40,7 +42,7 @@ and application:
   data of the CNs and the network mapping information. CN configuration is
   handled by the configuration manager (CFM) module of the MN.
 
-### POWERLINK network
+## POWERLINK network
 
 For testing a VxWorks openPOWERLINK MN a POWERLINK network with controlled
 nodes (CNs) is required. You can use the following CNs:
@@ -54,7 +56,7 @@ of the POWERLINK CNs and are driving a running light on the CNs digital
 outputs. The application used CNs with node numbers 1, 32 and 110.
 
 
-## Limitations
+# Limitations {#sect_vxworks_limits}
 
 The VxWorks openPOWERLINK implementation has the following limitations at
 the moment:
@@ -64,12 +66,12 @@ the moment:
   traffic on the POWERLINK network.
 
 
-## Implementation details
+# Implementation details  {#sect_vxworks_implementation}
 
 The following section contains information about the implementation of
 openPOWERLINK on VxWorks and give some hints about porting to other targets.
 
-### Operating System Functions
+## Operating System Functions
 
 - Multitasking:
 
@@ -87,12 +89,12 @@ openPOWERLINK on VxWorks and give some hints about porting to other targets.
   To provide debugging output the logMsg() function which is provided in
   logLib is used.
 
-### Ethernet Interface
+## Ethernet Interface
 openPOWERLINK uses the VxWorks MUX network interface. Therefore, openPOWERLINK
 should run on every network interface for which a VxWorks drivers is available.
 The network device to be used for POWERLINK should not be used by VxWorks!
 
-### Timer Architecture
+## Timer Architecture
 
 The VxWorks operating system doesn't provide high-resolution timers. Therefore
 the openPOWERLINK provides it's own high-resolution timer library. The timer
@@ -163,7 +165,7 @@ The timer device module has to provide the following functions:
   This function could be implemented to provide timer device information
   needed for debugging.
 
-### Task Priorities
+## Task Priorities
 
 As VxWorks provides a priority-based preemptive scheduler it is important
 to assign the right task priorities in order to get a stable POWERLINK
@@ -172,33 +174,31 @@ cycle.
 The priorities of the tasks created by openPOWERLINK are setup in `EplCfg.h`.
 They are assigned as follows:
 
-    Task Name                          Priority
-    ------------------------------------------------------------------------------
-    High-Resolution timer tasks        1
-    TX callback handler task           1
-    Shared Buffer Tasks                10 (User->Kernel direction will be
-                                           increased by 5 in ShbIpc-VxWorks.c
-                                           ==> 5)
-    User timer task                    50
+Task Name                         | Priority
+---------                         | --------
+High-Resolution timer tasks       | 1
+TX callback handler task          | 1
+Shared Buffer Tasks               | 10 (User->Kernel direction will be increased by 5 in ShbIpc-VxWorks.c ==> 5)
+User timer task                   | 50
 
 Additionally you have to increase the priority of the network stack task to be
 able to get all network packets in time:
 
-    Task Name    Default Priority      Adjusted Priority
-    ------------------------------------------------------------------------------
-    tNet0        50                    5
+Task Name   | Default Priority     | Adjusted Priority
+---------   | ----------------     | -----------------
+tNet0       | 50                   | 5
 
-## Supported Architectures and Targets
+# Supported Architectures and Targets  {#sect_vxworks_supported-targets}
 
-### Supported Architectures
+## Supported Architectures
 
 The following architectures are currently supported by the openPOWERLINK stack.
 
 - Intel X86 (only UP no SMP!)
 
-### Supported Targets
+## Supported Targets
 
-#### B&R APC810
+### B&R APC810
 
 The B&R BSP for APC 810 (Based on Pentium4) is used.
 
@@ -216,9 +216,9 @@ The B&R BSP for APC 810 (Based on Pentium4) is used.
   - Intel 82573 Gigabit Ethernet, gei825xxVxbEnd.c
 
 
-## Available demo applications
+# Available demo applications {#sect_vxworks_demos}
 
-### demo_mn_console
+## demo_mn_console
 
 This demo implements a POWERLINK managing node (MN) using the configuration
 manager (CFM) to initialize the controlled nodes. It uses the demo system
@@ -227,9 +227,9 @@ configuration also used for Linux which is located in `CfmProjects/Linux_Demo_3C
 It is located in: `Examples/X86/VxWorks/gnu/demo_mn_console`
 
 
-## Running openPOWERLINK on VxWorks
+# Running openPOWERLINK on VxWorks {#sect_vxworks_running}
 
-### Build
+## Build
 
 - Add the openPOWERLINK source path to your linked resources:
 
@@ -246,7 +246,7 @@ It is located in: `Examples/X86/VxWorks/gnu/demo_mn_console`
 
   Select project with right mouse button and select: _Build Project_
 
-### Connect and Download
+## Connect and Download
 
 - Create a target server connection to your target in the Remote Systems
   view and connect to it.
@@ -254,7 +254,7 @@ It is located in: `Examples/X86/VxWorks/gnu/demo_mn_console`
 - Download openPOWERLINK by selecting the project with right mouse button
   and select "Download VxWorks Kernel Task"
 
-### Starting/Stopping POWERLINK
+## Starting/Stopping POWERLINK
 
 - To start openPOWERLINK: open a hostShell on your target and type:
 
@@ -267,5 +267,5 @@ It is located in: `Examples/X86/VxWorks/gnu/demo_mn_console`
                 -> openPowerlinkExit
 
 
-## Troubleshooting
+# Troubleshooting {#sect_vxworks_trouble}
 

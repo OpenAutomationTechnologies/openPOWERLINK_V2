@@ -38,7 +38,7 @@ PROJECT_NUMBER         = 2.0.0
 # for a project that appears at the top of each page and should give viewer 
 # a quick idea about the purpose of the project. Keep the description short.
 
-PROJECT_BRIEF          = "BSD licensed Ethernet POWERLINK stack"
+PROJECT_BRIEF          = "An open-source POWERLINK protocol stack"
 
 # With the PROJECT_LOGO tag one can specify an logo or icon that is 
 # included in the documentation. The maximum height of the logo should not 
@@ -678,24 +678,27 @@ WARN_LOGFILE           =
 # with spaces.
 
 INPUT                  = ../../stack/src \
-                         mainpage.txt \
+                         ../../include \
                          calmodules.txt \
                          usermodules.txt \
                          kernelmodules.txt \
                          commonmodules.txt \
-                         ../cmake.md \
-                         ../supported-platforms/linux-x86.md \
-                         ../supported-platforms/vxworks.md \
+                         ../powerlink.md \
+                         ../openpowerlink.md \
+                         ../platforms.md \
                          ../software-architecture.md \
-                         ../../readme.md \
+                         ../cmake.md \
+                         ../build.md \
+                         ../demos.md \
+                         ../porting-guide.md \
+                         ../coding-guide.md \
+                         ../supported-platforms/linux.md \
+                         ../supported-platforms/vxworks.md \
                          ../supported-platforms/altera-mn.md \
                          ../supported-platforms/altera-cn.md \
                          ../supported-platforms/xilinx.md \
-                         ../supported-platforms/other-platforms.md \
-                         ../porting-guide.md \
-                         ../introduction.md \
-                         ../../include \
-                         ../coding-guide.md \
+                         ../supported-platforms/windows.md \
+                         ../../readme.md \
                          ../../license.md \
                          ../../revision.md
 

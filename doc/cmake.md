@@ -1,5 +1,7 @@
-Building with CMake {#cmake}
+Building with CMake {#page_cmake}
 ===================
+
+[TOC]
 
 For building openPOWERLINK on Linux and Windows the build utility CMake
 ([http://www.cmake.org](http://www.cmake.org)) is used. CMake controls the
@@ -12,7 +14,7 @@ files can be created. On Linux CMake may create:
 * Kdevelop3 - Unix Makefiles
 * CodeBlocks - Unix Makefiles
 
-## Executing CMake
+# Executing CMake {#sect_cmake_exec}
 
 The configuration of different build options of the openPOWERLINK stack will
 be done through the cmake interface.
@@ -33,7 +35,7 @@ There are three possible ways for configuring your build options
   If cmake is called with option -i you can interactively select your build
   options.
 
-## Configuration Options
+# Configuration Options {#sect_cmake_options}
 
 The following build configuration options are available:
 
@@ -88,7 +90,7 @@ The following build configuration options are available:
 
   If enabled, the unit tests will be compiled.
 
-### Linux Configuration Options
+## Linux Configuration Options {#sect_cmake_options_linux}
 
 - **CFG_BUILD_KERNEL_STACK**
 
@@ -127,7 +129,7 @@ The following build configuration options are available:
 
   Requires: *CFG_BUILD_KERNEL_STACK = Linux Kernel Module*
 
-### Windows Configuration Options
+## Windows Configuration Options {#sect_cmake_options_windows}
 
 - **CFG_BUILD_KERNEL_STACK**
 
@@ -138,7 +140,7 @@ The following build configuration options are available:
   application. winpcap will be used as ethernet driver.
 
 
-## Out-of-Source Builds
+# Out-of-Source Builds {#sect_cmake_outofsource}
 
 CMake support out-of-source builds. Therefore, all generated files are located
 in a seperate build directory which keeps your sources clean. It is recommended

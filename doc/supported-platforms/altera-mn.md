@@ -1,7 +1,9 @@
-Altera Nios II Managing Node {#altera-mn}
-============================
+openPOWERLINK MN on Altera Nios II {#page_platform_altera-mn}
+==================================
 
-## Introduction
+[TOC]
+
+# Introduction {#sect_altera-mn_introduction}
 
 The Altera Nios II Managing Node uses the POWERLINK IP-Core,
 which consists of an optimized MAC for POWERLINK (openMAC) and
@@ -15,14 +17,14 @@ which supports the following interface implementations:
 - Altera Avalon interconnect
 - External (de-)multiplexed address-/data-bus
 
-## Contents
+# Contents {#sect_altera-mn_contents}
 
 - FPGA designs with Nios II CPU, POWERLINK and Host Interface IP-Cores.
  - Pcp and Host in single FPGA
  - Pcp and Host in separate FPGAs
 - openCONFIGURATOR project for 10 CNs
 
-## Requirements
+# Requirements {#sect_altera-mn_requirements}
 
 - Altera Quartus II v12.1 SP1 (Web Edition is also possible)
   - <https://www.altera.com/download/archives/arc-index.jsp>
@@ -32,7 +34,7 @@ which supports the following interface implementations:
 - Optional: Second development Board TERASIC_DE2-115 (INK Board) if you want to run the separate FPGA demo.
 - Optional: 40-line ribbon cable to connect two INK boards via JP5 (length as short as possible).
 
-## Hardware Setup
+# Hardware Setup {#sect_altera-mn_hardware}
 
 - Setup for TERASIC_DE2-115 (INK)
  - Download the user guide for the board from the
@@ -49,7 +51,7 @@ which supports the following interface implementations:
  - Connect the two INK boards with a 40-line ribbon cable through JP5.
  - Switch on the two boards with the Power button (SW 18).
 
-## How to build the binaries
+# How to build the binaries {#sect_altera-mn_build}
 
 The Altera Quartus II projects are located in `/fpga/boards/altera/TERASIC_DE2-115.`\n
 The subdirectories starting with `mn_` refer to designs for POWERLINK MN demos:
@@ -78,7 +80,7 @@ Steps 1-5 are only necessary if you want to change the FPGA designs. Otherwise y
 10. Rebuild the Makefile for `mn_pcp` and `demo_mn` also, if the Nios II Design was changed inside Qsys. \n
     `$ ./create-this-app --rebuild`
 
-## How to run the demo
+# How to run the demo {#sect_altera-mn_run}
 
 1. Program SOF file with Quartus II Programmer into FPGA.
    It is located in the following subdirectory of openPOWERLINK main directory: \n
@@ -97,7 +99,7 @@ Steps 1-5 are only necessary if you want to change the FPGA designs. Otherwise y
    `$ nios2-download -i 1 epl.elf --go` \n
 3. Enjoy the running POWERLINK network.
 
-## How to import the project into Nios II Software Build Tools for Eclipse for debugging purposes
+# How to import the project into Nios II Software Build Tools for Eclipse for debugging purposes {#sect_altera-mn_import}
 
 Requirement: Steps in the previous section *How to build the binary* are completed.
 
@@ -109,14 +111,14 @@ Requirement: Steps in the previous section *How to build the binary* are complet
 6. Browse to `stack/make/driver/altera_nios2/mn_pcp` (via the button *Browse...*)
 7. Press the button *Finish*.
 
-## How to write the program to local flash
+# How to write the program to local flash {#sect_altera-mn_flash}
 
 Requirement: Steps in the previous section *How to build the binary* are completed.
 
 1. After successfully building the design use the makefile to program the flash:\n
    `$ make program-epcs`
 
-## Troubleshooting
+# Troubleshooting {#sect_altera-mn_trouble}
 
 1. It is adviced to clean all generated files after switching from one demo to the other.
 2. Always download the Pcp ELF file before the host ELF file.
