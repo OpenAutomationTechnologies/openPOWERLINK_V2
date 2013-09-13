@@ -1,0 +1,29 @@
+//==============================================================================
+/**
+\defgroup modules_common Common Software Modules
+
+These modules provide general functions which are used in both user and kernel
+layer.
+
+*/
+//==============================================================================
+
+//------------------------------------------------------------------------------
+/**
+\defgroup module_event event
+
+\brief Common event handler module
+
+This module provides common functionality for both the user and kernel layer
+event modules.
+
+\see module_eventk
+\see module_eventu
+
+\ingroup modules_common
+*/
+//------------------------------------------------------------------------------
+
+
+
+

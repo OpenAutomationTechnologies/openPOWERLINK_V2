@@ -1,0 +1,128 @@
+//==============================================================================
+/**
+\defgroup kernel_layer openPOWERLINK Kernel Layer
+
+The openPOWERLINK __kernel layer__ contains the lower level and time critical
+modules of the openPOWERLINK stack. The main part of the kernel layer is the data
+link layer (DLL) and its hardware drivers.
+*/
+//==============================================================================
+
+//------------------------------------------------------------------------------
+/**
+\defgroup module_ctrlk ctrlk
+
+\brief Kernel control module
+
+The kernel control module is used for controling the startup and shutdown
+of the kernel stack. It will be controled by the user stack and receives its
+commands through its communication abstraction layer (CAL). Additionally it
+provides status information to the user stack.
+
+\see module_ctrlu
+\see module_ctrlkcal
+
+\ingroup kernel_layer
+*/
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+/**
+\defgroup module_dllk dllk
+
+\brief Kernel DLL module
+
+The kernel data link layer (DLL) module provides the data link layer of the
+openPOWERLINK stack. It implements the DLL state machine and all functions
+to create and process the POWERLINK cycle.
+
+\ingroup kernel_layer
+*/
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+/**
+\defgroup module_errhndk errhndk
+
+\brief Kernel error handler module
+
+The kernel error handler module implements the POWERLINK error handler. It is
+used to manage the POWERLINK error counters.
+
+\see module_errhndu
+\see module_errhndkcal
+
+\ingroup kernel_layer
+*/
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+/**
+\defgroup module_eventk eventk
+
+\brief Kernel event handler module
+
+The kernel event handler provides the interface for posting events to other
+kernel modules. For the receive side it contains a general receive handler
+which will be executed when an event is posted to the kernel layer. The event
+handler examines the event and calls the handler of the module which is
+specified by the sink argument.
+
+To be independent of a specific event queue implementation it uses its
+communication abstraction layer (CAL) for posting and receiving events to/from
+different event queues.
+
+\see module_eventkcal
+
+\ingroup kernel_layer
+*/
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+/**
+\defgroup module_pdok pdok
+
+\brief Kernel PDO module
+
+The kernel PDO module is in charge of handling of process data
+objects (PDO) in the openPOWERLINK kernel layer. It is responsible for
+communication with the data link layer (DLL) to transfer PDOs on the network.
+It communicates with the user layer PDO module through its communication
+abstraction layer module (PDO CAL).
+
+\see module_pdou
+\see module_pdokcal
+
+\ingroup kernel_layer
+*/
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+/**
+\defgroup module_nmtk nmtk
+
+\brief Kernel NMT module
+
+The kernel NMT module provides the general network managemement functions (NMT)
+of the kernel layer. It implements the NMT state machine but it will be
+controlled by the user NMT module.
+
+\see module_nmtu
+
+\ingroup kernel_layer
+*/
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+/**
+\defgroup module_veth veth
+
+\brief Virtual Ethernet driver
+
+The virtual Ethernet driver provides a network interface which can be used
+by applications to send Ethernet packets on the POWERLINK network. The
+Ethernet packets will be transfered in the asynchronous phase of POWERLINK.
+
+\ingroup kernel_layer
+*/
+//------------------------------------------------------------------------------
