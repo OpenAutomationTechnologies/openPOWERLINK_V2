@@ -1,0 +1,414 @@
+//==============================================================================
+/**
+\defgroup cal_layer Communication Abstraction Layer (CAL)
+
+As the user and kernel layers can be implemented on different architectures and
+may even run on different processors, a system that is able to handle the different
+communication paths is needed. The Communication Abstraction Layer (CAL) is a
+set of modules implementing the different communication mechanisms which are
+used between the user and the kernel layer. The user part of the CAL is
+linked to the user layer while the kernel part is linked to the kernel layer.
+
+The following modules need to communicate with the opposite layer and therefore
+need a CAL interface.
+
+![](\ref cal_architecture.png "Architecture of CAL interface")
+
+*/
+//==============================================================================
+
+//------------------------------------------------------------------------------
+/**
+\defgroup cal_layer_ctrl Control module CAL interface
+
+\brief CAL modules which provide the control CAL interface
+
+The control module needs a CAL for transfering control information from the user
+to the kernel layer as well as transfering status information from the kernel to
+the user layer.
+
+![](\ref ctrlcal_architecture.png "Architecture of control CAL interface")
+
+The following CAL module implementations are available:
+- Shared memory block implementation: \ref ctrlucal-mem.c, \ref ctrlkcal-mem.c
+- Direct call implementation: \ref ctrlucal-direct.c, \ref ctrlkcal-direct.c
+- Implementation using IOCTL calls: \ref ctrlucal-ioctl.c, \ref ctrlkcal-linuxkernel.c
+- Host interface implementation: \ref ctrlucal-hostif.c, \ref ctrlkcal-hostif.c
+
+__NOTE:__ Depending on the used communication channel, only one of the available module
+pairs can be compiled into the openPOWERLINK stack at a time.
+
+\ingroup cal_layer
+*/
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+/**
+\defgroup module_ctrlucal ctrlucal
+
+\brief User control CAL module
+
+The user control CAL module provides the communciation abstraction layer (CAL)
+for the user control module to be able to communicate with the kernel stack.
+
+\see module_ctrlkcal
+\see module_ctrlu
+\see module_ctrlk
+
+\ingroup cal_layer_ctrl
+*/
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+/**
+\defgroup module_ctrlkcal ctrlkcal
+
+\brief Kernel control CAL module
+
+The kernel control CAL module provides the communciation abstraction layer (CAL)
+for the kernel control module to be able to communicate with the user stack.
+
+\see module_ctrlk
+\see module_ctrlu
+\see module_ctrlucal
+
+\ingroup cal_layer_ctrl
+*/
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+/**
+\defgroup cal_layer_errhnd Error handler CAL interface
+
+\brief CAL modules which provide the error handler CAL interface
+
+The error handler requires a CAL interface as the error counters need to be updated
+by the data link layer but they are stored in the object dictionary which is
+located in the user layer. As the error counters need to be accessed in
+every cycle, this CAL interface is very time critical.
+
+The solution of this problem is to locate the error counters in the kernel
+layer so that the access in the data link layer is very fast. In order to allow
+an application to read or write the error counters, a object dictionary callback was
+introduced which transfers the error counter variable through the CAL interface.
+
+The following figure shows the architecture of the error handler CAL interface.
+
+![](\ref errhndcal_architecture.png "Architecture of error handler CAL interface")
+
+The following CAL module implementations are available:
+- Local implementation: \ref errhnducal-local.c, \ref errhndkcal-local.c
+- Implementation using IOCTL calls: \ref errhnducal-ioctl.c, \ref errhndkcal-local.c
+- Host interface implementation: \ref errhnducal-hostif.c, \ref errhndkcal-hostif.c
+- Posix shared memory implementation: \ref errhnducal-posixshm.c, \ref errhndkcal-posixshm.c
+
+__NOTE:__ Depending on the used communication channel, only one of the available module
+pairs can be compiled into the openPOWERLINK stack at a time.
+
+\ingroup cal_layer
+*/
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+/**
+\defgroup module_errhnducal errhnducal
+
+\brief User error handler CAL module
+
+This module implements the CAL for the user POWERLINK error handler. It is
+responsible for transfering the error handler information to the kernel layer.
+There may be different implementations of the CAL layer using different
+communication mechanisms.
+
+\see module_errhndu
+\see module_errhndk
+\see module_errhndkcal
+
+\ingroup cal_layer_errhnd
+*/
+
+//------------------------------------------------------------------------------
+/**
+\defgroup module_errhndkcal errhndkcal
+
+\brief Kernel error handler CAL module
+
+This module implements the CAL for the kernel POWERLINK error handler. It is
+responsible for transfering the error handler information to the user layer.
+There may be different implementations of the CAL layer using different
+communication mechanisms.
+
+\see module_errhndk
+\see module_errhndu
+\see module_errhnducal
+
+\ingroup cal_layer_errhnd
+*/
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+/**
+\defgroup cal_layer_event Event handler CAL interface
+
+\brief CAL modules which provide the event handler CAL interface
+
+The event handler CAL interface provides different event queue implementations
+for the different communication mechanisms. The event handler CAL module differs
+from the other CAL modules. Beside the communication path between the user and
+kernel layer, the event CAL module must also provides the event queues inside
+the kernel or the user layer.
+
+![](\ref eventcalqueues.png "Event Queues")
+
+Because each platfrom needs a specific combination of event queue implementations
+for its queues a platform specific eventcal module is needed. This platform
+specific version uses a lower layer of event queue interfaces to implement the
+appropriate event queues.
+
+The following CAL module implementations are currently available:
+- Windows:
+  - \ref eventucal-win32.c, \ref eventkcal-win32.c
+  - \ref eventucalintf-circbuf.c, \ref eventkcalintf-circbuf.c
+- Linux userspace:
+  - \ref eventucal-linux.c, \ref eventkcal-linux.c
+  - \ref eventucalintf-circbuf.c, \ref eventkcalintf-circbuf.c
+- Linux userspace - kernelspace:
+  - \ref eventucal-linuxioctl.c, \ref eventkcal-linuxkernel.c
+  - \ref eventkcalintf-circbuf.c,
+- Dual processor non-OS System using host interface IP core:
+  - \ref eventucal-nooshostif.c, \ref eventkcal-nooshostif.c
+  - \ref eventucalintf-hostif.c, \ref eventkcalintf-hostif.c
+- Single processor non-OS System using circular buffers:
+  - \ref eventucal-nooscircbuf.c, \ref eventkcal-nooscircbuf.c
+  - \ref eventucalintf-circbuf.c, \ref eventkcalintf-circbuf.c
+
+![](\ref eventcal_architecture.png "Architecture of event handler CAL interface")
+
+\ingroup cal_layer
+*/
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+/**
+\defgroup module_eventucal eventucal
+
+\brief User event handler CAL module
+
+The user event CAL module builds the interface between the user event
+module and the different event queue implementations.
+
+The user event CAL module produces events in the user-to-kernel (U2K) and
+user-internal (UInt) queue. It consumes events from the user-internal (UInt)
+and the kernel-to-user (K2U) queue.
+
+A unique implementation is required for each architecture. This implementation
+can use different interface modules (eventucalintf-XXX.c) to implement the event
+queues.
+
+\see module_eventu
+\see module_eventk
+\see module_eventkcal
+
+\ingroup cal_layer_event
+*/
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+/**
+\defgroup module_eventkcal eventkcal
+
+\brief Kernel event handler CAL module
+
+The kernel event CAL module builds the interface between the kernel event
+module and the different event queue implementations.
+
+The kernel event CAL module produces events in the kernel-to-user (K2U) and
+kernel-internal (KInt) queue. It consumes events from the kernel-internal (KInt)
+and the user-to-kernel (U2K) queue.
+
+A unique implementation is required for each architecture. This implementation
+can use different interface modules (eventkcalintf-XXX.c) to implement the event
+queues.
+
+\see module_eventk
+\see module_eventu
+\see module_eventucal
+
+\ingroup cal_layer_event
+*/
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+/**
+\defgroup cal_layer_pdo PDO CAL interface
+
+\brief CAL modules which provide the PDO CAL interface
+
+The PDO CAL interface handles the transfer of isochronous data (PDOs)
+between the user and the kernel layer. In order to be able to access the data
+asynchonously without blocking the other side, a triple buffer mechanism is
+introduced.
+
+The PDO CAL interface is made up of two parts:
+- The PDO sync modules
+- The PDO memory modules
+
+### The PDO sync modules
+
+The PDO sync modules are responsible for notifying the user side at the
+configured sync point so that the application can handle the isochronous data.
+There are several sync modules available for the different architectures and
+platforms. Only one sync module pair can be compiled into the stack at a time!
+
+### The PDO memory modules
+
+The triple buffer copy mechanism requires memory to be shared between the user
+and the kernel layer. The PDO CAL memory modules provide this memory for the CAL
+interface. There are several architecture specific memory modules available.
+Only one memory module pair could be compiled into the stack at a time!
+
+![](\ref pdocal_architecture.png "Architecture of PDO CAL interface")
+
+\ingroup cal_layer
+*/
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+/**
+\defgroup module_pdoucal pdoucal
+
+\brief User PDO CAL module
+
+The user PDO CAL module provides the communication abstraction layer (CAL)
+for the user PDO module. The CAL module provides a communication mechanism
+for the user layer PDO module. Multiple implementations for this communication
+can be implemented.
+
+\see module_pdou
+\see module_pdok
+\see module_pdokcal
+
+\ingroup cal_layer_pdo
+*/
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+/**
+\defgroup module_pdokcal pdokcal
+
+\brief Kernel PDO CAL module
+
+The kernel PDO CAL module provides the communication abstraction layer (CAL)
+for the kernel PDO module.
+
+\see module_pdou
+\see module_pdok
+
+\ingroup cal_layer_pdo
+*/
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+/**
+\defgroup cal_layer_dll DLL CAL interface
+
+\brief CAL modules which provide the DLL CAL interface
+
+The data link layer (DLL) also needs a CAL interface. It is required for handling
+of asynchronous messages. It provides an interface to user modules for sending
+and receiving asynchronous frames.
+
+![](\ref dllcal_architecture.png "Architecture of DLL CAL interface")
+
+The following CAL module implementations are available:
+- Direct call implementation: \ref dllcal-direct.c
+- Implementation using circbuffer library: \ref dllucal-circbuf.c, \ref dllkcal-circbuf.c
+- Host interface implementation: \ref dllcal-hostif.c
+- Implementation using IOCTL calls: \ref dllucal-ioctl.c, \ref dllkcal-linuxkernel.c
+
+__NOTE:__ Depending on the used communication channel, only one of the available module
+pairs can be compiled into the openPOWERLINK stack at a time.
+
+\ingroup cal_layer
+*/
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+/**
+\defgroup module_dllucal dllucal
+
+\brief User DLL CAL module
+
+The user DLL CAL module provides an interface to user modules for sending and
+recieving asynchronous data.
+
+\see module_dllk
+\see module_dllkcal
+
+\ingroup cal_layer_dll
+*/
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+/**
+\defgroup module_dllkcal dllkcal
+
+\brief Kernel DLL CAL module
+
+This module implements the kernel part of the DLL CAL interface.
+
+\see module_dllk
+\see module_dllucal
+
+\ingroup cal_layer_dll
+*/
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+/**
+\defgroup module_eventcal eventcal
+
+\brief Common event handler CAL module
+
+This module provides common functionality for both the user and kernel layer
+event CAL modules.
+
+\see module_eventkcal
+\see module_eventucal
+
+\ingroup cal_layer_event
+*/
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+/**
+\defgroup module_ctrlcal ctrlcal
+
+\brief Common control CAL module
+
+The module provides common functionality for both the user and kernel layer
+control CAL modules.
+
+\see module_ctrlkcal
+\see module_ctrlucal
+
+\ingroup cal_layer_ctrl
+*/
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+/**
+\defgroup module_dllcal dllcal
+
+\brief Common dll handler CAL module
+
+This module provides common functionality for both the user and kernel layer
+DLL CAL modules.
+
+\see module_dllucal
+\see module_dllkcal
+
+\ingroup cal_layer_dll
+*/
+//------------------------------------------------------------------------------
+

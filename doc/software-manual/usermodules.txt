@@ -1,0 +1,230 @@
+//==============================================================================
+/**
+\defgroup user_layer openPOWERLINK User Layer
+
+The openPOWERLINK __user layer__ provides the upper layer of the openPOWERLINK
+stack. It contains the interface to the application and the higher level modules.
+*/
+//==============================================================================
+
+//-----------------------------------------------------------------------------
+/**
+\defgroup module_api api
+
+\brief Application programming interface module
+
+The API module implements the application programming interface of the
+openPOWERLINK stack. It provides all functions used by an application to
+interact with the openPOWERLINK stack.
+
+\ingroup user_layer
+*/
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+/**
+\defgroup module_ctrlu ctrlu
+
+\brief User control module
+
+The user control module is responsible for startup and shutdown
+of the stack. It communicates whith the kernel control module by its CAL layer.
+
+\see module_ctrlk
+\see module_ctrlucal
+
+\ingroup user_layer
+*/
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+/**
+\defgroup module_errhndu errhndu
+
+\brief User error handler module
+
+The user error handler module implements the parts of the error handler located
+in the user layer. The user layer parts are responsible to synchronize the
+error counters and thresholds located in the kernel with the appropriate objects
+in the object dictionary.
+
+\see module_errhndk
+\see module_errhnducal
+
+\ingroup user_layer
+*/
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+/**
+\defgroup module_eventu eventu
+
+\brief User event handler module
+
+The user event handler module provides the interface for posting events to
+other user and kernel modules. For the receiving side it contains a general
+receive handler which will be executed when an event is posted to the user
+layer. The event handler examines the event and calls the handler of the module
+which is specified by the sink argument.
+
+To be independent of a specific event queue implementation it uses its
+communication abstraction layer (CAL) for posting and receiving events to/from
+different event queues.
+
+\see module_eventucal
+
+\ingroup user_layer
+*/
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+/**
+\defgroup module_pdou pdou
+
+\brief User layer PDO module
+
+The user PDO module is responsible for exchanging process image data with the
+application using the process image API. Transmit data will be encoded to the
+configured PDOs and transfered to the kernel layer. Receive data will be
+received from the kernel layer and transfered to the application using the
+process image module.
+
+For communication with the kernel PDO module the user PDO communication
+abstraction layer (PDO CAL) is used.
+
+\see module_pdok
+
+\ingroup user_layer
+*/
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+/**
+\defgroup user_layer_nmt NMT Modules
+
+\brief User NMT modules
+
+The user NMT modules provide the network managemement functions (NMT)
+of the user layer.
+
+\ingroup user_layer
+*/
+//------------------------------------------------------------------------------
+
+
+//------------------------------------------------------------------------------
+/**
+\defgroup module_nmtu nmtu
+
+\brief User NMT module
+
+The user NMT module provides the general network managemement functions (NMT)
+of the user layer.
+
+\see module_nmtmnu
+\see module_nmtcnu
+\see module_statusu
+\see module_identu
+\see module_syncu
+\see module_nmtk
+
+\ingroup user_layer_nmt
+*/
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+/**
+\defgroup module_nmtmnu nmtmnu
+
+\brief User NMT-MN module
+
+The user NMT-MN module provides the network managemement functions (NMT) for
+the Managing Node (MN).
+
+\see module_nmucnu
+\see module_nmtu
+
+\ingroup user_layer_nmt
+*/
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+/**
+\defgroup module_nmtcnu nmtcnu
+
+\brief User NMT-CN module
+
+The user NMT-CN module provides the network managemement functions (NMT) for
+the controlled node (CN).
+
+\see module_nmumnu
+\see module_nmtu
+
+\ingroup user_layer_nmt
+*/
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+/**
+
+\defgroup module_identu identu
+
+\brief User ident module
+
+The user ident module provides the functions for handling
+IdentRequest/IdentResponse frames.
+
+\ingroup user_layer_nmt
+*/
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+/**
+\defgroup module_statusu statusu
+
+\brief User status module
+
+The user status module provides the functions for handling
+StatusRequest/StatusResponse frames.
+
+\ingroup user_layer_nmt
+*/
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+/**
+\defgroup module_syncu syncu
+
+\brief User sync module
+
+The user sync module provides the functions for handling
+SyncRequest/SyncResponse frames used by poll response chaining.
+
+\ingroup user_layer_nmt
+*/
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+/**
+\defgroup module_cfmu cfmu
+
+\brief Configuration manager module
+
+The configuration file manager (CFM) module is responsible for reading the
+CDC file and configuring the CNs using SDO transfers.
+
+\ingroup user_layer
+*/
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+/**
+\defgroup module_ledu ledu
+
+\brief User LED module
+
+The user LED module is responsible to control the POWERLIK status and error
+LEDs. The LEDs reflect the current status of the stack.
+\ingroup user_layer
+*/
+//------------------------------------------------------------------------------

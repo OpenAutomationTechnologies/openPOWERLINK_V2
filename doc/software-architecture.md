@@ -1,41 +1,22 @@
-Software Architecture {#software-architecture}
+Software Architecture {#page_software-architecture}
 =====================
 
-The following picture shows the generel software architecture of the openPOWERLINK
+[TOC]
+
+The following picture shows the software architecture of the openPOWERLINK
 stack.
 
 ![](\ref openpowerlink_architecture.png)
 
-## openPOWERLINK User Layer
+The openPOWERLINK stack is separated into a user layer and a kernel layer. The user
+layer contains the higher level parts wheras the kernel layer contains the lower
+level and time critical parts. The communication between user and kernel layer
+is performed by a communication abstraction layer (CAL). 
 
-### Error handler
-- \ref module_errhndu
-- \ref module_errhnducal
-
-### PDO
-- \ref module_pdou
-- \ref module_pdoucal
-
-### Control
-- \ref module_ctrlu
-
-## openPOWERLINK Kernel Layer
-
-### Error Handler
-- \ref module_errhndk
-- \ref module_errhndkcal
-
-### PDO
-- \ref module_pdok
-- \ref module_pdokcal
-
-### Control
-- \ref module_ctrlk
+- \ref user_layer
+- \ref kernel_layer
+- \ref cal_layer
+- \ref modules_common
 
 
-## Common Modules
-
-### Event Handler
-- \ref module_event
-- \ref module_eventcal
 

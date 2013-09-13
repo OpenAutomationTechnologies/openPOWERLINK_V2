@@ -679,7 +679,10 @@ WARN_LOGFILE           =
 
 INPUT                  = ../../stack/src \
                          mainpage.txt \
-                         modules.txt \
+                         calmodules.txt \
+                         usermodules.txt \
+                         kernelmodules.txt \
+                         commonmodules.txt \
                          ../cmake.md \
                          ../supported-platforms/linux-x86.md \
                          ../supported-platforms/vxworks.md \
