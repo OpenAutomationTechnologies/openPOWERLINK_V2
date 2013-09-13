@@ -1,22 +1,24 @@
-openPOWERLINK on Linux X86 {#linux-x86}
-==========================
+openPOWERLINK on Linux {#page_platform_linux}
+======================
 
-## Introduction
+[TOC]
 
-This file contains documentation for the openPOWERLINK stack on Linux x86.
+# Introduction {#sect_linux_intro}
 
-## Requirements
+This file contains documentation for the openPOWERLINK stack on Linux.
 
-### POWERLINK network
+# Requirements {#sect_linux_require}
+
+## POWERLINK network {#sect_linux_plknet}
 
 - POWERLINK network with controlled nodes (CN)
   * openPOWERLINK controlled nodes, e.g. Altera-based FPGA evaluation boards
   * B&R POWERLINK controlled nodes
   * other POWERLINK controlled nodes
 
-### Network Controller
+## Network Controller {#sect_linux_controller}
 One of the following network controllers is required to run openPOWERLINK on
-Linux x86.
+Linux.
 
 - Network controller card with Intel 82573L (or compatible) 1GBit Ethernet chip  
   For example:
@@ -44,7 +46,7 @@ Linux x86.
 - Standard Linux network controller through libpcap library  
     (for user-space stack version)
 
-### Linux Kernel
+## Linux Kernel {#sect_linux_kernel}
 - Linux kernel version 2.6.23 or later with CONFIG_HIGH_RES_TIMERS enabled
      * this needs ACPI support, maybe you need to append "`highres=on`" or
        "`acpi=force`" to kernel command line for older BIOSes)
@@ -52,7 +54,7 @@ Linux x86.
 
            $ cat /proc/timer_list | grep 'hres_active'
 
-#### Real-Time Kernel
+### Real-Time Kernel
 
 For best performance and minimal jitter on the POWERLINK cycle a real-time
 Linux kernel is recommended. The RT-Preempt patch maintaind by Ingo Molnar
@@ -100,24 +102,24 @@ behaviour on a _multicore_ processor:
 * Disable IRQ balancing by disable irqbalance. This depends on your
   Linux distribution. For example in Ubuntu edit `/etc/default/irqbalance`
 
-### Libraries and Tools
+## Libraries and Tools {#sect_linux_libs}
 
-#### CMake
+### CMake
 For building the openPOWERLINK stack and demo applications the Open Source
 cross-platform build tool CMake is used ([http://www.cmake.org]). CMake
 version V2.8 or higher is required.
 
-For a detailed description of the cmake options look at the [cmake documentation](\ref cmake).
+For a detailed description of the cmake options look at the [cmake documentation](\ref page_cmake).
 
-#### libpcap library
+### libpcap library
 In order to use the userspace POWERLINK stack the libpcap library is needed
 to access the Ethernet interface.
 
-#### QT4 development tools
+### QT4 development tools
 If you want to build the QT demo application the QT4 development tools must
 be installed on the system.
 
-#### openCONFIGURATOR
+### openCONFIGURATOR
 For configuration of your POWERLINK network the Open Source configuration
 tool openCONFIGURATOR should be used. The tool is available as SourceForge
 project. [http://sourceforge.net/projects/openconf/](http://sourceforge.net/projects/openconf/)
@@ -140,7 +142,7 @@ and application:
   manager (CFM) module of the MN.
 
 
-## openPOWERLINK Stack
+# openPOWERLINK Stack {#sect_linux_stack}
 
 The openPOWERLINK stack is divided in a user- and a kernel part. Whereas in
 previous versions the whole stack runs in the same domain, the current stack
@@ -162,15 +164,15 @@ are possible:
   could be configured to use one of the available openPOWERLINK ethernet
   drivers.
 
-### openPOWERLINK kernel stack
+## openPOWERLINK kernel stack {#sect_linux_kernel_stack}
 
-#### Direct Link to Application
+### Direct Link to Application
 
 If the openPOWERLINK stack is configured to be directly linked to the application
 there is no need of a separate stack daemon. The whole stack is compiled into
 the library libpowerlink.a. This library has to be linked by your application.
 
-#### Linux Userspace Daemon
+### Linux Userspace Daemon
 
 The kernel part of the stack is compiled as a separate userspace process. It
 uses the libpcap library for accessing the network interface and is therefore
@@ -180,7 +182,7 @@ of the kernel space stack!
 
 The Linux userspace daemon is located in: `stack/make/driver/linux/powerlink_userspace_daemon`
 
-#### Linux Kernel Module
+### Linux Kernel Module
 
 The openPOWERLINK stack may be implemented as Linux kernel module. This
 solution provides the best performance, but is limited to the available
@@ -188,9 +190,9 @@ openPOWERLINK network drivers.
 
 The linux kernel module is located in: `stack/make/driver/linux/powerlink_kernel_module`
 
-### openPOWERLINK stack library
+## openPOWERLINK stack library {#sect_linux_stacklib}
 
-#### openPOWERLINK stack library - complete stack
+### openPOWERLINK stack library - complete stack
 
 The openPOWERLINK stack library contains the whole openPOWERLINK stack. If you
 want to create an openPOWERLINK application which contains the stack in a
@@ -202,7 +204,7 @@ In this case you are using the libpcap library to access the ethernet device.
 The openPOWERLINK stack library is located in: `stack/make/lib/libpowerlink`
 
 
-#### openPOWERLINK user part library - user part of stack
+### openPOWERLINK user part library - user part of stack
 
 If you are using a separated kernel stack (either user space daemon or kernel
 module) you need to link your application to the user part stack library
@@ -211,7 +213,7 @@ or a special openPOWERLINK ethernet driver to access the ethernet interface.
 
 The openPOWERLINK user part stack library is located in: `stack/make/lib/libpowerlink_user`
 
-## Tools
+# Tools {#sect_linux_tools}
 
 There are some shellscripts used for loading POWERLINK modules, setting
 thread priorities etc.
@@ -219,43 +221,19 @@ thread priorities etc.
 These tools are located in: `tools/linux`
 
 
-## Demo applications
+# Demo applications {#sect_linux_demos}
 
-There are several demo applications available. The POWERLINK demo applications
-are able to visualize the digital inputs of POWERLINK controlled nodes and are
-driving a running light on the CNs digital outputs.
+There are several [demo applications](\ref page_demos) available. The POWERLINK
+demo applications are able to visualize the digital inputs of POWERLINK controlled
+nodes and are driving a running light on the CNs digital outputs.
 
-### QT MN demo
-  
-This QT demo implements a POWERLINK managing node (MN) using the configuration
-manager (CFM) to initialize the controlled nodes. It uses a network configuration
-created with the openCONFIGURATOR tool.
-  
-It is found in: `examples/demo_mn_qt`
+# Building {#sect_linux_build}
 
-### Console MN demo
-
-This demo also implements a POWERLINK MN with CFM. It is implemented as
-console application and is intended to machines where no graphical user
-interface is available.
-
-It is located in: `examples/demo_mn_console`
-
-### Console CN demo
-  
-This demo implements a POWERLINK CN digital I/O node according to CiA401
-profile. It is implemented as console application.
-
-It is located in: `examples/demo_cn_console`
-
-
-## Building
-
-### CMake
-For building openPOWERLINK on Linux the build utility [CMake](\ref cmake)
+## CMake
+For building openPOWERLINK on Linux the build utility [CMake](\ref page_cmake)
 is used. 
 
-### Build Instructions
+## Build Instructions
 
 Follow the steps below to build the stack and demo applications:
 
@@ -294,9 +272,9 @@ Follow the steps below to build the stack and demo applications:
   directory (Default:bin). There, the stack and demos can be started.
 
 
-## Running POWERLINK
+# Running POWERLINK {#sect_linux_running}
 
-### Starting the kernel module
+## Starting the kernel module
 
 To start the POWERLINK kernel modules, the scripts plkload and plkunload are
 used. The scripts will be installed in the installation directory. Additionally
@@ -316,7 +294,7 @@ To unload the kernel module:
     > cd bin
     > sudo ./plkunload powerlink82573.ko
 
-### Starting the userspace daemon
+## Starting the userspace daemon
 
 If the stack is configured to use the Linux userspace daemon, you must start it
 before starting your application. The userspace daemon is started by the following
@@ -325,9 +303,9 @@ command:
     > cd bin
     > sudo ./powerlink_mn_daemon
 
-### Starting the demo application
+## Starting the demo application
 
-#### Demo uses separate kernel stack daemon
+### Demo uses separate kernel stack daemon
 
 If the demo application is configured to use a seperately compiled kernel stack
 you have to ensure that the kernel stack daemon is running before you start your
@@ -336,7 +314,7 @@ application. Then you could start it by:
     > cd bin
     > sudo ./demo_mn_qt
 
-#### Demo is directly linked with the kernel stack
+### Demo is directly linked with the kernel stack
 
 If the demo application is  linked with the complete openPOWERLINK stack, you
 could directly start it:
@@ -353,16 +331,16 @@ specifcy the used ethernet interface. For example:
     > sudo ./set_prio eth1
 
 
-## Troubleshooting
+# Troubleshooting {#sect_linux_trouble}
 
-### Linux userspace stack
+## Linux userspace stack
 
 - The userspace based application doesn't find a network interface
 
   Be sure that the pcap library is installed and you are running the demo
   as root.
 
-### Linux kernelspace stack
+## Linux kernelspace stack
 
 - Linux kernel space: Check the kernel log
       $ dmesg

@@ -2,23 +2,45 @@
   <!-- Navigation index tabs for HTML output -->
   <navindex>
     <tab type="mainpage" visible="yes" title=""/>
-    <tab type="pages" visible="yes" title="" intro=""/>
-    <tab type="modules" visible="yes" title="" intro=""/>
-    <tab type="namespaces" visible="yes" title="">
-      <tab type="namespacelist" visible="yes" title="" intro=""/>
-      <tab type="namespacemembers" visible="yes" title="" intro=""/>
+    <tab type="user" url="\ref page_powerlink" title="Ethernet POWERLINK"/>
+    <tab type="usergroup" title="openPOWERLINK Stack" url="\ref page_openpowerlink">
+      <tab type="usergroup" title="Supported Platforms" url="\ref page_platforms">
+          <tab type="user" url="\ref page_platform_linux" title="Linux"/>
+          <tab type="user" url="\ref page_platform_windows" title="Windows"/>
+          <tab type="user" url="\ref page_platform_vxworks" title="VxWorks"/>
+          <tab type="user" url="\ref page_platform_xilinx" title="Xilinx"/>
+          <tab type="user" url="\ref page_platform_altera-mn" title="Altera(MN)"/>
+          <tab type="user" url="\ref page_platform_altera-cn" title="Altera(CN)"/>
+      </tab>
+      <tab type="usergroup" title="Building" url="\ref page_build">
+        <tab type="user" url="\ref page_cmake" title="Building with CMAKE"/>
+      </tab>
     </tab>
-    <tab type="classes" visible="yes" title="">
-      <tab type="classlist" visible="yes" title="" intro=""/>
-      <tab type="classindex" visible="$ALPHABETICAL_INDEX" title=""/> 
-      <tab type="hierarchy" visible="yes" title="" intro=""/>
-      <tab type="classmembers" visible="yes" title="" intro=""/>
+    <tab type="usergroup" title="Software Manual">
+      <tab type="user" url="\ref page_software-architecture" title="Software Architecture"/>
+      <tab type="modules" visible="yes" title="" intro=""/>
+      <tab type="namespaces" visible="no" title="">
+        <tab type="namespacelist" visible="yes" title="" intro=""/>
+        <tab type="namespacemembers" visible="yes" title="" intro=""/>
+      </tab>
+      <tab type="classes" visible="yes" title="">
+       <tab type="classlist" visible="yes" title="" intro=""/>
+       <tab type="classindex" visible="$ALPHABETICAL_INDEX" title=""/>
+       <tab type="hierarchy" visible="yes" title="" intro=""/>
+       <tab type="classmembers" visible="yes" title="" intro=""/>
+      </tab>
+      <tab type="files" visible="yes" title="">
+        <tab type="filelist" visible="yes" title="" intro=""/>
+        <tab type="globals" visible="yes" title="" intro=""/>
+      </tab>
+      <tab type="examples" visible="yes" title="" intro=""/>
     </tab>
-    <tab type="files" visible="yes" title="">
-      <tab type="filelist" visible="yes" title="" intro=""/>
-      <tab type="globals" visible="yes" title="" intro=""/>
+    <tab type="usergroup" title="Contribute">
+        <tab type="user" url="\ref page_porting-guide" title="Porting openPOWERLINK"/>
+        <tab type="user" url="\ref page_coding" title="Coding Guidelines"/>
     </tab>
-    <tab type="examples" visible="yes" title="" intro=""/>  
+    <tab type="user" url="\ref page_revision_history" title="Revision History"/>
+    <tab type="user" url="\ref page_licenses" title="Licenses"/>
   </navindex>
 
   <!-- Layout definition for a class page -->
