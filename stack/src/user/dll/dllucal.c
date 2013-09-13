@@ -4,10 +4,13 @@
 
 \brief  User DLL CAL module
 
-This file contains the user DLL CAL mdodule
+This file contains the user DLL CAL module.
 
-Copyright (c) 2012, SYSTEC electronik GmbH
-Copyright (c) 2012, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+\ingroup module_dllucal
+*******************************************************************************/
+/*------------------------------------------------------------------------------
+Copyright (c) 2013, SYSTEC electronic GmbH
+Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -31,7 +34,7 @@ LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
 ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*******************************************************************************/
+------------------------------------------------------------------------------*/
 
 //------------------------------------------------------------------------------
 // includes
@@ -109,7 +112,9 @@ static tEplKernel SetAsndServiceIdFilter(tDllAsndServiceId ServiceId_p,
 
 This function initializes the user DLL CAL module.
 
-\return Returns an error code
+\return The function returns a tEplKernel error code.
+
+\ingroup module_dllucal
 */
 //------------------------------------------------------------------------------
 tEplKernel dllucal_init(void)
@@ -159,7 +164,9 @@ Exit:
 
 This function cleans up the user DLL CAL module
 
-\return Returns an error code
+\return The function returns a tEplKernel error code.
+
+\ingroup module_dllucal
 */
 //------------------------------------------------------------------------------
 tEplKernel dllucal_exit(void)
@@ -185,7 +192,9 @@ The function processes an asynchronous frame event
 
 \param  pEvent_p				Event to process
 
-\return Returns an error code
+\return The function returns a tEplKernel error code.
+
+\ingroup module_dllucal
 */
 //------------------------------------------------------------------------------
 tEplKernel dllucal_process(tEplEvent * pEvent_p)
@@ -233,7 +242,9 @@ This function posts a DLL configuration event to the kernel DLL CAL module
 
 \param  pDllConfigParam_p       Pointer to the DLL configuration parameters
 
-\return Returns an error code
+\return The function returns a tEplKernel error code.
+
+\ingroup module_dllucal
 */
 //------------------------------------------------------------------------------
 tEplKernel dllucal_config(tDllConfigParam * pDllConfigParam_p)
@@ -259,7 +270,9 @@ configure the identity of a local node for IdentResponse.
 
 \param  pDllIdentParam_p        Pointer to ident parameters
 
-\return Returns an error code
+\return The function returns a tEplKernel error code.
+
+\ingroup module_dllucal
 */
 //------------------------------------------------------------------------------
 tEplKernel dllucal_setIdentity(tDllIdentParam * pDllIdentParam_p)
@@ -286,7 +299,9 @@ ID with the specified node ID filter.
 \param  pfnDlluCbAsnd_p         Pointer to callback function.
 \param  filter_p                Node filter ID.
 
-\return Returns an error code
+\return The function returns a tEplKernel error code.
+
+\ingroup module_dllucal
 */
 //------------------------------------------------------------------------------
 tEplKernel dllucal_regAsndService(tDllAsndServiceId serviceId_p,
@@ -325,7 +340,9 @@ This function sends an asynchronous fram with the specified priority.
                                 includes the ethernet header (14 bytes).
 \param  priority_p              Priority for sending this frame.
 
-\return Returns an error code
+\return The function returns a tEplKernel error code.
+
+\ingroup module_dllucal
 */
 //------------------------------------------------------------------------------
 tEplKernel dllucal_sendAsyncFrame(tFrameInfo * pFrameInfo_p,
@@ -379,7 +396,9 @@ This function issues a StatusRequest or an IdentRequest to the specified node.
 \param  soaFlag1_p              Flag1 for this node (transmit in SoA and PReq).
                                 If 0xff this flag is ignored.
 
-\return Returns an error code.
+\return The function returns a tEplKernel error code.
+
+\ingroup module_dllucal
 */
 //------------------------------------------------------------------------------
 tEplKernel dllucal_issueRequest(tDllReqServiceId service_p, UINT nodeId_p,
@@ -422,7 +441,9 @@ This function issues a SyncRequest or an IdentRequest to the specified node.
 \param  pSyncRequest_p          Pointer to sync request structure.
 \param  size_p                  Size of sync request structure.
 
-\return Returns an error code.
+\return The function returns a tEplKernel error code.
+
+\ingroup module_dllucal
 */
 //------------------------------------------------------------------------------
 #if EPL_DLL_PRES_CHAINING_MN != FALSE
@@ -448,7 +469,9 @@ kEplEventTypeDllkConfigNode event to the kernel DLL CAL module.
 
 \param  pNodeInfo_p             Pointer to node info structure.
 
-\return Returns an error code
+\return The function returns a tEplKernel error code.
+
+\ingroup module_dllucal
 */
 //------------------------------------------------------------------------------
 tEplKernel dllucal_configNode(tDllNodeInfo* pNodeInfo_p)
@@ -476,7 +499,9 @@ kEplEventTypeDllkAddNode event to the kernel DLL CAL module.
 
 \param  pNodeOpParam_p          Pointer to node info structure
 
-\return Returns an error code
+\return The function returns a tEplKernel error code.
+
+\ingroup module_dllucal
 */
 //------------------------------------------------------------------------------
 tEplKernel dllucal_addNode(tDllNodeOpParam* pNodeOpParam_p)
@@ -503,8 +528,9 @@ a kEplEventTypeDllkDelNode event to the kernel DLL CAL module.
 
 \param  pNodeOpParam_p          Pointer to node	info structure
 
-\return Returns an error code
+\return The function returns a tEplKernel error code.
 
+\ingroup module_dllucal
 */
 //------------------------------------------------------------------------------
 tEplKernel dllucal_deleteNode(tDllNodeOpParam* pNodeOpParam_p)
@@ -537,7 +563,7 @@ The function forwards a filter event to the kernel DLL CAL module.
 \param  serviceId_p             ASnd Service ID to forward.
 \param  filter_p                Node ID filter to forward.
 
-\return Returns an error code
+\return The function returns a tEplKernel error code.
 */
 //------------------------------------------------------------------------------
 static tEplKernel SetAsndServiceIdFilter(tDllAsndServiceId serviceId_p,

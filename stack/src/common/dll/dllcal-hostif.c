@@ -146,7 +146,7 @@ Add a host interface queue instance for TX packet forwarding in DLL CAL
 \param  ppDllCalQueue_p         double-pointer to DllCal Queue instance
 \param  dllCalQueue_p           parameter that determines the queue
 
-\return Returns an error code
+\return The function returns a tEplKernel error code.
 \retval kEplSuccessful          if function executes correctly
 \retval other                   error
 */
@@ -230,7 +230,7 @@ Delete the host interface queue instance.
 
 \param  pDllCalQueue_p          Pointer to DllCal Queue instance
 
-\return Returns an error code
+\return The function returns a tEplKernel error code.
 \retval kEplSuccessful          if function executes correctly
 \retval other                   error
 */
@@ -264,7 +264,7 @@ be of any type (e.g. TX packet).
 \param  pDataSize_p             Pointer to the size of the data block to be
                                 insert
 
-\return Returns an error code
+\return The function returns a tEplKernel error code.
 \retval kEplSuccessful          if function executes correctly
 \retval other                   error
 */
@@ -317,7 +317,7 @@ of any type (e.g. TX packet).
 \param  pDataSize_p             Pointer to the size of the data buffer
                                 (will be replaced with actual data block size)
 
-\return Returns an error code
+\return The function returns a tEplKernel error code.
 \retval kEplSuccessful          if function executes correctly
 \retval other                   error
 */
@@ -366,7 +366,7 @@ Returns the data block counter.
 \param  pDllCalQueue_p          Pointer to DllCal Queue instance
 \param  pDataBlockCount_p       Pointer which returns the data block count
 
-\return Returns an error code
+\return The function returns a tEplKernel error code.
 \retval kEplSuccessful          if function executes correctly
 \retval other                   error
 */
@@ -407,7 +407,7 @@ Resets the host interface queue instance after a given timeout.
 \param  pDllCalQueue_p          pPinter to DllCal Queue instance
 \param  timeOutMs_p             Timeout before buffer reset is done
 
-\return Returns an error code
+\return The function returns a tEplKernel error code.
 \retval kEplSuccessful          if function executes correctly
 \retval other                   error
 */
