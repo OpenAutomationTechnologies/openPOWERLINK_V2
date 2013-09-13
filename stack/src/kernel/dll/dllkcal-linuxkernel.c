@@ -7,7 +7,10 @@
 This file contains the implementation of the DLL CAL module for the
 Linux kernel.
 
-Copyright (c) 2012, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+\ingroup module_dllkcal
+*******************************************************************************/
+/*------------------------------------------------------------------------------
+Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -31,7 +34,7 @@ LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
 ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*******************************************************************************/
+------------------------------------------------------------------------------*/
 
 //------------------------------------------------------------------------------
 // includes
@@ -123,6 +126,8 @@ This function returns a pointer to the function interface structure which
 is used to access the dllcal functions of the shared buffer implementation.
 
 \return Returns a pointer to the local function interface
+
+\ingroup module_dllkcal
 */
 //------------------------------------------------------------------------------
 tDllCalFuncIntf* dllkcalcircbuf_getInterface(void)
@@ -143,7 +148,7 @@ Add an instance for TX packet forwarding in DLL CAL.
 \param  ppDllCalQueue_p         double-pointer to DllCal Queue instance
 \param  dllCalQueue_p           parameter that determines the queue
 
-\return Returns an error code
+\return The function returns a tEplKernel error code.
 \retval kEplSuccessful          if function executes correctly
 \retval other                   error
 */
@@ -207,7 +212,7 @@ Delete the DLL CAL instance.
 
 \param  pDllCalQueue_p          Pointer to DllCal Queue instance
 
-\return Returns an error code
+\return The function returns a tEplKernel error code.
 \retval kEplSuccessful          if function executes correctly
 \retval other                   error
 */
@@ -238,7 +243,7 @@ Inserts a data block into the DLL CAL queue.
 \param  pDataSize_p             Pointer to the size of the data block to be
                                 insert
 
-\return Returns an error code
+\return The function returns a tEplKernel error code.
 \retval kEplSuccessful          if function executes correctly
 \retval other                   error
 */
@@ -289,7 +294,7 @@ Gets a data block from the DLL CAL queue.
 \param  pDataSize_p             Pointer to the size of the data buffer
                                 (will be replaced with actual data block size)
 
-\return Returns an error code
+\return The function returns a tEplKernel error code.
 \retval kEplSuccessful          if function executes correctly
 \retval other                   error
 */
@@ -340,7 +345,7 @@ Returns the data block counter.
 \param  pDllCalQueue_p          Pointer to DllCal Queue instance
 \param  pDataBlockCount_p       Pointer which returns the data block count
 
-\return Returns an error code
+\return The function returns a tEplKernel error code.
 \retval kEplSuccessful          if function executes correctly
 \retval other                   error
 */
@@ -375,7 +380,7 @@ Resets the DLL CAL queue instance after a given timeout.
 \param  pDllCalQueue_p          pointer to DllCal Queue instance
 \param  timeOutMs_p             Timeout before buffer reset is done
 
-\return Returns an error code
+\return The function returns a tEplKernel error code.
 \retval kEplSuccessful          if function executes correctly
 \retval other                   error
 */

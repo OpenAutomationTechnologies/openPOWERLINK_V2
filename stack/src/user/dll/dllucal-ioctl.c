@@ -6,6 +6,8 @@
 
 This file contains an implementation of the user dll CAL module which uses
 Linux ioctl for communication with the kernel layer.
+
+\ingroup module_dllucal
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
@@ -123,6 +125,8 @@ This function returns a pointer to the function interface structure which
 is used to access the dllcal functions of the shared buffer implementation.
 
 \return Returns a pointer to the local function interface
+
+\ingroup module_dllucal
 */
 //------------------------------------------------------------------------------
 tDllCalFuncIntf* dllcalioctl_getInterface(void)
@@ -143,7 +147,7 @@ Add an instance for TX packet forwarding in DLL CAL.
 \param  ppDllCalQueue_p         double-pointer to DllCal Queue instance
 \param  dllCalQueue_p           parameter that determines the queue
 
-\return Returns an error code
+\return The function returns a tEplKernel error code.
 \retval kEplSuccessful          if function executes correctly
 \retval other                   error
 */
@@ -179,7 +183,7 @@ Delete the DLL CAL instance.
 
 \param  pDllCalQueue_p          Pointer to DllCal Queue instance
 
-\return Returns an error code
+\return The function returns a tEplKernel error code.
 \retval kEplSuccessful          if function executes correctly
 \retval other                   error
 */
@@ -203,7 +207,7 @@ Inserts a data block into the DLL CAL queue.
 \param  pDataSize_p             Pointer to the size of the data block to be
                                 insert
 
-\return Returns an error code
+\return The function returns a tEplKernel error code.
 \retval kEplSuccessful          if function executes correctly
 \retval other                   error
 */

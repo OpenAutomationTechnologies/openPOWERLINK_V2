@@ -4,10 +4,13 @@
 
 \brief  Kernel DLL CAL module
 
-This file contains the source for the kernel DLL CAL module
+This file contains the kernel DLL CAL module.
 
-Copyright (c) 2012, SYSTEC electronik GmbH
-Copyright (c) 2012, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+\ingroup module_dllkcal
+*******************************************************************************/
+/*------------------------------------------------------------------------------
+Copyright (c) 2013, SYSTEC electronic GmbH
+Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -31,7 +34,7 @@ LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
 ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*******************************************************************************/
+------------------------------------------------------------------------------*/
 
 //------------------------------------------------------------------------------
 // includes
@@ -144,7 +147,9 @@ static BOOL getMnSyncRequest(tDllReqServiceId* pReqServiceId_p, UINT* pNodeId_p,
 
 This function initializes the kernel DLL CAL module.
 
-\return Returns an error code
+\return The function returns a tEplKernel error code.
+
+\ingroup module_dllkcal
 */
 //------------------------------------------------------------------------------
 tEplKernel dllkcal_init(void)
@@ -196,7 +201,9 @@ Exit:
 
 This function cleans up the kernel DLL CAL module.
 
-\return Returns an error code
+\return The function returns a tEplKernel error code.
+
+\ingroup module_dllkcal
 */
 //------------------------------------------------------------------------------
 tEplKernel dllkcal_exit(void)
@@ -223,7 +230,9 @@ This function is the event handler of the kernel DLL CAL module.
 
 \param  pEvent_p                Pointer to event to be processed.
 
-\return Returns an error code
+\return The function returns a tEplKernel error code.
+
+\ingroup module_dllkcal
 */
 //------------------------------------------------------------------------------
 tEplKernel dllkcal_process(tEplEvent* pEvent_p)
@@ -310,7 +319,9 @@ This function returns the count of TX frames of the FIFO with highest priority.
 \param  pPriority_p				Pointer to store the FIFO type.
 \param  pCount_p                Pointer to store the number of TX frames.
 
-\return Returns an error code
+\return The function returns a tEplKernel error code.
+
+\ingroup module_dllkcal
 */
 //------------------------------------------------------------------------------
 tEplKernel dllkcal_getAsyncTxCount(tDllAsyncReqPriority* pPriority_p,
@@ -368,7 +379,9 @@ The function return TX frames form the specified FIFO.
                                 rewritten with actual size of frame.
 \param  priority_p              Priority of the FIFO.
 
-\return Returns an error code
+\return The function returns a tEplKernel error code.
+
+\ingroup module_dllkcal
 */
 //------------------------------------------------------------------------------
 tEplKernel dllkcal_getAsyncTxFrame(void* pFrame_p, UINT* pFrameSize_p,
@@ -403,7 +416,9 @@ only for frames with registered AsndServiceIds.
 
 \param  pFrameInfo_p            Pointer to frame info of received frame
 
-\return Returns an error code
+\return The function returns a tEplKernel error code.
+
+\ingroup module_dllkcal
 */
 //------------------------------------------------------------------------------
 tEplKernel dllkcal_asyncFrameReceived(tFrameInfo* pFrameInfo_p)
@@ -439,7 +454,9 @@ priority.
 \param  pFrameInfo_p            Pointer to frame info structure
 \param  priority_p              Priority to send frame with
 
-\return Returns an error code
+\return The function returns a tEplKernel error code.
+
+\ingroup module_dllkcal
 */
 //------------------------------------------------------------------------------
 tEplKernel dllkcal_sendAsyncFrame(tFrameInfo* pFrameInfo_p,
@@ -491,7 +508,9 @@ The function writes the given frame into the specified dll CAL queue.
 \param  pFrameInfo_p            Pointer to frame info structure
 \param  dllQueue                DllCal Queue to use
 
-\return Returns an tEplKernel error code
+\return The function returns a tEplKernel error code.
+
+\ingroup module_dllkcal
 */
 //------------------------------------------------------------------------------
 tEplKernel dllkcal_writeAsyncFrame(tFrameInfo* pFrameInfo_p, tDllCalQueue dllQueue)
@@ -534,7 +553,9 @@ tEplKernel dllkcal_writeAsyncFrame(tFrameInfo* pFrameInfo_p, tDllCalQueue dllQue
 
 The function clear the asynchronous transmit buffers.
 
-\return Returns an error code
+\return The function returns a tEplKernel error code.
+
+\ingroup module_dllkcal
 */
 //------------------------------------------------------------------------------
 tEplKernel dllkcal_clearAsyncBuffer(void)
@@ -557,7 +578,9 @@ tEplKernel dllkcal_clearAsyncBuffer(void)
 
 The function clears the asynchronous transmit queues.
 
-\return Returns an error code
+\return The function returns a tEplKernel error code.
+
+\ingroup module_dllkcal
 */
 //------------------------------------------------------------------------------
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
@@ -591,7 +614,9 @@ The function returns statistics of the asynchronous queues
 
 \param  ppStatistics		    Pointer to store statistics pointer.
 
-\return Returns an error code
+\return The function returns a tEplKernel error code.
+
+\ingroup module_dllkcal
 */
 //------------------------------------------------------------------------------
 tEplKernel dllkcal_getStatistics(tDllkCalStatistics** ppStatistics)
@@ -622,7 +647,10 @@ The function issues a StatusRequest or an IdentRequest to the specified node.
 \param  nodeId_p                Node ID to which the request should be sent.
 \param  soaFlag1_p              Flag1 for this node (transmit in SoA and PReq).
                                 If 0xFF this flag is ignored.
-\return Returns an error code
+
+\return The function returns a tEplKernel error code.
+
+\ingroup module_dllkcal
 */
 //------------------------------------------------------------------------------
 tEplKernel dllkcal_issueRequest(tDllReqServiceId service_p, UINT nodeId_p,
@@ -693,7 +721,9 @@ DLL module.
 \param  pSoaPayload_p           Pointer to SoA payload.
 \param  PARAMETER
 
-\return Returns an error code.
+\return The function returns a tEplKernel error code.
+
+\ingroup module_dllkcal
 */
 //------------------------------------------------------------------------------
 tEplKernel dllkcal_getSoaRequest(tDllReqServiceId* pReqServiceId_p,
@@ -760,7 +790,9 @@ This will add the node to the asynchronous request scheduler.
 \param  asyncReqPrio_p          The asynchronous request priority.
 \param  count_p                 The count of asynchronous frames.
 
-\return Returns an error code
+\return The function returns a tEplKernel error code.
+
+\ingroup module_dllkcal
 */
 //------------------------------------------------------------------------------
 tEplKernel dllkcal_setAsyncPendingRequests(UINT nodeId_p,

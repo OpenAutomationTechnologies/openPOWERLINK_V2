@@ -7,7 +7,11 @@
 This DLL CAL queue implementation applies a single buffer for each queue
 instance.
 
-Copyright (c) 2012, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+\ingroup module_dllcal
+*******************************************************************************/
+
+/*------------------------------------------------------------------------------
+Copyright (c) 2012-2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -31,7 +35,7 @@ LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
 ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*******************************************************************************/
+------------------------------------------------------------------------------*/
 
 //------------------------------------------------------------------------------
 // includes
@@ -121,6 +125,8 @@ This function returns a pointer to the function interface structure which
 is used to access the dllcal functions of the direct call implementation.
 
 \return Returns a pointer to the local function interface
+
+\ingroup module_dllcal
 */
 //------------------------------------------------------------------------------
 tDllCalFuncIntf* dllcaldirect_getInterface(void)
@@ -141,7 +147,7 @@ Add a direct call instance for TX packet forwarding in DLL CAL
 \param  ppDllCalQueue_p         Double-pointer to DllCal Queue instance
 \param  dllCalQueue_p           Parameter that determines the queue
 
-\return Returns an error code
+\return The function returns a tEplKernel error code.
 \retval kEplSuccessful          if function executes correctly
 \retval other                   error
 */
@@ -231,7 +237,7 @@ Delete the direct call instance.
 
 \param  pDllCalQueue_p          Pointer to DllCal Queue instance
 
-\return Returns an error code
+\return The function returns a tEplKernel error code.
 \retval kEplSuccessful          if function executes correctly
 \retval other                   error
 */
@@ -296,7 +302,7 @@ any type (e.g. TX packet).
 \param  pDataSize_p             Pointer to the size of the data block to be
                                 inserted.
 
-\return Returns an error code
+\return The function returns a tEplKernel error code.
 \retval kEplSuccessful          if function executes correctly
 \retval other                   error
 */
@@ -345,7 +351,7 @@ type (e.g. TX packet).
 \param  pDataSize_p             Pointer to the size of the data buffer
                                 (will be replaced with actual data block size)
 
-\return Returns an error code
+\return The function returns a tEplKernel error code.
 \retval kEplSuccessful          if function executes correctly
 \retval other                   error
 */
@@ -400,7 +406,7 @@ Returns the data block counter.
 \param  pDllCalQueue_p          Pointer to DllCal Queue instance
 \param  pDataBlockCount_p       Pointer which returns the data block count
 
-\return Returns an error code
+\return The function returns a tEplKernel error code.
 \retval kEplSuccessful          if function executes correctly
 \retval other                   error
 */
@@ -438,7 +444,7 @@ Resets the direct call instance
 \param  pDllCalQueue_p          Pointer to DllCal Queue instance
 \param  timeOutMs_p             Timeout in milliseconds.
 
-\return Returns an error code
+\return The function returns a tEplKernel error code.
 \retval kEplSuccessful          if function executes correctly
 \retval other                   error
 */
