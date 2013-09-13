@@ -12,11 +12,13 @@
           <tab type="user" url="\ref page_platform_altera-mn" title="Altera(MN)"/>
           <tab type="user" url="\ref page_platform_altera-cn" title="Altera(CN)"/>
       </tab>
+      <tab type="user" url="\ref page_demos" title="Demo Applications"/>
       <tab type="usergroup" title="Building" url="\ref page_build">
         <tab type="user" url="\ref page_cmake" title="Building with CMAKE"/>
       </tab>
     </tab>
     <tab type="usergroup" title="Software Manual">
+      <tab type="user" url="\ref page_directories" title="Directory Structure"/>
       <tab type="user" url="\ref page_software-architecture" title="Software Architecture"/>
       <tab type="modules" visible="yes" title="" intro=""/>
       <tab type="namespaces" visible="no" title="">
@@ -40,6 +42,7 @@
         <tab type="user" url="\ref page_coding" title="Coding Guidelines"/>
     </tab>
     <tab type="user" url="\ref page_revision_history" title="Revision History"/>
+    <tab type="user" url="\ref page_glossary" title="Glossary"/>
     <tab type="user" url="\ref page_licenses" title="Licenses"/>
   </navindex>
 
