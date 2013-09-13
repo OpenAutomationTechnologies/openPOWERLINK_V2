@@ -692,6 +692,8 @@ INPUT                  = ../../stack/src \
                          ../demos.md \
                          ../porting-guide.md \
                          ../coding-guide.md \
+                         ../directories.md \
+                         ../glossary.md \
                          ../supported-platforms/linux.md \
                          ../supported-platforms/vxworks.md \
                          ../supported-platforms/altera-mn.md \
