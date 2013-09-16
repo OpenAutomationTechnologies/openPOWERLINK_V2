@@ -46,7 +46,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "user/statusu.h"
 #include "user/dllucal.h"
 #include "Benchmark.h"
-#include "EplObd.h"
+#include "obd.h"
 
 #if EPL_NMTMNU_PRES_CHAINING_MN != FALSE
 #include "user/syncu.h"

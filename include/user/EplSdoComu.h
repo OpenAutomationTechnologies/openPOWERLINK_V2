@@ -73,7 +73,7 @@
 #define _EPLSDOCOMU_H_
 
 #include "EplSdo.h"
-#include "EplObd.h"
+#include "obd.h"
 #include "EplSdoAc.h"
 #include "user/EplSdoAsySequ.h"
 

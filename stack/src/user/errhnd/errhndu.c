@@ -47,7 +47,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #include <nmt.h>
 #include <Benchmark.h>
-#include <EplObd.h>
+#include <obd.h>
 
 #include <errhnd.h>
 #include <user/errhndu.h>
