@@ -123,7 +123,7 @@
 #ifdef CONFIG_MN
 
 #if (TARGET_SYSTEM == _LINUX_)
-#define EPL_MODULE_INTEGRATION (EPL_MODULE_OBDK \
+#define EPL_MODULE_INTEGRATION (EPL_MODULE_OBD \
                                | EPL_MODULE_PDOK \
                                | EPL_MODULE_PDOU \
                                | EPL_MODULE_SDOS \
@@ -137,10 +137,9 @@
                                | EPL_MODULE_CFM \
                                | EPL_MODULE_NMT_MN)
 //                               | EPL_MODULE_VETH
-//                               | EPL_MODULE_OBDU
 //                               | EPL_MODULE_SDO_UDP
 #elif (TARGET_SYSTEM == _WIN32_)
-#define EPL_MODULE_INTEGRATION (EPL_MODULE_OBDK \
+#define EPL_MODULE_INTEGRATION (EPL_MODULE_OBD \
                                | EPL_MODULE_PDOK \
                                | EPL_MODULE_PDOU \
                                | EPL_MODULE_SDOS \
@@ -154,12 +153,11 @@
                                | EPL_MODULE_CFM \
                                | EPL_MODULE_NMT_MN)
 //                               | EPL_MODULE_VETH
-//                               | EPL_MODULE_OBDU
 #endif
 
 #else // CONFIG_MN
 
-#define EPL_MODULE_INTEGRATION (EPL_MODULE_OBDK \
+#define EPL_MODULE_INTEGRATION (EPL_MODULE_OBD \
                                | EPL_MODULE_PDOK \
                                | EPL_MODULE_PDOU \
                                | EPL_MODULE_SDOS \

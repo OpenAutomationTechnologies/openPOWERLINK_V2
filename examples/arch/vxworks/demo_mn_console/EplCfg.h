@@ -102,7 +102,7 @@
 
 // EPL_MODULE_INTEGRATION defines all modules which are included in
 // EPL application. Please add or delete modules for your application.
-#define EPL_MODULE_INTEGRATION EPL_MODULE_OBDK \
+#define EPL_MODULE_INTEGRATION EPL_MODULE_OBD \
                                | EPL_MODULE_PDOK \
                                | EPL_MODULE_PDOU \
                                | EPL_MODULE_NMT_MN \
@@ -117,7 +117,6 @@
                                | EPL_MODULE_CFM
 //                              | EPL_MODULE_SDO_UDP
 //                              | EPL_MODULE_VETH
-//                              | EPL_MODULE_OBDU
 
 
 // =========================================================================

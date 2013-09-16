@@ -46,7 +46,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <EplInc.h>
 #include <EplObd.h>
 #include <obdcdc.h>
-#include <kernel/EplObdk.h>
 #include <user/eventu.h>
 
 #if (EPL_OBD_USE_LOAD_CONCISEDCF != FALSE)

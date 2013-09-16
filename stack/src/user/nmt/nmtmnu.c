@@ -44,9 +44,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "user/EplTimeru.h"
 #include "user/identu.h"
 #include "user/statusu.h"
-#include "user/EplObdu.h"
 #include "user/dllucal.h"
 #include "Benchmark.h"
+#include "EplObd.h"
 
 #if EPL_NMTMNU_PRES_CHAINING_MN != FALSE
 #include "user/syncu.h"
@@ -54,8 +54,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #if defined(CONFIG_INCLUDE_NMT_MN)
 
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_OBDU)) == 0) && (EPL_OBD_USE_KERNEL == FALSE)
-#error "EPL NmtMnu module needs EPL module OBDU or OBDK!"
+#if !defined(CONFIG_INCLUDE_OBD)
+#error "NmtMnu module needs module OBD!"
 #endif
 
 //============================================================================//
@@ -917,13 +917,13 @@ tEplKernel nmtmnu_cbNmtStateChange(tEventNmtStateChange nmtStateChange_p)
 
                 // read object 0x1F80 NMT_StartUp_U32
                 obdSize = 4;
-                ret = EplObduReadEntry(0x1F80, 0, &nmtMnuInstance_g.nmtStartup, &obdSize);
+                ret = EplObdReadEntry(0x1F80, 0, &nmtMnuInstance_g.nmtStartup, &obdSize);
                 if (ret != kEplSuccessful)
                     break;
 
                 // compute StatusReqDelay = object 0x1006 * EPL_C_NMT_STATREQ_CYCLE
                 obdSize = sizeof (dwTimeout);
-                ret = EplObduReadEntry(0x1006, 0, &dwTimeout, &obdSize);
+                ret = EplObdReadEntry(0x1006, 0, &dwTimeout, &obdSize);
                 if (ret != kEplSuccessful)
                     break;
 
@@ -945,7 +945,7 @@ tEplKernel nmtmnu_cbNmtStateChange(tEventNmtStateChange nmtStateChange_p)
 
                 // fetch MNTimeoutPreOp2_U32 from OD
                 obdSize = sizeof (dwTimeout);
-                ret = EplObduReadEntry(0x1F89, 4, &dwTimeout, &obdSize);
+                ret = EplObdReadEntry(0x1F89, 4, &dwTimeout, &obdSize);
                 if (ret != kEplSuccessful)
                     break;
 
@@ -1069,7 +1069,7 @@ tEplKernel nmtmnu_processEvent(tEplEvent* pEvent_p)
 
                     pNodeInfo = NMTMNU_GET_NODEINFO(nodeId);
                     ObdSize = 1;
-                    ret = EplObduReadEntry(0x1F8E, nodeId, &bNmtState, &ObdSize);
+                    ret = EplObdReadEntry(0x1F8E, nodeId, &bNmtState, &ObdSize);
                     if (ret != kEplSuccessful)
                         break;
 
@@ -1317,7 +1317,7 @@ tEplKernel nmtmnu_processEvent(tEplEvent* pEvent_p)
 
                 // fetch current NMT state
                 ObdSize = sizeof (bNmtState);
-                ret = EplObduReadEntry(0x1F8E, pNodeCmd->nodeId, &bNmtState, &ObdSize);
+                ret = EplObdReadEntry(0x1F8E, pNodeCmd->nodeId, &bNmtState, &ObdSize);
                 if (ret != kEplSuccessful)
                     goto Exit;
 
@@ -1470,7 +1470,7 @@ static tEplKernel PUBLIC cbIdentResponse(UINT nodeId_p, tEplIdentResponse* pIden
 
         // check DeviceType (0x1F84)
         obdSize = 4;
-        ret = EplObduReadEntry(0x1F84, nodeId_p, &dwDevType, &obdSize);
+        ret = EplObdReadEntry(0x1F84, nodeId_p, &dwDevType, &obdSize);
         if (ret != kEplSuccessful)
             goto Exit;
 
@@ -1686,11 +1686,11 @@ static tEplKernel startBootStep1(BOOL fNmtResetAllIssued_p)
     nmtMnuInstance_g.mandatorySlaveCount = 0;
     nmtMnuInstance_g.signalSlaveCount = 0;
     // check 0x1F81
-    localNodeId = EplObduGetNodeId();
+    localNodeId = EplObdGetNodeId();
     for (subIndex = 1; subIndex <= 254; subIndex++)
     {
         obdSize = 4;
-        ret = EplObduReadEntry(0x1F81, subIndex, &nodeCfg, &obdSize);
+        ret = EplObdReadEntry(0x1F81, subIndex, &nodeCfg, &obdSize);
         if (ret != kEplSuccessful)
             goto Exit;
 
@@ -1824,7 +1824,7 @@ static tEplKernel doPreop1(tEventNmtStateChange nmtStateChange_p)
 
     // start timer for 0x1F89/2 MNTimeoutPreOp1_U32
     obdSize = sizeof (dwTimeout);
-    ret = EplObduReadEntry(0x1F89, 2, &dwTimeout, &obdSize);
+    ret = EplObdReadEntry(0x1F89, 2, &dwTimeout, &obdSize);
     if (ret != kEplSuccessful)
         return ret;
 
@@ -1875,7 +1875,7 @@ static tEplKernel startBootStep2(void)
     {
         obdSize = 1;
         // read object 0x1F8F NMT_MNNodeExpState_AU8
-        ret = EplObduReadEntry(0x1F8F, index, &nmtState, &obdSize);
+        ret = EplObdReadEntry(0x1F8F, index, &nmtState, &obdSize);
         if (ret != kEplSuccessful)
             goto Exit;
 
@@ -1901,7 +1901,7 @@ static tEplKernel startBootStep2(void)
 
             // update object 0x1F8F NMT_MNNodeExpState_AU8 to PreOp2
             nmtState = (UINT8)(kNmtCsPreOperational2 & 0xFF);
-            ret = EplObduWriteEntry(0x1F8F, index, &nmtState, 1);
+            ret = EplObdWriteEntry(0x1F8F, index, &nmtState, 1);
             if (ret != kEplSuccessful)
                 goto Exit;
 
@@ -1957,7 +1957,7 @@ static tEplKernel nodeBootStep2(UINT nodeId_p, tNmtMnuNodeInfo* pNodeInfo_p)
     {   // node is async-only
         // read object 0x1F8E NMT_MNNodeCurrState_AU8
         obdSize = 1;
-        ret = EplObduReadEntry(0x1F8E, nodeId_p, &bNmtState, &obdSize);
+        ret = EplObdReadEntry(0x1F8E, nodeId_p, &bNmtState, &obdSize);
         if (ret != kEplSuccessful)
             goto Exit;
 
@@ -2223,7 +2223,7 @@ static INT processNodeEventIdentResponse(UINT nodeId_p, tNmtState nodeNmtState_p
                 return -1;
         }
     }
-    *pRet_p = EplObduWriteEntry(0x1F8F, nodeId_p, &bNmtState, 1);
+    *pRet_p = EplObdWriteEntry(0x1F8F, nodeId_p, &bNmtState, 1);
     if (*pRet_p != kEplSuccessful)
         return -1;
 
@@ -2962,7 +2962,7 @@ static INT processNodeEventNmtCmdSent(UINT nodeId_p, tNmtState nodeNmtState_p, t
     bNmtState = (UINT8) (nodeNmtState_p & 0xFF);
 
     // write object 0x1F8F NMT_MNNodeExpState_AU8
-    *pRet_p = EplObduWriteEntry(0x1F8F, nodeId_p, &bNmtState, 1);
+    *pRet_p = EplObdWriteEntry(0x1F8F, nodeId_p, &bNmtState, 1);
     if (*pRet_p != kEplSuccessful)
         return -1;
 
@@ -3146,7 +3146,7 @@ static tEplKernel checkNmtState(UINT nodeId_p, tNmtMnuNodeInfo* pNodeInfo_p,
 
     obdSize = 1;
     // read object 0x1F8F NMT_MNNodeExpState_AU8
-    ret = EplObduReadEntry(0x1F8F, nodeId_p, &bExpNmtState, &obdSize);
+    ret = EplObdReadEntry(0x1F8F, nodeId_p, &bExpNmtState, &obdSize);
     if (ret != kEplSuccessful)
         goto Exit;
 
@@ -3196,7 +3196,7 @@ static tEplKernel checkNmtState(UINT nodeId_p, tNmtMnuNodeInfo* pNodeInfo_p,
         pNodeInfo_p->nodeState = kNmtMnuNodeStateReadyToOp;
 
         // update object 0x1F8F NMT_MNNodeExpState_AU8 to ReadyToOp
-        ret = EplObduWriteEntry(0x1F8F, nodeId_p, &nodeNmtState, 1);
+        ret = EplObdWriteEntry(0x1F8F, nodeId_p, &nodeNmtState, 1);
         if (ret != kEplSuccessful)
             goto Exit;
 
@@ -3281,7 +3281,7 @@ static tEplKernel checkNmtState(UINT nodeId_p, tNmtMnuNodeInfo* pNodeInfo_p,
 ExitButUpdate:
     // check if NMT_MNNodeCurrState_AU8 has to be changed
     obdSize = 1;
-    retUpdate = EplObduReadEntry(0x1F8E, nodeId_p, &nmtStatePrev, &obdSize);
+    retUpdate = EplObdReadEntry(0x1F8E, nodeId_p, &nmtStatePrev, &obdSize);
     if (retUpdate != kEplSuccessful)
     {
         ret = retUpdate;
@@ -3290,7 +3290,7 @@ ExitButUpdate:
     if (nodeNmtState != nmtStatePrev)
     {
         // update object 0x1F8E NMT_MNNodeCurrState_AU8
-        retUpdate = EplObduWriteEntry(0x1F8E, nodeId_p, &nodeNmtState, 1);
+        retUpdate = EplObdWriteEntry(0x1F8E, nodeId_p, &nodeNmtState, 1);
         if (retUpdate != kEplSuccessful)
         {
             ret =retUpdate;
@@ -3578,7 +3578,7 @@ static tEplKernel prcCalcPResResponseTimeNs(UINT nodeId_p, UINT nodeIdPredNode_p
 
     // read object 0x1F8D NMT_PResPayloadLimitList_AU16
     obdSize = 2;
-    ret = EplObduReadEntry(0x1F8D, nodeIdPredNode_p, &pResPayloadLimitPredNode, &obdSize);
+    ret = EplObdReadEntry(0x1F8D, nodeIdPredNode_p, &pResPayloadLimitPredNode, &obdSize);
     if (ret != kEplSuccessful)
         goto Exit;
 
@@ -3635,19 +3635,19 @@ static tEplKernel prcCalcPResChainingSlotTimeNs(UINT nodeIdLastNode_p,
     // read object 0x1F98 NMT_CycleTiming_REC
     // Sub-Index 05h PResActPayloadLimit_U16
     obdSize = 2;
-    ret = EplObduReadEntry(0x1F98, 5, &pResActPayloadLimit, &obdSize);
+    ret = EplObdReadEntry(0x1F98, 5, &pResActPayloadLimit, &obdSize);
     if (ret != kEplSuccessful)
         goto Exit;
 
     // read object 0x1F8B NMT_MNPReqPayloadLimitList_AU16
     obdSize = 2;
-    ret = EplObduReadEntry(0x1F8B, nodeIdLastNode_p, &cnPReqPayloadLastNode, &obdSize);
+    ret = EplObdReadEntry(0x1F8B, nodeIdLastNode_p, &cnPReqPayloadLastNode, &obdSize);
     if (ret != kEplSuccessful)
         goto Exit;
 
     // read object 0x1F92 NMT_MNCNPResTimeout_AU32
     obdSize = 4;
-    ret = EplObduReadEntry(0x1F92, nodeIdLastNode_p, &cnResTimeoutLastNodeNs, &obdSize);
+    ret = EplObdReadEntry(0x1F92, nodeIdLastNode_p, &cnResTimeoutLastNodeNs, &obdSize);
     if (ret != kEplSuccessful)
         goto Exit;
 
@@ -3925,12 +3925,12 @@ static tEplKernel prcAdd(UINT nodeIdPrevAdd_p)
 
     // read object 0x1006 NMT_CycleLen_U32
     obdSize = sizeof(UINT32);
-    ret = EplObduReadEntry(0x1006, 0, &cycleLenUs, &obdSize);
+    ret = EplObdReadEntry(0x1006, 0, &cycleLenUs, &obdSize);
     if (ret != kEplSuccessful)
         goto Exit;
 
     // read object 0x1C14 DLL_CNLossOfSocTolerance_U32
-    ret = EplObduReadEntry(0x1C14, 0, &cNLossOfSocToleranceNs, &obdSize);
+    ret = EplObdReadEntry(0x1C14, 0, &cNLossOfSocToleranceNs, &obdSize);
     if (ret != kEplSuccessful)
         goto Exit;
 

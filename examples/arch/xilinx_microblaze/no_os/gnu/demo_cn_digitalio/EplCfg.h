@@ -123,7 +123,7 @@
 // EPL application. Please add or delete modules for your application.
 
 #define EPL_MODULE_INTEGRATION     (0 \
-                                | EPL_MODULE_OBDK \
+                                | EPL_MODULE_OBD \
                                 | EPL_MODULE_PDOU \
                                 | EPL_MODULE_PDOK \
                                 | EPL_MODULE_SDOS \

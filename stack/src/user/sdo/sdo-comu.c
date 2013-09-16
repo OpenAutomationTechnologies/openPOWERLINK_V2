@@ -78,11 +78,10 @@
 #endif
 
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOS)) != 0)
-    #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_OBDU)) == 0) && (EPL_OBD_USE_KERNEL == FALSE)
 
-    #error 'ERROR: SDO Server needs OBDu module!'
-
-    #endif
+#if !defined(CONFIG_INCLUDE_OBD)
+#error 'ERROR: SDO Server needs OBDu module!'
+#endif
 
 #endif
 
@@ -1940,7 +1939,7 @@ DWORD           dwAbortCode;
 
     // check accesstype of entry
     // existens of entry
-    Ret = EplObduGetAccessType(uiIndex, uiSubindex, &AccessType);
+    Ret = EplObdGetAccessType(uiIndex, uiSubindex, &AccessType);
     if(Ret == kEplObdSubindexNotExist)
     {   // subentry doesn't exist
         dwAbortCode = EPL_SDOAC_SUB_INDEX_NOT_EXIST;
@@ -1991,12 +1990,12 @@ DWORD           dwAbortCode;
     pSdoComCon_p->m_SdoServiceType = kEplSdoServiceReadByIndex;
 
     // get size of object to see iof segmented or expedited transfer
-    EntrySize = EplObduGetDataSize(uiIndex, uiSubindex);
+    EntrySize = EplObdGetDataSize(uiIndex, uiSubindex);
     if(EntrySize > EPL_SDO_MAX_SEGMENT_SIZE)
     {   // segmented transfer
         pSdoComCon_p->m_SdoTransType = kEplSdoTransSegmented;
         // get pointer to object-entry data
-        pSdoComCon_p->m_pData = EplObduGetObjectDataPtr(uiIndex, uiSubindex);
+        pSdoComCon_p->m_pData = EplObdGetObjectDataPtr(uiIndex, uiSubindex);
     }
     else
     {   // expedited transfer
@@ -2113,7 +2112,7 @@ BYTE            bFlag;
             if(pSdoComCon_p->m_SdoTransType == kEplSdoTransExpedited)
             {   // Expedited transfer
                 // copy data in frame
-                Ret = EplObduReadEntryToLe(uiIndex_p,
+                Ret = EplObdReadEntryToLe(uiIndex_p,
                                         uiSubIndex_p,
                                         &pCommandFrame->m_le_abCommandData[0],
                                         (tEplObdSize*)&pSdoComCon_p->m_uiTransSize);
@@ -2332,7 +2331,7 @@ BYTE*           pbSrcData;
 
     // check accesstype of entry
     // existens of entry
-    Ret = EplObduGetAccessType(uiIndex, uiSubindex, &AccessType);
+    Ret = EplObdGetAccessType(uiIndex, uiSubindex, &AccessType);
     if (Ret == kEplObdSubindexNotExist)
     {   // subentry doesn't exist
         pSdoComCon_p->m_dwLastAbortCode = EPL_SDOAC_SUB_INDEX_NOT_EXIST;
@@ -2390,9 +2389,9 @@ BYTE*           pbSrcData;
     // write data to OD
     if(pSdoComCon_p->m_SdoTransType == kEplSdoTransExpedited)
     {   // expedited transfer
-        // size checking is done by EplObduWriteEntryFromLe()
+        // size checking is done by EplObdWriteEntryFromLe()
 
-        Ret = EplObduWriteEntryFromLe(uiIndex,
+        Ret = EplObdWriteEntryFromLe(uiIndex,
                                     uiSubindex,
                                     pbSrcData,
                                     pSdoComCon_p->m_uiTransSize);
@@ -2453,7 +2452,7 @@ BYTE*           pbSrcData;
         // because we directly write to the destination memory
         // d.k. no one calls the user OD callback function
 
-        EntrySize = EplObduGetDataSize(uiIndex, uiSubindex);
+        EntrySize = EplObdGetDataSize(uiIndex, uiSubindex);
         if(EntrySize < pSdoComCon_p->m_uiTransSize)
         {   // parameter too big
             pSdoComCon_p->m_dwLastAbortCode = EPL_SDOAC_DATA_TYPE_LENGTH_TOO_HIGH;
@@ -2471,7 +2470,7 @@ BYTE*           pbSrcData;
         // eleminate header (Command header (8) + variable part (4) + Command header (4))
         uiBytesToTransfer -= 16;
         // get pointer to object entry
-        pSdoComCon_p->m_pData = EplObduGetObjectDataPtr(uiIndex,
+        pSdoComCon_p->m_pData = EplObdGetObjectDataPtr(uiIndex,
                                                         uiSubindex);
         if(pSdoComCon_p->m_pData == NULL)
         {
