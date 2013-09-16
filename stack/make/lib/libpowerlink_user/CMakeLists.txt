@@ -164,8 +164,6 @@ SET (LIB_USER_HEADERS
      ${USER_INCLUDE_DIR}/nmtcnu.h
      ${USER_INCLUDE_DIR}/nmtmnu.h
      ${USER_INCLUDE_DIR}/nmtu.h
-     ${USER_INCLUDE_DIR}/EplObdu.h
-     ${USER_INCLUDE_DIR}/EplObduCal.h
      ${USER_INCLUDE_DIR}/pdou.h
      ${USER_INCLUDE_DIR}/pdoucal.h
      ${USER_INCLUDE_DIR}/EplSdoAsndu.h

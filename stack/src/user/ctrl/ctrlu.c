@@ -44,7 +44,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <kernel/dllk.h>
 #include <kernel/eventk.h>
 #include <kernel/nmtk.h>
-#include <kernel/EplObdk.h>
 #include <kernel/dllkcal.h>
 #include <kernel/pdokcal.h>
 #include <user/pdoucal.h>
@@ -63,6 +62,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <EplTarget.h>
 
 #include <ctrl.h>
+#include <EplObd.h>
+
 #include <user/ctrlucal.h>
 
 #if defined(CONFIG_INCLUDE_PDOK)
@@ -813,8 +814,7 @@ static tEplKernel initObd(tEplApiInitParam* pInitParam_p)
     tEplKernel          ret = kEplSuccessful;
     tEplObdInitParam    ObdInitParam;
 
-// TODO jba Is this really a obdk??
-#if defined(CONFIG_INCLUDE_OBDK)
+#if defined(CONFIG_INCLUDE_OBD)
     TRACE ("Initialize OBD module...\n");
     if (pInitParam_p->m_pfnObdInitRam == NULL)
         return kEplApiNoObdInitRam;

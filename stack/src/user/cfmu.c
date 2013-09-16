@@ -47,12 +47,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <user/cfmu.h>
 #include <EplSdoAc.h>
 #include <user/identu.h>
-#include <user/EplObdu.h>
+#include <EplObd.h>
 #include <user/EplSdoComu.h>
 #include <user/nmtu.h>
 
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_OBDU)) == 0) && (EPL_OBD_USE_KERNEL == FALSE)
-#error "CFM module needs openPOWERLINK module OBDU or OBDK!"
+#if !defined(CONFIG_INCLUDE_OBD)
+#error "CFM module needs openPOWERLINK module OBD!"
 #endif
 
 #if !defined(CONFIG_INCLUDE_SDOC)
@@ -323,11 +323,11 @@ tEplKernel cfmu_processNodeEvent(UINT nodeId_p, tNmtNodeEvent nodeEvent_p)
 
     // fetch pointer to ConciseDCF from object 0x1F22
     // (this allows the application to link its own memory to this object)
-    pNodeInfo->pDataConciseDcf = EplObduGetObjectDataPtr(0x1F22, nodeId_p);
+    pNodeInfo->pDataConciseDcf = EplObdGetObjectDataPtr(0x1F22, nodeId_p);
     if (pNodeInfo->pDataConciseDcf == NULL)
         return kEplCfmNoConfigData;
 
-    obdSize = EplObduGetDataSize(0x1F22, nodeId_p);
+    obdSize = EplObdGetDataSize(0x1F22, nodeId_p);
     pNodeInfo->bytesRemaining = (UINT32) obdSize;
     pNodeInfo->eventCnProgress.totalNumberOfBytes = pNodeInfo->bytesRemaining;
 #if (EPL_CFM_CONFIGURE_CYCLE_LENGTH != FALSE)
@@ -358,13 +358,13 @@ tEplKernel cfmu_processNodeEvent(UINT nodeId_p, tNmtNodeEvent nodeEvent_p)
     else
     {
         obdSize = sizeof (expConfDate);
-        ret = EplObduReadEntry(0x1F26, nodeId_p, &expConfDate, &obdSize);
+        ret = EplObdReadEntry(0x1F26, nodeId_p, &expConfDate, &obdSize);
         if (ret != kEplSuccessful)
         {
             EPL_DBGLVL_CFM_TRACE("CN%x Error Reading 0x1F26 returns 0x%X\n", uiNodeId_p, ret);
         }
         obdSize = sizeof (expConfTime);
-        ret = EplObduReadEntry(0x1F27, nodeId_p, &expConfTime, &obdSize);
+        ret = EplObdReadEntry(0x1F27, nodeId_p, &expConfTime, &obdSize);
         if (ret != kEplSuccessful)
         {
             EPL_DBGLVL_CFM_TRACE("CN%x Error Reading 0x1F27 returns 0x%X\n", uiNodeId_p, ret);
@@ -389,7 +389,7 @@ tEplKernel cfmu_processNodeEvent(UINT nodeId_p, tNmtNodeEvent nodeEvent_p)
 
 #if (EPL_CFM_CONFIGURE_CYCLE_LENGTH != FALSE)
     obdSize = sizeof(cfmInstance_g.leCycleLength);
-    ret = EplObduReadEntryToLe(0x1006, 0x00, &cfmInstance_g.leCycleLength, &obdSize);
+    ret = EplObdReadEntryToLe(0x1006, 0x00, &cfmInstance_g.leCycleLength, &obdSize);
     if (ret != kEplSuccessful)
     {   // local OD access failed
         EPL_DBGLVL_CFM_TRACE("Local OBD read failed %d\n", ret);

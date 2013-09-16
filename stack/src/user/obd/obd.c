@@ -70,9 +70,8 @@
 ****************************************************************************/
 
 #include "EplInc.h"
-#include "kernel/EplObdk.h"         // function prototyps of the EplOBD-Modul
+#include "EplObd.h"
 
-#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_OBDK)) != 0)
 
 /***************************************************************************/
 /*                                                                         */
@@ -3623,6 +3622,6 @@ tEplObdAccess Access;
     return pData;
 
 }
-#endif // end of #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_OBDK)) != 0)
+
 // EOF
 

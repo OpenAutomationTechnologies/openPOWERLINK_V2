@@ -191,7 +191,6 @@ SET (LIB_KERNEL_HEADERS
      ${KERNEL_INCLUDE_DIR}/eventk.h
      ${KERNEL_INCLUDE_DIR}/eventkcal.h
      ${KERNEL_INCLUDE_DIR}/nmtk.h
-     ${KERNEL_INCLUDE_DIR}/EplObdk.h
      ${KERNEL_INCLUDE_DIR}/pdok.h
      ${KERNEL_INCLUDE_DIR}/pdokcal.h
      ${KERNEL_INCLUDE_DIR}/EplTimerHighResk.h
@@ -216,8 +215,6 @@ SET (LIB_USER_HEADERS
      ${USER_INCLUDE_DIR}/nmtcnu.h
      ${USER_INCLUDE_DIR}/nmtmnu.h
      ${USER_INCLUDE_DIR}/nmtu.h
-     ${USER_INCLUDE_DIR}/EplObdu.h
-     ${USER_INCLUDE_DIR}/EplObduCal.h
      ${USER_INCLUDE_DIR}/pdou.h
      ${USER_INCLUDE_DIR}/pdoucal.h
      ${USER_INCLUDE_DIR}/EplSdoAsndu.h

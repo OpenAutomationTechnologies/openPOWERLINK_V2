@@ -287,14 +287,6 @@
 #define EPL_OBD_USE_VARIABLE_SUBINDEX_TAB   TRUE
 #endif
 
-#ifndef EPL_OBD_USE_KERNEL
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_OBDU)) == 0)
-#define EPL_OBD_USE_KERNEL                  TRUE
-#else
-#define EPL_OBD_USE_KERNEL                  FALSE
-#endif
-#endif
-
 #ifndef EPL_OBD_INCLUDE_A000_TO_DEVICE_PART
 #define EPL_OBD_INCLUDE_A000_TO_DEVICE_PART FALSE
 #endif

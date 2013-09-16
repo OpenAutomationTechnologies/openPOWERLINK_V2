@@ -98,7 +98,7 @@
 // EPL_MODULE_INTEGRATION defines all modules which are included in
 // EPL application. Please add or delete modules for your application.
 #ifdef CONFIG_MN
-#define EPL_MODULE_INTEGRATION (EPL_MODULE_OBDK \
+#define EPL_MODULE_INTEGRATION (EPL_MODULE_OBD \
                                | EPL_MODULE_PDOK \
                                | EPL_MODULE_PDOU \
                                | EPL_MODULE_SDOS \
@@ -116,7 +116,7 @@
 
 #else
 
-#define EPL_MODULE_INTEGRATION (EPL_MODULE_OBDK \
+#define EPL_MODULE_INTEGRATION (EPL_MODULE_OBD \
                                | EPL_MODULE_PDOK \
                                | EPL_MODULE_PDOU \
                                | EPL_MODULE_SDOS \

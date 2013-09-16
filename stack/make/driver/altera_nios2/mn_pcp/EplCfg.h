@@ -59,7 +59,7 @@ The generic defines are valid for the whole openPOWERLINK stack.
 #define EPL_MAX_INSTANCES                   1
     ///< number of EPL instances
 #define EPL_MODULE_INTEGRATION              (0 \
-                                            | EPL_MODULE_OBDK \
+                                            | EPL_MODULE_OBD \
                                             | EPL_MODULE_PDOK \
                                             | EPL_MODULE_SDOS \
                                             | EPL_MODULE_SDOC \

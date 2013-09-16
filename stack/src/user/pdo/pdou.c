@@ -43,14 +43,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <Epl.h>
 #include <EplInc.h>
 #include <user/pdoucal.h>
-#include <user/EplObdu.h>
 #include <user/pdou.h>
-#include <EplSdoAc.h>
 
+#include <EplSdoAc.h>
+#include <EplObd.h>
 #include <pdo.h>
 
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_OBDU)) == 0) && (EPL_OBD_USE_KERNEL == FALSE)
-#error "EPL PDOu module needs EPL module OBDU or OBDK!"
+#if !defined(CONFIG_INCLUDE_OBD)
+#error "PDOu module needs module OBD!"
 #endif
 
 //============================================================================//
@@ -496,7 +496,7 @@ static tEplKernel setupRxPdoChannelTables(
     {
         // read node ID from OD (ID:0x14XX Sub:1)
         obdSize = sizeof (nodeId);
-        ret = EplObduReadEntry(commParamIndex, 0x01, &nodeId, &obdSize);
+        ret = EplObdReadEntry(commParamIndex, 0x01, &nodeId, &obdSize);
         switch (ret)
         {
             case kEplObdIndexNotExist:
@@ -571,7 +571,7 @@ static tEplKernel setupTxPdoChannelTables(
     {
         obdSize = sizeof (bNodeId);
         // read node ID from OD (ID:0x18XX Sub:1)
-        ret = EplObduReadEntry(commParamIndex, 0x01, &bNodeId, &obdSize);
+        ret = EplObdReadEntry(commParamIndex, 0x01, &bNodeId, &obdSize);
         switch (ret)
         {
             case kEplObdIndexNotExist:
@@ -844,7 +844,7 @@ static tEplKernel checkAndConfigurePdos(UINT16 mappParamIndex_p, UINT channelCou
 
         obdSize = sizeof (mappObjectCount);
         // read mapping object count from OD
-        ret = EplObduReadEntry(mappParamIndex, 0x00, &mappObjectCount, &obdSize);
+        ret = EplObdReadEntry(mappParamIndex, 0x00, &mappObjectCount, &obdSize);
         if (ret != kEplSuccessful)
             return ret;
 
@@ -932,7 +932,7 @@ static tEplKernel checkAndConfigurePdo(UINT16 mappParamIndex_p,
 
     // read node ID from OD
     obdSize = sizeof (nodeId);
-    ret = EplObduReadEntry(commParamIndex, 0x01, &nodeId, &obdSize);
+    ret = EplObdReadEntry(commParamIndex, 0x01, &nodeId, &obdSize);
     if (ret != kEplSuccessful)
     {   // fatal error occurred
         goto Exit;
@@ -1071,7 +1071,7 @@ static tEplKernel getMaxPdoSize(BYTE nodeId_p, BOOL fTxPdo_p,
 
     // fetch maximum PDO size from OD
     obdSize = sizeof (maxPdoSize);
-    ret = EplObduReadEntry(payloadLimitIndex, payloadLimitSubIndex,
+    ret = EplObdReadEntry(payloadLimitIndex, payloadLimitSubIndex,
                            &maxPdoSize, &obdSize);
     if (ret != kEplSuccessful)
     {   // other fatal error occurred
@@ -1145,7 +1145,7 @@ static tEplKernel checkPdoValidity(UINT mappParamIndex_p, UINT32* pAbortCode_p)
         // outside from NMT reset states the PDO should have been disabled before changing it
         obdSize = sizeof (mappObjectCount);
         // read number of mapped objects from OD; this indicates if the PDO is valid
-        ret = EplObduReadEntry(mappParamIndex_p, 0x00, &mappObjectCount, &obdSize);
+        ret = EplObdReadEntry(mappParamIndex_p, 0x00, &mappObjectCount, &obdSize);
         if (ret != kEplSuccessful)
         {   // other fatal error occurred
             *pAbortCode_p = EPL_SDOAC_GEN_INTERNAL_INCOMPATIBILITY;
@@ -1214,7 +1214,7 @@ static tEplKernel checkAndSetObjectMapping(QWORD objectMapping_p,
         goto Exit;
     }
 
-    ret = EplObduGetType(index, subIndex, &obdType);
+    ret = EplObdGetType(index, subIndex, &obdType);
     if (ret != kEplSuccessful)
     {   // entry doesn't exist
         *pAbortCode_p = EPL_SDOAC_OBJECT_NOT_EXIST;
@@ -1231,7 +1231,7 @@ static tEplKernel checkAndSetObjectMapping(QWORD objectMapping_p,
     }
 
     // check access type
-    ret = EplObduGetAccessType(index, subIndex, &accessType);
+    ret = EplObdGetAccessType(index, subIndex, &accessType);
     if (ret != kEplSuccessful)
     {   // entry doesn't exist
         *pAbortCode_p = EPL_SDOAC_OBJECT_NOT_EXIST;
@@ -1262,7 +1262,7 @@ static tEplKernel checkAndSetObjectMapping(QWORD objectMapping_p,
         byteSize = (bitSize >> 3);
     }
 
-    obdSize = EplObduGetDataSize(index, subIndex);
+    obdSize = EplObdGetDataSize(index, subIndex);
     if (obdSize < byteSize)
     {   // object does not exist or has smaller size
         *pAbortCode_p = EPL_SDOAC_GENERAL_ERROR;
@@ -1270,7 +1270,7 @@ static tEplKernel checkAndSetObjectMapping(QWORD objectMapping_p,
         // todo really don't want to exit here?
     }
 
-    ret = EplObduIsNumerical(index, subIndex, &fNumerical);
+    ret = EplObdIsNumerical(index, subIndex, &fNumerical);
     if (ret != kEplSuccessful)
     {   // entry doesn't exist
         *pAbortCode_p = EPL_SDOAC_OBJECT_NOT_EXIST;
@@ -1286,7 +1286,7 @@ static tEplKernel checkAndSetObjectMapping(QWORD objectMapping_p,
         goto Exit;
     }
 
-    pVar = EplObduGetObjectDataPtr(index, subIndex);
+    pVar = EplObdGetObjectDataPtr(index, subIndex);
     if (pVar == NULL)
     {   // entry doesn't exist
         *pAbortCode_p = EPL_SDOAC_OBJECT_NOT_EXIST;
@@ -1347,7 +1347,7 @@ static tEplKernel setupMappingObjects(tPdoMappObject* pMappObject_p,
     {
         // read object mapping from OD
         obdSize = sizeof (objectMapping); //&pdouInstance_g.pRxPdoChannel[0] QWORD
-        ret = EplObduReadEntry(mappParamIndex_p, mappSubindex, &objectMapping,
+        ret = EplObdReadEntry(mappParamIndex_p, mappSubindex, &objectMapping,
                                &obdSize);
         if (ret != kEplSuccessful)
         {   // other fatal error occurred
