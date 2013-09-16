@@ -46,7 +46,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <user/pdou.h>
 
 #include <EplSdoAc.h>
-#include <EplObd.h>
+#include <obd.h>
 #include <pdo.h>
 
 #if !defined(CONFIG_INCLUDE_OBD)
