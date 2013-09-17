@@ -535,107 +535,26 @@ typedef enum
 // public functions
 // ============================================================================
 // ---------------------------------------------------------------------
-EPLDLLEXPORT tEplKernel PUBLIC obd_init (
-    tEplObdInitParam MEM*      pInitParam_p);
-
-// ---------------------------------------------------------------------
-EPLDLLEXPORT tEplKernel PUBLIC obd_addInstance (
-    tEplObdInitParam MEM*      pInitParam_p);
-
-// ---------------------------------------------------------------------
-EPLDLLEXPORT tEplKernel PUBLIC obd_deleteInstance ();
-
-// ---------------------------------------------------------------------
-EPLDLLEXPORT tEplKernel PUBLIC obd_writeEntry (
-    unsigned int  uiIndex_p,
-    unsigned int  uiSubIndex_p,
-    void * pSrcData_p,
-    tEplObdSize   Size_p);
-
-// ---------------------------------------------------------------------
-EPLDLLEXPORT tEplKernel PUBLIC obd_readEntry (
-    unsigned int        uiIndex_p,
-    unsigned int        uiSubIndex_p,
-    void *       pDstData_p,
-    tEplObdSize *pSize_p);
-
-// ---------------------------------------------------------------------
-EPLDLLEXPORT tEplKernel PUBLIC obd_storeLoadObjCallback (
-    tEplObdStoreLoadObjCallback fpCallback_p);
-
-// ---------------------------------------------------------------------
-EPLDLLEXPORT tEplKernel PUBLIC obd_accessOdPart (
-    tEplObdPart ObdPart_p,
-    tEplObdDir Direction_p);
-
-// ---------------------------------------------------------------------
-EPLDLLEXPORT tEplKernel PUBLIC obd_defineVar (
-    tEplVarParam MEM*          pVarParam_p);
-
-// ---------------------------------------------------------------------
-EPLDLLEXPORT void* PUBLIC obd_getObjectDataPtr (
-                                        unsigned int uiIndex_p,
-                                        unsigned int uiSubIndex_p);
-// ---------------------------------------------------------------------
-EPLDLLEXPORT tEplKernel PUBLIC obd_registerUserOd (
-                                        tEplObdEntryPtr pUserOd_p);
-
-// ---------------------------------------------------------------------
-EPLDLLEXPORT void PUBLIC obd_initVarEntry (
-                                        tEplObdVarEntry MEM* pVarEntry_p,
-                                        tEplObdType Type_p, tEplObdSize ObdSize_p);
-
-// ---------------------------------------------------------------------
-EPLDLLEXPORT tEplObdSize PUBLIC obd_getDataSize(
-                                        unsigned int uiIndex_p,
-                                        unsigned int uiSubIndex_p);
-
-// ---------------------------------------------------------------------
-EPLDLLEXPORT unsigned int PUBLIC obd_getNodeId();
-
-// ---------------------------------------------------------------------
-EPLDLLEXPORT tEplKernel PUBLIC obd_setNodeId(
-                                         unsigned int uiNodeId_p,
-                                         tEplObdNodeIdType NodeIdType_p);
-
-// ---------------------------------------------------------------------
-EPLDLLEXPORT tEplKernel PUBLIC obd_isNumerical(
-                                        unsigned int  uiIndex_p,
-                                        unsigned int  uiSubIndex_p,
-                                        BOOL*   pfEntryNumerical_p);
-
-// ---------------------------------------------------------------------
-EPLDLLEXPORT tEplKernel PUBLIC obd_getType(
-                                        unsigned int  uiIndex_p,
-                                        unsigned int  uiSubIndex_p,
-                                        tEplObdType*  pType_p);
-
-// ---------------------------------------------------------------------
-EPLDLLEXPORT tEplKernel PUBLIC obd_writeEntryFromLe (
-                                        unsigned int  uiIndex_p,
-                                        unsigned int  uiSubIndex_p,
-                                        void * pSrcData_p,
-                                        tEplObdSize   Size_p);
-
-// ---------------------------------------------------------------------
-EPLDLLEXPORT tEplKernel PUBLIC obd_readEntryToLe (
-                                        unsigned int        uiIndex_p,
-                                        unsigned int        uiSubIndex_p,
-                                        void *       pDstData_p,
-                                        tEplObdSize *pSize_p);
-
-// ---------------------------------------------------------------------
-EPLDLLEXPORT tEplKernel PUBLIC obd_getAccessType(
-                                        unsigned int uiIndex_p,
-                                        unsigned int uiSubIndex_p,
-                                        tEplObdAccess* pAccessTyp_p);
-
-// ---------------------------------------------------------------------
-EPLDLLEXPORT tEplKernel PUBLIC obd_searchVarEntry (
-    unsigned int            uiIndex_p,
-    unsigned int            uiSubindex_p,
-    tEplObdVarEntry MEM**   ppVarEntry_p);
-
+tEplKernel  obd_init(tEplObdInitParam MEM* pInitParam_p);
+tEplKernel  obd_addInstance(tEplObdInitParam MEM* pInitParam_p);
+tEplKernel  obd_deleteInstance(void);
+tEplKernel  obd_writeEntry(UINT index_p, UINT subIndex_p, void* pSrcData_p, tEplObdSize size_p);
+tEplKernel  obd_readEntry(UINT index_p, UINT subIndex_p, void* pDstData_p, tEplObdSize *pSize_p);
+tEplKernel  obd_storeLoadObjCallback(tEplObdStoreLoadObjCallback fpCallback_p);
+tEplKernel  obd_accessOdPart(tEplObdPart obdPart_p, tEplObdDir direction_p);
+tEplKernel  obd_defineVar(tEplVarParam MEM* pVarParam_p);
+void*       obd_getObjectDataPtr(UINT index_p, UINT subIndex_p);
+tEplKernel  obd_registerUserOd(tEplObdEntryPtr pUserOd_p);
+void        obd_initVarEntry(tEplObdVarEntry MEM* pVarEntry_p, tEplObdType type_p, tEplObdSize obdSize_p);
+tEplObdSize obd_getDataSize(UINT index_p, UINT subIndex_p);
+UINT        obd_getNodeId(void);
+tEplKernel  obd_setNodeId(UINT nodeId_p, tEplObdNodeIdType nodeIdType_p);
+tEplKernel  obd_isNumerical(UINT index_p, UINT subIndex_p, BOOL* pfEntryNumerical_p);
+tEplKernel  obd_getType(UINT index_p, UINT subIndex_p, tEplObdType* pType_p);
+tEplKernel  obd_writeEntryFromLe(UINT index_p, UINT subIndex_p, void* pSrcData_p, tEplObdSize size_p);
+tEplKernel  obd_readEntryToLe(UINT index_p, UINT subIndex_p, void* pDstData_p, tEplObdSize* pSize_p);
+tEplKernel  obd_getAccessType(UINT index_p, UINT subIndex_p, tEplObdAccess* pAccessTyp_p);
+tEplKernel  obd_searchVarEntry(UINT index_p, UINT subindex_p, tEplObdVarEntry MEM** ppVarEntry_p);
 
 #endif  // #ifndef _EPLOBD_H_
 
