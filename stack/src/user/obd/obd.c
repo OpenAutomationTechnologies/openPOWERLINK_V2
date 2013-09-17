@@ -118,93 +118,35 @@ BYTE MEM            abEplObdTrashObject_g[8];
 // local function prototypes
 //---------------------------------------------------------------------------
 
-static tEplKernel callObjectCallback (
-    tEplObdCallback     fpCallback_p,
-    tEplObdCbParam MEM* pCbParam_p);
-
-static tEplObdSize getDataSizeIntern (tEplObdSubEntryPtr pSubIndexEntry_p);
-
-static tEplObdSize getObdStringLen (void* pObjData_p,
-                                    tEplObdSize ObjLen_p,
-                                    tEplObdType ObjType_p);
-
+static tEplKernel   callObjectCallback(tEplObdCallback pfnCallback_p, tEplObdCbParam MEM* pCbParam_p);
+static tEplObdSize  getDataSizeIntern(tEplObdSubEntryPtr pSubIndexEntry_p);
+static tEplObdSize  getObdStringLen(void* pObjData_p, tEplObdSize objLen_p, tEplObdType objType_p);
 #if (EPL_OBD_CHECK_OBJECT_RANGE != FALSE)
-static tEplKernel checkObjectRange (
-            tEplObdSubEntryPtr pSubindexEntry_p,
-            void * pData_p);
+static tEplKernel   checkObjectRange(tEplObdSubEntryPtr pSubindexEntry_p, void * pData_p);
 #endif
-
-static tEplKernel getVarEntry (
-            tEplObdSubEntryPtr    pSubindexEntry_p,
-            tEplObdVarEntry MEM** ppVarEntry_p);
-
-static tEplKernel  getEntry (
-            unsigned int          uiIndex_p,
-            unsigned int          uiSubindex_p,
-            tEplObdEntryPtr*      ppObdEntry_p,
-            tEplObdSubEntryPtr*   ppObdSubEntry_p);
-
-static tEplObdSize getObjectSize (tEplObdSubEntryPtr pSubIndexEntry_p);
-
-static tEplKernel getIndexIntern (
-    tEplObdInitParam MEM*     pInitParam_p,
-    unsigned int              uiIndex_p,
-    tEplObdEntryPtr*          ppObdEntry_p);
-
-static tEplKernel getSubindexIntern (
-    tEplObdEntryPtr           pObdEntry_p,
-    unsigned int              uiSubIndex_p,
-    tEplObdSubEntryPtr*       ppObdSubEntry_p);
-
-static tEplKernel accessOdPartIntern (
-                            tEplObdPart     CurrentOdPart_p,
-                            tEplObdEntryPtr pObdEnty_p,
-                            tEplObdDir      Direction_p);
-
-static CONST void*     getObjectDefaultPtr (tEplObdSubEntryPtr pSubIndexEntry_p);
-static void MEM*       getObjectCurrentPtr (tEplObdSubEntryPtr pSubIndexEntry_p);
-
+static tEplKernel   getVarEntry(tEplObdSubEntryPtr pSubindexEntry_p, tEplObdVarEntry MEM** ppVarEntry_p);
+static tEplKernel   getEntry(UINT index_p, UINT subindex_p, tEplObdEntryPtr* ppObdEntry_p,
+                             tEplObdSubEntryPtr* ppObdSubEntry_p);
+static tEplObdSize  getObjectSize(tEplObdSubEntryPtr pSubIndexEntry_p);
+static tEplKernel   getIndexIntern(tEplObdInitParam MEM* pInitParam_p, UINT index_p, tEplObdEntryPtr* ppObdEntry_p);
+static tEplKernel   getSubindexIntern(tEplObdEntryPtr pObdEntry_p, UINT subIndex_p, tEplObdSubEntryPtr* ppObdSubEntry_p);
+static tEplKernel   accessOdPartIntern(tEplObdPart currentOdPart_p, tEplObdEntryPtr pObdEnty_p, tEplObdDir direction_p);
+static CONST void*  getObjectDefaultPtr (tEplObdSubEntryPtr pSubIndexEntry_p);
+static void MEM*    getObjectCurrentPtr (tEplObdSubEntryPtr pSubIndexEntry_p);
 #if (EPL_OBD_USE_STORE_RESTORE != FALSE)
-
-    static tEplKernel callStoreCallback (
-        tEplObdCbStoreParam MEM* pCbStoreParam_p);
-
+static tEplKernel   callStoreCallback(tEplObdCbStoreParam MEM* pCbStoreParam_p);
 #endif // (EPL_OBD_USE_STORE_RESTORE != FALSE)
-
-static void copyObjectData (
-                        void MEM*       pDstData_p,
-                        CONST void *    pSrcData_p,
-                        tEplObdSize     ObjSize_p,
-                        tEplObdType     ObjType_p);
-
-static tEplKernel callPostDefault (void *pData_p, tEplObdEntryPtr pObdEntry_p,
-                                         tEplObdSubEntryPtr pSubIndex_p);
-
-static void * getObjectDataPtrIntern (tEplObdSubEntryPtr pSubindexEntry_p);
-
-static tEplKernel isNumericalIntern(tEplObdSubEntryPtr pObdSubEntry_p,
-                                        BOOL*         pfEntryNumerical_p);
-
-static tEplKernel PUBLIC writeEntryPre (
-    unsigned int  uiIndex_p,
-    unsigned int  uiSubIndex_p,
-    void * pSrcData_p,
-    void** ppDstData_p,
-    tEplObdSize   Size_p,
-    tEplObdEntryPtr*        ppObdEntry_p,
-    tEplObdSubEntryPtr*     ppSubEntry_p,
-    tEplObdCbParam MEM*     pCbParam_p,
-    tEplObdSize*  pObdSize_p);
-
-static tEplKernel PUBLIC writeEntryPost (
-    tEplObdEntryPtr         pObdEntry_p,
-    tEplObdSubEntryPtr      pSubEntry_p,
-    tEplObdCbParam MEM*     pCbParam_p,
-    void * pSrcData_p,
-    void * pDstData_p,
-    tEplObdSize   ObdSize_p);
-
-
+static void         copyObjectData(void MEM* pDstData_p, CONST void* pSrcData_p, tEplObdSize objSize_p,
+                                   tEplObdType objType_p);
+static tEplKernel   callPostDefault(void *pData_p, tEplObdEntryPtr pObdEntry_p, tEplObdSubEntryPtr pSubIndex_p);
+static void*        getObjectDataPtrIntern(tEplObdSubEntryPtr pSubindexEntry_p);
+static tEplKernel   isNumericalIntern(tEplObdSubEntryPtr pObdSubEntry_p, BOOL* pfEntryNumerical_p);
+static tEplKernel   writeEntryPre(UINT uiIndex_p, UINT subIndex_p, void* pSrcData_p, void** ppDstData_p,
+                                  tEplObdSize Size_p, tEplObdEntryPtr* ppObdEntry_p, tEplObdSubEntryPtr* ppSubEntry_p,
+                                  tEplObdCbParam MEM* pCbParam_p, tEplObdSize* pObdSize_p);
+static tEplKernel   writeEntryPost(tEplObdEntryPtr pObdEntry_p, tEplObdSubEntryPtr pSubEntry_p,
+                                   tEplObdCbParam MEM* pCbParam_p, void* pSrcData_p,
+                                   void* pDstData_p, tEplObdSize obdSize_p);
 
 //=========================================================================//
 //                                                                         //
@@ -226,8 +168,7 @@ static tEplKernel PUBLIC writeEntryPost (
 //
 //---------------------------------------------------------------------------
 
-EPLDLLEXPORT tEplKernel PUBLIC obd_init (
-                    tEplObdInitParam MEM* pInitParam_p)
+tEplKernel obd_init(tEplObdInitParam MEM* pInitParam_p)
 {
 
 tEplKernel Ret;
@@ -261,8 +202,7 @@ Exit:
 //
 //---------------------------------------------------------------------------
 
-EPLDLLEXPORT tEplKernel PUBLIC obd_addInstance (
-    tEplObdInitParam MEM* pInitParam_p)
+tEplKernel obd_addInstance(tEplObdInitParam MEM* pInitParam_p)
 {
 
 tEplKernel Ret;
@@ -297,7 +237,7 @@ tEplKernel Ret;
 //
 //---------------------------------------------------------------------------
 #if (EPL_USE_DELETEINST_FUNC != FALSE)
-EPLDLLEXPORT tEplKernel PUBLIC obd_deleteInstance ()
+tEplKernel obd_deleteInstance(void)
 {
     return kEplSuccessful;
 
@@ -314,7 +254,7 @@ EPLDLLEXPORT tEplKernel PUBLIC obd_deleteInstance ()
 //
 // Parameters:
 //              uiIndex_p       =   Index of the OD entry
-//              uiSubIndex_p    =   Subindex of the OD Entry
+//              subIndex_p    =   Subindex of the OD Entry
 //              pSrcData_p      =   Pointer to the data to write
 //              Size_p          =   Size of the data in Byte
 //
@@ -325,11 +265,7 @@ EPLDLLEXPORT tEplKernel PUBLIC obd_deleteInstance ()
 //
 //---------------------------------------------------------------------------
 
-EPLDLLEXPORT tEplKernel PUBLIC obd_writeEntry (
-    unsigned int  uiIndex_p,
-    unsigned int  uiSubIndex_p,
-    void * pSrcData_p,
-    tEplObdSize   Size_p)
+tEplKernel obd_writeEntry(UINT index_p, UINT subIndex_p, void* pSrcData_p, tEplObdSize size_p)
 {
 
 tEplKernel              Ret;
@@ -341,11 +277,11 @@ tEplObdSize             ObdSize;
 
 
     Ret = writeEntryPre (
-                               uiIndex_p,
-                               uiSubIndex_p,
+                               index_p,
+                               subIndex_p,
                                pSrcData_p,
                                &pDstData,
-                               Size_p,
+                               size_p,
                                &pObdEntry,
                                &pSubEntry,
                                &CbParam,
@@ -383,8 +319,8 @@ Exit:
 //              is not set. The attrib is only checked up for SDO transfer.
 //
 // Parameters:
-//              uiIndex_p       = Index oof the OD entry to read
-//              uiSubIndex_p    = Subindex to read
+//              index_p       = Index oof the OD entry to read
+//              subIndex_p    = Subindex to read
 //              pDstData_p      = pointer to the buffer for data
 //              Offset_p        = offset in data for read access
 //              pSize_p         = IN: Size of the buffer
@@ -396,11 +332,7 @@ Exit:
 //
 //---------------------------------------------------------------------------
 
-EPLDLLEXPORT tEplKernel PUBLIC obd_readEntry (
-                                                unsigned int        uiIndex_p,
-                                                unsigned int        uiSubIndex_p,
-                                                void *              pDstData_p,
-                                                tEplObdSize *       pSize_p)
+tEplKernel obd_readEntry(UINT index_p, UINT subIndex_p, void* pDstData_p, tEplObdSize* pSize_p)
 {
 
 tEplKernel                      Ret;
@@ -415,7 +347,7 @@ tEplObdSize                     ObdSize;
 
     // get address of index and subindex entry
     Ret = getEntry (
-        uiIndex_p, uiSubIndex_p, &pObdEntry, &pSubEntry);
+        index_p, subIndex_p, &pObdEntry, &pSubEntry);
     if (Ret != kEplSuccessful)
     {
         goto Exit;
@@ -434,8 +366,8 @@ tEplObdSize                     ObdSize;
     //------------------------------------------------------------------------
     // address of source data to structure of callback parameters
     // so callback function can change this data before reading
-    CbParam.m_uiIndex   = uiIndex_p;
-    CbParam.m_uiSubIndex= uiSubIndex_p;
+    CbParam.m_uiIndex   = index_p;
+    CbParam.m_uiSubIndex= subIndex_p;
     CbParam.m_pArg      = pSrcData;
     CbParam.m_ObdEvent  = kEplObdEvPreRead;
     Ret = callObjectCallback (
@@ -488,7 +420,7 @@ Exit:
 // Description: restores default values of one part of OD
 //
 // Parameters:  ObdPart_p
-//              Direction_p
+//              direction_p
 //
 // Return:      tEplKernel
 //
@@ -496,9 +428,7 @@ Exit:
 //
 //---------------------------------------------------------------------------
 
-EPLDLLEXPORT tEplKernel PUBLIC obd_accessOdPart (
-    tEplObdPart ObdPart_p,
-    tEplObdDir  Direction_p)
+tEplKernel obd_accessOdPart (tEplObdPart obdPart_p, tEplObdDir  direction_p)
 {
 
 tEplKernel      Ret = kEplSuccessful;
@@ -509,16 +439,16 @@ tEplObdEntryPtr pObdEntry;
     pObdEntry = m_ObdInitParam.m_pGenericPart;
     ASSERTMSG (pObdEntry != NULL, "obd_accessOdPart(): no  OD part is defined!\n");
 
-    // if ObdPart_p is not valid fPartFound keeps FALSE and function returns kEplObdIllegalPart
+    // if obdPart_p is not valid fPartFound keeps FALSE and function returns kEplObdIllegalPart
     fPartFount = FALSE;
 
     // access to  part
-    if ((ObdPart_p & kEplObdPartGen) != 0)
+    if ((obdPart_p & kEplObdPartGen) != 0)
     {
         fPartFount = TRUE;
 
         Ret = accessOdPartIntern (
-            kEplObdPartGen, pObdEntry, Direction_p);
+            kEplObdPartGen, pObdEntry, direction_p);
         if (Ret != kEplSuccessful)
         {
             goto Exit;
@@ -528,13 +458,13 @@ tEplObdEntryPtr pObdEntry;
     // access to manufacturer part
     pObdEntry = m_ObdInitParam.m_pManufacturerPart;
 
-    if ( ((ObdPart_p & kEplObdPartMan) != 0) &&
+    if ( ((obdPart_p & kEplObdPartMan) != 0) &&
          (pObdEntry != NULL) )
     {
         fPartFount = TRUE;
 
         Ret = accessOdPartIntern (
-            kEplObdPartMan, pObdEntry, Direction_p);
+            kEplObdPartMan, pObdEntry, direction_p);
         if (Ret != kEplSuccessful)
         {
             goto Exit;
@@ -544,13 +474,13 @@ tEplObdEntryPtr pObdEntry;
     // access to device part
     pObdEntry = m_ObdInitParam.m_pDevicePart;
 
-    if ( ((ObdPart_p & kEplObdPartDev) != 0) &&
+    if ( ((obdPart_p & kEplObdPartDev) != 0) &&
          (pObdEntry != NULL) )
     {
         fPartFount = TRUE;
 
         Ret = accessOdPartIntern (
-            kEplObdPartDev, pObdEntry, Direction_p);
+            kEplObdPartDev, pObdEntry, direction_p);
         if (Ret != kEplSuccessful)
         {
             goto Exit;
@@ -562,12 +492,12 @@ tEplObdEntryPtr pObdEntry;
         // access to user part
         pObdEntry = m_ObdInitParam.m_pUserPart;
 
-        if ( ((ObdPart_p & kEplObdPartUsr) != 0) &&
+        if ( ((obdPart_p & kEplObdPartUsr) != 0) &&
              (pObdEntry != NULL) )
         {
             fPartFount = TRUE;
 
-            Ret = accessOdPartIntern (kEplObdPartUsr, pObdEntry, Direction_p);
+            Ret = accessOdPartIntern (kEplObdPartUsr, pObdEntry, direction_p);
             if (Ret != kEplSuccessful)
             {
                 goto Exit;
@@ -603,8 +533,7 @@ Exit:
 //
 //---------------------------------------------------------------------------
 
-EPLDLLEXPORT tEplKernel PUBLIC obd_defineVar (
-    tEplVarParam MEM* pVarParam_p)
+tEplKernel obd_defineVar (tEplVarParam MEM* pVarParam_p)
 {
 
 tEplKernel              Ret;
@@ -689,7 +618,7 @@ Exit:
 // Description: It returnes the current data pointer. But if object is an
 //              constant object it returnes the default pointer.
 //
-// Parameters:  uiIndex_p    =   Index of the entry
+// Parameters:  index_p    =   Index of the entry
 //              uiSubindex_p =   Subindex of the entry
 //
 // Return:      void *    = pointer to object data
@@ -698,9 +627,7 @@ Exit:
 //
 //---------------------------------------------------------------------------
 
-EPLDLLEXPORT void * PUBLIC obd_getObjectDataPtr (
-                                        unsigned int uiIndex_p,
-                                        unsigned int uiSubIndex_p)
+void* obd_getObjectDataPtr (UINT index_p, UINT subIndex_p)
  {
 tEplKernel          Ret;
 void *       pData;
@@ -710,7 +637,7 @@ tEplObdSubEntryPtr  pObdSubEntry;
 
     // get pointer to index structure
     Ret = getIndexIntern (&m_ObdInitParam,
-                                uiIndex_p,
+                                index_p,
                                 &pObdEntry);
     if(Ret != kEplSuccessful)
     {
@@ -720,7 +647,7 @@ tEplObdSubEntryPtr  pObdSubEntry;
 
     // get pointer to subindex structure
     Ret = getSubindexIntern (pObdEntry,
-                                uiSubIndex_p,
+                                subIndex_p,
                                 &pObdSubEntry);
     if(Ret != kEplSuccessful)
     {
@@ -751,8 +678,7 @@ Exit:
 // State:
 //
 //---------------------------------------------------------------------------
-EPLDLLEXPORT tEplKernel PUBLIC obd_registerUserOd (
-    tEplObdEntryPtr pUserOd_p)
+tEplKernel obd_registerUserOd (tEplObdEntryPtr pUserOd_p)
 {
 
     m_ObdInitParam.m_pUserPart = pUserOd_p;
@@ -772,7 +698,7 @@ EPLDLLEXPORT tEplKernel PUBLIC obd_registerUserOd (
 //
 // Parameters:  pVarEntry_p = pointer to var entry structure
 //              Type_p      = object type
-//              ObdSize_p   = size of object data
+//              obdSize_p   = size of object data
 //
 // Returns:     none
 //
@@ -780,9 +706,7 @@ EPLDLLEXPORT tEplKernel PUBLIC obd_registerUserOd (
 //
 //---------------------------------------------------------------------------
 
-EPLDLLEXPORT void PUBLIC obd_initVarEntry (
-                                             tEplObdVarEntry MEM* pVarEntry_p,
-                                             tEplObdType Type_p, tEplObdSize ObdSize_p)
+void obd_initVarEntry (tEplObdVarEntry MEM* pVarEntry_p, tEplObdType type_p, tEplObdSize obdSize_p)
 {
 /*
     #if (EPL_PDO_USE_STATIC_MAPPING == FALSE)
@@ -795,7 +719,7 @@ EPLDLLEXPORT void PUBLIC obd_initVarEntry (
 */
 
 // 10-dec-2004 r.d.: this function will not be used for strings
-    if ((Type_p == kEplObdTypDomain))
+    if ((type_p == kEplObdTypDomain))
 //         (bType_p == kEplObdTypVString) /* ||
 //         (bType_p == kEplObdTypOString) ||
 //         (bType_p == kEplObdTypUString)    */ )
@@ -812,7 +736,7 @@ EPLDLLEXPORT void PUBLIC obd_initVarEntry (
         // This prevents an access violation if user forgets to call obd_defineVar()
         // for this variable but mappes it in a PDO.
         pVarEntry_p->m_pData = &abEplObdTrashObject_g[0];
-        pVarEntry_p->m_Size  = ObdSize_p;
+        pVarEntry_p->m_Size  = obdSize_p;
     }
 
 }
@@ -827,17 +751,15 @@ EPLDLLEXPORT void PUBLIC obd_initVarEntry (
 //              without terminating null-character
 //
 // Parameters:
-//              uiIndex_p   =   Index
-//              uiSubIndex_p=   Subindex
+//              index_p   =   Index
+//              subIndex_p=   Subindex
 //
 // Return:      tEplObdSize
 //
 // State:
 //
 //---------------------------------------------------------------------------
-EPLDLLEXPORT tEplObdSize PUBLIC obd_getDataSize(
-                                                  unsigned int uiIndex_p,
-                                                  unsigned int uiSubIndex_p)
+tEplObdSize obd_getDataSize(UINT index_p, UINT subIndex_p)
 {
 tEplKernel          Ret;
 tEplObdSize         ObdSize;
@@ -847,7 +769,7 @@ tEplObdSubEntryPtr  pObdSubEntry;
 
     // get pointer to index structure
     Ret = getIndexIntern (&m_ObdInitParam,
-                                uiIndex_p,
+                                index_p,
                                 &pObdEntry);
     if(Ret != kEplSuccessful)
     {
@@ -857,7 +779,7 @@ tEplObdSubEntryPtr  pObdSubEntry;
 
     // get pointer to subindex structure
     Ret = getSubindexIntern (pObdEntry,
-                                uiSubIndex_p,
+                                subIndex_p,
                                 &pObdSubEntry);
     if(Ret != kEplSuccessful)
     {
@@ -879,12 +801,12 @@ Exit:
 //
 // Parameters:
 //
-// Return:      unsigned int = Node Id
+// Return:      UINT = Node Id
 //
 // State:
 //
 //---------------------------------------------------------------------------
-EPLDLLEXPORT unsigned int PUBLIC obd_getNodeId()
+UINT obd_getNodeId(void)
 {
 tEplKernel      Ret;
 tEplObdSize     ObdSize;
@@ -904,7 +826,7 @@ BYTE            bNodeId;
     }
 
 Exit:
-    return (unsigned int) bNodeId;
+    return (UINT) bNodeId;
 
 }
 
@@ -925,9 +847,7 @@ Exit:
 // State:
 //
 //---------------------------------------------------------------------------
-EPLDLLEXPORT tEplKernel PUBLIC obd_setNodeId(
-                                         unsigned int uiNodeId_p,
-                                         tEplObdNodeIdType NodeIdType_p)
+tEplKernel obd_setNodeId(UINT nodeId_p, tEplObdNodeIdType nodeIdType_p)
 {
 tEplKernel  Ret;
 tEplObdSize ObdSize;
@@ -935,12 +855,12 @@ BYTE        fHwBool;
 BYTE        bNodeId;
 
     // check Node Id
-    if(uiNodeId_p == EPL_C_ADR_INVALID)
+    if(nodeId_p == EPL_C_ADR_INVALID)
     {
         Ret = kEplInvalidNodeId;
         goto Exit;
     }
-    bNodeId = (BYTE)uiNodeId_p;
+    bNodeId = (BYTE)nodeId_p;
     ObdSize = sizeof(BYTE);
     // write NodeId to OD entry
     Ret = obd_writeEntry(
@@ -954,7 +874,7 @@ BYTE        bNodeId;
     }
 
     // set HWBOOL-Flag in Subindex EPL_OBD_NODE_ID_HWBOOL_SUBINDEX
-    switch (NodeIdType_p)
+    switch (nodeIdType_p)
     {
         // type unknown
         case kEplObdNodeIdUnknown:
@@ -1006,8 +926,8 @@ Exit:
 //
 //
 // Parameters:
-//              uiIndex_p           = Index
-//              uiSubIndex_p        = Subindex
+//              index_p           = Index
+//              subIndex_p        = Subindex
 //              pfEntryNumerical_p  = pointer to BOOL for returnvalue
 //                                  -> TRUE if entry a numerical value
 //                                  -> FALSE if entry not a numerical value
@@ -1017,10 +937,7 @@ Exit:
 // State:
 //
 //---------------------------------------------------------------------------
-EPLDLLEXPORT tEplKernel PUBLIC obd_isNumerical(
-                                        unsigned int  uiIndex_p,
-                                        unsigned int  uiSubIndex_p,
-                                        BOOL*         pfEntryNumerical_p)
+tEplKernel obd_isNumerical(UINT index_p, UINT subIndex_p, BOOL* pfEntryNumerical_p)
 {
 tEplKernel          Ret;
 tEplObdEntryPtr     pObdEntry;
@@ -1029,7 +946,7 @@ tEplObdSubEntryPtr  pObdSubEntry;
 
     // get pointer to index structure
     Ret = getIndexIntern (&m_ObdInitParam,
-                                uiIndex_p,
+                                index_p,
                                 &pObdEntry);
     if(Ret != kEplSuccessful)
     {
@@ -1038,7 +955,7 @@ tEplObdSubEntryPtr  pObdSubEntry;
 
     // get pointer to subindex structure
     Ret = getSubindexIntern (pObdEntry,
-                                uiSubIndex_p,
+                                subIndex_p,
                                 &pObdSubEntry);
     if(Ret != kEplSuccessful)
     {
@@ -1062,8 +979,8 @@ Exit:
 //
 //
 // Parameters:
-//              uiIndex_p           = Index
-//              uiSubIndex_p        = Subindex
+//              index_p           = Index
+//              subIndex_p        = Subindex
 //              pType_p             = pointer to tEplObdType for returnvalue
 //
 // Return:      tEplKernel = Errorcode
@@ -1071,10 +988,7 @@ Exit:
 // State:
 //
 //---------------------------------------------------------------------------
-EPLDLLEXPORT tEplKernel PUBLIC obd_getType(
-                                        unsigned int  uiIndex_p,
-                                        unsigned int  uiSubIndex_p,
-                                        tEplObdType*  pType_p)
+tEplKernel obd_getType(UINT index_p, UINT subIndex_p, tEplObdType* pType_p)
 {
 tEplKernel          Ret;
 tEplObdEntryPtr     pObdEntry;
@@ -1083,7 +997,7 @@ tEplObdSubEntryPtr  pObdSubEntry;
 
     // get pointer to index structure
     Ret = getIndexIntern (&m_ObdInitParam,
-                                uiIndex_p,
+                                index_p,
                                 &pObdEntry);
     if(Ret != kEplSuccessful)
     {
@@ -1092,7 +1006,7 @@ tEplObdSubEntryPtr  pObdSubEntry;
 
     // get pointer to subindex structure
     Ret = getSubindexIntern (pObdEntry,
-                                uiSubIndex_p,
+                                subIndex_p,
                                 &pObdSubEntry);
     if(Ret != kEplSuccessful)
     {
@@ -1119,8 +1033,8 @@ Exit:
 //              is not set. The attrib is only checked up for SDO transfer.
 //
 // Parameters:
-//              uiIndex_p       = Index of the OD entry to read
-//              uiSubIndex_p    = Subindex to read
+//              index_p       = Index of the OD entry to read
+//              subIndex_p    = Subindex to read
 //              pDstData_p      = pointer to the buffer for data
 //              Offset_p        = offset in data for read access
 //              pSize_p         = IN: Size of the buffer
@@ -1131,11 +1045,7 @@ Exit:
 // State:
 //
 //---------------------------------------------------------------------------
-EPLDLLEXPORT tEplKernel PUBLIC obd_readEntryToLe (
-                                        unsigned int        uiIndex_p,
-                                        unsigned int        uiSubIndex_p,
-                                        void *              pDstData_p,
-                                        tEplObdSize *       pSize_p)
+tEplKernel obd_readEntryToLe (UINT index_p, UINT subIndex_p, void* pDstData_p, tEplObdSize* pSize_p)
 {
 tEplKernel                      Ret;
 tEplObdEntryPtr                 pObdEntry;
@@ -1149,7 +1059,7 @@ tEplObdSize                     ObdSize;
 
     // get address of index and subindex entry
     Ret = getEntry (
-        uiIndex_p, uiSubIndex_p, &pObdEntry, &pSubEntry);
+        index_p, subIndex_p, &pObdEntry, &pSubEntry);
     if (Ret != kEplSuccessful)
     {
         goto Exit;
@@ -1168,8 +1078,8 @@ tEplObdSize                     ObdSize;
     //------------------------------------------------------------------------
     // address of source data to structure of callback parameters
     // so callback function can change this data before reading
-    CbParam.m_uiIndex   = uiIndex_p;
-    CbParam.m_uiSubIndex= uiSubIndex_p;
+    CbParam.m_uiIndex   = index_p;
+    CbParam.m_uiSubIndex= subIndex_p;
     CbParam.m_pArg      = pSrcData;
     CbParam.m_ObdEvent  = kEplObdEvPreRead;
     Ret = callObjectCallback (
@@ -1318,8 +1228,8 @@ Exit:
 //              are stored with added '\0' character.
 //
 // Parameters:
-//              uiIndex_p       =   Index of the OD entry
-//              uiSubIndex_p    =   Subindex of the OD Entry
+//              index_p       =   Index of the OD entry
+//              subIndex_p    =   Subindex of the OD Entry
 //              pSrcData_p      =   Pointer to the data to write
 //              Size_p          =   Size of the data in Byte
 //
@@ -1329,11 +1239,7 @@ Exit:
 // State:
 //
 //---------------------------------------------------------------------------
-EPLDLLEXPORT tEplKernel PUBLIC obd_writeEntryFromLe (
-                                        unsigned int  uiIndex_p,
-                                        unsigned int  uiSubIndex_p,
-                                        void *        pSrcData_p,
-                                        tEplObdSize   Size_p)
+tEplKernel obd_writeEntryFromLe (UINT index_p, UINT subIndex_p, void* pSrcData_p, tEplObdSize size_p)
 {
 tEplKernel              Ret;
 tEplObdEntryPtr         pObdEntry;
@@ -1346,11 +1252,11 @@ void*                   pBuffer = &qwBuffer;
 
 
     Ret = writeEntryPre (
-                               uiIndex_p,
-                               uiSubIndex_p,
+                               index_p,
+                               subIndex_p,
                                pSrcData_p,
                                &pDstData,
-                               Size_p,
+                               size_p,
                                &pObdEntry,
                                &pSubEntry,
                                &CbParam,
@@ -1477,8 +1383,8 @@ Exit:
 // Description: Function returns accesstype of the entry
 //
 // Parameters:
-//              uiIndex_p       =   Index of the OD entry
-//              uiSubIndex_p    =   Subindex of the OD Entry
+//              index_p       =   Index of the OD entry
+//              subIndex_p    =   Subindex of the OD Entry
 //              pAccessTyp_p    =   pointer to buffer to store accesstype
 //
 // Return:      tEplKernel     =   errorcode
@@ -1487,10 +1393,7 @@ Exit:
 // State:
 //
 //---------------------------------------------------------------------------
-EPLDLLEXPORT tEplKernel PUBLIC obd_getAccessType(
-                                        unsigned int uiIndex_p,
-                                        unsigned int uiSubIndex_p,
-                                        tEplObdAccess* pAccessTyp_p)
+tEplKernel obd_getAccessType(UINT index_p, UINT subIndex_p, tEplObdAccess* pAccessTyp_p)
 
 {
 tEplKernel          Ret;
@@ -1500,7 +1403,7 @@ tEplObdSubEntryPtr  pObdSubEntry;
 
     // get pointer to index structure
     Ret = getIndexIntern (&m_ObdInitParam,
-                                uiIndex_p,
+                                index_p,
                                 &pObdEntry);
     if(Ret != kEplSuccessful)
     {
@@ -1509,7 +1412,7 @@ tEplObdSubEntryPtr  pObdSubEntry;
 
     // get pointer to subindex structure
     Ret = getSubindexIntern (pObdEntry,
-                                uiSubIndex_p,
+                                subIndex_p,
                                 &pObdSubEntry);
     if(Ret != kEplSuccessful)
     {
@@ -1530,7 +1433,7 @@ Exit:
 //
 // Description: gets variable from OD
 //
-// Parameters:  uiIndex_p       =   index of the var entry to search
+// Parameters:  index_p       =   index of the var entry to search
 //              uiSubindex_p    =   subindex of var entry to search
 //              ppVarEntry_p    =   pointer to the pointer to the varentry
 //
@@ -1540,10 +1443,7 @@ Exit:
 //
 //---------------------------------------------------------------------------
 
-tEplKernel PUBLIC obd_searchVarEntry (
-    unsigned int            uiIndex_p,
-    unsigned int            uiSubindex_p,
-    tEplObdVarEntry MEM**   ppVarEntry_p)
+tEplKernel obd_searchVarEntry (UINT index_p, UINT subindex_p, tEplObdVarEntry MEM** ppVarEntry_p)
 {
 
 tEplKernel           Ret;
@@ -1551,7 +1451,7 @@ tEplObdSubEntryPtr   pSubindexEntry;
 
     // get address of subindex entry
     Ret = getEntry (
-        uiIndex_p, uiSubindex_p, NULL, &pSubindexEntry);
+        index_p, subindex_p, NULL, &pSubindexEntry);
     if (Ret == kEplSuccessful)
     {
         // get var entry
@@ -1573,7 +1473,7 @@ tEplObdSubEntryPtr   pSubindexEntry;
 //
 // Description: calls callback function of an object or of a variable
 //
-// Parameters:  fpCallback_p
+// Parameters:  pfnCallback_p
 //              pCbParam_p
 //
 // Return:      tEplKernel
@@ -1582,27 +1482,25 @@ tEplObdSubEntryPtr   pSubindexEntry;
 //
 //---------------------------------------------------------------------------
 
-static tEplKernel callObjectCallback (
-    tEplObdCallback fpCallback_p,
-    tEplObdCbParam MEM* pCbParam_p)
+static tEplKernel callObjectCallback(tEplObdCallback pfnCallback_p, tEplObdCbParam MEM* pCbParam_p)
 {
 
 tEplKernel           Ret;
-tEplObdCallback MEM  fpCallback;
+tEplObdCallback MEM  pfnCallback;
 
     ASSERT (pCbParam_p != NULL);
 
     Ret = kEplSuccessful;
 
     // check address of callback function before calling it
-    if (fpCallback_p != NULL)
+    if (pfnCallback_p != NULL)
     {
         // KEIL C51 V6.01 has a bug.
         // Therefore the parameter fpCallback_p has to be copied in local variable fpCallback.
-        fpCallback = fpCallback_p;
+        pfnCallback = pfnCallback_p;
 
         // call callback function for this object
-        Ret = fpCallback (pCbParam_p);
+        Ret = pfnCallback (pCbParam_p);
     }
 
     return Ret;
@@ -1624,7 +1522,7 @@ tEplObdCallback MEM  fpCallback;
 //
 //---------------------------------------------------------------------------
 
-static tEplObdSize getDataSizeIntern (tEplObdSubEntryPtr pSubIndexEntry_p)
+static tEplObdSize getDataSizeIntern(tEplObdSubEntryPtr pSubIndexEntry_p)
 {
 
 tEplObdSize DataSize;
@@ -1659,8 +1557,8 @@ void MEM*   pData;
 //              character is NOT included!!
 //
 // Parameters:  pObjData_p          = pointer to string
-//              ObjLen_p            = max. length of object entry
-//              bObjType_p          = object type (VSTRING, ...)
+//              objLen_p            = max. length of object entry
+//              bobjType_p          = object type (VSTRING, ...)
 //
 // Returns:     string length
 //
@@ -1668,9 +1566,7 @@ void MEM*   pData;
 //
 //---------------------------------------------------------------------------
 
-static tEplObdSize getObdStringLen (void * pObjData_p,
-                                 tEplObdSize ObjLen_p,
-                                 tEplObdType ObjType_p)
+static tEplObdSize getObdStringLen(void* pObjData_p, tEplObdSize objLen_p, tEplObdType objType_p)
 {
 
 tEplObdSize    StrLen = 0;
@@ -1683,11 +1579,11 @@ BYTE *  pbString;
 
     //----------------------------------------
     // Visible String: data format byte
-    if (ObjType_p == kEplObdTypVString)
+    if (objType_p == kEplObdTypVString)
     {
         pbString = pObjData_p;
 
-        for (StrLen = 0; StrLen < ObjLen_p; StrLen++)
+        for (StrLen = 0; StrLen < objLen_p; StrLen++)
         {
             if (*pbString == '\0')
             {
@@ -1731,9 +1627,7 @@ Exit:
 //
 //---------------------------------------------------------------------------
 
-static tEplKernel checkObjectRange (
-            tEplObdSubEntryPtr pSubindexEntry_p,
-            void * pData_p)
+static tEplKernel checkObjectRange (tEplObdSubEntryPtr pSubindexEntry_p, void * pData_p)
 {
 
 tEplKernel      Ret;
@@ -2030,8 +1924,8 @@ Exit:
 //              are stored with added '\0' character.
 //
 // Parameters:
-//              uiIndex_p       =   Index of the OD entry
-//              uiSubIndex_p    =   Subindex of the OD Entry
+//              index_p       =   Index of the OD entry
+//              subIndex_p    =   Subindex of the OD Entry
 //              pSrcData_p      =   Pointer to the data to write
 //              Size_p          =   Size of the data in Byte
 //
@@ -2042,16 +1936,10 @@ Exit:
 //
 //---------------------------------------------------------------------------
 
-static tEplKernel PUBLIC writeEntryPre (
-    unsigned int  uiIndex_p,
-    unsigned int  uiSubIndex_p,
-    void * pSrcData_p,
-    void** ppDstData_p,
-    tEplObdSize   Size_p,
-    tEplObdEntryPtr*        ppObdEntry_p,
-    tEplObdSubEntryPtr*     ppSubEntry_p,
-    tEplObdCbParam MEM*     pCbParam_p,
-    tEplObdSize*  pObdSize_p)
+static tEplKernel writeEntryPre (UINT index_p, UINT subIndex_p, void* pSrcData_p,
+                                 void** ppDstData_p, tEplObdSize Size_p, tEplObdEntryPtr* ppObdEntry_p,
+                                 tEplObdSubEntryPtr* ppSubEntry_p, tEplObdCbParam MEM* pCbParam_p,
+                                 tEplObdSize*  pObdSize_p)
 {
 
 tEplKernel              Ret;
@@ -2072,7 +1960,7 @@ BOOL                    fEntryNumerical;
     //------------------------------------------------------------------------
     // get address of index and subindex entry
     Ret = getEntry (
-        uiIndex_p, uiSubIndex_p, &pObdEntry, &pSubEntry);
+        index_p, subIndex_p, &pObdEntry, &pSubEntry);
     if (Ret != kEplSuccessful)
     {
         goto Exit;
@@ -2091,8 +1979,8 @@ BOOL                    fEntryNumerical;
     // To use the same callback function for ObdWriteEntry as well as for
     // an SDO download call at first (kEplObdEvPre...) the callback function
     // with the argument pointer to object size.
-    pCbParam_p->m_uiIndex    = uiIndex_p;
-    pCbParam_p->m_uiSubIndex = uiSubIndex_p;
+    pCbParam_p->m_uiIndex    = index_p;
+    pCbParam_p->m_uiSubIndex = subIndex_p;
 
     // Because object size and object pointer are
     // adapted by user callback function, re-read
@@ -2250,8 +2138,8 @@ Exit:
 //              are stored with added '\0' character.
 //
 // Parameters:
-//              uiIndex_p       =   Index of the OD entry
-//              uiSubIndex_p    =   Subindex of the OD Entry
+//              index_p       =   Index of the OD entry
+//              subIndex_p    =   Subindex of the OD Entry
 //              pSrcData_p      =   Pointer to the data to write
 //              Size_p          =   Size of the data in Byte
 //
@@ -2262,13 +2150,9 @@ Exit:
 //
 //---------------------------------------------------------------------------
 
-static tEplKernel PUBLIC writeEntryPost (
-    tEplObdEntryPtr         pObdEntry_p,
-    tEplObdSubEntryPtr      pSubEntry_p,
-    tEplObdCbParam MEM*     pCbParam_p,
-    void * pSrcData_p,
-    void * pDstData_p,
-    tEplObdSize   ObdSize_p)
+static tEplKernel writeEntryPost (tEplObdEntryPtr pObdEntry_p, tEplObdSubEntryPtr pSubEntry_p,
+                                  tEplObdCbParam MEM* pCbParam_p, void* pSrcData_p,
+                                  void* pDstData_p, tEplObdSize obdSize_p)
 {
 
 tEplKernel              Ret;
@@ -2301,12 +2185,12 @@ tEplKernel              Ret;
     }
 
     // copy object data to OBD
-    EPL_MEMCPY (pDstData_p, pSrcData_p, ObdSize_p);
+    EPL_MEMCPY (pDstData_p, pSrcData_p, obdSize_p);
 
     // terminate string with 0
     if (pSubEntry_p->m_Type == kEplObdTypVString)
     {
-        ((char MEM*) pDstData_p)[ObdSize_p] = '\0';
+        ((char MEM*) pDstData_p)[obdSize_p] = '\0';
     }
 
     // write address of destination to structure of callback parameters
@@ -2343,7 +2227,7 @@ Exit:
 //
 //---------------------------------------------------------------------------
 
-static tEplObdSize getObjectSize (tEplObdSubEntryPtr pSubIndexEntry_p)
+static tEplObdSize getObjectSize(tEplObdSubEntryPtr pSubIndexEntry_p)
 {
 
 tEplObdSize DataSize = 0;
@@ -2530,7 +2414,7 @@ void * pData;
 //
 //---------------------------------------------------------------------------
 
-static CONST void* getObjectDefaultPtr (tEplObdSubEntryPtr pSubIndexEntry_p)
+static CONST void* getObjectDefaultPtr(tEplObdSubEntryPtr pSubIndexEntry_p)
 {
 
 CONST void*     pDefault;
@@ -2584,9 +2468,7 @@ tEplObdType     Type;
 //
 //---------------------------------------------------------------------------
 
-static tEplKernel getVarEntry (
-    tEplObdSubEntryPtr    pSubindexEntry_p,
-    tEplObdVarEntry MEM** ppVarEntry_p)
+static tEplKernel getVarEntry (tEplObdSubEntryPtr pSubindexEntry_p, tEplObdVarEntry MEM** ppVarEntry_p)
 {
 
 tEplKernel Ret = kEplObdVarEntryNotExist;
@@ -2620,7 +2502,7 @@ tEplKernel Ret = kEplObdVarEntryNotExist;
 //
 // Description: gets a index entry from OD
 //
-// Parameters:  uiIndex_p       =   Index number
+// Parameters:  index_p       =   Index number
 //              uiSubindex_p    =   Subindex number
 //              ppObdEntry_p    =   pointer to the pointer to the entry
 //              ppObdSubEntry_p =   pointer to the pointer to the subentry
@@ -2632,11 +2514,8 @@ tEplKernel Ret = kEplObdVarEntryNotExist;
 //
 //---------------------------------------------------------------------------
 
-static tEplKernel  getEntry (
-    unsigned int             uiIndex_p,
-    unsigned int             uiSubindex_p,
-    tEplObdEntryPtr*         ppObdEntry_p,
-    tEplObdSubEntryPtr*      ppObdSubEntry_p)
+static tEplKernel getEntry(UINT index_p, UINT uiSubindex_p, tEplObdEntryPtr* ppObdEntry_p,
+                           tEplObdSubEntryPtr* ppObdSubEntry_p)
 {
 
 tEplObdEntryPtr         pObdEntry;
@@ -2645,7 +2524,7 @@ tEplKernel              Ret;
 
     //------------------------------------------------------------------------
     // get address of entry of index
-    Ret = getIndexIntern (&m_ObdInitParam, uiIndex_p, &pObdEntry);
+    Ret = getIndexIntern (&m_ObdInitParam, index_p, &pObdEntry);
     if (Ret != kEplSuccessful)
     {
         goto Exit;
@@ -2662,7 +2541,7 @@ tEplKernel              Ret;
     //------------------------------------------------------------------------
     // call callback function to inform user/stack that an object will be searched
     // if the called module returnes an error then we abort the searching with kEplObdIndexNotExist
-    CbParam.m_uiIndex    = uiIndex_p;
+    CbParam.m_uiIndex    = index_p;
     CbParam.m_uiSubIndex = uiSubindex_p;
     CbParam.m_pArg       = NULL;
     CbParam.m_ObdEvent   = kEplObdEvCheckExist;
@@ -2701,7 +2580,7 @@ Exit:
 //
 //---------------------------------------------------------------------------
 
-static void MEM* getObjectCurrentPtr (tEplObdSubEntryPtr pSubIndexEntry_p)
+static void MEM* getObjectCurrentPtr(tEplObdSubEntryPtr pSubIndexEntry_p)
 {
 
 void MEM*       pData;
@@ -2760,7 +2639,7 @@ tEplObdSize     Size;
 // Description: gets a index entry from OD
 //
 // Parameters:  pInitParam_p
-//              uiIndex_p
+//              index_p
 //              ppObdEntry_p
 //
 // Return:      tEplKernel
@@ -2769,10 +2648,7 @@ tEplObdSize     Size;
 //
 //---------------------------------------------------------------------------
 
-static tEplKernel getIndexIntern (
-                        tEplObdInitParam MEM*    pInitParam_p,
-                        unsigned int             uiIndex_p,
-                        tEplObdEntryPtr*         ppObdEntry_p)
+static tEplKernel getIndexIntern (tEplObdInitParam MEM* pInitParam_p, UINT index_p, tEplObdEntryPtr* ppObdEntry_p)
 {
 
 tEplObdEntryPtr pObdEntry;
@@ -2796,11 +2672,11 @@ unsigned int  nLoop;
     // get start address of OD part
     // start address depends on object index because
     // object dictionary is divided in 3 parts
-    if ((uiIndex_p >= 0x1000) && (uiIndex_p < 0x2000))
+    if ((index_p >= 0x1000) && (index_p < 0x2000))
     {
         pObdEntry = pInitParam_p->m_pGenericPart;
     }
-    else if ((uiIndex_p >= 0x2000) && (uiIndex_p < 0x6000))
+    else if ((index_p >= 0x2000) && (index_p < 0x6000))
     {
         pObdEntry = pInitParam_p->m_pManufacturerPart;
     }
@@ -2812,9 +2688,9 @@ unsigned int  nLoop;
     // should set OBD_INCLUDE_A000_TO_DEVICE_PART to TRUE.
 
 #if (EPL_OBD_INCLUDE_A000_TO_DEVICE_PART == FALSE)
-    else if ((uiIndex_p >= 0x6000) && (uiIndex_p < 0x9FFF))
+    else if ((index_p >= 0x6000) && (index_p < 0x9FFF))
 #else
-    else if ((uiIndex_p >= 0x6000) && (uiIndex_p < 0xFFFF))
+    else if ((index_p >= 0x6000) && (index_p < 0xFFFF))
 #endif
     {
         pObdEntry = pInitParam_p->m_pDevicePart;
@@ -2867,7 +2743,7 @@ unsigned int  nLoop;
         while (uiIndex != EPL_OBD_TABLE_INDEX_END)
         {
             // go to the end of this function if index is found
-            if (uiIndex_p == uiIndex)
+            if (index_p == uiIndex)
             {
                 // write address of OD entry to calling function
                 *ppObdEntry_p = pObdEntry;
@@ -2878,7 +2754,7 @@ unsigned int  nLoop;
             // objects are sorted in OD
             // if the current index in OD is greater than the index which is to search then break loop
             // in this case user OD has to be search too
-            if (uiIndex_p < uiIndex)
+            if (index_p < uiIndex)
             {
                 break;
             }
@@ -2933,10 +2809,7 @@ Exit:
 //
 //---------------------------------------------------------------------------
 
-static tEplKernel getSubindexIntern (
-    tEplObdEntryPtr           pObdEntry_p,
-    unsigned int              uiSubIndex_p,
-    tEplObdSubEntryPtr*       ppObdSubEntry_p)
+static tEplKernel getSubindexIntern (tEplObdEntryPtr pObdEntry_p, UINT subIndex_p, tEplObdSubEntryPtr* ppObdSubEntry_p)
 {
 
 tEplObdSubEntryPtr pSubEntry;
@@ -2961,10 +2834,10 @@ tEplKernel         Ret;
         if ((pSubEntry->m_Access & kEplObdAccArray) != 0)
         {
             // check if subindex is in range
-            if (uiSubIndex_p < pObdEntry_p->m_uiCount)
+            if (subIndex_p < pObdEntry_p->m_uiCount)
             {
                 // update subindex number (subindex entry of an array is always in RAM !!!)
-                pSubEntry->m_uiSubIndex = uiSubIndex_p;
+                pSubEntry->m_uiSubIndex = subIndex_p;
                 *ppObdSubEntry_p = pSubEntry;
                 Ret = kEplSuccessful;
                 goto Exit;
@@ -2972,7 +2845,7 @@ tEplKernel         Ret;
         }
 
         // go to the end of this function if subindex is found
-        else if (uiSubIndex_p == pSubEntry->m_uiSubIndex)
+        else if (subIndex_p == pSubEntry->m_uiSubIndex)
         {
             *ppObdSubEntry_p = pSubEntry;
             Ret = kEplSuccessful;
@@ -2982,7 +2855,7 @@ tEplKernel         Ret;
         // objects are sorted in OD
         // if the current subindex in OD is greater than the subindex which is to search then break loop
         // in this case user OD has to be search too
-        if (uiSubIndex_p < pSubEntry->m_uiSubIndex)
+        if (subIndex_p < pSubEntry->m_uiSubIndex)
         {
             break;
         }
@@ -3014,8 +2887,7 @@ Exit:
 //
 //---------------------------------------------------------------------------
 #if (EPL_OBD_USE_STORE_RESTORE != FALSE)
-EPLDLLEXPORT tEplKernel PUBLIC obd_storeLoadObjCallback (
-    tEplObdStoreLoadObjCallback fpCallback_p)
+tEplKernel obd_storeLoadObjCallback (tEplObdStoreLoadObjCallback fpCallback_p)
 {
 
     // set new address of callback function
@@ -3033,9 +2905,9 @@ EPLDLLEXPORT tEplKernel PUBLIC obd_storeLoadObjCallback (
 //
 // Description: runs through OD and executes a job
 //
-// Parameters:  CurrentOdPart_p
+// Parameters:  currentOdPart_p
 //              pObdEnty_p
-//              Direction_p     = what is to do (load values from flash or EEPROM, store, ...)
+//              direction_p     = what is to do (load values from flash or EEPROM, store, ...)
 //
 // Return:      tEplKernel
 //
@@ -3043,10 +2915,8 @@ EPLDLLEXPORT tEplKernel PUBLIC obd_storeLoadObjCallback (
 //
 //---------------------------------------------------------------------------
 
-static tEplKernel accessOdPartIntern (
-    tEplObdPart     CurrentOdPart_p,
-    tEplObdEntryPtr pObdEnty_p,
-    tEplObdDir      Direction_p)
+static tEplKernel accessOdPartIntern (tEplObdPart currentOdPart_p, tEplObdEntryPtr pObdEnty_p,
+                                      tEplObdDir direction_p)
 {
 
 tEplObdSubEntryPtr          pSubIndex;
@@ -3061,7 +2931,7 @@ tEplObdVarEntry MEM*        pVarEntry = NULL;
 #if (EPL_OBD_USE_STORE_RESTORE != FALSE)
 tEplObdCbStoreParam MEM     CbStore;
 #else
-UNUSED_PARAMETER(CurrentOdPart_p);
+UNUSED_PARAMETER(currentOdPart_p);
 #endif
 
     ASSERT (pObdEnty_p != NULL);
@@ -3069,14 +2939,14 @@ UNUSED_PARAMETER(CurrentOdPart_p);
     Ret = kEplSuccessful;
 #if (EPL_OBD_USE_STORE_RESTORE != FALSE)
     // prepare structure for STORE RESTORE callback function
-    CbStore.m_bCurrentOdPart = (BYTE) CurrentOdPart_p;
+    CbStore.m_bCurrentOdPart = (BYTE) currentOdPart_p;
     CbStore.m_pData          = NULL;
     CbStore.m_ObjSize        = 0;
 #endif
 
     // command of first action depends on direction to access
     #if (EPL_OBD_USE_STORE_RESTORE != FALSE)
-    if (Direction_p == kEplObdDirLoad)
+    if (direction_p == kEplObdDirLoad)
     {
         CbStore.m_bCommand = (BYTE) kEplObdCommOpenRead;
 
@@ -3091,7 +2961,7 @@ UNUSED_PARAMETER(CurrentOdPart_p);
         // set command for index and subindex loop
         CbStore.m_bCommand = (BYTE) kEplObdCommReadObj;
     }
-    else if (Direction_p == kEplObdDirStore)
+    else if (direction_p == kEplObdDirStore)
     {
         CbStore.m_bCommand = (BYTE) kEplObdCommOpenWrite;
 
@@ -3109,7 +2979,7 @@ UNUSED_PARAMETER(CurrentOdPart_p);
 
     // we should not restore the OD values here
     // the next NMT command "Reset Node" or "Reset Communication" resets the OD data
-    if (Direction_p != kEplObdDirRestore)
+    if (direction_p != kEplObdDirRestore)
     {
         // walk through OD part till end is found
         while (pObdEnty_p->m_uiIndex != EPL_OBD_TABLE_INDEX_END)
@@ -3135,7 +3005,7 @@ UNUSED_PARAMETER(CurrentOdPart_p);
                 ObjSize  = getObjectSize (pSubIndex);
 
                 // switch direction of OD access
-                switch (Direction_p)
+                switch (direction_p)
                 {
                     // --------------------------------------------------------------------------
                     // VarEntry structures has to be initialized
@@ -3315,7 +3185,7 @@ UNUSED_PARAMETER(CurrentOdPart_p);
 
     // -----------------------------------------------------------------------------------------
     // command of last action depends on direction to access
-    if (Direction_p == kEplObdDirOBKCheck)
+    if (direction_p == kEplObdDirOBKCheck)
     {
 
         goto Exit;
@@ -3323,15 +3193,15 @@ UNUSED_PARAMETER(CurrentOdPart_p);
     #if (EPL_OBD_USE_STORE_RESTORE != FALSE)
     else
     {
-        if (Direction_p == kEplObdDirLoad)
+        if (direction_p == kEplObdDirLoad)
         {
             CbStore.m_bCommand = (BYTE) kEplObdCommCloseRead;
         }
-        else if (Direction_p == kEplObdDirStore)
+        else if (direction_p == kEplObdDirStore)
         {
             CbStore.m_bCommand = (BYTE) kEplObdCommCloseWrite;
         }
-        else if (Direction_p == kEplObdDirRestore)
+        else if (direction_p == kEplObdDirRestore)
         {
             CbStore.m_bCommand = (BYTE) kEplObdCommClear;
         }
@@ -3361,17 +3231,14 @@ Exit:
 //
 // Parameters:  pDstData_p              = destination pointer
 //              pSrcData_p              = source pointer
-//              ObjSize_p               = size of object
-//              ObjType_p               =
+//              objSize_p               = size of object
+//              objType_p               =
 //
 // Returns:     tEplKernel              = error code
 // ----------------------------------------------------------------------------
 
-static void copyObjectData (
-            void MEM*           pDstData_p,
-            CONST void *        pSrcData_p,
-            tEplObdSize         ObjSize_p,
-            tEplObdType         ObjType_p)
+static void copyObjectData (void MEM* pDstData_p, CONST void* pSrcData_p,
+                            tEplObdSize objSize_p, tEplObdType objType_p)
 {
 
 
@@ -3382,28 +3249,28 @@ tEplObdSize StrSize = 0;
     if (pDstData_p != NULL)
     {
 
-        if (ObjType_p == kEplObdTypVString)
+        if (objType_p == kEplObdTypVString)
         {
             // The function calculates the really number of characters of string. The
             // object entry size can be bigger as string size of default string.
             // The '\0'-termination is NOT included. A string with no characters has a
             // size of 0.
-            StrSize = getObdStringLen ((void *) pSrcData_p, ObjSize_p, kEplObdTypVString);
+            StrSize = getObdStringLen ((void *) pSrcData_p, objSize_p, kEplObdTypVString);
 
             // If the string length is greater than or equal to the entry size in OD then only copy
             // entry size - 1 and always set the '\0'-termination.
-            if (StrSize >= ObjSize_p)
+            if (StrSize >= objSize_p)
             {
-                StrSize = ObjSize_p - 1;
+                StrSize = objSize_p - 1;
             }
         }
 
         if (pSrcData_p != NULL)
         {
             // copy data
-            EPL_MEMCPY (pDstData_p, pSrcData_p, ObjSize_p);
+            EPL_MEMCPY (pDstData_p, pSrcData_p, objSize_p);
 
-            if (ObjType_p == kEplObdTypVString)
+            if (objType_p == kEplObdTypVString)
             {
                 ((char MEM*) pDstData_p)[StrSize] = '\0';
             }
@@ -3424,7 +3291,7 @@ tEplObdSize StrSize = 0;
 // Returns:     tEplKernel              = error code
 // ----------------------------------------------------------------------------
 static tEplKernel callPostDefault (void *pData_p, tEplObdEntryPtr pObdEntry_p,
-                                         tEplObdSubEntryPtr pSubIndex_p)
+                                   tEplObdSubEntryPtr pSubIndex_p)
 {
     tEplKernel          ret;
     tEplObdCbParam      cbParam;
@@ -3447,8 +3314,8 @@ static tEplKernel callPostDefault (void *pData_p, tEplObdEntryPtr pObdEntry_p,
 //
 //
 // Parameters:
-//              uiIndex_p           = Index
-//              uiSubIndex_p        = Subindex
+//              index_p           = Index
+//              subIndex_p        = Subindex
 //              pfEntryNumerical_p  = pointer to BOOL for returnvalue
 //                                  -> TRUE if entry a numerical value
 //                                  -> FALSE if entry not a numerical value
@@ -3459,7 +3326,7 @@ static tEplKernel callPostDefault (void *pData_p, tEplObdEntryPtr pObdEntry_p,
 //
 //---------------------------------------------------------------------------
 static tEplKernel isNumericalIntern(tEplObdSubEntryPtr pObdSubEntry_p,
-                                        BOOL*         pfEntryNumerical_p)
+                                    BOOL* pfEntryNumerical_p)
 {
 tEplKernel          Ret = kEplSuccessful;
 
@@ -3497,8 +3364,7 @@ tEplKernel          Ret = kEplSuccessful;
 // Returns:     tEplKernel             = error code
 // ----------------------------------------------------------------------------
 #if (EPL_OBD_USE_STORE_RESTORE != FALSE)
-static tEplKernel callStoreCallback (
-    tEplObdCbStoreParam MEM* pCbStoreParam_p)
+static tEplKernel callStoreCallback(tEplObdCbStoreParam MEM* pCbStoreParam_p)
 {
 
 tEplKernel Ret = kEplSuccessful;
@@ -3531,7 +3397,7 @@ tEplKernel Ret = kEplSuccessful;
 //
 //---------------------------------------------------------------------------
 
-static void * getObjectDataPtrIntern (tEplObdSubEntryPtr pSubindexEntry_p)
+static void* getObjectDataPtrIntern(tEplObdSubEntryPtr pSubindexEntry_p)
 {
 
 void * pData;
