@@ -447,7 +447,7 @@ static BOOL processGeneralStateChange(tNmtState newNmtState_p, tEplKernel* pRet_
 
             // get node ID from OD
 #if defined(CONFIG_INCLUDE_OBD)
-            nodeId = EplObdGetNodeId(EPL_MCO_PTR_INSTANCE_PTR);
+            nodeId = EplObdGetNodeId();
 #else
             nodeId = 0;
 #endif
@@ -506,8 +506,7 @@ static BOOL processMnStateChange(tNmtState newNmtState_p, tEplKernel* pRet_p)
             // check NMT_StartUp_U32.Bit13
             obdSize = sizeof(startUp);
 #if defined(CONFIG_INCLUDE_OBD)
-            ret = EplObdReadEntry(EPL_MCO_PTR_INSTANCE_PTR_
-                                    0x1F80, 0x00, &startUp,&obdSize);
+            ret = EplObdReadEntry(0x1F80, 0x00, &startUp,&obdSize);
 #else
             ret = kEplObdIndexNotExist;
 #endif
@@ -526,8 +525,7 @@ static BOOL processMnStateChange(tNmtState newNmtState_p, tEplKernel* pRet_p)
             // read NMT_BootTime_REC.MNWaitNotAct_U32 from OD
             obdSize = sizeof(waitTime);
 #if defined(CONFIG_INCLUDE_OBD)
-            ret = EplObdReadEntry(EPL_MCO_PTR_INSTANCE_PTR_
-                                    0x1F89, 0x01, &waitTime, &obdSize);
+            ret = EplObdReadEntry(0x1F89, 0x01, &waitTime, &obdSize);
 #else
             ret = kEplObdIndexNotExist;
 #endif
@@ -545,8 +543,7 @@ static BOOL processMnStateChange(tNmtState newNmtState_p, tEplKernel* pRet_p)
             // read NMT_BootTime_REC.MNWaitPreOp1_U32 from OD
             obdSize = sizeof(waitTime);
 #if defined(CONFIG_INCLUDE_OBD)
-            ret = EplObdReadEntry(EPL_MCO_PTR_INSTANCE_PTR_
-                                    0x1F89, 0x03, &waitTime, &obdSize);
+            ret = EplObdReadEntry(0x1F89, 0x03, &waitTime, &obdSize);
             if(ret != kEplSuccessful)
             {
                 // ignore error, because this timeout is optional
@@ -618,8 +615,7 @@ static BOOL processCnStateChange(tNmtState newNmtState_p, tEplKernel* pRet_p)
             // read NMT_CNBasicEthernetTimeout_U32 from OD
             obdSize = sizeof(basicEthernetTimeout);
 #if defined(CONFIG_INCLUDE_OBD)
-            ret = EplObdReadEntry(EPL_MCO_PTR_INSTANCE_PTR_
-                                   0x1F99, 0x00, &basicEthernetTimeout, &obdSize);
+            ret = EplObdReadEntry(0x1F99, 0x00, &basicEthernetTimeout, &obdSize);
 #else
             ret = kEplObdIndexNotExist;
 #endif
