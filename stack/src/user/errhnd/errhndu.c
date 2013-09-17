@@ -344,19 +344,19 @@ static tEplKernel linkErrorCounter(tErrorObject* pErrorCounter_p, UINT index_p)
 
     varParam.m_pData = &(pErrorCounter_p->cumulativeCnt);
     varParam.m_uiSubindex = 0x01;
-    ret = EplObdDefineVar(&varParam);
+    ret = obd_defineVar(&varParam);
     if (ret != kEplSuccessful)
         return ret;
 
     varParam.m_pData = &(pErrorCounter_p->thresholdCnt);
     varParam.m_uiSubindex = 0x02;
-    ret = EplObdDefineVar(&varParam);
+    ret = obd_defineVar(&varParam);
     if (ret != kEplSuccessful)
         return ret;
 
     varParam.m_pData = &(pErrorCounter_p->threshold);
     varParam.m_uiSubindex = 0x03;
-    ret = EplObdDefineVar(&varParam);
+    ret = obd_defineVar(&varParam);
     return ret;
 }
 
@@ -386,7 +386,7 @@ static tEplKernel checkErrorObject(UINT index_p, BYTE *pEntries_p)
     BYTE            indexEntries;
 
     entrySize = (tEplObdSize)  sizeof(indexEntries);
-    ret = EplObdReadEntry ( index_p, 0x00, (void GENERIC*) &indexEntries, &entrySize );
+    ret = obd_readEntry ( index_p, 0x00, (void GENERIC*) &indexEntries, &entrySize );
 
     if ((ret != kEplSuccessful) || (indexEntries == 0x00))
     {
@@ -450,21 +450,21 @@ static tEplKernel linkMnCnLossPresErrors(tErrHndObjects* pError_p)
         // CumulativeCnt
         varParam.m_uiIndex = OID_DLL_MNCN_LOSSPRES_CUMCNT_AU32;
         varParam.m_pData = &(pErrCnt->cumulativeCnt);
-        ret = EplObdDefineVar(&varParam);
+        ret = obd_defineVar(&varParam);
         if (ret != kEplSuccessful)
             break;
 
         // ThresholdCnt 1C08
         varParam.m_uiIndex = OID_DLL_MNCN_LOSSPRES_THRCNT_AU32;
         varParam.m_pData = &(pErrCnt->thresholdCnt);
-        ret = EplObdDefineVar(&varParam);
+        ret = obd_defineVar(&varParam);
         if (ret != kEplSuccessful)
             break;
 
         // Threshold 1C09
         varParam.m_uiIndex = OID_DLL_MNCN_LOSSPRES_THRESHOLD_AU32;
         varParam.m_pData = &(pErrCnt->threshold);
-        ret = EplObdDefineVar(&varParam);
+        ret = obd_defineVar(&varParam);
         if (ret != kEplSuccessful)
             break;
 

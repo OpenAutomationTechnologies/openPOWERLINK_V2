@@ -204,7 +204,7 @@ tEplKernel cfmu_init(tCfmCbEventCnProgress pfnCbEventCnProgress_p,
     {
         varParam.m_uiSubindex = subindex;
         varParam.m_ValidFlag = kVarValidAll;
-        ret = EplObdDefineVar(&varParam);
+        ret = obd_defineVar(&varParam);
         if ((ret != kEplSuccessful) &&
             (ret != kEplObdIndexNotExist) &&
             (ret != kEplObdSubindexNotExist))
@@ -252,7 +252,7 @@ tEplKernel cfmu_exit(void)
             {
                 varParam.m_uiSubindex = nodeId;
                 varParam.m_ValidFlag = kVarValidAll;
-                EplObdDefineVar(&varParam);
+                obd_defineVar(&varParam);
                 // ignore return code, because buffer has to be freed anyway
 
                 EPL_FREE(pBuffer);
@@ -323,11 +323,11 @@ tEplKernel cfmu_processNodeEvent(UINT nodeId_p, tNmtNodeEvent nodeEvent_p)
 
     // fetch pointer to ConciseDCF from object 0x1F22
     // (this allows the application to link its own memory to this object)
-    pNodeInfo->pDataConciseDcf = EplObdGetObjectDataPtr(0x1F22, nodeId_p);
+    pNodeInfo->pDataConciseDcf = obd_getObjectDataPtr(0x1F22, nodeId_p);
     if (pNodeInfo->pDataConciseDcf == NULL)
         return kEplCfmNoConfigData;
 
-    obdSize = EplObdGetDataSize(0x1F22, nodeId_p);
+    obdSize = obd_getDataSize(0x1F22, nodeId_p);
     pNodeInfo->bytesRemaining = (UINT32) obdSize;
     pNodeInfo->eventCnProgress.totalNumberOfBytes = pNodeInfo->bytesRemaining;
 #if (EPL_CFM_CONFIGURE_CYCLE_LENGTH != FALSE)
@@ -358,13 +358,13 @@ tEplKernel cfmu_processNodeEvent(UINT nodeId_p, tNmtNodeEvent nodeEvent_p)
     else
     {
         obdSize = sizeof (expConfDate);
-        ret = EplObdReadEntry(0x1F26, nodeId_p, &expConfDate, &obdSize);
+        ret = obd_readEntry(0x1F26, nodeId_p, &expConfDate, &obdSize);
         if (ret != kEplSuccessful)
         {
             EPL_DBGLVL_CFM_TRACE("CN%x Error Reading 0x1F26 returns 0x%X\n", uiNodeId_p, ret);
         }
         obdSize = sizeof (expConfTime);
-        ret = EplObdReadEntry(0x1F27, nodeId_p, &expConfTime, &obdSize);
+        ret = obd_readEntry(0x1F27, nodeId_p, &expConfTime, &obdSize);
         if (ret != kEplSuccessful)
         {
             EPL_DBGLVL_CFM_TRACE("CN%x Error Reading 0x1F27 returns 0x%X\n", uiNodeId_p, ret);
@@ -389,7 +389,7 @@ tEplKernel cfmu_processNodeEvent(UINT nodeId_p, tNmtNodeEvent nodeEvent_p)
 
 #if (EPL_CFM_CONFIGURE_CYCLE_LENGTH != FALSE)
     obdSize = sizeof(cfmInstance_g.leCycleLength);
-    ret = EplObdReadEntryToLe(0x1006, 0x00, &cfmInstance_g.leCycleLength, &obdSize);
+    ret = obd_readEntryToLe(0x1006, 0x00, &cfmInstance_g.leCycleLength, &obdSize);
     if (ret != kEplSuccessful)
     {   // local OD access failed
         EPL_DBGLVL_CFM_TRACE("Local OBD read failed %d\n", ret);
