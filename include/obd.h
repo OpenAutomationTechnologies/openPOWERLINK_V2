@@ -1,84 +1,52 @@
-/****************************************************************************
+/**
+********************************************************************************
+\file   obd.h
 
-  (c) SYSTEC electronic GmbH, D-07973 Greiz, August-Bebel-Str. 29
-      www.systec-electronic.com
+\brief  Definitions for OBD module
 
-  Project:      openPOWERLINK
+This file contains definitions for the OBD module
+*******************************************************************************/
 
-  Description:  include file for api function of EplOBD-Module
+/*------------------------------------------------------------------------------
+Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2013, SYSTEC electronic GmbH
+Copyright (c) 2013, Kalycito Infotech Private Ltd.All rights reserved.
+All rights reserved.
 
-  License:
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+    * Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above copyright
+      notice, this list of conditions and the following disclaimer in the
+      documentation and/or other materials provided with the distribution.
+    * Neither the name of the copyright holders nor the
+      names of its contributors may be used to endorse or promote products
+      derived from this software without specific prior written permission.
 
-    Redistribution and use in source and binary forms, with or without
-    modification, are permitted provided that the following conditions
-    are met:
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL COPYRIGHT HOLDERS BE LIABLE FOR ANY
+DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+------------------------------------------------------------------------------*/
 
-    1. Redistributions of source code must retain the above copyright
-       notice, this list of conditions and the following disclaimer.
+#ifndef _INC_obd_H_
+#define _INC_obd_H_
 
-    2. Redistributions in binary form must reproduce the above copyright
-       notice, this list of conditions and the following disclaimer in the
-       documentation and/or other materials provided with the distribution.
+//------------------------------------------------------------------------------
+// includes
+//------------------------------------------------------------------------------
+#include <EplInc.h>
 
-    3. Neither the name of SYSTEC electronic GmbH nor the names of its
-       contributors may be used to endorse or promote products derived
-       from this software without prior written permission. For written
-       permission, please contact info@systec-electronic.com.
-
-    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-    LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-    FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-    COPYRIGHT HOLDERS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-    INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-    BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-    LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-    CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-    LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-    ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-    POSSIBILITY OF SUCH DAMAGE.
-
-    Severability Clause:
-
-        If a provision of this License is or becomes illegal, invalid or
-        unenforceable in any jurisdiction, that shall not affect:
-        1. the validity or enforceability in that jurisdiction of any other
-           provision of this License; or
-        2. the validity or enforceability in other jurisdictions of that or
-           any other provision of this License.
-
-  -------------------------------------------------------------------------
-
-                $RCSfile$
-
-                $Author$
-
-                $Revision$  $Date$
-
-                $State$
-
-                Build Environment:
-                Microsoft VC7
-
-  -------------------------------------------------------------------------
-
-  Revision History:
-
-  2006/06/02 k.t.:   start of the implementation, version 1.00
-
-
-****************************************************************************/
-
-#ifndef _EPLOBD_H_
-#define _EPLOBD_H_
-
-#include "EplInc.h"
-
-
-// ============================================================================
-// defines
-// ============================================================================
-
+//------------------------------------------------------------------------------
+// const defines
+//------------------------------------------------------------------------------
 #define EPL_OBD_TABLE_INDEX_END     0xFFFF
 
 // for the usage of BOOLEAN in OD
@@ -89,7 +57,6 @@
 #define OBD_NODE_ID_SUBINDEX                        0x01        // default subindex for NodeId in OD
 #define OBD_NODE_ID_HWBOOL_SUBINDEX                 0x02        // default subindex for NodeIDByHW_BOOL
 
-//------------------------------------------------------------------------------
 // object IDs of error handling objects
 #define OID_DLL_MN_CRCERROR_REC                     0x1C00
 #define OID_DLL_MN_CYCTIME_EXCEED_REC               0x1C02
@@ -106,21 +73,30 @@
 #define OID_DLL_MNCN_LOSSPRES_THRCNT_AU32           0x1C08
 #define OID_DLL_MNCN_LOSSPRES_THRESHOLD_AU32        0x1C09
 
-// ============================================================================
-// enums
-// ============================================================================
+//------------------------------------------------------------------------------
+// typedef
+//------------------------------------------------------------------------------
 
-// directions for access to object dictionary
+/**
+* \brief Directions for access to object dictionary
+*
+* This enumeration defines valid "directions" for accesses to the object
+* dictionary.
+*/
 typedef enum
 {
-    kObdDirInit             = 0x00,    // initialising after power on
-    kObdDirStore            = 0x01,    // store all object values to non volatile memory
-    kObdDirLoad             = 0x02,    // load all object values from non volatile memory
-    kObdDirRestore          = 0x03,    // deletes non volatile memory (restore)
-    kObdDirOBKCheck         = 0xFF     // reserved
+    kObdDirInit             = 0x00,    ///< Initialising after power on
+    kObdDirStore            = 0x01,    ///< Store all object values to non volatile memory
+    kObdDirLoad             = 0x02,    ///< Load all object values from non volatile memory
+    kObdDirRestore          = 0x03,    ///< Deletes non volatile memory (restore)
+    kObdDirOBKCheck         = 0xFF     ///< Reserved
 }tObdDir;
 
-// commands for store
+/**
+* \brief Valid OD store commands
+*
+* This enumeration defines valid store commands for the OD
+*/
 typedef enum
 {
     kObdCmdNothing          = 0x00,
@@ -134,40 +110,41 @@ typedef enum
     kObdCmdUnknown          = 0xFF
 }tObdCommand;
 
-// events of object callback function
+/**
+* \brief Events of object callback function
+*
+* This enumeration defines events that can be handled by the object
+* callback function.
+*/
 typedef enum
 {
-//                                                                                                      m_pArg points to
-//                                                                                                    ---------------------
-    kObdEvCheckExist        = 0x06,    // checking if object does exist (reading and writing)    NULL
-    kObdEvPreRead           = 0x00,    // before reading an object                               source data buffer in OD
-    kObdEvPostRead          = 0x01,    // after reading an object                                destination data buffer from caller
-    kObdEvWrStringDomain    = 0x07,    // event for changing string/domain data pointer or size  struct tObdVStringDomain in RAM
-    kObdEvInitWrite         = 0x04,    // initializes writing an object (checking object size)   size of object in OD (tObdSize)
-    kObdEvPreWrite          = 0x02,    // before writing an object                               source data buffer from caller
-    kObdEvPostWrite         = 0x03,    // after writing an object                                destination data buffer in OD
-//    kObdEvAbortSdo          = 0x05     // after an abort of an SDO transfer
-    kObdEvPostDefault       = 0x08,    // after setting default values                           data buffer in OD
+    kObdEvCheckExist        = 0x06,     ///< Checking if object does exist (reading and writing).  pArg points to: NULL
+    kObdEvPreRead           = 0x00,     ///< Called before reading an object. pArg points to: source data buffer in OD
+    kObdEvPostRead          = 0x01,     ///< Called after reading an object. pArg points to: destination data buffer from caller
+    kObdEvWrStringDomain    = 0x07,     ///< Event for changing string/domain data pointer or size. pArg points to: struct tObdVStringDomain in RAM
+    kObdEvInitWrite         = 0x04,     ///< Initializes writing an object (checking object size). pArg points to: size of object in OD (tObdSize)
+    kObdEvPreWrite          = 0x02,     ///< Called before writing an object. pArg points to: source data buffer from caller
+    kObdEvPostWrite         = 0x03,     ///< Called after writing an object. pArg points to: destination data buffer in OD
+    kObdEvPostDefault       = 0x08,     ///< Called after setting default values. pArg points to: data buffer in OD
 } tObdEvent;
 
-// part of OD (bit oriented)
-typedef unsigned int tObdPart;
+typedef unsigned int tObdPart;          ///< Data type for OD part definitions
 
-#define kObdPartNo          0x00    // nothing
-#define kObdPartGen         0x01    //  part      (0x1000 - 0x1FFF)
-#define kObdPartMan         0x02    // manufacturer part (0x2000 - 0x5FFF)
-#define kObdPartDev         0x04    // device part       (0x6000 - 0x9FFF)
-#define kObdPartUsr         0x08    // dynamic part e.g. for ICE61131-3
+// Definitions for parts of the OD (bit oriented)
+#define kObdPartNo          0x00        ///< Nothing
+#define kObdPartGen         0x01        ///< Communication part (0x1000 - 0x1FFF)
+#define kObdPartMan         0x02        ///< Manufacturer part (0x2000 - 0x5FFF)
+#define kObdPartDev         0x04        ///< Device part (0x6000 - 0x9FFF)
+#define kObdPartUsr         0x08        ///< Dynamic part e.g. for ICE61131-3
 
 // combinations
-#define kObdPartApp         (              kObdPartMan | kObdPartDev | kObdPartUsr)   // manufacturer and device part (0x2000 - 0x9FFF) and user OD
-#define kObdPartAll         (kObdPartGen | kObdPartMan | kObdPartDev | kObdPartUsr)   // whole OD
+#define kObdPartApp         (              kObdPartMan | kObdPartDev | kObdPartUsr)   ///< Manufacturer, device part and user OD
+#define kObdPartAll         (kObdPartGen | kObdPartMan | kObdPartDev | kObdPartUsr)   ///< The whole OD
+
+typedef unsigned int tObdAccess;        ///< Data type for OD access types
 
 //-----------------------------------------------------------------------------------------------------------
 // access types for objects
-// must be a difine because bit-flags
-typedef unsigned int tObdAccess;
-
 #define kObdAccRead         0x01    // object can be read
 #define kObdAccWrite        0x02    // object can be written
 #define kObdAccConst        0x04    // object contains a constant value
@@ -217,20 +194,18 @@ typedef unsigned int tObdAccess;
 #define kObdAccSVGPW        (kObdAccStore | kObdAccVar | kObdAccRange | kObdAccPdo | 0            | kObdAccWrite | 0          )
 #define kObdAccSVGPRW       (kObdAccStore | kObdAccVar | kObdAccRange | kObdAccPdo | 0            | kObdAccWrite | kObdAccRead)
 
+typedef unsigned int tObdSize;      // For all objects as objects size are used an unsigned int.
 
-
-typedef unsigned int tObdSize; // For all objects as objects size are used an unsigned int.
-
-
-// -------------------------------------------------------------------------
-// types for data types defined in DS301
-// -------------------------------------------------------------------------
-
-// types of objects in object dictionary
-// DS-301 defines these types as WORD
+/**
+* \brief Enumeration for object data types (DS301)
+*
+* This enumeration defines the data types of objects in object dictionary.
+* DS-301 defines these types as UINT16
+* openPOWERLINK support only the listed data types. Other types are not supported
+* in this version.
+*/
 typedef enum
 {
-// types which are always supported
     kObdTypeBool            = 0x0001,
 
     kObdTypeInt8            = 0x0002,
@@ -259,57 +234,41 @@ typedef enum
     kObdTypeTimeOfDay       = 0x000C,
     kObdTypeTimeDiff        = 0x000D
 } tObdType;
-// other types are not supported in this version
 
+// type definitions for data types defined in DS301
+typedef unsigned char               tObdBoolean;            // 0001
+typedef signed char                 tObdInteger8;           // 0002
+typedef signed short int            tObdInteger16;          // 0003
+typedef signed int                  tObdInteger32;          // 0004
+typedef unsigned char               tObdUnsigned8;          // 0005
+typedef unsigned short int          tObdUnsigned16;         // 0006
+typedef unsigned int                tObdUnsigned32;         // 0007
+typedef float                       tObdReal32;             // 0008
+typedef unsigned char               tObdDomain;             // 000F
+typedef signed   int                tObdInteger24;          // 0010
+typedef unsigned int                tObdUnsigned24;         // 0016
 
-// -------------------------------------------------------------------------
-// types for data types defined in DS301
-// -------------------------------------------------------------------------
+typedef signed long long int        tObdInteger40;          // 0012
+typedef signed long long int        tObdInteger48;          // 0013
+typedef signed long long int        tObdInteger56;          // 0014
+typedef signed long long int        tObdInteger64;          // 0015
 
-typedef unsigned char               tObdBoolean;      // 0001
-typedef signed char                 tObdInteger8;     // 0002
-typedef signed short int            tObdInteger16;    // 0003
-typedef signed int                  tObdInteger32;    // 0004
-typedef unsigned char               tObdUnsigned8;    // 0005
-typedef unsigned short int          tObdUnsigned16;   // 0006
-typedef unsigned int                tObdUnsigned32;   // 0007
-typedef float                       tObdReal32;       // 0008
-typedef unsigned char               tObdDomain;       // 000F
-typedef signed   int                tObdInteger24;    // 0010
-typedef unsigned int                tObdUnsigned24;   // 0016
+typedef unsigned long long int      tObdUnsigned40;         // 0018
+typedef unsigned long long int      tObdUnsigned48;         // 0019
+typedef unsigned long long int      tObdUnsigned56;         // 001A
+typedef unsigned long long int      tObdUnsigned64;         // 001B
 
-typedef signed long long int        tObdInteger40;    // 0012
-typedef signed long long int        tObdInteger48;    // 0013
-typedef signed long long int        tObdInteger56;    // 0014
-typedef signed long long int        tObdInteger64;    // 0015
+typedef double                      tObdReal64;             // 0011
 
-typedef unsigned long long int      tObdUnsigned40;   // 0018
-typedef unsigned long long int      tObdUnsigned48;   // 0019
-typedef unsigned long long int      tObdUnsigned56;   // 001A
-typedef unsigned long long int      tObdUnsigned64;   // 001B
+typedef tTimeOfDay                  tObdTimeOfDay;          // 000C
+typedef tTimeOfDay                  tObdTimeDifference;     // 000D
 
-typedef double                      tObdReal64;       // 0011
-
-typedef tTimeOfDay                  tObdTimeOfDay;         // 000C
-typedef tTimeOfDay                  tObdTimeDifference;    // 000D
-
-
-// -------------------------------------------------------------------------
-// structur for defining a variable
-// -------------------------------------------------------------------------
-// -------------------------------------------------------------------------
 typedef enum
 {
     kVarValidSize           = 0x01,
     kVarValidData           = 0x02,
-//    kVarValidCallback       = 0x04,
-//    kVarValidArg            = 0x08,
-    kVarValidAll            = 0x03  // currently only size and data are implemented and used
+    kVarValidAll            = 0x03          // currently only size and data are implemented and used
 }tVarParamValid;
-
-
-//typedef tEplKernel (PUBLIC ROM* tEplVarCallback) (CCM_DECL_INSTANCE_HDL_
-//    void * pParam_p);
 
 typedef struct
 {
@@ -318,134 +277,119 @@ typedef struct
     UINT                subindex;
     tObdSize            size;
     void MEM*           pData;
-//    tEplVarCallback     m_fpCallback;
-//    void *       m_pArg;
 } tVarParam;
 
 typedef struct
 {
     void MEM*           pData;
     tObdSize            size;
-/*
-    #if (EPL_PDO_USE_STATIC_MAPPING == FALSE)
-        tEplVarCallback    m_fpCallback;
-        void *   m_pArg;
-    #endif
-*/
 } tObdVarEntry;
 
 typedef struct
 {
    tObdSize             size;
    BYTE *               pString;
-} tObdOString;                          // 000C
+} tObdOString;                              // 0009
+
+typedef struct
+{
+   tObdSize             size;
+   UINT8*               pDefString;         // must be same offset as pString in tObdVString
+   UINT8*               pString;
+} tObdOStringDef;
 
 typedef struct
 {
    tObdSize             size;
    char*                pString;
-} tObdVString;                          // 000D
-
+} tObdVString;                              // 000A
 
 typedef struct
 {
     tObdSize            size;
-    CONST char*         pDefString;         // must be same offset as m_pString in tObdVString
+    CONST char*         pDefString;         // must be same offset as pString in tObdVString
     char*               pString;
 } tObdVStringDef;
-
-typedef struct
-{
-   tObdSize             size;
-   UINT8*               pDefString;   // must be same offset as m_pString in tObdVString
-   UINT8*               pString;
-} tObdOStringDef;
 
 //r.d. parameter struct for changing object size and/or pointer to data of Strings or Domains
 typedef struct
 {
-   tObdSize             downloadSize;     // download size from SDO or APP
-   tObdSize             objSize;          // current object size from OD - should be changed from callback function
-   void*                pData;            // current object ptr  from OD - should be changed from callback function
-} tObdVStringDomain;                          // 000D
+   tObdSize             downloadSize;       // download size from SDO or APP
+   tObdSize             objSize;            // current object size from OD - should be changed from callback function
+   void*                pData;              // current object ptr  from OD - should be changed from callback function
+} tObdVStringDomain;                        // 000D
 
-
-// ============================================================================
-// types
-// ============================================================================
-// -------------------------------------------------------------------------
-// subindexstruct
-// -------------------------------------------------------------------------
-
-// Change not the order for this struct!!!
+/**
+* \brief Parameters for callback function
+*
+* This structure defines the parameters for the OD callback function.
+*/
 typedef struct
 {
-    UINT                subIndex;
-    tObdType            type;
-    tObdAccess          access;
-    CONST void ROM*     pDefault;
-    void  MEM*          pCurrent;     // points always to RAM
-} tObdSubEntry;
-
-// r.d.: has always to be, because of new OBD-Macros for arrays
-typedef tObdSubEntry * tObdSubEntryPtr;
-
-// -------------------------------------------------------------------------
-// callback function for object dictionary module
-// -------------------------------------------------------------------------
-
-// parameters for callback function
-typedef struct
-{
-    tObdEvent           obdEvent;
-    UINT                index;
-    UINT                subIndex;
-    void*               pArg;
-    UINT32              abortCode;
+    tObdEvent           obdEvent;       ///< Event that caused calling the function.
+    UINT                index;          ///< Index of the accessed object.
+    UINT                subIndex;       ///< Subindex of the accessed object.
+    void*               pArg;           ///< Additional argument.
+    UINT32              abortCode;      ///< Abort Code.
 } tObdCbParam;
 
 // define type for callback function: pParam_p points to tObdCbParam
-typedef tEplKernel (PUBLIC ROM* tObdCallback) (tObdCbParam MEM* pParam_p);
+typedef tEplKernel (ROM* tObdCallback) (tObdCbParam MEM* pParam_p);
 
-// do not change the order for this struct!!!
-
+/**
+* \brief Structure for subindices
+*
+* This structure defines a subindex in the OD.
+*/
 typedef struct
 {
-    UINT                index;
-    tObdSubEntryPtr     pSubIndex;
-    UINT                count;
-    tObdCallback        pfnCallback;    // function is called back if object access
+    UINT                subIndex;           ///< Subindex of the object
+    tObdType            type;               ///< Data type of the object
+    tObdAccess          access;             ///< Access type of the object
+    CONST void ROM*     pDefault;           ///< Pointer to default data
+    void  MEM*          pCurrent;           ///< Pointer to data (points always to RAM)
+} tObdSubEntry;
+
+typedef tObdSubEntry * tObdSubEntryPtr;
+
+
+/**
+* \brief Structure for indices
+*
+* This structure defines an index in the OD.
+*/
+typedef struct
+{
+    UINT                index;              ///< Index of the object
+    tObdSubEntryPtr     pSubIndex;          ///< Points to subindex structures of this object
+    UINT                count;              ///< number of subindices.
+    tObdCallback        pfnCallback;        ///< function is called back if object access
 } tObdEntry;
 
-// allways  pointer
 typedef tObdEntry * tObdEntryPtr;
 
-
-// -------------------------------------------------------------------------
-// structur to initialize OBD module
-// -------------------------------------------------------------------------
-
+/**
+* \brief Structure for OBD init parameters
+*
+* This structure defines the init parameters of the OBD module.
+*/
 struct _tObdInitParam
 {
-    tObdEntryPtr        pGenericPart;
-    tObdEntryPtr        pManufacturerPart;
-    tObdEntryPtr        pDevicePart;
-
-    #if (defined (EPL_OBD_USER_OD) && (EPL_OBD_USER_OD != FALSE))
-
-          tObdEntryPtr      pUserPart;
-
-    #endif
-
+    tObdEntryPtr        pGenericPart;           /// Pointer to generic part of OD
+    tObdEntryPtr        pManufacturerPart;      ///< Pointer to manufacturer part of OD
+    tObdEntryPtr        pDevicePart;            ///< Pointer to device part of OD
+#if (defined (EPL_OBD_USER_OD) && (EPL_OBD_USER_OD != FALSE))
+    tObdEntryPtr        pUserPart;              ///< Pointer to user part of OD
+#endif
 };
 
 typedef struct _tObdInitParam tObdInitParam;
 
-
-// -------------------------------------------------------------------------
-// structur for parameters of STORE RESTORE command
-// -------------------------------------------------------------------------
-
+/**
+* \brief Structure for parameters of the store/restore commands
+*
+* This structure specifies the parameters for the store/restore commands.
+*/
 typedef struct
 {
     tObdCommand         command;
@@ -455,51 +399,31 @@ typedef struct
 } tObdCbStoreParam;
 
 
-typedef tEplKernel (PUBLIC ROM* tObdInitRam) (tObdInitParam MEM* pInitParam_p);
+typedef tEplKernel (ROM* tObdInitRam) (tObdInitParam MEM* pInitParam_p);
+typedef tEplKernel (ROM* tObdDeinitRam) (tObdInitParam MEM* pInitParam_p);
+typedef tEplKernel (ROM* tInitTabEntryCallback) (void MEM* pTabEntry_p, UINT uiObjIndex_p);
+typedef tEplKernel (ROM* tEplObdStoreLoadObjCallback) (tObdCbStoreParam MEM* pCbStoreParam_p);
 
-typedef tEplKernel (PUBLIC ROM* tObdDeinitRam) (tObdInitParam MEM* pInitParam_p);
-
-
-typedef tEplKernel (PUBLIC ROM* tInitTabEntryCallback) (
-    void MEM* pTabEntry_p,
-    UINT uiObjIndex_p);
-
-
-typedef tEplKernel (PUBLIC ROM* tEplObdStoreLoadObjCallback) (tObdCbStoreParam MEM* pCbStoreParam_p);
-
-// -------------------------------------------------------------------------
-// this stucture is used for parameters for function ObdInitModuleTab()
-// -------------------------------------------------------------------------
-typedef struct
-{
-    UINT                        lowerObjIndex;      // lower limit of ObjIndex
-    UINT                        upperObjIndex;      // upper limit of ObjIndex
-    tInitTabEntryCallback       pfnInitTabEntry;    // will be called if ObjIndex was found
-    void MEM*                   pTabBase;           // base address of table
-    UINT                        entrySize;          // size of table entry      // 25-feb-2005 r.d.: expansion from BYTE to WORD necessary for PDO bit mapping
-    UINT                        maxEntries;         // max. tabel entries
-} tObdModulTabParam;
-
-//-------------------------------------------------------------------
-//  enum for function obd_setNodeId
-//-------------------------------------------------------------------
+/**
+* \brief Enumeration for Node ID setting types
+*
+* This structure defines constants for the types of setting the node ID.
+* They are used in the function obd_setNodeId()
+*/
 typedef enum
 {
-    kObdNodeIdUnknown       = 0x00,   // unknown how the node id was set
-    kObdNodeIdSoftware      = 0x01,   // node id set by software
-    kObdNodeIdHardware      = 0x02    // node id set by hardware
+    kObdNodeIdUnknown       = 0x00,         ///< unknown how the node id was set
+    kObdNodeIdSoftware      = 0x01,         ///< node id set by software
+    kObdNodeIdHardware      = 0x02          ///< node id set by hardware
 }tObdNodeIdType;
 
-// ============================================================================
-// global variables
-// ============================================================================
+//------------------------------------------------------------------------------
+// function prototypes
+//------------------------------------------------------------------------------
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-
-
-// ============================================================================
-// public functions
-// ============================================================================
-// ---------------------------------------------------------------------
 tEplKernel  obd_init(tObdInitParam MEM* pInitParam_p);
 tEplKernel  obd_addInstance(tObdInitParam MEM* pInitParam_p);
 tEplKernel  obd_deleteInstance(void);
@@ -521,6 +445,9 @@ tEplKernel  obd_readEntryToLe(UINT index_p, UINT subIndex_p, void* pDstData_p, t
 tEplKernel  obd_getAccessType(UINT index_p, UINT subIndex_p, tObdAccess* pAccessTyp_p);
 tEplKernel  obd_searchVarEntry(UINT index_p, UINT subindex_p, tObdVarEntry MEM** ppVarEntry_p);
 
-#endif  // #ifndef _EPLOBD_H_
+#ifdef __cplusplus
+}
+#endif
 
+#endif /* _INC_obd_H_ */
 
