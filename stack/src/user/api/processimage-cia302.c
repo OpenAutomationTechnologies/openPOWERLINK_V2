@@ -78,7 +78,7 @@ typedef struct
     UINT            objIndexEnd;
     UINT            offsetPI;
     BOOL            fOutputPI;
-    tEplObdSize     entrySize;
+    tObdSize        entrySize;
     UINT            subindexCountPerIndex;
 } tProcessImageLink;
 
@@ -107,7 +107,7 @@ tProcessImageLink processImageLink_l[] =
 // local function prototypes
 //------------------------------------------------------------------------------
 static tEplKernel linkProcessImageRange(UINT objIndexStart_p, UINT objIndexEnd_p,
-                                        UINT offsetPI_p, BOOL fOutputPI_p, tEplObdSize entrySize_p,
+                                        UINT offsetPI_p, BOOL fOutputPI_p, tObdSize entrySize_p,
                                         UINT subindexCountPerIndex_p);
 
 //============================================================================//
@@ -170,7 +170,7 @@ The function links a range of variables to the object dictionary.
 //------------------------------------------------------------------------------
 static tEplKernel linkProcessImageRange(UINT objIndexStart_p, UINT objIndexEnd_p,
                                         UINT offsetPI_p, BOOL fOutputPI_p,
-                                        tEplObdSize entrySize_p, UINT subindexCountPerIndex_p)
+                                        tObdSize entrySize_p, UINT subindexCountPerIndex_p)
 {
     tEplKernel      ret = kEplSuccessful;
     UINT            varEntries;

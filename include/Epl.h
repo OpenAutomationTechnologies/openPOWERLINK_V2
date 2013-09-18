@@ -167,7 +167,7 @@ typedef union
     tEventNmtStateChange    m_NmtStateChange;
     tEplEventError          m_InternalError;
     tEplSdoComFinished      m_Sdo;
-    tEplObdCbParam          m_ObdCbParam;
+    tObdCbParam             m_ObdCbParam;
     tEplApiEventNode        m_Node;
     tEplApiEventBoot        m_Boot;
     tEplApiEventLed         m_Led;
@@ -250,8 +250,8 @@ typedef struct
     void*               m_pEventUserArg;
     tEplSyncCb          m_pfnCbSync;
 
-    tEplObdInitRam      m_pfnObdInitRam;    // function initializes OBD in RAM
-    tEplObdDeinitRam    m_pfnObdDeinitRam;  // function frees OBD (for future use, currently NULL)
+    tObdInitRam         m_pfnObdInitRam;    // function initializes OBD in RAM
+    tObdDeinitRam       m_pfnObdDeinitRam;  // function frees OBD (for future use, currently NULL)
 
     tEplHwParam         m_HwParam;
 
@@ -325,7 +325,7 @@ EPLDLLEXPORT tEplKernel oplk_init(tEplApiInitParam* pInitParam_p);
 EPLDLLEXPORT tEplKernel oplk_shutdown(void);
 EPLDLLEXPORT tEplKernel oplk_execNmtCommand(tNmtEvent NmtEvent_p);
 EPLDLLEXPORT tEplKernel oplk_linkObject(UINT objIndex_p, void* pVar_p, UINT* pVarEntries_p,
-                                        tEplObdSize* pEntrySize_p, UINT firstSubindex_p);
+                                        tObdSize* pEntrySize_p, UINT firstSubindex_p);
 EPLDLLEXPORT tEplKernel oplk_readObject(tEplSdoComConHdl* pSdoComConHdl_p, UINT  nodeId_p, UINT index_p,
                                         UINT subindex_p, void* pDstData_le_p, UINT* pSize_p,
                                         tEplSdoType sdoType_p, void* pUserArg_p);
@@ -351,7 +351,7 @@ EPLDLLEXPORT tEplKernel oplk_waitSyncEvent(ULONG timeout_p);
 EPLDLLEXPORT tEplKernel oplk_allocProcessImage(UINT sizeProcessImageIn_p, UINT sizeProcessImageOut_p);
 EPLDLLEXPORT tEplKernel oplk_freeProcessImage(void);
 EPLDLLEXPORT tEplKernel oplk_linkProcessImageObject(UINT objIndex_p, UINT firstSubindex_p, UINT offsetPI_p,
-                                                    BOOL fOutputPI_p, tEplObdSize entrySize_p, UINT* pVarEntries_p);
+                                                    BOOL fOutputPI_p, tObdSize entrySize_p, UINT* pVarEntries_p);
 EPLDLLEXPORT tEplKernel oplk_exchangeProcessImageIn(void);
 EPLDLLEXPORT tEplKernel oplk_exchangeProcessImageOut(void);
 EPLDLLEXPORT void*      oplk_getProcessImageIn(void);

@@ -1924,8 +1924,8 @@ static tEplKernel EplSdoComServerInitReadByIndex(tEplSdoComCon*     pSdoComCon_p
 tEplKernel      Ret;
 unsigned int    uiIndex;
 unsigned int    uiSubindex;
-tEplObdSize     EntrySize;
-tEplObdAccess   AccessType;
+tObdSize        EntrySize;
+tObdAccess      AccessType;
 DWORD           dwAbortCode;
 
     dwAbortCode = 0;
@@ -1964,11 +1964,11 @@ DWORD           dwAbortCode;
     }
 
     // compare accesstype must be read or const
-    if(((AccessType & kEplObdAccRead) == 0)
-        && ((AccessType & kEplObdAccConst) == 0))
+    if(((AccessType & kObdAccRead) == 0)
+        && ((AccessType & kObdAccConst) == 0))
     {
 
-        if((AccessType & kEplObdAccWrite) != 0)
+        if((AccessType & kObdAccWrite) != 0)
         {
             // entry read a write only object
             dwAbortCode = EPL_SDOAC_READ_TO_WRITE_ONLY_OBJ;
@@ -2115,7 +2115,7 @@ BYTE            bFlag;
                 Ret = obd_readEntryToLe(uiIndex_p,
                                         uiSubIndex_p,
                                         &pCommandFrame->m_le_abCommandData[0],
-                                        (tEplObdSize*)&pSdoComCon_p->m_uiTransSize);
+                                        (tObdSize*)&pSdoComCon_p->m_uiTransSize);
                 if(Ret != kEplSuccessful)
                 {
                     goto Exit;
@@ -2287,8 +2287,8 @@ tEplKernel  Ret = kEplSuccessful;
 unsigned int    uiIndex;
 unsigned int    uiSubindex;
 unsigned int    uiBytesToTransfer;
-tEplObdSize     EntrySize;
-tEplObdAccess   AccessType;
+tObdSize        EntrySize;
+tObdAccess      AccessType;
 BYTE*           pbSrcData;
 
     // a init of a write
@@ -2359,10 +2359,10 @@ BYTE*           pbSrcData;
     }
 
     // compare accesstype must be read
-    if((AccessType & kEplObdAccWrite) == 0)
+    if((AccessType & kObdAccWrite) == 0)
     {
 
-        if((AccessType & kEplObdAccRead) != 0)
+        if((AccessType & kObdAccRead) != 0)
         {
             // entry write a read only object
             pSdoComCon_p->m_dwLastAbortCode = EPL_SDOAC_WRITE_TO_READ_ONLY_OBJ;

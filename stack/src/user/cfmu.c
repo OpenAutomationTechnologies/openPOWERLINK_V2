@@ -189,7 +189,7 @@ tEplKernel cfmu_init(tCfmCbEventCnProgress pfnCbEventCnProgress_p,
 {
     tEplKernel      ret = kEplSuccessful;
     UINT            subindex;
-    tEplVarParam    varParam;
+    tVarParam       varParam;
 
     EPL_MEMSET(&cfmInstance_g, 0, sizeof(tCfmInstance));
 
@@ -229,7 +229,7 @@ The function deinitializes the CFM module.
 tEplKernel cfmu_exit(void)
 {
     UINT                nodeId;
-    tEplVarParam        varParam;
+    tVarParam           varParam;
     UINT8*              pBuffer;
     tCfmNodeInfo*       pNodeInfo;
 
@@ -289,7 +289,7 @@ tEplKernel cfmu_processNodeEvent(UINT nodeId_p, tNmtNodeEvent nodeEvent_p)
     tEplKernel          ret = kEplSuccessful;
     static UINT32       leSignature;
     tCfmNodeInfo*       pNodeInfo = NULL;
-    tEplObdSize         obdSize;
+    tObdSize            obdSize;
     UINT32              expConfTime = 0;
     UINT32              expConfDate = 0;
     tEplIdentResponse*  pIdentResponse = NULL;
@@ -493,16 +493,16 @@ The function implements the callback function which is called on OD accesses.
 \ingroup module_cfmu
 */
 //------------------------------------------------------------------------------
-tEplKernel cfmu_cbObdAccess(tEplObdCbParam MEM* pParam_p)
+tEplKernel cfmu_cbObdAccess(tObdCbParam MEM* pParam_p)
 {
     tEplKernel              ret = kEplSuccessful;
-    tEplObdVStringDomain*   pMemVStringDomain;
+    tObdVStringDomain*      pMemVStringDomain;
     tCfmNodeInfo*           pNodeInfo = NULL;
     UINT8*                  pBuffer;
 
     pParam_p->m_dwAbortCode = 0;
 
-    if ((pParam_p->m_uiIndex != 0x1F22) || (pParam_p->m_ObdEvent != kEplObdEvWrStringDomain))
+    if ((pParam_p->m_uiIndex != 0x1F22) || (pParam_p->m_ObdEvent != kObdEvWrStringDomain))
         return ret;
 
     // abort any running SDO transfer

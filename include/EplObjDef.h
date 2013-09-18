@@ -174,17 +174,17 @@
 //
 // ----------------------------------------------------------------------------
 
-EPLDLLEXPORT tEplKernel PUBLIC EPL_OBD_INIT_RAM_NAME (tEplObdInitParam MEM* pInitParam_p)
+EPLDLLEXPORT tEplKernel PUBLIC EPL_OBD_INIT_RAM_NAME (tObdInitParam MEM* pInitParam_p)
 {
 
-tEplObdInitParam MEM* pInitParam = pInitParam_p;
+tObdInitParam MEM* pInitParam = pInitParam_p;
 
     // check if pointer to parameter structure is valid
     // if not then only copy subindex tables below
     if (pInitParam != NULL)
     {
         // at first delete all parameters (all pointers will be set zu NULL)
-        EPL_MEMSET (pInitParam, 0, sizeof (tEplObdInitParam));
+        EPL_MEMSET (pInitParam, 0, sizeof (tObdInitParam));
 
         #define EPL_OBD_CREATE_INIT_FUNCTION
         {
@@ -215,6 +215,6 @@ tEplObdInitParam MEM* pInitParam = pInitParam_p;
 
 #endif // _EPLOBJDEF_H_
 
-// Die letzte Zeile muß unbedingt eine leere Zeile sein, weil manche Compiler
+// Die letzte Zeile muï¿½ unbedingt eine leere Zeile sein, weil manche Compiler
 // damit ein Problem haben, wenn das nicht so ist (z.B. GNU oder Borland C++ Builder).
 

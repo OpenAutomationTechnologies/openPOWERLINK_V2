@@ -165,7 +165,7 @@ typedef struct
     unsigned int        m_uiFirstSubindex;
     unsigned int        m_uiOffsetPI;
     BOOL                m_fOutputPI;
-    tEplObdSize         m_EntrySize;
+    tObdSize            m_EntrySize;
     unsigned int*       m_puiVarEntries;
 
 } tEplLinProcessImageLinkObject;

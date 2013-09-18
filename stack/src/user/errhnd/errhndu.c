@@ -210,12 +210,12 @@ PreRead events.
 \return Returns always kEplSuccessful
 */
 //------------------------------------------------------------------------------
-tEplKernel errhndu_cbObdAccess(tEplObdCbParam MEM* pParam_p)
+tEplKernel errhndu_cbObdAccess(tObdCbParam MEM* pParam_p)
 {
     switch (pParam_p->m_ObdEvent)
     {
-        case kEplObdEvPostWrite:
-        case kEplObdEvPostDefault:
+        case kObdEvPostWrite:
+        case kObdEvPostDefault:
             switch (pParam_p->m_uiSubIndex)
             {
                 // only cumulative counter and threshold will be written by
@@ -229,7 +229,7 @@ tEplKernel errhndu_cbObdAccess(tEplObdCbParam MEM* pParam_p)
             }
             break;
 
-        case kEplObdEvPreRead:
+        case kObdEvPreRead:
             switch (pParam_p->m_uiSubIndex)
             {
                 // the error handler only modifies the cumulative counter
@@ -268,7 +268,7 @@ PreRead objects.
 \ingroup module_errhndu
 */
 //------------------------------------------------------------------------------
-tEplKernel errhndu_mnCnLossPresCbObdAccess(tEplObdCbParam MEM* pParam_p)
+tEplKernel errhndu_mnCnLossPresCbObdAccess(tObdCbParam MEM* pParam_p)
 {
     tEplKernel          ret = kEplSuccessful;
 
@@ -277,8 +277,8 @@ tEplKernel errhndu_mnCnLossPresCbObdAccess(tEplObdCbParam MEM* pParam_p)
 
     switch (pParam_p->m_ObdEvent)
     {
-        case kEplObdEvPostWrite:
-        case kEplObdEvPostDefault:
+        case kObdEvPostWrite:
+        case kObdEvPostDefault:
             switch (pParam_p->m_uiIndex)
             {
                 // only cumulative counter and threshold will be written by
@@ -292,7 +292,7 @@ tEplKernel errhndu_mnCnLossPresCbObdAccess(tEplObdCbParam MEM* pParam_p)
             }
             break;
 
-        case kEplObdEvPreRead:
+        case kObdEvPreRead:
             switch (pParam_p->m_uiIndex)
             {
                 // the error handler only modifies the cumulative counter
@@ -336,7 +336,7 @@ directory entry.
 static tEplKernel linkErrorCounter(tErrorObject* pErrorCounter_p, UINT index_p)
 {
     tEplKernel      ret = kEplSuccessful;
-    tEplVarParam    varParam;
+    tVarParam       varParam;
 
     varParam.m_ValidFlag = kVarValidAll;
     varParam.m_uiIndex = index_p;
@@ -382,10 +382,10 @@ dictionary.
 static tEplKernel checkErrorObject(UINT index_p, BYTE *pEntries_p)
 {
     tEplKernel      ret = kEplSuccessful;
-    tEplObdSize     entrySize;
+    tObdSize        entrySize;
     BYTE            indexEntries;
 
-    entrySize = (tEplObdSize)  sizeof(indexEntries);
+    entrySize = (tObdSize)  sizeof(indexEntries);
     ret = obd_readEntry ( index_p, 0x00, (void GENERIC*) &indexEntries, &entrySize );
 
     if ((ret != kEplSuccessful) || (indexEntries == 0x00))
@@ -416,7 +416,7 @@ subindexes for each node ID.
 static tEplKernel linkMnCnLossPresErrors(tErrHndObjects* pError_p)
 {
     tEplKernel      ret = kEplSuccessful;
-    tEplVarParam    varParam;
+    tVarParam       varParam;
     BYTE            indexEntries;
     BYTE            numObjs;
     tErrorObject   *pErrCnt;

@@ -81,7 +81,7 @@ tEplKernel selectPcapDevice(char *pDevName_p);
 int getopt(int, char * const [], const char *);
 
 void initEvents (BOOL* pfGsOff_p);
-tEplKernel PUBLIC EplObdInitRam (tEplObdInitParam MEM* pIniEPL_C_ADR_INVALIDtParam_p);
+tEplKernel PUBLIC EplObdInitRam (tObdInitParam MEM* pIniEPL_C_ADR_INVALIDtParam_p);
 tEplKernel PUBLIC processEvents(tEplApiEventType EventType_p, tEplApiEventArg* pEventArg_p, void GENERIC* pUserArg_p);
 
 //============================================================================//

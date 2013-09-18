@@ -296,7 +296,7 @@ static tEplKernel initProcessImage(void)
 {
     tEplKernel      ret = kEplSuccessful;
     UINT            varEntries;
-    tEplObdSize     obdSize;
+    tObdSize        obdSize;
 
     /* Allocate process image */
     printf("Initializing process image...\n");

@@ -124,7 +124,7 @@ static tEplKernel   checkPdoValidity(UINT mappParamIndex_p, UINT32* pAbortCode_p
 static void         decodeObjectMapping(QWORD objectMapping_p, UINT* pIndex_p,
                                 UINT* pSubIndex_p, UINT* pBitOffset_p,
                                 UINT* pBitSize_p);
-static tEplKernel   checkAndSetObjectMapping(QWORD objectMapping_p, tEplObdAccess neededAccessType_p,
+static tEplKernel   checkAndSetObjectMapping(QWORD objectMapping_p, tObdAccess neededAccessType_p,
                                      tPdoMappObject* pMappObject_p,
                                      DWORD* pAbortCode_p, UINT* pPdoSize_p);
 static tEplKernel   setupMappingObjects(tPdoMappObject* pMappObject_p,
@@ -250,17 +250,17 @@ is accessed which belongs to the PDO module.
 \ingroup module_pdou
 **/
 //------------------------------------------------------------------------------
-tEplKernel PUBLIC pdou_cbObdAccess(tEplObdCbParam MEM* pParam_p)
+tEplKernel PUBLIC pdou_cbObdAccess(tObdCbParam MEM* pParam_p)
 {
     tEplKernel          ret = kEplSuccessful;
     UINT                indexType;
     BYTE                mappObjectCount;
     UINT                curPdoSize;
-    tEplObdAccess       neededAccessType;
+    tObdAccess          neededAccessType;
 
     pParam_p->m_dwAbortCode = 0;
 
-    if (pParam_p->m_ObdEvent != kEplObdEvPreWrite)
+    if (pParam_p->m_ObdEvent != kObdEvPreWrite)
     {   // read accesses, post write events etc. are OK
         return ret;
     }
@@ -280,12 +280,12 @@ tEplKernel PUBLIC pdou_cbObdAccess(tEplObdCbParam MEM* pParam_p)
 
         case PDOU_OBD_IDX_RX_MAPP_PARAM:
             // RPDO mapping parameter accessed
-            neededAccessType = kEplObdAccWrite;
+            neededAccessType = kObdAccWrite;
             break;
 
         case PDOU_OBD_IDX_TX_MAPP_PARAM:
             // TPDO mapping parameter accessed
-            neededAccessType = kEplObdAccRead;
+            neededAccessType = kObdAccRead;
             break;
 
         default:
@@ -478,7 +478,7 @@ static tEplKernel setupRxPdoChannelTables(
                        UINT* pCountChannelIdRx_p)
 {
     tEplKernel              ret = kEplSuccessful;
-    tEplObdSize             obdSize;
+    tObdSize                obdSize;
     BYTE                    nodeId;
     UINT                    pdoId;
     UINT                    commParamIndex;
@@ -549,7 +549,7 @@ static tEplKernel setupTxPdoChannelTables(
                         UINT* pCountChannelIdTx_p)
 {
     tEplKernel              ret = kEplSuccessful;
-    tEplObdSize             obdSize;
+    tObdSize                obdSize;
     BYTE                    bNodeId;
     UINT                    pdoId;
     UINT                    commParamIndex;
@@ -756,7 +756,7 @@ static tEplKernel freePdoChannels(void)
 
 //------------------------------------------------------------------------------
 /**
-\brief	configure all PDOs in Pdok module
+\brief    configure all PDOs in Pdok module
 
 The function configures the whole PDO mapping information in the Pdok module.
 
@@ -833,7 +833,7 @@ static tEplKernel checkAndConfigurePdos(UINT16 mappParamIndex_p, UINT channelCou
 {
     tEplKernel          ret = kEplSuccessful;
     UINT                index;
-    tEplObdSize         obdSize;
+    tObdSize            obdSize;
     BYTE                mappObjectCount;
     UINT                mappParamIndex;
 
@@ -874,7 +874,7 @@ static tEplKernel checkAndConfigurePdo(UINT16 mappParamIndex_p,
     tEplKernel          ret = kEplSuccessful;
     UINT16              pdoId;
     UINT16              commParamIndex;
-    tEplObdSize         obdSize;
+    tObdSize            obdSize;
     BYTE                nodeId;
     WORD                maxPdoSize;
     tPdoChannelConf     pdoChannelConf;
@@ -1036,7 +1036,7 @@ static tEplKernel getMaxPdoSize(BYTE nodeId_p, BOOL fTxPdo_p,
                          UINT16 *pMaxPdoSize_p, UINT32* pAbortCode_p)
 {
     tEplKernel          ret = kEplSuccessful;
-    tEplObdSize         obdSize;
+    tObdSize            obdSize;
     WORD                maxPdoSize;
     UINT                payloadLimitIndex;
     UINT                payloadLimitSubIndex;
@@ -1137,7 +1137,7 @@ configured or if the mapping of this POD is disabled.
 static tEplKernel checkPdoValidity(UINT mappParamIndex_p, UINT32* pAbortCode_p)
 {
     tEplKernel          ret = kEplSuccessful;
-    tEplObdSize         obdSize;
+    tObdSize            obdSize;
     BYTE                mappObjectCount;
 
     if (pdouInstance_g.fRunning)
@@ -1182,20 +1182,20 @@ static tEplKernel checkPdoValidity(UINT mappParamIndex_p, UINT32* pAbortCode_p)
 */
 //------------------------------------------------------------------------------
 static tEplKernel checkAndSetObjectMapping(QWORD objectMapping_p,
-                                   tEplObdAccess neededAccessType_p,
+                                   tObdAccess neededAccessType_p,
                                    tPdoMappObject* pMappObject_p,
                                    DWORD* pAbortCode_p, UINT* pPdoSize_p)
 {
     tEplKernel          ret = kEplSuccessful;
-    tEplObdSize         obdSize;
+    tObdSize            obdSize;
     UINT                index;
     UINT                subIndex;
     UINT                bitOffset;
     UINT                bitSize;
     UINT                byteSize;
-    tEplObdAccess       accessType;
+    tObdAccess          accessType;
     BOOL                fNumerical;
-    tEplObdType         obdType;
+    tObdType            obdType;
     void*               pVar;
 
     if (objectMapping_p == 0)
@@ -1223,7 +1223,7 @@ static tEplKernel checkAndSetObjectMapping(QWORD objectMapping_p,
     }
 
     if (((bitSize & 0x7) != 0x0) &&
-        ((bitSize != 1) || (obdType != kEplObdTypBool)))
+        ((bitSize != 1) || (obdType != kObdTypeBool)))
     {   // bit mapping is not supported, except for BOOLEAN objects on byte boundaries
         *pAbortCode_p = EPL_SDOAC_GENERAL_ERROR;
         ret = kEplPdoGranularityMismatch;
@@ -1239,7 +1239,7 @@ static tEplKernel checkAndSetObjectMapping(QWORD objectMapping_p,
         goto Exit;
     }
 
-    if ((accessType & kEplObdAccPdo) == 0)
+    if ((accessType & kObdAccPdo) == 0)
     {   // object is not mappable
         *pAbortCode_p = EPL_SDOAC_OBJECT_NOT_MAPPABLE;
         ret = kEplPdoVarNotMappable;
@@ -1253,7 +1253,7 @@ static tEplKernel checkAndSetObjectMapping(QWORD objectMapping_p,
         goto Exit;
     }
 
-    if (obdType == kEplObdTypBool)
+    if (obdType == kObdTypeBool)
     {   // bit size of BOOLEAN object was checked above
         byteSize = 1;
     }
@@ -1331,14 +1331,14 @@ static tEplKernel setupMappingObjects(tPdoMappObject* pMappObject_p,
                                       UINT* pCalcPdoSize_p, UINT* pCount_p)
 {
     tEplKernel          ret;
-    tEplObdSize         obdSize;
+    tObdSize            obdSize;
     QWORD               objectMapping;
     UINT                count;
     BYTE                mappSubindex;
     BYTE                mappObjectCount;
     UINT                curPdoSize;
     WORD                calcPdoSize = 0;
-    tEplObdAccess       neededAccessType;
+    tObdAccess          neededAccessType;
 
     mappObjectCount = mappObjectCount_p;
     count = 0;
@@ -1356,9 +1356,9 @@ static tEplKernel setupMappingObjects(tPdoMappObject* pMappObject_p,
         }
 
         if (mappParamIndex_p >= PDOU_OBD_IDX_TX_MAPP_PARAM)
-            neededAccessType = kEplObdAccRead;
+            neededAccessType = kObdAccRead;
         else
-            neededAccessType = kEplObdAccWrite;
+            neededAccessType = kObdAccWrite;
 
         ret = checkAndSetObjectMapping(objectMapping, neededAccessType, pMappObject_p,
                                pAbortCode_p, &curPdoSize);
@@ -1446,9 +1446,9 @@ static tEplKernel copyVarToPdo(BYTE* pPayload_p, tPdoMappObject* pMappObject_p)
     {
         //-----------------------------------------------
         // types without ami
-        case kEplObdTypVString:
-        case kEplObdTypOString:
-        case kEplObdTypDomain:
+        case kObdTypeVString:
+        case kObdTypeOString:
+        case kObdTypeDomain:
         default:
             // read value from object
             EPL_MEMCPY (pPayload_p, pVar, PDO_MAPPOBJECT_GET_BYTESIZE(pMappObject_p));
@@ -1457,59 +1457,59 @@ static tEplKernel copyVarToPdo(BYTE* pPayload_p, tPdoMappObject* pMappObject_p)
         //-----------------------------------------------
         // numerical type which needs ami-write
         // 8 bit or smaller values
-        case kEplObdTypBool:
-        case kEplObdTypInt8:
-        case kEplObdTypUInt8:
+        case kObdTypeBool:
+        case kObdTypeInt8:
+        case kObdTypeUInt8:
             AmiSetByteToLe(pPayload_p, *((BYTE*)pVar));
             break;
 
         // 16 bit values
-        case kEplObdTypInt16:
-        case kEplObdTypUInt16:
+        case kObdTypeInt16:
+        case kObdTypeUInt16:
             AmiSetWordToLe(pPayload_p, *((WORD*)pVar));
             break;
 
         // 24 bit values
-        case kEplObdTypInt24:
-        case kEplObdTypUInt24:
+        case kObdTypeInt24:
+        case kObdTypeUInt24:
             AmiSetDword24ToLe(pPayload_p, *((DWORD*)pVar));
             break;
 
         // 32 bit values
-        case kEplObdTypInt32:
-        case kEplObdTypUInt32:
-        case kEplObdTypReal32:
+        case kObdTypeInt32:
+        case kObdTypeUInt32:
+        case kObdTypeReal32:
             AmiSetDwordToLe(pPayload_p, *((DWORD*)pVar));
             break;
 
         // 40 bit values
-        case kEplObdTypInt40:
-        case kEplObdTypUInt40:
+        case kObdTypeInt40:
+        case kObdTypeUInt40:
             AmiSetQword40ToLe(pPayload_p, *((QWORD*)pVar));
             break;
 
         // 48 bit values
-        case kEplObdTypInt48:
-        case kEplObdTypUInt48:
+        case kObdTypeInt48:
+        case kObdTypeUInt48:
             AmiSetQword48ToLe(pPayload_p, *((QWORD*)pVar));
             break;
 
         // 56 bit values
-        case kEplObdTypInt56:
-        case kEplObdTypUInt56:
+        case kObdTypeInt56:
+        case kObdTypeUInt56:
             AmiSetQword56ToLe(pPayload_p, *((QWORD*)pVar));
             break;
 
         // 64 bit values
-        case kEplObdTypInt64:
-        case kEplObdTypUInt64:
-        case kEplObdTypReal64:
+        case kObdTypeInt64:
+        case kObdTypeUInt64:
+        case kObdTypeReal64:
             AmiSetQword64ToLe(pPayload_p, *((QWORD*)pVar));
             break;
 
         // time of day
-        case kEplObdTypTimeOfDay:
-        case kEplObdTypTimeDiff:
+        case kObdTypeTimeOfDay:
+        case kObdTypeTimeDiff:
             AmiSetTimeOfDay(pPayload_p, ((tTimeOfDay*)pVar));
             break;
     }
@@ -1544,9 +1544,9 @@ static tEplKernel copyVarFromPdo(BYTE* pPayload_p, tPdoMappObject* pMappObject_p
     {
         //-----------------------------------------------
         // types without ami
-        case kEplObdTypVString:
-        case kEplObdTypOString:
-        case kEplObdTypDomain:
+        case kObdTypeVString:
+        case kObdTypeOString:
+        case kObdTypeDomain:
         default:
             // read value from object
             EPL_MEMCPY (pVar, pPayload_p, PDO_MAPPOBJECT_GET_BYTESIZE(pMappObject_p));
@@ -1555,59 +1555,59 @@ static tEplKernel copyVarFromPdo(BYTE* pPayload_p, tPdoMappObject* pMappObject_p
         //-----------------------------------------------
         // numerical type which needs ami-write
         // 8 bit or smaller values
-        case kEplObdTypBool:
-        case kEplObdTypInt8:
-        case kEplObdTypUInt8:
+        case kObdTypeBool:
+        case kObdTypeInt8:
+        case kObdTypeUInt8:
             *((BYTE*)pVar) = AmiGetByteFromLe(pPayload_p);
             break;
 
         // 16 bit values
-        case kEplObdTypInt16:
-        case kEplObdTypUInt16:
+        case kObdTypeInt16:
+        case kObdTypeUInt16:
             *((WORD*)pVar) = AmiGetWordFromLe(pPayload_p);
             break;
 
         // 24 bit values
-        case kEplObdTypInt24:
-        case kEplObdTypUInt24:
+        case kObdTypeInt24:
+        case kObdTypeUInt24:
             *((DWORD*)pVar) = AmiGetDword24FromLe(pPayload_p);
             break;
 
         // 32 bit values
-        case kEplObdTypInt32:
-        case kEplObdTypUInt32:
-        case kEplObdTypReal32:
+        case kObdTypeInt32:
+        case kObdTypeUInt32:
+        case kObdTypeReal32:
             *((DWORD*)pVar) = AmiGetDwordFromLe(pPayload_p);
             break;
 
         // 40 bit values
-        case kEplObdTypInt40:
-        case kEplObdTypUInt40:
+        case kObdTypeInt40:
+        case kObdTypeUInt40:
             *((QWORD*)pVar) = AmiGetQword40FromLe(pPayload_p);
             break;
 
         // 48 bit values
-        case kEplObdTypInt48:
-        case kEplObdTypUInt48:
+        case kObdTypeInt48:
+        case kObdTypeUInt48:
             *((QWORD*)pVar) = AmiGetQword48FromLe(pPayload_p);
             break;
 
         // 56 bit values
-        case kEplObdTypInt56:
-        case kEplObdTypUInt56:
+        case kObdTypeInt56:
+        case kObdTypeUInt56:
             *((QWORD*)pVar) = AmiGetQword56FromLe(pPayload_p);
             break;
 
         // 64 bit values
-        case kEplObdTypInt64:
-        case kEplObdTypUInt64:
-        case kEplObdTypReal64:
+        case kObdTypeInt64:
+        case kObdTypeUInt64:
+        case kObdTypeReal64:
             *((QWORD*)pVar) = AmiGetQword64FromLe(pPayload_p);
             break;
 
         // time of day
-        case kEplObdTypTimeOfDay:
-        case kEplObdTypTimeDiff:
+        case kObdTypeTimeOfDay:
+        case kObdTypeTimeDiff:
             AmiGetTimeOfDay(pVar, ((tTimeOfDay*)pPayload_p));
             break;
     }

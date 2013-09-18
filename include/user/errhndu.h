@@ -66,8 +66,8 @@ tEplKernel errhndu_init(void);
 tEplKernel errhndu_exit(void);
 
 // object callback functions
-tEplKernel errhndu_cbObdAccess(tEplObdCbParam MEM* pParam_p);
-tEplKernel errhndu_mnCnLossPresCbObdAccess(tEplObdCbParam MEM* pParam_p);
+tEplKernel errhndu_cbObdAccess(tObdCbParam MEM* pParam_p);
+tEplKernel errhndu_mnCnLossPresCbObdAccess(tObdCbParam MEM* pParam_p);
 
 #ifdef __cplusplus
 }

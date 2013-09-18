@@ -75,7 +75,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // in OBJDICT.C by define EPL_OBD_INIT_RAM_NAME. Use this function name to define
 // this function prototype here. If you want to use more than one Epl
 // instances then the function name of each object dictionary has to differ.
-tEplKernel PUBLIC  EplObdInitRam (tEplObdInitParam MEM* pInitParam_p);
+tEplKernel PUBLIC  EplObdInitRam (tObdInitParam MEM* pInitParam_p);
 
 tEplKernel PUBLIC AppCbSync(void);
 tEplKernel PUBLIC AppCbEvent(
@@ -455,7 +455,7 @@ static int openPowerlink(BYTE bNodeId_p)
     DWORD                       ip = IP_ADDR;          ///< ip address
     const BYTE                  abMacAddr[] = {MAC_ADDR};
     static tEplApiInitParam     EplApiInitParam;       ///< epl init parameter
-    tEplObdSize                 ObdSize;               ///< needed for process var
+    tObdSize                    ObdSize;               ///< needed for process var
     tEplKernel                  EplRet;
     unsigned int                uiVarEntries;
 

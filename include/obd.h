@@ -82,15 +82,12 @@
 #define EPL_OBD_TABLE_INDEX_END     0xFFFF
 
 // for the usage of BOOLEAN in OD
-#define OBD_TRUE    0x01
-#define OBD_FALSE   0x00
+#define OBD_TRUE                                    0x01
+#define OBD_FALSE                                   0x00
 
-// default OD index for Node id
-#define EPL_OBD_NODE_ID_INDEX               0x1F93
-// default subindex for NodeId in OD
-#define EPL_OBD_NODE_ID_SUBINDEX            0x01
-// default subindex for NodeIDByHW_BOOL
-#define EPL_OBD_NODE_ID_HWBOOL_SUBINDEX     0x02
+#define OBD_NODE_ID_INDEX                           0x1F93      // default OD index for Node id
+#define OBD_NODE_ID_SUBINDEX                        0x01        // default subindex for NodeId in OD
+#define OBD_NODE_ID_HWBOOL_SUBINDEX                 0x02        // default subindex for NodeIDByHW_BOOL
 
 //------------------------------------------------------------------------------
 // object IDs of error handling objects
@@ -116,116 +113,113 @@
 // directions for access to object dictionary
 typedef enum
 {
-    kEplObdDirInit         = 0x00,    // initialising after power on
-    kEplObdDirStore        = 0x01,    // store all object values to non volatile memory
-    kEplObdDirLoad         = 0x02,    // load all object values from non volatile memory
-    kEplObdDirRestore      = 0x03,    // deletes non volatile memory (restore)
-    kEplObdDirOBKCheck     = 0xFF     // reserved
-
-}tEplObdDir;
+    kObdDirInit             = 0x00,    // initialising after power on
+    kObdDirStore            = 0x01,    // store all object values to non volatile memory
+    kObdDirLoad             = 0x02,    // load all object values from non volatile memory
+    kObdDirRestore          = 0x03,    // deletes non volatile memory (restore)
+    kObdDirOBKCheck         = 0xFF     // reserved
+}tObdDir;
 
 // commands for store
 typedef enum
 {
-    kEplObdCommNothing     = 0x00,
-    kEplObdCommOpenWrite   = 0x01,
-    kEplObdCommWriteObj    = 0x02,
-    kEplObdCommCloseWrite  = 0x03,
-    kEplObdCommOpenRead    = 0x04,
-    kEplObdCommReadObj     = 0x05,
-    kEplObdCommCloseRead   = 0x06,
-    kEplObdCommClear       = 0x07,
-    kEplObdCommUnknown     = 0xFF
-}tEplObdCommand;
+    kObdCmdNothing          = 0x00,
+    kObdCmdOpenWrite        = 0x01,
+    kObdCmdWriteObj         = 0x02,
+    kObdCmdCloseWrite       = 0x03,
+    kObdCmdOpenRead         = 0x04,
+    kObdCmdReadObj          = 0x05,
+    kObdCmdCloseRead        = 0x06,
+    kObdCmdClear            = 0x07,
+    kObdCmdUnknown          = 0xFF
+}tObdCommand;
 
-//-----------------------------------------------------------------------------------------------------------
 // events of object callback function
 typedef enum
 {
 //                                                                                                      m_pArg points to
 //                                                                                                    ---------------------
-    kEplObdEvCheckExist            = 0x06,    // checking if object does exist (reading and writing)    NULL
-    kEplObdEvPreRead               = 0x00,    // before reading an object                               source data buffer in OD
-    kEplObdEvPostRead              = 0x01,    // after reading an object                                destination data buffer from caller
-    kEplObdEvWrStringDomain        = 0x07,    // event for changing string/domain data pointer or size  struct tEplObdVStringDomain in RAM
-    kEplObdEvInitWrite             = 0x04,    // initializes writing an object (checking object size)   size of object in OD (tEplObdSize)
-    kEplObdEvPreWrite              = 0x02,    // before writing an object                               source data buffer from caller
-    kEplObdEvPostWrite             = 0x03,    // after writing an object                                destination data buffer in OD
-//    kEplObdEvAbortSdo              = 0x05     // after an abort of an SDO transfer
-    kEplObdEvPostDefault           = 0x08,    // after setting default values                           data buffer in OD
-
-} tEplObdEvent;
+    kObdEvCheckExist        = 0x06,    // checking if object does exist (reading and writing)    NULL
+    kObdEvPreRead           = 0x00,    // before reading an object                               source data buffer in OD
+    kObdEvPostRead          = 0x01,    // after reading an object                                destination data buffer from caller
+    kObdEvWrStringDomain    = 0x07,    // event for changing string/domain data pointer or size  struct tObdVStringDomain in RAM
+    kObdEvInitWrite         = 0x04,    // initializes writing an object (checking object size)   size of object in OD (tObdSize)
+    kObdEvPreWrite          = 0x02,    // before writing an object                               source data buffer from caller
+    kObdEvPostWrite         = 0x03,    // after writing an object                                destination data buffer in OD
+//    kObdEvAbortSdo          = 0x05     // after an abort of an SDO transfer
+    kObdEvPostDefault       = 0x08,    // after setting default values                           data buffer in OD
+} tObdEvent;
 
 // part of OD (bit oriented)
-typedef unsigned int tEplObdPart;
+typedef unsigned int tObdPart;
 
-#define kEplObdPartNo          0x00    // nothing
-#define kEplObdPartGen         0x01    //  part      (0x1000 - 0x1FFF)
-#define kEplObdPartMan         0x02    // manufacturer part (0x2000 - 0x5FFF)
-#define kEplObdPartDev         0x04    // device part       (0x6000 - 0x9FFF)
-#define kEplObdPartUsr         0x08    // dynamic part e.g. for ICE61131-3
+#define kObdPartNo          0x00    // nothing
+#define kObdPartGen         0x01    //  part      (0x1000 - 0x1FFF)
+#define kObdPartMan         0x02    // manufacturer part (0x2000 - 0x5FFF)
+#define kObdPartDev         0x04    // device part       (0x6000 - 0x9FFF)
+#define kObdPartUsr         0x08    // dynamic part e.g. for ICE61131-3
 
 // combinations
-#define kEplObdPartApp         (              kEplObdPartMan | kEplObdPartDev | kEplObdPartUsr)   // manufacturer and device part (0x2000 - 0x9FFF) and user OD
-#define kEplObdPartAll         (kEplObdPartGen | kEplObdPartMan | kEplObdPartDev | kEplObdPartUsr)   // whole OD
+#define kObdPartApp         (              kObdPartMan | kObdPartDev | kObdPartUsr)   // manufacturer and device part (0x2000 - 0x9FFF) and user OD
+#define kObdPartAll         (kObdPartGen | kObdPartMan | kObdPartDev | kObdPartUsr)   // whole OD
 
 //-----------------------------------------------------------------------------------------------------------
 // access types for objects
 // must be a difine because bit-flags
-typedef unsigned int tEplObdAccess;
+typedef unsigned int tObdAccess;
 
-#define kEplObdAccRead         0x01    // object can be read
-#define kEplObdAccWrite        0x02    // object can be written
-#define kEplObdAccConst        0x04    // object contains a constant value
-#define kEplObdAccPdo          0x08    // object can be mapped in a PDO
-#define kEplObdAccArray        0x10    // object contains an array of numerical values
-#define kEplObdAccRange        0x20    // object contains lower and upper limit
-#define kEplObdAccVar          0x40    // object data is placed in application
-#define kEplObdAccStore        0x80    // object data can be stored to non volatile memory
+#define kObdAccRead         0x01    // object can be read
+#define kObdAccWrite        0x02    // object can be written
+#define kObdAccConst        0x04    // object contains a constant value
+#define kObdAccPdo          0x08    // object can be mapped in a PDO
+#define kObdAccArray        0x10    // object contains an array of numerical values
+#define kObdAccRange        0x20    // object contains lower and upper limit
+#define kObdAccVar          0x40    // object data is placed in application
+#define kObdAccStore        0x80    // object data can be stored to non volatile memory
 
 // combinations (not all combinations are required)
-#define kEplObdAccR            (0            | 0          | 0            | 0          | 0            | 0            | kEplObdAccRead)
-#define kEplObdAccW            (0            | 0          | 0            | 0          | 0            | kEplObdAccWrite | 0          )
-#define kEplObdAccRW           (0            | 0          | 0            | 0          | 0            | kEplObdAccWrite | kEplObdAccRead)
-#define kEplObdAccCR           (0            | 0          | 0            | 0          | kEplObdAccConst | 0            | kEplObdAccRead)
-#define kEplObdAccGR           (0            | 0          | kEplObdAccRange | 0          | 0            | 0            | kEplObdAccRead)
-#define kEplObdAccGW           (0            | 0          | kEplObdAccRange | 0          | 0            | kEplObdAccWrite | 0          )
-#define kEplObdAccGRW          (0            | 0          | kEplObdAccRange | 0          | 0            | kEplObdAccWrite | kEplObdAccRead)
-#define kEplObdAccVR           (0            | kEplObdAccVar | 0            | 0          | 0            | 0            | kEplObdAccRead)
-#define kEplObdAccVW           (0            | kEplObdAccVar | 0            | 0          | 0            | kEplObdAccWrite | 0          )
-#define kEplObdAccVRW          (0            | kEplObdAccVar | 0            | 0          | 0            | kEplObdAccWrite | kEplObdAccRead)
-#define kEplObdAccVPR          (0            | kEplObdAccVar | 0            | kEplObdAccPdo | 0            | 0            | kEplObdAccRead)
-#define kEplObdAccVPW          (0            | kEplObdAccVar | 0            | kEplObdAccPdo | 0            | kEplObdAccWrite | 0          )
-#define kEplObdAccVPRW         (0            | kEplObdAccVar | 0            | kEplObdAccPdo | 0            | kEplObdAccWrite | kEplObdAccRead)
-#define kEplObdAccVGR          (0            | kEplObdAccVar | kEplObdAccRange | 0          | 0            | 0            | kEplObdAccRead)
-#define kEplObdAccVGW          (0            | kEplObdAccVar | kEplObdAccRange | 0          | 0            | kEplObdAccWrite | 0          )
-#define kEplObdAccVGRW         (0            | kEplObdAccVar | kEplObdAccRange | 0          | 0            | kEplObdAccWrite | kEplObdAccRead)
-#define kEplObdAccVGPR         (0            | kEplObdAccVar | kEplObdAccRange | kEplObdAccPdo | 0            | 0            | kEplObdAccRead)
-#define kEplObdAccVGPW         (0            | kEplObdAccVar | kEplObdAccRange | kEplObdAccPdo | 0            | kEplObdAccWrite | 0          )
-#define kEplObdAccVGPRW        (0            | kEplObdAccVar | kEplObdAccRange | kEplObdAccPdo | 0            | kEplObdAccWrite | kEplObdAccRead)
-#define kEplObdAccSR           (kEplObdAccStore | 0          | 0            | 0          | 0            | 0            | kEplObdAccRead)
-#define kEplObdAccSW           (kEplObdAccStore | 0          | 0            | 0          | 0            | kEplObdAccWrite | 0          )
-#define kEplObdAccSRW          (kEplObdAccStore | 0          | 0            | 0          | 0            | kEplObdAccWrite | kEplObdAccRead)
-#define kEplObdAccSCR          (kEplObdAccStore | 0          | 0            | 0          | kEplObdAccConst | 0            | kEplObdAccRead)
-#define kEplObdAccSGR          (kEplObdAccStore | 0          | kEplObdAccRange | 0          | 0            | 0            | kEplObdAccRead)
-#define kEplObdAccSGW          (kEplObdAccStore | 0          | kEplObdAccRange | 0          | 0            | kEplObdAccWrite | 0          )
-#define kEplObdAccSGRW         (kEplObdAccStore | 0          | kEplObdAccRange | 0          | 0            | kEplObdAccWrite | kEplObdAccRead)
-#define kEplObdAccSVR          (kEplObdAccStore | kEplObdAccVar | 0            | 0          | 0            | 0            | kEplObdAccRead)
-#define kEplObdAccSVW          (kEplObdAccStore | kEplObdAccVar | 0            | 0          | 0            | kEplObdAccWrite | 0          )
-#define kEplObdAccSVRW         (kEplObdAccStore | kEplObdAccVar | 0            | 0          | 0            | kEplObdAccWrite | kEplObdAccRead)
-#define kEplObdAccSVPR         (kEplObdAccStore | kEplObdAccVar | 0            | kEplObdAccPdo | 0            | 0            | kEplObdAccRead)
-#define kEplObdAccSVPW         (kEplObdAccStore | kEplObdAccVar | 0            | kEplObdAccPdo | 0            | kEplObdAccWrite | 0          )
-#define kEplObdAccSVPRW        (kEplObdAccStore | kEplObdAccVar | 0            | kEplObdAccPdo | 0            | kEplObdAccWrite | kEplObdAccRead)
-#define kEplObdAccSVGR         (kEplObdAccStore | kEplObdAccVar | kEplObdAccRange | 0          | 0            | 0            | kEplObdAccRead)
-#define kEplObdAccSVGW         (kEplObdAccStore | kEplObdAccVar | kEplObdAccRange | 0          | 0            | kEplObdAccWrite | 0          )
-#define kEplObdAccSVGRW        (kEplObdAccStore | kEplObdAccVar | kEplObdAccRange | 0          | 0            | kEplObdAccWrite | kEplObdAccRead)
-#define kEplObdAccSVGPR        (kEplObdAccStore | kEplObdAccVar | kEplObdAccRange | kEplObdAccPdo | 0            | 0            | kEplObdAccRead)
-#define kEplObdAccSVGPW        (kEplObdAccStore | kEplObdAccVar | kEplObdAccRange | kEplObdAccPdo | 0            | kEplObdAccWrite | 0          )
-#define kEplObdAccSVGPRW       (kEplObdAccStore | kEplObdAccVar | kEplObdAccRange | kEplObdAccPdo | 0            | kEplObdAccWrite | kEplObdAccRead)
+#define kObdAccR            (0            | 0          | 0            | 0          | 0            | 0            | kObdAccRead)
+#define kObdAccW            (0            | 0          | 0            | 0          | 0            | kObdAccWrite | 0          )
+#define kObdAccRW           (0            | 0          | 0            | 0          | 0            | kObdAccWrite | kObdAccRead)
+#define kObdAccCR           (0            | 0          | 0            | 0          | kObdAccConst | 0            | kObdAccRead)
+#define kObdAccGR           (0            | 0          | kObdAccRange | 0          | 0            | 0            | kObdAccRead)
+#define kObdAccGW           (0            | 0          | kObdAccRange | 0          | 0            | kObdAccWrite | 0          )
+#define kObdAccGRW          (0            | 0          | kObdAccRange | 0          | 0            | kObdAccWrite | kObdAccRead)
+#define kObdAccVR           (0            | kObdAccVar | 0            | 0          | 0            | 0            | kObdAccRead)
+#define kObdAccVW           (0            | kObdAccVar | 0            | 0          | 0            | kObdAccWrite | 0          )
+#define kObdAccVRW          (0            | kObdAccVar | 0            | 0          | 0            | kObdAccWrite | kObdAccRead)
+#define kObdAccVPR          (0            | kObdAccVar | 0            | kObdAccPdo | 0            | 0            | kObdAccRead)
+#define kObdAccVPW          (0            | kObdAccVar | 0            | kObdAccPdo | 0            | kObdAccWrite | 0          )
+#define kObdAccVPRW         (0            | kObdAccVar | 0            | kObdAccPdo | 0            | kObdAccWrite | kObdAccRead)
+#define kObdAccVGR          (0            | kObdAccVar | kObdAccRange | 0          | 0            | 0            | kObdAccRead)
+#define kObdAccVGW          (0            | kObdAccVar | kObdAccRange | 0          | 0            | kObdAccWrite | 0          )
+#define kObdAccVGRW         (0            | kObdAccVar | kObdAccRange | 0          | 0            | kObdAccWrite | kObdAccRead)
+#define kObdAccVGPR         (0            | kObdAccVar | kObdAccRange | kObdAccPdo | 0            | 0            | kObdAccRead)
+#define kObdAccVGPW         (0            | kObdAccVar | kObdAccRange | kObdAccPdo | 0            | kObdAccWrite | 0          )
+#define kObdAccVGPRW        (0            | kObdAccVar | kObdAccRange | kObdAccPdo | 0            | kObdAccWrite | kObdAccRead)
+#define kObdAccSR           (kObdAccStore | 0          | 0            | 0          | 0            | 0            | kObdAccRead)
+#define kObdAccSW           (kObdAccStore | 0          | 0            | 0          | 0            | kObdAccWrite | 0          )
+#define kObdAccSRW          (kObdAccStore | 0          | 0            | 0          | 0            | kObdAccWrite | kObdAccRead)
+#define kObdAccSCR          (kObdAccStore | 0          | 0            | 0          | kObdAccConst | 0            | kObdAccRead)
+#define kObdAccSGR          (kObdAccStore | 0          | kObdAccRange | 0          | 0            | 0            | kObdAccRead)
+#define kObdAccSGW          (kObdAccStore | 0          | kObdAccRange | 0          | 0            | kObdAccWrite | 0          )
+#define kObdAccSGRW         (kObdAccStore | 0          | kObdAccRange | 0          | 0            | kObdAccWrite | kObdAccRead)
+#define kObdAccSVR          (kObdAccStore | kObdAccVar | 0            | 0          | 0            | 0            | kObdAccRead)
+#define kObdAccSVW          (kObdAccStore | kObdAccVar | 0            | 0          | 0            | kObdAccWrite | 0          )
+#define kObdAccSVRW         (kObdAccStore | kObdAccVar | 0            | 0          | 0            | kObdAccWrite | kObdAccRead)
+#define kObdAccSVPR         (kObdAccStore | kObdAccVar | 0            | kObdAccPdo | 0            | 0            | kObdAccRead)
+#define kObdAccSVPW         (kObdAccStore | kObdAccVar | 0            | kObdAccPdo | 0            | kObdAccWrite | 0          )
+#define kObdAccSVPRW        (kObdAccStore | kObdAccVar | 0            | kObdAccPdo | 0            | kObdAccWrite | kObdAccRead)
+#define kObdAccSVGR         (kObdAccStore | kObdAccVar | kObdAccRange | 0          | 0            | 0            | kObdAccRead)
+#define kObdAccSVGW         (kObdAccStore | kObdAccVar | kObdAccRange | 0          | 0            | kObdAccWrite | 0          )
+#define kObdAccSVGRW        (kObdAccStore | kObdAccVar | kObdAccRange | 0          | 0            | kObdAccWrite | kObdAccRead)
+#define kObdAccSVGPR        (kObdAccStore | kObdAccVar | kObdAccRange | kObdAccPdo | 0            | 0            | kObdAccRead)
+#define kObdAccSVGPW        (kObdAccStore | kObdAccVar | kObdAccRange | kObdAccPdo | 0            | kObdAccWrite | 0          )
+#define kObdAccSVGPRW       (kObdAccStore | kObdAccVar | kObdAccRange | kObdAccPdo | 0            | kObdAccWrite | kObdAccRead)
 
 
 
-typedef unsigned int tEplObdSize; // For all objects as objects size are used an unsigned int.
+typedef unsigned int tObdSize; // For all objects as objects size are used an unsigned int.
 
 
 // -------------------------------------------------------------------------
@@ -237,35 +231,34 @@ typedef unsigned int tEplObdSize; // For all objects as objects size are used an
 typedef enum
 {
 // types which are always supported
-    kEplObdTypBool         = 0x0001,
+    kObdTypeBool            = 0x0001,
 
-    kEplObdTypInt8         = 0x0002,
-    kEplObdTypInt16        = 0x0003,
-    kEplObdTypInt32        = 0x0004,
-    kEplObdTypUInt8        = 0x0005,
-    kEplObdTypUInt16       = 0x0006,
-    kEplObdTypUInt32       = 0x0007,
-    kEplObdTypReal32       = 0x0008,
-    kEplObdTypVString      = 0x0009,
-    kEplObdTypOString      = 0x000A,
-    kEplObdTypDomain       = 0x000F,
+    kObdTypeInt8            = 0x0002,
+    kObdTypeInt16           = 0x0003,
+    kObdTypeInt32           = 0x0004,
+    kObdTypeUInt8           = 0x0005,
+    kObdTypeUInt16          = 0x0006,
+    kObdTypeUInt32          = 0x0007,
+    kObdTypeReal32          = 0x0008,
+    kObdTypeVString         = 0x0009,
+    kObdTypeOString         = 0x000A,
+    kObdTypeDomain          = 0x000F,
 
-    kEplObdTypInt24        = 0x0010,
-    kEplObdTypUInt24       = 0x0016,
+    kObdTypeInt24           = 0x0010,
+    kObdTypeUInt24          = 0x0016,
 
-    kEplObdTypReal64       = 0x0011,
-    kEplObdTypInt40        = 0x0012,
-    kEplObdTypInt48        = 0x0013,
-    kEplObdTypInt56        = 0x0014,
-    kEplObdTypInt64        = 0x0015,
-    kEplObdTypUInt40       = 0x0018,
-    kEplObdTypUInt48       = 0x0019,
-    kEplObdTypUInt56       = 0x001A,
-    kEplObdTypUInt64       = 0x001B,
-    kEplObdTypTimeOfDay    = 0x000C,
-    kEplObdTypTimeDiff     = 0x000D
-
-} tEplObdType;
+    kObdTypeReal64          = 0x0011,
+    kObdTypeInt40           = 0x0012,
+    kObdTypeInt48           = 0x0013,
+    kObdTypeInt56           = 0x0014,
+    kObdTypeInt64           = 0x0015,
+    kObdTypeUInt40          = 0x0018,
+    kObdTypeUInt48          = 0x0019,
+    kObdTypeUInt56          = 0x001A,
+    kObdTypeUInt64          = 0x001B,
+    kObdTypeTimeOfDay       = 0x000C,
+    kObdTypeTimeDiff        = 0x000D
+} tObdType;
 // other types are not supported in this version
 
 
@@ -273,45 +266,32 @@ typedef enum
 // types for data types defined in DS301
 // -------------------------------------------------------------------------
 
-typedef unsigned char       tEplObdBoolean;      // 0001
-typedef signed char         tEplObdInteger8;     // 0002
-typedef signed short int    tEplObdInteger16;    // 0003
-#if defined (__LP64__) || defined (_LP64)
-typedef signed int          tEplObdInteger32;    // 0004
-#else
-typedef signed long         tEplObdInteger32;    // 0004
-#endif
-typedef unsigned char       tEplObdUnsigned8;    // 0005
-typedef unsigned short int  tEplObdUnsigned16;   // 0006
-#if defined (__LP64__) || defined (_LP64)
-typedef unsigned int        tEplObdUnsigned32;   // 0007
-#else
-typedef unsigned long       tEplObdUnsigned32;   // 0007
-#endif
-typedef float               tEplObdReal32;       // 0008
-typedef unsigned char       tEplObdDomain;       // 000F
-#if defined (__LP64__) || defined (_LP64)
-typedef signed   int        tEplObdInteger24;    // 0010
-typedef unsigned int        tEplObdUnsigned24;   // 0016
-#else
-typedef signed   long       tEplObdInteger24;    // 0010
-typedef unsigned long       tEplObdUnsigned24;   // 0016
-#endif
+typedef unsigned char               tObdBoolean;      // 0001
+typedef signed char                 tObdInteger8;     // 0002
+typedef signed short int            tObdInteger16;    // 0003
+typedef signed int                  tObdInteger32;    // 0004
+typedef unsigned char               tObdUnsigned8;    // 0005
+typedef unsigned short int          tObdUnsigned16;   // 0006
+typedef unsigned int                tObdUnsigned32;   // 0007
+typedef float                       tObdReal32;       // 0008
+typedef unsigned char               tObdDomain;       // 000F
+typedef signed   int                tObdInteger24;    // 0010
+typedef unsigned int                tObdUnsigned24;   // 0016
 
-typedef signed QWORD        tEplObdInteger40;    // 0012
-typedef signed QWORD        tEplObdInteger48;    // 0013
-typedef signed QWORD        tEplObdInteger56;    // 0014
-typedef signed QWORD        tEplObdInteger64;    // 0015
+typedef signed long long int        tObdInteger40;    // 0012
+typedef signed long long int        tObdInteger48;    // 0013
+typedef signed long long int        tObdInteger56;    // 0014
+typedef signed long long int        tObdInteger64;    // 0015
 
-typedef unsigned QWORD      tEplObdUnsigned40;   // 0018
-typedef unsigned QWORD      tEplObdUnsigned48;   // 0019
-typedef unsigned QWORD      tEplObdUnsigned56;   // 001A
-typedef unsigned QWORD      tEplObdUnsigned64;   // 001B
+typedef unsigned long long int      tObdUnsigned40;   // 0018
+typedef unsigned long long int      tObdUnsigned48;   // 0019
+typedef unsigned long long int      tObdUnsigned56;   // 001A
+typedef unsigned long long int      tObdUnsigned64;   // 001B
 
-typedef double              tEplObdReal64;       // 0011
+typedef double                      tObdReal64;       // 0011
 
-typedef tTimeOfDay          tEplObdTimeOfDay;         // 000C
-typedef tTimeOfDay          tEplObdTimeDifference;    // 000D
+typedef tTimeOfDay                  tObdTimeOfDay;         // 000C
+typedef tTimeOfDay                  tObdTimeDifference;    // 000D
 
 
 // -------------------------------------------------------------------------
@@ -324,10 +304,8 @@ typedef enum
     kVarValidData           = 0x02,
 //    kVarValidCallback       = 0x04,
 //    kVarValidArg            = 0x08,
-
     kVarValidAll            = 0x03  // currently only size and data are implemented and used
-
-}tEplVarParamValid;
+}tVarParamValid;
 
 
 //typedef tEplKernel (PUBLIC ROM* tEplVarCallback) (CCM_DECL_INSTANCE_HDL_
@@ -335,66 +313,61 @@ typedef enum
 
 typedef struct
 {
-    tEplVarParamValid   m_ValidFlag;
-    unsigned int        m_uiIndex;
-    unsigned int        m_uiSubindex;
-    tEplObdSize         m_Size;
+    tVarParamValid      m_ValidFlag;
+    UINT                m_uiIndex;
+    UINT                m_uiSubindex;
+    tObdSize            m_Size;
     void MEM*           m_pData;
 //    tEplVarCallback     m_fpCallback;
 //    void *       m_pArg;
-
-} tEplVarParam;
+} tVarParam;
 
 typedef struct
 {
     void MEM*           m_pData;
-    tEplObdSize            m_Size;
+    tObdSize            m_Size;
 /*
     #if (EPL_PDO_USE_STATIC_MAPPING == FALSE)
         tEplVarCallback    m_fpCallback;
         void *   m_pArg;
     #endif
 */
-} tEplObdVarEntry;
+} tObdVarEntry;
 
 typedef struct
 {
-   tEplObdSize      m_Size;
+   tObdSize         m_Size;
    BYTE *           m_pString;
-
-} tEplObdOString;                          // 000C
-
-typedef struct
-{
-   tEplObdSize      m_Size;
-   char *           m_pString;
-} tEplObdVString;                          // 000D
-
+} tObdOString;                          // 000C
 
 typedef struct
 {
-    tEplObdSize     m_Size;
-    CONST char *    m_pDefString;         // must be same offset as m_pString in tEplObdVString
-    char *          m_pString;
+   tObdSize         m_Size;
+   char*            m_pString;
+} tObdVString;                          // 000D
 
-} tEplObdVStringDef;
 
 typedef struct
 {
-   tEplObdSize      m_Size;
-   BYTE *           m_pDefString;   // must be same offset as m_pString in tEplObdVString
-   BYTE *           m_pString;
+    tObdSize        m_Size;
+    CONST char*     m_pDefString;         // must be same offset as m_pString in tObdVString
+    char*           m_pString;
+} tObdVStringDef;
 
-} tEplObdOStringDef;
+typedef struct
+{
+   tObdSize         m_Size;
+   UINT8*           m_pDefString;   // must be same offset as m_pString in tObdVString
+   UINT8*           m_pString;
+} tObdOStringDef;
 
 //r.d. parameter struct for changing object size and/or pointer to data of Strings or Domains
 typedef struct
 {
-   tEplObdSize      m_DownloadSize;     // download size from SDO or APP
-   tEplObdSize      m_ObjSize;          // current object size from OD - should be changed from callback function
-   void *    m_pData;            // current object ptr  from OD - should be changed from callback function
-
-} tEplObdVStringDomain;                          // 000D
+   tObdSize      m_DownloadSize;     // download size from SDO or APP
+   tObdSize      m_ObjSize;          // current object size from OD - should be changed from callback function
+   void*         m_pData;            // current object ptr  from OD - should be changed from callback function
+} tObdVStringDomain;                          // 000D
 
 
 // ============================================================================
@@ -407,16 +380,15 @@ typedef struct
 // Change not the order for this struct!!!
 typedef struct
 {
-    unsigned int    m_uiSubIndex;
-    tEplObdType     m_Type;
-    tEplObdAccess   m_Access;
+    UINT            m_uiSubIndex;
+    tObdType        m_Type;
+    tObdAccess      m_Access;
     CONST void ROM* m_pDefault;
     void  MEM*      m_pCurrent;     // points always to RAM
-
-} tEplObdSubEntry;
+} tObdSubEntry;
 
 // r.d.: has always to be, because of new OBD-Macros for arrays
-typedef tEplObdSubEntry * tEplObdSubEntryPtr;
+typedef tObdSubEntry * tObdSubEntryPtr;
 
 // -------------------------------------------------------------------------
 // callback function for object dictionary module
@@ -425,53 +397,49 @@ typedef tEplObdSubEntry * tEplObdSubEntryPtr;
 // parameters for callback function
 typedef struct
 {
-    tEplObdEvent    m_ObdEvent;
-    unsigned int    m_uiIndex;
-    unsigned int    m_uiSubIndex;
+    tObdEvent       m_ObdEvent;
+    UINT            m_uiIndex;
+    UINT            m_uiSubIndex;
     void *          m_pArg;
-    DWORD           m_dwAbortCode;
+    UINT32          m_dwAbortCode;
+} tObdCbParam;
 
-} tEplObdCbParam;
-
-// define type for callback function: pParam_p points to tEplObdCbParam
-typedef tEplKernel (PUBLIC ROM* tEplObdCallback) (tEplObdCbParam MEM* pParam_p);
+// define type for callback function: pParam_p points to tObdCbParam
+typedef tEplKernel (PUBLIC ROM* tObdCallback) (tObdCbParam MEM* pParam_p);
 
 // do not change the order for this struct!!!
 
 typedef struct
 {
-    unsigned int        m_uiIndex;
-    tEplObdSubEntryPtr  m_pSubIndex;
-    unsigned int        m_uiCount;
-    tEplObdCallback     m_fpCallback;   // function is called back if object access
-
-} tEplObdEntry;
-
+    UINT                m_uiIndex;
+    tObdSubEntryPtr     m_pSubIndex;
+    UINT                m_uiCount;
+    tObdCallback        m_fpCallback;   // function is called back if object access
+} tObdEntry;
 
 // allways  pointer
-typedef tEplObdEntry * tEplObdEntryPtr;
-
+typedef tObdEntry * tObdEntryPtr;
 
 
 // -------------------------------------------------------------------------
 // structur to initialize OBD module
 // -------------------------------------------------------------------------
 
-struct _tEplObdInitParam
+struct _tObdInitParam
 {
-    tEplObdEntryPtr        m_pGenericPart;
-    tEplObdEntryPtr        m_pManufacturerPart;
-    tEplObdEntryPtr        m_pDevicePart;
+    tObdEntryPtr            m_pGenericPart;
+    tObdEntryPtr            m_pManufacturerPart;
+    tObdEntryPtr            m_pDevicePart;
 
     #if (defined (EPL_OBD_USER_OD) && (EPL_OBD_USER_OD != FALSE))
 
-          tEplObdEntryPtr  m_pUserPart;
+          tObdEntryPtr      m_pUserPart;
 
     #endif
 
 };
 
-typedef struct _tEplObdInitParam tEplObdInitParam;
+typedef struct _tObdInitParam tObdInitParam;
 
 
 // -------------------------------------------------------------------------
@@ -480,50 +448,49 @@ typedef struct _tEplObdInitParam tEplObdInitParam;
 
 typedef struct
 {
-    tEplObdCommand  m_bCommand;
-    tEplObdPart     m_bCurrentOdPart;
+    tObdCommand     m_bCommand;
+    tObdPart        m_bCurrentOdPart;
     void MEM*       m_pData;
-    tEplObdSize     m_ObjSize;
+    tObdSize        m_ObjSize;
 
-} tEplObdCbStoreParam;
-
-
-typedef tEplKernel (PUBLIC ROM* tEplObdInitRam) (tEplObdInitParam MEM* pInitParam_p);
-
-typedef tEplKernel (PUBLIC ROM* tEplObdDeinitRam) (tEplObdInitParam MEM* pInitParam_p);
+} tObdCbStoreParam;
 
 
-typedef tEplKernel (PUBLIC ROM* tEplInitTabEntryCallback) (
+typedef tEplKernel (PUBLIC ROM* tObdInitRam) (tObdInitParam MEM* pInitParam_p);
+
+typedef tEplKernel (PUBLIC ROM* tObdDeinitRam) (tObdInitParam MEM* pInitParam_p);
+
+
+typedef tEplKernel (PUBLIC ROM* tInitTabEntryCallback) (
     void MEM* pTabEntry_p,
-    unsigned int uiObjIndex_p);
+    UINT uiObjIndex_p);
 
 
-typedef tEplKernel (PUBLIC ROM* tEplObdStoreLoadObjCallback) (tEplObdCbStoreParam MEM* pCbStoreParam_p);
+typedef tEplKernel (PUBLIC ROM* tEplObdStoreLoadObjCallback) (tObdCbStoreParam MEM* pCbStoreParam_p);
 
 // -------------------------------------------------------------------------
 // this stucture is used for parameters for function ObdInitModuleTab()
 // -------------------------------------------------------------------------
 typedef struct
 {
-    unsigned int                m_uiLowerObjIndex;  // lower limit of ObjIndex
-    unsigned int                m_uiUpperObjIndex;  // upper limit of ObjIndex
-    tEplInitTabEntryCallback    m_fpInitTabEntry;   // will be called if ObjIndex was found
+    UINT                        m_uiLowerObjIndex;  // lower limit of ObjIndex
+    UINT                        m_uiUpperObjIndex;  // upper limit of ObjIndex
+    tInitTabEntryCallback       m_fpInitTabEntry;   // will be called if ObjIndex was found
     void MEM*                   m_pTabBase;         // base address of table
-    unsigned int                m_uiEntrySize;      // size of table entry      // 25-feb-2005 r.d.: expansion from BYTE to WORD necessary for PDO bit mapping
-    unsigned int                m_uiMaxEntries;     // max. tabel entries
+    UINT                        m_uiEntrySize;      // size of table entry      // 25-feb-2005 r.d.: expansion from BYTE to WORD necessary for PDO bit mapping
+    UINT                        m_uiMaxEntries;     // max. tabel entries
 
-} tEplObdModulTabParam;
+} tObdModulTabParam;
 
 //-------------------------------------------------------------------
 //  enum for function obd_setNodeId
 //-------------------------------------------------------------------
 typedef enum
 {
-    kEplObdNodeIdUnknown    =   0x00,   // unknown how the node id was set
-    kEplObdNodeIdSoftware   =   0x01,   // node id set by software
-    kEplObdNodeIdHardware   =   0x02    // node id set by hardware
-
-}tEplObdNodeIdType;
+    kObdNodeIdUnknown       = 0x00,   // unknown how the node id was set
+    kObdNodeIdSoftware      = 0x01,   // node id set by software
+    kObdNodeIdHardware      = 0x02    // node id set by hardware
+}tObdNodeIdType;
 
 // ============================================================================
 // global variables
@@ -535,26 +502,26 @@ typedef enum
 // public functions
 // ============================================================================
 // ---------------------------------------------------------------------
-tEplKernel  obd_init(tEplObdInitParam MEM* pInitParam_p);
-tEplKernel  obd_addInstance(tEplObdInitParam MEM* pInitParam_p);
+tEplKernel  obd_init(tObdInitParam MEM* pInitParam_p);
+tEplKernel  obd_addInstance(tObdInitParam MEM* pInitParam_p);
 tEplKernel  obd_deleteInstance(void);
-tEplKernel  obd_writeEntry(UINT index_p, UINT subIndex_p, void* pSrcData_p, tEplObdSize size_p);
-tEplKernel  obd_readEntry(UINT index_p, UINT subIndex_p, void* pDstData_p, tEplObdSize *pSize_p);
+tEplKernel  obd_writeEntry(UINT index_p, UINT subIndex_p, void* pSrcData_p, tObdSize size_p);
+tEplKernel  obd_readEntry(UINT index_p, UINT subIndex_p, void* pDstData_p, tObdSize *pSize_p);
 tEplKernel  obd_storeLoadObjCallback(tEplObdStoreLoadObjCallback fpCallback_p);
-tEplKernel  obd_accessOdPart(tEplObdPart obdPart_p, tEplObdDir direction_p);
-tEplKernel  obd_defineVar(tEplVarParam MEM* pVarParam_p);
+tEplKernel  obd_accessOdPart(tObdPart obdPart_p, tObdDir direction_p);
+tEplKernel  obd_defineVar(tVarParam MEM* pVarParam_p);
 void*       obd_getObjectDataPtr(UINT index_p, UINT subIndex_p);
-tEplKernel  obd_registerUserOd(tEplObdEntryPtr pUserOd_p);
-void        obd_initVarEntry(tEplObdVarEntry MEM* pVarEntry_p, tEplObdType type_p, tEplObdSize obdSize_p);
-tEplObdSize obd_getDataSize(UINT index_p, UINT subIndex_p);
+tEplKernel  obd_registerUserOd(tObdEntryPtr pUserOd_p);
+void        obd_initVarEntry(tObdVarEntry MEM* pVarEntry_p, tObdType type_p, tObdSize obdSize_p);
+tObdSize    obd_getDataSize(UINT index_p, UINT subIndex_p);
 UINT        obd_getNodeId(void);
-tEplKernel  obd_setNodeId(UINT nodeId_p, tEplObdNodeIdType nodeIdType_p);
+tEplKernel  obd_setNodeId(UINT nodeId_p, tObdNodeIdType nodeIdType_p);
 tEplKernel  obd_isNumerical(UINT index_p, UINT subIndex_p, BOOL* pfEntryNumerical_p);
-tEplKernel  obd_getType(UINT index_p, UINT subIndex_p, tEplObdType* pType_p);
-tEplKernel  obd_writeEntryFromLe(UINT index_p, UINT subIndex_p, void* pSrcData_p, tEplObdSize size_p);
-tEplKernel  obd_readEntryToLe(UINT index_p, UINT subIndex_p, void* pDstData_p, tEplObdSize* pSize_p);
-tEplKernel  obd_getAccessType(UINT index_p, UINT subIndex_p, tEplObdAccess* pAccessTyp_p);
-tEplKernel  obd_searchVarEntry(UINT index_p, UINT subindex_p, tEplObdVarEntry MEM** ppVarEntry_p);
+tEplKernel  obd_getType(UINT index_p, UINT subIndex_p, tObdType* pType_p);
+tEplKernel  obd_writeEntryFromLe(UINT index_p, UINT subIndex_p, void* pSrcData_p, tObdSize size_p);
+tEplKernel  obd_readEntryToLe(UINT index_p, UINT subIndex_p, void* pDstData_p, tObdSize* pSize_p);
+tEplKernel  obd_getAccessType(UINT index_p, UINT subIndex_p, tObdAccess* pAccessTyp_p);
+tEplKernel  obd_searchVarEntry(UINT index_p, UINT subindex_p, tObdVarEntry MEM** ppVarEntry_p);
 
 #endif  // #ifndef _EPLOBD_H_
 
