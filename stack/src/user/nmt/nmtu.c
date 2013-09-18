@@ -314,7 +314,7 @@ static tEplKernel configureDll(void)
 {
     tEplKernel      ret = kEplSuccessful;
     UINT32          nodeCfg;
-    tEplObdSize     obdSize;
+    tObdSize        obdSize;
     tDllNodeInfo    dllNodeInfo;
     UINT            index;
     UINT8           count;
@@ -496,7 +496,7 @@ static BOOL processMnStateChange(tNmtState newNmtState_p, tEplKernel* pRet_p)
     UINT32              waitTime;
     UINT32              startUp;
     tNmtEvent           timerEvent;
-    tEplObdSize         obdSize;
+    tObdSize            obdSize;
 
     switch (newNmtState_p)
     {
@@ -605,7 +605,7 @@ static BOOL processCnStateChange(tNmtState newNmtState_p, tEplKernel* pRet_p)
     tEplKernel          ret = kEplSuccessful;
     BOOL                fHandled = TRUE;
     UINT32              basicEthernetTimeout;
-    tEplObdSize         obdSize;
+    tObdSize            obdSize;
 
     switch (newNmtState_p)
     {

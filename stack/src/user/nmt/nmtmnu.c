@@ -913,7 +913,7 @@ tEplKernel nmtmnu_cbNmtStateChange(tEventNmtStateChange nmtStateChange_p)
         case kNmtGsResetConfiguration:
             {
                 UINT32          dwTimeout;
-                tEplObdSize     obdSize;
+                tObdSize        obdSize;
 
                 // read object 0x1F80 NMT_StartUp_U32
                 obdSize = 4;
@@ -1063,7 +1063,7 @@ tEplKernel nmtmnu_processEvent(tEplEvent* pEvent_p)
                 nodeId = (UINT) (pTimerEventArg->m_Arg.m_dwVal & NMTMNU_TIMERARG_NODE_MASK);
                 if (nodeId != 0)
                 {
-                    tEplObdSize         ObdSize;
+                    tObdSize             ObdSize;
                     UINT8                bNmtState;
                     tNmtMnuNodeInfo* pNodeInfo;
 
@@ -1277,7 +1277,7 @@ tEplKernel nmtmnu_processEvent(tEplEvent* pEvent_p)
             {
                 tNmtMnuNodeCmd*      pNodeCmd = (tNmtMnuNodeCmd*)pEvent_p->m_pArg;
                 tNmtMnuIntNodeEvent  NodeEvent;
-                tEplObdSize             ObdSize;
+                tObdSize             ObdSize;
                 UINT8                    bNmtState;
                 UINT16                    wErrorCode = EPL_E_NO_ERROR;
 
@@ -1451,7 +1451,7 @@ The function implements the callback function for Ident responses
 static tEplKernel PUBLIC cbIdentResponse(UINT nodeId_p, tEplIdentResponse* pIdentResponse_p)
 {
     tEplKernel      ret = kEplSuccessful;
-    tEplObdSize     obdSize;
+    tObdSize        obdSize;
     UINT32          dwDevType;
     UINT16          errorCode;
     tNmtState       nmtState;
@@ -1677,7 +1677,7 @@ static tEplKernel startBootStep1(BOOL fNmtResetAllIssued_p)
     UINT                subIndex;
     UINT                localNodeId;
     UINT32                nodeCfg;
-    tEplObdSize            obdSize;
+    tObdSize            obdSize;
     tNmtMnuNodeInfo*    pNodeInfo;
 
     // $$$ d.k.: save current time for 0x1F89/2 MNTimeoutPreOp1_U32
@@ -1769,7 +1769,7 @@ static tEplKernel doPreop1(tEventNmtStateChange nmtStateChange_p)
 {
     UINT32          dwTimeout;
     tEplTimerArg    timerArg;
-    tEplObdSize     obdSize;
+    tObdSize        obdSize;
     tEplEvent       event;
     BOOL            fNmtResetAllIssued = FALSE;
     tEplKernel      ret = kEplSuccessful;
@@ -1858,7 +1858,7 @@ static tEplKernel startBootStep2(void)
     tEplKernel          ret = kEplSuccessful;
     UINT                index;
     tNmtMnuNodeInfo*    pNodeInfo;
-    tEplObdSize         obdSize;
+    tObdSize            obdSize;
     UINT8               nmtState;
     tNmtState           expNmtState;
 
@@ -1951,7 +1951,7 @@ static tEplKernel nodeBootStep2(UINT nodeId_p, tNmtMnuNodeInfo* pNodeInfo_p)
     tEplTimerArg        timerArg;
     UINT8               bNmtState;
     tNmtState           nmtState;
-    tEplObdSize         obdSize;
+    tObdSize            obdSize;
 
     if (pNodeInfo_p->nodeCfg & EPL_NODEASSIGN_ASYNCONLY_NODE)
     {   // node is async-only
@@ -3128,7 +3128,7 @@ static tEplKernel checkNmtState(UINT nodeId_p, tNmtMnuNodeInfo* pNodeInfo_p,
 {
     tEplKernel      ret = kEplSuccessful;
     tEplKernel      retUpdate = kEplSuccessful;
-    tEplObdSize     obdSize;
+    tObdSize        obdSize;
     UINT8           nodeNmtState;
     UINT8           bExpNmtState;
     UINT8           nmtStatePrev;
@@ -3558,7 +3558,7 @@ static tEplKernel prcCalcPResResponseTimeNs(UINT nodeId_p, UINT nodeIdPredNode_p
     tEplKernel              ret;
     UINT16                  pResPayloadLimitPredNode;
     tNmtMnuNodeInfo*        pNodeInfoPredNode;
-    tEplObdSize             obdSize;
+    tObdSize                obdSize;
 
     ret = kEplSuccessful;
 
@@ -3630,7 +3630,7 @@ static tEplKernel prcCalcPResChainingSlotTimeNs(UINT nodeIdLastNode_p,
     UINT16          pResActPayloadLimit;
     UINT16          cnPReqPayloadLastNode;
     UINT32          cnResTimeoutLastNodeNs;
-    tEplObdSize     obdSize;
+    tObdSize        obdSize;
 
     // read object 0x1F98 NMT_CycleTiming_REC
     // Sub-Index 05h PResActPayloadLimit_U16
@@ -3907,7 +3907,7 @@ The function performs the add phase of a PRC node insertion.
 static tEplKernel prcAdd(UINT nodeIdPrevAdd_p)
 {
     tEplKernel          ret;
-    tEplObdSize         obdSize;
+    tObdSize            obdSize;
     UINT32              cycleLenUs;
     UINT32              cNLossOfSocToleranceNs;
     UINT                nodeId;

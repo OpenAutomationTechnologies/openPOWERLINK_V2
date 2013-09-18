@@ -84,7 +84,7 @@ static BOOL fGsOff_l;
 tEplKernel selectPcapDevice(char *pDevName_p);
 #endif
 void initEvents (BOOL* pfGsOff_p);
-tEplKernel PUBLIC EplObdInitRam (tEplObdInitParam MEM* pInitParam_p);
+tEplKernel PUBLIC EplObdInitRam (tObdInitParam MEM* pInitParam_p);
 tEplKernel processEvents(tEplApiEventType EventType_p, tEplApiEventArg* pEventArg_p, void GENERIC* pUserArg_p);
 
 //============================================================================//

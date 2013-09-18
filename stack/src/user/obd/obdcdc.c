@@ -421,7 +421,7 @@ static tEplKernel processCdc(tObdCdcInfo* pCdcInfo_p)
         }
 
         ret = obd_writeEntryFromLe(objectIndex, objectSubIndex, pCdcInfo_p->pCurBuffer,
-                                     (tEplObdSize) curDataSize);
+                                     (tObdSize) curDataSize);
         if (ret != kEplSuccessful)
         {
             tEplEventObdError       obdError;

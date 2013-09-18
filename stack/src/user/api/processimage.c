@@ -206,7 +206,7 @@ The function links an object in the OD into a location in the process image.
 //------------------------------------------------------------------------------
 tEplKernel oplk_linkProcessImageObject(UINT objIndex_p, UINT firstSubindex_p,
                                        UINT offsetPI_p, BOOL fOutputPI_p,
-                                       tEplObdSize entrySize_p, UINT* pVarEntries_p)
+                                       tObdSize entrySize_p, UINT* pVarEntries_p)
 {
     tEplKernel      ret = kEplSuccessful;
     void*           pVar;

@@ -213,15 +213,15 @@ in the object dictionary (OD).
 */
 //------------------------------------------------------------------------------
 tEplKernel oplk_linkObject(UINT objIndex_p, void* pVar_p, UINT* pVarEntries_p,
-                           tEplObdSize* pEntrySize_p, UINT firstSubindex_p)
+                           tObdSize* pEntrySize_p, UINT firstSubindex_p)
 {
     UINT8           varEntries;
     UINT8           indexEntries;
     UINT8 MEM*      pData;
     UINT            subindex;
-    tEplVarParam    varParam;
-    tEplObdSize     entrySize;
-    tEplObdSize     usedSize;
+    tVarParam       varParam;
+    tObdSize        entrySize;
+    tObdSize        usedSize;
 
     tEplKernel      ret = kEplSuccessful;
 
@@ -240,7 +240,7 @@ tEplKernel oplk_linkObject(UINT objIndex_p, void* pVar_p, UINT* pVarEntries_p,
     {   // check if object exists by reading subindex 0x00,
         // because user wants to link a variable to a subindex unequal 0x00
         // read number of entries
-        entrySize = (tEplObdSize)sizeof(indexEntries);
+        entrySize = (tObdSize)sizeof(indexEntries);
         ret = obd_readEntry (objIndex_p, 0x00, (void GENERIC*) &indexEntries, &entrySize );
         if ((ret != kEplSuccessful) || (indexEntries == 0x00))
         {
@@ -331,14 +331,14 @@ tEplKernel oplk_readObject(tEplSdoComConHdl* pSdoComConHdl_p, UINT nodeId_p, UIN
                            tEplSdoType sdoType_p, void* pUserArg_p)
 {
     tEplKernel      ret = kEplSuccessful;
-    tEplObdSize     obdSize;
+    tObdSize        obdSize;
 
     if ((index_p == 0) || (pDstData_le_p == NULL) || (pSize_p == NULL) || (*pSize_p == 0))
         return kEplApiInvalidParam;
 
     if (nodeId_p == 0 || nodeId_p == obd_getNodeId())
     {   // local OD access can be performed
-        obdSize = (tEplObdSize) *pSize_p;
+        obdSize = (tObdSize) *pSize_p;
         ret = obd_readEntryToLe(index_p, subindex_p, pDstData_le_p, &obdSize);
         *pSize_p = (UINT) obdSize;
     }
@@ -568,9 +568,9 @@ tEplKernel oplk_readLocalObject(UINT index_p, UINT subindex_p, void* pDstData_p,
                                 UINT* pSize_p)
 {
     tEplKernel      ret = kEplSuccessful;
-    tEplObdSize     obdSize;
+    tObdSize        obdSize;
 
-    obdSize = (tEplObdSize)*pSize_p;
+    obdSize = (tObdSize)*pSize_p;
     ret = obd_readEntry(index_p, subindex_p, pDstData_p, &obdSize);
     *pSize_p = (UINT)obdSize;
 
@@ -597,7 +597,7 @@ The function writes the specified entry to the local object dictionary.
 tEplKernel oplk_writeLocalObject(UINT index_p, UINT subindex_p, void* pSrcData_p,
                                         UINT size_p)
 {
-    return obd_writeEntry(index_p, subindex_p, pSrcData_p, (tEplObdSize)size_p);
+    return obd_writeEntry(index_p, subindex_p, pSrcData_p, (tObdSize)size_p);
 }
 
 //------------------------------------------------------------------------------

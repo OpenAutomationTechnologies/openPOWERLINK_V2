@@ -77,7 +77,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // global function prototypes
 //------------------------------------------------------------------------------
-extern "C" tEplKernel PUBLIC  EplObdInitRam (tEplObdInitParam MEM* pInitParam_p);
+extern "C" tEplKernel PUBLIC  EplObdInitRam (tObdInitParam MEM* pInitParam_p);
 
 //============================================================================//
 //            P R I V A T E   D E F I N I T I O N S                           //

@@ -76,7 +76,7 @@ typedef struct
 extern "C" {
 #endif
 
-tEplKernel  cfmu_cbObdAccess(tEplObdCbParam MEM* pParam_p);
+tEplKernel  cfmu_cbObdAccess(tObdCbParam MEM* pParam_p);
 
 #ifdef __cplusplus
 }

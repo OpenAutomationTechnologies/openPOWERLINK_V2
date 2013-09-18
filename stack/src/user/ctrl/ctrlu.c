@@ -552,7 +552,7 @@ actions for system objects.
 \ingroup module_ctrlu
 */
 //------------------------------------------------------------------------------
-tEplKernel ctrlu_cbObdAccess(tEplObdCbParam MEM* pParam_p)
+tEplKernel ctrlu_cbObdAccess(tObdCbParam MEM* pParam_p)
 {
     tEplKernel          ret = kEplSuccessful;
 
@@ -578,7 +578,7 @@ tEplKernel ctrlu_cbObdAccess(tEplObdCbParam MEM* pParam_p)
         //case 0x1006:    // NMT_CycleLen_U32 (valid on reset)
         case 0x1C14:    // DLL_LossOfFrameTolerance_U32
         //case 0x1F98:    // NMT_CycleTiming_REC (valid on reset)
-            if (pParam_p->m_ObdEvent == kEplObdEvPostWrite)
+            if (pParam_p->m_ObdEvent == kObdEvPostWrite)
             {
                 // update DLL configuration
                 ret = updateDllConfig(&ctrlInstance_l.initParam, FALSE);
@@ -586,7 +586,7 @@ tEplKernel ctrlu_cbObdAccess(tEplObdCbParam MEM* pParam_p)
             break;
 
         case 0x1020:    // CFM_VerifyConfiguration_REC.ConfId_U32 != 0
-            if ((pParam_p->m_ObdEvent == kEplObdEvPostWrite) &&
+            if ((pParam_p->m_ObdEvent == kObdEvPostWrite) &&
                 (pParam_p->m_uiSubIndex == 3) &&
                 (*((UINT32*)pParam_p->m_pArg) != 0))
             {
@@ -599,7 +599,7 @@ tEplKernel ctrlu_cbObdAccess(tEplObdCbParam MEM* pParam_p)
             break;
 
         case 0x1F9E:    // NMT_ResetCmd_U8
-            if (pParam_p->m_ObdEvent == kEplObdEvPreWrite)
+            if (pParam_p->m_ObdEvent == kObdEvPreWrite)
             {
                 UINT8    nmtCommand;
 
@@ -621,7 +621,7 @@ tEplKernel ctrlu_cbObdAccess(tEplObdCbParam MEM* pParam_p)
                         break;
                 }
             }
-            else if (pParam_p->m_ObdEvent == kEplObdEvPostWrite)
+            else if (pParam_p->m_ObdEvent == kObdEvPostWrite)
             {
                 UINT8    nmtCommand;
 
@@ -660,13 +660,13 @@ tEplKernel ctrlu_cbObdAccess(tEplObdCbParam MEM* pParam_p)
 
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
         case 0x1F9F:    // NMT_RequestCmd_REC
-            if ((pParam_p->m_ObdEvent == kEplObdEvPostWrite) &&
+            if ((pParam_p->m_ObdEvent == kObdEvPostWrite) &&
                 (pParam_p->m_uiSubIndex == 1) &&
                 (*((UINT8*)pParam_p->m_pArg) != 0))
             {
                 UINT8       cmdId;
                 UINT8       cmdTarget;
-                tEplObdSize obdSize;
+                tObdSize    obdSize;
                 tNmtState   nmtState;
 
                 obdSize = sizeof(UINT8);
@@ -812,7 +812,7 @@ The function initializes the object dictionary
 static tEplKernel initObd(tEplApiInitParam* pInitParam_p)
 {
     tEplKernel          ret = kEplSuccessful;
-    tEplObdInitParam    ObdInitParam;
+    tObdInitParam       ObdInitParam;
 
 #if defined(CONFIG_INCLUDE_OBD)
     TRACE ("Initialize OBD module...\n");
@@ -882,7 +882,7 @@ static tEplKernel cbNmtStateChange(tEventNmtStateChange nmtStateChange_p)
         // standardised device profile area
         case kNmtGsResetApplication:
             // reset application part of OD
-            ret = obd_accessOdPart(kEplObdPartApp, kEplObdDirLoad);
+            ret = obd_accessOdPart(kObdPartApp, kObdDirLoad);
             if (ret != kEplSuccessful)
                 return ret;
             break;
@@ -890,7 +890,7 @@ static tEplKernel cbNmtStateChange(tEventNmtStateChange nmtStateChange_p)
         // init of the communication profile area
         case kNmtGsResetCommunication:
             // reset communication part of OD
-            ret = obd_accessOdPart(kEplObdPartGen, kEplObdDirLoad);
+            ret = obd_accessOdPart(kObdPartGen, kObdDirLoad);
             if (ret != kEplSuccessful)
                 return ret;
 
@@ -1111,7 +1111,7 @@ static tEplKernel updateDllConfig(tEplApiInitParam* pInitParam_p, BOOL fUpdateId
     tEplKernel          ret = kEplSuccessful;
     tDllConfigParam     dllConfigParam;
     tDllIdentParam      dllIdentParam;
-    tEplObdSize         obdSize;
+    tObdSize            obdSize;
     UINT16              wTemp;
     UINT8               bTemp;
 
@@ -1296,7 +1296,7 @@ The function updates the SDO configuration from the object dictionary.
 static tEplKernel updateSdoConfig(void)
 {
     tEplKernel          ret = kEplSuccessful;
-    tEplObdSize         obdSize;
+    tObdSize            obdSize;
     DWORD               sdoSequTimeout;
 
     obdSize = sizeof(sdoSequTimeout);
@@ -1328,7 +1328,7 @@ static tEplKernel updateObd(tEplApiInitParam* pInitParam_p)
 
     // set node id in OD
     ret = obd_setNodeId(pInitParam_p->m_uiNodeId,    // node id
-                            kEplObdNodeIdHardware); // set by hardware
+                            kObdNodeIdHardware); // set by hardware
     if (ret != kEplSuccessful)
         return ret;
 
@@ -1430,21 +1430,21 @@ static tEplKernel updateObd(tEplApiInitParam* pInitParam_p)
     {
         // write Device Name (0x1008)
         obd_writeEntry (0x1008, 0, (void GENERIC*) pInitParam_p->m_pszDevName,
-                          (tEplObdSize) strlen(pInitParam_p->m_pszDevName));
+                          (tObdSize) strlen(pInitParam_p->m_pszDevName));
     }
 
     if (pInitParam_p->m_pszHwVersion != NULL)
     {
         // write Hardware version (0x1009)
         obd_writeEntry (0x1009, 0, (void GENERIC*) pInitParam_p->m_pszHwVersion,
-                          (tEplObdSize) strlen(pInitParam_p->m_pszHwVersion));
+                          (tObdSize) strlen(pInitParam_p->m_pszHwVersion));
     }
 
     if (pInitParam_p->m_pszSwVersion != NULL)
     {
         // write Software version (0x100A)
         obd_writeEntry (0x100A, 0, (void GENERIC*) pInitParam_p->m_pszSwVersion,
-                          (tEplObdSize) strlen(pInitParam_p->m_pszSwVersion));
+                          (tObdSize) strlen(pInitParam_p->m_pszSwVersion));
     }
 
 #if defined(CONFIG_INCLUDE_VETH)

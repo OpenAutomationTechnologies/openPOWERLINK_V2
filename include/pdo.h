@@ -92,10 +92,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
             (pPdoMappObject_p->byteSizeOrType - PDO_COMMUNICATION_PROFILE_START)
 
 #define PDO_MAPPOBJECT_GET_TYPE(pPdoMappObject_p) \
-            ((tEplObdType) pPdoMappObject_p->byteSizeOrType)
+            ((tObdType) pPdoMappObject_p->byteSizeOrType)
 
 #define PDO_MAPPOBJECT_SET_BYTESIZE_OR_TYPE(pPdoMappObject_p, wByteSize_p, ObdType_p) \
-            if ((ObdType_p == kEplObdTypVString) || (ObdType_p == kEplObdTypOString) || (ObdType_p == kEplObdTypDomain)) \
+            if ((ObdType_p == kObdTypeVString) || (ObdType_p == kObdTypeOString) || (ObdType_p == kObdTypeDomain)) \
             { \
                 pPdoMappObject_p->byteSizeOrType = wByteSize_p + PDO_COMMUNICATION_PROFILE_START; \
             } \

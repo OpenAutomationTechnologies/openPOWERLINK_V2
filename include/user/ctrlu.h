@@ -69,7 +69,7 @@ tEplKernel ctrlu_shutdownStack(void);
 tEplKernel ctrlu_processStack(void);
 BOOL       ctrlu_checkKernelStack(void);
 tEplKernel ctrlu_callUserEventCallback(tEplApiEventType eventType_p, tEplApiEventArg* pEventArg_p);
-tEplKernel ctrlu_cbObdAccess(tEplObdCbParam MEM* pParam_p);
+tEplKernel ctrlu_cbObdAccess(tObdCbParam MEM* pParam_p);
 
 #ifdef __cplusplus
 }
