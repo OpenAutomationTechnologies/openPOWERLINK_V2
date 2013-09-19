@@ -236,13 +236,11 @@ tEplKernel Ret;
 // State:
 //
 //---------------------------------------------------------------------------
-#if (EPL_USE_DELETEINST_FUNC != FALSE)
 tEplKernel obd_deleteInstance(void)
 {
     return kEplSuccessful;
 
 }
-#endif // (EPL_USE_DELETEINST_FUNC != FALSE)
 
 
 //---------------------------------------------------------------------------

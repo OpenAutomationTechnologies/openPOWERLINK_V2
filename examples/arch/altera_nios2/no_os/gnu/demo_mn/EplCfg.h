@@ -53,7 +53,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 The generic defines are valid for the whole openPOWERLINK stack.
 */
 /**@{*/
-#define EPL_USE_DELETEINST_FUNC             TRUE
     ///< use delete instance functions
 #define USE_VAR64
     ///< data type support higher 32 bit

@@ -74,8 +74,6 @@
 // =========================================================================
 // generic defines which for whole EPL Stack
 // =========================================================================
-#define EPL_USE_DELETEINST_FUNC         TRUE
-
 // needed to support datatypes over 32 bit by global.h
 #define USE_VAR64
 
