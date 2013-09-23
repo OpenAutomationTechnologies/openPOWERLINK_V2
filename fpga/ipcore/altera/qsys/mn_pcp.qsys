@@ -425,7 +425,7 @@
   <parameter name="dcache_size" value="4096" />
   <parameter name="dcache_ramBlockType" value="Automatic" />
   <parameter name="dcache_numTCDM" value="0" />
-  <parameter name="dcache_lineSize" value="32" />
+  <parameter name="dcache_lineSize" value="4" />
   <parameter name="regfile_ramBlockType" value="Automatic" />
   <parameter name="mmu_ramBlockType" value="Automatic" />
   <parameter name="bht_ramBlockType" value="Automatic" />
