@@ -1,0 +1,14 @@
+# Gitignore for Xilinx Microblaze SW projects
+
+# Dirs
+obj/
+pcp/
+
+# Files
+*.elf
+*.elfcheck
+*.map
+*.size
+*.srec
+Makefile
+*.log
