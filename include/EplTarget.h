@@ -176,15 +176,23 @@
 
     #if (DEV_SYSTEM == _DEV_MICROBLAZE_BIG_ \
         || DEV_SYSTEM == _DEV_MICROBLAZE_LITTLE_)
-        //FIXME jz Find way for atomic exchange!!!
-        // NOTE: THIS IS NO ATOMIC EXCHANGE!!!
+        /* NOTE:
+         * Pseudo atomic macro is applied with locking.
+         */
         #include <xil_types.h>
         #include <xil_io.h>
+        #include <lock.h>
 
         #define OPLK_ATOMIC_T    u8
+        #define OPLK_LOCK_T      LOCK_T
+        #define OPLK_ATOMIC_INIT(base) \
+                                if(target_initLock(&base->lock) != 0) \
+                                    return kEplNoResource
         #define OPLK_ATOMIC_EXCHANGE(address, newval, oldval) \
+                                target_lock(); \
                                 oldval = Xil_In8(address); \
-                                Xil_Out8(address, newval)
+                                Xil_Out8(address, newval); \
+                                target_unlock()
     #endif
 
 #elif (TARGET_SYSTEM == _LINUX_)
