@@ -94,13 +94,22 @@ tEplKernel PUBLIC AppCbEvent(
 //------------------------------------------------------------------------------
 // local types
 //------------------------------------------------------------------------------
+typedef struct sPiOut
+{
+    BYTE    aByte_m[4];
+} tPiOut;
+
+typedef struct sPiIn
+{
+    BYTE    aByte_m[4];
+} tPiIn;
 
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
-static BYTE        digitalIn[4];
-static BYTE        digitalOut[4];
-static BOOL        fShutdown_l = FALSE;
+static tPiIn*   pPiIn_l;
+static tPiOut*  pPiOut_l;
+static BOOL     fShutdown_l = FALSE;
 
 //------------------------------------------------------------------------------
 // local function prototypes
@@ -384,19 +393,19 @@ tEplKernel PUBLIC AppCbSync(void)
     }
 
     // Get inputs
-    digitalIn[0] = *pKey;
-    digitalIn[1] = 0;
-    digitalIn[2] = 0;
-    digitalIn[3] = 0;
+    pPiIn_l->aByte_m[0] = *pKey;
+    pPiIn_l->aByte_m[1] = 0;
+    pPiIn_l->aByte_m[2] = 0;
+    pPiIn_l->aByte_m[3] = 0;
 
     // Drive outputs
-    *pLedRed =  digitalOut[1] << 8 |
-                digitalOut[0];
+    *pLedRed =  pPiOut_l->aByte_m[1] << 8 |
+                pPiOut_l->aByte_m[0];
 
-    *pHex = digitalOut[3] << 24 |
-            digitalOut[2] << 16 |
-            digitalOut[1] <<  8 |
-            digitalOut[0];
+    *pHex = pPiOut_l->aByte_m[3] << 24 |
+            pPiOut_l->aByte_m[2] << 16 |
+            pPiOut_l->aByte_m[1] <<  8 |
+            pPiOut_l->aByte_m[0];
 
     EplRet = oplk_exchangeProcessImageIn();
 
@@ -483,21 +492,33 @@ static int openPowerlink(BYTE bNodeId_p)
     }
     PRINTF("init POWERLINK Stack...ok\n\n");
 
-    /* link process variables used by CN to object dictionary */
+    /* link process image to OD */
+    printf("Initializing process image...\n");
+    printf("Size of input process image: %ld\n", sizeof(pPiIn_l));
+    printf("Size of output process image: %ld\n", sizeof (pPiOut_l));
+    EplRet = oplk_allocProcessImage(sizeof(pPiIn_l), sizeof(pPiOut_l));
+    if (EplRet != kEplSuccessful)
+    {
+        goto Exit;
+    }
+
+    pPiIn_l = oplk_getProcessImageIn();
+    pPiOut_l = oplk_getProcessImageOut();
+
     PRINTF("linking process vars:\n");
 
-    ObdSize = sizeof(digitalIn[0]);
+    ObdSize = sizeof(pPiIn_l->aByte_m[0]);
     uiVarEntries = 4;
-    EplRet = oplk_linkObject(0x6000, digitalIn, &uiVarEntries, &ObdSize, 0x01);
+    EplRet = oplk_linkProcessImageObject(0x6000, 1, 0, FALSE, ObdSize, &uiVarEntries);
     if (EplRet != kEplSuccessful)
     {
         printf("linking process vars... error\n\n");
         goto ExitShutdown;
     }
 
-    ObdSize = sizeof(digitalOut[0]);
+    ObdSize = sizeof(pPiOut_l->aByte_m[0]);
     uiVarEntries = 4;
-    EplRet = oplk_linkObject(0x6200, digitalOut, &uiVarEntries, &ObdSize, 0x01);
+    EplRet = oplk_linkProcessImageObject(0x6200, 1, 0, TRUE, ObdSize, &uiVarEntries);
     if (EplRet != kEplSuccessful)
     {
         printf("linking process vars... error\n\n");
@@ -528,7 +549,9 @@ static int openPowerlink(BYTE bNodeId_p)
 
     while(1)
     {
-        oplk_process();
+        if((EplRet = oplk_process()) != kEplSuccessful)
+            goto ExitShutdown;
+
         if (fShutdown_l == TRUE)
         {
             break;
@@ -536,8 +559,15 @@ static int openPowerlink(BYTE bNodeId_p)
     }
 
 ExitShutdown:
-    PRINTF("Shutdown EPL Stack\n");
-    oplk_shutdown();       // shutdown node
+    // halt the NMT state machine
+    // so the processing of POWERLINK frames stops
+    EplRet = oplk_execNmtCommand(kNmtEventSwitchOff);
+
+    // delete process image
+    EplRet = oplk_freeProcessImage();
+
+    // delete instance for all modules
+    EplRet = oplk_shutdown();
 
 Exit:
     return EplRet;
