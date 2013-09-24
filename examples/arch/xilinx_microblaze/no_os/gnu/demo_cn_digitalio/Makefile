@@ -125,6 +125,7 @@ ${STACK_ROOT}/stack/src/user/ledu.c \
 ${STACK_ROOT}/stack/src/arch/xilinx_microblaze/xilinx_irq.c \
 ${STACK_ROOT}/stack/src/arch/xilinx_microblaze/xilinx_usleep.c \
 ${STACK_ROOT}/stack/src/arch/xilinx_microblaze/target-microblaze.c \
+${STACK_ROOT}/stack/src/arch/xilinx_microblaze/lock-localnoos.c \
 ${APP_DIR}/systemComponents.c
 
 LIBRARIES = libxil.a
