@@ -1,0 +1,15 @@
+# Gitignore for Xilinx Platform Studio projects
+
+# Dirs
+__xps/
+bootloops/
+hdl/
+implementation/
+pcores/
+SDK/
+synthesis/
+
+# Files
+*.log
+*.opt
+*.make
