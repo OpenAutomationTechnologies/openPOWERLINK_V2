@@ -126,17 +126,17 @@ static tEplKernel   callObjectCallback(tObdCallback pfnCallback_p, tObdCbParam M
 static tEplKernel   callPostDefault(void *pData_p, tObdEntryPtr pObdEntry_p, tObdSubEntryPtr pObdSubEntry_p);
 static tEplKernel   isNumerical(tObdSubEntryPtr pObdSubEntry_p, BOOL* pfEntryNumerical_p);
 
-#if (EPL_OBD_CHECK_OBJECT_RANGE != FALSE)
+#if (CONFIG_OBD_CHECK_OBJECT_RANGE != FALSE)
 static tEplKernel   checkObjectRange(tObdSubEntryPtr pSubIndexEntry_p, void * pData_p);
 #endif
 
-#if (EPL_OBD_USE_STORE_RESTORE != FALSE)
+#if (CONFIG_OBD_USE_STORE_RESTORE != FALSE)
 static tEplKernel   prepareStoreRestore(tObdDir direction_p, tObdCbStoreParam MEM* pCbStore_p);
 static tEplKernel   cleanupStoreRestore(tObdDir direction_p, tObdCbStoreParam MEM* pCbStore_p)
 static tEplKernel   doStoreRestore(tObdAccess access_p, tObdCbStoreParam MEM* pCbStore_p,
                                    void MEM * pObjData_p, tObdSize objSize_p);
 static tEplKernel   callStoreCallback(tObdCbStoreParam MEM* pCbStoreParam_p);
-#endif // (EPL_OBD_USE_STORE_RESTORE != FALSE)
+#endif // (CONFIG_OBD_USE_STORE_RESTORE != FALSE)
 
 //------------------------------------------------------------------------------
 // local vars
@@ -387,7 +387,7 @@ tEplKernel obd_accessOdPart (tObdPart obdPart_p, tObdDir direction_p)
             return ret;
     }
 
-#if (defined (EPL_OBD_USER_OD) && (EPL_OBD_USER_OD != FALSE))
+#if (defined (OBD_USER_OD) && (OBD_USER_OD != FALSE))
     pObdEntry = obdInstance_l.initParam.m_pUserPart;
     if (((obdPart_p & kObdPartUsr) != 0) && (pObdEntry != NULL))
     {
@@ -504,7 +504,7 @@ void* obd_getObjectDataPtr(UINT index_p, UINT subIndex_p)
     return pData;
 }
 
-#if (defined (EPL_OBD_USER_OD) && (EPL_OBD_USER_OD != FALSE))
+#if (defined (OBD_USER_OD) && (OBD_USER_OD != FALSE))
 //------------------------------------------------------------------------------
 /**
 \brief  Register an user OD
@@ -1054,14 +1054,14 @@ The function sets the callback function for the load/store command.
 \ingroup module_obd
 */
 //------------------------------------------------------------------------------
-#if (EPL_OBD_USE_STORE_RESTORE != FALSE)
+#if (CONFIG_OBD_USE_STORE_RESTORE != FALSE)
 tEplKernel obd_storeLoadObjCallback (tObdStoreLoadCallback pfnCallback_p)
 {
     // set new address of callback function
     pfnStoreLoadObjectCb_l = pfnCallback_p;
     return kEplSuccessful;
 }
-#endif // (EPL_OBD_USE_STORE_RESTORE != FALSE)
+#endif // (CONFIG_OBD_USE_STORE_RESTORE != FALSE)
 
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
@@ -1102,7 +1102,7 @@ static tEplKernel writeEntryPre (UINT index_p, UINT subIndex_p, void* pSrcData_p
     tObdSize                obdSize;
     BOOL                    fEntryNumerical;
 
-#if (EPL_OBD_USE_STRING_DOMAIN_IN_RAM != FALSE)
+#if (CONFIG_OBD_USE_STRING_DOMAIN_IN_RAM != FALSE)
     tObdVStringDomain MEM   memVStringDomain;
     void MEM*               pCurrData;
 #endif
@@ -1130,7 +1130,7 @@ static tEplKernel writeEntryPre (UINT index_p, UINT subIndex_p, void* pSrcData_p
     // Function obd_writeEntry() calls event kObdEvWrStringDomain for String or
     // Domain which lets called module directly change the data pointer or size.
     // This prevents a recursive call to the callback function if it calls getEntry().
-#if (EPL_OBD_USE_STRING_DOMAIN_IN_RAM != FALSE)
+#if (CONFIG_OBD_USE_STRING_DOMAIN_IN_RAM != FALSE)
     if ((pSubEntry->type == kObdTypeVString) || (pSubEntry->type == kObdTypeDomain) ||
         (pSubEntry->type == kObdTypeOString))
     {
@@ -1252,7 +1252,7 @@ static tEplKernel writeEntryPost(tObdEntryPtr pObdEntry_p, tObdSubEntryPtr pSubE
 
     // caller converted the source value to platform byte order
     // now the range of the value may be checked
-#if (EPL_OBD_CHECK_OBJECT_RANGE != FALSE)
+#if (CONFIG_OBD_CHECK_OBJECT_RANGE != FALSE)
     {
         ret = checkObjectRange (pSubEntry_p, pSrcData_p);
         if (ret != kEplSuccessful)
@@ -1301,7 +1301,7 @@ static tObdSize getDataSize(tObdSubEntryPtr pSubIndexEntry_p)
     tObdSize    dataSize;
     void MEM*   pData;
 
-    // If OD entry is defined by macro EPL_OBD_SUBINDEX_ROM_VSTRING
+    // If OD entry is defined by macro OBD_SUBINDEX_ROM_VSTRING
     // then the current pointer is always NULL. The function
     // returns the length of default string.
     dataSize = getObjectSize(pSubIndexEntry_p);
@@ -1400,7 +1400,7 @@ static tObdSize getVstringSize(tObdSubEntryPtr pSubIndexEntry_p)
     tObdSize                dataSize = 0;
     void*                   pData;
 
-    // If OD entry is defined by macro EPL_OBD_SUBINDEX_ROM_VSTRING
+    // If OD entry is defined by macro OBD_SUBINDEX_ROM_VSTRING
     // then the current pointer is always NULL. The function
     // returns the length of default string.
     pData = (void *) pSubIndexEntry_p->pCurrent;
@@ -1670,8 +1670,8 @@ static void MEM* getObjectCurrentPtr(tObdSubEntryPtr pSubIndexEntry_p)
 /**
 \brief  Get object data pointer
 
-The function gets the data pointer of an object. It returnes the current data
-pointer. But if object is an constant object it returnes the default pointer.
+The function gets the data pointer of an object. It returns the current data
+pointer. But if object is an constant object it returns the default pointer.
 
 \param  pSubIndexEntry_p        Pointer to sub-index entry of object.
 
@@ -1728,7 +1728,7 @@ static tObdEntryPtr searchIndex(tObdEntryPtr pObdEntry_p, UINT index_p)
     index = pObdEntry_p->index;
 
     // search index in OD part
-    while (index != EPL_OBD_TABLE_INDEX_END)
+    while (index != OBD_TABLE_INDEX_END)
     {
         if (index_p == index)
             return pObdEntry_p;     // we found it
@@ -1763,7 +1763,7 @@ static tEplKernel getIndex(tObdInitParam MEM* pInitParam_p, UINT index_p,
 {
     tObdEntryPtr    pObdEntry;
 
-#if (defined (EPL_OBD_USER_OD) && (EPL_OBD_USER_OD != FALSE))
+#if (defined (OBD_USER_OD) && (OBD_USER_OD != FALSE))
     UINT            nLoop;
 
     // if user OD is used then objekts also has to be searched in user OD
@@ -1785,11 +1785,11 @@ static tEplKernel getIndex(tObdInitParam MEM* pInitParam_p, UINT index_p,
 
     // index range 0xA000 to 0xFFFF is reserved for DSP-405
     // DS-301 defines that range 0x6000 to 0x9FFF (!!!) is stored if "store" was written to 0x1010/3.
-    // Therefore default configuration is OBD_INCLUDE_A000_TO_DEVICE_PART = FALSE.
+    // Therefore default configuration is CONFIG_OBD_INCLUDE_A000_TO_DEVICE_PART = FALSE.
     // But a CANopen Application which does not implement dynamic OD or user-OD
     // but wants to use static objets 0xA000... should set
-    // OBD_INCLUDE_A000_TO_DEVICE_PART to TRUE.
-#if (EPL_OBD_INCLUDE_A000_TO_DEVICE_PART == FALSE)
+    // CONFIG_OBD_INCLUDE_A000_TO_DEVICE_PART to TRUE.
+#if (CONFIG_OBD_INCLUDE_A000_TO_DEVICE_PART == FALSE)
     else if ((index_p >= 0x6000) && (index_p < 0x9FFF))
 #else
     else if ((index_p >= 0x6000) && (index_p < 0xFFFF))
@@ -1798,7 +1798,7 @@ static tEplKernel getIndex(tObdInitParam MEM* pInitParam_p, UINT index_p,
         pObdEntry = pInitParam_p->pDevicePart;
     }
 
-#if (defined (EPL_OBD_USER_OD) && (EPL_OBD_USER_OD != FALSE))
+#if (defined (OBD_USER_OD) && (OBD_USER_OD != FALSE))
     // if index does not match in static OD then index only has to be searched in user OD
     else
     {
@@ -1818,7 +1818,7 @@ static tEplKernel getIndex(tObdInitParam MEM* pInitParam_p, UINT index_p,
     }
 #endif
 
-#if (defined (EPL_OBD_USER_OD) && (EPL_OBD_USER_OD != FALSE))
+#if (defined (OBD_USER_OD) && (OBD_USER_OD != FALSE))
     do
     {
         if ((*ppObdEntry_p = searchIndex(pObdEntry, index_p)) != NULL)
@@ -1862,7 +1862,7 @@ static tEplKernel getSubindex(tObdEntryPtr pObdEntry_p, UINT subIndex_p,
     tObdSubEntryPtr     pSubEntry;
     UINT                nSubIndexCount;
 
-    // get start address of sub-index table and count of subindices
+    // get start address of sub-index table and count of sub-indices
     pSubEntry =       pObdEntry_p->pSubIndex;
     nSubIndexCount =  pObdEntry_p->count;
 
@@ -1922,13 +1922,13 @@ static tEplKernel accessOdPartition (tObdPart currentOdPart_p, tObdEntryPtr pObd
     tEplKernel                  Ret = kEplSuccessful;
     tObdVarEntry MEM*           pVarEntry = NULL;
 
-#if (EPL_OBD_USE_STORE_RESTORE != FALSE)
+#if (CONFIG_OBD_USE_STORE_RESTORE != FALSE)
     tObdCbStoreParam MEM        CbStore;
 #else
     UNUSED_PARAMETER(currentOdPart_p);
 #endif
 
-#if (EPL_OBD_USE_STORE_RESTORE != FALSE)
+#if (CONFIG_OBD_USE_STORE_RESTORE != FALSE)
     // prepare structure for STORE RESTORE callback function
     CbStore.currentOdPart   = (BYTE) currentOdPart_p;
     CbStore.pData           = NULL;
@@ -1943,12 +1943,12 @@ static tEplKernel accessOdPartition (tObdPart currentOdPart_p, tObdEntryPtr pObd
     // the next NMT command "Reset Node" or "Reset Communication" resets the OD data
     if (direction_p != kObdDirRestore)
     {
-        while (pObdEntry_p->index != EPL_OBD_TABLE_INDEX_END)    // walk through OD part till end is found
+        while (pObdEntry_p->index != OBD_TABLE_INDEX_END)    // walk through OD part till end is found
         {
             pSubIndex = pObdEntry_p->pSubIndex;
             nSubIndexCount = pObdEntry_p->count;
 
-            while (nSubIndexCount != 0)                         // walk through sub-index table till all subindices were restored
+            while (nSubIndexCount != 0)                         // walk through sub-index table till all sub-indices were restored
             {
                 Access = (tObdAccess) pSubIndex->access;
                 pDefault = getObjectDefaultPtr(pSubIndex);
@@ -1970,7 +1970,7 @@ static tEplKernel accessOdPartition (tObdPart currentOdPart_p, tObdEntryPtr pObd
                         }
                         else if (pSubIndex->type == kObdTypeVString)
                         {
-                            // If pCurrent is not NULL then the string was defined with EPL_OBD_SUBINDEX_RAM_VSTRING.
+                            // If pCurrent is not NULL then the string was defined with OBD_SUBINDEX_RAM_VSTRING.
                             // The current pointer points to struct tObdVString located in MEM. The element size includes
                             // the max. number of bytes. pString includes the pointer to string in MEM. The memory
                             // location of default string must be copied to memory location of current string.
@@ -2007,14 +2007,14 @@ static tEplKernel accessOdPartition (tObdPart currentOdPart_p, tObdEntryPtr pObd
                     case kObdDirLoad:
                         copyObjectData(pDstData, pDefault, ObjSize, pSubIndex->type);
                         callPostDefault(pDstData, pObdEntry_p, pSubIndex);
-#if (EPL_OBD_USE_STORE_RESTORE != FALSE)
+#if (CONFIG_OBD_USE_STORE_RESTORE != FALSE)
                         doStoreRestore(Access, &CbStore, pDstData, ObjSize);
 #endif
                         break;
 
                     // objects with attribute kObdAccStore has to be stored in EEPROM or in a file
                     case kObdDirStore:
-#if (EPL_OBD_USE_STORE_RESTORE != FALSE)
+#if (CONFIG_OBD_USE_STORE_RESTORE != FALSE)
                         doStoreRestore(Access, &CbStore, pDstData, ObjSize);
 #endif
                         break;
@@ -2054,7 +2054,7 @@ static tEplKernel accessOdPartition (tObdPart currentOdPart_p, tObdEntryPtr pObd
     }
 
     // command of last action depends on direction to access
-#if (EPL_OBD_USE_STORE_RESTORE != FALSE)
+#if (CONFIG_OBD_USE_STORE_RESTORE != FALSE)
     return cleanupStoreRestore(direction_p, &CbStore);
 #else
     return Ret;
@@ -2194,7 +2194,7 @@ static tEplKernel isNumerical(tObdSubEntryPtr pObdSubEntry_p,
     return ret;
 }
 
-#if (EPL_OBD_CHECK_OBJECT_RANGE != FALSE)
+#if (CONFIG_OBD_CHECK_OBJECT_RANGE != FALSE)
 //------------------------------------------------------------------------------
 /**
 \brief  Check value range of object
@@ -2387,9 +2387,9 @@ static tEplKernel checkObjectRange (tObdSubEntryPtr pSubIndexEntry_p, void* pDat
     }
     return ret;
 }
-#endif // (EPL_OBD_CHECK_OBJECT_RANGE != FALSE)
+#endif // (CONFIG_OBD_CHECK_OBJECT_RANGE != FALSE)
 
-#if (EPL_OBD_USE_STORE_RESTORE != FALSE)
+#if (CONFIG_OBD_USE_STORE_RESTORE != FALSE)
 //------------------------------------------------------------------------------
 /**
 \brief  Prepare Store/Restore of objects
@@ -2526,7 +2526,7 @@ static tEplKernel callStoreCallback(tObdCbStoreParam MEM* pCbStoreParam_p)
     }
     return ret;
 }
-#endif // (EPL_OBD_USE_STORE_RESTORE != FALSE)
+#endif // (CONFIG_OBD_USE_STORE_RESTORE != FALSE)
 
 ///\}
 

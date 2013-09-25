@@ -20,7 +20,7 @@ How to update from any previous version to version 1.6
    - Add the OD callback function EplPdouCbObdAccess to the PDO objects (index 0x1400 - 0x1AFF)
      in your objdict.h. E.g.
 
-        EPL_OBD_BEGIN_INDEX_RAM(0x1400, 0x03, EplPdouCbObdAccess)
+        OBD_BEGIN_INDEX_RAM(0x1400, 0x03, EplPdouCbObdAccess)
 
 
 2. To enable PRes cross-traffic on pure CNs it is necessary to define the

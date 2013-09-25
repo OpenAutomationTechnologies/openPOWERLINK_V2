@@ -47,7 +47,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#define EPL_OBD_TABLE_INDEX_END     0xFFFF
+#define OBD_TABLE_INDEX_END     0xFFFF
 
 // for the usage of BOOLEAN in OD
 #define OBD_TRUE                                    0x01
@@ -381,7 +381,7 @@ struct _tObdInitParam
     tObdEntryPtr        pGenericPart;           /// Pointer to generic part of OD
     tObdEntryPtr        pManufacturerPart;      ///< Pointer to manufacturer part of OD
     tObdEntryPtr        pDevicePart;            ///< Pointer to device part of OD
-#if (defined (EPL_OBD_USER_OD) && (EPL_OBD_USER_OD != FALSE))
+#if (defined (OBD_USER_OD) && (OBD_USER_OD != FALSE))
     tObdEntryPtr        pUserPart;              ///< Pointer to user part of OD
 #endif
 };
@@ -445,7 +445,7 @@ tEplKernel  obd_searchVarEntry(UINT index_p, UINT subindex_p, tObdVarEntry MEM**
 
 tEplKernel  obd_initObd(tObdInitParam MEM* pInitParam_p);
 
-#if (EPL_OBD_USE_STORE_RESTORE != FALSE)
+#if (CONFIG_OBD_USE_STORE_RESTORE != FALSE)
 tEplKernel  obd_storeLoadObjCallback(tObdStoreLoadCallback pfnCallback_p);
 #endif
 

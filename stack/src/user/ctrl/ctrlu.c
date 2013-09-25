@@ -74,7 +74,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <SharedBuff.h>
 #endif
 
-#if (EPL_OBD_USE_LOAD_CONCISEDCF != FALSE)
+#if (CONFIG_OBD_USE_LOAD_CONCISEDCF != FALSE)
 #include <obdcdc.h>
 #endif
 
@@ -440,7 +440,7 @@ tEplKernel ctrlu_shutdownStack(void)
     ret = ctrlucal_executeCmd(kCtrlCleanupStack);
     TRACE("shoutdown kernel modules():  0x%X\n", ret);
 
-#if (EPL_OBD_USE_LOAD_CONCISEDCF != FALSE)
+#if (CONFIG_OBD_USE_LOAD_CONCISEDCF != FALSE)
     obdcdc_exit();
 #endif
 
@@ -826,7 +826,7 @@ static tEplKernel initObd(tEplApiInitParam* pInitParam_p)
     if (ret != kEplSuccessful)
         return ret;
 
-#if (EPL_OBD_USE_LOAD_CONCISEDCF != FALSE)
+#if (CONFIG_OBD_USE_LOAD_CONCISEDCF != FALSE)
     ret = obdcdc_init();
 #endif
 
@@ -898,7 +898,7 @@ static tEplKernel cbNmtStateChange(tEventNmtStateChange nmtStateChange_p)
             if (ret != kEplSuccessful)
                 return ret;
 
-#if (EPL_OBD_USE_LOAD_CONCISEDCF != FALSE)
+#if (CONFIG_OBD_USE_LOAD_CONCISEDCF != FALSE)
             ret = obdcdc_loadCdc();
             if (ret != kEplSuccessful)
                 return ret;

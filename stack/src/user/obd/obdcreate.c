@@ -62,24 +62,16 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // macros to help building OD
 
-#if (defined (EPL_OBD_USE_VARIABLE_SUBINDEX_TAB) && (EPL_OBD_USE_VARIABLE_SUBINDEX_TAB != FALSE))
-    #define CCM_SUBINDEX_RAM_ONLY(a)    a;
-    #define CCM_SUBINDEX_RAM_ONEOF(a,b) a
-#else
-    #define CCM_SUBINDEX_RAM_ONLY(a)
-    #define CCM_SUBINDEX_RAM_ONEOF(a,b) b
-#endif
-
 // To prevent unused memory in subindex tables we need this macro.
 // But not all compilers support to preset the last struct value followed by a comma.
 // Compilers which does not support a comma after last struct value has to place in a dummy subindex.
 #if ((DEV_SYSTEM & _DEV_COMMA_EXT_) != 0)
-    #define EPL_OBD_END_SUBINDEX()
-    #define EPL_OBD_MAX_ARRAY_SUBENTRIES    2
+    #define OBD_END_SUBINDEX()
+    #define OBD_MAX_ARRAY_SUBENTRIES    2
 
 #else
-    #define EPL_OBD_END_SUBINDEX()          {0,0,0,NULL,NULL}
-    #define EPL_OBD_MAX_ARRAY_SUBENTRIES    3
+    #define OBD_END_SUBINDEX()          {0,0,0,NULL,NULL}
+    #define OBD_MAX_ARRAY_SUBENTRIES    3
 #endif
 
 
@@ -88,24 +80,24 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 
 // creation of data in ROM memory
-#define EPL_OBD_CREATE_ROM_DATA
+#define OBD_CREATE_ROM_DATA
 #include "objdict.h"
-#undef EPL_OBD_CREATE_ROM_DATA
+#undef OBD_CREATE_ROM_DATA
 
 // creation of data in RAM memory
-#define EPL_OBD_CREATE_RAM_DATA
+#define OBD_CREATE_RAM_DATA
 #include "objdict.h"
-#undef EPL_OBD_CREATE_RAM_DATA
+#undef OBD_CREATE_RAM_DATA
 
 // creation of subindex tables in ROM and RAM
-#define EPL_OBD_CREATE_SUBINDEX_TAB
+#define OBD_CREATE_SUBINDEX_TAB
 #include "objdict.h"
-#undef EPL_OBD_CREATE_SUBINDEX_TAB
+#undef OBD_CREATE_SUBINDEX_TAB
 
 // creation of index tables for generic, manufacturer and device part
-#define EPL_OBD_CREATE_INDEX_TAB
+#define OBD_CREATE_INDEX_TAB
 #include "objdict.h"
-#undef EPL_OBD_CREATE_INDEX_TAB
+#undef OBD_CREATE_INDEX_TAB
 
 //------------------------------------------------------------------------------
 /**
@@ -131,26 +123,26 @@ tEplKernel obd_initObd(tObdInitParam MEM* pInitParam_p)
         // at first delete all parameters (all pointers will be set zu NULL)
         EPL_MEMSET (pInitParam, 0, sizeof (tObdInitParam));
 
-        #define EPL_OBD_CREATE_INIT_FUNCTION
+        #define OBD_CREATE_INIT_FUNCTION
         {
             // inserts code to init pointer to index tables
             #include "objdict.h"
         }
-        #undef EPL_OBD_CREATE_INIT_FUNCTION
+        #undef OBD_CREATE_INIT_FUNCTION
 
-#if (defined (EPL_OBD_USER_OD) && (EPL_OBD_USER_OD != FALSE))
+#if (defined (OBD_USER_OD) && (OBD_USER_OD != FALSE))
         {
             // to begin no user OD is defined
             pInitParam_p->m_pUserPart = NULL;
         }
 #endif
     }
-    #define EPL_OBD_CREATE_INIT_SUBINDEX
+    #define OBD_CREATE_INIT_SUBINDEX
     {
         // inserts code to copy subindex tables
         #include "objdict.h"
     }
-    #undef EPL_OBD_CREATE_INIT_SUBINDEX
+    #undef OBD_CREATE_INIT_SUBINDEX
 
     return kEplSuccessful;
 }

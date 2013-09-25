@@ -54,7 +54,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <user/cfmu.h>
 #include <user/ctrlu.h>
 
-#if (EPL_OBD_USE_LOAD_CONCISEDCF != FALSE)
+#if (CONFIG_OBD_USE_LOAD_CONCISEDCF != FALSE)
 #include "obdcdc.h"
 #endif
 
@@ -766,7 +766,7 @@ the stack to read the configuration.
 //------------------------------------------------------------------------------
 tEplKernel oplk_setCdcBuffer(BYTE* pCdc_p, UINT cdcSize_p)
 {
-#if (EPL_OBD_USE_LOAD_CONCISEDCF != FALSE)
+#if (CONFIG_OBD_USE_LOAD_CONCISEDCF != FALSE)
     obdcdc_setBuffer(pCdc_p, cdcSize_p);
     return kEplSuccessful;
 #else
@@ -791,7 +791,7 @@ the stack to read the configuration.
 //------------------------------------------------------------------------------
 tEplKernel oplk_setCdcFilename(char* pCdcFilename_p)
 {
-#if (EPL_OBD_USE_LOAD_CONCISEDCF != FALSE)
+#if (CONFIG_OBD_USE_LOAD_CONCISEDCF != FALSE)
     obdcdc_setFilename(pCdcFilename_p);
     return kEplSuccessful;
 #else

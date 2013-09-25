@@ -118,16 +118,13 @@ The Data Link Layer (DLL) defines determine the POWERLINK DLL module.
 The OBD defines determine the Object Dictionary.
 */
 /**@{*/
-#define EPL_OBD_USE_KERNEL                  TRUE
     ///< enable OBD in kernel layer
-#define EPL_OBD_CHECK_OBJECT_RANGE          FALSE
+#define CONFIG_OBD_CHECK_OBJECT_RANGE              FALSE
     ///< support automatic object range check
-#define EPL_OBD_USE_STRING_DOMAIN_IN_RAM    TRUE
-    ///< support variable size of strings or domains in OD
-#define EPL_OBD_USE_VARIABLE_SUBINDEX_TAB   TRUE
+#define CONFIG_OBD_USE_STRING_DOMAIN_IN_RAM        TRUE
     ///< support variable subindex
-#define EPL_OBD_INCLUDE_A000_TO_DEVICE_PART TRUE
-#define EPL_OBD_USE_LOAD_CONCISEDCF         TRUE
+#define CONFIG_OBD_INCLUDE_A000_TO_DEVICE_PART     TRUE
+#define CONFIG_OBD_USE_LOAD_CONCISEDCF             TRUE
 /**@}*/
 
 /**
