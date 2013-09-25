@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   EplObdMacro.h
+\file   obdmacro.h
 
 \brief  Macros for OD creation
 
