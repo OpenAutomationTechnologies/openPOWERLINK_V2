@@ -209,20 +209,16 @@
 // OBD specific defines
 // =========================================================================
 
-#define EPL_OBD_USE_KERNEL                TRUE
-
 // switch this define to TRUE if Epl should compare object range
 // automaticly
-#define EPL_OBD_CHECK_OBJECT_RANGE          FALSE
-//#define EPL_OBD_CHECK_OBJECT_RANGE          TRUE
+#define CONFIG_OBD_CHECK_OBJECT_RANGE          FALSE
+//#define CONFIG_OBD_CHECK_OBJECT_RANGE          TRUE
 
 // set this define to TRUE if there are strings or domains in OD, which
 // may be changed in object size and/or object data pointer by its object
 // callback function (called event kObdEvWrStringDomain)
-//#define EPL_OBD_USE_STRING_DOMAIN_IN_RAM    FALSE
-#define EPL_OBD_USE_STRING_DOMAIN_IN_RAM    TRUE
-
-#define EPL_OBD_USE_VARIABLE_SUBINDEX_TAB TRUE
+//#define CONFIG_OBD_USE_STRING_DOMAIN_IN_RAM    FALSE
+#define CONFIG_OBD_USE_STRING_DOMAIN_IN_RAM    TRUE
 
 
 // =========================================================================

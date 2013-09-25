@@ -209,19 +209,17 @@
 
 // switch this define to TRUE if Epl should compare object range
 // automaticly
-#define EPL_OBD_CHECK_OBJECT_RANGE          FALSE
+#define CONFIG_OBD_CHECK_OBJECT_RANGE          FALSE
 
 // set this define to TRUE if there are strings or domains in OD, which
 // may be changed in object size and/or object data pointer by its object
 // callback function (called event kObdEvWrStringDomain)
-#define EPL_OBD_USE_STRING_DOMAIN_IN_RAM    TRUE
-
-#define EPL_OBD_USE_VARIABLE_SUBINDEX_TAB   TRUE
+#define CONFIG_OBD_USE_STRING_DOMAIN_IN_RAM    TRUE
 
 #ifdef CONFIG_CFM
 
-#define EPL_OBD_USE_LOAD_CONCISEDCF         TRUE
-#define EPL_OBD_DEF_CONCISEDCF_FILENAME     "mnobd.cdc"
+#define CONFIG_OBD_USE_LOAD_CONCISEDCF         TRUE
+#define CONFIG_OBD_DEF_CONCISEDCF_FILENAME     "mnobd.cdc"
 
 #define EPL_CFM_CONFIGURE_CYCLE_LENGTH      TRUE
 
@@ -230,14 +228,14 @@
 // openCONFIGURATOR uses this range for mapping
 // objects.
 #ifdef CONFIG_OPENCONFIGURATOR_MAPPING
-#define EPL_OBD_INCLUDE_A000_TO_DEVICE_PART TRUE
+#define CONFIG_OBD_INCLUDE_A000_TO_DEVICE_PART TRUE
 #endif
 
 #else // CONFIG_CFM
 
-#define EPL_OBD_USE_LOAD_CONCISEDCF         FALSE
+#define CONFIG_OBD_USE_LOAD_CONCISEDCF         FALSE
 #define EPL_CFM_CONFIGURE_CYCLE_LENGTH      FALSE
-#define EPL_OBD_INCLUDE_A000_TO_DEVICE_PART FALSE
+#define CONFIG_OBD_INCLUDE_A000_TO_DEVICE_PART FALSE
 
 #endif // CONFIG_CFM
 

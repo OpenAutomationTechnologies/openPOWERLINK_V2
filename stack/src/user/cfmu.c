@@ -59,8 +59,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #error "CFM module needs openPOWERLINK module SDO client!"
 #endif
 
-#if (EPL_OBD_USE_STRING_DOMAIN_IN_RAM == FALSE)
-#error "CFM module needs define EPL_OBD_USE_STRING_DOMAIN_IN_RAM == TRUE"
+#if (CONFIG_OBD_USE_STRING_DOMAIN_IN_RAM == FALSE)
+#error "CFM module needs define CONFIG_OBD_USE_STRING_DOMAIN_IN_RAM == TRUE"
 #endif
 
 //============================================================================//

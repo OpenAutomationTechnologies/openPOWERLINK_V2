@@ -166,21 +166,19 @@
 
 // switch this define to TRUE if Epl should compare object range
 // automaticly
-#define EPL_OBD_CHECK_OBJECT_RANGE              FALSE
+#define CONFIG_OBD_CHECK_OBJECT_RANGE                  FALSE
 
 // set this define to TRUE if there are strings or domains in OD, which
 // may be changed in object size and/or object data pointer by its object
 // callback function (called event kObdEvWrStringDomain)
-//#define EPL_OBD_USE_STRING_DOMAIN_IN_RAM    FALSE
-#define EPL_OBD_USE_STRING_DOMAIN_IN_RAM        TRUE
+//#define CONFIG_OBD_USE_STRING_DOMAIN_IN_RAM        FALSE
+#define CONFIG_OBD_USE_STRING_DOMAIN_IN_RAM            TRUE
 
-#define EPL_OBD_USE_VARIABLE_SUBINDEX_TAB       TRUE
+#define CONFIG_OBD_USE_LOAD_CONCISEDCF                 TRUE
 
-#define EPL_OBD_USE_LOAD_CONCISEDCF             TRUE
+#define CONFIG_OBD_DEF_CONCISEDCF_FILENAME             "/ata0a/mnobd.cdc"
 
-#define EPL_OBD_DEF_CONCISEDCF_FILENAME         "/ata0a/mnobd.cdc"
-
-#define EPL_OBD_INCLUDE_A000_TO_DEVICE_PART     TRUE
+#define CONFIG_OBD_INCLUDE_A000_TO_DEVICE_PART         TRUE
 
 // =========================================================================
 // Timer module specific defines

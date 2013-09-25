@@ -48,7 +48,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <obdcdc.h>
 #include <user/eventu.h>
 
-#if (EPL_OBD_USE_LOAD_CONCISEDCF != FALSE)
+#if (CONFIG_OBD_USE_LOAD_CONCISEDCF != FALSE)
 
 #include <sys/stat.h>
 #include <assert.h>

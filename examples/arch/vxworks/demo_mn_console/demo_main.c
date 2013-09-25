@@ -115,7 +115,7 @@ static DWORD    dw_le_CycleLen_g;
 #endif
 
 static UINT uiNodeId_g = EPL_C_ADR_INVALID;
-static char* pszCdcFilename_g = EPL_OBD_DEF_CONCISEDCF_FILENAME;
+static char* pszCdcFilename_g = CONFIG_OBD_DEF_CONCISEDCF_FILENAME;
 
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_CFM)) != 0)
 static UINT uiCycleLen_g = 0;
