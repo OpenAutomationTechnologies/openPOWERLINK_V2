@@ -9,7 +9,7 @@ function.
 
 The OD data structure initialization is a very tricky part of the openPOWERLINK
 stack. To create the different tables and code parts a set of macros defined in
-EplObdMacro.h is used. These macros are redefined depending on some other
+obdmacro.h is used. These macros are redefined depending on some other
 "type definition" macros. To create the different tables the specific
 "type definition" macro will be set, the file objdict.h is included and therefore
 the specified data structures are created. Afterwards the "type definition"

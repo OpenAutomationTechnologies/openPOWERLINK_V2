@@ -3,7 +3,7 @@
 //-------------------------------
 
 #define EPL_OBD_DEFINE_MACRO
-    #include "EplObdMacro.h"
+    #include "obdmacro.h"
 #undef EPL_OBD_DEFINE_MACRO
 
 EPL_OBD_BEGIN ()
@@ -234,6 +234,6 @@ EPL_OBD_END ()
 
 
 #define EPL_OBD_UNDEFINE_MACRO
-    #include "EplObdMacro.h"
+    #include "obdmacro.h"
 #undef EPL_OBD_UNDEFINE_MACRO
 
