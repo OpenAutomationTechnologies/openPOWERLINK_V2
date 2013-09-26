@@ -217,22 +217,25 @@ typedef enum
     kObdTypeReal32          = 0x0008,
     kObdTypeVString         = 0x0009,
     kObdTypeOString         = 0x000A,
+
+    kObdTypeTimeOfDay       = 0x000C,
+    kObdTypeTimeDiff        = 0x000D,
+
     kObdTypeDomain          = 0x000F,
-
     kObdTypeInt24           = 0x0010,
-    kObdTypeUInt24          = 0x0016,
-
     kObdTypeReal64          = 0x0011,
     kObdTypeInt40           = 0x0012,
     kObdTypeInt48           = 0x0013,
     kObdTypeInt56           = 0x0014,
     kObdTypeInt64           = 0x0015,
+    kObdTypeUInt24          = 0x0016,
+
     kObdTypeUInt40          = 0x0018,
     kObdTypeUInt48          = 0x0019,
     kObdTypeUInt56          = 0x001A,
     kObdTypeUInt64          = 0x001B,
-    kObdTypeTimeOfDay       = 0x000C,
-    kObdTypeTimeDiff        = 0x000D
+
+    kObdTypeMax             = 0x001C
 } tObdType;
 
 // type definitions for data types defined in DS301
@@ -402,7 +405,7 @@ typedef struct
 typedef tEplKernel (ROM* tObdInitRam) (tObdInitParam MEM* pInitParam_p);
 typedef tEplKernel (ROM* tObdDeinitRam) (tObdInitParam MEM* pInitParam_p);
 typedef tEplKernel (ROM* tInitTabEntryCallback) (void MEM* pTabEntry_p, UINT uiObjIndex_p);
-typedef tEplKernel (ROM* tEplObdStoreLoadObjCallback) (tObdCbStoreParam MEM* pCbStoreParam_p);
+typedef tEplKernel (ROM* tObdStoreLoadCallback) (tObdCbStoreParam MEM* pCbStoreParam_p);
 
 /**
 * \brief Enumeration for Node ID setting types
@@ -425,11 +428,9 @@ extern "C" {
 #endif
 
 tEplKernel  obd_init(tObdInitParam MEM* pInitParam_p);
-tEplKernel  obd_addInstance(tObdInitParam MEM* pInitParam_p);
 tEplKernel  obd_deleteInstance(void);
 tEplKernel  obd_writeEntry(UINT index_p, UINT subIndex_p, void* pSrcData_p, tObdSize size_p);
 tEplKernel  obd_readEntry(UINT index_p, UINT subIndex_p, void* pDstData_p, tObdSize *pSize_p);
-tEplKernel  obd_storeLoadObjCallback(tEplObdStoreLoadObjCallback fpCallback_p);
 tEplKernel  obd_accessOdPart(tObdPart obdPart_p, tObdDir direction_p);
 tEplKernel  obd_defineVar(tVarParam MEM* pVarParam_p);
 void*       obd_getObjectDataPtr(UINT index_p, UINT subIndex_p);
@@ -442,8 +443,12 @@ tEplKernel  obd_isNumerical(UINT index_p, UINT subIndex_p, BOOL* pfEntryNumerica
 tEplKernel  obd_getType(UINT index_p, UINT subIndex_p, tObdType* pType_p);
 tEplKernel  obd_writeEntryFromLe(UINT index_p, UINT subIndex_p, void* pSrcData_p, tObdSize size_p);
 tEplKernel  obd_readEntryToLe(UINT index_p, UINT subIndex_p, void* pDstData_p, tObdSize* pSize_p);
-tEplKernel  obd_getAccessType(UINT index_p, UINT subIndex_p, tObdAccess* pAccessTyp_p);
+tEplKernel  obd_getAccessType(UINT index_p, UINT subIndex_p, tObdAccess* pAccessType_p);
 tEplKernel  obd_searchVarEntry(UINT index_p, UINT subindex_p, tObdVarEntry MEM** ppVarEntry_p);
+
+#if (EPL_OBD_USE_STORE_RESTORE != FALSE)
+tEplKernel  obd_storeLoadObjCallback(tObdStoreLoadCallback pfnCallback_p);
+#endif
 
 #ifdef __cplusplus
 }
