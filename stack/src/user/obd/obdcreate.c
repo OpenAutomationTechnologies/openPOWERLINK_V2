@@ -79,6 +79,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // global variables
 //------------------------------------------------------------------------------
 
+#if !defined(DOXYGEN_PARSER) // skip section for doxygen
+
 // creation of data in ROM memory
 #define OBD_CREATE_ROM_DATA
 #include "objdict.h"
@@ -99,6 +101,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "objdict.h"
 #undef OBD_CREATE_INDEX_TAB
 
+#endif
+
 //------------------------------------------------------------------------------
 /**
 \brief  Initialize OD data structures
@@ -114,6 +118,10 @@ The function initializes the object dictionary data structures.
 //------------------------------------------------------------------------------
 tEplKernel obd_initObd(tObdInitParam MEM* pInitParam_p)
 {
+// Doxygen is confused by the inclusion of objdict.h in this function, therefore
+// we exclude the function body from parsing by doxygen!
+#if !defined(DOXYGEN_PARSER)
+
     tObdInitParam MEM* pInitParam = pInitParam_p;
 
     // check if pointer to parameter structure is valid
@@ -144,5 +152,6 @@ tEplKernel obd_initObd(tObdInitParam MEM* pInitParam_p)
     }
     #undef OBD_CREATE_INIT_SUBINDEX
 
+#endif // !defined(DOXYGEN_PARSER)
     return kEplSuccessful;
 }
