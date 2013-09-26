@@ -102,14 +102,11 @@ typedef struct
 
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
     // IdentRequest queue with CN node IDs
-    UINT                    aQueueIdentReq[EPL_D_NMT_MaxCNNumber_U8 + 1];   // 1 entry is reserved to distinguish between full and empty
-    volatile UINT           writeIdentReq;
-    volatile UINT           readIdentReq;
+
+    tCircBufInstance*       pQueueIdentReq;
 
     // StatusRequest queue with CN node IDs
-    UINT                    aQueueStatusReq[EPL_D_NMT_MaxCNNumber_U8 + 1];  // 1 entry is reserved to distinguish between full and empty
-    volatile UINT           writeStatusReq;
-    volatile UINT           readStatusReq;
+    tCircBufInstance*       pQueueStatusReq;
 
     tCircBufInstance*       pQueueCnRequestNmt;
     UINT                    aCnRequestCntNmt[254];
@@ -215,6 +212,22 @@ tEplKernel dllkcal_init(void)
         EPL_DBGLVL_ERROR_TRACE("%s() Allocate CIRCBUF_ASYNC_SCHED_GEN failed\n", __func__);
         goto Exit;
     }
+
+    circErr = circbuf_alloc(CIRCBUF_DLLCAL_CN_REQ_IDENT, DLLCAL_SIZE_CIRCBUF_REQ_IDENT,
+            &instance_l.pQueueIdentReq);
+    if(circErr != kCircBufOk)
+    {
+        EPL_DBGLVL_ERROR_TRACE("%s() Allocate CIRCBUF_DLLCAL_CN_REQ_IDENT failed\n", __func__);
+        goto Exit;
+    }
+
+    circErr = circbuf_alloc(CIRCBUF_DLLCAL_CN_REQ_STATUS, DLLCAL_SIZE_CIRCBUF_REQ_STATUS,
+            &instance_l.pQueueStatusReq);
+    if(circErr != kCircBufOk)
+    {
+        EPL_DBGLVL_ERROR_TRACE("%s() Allocate CIRCBUF_DLLCAL_CN_REQ_STATUS failed\n", __func__);
+        goto Exit;
+    }
 #endif
 
 Exit:
@@ -239,6 +252,8 @@ tEplKernel dllkcal_exit(void)
 #ifdef CONFIG_INCLUDE_NMT_MN
     circbuf_free(instance_l.pQueueCnRequestGen);
     circbuf_free(instance_l.pQueueCnRequestNmt);
+    circbuf_free(instance_l.pQueueIdentReq);
+    circbuf_free(instance_l.pQueueStatusReq);
 #endif
 
     instance_l.pTxNmtFuncs->pfnDelInstance(instance_l.dllCalQueueTxNmt);
@@ -627,13 +642,11 @@ tEplKernel dllkcal_clearAsyncQueues(void)
 
     // clear MN asynchronous queues
     instance_l.nextRequestQueue = 0;
-    instance_l.readIdentReq = 0;
-    instance_l.writeIdentReq = 0;
-    instance_l.readStatusReq = 0;
-    instance_l.writeStatusReq = 0;
 
     circbuf_reset(instance_l.pQueueCnRequestGen);
     circbuf_reset(instance_l.pQueueCnRequestNmt);
+    circbuf_reset(instance_l.pQueueIdentReq);
+    circbuf_reset(instance_l.pQueueStatusReq);
 
     return ret;
 }
@@ -689,7 +702,8 @@ The function issues a StatusRequest or an IdentRequest to the specified node.
 tEplKernel dllkcal_issueRequest(tDllReqServiceId service_p, UINT nodeId_p,
                                   BYTE soaFlag1_p)
 {
-    tEplKernel  ret = kEplSuccessful;
+    tEplKernel      ret = kEplSuccessful;
+    tCircBufError   err;
 
     if (soaFlag1_p != 0xFF)
     {
@@ -704,27 +718,21 @@ tEplKernel dllkcal_issueRequest(tDllReqServiceId service_p, UINT nodeId_p,
     switch (service_p)
     {
         case kDllReqServiceIdent:
-            if (((instance_l.writeIdentReq + 1) % tabentries (instance_l.aQueueIdentReq))
-                == instance_l.readIdentReq)
+            err = circbuf_writeData(instance_l.pQueueIdentReq, &nodeId_p, sizeof(nodeId_p));
+            if(err != kCircBufOk)
             {   // queue is full
                 ret = kEplDllAsyncTxBufferFull;
                 goto Exit;
             }
-            instance_l.aQueueIdentReq[instance_l.writeIdentReq] = nodeId_p;
-            instance_l.writeIdentReq =
-                (instance_l.writeIdentReq + 1) % tabentries (instance_l.aQueueIdentReq);
             break;
 
         case kDllReqServiceStatus:
-            if (((instance_l.writeStatusReq + 1) % tabentries (instance_l.aQueueStatusReq))
-                == instance_l.readStatusReq)
+            err = circbuf_writeData(instance_l.pQueueStatusReq, &nodeId_p, sizeof(nodeId_p));
+            if(err != kCircBufOk)
             {   // queue is full
                 ret = kEplDllAsyncTxBufferFull;
                 goto Exit;
             }
-            instance_l.aQueueStatusReq[instance_l.writeStatusReq] = nodeId_p;
-            instance_l.writeStatusReq =
-                (instance_l.writeStatusReq + 1) % tabentries (instance_l.aQueueStatusReq);
             break;
 
         default:
@@ -1009,13 +1017,18 @@ The function returns the next MN ident request.
 //------------------------------------------------------------------------------
 static BOOL getMnIdentRequest(tDllReqServiceId* pReqServiceId_p, UINT* pNodeId_p)
 {
+    tCircBufError   err;
+    UINT            rxNodeId;
+    size_t          size = sizeof(rxNodeId);
+
     // next queue will be MnStatusReq queue
     instance_l.nextRequestQueue = 4;
-    if (instance_l.readIdentReq != instance_l.writeIdentReq)
+
+    err = circbuf_readData(instance_l.pQueueIdentReq, &rxNodeId, size, &size);
+
+    if(err == kCircBufOk)
     {   // queue is not empty
-        *pNodeId_p = instance_l.aQueueIdentReq[instance_l.readIdentReq];
-        instance_l.readIdentReq =
-            (instance_l.readIdentReq + 1) % tabentries (instance_l.aQueueIdentReq);
+        *pNodeId_p = rxNodeId;
         *pReqServiceId_p = kDllReqServiceIdent;
         return TRUE;
     }
@@ -1039,6 +1052,9 @@ The function returns the next MN status request.
 //------------------------------------------------------------------------------
 static BOOL getMnStatusRequest(tDllReqServiceId* pReqServiceId_p, UINT* pNodeId_p)
 {
+    tCircBufError   err;
+    UINT            rxNodeId;
+    size_t          size = sizeof(rxNodeId);
 #if EPL_DLL_PRES_CHAINING_MN != FALSE
     // next queue will be MnSyncReq queue
     instance_l.nextRequestQueue = 5;
@@ -1046,11 +1062,11 @@ static BOOL getMnStatusRequest(tDllReqServiceId* pReqServiceId_p, UINT* pNodeId_
     // next queue will be CnGenReq queue
     instance_l.nextRequestQueue = 0;
 #endif
-    if (instance_l.readStatusReq != instance_l.writeStatusReq)
+    err = circbuf_readData(instance_l.pQueueStatusReq, &rxNodeId, size, &size);
+
+    if(err == kCircBufOk)
     {   // queue is not empty
-        *pNodeId_p = instance_l.aQueueStatusReq[instance_l.readStatusReq];
-        instance_l.readStatusReq =
-            (instance_l.readStatusReq + 1) % tabentries (instance_l.aQueueStatusReq);
+        *pNodeId_p = rxNodeId;
         *pReqServiceId_p = kDllReqServiceStatus;
         return TRUE;
     }
