@@ -679,6 +679,7 @@ WARN_LOGFILE           =
 
 INPUT                  = ../../stack/src \
                          ../../include \
+                         ../../objdicts \
                          calmodules.txt \
                          usermodules.txt \
                          kernelmodules.txt \
@@ -1635,7 +1636,9 @@ PREDEFINED             = CONFIG_INCLUDE_NMT_MN \
                          EPL_DLL_PRES_CHAINING_CN:=1 \
                          EPL_NMT_MAX_NODE_ID:=255 \
                          EPL_DLL_DISABLE_DEFERRED_RXFRAME_RELEASE:=1 \
-                         EPL_TIMER_USE_HIGHRES:=1
+                         EPL_TIMER_USE_HIGHRES:=1 \
+                         OBD_DEFINE_MACRO \
+                         DOXYGEN_PARSER
 
 # If the MACRO_EXPANSION and EXPAND_ONLY_PREDEF tags are set to YES then 
 # this tag can be used to specify a list of macro names that should be expanded. 

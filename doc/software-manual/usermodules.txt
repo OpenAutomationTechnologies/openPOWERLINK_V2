@@ -228,3 +228,32 @@ LEDs. The LEDs reflect the current status of the stack.
 \ingroup user_layer
 */
 //------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+/**
+\defgroup module_obd obd
+
+\brief Object dictionary module
+
+The object dictionary module implements the POWERLINK Object Dictionary (OD).
+For detailed information on the POWERLINK OD refer to \ref sect_powerlink_od
+
+The following picture shows the structure of the openPOWERLINK OD implementation:
+
+![](\ref structure-objectdictionary.png "Structure of object dictionary")
+
+The index tables contain all available indexes in ascending order. Each index
+entry refers to the beginning of the corresponding sub-index table and its callback
+functions, which are called for each access.
+
+Each sub index table contains all available sub-indexes for an index entry. Every
+sub-index entry provides information about the object type, the access rights,
+the location of the default value and the location of the actual data in RAM.
+
+After the openPOWERLINK stack is initialized, the corresponding default values are
+assigned to all object data. The above described structures are constructed via
+macros. These macros are located in obdmacro.h.
+
+\ingroup user_layer
+*/
+//------------------------------------------------------------------------------

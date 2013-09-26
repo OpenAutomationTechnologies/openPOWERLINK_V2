@@ -1,6 +1,12 @@
-//-----------------------------------------------------------------
-//  Generic Communication Profile Area 1B00h - 1FFFh
-//-----------------------------------------------------------------
+/**
+********************************************************************************
+\file   objdicts/generic/objdict_1b00-1fff.h
+
+\brief  OD definitions for generic communication area 0x1B00 - 0x1FFF
+
+This file contains the object dictionary definition for the generic communication
+area from 0x1B00 - 0x1FFF.
+*******************************************************************************/
 
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
         // Object 1C00h: DLL_MNCRCError_REC

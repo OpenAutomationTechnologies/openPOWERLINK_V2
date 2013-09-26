@@ -4,8 +4,43 @@
 
 \brief  Macros for OD creation
 
-This file contains macros for creation the OD data structure tables and
-initialization code.
+This file contains the macros for the creation of the OD data structure tables and
+initialization code. The macros will be used in the OD creation module
+obdcreate.c. The object dictionaries in the directory objdicts are defined by
+these macros.
+
+For further information on a POWERLINK object dictionary (OD) refer to
+\ref sect_powerlink_od
+
+### Access Rights
+
+Combinations of \ref sect_obdAccessRights "access rights" are possible. Some of
+these access rights are automatically set by the macros. Which objects contain
+which access rights depends on the applied device profile or on the application.
+
+Macro                           | Automatically assigned rights
+--------------------------------|------------------------------
+OBD_SUBINDEX_RAM_VAR            | None
+OBD_SUBINDEX_RAM_VAR_RG         | kObdAccRange
+OBD_SUBINDEX_RAM_VSTRING        | None
+OBD_SUBINDEX_RAM_OSTRING        | None
+OBD_SUBINDEX_RAM_DOMAIN         | kObdAccVar
+OBD_SUBINDEX_RAM_USERDEF        | kObdAccVar
+OBD_SUBINDEX_RAM_USERDEF_RG     | kObdAccVar \| kObdAccRange
+
+For readable and writable objects (kObdAccRead and kObdAccWrite) there is always
+a value available in ROM, which contains the default value, as well as a current
+value in RAM. The default value is copied to the current value in the NMT states
+kNmtGsResetApplication or kNmtGsResetCommunication and on the command to restore
+the default parameters (object 0x1011, NMT_RestoreDefParam_REC). The current value
+can be written and read for both SDO accesses or from the application.
+
+Read-only objects created with macro OBD_SUBINDEX_RAM_... but without kEplObdAccWrite
+cannot be written per SDO. However, the application can modify its object data by
+calling the function oplk_writeLocalObject(). Therefore, a value is created in
+ROM as well as in RAM.
+
+\ingroup module_obd
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
@@ -242,34 +277,304 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // Nothing specified macros are empty
 //------------------------------------------------------------------------------
 
-// generic macros
-#define OBD_BEGIN()
-#define OBD_END()
+///\{
+/**
+********************************************************************************
+\name OD Section Limiters
 
-// partition macros
-#define OBD_BEGIN_PART_GENERIC()
-#define OBD_BEGIN_PART_MANUFACTURER()
-#define OBD_BEGIN_PART_DEVICE()
-#define OBD_END_PART()
+The Object Dictionary is always introduced with the macro OBD_BEGIN.
+OBD_END ends the definition of the Object Dictionary. No other macros can be
+used for the Object Dictionary outside of the boundary set by OBD_BEGIN and
+OBD_END.
+*/
+#define OBD_BEGIN()                                                         ///< Begin of an OD definition section
+#define OBD_END()                                                           ///< End of an OD definition section
+///\}
 
-// index macros
+///\{
+/**
+********************************************************************************
+\name OD Partition Limiters
+
+These  macros are always positioned between the macros OBD_BEGIN and OBD_END and
+introduce a partition of the Object Dictionary. The "GENERIC" range is always
+utilized for the index range 0x1000 to 0x1FFF, the "MANUFACTURER" section
+is used for 0x2000 to 0x5FFF and the "DEVICE" section for index range 0x6000 to
+0x9FFF. Each of these macros may only be used a single time within an Object
+Dictionary. The applicable range or partial section is always closed with the
+macro OBD_END_PART.
+*/
+#define OBD_BEGIN_PART_GENERIC()                                            ///< Begin of generic partition
+#define OBD_BEGIN_PART_MANUFACTURER()                                       ///< Begin of manufacturer partition
+#define OBD_BEGIN_PART_DEVICE()                                             ///< Begin of device partition
+#define OBD_END_PART()                                                      ///< End of partition
+///\}
+
+///\{
+/**
+********************************************************************************
+\name OD Index Definitions
+
+These macros are found within a partition of the Object Dictionary. They are
+located within the range between the macros OBD_BEGIN_PART_... and OBD_END_PART.
+They must be ordered with ascending object index. These macros define an index
+entry in the Object Dictionary. An index entry is therefore always introduced
+with the macro OBD_BEGIN_INDEX_... and ended with OBD_END_INDEX. The suffix
+..._RAM indicates that the sub index table is located in RAM.
+*/
+/**
+\brief Begin of index entry
+
+\param ind                  Object index of the entry to be defined
+\param cnt                  Number of sub-indices whithin this index entry
+\param call                 Pointer to the callback function for this index entry.
+                            The callback function is always called if an object
+                            has been read or written. It doesn’t matter if the
+                            access comes from the application or per SDO. The
+                            POWERLINK ctrl module has one callback function that
+                            must be specified for some objects in the index range
+                            0x1000 through 0x1FFF and may be specified for any
+                            other object indexes, including application-specific
+                            objects.
+*/
 #define OBD_BEGIN_INDEX_RAM(ind,cnt,call)
-#define OBD_END_INDEX(ind)
+
+/**
+\brief Begin of array index entry
+
+This macro simplifies the definition of arrays. It can replace the OBD_BEGIN_INDEX_...,
+OBD_END_INDEX and OBD_SUBINDEX_... macros. The macro reduces the allocation of
+const memory, because of less sub-index table entries. The drawback is that it
+needs a little more RAM.
+
+\param ind                  Object index of the entry to be defined
+\param cnt                  Number of sub-indices whithin this index entry
+\param call                 Pointer to the callback function for this index entry
+\param typ                  Coded Object type (see \ref tObdType)
+\param acc                  Access rights for object (see \ref sect_obdAccessRights "access rights")
+\param dtyp                 C Data type definition used for this object
+\param name                 Name of object
+\param def                  Default value of object
+*/
 #define OBD_RAM_INDEX_RAM_ARRAY(ind,cnt,call,typ,acc,dtyp,name,def)
+
+/**
+\brief Begin of var-array index entry
+
+Same as \ref OBD_RAM_INDEX_RAM_ARRAY but it contains a tVarEntry information structure
+like it was defined by the \ref OBD_SUBINDEX_RAM_DOMAIN macro so it must be linked to
+a variable by oplk_linkObject().
+
+\param ind                  Object index of the entry to be defined
+\param cnt                  Number of sub-indices whithin this index entry
+\param call                 Pointer to the callback function for this index entry.
+\param typ                  Coded Object type (see \ref tObdType)
+\param acc                  Access rights for object (see \ref sect_obdAccessRights "access rights")
+\param dtyp                 C Data type definition used for this object
+\param name                 Name of object
+\param def                  Default value of object
+*/
 #define OBD_RAM_INDEX_RAM_VARARRAY(ind,cnt,call,typ,acc,dtyp,name,def)
+
+/**
+\brief Begin of var-array index entry without initialization
+
+Same as \ref OBD_RAM_INDEX_RAM_VARARRAY but it isn't initialized with a default
+value.
+
+\param ind                  Object index of the entry to be defined
+\param cnt                  Number of sub-indices whithin this index entry
+\param call                 Pointer to the callback function for this index entry
+\param typ                  Coded Object type (see \ref tObdType)
+\param acc                  Access rights for object (see \ref sect_obdAccessRights "access rights")
+\param dtyp                 C Data type definition used for this object
+\param name                 Name of object
+*/
 #define OBD_RAM_INDEX_RAM_VARARRAY_NOINIT(ind,cnt,call,typ,acc,dtyp,name)
+
+/**
+\brief Begin of PDO mapped variable
+
+This macro generates an entry for a PDO mapping object.
+
+\param ind                  Object index of the entry to be defined
+\param cnt                  Number of sub-indices whithin this index entry
+\param call                 Pointer to the callback function for this index entry
+\param acc                  Access rights for object (see \ref sect_obdAccessRights "access rights")
+\param name                 Name of object
+\param def                  Default value of object
+*/
 #define OBD_RAM_INDEX_RAM_PDO_MAPPING(ind,cnt,call,acc,name,def)
 
-// subindex macros
+#define OBD_END_INDEX(ind)                                                  ///< End of index entry
+///\}
+
+///\{
+/**
+********************************************************************************
+\name OD Sub-index Entry Definitions
+
+The sub-indexes are now defined within an index entry. They are always located
+within the range between the macros OBD_BEGIN_INDEX_... and OBD_END_INDEX and
+must be ordered with ascending sub-index. Since there are various object types
+and therefore various data types that have to be created, there are different
+macros as well.
+
+The macros ..._DOMAIN, ..._USERDEF and ..._USERDEF_RG define a variable
+information structure of type tVarEntry in the RAM along with the sub-index entry.
+This structure contains the data length and a pointer to the data. Upon initialization
+of the openPOWERLINK stack with the function oplk_init() all variable information is
+deleted. The application has to link these objects to its own variables by calling
+the function oplk_linkObject().
+*/
+
+/**
+\brief  Definition of a variable
+
+This macro defines an object for variables that have a defined data length, which
+is determined by the object type (e.g. UNSIGNED8, UNSIGNED16, INTEGER8, etc.).
+These objects cannot be mapped to a PDO!
+
+\param ind                  Object index of the entry to be defined
+\param sub                  Sub-index of the entry to be defined
+\param typ                  Coded Object type (see \ref tObdType)
+\param acc                  Access rights for object (see \ref sect_obdAccessRights "access rights")
+\param dtyp                 C Data type definition used for this object
+\param name                 Name of object
+\param val                  Default value of this sub-index entry
+*/
 #define OBD_SUBINDEX_RAM_VAR(ind,sub,typ,acc,dtyp,name,val)
+
+/**
+\brief  Definition of a variable with range check
+
+Same as \ref OBD_SUBINDEX_RAM_VAR but with a range check for minimum and
+maximum values. If CONFIG_OBD_CHECK_OBJECT_RANGE is set to TRUE, the openPOWERLINK
+stack automatically checks the value range before an object is written to
+(from the application or per SDO).
+
+\param ind                  Object index of the entry to be defined
+\param sub                  Sub-index of the entry to be defined
+\param typ                  Coded Object type (see \ref tObdType)
+\param acc                  Access rights for object (see \ref sect_obdAccessRights "access rights")
+\param dtyp                 C Data type definition used for this object
+\param name                 Name of object
+\param val                  Default value of this sub-index entry
+\param low                  Lower limit of valid range
+\param high                 Higher limit of valid range
+*/
 #define OBD_SUBINDEX_RAM_VAR_RG(ind,sub,typ,acc,dtyp,name,val,low,high)
-#define OBD_SUBINDEX_RAM_VSTRING(ind,sub,acc,name,sizes,val)
+
+/**
+\brief  Definition of a VSTRING variable
+
+This macro defines an object for variables of type VSTRING.
+
+\param ind                  Object index of the entry to be defined
+\param sub                  Sub-index of the entry to be defined
+\param acc                  Access rights for object (see \ref sect_obdAccessRights "access rights")
+\param name                 Name of object
+\param size                 Maximum length of the string in RAM (incl. \0 termination)
+\param val                  Default value of this sub-index entry
+*/
+#define OBD_SUBINDEX_RAM_VSTRING(ind,sub,acc,name,size,val)
+
+/**
+\brief  Definition of an OSTRING variable
+
+This macro defines an object for variables of type OSTRING.
+
+\param ind                  Object index of the entry to be defined
+\param sub                  Sub-index of the entry to be defined
+\param acc                  Access rights for object (see \ref sect_obdAccessRights "access rights")
+\param name                 Name of object
+\param size                 Maximum length of the string in RAM (incl. \0 termination)
+
+*/
 #define OBD_SUBINDEX_RAM_OSTRING(ind,sub,acc,name,size)
+
+/**
+Definition of a variable which isn't initialized
+
+The suffix ..._NOINIT defines objects which have no default value. That means the
+openPOWERLINK stack does not initialize those variables with a default value on
+NMT reset events. It is the responsibility of the application to initialize those
+objects.
+
+\param ind                  Object index of the entry to be defined
+\param sub                  Sub-index of the entry to be defined
+\param typ                  Coded Object type (see \ref tObdType)
+\param acc                  Access rights for object (see \ref sect_obdAccessRights "access rights")
+\param dtyp                 C Data type definition used for this object
+\param name                 Name of object
+*/
 #define OBD_SUBINDEX_RAM_VAR_NOINIT(ind,sub,typ,acc,dtyp,name)
+
+/**
+\brief  Definition of a DOMAIN variable
+
+This macro defines an object for variables of type DOMAIN.
+
+\param ind                  Object index of the entry to be defined
+\param sub                  Sub-index of the entry to be defined
+\param acc                  Access rights for object (see \ref sect_obdAccessRights "access rights")
+\param name                 Name of object
+*/
 #define OBD_SUBINDEX_RAM_DOMAIN(ind,sub,acc,name)
+
+/**
+\brief  Definition of a variable with user-specific type
+
+Objects, which the user wants to manage in his application, can be created with
+this _USERDEF macro. Only these objects can be mapped to a PDO as process variables.
+
+\param ind                  Object index of the entry to be defined
+\param sub                  Sub-index of the entry to be defined
+\param typ                  Coded Object type (see \ref tObdType)
+\param acc                  Access rights for object (see \ref sect_obdAccessRights "access rights")
+\param dtyp                 C Data type definition used for this object
+\param name                 Name of object
+\param val                  Default value of this sub-index entry
+*/
 #define OBD_SUBINDEX_RAM_USERDEF(ind,sub,typ,acc,dtyp,name,val)
+
+/**
+\brief  Definition of a variable with user-specific type and range check
+
+Same as \ref OBD_SUBINDEX_RAM_USERDEF but with a range check for minimum and
+maximum values.  If CONFIG_OBD_CHECK_OBJECT_RANGE is set to TRUE, the openPOWERLINK
+stack automatically checks the value range before an object is written to
+(from the application or per SDO).
+
+\param ind                  Object index of the entry to be defined
+\param sub                  Sub-index of the entry to be defined
+\param typ                  Coded Object type (see \ref tObdType)
+\param acc                  Access rights for object (see \ref sect_obdAccessRights "access rights")
+\param dtyp                 C Data type definition used for this object
+\param name                 Name of object
+\param val                  Default value of this sub-index entry
+\param low                  Lower limit of valid range
+\param high                 Higher limit of valid range
+*/
 #define OBD_SUBINDEX_RAM_USERDEF_RG(ind,sub,typ,acc,dtyp,name,val,low,high)
+
+/**
+\brief  Definition of a variable with user-specific type that isn't initialized
+
+The suffix ..._NOINIT defines objects which have no default value. That means the
+openPOWERLINK stack does not initialize those variables with a default value on
+NMT reset events. It is the responsibility of the application to initialize those
+objects.
+
+\param ind                  Object index of the entry to be defined
+\param sub                  Sub-index of the entry to be defined
+\param typ                  Coded Object type (see \ref tObdType)
+\param acc                  Access rights for object (see \ref sect_obdAccessRights "access rights")
+\param dtyp                 C Data type definition used for this object
+\param name                 Name of object
+*/
 #define OBD_SUBINDEX_RAM_USERDEF_NOINIT(ind,sub,typ,acc,dtyp,name)
+///\}
 
 #endif
 

@@ -143,16 +143,22 @@ typedef unsigned int tObdPart;          ///< Data type for OD part definitions
 
 typedef unsigned int tObdAccess;        ///< Data type for OD access types
 
-//-----------------------------------------------------------------------------------------------------------
-// access types for objects
-#define kObdAccRead         0x01    // object can be read
-#define kObdAccWrite        0x02    // object can be written
-#define kObdAccConst        0x04    // object contains a constant value
-#define kObdAccPdo          0x08    // object can be mapped in a PDO
-#define kObdAccArray        0x10    // object contains an array of numerical values
-#define kObdAccRange        0x20    // object contains lower and upper limit
-#define kObdAccVar          0x40    // object data is placed in application
-#define kObdAccStore        0x80    // object data can be stored to non volatile memory
+
+///\{
+/**
+* \anchor sect_obdAccessRights
+* \name   Access rights for objects
+*
+* The following macros define the access rights for objects.
+*/
+#define kObdAccRead         0x01    ///< Object can be read
+#define kObdAccWrite        0x02    ///< Object can be written
+#define kObdAccConst        0x04    ///< Object contains a constant value
+#define kObdAccPdo          0x08    ///< Object can be mapped to a PDO (always in conjunction with kObdAccVar)
+#define kObdAccArray        0x10    ///< Object contains an array of numerical values
+#define kObdAccRange        0x20    ///< Object contains lower and upper limit
+#define kObdAccVar          0x40    ///< Object data is placed in application (contains a variable information structure)
+#define kObdAccStore        0x80    ///< Object data can be stored to non-volatile memory
 
 // combinations (not all combinations are required)
 #define kObdAccR            (0            | 0          | 0            | 0          | 0            | 0            | kObdAccRead)
@@ -193,78 +199,84 @@ typedef unsigned int tObdAccess;        ///< Data type for OD access types
 #define kObdAccSVGPR        (kObdAccStore | kObdAccVar | kObdAccRange | kObdAccPdo | 0            | 0            | kObdAccRead)
 #define kObdAccSVGPW        (kObdAccStore | kObdAccVar | kObdAccRange | kObdAccPdo | 0            | kObdAccWrite | 0          )
 #define kObdAccSVGPRW       (kObdAccStore | kObdAccVar | kObdAccRange | kObdAccPdo | 0            | kObdAccWrite | kObdAccRead)
+///\}
 
 typedef unsigned int tObdSize;      // For all objects as objects size are used an unsigned int.
 
 /**
-* \brief Enumeration for object data types (DS301)
-*
-* This enumeration defines the data types of objects in object dictionary.
-* DS-301 defines these types as UINT16
-* openPOWERLINK support only the listed data types. Other types are not supported
-* in this version.
+\brief Enumeration for object data types (DS301)
+
+This enumeration defines the data types of objects in object dictionary.
+DS-301 defines these types as UINT16.
+
+openPOWERLINK supports only the listed data types. Other types are not supported
+in this version.
 */
 typedef enum
 {
-    kObdTypeBool            = 0x0001,
+    kObdTypeBool            = 0x0001,      ///< 0001 - BOOLEAN
+    kObdTypeInt8            = 0x0002,      ///< 0002 - INTEGER8
+    kObdTypeInt16           = 0x0003,      ///< 0003 - INTEGER16
+    kObdTypeInt32           = 0x0004,      ///< 0004 - INTEGER32
+    kObdTypeUInt8           = 0x0005,      ///< 0005 - UNSIGNED8
+    kObdTypeUInt16          = 0x0006,      ///< 0006 - UNSIGNED16
+    kObdTypeUInt32          = 0x0007,      ///< 0007 - UNSIGNED32
+    kObdTypeReal32          = 0x0008,      ///< 0008 - REAL32
+    kObdTypeVString         = 0x0009,      ///< 0009 - VISIBLE_STRING
+    kObdTypeOString         = 0x000A,      ///< 000A - OCTET_STRING
 
-    kObdTypeInt8            = 0x0002,
-    kObdTypeInt16           = 0x0003,
-    kObdTypeInt32           = 0x0004,
-    kObdTypeUInt8           = 0x0005,
-    kObdTypeUInt16          = 0x0006,
-    kObdTypeUInt32          = 0x0007,
-    kObdTypeReal32          = 0x0008,
-    kObdTypeVString         = 0x0009,
-    kObdTypeOString         = 0x000A,
+    kObdTypeTimeOfDay       = 0x000C,      ///< 000C - TIME_OF_DAY
+    kObdTypeTimeDiff        = 0x000D,      ///< 000D - TIME_DIFFERENCE
 
-    kObdTypeTimeOfDay       = 0x000C,
-    kObdTypeTimeDiff        = 0x000D,
+    kObdTypeDomain          = 0x000F,      ///< 000F - DOMAIN
+    kObdTypeInt24           = 0x0010,      ///< 0010 - INTEGER24
+    kObdTypeReal64          = 0x0011,      ///< 0011 - REAL64
+    kObdTypeInt40           = 0x0012,      ///< 0012 - INTEGER40
+    kObdTypeInt48           = 0x0013,      ///< 0013 - INTEGER48
+    kObdTypeInt56           = 0x0014,      ///< 0014 - INTEGER56
+    kObdTypeInt64           = 0x0015,      ///< 0015 - INTEGER64
+    kObdTypeUInt24          = 0x0016,      ///< 0016 - UNSIGNED24
 
-    kObdTypeDomain          = 0x000F,
-    kObdTypeInt24           = 0x0010,
-    kObdTypeReal64          = 0x0011,
-    kObdTypeInt40           = 0x0012,
-    kObdTypeInt48           = 0x0013,
-    kObdTypeInt56           = 0x0014,
-    kObdTypeInt64           = 0x0015,
-    kObdTypeUInt24          = 0x0016,
-
-    kObdTypeUInt40          = 0x0018,
-    kObdTypeUInt48          = 0x0019,
-    kObdTypeUInt56          = 0x001A,
-    kObdTypeUInt64          = 0x001B,
-
+    kObdTypeUInt40          = 0x0018,      ///< 0018 - UNSIGNED40
+    kObdTypeUInt48          = 0x0019,      ///< 0019 - UNSIGNED48
+    kObdTypeUInt56          = 0x001A,      ///< 001A - UNSIGNED56
+    kObdTypeUInt64          = 0x001B,      ///< 001B - UNSIGNED64
     kObdTypeMax             = 0x001C
 } tObdType;
 
-// type definitions for data types defined in DS301
-typedef unsigned char               tObdBoolean;            // 0001
-typedef signed char                 tObdInteger8;           // 0002
-typedef signed short int            tObdInteger16;          // 0003
-typedef signed int                  tObdInteger32;          // 0004
-typedef unsigned char               tObdUnsigned8;          // 0005
-typedef unsigned short int          tObdUnsigned16;         // 0006
-typedef unsigned int                tObdUnsigned32;         // 0007
-typedef float                       tObdReal32;             // 0008
-typedef unsigned char               tObdDomain;             // 000F
-typedef signed   int                tObdInteger24;          // 0010
-typedef unsigned int                tObdUnsigned24;         // 0016
+///\{
+/**
+\name C type definitions for data types defined in POWERLINK DS301
 
-typedef signed long long int        tObdInteger40;          // 0012
-typedef signed long long int        tObdInteger48;          // 0013
-typedef signed long long int        tObdInteger56;          // 0014
-typedef signed long long int        tObdInteger64;          // 0015
+The following C data types are defined according to the POWERLINK DS301
+specification.
+*/
+typedef unsigned char               tObdBoolean;            ///< for DS301 data type \ref kObdTypeBool
+typedef signed char                 tObdInteger8;           ///< for DS301 data type \ref kObdTypeInt8
+typedef signed short int            tObdInteger16;          ///< for DS301 data type \ref kObdTypeInt16
+typedef signed int                  tObdInteger32;          ///< for DS301 data type \ref kObdTypeInt32
+typedef unsigned char               tObdUnsigned8;          ///< for DS301 data type \ref kObdTypeUInt8
+typedef unsigned short int          tObdUnsigned16;         ///< for DS301 data type \ref kObdTypeUInt16
+typedef unsigned int                tObdUnsigned32;         ///< for DS301 data type \ref kObdTypeUInt32
+typedef float                       tObdReal32;             ///< for DS301 data type \ref kObdTypeReal32
 
-typedef unsigned long long int      tObdUnsigned40;         // 0018
-typedef unsigned long long int      tObdUnsigned48;         // 0019
-typedef unsigned long long int      tObdUnsigned56;         // 001A
-typedef unsigned long long int      tObdUnsigned64;         // 001B
+typedef tTimeOfDay                  tObdTimeOfDay;          ///< for DS301 data type \ref kObdTypeTimeOfDay
+typedef tTimeOfDay                  tObdTimeDifference;     ///< for DS301 data type \ref kObdTypeTimeDiff
 
-typedef double                      tObdReal64;             // 0011
+typedef unsigned char               tObdDomain;             ///< for DS301 data type \ref kObdTypeDomain
+typedef signed   int                tObdInteger24;          ///< for DS301 data type \ref kObdTypeInt24
+typedef double                      tObdReal64;             ///< for DS301 data type \ref kObdTypeReal64
+typedef signed long long int        tObdInteger40;          ///< for DS301 data type \ref kObdTypeInt40
+typedef signed long long int        tObdInteger48;          ///< for DS301 data type \ref kObdTypeInt48
+typedef signed long long int        tObdInteger56;          ///< for DS301 data type \ref kObdTypeInt56
+typedef signed long long int        tObdInteger64;          ///< for DS301 data type \ref kObdTypeInt64
+typedef unsigned int                tObdUnsigned24;         ///< for DS301 data type \ref kObdTypeUInt24
 
-typedef tTimeOfDay                  tObdTimeOfDay;          // 000C
-typedef tTimeOfDay                  tObdTimeDifference;     // 000D
+typedef unsigned long long int      tObdUnsigned40;         ///< for DS301 data type \ref kObdTypeUInt40
+typedef unsigned long long int      tObdUnsigned48;         ///< for DS301 data type \ref kObdTypeUInt48
+typedef unsigned long long int      tObdUnsigned56;         ///< for DS301 data type \ref kObdTypeUInt56
+typedef unsigned long long int      tObdUnsigned64;         ///< for DS301 data type \ref kObdTypeUInt64
+///\}
 
 typedef enum
 {
@@ -272,6 +284,8 @@ typedef enum
     kVarValidData           = 0x02,
     kVarValidAll            = 0x03          // currently only size and data are implemented and used
 }tVarParamValid;
+
+
 
 typedef struct
 {
@@ -288,6 +302,7 @@ typedef struct
     tObdSize            size;
 } tObdVarEntry;
 
+/// C type definition for DS301 data type \ref kObdTypeOstring
 typedef struct
 {
    tObdSize             size;
@@ -301,6 +316,8 @@ typedef struct
    UINT8*               pString;
 } tObdOStringDef;
 
+
+/// C type definition for DS301 data type \ref kObdTypeVstring
 typedef struct
 {
    tObdSize             size;
@@ -323,9 +340,9 @@ typedef struct
 } tObdVStringDomain;                        // 000D
 
 /**
-* \brief Parameters for callback function
-*
-* This structure defines the parameters for the OD callback function.
+\brief Parameters for callback function
+
+This structure defines the parameters for the OD callback function.
 */
 typedef struct
 {
@@ -340,9 +357,9 @@ typedef struct
 typedef tEplKernel (ROM* tObdCallback) (tObdCbParam MEM* pParam_p);
 
 /**
-* \brief Structure for subindices
-*
-* This structure defines a subindex in the OD.
+\brief Structure for subindices
+
+This structure defines a subindex in the OD.
 */
 typedef struct
 {
@@ -357,9 +374,9 @@ typedef tObdSubEntry * tObdSubEntryPtr;
 
 
 /**
-* \brief Structure for indices
-*
-* This structure defines an index in the OD.
+\brief Structure for indices
+
+This structure defines an index in the OD.
 */
 typedef struct
 {
@@ -372,9 +389,9 @@ typedef struct
 typedef tObdEntry * tObdEntryPtr;
 
 /**
-* \brief Structure for OBD init parameters
-*
-* This structure defines the init parameters of the OBD module.
+\brief Structure for OBD init parameters
+
+This structure defines the init parameters of the OBD module.
 */
 struct _tObdInitParam
 {
@@ -389,9 +406,9 @@ struct _tObdInitParam
 typedef struct _tObdInitParam tObdInitParam;
 
 /**
-* \brief Structure for parameters of the store/restore commands
-*
-* This structure specifies the parameters for the store/restore commands.
+\brief Structure for parameters of the store/restore commands
+
+This structure specifies the parameters for the store/restore commands.
 */
 typedef struct
 {
@@ -405,10 +422,10 @@ typedef tEplKernel (ROM* tInitTabEntryCallback) (void MEM* pTabEntry_p, UINT uiO
 typedef tEplKernel (ROM* tObdStoreLoadCallback) (tObdCbStoreParam MEM* pCbStoreParam_p);
 
 /**
-* \brief Enumeration for Node ID setting types
-*
-* This structure defines constants for the types of setting the node ID.
-* They are used in the function obd_setNodeId()
+\brief Enumeration for Node ID setting types
+
+This structure defines constants for the types of setting the node ID.
+They are used in the function obd_setNodeId()
 */
 typedef enum
 {
