@@ -59,18 +59,6 @@ IF(CFG_POWERLINK_MN)
 ENDIF(CFG_POWERLINK_MN)
 
 #
-# setup object dictionary to use
-#
-SET (LIB_OBJDICT
-     ${LIB_OBJDICT}
-     ${OBJDICT_DIR}/${OBJDICT}/Objdict.c
-     ${OBJDICT_DIR}/${OBJDICT}/objdict.h
-     ${OBJDICT_DIR}/${OBJDICT}/obdcfg.h
-     ${OBJDICT_DIR}/generic/objdict_1000-13ff.h
-     ${OBJDICT_DIR}/generic/objdict_1b00-1fff.h
-     )
-
-#
 # set general sources of POWERLINK library
 #
 SET (LIB_SOURCES
@@ -79,6 +67,7 @@ SET (LIB_SOURCES
      ${USER_SOURCE_DIR}/api/processimage.c
      ${COMMON_SOURCE_DIR}/debug.c
      ${USER_SOURCE_DIR}/obd/obd.c
+     ${USER_SOURCE_DIR}/obd/obdcreate.c
      ${COMMON_SOURCE_DIR}/event/event.c
      ${LIB_SOURCE_DIR}/ami/amix86.c
      ${LIB_SOURCE_DIR}/circbuf/circbuffer.c
@@ -132,7 +121,6 @@ SET (LIB_HEADERS
      ${POWERLINK_INCLUDE_DIR}/obd.h
      ${POWERLINK_INCLUDE_DIR}/obdcdc.h
      ${POWERLINK_INCLUDE_DIR}/EplObdMacro.h
-     ${POWERLINK_INCLUDE_DIR}/EplObjDef.h
      ${POWERLINK_INCLUDE_DIR}/pdo.h
      ${POWERLINK_INCLUDE_DIR}/EplSdo.h
      ${POWERLINK_INCLUDE_DIR}/EplSdoAc.h
@@ -202,8 +190,7 @@ INCLUDE_DIRECTORIES(
 # Define library source code
 #
 ADD_LIBRARY(powerlink_user ${LIB_TYPE} ${LIB_SOURCES} ${LIB_ARCH_SOURCES}
-                           ${LIB_USER_SOURCES} ${LIB_HEADERS} ${LIB_USER_HEADERS}
-                           ${LIB_OBJDICT})
+                           ${LIB_USER_SOURCES} ${LIB_HEADERS} ${LIB_USER_HEADERS})
 
 TARGET_LINK_LIBRARIES(powerlink_user ${ARCH_LIBRARIES})
 

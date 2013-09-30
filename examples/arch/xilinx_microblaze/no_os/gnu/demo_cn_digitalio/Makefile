@@ -70,7 +70,6 @@ ${STACK_ROOT}/libs/omethlib/omethlib_phycfg_generic.c \
 ${STACK_ROOT}/libs/circbuf/circbuffer.c \
 ${STACK_ROOT}/libs/circbuf/circbuf-noos.c \
 ${STACK_ROOT}/libs/trace/trace-printf.c \
-${STACK_ROOT}/objdicts/CiA401_CN/Objdict.c \
 ${STACK_ROOT}/stack/src/common/debug.c \
 ${STACK_ROOT}/stack/src/common/errstring.c \
 ${STACK_ROOT}/stack/src/common/dll/dllcal-direct.c \
@@ -113,6 +112,7 @@ ${STACK_ROOT}/stack/src/user/event/eventucal-nooscircbuf.c \
 ${STACK_ROOT}/stack/src/user/nmt/nmtu.c \
 ${STACK_ROOT}/stack/src/user/nmt/nmtcnu.c \
 ${STACK_ROOT}/stack/src/user/obd/obd.c \
+${STACK_ROOT}/stack/src/user/obd/obdcreate.c \
 ${STACK_ROOT}/stack/src/user/pdo/pdou.c \
 ${STACK_ROOT}/stack/src/user/pdo/pdoucal.c \
 ${STACK_ROOT}/stack/src/user/pdo/pdoucalmem-local.c \

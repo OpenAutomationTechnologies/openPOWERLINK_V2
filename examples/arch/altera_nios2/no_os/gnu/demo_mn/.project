@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml	version="1.0"	encoding="UTF-8"?>
 <projectDescription>
 	<name>demo_mn</name>
 	<comment></comment>
@@ -139,11 +139,6 @@
 			<locationURI>OPLK_LOC/stack/src/user/api/processimage-cia302.c</locationURI>
 		</link>
 		<link>
-			<name>Objdict.c</name>
-			<type>1</type>
-			<locationURI>OPLK_LOC/objdicts/CiA302-4_MN/Objdict.c</locationURI>
-		</link>
-		<link>
 			<name>target-nios2.c</name>
 			<type>1</type>
 			<locationURI>OPLK_LOC/stack/src/arch/altera_nios2/target-nios2.c</locationURI>
@@ -262,6 +257,11 @@
 			<name>obd.c</name>
 			<type>1</type>
 			<locationURI>OPLK_LOC/stack/src/user/obd/obd.c</locationURI>
+		</link>
+		<link>
+			<name>obdcreate.c</name>
+			<type>1</type>
+			<locationURI>OPLK_LOC/stack/src/user/obd/obdcreate.c</locationURI>
 		</link>
 		<link>
 			<name>obdcdc.c</name>

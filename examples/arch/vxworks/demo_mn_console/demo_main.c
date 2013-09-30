@@ -159,13 +159,6 @@ BOOL                        fOpenPowerlinkIsRunning_g;
 // local function prototypes
 //---------------------------------------------------------------------------
 
-// This function is the entry point for your object dictionary. It is defined
-// in OBJDICT.C by define EPL_OBD_INIT_RAM_NAME. Use this function name to
-// define this function prototype here. If you want to use more than one Epl
-// instances then the function name of each object dictionary has to differ.
-
-tEplKernel PUBLIC  EplObdInitRam (tObdInitParam MEM* pInitParam_p);
-
 tEplKernel PUBLIC AppCbEvent(
     tEplApiEventType        EventType_p,   // IN: event type (enum)
     tEplApiEventArg*        pEventArg_p,   // IN: event argument (union)
@@ -274,7 +267,6 @@ int openPowerlinkInit (char *pszEthName, unsigned int uiDevNumber)
     // set callback functions
     EplApiInitParam.m_pfnCbEvent = AppCbEvent;
     EplApiInitParam.m_pfnCbSync  = AppCbSync;
-    EplApiInitParam.m_pfnObdInitRam = EplObdInitRam;
 
     printf("\n\n Hello, I'm a VxWorks POWERLINK node running as %s!\n"
            "(build: %s / %s)\n\n",

@@ -70,12 +70,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // global function prototypes
 //------------------------------------------------------------------------------
 
-// This function is the entry point for your object dictionary. It is defined
-// in OBJDICT.C by define EPL_OBD_INIT_RAM_NAME. Use this function name to define
-// this function prototype here. If you want to use more than one Epl
-// instances then the function name of each object dictionary has to differ.
-tEplKernel PUBLIC  EplObdInitRam (tObdInitParam MEM* pInitParam_p);
-
 tEplKernel PUBLIC AppCbSync(void) SECTION_MAIN_APP_CB_SYNC;
 tEplKernel PUBLIC AppCbEvent(
     tEplApiEventType        EventType_p,
@@ -476,7 +470,6 @@ static int openPowerlink(BYTE bNodeId_p)
     EplApiInitParam.m_dwDefaultGateway = 0;
     EplApiInitParam.m_pfnCbEvent = AppCbEvent;
     EplApiInitParam.m_pfnCbSync  = AppCbSync;
-    EplApiInitParam.m_pfnObdInitRam = EplObdInitRam;
 
     PRINTF("\nNode ID is set to: %d\n", EplApiInitParam.m_uiNodeId);
 

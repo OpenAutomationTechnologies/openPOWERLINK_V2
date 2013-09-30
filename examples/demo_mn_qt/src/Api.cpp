@@ -77,7 +77,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // global function prototypes
 //------------------------------------------------------------------------------
-extern "C" tEplKernel PUBLIC  EplObdInitRam (tObdInitParam MEM* pInitParam_p);
 
 //============================================================================//
 //            P R I V A T E   D E F I N I T I O N S                           //
@@ -217,8 +216,6 @@ Api::Api(MainWindow *pMainWindow_p, UINT nodeId_p, QString devName_p)
 
     /* write 00:00:00:00:00:00 to MAC address, so that the driver uses the real hardware address */
     EPL_MEMCPY(initParam.m_abMacAddress, abMacAddr, sizeof (initParam.m_abMacAddress));
-
-    initParam.m_pfnObdInitRam = EplObdInitRam;
 
     // Copy the selected interface string to a local variable
     strcpy(devName_g, devName_p.toStdString().c_str());

@@ -81,7 +81,6 @@ tEplKernel selectPcapDevice(char *pDevName_p);
 int getopt(int, char * const [], const char *);
 
 void initEvents (BOOL* pfGsOff_p);
-tEplKernel PUBLIC EplObdInitRam (tObdInitParam MEM* pInitParam_p);
 tEplKernel PUBLIC processEvents(tEplApiEventType EventType_p, tEplApiEventArg* pEventArg_p, void GENERIC* pUserArg_p);
 
 //============================================================================//
@@ -246,8 +245,6 @@ static tEplKernel initPowerlink(UINT32 cycleLen_p, char *pszCdcFileName_p,
 #else
     initParam.m_pfnCbSync  =    NULL;
 #endif
-
-    initParam.m_pfnObdInitRam = EplObdInitRam;
 
     // initialize POWERLINK stack
     ret = oplk_init(&initParam);
