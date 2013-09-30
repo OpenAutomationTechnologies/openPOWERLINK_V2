@@ -72,7 +72,7 @@
 #ifndef _EPLSDOASNDU_H_
 #define _EPLSDOASNDU_H_
 
-#include "EplSdo.h"
+#include <sdo.h>
 #include <dll.h>
 
 

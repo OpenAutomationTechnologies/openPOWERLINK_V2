@@ -72,7 +72,7 @@
 #ifndef _EPLSDOCOMU_H_
 #define _EPLSDOCOMU_H_
 
-#include "EplSdo.h"
+#include <sdo.h>
 #include "obd.h"
 #include "EplSdoAc.h"
 #include "user/EplSdoAsySequ.h"
