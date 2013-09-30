@@ -393,7 +393,7 @@ tEplKernel ProcessThread::processStateChangeEvent(tEplApiEventType EventType_p,
         // for configuration of remote CN
             varLen = sizeof(UINT32);
             EplRet = EplApiReadObject(NULL, 0, 0x1006, 0x00, &cycleLen_g,
-                                      &varLen, kEplSdoTypeAsnd, NULL);
+                                      &varLen, kSdoTypeAsnd, NULL);
             if (ret != kEplSuccessful)
             {   // local OD access failed
                 break;
@@ -563,12 +563,12 @@ tEplKernel ProcessThread::processNodeEvent(tEplApiEventType EventType_p,
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_CFM)) == 0)
             // Configuration Manager is not available,
             // so configure CycleLen (object 0x1006) on CN
-            tEplSdoComConHdl SdoComConHdl;
+            tSdoComConHdl SdoComConHdl;
 
             // update object 0x1006 on CN
             EplRet = EplApiWriteObject(&SdoComConHdl, pEventArg_p->m_Node.m_uiNodeId,
                                        0x1006, 0x00, &cycleLen_g, 4,
-                                       kEplSdoTypeAsnd, NULL);
+                                       kSdoTypeAsnd, NULL);
             if (EplRet == kEplApiTaskDeferred)
             {   // SDO transfer started
                 EplRet = kEplReject;
@@ -585,7 +585,7 @@ tEplKernel ProcessThread::processNodeEvent(tEplApiEventType EventType_p,
 
                 EplRet = EplApiWriteObject(&SdoComConHdl, pEventArg_p->m_Node.m_uiNodeId,
                                            0x1006, 0x00, &cycleLen_g, 4,
-                                           kEplSdoTypeAsnd, NULL);
+                                           kSdoTypeAsnd, NULL);
                 if (EplRet == kEplApiTaskDeferred)
                 {   // SDO transfer started
                     EplRet = kEplReject;
@@ -760,7 +760,7 @@ tEplKernel ProcessThread::processSdoEvent(tEplApiEventType EventType_p,
                                   tEplApiEventArg* pEventArg_p,
                                   void GENERIC* pUserArg_p)
 {
-    tEplSdoComFinished*       pSdo = &pEventArg_p->m_Sdo;
+    tSdoComFinished*          pSdo = &pEventArg_p->m_Sdo;
     tEplKernel                ret = kEplSuccessful;
 
     UNUSED_PARAMETER(EventType_p);

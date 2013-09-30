@@ -99,20 +99,20 @@ tEplKernel PUBLIC EplSdoComDelInstance(void);
 
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOC)) != 0)
 
-tEplKernel PUBLIC EplSdoComDefineCon(tEplSdoComConHdl*  pSdoComConHdl_p,
+tEplKernel PUBLIC EplSdoComDefineCon(tSdoComConHdl*  pSdoComConHdl_p,
                                       unsigned int      uiTargetNodeId_p,
-                                      tEplSdoType        ProtType_p);
+                                      tSdoType        ProtType_p);
 
-tEplKernel PUBLIC EplSdoComInitTransferByIndex(tEplSdoComTransParamByIndex* pSdoComTransParam_p);
+tEplKernel PUBLIC EplSdoComInitTransferByIndex(tSdoComTransParamByIndex* pSdoComTransParam_p);
 
-unsigned int PUBLIC EplSdoComGetNodeId(tEplSdoComConHdl  SdoComConHdl_p);
+unsigned int PUBLIC EplSdoComGetNodeId(tSdoComConHdl  SdoComConHdl_p);
 
-tEplKernel PUBLIC EplSdoComUndefineCon(tEplSdoComConHdl  SdoComConHdl_p);
+tEplKernel PUBLIC EplSdoComUndefineCon(tSdoComConHdl  SdoComConHdl_p);
 
-tEplKernel PUBLIC EplSdoComGetState(tEplSdoComConHdl SdoComConHdl_p,
-                                    tEplSdoComFinished* pSdoComFinished_p);
+tEplKernel PUBLIC EplSdoComGetState(tSdoComConHdl SdoComConHdl_p,
+                                    tSdoComFinished* pSdoComFinished_p);
 
-tEplKernel PUBLIC EplSdoComSdoAbort(tEplSdoComConHdl SdoComConHdl_p,
+tEplKernel PUBLIC EplSdoComSdoAbort(tSdoComConHdl SdoComConHdl_p,
                               DWORD           dwAbortCode_p);
 
 #endif

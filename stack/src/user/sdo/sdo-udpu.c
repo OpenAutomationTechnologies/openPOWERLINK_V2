@@ -127,7 +127,7 @@ typedef struct
 typedef struct
 {
     tEplSdoUdpCon           m_aSdoAbsUdpConnection[EPL_SDO_MAX_CONNECTION_UDP];
-    tEplSequLayerReceiveCb  m_fpSdoAsySeqCb;
+    tSequLayerReceiveCb  m_fpSdoAsySeqCb;
     SOCKET                  m_UdpSocket;
 
 #if (TARGET_SYSTEM == _WIN32_)
@@ -199,7 +199,7 @@ static int EplSdoUdpThread(void * pArg_p);
 // State:
 //
 //---------------------------------------------------------------------------
-tEplKernel PUBLIC EplSdoUdpuInit(tEplSequLayerReceiveCb fpReceiveCb_p)
+tEplKernel PUBLIC EplSdoUdpuInit(tSequLayerReceiveCb fpReceiveCb_p)
 {
 tEplKernel  Ret;
 
@@ -228,7 +228,7 @@ return Ret;
 // State:
 //
 //---------------------------------------------------------------------------
-tEplKernel PUBLIC EplSdoUdpuAddInstance(tEplSequLayerReceiveCb fpReceiveCb_p)
+tEplKernel PUBLIC EplSdoUdpuAddInstance(tSequLayerReceiveCb fpReceiveCb_p)
 {
 tEplKernel          Ret;
 
@@ -495,7 +495,7 @@ Exit:
 // State:
 //
 //---------------------------------------------------------------------------
-tEplKernel PUBLIC EplSdoUdpuInitCon(tEplSdoConHdl*  pSdoConHandle_p,
+tEplKernel PUBLIC EplSdoUdpuInitCon(tSdoConHdl*  pSdoConHandle_p,
                                     unsigned int    uiTargetNodeId_p)
 {
 tEplKernel          Ret;
@@ -514,7 +514,7 @@ tEplSdoUdpCon*      pSdoUdpCon;
         if ((pSdoUdpCon->m_ulIpAddr & htonl(0xFF)) == htonl(uiTargetNodeId_p))
         {   // existing connection to target node found
             // set handle
-            *pSdoConHandle_p = (uiCount | EPL_SDO_UDP_HANDLE);
+            *pSdoConHandle_p = (uiCount | SDO_UDP_HANDLE);
 
             goto Exit;
         }
@@ -540,7 +540,7 @@ tEplSdoUdpCon*      pSdoUdpCon;
         pSdoUdpCon->m_ulIpAddr = htonl(0xC0A86400 | uiTargetNodeId_p);   // 192.168.100.uiTargetNodeId_p
 
         // set handle
-        *pSdoConHandle_p = (uiFreeCon | EPL_SDO_UDP_HANDLE);
+        *pSdoConHandle_p = (uiFreeCon | SDO_UDP_HANDLE);
 
     }
 
@@ -568,7 +568,7 @@ Exit:
 // State:
 //
 //---------------------------------------------------------------------------
-tEplKernel PUBLIC EplSdoUdpuSendData(tEplSdoConHdl       SdoConHandle_p,
+tEplKernel PUBLIC EplSdoUdpuSendData(tSdoConHdl       SdoConHandle_p,
                                     tEplFrame *          pSrcData_p,
                                     DWORD                dwDataSize_p)
 {
@@ -579,7 +579,7 @@ struct sockaddr_in  Addr;
 
     Ret = kEplSuccessful;
 
-    uiArray = (SdoConHandle_p & ~EPL_SDO_ASY_HANDLE_MASK);
+    uiArray = (SdoConHandle_p & ~SDO_ASY_HANDLE_MASK);
     if(uiArray >= EPL_SDO_MAX_CONNECTION_UDP)
     {
         Ret = kEplSdoUdpInvalidHdl;
@@ -593,7 +593,7 @@ struct sockaddr_in  Addr;
     AmiSetByteToLe(&pSrcData_p->m_le_bSrcNodeId, 0x00);
 
     // calc size
-    dwDataSize_p += EPL_ASND_HEADER_SIZE;
+    dwDataSize_p += ASND_HEADER_SIZE;
 
     // call sendto
     Addr.sin_family = AF_INET;
@@ -645,13 +645,13 @@ Exit:
 // State:
 //
 //---------------------------------------------------------------------------
-tEplKernel PUBLIC EplSdoUdpuDelCon(tEplSdoConHdl SdoConHandle_p)
+tEplKernel PUBLIC EplSdoUdpuDelCon(tSdoConHdl SdoConHandle_p)
 {
 tEplKernel      Ret;
 unsigned int    uiArray;
 
 
-    uiArray = (SdoConHandle_p & ~EPL_SDO_ASY_HANDLE_MASK);
+    uiArray = (SdoConHandle_p & ~SDO_ASY_HANDLE_MASK);
 
     if(uiArray >= EPL_SDO_MAX_CONNECTION_UDP)
     {
@@ -709,9 +709,9 @@ struct sockaddr_in  RemoteAddr;
 int                 iError;
 int                 iCount;
 int                 iFreeEntry;
-BYTE                abBuffer[EPL_MAX_SDO_REC_FRAME_SIZE];
+BYTE                abBuffer[SDO_MAX_REC_FRAME_SIZE];
 unsigned int        uiSize;
-tEplSdoConHdl       SdoConHdl;
+tSdoConHdl       SdoConHdl;
 
 #if (TARGET_SYSTEM == _WIN32_)
     pInstance = (tEplSdoUdpInstance*)lpParameter;
@@ -786,11 +786,11 @@ tEplSdoConHdl       SdoConHdl;
 #endif
                     // call callback
                     SdoConHdl = iFreeEntry;
-                    SdoConHdl |= EPL_SDO_UDP_HANDLE;
+                    SdoConHdl |= SDO_UDP_HANDLE;
                     // offset 4 -> start of SDO Sequence header
                     Ret = pInstance->m_fpSdoAsySeqCb(
                             SdoConHdl,
-                            (tEplAsySdoSeq*)&abBuffer[4],
+                            (tAsySdoSeq*)&abBuffer[4],
                             (iError - 4));
                     if (Ret != kEplSuccessful)
                     {
@@ -816,7 +816,7 @@ tEplSdoConHdl       SdoConHdl;
                 // known connection
                 // call callback with correct handle
                 SdoConHdl = iCount;
-                SdoConHdl |= EPL_SDO_UDP_HANDLE;
+                SdoConHdl |= SDO_UDP_HANDLE;
 #if (TARGET_SYSTEM == _WIN32_)
     // leave critical section for process function
     LeaveCriticalSection(SdoUdpInstance_g.m_pCriticalSection);
@@ -824,7 +824,7 @@ tEplSdoConHdl       SdoConHdl;
                 // offset 4 -> start of SDO Sequence header
                 Ret = pInstance->m_fpSdoAsySeqCb(
                         SdoConHdl,
-                        (tEplAsySdoSeq*)&abBuffer[4],
+                        (tAsySdoSeq*)&abBuffer[4],
                         (iError - 4));
                 if (Ret != kEplSuccessful)
                 {

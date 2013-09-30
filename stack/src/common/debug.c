@@ -755,7 +755,7 @@ connection state.
 \ingroup module_debug
 */
 //------------------------------------------------------------------------------
-char* EplGetSdoComConStateStr(tEplSdoComConState SdoComConState_p )
+char* EplGetSdoComConStateStr(tSdoComConState SdoComConState_p )
 {
     if( SdoComConState_p >= tabentries(EplSdoComConStateStr_g) )
     {
