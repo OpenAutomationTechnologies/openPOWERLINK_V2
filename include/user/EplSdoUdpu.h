@@ -73,7 +73,7 @@
 #ifndef _EPLSDOUDPU_H_
 #define _EPLSDOUDPU_H_
 
-#include "EplSdo.h"
+#include <sdo.h>
 
 //---------------------------------------------------------------------------
 // const defines

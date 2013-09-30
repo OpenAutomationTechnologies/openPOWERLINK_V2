@@ -73,7 +73,7 @@
 #define _EPL_API_H_
 
 #include "EplInc.h"
-#include "EplSdo.h"
+#include <sdo.h>
 #include "obd.h"
 #include "led.h"
 #include "cfm.h"
