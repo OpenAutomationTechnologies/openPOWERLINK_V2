@@ -401,9 +401,6 @@ typedef struct
     tObdSize            objSize;
 } tObdCbStoreParam;
 
-
-typedef tEplKernel (ROM* tObdInitRam) (tObdInitParam MEM* pInitParam_p);
-typedef tEplKernel (ROM* tObdDeinitRam) (tObdInitParam MEM* pInitParam_p);
 typedef tEplKernel (ROM* tInitTabEntryCallback) (void MEM* pTabEntry_p, UINT uiObjIndex_p);
 typedef tEplKernel (ROM* tObdStoreLoadCallback) (tObdCbStoreParam MEM* pCbStoreParam_p);
 
@@ -445,6 +442,8 @@ tEplKernel  obd_writeEntryFromLe(UINT index_p, UINT subIndex_p, void* pSrcData_p
 tEplKernel  obd_readEntryToLe(UINT index_p, UINT subIndex_p, void* pDstData_p, tObdSize* pSize_p);
 tEplKernel  obd_getAccessType(UINT index_p, UINT subIndex_p, tObdAccess* pAccessType_p);
 tEplKernel  obd_searchVarEntry(UINT index_p, UINT subindex_p, tObdVarEntry MEM** ppVarEntry_p);
+
+tEplKernel  obd_initObd(tObdInitParam MEM* pInitParam_p);
 
 #if (EPL_OBD_USE_STORE_RESTORE != FALSE)
 tEplKernel  obd_storeLoadObjCallback(tObdStoreLoadCallback pfnCallback_p);

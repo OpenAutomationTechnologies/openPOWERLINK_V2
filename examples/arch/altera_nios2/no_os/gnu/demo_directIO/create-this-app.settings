@@ -74,7 +74,6 @@ ${STACKROOT_DIR}/libs/omethlib/omethlib_phycfg_generic.c \
 ${STACKROOT_DIR}/libs/circbuf/circbuffer.c \
 ${STACKROOT_DIR}/libs/circbuf/circbuf-noos.c \
 ${STACKROOT_DIR}/libs/trace/trace-printf.c \
-${STACKROOT_DIR}/objdicts/CiA401_CN/Objdict.c \
 ${STACKROOT_DIR}/stack/src/arch/altera_nios2/target-nios2.c \
 ${STACKROOT_DIR}/stack/src/arch/altera_nios2/lock-localnoos.c \
 ${STACKROOT_DIR}/stack/src/common/debug.c \
@@ -119,6 +118,7 @@ ${STACKROOT_DIR}/stack/src/user/event/eventucal-nooscircbuf.c \
 ${STACKROOT_DIR}/stack/src/user/nmt/nmtu.c \
 ${STACKROOT_DIR}/stack/src/user/nmt/nmtcnu.c \
 ${STACKROOT_DIR}/stack/src/user/obd/obd.c \
+${STACKROOT_DIR}/stack/src/user/obd/obdcreate.c \
 ${STACKROOT_DIR}/stack/src/user/pdo/pdou.c \
 ${STACKROOT_DIR}/stack/src/user/pdo/pdoucal.c \
 ${STACKROOT_DIR}/stack/src/user/pdo/pdoucalmem-local.c \

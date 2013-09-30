@@ -250,9 +250,6 @@ typedef struct
     void*               m_pEventUserArg;
     tEplSyncCb          m_pfnCbSync;
 
-    tObdInitRam         m_pfnObdInitRam;    // function initializes OBD in RAM
-    tObdDeinitRam       m_pfnObdDeinitRam;  // function frees OBD (for future use, currently NULL)
-
     tEplHwParam         m_HwParam;
 
     DWORD               m_dwSyncResLatency; // constant response latency for SyncRes in [ns]

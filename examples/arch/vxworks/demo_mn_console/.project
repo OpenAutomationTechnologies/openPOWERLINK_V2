@@ -205,6 +205,11 @@
 			<location>OPENPOWERLINK_DIR/stack/src/user/obd/obd.c</location>
 		</link>
 		<link>
+			<name>obdcreate.c</name>
+			<type>1</type>
+			<location>OPENPOWERLINK_DIR/stack/src/user/obd/obdcreate.c</location>
+		</link>
+		<link>
 			<name>obdcdc.c</name>
 			<type>1</type>
 			<location>OPENPOWERLINK_DIR/stack/src/user/obd/obdcdc.c</location>
@@ -283,11 +288,6 @@
 			<name>timer-vxworks.c</name>
 			<type>1</type>
 			<location>OPENPOWERLINK_DIR/stack/src/common/timer/timer-vxworks.c</location>
-		</link>
-		<link>
-			<name>Objdict.c</name>
-			<type>1</type>
-			<location>OPENPOWERLINK_DIR/objdicts/CiA302-4_MN/Objdict.c</location>
 		</link>
 		<link>
 			<name>SharedBuff.c</name>

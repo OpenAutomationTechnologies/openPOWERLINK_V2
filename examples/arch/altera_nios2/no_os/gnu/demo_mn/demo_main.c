@@ -125,7 +125,6 @@ static APP_NODE_VAR_T       nodeVar_g[MAX_NODES];
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-tEplKernel PUBLIC  EplObdInitRam (tObdInitParam MEM* pInitParam_p);
 tEplKernel PUBLIC AppCbSync(void);
 tEplKernel PUBLIC AppInit(void);
 
@@ -196,7 +195,6 @@ int  main (void)
 
     // set callback functions
     EplApiInitParam.m_pfnCbEvent = processEvents;
-    EplApiInitParam.m_pfnObdInitRam = EplObdInitRam;
     EplApiInitParam.m_pfnCbSync  = AppCbSync;
 
 
