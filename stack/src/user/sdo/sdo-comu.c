@@ -549,24 +549,24 @@ tEplKernel      Ret;
 tEplSdoComCon*  pSdoComCon;
 
     // check parameter
-    if ((pSdoComTransParam_p->m_uiSubindex >= 0xFF)
-        || (pSdoComTransParam_p->m_uiIndex == 0)
-        || (pSdoComTransParam_p->m_uiIndex > 0xFFFF)
-        || (pSdoComTransParam_p->m_pData == NULL)
-        || (pSdoComTransParam_p->m_uiDataSize == 0))
+    if ((pSdoComTransParam_p->subindex >= 0xFF)
+        || (pSdoComTransParam_p->index == 0)
+        || (pSdoComTransParam_p->index > 0xFFFF)
+        || (pSdoComTransParam_p->pData == NULL)
+        || (pSdoComTransParam_p->dataSize == 0))
     {
         Ret = kEplSdoComInvalidParam;
         goto Exit;
     }
 
-    if(pSdoComTransParam_p->m_SdoComConHdl >= EPL_MAX_SDO_COM_CON)
+    if(pSdoComTransParam_p->sdoComConHdl >= EPL_MAX_SDO_COM_CON)
     {
         Ret = kEplSdoComInvalidHandle;
         goto Exit;
     }
 
     // get pointer to control structure of connection
-    pSdoComCon = &SdoComInstance_g.m_SdoComCon[pSdoComTransParam_p->m_SdoComConHdl];
+    pSdoComCon = &SdoComInstance_g.m_SdoComCon[pSdoComTransParam_p->sdoComConHdl];
 
     // check if handle ok
     if(pSdoComCon->m_SdoSeqConHdl == 0)
@@ -584,11 +584,11 @@ tEplSdoComCon*  pSdoComCon;
 
     // save parameter
     // callback function for end of transfer
-    pSdoComCon->m_pfnTransferFinished = pSdoComTransParam_p->m_pfnSdoFinishedCb;
-    pSdoComCon->m_pUserArg = pSdoComTransParam_p->m_pUserArg;
+    pSdoComCon->m_pfnTransferFinished = pSdoComTransParam_p->pfnSdoFinishedCb;
+    pSdoComCon->m_pUserArg = pSdoComTransParam_p->pUserArg;
 
     // set type of SDO command
-    if (pSdoComTransParam_p->m_SdoAccessType == kSdoAccessTypeRead)
+    if (pSdoComTransParam_p->sdoAccessType == kSdoAccessTypeRead)
     {
         pSdoComCon->m_SdoServiceType = kSdoServiceReadByIndex;
     }
@@ -598,9 +598,9 @@ tEplSdoComCon*  pSdoComCon;
 
     }
     // save pointer to data
-    pSdoComCon->m_pData = pSdoComTransParam_p->m_pData;
+    pSdoComCon->m_pData = pSdoComTransParam_p->pData;
     // maximal bytes to transfer
-    pSdoComCon->m_uiTransSize = pSdoComTransParam_p->m_uiDataSize;
+    pSdoComCon->m_uiTransSize = pSdoComTransParam_p->dataSize;
     // bytes already transfered
     pSdoComCon->m_uiTransferredByte = 0;
 
@@ -608,14 +608,14 @@ tEplSdoComCon*  pSdoComCon;
     pSdoComCon->m_dwLastAbortCode = 0;
     pSdoComCon->m_SdoTransType = kSdoTransAuto;
     // save timeout
-    //pSdoComCon->m_uiTimeout = SdoComTransParam_p.m_uiTimeout;
+    //pSdoComCon->m_uiTimeout = SdoComTransParam_p.timeout;
 
     // save index and subindex
-    pSdoComCon->m_uiTargetIndex = pSdoComTransParam_p->m_uiIndex;
-    pSdoComCon->m_uiTargetSubIndex = pSdoComTransParam_p->m_uiSubindex;
+    pSdoComCon->m_uiTargetIndex = pSdoComTransParam_p->index;
+    pSdoComCon->m_uiTargetSubIndex = pSdoComTransParam_p->subindex;
 
     // call process function
-    Ret = EplSdoComProcessIntern(pSdoComTransParam_p->m_SdoComConHdl,
+    Ret = EplSdoComProcessIntern(pSdoComTransParam_p->sdoComConHdl,
                                     kEplSdoComConEventSendFirst,    // event to start transfer
                                     NULL);
 
@@ -735,25 +735,25 @@ tEplSdoComCon*      pSdoComCon;
         goto Exit;
     }
 
-    pSdoComFinished_p->m_pUserArg = pSdoComCon->m_pUserArg;
-    pSdoComFinished_p->m_uiNodeId = pSdoComCon->m_uiNodeId;
-    pSdoComFinished_p->m_uiTargetIndex = pSdoComCon->m_uiTargetIndex;
-    pSdoComFinished_p->m_uiTargetSubIndex = pSdoComCon->m_uiTargetSubIndex;
-    pSdoComFinished_p->m_uiTransferredByte = pSdoComCon->m_uiTransferredByte;
-    pSdoComFinished_p->m_dwAbortCode = pSdoComCon->m_dwLastAbortCode;
-    pSdoComFinished_p->m_SdoComConHdl = SdoComConHdl_p;
+    pSdoComFinished_p->pUserArg = pSdoComCon->m_pUserArg;
+    pSdoComFinished_p->nodeId = pSdoComCon->m_uiNodeId;
+    pSdoComFinished_p->targetIndex = pSdoComCon->m_uiTargetIndex;
+    pSdoComFinished_p->targetSubIndex = pSdoComCon->m_uiTargetSubIndex;
+    pSdoComFinished_p->transferredBytes = pSdoComCon->m_uiTransferredByte;
+    pSdoComFinished_p->abortCode = pSdoComCon->m_dwLastAbortCode;
+    pSdoComFinished_p->sdoComConHdl = SdoComConHdl_p;
     if (pSdoComCon->m_SdoServiceType == kSdoServiceWriteByIndex)
     {
-        pSdoComFinished_p->m_SdoAccessType = kSdoAccessTypeWrite;
+        pSdoComFinished_p->sdoAccessType = kSdoAccessTypeWrite;
     }
     else
     {
-        pSdoComFinished_p->m_SdoAccessType = kSdoAccessTypeRead;
+        pSdoComFinished_p->sdoAccessType = kSdoAccessTypeRead;
     }
 
     if(pSdoComCon->m_dwLastAbortCode != 0)
     {   // sdo abort
-        pSdoComFinished_p->m_SdoComConState = kEplSdoComTransferRxAborted;
+        pSdoComFinished_p->sdoComConState = kEplSdoComTransferRxAborted;
 
         // delete abort code
         pSdoComCon->m_dwLastAbortCode = 0;
@@ -761,16 +761,16 @@ tEplSdoComCon*      pSdoComCon;
     }
     else if((pSdoComCon->m_SdoSeqConHdl & ~SDO_SEQ_HANDLE_MASK)== SDO_SEQ_INVALID_HDL)
     {   // check state
-        pSdoComFinished_p->m_SdoComConState = kEplSdoComTransferLowerLayerAbort;
+        pSdoComFinished_p->sdoComConState = kEplSdoComTransferLowerLayerAbort;
     }
     else if(pSdoComCon->m_SdoComState == kEplSdoComStateClientWaitInit)
     {
         // finished
-        pSdoComFinished_p->m_SdoComConState = kEplSdoComTransferNotActive;
+        pSdoComFinished_p->sdoComConState = kEplSdoComTransferNotActive;
     }
     else if(pSdoComCon->m_uiTransSize == 0)
     {   // finished
-        pSdoComFinished_p->m_SdoComConState = kEplSdoComTransferFinished;
+        pSdoComFinished_p->sdoComConState = kEplSdoComTransferFinished;
     }
 
 Exit:
@@ -3087,21 +3087,21 @@ tEplKernel      Ret;
     tSdoFinishedCb   pfnTransferFinished;
     tSdoComFinished  SdoComFinished;
 
-        SdoComFinished.m_pUserArg = pSdoComCon_p->m_pUserArg;
-        SdoComFinished.m_uiNodeId = pSdoComCon_p->m_uiNodeId;
-        SdoComFinished.m_uiTargetIndex = pSdoComCon_p->m_uiTargetIndex;
-        SdoComFinished.m_uiTargetSubIndex = pSdoComCon_p->m_uiTargetSubIndex;
-        SdoComFinished.m_uiTransferredByte = pSdoComCon_p->m_uiTransferredByte;
-        SdoComFinished.m_dwAbortCode = pSdoComCon_p->m_dwLastAbortCode;
-        SdoComFinished.m_SdoComConHdl = SdoComCon_p;
-        SdoComFinished.m_SdoComConState = SdoComConState_p;
+        SdoComFinished.pUserArg = pSdoComCon_p->m_pUserArg;
+        SdoComFinished.nodeId = pSdoComCon_p->m_uiNodeId;
+        SdoComFinished.targetIndex = pSdoComCon_p->m_uiTargetIndex;
+        SdoComFinished.targetSubIndex = pSdoComCon_p->m_uiTargetSubIndex;
+        SdoComFinished.transferredBytes = pSdoComCon_p->m_uiTransferredByte;
+        SdoComFinished.abortCode = pSdoComCon_p->m_dwLastAbortCode;
+        SdoComFinished.sdoComConHdl = SdoComCon_p;
+        SdoComFinished.sdoComConState = SdoComConState_p;
         if (pSdoComCon_p->m_SdoServiceType == kSdoServiceWriteByIndex)
         {
-            SdoComFinished.m_SdoAccessType = kSdoAccessTypeWrite;
+            SdoComFinished.sdoAccessType = kSdoAccessTypeWrite;
         }
         else
         {
-            SdoComFinished.m_SdoAccessType = kSdoAccessTypeRead;
+            SdoComFinished.sdoAccessType = kSdoAccessTypeRead;
         }
 
         // reset transfer state so this handle is not busy anymore

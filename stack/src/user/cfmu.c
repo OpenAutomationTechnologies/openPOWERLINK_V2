@@ -653,14 +653,14 @@ transfer is finished.
 static tEplKernel cbSdoCon(tSdoComFinished* pSdoComFinished_p)
 {
     tEplKernel          ret = kEplSuccessful;
-    tCfmNodeInfo*       pNodeInfo = pSdoComFinished_p->m_pUserArg;
+    tCfmNodeInfo*       pNodeInfo = pSdoComFinished_p->pUserArg;
     tNmtCommand         nmtCommand;
 
     if (pNodeInfo == NULL)
         return kEplInvalidNodeId;
 
-    pNodeInfo->eventCnProgress.sdoAbortCode = pSdoComFinished_p->m_dwAbortCode;
-    pNodeInfo->eventCnProgress.bytesDownloaded += pSdoComFinished_p->m_uiTransferredByte;
+    pNodeInfo->eventCnProgress.sdoAbortCode = pSdoComFinished_p->abortCode;
+    pNodeInfo->eventCnProgress.bytesDownloaded += pSdoComFinished_p->transferredBytes;
 
     if ((ret = callCbProgress(pNodeInfo)) != kEplSuccessful)
         return ret;
@@ -672,7 +672,7 @@ static tEplKernel cbSdoCon(tSdoComFinished* pSdoComFinished_p)
             break;
 
         case kCfmStateUpToDate:
-            if (pSdoComFinished_p->m_SdoComConState == kEplSdoComTransferFinished)
+            if (pSdoComFinished_p->sdoComConState == kEplSdoComTransferFinished)
                 nmtCommand = kNmtNodeCommandConfReset;  // continue boot-up of CN with NMT command Reset Configuration
             else
                 nmtCommand = kNmtNodeCommandConfErr;   // indicate configuration error CN
@@ -681,14 +681,14 @@ static tEplKernel cbSdoCon(tSdoComFinished* pSdoComFinished_p)
             break;
 
         case kCfmStateDownload:
-            if (pSdoComFinished_p->m_SdoComConState == kEplSdoComTransferFinished)
+            if (pSdoComFinished_p->sdoComConState == kEplSdoComTransferFinished)
                 ret = downloadObject(pNodeInfo);
             else
                 ret = finishConfig(pNodeInfo, kNmtNodeCommandConfErr);      // configuration was not successful
             break;
 
         case kCfmStateWaitRestore:
-            if (pSdoComFinished_p->m_SdoComConState == kEplSdoComTransferFinished)
+            if (pSdoComFinished_p->sdoComConState == kEplSdoComTransferFinished)
             {   // configuration successfully restored
                 EPL_DBGLVL_CFM_TRACE("\nCN%x - Restore Complete. Resetting Node...\n", pNodeInfo->eventCnProgress.m_uiNodeId);
                 // send NMT command reset node to activate the original configuration
@@ -878,14 +878,14 @@ static tEplKernel sdoWriteObject(tCfmNodeInfo* pNodeInfo_p, void* pLeSrcData_p, 
             return ret;
     }
 
-    transParamByIndex.m_pData = pLeSrcData_p;
-    transParamByIndex.m_SdoAccessType = kSdoAccessTypeWrite;
-    transParamByIndex.m_SdoComConHdl = pNodeInfo_p->sdoComConHdl;
-    transParamByIndex.m_uiDataSize = size_p;
-    transParamByIndex.m_uiIndex = pNodeInfo_p->eventCnProgress.objectIndex;
-    transParamByIndex.m_uiSubindex = pNodeInfo_p->eventCnProgress.objectSubIndex;
-    transParamByIndex.m_pfnSdoFinishedCb = cbSdoCon;
-    transParamByIndex.m_pUserArg = pNodeInfo_p;
+    transParamByIndex.pData = pLeSrcData_p;
+    transParamByIndex.sdoAccessType = kSdoAccessTypeWrite;
+    transParamByIndex.sdoComConHdl = pNodeInfo_p->sdoComConHdl;
+    transParamByIndex.dataSize = size_p;
+    transParamByIndex.index = pNodeInfo_p->eventCnProgress.objectIndex;
+    transParamByIndex.subindex = pNodeInfo_p->eventCnProgress.objectSubIndex;
+    transParamByIndex.pfnSdoFinishedCb = cbSdoCon;
+    transParamByIndex.pUserArg = pNodeInfo_p;
 
     ret = EplSdoComInitTransferByIndex(&transParamByIndex);
     if (ret == kEplSdoComHandleBusy)
@@ -915,7 +915,7 @@ static tEplKernel sdoWriteObject(tCfmNodeInfo* pNodeInfo_p, void* pLeSrcData_p, 
             return ret;
 
         // retry transfer
-        transParamByIndex.m_SdoComConHdl = pNodeInfo_p->sdoComConHdl;
+        transParamByIndex.sdoComConHdl = pNodeInfo_p->sdoComConHdl;
         ret = EplSdoComInitTransferByIndex(&transParamByIndex);
     }
 

@@ -767,18 +767,18 @@ tEplKernel ProcessThread::processSdoEvent(tEplApiEventType EventType_p,
     UNUSED_PARAMETER(pUserArg_p);
 
     // SDO transfer finished
-    if ((ret = oplk_freeSdoChannel(pSdo->m_SdoAccessType)) != kEplSuccessful)
+    if ((ret = oplk_freeSdoChannel(pSdo->sdoAccessType)) != kEplSuccessful)
     {
         return ret;
     }
 
-    if (pSdo->m_SdoComConState == kEplSdoComTransferFinished)
+    if (pSdo->sdoComConState == kEplSdoComTransferFinished)
     {   // continue boot-up of CN with NMT command Reset Configuration
-        ret = oplk_triggerMnStateChange(pSdo->m_uiNodeId, kNmtNodeCommandConfReset);
+        ret = oplk_triggerMnStateChange(pSdo->nodeId, kNmtNodeCommandConfReset);
     }
     else
     {   // indicate configuration error CN
-        ret = oplk_triggerMnStateChange(pSdo->m_uiNodeId, kNmtNodeCommandConfErr);
+        ret = oplk_triggerMnStateChange(pSdo->nodeId, kNmtNodeCommandConfErr);
     }
     return ret;
 }
