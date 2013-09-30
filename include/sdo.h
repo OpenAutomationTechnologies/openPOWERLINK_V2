@@ -1,86 +1,53 @@
-/****************************************************************************
+/**
+********************************************************************************
+\file   sdo.h
 
-  (c) SYSTEC electronic GmbH, D-07973 Greiz, August-Bebel-Str. 29
-      www.systec-electronic.com
+\brief  Definitions for SDO module
 
-  Project:      openPOWERLINK
+This file contains definitions for the SDO module.
+*******************************************************************************/
 
-  Description:  include file for api function of the sdo module
+/*------------------------------------------------------------------------------
+Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2013, SYSTEC electronic GmbH
+All rights reserved.
 
-  License:
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+    * Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above copyright
+      notice, this list of conditions and the following disclaimer in the
+      documentation and/or other materials provided with the distribution.
+    * Neither the name of the copyright holders nor the
+      names of its contributors may be used to endorse or promote products
+      derived from this software without specific prior written permission.
 
-    Redistribution and use in source and binary forms, with or without
-    modification, are permitted provided that the following conditions
-    are met:
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL COPYRIGHT HOLDERS BE LIABLE FOR ANY
+DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+------------------------------------------------------------------------------*/
 
-    1. Redistributions of source code must retain the above copyright
-       notice, this list of conditions and the following disclaimer.
+#ifndef _INC_sdo_H_
+#define _INC_sdo_H_
 
-    2. Redistributions in binary form must reproduce the above copyright
-       notice, this list of conditions and the following disclaimer in the
-       documentation and/or other materials provided with the distribution.
+//------------------------------------------------------------------------------
+// includes
+//------------------------------------------------------------------------------
+#include <EplInc.h>
+#include <EplFrame.h>
+#include <EplSdoAc.h>
 
-    3. Neither the name of SYSTEC electronic GmbH nor the names of its
-       contributors may be used to endorse or promote products derived
-       from this software without prior written permission. For written
-       permission, please contact info@systec-electronic.com.
-
-    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-    LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-    FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-    COPYRIGHT HOLDERS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-    INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-    BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-    LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-    CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-    LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-    ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-    POSSIBILITY OF SUCH DAMAGE.
-
-    Severability Clause:
-
-        If a provision of this License is or becomes illegal, invalid or
-        unenforceable in any jurisdiction, that shall not affect:
-        1. the validity or enforceability in that jurisdiction of any other
-           provision of this License; or
-        2. the validity or enforceability in other jurisdictions of that or
-           any other provision of this License.
-
-  -------------------------------------------------------------------------
-
-                $RCSfile$
-
-                $Author$
-
-                $Revision$  $Date$
-
-                $State$
-
-                Build Environment:
-                    GCC V3.4
-
-  -------------------------------------------------------------------------
-
-  Revision History:
-
- 2006/06/26 k.t.:   start of the implementation
-
-
-****************************************************************************/
-
-#ifndef _EPLSDO_H_
-#define _EPLSDO_H_
-
-#include "EplInc.h"
-#include "EplFrame.h"
-#include "EplSdoAc.h"
-
-
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // const defines
-//---------------------------------------------------------------------------
-// global defines
+//------------------------------------------------------------------------------
 #ifndef SDO_MAX_SEGMENT_SIZE
 #define SDO_MAX_SEGMENT_SIZE        256
 #endif
@@ -108,153 +75,172 @@
 //    without Sdo-Command: Maximum Segment Size
 #define SDO_MAX_REC_FRAME_SIZE      EPL_C_IP_MAX_MTU
 
-//---------------------------------------------------------------------------
-// typedef
-//---------------------------------------------------------------------------
-// handle between Protocol Abstraction Layer and asynchronous SDO Sequence Layer
-typedef unsigned int tSdoConHdl;
+//------------------------------------------------------------------------------
+// Type definitions
+//------------------------------------------------------------------------------
 
-// callback function pointer for Protocol Abstraction Layer to call
-// asynchronous SDO Sequence Layer
-typedef tEplKernel (PUBLIC* tSequLayerReceiveCb ) (
-    tSdoConHdl          ConHdl_p,
-    tAsySdoSeq*         pSdoSeqData_p,
-    unsigned int        uiDataSize_p);
+/// Data type for handle between Protocol Abstraction Layer and asynchronous SDO Sequence Layer
+typedef UINT tSdoConHdl;
 
-// handle between asynchronous SDO Sequence Layer and SDO Command layer
-typedef unsigned int tSdoSeqConHdl;
+/// Callback function pointer for Protocol Abstraction Layer to call asynchronous SDO Sequence Layer
+typedef tEplKernel (*tSequLayerReceiveCb)(tSdoConHdl ConHdl_p, tAsySdoSeq* pSdoSeqData_p, UINT uiDataSize_p);
 
-// callback function pointer for asynchronous SDO Sequence Layer to call
-// SDO Command layer for received data
-typedef tEplKernel (PUBLIC* tSdoComReceiveCb) (
-    tSdoSeqConHdl       SdoSeqConHdl_p,
-    tAsySdoCom*         pAsySdoCom_p,
-    unsigned int        uiDataSize_p);
+/// Data type for handle between asynchronous SDO Sequence Layer and SDO Command layer
+typedef UINT tSdoSeqConHdl;
 
-// status of connection
+/// Callback function pointer for asynchronous SDO Sequence Layer to call SDO Command layer for received data
+typedef tEplKernel (*tSdoComReceiveCb)(tSdoSeqConHdl SdoSeqConHdl_p, tAsySdoCom* pAsySdoCom_p, UINT uiDataSize_p);
+
+/**
+\brief Enumeration lists valid SDO connection states
+
+This enumeration lists all valid SDO connection states.
+*/
 typedef enum
 {
-    kAsySdoConStateConnected    = 0x00,
-    kAsySdoConStateInitError    = 0x01,
-    kAsySdoConStateConClosed    = 0x02,
-    kAsySdoConStateAckReceived  = 0x03,
-    kAsySdoConStateFrameSended  = 0x04,
-    kAsySdoConStateTimeout      = 0x05,
-    kAsySdoConStateTransferAbort= 0x06,
-
+    kAsySdoConStateConnected            = 0x00,
+    kAsySdoConStateInitError            = 0x01,
+    kAsySdoConStateConClosed            = 0x02,
+    kAsySdoConStateAckReceived          = 0x03,
+    kAsySdoConStateFrameSended          = 0x04,
+    kAsySdoConStateTimeout              = 0x05,
+    kAsySdoConStateTransferAbort        = 0x06,
 }tAsySdoConState;
 
-// callback function pointer for asynchronous SDO Sequence Layer to call
-// SDO Command layer for connection status
-typedef tEplKernel (PUBLIC* tSdoComConCb) (
-    tSdoSeqConHdl    SdoSeqConHdl_p,
-    tAsySdoConState  AsySdoConState_p);
+/// callback function pointer for asynchronous SDO sequence layer to call SDO command layer for connection status
+typedef tEplKernel (*tSdoComConCb)(tSdoSeqConHdl SdoSeqConHdl_p, tAsySdoConState AsySdoConState_p);
 
-// handle between  SDO Command layer and application
-typedef unsigned int tSdoComConHdl;
+/// Data type for handle between SDO command layer and application
+typedef UINT tSdoComConHdl;
 
-// status of connection
+/**
+\brief Enumeration lists valid SDO command layer connection states
+
+This enumeration lists all valid SDO command layer connection states.
+*/
 typedef enum
 {
-    kEplSdoComTransferNotActive         =   0x00,
-    kEplSdoComTransferRunning           =   0x01,
-    kEplSdoComTransferTxAborted         =   0x02,
-    kEplSdoComTransferRxAborted         =   0x03,
-    kEplSdoComTransferFinished          =   0x04,
-    kEplSdoComTransferLowerLayerAbort   =   0x05
-
+    kEplSdoComTransferNotActive         = 0x00,
+    kEplSdoComTransferRunning           = 0x01,
+    kEplSdoComTransferTxAborted         = 0x02,
+    kEplSdoComTransferRxAborted         = 0x03,
+    kEplSdoComTransferFinished          = 0x04,
+    kEplSdoComTransferLowerLayerAbort   = 0x05
 } tSdoComConState;
 
-// SDO Services and Command-Ids from DS 1.0.0 p.152
+/**
+\brief Enumeration for SDO service types (command IDs)
+
+This enumeration lists all valid SDO command IDs.
+*/
 typedef enum
 {
-    kSdoServiceNIL                  = 0x00,
-    kSdoServiceWriteByIndex         = 0x01,
-    kSdoServiceReadByIndex          = 0x02,
+    kSdoServiceNIL                      = 0x00,
+    kSdoServiceWriteByIndex             = 0x01,
+    kSdoServiceReadByIndex              = 0x02,
+
     // the following services are optional and are not supported now
-    kSdoServiceWriteAllByIndex      = 0x03,
-    kSdoServiceReadAllByIndex       = 0x04,
-    kSdoServiceWriteByName          = 0x05,
-    kSdoServiceReadByName           = 0x06,
-    kSdoServiceFileWrite            = 0x20,
-    kSdoServiceFileRead             = 0x21,
-    kSdoServiceWriteMultiByIndex    = 0x31,
-    kSdoServiceReadMultiByIndex     = 0x32,
-    kSdoServiceMaxSegSize           = 0x70
+    kSdoServiceWriteAllByIndex          = 0x03,
+    kSdoServiceReadAllByIndex           = 0x04,
+    kSdoServiceWriteByName              = 0x05,
+    kSdoServiceReadByName               = 0x06,
+    kSdoServiceFileWrite                = 0x20,
+    kSdoServiceFileRead                 = 0x21,
+    kSdoServiceWriteMultiByIndex        = 0x31,
+    kSdoServiceReadMultiByIndex         = 0x32,
+    kSdoServiceMaxSegSize               = 0x70
     // 0x80 - 0xFF manufacturer specific
 } tSdoServiceType;
 
-// describes if read or write access
+
+/**
+\brief Enumeration for SDO access types
+
+This enumeration lists all valid SDO access types.
+*/
 typedef enum
 {
-    kSdoAccessTypeRead              = 0x00,
-    kSdoAccessTypeWrite             = 0x01
-
+    kSdoAccessTypeRead                  = 0x00,
+    kSdoAccessTypeWrite                 = 0x01
 } tSdoAccessType;
 
+/**
+\brief Enumeration for SDO types
+
+This enumeration lists all valid SDO types.
+*/
 typedef enum
 {
-    kSdoTypeAuto                    = 0x00,
-    kSdoTypeUdp                     = 0x01,
-    kSdoTypeAsnd                    = 0x02,
-    kSdoTypePdo                     = 0x03
-
+    kSdoTypeAuto                        = 0x00,
+    kSdoTypeUdp                         = 0x01,
+    kSdoTypeAsnd                        = 0x02,
+    kSdoTypePdo                         = 0x03
 }tSdoType;
 
+/**
+\brief Enumeration for SDO transfer types
+
+This enumeration lists all valid SDO transfer types.
+*/
 typedef enum
 {
-    kSdoTransAuto                   = 0x00,
-    kSdoTransExpedited              = 0x01,
-    kSdoTransSegmented              = 0x02
-
-
+    kSdoTransAuto                       = 0x00,
+    kSdoTransExpedited                  = 0x01,
+    kSdoTransSegmented                  = 0x02
 } tSdoTransType;
 
+/**
+\brief Structure for finished SDO transfer
 
-// structure to inform application about finish of SDO transfer
+This structure is used to inform the application about a finished SDO transfer.
+*/
 typedef struct
 {
-    tSdoComConHdl       m_SdoComConHdl;
-    tSdoComConState     m_SdoComConState;
-    DWORD               m_dwAbortCode;
-    tSdoAccessType      m_SdoAccessType;
-    unsigned int        m_uiNodeId;         // NodeId of the target
-    unsigned int        m_uiTargetIndex;    // index which was accessed
-    unsigned int        m_uiTargetSubIndex; // subindex which was accessed
-    unsigned int        m_uiTransferredByte; // number of bytes transferred
-    void*               m_pUserArg;         // user definable argument pointer
-
+    tSdoComConHdl       sdoComConHdl;           ///< Handle to SDO command layer connection
+    tSdoComConState     sdoComConState;         ///< Status of SDO command layer connection
+    UINT32              abortCode;              ///< SDO abort code
+    tSdoAccessType      sdoAccessType;          ///< SDO access type
+    UINT                nodeId;                 ///< The node ID of the target
+    UINT                targetIndex;            ///< Index which was accessed
+    UINT                targetSubIndex;         ///< Sub-index which was accessed
+    UINT                transferredBytes;       ///< The number of bytes transferred
+    void*               pUserArg;               ///< The user defined argument pointer
 } tSdoComFinished;
 
 
-// callback function pointer to inform application about connection
-typedef tEplKernel (PUBLIC* tSdoFinishedCb) (
-    tSdoComFinished* pSdoComFinished_p);
+/// callback function pointer to inform application about connection
+typedef tEplKernel (*tSdoFinishedCb)(tSdoComFinished* pSdoComFinished_p);
 
+/**
+\brief Structure for initializing Read/Write by Index SDO transfer
 
-// structure to init SDO transfer to Read or Write by Index
+This structure is used to initialize a SDO transfer of a Read or Write
+by Index command.
+*/
 typedef struct
 {
-    tSdoComConHdl       m_SdoComConHdl;
-    unsigned int        m_uiIndex;
-    unsigned int        m_uiSubindex;
-    void*               m_pData;
-    unsigned int        m_uiDataSize;
-    unsigned int        m_uiTimeout;    // not used in this version
-    tSdoAccessType      m_SdoAccessType;
-    tSdoFinishedCb      m_pfnSdoFinishedCb;
-    void*               m_pUserArg;         // user definable argument pointer
-
+    tSdoComConHdl       sdoComConHdl;           ///< Handle to SDO command layer connection
+    UINT                index;                  ///< Index to read/write
+    UINT                subindex;               ///< Sub-index to read/write
+    void*               pData;                  ///< Pointer to data which should be transfered
+    UINT                dataSize;               ///< Size of data to be transfered
+    UINT                timeout;                ///< Timeout: not supported in this version of openPOWERLINK
+    tSdoAccessType      sdoAccessType;          ///< The SDO access type (Read or Write) for this transfer
+    tSdoFinishedCb      pfnSdoFinishedCb;       ///< Pointer to callback function which will be called when transfer is finished.
+    void*               pUserArg;               ///< User definable argument pointer
 } tSdoComTransParamByIndex;
 
-
-
-
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // function prototypes
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-#endif  // #ifndef _EPLSDO_H_
+#ifdef __cplusplus
+}
+#endif
 
+#endif /* _INC_sdo_H_ */
 

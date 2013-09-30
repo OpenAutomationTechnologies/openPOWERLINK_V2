@@ -363,14 +363,14 @@ tEplKernel oplk_readObject(tSdoComConHdl* pSdoComConHdl_p, UINT nodeId_p, UINT i
             return ret;
         }
 
-        transParamByIndex.m_pData = pDstData_le_p;
-        transParamByIndex.m_SdoAccessType = kSdoAccessTypeRead;
-        transParamByIndex.m_SdoComConHdl = *pSdoComConHdl_p;
-        transParamByIndex.m_uiDataSize = *pSize_p;
-        transParamByIndex.m_uiIndex = index_p;
-        transParamByIndex.m_uiSubindex = subindex_p;
-        transParamByIndex.m_pfnSdoFinishedCb = cbSdoCon;
-        transParamByIndex.m_pUserArg = pUserArg_p;
+        transParamByIndex.pData = pDstData_le_p;
+        transParamByIndex.sdoAccessType = kSdoAccessTypeRead;
+        transParamByIndex.sdoComConHdl = *pSdoComConHdl_p;
+        transParamByIndex.dataSize = *pSize_p;
+        transParamByIndex.index = index_p;
+        transParamByIndex.subindex = subindex_p;
+        transParamByIndex.pfnSdoFinishedCb = cbSdoCon;
+        transParamByIndex.pUserArg = pUserArg_p;
 
         if ((ret = EplSdoComInitTransferByIndex(&transParamByIndex)) != kEplSuccessful)
             return ret;
@@ -449,14 +449,14 @@ tEplKernel oplk_writeObject(tSdoComConHdl* pSdoComConHdl_p, UINT nodeId_p, UINT 
         if ((ret != kEplSuccessful) && (ret != kEplSdoComHandleExists))
             return ret;
 
-        transParamByIndex.m_pData = pSrcData_le_p;
-        transParamByIndex.m_SdoAccessType = kSdoAccessTypeWrite;
-        transParamByIndex.m_SdoComConHdl = *pSdoComConHdl_p;
-        transParamByIndex.m_uiDataSize = size_p;
-        transParamByIndex.m_uiIndex = index_p;
-        transParamByIndex.m_uiSubindex = subindex_p;
-        transParamByIndex.m_pfnSdoFinishedCb = cbSdoCon;
-        transParamByIndex.m_pUserArg = pUserArg_p;
+        transParamByIndex.pData = pSrcData_le_p;
+        transParamByIndex.sdoAccessType = kSdoAccessTypeWrite;
+        transParamByIndex.sdoComConHdl = *pSdoComConHdl_p;
+        transParamByIndex.dataSize = size_p;
+        transParamByIndex.index = index_p;
+        transParamByIndex.subindex = subindex_p;
+        transParamByIndex.pfnSdoFinishedCb = cbSdoCon;
+        transParamByIndex.pUserArg = pUserArg_p;
 
         if ((ret = EplSdoComInitTransferByIndex(&transParamByIndex)) != kEplSuccessful)
             return ret;
