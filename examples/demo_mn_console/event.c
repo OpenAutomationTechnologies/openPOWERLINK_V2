@@ -561,7 +561,7 @@ static tEplKernel processSdoEvent(tEplApiEventType EventType_p,
                                   tEplApiEventArg* pEventArg_p,
                                   void GENERIC* pUserArg_p)
 {
-    tEplSdoComFinished*       pSdo = &pEventArg_p->m_Sdo;
+    tSdoComFinished*          pSdo = &pEventArg_p->m_Sdo;
     tEplKernel                ret = kEplSuccessful;
 
     UNUSED_PARAMETER(EventType_p);

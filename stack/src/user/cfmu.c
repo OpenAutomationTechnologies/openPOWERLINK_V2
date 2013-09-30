@@ -126,7 +126,7 @@ typedef struct
     UINT8*                  pDataConciseDcf;
     UINT32                  bytesRemaining;
     UINT32                  entriesRemaining;
-    tEplSdoComConHdl        sdoComConHdl;
+    tSdoComConHdl           sdoComConHdl;
     tCfmState               cfmState;
     UINT                    curDataSize;
     BOOL                    fDoStore;
@@ -162,7 +162,7 @@ static tEplKernel callCbProgress(tCfmNodeInfo* pNodeInfo_p);
 static tEplKernel downloadCycleLength(tCfmNodeInfo* pNodeInfo_p);
 static tEplKernel downloadObject(tCfmNodeInfo* pNodeInfo_p);
 static tEplKernel sdoWriteObject(tCfmNodeInfo* pNodeInfo_p, void* pLeSrcData_p, UINT size_p);
-static tEplKernel cbSdoCon(tEplSdoComFinished* pSdoComFinished_p);
+static tEplKernel cbSdoCon(tSdoComFinished* pSdoComFinished_p);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -650,7 +650,7 @@ transfer is finished.
 \return The function returns a tEplKernel error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel cbSdoCon(tEplSdoComFinished* pSdoComFinished_p)
+static tEplKernel cbSdoCon(tSdoComFinished* pSdoComFinished_p)
 {
     tEplKernel          ret = kEplSuccessful;
     tCfmNodeInfo*       pNodeInfo = pSdoComFinished_p->m_pUserArg;
@@ -863,7 +863,7 @@ The function writes the specified entry to the OD of the specified node.
 static tEplKernel sdoWriteObject(tCfmNodeInfo* pNodeInfo_p, void* pLeSrcData_p, UINT size_p)
 {
     tEplKernel                  ret = kEplSuccessful;
-    tEplSdoComTransParamByIndex transParamByIndex;
+    tSdoComTransParamByIndex    transParamByIndex;
 
     if ((pLeSrcData_p == NULL) || (size_p == 0))
         return kEplApiInvalidParam;
@@ -873,13 +873,13 @@ static tEplKernel sdoWriteObject(tCfmNodeInfo* pNodeInfo_p, void* pLeSrcData_p, 
         // init command layer connection
         ret = EplSdoComDefineCon(&pNodeInfo_p->sdoComConHdl,
                                  pNodeInfo_p->eventCnProgress.nodeId,
-                                 kEplSdoTypeAsnd);
+                                 kSdoTypeAsnd);
         if ((ret != kEplSuccessful) && (ret != kEplSdoComHandleExists))
             return ret;
     }
 
     transParamByIndex.m_pData = pLeSrcData_p;
-    transParamByIndex.m_SdoAccessType = kEplSdoAccessTypeWrite;
+    transParamByIndex.m_SdoAccessType = kSdoAccessTypeWrite;
     transParamByIndex.m_SdoComConHdl = pNodeInfo_p->sdoComConHdl;
     transParamByIndex.m_uiDataSize = size_p;
     transParamByIndex.m_uiIndex = pNodeInfo_p->eventCnProgress.objectIndex;
@@ -910,7 +910,7 @@ static tEplKernel sdoWriteObject(tCfmNodeInfo* pNodeInfo_p, void* pLeSrcData_p, 
         // reinit command layer connection
         ret = EplSdoComDefineCon(&pNodeInfo_p->sdoComConHdl,
                                  pNodeInfo_p->eventCnProgress.nodeId,
-                                 kEplSdoTypeAsnd);
+                                 kSdoTypeAsnd);
         if ((ret != kEplSuccessful) && (ret != kEplSdoComHandleExists))
             return ret;
 

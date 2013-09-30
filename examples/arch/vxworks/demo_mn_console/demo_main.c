@@ -507,7 +507,7 @@ tEplKernel          EplRet = kEplSuccessful;
                     uiSize = 4;
                     EplRet = oplk_readObject(NULL, 0, 0x1006, 0x00,
                                               &dw_le_CycleLen_g, &uiSize,
-                                              kEplSdoTypeAsnd, NULL);
+                                              kSdoTypeAsnd, NULL);
                     if (EplRet != kEplSuccessful)
                     {   // local OD access failed
                         break;

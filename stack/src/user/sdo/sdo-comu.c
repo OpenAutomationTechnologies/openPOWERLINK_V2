@@ -166,21 +166,21 @@ typedef enum
 // control structure for transaction
 typedef struct
 {
-    tEplSdoSeqConHdl    m_SdoSeqConHdl;     // if != 0 -> entry used
+    tSdoSeqConHdl    m_SdoSeqConHdl;     // if != 0 -> entry used
     tEplSdoComState     m_SdoComState;
     BYTE                m_bTransactionId;
     unsigned int        m_uiNodeId;         // NodeId of the target
                                             // -> needed to reinit connection
                                             //    after timeout
-    tEplSdoTransType    m_SdoTransType;     // Auto, Expedited, Segmented
-    tEplSdoServiceType  m_SdoServiceType;   // WriteByIndex, ReadByIndex
-    tEplSdoType         m_SdoProtType;      // protocol layer: Auto, Udp, Asnd, Pdo
+    tSdoTransType    m_SdoTransType;     // Auto, Expedited, Segmented
+    tSdoServiceType  m_SdoServiceType;   // WriteByIndex, ReadByIndex
+    tSdoType         m_SdoProtType;      // protocol layer: Auto, Udp, Asnd, Pdo
     BYTE*               m_pData;            // pointer to data
     unsigned int        m_uiTransSize;      // number of bytes
                                             // to transfer
     unsigned int        m_uiTransferredByte;// number of bytes
                                             // already transferred
-    tEplSdoFinishedCb   m_pfnTransferFinished;// callback function of the
+    tSdoFinishedCb   m_pfnTransferFinished;// callback function of the
                                             // application
                                             // -> called in the end of
                                             //    the SDO transfer
@@ -218,29 +218,29 @@ static tEplSdoComInstance SdoComInstance_g;
 //---------------------------------------------------------------------------
 // local function prototypes
 //---------------------------------------------------------------------------
-tEplKernel PUBLIC EplSdoComReceiveCb (tEplSdoSeqConHdl    SdoSeqConHdl_p,
-                                    tEplAsySdoCom*      pAsySdoCom_p,
+tEplKernel PUBLIC EplSdoComReceiveCb (tSdoSeqConHdl    SdoSeqConHdl_p,
+                                    tAsySdoCom*      pAsySdoCom_p,
                                     unsigned int        uiDataSize_p);
 
 
-tEplKernel PUBLIC EplSdoComConCb (tEplSdoSeqConHdl    SdoSeqConHdl_p,
-                                    tEplAsySdoConState  AsySdoConState_p);
+tEplKernel PUBLIC EplSdoComConCb (tSdoSeqConHdl    SdoSeqConHdl_p,
+                                    tAsySdoConState  AsySdoConState_p);
 
-static tEplKernel EplSdoComSearchConIntern(tEplSdoSeqConHdl    SdoSeqConHdl_p,
+static tEplKernel EplSdoComSearchConIntern(tSdoSeqConHdl    SdoSeqConHdl_p,
                                          tEplSdoComConEvent SdoComConEvent_p,
-                                         tEplAsySdoCom*     pAsySdoCom_p);
+                                         tAsySdoCom*     pAsySdoCom_p);
 
-static tEplKernel EplSdoComProcessIntern(tEplSdoComConHdl   SdoComCon_p,
+static tEplKernel EplSdoComProcessIntern(tSdoComConHdl   SdoComCon_p,
                                          tEplSdoComConEvent SdoComConEvent_p,
-                                         tEplAsySdoCom*     pAsySdoCom_p);
+                                         tAsySdoCom*     pAsySdoCom_p);
 
-static tEplKernel EplSdoComTransferFinished(tEplSdoComConHdl   SdoComCon_p,
+static tEplKernel EplSdoComTransferFinished(tSdoComConHdl   SdoComCon_p,
                                             tEplSdoComCon*     pSdoComCon_p,
-                                            tEplSdoComConState SdoComConState_p);
+                                            tSdoComConState SdoComConState_p);
 
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOS)) != 0)
 static tEplKernel EplSdoComServerInitReadByIndex(tEplSdoComCon*     pSdoComCon_p,
-                                         tEplAsySdoCom*     pAsySdoCom_p);
+                                         tAsySdoCom*     pAsySdoCom_p);
 
 static tEplKernel EplSdoComServerSendFrameIntern(tEplSdoComCon*     pSdoComCon_p,
                                            unsigned int       uiIndex_p,
@@ -248,7 +248,7 @@ static tEplKernel EplSdoComServerSendFrameIntern(tEplSdoComCon*     pSdoComCon_p
                                            tEplSdoComSendType SendType_p);
 
 static tEplKernel EplSdoComServerInitWriteByIndex(tEplSdoComCon*     pSdoComCon_p,
-                                         tEplAsySdoCom*     pAsySdoCom_p);
+                                         tAsySdoCom*     pAsySdoCom_p);
 #endif
 
 
@@ -256,8 +256,8 @@ static tEplKernel EplSdoComServerInitWriteByIndex(tEplSdoComCon*     pSdoComCon_
 
 static tEplKernel EplSdoComClientSend(tEplSdoComCon* pSdoComCon_p);
 
-static tEplKernel EplSdoComClientProcessFrame(tEplSdoComConHdl   SdoComCon_p,
-                                              tEplAsySdoCom*     pAsySdoCom_p);
+static tEplKernel EplSdoComClientProcessFrame(tSdoComConHdl   SdoComCon_p,
+                                              tAsySdoCom*     pAsySdoCom_p);
 
 static tEplKernel EplSdoComClientSendAbort(tEplSdoComCon* pSdoComCon_p,
                                            DWORD          dwAbortCode_p);
@@ -419,9 +419,9 @@ Exit:
 //
 //---------------------------------------------------------------------------
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOC)) != 0)
-tEplKernel PUBLIC EplSdoComDefineCon(tEplSdoComConHdl*  pSdoComConHdl_p,
+tEplKernel PUBLIC EplSdoComDefineCon(tSdoComConHdl*  pSdoComConHdl_p,
                                       unsigned int      uiTargetNodeId_p,
-                                      tEplSdoType       ProtType_p)
+                                      tSdoType       ProtType_p)
 {
 tEplKernel      Ret;
 unsigned int    uiCount;
@@ -480,12 +480,12 @@ tEplSdoComCon*  pSdoComCon;
     switch(ProtType_p)
     {
         // udp
-        case kEplSdoTypeUdp:
+        case kSdoTypeUdp:
         {
             // call connection int function of lower layer
             Ret = EplSdoAsySeqInitCon(&pSdoComCon->m_SdoSeqConHdl,
                           pSdoComCon->m_uiNodeId,
-                          kEplSdoTypeUdp);
+                          kSdoTypeUdp);
             if(Ret != kEplSuccessful)
             {
                 goto Exit;
@@ -494,12 +494,12 @@ tEplSdoComCon*  pSdoComCon;
         }
 
         // Asend
-        case kEplSdoTypeAsnd:
+        case kSdoTypeAsnd:
         {
             // call connection int function of lower layer
             Ret = EplSdoAsySeqInitCon(&pSdoComCon->m_SdoSeqConHdl,
                           pSdoComCon->m_uiNodeId,
-                          kEplSdoTypeAsnd);
+                          kSdoTypeAsnd);
             if(Ret != kEplSuccessful)
             {
                 goto Exit;
@@ -508,7 +508,7 @@ tEplSdoComCon*  pSdoComCon;
         }
 
         // Pdo -> not supported
-        case kEplSdoTypePdo:
+        case kSdoTypePdo:
         default:
         {
             Ret = kEplSdoComUnsupportedProt;
@@ -543,7 +543,7 @@ Exit:
 //
 //---------------------------------------------------------------------------
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOC)) != 0)
-tEplKernel PUBLIC EplSdoComInitTransferByIndex(tEplSdoComTransParamByIndex* pSdoComTransParam_p)
+tEplKernel PUBLIC EplSdoComInitTransferByIndex(tSdoComTransParamByIndex* pSdoComTransParam_p)
 {
 tEplKernel      Ret;
 tEplSdoComCon*  pSdoComCon;
@@ -588,13 +588,13 @@ tEplSdoComCon*  pSdoComCon;
     pSdoComCon->m_pUserArg = pSdoComTransParam_p->m_pUserArg;
 
     // set type of SDO command
-    if (pSdoComTransParam_p->m_SdoAccessType == kEplSdoAccessTypeRead)
+    if (pSdoComTransParam_p->m_SdoAccessType == kSdoAccessTypeRead)
     {
-        pSdoComCon->m_SdoServiceType = kEplSdoServiceReadByIndex;
+        pSdoComCon->m_SdoServiceType = kSdoServiceReadByIndex;
     }
     else
     {
-        pSdoComCon->m_SdoServiceType = kEplSdoServiceWriteByIndex;
+        pSdoComCon->m_SdoServiceType = kSdoServiceWriteByIndex;
 
     }
     // save pointer to data
@@ -606,7 +606,7 @@ tEplSdoComCon*  pSdoComCon;
 
     // reset parts of control structure
     pSdoComCon->m_dwLastAbortCode = 0;
-    pSdoComCon->m_SdoTransType = kEplSdoTransAuto;
+    pSdoComCon->m_SdoTransType = kSdoTransAuto;
     // save timeout
     //pSdoComCon->m_uiTimeout = SdoComTransParam_p.m_uiTimeout;
 
@@ -643,7 +643,7 @@ Exit:
 //
 //---------------------------------------------------------------------------
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOC)) != 0)
-tEplKernel PUBLIC EplSdoComUndefineCon(tEplSdoComConHdl  SdoComConHdl_p)
+tEplKernel PUBLIC EplSdoComUndefineCon(tSdoComConHdl  SdoComConHdl_p)
 {
 tEplKernel          Ret;
 tEplSdoComCon*      pSdoComCon;
@@ -661,21 +661,21 @@ tEplSdoComCon*      pSdoComCon;
 
     // $$$ d.k. abort a running transfer before closing the sequence layer
 
-    if(((pSdoComCon->m_SdoSeqConHdl & ~EPL_SDO_SEQ_HANDLE_MASK)  != EPL_SDO_SEQ_INVALID_HDL)
+    if(((pSdoComCon->m_SdoSeqConHdl & ~SDO_SEQ_HANDLE_MASK)  != SDO_SEQ_INVALID_HDL)
         && (pSdoComCon->m_SdoSeqConHdl != 0))
     {
         // close connection in lower layer
         switch(pSdoComCon->m_SdoProtType)
         {
-            case kEplSdoTypeAsnd:
-            case kEplSdoTypeUdp:
+            case kSdoTypeAsnd:
+            case kSdoTypeUdp:
             {
                 Ret = EplSdoAsySeqDelCon(pSdoComCon->m_SdoSeqConHdl);
                 break;
             }
 
-            case kEplSdoTypePdo:
-            case kEplSdoTypeAuto:
+            case kSdoTypePdo:
+            case kSdoTypeAuto:
             default:
             {
                 Ret = kEplSdoComUnsupportedProt;
@@ -711,8 +711,8 @@ Exit:
 //
 //---------------------------------------------------------------------------
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOC)) != 0)
-tEplKernel PUBLIC EplSdoComGetState(tEplSdoComConHdl    SdoComConHdl_p,
-                                    tEplSdoComFinished* pSdoComFinished_p)
+tEplKernel PUBLIC EplSdoComGetState(tSdoComConHdl    SdoComConHdl_p,
+                                    tSdoComFinished* pSdoComFinished_p)
 {
 tEplKernel          Ret;
 tEplSdoComCon*      pSdoComCon;
@@ -742,13 +742,13 @@ tEplSdoComCon*      pSdoComCon;
     pSdoComFinished_p->m_uiTransferredByte = pSdoComCon->m_uiTransferredByte;
     pSdoComFinished_p->m_dwAbortCode = pSdoComCon->m_dwLastAbortCode;
     pSdoComFinished_p->m_SdoComConHdl = SdoComConHdl_p;
-    if (pSdoComCon->m_SdoServiceType == kEplSdoServiceWriteByIndex)
+    if (pSdoComCon->m_SdoServiceType == kSdoServiceWriteByIndex)
     {
-        pSdoComFinished_p->m_SdoAccessType = kEplSdoAccessTypeWrite;
+        pSdoComFinished_p->m_SdoAccessType = kSdoAccessTypeWrite;
     }
     else
     {
-        pSdoComFinished_p->m_SdoAccessType = kEplSdoAccessTypeRead;
+        pSdoComFinished_p->m_SdoAccessType = kSdoAccessTypeRead;
     }
 
     if(pSdoComCon->m_dwLastAbortCode != 0)
@@ -759,7 +759,7 @@ tEplSdoComCon*      pSdoComCon;
         pSdoComCon->m_dwLastAbortCode = 0;
 
     }
-    else if((pSdoComCon->m_SdoSeqConHdl & ~EPL_SDO_SEQ_HANDLE_MASK)== EPL_SDO_SEQ_INVALID_HDL)
+    else if((pSdoComCon->m_SdoSeqConHdl & ~SDO_SEQ_HANDLE_MASK)== SDO_SEQ_INVALID_HDL)
     {   // check state
         pSdoComFinished_p->m_SdoComConState = kEplSdoComTransferLowerLayerAbort;
     }
@@ -794,7 +794,7 @@ Exit:
 //
 //---------------------------------------------------------------------------
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOC)) != 0)
-unsigned int PUBLIC EplSdoComGetNodeId(tEplSdoComConHdl  SdoComConHdl_p)
+unsigned int PUBLIC EplSdoComGetNodeId(tSdoComConHdl  SdoComConHdl_p)
 {
 unsigned int    uiNodeId = EPL_C_ADR_INVALID;
 tEplSdoComCon*  pSdoComCon;
@@ -839,7 +839,7 @@ Exit:
 //
 //---------------------------------------------------------------------------
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOC)) != 0)
-tEplKernel PUBLIC EplSdoComSdoAbort(tEplSdoComConHdl SdoComConHdl_p,
+tEplKernel PUBLIC EplSdoComSdoAbort(tSdoComConHdl SdoComConHdl_p,
                                     DWORD            dwAbortCode_p)
 {
 tEplKernel  Ret;
@@ -867,7 +867,7 @@ tEplSdoComCon*      pSdoComCon;
 
     Ret = EplSdoComProcessIntern(SdoComConHdl_p,
                                 kEplSdoComConEventAbort,
-                                (tEplAsySdoCom*)NULL);
+                                (tAsySdoCom*)NULL);
 
 Exit:
     return Ret;
@@ -900,8 +900,8 @@ Exit:
 // State:
 //
 //---------------------------------------------------------------------------
-tEplKernel PUBLIC EplSdoComReceiveCb (tEplSdoSeqConHdl    SdoSeqConHdl_p,
-                                    tEplAsySdoCom*      pAsySdoCom_p,
+tEplKernel PUBLIC EplSdoComReceiveCb (tSdoSeqConHdl    SdoSeqConHdl_p,
+                                    tAsySdoCom*      pAsySdoCom_p,
                                     unsigned int        uiDataSize_p)
 {
 tEplKernel       Ret;
@@ -937,8 +937,8 @@ tEplKernel       Ret;
 // State:
 //
 //---------------------------------------------------------------------------
-tEplKernel PUBLIC EplSdoComConCb (tEplSdoSeqConHdl    SdoSeqConHdl_p,
-                                    tEplAsySdoConState  AsySdoConState_p)
+tEplKernel PUBLIC EplSdoComConCb (tSdoSeqConHdl    SdoSeqConHdl_p,
+                                    tAsySdoConState  AsySdoConState_p)
 {
 tEplKernel          Ret;
 tEplSdoComConEvent  SdoComConEvent = kEplSdoComConEventSendFirst;
@@ -1011,7 +1011,7 @@ tEplSdoComConEvent  SdoComConEvent = kEplSdoComConEventSendFirst;
 
     Ret = EplSdoComSearchConIntern(SdoSeqConHdl_p,
                                    SdoComConEvent,
-                                   (tEplAsySdoCom*)NULL);
+                                   (tAsySdoCom*)NULL);
 
     return Ret;
 }
@@ -1033,14 +1033,14 @@ tEplSdoComConEvent  SdoComConEvent = kEplSdoComConEventSendFirst;
 // State:
 //
 //---------------------------------------------------------------------------
-static tEplKernel EplSdoComSearchConIntern(tEplSdoSeqConHdl    SdoSeqConHdl_p,
+static tEplKernel EplSdoComSearchConIntern(tSdoSeqConHdl    SdoSeqConHdl_p,
                                          tEplSdoComConEvent SdoComConEvent_p,
-                                         tEplAsySdoCom*     pAsySdoCom_p)
+                                         tAsySdoCom*     pAsySdoCom_p)
 {
 tEplKernel          Ret;
 tEplSdoComCon*      pSdoComCon;
-tEplSdoComConHdl    HdlCount;
-tEplSdoComConHdl    HdlFree;
+tSdoComConHdl    HdlCount;
+tSdoComConHdl    HdlFree;
 
     Ret = kEplSdoComNotResponsible;
 
@@ -1110,9 +1110,9 @@ tEplSdoComConHdl    HdlFree;
 // State:
 //
 //---------------------------------------------------------------------------
-static tEplKernel EplSdoComProcessIntern(tEplSdoComConHdl   SdoComCon_p,
+static tEplKernel EplSdoComProcessIntern(tSdoComConHdl   SdoComCon_p,
                                          tEplSdoComConEvent SdoComConEvent_p,
-                                         tEplAsySdoCom*     pAsySdoCom_p)
+                                         tAsySdoCom*     pAsySdoCom_p)
 {
 tEplKernel          Ret;
 tEplSdoComCon*      pSdoComCon;
@@ -1171,7 +1171,7 @@ unsigned int        uiSize;
                             // check command
                             switch(pAsySdoCom_p->m_le_bCommandId)
                             {
-                                case kEplSdoServiceNIL:
+                                case kSdoServiceNIL:
                                 {   // simply acknowlegde NIL command on sequence layer
 
                                     Ret = EplSdoAsySeqSendData(pSdoComCon->m_SdoSeqConHdl,
@@ -1181,7 +1181,7 @@ unsigned int        uiSize;
                                     break;
                                 }
 
-                                case kEplSdoServiceReadByIndex:
+                                case kSdoServiceReadByIndex:
                                 {   // read by index
 
                                     // search entry an start transfer
@@ -1202,7 +1202,7 @@ unsigned int        uiSize;
                                     break;
                                 }
 
-                                case kEplSdoServiceWriteByIndex:
+                                case kSdoServiceWriteByIndex:
                                 {
 
                                     // search entry an start write
@@ -1285,7 +1285,7 @@ unsigned int        uiSize;
                 case kEplSdoComConEventFrameSended:
                 {
                     // check if it is a read
-                    if(pSdoComCon->m_SdoServiceType == kEplSdoServiceReadByIndex)
+                    if(pSdoComCon->m_SdoServiceType == kSdoServiceReadByIndex)
                     {
                         // send next frame
                         EplSdoComServerSendFrameIntern(pSdoComCon,
@@ -1328,7 +1328,7 @@ unsigned int        uiSize;
                         }
 
                         // check if it is a write
-                        if (pSdoComCon->m_SdoServiceType == kEplSdoServiceWriteByIndex)
+                        if (pSdoComCon->m_SdoServiceType == kSdoServiceWriteByIndex)
                         {
                             // write data to OD
                             uiSize = AmiGetWordFromLe(&pAsySdoCom_p->m_le_wSegmentSize);
@@ -1434,19 +1434,19 @@ unsigned int        uiSize;
 
             // if connection handle is invalid reinit connection
             // d.k.: this will be done only on new events (i.e. InitTransfer)
-            if((pSdoComCon->m_SdoSeqConHdl & ~EPL_SDO_SEQ_HANDLE_MASK) == EPL_SDO_SEQ_INVALID_HDL)
+            if((pSdoComCon->m_SdoSeqConHdl & ~SDO_SEQ_HANDLE_MASK) == SDO_SEQ_INVALID_HDL)
             {
                 // check kind of connection to reinit
                 // check protocol
                 switch(pSdoComCon->m_SdoProtType)
                 {
                     // udp
-                    case kEplSdoTypeUdp:
+                    case kSdoTypeUdp:
                     {
                         // call connection int function of lower layer
                         Ret = EplSdoAsySeqInitCon(&pSdoComCon->m_SdoSeqConHdl,
                                     pSdoComCon->m_uiNodeId,
-                                    kEplSdoTypeUdp);
+                                    kSdoTypeUdp);
                         if(Ret != kEplSuccessful)
                         {
                             goto Exit;
@@ -1455,12 +1455,12 @@ unsigned int        uiSize;
                     }
 
                     // Asend -> not supported
-                    case kEplSdoTypeAsnd:
+                    case kSdoTypeAsnd:
                     {
                         // call connection int function of lower layer
                         Ret = EplSdoAsySeqInitCon(&pSdoComCon->m_SdoSeqConHdl,
                                     pSdoComCon->m_uiNodeId,
-                                    kEplSdoTypeAsnd);
+                                    kSdoTypeAsnd);
                         if(Ret != kEplSuccessful)
                         {
                             goto Exit;
@@ -1469,7 +1469,7 @@ unsigned int        uiSize;
                     }
 
                     // Pdo -> not supported
-                    case kEplSdoTypePdo:
+                    case kSdoTypePdo:
                     default:
                     {
                         Ret = kEplSdoComUnsupportedProt;
@@ -1492,7 +1492,7 @@ unsigned int        uiSize;
                         && (pSdoComCon->m_uiTargetIndex != 0))
                     {   // start SDO transfer
                         // check if segemted transfer
-                        if (pSdoComCon->m_SdoTransType == kEplSdoTransSegmented)
+                        if (pSdoComCon->m_SdoTransType == kSdoTransSegmented)
                         {
                             pSdoComCon->m_SdoComState = kEplSdoComStateClientSegmTrans;
                         }
@@ -1539,7 +1539,7 @@ unsigned int        uiSize;
                 {
                     // close sequence layer handle
                     Ret = EplSdoAsySeqDelCon(pSdoComCon->m_SdoSeqConHdl);
-                    pSdoComCon->m_SdoSeqConHdl |= EPL_SDO_SEQ_INVALID_HDL;
+                    pSdoComCon->m_SdoSeqConHdl |= SDO_SEQ_INVALID_HDL;
                     // call callback function
                     if (SdoComConEvent_p == kEplSdoComConEventTimeout)
                     {
@@ -1582,7 +1582,7 @@ unsigned int        uiSize;
                     // check if read transfer finished
                     if((pSdoComCon->m_uiTransSize == 0)
                         && (pSdoComCon->m_uiTransferredByte != 0)
-                        && (pSdoComCon->m_SdoServiceType == kEplSdoServiceReadByIndex))
+                        && (pSdoComCon->m_SdoServiceType == kSdoServiceReadByIndex))
                     {
                         // inc transaction id
                         pSdoComCon->m_bTransactionId++;
@@ -1594,7 +1594,7 @@ unsigned int        uiSize;
                     }
 
                     // check if segemted transfer
-                    if(pSdoComCon->m_SdoTransType == kEplSdoTransSegmented)
+                    if(pSdoComCon->m_SdoTransType == kSdoTransSegmented)
                     {
                         pSdoComCon->m_SdoComState = kEplSdoComStateClientSegmTrans;
                         goto Exit;
@@ -1663,7 +1663,7 @@ unsigned int        uiSize;
                     // close sequence layer handle
                     Ret = EplSdoAsySeqDelCon(pSdoComCon->m_SdoSeqConHdl);
                     // set handle to invalid and enter kEplSdoComStateClientWaitInit
-                    pSdoComCon->m_SdoSeqConHdl |= EPL_SDO_SEQ_INVALID_HDL;
+                    pSdoComCon->m_SdoSeqConHdl |= SDO_SEQ_INVALID_HDL;
                     // change state
                     pSdoComCon->m_SdoComState = kEplSdoComStateClientWaitInit;
 
@@ -1693,7 +1693,7 @@ unsigned int        uiSize;
                 {
                     // close sequence layer handle
                     Ret = EplSdoAsySeqDelCon(pSdoComCon->m_SdoSeqConHdl);
-                    pSdoComCon->m_SdoSeqConHdl |= EPL_SDO_SEQ_INVALID_HDL;
+                    pSdoComCon->m_SdoSeqConHdl |= SDO_SEQ_INVALID_HDL;
                     // change state
                     pSdoComCon->m_SdoComState = kEplSdoComStateClientWaitInit;
                     // call callback of application
@@ -1742,7 +1742,7 @@ unsigned int        uiSize;
 
                     // check if read transfer finished
                     if((pSdoComCon->m_uiTransSize == 0)
-                        && (pSdoComCon->m_SdoServiceType == kEplSdoServiceReadByIndex))
+                        && (pSdoComCon->m_SdoServiceType == kSdoServiceReadByIndex))
                     {
                         // inc transaction id
                         pSdoComCon->m_bTransactionId++;
@@ -1816,7 +1816,7 @@ unsigned int        uiSize;
                     // close sequence layer handle
                     Ret = EplSdoAsySeqDelCon(pSdoComCon->m_SdoSeqConHdl);
                     // set handle to invalid and enter kEplSdoComStateClientWaitInit
-                    pSdoComCon->m_SdoSeqConHdl |= EPL_SDO_SEQ_INVALID_HDL;
+                    pSdoComCon->m_SdoSeqConHdl |= SDO_SEQ_INVALID_HDL;
                     // change state
                     pSdoComCon->m_SdoComState = kEplSdoComStateClientWaitInit;
                     // inc transaction id
@@ -1849,7 +1849,7 @@ unsigned int        uiSize;
                 {
                     // close sequence layer handle
                     Ret = EplSdoAsySeqDelCon(pSdoComCon->m_SdoSeqConHdl);
-                    pSdoComCon->m_SdoSeqConHdl |= EPL_SDO_SEQ_INVALID_HDL;
+                    pSdoComCon->m_SdoSeqConHdl |= SDO_SEQ_INVALID_HDL;
                     // change state
                     pSdoComCon->m_SdoComState = kEplSdoComStateClientWaitInit;
                     // call callback of application
@@ -1919,7 +1919,7 @@ Exit:
 //---------------------------------------------------------------------------
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOS)) != 0)
 static tEplKernel EplSdoComServerInitReadByIndex(tEplSdoComCon*     pSdoComCon_p,
-                                         tEplAsySdoCom*     pAsySdoCom_p)
+                                         tAsySdoCom*     pAsySdoCom_p)
 {
 tEplKernel      Ret;
 unsigned int    uiIndex;
@@ -1987,19 +1987,19 @@ DWORD           dwAbortCode;
     }
 
     // save service
-    pSdoComCon_p->m_SdoServiceType = kEplSdoServiceReadByIndex;
+    pSdoComCon_p->m_SdoServiceType = kSdoServiceReadByIndex;
 
     // get size of object to see iof segmented or expedited transfer
     EntrySize = obd_getDataSize(uiIndex, uiSubindex);
-    if(EntrySize > EPL_SDO_MAX_SEGMENT_SIZE)
+    if(EntrySize > SDO_MAX_SEGMENT_SIZE)
     {   // segmented transfer
-        pSdoComCon_p->m_SdoTransType = kEplSdoTransSegmented;
+        pSdoComCon_p->m_SdoTransType = kSdoTransSegmented;
         // get pointer to object-entry data
         pSdoComCon_p->m_pData = obd_getObjectDataPtr(uiIndex, uiSubindex);
     }
     else
     {   // expedited transfer
-        pSdoComCon_p->m_SdoTransType = kEplSdoTransExpedited;
+        pSdoComCon_p->m_SdoTransType = kSdoTransExpedited;
     }
 
     pSdoComCon_p->m_uiTransSize = EntrySize;
@@ -2053,9 +2053,9 @@ static tEplKernel EplSdoComServerSendFrameIntern(tEplSdoComCon*     pSdoComCon_p
                                            tEplSdoComSendType SendType_p)
 {
 tEplKernel      Ret;
-BYTE            abFrame[EPL_MAX_SDO_FRAME_SIZE];
+BYTE            abFrame[SDO_MAX_FRAME_SIZE];
 tEplFrame*      pFrame;
-tEplAsySdoCom*  pCommandFrame;
+tAsySdoCom*  pCommandFrame;
 unsigned int    uiSizeOfFrame;
 BYTE            bFlag;
 
@@ -2109,7 +2109,7 @@ BYTE            bFlag;
             AmiSetByteToLe(&pCommandFrame->m_le_bFlags,  bFlag);
 
             // check type of resonse
-            if(pSdoComCon_p->m_SdoTransType == kEplSdoTransExpedited)
+            if(pSdoComCon_p->m_SdoTransType == kSdoTransExpedited)
             {   // Expedited transfer
                 // copy data in frame
                 Ret = obd_readEntryToLe(uiIndex_p,
@@ -2136,7 +2136,7 @@ BYTE            bFlag;
                                             uiSizeOfFrame,
                                             pFrame);
             }
-            else if(pSdoComCon_p->m_SdoTransType == kEplSdoTransSegmented)
+            else if(pSdoComCon_p->m_SdoTransType == kSdoTransSegmented)
             {   // segmented transfer
                 // distinguish between init, segment and complete
                 if(pSdoComCon_p->m_uiTransferredByte == 0)
@@ -2148,26 +2148,26 @@ BYTE            bFlag;
                     // init data size in variable header, which includes itself
                     AmiSetDwordToLe(&pCommandFrame->m_le_abCommandData[0], pSdoComCon_p->m_uiTransSize + 4);
                     // copy data in frame
-                    EPL_MEMCPY(&pCommandFrame->m_le_abCommandData[4],pSdoComCon_p->m_pData, (EPL_SDO_MAX_SEGMENT_SIZE-4));
+                    EPL_MEMCPY(&pCommandFrame->m_le_abCommandData[4],pSdoComCon_p->m_pData, (SDO_MAX_SEGMENT_SIZE-4));
 
                     // correct byte-counter
-                    pSdoComCon_p->m_uiTransSize -= (EPL_SDO_MAX_SEGMENT_SIZE-4);
-                    pSdoComCon_p->m_uiTransferredByte += (EPL_SDO_MAX_SEGMENT_SIZE-4);
+                    pSdoComCon_p->m_uiTransSize -= (SDO_MAX_SEGMENT_SIZE-4);
+                    pSdoComCon_p->m_uiTransferredByte += (SDO_MAX_SEGMENT_SIZE-4);
                     // move data pointer
-                    pSdoComCon_p->m_pData +=(EPL_SDO_MAX_SEGMENT_SIZE-4);
+                    pSdoComCon_p->m_pData +=(SDO_MAX_SEGMENT_SIZE-4);
 
                     // set segment size
-                    AmiSetWordToLe(&pCommandFrame->m_le_wSegmentSize, EPL_SDO_MAX_SEGMENT_SIZE);
+                    AmiSetWordToLe(&pCommandFrame->m_le_wSegmentSize, SDO_MAX_SEGMENT_SIZE);
 
                     // send frame
-                    uiSizeOfFrame += EPL_SDO_MAX_SEGMENT_SIZE;
+                    uiSizeOfFrame += SDO_MAX_SEGMENT_SIZE;
                     Ret = EplSdoAsySeqSendData(pSdoComCon_p->m_SdoSeqConHdl,
                                                 uiSizeOfFrame,
                                                 pFrame);
 
                 }
                 else if((pSdoComCon_p->m_uiTransferredByte > 0)
-                    &&(pSdoComCon_p->m_uiTransSize > EPL_SDO_MAX_SEGMENT_SIZE))
+                    &&(pSdoComCon_p->m_uiTransSize > SDO_MAX_SEGMENT_SIZE))
                 {   // segment
                     // set segment flag
                     bFlag = AmiGetByteFromLe( &pCommandFrame->m_le_bFlags);
@@ -2175,19 +2175,19 @@ BYTE            bFlag;
                     AmiSetByteToLe(&pCommandFrame->m_le_bFlags,  bFlag);
 
                     // copy data in frame
-                    EPL_MEMCPY(&pCommandFrame->m_le_abCommandData[0],pSdoComCon_p->m_pData, EPL_SDO_MAX_SEGMENT_SIZE);
+                    EPL_MEMCPY(&pCommandFrame->m_le_abCommandData[0],pSdoComCon_p->m_pData, SDO_MAX_SEGMENT_SIZE);
 
                     // correct byte-counter
-                    pSdoComCon_p->m_uiTransSize -= EPL_SDO_MAX_SEGMENT_SIZE;
-                    pSdoComCon_p->m_uiTransferredByte += EPL_SDO_MAX_SEGMENT_SIZE;
+                    pSdoComCon_p->m_uiTransSize -= SDO_MAX_SEGMENT_SIZE;
+                    pSdoComCon_p->m_uiTransferredByte += SDO_MAX_SEGMENT_SIZE;
                     // move data pointer
-                    pSdoComCon_p->m_pData +=EPL_SDO_MAX_SEGMENT_SIZE;
+                    pSdoComCon_p->m_pData +=SDO_MAX_SEGMENT_SIZE;
 
                     // set segment size
-                    AmiSetWordToLe(&pCommandFrame->m_le_wSegmentSize,EPL_SDO_MAX_SEGMENT_SIZE);
+                    AmiSetWordToLe(&pCommandFrame->m_le_wSegmentSize,SDO_MAX_SEGMENT_SIZE);
 
                     // send frame
-                    uiSizeOfFrame += EPL_SDO_MAX_SEGMENT_SIZE;
+                    uiSizeOfFrame += SDO_MAX_SEGMENT_SIZE;
                     Ret = EplSdoAsySeqSendData(pSdoComCon_p->m_SdoSeqConHdl,
                                                 uiSizeOfFrame,
                                                 pFrame);
@@ -2195,7 +2195,7 @@ BYTE            bFlag;
                 else
                 {
                     if((pSdoComCon_p->m_uiTransSize == 0)
-                        && (pSdoComCon_p->m_SdoServiceType != kEplSdoServiceWriteByIndex))
+                        && (pSdoComCon_p->m_SdoServiceType != kSdoServiceWriteByIndex))
                     {
                         goto Exit;
                     }
@@ -2281,7 +2281,7 @@ Exit:
 //---------------------------------------------------------------------------
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOS)) != 0)
 static tEplKernel EplSdoComServerInitWriteByIndex(tEplSdoComCon*     pSdoComCon_p,
-                                         tEplAsySdoCom*     pAsySdoCom_p)
+                                         tAsySdoCom*     pAsySdoCom_p)
 {
 tEplKernel  Ret = kEplSuccessful;
 unsigned int    uiIndex;
@@ -2297,7 +2297,7 @@ BYTE*           pbSrcData;
     // check if expedited or segmented transfer
     if ((pAsySdoCom_p->m_le_bFlags & 0x30) == 0x10)
     {   // initiate segmented transfer
-        pSdoComCon_p->m_SdoTransType = kEplSdoTransSegmented;
+        pSdoComCon_p->m_SdoTransType = kSdoTransSegmented;
         // get index and subindex
         uiIndex = AmiGetWordFromLe(&pAsySdoCom_p->m_le_abCommandData[4]);
         uiSubindex = AmiGetByteFromLe(&pAsySdoCom_p->m_le_abCommandData[6]);
@@ -2311,7 +2311,7 @@ BYTE*           pbSrcData;
     }
     else if ((pAsySdoCom_p->m_le_bFlags & 0x30) == 0x00)
     {   // expedited transfer
-        pSdoComCon_p->m_SdoTransType = kEplSdoTransExpedited;
+        pSdoComCon_p->m_SdoTransType = kSdoTransExpedited;
         // get index and subindex
         uiIndex = AmiGetWordFromLe(&pAsySdoCom_p->m_le_abCommandData[0]);
         uiSubindex = AmiGetByteFromLe(&pAsySdoCom_p->m_le_abCommandData[2]);
@@ -2382,12 +2382,12 @@ BYTE*           pbSrcData;
     }
 
     // save service
-    pSdoComCon_p->m_SdoServiceType = kEplSdoServiceWriteByIndex;
+    pSdoComCon_p->m_SdoServiceType = kSdoServiceWriteByIndex;
 
     pSdoComCon_p->m_uiTransferredByte = 0;
 
     // write data to OD
-    if(pSdoComCon_p->m_SdoTransType == kEplSdoTransExpedited)
+    if(pSdoComCon_p->m_SdoTransType == kSdoTransExpedited)
     {   // expedited transfer
         // size checking is done by obd_writeEntryFromLe()
 
@@ -2543,9 +2543,9 @@ Exit:
 static tEplKernel EplSdoComClientSend(tEplSdoComCon* pSdoComCon_p)
 {
 tEplKernel      Ret;
-BYTE            abFrame[EPL_MAX_SDO_FRAME_SIZE];
+BYTE            abFrame[SDO_MAX_FRAME_SIZE];
 tEplFrame*      pFrame;
-tEplAsySdoCom*  pCommandFrame;
+tAsySdoCom*  pCommandFrame;
 unsigned int    uiSizeOfFrame;
 BYTE            bFlags;
 BYTE*           pbPayload;
@@ -2574,9 +2574,9 @@ BYTE*           pbPayload;
             // only for write commands
             switch(pSdoComCon_p->m_SdoServiceType)
             {
-                case kEplSdoServiceReadByIndex:
+                case kSdoServiceReadByIndex:
                 {   // first frame of read access always expedited
-                    pSdoComCon_p->m_SdoTransType = kEplSdoTransExpedited;
+                    pSdoComCon_p->m_SdoTransType = kSdoTransExpedited;
                     pbPayload = &pCommandFrame->m_le_abCommandData[0];
                     // fill rest of header
                     AmiSetWordToLe( &pCommandFrame->m_le_wSegmentSize, 4);
@@ -2593,20 +2593,20 @@ BYTE*           pbPayload;
                     break;
                 }
 
-                case kEplSdoServiceWriteByIndex:
+                case kSdoServiceWriteByIndex:
                 {
-                    if(pSdoComCon_p->m_uiTransSize > (EPL_SDO_MAX_SEGMENT_SIZE - 4))
+                    if(pSdoComCon_p->m_uiTransSize > (SDO_MAX_SEGMENT_SIZE - 4))
                     {   // segmented transfer
                         // -> variable part of header needed
                         // save that transfer is segmented
-                        pSdoComCon_p->m_SdoTransType = kEplSdoTransSegmented;
+                        pSdoComCon_p->m_SdoTransType = kSdoTransSegmented;
                         // fill variable part of header
                         // set data size which includes the header
                         AmiSetDwordToLe( &pCommandFrame->m_le_abCommandData[0], pSdoComCon_p->m_uiTransSize + 8);
                         // set pointer to real payload
                         pbPayload = &pCommandFrame->m_le_abCommandData[4];
                         // fill rest of header
-                        AmiSetWordToLe( &pCommandFrame->m_le_wSegmentSize, EPL_SDO_MAX_SEGMENT_SIZE);
+                        AmiSetWordToLe( &pCommandFrame->m_le_wSegmentSize, SDO_MAX_SEGMENT_SIZE);
                         bFlags = 0x10;
                         AmiSetByteToLe( &pCommandFrame->m_le_bFlags, bFlags);
                         // create command header
@@ -2616,20 +2616,20 @@ BYTE*           pbPayload;
                         // on byte for reserved
                         pbPayload += 2;
                         // calc size
-                        uiSizeOfFrame += EPL_SDO_MAX_SEGMENT_SIZE;
+                        uiSizeOfFrame += SDO_MAX_SEGMENT_SIZE;
 
                         // copy payload
-                        EPL_MEMCPY( pbPayload,pSdoComCon_p->m_pData,  (EPL_SDO_MAX_SEGMENT_SIZE - 8));
-                        pSdoComCon_p->m_pData += (EPL_SDO_MAX_SEGMENT_SIZE - 8);
+                        EPL_MEMCPY( pbPayload,pSdoComCon_p->m_pData,  (SDO_MAX_SEGMENT_SIZE - 8));
+                        pSdoComCon_p->m_pData += (SDO_MAX_SEGMENT_SIZE - 8);
                         // correct intern counter
-                        pSdoComCon_p->m_uiTransSize -= (EPL_SDO_MAX_SEGMENT_SIZE - 8);
-                        pSdoComCon_p->m_uiTransferredByte = (EPL_SDO_MAX_SEGMENT_SIZE - 8);
+                        pSdoComCon_p->m_uiTransSize -= (SDO_MAX_SEGMENT_SIZE - 8);
+                        pSdoComCon_p->m_uiTransferredByte = (SDO_MAX_SEGMENT_SIZE - 8);
 
                     }
                     else
                     {   // expedited trandsfer
                         // save that transfer is expedited
-                        pSdoComCon_p->m_SdoTransType = kEplSdoTransExpedited;
+                        pSdoComCon_p->m_SdoTransType = kSdoTransExpedited;
                         pbPayload = &pCommandFrame->m_le_abCommandData[0];
 
                         // create command header
@@ -2651,7 +2651,7 @@ BYTE*           pbPayload;
                     break;
                 }
 
-                case kEplSdoServiceNIL:
+                case kSdoServiceNIL:
                 default:
                     // invalid service requested
                     Ret = kEplSdoComInvalidServiceType;
@@ -2665,25 +2665,25 @@ BYTE*           pbPayload;
                 // for expedited read is nothing to do
                 // -> server sends data
 
-                case kEplSdoServiceWriteByIndex:
+                case kSdoServiceWriteByIndex:
                 {   // send next frame
-                    if(pSdoComCon_p->m_SdoTransType == kEplSdoTransSegmented)
+                    if(pSdoComCon_p->m_SdoTransType == kSdoTransSegmented)
                     {
-                        if(pSdoComCon_p->m_uiTransSize > EPL_SDO_MAX_SEGMENT_SIZE)
+                        if(pSdoComCon_p->m_uiTransSize > SDO_MAX_SEGMENT_SIZE)
                         {   // next segment
                             pbPayload = &pCommandFrame->m_le_abCommandData[0];
                             // fill rest of header
-                            AmiSetWordToLe( &pCommandFrame->m_le_wSegmentSize, EPL_SDO_MAX_SEGMENT_SIZE);
+                            AmiSetWordToLe( &pCommandFrame->m_le_wSegmentSize, SDO_MAX_SEGMENT_SIZE);
                             bFlags = 0x20;
                             AmiSetByteToLe( &pCommandFrame->m_le_bFlags, bFlags);
                             // copy data
-                            EPL_MEMCPY( pbPayload,pSdoComCon_p->m_pData,  EPL_SDO_MAX_SEGMENT_SIZE);
-                            pSdoComCon_p->m_pData += EPL_SDO_MAX_SEGMENT_SIZE;
+                            EPL_MEMCPY( pbPayload,pSdoComCon_p->m_pData,  SDO_MAX_SEGMENT_SIZE);
+                            pSdoComCon_p->m_pData += SDO_MAX_SEGMENT_SIZE;
                             // correct intern counter
-                            pSdoComCon_p->m_uiTransSize -= EPL_SDO_MAX_SEGMENT_SIZE;
-                            pSdoComCon_p->m_uiTransferredByte += EPL_SDO_MAX_SEGMENT_SIZE;
+                            pSdoComCon_p->m_uiTransSize -= SDO_MAX_SEGMENT_SIZE;
+                            pSdoComCon_p->m_uiTransferredByte += SDO_MAX_SEGMENT_SIZE;
                             // calc size
-                            uiSizeOfFrame += EPL_SDO_MAX_SEGMENT_SIZE;
+                            uiSizeOfFrame += SDO_MAX_SEGMENT_SIZE;
 
 
                         }
@@ -2727,8 +2727,8 @@ BYTE*           pbPayload;
     // call send function of lower layer
     switch(pSdoComCon_p->m_SdoProtType)
     {
-        case kEplSdoTypeAsnd:
-        case kEplSdoTypeUdp:
+        case kSdoTypeAsnd:
+        case kSdoTypeUdp:
         {
             Ret = EplSdoAsySeqSendData(pSdoComCon_p->m_SdoSeqConHdl,
                                         uiSizeOfFrame,
@@ -2766,8 +2766,8 @@ Exit:
 //
 //---------------------------------------------------------------------------
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOC)) != 0)
-static tEplKernel EplSdoComClientProcessFrame(tEplSdoComConHdl   SdoComCon_p,
-                                              tEplAsySdoCom*     pAsySdoCom_p)
+static tEplKernel EplSdoComClientProcessFrame(tSdoComConHdl   SdoComCon_p,
+                                              tAsySdoCom*     pAsySdoCom_p)
 {
 tEplKernel          Ret;
 BYTE                bBuffer;
@@ -2822,13 +2822,13 @@ tEplSdoComCon*      pSdoComCon;
         {   // switch on command
             switch(pSdoComCon->m_SdoServiceType)
             {
-                case kEplSdoServiceWriteByIndex:
+                case kSdoServiceWriteByIndex:
                 {   // check if confirmation from server
                     // nothing more to do
                     break;
                 }
 
-                case kEplSdoServiceReadByIndex:
+                case kSdoServiceReadByIndex:
                 {   // check if it is an segmented or an expedited transfer
                     bBuffer = AmiGetByteFromLe(&pAsySdoCom_p->m_le_bFlags);
                     // mask uninteressting bits
@@ -2955,7 +2955,7 @@ tEplSdoComCon*      pSdoComCon;
                     break;
                 }
 
-                case kEplSdoServiceNIL:
+                case kSdoServiceNIL:
                 default:
                     // invalid service requested
                     // $$$ d.k. What should we do?
@@ -2991,9 +2991,9 @@ static tEplKernel EplSdoComClientSendAbort(tEplSdoComCon* pSdoComCon_p,
                                            DWORD          dwAbortCode_p)
 {
 tEplKernel      Ret;
-BYTE            abFrame[EPL_MAX_SDO_FRAME_SIZE];
+BYTE            abFrame[SDO_MAX_FRAME_SIZE];
 tEplFrame*      pFrame;
-tEplAsySdoCom*  pCommandFrame;
+tAsySdoCom*  pCommandFrame;
 unsigned int    uiSizeOfFrame;
 
     Ret = kEplSuccessful;
@@ -3032,8 +3032,8 @@ unsigned int    uiSizeOfFrame;
     // call send function of lower layer
     switch(pSdoComCon_p->m_SdoProtType)
     {
-        case kEplSdoTypeAsnd:
-        case kEplSdoTypeUdp:
+        case kSdoTypeAsnd:
+        case kSdoTypeUdp:
         {
             Ret = EplSdoAsySeqSendData(pSdoComCon_p->m_SdoSeqConHdl,
                                         uiSizeOfFrame,
@@ -3074,9 +3074,9 @@ unsigned int    uiSizeOfFrame;
 // State:
 //
 //---------------------------------------------------------------------------
-static tEplKernel EplSdoComTransferFinished(tEplSdoComConHdl   SdoComCon_p,
+static tEplKernel EplSdoComTransferFinished(tSdoComConHdl   SdoComCon_p,
                                             tEplSdoComCon*     pSdoComCon_p,
-                                            tEplSdoComConState SdoComConState_p)
+                                            tSdoComConState SdoComConState_p)
 {
 tEplKernel      Ret;
 
@@ -3084,8 +3084,8 @@ tEplKernel      Ret;
 
     if(pSdoComCon_p->m_pfnTransferFinished != NULL)
     {
-    tEplSdoFinishedCb   pfnTransferFinished;
-    tEplSdoComFinished  SdoComFinished;
+    tSdoFinishedCb   pfnTransferFinished;
+    tSdoComFinished  SdoComFinished;
 
         SdoComFinished.m_pUserArg = pSdoComCon_p->m_pUserArg;
         SdoComFinished.m_uiNodeId = pSdoComCon_p->m_uiNodeId;
@@ -3095,13 +3095,13 @@ tEplKernel      Ret;
         SdoComFinished.m_dwAbortCode = pSdoComCon_p->m_dwLastAbortCode;
         SdoComFinished.m_SdoComConHdl = SdoComCon_p;
         SdoComFinished.m_SdoComConState = SdoComConState_p;
-        if (pSdoComCon_p->m_SdoServiceType == kEplSdoServiceWriteByIndex)
+        if (pSdoComCon_p->m_SdoServiceType == kSdoServiceWriteByIndex)
         {
-            SdoComFinished.m_SdoAccessType = kEplSdoAccessTypeWrite;
+            SdoComFinished.m_SdoAccessType = kSdoAccessTypeWrite;
         }
         else
         {
-            SdoComFinished.m_SdoAccessType = kEplSdoAccessTypeRead;
+            SdoComFinished.m_SdoAccessType = kSdoAccessTypeRead;
         }
 
         // reset transfer state so this handle is not busy anymore

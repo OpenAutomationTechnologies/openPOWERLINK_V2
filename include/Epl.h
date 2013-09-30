@@ -166,7 +166,7 @@ typedef union
     void*                   m_pUserArg;
     tEventNmtStateChange    m_NmtStateChange;
     tEplEventError          m_InternalError;
-    tEplSdoComFinished      m_Sdo;
+    tSdoComFinished         m_Sdo;
     tObdCbParam             m_ObdCbParam;
     tEplApiEventNode        m_Node;
     tEplApiEventBoot        m_Boot;
@@ -323,14 +323,14 @@ EPLDLLEXPORT tEplKernel oplk_shutdown(void);
 EPLDLLEXPORT tEplKernel oplk_execNmtCommand(tNmtEvent NmtEvent_p);
 EPLDLLEXPORT tEplKernel oplk_linkObject(UINT objIndex_p, void* pVar_p, UINT* pVarEntries_p,
                                         tObdSize* pEntrySize_p, UINT firstSubindex_p);
-EPLDLLEXPORT tEplKernel oplk_readObject(tEplSdoComConHdl* pSdoComConHdl_p, UINT  nodeId_p, UINT index_p,
+EPLDLLEXPORT tEplKernel oplk_readObject(tSdoComConHdl* pSdoComConHdl_p, UINT  nodeId_p, UINT index_p,
                                         UINT subindex_p, void* pDstData_le_p, UINT* pSize_p,
-                                        tEplSdoType sdoType_p, void* pUserArg_p);
-EPLDLLEXPORT tEplKernel oplk_writeObject(tEplSdoComConHdl* pSdoComConHdl_p, UINT nodeId_p, UINT index_p,
+                                        tSdoType sdoType_p, void* pUserArg_p);
+EPLDLLEXPORT tEplKernel oplk_writeObject(tSdoComConHdl* pSdoComConHdl_p, UINT nodeId_p, UINT index_p,
                                          UINT subindex_p, void* pSrcData_le_p, UINT size_p,
-                                         tEplSdoType sdoType_p, void* pUserArg_p);
-EPLDLLEXPORT tEplKernel oplk_freeSdoChannel(tEplSdoComConHdl sdoComConHdl_p);
-EPLDLLEXPORT tEplKernel oplk_abortSdo(tEplSdoComConHdl sdoComConHdl_p, UINT32 abortCode_p);
+                                         tSdoType sdoType_p, void* pUserArg_p);
+EPLDLLEXPORT tEplKernel oplk_freeSdoChannel(tSdoComConHdl sdoComConHdl_p);
+EPLDLLEXPORT tEplKernel oplk_abortSdo(tSdoComConHdl sdoComConHdl_p, UINT32 abortCode_p);
 EPLDLLEXPORT tEplKernel oplk_readLocalObject(UINT index_p, UINT subindex_p, void* pDstData_p, UINT* pSize_p);
 EPLDLLEXPORT tEplKernel oplk_writeLocalObject(UINT index_p, UINT subindex_p, void* pSrcData_p, UINT size_p);
 EPLDLLEXPORT tEplKernel oplk_sendAsndFrame(UINT8 dstNodeId_p, tEplAsndFrame *pAsndFrame_p, size_t asndSize_p);
@@ -366,7 +366,7 @@ EPLDLLEXPORT char* EplGetNmtStateStr(tNmtState nmtState_p);
 EPLDLLEXPORT char* EplGetApiEventStr(tEplApiEventType ApiEvent_p);
 EPLDLLEXPORT char* EplGetNmtNodeEventTypeStr(tNmtNodeEvent NodeEventType_p);
 EPLDLLEXPORT char* EplGetNmtBootEventTypeStr(tNmtBootEvent BootEventType_p);
-EPLDLLEXPORT char* EplGetSdoComConStateStr(tEplSdoComConState SdoComConState_p);
+EPLDLLEXPORT char* EplGetSdoComConStateStr(tSdoComConState SdoComConState_p);
 EPLDLLEXPORT char* EplGetEplKernelStr(tEplKernel EplKernel_p);
 EPLDLLEXPORT const char* EplGetEmergErrCodeStr( WORD EmergErrCode_p);
 

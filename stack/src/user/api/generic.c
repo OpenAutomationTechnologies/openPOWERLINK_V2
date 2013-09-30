@@ -96,7 +96,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 
 #if defined(CONFIG_INCLUDE_SDOC)
-static tEplKernel cbSdoCon(tEplSdoComFinished* pSdoComFinished_p);
+static tEplKernel cbSdoCon(tSdoComFinished* pSdoComFinished_p);
 #endif
 static tEplKernel cbReceivedAsnd(tFrameInfo *pFrameInfo_p);
 
@@ -326,9 +326,9 @@ event callback function when the task is completed.
 \ingroup module_api
 */
 //------------------------------------------------------------------------------
-tEplKernel oplk_readObject(tEplSdoComConHdl* pSdoComConHdl_p, UINT nodeId_p, UINT index_p,
+tEplKernel oplk_readObject(tSdoComConHdl* pSdoComConHdl_p, UINT nodeId_p, UINT index_p,
                            UINT subindex_p, void* pDstData_le_p, UINT* pSize_p,
-                           tEplSdoType sdoType_p, void* pUserArg_p)
+                           tSdoType sdoType_p, void* pUserArg_p)
 {
     tEplKernel      ret = kEplSuccessful;
     tObdSize        obdSize;
@@ -345,7 +345,7 @@ tEplKernel oplk_readObject(tEplSdoComConHdl* pSdoComConHdl_p, UINT nodeId_p, UIN
     else
     {   // perform SDO transfer
 #if defined(CONFIG_INCLUDE_SDOC)
-        tEplSdoComTransParamByIndex transParamByIndex;
+        tSdoComTransParamByIndex transParamByIndex;
 
         // check if application provides space for handle
         if (pSdoComConHdl_p == NULL)
@@ -364,7 +364,7 @@ tEplKernel oplk_readObject(tEplSdoComConHdl* pSdoComConHdl_p, UINT nodeId_p, UIN
         }
 
         transParamByIndex.m_pData = pDstData_le_p;
-        transParamByIndex.m_SdoAccessType = kEplSdoAccessTypeRead;
+        transParamByIndex.m_SdoAccessType = kSdoAccessTypeRead;
         transParamByIndex.m_SdoComConHdl = *pSdoComConHdl_p;
         transParamByIndex.m_uiDataSize = *pSize_p;
         transParamByIndex.m_uiIndex = index_p;
@@ -412,9 +412,9 @@ event callback function when the task is completed.
 \ingroup module_api
 */
 //------------------------------------------------------------------------------
-tEplKernel oplk_writeObject(tEplSdoComConHdl* pSdoComConHdl_p, UINT nodeId_p, UINT index_p,
+tEplKernel oplk_writeObject(tSdoComConHdl* pSdoComConHdl_p, UINT nodeId_p, UINT index_p,
                             UINT subindex_p, void* pSrcData_le_p, UINT size_p,
-                            tEplSdoType sdoType_p, void* pUserArg_p)
+                            tSdoType sdoType_p, void* pUserArg_p)
 {
     tEplKernel      ret = kEplSuccessful;
 
@@ -428,7 +428,7 @@ tEplKernel oplk_writeObject(tEplSdoComConHdl* pSdoComConHdl_p, UINT nodeId_p, UI
     else
     {   // perform SDO transfer
 #if defined(CONFIG_INCLUDE_SDOC)
-        tEplSdoComTransParamByIndex transParamByIndex;
+        tSdoComTransParamByIndex transParamByIndex;
 
         // check if application provides space for handle
         if (pSdoComConHdl_p == NULL)
@@ -450,7 +450,7 @@ tEplKernel oplk_writeObject(tEplSdoComConHdl* pSdoComConHdl_p, UINT nodeId_p, UI
             return ret;
 
         transParamByIndex.m_pData = pSrcData_le_p;
-        transParamByIndex.m_SdoAccessType = kEplSdoAccessTypeWrite;
+        transParamByIndex.m_SdoAccessType = kSdoAccessTypeWrite;
         transParamByIndex.m_SdoComConHdl = *pSdoComConHdl_p;
         transParamByIndex.m_uiDataSize = size_p;
         transParamByIndex.m_uiIndex = index_p;
@@ -485,7 +485,7 @@ callback function when the last SDO transfer to a remote node has completed.
 \ingroup module_api
 */
 //------------------------------------------------------------------------------
-tEplKernel oplk_freeSdoChannel(tEplSdoComConHdl sdoComConHdl_p)
+tEplKernel oplk_freeSdoChannel(tSdoComConHdl sdoComConHdl_p)
 {
     tEplKernel      ret = kEplSuccessful;
 
@@ -523,7 +523,7 @@ The function aborts the running SDO transfer on the specified SDO channel.
 \ingroup module_api
 */
 //------------------------------------------------------------------------------
-tEplKernel oplk_abortSdo(tEplSdoComConHdl sdoComConHdl_p, UINT32 abortCode_p)
+tEplKernel oplk_abortSdo(tSdoComConHdl sdoComConHdl_p, UINT32 abortCode_p)
 {
     tEplKernel      ret = kEplSuccessful;
 
@@ -897,7 +897,7 @@ SDO event to the application.
 */
 //------------------------------------------------------------------------------
 #if defined(CONFIG_INCLUDE_SDOC)
-static tEplKernel cbSdoCon(tEplSdoComFinished* pSdoComFinished_p)
+static tEplKernel cbSdoCon(tSdoComFinished* pSdoComFinished_p)
 {
     tEplKernel          ret = kEplSuccessful;
     tEplApiEventArg     eventArg;

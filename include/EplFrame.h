@@ -324,7 +324,7 @@ typedef struct
     WORD                    m_le_wReserved;
     BYTE                    m_le_abCommandData[8];  // just reserve a minimum number of bytes as a placeholder
 
-}PACK_STRUCT tEplAsySdoCom;
+}PACK_STRUCT tAsySdoCom;
 
 
 // asynchronous SDO Sequence Header
@@ -333,9 +333,9 @@ typedef struct
     BYTE           m_le_bRecSeqNumCon;
     BYTE           m_le_bSendSeqNumCon;
     BYTE           m_le_abReserved[2];
-    tEplAsySdoCom  m_le_abSdoSeqPayload;
+    tAsySdoCom     m_le_abSdoSeqPayload;
 
-} PACK_STRUCT tEplAsySdoSeq;
+} PACK_STRUCT tAsySdoSeq;
 
 typedef struct
 {
@@ -354,7 +354,7 @@ typedef union
     tEplIdentResponse       m_IdentResponse;
     tEplNmtCommandService   m_NmtCommandService;
     tEplNmtRequestService   m_NmtRequestService;
-    tEplAsySdoSeq           m_SdoSequenceFrame;
+    tAsySdoSeq              m_SdoSequenceFrame;
     tEplSyncResponse        m_SyncResponse;
     BYTE                    m_le_abPayload[256 /*D_NMT_ASndTxMaxPayload_U16
                                         / D_NMT_ASndRxMaxPayload_U16*/];

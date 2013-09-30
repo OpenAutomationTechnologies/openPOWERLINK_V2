@@ -97,7 +97,7 @@
 typedef struct
 {
     unsigned int            m_auiSdoAsndConnection[EPL_SDO_MAX_CONNECTION_ASND];
-    tEplSequLayerReceiveCb  m_fpSdoAsySeqCb;
+    tSequLayerReceiveCb  m_fpSdoAsySeqCb;
 
 
 } tEplSdoAsndInstance;
@@ -153,7 +153,7 @@ tEplKernel PUBLIC EplSdoAsnduCb(tFrameInfo * pFrameInfo_p);
 // State:
 //
 //---------------------------------------------------------------------------
-tEplKernel PUBLIC EplSdoAsnduInit(tEplSequLayerReceiveCb fpReceiveCb_p)
+tEplKernel PUBLIC EplSdoAsnduInit(tSequLayerReceiveCb fpReceiveCb_p)
 {
 tEplKernel  Ret;
 
@@ -182,7 +182,7 @@ return Ret;
 // State:
 //
 //---------------------------------------------------------------------------
-tEplKernel PUBLIC EplSdoAsnduAddInstance(tEplSequLayerReceiveCb fpReceiveCb_p)
+tEplKernel PUBLIC EplSdoAsnduAddInstance(tSequLayerReceiveCb fpReceiveCb_p)
 {
 tEplKernel  Ret;
 
@@ -263,7 +263,7 @@ return Ret;
 // State:
 //
 //---------------------------------------------------------------------------
-tEplKernel PUBLIC EplSdoAsnduInitCon(tEplSdoConHdl*  pSdoConHandle_p,
+tEplKernel PUBLIC EplSdoAsnduInitCon(tSdoConHdl*  pSdoConHandle_p,
                                unsigned int    uiTargetNodeId_p)
 {
 tEplKernel      Ret;
@@ -289,7 +289,7 @@ unsigned int*   puiConnection;
         if (*puiConnection == uiTargetNodeId_p)
         {   // existing connection to target node found
             // save handle for higher layer
-            *pSdoConHandle_p = (uiCount | EPL_SDO_ASND_HANDLE );
+            *pSdoConHandle_p = (uiCount | SDO_ASND_HANDLE );
 
             goto Exit;
         }
@@ -311,7 +311,7 @@ unsigned int*   puiConnection;
         puiConnection = &SdoAsndInstance_g.m_auiSdoAsndConnection[uiFreeCon];
         *puiConnection = uiTargetNodeId_p;
         // save handle for higher layer
-        *pSdoConHandle_p = (uiFreeCon | EPL_SDO_ASND_HANDLE );
+        *pSdoConHandle_p = (uiFreeCon | SDO_ASND_HANDLE );
 
         goto Exit;
     }
@@ -339,7 +339,7 @@ Exit:
 // State:
 //
 //---------------------------------------------------------------------------
-tEplKernel PUBLIC EplSdoAsnduSendData(tEplSdoConHdl       SdoConHandle_p,
+tEplKernel PUBLIC EplSdoAsnduSendData(tSdoConHdl       SdoConHandle_p,
                                     tEplFrame *          pSrcData_p,
                                     DWORD                dwDataSize_p)
 {
@@ -349,7 +349,7 @@ tFrameInfo      FrameInfo;
 
     Ret = kEplSuccessful;
 
-    uiArray = (SdoConHandle_p & ~EPL_SDO_ASY_HANDLE_MASK);
+    uiArray = (SdoConHandle_p & ~SDO_ASY_HANDLE_MASK);
 
     if(uiArray > EPL_SDO_MAX_CONNECTION_ASND)
     {
@@ -402,7 +402,7 @@ Exit:
 // State:
 //
 //---------------------------------------------------------------------------
-tEplKernel PUBLIC EplSdoAsnduDelCon(tEplSdoConHdl SdoConHandle_p)
+tEplKernel PUBLIC EplSdoAsnduDelCon(tSdoConHdl SdoConHandle_p)
 {
 tEplKernel  Ret;
 unsigned int    uiArray;
@@ -410,7 +410,7 @@ unsigned int    uiArray;
     Ret = kEplSuccessful;
 
 
-    uiArray = (SdoConHandle_p & ~EPL_SDO_ASY_HANDLE_MASK);
+    uiArray = (SdoConHandle_p & ~SDO_ASY_HANDLE_MASK);
     // check parameter
     if(uiArray > EPL_SDO_MAX_CONNECTION_ASND)
     {
@@ -455,7 +455,7 @@ unsigned int    uiCount;
 unsigned int*   puiConnection;
 unsigned int    uiNodeId;
 unsigned int    uiFreeEntry = 0xFFFF;
-tEplSdoConHdl   SdoConHdl;
+tSdoConHdl   SdoConHdl;
 tEplFrame*      pFrame;
 
     pFrame = pFrameInfo_p->pFrame;
@@ -496,7 +496,7 @@ tEplFrame*      pFrame;
     }
 //    if (uiNodeId == *puiConnection)
     {   // entry found or created
-        SdoConHdl = (uiCount | EPL_SDO_ASND_HANDLE );
+        SdoConHdl = (uiCount | SDO_ASND_HANDLE );
 
         SdoAsndInstance_g.m_fpSdoAsySeqCb(SdoConHdl, &pFrame->m_Data.m_Asnd.m_Payload.m_SdoSequenceFrame, (pFrameInfo_p->frameSize - 18));
     }
