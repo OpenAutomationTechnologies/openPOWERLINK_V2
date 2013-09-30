@@ -313,19 +313,19 @@ typedef enum
 
 typedef struct
 {
-    tVarParamValid      m_ValidFlag;
-    UINT                m_uiIndex;
-    UINT                m_uiSubindex;
-    tObdSize            m_Size;
-    void MEM*           m_pData;
+    tVarParamValid      validFlag;
+    UINT                index;
+    UINT                subindex;
+    tObdSize            size;
+    void MEM*           pData;
 //    tEplVarCallback     m_fpCallback;
 //    void *       m_pArg;
 } tVarParam;
 
 typedef struct
 {
-    void MEM*           m_pData;
-    tObdSize            m_Size;
+    void MEM*           pData;
+    tObdSize            size;
 /*
     #if (EPL_PDO_USE_STATIC_MAPPING == FALSE)
         tEplVarCallback    m_fpCallback;
@@ -336,37 +336,37 @@ typedef struct
 
 typedef struct
 {
-   tObdSize         m_Size;
-   BYTE *           m_pString;
+   tObdSize             size;
+   BYTE *               pString;
 } tObdOString;                          // 000C
 
 typedef struct
 {
-   tObdSize         m_Size;
-   char*            m_pString;
+   tObdSize             size;
+   char*                pString;
 } tObdVString;                          // 000D
 
 
 typedef struct
 {
-    tObdSize        m_Size;
-    CONST char*     m_pDefString;         // must be same offset as m_pString in tObdVString
-    char*           m_pString;
+    tObdSize            size;
+    CONST char*         pDefString;         // must be same offset as m_pString in tObdVString
+    char*               pString;
 } tObdVStringDef;
 
 typedef struct
 {
-   tObdSize         m_Size;
-   UINT8*           m_pDefString;   // must be same offset as m_pString in tObdVString
-   UINT8*           m_pString;
+   tObdSize             size;
+   UINT8*               pDefString;   // must be same offset as m_pString in tObdVString
+   UINT8*               pString;
 } tObdOStringDef;
 
 //r.d. parameter struct for changing object size and/or pointer to data of Strings or Domains
 typedef struct
 {
-   tObdSize      m_DownloadSize;     // download size from SDO or APP
-   tObdSize      m_ObjSize;          // current object size from OD - should be changed from callback function
-   void*         m_pData;            // current object ptr  from OD - should be changed from callback function
+   tObdSize             downloadSize;     // download size from SDO or APP
+   tObdSize             objSize;          // current object size from OD - should be changed from callback function
+   void*                pData;            // current object ptr  from OD - should be changed from callback function
 } tObdVStringDomain;                          // 000D
 
 
@@ -380,11 +380,11 @@ typedef struct
 // Change not the order for this struct!!!
 typedef struct
 {
-    UINT            m_uiSubIndex;
-    tObdType        m_Type;
-    tObdAccess      m_Access;
-    CONST void ROM* m_pDefault;
-    void  MEM*      m_pCurrent;     // points always to RAM
+    UINT                subIndex;
+    tObdType            type;
+    tObdAccess          access;
+    CONST void ROM*     pDefault;
+    void  MEM*          pCurrent;     // points always to RAM
 } tObdSubEntry;
 
 // r.d.: has always to be, because of new OBD-Macros for arrays
@@ -397,11 +397,11 @@ typedef tObdSubEntry * tObdSubEntryPtr;
 // parameters for callback function
 typedef struct
 {
-    tObdEvent       m_ObdEvent;
-    UINT            m_uiIndex;
-    UINT            m_uiSubIndex;
-    void *          m_pArg;
-    UINT32          m_dwAbortCode;
+    tObdEvent           obdEvent;
+    UINT                index;
+    UINT                subIndex;
+    void*               pArg;
+    UINT32              abortCode;
 } tObdCbParam;
 
 // define type for callback function: pParam_p points to tObdCbParam
@@ -411,10 +411,10 @@ typedef tEplKernel (PUBLIC ROM* tObdCallback) (tObdCbParam MEM* pParam_p);
 
 typedef struct
 {
-    UINT                m_uiIndex;
-    tObdSubEntryPtr     m_pSubIndex;
-    UINT                m_uiCount;
-    tObdCallback        m_fpCallback;   // function is called back if object access
+    UINT                index;
+    tObdSubEntryPtr     pSubIndex;
+    UINT                count;
+    tObdCallback        pfnCallback;    // function is called back if object access
 } tObdEntry;
 
 // allways  pointer
@@ -427,13 +427,13 @@ typedef tObdEntry * tObdEntryPtr;
 
 struct _tObdInitParam
 {
-    tObdEntryPtr            m_pGenericPart;
-    tObdEntryPtr            m_pManufacturerPart;
-    tObdEntryPtr            m_pDevicePart;
+    tObdEntryPtr        pGenericPart;
+    tObdEntryPtr        pManufacturerPart;
+    tObdEntryPtr        pDevicePart;
 
     #if (defined (EPL_OBD_USER_OD) && (EPL_OBD_USER_OD != FALSE))
 
-          tObdEntryPtr      m_pUserPart;
+          tObdEntryPtr      pUserPart;
 
     #endif
 
@@ -448,11 +448,10 @@ typedef struct _tObdInitParam tObdInitParam;
 
 typedef struct
 {
-    tObdCommand     m_bCommand;
-    tObdPart        m_bCurrentOdPart;
-    void MEM*       m_pData;
-    tObdSize        m_ObjSize;
-
+    tObdCommand         command;
+    tObdPart            currentOdPart;
+    void MEM*           pData;
+    tObdSize            objSize;
 } tObdCbStoreParam;
 
 
@@ -473,13 +472,12 @@ typedef tEplKernel (PUBLIC ROM* tEplObdStoreLoadObjCallback) (tObdCbStoreParam M
 // -------------------------------------------------------------------------
 typedef struct
 {
-    UINT                        m_uiLowerObjIndex;  // lower limit of ObjIndex
-    UINT                        m_uiUpperObjIndex;  // upper limit of ObjIndex
-    tInitTabEntryCallback       m_fpInitTabEntry;   // will be called if ObjIndex was found
-    void MEM*                   m_pTabBase;         // base address of table
-    UINT                        m_uiEntrySize;      // size of table entry      // 25-feb-2005 r.d.: expansion from BYTE to WORD necessary for PDO bit mapping
-    UINT                        m_uiMaxEntries;     // max. tabel entries
-
+    UINT                        lowerObjIndex;      // lower limit of ObjIndex
+    UINT                        upperObjIndex;      // upper limit of ObjIndex
+    tInitTabEntryCallback       pfnInitTabEntry;    // will be called if ObjIndex was found
+    void MEM*                   pTabBase;           // base address of table
+    UINT                        entrySize;          // size of table entry      // 25-feb-2005 r.d.: expansion from BYTE to WORD necessary for PDO bit mapping
+    UINT                        maxEntries;         // max. tabel entries
 } tObdModulTabParam;
 
 //-------------------------------------------------------------------

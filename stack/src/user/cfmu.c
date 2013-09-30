@@ -197,13 +197,13 @@ tEplKernel cfmu_init(tCfmCbEventCnProgress pfnCbEventCnProgress_p,
     cfmInstance_g.pfnCbEventCnResult = pfnCbEventCnResult_p;
 
     // link domain with 4 zero-bytes to object 0x1F22 CFM_ConciseDcfList_ADOM
-    varParam.m_pData = &cfmInstance_g.leDomainSizeNull;
-    varParam.m_Size = sizeof(cfmInstance_g.leDomainSizeNull);
-    varParam.m_uiIndex = 0x1F22;    // CFM_ConciseDcfList_ADOM
+    varParam.pData = &cfmInstance_g.leDomainSizeNull;
+    varParam.size = sizeof(cfmInstance_g.leDomainSizeNull);
+    varParam.index = 0x1F22;    // CFM_ConciseDcfList_ADOM
     for (subindex = 1; subindex <= EPL_NMT_MAX_NODE_ID; subindex++)
     {
-        varParam.m_uiSubindex = subindex;
-        varParam.m_ValidFlag = kVarValidAll;
+        varParam.subindex = subindex;
+        varParam.validFlag = kVarValidAll;
         ret = obd_defineVar(&varParam);
         if ((ret != kEplSuccessful) &&
             (ret != kEplObdIndexNotExist) &&
@@ -234,9 +234,9 @@ tEplKernel cfmu_exit(void)
     tCfmNodeInfo*       pNodeInfo;
 
     // free domain for object 0x1F22 CFM_ConciseDcfList_ADOM
-    varParam.m_pData = NULL;
-    varParam.m_Size = 0;
-    varParam.m_uiIndex = 0x1F22;    //CFM_ConciseDcfList_ADOM
+    varParam.pData = NULL;
+    varParam.size = 0;
+    varParam.index = 0x1F22;    //CFM_ConciseDcfList_ADOM
     for (nodeId = 1; nodeId <= EPL_NMT_MAX_NODE_ID; nodeId++)
     {
         pNodeInfo = CFM_GET_NODEINFO(nodeId);
@@ -250,8 +250,8 @@ tEplKernel cfmu_exit(void)
             pBuffer = pNodeInfo->pObdBufferConciseDcf;
             if (pBuffer != NULL)
             {
-                varParam.m_uiSubindex = nodeId;
-                varParam.m_ValidFlag = kVarValidAll;
+                varParam.subindex = nodeId;
+                varParam.validFlag = kVarValidAll;
                 obd_defineVar(&varParam);
                 // ignore return code, because buffer has to be freed anyway
 
@@ -500,26 +500,26 @@ tEplKernel cfmu_cbObdAccess(tObdCbParam MEM* pParam_p)
     tCfmNodeInfo*           pNodeInfo = NULL;
     UINT8*                  pBuffer;
 
-    pParam_p->m_dwAbortCode = 0;
+    pParam_p->abortCode = 0;
 
-    if ((pParam_p->m_uiIndex != 0x1F22) || (pParam_p->m_ObdEvent != kObdEvWrStringDomain))
+    if ((pParam_p->index != 0x1F22) || (pParam_p->obdEvent != kObdEvWrStringDomain))
         return ret;
 
     // abort any running SDO transfer
-    pNodeInfo = CFM_GET_NODEINFO(pParam_p->m_uiSubIndex);
+    pNodeInfo = CFM_GET_NODEINFO(pParam_p->subIndex);
     if ((pNodeInfo != NULL) && (pNodeInfo->sdoComConHdl != UINT_MAX))
     {
         ret = EplSdoComSdoAbort(pNodeInfo->sdoComConHdl, EPL_SDOAC_DATA_NOT_TRANSF_DUE_DEVICE_STATE);
     }
 
-    pMemVStringDomain = pParam_p->m_pArg;
-    if ((pMemVStringDomain->m_ObjSize != pMemVStringDomain->m_DownloadSize) ||
-        (pMemVStringDomain->m_pData == NULL))
+    pMemVStringDomain = pParam_p->pArg;
+    if ((pMemVStringDomain->objSize != pMemVStringDomain->downloadSize) ||
+        (pMemVStringDomain->pData == NULL))
     {
-        pNodeInfo = allocNodeInfo(pParam_p->m_uiSubIndex);
+        pNodeInfo = allocNodeInfo(pParam_p->subIndex);
         if (pNodeInfo == NULL)
         {
-            pParam_p->m_dwAbortCode = EPL_SDOAC_OUT_OF_MEMORY;
+            pParam_p->abortCode = EPL_SDOAC_OUT_OF_MEMORY;
             return kEplNoResource;
         }
 
@@ -529,15 +529,15 @@ tEplKernel cfmu_cbObdAccess(tObdCbParam MEM* pParam_p)
             EPL_FREE(pBuffer);
             pNodeInfo->pObdBufferConciseDcf = NULL;
         }
-        pBuffer = EPL_MALLOC(pMemVStringDomain->m_DownloadSize);
+        pBuffer = EPL_MALLOC(pMemVStringDomain->downloadSize);
         if (pBuffer == NULL)
         {
-            pParam_p->m_dwAbortCode = EPL_SDOAC_OUT_OF_MEMORY;
+            pParam_p->abortCode = EPL_SDOAC_OUT_OF_MEMORY;
             return kEplNoResource;
         }
         pNodeInfo->pObdBufferConciseDcf = pBuffer;
-        pMemVStringDomain->m_pData = pBuffer;
-        pMemVStringDomain->m_ObjSize = pMemVStringDomain->m_DownloadSize;
+        pMemVStringDomain->pData = pBuffer;
+        pMemVStringDomain->objSize = pMemVStringDomain->downloadSize;
     }
 
     return ret;
