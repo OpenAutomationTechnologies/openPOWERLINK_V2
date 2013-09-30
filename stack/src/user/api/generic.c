@@ -233,8 +233,8 @@ tEplKernel oplk_linkObject(UINT objIndex_p, void* pVar_p, UINT* pVarEntries_p,
     usedSize   = 0;
 
     // init varParam structure with default values
-    varParam.m_uiIndex    = objIndex_p;
-    varParam.m_ValidFlag  = kVarValidAll;
+    varParam.index = objIndex_p;
+    varParam.validFlag = kVarValidAll;
 
     if (firstSubindex_p != 0)
     {   // check if object exists by reading subindex 0x00,
@@ -279,9 +279,9 @@ tEplKernel oplk_linkObject(UINT objIndex_p, void* pVar_p, UINT* pVarEntries_p,
             entrySize = *pEntrySize_p;
         }
 
-        varParam.m_uiSubindex = subindex;
-        varParam.m_Size  = entrySize;
-        varParam.m_pData = pData;
+        varParam.subindex = subindex;
+        varParam.size = entrySize;
+        varParam.pData = pData;
 
         usedSize += entrySize;
         pData   += entrySize;

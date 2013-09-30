@@ -258,23 +258,23 @@ tEplKernel PUBLIC pdou_cbObdAccess(tObdCbParam MEM* pParam_p)
     UINT                curPdoSize;
     tObdAccess          neededAccessType;
 
-    pParam_p->m_dwAbortCode = 0;
+    pParam_p->abortCode = 0;
 
-    if (pParam_p->m_ObdEvent != kObdEvPreWrite)
+    if (pParam_p->obdEvent != kObdEvPreWrite)
     {   // read accesses, post write events etc. are OK
         return ret;
     }
 
     // fetch object index type
-    indexType = pParam_p->m_uiIndex & PDOU_OBD_IDX_MASK;
+    indexType = pParam_p->index & PDOU_OBD_IDX_MASK;
 
     // check index type
     switch (indexType)
     {
         case PDOU_OBD_IDX_RX_COMM_PARAM:
         case PDOU_OBD_IDX_TX_COMM_PARAM:
-            ret = checkPdoValidity((PDOU_OBD_IDX_MAPP_PARAM | pParam_p->m_uiIndex),
-                                   &pParam_p->m_dwAbortCode);
+            ret = checkPdoValidity((PDOU_OBD_IDX_MAPP_PARAM | pParam_p->index),
+                                   &pParam_p->abortCode);
             return ret;
             break;
 
@@ -291,19 +291,19 @@ tEplKernel PUBLIC pdou_cbObdAccess(tObdCbParam MEM* pParam_p)
         default:
             // this callback function is only for PDO mapping and communication
             // parameters therfore we shouldn't come here!
-            pParam_p->m_dwAbortCode = EPL_SDOAC_GENERAL_ERROR;
+            pParam_p->abortCode = EPL_SDOAC_GENERAL_ERROR;
             ret = kEplPdoInvalidObjIndex;
             return ret;
             break;
     }
 
     // RPDO and TPDO mapping parameter accessed
-    if (pParam_p->m_uiSubIndex == 0)
+    if (pParam_p->subIndex == 0)
     {   // object mapping count accessed
         // PDO is enabled or disabled
-        mappObjectCount = *((BYTE*) pParam_p->m_pArg);
-        ret = checkAndConfigurePdo(pParam_p->m_uiIndex, mappObjectCount,
-                                   &pParam_p->m_dwAbortCode);
+        mappObjectCount = *((BYTE*) pParam_p->pArg);
+        ret = checkAndConfigurePdo(pParam_p->index, mappObjectCount,
+                                   &pParam_p->abortCode);
         if (ret != kEplSuccessful)
             return ret;
     }
@@ -313,16 +313,16 @@ tEplKernel PUBLIC pdou_cbObdAccess(tObdCbParam MEM* pParam_p)
         tPdoMappObject      mappObject;     // temporary object for check
         QWORD               objectMapping;
 
-        ret = checkPdoValidity(pParam_p->m_uiIndex, &pParam_p->m_dwAbortCode);
+        ret = checkPdoValidity(pParam_p->index, &pParam_p->abortCode);
         if (ret != kEplSuccessful)
         {   // PDO is valid or does not exist
             return ret;
         }
 
         // check existence of object and validity of object length
-        objectMapping = *((QWORD*) pParam_p->m_pArg);
+        objectMapping = *((QWORD*) pParam_p->pArg);
         ret = checkAndSetObjectMapping(objectMapping, neededAccessType, &mappObject,
-                                       &pParam_p->m_dwAbortCode, &curPdoSize);
+                                       &pParam_p->abortCode, &curPdoSize);
     }
 
     return ret;

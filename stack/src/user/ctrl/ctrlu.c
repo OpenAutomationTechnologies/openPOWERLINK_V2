@@ -573,12 +573,12 @@ tEplKernel ctrlu_cbObdAccess(tObdCbParam MEM* pParam_p)
     }
 #endif
 
-    switch (pParam_p->m_uiIndex)
+    switch (pParam_p->index)
     {
         //case 0x1006:    // NMT_CycleLen_U32 (valid on reset)
         case 0x1C14:    // DLL_LossOfFrameTolerance_U32
         //case 0x1F98:    // NMT_CycleTiming_REC (valid on reset)
-            if (pParam_p->m_ObdEvent == kObdEvPostWrite)
+            if (pParam_p->obdEvent == kObdEvPostWrite)
             {
                 // update DLL configuration
                 ret = updateDllConfig(&ctrlInstance_l.initParam, FALSE);
@@ -586,9 +586,9 @@ tEplKernel ctrlu_cbObdAccess(tObdCbParam MEM* pParam_p)
             break;
 
         case 0x1020:    // CFM_VerifyConfiguration_REC.ConfId_U32 != 0
-            if ((pParam_p->m_ObdEvent == kObdEvPostWrite) &&
-                (pParam_p->m_uiSubIndex == 3) &&
-                (*((UINT32*)pParam_p->m_pArg) != 0))
+            if ((pParam_p->obdEvent == kObdEvPostWrite) &&
+                (pParam_p->subIndex == 3) &&
+                (*((UINT32*)pParam_p->pArg) != 0))
             {
                 UINT32      verifyConfInvalid = 0;
                 // set CFM_VerifyConfiguration_REC.VerifyConfInvalid_U32 to 0
@@ -599,11 +599,11 @@ tEplKernel ctrlu_cbObdAccess(tObdCbParam MEM* pParam_p)
             break;
 
         case 0x1F9E:    // NMT_ResetCmd_U8
-            if (pParam_p->m_ObdEvent == kObdEvPreWrite)
+            if (pParam_p->obdEvent == kObdEvPreWrite)
             {
                 UINT8    nmtCommand;
 
-                nmtCommand = *((UINT8 *) pParam_p->m_pArg);
+                nmtCommand = *((UINT8 *) pParam_p->pArg);
                 // check value range
                 switch ((tNmtCommand)nmtCommand)
                 {
@@ -616,16 +616,16 @@ tEplKernel ctrlu_cbObdAccess(tObdCbParam MEM* pParam_p)
                         break;
 
                     default:
-                        pParam_p->m_dwAbortCode = EPL_SDOAC_VALUE_RANGE_EXCEEDED;
+                        pParam_p->abortCode = EPL_SDOAC_VALUE_RANGE_EXCEEDED;
                         ret = kEplObdAccessViolation;
                         break;
                 }
             }
-            else if (pParam_p->m_ObdEvent == kObdEvPostWrite)
+            else if (pParam_p->obdEvent == kObdEvPostWrite)
             {
                 UINT8    nmtCommand;
 
-                nmtCommand = *((UINT8 *) pParam_p->m_pArg);
+                nmtCommand = *((UINT8 *) pParam_p->pArg);
                 // check value range
                 switch ((tNmtCommand)nmtCommand)
                 {
@@ -651,7 +651,7 @@ tEplKernel ctrlu_cbObdAccess(tObdCbParam MEM* pParam_p)
                         break;
 
                     default:
-                        pParam_p->m_dwAbortCode = EPL_SDOAC_VALUE_RANGE_EXCEEDED;
+                        pParam_p->abortCode = EPL_SDOAC_VALUE_RANGE_EXCEEDED;
                         ret = kEplObdAccessViolation;
                         break;
                 }
@@ -660,9 +660,9 @@ tEplKernel ctrlu_cbObdAccess(tObdCbParam MEM* pParam_p)
 
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
         case 0x1F9F:    // NMT_RequestCmd_REC
-            if ((pParam_p->m_ObdEvent == kObdEvPostWrite) &&
-                (pParam_p->m_uiSubIndex == 1) &&
-                (*((UINT8*)pParam_p->m_pArg) != 0))
+            if ((pParam_p->obdEvent == kObdEvPostWrite) &&
+                (pParam_p->subIndex == 1) &&
+                (*((UINT8*)pParam_p->pArg) != 0))
             {
                 UINT8       cmdId;
                 UINT8       cmdTarget;
@@ -673,7 +673,7 @@ tEplKernel ctrlu_cbObdAccess(tObdCbParam MEM* pParam_p)
                 ret = obd_readEntry(0x1F9F, 2, &cmdId, &obdSize);
                 if (ret != kEplSuccessful)
                 {
-                    pParam_p->m_dwAbortCode = EPL_SDOAC_GENERAL_ERROR;
+                    pParam_p->abortCode = EPL_SDOAC_GENERAL_ERROR;
                     goto Exit;
                 }
 
@@ -681,7 +681,7 @@ tEplKernel ctrlu_cbObdAccess(tObdCbParam MEM* pParam_p)
                 ret = obd_readEntry(0x1F9F, 3, &cmdTarget, &obdSize);
                 if (ret != kEplSuccessful)
                 {
-                    pParam_p->m_dwAbortCode = EPL_SDOAC_GENERAL_ERROR;
+                    pParam_p->abortCode = EPL_SDOAC_GENERAL_ERROR;
                     goto Exit;
                 }
 
@@ -700,11 +700,11 @@ tEplKernel ctrlu_cbObdAccess(tObdCbParam MEM* pParam_p)
                 }
                 if (ret != kEplSuccessful)
                 {
-                    pParam_p->m_dwAbortCode = EPL_SDOAC_GENERAL_ERROR;
+                    pParam_p->abortCode = EPL_SDOAC_GENERAL_ERROR;
                 }
 
                 // reset request flag
-                *((UINT8*)pParam_p->m_pArg) = 0;
+                *((UINT8*)pParam_p->pArg) = 0;
             }
             break;
 #endif // (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
