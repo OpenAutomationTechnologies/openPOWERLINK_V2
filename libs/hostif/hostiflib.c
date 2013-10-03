@@ -2,11 +2,9 @@
 ********************************************************************************
 \file   hostiflib.c
 
-\brief  Host Interface Library - High Level Driver Header
+\brief  Host Interface Library - High Level Driver Implementation
 
-The Host Interface Library High Level Driver provides a software library for the
-host interface IP-Core.
-The hostiflib provides several features like queues and linear memory modules.
+The file contains the high level driver for the host interface library.
 
 \ingroup module_hostiflib
 *******************************************************************************/
@@ -37,6 +35,16 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
+
+/**
+********************************************************************************
+\defgroup   module_hostiflib    Host Interface Library
+\ingroup    libraries
+
+The host interface library provides a software interface for using the host
+interface IP core. It provides several features like queues and linear memory
+modules.
+*******************************************************************************/
 
 //------------------------------------------------------------------------------
 // includes
@@ -400,7 +408,7 @@ on the pConfig_p parameters.
 \param  ppInstance_p            The function returns with this double-pointer
                                 the created instance pointer. (return)
 
-\return tHostifReturn
+\return The function returns a tHostifReturn error code.
 \retval kHostifSuccessful       The host interface is configured successfully
                                 with the provided parameters.
 \retval kHostifInvalidParameter The caller has provided incorrect parameters.
@@ -557,7 +565,7 @@ This function deletes a host interface instance.
 \param  pInstance_p             The host interface instance that should be
                                 deleted
 
-\return tHostifReturn
+\return The function returns a tHostifReturn error code.
 \retval kHostifSuccessful       The host interface is deleted successfully.
 \retval kHostifInvalidParameter The caller has provided incorrect parameters.
 \retval kHostifHwWriteError     Deactivation of hardware is faulty.
@@ -616,12 +624,12 @@ Exit:
 /**
 \brief  Returns the instance of the given processor instance
 
-If the instance is not found NULL is returned
+If the instance is not found NULL is returned.
 
 \param  Instance_p              Processor instance
 
-\return tHostifInstance
-\retval NULL                    host interface instance not found
+\return The function returns an host interface instance.
+\retval NULL                    Host interface instance not found
 
 \ingroup module_hostiflib
 */
@@ -652,9 +660,9 @@ tHostifInstance hostif_getInstance (tHostifProcInstance Instance_p)
 This function processes the configured resources of the host interface like
 the queues.
 
-\param  pInstance_p             host interface instance
+\param  pInstance_p             Host interface instance
 
-\return tHostifReturn
+\return The function returns a tHostifReturn error code.
 \retval kHostifSuccessful       The process function exit without errors.
 \retval kHostifInvalidParameter The caller has provided incorrect parameters.
 
@@ -716,11 +724,11 @@ This function adds an irq handler function for the corresponding irq source.
 Note: The provided callback is invoked within the interrupt context!
 If the provided callback is NULL, then the irq source is disabled.
 
-\param  pInstance_p             host interface instance
-\param  irqSrc_p                irq source that should invoke the callback
-\param  callback_p              callback that is invoked
+\param  pInstance_p             Host interface instance
+\param  irqSrc_p                Irq source that should invoke the callback
+\param  pfnCb_p                 Callback function that is invoked
 
-\return tHostifReturn
+\return The function returns a tHostifReturn error code.
 \retval kHostifSuccessful       The process function exit without errors.
 \retval kHostifInvalidParameter The caller has provided incorrect parameters.
 \retval kHostifWrongProcInst    Only the host may call this function.
@@ -776,7 +784,7 @@ This function enables an irq source from the Pcp side.
 \param  irqSrc_p                irq source to be controlled
 \param  fEnable_p               enable the irq source (TRUE)
 
-\return tHostifReturn
+\return The function returns a tHostifReturn error code.
 \retval kHostifSuccessful       The process function exit without errors.
 \retval kHostifInvalidParameter The caller has provided incorrect parameters.
 \retval kHostifWrongProcInst    Only the host may call this function.
@@ -828,7 +836,7 @@ host interface.
 \param  pInstance_p             host interface instance
 \param  fEnable_p               enable the master irq (TRUE)
 
-\return tHostifReturn
+\return The function returns a tHostifReturn error code.
 \retval kHostifSuccessful       The process function exit without errors.
 \retval kHostifInvalidParameter The caller has provided incorrect parameters.
 \retval kHostifWrongProcInst    Only the host may call this function.
@@ -872,7 +880,7 @@ Exit:
 \param  pInstance_p             host interface instance
 \param  base_p                  base address to boot memory
 
-\return tHostifReturn
+\return The function returns a tHostifReturn error code.
 \retval kHostifSuccessful       The process function exit without errors.
 \retval kHostifInvalidParameter The caller has provided incorrect parameters.
 
@@ -903,7 +911,7 @@ Exit:
 \param  pInstance_p             host interface instance
 \param  pBase_p                 pointer to boot base
 
-\return tHostifReturn
+\return The function returns a tHostifReturn error code.
 \retval kHostifSuccessful       The process function exit without errors.
 \retval kHostifInvalidParameter The caller has provided incorrect parameters.
 
@@ -934,7 +942,7 @@ Exit:
 \param  pInstance_p             host interface instance
 \param  base_p                  base address to init memory
 
-\return tHostifReturn
+\return The function returns a tHostifReturn error code.
 \retval kHostifSuccessful       The process function exit without errors.
 \retval kHostifInvalidParameter The caller has provided incorrect parameters.
 
@@ -965,7 +973,7 @@ Exit:
 \param  pInstance_p             host interface instance
 \param  pBase_p                 pointer to init base
 
-\return tHostifReturn
+\return The function returns a tHostifReturn error code.
 \retval kHostifSuccessful       The process function exit without errors.
 \retval kHostifInvalidParameter The caller has provided incorrect parameters.
 
@@ -996,7 +1004,7 @@ Exit:
 \param  pInstance_p             host interface instance
 \param  cmd_p                   command
 
-\return tHostifReturn
+\return The function returns a tHostifReturn error code.
 \retval kHostifSuccessful       The process function exit without errors.
 \retval kHostifInvalidParameter The caller has provided incorrect parameters.
 
@@ -1027,7 +1035,7 @@ Exit:
 \param  pInstance_p             host interface instance
 \param  pCmd_p                  command
 
-\return tHostifReturn
+\return The function returns a tHostifReturn error code.
 \retval kHostifSuccessful       The process function exit without errors.
 \retval kHostifInvalidParameter The caller has provided incorrect parameters.
 
@@ -1060,7 +1068,7 @@ Note that only the Pcp is allowed to write to this register!
 \param  pInstance_p             host interface instance
 \param  sta_p                   state
 
-\return tHostifReturn
+\return The function returns a tHostifReturn error code.
 \retval kHostifSuccessful       The process function exit without errors.
 \retval kHostifInvalidParameter The caller has provided incorrect parameters.
 \retval kHostifWrongProcInst    The caller processor instance is not allowed.
@@ -1099,7 +1107,7 @@ Exit:
 \param  pInstance_p             host interface instance
 \param  pSta_p                  state
 
-\return tHostifReturn
+\return The function returns a tHostifReturn error code.
 \retval kHostifSuccessful       The process function exit without errors.
 \retval kHostifInvalidParameter The caller has provided incorrect parameters.
 
@@ -1132,7 +1140,7 @@ Note that only the Pcp is allowed to write to this register!
 \param  pInstance_p             host interface instance
 \param  err_p                   error/return code
 
-\return tHostifReturn
+\return The function returns a tHostifReturn error code.
 \retval kHostifSuccessful       The process function exit without errors.
 \retval kHostifInvalidParameter The caller has provided incorrect parameters.
 \retval kHostifWrongProcInst    The caller processor instance is not allowed.
@@ -1171,7 +1179,7 @@ Exit:
 \param  pInstance_p             host interface instance
 \param  pErr_p                  error/return
 
-\return tHostifReturn
+\return The function returns a tHostifReturn error code.
 \retval kHostifSuccessful       The process function exit without errors.
 \retval kHostifInvalidParameter The caller has provided incorrect parameters.
 
@@ -1201,10 +1209,10 @@ Exit:
 
 Note that only the Pcp is allowed to write to this register!
 
-\param  pInstance_p             host interface instance
-\param  heartbeat_p             heart beat value
+\param  pInstance_p             Host interface instance
+\param  heartbeat_p             Heart beat value
 
-\return tHostifReturn
+\return The function returns a tHostifReturn error code.
 \retval kHostifSuccessful       The process function exit without errors.
 \retval kHostifInvalidParameter The caller has provided incorrect parameters.
 \retval kHostifWrongProcInst    The caller processor instance is not allowed.
@@ -1240,10 +1248,10 @@ Exit:
 /**
 \brief  This function gets the heart beat value from the host interface
 
-\param  pInstance_p             host interface instance
-\param  pHeartbeat_p            heart beat value
+\param  pInstance_p             Host interface instance
+\param  pHeartbeat_p            Heart beat value
 
-\return tHostifReturn
+\return The function returns a tHostifReturn error code.
 \retval kHostifSuccessful       The process function exit without errors.
 \retval kHostifInvalidParameter The caller has provided incorrect parameters.
 
@@ -1271,11 +1279,11 @@ Exit:
 /**
 \brief  This function acquires a dynamic buffer for the host
 
-\param  pinstance_p             host interface instance
-\param  pcpBaseAddr_p           address in pcp memory space
-\param  ppDynBufBase_p          returns base address in host memory space
+\param  pInstance_p             Host interface instance
+\param  pcpBaseAddr_p           Address in pcp memory space
+\param  ppDynBufBase_p          Returns base address in host memory space
 
-\return tHostifReturn
+\return The function returns a tHostifReturn error code.
 \retval kHostifSuccessful       Dynamic buffer acquired ppDynBufBase_p valid.
 \retval kHostifInvalidParameter The caller has provided incorrect parameters.
 \retval kHostifBridgeDisabled   The bridge is disabled.
@@ -1331,10 +1339,10 @@ Exit:
 /**
 \brief  This function frees a dynamic buffer acquired by the host
 
-\param  pInstance_p             host interface instance
-\param  pcpBaseAddr_p           address in pcp memory space
+\param  pInstance_p             Host interface instance
+\param  pcpBaseAddr_p           Address in pcp memory space
 
-\return tHostifReturn
+\return The function returns a tHostifReturn error code.
 \retval kHostifSuccessful       Dynamic buffer freed
 \retval kHostifInvalidParameter The caller has provided incorrect parameters.
 \retval kHostifNoResource       No dynamic buffer is available to be freed
@@ -1380,11 +1388,11 @@ Exit:
 
 This function creates queue instance for the given host instance.
 
-\param  pInstance_p             host interface instance
-\param  InstanceId_p            resource instance id (Queue)
-\param  ppQueueInstance_p       double-pointer to return created queue instance
+\param  pInstance_p             Host interface instance
+\param  InstanceId_p            Resource instance id (Queue)
+\param  ppQueueInstance_p       Double-pointer to return created queue instance
 
-\return tHostifReturn
+\return The function returns a tHostifReturn error code.
 \retval kHostifSuccessful       The queue is created succesfully.
 \retval kHostifInvalidParameter The caller has provided incorrect parameters.
 \retval kHostifNoResource       The queue can't be created
@@ -1456,9 +1464,9 @@ Exit:
 
 This function deletes the queue instance
 
-\param  pQueueInstance_p        queue instance that has to be deleted
+\param  pQueueInstance_p        Queue instance that has to be deleted
 
-\return tHostifReturn
+\return The function returns a tHostifReturn error code.
 \retval kHostifSuccessful       The queue is deleted succesfully.
 \retval kHostifInvalidParameter The caller has provided incorrect parameters.
 \retval kHostifUnspecError      Unspecified error.
@@ -1514,11 +1522,11 @@ Exit:
 This function adds a queue callback for a specific queue instance into the
 queue process array.
 
-\param  pQueueInstance_p        queue instance
-\param  pfnQueueCb_p            call back for queue instance
-\param  pArg_p                  argument of call back
+\param  pQueueInstance_p        Queue instance
+\param  pfnQueueCb_p            Call back for queue instance
+\param  pArg_p                  Argument of call back
 
-\return tHostifReturn
+\return The function returns a tHostifReturn error code.
 \retval kHostifSuccessful       The queue is deleted succesfully.
 \retval kHostifInvalidParameter The caller has provided incorrect parameters.
 \retval kHostifNoResource       The queue can't be processed.
@@ -1562,10 +1570,10 @@ Exit:
 
 This function triggers a queue reset with a given timeout
 
-\param  pQueueInstance_p        queue instance
+\param  pQueueInstance_p        Queue instance
 
-\return tHostifReturn
-\retval kHostifSuccessful       The queue is deleted successfülly.
+\return The function returns a tHostifReturn error code.
+\retval kHostifSuccessful       The queue is deleted successfully.
 \retval kHostifInvalidParameter The caller has provided incorrect parameters.
 \retval kHostifBridgeDisabled   The bridge logic of the hostif is disabled.
 
@@ -1617,11 +1625,11 @@ Exit:
 
 This function returns the number of entries in the given queue
 
-\param  pQueueInstance_p        queue instance
-\param  pwEntryCount_p          returns the number of entries in the queue
+\param  pQueueInstance_p        Queue instance
+\param  pEntryCount_p           Returns the number of entries in the queue
 
-\return tHostifReturn
-\retval kHostifSuccessful       The queue is deleted successfülly.
+\return The function returns a tHostifReturn error code.
+\retval kHostifSuccessful       The queue is deleted successfully.
 \retval kHostifInvalidParameter The caller has provided incorrect parameters.
 \retval kHostifBridgeDisabled   The bridge logic of the hostif is disabled.
 
@@ -1671,12 +1679,12 @@ Exit:
 
 This function inserts the given queue entry into a specified queue.
 
-\param  pQueueInstance_p        queue instance
-\param  pData_p                 data to be inserted
-\param  size_p                  size of data to be inserted
+\param  pQueueInstance_p        Queue instance
+\param  pData_p                 Data to be inserted
+\param  size_p                  Size of data to be inserted
 
-\return tHostifReturn
-\retval kHostifSuccessful       The queue is deleted successfülly.
+\return The function returns a tHostifReturn error code.
+\retval kHostifSuccessful       The queue is deleted successfully.
 \retval kHostifInvalidParameter The caller has provided incorrect parameters.
 \retval kHostifBridgeDisabled   The bridge logic of the hostif is disabled.
 \retval kHostifBufferOverflow   The queue is full.
@@ -1732,12 +1740,12 @@ Exit:
 
 This function extracts an entry from the specified queue.
 
-\param  pQueueInstance_p        queue instance
-\param  pData_p                 buffer provided by the caller
-\param  pSize_p                 buffer size, returns actual size
+\param  pQueueInstance_p        Queue instance
+\param  pData_p                 Buffer provided by the caller
+\param  pSize_p                 Buffer size, returns actual size
 
-\return tHostifReturn
-\retval kHostifSuccessful       The queue is deleted successfülly.
+\return The function returns a tHostifReturn error code.
+\retval kHostifSuccessful       The queue is deleted successfully.
 \retval kHostifInvalidParameter The caller has provided incorrect parameters.
 \retval kHostifBridgeDisabled   The bridge logic of the hostif is disabled.
 \retval kHostifBufferEmpty      The queue is empty.
@@ -1797,12 +1805,12 @@ Exit:
 
 This function creates linear memory instance for the given host instance.
 
-\param  pInstance_p             host interface instance
-\param  InstanceId_p            resource instance id (Queue)
-\param  ppQueueInstance_p       double-pointer to return created linear memory
+\param  pInstance_p             Host interface instance
+\param  InstanceId_p            Resource instance id (Queue)
+\param  ppLimInstance_p         Double-pointer to return created linear memory
                                 instance
 
-\return tHostifReturn
+\return The function returns a tHostifReturn error code.
 \retval kHostifSuccessful       The lim is created successfully.
 \retval kHostifInvalidParameter The caller has provided incorrect parameters.
 \retval kHostifNoResource       The lim can't be created
@@ -1875,9 +1883,9 @@ Exit:
 
 This function deletes the linear memory instance
 
-\param  pLimInstance_p          linear memory instance that has to be deleted
+\param  pLimInstance_p          Linear memory instance that has to be deleted
 
-\return tHostifReturn
+\return The function returns a tHostifReturn error code.
 \retval kHostifSuccessful       The queue is deleted succesfully.
 \retval kHostifInvalidParameter The caller has provided incorrect parameters.
 \retval kHostifUnspecError      Unspecified error.
@@ -1923,12 +1931,12 @@ Exit:
 
 This function writes to the linear memory instance
 
-\param  pLimInstance_p          linear memory instance to be written to
-\param  offset_p                write at byte offset (UINT32-aligned!)
-\param  pSrc_p                  pointer to data to be written (UINT32-aligned!)
-\param  size_p                  size of data to be written
+\param  pLimInstance_p          Linear memory instance to be written to
+\param  offset_p                Write at byte offset (UINT32-aligned!)
+\param  pSrc_p                  Pointer to data to be written (UINT32-aligned!)
+\param  size_p                  Size of data to be written
 
-\return tHostifReturn
+\return The function returns a tHostifReturn error code.
 \retval kHostifSuccessful       The queue is deleted succesfully.
 \retval kHostifInvalidParameter The caller has provided incorrect parameters.
 \retval kHostifBridgeDisabled   The bridge logic of the hostif is disabled.
@@ -1986,13 +1994,13 @@ Exit:
 
 This function reads from the linear memory instance
 
-\param  pLimInstance_p          linear memory instance to be written to
+\param  pLimInstance_p          Linear memory instance to be written to
 \param  pDst_p                  pointer to buffer to be written to
                                 (UINT32-aligned!)
-\param  offset_p                write at byte offset (UINT32-aligned!)
-\param  size_p                  size of buffer
+\param  offset_p                Write at byte offset (UINT32-aligned!)
+\param  size_p                  Size of buffer
 
-\return tHostifReturn
+\return The function returns a tHostifReturn error code.
 \retval kHostifSuccessful       The queue is deleted succesfully.
 \retval kHostifInvalidParameter The caller has provided incorrect parameters.
 \retval kHostifBridgeDisabled   The bridge logic of the hostif is disabled.
@@ -2051,11 +2059,11 @@ Exit:
 This function provides the base address and size of the linear memory buffer of
 the specified instance.
 
-\param  pLimInstance_p          linear memory instance of interest
+\param  pLimInstance_p          Linear memory instance of interest
 \param  ppBase_p                With this pointer the base address is returned.
 \param  pSpan_p                 With this pointer the size is returned.
 
-\return tHostifReturn
+\return The function returns a tHostifReturn error code.
 \retval kHostifSuccessful       The queue is deleted succesfully.
 \retval kHostifInvalidParameter The caller has provided incorrect parameters.
 
@@ -2147,6 +2155,8 @@ Exit:
 /**
 \brief  Free pointers which are not NULL
 
+The function frees a pointer if it isn't NULL.
+
 \param  p                       Pointer to be freed
 */
 //------------------------------------------------------------------------------
@@ -2164,7 +2174,7 @@ This function reads and verifies the magic word from the host interface.
 
 \param  pHostif_p               Host interface instance
 
-\return The function returns tHostifReturn error code.
+\return The function returns a tHostifReturn error code.
 */
 //------------------------------------------------------------------------------
 static tHostifReturn checkMagic(tHostif *pHostif_p)
@@ -2183,7 +2193,7 @@ This function reads and verifies the version from the host interface.
 
 \param  pHostif_p               Host interface instance
 
-\return The function returns tHostifReturn error code.
+\return The function returns a tHostifReturn error code.
 */
 //------------------------------------------------------------------------------
 static tHostifReturn checkVersion(tHostif *pHostif_p)
@@ -2211,7 +2221,7 @@ can be set from host side, instead buffers like K2U-Queue or Error Counters.
 
 \param  pHostif_p               Host interface instance
 
-\return The function returns tHostifReturn error code.
+\return The function returns a tHostifReturn error code.
 */
 //------------------------------------------------------------------------------
 static tHostifReturn allocateDynBuffers (tHostif *pHostif_p)
@@ -2271,7 +2281,7 @@ can be set from host side, instead buffers like K2U-Queue or Error Counters.
 
 \param  pHostif_p               Host interface instance
 
-\return The function returns tHostifReturn error code.
+\return The function returns a tHostifReturn error code.
 */
 //------------------------------------------------------------------------------
 static tHostifReturn freeDynBuffers (tHostif *pHostif_p)
@@ -2306,7 +2316,7 @@ to the host interface bridge logic.
 
 \param  pHostif_p               Host interface instance
 
-\return The function returns tHostifReturn error code.
+\return The function returns a tHostifReturn error code.
 */
 //------------------------------------------------------------------------------
 static tHostifReturn setDynBuffers (tHostif *pHostif_p)
@@ -2338,7 +2348,7 @@ again.
 \param  pHostif_p               Host interface instance
 \param  fEnable_p               Enable the bridge with TRUE
 
-\return The function returns tHostifReturn error code.
+\return The function returns a tHostifReturn error code.
 */
 //------------------------------------------------------------------------------
 static tHostifReturn controlBridge (tHostif *pHostif_p, BOOL fEnable_p)
@@ -2402,7 +2412,7 @@ again.
 \param  pHostif_p               Host interface instance
 \param  fEnable_p               Enable interrupt master with TRUE
 
-\return The function returns tHostifReturn error code.
+\return The function returns a tHostifReturn error code.
 */
 //------------------------------------------------------------------------------
 static tHostifReturn controlIrqMaster (tHostif *pHostif_p, BOOL fEnable_p)
@@ -2443,7 +2453,7 @@ This function configures the queue instances depending on the processor instance
 \param  InstanceId_p            Instance to be configured
 \param  pQueueConfig_p          Reference to queue configuration structure
 
-\return The function returns tHostifReturn error code.
+\return The function returns a tHostifReturn error code.
 */
 //------------------------------------------------------------------------------
 static tHostifReturn queueConfig (tHostif *pHostif_p,
@@ -2549,7 +2559,7 @@ processed.
 \param  pHostif_p               Host interface instance
 \param  QueueProcess_p          Entry to be added to queue process table
 
-\return The function returns tHostifReturn error code.
+\return The function returns a tHostifReturn error code.
 */
 //------------------------------------------------------------------------------
 static tHostifReturn addQueueProcess (tHostif *pHostif_p,
@@ -2583,7 +2593,7 @@ interface instance.
 \param  pHostif_p               Host interface instance
 \param  QueueProcess_p          Entry to be removed from queue process table
 
-\return The function returns tHostifReturn error code.
+\return The function returns a tHostifReturn error code.
 */
 //------------------------------------------------------------------------------
 static tHostifReturn removeQueueProcess (tHostif *pHostif_p,
@@ -2620,7 +2630,7 @@ instance (Pcp or host).
 \param  pLimConfig_p            Reference to linear memory configuration
                                 structure
 
-\return The function returns tHostifReturn error code.
+\return The function returns a tHostifReturn error code.
 */
 //------------------------------------------------------------------------------
 static tHostifReturn limConfig (tHostif *pHostif_p,

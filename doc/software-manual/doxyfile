@@ -680,10 +680,13 @@ WARN_LOGFILE           =
 INPUT                  = ../../stack/src \
                          ../../include \
                          ../../objdicts \
+                         ../../libs/circbuf \
+                         ../../libs/hostif \
                          calmodules.txt \
                          usermodules.txt \
                          kernelmodules.txt \
                          commonmodules.txt \
+                         libmodules.txt \
                          ../powerlink.md \
                          ../openpowerlink.md \
                          ../platforms.md \

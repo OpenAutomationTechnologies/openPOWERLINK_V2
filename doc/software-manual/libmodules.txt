@@ -1,0 +1,8 @@
+//==============================================================================
+/**
+\defgroup libraries openPOWERLINK Libraries
+
+A set of libraries provides miscellaneous functions which are used by the
+openPOWERLINK stack.
+*/
+//==============================================================================
