@@ -302,7 +302,7 @@ typedef struct
     tObdSize            size;
 } tObdVarEntry;
 
-/// C type definition for DS301 data type \ref kObdTypeOstring
+/// C type definition for DS301 data type \ref kObdTypeOString
 typedef struct
 {
    tObdSize             size;
@@ -317,7 +317,7 @@ typedef struct
 } tObdOStringDef;
 
 
-/// C type definition for DS301 data type \ref kObdTypeVstring
+/// C type definition for DS301 data type \ref kObdTypeVString
 typedef struct
 {
    tObdSize             size;
