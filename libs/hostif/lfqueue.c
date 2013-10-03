@@ -146,12 +146,16 @@ typedef union uIndicesHw
     volatile tBothIndices   reset;    ///< use this to reset indices
 } tIndicesHw;
 
+/**
+\brief Queue state
+
+This type defines valid queue states.
+*/
 typedef enum eQueueState
 {
     kQueueStateInvalid      = 0,        ///< queue invalid
     kQueueStateReset        = 1,        ///< queue is in reset
     kQueueStateOperational  = 2,        ///< queue is operational
-
 } tQueueState;
 
 /**

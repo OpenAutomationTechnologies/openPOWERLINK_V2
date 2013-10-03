@@ -12,19 +12,6 @@ allocation. Therefore for each supported architecture a low-level module must
 be implemented. The interface of the low-level module is defined in
 circbuf-arch.h.
 
-The circular buffer library is designed for concurrent access of different
-instances (threads, processes, etc.) to the circular buffer. Therefore a
-shared memory which could be accessed by all instances is needed. Additionally
-a lock mechanism is needed to lockout the critical sections.
-
-The circular buffer library provides "an asynchronous interface". This means
-there is a primary instance that uses different functions than all "secondary"
-instances which would like to access the buffer. The primary instance creates
-the buffer by calling circbuf_alloc(). All other instances need to connect to
-the buffer by calling circbuf_connect(). The same applies for deinitialization.
-After all connected instances are disconnected by calling circbuf_disconnect(),
-the main instance could cleanup and free the buffer by calling circbuf_free().
-
 \ingroup module_lib_circbuf
 *******************************************************************************/
 
@@ -54,6 +41,27 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
+
+/**
+********************************************************************************
+
+\defgroup   module_lib_circbuf    Circular Buffer Library
+\ingroup    libraries
+
+The circular buffer library is designed for concurrent access of different
+instances (threads, processes, etc.) to the circular buffer. Therefore a
+shared memory which could be accessed by all instances is needed. Additionally
+a lock mechanism is needed to lockout the critical sections.
+
+The circular buffer library provides "an asynchronous interface". This means
+there is a primary instance that uses different functions than all "secondary"
+instances which would like to access the buffer. The primary instance creates
+the buffer by calling circbuf_alloc(). All other instances need to connect to
+the buffer by calling circbuf_connect(). The same applies for deinitialization.
+After all connected instances are disconnected by calling circbuf_disconnect(),
+the main instance could cleanup and free the buffer by calling circbuf_free().
+
+*******************************************************************************/
 
 //------------------------------------------------------------------------------
 // includes
@@ -236,7 +244,7 @@ tCircBufError circbuf_disconnect (tCircBufInstance* pInstance_p)
 The function resets a circular buffer. The read and write pointer a restored
 to the start address of the buffer.
 
-\param  id_p            The ID of the buffer to reset,
+\param  pInstance_p         Pointer to circular buffer instance to be reset.
 
 \return The function returns a tCircBuf Error code.
 
@@ -261,7 +269,7 @@ void circbuf_reset (tCircBufInstance* pInstance_p)
 
 The function writes a data block to a circular buffer.
 
-\param  id_p            The ID of the buffer to write to,
+\param  pInstance_p     Pointer to circular buffer instance.
 \param  pData_p         Pointer to the data which should be written.
 \param  size_p          The size of the data to write.
 
@@ -331,7 +339,7 @@ tCircBufError circbuf_writeData (tCircBufInstance* pInstance_p, const void* pDat
 
 The function writes two different source data block to a circular buffer.
 
-\param  id_p            The ID of the buffer to write to,
+\param  pInstance_p     Pointer to circular buffer instance.
 \param  pData_p         Pointer to the first data block to be written.
 \param  size_p          The size of the first data block to be written.
 \param  pData2_p        Pointer to the second data block to be written.
@@ -426,7 +434,7 @@ tCircBufError circbuf_writeMultipleData(tCircBufInstance* pInstance_p,
 
 The function reads a data block from a circular buffer.
 
-\param  id_p                The ID of the buffer to write to,
+\param  pInstance_p         Pointer to circular buffer instance.
 \param  pData_p             Pointer to store the read data.
 \param  size_p              The size of the destination buffer to store the data.
 \param  pDataBlockSize_p    Pointer to store the size of the read data.
@@ -495,7 +503,7 @@ tCircBufError circbuf_readData(tCircBufInstance* pInstance_p, void* pData_p,
 
 The function returns the available data count
 
-\param  id_p            The ID of the buffer to write to,
+\param  pInstance_p     Pointer to circular buffer instance.
 
 \return The function returns the available data count
 
@@ -514,8 +522,8 @@ UINT32 circbuf_getDataCount(tCircBufInstance* pInstance_p)
 
 The function sets up signalling for a specified buffer.
 
-\param  id_p            The ID of the buffer to setup signalling.
-\param  sig_p           Pointer to signaling instance for this buffer.
+\param  pInstance_p     Pointer to circular buffer instance.
+\param  pfnSigCb_p      Pointer to signaling callback function.
 
 \return The function returns a tCircBuf Error code.
 
