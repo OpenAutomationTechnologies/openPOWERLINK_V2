@@ -90,22 +90,22 @@
 //---------------------------------------------------------------------------
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDO_UDP)) != 0)
 
-tEplKernel PUBLIC EplSdoUdpuInit(tSequLayerReceiveCb fpReceiveCb_p);
+tEplKernel sdoudp_init(tSequLayerReceiveCb fpReceiveCb_p);
 
-tEplKernel PUBLIC EplSdoUdpuAddInstance(tSequLayerReceiveCb fpReceiveCb_p);
+tEplKernel sdoudp_addInstance(tSequLayerReceiveCb fpReceiveCb_p);
 
-tEplKernel PUBLIC EplSdoUdpuDelInstance(void);
+tEplKernel sdoudp_delInstance(void);
 
-tEplKernel PUBLIC EplSdoUdpuConfig(unsigned long ulIpAddr_p, unsigned int uiPort_p);
+tEplKernel sdoudp_config(unsigned long ulIpAddr_p, unsigned int uiPort_p);
 
-tEplKernel PUBLIC EplSdoUdpuInitCon(tSdoConHdl*  pSdoConHandle_p,
+tEplKernel sdoudp_initCon(tSdoConHdl*  pSdoConHandle_p,
                                unsigned int    uiTargetNodeId_p);
 
-tEplKernel PUBLIC EplSdoUdpuSendData(tSdoConHdl       SdoConHandle_p,
+tEplKernel sdoudp_sendData(tSdoConHdl       SdoConHandle_p,
                                     tEplFrame *          pSrcData_p,
                                     DWORD                dwDataSize_p);
 
-tEplKernel PUBLIC EplSdoUdpuDelCon(tSdoConHdl SdoConHandle_p);
+tEplKernel sdoudp_delConnection(tSdoConHdl SdoConHandle_p);
 
 #endif // end of #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDO_UDP)) != 0)
 

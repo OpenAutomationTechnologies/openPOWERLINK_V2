@@ -352,7 +352,7 @@ tEplKernel PUBLIC EplSdoAsySeqAddInstance (tSdoComReceiveCb fpSdoComCb_p,
 
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDO_UDP)) != 0)
     // init lower layer
-    Ret = EplSdoUdpuAddInstance(EplSdoAsyReceiveCb);
+    Ret = sdoudp_addInstance(EplSdoAsyReceiveCb);
     if(Ret != kEplSuccessful)
     {
         goto Exit;
@@ -424,7 +424,7 @@ tEplAsySdoSeqCon*   pAsySdoSeqCon;
 
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDO_UDP)) != 0)
     // delete lower layer
-    Ret = EplSdoUdpuDelInstance();
+    Ret = sdoudp_delInstance();
 #endif
 
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDO_ASND)) != 0)
@@ -474,7 +474,7 @@ tEplAsySdoSeqCon*   pAsySdoSeqCon;
         case kSdoTypeUdp:
         {
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDO_UDP)) != 0)
-            Ret = EplSdoUdpuInitCon(&ConHandle,
+            Ret = sdoudp_initCon(&ConHandle,
                                     uiNodeId_p);
             if(Ret != kEplSuccessful)
             {
@@ -546,7 +546,7 @@ tEplAsySdoSeqCon*   pAsySdoSeqCon;
                 case kSdoTypeUdp:
                 {
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDO_UDP)) != 0)
-                    Ret = EplSdoUdpuDelCon(ConHandle);
+                    Ret = sdoudp_delConnection(ConHandle);
                     if(Ret != kEplSuccessful)
                     {
                         goto Exit;
@@ -803,7 +803,7 @@ tEplAsySdoSeqCon*   pAsySdoSeqCon;
         {
         #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDO_UDP)) != 0)
             // call close function of lower layer
-            EplSdoUdpuDelCon(pAsySdoSeqCon->m_ConHandle);
+            sdoudp_delConnection(pAsySdoSeqCon->m_ConHandle);
         #endif// end of #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDO_UDP)) != 0)
         }
         else
@@ -2018,7 +2018,7 @@ tEplKernel      Ret;
     if ((pAsySdoSeqCon_p->m_ConHandle & SDO_ASY_HANDLE_MASK) == SDO_UDP_HANDLE)
     {   // send over UDP
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDO_UDP)) != 0)
-        Ret = EplSdoUdpuSendData(pAsySdoSeqCon_p->m_ConHandle,
+        Ret = sdoudp_sendData(pAsySdoSeqCon_p->m_ConHandle,
                                     pEplFrame_p,      // pointer to frame
                                     uiDataSize_p);
 #else

@@ -183,7 +183,7 @@ static int EplSdoUdpThread(void * pArg_p);
 
 //---------------------------------------------------------------------------
 //
-// Function:    EplSdoUdpuInit
+// Function:    sdoudp_init
 //
 // Description: init first instance of the module
 //
@@ -199,19 +199,19 @@ static int EplSdoUdpThread(void * pArg_p);
 // State:
 //
 //---------------------------------------------------------------------------
-tEplKernel PUBLIC EplSdoUdpuInit(tSequLayerReceiveCb fpReceiveCb_p)
+tEplKernel sdoudp_init(tSequLayerReceiveCb fpReceiveCb_p)
 {
 tEplKernel  Ret;
 
 
-    Ret = EplSdoUdpuAddInstance(fpReceiveCb_p);
+    Ret = sdoudp_addInstance(fpReceiveCb_p);
 
 return Ret;
 }
 
 //---------------------------------------------------------------------------
 //
-// Function:    EplSdoUdpuAddInstance
+// Function:    sdoudp_addInstance
 //
 // Description: init additional instance of the module
 //              init socket and start Listen-Thread
@@ -228,7 +228,7 @@ return Ret;
 // State:
 //
 //---------------------------------------------------------------------------
-tEplKernel PUBLIC EplSdoUdpuAddInstance(tSequLayerReceiveCb fpReceiveCb_p)
+tEplKernel sdoudp_addInstance(tSequLayerReceiveCb fpReceiveCb_p)
 {
 tEplKernel          Ret;
 
@@ -272,7 +272,7 @@ WSADATA             Wsa;
     SdoUdpInstance_g.m_ThreadHandle = 0;
     SdoUdpInstance_g.m_UdpSocket = INVALID_SOCKET;
 
-    Ret = EplSdoUdpuConfig(INADDR_ANY, 0);
+    Ret = sdoudp_config(INADDR_ANY, 0);
 
 Exit:
     return Ret;
@@ -281,7 +281,7 @@ Exit:
 
 //---------------------------------------------------------------------------
 //
-// Function:    EplSdoUdpuDelInstance
+// Function:    sdoudp_delInstance
 //
 // Description: del instance of the module
 //              del socket and del Listen-Thread
@@ -297,7 +297,7 @@ Exit:
 // State:
 //
 //---------------------------------------------------------------------------
-tEplKernel PUBLIC EplSdoUdpuDelInstance()
+tEplKernel sdoudp_delInstance()
 {
 tEplKernel      Ret;
 
@@ -351,7 +351,7 @@ Exit:
 
 //---------------------------------------------------------------------------
 //
-// Function:    EplSdoUdpuConfig
+// Function:    sdoudp_config
 //
 // Description: reconfigurate socket with new IP-Address
 //              -> needed for NMT ResetConfiguration
@@ -366,7 +366,7 @@ Exit:
 // State:
 //
 //---------------------------------------------------------------------------
-tEplKernel PUBLIC EplSdoUdpuConfig(unsigned long ulIpAddr_p, unsigned int uiPort_p)
+tEplKernel sdoudp_config(unsigned long ulIpAddr_p, unsigned int uiPort_p)
 {
 tEplKernel          Ret;
 struct sockaddr_in  Addr;
@@ -426,7 +426,7 @@ unsigned long       ulThreadId;
     if (SdoUdpInstance_g.m_UdpSocket == INVALID_SOCKET)
     {
         Ret = kEplSdoUdpNoSocket;
-        EPL_DBGLVL_SDO_TRACE("EplSdoUdpuConfig: socket() failed\n");
+        EPL_DBGLVL_SDO_TRACE("sdoudp_config: socket() failed\n");
         goto Exit;
     }
 
@@ -438,7 +438,7 @@ unsigned long       ulThreadId;
     if (iError < 0)
     {
         //iError = WSAGetLastError();
-        EPL_DBGLVL_SDO_TRACE("EplSdoUdpuConfig: bind() finished with %i\n", iError);
+        EPL_DBGLVL_SDO_TRACE("sdoudp_config: bind() finished with %i\n", iError);
         Ret = kEplSdoUdpNoSocket;
         goto Exit;
     }
@@ -479,7 +479,7 @@ Exit:
 
 //---------------------------------------------------------------------------
 //
-// Function:    EplSdoUdpuInitCon
+// Function:    sdoudp_initCon
 //
 // Description: init a new connect
 //
@@ -495,7 +495,7 @@ Exit:
 // State:
 //
 //---------------------------------------------------------------------------
-tEplKernel PUBLIC EplSdoUdpuInitCon(tSdoConHdl*  pSdoConHandle_p,
+tEplKernel sdoudp_initCon(tSdoConHdl*  pSdoConHandle_p,
                                     unsigned int    uiTargetNodeId_p)
 {
 tEplKernel          Ret;
@@ -551,7 +551,7 @@ Exit:
 
 //---------------------------------------------------------------------------
 //
-// Function:    EplSdoUdpuSendData
+// Function:    sdoudp_sendData
 //
 // Description: send data using exisiting connection
 //
@@ -568,7 +568,7 @@ Exit:
 // State:
 //
 //---------------------------------------------------------------------------
-tEplKernel PUBLIC EplSdoUdpuSendData(tSdoConHdl       SdoConHandle_p,
+tEplKernel sdoudp_sendData(tSdoConHdl       SdoConHandle_p,
                                     tEplFrame *          pSrcData_p,
                                     DWORD                dwDataSize_p)
 {
@@ -618,7 +618,7 @@ struct sockaddr_in  Addr;
                 sizeof(struct sockaddr_in));                  // sizeof targetadress
     if(iError < 0)
     {
-        EPL_DBGLVL_SDO_TRACE("EplSdoUdpuSendData: sendto() finished with %i\n", iError);
+        EPL_DBGLVL_SDO_TRACE("sdoudp_sendData: sendto() finished with %i\n", iError);
         Ret = kEplSdoUdpSendError;
         goto Exit;
     }
@@ -631,7 +631,7 @@ Exit:
 
 //---------------------------------------------------------------------------
 //
-// Function:    EplSdoUdpuDelCon
+// Function:    sdoudp_delConnection
 //
 // Description: delete connection from intern structure
 //
@@ -645,7 +645,7 @@ Exit:
 // State:
 //
 //---------------------------------------------------------------------------
-tEplKernel PUBLIC EplSdoUdpuDelCon(tSdoConHdl SdoConHandle_p)
+tEplKernel sdoudp_delCon(tSdoConHdl SdoConHandle_p)
 {
 tEplKernel      Ret;
 unsigned int    uiArray;
