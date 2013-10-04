@@ -61,11 +61,11 @@ extern "C" {
 
 #if defined(CONFIG_INCLUDE_SDO_UDP)
 
-tEplKernel sdoudp_init(tSequLayerReceiveCb fpReceiveCb_p);
-tEplKernel sdoudp_addInstance(tSequLayerReceiveCb fpReceiveCb_p);
+tEplKernel sdoudp_init(tSequLayerReceiveCb pfnReceiveCb_p);
+tEplKernel sdoudp_addInstance(tSequLayerReceiveCb pfnReceiveCb_p);
 tEplKernel sdoudp_delInstance(void);
-tEplKernel sdoudp_config(unsigned long ulIpAddr_p, unsigned int uiPort_p);
-tEplKernel sdoudp_initCon(tSdoConHdl* pSdoConHandle_p, unsigned int uiTargetNodeId_p);
+tEplKernel sdoudp_config(ULONG ipAddr_p, UINT port_p);
+tEplKernel sdoudp_initCon(tSdoConHdl* pSdoConHandle_p, UINT targetNodeId_p);
 tEplKernel sdoudp_sendData(tSdoConHdl SdoConHandle_p, tEplFrame* pSrcData_p, DWORD dwDataSize_p);
 tEplKernel sdoudp_delConnection(tSdoConHdl SdoConHandle_p);
 
@@ -76,6 +76,4 @@ tEplKernel sdoudp_delConnection(tSdoConHdl SdoConHandle_p);
 #endif
 
 #endif /* _INC_sdoudp_H_ */
-
-
 

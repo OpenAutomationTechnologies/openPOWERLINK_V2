@@ -100,6 +100,30 @@ abstraction layer (PDO CAL) is used.
 
 //------------------------------------------------------------------------------
 /**
+\defgroup user_layer_sdo SDO Modules
+
+\brief SDO modules
+
+The SDO modules provide the Service Data Objects (SDO) stack of openPOWERLINK.
+
+\ingroup user_layer
+*/
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+/**
+\defgroup module_sdo_udp sdo_udp
+
+\brief SDO over PDO module
+
+This module provide the functionality of sending SDO packets over UDP.
+
+\ingroup user_layer_sdo
+*/
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+/**
 \defgroup user_layer_nmt NMT Modules
 
 \brief User NMT modules
