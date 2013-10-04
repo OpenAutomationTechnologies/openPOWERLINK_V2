@@ -869,7 +869,7 @@ static tEplKernel cbNmtStateChange(tEventNmtStateChange nmtStateChange_p)
 #if 0
 #if defined(CONFIG_INCLUDE_SDO_UDP)
             // configure SDO via UDP (i.e. bind it to the EPL ethernet interface)
-            ret = EplSdoUdpuConfig(stackInstance_l.m_InitParam.m_dwIpAddress, EPL_C_SDO_EPL_PORT);
+            ret = sdoudp_config(stackInstance_l.m_InitParam.m_dwIpAddress, EPL_C_SDO_EPL_PORT);
             if (ret != kEplSuccessful)
                 return ret;
 #endif
