@@ -1,5 +1,8 @@
 -------------------------------------------------------------------------------
--- Entity : axi_powerlink
+--! @file axi_powerlink.vhd
+--
+--! @brief
+--
 -------------------------------------------------------------------------------
 --
 --    (c) B&R, 2012
@@ -34,17 +37,9 @@
 --    POSSIBILITY OF SUCH DAMAGE.
 --
 -------------------------------------------------------------------------------
--- Design unit header --
 --
 -- This is the toplevel file for using the POWERLINK IP-Core
 -- with Xilinx AXI.
---
--------------------------------------------------------------------------------
---
--- 2012-01-12   V0.01   zelenkaj	First version
--- 2012-01-26   V0.02   zelenkaj    Added number of SMI generic feature
--- 2012-01-27   V0.10   zelenkaj    Incremented PdiRev
--- 2012-08-03   V0.11   zelenkaj    add pcp sys id
 --
 -------------------------------------------------------------------------------
 
@@ -80,6 +75,7 @@ library AXI_MASTER_BURST_V1_00_A;
 
 entity axi_powerlink is
   generic(
+       C_FAMILY : string := "spartan6";
        -- general
        C_GEN_PDI : boolean := false;
        C_GEN_PAR_IF : boolean := false;
@@ -95,6 +91,7 @@ entity axi_powerlink is
        C_RX_INT_PKT : boolean := false;
        C_USE_2ND_PHY : boolean := true;
        C_NUM_SMI : integer range 1 to 2 := 2;
+       C_MAC_GEN_SECOND_TIMER : boolean := false;
        --pdi
        C_PDI_REV : integer := 0;
        C_PCP_SYS_ID : integer := 0;
@@ -104,7 +101,6 @@ entity axi_powerlink is
        C_PDI_ASYNC_BUF_1 : integer := 50;
        C_PDI_GEN_LED : boolean := false;
        C_PDI_GEN_TIME_SYNC : boolean := true;
-       C_PDI_GEN_SECOND_TIMER : boolean := false;
        C_PDI_GEN_EVENT : boolean := true;
        --global pdi and mac
        C_NUM_RPDO : integer := 3;
@@ -127,6 +123,9 @@ entity axi_powerlink is
        C_OBSERVER_ENABLE : boolean := false;
        -- clock stabiliser
        C_INSTANCE_ODDR2 : boolean := false;
+       -- sync IRQ pulse width
+       C_USE_PULSE_2nd_CMP_TIMER : boolean := true;
+       C_PULSE_WIDTH_2nd_CMP_TIMER : integer := 9;
        -- PDI AP AXI Slave
        C_S_AXI_PDI_AP_BASEADDR : std_logic_vector := X"00000000";
        C_S_AXI_PDI_AP_HIGHADDR : std_logic_vector := X"000FFFFF";
@@ -223,6 +222,7 @@ entity axi_powerlink is
        S_AXI_SMP_PCP_RREADY : in std_logic;
        S_AXI_SMP_PCP_WVALID : in std_logic;
        clk100 : in std_logic;
+       clk50 : in std_logic;
        pap_cs : in std_logic;
        pap_cs_n : in std_logic;
        pap_rd : in std_logic;
@@ -437,16 +437,37 @@ architecture struct of axi_powerlink is
 ---- Architecture declarations -----
 function get_max( a, b : integer)  return integer is
 begin
-	if a < b then
-		return b;
-	else
-		return a;
-	end if;
+    if a < b then
+        return b;
+    else
+        return a;
+    end if;
 end get_max;
 
 
 ---- Component declarations -----
 
+component clkXing
+  generic(
+       gCsNum : natural := 2;
+       gDataWidth : natural := 32
+  );
+  port (
+       iArst : in std_logic;
+       iFastClk : in std_logic;
+       iFastCs : in std_logic_vector(gCsNum-1 downto 0);
+       iFastRNW : in std_logic;
+       iSlowClk : in std_logic;
+       iSlowRdAck : in std_logic;
+       iSlowReaddata : in std_logic_vector(gDataWidth-1 downto 0);
+       iSlowWrAck : in std_logic;
+       oFastRdAck : out std_logic;
+       oFastReaddata : out std_logic_vector(gDataWidth-1 downto 0);
+       oFastWrAck : out std_logic;
+       oSlowCs : out std_logic_vector(gCsNum-1 downto 0);
+       oSlowRNW : out std_logic
+  );
+end component;
 component ipif_master_handler
   generic(
        C_MAC_DMA_IPIF_AWIDTH : integer := 32;
@@ -573,6 +594,8 @@ component powerlink
        spiCPHA_g : integer := 0;
        spiCPOL_g : integer := 0;
        use2ndCmpTimer_g : integer := 1;
+       usePulse2ndCmpTimer_g : integer := 1;
+       pulseWidth2ndCmpTimer_g : integer := 9;
        use2ndPhy_g : integer := 1;
        useIntPacketBuf_g : integer := 1;
        useRmii_g : integer := 1;
@@ -860,7 +883,6 @@ component axi_master_burst
 end component;
 
 ---- Architecture declarations -----
-constant C_FAMILY : string := "spartan6";
 constant C_ADDR_PAD_ZERO : std_logic_vector(31 downto 0) := (others => '0');
 -- openMAC REG PLB Slave
 constant C_MAC_REG_BASE : std_logic_vector(63 downto 0) := C_ADDR_PAD_ZERO & C_S_AXI_MAC_REG_RNG0_BASEADDR;
@@ -924,6 +946,7 @@ signal Bus2MAC_REG_Clk : std_logic;
 signal Bus2MAC_REG_Reset : std_logic := '0';
 signal Bus2MAC_REG_Resetn : std_logic;
 signal Bus2MAC_REG_RNW : std_logic;
+signal Bus2MAC_REG_RNW_fast : std_logic;
 signal Bus2MAC_REG_RNW_n : std_logic;
 signal Bus2PDI_AP_Clk : std_logic;
 signal Bus2PDI_AP_Reset : std_logic := '0';
@@ -937,12 +960,13 @@ signal Bus2SMP_PCP_Clk : std_logic;
 signal Bus2SMP_PCP_Reset : std_logic := '0';
 signal Bus2SMP_PCP_Resetn : std_logic;
 signal Bus2SMP_PCP_RNW : std_logic;
-signal clk50 : std_logic;
 signal clkAp : std_logic;
 signal clkPcp : std_logic;
 signal GND : std_logic;
 signal IP2Bus_Error_s : std_logic;
+signal IP2Bus_RdAck_fast : std_logic;
 signal IP2Bus_RdAck_s : std_logic;
+signal IP2Bus_WrAck_fast : std_logic;
 signal IP2Bus_WrAck_s : std_logic;
 signal mac_chipselect : std_logic;
 signal MAC_CMP2Bus_Error : std_logic;
@@ -1022,6 +1046,7 @@ signal Bus2MAC_PKT_Data : std_logic_vector (C_S_AXI_MAC_PKT_DATA_WIDTH-1 downto 
 signal Bus2MAC_REG_Addr : std_logic_vector (C_S_AXI_MAC_REG_ADDR_WIDTH-1 downto 0);
 signal Bus2MAC_REG_BE : std_logic_vector ((C_S_AXI_MAC_REG_DATA_WIDTH/8)-1 downto 0);
 signal Bus2MAC_REG_CS : std_logic_vector (1 downto 0);
+signal Bus2MAC_REG_CS_fast : std_logic_vector (1 downto 0);
 signal Bus2MAC_REG_Data : std_logic_vector (C_S_AXI_MAC_REG_DATA_WIDTH-1 downto 0);
 signal Bus2PDI_AP_Addr : std_logic_vector (C_S_AXI_PDI_AP_ADDR_WIDTH-1 downto 0);
 signal Bus2PDI_AP_BE : std_logic_vector ((C_S_AXI_PDI_AP_DATA_WIDTH/8)-1 downto 0);
@@ -1035,6 +1060,7 @@ signal Bus2SMP_PCP_Addr : std_logic_vector (C_S_AXI_SMP_PCP_ADDR_WIDTH-1 downto 
 signal Bus2SMP_PCP_BE : std_logic_vector ((C_S_AXI_SMP_PCP_DATA_WIDTH/8)-1 downto 0);
 signal Bus2SMP_PCP_CS : std_logic_vector (0 downto 0);
 signal Bus2SMP_PCP_Data : std_logic_vector (C_S_AXI_SMP_PCP_DATA_WIDTH-1 downto 0);
+signal IP2Bus_Data_fast : std_logic_vector (C_S_AXI_MAC_REG_DATA_WIDTH-1 downto 0);
 signal IP2Bus_Data_s : std_logic_vector (C_S_AXI_MAC_REG_DATA_WIDTH-1 downto 0);
 signal mac_address : std_logic_vector (11 downto 0);
 signal mac_address_full : std_logic_vector (C_S_AXI_MAC_REG_ADDR_WIDTH-1 downto 0);
@@ -1078,7 +1104,7 @@ begin
 
 ---- User Signal Assignments ----
 -- connect mac reg with mac cmp or reg output signals
-with Bus2MAC_REG_CS select 
+with Bus2MAC_REG_CS select
     IP2Bus_Data_s <=    MAC_CMP2Bus_Data    when "01",
                         MAC_REG2Bus_Data    when others; --"10" and others are decoded to MAC_REG
 
@@ -1103,8 +1129,8 @@ MAC_CMP2Bus_Error <= '0';
 pkt_clk <= Bus2MAC_PKT_Clk;
 Bus2MAC_PKT_Reset <= not Bus2MAC_PKT_Resetn;
 mbf_writedata <= Bus2MAC_PKT_Data;
---	Bus2MAC_PKT_Data(7 downto 0) & Bus2MAC_PKT_Data(15 downto 8) &
---	Bus2MAC_PKT_Data(23 downto 16) & Bus2MAC_PKT_Data(31 downto 24);
+--    Bus2MAC_PKT_Data(7 downto 0) & Bus2MAC_PKT_Data(15 downto 8) &
+--    Bus2MAC_PKT_Data(23 downto 16) & Bus2MAC_PKT_Data(31 downto 24);
 mbf_read <= Bus2MAC_PKT_RNW;
 mbf_write <= not Bus2MAC_PKT_RNW;
 mbf_chipselect <= Bus2MAC_PKT_CS(0);
@@ -1165,7 +1191,7 @@ MAC_REG_16to32 : openMAC_16to32conv
        bus_select => Bus2MAC_REG_CS(1),
        bus_write => Bus2MAC_REG_RNW_n,
        bus_writedata => Bus2MAC_REG_Data( C_S_AXI_MAC_REG_DATA_WIDTH-1 downto 0 ),
-       clk => Bus2MAC_REG_Clk,
+       clk => clk50,
        rst => Bus2MAC_REG_Reset,
        s_address => mac_address_full( C_S_AXI_MAC_REG_ADDR_WIDTH-1 downto 0 ),
        s_byteenable => mac_byteenable,
@@ -1191,17 +1217,17 @@ MAC_REG_AXI_SINGLE_SLAVE : axi_lite_ipif
   port map(
        Bus2IP_Addr => Bus2MAC_REG_Addr( C_S_AXI_MAC_REG_ADDR_WIDTH-1 downto 0 ),
        Bus2IP_BE => Bus2MAC_REG_BE( (C_S_AXI_MAC_REG_DATA_WIDTH/8)-1 downto 0 ),
-       Bus2IP_CS => Bus2MAC_REG_CS( 1 downto 0 ),
+       Bus2IP_CS => Bus2MAC_REG_CS_fast( 1 downto 0 ),
        Bus2IP_Clk => Bus2MAC_REG_Clk,
        Bus2IP_Data => Bus2MAC_REG_Data( C_S_AXI_MAC_REG_DATA_WIDTH-1 downto 0 ),
-       Bus2IP_RNW => Bus2MAC_REG_RNW,
+       Bus2IP_RNW => Bus2MAC_REG_RNW_fast,
        Bus2IP_RdCE => open,
        Bus2IP_Resetn => Bus2MAC_REG_Resetn,
        Bus2IP_WrCE => open,
-       IP2Bus_Data => IP2Bus_Data_s( C_S_AXI_MAC_REG_DATA_WIDTH-1 downto 0 ),
+       IP2Bus_Data => IP2Bus_Data_fast( C_S_AXI_MAC_REG_DATA_WIDTH-1 downto 0 ),
        IP2Bus_Error => IP2Bus_Error_s,
-       IP2Bus_RdAck => IP2Bus_RdAck_s,
-       IP2Bus_WrAck => IP2Bus_WrAck_s,
+       IP2Bus_RdAck => IP2Bus_RdAck_fast,
+       IP2Bus_WrAck => IP2Bus_WrAck_fast,
        S_AXI_ACLK => S_AXI_MAC_REG_ACLK,
        S_AXI_ARADDR => S_AXI_MAC_REG_ARADDR( C_S_AXI_MAC_REG_ADDR_WIDTH-1 downto 0 ),
        S_AXI_ARESETN => S_AXI_MAC_REG_ARESETN,
@@ -1264,12 +1290,14 @@ THE_POWERLINK_IP_CORE : powerlink
        papLowAct_g => booleanToInteger(C_PAP_LOW_ACT),
        pcpSysId => C_PCP_SYS_ID,
        pioValLen_g => C_PIO_VAL_LENGTH,
+       pulseWidth2ndCmpTimer_g => C_PULSE_WIDTH_2nd_CMP_TIMER,
        spiBigEnd_g => booleanToInteger(false),
        spiCPHA_g => booleanToInteger(C_SPI_CPHA),
        spiCPOL_g => booleanToInteger(C_SPI_CPOL),
-       use2ndCmpTimer_g => booleanToInteger(C_PDI_GEN_SECOND_TIMER),
+       use2ndCmpTimer_g => booleanToInteger(C_MAC_GEN_SECOND_TIMER),
        use2ndPhy_g => booleanToInteger(C_USE_2ND_PHY),
        useIntPacketBuf_g => booleanToInteger(C_MAC_PKT_EN),
+       usePulse2ndCmpTimer_g => booleanToInteger(C_USE_PULSE_2nd_CMP_TIMER),
        useRmii_g => booleanToInteger(C_USE_RMII),
        useRxIntPacketBuf_g => booleanToInteger(C_MAC_PKT_RX_EN)
   )
@@ -1437,8 +1465,6 @@ MAC_DMA_areset <= not(M_AXI_MAC_DMA_aresetn);
 
 Bus2MAC_REG_RNW_n <= not(Bus2MAC_REG_RNW);
 
-clk50 <= Bus2MAC_REG_Clk;
-
 Bus2MAC_REG_Reset <= not(Bus2MAC_REG_Resetn);
 
 rstPcp <= Bus2SMP_PCP_Reset or Bus2PDI_PCP_Reset or Bus2MAC_PKT_Reset;
@@ -1446,6 +1472,27 @@ rstPcp <= Bus2SMP_PCP_Reset or Bus2PDI_PCP_Reset or Bus2MAC_PKT_Reset;
 rstAp <= Bus2PDI_AP_Reset;
 
 rst <= Bus2MAC_REG_Reset;
+
+macRegClkXing : clkXing
+  generic map (
+       gCsNum => 2,
+       gDataWidth => C_S_AXI_MAC_REG_DATA_WIDTH
+  )
+  port map(
+       iArst => Bus2MAC_REG_Reset,
+       iFastClk => Bus2MAC_REG_Clk,
+       iFastCs => Bus2MAC_REG_CS_fast( 1 downto 0 ),
+       iFastRNW => Bus2MAC_REG_RNW_fast,
+       iSlowClk => clk50,
+       iSlowRdAck => IP2Bus_RdAck_s,
+       iSlowReaddata => IP2Bus_Data_s( C_S_AXI_MAC_REG_DATA_WIDTH-1 downto 0 ),
+       iSlowWrAck => IP2Bus_WrAck_s,
+       oFastRdAck => IP2Bus_RdAck_fast,
+       oFastReaddata => IP2Bus_Data_fast( C_S_AXI_MAC_REG_DATA_WIDTH-1 downto 0 ),
+       oFastWrAck => IP2Bus_WrAck_fast,
+       oSlowCs => Bus2MAC_REG_CS( 1 downto 0 ),
+       oSlowRNW => Bus2MAC_REG_RNW
+  );
 
 
 ---- Power , ground assignment ----
@@ -1457,8 +1504,8 @@ MAC_REG2Bus_Error <= GND;
 ---- Terminal assignment ----
 
     -- Output\buffer terminals
-	mac_irq <= mac_irq_s;
-	tcp_irq <= tcp_irq_s;
+    mac_irq <= mac_irq_s;
+    tcp_irq <= tcp_irq_s;
 
 
 ----  Generate statements  ----
@@ -1474,7 +1521,7 @@ begin
          C_M_AXI_ADDR_WIDTH => C_M_AXI_MAC_DMA_ADDR_WIDTH,
          C_M_AXI_DATA_WIDTH => C_M_AXI_MAC_DMA_DATA_WIDTH,
          C_NATIVE_DATA_WIDTH => C_M_AXI_MAC_DMA_NATIVE_DWIDTH
-    )  
+    )
     port map(
          bus2ip_mst_cmd_timeout => bus2MAC_DMA_mst_cmd_timeout,
          bus2ip_mst_cmdack => bus2MAC_DMA_mst_cmdack,
@@ -1550,7 +1597,7 @@ begin
          gen_rx_fifo_g => not C_RX_INT_PKT,
          gen_tx_fifo_g => not C_TX_INT_PKT,
          m_burstcount_width_g => C_M_BURSTCOUNT_WIDTH
-    )  
+    )
     port map(
          Bus2MAC_DMA_MstRd_d => bus2MAC_DMA_mstrd_d( C_M_AXI_MAC_DMA_NATIVE_DWIDTH-1 downto 0 ),
          Bus2MAC_DMA_MstRd_eof_n => bus2MAC_DMA_mstrd_eof_n,
@@ -1609,7 +1656,7 @@ begin
          C_S_AXI_DATA_WIDTH => C_S_AXI_MAC_PKT_DATA_WIDTH,
          C_S_AXI_MIN_SIZE => C_MAC_PKT_MINSIZE,
          C_USE_WSTRB => C_S_AXI_MAC_PKT_USE_WSTRB
-    )  
+    )
     port map(
          Bus2IP_Addr => Bus2MAC_PKT_Addr( C_S_AXI_MAC_PKT_ADDR_WIDTH-1 downto 0 ),
          Bus2IP_BE => Bus2MAC_PKT_BE( (C_S_AXI_MAC_PKT_DATA_WIDTH/8)-1 downto 0 ),
@@ -1658,7 +1705,7 @@ begin
          C_S_AXI_DATA_WIDTH => C_S_AXI_PDI_PCP_DATA_WIDTH,
          C_S_AXI_MIN_SIZE => C_PDI_PCP_MINSIZE,
          C_USE_WSTRB => C_S_AXI_PDI_PCP_USE_WSTRB
-    )  
+    )
     port map(
          Bus2IP_Addr => Bus2PDI_PCP_Addr( C_S_AXI_PDI_PCP_ADDR_WIDTH-1 downto 0 ),
          Bus2IP_BE => Bus2PDI_PCP_BE( (C_S_AXI_PDI_PCP_DATA_WIDTH/8)-1 downto 0 ),
@@ -1701,8 +1748,8 @@ begin
 clkPcp <= Bus2PDI_PCP_Clk;
 Bus2PDI_PCP_Reset <= not Bus2PDI_PCP_Resetn;
 pcp_writedata <= Bus2PDI_PCP_Data;
---	Bus2MAC_PKT_Data(7 downto 0) & Bus2MAC_PKT_Data(15 downto 8) &
---	Bus2MAC_PKT_Data(23 downto 16) & Bus2MAC_PKT_Data(31 downto 24);
+--    Bus2MAC_PKT_Data(7 downto 0) & Bus2MAC_PKT_Data(15 downto 8) &
+--    Bus2MAC_PKT_Data(23 downto 16) & Bus2MAC_PKT_Data(31 downto 24);
 pcp_read <= Bus2PDI_PCP_RNW;
 pcp_write <= not Bus2PDI_PCP_RNW;
 pcp_chipselect <= Bus2PDI_PCP_CS(0);
@@ -1727,7 +1774,7 @@ begin
          C_S_AXI_DATA_WIDTH => C_S_AXI_PDI_AP_DATA_WIDTH,
          C_S_AXI_MIN_SIZE => C_PDI_AP_MINSIZE,
          C_USE_WSTRB => C_S_AXI_PDI_AP_USE_WSTRB
-    )  
+    )
     port map(
          Bus2IP_Addr => Bus2PDI_AP_Addr( C_S_AXI_PDI_AP_ADDR_WIDTH-1 downto 0 ),
          Bus2IP_BE => Bus2PDI_AP_BE( (C_S_AXI_PDI_AP_DATA_WIDTH/8)-1 downto 0 ),
@@ -1770,8 +1817,8 @@ begin
 clkAp <= Bus2PDI_AP_Clk;
 Bus2PDI_AP_Reset <= not Bus2PDI_AP_Resetn;
 ap_writedata <= Bus2PDI_AP_Data;
---	Bus2MAC_PKT_Data(7 downto 0) & Bus2MAC_PKT_Data(15 downto 8) &
---	Bus2MAC_PKT_Data(23 downto 16) & Bus2MAC_PKT_Data(31 downto 24);
+--    Bus2MAC_PKT_Data(7 downto 0) & Bus2MAC_PKT_Data(15 downto 8) &
+--    Bus2MAC_PKT_Data(23 downto 16) & Bus2MAC_PKT_Data(31 downto 24);
 ap_read <= Bus2PDI_AP_RNW;
 ap_write <= not Bus2PDI_AP_RNW;
 ap_chipselect <= Bus2PDI_AP_CS(0);
@@ -1796,7 +1843,7 @@ begin
          C_S_AXI_DATA_WIDTH => C_S_AXI_SMP_PCP_DATA_WIDTH,
          C_S_AXI_MIN_SIZE => C_SMP_PCP_MINSIZE,
          C_USE_WSTRB => C_S_AXI_SMP_PCP_USE_WSTRB
-    )  
+    )
     port map(
          Bus2IP_Addr => Bus2SMP_PCP_Addr( C_S_AXI_SMP_PCP_ADDR_WIDTH-1 downto 0 ),
          Bus2IP_BE => Bus2SMP_PCP_BE( (C_S_AXI_SMP_PCP_DATA_WIDTH/8)-1 downto 0 ),
@@ -1854,7 +1901,7 @@ end generate genSimpleIoSignals;
 oddr2_0 : if not C_INSTANCE_ODDR2 generate
 begin
   phy0_clk <= clk50;
-  
+
   phy1_clk <= clk50;
 end generate oddr2_0;
 
@@ -1871,7 +1918,7 @@ begin
          R => GND,
          S => GND
     );
-  
+
   U11 : ODDR2
     port map(
          C0 => clk50,
@@ -1883,9 +1930,9 @@ begin
          R => GND,
          S => GND
     );
-  
+
   NET38470 <= not(clk50);
-  
+
   NET38418 <= not(clk50);
 end generate oddr2_1;
 

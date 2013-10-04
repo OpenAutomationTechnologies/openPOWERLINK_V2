@@ -34,31 +34,6 @@
 --    POSSIBILITY OF SUCH DAMAGE.
 --
 -------------------------------------------------------------------------------
--- Design unit header --
---
--- This is the top level of openMAC. 
--- It instantiates openMAC, openHUB, openFILTER and other components for the
---  MAC-layer.
---
--------------------------------------------------------------------------------
---
--- 2011-07-26   V0.01    zelenkaj    First version
--- 2011-10-11   V0.02    zelenkaj    ack for pkt was clocked by clk50
--- 2011-10-13   V0.03    zelenkaj    changed names of instances
--- 2011-11-07   V0.04    zelenkaj    added big/little endian consideration
---                                   minor changes in SMI core generation
--- 2011-11-28   V0.05    zelenkaj    Added DMA observer
--- 2011-11-29   V0.06    zelenkaj    waitrequest for mac_reg is gen. once
---                                   tx_off / rx_off is derived in openMAC
--- 2011-11-30   V0.07    zelenkaj    Added generic for DMA observer
---                                   Fixed generic assignments for DMA master
--- 2011-12-02   V0.08    zelenkaj    Added Dma Req Overflow
--- 2011-12-05   V0.09    zelenkaj    Reduced Dma Req overflow vector
--- 2012-01-26   V0.10    zelenkaj    Revised SMI to use one SMI with two phys
--- 2012-03-21   V0.20    zelenkaj    redesigned endian conversion
--- 2012-04-17   V0.21    zelenkaj    Added forwarding of DMA read length
---
--------------------------------------------------------------------------------
 
 library ieee;
 use ieee.std_logic_1164.all;
@@ -70,6 +45,8 @@ entity openmac_ethernet is
        genSmiIO : boolean := true;
        gNumSmi : integer := 2;
        gen2ndCmpTimer_g : boolean := false;
+       genPulse2ndCmpTimer_g : boolean := true;
+       pulseWidth2ndCmpTimer_g : integer := 9;
        simulate : boolean := false;
        dma_highadr_g : integer := 31;
        m_data_width_g : integer := 16;
@@ -274,8 +251,10 @@ component OpenMAC
 end component;
 component openMAC_cmp
   generic(
-       gen2ndCmpTimer_g : boolean := false;
-       mac_time_width_g : integer := 32
+       gen2ndCmpTimer_g : BOOLEAN := false;
+       genPulse2ndCmpTimer_g : BOOLEAN := false;
+       mac_time_width_g : INTEGER := 32;
+       pulseWidth2ndCmpTimer_g : INTEGER := 9
   );
   port (
        addr : in std_logic_vector(1 downto 0);
@@ -579,7 +558,9 @@ smi_din <=  s_writedata when endian_g = "little" or (endian_g = "big" and s_byte
 THE_MAC_TIME_CMP : openMAC_cmp
   generic map (
        gen2ndCmpTimer_g => gen2ndCmpTimer_g,
-       mac_time_width_g => 32
+       genPulse2ndCmpTimer_g => genPulse2ndCmpTimer_g,
+       mac_time_width_g => 32,
+       pulseWidth2ndCmpTimer_g => pulseWidth2ndCmpTimer_g
   )
   port map(
        addr => t_address,
@@ -822,9 +803,9 @@ dma_be(0) <= VCC;
 ---- Terminal assignment ----
 
     -- Output\buffer terminals
-	mac_rx_irq <= mac_rx_irq_s;
-	mac_tx_irq <= mac_tx_irq_s;
-	t_tog <= toggle;
+    mac_rx_irq <= mac_rx_irq_s;
+    mac_tx_irq <= mac_tx_irq_s;
+    t_tog <= toggle;
 
 
 ----  Generate statements  ----
@@ -834,7 +815,7 @@ begin
   THE_PHY_ACT : OpenMAC_phyAct
     generic map (
          iBlinkFreq_g => 6
-    )  
+    )
     port map(
          act_led => act_led,
          clk => clk,
@@ -849,7 +830,7 @@ begin
   THE_OPENFILTER0 : openFILTER
     generic map (
          bypassFilter => not useRmii_g
-    )  
+    )
     port map(
          Clk => clk,
          Rst => rst,
@@ -864,11 +845,11 @@ begin
          TxEnOut => phy0_tx_en_s,
          nCheckShortFrames => VCC
     );
-  
+
   THE_OPENFILTER1 : openFILTER
     generic map (
          bypassFilter => not useRmii_g
-    )  
+    )
     port map(
          Clk => clk,
          Rst => rst,
@@ -883,11 +864,11 @@ begin
          TxEnOut => phy1_tx_en_s,
          nCheckShortFrames => VCC
     );
-  
+
   THE_OPENHUB : OpenHUB
     generic map (
          Ports => 3
-    )  
+    )
     port map(
          Clk => clk,
          ReceivePort => hub_rx_port,
@@ -989,19 +970,19 @@ begin
   -- "Update sensitivity list automatically" option status
   begin
   if rst = '1' then
-  	phy0_rx_dv_s <= '0';
-  	phy0_rx_err_s <= '0';
-  	phy0_rx_dat_s <= (others => '0');
-  	phy1_rx_dv_s <= '0';
-  	phy1_rx_err_s <= '0';
-  	phy1_rx_dat_s <= (others => '0');
+      phy0_rx_dv_s <= '0';
+      phy0_rx_err_s <= '0';
+      phy0_rx_dat_s <= (others => '0');
+      phy1_rx_dv_s <= '0';
+      phy1_rx_err_s <= '0';
+      phy1_rx_dat_s <= (others => '0');
   elsif clk = '1' and clk'event then
-  	phy0_rx_dv_s <= phy0_rx_dv;
-  	phy0_rx_err_s <= phy0_rx_err;
-  	phy0_rx_dat_s <= phy0_rx_dat;
-  	phy1_rx_dv_s <= phy1_rx_dv;
-  	phy1_rx_err_s <= phy1_rx_err;
-  	phy1_rx_dat_s <= phy1_rx_dat;
+      phy0_rx_dv_s <= phy0_rx_dv;
+      phy0_rx_err_s <= phy0_rx_err;
+      phy0_rx_dat_s <= phy0_rx_dat;
+      phy1_rx_dv_s <= phy1_rx_dv;
+      phy1_rx_err_s <= phy1_rx_err;
+      phy1_rx_dat_s <= phy1_rx_dat;
   end if;
   end process;
 
@@ -1011,15 +992,15 @@ begin
   -- "Update sensitivity list automatically" option status
   begin
   if rst = '1' then
-  	phy0_tx_en <= '0';
-  	phy0_tx_dat <= (others => '0');
-  	phy1_tx_en <= '0';
-  	phy1_tx_dat <= (others => '0');
+      phy0_tx_en <= '0';
+      phy0_tx_dat <= (others => '0');
+      phy1_tx_en <= '0';
+      phy1_tx_dat <= (others => '0');
   elsif clkx2 = '0' and clkx2'event then
-  	phy0_tx_en <= phy0_tx_en_s;
-  	phy0_tx_dat <= phy0_tx_dat_s;
-  	phy1_tx_en <= phy1_tx_en_s;
-  	phy1_tx_dat <= phy1_tx_dat_s;
+      phy0_tx_en <= phy0_tx_en_s;
+      phy0_tx_dat <= phy0_tx_dat_s;
+      phy1_tx_en <= phy1_tx_en_s;
+      phy1_tx_dat <= phy1_tx_dat_s;
   end if;
   end process;
 end generate genRmii100MegFFs;
@@ -1029,7 +1010,7 @@ begin
   THE_OPENFILTER : openFILTER
     generic map (
          bypassFilter => not useRmii_g
-    )  
+    )
     port map(
          Clk => clk,
          Rst => rst,
@@ -1057,7 +1038,7 @@ begin
     generic map (
          memSizeLOG2_g => iPktBufSizeLog2_g,
          memSize_g => iPktBufSize_g
-    )  
+    )
     port map(
          address_a => dma_addr_s( iPktBufSizeLog2_g-1 downto 1 ),
          address_b => pkt_address( iPktBufSizeLog2_g-3 downto 0 ),
@@ -1074,34 +1055,34 @@ begin
          wren_a => write_a,
          wren_b => write_b
     );
-  
+
   read_b <= pkt_read and pkt_chipselect;
-  
+
   write_b <= pkt_write and pkt_chipselect;
-  
+
   read_a <= dma_req_read;
-  
+
   dma_ack_read <= dma_ack_rw;
-  
+
   pkt_waitrequest <= not(pkt_write_ack or pkt_read_ack);
-  
+
   regack4 : req_ack
     generic map (
          ack_delay_g => 1,
          zero_delay_g => true
-    )  
+    )
     port map(
          ack => pkt_write_ack,
          clk => pkt_clk,
          enable => write_b,
          rst => rst
     );
-  
+
   regack5 : req_ack
     generic map (
          ack_delay_g => 2,
          zero_delay_g => false
-    )  
+    )
     port map(
          ack => pkt_read_ack,
          clk => pkt_clk,
@@ -1122,15 +1103,15 @@ write_a <= dma_req_write when useRxIntPktBuf_g = TRUE else '0';
   -- "Update sensitivity list automatically" option status
   -- declarations
   begin
-  	if rst = '1' then
-  		dma_ack_rw <= '0';
-  	elsif clk = '1' and clk'event then
-  		if dma_req = '1' and dma_ack_rw = '0' then
-  			dma_ack_rw <= '1';
-  		else
-  			dma_ack_rw <= '0';
-  		end if;
-  	end if;
+      if rst = '1' then
+          dma_ack_rw <= '0';
+      elsif clk = '1' and clk'event then
+          if dma_req = '1' and dma_ack_rw = '0' then
+              dma_ack_rw <= '1';
+          else
+              dma_ack_rw <= '0';
+          end if;
+      end if;
   end process;
 end generate genPktBuf;
 
@@ -1139,10 +1120,10 @@ begin
   genReadDmaMaster : if not useIntPktBuf_g generate
   begin
     dma_ack_read <= dma_ack_rd_mst;
-    
+
         U69_array: for U69_array_index in 0 to (dma_din'length - 1) generate
-    	U69_array :
-    		dma_din(U69_array_index+dma_din'Low) <= dma_din_mst(U69_array_index+dma_din_mst'Low);
+        U69_array :
+            dma_din(U69_array_index+dma_din'Low) <= dma_din_mst(U69_array_index+dma_din_mst'Low);
     end generate;
   end generate genReadDmaMaster;
 
@@ -1160,7 +1141,7 @@ begin
          rx_fifo_word_size_g => rx_fifo_word_size_c,
          simulate => simulate,
          tx_fifo_word_size_g => tx_fifo_word_size_c
-    )  
+    )
     port map(
          dma_ack_rd => dma_ack_rd_mst,
          dma_ack_wr => dma_ack_write,
@@ -1196,21 +1177,21 @@ begin
   genOneTriStateBuf : if genSmiIO generate
   begin
     smi_di_s <= phy_smi_dio;
-    
+
     phy_smi_dio <= smi_do_s when smi_doe_s='1' else 'Z';
   end generate genOneTriStateBuf;
 
   dontGenOneTriStateBuf : if not genSmiIO generate
   begin
     smi_di_s <= phy_smi_dio_I;
-    
+
     phy_smi_dio_O <= smi_do_s;
-    
+
     phy_smi_dio_T <= smi_doe_s_n;
   end generate dontGenOneTriStateBuf;
 
   phy_rst_n <= smi_rst_n;
-  
+
   phy_smi_clk <= smi_clk;
 end generate genOneSmi;
 
@@ -1219,31 +1200,31 @@ begin
   genTwoTriStateBuf : if genSmiIO generate
   begin
     phy0_smi_dio <= smi_do_s when smi_doe_s='1' else 'Z';
-    
+
     phy1_smi_dio <= smi_do_s when smi_doe_s='1' else 'Z';
-    
+
     smi_di_s <= phy0_smi_dio and phy1_smi_dio;
   end generate genTwoTriStateBuf;
 
   dontGenTwoTriStateBuf : if not genSmiIO generate
   begin
     phy1_smi_dio_T <= smi_doe_s_n;
-    
+
     smi_di_s <= phy0_smi_dio_I and phy1_smi_dio_I;
-    
+
     phy0_smi_dio_T <= smi_doe_s_n;
-    
+
     phy1_smi_dio_O <= smi_do_s;
-    
+
     phy0_smi_dio_O <= smi_do_s;
   end generate dontGenTwoTriStateBuf;
 
   phy0_smi_clk <= smi_clk;
-  
+
   phy0_rst_n <= smi_rst_n;
-  
+
   phy1_smi_clk <= smi_clk;
-  
+
   phy1_rst_n <= smi_rst_n;
 end generate genTwoSmi;
 

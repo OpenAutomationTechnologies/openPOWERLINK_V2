@@ -1,7 +1,7 @@
 #------------------------------------------------------------------------------------------------------------------------
 #-- POWERLINK SOPC COMPONENT
 #--
-#-- 	  Copyright (C) 2010 B&R
+#--       Copyright (C) 2010 B&R
 #--
 #--    Redistribution and use in source and binary forms, with or without
 #--    modification, are permitted provided that the following conditions
@@ -33,97 +33,12 @@
 #--    POSSIBILITY OF SUCH DAMAGE.
 #--
 #------------------------------------------------------------------------------------------------------------------------
-#-- Version History
-#------------------------------------------------------------------------------------------------------------------------
-#-- 2010-08-24	V0.01	zelenkaj	first generation
-#-- 2010-09-13	V0.02	zelenkaj	added selection Rmii / Mii
-#-- 2010-10-04  V0.03	zelenkaj	bugfix: Rmii / Mii selection was faulty
-#-- 2010-10-11  V0.04	zelenkaj	changed pdi dpr size calculation
-#-- 2010-10-18	V0.05	zelenkaj	added selection Big/Little Endian (pdi_par)
-#--									use bidirectional data bus (pdi_par)
-#-- 2010-11-15	V0.06	zelenkaj	bugfix: rpdo header was calculated twice
-#-- 2010-11-22	V0.07	zelenkaj	Added 2 GPIO signals to parallel interface
-#--									Added Operational Flag to simple I/O interface
-#--									Omitted T/RPDO descriptor sections in DPR
-#--									Added ability to verify connected clock rates (to clkEth and clk50meg)
-#--									Added generic to set duration of valid assertion (portio)
-#-- 2010-11-29	V0.08	zelenkaj	Changed several Endianness sel. to one for AP
-#--									Allocation of ping-pong tx buffers (necessary by openPOWERLINK stack)
-#-- 2010-11-30	V0.09	zelenkaj	Added other picture as Block Diagram (3 design approaches)
-#-- 2010-12-06	V0.10	zelenkaj	Changed Cmacros
-#--									Added openMAC only parameter
-#--									Added SPI IRQ active high/low choice
-#-- 2010-12-07	V0.11	zelenkaj	Bugfix: AP IRQ was generated incorrect for SPI
-#--									Code clean up
-#-- 2011-01-25	V0.12	zelenkaj	Added generic internal/external packet storage
-#-- 2011-02-24	V0.13	zelenkaj	Bugfix: openMAC only with RMII generates division by zero
-#--									minor changes (naming conventions Mii->SMI)
-#-- 2011-03-14	V0.14	zelenkaj	Added generic for packet storage (RX int/ext)
-#-- 2011-03-21	V0.15	zelenkaj	bugfix: packet buffer padding wasn't considered
-#-- 2011-03-28	V0.20	zelenkaj	Added: LED
-#--									Added: Events
-#--									Added/Changed: Asynchronous buffer 2x Ping-Pong
-#-- 2011-04-04	V0.21	zelenkaj	minor: led_status is the official name
-#--									minor: parallel interface uses ack instead of ready
-#-- 2011-04-26	V0.22	zelenkaj	prepared for pdi clock domain configuration, but not allowed to change by SOPC
-#-- 2011-04-28	V0.23	zelenkaj	second cmp timer of openMAC is optinal by generic
-#--									added link to IP-core documentation
-#--									added description to parameters (shown in SOPC GUI)
-#-- 2011-05-06	V0.24	zelenkaj	some naming convention changes
-#--									bug fix: use the RX_ER signal, it has important meaning!
-#-- 2011-05-09  V0.30	zelenkaj	Hardware Acceleration (HW ACC) added.
-#-- 2011-06-06	V0.31	zelenkaj	PDI status/control register enhanced by 8 bytes
-#-- 2011-06-20	V0.32	zelenkaj	RPDO size is set once for all
-#--									big/little endian option forwarded to system.h only, not to vhdl!
-#-- 2011-07-23	V0.33	zelenkaj	added RXERR for RMII
-#-- 2011-07-25	V0.34	zelenkaj	LED gadget and asynchronous buffer optional, reset of pdi revision
-#-- 2011-08-08	V0.35	zelenkaj	LED gadget enhancement -> added 8 general purpose outputs
-#-- 2011-08-02	V1.00	zelenkaj	exchanged Avalon interface with entity openMAC_Ethernet
-#-- 2011-09-05	V1.01	zelenkaj	PDI SPI async Irq low/high active was not terminated
-#-- 2011-09-06	V1.02	zelenkaj	async-buffer limitation is deactivated
-#-- 2011-09-14	V1.03	zelenkaj	extract of components into own files
-#-- 2011-10-10	V1.04	zelenkaj	async-buffer limitation fixed again..
-#-- 2011-10-13	V1.05	zelenkaj	file names changed..
-#-- 2011-10-14	V1.06	zelenkaj	rmii2mii fifos are deleted (dma fifo is abused for..)
-#-- 2011-11-07	V1.07	zelenkaj	added generic for dma master qualifiers
-#-- 2011-11-17	V1.08	zelenkaj	pdi dpr vhd-file renamed
-#-- 2011-11-21	V1.09	zelenkaj	added time synchronization feature
-#-- 2011-11-28	V1.10	zelenkaj	added waitrequest signals to pdi pcp/ap
-#-- 2011-11-29	V1.11	zelenkaj	event feature is optional
-#-- 2011-11-30	V1.12	zelenkaj	Added generic for DMA observer
-#-- 2011-12-12	V1.13	zelenkaj	Changed packet location enumerator
-#-- 2011-12-14	V1.14	zelenkaj	Changed documentation path/filename
-#-- 2011-12-15	V1.15	zelenkaj	Changed openMAC only RX buffer configuration
-#-- 2012-01-04	V1.16	zelenkaj	Added feature to create mif files for openMAC DPR and PDI DPR
-#-- 2012-01-09  V1.17   zelenkaj    Added ap_syncIrq for external AP
-#-- 2012-01-11	V1.18	zelenkaj	Async Irq is omitted if event hw support is disabled
-#-- 2012-01-12	V1.19	zelenkaj	Added macro to system.h in case of low-jitter SYNC
-#-- 2012-01-25	V1.20	zelenkaj	Added special initialization to pdi_dpr.mif
-#-- 2012-01-26	V1.21	zelenkaj    Added generic for SMI generation and one SMI ports
-#--                                 Renamed label for SYNC IRQ feature
-#--                                 Added "expert mode" for the advanced users
-#--                                 Omit hwacc options, since we are fast enough!
-#--                                 Minor delete of system.h parameter
-#-- 2012-01-27  V1.30   zelenkaj    Incremented PdiRev
-#-- 2012-01-31  V1.31   zelenkaj    moved hw event support into "exper mode"
-#--                                 fixed expert mode for dma observer
-#-- 2012-02-21  V1.32   zelenkaj    Changed IP-Core group
-#--                                 Added mif files and removed generation (to support ip-core repo)
-#-- 2012-02-29  V1.33   zelenkaj    Fix buffer size allocation
-#-- 2012-03-07  V1.34   zelenkaj    Fix top HDL file path
-#-- 2012-03-13  V1.35   zelenkaj    Forward R/TPDO + async buffer size to system.h
-#-- 2012-04-02  V1.36   zelenkaj    vhdl file names case sensitive
-#-- 2012-05-22  V1.37   zelenkaj    Fix DPRAM size allocation
-#-- 2012-06-14  V1.38   zelenkaj    RX buffer number has to be set by user for openMAC only in any case
-#-- 2012-08-03  V1.39   zelenkaj    revised PDI REV
-#--                                 added PCPSYSID
-#------------------------------------------------------------------------------------------------------------------------
 
 package require -exact sopc 10.1
 
 set_module_property DESCRIPTION "POWERLINK IP-core"
 set_module_property NAME powerlink
-set_module_property VERSION 0.2.9
+set_module_property VERSION 0.3.0
 set_module_property INTERNAL false
 set_module_property GROUP "Interface Protocols/Ethernet"
 set_module_property AUTHOR "B&R"
@@ -134,7 +49,7 @@ set_module_property INSTANTIATE_IN_SYSTEM_MODULE true
 set_module_property EDITABLE FALSE
 set_module_property ANALYZE_HDL TRUE
 set_module_property ICON_PATH "img/br.png"
-add_documentation_link "POWERLINK IP-Core Documentation" "doc/index.htm"
+add_documentation_link "POWERLINK IP-Core Documentation" "doc/index.pdf"
 
 #files
 add_file "../../common/lib/src/global.vhd" {SYNTHESIS SIMULATION}
@@ -254,11 +169,6 @@ set_parameter_property configApParOutSigs DISPLAY_NAME "Active State of Output S
 set_parameter_property configApParOutSigs ALLOWED_RANGES {"High Active" "Low Active"}
 set_parameter_property configApParOutSigs DESCRIPTION "Set the active states of the parallel interface output signals. Optionally you can add inverters in the top-level design which instantiates the SOPC block."
 
-add_parameter configApEndian STRING "Little"
-set_parameter_property configApEndian VISIBLE false
-set_parameter_property configApEndian DISPLAY_NAME "Endianness of AP"
-set_parameter_property configApEndian ALLOWED_RANGES {"Little" "Big"}
-
 add_parameter configApSpi_CPOL STRING "0"
 set_parameter_property configApSpi_CPOL VISIBLE false
 set_parameter_property configApSpi_CPOL DISPLAY_NAME "SPI CPOL"
@@ -349,15 +259,15 @@ set_parameter_property macTxBuf UNITS bytes
 set_parameter_property macTxBuf DISPLAY_NAME "openMAC TX Buffer Size"
 set_parameter_property macTxBuf DESCRIPTION "If \"openMAC only\" is selected, the MAC TX buffer size has to be set manually. E.g. POWERLINK CN requires approx. 7000 bytes."
 
-add_parameter macRxBuf INTEGER 4
+add_parameter macRxBuf INTEGER 10
 set_parameter_property macRxBuf ALLOWED_RANGES 4:16
 set_parameter_property macRxBuf DISPLAY_NAME "openMAC Number RX Buffers (MTU = 1500 byte)"
-set_parameter_property macRxBuf DESCRIPTION "If \"openMAC only\" is selected, the number of MAC RX buffers has to be set manually (MTU = 1500 byte). E.g. POWERLINK CN requires 4 RX buffers (SoC, PReq, SoA and Asnd)."
+set_parameter_property macRxBuf DESCRIPTION "If \"openMAC only\" is selected, the number of MAC RX buffers has to be set manually (MTU = 1500 byte). E.g. POWERLINK CN requires 10 RX buffers (SoC, PReq, SoA and Asnd (7 times))."
 
 add_parameter hwSupportSyncIrq BOOLEAN FALSE
 set_parameter_property hwSupportSyncIrq VISIBLE true
-set_parameter_property hwSupportSyncIrq DISPLAY_NAME "Use low-jitter SYNC IRQ with SoC timestamps for AP synchronization"
-set_parameter_property hwSupportSyncIrq DESCRIPTION "The Application Processor (AP) is synchronized to the POWERLINK cycles. In order to reduce FPGA-resource consumption you can disable the low-jitter SYNC interrupt if your application does not require low-jitter synchronization."
+set_parameter_property hwSupportSyncIrq DISPLAY_NAME "Enable second timer for synchronous interrupt on SoC reception"
+set_parameter_property hwSupportSyncIrq DESCRIPTION "This option triggers an edge or pulse on SoC reception which enables the synchronization of an external task to the POWERLINK cycle."
 
 add_parameter mac2phys BOOLEAN TRUE
 set_parameter_property mac2phys VISIBLE true
@@ -382,6 +292,42 @@ set_parameter_property macRxBurstSize DESCRIPTION "Sets the number of words (2 b
 add_parameter enDmaObserver BOOLEAN false
 set_parameter_property enDmaObserver DISPLAY_NAME "Enable packet DMA transfer monitor circuit"
 set_parameter_property enDmaObserver DESCRIPTION "The DMA monitor verifies the error-free Ethernet packet data transfer to/from the memory."
+
+add_parameter macRxQueueNum INTEGER 2
+set_parameter_property macRxQueueNum ALLOWED_RANGES 0:5
+set_parameter_property macRxQueueNum DISPLAY_NAME "Number of additional Rx queues"
+set_parameter_property macRxQueueNum DESCRIPTION "An additional receive queue can be used for the defered release feature of the POWERLINK stack. It enables to queue special types of packets in a seperate queue!"
+set_parameter_property macRxQueueNum VISIBLE false
+
+add_parameter macRxQueue1Size INTEGER 5
+set_parameter_property macRxQueue1Size ALLOWED_RANGES 0:10
+set_parameter_property macRxQueue1Size DISPLAY_NAME "Size of receive queue number 1"
+set_parameter_property macRxQueue1Size DESCRIPTION "This parameter enables to adjust the size of the additional receive queue."
+set_parameter_property macRxQueue1Size VISIBLE false
+
+add_parameter macRxQueue2Size INTEGER 5
+set_parameter_property macRxQueue2Size ALLOWED_RANGES 0:10
+set_parameter_property macRxQueue2Size DISPLAY_NAME "Size of receive queue number 2"
+set_parameter_property macRxQueue2Size DESCRIPTION "This parameter enables to adjust the size of the additional receive queue."
+set_parameter_property macRxQueue2Size VISIBLE false
+
+add_parameter macRxQueue3Size INTEGER 5
+set_parameter_property macRxQueue3Size ALLOWED_RANGES 0:10
+set_parameter_property macRxQueue3Size DISPLAY_NAME "Size of receive queue number 3"
+set_parameter_property macRxQueue3Size DESCRIPTION "This parameter enables to adjust the size of the additional receive queue."
+set_parameter_property macRxQueue3Size VISIBLE false
+
+add_parameter macRxQueue4Size INTEGER 5
+set_parameter_property macRxQueue4Size ALLOWED_RANGES 0:10
+set_parameter_property macRxQueue4Size DISPLAY_NAME "Size of receive queue number 4"
+set_parameter_property macRxQueue4Size DESCRIPTION "This parameter enables to adjust the size of the additional receive queue."
+set_parameter_property macRxQueue4Size VISIBLE false
+
+add_parameter macRxQueue5Size INTEGER 5
+set_parameter_property macRxQueue5Size ALLOWED_RANGES 0:10
+set_parameter_property macRxQueue5Size DISPLAY_NAME "Size of receive queue number 5"
+set_parameter_property macRxQueue5Size DESCRIPTION "This parameter enables to adjust the size of the additional receive queue."
+set_parameter_property macRxQueue5Size VISIBLE false
 
 #parameters for PDI HDL
 add_parameter genOnePdiClkDomain_g INTEGER 0
@@ -512,6 +458,16 @@ set_parameter_property use2ndCmpTimer_g HDL_PARAMETER true
 set_parameter_property use2ndCmpTimer_g VISIBLE false
 set_parameter_property use2ndCmpTimer_g DERIVED true
 
+add_parameter usePulse2ndCmpTimer_g INTEGER 1
+set_parameter_property usePulse2ndCmpTimer_g HDL_PARAMETER true
+set_parameter_property usePulse2ndCmpTimer_g VISIBLE false
+set_parameter_property usePulse2ndCmpTimer_g DERIVED true
+
+add_parameter pulseWidth2ndCmpTimer_g INTEGER 9
+set_parameter_property pulseWidth2ndCmpTimer_g HDL_PARAMETER true
+set_parameter_property pulseWidth2ndCmpTimer_g VISIBLE false
+set_parameter_property pulseWidth2ndCmpTimer_g DERIVED TRUE
+
 add_parameter use2ndPhy_g INTEGER 1
 set_parameter_property use2ndPhy_g HDL_PARAMETER true
 set_parameter_property use2ndPhy_g VISIBLE false
@@ -575,11 +531,6 @@ set_parameter_property papLowAct_g HDL_PARAMETER true
 set_parameter_property papLowAct_g VISIBLE false
 set_parameter_property papLowAct_g DERIVED TRUE
 
-add_parameter papBigEnd_g INTEGER 0
-set_parameter_property papBigEnd_g HDL_PARAMETER true
-set_parameter_property papBigEnd_g VISIBLE false
-set_parameter_property papBigEnd_g DERIVED TRUE
-
 #parameters for SPI
 add_parameter spiCPOL_g INTEGER 0
 set_parameter_property spiCPOL_g HDL_PARAMETER true
@@ -590,11 +541,6 @@ add_parameter spiCPHA_g INTEGER 0
 set_parameter_property spiCPHA_g HDL_PARAMETER true
 set_parameter_property spiCPHA_g VISIBLE false
 set_parameter_property spiCPHA_g DERIVED TRUE
-
-add_parameter spiBigEnd_g INTEGER 0
-set_parameter_property spiBigEnd_g HDL_PARAMETER true
-set_parameter_property spiBigEnd_g VISIBLE false
-set_parameter_property spiBigEnd_g DERIVED TRUE
 
 #parameters for portio
 add_parameter pioValLen_g INTEGER 50
@@ -607,61 +553,101 @@ proc my_validation_callback {} {
     set PDI_REV_VAL 4
     set PLK_REV_VAL \"[get_module_property VERSION]\"
 # REVISION NUMBERS #
-    
+
 #do some preparation stuff
-	set configPowerlink 			[get_parameter_value configPowerlink]
-	set configApInterface 			[get_parameter_value configApInterface]
-	set configApParallelInterface 	[get_parameter_value configApParallelInterface]
-	set spiCpol						[get_parameter_value configApSpi_CPOL]
-	set spiCpha						[get_parameter_value configApSpi_CPHA]
-	set rpdos						[get_parameter_value rpdoNum]
-	set tpdos						[get_parameter_value tpdoNum]
-	set rpdo0size					[get_parameter_value rpdo0size]
-	set rpdo1size					[get_parameter_value rpdo0size]
-	#set rpdo1size					[get_parameter_value rpdo1size]
-	set rpdo2size					[get_parameter_value rpdo0size]
-	#set rpdo2size					[get_parameter_value rpdo2size]
-	set tpdo0size					[get_parameter_value tpdo0size]
-	set asyncBuf1Size				[get_parameter_value asyncBuf1Size]
-	set asyncBuf2Size				[get_parameter_value asyncBuf2Size]
-	set ledGadgetEn					[get_parameter_value genLedGadget]
-	
-	set macTxBuf					[get_parameter_value macTxBuf]
-	set macRxBuf					[get_parameter_value macRxBuf]
-	set useLowJitterSync			[get_parameter_value hwSupportSyncIrq]
-	
-	set mii							[get_parameter_value phyIF]
-	set ploc						[get_parameter_value packetLoc]
-	set enDmaObserver 				[get_parameter_value enDmaObserver]
+    set configPowerlink             [get_parameter_value configPowerlink]
+    set configApInterface           [get_parameter_value configApInterface]
+    set configApParallelInterface   [get_parameter_value configApParallelInterface]
+    set spiCpol                     [get_parameter_value configApSpi_CPOL]
+    set spiCpha                     [get_parameter_value configApSpi_CPHA]
+    set rpdos                       [get_parameter_value rpdoNum]
+    set tpdos                       [get_parameter_value tpdoNum]
+    set rpdo0size                   [get_parameter_value rpdo0size]
+    set rpdo1size                   [get_parameter_value rpdo0size]
+    #set rpdo1size                  [get_parameter_value rpdo1size]
+    set rpdo2size                   [get_parameter_value rpdo0size]
+    #set rpdo2size                  [get_parameter_value rpdo2size]
+    set tpdo0size                   [get_parameter_value tpdo0size]
+    set asyncBuf1Size               [get_parameter_value asyncBuf1Size]
+    set asyncBuf2Size               [get_parameter_value asyncBuf2Size]
+    set ledGadgetEn                 [get_parameter_value genLedGadget]
+
+    set macTxBuf                    [get_parameter_value macTxBuf]
+    set macRxBuf                    [get_parameter_value macRxBuf]
+    set useLowJitterSync            [get_parameter_value hwSupportSyncIrq]
+
+    set mii                         [get_parameter_value phyIF]
+    set ploc                        [get_parameter_value packetLoc]
+    set enDmaObserver               [get_parameter_value enDmaObserver]
     set genEvent                    [get_parameter_value genEvent]
-    
+
     set expert                      [get_parameter_value expertMode]
-	
-	if {$mii == "RMII"} {
-		set_parameter_value useRmii_g 1
-	} else {
-		set_parameter_value useRmii_g 0
-		send_message info "Consider to use RMII to reduce resource usage!"
-	}
-	
-	if {$ploc == "TX and RX into embedded memory (M9K)"} {
-		set_parameter_value useIntPacketBuf_g 1
-		set_parameter_value useRxIntPacketBuf_g 1
-	} elseif {$ploc == "TX into embedded memory (M9K) and RX over Avalon Master" } {
-		set_parameter_value useIntPacketBuf_g 1
-		set_parameter_value useRxIntPacketBuf_g 0
-		send_message info "Connect the Avalon Master 'MAC_DMA' to the memory where Heap is located!"
-	} elseif {$ploc == "TX and RX over Avalon Master"} {
-		set_parameter_value useIntPacketBuf_g 0
-		set_parameter_value useRxIntPacketBuf_g 0
-		send_message info "Connect the Avalon Master 'MAC_DMA' to low latency memory! Heap must be located in the same memory!"
-	} else {
-		send_message error "error 0x01"
-	}
-	
-	if {$expert} {
+    set macrxqueuenum               [get_parameter_value macRxQueueNum]
+
+    set macRxQueueSize1             0
+    set macRxQueueSize2             0
+    set macRxQueueSize3             0
+    set macRxQueueSize4             0
+    set macRxQueueSize5             0
+
+    set_parameter_property macRxQueueNum VISIBLE false
+
+    set_parameter_property macRxQueue1Size VISIBLE false
+    set_parameter_property macRxQueue2Size VISIBLE false
+    set_parameter_property macRxQueue3Size VISIBLE false
+    set_parameter_property macRxQueue4Size VISIBLE false
+    set_parameter_property macRxQueue5Size VISIBLE false
+
+    if {$mii == "RMII"} {
+        set_parameter_value useRmii_g 1
+    } else {
+        set_parameter_value useRmii_g 0
+        send_message info "Consider to use RMII to reduce resource usage!"
+    }
+
+    if {$ploc == "TX and RX into embedded memory (M9K)"} {
+        set_parameter_value useIntPacketBuf_g true
+        set_parameter_value useRxIntPacketBuf_g true
+
+        # handle additional receive queue
+        set_parameter_property macRxQueueNum VISIBLE true
+
+        if { $macrxqueuenum >= 1} {
+            set_parameter_property macRxQueue1Size VISIBLE true
+            set macRxQueueSize1 [get_parameter_value macRxQueue1Size]
+        }
+        if { $macrxqueuenum >= 2} {
+            set_parameter_property macRxQueue2Size VISIBLE true
+            set macRxQueueSize2 [get_parameter_value macRxQueue2Size]
+        }
+        if { $macrxqueuenum >= 3} {
+            set_parameter_property macRxQueue3Size VISIBLE true
+            set macRxQueueSize3 [get_parameter_value macRxQueue3Size]
+        }
+        if { $macrxqueuenum >= 4} {
+            set_parameter_property macRxQueue4Size VISIBLE true
+            set macRxQueueSize4 [get_parameter_value macRxQueue4Size]
+        }
+        if { $macrxqueuenum >= 5} {
+            set_parameter_property macRxQueue5Size VISIBLE true
+            set macRxQueueSize5 [get_parameter_value macRxQueue5Size]
+        }
+
+    } elseif {$ploc == "TX into embedded memory (M9K) and RX over Avalon Master" } {
+        set_parameter_value useIntPacketBuf_g 1
+        set_parameter_value useRxIntPacketBuf_g 0
+        send_message info "Connect the Avalon Master 'MAC_DMA' to the memory where Heap is located!"
+    } elseif {$ploc == "TX and RX over Avalon Master"} {
+        set_parameter_value useIntPacketBuf_g 0
+        set_parameter_value useRxIntPacketBuf_g 0
+        send_message info "Connect the Avalon Master 'MAC_DMA' to low latency memory! Heap must be located in the same memory!"
+    } else {
+        send_message error "error 0x01"
+    }
+
+    if {$expert} {
         set macTxBurstSize [get_parameter_value macTxBurstSize]
-    	set macRxBurstSize [get_parameter_value macRxBurstSize]
+        set macRxBurstSize [get_parameter_value macRxBurstSize]
         set pcpSysId [get_parameter_value pcpSysId]
         set_parameter_property plkCoreRev VISIBLE true
         set_parameter_property iPdiRev_g  VISIBLE true
@@ -673,480 +659,488 @@ proc my_validation_callback {} {
         set_parameter_property plkCoreRev VISIBLE false
         set_parameter_property iPdiRev_g VISIBLE  false
     }
-	
-	#burst size setting allowed?!
-	if {$ploc == "TX and RX into embedded memory (M9K)"} {
-		#no
-		set_parameter_property macTxBurstSize VISIBLE false
-		set_parameter_property macRxBurstSize VISIBLE false
-		
-		#no bursts...
-		set macTxBurstSize 0
-		set macRxBurstSize 0
-	} else {
-		#yes!
-		
-		if {$ploc == "TX into embedded memory (M9K) and RX over Avalon Master"} {
-			set_parameter_property macTxBurstSize VISIBLE false
+
+    #burst size setting allowed?!
+    if {$ploc == "TX and RX into embedded memory (M9K)"} {
+        #no
+        set_parameter_property macTxBurstSize VISIBLE false
+        set_parameter_property macRxBurstSize VISIBLE false
+
+        #no bursts...
+        set macTxBurstSize 0
+        set macRxBurstSize 0
+
+    } else {
+        #yes!
+
+        if {$ploc == "TX into embedded memory (M9K) and RX over Avalon Master"} {
+            set_parameter_property macTxBurstSize VISIBLE false
             if {$expert} {
-			    set_parameter_property macRxBurstSize VISIBLE true
-			} else {
+                set_parameter_property macRxBurstSize VISIBLE true
+            } else {
                 set_parameter_property macRxBurstSize VISIBLE false
             }
-            
-			#no tx bursts...
-			set macTxBurstSize 0
-		} elseif {$ploc == "TX and RX over Avalon Master"} {
+
+            #no tx bursts...
+            set macTxBurstSize 0
+        } elseif {$ploc == "TX and RX over Avalon Master"} {
             if {$expert} {
-    			set_parameter_property macTxBurstSize VISIBLE true
-    			set_parameter_property macRxBurstSize VISIBLE true
+                set_parameter_property macTxBurstSize VISIBLE true
+                set_parameter_property macRxBurstSize VISIBLE true
             } else {
                 set_parameter_property macTxBurstSize VISIBLE false
-    			set_parameter_property macRxBurstSize VISIBLE false
+                set_parameter_property macRxBurstSize VISIBLE false
             }
-		} else {
-			#oje :(
-			send_message error "error 0x01a"
-		}
-		
-		#find the max burst size to be handled
-		if {$macTxBurstSize > $macRxBurstSize} {
-			set maxMacBurstSize $macTxBurstSize
-		} else {
-			set maxMacBurstSize $macRxBurstSize
-		}
-		
-		set m_burstcntwidth [expr int(ceil(log($maxMacBurstSize) / log(2.))) + 1]
-		
-		set_parameter_value m_burstcount_width_g $m_burstcntwidth
-		#also define the fifo size
-		set txFifoSize 16
-		set rxFifoSize 16
-		
-		if {[expr $macTxBurstSize * 2] > $txFifoSize} {
-			set txFifoSize [expr $macTxBurstSize * 2]
-		}
-		
-		if {[expr $macRxBurstSize * 2] > $rxFifoSize} {
-			set rxFifoSize [expr $macRxBurstSize * 2]
-		}
-		
-		set_parameter_value m_tx_fifo_size_g $txFifoSize
-		set_parameter_value m_tx_burst_size_g $macTxBurstSize
-		
-		set_parameter_value m_rx_fifo_size_g $rxFifoSize
-		set_parameter_value m_rx_burst_size_g $macRxBurstSize
-		
-		if {$macTxBurstSize > 1 || $macRxBurstSize > 1} {
-			send_message info "The Avalon Master 'MAC_DMA' performs 16bit burst transfers (TX=$macTxBurstSize RX=$macRxBurstSize)."
-		} else {
-			#no burst transfers
-		}
-	}
-	
-	set memRpdo 0
-	set memTpdo 0
-	
-	#add to RPDOs and Async buffers the header (since it isn't done by vhdl anymore)
-	set rpdo0size 					[expr $rpdo0size + 16]
-	set rpdo1size 					[expr $rpdo1size + 16]
-	set rpdo2size 					[expr $rpdo2size + 16]
-	set tpdo0size 					[expr $tpdo0size + 0]
-	
-	#async buffers set to zero are omitted
-	
-	#hold on! asyncBuf1Size may not be lower 20 byte!!!
-	if {$asyncBuf1Size < 20} {
-		send_message error "Set Asynchronous Buffer Nr. 1 Size to at least 20 byte!"
-	}
-	
+        } else {
+            #oje :(
+            send_message error "error 0x01a"
+        }
+
+        #find the max burst size to be handled
+        if {$macTxBurstSize > $macRxBurstSize} {
+            set maxMacBurstSize $macTxBurstSize
+        } else {
+            set maxMacBurstSize $macRxBurstSize
+        }
+
+        set m_burstcntwidth [expr int(ceil(log($maxMacBurstSize) / log(2.))) + 1]
+
+        set_parameter_value m_burstcount_width_g $m_burstcntwidth
+        #also define the fifo size
+        set txFifoSize 16
+        set rxFifoSize 16
+
+        if {[expr $macTxBurstSize * 2] > $txFifoSize} {
+            set txFifoSize [expr $macTxBurstSize * 2]
+        }
+
+        if {[expr $macRxBurstSize * 2] > $rxFifoSize} {
+            set rxFifoSize [expr $macRxBurstSize * 2]
+        }
+
+        set_parameter_value m_tx_fifo_size_g $txFifoSize
+        set_parameter_value m_tx_burst_size_g $macTxBurstSize
+
+        set_parameter_value m_rx_fifo_size_g $rxFifoSize
+        set_parameter_value m_rx_burst_size_g $macRxBurstSize
+
+        if {$macTxBurstSize > 1 || $macRxBurstSize > 1} {
+            send_message info "The Avalon Master 'MAC_DMA' performs 16bit burst transfers (TX=$macTxBurstSize RX=$macRxBurstSize)."
+        } else {
+            #no burst transfers
+        }
+    }
+
+    set memRpdo 0
+    set memTpdo 0
+
+    #add to RPDOs and Async buffers the header (since it isn't done by vhdl anymore)
+    set rpdo0size                     [expr $rpdo0size + 16]
+    set rpdo1size                     [expr $rpdo1size + 16]
+    set rpdo2size                     [expr $rpdo2size + 16]
+    set tpdo0size                     [expr $tpdo0size + 0]
+
+    #async buffers set to zero are omitted
+
+    #hold on! asyncBuf1Size may not be lower 20 byte!!!
+    if {$asyncBuf1Size < 20} {
+        send_message error "Set Asynchronous Buffer Nr. 1 Size to at least 20 byte!"
+    }
+
     # forward to system.h
     set_module_assignment embeddedsw.CMacro.PDIASYNCBUFSIZE1        $asyncBuf1Size
     set_module_assignment embeddedsw.CMacro.PDIASYNCBUFSIZE2        $asyncBuf2Size
-    
-	#set boolean generic
-	if {$asyncBuf1Size == 0} {
-		set_parameter_value genABuf1_g 0
-	} else {
-		set asyncBuf1Size			[expr $asyncBuf1Size + 12]
-		set_parameter_value genABuf1_g 1
-	}
-	
-	if {$asyncBuf2Size == 0} {
-		set_parameter_value genABuf2_g 0
-	} else {
-		set asyncBuf2Size			[expr $asyncBuf2Size + 12]
-		set_parameter_value genABuf2_g 1
-	}
-	
-	set genPdi false
-	set genAvalonAp false
-	set genSimpleIO false
-	set genSpiAp false
-	
-	#some constants from openMAC
-	set macPktLength	4
-	# tx buffer header (header + packet length)
-	set macTxHd			[expr  0 + $macPktLength]
-	# rx buffer header (header + packet length)
-	set macRxHd 		[expr 26 + $macPktLength]
-	# max rx buffers
-	set macRxBuffers 	16
-	# max tx buffers
-	set macTxBuffers	16
-	# mtu by ieee
-	set mtu 			1500
-	# eth header
-	set ethHd			14
-	# crc size by ieee
-	set crc				4
-	# min data size of a packet
-	set minDatSize		46
-	# min packet size (ethheader + mindata + crc + tx buffer header)
-	set minPktBufSize	[expr $ethHd + $minDatSize + $crc + $macTxHd]
-	# max packet size (ethheader + mtu + crc + tx buffer header)
-	set maxPktBufSize	[expr $ethHd + $mtu + $crc + $macTxHd]
+
+    #set boolean generic
+    if {$asyncBuf1Size == 0} {
+        set_parameter_value genABuf1_g 0
+    } else {
+        set asyncBuf1Size            [expr $asyncBuf1Size + 12]
+        set_parameter_value genABuf1_g 1
+    }
+
+    if {$asyncBuf2Size == 0} {
+        set_parameter_value genABuf2_g 0
+    } else {
+        set asyncBuf2Size            [expr $asyncBuf2Size + 12]
+        set_parameter_value genABuf2_g 1
+    }
+
+    set genPdi false
+    set genAvalonAp false
+    set genSimpleIO false
+    set genSpiAp false
+
+    #some constants from openMAC
+    set macPktLength    4
+    # tx buffer header (header + packet length)
+    set macTxHd            [expr  0 + $macPktLength]
+    # rx buffer header (header + packet length)
+    set macRxHd         [expr 26 + $macPktLength]
+    # max rx buffers
+    set macRxBuffers     16
+    # max tx buffers
+    set macTxBuffers    16
+    # mtu by ieee
+    set mtu             1500
+    # eth header
+    set ethHd            14
+    # crc size by ieee
+    set crc                4
+    # min data size of a packet
+    set minDatSize        46
+    # min packet size (ethheader + mindata + crc + tx buffer header)
+    set minPktBufSize    [expr $ethHd + $minDatSize + $crc + $macTxHd]
+    # max packet size (ethheader + mtu + crc + tx buffer header)
+    set maxPktBufSize    [expr $ethHd + $mtu + $crc + $macTxHd]
 
 #so, now verify which configuration should be set
-	#default assignments...
-	set_parameter_property configApInterface VISIBLE false
-	set_parameter_property configApParallelInterface VISIBLE false
-	set_parameter_property configApParSigs VISIBLE false
-	set_parameter_property configApParOutSigs VISIBLE false
-	set_parameter_property configApEndian VISIBLE false
-	set_parameter_property configApSpi_CPOL VISIBLE false
-	set_parameter_property configApSpi_CPHA VISIBLE false
-	set_parameter_property configApSpi_IRQ VISIBLE false
-	set_parameter_property genLedGadget VISIBLE false
-	set_parameter_property genEvent VISIBLE false
-	set_parameter_property asyncBuf1Size VISIBLE false
-	set_parameter_property asyncBuf2Size VISIBLE false
-	set_parameter_property rpdo0size VISIBLE false
-	set_parameter_property tpdo0size VISIBLE false
-	set_parameter_property validAssertDuration VISIBLE false
-	set_parameter_property validSet VISIBLE false
-	set_parameter_property macTxBuf VISIBLE false
-	set_parameter_property macRxBuf VISIBLE false
-	set_parameter_property hwSupportSyncIrq VISIBLE false
-	set_parameter_property enDmaObserver VISIBLE false
+    #default assignments...
+    set_parameter_property configApInterface VISIBLE false
+    set_parameter_property configApParallelInterface VISIBLE false
+    set_parameter_property configApParSigs VISIBLE false
+    set_parameter_property configApParOutSigs VISIBLE false
+    set_parameter_property configApSpi_CPOL VISIBLE false
+    set_parameter_property configApSpi_CPHA VISIBLE false
+    set_parameter_property configApSpi_IRQ VISIBLE false
+    set_parameter_property genLedGadget VISIBLE false
+    set_parameter_property genEvent VISIBLE false
+    set_parameter_property asyncBuf1Size VISIBLE false
+    set_parameter_property asyncBuf2Size VISIBLE false
+    set_parameter_property rpdo0size VISIBLE false
+    set_parameter_property tpdo0size VISIBLE false
+    set_parameter_property validAssertDuration VISIBLE false
+    set_parameter_property validSet VISIBLE false
+    set_parameter_property macTxBuf VISIBLE false
+    set_parameter_property macRxBuf VISIBLE false
+    set_parameter_property hwSupportSyncIrq VISIBLE false
+    set_parameter_property enDmaObserver VISIBLE false
     set_parameter_property pcpSysId VISIBLE false
     set_parameter_property iPdiRev_g VISIBLE  false
-	
-	set_parameter_property mac2phys VISIBLE true
+
+    set_parameter_property mac2phys VISIBLE true
     set_parameter_property macGen2ndSmi VISIBLE false
-	
-	set_parameter_property rpdoNum VISIBLE true
-	set_parameter_property tpdoNum VISIBLE true
-	
-	if {$configPowerlink == "openMAC only"} {
-		#no PDI, only openMAC
-		if {$ploc == "TX and RX into embedded memory (M9K)"} {
-			set_parameter_property macTxBuf VISIBLE true
-			set_parameter_property macRxBuf VISIBLE true
-		} elseif {$ploc == "TX into embedded memory (M9K) and RX over Avalon Master"} {
-			set_parameter_property macTxBuf VISIBLE true
+
+    set_parameter_property rpdoNum VISIBLE true
+    set_parameter_property tpdoNum VISIBLE true
+
+    if {$configPowerlink == "openMAC only"} {
+        #no PDI, only openMAC
+        if {$ploc == "TX and RX into embedded memory (M9K)"} {
+            set_parameter_property macTxBuf VISIBLE true
             set_parameter_property macRxBuf VISIBLE true
-		} elseif {$ploc == "TX and RX over Avalon Master"} {
-			set_parameter_property macRxBuf VISIBLE true
-		} else {
-			send_message error "error 0x02"
-		}
-		
-		set_parameter_property rpdoNum VISIBLE false
-		set_parameter_property tpdoNum VISIBLE false
-	} elseif {$configPowerlink == "Direct I/O CN"} {
-		#CN is only a Direct I/O CN, so there are only 4bytes I/Os
-		if {$rpdos == 1} {
-			set rpdo0size [expr 4 + 16]
-			set rpdo1size 0
-			set rpdo2size 0
-			set macRxBuffers 4
-		} elseif {$rpdos == 2} {
-			set rpdo0size [expr 4 + 16]
-			set rpdo1size [expr 4 + 16]
-			set rpdo2size 0
-			set macRxBuffers 5
-		} elseif {$rpdos == 3} {
-			set rpdo0size [expr 4 + 16]
-			set rpdo1size [expr 4 + 16]
-			set rpdo2size [expr 4 + 16]
-			set macRxBuffers 6
-		}
-		#and fix tpdo size
-		set tpdo0size 4
-		
-		set genSimpleIO true
-		
-		set_parameter_property validAssertDuration VISIBLE true
-		set_parameter_property validSet VISIBLE true
-		
-	} elseif {$configPowerlink == "CN with Processor Interface"} {
-		#CN is connected to AP processor, so enable everything for this
-		set_parameter_property configApInterface VISIBLE true
-		set_parameter_property asyncBuf1Size VISIBLE true
-		set_parameter_property asyncBuf2Size VISIBLE true
-		set_parameter_property genLedGadget VISIBLE true
+        } elseif {$ploc == "TX into embedded memory (M9K) and RX over Avalon Master"} {
+            set_parameter_property macTxBuf VISIBLE true
+            set_parameter_property macRxBuf VISIBLE true
+        } elseif {$ploc == "TX and RX over Avalon Master"} {
+            set_parameter_property macRxBuf VISIBLE true
+        } else {
+            send_message error "error 0x02"
+        }
+
+        set_parameter_property hwSupportSyncIrq VISIBLE true
+        set_parameter_property rpdoNum VISIBLE false
+        set_parameter_property tpdoNum VISIBLE false
+    } elseif {$configPowerlink == "Direct I/O CN"} {
+        #CN is only a Direct I/O CN, so there are only 4bytes I/Os
+        if {$rpdos == 1} {
+            set rpdo0size [expr 4 + 16]
+            set rpdo1size 0
+            set rpdo2size 0
+            set macRxBuffers 3
+        } elseif {$rpdos == 2} {
+            set rpdo0size [expr 4 + 16]
+            set rpdo1size [expr 4 + 16]
+            set rpdo2size 0
+            set macRxBuffers 4
+        } elseif {$rpdos == 3} {
+            set rpdo0size [expr 4 + 16]
+            set rpdo1size [expr 4 + 16]
+            set rpdo2size [expr 4 + 16]
+            set macRxBuffers 5
+        }
+
+        # add additional buffers for asnd (masnd supports 7 multi asnd slots + 6 AInv!)
+        incr macRxBuffers 13
+
+        if { $macRxBuffers > 16 } {
+            set macRxBuffers 16
+        }
+
+        #and fix tpdo size
+        set tpdo0size 4
+
+        set genSimpleIO true
+
+        set_parameter_property validAssertDuration VISIBLE true
+        set_parameter_property validSet VISIBLE true
+
+    } elseif {$configPowerlink == "CN with Processor Interface"} {
+        #CN is connected to AP processor, so enable everything for this
+        set_parameter_property configApInterface VISIBLE true
+        set_parameter_property asyncBuf1Size VISIBLE true
+        set_parameter_property asyncBuf2Size VISIBLE true
         if {$expert} {
             #in case of expert mode event hw support can be set
             set_parameter_property iPdiRev_g VISIBLE true
-		    set_parameter_property genEvent VISIBLE true
             set_parameter_property pcpSysId VISIBLE true
-            if {$genEvent} {
-                set_parameter_value genEvent_g 1
+
+            #set the led gadget enable generic
+            set_parameter_property genLedGadget VISIBLE true
+            if {$ledGadgetEn} {
+                set_parameter_value genLedGadget_g 1
             } else {
-                set_parameter_value genEvent_g 0
-                send_message warning "Event Hardware Support is mandatory for CN API library!"
+                set_parameter_value genLedGadget_g 0
             }
         } else {
             #no expert mode => TRUE!
-            set_parameter_property genEvent VISIBLE false
-            set_parameter_value genEvent_g 1
             set_parameter_property pcpSysId VISIBLE false
+
+            #set the led gadget enable generic
+            set_parameter_property genLedGadget VISIBLE false
+            set_parameter_value genLedGadget_g 1
         }
-		#AP can be big or little endian - allow choice
-		set_parameter_property configApEndian VISIBLE true
-		set_parameter_property hwSupportSyncIrq VISIBLE true
-		
-		#set the led gadget enable generic
-        if {$ledGadgetEn} {
-		    set_parameter_value genLedGadget_g 1
+
+        set_parameter_property genEvent VISIBLE true
+        if {$genEvent} {
+            set_parameter_value genEvent_g 1
         } else {
-            set_parameter_value genLedGadget_g 0
+            set_parameter_value genEvent_g 0
         }
-		
-		set genPdi 1
-		
-		#set rpdo size to zero if not used
-		if {$rpdos == 1} {
-			set_parameter_property rpdo0size VISIBLE true
-			set rpdo1size 0
-			set rpdo2size 0
-			set macRxBuffers 4
-			set memRpdo [expr ($rpdo0size)*3]
-		} elseif {$rpdos == 2} {
-			set_parameter_property rpdo0size VISIBLE true
-			set rpdo2size 0
-			set macRxBuffers 5
-			set memRpdo [expr ($rpdo0size + $rpdo1size)*3]
-		} elseif {$rpdos == 3} {
-			set_parameter_property rpdo0size VISIBLE true
-			set macRxBuffers 6
-			set memRpdo [expr ($rpdo0size + $rpdo1size + $rpdo2size )*3]
-		}
-		set_parameter_property tpdo0size VISIBLE true
-		set memTpdo [expr ($tpdo0size)*3]
-		
-		if {$configApInterface == "Avalon"} {
-			#avalon is used for the ap!
-			set genAvalonAp 1
-			
-		} elseif {$configApInterface == "Parallel"} {
-			#the parallel interface is used
-			
-			set_parameter_property configApParallelInterface VISIBLE true
-			set_parameter_property configApParSigs VISIBLE true
-			set_parameter_property configApParOutSigs VISIBLE true
-			
-		} elseif {$configApInterface == "SPI"} {
-			#let's use spi
-			set_parameter_property configApSpi_CPOL VISIBLE true
-			set_parameter_property configApSpi_CPHA VISIBLE true
-			set_parameter_property configApSpi_IRQ VISIBLE true
-			
-			set genSpiAp 1
-			
-		}
-	}
-	
-	#calc tx packet size
-	set IdRes 	[expr 176 				+ $crc + $macTxHd]
-	set StRes 	[expr 72 				+ $crc + $macTxHd]
-	set NmtReq 	[expr $ethHd + $mtu		+ $crc + $macTxHd]
-	set nonEpl	[expr $ethHd + $mtu		+ $crc + $macTxHd]
-	set PRes	[expr 24 + $tpdo0size	+ $crc + $macTxHd]
-	#sync response for poll-resp-ch (44 bytes + padding = 60bytes)
-	set SyncRes [expr 60				+ $crc + $macTxHd]
-	
-	if {$PRes < $minPktBufSize} {
-		#PRes buffer is smaller 64 bytes => padding!
-		set PRes $minPktBufSize
-	}
-	
-	#the following error is catched by the allowed range of pdo size
-	if {$PRes > $maxPktBufSize} {
-		send_message error "TPDO Size is too large. Allowed Range 1...1490 bytes!"
-	}
-	
-	#align all tx buffers
-	set IdRes 	[expr ($IdRes + 3) & ~3]
-	set StRes 	[expr ($StRes + 3) & ~3]
-	set NmtReq 	[expr ($NmtReq + 3) & ~3]
-	set nonEpl 	[expr ($nonEpl + 3) & ~3]
-	set PRes 	[expr ($PRes + 3) & ~3]
-	set SyncRes [expr ($SyncRes + 3) & ~3]
-	
-	#calculate tx buffer size out of tpdos and other packets
-	set txBufSize [expr $IdRes + $StRes + $NmtReq + $nonEpl + $PRes + $SyncRes]
-	set macTxBuffers 6
-	
-	#openPOWERLINK allocates TX buffers twice (ping-pong)
-	set txBufSize [expr $txBufSize * 2]
-	set macTxBuffers [expr $macTxBuffers * 2]
-	
-	#calculate rx buffer size out of packets per cycle
-	set rxBufSize [expr $ethHd + $mtu + $crc + $macRxHd]
-	set rxBufSize [expr ($rxBufSize + 3) & ~3]
-	set rxBufSize [expr $macRxBuffers * $rxBufSize]
-	
-	if {$configPowerlink == "openMAC only"} {
-		#overwrite done calulations
-		# for tx
-		set txBufSize $macTxBuf
-		# for rx using MTU and number of buffers...
-		set rxBufSize [expr $macRxBuf * ($ethHd + $mtu + $crc + $macRxHd)]
-		
-		# forward number of RX buffers
-		set macRxBuffers $macRxBuf
-		
-		#set unsupported to zeros or allowed range
-		set macTxBuffers 0
-		set rpdos 0
-		set tpdos 0
-		set rpdo0size 0
-		set rpdo1size 0
-		set rpdo2size 0
-		set tpdo0size 0
-		set asyncBuf1Size 0
-		set asyncBuf2Size 0
-	}
-    
+
+        #AP can be big or little endian - allow choice
+        set_parameter_property hwSupportSyncIrq VISIBLE true
+
+        set genPdi true
+
+        #set rpdo size to zero if not used
+        if {$rpdos == 1} {
+            set_parameter_property rpdo0size VISIBLE true
+            set rpdo1size 0
+            set rpdo2size 0
+            set macRxBuffers 3
+            set memRpdo [expr ($rpdo0size)*3]
+        } elseif {$rpdos == 2} {
+            set_parameter_property rpdo0size VISIBLE true
+            set rpdo2size 0
+            set macRxBuffers 4
+            set memRpdo [expr ($rpdo0size + $rpdo1size)*3]
+        } elseif {$rpdos == 3} {
+            set_parameter_property rpdo0size VISIBLE true
+            set macRxBuffers 5
+            set memRpdo [expr ($rpdo0size + $rpdo1size + $rpdo2size )*3]
+        }
+
+        # add additional buffers for asnd (masnd supports 7 multi asnd slots!)
+        incr macRxBuffers 7
+
+        set_parameter_property tpdo0size VISIBLE true
+        set memTpdo [expr ($tpdo0size)*3]
+
+        if {$configApInterface == "Avalon"} {
+            #avalon is used for the ap!
+            set genAvalonAp 1
+
+        } elseif {$configApInterface == "Parallel"} {
+            #the parallel interface is used
+
+            set_parameter_property configApParallelInterface VISIBLE true
+            set_parameter_property configApParSigs VISIBLE true
+            set_parameter_property configApParOutSigs VISIBLE true
+
+        } elseif {$configApInterface == "SPI"} {
+            #let's use spi
+            set_parameter_property configApSpi_CPOL VISIBLE true
+            set_parameter_property configApSpi_CPHA VISIBLE true
+            set_parameter_property configApSpi_IRQ VISIBLE true
+
+            set genSpiAp 1
+
+        }
+    }
+
+    #calc tx packet size
+    set IdRes     [expr 176                 + $crc + $macTxHd]
+    set StRes     [expr 72                 + $crc + $macTxHd]
+    set NmtReq     [expr $ethHd + $mtu        + $crc + $macTxHd]
+    set nonEpl    [expr $ethHd + $mtu        + $crc + $macTxHd]
+    set PRes    [expr 24 + $tpdo0size    + $crc + $macTxHd]
+    #sync response for poll-resp-ch (44 bytes + padding = 60bytes)
+    set SyncRes [expr 60                + $crc + $macTxHd]
+
+    if {$PRes < $minPktBufSize} {
+        #PRes buffer is smaller 64 bytes => padding!
+        set PRes $minPktBufSize
+    }
+
+    #the following error is catched by the allowed range of pdo size
+    if {$PRes > $maxPktBufSize} {
+        send_message error "TPDO Size is too large. Allowed Range 1...1490 bytes!"
+    }
+
+    #align all tx buffers
+    set IdRes     [expr ($IdRes + 3) & ~3]
+    set StRes     [expr ($StRes + 3) & ~3]
+    set NmtReq     [expr ($NmtReq + 3) & ~3]
+    set nonEpl     [expr ($nonEpl + 3) & ~3]
+    set PRes     [expr ($PRes + 3) & ~3]
+    set SyncRes [expr ($SyncRes + 3) & ~3]
+
+    #calculate tx buffer size out of tpdos and other packets
+    set txBufSize [expr $IdRes + $StRes + $NmtReq + $nonEpl + $PRes + $SyncRes]
+    set macTxBuffers 6
+
+    #openPOWERLINK allocates TX buffers twice (ping-pong)
+    set txBufSize [expr $txBufSize * 2]
+    set macTxBuffers [expr $macTxBuffers * 2]
+
+    #calculate rx buffer size out of packets per cycle
+    set rxBufSize [expr $ethHd + $mtu + $crc + $macRxHd]
+    set rxBufSize [expr ($rxBufSize + 3) & ~3]
+    set rxBufSize [expr ($macRxBuffers + $macRxQueueSize1 + $macRxQueueSize2 +\
+                  $macRxQueueSize3 + $macRxQueueSize4 + $macRxQueueSize5) * $rxBufSize]
+
+    if {$configPowerlink == "openMAC only"} {
+        #overwrite done calulations
+        # for tx
+        set txBufSize $macTxBuf
+        # for rx using MTU and number of buffers...
+        set rxBufSize [expr ($macRxBuf + $macRxQueueSize1 + $macRxQueueSize2 +\
+                  $macRxQueueSize3 + $macRxQueueSize4 + $macRxQueueSize5) * ($ethHd \
+                  + $mtu + $crc + $macRxHd)]
+
+        # forward number of RX buffers
+        set macRxBuffers $macRxBuf
+
+        #set unsupported to zeros or allowed range
+        set macTxBuffers 0
+        set rpdos 0
+        set tpdos 0
+        set rpdo0size 0
+        set rpdo1size 0
+        set rpdo2size 0
+        set tpdo0size 0
+        set asyncBuf1Size 0
+        set asyncBuf2Size 0
+    }
+
     # align TX and RX buffer size to 32 bit
     set txBufSize   [expr ($txBufSize + 3) & ~3]
     set rxBufSize   [expr ($rxBufSize + 3) & ~3]
-	
-	if {$ploc == "TX and RX into embedded memory (M9K)"} {
-		set macBufSize [expr $txBufSize + $rxBufSize]
-		set log2MacBufSize [expr int(ceil(log($macBufSize) / log(2.)))]
-		set enDmaObserver false
-	} elseif {$ploc == "TX into embedded memory (M9K) and RX over Avalon Master" } {
-		set macBufSize $txBufSize
+
+    if {$ploc == "TX and RX into embedded memory (M9K)"} {
+        set macBufSize [expr $txBufSize + $rxBufSize]
+        set log2MacBufSize [expr int(ceil(log($macBufSize) / log(2.)))]
+        set enDmaObserver 0
+    } elseif {$ploc == "TX into embedded memory (M9K) and RX over Avalon Master" } {
+        set macBufSize $txBufSize
         if {$expert} {
             #expert may enable it manually
-		    set_parameter_property enDmaObserver VISIBLE true
+            set_parameter_property enDmaObserver VISIBLE true
         } else {
             #no expert is not visible but set to true
             set enDmaObserver 1
         }
-		#no rx buffers are stored in dpram => set to zero
-		set rxBufSize 0
-		set log2MacBufSize [expr int(ceil(log($macBufSize) / log(2.)))]
-		set macRxBuffers 16
-	} elseif {$ploc == "TX and RX over Avalon Master"} {
+        #no rx buffers are stored in dpram => set to zero
+        set rxBufSize 0
+        set log2MacBufSize [expr int(ceil(log($macBufSize) / log(2.)))]
+        set macRxBuffers 16
+    } elseif {$ploc == "TX and RX over Avalon Master"} {
         if {$expert} {
             #expert may enable it manually
-		    set_parameter_property enDmaObserver VISIBLE true
+            set_parameter_property enDmaObserver VISIBLE true
         } else {
             #no expert is not visible but set to true
             set enDmaObserver 1
         }
-		#any value to avoid errors in SOPC
-		set macBufSize 0
-		#no rx and tx buffers are stored in dpram => set to zero
-		set rxBufSize 0
-		set txBufSize 0
-		set log2MacBufSize 3
-	} else {
-		set macBufSize 0
-		set rxBufSize 0
-		set txBufSize 0
-		set log2MacBufSize 3
-	}
-	
-	#set pdi generics
-	set_parameter_value iRpdos_g			$rpdos
-	set_parameter_value iTpdos_g			$tpdos
-	set_parameter_value iTpdoBufSize_g		$tpdo0size
-	set_parameter_value iRpdo0BufSize_g		$rpdo0size
-	set_parameter_value iRpdo1BufSize_g		$rpdo1size
-	set_parameter_value iRpdo2BufSize_g		$rpdo2size
-	set_parameter_value iAsyBuf1Size_g		$asyncBuf1Size
-	set_parameter_value iAsyBuf2Size_g		$asyncBuf2Size
-	
+        #any value to avoid errors in SOPC
+        set macBufSize 0
+        #no rx and tx buffers are stored in dpram => set to zero
+        set rxBufSize 0
+        set txBufSize 0
+        set log2MacBufSize 3
+    } else {
+        set macBufSize 0
+        set rxBufSize 0
+        set txBufSize 0
+        set log2MacBufSize 3
+    }
+
+    #set pdi generics
+    set_parameter_value iRpdos_g            $rpdos
+    set_parameter_value iTpdos_g            $tpdos
+    set_parameter_value iTpdoBufSize_g        $tpdo0size
+    set_parameter_value iRpdo0BufSize_g        $rpdo0size
+    set_parameter_value iRpdo1BufSize_g        $rpdo1size
+    set_parameter_value iRpdo2BufSize_g        $rpdo2size
+    set_parameter_value iAsyBuf1Size_g        $asyncBuf1Size
+    set_parameter_value iAsyBuf2Size_g        $asyncBuf2Size
+
 #now, let's set generics to HDL
     if {$genPdi} {
-        set_parameter_value genPdi_g        1
+        set_parameter_value genPdi_g 1
     } else {
-        set_parameter_value genPdi_g        0
+        set_parameter_value genPdi_g 0
     }
-    
+
     if {$genAvalonAp} {
         set_parameter_value genInternalAp_g 1
     } else {
         set_parameter_value genInternalAp_g 0
     }
-    
+
     if {$genSimpleIO} {
-        set_parameter_value genSimpleIO_g   1
+        set_parameter_value genSimpleIO_g 1
     } else {
-        set_parameter_value genSimpleIO_g   0
+        set_parameter_value genSimpleIO_g 0
     }
-    
+
     if {$genSpiAp} {
-        set_parameter_value genSpiAp_g      1
+        set_parameter_value genSpiAp_g 1
     } else {
-        set_parameter_value genSpiAp_g      0
+        set_parameter_value genSpiAp_g 0
     }
-    
-    set_parameter_value Simulate            0
-    
+
     if {$enDmaObserver} {
-        set_parameter_value gen_dma_observer_g	1
+        set_parameter_value gen_dma_observer_g 1
     } else {
-        set_parameter_value gen_dma_observer_g	0
+        set_parameter_value gen_dma_observer_g 0
     }
-	
-	set_parameter_value iBufSize_g			$macBufSize
-	set_parameter_value iBufSizeLOG2_g		$log2MacBufSize
-	
-	if {[get_parameter_value configApParallelInterface] == "8bit"} {
-		set_parameter_value papDataWidth_g	8
-	} else {
-		set_parameter_value papDataWidth_g	16
-	}
-	if {[get_parameter_value configApEndian] == "Little"} {
-		set_parameter_value papBigEnd_g	0
-		set_parameter_value spiBigEnd_g	0
-	} else {
-#		big/little endian conversion is considered by software, THX Michael!
-#		set_parameter_value papBigEnd_g	1
-#		set_parameter_value spiBigEnd_g	1
-		set_parameter_value papBigEnd_g	0
-		set_parameter_value spiBigEnd_g	0
-	}
-	if {[get_parameter_value configApParSigs] == "Low Active"} {
-		set_parameter_value papLowAct_g	1
-	} else {
-		set_parameter_value papLowAct_g	0
-	}
-	if {$spiCpol == "1"} {
-		set_parameter_value spiCPOL_g 1
-	} else {
-		set_parameter_value spiCPOL_g 0
-	}
-	if {$spiCpha == "1"} {
-		set_parameter_value spiCPHA_g 1
-	} else {
-		set_parameter_value spiCPHA_g 0
-	}
-	
-	#generate 2 phy port
-	set_parameter_value use2ndPhy_g 0
-	set_module_assignment embeddedsw.CMacro.PHYCNT 1
+
+    set_parameter_value Simulate            0
+    set_parameter_value iBufSize_g            $macBufSize
+    set_parameter_value iBufSizeLOG2_g        $log2MacBufSize
+
+    if {[get_parameter_value configApParallelInterface] == "8bit"} {
+        set_parameter_value papDataWidth_g    8
+    } else {
+        set_parameter_value papDataWidth_g    16
+    }
+
+    if {[get_parameter_value configApParSigs] == "Low Active"} {
+        set_parameter_value papLowAct_g    1
+    } else {
+        set_parameter_value papLowAct_g    0
+    }
+    if {$spiCpol == "1"} {
+        set_parameter_value spiCPOL_g 1
+    } else {
+        set_parameter_value spiCPOL_g 0
+    }
+    if {$spiCpha == "1"} {
+        set_parameter_value spiCPHA_g 1
+    } else {
+        set_parameter_value spiCPHA_g 0
+    }
+
+    #generate 2 phy port
+    set_parameter_value use2ndPhy_g 0
+    set_module_assignment embeddedsw.CMacro.PHYCNT 1
     #default
     set_parameter_value gNumSmi 1
-	if {[get_parameter_value mac2phys]} {
-		set_parameter_value use2ndPhy_g 1
-		set_module_assignment embeddedsw.CMacro.PHYCNT 2
+    if {[get_parameter_value mac2phys]} {
+        set_parameter_value use2ndPhy_g 1
+        set_module_assignment embeddedsw.CMacro.PHYCNT 2
         #two phys are used
         set_parameter_property macGen2ndSmi VISIBLE true
         if {[get_parameter_value macGen2ndSmi]} {
@@ -1156,120 +1150,118 @@ proc my_validation_callback {} {
             #generate one SMI
             set_parameter_value gNumSmi 1
         }
-	} else {
+    } else {
         #one phy is used
         set_parameter_property macGen2ndSmi VISIBLE false
     }
-	
-	#generate 2nd timer cmp if pdi and if set in sopc
-	# otherwise not (e.g. openMAC only, DirectIO or no selected)
-	set_parameter_value use2ndCmpTimer_g 0
-    set_parameter_value genTimeSync_g 0
-	if {$configPowerlink == "CN with Processor Interface"} {
-		if {$useLowJitterSync} {
-			set_parameter_value use2ndCmpTimer_g 1
+
+    #generate 2nd timer cmp if pdi and if set in sopc
+    # otherwise not (e.g. openMAC only, DirectIO or no selected)
+    set_parameter_value use2ndCmpTimer_g FALSE
+    set_parameter_value usePulse2ndCmpTimer_g FALSE
+    set_parameter_value genTimeSync_g FALSE
+    if {$configPowerlink == "CN with Processor Interface"} {
+        if {$useLowJitterSync} {
+            set_parameter_value use2ndCmpTimer_g 1
             set_parameter_value genTimeSync_g 1
-		} else {
-		}
-	} else {
-	}
-	
-	#forward parameters to system.h
-	
-	# workaround: strings are erroneous => no blanks, etc.
-	if {$ledGadgetEn} {
-		set_module_assignment embeddedsw.CMacro.LEDGADGET			TRUE
-	} else {
-		set_module_assignment embeddedsw.CMacro.LEDGADGET			FALSE
-	}
-	
-	if {$enDmaObserver} {
-		set_module_assignment embeddedsw.CMacro.DMAOBSERV			TRUE
-	} else {
-		set_module_assignment embeddedsw.CMacro.DMAOBSERV			FALSE
-	}
-	
-	if {[get_parameter_value hwSupportSyncIrq]} {
-		set_module_assignment embeddedsw.CMacro.TIMESYNCHW		    TRUE
-	} else {
-		set_module_assignment embeddedsw.CMacro.TIMESYNCHW			FALSE
-	}
-	
-	if {[get_parameter_value genEvent_g] == 1} {
-		set_module_assignment embeddedsw.CMacro.EVENT			TRUE
-	} else {
-		set_module_assignment embeddedsw.CMacro.EVENT			FALSE
-	}
-	
-	if {$configPowerlink == "Direct I/O CN"} {
-																	#direct I/O
-		set_module_assignment embeddedsw.CMacro.CONFIG				0
-	} elseif {$configPowerlink == "CN with Processor Interface"} {
-		if {$configApInterface == "Avalon"} {
-																	#Avalon
-			set_module_assignment embeddedsw.CMacro.CONFIG			4
-		} elseif {$configApInterface == "Parallel"} {
-			if {[get_parameter_value configApParallelInterface] == "8bit"} {
-																	#parallel 8bit
-				set_module_assignment embeddedsw.CMacro.CONFIG		1
-			} else {
-																	#parallel 16bit
-				set_module_assignment embeddedsw.CMacro.CONFIG		2
-			}
-		} else {
-																	#SPI
-			set_module_assignment embeddedsw.CMacro.CONFIG			3
-		}
+        } else {
+        }
+    } else {
+        if {$useLowJitterSync} {
+            set_parameter_value use2ndCmpTimer_g 1
+            set_parameter_value usePulse2ndCmpTimer_g 1
+        } else {
+        }
+    }
 
-		if { $asyncBuf2Size == 0 } {
-			set_module_assignment embeddedsw.CMacro.ASYNCBUFCOUNT	1
-		} else {
-			set_module_assignment embeddedsw.CMacro.ASYNCBUFCOUNT	2
-		}
+    #forward parameters to system.h
 
-	} elseif {$configPowerlink == "openMAC only"} {
-																	#openMAC only
-		set_module_assignment embeddedsw.CMacro.CONFIG				5
-	}
-	
-	if {[get_parameter_value configApEndian] == "Little"} {
-																	#little endian
-		set_module_assignment embeddedsw.CMacro.CONFIGAPENDIAN		0
-	} else {
-																	#big endian
-		set_module_assignment embeddedsw.CMacro.CONFIGAPENDIAN		1
-	}
-	
-	if {$ploc == "TX and RX into embedded memory (M9K)"} {			#all packets stored in openMAC DPRAM
-		set_module_assignment embeddedsw.CMacro.PKTLOC				0
-	} elseif {$ploc == "TX into embedded memory (M9K) and RX over Avalon Master"} {	#Rx packets stored in heap
-		set_module_assignment embeddedsw.CMacro.PKTLOC				1
-	} elseif {$ploc == "TX and RX over Avalon Master"} {			#all packets stored in heap
-		set_module_assignment embeddedsw.CMacro.PKTLOC				2
-	} else {
-		send_message error "error 0x03"
-	}
-	
-	set_parameter_value iPdiRev_g $PDI_REV_VAL
+    # workaround: strings are erroneous => no blanks, etc.
+    if {$ledGadgetEn} {
+        set_module_assignment embeddedsw.CMacro.LEDGADGET            TRUE
+    } else {
+        set_module_assignment embeddedsw.CMacro.LEDGADGET            FALSE
+    }
+
+    if {$enDmaObserver} {
+        set_module_assignment embeddedsw.CMacro.DMAOBSERV            TRUE
+    } else {
+        set_module_assignment embeddedsw.CMacro.DMAOBSERV            FALSE
+    }
+
+    if {[get_parameter_value hwSupportSyncIrq]} {
+        set_module_assignment embeddedsw.CMacro.TIMESYNCHW            TRUE
+    } else {
+        set_module_assignment embeddedsw.CMacro.TIMESYNCHW            FALSE
+    }
+
+    if {[get_parameter_value genEvent_g]} {
+        set_module_assignment embeddedsw.CMacro.EVENT            TRUE
+    } else {
+        set_module_assignment embeddedsw.CMacro.EVENT            FALSE
+    }
+
+    if {$configPowerlink == "Direct I/O CN"} {
+                                                                    #direct I/O
+        set_module_assignment embeddedsw.CMacro.CONFIG                0
+    } elseif {$configPowerlink == "CN with Processor Interface"} {
+        if {$configApInterface == "Avalon"} {
+                                                                    #Avalon
+            set_module_assignment embeddedsw.CMacro.CONFIG            4
+        } elseif {$configApInterface == "Parallel"} {
+            if {[get_parameter_value configApParallelInterface] == "8bit"} {
+                                                                    #parallel 8bit
+                set_module_assignment embeddedsw.CMacro.CONFIG        1
+            } else {
+                                                                    #parallel 16bit
+                set_module_assignment embeddedsw.CMacro.CONFIG        2
+            }
+        } else {
+                                                                    #SPI
+            set_module_assignment embeddedsw.CMacro.CONFIG            3
+        }
+
+        if { $asyncBuf2Size == 0 } {
+            set_module_assignment embeddedsw.CMacro.ASYNCBUFCOUNT    1
+        } else {
+            set_module_assignment embeddedsw.CMacro.ASYNCBUFCOUNT    2
+        }
+
+    } elseif {$configPowerlink == "openMAC only"} {
+                                                                    #openMAC only
+        set_module_assignment embeddedsw.CMacro.CONFIG                5
+    }
+
+    if {$ploc == "TX and RX into embedded memory (M9K)"} {            #all packets stored in openMAC DPRAM
+        set_module_assignment embeddedsw.CMacro.PKTLOC                0
+    } elseif {$ploc == "TX into embedded memory (M9K) and RX over Avalon Master"} {    #Rx packets stored in heap
+        set_module_assignment embeddedsw.CMacro.PKTLOC                1
+    } elseif {$ploc == "TX and RX over Avalon Master"} {            #all packets stored in heap
+        set_module_assignment embeddedsw.CMacro.PKTLOC                2
+    } else {
+        send_message error "error 0x03"
+    }
+
+    set_parameter_value iPdiRev_g $PDI_REV_VAL
     set_parameter_value plkCoreRev $PLK_REV_VAL
-	
-	# here you can change manually to use only one PDI Clk domain
-	set_parameter_value genOnePdiClkDomain_g 0
-	
-	set_module_assignment embeddedsw.CMacro.MACBUFSIZE				$macBufSize
-	set_module_assignment embeddedsw.CMacro.MACRXBUFSIZE			$rxBufSize
-	set_module_assignment embeddedsw.CMacro.MACRXBUFFERS			$macRxBuffers
-	set_module_assignment embeddedsw.CMacro.MACTXBUFSIZE			$txBufSize
-	set_module_assignment embeddedsw.CMacro.MACTXBUFFERS			$macTxBuffers
-	set_module_assignment embeddedsw.CMacro.PDIRPDOS				$rpdos
-	set_module_assignment embeddedsw.CMacro.PDITPDOS				$tpdos
-	set_module_assignment embeddedsw.CMacro.PDIREV					[get_parameter_value iPdiRev_g]
-    
+
+    # here you can change manually to use only one PDI Clk domain
+    set_parameter_value genOnePdiClkDomain_g 0
+
+    set_module_assignment embeddedsw.CMacro.MACBUFSIZE                $macBufSize
+    set_module_assignment embeddedsw.CMacro.MACRXBUFSIZE            $rxBufSize
+    set_module_assignment embeddedsw.CMacro.MACRXBUFFERS            $macRxBuffers
+    set_module_assignment embeddedsw.CMacro.MACTXBUFSIZE            $txBufSize
+    set_module_assignment embeddedsw.CMacro.MACTXBUFFERS            $macTxBuffers
+    set_module_assignment embeddedsw.CMacro.PDIRPDOS                $rpdos
+    set_module_assignment embeddedsw.CMacro.PDITPDOS                $tpdos
+    set_module_assignment embeddedsw.CMacro.PDIREV                    [get_parameter_value iPdiRev_g]
+
     set_module_assignment embeddedsw.CMacro.PDITPDOBUFSIZE0         $tpdo0size
-    
+
     set_module_assignment embeddedsw.CMacro.PCPSYSID                $pcpSysId
     set_module_assignment embeddedsw.CMacro.PLKCOREREV              [get_parameter_value plkCoreRev]
-    
+
     # set RPDO buffer size to zero if disabled
     if {$rpdos < 1} {
         set rpdo0size   0
@@ -1280,11 +1272,17 @@ proc my_validation_callback {} {
     if {$rpdos < 3} {
         set rpdo2size   0
     }
-    
+
     set_module_assignment embeddedsw.CMacro.PDIRPDOBUFSIZE0         $rpdo0size
     set_module_assignment embeddedsw.CMacro.PDIRPDOBUFSIZE1         $rpdo1size
     set_module_assignment embeddedsw.CMacro.PDIRPDOBUFSIZE2         $rpdo2size
-	
+
+    set_module_assignment embeddedsw.CMacro.MACRXQUEUE1SIZE         $macRxQueueSize1
+    set_module_assignment embeddedsw.CMacro.MACRXQUEUE2SIZE         $macRxQueueSize2
+    set_module_assignment embeddedsw.CMacro.MACRXQUEUE3SIZE         $macRxQueueSize3
+    set_module_assignment embeddedsw.CMacro.MACRXQUEUE4SIZE         $macRxQueueSize4
+    set_module_assignment embeddedsw.CMacro.MACRXQUEUE5SIZE         $macRxQueueSize5
+
 }
 
 #display
@@ -1292,6 +1290,7 @@ add_display_item "Block Diagram" id0 icon img/block_diagram.png
 add_display_item "General Settings" expertMode PARAMETER
 add_display_item "General Settings" plkCoreRev PARAMETER
 add_display_item "General Settings" configPowerlink PARAMETER
+add_display_item "General Settings" hwSupportSyncIrq PARAMETER
 add_display_item "Process Data Interface Settings" iPdiRev_g  PARAMETER
 add_display_item "Process Data Interface Settings" configApInterface PARAMETER
 add_display_item "Process Data Interface Settings" configApParallelInterface PARAMETER
@@ -1303,7 +1302,6 @@ add_display_item "Process Data Interface Settings" configApSpi_CPOL PARAMETER
 add_display_item "Process Data Interface Settings" configApSpi_CPHA PARAMETER
 add_display_item "Process Data Interface Settings" validSet PARAMETER
 add_display_item "Process Data Interface Settings" validAssertDuration PARAMETER
-add_display_item "Process Data Interface Settings" hwSupportSyncIrq PARAMETER
 add_display_item "Process Data Interface Settings" genLedGadget PARAMETER
 add_display_item "Process Data Interface Settings" genEvent PARAMETER
 add_display_item "Process Data Interface Settings" pcpSysId PARAMETER
@@ -1322,6 +1320,13 @@ add_display_item "openMAC" macTxBurstSize  PARAMETER
 add_display_item "openMAC" macRxBurstSize  PARAMETER
 add_display_item "openMAC" macTxBuf  PARAMETER
 add_display_item "openMAC" macRxBuf  PARAMETER
+add_display_item "openMAC" macRxQueueNum  PARAMETER
+add_display_item "openMAC" macRxQueue1Size  PARAMETER
+add_display_item "openMAC" macRxQueue2Size  PARAMETER
+add_display_item "openMAC" macRxQueue3Size  PARAMETER
+add_display_item "openMAC" macRxQueue4Size  PARAMETER
+add_display_item "openMAC" macRxQueue5Size  PARAMETER
+
 
 #INTERFACES
 
@@ -1368,9 +1373,9 @@ set_interface_property clkEth ENABLED true
 add_interface_port clkEth clkEth clk Input 1
 
 ##DMA Clock
-add_interface clkDma clock end
-set_interface_property clkDma ENABLED true
-add_interface_port clkDma m_clk clk Input 1
+add_interface clkMaster clock end
+set_interface_property clkMaster ENABLED true
+add_interface_port clkMaster m_clk clk Input 1
 
 ##pkt buffer clock
 add_interface clkPkt clock end
@@ -1378,7 +1383,7 @@ set_interface_property clkPkt ENABLED true
 add_interface_port clkPkt pkt_clk clk Input 1
 
 #openMAC
-##Avalon Memory Mapped Slave: Compare Unit 
+##Avalon Memory Mapped Slave: Compare Unit
 add_interface MAC_CMP avalon end
 set_interface_property MAC_CMP addressAlignment DYNAMIC
 set_interface_property MAC_CMP associatedClock clk50meg
@@ -1482,7 +1487,7 @@ add_interface MAC_DMA avalon start
 set_interface_property MAC_DMA burstOnBurstBoundariesOnly false
 #not yet supported: set_interface_property MAC_DMA constantBurstBehavior false
 set_interface_property MAC_DMA linewrapBursts false
-set_interface_property MAC_DMA ASSOCIATED_CLOCK clkDma
+set_interface_property MAC_DMA ASSOCIATED_CLOCK clkMaster
 set_interface_property MAC_DMA associatedReset reset
 set_interface_property MAC_DMA ENABLED false
 add_interface_port MAC_DMA m_read read Output 1
@@ -1553,33 +1558,6 @@ add_interface_port PDI_AP ap_address address Input 13
 add_interface_port PDI_AP ap_writedata writedata Input 32
 add_interface_port PDI_AP ap_readdata readdata Output 32
 add_interface_port PDI_AP ap_waitrequest waitrequest Output 1
-
-#Simple I/O
-##Avalon Memory Mapped Slave: SMP
-add_interface SMP avalon end
-set_interface_property SMP addressAlignment DYNAMIC
-set_interface_property SMP associatedClock pcp_clk
-set_interface_property SMP associatedReset pcp_reset
-set_interface_property SMP burstOnBurstBoundariesOnly false
-set_interface_property SMP explicitAddressSpan 0
-set_interface_property SMP holdTime 0
-set_interface_property SMP isMemoryDevice false
-set_interface_property SMP isNonVolatileStorage false
-set_interface_property SMP linewrapBursts false
-set_interface_property SMP maximumPendingReadTransactions 0
-set_interface_property SMP printableDevice false
-set_interface_property SMP readLatency 0
-set_interface_property SMP readWaitTime 1
-set_interface_property SMP setupTime 0
-set_interface_property SMP timingUnits Cycles
-set_interface_property SMP writeWaitTime 0
-set_interface_property SMP ENABLED false
-add_interface_port SMP smp_address address Input 1
-add_interface_port SMP smp_read read Input 1
-add_interface_port SMP smp_readdata readdata Output 32
-add_interface_port SMP smp_write write Input 1
-add_interface_port SMP smp_writedata writedata Input 32
-add_interface_port SMP smp_byteenable byteenable Input 4
 
 ###PDI AP IRQ source
 add_interface PDI_AP_IRQ interrupt end
@@ -1694,6 +1672,33 @@ add_interface_port PAR_AP pap_ack_n export Output 1
 ###GPIO
 add_interface_port PAR_AP pap_gpio export Bidir 2
 
+#Simple I/O
+##Avalon Memory Mapped Slave: SMP
+add_interface SMP avalon end
+set_interface_property SMP addressAlignment DYNAMIC
+set_interface_property SMP associatedClock pcp_clk
+set_interface_property SMP associatedReset pcp_reset
+set_interface_property SMP burstOnBurstBoundariesOnly false
+set_interface_property SMP explicitAddressSpan 0
+set_interface_property SMP holdTime 0
+set_interface_property SMP isMemoryDevice false
+set_interface_property SMP isNonVolatileStorage false
+set_interface_property SMP linewrapBursts false
+set_interface_property SMP maximumPendingReadTransactions 0
+set_interface_property SMP printableDevice false
+set_interface_property SMP readLatency 0
+set_interface_property SMP readWaitTime 1
+set_interface_property SMP setupTime 0
+set_interface_property SMP timingUnits Cycles
+set_interface_property SMP writeWaitTime 0
+set_interface_property SMP ENABLED false
+add_interface_port SMP smp_address address Input 1
+add_interface_port SMP smp_read read Input 1
+add_interface_port SMP smp_readdata readdata Output 32
+add_interface_port SMP smp_write write Input 1
+add_interface_port SMP smp_writedata writedata Input 32
+add_interface_port SMP smp_byteenable byteenable Input 4
+
 ##Portio export
 add_interface SMP_PIO conduit end
 set_interface_property SMP_PIO ENABLED false
@@ -1721,13 +1726,13 @@ set ClkRate50meg [get_parameter_value clkRate50]
 #valid set
 set ClkPcp [get_parameter_value clkRatePcp]
 if {$ClkPcp == 0} {
-	# avoid 1 / zero!
-	set ClkPcp 1
+    # avoid 1 / zero!
+    set ClkPcp 1
 }
 set ClkPcpPeriod [expr 1. / $ClkPcp * 1000 * 1000 * 1000]
 set validTicks [get_parameter_value validSet]
 if {$validTicks <= 0} {
-	set validTicks 1
+    set validTicks 1
 }
 set validLength [expr $validTicks * $ClkPcpPeriod]
 
@@ -1737,13 +1742,13 @@ set_parameter_value pioValLen_g $validTicks
 if {$ClkRate50meg == 50000000} {
 
 } else {
-	send_message error "MAC_CMP and MAC_REG must be connected to 50MHz Clock!"
+    send_message error "MAC_CMP and MAC_REG must be connected to 50MHz Clock!"
 }
 
 #if {$ClkPcp == 50000000} {
 #
 #} else {
-#	send_message error "PDI must be connected to 50MHz Clock!"
+#    send_message error "PDI must be connected to 50MHz Clock!"
 #}
 
 #find out, which interfaces (avalon, exports, etc) are not necessary for the configurated device!
@@ -1759,65 +1764,64 @@ if {$ClkRate50meg == 50000000} {
 	set_interface_property SMP_PIO ENABLED false
 	set_interface_property AP_EX_IRQ ENABLED false
 	set_interface_property LED_GADGET ENABLED false
-	
+
 	set_interface_property MAC_DMA ENABLED false
-	set_interface_property clkDma ENABLED false
+	set_interface_property clkMaster ENABLED false
 	set_interface_property MAC_BUF ENABLED false
 	set_interface_property clkPkt ENABLED false
-	
-	if {[get_parameter_value macTxBurstSize] > 1 || [get_parameter_value macRxBurstSize] > 1} {
-		#we want to burst!
-		set_port_property m_burstcount termination false
-	} else {
-		#don't want to burst!
-		set_port_property m_burstcount termination true
-	}
-	
-	#verify which packet location is set and disable/enable dma/dpr
-	if {[get_parameter_value packetLoc] == "TX and RX into embedded memory (M9K)"} {
-		#use internal packet buffering
-		set_interface_property MAC_BUF ENABLED true
-		set_interface_property clkPkt ENABLED true
-	} elseif {[get_parameter_value packetLoc] == "TX into embedded memory (M9K) and RX over Avalon Master"} {
-		#use internal packet buffering
-		set_interface_property MAC_BUF ENABLED true
-		set_interface_property clkPkt ENABLED true
-		#use DMA for Rx packets
-		set_interface_property MAC_DMA ENABLED true
-		set_interface_property clkDma ENABLED true
-	} elseif {[get_parameter_value packetLoc] == "TX and RX over Avalon Master"} {
-		#use external packet buffering
-		set_interface_property MAC_DMA ENABLED true
-		set_interface_property clkDma ENABLED true
-	} else {
-		send_message error "error 0x04"
-	}
-	
-	if {[get_parameter_value useRmii_g] == 1} {
-		set_interface_property RMII0 ENABLED true
-		set_interface_property RMII1 ENABLED true
-		set_interface_property MII0 ENABLED false
-		set_interface_property MII1 ENABLED false
-		set_interface_property clkEth ENABLED true
-		if {$EthernetClkRate == 100000000} {
-		
-		} else {
-			send_message error "Clock Source of 100MHz required!"
-		}
-	} else {
-		set_interface_property RMII0 ENABLED false
-		set_interface_property RMII1 ENABLED false
-		set_interface_property MII0 ENABLED true
-		set_interface_property MII1 ENABLED true
-		set_interface_property clkEth ENABLED false
-	}
-	
-	#okay, maybe only one phy port is set by the user!?
-	if {[get_parameter_value mac2phys]} {
-		#yes, two phys please!
-		#do nothing here, it is already set correctly above ;)
-		#only not terminate the phy link input
-		set_port_property phy1_link termination false
+    if {[get_parameter_value macTxBurstSize] > 1 || [get_parameter_value macRxBurstSize] > 1} {
+        #we want to burst!
+        set_port_property m_burstcount termination false
+    } else {
+        #don't want to burst!
+        set_port_property m_burstcount termination true
+    }
+
+    #verify which packet location is set and disable/enable dma/dpr
+    if {[get_parameter_value packetLoc] == "TX and RX into embedded memory (M9K)"} {
+        #use internal packet buffering
+        set_interface_property MAC_BUF ENABLED true
+        set_interface_property clkPkt ENABLED true
+    } elseif {[get_parameter_value packetLoc] == "TX into embedded memory (M9K) and RX over Avalon Master"} {
+        #use internal packet buffering
+        set_interface_property MAC_BUF ENABLED true
+        set_interface_property clkPkt ENABLED true
+        #use DMA for Rx packets
+        set_interface_property MAC_DMA ENABLED true
+        set_interface_property clkMaster ENABLED true
+    } elseif {[get_parameter_value packetLoc] == "TX and RX over Avalon Master"} {
+        #use external packet buffering
+        set_interface_property MAC_DMA ENABLED true
+        set_interface_property clkMaster ENABLED true
+    } else {
+        send_message error "error 0x04"
+    }
+
+    if {[get_parameter_value useRmii_g] == 1} {
+        set_interface_property RMII0 ENABLED true
+        set_interface_property RMII1 ENABLED true
+        set_interface_property MII0 ENABLED false
+        set_interface_property MII1 ENABLED false
+        set_interface_property clkEth ENABLED true
+        if {$EthernetClkRate == 100000000} {
+
+        } else {
+            send_message error "Clock Source of 100MHz required!"
+        }
+    } else {
+        set_interface_property RMII0 ENABLED false
+        set_interface_property RMII1 ENABLED false
+        set_interface_property MII0 ENABLED true
+        set_interface_property MII1 ENABLED true
+        set_interface_property clkEth ENABLED false
+    }
+
+    #okay, maybe only one phy port is set by the user!?
+    if {[get_parameter_value mac2phys]} {
+        #yes, two phys please!
+        #do nothing here, it is already set correctly above ;)
+        #only not terminate the phy link input
+        set_port_property phy1_link termination false
         #do we need 2nd SMI!?
         if {[get_parameter_value macGen2ndSmi]} {
             #yes we do, enable PHYM0 and PHYM1
@@ -1831,129 +1835,136 @@ if {$ClkRate50meg == 50000000} {
             set_interface_property PHYM1 ENABLED false
             set_interface_property PHYM ENABLED true
         }
-	} else {
-		#no, leave me one phy only!
+    } else {
+        #no, leave me one phy only!
         set_interface_property PHYM ENABLED true
-		set_interface_property RMII1 ENABLED false
-		set_interface_property MII1 ENABLED false
-		#phy management (0 + 1) can be omitted too...
+        set_interface_property RMII1 ENABLED false
+        set_interface_property MII1 ENABLED false
+        #phy management (0 + 1) can be omitted too...
         set_interface_property PHYM0 ENABLED false
         set_interface_property PHYM1 ENABLED false
-		set_port_property phy1_link termination true
-	}
-	
-	#if the MAC DMA master only write data to memory (RX), then we can disable read and readdata
-	if {[get_parameter_value packetLoc] == "TX into embedded memory (M9K) and RX over Avalon Master"} {
-		set_port_property m_read termination true
-		set_port_property m_readdata termination true
-		set_port_property m_readdatavalid termination true
-	}
-	
-	if {[get_parameter_value configPowerlink] == "openMAC only"} {
-		#don't need pcp_clk
-		set_interface_property pcp_clk ENABLED false
+        set_port_property phy1_link termination true
+    }
+
+    #if the MAC DMA master only write data to memory (RX), then we can disable read and readdata
+    if {[get_parameter_value packetLoc] == "TX into embedded memory (M9K) and RX over Avalon Master"} {
+        set_port_property m_read termination true
+        set_port_property m_readdata termination true
+        set_port_property m_readdatavalid termination true
+    }
+
+    if {[get_parameter_value configPowerlink] == "openMAC only"} {
+        #don't need pcp_clk
+        set_interface_property pcp_clk ENABLED false
         set_interface_property pcp_reset ENABLED false
-        #and those phy links...
-        set_interface_property PHYL ENABLED false
-	} elseif {[get_parameter_value configPowerlink] == "Direct I/O CN"} {
-		#the Direct I/O CN requires:
-		# MAC stuff
-		# portio export
-		# Avalon SMP
-		set_interface_property SMP ENABLED true
-		set_interface_property SMP_PIO ENABLED true
-        set_interface_property PHYL ENABLED false
-	} else {
-		#CN with Processor Interface requires:
-		# MAC stuff
-		# PDI_PCP
-		set_interface_property PDI_PCP ENABLED true
-        # and those phy links...
-        set_interface_property PHYL ENABLED true
-		
-		if {[get_parameter_value configApInterface] == "Avalon"} {
-		# AP as Avalon (PDI_AP)
-			set_interface_property PDI_AP ENABLED true
-			set_interface_property PDI_AP_IRQ ENABLED true
-			set_interface_property ap_clk ENABLED true
+        if {[get_parameter_value hwSupportSyncIrq]} {
+            set_interface_property AP_EX_IRQ ENABLED true
+            set_port_property ap_syncIrq_n termination true
+            set_port_property ap_asyncIrq_n termination true
+            set_port_property ap_asyncIrq termination true
+        }
+    } elseif {[get_parameter_value configPowerlink] == "Direct I/O CN"} {
+        #the Direct I/O CN requires:
+        # MAC stuff
+        # portio export
+        # Avalon SMP
+        set_interface_property SMP ENABLED true
+        set_interface_property SMP_PIO ENABLED true
+        if {[get_parameter_value hwSupportSyncIrq]} {
+            set_interface_property AP_EX_IRQ ENABLED true
+            set_port_property ap_syncIrq_n termination true
+            set_port_property ap_asyncIrq_n termination true
+            set_port_property ap_asyncIrq termination true
+        }
+    } else {
+        #CN with Processor Interface requires:
+        # MAC stuff
+        # PDI_PCP
+        set_interface_property PDI_PCP ENABLED true
+
+        if {[get_parameter_value configApInterface] == "Avalon"} {
+        # AP as Avalon (PDI_AP)
+            set_interface_property PDI_AP ENABLED true
+            set_interface_property PDI_AP_IRQ ENABLED true
+            set_interface_property ap_clk ENABLED true
             set_interface_property ap_reset ENABLED true
-			
-			if {[get_parameter_value genLedGadget]} {
-				set_interface_property LED_GADGET ENABLED true
-			}
-			
-		} elseif {[get_parameter_value configApInterface] == "Parallel"} {
-		# AP is external (PAR_AP)
-			set_interface_property PAR_AP ENABLED true
-			set_interface_property AP_EX_IRQ ENABLED true
-			
-			if {[get_parameter_value genLedGadget]} {
-				set_interface_property LED_GADGET ENABLED true
-			}
-			
-			if {[get_parameter_value papDataWidth_g] == 8} {
-				#we don't need byteenable for 8bit data bus width!
-				set_port_property pap_be termination true
-			}
-			if {[get_parameter_value configApParOutSigs] == "Low Active"} {
-				#low active output signals (ap_irq_n and pap_ack_n) are used
-				set_port_property pap_ack termination true
-				set_port_property ap_syncIrq termination true
-				set_port_property ap_asyncIrq termination true
-			} else {
-				#high active output signals (ap_irq and pap_ack) are used
-				set_port_property pap_ack_n termination true
-				set_port_property ap_syncIrq_n termination true
-				set_port_property ap_asyncIrq_n termination true
-			}
-			
-			#if event support disabled terminate async irq
-			if {[get_parameter_value genEvent_g] == 1} {
-			
-			} else {
-				set_port_property ap_asyncIrq termination true
-				set_port_property ap_asyncIrq_n termination true
-			}
-			
-			if {[get_parameter_value configApParSigs] == "Low Active"} {
-				#low active input signals (pap_cs_n, pap_rd_n, pap_wr_n and pap_be_n) are used
-				set_port_property pap_cs termination true
-				set_port_property pap_rd termination true
-				set_port_property pap_wr termination true
-				set_port_property pap_be termination true
-			} else {
-				#high active input signals (pap_cs, pap_rd, pap_wr and pap_be) are used
-				set_port_property pap_cs_n termination true
-				set_port_property pap_rd_n termination true
-				set_port_property pap_wr_n termination true
-				set_port_property pap_be_n termination true
-			}
-		} elseif {[get_parameter_value configApInterface] == "SPI"} {
-		# AP is external via SPI (SPI_AP)
-			set_interface_property SPI_AP ENABLED true
-			set_interface_property AP_EX_IRQ ENABLED true
-			
-			if {[get_parameter_value genLedGadget]} {
-				set_interface_property LED_GADGET ENABLED true
-			}
-			
-			if {[get_parameter_value configApSpi_IRQ] == "Low Active"} {
-				#low active output signal (irq_n) is used
-				set_port_property ap_syncIrq termination true
-				set_port_property ap_asyncIrq termination true
-			} else {
-				#high active output signal (irq) is used
-				set_port_property ap_syncIrq_n termination true
-				set_port_property ap_asyncIrq_n termination true
-			}
-			
-			#if event support disabled terminate async irq
-			if {[get_parameter_value genEvent_g] == 1} {
-			
-			} else {
-				set_port_property ap_asyncIrq termination true
-				set_port_property ap_asyncIrq_n termination true
-			}
-		}
-	}
+
+            if {[get_parameter_value genLedGadget]} {
+                set_interface_property LED_GADGET ENABLED true
+            }
+
+        } elseif {[get_parameter_value configApInterface] == "Parallel"} {
+        # AP is external (PAR_AP)
+            set_interface_property PAR_AP ENABLED true
+            set_interface_property AP_EX_IRQ ENABLED true
+
+            if {[get_parameter_value genLedGadget]} {
+                set_interface_property LED_GADGET ENABLED true
+            }
+
+            if {[get_parameter_value papDataWidth_g] == 8} {
+                #we don't need byteenable for 8bit data bus width!
+                set_port_property pap_be termination true
+            }
+            if {[get_parameter_value configApParOutSigs] == "Low Active"} {
+                #low active output signals (ap_irq_n and pap_ack_n) are used
+                set_port_property pap_ack termination true
+                set_port_property ap_syncIrq termination true
+                set_port_property ap_asyncIrq termination true
+            } else {
+                #high active output signals (ap_irq and pap_ack) are used
+                set_port_property pap_ack_n termination true
+                set_port_property ap_syncIrq_n termination true
+                set_port_property ap_asyncIrq_n termination true
+            }
+
+            #if event support disabled terminate async irq
+            if {[get_parameter_value genEvent_g] == 1} {
+
+            } else {
+                set_port_property ap_asyncIrq termination true
+                set_port_property ap_asyncIrq_n termination true
+            }
+
+            if {[get_parameter_value configApParSigs] == "Low Active"} {
+                #low active input signals (pap_cs_n, pap_rd_n, pap_wr_n and pap_be_n) are used
+                set_port_property pap_cs termination true
+                set_port_property pap_rd termination true
+                set_port_property pap_wr termination true
+                set_port_property pap_be termination true
+            } else {
+                #high active input signals (pap_cs, pap_rd, pap_wr and pap_be) are used
+                set_port_property pap_cs_n termination true
+                set_port_property pap_rd_n termination true
+                set_port_property pap_wr_n termination true
+                set_port_property pap_be_n termination true
+            }
+        } elseif {[get_parameter_value configApInterface] == "SPI"} {
+        # AP is external via SPI (SPI_AP)
+            set_interface_property SPI_AP ENABLED true
+            set_interface_property AP_EX_IRQ ENABLED true
+
+            if {[get_parameter_value genLedGadget]} {
+                set_interface_property LED_GADGET ENABLED true
+            }
+
+            if {[get_parameter_value configApSpi_IRQ] == "Low Active"} {
+                #low active output signal (irq_n) is used
+                set_port_property ap_syncIrq termination true
+                set_port_property ap_asyncIrq termination true
+            } else {
+                #high active output signal (irq) is used
+                set_port_property ap_syncIrq_n termination true
+                set_port_property ap_asyncIrq_n termination true
+            }
+
+            #if event support disabled terminate async irq
+            if {[get_parameter_value genEvent_g] == 1} {
+
+            } else {
+                set_port_property ap_asyncIrq termination true
+                set_port_property ap_asyncIrq_n termination true
+            }
+        }
+    }
 }

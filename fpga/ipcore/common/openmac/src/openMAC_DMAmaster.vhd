@@ -34,25 +34,6 @@
 --    POSSIBILITY OF SUCH DAMAGE.
 --
 -------------------------------------------------------------------------------
--- Design unit header --
---
--- This is the toplevel of the openMAC DMA master component.
--- It introduces a generic master device applying burst transfers for
--- RX and TX packet data transfers via a common bus.
---
--------------------------------------------------------------------------------
---
--- 2011-08-03	V0.01	zelenkaj	First version
--- 2011-10-13	V0.02	zelenkaj	changed names of instances
--- 2011-11-28	V0.03	zelenkaj	Added DMA observer
--- 2011-11-29	V0.04	zelenkaj	Changed clkXing of Dma Addr
--- 2011-11-30	V0.05	zelenkaj	Added generic for DMA observer
--- 2011-12-02	V0.06	zelenkaj	Added Dma Req Overflow
--- 2011-12-05	V0.07	zelenkaj	Reduced Dma Req overflow 
--- 2012-03-21   V0.10   zelenkaj   Fixed 32 bit FIFO to support openMAC endian
--- 2012-04-17   V0.11   zelenkaj   Added forwarding of DMA read length
---
--------------------------------------------------------------------------------
 
 library ieee;
 use ieee.std_logic_1164.all;
@@ -411,7 +392,7 @@ begin
            fifo_data_width_g => fifo_data_width_g,
            fifo_word_size_g => tx_fifo_word_size_c,
            fifo_word_size_log2_g => tx_fifo_word_size_log2_c
-      )    
+      )
       port map(
            aclr => tx_aclr,
            rd_clk => tx_rd_clk,
@@ -444,7 +425,7 @@ begin
             end if;
         end if;
     end process;
-    
+
     tx_rd_empty <= tx_rd_empty_s when tx_rd_empty_s_l = '0' else '0';
   end generate txFifoGen;
 
@@ -455,7 +436,7 @@ begin
            fifo_data_width_g => fifo_data_width_g,
            fifo_word_size_g => rx_fifo_word_size_c,
            fifo_word_size_log2_g => rx_fifo_word_size_log2_c
-      )    
+      )
       port map(
            aclr => rx_aclr,
            rd_clk => rx_rd_clk,
@@ -501,7 +482,7 @@ begin
          rstDst => rst,
          rstSrc => rst
     );
-  
+
   sync6 : slow2fastSync
     port map(
          clkDst => m_clk,
@@ -522,7 +503,7 @@ begin
            fifo_data_width_g => fifo_data_width_g,
            fifo_word_size_g => tx_fifo_word_size_c,
            fifo_word_size_log2_g => tx_fifo_word_size_log2_c
-      )    
+      )
       port map(
            aclr => tx_aclr,
            rd_clk => tx_rd_clk,
@@ -541,34 +522,34 @@ begin
     tx_rd_proc :
     process (tx_rd_clk, rst)
     begin
-    	if rst = '1' then
-    		tx_rd_sel_word <= '0';
+        if rst = '1' then
+            tx_rd_sel_word <= '0';
             tx_rd_empty_s_l <= '0';
-    	elsif rising_edge(tx_rd_clk) then
-    		if mac_tx_off = '1' then
-    			tx_rd_sel_word <= '0';
+        elsif rising_edge(tx_rd_clk) then
+            if mac_tx_off = '1' then
+                tx_rd_sel_word <= '0';
                 tx_rd_empty_s_l <= '0';
-    		elsif tx_rd_req = '1' then
-    			if tx_rd_sel_word = '0' then
-    				tx_rd_sel_word <= '1';
-    			else
-    				tx_rd_sel_word <= '0';
+            elsif tx_rd_req = '1' then
+                if tx_rd_sel_word = '0' then
+                    tx_rd_sel_word <= '1';
+                else
+                    tx_rd_sel_word <= '0';
                     --workaround...
                     if tx_rd_empty_s = '0' then
                         tx_rd_empty_s_l <= '1';
                     else
                         tx_rd_empty_s_l <= '0';
                     end if;
-    			end if;
-    		end if;
-    	end if;
+                end if;
+            end if;
+        end if;
     end process;
-    
+
     tx_rd_req_s <= tx_rd_req when tx_rd_sel_word = '0' else '0';
-    
+
     tx_rd_empty <= tx_rd_empty_s when tx_rd_empty_s_l = '0' else '0';
-    
-    dma_din <= 	rd_data(15 downto 0) when tx_rd_sel_word = '1' else
+
+    dma_din <=     rd_data(15 downto 0) when tx_rd_sel_word = '1' else
                 rd_data(31 downto 16);
   end generate txFifoGen32;
 
@@ -579,7 +560,7 @@ begin
            fifo_data_width_g => fifo_data_width_g,
            fifo_word_size_g => rx_fifo_word_size_c,
            fifo_word_size_log2_g => rx_fifo_word_size_log2_c
-      )    
+      )
       port map(
            aclr => rx_aclr,
            rd_clk => rx_rd_clk,
@@ -599,32 +580,32 @@ begin
     process (rx_wr_clk, rst)
     variable toggle : std_logic;
     begin
-    	if rst = '1' then
-    		wr_data_s <= (others => '0');
-    		toggle := '0';
-    		rx_wr_req_s <= '0';
-    	elsif rising_edge(rx_wr_clk) then
-    		rx_wr_req_s <= '0';
-    		
-    		if mac_rx_off = '1' then
+        if rst = '1' then
+            wr_data_s <= (others => '0');
+            toggle := '0';
+            rx_wr_req_s <= '0';
+        elsif rising_edge(rx_wr_clk) then
+            rx_wr_req_s <= '0';
+
+            if mac_rx_off = '1' then
                 if toggle = '1' then
                     rx_wr_req_s <= '1';
                 end if;
-                
-    			toggle := '0';
-    		elsif rx_wr_req = '1' then
-    			if toggle = '0' then
-    				--capture data
-    				wr_data_s <= dma_dout;
-    				toggle := '1';
-    			else
-    				rx_wr_req_s <= '1';
-    				toggle := '0';
-    			end if;
-    		end if;
-    	end if;
+
+                toggle := '0';
+            elsif rx_wr_req = '1' then
+                if toggle = '0' then
+                    --capture data
+                    wr_data_s <= dma_dout;
+                    toggle := '1';
+                else
+                    rx_wr_req_s <= '1';
+                    toggle := '0';
+                end if;
+            end if;
+        end if;
     end process;
-    
+
     wr_data <=  dma_dout & wr_data_s;
   end generate rxFifoGen32;
 end generate gen32bitFifo;

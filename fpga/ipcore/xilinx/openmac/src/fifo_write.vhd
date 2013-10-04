@@ -1,7 +1,7 @@
-------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
 -- write controller of the fifo
 --
--- 	  Copyright (C) 2009 B&R
+--       Copyright (C) 2009 B&R
 --
 --    Redistribution and use in source and binary forms, with or without
 --    modification, are permitted provided that the following conditions
@@ -33,18 +33,14 @@
 --    POSSIBILITY OF SUCH DAMAGE.
 --
 -- Note: A general implementation of a asynchronous fifo which is
---			using a dual port ram. This file is the write controler.
+-- using a dual port ram. This file is the write controler.
 --
-------------------------------------------------------------------------------------------------------------------------
--- Version History
-------------------------------------------------------------------------------------------------------------------------
--- 2011-09-22	V0.01		mairt		first version
--- 2011-10-14	V0.02		zelenkaj	element calculation buggy
-------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
 
 library ieee;
 use ieee.std_logic_1164.all;
-use ieee.numeric_std.all; 
+use ieee.numeric_std.all;
 
 entity fifo_write_ctrl is
    generic(N: natural:=4);
@@ -52,11 +48,11 @@ entity fifo_write_ctrl is
       clkw, resetw: in std_logic;
       wr: in std_logic;
       r_ptr_in: in std_logic_vector(N downto 0);
-      w_full: out std_logic; 
-	  w_empty: out std_logic;
+      w_full: out std_logic;
+      w_empty: out std_logic;
       w_ptr_out: out std_logic_vector(N downto 0);
       w_addr: out std_logic_vector(N-1 downto 0);
-	  w_elements: out std_logic_vector(N-1 downto 0)
+      w_elements: out std_logic_vector(N-1 downto 0)
    );
 end fifo_write_ctrl;
 
@@ -75,12 +71,12 @@ begin
    begin
       if (resetw='1') then
           w_ptr_reg <= (others=>'0');
-		  --r_ptr_reg <= (others => '0');
-		  w_elements_reg <= (others => '0');
+          --r_ptr_reg <= (others => '0');
+          w_elements_reg <= (others => '0');
       elsif (clkw'event and clkw='1') then
          w_ptr_reg <= w_ptr_next;
-		 --r_ptr_reg <= r_ptr_next;
-		 w_elements_reg <= w_elements_next;
+         --r_ptr_reg <= r_ptr_next;
+         w_elements_reg <= w_elements_next;
       end if;
    end process;
    -- (N+1)-bit Gray counter
@@ -89,37 +85,37 @@ begin
    gray1 <= bin1 xor ('0' & bin1(N downto 1));
    -- update write pointer
    w_ptr_next <= gray1 when wr='1' and full_flag='0' else
-	   w_ptr_reg;  
+       w_ptr_reg;
    -- save read pointer
    r_ptr_next <= r_ptr_in;
    -- N-bit Gray counter
    waddr_msb <=  w_ptr_reg(N) xor w_ptr_reg(N-1);
    waddr_all <= waddr_msb & w_ptr_reg(N-2 downto 0);
-   
+
    -- check for FIFO full and empty
    raddr_msb <= r_ptr_in(N) xor r_ptr_in(N-1);
    full_flag <=
      '1' when r_ptr_in(N) /=w_ptr_reg(N) and
          r_ptr_in(N-2 downto 0)=w_ptr_reg(N-2 downto 0) and
          raddr_msb = waddr_msb else
-     '0';				
+     '0';
    empty_flag <=
      '1' when r_ptr_in(N) =w_ptr_reg(N) and
          r_ptr_in(N-2 downto 0)=w_ptr_reg(N-2 downto 0) and
          raddr_msb = waddr_msb else
      '0';
-	 
+
    -- convert gray value to bin and obtain difference
    w_elements_wr <= bin;
    w_elements_rd <= r_ptr_in xor ('0' & w_elements_rd(N downto 1));
    w_elements_diff <= std_logic_vector(unsigned(w_elements_wr) - unsigned(w_elements_rd));
-   w_elements_next <= w_elements_diff(w_elements_next'range);  
-   
+   w_elements_next <= w_elements_diff(w_elements_next'range);
+
    -- output
    w_addr <= waddr_all;
    w_ptr_out <= w_ptr_reg;
    w_elements <= w_elements_reg;
    w_full <= full_flag;
-   w_empty <= empty_flag; 
-   
+   w_empty <= empty_flag;
+
 end gray_arch;

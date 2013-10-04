@@ -1,17 +1,5 @@
 -------------------------------------------------------------------------------
 --
--- Title       : slow2fastSync
--- Design      : POWERLINK
---
--------------------------------------------------------------------------------
---
--- File        : C:\my_designs\POWERLINK\src\lib\slow2fastSync.vhd
--- Generated   : Tue Aug  9 16:38:41 2011
--- From        : interface description file
--- By          : Itf2Vhdl ver. 1.22
---
--------------------------------------------------------------------------------
---
 --    (c) B&R, 2011
 --
 --    Redistribution and use in source and binary forms, with or without
@@ -44,10 +32,6 @@
 --    POSSIBILITY OF SUCH DAMAGE.
 --
 -------------------------------------------------------------------------------
---
--- 2011-08-09  	V0.01	zelenkaj    First version
---
--------------------------------------------------------------------------------
 
 LIBRARY ieee;
 USE ieee.std_logic_1164.all;
@@ -55,64 +39,64 @@ USE ieee.std_logic_arith.all;
 USE ieee.std_logic_unsigned.all;
 
 ENTITY slow2fastSync IS
-	GENERIC (
-			doSync_g					:		BOOLEAN := TRUE
-	);
-	PORT (
-			dataSrc						: IN	STD_LOGIC;
-			dataDst						: OUT	STD_LOGIC;
-			clkSrc						: IN	STD_LOGIC;
-			rstSrc						: IN	STD_LOGIC;
-			clkDst						: IN	STD_LOGIC;
-			rstDst						: IN	STD_LOGIC
-	);
+    GENERIC (
+            doSync_g                    :        BOOLEAN := TRUE
+    );
+    PORT (
+            dataSrc                        : IN    STD_LOGIC;
+            dataDst                        : OUT    STD_LOGIC;
+            clkSrc                        : IN    STD_LOGIC;
+            rstSrc                        : IN    STD_LOGIC;
+            clkDst                        : IN    STD_LOGIC;
+            rstDst                        : IN    STD_LOGIC
+    );
 END ENTITY slow2fastSync;
 
 ARCHITECTURE rtl OF slow2fastSync IS
 signal toggle, toggleSync, pulse, dataDst_s : std_logic;
 begin
-	
-	dataDst <= dataDst_s when doSync_g = TRUE else dataSrc;
-	
-	genSync : IF doSync_g = TRUE GENERATE
-		firstEdgeDet : entity work.edgeDet
-			port map (
-				din => dataSrc,
-				rising => pulse,
-				falling => open,
-				any => open,
-				clk => clkSrc,
-				rst => rstSrc
-			);
-		
-		process(clkSrc, rstSrc)
-		begin
-			if rstSrc = '1' then
-				toggle <= '0';
-			elsif clkSrc = '1' and clkSrc'event then
-				if pulse = '1' then
-					toggle <= not toggle;
-				end if;
-			end if;
-		end process;
-		
-		sync : entity work.sync
-			port map (
-				din => toggle,
-				dout => toggleSync,
-				clk => clkDst,
-				rst => rstDst
-			);
-		
-		secondEdgeDet : entity work.edgeDet
-			port map (
-				din => toggleSync,
-				rising => open,
-				falling => open,
-				any => dataDst_s,
-				clk => clkDst,
-				rst => rstDst
-			);
-	END GENERATE;
-		
+
+    dataDst <= dataDst_s when doSync_g = TRUE else dataSrc;
+
+    genSync : IF doSync_g = TRUE GENERATE
+        firstEdgeDet : entity work.edgeDet
+            port map (
+                din => dataSrc,
+                rising => pulse,
+                falling => open,
+                any => open,
+                clk => clkSrc,
+                rst => rstSrc
+            );
+
+        process(clkSrc, rstSrc)
+        begin
+            if rstSrc = '1' then
+                toggle <= '0';
+            elsif clkSrc = '1' and clkSrc'event then
+                if pulse = '1' then
+                    toggle <= not toggle;
+                end if;
+            end if;
+        end process;
+
+        sync : entity work.sync
+            port map (
+                din => toggle,
+                dout => toggleSync,
+                clk => clkDst,
+                rst => rstDst
+            );
+
+        secondEdgeDet : entity work.edgeDet
+            port map (
+                din => toggleSync,
+                rising => open,
+                falling => open,
+                any => dataDst_s,
+                clk => clkDst,
+                rst => rstDst
+            );
+    END GENERATE;
+
 END ARCHITECTURE rtl;

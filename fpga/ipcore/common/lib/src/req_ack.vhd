@@ -1,17 +1,5 @@
 -------------------------------------------------------------------------------
 --
--- Title       : req_ack
--- Design      : plk_mn
---
--------------------------------------------------------------------------------
---
--- File        : C:\my_designs\PLK_MN\plk_mn\src\lib\req_ack.vhd
--- Generated   : Mon Aug  1 15:58:57 2011
--- From        : interface description file
--- By          : Itf2Vhdl ver. 1.22
---
--------------------------------------------------------------------------------
---
 --    (c) B&R, 2011
 --
 --    Redistribution and use in source and binary forms, with or without
@@ -44,11 +32,6 @@
 --    POSSIBILITY OF SUCH DAMAGE.
 --
 -------------------------------------------------------------------------------
---
--- 2011-08-01  	V0.01	zelenkaj    First version
--- 2011-11-30	V0.02	zelenkaj	removed enable at ack output
---
--------------------------------------------------------------------------------
 
 library ieee;
 use ieee.std_logic_1164.all;
@@ -58,16 +41,16 @@ USE ieee.math_real.log2;
 USE ieee.math_real.ceil;
 
 entity req_ack is
-	generic(
-		ack_delay_g : integer := 1;
-		zero_delay_g : boolean := false
-	);
-	port(
-		clk : in std_logic;
-		rst : in std_logic;
-		enable : in std_logic;
-		ack : out std_logic
-	);
+    generic(
+        ack_delay_g : integer := 1;
+        zero_delay_g : boolean := false
+    );
+    port(
+        clk : in std_logic;
+        rst : in std_logic;
+        enable : in std_logic;
+        ack : out std_logic
+    );
 end req_ack;
 
 architecture rtl of req_ack is
@@ -77,25 +60,25 @@ constant iMaxCntLog2 : integer := integer(ceil(log2(real(iMaxCnt))));
 signal cnt, cnt_next : std_logic_vector(iMaxCntLog2 downto 0);
 signal cnt_tc : std_logic;
 begin
-	genDelay : if zero_delay_g = false generate
-		theCnter : process(clk, rst)
-		begin
-			if rst = '1' then
-				cnt <= (others => '0');
-			elsif clk = '1' and clk'event then
-				cnt <= cnt_next;
-			end if;
-		end process;
-		
-		cnt_next <= cnt + 1 when enable = '1' and cnt_tc /= '1' else (others => '0');
-		
-		cnt_tc <= '1' when cnt = iMaxCnt else '0';
-		
-		ack <= cnt_tc;
-	end generate;
-	
-	genNoDelay : if zero_delay_g = true generate
-		ack <= enable;
-	end generate;
-	
+    genDelay : if zero_delay_g = false generate
+        theCnter : process(clk, rst)
+        begin
+            if rst = '1' then
+                cnt <= (others => '0');
+            elsif clk = '1' and clk'event then
+                cnt <= cnt_next;
+            end if;
+        end process;
+        
+        cnt_next <= cnt + 1 when enable = '1' and cnt_tc /= '1' else (others => '0');
+        
+        cnt_tc <= '1' when cnt = iMaxCnt else '0';
+        
+        ack <= cnt_tc;
+    end generate;
+    
+    genNoDelay : if zero_delay_g = true generate
+        ack <= enable;
+    end generate;
+    
 end rtl;
