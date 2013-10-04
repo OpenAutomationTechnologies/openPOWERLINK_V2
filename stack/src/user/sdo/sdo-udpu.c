@@ -1,858 +1,662 @@
-/****************************************************************************
+/**
+********************************************************************************
+\file   sdo-udpu.c
 
-  (c) SYSTEC electronic GmbH, D-07973 Greiz, August-Bebel-Str. 29
-      www.systec-electronic.com
+\brief  Implementation of SDO over UDP protocol
 
-  Project:      openPOWERLINK
+This file contains the implementation of the SDO over UDP protocol.
 
-  Description:  source file for SDO/UDP-Protocolabstractionlayer module
+\todo Platform specific code should be extracted into a cross-platform library
+to get rid of "#ifdef" statements for different platforms!
 
-  License:
+\ingroup module_sdo_udp
+*******************************************************************************/
 
-    Redistribution and use in source and binary forms, with or without
-    modification, are permitted provided that the following conditions
-    are met:
+/*------------------------------------------------------------------------------
+Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2013, SYSTEC electronic GmbH
+All rights reserved.
 
-    1. Redistributions of source code must retain the above copyright
-       notice, this list of conditions and the following disclaimer.
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+    * Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above copyright
+      notice, this list of conditions and the following disclaimer in the
+      documentation and/or other materials provided with the distribution.
+    * Neither the name of the copyright holders nor the
+      names of its contributors may be used to endorse or promote products
+      derived from this software without specific prior written permission.
 
-    2. Redistributions in binary form must reproduce the above copyright
-       notice, this list of conditions and the following disclaimer in the
-       documentation and/or other materials provided with the distribution.
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL COPYRIGHT HOLDERS BE LIABLE FOR ANY
+DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+------------------------------------------------------------------------------*/
 
-    3. Neither the name of SYSTEC electronic GmbH nor the names of its
-       contributors may be used to endorse or promote products derived
-       from this software without prior written permission. For written
-       permission, please contact info@systec-electronic.com.
-
-    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-    LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-    FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-    COPYRIGHT HOLDERS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-    INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-    BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-    LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-    CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-    LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-    ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-    POSSIBILITY OF SUCH DAMAGE.
-
-    Severability Clause:
-
-        If a provision of this License is or becomes illegal, invalid or
-        unenforceable in any jurisdiction, that shall not affect:
-        1. the validity or enforceability in that jurisdiction of any other
-           provision of this License; or
-        2. the validity or enforceability in other jurisdictions of that or
-           any other provision of this License.
-
-  -------------------------------------------------------------------------
-
-                $RCSfile$
-
-                $Author$
-
-                $Revision$  $Date$
-
-                $State$
-
-                Build Environment:
-                    GCC V3.4
-
-  -------------------------------------------------------------------------
-
-  Revision History:
-
-  2006/06/26 k.t.:   start of the implementation
-
-****************************************************************************/
-
-
+//------------------------------------------------------------------------------
+// includes
+//------------------------------------------------------------------------------
 #include <user/sdoudp.h>
 
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDO_UDP)) != 0)
-
-#if (TARGET_SYSTEM == _LINUX_) && defined(__KERNEL__)
-#include "SocketLinuxKernel.h"
-#include <linux/sched.h>
-#include <linux/kthread.h>
-#endif
-
-#if (TARGET_SYSTEM == _LINUX_) && !defined(__KERNEL__)
+#if (TARGET_SYSTEM == _LINUX_)
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <pthread.h>
-
-
-#define INVALID_SOCKET  0
-
-typedef struct socket* SOCKET;
-
-#define closesocket close
 #endif
 
+#if defined(CONFIG_INCLUDE_SDO_UDP)
 
+//============================================================================//
+//            G L O B A L   D E F I N I T I O N S                             //
+//============================================================================//
 
-/***************************************************************************/
-/*                                                                         */
-/*                                                                         */
-/*          G L O B A L   D E F I N I T I O N S                            */
-/*                                                                         */
-/*                                                                         */
-/***************************************************************************/
-
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // const defines
-//---------------------------------------------------------------------------
-
-#ifndef EPL_SDO_MAX_CONNECTION_UDP
-#define EPL_SDO_MAX_CONNECTION_UDP  5
+//------------------------------------------------------------------------------
+#ifndef SDO_MAX_CONNECTION_UDP
+#define SDO_MAX_CONNECTION_UDP  5
 #endif
 
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+// module global vars
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// global function prototypes
+//------------------------------------------------------------------------------
+
+//============================================================================//
+//            P R I V A T E   D E F I N I T I O N S                           //
+//============================================================================//
+
+//------------------------------------------------------------------------------
+// const defines
+//------------------------------------------------------------------------------
+#if (TARGET_SYSTEM == _LINUX_)
+#define INVALID_SOCKET  0
+#define closesocket close
+#define SOCKLEN_T   socklen_t*
+#endif
+
+#if (TARGET_SYSTEM == _WIN32_)
+#define SOCKLEN_T   int*
+#endif
+
+//------------------------------------------------------------------------------
 // local types
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+#if (TARGET_SYSTEM == _LINUX_)
+typedef int SOCKET;
+
+typedef void* tThreadResult;
+typedef void* tThreadArg;
+
+#elif (TARGET_SYSTEM == _WIN32_)
+
+typedef DWORD tThreadResult;
+typedef LPVOID tThreadArg;
+
+#endif
 
 typedef struct
 {
-    unsigned long   m_ulIpAddr;     // in network byte order
-    unsigned int    m_uiPort;       // in network byte order
-
-} tEplSdoUdpCon;
+    ULONG           ipAddr;     /// IP address in network byte order
+    ULONG           port;       /// Port in network byte order
+} tSdoUdpCon;
 
 // instance table
 typedef struct
 {
-    tEplSdoUdpCon           m_aSdoAbsUdpConnection[EPL_SDO_MAX_CONNECTION_UDP];
-    tSequLayerReceiveCb  m_fpSdoAsySeqCb;
-    SOCKET                  m_UdpSocket;
-
+    tSdoUdpCon              aSdoAbsUdpConnection[SDO_MAX_CONNECTION_UDP];
+    tSequLayerReceiveCb     pfnSdoAsySeqCb;
+    SOCKET                  udpSocket;
 #if (TARGET_SYSTEM == _WIN32_)
-    HANDLE                  m_ThreadHandle;
-    LPCRITICAL_SECTION      m_pCriticalSection;
-    CRITICAL_SECTION        m_CriticalSection;
-
-#elif (TARGET_SYSTEM == _LINUX_) && defined(__KERNEL__)
-    struct task_struct*     m_ThreadHandle;
-#elif (TARGET_SYSTEM == _LINUX_) && !defined(__KERNEL__)
-    pthread_t*              m_ThreadHandle;
+    HANDLE                  threadHandle;
+    LPCRITICAL_SECTION      pCriticalSection;
+    CRITICAL_SECTION        criticalSection;
+#elif (TARGET_SYSTEM == _LINUX_)
+    pthread_t               threadHandle;
 #endif
+    BOOL                    fStopThread;
+} tSdoUdpInstance;
 
-} tEplSdoUdpInstance;
 
-//---------------------------------------------------------------------------
-// module global vars
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+// local vars
+//------------------------------------------------------------------------------
+static tSdoUdpInstance      sdoUdpInstance_l;
 
-static tEplSdoUdpInstance  SdoUdpInstance_g;
-
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // local function prototypes
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+static tThreadResult sdoUdpThread(tThreadArg lpParameter);
 
-#if (TARGET_SYSTEM == _WIN32_)
-static DWORD PUBLIC EplSdoUdpThread(LPVOID lpParameter);
+//============================================================================//
+//            P U B L I C   F U N C T I O N S                                 //
+//============================================================================//
 
-#elif (TARGET_SYSTEM == _LINUX_) && defined(__KERNEL__)
-static int EplSdoUdpThread(void * pArg_p);
-#endif
+//------------------------------------------------------------------------------
+/**
+\brief  Initialize SDO over UDP module
 
-/***************************************************************************/
-/*                                                                         */
-/*                                                                         */
-/*          C L A S S  <EPL-SDO-UDP-Layer>                                 */
-/*                                                                         */
-/*                                                                         */
-/***************************************************************************/
-//
-// Description: Protocolabstraction layer for UDP
-//
-//
-/***************************************************************************/
+The function initializes the SDO over UDP module.
 
+\param  pfnReceiveCb_p          Pointer to SDO sequence layer receive callback function.
 
+\return The function returns a tEplKernel error code.
 
-//=========================================================================//
-//                                                                         //
-//          P U B L I C   F U N C T I O N S                                //
-//                                                                         //
-//=========================================================================//
-
-//---------------------------------------------------------------------------
-//
-// Function:    sdoudp_init
-//
-// Description: init first instance of the module
-//
-//
-//
-// Parameters:  pReceiveCb_p    =   functionpointer to Sdo-Sequence layer
-//                                  callback-function
-//
-//
-// Returns:     tEplKernel  = Errorcode
-//
-//
-// State:
-//
-//---------------------------------------------------------------------------
-tEplKernel sdoudp_init(tSequLayerReceiveCb fpReceiveCb_p)
+\ingroup module_sdo_udp
+*/
+//------------------------------------------------------------------------------
+tEplKernel sdoudp_init(tSequLayerReceiveCb pfnReceiveCb_p)
 {
-tEplKernel  Ret;
-
-
-    Ret = sdoudp_addInstance(fpReceiveCb_p);
-
-return Ret;
+    return sdoudp_addInstance(pfnReceiveCb_p);
 }
 
-//---------------------------------------------------------------------------
-//
-// Function:    sdoudp_addInstance
-//
-// Description: init additional instance of the module
-//              init socket and start Listen-Thread
-//
-//
-//
-// Parameters:  pReceiveCb_p    =   functionpointer to Sdo-Sequence layer
-//                                  callback-function
-//
-//
-// Returns:     tEplKernel  = Errorcode
-//
-//
-// State:
-//
-//---------------------------------------------------------------------------
-tEplKernel sdoudp_addInstance(tSequLayerReceiveCb fpReceiveCb_p)
+//------------------------------------------------------------------------------
+/**
+\brief  Add an instance of a SDO over UDP module
+
+The function adds an instance of a SDO over UDP module.
+
+\param  pfnReceiveCb_p          Pointer to SDO sequence layer receive callback function.
+
+\return The function returns a tEplKernel error code.
+
+\ingroup module_sdo_udp
+*/
+//------------------------------------------------------------------------------
+tEplKernel sdoudp_addInstance(tSequLayerReceiveCb pfnReceiveCb_p)
 {
-tEplKernel          Ret;
+    tEplKernel          ret = kEplSuccessful;
 
 #if (TARGET_SYSTEM == _WIN32_)
-int                 iError;
-WSADATA             Wsa;
-
+    int                 error;
+    WSADATA             wsa;
 #endif
 
-    // set instance variables to 0
-    EPL_MEMSET(&SdoUdpInstance_g, 0x00, sizeof(SdoUdpInstance_g));
+    EPL_MEMSET(&sdoUdpInstance_l, 0x00, sizeof(sdoUdpInstance_l));
 
-    Ret = kEplSuccessful;
-
-    // save pointer to callback-function
-    if (fpReceiveCb_p != NULL)
+    if (pfnReceiveCb_p != NULL)
     {
-        SdoUdpInstance_g.m_fpSdoAsySeqCb = fpReceiveCb_p;
+        sdoUdpInstance_l.pfnSdoAsySeqCb = pfnReceiveCb_p;
     }
     else
     {
-        Ret = kEplSdoUdpMissCb;
-        goto Exit;
+        return kEplSdoUdpMissCb;
     }
 
 #if (TARGET_SYSTEM == _WIN32_)
-    // start winsock2 for win32
-    // windows specific start of socket
-    iError = WSAStartup(MAKEWORD(2,0),&Wsa);
-    if (iError != 0)
-    {
-        Ret = kEplSdoUdpNoSocket;
-        goto Exit;
-    }
+    //  windows specific start of socket
+    if ((error = WSAStartup(MAKEWORD(2,0), &wsa)) != 0)
+        return kEplSdoUdpNoSocket;
 
     // create critical section for access of instance variables
-    SdoUdpInstance_g.m_pCriticalSection = &SdoUdpInstance_g.m_CriticalSection;
-    InitializeCriticalSection(SdoUdpInstance_g.m_pCriticalSection);
+    sdoUdpInstance_l.pCriticalSection = &sdoUdpInstance_l.criticalSection;
+    InitializeCriticalSection(sdoUdpInstance_l.pCriticalSection);
 #endif
 
-    SdoUdpInstance_g.m_ThreadHandle = 0;
-    SdoUdpInstance_g.m_UdpSocket = INVALID_SOCKET;
+    sdoUdpInstance_l.threadHandle = 0;
+    sdoUdpInstance_l.udpSocket = INVALID_SOCKET;
 
-    Ret = sdoudp_config(INADDR_ANY, 0);
-
-Exit:
-    return Ret;
+    ret = sdoudp_config(INADDR_ANY, 0);
+    return ret;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Delete an instance of a SDO over UDP module
 
-//---------------------------------------------------------------------------
-//
-// Function:    sdoudp_delInstance
-//
-// Description: del instance of the module
-//              del socket and del Listen-Thread
-//
-//
-//
-// Parameters:
-//
-//
-// Returns:     tEplKernel  = Errorcode
-//
-//
-// State:
-//
-//---------------------------------------------------------------------------
-tEplKernel sdoudp_delInstance()
+The function deletes an instance of a SDO over UDP module. It deletes the created
+sockets and deletes the listener thread.
+
+\return The function returns a tEplKernel error code.
+
+\ingroup module_sdo_udp
+*/
+//------------------------------------------------------------------------------
+tEplKernel sdoudp_delInstance(void)
 {
-tEplKernel      Ret;
+    tEplKernel      ret = kEplSuccessful;
 
 #if (TARGET_SYSTEM == _WIN32_)
-BOOL                fTermError;
+    BOOL                fTermError;
 #endif
 
-    Ret = kEplSuccessful;
-
-    if (SdoUdpInstance_g.m_ThreadHandle != 0)
-    {   // listen thread was started
-        // close thread
+    if (sdoUdpInstance_l.threadHandle != 0)
+    {   // listen thread was started -> close thread
 #if (TARGET_SYSTEM == _WIN32_)
-        fTermError = TerminateThread(SdoUdpInstance_g.m_ThreadHandle, 0);
+        fTermError = TerminateThread(sdoUdpInstance_l.threadHandle, 0);
         if(fTermError == FALSE)
-        {
-            Ret = kEplSdoUdpThreadError;
-            goto Exit;
-        }
-
-#elif (TARGET_SYSTEM == _LINUX_) && defined(__KERNEL__)
-        send_sig(SIGTERM, SdoUdpInstance_g.m_ThreadHandle, 1);
-        kthread_stop(SdoUdpInstance_g.m_ThreadHandle);
+            return kEplSdoUdpThreadError;
+#elif (TARGET_SYSTEM == _LINUX_)
+        sdoUdpInstance_l.fStopThread = TRUE;
+        if (pthread_join(sdoUdpInstance_l.threadHandle, NULL) != 0)
+            return kEplSdoUdpThreadError;
 #endif
-
-        SdoUdpInstance_g.m_ThreadHandle = 0;
+        sdoUdpInstance_l.threadHandle = 0;
     }
 
-    if (SdoUdpInstance_g.m_UdpSocket != INVALID_SOCKET)
+    if (sdoUdpInstance_l.udpSocket != INVALID_SOCKET)
     {
-        // close socket
-        closesocket(SdoUdpInstance_g.m_UdpSocket);
-        SdoUdpInstance_g.m_UdpSocket = INVALID_SOCKET;
+        closesocket(sdoUdpInstance_l.udpSocket);
+        sdoUdpInstance_l.udpSocket = INVALID_SOCKET;
     }
 
 #if (TARGET_SYSTEM == _WIN32_)
-    // delete critical section
-    DeleteCriticalSection(SdoUdpInstance_g.m_pCriticalSection);
-#endif
-
-#if (TARGET_SYSTEM == _WIN32_)
-    // for win 32
+    DeleteCriticalSection(sdoUdpInstance_l.pCriticalSection);
     WSACleanup();
 #endif
-
-#if (TARGET_SYSTEM == _WIN32_)
-Exit:
-#endif
-    return Ret;
+    return ret;
 }
 
-//---------------------------------------------------------------------------
-//
-// Function:    sdoudp_config
-//
-// Description: reconfigurate socket with new IP-Address
-//              -> needed for NMT ResetConfiguration
-//
-// Parameters:  ulIpAddr_p      = IpAddress in platform byte order
-//              uiPort_p        = port number in platform byte order
-//
-//
-// Returns:     tEplKernel  = Errorcode
-//
-//
-// State:
-//
-//---------------------------------------------------------------------------
-tEplKernel sdoudp_config(unsigned long ulIpAddr_p, unsigned int uiPort_p)
+//------------------------------------------------------------------------------
+/**
+\brief  Reconfigure socket
+
+The function reconfigures socket with a new IP address. It is needed for
+NMT_ResetConfiguration.
+
+\param  ipAddr_p            IP address to configure.
+\param  port_p              Port to configure
+
+\return The function returns a tEplKernel error code.
+
+\ingroup module_sdo_udp
+*/
+//------------------------------------------------------------------------------
+tEplKernel sdoudp_config(ULONG ipAddr_p, UINT port_p)
 {
-tEplKernel          Ret;
-struct sockaddr_in  Addr;
-int                 iError;
+    tEplKernel          ret = kEplSuccessful;
+    struct sockaddr_in  addr;
+    INT                 error;
 
 #if (TARGET_SYSTEM == _WIN32_)
-BOOL                fTermError;
-unsigned long       ulThreadId;
+    BOOL                fTermError;
+    ULONG               threadId;
 #endif
 
-    Ret = kEplSuccessful;
-
-    if (uiPort_p == 0)
-    {   // set UDP port to default port number
-        uiPort_p = EPL_C_SDO_EPL_PORT;
-    }
-    else if (uiPort_p > 65535)
+    if (port_p == 0)
     {
-        Ret = kEplSdoUdpSocketError;
-        goto Exit;
+        port_p = EPL_C_SDO_EPL_PORT;  // set UDP port to default port number
+    }
+    else if (port_p > 65535)
+    {
+        return kEplSdoUdpSocketError;
     }
 
-    if (SdoUdpInstance_g.m_ThreadHandle != 0)
-    {   // listen thread was started
-
-        // close old thread
+    if (sdoUdpInstance_l.threadHandle != 0)
+    {   // listen thread was started -> close old thread
 #if (TARGET_SYSTEM == _WIN32_)
-        fTermError = TerminateThread(SdoUdpInstance_g.m_ThreadHandle, 0);
+        fTermError = TerminateThread(sdoUdpInstance_l.threadHandle, 0);
         if(fTermError == FALSE)
-        {
-            Ret = kEplSdoUdpThreadError;
-            goto Exit;
-        }
-
-#elif (TARGET_SYSTEM == _LINUX_) && defined(__KERNEL__)
-        send_sig(SIGTERM, SdoUdpInstance_g.m_ThreadHandle, 1);
-        kthread_stop(SdoUdpInstance_g.m_ThreadHandle);
+            return kEplSdoUdpThreadError;
+#elif (TARGET_SYSTEM == _LINUX_)
+        sdoUdpInstance_l.fStopThread = TRUE;
+        if (pthread_join(sdoUdpInstance_l.threadHandle, NULL) != 0)
+            return kEplSdoUdpThreadError;
 #endif
-
-        SdoUdpInstance_g.m_ThreadHandle = 0;
+        sdoUdpInstance_l.threadHandle = 0;
     }
 
-    if (SdoUdpInstance_g.m_UdpSocket != INVALID_SOCKET)
+    if (sdoUdpInstance_l.udpSocket != INVALID_SOCKET)
     {
-        // close socket
-        iError = closesocket(SdoUdpInstance_g.m_UdpSocket);
-        SdoUdpInstance_g.m_UdpSocket = INVALID_SOCKET;
-        if(iError != 0)
-        {
-            Ret = kEplSdoUdpSocketError;
-            goto Exit;
-        }
+        error = closesocket(sdoUdpInstance_l.udpSocket);
+        sdoUdpInstance_l.udpSocket = INVALID_SOCKET;
+        if(error != 0)
+            return kEplSdoUdpSocketError;
     }
 
     // create Socket
-    SdoUdpInstance_g.m_UdpSocket = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP);
-    if (SdoUdpInstance_g.m_UdpSocket == INVALID_SOCKET)
+    sdoUdpInstance_l.udpSocket = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP);
+    if (sdoUdpInstance_l.udpSocket == INVALID_SOCKET)
     {
-        Ret = kEplSdoUdpNoSocket;
+        ret = kEplSdoUdpNoSocket;
         EPL_DBGLVL_SDO_TRACE("sdoudp_config: socket() failed\n");
-        goto Exit;
+        return ret;
     }
 
     // bind socket
-    Addr.sin_family = AF_INET;
-    Addr.sin_port = htons((unsigned short) uiPort_p);
-    Addr.sin_addr.s_addr = htonl(ulIpAddr_p);
-    iError = bind(SdoUdpInstance_g.m_UdpSocket, (struct sockaddr*)&Addr, sizeof (Addr));
-    if (iError < 0)
+    addr.sin_family = AF_INET;
+    addr.sin_port = htons((USHORT) port_p);
+    addr.sin_addr.s_addr = htonl(ipAddr_p);
+    error = bind(sdoUdpInstance_l.udpSocket, (struct sockaddr*)&addr, sizeof(addr));
+    if (error < 0)
     {
-        //iError = WSAGetLastError();
-        EPL_DBGLVL_SDO_TRACE("sdoudp_config: bind() finished with %i\n", iError);
-        Ret = kEplSdoUdpNoSocket;
-        goto Exit;
+        EPL_DBGLVL_SDO_TRACE("sdoudp_config: bind() finished with %i\n", error);
+        return kEplSdoUdpNoSocket;
     }
 
     // create Listen-Thread
+    sdoUdpInstance_l.fStopThread = FALSE;
 #if (TARGET_SYSTEM == _WIN32_)
-    // for win32
-
-    // create thread
-    SdoUdpInstance_g.m_ThreadHandle = CreateThread(NULL,
-                                                    0,
-                                                    EplSdoUdpThread,
-                                                    &SdoUdpInstance_g,
-                                                    0,
-                                                    &ulThreadId);
-    if (SdoUdpInstance_g.m_ThreadHandle == NULL)
-    {
-        Ret = kEplSdoUdpThreadError;
-        goto Exit;
-    }
-
-#elif (TARGET_SYSTEM == _LINUX_) && defined(__KERNEL__)
-
-    SdoUdpInstance_g.m_ThreadHandle = kthread_run(EplSdoUdpThread, &SdoUdpInstance_g, "EplSdoUdpThread");
-    if (IS_ERR(SdoUdpInstance_g.m_ThreadHandle))
-    {
-        Ret = kEplSdoUdpThreadError;
-        goto Exit;
-    }
+    sdoUdpInstance_l.threadHandle = CreateThread(NULL, 0, sdoUdpThread, &sdoUdpInstance_l,
+                                                 0, &threadId);
+    if (sdoUdpInstance_l.threadHandle == NULL)
+        return kEplSdoUdpThreadError;
+#elif (TARGET_SYSTEM == _LINUX_)
+    if (pthread_create(&sdoUdpInstance_l.threadHandle, NULL, sdoUdpThread, (void*)&sdoUdpInstance_l) != 0)
+        return kEplSdoUdpThreadError;
 #endif
 
-
-Exit:
-    return Ret;
+    return ret;
 
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Initialize new connection
 
-//---------------------------------------------------------------------------
-//
-// Function:    sdoudp_initCon
-//
-// Description: init a new connect
-//
-//
-//
-// Parameters:  pSdoConHandle_p = pointer for the new connection handle
-//              uiTargetNodeId_p = NodeId of the target node
-//
-//
-// Returns:     tEplKernel  = Errorcode
-//
-//
-// State:
-//
-//---------------------------------------------------------------------------
-tEplKernel sdoudp_initCon(tSdoConHdl*  pSdoConHandle_p,
-                                    unsigned int    uiTargetNodeId_p)
+The function initializes a new connection.
+
+\param  pSdoConHandle_p           Pointer for the new connection handle.
+\param  targetNodeId_p            Node ID of the target.
+
+\return The function returns a tEplKernel error code.
+
+\ingroup module_sdo_udp
+*/
+//------------------------------------------------------------------------------
+tEplKernel sdoudp_initCon(tSdoConHdl* pSdoConHandle_p, UINT targetNodeId_p)
 {
-tEplKernel          Ret;
-unsigned int        uiCount;
-unsigned int        uiFreeCon;
-tEplSdoUdpCon*      pSdoUdpCon;
-
-    Ret = kEplSuccessful;
+    tEplKernel          ret = kEplSuccessful;
+    UINT                count;
+    UINT                freeCon;
+    tSdoUdpCon*         pSdoUdpCon;
 
     // get free entry in control structure
-    uiCount = 0;
-    uiFreeCon = EPL_SDO_MAX_CONNECTION_UDP;
-    pSdoUdpCon = &SdoUdpInstance_g.m_aSdoAbsUdpConnection[0];
-    while (uiCount < EPL_SDO_MAX_CONNECTION_UDP)
-    {
-        if ((pSdoUdpCon->m_ulIpAddr & htonl(0xFF)) == htonl(uiTargetNodeId_p))
-        {   // existing connection to target node found
-            // set handle
-            *pSdoConHandle_p = (uiCount | SDO_UDP_HANDLE);
+    count = 0;
+    freeCon = SDO_MAX_CONNECTION_UDP;
+    pSdoUdpCon = &sdoUdpInstance_l.aSdoAbsUdpConnection[0];
 
-            goto Exit;
+    while (count < SDO_MAX_CONNECTION_UDP)
+    {
+        if ((pSdoUdpCon->ipAddr & htonl(0xFF)) == htonl(targetNodeId_p))
+        {   // existing connection to target node found -> set handle
+            *pSdoConHandle_p = (count | SDO_UDP_HANDLE);
+            return ret;
         }
-        else if ((pSdoUdpCon->m_ulIpAddr == 0)
-                && (pSdoUdpCon->m_uiPort == 0))
+        else if ((pSdoUdpCon->ipAddr == 0) && (pSdoUdpCon->port == 0))
         {
-            uiFreeCon = uiCount;
+            freeCon = count;
         }
-        uiCount++;
+
+        count++;
         pSdoUdpCon++;
     }
 
-    if (uiFreeCon == EPL_SDO_MAX_CONNECTION_UDP)
+    if (freeCon == SDO_MAX_CONNECTION_UDP)
     {
-        // error no free handle
-        Ret = kEplSdoUdpNoFreeHandle;
+        ret = kEplSdoUdpNoFreeHandle;
     }
     else
     {
-        pSdoUdpCon = &SdoUdpInstance_g.m_aSdoAbsUdpConnection[uiFreeCon];
+        pSdoUdpCon = &sdoUdpInstance_l.aSdoAbsUdpConnection[freeCon];
         // save infos for connection
-        pSdoUdpCon->m_uiPort = htons(EPL_C_SDO_EPL_PORT);
-        pSdoUdpCon->m_ulIpAddr = htonl(0xC0A86400 | uiTargetNodeId_p);   // 192.168.100.uiTargetNodeId_p
+        pSdoUdpCon->port = htons(EPL_C_SDO_EPL_PORT);
+        pSdoUdpCon->ipAddr = htonl(0xC0A86400 | targetNodeId_p);   // 192.168.100.uiTargetNodeId_p
 
         // set handle
-        *pSdoConHandle_p = (uiFreeCon | SDO_UDP_HANDLE);
-
+        *pSdoConHandle_p = (freeCon | SDO_UDP_HANDLE);
     }
-
-Exit:
-    return Ret;
-
+    return ret;
 }
 
-//---------------------------------------------------------------------------
-//
-// Function:    sdoudp_sendData
-//
-// Description: send data using exisiting connection
-//
-//
-//
-// Parameters:  SdoConHandle_p  = connection handle
-//              pSrcData_p      = pointer to data
-//              dwDataSize_p    = number of databyte
-//                                  -> without asend-header!!!
-//
-// Returns:     tEplKernel  = Errorcode
-//
-//
-// State:
-//
-//---------------------------------------------------------------------------
-tEplKernel sdoudp_sendData(tSdoConHdl       SdoConHandle_p,
-                                    tEplFrame *          pSrcData_p,
-                                    DWORD                dwDataSize_p)
+//------------------------------------------------------------------------------
+/**
+\brief  Send data using existing connection
+
+The function sends data on an existing connection.
+
+\param  sdoConHandle_p          Connection handle to use for data transfer.
+\param  pSrcData_p              Pointer to data which should be sent.
+\param  dataSize_p              Size of data to send
+
+\return The function returns a tEplKernel error code.
+
+\ingroup module_sdo_udp
+*/
+//------------------------------------------------------------------------------
+tEplKernel sdoudp_sendData(tSdoConHdl sdoConHandle_p, tEplFrame* pSrcData_p, UINT32 dataSize_p)
 {
-tEplKernel          Ret;
-int                 iError;
-unsigned int        uiArray;
-struct sockaddr_in  Addr;
+    INT                 error;
+    UINT                array;
+    struct sockaddr_in  addr;
 
-    Ret = kEplSuccessful;
+    array = (sdoConHandle_p & ~SDO_ASY_HANDLE_MASK);
+    if(array >= SDO_MAX_CONNECTION_UDP)
+        return kEplSdoUdpInvalidHdl;
 
-    uiArray = (SdoConHandle_p & ~SDO_ASY_HANDLE_MASK);
-    if(uiArray >= EPL_SDO_MAX_CONNECTION_UDP)
-    {
-        Ret = kEplSdoUdpInvalidHdl;
-        goto Exit;
-    }
-    //set message type
-    AmiSetByteToLe(&pSrcData_p->m_le_bMessageType, 0x06); // SDO
-    // target node id (for Udp = 0)
-    AmiSetByteToLe(&pSrcData_p->m_le_bDstNodeId, 0x00);
-    // set source-nodeid (for Udp = 0)
-    AmiSetByteToLe(&pSrcData_p->m_le_bSrcNodeId, 0x00);
+    AmiSetByteToLe(&pSrcData_p->m_le_bMessageType, 0x06);   // set message type SDO
+    AmiSetByteToLe(&pSrcData_p->m_le_bDstNodeId, 0x00);     // target node id (for Udp = 0)
+    AmiSetByteToLe(&pSrcData_p->m_le_bSrcNodeId, 0x00);     // set source-nodeid (for Udp = 0)
+    dataSize_p += ASND_HEADER_SIZE;                         // calc size
 
-    // calc size
-    dwDataSize_p += ASND_HEADER_SIZE;
-
-    // call sendto
-    Addr.sin_family = AF_INET;
+    addr.sin_family = AF_INET;
 #if (TARGET_SYSTEM == _WIN32_)
-        // enter  critical section for process function
-    EnterCriticalSection(SdoUdpInstance_g.m_pCriticalSection);
+    EnterCriticalSection(sdoUdpInstance_l.pCriticalSection);
 #endif
-
-    Addr.sin_port = (unsigned short) SdoUdpInstance_g.m_aSdoAbsUdpConnection[uiArray].m_uiPort;
-    Addr.sin_addr.s_addr = SdoUdpInstance_g.m_aSdoAbsUdpConnection[uiArray].m_ulIpAddr;
+    addr.sin_port = (USHORT)sdoUdpInstance_l.aSdoAbsUdpConnection[array].port;
+    addr.sin_addr.s_addr = sdoUdpInstance_l.aSdoAbsUdpConnection[array].ipAddr;
 
 #if (TARGET_SYSTEM == _WIN32_)
-    // leave critical section for process function
-    LeaveCriticalSection(SdoUdpInstance_g.m_pCriticalSection);
+    LeaveCriticalSection(sdoUdpInstance_l.pCriticalSection);
 #endif
 
-    iError = sendto (SdoUdpInstance_g.m_UdpSocket,       // sockethandle
-                (const char*) &pSrcData_p->m_le_bMessageType,        // data to send
-                dwDataSize_p,                          // number of bytes to send
-                0,                                     // flags
-                (struct sockaddr*)&Addr,                      // target
-                sizeof(struct sockaddr_in));                  // sizeof targetadress
-    if(iError < 0)
+    error = sendto (sdoUdpInstance_l.udpSocket, (const char*) &pSrcData_p->m_le_bMessageType,
+                    dataSize_p, 0, (struct sockaddr*)&addr, sizeof(struct sockaddr_in));
+    if(error < 0)
     {
         EPL_DBGLVL_SDO_TRACE("sdoudp_sendData: sendto() finished with %i\n", iError);
-        Ret = kEplSdoUdpSendError;
-        goto Exit;
+        return kEplSdoUdpSendError;
     }
-
-Exit:
-    return Ret;
-
+    return kEplSuccessful;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Delete connection
 
-//---------------------------------------------------------------------------
-//
-// Function:    sdoudp_delConnection
-//
-// Description: delete connection from intern structure
-//
-//
-//
-// Parameters:  SdoConHandle_p  = connection handle
-//
-// Returns:     tEplKernel  = Errorcode
-//
-//
-// State:
-//
-//---------------------------------------------------------------------------
-tEplKernel sdoudp_delCon(tSdoConHdl SdoConHandle_p)
+The function deletes an existing connection.
+
+\param  sdoConHandle_p          Connection handle to use for data transfer.
+
+\return The function returns a tEplKernel error code.
+
+\ingroup module_sdo_udp
+*/
+//------------------------------------------------------------------------------
+tEplKernel sdoudp_delConnection(tSdoConHdl sdoConHandle_p)
 {
-tEplKernel      Ret;
-unsigned int    uiArray;
+    tEplKernel      ret = kEplSuccessful;
+    UINT            array;
 
-
-    uiArray = (SdoConHandle_p & ~SDO_ASY_HANDLE_MASK);
-
-    if(uiArray >= EPL_SDO_MAX_CONNECTION_UDP)
+    array = (sdoConHandle_p & ~SDO_ASY_HANDLE_MASK);
+    if(array >= SDO_MAX_CONNECTION_UDP)
     {
-        Ret = kEplSdoUdpInvalidHdl;
-        goto Exit;
+        return kEplSdoUdpInvalidHdl;
     }
-    else
-    {
-        Ret = kEplSuccessful;
-    }
-
-
     // delete connection
-    SdoUdpInstance_g.m_aSdoAbsUdpConnection[uiArray].m_ulIpAddr = 0;
-    SdoUdpInstance_g.m_aSdoAbsUdpConnection[uiArray].m_uiPort = 0;
+    sdoUdpInstance_l.aSdoAbsUdpConnection[array].ipAddr = 0;
+    sdoUdpInstance_l.aSdoAbsUdpConnection[array].port = 0;
 
-Exit:
-    return Ret;
+    return ret;
 }
 
-//=========================================================================//
-//                                                                         //
-//          P R I V A T E   F U N C T I O N S                              //
-//                                                                         //
-//=========================================================================//
+//============================================================================//
+//            P R I V A T E   F U N C T I O N S                               //
+//============================================================================//
+/// \name Private Functions
+/// \{
 
-//---------------------------------------------------------------------------
-//
-// Function:        EplSdoUdpThread
-//
-// Description:     thread check socket for new data
-//
-//
-//
-// Parameters:      lpParameter = pointer to parameter type tEplSdoUdpThreadPara
-//
-//
-// Returns:         DWORD   =   errorcode
-//
-//
-// State:
-//
-//---------------------------------------------------------------------------
-#if (TARGET_SYSTEM == _WIN32_)
-static DWORD PUBLIC EplSdoUdpThread(LPVOID lpParameter)
-#elif (TARGET_SYSTEM == _LINUX_) && defined(__KERNEL__)
-static int EplSdoUdpThread(void * pArg_p)
-#elif (TARGET_SYSTEM == _LINUX_) && !defined(__KERNEL__)
-static void *EplSdoUdpThread(void * pArg_p)
-#endif
+//------------------------------------------------------------------------------
+/**
+\brief  receive data from socket
+
+The function receives data from the UDP socket.
+
+\param  pInstance_p           Pointer to SDO instance.
+
+\return The function returns a tEplKernel error code.
+*/
+//------------------------------------------------------------------------------
+void receiveFromSocket(tSdoUdpInstance* pInstance_p)
 {
-tEplKernel          Ret;
-tEplSdoUdpInstance* pInstance;
-struct sockaddr_in  RemoteAddr;
-int                 iError;
-int                 iCount;
-int                 iFreeEntry;
-BYTE                abBuffer[SDO_MAX_REC_FRAME_SIZE];
-unsigned int        uiSize;
-tSdoConHdl       SdoConHdl;
+    tEplKernel          ret;
+    struct sockaddr_in  remoteAddr;
+    INT                 error;
+    INT                 count;
+    INT                 freeEntry;
+    UINT8               aBuffer[SDO_MAX_REC_FRAME_SIZE];
+    UINT                size;
+    tSdoConHdl          sdoConHdl;
 
-#if (TARGET_SYSTEM == _WIN32_)
-    pInstance = (tEplSdoUdpInstance*)lpParameter;
+    size = sizeof(struct sockaddr);
 
-    for (;;)
-
-#elif (TARGET_SYSTEM == _LINUX_) && defined(__KERNEL__)
-    pInstance = (tEplSdoUdpInstance*)pArg_p;
-    allow_signal( SIGTERM );
-
-    while (!kthread_should_stop())
-#endif
-
+    error = recvfrom(pInstance_p->udpSocket, (char *)&aBuffer[0], sizeof(aBuffer),
+                     0, (struct sockaddr*)&remoteAddr, (SOCKLEN_T)&size);
+    if (error > 0)
     {
-        // wait for data
-        uiSize = sizeof(struct sockaddr);
-        iError = recvfrom(pInstance->m_UdpSocket,   // Socket
-                        (char *)&abBuffer[0],               // buffer for data
-                        sizeof(abBuffer),           // size of the buffer
-                        0,                          // flags
-                        (struct sockaddr*)&RemoteAddr,
-                        (int*)&uiSize);
-#if (TARGET_SYSTEM == _LINUX_) && defined(__KERNEL__)
-        if (iError == -ERESTARTSYS)
-        {
-            break;
-        }
-#endif
-        if (iError > 0)
-        {
-            // get handle for higher layer
-            iCount = 0;
-            iFreeEntry = 0xFFFF;
+        // get handle for higher layer
+        count = 0;
+        freeEntry = 0xFFFF;
 #if (TARGET_SYSTEM == _WIN32_)
-        // enter  critical section for process function
-    EnterCriticalSection(SdoUdpInstance_g.m_pCriticalSection);
+        EnterCriticalSection(sdoUdpInstance_l.pCriticalSection);
 #endif
-            while (iCount < EPL_SDO_MAX_CONNECTION_UDP)
+        while (count < SDO_MAX_CONNECTION_UDP)
+        {
+            // check if this connection is already known
+            if((pInstance_p->aSdoAbsUdpConnection[count].ipAddr == remoteAddr.sin_addr.s_addr) &&
+               (pInstance_p->aSdoAbsUdpConnection[count].port == remoteAddr.sin_port))
             {
-                // check if this connection is already known
-                if((pInstance->m_aSdoAbsUdpConnection[iCount].m_ulIpAddr == RemoteAddr.sin_addr.s_addr)
-                    && (pInstance->m_aSdoAbsUdpConnection[iCount].m_uiPort == RemoteAddr.sin_port))
-                {
-                    break;
-                }
-
-                if((pInstance->m_aSdoAbsUdpConnection[iCount].m_ulIpAddr == 0)
-                    && (pInstance->m_aSdoAbsUdpConnection[iCount].m_uiPort == 0)
-                    && (iFreeEntry == 0xFFFF))
-
-                {
-                    iFreeEntry  = iCount;
-                }
-
-                iCount++;
+                break;
             }
 
-            if (iCount == EPL_SDO_MAX_CONNECTION_UDP)
+            if((pInstance_p->aSdoAbsUdpConnection[count].ipAddr == 0) &&
+               (pInstance_p->aSdoAbsUdpConnection[count].port == 0) &&
+               (freeEntry == 0xFFFF))
             {
-                // connection unknown
-                // see if there is a free handle
-                if (iFreeEntry != 0xFFFF)
-                {
-                    // save adress infos
-                    pInstance->m_aSdoAbsUdpConnection[iFreeEntry].m_ulIpAddr =
-                        RemoteAddr.sin_addr.s_addr;
-                    pInstance->m_aSdoAbsUdpConnection[iFreeEntry].m_uiPort =
-                        RemoteAddr.sin_port;
-#if (TARGET_SYSTEM == _WIN32_)
-    // leave critical section for process function
-    LeaveCriticalSection(SdoUdpInstance_g.m_pCriticalSection);
-#endif
-                    // call callback
-                    SdoConHdl = iFreeEntry;
-                    SdoConHdl |= SDO_UDP_HANDLE;
-                    // offset 4 -> start of SDO Sequence header
-                    Ret = pInstance->m_fpSdoAsySeqCb(
-                            SdoConHdl,
-                            (tAsySdoSeq*)&abBuffer[4],
-                            (iError - 4));
-                    if (Ret != kEplSuccessful)
-                    {
-                        PRINTF("%s new con: ip=%lX, port=%u, Ret=0x%X\n",
-                                __func__,
-                                (unsigned long) ntohl(pInstance->m_aSdoAbsUdpConnection[iFreeEntry].m_ulIpAddr),
-                                ntohs((unsigned short) pInstance->m_aSdoAbsUdpConnection[iFreeEntry].m_uiPort),
-                                Ret);
-                    }
-                }
-                else
-                {
-                    EPL_DBGLVL_SDO_TRACE("Error in EplSdoUdpThread() no free handle\n");
-#if (TARGET_SYSTEM == _WIN32_)
-    // leave critical section for process function
-    LeaveCriticalSection(SdoUdpInstance_g.m_pCriticalSection);
-#endif
-                }
+                freeEntry = count;
+            }
+            count++;
+        }
 
+        if (count == SDO_MAX_CONNECTION_UDP)
+        {
+            // connection unknown -> see if there is a free handle
+            if (freeEntry != 0xFFFF)
+            {
+                // save address infos
+                pInstance_p->aSdoAbsUdpConnection[freeEntry].ipAddr = remoteAddr.sin_addr.s_addr;
+                pInstance_p->aSdoAbsUdpConnection[freeEntry].port = remoteAddr.sin_port;
+#if (TARGET_SYSTEM == _WIN32_)
+                LeaveCriticalSection(sdoUdpInstance_l.pCriticalSection);
+#endif
+                // call callback
+                sdoConHdl = freeEntry;
+                sdoConHdl |= SDO_UDP_HANDLE;
+
+                // offset 4 -> start of SDO Sequence header
+                ret = pInstance_p->pfnSdoAsySeqCb(sdoConHdl, (tAsySdoSeq*)&aBuffer[4], (error - 4));
+                if (ret != kEplSuccessful)
+                {
+                    EPL_DBGLVL_ERROR_TRACE("%s new con: ip=%lX, port=%u, Ret=0x%X\n", __func__,
+                          (ULONG) ntohl(pInstance_p->aSdoAbsUdpConnection[freeEntry].ipAddr),
+                          ntohs((USHORT) pInstance_p->aSdoAbsUdpConnection[freeEntry].port), ret);
+                }
             }
             else
             {
-                // known connection
-                // call callback with correct handle
-                SdoConHdl = iCount;
-                SdoConHdl |= SDO_UDP_HANDLE;
+                EPL_DBGLVL_ERROR_TRACE("Error in EplSdoUdpThread() no free handle\n");
 #if (TARGET_SYSTEM == _WIN32_)
-    // leave critical section for process function
-    LeaveCriticalSection(SdoUdpInstance_g.m_pCriticalSection);
+                LeaveCriticalSection(sdoUdpInstance_l.pCriticalSection);
 #endif
-                // offset 4 -> start of SDO Sequence header
-                Ret = pInstance->m_fpSdoAsySeqCb(
-                        SdoConHdl,
-                        (tAsySdoSeq*)&abBuffer[4],
-                        (iError - 4));
-                if (Ret != kEplSuccessful)
-                {
-                    PRINTF("%s known con: ip=%lX, port=%u, Ret=0x%X\n",
-                            __func__,
-                            (unsigned long) ntohl(pInstance->m_aSdoAbsUdpConnection[iCount].m_ulIpAddr),
-                            ntohs((unsigned short) pInstance->m_aSdoAbsUdpConnection[iCount].m_uiPort),
-                            Ret);
-                }
             }
-        } // end of  if(iError!=SOCKET_ERROR)
-    }// end of for(;;)
+        }
+        else
+        {
+            // known connection -> call callback with correct handle
+            sdoConHdl = count;
+            sdoConHdl |= SDO_UDP_HANDLE;
+#if (TARGET_SYSTEM == _WIN32_)
+LeaveCriticalSection(sdoUdpInstance_l.pCriticalSection);
+#endif
+            // offset 4 -> start of SDO Sequence header
+            ret = pInstance_p->pfnSdoAsySeqCb(sdoConHdl, (tAsySdoSeq*)&aBuffer[4], (error - 4));
+            if (ret != kEplSuccessful)
+            {
+                EPL_DBGLVL_ERROR_TRACE("%s known con: ip=%lX, port=%u, Ret=0x%X\n", __func__,
+                      (ULONG) ntohl(pInstance_p->aSdoAbsUdpConnection[count].ipAddr),
+                      ntohs((USHORT) pInstance_p->aSdoAbsUdpConnection[count].port), ret);
+            }
+        }
+    }
+}
 
-#if (TARGET_SYSTEM == _LINUX_) && defined(__KERNEL__)
+//------------------------------------------------------------------------------
+/**
+\brief  UDP Receiving thread function
 
-    /* Hmm, linux becomes *very* unhappy without this ... */
-    while (!kthread_should_stop()) {
-        printk("%s: waiting for kthread_stop()\n", __FUNCTION__);
-        set_current_state(TASK_UNINTERRUPTIBLE);
-        schedule();
+The function implements the UDP receive thread. It waits for packets on the
+UDP socket and calls receiveFromSocket() if data is available.
+
+
+\param  pArg_p          Thread argument. The pointer to the SDO instance is
+                        transfered to the thread as thread argument.
+
+\return The function returns a thread exit code. It returns always NULL (0).
+*/
+//------------------------------------------------------------------------------
+static tThreadResult sdoUdpThread(tThreadArg pArg_p)
+{
+    tSdoUdpInstance*    pInstance;
+    fd_set              readFds;
+    int                 result;
+    struct timeval      timeout;
+
+    pInstance = (tSdoUdpInstance*)pArg_p;
+
+    while (!pInstance->fStopThread)
+    {
+        timeout.tv_sec = 0;
+        timeout.tv_usec = 400000;
+
+        FD_ZERO(&readFds);
+        FD_SET(pInstance->udpSocket, &readFds);
+
+        result = select (pInstance->udpSocket + 1, &readFds, NULL, NULL, &timeout);
+        switch(result)
+        {
+            case 0:     // timeout
+                //EPL_DBGLVL_SDO_TRACE ("select timeout\n");
+                break;
+
+            case -1:    // error
+                EPL_DBGLVL_SDO_TRACE ("select error: %s\n", strerror(errno));
+                break;
+
+            default:    // data available
+                receiveFromSocket(pInstance);
+                break;
+        }
     }
 
+#if (TARGET_SYSTEM == _LINUX_)
+    pthread_exit(NULL);
 #endif
-
     return 0;
 }
 
-#endif // end of #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDO_UDP)) != 0)
+///\}
 
-// EOF
+#endif
 
