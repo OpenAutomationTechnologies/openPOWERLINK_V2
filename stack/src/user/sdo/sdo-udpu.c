@@ -69,7 +69,7 @@
 ****************************************************************************/
 
 
-#include "user/EplSdoUdpu.h"
+#include <user/sdoudp.h>
 
 #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDO_UDP)) != 0)
 
