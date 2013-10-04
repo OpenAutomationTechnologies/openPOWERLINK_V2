@@ -1,7 +1,7 @@
-------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
 -- OpenFILTER
 --
--- 	  Copyright (C) 2009 B&R
+--       Copyright (C) 2009 B&R
 --
 --    Redistribution and use in source and binary forms, with or without
 --    modification, are permitted provided that the following conditions
@@ -33,37 +33,27 @@
 --    POSSIBILITY OF SUCH DAMAGE.
 --
 -- Note: RxDv and RxDat have to be synchron to Clk
---	     The following Conditions are checked:
+--         The following Conditions are checked:
 --         RxDV >163.64탎ec HIGH -> invalid
 --         RxDV <0.64탎ec LOW -> invalid
 --         RxDV 4x <5.12탎ec HIGH -> invalid
 --         RxDV >5.12탎ec HIGH -> valid
---		   RxErr HIGH -> invalid
---			if invalid deactivation of port, until RxDv and RxErr > 10.24탎ec low
+--           RxErr HIGH -> invalid
+--            if invalid deactivation of port, until RxDv and RxErr > 10.24탎ec low
 --
-------------------------------------------------------------------------------------------------------------------------
--- Version History
-------------------------------------------------------------------------------------------------------------------------
--- 2009-08-07  	V0.01   			Converted from V1.1 to first official version.
--- 2011-07-23  	V0.10	zelenkaj	Consideration of RX Error signal and jitter (converted from V2.3)
--- 2011-08-03  	V0.11	zelenkaj	translated comments
--- 2011-11-18  	V0.12	zelenkaj	bypass filter by generic
--- 2011-11-28	V0.13	zelenkaj	Changed reset level to high-active
--- 2012-04-19   V0.20   zelenkaj    Redesign with fsm, Preamble-check improvement
--- 2012-05-21   V0.21   muelhausens changed timeout of fs_FRMnopre to 660ns
-------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
 
-library ieee;                                                                                 
-use ieee.std_logic_unsigned.all;                                                             
+library ieee;
+use ieee.std_logic_unsigned.all;
 use ieee.std_logic_1164.all;
 use ieee.std_logic_arith.all;
 
 
 ENTITY openFILTER is
-	Generic (
-				bypassFilter		:		boolean := false
-			);
-    Port    (   Rst					: in    std_logic;
+    Generic (
+                bypassFilter        :        boolean := false
+            );
+    Port    (   Rst                    : in    std_logic;
                 Clk                 : in    std_logic;
                 nCheckShortFrames   : in    std_logic := '0';   -- Rx Port von Hub;
                 RxDvIn              : in    std_logic;
@@ -84,11 +74,11 @@ ARCHITECTURE rtl OF openFILTER IS
       RxDv : std_logic;
       RxDat: std_logic_vector(1 downto 0);
     end record;
-    
+
     type aRxSetArr is array (3 downto 0) of aRxSet;
     type aFiltState is (fs_init, fs_GAP2short, fs_GAPext, fs_GAPok, fs_FRMnopre,
                         fs_FRMpre2short, fs_FRMpreOk, fs_FRM2short, fs_FRMok, fs_FRM2long, fs_BlockAll);
-     
+
     signal FiltState     : aFiltState;
     signal RxDel         : aRxSetArr;
     signal FrameShift    : std_logic;
@@ -100,15 +90,15 @@ BEGIN
 
 disFilter : if bypassFilter generate
 begin
-	RxDvOut <= RxDvIn;
-	RxDatOut <= RxDatIn;
-	TxEnOut <= TxEnIn;
-	TxDatOut <= TxDatIn;
+    RxDvOut <= RxDvIn;
+    RxDatOut <= RxDatIn;
+    TxEnOut <= TxEnIn;
+    TxDatOut <= TxDatIn;
 end generate;
 
 enFilter : if not bypassFilter generate
 begin
-    
+
     -- IN --
     RxDel(0).RxDv  <= RxDvIn;
     RxDel(0).RxDat <= RxDatIn;
@@ -133,7 +123,7 @@ begin
 
 fsm: PROCESS(Rst, Clk)
   VARIABLE RstStCnt : std_logic;
-begin 
+begin
   if Rst = '1' then
     StCnt               <= (others => '0');
     FiltState           <= fs_init;
@@ -150,14 +140,14 @@ begin
    case FiltState is
 -------------------------------- INIT ---------------------------------------
      when fs_init =>
-       FiltState <= fs_GAP2short; RstStCnt  := '1'; 
+       FiltState <= fs_GAP2short; RstStCnt  := '1';
 
 
 
 -------------------------------- GAP 2 SHORT --------------------------------
      when fs_GAP2short =>
        FrameShift <= '0';
-       IF StCnt(4) = '1'              then FiltState <= fs_GAPext;                      END IF;   -- 360ns 
+       IF StCnt(4) = '1'              then FiltState <= fs_GAPext;                      END IF;   -- 360ns
        IF RxDel(0).RxDv = '1'         then FiltState <= fs_BlockAll;   RstStCnt := '1'; END IF;   -- Gap < 360 ns -> too short -> Block Filter
 
 
@@ -180,7 +170,7 @@ begin
             IF RxDel(0).RxDat = "01" then FiltState <= fs_FRMpre2short;                            -- GAP > 960ns -> OK -> Start Frame (preamble already beginning)
             ELSE                          FiltState <= fs_FRMnopre;                                -- GAP > 960ns -> OK -> Start Frame and wait of preamble
             END IF;
-        END IF;   
+        END IF;
 
 
 
@@ -197,12 +187,12 @@ begin
      when fs_FRMpre2short =>
        IF RxDel(0).RxDat /= "01" or                                                               -- preamble wrong               -> Block Filter
           (RxDel(0).RxDv = '0'   and RxDel(1).RxDv = '0')
-                                    then FiltState <= fs_BlockAll;     RstStCnt := '1'; 
+                                    then FiltState <= fs_BlockAll;     RstStCnt := '1';
        ELSIF StCnt(3) = '1'         then FiltState <= fs_FRMpreOk;                      END IF;   -- preamble ok for 180 ns       -> Preamble OK
 
 
 -------------------------------- FRAME CHECK PREAMBLE OK ---------------
-     when fs_FRMpreOk => 
+     when fs_FRMpreOk =>
        IF RxDel(0).RxDat /= "01"                  then FiltState <= fs_FRMok;                     END IF;   -- preamble done                -> Start Frame
        IF (StCnt(5) = '1' and StCnt(2) = '1') or                                                            -- preamble to long for 740 ns  -> Block Filter
           (RxDel(0).RxDv = '0' and RxDel(1).RxDv = '0')
@@ -238,6 +228,6 @@ begin
 
   end if;
 end process;
-    
+
 end generate;
 END rtl;

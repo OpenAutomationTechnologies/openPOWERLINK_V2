@@ -1,7 +1,7 @@
-------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
 -- Global package
 --
--- 	  Copyright (C) 2012 B&R
+--       Copyright (C) 2012 B&R
 --
 --    Redistribution and use in source and binary forms, with or without
 --    modification, are permitted provided that the following conditions
@@ -33,11 +33,11 @@
 --    POSSIBILITY OF SUCH DAMAGE.
 --
 --
-------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
 -- Version History
-------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
 -- 2012-02-07   zelenkaj    Derived from global package
-------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
 
 library ieee;
 use ieee.std_logic_1164.all;
@@ -55,7 +55,7 @@ package Global is
 
     function MAX (a : natural; b : natural) return natural;
     function MIN (a : natural; b : natural) return natural;
-    
+
     function integerToBoolean (a : integer) return boolean;
     function booleanToInteger (a : boolean) return integer;
 
@@ -77,29 +77,29 @@ package body Global is
     function MAX (a : natural; b : natural) return natural is
         variable vRes : natural;
     begin
-        
+
         if a > b then
             vRes := a;
         else
             vRes := b;
         end if;
-        
+
         return vRes;
-        
+
     end function;
 
     function MIN (a : natural; b : natural) return natural is
         variable vRes : natural;
     begin
-        
+
         if a < b then
             vRes := a;
         else
             vRes := b;
         end if;
-        
+
         return vRes;
-        
+
     end function;
 
     function integerToBoolean (a : integer) return boolean is
@@ -113,7 +113,7 @@ package body Global is
 
         return vRes;
     end function;
-    
+
     function booleanToInteger (a : boolean) return integer is
         variable vRes : integer;
     begin

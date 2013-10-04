@@ -1,7 +1,7 @@
-------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
 -- n sychronizer of the async fifo
 --
--- 	  Copyright (C) 2009 B&R
+--       Copyright (C) 2009 B&R
 --
 --    Redistribution and use in source and binary forms, with or without
 --    modification, are permitted provided that the following conditions
@@ -33,15 +33,10 @@
 --    POSSIBILITY OF SUCH DAMAGE.
 --
 -- Note: A general implementation of a asynchronous fifo which is
---			using a dual port ram. This file is the n sychronizer.
+--            using a dual port ram. This file is the n sychronizer.
 --
-------------------------------------------------------------------------------------------------------------------------
--- Version History
-------------------------------------------------------------------------------------------------------------------------
--- 2011-09-22	V0.01	mairt		first version
--- 2011-10-14	V0.02	zelenkaj	add an additional sync stage
--- 2011-11-25	V0.03	mairt		omitted reset out
-------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
 library ieee;
 use ieee.std_logic_1164.all;
 entity synchronizer_g is
@@ -63,11 +58,11 @@ begin
 --      if (reset='1') then
 --         meta_reg <= (others=>'0');
 --         sync_reg <= (others=>'0');
---		 sync_reg1 <= (others => '0');
+--         sync_reg1 <= (others => '0');
       if (clk'event and clk='1') then
          meta_reg <= meta_next;
          sync_reg <= sync_next;
-		 sync_reg1 <= sync_next1;
+         sync_reg1 <= sync_next1;
       end if;
    end process;
    -- next-state logic

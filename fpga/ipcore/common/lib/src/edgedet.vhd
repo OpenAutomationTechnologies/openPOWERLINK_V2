@@ -1,17 +1,5 @@
 -------------------------------------------------------------------------------
 --
--- Title       : sync
--- Design      : plk_mn
---
--------------------------------------------------------------------------------
---
--- File        : edgedet.vhd
--- Generated   : Wed Jul 27 09:33:40 2011
--- From        : interface description file
--- By          : Itf2Vhdl ver. 1.22
---
--------------------------------------------------------------------------------
---
 --    (c) B&R, 2011
 --
 --    Redistribution and use in source and binary forms, with or without
@@ -44,13 +32,6 @@
 --    POSSIBILITY OF SUCH DAMAGE.
 --
 -------------------------------------------------------------------------------
---
--- 2011-07-26  	V0.01	zelenkaj    First version
--- 2011-11-29	V0.02	zelenkaj	omitted out reset
--- 2011-12-12	V0.03	zelenkaj	reduced to one FF
--- 2012-07-30   V0.04   zelenkaj    reverted to two FFs to reduce glitch
---
--------------------------------------------------------------------------------
 
 LIBRARY ieee;
 USE ieee.std_logic_1164.all;
@@ -58,30 +39,30 @@ USE ieee.std_logic_arith.all;
 USE ieee.std_logic_unsigned.all;
 
 ENTITY edgeDet IS
-	PORT (
-			din							: IN	STD_LOGIC;
-			rising						: OUT	STD_LOGIC;
-			falling						: OUT	STD_LOGIC;
-			any							: OUT	STD_LOGIC;
-			clk							: IN	STD_LOGIC;
-			rst							: IN	STD_LOGIC
-	);
+    PORT (
+            din                            : IN    STD_LOGIC;
+            rising                        : OUT    STD_LOGIC;
+            falling                        : OUT    STD_LOGIC;
+            any                            : OUT    STD_LOGIC;
+            clk                            : IN    STD_LOGIC;
+            rst                            : IN    STD_LOGIC
+    );
 END ENTITY edgeDet;
 
 ARCHITECTURE rtl OF edgeDet IS
-	signal RegDin, RegDinL : std_logic;
+    signal RegDin, RegDinL : std_logic;
 BEGIN
-	
-	any <= RegDinL xor RegDin;
-	falling <= RegDinL and not RegDin;
-	rising <= not RegDinL and RegDin;
-	
-	process(clk)
-	begin
-		if rising_edge(clk) then
-			RegDin <= din;
+
+    any <= RegDinL xor RegDin;
+    falling <= RegDinL and not RegDin;
+    rising <= not RegDinL and RegDin;
+
+    process(clk)
+    begin
+        if rising_edge(clk) then
+            RegDin <= din;
             RegDinL <= RegDin;
-		end if;
-	end process;
-	
+        end if;
+    end process;
+
 END ARCHITECTURE rtl;

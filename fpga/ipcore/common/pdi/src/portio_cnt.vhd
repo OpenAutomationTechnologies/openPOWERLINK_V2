@@ -1,7 +1,7 @@
-------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
 -- Simple Port I/O valid pulse counter
 --
--- 	  Copyright (C) 2010 B&R
+--       Copyright (C) 2010 B&R
 --
 --    Redistribution and use in source and binary forms, with or without
 --    modification, are permitted provided that the following conditions
@@ -32,11 +32,7 @@
 --    ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 --    POSSIBILITY OF SUCH DAMAGE.
 --
-------------------------------------------------------------------------------------------------------------------------
--- Version History
-------------------------------------------------------------------------------------------------------------------------
--- 2011-09-14  	V0.01	zelenkaj    Extract from portio.vhd
-------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
 
 LIBRARY ieee;
 USE ieee.std_logic_1164.all;
@@ -44,56 +40,56 @@ USE ieee.std_logic_arith.all;
 USE ieee.std_logic_unsigned.all;
 
 entity portio_cnt is
-	generic (
-		maxVal 			:		integer := 50 --clock ticks of pcp_clk
-	);
-	port (
-		clk				:		in std_logic;
-		rst				:		in std_logic;
-		pulse			:		in std_logic;
-		valid			:		out std_logic
-	);
+    generic (
+        maxVal             :        integer := 50 --clock ticks of pcp_clk
+    );
+    port (
+        clk                :        in std_logic;
+        rst                :        in std_logic;
+        pulse            :        in std_logic;
+        valid            :        out std_logic
+    );
 end entity portio_cnt;
 
 architecture rtl of portio_cnt is
 signal cnt : integer range 0 to maxVal-2;
 signal tc, en : std_logic;
 begin
-	genCnter : if maxVal > 1 generate
-		tc <= '1' when cnt = maxVal-2 else '0';
-		valid <= en or pulse;
-		
-		counter : process(clk, rst)
-		begin
-			if rst = '1' then
-				cnt <= 0;
-			elsif clk = '1' and clk'event then
-				if tc = '1' then
-					cnt <= 0;
-				elsif en = '1' then
-					cnt <= cnt + 1;
-				else
-					cnt <= 0;
-				end if;
-			end if;
-		end process;
-		
-		enGen : process(clk, rst)
-		begin
-			if rst = '1' then
-				en <= '0';
-			elsif clk = '1' and clk'event then
-				if pulse = '1' then
-					en <= '1';
-				elsif tc = '1' then
-					en <= '0';
-				end if;
-			end if;
-		end process;
-	end generate;
-	
-	genSimple : if maxVal = 1 generate
-		valid <= pulse;
-	end generate;
-	
+    genCnter : if maxVal > 1 generate
+        tc <= '1' when cnt = maxVal-2 else '0';
+        valid <= en or pulse;
+
+        counter : process(clk, rst)
+        begin
+            if rst = '1' then
+                cnt <= 0;
+            elsif clk = '1' and clk'event then
+                if tc = '1' then
+                    cnt <= 0;
+                elsif en = '1' then
+                    cnt <= cnt + 1;
+                else
+                    cnt <= 0;
+                end if;
+            end if;
+        end process;
+
+        enGen : process(clk, rst)
+        begin
+            if rst = '1' then
+                en <= '0';
+            elsif clk = '1' and clk'event then
+                if pulse = '1' then
+                    en <= '1';
+                elsif tc = '1' then
+                    en <= '0';
+                end if;
+            end if;
+        end process;
+    end generate;
+
+    genSimple : if maxVal = 1 generate
+        valid <= pulse;
+    end generate;
+
 end architecture rtl;

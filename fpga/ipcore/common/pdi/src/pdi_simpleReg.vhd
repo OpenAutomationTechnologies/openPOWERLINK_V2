@@ -1,7 +1,7 @@
-------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
 -- Process Data Interface (PDI) simple register
 --
--- 	  Copyright (C) 2011 B&R
+--       Copyright (C) 2011 B&R
 --
 --    Redistribution and use in source and binary forms, with or without
 --    modification, are permitted provided that the following conditions
@@ -32,58 +32,55 @@
 --    ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 --    POSSIBILITY OF SUCH DAMAGE.
 --
-------------------------------------------------------------------------------------------------------------------------
--- Version History
-------------------------------------------------------------------------------------------------------------------------
--- 2011-09-14  	V0.01	zelenkaj    extract from pdi.vhd
-------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
 LIBRARY ieee;
 USE ieee.std_logic_1164.all;
 USE ieee.std_logic_arith.all;
 USE ieee.std_logic_unsigned.all;
 
 entity pdiSimpleReg is
-	generic (
-			iAddrWidth_g				:		integer := 10; --only use effective addr range (e.g. 2kB leads to iAddrWidth_g := 10)
-			iBaseMap2_g					:		integer := 0; --base address in dpr
-			iDprAddrWidth_g				:		integer := 12
-	);
-			
-	port (   
-			--memory mapped interface
-			sel							: in	std_logic;
-			wr							: in	std_logic;
-			rd							: in	std_logic;
-			addr						: in	std_logic_vector(iAddrWidth_g-1 downto 0);
-			be							: in	std_logic_vector(3 downto 0);
-			din							: in	std_logic_vector(31 downto 0);
-			dout						: out	std_logic_vector(31 downto 0);
-			--dpr interface (from PCP/AP to DPR)
-			dprAddrOff					: out	std_logic_vector(iDprAddrWidth_g downto 0);
-			dprDin						: out	std_logic_vector(31 downto 0);
-			dprDout						: in	std_logic_vector(31 downto 0);
-			dprBe						: out	std_logic_vector(3 downto 0);
-			dprWr						: out	std_logic
-			
-	);
+    generic (
+            iAddrWidth_g                :        integer := 10; --only use effective addr range (e.g. 2kB leads to iAddrWidth_g := 10)
+            iBaseMap2_g                    :        integer := 0; --base address in dpr
+            iDprAddrWidth_g                :        integer := 12
+    );
+
+    port (
+            --memory mapped interface
+            sel                            : in    std_logic;
+            wr                            : in    std_logic;
+            rd                            : in    std_logic;
+            addr                        : in    std_logic_vector(iAddrWidth_g-1 downto 0);
+            be                            : in    std_logic_vector(3 downto 0);
+            din                            : in    std_logic_vector(31 downto 0);
+            dout                        : out    std_logic_vector(31 downto 0);
+            --dpr interface (from PCP/AP to DPR)
+            dprAddrOff                    : out    std_logic_vector(iDprAddrWidth_g downto 0);
+            dprDin                        : out    std_logic_vector(31 downto 0);
+            dprDout                        : in    std_logic_vector(31 downto 0);
+            dprBe                        : out    std_logic_vector(3 downto 0);
+            dprWr                        : out    std_logic
+
+    );
 end entity pdiSimpleReg;
 
 architecture rtl of pdiSimpleReg is
-signal addrRes							:		std_logic_vector(dprAddrOff'range);
+signal addrRes                            :        std_logic_vector(dprAddrOff'range);
 begin
-	
-	--assign content to dpr
-	dprDin		<=	din;
-	dprBe		<=	be;
-	dprWr		<=	wr		when	sel = '1'		else
-					'0';
-	dout		<=	dprDout	when	sel = '1'		else
-					(others => '0');
-	dprAddrOff	<=	addrRes when	sel = '1'		else
-					(others => '0');
-	
-	--address conversion
-	---map external address mapping into dpr
-	addrRes <= '0' & conv_std_logic_vector(iBaseMap2_g, addrRes'length - 1);
-		
+
+    --assign content to dpr
+    dprDin        <=    din;
+    dprBe        <=    be;
+    dprWr        <=    wr        when    sel = '1'        else
+                    '0';
+    dout        <=    dprDout    when    sel = '1'        else
+                    (others => '0');
+    dprAddrOff    <=    addrRes when    sel = '1'        else
+                    (others => '0');
+
+    --address conversion
+    ---map external address mapping into dpr
+    addrRes <= '0' & conv_std_logic_vector(iBaseMap2_g, addrRes'length - 1);
+
 end architecture rtl;

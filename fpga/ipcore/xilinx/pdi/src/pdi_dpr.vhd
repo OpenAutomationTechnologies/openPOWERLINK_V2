@@ -1,7 +1,7 @@
-------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
 -- Process Data Interface (PDI) DPR for Xilinx
 --
--- 	  Copyright (C) 2011 B&R
+--       Copyright (C) 2011 B&R
 --
 --    Redistribution and use in source and binary forms, with or without
 --    modification, are permitted provided that the following conditions
@@ -32,57 +32,52 @@
 --    ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 --    POSSIBILITY OF SUCH DAMAGE.
 --
-------------------------------------------------------------------------------------------------------------------------
--- Version History
-------------------------------------------------------------------------------------------------------------------------
--- 2011-11-17  	V0.01	zelenkaj	First version
--- 2011-12-06	V0.02	zelenkaj	Uses openMAC DPR implementation
-------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
 
 LIBRARY ieee;
 USE ieee.std_logic_1164.all;
 
 ENTITY pdi_dpr IS
-	GENERIC
-	(
-		NUM_WORDS		: INTEGER := 1024;
-		LOG2_NUM_WORDS	: INTEGER := 10
-	);
-	PORT
-	(
-		address_a		: IN STD_LOGIC_VECTOR (LOG2_NUM_WORDS-1 DOWNTO 0);
-		address_b		: IN STD_LOGIC_VECTOR (LOG2_NUM_WORDS-1 DOWNTO 0);
-		byteena_a		: IN STD_LOGIC_VECTOR (3 DOWNTO 0) :=  (OTHERS => '1');
-		byteena_b		: IN STD_LOGIC_VECTOR (3 DOWNTO 0) :=  (OTHERS => '1');
-		clock_a		: IN STD_LOGIC  := '1';
-		clock_b		: IN STD_LOGIC ;
-		data_a		: IN STD_LOGIC_VECTOR (31 DOWNTO 0);
-		data_b		: IN STD_LOGIC_VECTOR (31 DOWNTO 0);
-		wren_a		: IN STD_LOGIC  := '0';
-		wren_b		: IN STD_LOGIC  := '0';
-		q_a		: OUT STD_LOGIC_VECTOR (31 DOWNTO 0);
-		q_b		: OUT STD_LOGIC_VECTOR (31 DOWNTO 0)
-	);
+    GENERIC
+    (
+        NUM_WORDS        : INTEGER := 1024;
+        LOG2_NUM_WORDS    : INTEGER := 10
+    );
+    PORT
+    (
+        address_a        : IN STD_LOGIC_VECTOR (LOG2_NUM_WORDS-1 DOWNTO 0);
+        address_b        : IN STD_LOGIC_VECTOR (LOG2_NUM_WORDS-1 DOWNTO 0);
+        byteena_a        : IN STD_LOGIC_VECTOR (3 DOWNTO 0) :=  (OTHERS => '1');
+        byteena_b        : IN STD_LOGIC_VECTOR (3 DOWNTO 0) :=  (OTHERS => '1');
+        clock_a        : IN STD_LOGIC  := '1';
+        clock_b        : IN STD_LOGIC ;
+        data_a        : IN STD_LOGIC_VECTOR (31 DOWNTO 0);
+        data_b        : IN STD_LOGIC_VECTOR (31 DOWNTO 0);
+        wren_a        : IN STD_LOGIC  := '0';
+        wren_b        : IN STD_LOGIC  := '0';
+        q_a        : OUT STD_LOGIC_VECTOR (31 DOWNTO 0);
+        q_b        : OUT STD_LOGIC_VECTOR (31 DOWNTO 0)
+    );
 END pdi_dpr;
 
 architecture struct of pdi_dpr is
-	constant cActivated : std_logic := '1';
+    constant cActivated : std_logic := '1';
 begin
-	
-	abuseMacDpr : entity work.dc_dpr_be
-	generic map (
+
+    abuseMacDpr : entity work.dc_dpr_be
+    generic map (
         gDoInit => true,
         WIDTH => data_a'length,
-		ADDRWIDTH => LOG2_NUM_WORDS
-	)
-	port map (
-		clkA => clock_a,		clkB => clock_b,
-		enA => cActivated,	enB => cActivated,
-		addrA => address_a, 	addrB => address_b,
-		diA => data_a,			diB => data_b,
-		doA => q_a, 			doB => q_b,
-		weA => wren_a, 		weB => wren_b,
-		beA => byteena_a,		beB => byteena_b
-	);
-	
+        ADDRWIDTH => LOG2_NUM_WORDS
+    )
+    port map (
+        clkA => clock_a,        clkB => clock_b,
+        enA => cActivated,    enB => cActivated,
+        addrA => address_a,     addrB => address_b,
+        diA => data_a,            diB => data_b,
+        doA => q_a,             doB => q_b,
+        weA => wren_a,         weB => wren_b,
+        beA => byteena_a,        beB => byteena_b
+    );
+
 end architecture struct;
