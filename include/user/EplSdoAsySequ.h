@@ -73,7 +73,7 @@
 #define _EPLSDOASYSEQU_H_
 
 #include <sdo.h>
-#include "user/EplSdoUdpu.h"
+#include <user/sdoudp.h>
 #include "user/EplSdoAsndu.h"
 #include "event.h"
 #include "user/EplTimeru.h"
