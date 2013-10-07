@@ -8,11 +8,11 @@
 		</buildSystem>
 		<cconfiguration id="preference.org.eclipse.cdt.managedbuilder.core.configurationDataProvider.424612572">
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
-				<configuration artifactName="demo_directIO" buildProperties="" description="" id="preference.org.eclipse.cdt.managedbuilder.core.configurationDataProvider.424612572" name="Nios II" parent="org.eclipse.cdt.build.core.prefbase.cfg">
+				<configuration artifactName="demo_cn_embedded" buildProperties="" description="" id="preference.org.eclipse.cdt.managedbuilder.core.configurationDataProvider.424612572" name="Nios II" parent="org.eclipse.cdt.build.core.prefbase.cfg">
 					<folderInfo id="preference.org.eclipse.cdt.managedbuilder.core.configurationDataProvider.424612572." name="/" resourcePath="">
 						<toolChain id="altera.nios2.mingw.gcc4.927127622" name="MinGW Nios II GCC4" superClass="altera.nios2.mingw.gcc4">
 							<targetPlatform id="altera.nios2.mingw.gcc4.961714352" name="Nios II" superClass="altera.nios2.mingw.gcc4"/>
-							<builder buildPath="${workspace_loc://demo_directIO}" id="cdt.managedbuild.target.gnu.builder.cygwin.base.1402394731" keepEnvironmentInBuildfile="false" managedBuildOn="false" name="Gnu Make Builder" superClass="cdt.managedbuild.target.gnu.builder.cygwin.base">
+							<builder buildPath="${workspace_loc://demo_cn_embedded}" id="cdt.managedbuild.target.gnu.builder.cygwin.base.1402394731" keepEnvironmentInBuildfile="false" managedBuildOn="false" name="Gnu Make Builder" superClass="cdt.managedbuild.target.gnu.builder.cygwin.base">
 								<outputEntries>
 									<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="outputPath" name=""/>
 								</outputEntries>
@@ -200,7 +200,8 @@
 								</option>
 								<option id="gnu.c.compiler.option.include.paths.467157462" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="../../../../../../../include"/>
-									<listOptionValue builtIn="false" value="../generic"/>
+									<listOptionValue builtIn="false" value="../../../../../../../examples/common/lcd"/>
+									<listOptionValue builtIn="false" value="../../../../../../../examples/common/gpio"/>
 									<listOptionValue builtIn="false" value="../../../../../../../libs/circbuf"/>
 									<listOptionValue builtIn="false" value="../../../../../../../objdicts/CiA401_CN"/>
 									<listOptionValue builtIn="false" value="../../../../../../../stack/src"/>
@@ -521,6 +522,6 @@
 		</cconfiguration>
 	</storageModule>
 	<storageModule moduleId="cdtBuildSystem" version="4.0.0">
-		<project id="demo_directIO.null.113450652" name="demo_directIO"/>
+		<project id="demo_cn_embedded.null.113450652" name="demo_cn_embedded"/>
 	</storageModule>
 </cproject>
