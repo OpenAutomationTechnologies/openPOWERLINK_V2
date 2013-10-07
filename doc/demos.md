@@ -25,3 +25,10 @@ configuration manager (CFM) to initialize the controlled nodes. It uses a
 network configuration created with the openCONFIGURATOR tool.
   
 The demo can be found in: `examples/demo_mn_qt`
+
+# Embedded CN demo {#sect_demos_cnembedded}
+
+This demo implements a POWERLINK CN digital I/O node according to the CiA401
+profile. It is implemented as an embedded application.
+
+It is located in: `examples/demo_cn_embedded`
