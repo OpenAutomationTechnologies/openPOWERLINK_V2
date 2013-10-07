@@ -55,7 +55,8 @@ BSP_DIR=./bsp
 ##################################
 # Include path
 INCLUDES=". \
-${STACKROOT_DIR}/examples/arch/altera_nios2/no_os/gnu/generic \
+${STACKROOT_DIR}/examples/common/gpio \
+${STACKROOT_DIR}/examples/common/lcd \
 ${STACKROOT_DIR}/include \
 ${STACKROOT_DIR}/libs/omethlib \
 ${STACKROOT_DIR}/libs/circbuf \
@@ -128,8 +129,10 @@ ${STACKROOT_DIR}/stack/src/user/sdo/sdo-asndu.c \
 ${STACKROOT_DIR}/stack/src/user/sdo/sdo-asysequ.c \
 ${STACKROOT_DIR}/stack/src/user/sdo/sdo-comu.c \
 ${STACKROOT_DIR}/stack/src/user/ledu.c \
-${STACKROOT_DIR}/examples/arch/altera_nios2/no_os/gnu/generic/lcd.c \
-${STACKROOT_DIR}/examples/arch/altera_nios2/no_os/gnu/generic/lcdl-16207.c \
-demo_main.c \
-systemComponents.c\
+${STACKROOT_DIR}/examples/common/lcd/lcd.c \
+${STACKROOT_DIR}/examples/common/lcd/lcdl-16207.c \
+${STACKROOT_DIR}/examples/common/gpio/gpio-nios2.c \
+${STACKROOT_DIR}/examples/demo_cn_embedded/app.c \
+${STACKROOT_DIR}/examples/demo_cn_embedded/event.c \
+${STACKROOT_DIR}/examples/demo_cn_embedded/main.c \
 "

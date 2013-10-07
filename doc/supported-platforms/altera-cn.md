@@ -71,7 +71,7 @@ Steps 1-5 can be carried out by calling `$ ./create-this-fpga` in a "Nios II Com
 5. Start the compilation in the Quartus II window via menu *Processing* -> *Start Compilation*.
 6. Open "Nios II Command Shell"
 7. Use the software design available in the openPOWERLINK subdirectory \n
-   `examples/arch/altera_nios2/no_os/gnu/demo_directIO`. \n
+   `examples/arch/altera_nios2/no_os/gnu/demo_cn_embedded`. \n
    Change to the directory and open the create-this-app.settings file.
    Make sure that the SOPC_DIR variable is set to the board design of your choice. \n
    If you want to run the INK demo set `SOPC_DIR=../../../../../fpga/boards/altera/TERASIC_DE2-115/cn_directIO/` \n
@@ -95,7 +95,7 @@ Note: You can combine step 2-3 by typing the following into the
    For the TERASIC_DE2-115 (INK) it is located in the following subdirectory:\n
    `openPOWERLINK_ROOT/fpga/boards/altera/TERASIC_DE2-115/cn_directIO/ink_de2-115.sof`\n
 3. To Download the ELF file to the target, change to the openPOWERLINK subdirectory:\n
-   `openPOWERLINK_ROOT/examples/arch/altera_nios2/no_os/gnu/demo_directIO`\n
+   `openPOWERLINK_ROOT/examples/arch/altera_nios2/no_os/gnu/demo_cn_embedded`\n
    And call:\n
    `$ make download-elf`\n
 4. Enjoy the running POWERLINK network.
@@ -107,7 +107,7 @@ completed.
 1. Start the Nios II Software Build Tools for Eclipse
 2. Select menu *File -> Import...*
 3. Select the import source *General* -> *Existing Projects into Workspace*
-4. Browse to `examples/arch/altera_nios2/no_os/gnu/demo_directIO` (via the button *Browse...*)
+4. Browse to `examples/arch/altera_nios2/no_os/gnu/demo_cn_embedded` (via the button *Browse...*)
 5. Press the button *Finish*.
 
 # How to write the program to local flash  {#sect_altera-cn_flash}
