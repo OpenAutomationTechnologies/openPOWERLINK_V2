@@ -335,11 +335,11 @@ BYTE            abFilterMask[31],
 
     EdrvInstance_l.m_InitParam = *pEdrvInitParam_p;
 
-    ////////////////////
-    // initialize phy //
-    ////////////////////
-    omethMiiControl(EDRV_MII_BASE, MII_CTRL_RESET);
+    // the phys are reset by the initial hw state
+    //  If sw comes here again, no phy reset is done!
     EDRV_USLEEP(EDRV_PHY_RST_PULSE_US);
+
+    // activate phys and wait until ready
     omethMiiControl(EDRV_MII_BASE, MII_CTRL_ACTIVE);
     EDRV_USLEEP(EDRV_PHY_RST_READY_US);
 
