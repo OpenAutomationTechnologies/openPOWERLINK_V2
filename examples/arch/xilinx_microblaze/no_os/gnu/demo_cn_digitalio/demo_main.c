@@ -479,7 +479,7 @@ static int openPowerlink(BYTE bNodeId_p)
     EplApiInitParam.m_abMacAddress[5] = bNodeId_p;
     EplApiInitParam.m_uiNodeId = bNodeId_p;
     EplApiInitParam.m_dwIpAddress = ip;
-    EplApiInitParam.m_uiIsochrTxMaxPayload = 36;
+    EplApiInitParam.m_uiIsochrTxMaxPayload = 40;
     EplApiInitParam.m_uiIsochrRxMaxPayload = 1490;
     EplApiInitParam.m_dwPresMaxLatency = 2000;
     EplApiInitParam.m_dwAsndMaxLatency = 2000;
@@ -487,7 +487,7 @@ static int openPowerlink(BYTE bNodeId_p)
     EplApiInitParam.m_dwFeatureFlags = -1;
     EplApiInitParam.m_dwCycleLen = CYCLE_LEN;
     EplApiInitParam.m_uiPreqActPayloadLimit = 36;
-    EplApiInitParam.m_uiPresActPayloadLimit = 36;
+    EplApiInitParam.m_uiPresActPayloadLimit = 40;
     EplApiInitParam.m_uiMultiplCycleCnt = 0;
     EplApiInitParam.m_uiAsyncMtu = 300;
     EplApiInitParam.m_uiPrescaler = 2;

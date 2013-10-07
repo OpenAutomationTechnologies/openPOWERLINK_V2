@@ -180,9 +180,9 @@ tEplKernel processSync(void)
 
     cnt_l++;
 
-    nodeVar_l[0].input = pProcessImageOut_l->CN1_M00_Digital_Input_8_Bit_Byte_1;
-    nodeVar_l[1].input = pProcessImageOut_l->CN32_M00_Digital_Input_8_Bit_Byte_1;
-    nodeVar_l[2].input = pProcessImageOut_l->CN110_M00_Digital_Input_8_Bit_Byte_1;
+    nodeVar_l[0].input = pProcessImageOut_l->CN1_M00_DigitalInput_00h_AU8_DigitalInput;
+    nodeVar_l[1].input = pProcessImageOut_l->CN32_M00_DigitalInput_00h_AU8_DigitalInput;
+    nodeVar_l[2].input = pProcessImageOut_l->CN110_M00_DigitalInput_00h_AU8_DigitalInput;
 
     for (i = 0; (i < MAX_NODES) && (usedNodeIds_l[i] != 0); i++)
     {
@@ -228,9 +228,9 @@ tEplKernel processSync(void)
         }
     }
 
-    pProcessImageIn_l->CN1_M00_Digital_Ouput_8_Bit_Byte_1 = nodeVar_l[0].leds;
-    pProcessImageIn_l->CN32_M00_Digital_Ouput_8_Bit_Byte_1 = nodeVar_l[1].leds;
-    pProcessImageIn_l->CN110_M00_Digital_Ouput_8_Bit_Byte_1 = nodeVar_l[2].leds;
+    pProcessImageIn_l->CN1_M00_DigitalOutput_00h_AU8_DigitalOutput = nodeVar_l[0].leds;
+    pProcessImageIn_l->CN32_M00_DigitalOutput_00h_AU8_DigitalOutput = nodeVar_l[1].leds;
+    pProcessImageIn_l->CN110_M00_DigitalOutput_00h_AU8_DigitalOutput = nodeVar_l[2].leds;
 
     ret = oplk_exchangeProcessImageIn();
 

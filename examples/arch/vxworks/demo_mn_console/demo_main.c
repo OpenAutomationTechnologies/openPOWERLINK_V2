@@ -802,9 +802,9 @@ tEplKernel PUBLIC AppCbSync(void)
 
     uiCnt_g++;
 
-    nodeVar_g[0].m_uiInput = pProcessImageOut_l->CN1_M00_Digital_Input_8_Bit_Byte_1;
-    nodeVar_g[1].m_uiInput = pProcessImageOut_l->CN32_M00_Digital_Input_8_Bit_Byte_1;
-    nodeVar_g[2].m_uiInput = pProcessImageOut_l->CN110_M00_Digital_Input_8_Bit_Byte_1;
+    nodeVar_g[0].m_uiInput = pProcessImageOut_l->CN1_M00_DigitalInput_00h_AU8_DigitalInput;
+    nodeVar_g[1].m_uiInput = pProcessImageOut_l->CN32_M00_DigitalInput_00h_AU8_DigitalInput;
+    nodeVar_g[2].m_uiInput = pProcessImageOut_l->CN110_M00_DigitalInput_00h_AU8_DigitalInput;
 
     for (i = 0; (i < MAX_NODES) && (iUsedNodeIds_g[i] != 0); i++)
     {
@@ -850,9 +850,9 @@ tEplKernel PUBLIC AppCbSync(void)
         }
     }
 
-    pProcessImageIn_l->CN1_M00_Digital_Ouput_8_Bit_Byte_1 = nodeVar_g[0].m_uiLeds;
-    pProcessImageIn_l->CN32_M00_Digital_Ouput_8_Bit_Byte_1 = nodeVar_g[1].m_uiLeds;
-    pProcessImageIn_l->CN110_M00_Digital_Ouput_8_Bit_Byte_1 = nodeVar_g[2].m_uiLeds;
+    pProcessImageIn_l->CN1_M00_DigitalOutput_00h_AU8_DigitalOutput = nodeVar_g[0].m_uiLeds;
+    pProcessImageIn_l->CN32_M00_DigitalOutput_00h_AU8_DigitalOutput = nodeVar_g[1].m_uiLeds;
+    pProcessImageIn_l->CN110_M00_DigitalOutput_00h_AU8_DigitalOutput = nodeVar_g[2].m_uiLeds;
 
     EplRet = oplk_exchangeProcessImageIn();
 
