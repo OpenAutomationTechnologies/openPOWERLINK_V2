@@ -215,11 +215,11 @@ static tEplKernel initPowerlink(UINT32 cycleLen_p, const BYTE* macAddr_p, UINT32
 
     initParam.m_dwFeatureFlags            = UINT_MAX;
     initParam.m_dwCycleLen                = cycleLen_p;       // required for error detection
-    initParam.m_uiIsochrTxMaxPayload      = 36;               // const
+    initParam.m_uiIsochrTxMaxPayload      = 40;               // const
     initParam.m_uiIsochrRxMaxPayload      = 36;               // const
     initParam.m_dwPresMaxLatency          = 50000;            // const; only required for IdentRes
     initParam.m_uiPreqActPayloadLimit     = 36;               // required for initialisation (+28 bytes)
-    initParam.m_uiPresActPayloadLimit     = 36;               // required for initialisation of Pres frame (+28 bytes)
+    initParam.m_uiPresActPayloadLimit     = 40;               // required for initialisation of Pres frame (+28 bytes)
     initParam.m_dwAsndMaxLatency          = 150000;           // const; only required for IdentRes
     initParam.m_uiMultiplCycleCnt         = 0;                // required for error detection
     initParam.m_uiAsyncMtu                = 1500;             // required to set up max frame size
