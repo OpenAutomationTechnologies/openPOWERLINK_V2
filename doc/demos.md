@@ -32,3 +32,10 @@ This demo implements a POWERLINK CN digital I/O node according to the CiA401
 profile. It is implemented as an embedded application.
 
 It is located in: `examples/demo_cn_embedded`
+
+# Embedded MN demo {#sect_demos_mnembedded}
+
+This demo implements a POWERLINK MN with CFM. It is implemented as an embedded
+application.
+
+It is located in: `examples/demo_mn_embedded`
