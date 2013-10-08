@@ -70,17 +70,17 @@ Steps 1-5 can be carried out by calling `$ ./create-this-fpga` in a "Nios II Com
 6. Open "Nios II Command Shell"
 7. There are two software designs available in the openPOWERLINK subdirectory \n
    `stack/make/driver/altera_nios2/mn_pcp` (for the Pcp) and \n
-   `examples/arch/altera_nios2/no_os/gnu/demo_mn (for the host)`. \n
+   `examples/arch/altera_nios2/no_os/gnu/demo_mn_embedded (for the host)`. \n
    Change to each of the directories and open the create-this-app.settings file.
    Make sure that the SOPC_DIR variable is set to the board design of your choice. \n
    If you want to run the single FPGA solution set `SOPC_DIR=../../../../../fpga/boards/altera/TERASIC_DE2-115/mn_dual_nios2/` \n
    If you want to run the two FPGA demo set `SOPC_DIR=../../../../../fpga/boards/altera/TERASIC_DE2-115/mn_par_pcp/` for the Pcp and \n
    `SOPC_DIR=../../../../../../fpga/boards/altera/TERASIC_DE2-115/mn_dual_nios2/` for the host.
-8. Run script *create-this-app* in `mn_pcp` and `demo_mn` to create the Makefile for application and BSP. \n
+8. Run script *create-this-app* in `mn_pcp` and `demo_mn_embedded` to create the Makefile for application and BSP. \n
    `$ ./create-this-app`
 9. Run make to build the ELF file after changing the sources. (The script create-this-app will do this automatically) \n
    `$ make`
-10. Rebuild the Makefile for `mn_pcp` and `demo_mn` also, if the Nios II Design was changed inside Qsys. \n
+10. Rebuild the Makefile for `mn_pcp` and `demo_mn_embedded` also, if the Nios II Design was changed inside Qsys. \n
     `$ ./create-this-app --rebuild`
 
 # How to run the demo {#sect_altera-mn_run}
@@ -107,7 +107,7 @@ Requirement: Steps in the previous section *How to build the binary* are complet
 1. Start the Nios II Software Build Tools for Eclipse
 2. Select menu *File -> Import...*
 3. Select the import source *General* -> *Existing Projects into Workspace*
-4. Browse to `examples/arch/altera_nios2/no_os/gnu/demo_mn` (via the button *Browse...*)
+4. Browse to `examples/arch/altera_nios2/no_os/gnu/demo_mn_embedded` (via the button *Browse...*)
 5. Press the button *Finish*.
 6. Browse to `stack/make/driver/altera_nios2/mn_pcp` (via the button *Browse...*)
 7. Press the button *Finish*.

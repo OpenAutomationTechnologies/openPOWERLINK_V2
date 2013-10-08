@@ -155,8 +155,8 @@ if [ -n "$REBUILD" -o ! -f $BSP_DIR/public.mk ]; then
     popd >> /dev/null
 
     #workaround for linker.x issue
-    chmod +x fix-linkerx
-    ./fix-linkerx
+    chmod +x ${STACKROOT_DIR}/tools/altera_nios2/fix-linkerx
+    ${STACKROOT_DIR}/tools/altera_nios2/fix-linkerx
 fi
 
 # Set TCI memory size
