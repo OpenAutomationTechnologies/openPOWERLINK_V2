@@ -4,6 +4,7 @@ incremental_db/
 cn_directIO/
 *.bak
 *.bsf
+*.cmp
 *.done
 *.html
 *.jdi

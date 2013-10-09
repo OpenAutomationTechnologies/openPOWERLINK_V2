@@ -10,12 +10,7 @@ QUARTUS_PRJ=ink_de2-115
 # Qsys toplevel name
 QSYS_PRJ=mn_dual_nios2
 
-ip-generate --outputdirectory=${QSYS_PRJ}/synthesis/ \
-            --file-set=QUARTUS_SYNTH \
-            --reportfile=sopcinfo:${QSYS_PRJ}.sopcinfo \
-            --reportfile=html:${QSYS_PRJ}.html \
-            --reportfile=qip:${QSYS_PRJ}/synthesis/${QSYS_PRJ}.qip \
-            --component-file=${QSYS_PRJ}.qsys
+qsys-generate ${QSYS_PRJ}.qsys --synthesis=VERILOG
 
 #check return
 if [ $? -ne 0 ]; then

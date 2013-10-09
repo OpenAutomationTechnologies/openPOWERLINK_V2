@@ -4,6 +4,7 @@ incremental_db/
 mn_dual_nios2/
 *.bak
 *.bsf
+*.cmp
 *.done
 *.html
 *.jdi

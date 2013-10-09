@@ -26,7 +26,7 @@ which supports the following interface implementations:
 
 # Requirements {#sect_altera-mn_requirements}
 
-- Altera Quartus II v12.1 SP1 (Web Edition is also possible)
+- Altera Quartus II v13.0 SP1 (Web Edition is also possible)
   - <https://www.altera.com/download/archives/arc-index.jsp>
   - <ftp://ftp.altera.com/outgoing/release/>
 - Experiences with this development environment is required.

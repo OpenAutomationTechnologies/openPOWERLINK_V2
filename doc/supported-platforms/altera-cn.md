@@ -25,7 +25,7 @@ This file contains documentation for the openPOWERLINK stack on Altera NiosII.
 
 - Development Board TERASIC_DE2-115 (INK Board)
 
-- Altera Quartus II v12.1 SP1 (Web Edition is also possible)
+- Altera Quartus II v13.0 SP1 (Web Edition is also possible)
   - <https://www.altera.com/download/archives/arc-index.jsp>
   - <ftp://ftp.altera.com/outgoing/release/>
 

@@ -4,6 +4,7 @@ incremental_db/
 mn_par_host/
 *.bak
 *.bsf
+*.cmp
 *.done
 *.html
 *.jdi

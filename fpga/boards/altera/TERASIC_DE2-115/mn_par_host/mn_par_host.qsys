@@ -171,7 +171,7 @@
  <parameter name="projectName" value="ink_de2-115.qpf" />
  <parameter name="sopcBorderPoints" value="false" />
  <parameter name="systemHash" value="1" />
- <parameter name="timeStamp" value="1377073196257" />
+ <parameter name="timeStamp" value="1381301590396" />
  <parameter name="useTestBenchNamingPattern" value="false" />
  <instanceScript></instanceScript>
  <interface name="clk50" internal="clk50.clk_in" type="clock" dir="end" />
@@ -209,19 +209,19 @@
    type="interrupt"
    dir="start" />
  <interface name="lcd" internal="lcd.external" type="conduit" dir="end" />
- <module kind="clock_source" version="12.1" enabled="1" name="clk50">
+ <module kind="clock_source" version="13.0" enabled="1" name="clk50">
   <parameter name="clockFrequency" value="50000000" />
   <parameter name="clockFrequencyKnown" value="true" />
   <parameter name="inputClockFrequency" value="0" />
   <parameter name="resetSynchronousEdges" value="NONE" />
  </module>
- <module kind="clock_source" version="12.1" enabled="1" name="clk100">
+ <module kind="clock_source" version="13.0" enabled="1" name="clk100">
   <parameter name="clockFrequency" value="100000000" />
   <parameter name="clockFrequencyKnown" value="true" />
   <parameter name="inputClockFrequency" value="0" />
   <parameter name="resetSynchronousEdges" value="NONE" />
  </module>
- <module kind="clock_source" version="12.1" enabled="1" name="clk25">
+ <module kind="clock_source" version="13.0" enabled="1" name="clk25">
   <parameter name="clockFrequency" value="25000000" />
   <parameter name="clockFrequencyKnown" value="true" />
   <parameter name="inputClockFrequency" value="0" />
@@ -241,23 +241,23 @@
  </module>
  <module
    kind="altera_avalon_epcs_flash_controller"
-   version="12.1"
+   version="13.0.1.99.2"
    enabled="1"
    name="epcs_flash_controller_0">
   <parameter name="autoSelectASMIAtom" value="true" />
+  <parameter name="useASMIAtom" value="false" />
   <parameter name="clockRate" value="50000000" />
   <parameter name="deviceFamilyString" value="Cyclone IV E" />
-  <parameter name="useASMIAtom" value="false" />
+  <parameter name="autoInitializationFileName">$${FILENAME}_epcs_flash_controller_0</parameter>
  </module>
  <module
    kind="altera_avalon_pio"
-   version="12.1"
+   version="13.0.1.99.2"
    enabled="1"
    name="status_led_pio">
   <parameter name="bitClearingEdgeCapReg" value="false" />
   <parameter name="bitModifyingOutReg" value="false" />
   <parameter name="captureEdge" value="false" />
-  <parameter name="clockRate" value="50000000" />
   <parameter name="direction" value="Output" />
   <parameter name="edgeType" value="RISING" />
   <parameter name="generateIRQ" value="false" />
@@ -266,10 +266,11 @@
   <parameter name="simDoTestBenchWiring" value="false" />
   <parameter name="simDrivenValue" value="0" />
   <parameter name="width" value="2" />
+  <parameter name="clockRate" value="50000000" />
  </module>
  <module
    kind="altera_avalon_sysid_qsys"
-   version="12.1"
+   version="13.0"
    enabled="1"
    name="sysid">
   <parameter name="id" value="0" />
@@ -284,164 +285,175 @@
    name="multiplexedAdbus_0">
   <parameter name="AUTO_CLOCK_CLOCK_RATE" value="100000000" />
  </module>
- <module kind="altera_avalon_lcd_16207" version="12.1" enabled="1" name="lcd" />
+ <module
+   kind="altera_avalon_lcd_16207"
+   version="13.0.1.99.2"
+   enabled="1"
+   name="lcd" />
  <connection
    kind="reset"
-   version="12.1"
+   version="13.0"
    start="clk50.clk_reset"
    end="clk100.clk_in_reset" />
  <connection
    kind="reset"
-   version="12.1"
+   version="13.0"
    start="clk25.clk_reset"
    end="clk50.clk_in_reset" />
  <connection
    kind="reset"
-   version="12.1"
+   version="13.0"
    start="clk25.clk_reset"
    end="clk100.clk_in_reset" />
- <connection kind="clock" version="12.1" start="clk100.clk" end="host_0.clk100" />
- <connection kind="clock" version="12.1" start="clk50.clk" end="host_0.clk50" />
+ <connection kind="clock" version="13.0" start="clk100.clk" end="host_0.clk100" />
+ <connection kind="clock" version="13.0" start="clk50.clk" end="host_0.clk50" />
  <connection
    kind="reset"
-   version="12.1"
+   version="13.0"
    start="clk50.clk_reset"
    end="host_0.rst_clk100" />
  <connection
    kind="reset"
-   version="12.1"
+   version="13.0"
    start="clk100.clk_reset"
    end="host_0.rst_clk100" />
  <connection
    kind="reset"
-   version="12.1"
+   version="13.0"
    start="clk25.clk_reset"
    end="host_0.rst_clk100" />
  <connection
    kind="reset"
-   version="12.1"
+   version="13.0"
    start="clk50.clk_reset"
    end="host_0.rst_clk50" />
  <connection
    kind="reset"
-   version="12.1"
+   version="13.0"
    start="clk100.clk_reset"
    end="host_0.rst_clk50" />
  <connection
    kind="reset"
-   version="12.1"
+   version="13.0"
    start="clk25.clk_reset"
    end="host_0.rst_clk50" />
  <connection
    kind="clock"
-   version="12.1"
+   version="13.0"
    start="clk50.clk"
    end="epcs_flash_controller_0.clk" />
  <connection
    kind="avalon"
-   version="12.1"
+   version="13.0"
    start="host_0.slow_bridge"
    end="epcs_flash_controller_0.epcs_control_port">
   <parameter name="arbitrationPriority" value="1" />
   <parameter name="baseAddress" value="0x0000" />
+  <parameter name="defaultConnection" value="false" />
  </connection>
  <connection
    kind="reset"
-   version="12.1"
+   version="13.0"
    start="clk50.clk_reset"
    end="epcs_flash_controller_0.reset" />
  <connection
    kind="reset"
-   version="12.1"
+   version="13.0"
    start="clk100.clk_reset"
    end="epcs_flash_controller_0.reset" />
  <connection
    kind="reset"
-   version="12.1"
+   version="13.0"
    start="clk25.clk_reset"
    end="epcs_flash_controller_0.reset" />
  <connection
    kind="clock"
-   version="12.1"
+   version="13.0"
    start="clk50.clk"
    end="status_led_pio.clk" />
  <connection
    kind="avalon"
-   version="12.1"
+   version="13.0"
    start="host_0.slow_bridge"
    end="status_led_pio.s1">
   <parameter name="arbitrationPriority" value="1" />
   <parameter name="baseAddress" value="0x0800" />
+  <parameter name="defaultConnection" value="false" />
  </connection>
  <connection
    kind="reset"
-   version="12.1"
+   version="13.0"
    start="clk50.clk_reset"
    end="status_led_pio.reset" />
  <connection
    kind="reset"
-   version="12.1"
+   version="13.0"
    start="clk100.clk_reset"
    end="status_led_pio.reset" />
  <connection
    kind="reset"
-   version="12.1"
+   version="13.0"
    start="clk25.clk_reset"
    end="status_led_pio.reset" />
- <connection kind="clock" version="12.1" start="clk50.clk" end="sysid.clk" />
- <connection kind="reset" version="12.1" start="clk50.clk_reset" end="sysid.reset" />
+ <connection kind="clock" version="13.0" start="clk50.clk" end="sysid.clk" />
+ <connection kind="reset" version="13.0" start="clk50.clk_reset" end="sysid.reset" />
  <connection
    kind="reset"
-   version="12.1"
+   version="13.0"
    start="clk100.clk_reset"
    end="sysid.reset" />
- <connection kind="reset" version="12.1" start="clk25.clk_reset" end="sysid.reset" />
+ <connection kind="reset" version="13.0" start="clk25.clk_reset" end="sysid.reset" />
  <connection
    kind="avalon"
-   version="12.1"
+   version="13.0"
    start="host_0.slow_bridge"
    end="sysid.control_slave">
   <parameter name="arbitrationPriority" value="1" />
   <parameter name="baseAddress" value="0x0810" />
+  <parameter name="defaultConnection" value="false" />
  </connection>
  <connection
    kind="clock"
-   version="12.1"
+   version="13.0"
    start="clk100.clk"
    end="multiplexedAdbus_0.clock" />
  <connection
    kind="avalon"
-   version="12.1"
+   version="13.0"
    start="host_0.fast_bridge"
    end="multiplexedAdbus_0.s0">
   <parameter name="arbitrationPriority" value="1" />
   <parameter name="baseAddress" value="0x0000" />
+  <parameter name="defaultConnection" value="false" />
  </connection>
  <connection
    kind="reset"
-   version="12.1"
+   version="13.0"
    start="clk50.clk_reset"
    end="multiplexedAdbus_0.reset" />
  <connection
    kind="reset"
-   version="12.1"
+   version="13.0"
    start="clk100.clk_reset"
    end="multiplexedAdbus_0.reset" />
  <connection
    kind="reset"
-   version="12.1"
+   version="13.0"
    start="clk25.clk_reset"
    end="multiplexedAdbus_0.reset" />
- <connection kind="clock" version="12.1" start="clk50.clk" end="lcd.clk" />
+ <connection kind="clock" version="13.0" start="clk50.clk" end="lcd.clk" />
  <connection
    kind="avalon"
-   version="12.1"
+   version="13.0"
    start="host_0.slow_bridge"
    end="lcd.control_slave">
   <parameter name="arbitrationPriority" value="1" />
   <parameter name="baseAddress" value="0x1000" />
+  <parameter name="defaultConnection" value="false" />
  </connection>
- <connection kind="reset" version="12.1" start="clk50.clk_reset" end="lcd.reset" />
- <connection kind="reset" version="12.1" start="clk100.clk_reset" end="lcd.reset" />
- <connection kind="reset" version="12.1" start="clk25.clk_reset" end="lcd.reset" />
+ <connection kind="reset" version="13.0" start="clk50.clk_reset" end="lcd.reset" />
+ <connection kind="reset" version="13.0" start="clk100.clk_reset" end="lcd.reset" />
+ <connection kind="reset" version="13.0" start="clk25.clk_reset" end="lcd.reset" />
+ <interconnectRequirement for="$system" name="qsys_mm.clockCrossingAdapter" value="HANDSHAKE" />
+ <interconnectRequirement for="$system" name="qsys_mm.maxAdditionalLatency" value="0" />
 </system>

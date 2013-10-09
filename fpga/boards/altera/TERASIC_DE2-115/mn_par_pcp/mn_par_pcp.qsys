@@ -171,7 +171,7 @@
  <parameter name="projectName" value="ink_de2-115.qpf" />
  <parameter name="sopcBorderPoints" value="false" />
  <parameter name="systemHash" value="1" />
- <parameter name="timeStamp" value="1376410936958" />
+ <parameter name="timeStamp" value="1381301613947" />
  <parameter name="useTestBenchNamingPattern" value="false" />
  <instanceScript></instanceScript>
  <interface name="clk50" internal="clk50.clk_in" type="clock" dir="end" />
@@ -223,7 +223,7 @@
    internal="hostinterface_0.parHost"
    type="conduit"
    dir="end" />
- <module kind="clock_source" version="12.1" enabled="1" name="clk50">
+ <module kind="clock_source" version="13.0" enabled="1" name="clk50">
   <parameter name="clockFrequency" value="50000000" />
   <parameter name="clockFrequencyKnown" value="true" />
   <parameter name="inputClockFrequency" value="0" />
@@ -252,13 +252,13 @@
   <parameter name="gui_sizeRpdo" value="10240" />
   <parameter name="AUTO_C0_CLOCK_RATE" value="100000000" />
  </module>
- <module kind="clock_source" version="12.1" enabled="1" name="clk100">
+ <module kind="clock_source" version="13.0" enabled="1" name="clk100">
   <parameter name="clockFrequency" value="100000000" />
   <parameter name="clockFrequencyKnown" value="true" />
   <parameter name="inputClockFrequency" value="0" />
   <parameter name="resetSynchronousEdges" value="NONE" />
  </module>
- <module kind="clock_source" version="12.1" enabled="1" name="clk25">
+ <module kind="clock_source" version="13.0" enabled="1" name="clk25">
   <parameter name="clockFrequency" value="25000000" />
   <parameter name="clockFrequencyKnown" value="true" />
   <parameter name="inputClockFrequency" value="0" />
@@ -278,17 +278,18 @@
  </module>
  <module
    kind="altera_avalon_epcs_flash_controller"
-   version="12.1"
+   version="13.0.1.99.2"
    enabled="1"
    name="epcs_flash_controller_0">
   <parameter name="autoSelectASMIAtom" value="true" />
+  <parameter name="useASMIAtom" value="false" />
   <parameter name="clockRate" value="50000000" />
   <parameter name="deviceFamilyString" value="Cyclone IV E" />
-  <parameter name="useASMIAtom" value="false" />
+  <parameter name="autoInitializationFileName">$${FILENAME}_epcs_flash_controller_0</parameter>
  </module>
  <module
    kind="altera_generic_tristate_controller"
-   version="12.1"
+   version="13.0"
    enabled="1"
    name="sram_0">
   <parameter name="TCM_ADDRESS_W" value="21" />
@@ -345,7 +346,7 @@
  </module>
  <module
    kind="altera_tristate_conduit_bridge"
-   version="12.1"
+   version="13.0"
    enabled="1"
    name="tri_state_0">
   <parameter name="INTERFACE_INFO"><![CDATA[<info><slave name="tcs"><master name="sram_0.tcm"><pin role="" width="1" type="Invalid" output_name="" output_enable_name="" input_name="" /><pin role="address" width="21" type="Output" output_name="tcm_address_out" output_enable_name="" input_name="" /><pin role="write_n" width="1" type="Output" output_name="tcm_write_n_out" output_enable_name="" input_name="" /><pin role="byteenable_n" width="2" type="Output" output_name="tcm_byteenable_n_out" output_enable_name="" input_name="" /><pin role="data" width="16" type="Bidirectional" output_name="tcm_data_out" output_enable_name="tcm_data_outen" input_name="tcm_data_in" /><pin role="read_n" width="1" type="Output" output_name="tcm_read_n_out" output_enable_name="" input_name="" /><pin role="chipselect_n" width="1" type="Output" output_name="tcm_chipselect_n_out" output_enable_name="" input_name="" /></master></slave></info>]]></parameter>
@@ -354,7 +355,7 @@
  </module>
  <module
    kind="altera_avalon_sysid_qsys"
-   version="12.1"
+   version="13.0"
    enabled="1"
    name="sysid">
   <parameter name="id" value="0" />
@@ -364,189 +365,197 @@
  </module>
  <connection
    kind="reset"
-   version="12.1"
+   version="13.0"
    start="clk50.clk_reset"
    end="hostinterface_0.r0" />
  <connection
    kind="clock"
-   version="12.1"
+   version="13.0"
    start="clk100.clk"
    end="hostinterface_0.c0" />
  <connection
    kind="reset"
-   version="12.1"
+   version="13.0"
    start="clk100.clk_reset"
    end="hostinterface_0.r0" />
  <connection
    kind="reset"
-   version="12.1"
+   version="13.0"
    start="clk50.clk_reset"
    end="clk100.clk_in_reset" />
  <connection
    kind="reset"
-   version="12.1"
+   version="13.0"
    start="clk25.clk_reset"
    end="clk50.clk_in_reset" />
  <connection
    kind="reset"
-   version="12.1"
+   version="13.0"
    start="clk25.clk_reset"
    end="hostinterface_0.r0" />
  <connection
    kind="reset"
-   version="12.1"
+   version="13.0"
    start="clk25.clk_reset"
    end="clk100.clk_in_reset" />
- <connection kind="clock" version="12.1" start="clk50.clk" end="pcp_0.clk50" />
- <connection kind="clock" version="12.1" start="clk100.clk" end="pcp_0.clk100" />
+ <connection kind="clock" version="13.0" start="clk50.clk" end="pcp_0.clk50" />
+ <connection kind="clock" version="13.0" start="clk100.clk" end="pcp_0.clk100" />
  <connection
    kind="reset"
-   version="12.1"
+   version="13.0"
    start="clk50.clk_reset"
    end="pcp_0.rst_clk50" />
  <connection
    kind="reset"
-   version="12.1"
+   version="13.0"
    start="clk100.clk_reset"
    end="pcp_0.rst_clk50" />
  <connection
    kind="reset"
-   version="12.1"
+   version="13.0"
    start="clk25.clk_reset"
    end="pcp_0.rst_clk50" />
  <connection
    kind="reset"
-   version="12.1"
+   version="13.0"
    start="clk50.clk_reset"
    end="pcp_0.rst_clk100" />
  <connection
    kind="reset"
-   version="12.1"
+   version="13.0"
    start="clk100.clk_reset"
    end="pcp_0.rst_clk100" />
  <connection
    kind="reset"
-   version="12.1"
+   version="13.0"
    start="clk25.clk_reset"
    end="pcp_0.rst_clk100" />
  <connection
    kind="interrupt"
-   version="12.1"
+   version="13.0"
    start="hostinterface_0.irqSync"
    end="pcp_0.sync_irq_bridge_0_sender0_irq">
   <parameter name="irqNumber" value="0" />
  </connection>
  <connection
    kind="clock"
-   version="12.1"
+   version="13.0"
    start="clk50.clk"
    end="epcs_flash_controller_0.clk" />
  <connection
    kind="reset"
-   version="12.1"
+   version="13.0"
    start="clk50.clk_reset"
    end="epcs_flash_controller_0.reset" />
  <connection
    kind="reset"
-   version="12.1"
+   version="13.0"
    start="clk100.clk_reset"
    end="epcs_flash_controller_0.reset" />
  <connection
    kind="reset"
-   version="12.1"
+   version="13.0"
    start="clk25.clk_reset"
    end="epcs_flash_controller_0.reset" />
  <connection
    kind="tristate_conduit"
-   version="12.1"
+   version="13.0"
    start="sram_0.tcm"
    end="tri_state_0.tcs" />
- <connection kind="clock" version="12.1" start="clk100.clk" end="tri_state_0.clk" />
- <connection kind="clock" version="12.1" start="clk100.clk" end="sram_0.clk" />
+ <connection kind="clock" version="13.0" start="clk100.clk" end="tri_state_0.clk" />
+ <connection kind="clock" version="13.0" start="clk100.clk" end="sram_0.clk" />
  <connection
    kind="reset"
-   version="12.1"
+   version="13.0"
    start="clk50.clk_reset"
    end="sram_0.reset" />
  <connection
    kind="reset"
-   version="12.1"
+   version="13.0"
    start="clk100.clk_reset"
    end="sram_0.reset" />
  <connection
    kind="reset"
-   version="12.1"
+   version="13.0"
    start="clk25.clk_reset"
    end="sram_0.reset" />
  <connection
    kind="reset"
-   version="12.1"
+   version="13.0"
    start="clk50.clk_reset"
    end="tri_state_0.reset" />
  <connection
    kind="reset"
-   version="12.1"
+   version="13.0"
    start="clk100.clk_reset"
    end="tri_state_0.reset" />
  <connection
    kind="reset"
-   version="12.1"
+   version="13.0"
    start="clk25.clk_reset"
    end="tri_state_0.reset" />
- <connection kind="clock" version="12.1" start="clk50.clk" end="sysid.clk" />
+ <connection kind="clock" version="13.0" start="clk50.clk" end="sysid.clk" />
  <connection
    kind="avalon"
-   version="12.1"
+   version="13.0"
    start="pcp_0.slow_bridge"
    end="sysid.control_slave">
   <parameter name="arbitrationPriority" value="1" />
   <parameter name="baseAddress" value="0x1000" />
+  <parameter name="defaultConnection" value="false" />
  </connection>
- <connection kind="reset" version="12.1" start="clk50.clk_reset" end="sysid.reset" />
+ <connection kind="reset" version="13.0" start="clk50.clk_reset" end="sysid.reset" />
  <connection
    kind="reset"
-   version="12.1"
+   version="13.0"
    start="clk100.clk_reset"
    end="sysid.reset" />
- <connection kind="reset" version="12.1" start="clk25.clk_reset" end="sysid.reset" />
+ <connection kind="reset" version="13.0" start="clk25.clk_reset" end="sysid.reset" />
  <connection
    kind="avalon"
-   version="12.1"
+   version="13.0"
    start="pcp_0.slow_bridge"
    end="hostinterface_0.pcp">
   <parameter name="arbitrationPriority" value="1" />
   <parameter name="baseAddress" value="0x0800" />
+  <parameter name="defaultConnection" value="false" />
  </connection>
  <connection
    kind="avalon"
-   version="12.1"
+   version="13.0"
    start="pcp_0.slow_bridge"
    end="epcs_flash_controller_0.epcs_control_port">
   <parameter name="arbitrationPriority" value="1" />
   <parameter name="baseAddress" value="0x0000" />
+  <parameter name="defaultConnection" value="false" />
  </connection>
  <connection
    kind="avalon"
-   version="12.1"
+   version="13.0"
    start="pcp_0.cpu_bridge"
    end="sram_0.uas">
   <parameter name="arbitrationPriority" value="1" />
   <parameter name="baseAddress" value="0x0000" />
+  <parameter name="defaultConnection" value="false" />
  </connection>
  <connection
    kind="avalon"
-   version="12.1"
+   version="13.0"
    start="pcp_0.mac_dma_bridge"
    end="sram_0.uas">
   <parameter name="arbitrationPriority" value="1" />
   <parameter name="baseAddress" value="0x0000" />
+  <parameter name="defaultConnection" value="false" />
  </connection>
  <connection
    kind="avalon"
-   version="12.1"
+   version="13.0"
    start="hostinterface_0.hostBridge"
    end="sram_0.uas">
   <parameter name="arbitrationPriority" value="1" />
   <parameter name="baseAddress" value="0x0000" />
+  <parameter name="defaultConnection" value="false" />
  </connection>
+ <interconnectRequirement for="$system" name="qsys_mm.clockCrossingAdapter" value="HANDSHAKE" />
+ <interconnectRequirement for="$system" name="qsys_mm.maxAdditionalLatency" value="1" />
 </system>
