@@ -5,8 +5,55 @@ Revision history of openPOWERLINK Protocol Stack {#page_revision_history}
 
 # Release 2 {#sect_revision_v2}
 
-## V2.0.0 {#sect_revision_v2_0_0}
+## V2.0.0 pre1 {#sect_revision_v2_0_0_pre1}
 
+This is an early preview of the upcoming openPOWERLINK release 2.0.0.
+The new code base works fairly stable on Linux, Windows and FPGA platforms.
+A lot of modules are refactored and cleaned-up but there are still several
+files which need to be reformated and renamed. The release should give
+a good overview on the new architecture and directory structure and can be
+used for testing. It is not advised to use it in productive environments!
+
+- [TASK] Update version information
+- [TASK] Update Altera demos to Quartus version 13.0sp1
+- [TASK] Update openCONFIGURATOR project Demo_3CN
+- [FIX] Fix wrong doxygen reference in obd.h
+- [TASK] Add libraries to the software manual
+- [TASK] Change documentation options in doxyfile
+- [TASK] Remove EplApiLinux.h
+- [TASK] React on termination signals in demo_cn_console
+- [TASK] React on termination signals in demo_mn_console
+- [TASK] Add support to receive termination signals in the system module
+- [TASK] Add Lcd to Altera MN demos
+- [TASK] Revise FPGA CN demos by using process image functions
+- [TASK] Add gitignore files to Xilinx demos
+- [FIX] Change Nios II /f data cache line size to 4 byte
+- [FIX] Fix FPGA MN and CN platform documentation
+- [TASK] Add inline macros to hostif library for Nios II target
+- [TASK] Add documentation for OBD module
+- [TASK] Cleanup OBD macros
+- [TASK] Rename EplObdMacro.h to obdmacro.h
+- [TASK] Reformat EplObdMacro.h
+- [TASK] Redesign OBD initialization
+- [TASK] Refactor OBD module
+- [TASK] Remove EPL_USE_DELETINST_FUNC
+- [TASK] Refactor obd.h
+- [TASK] Rename structure member variables in obd.h
+- [TASK] Rename types and variables in obd.h
+- [TASK] Reformat OBD functions
+- [TASK] Rename OBD functions
+- [TASK] Remove multi instance functionality from obd.c
+- [TASK] Rename EplObd.h to obd.h
+- [TASK] Merge OBD user and kernel module
+- [TASK] Revise section mapping for Nios II MN
+- [TASK] Add additional documentation
+- [TASK] Improve documentation
+- [TASK] Update revision information and add it to software manual
+- [TASK] Add license file to software manual
+- [TASK] Rework module documentation
+- [FIX] Fix documentation of event and error handler modules
+- [FIX] Fix documentation of DLL CAL source files
+- [TASK] Add documentation of coding rules
 - [FIX] MN/CN demo apps: Improve state change output
 - [FIX] Add missing 'break' in demo_mn_qt
 - [TASK] Remove dllcal and errhndcal shared buffer implementations
