@@ -115,6 +115,6 @@ ${STACKROOT_DIR}/examples/common/lcd/lcd.c \
 ${STACKROOT_DIR}/examples/common/lcd/lcdl-16207.c \
 ${STACKROOT_DIR}/examples/common/gpio/gpio-nios2.c \
 ${STACKROOT_DIR}/examples/demo_mn_embedded/app.c \
-${STACKROOT_DIR}/examples/demo_mn_embedded/event.c \
+${STACKROOT_DIR}/examples/demo_mn_embedded/event-mn.c \
 ${STACKROOT_DIR}/examples/demo_mn_embedded/main.c \
 "

@@ -66,7 +66,7 @@ INCLUDES=-I$(STACK_ROOT)/include \
 ##################################
 # Source files
 SRCFILES=$(APP_DIR_GEN)/main.c \
-$(APP_DIR_GEN)/event.c \
+$(APP_DIR_GEN)/event-cn.c \
 $(APP_DIR_GEN)/app.c \
 $(APP_DIR_COM)/lcd/lcd.c \
 $(APP_DIR_COM)/lcd/lcdl-null.c \
