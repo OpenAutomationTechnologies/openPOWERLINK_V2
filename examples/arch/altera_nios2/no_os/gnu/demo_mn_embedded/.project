@@ -334,9 +334,9 @@
 			<locationURI>STACK_LOC/examples/demo_mn_embedded/app.c</locationURI>
 		</link>
 		<link>
-			<name>examples/event.c</name>
+			<name>examples/event-mn.c</name>
 			<type>1</type>
-			<locationURI>STACK_LOC/examples/demo_mn_embedded/event.c</locationURI>
+			<locationURI>STACK_LOC/examples/demo_mn_embedded/event-mn.c</locationURI>
 		</link>
 		<link>
 			<name>examples/main.c</name>

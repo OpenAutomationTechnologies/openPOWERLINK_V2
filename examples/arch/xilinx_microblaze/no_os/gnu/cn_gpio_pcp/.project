@@ -87,9 +87,9 @@
 			<locationURI>STACK_LOC/examples/demo_cn_embedded/app.c</locationURI>
 		</link>
 		<link>
-			<name>event.c</name>
+			<name>event-cn.c</name>
 			<type>1</type>
-			<locationURI>STACK_LOC/examples/demo_cn_embedded/event.c</locationURI>
+			<locationURI>STACK_LOC/examples/demo_cn_embedded/event-cn.c</locationURI>
 		</link>
 		<link>
 			<name>gpio-microblaze.c</name>
