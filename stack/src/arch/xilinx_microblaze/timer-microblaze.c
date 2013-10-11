@@ -1,11 +1,10 @@
 /**
 ********************************************************************************
-\file   target-microblaze.c
+\file   timer-microblaze.c
 
-\brief  target specific functions for Microblaze without OS
+\brief  Implement system timer by using a periodic millisecond counter
 
-This target depending module provides several functions that are necessary for
-systems without shared buffer and any OS.
+Initialize the system timer and count the milliseconds
 
 \ingroup module_target
 *******************************************************************************/
@@ -40,13 +39,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <Epl.h>
 
-#include "usleep-microblaze.h"
 #include "timer-microblaze.h"
 
+#include <xintc.h>           //interrupt controller higher level
+#include <mb_interface.h>
 #include <xparameters.h>
-#include <xintc.h>         // interrupt controller
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -55,7 +53,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#define TGTCONIO_MS_IN_US(x)    (x*1000U)
 
 //------------------------------------------------------------------------------
 // module global vars
@@ -81,12 +78,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // local vars
 //------------------------------------------------------------------------------
 
+static UINT32 msCount_l = 0;
+
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
 
-static void enableInterruptMaster(void);
-static void disableInterruptMaster(void);
+static void irqHandler (void* pArg_p);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -94,206 +92,57 @@ static void disableInterruptMaster(void);
 
 //------------------------------------------------------------------------------
 /**
-\brief    Get current system tick
-
-This function returns the current system tick determined by the system timer.
-
-\return DWORD
-\retval Timer   The current timer in milliseconds
+\brief    Initialize system timer
 
 \ingroup module_target
 */
 //------------------------------------------------------------------------------
-UINT32 PUBLIC EplTgtGetTickCountMs (void)
+void timer_init(void)
 {
-    UINT32 ticks;
 
-    ticks = timer_getMSCount();
+    //register fit interrupt handler
+    XIntc_RegisterHandler(XPAR_PCP_INTC_BASEADDR, XPAR_PCP_INTC_FIT_TIMER_0_INTERRUPT_INTR,
+            (XInterruptHandler)irqHandler, 0);
 
-    return ticks;
+    //enable the fit interrupt
+    XIntc_EnableIntr(XPAR_PCP_INTC_BASEADDR, XPAR_FIT_TIMER_0_INTERRUPT_MASK);
 }
+
+
 
 //------------------------------------------------------------------------------
 /**
-\brief    enables global interrupt
+\brief    Get current timer in ms
 
-This function enables/disables global interrupts.
-
-\param  fEnable_p               TRUE = enable interrupts
-                                FALSE = disable interrupts
+\return The timer in ms
 
 \ingroup module_target
 */
 //------------------------------------------------------------------------------
-void PUBLIC EplTgtEnableGlobalInterrupt (UINT8 fEnable_p)
+UINT32 timer_getMSCount(void)
 {
-    static INT lockCount = 0;
-
-    if (fEnable_p != FALSE)
-    {   // restore interrupts
-        if (--lockCount == 0)
-        {
-            enableInterruptMaster();
-        }
-    }
-    else
-    {   // disable interrupts
-        if (lockCount == 0)
-        {
-            disableInterruptMaster();
-        }
-        lockCount++;
-    }
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief    checks if CPU is in interrupt context
-
-This function obtains if the CPU is in interrupt context.
-
-\return UINT8
-\retval TRUE                    CPU is in interrupt context
-\retval FALSE                   CPU is NOT in interrupt context
-
-\ingroup module_target
-*/
-//------------------------------------------------------------------------------
-UINT8 PUBLIC EplTgtIsInterruptContext (void)
-{
-    // No real interrupt context check is performed.
-    // This would be possible with a flag in the ISR, only.
-    // For now, the global interrupt enable flag is checked.
-
-    UINT32 glIntEn;
-
-    glIntEn = Xil_In32(XPAR_PCP_INTC_BASEADDR + XIN_MER_OFFSET) & \
-            XIN_INT_MASTER_ENABLE_MASK;
-
-    if(glIntEn == 0)
-    {
-        //master enable is off
-        return TRUE;
-    }
-    else
-    {
-        //master enable is on
-        return FALSE;
-    }
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief  Initialize target specific stuff
-
-The function initialize target specific stuff which is needed to run the
-openPOWERLINK stack.
-
-\return The function returns a tEplKernel error code.
-*/
-//------------------------------------------------------------------------------
-tEplKernel target_init(void)
-{
-    // initialize microblaze caches
-#if XPAR_MICROBLAZE_USE_ICACHE
-    microblaze_invalidate_icache();
-    microblaze_enable_icache();
-#endif
-
-#if XPAR_MICROBLAZE_USE_DCACHE
-    microblaze_invalidate_dcache();
-    microblaze_enable_dcache();
-#endif
-
-    //enable microblaze interrupts
-    microblaze_enable_interrupts();
-
-    // initialize system timer
-    timer_init();
-
-    // enable the interrupt master
-    enableInterruptMaster();
-
-    return kEplSuccessful;
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief  Cleanup target specific stuff
-
-The function cleans-up target specific stuff.
-
-\return The function returns a tEplKernel error code.
-*/
-//------------------------------------------------------------------------------
-tEplKernel target_cleanup(void)
-{
-    // disable microblaze caches
-#if XPAR_MICROBLAZE_USE_DCACHE
-    microblaze_invalidate_dcache();
-    microblaze_disable_dcache();
-#endif
-
-#if XPAR_MICROBLAZE_USE_ICACHE
-    microblaze_invalidate_icache();
-    microblaze_disable_icache();
-#endif
-
-    //disable microblaze interrupts
-    microblaze_disable_interrupts();
-
-    // disable the interrupt master
-    disableInterruptMaster();
-
-    return kEplSuccessful;
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief Sleep for the specified number of milliseconds
-
-The function makes the calling thread sleep until the number of specified
-milliseconds have elapsed.
-
-\param  milliSecond_p       Number of milliseconds to sleep
-
-\ingroup module_target
-*/
-//------------------------------------------------------------------------------
-void target_msleep (UINT32 milliSecond_p)
-{
-    usleep(TGTCONIO_MS_IN_US(milliSecond_p));
+    return msCount_l;
 }
 
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
 //============================================================================//
+
 /// \name Private Functions
 /// \{
 
 //------------------------------------------------------------------------------
 /**
-\brief Enable the global interrupt master
+\brief    User timer interrupt handler
+
+\param pArg_p       Interrupt handler argument
 
 \ingroup module_target
 */
 //------------------------------------------------------------------------------
-static void enableInterruptMaster(void)
+static void irqHandler (void* pArg_p)
 {
-    //enable global interrupt master
-    XIntc_MasterEnable(XPAR_PCP_INTC_BASEADDR);
+    msCount_l++;
 }
 
-//------------------------------------------------------------------------------
-/**
-\brief Disable the global interrupt master
-
-\ingroup module_target
-*/
-//------------------------------------------------------------------------------
-static void disableInterruptMaster(void)
-{
-    //disable global interrupt master
-    XIntc_MasterDisable(XPAR_PCP_INTC_BASEADDR);
-}
 ///\}
