@@ -49,12 +49,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <kernel/eventkcal.h>
 #include <kernel/eventkcalintf.h>
 
-#include <time.h>
-#include <fcntl.h>
-#include <pthread.h>
-#include <semaphore.h>
-#include <linux/errno.h>
-
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
 //============================================================================//
