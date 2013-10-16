@@ -178,6 +178,21 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define EPL_DLL_DISABLE_DEFERRED_RXFRAME_RELEASE    TRUE
 
 
+// Asynchronous transmit buffer for NMT frames in bytes
+#define DLLCAL_BUFFER_SIZE_TX_NMT           4096
+
+// Asynchronous transmit buffer for generic Asnd frames in bytes
+#define DLLCAL_BUFFER_SIZE_TX_GEN_ASND      8192
+
+// Asynchronous transmit buffer for generic Ethernet frames in bytes
+#define DLLCAL_BUFFER_SIZE_TX_GEN_ETH       8192
+
+// Asynchronous transmit buffer for sync response frames in bytes
+#define DLLCAL_BUFFER_SIZE_TX_SYNC          4096
+
+// Size of kernel to user queue
+#define EVENT_SIZE_CIRCBUF_KERNEL_TO_USER   8192
+
 // =========================================================================
 // OBD specific defines
 // =========================================================================
