@@ -203,8 +203,8 @@ static tEplKernel initProcessImage(void)
 
     /* Allocate process image */
     PRINTF("Initializing process image...\n");
-    PRINTF("Size of input process image: %ld\n", sizeof(PI_IN));
-    PRINTF("Size of output process image: %ld\n", sizeof (PI_OUT));
+    PRINTF("Size of input process image: %d\n", (UINT32)sizeof(PI_IN));
+    PRINTF("Size of output process image: %d\n", (UINT32)sizeof (PI_OUT));
     ret = oplk_allocProcessImage(sizeof(PI_IN), sizeof(PI_OUT));
     if (ret != kEplSuccessful)
     {
