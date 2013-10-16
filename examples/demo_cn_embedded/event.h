@@ -60,7 +60,7 @@ typedef tEplKernel (*tEventCb)(tEplApiEventType EventType_p, tEplApiEventArg* pE
 extern "C" {
 #endif
 
-void initEvents (tEventCb* pfnEventCb_p);
+void initEvents (tEventCb pfnEventCb_p);
 tEplKernel processEvents(tEplApiEventType EventType_p,
         tEplApiEventArg* pEventArg_p, void* pUserArg_p);
 

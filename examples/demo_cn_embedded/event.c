@@ -80,7 +80,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
-tEventCb pfnEventCb_l = NULL;
+static tEventCb pfnEventCb_l = NULL;
 
 //------------------------------------------------------------------------------
 // local function prototypes
@@ -109,7 +109,7 @@ The function initializes the applications event module
 \ingroup module_demo_cn_embedded
 */
 //------------------------------------------------------------------------------
-void initEvents (tEventCb* pfnEventCb_p)
+void initEvents (tEventCb pfnEventCb_p)
 {
     pfnEventCb_l = pfnEventCb_p;
 }
