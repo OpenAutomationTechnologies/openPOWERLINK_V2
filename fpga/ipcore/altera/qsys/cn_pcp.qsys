@@ -294,7 +294,7 @@
  <parameter name="projectName" value="" />
  <parameter name="sopcBorderPoints" value="false" />
  <parameter name="systemHash" value="1" />
- <parameter name="timeStamp" value="1381301123146" />
+ <parameter name="timeStamp" value="1381989445981" />
  <parameter name="useTestBenchNamingPattern" value="false" />
  <instanceScript></instanceScript>
  <interface name="clk50" internal="clk50.clk_in" type="clock" dir="end" />
@@ -571,7 +571,7 @@
   <parameter name="inputClockFrequency" value="0" />
   <parameter name="resetSynchronousEdges" value="NONE" />
  </module>
- <module kind="powerlink" version="0.2.9" enabled="1" name="powerlink_0">
+ <module kind="powerlink" version="0.3.0" enabled="1" name="powerlink_0">
   <parameter name="pcpSysId" value="1" />
   <parameter name="expertMode" value="true" />
   <parameter name="clkRateEth" value="0" />
@@ -582,7 +582,6 @@
   <parameter name="configApParallelInterface" value="8bit" />
   <parameter name="configApParSigs" value="High Active" />
   <parameter name="configApParOutSigs" value="High Active" />
-  <parameter name="configApEndian" value="Little" />
   <parameter name="configApSpi_CPOL" value="0" />
   <parameter name="configApSpi_CPHA" value="0" />
   <parameter name="configApSpi_IRQ" value="High Active" />
@@ -605,8 +604,14 @@
   <parameter name="macTxBurstSize" value="4" />
   <parameter name="macRxBurstSize" value="4" />
   <parameter name="enDmaObserver" value="true" />
+  <parameter name="macRxQueueNum" value="2" />
+  <parameter name="macRxQueue1Size" value="5" />
+  <parameter name="macRxQueue2Size" value="5" />
+  <parameter name="macRxQueue3Size" value="5" />
+  <parameter name="macRxQueue4Size" value="5" />
+  <parameter name="macRxQueue5Size" value="5" />
   <parameter name="AUTO_AP_CLK_CLOCK_RATE" value="-1" />
-  <parameter name="AUTO_CLKDMA_CLOCK_RATE" value="100000000" />
+  <parameter name="AUTO_CLKMASTER_CLOCK_RATE" value="100000000" />
   <parameter name="AUTO_CLKPKT_CLOCK_RATE" value="100000000" />
  </module>
  <module
@@ -704,11 +709,6 @@
    version="13.0"
    start="clk100.clk"
    end="powerlink_0.clkPkt" />
- <connection
-   kind="clock"
-   version="13.0"
-   start="clk100.clk"
-   end="powerlink_0.clkDma" />
  <connection
    kind="clock"
    version="13.0"
@@ -1028,6 +1028,11 @@
    version="13.0"
    start="clk100.clk_reset"
    end="sync_irq_bridge_0.clk_reset" />
+ <connection
+   kind="clock"
+   version="13.0"
+   start="clk100.clk"
+   end="powerlink_0.clkMaster" />
  <interconnectRequirement for="$system" name="qsys_mm.clockCrossingAdapter" value="HANDSHAKE" />
  <interconnectRequirement for="$system" name="qsys_mm.maxAdditionalLatency" value="0" />
 </system>
