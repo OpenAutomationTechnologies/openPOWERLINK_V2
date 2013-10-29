@@ -202,6 +202,13 @@
 //---------------------------------------------------------------------------
 // local types
 //---------------------------------------------------------------------------
+#ifdef EDRV_2NDTXQUEUE
+typedef struct _tEdrv2ndTxQueue
+{
+    tEdrvTxBuffer*      m_pBuffer;
+    DWORD               dwAbsTk;
+}tEdrv2ndTxQueue;
+#endif
 
 typedef struct _tEdrvInstance
 {
@@ -240,7 +247,7 @@ typedef struct _tEdrvInstance
 
 #ifdef EDRV_2NDTXQUEUE
     //additional tx queue
-    tEdrvTxBuffer*           m_apTxQueue[EDRV_MAX_TX_BUF2];
+    tEdrv2ndTxQueue          m_TxQueue[EDRV_MAX_TX_BUF2];
     int                      m_iTxQueueWr;
     int                      m_iTxQueueRd;
 #endif
@@ -883,7 +890,10 @@ unsigned long       ulTxLength;
             }
             else
             {
-                EdrvInstance_l.m_apTxQueue[EdrvInstance_l.m_iTxQueueWr & (EDRV_MAX_TX_BUF2-1)] = pBuffer_p;
+                tEdrv2ndTxQueue *pTxqueue = &EdrvInstance_l.m_TxQueue[EdrvInstance_l.m_iTxQueueWr & (EDRV_MAX_TX_BUF2-1)];
+                pTxqueue->m_pBuffer = pBuffer_p;
+                pTxqueue->dwAbsTk = pBuffer_p->m_dwTimeOffsetAbsTk;
+
                 EdrvInstance_l.m_iTxQueueWr++;
                 Ret = kEplSuccessful;
                 goto Exit; //packet will be sent!
@@ -1281,8 +1291,8 @@ static void EdrvIrqHandler (void* pArg_p
         tEdrvTxBuffer*         pBuffer_p;
         ometh_packet_typ*   pPacket;
         unsigned long       ulTxLength = 0U;
-
-        pBuffer_p = EdrvInstance_l.m_apTxQueue[EdrvInstance_l.m_iTxQueueRd & (EDRV_MAX_TX_BUF2-1)];
+        tEdrv2ndTxQueue *pTxqueue = &EdrvInstance_l.m_TxQueue[EdrvInstance_l.m_iTxQueueRd & (EDRV_MAX_TX_BUF2-1)];
+        pBuffer_p = pTxqueue->m_pBuffer;
 
         pPacket = GET_TYPE_BASE(ometh_packet_typ, data, pBuffer_p->m_pbBuffer);
 
@@ -1290,7 +1300,7 @@ static void EdrvIrqHandler (void* pArg_p
 
         //offset is the openMAC time tick (no conversion needed)
         ulTxLength = omethTransmitTime(EdrvInstance_l.m_hOpenMac, pPacket,
-                        EdrvCbSendAck, pBuffer_p, pBuffer_p->m_dwTimeOffsetAbsTk);
+                        EdrvCbSendAck, pBuffer_p, pTxqueue->dwAbsTk);
 
         if( ulTxLength > 0 )
         {
