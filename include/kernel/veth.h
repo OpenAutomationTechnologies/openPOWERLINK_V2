@@ -59,8 +59,6 @@ extern "C" {
 
 tEplKernel veth_addInstance(const UINT8 aSrcMac_p[6]);
 tEplKernel veth_delInstance(void);
-tEplKernel veth_setIpAdrs(UINT32 ipAddress_p, UINT32 subnetMask_p, UINT16 mtu_p);
-tEplKernel veth_setDefaultGateway(UINT32 defaultGateway_p);
 
 #ifdef __cplusplus
 }
