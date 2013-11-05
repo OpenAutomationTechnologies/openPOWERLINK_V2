@@ -137,3 +137,89 @@ void target_msleep(UINT32 milliSeconds_p)
     }
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Set IP address of specified Ethernet interface
+
+The function sets the IP address, subnetMask and MTU of an Ethernet
+interface.
+
+\param  ifName_p                Name of ethernet interface.
+\param  ipAddress_p             IP address to set for interface.
+\param  subnetMask_p            Subnet mask to set for interface.
+\param  mtu_p                   MTU to set for interface.
+
+\return The function returns a tEplKernel error code.
+
+\ingroup module_target
+*/
+//------------------------------------------------------------------------------
+tEplKernel target_setIpAdrs(char* ifName_p, UINT32 ipAddress_p, UINT32 subnetMask_p, UINT16 mtu_p)
+{
+    tEplKernel  ret = kEplSuccessful;
+    INT         iRet;
+    char        sBufferIp[16];
+    char        sBufferMask[16];
+    char        sBufferMtu[6];
+    char        command[256];
+
+    // configure IP address of virtual network interface
+    // for TCP/IP communication over the POWERLINK network
+    snprintf(sBufferIp, sizeof (sBufferIp), "%u.%u.%u.%u",
+             (UINT) (ipAddress_p >> 24), (UINT) ((ipAddress_p >> 16) & 0xFF),
+             (UINT) ((ipAddress_p >> 8) & 0xFF),(UINT) (ipAddress_p & 0xFF));
+
+    snprintf(sBufferMask, sizeof (sBufferMask), "%u.%u.%u.%u",
+             (UINT) (subnetMask_p >> 24), (UINT) ((subnetMask_p >> 16) & 0xFF),
+             (UINT) ((subnetMask_p >> 8) & 0xFF), (UINT) (subnetMask_p & 0xFF));
+
+    snprintf(sBufferMtu, sizeof (sBufferMtu), "%u", (UINT) mtu_p);
+
+    /* call ifconfig to configure the virtual network interface */
+    sprintf (command, "/sbin/ifconfig %s %s netmask %s mtu %s",
+             ifName_p, sBufferIp, sBufferMask, sBufferMtu);
+    iRet = system(command);
+    TRACE("ifconfig %s %s returned %d\n", ifName_p, sBufferIp, iRet);
+
+    return ret;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Set default gateway for Ethernet interface
+
+The function sets the default gateway of an Ethernet interface.
+
+\param  defaultGateway_p            Default gateway to set.
+
+\return The function returns a tEplKernel error code.
+
+\ingroup module_target
+*/
+//------------------------------------------------------------------------------
+tEplKernel target_setDefaultGateway(UINT32 defaultGateway_p)
+{
+    tEplKernel  ret = kEplSuccessful;
+    INT         iRet;
+    char        sBuffer[16];
+    char        command[128];
+
+    if (defaultGateway_p != 0)
+    {
+        // configure default gateway of virtual network interface
+        // for TCP/IP communication over the POWERLINK network
+        snprintf(sBuffer, sizeof (sBuffer), "%u.%u.%u.%u",
+                 (UINT) (defaultGateway_p >> 24), (UINT) ((defaultGateway_p >> 16) & 0xFF),
+                 (UINT) ((defaultGateway_p >> 8) & 0xFF), (UINT) (defaultGateway_p & 0xFF));
+
+        sprintf (command, "route del default");
+        iRet = system(command);
+        TRACE("route del default returned %d\n", iRet);
+
+        /* call route to configure the default gateway */
+        sprintf (command, "route add default gw %s", sBuffer);
+        iRet = system(command);
+        TRACE("route add default gw %s returned %d\n", sBuffer, iRet);
+    }
+    return ret;
+}
