@@ -1244,11 +1244,11 @@ static tEplKernel updateDllConfig(tEplApiInitParam* pInitParam_p, BOOL fUpdateId
 
 #if defined(CONFIG_INCLUDE_VETH)
         // configure Virtual Ethernet Driver
-        ret = veth_setIpAdrs(dllIdentParam.ipAddress, dllIdentParam.m_dwSubnetMask, (UINT16)dllConfigParam.m_uiAsyncMtu);
+        ret = target_setIpAdrs(EPL_VETH_NAME, dllIdentParam.ipAddress, dllIdentParam.subnetMask, (UINT16)dllConfigParam.asyncMtu);
         if(ret != kEplSuccessful)
             return ret;
 
-        ret = veth_setDefaultGateway(dllIdentParam.m_dwDefaultGateway);
+        ret = target_setDefaultGateway(dllIdentParam.defaultGateway);
         if(ret != kEplSuccessful)
             return ret;
 #endif
@@ -1658,6 +1658,8 @@ static tEplKernel cbCnCheckEvent(tNmtEvent nmtEvent_p)
     }
     return ret;
 }
+
+
 
 /// \}
 
