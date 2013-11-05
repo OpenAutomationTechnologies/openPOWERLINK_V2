@@ -374,6 +374,8 @@ EPLDLLEXPORT const char* EplGetEmergErrCodeStr( WORD EmergErrCode_p);
 EPLDLLEXPORT tEplKernel target_init(void);
 EPLDLLEXPORT tEplKernel target_cleanup(void);
 EPLDLLEXPORT void target_msleep(UINT32 milliSeconds_p);
+EPLDLLEXPORT tEplKernel target_setIpAdrs(char* ifName_p, UINT32 ipAddress_p, UINT32 subnetMask_p, UINT16 mtu_p);
+EPLDLLEXPORT tEplKernel target_setDefaultGateway(UINT32 defaultGateway_p);
 
 #ifdef __cplusplus
     }
