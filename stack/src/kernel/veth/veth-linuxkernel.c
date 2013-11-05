@@ -1,16 +1,11 @@
 /**
 ********************************************************************************
-\file   veth-linux.c
+\file   veth-linuxkernel.c
 
-\brief  Implementation of virtual ethernet for Linux
+\brief  Implementation of virtual Ethernet for Linux
 
-This file contains the the virtual ethernet driver for the Linux kernel
+This file contains the the virtual Ethernet driver for the Linux kernel
 implementation.
-
-\todo
-Copied todo items from old file version, what's the reasen for this todo?
-void netif_carrier_off(struct net_device *dev);
-void netif_carrier_on(struct net_device *dev);
 
 \ingroup module_veth
 *******************************************************************************/
@@ -122,7 +117,8 @@ static tEplKernel veth_receiveFrame(tFrameInfo * pFrameInfo_p);
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
-static const struct net_device_ops epl_netdev_ops = {
+static const struct net_device_ops epl_netdev_ops =
+{
     .ndo_open               = veth_open,
     .ndo_stop               = veth_close,
     .ndo_get_stats          = veth_getStats,
@@ -198,130 +194,6 @@ tEplKernel veth_delInstance(void)
     }
 
     return kEplSuccessful;
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief  Set IP address of virtual Ethernet interface
-
-The function sets the IP address, subnetMask and MTU of the virtual Ethernet
-interface.
-
-\param  ipAddress_p             IP address to set for virtual Ethernet.
-\param  subnetMask_p            Subnet mask to set for virtual Ethernet.
-\param  mtu_p                   MTU to set for virtual Ethernet.
-
-\return The function returns a tEplKernel error code.
-
-\ingroup module_veth
-*/
-//------------------------------------------------------------------------------
-tEplKernel veth_setIpAdrs(UINT32 ipAddress_p, UINT32 subnetMask_p, UINT16 mtu_p)
-{
-    tEplKernel  ret = kEplSuccessful;
-    INT         iRet;
-    char*       argv[8];
-    char*       envp[3];
-    char        sBufferIp[16];
-    char        sBufferMask[16];
-    char        sBufferMtu[6];
-
-    // configure IP address of virtual network interface
-    // for TCP/IP communication over the POWERLINK network
-    snprintf(sBufferIp, sizeof (sBufferIp), "%u.%u.%u.%u",
-             (UINT) (ipAddress_p >> 24), (UINT) ((ipAddress_p >> 16) & 0xFF),
-             (UINT) ((ipAddress_p >> 8) & 0xFF),(UINT) (ipAddress_p & 0xFF));
-
-    snprintf(sBufferMask, sizeof (sBufferMask), "%u.%u.%u.%u",
-             (UINT) (subnetMask_p >> 24), (UINT) ((subnetMask_p >> 16) & 0xFF),
-             (UINT) ((subnetMask_p >> 8) & 0xFF), (UINT) (subnetMask_p & 0xFF));
-
-    snprintf(sBufferMtu, sizeof (sBufferMtu), "%u", (UINT) mtu_p);
-
-    /* set up a minimal environment */
-    iRet = 0;
-    envp[iRet++] = "HOME=/";
-    envp[iRet++] = "PATH=/sbin:/bin:/usr/sbin:/usr/bin";
-    envp[iRet] = NULL;
-
-    /* set up the argument list */
-    iRet = 0;
-    argv[iRet++] = "/sbin/ifconfig";
-    argv[iRet++] = EPL_VETH_NAME;
-    argv[iRet++] = sBufferIp;
-    argv[iRet++] = "netmask";
-    argv[iRet++] = sBufferMask;
-    argv[iRet++] = "mtu";
-    argv[iRet++] = sBufferMtu;
-    argv[iRet] = NULL;
-
-    /* call ifconfig to configure the virtual network interface */
-    iRet = call_usermodehelper(argv[0], argv, envp, 1);
-    printk("ifconfig %s %s returned %d\n", argv[1], argv[2], iRet);
-
-    return ret;
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief  Set default gateway of virtual Ethernet interface
-
-The function sets the default gateway of the virtual Ethernet interface.
-
-\param  defaultGateway_p            Default gateway to set for virtual Ethernet.
-
-\return The function returns a tEplKernel error code.
-
-\ingroup module_veth
-*/
-//------------------------------------------------------------------------------
-tEplKernel veth_setDefaultGateway(UINT32 defaultGateway_p)
-{
-    tEplKernel  ret = kEplSuccessful;
-    INT         iRet;
-    char*       argv[6];
-    char*       envp[3];
-    char        sBuffer[16];
-
-    if (defaultGateway_p != 0)
-    {
-        // configure default gateway of virtual network interface
-        // for TCP/IP communication over the POWERLINK network
-        snprintf(sBuffer, sizeof (sBuffer), "%u.%u.%u.%u",
-                 (UINT) (defaultGateway_p >> 24), (UINT) ((defaultGateway_p >> 16) & 0xFF),
-                 (UINT) ((defaultGateway_p >> 8) & 0xFF), (UINT) (defaultGateway_p & 0xFF));
-
-        /* set up a minimal environment */
-        iRet = 0;
-        envp[iRet++] = "HOME=/";
-        envp[iRet++] = "PATH=/sbin:/bin:/usr/sbin:/usr/bin";
-        envp[iRet] = NULL;
-
-        /* set up the argument list */
-        iRet = 0;
-        argv[iRet++] = "route";
-        argv[iRet++] = "del";
-        argv[iRet++] = "default";
-        argv[iRet] = NULL;
-
-        /* call route to delete the default gateway */
-        iRet = call_usermodehelper(argv[0], argv, envp, 1);
-        printk("route del default returned %d\n", iRet);
-
-        /* set up the argument list */
-        iRet = 0;
-        argv[iRet++] = "route";
-        argv[iRet++] = "add";
-        argv[iRet++] = "default";
-        argv[iRet++] = "gw";
-        argv[iRet++] = sBuffer;
-        argv[iRet] = NULL;
-
-        /* call route to configure the default gateway */
-        iRet = call_usermodehelper(argv[0], argv, envp, 1);
-        printk("route add default gw %s returned %d\n", argv[4], iRet);
-    }
-    return ret;
 }
 
 //============================================================================//
