@@ -1,15 +1,13 @@
 -------------------------------------------------------------------------------
---! @file binaryEncoderRtl.vhd
+--! @file edgedetectorRtl.vhd
 --
---! @brief Generic Binary Encoder with reduced or-operation
+--! @brief Edge detector
 --
---! @details This generic binary encoder can be configured to any width,
---! however, mind base 2 values. In order to reduce the complexity of the
---! synthesized circuit the reduced or-operation is applied.
--- (Borrowed from academic.csuohio.edu/chu_p and applied coding styles)
+--! @details This is an edge detector circuit providing any, rising and falling
+--! edge outputs.
 -------------------------------------------------------------------------------
 --
---    (c) B&R, 2012
+--    (c) B&R, 2013
 --
 --    Redistribution and use in source and binary forms, with or without
 --    modification, are permitted provided that the following conditions
@@ -47,58 +45,76 @@ use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 use work.global.all;
 
-entity binaryEncoder is
-    generic (
-        --! One-hot data width
-        gDataWidth : natural := 8
-    );
+entity edgedetector is
     port (
-        --! One hot code input
-        iOneHot : in std_logic_vector(gDataWidth-1 downto 0);
-        --! Binary encoded output
-        oBinary : out std_logic_vector(LogDualis(gDataWidth)-1 downto 0)
+        --! Asynchronous reset
+        iArst : in std_logic;
+        --! Clock
+        iClk : in std_logic;
+        --! Enable detection
+        iEnable : in std_logic;
+        --! Data to be sampled
+        iData : in std_logic;
+        --! Rising edge detected (unregistered)
+        oRising : out std_logic;
+        --! Falling edge detected (unregistered)
+        oFalling : out std_logic;
+        --! Any edge detected (unregistered)
+        oAny : out std_logic
     );
-end binaryEncoder;
+end edgedetector;
 
-architecture rtl of binaryEncoder is
-    type tMaskArray is array(LogDualis(gDataWidth)-1 downto 0) of
-        std_logic_vector(gDataWidth-1 downto 0);
-
-    signal mask : tMaskArray;
-
-    function genOrMask return tMaskArray is
-        variable vOrMask: tMaskArray;
-    begin
-        for i in (LogDualis(gDataWidth)-1) downto 0 loop
-            for j in (gDataWidth-1) downto 0 loop
-                if (j/(2**i) mod 2)= 1 then
-                    vOrMask(i)(j) := '1';
-                else
-                    vOrMask(i)(j) := '0';
-                end if;
-            end loop;
-        end loop;
-        return vOrMask;
-    end function;
+architecture rtl of edgedetector is
+    --! Register to delay input by one clock cycle
+    signal reg          : std_logic;
+    --! Register next
+    signal reg_next     : std_logic;
+    --! Second register
+    signal reg_l        : std_logic;
+    --! Second register next
+    signal reg_l_next   : std_logic;
 begin
-    mask <= genOrMask;
+    -- assign input data to register
+    reg_next <= iData;
 
-    process (
-        mask,
-        iOneHot
+    --! Detection
+    comb : process (
+        iEnable,
+        reg,
+        reg_l
     )
-        variable rowVector : std_logic_vector(gDataWidth-1 downto 0);
-        variable tempBit : std_logic;
     begin
-        for i in (LogDualis(gDataWidth)-1) downto 0 loop
-            rowVector := iOneHot and mask(i);
-            -- reduced or operation
-            tempBit := '0';
-            for j in (gDataWidth-1) downto 0 loop
-                tempBit := tempBit or rowVector(j);
-            end loop;
-            oBinary(i) <= tempBit;
-        end loop;
+        -- default
+        oRising <= cInactivated;
+        oFalling <= cInactivated;
+        oAny <= cInactivated;
+
+        if iEnable = cActivated then
+            -- rising edge
+            if reg_l = cInactivated and reg = cActivated then
+                oRising <= cActivated;
+                oAny <= cActivated;
+            end if;
+
+            -- falling edge
+            if reg_l = cActivated and reg = cInactivated then
+                oFalling <= cActivated;
+                oAny <= cActivated;
+            end if;
+        end if;
     end process;
 
+    reg_l_next <= reg;
+
+    --! Clock process
+    regClk : process(iArst, iClk)
+    begin
+        if iArst = cActivated then
+            reg     <= cInactivated;
+            reg_l   <= cInactivated;
+        elsif rising_edge(iClk) then
+            reg     <= reg_next;
+            reg_l   <= reg_l_next;
+        end if;
+    end process;
 end rtl;

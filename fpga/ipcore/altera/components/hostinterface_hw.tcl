@@ -44,7 +44,7 @@ package require -exact qsys 12.0
 # module
 # -----------------------------------------------------------------------------
 set_module_property NAME hostinterface
-set_module_property VERSION 0.0.1
+set_module_property VERSION 0.0.4
 set_module_property INTERNAL false
 set_module_property OPAQUE_ADDRESS_MAP true
 set_module_property GROUP "Bridges and Adapters/Memory Mapped"
@@ -62,23 +62,26 @@ set_module_property ICON_PATH "img/br.png"
 # -----------------------------------------------------------------------------
 # file sets
 # -----------------------------------------------------------------------------
-add_fileset QUARTUS_SYNTH QUARTUS_SYNTH                     fileset_callback
-set_fileset_property QUARTUS_SYNTH                          TOP_LEVEL alteraHostInterface
-set_fileset_property QUARTUS_SYNTH                          ENABLE_RELATIVE_INCLUDE_PATHS false
-add_fileset_file "hostinterface/alteraHostInterfaceRtl.vhd" VHDL PATH "../../altera/hostinterface/src/alteraHostInterfaceRtl.vhd"
-add_fileset_file "hostinterface/hostInterfacePkg.vhd"       VHDL PATH "../../common/hostinterface/src/hostInterfacePkg.vhd"
-add_fileset_file "hostinterface/hostInterfaceRtl.vhd"       VHDL PATH "../../common/hostinterface/src/hostInterfaceRtl.vhd"
-add_fileset_file "hostinterface/irqGenRtl.vhd"              VHDL PATH "../../common/hostinterface/src/irqGenRtl.vhd"
-add_fileset_file "hostinterface/magicBridgeRtl.vhd"         VHDL PATH "../../common/hostinterface/src/magicBridgeRtl.vhd"
-add_fileset_file "hostinterface/statusControlRegRtl.vhd"    VHDL PATH "../../common/hostinterface/src/statusControlRegRtl.vhd"
-add_fileset_file "hostinterface/parallelInterfaceRtl.vhd"   VHDL PATH "../../common/hostinterface/src/parallelInterfaceRtl.vhd"
-add_fileset_file "addr_decoder.vhd"                         VHDL PATH "../../common/lib/src/addr_decoder.vhd"
-add_fileset_file "binaryEncoderRtl.vhd"                     VHDL PATH "../../common/lib/src/binaryEncoderRtl.vhd"
-add_fileset_file "edgedet.vhd"                              VHDL PATH "../../common/lib/src/edgedet.vhd"
-add_fileset_file "global.vhd"                               VHDL PATH "../../common/lib/src/global.vhd"
-add_fileset_file "lutFileRtl.vhd"                           VHDL PATH "../../common/lib/src/lutFileRtl.vhd"
-add_fileset_file "registerFileRtl.vhd"                      VHDL PATH "../../common/lib/src/registerFileRtl.vhd"
-add_fileset_file "sync.vhd"                                 VHDL PATH "../../common/lib/src/sync.vhd"
+add_fileset QUARTUS_SYNTH QUARTUS_SYNTH         fileset_callback
+set_fileset_property QUARTUS_SYNTH              TOP_LEVEL alteraHostInterface
+set_fileset_property QUARTUS_SYNTH              ENABLE_RELATIVE_INCLUDE_PATHS false
+add_fileset_file "dpRam-e.vhd"                  VHDL PATH "../../common/lib/src/dpRam-e.vhd"
+add_fileset_file "dpRam-rtl-a.vhd"              VHDL PATH "../../altera/lib/src/dpRam-rtl-a.vhd"
+add_fileset_file "addrDecodeRtl.vhd"            VHDL PATH "../../common/lib/src/addrDecodeRtl.vhd"
+add_fileset_file "binaryEncoderRtl.vhd"         VHDL PATH "../../common/lib/src/binaryEncoderRtl.vhd"
+add_fileset_file "cntRtl.vhd"                   VHDL PATH "../../common/lib/src/cntRtl.vhd"
+add_fileset_file "edgedetectorRtl.vhd"          VHDL PATH "../../common/lib/src/edgedetectorRtl.vhd"
+add_fileset_file "lutFileRtl.vhd"               VHDL PATH "../../common/lib/src/lutFileRtl.vhd"
+add_fileset_file "synchronizerRtl.vhd"          VHDL PATH "../../common/lib/src/synchronizerRtl.vhd"
+add_fileset_file "registerFileRtl.vhd"          VHDL PATH "../../common/lib/src/registerFileRtl.vhd"
+add_fileset_file "alteraHostInterfaceRtl.vhd"   VHDL PATH "../../altera/hostinterface/src/alteraHostInterfaceRtl.vhd"
+add_fileset_file "hostInterfacePkg.vhd"         VHDL PATH "../../common/hostinterface/src/hostInterfacePkg.vhd"
+add_fileset_file "hostInterfaceRtl.vhd"         VHDL PATH "../../common/hostinterface/src/hostInterfaceRtl.vhd"
+add_fileset_file "irqGenRtl.vhd"                VHDL PATH "../../common/hostinterface/src/irqGenRtl.vhd"
+add_fileset_file "dynamicBridgeRtl.vhd"         VHDL PATH "../../common/hostinterface/src/dynamicBridgeRtl.vhd"
+add_fileset_file "statusControlRegRtl.vhd"      VHDL PATH "../../common/hostinterface/src/statusControlRegRtl.vhd"
+add_fileset_file "parallelInterfaceRtl.vhd"     VHDL PATH "../../common/hostinterface/src/parallelInterfaceRtl.vhd"
+add_fileset_file "global.vhd"                   VHDL PATH "../../common/lib/src/global.vhd"
 
 
 # -----------------------------------------------------------------------------

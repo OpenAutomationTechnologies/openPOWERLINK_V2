@@ -1,6 +1,15 @@
+--! @file dpRam-bhv-a.vhd
+--
+--! @brief Dual Port Ram Register Transfer Level Architecture
+--
+--! @details This is the DPRAM intended for synthesis on Altera platforms only.
+--!          Timing as follows [clk-cycles]: write=0 / read=1
+--
+-------------------------------------------------------------------------------
+-- Architecture : rtl
 -------------------------------------------------------------------------------
 --
---    (c) B&R, 2011
+--    (c) B&R, 2013
 --
 --    Redistribution and use in source and binary forms, with or without
 --    modification, are permitted provided that the following conditions
@@ -32,28 +41,44 @@
 --    POSSIBILITY OF SUCH DAMAGE.
 --
 -------------------------------------------------------------------------------
-
 library ieee;
 use ieee.std_logic_1164.all;
-use ieee.std_logic_arith.all;
-use ieee.std_logic_unsigned.all;
+use ieee.numeric_std.all;
 
-entity addr_decoder is
-    generic(
-    addrWidth_g : integer := 32;
-    baseaddr_g : integer := 16#1000#;
-    highaddr_g : integer := 16#1FFF#
-    );
-     port(
-         selin : in std_logic;
-         addr : in std_logic_vector(addrWidth_g-1 downto 0);
-         selout : out std_logic
-         );
-end addr_decoder;
+--! use altera_mf library
+library altera_mf;
+use altera_mf.altera_mf_components.all;
 
-architecture rtl of addr_decoder is
+architecture rtl of dpRam is
 begin
-
-     selout <= selin when addr >= conv_std_logic_vector(baseaddr_g, addr'length) and addr <= conv_std_logic_vector(highaddr_g, addr'length) else '0';
-
-end rtl;
+    altsyncram_component : altsyncram
+        generic map (
+            operation_mode          => "BIDIR_DUAL_PORT",
+            intended_device_family  => "Cyclone IV",
+            init_file               => gInitFile,
+            numwords_a              => gNumberOfWords,
+            numwords_b              => gNumberOfWords,
+            widthad_a               => logDualis(gNumberOfWords),
+            widthad_b               => logDualis(gNumberOfWords),
+            width_a                 => gWordWidth,
+            width_b                 => gWordWidth,
+            width_byteena_a         => gWordWidth/8,
+            width_byteena_b         => gWordWidth/8
+        )
+        port map (
+            clock0      => iClk_A,
+            clocken0    => iEnable_A,
+            wren_a      => iWriteEnable_A,
+            address_a   => iAddress_A,
+            byteena_a   => iByteenable_A,
+            data_a      => iWritedata_A,
+            q_a         => oReaddata_A,
+            clock1      => iClk_B,
+            clocken1    => iEnable_B,
+            wren_b      => iWriteEnable_B,
+            address_b   => iAddress_B,
+            byteena_b   => iByteenable_B,
+            data_b      => iWritedata_B,
+            q_b         => oReaddata_B
+        );
+end architecture rtl;

@@ -1,6 +1,12 @@
 -------------------------------------------------------------------------------
+--! @file synchronizerRtl.vhd
 --
---    (c) B&R, 2011
+--! @brief Synchronizer
+--
+--! @details This is a synchronizer with configurable stage size.
+-------------------------------------------------------------------------------
+--
+--    (c) B&R, 2013
 --
 --    Redistribution and use in source and binary forms, with or without
 --    modification, are permitted provided that the following conditions
@@ -33,36 +39,52 @@
 --
 -------------------------------------------------------------------------------
 
-LIBRARY ieee;
-USE ieee.std_logic_1164.all;
-USE ieee.std_logic_arith.all;
-USE ieee.std_logic_unsigned.all;
+library ieee;
+use ieee.std_logic_1164.all;
+use ieee.numeric_std.all;
+use work.global.all;
 
-ENTITY edgeDet IS
-    PORT (
-            din                            : IN    STD_LOGIC;
-            rising                        : OUT    STD_LOGIC;
-            falling                        : OUT    STD_LOGIC;
-            any                            : OUT    STD_LOGIC;
-            clk                            : IN    STD_LOGIC;
-            rst                            : IN    STD_LOGIC
+entity synchronizer is
+    generic (
+        --! Stages
+        gStages : natural := 2;
+        --! Initialization level
+        gInit : std_logic := cInactivated
     );
-END ENTITY edgeDet;
+    port (
+        --! Asynchronous reset
+        iArst : in std_logic;
+        --! Clock
+        iClk : in std_logic;
+        --! Asynchronous input
+        iAsync : in std_logic;
+        --! Synchronous output
+        oSync : out std_logic
+    );
+end synchronizer;
 
-ARCHITECTURE rtl OF edgeDet IS
-    signal RegDin, RegDinL : std_logic;
-BEGIN
+architecture rtl of synchronizer is
+    --! Meta registers used to synchronize input signal
+    signal metaReg : std_logic_vector(gStages-1 downto 0);
+    --! Meta registers next
+    signal metaReg_next : std_logic_vector(metaReg'range);
+begin
+    -- handle wrong stage generic
+    assert (gStages > 0)
+    report "gStages must be set higher 0!" severity failure;
 
-    any <= RegDinL xor RegDin;
-    falling <= RegDinL and not RegDin;
-    rising <= not RegDinL and RegDin;
+    -- output last synchronizer stage
+    oSync <= metaReg(metaReg'left);
 
-    process(clk)
+    -- assign asynchronous signal to metaRegisters
+    metaReg_next <= metaReg(metaReg'left-1 downto 0) & iAsync;
+
+    reg : process(iArst, iClk)
     begin
-        if rising_edge(clk) then
-            RegDin <= din;
-            RegDinL <= RegDin;
+        if iArst = cActivated then
+            metaReg <= (others => gInit);
+        elsif rising_edge(iClk) then
+            metaReg <= metaReg_next;
         end if;
     end process;
-
-END ARCHITECTURE rtl;
+end rtl;

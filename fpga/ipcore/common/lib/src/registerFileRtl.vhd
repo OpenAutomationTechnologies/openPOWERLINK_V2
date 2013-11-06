@@ -90,7 +90,7 @@ begin
     --write data into Register File with respect to address
     --note: a overrules b
     regFileWrite : process(
-        iWriteA, iWriteB, iAddrA, iAddrB, 
+        iWriteA, iWriteB, iAddrA, iAddrB,
         iByteenableA, iByteenableB,
         iWritedataA, iWritedataB, regFile)
 

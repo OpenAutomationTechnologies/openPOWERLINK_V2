@@ -9,3 +9,6 @@ Revision History
 
 07.11.2012  V0.0.1      First release
 08.03.2013  V0.0.2      [FEATURE] Add asynchronous (de-)multiplexed parallel interface
+07.06.2013  V0.0.3      [FIX] Dynamic buffer address write works with 16 bit host interface
+04.10.2013  V0.0.4      [TASK] Exchange revised component library in host interface
+                        [TASK] Rework host interface bridge instance

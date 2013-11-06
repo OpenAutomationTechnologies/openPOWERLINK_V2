@@ -1,15 +1,13 @@
 -------------------------------------------------------------------------------
---! @file binaryEncoderRtl.vhd
+--! @file dpRam-e.vhd
 --
---! @brief Generic Binary Encoder with reduced or-operation
+--! @brief Dual Port Ram Entity
 --
---! @details This generic binary encoder can be configured to any width,
---! however, mind base 2 values. In order to reduce the complexity of the
---! synthesized circuit the reduced or-operation is applied.
--- (Borrowed from academic.csuohio.edu/chu_p and applied coding styles)
+--! @details This is the DPRAM entity
+--
 -------------------------------------------------------------------------------
 --
---    (c) B&R, 2012
+--    (c) B&R, 2013
 --
 --    Redistribution and use in source and binary forms, with or without
 --    modification, are permitted provided that the following conditions
@@ -45,60 +43,49 @@
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
+
+--! use global library
 use work.global.all;
 
-entity binaryEncoder is
+entity dpRam is
     generic (
-        --! One-hot data width
-        gDataWidth : natural := 8
+        --! Data width [bit]
+        gWordWidth      : natural := 32;
+        --! Number of words
+        gNumberOfWords  : natural := 1024;
+        --! Initialization file
+        gInitFile       : string := "UNUSED"
     );
     port (
-        --! One hot code input
-        iOneHot : in std_logic_vector(gDataWidth-1 downto 0);
-        --! Binary encoded output
-        oBinary : out std_logic_vector(LogDualis(gDataWidth)-1 downto 0)
+        -- PORT A
+        --! Clock of port A
+        iClk_A          : in std_logic;
+        --! Enable of port A
+        iEnable_A       : in std_logic;
+        --! Write enable of port A
+        iWriteEnable_A  : in std_logic;
+        --! Address of port A
+        iAddress_A      : in std_logic_vector(logDualis(gNumberOfWords)-1 downto 0);
+        --! Byteenable of port A
+        iByteenable_A   : in std_logic_vector(gWordWidth/8-1 downto 0);
+        --! Writedata of port A
+        iWritedata_A    : in std_logic_vector(gWordWidth-1 downto 0);
+        --! Readdata of port A
+        oReaddata_A     : out std_logic_vector(gWordWidth-1 downto 0);
+        -- PORT B
+        --! Clock of port B
+        iClk_B          : in std_logic;
+        --! Enable of port B
+        iEnable_B       : in std_logic;
+        --! Write enable of port B
+        iWriteEnable_B  : in std_logic;
+        --! Byteenable of port B
+        iByteenable_B   : in std_logic_vector(gWordWidth/8-1 downto 0);
+        --! Address of port B
+        iAddress_B      : in std_logic_vector(logDualis(gNumberOfWords)-1 downto 0);
+        --! Writedata of port B
+        iWritedata_B    : in std_logic_vector(gWordWidth-1 downto 0);
+        --! Readdata of port B
+        oReaddata_B     : out std_logic_vector(gWordWidth-1 downto 0)
     );
-end binaryEncoder;
-
-architecture rtl of binaryEncoder is
-    type tMaskArray is array(LogDualis(gDataWidth)-1 downto 0) of
-        std_logic_vector(gDataWidth-1 downto 0);
-
-    signal mask : tMaskArray;
-
-    function genOrMask return tMaskArray is
-        variable vOrMask: tMaskArray;
-    begin
-        for i in (LogDualis(gDataWidth)-1) downto 0 loop
-            for j in (gDataWidth-1) downto 0 loop
-                if (j/(2**i) mod 2)= 1 then
-                    vOrMask(i)(j) := '1';
-                else
-                    vOrMask(i)(j) := '0';
-                end if;
-            end loop;
-        end loop;
-        return vOrMask;
-    end function;
-begin
-    mask <= genOrMask;
-
-    process (
-        mask,
-        iOneHot
-    )
-        variable rowVector : std_logic_vector(gDataWidth-1 downto 0);
-        variable tempBit : std_logic;
-    begin
-        for i in (LogDualis(gDataWidth)-1) downto 0 loop
-            rowVector := iOneHot and mask(i);
-            -- reduced or operation
-            tempBit := '0';
-            for j in (gDataWidth-1) downto 0 loop
-                tempBit := tempBit or rowVector(j);
-            end loop;
-            oBinary(i) <= tempBit;
-        end loop;
-    end process;
-
-end rtl;
+end dpRam;

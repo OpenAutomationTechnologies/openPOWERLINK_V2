@@ -45,19 +45,31 @@ use ieee.numeric_std.all;
 
 package Global is
 
-    constant cActivated : std_logic := '1';
-    constant cInactivated : std_logic := '0';
+    constant cActivated     : std_logic := '1';
+    constant cInactivated   : std_logic := '0';
 
-    constant cnActivated : std_logic := '0';
-    constant cnInactivated : std_logic := '1';
+    constant cnActivated    : std_logic := '0';
+    constant cnInactivated  : std_logic := '1';
+
+    constant cByteLength    : natural := 8;
+    constant cWordLength    : natural := 2 * cByteLength;
+
+    constant cFalse         : natural := 0;
+    constant cTrue          : natural := 1;
 
     function LogDualis(cNumber : natural) return natural;
 
-    function MAX (a : natural; b : natural) return natural;
-    function MIN (a : natural; b : natural) return natural;
+    function maximum (a : natural; b : natural) return natural;
+    function minimum (a : natural; b : natural) return natural;
 
     function integerToBoolean (a : integer) return boolean;
     function booleanToInteger (a : boolean) return integer;
+
+    function byteSwap (iVector : std_logic_vector) return std_logic_vector;
+    function wordSwap (iVector : std_logic_vector) return std_logic_vector;
+
+    function reduceOr (iVector : std_logic_vector) return std_logic;
+    function reduceAnd (iVector : std_logic_vector) return std_logic;
 
 end Global;
 
@@ -74,7 +86,7 @@ package body Global is
         return vResult;
     end LogDualis;
 
-    function MAX (a : natural; b : natural) return natural is
+    function maximum (a : natural; b : natural) return natural is
         variable vRes : natural;
     begin
 
@@ -88,7 +100,7 @@ package body Global is
 
     end function;
 
-    function MIN (a : natural; b : natural) return natural is
+    function minimum (a : natural; b : natural) return natural is
         variable vRes : natural;
     begin
 
@@ -105,7 +117,7 @@ package body Global is
     function integerToBoolean (a : integer) return boolean is
         variable vRes : boolean;
     begin
-        if a = 0 then
+        if a = cFalse then
             vRes := false;
         else
             vRes := true;
@@ -118,12 +130,76 @@ package body Global is
         variable vRes : integer;
     begin
         if a = false then
-            vRes := 0;
+            vRes := cFalse;
         else
-            vRes := 1;
+            vRes := cTrue;
         end if;
 
         return vRes;
+    end function;
+
+    function byteSwap (iVector : std_logic_vector) return std_logic_vector is
+        variable vResult        : std_logic_vector(iVector'range);
+        variable vLeftIndex     : natural;
+        variable vRightIndex    : natural;
+    begin
+        assert ((iVector'length mod cByteLength) = 0)
+        report "Byte swapping can't be done with that vector!"
+        severity failure;
+
+        for i in iVector'length / cByteLength downto 1 loop
+            vLeftIndex := i;
+            vRightIndex := iVector'length / cByteLength - i + 1;
+            vResult(vLeftIndex * cByteLength - 1 downto (vLeftIndex-1) * cByteLength) :=
+            iVector(vRightIndex * cByteLength - 1 downto (vRightIndex-1) * cByteLength);
+        end loop;
+
+        return vResult;
+    end function;
+
+    function wordSwap (iVector : std_logic_vector) return std_logic_vector is
+        variable vResult        : std_logic_vector(iVector'range);
+        variable vLeftIndex     : natural;
+        variable vRightIndex    : natural;
+    begin
+        assert ((iVector'length mod cWordLength) = 0)
+        report "Word swapping can't be done with that vector!"
+        severity failure;
+
+        for i in iVector'length / cWordLength downto 1 loop
+            vLeftIndex := i;
+            vRightIndex := iVector'length / cWordLength - i + 1;
+            vResult(vLeftIndex * cWordLength - 1 downto (vLeftIndex-1) * cWordLength) :=
+            iVector(vRightIndex * cWordLength - 1 downto (vRightIndex-1) * cWordLength);
+        end loop;
+
+        return vResult;
+    end function;
+
+    function reduceOr (iVector : std_logic_vector) return std_logic is
+        variable vRes_tmp : std_logic;
+    begin
+        -- initialize result variable
+        vRes_tmp := cInactivated;
+
+        for i in iVector'range loop
+            vRes_tmp := vRes_tmp or iVector(i);
+        end loop;
+
+        return vRes_tmp;
+    end function;
+
+    function reduceAnd (iVector : std_logic_vector) return std_logic is
+        variable vRes_tmp : std_logic;
+    begin
+        -- initialize result variable
+        vRes_tmp := cActivated;
+
+        for i in iVector'range loop
+            vRes_tmp := vRes_tmp and iVector(i);
+        end loop;
+
+        return vRes_tmp;
     end function;
 
 end Global;

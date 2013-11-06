@@ -1,15 +1,14 @@
 -------------------------------------------------------------------------------
---! @file binaryEncoderRtl.vhd
+--! @file cntRtl.vhd
 --
---! @brief Generic Binary Encoder with reduced or-operation
+--! @brief Terminal Counter
 --
---! @details This generic binary encoder can be configured to any width,
---! however, mind base 2 values. In order to reduce the complexity of the
---! synthesized circuit the reduced or-operation is applied.
--- (Borrowed from academic.csuohio.edu/chu_p and applied coding styles)
+--! @details The terminal counter is a synchronous counter configured
+--!          by several generics.
+--
 -------------------------------------------------------------------------------
 --
---    (c) B&R, 2012
+--    (c) B&R, 2013
 --
 --    Redistribution and use in source and binary forms, with or without
 --    modification, are permitted provided that the following conditions
@@ -45,60 +44,67 @@
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
+--! use global library
 use work.global.all;
 
-entity binaryEncoder is
+entity cnt is
     generic (
-        --! One-hot data width
-        gDataWidth : natural := 8
+        --! Width of counter
+        gCntWidth : natural := 32;
+        --! Value that triggers the counter reset
+        gTcntVal : natural := 1000
     );
     port (
-        --! One hot code input
-        iOneHot : in std_logic_vector(gDataWidth-1 downto 0);
-        --! Binary encoded output
-        oBinary : out std_logic_vector(LogDualis(gDataWidth)-1 downto 0)
+        iArst : in std_logic;
+        iClk : in std_logic;
+        iEnable : in std_logic;
+        iSrst : in std_logic;
+        oCnt : out std_logic_vector(gCntWidth-1 downto 0);
+        oTcnt : out std_logic
     );
-end binaryEncoder;
+end entity;
 
-architecture rtl of binaryEncoder is
-    type tMaskArray is array(LogDualis(gDataWidth)-1 downto 0) of
-        std_logic_vector(gDataWidth-1 downto 0);
+architecture rtl of cnt is
+    constant cTcntVal : std_logic_vector(gCntWidth-1 downto 0) :=
+        std_logic_vector(to_unsigned(gTcntVal, gCntWidth));
 
-    signal mask : tMaskArray;
-
-    function genOrMask return tMaskArray is
-        variable vOrMask: tMaskArray;
-    begin
-        for i in (LogDualis(gDataWidth)-1) downto 0 loop
-            for j in (gDataWidth-1) downto 0 loop
-                if (j/(2**i) mod 2)= 1 then
-                    vOrMask(i)(j) := '1';
-                else
-                    vOrMask(i)(j) := '0';
-                end if;
-            end loop;
-        end loop;
-        return vOrMask;
-    end function;
+    signal cnt, cnt_next : std_logic_vector(gCntWidth-1 downto 0);
+    signal tc : std_logic;
 begin
-    mask <= genOrMask;
+    -- handle wrong generics
+    assert (gTcntVal > 0)
+    report "Terminal count value of 0 makes no sense!"
+    severity failure;
 
-    process (
-        mask,
-        iOneHot
-    )
-        variable rowVector : std_logic_vector(gDataWidth-1 downto 0);
-        variable tempBit : std_logic;
+    regClk : process(iArst, iClk)
     begin
-        for i in (LogDualis(gDataWidth)-1) downto 0 loop
-            rowVector := iOneHot and mask(i);
-            -- reduced or operation
-            tempBit := '0';
-            for j in (gDataWidth-1) downto 0 loop
-                tempBit := tempBit or rowVector(j);
-            end loop;
-            oBinary(i) <= tempBit;
-        end loop;
+        if iArst = cActivated then
+            cnt <= (others => cInactivated);
+        elsif rising_edge(iClk) then
+            cnt <= cnt_next;
+        end if;
     end process;
 
-end rtl;
+    tc <= cActivated when cnt = cTcntVal else
+          cInactivated;
+
+    oCnt <= cnt;
+    oTcnt <= tc;
+
+    comb : process(iSrst, iEnable, cnt, tc)
+    begin
+        --default
+        cnt_next <= cnt;
+
+        if iSrst = cActivated then
+            cnt_next <= (others => cInactivated);
+        elsif iEnable = cActivated then
+            if tc = cActivated then
+                cnt_next <= (others => cInactivated);
+            else
+                cnt_next <= std_logic_vector(unsigned(cnt) + 1);
+            end if;
+        end if;
+    end process;
+
+end architecture;

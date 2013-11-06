@@ -20,21 +20,21 @@ set instIrqGen  $instHostif*irqGen
 # SETUP / HOLD Timing for inputs
 
 ## CHIPSELECT
-set_max_delay -from [get_ports *] -to [get_registers $instPar*syncChipselect|s0] $hostif_in_max
-set_min_delay -from [get_ports *] -to [get_registers $instPar*syncChipselect|s0] $hostif_in_min
+set_max_delay -from [get_ports *] -to [get_registers $instPar*syncChipselect|metaReg[0]] $hostif_in_max
+set_min_delay -from [get_ports *] -to [get_registers $instPar*syncChipselect|metaReg[0]] $hostif_in_min
 
 ## WRITE
-set_max_delay -from [get_ports *] -to [get_registers $instPar*syncWrite|s0] $hostif_in_max
-set_min_delay -from [get_ports *] -to [get_registers $instPar*syncWrite|s0] $hostif_in_min
+set_max_delay -from [get_ports *] -to [get_registers $instPar*syncWrite|metaReg[0]] $hostif_in_max
+set_min_delay -from [get_ports *] -to [get_registers $instPar*syncWrite|metaReg[0]] $hostif_in_min
 
 ## READ
-set_max_delay -from [get_ports *] -to [get_registers $instPar*syncRead|s0] $hostif_in_max
-set_min_delay -from [get_ports *] -to [get_registers $instPar*syncRead|s0] $hostif_in_min
+set_max_delay -from [get_ports *] -to [get_registers $instPar*syncRead|metaReg[0]] $hostif_in_max
+set_min_delay -from [get_ports *] -to [get_registers $instPar*syncRead|metaReg[0]] $hostif_in_min
 
 ## ADDRESSLATCHENABLE
-if {[get_registers $instPar*syncAle|s0] != ""} {
-    set_max_delay -from [get_ports *] -to [get_registers $instPar*syncAle|s0] $hostif_in_max
-    set_min_delay -from [get_ports *] -to [get_registers $instPar*syncAle|s0] $hostif_in_min
+if {[get_registers $instPar*syncAle|metaReg[0]] != ""} {
+    set_max_delay -from [get_ports *] -to [get_registers $instPar*syncAle|metaReg[0]] $hostif_in_max
+    set_min_delay -from [get_ports *] -to [get_registers $instPar*syncAle|metaReg[0]] $hostif_in_min
 }
 
 ## BYTEENABLE

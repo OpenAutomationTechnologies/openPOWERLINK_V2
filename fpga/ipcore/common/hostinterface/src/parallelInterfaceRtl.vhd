@@ -52,104 +52,112 @@ use work.hostInterfacePkg.all;
 entity parallelInterface is
     generic (
         --! Data bus width
-        gDataWidth : natural := 16;
+        gDataWidth  : natural := 16;
         --! Address and Data bus are multiplexed (0 = FALSE, otherwise = TRUE)
-        gMultiplex : natural := 0
+        gMultiplex  : natural := 0
     );
     port (
         -- Parallel Interface
         --! Chipselect
-        iParHostChipselect : in std_logic := cInactivated;
+        iParHostChipselect          : in std_logic := cInactivated;
         --! Read strobe
-        iParHostRead : in std_logic := cInactivated;
+        iParHostRead                : in std_logic := cInactivated;
         --! Write strobe
-        iParHostWrite : in std_logic := cInactivated;
+        iParHostWrite               : in std_logic := cInactivated;
         --! Address Latch enable (Multiplexed only)
-        iParHostAddressLatchEnable : in std_logic := cInactivated;
+        iParHostAddressLatchEnable  : in std_logic := cInactivated;
         --! High active Acknowledge
-        oParHostAcknowledge : out std_logic := cInactivated;
+        oParHostAcknowledge         : out std_logic := cInactivated;
         --! Byteenables
-        iParHostByteenable : in std_logic_vector(gDataWidth/cByte-1 downto 0) := (others => cInactivated);
+        iParHostByteenable          : in std_logic_vector(gDataWidth/cByte-1 downto 0) := (others => cInactivated);
         --! Address bus (Demultiplexed, word-address)
-        iParHostAddress : in std_logic_vector(15 downto 0) := (others => cInactivated);
-        --! Data bus (Demultiplexed)
-        oParHostData : out std_logic_vector(gDataWidth-1 downto 0) := (others => cInactivated);
-        iParHostData : in std_logic_vector(gDataWidth-1 downto 0) := (others => cInactivated);
-        oParHostDataEnable : out std_logic;
-        --! Address/Data bus (Multiplexed, word-address))
-        oParHostAddressData : out std_logic_vector(gDataWidth-1 downto 0) := (others => cInactivated);
-        iParHostAddressData : in std_logic_vector(gDataWidth-1 downto 0) := (others => cInactivated);
-        oParHostAddressDataEnable : out std_logic;
+        iParHostAddress             : in std_logic_vector(15 downto 0) := (others => cInactivated);
+        --! Data bus out (Demultiplexed)
+        oParHostData                : out std_logic_vector(gDataWidth-1 downto 0) := (others => cInactivated);
+        --! Data bus in (Demultiplexed)
+        iParHostData                : in std_logic_vector(gDataWidth-1 downto 0) := (others => cInactivated);
+        --! Data bus outenable (Demultiplexed)
+        oParHostDataEnable          : out std_logic;
+        --! Address/Data bus out (Multiplexed, word-address))
+        oParHostAddressData         : out std_logic_vector(gDataWidth-1 downto 0) := (others => cInactivated);
+        --! Address/Data bus in (Multiplexed, word-address))
+        iParHostAddressData         : in std_logic_vector(gDataWidth-1 downto 0) := (others => cInactivated);
+        --! Address/Data bus outenable (Multiplexed, word-address))
+        oParHostAddressDataEnable   : out std_logic;
         -- Clock/Reset sources
         --! Clock Source input
-        iClk : in std_logic:= cInactivated;
+        iClk                        : in std_logic:= cInactivated;
         --! Reset Source input
-        iRst : in std_logic:= cInactivated;
+        iRst                        : in std_logic:= cInactivated;
         -- Memory Mapped Slave for Host
         --! MM slave host address
-        oHostAddress : out std_logic_vector(16 downto 2) := (others => cInactivated);
+        oHostAddress                : out std_logic_vector(16 downto 2) := (others => cInactivated);
         --! MM slave host byteenable
-        oHostByteenable : out std_logic_vector(3 downto 0) := (others => cInactivated);
+        oHostByteenable             : out std_logic_vector(3 downto 0) := (others => cInactivated);
         --! MM slave host read
-        oHostRead : out std_logic := cInactivated;
+        oHostRead                   : out std_logic := cInactivated;
         --! MM slave host readdata
-        iHostReaddata : in std_logic_vector(31 downto 0) := (others => cInactivated);
+        iHostReaddata               : in std_logic_vector(31 downto 0) := (others => cInactivated);
         --! MM slave host write
-        oHostWrite : out std_logic := cInactivated;
+        oHostWrite                  : out std_logic := cInactivated;
         --! MM slave host writedata
-        oHostWritedata : out std_logic_vector(31 downto 0) := (others => cInactivated);
+        oHostWritedata              : out std_logic_vector(31 downto 0) := (others => cInactivated);
         --! MM slave host waitrequest
-        iHostWaitrequest : in std_logic := cInactivated
+        iHostWaitrequest            : in std_logic := cInactivated
     );
 end parallelInterface;
 
 architecture rtl of parallelInterface is
     -- address register to store the address populated to the interface
-    signal addressRegister : std_logic_vector(iParHostAddress'range);
+    signal addressRegister      : std_logic_vector(iParHostAddress'range);
     -- register clock enable
-    signal addressRegClkEnable : std_logic;
+    signal addressRegClkEnable  : std_logic;
 
     -- byteenable register to store byteenable qualifiers
-    signal byteenableRegister : std_logic_vector(gDataWidth/cByte-1 downto 0);
+    signal byteenableRegister       : std_logic_vector(gDataWidth/cByte-1 downto 0);
     -- register clock enable
-    signal byteenableRegClkEnable : std_logic;
+    signal byteenableRegClkEnable   : std_logic;
 
     -- write data register to store the data populated to the interface
-    signal writeDataRegister : std_logic_vector(gDataWidth-1 downto 0);
+    signal writeDataRegister        : std_logic_vector(gDataWidth-1 downto 0);
     -- register clock enable
-    signal writeDataRegClkEnable : std_logic;
+    signal writeDataRegClkEnable    : std_logic;
 
     -- read data register to store the read data populated to the host
-    signal readDataRegister : std_logic_vector(gDataWidth-1 downto 0);
-    signal readDataRegister_next : std_logic_vector(gDataWidth-1 downto 0);
+    signal readDataRegister         : std_logic_vector(gDataWidth-1 downto 0);
+    signal readDataRegister_next    : std_logic_vector(gDataWidth-1 downto 0);
 
     -- synchronized signals
-    signal hostChipselect : std_logic;
-    signal hostWrite, hostWrite_noCs : std_logic;
-    signal hostRead, hostRead_noCs : std_logic;
-    signal hostAle, hostAle_noCs, hostAle_noCsEdge : std_logic;
+    signal hostChipselect   : std_logic;
+    signal hostWrite        : std_logic;
+    signal hostWrite_noCs   : std_logic;
+    signal hostRead         : std_logic;
+    signal hostRead_noCs    : std_logic;
+    signal hostAle          : std_logic;
+    signal hostAle_noCs     : std_logic;
+    signal hostAle_noCsEdge : std_logic;
 
-    signal hostDataEnable : std_logic;
-    signal hostDataEnable_reg : std_logic;
-    signal hostAck : std_logic;
-    signal hostAck_reg : std_logic;
+    signal hostDataEnable       : std_logic;
+    signal hostDataEnable_reg   : std_logic;
+    signal hostAck              : std_logic;
+    signal hostAck_reg          : std_logic;
 
     -- fsm
     type tFsm is (sIdle, sDo, sWait);
     signal fsm : tFsm;
 
     -- timeout
-    constant cCountWidth : natural := 4;
-    signal count : std_logic_vector(cCountWidth-1 downto 0);
-    alias countTc : std_logic is count(cCountWidth-1);
-    signal countEn : std_logic;
-    signal countRst : std_logic;
+    constant cCountWidth    : natural := 4;
+    signal count            : std_logic_vector(cCountWidth-1 downto 0);
+    alias countTc           : std_logic is count(cCountWidth-1);
+    signal countEn          : std_logic;
+    signal countRst         : std_logic;
     constant cCountWrAckAct : std_logic_vector(count'range) := "0000";
     constant cCountWrAckDea : std_logic_vector(count'range) := "0001";
     constant cCountRdAckAct : std_logic_vector(count'range) := "0001";
     constant cCountRdAckDea : std_logic_vector(count'range) := "0010";
-    constant cCountRdEnAct : std_logic_vector(count'range) := "0000";
-    constant cCountRdEnDea : std_logic_vector(count'range) := "0011";
+    constant cCountRdEnAct  : std_logic_vector(count'range) := "0000";
+    constant cCountRdEnDea  : std_logic_vector(count'range) := "0011";
 
 begin
 
@@ -199,22 +207,27 @@ begin
 
     oHostAddress <= addressRegister(15 downto 1);
 
-    oParHostDataEnable <= hostDataEnable_reg;
-    oParHostAddressDataEnable <= hostDataEnable_reg;
-    oParHostAcknowledge <= hostAck_reg;
+    oParHostDataEnable          <= hostDataEnable_reg;
+    oParHostAddressDataEnable   <= hostDataEnable_reg;
+    oParHostAcknowledge         <= hostAck_reg;
 
     oParHostAddressData <= readDataRegister;
-    oParHostData <= readDataRegister;
+    oParHostData        <= readDataRegister;
 
-    countRst <= cActivated when fsm = sIdle else cInactivated;
-    countEn <= cActivated when fsm = sWait else cInactivated;
+    countRst    <= cActivated when fsm = sIdle else cInactivated;
+    countEn     <= cActivated when fsm = sWait else cInactivated;
 
     --! combinatoric process for ack and output enable generation
-    combProc : process(count, hostWrite, hostRead, fsm)
+    combProc : process (
+        count,
+        hostWrite,
+        hostRead,
+        fsm
+    )
     begin
         -- default assignments to avoid unwanted latches
-        hostAck <= cInactivated;
-        hostDataEnable <= cInactivated;
+        hostAck         <= cInactivated;
+        hostDataEnable  <= cInactivated;
 
         if fsm = sWait then
             if hostRead = cActivated then
@@ -240,13 +253,13 @@ begin
     begin
         if rising_edge(iClk) then
             if iRst = cActivated then
-                fsm <= sIdle;
-                addressRegClkEnable <= cInactivated;
-                byteenableRegClkEnable <= cInactivated;
-                writeDataRegClkEnable <= cInactivated;
-                oHostWrite <= cInactivated;
-                oHostRead <= cInactivated;
-                count <= (others => cInactivated);
+                fsm                     <= sIdle;
+                addressRegClkEnable     <= cInactivated;
+                byteenableRegClkEnable  <= cInactivated;
+                writeDataRegClkEnable   <= cInactivated;
+                oHostWrite              <= cInactivated;
+                oHostRead               <= cInactivated;
+                count                   <= (others => cInactivated);
             else
 
                 if countRst = cActivated then
@@ -256,11 +269,11 @@ begin
                 end if;
 
                 --defaults
-                addressRegClkEnable <= cInactivated;
-                byteenableRegClkEnable <= cInactivated;
-                writeDataRegClkEnable <= cInactivated;
-                oHostWrite <= cInactivated;
-                oHostRead <= cInactivated;
+                addressRegClkEnable     <= cInactivated;
+                byteenableRegClkEnable  <= cInactivated;
+                writeDataRegClkEnable   <= cInactivated;
+                oHostWrite              <= cInactivated;
+                oHostRead               <= cInactivated;
 
                 if hostAle = cActivated and gMultiplex /= 0 then
                     addressRegClkEnable <= cActivated;
@@ -273,16 +286,16 @@ begin
                             if gMultiplex = 0 then
                                 addressRegClkEnable <= cActivated;
                             end if;
-                            byteenableRegClkEnable <= cActivated;
-                            writeDataRegClkEnable <= hostWrite;
+                            byteenableRegClkEnable  <= cActivated;
+                            writeDataRegClkEnable   <= hostWrite;
                         end if;
                     when sDo =>
-                        oHostRead <= hostRead;
-                        oHostWrite <= hostWrite;
+                        oHostRead   <= hostRead;
+                        oHostWrite  <= hostWrite;
                         if iHostWaitrequest = cInactivated then
-                            fsm <= sWait;
-                            oHostRead <= cInactivated;
-                            oHostWrite <= cInactivated;
+                            fsm         <= sWait;
+                            oHostRead   <= cInactivated;
+                            oHostWrite  <= cInactivated;
                         end if;
                     when sWait =>
                         if countTc = cActivated then
@@ -295,22 +308,24 @@ begin
 
     genHostBusDword : if gDataWidth = cDword generate
     begin
-        oHostByteenable <= byteenableRegister;
-        oHostWritedata <= writeDataRegister;
-        readDataRegister_next <= iHostReaddata;
+        oHostByteenable         <= byteenableRegister;
+        oHostWritedata          <= writeDataRegister;
+        readDataRegister_next   <= iHostReaddata;
     end generate;
 
     genHostBusWord : if gDataWidth = cWord generate
     begin
         oHostWritedata <= writeDataRegister & writeDataRegister;
 
-        busCombProc : process(byteenableRegister,
-                              addressRegister,
-                              iHostReaddata)
+        busCombProc : process (
+            byteenableRegister,
+            addressRegister,
+            iHostReaddata
+        )
         begin
             --default assignments (to avoid evil latches)
-            oHostByteenable <= (others => cInactivated);
-            readDataRegister_next <= (others => cInactivated);
+            oHostByteenable         <= (others => cInactivated);
+            readDataRegister_next   <= (others => cInactivated);
 
             -- assign byteenable to lower/upper word
             for i in gDataWidth/8-1 downto 0 loop
@@ -334,59 +349,74 @@ begin
                 end if;
             end loop;
         end process;
-
     end generate;
 
     -- synchronize all available control signals
-    syncChipselect : entity work.sync
+    syncChipselect : entity work.synchronizer
+        generic map (
+            gStages => 2,
+            gInit   => cInactivated
+        )
         port map (
-            clk => iClk,
-            rst => iRst,
-            din => iParHostChipselect,
-            dout => hostChipselect
+            iArst   => iRst,
+            iClk    => iClk,
+            iAsync  => iParHostChipselect,
+            oSync   => hostChipselect
         );
 
-    syncWrite : entity work.sync
+    syncWrite : entity work.synchronizer
+        generic map (
+            gStages => 2,
+            gInit   => cInactivated
+        )
         port map (
-            clk => iClk,
-            rst => iRst,
-            din => iParHostWrite,
-            dout => hostWrite_noCs
+            iArst   => iRst,
+            iClk    => iClk,
+            iAsync  => iParHostWrite,
+            oSync   => hostWrite_noCs
         );
 
     hostWrite <= hostChipselect and hostWrite_noCs;
 
-    syncRead : entity work.sync
+    syncRead : entity work.synchronizer
+        generic map (
+            gStages => 2,
+            gInit   => cInactivated
+        )
         port map (
-            clk => iClk,
-            rst => iRst,
-            din => iParHostRead,
-            dout => hostRead_noCs
+            iArst   => iRst,
+            iClk    => iClk,
+            iAsync  => iParHostRead,
+            oSync   => hostRead_noCs
         );
 
     hostRead <= hostChipselect and hostRead_noCs;
 
     genSyncAle : if gMultiplex /= 0 generate
     begin
-        syncAle : entity work.sync
+        syncAle : entity work.synchronizer
+        generic map (
+            gStages => 2,
+            gInit   => cInactivated
+        )
         port map (
-            clk => iClk,
-            rst => iRst,
-            din => iParHostAddressLatchEnable,
-            dout => hostAle_noCs
+            iArst   => iRst,
+            iClk    => iClk,
+            iAsync  => iParHostAddressLatchEnable,
+            oSync   => hostAle_noCs
         );
 
-        edgeAle : entity work.edgeDet
+        edgeAle : entity work.edgedetector
         port map (
-            clk => iClk,
-            rst => iRst,
-            din => hostAle_noCs,
-            any => open,
-            rising => hostAle_noCsEdge,
-            falling => open
+            iArst       => iRst,
+            iClk        => iClk,
+            iEnable     => cActivated,
+            iData       => hostAle_noCs,
+            oRising     => hostAle_noCsEdge,
+            oFalling    => open,
+            oAny        => open
         );
 
         hostAle <= hostChipselect and hostAle_noCsEdge;
     end generate;
-
 end rtl;
