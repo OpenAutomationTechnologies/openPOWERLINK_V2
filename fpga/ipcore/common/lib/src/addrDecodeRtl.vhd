@@ -1,15 +1,14 @@
 -------------------------------------------------------------------------------
---! @file binaryEncoderRtl.vhd
+--! @file addrDecodeRtl.vhd
 --
---! @brief Generic Binary Encoder with reduced or-operation
+--! @brief Address Decoder for generating select signal
 --
---! @details This generic binary encoder can be configured to any width,
---! however, mind base 2 values. In order to reduce the complexity of the
---! synthesized circuit the reduced or-operation is applied.
--- (Borrowed from academic.csuohio.edu/chu_p and applied coding styles)
+--! @details This address decoder generates a select signal depending on the
+--! provided base- and high-addresses by using smaller/greater logic.
+--! Additionally a strob is generated if the base or high address is selected.
 -------------------------------------------------------------------------------
 --
---    (c) B&R, 2012
+--    (c) B&R, 2013
 --
 --    Redistribution and use in source and binary forms, with or without
 --    modification, are permitted provided that the following conditions
@@ -47,58 +46,59 @@ use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 use work.global.all;
 
-entity binaryEncoder is
+entity addrDecode is
     generic (
-        --! One-hot data width
-        gDataWidth : natural := 8
+        --! Address bus width
+        gAddrWidth : natural := 32;
+        --! Decode space base address
+        gBaseAddr : natural := 16#1000#;
+        --! Decode space high address
+        gHighAddr : natural := 16#1FFF#
     );
     port (
-        --! One hot code input
-        iOneHot : in std_logic_vector(gDataWidth-1 downto 0);
-        --! Binary encoded output
-        oBinary : out std_logic_vector(LogDualis(gDataWidth)-1 downto 0)
+        --! Enable decoding
+        iEnable : in std_logic;
+        --! Address bus
+        iAddress : in std_logic_vector(gAddrWidth-1 downto 0);
+        --! Select output
+        oSelect : out std_logic
     );
-end binaryEncoder;
+end addrDecode;
 
-architecture rtl of binaryEncoder is
-    type tMaskArray is array(LogDualis(gDataWidth)-1 downto 0) of
-        std_logic_vector(gDataWidth-1 downto 0);
+architecture rtl of addrDecode is
+    --! Address to be decoded
+    signal address : unsigned(gAddrWidth-1 downto 0);
+    --! Address is in range
+    signal addressInRange : std_logic;
 
-    signal mask : tMaskArray;
-
-    function genOrMask return tMaskArray is
-        variable vOrMask: tMaskArray;
-    begin
-        for i in (LogDualis(gDataWidth)-1) downto 0 loop
-            for j in (gDataWidth-1) downto 0 loop
-                if (j/(2**i) mod 2)= 1 then
-                    vOrMask(i)(j) := '1';
-                else
-                    vOrMask(i)(j) := '0';
-                end if;
-            end loop;
-        end loop;
-        return vOrMask;
-    end function;
+    --! Base address used for comparison
+    constant cBase : unsigned(gAddrWidth-1 downto 0) :=
+                                        to_unsigned(gBaseAddr, gAddrWidth);
+    --! High address used for comparison
+    constant cHigh : unsigned(gAddrWidth-1 downto 0) :=
+                                        to_unsigned(gHighAddr, gAddrWidth);
 begin
-    mask <= genOrMask;
+    -- check generics
+    assert (gBaseAddr < gHighAddr)
+    report "Base address should be smaller than High address!" severity failure;
 
-    process (
-        mask,
-        iOneHot
+    -- connect ports to signals
+    oSelect <= addressInRange;
+    address <= unsigned(iAddress);
+
+    --! Decode input address logic
+    combAddrDec : process (
+        iEnable,
+        address
     )
-        variable rowVector : std_logic_vector(gDataWidth-1 downto 0);
-        variable tempBit : std_logic;
     begin
-        for i in (LogDualis(gDataWidth)-1) downto 0 loop
-            rowVector := iOneHot and mask(i);
-            -- reduced or operation
-            tempBit := '0';
-            for j in (gDataWidth-1) downto 0 loop
-                tempBit := tempBit or rowVector(j);
-            end loop;
-            oBinary(i) <= tempBit;
-        end loop;
-    end process;
+        --default assignments of process outputs
+        addressInRange <= cInactivated;
 
+        if iEnable = cActivated then
+            if (cBase <= address) and (address <= cHigh) then
+                addressInRange <= cActivated;
+            end if;
+        end if;
+    end process;
 end rtl;

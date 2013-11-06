@@ -55,7 +55,7 @@ entity irqGen is
     generic (
         --! number of interrupt sources
         gIrqSourceCount     :       natural := 3
-        );
+    );
     port (
         -- Global
         --! component wide clock signal
@@ -78,59 +78,44 @@ entity irqGen is
         iIrqAcknowledge     : in    std_logic_vector(gIrqSourceCount downto 0);
         --! interrupt source pending
         oIrgPending         : out   std_logic_vector(gIrqSourceCount downto 0)
-        );
+    );
 end irqGen;
 
 architecture Rtl of irqGen is
-
-    --! edge detector
-    component edgeDet
-        port(
-            din : in STD_LOGIC;
-            rising : out STD_LOGIC;
-            falling : out STD_LOGIC;
-            any : out STD_LOGIC;
-            clk : in STD_LOGIC;
-            rst : in STD_LOGIC);
-    end component;
-
     --! sync rising edge
     signal syncRising                           : std_logic;
     --! interrupt register latch
-    signal irqRegLatch, irqRegLatch_next        : std_logic_vector
-    (gIrqSourceCount downto 0);
+    signal irqRegLatch, irqRegLatch_next        : std_logic_vector(gIrqSourceCount downto 0);
     --! interrupt source store
-    signal irqSourceStore, irqSourceStore_next  : std_logic_vector
-    (gIrqSourceCount downto 1);
+    signal irqSourceStore, irqSourceStore_next  : std_logic_vector(gIrqSourceCount downto 1);
     --! unregistered irq out signal
-    signal unregIrq, irq_reg : std_logic;
+    signal unregIrq, irq_reg                    : std_logic;
 
 begin
-
     --! generate pulse for rising edge of sync
-    syncEdgeDet : edgeDet
-    port map(
-        din     => iSync,
-        rising  => syncRising,
-        falling => open,
-        any     => open,
-        clk     => iClk,
-        rst     => iRst
-        );
+    syncEdgeDet : entity work.edgedetector
+    port map (
+        iArst       => iRst,
+        iClk        => iClk,
+        iEnable     => cActivated,
+        iData       => iSync,
+        oRising     => syncRising,
+        oFalling    => open,
+        oAny        => open
+    );
 
     --! irq registers
     clkdReg : process(iClk)
-
     begin
         if rising_edge(iClk) then
             if iRst = cActivated then
-                irqRegLatch <= (others => cInactivated);
-                irqSourceStore <= (others => cInactivated);
-                irq_reg <= cInactivated;
+                irqRegLatch     <= (others => cInactivated);
+                irqSourceStore  <= (others => cInactivated);
+                irq_reg         <= cInactivated;
             else
-                irqRegLatch <= irqRegLatch_next;
-                irqSourceStore <= irqSourceStore_next;
-                irq_reg <= unregIrq;
+                irqRegLatch     <= irqRegLatch_next;
+                irqSourceStore  <= irqSourceStore_next;
+                irq_reg         <= unregIrq;
             end if;
         end if;
     end process;
@@ -138,21 +123,24 @@ begin
     oIrq <= irq_reg;
 
     --! irq register control
-    combIrqRegCont : process(
-        iIrqSource, iIrqAcknowledge,
-        irqRegLatch, irqSourceStore,
-        syncRising, iIrqSourceEnable(iIrqSourceEnable'right))
-
+    combIrqRegCont : process (
+        iIrqSource,
+        iIrqAcknowledge,
+        irqRegLatch,
+        irqSourceStore,
+        syncRising,
+        iIrqSourceEnable(iIrqSourceEnable'right)
+    )
     begin
         --default
-        irqRegLatch_next <= irqRegLatch;
+        irqRegLatch_next    <= irqRegLatch;
         irqSourceStore_next <= irqSourceStore;
 
         -- do acknowledge with latched and source register
         for i in gIrqSourceCount downto 1 loop
             if iIrqAcknowledge(i) = cActivated then
-                irqRegLatch_next(i) <= cInactivated;
-                irqSourceStore_next(i) <= cInactivated;
+                irqRegLatch_next(i)     <= cInactivated;
+                irqSourceStore_next(i)  <= cInactivated;
             end if;
         end loop;
 
@@ -175,8 +163,7 @@ begin
 
             -- activate sync irq if it is enabled
             -- (sync irqs in the past are not of interest!)
-            irqRegLatch_next(irqRegLatch'right) <=
-            iIrqSourceEnable(iIrqSourceEnable'right);
+            irqRegLatch_next(irqRegLatch'right) <= iIrqSourceEnable(iIrqSourceEnable'right);
         end if;
     end process;
 
@@ -184,27 +171,26 @@ begin
     oIrgPending <= irqRegLatch;
 
     --! irq signal generation
-    combIrqGen : process(
+    combIrqGen : process (
         irqRegLatch,
-        iIrqMasterEnable, iIrqSourceEnable)
-
+        iIrqMasterEnable,
+        iIrqSourceEnable
+    )
         variable vTmp : std_logic;
-
     begin
         --default
         unregIrq <= cInactivated;
 
-        --! the master enable overrules everything
+        -- the master enable overrules everything
         if iIrqMasterEnable = cActivated then
-
-            --! check individual irqs
+            -- check individual irqs
             vTmp := cInactivated;
 
             for i in gIrqSourceCount downto 0 loop
                 vTmp := vTmp or (iIrqSourceEnable(i) and irqRegLatch(i));
             end loop;
 
-            --! variable holds irq state
+            -- variable holds irq state
             unregIrq <= vTmp;
         end if;
     end process;

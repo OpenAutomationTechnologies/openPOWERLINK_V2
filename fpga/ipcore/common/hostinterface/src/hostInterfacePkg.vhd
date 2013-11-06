@@ -1,5 +1,8 @@
 -------------------------------------------------------------------------------
--- Host Interface Package
+--! @file hostInterfacePkg.vhd
+--
+--! @brief Host interface package
+--
 -------------------------------------------------------------------------------
 --
 --    (c) B&R, 2012
@@ -73,11 +76,9 @@ package hostInterfacePkg is
     --! convert arrayIn into std_logic_vector stream
     function CONV_STDLOGICVECTOR (arrayIn : tArrayStd32; arrayLength : natural)
     return std_logic_vector;
-
 end hostInterfacePkg;
 
 package body hostInterfacePkg is
-
     -- function
     function CONV_STDLOGICVECTOR (arrayIn : tArrayStd32; arrayLength : natural)
         return std_logic_vector is
@@ -98,7 +99,5 @@ package body hostInterfacePkg is
         end loop;
 
         return vTmpStream;
-
     end function;
-
 end package body;
