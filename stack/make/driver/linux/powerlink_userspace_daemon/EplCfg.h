@@ -110,12 +110,14 @@
 #define EPL_MODULE_INTEGRATION (EPL_MODULE_DLLK \
                                 | EPL_MODULE_PDOK \
                                 | EPL_MODULE_NMTK \
-                                | EPL_MODULE_NMT_MN)
+                                | EPL_MODULE_NMT_MN \
+                                | EPL_MODULE_VETH)
 #else
 #define EPL_MODULE_INTEGRATION (EPL_MODULE_DLLK \
                                 | EPL_MODULE_PDOK \
                                 | EPL_MODULE_NMTK \
-                                | EPL_MODULE_NMT_CN)
+                                | EPL_MODULE_NMT_CN \
+                                | EPL_MODULE_VETH)
 #endif
 
 // =========================================================================
