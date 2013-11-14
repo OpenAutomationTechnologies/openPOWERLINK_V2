@@ -45,5 +45,6 @@ SET (LIB_ARCH_SOURCES
      ${USER_SOURCE_DIR}/event/eventucalintf-circbuf.c
      ${KERNEL_SOURCE_DIR}/event/eventkcal-linux.c
      ${KERNEL_SOURCE_DIR}/event/eventkcalintf-circbuf.c
+     ${KERNEL_SOURCE_DIR}/veth/veth-linuxuser.c
      )
 

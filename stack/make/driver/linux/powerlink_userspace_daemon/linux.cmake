@@ -45,6 +45,7 @@ SET (DAEMON_ARCH_SOURCES
      ${KERNEL_SOURCE_DIR}/event/eventkcalintf-circbuf.c
      ${COMMON_SOURCE_DIR}/ctrl/ctrlcal-posixshm.c
      ${LIB_SOURCE_DIR}/circbuf/circbuf-posixshm.c
+     ${KERNEL_SOURCE_DIR}/veth/veth-linuxuser.c
      )
 
 SET (ARCH_LIBRARIES pcap pthread rt)

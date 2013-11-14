@@ -134,10 +134,10 @@
                                | EPL_MODULE_NMT_CN \
                                | EPL_MODULE_NMTU \
                                | EPL_MODULE_DLLU \
+                               | EPL_MODULE_VETH \
+                               | EPL_MODULE_SDO_UDP \
                                | EPL_MODULE_CFM \
                                | EPL_MODULE_NMT_MN)
-//                               | EPL_MODULE_VETH
-//                               | EPL_MODULE_SDO_UDP
 #elif (TARGET_SYSTEM == _WIN32_)
 #define EPL_MODULE_INTEGRATION (EPL_MODULE_OBD \
                                | EPL_MODULE_PDOU \
@@ -149,7 +149,6 @@
                                | EPL_MODULE_DLLU \
                                | EPL_MODULE_CFM \
                                | EPL_MODULE_NMT_MN)
-//                               | EPL_MODULE_VETH
 #endif
 
 #else // CONFIG_MN
