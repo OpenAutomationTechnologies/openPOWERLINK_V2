@@ -1,512 +1,396 @@
-/****************************************************************************
+/**
+********************************************************************************
+\file   sdo-asndu.c
 
-  (c) SYSTEC electronic GmbH, D-07973 Greiz, August-Bebel-Str. 29
-      www.systec-electronic.com
+\brief  Implementation of SDO over ASnd protocol
 
-  Project:      openPOWERLINK
+This file contains the implementation of the SDO over ASnd protocol.
 
-  Description:  source file for SDO/Asnd-Protocolabstractionlayer module
+\ingroup module_sdo_asnd
+*******************************************************************************/
+/*------------------------------------------------------------------------------
+Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2013, SYSTEC electronic GmbH
+All rights reserved.
 
-  License:
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+    * Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above copyright
+      notice, this list of conditions and the following disclaimer in the
+      documentation and/or other materials provided with the distribution.
+    * Neither the name of the copyright holders nor the
+      names of its contributors may be used to endorse or promote products
+      derived from this software without specific prior written permission.
 
-    Redistribution and use in source and binary forms, with or without
-    modification, are permitted provided that the following conditions
-    are met:
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL COPYRIGHT HOLDERS BE LIABLE FOR ANY
+DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+------------------------------------------------------------------------------*/
 
-    1. Redistributions of source code must retain the above copyright
-       notice, this list of conditions and the following disclaimer.
-
-    2. Redistributions in binary form must reproduce the above copyright
-       notice, this list of conditions and the following disclaimer in the
-       documentation and/or other materials provided with the distribution.
-
-    3. Neither the name of SYSTEC electronic GmbH nor the names of its
-       contributors may be used to endorse or promote products derived
-       from this software without prior written permission. For written
-       permission, please contact info@systec-electronic.com.
-
-    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-    LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-    FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-    COPYRIGHT HOLDERS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-    INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-    BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-    LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-    CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-    LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-    ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-    POSSIBILITY OF SUCH DAMAGE.
-
-    Severability Clause:
-
-        If a provision of this License is or becomes illegal, invalid or
-        unenforceable in any jurisdiction, that shall not affect:
-        1. the validity or enforceability in that jurisdiction of any other
-           provision of this License; or
-        2. the validity or enforceability in other jurisdictions of that or
-           any other provision of this License.
-
-  -------------------------------------------------------------------------
-
-                $RCSfile$
-
-                $Author$
-
-                $Revision$  $Date$
-
-                $State$
-
-                Build Environment:
-                    GCC V3.4
-
-  -------------------------------------------------------------------------
-
-  Revision History:
-
-  2006/07/07 k.t.:   start of the implementation
-
-****************************************************************************/
-
+//------------------------------------------------------------------------------
+// includes
+//------------------------------------------------------------------------------
 #include <user/sdoasnd.h>
-#include "user/dllucal.h"
+#include <user/dllucal.h>
 
-#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDO_ASND)) != 0)
+#if defined(CONFIG_INCLUDE_SDO_ASND)
 
-/***************************************************************************/
-/*                                                                         */
-/*                                                                         */
-/*          G L O B A L   D E F I N I T I O N S                            */
-/*                                                                         */
-/*                                                                         */
-/***************************************************************************/
+//============================================================================//
+//            G L O B A L   D E F I N I T I O N S                             //
+//============================================================================//
 
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // const defines
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
-#ifndef EPL_SDO_MAX_CONNECTION_ASND
-#define EPL_SDO_MAX_CONNECTION_ASND 5
+#ifndef SDO_MAX_CONNECTION_ASND
+#define SDO_MAX_CONNECTION_ASND     5
 #endif
 
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+// module global vars
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// global function prototypes
+//------------------------------------------------------------------------------
+
+//============================================================================//
+//            P R I V A T E   D E F I N I T I O N S                           //
+//============================================================================//
+
+//------------------------------------------------------------------------------
+// const defines
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
 // local types
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
 // instance table
 typedef struct
 {
-    unsigned int            m_auiSdoAsndConnection[EPL_SDO_MAX_CONNECTION_ASND];
-    tSequLayerReceiveCb  m_fpSdoAsySeqCb;
+    UINT                aSdoAsndConnection[SDO_MAX_CONNECTION_ASND];
+    tSequLayerReceiveCb pfnSdoAsySeqCb;
+} tSdoAsndInstance;
 
 
-} tEplSdoAsndInstance;
+//------------------------------------------------------------------------------
+// local vars
+//------------------------------------------------------------------------------
+static tSdoAsndInstance  sdoAsndInstance_l;
 
-//---------------------------------------------------------------------------
-// module global vars
-//---------------------------------------------------------------------------
-
-static tEplSdoAsndInstance  SdoAsndInstance_g;
-
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // local function prototypes
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+tEplKernel sdoAsndCb(tFrameInfo * pFrameInfo_p);
 
-tEplKernel PUBLIC EplSdoAsnduCb(tFrameInfo * pFrameInfo_p);
+//============================================================================//
+//            P U B L I C   F U N C T I O N S                                 //
+//============================================================================//
 
-/***************************************************************************/
-/*                                                                         */
-/*                                                                         */
-/*          C L A S S  <EPL SDO-Asnd Protocolabstraction layer>            */
-/*                                                                         */
-/*                                                                         */
-/***************************************************************************/
-//
-// Description: EPL SDO-Asnd Protocolabstraction layer
-//
-//
-/***************************************************************************/
+//------------------------------------------------------------------------------
+/**
+\brief  Initialize first instance of SDO over ASnd module
 
+The function initializes a first instance of the SDO over ASnd module.
 
+\param  pfnReceiveCb_p          Pointer to SDO sequence layer callback function.
 
-//=========================================================================//
-//                                                                         //
-//          P U B L I C   F U N C T I O N S                                //
-//                                                                         //
-//=========================================================================//
+\return The function returns a tEplKernel error code.
 
-//---------------------------------------------------------------------------
-//
-// Function:    EplSdoAsnduInit
-//
-// Description: init first instance of the module
-//
-//
-//
-// Parameters:  pReceiveCb_p    =   functionpointer to Sdo-Sequence layer
-//                                  callback-function
-//
-//
-// Returns:     tEplKernel  = Errorcode
-//
-//
-// State:
-//
-//---------------------------------------------------------------------------
-tEplKernel PUBLIC EplSdoAsnduInit(tSequLayerReceiveCb fpReceiveCb_p)
+\ingroup module_sdo_asnd
+*/
+//------------------------------------------------------------------------------
+tEplKernel sdoasnd_init(tSequLayerReceiveCb pfnReceiveCb_p)
 {
-tEplKernel  Ret;
+    tEplKernel  ret;
 
-
-    Ret = EplSdoAsnduAddInstance(fpReceiveCb_p);
-
-return Ret;
+    ret = sdoasnd_addInstance(pfnReceiveCb_p);
+    return ret;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Add instance of SDO over ASnd module
 
-//---------------------------------------------------------------------------
-//
-// Function:    EplSdoAsnduAddInstance
-//
-// Description: init additional instance of the module
-//
-//
-//
-// Parameters:  pReceiveCb_p    =   functionpointer to Sdo-Sequence layer
-//                                  callback-function
-//
-//
-// Returns:     tEplKernel  = Errorcode
-//
-//
-// State:
-//
-//---------------------------------------------------------------------------
-tEplKernel PUBLIC EplSdoAsnduAddInstance(tSequLayerReceiveCb fpReceiveCb_p)
+The function adds an instance of the SDO over ASnd module.
+
+\param  pfnReceiveCb_p          Pointer to SDO sequence layer callback function.
+
+\return The function returns a tEplKernel error code.
+
+\ingroup module_sdo_asnd
+*/
+//------------------------------------------------------------------------------
+tEplKernel sdoasnd_addInstance(tSequLayerReceiveCb pfnReceiveCb_p)
 {
-tEplKernel  Ret;
+    tEplKernel  ret = kEplSuccessful;
 
-    Ret = kEplSuccessful;
+    EPL_MEMSET(&sdoAsndInstance_l, 0x00, sizeof(sdoAsndInstance_l));
 
-    // init control structure
-    EPL_MEMSET(&SdoAsndInstance_g, 0x00, sizeof(SdoAsndInstance_g));
-
-    // save pointer to callback-function
-    if (fpReceiveCb_p != NULL)
+    if (pfnReceiveCb_p != NULL)
     {
-        SdoAsndInstance_g.m_fpSdoAsySeqCb = fpReceiveCb_p;
+        sdoAsndInstance_l.pfnSdoAsySeqCb = pfnReceiveCb_p;
     }
     else
     {
-        Ret = kEplSdoUdpMissCb;
+        ret = kEplSdoUdpMissCb;
     }
 
-#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLU)) != 0)
-    Ret = dllucal_regAsndService(kDllAsndSdo,
-                                   EplSdoAsnduCb,
-                                   kDllAsndFilterLocal);
+#if defined(CONFIG_INCLUDE_DLLU)
+    ret = dllucal_regAsndService(kDllAsndSdo, sdoAsndCb, kDllAsndFilterLocal);
 #endif
 
-    return Ret;
+    return ret;
 }
 
-//---------------------------------------------------------------------------
-//
-// Function:    EplSdoAsnduDelInstance
-//
-// Description: del instance of the module
-//              del socket and del Listen-Thread
-//
-//
-//
-// Parameters:
-//
-//
-// Returns:     tEplKernel  = Errorcode
-//
-//
-// State:
-//
-//---------------------------------------------------------------------------
-tEplKernel PUBLIC EplSdoAsnduDelInstance()
+//------------------------------------------------------------------------------
+/**
+\brief  Delete instance of SDO over ASnd module
+
+The function deletes an instance of the SDO over ASnd module.
+
+\return The function returns a tEplKernel error code.
+
+\ingroup module_sdo_asnd
+*/
+//------------------------------------------------------------------------------
+tEplKernel sdoasnd_delInstance(void)
 {
-tEplKernel  Ret;
+    tEplKernel  ret = kEplSuccessful;
 
-    Ret = kEplSuccessful;
-
-#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLU)) != 0)
-    // deregister callback function from DLL
-    Ret = dllucal_regAsndService(kDllAsndSdo,
-                                   NULL,
-                                   kDllAsndFilterNone);
+#if defined(CONFIG_INCLUDE_DLLU)
+    ret = dllucal_regAsndService(kDllAsndSdo, NULL, kDllAsndFilterNone);
 #endif
 
-return Ret;
+    return ret;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Init SDO over ASnd connection
 
-//---------------------------------------------------------------------------
-//
-// Function:    EplSdoAsnduInitCon
-//
-// Description: init a new connect
-//
-//
-//
-// Parameters:  pSdoConHandle_p = pointer for the new connection handle
-//              uiTargetNodeId_p = NodeId of the target node
-//
-//
-// Returns:     tEplKernel  = Errorcode
-//
-//
-// State:
-//
-//---------------------------------------------------------------------------
-tEplKernel PUBLIC EplSdoAsnduInitCon(tSdoConHdl*  pSdoConHandle_p,
-                               unsigned int    uiTargetNodeId_p)
+The function initializes a SDO over ASnd connection to a node.
+
+\param  pSdoConHandle_p         Pointer to store the connection handle for this
+                                new connection.
+\param  targetNodeId_p          Node ID of the target to connect to.
+
+\return The function returns a tEplKernel error code.
+
+\ingroup module_sdo_asnd
+*/
+//------------------------------------------------------------------------------
+tEplKernel sdoasnd_initCon(tSdoConHdl* pSdoConHandle_p, UINT targetNodeId_p)
 {
-tEplKernel      Ret;
-unsigned int    uiCount;
-unsigned int    uiFreeCon;
-unsigned int*   puiConnection;
+    tEplKernel      ret;
+    UINT            count;
+    UINT            freeCon;
+    UINT*           pConnection;
 
-    Ret = kEplSuccessful;
+    ret = kEplSuccessful;
 
-    if ((uiTargetNodeId_p == EPL_C_ADR_INVALID)
-        || (uiTargetNodeId_p >= EPL_C_ADR_BROADCAST))
+    if ((targetNodeId_p == EPL_C_ADR_INVALID) || (targetNodeId_p >= EPL_C_ADR_BROADCAST))
     {
-        Ret = kEplSdoAsndInvalidNodeId;
-        goto Exit;
+        return kEplSdoAsndInvalidNodeId;
     }
 
     // get free entry in control structure
-    uiCount = 0;
-    uiFreeCon = EPL_SDO_MAX_CONNECTION_ASND;
-    puiConnection = &SdoAsndInstance_g.m_auiSdoAsndConnection[0];
-    while(uiCount < EPL_SDO_MAX_CONNECTION_ASND)
+    count = 0;
+    freeCon = SDO_MAX_CONNECTION_ASND;
+    pConnection = &sdoAsndInstance_l.aSdoAsndConnection[0];
+    while(count < SDO_MAX_CONNECTION_ASND)
     {
-        if (*puiConnection == uiTargetNodeId_p)
+        if (*pConnection == targetNodeId_p)
         {   // existing connection to target node found
             // save handle for higher layer
-            *pSdoConHandle_p = (uiCount | SDO_ASND_HANDLE );
-
-            goto Exit;
+            *pSdoConHandle_p = (count | SDO_ASND_HANDLE);
+            return ret;
         }
-        else if (*puiConnection == 0)
+        else if (*pConnection == 0)
         {   // free entry-> save target nodeId
-            uiFreeCon = uiCount;
+            freeCon = count;
         }
-        uiCount++;
-        puiConnection++;
+        count++;
+        pConnection++;
     }
 
-    if (uiFreeCon == EPL_SDO_MAX_CONNECTION_ASND)
+    if (freeCon == SDO_MAX_CONNECTION_ASND)
     {
         // no free connection
-        Ret = kEplSdoAsndNoFreeHandle;
+        ret = kEplSdoAsndNoFreeHandle;
     }
     else
     {
-        puiConnection = &SdoAsndInstance_g.m_auiSdoAsndConnection[uiFreeCon];
-        *puiConnection = uiTargetNodeId_p;
+        pConnection = &sdoAsndInstance_l.aSdoAsndConnection[freeCon];
+        *pConnection = targetNodeId_p;
         // save handle for higher layer
-        *pSdoConHandle_p = (uiFreeCon | SDO_ASND_HANDLE );
-
-        goto Exit;
+        *pSdoConHandle_p = (freeCon | SDO_ASND_HANDLE);
     }
-
-Exit:
-    return Ret;
+    return ret;
 }
 
-//---------------------------------------------------------------------------
-//
-// Function:    EplSdoAsnduSendData
-//
-// Description: send data using existing connection
-//
-//
-//
-// Parameters:  SdoConHandle_p  = connection handle
-//              pSrcData_p      = pointer to data
-//              dwDataSize_p    = number of databyte
-//                                  -> without asnd-header!!!
-//
-// Returns:     tEplKernel  = Errorcode
-//
-//
-// State:
-//
-//---------------------------------------------------------------------------
-tEplKernel PUBLIC EplSdoAsnduSendData(tSdoConHdl       SdoConHandle_p,
-                                    tEplFrame *          pSrcData_p,
-                                    DWORD                dwDataSize_p)
+//------------------------------------------------------------------------------
+/**
+\brief  Send data via an existing connection
+
+The function sends data via an existing SDO over ASnd connection.
+
+\param  sdoConHandle_p          Connection handle of the connection to use.
+\param  pSrcData_p              Pointer to data which shall be sent.
+\param  dataSize_p              Size of data to be sent.
+
+\return The function returns a tEplKernel error code.
+
+\ingroup module_sdo_asnd
+*/
+//------------------------------------------------------------------------------
+tEplKernel sdoasnd_sendData(tSdoConHdl sdoConHandle_p, tEplFrame* pSrcData_p, UINT32 dataSize_p)
 {
-tEplKernel      Ret;
-unsigned int    uiArray;
-tFrameInfo      FrameInfo;
+    tEplKernel      ret;
+    UINT            array;
+    tFrameInfo      frameInfo;
 
-    Ret = kEplSuccessful;
+    ret = kEplSuccessful;
 
-    uiArray = (SdoConHandle_p & ~SDO_ASY_HANDLE_MASK);
+    array = (sdoConHandle_p & ~SDO_ASY_HANDLE_MASK);
 
-    if(uiArray > EPL_SDO_MAX_CONNECTION_ASND)
-    {
-        Ret = kEplSdoAsndInvalidHandle;
-        goto Exit;
-    }
+    if(array > SDO_MAX_CONNECTION_ASND)
+        return kEplSdoAsndInvalidHandle;
 
     // fillout Asnd header
     // own node id not needed -> filled by DLL
-
-    // set message type
-    AmiSetByteToLe(&pSrcData_p->m_le_bMessageType, (BYTE)kEplMsgTypeAsnd); // ASnd == 0x06
-    // target node id
-    AmiSetByteToLe(&pSrcData_p->m_le_bDstNodeId, (BYTE) SdoAsndInstance_g.m_auiSdoAsndConnection[uiArray]);
-    // set source-nodeid (filled by DLL 0)
-    AmiSetByteToLe(&pSrcData_p->m_le_bSrcNodeId, 0x00);
-
+    AmiSetByteToLe(&pSrcData_p->m_le_bMessageType, (BYTE)kEplMsgTypeAsnd);  // ASnd == 0x06
+    AmiSetByteToLe(&pSrcData_p->m_le_bDstNodeId, (BYTE)sdoAsndInstance_l.aSdoAsndConnection[array]);
+    AmiSetByteToLe(&pSrcData_p->m_le_bSrcNodeId, 0x00);                     // set source-nodeid (filled by DLL 0)
     // calc size (add Ethernet and ASnd header size)
-    dwDataSize_p += (DWORD) ((BYTE*) &pSrcData_p->m_Data.m_Asnd.m_Payload.m_SdoSequenceFrame - (BYTE*) pSrcData_p);
+    dataSize_p += (UINT32) ((UINT8*)&pSrcData_p->m_Data.m_Asnd.m_Payload.m_SdoSequenceFrame - (UINT8*)pSrcData_p);
 
     // send function of DLL
-    FrameInfo.frameSize = dwDataSize_p;
-    FrameInfo.pFrame = pSrcData_p;
-#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLU)) != 0)
-    Ret = dllucal_sendAsyncFrame(&FrameInfo,kDllAsyncReqPrioGeneric);
-    if (Ret == kEplDllAsyncTxBufferFull)
+    frameInfo.frameSize = dataSize_p;
+    frameInfo.pFrame = pSrcData_p;
+
+#if defined(CONFIG_INCLUDE_DLLU)
+    ret = dllucal_sendAsyncFrame(&frameInfo, kDllAsyncReqPrioGeneric);
+    if (ret == kEplDllAsyncTxBufferFull)
     {   // ignore TxBufferFull errors
-        Ret = kEplSuccessful;
+        ret = kEplSuccessful;
     }
 #endif
 
-Exit:
-    return Ret;
-
+    return ret;
 }
 
-//---------------------------------------------------------------------------
-//
-// Function:    EplSdoAsnduDelCon
-//
-// Description: delete connection from intern structure
-//
-//
-//
-// Parameters:  SdoConHandle_p  = connection handle
-//
-// Returns:     tEplKernel  = Errorcode
-//
-//
-// State:
-//
-//---------------------------------------------------------------------------
-tEplKernel PUBLIC EplSdoAsnduDelCon(tSdoConHdl SdoConHandle_p)
+//------------------------------------------------------------------------------
+/**
+\brief  Delete an existing connection
+
+The function deletes an existing SDO over ASnd connection.
+
+\param  sdoConHandle_p          Connection handle of the connection to delete.
+
+\return The function returns a tEplKernel error code.
+
+\ingroup module_sdo_asnd
+*/
+//------------------------------------------------------------------------------
+tEplKernel sdoasnd_deleteCon(tSdoConHdl sdoConHandle_p)
 {
-tEplKernel  Ret;
-unsigned int    uiArray;
+    tEplKernel  ret;
+    UINT        array;
 
-    Ret = kEplSuccessful;
+    ret = kEplSuccessful;
 
-
-    uiArray = (SdoConHandle_p & ~SDO_ASY_HANDLE_MASK);
-    // check parameter
-    if(uiArray > EPL_SDO_MAX_CONNECTION_ASND)
+    array = (sdoConHandle_p & ~SDO_ASY_HANDLE_MASK);
+    if(array > SDO_MAX_CONNECTION_ASND)
     {
-        Ret = kEplSdoAsndInvalidHandle;
-        goto Exit;
+        return kEplSdoAsndInvalidHandle;
     }
 
     // set target nodeId to 0
-    SdoAsndInstance_g.m_auiSdoAsndConnection[uiArray] = 0;
-
-Exit:
-    return Ret;
+    sdoAsndInstance_l.aSdoAsndConnection[array] = 0;
+    return ret;
 }
+//============================================================================//
+//            P R I V A T E   F U N C T I O N S                               //
+//============================================================================//
+/// \name Private Functions
+/// \{
 
-//=========================================================================//
-//                                                                         //
-//          P R I V A T E   F U N C T I O N S                              //
-//                                                                         //
-//=========================================================================//
+//------------------------------------------------------------------------------
+/**
+\brief  Callback function for ASnd frames
 
-//---------------------------------------------------------------------------
-//
-// Function:    EplSdoAsnduCb
-//
-// Description: callback function for SDO ASnd frames
-//
-//
-//
-// Parameters:      pFrameInfo_p = Frame with SDO payload
-//
-//
-// Returns:         tEplKernel = errorcode
-//
-//
-// State:
-//
-//---------------------------------------------------------------------------
-tEplKernel PUBLIC EplSdoAsnduCb(tFrameInfo * pFrameInfo_p)
+The function implements the callback function which should be called when
+receiving ASnd frames.
+
+\param  pFrameInfo_p        Pointer to received frame.
+
+\return The function returns a tEplKernel error code.
+*/
+//------------------------------------------------------------------------------
+tEplKernel sdoAsndCb(tFrameInfo* pFrameInfo_p)
 {
-tEplKernel      Ret = kEplSuccessful;
-unsigned int    uiCount;
-unsigned int*   puiConnection;
-unsigned int    uiNodeId;
-unsigned int    uiFreeEntry = 0xFFFF;
-tSdoConHdl   SdoConHdl;
-tEplFrame*      pFrame;
+    tEplKernel      ret = kEplSuccessful;
+    UINT            count;
+    UINT*           pConnection;
+    UINT            nodeId;
+    UINT            freeEntry = 0xFFFF;
+    tSdoConHdl      sdoConHdl;
+    tEplFrame*      pFrame;
 
     pFrame = pFrameInfo_p->pFrame;
-
-    uiNodeId = AmiGetByteFromLe(&pFrame->m_le_bSrcNodeId);
+    nodeId = AmiGetByteFromLe(&pFrame->m_le_bSrcNodeId);
 
     // search corresponding entry in control structure
-    uiCount = 0;
-    puiConnection = &SdoAsndInstance_g.m_auiSdoAsndConnection[0];
-    while (uiCount < EPL_SDO_MAX_CONNECTION_ASND)
+    count = 0;
+    pConnection = &sdoAsndInstance_l.aSdoAsndConnection[0];
+    while (count < SDO_MAX_CONNECTION_ASND)
     {
-        if (uiNodeId == *puiConnection)
+        if (nodeId == *pConnection)
         {
             break;
         }
-        else if ((*puiConnection == 0)
-            && (uiFreeEntry == 0xFFFF))
+        else if ((*pConnection == 0) && (freeEntry == 0xFFFF))
         {   // free entry
-            uiFreeEntry = uiCount;
+            freeEntry = count;
         }
-        uiCount++;
-        puiConnection++;
+        count++;
+        pConnection++;
     }
 
-    if (uiCount == EPL_SDO_MAX_CONNECTION_ASND)
+    if (count == SDO_MAX_CONNECTION_ASND)
     {
-        if (uiFreeEntry != 0xFFFF)
+        if (freeEntry != 0xFFFF)
         {
-            puiConnection = &SdoAsndInstance_g.m_auiSdoAsndConnection[uiFreeEntry];
-            *puiConnection = uiNodeId;
-            uiCount = uiFreeEntry;
+            pConnection = &sdoAsndInstance_l.aSdoAsndConnection[freeEntry];
+            *pConnection = nodeId;
+            count = freeEntry;
         }
         else
         {
-            EPL_DBGLVL_SDO_TRACE("EplSdoAsnduCb(): no free handle\n");
-            goto Exit;
+            EPL_DBGLVL_SDO_TRACE("%s(): no free handle\n", __func__);
+            return ret;
         }
     }
-//    if (uiNodeId == *puiConnection)
-    {   // entry found or created
-        SdoConHdl = (uiCount | SDO_ASND_HANDLE );
 
-        SdoAsndInstance_g.m_fpSdoAsySeqCb(SdoConHdl, &pFrame->m_Data.m_Asnd.m_Payload.m_SdoSequenceFrame, (pFrameInfo_p->frameSize - 18));
-    }
-
-Exit:
-    return Ret;
-
+    sdoConHdl = (count | SDO_ASND_HANDLE);
+    sdoAsndInstance_l.pfnSdoAsySeqCb(sdoConHdl, &pFrame->m_Data.m_Asnd.m_Payload.m_SdoSequenceFrame,
+                                     (pFrameInfo_p->frameSize - 18));
+    return ret;
 }
 
+///\}
 
-#endif // end of #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDO_ASND)) != 0)
-// EOF
+#endif
 
