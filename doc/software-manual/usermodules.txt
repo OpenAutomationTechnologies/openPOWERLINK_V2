@@ -124,6 +124,18 @@ This module provide the functionality of sending SDO packets over UDP.
 
 //------------------------------------------------------------------------------
 /**
+\defgroup module_sdo_asnd sdo_asnd
+
+\brief SDO over ASnd module
+
+This module provide the functionality of sending SDO packets over ASnd protocol.
+
+\ingroup user_layer_sdo
+*/
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+/**
 \defgroup user_layer_nmt NMT Modules
 
 \brief User NMT modules

@@ -361,7 +361,7 @@ tEplKernel PUBLIC EplSdoAsySeqAddInstance (tSdoComReceiveCb fpSdoComCb_p,
 
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDO_ASND)) != 0)
     // init lower layer
-    Ret = EplSdoAsnduAddInstance(EplSdoAsyReceiveCb);
+    Ret = sdoasnd_addInstance(EplSdoAsyReceiveCb);
     if(Ret != kEplSuccessful)
     {
         goto Exit;
@@ -429,7 +429,7 @@ tEplAsySdoSeqCon*   pAsySdoSeqCon;
 
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDO_ASND)) != 0)
     // delete lower layer
-    Ret = EplSdoAsnduDelInstance();
+    Ret = sdoasnd_delInstance();
 #endif
 
     return Ret;
@@ -491,7 +491,7 @@ tEplAsySdoSeqCon*   pAsySdoSeqCon;
         case kSdoTypeAsnd:
         {
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDO_ASND)) != 0)
-            Ret = EplSdoAsnduInitCon(&ConHandle,
+            Ret = sdoasnd_initCon(&ConHandle,
                                     uiNodeId_p);
             if(Ret != kEplSuccessful)
             {
@@ -559,7 +559,7 @@ tEplAsySdoSeqCon*   pAsySdoSeqCon;
                 case kSdoTypeAsnd:
                 {
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDO_ASND)) != 0)
-                    Ret = EplSdoAsnduDelCon(ConHandle);
+                    Ret = sdoasnd_deleteCon(ConHandle);
                     if(Ret != kEplSuccessful)
                     {
                         goto Exit;
@@ -810,7 +810,7 @@ tEplAsySdoSeqCon*   pAsySdoSeqCon;
         {
         #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDO_ASND)) != 0)
             // call close function of lower layer
-            EplSdoAsnduDelCon(pAsySdoSeqCon->m_ConHandle);
+            sdoasnd_deleteCon(pAsySdoSeqCon->m_ConHandle);
         #endif// end of #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDO_ASND)) != 0)
         }
 
@@ -2029,7 +2029,7 @@ tEplKernel      Ret;
     else if ((pAsySdoSeqCon_p->m_ConHandle & SDO_ASY_HANDLE_MASK) == SDO_ASND_HANDLE)
     {   // ASND
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDO_ASND)) != 0)
-        Ret = EplSdoAsnduSendData(pAsySdoSeqCon_p->m_ConHandle,
+        Ret = sdoasnd_sendData(pAsySdoSeqCon_p->m_ConHandle,
                                     pEplFrame_p,      // pointer to frame
                                     uiDataSize_p);
 #else
