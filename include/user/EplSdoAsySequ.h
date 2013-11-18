@@ -74,7 +74,7 @@
 
 #include <sdo.h>
 #include <user/sdoudp.h>
-#include "user/EplSdoAsndu.h"
+#include <user/sdoasnd.h>
 #include "event.h"
 #include "user/EplTimeru.h"
 

@@ -205,7 +205,7 @@ SET (LIB_USER_HEADERS
      ${USER_INCLUDE_DIR}/nmtu.h
      ${USER_INCLUDE_DIR}/pdou.h
      ${USER_INCLUDE_DIR}/pdoucal.h
-     ${USER_INCLUDE_DIR}/EplSdoAsndu.h
+     ${USER_INCLUDE_DIR}/sdoasnd.h
      ${USER_INCLUDE_DIR}/EplSdoAsySequ.h
      ${USER_INCLUDE_DIR}/EplSdoComu.h
      ${USER_INCLUDE_DIR}/statusu.h
