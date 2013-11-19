@@ -64,16 +64,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 extern "C" {
 #endif
 
-tEplKernel PUBLIC sdoseq_init(tSdoComReceiveCb fpSdoComCb_p, tSdoComConCb fpSdoComConCb_p);
-tEplKernel PUBLIC sdoseq_addInstance (tSdoComReceiveCb fpSdoComCb_p, tSdoComConCb fpSdoComConCb_p);
-tEplKernel PUBLIC sdoseq_delInstance(void);
-tEplKernel PUBLIC sdoseq_initCon(tSdoSeqConHdl* pSdoSeqConHdl_p, unsigned int uiNodeId_p, tSdoType SdoType);
-tEplKernel PUBLIC sdoseq_sendData(tSdoSeqConHdl SdoSeqConHdl_p, unsigned int uiDataSize_p,
-                                       tEplFrame* pData_p );
-tEplKernel PUBLIC sdoseq_processEvent(tEplEvent* pEvent_p);
-tEplKernel PUBLIC sdoseq_deleteCon(tSdoSeqConHdl SdoSeqConHdl_p);
-tEplKernel PUBLIC sdoseq_setTimeout( DWORD Timeout_p );
-
+tEplKernel sdoseq_init(tSdoComReceiveCb pfnSdoComRecvCb_p, tSdoComConCb pfnSdoComConCb_p);
+tEplKernel sdoseq_addInstance (tSdoComReceiveCb pfnSdoComRecvCb_p, tSdoComConCb pfnSdoComConCb_p);
+tEplKernel sdoseq_delInstance(void);
+tEplKernel sdoseq_initCon(tSdoSeqConHdl* pSdoSeqConHdl_p, UINT nodeId_p, tSdoType sdoType_p);
+tEplKernel sdoseq_sendData(tSdoSeqConHdl sdoSeqConHdl_p, UINT dataSize_p, tEplFrame* pData_p );
+tEplKernel sdoseq_processEvent(tEplEvent* pEvent_p);
+tEplKernel sdoseq_deleteCon(tSdoSeqConHdl sdoSeqConHdl_p);
+tEplKernel sdoseq_setTimeout(UINT32 timeout_p);
 
 #ifdef __cplusplus
 }
