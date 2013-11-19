@@ -339,7 +339,7 @@ tEplKernel Ret;
     EPL_MEMSET(&SdoComInstance_g, 0x00, sizeof(SdoComInstance_g));
 
     // init instance of lower layer
-    Ret = EplSdoAsySeqAddInstance(EplSdoComReceiveCb, EplSdoComConCb);
+    Ret = sdoseq_addInstance(EplSdoComReceiveCb, EplSdoComConCb);
     if(Ret != kEplSuccessful)
     {
         goto Exit;
@@ -384,7 +384,7 @@ tEplKernel  Ret;
     DeleteCriticalSection(SdoComInstance_g.m_pCriticalSection);
 #endif
 
-    Ret = EplSdoAsySeqDelInstance();
+    Ret = sdoseq_delInstance();
     if(Ret != kEplSuccessful)
     {
         goto Exit;
@@ -483,7 +483,7 @@ tEplSdoComCon*  pSdoComCon;
         case kSdoTypeUdp:
         {
             // call connection int function of lower layer
-            Ret = EplSdoAsySeqInitCon(&pSdoComCon->m_SdoSeqConHdl,
+            Ret = sdoseq_initCon(&pSdoComCon->m_SdoSeqConHdl,
                           pSdoComCon->m_uiNodeId,
                           kSdoTypeUdp);
             if(Ret != kEplSuccessful)
@@ -497,7 +497,7 @@ tEplSdoComCon*  pSdoComCon;
         case kSdoTypeAsnd:
         {
             // call connection int function of lower layer
-            Ret = EplSdoAsySeqInitCon(&pSdoComCon->m_SdoSeqConHdl,
+            Ret = sdoseq_initCon(&pSdoComCon->m_SdoSeqConHdl,
                           pSdoComCon->m_uiNodeId,
                           kSdoTypeAsnd);
             if(Ret != kEplSuccessful)
@@ -670,7 +670,7 @@ tEplSdoComCon*      pSdoComCon;
             case kSdoTypeAsnd:
             case kSdoTypeUdp:
             {
-                Ret = EplSdoAsySeqDelCon(pSdoComCon->m_SdoSeqConHdl);
+                Ret = sdoseq_deleteCon(pSdoComCon->m_SdoSeqConHdl);
                 break;
             }
 
@@ -1073,7 +1073,7 @@ tSdoComConHdl    HdlFree;
             // delete connection immediately
             // 2008/04/14 m.u./d.k. This connection actually does not exist.
             //                      pSdoComCon is invalid.
-            // Ret = EplSdoAsySeqDelCon(pSdoComCon->m_SdoSeqConHdl);
+            // Ret = sdoseq_deleteCon(pSdoComCon->m_SdoSeqConHdl);
             Ret = kEplSdoComNoFreeHandle;
         }
         else
@@ -1174,7 +1174,7 @@ unsigned int        uiSize;
                                 case kSdoServiceNIL:
                                 {   // simply acknowlegde NIL command on sequence layer
 
-                                    Ret = EplSdoAsySeqSendData(pSdoComCon->m_SdoSeqConHdl,
+                                    Ret = sdoseq_sendData(pSdoComCon->m_SdoSeqConHdl,
                                                                             0,
                                                                             (tEplFrame*)NULL);
 
@@ -1258,7 +1258,7 @@ unsigned int        uiSize;
                 case kEplSdoComConEventTimeout:
                 case kEplSdoComConEventConClosed:
                 {
-                    Ret = EplSdoAsySeqDelCon(pSdoComCon->m_SdoSeqConHdl);
+                    Ret = sdoseq_deleteCon(pSdoComCon->m_SdoSeqConHdl);
                     // clean control structure
                     EPL_MEMSET(pSdoComCon, 0x00, sizeof(tEplSdoComCon));
                     break;
@@ -1389,7 +1389,7 @@ unsigned int        uiSize;
                             else
                             {
                                 // send acknowledge without any Command layer data
-                                Ret = EplSdoAsySeqSendData(pSdoComCon->m_SdoSeqConHdl,
+                                Ret = sdoseq_sendData(pSdoComCon->m_SdoSeqConHdl,
                                                                         0,
                                                                         (tEplFrame*)NULL);
                             }
@@ -1409,7 +1409,7 @@ unsigned int        uiSize;
                 case kEplSdoComConEventTimeout:
                 case kEplSdoComConEventConClosed:
                 {
-                    Ret = EplSdoAsySeqDelCon(pSdoComCon->m_SdoSeqConHdl);
+                    Ret = sdoseq_deleteCon(pSdoComCon->m_SdoSeqConHdl);
                     // clean control structure
                     EPL_MEMSET(pSdoComCon, 0x00, sizeof(tEplSdoComCon));
                     break;
@@ -1444,7 +1444,7 @@ unsigned int        uiSize;
                     case kSdoTypeUdp:
                     {
                         // call connection int function of lower layer
-                        Ret = EplSdoAsySeqInitCon(&pSdoComCon->m_SdoSeqConHdl,
+                        Ret = sdoseq_initCon(&pSdoComCon->m_SdoSeqConHdl,
                                     pSdoComCon->m_uiNodeId,
                                     kSdoTypeUdp);
                         if(Ret != kEplSuccessful)
@@ -1458,7 +1458,7 @@ unsigned int        uiSize;
                     case kSdoTypeAsnd:
                     {
                         // call connection int function of lower layer
-                        Ret = EplSdoAsySeqInitCon(&pSdoComCon->m_SdoSeqConHdl,
+                        Ret = sdoseq_initCon(&pSdoComCon->m_SdoSeqConHdl,
                                     pSdoComCon->m_uiNodeId,
                                     kSdoTypeAsnd);
                         if(Ret != kEplSuccessful)
@@ -1538,7 +1538,7 @@ unsigned int        uiSize;
                 case kEplSdoComConEventTransferAbort:
                 {
                     // close sequence layer handle
-                    Ret = EplSdoAsySeqDelCon(pSdoComCon->m_SdoSeqConHdl);
+                    Ret = sdoseq_deleteCon(pSdoComCon->m_SdoSeqConHdl);
                     pSdoComCon->m_SdoSeqConHdl |= SDO_SEQ_INVALID_HDL;
                     // call callback function
                     if (SdoComConEvent_p == kEplSdoComConEventTimeout)
@@ -1613,7 +1613,7 @@ unsigned int        uiSize;
                         if((bFlag & 0x40) != 0)
                         {
                             // send acknowledge without any Command layer data
-                            Ret = EplSdoAsySeqSendData(pSdoComCon->m_SdoSeqConHdl,
+                            Ret = sdoseq_sendData(pSdoComCon->m_SdoSeqConHdl,
                                                                     0,
                                                                     (tEplFrame*)NULL);
                             // inc transaction id
@@ -1634,7 +1634,7 @@ unsigned int        uiSize;
                             if(pSdoComCon->m_uiTransSize == 0)
                             {
                                 // send acknowledge without any Command layer data
-                                Ret = EplSdoAsySeqSendData(pSdoComCon->m_SdoSeqConHdl,
+                                Ret = sdoseq_sendData(pSdoComCon->m_SdoSeqConHdl,
                                                                         0,
                                                                         (tEplFrame*)NULL);
                                 // inc transaction id
@@ -1661,7 +1661,7 @@ unsigned int        uiSize;
                 case kEplSdoComConEventConClosed:
                 {   // connection closed by communication partner
                     // close sequence layer handle
-                    Ret = EplSdoAsySeqDelCon(pSdoComCon->m_SdoSeqConHdl);
+                    Ret = sdoseq_deleteCon(pSdoComCon->m_SdoSeqConHdl);
                     // set handle to invalid and enter kEplSdoComStateClientWaitInit
                     pSdoComCon->m_SdoSeqConHdl |= SDO_SEQ_INVALID_HDL;
                     // change state
@@ -1692,7 +1692,7 @@ unsigned int        uiSize;
                 case kEplSdoComConEventTimeout:
                 {
                     // close sequence layer handle
-                    Ret = EplSdoAsySeqDelCon(pSdoComCon->m_SdoSeqConHdl);
+                    Ret = sdoseq_deleteCon(pSdoComCon->m_SdoSeqConHdl);
                     pSdoComCon->m_SdoSeqConHdl |= SDO_SEQ_INVALID_HDL;
                     // change state
                     pSdoComCon->m_SdoComState = kEplSdoComStateClientWaitInit;
@@ -1769,7 +1769,7 @@ unsigned int        uiSize;
                         if((bFlag & 0x40) != 0)
                         {
                             // send acknowledge without any Command layer data
-                            Ret = EplSdoAsySeqSendData(pSdoComCon->m_SdoSeqConHdl,
+                            Ret = sdoseq_sendData(pSdoComCon->m_SdoSeqConHdl,
                                                                     0,
                                                                     (tEplFrame*)NULL);
                             // inc transaction id
@@ -1792,7 +1792,7 @@ unsigned int        uiSize;
                             if(pSdoComCon->m_uiTransSize == 0)
                             {
                                 // send acknowledge without any Command layer data
-                                Ret = EplSdoAsySeqSendData(pSdoComCon->m_SdoSeqConHdl,
+                                Ret = sdoseq_sendData(pSdoComCon->m_SdoSeqConHdl,
                                                                         0,
                                                                         (tEplFrame*)NULL);
                                 // inc transaction id
@@ -1814,7 +1814,7 @@ unsigned int        uiSize;
                 case kEplSdoComConEventConClosed:
                 {   // connection closed by communication partner
                     // close sequence layer handle
-                    Ret = EplSdoAsySeqDelCon(pSdoComCon->m_SdoSeqConHdl);
+                    Ret = sdoseq_deleteCon(pSdoComCon->m_SdoSeqConHdl);
                     // set handle to invalid and enter kEplSdoComStateClientWaitInit
                     pSdoComCon->m_SdoSeqConHdl |= SDO_SEQ_INVALID_HDL;
                     // change state
@@ -1848,7 +1848,7 @@ unsigned int        uiSize;
                 case kEplSdoComConEventTimeout:
                 {
                     // close sequence layer handle
-                    Ret = EplSdoAsySeqDelCon(pSdoComCon->m_SdoSeqConHdl);
+                    Ret = sdoseq_deleteCon(pSdoComCon->m_SdoSeqConHdl);
                     pSdoComCon->m_SdoSeqConHdl |= SDO_SEQ_INVALID_HDL;
                     // change state
                     pSdoComCon->m_SdoComState = kEplSdoComStateClientWaitInit;
@@ -2093,7 +2093,7 @@ BYTE            bFlag;
             AmiSetByteToLe(&pCommandFrame->m_le_bFlags,  0x80);
 
             // send frame
-            Ret = EplSdoAsySeqSendData(pSdoComCon_p->m_SdoSeqConHdl,
+            Ret = sdoseq_sendData(pSdoComCon_p->m_SdoSeqConHdl,
                                             uiSizeOfFrame,
                                             pFrame);
 
@@ -2132,7 +2132,7 @@ BYTE            bFlag;
 
                 // send frame
                 uiSizeOfFrame += pSdoComCon_p->m_uiTransSize;
-                Ret = EplSdoAsySeqSendData(pSdoComCon_p->m_SdoSeqConHdl,
+                Ret = sdoseq_sendData(pSdoComCon_p->m_SdoSeqConHdl,
                                             uiSizeOfFrame,
                                             pFrame);
             }
@@ -2161,7 +2161,7 @@ BYTE            bFlag;
 
                     // send frame
                     uiSizeOfFrame += SDO_MAX_SEGMENT_SIZE;
-                    Ret = EplSdoAsySeqSendData(pSdoComCon_p->m_SdoSeqConHdl,
+                    Ret = sdoseq_sendData(pSdoComCon_p->m_SdoSeqConHdl,
                                                 uiSizeOfFrame,
                                                 pFrame);
 
@@ -2188,7 +2188,7 @@ BYTE            bFlag;
 
                     // send frame
                     uiSizeOfFrame += SDO_MAX_SEGMENT_SIZE;
-                    Ret = EplSdoAsySeqSendData(pSdoComCon_p->m_SdoSeqConHdl,
+                    Ret = sdoseq_sendData(pSdoComCon_p->m_SdoSeqConHdl,
                                                 uiSizeOfFrame,
                                                 pFrame);
                 }
@@ -2221,7 +2221,7 @@ BYTE            bFlag;
                     // send frame
                     uiSizeOfFrame += pSdoComCon_p->m_uiTransSize;
                     pSdoComCon_p->m_uiTransSize = 0;
-                    Ret = EplSdoAsySeqSendData(pSdoComCon_p->m_SdoSeqConHdl,
+                    Ret = sdoseq_sendData(pSdoComCon_p->m_SdoSeqConHdl,
                                                 uiSizeOfFrame,
                                                 pFrame);
                 }
@@ -2249,7 +2249,7 @@ BYTE            bFlag;
 
             // calc framesize
             uiSizeOfFrame += sizeof(DWORD);
-            Ret = EplSdoAsySeqSendData(pSdoComCon_p->m_SdoSeqConHdl,
+            Ret = sdoseq_sendData(pSdoComCon_p->m_SdoSeqConHdl,
                                                 uiSizeOfFrame,
                                                 pFrame);
             DEBUG_LVL_25_TRACE("ERROR: SDO Aborted!\n");
@@ -2496,7 +2496,7 @@ BYTE*           pbSrcData;
         (/*(BYTE*)*/pSdoComCon_p->m_pData) += uiBytesToTransfer;
 
         // send acknowledge without any Command layer data
-        Ret = EplSdoAsySeqSendData(pSdoComCon_p->m_SdoSeqConHdl,
+        Ret = sdoseq_sendData(pSdoComCon_p->m_SdoSeqConHdl,
                                                 0,
                                                 (tEplFrame*)NULL);
         goto Exit;
@@ -2730,7 +2730,7 @@ BYTE*           pbPayload;
         case kSdoTypeAsnd:
         case kSdoTypeUdp:
         {
-            Ret = EplSdoAsySeqSendData(pSdoComCon_p->m_SdoSeqConHdl,
+            Ret = sdoseq_sendData(pSdoComCon_p->m_SdoSeqConHdl,
                                         uiSizeOfFrame,
                                         pFrame);
             break;
@@ -3035,7 +3035,7 @@ unsigned int    uiSizeOfFrame;
         case kSdoTypeAsnd:
         case kSdoTypeUdp:
         {
-            Ret = EplSdoAsySeqSendData(pSdoComCon_p->m_SdoSeqConHdl,
+            Ret = sdoseq_sendData(pSdoComCon_p->m_SdoSeqConHdl,
                                         uiSizeOfFrame,
                                         pFrame);
             if (Ret == kEplSdoSeqConnectionBusy)

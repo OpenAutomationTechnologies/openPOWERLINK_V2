@@ -64,15 +64,15 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 extern "C" {
 #endif
 
-tEplKernel PUBLIC EplSdoAsySeqInit(tSdoComReceiveCb fpSdoComCb_p, tSdoComConCb fpSdoComConCb_p);
-tEplKernel PUBLIC EplSdoAsySeqAddInstance (tSdoComReceiveCb fpSdoComCb_p, tSdoComConCb fpSdoComConCb_p);
-tEplKernel PUBLIC EplSdoAsySeqDelInstance(void);
-tEplKernel PUBLIC EplSdoAsySeqInitCon(tSdoSeqConHdl* pSdoSeqConHdl_p, unsigned int uiNodeId_p, tSdoType SdoType);
-tEplKernel PUBLIC EplSdoAsySeqSendData(tSdoSeqConHdl SdoSeqConHdl_p, unsigned int uiDataSize_p,
+tEplKernel PUBLIC sdoseq_init(tSdoComReceiveCb fpSdoComCb_p, tSdoComConCb fpSdoComConCb_p);
+tEplKernel PUBLIC sdoseq_addInstance (tSdoComReceiveCb fpSdoComCb_p, tSdoComConCb fpSdoComConCb_p);
+tEplKernel PUBLIC sdoseq_delInstance(void);
+tEplKernel PUBLIC sdoseq_initCon(tSdoSeqConHdl* pSdoSeqConHdl_p, unsigned int uiNodeId_p, tSdoType SdoType);
+tEplKernel PUBLIC sdoseq_sendData(tSdoSeqConHdl SdoSeqConHdl_p, unsigned int uiDataSize_p,
                                        tEplFrame* pData_p );
-tEplKernel PUBLIC EplSdoAsySeqProcessEvent(tEplEvent* pEvent_p);
-tEplKernel PUBLIC EplSdoAsySeqDelCon(tSdoSeqConHdl SdoSeqConHdl_p);
-tEplKernel PUBLIC EplSdoAsySeqSetTimeout( DWORD Timeout_p );
+tEplKernel PUBLIC sdoseq_processEvent(tEplEvent* pEvent_p);
+tEplKernel PUBLIC sdoseq_deleteCon(tSdoSeqConHdl SdoSeqConHdl_p);
+tEplKernel PUBLIC sdoseq_setTimeout( DWORD Timeout_p );
 
 
 #ifdef __cplusplus
