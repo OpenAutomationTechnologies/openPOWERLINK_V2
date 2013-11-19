@@ -276,13 +276,12 @@ static tEplKernel EplSdoAsySeqSetTimer(tEplAsySdoSeqCon* pAsySdoSeqCon_p,
 // State:
 //
 //---------------------------------------------------------------------------
-tEplKernel PUBLIC sdoseq_init(tSdoComReceiveCb fpSdoComCb_p,
-                                   tSdoComConCb fpSdoComConCb_p)
+tEplKernel sdoseq_init(tSdoComReceiveCb pfnSdoComRecvCb_p, tSdoComConCb pfnSdoComConCb_p)
 {
 tEplKernel  Ret;
 
 
-    Ret = sdoseq_addInstance(fpSdoComCb_p, fpSdoComConCb_p);
+    Ret = sdoseq_addInstance(pfnSdoComRecvCb_p, pfnSdoComConCb_p);
 
     return Ret;
 
@@ -307,33 +306,32 @@ tEplKernel  Ret;
 // State:
 //
 //---------------------------------------------------------------------------
-tEplKernel PUBLIC sdoseq_addInstance (tSdoComReceiveCb fpSdoComCb_p,
-                                   tSdoComConCb fpSdoComConCb_p)
+tEplKernel sdoseq_addInstance(tSdoComReceiveCb pfnSdoComRecvCb_p, tSdoComConCb pfnSdoComConCb_p)
 {
     tEplKernel      Ret;
 
     Ret = kEplSuccessful;
 
     // check function pointer
-    if(fpSdoComCb_p == NULL)
+    if(pfnSdoComRecvCb_p == NULL)
     {
         Ret = kEplSdoSeqMissCb;
         goto Exit;
     }
     else
     {
-        AsySdoSequInstance_g.m_fpSdoComReceiveCb = fpSdoComCb_p;
+        AsySdoSequInstance_g.m_fpSdoComReceiveCb = pfnSdoComRecvCb_p;
     }
 
     // check function pointer
-    if(fpSdoComConCb_p == NULL)
+    if(pfnSdoComConCb_p == NULL)
     {
         Ret = kEplSdoSeqMissCb;
         goto Exit;
     }
     else
     {
-        AsySdoSequInstance_g.m_fpSdoComConCb = fpSdoComConCb_p;
+        AsySdoSequInstance_g.m_fpSdoComConCb = pfnSdoComConCb_p;
     }
 
     // set control structure to 0
@@ -392,7 +390,7 @@ Exit:
 // State:
 //
 //---------------------------------------------------------------------------
-tEplKernel PUBLIC sdoseq_delInstance()
+tEplKernel sdoseq_delInstance(void)
 {
 tEplKernel  Ret;
 unsigned int        uiCount;
@@ -454,9 +452,7 @@ tEplAsySdoSeqCon*   pAsySdoSeqCon;
 // State:
 //
 //---------------------------------------------------------------------------
-tEplKernel PUBLIC sdoseq_initCon(tSdoSeqConHdl* pSdoSeqConHdl_p,
-                                unsigned int uiNodeId_p,
-                                tSdoType   SdoType)
+tEplKernel sdoseq_initCon(tSdoSeqConHdl* pSdoSeqConHdl_p, UINT nodeId_p, tSdoType sdoType_p)
 {
 tEplKernel          Ret;
 unsigned int        uiCount;
@@ -468,14 +464,14 @@ tEplAsySdoSeqCon*   pAsySdoSeqCon;
     // check SdoType
     // call init function of the protocol abstraction layer
     // which tries to find an existing connection to the same node
-    switch (SdoType)
+    switch (sdoType_p)
     {
         // SDO over UDP
         case kSdoTypeUdp:
         {
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDO_UDP)) != 0)
             Ret = sdoudp_initCon(&ConHandle,
-                                    uiNodeId_p);
+                                    nodeId_p);
             if(Ret != kEplSuccessful)
             {
                 goto Exit;
@@ -492,7 +488,7 @@ tEplAsySdoSeqCon*   pAsySdoSeqCon;
         {
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDO_ASND)) != 0)
             Ret = sdoasnd_initCon(&ConHandle,
-                                    uiNodeId_p);
+                                    nodeId_p);
             if(Ret != kEplSuccessful)
             {
                 goto Exit;
@@ -540,7 +536,7 @@ tEplAsySdoSeqCon*   pAsySdoSeqCon;
     {
         if (uiFreeCon == EPL_MAX_SDO_SEQ_CON)
         {   // no free entry found
-            switch (SdoType)
+            switch (sdoType_p)
             {
                 // SDO over UDP
                 case kSdoTypeUdp:
@@ -631,16 +627,14 @@ Exit:
 // State:
 //
 //---------------------------------------------------------------------------
-tEplKernel PUBLIC sdoseq_sendData(tSdoSeqConHdl SdoSeqConHdl_p,
-                                 unsigned int    uiDataSize_p,
-                                 tEplFrame*      pabData_p )
+tEplKernel sdoseq_sendData(tSdoSeqConHdl sdoSeqConHdl_p, UINT dataSize_p, tEplFrame* pData_p )
 {
 tEplKernel      Ret;
 unsigned int    uiHandle;
 
 
 
-    uiHandle = (SdoSeqConHdl_p & ~SDO_SEQ_HANDLE_MASK);
+    uiHandle = (sdoSeqConHdl_p & ~SDO_SEQ_HANDLE_MASK);
 
     // check if connection ready
     if(AsySdoSequInstance_g.m_AsySdoConnection[uiHandle].m_SdoState == kEplAsySdoStateIdle )
@@ -656,8 +650,8 @@ unsigned int    uiHandle;
     }
 
     Ret = EplSdoAsySeqProcess(uiHandle,
-                                uiDataSize_p,
-                                pabData_p,
+                                dataSize_p,
+                                pData_p,
                                 NULL,
                                 kAsySdoSeqEventFrameSend);
 Exit:
@@ -683,7 +677,7 @@ Exit:
 // State:
 //
 //---------------------------------------------------------------------------
-tEplKernel PUBLIC sdoseq_processEvent(tEplEvent* pEvent_p)
+tEplKernel sdoseq_processEvent(tEplEvent* pEvent_p)
 {
 tEplKernel          Ret;
 tEplTimerEventArg*  pTimerEventArg;
@@ -768,13 +762,13 @@ Exit:
 // State:
 //
 //---------------------------------------------------------------------------
-tEplKernel PUBLIC sdoseq_deleteCon(tSdoSeqConHdl SdoSeqConHdl_p)
+tEplKernel sdoseq_deleteCon(tSdoSeqConHdl sdoSeqConHdl_p)
 {
 tEplKernel      Ret = kEplSuccessful;
 unsigned int    uiHandle;
 tEplAsySdoSeqCon*   pAsySdoSeqCon;
 
-    uiHandle = (SdoSeqConHdl_p & ~SDO_SEQ_HANDLE_MASK);
+    uiHandle = (sdoSeqConHdl_p & ~SDO_SEQ_HANDLE_MASK);
 
     // check if handle invalid
     if(uiHandle >= EPL_MAX_SDO_SEQ_CON)
@@ -838,10 +832,10 @@ Exit:
 // Returns:     tEplKernel = errorcode
 //
 //---------------------------------------------------------------------------
-tEplKernel PUBLIC sdoseq_setTimeout( DWORD Timeout_p )
+tEplKernel sdoseq_setTimeout(UINT32 timeout_p)
 {
     // Adopt new SDO sequence layer timeout (truncated to an upper bound)
-    AsySdoSequInstance_g.m_SdoSequTimeout   = min(Timeout_p, EPL_ASY_SDO_MAX_SEQU_TIMEOUT_MS);
+    AsySdoSequInstance_g.m_SdoSequTimeout   = min(timeout_p, EPL_ASY_SDO_MAX_SEQU_TIMEOUT_MS);
 
     return  kEplSuccessful;
 }
