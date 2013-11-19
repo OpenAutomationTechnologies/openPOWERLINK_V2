@@ -136,6 +136,18 @@ This module provide the functionality of sending SDO packets over ASnd protocol.
 
 //------------------------------------------------------------------------------
 /**
+\defgroup module_sdo_seq sdo_seq
+
+\brief SDO sequence layer
+
+This module implements the SDO sequence layer of the openPOWERLINK stack.
+
+\ingroup user_layer_sdo
+*/
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+/**
 \defgroup user_layer_nmt NMT Modules
 
 \brief User NMT modules
