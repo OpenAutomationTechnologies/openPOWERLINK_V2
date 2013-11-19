@@ -75,7 +75,7 @@
 #include <sdo.h>
 #include "obd.h"
 #include "EplSdoAc.h"
-#include "user/EplSdoAsySequ.h"
+#include <user/sdoseq.h>
 
 
 //---------------------------------------------------------------------------

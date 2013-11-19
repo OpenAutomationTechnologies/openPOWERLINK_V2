@@ -45,7 +45,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <user/eventucal.h>
 #include <user/nmtu.h>
 #include <user/nmtmnu.h>
-#include <user/EplSdoAsySequ.h>
+#include <user/sdoseq.h>
 #include <user/dllucal.h>
 #include <user/ledu.h>
 #include <Benchmark.h>
