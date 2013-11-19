@@ -195,7 +195,7 @@
 
 // increase the number of SDO channels, because we are master
 #define SDO_MAX_CONNECTION_ASND                 100
-#define EPL_MAX_SDO_SEQ_CON                     100
+#define MAX_SDO_SEQ_CON                         100
 #define EPL_MAX_SDO_COM_CON                     100
 #define SDO_MAX_CONNECTION_UDP                  50
 
