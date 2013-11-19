@@ -198,43 +198,28 @@ static tEplAsySdoSequInstance   AsySdoSequInstance_g;
 // local function prototypes
 //---------------------------------------------------------------------------
 
-static tEplKernel EplSdoAsySeqProcess(unsigned int  uiHandle_p,
-                                         unsigned int       uiDataSize_p,
-                                         tEplFrame*         pData_p,
-                                         tAsySdoSeq*     pRecFrame_p,
-                                         tEplAsySdoSeqEvent Event_p);
+static tEplKernel processState(UINT handle_p, UINT dataSize_p, tEplFrame* pData_p,
+                               tAsySdoSeq* pRecFrame_p, tEplAsySdoSeqEvent event_p);
 
-static tEplKernel EplSdoAsySeqSendIntern(tEplAsySdoSeqCon*  pAsySdoSeqCon_p,
-                                         unsigned int       uiDataSize_p,
-                                         tEplFrame*         pData_p,
-                                         BOOL               fFrameInHistory);
+static tEplKernel sendFrame(tEplAsySdoSeqCon* pAsySdoSeqCon_p, UINT dataSize_p,
+                            tEplFrame* pData_p, BOOL fFrameInHistory_p);
 
-static tEplKernel EplSdoAsySeqSendLowerLayer(tEplAsySdoSeqCon*  pAsySdoSeqCon_p,
-                                         unsigned int       uiDataSize_p,
-                                         tEplFrame*         pEplFrame_p);
+static tEplKernel sendToLowerLayer(tEplAsySdoSeqCon* pAsySdoSeqCon_p, UINT dataSize_p, tEplFrame* pFrame_p);
 
-tEplKernel PUBLIC EplSdoAsyReceiveCb (tSdoConHdl       ConHdl_p,
-                                        tAsySdoSeq*      pSdoSeqData_p,
-                                        unsigned int        uiDataSize_p);
+static tEplKernel receiveCb(tSdoConHdl conHdl_p, tAsySdoSeq* pSdoSeqData_p, UINT dataSize_p);
 
-static tEplKernel EplSdoAsyInitHistory(tEplAsySdoSeqCon*  pAsySdoSeqCon_p);
+static tEplKernel initHistory(tEplAsySdoSeqCon*  pAsySdoSeqCon_p);
 
-static tEplKernel EplSdoAsyAddFrameToHistory(tEplAsySdoSeqCon*  pAsySdoSeqCon_p,
-                                        tEplFrame*      pFrame_p,
-                                        unsigned int    uiSize_p);
+static tEplKernel addFrameToHistory(tEplAsySdoSeqCon* pAsySdoSeqCon_p, tEplFrame* pFrame_p, UINT size_p);
 
-static tEplKernel EplSdoAsyAckFrameToHistory(tEplAsySdoSeqCon*  pAsySdoSeqCon_p,
-                                        BYTE   bRecSeqNumber_p);
+static tEplKernel deleteAckedFrameFromHistory(tEplAsySdoSeqCon* pAsySdoSeqCon_p, UINT8 recvSeqNumber_p);
 
-static tEplKernel EplSdoAsyReadFromHistory(tEplAsySdoSeqCon*  pAsySdoSeqCon_p,
-                                           tEplFrame**      ppFrame_p,
-                                           unsigned int*    puiSize_p,
-                                           BOOL             fInitRead);
+static tEplKernel readFromHistory(tEplAsySdoSeqCon* pAsySdoSeqCon_p, tEplFrame** ppFrame_p,
+                                  UINT* pSize_p, BOOL fInitRead_p);
 
-static unsigned int EplSdoAsyGetFreeEntriesFromHistory(tEplAsySdoSeqCon*  pAsySdoSeqCon_p);
+static UINT       getFreeHistoryEntries(tEplAsySdoSeqCon* pAsySdoSeqCon_p);
 
-static tEplKernel EplSdoAsySeqSetTimer(tEplAsySdoSeqCon* pAsySdoSeqCon_p,
-                                        unsigned long    ulTimeout);
+static tEplKernel setTimer(tEplAsySdoSeqCon* pAsySdoSeqCon_p, ULONG timeout_p);
 
 /***************************************************************************/
 /*                                                                         */
@@ -350,7 +335,7 @@ tEplKernel sdoseq_addInstance(tSdoComReceiveCb pfnSdoComRecvCb_p, tSdoComConCb p
 
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDO_UDP)) != 0)
     // init lower layer
-    Ret = sdoudp_addInstance(EplSdoAsyReceiveCb);
+    Ret = sdoudp_addInstance(receiveCb);
     if(Ret != kEplSuccessful)
     {
         goto Exit;
@@ -359,7 +344,7 @@ tEplKernel sdoseq_addInstance(tSdoComReceiveCb pfnSdoComRecvCb_p, tSdoComConCb p
 
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDO_ASND)) != 0)
     // init lower layer
-    Ret = sdoasnd_addInstance(EplSdoAsyReceiveCb);
+    Ret = sdoasnd_addInstance(receiveCb);
     if(Ret != kEplSuccessful)
     {
         goto Exit;
@@ -594,7 +579,7 @@ tEplAsySdoSeqCon*   pAsySdoSeqCon;
     *pSdoSeqConHdl_p = (uiCount | SDO_ASY_HANDLE);
 
     // call intern process function
-    Ret = EplSdoAsySeqProcess(uiCount,
+    Ret = processState(uiCount,
                                 0,
                                 NULL,
                                 NULL,
@@ -649,7 +634,7 @@ unsigned int    uiHandle;
         goto Exit;
     }
 
-    Ret = EplSdoAsySeqProcess(uiHandle,
+    Ret = processState(uiHandle,
                                 dataSize_p,
                                 pData_p,
                                 NULL,
@@ -734,7 +719,7 @@ unsigned int        uiCount;
 
 
     // process event and call process function if needed
-    Ret = EplSdoAsySeqProcess(uiCount,
+    Ret = processState(uiCount,
                                 0,
                                 NULL,
                                 NULL,
@@ -786,7 +771,7 @@ tEplAsySdoSeqCon*   pAsySdoSeqCon;
     if (pAsySdoSeqCon->m_uiUseCount == 0)
     {
         // process close in process function
-        Ret = EplSdoAsySeqProcess(uiHandle,
+        Ret = processState(uiHandle,
                                     0,
                                     NULL,
                                     NULL,
@@ -848,7 +833,7 @@ tEplKernel sdoseq_setTimeout(UINT32 timeout_p)
 
 //---------------------------------------------------------------------------
 //
-// Function:    EplEplSdoAsySeqProcess
+// Function:    processState
 //
 // Description: intern function to process the asynchronous SDO Sequence Layer
 //              state machine
@@ -871,11 +856,8 @@ tEplKernel sdoseq_setTimeout(UINT32 timeout_p)
 // State:
 //
 //---------------------------------------------------------------------------
-static tEplKernel EplSdoAsySeqProcess(unsigned int  uiHandle_p,
-                                         unsigned int       uiDataSize_p,
-                                         tEplFrame*         pData_p,
-                                         tAsySdoSeq*     pRecFrame_p,
-                                         tEplAsySdoSeqEvent Event_p)
+static tEplKernel processState(UINT handle_p, UINT dataSize_p, tEplFrame* pData_p,
+                               tAsySdoSeq* pRecFrame_p, tEplAsySdoSeqEvent Event_p)
 
 {
 tEplKernel          Ret;
@@ -893,7 +875,7 @@ unsigned int        uiFreeEntries;
     Ret = kEplSuccessful;
 
     // get handle for hinger layer
-    SdoSeqConHdl = uiHandle_p | SDO_ASY_HANDLE;
+    SdoSeqConHdl = handle_p | SDO_ASY_HANDLE;
 
     // check if handle invalid
     if((SdoSeqConHdl & ~SDO_SEQ_HANDLE_MASK) == SDO_SEQ_INVALID_HDL)
@@ -903,10 +885,10 @@ unsigned int        uiFreeEntries;
     }
 
     // get pointer to connection
-    pAsySdoSeqCon = &AsySdoSequInstance_g.m_AsySdoConnection[uiHandle_p];
+    pAsySdoSeqCon = &AsySdoSequInstance_g.m_AsySdoConnection[handle_p];
 
     // check size
-    if((pData_p == NULL)&& (pRecFrame_p == NULL) && (uiDataSize_p != 0))
+    if((pData_p == NULL)&& (pRecFrame_p == NULL) && (dataSize_p != 0))
     {
         Ret = kEplSdoSeqInvalidFrame;
         goto Exit;
@@ -931,7 +913,7 @@ unsigned int        uiFreeEntries;
                     // set set send rcon to 0
                     pAsySdoSeqCon->m_bSendSeqNum = 0x00;
 
-                    Ret = EplSdoAsySeqSendIntern(pAsySdoSeqCon,
+                    Ret = sendFrame(pAsySdoSeqCon,
                                                  0,
                                                  NULL,
                                                  FALSE);
@@ -944,7 +926,7 @@ unsigned int        uiFreeEntries;
                     pAsySdoSeqCon->m_SdoState = kEplAsySdoStateInit1;
 
                     // set timer
-                    Ret = EplSdoAsySeqSetTimer(pAsySdoSeqCon,
+                    Ret = setTimer(pAsySdoSeqCon,
                             AsySdoSequInstance_g.m_SdoSequTimeout);
 
                     break;
@@ -971,7 +953,7 @@ unsigned int        uiFreeEntries;
                         // create answer and send answer
                         // set rcon to 1 (in send direction own scon)
                         pAsySdoSeqCon->m_bRecSeqNum++;
-                        Ret = EplSdoAsySeqSendIntern(pAsySdoSeqCon,
+                        Ret = sendFrame(pAsySdoSeqCon,
                                                  0,
                                                  NULL,
                                                  FALSE);
@@ -983,7 +965,7 @@ unsigned int        uiFreeEntries;
                         pAsySdoSeqCon->m_SdoState = kEplAsySdoStateInit2;
 
                         // set timer
-                        Ret = EplSdoAsySeqSetTimer(pAsySdoSeqCon,
+                        Ret = setTimer(pAsySdoSeqCon,
                                 AsySdoSequInstance_g.m_SdoSequTimeout);
                     }
                     else
@@ -1000,7 +982,7 @@ unsigned int        uiFreeEntries;
                             pAsySdoSeqCon->m_bSendSeqNum &= SEQ_NUM_MASK;
                             pAsySdoSeqCon->m_bRecSeqNum &= SEQ_NUM_MASK;
                             // send frame
-                            EplSdoAsySeqSendIntern(pAsySdoSeqCon,
+                            sendFrame(pAsySdoSeqCon,
                                                         0,
                                                         NULL,
                                                         FALSE);
@@ -1043,7 +1025,7 @@ unsigned int        uiFreeEntries;
                         pAsySdoSeqCon->m_bSendSeqNum = AmiGetByteFromLe(&pRecFrame_p->m_le_bSendSeqNumCon);
 
                         pAsySdoSeqCon->m_bRecSeqNum++;
-                        Ret = EplSdoAsySeqSendIntern(pAsySdoSeqCon,
+                        Ret = sendFrame(pAsySdoSeqCon,
                                                  0,
                                                  NULL,
                                                  FALSE);
@@ -1055,7 +1037,7 @@ unsigned int        uiFreeEntries;
                         pAsySdoSeqCon->m_SdoState = kEplAsySdoStateInit3;
 
                         // set timer
-                        Ret = EplSdoAsySeqSetTimer(pAsySdoSeqCon,
+                        Ret = setTimer(pAsySdoSeqCon,
                                 AsySdoSequInstance_g.m_SdoSequTimeout);
 
                     }
@@ -1069,7 +1051,7 @@ unsigned int        uiFreeEntries;
                         // create answer and send answer
                         // set rcon to 1 (in send direction own scon)
                         pAsySdoSeqCon->m_bRecSeqNum++;
-                        Ret = EplSdoAsySeqSendIntern(pAsySdoSeqCon,
+                        Ret = sendFrame(pAsySdoSeqCon,
                                                  0,
                                                  NULL,
                                                  FALSE);
@@ -1081,7 +1063,7 @@ unsigned int        uiFreeEntries;
                         pAsySdoSeqCon->m_SdoState = kEplAsySdoStateInit2;
 
                         // set timer
-                        Ret = EplSdoAsySeqSetTimer(pAsySdoSeqCon,
+                        Ret = setTimer(pAsySdoSeqCon,
                                 AsySdoSequInstance_g.m_SdoSequTimeout);
                     }
                     else
@@ -1100,7 +1082,7 @@ unsigned int        uiFreeEntries;
                             pAsySdoSeqCon->m_bSendSeqNum &= SEQ_NUM_MASK;
                             pAsySdoSeqCon->m_bRecSeqNum &= SEQ_NUM_MASK;
                             // send frame
-                            EplSdoAsySeqSendIntern(pAsySdoSeqCon,
+                            sendFrame(pAsySdoSeqCon,
                                                         0,
                                                         NULL,
                                                         FALSE);
@@ -1121,7 +1103,7 @@ unsigned int        uiFreeEntries;
                     pAsySdoSeqCon->m_bSendSeqNum &= SEQ_NUM_MASK;
                     pAsySdoSeqCon->m_bRecSeqNum &= SEQ_NUM_MASK;
                     // send frame
-                    EplSdoAsySeqSendIntern(pAsySdoSeqCon,
+                    sendFrame(pAsySdoSeqCon,
                                                 0,
                                                 NULL,
                                                 FALSE);
@@ -1159,7 +1141,7 @@ unsigned int        uiFreeEntries;
                         pAsySdoSeqCon->m_bSendSeqNum = AmiGetByteFromLe(&pRecFrame_p->m_le_bSendSeqNumCon);
 
                         pAsySdoSeqCon->m_bRecSeqNum++;
-                        Ret = EplSdoAsySeqSendIntern(pAsySdoSeqCon,
+                        Ret = sendFrame(pAsySdoSeqCon,
                                                  0,
                                                  NULL,
                                                  FALSE);
@@ -1171,14 +1153,14 @@ unsigned int        uiFreeEntries;
                         pAsySdoSeqCon->m_SdoState = kEplAsySdoStateConnected;
 
                         // init History
-                        Ret = EplSdoAsyInitHistory(pAsySdoSeqCon);
+                        Ret = initHistory(pAsySdoSeqCon);
                         if(Ret != kEplSuccessful)
                         {
                             goto Exit;
                         }
 
                         // set timer
-                        Ret = EplSdoAsySeqSetTimer(pAsySdoSeqCon,
+                        Ret = setTimer(pAsySdoSeqCon,
                                 AsySdoSequInstance_g.m_SdoSequTimeout);
 
                         // call Command Layer Cb
@@ -1196,7 +1178,7 @@ unsigned int        uiFreeEntries;
                         // create answer and send answer
                         // set rcon to 1 (in send direction own scon)
                         pAsySdoSeqCon->m_bRecSeqNum++;
-                        Ret = EplSdoAsySeqSendIntern(pAsySdoSeqCon,
+                        Ret = sendFrame(pAsySdoSeqCon,
                                                  0,
                                                  NULL,
                                                  FALSE);
@@ -1205,7 +1187,7 @@ unsigned int        uiFreeEntries;
                             goto Exit;
                         }
                         // set timer
-                        Ret = EplSdoAsySeqSetTimer(pAsySdoSeqCon,
+                        Ret = setTimer(pAsySdoSeqCon,
                                 AsySdoSequInstance_g.m_SdoSequTimeout);
                         // change state to kEplAsySdoStateInit3
                         pAsySdoSeqCon->m_SdoState = kEplAsySdoStateInit3;
@@ -1226,7 +1208,7 @@ unsigned int        uiFreeEntries;
                             pAsySdoSeqCon->m_bSendSeqNum &= SEQ_NUM_MASK;
                             pAsySdoSeqCon->m_bRecSeqNum &= SEQ_NUM_MASK;
                             // send frame
-                            EplSdoAsySeqSendIntern(pAsySdoSeqCon,
+                            sendFrame(pAsySdoSeqCon,
                                                         0,
                                                         NULL,
                                                         FALSE);
@@ -1246,7 +1228,7 @@ unsigned int        uiFreeEntries;
                     pAsySdoSeqCon->m_bSendSeqNum &= SEQ_NUM_MASK;
                     pAsySdoSeqCon->m_bRecSeqNum &= SEQ_NUM_MASK;
                     // send frame
-                    EplSdoAsySeqSendIntern(pAsySdoSeqCon,
+                    sendFrame(pAsySdoSeqCon,
                                                 0,
                                                 NULL,
                                                 FALSE);
@@ -1285,14 +1267,14 @@ unsigned int        uiFreeEntries;
                         pAsySdoSeqCon->m_SdoState = kEplAsySdoStateConnected;
 
                         // init History
-                        Ret = EplSdoAsyInitHistory(pAsySdoSeqCon);
+                        Ret = initHistory(pAsySdoSeqCon);
                         if(Ret != kEplSuccessful)
                         {
                             goto Exit;
                         }
 
                         // set timer
-                        Ret = EplSdoAsySeqSetTimer(pAsySdoSeqCon,
+                        Ret = setTimer(pAsySdoSeqCon,
                                 AsySdoSequInstance_g.m_SdoSequTimeout);
                         // call Command Layer Cb
                         AsySdoSequInstance_g.m_fpSdoComConCb(SdoSeqConHdl,
@@ -1308,7 +1290,7 @@ unsigned int        uiFreeEntries;
                         pAsySdoSeqCon->m_bSendSeqNum = AmiGetByteFromLe(&pRecFrame_p->m_le_bSendSeqNumCon);
 
                         pAsySdoSeqCon->m_bRecSeqNum++;
-                        Ret = EplSdoAsySeqSendIntern(pAsySdoSeqCon,
+                        Ret = sendFrame(pAsySdoSeqCon,
                                                  0,
                                                  NULL,
                                                  FALSE);
@@ -1320,14 +1302,14 @@ unsigned int        uiFreeEntries;
                         pAsySdoSeqCon->m_SdoState = kEplAsySdoStateConnected;
 
                         // init History
-                        Ret = EplSdoAsyInitHistory(pAsySdoSeqCon);
+                        Ret = initHistory(pAsySdoSeqCon);
                         if(Ret != kEplSuccessful)
                         {
                             goto Exit;
                         }
 
                         // set timer
-                        Ret = EplSdoAsySeqSetTimer(pAsySdoSeqCon,
+                        Ret = setTimer(pAsySdoSeqCon,
                                 AsySdoSequInstance_g.m_SdoSequTimeout);
 
                         // call Command Layer Cb
@@ -1350,7 +1332,7 @@ unsigned int        uiFreeEntries;
                             pAsySdoSeqCon->m_bSendSeqNum &= SEQ_NUM_MASK;
                             pAsySdoSeqCon->m_bRecSeqNum &= SEQ_NUM_MASK;
                             // send frame
-                            EplSdoAsySeqSendIntern(pAsySdoSeqCon,
+                            sendFrame(pAsySdoSeqCon,
                                                         0,
                                                         NULL,
                                                         FALSE);
@@ -1370,7 +1352,7 @@ unsigned int        uiFreeEntries;
                     pAsySdoSeqCon->m_bSendSeqNum &= SEQ_NUM_MASK;
                     pAsySdoSeqCon->m_bRecSeqNum &= SEQ_NUM_MASK;
                     // send frame
-                    EplSdoAsySeqSendIntern(pAsySdoSeqCon,
+                    sendFrame(pAsySdoSeqCon,
                                                 0,
                                                 NULL,
                                                 FALSE);
@@ -1400,14 +1382,14 @@ unsigned int        uiFreeEntries;
                 case kAsySdoSeqEventFrameSend:
                 {
                     // set timer
-                    Ret = EplSdoAsySeqSetTimer(pAsySdoSeqCon,
+                    Ret = setTimer(pAsySdoSeqCon,
                             AsySdoSequInstance_g.m_SdoSequTimeout);
                     // check if data frame or ack
                     if(pData_p == NULL)
                     {   // send ack
                         // inc scon
                         //pAsySdoSeqCon->m_bRecSeqNum += 4;
-                        Ret = EplSdoAsySeqSendIntern(pAsySdoSeqCon,
+                        Ret = sendFrame(pAsySdoSeqCon,
                                                  0,
                                                  NULL,
                                                  FALSE);
@@ -1420,8 +1402,8 @@ unsigned int        uiFreeEntries;
                     {   // send dataframe
                         // increment send sequence number
                         pAsySdoSeqCon->m_bRecSeqNum += 4;
-                        Ret = EplSdoAsySeqSendIntern(pAsySdoSeqCon,
-                                                 uiDataSize_p,
+                        Ret = sendFrame(pAsySdoSeqCon,
+                                                 dataSize_p,
                                                  pData_p,
                                                  TRUE);
                         if(Ret == kEplSdoSeqRequestAckNeeded)
@@ -1453,7 +1435,7 @@ unsigned int        uiFreeEntries;
                 BYTE bSendSeqNumCon = AmiGetByteFromLe(&pRecFrame_p->m_le_bSendSeqNumCon);
 
                     // set timer
-                    Ret = EplSdoAsySeqSetTimer(pAsySdoSeqCon,
+                    Ret = setTimer(pAsySdoSeqCon,
                             AsySdoSequInstance_g.m_SdoSequTimeout);
                     // check scon
                     switch (bSendSeqNumCon & EPL_ASY_SDO_CON_MASK)
@@ -1502,7 +1484,7 @@ unsigned int        uiFreeEntries;
                                 // resend frames from history
 
                                 // read frame from history
-                                Ret = EplSdoAsyReadFromHistory(pAsySdoSeqCon,
+                                Ret = readFromHistory(pAsySdoSeqCon,
                                                                 &pEplFrame,
                                                                 &uiFrameSize,
                                                                 TRUE);
@@ -1515,7 +1497,7 @@ unsigned int        uiFreeEntries;
                                        && (uiFrameSize != 0))
                                 {
                                     // send frame
-                                    Ret = EplSdoAsySeqSendLowerLayer(pAsySdoSeqCon,
+                                    Ret = sendToLowerLayer(pAsySdoSeqCon,
                                                         uiFrameSize,
                                                         pEplFrame);
                                     if(Ret != kEplSuccessful)
@@ -1524,7 +1506,7 @@ unsigned int        uiFreeEntries;
                                     }
 
                                     // read next frame from history
-                                    Ret = EplSdoAsyReadFromHistory(pAsySdoSeqCon,
+                                    Ret = readFromHistory(pAsySdoSeqCon,
                                                                     &pEplFrame,
                                                                     &uiFrameSize,
                                                                     FALSE);
@@ -1542,12 +1524,12 @@ unsigned int        uiFreeEntries;
 
                                 // check if ack or data-frame
                                 //ignore ack -> already processed
-                                if(uiDataSize_p > EPL_SEQ_HEADER_SIZE)
+                                if(dataSize_p > EPL_SEQ_HEADER_SIZE)
                                 {
                                     AsySdoSequInstance_g.m_fpSdoComReceiveCb(
                                                         SdoSeqConHdl,
                                                         ((tAsySdoCom*) &pRecFrame_p->m_le_abSdoSeqPayload),
-                                                        (uiDataSize_p - EPL_SEQ_HEADER_SIZE));
+                                                        (dataSize_p - EPL_SEQ_HEADER_SIZE));
                                     // call Command Layer Cb
                                     AsySdoSequInstance_g.m_fpSdoComConCb(SdoSeqConHdl,
                                                                 kAsySdoConStateFrameSended);
@@ -1568,7 +1550,7 @@ unsigned int        uiFreeEntries;
 
                                 // send error frame with own rcon = 3
                                 pAsySdoSeqCon->m_bSendSeqNum |= 0x03;
-                                Ret = EplSdoAsySeqSendIntern(pAsySdoSeqCon,
+                                Ret = sendFrame(pAsySdoSeqCon,
                                                         0,
                                                         NULL,
                                                         FALSE);
@@ -1589,7 +1571,7 @@ unsigned int        uiFreeEntries;
                             {   // ack request received
 
                                 // create ack with own scon = 2
-                                Ret = EplSdoAsySeqSendIntern(pAsySdoSeqCon,
+                                Ret = sendFrame(pAsySdoSeqCon,
                                                         0,
                                                         NULL,
                                                         FALSE);
@@ -1615,7 +1597,7 @@ unsigned int        uiFreeEntries;
                     pAsySdoSeqCon->m_bSendSeqNum &= SEQ_NUM_MASK;
                     pAsySdoSeqCon->m_bRecSeqNum &= SEQ_NUM_MASK;
                     // send frame
-                    EplSdoAsySeqSendIntern(pAsySdoSeqCon,
+                    sendFrame(pAsySdoSeqCon,
                                                  0,
                                                  NULL,
                                                  FALSE);
@@ -1632,7 +1614,7 @@ unsigned int        uiFreeEntries;
                 case kAsySdoSeqEventTimeout:
                 {
 
-                    uiFreeEntries = EplSdoAsyGetFreeEntriesFromHistory(pAsySdoSeqCon);
+                    uiFreeEntries = getFreeHistoryEntries(pAsySdoSeqCon);
                     if ((uiFreeEntries < EPL_SDO_HISTORY_SIZE)
                         && (pAsySdoSeqCon->m_uiRetryCount < EPL_SEQ_RETRY_COUNT))
                     {   // unacknowledged frames in history
@@ -1644,11 +1626,11 @@ unsigned int        uiFreeEntries;
                         pAsySdoSeqCon->m_uiRetryCount++;
 
                         // set timer
-                        Ret = EplSdoAsySeqSetTimer(pAsySdoSeqCon,
+                        Ret = setTimer(pAsySdoSeqCon,
                                 AsySdoSequInstance_g.m_SdoSequTimeout);
 
                         // read first frame from history
-                        Ret = EplSdoAsyReadFromHistory(pAsySdoSeqCon,
+                        Ret = readFromHistory(pAsySdoSeqCon,
                                                         &pEplFrame,
                                                         &uiFrameSize,
                                                         TRUE);
@@ -1666,7 +1648,7 @@ unsigned int        uiFreeEntries;
                                     AmiGetByteFromLe( &pEplFrame->m_Data.m_Asnd.m_Payload.m_SdoSequenceFrame.m_le_bSendSeqNumCon) | 0x03);
 
                             // send frame
-                            Ret = EplSdoAsySeqSendLowerLayer(pAsySdoSeqCon,
+                            Ret = sendToLowerLayer(pAsySdoSeqCon,
                                                 uiFrameSize,
                                                 pEplFrame);
                             if(Ret != kEplSuccessful)
@@ -1684,7 +1666,7 @@ unsigned int        uiFreeEntries;
                         pAsySdoSeqCon->m_bSendSeqNum &= SEQ_NUM_MASK;
                         pAsySdoSeqCon->m_bRecSeqNum &= SEQ_NUM_MASK;
                         // send frame
-                        EplSdoAsySeqSendIntern(pAsySdoSeqCon,
+                        sendFrame(pAsySdoSeqCon,
                                                     0,
                                                     NULL,
                                                     FALSE);
@@ -1711,7 +1693,7 @@ unsigned int        uiFreeEntries;
             DEBUG_LVL_25_TRACE("EplSdoAsySequ: StateWaitAck\n");
 
             // set timer
-            Ret = EplSdoAsySeqSetTimer(pAsySdoSeqCon,
+            Ret = setTimer(pAsySdoSeqCon,
                     AsySdoSequInstance_g.m_SdoSequTimeout);
 
             //TODO: retry of acknowledge
@@ -1760,12 +1742,12 @@ unsigned int        uiFreeEntries;
                         AsySdoSequInstance_g.m_fpSdoComConCb(SdoSeqConHdl,
                                                                 kAsySdoConStateAckReceived);
                         // send data to higher layer if needed
-                        if(uiDataSize_p > EPL_SEQ_HEADER_SIZE)
+                        if(dataSize_p > EPL_SEQ_HEADER_SIZE)
                         {
                             AsySdoSequInstance_g.m_fpSdoComReceiveCb(
                                                 SdoSeqConHdl,
                                                 ((tAsySdoCom*) &pRecFrame_p->m_le_abSdoSeqPayload),
-                                                (uiDataSize_p - EPL_SEQ_HEADER_SIZE));
+                                                (dataSize_p - EPL_SEQ_HEADER_SIZE));
                         }
                         break;
                     }
@@ -1787,12 +1769,12 @@ unsigned int        uiFreeEntries;
                             pAsySdoSeqCon->m_bRecSeqNum--;
 
                             // check if ack or data-frame
-                            if(uiDataSize_p > EPL_SEQ_HEADER_SIZE)
+                            if(dataSize_p > EPL_SEQ_HEADER_SIZE)
                             {
                                 AsySdoSequInstance_g.m_fpSdoComReceiveCb(
                                                     SdoSeqConHdl,
                                                     ((tAsySdoCom*) &pRecFrame_p->m_le_abSdoSeqPayload),
-                                                    (uiDataSize_p - EPL_SEQ_HEADER_SIZE));
+                                                    (dataSize_p - EPL_SEQ_HEADER_SIZE));
                                 // call Command Layer Cb
                                 AsySdoSequInstance_g.m_fpSdoComConCb(SdoSeqConHdl,
                                                             kAsySdoConStateFrameSended);
@@ -1801,7 +1783,7 @@ unsigned int        uiFreeEntries;
                             }
                             else
                             {
-                                Ret = EplSdoAsySeqSendIntern(pAsySdoSeqCon,
+                                Ret = sendFrame(pAsySdoSeqCon,
                                                         0,
                                                         NULL,
                                                         FALSE);
@@ -1818,7 +1800,7 @@ unsigned int        uiFreeEntries;
                             // resend frames from history
 
                             // read frame from history
-                            Ret = EplSdoAsyReadFromHistory(pAsySdoSeqCon,
+                            Ret = readFromHistory(pAsySdoSeqCon,
                                                             &pEplFrame,
                                                             &uiFrameSize,
                                                             TRUE);
@@ -1826,7 +1808,7 @@ unsigned int        uiFreeEntries;
                                     && (uiFrameSize != 0))
                             {
                                 // send frame
-                                Ret = EplSdoAsySeqSendLowerLayer(pAsySdoSeqCon,
+                                Ret = sendToLowerLayer(pAsySdoSeqCon,
                                                     uiFrameSize,
                                                     pEplFrame);
                                 if(Ret != kEplSuccessful)
@@ -1836,7 +1818,7 @@ unsigned int        uiFreeEntries;
                                 // read next frame
 
                                 // read frame from history
-                                Ret = EplSdoAsyReadFromHistory(pAsySdoSeqCon,
+                                Ret = readFromHistory(pAsySdoSeqCon,
                                                                 &pEplFrame,
                                                                 &uiFrameSize,
                                                                 FALSE);
@@ -1854,7 +1836,7 @@ unsigned int        uiFreeEntries;
                 pAsySdoSeqCon->m_bSendSeqNum &= SEQ_NUM_MASK;
                 pAsySdoSeqCon->m_bRecSeqNum &= SEQ_NUM_MASK;
                 // send frame
-                EplSdoAsySeqSendIntern(pAsySdoSeqCon,
+                sendFrame(pAsySdoSeqCon,
                                             0,
                                             NULL,
                                             FALSE);
@@ -1870,7 +1852,7 @@ unsigned int        uiFreeEntries;
         // unknown state
         default:
         {
-            EPL_DBGLVL_SDO_TRACE("Error: Unknown State in EplSdoAsySeqProcess\n");
+            EPL_DBGLVL_SDO_TRACE("Error: Unknown State in processState\n");
 
         }
     }// end of switch(pAsySdoSeqCon->m_SdoState)
@@ -1889,7 +1871,7 @@ Exit:
 
 //---------------------------------------------------------------------------
 //
-// Function:    EplSdoAsySeqSendIntern
+// Function:    sendFrame
 //
 // Description: intern function to create and send a frame
 //              -> if uiDataSize_p == 0 create a frame with infos from
@@ -1911,10 +1893,8 @@ Exit:
 // State:
 //
 //---------------------------------------------------------------------------
-static tEplKernel EplSdoAsySeqSendIntern(tEplAsySdoSeqCon*  pAsySdoSeqCon_p,
-                                         unsigned int       uiDataSize_p,
-                                         tEplFrame*         pData_p,
-                                         BOOL               fFrameInHistory_p)
+static tEplKernel sendFrame(tEplAsySdoSeqCon* pAsySdoSeqCon_p, UINT dataSize_p,
+                            tEplFrame* pData_p, BOOL fFrameInHistory_p)
 {
 tEplKernel      Ret;
 BYTE            abFrame[EPL_SEQ_FRAME_SIZE];
@@ -1934,7 +1914,7 @@ unsigned int    uiFreeEntries = 0;
     if (fFrameInHistory_p != FALSE)
     {
         // check if only one free entry in history buffer
-        uiFreeEntries = EplSdoAsyGetFreeEntriesFromHistory(pAsySdoSeqCon_p);
+        uiFreeEntries = getFreeHistoryEntries(pAsySdoSeqCon_p);
         if (uiFreeEntries <= 1)
         {   // request an acknowledge in dataframe
             // own scon = 3
@@ -1952,12 +1932,12 @@ unsigned int    uiFreeEntries = 0;
     AmiSetByteToLe( &pEplFrame->m_Data.m_Asnd.m_Payload.m_SdoSequenceFrame.m_le_bSendSeqNumCon, pAsySdoSeqCon_p->m_bRecSeqNum);
 
     // add size
-    uiDataSize_p += EPL_SEQ_HEADER_SIZE;
+    dataSize_p += EPL_SEQ_HEADER_SIZE;
 
 
     // forward frame to appropriate lower layer
-    Ret = EplSdoAsySeqSendLowerLayer(pAsySdoSeqCon_p,
-                                     uiDataSize_p,
+    Ret = sendToLowerLayer(pAsySdoSeqCon_p,
+                                     dataSize_p,
                                      pEplFrame);    // pointer to frame
 
     // check if all alright
@@ -1971,9 +1951,9 @@ unsigned int    uiFreeEntries = 0;
         }
 
         // save frame to history
-        Ret = EplSdoAsyAddFrameToHistory(pAsySdoSeqCon_p,
+        Ret = addFrameToHistory(pAsySdoSeqCon_p,
                                             pEplFrame,
-                                            uiDataSize_p);
+                                            dataSize_p);
         if ((Ret == kEplSdoSeqNoFreeHistory) || (uiFreeEntries <= 1))
         {   // request Ack needed
             Ret = kEplSdoSeqRequestAckNeeded;
@@ -1986,7 +1966,7 @@ unsigned int    uiFreeEntries = 0;
 
 //---------------------------------------------------------------------------
 //
-// Function:    EplSdoAsySeqSendLowerLayer
+// Function:    sendToLowerLayer
 //
 // Description: intern function to send a previously created frame to lower layer
 //
@@ -2001,9 +1981,8 @@ unsigned int    uiFreeEntries = 0;
 // State:
 //
 //---------------------------------------------------------------------------
-static tEplKernel EplSdoAsySeqSendLowerLayer(tEplAsySdoSeqCon*  pAsySdoSeqCon_p,
-                                         unsigned int       uiDataSize_p,
-                                         tEplFrame*         pEplFrame_p)
+static tEplKernel sendToLowerLayer(tEplAsySdoSeqCon* pAsySdoSeqCon_p, UINT dataSize_p,
+                                   tEplFrame* pFrame_p)
 {
 tEplKernel      Ret;
 
@@ -2013,8 +1992,8 @@ tEplKernel      Ret;
     {   // send over UDP
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDO_UDP)) != 0)
         Ret = sdoudp_sendData(pAsySdoSeqCon_p->m_ConHandle,
-                                    pEplFrame_p,      // pointer to frame
-                                    uiDataSize_p);
+                                    pFrame_p,      // pointer to frame
+                                    dataSize_p);
 #else
         Ret = kEplSdoSeqUnsupportedProt;
 #endif
@@ -2024,8 +2003,8 @@ tEplKernel      Ret;
     {   // ASND
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDO_ASND)) != 0)
         Ret = sdoasnd_sendData(pAsySdoSeqCon_p->m_ConHandle,
-                                    pEplFrame_p,      // pointer to frame
-                                    uiDataSize_p);
+                                    pFrame_p,      // pointer to frame
+                                    dataSize_p);
 #else
         Ret = kEplSdoSeqUnsupportedProt;
 #endif
@@ -2040,7 +2019,7 @@ tEplKernel      Ret;
 
 //---------------------------------------------------------------------------
 //
-// Function:        EplSdoAsyReceiveCb
+// Function:        receiveCb
 //
 // Description:     callback-function for received frames from lower layer
 //
@@ -2057,10 +2036,8 @@ tEplKernel      Ret;
 // State:
 //
 //---------------------------------------------------------------------------
-tEplKernel PUBLIC EplSdoAsyReceiveCb (
-                tSdoConHdl       ConHdl_p,
-                tAsySdoSeq*      pSdoSeqData_p,
-                unsigned int        uiDataSize_p)
+static tEplKernel receiveCb(tSdoConHdl conHdl_p, tAsySdoSeq* pSdoSeqData_p,
+                            UINT dataSize_p)
 {
 tEplKernel          Ret;
 unsigned int        uiCount;
@@ -2083,7 +2060,7 @@ tEplAsySdoSeqCon*   pAsySdoSeqCon;
         pAsySdoSeqCon = &AsySdoSequInstance_g.m_AsySdoConnection[uiCount];
         while (uiCount < EPL_MAX_SDO_SEQ_CON)
         {
-            if (pAsySdoSeqCon->m_ConHandle == ConHdl_p)
+            if (pAsySdoSeqCon->m_ConHandle == conHdl_p)
             {
                 break;
             }
@@ -2114,7 +2091,7 @@ tEplAsySdoSeqCon*   pAsySdoSeqCon;
             {
                 pAsySdoSeqCon = &AsySdoSequInstance_g.m_AsySdoConnection[uiFreeEntry];
                 // save handle from lower layer
-                pAsySdoSeqCon->m_ConHandle = ConHdl_p;
+                pAsySdoSeqCon->m_ConHandle = conHdl_p;
                 // increment use counter
                 pAsySdoSeqCon->m_uiUseCount++;
                 uiCount = uiFreeEntry;
@@ -2122,7 +2099,7 @@ tEplAsySdoSeqCon*   pAsySdoSeqCon;
         }
 
         // call history ack function
-        Ret = EplSdoAsyAckFrameToHistory(pAsySdoSeqCon,
+        Ret = deleteAckedFrameFromHistory(pAsySdoSeqCon,
             (AmiGetByteFromLe(&pSdoSeqData_p->m_le_bRecSeqNumCon)& SEQ_NUM_MASK));
 
 #if defined(WIN32) || defined(_WIN32)
@@ -2136,8 +2113,8 @@ tEplAsySdoSeqCon*   pAsySdoSeqCon;
         }
 
         // call process function with pointer of frame and event kAsySdoSeqEventFrameRec
-        Ret = EplSdoAsySeqProcess(uiCount,
-                                    uiDataSize_p,
+        Ret = processState(uiCount,
+                                    dataSize_p,
                                     NULL,
                                     pSdoSeqData_p,
                                     kAsySdoSeqEventFrameRec);
@@ -2150,7 +2127,7 @@ Exit:
 
 //---------------------------------------------------------------------------
 //
-// Function:        EplSdoAsyInitHistory
+// Function:        initHistory
 //
 // Description:     init function for history buffer
 //
@@ -2165,7 +2142,7 @@ Exit:
 // State:
 //
 //---------------------------------------------------------------------------
-static tEplKernel EplSdoAsyInitHistory(tEplAsySdoSeqCon*  pAsySdoSeqCon_p)
+static tEplKernel initHistory(tEplAsySdoSeqCon* pAsySdoSeqCon_p)
 {
 tEplKernel      Ret;
 
@@ -2181,7 +2158,7 @@ tEplKernel      Ret;
 
 //---------------------------------------------------------------------------
 //
-// Function:        EplSdoAsyAddFrameToHistory
+// Function:        addFrameToHistory
 //
 // Description:     function to add a frame to the history buffer
 //
@@ -2199,9 +2176,8 @@ tEplKernel      Ret;
 // State:
 //
 //---------------------------------------------------------------------------
-static tEplKernel EplSdoAsyAddFrameToHistory(tEplAsySdoSeqCon*  pAsySdoSeqCon_p,
-                                        tEplFrame*      pFrame_p,
-                                        unsigned int    uiSize_p)
+static tEplKernel addFrameToHistory(tEplAsySdoSeqCon* pAsySdoSeqCon_p, tEplFrame* pFrame_p,
+                                    UINT size_p)
 {
 tEplKernel              Ret;
 tEplAsySdoConHistory*   pHistory;
@@ -2212,7 +2188,7 @@ tEplAsySdoConHistory*   pHistory;
 
     // check size
     // $$$ d.k. EPL_SEQ_HISTORY_FRAME_SIZE includes the header size, but uiSize_p does not!!!
-    if(uiSize_p > EPL_SEQ_HISTROY_FRAME_SIZE)
+    if(size_p > EPL_SEQ_HISTROY_FRAME_SIZE)
     {
         Ret = kEplSdoSeqFrameSizeError;
         goto Exit;
@@ -2227,9 +2203,9 @@ tEplAsySdoConHistory*   pHistory;
     {   // write message in free entry
         EPL_MEMCPY(&((tEplFrame*)pHistory->m_aabHistoryFrame[pHistory->m_bWrite])->m_le_bMessageType,
                 &pFrame_p->m_le_bMessageType,
-                uiSize_p + ASND_HEADER_SIZE);
+                size_p + ASND_HEADER_SIZE);
         // store size
-        pHistory->m_auiFrameSize[pHistory->m_bWrite] = uiSize_p;
+        pHistory->m_auiFrameSize[pHistory->m_bWrite] = size_p;
 
         // decrement number of free buffer entries
         pHistory->m_bFreeEntries--;
@@ -2256,7 +2232,7 @@ Exit:
 
 //---------------------------------------------------------------------------
 //
-// Function:        EplSdoAsyAckFrameToHistory
+// Function:        deleteAckedFrameFromHistory
 //
 // Description:     function to delete acknowledged frames from history buffer
 //
@@ -2272,8 +2248,8 @@ Exit:
 // State:
 //
 //---------------------------------------------------------------------------
-static tEplKernel EplSdoAsyAckFrameToHistory(tEplAsySdoSeqCon*  pAsySdoSeqCon_p,
-                                        BYTE   bRecSeqNumber_p)
+static tEplKernel deleteAckedFrameFromHistory(tEplAsySdoSeqCon* pAsySdoSeqCon_p,
+                                              UINT8 recvSeqNumber_p)
 {
 tEplKernel              Ret;
 tEplAsySdoConHistory*   pHistory;
@@ -2294,7 +2270,7 @@ BYTE                    bCurrentSeqNum;
         do
         {
             bCurrentSeqNum = (((tEplFrame*)pHistory->m_aabHistoryFrame[bAckIndex])->m_Data.m_Asnd.m_Payload.m_SdoSequenceFrame.m_le_bSendSeqNumCon & SEQ_NUM_MASK);
-            if (((bRecSeqNumber_p - bCurrentSeqNum) & SEQ_NUM_MASK)
+            if (((recvSeqNumber_p - bCurrentSeqNum) & SEQ_NUM_MASK)
                     < EPL_SEQ_NUM_THRESHOLD)
             {
                 pHistory->m_auiFrameSize[bAckIndex] = 0;
@@ -2312,7 +2288,7 @@ BYTE                    bCurrentSeqNum;
                 goto Exit;
             }
         }
-        while ((((bRecSeqNumber_p - 1 - bCurrentSeqNum) & SEQ_NUM_MASK)
+        while ((((recvSeqNumber_p - 1 - bCurrentSeqNum) & SEQ_NUM_MASK)
                     < EPL_SEQ_NUM_THRESHOLD)
                && (pHistory->m_bWrite != bAckIndex));
 
@@ -2326,7 +2302,7 @@ Exit:
 
 //---------------------------------------------------------------------------
 //
-// Function:        EplSdoAsyReadFromHistory
+// Function:        readFromHistory
 //
 // Description:     function to one frame from history
 //
@@ -2345,10 +2321,8 @@ Exit:
 // State:
 //
 //---------------------------------------------------------------------------
-static tEplKernel EplSdoAsyReadFromHistory(tEplAsySdoSeqCon*  pAsySdoSeqCon_p,
-                                           tEplFrame**      ppFrame_p,
-                                           unsigned int*    puiSize_p,
-                                           BOOL             fInitRead_p)
+static tEplKernel readFromHistory(tEplAsySdoSeqCon* pAsySdoSeqCon_p, tEplFrame** ppFrame_p,
+                                  UINT* pSize_p, BOOL fInitRead_p)
 {
 tEplKernel              Ret;
 tEplAsySdoConHistory*   pHistory;
@@ -2370,14 +2344,14 @@ tEplAsySdoConHistory*   pHistory;
     if ((pHistory->m_bFreeEntries < EPL_SDO_HISTORY_SIZE)
         && (pHistory->m_bWrite != pHistory->m_bRead))
     {
-//        PRINTF("EplSdoAsyReadFromHistory(): init = %d, read = %u, write = %u, ack = %u", (int) fInitRead_p, (WORD)pHistory->m_bRead, (WORD)pHistory->m_bWrite, (WORD)pHistory->m_bAck);
+//        PRINTF("readFromHistory(): init = %d, read = %u, write = %u, ack = %u", (int) fInitRead_p, (WORD)pHistory->m_bRead, (WORD)pHistory->m_bWrite, (WORD)pHistory->m_bAck);
 //        PRINTF(", free entries = %u, next frame size = %u\n", (WORD)pHistory->m_bFreeEntries, pHistory->m_auiFrameSize[pHistory->m_bRead]);
 
         // return pointer to stored frame
         *ppFrame_p = (tEplFrame*)pHistory->m_aabHistoryFrame[pHistory->m_bRead];
 
         // save size
-        *puiSize_p = pHistory->m_auiFrameSize[pHistory->m_bRead];
+        *pSize_p = pHistory->m_auiFrameSize[pHistory->m_bRead];
 
         pHistory->m_bRead++;
         if(pHistory->m_bRead == EPL_SDO_HISTORY_SIZE)
@@ -2388,13 +2362,13 @@ tEplAsySdoConHistory*   pHistory;
     }
     else
     {
-//        PRINTF("EplSdoAsyReadFromHistory(): read = %u, ack = %u, free entries = %u, no frame\n", (WORD)pHistory->m_bRead, (WORD)pHistory->m_bAck, (WORD)pHistory->m_bFreeEntries);
+//        PRINTF("readFromHistory(): read = %u, ack = %u, free entries = %u, no frame\n", (WORD)pHistory->m_bRead, (WORD)pHistory->m_bAck, (WORD)pHistory->m_bFreeEntries);
 
         // no more frames to send
         // return null pointer
         *ppFrame_p = NULL;
 
-        *puiSize_p = 0;
+        *pSize_p = 0;
     }
 
     return Ret;
@@ -2403,7 +2377,7 @@ tEplAsySdoConHistory*   pHistory;
 
 //---------------------------------------------------------------------------
 //
-// Function:        EplSdoAsyGetFreeEntriesFromHistory
+// Function:        getFreeHistoryEntries
 //
 // Description:     function returns the number of free history entries
 //
@@ -2418,7 +2392,7 @@ tEplAsySdoConHistory*   pHistory;
 // State:
 //
 //---------------------------------------------------------------------------
-static unsigned int EplSdoAsyGetFreeEntriesFromHistory(tEplAsySdoSeqCon*  pAsySdoSeqCon_p)
+static unsigned int getFreeHistoryEntries(tEplAsySdoSeqCon* pAsySdoSeqCon_p)
 {
 unsigned int uiFreeEntries;
 
@@ -2429,7 +2403,7 @@ unsigned int uiFreeEntries;
 
 //---------------------------------------------------------------------------
 //
-// Function:        EplSdoAsySeqSetTimer
+// Function:        setTimer
 //
 // Description:     function sets or modify timer in timermodule
 //
@@ -2445,8 +2419,7 @@ unsigned int uiFreeEntries;
 // State:
 //
 //---------------------------------------------------------------------------
-static tEplKernel EplSdoAsySeqSetTimer(tEplAsySdoSeqCon* pAsySdoSeqCon_p,
-                                        unsigned long    ulTimeout)
+static tEplKernel setTimer(tEplAsySdoSeqCon* pAsySdoSeqCon_p, ULONG timeout)
 {
 tEplKernel      Ret;
 tEplTimerArg    TimerArg;
@@ -2457,13 +2430,13 @@ tEplTimerArg    TimerArg;
     if(pAsySdoSeqCon_p->m_EplTimerHdl == 0)
     {   // create new timer
         Ret = EplTimeruSetTimerMs(&pAsySdoSeqCon_p->m_EplTimerHdl,
-                                    ulTimeout,
+                                    timeout,
                                     TimerArg);
     }
     else
     {   // modify existing timer
         Ret = EplTimeruModifyTimerMs(&pAsySdoSeqCon_p->m_EplTimerHdl,
-                                    ulTimeout,
+                                    timeout,
                                     TimerArg);
 
     }
