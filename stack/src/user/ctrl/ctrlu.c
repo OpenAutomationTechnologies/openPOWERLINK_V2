@@ -1303,7 +1303,7 @@ static tEplKernel updateSdoConfig(void)
     if(ret != kEplSuccessful)
         return ret;
 
-    ret = EplSdoAsySeqSetTimeout(sdoSequTimeout);
+    ret = sdoseq_setTimeout(sdoSequTimeout);
     return ret;
 }
 

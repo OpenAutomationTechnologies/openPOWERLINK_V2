@@ -258,7 +258,7 @@ static tEplKernel EplSdoAsySeqSetTimer(tEplAsySdoSeqCon* pAsySdoSeqCon_p,
 
 //---------------------------------------------------------------------------
 //
-// Function:    EplSdoAsySeqInit
+// Function:    sdoseq_init
 //
 // Description: init first instance
 //
@@ -276,13 +276,13 @@ static tEplKernel EplSdoAsySeqSetTimer(tEplAsySdoSeqCon* pAsySdoSeqCon_p,
 // State:
 //
 //---------------------------------------------------------------------------
-tEplKernel PUBLIC EplSdoAsySeqInit(tSdoComReceiveCb fpSdoComCb_p,
+tEplKernel PUBLIC sdoseq_init(tSdoComReceiveCb fpSdoComCb_p,
                                    tSdoComConCb fpSdoComConCb_p)
 {
 tEplKernel  Ret;
 
 
-    Ret = EplSdoAsySeqAddInstance(fpSdoComCb_p, fpSdoComConCb_p);
+    Ret = sdoseq_addInstance(fpSdoComCb_p, fpSdoComConCb_p);
 
     return Ret;
 
@@ -290,7 +290,7 @@ tEplKernel  Ret;
 
 //---------------------------------------------------------------------------
 //
-// Function:    EplSdoAsySeqAddInstance
+// Function:    sdoseq_addInstance
 //
 // Description: init following instances
 //
@@ -307,7 +307,7 @@ tEplKernel  Ret;
 // State:
 //
 //---------------------------------------------------------------------------
-tEplKernel PUBLIC EplSdoAsySeqAddInstance (tSdoComReceiveCb fpSdoComCb_p,
+tEplKernel PUBLIC sdoseq_addInstance (tSdoComReceiveCb fpSdoComCb_p,
                                    tSdoComConCb fpSdoComConCb_p)
 {
     tEplKernel      Ret;
@@ -377,7 +377,7 @@ Exit:
 
 //---------------------------------------------------------------------------
 //
-// Function:    EplSdoAsySeqDelInstance
+// Function:    sdoseq_delInstance
 //
 // Description: delete instances
 //
@@ -392,7 +392,7 @@ Exit:
 // State:
 //
 //---------------------------------------------------------------------------
-tEplKernel PUBLIC EplSdoAsySeqDelInstance()
+tEplKernel PUBLIC sdoseq_delInstance()
 {
 tEplKernel  Ret;
 unsigned int        uiCount;
@@ -437,7 +437,7 @@ tEplAsySdoSeqCon*   pAsySdoSeqCon;
 
 //---------------------------------------------------------------------------
 //
-// Function:    EplSdoAsySeqInitCon
+// Function:    sdoseq_initCon
 //
 // Description: start initialization of a sequence layer connection.
 //              It tries to reuse an existing connection to the same node.
@@ -454,7 +454,7 @@ tEplAsySdoSeqCon*   pAsySdoSeqCon;
 // State:
 //
 //---------------------------------------------------------------------------
-tEplKernel PUBLIC EplSdoAsySeqInitCon(tSdoSeqConHdl* pSdoSeqConHdl_p,
+tEplKernel PUBLIC sdoseq_initCon(tSdoSeqConHdl* pSdoSeqConHdl_p,
                                 unsigned int uiNodeId_p,
                                 tSdoType   SdoType)
 {
@@ -611,7 +611,7 @@ Exit:
 
 //---------------------------------------------------------------------------
 //
-// Function:    EplSdoAsySeqSendData
+// Function:    sdoseq_sendData
 //
 // Description: send data using an established connection
 //
@@ -631,7 +631,7 @@ Exit:
 // State:
 //
 //---------------------------------------------------------------------------
-tEplKernel PUBLIC EplSdoAsySeqSendData(tSdoSeqConHdl SdoSeqConHdl_p,
+tEplKernel PUBLIC sdoseq_sendData(tSdoSeqConHdl SdoSeqConHdl_p,
                                  unsigned int    uiDataSize_p,
                                  tEplFrame*      pabData_p )
 {
@@ -667,7 +667,7 @@ Exit:
 
 //---------------------------------------------------------------------------
 //
-// Function:    EplSdoAsySeqProcessEvent
+// Function:    sdoseq_processEvent
 //
 // Description: function processes external events
 //              -> later needed for timeout control with timer-module
@@ -683,7 +683,7 @@ Exit:
 // State:
 //
 //---------------------------------------------------------------------------
-tEplKernel PUBLIC EplSdoAsySeqProcessEvent(tEplEvent* pEvent_p)
+tEplKernel PUBLIC sdoseq_processEvent(tEplEvent* pEvent_p)
 {
 tEplKernel          Ret;
 tEplTimerEventArg*  pTimerEventArg;
@@ -753,7 +753,7 @@ Exit:
 
 //---------------------------------------------------------------------------
 //
-// Function:    EplSdoAsySeqDelCon
+// Function:    sdoseq_deleteCon
 //
 // Description: del and close one connection
 //
@@ -768,7 +768,7 @@ Exit:
 // State:
 //
 //---------------------------------------------------------------------------
-tEplKernel PUBLIC EplSdoAsySeqDelCon(tSdoSeqConHdl SdoSeqConHdl_p)
+tEplKernel PUBLIC sdoseq_deleteCon(tSdoSeqConHdl SdoSeqConHdl_p)
 {
 tEplKernel      Ret = kEplSuccessful;
 unsigned int    uiHandle;
@@ -829,7 +829,7 @@ Exit:
 
 //---------------------------------------------------------------------------
 //
-// Function:    EplSdoAsySeqSetTimeout
+// Function:    sdoseq_setTimeout
 //
 // Description: Set new SDO sequence layer timeout
 //
@@ -838,7 +838,7 @@ Exit:
 // Returns:     tEplKernel = errorcode
 //
 //---------------------------------------------------------------------------
-tEplKernel PUBLIC EplSdoAsySeqSetTimeout( DWORD Timeout_p )
+tEplKernel PUBLIC sdoseq_setTimeout( DWORD Timeout_p )
 {
     // Adopt new SDO sequence layer timeout (truncated to an upper bound)
     AsySdoSequInstance_g.m_SdoSequTimeout   = min(Timeout_p, EPL_ASY_SDO_MAX_SEQU_TIMEOUT_MS);
