@@ -62,20 +62,20 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 extern "C" {
 #endif
 
-tEplKernel PUBLIC EplSdoComInit(void);
-tEplKernel PUBLIC EplSdoComAddInstance(void);
-tEplKernel PUBLIC EplSdoComDelInstance(void);
+tEplKernel PUBLIC sdocom_init(void);
+tEplKernel PUBLIC sdocom_addInstance(void);
+tEplKernel PUBLIC sdocom_delInstance(void);
 
 #if defined(CONFIG_INCLUDE_SDOC)
-tEplKernel PUBLIC EplSdoComDefineCon(tSdoComConHdl*  pSdoComConHdl_p,
+tEplKernel PUBLIC sdocom_defineConnection(tSdoComConHdl*  pSdoComConHdl_p,
                                       unsigned int      uiTargetNodeId_p,
                                       tSdoType        ProtType_p);
-tEplKernel PUBLIC EplSdoComInitTransferByIndex(tSdoComTransParamByIndex* pSdoComTransParam_p);
-unsigned int PUBLIC EplSdoComGetNodeId(tSdoComConHdl  SdoComConHdl_p);
-tEplKernel PUBLIC EplSdoComUndefineCon(tSdoComConHdl  SdoComConHdl_p);
-tEplKernel PUBLIC EplSdoComGetState(tSdoComConHdl SdoComConHdl_p,
+tEplKernel PUBLIC sdocom_initTransferByIndex(tSdoComTransParamByIndex* pSdoComTransParam_p);
+unsigned int PUBLIC sdocom_getNodeId(tSdoComConHdl  SdoComConHdl_p);
+tEplKernel PUBLIC sdocom_undefineConnection(tSdoComConHdl  SdoComConHdl_p);
+tEplKernel PUBLIC sdocom_getState(tSdoComConHdl SdoComConHdl_p,
                                     tSdoComFinished* pSdoComFinished_p);
-tEplKernel PUBLIC EplSdoComSdoAbort(tSdoComConHdl SdoComConHdl_p,
+tEplKernel PUBLIC sdocom_abortTransfer(tSdoComConHdl SdoComConHdl_p,
                               DWORD           dwAbortCode_p);
 #endif
 

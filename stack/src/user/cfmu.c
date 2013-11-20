@@ -244,7 +244,7 @@ tEplKernel cfmu_exit(void)
         {
             if (pNodeInfo->sdoComConHdl != UINT_MAX)
             {
-                EplSdoComSdoAbort(pNodeInfo->sdoComConHdl, EPL_SDOAC_DATA_NOT_TRANSF_DUE_DEVICE_STATE);
+                sdocom_abortTransfer(pNodeInfo->sdoComConHdl, EPL_SDOAC_DATA_NOT_TRANSF_DUE_DEVICE_STATE);
             }
 
             pBuffer = pNodeInfo->pObdBufferConciseDcf;
@@ -305,12 +305,12 @@ tEplKernel cfmu_processNodeEvent(UINT nodeId_p, tNmtNodeEvent nodeEvent_p)
     {
         // send abort
         pNodeInfo->cfmState = kCfmStateInternalAbort;
-        ret = EplSdoComSdoAbort(pNodeInfo->sdoComConHdl, EPL_SDOAC_DATA_NOT_TRANSF_DUE_LOCAL_CONTROL);
+        ret = sdocom_abortTransfer(pNodeInfo->sdoComConHdl, EPL_SDOAC_DATA_NOT_TRANSF_DUE_LOCAL_CONTROL);
         if (ret != kEplSuccessful)
             return ret;
 
         // close connection
-        ret = EplSdoComUndefineCon(pNodeInfo->sdoComConHdl);
+        ret = sdocom_undefineConnection(pNodeInfo->sdoComConHdl);
         pNodeInfo->sdoComConHdl = UINT_MAX;
         if (ret != kEplSuccessful)
         {
@@ -509,7 +509,7 @@ tEplKernel cfmu_cbObdAccess(tObdCbParam MEM* pParam_p)
     pNodeInfo = CFM_GET_NODEINFO(pParam_p->subIndex);
     if ((pNodeInfo != NULL) && (pNodeInfo->sdoComConHdl != UINT_MAX))
     {
-        ret = EplSdoComSdoAbort(pNodeInfo->sdoComConHdl, EPL_SDOAC_DATA_NOT_TRANSF_DUE_DEVICE_STATE);
+        ret = sdocom_abortTransfer(pNodeInfo->sdoComConHdl, EPL_SDOAC_DATA_NOT_TRANSF_DUE_DEVICE_STATE);
     }
 
     pMemVStringDomain = pParam_p->pArg;
@@ -621,7 +621,7 @@ static tEplKernel finishConfig(tCfmNodeInfo* pNodeInfo_p, tNmtCommand nmtCommand
 
     if (pNodeInfo_p->sdoComConHdl != UINT_MAX)
     {
-        ret = EplSdoComUndefineCon(pNodeInfo_p->sdoComConHdl);
+        ret = sdocom_undefineConnection(pNodeInfo_p->sdoComConHdl);
         pNodeInfo_p->sdoComConHdl = UINT_MAX;
         if (ret != kEplSuccessful)
         {
@@ -871,7 +871,7 @@ static tEplKernel sdoWriteObject(tCfmNodeInfo* pNodeInfo_p, void* pLeSrcData_p, 
     if (pNodeInfo_p->sdoComConHdl == UINT_MAX)
     {
         // init command layer connection
-        ret = EplSdoComDefineCon(&pNodeInfo_p->sdoComConHdl,
+        ret = sdocom_defineConnection(&pNodeInfo_p->sdoComConHdl,
                                  pNodeInfo_p->eventCnProgress.nodeId,
                                  kSdoTypeAsnd);
         if ((ret != kEplSuccessful) && (ret != kEplSdoComHandleExists))
@@ -887,19 +887,19 @@ static tEplKernel sdoWriteObject(tCfmNodeInfo* pNodeInfo_p, void* pLeSrcData_p, 
     transParamByIndex.pfnSdoFinishedCb = cbSdoCon;
     transParamByIndex.pUserArg = pNodeInfo_p;
 
-    ret = EplSdoComInitTransferByIndex(&transParamByIndex);
+    ret = sdocom_initTransferByIndex(&transParamByIndex);
     if (ret == kEplSdoComHandleBusy)
     {
-        ret = EplSdoComSdoAbort(pNodeInfo_p->sdoComConHdl, EPL_SDOAC_DATA_NOT_TRANSF_DUE_LOCAL_CONTROL);
+        ret = sdocom_abortTransfer(pNodeInfo_p->sdoComConHdl, EPL_SDOAC_DATA_NOT_TRANSF_DUE_LOCAL_CONTROL);
         if (ret == kEplSuccessful)
         {
-            ret = EplSdoComInitTransferByIndex(&transParamByIndex);
+            ret = sdocom_initTransferByIndex(&transParamByIndex);
         }
     }
     else if (ret == kEplSdoSeqConnectionBusy)
     {
         // close connection
-        ret = EplSdoComUndefineCon(pNodeInfo_p->sdoComConHdl);
+        ret = sdocom_undefineConnection(pNodeInfo_p->sdoComConHdl);
         pNodeInfo_p->sdoComConHdl = UINT_MAX;
         if (ret != kEplSuccessful)
         {
@@ -908,7 +908,7 @@ static tEplKernel sdoWriteObject(tCfmNodeInfo* pNodeInfo_p, void* pLeSrcData_p, 
         }
 
         // reinit command layer connection
-        ret = EplSdoComDefineCon(&pNodeInfo_p->sdoComConHdl,
+        ret = sdocom_defineConnection(&pNodeInfo_p->sdoComConHdl,
                                  pNodeInfo_p->eventCnProgress.nodeId,
                                  kSdoTypeAsnd);
         if ((ret != kEplSuccessful) && (ret != kEplSdoComHandleExists))
@@ -916,7 +916,7 @@ static tEplKernel sdoWriteObject(tCfmNodeInfo* pNodeInfo_p, void* pLeSrcData_p, 
 
         // retry transfer
         transParamByIndex.sdoComConHdl = pNodeInfo_p->sdoComConHdl;
-        ret = EplSdoComInitTransferByIndex(&transParamByIndex);
+        ret = sdocom_initTransferByIndex(&transParamByIndex);
     }
 
     return ret;

@@ -337,7 +337,7 @@ tEplKernel ctrlu_initStack(tEplApiInitParam * pInitParam_p)
 #if defined(CONFIG_INCLUDE_SDOS) || defined(CONFIG_INCLUDE_SDOC)
     // init sdo command layer
     TRACE ("Initialize SdoCom module...\n");
-    ret = EplSdoComInit();
+    ret = sdocom_init();
     if (ret != kEplSuccessful)
     {
         goto Exit;
@@ -386,8 +386,8 @@ tEplKernel ctrlu_shutdownStack(void)
 #endif
 
 #if defined(CONFIG_INCLUDE_SDOS) || defined(CONFIG_INCLUDE_SDOC)
-    ret = EplSdoComDelInstance();
-    TRACE("EplSdoComDelInstance():  0x%X\n", ret);
+    ret = sdocom_delInstance();
+    TRACE("sdocom_delInstance():  0x%X\n", ret);
 #endif
 
 #if defined(CONFIG_INCLUDE_LEDU)
