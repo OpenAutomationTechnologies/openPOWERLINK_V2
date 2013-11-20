@@ -286,7 +286,7 @@ static tEplKernel EplSdoComClientSendAbort(tEplSdoComCon* pSdoComCon_p,
 
 //---------------------------------------------------------------------------
 //
-// Function:    EplSdoComInit
+// Function:    sdocom_init
 //
 // Description: Init first instance of the module
 //
@@ -301,12 +301,12 @@ static tEplKernel EplSdoComClientSendAbort(tEplSdoComCon* pSdoComCon_p,
 // State:
 //
 //---------------------------------------------------------------------------
-tEplKernel PUBLIC EplSdoComInit(void)
+tEplKernel PUBLIC sdocom_init(void)
 {
 tEplKernel  Ret;
 
 
-    Ret = EplSdoComAddInstance();
+    Ret = sdocom_addInstance();
 
 return Ret;
 
@@ -314,7 +314,7 @@ return Ret;
 
 //---------------------------------------------------------------------------
 //
-// Function:    EplSdoComAddInstance
+// Function:    sdocom_addInstance
 //
 // Description: Init additional instance of the module
 //
@@ -329,7 +329,7 @@ return Ret;
 // State:
 //
 //---------------------------------------------------------------------------
-tEplKernel PUBLIC EplSdoComAddInstance(void)
+tEplKernel PUBLIC sdocom_addInstance(void)
 {
 tEplKernel Ret;
 
@@ -357,7 +357,7 @@ Exit:
 
 //---------------------------------------------------------------------------
 //
-// Function:    EplSdoComDelInstance
+// Function:    sdocom_delInstance
 //
 // Description: delete instance of the module
 //
@@ -372,7 +372,7 @@ Exit:
 // State:
 //
 //---------------------------------------------------------------------------
-tEplKernel PUBLIC EplSdoComDelInstance(void)
+tEplKernel PUBLIC sdocom_delInstance(void)
 {
 tEplKernel  Ret;
 
@@ -397,7 +397,7 @@ Exit:
 
 //---------------------------------------------------------------------------
 //
-// Function:    EplSdoComDefineCon
+// Function:    sdocom_defineConnection
 //
 // Description: function defines a SDO connection to another node
 //              -> init lower layer and returns a handle for the connection.
@@ -419,7 +419,7 @@ Exit:
 //
 //---------------------------------------------------------------------------
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOC)) != 0)
-tEplKernel PUBLIC EplSdoComDefineCon(tSdoComConHdl*  pSdoComConHdl_p,
+tEplKernel PUBLIC sdocom_defineConnection(tSdoComConHdl*  pSdoComConHdl_p,
                                       unsigned int      uiTargetNodeId_p,
                                       tSdoType       ProtType_p)
 {
@@ -527,7 +527,7 @@ Exit:
 #endif
 //---------------------------------------------------------------------------
 //
-// Function:    EplSdoComInitTransferByIndex
+// Function:    sdocom_initTransferByIndex
 //
 // Description: function init SDO Transfer for a defined connection
 //
@@ -543,7 +543,7 @@ Exit:
 //
 //---------------------------------------------------------------------------
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOC)) != 0)
-tEplKernel PUBLIC EplSdoComInitTransferByIndex(tSdoComTransParamByIndex* pSdoComTransParam_p)
+tEplKernel PUBLIC sdocom_initTransferByIndex(tSdoComTransParamByIndex* pSdoComTransParam_p)
 {
 tEplKernel      Ret;
 tEplSdoComCon*  pSdoComCon;
@@ -627,7 +627,7 @@ Exit:
 
 //---------------------------------------------------------------------------
 //
-// Function:    EplSdoComUndefineCon
+// Function:    sdocom_undefineConnection
 //
 // Description: function undefines a SDO connection
 //
@@ -643,7 +643,7 @@ Exit:
 //
 //---------------------------------------------------------------------------
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOC)) != 0)
-tEplKernel PUBLIC EplSdoComUndefineCon(tSdoComConHdl  SdoComConHdl_p)
+tEplKernel PUBLIC sdocom_undefineConnection(tSdoComConHdl  SdoComConHdl_p)
 {
 tEplKernel          Ret;
 tEplSdoComCon*      pSdoComCon;
@@ -694,7 +694,7 @@ Exit:
 #endif
 //---------------------------------------------------------------------------
 //
-// Function:    EplSdoComGetState
+// Function:    sdocom_getState
 //
 // Description: function returns the state of the connection
 //
@@ -711,7 +711,7 @@ Exit:
 //
 //---------------------------------------------------------------------------
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOC)) != 0)
-tEplKernel PUBLIC EplSdoComGetState(tSdoComConHdl    SdoComConHdl_p,
+tEplKernel PUBLIC sdocom_getState(tSdoComConHdl    SdoComConHdl_p,
                                     tSdoComFinished* pSdoComFinished_p)
 {
 tEplKernel          Ret;
@@ -782,7 +782,7 @@ Exit:
 
 //---------------------------------------------------------------------------
 //
-// Function:    EplSdoComGetNodeId
+// Function:    sdocom_getNodeId
 //
 // Description: returns the remote node-ID which corresponds to the specified handle
 //
@@ -794,7 +794,7 @@ Exit:
 //
 //---------------------------------------------------------------------------
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOC)) != 0)
-unsigned int PUBLIC EplSdoComGetNodeId(tSdoComConHdl  SdoComConHdl_p)
+unsigned int PUBLIC sdocom_getNodeId(tSdoComConHdl  SdoComConHdl_p)
 {
 unsigned int    uiNodeId = EPL_C_ADR_INVALID;
 tEplSdoComCon*  pSdoComCon;
@@ -822,7 +822,7 @@ Exit:
 
 //---------------------------------------------------------------------------
 //
-// Function:    EplSdoComSdoAbort
+// Function:    sdocom_abortTransfer
 //
 // Description: function abort a sdo transfer
 //
@@ -839,7 +839,7 @@ Exit:
 //
 //---------------------------------------------------------------------------
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOC)) != 0)
-tEplKernel PUBLIC EplSdoComSdoAbort(tSdoComConHdl SdoComConHdl_p,
+tEplKernel PUBLIC sdocom_abortTransfer(tSdoComConHdl SdoComConHdl_p,
                                     DWORD            dwAbortCode_p)
 {
 tEplKernel  Ret;
@@ -1149,7 +1149,7 @@ unsigned int        uiSize;
                 {
 
                     // call of the init function already
-                    // processed in EplSdoComDefineCon()
+                    // processed in sdocom_defineConnection()
                     // only change state to kEplSdoComStateClientWaitInit
                     pSdoComCon->m_SdoComState = kEplSdoComStateClientWaitInit;
                     break;
@@ -1518,7 +1518,7 @@ unsigned int        uiSize;
 
                 case kEplSdoComConEventSendFirst:
                 {
-                    // infos for transfer already saved by function EplSdoComInitTransferByIndex
+                    // infos for transfer already saved by function sdocom_initTransferByIndex
                     break;
                 }
 

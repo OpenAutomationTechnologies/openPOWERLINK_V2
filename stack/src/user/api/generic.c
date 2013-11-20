@@ -357,7 +357,7 @@ tEplKernel oplk_readObject(tSdoComConHdl* pSdoComConHdl_p, UINT nodeId_p, UINT i
 #endif
 
         // init command layer connection
-        ret = EplSdoComDefineCon(pSdoComConHdl_p, nodeId_p, sdoType_p);
+        ret = sdocom_defineConnection(pSdoComConHdl_p, nodeId_p, sdoType_p);
         if ((ret != kEplSuccessful) && (ret != kEplSdoComHandleExists))
         {
             return ret;
@@ -372,7 +372,7 @@ tEplKernel oplk_readObject(tSdoComConHdl* pSdoComConHdl_p, UINT nodeId_p, UINT i
         transParamByIndex.pfnSdoFinishedCb = cbSdoCon;
         transParamByIndex.pUserArg = pUserArg_p;
 
-        if ((ret = EplSdoComInitTransferByIndex(&transParamByIndex)) != kEplSuccessful)
+        if ((ret = sdocom_initTransferByIndex(&transParamByIndex)) != kEplSuccessful)
             return ret;
 
         ret = kEplApiTaskDeferred;
@@ -441,11 +441,11 @@ tEplKernel oplk_writeObject(tSdoComConHdl* pSdoComConHdl_p, UINT nodeId_p, UINT 
         // d.k.: How to recycle command layer connection?
         //       Try to redefine it, which will return kEplSdoComHandleExists
         //       and the existing command layer handle.
-        //       If the returned handle is busy, EplSdoComInitTransferByIndex()
+        //       If the returned handle is busy, sdocom_initTransferByIndex()
         //       will return with error.
 
         // init command layer connection
-        ret = EplSdoComDefineCon(pSdoComConHdl_p, nodeId_p, sdoType_p);
+        ret = sdocom_defineConnection(pSdoComConHdl_p, nodeId_p, sdoType_p);
         if ((ret != kEplSuccessful) && (ret != kEplSdoComHandleExists))
             return ret;
 
@@ -458,7 +458,7 @@ tEplKernel oplk_writeObject(tSdoComConHdl* pSdoComConHdl_p, UINT nodeId_p, UINT 
         transParamByIndex.pfnSdoFinishedCb = cbSdoCon;
         transParamByIndex.pUserArg = pUserArg_p;
 
-        if ((ret = EplSdoComInitTransferByIndex(&transParamByIndex)) != kEplSuccessful)
+        if ((ret = sdocom_initTransferByIndex(&transParamByIndex)) != kEplSuccessful)
             return ret;
 
         ret = kEplApiTaskDeferred;
@@ -492,7 +492,7 @@ tEplKernel oplk_freeSdoChannel(tSdoComConHdl sdoComConHdl_p)
 #if defined(CONFIG_INCLUDE_SDOC)
 
 #if defined(CONFIG_INCLUDE_CFM)
-    if (cfmu_isSdoRunning(EplSdoComGetNodeId(sdoComConHdl_p)))
+    if (cfmu_isSdoRunning(sdocom_getNodeId(sdoComConHdl_p)))
     {
         ret = kEplApiSdoBusyIntern;
     }
@@ -500,7 +500,7 @@ tEplKernel oplk_freeSdoChannel(tSdoComConHdl sdoComConHdl_p)
 #endif
     {
         // delete command layer connection
-        ret = EplSdoComUndefineCon(sdoComConHdl_p);
+        ret = sdocom_undefineConnection(sdoComConHdl_p);
     }
 #else
     ret = kEplApiInvalidParam;
@@ -530,14 +530,14 @@ tEplKernel oplk_abortSdo(tSdoComConHdl sdoComConHdl_p, UINT32 abortCode_p)
 #if defined(CONFIG_INCLUDE_SDOC)
 
 #if defined(CONFIG_INCLUDE_CFM)
-    if (cfmu_isSdoRunning(EplSdoComGetNodeId(sdoComConHdl_p)))
+    if (cfmu_isSdoRunning(sdocom_getNodeId(sdoComConHdl_p)))
     {
         ret = kEplApiSdoBusyIntern;
     }
     else
 #endif
     {
-        ret = EplSdoComSdoAbort(sdoComConHdl_p, abortCode_p);
+        ret = sdocom_abortTransfer(sdoComConHdl_p, abortCode_p);
     }
 #else
     ret = kEplApiInvalidParam;
