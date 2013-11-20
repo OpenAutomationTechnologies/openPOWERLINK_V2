@@ -301,7 +301,7 @@ static tEplKernel clientSendAbort(tEplSdoComCon* pSdoComCon_p,
 // State:
 //
 //---------------------------------------------------------------------------
-tEplKernel PUBLIC sdocom_init(void)
+tEplKernel sdocom_init(void)
 {
 tEplKernel  Ret;
 
@@ -329,7 +329,7 @@ return Ret;
 // State:
 //
 //---------------------------------------------------------------------------
-tEplKernel PUBLIC sdocom_addInstance(void)
+tEplKernel sdocom_addInstance(void)
 {
 tEplKernel Ret;
 
@@ -372,7 +372,7 @@ Exit:
 // State:
 //
 //---------------------------------------------------------------------------
-tEplKernel PUBLIC sdocom_delInstance(void)
+tEplKernel sdocom_delInstance(void)
 {
 tEplKernel  Ret;
 
@@ -408,8 +408,8 @@ Exit:
 //              Using of existing server connections is possible.
 //
 // Parameters:  pSdoComConHdl_p     = pointer to the buffer of the handle
-//              uiTargetNodeId_p    = NodeId of the targetnode
-//              ProtType_p          = type of protocol to use for connection
+//              targetNodeId_p      = NodeId of the targetnode
+//              protType_p          = type of protocol to use for connection
 //
 //
 // Returns:     tEplKernel  = errorcode
@@ -419,9 +419,8 @@ Exit:
 //
 //---------------------------------------------------------------------------
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOC)) != 0)
-tEplKernel PUBLIC sdocom_defineConnection(tSdoComConHdl*  pSdoComConHdl_p,
-                                      unsigned int      uiTargetNodeId_p,
-                                      tSdoType       ProtType_p)
+tEplKernel sdocom_defineConnection(tSdoComConHdl* pSdoComConHdl_p, UINT targetNodeId_p,
+                                   tSdoType protType_p)
 {
 tEplKernel      Ret;
 unsigned int    uiCount;
@@ -432,8 +431,8 @@ tEplSdoComCon*  pSdoComCon;
     ASSERT(pSdoComConHdl_p != NULL);
 
     // check NodeId
-    if((uiTargetNodeId_p == EPL_C_ADR_INVALID)
-        ||(uiTargetNodeId_p >= EPL_C_ADR_BROADCAST))
+    if((targetNodeId_p == EPL_C_ADR_INVALID)
+        ||(targetNodeId_p >= EPL_C_ADR_BROADCAST))
     {
         Ret = kEplInvalidNodeId;
 
@@ -449,8 +448,8 @@ tEplSdoComCon*  pSdoComCon;
         {   // free entry
             uiFreeHdl = uiCount;
         }
-        else if ((pSdoComCon->m_uiNodeId == uiTargetNodeId_p)
-            && (pSdoComCon->m_SdoProtType == ProtType_p))
+        else if ((pSdoComCon->m_uiNodeId == targetNodeId_p)
+            && (pSdoComCon->m_SdoProtType == protType_p))
         {   // existing client connection with same node ID and same protocol type
             *pSdoComConHdl_p = uiCount;
             Ret = kEplSdoComHandleExists;
@@ -470,14 +469,14 @@ tEplSdoComCon*  pSdoComCon;
     // save handle for application
     *pSdoComConHdl_p = uiFreeHdl;
     // save parameters
-    pSdoComCon->m_SdoProtType = ProtType_p;
-    pSdoComCon->m_uiNodeId = uiTargetNodeId_p;
+    pSdoComCon->m_SdoProtType = protType_p;
+    pSdoComCon->m_uiNodeId = targetNodeId_p;
 
     // set Transaction Id
     pSdoComCon->m_bTransactionId = 0;
 
     // check protocol
-    switch(ProtType_p)
+    switch(protType_p)
     {
         // udp
         case kSdoTypeUdp:
@@ -543,7 +542,7 @@ Exit:
 //
 //---------------------------------------------------------------------------
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOC)) != 0)
-tEplKernel PUBLIC sdocom_initTransferByIndex(tSdoComTransParamByIndex* pSdoComTransParam_p)
+tEplKernel sdocom_initTransferByIndex(tSdoComTransParamByIndex* pSdoComTransParam_p)
 {
 tEplKernel      Ret;
 tEplSdoComCon*  pSdoComCon;
@@ -633,7 +632,7 @@ Exit:
 //
 //
 //
-// Parameters:  SdoComConHdl_p    = handle for the connection
+// Parameters:  sdoComConHdl_p    = handle for the connection
 //
 //
 // Returns:     tEplKernel  = errorcode
@@ -643,21 +642,21 @@ Exit:
 //
 //---------------------------------------------------------------------------
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOC)) != 0)
-tEplKernel PUBLIC sdocom_undefineConnection(tSdoComConHdl  SdoComConHdl_p)
+tEplKernel sdocom_undefineConnection(tSdoComConHdl sdoComConHdl_p)
 {
 tEplKernel          Ret;
 tEplSdoComCon*      pSdoComCon;
 
     Ret = kEplSuccessful;
 
-    if(SdoComConHdl_p >= EPL_MAX_SDO_COM_CON)
+    if(sdoComConHdl_p >= EPL_MAX_SDO_COM_CON)
     {
         Ret = kEplSdoComInvalidHandle;
         goto Exit;
     }
 
     // get pointer to control structure
-    pSdoComCon = &SdoComInstance_g.m_SdoComCon[SdoComConHdl_p];
+    pSdoComCon = &SdoComInstance_g.m_SdoComCon[sdoComConHdl_p];
 
     // $$$ d.k. abort a running transfer before closing the sequence layer
 
@@ -700,7 +699,7 @@ Exit:
 //
 //
 //
-// Parameters:  SdoComConHdl_p    = handle for the connection
+// Parameters:  sdoComConHdl_p    = handle for the connection
 //              pSdoComFinished_p = pointer to structure for sdo state
 //
 //
@@ -711,22 +710,21 @@ Exit:
 //
 //---------------------------------------------------------------------------
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOC)) != 0)
-tEplKernel PUBLIC sdocom_getState(tSdoComConHdl    SdoComConHdl_p,
-                                    tSdoComFinished* pSdoComFinished_p)
+tEplKernel sdocom_getState(tSdoComConHdl sdoComConHdl_p, tSdoComFinished* pSdoComFinished_p)
 {
 tEplKernel          Ret;
 tEplSdoComCon*      pSdoComCon;
 
     Ret = kEplSuccessful;
 
-    if(SdoComConHdl_p >= EPL_MAX_SDO_COM_CON)
+    if(sdoComConHdl_p >= EPL_MAX_SDO_COM_CON)
     {
         Ret = kEplSdoComInvalidHandle;
         goto Exit;
     }
 
     // get pointer to control structure
-    pSdoComCon = &SdoComInstance_g.m_SdoComCon[SdoComConHdl_p];
+    pSdoComCon = &SdoComInstance_g.m_SdoComCon[sdoComConHdl_p];
 
     // check if handle ok
     if(pSdoComCon->m_SdoSeqConHdl == 0)
@@ -741,7 +739,7 @@ tEplSdoComCon*      pSdoComCon;
     pSdoComFinished_p->targetSubIndex = pSdoComCon->m_uiTargetSubIndex;
     pSdoComFinished_p->transferredBytes = pSdoComCon->m_uiTransferredByte;
     pSdoComFinished_p->abortCode = pSdoComCon->m_dwLastAbortCode;
-    pSdoComFinished_p->sdoComConHdl = SdoComConHdl_p;
+    pSdoComFinished_p->sdoComConHdl = sdoComConHdl_p;
     if (pSdoComCon->m_SdoServiceType == kSdoServiceWriteByIndex)
     {
         pSdoComFinished_p->sdoAccessType = kSdoAccessTypeWrite;
@@ -786,7 +784,7 @@ Exit:
 //
 // Description: returns the remote node-ID which corresponds to the specified handle
 //
-// Parameters:  SdoComConHdl_p    = handle for the connection
+// Parameters:  sdoComConHdl_p    = handle for the connection
 //
 // Returns:     tEplKernel  = errorcode
 //
@@ -794,18 +792,18 @@ Exit:
 //
 //---------------------------------------------------------------------------
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOC)) != 0)
-unsigned int PUBLIC sdocom_getNodeId(tSdoComConHdl  SdoComConHdl_p)
+UINT sdocom_getNodeId(tSdoComConHdl sdoComConHdl_p)
 {
 unsigned int    uiNodeId = EPL_C_ADR_INVALID;
 tEplSdoComCon*  pSdoComCon;
 
-    if(SdoComConHdl_p >= EPL_MAX_SDO_COM_CON)
+    if(sdoComConHdl_p >= EPL_MAX_SDO_COM_CON)
     {
         goto Exit;
     }
 
     // get pointer to control structure
-    pSdoComCon = &SdoComInstance_g.m_SdoComCon[SdoComConHdl_p];
+    pSdoComCon = &SdoComInstance_g.m_SdoComCon[sdoComConHdl_p];
 
     // check if handle ok
     if(pSdoComCon->m_SdoSeqConHdl == 0)
@@ -828,8 +826,8 @@ Exit:
 //
 //
 //
-// Parameters:  SdoComConHdl_p    = handle for the connection
-//              dwAbortCode_p     = abort code
+// Parameters:  sdoComConHdl_p    = handle for the connection
+//              abortCode_p     = abort code
 //
 //
 // Returns:     tEplKernel  = errorcode
@@ -839,21 +837,20 @@ Exit:
 //
 //---------------------------------------------------------------------------
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOC)) != 0)
-tEplKernel PUBLIC sdocom_abortTransfer(tSdoComConHdl SdoComConHdl_p,
-                                    DWORD            dwAbortCode_p)
+tEplKernel sdocom_abortTransfer(tSdoComConHdl sdoComConHdl_p, UINT32 abortCode_p)
 {
 tEplKernel  Ret;
 tEplSdoComCon*      pSdoComCon;
 
 
-    if(SdoComConHdl_p >= EPL_MAX_SDO_COM_CON)
+    if(sdoComConHdl_p >= EPL_MAX_SDO_COM_CON)
     {
         Ret = kEplSdoComInvalidHandle;
         goto Exit;
     }
 
     // get pointer to control structure of connection
-    pSdoComCon = &SdoComInstance_g.m_SdoComCon[SdoComConHdl_p];
+    pSdoComCon = &SdoComInstance_g.m_SdoComCon[sdoComConHdl_p];
 
     // check if handle ok
     if(pSdoComCon->m_SdoSeqConHdl == 0)
@@ -863,9 +860,9 @@ tEplSdoComCon*      pSdoComCon;
     }
 
     // save pointer to abort code
-    pSdoComCon->m_pData = (BYTE*)&dwAbortCode_p;
+    pSdoComCon->m_pData = (BYTE*)&abortCode_p;
 
-    Ret = processState(SdoComConHdl_p,
+    Ret = processState(sdoComConHdl_p,
                                 kEplSdoComConEventAbort,
                                 (tAsySdoCom*)NULL);
 
