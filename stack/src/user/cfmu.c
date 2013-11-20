@@ -48,7 +48,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <EplSdoAc.h>
 #include <user/identu.h>
 #include <obd.h>
-#include <user/EplSdoComu.h>
+#include <user/sdocom.h>
 #include <user/nmtu.h>
 
 #if !defined(CONFIG_INCLUDE_OBD)
