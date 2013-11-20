@@ -136,7 +136,7 @@ The SDO defines determine the SDO stack configuration.
     ///< max. supported ASND SDO connections
 #define MAX_SDO_SEQ_CON                     100
     ///< max. supported SDO sequence connections
-#define EPL_MAX_SDO_COM_CON                 100
+#define MAX_SDO_COM_CON                     100
     ///< max. supported SDO command connections
 /**@}*/
 

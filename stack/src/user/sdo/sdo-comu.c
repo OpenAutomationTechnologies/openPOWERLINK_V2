@@ -97,8 +97,8 @@
 // const defines
 //---------------------------------------------------------------------------
 
-#ifndef EPL_MAX_SDO_COM_CON
-#define EPL_MAX_SDO_COM_CON         5
+#ifndef MAX_SDO_COM_CON
+#define MAX_SDO_COM_CON         5
 #endif
 
 
@@ -202,7 +202,7 @@ typedef struct
 // instance table
 typedef struct
 {
-    tEplSdoComCon       m_SdoComCon[EPL_MAX_SDO_COM_CON];
+    tEplSdoComCon       m_SdoComCon[MAX_SDO_COM_CON];
 
 #if defined(WIN32) || defined(_WIN32)
     LPCRITICAL_SECTION  m_pCriticalSection;
@@ -441,8 +441,8 @@ tEplSdoComCon*  pSdoComCon;
     // search free control structure
     pSdoComCon = &SdoComInstance_g.m_SdoComCon[0];
     uiCount = 0;
-    uiFreeHdl = EPL_MAX_SDO_COM_CON;
-    while (uiCount < EPL_MAX_SDO_COM_CON)
+    uiFreeHdl = MAX_SDO_COM_CON;
+    while (uiCount < MAX_SDO_COM_CON)
     {
         if (pSdoComCon->m_SdoSeqConHdl == 0)
         {   // free entry
@@ -459,7 +459,7 @@ tEplSdoComCon*  pSdoComCon;
         pSdoComCon++;
     }
 
-    if (uiFreeHdl == EPL_MAX_SDO_COM_CON)
+    if (uiFreeHdl == MAX_SDO_COM_CON)
     {
         Ret = kEplSdoComNoFreeHandle;
         goto Exit;
@@ -558,7 +558,7 @@ tEplSdoComCon*  pSdoComCon;
         goto Exit;
     }
 
-    if(pSdoComTransParam_p->sdoComConHdl >= EPL_MAX_SDO_COM_CON)
+    if(pSdoComTransParam_p->sdoComConHdl >= MAX_SDO_COM_CON)
     {
         Ret = kEplSdoComInvalidHandle;
         goto Exit;
@@ -649,7 +649,7 @@ tEplSdoComCon*      pSdoComCon;
 
     Ret = kEplSuccessful;
 
-    if(sdoComConHdl_p >= EPL_MAX_SDO_COM_CON)
+    if(sdoComConHdl_p >= MAX_SDO_COM_CON)
     {
         Ret = kEplSdoComInvalidHandle;
         goto Exit;
@@ -717,7 +717,7 @@ tEplSdoComCon*      pSdoComCon;
 
     Ret = kEplSuccessful;
 
-    if(sdoComConHdl_p >= EPL_MAX_SDO_COM_CON)
+    if(sdoComConHdl_p >= MAX_SDO_COM_CON)
     {
         Ret = kEplSdoComInvalidHandle;
         goto Exit;
@@ -797,7 +797,7 @@ UINT sdocom_getNodeId(tSdoComConHdl sdoComConHdl_p)
 unsigned int    uiNodeId = EPL_C_ADR_INVALID;
 tEplSdoComCon*  pSdoComCon;
 
-    if(sdoComConHdl_p >= EPL_MAX_SDO_COM_CON)
+    if(sdoComConHdl_p >= MAX_SDO_COM_CON)
     {
         goto Exit;
     }
@@ -843,7 +843,7 @@ tEplKernel  Ret;
 tEplSdoComCon*      pSdoComCon;
 
 
-    if(sdoComConHdl_p >= EPL_MAX_SDO_COM_CON)
+    if(sdoComConHdl_p >= MAX_SDO_COM_CON)
     {
         Ret = kEplSdoComInvalidHandle;
         goto Exit;
@@ -1045,7 +1045,7 @@ tSdoComConHdl    HdlFree;
     pSdoComCon = &SdoComInstance_g.m_SdoComCon[0];
     HdlCount = 0;
     HdlFree = 0xFFFF;
-    while (HdlCount < EPL_MAX_SDO_COM_CON)
+    while (HdlCount < MAX_SDO_COM_CON)
     {
         if (pSdoComCon->m_SdoSeqConHdl == SdoSeqConHdl_p)
         {   // matching command layer handle found
