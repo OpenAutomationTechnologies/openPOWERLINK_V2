@@ -49,7 +49,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <user/dllucal.h>
 #include <user/nmtcnu.h>
 #include <user/nmtmnu.h>
-#include <user/EplSdoComu.h>
+#include <user/sdocom.h>
 #include <user/identu.h>
 #include <user/cfmu.h>
 #include <user/ctrlu.h>

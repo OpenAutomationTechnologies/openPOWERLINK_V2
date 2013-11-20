@@ -68,7 +68,7 @@
 
 ****************************************************************************/
 
-#include "user/EplSdoComu.h"
+#include <user/sdocom.h>
 
 #if ((((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOS)) == 0) &&\
      (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOC)) == 0)   )
