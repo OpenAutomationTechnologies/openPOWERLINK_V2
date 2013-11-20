@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   lock.h
+\file   altera_nios2/lock.h
 
 \brief  Include file Nios II lock
 

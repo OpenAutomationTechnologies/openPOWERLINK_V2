@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   lock-localnoos.c
+\file   altera_nios2/lock-localnoos.c
 
 \brief  Locks for Nios II without OS in single-thread-system
 
