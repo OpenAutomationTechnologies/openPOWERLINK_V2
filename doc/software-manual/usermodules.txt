@@ -148,6 +148,18 @@ This module implements the SDO sequence layer of the openPOWERLINK stack.
 
 //------------------------------------------------------------------------------
 /**
+\defgroup module_sdo_com sdo_com
+
+\brief SDO command layer
+
+This module implements the SDO command layer of the openPOWERLINK stack.
+
+\ingroup user_layer_sdo
+*/
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+/**
 \defgroup user_layer_nmt NMT Modules
 
 \brief User NMT modules
