@@ -126,7 +126,7 @@ ${STACKROOT_DIR}/stack/src/user/pdo/pdoucalmem-local.c \
 ${STACKROOT_DIR}/stack/src/user/pdo/pdoucalsync-null.c \
 ${STACKROOT_DIR}/stack/src/user/pdo/pdoucal-triplebufshm.c \
 ${STACKROOT_DIR}/stack/src/user/sdo/sdo-asndu.c \
-${STACKROOT_DIR}/stack/src/user/sdo/sdo-asysequ.c \
+${STACKROOT_DIR}/stack/src/user/sdo/sdo-sequ.c \
 ${STACKROOT_DIR}/stack/src/user/sdo/sdo-comu.c \
 ${STACKROOT_DIR}/stack/src/user/ledu.c \
 ${STACKROOT_DIR}/examples/common/lcd/lcd.c \

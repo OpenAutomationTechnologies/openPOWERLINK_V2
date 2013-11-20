@@ -260,9 +260,9 @@
 			<location>OPENPOWERLINK_DIR/stack/src/user/sdo/sdo-asndu.c</location>
 		</link>
 		<link>
-			<name>sdo-asysequ.c</name>
+			<name>sdo-sequ.c</name>
 			<type>1</type>
-			<location>OPENPOWERLINK_DIR/stack/src/user/sdo/sdo-asysequ.c</location>
+			<location>OPENPOWERLINK_DIR/stack/src/user/sdo/sdo-sequ.c</location>
 		</link>
 		<link>
 			<name>sdo-comu.c</name>

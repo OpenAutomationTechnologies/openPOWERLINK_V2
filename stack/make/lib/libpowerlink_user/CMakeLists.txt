@@ -90,7 +90,7 @@ SET (LIB_USER_SOURCES
      ${USER_SOURCE_DIR}/pdo/pdoucal.c
      ${USER_SOURCE_DIR}/pdo/pdoucal-triplebufshm.c
      ${USER_SOURCE_DIR}/sdo/sdo-comu.c
-     ${USER_SOURCE_DIR}/sdo/sdo-asysequ.c
+     ${USER_SOURCE_DIR}/sdo/sdo-sequ.c
      ${USER_SOURCE_DIR}/sdo/sdo-asndu.c
      ${USER_SOURCE_DIR}/errhnd/errhndu.c
      ${USER_SOURCE_DIR}/ctrl/ctrlu.c

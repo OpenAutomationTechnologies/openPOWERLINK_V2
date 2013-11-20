@@ -294,9 +294,9 @@
 			<locationURI>USER_LOC/sdo/sdo-asndu.c</locationURI>
 		</link>
 		<link>
-			<name>stack/user/sdo-asysequ.c</name>
+			<name>stack/user/sdo-sequ.c</name>
 			<type>1</type>
-			<locationURI>USER_LOC/sdo/sdo-asysequ.c</locationURI>
+			<locationURI>USER_LOC/sdo/sdo-sequ.c</locationURI>
 		</link>
 		<link>
 			<name>stack/user/sdo-comu.c</name>
