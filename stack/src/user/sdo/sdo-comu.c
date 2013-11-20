@@ -106,115 +106,108 @@
 // local types
 //---------------------------------------------------------------------------
 
-// intern events
+/**
+\brief  SDO command layer events
+
+This enumeration defines all valid events which will be processed by the
+SDO command layer.
+*/
 typedef enum
 {
-    kEplSdoComConEventSendFirst     = 0x00, // first frame to send
-    kEplSdoComConEventRec           = 0x01, // frame received
-    kEplSdoComConEventConEstablished= 0x02, // connection established
-    kEplSdoComConEventConClosed     = 0x03, // connection closed
-    kEplSdoComConEventAckReceived   = 0x04, // acknowledge received by lower layer
-                                        // -> continue sending
-    kEplSdoComConEventFrameSended   = 0x05, // lower has send a frame
-    kEplSdoComConEventInitError     = 0x06, // error during initialisation
-                                            // of the connection
-    kEplSdoComConEventTimeout       = 0x07, // timeout in lower layer
-    kEplSdoComConEventTransferAbort = 0x08, // transfer abort by lower layer
-#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOC)) != 0)
-
-    kEplSdoComConEventInitCon       = 0x09, // init connection (only client)
-    kEplSdoComConEventAbort         = 0x0A, // abort sdo transfer (only client)
+    kSdoComConEventSendFirst        = 0x00, ///< First frame to send
+    kSdoComConEventRec              = 0x01, ///< Frame received
+    kSdoComConEventConEstablished   = 0x02, ///< Connection established
+    kSdoComConEventConClosed        = 0x03, ///< Connection closed
+    kSdoComConEventAckReceived      = 0x04, ///< Acknowledge received by lower layer -> continue sending
+    kSdoComConEventFrameSended      = 0x05, ///< Lower has send a frame
+    kSdoComConEventInitError        = 0x06, ///< Error during initialization of the connection
+    kSdoComConEventTimeout          = 0x07, ///< Timeout in lower layer
+    kSdoComConEventTransferAbort    = 0x08, ///< Transfer abort by lower layer
+#if defined(CONFIG_INCLUDE_SDOC)
+    kSdoComConEventInitCon          = 0x09, ///< Init connection (only client)
+    kSdoComConEventAbort            = 0x0A, ///< Abort SDO transfer (only client)
 #endif
+} tSdoComConEvent;
 
 
-}tEplSdoComConEvent;
+/**
+\brief  SDO command layer message types
 
+This enumeration defines all valid message types handled by the SDO command layer.
+*/
 typedef enum
 {
-    kEplSdoComSendTypeReq      = 0x00,  // send a request
-    kEplSdoComSendTypeAckRes   = 0x01,  // send a response without data
-    kEplSdoComSendTypeRes      = 0x02,  // send response with data
-    kEplSdoComSendTypeAbort    = 0x03   // send abort
+    kSdoComSendTypeReq              = 0x00,  ///< Send a request
+    kSdoComSendTypeAckRes           = 0x01,  ///< Send a response without data
+    kSdoComSendTypeRes              = 0x02,  ///< Send response with data
+    kSdoComSendTypeAbort            = 0x03   ///< Send abort
+} tSdoComSendType;
 
-}tEplSdoComSendType;
+/**
+\brief  SDO command layer states
 
-// state of the state machine
+This enumeration defines all valid states of the SDO command layer state
+machine.
+*/
 typedef enum
 {
-    // General State
-    kEplSdoComStateIdle             = 0x00, // idle state
-
-#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOS)) != 0)
-    // Server States
-    kEplSdoComStateServerSegmTrans  = 0x01, // send following frames
+    kSdoComStateIdle                = 0x00, ///< Idle state
+#if defined(CONFIG_INCLUDE_SDOS)
+    kSdoComStateServerSegmTrans     = 0x01, ///< Client: Send following frames
 #endif
-
-
-#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOC)) != 0)
-    // Client States
-    kEplSdoComStateClientWaitInit   = 0x10, // wait for init connection
-                                            // on lower layer
-    kEplSdoComStateClientConnected  = 0x11, // connection established
-    kEplSdoComStateClientSegmTrans  = 0x12  // send following frames
+#if defined(CONFIG_INCLUDE_SDOC)
+    kSdoComStateClientWaitInit      = 0x10, ///< Server: Wait for init connection on lower layer
+    kSdoComStateClientConnected     = 0x11, ///< Server: Connection established
+    kSdoComStateClientSegmTrans     = 0x12  ///< Server: Send following frames
 #endif
+} tSdoComState;
 
+/**
+\brief  SDO command layer connection control structure
 
-
-} tEplSdoComState;
-
-
-// control structure for transaction
+This structure defines the connection control structure of the command layer.
+*/
 typedef struct
 {
-    tSdoSeqConHdl    m_SdoSeqConHdl;     // if != 0 -> entry used
-    tEplSdoComState     m_SdoComState;
-    BYTE                m_bTransactionId;
-    unsigned int        m_uiNodeId;         // NodeId of the target
-                                            // -> needed to reinit connection
-                                            //    after timeout
-    tSdoTransType    m_SdoTransType;     // Auto, Expedited, Segmented
-    tSdoServiceType  m_SdoServiceType;   // WriteByIndex, ReadByIndex
-    tSdoType         m_SdoProtType;      // protocol layer: Auto, Udp, Asnd, Pdo
-    BYTE*               m_pData;            // pointer to data
-    unsigned int        m_uiTransSize;      // number of bytes
-                                            // to transfer
-    unsigned int        m_uiTransferredByte;// number of bytes
-                                            // already transferred
-    tSdoFinishedCb   m_pfnTransferFinished;// callback function of the
-                                            // application
-                                            // -> called in the end of
-                                            //    the SDO transfer
-    void*               m_pUserArg;         // user definable argument pointer
-
-    DWORD               m_dwLastAbortCode;  // save the last abort code
-#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOC)) != 0)
-    // only for client
-    unsigned int        m_uiTargetIndex;    // index to access
-    unsigned int        m_uiTargetSubIndex; // subindex to access
-
-    // for future use
-    unsigned int        m_uiTimeout;        // timeout for this connection
-
+    tSdoSeqConHdl       sdoSeqConHdl;       // if != 0 -> entry used
+    tSdoComState        sdoComState;
+    UINT8               transactionId;
+    UINT                nodeId;             ///< NodeId of the target -> needed to reinit connection after timeout
+    tSdoTransType       sdoTransferType;    ///< Transfer Type: Auto, Expedited, Segmented
+    tSdoServiceType     sdoServiceType;     ///< Service Type: WriteByIndex, ReadByIndex
+    tSdoType            sdoProtocolType;    ///< Protocol Type: Auto, Udp, ASnd
+    UINT8*              pData;              ///< Pointer to data
+    UINT                transferSize;       ///< Number of bytes to transfer
+    UINT                transferredBytes;   ///< Number of bytes already transferred
+    tSdoFinishedCb      pfnTransferFinished;///< Callback function to be called in the end of the SDO transfer
+    void*               pUserArg;           ///< User definable argument pointer
+    UINT32              lastAbortCode;      ///< Last abort code
+#if defined(CONFIG_INCLUDE_SDOC)
+    UINT                targetIndex;        ///< Object Index to access
+    UINT                targetSubIndex;     ///< Object subindex to access
+    UINT                timeout;            ///< Timeout for this connection
 #endif
+} tSdoComCon;
 
-} tEplSdoComCon;
+/**
+\brief  SDO command layer instance structure
 
-// instance table
+This structure describes a SDO command layer instance
+*/
 typedef struct
 {
-    tEplSdoComCon       m_SdoComCon[MAX_SDO_COM_CON];
-
+    tSdoComCon          sdoComCon[MAX_SDO_COM_CON]; ///< Array to store command layer connections
 #if defined(WIN32) || defined(_WIN32)
-    LPCRITICAL_SECTION  m_pCriticalSection;
-    CRITICAL_SECTION    m_CriticalSection;
+    LPCRITICAL_SECTION  pCriticalSection;
+    CRITICAL_SECTION    criticalSection;
 #endif
-
-}tEplSdoComInstance;
+} tSdoComInstance;
 
 //---------------------------------------------------------------------------
 // module global vars
 //---------------------------------------------------------------------------
-static tEplSdoComInstance SdoComInstance_g;
+static tSdoComInstance sdoComInstance_l;
+
 //---------------------------------------------------------------------------
 // local function prototypes
 //---------------------------------------------------------------------------
@@ -227,39 +220,39 @@ tEplKernel PUBLIC conStateChangeCb (tSdoSeqConHdl    SdoSeqConHdl_p,
                                     tAsySdoConState  AsySdoConState_p);
 
 static tEplKernel searchConnection(tSdoSeqConHdl    SdoSeqConHdl_p,
-                                         tEplSdoComConEvent SdoComConEvent_p,
+                                         tSdoComConEvent SdoComConEvent_p,
                                          tAsySdoCom*     pAsySdoCom_p);
 
 static tEplKernel processState(tSdoComConHdl   SdoComCon_p,
-                                         tEplSdoComConEvent SdoComConEvent_p,
+                                         tSdoComConEvent SdoComConEvent_p,
                                          tAsySdoCom*     pAsySdoCom_p);
 
 static tEplKernel transferFinished(tSdoComConHdl   SdoComCon_p,
-                                            tEplSdoComCon*     pSdoComCon_p,
+                                            tSdoComCon*     pSdoComCon_p,
                                             tSdoComConState SdoComConState_p);
 
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOS)) != 0)
-static tEplKernel serverInitReadByIndex(tEplSdoComCon*     pSdoComCon_p,
+static tEplKernel serverInitReadByIndex(tSdoComCon*     pSdoComCon_p,
                                          tAsySdoCom*     pAsySdoCom_p);
 
-static tEplKernel serverSendFrame(tEplSdoComCon*     pSdoComCon_p,
+static tEplKernel serverSendFrame(tSdoComCon*     pSdoComCon_p,
                                            unsigned int       uiIndex_p,
                                            unsigned int       uiSubIndex_p,
-                                           tEplSdoComSendType SendType_p);
+                                           tSdoComSendType SendType_p);
 
-static tEplKernel serverInitWriteByIndex(tEplSdoComCon*     pSdoComCon_p,
+static tEplKernel serverInitWriteByIndex(tSdoComCon*     pSdoComCon_p,
                                          tAsySdoCom*     pAsySdoCom_p);
 #endif
 
 
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOC)) != 0)
 
-static tEplKernel clientSend(tEplSdoComCon* pSdoComCon_p);
+static tEplKernel clientSend(tSdoComCon* pSdoComCon_p);
 
 static tEplKernel clientProcessFrame(tSdoComConHdl   SdoComCon_p,
                                               tAsySdoCom*     pAsySdoCom_p);
 
-static tEplKernel clientSendAbort(tEplSdoComCon* pSdoComCon_p,
+static tEplKernel clientSendAbort(tSdoComCon* pSdoComCon_p,
                                            DWORD          dwAbortCode_p);
 #endif
 
@@ -336,7 +329,7 @@ tEplKernel Ret;
     Ret = kEplSuccessful;
 
     // init control structure
-    EPL_MEMSET(&SdoComInstance_g, 0x00, sizeof(SdoComInstance_g));
+    EPL_MEMSET(&sdoComInstance_l, 0x00, sizeof(sdoComInstance_l));
 
     // init instance of lower layer
     Ret = sdoseq_addInstance(receiveCb, conStateChangeCb);
@@ -347,8 +340,8 @@ tEplKernel Ret;
 
 #if defined(WIN32) || defined(_WIN32)
     // create critical section for process function
-    SdoComInstance_g.m_pCriticalSection = &SdoComInstance_g.m_CriticalSection;
-    InitializeCriticalSection(SdoComInstance_g.m_pCriticalSection);
+    sdoComInstance_l.pCriticalSection = &sdoComInstance_l.criticalSection;
+    InitializeCriticalSection(sdoComInstance_l.pCriticalSection);
 #endif
 
 Exit:
@@ -381,7 +374,7 @@ tEplKernel  Ret;
 
 #if defined(WIN32) || defined(_WIN32)
     // delete critical section for process function
-    DeleteCriticalSection(SdoComInstance_g.m_pCriticalSection);
+    DeleteCriticalSection(sdoComInstance_l.pCriticalSection);
 #endif
 
     Ret = sdoseq_delInstance();
@@ -425,7 +418,7 @@ tEplKernel sdocom_defineConnection(tSdoComConHdl* pSdoComConHdl_p, UINT targetNo
 tEplKernel      Ret;
 unsigned int    uiCount;
 unsigned int    uiFreeHdl;
-tEplSdoComCon*  pSdoComCon;
+tSdoComCon*  pSdoComCon;
 
     // check Parameter
     ASSERT(pSdoComConHdl_p != NULL);
@@ -439,17 +432,17 @@ tEplSdoComCon*  pSdoComCon;
     }
 
     // search free control structure
-    pSdoComCon = &SdoComInstance_g.m_SdoComCon[0];
+    pSdoComCon = &sdoComInstance_l.sdoComCon[0];
     uiCount = 0;
     uiFreeHdl = MAX_SDO_COM_CON;
     while (uiCount < MAX_SDO_COM_CON)
     {
-        if (pSdoComCon->m_SdoSeqConHdl == 0)
+        if (pSdoComCon->sdoSeqConHdl == 0)
         {   // free entry
             uiFreeHdl = uiCount;
         }
-        else if ((pSdoComCon->m_uiNodeId == targetNodeId_p)
-            && (pSdoComCon->m_SdoProtType == protType_p))
+        else if ((pSdoComCon->nodeId == targetNodeId_p)
+            && (pSdoComCon->sdoProtocolType == protType_p))
         {   // existing client connection with same node ID and same protocol type
             *pSdoComConHdl_p = uiCount;
             Ret = kEplSdoComHandleExists;
@@ -465,15 +458,15 @@ tEplSdoComCon*  pSdoComCon;
         goto Exit;
     }
 
-    pSdoComCon = &SdoComInstance_g.m_SdoComCon[uiFreeHdl];
+    pSdoComCon = &sdoComInstance_l.sdoComCon[uiFreeHdl];
     // save handle for application
     *pSdoComConHdl_p = uiFreeHdl;
     // save parameters
-    pSdoComCon->m_SdoProtType = protType_p;
-    pSdoComCon->m_uiNodeId = targetNodeId_p;
+    pSdoComCon->sdoProtocolType = protType_p;
+    pSdoComCon->nodeId = targetNodeId_p;
 
     // set Transaction Id
-    pSdoComCon->m_bTransactionId = 0;
+    pSdoComCon->transactionId = 0;
 
     // check protocol
     switch(protType_p)
@@ -482,8 +475,8 @@ tEplSdoComCon*  pSdoComCon;
         case kSdoTypeUdp:
         {
             // call connection int function of lower layer
-            Ret = sdoseq_initCon(&pSdoComCon->m_SdoSeqConHdl,
-                          pSdoComCon->m_uiNodeId,
+            Ret = sdoseq_initCon(&pSdoComCon->sdoSeqConHdl,
+                          pSdoComCon->nodeId,
                           kSdoTypeUdp);
             if(Ret != kEplSuccessful)
             {
@@ -496,8 +489,8 @@ tEplSdoComCon*  pSdoComCon;
         case kSdoTypeAsnd:
         {
             // call connection int function of lower layer
-            Ret = sdoseq_initCon(&pSdoComCon->m_SdoSeqConHdl,
-                          pSdoComCon->m_uiNodeId,
+            Ret = sdoseq_initCon(&pSdoComCon->sdoSeqConHdl,
+                          pSdoComCon->nodeId,
                           kSdoTypeAsnd);
             if(Ret != kEplSuccessful)
             {
@@ -517,7 +510,7 @@ tEplSdoComCon*  pSdoComCon;
 
     // call process function
     Ret = processState(uiFreeHdl,
-                                    kEplSdoComConEventInitCon,
+                                    kSdoComConEventInitCon,
                                     NULL);
 
 Exit:
@@ -545,7 +538,7 @@ Exit:
 tEplKernel sdocom_initTransferByIndex(tSdoComTransParamByIndex* pSdoComTransParam_p)
 {
 tEplKernel      Ret;
-tEplSdoComCon*  pSdoComCon;
+tSdoComCon*  pSdoComCon;
 
     // check parameter
     if ((pSdoComTransParam_p->subindex >= 0xFF)
@@ -565,17 +558,17 @@ tEplSdoComCon*  pSdoComCon;
     }
 
     // get pointer to control structure of connection
-    pSdoComCon = &SdoComInstance_g.m_SdoComCon[pSdoComTransParam_p->sdoComConHdl];
+    pSdoComCon = &sdoComInstance_l.sdoComCon[pSdoComTransParam_p->sdoComConHdl];
 
     // check if handle ok
-    if(pSdoComCon->m_SdoSeqConHdl == 0)
+    if(pSdoComCon->sdoSeqConHdl == 0)
     {
         Ret = kEplSdoComInvalidHandle;
         goto Exit;
     }
 
     // check if command layer is idle
-    if ((pSdoComCon->m_uiTransferredByte + pSdoComCon->m_uiTransSize) > 0)
+    if ((pSdoComCon->transferredBytes + pSdoComCon->transferSize) > 0)
     {   // handle is not idle
         Ret = kEplSdoComHandleBusy;
         goto Exit;
@@ -583,39 +576,39 @@ tEplSdoComCon*  pSdoComCon;
 
     // save parameter
     // callback function for end of transfer
-    pSdoComCon->m_pfnTransferFinished = pSdoComTransParam_p->pfnSdoFinishedCb;
-    pSdoComCon->m_pUserArg = pSdoComTransParam_p->pUserArg;
+    pSdoComCon->pfnTransferFinished = pSdoComTransParam_p->pfnSdoFinishedCb;
+    pSdoComCon->pUserArg = pSdoComTransParam_p->pUserArg;
 
     // set type of SDO command
     if (pSdoComTransParam_p->sdoAccessType == kSdoAccessTypeRead)
     {
-        pSdoComCon->m_SdoServiceType = kSdoServiceReadByIndex;
+        pSdoComCon->sdoServiceType = kSdoServiceReadByIndex;
     }
     else
     {
-        pSdoComCon->m_SdoServiceType = kSdoServiceWriteByIndex;
+        pSdoComCon->sdoServiceType = kSdoServiceWriteByIndex;
 
     }
     // save pointer to data
-    pSdoComCon->m_pData = pSdoComTransParam_p->pData;
+    pSdoComCon->pData = pSdoComTransParam_p->pData;
     // maximal bytes to transfer
-    pSdoComCon->m_uiTransSize = pSdoComTransParam_p->dataSize;
+    pSdoComCon->transferSize = pSdoComTransParam_p->dataSize;
     // bytes already transfered
-    pSdoComCon->m_uiTransferredByte = 0;
+    pSdoComCon->transferredBytes = 0;
 
     // reset parts of control structure
-    pSdoComCon->m_dwLastAbortCode = 0;
-    pSdoComCon->m_SdoTransType = kSdoTransAuto;
+    pSdoComCon->lastAbortCode = 0;
+    pSdoComCon->sdoTransferType = kSdoTransAuto;
     // save timeout
-    //pSdoComCon->m_uiTimeout = SdoComTransParam_p.timeout;
+    //pSdoComCon->timeout = SdoComTransParam_p.timeout;
 
     // save index and subindex
-    pSdoComCon->m_uiTargetIndex = pSdoComTransParam_p->index;
-    pSdoComCon->m_uiTargetSubIndex = pSdoComTransParam_p->subindex;
+    pSdoComCon->targetIndex = pSdoComTransParam_p->index;
+    pSdoComCon->targetSubIndex = pSdoComTransParam_p->subindex;
 
     // call process function
     Ret = processState(pSdoComTransParam_p->sdoComConHdl,
-                                    kEplSdoComConEventSendFirst,    // event to start transfer
+                                    kSdoComConEventSendFirst,    // event to start transfer
                                     NULL);
 
 Exit:
@@ -645,7 +638,7 @@ Exit:
 tEplKernel sdocom_undefineConnection(tSdoComConHdl sdoComConHdl_p)
 {
 tEplKernel          Ret;
-tEplSdoComCon*      pSdoComCon;
+tSdoComCon*      pSdoComCon;
 
     Ret = kEplSuccessful;
 
@@ -656,20 +649,20 @@ tEplSdoComCon*      pSdoComCon;
     }
 
     // get pointer to control structure
-    pSdoComCon = &SdoComInstance_g.m_SdoComCon[sdoComConHdl_p];
+    pSdoComCon = &sdoComInstance_l.sdoComCon[sdoComConHdl_p];
 
     // $$$ d.k. abort a running transfer before closing the sequence layer
 
-    if(((pSdoComCon->m_SdoSeqConHdl & ~SDO_SEQ_HANDLE_MASK)  != SDO_SEQ_INVALID_HDL)
-        && (pSdoComCon->m_SdoSeqConHdl != 0))
+    if(((pSdoComCon->sdoSeqConHdl & ~SDO_SEQ_HANDLE_MASK)  != SDO_SEQ_INVALID_HDL)
+        && (pSdoComCon->sdoSeqConHdl != 0))
     {
         // close connection in lower layer
-        switch(pSdoComCon->m_SdoProtType)
+        switch(pSdoComCon->sdoProtocolType)
         {
             case kSdoTypeAsnd:
             case kSdoTypeUdp:
             {
-                Ret = sdoseq_deleteCon(pSdoComCon->m_SdoSeqConHdl);
+                Ret = sdoseq_deleteCon(pSdoComCon->sdoSeqConHdl);
                 break;
             }
 
@@ -681,12 +674,12 @@ tEplSdoComCon*      pSdoComCon;
                 goto Exit;
             }
 
-        }// end of switch(pSdoComCon->m_SdoProtType)
+        }// end of switch(pSdoComCon->sdoProtocolType)
     }
 
 
     // clean control structure
-    EPL_MEMSET(pSdoComCon, 0x00, sizeof(tEplSdoComCon));
+    EPL_MEMSET(pSdoComCon, 0x00, sizeof(tSdoComCon));
 Exit:
     return Ret;
 }
@@ -713,7 +706,7 @@ Exit:
 tEplKernel sdocom_getState(tSdoComConHdl sdoComConHdl_p, tSdoComFinished* pSdoComFinished_p)
 {
 tEplKernel          Ret;
-tEplSdoComCon*      pSdoComCon;
+tSdoComCon*      pSdoComCon;
 
     Ret = kEplSuccessful;
 
@@ -724,23 +717,23 @@ tEplSdoComCon*      pSdoComCon;
     }
 
     // get pointer to control structure
-    pSdoComCon = &SdoComInstance_g.m_SdoComCon[sdoComConHdl_p];
+    pSdoComCon = &sdoComInstance_l.sdoComCon[sdoComConHdl_p];
 
     // check if handle ok
-    if(pSdoComCon->m_SdoSeqConHdl == 0)
+    if(pSdoComCon->sdoSeqConHdl == 0)
     {
         Ret = kEplSdoComInvalidHandle;
         goto Exit;
     }
 
-    pSdoComFinished_p->pUserArg = pSdoComCon->m_pUserArg;
-    pSdoComFinished_p->nodeId = pSdoComCon->m_uiNodeId;
-    pSdoComFinished_p->targetIndex = pSdoComCon->m_uiTargetIndex;
-    pSdoComFinished_p->targetSubIndex = pSdoComCon->m_uiTargetSubIndex;
-    pSdoComFinished_p->transferredBytes = pSdoComCon->m_uiTransferredByte;
-    pSdoComFinished_p->abortCode = pSdoComCon->m_dwLastAbortCode;
+    pSdoComFinished_p->pUserArg = pSdoComCon->pUserArg;
+    pSdoComFinished_p->nodeId = pSdoComCon->nodeId;
+    pSdoComFinished_p->targetIndex = pSdoComCon->targetIndex;
+    pSdoComFinished_p->targetSubIndex = pSdoComCon->targetSubIndex;
+    pSdoComFinished_p->transferredBytes = pSdoComCon->transferredBytes;
+    pSdoComFinished_p->abortCode = pSdoComCon->lastAbortCode;
     pSdoComFinished_p->sdoComConHdl = sdoComConHdl_p;
-    if (pSdoComCon->m_SdoServiceType == kSdoServiceWriteByIndex)
+    if (pSdoComCon->sdoServiceType == kSdoServiceWriteByIndex)
     {
         pSdoComFinished_p->sdoAccessType = kSdoAccessTypeWrite;
     }
@@ -749,24 +742,24 @@ tEplSdoComCon*      pSdoComCon;
         pSdoComFinished_p->sdoAccessType = kSdoAccessTypeRead;
     }
 
-    if(pSdoComCon->m_dwLastAbortCode != 0)
+    if(pSdoComCon->lastAbortCode != 0)
     {   // sdo abort
         pSdoComFinished_p->sdoComConState = kEplSdoComTransferRxAborted;
 
         // delete abort code
-        pSdoComCon->m_dwLastAbortCode = 0;
+        pSdoComCon->lastAbortCode = 0;
 
     }
-    else if((pSdoComCon->m_SdoSeqConHdl & ~SDO_SEQ_HANDLE_MASK)== SDO_SEQ_INVALID_HDL)
+    else if((pSdoComCon->sdoSeqConHdl & ~SDO_SEQ_HANDLE_MASK)== SDO_SEQ_INVALID_HDL)
     {   // check state
         pSdoComFinished_p->sdoComConState = kEplSdoComTransferLowerLayerAbort;
     }
-    else if(pSdoComCon->m_SdoComState == kEplSdoComStateClientWaitInit)
+    else if(pSdoComCon->sdoComState == kSdoComStateClientWaitInit)
     {
         // finished
         pSdoComFinished_p->sdoComConState = kEplSdoComTransferNotActive;
     }
-    else if(pSdoComCon->m_uiTransSize == 0)
+    else if(pSdoComCon->transferSize == 0)
     {   // finished
         pSdoComFinished_p->sdoComConState = kEplSdoComTransferFinished;
     }
@@ -795,7 +788,7 @@ Exit:
 UINT sdocom_getNodeId(tSdoComConHdl sdoComConHdl_p)
 {
 unsigned int    uiNodeId = EPL_C_ADR_INVALID;
-tEplSdoComCon*  pSdoComCon;
+tSdoComCon*  pSdoComCon;
 
     if(sdoComConHdl_p >= MAX_SDO_COM_CON)
     {
@@ -803,15 +796,15 @@ tEplSdoComCon*  pSdoComCon;
     }
 
     // get pointer to control structure
-    pSdoComCon = &SdoComInstance_g.m_SdoComCon[sdoComConHdl_p];
+    pSdoComCon = &sdoComInstance_l.sdoComCon[sdoComConHdl_p];
 
     // check if handle ok
-    if(pSdoComCon->m_SdoSeqConHdl == 0)
+    if(pSdoComCon->sdoSeqConHdl == 0)
     {
         goto Exit;
     }
 
-    uiNodeId = pSdoComCon->m_uiNodeId;
+    uiNodeId = pSdoComCon->nodeId;
 
 Exit:
     return uiNodeId;
@@ -840,7 +833,7 @@ Exit:
 tEplKernel sdocom_abortTransfer(tSdoComConHdl sdoComConHdl_p, UINT32 abortCode_p)
 {
 tEplKernel  Ret;
-tEplSdoComCon*      pSdoComCon;
+tSdoComCon*      pSdoComCon;
 
 
     if(sdoComConHdl_p >= MAX_SDO_COM_CON)
@@ -850,20 +843,20 @@ tEplSdoComCon*      pSdoComCon;
     }
 
     // get pointer to control structure of connection
-    pSdoComCon = &SdoComInstance_g.m_SdoComCon[sdoComConHdl_p];
+    pSdoComCon = &sdoComInstance_l.sdoComCon[sdoComConHdl_p];
 
     // check if handle ok
-    if(pSdoComCon->m_SdoSeqConHdl == 0)
+    if(pSdoComCon->sdoSeqConHdl == 0)
     {
         Ret = kEplSdoComInvalidHandle;
         goto Exit;
     }
 
     // save pointer to abort code
-    pSdoComCon->m_pData = (BYTE*)&abortCode_p;
+    pSdoComCon->pData = (BYTE*)&abortCode_p;
 
     Ret = processState(sdoComConHdl_p,
-                                kEplSdoComConEventAbort,
+                                kSdoComConEventAbort,
                                 (tAsySdoCom*)NULL);
 
 Exit:
@@ -907,7 +900,7 @@ tEplKernel       Ret;
 
     // search connection internally
     Ret = searchConnection(SdoSeqConHdl_p,
-                                   kEplSdoComConEventRec,
+                                   kSdoComConEventRec,
                                    pAsySdoCom_p);
 
     EPL_DBGLVL_SDO_TRACE("receiveCb SdoSeqConHdl: 0x%X, First Byte of pAsySdoCom_p: 0x%02X, uiDataSize_p: 0x%04X\n", SdoSeqConHdl_p, (WORD)pAsySdoCom_p->m_le_abCommandData[0], uiDataSize_p);
@@ -938,7 +931,7 @@ tEplKernel PUBLIC conStateChangeCb (tSdoSeqConHdl    SdoSeqConHdl_p,
                                     tAsySdoConState  AsySdoConState_p)
 {
 tEplKernel          Ret;
-tEplSdoComConEvent  SdoComConEvent = kEplSdoComConEventSendFirst;
+tSdoComConEvent  SdoComConEvent = kSdoComConEventSendFirst;
 
     Ret = kEplSuccessful;
 
@@ -948,7 +941,7 @@ tEplSdoComConEvent  SdoComConEvent = kEplSdoComConEventSendFirst;
         case kAsySdoConStateConnected:
         {
             EPL_DBGLVL_SDO_TRACE("Connection established\n");
-            SdoComConEvent = kEplSdoComConEventConEstablished;
+            SdoComConEvent = kSdoComConEventConEstablished;
             // start transmission if needed
             break;
         }
@@ -956,7 +949,7 @@ tEplSdoComConEvent  SdoComConEvent = kEplSdoComConEventSendFirst;
         case kAsySdoConStateInitError:
         {
             EPL_DBGLVL_SDO_TRACE("Error during initialisation\n");
-            SdoComConEvent = kEplSdoComConEventInitError;
+            SdoComConEvent = kSdoComConEventInitError;
             // inform app about error and close sequence layer handle
             break;
         }
@@ -964,7 +957,7 @@ tEplSdoComConEvent  SdoComConEvent = kEplSdoComConEventSendFirst;
         case kAsySdoConStateConClosed:
         {
             EPL_DBGLVL_SDO_TRACE("Connection closed\n");
-            SdoComConEvent = kEplSdoComConEventConClosed;
+            SdoComConEvent = kSdoComConEventConClosed;
             // close sequence layer handle
             break;
         }
@@ -972,7 +965,7 @@ tEplSdoComConEvent  SdoComConEvent = kEplSdoComConEventSendFirst;
         case kAsySdoConStateAckReceived:
         {
             EPL_DBGLVL_SDO_TRACE("Acknowledge received\n");
-            SdoComConEvent = kEplSdoComConEventAckReceived;
+            SdoComConEvent = kSdoComConEventAckReceived;
             // continue transmission
             break;
         }
@@ -980,7 +973,7 @@ tEplSdoComConEvent  SdoComConEvent = kEplSdoComConEventSendFirst;
         case kAsySdoConStateFrameSended:
         {
             EPL_DBGLVL_SDO_TRACE("One Frame sent\n");
-            SdoComConEvent = kEplSdoComConEventFrameSended;
+            SdoComConEvent = kSdoComConEventFrameSended;
             // to continue transmission
             break;
 
@@ -989,7 +982,7 @@ tEplSdoComConEvent  SdoComConEvent = kEplSdoComConEventSendFirst;
         case kAsySdoConStateTimeout:
         {
             EPL_DBGLVL_SDO_TRACE("Timeout\n");
-            SdoComConEvent = kEplSdoComConEventTimeout;
+            SdoComConEvent = kSdoComConEventTimeout;
             // close sequence layer handle
             break;
 
@@ -998,7 +991,7 @@ tEplSdoComConEvent  SdoComConEvent = kEplSdoComConEventSendFirst;
         case kAsySdoConStateTransferAbort:
         {
             EPL_DBGLVL_SDO_TRACE("Transfer aborted\n");
-            SdoComConEvent = kEplSdoComConEventTransferAbort;
+            SdoComConEvent = kSdoComConEventTransferAbort;
             // inform higher layer if necessary,
             // but do not close sequence layer handle
             break;
@@ -1031,29 +1024,29 @@ tEplSdoComConEvent  SdoComConEvent = kEplSdoComConEventSendFirst;
 //
 //---------------------------------------------------------------------------
 static tEplKernel searchConnection(tSdoSeqConHdl    SdoSeqConHdl_p,
-                                         tEplSdoComConEvent SdoComConEvent_p,
+                                         tSdoComConEvent SdoComConEvent_p,
                                          tAsySdoCom*     pAsySdoCom_p)
 {
 tEplKernel          Ret;
-tEplSdoComCon*      pSdoComCon;
+tSdoComCon*      pSdoComCon;
 tSdoComConHdl    HdlCount;
 tSdoComConHdl    HdlFree;
 
     Ret = kEplSdoComNotResponsible;
 
     // get pointer to first element of the array
-    pSdoComCon = &SdoComInstance_g.m_SdoComCon[0];
+    pSdoComCon = &sdoComInstance_l.sdoComCon[0];
     HdlCount = 0;
     HdlFree = 0xFFFF;
     while (HdlCount < MAX_SDO_COM_CON)
     {
-        if (pSdoComCon->m_SdoSeqConHdl == SdoSeqConHdl_p)
+        if (pSdoComCon->sdoSeqConHdl == SdoSeqConHdl_p)
         {   // matching command layer handle found
             Ret = processState(HdlCount,
                                     SdoComConEvent_p,
                                     pAsySdoCom_p);
         }
-        else if ((pSdoComCon->m_SdoSeqConHdl == 0)
+        else if ((pSdoComCon->sdoSeqConHdl == 0)
             &&(HdlFree == 0xFFFF))
         {
             HdlFree = HdlCount;
@@ -1070,14 +1063,14 @@ tSdoComConHdl    HdlFree;
             // delete connection immediately
             // 2008/04/14 m.u./d.k. This connection actually does not exist.
             //                      pSdoComCon is invalid.
-            // Ret = sdoseq_deleteCon(pSdoComCon->m_SdoSeqConHdl);
+            // Ret = sdoseq_deleteCon(pSdoComCon->sdoSeqConHdl);
             Ret = kEplSdoComNoFreeHandle;
         }
         else
         {   // create new handle
             HdlCount = HdlFree;
-            pSdoComCon = &SdoComInstance_g.m_SdoComCon[HdlCount];
-            pSdoComCon->m_SdoSeqConHdl = SdoSeqConHdl_p;
+            pSdoComCon = &sdoComInstance_l.sdoComCon[HdlCount];
+            pSdoComCon->sdoSeqConHdl = SdoSeqConHdl_p;
             Ret = processState(HdlCount,
                                     SdoComConEvent_p,
                                     pAsySdoCom_p);
@@ -1108,11 +1101,11 @@ tSdoComConHdl    HdlFree;
 //
 //---------------------------------------------------------------------------
 static tEplKernel processState(tSdoComConHdl   SdoComCon_p,
-                                         tEplSdoComConEvent SdoComConEvent_p,
+                                         tSdoComConEvent SdoComConEvent_p,
                                          tAsySdoCom*     pAsySdoCom_p)
 {
 tEplKernel          Ret;
-tEplSdoComCon*      pSdoComCon;
+tSdoComCon*      pSdoComCon;
 BYTE                bFlag;
 
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOS)) != 0)
@@ -1122,40 +1115,40 @@ unsigned int        uiSize;
 
 #if defined(WIN32) || defined(_WIN32)
     // enter  critical section for process function
-    EnterCriticalSection(SdoComInstance_g.m_pCriticalSection);
+    EnterCriticalSection(sdoComInstance_l.pCriticalSection);
     EPL_DBGLVL_SDO_TRACE("\n\tEnterCiticalSection processState\n\n");
 #endif
 
     Ret = kEplSuccessful;
 
     // get pointer to control structure
-    pSdoComCon = &SdoComInstance_g.m_SdoComCon[SdoComCon_p];
+    pSdoComCon = &sdoComInstance_l.sdoComCon[SdoComCon_p];
 
     // process state maschine
-    switch(pSdoComCon->m_SdoComState)
+    switch(pSdoComCon->sdoComState)
     {
         // idle state
-        case kEplSdoComStateIdle:
+        case kSdoComStateIdle:
         {
             // check events
             switch(SdoComConEvent_p)
             {
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOC)) != 0)
                 // init con for client
-                case kEplSdoComConEventInitCon:
+                case kSdoComConEventInitCon:
                 {
 
                     // call of the init function already
                     // processed in sdocom_defineConnection()
-                    // only change state to kEplSdoComStateClientWaitInit
-                    pSdoComCon->m_SdoComState = kEplSdoComStateClientWaitInit;
+                    // only change state to kSdoComStateClientWaitInit
+                    pSdoComCon->sdoComState = kSdoComStateClientWaitInit;
                     break;
                 }
 #endif
 
 
                 // int con for server
-                case kEplSdoComConEventRec:
+                case kSdoComConEventRec:
                 {
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOS)) != 0)
                     // check if init of an transfer and no SDO abort
@@ -1164,14 +1157,14 @@ unsigned int        uiSize;
                         if ((pAsySdoCom_p->m_le_bFlags & 0x40) == 0)
                         {   // no SDO abort
                             // save tansaction id
-                            pSdoComCon->m_bTransactionId = AmiGetByteFromLe(&pAsySdoCom_p->m_le_bTransactionId);
+                            pSdoComCon->transactionId = AmiGetByteFromLe(&pAsySdoCom_p->m_le_bTransactionId);
                             // check command
                             switch(pAsySdoCom_p->m_le_bCommandId)
                             {
                                 case kSdoServiceNIL:
                                 {   // simply acknowlegde NIL command on sequence layer
 
-                                    Ret = sdoseq_sendData(pSdoComCon->m_SdoSeqConHdl,
+                                    Ret = sdoseq_sendData(pSdoComCon->sdoSeqConHdl,
                                                                             0,
                                                                             (tEplFrame*)NULL);
 
@@ -1185,15 +1178,15 @@ unsigned int        uiSize;
                                     serverInitReadByIndex(pSdoComCon,
                                                                     pAsySdoCom_p);
                                     // check next state
-                                    if(pSdoComCon->m_uiTransSize == 0)
+                                    if(pSdoComCon->transferSize == 0)
                                     {   // ready -> stay idle
-                                        pSdoComCon->m_SdoComState = kEplSdoComStateIdle;
+                                        pSdoComCon->sdoComState = kSdoComStateIdle;
                                         // reset abort code
-                                        pSdoComCon->m_dwLastAbortCode = 0;
+                                        pSdoComCon->lastAbortCode = 0;
                                     }
                                     else
                                     {   // segmented transfer
-                                        pSdoComCon->m_SdoComState = kEplSdoComStateServerSegmTrans;
+                                        pSdoComCon->sdoComState = kSdoComStateServerSegmTrans;
                                     }
 
                                     break;
@@ -1206,15 +1199,15 @@ unsigned int        uiSize;
                                     serverInitWriteByIndex(pSdoComCon,
                                                                     pAsySdoCom_p);
                                     // check next state
-                                    if(pSdoComCon->m_uiTransSize == 0)
+                                    if(pSdoComCon->transferSize == 0)
                                     {   // already -> stay idle
-                                        pSdoComCon->m_SdoComState = kEplSdoComStateIdle;
+                                        pSdoComCon->sdoComState = kSdoComStateIdle;
                                         // reset abort code
-                                        pSdoComCon->m_dwLastAbortCode = 0;
+                                        pSdoComCon->lastAbortCode = 0;
                                     }
                                     else
                                     {   // segmented transfer
-                                        pSdoComCon->m_SdoComState = kEplSdoComStateServerSegmTrans;
+                                        pSdoComCon->sdoComState = kSdoComStateServerSegmTrans;
                                     }
 
                                     break;
@@ -1226,11 +1219,11 @@ unsigned int        uiSize;
                                     //       -> abort senden
                                     dwAbortCode = EPL_SDOAC_UNKNOWN_COMMAND_SPECIFIER;
                                     // send abort
-                                    pSdoComCon->m_pData = (BYTE*)&dwAbortCode;
+                                    pSdoComCon->pData = (BYTE*)&dwAbortCode;
                                     Ret = serverSendFrame(pSdoComCon,
                                                                 0,
                                                                 0,
-                                                                kEplSdoComSendTypeAbort);
+                                                                kSdoComSendTypeAbort);
 
                                     break;
                                 }
@@ -1251,13 +1244,13 @@ unsigned int        uiSize;
                 }
 
                 // connection closed
-                case kEplSdoComConEventInitError:
-                case kEplSdoComConEventTimeout:
-                case kEplSdoComConEventConClosed:
+                case kSdoComConEventInitError:
+                case kSdoComConEventTimeout:
+                case kSdoComConEventConClosed:
                 {
-                    Ret = sdoseq_deleteCon(pSdoComCon->m_SdoSeqConHdl);
+                    Ret = sdoseq_deleteCon(pSdoComCon->sdoSeqConHdl);
                     // clean control structure
-                    EPL_MEMSET(pSdoComCon, 0x00, sizeof(tEplSdoComCon));
+                    EPL_MEMSET(pSdoComCon, 0x00, sizeof(tSdoComCon));
                     break;
                 }
 
@@ -1272,29 +1265,29 @@ unsigned int        uiSize;
         //----------------------------------------------------------------------
         // SDO Server part
         // segmented transfer
-        case kEplSdoComStateServerSegmTrans:
+        case kSdoComStateServerSegmTrans:
         {
             // check events
             switch(SdoComConEvent_p)
             {
                 // send next frame
-                case kEplSdoComConEventAckReceived:
-                case kEplSdoComConEventFrameSended:
+                case kSdoComConEventAckReceived:
+                case kSdoComConEventFrameSended:
                 {
                     // check if it is a read
-                    if(pSdoComCon->m_SdoServiceType == kSdoServiceReadByIndex)
+                    if(pSdoComCon->sdoServiceType == kSdoServiceReadByIndex)
                     {
                         // send next frame
                         serverSendFrame(pSdoComCon,
                                                             0,
                                                             0,
-                                                            kEplSdoComSendTypeRes);
+                                                            kSdoComSendTypeRes);
                         // if all send -> back to idle
-                        if(pSdoComCon->m_uiTransSize == 0)
+                        if(pSdoComCon->transferSize == 0)
                         {   // back to idle
-                            pSdoComCon->m_SdoComState = kEplSdoComStateIdle;
+                            pSdoComCon->sdoComState = kSdoComStateIdle;
                             // reset abort code
-                            pSdoComCon->m_dwLastAbortCode = 0;
+                            pSdoComCon->lastAbortCode = 0;
                         }
 
                     }
@@ -1302,91 +1295,91 @@ unsigned int        uiSize;
                 }
 
                 // process next frame
-                case kEplSdoComConEventRec:
+                case kSdoComConEventRec:
                 {
                     // check if the frame is a SDO response and has the right transaction ID
                     bFlag = AmiGetByteFromLe(&pAsySdoCom_p->m_le_bFlags);
 
                     if (((bFlag & 0x80) == 0)
-                        && (AmiGetByteFromLe(&pAsySdoCom_p->m_le_bTransactionId) == pSdoComCon->m_bTransactionId))
+                        && (AmiGetByteFromLe(&pAsySdoCom_p->m_le_bTransactionId) == pSdoComCon->transactionId))
                     {
                         // check if it is a abort
                         if ((bFlag & 0x40) != 0)
                         {   // SDO abort
                             // clear control structure
-                            pSdoComCon->m_uiTransSize = 0;
-                            pSdoComCon->m_uiTransferredByte = 0;
+                            pSdoComCon->transferSize = 0;
+                            pSdoComCon->transferredBytes = 0;
                             // change state
-                            pSdoComCon->m_SdoComState = kEplSdoComStateIdle;
+                            pSdoComCon->sdoComState = kSdoComStateIdle;
                             // reset abort code
-                            pSdoComCon->m_dwLastAbortCode = 0;
+                            pSdoComCon->lastAbortCode = 0;
                             // d.k.: do not execute anything further on this command
                             break;
                         }
 
                         // check if it is a write
-                        if (pSdoComCon->m_SdoServiceType == kSdoServiceWriteByIndex)
+                        if (pSdoComCon->sdoServiceType == kSdoServiceWriteByIndex)
                         {
                             // write data to OD
                             uiSize = AmiGetWordFromLe(&pAsySdoCom_p->m_le_wSegmentSize);
-                            if (uiSize > pSdoComCon->m_uiTransSize)
+                            if (uiSize > pSdoComCon->transferSize)
                             {
-                                pSdoComCon->m_dwLastAbortCode = EPL_SDOAC_DATA_TYPE_LENGTH_TOO_HIGH;
+                                pSdoComCon->lastAbortCode = EPL_SDOAC_DATA_TYPE_LENGTH_TOO_HIGH;
                                 // send abort
                                 Ret = serverSendFrame(pSdoComCon,
                                                             0,
                                                             0,
-                                                            kEplSdoComSendTypeAbort);
+                                                            kSdoComSendTypeAbort);
                                 goto Exit;
                             }
-                            if (pSdoComCon->m_dwLastAbortCode == 0)
+                            if (pSdoComCon->lastAbortCode == 0)
                             {
-                                EPL_MEMCPY(pSdoComCon->m_pData, &pAsySdoCom_p->m_le_abCommandData[0],uiSize);
-                                (pSdoComCon->m_pData) += uiSize;
+                                EPL_MEMCPY(pSdoComCon->pData, &pAsySdoCom_p->m_le_abCommandData[0],uiSize);
+                                (pSdoComCon->pData) += uiSize;
                             }
                             // update counter
-                            pSdoComCon->m_uiTransferredByte += uiSize;
-                            pSdoComCon->m_uiTransSize -= uiSize;
+                            pSdoComCon->transferredBytes += uiSize;
+                            pSdoComCon->transferSize -= uiSize;
 
                             // check end of transfer
                             if((pAsySdoCom_p->m_le_bFlags & 0x30) == 0x30)
                             {   // transfer ready
-                                pSdoComCon->m_uiTransSize = 0;
+                                pSdoComCon->transferSize = 0;
 
-                                if(pSdoComCon->m_dwLastAbortCode == 0)
+                                if(pSdoComCon->lastAbortCode == 0)
                                 {
                                     // send response
                                     // send next frame
                                     serverSendFrame(pSdoComCon,
                                                                         0,
                                                                         0,
-                                                                        kEplSdoComSendTypeRes);
+                                                                        kSdoComSendTypeRes);
                                     // if all send -> back to idle
-                                    if(pSdoComCon->m_uiTransSize == 0)
+                                    if(pSdoComCon->transferSize == 0)
                                     {   // back to idle
-                                        pSdoComCon->m_SdoComState = kEplSdoComStateIdle;
+                                        pSdoComCon->sdoComState = kSdoComStateIdle;
                                         // reset abort code
-                                        pSdoComCon->m_dwLastAbortCode = 0;
+                                        pSdoComCon->lastAbortCode = 0;
                                     }
                                 }
                                 else
                                 {   // send dabort code
                                     // send abort
-                                    pSdoComCon->m_pData = (BYTE*)&pSdoComCon->m_dwLastAbortCode;
+                                    pSdoComCon->pData = (BYTE*)&pSdoComCon->lastAbortCode;
                                     Ret = serverSendFrame(pSdoComCon,
                                                                 0,
                                                                 0,
-                                                                kEplSdoComSendTypeAbort);
+                                                                kSdoComSendTypeAbort);
 
                                     // reset abort code
-                                    pSdoComCon->m_dwLastAbortCode = 0;
+                                    pSdoComCon->lastAbortCode = 0;
 
                                 }
                             }
                             else
                             {
                                 // send acknowledge without any Command layer data
-                                Ret = sdoseq_sendData(pSdoComCon->m_SdoSeqConHdl,
+                                Ret = sdoseq_sendData(pSdoComCon->sdoSeqConHdl,
                                                                         0,
                                                                         (tEplFrame*)NULL);
                             }
@@ -1402,13 +1395,13 @@ unsigned int        uiSize;
                 }
 
                 // connection closed
-                case kEplSdoComConEventInitError:
-                case kEplSdoComConEventTimeout:
-                case kEplSdoComConEventConClosed:
+                case kSdoComConEventInitError:
+                case kSdoComConEventTimeout:
+                case kSdoComConEventConClosed:
                 {
-                    Ret = sdoseq_deleteCon(pSdoComCon->m_SdoSeqConHdl);
+                    Ret = sdoseq_deleteCon(pSdoComCon->sdoSeqConHdl);
                     // clean control structure
-                    EPL_MEMSET(pSdoComCon, 0x00, sizeof(tEplSdoComCon));
+                    EPL_MEMSET(pSdoComCon, 0x00, sizeof(tSdoComCon));
                     break;
                 }
 
@@ -1426,23 +1419,23 @@ unsigned int        uiSize;
         //----------------------------------------------------------------------
         // SDO Client part
         // wait for finish of establishing connection
-        case kEplSdoComStateClientWaitInit:
+        case kSdoComStateClientWaitInit:
         {
 
             // if connection handle is invalid reinit connection
             // d.k.: this will be done only on new events (i.e. InitTransfer)
-            if((pSdoComCon->m_SdoSeqConHdl & ~SDO_SEQ_HANDLE_MASK) == SDO_SEQ_INVALID_HDL)
+            if((pSdoComCon->sdoSeqConHdl & ~SDO_SEQ_HANDLE_MASK) == SDO_SEQ_INVALID_HDL)
             {
                 // check kind of connection to reinit
                 // check protocol
-                switch(pSdoComCon->m_SdoProtType)
+                switch(pSdoComCon->sdoProtocolType)
                 {
                     // udp
                     case kSdoTypeUdp:
                     {
                         // call connection int function of lower layer
-                        Ret = sdoseq_initCon(&pSdoComCon->m_SdoSeqConHdl,
-                                    pSdoComCon->m_uiNodeId,
+                        Ret = sdoseq_initCon(&pSdoComCon->sdoSeqConHdl,
+                                    pSdoComCon->nodeId,
                                     kSdoTypeUdp);
                         if(Ret != kEplSuccessful)
                         {
@@ -1455,8 +1448,8 @@ unsigned int        uiSize;
                     case kSdoTypeAsnd:
                     {
                         // call connection int function of lower layer
-                        Ret = sdoseq_initCon(&pSdoComCon->m_SdoSeqConHdl,
-                                    pSdoComCon->m_uiNodeId,
+                        Ret = sdoseq_initCon(&pSdoComCon->sdoSeqConHdl,
+                                    pSdoComCon->nodeId,
                                     kSdoTypeAsnd);
                         if(Ret != kEplSuccessful)
                         {
@@ -1475,27 +1468,27 @@ unsigned int        uiSize;
                 }// end of switch(m_ProtType_p)
                 // d.k.: reset transaction ID, because new sequence layer connection was initialized
                 // $$$ d.k. is this really necessary?
-                //pSdoComCon->m_bTransactionId = 0;
+                //pSdoComCon->transactionId = 0;
             }
 
             // check events
             switch(SdoComConEvent_p)
             {
                 // connection established
-                case kEplSdoComConEventConEstablished:
+                case kSdoComConEventConEstablished:
                 {
                     // send first frame if needed
-                    if ((pSdoComCon->m_uiTransSize > 0)
-                        && (pSdoComCon->m_uiTargetIndex != 0))
+                    if ((pSdoComCon->transferSize > 0)
+                        && (pSdoComCon->targetIndex != 0))
                     {   // start SDO transfer
                         // check if segemted transfer
-                        if (pSdoComCon->m_SdoTransType == kSdoTransSegmented)
+                        if (pSdoComCon->sdoTransferType == kSdoTransSegmented)
                         {
-                            pSdoComCon->m_SdoComState = kEplSdoComStateClientSegmTrans;
+                            pSdoComCon->sdoComState = kSdoComStateClientSegmTrans;
                         }
                         else
                         {
-                            pSdoComCon->m_SdoComState = kEplSdoComStateClientConnected;
+                            pSdoComCon->sdoComState = kSdoComStateClientConnected;
                         }
 
                         Ret = clientSend(pSdoComCon);
@@ -1507,44 +1500,44 @@ unsigned int        uiSize;
                     }
                     else
                     {
-                        // goto state kEplSdoComStateClientConnected
-                        pSdoComCon->m_SdoComState = kEplSdoComStateClientConnected;
+                        // goto state kSdoComStateClientConnected
+                        pSdoComCon->sdoComState = kSdoComStateClientConnected;
                     }
                     goto Exit;
                 }
 
-                case kEplSdoComConEventSendFirst:
+                case kSdoComConEventSendFirst:
                 {
                     // infos for transfer already saved by function sdocom_initTransferByIndex
                     break;
                 }
 
                 // abort to send from higher layer
-                case kEplSdoComConEventAbort:
+                case kSdoComConEventAbort:
                 {
                     // call callback of application
-                    pSdoComCon->m_dwLastAbortCode = *((DWORD*)pSdoComCon->m_pData);
+                    pSdoComCon->lastAbortCode = *((DWORD*)pSdoComCon->pData);
                     Ret = transferFinished(SdoComCon_p, pSdoComCon, kEplSdoComTransferTxAborted);
 
                     break;
                 }
 
-                case kEplSdoComConEventConClosed:
-                case kEplSdoComConEventInitError:
-                case kEplSdoComConEventTimeout:
-                case kEplSdoComConEventTransferAbort:
+                case kSdoComConEventConClosed:
+                case kSdoComConEventInitError:
+                case kSdoComConEventTimeout:
+                case kSdoComConEventTransferAbort:
                 {
                     // close sequence layer handle
-                    Ret = sdoseq_deleteCon(pSdoComCon->m_SdoSeqConHdl);
-                    pSdoComCon->m_SdoSeqConHdl |= SDO_SEQ_INVALID_HDL;
+                    Ret = sdoseq_deleteCon(pSdoComCon->sdoSeqConHdl);
+                    pSdoComCon->sdoSeqConHdl |= SDO_SEQ_INVALID_HDL;
                     // call callback function
-                    if (SdoComConEvent_p == kEplSdoComConEventTimeout)
+                    if (SdoComConEvent_p == kSdoComConEventTimeout)
                     {
-                        pSdoComCon->m_dwLastAbortCode = EPL_SDOAC_TIME_OUT;
+                        pSdoComCon->lastAbortCode = EPL_SDOAC_TIME_OUT;
                     }
                     else
                     {
-                        pSdoComCon->m_dwLastAbortCode = 0;
+                        pSdoComCon->lastAbortCode = 0;
                     }
                     Ret = transferFinished(SdoComCon_p, pSdoComCon, kEplSdoComTransferLowerLayerAbort);
                     // d.k.: do not clean control structure
@@ -1560,15 +1553,15 @@ unsigned int        uiSize;
         }
 
         // connected
-        case kEplSdoComStateClientConnected:
+        case kSdoComStateClientConnected:
         {
             // check events
             switch(SdoComConEvent_p)
             {
                 // send a frame
-                case kEplSdoComConEventSendFirst:
-                case kEplSdoComConEventAckReceived:
-                case kEplSdoComConEventFrameSended:
+                case kSdoComConEventSendFirst:
+                case kSdoComConEventAckReceived:
+                case kSdoComConEventFrameSended:
                 {
                     Ret = clientSend(pSdoComCon);
                     if(Ret != kEplSuccessful)
@@ -1577,46 +1570,46 @@ unsigned int        uiSize;
                     }
 
                     // check if read transfer finished
-                    if((pSdoComCon->m_uiTransSize == 0)
-                        && (pSdoComCon->m_uiTransferredByte != 0)
-                        && (pSdoComCon->m_SdoServiceType == kSdoServiceReadByIndex))
+                    if((pSdoComCon->transferSize == 0)
+                        && (pSdoComCon->transferredBytes != 0)
+                        && (pSdoComCon->sdoServiceType == kSdoServiceReadByIndex))
                     {
                         // inc transaction id
-                        pSdoComCon->m_bTransactionId++;
+                        pSdoComCon->transactionId++;
                         // call callback of application
-                        pSdoComCon->m_dwLastAbortCode = 0;
+                        pSdoComCon->lastAbortCode = 0;
                         Ret = transferFinished(SdoComCon_p, pSdoComCon, kEplSdoComTransferFinished);
 
                         goto Exit;
                     }
 
                     // check if segemted transfer
-                    if(pSdoComCon->m_SdoTransType == kSdoTransSegmented)
+                    if(pSdoComCon->sdoTransferType == kSdoTransSegmented)
                     {
-                        pSdoComCon->m_SdoComState = kEplSdoComStateClientSegmTrans;
+                        pSdoComCon->sdoComState = kSdoComStateClientSegmTrans;
                         goto Exit;
                     }
                     break;
                 }
 
                 // frame received
-                case kEplSdoComConEventRec:
+                case kSdoComConEventRec:
                 {
                     // check if the frame is a SDO response and has the right transaction ID
                     bFlag = AmiGetByteFromLe(&pAsySdoCom_p->m_le_bFlags);
-                    if (((bFlag & 0x80) != 0) && (AmiGetByteFromLe(&pAsySdoCom_p->m_le_bTransactionId) == pSdoComCon->m_bTransactionId))
+                    if (((bFlag & 0x80) != 0) && (AmiGetByteFromLe(&pAsySdoCom_p->m_le_bTransactionId) == pSdoComCon->transactionId))
                     {
                         // check if abort or not
                         if((bFlag & 0x40) != 0)
                         {
                             // send acknowledge without any Command layer data
-                            Ret = sdoseq_sendData(pSdoComCon->m_SdoSeqConHdl,
+                            Ret = sdoseq_sendData(pSdoComCon->sdoSeqConHdl,
                                                                     0,
                                                                     (tEplFrame*)NULL);
                             // inc transaction id
-                            pSdoComCon->m_bTransactionId++;
+                            pSdoComCon->transactionId++;
                             // save abort code
-                            pSdoComCon->m_dwLastAbortCode = AmiGetDwordFromLe(&pAsySdoCom_p->m_le_abCommandData[0]);
+                            pSdoComCon->lastAbortCode = AmiGetDwordFromLe(&pAsySdoCom_p->m_le_abCommandData[0]);
                             // call callback of application
                             Ret = transferFinished(SdoComCon_p, pSdoComCon, kEplSdoComTransferRxAborted);
 
@@ -1628,16 +1621,16 @@ unsigned int        uiSize;
                             Ret = clientProcessFrame(SdoComCon_p, pAsySdoCom_p);
 
                             // check if transfer ready
-                            if(pSdoComCon->m_uiTransSize == 0)
+                            if(pSdoComCon->transferSize == 0)
                             {
                                 // send acknowledge without any Command layer data
-                                Ret = sdoseq_sendData(pSdoComCon->m_SdoSeqConHdl,
+                                Ret = sdoseq_sendData(pSdoComCon->sdoSeqConHdl,
                                                                         0,
                                                                         (tEplFrame*)NULL);
                                 // inc transaction id
-                                pSdoComCon->m_bTransactionId++;
+                                pSdoComCon->transactionId++;
                                 // call callback of application
-                                pSdoComCon->m_dwLastAbortCode = 0;
+                                pSdoComCon->lastAbortCode = 0;
                                 Ret = transferFinished(SdoComCon_p, pSdoComCon, kEplSdoComTransferFinished);
 
                                 goto Exit;
@@ -1654,58 +1647,58 @@ unsigned int        uiSize;
                     break;
                 }
 
-                // connection closed event go back to kEplSdoComStateClientWaitInit
-                case kEplSdoComConEventConClosed:
+                // connection closed event go back to kSdoComStateClientWaitInit
+                case kSdoComConEventConClosed:
                 {   // connection closed by communication partner
                     // close sequence layer handle
-                    Ret = sdoseq_deleteCon(pSdoComCon->m_SdoSeqConHdl);
-                    // set handle to invalid and enter kEplSdoComStateClientWaitInit
-                    pSdoComCon->m_SdoSeqConHdl |= SDO_SEQ_INVALID_HDL;
+                    Ret = sdoseq_deleteCon(pSdoComCon->sdoSeqConHdl);
+                    // set handle to invalid and enter kSdoComStateClientWaitInit
+                    pSdoComCon->sdoSeqConHdl |= SDO_SEQ_INVALID_HDL;
                     // change state
-                    pSdoComCon->m_SdoComState = kEplSdoComStateClientWaitInit;
+                    pSdoComCon->sdoComState = kSdoComStateClientWaitInit;
 
                     // call callback of application
-                    pSdoComCon->m_dwLastAbortCode = 0;
+                    pSdoComCon->lastAbortCode = 0;
                     Ret = transferFinished(SdoComCon_p, pSdoComCon, kEplSdoComTransferLowerLayerAbort);
 
                     break;
                 }
 
                 // abort to send from higher layer
-                case kEplSdoComConEventAbort:
+                case kSdoComConEventAbort:
                 {
-                    clientSendAbort(pSdoComCon,*((DWORD*)pSdoComCon->m_pData));
+                    clientSendAbort(pSdoComCon,*((DWORD*)pSdoComCon->pData));
 
                     // inc transaction id
-                    pSdoComCon->m_bTransactionId++;
+                    pSdoComCon->transactionId++;
                     // call callback of application
-                    pSdoComCon->m_dwLastAbortCode = *((DWORD*)pSdoComCon->m_pData);
+                    pSdoComCon->lastAbortCode = *((DWORD*)pSdoComCon->pData);
                     Ret = transferFinished(SdoComCon_p, pSdoComCon, kEplSdoComTransferTxAborted);
 
                     break;
                 }
 
-                case kEplSdoComConEventInitError:
-                case kEplSdoComConEventTimeout:
+                case kSdoComConEventInitError:
+                case kSdoComConEventTimeout:
                 {
                     // close sequence layer handle
-                    Ret = sdoseq_deleteCon(pSdoComCon->m_SdoSeqConHdl);
-                    pSdoComCon->m_SdoSeqConHdl |= SDO_SEQ_INVALID_HDL;
+                    Ret = sdoseq_deleteCon(pSdoComCon->sdoSeqConHdl);
+                    pSdoComCon->sdoSeqConHdl |= SDO_SEQ_INVALID_HDL;
                     // change state
-                    pSdoComCon->m_SdoComState = kEplSdoComStateClientWaitInit;
+                    pSdoComCon->sdoComState = kSdoComStateClientWaitInit;
                     // call callback of application
-                    pSdoComCon->m_dwLastAbortCode = EPL_SDOAC_TIME_OUT;
+                    pSdoComCon->lastAbortCode = EPL_SDOAC_TIME_OUT;
                     Ret = transferFinished(SdoComCon_p, pSdoComCon, kEplSdoComTransferLowerLayerAbort);
 
                     break;
                 }
 
-                case kEplSdoComConEventTransferAbort:
+                case kSdoComConEventTransferAbort:
                 {
                     // change state
-                    pSdoComCon->m_SdoComState = kEplSdoComStateClientWaitInit;
+                    pSdoComCon->sdoComState = kSdoComStateClientWaitInit;
                     // call callback of application
-                    pSdoComCon->m_dwLastAbortCode = EPL_SDOAC_TIME_OUT;
+                    pSdoComCon->lastAbortCode = EPL_SDOAC_TIME_OUT;
                     Ret = transferFinished(SdoComCon_p, pSdoComCon, kEplSdoComTransferLowerLayerAbort);
 
                     break;
@@ -1721,15 +1714,15 @@ unsigned int        uiSize;
         }
 
         // process segmented transfer
-        case kEplSdoComStateClientSegmTrans:
+        case kSdoComStateClientSegmTrans:
         {
             // check events
             switch(SdoComConEvent_p)
             {
                 // sned a frame
-                case kEplSdoComConEventSendFirst:
-                case kEplSdoComConEventAckReceived:
-                case kEplSdoComConEventFrameSended:
+                case kSdoComConEventSendFirst:
+                case kSdoComConEventAckReceived:
+                case kSdoComConEventFrameSended:
                 {
                     Ret = clientSend(pSdoComCon);
                     if(Ret != kEplSuccessful)
@@ -1738,15 +1731,15 @@ unsigned int        uiSize;
                     }
 
                     // check if read transfer finished
-                    if((pSdoComCon->m_uiTransSize == 0)
-                        && (pSdoComCon->m_SdoServiceType == kSdoServiceReadByIndex))
+                    if((pSdoComCon->transferSize == 0)
+                        && (pSdoComCon->sdoServiceType == kSdoServiceReadByIndex))
                     {
                         // inc transaction id
-                        pSdoComCon->m_bTransactionId++;
+                        pSdoComCon->transactionId++;
                         // change state
-                        pSdoComCon->m_SdoComState = kEplSdoComStateClientConnected;
+                        pSdoComCon->sdoComState = kSdoComStateClientConnected;
                         // call callback of application
-                        pSdoComCon->m_dwLastAbortCode = 0;
+                        pSdoComCon->lastAbortCode = 0;
                         Ret = transferFinished(SdoComCon_p, pSdoComCon, kEplSdoComTransferFinished);
 
                         goto Exit;
@@ -1756,25 +1749,25 @@ unsigned int        uiSize;
                 }
 
                 // frame received
-                case kEplSdoComConEventRec:
+                case kSdoComConEventRec:
                 {
                     // check if the frame is a response
                     bFlag = AmiGetByteFromLe(&pAsySdoCom_p->m_le_bFlags);
-                    if (((bFlag & 0x80) != 0) && (AmiGetByteFromLe(&pAsySdoCom_p->m_le_bTransactionId) == pSdoComCon->m_bTransactionId))
+                    if (((bFlag & 0x80) != 0) && (AmiGetByteFromLe(&pAsySdoCom_p->m_le_bTransactionId) == pSdoComCon->transactionId))
                     {
                         // check if abort or not
                         if((bFlag & 0x40) != 0)
                         {
                             // send acknowledge without any Command layer data
-                            Ret = sdoseq_sendData(pSdoComCon->m_SdoSeqConHdl,
+                            Ret = sdoseq_sendData(pSdoComCon->sdoSeqConHdl,
                                                                     0,
                                                                     (tEplFrame*)NULL);
                             // inc transaction id
-                            pSdoComCon->m_bTransactionId++;
+                            pSdoComCon->transactionId++;
                             // change state
-                            pSdoComCon->m_SdoComState = kEplSdoComStateClientConnected;
+                            pSdoComCon->sdoComState = kSdoComStateClientConnected;
                             // save abort code
-                            pSdoComCon->m_dwLastAbortCode = AmiGetDwordFromLe(&pAsySdoCom_p->m_le_abCommandData[0]);
+                            pSdoComCon->lastAbortCode = AmiGetDwordFromLe(&pAsySdoCom_p->m_le_abCommandData[0]);
                             // call callback of application
                             Ret = transferFinished(SdoComCon_p, pSdoComCon, kEplSdoComTransferRxAborted);
 
@@ -1786,18 +1779,18 @@ unsigned int        uiSize;
                             Ret = clientProcessFrame(SdoComCon_p, pAsySdoCom_p);
 
                             // check if transfer ready
-                            if(pSdoComCon->m_uiTransSize == 0)
+                            if(pSdoComCon->transferSize == 0)
                             {
                                 // send acknowledge without any Command layer data
-                                Ret = sdoseq_sendData(pSdoComCon->m_SdoSeqConHdl,
+                                Ret = sdoseq_sendData(pSdoComCon->sdoSeqConHdl,
                                                                         0,
                                                                         (tEplFrame*)NULL);
                                 // inc transaction id
-                                pSdoComCon->m_bTransactionId++;
+                                pSdoComCon->transactionId++;
                                 // change state
-                                pSdoComCon->m_SdoComState = kEplSdoComStateClientConnected;
+                                pSdoComCon->sdoComState = kSdoComStateClientConnected;
                                 // call callback of application
-                                pSdoComCon->m_dwLastAbortCode = 0;
+                                pSdoComCon->lastAbortCode = 0;
                                 Ret = transferFinished(SdoComCon_p, pSdoComCon, kEplSdoComTransferFinished);
 
                             }
@@ -1807,61 +1800,61 @@ unsigned int        uiSize;
                     break;
                 }
 
-                // connection closed event go back to kEplSdoComStateClientWaitInit
-                case kEplSdoComConEventConClosed:
+                // connection closed event go back to kSdoComStateClientWaitInit
+                case kSdoComConEventConClosed:
                 {   // connection closed by communication partner
                     // close sequence layer handle
-                    Ret = sdoseq_deleteCon(pSdoComCon->m_SdoSeqConHdl);
-                    // set handle to invalid and enter kEplSdoComStateClientWaitInit
-                    pSdoComCon->m_SdoSeqConHdl |= SDO_SEQ_INVALID_HDL;
+                    Ret = sdoseq_deleteCon(pSdoComCon->sdoSeqConHdl);
+                    // set handle to invalid and enter kSdoComStateClientWaitInit
+                    pSdoComCon->sdoSeqConHdl |= SDO_SEQ_INVALID_HDL;
                     // change state
-                    pSdoComCon->m_SdoComState = kEplSdoComStateClientWaitInit;
+                    pSdoComCon->sdoComState = kSdoComStateClientWaitInit;
                     // inc transaction id
-                    pSdoComCon->m_bTransactionId++;
+                    pSdoComCon->transactionId++;
                     // call callback of application
-                    pSdoComCon->m_dwLastAbortCode = 0;
+                    pSdoComCon->lastAbortCode = 0;
                     Ret = transferFinished(SdoComCon_p, pSdoComCon, kEplSdoComTransferFinished);
 
                     break;
                 }
 
                 // abort to send from higher layer
-                case kEplSdoComConEventAbort:
+                case kSdoComConEventAbort:
                 {
-                    clientSendAbort(pSdoComCon,*((DWORD*)pSdoComCon->m_pData));
+                    clientSendAbort(pSdoComCon,*((DWORD*)pSdoComCon->pData));
 
                     // inc transaction id
-                    pSdoComCon->m_bTransactionId++;
+                    pSdoComCon->transactionId++;
                     // change state
-                    pSdoComCon->m_SdoComState = kEplSdoComStateClientConnected;
+                    pSdoComCon->sdoComState = kSdoComStateClientConnected;
                     // call callback of application
-                    pSdoComCon->m_dwLastAbortCode = *((DWORD*)pSdoComCon->m_pData);
+                    pSdoComCon->lastAbortCode = *((DWORD*)pSdoComCon->pData);
                     Ret = transferFinished(SdoComCon_p, pSdoComCon, kEplSdoComTransferTxAborted);
 
                     break;
                 }
 
-                case kEplSdoComConEventInitError:
-                case kEplSdoComConEventTimeout:
+                case kSdoComConEventInitError:
+                case kSdoComConEventTimeout:
                 {
                     // close sequence layer handle
-                    Ret = sdoseq_deleteCon(pSdoComCon->m_SdoSeqConHdl);
-                    pSdoComCon->m_SdoSeqConHdl |= SDO_SEQ_INVALID_HDL;
+                    Ret = sdoseq_deleteCon(pSdoComCon->sdoSeqConHdl);
+                    pSdoComCon->sdoSeqConHdl |= SDO_SEQ_INVALID_HDL;
                     // change state
-                    pSdoComCon->m_SdoComState = kEplSdoComStateClientWaitInit;
+                    pSdoComCon->sdoComState = kSdoComStateClientWaitInit;
                     // call callback of application
-                    pSdoComCon->m_dwLastAbortCode = EPL_SDOAC_TIME_OUT;
+                    pSdoComCon->lastAbortCode = EPL_SDOAC_TIME_OUT;
                     Ret = transferFinished(SdoComCon_p, pSdoComCon, kEplSdoComTransferLowerLayerAbort);
 
                     break;
                 }
 
-                case kEplSdoComConEventTransferAbort:
+                case kSdoComConEventTransferAbort:
                 {
                     // change state
-                    pSdoComCon->m_SdoComState = kEplSdoComStateClientWaitInit;
+                    pSdoComCon->sdoComState = kSdoComStateClientWaitInit;
                     // call callback of application
-                    pSdoComCon->m_dwLastAbortCode = EPL_SDOAC_TIME_OUT;
+                    pSdoComCon->lastAbortCode = EPL_SDOAC_TIME_OUT;
                     Ret = transferFinished(SdoComCon_p, pSdoComCon, kEplSdoComTransferLowerLayerAbort);
 
                     break;
@@ -1877,7 +1870,7 @@ unsigned int        uiSize;
         }
 #endif // endo of #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOC)) != 0)
 
-    }// end of switch(pSdoComCon->m_SdoComState)
+    }// end of switch(pSdoComCon->sdoComState)
 
 
 
@@ -1888,7 +1881,7 @@ Exit:
 #if defined(WIN32) || defined(_WIN32)
     // leave critical section for process function
     EPL_DBGLVL_SDO_TRACE("\n\tLeaveCriticalSection processState\n\n");
-    LeaveCriticalSection(SdoComInstance_g.m_pCriticalSection);
+    LeaveCriticalSection(sdoComInstance_l.pCriticalSection);
 
 #endif
 
@@ -1915,7 +1908,7 @@ Exit:
 //
 //---------------------------------------------------------------------------
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOS)) != 0)
-static tEplKernel serverInitReadByIndex(tEplSdoComCon*     pSdoComCon_p,
+static tEplKernel serverInitReadByIndex(tSdoComCon*     pSdoComCon_p,
                                          tAsySdoCom*     pAsySdoCom_p)
 {
 tEplKernel      Ret;
@@ -1941,22 +1934,22 @@ DWORD           dwAbortCode;
     {   // subentry doesn't exist
         dwAbortCode = EPL_SDOAC_SUB_INDEX_NOT_EXIST;
         // send abort
-        pSdoComCon_p->m_pData = (BYTE*)&dwAbortCode;
+        pSdoComCon_p->pData = (BYTE*)&dwAbortCode;
         Ret = serverSendFrame(pSdoComCon_p,
                                     uiIndex,
                                     uiSubindex,
-                                    kEplSdoComSendTypeAbort);
+                                    kSdoComSendTypeAbort);
         goto Exit;
     }
     else if(Ret != kEplSuccessful)
     {   // entry doesn't exist
         dwAbortCode = EPL_SDOAC_OBJECT_NOT_EXIST;
         // send abort
-        pSdoComCon_p->m_pData = (BYTE*)&dwAbortCode;
+        pSdoComCon_p->pData = (BYTE*)&dwAbortCode;
         Ret = serverSendFrame(pSdoComCon_p,
                                     uiIndex,
                                     uiSubindex,
-                                    kEplSdoComSendTypeAbort);
+                                    kSdoComSendTypeAbort);
         goto Exit;
     }
 
@@ -1975,47 +1968,47 @@ DWORD           dwAbortCode;
             dwAbortCode = EPL_SDOAC_UNSUPPORTED_ACCESS;
         }
         // send abort
-        pSdoComCon_p->m_pData = (BYTE*)&dwAbortCode;
+        pSdoComCon_p->pData = (BYTE*)&dwAbortCode;
         Ret = serverSendFrame(pSdoComCon_p,
                                     uiIndex,
                                     uiSubindex,
-                                    kEplSdoComSendTypeAbort);
+                                    kSdoComSendTypeAbort);
         goto Exit;
     }
 
     // save service
-    pSdoComCon_p->m_SdoServiceType = kSdoServiceReadByIndex;
+    pSdoComCon_p->sdoServiceType = kSdoServiceReadByIndex;
 
     // get size of object to see iof segmented or expedited transfer
     EntrySize = obd_getDataSize(uiIndex, uiSubindex);
     if(EntrySize > SDO_MAX_SEGMENT_SIZE)
     {   // segmented transfer
-        pSdoComCon_p->m_SdoTransType = kSdoTransSegmented;
+        pSdoComCon_p->sdoTransferType = kSdoTransSegmented;
         // get pointer to object-entry data
-        pSdoComCon_p->m_pData = obd_getObjectDataPtr(uiIndex, uiSubindex);
+        pSdoComCon_p->pData = obd_getObjectDataPtr(uiIndex, uiSubindex);
     }
     else
     {   // expedited transfer
-        pSdoComCon_p->m_SdoTransType = kSdoTransExpedited;
+        pSdoComCon_p->sdoTransferType = kSdoTransExpedited;
     }
 
-    pSdoComCon_p->m_uiTransSize = EntrySize;
-    pSdoComCon_p->m_uiTransferredByte = 0;
+    pSdoComCon_p->transferSize = EntrySize;
+    pSdoComCon_p->transferredBytes = 0;
 
     Ret = serverSendFrame(pSdoComCon_p,
                                     uiIndex,
                                     uiSubindex,
-                                    kEplSdoComSendTypeRes);
+                                    kSdoComSendTypeRes);
     if(Ret != kEplSuccessful)
     {
         // error -> abort
         dwAbortCode = EPL_SDOAC_GENERAL_ERROR;
         // send abort
-        pSdoComCon_p->m_pData = (BYTE*)&dwAbortCode;
+        pSdoComCon_p->pData = (BYTE*)&dwAbortCode;
         Ret = serverSendFrame(pSdoComCon_p,
                                     uiIndex,
                                     uiSubindex,
-                                    kEplSdoComSendTypeAbort);
+                                    kSdoComSendTypeAbort);
         goto Exit;
     }
 
@@ -2044,10 +2037,10 @@ Exit:
 //
 //---------------------------------------------------------------------------
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOS)) != 0)
-static tEplKernel serverSendFrame(tEplSdoComCon*     pSdoComCon_p,
+static tEplKernel serverSendFrame(tSdoComCon*     pSdoComCon_p,
                                            unsigned int       uiIndex_p,
                                            unsigned int       uiSubIndex_p,
-                                           tEplSdoComSendType SendType_p)
+                                           tSdoComSendType SendType_p)
 {
 tEplKernel      Ret;
 BYTE            abFrame[SDO_MAX_FRAME_SIZE];
@@ -2065,8 +2058,8 @@ BYTE            bFlag;
     // build generic part of frame
     // get pointer to command layerpart of frame
     pCommandFrame = &pFrame->m_Data.m_Asnd.m_Payload.m_SdoSequenceFrame.m_le_abSdoSeqPayload;
-    AmiSetByteToLe(&pCommandFrame->m_le_bCommandId, pSdoComCon_p->m_SdoServiceType);
-    AmiSetByteToLe(&pCommandFrame->m_le_bTransactionId, pSdoComCon_p->m_bTransactionId);
+    AmiSetByteToLe(&pCommandFrame->m_le_bCommandId, pSdoComCon_p->sdoServiceType);
+    AmiSetByteToLe(&pCommandFrame->m_le_bTransactionId, pSdoComCon_p->transactionId);
 
     // set size to header size
     uiSizeOfFrame = 8;
@@ -2075,7 +2068,7 @@ BYTE            bFlag;
     switch(SendType_p)
     {
         // requestframe to send
-        case kEplSdoComSendTypeReq:
+        case kSdoComSendTypeReq:
         {
             // nothing to do for server
             //-> error
@@ -2084,13 +2077,13 @@ BYTE            bFlag;
         }
 
         // response without data to send
-        case kEplSdoComSendTypeAckRes:
+        case kSdoComSendTypeAckRes:
         {
             // set response flag
             AmiSetByteToLe(&pCommandFrame->m_le_bFlags,  0x80);
 
             // send frame
-            Ret = sdoseq_sendData(pSdoComCon_p->m_SdoSeqConHdl,
+            Ret = sdoseq_sendData(pSdoComCon_p->sdoSeqConHdl,
                                             uiSizeOfFrame,
                                             pFrame);
 
@@ -2098,7 +2091,7 @@ BYTE            bFlag;
         }
 
         // responsframe to send
-        case kEplSdoComSendTypeRes:
+        case kSdoComSendTypeRes:
         {
             // set response flag
             bFlag = AmiGetByteFromLe( &pCommandFrame->m_le_bFlags);
@@ -2106,65 +2099,65 @@ BYTE            bFlag;
             AmiSetByteToLe(&pCommandFrame->m_le_bFlags,  bFlag);
 
             // check type of resonse
-            if(pSdoComCon_p->m_SdoTransType == kSdoTransExpedited)
+            if(pSdoComCon_p->sdoTransferType == kSdoTransExpedited)
             {   // Expedited transfer
                 // copy data in frame
                 Ret = obd_readEntryToLe(uiIndex_p,
                                         uiSubIndex_p,
                                         &pCommandFrame->m_le_abCommandData[0],
-                                        (tObdSize*)&pSdoComCon_p->m_uiTransSize);
+                                        (tObdSize*)&pSdoComCon_p->transferSize);
                 if(Ret != kEplSuccessful)
                 {
                     goto Exit;
                 }
 
                 // set size of frame
-                AmiSetWordToLe(&pCommandFrame->m_le_wSegmentSize, (WORD) pSdoComCon_p->m_uiTransSize);
+                AmiSetWordToLe(&pCommandFrame->m_le_wSegmentSize, (WORD) pSdoComCon_p->transferSize);
 
                 // correct byte-counter
-                uiSizeOfFrame += pSdoComCon_p->m_uiTransSize;
-                pSdoComCon_p->m_uiTransferredByte += pSdoComCon_p->m_uiTransSize;
-                pSdoComCon_p->m_uiTransSize = 0;
+                uiSizeOfFrame += pSdoComCon_p->transferSize;
+                pSdoComCon_p->transferredBytes += pSdoComCon_p->transferSize;
+                pSdoComCon_p->transferSize = 0;
 
 
                 // send frame
-                uiSizeOfFrame += pSdoComCon_p->m_uiTransSize;
-                Ret = sdoseq_sendData(pSdoComCon_p->m_SdoSeqConHdl,
+                uiSizeOfFrame += pSdoComCon_p->transferSize;
+                Ret = sdoseq_sendData(pSdoComCon_p->sdoSeqConHdl,
                                             uiSizeOfFrame,
                                             pFrame);
             }
-            else if(pSdoComCon_p->m_SdoTransType == kSdoTransSegmented)
+            else if(pSdoComCon_p->sdoTransferType == kSdoTransSegmented)
             {   // segmented transfer
                 // distinguish between init, segment and complete
-                if(pSdoComCon_p->m_uiTransferredByte == 0)
+                if(pSdoComCon_p->transferredBytes == 0)
                 {   // init
                     // set init flag
                     bFlag = AmiGetByteFromLe( &pCommandFrame->m_le_bFlags);
                     bFlag |= 0x10;
                     AmiSetByteToLe(&pCommandFrame->m_le_bFlags,  bFlag);
                     // init data size in variable header, which includes itself
-                    AmiSetDwordToLe(&pCommandFrame->m_le_abCommandData[0], pSdoComCon_p->m_uiTransSize + 4);
+                    AmiSetDwordToLe(&pCommandFrame->m_le_abCommandData[0], pSdoComCon_p->transferSize + 4);
                     // copy data in frame
-                    EPL_MEMCPY(&pCommandFrame->m_le_abCommandData[4],pSdoComCon_p->m_pData, (SDO_MAX_SEGMENT_SIZE-4));
+                    EPL_MEMCPY(&pCommandFrame->m_le_abCommandData[4],pSdoComCon_p->pData, (SDO_MAX_SEGMENT_SIZE-4));
 
                     // correct byte-counter
-                    pSdoComCon_p->m_uiTransSize -= (SDO_MAX_SEGMENT_SIZE-4);
-                    pSdoComCon_p->m_uiTransferredByte += (SDO_MAX_SEGMENT_SIZE-4);
+                    pSdoComCon_p->transferSize -= (SDO_MAX_SEGMENT_SIZE-4);
+                    pSdoComCon_p->transferredBytes += (SDO_MAX_SEGMENT_SIZE-4);
                     // move data pointer
-                    pSdoComCon_p->m_pData +=(SDO_MAX_SEGMENT_SIZE-4);
+                    pSdoComCon_p->pData +=(SDO_MAX_SEGMENT_SIZE-4);
 
                     // set segment size
                     AmiSetWordToLe(&pCommandFrame->m_le_wSegmentSize, SDO_MAX_SEGMENT_SIZE);
 
                     // send frame
                     uiSizeOfFrame += SDO_MAX_SEGMENT_SIZE;
-                    Ret = sdoseq_sendData(pSdoComCon_p->m_SdoSeqConHdl,
+                    Ret = sdoseq_sendData(pSdoComCon_p->sdoSeqConHdl,
                                                 uiSizeOfFrame,
                                                 pFrame);
 
                 }
-                else if((pSdoComCon_p->m_uiTransferredByte > 0)
-                    &&(pSdoComCon_p->m_uiTransSize > SDO_MAX_SEGMENT_SIZE))
+                else if((pSdoComCon_p->transferredBytes > 0)
+                    &&(pSdoComCon_p->transferSize > SDO_MAX_SEGMENT_SIZE))
                 {   // segment
                     // set segment flag
                     bFlag = AmiGetByteFromLe( &pCommandFrame->m_le_bFlags);
@@ -2172,27 +2165,27 @@ BYTE            bFlag;
                     AmiSetByteToLe(&pCommandFrame->m_le_bFlags,  bFlag);
 
                     // copy data in frame
-                    EPL_MEMCPY(&pCommandFrame->m_le_abCommandData[0],pSdoComCon_p->m_pData, SDO_MAX_SEGMENT_SIZE);
+                    EPL_MEMCPY(&pCommandFrame->m_le_abCommandData[0],pSdoComCon_p->pData, SDO_MAX_SEGMENT_SIZE);
 
                     // correct byte-counter
-                    pSdoComCon_p->m_uiTransSize -= SDO_MAX_SEGMENT_SIZE;
-                    pSdoComCon_p->m_uiTransferredByte += SDO_MAX_SEGMENT_SIZE;
+                    pSdoComCon_p->transferSize -= SDO_MAX_SEGMENT_SIZE;
+                    pSdoComCon_p->transferredBytes += SDO_MAX_SEGMENT_SIZE;
                     // move data pointer
-                    pSdoComCon_p->m_pData +=SDO_MAX_SEGMENT_SIZE;
+                    pSdoComCon_p->pData +=SDO_MAX_SEGMENT_SIZE;
 
                     // set segment size
                     AmiSetWordToLe(&pCommandFrame->m_le_wSegmentSize,SDO_MAX_SEGMENT_SIZE);
 
                     // send frame
                     uiSizeOfFrame += SDO_MAX_SEGMENT_SIZE;
-                    Ret = sdoseq_sendData(pSdoComCon_p->m_SdoSeqConHdl,
+                    Ret = sdoseq_sendData(pSdoComCon_p->sdoSeqConHdl,
                                                 uiSizeOfFrame,
                                                 pFrame);
                 }
                 else
                 {
-                    if((pSdoComCon_p->m_uiTransSize == 0)
-                        && (pSdoComCon_p->m_SdoServiceType != kSdoServiceWriteByIndex))
+                    if((pSdoComCon_p->transferSize == 0)
+                        && (pSdoComCon_p->sdoServiceType != kSdoServiceWriteByIndex))
                     {
                         goto Exit;
                     }
@@ -2203,22 +2196,22 @@ BYTE            bFlag;
                     AmiSetByteToLe(&pCommandFrame->m_le_bFlags,  bFlag);
 
                     // copy data in frame
-                    EPL_MEMCPY(&pCommandFrame->m_le_abCommandData[0],pSdoComCon_p->m_pData, pSdoComCon_p->m_uiTransSize);
+                    EPL_MEMCPY(&pCommandFrame->m_le_abCommandData[0],pSdoComCon_p->pData, pSdoComCon_p->transferSize);
 
                     // correct byte-counter
-                    pSdoComCon_p->m_uiTransferredByte += pSdoComCon_p->m_uiTransSize;
+                    pSdoComCon_p->transferredBytes += pSdoComCon_p->transferSize;
 
 
                     // move data pointer
-                    pSdoComCon_p->m_pData +=pSdoComCon_p->m_uiTransSize;
+                    pSdoComCon_p->pData +=pSdoComCon_p->transferSize;
 
                     // set segment size
-                    AmiSetWordToLe(&pCommandFrame->m_le_wSegmentSize, (WORD) pSdoComCon_p->m_uiTransSize);
+                    AmiSetWordToLe(&pCommandFrame->m_le_wSegmentSize, (WORD) pSdoComCon_p->transferSize);
 
                     // send frame
-                    uiSizeOfFrame += pSdoComCon_p->m_uiTransSize;
-                    pSdoComCon_p->m_uiTransSize = 0;
-                    Ret = sdoseq_sendData(pSdoComCon_p->m_SdoSeqConHdl,
+                    uiSizeOfFrame += pSdoComCon_p->transferSize;
+                    pSdoComCon_p->transferSize = 0;
+                    Ret = sdoseq_sendData(pSdoComCon_p->sdoSeqConHdl,
                                                 uiSizeOfFrame,
                                                 pFrame);
                 }
@@ -2227,7 +2220,7 @@ BYTE            bFlag;
             break;
         }
         // abort to send
-        case kEplSdoComSendTypeAbort:
+        case kSdoComSendTypeAbort:
         {
             // set response and abort flag
             bFlag = AmiGetByteFromLe( &pCommandFrame->m_le_bFlags);
@@ -2235,18 +2228,18 @@ BYTE            bFlag;
             AmiSetByteToLe(&pCommandFrame->m_le_bFlags,  bFlag);
 
             // copy abortcode to frame
-            AmiSetDwordToLe(&pCommandFrame->m_le_abCommandData[0], *((DWORD*)pSdoComCon_p->m_pData));
+            AmiSetDwordToLe(&pCommandFrame->m_le_abCommandData[0], *((DWORD*)pSdoComCon_p->pData));
 
             // set size of segment
             AmiSetWordToLe(&pCommandFrame->m_le_wSegmentSize, sizeof(DWORD));
 
             // update counter
-            pSdoComCon_p->m_uiTransferredByte = sizeof(DWORD);
-            pSdoComCon_p->m_uiTransSize = 0;
+            pSdoComCon_p->transferredBytes = sizeof(DWORD);
+            pSdoComCon_p->transferSize = 0;
 
             // calc framesize
             uiSizeOfFrame += sizeof(DWORD);
-            Ret = sdoseq_sendData(pSdoComCon_p->m_SdoSeqConHdl,
+            Ret = sdoseq_sendData(pSdoComCon_p->sdoSeqConHdl,
                                                 uiSizeOfFrame,
                                                 pFrame);
             DEBUG_LVL_25_TRACE("ERROR: SDO Aborted!\n");
@@ -2277,7 +2270,7 @@ Exit:
 //
 //---------------------------------------------------------------------------
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOS)) != 0)
-static tEplKernel serverInitWriteByIndex(tEplSdoComCon*     pSdoComCon_p,
+static tEplKernel serverInitWriteByIndex(tSdoComCon*     pSdoComCon_p,
                                          tAsySdoCom*     pAsySdoCom_p)
 {
 tEplKernel  Ret = kEplSuccessful;
@@ -2294,30 +2287,30 @@ BYTE*           pbSrcData;
     // check if expedited or segmented transfer
     if ((pAsySdoCom_p->m_le_bFlags & 0x30) == 0x10)
     {   // initiate segmented transfer
-        pSdoComCon_p->m_SdoTransType = kSdoTransSegmented;
+        pSdoComCon_p->sdoTransferType = kSdoTransSegmented;
         // get index and subindex
         uiIndex = AmiGetWordFromLe(&pAsySdoCom_p->m_le_abCommandData[4]);
         uiSubindex = AmiGetByteFromLe(&pAsySdoCom_p->m_le_abCommandData[6]);
         // get source-pointer for copy
         pbSrcData = &pAsySdoCom_p->m_le_abCommandData[8];
         // save size
-        pSdoComCon_p->m_uiTransSize = AmiGetDwordFromLe(&pAsySdoCom_p->m_le_abCommandData[0]);
+        pSdoComCon_p->transferSize = AmiGetDwordFromLe(&pAsySdoCom_p->m_le_abCommandData[0]);
         // subtract header
-        pSdoComCon_p->m_uiTransSize -= 8;
+        pSdoComCon_p->transferSize -= 8;
 
     }
     else if ((pAsySdoCom_p->m_le_bFlags & 0x30) == 0x00)
     {   // expedited transfer
-        pSdoComCon_p->m_SdoTransType = kSdoTransExpedited;
+        pSdoComCon_p->sdoTransferType = kSdoTransExpedited;
         // get index and subindex
         uiIndex = AmiGetWordFromLe(&pAsySdoCom_p->m_le_abCommandData[0]);
         uiSubindex = AmiGetByteFromLe(&pAsySdoCom_p->m_le_abCommandData[2]);
         // get source-pointer for copy
         pbSrcData = &pAsySdoCom_p->m_le_abCommandData[4];
         // save size
-        pSdoComCon_p->m_uiTransSize = AmiGetWordFromLe(&pAsySdoCom_p->m_le_wSegmentSize);
+        pSdoComCon_p->transferSize = AmiGetWordFromLe(&pAsySdoCom_p->m_le_wSegmentSize);
         // subtract header
-        pSdoComCon_p->m_uiTransSize -= 4;
+        pSdoComCon_p->transferSize -= 4;
 
     }
     else
@@ -2331,27 +2324,27 @@ BYTE*           pbSrcData;
     Ret = obd_getAccessType(uiIndex, uiSubindex, &AccessType);
     if (Ret == kEplObdSubindexNotExist)
     {   // subentry doesn't exist
-        pSdoComCon_p->m_dwLastAbortCode = EPL_SDOAC_SUB_INDEX_NOT_EXIST;
+        pSdoComCon_p->lastAbortCode = EPL_SDOAC_SUB_INDEX_NOT_EXIST;
         // send abort
         // d.k. This is wrong: k.t. not needed send abort on end of write
-        /*pSdoComCon_p->m_pData = (BYTE*)pSdoComCon_p->m_dwLastAbortCode;
+        /*pSdoComCon_p->pData = (BYTE*)pSdoComCon_p->lastAbortCode;
         Ret = serverSendFrame(pSdoComCon_p,
                                     uiIndex,
                                     uiSubindex,
-                                    kEplSdoComSendTypeAbort);*/
+                                    kSdoComSendTypeAbort);*/
         goto Abort;
     }
     else if(Ret != kEplSuccessful)
     {   // entry doesn't exist
-        pSdoComCon_p->m_dwLastAbortCode = EPL_SDOAC_OBJECT_NOT_EXIST;
+        pSdoComCon_p->lastAbortCode = EPL_SDOAC_OBJECT_NOT_EXIST;
         // send abort
         // d.k. This is wrong: k.t. not needed send abort on end of write
         /*
-        pSdoComCon_p->m_pData = (BYTE*)&dwAbortCode;
+        pSdoComCon_p->pData = (BYTE*)&dwAbortCode;
         Ret = serverSendFrame(pSdoComCon_p,
                                     uiIndex,
                                     uiSubindex,
-                                    kEplSdoComSendTypeAbort);*/
+                                    kSdoComSendTypeAbort);*/
         goto Abort;
     }
 
@@ -2362,36 +2355,36 @@ BYTE*           pbSrcData;
         if((AccessType & kObdAccRead) != 0)
         {
             // entry write a read only object
-            pSdoComCon_p->m_dwLastAbortCode = EPL_SDOAC_WRITE_TO_READ_ONLY_OBJ;
+            pSdoComCon_p->lastAbortCode = EPL_SDOAC_WRITE_TO_READ_ONLY_OBJ;
         }
         else
         {
-            pSdoComCon_p->m_dwLastAbortCode = EPL_SDOAC_UNSUPPORTED_ACCESS;
+            pSdoComCon_p->lastAbortCode = EPL_SDOAC_UNSUPPORTED_ACCESS;
         }
         // send abort
         // d.k. This is wrong: k.t. not needed send abort on end of write
-        /*pSdoComCon_p->m_pData = (BYTE*)&dwAbortCode;
+        /*pSdoComCon_p->pData = (BYTE*)&dwAbortCode;
         Ret = serverSendFrame(pSdoComCon_p,
                                     uiIndex,
                                     uiSubindex,
-                                    kEplSdoComSendTypeAbort);*/
+                                    kSdoComSendTypeAbort);*/
         goto Abort;
     }
 
     // save service
-    pSdoComCon_p->m_SdoServiceType = kSdoServiceWriteByIndex;
+    pSdoComCon_p->sdoServiceType = kSdoServiceWriteByIndex;
 
-    pSdoComCon_p->m_uiTransferredByte = 0;
+    pSdoComCon_p->transferredBytes = 0;
 
     // write data to OD
-    if(pSdoComCon_p->m_SdoTransType == kSdoTransExpedited)
+    if(pSdoComCon_p->sdoTransferType == kSdoTransExpedited)
     {   // expedited transfer
         // size checking is done by obd_writeEntryFromLe()
 
         Ret = obd_writeEntryFromLe(uiIndex,
                                     uiSubindex,
                                     pbSrcData,
-                                    pSdoComCon_p->m_uiTransSize);
+                                    pSdoComCon_p->transferSize);
         switch (Ret)
         {
             case kEplSuccessful:
@@ -2401,35 +2394,35 @@ BYTE*           pbSrcData;
 
             case kEplObdAccessViolation:
             {
-                pSdoComCon_p->m_dwLastAbortCode = EPL_SDOAC_UNSUPPORTED_ACCESS;
+                pSdoComCon_p->lastAbortCode = EPL_SDOAC_UNSUPPORTED_ACCESS;
                 // send abort
                 goto Abort;
             }
 
             case kEplObdValueLengthError:
             {
-                pSdoComCon_p->m_dwLastAbortCode = EPL_SDOAC_DATA_TYPE_LENGTH_NOT_MATCH;
+                pSdoComCon_p->lastAbortCode = EPL_SDOAC_DATA_TYPE_LENGTH_NOT_MATCH;
                 // send abort
                 goto Abort;
             }
 
             case kEplObdValueTooHigh:
             {
-                pSdoComCon_p->m_dwLastAbortCode = EPL_SDOAC_VALUE_RANGE_TOO_HIGH;
+                pSdoComCon_p->lastAbortCode = EPL_SDOAC_VALUE_RANGE_TOO_HIGH;
                 // send abort
                 goto Abort;
             }
 
             case kEplObdValueTooLow:
             {
-                pSdoComCon_p->m_dwLastAbortCode = EPL_SDOAC_VALUE_RANGE_TOO_LOW;
+                pSdoComCon_p->lastAbortCode = EPL_SDOAC_VALUE_RANGE_TOO_LOW;
                 // send abort
                 goto Abort;
             }
 
             default:
             {
-                pSdoComCon_p->m_dwLastAbortCode = EPL_SDOAC_GENERAL_ERROR;
+                pSdoComCon_p->lastAbortCode = EPL_SDOAC_GENERAL_ERROR;
                 // send abort
                 goto Abort;
             }
@@ -2438,9 +2431,9 @@ BYTE*           pbSrcData;
         Ret = serverSendFrame(pSdoComCon_p,
                                         0,
                                         0,
-                                        kEplSdoComSendTypeAckRes);
+                                        kSdoComSendTypeAckRes);
 
-        pSdoComCon_p->m_uiTransSize = 0;
+        pSdoComCon_p->transferSize = 0;
         goto Exit;
     }
     else
@@ -2450,16 +2443,16 @@ BYTE*           pbSrcData;
         // d.k. no one calls the user OD callback function
 
         EntrySize = obd_getDataSize(uiIndex, uiSubindex);
-        if(EntrySize < pSdoComCon_p->m_uiTransSize)
+        if(EntrySize < pSdoComCon_p->transferSize)
         {   // parameter too big
-            pSdoComCon_p->m_dwLastAbortCode = EPL_SDOAC_DATA_TYPE_LENGTH_TOO_HIGH;
+            pSdoComCon_p->lastAbortCode = EPL_SDOAC_DATA_TYPE_LENGTH_TOO_HIGH;
             // send abort
             // d.k. This is wrong: k.t. not needed send abort on end of write
-            /*pSdoComCon_p->m_pData = (BYTE*)&dwAbortCode;
+            /*pSdoComCon_p->pData = (BYTE*)&dwAbortCode;
             Ret = serverSendFrame(pSdoComCon_p,
                                         uiIndex,
                                         uiSubindex,
-                                        kEplSdoComSendTypeAbort);*/
+                                        kSdoComSendTypeAbort);*/
             goto Abort;
         }
 
@@ -2467,51 +2460,51 @@ BYTE*           pbSrcData;
         // eleminate header (Command header (8) + variable part (4) + Command header (4))
         uiBytesToTransfer -= 16;
         // get pointer to object entry
-        pSdoComCon_p->m_pData = obd_getObjectDataPtr(uiIndex,
+        pSdoComCon_p->pData = obd_getObjectDataPtr(uiIndex,
                                                         uiSubindex);
-        if(pSdoComCon_p->m_pData == NULL)
+        if(pSdoComCon_p->pData == NULL)
         {
-            pSdoComCon_p->m_dwLastAbortCode = EPL_SDOAC_GENERAL_ERROR;
+            pSdoComCon_p->lastAbortCode = EPL_SDOAC_GENERAL_ERROR;
             // send abort
             // d.k. This is wrong: k.t. not needed send abort on end of write
-/*            pSdoComCon_p->m_pData = (BYTE*)&pSdoComCon_p->m_dwLastAbortCode;
+/*            pSdoComCon_p->pData = (BYTE*)&pSdoComCon_p->lastAbortCode;
             Ret = serverSendFrame(pSdoComCon_p,
                                         uiIndex,
                                         uiSubindex,
-                                        kEplSdoComSendTypeAbort);*/
+                                        kSdoComSendTypeAbort);*/
             goto Abort;
         }
 
         // copy data
-        EPL_MEMCPY(pSdoComCon_p->m_pData, pbSrcData, uiBytesToTransfer);
+        EPL_MEMCPY(pSdoComCon_p->pData, pbSrcData, uiBytesToTransfer);
 
         // update internal counter
-        pSdoComCon_p->m_uiTransferredByte = uiBytesToTransfer;
-        pSdoComCon_p->m_uiTransSize -= uiBytesToTransfer;
+        pSdoComCon_p->transferredBytes = uiBytesToTransfer;
+        pSdoComCon_p->transferSize -= uiBytesToTransfer;
 
         // update target pointer
-        (/*(BYTE*)*/pSdoComCon_p->m_pData) += uiBytesToTransfer;
+        (/*(BYTE*)*/pSdoComCon_p->pData) += uiBytesToTransfer;
 
         // send acknowledge without any Command layer data
-        Ret = sdoseq_sendData(pSdoComCon_p->m_SdoSeqConHdl,
+        Ret = sdoseq_sendData(pSdoComCon_p->sdoSeqConHdl,
                                                 0,
                                                 (tEplFrame*)NULL);
         goto Exit;
     }
 
 Abort:
-    if(pSdoComCon_p->m_dwLastAbortCode != 0)
+    if(pSdoComCon_p->lastAbortCode != 0)
     {
         // send abort
-        pSdoComCon_p->m_pData = (BYTE*)&pSdoComCon_p->m_dwLastAbortCode;
+        pSdoComCon_p->pData = (BYTE*)&pSdoComCon_p->lastAbortCode;
         Ret = serverSendFrame(pSdoComCon_p,
                                     uiIndex,
                                     uiSubindex,
-                                    kEplSdoComSendTypeAbort);
+                                    kSdoComSendTypeAbort);
 
         // reset abort code
-        pSdoComCon_p->m_dwLastAbortCode = 0;
-        pSdoComCon_p->m_uiTransSize = 0;
+        pSdoComCon_p->lastAbortCode = 0;
+        pSdoComCon_p->transferSize = 0;
         goto Exit;
     }
 
@@ -2537,7 +2530,7 @@ Exit:
 //
 //---------------------------------------------------------------------------
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOC)) != 0)
-static tEplKernel clientSend(tEplSdoComCon* pSdoComCon_p)
+static tEplKernel clientSend(tSdoComCon* pSdoComCon_p)
 {
 tEplKernel      Ret;
 BYTE            abFrame[SDO_MAX_FRAME_SIZE];
@@ -2556,50 +2549,50 @@ BYTE*           pbPayload;
     // build generic part of frame
     // get pointer to command layerpart of frame
     pCommandFrame = &pFrame->m_Data.m_Asnd.m_Payload.m_SdoSequenceFrame.m_le_abSdoSeqPayload;
-    AmiSetByteToLe( &pCommandFrame->m_le_bCommandId, pSdoComCon_p->m_SdoServiceType);
-    AmiSetByteToLe( &pCommandFrame->m_le_bTransactionId, pSdoComCon_p->m_bTransactionId);
+    AmiSetByteToLe( &pCommandFrame->m_le_bCommandId, pSdoComCon_p->sdoServiceType);
+    AmiSetByteToLe( &pCommandFrame->m_le_bTransactionId, pSdoComCon_p->transactionId);
 
     // set size constant part of header
     uiSizeOfFrame = 8;
 
     // check if first frame to send -> command header needed
-    if (pSdoComCon_p->m_uiTransSize > 0)
+    if (pSdoComCon_p->transferSize > 0)
     {
-        if (pSdoComCon_p->m_uiTransferredByte == 0)
+        if (pSdoComCon_p->transferredBytes == 0)
         {   // start SDO transfer
             // check if segmented or expedited transfer
             // only for write commands
-            switch(pSdoComCon_p->m_SdoServiceType)
+            switch(pSdoComCon_p->sdoServiceType)
             {
                 case kSdoServiceReadByIndex:
                 {   // first frame of read access always expedited
-                    pSdoComCon_p->m_SdoTransType = kSdoTransExpedited;
+                    pSdoComCon_p->sdoTransferType = kSdoTransExpedited;
                     pbPayload = &pCommandFrame->m_le_abCommandData[0];
                     // fill rest of header
                     AmiSetWordToLe( &pCommandFrame->m_le_wSegmentSize, 4);
 
                     // create command header
-                    AmiSetWordToLe(pbPayload, (WORD)pSdoComCon_p->m_uiTargetIndex);
+                    AmiSetWordToLe(pbPayload, (WORD)pSdoComCon_p->targetIndex);
                     pbPayload += 2;
-                    AmiSetByteToLe(pbPayload, (BYTE)pSdoComCon_p->m_uiTargetSubIndex);
+                    AmiSetByteToLe(pbPayload, (BYTE)pSdoComCon_p->targetSubIndex);
                     // calc size
                     uiSizeOfFrame += 4;
 
-                    // set pSdoComCon_p->m_uiTransferredByte to one
-                    pSdoComCon_p->m_uiTransferredByte = 1;
+                    // set pSdoComCon_p->transferredBytes to one
+                    pSdoComCon_p->transferredBytes = 1;
                     break;
                 }
 
                 case kSdoServiceWriteByIndex:
                 {
-                    if(pSdoComCon_p->m_uiTransSize > (SDO_MAX_SEGMENT_SIZE - 4))
+                    if(pSdoComCon_p->transferSize > (SDO_MAX_SEGMENT_SIZE - 4))
                     {   // segmented transfer
                         // -> variable part of header needed
                         // save that transfer is segmented
-                        pSdoComCon_p->m_SdoTransType = kSdoTransSegmented;
+                        pSdoComCon_p->sdoTransferType = kSdoTransSegmented;
                         // fill variable part of header
                         // set data size which includes the header
-                        AmiSetDwordToLe( &pCommandFrame->m_le_abCommandData[0], pSdoComCon_p->m_uiTransSize + 8);
+                        AmiSetDwordToLe( &pCommandFrame->m_le_abCommandData[0], pSdoComCon_p->transferSize + 8);
                         // set pointer to real payload
                         pbPayload = &pCommandFrame->m_le_abCommandData[4];
                         // fill rest of header
@@ -2607,43 +2600,43 @@ BYTE*           pbPayload;
                         bFlags = 0x10;
                         AmiSetByteToLe( &pCommandFrame->m_le_bFlags, bFlags);
                         // create command header
-                        AmiSetWordToLe(pbPayload, (WORD) pSdoComCon_p->m_uiTargetIndex);
+                        AmiSetWordToLe(pbPayload, (WORD) pSdoComCon_p->targetIndex);
                         pbPayload += 2;
-                        AmiSetByteToLe(pbPayload, (BYTE)pSdoComCon_p->m_uiTargetSubIndex);
+                        AmiSetByteToLe(pbPayload, (BYTE)pSdoComCon_p->targetSubIndex);
                         // on byte for reserved
                         pbPayload += 2;
                         // calc size
                         uiSizeOfFrame += SDO_MAX_SEGMENT_SIZE;
 
                         // copy payload
-                        EPL_MEMCPY( pbPayload,pSdoComCon_p->m_pData,  (SDO_MAX_SEGMENT_SIZE - 8));
-                        pSdoComCon_p->m_pData += (SDO_MAX_SEGMENT_SIZE - 8);
+                        EPL_MEMCPY( pbPayload,pSdoComCon_p->pData,  (SDO_MAX_SEGMENT_SIZE - 8));
+                        pSdoComCon_p->pData += (SDO_MAX_SEGMENT_SIZE - 8);
                         // correct intern counter
-                        pSdoComCon_p->m_uiTransSize -= (SDO_MAX_SEGMENT_SIZE - 8);
-                        pSdoComCon_p->m_uiTransferredByte = (SDO_MAX_SEGMENT_SIZE - 8);
+                        pSdoComCon_p->transferSize -= (SDO_MAX_SEGMENT_SIZE - 8);
+                        pSdoComCon_p->transferredBytes = (SDO_MAX_SEGMENT_SIZE - 8);
 
                     }
                     else
                     {   // expedited trandsfer
                         // save that transfer is expedited
-                        pSdoComCon_p->m_SdoTransType = kSdoTransExpedited;
+                        pSdoComCon_p->sdoTransferType = kSdoTransExpedited;
                         pbPayload = &pCommandFrame->m_le_abCommandData[0];
 
                         // create command header
-                        AmiSetWordToLe(pbPayload, (WORD) pSdoComCon_p->m_uiTargetIndex);
+                        AmiSetWordToLe(pbPayload, (WORD) pSdoComCon_p->targetIndex);
                         pbPayload += 2;
-                        AmiSetByteToLe(pbPayload, (BYTE)pSdoComCon_p->m_uiTargetSubIndex);
+                        AmiSetByteToLe(pbPayload, (BYTE)pSdoComCon_p->targetSubIndex);
                         // + 2 -> one byte for subindex and one byte reserved
                         pbPayload += 2;
                         // copy data
-                        EPL_MEMCPY( pbPayload,pSdoComCon_p->m_pData,  pSdoComCon_p->m_uiTransSize);
+                        EPL_MEMCPY( pbPayload,pSdoComCon_p->pData,  pSdoComCon_p->transferSize);
                         // calc size
-                        uiSizeOfFrame += (4 + pSdoComCon_p->m_uiTransSize);
+                        uiSizeOfFrame += (4 + pSdoComCon_p->transferSize);
                         // fill rest of header
-                        AmiSetWordToLe( &pCommandFrame->m_le_wSegmentSize, (WORD) (4 + pSdoComCon_p->m_uiTransSize));
+                        AmiSetWordToLe( &pCommandFrame->m_le_wSegmentSize, (WORD) (4 + pSdoComCon_p->transferSize));
 
-                        pSdoComCon_p->m_uiTransferredByte = pSdoComCon_p->m_uiTransSize;
-                        pSdoComCon_p->m_uiTransSize = 0;
+                        pSdoComCon_p->transferredBytes = pSdoComCon_p->transferSize;
+                        pSdoComCon_p->transferSize = 0;
                     }
                     break;
                 }
@@ -2653,20 +2646,20 @@ BYTE*           pbPayload;
                     // invalid service requested
                     Ret = kEplSdoComInvalidServiceType;
                     goto Exit;
-            } // end of switch(pSdoComCon_p->m_SdoServiceType)
+            } // end of switch(pSdoComCon_p->sdoServiceType)
         }
-        else // (pSdoComCon_p->m_uiTransferredByte > 0)
+        else // (pSdoComCon_p->transferredBytes > 0)
         {   // continue SDO transfer
-            switch(pSdoComCon_p->m_SdoServiceType)
+            switch(pSdoComCon_p->sdoServiceType)
             {
                 // for expedited read is nothing to do
                 // -> server sends data
 
                 case kSdoServiceWriteByIndex:
                 {   // send next frame
-                    if(pSdoComCon_p->m_SdoTransType == kSdoTransSegmented)
+                    if(pSdoComCon_p->sdoTransferType == kSdoTransSegmented)
                     {
-                        if(pSdoComCon_p->m_uiTransSize > SDO_MAX_SEGMENT_SIZE)
+                        if(pSdoComCon_p->transferSize > SDO_MAX_SEGMENT_SIZE)
                         {   // next segment
                             pbPayload = &pCommandFrame->m_le_abCommandData[0];
                             // fill rest of header
@@ -2674,11 +2667,11 @@ BYTE*           pbPayload;
                             bFlags = 0x20;
                             AmiSetByteToLe( &pCommandFrame->m_le_bFlags, bFlags);
                             // copy data
-                            EPL_MEMCPY( pbPayload,pSdoComCon_p->m_pData,  SDO_MAX_SEGMENT_SIZE);
-                            pSdoComCon_p->m_pData += SDO_MAX_SEGMENT_SIZE;
+                            EPL_MEMCPY( pbPayload,pSdoComCon_p->pData,  SDO_MAX_SEGMENT_SIZE);
+                            pSdoComCon_p->pData += SDO_MAX_SEGMENT_SIZE;
                             // correct intern counter
-                            pSdoComCon_p->m_uiTransSize -= SDO_MAX_SEGMENT_SIZE;
-                            pSdoComCon_p->m_uiTransferredByte += SDO_MAX_SEGMENT_SIZE;
+                            pSdoComCon_p->transferSize -= SDO_MAX_SEGMENT_SIZE;
+                            pSdoComCon_p->transferredBytes += SDO_MAX_SEGMENT_SIZE;
                             // calc size
                             uiSizeOfFrame += SDO_MAX_SEGMENT_SIZE;
 
@@ -2688,17 +2681,17 @@ BYTE*           pbPayload;
                         {   // end of transfer
                             pbPayload = &pCommandFrame->m_le_abCommandData[0];
                             // fill rest of header
-                            AmiSetWordToLe( &pCommandFrame->m_le_wSegmentSize, (WORD) pSdoComCon_p->m_uiTransSize);
+                            AmiSetWordToLe( &pCommandFrame->m_le_wSegmentSize, (WORD) pSdoComCon_p->transferSize);
                             bFlags = 0x30;
                             AmiSetByteToLe( &pCommandFrame->m_le_bFlags, bFlags);
                             // copy data
-                            EPL_MEMCPY( pbPayload,pSdoComCon_p->m_pData,  pSdoComCon_p->m_uiTransSize);
-                            pSdoComCon_p->m_pData += pSdoComCon_p->m_uiTransSize;
+                            EPL_MEMCPY( pbPayload,pSdoComCon_p->pData,  pSdoComCon_p->transferSize);
+                            pSdoComCon_p->pData += pSdoComCon_p->transferSize;
                             // calc size
-                            uiSizeOfFrame += pSdoComCon_p->m_uiTransSize;
+                            uiSizeOfFrame += pSdoComCon_p->transferSize;
                             // correct intern counter
-                            pSdoComCon_p->m_uiTransSize = 0;
-                            pSdoComCon_p->m_uiTransferredByte += pSdoComCon_p->m_uiTransSize;
+                            pSdoComCon_p->transferSize = 0;
+                            pSdoComCon_p->transferredBytes += pSdoComCon_p->transferSize;
 
                         }
                     }
@@ -2712,7 +2705,7 @@ BYTE*           pbPayload;
                 {
                     goto Exit;
                 }
-            } // end of switch(pSdoComCon_p->m_SdoServiceType)
+            } // end of switch(pSdoComCon_p->sdoServiceType)
         }
     }
     else
@@ -2722,12 +2715,12 @@ BYTE*           pbPayload;
 
 
     // call send function of lower layer
-    switch(pSdoComCon_p->m_SdoProtType)
+    switch(pSdoComCon_p->sdoProtocolType)
     {
         case kSdoTypeAsnd:
         case kSdoTypeUdp:
         {
-            Ret = sdoseq_sendData(pSdoComCon_p->m_SdoSeqConHdl,
+            Ret = sdoseq_sendData(pSdoComCon_p->sdoSeqConHdl,
                                         uiSizeOfFrame,
                                         pFrame);
             break;
@@ -2737,7 +2730,7 @@ BYTE*           pbPayload;
         {
             Ret = kEplSdoComUnsupportedProt;
         }
-    } // end of switch(pSdoComCon_p->m_SdoProtType)
+    } // end of switch(pSdoComCon_p->sdoProtocolType)
 
 
 Exit:
@@ -2771,27 +2764,27 @@ BYTE                bBuffer;
 unsigned int        uiBuffer;
 unsigned int        uiDataSize;
 unsigned long       ulBuffer;
-tEplSdoComCon*      pSdoComCon;
+tSdoComCon*      pSdoComCon;
 
 
     Ret = kEplSuccessful;
 
     // get pointer to control structure
-    pSdoComCon = &SdoComInstance_g.m_SdoComCon[SdoComCon_p];
+    pSdoComCon = &sdoComInstance_l.sdoComCon[SdoComCon_p];
 
     // check if transaction Id fit
     bBuffer = AmiGetByteFromLe(&pAsySdoCom_p->m_le_bTransactionId);
-    if(pSdoComCon->m_bTransactionId != bBuffer)
+    if(pSdoComCon->transactionId != bBuffer)
     {
         // incorrect transaction id
 
         // if running transfer
-        if((pSdoComCon->m_uiTransferredByte != 0)
-            && (pSdoComCon->m_uiTransSize !=0))
+        if((pSdoComCon->transferredBytes != 0)
+            && (pSdoComCon->transferSize !=0))
         {
-            pSdoComCon->m_dwLastAbortCode = EPL_SDOAC_GENERAL_ERROR;
+            pSdoComCon->lastAbortCode = EPL_SDOAC_GENERAL_ERROR;
             // -> send abort
-            clientSendAbort(pSdoComCon, pSdoComCon->m_dwLastAbortCode);
+            clientSendAbort(pSdoComCon, pSdoComCon->lastAbortCode);
             // call callback of application
             Ret = transferFinished(SdoComCon_p, pSdoComCon, kEplSdoComTransferTxAborted);
         }
@@ -2800,16 +2793,16 @@ tEplSdoComCon*      pSdoComCon;
     else
     {   // check if correct command
         bBuffer = AmiGetByteFromLe(&pAsySdoCom_p->m_le_bCommandId);
-        if(pSdoComCon->m_SdoServiceType != bBuffer)
+        if(pSdoComCon->sdoServiceType != bBuffer)
         {
             // incorrect command
             // if running transfer
-            if((pSdoComCon->m_uiTransferredByte != 0)
-                && (pSdoComCon->m_uiTransSize !=0))
+            if((pSdoComCon->transferredBytes != 0)
+                && (pSdoComCon->transferSize !=0))
             {
-                pSdoComCon->m_dwLastAbortCode = EPL_SDOAC_GENERAL_ERROR;
+                pSdoComCon->lastAbortCode = EPL_SDOAC_GENERAL_ERROR;
                 // -> send abort
-                clientSendAbort(pSdoComCon, pSdoComCon->m_dwLastAbortCode);
+                clientSendAbort(pSdoComCon, pSdoComCon->lastAbortCode);
                 // call callback of application
                 Ret = transferFinished(SdoComCon_p, pSdoComCon, kEplSdoComTransferTxAborted);
             }
@@ -2817,7 +2810,7 @@ tEplSdoComCon*      pSdoComCon;
         }
         else
         {   // switch on command
-            switch(pSdoComCon->m_SdoServiceType)
+            switch(pSdoComCon->sdoServiceType)
             {
                 case kSdoServiceWriteByIndex:
                 {   // check if confirmation from server
@@ -2837,10 +2830,10 @@ tEplSdoComCon*      pSdoComCon;
                         {
                             // check size of buffer
                             uiBuffer = AmiGetWordFromLe(&pAsySdoCom_p->m_le_wSegmentSize);
-                            if (uiBuffer > pSdoComCon->m_uiTransSize)
+                            if (uiBuffer > pSdoComCon->transferSize)
                             {   // buffer provided by the application is too small
                                 // copy only a part
-                                uiDataSize = pSdoComCon->m_uiTransSize;
+                                uiDataSize = pSdoComCon->transferSize;
                             }
                             else
                             {   // buffer fits
@@ -2848,11 +2841,11 @@ tEplSdoComCon*      pSdoComCon;
                             }
 
                             // copy data
-                            EPL_MEMCPY(pSdoComCon->m_pData, &pAsySdoCom_p->m_le_abCommandData[0], uiDataSize);
+                            EPL_MEMCPY(pSdoComCon->pData, &pAsySdoCom_p->m_le_abCommandData[0], uiDataSize);
 
                             // correct counter
-                            pSdoComCon->m_uiTransSize = 0;
-                            pSdoComCon->m_uiTransferredByte = uiDataSize;
+                            pSdoComCon->transferSize = 0;
+                            pSdoComCon->transferredBytes = uiDataSize;
                             break;
                         }
 
@@ -2862,16 +2855,16 @@ tEplSdoComCon*      pSdoComCon;
                             ulBuffer = AmiGetDwordFromLe(&pAsySdoCom_p->m_le_abCommandData[0]);
                             // subtract size of variable header from data size
                             ulBuffer -= 4;
-                            if (ulBuffer <= pSdoComCon->m_uiTransSize)
+                            if (ulBuffer <= pSdoComCon->transferSize)
                             {   // buffer fits
-                                pSdoComCon->m_uiTransSize = (unsigned int)ulBuffer;
+                                pSdoComCon->transferSize = (unsigned int)ulBuffer;
                             }
                             else
                             {   // buffer too small
                                 // send abort
-                                pSdoComCon->m_dwLastAbortCode = EPL_SDOAC_DATA_TYPE_LENGTH_TOO_HIGH;
+                                pSdoComCon->lastAbortCode = EPL_SDOAC_DATA_TYPE_LENGTH_TOO_HIGH;
                                 // -> send abort
-                                clientSendAbort(pSdoComCon, pSdoComCon->m_dwLastAbortCode);
+                                clientSendAbort(pSdoComCon, pSdoComCon->lastAbortCode);
                                 // call callback of application
                                 Ret = transferFinished(SdoComCon_p, pSdoComCon, kEplSdoComTransferTxAborted);
                                 goto Exit;
@@ -2883,12 +2876,12 @@ tEplSdoComCon*      pSdoComCon;
                             // subtract size of variable header from segment size
                             uiBuffer -= 4;
                             // copy data
-                            EPL_MEMCPY(pSdoComCon->m_pData, &pAsySdoCom_p->m_le_abCommandData[4], uiBuffer);
+                            EPL_MEMCPY(pSdoComCon->pData, &pAsySdoCom_p->m_le_abCommandData[4], uiBuffer);
 
                             // correct counter an pointer
-                            pSdoComCon->m_pData += uiBuffer;
-                            pSdoComCon->m_uiTransferredByte = uiBuffer;
-                            pSdoComCon->m_uiTransSize -= uiBuffer;
+                            pSdoComCon->pData += uiBuffer;
+                            pSdoComCon->transferredBytes = uiBuffer;
+                            pSdoComCon->transferSize -= uiBuffer;
 
                             break;
                         }
@@ -2900,23 +2893,23 @@ tEplSdoComCon*      pSdoComCon;
                             // check size of buffer
                             uiBuffer = AmiGetWordFromLe(&pAsySdoCom_p->m_le_wSegmentSize);
                             // check if data to copy fit to buffer
-                            if (uiBuffer > pSdoComCon->m_uiTransSize)
+                            if (uiBuffer > pSdoComCon->transferSize)
                             {   // segment too large
                                 // send abort
-                                pSdoComCon->m_dwLastAbortCode = EPL_SDOAC_INVALID_BLOCK_SIZE;
+                                pSdoComCon->lastAbortCode = EPL_SDOAC_INVALID_BLOCK_SIZE;
                                 // -> send abort
-                                clientSendAbort(pSdoComCon, pSdoComCon->m_dwLastAbortCode);
+                                clientSendAbort(pSdoComCon, pSdoComCon->lastAbortCode);
                                 // call callback of application
                                 Ret = transferFinished(SdoComCon_p, pSdoComCon, kEplSdoComTransferTxAborted);
                                 goto Exit;
                             }
                             // copy data
-                            EPL_MEMCPY(pSdoComCon->m_pData, &pAsySdoCom_p->m_le_abCommandData[0], uiBuffer);
+                            EPL_MEMCPY(pSdoComCon->pData, &pAsySdoCom_p->m_le_abCommandData[0], uiBuffer);
 
                             // correct counter an pointer
-                            pSdoComCon->m_pData += uiBuffer;
-                            pSdoComCon->m_uiTransferredByte += uiBuffer;
-                            pSdoComCon->m_uiTransSize -= uiBuffer;
+                            pSdoComCon->pData += uiBuffer;
+                            pSdoComCon->transferredBytes += uiBuffer;
+                            pSdoComCon->transferSize -= uiBuffer;
                             break;
                         }
 
@@ -2927,23 +2920,23 @@ tEplSdoComCon*      pSdoComCon;
                             // check size of buffer
                             uiBuffer = AmiGetWordFromLe(&pAsySdoCom_p->m_le_wSegmentSize);
                             // check if data to copy fit to buffer
-                            if(uiBuffer > pSdoComCon->m_uiTransSize)
+                            if(uiBuffer > pSdoComCon->transferSize)
                             {   // segment too large
                                 // send abort
-                                pSdoComCon->m_dwLastAbortCode = EPL_SDOAC_INVALID_BLOCK_SIZE;
+                                pSdoComCon->lastAbortCode = EPL_SDOAC_INVALID_BLOCK_SIZE;
                                 // -> send abort
-                                clientSendAbort(pSdoComCon, pSdoComCon->m_dwLastAbortCode);
+                                clientSendAbort(pSdoComCon, pSdoComCon->lastAbortCode);
                                 // call callback of application
                                 Ret = transferFinished(SdoComCon_p, pSdoComCon, kEplSdoComTransferTxAborted);
                                 goto Exit;
                             }
                             // copy data
-                            EPL_MEMCPY(pSdoComCon->m_pData, &pAsySdoCom_p->m_le_abCommandData[0], uiBuffer);
+                            EPL_MEMCPY(pSdoComCon->pData, &pAsySdoCom_p->m_le_abCommandData[0], uiBuffer);
 
                             // correct counter an pointer
-                            pSdoComCon->m_pData += uiBuffer;
-                            pSdoComCon->m_uiTransferredByte += uiBuffer;
-                            pSdoComCon->m_uiTransSize  = 0;
+                            pSdoComCon->pData += uiBuffer;
+                            pSdoComCon->transferredBytes += uiBuffer;
+                            pSdoComCon->transferSize  = 0;
 
                             break;
                         }
@@ -2957,7 +2950,7 @@ tEplSdoComCon*      pSdoComCon;
                     // invalid service requested
                     // $$$ d.k. What should we do?
                     break;
-            }// end of switch(pSdoComCon->m_SdoServiceType)
+            }// end of switch(pSdoComCon->sdoServiceType)
         }
     }
 
@@ -2984,7 +2977,7 @@ Exit:
 //
 //---------------------------------------------------------------------------
 #if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOC)) != 0)
-static tEplKernel clientSendAbort(tEplSdoComCon* pSdoComCon_p,
+static tEplKernel clientSendAbort(tSdoComCon* pSdoComCon_p,
                                            DWORD          dwAbortCode_p)
 {
 tEplKernel      Ret;
@@ -3002,8 +2995,8 @@ unsigned int    uiSizeOfFrame;
     // build generic part of frame
     // get pointer to command layerpart of frame
     pCommandFrame = &pFrame->m_Data.m_Asnd.m_Payload.m_SdoSequenceFrame.m_le_abSdoSeqPayload;
-    AmiSetByteToLe( &pCommandFrame->m_le_bCommandId, pSdoComCon_p->m_SdoServiceType);
-    AmiSetByteToLe( &pCommandFrame->m_le_bTransactionId, pSdoComCon_p->m_bTransactionId);
+    AmiSetByteToLe( &pCommandFrame->m_le_bCommandId, pSdoComCon_p->sdoServiceType);
+    AmiSetByteToLe( &pCommandFrame->m_le_bTransactionId, pSdoComCon_p->transactionId);
 
     uiSizeOfFrame = 8;
 
@@ -3017,22 +3010,22 @@ unsigned int    uiSizeOfFrame;
     AmiSetWordToLe(&pCommandFrame->m_le_wSegmentSize, sizeof(DWORD));
 
     // update counter
-    pSdoComCon_p->m_uiTransferredByte = sizeof(DWORD);
-    pSdoComCon_p->m_uiTransSize = 0;
+    pSdoComCon_p->transferredBytes = sizeof(DWORD);
+    pSdoComCon_p->transferSize = 0;
 
     // calc framesize
     uiSizeOfFrame += sizeof(DWORD);
 
     // save abort code
-    pSdoComCon_p->m_dwLastAbortCode = dwAbortCode_p;
+    pSdoComCon_p->lastAbortCode = dwAbortCode_p;
 
     // call send function of lower layer
-    switch(pSdoComCon_p->m_SdoProtType)
+    switch(pSdoComCon_p->sdoProtocolType)
     {
         case kSdoTypeAsnd:
         case kSdoTypeUdp:
         {
-            Ret = sdoseq_sendData(pSdoComCon_p->m_SdoSeqConHdl,
+            Ret = sdoseq_sendData(pSdoComCon_p->sdoSeqConHdl,
                                         uiSizeOfFrame,
                                         pFrame);
             if (Ret == kEplSdoSeqConnectionBusy)
@@ -3048,7 +3041,7 @@ unsigned int    uiSizeOfFrame;
         {
             Ret = kEplSdoComUnsupportedProt;
         }
-    } // end of switch(pSdoComCon_p->m_SdoProtType)
+    } // end of switch(pSdoComCon_p->sdoProtocolType)
 
 
     return Ret;
@@ -3072,27 +3065,27 @@ unsigned int    uiSizeOfFrame;
 //
 //---------------------------------------------------------------------------
 static tEplKernel transferFinished(tSdoComConHdl   SdoComCon_p,
-                                            tEplSdoComCon*     pSdoComCon_p,
+                                            tSdoComCon*     pSdoComCon_p,
                                             tSdoComConState SdoComConState_p)
 {
 tEplKernel      Ret;
 
     Ret = kEplSuccessful;
 
-    if(pSdoComCon_p->m_pfnTransferFinished != NULL)
+    if(pSdoComCon_p->pfnTransferFinished != NULL)
     {
     tSdoFinishedCb   pfnTransferFinished;
     tSdoComFinished  SdoComFinished;
 
-        SdoComFinished.pUserArg = pSdoComCon_p->m_pUserArg;
-        SdoComFinished.nodeId = pSdoComCon_p->m_uiNodeId;
-        SdoComFinished.targetIndex = pSdoComCon_p->m_uiTargetIndex;
-        SdoComFinished.targetSubIndex = pSdoComCon_p->m_uiTargetSubIndex;
-        SdoComFinished.transferredBytes = pSdoComCon_p->m_uiTransferredByte;
-        SdoComFinished.abortCode = pSdoComCon_p->m_dwLastAbortCode;
+        SdoComFinished.pUserArg = pSdoComCon_p->pUserArg;
+        SdoComFinished.nodeId = pSdoComCon_p->nodeId;
+        SdoComFinished.targetIndex = pSdoComCon_p->targetIndex;
+        SdoComFinished.targetSubIndex = pSdoComCon_p->targetSubIndex;
+        SdoComFinished.transferredBytes = pSdoComCon_p->transferredBytes;
+        SdoComFinished.abortCode = pSdoComCon_p->lastAbortCode;
         SdoComFinished.sdoComConHdl = SdoComCon_p;
         SdoComFinished.sdoComConState = SdoComConState_p;
-        if (pSdoComCon_p->m_SdoServiceType == kSdoServiceWriteByIndex)
+        if (pSdoComCon_p->sdoServiceType == kSdoServiceWriteByIndex)
         {
             SdoComFinished.sdoAccessType = kSdoAccessTypeWrite;
         }
@@ -3102,12 +3095,12 @@ tEplKernel      Ret;
         }
 
         // reset transfer state so this handle is not busy anymore
-        pSdoComCon_p->m_uiTransferredByte = 0;
-        pSdoComCon_p->m_uiTransSize = 0;
+        pSdoComCon_p->transferredBytes = 0;
+        pSdoComCon_p->transferSize = 0;
 
-        pfnTransferFinished = pSdoComCon_p->m_pfnTransferFinished;
+        pfnTransferFinished = pSdoComCon_p->pfnTransferFinished;
         // delete function pointer to inform application only once for each transfer
-        pSdoComCon_p->m_pfnTransferFinished = NULL;
+        pSdoComCon_p->pfnTransferFinished = NULL;
 
         // call application's callback function
         pfnTransferFinished(&SdoComFinished);
