@@ -119,7 +119,7 @@ ${STACK_ROOT}/stack/src/user/pdo/pdoucalmem-local.c \
 ${STACK_ROOT}/stack/src/user/pdo/pdoucalsync-null.c \
 ${STACK_ROOT}/stack/src/user/pdo/pdoucal-triplebufshm.c \
 ${STACK_ROOT}/stack/src/user/sdo/sdo-asndu.c \
-${STACK_ROOT}/stack/src/user/sdo/sdo-asysequ.c \
+${STACK_ROOT}/stack/src/user/sdo/sdo-sequ.c \
 ${STACK_ROOT}/stack/src/user/sdo/sdo-comu.c \
 ${STACK_ROOT}/stack/src/user/ledu.c \
 ${STACK_ROOT}/stack/src/arch/xilinx_microblaze/xilinx_irq.c \

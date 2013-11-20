@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   sdo-asysequ.c
+\file   sdo-sequ.c
 
 \brief  Implementation of SDO sequence layer
 

@@ -119,7 +119,7 @@ SET (LIB_USER_SOURCES
      ${USER_SOURCE_DIR}/pdo/pdoucalmem-local.c
      ${USER_SOURCE_DIR}/pdo/pdoucalsync-null.c
      ${USER_SOURCE_DIR}/sdo/sdo-comu.c
-     ${USER_SOURCE_DIR}/sdo/sdo-asysequ.c
+     ${USER_SOURCE_DIR}/sdo/sdo-sequ.c
      ${USER_SOURCE_DIR}/sdo/sdo-asndu.c
      ${USER_SOURCE_DIR}/errhnd/errhndu.c
      ${USER_SOURCE_DIR}/errhnd/errhnducal-local.c
