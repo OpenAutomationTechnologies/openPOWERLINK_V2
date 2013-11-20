@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   lock-localnoos.c
+\file   xilinx_microblaze/lock-localnoos.c
 
 \brief  Locks for Microblaze without OS in single-thread-system
 

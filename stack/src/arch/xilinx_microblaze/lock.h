@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   lock.h
+\file   xilinx_microblaze/lock.h
 
 \brief  Include file Microblaze lock
 
