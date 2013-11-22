@@ -1,73 +1,45 @@
-/****************************************************************************
+/**
+********************************************************************************
+\file   sdo-comu.c
 
-  (c) SYSTEC electronic GmbH, D-07973 Greiz, August-Bebel-Str. 29
-      www.systec-electronic.com
+\brief  Implementation of SDO command layer
 
-  Project:      openPOWERLINK
+This file contains the implementation of the SDO command layer.
 
-  Description:  source file for SDO Command Layer module
+\ingroup module_sdo_com
+*******************************************************************************/
 
-  License:
+/*------------------------------------------------------------------------------
+Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2013, SYSTEC electronic GmbH
+All rights reserved.
 
-    Redistribution and use in source and binary forms, with or without
-    modification, are permitted provided that the following conditions
-    are met:
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+    * Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above copyright
+      notice, this list of conditions and the following disclaimer in the
+      documentation and/or other materials provided with the distribution.
+    * Neither the name of the copyright holders nor the
+      names of its contributors may be used to endorse or promote products
+      derived from this software without specific prior written permission.
 
-    1. Redistributions of source code must retain the above copyright
-       notice, this list of conditions and the following disclaimer.
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL COPYRIGHT HOLDERS BE LIABLE FOR ANY
+DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+------------------------------------------------------------------------------*/
 
-    2. Redistributions in binary form must reproduce the above copyright
-       notice, this list of conditions and the following disclaimer in the
-       documentation and/or other materials provided with the distribution.
-
-    3. Neither the name of SYSTEC electronic GmbH nor the names of its
-       contributors may be used to endorse or promote products derived
-       from this software without prior written permission. For written
-       permission, please contact info@systec-electronic.com.
-
-    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-    LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-    FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-    COPYRIGHT HOLDERS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-    INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-    BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-    LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-    CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-    LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-    ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-    POSSIBILITY OF SUCH DAMAGE.
-
-    Severability Clause:
-
-        If a provision of this License is or becomes illegal, invalid or
-        unenforceable in any jurisdiction, that shall not affect:
-        1. the validity or enforceability in that jurisdiction of any other
-           provision of this License; or
-        2. the validity or enforceability in other jurisdictions of that or
-           any other provision of this License.
-
-  -------------------------------------------------------------------------
-
-                $RCSfile$
-
-                $Author$
-
-                $Revision$  $Date$
-
-                $State$
-
-                Build Environment:
-                    GCC V3.4
-
-  -------------------------------------------------------------------------
-
-  Revision History:
-
-  2006/06/26 k.t.:   start of the implementation
-
-****************************************************************************/
-
+//------------------------------------------------------------------------------
+// includes
+//------------------------------------------------------------------------------
 #include <user/sdocom.h>
 
 #if !defined(CONFIG_INCLUDE_SDOS) && !defined(CONFIG_INCLUDE_SDOC)
@@ -78,26 +50,37 @@
 #error 'ERROR: SDO Server needs OBD module!'
 #endif
 
-/***************************************************************************/
-/*                                                                         */
-/*                                                                         */
-/*          G L O B A L   D E F I N I T I O N S                            */
-/*                                                                         */
-/*                                                                         */
-/***************************************************************************/
+//============================================================================//
+//            G L O B A L   D E F I N I T I O N S                             //
+//============================================================================//
 
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // const defines
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
 #ifndef MAX_SDO_COM_CON
 #define MAX_SDO_COM_CON         5
 #endif
 
+//------------------------------------------------------------------------------
+// module global vars
+//------------------------------------------------------------------------------
 
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+// global function prototypes
+//------------------------------------------------------------------------------
+
+//============================================================================//
+//            P R I V A T E   D E F I N I T I O N S                           //
+//============================================================================//
+
+//------------------------------------------------------------------------------
+// const defines
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
 // local types
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
 /**
 \brief  SDO command layer events
@@ -195,14 +178,14 @@ typedef struct
 #endif
 } tSdoComInstance;
 
-//---------------------------------------------------------------------------
-// module global vars
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+// local vars
+//------------------------------------------------------------------------------
 static tSdoComInstance sdoComInstance_l;
 
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // local function prototypes
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 static tEplKernel receiveCb (tSdoSeqConHdl sdoSeqConHdl_p, tAsySdoCom* pSdoCom_p, UINT dataSize_p);
 static tEplKernel conStateChangeCb (tSdoSeqConHdl sdoSeqConHdl_p, tAsySdoConState sdoConnectionState_p);
 static tEplKernel searchConnection(tSdoSeqConHdl sdoSeqConHdl_p, tSdoComConEvent sdoComConEvent_p, tAsySdoCom* pSdoCom_p);
@@ -234,65 +217,37 @@ static tEplKernel clientProcessFrame(tSdoComConHdl sdoComConHdl_p, tAsySdoCom* p
 static tEplKernel clientSendAbort(tSdoComCon* pSdoComCon_p, UINT32 abortCode_p);
 #endif
 
+//============================================================================//
+//            P U B L I C   F U N C T I O N S                                 //
+//============================================================================//
 
-/***************************************************************************/
-/*                                                                         */
-/*                                                                         */
-/*          C L A S S  <SDO Command Layer>                                 */
-/*                                                                         */
-/*                                                                         */
-/***************************************************************************/
-//
-// Description: SDO Command layer Modul
-//
-//
-/***************************************************************************/
+//------------------------------------------------------------------------------
+/**
+\brief  Initialize SDO command layer module
 
-//=========================================================================//
-//                                                                         //
-//          P U B L I C   F U N C T I O N S                                //
-//                                                                         //
-//=========================================================================//
+The function initializes the command layer module.
 
-//---------------------------------------------------------------------------
-//
-// Function:    sdocom_init
-//
-// Description: Init first instance of the module
-//
-//
-//
-// Parameters:
-//
-//
-// Returns:     tEplKernel  = errorcode
-//
-//
-// State:
-//
-//---------------------------------------------------------------------------
+\return The function returns a tEplKernel error code.
+
+\ingroup module_sdo_com
+*/
+//------------------------------------------------------------------------------
 tEplKernel sdocom_init(void)
 {
     return sdocom_addInstance();
 }
 
-//---------------------------------------------------------------------------
-//
-// Function:    sdocom_addInstance
-//
-// Description: Init additional instance of the module
-//
-//
-//
-// Parameters:
-//
-//
-// Returns:     tEplKernel  = errorcode
-//
-//
-// State:
-//
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+/**
+\brief  Add an instance of the SDO command layer module
+
+The function adds an instance of the command layer module.
+
+\return The function returns a tEplKernel error code.
+
+\ingroup module_sdo_com
+*/
+//------------------------------------------------------------------------------
 tEplKernel sdocom_addInstance(void)
 {
     tEplKernel ret = kEplSuccessful;
@@ -310,23 +265,17 @@ tEplKernel sdocom_addInstance(void)
     return ret;
 }
 
-//---------------------------------------------------------------------------
-//
-// Function:    sdocom_delInstance
-//
-// Description: delete instance of the module
-//
-//
-//
-// Parameters:
-//
-//
-// Returns:     tEplKernel  = errorcode
-//
-//
-// State:
-//
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+/**
+\brief  Delete an instance of the SDO command layer module
+
+The function deletes an instance of the command layer module.
+
+\return The function returns a tEplKernel error code.
+
+\ingroup module_sdo_com
+*/
+//------------------------------------------------------------------------------
 tEplKernel sdocom_delInstance(void)
 {
     tEplKernel  ret = kEplSuccessful;
@@ -339,29 +288,27 @@ tEplKernel sdocom_delInstance(void)
 }
 
 #if defined(CONFIG_INCLUDE_SDOC)
-//---------------------------------------------------------------------------
-//
-// Function:    sdocom_defineConnection
-//
-// Description: function defines a SDO connection to another node
-//              -> init lower layer and returns a handle for the connection.
-//              Two client connections to the same node via the same protocol
-//              are not allowed. If this function detects such a situation
-//              it will return kEplSdoComHandleExists and the handle of
-//              the existing connection in pSdoComConHdl_p.
-//              Using of existing server connections is possible.
-//
-// Parameters:  pSdoComConHdl_p     = pointer to the buffer of the handle
-//              targetNodeId_p      = NodeId of the targetnode
-//              protType_p          = type of protocol to use for connection
-//
-//
-// Returns:     tEplKernel  = errorcode
-//
-//
-// State:
-//
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+/**
+\brief  Define a command layer connection
+
+The function defines a SDO command layer connection to another node. It
+initializes the lower layer and returns a handle for the connection. Multiple
+client connections to the same node via the same protocol are not allowed.
+If this function detects such a situation it will return
+kEplSdoComHandleExists and the handle of the existing connection in
+pSdoComConHdl_p.
+
+\param  pSdoComConHdl_p         Pointer to store the connection handle.
+\param  targetNodeId_p          The node ID to connect to.
+\param  protType_p              The protocol type to use for the connection
+                                (UDP and ASnd is supported)
+
+\return The function returns a tEplKernel error code.
+
+\ingroup module_sdo_com
+*/
+//------------------------------------------------------------------------------
 tEplKernel sdocom_defineConnection(tSdoComConHdl* pSdoComConHdl_p, UINT targetNodeId_p,
                                    tSdoType protType_p)
 {
@@ -429,23 +376,19 @@ tEplKernel sdocom_defineConnection(tSdoComConHdl* pSdoComConHdl_p, UINT targetNo
     return ret;
 }
 
-//---------------------------------------------------------------------------
-//
-// Function:    sdocom_initTransferByIndex
-//
-// Description: function init SDO Transfer for a defined connection
-//
-//
-//
-// Parameters:  SdoComTransParam_p    = Structure with parameters for connection
-//
-//
-// Returns:     tEplKernel  = errorcode
-//
-//
-// State:
-//
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+/**
+\brief  Initialize a transfer by index command
+
+The function initializes a "transfer by index" operation for a connection.
+
+\param  pSdoComTransParam_p     Pointer to transfer command parameters
+
+\return The function returns a tEplKernel error code.
+
+\ingroup module_sdo_com
+*/
+//------------------------------------------------------------------------------
 tEplKernel sdocom_initTransferByIndex(tSdoComTransParamByIndex* pSdoComTransParam_p)
 {
     tEplKernel      ret;
@@ -498,23 +441,19 @@ tEplKernel sdocom_initTransferByIndex(tSdoComTransParamByIndex* pSdoComTransPara
     return ret;
 }
 
-//---------------------------------------------------------------------------
-//
-// Function:    sdocom_undefineConnection
-//
-// Description: function undefines a SDO connection
-//
-//
-//
-// Parameters:  sdoComConHdl_p    = handle for the connection
-//
-//
-// Returns:     tEplKernel  = errorcode
-//
-//
-// State:
-//
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+/**
+\brief  Delete a command layer connection
+
+The function deletes a SDO command layer connection to another node.
+
+\param  sdoComConHdl_p          Handle of the connection to delete.
+
+\return The function returns a tEplKernel error code.
+
+\ingroup module_sdo_com
+*/
+//------------------------------------------------------------------------------
 tEplKernel sdocom_undefineConnection(tSdoComConHdl sdoComConHdl_p)
 {
     tEplKernel          ret = kEplSuccessful;
@@ -550,24 +489,20 @@ tEplKernel sdocom_undefineConnection(tSdoComConHdl sdoComConHdl_p)
     return ret;
 }
 
-//---------------------------------------------------------------------------
-//
-// Function:    sdocom_getState
-//
-// Description: function returns the state of the connection
-//
-//
-//
-// Parameters:  sdoComConHdl_p    = handle for the connection
-//              pSdoComFinished_p = pointer to structure for sdo state
-//
-//
-// Returns:     tEplKernel  = errorcode
-//
-//
-// State:
-//
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+/**
+\brief  Get command layer connection state
+
+The function returns the state of a command layer connection.
+
+\param  sdoComConHdl_p          Handle of the command layer connection.
+\param  pSdoComFinished_p       Pointer to store connection information.
+
+\return The function returns a tEplKernel error code.
+
+\ingroup module_sdo_com
+*/
+//------------------------------------------------------------------------------
 tEplKernel sdocom_getState(tSdoComConHdl sdoComConHdl_p, tSdoComFinished* pSdoComFinished_p)
 {
     tEplKernel          ret = kEplSuccessful;
@@ -620,19 +555,20 @@ tEplKernel sdocom_getState(tSdoComConHdl sdoComConHdl_p, tSdoComFinished* pSdoCo
     return ret;
 }
 
-//---------------------------------------------------------------------------
-//
-// Function:    sdocom_getNodeId
-//
-// Description: returns the remote node-ID which corresponds to the specified handle
-//
-// Parameters:  sdoComConHdl_p    = handle for the connection
-//
-// Returns:     tEplKernel  = errorcode
-//
-// State:
-//
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+/**
+\brief  Get remote node ID of connection
+
+The function returns the node ID of the remote node of a connection.
+
+\param  sdoComConHdl_p          Handle of connection.
+
+\return The function returns the node ID of the remote node or EPL_C_ADR_INVALID
+        on error.
+
+\ingroup module_sdo_com
+*/
+//------------------------------------------------------------------------------
 UINT sdocom_getNodeId(tSdoComConHdl sdoComConHdl_p)
 {
     UINT            nodeId = EPL_C_ADR_INVALID;
@@ -651,24 +587,20 @@ UINT sdocom_getNodeId(tSdoComConHdl sdoComConHdl_p)
     return nodeId;
 }
 
-//---------------------------------------------------------------------------
-//
-// Function:    sdocom_abortTransfer
-//
-// Description: function abort a sdo transfer
-//
-//
-//
-// Parameters:  sdoComConHdl_p    = handle for the connection
-//              abortCode_p     = abort code
-//
-//
-// Returns:     tEplKernel  = errorcode
-//
-//
-// State:
-//
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+/**
+\brief  Abort a SDO transfer
+
+The function aborts an SDO transfer.
+
+\param  sdoComConHdl_p          Handle of the connection to abort.
+\param  abortCode_p             The abort code to use.
+
+\return The function returns a tEplKernel error code.
+
+\ingroup module_sdo_com
+*/
+//------------------------------------------------------------------------------
 tEplKernel sdocom_abortTransfer(tSdoComConHdl sdoComConHdl_p, UINT32 abortCode_p)
 {
     tEplKernel      ret;
@@ -690,32 +622,27 @@ tEplKernel sdocom_abortTransfer(tSdoComConHdl sdoComConHdl_p, UINT32 abortCode_p
 
 #endif
 
-//=========================================================================//
-//                                                                         //
-//          P R I V A T E   F U N C T I O N S                              //
-//                                                                         //
-//=========================================================================//
 
-//---------------------------------------------------------------------------
-//
-// Function:        receiveCb
-//
-// Description:     callback function for SDO Sequence Layer
-//                  -> indicates new data
-//
-//
-//
-// Parameters:      sdoSeqConHdl_p = Handle for connection
-//                  pSdoCom_p   = pointer to data
-//                  dataSize_p   = size of data ($$$ not used yet, but it should)
-//
-//
-// Returns:
-//
-//
-// State:
-//
-//---------------------------------------------------------------------------
+//============================================================================//
+//            P R I V A T E   F U N C T I O N S                               //
+//============================================================================//
+/// \name Private Functions
+/// \{
+
+//------------------------------------------------------------------------------
+/**
+\brief  Receive callback function
+
+The function implements the receive callback function that is called by the
+SOD sequence layer when new data is received.
+
+\param  sdoSeqConHdl_p          Handle of the SDO sequence layer connection.
+\param  pSdoCom_p               Pointer to received command layer data.
+\param  dataSize_p              Size of the received data.
+
+\return The function returns a tEplKernel error code.
+*/
+//------------------------------------------------------------------------------
 static tEplKernel receiveCb (tSdoSeqConHdl sdoSeqConHdl_p, tAsySdoCom* pSdoCom_p, UINT dataSize_p)
 {
     tEplKernel       ret;
@@ -728,25 +655,20 @@ static tEplKernel receiveCb (tSdoSeqConHdl sdoSeqConHdl_p, tAsySdoCom* pSdoCom_p
     return ret;
 }
 
-//---------------------------------------------------------------------------
-//
-// Function:        conStateChangeCb
-//
-// Description:     callback function called by SDO Sequence Layer to inform
-//                  command layer about state change of connection
-//
-//
-//
-// Parameters:      sdoSeqConHdl_p      = Handle of the connection
-//                  sdoConnectionState_p    = Event of the connection
-//
-//
-// Returns:         tEplKernel  = Errorcode
-//
-//
-// State:
-//
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+/**
+\brief  Connection state change callback function
+
+The function implements the connection stat change callback function. It is
+called by the SDO sequence layer to inform the command layer about state changes
+of the connection.
+
+\param  sdoSeqConHdl_p          Handle of the SDO sequence layer connection.
+\param  sdoConnectionState_p    SDO connection state.
+
+\return The function returns a tEplKernel error code.
+*/
+//------------------------------------------------------------------------------
 static tEplKernel conStateChangeCb (tSdoSeqConHdl sdoSeqConHdl_p,
                                     tAsySdoConState sdoConnectionState_p)
 {
@@ -803,23 +725,19 @@ static tEplKernel conStateChangeCb (tSdoSeqConHdl sdoSeqConHdl_p,
     return ret;
 }
 
-//---------------------------------------------------------------------------
-//
-// Function:        searchConnection
-//
-// Description:     search a Sdo Sequence Layer connection handle in the
-//                  control structure of the Command Layer
-//
-// Parameters:      sdoSeqConHdl_p     = Handle to search
-//                  sdoComConEvent_p = event to process
-//                  pSdoCom_p     = pointer to received frame
-//
-// Returns:         tEplKernel
-//
-//
-// State:
-//
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+/**
+\brief  Search a connection
+
+The function searches for a SDO sequence layer connection.
+
+\param  sdoSeqConHdl_p          Handle of the SDO sequence layer connection.
+\param  sdoComConEvent_p        Event to process for found connection.
+\param  pSdoCom_p               Pointer to received command layer data.
+
+\return The function returns a tEplKernel error code.
+*/
+//------------------------------------------------------------------------------
 static tEplKernel searchConnection(tSdoSeqConHdl sdoSeqConHdl_p, tSdoComConEvent sdoComConEvent_p,
                                    tAsySdoCom* pSdoCom_p)
 {
@@ -1543,23 +1461,19 @@ static tEplKernel processState(tSdoComConHdl sdoComConHdl_p, tSdoComConEvent sdo
 }
 
 #if defined(CONFIG_INCLUDE_SDOS)
-//---------------------------------------------------------------------------
-//
-// Function:        serverInitReadByIndex
-//
-// Description:    function start the processing of an read by index command
-//
-//
-//
-// Parameters:      pSdoComCon     = pointer to control structure of connection
-//                  pSdoCom_p     = pointer to received frame
-//
-// Returns:         tEplKernel  =  errorcode
-//
-//
-// State:
-//
-//---------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+/**
+\brief  Initialize a ReadByIndex command
+
+The function initializes a ReadByIndex SDO command.
+
+\param  pSdoComCon_p            Pointer to SDO command layer connection structure.
+\param  pSdoCom_p               Pointer to received command layer data.
+
+\return The function returns a tEplKernel error code.
+*/
+//------------------------------------------------------------------------------
 static tEplKernel serverInitReadByIndex(tSdoComCon* pSdoComCon_p, tAsySdoCom* pSdoCom_p)
 {
     tEplKernel      ret;
@@ -1636,25 +1550,22 @@ static tEplKernel serverInitReadByIndex(tSdoComCon* pSdoComCon_p, tAsySdoCom* pS
     return ret;
 }
 
-//---------------------------------------------------------------------------
-//
-// Function:        serverSendFrame();
-//
-// Description:    function creats and send a frame for server
-//
-//
-//
-// Parameters:      pSdoComCon_p     = pointer to control structure of connection
-//                  index_p        = index to send if expedited transfer else 0
-//                  subIndex_p     = subindex to send if expedited transfer else 0
-//                  sendType_p       = to of frame to send
-//
-// Returns:         tEplKernel  =  errorcode
-//
-//
-// State:
-//
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+/**
+\brief  Send a SDO command layer frame from a SDO server
+
+The function creates and sends a command layer frame from a SDO server.
+
+\param  pSdoComCon_p            Pointer to SDO command layer connection structure.
+\param  index_p                 Index of object to send if it is an expedited
+                                transfer. (Ignored otherwise)
+\param  subIndex_p              Sub index of object to send if it is an expedited
+                                transfer. (Ignored otherwise)
+\param  sendType_p              Type of data to send.
+
+\return The function returns a tEplKernel error code.
+*/
+//------------------------------------------------------------------------------
 static tEplKernel serverSendFrame(tSdoComCon* pSdoComCon_p, UINT index_p,
                                   UINT subIndex_p, tSdoComSendType sendType_p)
 {
@@ -1786,23 +1697,18 @@ static tEplKernel serverSendFrame(tSdoComCon* pSdoComCon_p, UINT index_p,
     return ret;
 }
 
-//---------------------------------------------------------------------------
-//
-// Function:        serverInitWriteByIndex
-//
-// Description:    function start the processing of an write by index command
-//
-//
-//
-// Parameters:      pSdoComCon_p     = pointer to control structure of connection
-//                  pSdoCom_p     = pointer to received frame
-//
-// Returns:         tEplKernel  =  errorcode
-//
-//
-// State:
-//
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+/**
+\brief  Initialize a WriteByIndex command
+
+The function initializes a WriteByIndex SDO command.
+
+\param  pSdoComCon_p            Pointer to SDO command layer connection structure.
+\param  pSdoCom_p               Pointer to received command layer data.
+
+\return The function returns a tEplKernel error code.
+*/
+//------------------------------------------------------------------------------
 static tEplKernel serverInitWriteByIndex(tSdoComCon* pSdoComCon_p, tAsySdoCom* pSdoCom_p)
 {
     tEplKernel      ret = kEplSuccessful;
@@ -1986,22 +1892,18 @@ Abort:
 #endif
 
 #if defined(CONFIG_INCLUDE_SDOC)
-//---------------------------------------------------------------------------
-//
-// Function:        clientSend
-//
-// Description:    function starts an sdo transfer an send all further frames
-//
-//
-//
-// Parameters:      pSdoComCon_p     = pointer to control structure of connection
-//
-// Returns:         tEplKernel  =  errorcode
-//
-//
-// State:
-//
-//---------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+/**
+\brief  Send a SDO command layer frame from a SDO client
+
+The function starts a SDO transfer and sends all further frames..
+
+\param  pSdoComCon_p            Pointer to SDO command layer connection structure.
+
+\return The function returns a tEplKernel error code.
+*/
+//------------------------------------------------------------------------------
 static tEplKernel clientSend(tSdoComCon* pSdoComCon_p)
 {
     tEplKernel      ret = kEplSuccessful;
@@ -2152,23 +2054,18 @@ static tEplKernel clientSend(tSdoComCon* pSdoComCon_p)
     return ret;
 }
 
-//---------------------------------------------------------------------------
-//
-// Function:        clientProcessFrame
-//
-// Description:    function process a received frame
-//
-//
-//
-// Parameters:      sdoComConHdl_p      = connection handle
-//                  pSdoCom_p     = pointer to frame to process
-//
-// Returns:         tEplKernel  =  errorcode
-//
-//
-// State:
-//
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+/**
+\brief  Process a SDO command layer frame on a SDO client
+
+The function processes a received command layer frame on a SDO client.
+
+\param  sdoComConHdl_p          Handle of sequence layer connection.
+\param  pSdoCom_p               Pointer to received frame.
+
+\return The function returns a tEplKernel error code.
+*/
+//------------------------------------------------------------------------------
 static tEplKernel clientProcessFrame(tSdoComConHdl sdoComConHdl_p, tAsySdoCom* pSdoCom_p)
 {
     tEplKernel          ret = kEplSuccessful;
@@ -2319,23 +2216,18 @@ static tEplKernel clientProcessFrame(tSdoComConHdl sdoComConHdl_p, tAsySdoCom* p
     return ret;
 }
 
-//---------------------------------------------------------------------------
-//
-// Function:    clientSendAbort
-//
-// Description: function send a abort message
-//
-//
-//
-// Parameters:  pSdoComCon_p     = pointer to control structure of connection
-//              abortCode_p    = Sdo abort code
-//
-// Returns:     tEplKernel  =  errorcode
-//
-//
-// State:
-//
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+/**
+\brief  Send an abort message
+
+The function sends an abort message on a SDO client.
+
+\param  pSdoComCon_p            Pointer to SDO command layer connection structure.
+\param  abortCode_p             Abort code to send.
+
+\return The function returns a tEplKernel error code.
+*/
+//------------------------------------------------------------------------------
 static tEplKernel clientSendAbort(tSdoComCon* pSdoComCon_p, UINT32 abortCode_p)
 {
     tEplKernel      ret = kEplSuccessful;
@@ -2353,7 +2245,7 @@ static tEplKernel clientSendAbort(tSdoComCon* pSdoComCon_p, UINT32 abortCode_p)
     AmiSetByteToLe( &pCommandFrame->m_le_bCommandId, pSdoComCon_p->sdoServiceType);
     AmiSetByteToLe( &pCommandFrame->m_le_bTransactionId, pSdoComCon_p->transactionId);
 
-    sizeOfFrame = 8;
+    sizeOfFrame = SDO_CMDL_HDR_FIXED_SIZE;
     pCommandFrame->m_le_bFlags |= SDO_CMDL_FLAG_ABORT;
 
     AmiSetDwordToLe(&pCommandFrame->m_le_abCommandData[0], abortCode_p);
@@ -2388,22 +2280,20 @@ static tEplKernel clientSendAbort(tSdoComCon* pSdoComCon_p, UINT32 abortCode_p)
 }
 #endif
 
-//---------------------------------------------------------------------------
-//
-// Function:    transferFinished
-//
-// Description: calls callback function of application if available
-//              and clears entry in control structure
-//
-// Parameters:  pSdoComCon_p     = pointer to control structure of connection
-//              SdoComConState_p = state of SDO transfer
-//
-// Returns:     tEplKernel  =  errorcode
-//
-//
-// State:
-//
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+/**
+\brief  Finish SDO transfer
+
+The function finishes a SDO transfer by calling the applications callback
+function.
+
+\param  sdoComConHdl_p          Handle of sequence layer connection.
+\param  pSdoComCon_p            Pointer to SDO command layer connection structure.
+\param  sdoComConState_p        Connection state of the SDO transfer.
+
+\return The function returns a tEplKernel error code.
+*/
+//------------------------------------------------------------------------------
 static tEplKernel transferFinished(tSdoComConHdl sdoComConHdl_p, tSdoComCon* pSdoComCon_p,
                                    tSdoComConState sdoComConState_p)
 {
@@ -2444,4 +2334,6 @@ static tEplKernel transferFinished(tSdoComConHdl sdoComConHdl_p, tSdoComCon* pSd
     }
     return ret;
 }
+
+///\}
 
