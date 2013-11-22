@@ -1673,7 +1673,7 @@ static tEplKernel serverSendFrame(tSdoComCon* pSdoComCon_p, UINT index_p,
     AmiSetByteToLe(&pCommandFrame->m_le_bCommandId, pSdoComCon_p->sdoServiceType);
     AmiSetByteToLe(&pCommandFrame->m_le_bTransactionId, pSdoComCon_p->transactionId);
 
-    sizeOfFrame = 8;        // set size to header size
+    sizeOfFrame = SDO_CMDL_HDR_FIXED_SIZE;
 
     switch(sendType_p)
     {
@@ -1719,12 +1719,12 @@ static tEplKernel serverSendFrame(tSdoComCon* pSdoComCon_p, UINT index_p,
                     flag |= SDO_CMDL_FLAG_SEGMINIT;
                     AmiSetByteToLe(&pCommandFrame->m_le_bFlags,  flag);
                     // init data size in variable header, which includes itself
-                    AmiSetDwordToLe(&pCommandFrame->m_le_abCommandData[0], pSdoComCon_p->transferSize + 4);
-                    EPL_MEMCPY(&pCommandFrame->m_le_abCommandData[4],pSdoComCon_p->pData, (SDO_MAX_SEGMENT_SIZE-4));
+                    AmiSetDwordToLe(&pCommandFrame->m_le_abCommandData[0], pSdoComCon_p->transferSize + SDO_CMDL_HDR_VAR_SIZE);
+                    EPL_MEMCPY(&pCommandFrame->m_le_abCommandData[SDO_CMDL_HDR_VAR_SIZE],pSdoComCon_p->pData, (SDO_MAX_SEGMENT_SIZE - SDO_CMDL_HDR_VAR_SIZE));
 
-                    pSdoComCon_p->transferSize -= (SDO_MAX_SEGMENT_SIZE-4);
-                    pSdoComCon_p->transferredBytes += (SDO_MAX_SEGMENT_SIZE-4);
-                    pSdoComCon_p->pData +=(SDO_MAX_SEGMENT_SIZE-4);
+                    pSdoComCon_p->transferSize -= (SDO_MAX_SEGMENT_SIZE - SDO_CMDL_HDR_VAR_SIZE);
+                    pSdoComCon_p->transferredBytes += (SDO_MAX_SEGMENT_SIZE - SDO_CMDL_HDR_VAR_SIZE);
+                    pSdoComCon_p->pData +=(SDO_MAX_SEGMENT_SIZE - SDO_CMDL_HDR_VAR_SIZE);
 
                     AmiSetWordToLe(&pCommandFrame->m_le_wSegmentSize, SDO_MAX_SEGMENT_SIZE);
 
@@ -1819,22 +1819,20 @@ static tEplKernel serverInitWriteByIndex(tSdoComCon* pSdoComCon_p, tAsySdoCom* p
     if ((pSdoCom_p->m_le_bFlags & SDO_CMDL_FLAG_SEGM_MASK) == SDO_CMDL_FLAG_SEGMINIT)
     {
         pSdoComCon_p->sdoTransferType = kSdoTransSegmented;
-        index = AmiGetWordFromLe(&pSdoCom_p->m_le_abCommandData[4]);
-        subindex = AmiGetByteFromLe(&pSdoCom_p->m_le_abCommandData[6]);
-        pSrcData = &pSdoCom_p->m_le_abCommandData[8];
+        index = AmiGetWordFromLe(&pSdoCom_p->m_le_abCommandData[SDO_CMDL_HDR_VAR_SIZE]);
+        subindex = AmiGetByteFromLe(&pSdoCom_p->m_le_abCommandData[SDO_CMDL_HDR_VAR_SIZE + 2]);
+        pSrcData = &pSdoCom_p->m_le_abCommandData[SDO_CMDL_HDR_VAR_SIZE + SDO_CMDL_HDR_WRITEBYINDEX_SIZE];
         pSdoComCon_p->transferSize = AmiGetDwordFromLe(&pSdoCom_p->m_le_abCommandData[0]);
-
-        pSdoComCon_p->transferSize -= 8;
+        pSdoComCon_p->transferSize -= (SDO_CMDL_HDR_VAR_SIZE + SDO_CMDL_HDR_WRITEBYINDEX_SIZE);
     }
     else if ((pSdoCom_p->m_le_bFlags & SDO_CMDL_FLAG_SEGM_MASK) == SDO_CMDL_FLAG_EXPEDITED)
     {
         pSdoComCon_p->sdoTransferType = kSdoTransExpedited;
         index = AmiGetWordFromLe(&pSdoCom_p->m_le_abCommandData[0]);
         subindex = AmiGetByteFromLe(&pSdoCom_p->m_le_abCommandData[2]);
-        pSrcData = &pSdoCom_p->m_le_abCommandData[4];
+        pSrcData = &pSdoCom_p->m_le_abCommandData[SDO_CMDL_HDR_WRITEBYINDEX_SIZE];
         pSdoComCon_p->transferSize = AmiGetWordFromLe(&pSdoCom_p->m_le_wSegmentSize);
-        // subtract header
-        pSdoComCon_p->transferSize -= 4;    // jba define for header (all occurances) // subtract header
+        pSdoComCon_p->transferSize -= SDO_CMDL_HDR_WRITEBYINDEX_SIZE;
     }
     else
     {
@@ -1950,10 +1948,8 @@ static tEplKernel serverInitWriteByIndex(tSdoComCon* pSdoComCon_p, tAsySdoCom* p
         }
 
         bytesToTransfer = AmiGetWordFromLe(&pSdoCom_p->m_le_wSegmentSize);
-        // eleminate header (Command header (8) + variable part (4) + Command header (4))
-        bytesToTransfer -= 16;
-        // get pointer to object entry
-        pSdoComCon_p->pData = obd_getObjectDataPtr(index, subindex);
+        bytesToTransfer -= (SDO_CMDL_HDR_FIXED_SIZE + SDO_CMDL_HDR_VAR_SIZE + SDO_CMDL_HDR_WRITEBYINDEX_SIZE);
+        pSdoComCon_p->pData = obd_getObjectDataPtr(index, subindex);    // get pointer to object entry
         if(pSdoComCon_p->pData == NULL)
         {
             pSdoComCon_p->lastAbortCode = EPL_SDOAC_GENERAL_ERROR;
@@ -1980,7 +1976,6 @@ Abort:
         // send abort
         pSdoComCon_p->pData = (UINT8*)&pSdoComCon_p->lastAbortCode;
         ret = serverSendFrame(pSdoComCon_p, index, subindex, kSdoComSendTypeAbort);
-
         // reset abort code
         pSdoComCon_p->lastAbortCode = 0;
         pSdoComCon_p->transferSize = 0;
@@ -2016,6 +2011,7 @@ static tEplKernel clientSend(tSdoComCon* pSdoComCon_p)
     UINT            sizeOfFrame;
     UINT8           flags;
     UINT8*          pPayload;
+    UINT            payloadSize;
 
     pFrame = (tEplFrame*)&aFrame[0];
 
@@ -2025,9 +2021,7 @@ static tEplKernel clientSend(tSdoComCon* pSdoComCon_p)
     pCommandFrame = &pFrame->m_Data.m_Asnd.m_Payload.m_SdoSequenceFrame.m_le_abSdoSeqPayload;
     AmiSetByteToLe( &pCommandFrame->m_le_bCommandId, pSdoComCon_p->sdoServiceType);
     AmiSetByteToLe( &pCommandFrame->m_le_bTransactionId, pSdoComCon_p->transactionId);
-
-    // set size constant part of header
-    sizeOfFrame = 8;        // jba add define!
+    sizeOfFrame = SDO_CMDL_HDR_FIXED_SIZE;
 
     // check if first frame to send -> command header needed
     if (pSdoComCon_p->transferSize > 0)
@@ -2042,60 +2036,45 @@ static tEplKernel clientSend(tSdoComCon* pSdoComCon_p)
                     // first frame of read access always expedited
                     pSdoComCon_p->sdoTransferType = kSdoTransExpedited;
                     pPayload = &pCommandFrame->m_le_abCommandData[0];
-                    AmiSetWordToLe( &pCommandFrame->m_le_wSegmentSize, 4);
-
-                    // create command header
+                    AmiSetWordToLe(&pCommandFrame->m_le_wSegmentSize, SDO_CMDL_HDR_READBYINDEX_SIZE);
                     AmiSetWordToLe(pPayload, (WORD)pSdoComCon_p->targetIndex);
                     pPayload += 2;
                     AmiSetByteToLe(pPayload, (UINT8)pSdoComCon_p->targetSubIndex);
-                    sizeOfFrame += 4;
+                    sizeOfFrame += SDO_CMDL_HDR_READBYINDEX_SIZE;
                     pSdoComCon_p->transferredBytes = 1;
                     break;
 
                 case kSdoServiceWriteByIndex:
-                    if(pSdoComCon_p->transferSize > (SDO_MAX_SEGMENT_SIZE - 4))
-                    {   // segmented transfer
-                        // -> variable part of header needed
-                        // save that transfer is segmented
+                    if(pSdoComCon_p->transferSize > (SDO_MAX_SEGMENT_SIZE - SDO_CMDL_HDR_WRITEBYINDEX_SIZE))
+                    {   // segmented transfer -> variable part of header needed
                         pSdoComCon_p->sdoTransferType = kSdoTransSegmented;
-                        // fill variable part of header
-                        // set data size which includes the header
-                        AmiSetDwordToLe( &pCommandFrame->m_le_abCommandData[0], pSdoComCon_p->transferSize + 8);
-                        // set pointer to real payload
-                        pPayload = &pCommandFrame->m_le_abCommandData[4];
-                        // fill rest of header
+                        AmiSetDwordToLe(&pCommandFrame->m_le_abCommandData[0], pSdoComCon_p->transferSize + SDO_CMDL_HDR_FIXED_SIZE);
+                        pPayload = &pCommandFrame->m_le_abCommandData[SDO_CMDL_HDR_VAR_SIZE];
                         AmiSetWordToLe( &pCommandFrame->m_le_wSegmentSize, SDO_MAX_SEGMENT_SIZE);
                         flags = SDO_CMDL_FLAG_SEGMINIT;
                         AmiSetByteToLe( &pCommandFrame->m_le_bFlags, flags);
-                        // create command header
                         AmiSetWordToLe(pPayload, (WORD) pSdoComCon_p->targetIndex);
                         pPayload += 2;
                         AmiSetByteToLe(pPayload, (UINT8)pSdoComCon_p->targetSubIndex);
-                        // on byte for reserved
-                        pPayload += 2;
-
+                        pPayload += 2;      // on byte for reserved
                         sizeOfFrame += SDO_MAX_SEGMENT_SIZE;
-
-                        EPL_MEMCPY( pPayload,pSdoComCon_p->pData,  (SDO_MAX_SEGMENT_SIZE - 8));
-                        pSdoComCon_p->pData += (SDO_MAX_SEGMENT_SIZE - 8);
-                        pSdoComCon_p->transferSize -= (SDO_MAX_SEGMENT_SIZE - 8);
-                        pSdoComCon_p->transferredBytes = (SDO_MAX_SEGMENT_SIZE - 8);
-
+                        payloadSize = SDO_MAX_SEGMENT_SIZE - (SDO_CMDL_HDR_VAR_SIZE + SDO_CMDL_HDR_WRITEBYINDEX_SIZE);
+                        EPL_MEMCPY(pPayload, pSdoComCon_p->pData, payloadSize);
+                        pSdoComCon_p->pData += payloadSize;
+                        pSdoComCon_p->transferSize -= payloadSize;
+                        pSdoComCon_p->transferredBytes = payloadSize;
                     }
                     else
                     {   // expedited transfer
                         pSdoComCon_p->sdoTransferType = kSdoTransExpedited;
                         pPayload = &pCommandFrame->m_le_abCommandData[0];
-
                         AmiSetWordToLe(pPayload, (WORD) pSdoComCon_p->targetIndex);
                         pPayload += 2;
                         AmiSetByteToLe(pPayload, (UINT8)pSdoComCon_p->targetSubIndex);
-                        // + 2 -> one byte for subindex and one byte reserved
-                        pPayload += 2;
-                        EPL_MEMCPY( pPayload,pSdoComCon_p->pData,  pSdoComCon_p->transferSize);
-                        sizeOfFrame += (4 + pSdoComCon_p->transferSize);
-                        AmiSetWordToLe( &pCommandFrame->m_le_wSegmentSize, (WORD) (4 + pSdoComCon_p->transferSize));
-
+                        pPayload += 2;      // + 2 -> one byte for sub index and one byte reserved
+                        EPL_MEMCPY(pPayload, pSdoComCon_p->pData,  pSdoComCon_p->transferSize);
+                        sizeOfFrame += (pSdoComCon_p->transferSize + SDO_CMDL_HDR_WRITEBYINDEX_SIZE);
+                        AmiSetWordToLe(&pCommandFrame->m_le_wSegmentSize, (WORD)(pSdoComCon_p->transferSize + SDO_CMDL_HDR_WRITEBYINDEX_SIZE));
                         pSdoComCon_p->transferredBytes = pSdoComCon_p->transferSize;
                         pSdoComCon_p->transferSize = 0;
                     }
@@ -2264,8 +2243,7 @@ static tEplKernel clientProcessFrame(tSdoComConHdl sdoComConHdl_p, tAsySdoCom* p
                         case SDO_CMDL_FLAG_SEGMINIT:
                             // get total size of transfer including the header
                             transferSize = AmiGetDwordFromLe(&pSdoCom_p->m_le_abCommandData[0]);
-                            // subtract size of variable header from data size
-                            transferSize -= 4;
+                            transferSize -= SDO_CMDL_HDR_VAR_SIZE;
                             if (transferSize <= pSdoComCon->transferSize)
                             {   // buffer fits
                                 pSdoComCon->transferSize = (UINT)transferSize;
@@ -2281,10 +2259,8 @@ static tEplKernel clientProcessFrame(tSdoComConHdl sdoComConHdl_p, tAsySdoCom* p
                             // get segment size
                             // check size of buffer
                             segmentSize = AmiGetWordFromLe(&pSdoCom_p->m_le_wSegmentSize);
-                            // subtract size of variable header from segment size
-                            segmentSize -= 4;
-                            // copy data
-                            EPL_MEMCPY(pSdoComCon->pData, &pSdoCom_p->m_le_abCommandData[4], segmentSize);
+                            segmentSize -= SDO_CMDL_HDR_VAR_SIZE;
+                            EPL_MEMCPY(pSdoComCon->pData, &pSdoCom_p->m_le_abCommandData[SDO_CMDL_HDR_VAR_SIZE], segmentSize);
 
                             // correct counter an pointer
                             pSdoComCon->pData += segmentSize;

@@ -126,6 +126,12 @@
 #define EPL_SYNC_PRES_MODE_RESET                0x40000000
 #define EPL_SYNC_PRES_MODE_SET                  0x80000000
 
+// defines for SDO command layer
+#define SDO_CMDL_HDR_FIXED_SIZE             8       // size of fixed header part
+#define SDO_CMDL_HDR_VAR_SIZE               4       // size of variable header part
+#define SDO_CMDL_HDR_WRITEBYINDEX_SIZE      4       // size of write by index header (index + subindex + reserved)
+#define SDO_CMDL_HDR_READBYINDEX_SIZE       4       // size of read by index header (index + subindex + reserved)
+
 // defines for SDO command layer flags
 #define SDO_CMDL_FLAG_RESPONSE       0x80
 #define SDO_CMDL_FLAG_ABORT          0x40
