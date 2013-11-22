@@ -126,6 +126,15 @@
 #define EPL_SYNC_PRES_MODE_RESET                0x40000000
 #define EPL_SYNC_PRES_MODE_SET                  0x80000000
 
+// defines for SDO command layer flags
+#define SDO_CMDL_FLAG_RESPONSE       0x80
+#define SDO_CMDL_FLAG_ABORT          0x40
+#define SDO_CMDL_FLAG_EXPEDITED      0x00
+#define SDO_CMDL_FLAG_SEGMINIT       0x10
+#define SDO_CMDL_FLAG_SEGMENTED      0x20
+#define SDO_CMDL_FLAG_SEGMCOMPL      0x30
+#define SDO_CMDL_FLAG_SEGM_MASK      0x30
+
 //---------------------------------------------------------------------------
 // typedef
 //---------------------------------------------------------------------------
@@ -209,7 +218,7 @@ typedef struct
     DWORD                   m_le_dwSyncMnDelaySecond;
     DWORD                   m_le_dwPResFallBackTimeout;
     BYTE                    m_be_abDestMacAddress[6];
-    
+
 } PACK_STRUCT tEplSyncRequest;
 
 typedef union
@@ -311,7 +320,7 @@ typedef struct
     DWORD                   m_le_dwSyncDelay;
     DWORD                   m_le_dwPResTimeFirst;
     DWORD                   m_le_dwPResTimeSecond;
-    
+
 } PACK_STRUCT tEplSyncResponse;
 
 typedef struct
