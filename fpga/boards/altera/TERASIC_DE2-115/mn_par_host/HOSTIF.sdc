@@ -16,7 +16,6 @@ set clk100          pllInst|altpll_component|auto_generated|pll1|clk[1]
 
 # ----------------------------------------------------------------------------------
 # constrain JTAG
-create_clock -period 10MHz {altera_reserved_tck}
 set_clock_groups -asynchronous -group {altera_reserved_tck}
 set_input_delay -clock {altera_reserved_tck} 20 [get_ports altera_reserved_tdi]
 set_input_delay -clock {altera_reserved_tck} 20 [get_ports altera_reserved_tms]
