@@ -1,5 +1,4 @@
-# SDC file for POWERLINK Slave reference design with
-# - MII phys (88E1111)
+# SDC file for INK DE2-115 evaluation board
 # - SRAM (10 ns - IS61WV102416BLL)
 # - Nios II (PCP) with 100 MHz
 
@@ -13,11 +12,6 @@ set clk50           pllInst|altpll_component|auto_generated|pll1|clk[0]
 set clk100          pllInst|altpll_component|auto_generated|pll1|clk[1]
 set clk25           pllInst|altpll_component|auto_generated|pll1|clk[2]
 
-set p0TxClk         PHY0_TXCLK
-set p0RxClk         PHY0_RXCLK
-set p1TxClk         PHY1_TXCLK
-set p1RxClk         PHY1_RXCLK
-
 ## define which clock drives SRAM controller
 set clkSRAM         $clk100
 # ----------------------------------------------------------------------------------
@@ -27,7 +21,6 @@ set clkSRAM         $clk100
 
 # ----------------------------------------------------------------------------------
 # constrain JTAG
-create_clock -period 10MHz {altera_reserved_tck}
 set_clock_groups -asynchronous -group {altera_reserved_tck}
 set_input_delay -clock {altera_reserved_tck} 20 [get_ports altera_reserved_tdi]
 set_input_delay -clock {altera_reserved_tck} 20 [get_ports altera_reserved_tms]
@@ -106,77 +99,11 @@ set_multicycle_path -from [get_clocks CLKSRAM_virt] -to [get_clocks $clkSRAM] -h
 # ----------------------------------------------------------------------------------
 
 # ----------------------------------------------------------------------------------
-# MII
-# phy = MARVELL 88E1111
-set phy_tper        40.0
-set phy_tout2clk    10.0
-set phy_tclk2out    10.0
-set phy_tsu         10.0
-set phy_th          0.0
-# pcb delay
-set phy_tpcb        0.1
-
-set phy_in_max      [expr $phy_tper - ($phy_tout2clk - $phy_tpcb)]
-set phy_in_min      [expr $phy_tclk2out - $phy_tpcb]
-set phy_out_max [expr $phy_tsu + $phy_tpcb]
-set phy_out_min [expr $phy_tclk2out - $phy_tpcb]
-
-##PHY0
-## real clock
-create_clock -period 25MHz -name phy0_rxclk [get_ports $p0RxClk]
-create_clock -period 25MHz -name phy0_txclk [get_ports $p0TxClk]
-## virtual clock
-create_clock -period 25MHz -name phy0_vrxclk
-create_clock -period 25MHz -name phy0_vtxclk
-## input
-set_input_delay -clock phy0_vrxclk -max $phy_in_max [get_ports {PHY0_RXDV PHY0_RXD[*]}]
-set_input_delay -clock phy0_vrxclk -min $phy_in_min [get_ports {PHY0_RXDV PHY0_RXD[*]}]
-## output
-set_output_delay -clock phy0_vtxclk -max $phy_out_max [get_ports {PHY0_TXEN PHY0_TXD[*]}]
-set_output_delay -clock phy0_vtxclk -min $phy_out_min [get_ports {PHY0_TXEN PHY0_TXD[*]}]
-## cut path
-set_false_path -from [get_registers *] -to [get_ports PHY0_GXCLK]
-set_false_path -from [get_registers *] -to [get_ports PHY0_RESET_n]
-set_false_path -from [get_registers *] -to [get_ports PHY0_MDC]
-set_false_path -from [get_registers *] -to [get_ports PHY0_MDIO]
-set_false_path -from [get_ports PHY0_MDIO] -to [get_registers *]
-#set_false_path -from [get_ports PHY0_LINK] -to [get_registers *]
-set_false_path -from [get_ports PHY0_RXER] -to [get_registers *]
-
-##PHY1
-## real clock
-create_clock -period 25MHz -name phy1_rxclk [get_ports $p1RxClk]
-create_clock -period 25MHz -name phy1_txclk [get_ports $p1TxClk]
-## virtual clock
-create_clock -period 25MHz -name phy1_vrxclk
-create_clock -period 25MHz -name phy1_vtxclk
-## input
-set_input_delay -clock phy1_vrxclk -max $phy_in_max [get_ports {PHY1_RXDV PHY1_RXD[*]}]
-set_input_delay -clock phy1_vrxclk -min $phy_in_min [get_ports {PHY1_RXDV PHY1_RXD[*]}]
-## output
-set_output_delay -clock phy1_vtxclk -max $phy_out_max [get_ports {PHY1_TXEN PHY1_TXD[*]}]
-set_output_delay -clock phy1_vtxclk -min $phy_out_min [get_ports {PHY1_TXEN PHY1_TXD[*]}]
-## cut path
-set_false_path -from [get_registers *] -to [get_ports PHY1_GXCLK]
-set_false_path -from [get_registers *] -to [get_ports PHY1_RESET_n]
-set_false_path -from [get_registers *] -to [get_ports PHY1_MDC]
-set_false_path -from [get_registers *] -to [get_ports PHY1_MDIO]
-set_false_path -from [get_ports PHY1_MDIO] -to [get_registers *]
-#set_false_path -from [get_ports PHY1_LINK] -to [get_registers *]
-set_false_path -from [get_ports PHY1_RXER] -to [get_registers *]
-
-# ----------------------------------------------------------------------------------
-
-# ----------------------------------------------------------------------------------
 # Set clock groups (cut paths)
 set_clock_groups -asynchronous  \
                                             -group $clk50 \
                                             -group $clk25 \
                                             -group [format "%s %s" $clk100 CLKSRAM_virt] \
-                                            -group [format "%s %s" phy0_rxclk phy0_vrxclk] \
-                                            -group [format "%s %s" phy0_txclk phy0_vtxclk] \
-                                            -group [format "%s %s" phy1_rxclk phy1_vrxclk] \
-                                            -group [format "%s %s" phy1_txclk phy1_vtxclk] \
                                             -group $ext_clk
 
 # ----------------------------------------------------------------------------------
