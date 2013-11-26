@@ -361,7 +361,7 @@ END PROCESS pBackDel;
 
     CrcDin <= Tx_Sr(1 DOWNTO 0);
 
-Calc: PROCESS ( Clk, Crc, CrcDin )     IS
+Calc: PROCESS ( Clk, Crc, CrcDin, Sm_Tx )     IS
     VARIABLE    H         : std_logic_vector(1 DOWNTO 0);
 BEGIN
 
@@ -494,25 +494,38 @@ gnTxTime:    IF NOT Timer GENERATE
                   Tx_Dma_Out & Tx_Sync & "00" & "0100" & "00" & "0" & "0" & Col_Cnt;
 END GENERATE;
 
-
-RamH:    ENTITY    work.Dpr_16_16
-    GENERIC MAP(Simulate => Simulate)
-    PORT MAP (    CLKA    => Clk,                    CLKB    => Clk,
-                EnA        => cActivated,            Enb        => cActivated,
-                BEA        => Ram_Be,
-                WEA        => Ram_Wr,                WEB        => Desc_We,
-                ADDRA    => s_Adr(8 DOWNTO 1),    ADDRB    => Desc_Addr,
-                  DIA        => s_Din,                DIB        => DescRam_In,
-                DOA        => Tx_Ram_Dat,            DOB        => DescRam_Out
-            );
+    --! This DPRAM holds the Tx descriptor accessible by the host and the DMA.
+    TXRAM : entity work.dpRam
+        generic map (
+            gWordWidth      => s_Din'length,
+            gNumberOfWords  => 256,
+            gInitFile       => "UNUSED"
+        )
+        port map (
+            iClk_A          => Clk,
+            iEnable_A       => cActivated,
+            iWriteEnable_A  => Ram_Wr,
+            iAddress_A      => s_Adr(8 downto 1),
+            iByteenable_A   => Ram_Be,
+            iWritedata_A    => s_Din,
+            oReaddata_A     => Tx_Ram_Dat,
+            iClk_B          => Clk,
+            iEnable_B       => cActivated,
+            iWriteEnable_B  => Desc_We,
+            iByteenable_B   => (others => cActivated),
+            iAddress_B      => Desc_Addr,
+            iWritedata_B    => DescRam_In,
+            oReaddata_B     => DescRam_Out
+        );
 
     ASSERT NOT( TxSyncOn AND NOT Timer )
         REPORT "TxSyncOn needs Timer!"
             severity failure;
 
-pTxSm: PROCESS( Rst, Clk, Dsm,
+pTxSm: PROCESS( Dsm,
                 Tx_On, TX_OWN, Retry_Cnt, Ext_Tx, Tx_Wait,
-                Tx_Sync, Sm_Tx, F_End, Tx_Col, Ext_Ack, Tx_Del, Tx_Beg, Tx_Half, Tx_Del_End )
+                Tx_Sync, Sm_Tx, F_End, Tx_Col, Ext_Ack, Tx_Del, Tx_Beg, Tx_Half, Tx_Del_End,
+                rCrs_Dv )
 BEGIN
 
 
@@ -562,12 +575,17 @@ BEGIN
                             end if;
             WHEN OTHERS     =>
         END CASE;
-
-    IF    Rst = '1'                    THEN    Dsm <= sIdle;
-    ELSIF    rising_edge( Clk )        THEN    Dsm <= Tx_Dsm_Next;
-    END IF;
-
 END PROCESS pTxSm;
+
+    pTxSmClk : process(Rst, Clk)
+    begin
+        if Rst = cActivated then
+            Dsm <= sIdle;
+        elsif rising_edge(Clk) then
+            Dsm <= Tx_Dsm_Next;
+        end if;
+    end process pTxSmClk;
+
 pTxControl: PROCESS( Rst, Clk )
 BEGIN
 
@@ -1035,19 +1053,31 @@ ngRxTime:    IF NOT timer GENERATE
                   Rx_Dma_Out & '0' & "0" & A_Err & Hub_Rx_L & "00" & Match_Desc & N_Err & P_Err & Rx_Ovr & F_Err;
 END GENERATE;
 
-RxRam:    ENTITY    work.Dpr_16_16
-    GENERIC MAP(Simulate => Simulate)
-    PORT MAP (    CLKA    => Clk,                    CLKB    => Clk,
-                EnA        => cActivated,            Enb        => cActivated,
-                BEA        => Ram_Be,
-                WEA        => Ram_Wr,                WEB        => Desc_We,
-                ADDRA    => s_Adr(8 DOWNTO 1),    ADDRB    => Desc_Addr,
-                  DIA        => s_Din,                DIB        => DescRam_In,
-                DOA        => Rx_Ram_Dat,            DOB        => DescRam_Out
-            );
+    --! This DPRAM holds the Rx descriptor accessible by the host and the DMA.
+    RXRAM : entity work.dpRam
+        generic map (
+            gWordWidth      => s_Din'length,
+            gNumberOfWords  => 256,
+            gInitFile       => "UNUSED"
+        )
+        port map (
+            iClk_A          => Clk,
+            iEnable_A       => cActivated,
+            iWriteEnable_A  => Ram_Wr,
+            iAddress_A      => s_Adr(8 downto 1),
+            iByteenable_A   => Ram_Be,
+            iWritedata_A    => s_Din,
+            oReaddata_A     => Rx_Ram_Dat,
+            iClk_B          => Clk,
+            iEnable_B       => cActivated,
+            iWriteEnable_B  => Desc_We,
+            iByteenable_B   => (others => cActivated),
+            iAddress_B      => Desc_Addr,
+            iWritedata_B    => DescRam_In,
+            oReaddata_B     => DescRam_Out
+        );
 
-
-pRxSm: PROCESS( Rst, Clk, Dsm,
+pRxSm: PROCESS( Dsm,
                 Rx_Beg, Rx_On, RX_OWN, F_End, F_Err, Diag, Rx_Count )
 BEGIN
 
@@ -1075,12 +1105,16 @@ BEGIN
             WHEN sOdd   =>                                Rx_Dsm_Next <= sIdle;
             WHEN OTHERS     =>
         END CASE;
-
-    IF        Rst = '1'                THEN    Dsm <= sIdle;
-    ELSIF    rising_edge( Clk )        THEN    Dsm <= Rx_Dsm_Next;
-    END IF;
-
 END PROCESS pRxSm;
+
+    pRxSmClk : process(Rst, Clk)
+    begin
+        if Rst = cActivated then
+            Dsm <= sIdle;
+        elsif rising_edge(Clk) then
+            Dsm <= Rx_Dsm_Next;
+        end if;
+    end process pRxSmClk;
 
 pRxControl: PROCESS( Rst, Clk )
 BEGIN
@@ -1196,25 +1230,51 @@ BEGIN
 
     Filter_Addr <= Dibl_Cnt & Byte_Cnt;
 
-FiltRamH:    ENTITY    work.Dpr_16_32
-    GENERIC MAP(Simulate => Simulate)
-    PORT MAP (    CLKA    => Clk,            CLKB    => Clk,
-                EnA        => cActivated,    EnB        => cActivated,
-                BEA        => Ram_BeH,
-                WEA        => Ram_Wr,
-                ADDRA    => Ram_Addr,    ADDRB    => Filter_Addr,
-                  DIA        => s_Din,        DOB        => Filter_Out_H
-                );
+    --! This simplex DPRAM holds the higher dword for the Rx packet filters.
+    FILTERRAMHIGH : entity work.dpRamSplx
+        generic map (
+            gWordWidthA         => s_Din'length,
+            gByteenableWidthA   => Ram_BeH'length,
+            gNumberOfWordsA     => 256,
+            gWordWidthB         => Filter_Out_H'length,
+            gNumberOfWordsB     => 128,
+            gInitFile           => "UNUSED"
+        )
+        port map (
+            iClk_A          => Clk,
+            iEnable_A       => cActivated,
+            iWriteEnable_A  => Ram_Wr,
+            iAddress_A      => Ram_Addr,
+            iByteenable_A   => Ram_BeH,
+            iWritedata_A    => s_Din,
+            iClk_B          => Clk,
+            iEnable_B       => cActivated,
+            iAddress_B      => Filter_Addr,
+            oReaddata_B     => Filter_Out_H
+        );
 
-FiltRamL:    ENTITY    work.Dpr_16_32
-    GENERIC MAP(Simulate => Simulate)
-    PORT MAP (    CLKA    => Clk,            CLKB    => Clk,
-                EnA        => cActivated,    EnB        => cActivated,
-                BEA        => Ram_BeL,
-                WEA        => Ram_Wr,
-                ADDRA    => Ram_Addr,    ADDRB    => Filter_Addr,
-                DIA        => s_Din,        DOB        => Filter_Out_L
-            );
+    --! This simplex DPRAM holds the lower dword for the Rx packet filters.
+    FILTERRAMLOW : entity work.dpRamSplx
+        generic map (
+            gWordWidthA         => s_Din'length,
+            gByteenableWidthA   => Ram_BeL'length,
+            gNumberOfWordsA     => 256,
+            gWordWidthB         => Filter_Out_H'length,
+            gNumberOfWordsB     => 128,
+            gInitFile           => "UNUSED"
+        )
+        port map (
+            iClk_A          => Clk,
+            iEnable_A       => cActivated,
+            iWriteEnable_A  => Ram_Wr,
+            iAddress_A      => Ram_Addr,
+            iByteenable_A   => Ram_BeL,
+            iWritedata_A    => s_Din,
+            iClk_B          => Clk,
+            iEnable_B       => cActivated,
+            iAddress_B      => Filter_Addr,
+            oReaddata_B     => Filter_Out_L
+        );
 
     Erg0 <= (Rx_Buf XOR Filter_Out_H( 7 DOWNTO  0)) AND Filter_Out_H(15 DOWNTO  8);
      Erg1 <= (Rx_Buf XOR Filter_Out_H(23 DOWNTO 16)) AND Filter_Out_H(31 DOWNTO 24);

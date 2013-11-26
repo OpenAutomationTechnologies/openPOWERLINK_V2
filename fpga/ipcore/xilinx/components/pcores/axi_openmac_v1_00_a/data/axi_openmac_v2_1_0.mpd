@@ -1,0 +1,273 @@
+###############################################################################
+##
+##    (c) B&R, 2013
+##
+##    Redistribution and use in source and binary forms, with or without
+##    modification, are permitted provided that the following conditions
+##    are met:
+##
+##    1. Redistributions of source code must retain the above copyright
+##       notice, this list of conditions and the following disclaimer.
+##
+##    2. Redistributions in binary form must reproduce the above copyright
+##       notice, this list of conditions and the following disclaimer in the
+##       documentation and/or other materials provided with the distribution.
+##
+##    3. Neither the name of B&R nor the names of its
+##       contributors may be used to endorse or promote products derived
+##       from this software without prior written permission. For written
+##       permission, please contact office@br-automation.com
+##
+##    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+##    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+##    LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+##    FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+##    COPYRIGHT HOLDERS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+##    INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+##    BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+##    LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+##    CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+##    LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+##    ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+##    POSSIBILITY OF SUCH DAMAGE.
+##
+###############################################################################
+
+BEGIN axi_openmac
+
+###############################################################################
+## Peripheral Options
+OPTION IPTYPE = PERIPHERAL
+OPTION IMP_NETLIST = TRUE
+OPTION HDL = VHDL
+OPTION SYSLEVEL_DRC_PROC = syslevel_drc_proc
+OPTION IPLEVEL_DRC_PROC = iplevel_drc_proc
+OPTION DESC = AXI_OPENMAC
+OPTION LONG_DESC = OPENMAC with AXI interface
+OPTION IP_GROUP = 'Industrial Ethernet:MICROBLAZE:PPC'
+OPTION ARCH_SUPPORT_MAP = (others=DEVELOPMENT)
+
+IO_INTERFACE IO_IF = RMII, IO_TYPE = XIL_Ethernet_V1
+IO_INTERFACE IO_IF = MII, IO_TYPE = XIL_Ethernet_V1
+IO_INTERFACE IO_IF = SMI, IO_TYPE = XIL_Ethernet_V1
+
+###############################################################################
+## Bus Interfaces
+### DMA (optional)
+BUS_INTERFACE BUS = M_AXI_MAC_DMA, BUS_STD = AXI, BUS_TYPE = MASTER, ISVALID = (gui_txBufLoc == 2 || gui_rxBufLoc == 2)
+### REG
+BUS_INTERFACE BUS = S_AXI_MAC_REG, BUS_STD = AXI, BUS_TYPE = SLAVE
+### PKT (optional)
+BUS_INTERFACE BUS = S_AXI_MAC_PKT, BUS_STD = AXI, BUS_TYPE = SLAVE, ISVALID = (gui_txBufLoc == 1 || gui_rxBufLoc == 1)
+
+###############################################################################
+# PARAMETERS
+###############################################################################
+
+###############################################################################
+## SYSTEM PARAMETERS
+PARAMETER C_FAMILY          = "spartan6", DT = STRING
+PARAMETER C_iClk50_FREQ_HZ  = 0,          DT = integer, ASSIGNMENT = UPDATE, TYPE = NON_HDL
+PARAMETER C_iClk100_FREQ_HZ = 0,          DT = integer, ASSIGNMENT = UPDATE, TYPE = NON_HDL
+
+###############################################################################
+## GUI PARAMETERS
+PARAMETER gui_phyType       = 1,  DT = natural, TYPE = NON_HDL, RANGE = (1,2), VALUES = (1 = "RMII", 2 = "MII")
+PARAMETER gui_phyCount      = 1,  DT = natural, TYPE = NON_HDL, RANGE = (1:15)
+PARAMETER gui_extraSmi      = 0,  DT = natural, TYPE = NON_HDL, RANGE = (0,1), VALUES = (0 = "FALSE", 1 = "TRUE")
+PARAMETER gui_txBufLoc      = 1,  DT = natural, TYPE = NON_HDL, RANGE = (1,2), VALUES = (1 = "LOCAL", 2 = "EXTERNAL")
+PARAMETER gui_txBufSize     = 1,  DT = natural, TYPE = NON_HDL, RANGE = (1:32), ISVALID = (gui_txBufLoc == 1)
+PARAMETER gui_txBurstSize   = 4,  DT = natural, TYPE = NON_HDL, RANGE = (4,8,16,32,64), ISVALID = (gui_txBufLoc == 2)
+PARAMETER gui_rxBufLoc      = 1,  DT = natural, TYPE = NON_HDL, RANGE = (1,2), VALUES = (1 = "LOCAL", 2 = "EXTERNAL")
+PARAMETER gui_rxBufSize     = 1,  DT = natural, TYPE = NON_HDL, RANGE = (1:32), ISVALID = (gui_rxBufLoc == 1)
+PARAMETER gui_rxBurstSize   = 4,  DT = natural, TYPE = NON_HDL, RANGE = (4,8,16,32,64), ISVALID = (gui_rxBufLoc == 2)
+PARAMETER gui_tmrCount      = 1,  DT = natural, TYPE = NON_HDL, RANGE = (1:2)
+PARAMETER gui_tmrPulseEn    = 0,  DT = natural, TYPE = NON_HDL, RANGE = (0,1), VALUES = (0 = "FALSE", 1 = "TRUE")
+PARAMETER gui_tmrPulseWdt   = 10, DT = natural, TYPE = NON_HDL, RANGE = (1:31)
+PARAMETER gui_actEn         = 0,  DT = natural, TYPE = NON_HDL, RANGE = (0,1), VALUES = (0 = "FALSE", 1 = "TRUE")
+
+###############################################################################
+## AXI ENDPOINT PARAMETERS
+### DMA
+PARAMETER C_M_AXI_MAC_DMA_ADDR_WIDTH        = 32,           DT = integer,           BUS = M_AXI_MAC_DMA, ASSIGNMENT = CONSTANT
+PARAMETER C_M_AXI_MAC_DMA_DATA_WIDTH        = 32,           DT = integer,           BUS = M_AXI_MAC_DMA, ASSIGNMENT = CONSTANT
+PARAMETER C_M_AXI_MAC_DMA_NATIVE_DWIDTH     = 32,           DT = integer,           BUS = M_AXI_MAC_DMA, ASSIGNMENT = CONSTANT, RANGE = (32)
+PARAMETER C_M_AXI_MAC_DMA_LENGTH_WIDTH      = 12,           DT = integer,           BUS = M_AXI_MAC_DMA, ASSIGNMENT = CONSTANT, RANGE = (12)
+PARAMETER C_M_AXI_MAC_DMA_MAX_BURST_LEN     = 16,           DT = integer,           BUS = M_AXI_MAC_DMA, RANGE = (16,32,64,128,256), IPLEVEL_UPDATE_VALUE_PROC = get_C_M_AXI_MAC_DMA_MAX_BURST_LEN
+PARAMETER C_M_AXI_MAC_DMA_PROTOCOL          = AXI4,         DT = string,            BUS = M_AXI_MAC_DMA, ASSIGNMENT = CONSTANT, TYPE = NON_HDL
+
+### REG
+PARAMETER C_S_AXI_MAC_REG_NUM_ADDR_RANGES   = 2,            DT = integer,           BUS = S_AXI_MAC_REG, ASSIGNMENT = CONSTANT
+PARAMETER C_S_AXI_MAC_REG_RNG0_BASEADDR     = 0xffffffff,   DT = std_logic_vector,  BUS = S_AXI_MAC_REG, ASSIGNMENT = REQUIRE, ADDRESS = BASE, PAIR = C_S_AXI_MAC_REG_RNG0_HIGHADDR, MIN_SIZE = 0x2000
+PARAMETER C_S_AXI_MAC_REG_RNG0_HIGHADDR     = 0x00000000,   DT = std_logic_vector,  BUS = S_AXI_MAC_REG, ASSIGNMENT = REQUIRE, ADDRESS = HIGH, PAIR = C_S_AXI_MAC_REG_RNG0_BASEADDR
+PARAMETER C_S_AXI_MAC_REG_RNG1_BASEADDR     = 0xffffffff,   DT = std_logic_vector,  BUS = S_AXI_MAC_REG, ASSIGNMENT = REQUIRE, ADDRESS = BASE, PAIR = C_S_AXI_MAC_REG_RNG1_HIGHADDR, MIN_SIZE = 0x10
+PARAMETER C_S_AXI_MAC_REG_RNG1_HIGHADDR     = 0x00000000,   DT = std_logic_vector,  BUS = S_AXI_MAC_REG, ASSIGNMENT = REQUIRE, ADDRESS = HIGH, PAIR = C_S_AXI_MAC_REG_RNG1_BASEADDR
+PARAMETER C_S_AXI_MAC_REG_MIN_SIZE          = 0x00001fff,   DT = std_logic_vector, IPLEVEL_UPDATE_VALUE_PROC = get_C_S_AXI_MAC_REG_MIN_SIZE
+PARAMETER C_S_AXI_MAC_REG_DATA_WIDTH        = 32,           DT = integer,           BUS = S_AXI_MAC_REG, ASSIGNMENT = CONSTANT
+PARAMETER C_S_AXI_MAC_REG_ADDR_WIDTH        = 32,           DT = integer,           BUS = S_AXI_MAC_REG, ASSIGNMENT = CONSTANT
+PARAMETER C_S_AXI_MAC_REG_USE_WSTRB         = 1,            DT = integer,           BUS = S_AXI_MAC_REG, ASSIGNMENT = CONSTANT
+PARAMETER C_S_AXI_MAC_REG_DPHASE_TIMEOUT    = 0,            DT = integer,           BUS = S_AXI_MAC_REG, RANGE = (0:512)
+PARAMETER C_S_AXI_MAC_REG_PROTOCOL          = AXI4LITE,     DT = string,            BUS = S_AXI_MAC_REG, ASSIGNMENT = CONSTANT, TYPE = NON_HDL
+
+### PKT
+PARAMETER C_S_AXI_MAC_PKT_BASEADDR          = 0xffffffff,   DT = std_logic_vector,  BUS = S_AXI_MAC_PKT, ASSIGNMENT = REQUIRE, ADDRESS = BASE, PAIR = C_S_AXI_MAC_PKT_HIGHADDR, MIN_SIZE = 0x10000
+PARAMETER C_S_AXI_MAC_PKT_HIGHADDR          = 0x00000000,   DT = std_logic_vector,  BUS = S_AXI_MAC_PKT, ASSIGNMENT = REQUIRE, ADDRESS = HIGH, PAIR = C_S_AXI_MAC_PKT_BASEADDR
+PARAMETER C_S_AXI_MAC_PKT_MIN_SIZE          = 0x0000ffff,   DT = std_logic_vector, IPLEVEL_UPDATE_VALUE_PROC = get_C_S_AXI_MAC_PKT_MIN_SIZE
+PARAMETER C_S_AXI_MAC_PKT_DATA_WIDTH        = 32,           DT = integer,           BUS = S_AXI_MAC_PKT, ASSIGNMENT = CONSTANT
+PARAMETER C_S_AXI_MAC_PKT_ADDR_WIDTH        = 32,           DT = integer,           BUS = S_AXI_MAC_PKT, ASSIGNMENT = CONSTANT
+PARAMETER C_S_AXI_MAC_PKT_USE_WSTRB         = 1,            DT = integer,           BUS = S_AXI_MAC_PKT, ASSIGNMENT = CONSTANT
+PARAMETER C_S_AXI_MAC_PKT_DPHASE_TIMEOUT    = 0,            DT = integer,           BUS = S_AXI_MAC_PKT, RANGE = (0:512)
+PARAMETER C_S_AXI_MAC_PKT_PROTOCOL          = AXI4LITE,     DT = string,            BUS = S_AXI_MAC_PKT, ASSIGNMENT = CONSTANT, TYPE = NON_HDL
+
+###############################################################################
+## HDL PARAMETERS
+PARAMETER gPhyPortCount             = 2,        IPLEVEL_UPDATE_VALUE_PROC = get_gPhyPortCount,          DT = natural, RANGE = (1:15)
+PARAMETER gPhyPortType              = 1,        IPLEVEL_UPDATE_VALUE_PROC = get_gPhyPortType,           DT = natural, RANGE = (1,2), VALUES = (1 = "RMII", 2 = "MII")
+PARAMETER gSmiPortCount             = 1,        IPLEVEL_UPDATE_VALUE_PROC = get_gSmiPortCount,          DT = natural
+PARAMETER gEndianness               = "little", IPLEVEL_UPDATE_VALUE_PROC = get_gEndianness,            DT = string
+PARAMETER gEnableActivity           = 0,        IPLEVEL_UPDATE_VALUE_PROC = get_gEnableActivity,        DT = natural, RANGE = (0,1), VALUES = (0 = "FALSE", 1 = "TRUE")
+PARAMETER gEnableDmaObserver        = 0,        IPLEVEL_UPDATE_VALUE_PROC = get_gEnableDmaObserver,     DT = natural, RANGE = (0,1), VALUES = (0 = "FALSE", 1 = "TRUE")
+PARAMETER gDmaAddrWidth             = 32,       IPLEVEL_UPDATE_VALUE_PROC = get_gDmaAddrWidth,          DT = natural, RANGE = (32)
+PARAMETER gDmaDataWidth             = 16,       IPLEVEL_UPDATE_VALUE_PROC = get_gDmaDataWidth,          DT = natural, RANGE = (32)
+PARAMETER gDmaBurstCountWidth       = 4,        IPLEVEL_UPDATE_VALUE_PROC = get_gDmaBurstCountWidth,    DT = natural
+PARAMETER gDmaWriteBurstLength      = 16,       IPLEVEL_UPDATE_VALUE_PROC = get_gDmaWriteBurstLength,   DT = natural
+PARAMETER gDmaReadBurstLength       = 16,       IPLEVEL_UPDATE_VALUE_PROC = get_gDmaReadBurstLength,    DT = natural
+PARAMETER gDmaWriteFifoLength       = 16,       IPLEVEL_UPDATE_VALUE_PROC = get_gDmaWriteFifoLength,    DT = natural
+PARAMETER gDmaReadFifoLength        = 16,       IPLEVEL_UPDATE_VALUE_PROC = get_gDmaReadFifoLength,     DT = natural
+PARAMETER gPacketBufferLocTx        = 1,        IPLEVEL_UPDATE_VALUE_PROC = get_gPacketBufferLocTx,     DT = natural, RANGE = (1,2), VALUES = (1 = "LOCAL", 2 = "EXTERNAL")
+PARAMETER gPacketBufferLocRx        = 1,        IPLEVEL_UPDATE_VALUE_PROC = get_gPacketBufferLocRx,     DT = natural, RANGE = (1,2), VALUES = (1 = "LOCAL", 2 = "EXTERNAL")
+PARAMETER gPacketBufferLog2Size     = 10,       IPLEVEL_UPDATE_VALUE_PROC = get_gPacketBufferLog2Size,  DT = natural
+PARAMETER gTimerCount               = 2,        IPLEVEL_UPDATE_VALUE_PROC = get_gTimerCount,            DT = natural
+PARAMETER gTimerEnablePulseWidth    = 0,        IPLEVEL_UPDATE_VALUE_PROC = get_gTimerEnablePulseWidth, DT = natural, RANGE = (0,1), VALUES = (0 = "FALSE", 1 = "TRUE")
+PARAMETER gTimerPulseRegWidth       = 10,       IPLEVEL_UPDATE_VALUE_PROC = get_gTimerPulseRegWidth,    DT = natural
+
+###############################################################################
+# PORTS
+###############################################################################
+
+###############################################################################
+## Clock
+PORT iClk50                 = "",       DIR = I, SIGIS = CLK
+PORT iClk100                = "",       DIR = I, SIGIS = CLK, ISVALID = (gui_phyType == 1)
+
+###############################################################################
+## AXI ENDPOINTS
+### DMA
+PORT M_AXI_MAC_DMA_ACLK     = "",       DIR = I, BUS = M_AXI_MAC_DMA, SIGIS = CLK
+PORT M_AXI_MAC_DMA_ARESETN  = ARESETN,  DIR = I, BUS = M_AXI_MAC_DMA, SIGIS = RST
+PORT M_AXI_MAC_DMA_MD_ERROR = "",       DIR = O
+PORT M_AXI_MAC_DMA_ARREADY  = ARREADY,  DIR = I, BUS = M_AXI_MAC_DMA
+PORT M_AXI_MAC_DMA_AWREADY  = AWREADY,  DIR = I, BUS = M_AXI_MAC_DMA
+PORT M_AXI_MAC_DMA_BVALID   = BVALID,   DIR = I, BUS = M_AXI_MAC_DMA
+PORT M_AXI_MAC_DMA_RLAST    = RLAST,    DIR = I, BUS = M_AXI_MAC_DMA
+PORT M_AXI_MAC_DMA_RVALID   = RVALID,   DIR = I, BUS = M_AXI_MAC_DMA
+PORT M_AXI_MAC_DMA_WREADY   = WREADY,   DIR = I, BUS = M_AXI_MAC_DMA
+PORT M_AXI_MAC_DMA_BRESP    = BRESP,    DIR = I, BUS = M_AXI_MAC_DMA, ENDIAN = LITTLE, VEC = [1:0]
+PORT M_AXI_MAC_DMA_RDATA    = RDATA,    DIR = I, BUS = M_AXI_MAC_DMA, ENDIAN = LITTLE, VEC = [C_M_AXI_MAC_DMA_DATA_WIDTH-1:0]
+PORT M_AXI_MAC_DMA_RRESP    = RRESP,    DIR = I, BUS = M_AXI_MAC_DMA, ENDIAN = LITTLE, VEC = [1:0]
+PORT M_AXI_MAC_DMA_ARVALID  = ARVALID,  DIR = O, BUS = M_AXI_MAC_DMA
+PORT M_AXI_MAC_DMA_AWVALID  = AWVALID,  DIR = O, BUS = M_AXI_MAC_DMA
+PORT M_AXI_MAC_DMA_BREADY   = BREADY,   DIR = O, BUS = M_AXI_MAC_DMA
+PORT M_AXI_MAC_DMA_RREADY   = RREADY,   DIR = O, BUS = M_AXI_MAC_DMA
+PORT M_AXI_MAC_DMA_WLAST    = WLAST,    DIR = O, BUS = M_AXI_MAC_DMA
+PORT M_AXI_MAC_DMA_WVALID   = WVALID,   DIR = O, BUS = M_AXI_MAC_DMA
+PORT M_AXI_MAC_DMA_ARADDR   = ARADDR,   DIR = O, BUS = M_AXI_MAC_DMA, ENDIAN = LITTLE, VEC = [C_M_AXI_MAC_DMA_ADDR_WIDTH-1:0]
+PORT M_AXI_MAC_DMA_ARBURST  = ARBURST,  DIR = O, BUS = M_AXI_MAC_DMA, ENDIAN = LITTLE, VEC = [1:0]
+PORT M_AXI_MAC_DMA_ARCACHE  = ARCACHE,  DIR = O, BUS = M_AXI_MAC_DMA, ENDIAN = LITTLE, VEC = [3:0]
+PORT M_AXI_MAC_DMA_ARLEN    = ARLEN,    DIR = O, BUS = M_AXI_MAC_DMA, ENDIAN = LITTLE, VEC = [7:0]
+PORT M_AXI_MAC_DMA_ARPROT   = ARPROT,   DIR = O, BUS = M_AXI_MAC_DMA, ENDIAN = LITTLE, VEC = [2:0]
+PORT M_AXI_MAC_DMA_ARSIZE   = ARSIZE,   DIR = O, BUS = M_AXI_MAC_DMA, ENDIAN = LITTLE, VEC = [2:0]
+PORT M_AXI_MAC_DMA_AWADDR   = AWADDR,   DIR = O, BUS = M_AXI_MAC_DMA, ENDIAN = LITTLE, VEC = [C_M_AXI_MAC_DMA_ADDR_WIDTH-1:0]
+PORT M_AXI_MAC_DMA_AWBURST  = AWBURST,  DIR = O, BUS = M_AXI_MAC_DMA, ENDIAN = LITTLE, VEC = [1:0]
+PORT M_AXI_MAC_DMA_AWCACHE  = AWCACHE,  DIR = O, BUS = M_AXI_MAC_DMA, ENDIAN = LITTLE, VEC = [3:0]
+PORT M_AXI_MAC_DMA_AWLEN    = AWLEN,    DIR = O, BUS = M_AXI_MAC_DMA, ENDIAN = LITTLE, VEC = [7:0]
+PORT M_AXI_MAC_DMA_AWPROT   = AWPROT,   DIR = O, BUS = M_AXI_MAC_DMA, ENDIAN = LITTLE, VEC = [2:0]
+PORT M_AXI_MAC_DMA_AWSIZE   = AWSIZE,   DIR = O, BUS = M_AXI_MAC_DMA, ENDIAN = LITTLE, VEC = [2:0]
+PORT M_AXI_MAC_DMA_WDATA    = WDATA,    DIR = O, BUS = M_AXI_MAC_DMA, ENDIAN = LITTLE, VEC = [C_M_AXI_MAC_DMA_DATA_WIDTH-1:0]
+PORT M_AXI_MAC_DMA_WSTRB    = WSTRB,    DIR = O, BUS = M_AXI_MAC_DMA, ENDIAN = LITTLE, VEC = [C_M_AXI_MAC_DMA_DATA_WIDTH/8-1:0]
+
+### REG
+PORT S_AXI_MAC_REG_ACLK     = "",       DIR = I, BUS = S_AXI_MAC_REG, SIGIS = CLK
+PORT S_AXI_MAC_REG_ARESETN  = ARESETN,  DIR = I, BUS = S_AXI_MAC_REG, SIGIS = RST
+PORT S_AXI_MAC_REG_ARVALID  = ARVALID,  DIR = I, BUS = S_AXI_MAC_REG
+PORT S_AXI_MAC_REG_AWVALID  = AWVALID,  DIR = I, BUS = S_AXI_MAC_REG
+PORT S_AXI_MAC_REG_BREADY   = BREADY,   DIR = I, BUS = S_AXI_MAC_REG
+PORT S_AXI_MAC_REG_RREADY   = RREADY,   DIR = I, BUS = S_AXI_MAC_REG
+PORT S_AXI_MAC_REG_WVALID   = WVALID,   DIR = I, BUS = S_AXI_MAC_REG
+PORT S_AXI_MAC_REG_ARADDR   = ARADDR,   DIR = I, BUS = S_AXI_MAC_REG, ENDIAN = LITTLE, VEC = [C_S_AXI_MAC_REG_ADDR_WIDTH-1:0]
+PORT S_AXI_MAC_REG_AWADDR   = AWADDR,   DIR = I, BUS = S_AXI_MAC_REG, ENDIAN = LITTLE, VEC = [C_S_AXI_MAC_REG_ADDR_WIDTH-1:0]
+PORT S_AXI_MAC_REG_WDATA    = WDATA,    DIR = I, BUS = S_AXI_MAC_REG, ENDIAN = LITTLE, VEC = [C_S_AXI_MAC_REG_DATA_WIDTH-1:0]
+PORT S_AXI_MAC_REG_WSTRB    = WSTRB,    DIR = I, BUS = S_AXI_MAC_REG, ENDIAN = LITTLE, VEC = [C_S_AXI_MAC_REG_DATA_WIDTH/8-1:0]
+PORT S_AXI_MAC_REG_ARREADY  = ARREADY,  DIR = O, BUS = S_AXI_MAC_REG
+PORT S_AXI_MAC_REG_AWREADY  = AWREADY,  DIR = O, BUS = S_AXI_MAC_REG
+PORT S_AXI_MAC_REG_BVALID   = BVALID,   DIR = O, BUS = S_AXI_MAC_REG
+PORT S_AXI_MAC_REG_RVALID   = RVALID,   DIR = O, BUS = S_AXI_MAC_REG
+PORT S_AXI_MAC_REG_WREADY   = WREADY,   DIR = O, BUS = S_AXI_MAC_REG
+PORT S_AXI_MAC_REG_BRESP    = BRESP,    DIR = O, BUS = S_AXI_MAC_REG, ENDIAN = LITTLE, VEC = [1:0]
+PORT S_AXI_MAC_REG_RDATA    = RDATA,    DIR = O, BUS = S_AXI_MAC_REG, ENDIAN = LITTLE, VEC = [C_S_AXI_MAC_REG_DATA_WIDTH-1:0]
+PORT S_AXI_MAC_REG_RRESP    = RRESP,    DIR = O, BUS = S_AXI_MAC_REG, ENDIAN = LITTLE, VEC = [1:0]
+
+### PKT
+PORT S_AXI_MAC_PKT_ACLK     = "",       DIR = I, BUS = S_AXI_MAC_PKT, SIGIS = CLK
+PORT S_AXI_MAC_PKT_ARESETN  = ARESETN,  DIR = I, BUS = S_AXI_MAC_PKT, SIGIS = RST
+PORT S_AXI_MAC_PKT_ARVALID  = ARVALID,  DIR = I, BUS = S_AXI_MAC_PKT
+PORT S_AXI_MAC_PKT_AWVALID  = AWVALID,  DIR = I, BUS = S_AXI_MAC_PKT
+PORT S_AXI_MAC_PKT_BREADY   = BREADY,   DIR = I, BUS = S_AXI_MAC_PKT
+PORT S_AXI_MAC_PKT_RREADY   = RREADY,   DIR = I, BUS = S_AXI_MAC_PKT
+PORT S_AXI_MAC_PKT_WVALID   = WVALID,   DIR = I, BUS = S_AXI_MAC_PKT
+PORT S_AXI_MAC_PKT_ARADDR   = ARADDR,   DIR = I, BUS = S_AXI_MAC_PKT, ENDIAN = LITTLE, VEC = [C_S_AXI_MAC_PKT_ADDR_WIDTH-1:0]
+PORT S_AXI_MAC_PKT_AWADDR   = AWADDR,   DIR = I, BUS = S_AXI_MAC_PKT, ENDIAN = LITTLE, VEC = [C_S_AXI_MAC_PKT_ADDR_WIDTH-1:0]
+PORT S_AXI_MAC_PKT_WDATA    = WDATA,    DIR = I, BUS = S_AXI_MAC_PKT, ENDIAN = LITTLE, VEC = [C_S_AXI_MAC_PKT_DATA_WIDTH-1:0]
+PORT S_AXI_MAC_PKT_WSTRB    = WSTRB,    DIR = I, BUS = S_AXI_MAC_PKT, ENDIAN = LITTLE, VEC = [C_S_AXI_MAC_PKT_DATA_WIDTH/8-1:0]
+PORT S_AXI_MAC_PKT_ARREADY  = ARREADY,  DIR = O, BUS = S_AXI_MAC_PKT
+PORT S_AXI_MAC_PKT_AWREADY  = AWREADY,  DIR = O, BUS = S_AXI_MAC_PKT
+PORT S_AXI_MAC_PKT_BVALID   = BVALID,   DIR = O, BUS = S_AXI_MAC_PKT
+PORT S_AXI_MAC_PKT_RVALID   = RVALID,   DIR = O, BUS = S_AXI_MAC_PKT
+PORT S_AXI_MAC_PKT_WREADY   = WREADY,   DIR = O, BUS = S_AXI_MAC_PKT
+PORT S_AXI_MAC_PKT_BRESP    = BRESP,    DIR = O, BUS = S_AXI_MAC_PKT, ENDIAN = LITTLE, VEC = [1:0]
+PORT S_AXI_MAC_PKT_RDATA    = RDATA,    DIR = O, BUS = S_AXI_MAC_PKT, ENDIAN = LITTLE, VEC = [C_S_AXI_MAC_PKT_DATA_WIDTH-1:0]
+PORT S_AXI_MAC_PKT_RRESP    = RRESP,    DIR = O, BUS = S_AXI_MAC_PKT, ENDIAN = LITTLE, VEC = [1:0]
+
+###############################################################################
+## INTERRUPTS
+PORT TIMER_IRQ  = "", DIR = O, SIGIS = INTERRUPT, SENSITIVITY = LEVEL_HIGH
+PORT MAC_IRQ    = "", DIR = O, SIGIS = INTERRUPT, SENSITIVITY = LEVEL_HIGH
+
+###############################################################################
+## RMII
+PORT oRmii_clk          = "", DIR = O, VEC = [gPhyPortCount-1:0],   ISVALID = (gui_phyType == 1), IO_IF = RMII, IO_IS = rmii_clk
+PORT iRmii_rxDataValid  = "", DIR = I, VEC = [gPhyPortCount-1:0],   ISVALID = (gui_phyType == 1), IO_IF = RMII, IO_IS = rmii_rxdv
+PORT iRmii_rxData       = "", DIR = I, VEC = [gPhyPortCount*2-1:0], ISVALID = (gui_phyType == 1), IO_IF = RMII, IO_IS = rmii_rxdat
+PORT iRmii_rxError      = "", DIR = I, VEC = [gPhyPortCount-1:0],   ISVALID = (gui_phyType == 1), IO_IF = RMII, IO_IS = rmii_rxerr
+PORT oRmii_txEnable     = "", DIR = O, VEC = [gPhyPortCount-1:0],   ISVALID = (gui_phyType == 1), IO_IF = RMII, IO_IS = rmii_txen
+PORT oRmii_txData       = "", DIR = O, VEC = [gPhyPortCount*2-1:0], ISVALID = (gui_phyType == 1), IO_IF = RMII, IO_IS = rmii_txdat
+
+###############################################################################
+## MII
+PORT iMii_rxDataValid   = "", DIR = I, VEC = [gPhyPortCount-1:0],   ISVALID = (gui_phyType == 2), IO_IF = MII, IO_IS = mii_rxdv
+PORT iMii_rxData        = "", DIR = I, VEC = [gPhyPortCount*4-1:0], ISVALID = (gui_phyType == 2), IO_IF = MII, IO_IS = mii_rxdat
+PORT iMii_rxError       = "", DIR = I, VEC = [gPhyPortCount-1:0],   ISVALID = (gui_phyType == 2), IO_IF = MII, IO_IS = mii_rxerr
+PORT iMii_rxClk         = "", DIR = I, VEC = [gPhyPortCount-1:0],   ISVALID = (gui_phyType == 2), IO_IF = MII, IO_IS = mii_rxclk, SIGIS = CLK
+PORT oMii_txEnable      = "", DIR = O, VEC = [gPhyPortCount-1:0],   ISVALID = (gui_phyType == 2), IO_IF = MII, IO_IS = mii_txen
+PORT oMii_txData        = "", DIR = O, VEC = [gPhyPortCount*4-1:0], ISVALID = (gui_phyType == 2), IO_IF = MII, IO_IS = mii_txdat
+PORT iMii_txClk         = "", DIR = I, VEC = [gPhyPortCount-1:0],   ISVALID = (gui_phyType == 2), IO_IF = MII, IO_IS = mii_txclk, SIGIS = CLK
+
+###############################################################################
+## SMI
+PORT oSmi_nPhyRst   = "", DIR = O,  VEC = [gSmiPortCount-1:0], IO_IF = SMI
+PORT oSmi_clk       = "", DIR = O,  VEC = [gSmiPortCount-1:0], IO_IF = SMI
+PORT ioSmi_dio      = "", DIR = IO, VEC = [gSmiPortCount-1:0], IO_IF = SMI, THREE_STATE = TRUE, TRI_I = iSmi_dio, TRI_O = oSmi_dio, TRI_T = oSmi_dio_tri
+PORT iSmi_dio       = "", DIR = I,  VEC = [gSmiPortCount-1:0], IO_IF = SMI
+PORT oSmi_dio       = "", DIR = O,  VEC = [gSmiPortCount-1:0], IO_IF = SMI
+PORT oSmi_dio_tri   = "", DIR = O,  IO_IF = SMI
+
+###############################################################################
+## Others
+PORT oPktActivity   = "", DIR = O, ISVALID = (gui_actEn != 0)
+PORT oMacTimerOut   = "", DIR = O, VEC = [gTimerCount-1:0]
+
+###############################################################################
+## Test port
+PORT testPort  = "", DIR = O, VEC = [255:0]
+
+END
