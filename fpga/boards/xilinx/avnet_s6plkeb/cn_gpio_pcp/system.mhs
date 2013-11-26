@@ -22,23 +22,10 @@
  PORT fpga_0_SRAM_A_pin = fpga_0_SRAM_A, DIR = O, VEC = [21:2]
  PORT fpga_0_clk_1_sys_clk_pin = CLK_S, DIR = I, SIGIS = CLK, CLK_FREQ = 50000000
  PORT fpga_0_rst_1_sys_rst_pin = sys_rst_s, DIR = I, SIGIS = RST, RST_POLARITY = 0
- PORT axi_powerlink_0_phy_SMIDat_pin = axi_powerlink_0_phy_SMIDat, DIR = IO
- PORT axi_powerlink_0_phy_SMIClk_pin = axi_powerlink_0_phy_SMIClk, DIR = O
- PORT axi_powerlink_0_phy_Rst_n_pin = axi_powerlink_0_phy_Rst_n, DIR = O
- PORT axi_powerlink_0_phy0_RxDat_pin = axi_powerlink_0_phy0_RxDat, DIR = I, VEC = [1:0]
- PORT axi_powerlink_0_phy0_RxDv_pin = axi_powerlink_0_phy0_RxDv, DIR = I
- PORT axi_powerlink_0_phy0_TxDat_pin = axi_powerlink_0_phy0_TxDat, DIR = O, VEC = [1:0]
- PORT axi_powerlink_0_phy0_TxEn_pin = axi_powerlink_0_phy0_TxEn, DIR = O
- PORT axi_powerlink_0_phy1_RxDat_pin = axi_powerlink_0_phy1_RxDat, DIR = I, VEC = [1:0]
- PORT axi_powerlink_0_phy1_RxDv_pin = axi_powerlink_0_phy1_RxDv, DIR = I
- PORT axi_powerlink_0_phy1_TxDat_pin = axi_powerlink_0_phy1_TxDat, DIR = O, VEC = [1:0]
- PORT axi_powerlink_0_phy1_TxEn_pin = axi_powerlink_0_phy1_TxEn, DIR = O
  PORT POWERLINK_NODE_ID_GPIO_IO_I_pin = POWERLINK_NODE_ID_GPIO_IO_I, DIR = I, VEC = [7:0]
  PORT POWERLINK_LED_GPIO_IO_O_pin = POWERLINK_LED_GPIO_IO_O, DIR = O, VEC = [1:0]
  PORT fpga_0_RS232_Uart_1_RX_pin = fpga_0_RS232_Uart_1_RX, DIR = I
  PORT fpga_0_RS232_Uart_1_TX_pin = fpga_0_RS232_Uart_1_TX, DIR = O
- PORT axi_powerlink_0_phy1_clk_pin = axi_powerlink_0_phy1_clk, DIR = O, SIGIS = CLK
- PORT axi_powerlink_0_phy0_clk_pin = axi_powerlink_0_phy0_clk, DIR = O, SIGIS = CLK
  PORT BENCHMARK_PIO_GPIO_IO_O_pin = BENCHMARK_PIO_GPIO_IO_O, DIR = O, VEC = [15:0]
  PORT SPI_FLASH_SS_O_pin = SPI_FLASH_SS_O, DIR = O, VEC = [0:0]
  PORT SPI_FLASH_MOSI_O_pin = SPI_FLASH_MOSI_O, DIR = O
@@ -46,6 +33,14 @@
  PORT SPI_FLASH_SCK_O_pin = SPI_FLASH_SCK_O, DIR = O
  PORT GPIO_INPUTS_GPIO_IO_I_pin = GPIO_INPUTS_GPIO_IO_I, DIR = I, VEC = [7:0]
  PORT GPIO_OUTPUTS_GPIO_IO_O_pin = GPIO_OUTPUTS_GPIO_IO_O, DIR = O, VEC = [7:0]
+ PORT axi_openmac_0_oRmii_clk_pin = axi_openmac_0_oRmii_clk, DIR = O, VEC = [1:0]
+ PORT axi_openmac_0_iRmii_rxDataValid_pin = axi_openmac_0_iRmii_rxDataValid, DIR = I, VEC = [1:0]
+ PORT axi_openmac_0_iRmii_rxData_pin = axi_openmac_0_iRmii_rxData, DIR = I, VEC = [3:0]
+ PORT axi_openmac_0_oRmii_txEnable_pin = axi_openmac_0_oRmii_txEnable, DIR = O, VEC = [1:0]
+ PORT axi_openmac_0_oRmii_txData_pin = axi_openmac_0_oRmii_txData, DIR = O, VEC = [3:0]
+ PORT axi_openmac_0_oSmi_nPhyRst_pin = axi_openmac_0_oSmi_nPhyRst, DIR = O
+ PORT axi_openmac_0_oSmi_clk_pin = axi_openmac_0_oSmi_clk, DIR = O
+ PORT axi_openmac_0_ioSmi_dio_pin = axi_openmac_0_ioSmi_dio, DIR = IO
 
 
 BEGIN proc_sys_reset
@@ -75,7 +70,7 @@ BEGIN axi_intc
  PARAMETER C_BASEADDR = 0x41200000
  PARAMETER C_HIGHADDR = 0x4120ffff
  BUS_INTERFACE S_AXI = axi4lite
- PORT Intr = xps_hwicap_0_IP2INTC_Irpt & fit_timer_0_Interrupt & axi_powerlink_0_mac_irq & axi_powerlink_0_tcp_irq
+ PORT Intr = xps_hwicap_0_IP2INTC_Irpt & fit_timer_0_Interrupt & axi_openmac_0_MAC_IRQ & axi_openmac_0_TIMER_IRQ
  PORT Irq = pcp_INTERRUPT
  PORT S_AXI_ACLK = clk_100_0000MHzPLL0
 END
@@ -216,53 +211,6 @@ BEGIN clock_generator
  PORT CLKOUT2 = clk_4_0000MHz
 END
 
-BEGIN axi_powerlink
- PARAMETER INSTANCE = axi_powerlink_0
- PARAMETER HW_VER = 0.30.a
- PARAMETER C_IP_CORE_MODE = 5
- PARAMETER C_USE_RMII = TRUE
- PARAMETER C_PACKET_LOCATION = 1
- PARAMETER C_INTERCONNECT_M_AXI_MAC_DMA_ARB_PRIORITY = 15
- PARAMETER C_INSTANCE_ODDR2 = true
- PARAMETER C_OBSERVER_ENABLE_USER = true
- PARAMETER C_MAC_NUM_RX_BUFFER_USER = 16
- PARAMETER C_S_AXI_MAC_PKT_BASEADDR = 0x7ea00000
- PARAMETER C_S_AXI_MAC_PKT_HIGHADDR = 0x7ea0ffff
- PARAMETER C_S_AXI_MAC_REG_RNG0_BASEADDR = 0x7aa00000
- PARAMETER C_S_AXI_MAC_REG_RNG0_HIGHADDR = 0x7aa0ffff
- PARAMETER C_S_AXI_MAC_REG_RNG1_BASEADDR = 0x7aa20000
- PARAMETER C_S_AXI_MAC_REG_RNG1_HIGHADDR = 0x7aa2ffff
- BUS_INTERFACE S_AXI_MAC_REG = axi4lite
- BUS_INTERFACE S_AXI_MAC_PKT = axi4lite
- BUS_INTERFACE M_AXI_MAC_DMA = axi4
- PORT mac_irq = axi_powerlink_0_mac_irq
- PORT tcp_irq = axi_powerlink_0_tcp_irq
- PORT phy_SMIDat = axi_powerlink_0_phy_SMIDat
- PORT phy_SMIClk = axi_powerlink_0_phy_SMIClk
- PORT phy_Rst_n = axi_powerlink_0_phy_Rst_n
- PORT phy0_link = net_gnd
- PORT phy0_RxDat = axi_powerlink_0_phy0_RxDat
- PORT phy0_RxDv = axi_powerlink_0_phy0_RxDv
- PORT phy0_RxErr = net_gnd
- PORT phy0_TxDat = axi_powerlink_0_phy0_TxDat
- PORT phy0_TxEn = axi_powerlink_0_phy0_TxEn
- PORT phy1_link = net_gnd
- PORT phy1_RxDat = axi_powerlink_0_phy1_RxDat
- PORT phy1_RxDv = axi_powerlink_0_phy1_RxDv
- PORT phy1_RxErr = net_gnd
- PORT phy1_TxDat = axi_powerlink_0_phy1_TxDat
- PORT phy1_TxEn = axi_powerlink_0_phy1_TxEn
- PORT clk100 = clk_100_0000MHzPLL0
- PORT S_AXI_MAC_REG_ACLK = clk_100_0000MHzPLL0
- PORT S_AXI_MAC_PKT_ACLK = clk_100_0000MHzPLL0
- PORT S_AXI_PDI_PCP_ACLK = clk_100_0000MHzPLL0
- PORT M_AXI_MAC_DMA_aclk = clk_100_0000MHzPLL0
- PORT S_AXI_SMP_PCP_ACLK = clk_100_0000MHzPLL0
- PORT phy1_clk = axi_powerlink_0_phy1_clk
- PORT phy0_clk = axi_powerlink_0_phy0_clk
- PORT clk50 = clk_50_0000MHzPLL0
-END
-
 BEGIN axi_hwicap
  PARAMETER INSTANCE = axi_hwicap_0
  PARAMETER HW_VER = 2.03.a
@@ -305,7 +253,7 @@ BEGIN axi_emc
  PARAMETER C_TWC_PS_MEM_0 = 10000
  PARAMETER C_TWP_PS_MEM_0 = 7000
  PARAMETER C_TLZWE_PS_MEM_0 = 3000
- PARAMETER C_INTERCONNECT_S_AXI_MEM_MASTERS = pcp.M_AXI_IC & pcp.M_AXI_DC & axi_powerlink_0.M_AXI_MAC_DMA
+ PARAMETER C_INTERCONNECT_S_AXI_MEM_MASTERS = pcp.M_AXI_IC & pcp.M_AXI_DC & axi_openmac_0.M_AXI_MAC_DMA
  PARAMETER C_S_AXI_MEM0_BASEADDR = 0x10000000
  PARAMETER C_S_AXI_MEM0_HIGHADDR = 0x100fffff
  BUS_INTERFACE S_AXI_MEM = axi4
@@ -401,5 +349,39 @@ BEGIN axi_gpio
  BUS_INTERFACE S_AXI = axi4lite
  PORT S_AXI_ACLK = clk_100_0000MHzPLL0
  PORT GPIO_IO_O = GPIO_OUTPUTS_GPIO_IO_O
+END
+
+BEGIN axi_openmac
+ PARAMETER INSTANCE = axi_openmac_0
+ PARAMETER HW_VER = 1.00.a
+ PARAMETER gui_phyCount = 2
+ PARAMETER gui_txBufSize = 8
+ PARAMETER gui_rxBufLoc = 2
+ PARAMETER gui_rxBurstSize = 8
+ PARAMETER C_S_AXI_MAC_PKT_BASEADDR = 0x20400000
+ PARAMETER C_S_AXI_MAC_PKT_HIGHADDR = 0x2040FFFF
+ PARAMETER C_S_AXI_MAC_REG_RNG0_BASEADDR = 0x2C400000
+ PARAMETER C_S_AXI_MAC_REG_RNG0_HIGHADDR = 0x2C40FFFF
+ PARAMETER C_S_AXI_MAC_REG_RNG1_BASEADDR = 0x2C420000
+ PARAMETER C_S_AXI_MAC_REG_RNG1_HIGHADDR = 0x2C42FFFF
+ BUS_INTERFACE M_AXI_MAC_DMA = axi4
+ BUS_INTERFACE S_AXI_MAC_REG = axi4lite
+ BUS_INTERFACE S_AXI_MAC_PKT = axi4lite
+ PORT S_AXI_MAC_REG_ACLK = clk_100_0000MHzPLL0
+ PORT M_AXI_MAC_DMA_ACLK = clk_100_0000MHzPLL0
+ PORT oRmii_clk = axi_openmac_0_oRmii_clk
+ PORT iRmii_rxDataValid = axi_openmac_0_iRmii_rxDataValid
+ PORT iRmii_rxData = axi_openmac_0_iRmii_rxData
+ PORT oRmii_txEnable = axi_openmac_0_oRmii_txEnable
+ PORT oRmii_txData = axi_openmac_0_oRmii_txData
+ PORT oSmi_nPhyRst = axi_openmac_0_oSmi_nPhyRst
+ PORT oSmi_clk = axi_openmac_0_oSmi_clk
+ PORT ioSmi_dio = axi_openmac_0_ioSmi_dio
+ PORT MAC_IRQ = axi_openmac_0_MAC_IRQ
+ PORT TIMER_IRQ = axi_openmac_0_TIMER_IRQ
+ PORT iClk50 = clk_50_0000MHzPLL0
+ PORT iClk100 = clk_100_0000MHzPLL0
+ PORT S_AXI_MAC_PKT_ACLK = clk_100_0000MHzPLL0
+ PORT iRmii_rxError = net_gnd
 END
 
