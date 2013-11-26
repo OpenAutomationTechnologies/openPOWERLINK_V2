@@ -135,19 +135,24 @@
          type = "boolean";
       }
    }
-   element powerlink_0
+   element mac_irq
    {
       datum _sortIndex
       {
-         value = "5";
+         value = "6";
          type = "int";
+      }
+      datum sopceditor_expanded
+      {
+         value = "0";
+         type = "boolean";
       }
    }
    element slow_bridge.s0
    {
       datum baseAddress
       {
-         value = "16384";
+         value = "32768";
          type = "String";
       }
    }
@@ -177,14 +182,6 @@
          type = "String";
       }
    }
-   element benchmark_pio.s1
-   {
-      datum baseAddress
-      {
-         value = "32";
-         type = "String";
-      }
-   }
    element timer_0.s1
    {
       datum baseAddress
@@ -203,6 +200,14 @@
       datum baseAddress
       {
          value = "134217728";
+         type = "String";
+      }
+   }
+   element benchmark_pio.s1
+   {
+      datum baseAddress
+      {
+         value = "32";
          type = "String";
       }
    }
@@ -232,11 +237,11 @@
          type = "boolean";
       }
    }
-   element sync_irq_bridge_0
+   element sync_irq
    {
       datum _sortIndex
       {
-         value = "6";
+         value = "5";
          type = "int";
       }
       datum sopceditor_expanded
@@ -286,7 +291,7 @@
  <parameter name="projectName" value="" />
  <parameter name="sopcBorderPoints" value="false" />
  <parameter name="systemHash" value="1" />
- <parameter name="timeStamp" value="1381992295716" />
+ <parameter name="timeStamp" value="1383754155969" />
  <parameter name="useTestBenchNamingPattern" value="false" />
  <instanceScript></instanceScript>
  <interface name="clk50" internal="clk50.clk_in" type="clock" dir="end" />
@@ -303,40 +308,20 @@
    type="conduit"
    dir="end" />
  <interface
-   name="powerlink_0_phym0"
-   internal="powerlink_0.PHYM0"
-   type="conduit"
-   dir="end" />
- <interface
-   name="powerlink_0_phym1"
-   internal="powerlink_0.PHYM1"
-   type="conduit"
-   dir="end" />
- <interface
-   name="powerlink_0_mii0"
-   internal="powerlink_0.MII0"
-   type="conduit"
-   dir="end" />
- <interface
-   name="powerlink_0_mii1"
-   internal="powerlink_0.MII1"
-   type="conduit"
-   dir="end" />
- <interface
-   name="sync_irq_bridge_0_sender0_irq"
-   internal="sync_irq_bridge_0.sender0_irq"
-   type="interrupt"
-   dir="end" />
- <interface
    name="slow_bridge"
    internal="slow_bridge.m0"
    type="avalon"
    dir="start" />
  <interface name="cpu_bridge" internal="cpu_bridge.m0" type="avalon" dir="start" />
  <interface
-   name="mac_dma_bridge"
-   internal="powerlink_0.MAC_DMA"
-   type="avalon"
+   name="sync_irq"
+   internal="sync_irq.receiver_irq"
+   type="interrupt"
+   dir="start" />
+ <interface
+   name="mac_irq"
+   internal="mac_irq.receiver_irq"
+   type="interrupt"
    dir="start" />
  <module kind="clock_source" version="13.0" enabled="1" name="clk100">
   <parameter name="clockFrequency" value="100000000" />
@@ -446,7 +431,7 @@
   <parameter name="tightlyCoupledInstructionMaster2AddrWidth" value="1" />
   <parameter name="tightlyCoupledInstructionMaster3AddrWidth" value="1" />
   <parameter name="instSlaveMapParam"><![CDATA[<address-map><slave name='cpu_0.jtag_debug_module' start='0x2002800' end='0x2003000' /></address-map>]]></parameter>
-  <parameter name="dataSlaveMapParam"><![CDATA[<address-map><slave name='cpu_0.jtag_debug_module' start='0x2002800' end='0x2003000' /><slave name='tc_i_mem.s2' start='0x8000000' end='0x8005000' /><slave name='timer_0.s1' start='0x20000000' end='0x20000020' /><slave name='benchmark_pio.s1' start='0x20000020' end='0x20000040' /><slave name='jtag_uart_0.avalon_jtag_slave' start='0x20000040' end='0x20000048' /><slave name='powerlink_0.MAC_REG' start='0x20008000' end='0x2000A000' /><slave name='powerlink_0.MAC_CMP' start='0x2000A000' end='0x2000A010' /></address-map>]]></parameter>
+  <parameter name="dataSlaveMapParam"><![CDATA[<address-map><slave name='cpu_0.jtag_debug_module' start='0x2002800' end='0x2003000' /><slave name='tc_i_mem.s2' start='0x8000000' end='0x8005000' /><slave name='timer_0.s1' start='0x20000000' end='0x20000020' /><slave name='benchmark_pio.s1' start='0x20000020' end='0x20000040' /><slave name='jtag_uart_0.avalon_jtag_slave' start='0x20000040' end='0x20000048' /></address-map>]]></parameter>
   <parameter name="clockFrequency" value="100000000" />
   <parameter name="deviceFamilyName" value="Cyclone IV E" />
   <parameter name="internalIrqMaskSystemInfo" value="15" />
@@ -492,49 +477,6 @@
   <parameter name="clockFrequencyKnown" value="true" />
   <parameter name="inputClockFrequency" value="0" />
   <parameter name="resetSynchronousEdges" value="NONE" />
- </module>
- <module kind="powerlink" version="0.3.0" enabled="1" name="powerlink_0">
-  <parameter name="pcpSysId" value="1" />
-  <parameter name="expertMode" value="true" />
-  <parameter name="clkRateEth" value="0" />
-  <parameter name="clkRate50" value="50000000" />
-  <parameter name="clkRatePcp" value="0" />
-  <parameter name="configPowerlink" value="openMAC only" />
-  <parameter name="configApInterface" value="Avalon" />
-  <parameter name="configApParallelInterface" value="8bit" />
-  <parameter name="configApParSigs" value="High Active" />
-  <parameter name="configApParOutSigs" value="High Active" />
-  <parameter name="configApSpi_CPOL" value="0" />
-  <parameter name="configApSpi_CPHA" value="0" />
-  <parameter name="configApSpi_IRQ" value="High Active" />
-  <parameter name="rpdoNum" value="3" />
-  <parameter name="rpdo0size" value="1" />
-  <parameter name="tpdoNum" value="1" />
-  <parameter name="tpdo0size" value="1" />
-  <parameter name="genLedGadget" value="true" />
-  <parameter name="genEvent" value="true" />
-  <parameter name="asyncBuf1Size" value="1514" />
-  <parameter name="asyncBuf2Size" value="1514" />
-  <parameter name="phyIF" value="MII" />
-  <parameter name="packetLoc">TX and RX over Avalon Master</parameter>
-  <parameter name="validSet" value="1" />
-  <parameter name="macTxBuf" value="7000" />
-  <parameter name="macRxBuf" value="16" />
-  <parameter name="hwSupportSyncIrq" value="false" />
-  <parameter name="mac2phys" value="true" />
-  <parameter name="macGen2ndSmi" value="true" />
-  <parameter name="macTxBurstSize" value="16" />
-  <parameter name="macRxBurstSize" value="16" />
-  <parameter name="enDmaObserver" value="true" />
-  <parameter name="macRxQueueNum" value="2" />
-  <parameter name="macRxQueue1Size" value="5" />
-  <parameter name="macRxQueue2Size" value="5" />
-  <parameter name="macRxQueue3Size" value="5" />
-  <parameter name="macRxQueue4Size" value="5" />
-  <parameter name="macRxQueue5Size" value="5" />
-  <parameter name="AUTO_AP_CLK_CLOCK_RATE" value="-1" />
-  <parameter name="AUTO_CLKMASTER_CLOCK_RATE" value="100000000" />
-  <parameter name="AUTO_CLKPKT_CLOCK_RATE" value="-1" />
  </module>
  <module
    kind="altera_avalon_mm_clock_crossing_bridge"
@@ -606,23 +548,13 @@
   <parameter name="avalonSpec" value="2.0" />
  </module>
  <module
-   kind="altera_irq_bridge"
-   version="13.0"
-   enabled="1"
-   name="sync_irq_bridge_0">
-  <parameter name="IRQ_WIDTH" value="1" />
-  <parameter name="IRQ_N" value="0" />
-  <parameter name="AUTO_CLK_CLOCK_RATE" value="50000000" />
-  <parameter name="AUTO_DEVICE_FAMILY" value="Cyclone IV E" />
- </module>
- <module
    kind="altera_avalon_mm_bridge"
    version="13.0"
    enabled="1"
    name="slow_bridge">
   <parameter name="DATA_WIDTH" value="32" />
   <parameter name="SYMBOL_WIDTH" value="8" />
-  <parameter name="ADDRESS_WIDTH" value="14" />
+  <parameter name="ADDRESS_WIDTH" value="15" />
   <parameter name="ADDRESS_UNITS" value="SYMBOLS" />
   <parameter name="MAX_BURST_SIZE" value="1" />
   <parameter name="MAX_PENDING_RESPONSES" value="1" />
@@ -647,6 +579,18 @@
   <parameter name="PIPELINE_COMMAND" value="0" />
   <parameter name="PIPELINE_RESPONSE" value="0" />
   <parameter name="AUTO_CLK_CLOCK_RATE" value="100000000" />
+  <parameter name="AUTO_DEVICE_FAMILY" value="Cyclone IV E" />
+ </module>
+ <module kind="altera_irq_bridge" version="13.0" enabled="1" name="sync_irq">
+  <parameter name="IRQ_WIDTH" value="1" />
+  <parameter name="IRQ_N" value="0" />
+  <parameter name="AUTO_CLK_CLOCK_RATE" value="50000000" />
+  <parameter name="AUTO_DEVICE_FAMILY" value="Cyclone IV E" />
+ </module>
+ <module kind="altera_irq_bridge" version="13.0" enabled="1" name="mac_irq">
+  <parameter name="IRQ_WIDTH" value="1" />
+  <parameter name="IRQ_N" value="0" />
+  <parameter name="AUTO_CLK_CLOCK_RATE" value="50000000" />
   <parameter name="AUTO_DEVICE_FAMILY" value="Cyclone IV E" />
  </module>
  <connection
@@ -707,11 +651,6 @@
    kind="clock"
    version="13.0"
    start="clk50.clk"
-   end="powerlink_0.clk50meg" />
- <connection
-   kind="clock"
-   version="13.0"
-   start="clk50.clk"
    end="clock_crossing_0.m0_clk" />
  <connection
    kind="clock"
@@ -752,11 +691,6 @@
   <parameter name="baseAddress" value="0x0000" />
   <parameter name="defaultConnection" value="false" />
  </connection>
- <connection
-   kind="reset"
-   version="13.0"
-   start="clk50.clk_reset"
-   end="powerlink_0.reset" />
  <connection kind="clock" version="13.0" start="clk50.clk" end="benchmark_pio.clk" />
  <connection
    kind="reset"
@@ -786,20 +720,6 @@
   <parameter name="arbitrationPriority" value="1" />
   <parameter name="baseAddress" value="0x0040" />
   <parameter name="defaultConnection" value="false" />
- </connection>
- <connection
-   kind="interrupt"
-   version="13.0"
-   start="cpu_0.d_irq"
-   end="powerlink_0.MACCMP_IRQ">
-  <parameter name="irqNumber" value="0" />
- </connection>
- <connection
-   kind="interrupt"
-   version="13.0"
-   start="cpu_0.d_irq"
-   end="powerlink_0.MAC_IRQ">
-  <parameter name="irqNumber" value="1" />
  </connection>
  <connection kind="interrupt" version="13.0" start="cpu_0.d_irq" end="timer_0.irq">
   <parameter name="irqNumber" value="2" />
@@ -845,16 +765,6 @@
    kind="reset"
    version="13.0"
    start="clk100.clk_reset"
-   end="powerlink_0.reset" />
- <connection
-   kind="reset"
-   version="13.0"
-   start="cpu_0.jtag_debug_module_reset"
-   end="powerlink_0.reset" />
- <connection
-   kind="reset"
-   version="13.0"
-   start="clk100.clk_reset"
    end="clock_crossing_0.m0_reset" />
  <connection
    kind="reset"
@@ -901,33 +811,6 @@
    version="13.0"
    start="cpu_0.jtag_debug_module_reset"
    end="jtag_uart_0.reset" />
- <connection
-   kind="interrupt"
-   version="13.0"
-   start="sync_irq_bridge_0.receiver_irq"
-   end="powerlink_0.MACCMP_IRQ">
-  <parameter name="irqNumber" value="0" />
- </connection>
- <connection
-   kind="reset"
-   version="13.0"
-   start="clk100.clk_reset"
-   end="sync_irq_bridge_0.clk_reset" />
- <connection
-   kind="reset"
-   version="13.0"
-   start="cpu_0.jtag_debug_module_reset"
-   end="sync_irq_bridge_0.clk_reset" />
- <connection
-   kind="reset"
-   version="13.0"
-   start="clk50.clk_reset"
-   end="sync_irq_bridge_0.clk_reset" />
- <connection
-   kind="clock"
-   version="13.0"
-   start="clk50.clk"
-   end="sync_irq_bridge_0.clk" />
  <connection kind="clock" version="13.0" start="clk50.clk" end="slow_bridge.clk" />
  <connection
    kind="avalon"
@@ -935,7 +818,7 @@
    start="clock_crossing_0.m0"
    end="slow_bridge.s0">
   <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x4000" />
+  <parameter name="baseAddress" value="0x8000" />
   <parameter name="defaultConnection" value="false" />
  </connection>
  <connection
@@ -987,29 +870,52 @@
    version="13.0"
    start="clk50.clk_reset"
    end="cpu_bridge.reset" />
+ <connection kind="clock" version="13.0" start="clk50.clk" end="sync_irq.clk" />
+ <connection kind="clock" version="13.0" start="clk50.clk" end="mac_irq.clk" />
  <connection
-   kind="avalon"
+   kind="interrupt"
    version="13.0"
-   start="clock_crossing_0.m0"
-   end="powerlink_0.MAC_REG">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x8000" />
-  <parameter name="defaultConnection" value="false" />
+   start="cpu_0.d_irq"
+   end="sync_irq.sender0_irq">
+  <parameter name="irqNumber" value="0" />
  </connection>
  <connection
-   kind="avalon"
+   kind="interrupt"
    version="13.0"
-   start="clock_crossing_0.m0"
-   end="powerlink_0.MAC_CMP">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0xa000" />
-  <parameter name="defaultConnection" value="false" />
+   start="cpu_0.d_irq"
+   end="mac_irq.sender0_irq">
+  <parameter name="irqNumber" value="1" />
  </connection>
  <connection
-   kind="clock"
+   kind="reset"
    version="13.0"
-   start="clk100.clk"
-   end="powerlink_0.clkMaster" />
+   start="clk100.clk_reset"
+   end="sync_irq.clk_reset" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="cpu_0.jtag_debug_module_reset"
+   end="sync_irq.clk_reset" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="clk50.clk_reset"
+   end="sync_irq.clk_reset" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="clk100.clk_reset"
+   end="mac_irq.clk_reset" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="cpu_0.jtag_debug_module_reset"
+   end="mac_irq.clk_reset" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="clk50.clk_reset"
+   end="mac_irq.clk_reset" />
  <interconnectRequirement for="$system" name="qsys_mm.clockCrossingAdapter" value="HANDSHAKE" />
  <interconnectRequirement for="$system" name="qsys_mm.maxAdditionalLatency" value="0" />
 </system>
