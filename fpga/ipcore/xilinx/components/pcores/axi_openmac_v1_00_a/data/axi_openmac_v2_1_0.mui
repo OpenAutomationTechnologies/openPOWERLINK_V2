@@ -1,0 +1,378 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<!--
+###############################################################################
+## DISCLAIMER OF LIABILITY
+##
+## This file contains proprietary and confidential information of
+## Xilinx, Inc. ("Xilinx"), that is distributed under a license
+## from Xilinx, and may be used, copied and/or disclosed only
+## pursuant to the terms of a valid license agreement with Xilinx.
+##
+## XILINX IS PROVIDING THIS DESIGN, CODE, OR INFORMATION
+## ("MATERIALS") "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
+## EXPRESSED, IMPLIED, OR STATUTORY, INCLUDING WITHOUT
+## LIMITATION, ANY WARRANTY WITH RESPECT TO NONINFRINGEMENT,
+## MERCHANTABILITY OR FITNESS FOR ANY PARTICULAR PURPOSE. Xilinx
+## does not warrant that functions included in the Materials will
+## meet the requirements of Licensee, or that the operation of the
+## Materials will be uninterrupted or error-free, or that defects
+## in the Materials will be corrected. Furthermore, Xilinx does
+## not warrant or make any representations regarding use, or the
+## results of the use, of the Materials in terms of correctness,
+## accuracy, reliability or otherwise.
+##
+## Xilinx products are not designed or intended to be fail-safe,
+## or for use in any application requiring fail-safe performance,
+## such as life-support or safety devices or systems, Class III
+## medical devices, nuclear facilities, applications related to
+## the deployment of airbags, or any other applications that could
+## lead to death, personal injury or severe property or
+## environmental damage (individually and collectively, "critical
+## applications"). Customer assumes the sole risk and liability
+## of any use of Xilinx products in critical applications,
+## subject only to applicable laws and regulations governing
+## limitations on product liability.
+##
+## Copyright 2007, 2009 Xilinx, Inc.
+## All rights reserved.
+##
+## This disclaimer and copyright notice must be retained as part
+## of this file at all times.
+##
+###############################################################################
+-->
+
+<!DOCTYPE doc SYSTEM "$XILINX_EDK\hw\XilinxProcessorIPLib\pcores\ipdialog.dtd" [
+    <!-- -->
+    <!-- Phy Interface -->
+    <!ENTITY gui_phyType '
+    <widget id="gui_phyType">
+        <key>gui_phyType</key>
+        <label>Phy(s) interface type</label>
+        <tip></tip>
+    </widget>
+    '>
+    <!ENTITY gui_phyCount '
+    <widget id="gui_phyCount">
+        <key>gui_phyCount</key>
+        <label>Number of Phys</label>
+        <tip></tip>
+    </widget>
+    '>
+    <!ENTITY gui_extraSmi '
+    <widget id="gui_extraSmi">
+        <key>gui_extraSmi</key>
+        <label>Extra SMI ports</label>
+        <tip></tip>
+    </widget>
+    '>
+
+    <!-- Packet Buffer -->
+    <!ENTITY gui_txBufLoc '
+    <widget id="gui_txBufLoc">
+        <key>gui_txBufLoc</key>
+        <label>Tx Buffer Location</label>
+        <tip></tip>
+    </widget>
+    '>
+    <!ENTITY gui_txBufSize '
+    <widget id="gui_txBufSize">
+        <key>gui_txBufSize</key>
+        <label>Tx Buffer Size</label>
+        <tip></tip>
+    </widget>
+    '>
+    <!ENTITY gui_txBurstSize '
+    <widget id="gui_txBurstSize">
+        <key>gui_txBurstSize</key>
+        <label>Tx Burst Size</label>
+        <tip></tip>
+    </widget>
+    '>
+    <!ENTITY gui_rxBufLoc '
+    <widget id="gui_rxBufLoc">
+        <key>gui_rxBufLoc</key>
+        <label>Rx Buffer Location</label>
+        <tip></tip>
+    </widget>
+    '>
+    <!ENTITY gui_rxBufSize '
+    <widget id="gui_rxBufSize">
+        <key>gui_rxBufSize</key>
+        <label>Rx Buffer Size</label>
+        <tip></tip>
+    </widget>
+    '>
+    <!ENTITY gui_rxBurstSize '
+    <widget id="gui_rxBurstSize">
+        <key>gui_rxBurstSize</key>
+        <label>Rx Burst Size</label>
+        <tip></tip>
+    </widget>
+    '>
+
+    <!-- Timer -->
+    <!ENTITY gui_tmrCount '
+    <widget id="gui_tmrCount">
+        <key>gui_tmrCount</key>
+        <label>Number of Hardware Timers</label>
+        <tip></tip>
+    </widget>
+    '>
+    <!ENTITY gui_tmrPulseEn '
+    <widget id="gui_tmrPulseEn">
+        <key>gui_tmrPulseEn</key>
+        <label>Timer Pulse Width Control</label>
+        <tip></tip>
+    </widget>
+    '>
+    <!ENTITY gui_tmrPulseWdt '
+    <widget id="gui_tmrPulseWdt">
+        <key>gui_tmrPulseWdt</key>
+        <label>Timer Pulse Width register width</label>
+        <tip></tip>
+    </widget>
+    '>
+
+    <!-- Others -->
+    <!ENTITY gui_actEn '
+    <widget id="gui_actEn">
+        <key>gui_actEn</key>
+        <label>Packet activity LED</label>
+        <tip></tip>
+    </widget>
+    '>
+
+    <!-- AXI MAC DMA -->
+    <!ENTITY C_M_AXI_MAC_DMA_ADDR_WIDTH '
+    <widget id="C_M_AXI_MAC_DMA_ADDR_WIDTH">
+        <key>C_M_AXI_MAC_DMA_ADDR_WIDTH</key>
+        <tip></tip>
+    </widget>
+    '>
+    <!ENTITY C_M_AXI_MAC_DMA_DATA_WIDTH '
+    <widget id="C_M_AXI_MAC_DMA_DATA_WIDTH">
+        <key>C_M_AXI_MAC_DMA_DATA_WIDTH</key>
+        <tip></tip>
+    </widget>
+    '>
+    <!ENTITY C_M_AXI_MAC_DMA_NATIVE_DWIDTH '
+    <widget id="C_M_AXI_MAC_DMA_NATIVE_DWIDTH">
+        <key>C_M_AXI_MAC_DMA_NATIVE_DWIDTH</key>
+        <tip></tip>
+    </widget>
+    '>
+    <!ENTITY C_M_AXI_MAC_DMA_LENGTH_WIDTH '
+    <widget id="C_M_AXI_MAC_DMA_LENGTH_WIDTH">
+        <key>C_M_AXI_MAC_DMA_LENGTH_WIDTH</key>
+        <tip></tip>
+    </widget>
+    '>
+    <!ENTITY C_M_AXI_MAC_DMA_MAX_BURST_LEN '
+    <widget id="C_M_AXI_MAC_DMA_MAX_BURST_LEN">
+        <key>C_M_AXI_MAC_DMA_MAX_BURST_LEN</key>
+        <tip></tip>
+    </widget>
+    '>
+    <!ENTITY C_M_AXI_MAC_DMA_PROTOCOL '
+    <widget id="C_M_AXI_MAC_DMA_PROTOCOL">
+        <key>C_M_AXI_MAC_DMA_PROTOCOL</key>
+        <tip></tip>
+    </widget>
+    '>
+
+    <!-- AXI MAC REG -->
+    <!ENTITY C_S_AXI_MAC_REG_NUM_ADDR_RANGES '
+    <widget id="C_S_AXI_MAC_REG_NUM_ADDR_RANGES">
+        <key>C_S_AXI_MAC_REG_NUM_ADDR_RANGES</key>
+        <tip></tip>
+    </widget>
+    '>
+    <!ENTITY C_S_AXI_MAC_REG_RNG0_BASEADDR '
+    <widget id="C_S_AXI_MAC_REG_RNG0_BASEADDR">
+        <key>C_S_AXI_MAC_REG_RNG0_BASEADDR</key>
+        <tip></tip>
+    </widget>
+    '>
+    <!ENTITY C_S_AXI_MAC_REG_RNG0_HIGHADDR '
+    <widget id="C_S_AXI_MAC_REG_RNG0_HIGHADDR">
+        <key>C_S_AXI_MAC_REG_RNG0_HIGHADDR</key>
+        <tip></tip>
+    </widget>
+    '>
+    <!ENTITY C_S_AXI_MAC_REG_RNG1_BASEADDR '
+    <widget id="C_S_AXI_MAC_REG_RNG1_BASEADDR">
+        <key>C_S_AXI_MAC_REG_RNG1_BASEADDR</key>
+        <tip></tip>
+    </widget>
+    '>
+    <!ENTITY C_S_AXI_MAC_REG_RNG1_HIGHADDR '
+    <widget id="C_S_AXI_MAC_REG_RNG1_HIGHADDR">
+        <key>C_S_AXI_MAC_REG_RNG1_HIGHADDR</key>
+        <tip></tip>
+    </widget>
+    '>
+    <!ENTITY C_S_AXI_MAC_REG_MIN_SIZE '
+    <widget id="C_S_AXI_MAC_REG_MIN_SIZE">
+        <key>C_S_AXI_MAC_REG_MIN_SIZE</key>
+        <tip></tip>
+    </widget>
+    '>
+    <!ENTITY C_S_AXI_MAC_REG_DATA_WIDTH '
+    <widget id="C_S_AXI_MAC_REG_DATA_WIDTH">
+        <key>C_S_AXI_MAC_REG_DATA_WIDTH</key>
+        <tip></tip>
+    </widget>
+    '>
+    <!ENTITY C_S_AXI_MAC_REG_ADDR_WIDTH '
+    <widget id="C_S_AXI_MAC_REG_ADDR_WIDTH">
+        <key>C_S_AXI_MAC_REG_ADDR_WIDTH</key>
+        <tip></tip>
+    </widget>
+    '>
+    <!ENTITY C_S_AXI_MAC_REG_USE_WSTRB '
+    <widget id="C_S_AXI_MAC_REG_USE_WSTRB">
+        <key>C_S_AXI_MAC_REG_USE_WSTRB</key>
+        <tip></tip>
+    </widget>
+    '>
+    <!ENTITY C_S_AXI_MAC_REG_DPHASE_TIMEOUT '
+    <widget id="C_S_AXI_MAC_REG_DPHASE_TIMEOUT">
+        <key>C_S_AXI_MAC_REG_DPHASE_TIMEOUT</key>
+        <tip></tip>
+    </widget>
+    '>
+    <!ENTITY C_S_AXI_MAC_REG_PROTOCOL '
+    <widget id="C_S_AXI_MAC_REG_PROTOCOL">
+        <key>C_S_AXI_MAC_REG_PROTOCOL</key>
+        <tip></tip>
+    </widget>
+    '>
+
+    <!-- AXI MAC PKT -->
+    <!ENTITY C_S_AXI_MAC_PKT_BASEADDR '
+    <widget id="C_S_AXI_MAC_PKT_BASEADDR">
+        <key>C_S_AXI_MAC_PKT_BASEADDR</key>
+        <tip></tip>
+    </widget>
+    '>
+    <!ENTITY C_S_AXI_MAC_PKT_HIGHADDR '
+    <widget id="C_S_AXI_MAC_PKT_HIGHADDR">
+        <key>C_S_AXI_MAC_PKT_HIGHADDR</key>
+        <tip></tip>
+    </widget>
+    '>
+    <!ENTITY C_S_AXI_MAC_PKT_MIN_SIZE '
+    <widget id="C_S_AXI_MAC_PKT_MIN_SIZE">
+        <key>C_S_AXI_MAC_PKT_MIN_SIZE</key>
+        <tip></tip>
+    </widget>
+    '>
+    <!ENTITY C_S_AXI_MAC_PKT_DATA_WIDTH '
+    <widget id="C_S_AXI_MAC_PKT_DATA_WIDTH">
+        <key>C_S_AXI_MAC_PKT_DATA_WIDTH</key>
+        <tip></tip>
+    </widget>
+    '>
+    <!ENTITY C_S_AXI_MAC_PKT_ADDR_WIDTH '
+    <widget id="C_S_AXI_MAC_PKT_ADDR_WIDTH">
+        <key>C_S_AXI_MAC_PKT_ADDR_WIDTH</key>
+        <tip></tip>
+    </widget>
+    '>
+    <!ENTITY C_S_AXI_MAC_PKT_USE_WSTRB '
+    <widget id="C_S_AXI_MAC_PKT_USE_WSTRB">
+        <key>C_S_AXI_MAC_PKT_USE_WSTRB</key>
+        <tip></tip>
+    </widget>
+    '>
+    <!ENTITY C_S_AXI_MAC_PKT_DPHASE_TIMEOUT '
+    <widget id="C_S_AXI_MAC_PKT_DPHASE_TIMEOUT">
+        <key>C_S_AXI_MAC_PKT_DPHASE_TIMEOUT</key>
+        <tip></tip>
+    </widget>
+    '>
+    <!ENTITY C_S_AXI_MAC_PKT_PROTOCOL '
+    <widget id="C_S_AXI_MAC_PKT_PROTOCOL">
+        <key>C_S_AXI_MAC_PKT_PROTOCOL</key>
+        <tip></tip>
+    </widget>
+    '>
+
+]>
+
+<doc>
+    <view id="User">
+        <display>User</display>
+        <group id="Phy_Interface">
+            <display>Phy Interface</display>
+            <item>&gui_phyType;</item>
+            <item>&gui_phyCount;</item>
+            <item>&gui_extraSmi;</item>
+        </group>
+        <group id="Packet_Buffer">
+            <display>Packet Buffer</display>
+            <item>&gui_txBufLoc;</item>
+            <item>&gui_txBufSize;</item>
+            <item>&gui_txBurstSize;</item>
+            <item>&gui_rxBufLoc;</item>
+            <item>&gui_rxBufSize;</item>
+            <item>&gui_rxBurstSize;</item>
+        </group>
+        <group id="Timer">
+            <display>Timer</display>
+            <item>&gui_tmrCount;</item>
+            <item>&gui_tmrPulseEn;</item>
+            <item>&gui_tmrPulseWdt;</item>
+        </group>
+        <group id="Others">
+            <display>Others</display>
+            <item>&gui_actEn;</item>
+        </group>
+    </view>
+    <view id="System">
+        <display>System</display>
+        <group id="Addresses">
+            <display>Addresses</display>
+            <item>&C_S_AXI_MAC_REG_RNG0_BASEADDR;</item>
+            <item>&C_S_AXI_MAC_REG_RNG0_HIGHADDR;</item>
+            <item>&C_S_AXI_MAC_REG_RNG1_BASEADDR;</item>
+            <item>&C_S_AXI_MAC_REG_RNG1_HIGHADDR;</item>
+            <item>&C_S_AXI_MAC_PKT_BASEADDR;</item>
+            <item>&C_S_AXI_MAC_PKT_HIGHADDR;</item>
+        </group>
+        <group id="AXI_MAC_DMA">
+            <display>AXI MAC DMA</display>
+            <item>&C_M_AXI_MAC_DMA_ADDR_WIDTH;</item>
+            <item>&C_M_AXI_MAC_DMA_DATA_WIDTH;</item>
+            <item>&C_M_AXI_MAC_DMA_NATIVE_DWIDTH;</item>
+            <item>&C_M_AXI_MAC_DMA_LENGTH_WIDTH;</item>
+            <item>&C_M_AXI_MAC_DMA_MAX_BURST_LEN;</item>
+            <item>&C_M_AXI_MAC_DMA_PROTOCOL;</item>
+        </group>
+        <group id="AXI_MAC_REG">
+            <display>AXI MAC REG</display>
+            <item>&C_S_AXI_MAC_REG_NUM_ADDR_RANGES;</item>
+            <item>&C_S_AXI_MAC_REG_MIN_SIZE;</item>
+            <item>&C_S_AXI_MAC_REG_DATA_WIDTH;</item>
+            <item>&C_S_AXI_MAC_REG_ADDR_WIDTH;</item>
+            <item>&C_S_AXI_MAC_REG_USE_WSTRB;</item>
+            <item>&C_S_AXI_MAC_REG_DPHASE_TIMEOUT;</item>
+            <item>&C_S_AXI_MAC_REG_PROTOCOL;</item>
+        </group>
+        <group id="AXI_MAC_PKT">
+            <display>AXI MAC PKT</display>
+            <item>&C_S_AXI_MAC_PKT_MIN_SIZE;</item>
+            <item>&C_S_AXI_MAC_PKT_DATA_WIDTH;</item>
+            <item>&C_S_AXI_MAC_PKT_ADDR_WIDTH;</item>
+            <item>&C_S_AXI_MAC_PKT_USE_WSTRB;</item>
+            <item>&C_S_AXI_MAC_PKT_DPHASE_TIMEOUT;</item>
+            <item>&C_S_AXI_MAC_PKT_PROTOCOL;</item>
+        </group>
+        <group id="Hidden">
+            <display>Hidden</display>
+            <item>&C_FAMILY;</item>
+        </group>
+    </view>
+</doc>

@@ -42,6 +42,9 @@ use ieee.std_logic_unsigned.all;
 use ieee.math_real.log2;
 use ieee.math_real.ceil;
 
+library work;
+use work.global.all;
+
 entity openMAC_DMAmaster is
   generic(
        simulate : boolean := false;
@@ -174,41 +177,6 @@ component master_handler
        rx_rd_req : out std_logic;
        tx_aclr : out std_logic;
        tx_wr_req : out std_logic
-  );
-end component;
-component OpenMAC_DMAFifo
-  generic(
-       fifo_data_width_g : natural := 16;
-       fifo_word_size_g : natural := 32;
-       fifo_word_size_log2_g : natural := 5
-  );
-  port (
-       aclr : in std_logic;
-       rd_clk : in std_logic;
-       rd_req : in std_logic;
-       wr_clk : in std_logic;
-       wr_data : in std_logic_vector(fifo_data_width_g-1 downto 0);
-       wr_req : in std_logic;
-       rd_data : out std_logic_vector(fifo_data_width_g-1 downto 0);
-       rd_empty : out std_logic;
-       rd_full : out std_logic;
-       rd_usedw : out std_logic_vector(fifo_word_size_log2_g-1 downto 0);
-       wr_empty : out std_logic;
-       wr_full : out std_logic;
-       wr_usedw : out std_logic_vector(fifo_word_size_log2_g-1 downto 0)
-  );
-end component;
-component slow2fastSync
-  generic(
-       doSync_g : boolean := TRUE
-  );
-  port (
-       clkDst : in std_logic;
-       clkSrc : in std_logic;
-       dataSrc : in std_logic;
-       rstDst : in std_logic;
-       rstSrc : in std_logic;
-       dataDst : out std_logic
   );
 end component;
 
@@ -360,25 +328,33 @@ rx_wr_clk <= dma_clk;
 
 tx_wr_clk <= m_clk;
 
-sync1 : slow2fastSync
-  port map(
-       clkDst => m_clk,
-       clkSrc => dma_clk,
-       dataDst => m_mac_tx_off,
-       dataSrc => mac_tx_off,
-       rstDst => rst,
-       rstSrc => rst
-  );
+    sync1 : entity work.syncTog
+        generic map (
+            gStages => 2,
+            gInit   => cInactivated
+        )
+        port map (
+            iSrc_rst    => rst,
+            iSrc_clk    => dma_clk,
+            iSrc_data   => mac_tx_off,
+            iDst_rst    => rst,
+            iDst_clk    => m_clk,
+            oDst_data   => m_mac_tx_off
+        );
 
-sync2 : slow2fastSync
-  port map(
-       clkDst => m_clk,
-       clkSrc => dma_clk,
-       dataDst => m_mac_rx_off,
-       dataSrc => mac_rx_off,
-       rstDst => rst,
-       rstSrc => rst
-  );
+    sync2 : entity work.syncTog
+        generic map (
+            gStages => 2,
+            gInit   => cInactivated
+        )
+        port map (
+            iSrc_rst    => rst,
+            iSrc_clk    => dma_clk,
+            iSrc_data   => mac_rx_off,
+            iDst_rst    => rst,
+            iDst_clk    => m_clk,
+            oDst_data   => m_mac_rx_off
+        );
 
 
 ----  Generate statements  ----
@@ -387,27 +363,29 @@ gen16bitFifo : if fifo_data_width_g = 16 generate
 begin
   txFifoGen : if gen_tx_fifo_g generate
   begin
-    TX_FIFO_16 : OpenMAC_DMAFifo
+    TX_FIFO_16 : entity work.asyncFifo
       generic map (
-           fifo_data_width_g => fifo_data_width_g,
-           fifo_word_size_g => tx_fifo_word_size_c,
-           fifo_word_size_log2_g => tx_fifo_word_size_log2_c
+           gDataWidth   => fifo_data_width_g,
+           gWordSize    => tx_fifo_word_size_c,
+           gSyncStages  => 2,
+           gMemRes      => "ON"
       )
       port map(
-           aclr => tx_aclr,
-           rd_clk => tx_rd_clk,
-           rd_data => rd_data( fifo_data_width_g-1 downto 0 ),
-           rd_empty => tx_rd_empty_s,
-           rd_full => tx_rd_full,
-           rd_req => tx_rd_req,
-           rd_usedw => tx_rd_usedw( tx_fifo_word_size_log2_c-1 downto 0 ),
-           wr_clk => tx_wr_clk,
-           wr_data => m_readdata( fifo_data_width_g-1 downto 0 ),
-           wr_empty => tx_wr_empty,
-           wr_full => tx_wr_full,
-           wr_req => tx_wr_req,
-           wr_usedw => tx_wr_usedw( tx_fifo_word_size_log2_c-1 downto 0 )
+           iAclr    => tx_aclr,
+           iWrClk   => tx_wr_clk,
+           iWrReq   => tx_wr_req,
+           iWrData  => m_readdata,
+           oWrEmpty => tx_wr_empty,
+           oWrFull  => tx_wr_full,
+           oWrUsedw => tx_wr_usedw,
+           iRdClk   => tx_rd_clk,
+           iRdReq   => tx_rd_req,
+           oRdData  => rd_data,
+           oRdEmpty => tx_rd_empty_s,
+           oRdFull  => tx_rd_full,
+           oRdUsedw => tx_rd_usedw
       );
+
     tx_rd_empty_proc :
     process(tx_aclr, tx_rd_clk)
     begin
@@ -431,94 +409,109 @@ begin
 
   rxFifoGen : if gen_rx_fifo_g generate
   begin
-    RX_FIFO_16 : OpenMAC_DMAFifo
+    RX_FIFO_16 : entity work.asyncFifo
       generic map (
-           fifo_data_width_g => fifo_data_width_g,
-           fifo_word_size_g => rx_fifo_word_size_c,
-           fifo_word_size_log2_g => rx_fifo_word_size_log2_c
+           gDataWidth   => fifo_data_width_g,
+           gWordSize    => rx_fifo_word_size_c,
+           gSyncStages  => 2,
+           gMemRes      => "ON"
       )
       port map(
-           aclr => rx_aclr,
-           rd_clk => rx_rd_clk,
-           rd_data => m_writedata( fifo_data_width_g-1 downto 0 ),
-           rd_empty => rx_rd_empty,
-           rd_full => rx_rd_full,
-           rd_req => rx_rd_req,
-           rd_usedw => rx_rd_usedw( rx_fifo_word_size_log2_c-1 downto 0 ),
-           wr_clk => rx_wr_clk,
-           wr_data => wr_data( fifo_data_width_g-1 downto 0 ),
-           wr_empty => rx_wr_empty,
-           wr_full => rx_wr_full,
-           wr_req => rx_wr_req,
-           wr_usedw => rx_wr_usedw( rx_fifo_word_size_log2_c-1 downto 0 )
+           iAclr    => rx_aclr,
+           iWrClk   => rx_wr_clk,
+           iWrReq   => rx_wr_req,
+           iWrData  => wr_data,
+           oWrEmpty => rx_wr_empty,
+           oWrFull  => rx_wr_full,
+           oWrUsedw => rx_wr_usedw,
+           iRdClk   => rx_rd_clk,
+           iRdReq   => rx_rd_req,
+           oRdData  => m_writedata,
+           oRdEmpty => rx_rd_empty,
+           oRdFull  => rx_rd_full,
+           oRdUsedw => rx_rd_usedw
       );
   end generate rxFifoGen;
-  --
+
 wr_data <= dma_dout;
 dma_din <= rd_data;
 end generate gen16bitFifo;
 
 genRxAddrSync : if gen_rx_fifo_g generate
 begin
-  sync4 : slow2fastSync
-    port map(
-         clkDst => m_clk,
-         clkSrc => dma_clk,
-         dataDst => m_dma_new_addr_wr,
-         dataSrc => dma_new_addr_wr,
-         rstDst => rst,
-         rstSrc => rst
-    );
+    sync4 : entity work.syncTog
+        generic map (
+            gStages => 2,
+            gInit   => cInactivated
+        )
+        port map (
+            iSrc_rst    => rst,
+            iSrc_clk    => dma_clk,
+            iSrc_data   => dma_new_addr_wr,
+            iDst_rst    => rst,
+            iDst_clk    => m_clk,
+            oDst_data   => m_dma_new_addr_wr
+        );
 end generate genRxAddrSync;
 
 genTxAddrSync : if gen_tx_fifo_g generate
 begin
-  sync5 : slow2fastSync
-    port map(
-         clkDst => m_clk,
-         clkSrc => dma_clk,
-         dataDst => m_dma_new_addr_rd,
-         dataSrc => dma_new_addr_rd,
-         rstDst => rst,
-         rstSrc => rst
-    );
+    sync5 : entity work.syncTog
+        generic map (
+            gStages => 2,
+            gInit   => cInactivated
+        )
+        port map(
+            iSrc_rst    => rst,
+            iSrc_clk    => dma_clk,
+            iSrc_data   => dma_new_addr_rd,
+            iDst_rst    => rst,
+            iDst_clk    => m_clk,
+            oDst_data   => m_dma_new_addr_rd
+        );
 
-  sync6 : slow2fastSync
-    port map(
-         clkDst => m_clk,
-         clkSrc => dma_clk,
-         dataDst => m_dma_new_rd_len,
-         dataSrc => dma_new_rd_len,
-         rstDst => rst,
-         rstSrc => rst
-    );
+    sync6 : entity work.syncTog
+        generic map (
+            gStages => 2,
+            gInit   => cInactivated
+        )
+        port map(
+            iSrc_rst    => rst,
+            iSrc_clk    => dma_clk,
+            iSrc_data   => dma_new_rd_len,
+            iDst_rst    => rst,
+            iDst_clk    => m_clk,
+            oDst_data   => m_dma_new_rd_len
+        );
 end generate genTxAddrSync;
 
 gen32bitFifo : if fifo_data_width_g = 32 generate
 begin
   txFifoGen32 : if gen_tx_fifo_g generate
   begin
-    TX_FIFO_32 : OpenMAC_DMAFifo
+    TX_FIFO_32 : entity work.asyncFifo
       generic map (
-           fifo_data_width_g => fifo_data_width_g,
-           fifo_word_size_g => tx_fifo_word_size_c,
-           fifo_word_size_log2_g => tx_fifo_word_size_log2_c
+           gDataWidth   => fifo_data_width_g,
+           gWordSize    => tx_fifo_word_size_c,
+           gSyncStages  => 2,
+           gMemRes      => "ON"
       )
       port map(
-           aclr => tx_aclr,
-           rd_clk => tx_rd_clk,
-           rd_data => rd_data( fifo_data_width_g-1 downto 0 ),
-           rd_empty => tx_rd_empty_s,
-           rd_full => tx_rd_full,
-           rd_req => tx_rd_req_s,
-           rd_usedw => tx_rd_usedw( tx_fifo_word_size_log2_c-1 downto 0 ),
-           wr_clk => tx_wr_clk,
-           wr_data => m_readdata( fifo_data_width_g-1 downto 0 ),
-           wr_empty => tx_wr_empty,
-           wr_full => tx_wr_full,
-           wr_req => tx_wr_req,
-           wr_usedw => tx_wr_usedw( tx_fifo_word_size_log2_c-1 downto 0 )
+           iAclr    => tx_aclr,
+           iWrClk   => tx_wr_clk,
+           iWrReq   => tx_wr_req,
+           iWrData  => m_readdata,
+           oWrEmpty => tx_wr_empty,
+           oWrFull  => tx_wr_full,
+           oWrUsedw => tx_wr_usedw,
+           iRdClk   => tx_rd_clk,
+           iRdReq   => tx_rd_req_s,
+           oRdData  => rd_data,
+           oRdEmpty => tx_rd_empty_s,
+           oRdFull  => tx_rd_full,
+           oRdUsedw => tx_rd_usedw
       );
+
     tx_rd_proc :
     process (tx_rd_clk, rst)
     begin
@@ -555,27 +548,29 @@ begin
 
   rxFifoGen32 : if gen_rx_fifo_g generate
   begin
-    RX_FIFO_32 : OpenMAC_DMAFifo
+    RX_FIFO_32 : entity work.asyncFifo
       generic map (
-           fifo_data_width_g => fifo_data_width_g,
-           fifo_word_size_g => rx_fifo_word_size_c,
-           fifo_word_size_log2_g => rx_fifo_word_size_log2_c
+           gDataWidth   => fifo_data_width_g,
+           gWordSize    => rx_fifo_word_size_c,
+           gSyncStages  => rx_fifo_word_size_log2_c,
+           gMemRes      => "ON"
       )
       port map(
-           aclr => rx_aclr,
-           rd_clk => rx_rd_clk,
-           rd_data => m_writedata( fifo_data_width_g-1 downto 0 ),
-           rd_empty => rx_rd_empty,
-           rd_full => rx_rd_full,
-           rd_req => rx_rd_req,
-           rd_usedw => rx_rd_usedw( rx_fifo_word_size_log2_c-1 downto 0 ),
-           wr_clk => rx_wr_clk,
-           wr_data => wr_data( fifo_data_width_g-1 downto 0 ),
-           wr_empty => rx_wr_empty,
-           wr_full => rx_wr_full,
-           wr_req => rx_wr_req_s,
-           wr_usedw => rx_wr_usedw( rx_fifo_word_size_log2_c-1 downto 0 )
+           iAclr    => rx_aclr,
+           iWrClk   => rx_wr_clk,
+           iWrReq   => rx_wr_req_s,
+           iWrData  => wr_data,
+           oWrEmpty => rx_wr_empty,
+           oWrFull  => rx_wr_full,
+           oWrUsedw => rx_wr_usedw,
+           iRdClk   => rx_rd_clk,
+           iRdReq   => rx_rd_req,
+           oRdData  => m_writedata,
+           oRdEmpty => rx_rd_empty,
+           oRdFull  => rx_rd_full,
+           oRdUsedw => rx_rd_usedw
       );
+
     rx_wr_proc :
     process (rx_wr_clk, rst)
     variable toggle : std_logic;
