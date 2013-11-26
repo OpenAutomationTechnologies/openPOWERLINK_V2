@@ -21,7 +21,7 @@
       }
       datum sopceditor_expanded
       {
-         value = "1";
+         value = "0";
          type = "boolean";
       }
    }
@@ -34,7 +34,7 @@
       }
       datum sopceditor_expanded
       {
-         value = "1";
+         value = "0";
          type = "boolean";
       }
    }
@@ -47,16 +47,8 @@
       }
       datum sopceditor_expanded
       {
-         value = "1";
+         value = "0";
          type = "boolean";
-      }
-   }
-   element lcd.control_slave
-   {
-      datum baseAddress
-      {
-         value = "4160";
-         type = "String";
       }
    }
    element sysid.control_slave
@@ -67,11 +59,19 @@
          type = "String";
       }
    }
+   element lcd.control_slave
+   {
+      datum baseAddress
+      {
+         value = "4160";
+         type = "String";
+      }
+   }
    element epcs_flash_controller_0
    {
       datum _sortIndex
       {
-         value = "7";
+         value = "8";
          type = "int";
       }
       datum megawizard_uipreferences
@@ -89,7 +89,7 @@
    {
       datum _sortIndex
       {
-         value = "12";
+         value = "13";
          type = "int";
       }
       datum sopceditor_expanded
@@ -102,7 +102,7 @@
    {
       datum _sortIndex
       {
-         value = "14";
+         value = "15";
          type = "int";
       }
       datum sopceditor_expanded
@@ -115,7 +115,7 @@
    {
       datum _sortIndex
       {
-         value = "11";
+         value = "12";
          type = "int";
       }
       datum megawizard_uipreferences
@@ -133,7 +133,7 @@
    {
       datum _sortIndex
       {
-         value = "13";
+         value = "14";
          type = "int";
       }
       datum sopceditor_expanded
@@ -142,17 +142,41 @@
          type = "boolean";
       }
    }
+   element openmac_0.macReg
+   {
+      datum baseAddress
+      {
+         value = "16384";
+         type = "String";
+      }
+   }
+   element openmac_0.macTimer
+   {
+      datum baseAddress
+      {
+         value = "24576";
+         type = "String";
+      }
+   }
    element node_switch_pio
    {
       datum _sortIndex
       {
-         value = "9";
+         value = "10";
          type = "int";
       }
       datum sopceditor_expanded
       {
          value = "0";
          type = "boolean";
+      }
+   }
+   element openmac_0
+   {
+      datum _sortIndex
+      {
+         value = "6";
+         type = "int";
       }
    }
    element pcp_0
@@ -167,21 +191,13 @@
    {
       datum _sortIndex
       {
-         value = "8";
+         value = "9";
          type = "int";
       }
       datum sopceditor_expanded
       {
          value = "0";
          type = "boolean";
-      }
-   }
-   element node_switch_pio.s1
-   {
-      datum baseAddress
-      {
-         value = "4112";
-         type = "String";
       }
    }
    element remote_update_cycloneiii_0.s1
@@ -200,11 +216,11 @@
          type = "String";
       }
    }
-   element ledr_pio.s1
+   element node_switch_pio.s1
    {
       datum baseAddress
       {
-         value = "48";
+         value = "4112";
          type = "String";
       }
    }
@@ -221,6 +237,14 @@
       datum baseAddress
       {
          value = "4128";
+         type = "String";
+      }
+   }
+   element ledr_pio.s1
+   {
+      datum baseAddress
+      {
+         value = "48";
          type = "String";
       }
    }
@@ -241,7 +265,7 @@
    {
       datum _sortIndex
       {
-         value = "10";
+         value = "11";
          type = "int";
       }
       datum sopceditor_expanded
@@ -254,7 +278,7 @@
    {
       datum _sortIndex
       {
-         value = "6";
+         value = "7";
          type = "int";
       }
       datum sopceditor_expanded
@@ -291,7 +315,7 @@
  <parameter name="projectName" value="ink_de2-115.qpf" />
  <parameter name="sopcBorderPoints" value="false" />
  <parameter name="systemHash" value="1" />
- <parameter name="timeStamp" value="1381301526910" />
+ <parameter name="timeStamp" value="1383748560325" />
  <parameter name="useTestBenchNamingPattern" value="false" />
  <instanceScript></instanceScript>
  <interface name="clk50" internal="clk50.clk_in" type="clock" dir="end" />
@@ -313,27 +337,10 @@
    internal="epcs_flash_controller_0.external"
    type="conduit"
    dir="end" />
- <interface name="pcp_0_sync_irq" internal="pcp_0.sync_irq" />
- <interface
-   name="powerlink_0_mii1"
-   internal="pcp_0.powerlink_0_mii1"
-   type="conduit"
-   dir="end" />
- <interface
-   name="powerlink_0_mii0"
-   internal="pcp_0.powerlink_0_mii0"
-   type="conduit"
-   dir="end" />
- <interface
-   name="powerlink_0_phym1"
-   internal="pcp_0.powerlink_0_phym1"
-   type="conduit"
-   dir="end" />
- <interface
-   name="powerlink_0_phym0"
-   internal="pcp_0.powerlink_0_phym0"
-   type="conduit"
-   dir="end" />
+ <interface name="powerlink_0_mii1" internal="pcp_0.powerlink_0_mii1" />
+ <interface name="powerlink_0_mii0" internal="pcp_0.powerlink_0_mii0" />
+ <interface name="powerlink_0_phym1" internal="pcp_0.powerlink_0_phym1" />
+ <interface name="powerlink_0_phym0" internal="pcp_0.powerlink_0_phym0" />
  <interface
    name="pcp_0_benchmark_pio_external_connection"
    internal="pcp_0.benchmark_pio_external_connection" />
@@ -362,6 +369,16 @@
  <interface
    name="key_pio"
    internal="key_pio.external_connection"
+   type="conduit"
+   dir="end" />
+ <interface
+   name="openmac_0_mii"
+   internal="openmac_0.mii"
+   type="conduit"
+   dir="end" />
+ <interface
+   name="openmac_0_smi"
+   internal="openmac_0.smi"
    type="conduit"
    dir="end" />
  <module kind="clock_source" version="13.0" enabled="1" name="clk50">
@@ -584,6 +601,26 @@
   <parameter name="clockFrequency" value="25000000" />
   <parameter name="AUTO_DEVICE_FAMILY" value="Cyclone IV E" />
  </module>
+ <module kind="openmac" version="1.0.0" enabled="1" name="openmac_0">
+  <parameter name="sys_mainClk" value="50000000" />
+  <parameter name="sys_mainClkx2" value="100000000" />
+  <parameter name="sys_dmaAddrWidth" value="21" />
+  <parameter name="gui_phyType" value="2" />
+  <parameter name="gui_phyCount" value="2" />
+  <parameter name="gui_extraSmi" value="true" />
+  <parameter name="gui_txBufLoc" value="2" />
+  <parameter name="gui_txBufSize" value="1" />
+  <parameter name="gui_txBurstSize" value="8" />
+  <parameter name="gui_rxBufLoc" value="2" />
+  <parameter name="gui_rxBufSize" value="1" />
+  <parameter name="gui_rxBurstSize" value="1" />
+  <parameter name="gui_tmrCount" value="1" />
+  <parameter name="gui_tmrPulsEn" value="false" />
+  <parameter name="gui_tmrPulseWdt" value="10" />
+  <parameter name="gui_actEn" value="false" />
+  <parameter name="AUTO_DMACLK_CLOCK_RATE" value="100000000" />
+  <parameter name="AUTO_PKTCLK_CLOCK_RATE" value="-1" />
+ </module>
  <connection kind="clock" version="13.0" start="clk50.clk" end="lcd.clk" />
  <connection
    kind="clock"
@@ -753,15 +790,6 @@
  <connection
    kind="avalon"
    version="13.0"
-   start="pcp_0.mac_dma_bridge"
-   end="sram_0.uas">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x0000" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
- <connection
-   kind="avalon"
-   version="13.0"
    start="pcp_0.cpu_bridge"
    end="sram_0.uas">
   <parameter name="arbitrationPriority" value="1" />
@@ -902,6 +930,80 @@
    version="13.0"
    start="clk25.clk_reset"
    end="remote_update_cycloneiii_0.global_signals_clock_reset" />
+ <connection kind="clock" version="13.0" start="clk50.clk" end="openmac_0.mainClk" />
+ <connection
+   kind="clock"
+   version="13.0"
+   start="clk100.clk"
+   end="openmac_0.mainClkx2" />
+ <connection kind="clock" version="13.0" start="clk100.clk" end="openmac_0.dmaClk" />
+ <connection
+   kind="avalon"
+   version="13.0"
+   start="pcp_0.slow_bridge"
+   end="openmac_0.macTimer">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x6000" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="13.0"
+   start="pcp_0.slow_bridge"
+   end="openmac_0.macReg">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x4000" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection kind="avalon" version="13.0" start="openmac_0.dma" end="sram_0.uas">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0000" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="reset"
+   version="13.0"
+   start="clk50.clk_reset"
+   end="openmac_0.mainRst" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="clk100.clk_reset"
+   end="openmac_0.mainRst" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="clk25.clk_reset"
+   end="openmac_0.mainRst" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="clk50.clk_reset"
+   end="openmac_0.dmaRst" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="clk100.clk_reset"
+   end="openmac_0.dmaRst" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="clk25.clk_reset"
+   end="openmac_0.dmaRst" />
+ <connection
+   kind="interrupt"
+   version="13.0"
+   start="pcp_0.sync_irq"
+   end="openmac_0.timerIrq">
+  <parameter name="irqNumber" value="0" />
+ </connection>
+ <connection
+   kind="interrupt"
+   version="13.0"
+   start="pcp_0.mac_irq"
+   end="openmac_0.macIrq">
+  <parameter name="irqNumber" value="0" />
+ </connection>
  <interconnectRequirement for="$system" name="qsys_mm.clockCrossingAdapter" value="HANDSHAKE" />
  <interconnectRequirement for="$system" name="qsys_mm.maxAdditionalLatency" value="1" />
 </system>
