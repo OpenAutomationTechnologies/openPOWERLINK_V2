@@ -48,34 +48,19 @@ entity toplevel is
     port (
         -- 50 MHZ CLK IN
         EXT_CLK         : in  std_logic;
-        -- PHY0 Interface
-        PHY0_GXCLK      : out  std_logic;
-        PHY0_RXCLK      : in  std_logic;
-        PHY0_RXER       : in  std_logic;
-        PHY0_RXDV       : in  std_logic;
-        PHY0_RXD        : in  std_logic_vector(3 downto 0);
-        PHY0_TXCLK      : in  std_logic;
-        PHY0_TXER       : out  std_logic;
-        PHY0_TXEN       : out  std_logic;
-        PHY0_TXD        : out  std_logic_vector(3 downto 0);
-        PHY0_LINK       : in  std_logic;
-        PHY0_MDIO       : inout  std_logic;
-        PHY0_MDC        : out  std_logic;
-        PHY0_RESET_n    : out  std_logic;
-        -- PHY1 Interface
-        PHY1_GXCLK      : out  std_logic;
-        PHY1_RXCLK      : in  std_logic;
-        PHY1_RXER       : in  std_logic;
-        PHY1_RXDV       : in  std_logic;
-        PHY1_RXD        : in  std_logic_vector(3 downto 0);
-        PHY1_TXCLK      : in  std_logic;
-        PHY1_TXER       : out  std_logic;
-        PHY1_TXEN       : out  std_logic;
-        PHY1_TXD        : out  std_logic_vector(3 downto 0);
-        PHY1_LINK       : in  std_logic;
-        PHY1_MDIO       : inout  std_logic;
-        PHY1_MDC        : out  std_logic;
-        PHY1_RESET_n    : out  std_logic;
+        -- PHY Interfaces
+        PHY_GXCLK           : out   std_logic_vector(1 downto 0);
+        PHY_RXCLK           : in    std_logic_vector(1 downto 0);
+        PHY_RXER            : in    std_logic_vector(1 downto 0);
+        PHY_RXDV            : in    std_logic_vector(1 downto 0);
+        PHY_RXD             : in    std_logic_vector(7 downto 0);
+        PHY_TXCLK           : in    std_logic_vector(1 downto 0);
+        PHY_TXER            : out   std_logic_vector(1 downto 0);
+        PHY_TXEN            : out   std_logic_vector(1 downto 0);
+        PHY_TXD             : out   std_logic_vector(7 downto 0);
+        PHY_MDIO            : inout std_logic_vector(1 downto 0);
+        PHY_MDC             : out   std_logic_vector(1 downto 0);
+        PHY_RESET_n         : out   std_logic_vector(1 downto 0);
         -- EPCS
         EPCS_DCLK       : out  std_logic;
         EPCS_SCE        : out  std_logic;
@@ -131,28 +116,17 @@ architecture rtl of toplevel is
             tri_state_0_tcm_data_out            : inout std_logic_vector(15 downto 0) := (others => 'X');
             tri_state_0_tcm_chipselect_n_out    : out   std_logic;
             pcp_0_benchmark_pio_export          : out   std_logic_vector(7 downto 0);
-            powerlink_0_phym0_SMIClk            : out   std_logic;
-            powerlink_0_phym0_SMIDat            : inout std_logic                     := 'X';
-            powerlink_0_phym0_Rst_n             : out   std_logic;
-            powerlink_0_phym1_SMIClk            : out   std_logic;
-            powerlink_0_phym1_SMIDat            : inout std_logic                     := 'X';
-            powerlink_0_phym1_Rst_n             : out   std_logic;
-            powerlink_0_mii0_phyMii0_TxClk      : in    std_logic                     := 'X';
-            powerlink_0_mii0_phyMii0_TxEn       : out   std_logic;
-            powerlink_0_mii0_phyMii0_TxEr       : out   std_logic;
-            powerlink_0_mii0_phyMii0_TxDat      : out   std_logic_vector(3 downto 0);
-            powerlink_0_mii0_phyMii0_RxClk      : in    std_logic                     := 'X';
-            powerlink_0_mii0_phyMii0_RxDv       : in    std_logic                     := 'X';
-            powerlink_0_mii0_phyMii0_RxEr       : in    std_logic                     := 'X';
-            powerlink_0_mii0_phyMii0_RxDat      : in    std_logic_vector(3 downto 0)  := (others => 'X');
-            powerlink_0_mii0_phyMii1_RxEr       : in    std_logic                     := 'X';
-            powerlink_0_mii1_TxClk              : in    std_logic                     := 'X';
-            powerlink_0_mii1_TxEn               : out   std_logic;
-            powerlink_0_mii1_TxEr               : out   std_logic;
-            powerlink_0_mii1_TxDat              : out   std_logic_vector(3 downto 0);
-            powerlink_0_mii1_RxClk              : in    std_logic                     := 'X';
-            powerlink_0_mii1_RxDv               : in    std_logic                     := 'X';
-            powerlink_0_mii1_RxDat              : in    std_logic_vector(3 downto 0)  := (others => 'X');
+            -- OPENMAC
+            openmac_0_mii_txEnable              : out   std_logic_vector(1 downto 0);
+            openmac_0_mii_txData                : out   std_logic_vector(7 downto 0);
+            openmac_0_mii_txClk                 : in    std_logic_vector(1 downto 0)  := (others => 'X');
+            openmac_0_mii_rxError               : in    std_logic_vector(1 downto 0)  := (others => 'X');
+            openmac_0_mii_rxDataValid           : in    std_logic_vector(1 downto 0)  := (others => 'X');
+            openmac_0_mii_rxData                : in    std_logic_vector(7 downto 0)  := (others => 'X');
+            openmac_0_mii_rxClk                 : in    std_logic_vector(1 downto 0)  := (others => 'X');
+            openmac_0_smi_nPhyRst               : out   std_logic_vector(1 downto 0);
+            openmac_0_smi_clk                   : out   std_logic_vector(1 downto 0);
+            openmac_0_smi_dio                   : inout std_logic_vector(1 downto 0)  := (others => 'X');
             host_0_benchmark_pio_export         : out   std_logic_vector(7 downto 0);
             status_led_pio_export               : out   std_logic_vector(1 downto 0);
             epcs_flash_dclk                     : out   std_logic;
@@ -198,8 +172,8 @@ begin
 
     SRAM_ADDR <= sramAddr(SRAM_ADDR'range);
 
-    PHY0_GXCLK <= '0';
-    PHY1_GXCLK <= '0';
+    PHY_GXCLK   <= (others => '0');
+    PHY_TXER    <= (others => '0');
 
     LCD_ON      <= '1';
     LCD_BLON    <= '1';
@@ -213,29 +187,16 @@ begin
             clk100_clk                          => clk100,
             reset_reset_n                       => pllLocked,
 
-            powerlink_0_mii0_phyMii0_TxClk      => PHY0_TXCLK,
-            powerlink_0_mii0_phyMii0_TxEn       => PHY0_TXEN,
-            powerlink_0_mii0_phyMii0_TxEr       => PHY0_TXER,
-            powerlink_0_mii0_phyMii0_TxDat      => PHY0_TXD,
-            powerlink_0_mii0_phyMii0_RxClk      => PHY0_RXCLK,
-            powerlink_0_mii0_phyMii0_RxDv       => PHY0_RXDV,
-            powerlink_0_mii0_phyMii0_RxEr       => PHY0_RXER,
-            powerlink_0_mii0_phyMii0_RxDat      => PHY0_RXD,
-            powerlink_0_phym0_SMIClk            => PHY0_MDC,
-            powerlink_0_phym0_SMIDat            => PHY0_MDIO,
-            powerlink_0_phym0_Rst_n             => PHY0_RESET_n,
-
-            powerlink_0_mii1_TxClk              => PHY1_TXCLK,
-            powerlink_0_mii1_TxEn               => PHY1_TXEN,
-            powerlink_0_mii1_TxEr               => PHY1_TXER,
-            powerlink_0_mii1_TxDat              => PHY1_TXD,
-            powerlink_0_mii1_RxClk              => PHY1_RXCLK,
-            powerlink_0_mii1_RxDv               => PHY1_RXDV,
-            powerlink_0_mii1_RxDat              => PHY1_RXD,
-            powerlink_0_mii0_phyMii1_RxEr       => PHY1_RXER,
-            powerlink_0_phym1_SMIClk            => PHY1_MDC,
-            powerlink_0_phym1_SMIDat            => PHY1_MDIO,
-            powerlink_0_phym1_Rst_n             => PHY1_RESET_n,
+            openmac_0_mii_txEnable              => PHY_TXEN,
+            openmac_0_mii_txData                => PHY_TXD,
+            openmac_0_mii_txClk                 => PHY_TXCLK,
+            openmac_0_mii_rxError               => PHY_RXER,
+            openmac_0_mii_rxDataValid           => PHY_RXDV,
+            openmac_0_mii_rxData                => PHY_RXD,
+            openmac_0_mii_rxClk                 => PHY_RXCLK,
+            openmac_0_smi_nPhyRst               => PHY_RESET_n,
+            openmac_0_smi_clk                   => PHY_MDC,
+            openmac_0_smi_dio                   => PHY_MDIO,
 
             tri_state_0_tcm_address_out         => sramAddr,
             tri_state_0_tcm_read_n_out          => SRAM_OE_n,
