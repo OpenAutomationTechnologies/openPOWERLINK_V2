@@ -54,7 +54,7 @@ INCLUDES=-I$(STACK_ROOT)/include \
 -I$(LIBS_DIR)/omethlib \
 -I$(LIBS_DIR)/circbuf \
 -I$(STACK_ROOT)/objdicts/cia401_cn \
--I$(STACK_ROOT)/stack/include/target/openmac \
+-I$(STACK_ROOT)/stack/include/target \
 -I$(STACK_ROOT)/stack/src \
 -I$(STACK_ROOT)/stack/src/arch/xilinx_microblaze \
 -I$(PROCESSOR_NAME)/include \
@@ -129,6 +129,7 @@ $(USER_DIR)/sdo/sdo-asndu.c \
 $(USER_DIR)/sdo/sdo-sequ.c \
 $(USER_DIR)/sdo/sdo-comu.c \
 $(USER_DIR)/ledu.c \
+$(TARGET_DIR)/openmac-microblaze.c \
 $(TARGET_DIR)/systemtimer.c \
 $(TARGET_DIR)/usleep.c \
 $(TARGET_DIR)/target-microblaze.c \

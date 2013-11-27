@@ -200,10 +200,11 @@
 								</option>
 								<option id="gnu.c.compiler.option.include.paths.1846138449" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="../../../../../../include"/>
-									<listOptionValue builtIn="false" value="../../../../../../libs/circbuf"/>
-									<listOptionValue builtIn="false" value="../../../../../../libs/hostif"/>
 									<listOptionValue builtIn="false" value="../../../../../../libs/omethlib"/>
-									<listOptionValue builtIn="false" value="../../../../../../stack/include/target/openmac"/>
+									<listOptionValue builtIn="false" value="../../../../../../libs/hostif"/>
+									<listOptionValue builtIn="false" value="../../../../../../libs/circbuf"/>
+									<listOptionValue builtIn="false" value="../../../../../../stack/include/target"/>
+									<listOptionValue builtIn="false" value="../../../../../../stack/src/arch/altera_nios2"/>
 									<listOptionValue builtIn="false" value="../../../../../../stack/src"/>
 									<listOptionValue builtIn="false" value=".././"/>
 								</option>

@@ -60,7 +60,7 @@ ${STACKROOT_DIR}/examples/common/lcd \
 ${STACKROOT_DIR}/include \
 ${STACKROOT_DIR}/libs/omethlib \
 ${STACKROOT_DIR}/libs/circbuf \
-${STACKROOT_DIR}/stack/include/target/openmac \
+${STACKROOT_DIR}/stack/include/target \
 ${STACKROOT_DIR}/objdicts/CiA401_CN \
 ${STACKROOT_DIR}/stack/src/arch/altera_nios2 \
 ${STACKROOT_DIR}/stack/src"
@@ -75,6 +75,7 @@ ${STACKROOT_DIR}/libs/omethlib/omethlib_phycfg_generic.c \
 ${STACKROOT_DIR}/libs/circbuf/circbuffer.c \
 ${STACKROOT_DIR}/libs/circbuf/circbuf-noos.c \
 ${STACKROOT_DIR}/libs/trace/trace-printf.c \
+${STACKROOT_DIR}/stack/src/arch/altera_nios2/openmac-nios2.c \
 ${STACKROOT_DIR}/stack/src/arch/altera_nios2/target-nios2.c \
 ${STACKROOT_DIR}/stack/src/arch/altera_nios2/lock-localnoos.c \
 ${STACKROOT_DIR}/stack/src/common/debug.c \
