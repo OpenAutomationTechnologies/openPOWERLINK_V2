@@ -45,7 +45,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <user/pdoucal.h>
 #include <user/pdou.h>
 
-#include <EplSdoAc.h>
+#include <sdoabortcodes.h>
 #include <obd.h>
 #include <pdo.h>
 

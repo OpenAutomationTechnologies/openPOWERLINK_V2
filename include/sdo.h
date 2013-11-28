@@ -43,7 +43,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #include <EplInc.h>
 #include <EplFrame.h>
-#include <EplSdoAc.h>
+#include <sdoabortcodes.h>
 
 //------------------------------------------------------------------------------
 // const defines
