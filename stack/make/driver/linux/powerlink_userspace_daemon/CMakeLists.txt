@@ -97,7 +97,7 @@ SET (DAEMON_HEADERS
      ${POWERLINK_INCLUDE_DIR}/EplObjDef.h
      ${POWERLINK_INCLUDE_DIR}/pdo.h
      ${POWERLINK_INCLUDE_DIR}/sdo.h
-     ${POWERLINK_INCLUDE_DIR}/EplSdoAc.h
+     ${POWERLINK_INCLUDE_DIR}/sdoabortcodes.h
      ${POWERLINK_INCLUDE_DIR}/EplTarget.h
      ${POWERLINK_INCLUDE_DIR}/EplTimer.h
      ${POWERLINK_INCLUDE_DIR}/EplVersion.h
