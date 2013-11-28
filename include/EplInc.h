@@ -140,7 +140,6 @@
 #include "global.h"     // global definitions
 
 #include "EplDef.h"     // EPL configuration file (default configuration)
-#include "EplInstDef.h" // defines macros for instance types and table
 #include "Debug.h"      // debug definitions
 #include "ftraceDebug.h"
 
