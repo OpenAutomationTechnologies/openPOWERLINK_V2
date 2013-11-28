@@ -869,7 +869,7 @@ static tEplKernel processStateIdle(tSdoComConHdl sdoComConHdl_p, tSdoComConEvent
 
                         default:
                             //  unsupported command -> send abort
-                            abortCode = EPL_SDOAC_UNKNOWN_COMMAND_SPECIFIER;
+                            abortCode = SDO_AC_UNKNOWN_COMMAND_SPECIFIER;
                             pSdoComCon->pData = (UINT8*)&abortCode;
                             ret = serverSendFrame(pSdoComCon, 0, 0, kSdoComSendTypeAbort);
                             break;
@@ -967,7 +967,7 @@ static tEplKernel processStateServerSegmTrans(tSdoComConHdl sdoComConHdl_p, tSdo
                     size = AmiGetWordFromLe(&pRecvdCmdLayer_p->m_le_wSegmentSize);
                     if (size > pSdoComCon->transferSize)
                     {
-                        pSdoComCon->lastAbortCode = EPL_SDOAC_DATA_TYPE_LENGTH_TOO_HIGH;
+                        pSdoComCon->lastAbortCode = SDO_AC_DATA_TYPE_LENGTH_TOO_HIGH;
                         ret = serverSendFrame(pSdoComCon, 0, 0, kSdoComSendTypeAbort);
                         return ret;
                     }
@@ -1129,7 +1129,7 @@ static tEplKernel processStateClientWaitInit(tSdoComConHdl sdoComConHdl_p, tSdoC
             pSdoComCon->sdoSeqConHdl |= SDO_SEQ_INVALID_HDL;
             if (sdoComConEvent_p == kSdoComConEventTimeout)
             {
-                pSdoComCon->lastAbortCode = EPL_SDOAC_TIME_OUT;
+                pSdoComCon->lastAbortCode = SDO_AC_TIME_OUT;
             }
             else
             {
@@ -1255,13 +1255,13 @@ static tEplKernel processStateClientConnected(tSdoComConHdl sdoComConHdl_p, tSdo
             ret = sdoseq_deleteCon(pSdoComCon->sdoSeqConHdl);         // close sequence layer handle
             pSdoComCon->sdoSeqConHdl |= SDO_SEQ_INVALID_HDL;
             pSdoComCon->sdoComState = kSdoComStateClientWaitInit;
-            pSdoComCon->lastAbortCode = EPL_SDOAC_TIME_OUT;
+            pSdoComCon->lastAbortCode = SDO_AC_TIME_OUT;
             ret = transferFinished(sdoComConHdl_p, pSdoComCon, kEplSdoComTransferLowerLayerAbort);
             break;
 
         case kSdoComConEventTransferAbort:
             pSdoComCon->sdoComState = kSdoComStateClientWaitInit;
-            pSdoComCon->lastAbortCode = EPL_SDOAC_TIME_OUT;
+            pSdoComCon->lastAbortCode = SDO_AC_TIME_OUT;
             ret = transferFinished(sdoComConHdl_p, pSdoComCon, kEplSdoComTransferLowerLayerAbort);
             break;
 
@@ -1371,13 +1371,13 @@ static tEplKernel processStateClientSegmTransfer(tSdoComConHdl sdoComConHdl_p, t
             ret = sdoseq_deleteCon(pSdoComCon->sdoSeqConHdl);         // close sequence layer handle
             pSdoComCon->sdoSeqConHdl |= SDO_SEQ_INVALID_HDL;
             pSdoComCon->sdoComState = kSdoComStateClientWaitInit;
-            pSdoComCon->lastAbortCode = EPL_SDOAC_TIME_OUT;
+            pSdoComCon->lastAbortCode = SDO_AC_TIME_OUT;
             ret = transferFinished(sdoComConHdl_p, pSdoComCon, kEplSdoComTransferLowerLayerAbort);
             break;
 
         case kSdoComConEventTransferAbort:
             pSdoComCon->sdoComState = kSdoComStateClientWaitInit;
-            pSdoComCon->lastAbortCode = EPL_SDOAC_TIME_OUT;
+            pSdoComCon->lastAbortCode = SDO_AC_TIME_OUT;
             ret = transferFinished(sdoComConHdl_p, pSdoComCon, kEplSdoComTransferLowerLayerAbort);
             break;
 
@@ -1493,14 +1493,14 @@ static tEplKernel serverInitReadByIndex(tSdoComCon* pSdoComCon_p, tAsySdoCom* pS
     ret = obd_getAccessType(index, subindex, &accessType);
     if(ret == kEplObdSubindexNotExist)
     {   // subentry doesn't exist
-        abortCode = EPL_SDOAC_SUB_INDEX_NOT_EXIST;
+        abortCode = SDO_AC_SUB_INDEX_NOT_EXIST;
         pSdoComCon_p->pData = (UINT8*)&abortCode;
         ret = serverSendFrame(pSdoComCon_p, index, subindex, kSdoComSendTypeAbort);
         return ret;
     }
     else if(ret != kEplSuccessful)
     {   // entry doesn't exist
-        abortCode = EPL_SDOAC_OBJECT_NOT_EXIST;
+        abortCode = SDO_AC_OBJECT_NOT_EXIST;
         pSdoComCon_p->pData = (UINT8*)&abortCode;
         ret = serverSendFrame(pSdoComCon_p, index, subindex, kSdoComSendTypeAbort);
         return ret;
@@ -1511,11 +1511,11 @@ static tEplKernel serverInitReadByIndex(tSdoComCon* pSdoComCon_p, tAsySdoCom* pS
     {
         if((accessType & kObdAccWrite) != 0)
         {
-            abortCode = EPL_SDOAC_READ_TO_WRITE_ONLY_OBJ;
+            abortCode = SDO_AC_READ_TO_WRITE_ONLY_OBJ;
         }
         else
         {
-            abortCode = EPL_SDOAC_UNSUPPORTED_ACCESS;
+            abortCode = SDO_AC_UNSUPPORTED_ACCESS;
         }
         pSdoComCon_p->pData = (UINT8*)&abortCode;
         ret = serverSendFrame(pSdoComCon_p, index, subindex, kSdoComSendTypeAbort);
@@ -1542,7 +1542,7 @@ static tEplKernel serverInitReadByIndex(tSdoComCon* pSdoComCon_p, tAsySdoCom* pS
     ret = serverSendFrame(pSdoComCon_p, index, subindex, kSdoComSendTypeRes);
     if(ret != kEplSuccessful)
     {
-        abortCode = EPL_SDOAC_GENERAL_ERROR;
+        abortCode = SDO_AC_GENERAL_ERROR;
         pSdoComCon_p->pData = (UINT8*)&abortCode;
         ret = serverSendFrame(pSdoComCon_p, index, subindex, kSdoComSendTypeAbort);
         return ret;
@@ -1748,7 +1748,7 @@ static tEplKernel serverInitWriteByIndex(tSdoComCon* pSdoComCon_p, tAsySdoCom* p
     ret = obd_getAccessType(index, subindex, &accessType);
     if (ret == kEplObdSubindexNotExist)
     {
-        pSdoComCon_p->lastAbortCode = EPL_SDOAC_SUB_INDEX_NOT_EXIST;
+        pSdoComCon_p->lastAbortCode = SDO_AC_SUB_INDEX_NOT_EXIST;
         // send abort
         // d.k. This is wrong: k.t. not needed send abort on end of write
         /*pSdoComCon_p->pData = (UINT8*)pSdoComCon_p->lastAbortCode;
@@ -1757,7 +1757,7 @@ static tEplKernel serverInitWriteByIndex(tSdoComCon* pSdoComCon_p, tAsySdoCom* p
     }
     else if(ret != kEplSuccessful)
     {   // entry doesn't exist
-        pSdoComCon_p->lastAbortCode = EPL_SDOAC_OBJECT_NOT_EXIST;
+        pSdoComCon_p->lastAbortCode = SDO_AC_OBJECT_NOT_EXIST;
         // send abort
         // d.k. This is wrong: k.t. not needed send abort on end of write
         /*
@@ -1771,11 +1771,11 @@ static tEplKernel serverInitWriteByIndex(tSdoComCon* pSdoComCon_p, tAsySdoCom* p
     {
         if((accessType & kObdAccRead) != 0)
         {
-            pSdoComCon_p->lastAbortCode = EPL_SDOAC_WRITE_TO_READ_ONLY_OBJ;
+            pSdoComCon_p->lastAbortCode = SDO_AC_WRITE_TO_READ_ONLY_OBJ;
         }
         else
         {
-            pSdoComCon_p->lastAbortCode = EPL_SDOAC_UNSUPPORTED_ACCESS;
+            pSdoComCon_p->lastAbortCode = SDO_AC_UNSUPPORTED_ACCESS;
         }
 
         // send abort
@@ -1800,31 +1800,31 @@ static tEplKernel serverInitWriteByIndex(tSdoComCon* pSdoComCon_p, tAsySdoCom* p
                 break;
 
             case kEplObdAccessViolation:
-                pSdoComCon_p->lastAbortCode = EPL_SDOAC_UNSUPPORTED_ACCESS;
+                pSdoComCon_p->lastAbortCode = SDO_AC_UNSUPPORTED_ACCESS;
                 // send abort
                 goto Abort;
                 break;
 
             case kEplObdValueLengthError:
-                pSdoComCon_p->lastAbortCode = EPL_SDOAC_DATA_TYPE_LENGTH_NOT_MATCH;
+                pSdoComCon_p->lastAbortCode = SDO_AC_DATA_TYPE_LENGTH_NOT_MATCH;
                 // send abort
                 goto Abort;
                 break;
 
             case kEplObdValueTooHigh:
-                pSdoComCon_p->lastAbortCode = EPL_SDOAC_VALUE_RANGE_TOO_HIGH;
+                pSdoComCon_p->lastAbortCode = SDO_AC_VALUE_RANGE_TOO_HIGH;
                 // send abort
                 goto Abort;
                 break;
 
             case kEplObdValueTooLow:
-                pSdoComCon_p->lastAbortCode = EPL_SDOAC_VALUE_RANGE_TOO_LOW;
+                pSdoComCon_p->lastAbortCode = SDO_AC_VALUE_RANGE_TOO_LOW;
                 // send abort
                 goto Abort;
                 break;
 
             default:
-                pSdoComCon_p->lastAbortCode = EPL_SDOAC_GENERAL_ERROR;
+                pSdoComCon_p->lastAbortCode = SDO_AC_GENERAL_ERROR;
                 // send abort
                 goto Abort;
                 break;
@@ -1845,7 +1845,7 @@ static tEplKernel serverInitWriteByIndex(tSdoComCon* pSdoComCon_p, tAsySdoCom* p
         entrySize = obd_getDataSize(index, subindex);
         if(entrySize < pSdoComCon_p->transferSize)
         {   // parameter too big
-            pSdoComCon_p->lastAbortCode = EPL_SDOAC_DATA_TYPE_LENGTH_TOO_HIGH;
+            pSdoComCon_p->lastAbortCode = SDO_AC_DATA_TYPE_LENGTH_TOO_HIGH;
             // send abort
             // d.k. This is wrong: k.t. not needed send abort on end of write
             /*pSdoComCon_p->pData = (UINT8*)&abortCode;
@@ -1858,7 +1858,7 @@ static tEplKernel serverInitWriteByIndex(tSdoComCon* pSdoComCon_p, tAsySdoCom* p
         pSdoComCon_p->pData = obd_getObjectDataPtr(index, subindex);    // get pointer to object entry
         if(pSdoComCon_p->pData == NULL)
         {
-            pSdoComCon_p->lastAbortCode = EPL_SDOAC_GENERAL_ERROR;
+            pSdoComCon_p->lastAbortCode = SDO_AC_GENERAL_ERROR;
             // send abort
             // d.k. This is wrong: k.t. not needed send abort on end of write
 /*            pSdoComCon_p->pData = (UINT8*)&pSdoComCon_p->lastAbortCode;
@@ -2086,7 +2086,7 @@ static tEplKernel clientProcessFrame(tSdoComConHdl sdoComConHdl_p, tAsySdoCom* p
         // if running transfer
         if((pSdoComCon->transferredBytes != 0) && (pSdoComCon->transferSize !=0))
         {
-            pSdoComCon->lastAbortCode = EPL_SDOAC_GENERAL_ERROR;
+            pSdoComCon->lastAbortCode = SDO_AC_GENERAL_ERROR;
             clientSendAbort(pSdoComCon, pSdoComCon->lastAbortCode);
             ret = transferFinished(sdoComConHdl_p, pSdoComCon, kEplSdoComTransferTxAborted);
         }
@@ -2100,7 +2100,7 @@ static tEplKernel clientProcessFrame(tSdoComConHdl sdoComConHdl_p, tAsySdoCom* p
             // if running transfer
             if((pSdoComCon->transferredBytes != 0) && (pSdoComCon->transferSize !=0))
             {
-                pSdoComCon->lastAbortCode = EPL_SDOAC_GENERAL_ERROR;
+                pSdoComCon->lastAbortCode = SDO_AC_GENERAL_ERROR;
                 clientSendAbort(pSdoComCon, pSdoComCon->lastAbortCode);
                 ret = transferFinished(sdoComConHdl_p, pSdoComCon, kEplSdoComTransferTxAborted);
             }
@@ -2147,7 +2147,7 @@ static tEplKernel clientProcessFrame(tSdoComConHdl sdoComConHdl_p, tAsySdoCom* p
                             }
                             else
                             {   // buffer too small -> send abort
-                                pSdoComCon->lastAbortCode = EPL_SDOAC_DATA_TYPE_LENGTH_TOO_HIGH;
+                                pSdoComCon->lastAbortCode = SDO_AC_DATA_TYPE_LENGTH_TOO_HIGH;
                                 clientSendAbort(pSdoComCon, pSdoComCon->lastAbortCode);
                                 ret = transferFinished(sdoComConHdl_p, pSdoComCon, kEplSdoComTransferTxAborted);
                                 return ret;
@@ -2173,7 +2173,7 @@ static tEplKernel clientProcessFrame(tSdoComConHdl sdoComConHdl_p, tAsySdoCom* p
                             // check if data to copy fit to buffer
                             if (segmentSize > pSdoComCon->transferSize)
                             {   // segment too large -> send abort
-                                pSdoComCon->lastAbortCode = EPL_SDOAC_INVALID_BLOCK_SIZE;
+                                pSdoComCon->lastAbortCode = SDO_AC_INVALID_BLOCK_SIZE;
                                 clientSendAbort(pSdoComCon, pSdoComCon->lastAbortCode);
                                 ret = transferFinished(sdoComConHdl_p, pSdoComCon, kEplSdoComTransferTxAborted);
                                 return ret;
@@ -2191,7 +2191,7 @@ static tEplKernel clientProcessFrame(tSdoComConHdl sdoComConHdl_p, tAsySdoCom* p
                             // check if data to copy fit to buffer
                             if(segmentSize > pSdoComCon->transferSize)
                             {   // segment too large -> send abort
-                                pSdoComCon->lastAbortCode = EPL_SDOAC_INVALID_BLOCK_SIZE;
+                                pSdoComCon->lastAbortCode = SDO_AC_INVALID_BLOCK_SIZE;
                                 clientSendAbort(pSdoComCon, pSdoComCon->lastAbortCode);
                                 ret = transferFinished(sdoComConHdl_p, pSdoComCon, kEplSdoComTransferTxAborted);
                                 return ret;

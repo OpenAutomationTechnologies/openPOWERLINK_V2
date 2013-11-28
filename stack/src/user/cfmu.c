@@ -244,7 +244,7 @@ tEplKernel cfmu_exit(void)
         {
             if (pNodeInfo->sdoComConHdl != UINT_MAX)
             {
-                sdocom_abortTransfer(pNodeInfo->sdoComConHdl, EPL_SDOAC_DATA_NOT_TRANSF_DUE_DEVICE_STATE);
+                sdocom_abortTransfer(pNodeInfo->sdoComConHdl, SDO_AC_DATA_NOT_TRANSF_DUE_DEVICE_STATE);
             }
 
             pBuffer = pNodeInfo->pObdBufferConciseDcf;
@@ -305,7 +305,7 @@ tEplKernel cfmu_processNodeEvent(UINT nodeId_p, tNmtNodeEvent nodeEvent_p)
     {
         // send abort
         pNodeInfo->cfmState = kCfmStateInternalAbort;
-        ret = sdocom_abortTransfer(pNodeInfo->sdoComConHdl, EPL_SDOAC_DATA_NOT_TRANSF_DUE_LOCAL_CONTROL);
+        ret = sdocom_abortTransfer(pNodeInfo->sdoComConHdl, SDO_AC_DATA_NOT_TRANSF_DUE_LOCAL_CONTROL);
         if (ret != kEplSuccessful)
             return ret;
 
@@ -509,7 +509,7 @@ tEplKernel cfmu_cbObdAccess(tObdCbParam MEM* pParam_p)
     pNodeInfo = CFM_GET_NODEINFO(pParam_p->subIndex);
     if ((pNodeInfo != NULL) && (pNodeInfo->sdoComConHdl != UINT_MAX))
     {
-        ret = sdocom_abortTransfer(pNodeInfo->sdoComConHdl, EPL_SDOAC_DATA_NOT_TRANSF_DUE_DEVICE_STATE);
+        ret = sdocom_abortTransfer(pNodeInfo->sdoComConHdl, SDO_AC_DATA_NOT_TRANSF_DUE_DEVICE_STATE);
     }
 
     pMemVStringDomain = pParam_p->pArg;
@@ -519,7 +519,7 @@ tEplKernel cfmu_cbObdAccess(tObdCbParam MEM* pParam_p)
         pNodeInfo = allocNodeInfo(pParam_p->subIndex);
         if (pNodeInfo == NULL)
         {
-            pParam_p->abortCode = EPL_SDOAC_OUT_OF_MEMORY;
+            pParam_p->abortCode = SDO_AC_OUT_OF_MEMORY;
             return kEplNoResource;
         }
 
@@ -532,7 +532,7 @@ tEplKernel cfmu_cbObdAccess(tObdCbParam MEM* pParam_p)
         pBuffer = EPL_MALLOC(pMemVStringDomain->downloadSize);
         if (pBuffer == NULL)
         {
-            pParam_p->abortCode = EPL_SDOAC_OUT_OF_MEMORY;
+            pParam_p->abortCode = SDO_AC_OUT_OF_MEMORY;
             return kEplNoResource;
         }
         pNodeInfo->pObdBufferConciseDcf = pBuffer;
@@ -890,7 +890,7 @@ static tEplKernel sdoWriteObject(tCfmNodeInfo* pNodeInfo_p, void* pLeSrcData_p, 
     ret = sdocom_initTransferByIndex(&transParamByIndex);
     if (ret == kEplSdoComHandleBusy)
     {
-        ret = sdocom_abortTransfer(pNodeInfo_p->sdoComConHdl, EPL_SDOAC_DATA_NOT_TRANSF_DUE_LOCAL_CONTROL);
+        ret = sdocom_abortTransfer(pNodeInfo_p->sdoComConHdl, SDO_AC_DATA_NOT_TRANSF_DUE_LOCAL_CONTROL);
         if (ret == kEplSuccessful)
         {
             ret = sdocom_initTransferByIndex(&transParamByIndex);
