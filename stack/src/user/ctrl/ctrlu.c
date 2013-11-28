@@ -616,7 +616,7 @@ tEplKernel ctrlu_cbObdAccess(tObdCbParam MEM* pParam_p)
                         break;
 
                     default:
-                        pParam_p->abortCode = EPL_SDOAC_VALUE_RANGE_EXCEEDED;
+                        pParam_p->abortCode = SDO_AC_VALUE_RANGE_EXCEEDED;
                         ret = kEplObdAccessViolation;
                         break;
                 }
@@ -651,7 +651,7 @@ tEplKernel ctrlu_cbObdAccess(tObdCbParam MEM* pParam_p)
                         break;
 
                     default:
-                        pParam_p->abortCode = EPL_SDOAC_VALUE_RANGE_EXCEEDED;
+                        pParam_p->abortCode = SDO_AC_VALUE_RANGE_EXCEEDED;
                         ret = kEplObdAccessViolation;
                         break;
                 }
@@ -673,7 +673,7 @@ tEplKernel ctrlu_cbObdAccess(tObdCbParam MEM* pParam_p)
                 ret = obd_readEntry(0x1F9F, 2, &cmdId, &obdSize);
                 if (ret != kEplSuccessful)
                 {
-                    pParam_p->abortCode = EPL_SDOAC_GENERAL_ERROR;
+                    pParam_p->abortCode = SDO_AC_GENERAL_ERROR;
                     goto Exit;
                 }
 
@@ -681,7 +681,7 @@ tEplKernel ctrlu_cbObdAccess(tObdCbParam MEM* pParam_p)
                 ret = obd_readEntry(0x1F9F, 3, &cmdTarget, &obdSize);
                 if (ret != kEplSuccessful)
                 {
-                    pParam_p->abortCode = EPL_SDOAC_GENERAL_ERROR;
+                    pParam_p->abortCode = SDO_AC_GENERAL_ERROR;
                     goto Exit;
                 }
 
@@ -700,7 +700,7 @@ tEplKernel ctrlu_cbObdAccess(tObdCbParam MEM* pParam_p)
                 }
                 if (ret != kEplSuccessful)
                 {
-                    pParam_p->abortCode = EPL_SDOAC_GENERAL_ERROR;
+                    pParam_p->abortCode = SDO_AC_GENERAL_ERROR;
                 }
 
                 // reset request flag

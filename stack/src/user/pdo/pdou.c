@@ -291,7 +291,7 @@ tEplKernel PUBLIC pdou_cbObdAccess(tObdCbParam MEM* pParam_p)
         default:
             // this callback function is only for PDO mapping and communication
             // parameters therfore we shouldn't come here!
-            pParam_p->abortCode = EPL_SDOAC_GENERAL_ERROR;
+            pParam_p->abortCode = SDO_AC_GENERAL_ERROR;
             ret = kEplPdoInvalidObjIndex;
             return ret;
             break;
@@ -895,7 +895,7 @@ static tEplKernel checkAndConfigurePdo(UINT16 mappParamIndex_p,
     {
         EPL_DBGLVL_ERROR_TRACE ("%s() %d exceeds object!\n",
                                 __func__, mappObjectCount_p);
-        *pAbortCode_p = EPL_SDOAC_VALUE_RANGE_EXCEEDED;
+        *pAbortCode_p = SDO_AC_VALUE_RANGE_EXCEEDED;
         ret = kEplObdValueTooHigh;
         goto Exit;
     }
@@ -905,7 +905,7 @@ static tEplKernel checkAndConfigurePdo(UINT16 mappParamIndex_p,
     if (ret != kEplSuccessful)
     {
         EPL_DBGLVL_ERROR_TRACE ("%s() error get channelID!\n", __func__);
-        *pAbortCode_p = EPL_SDOAC_GENERAL_ERROR;
+        *pAbortCode_p = SDO_AC_GENERAL_ERROR;
         ret = kEplPdoInvalidObjIndex;
         goto Exit;
     }
@@ -974,7 +974,7 @@ static tEplKernel checkAndConfigurePdo(UINT16 mappParamIndex_p,
     ret = configurePdoChannel(&pdoChannelConf);
     if (ret != kEplSuccessful)
     {   // fatal error occurred
-        *pAbortCode_p = EPL_SDOAC_GENERAL_ERROR;
+        *pAbortCode_p = SDO_AC_GENERAL_ERROR;
         goto Exit;
     }
 
@@ -1075,7 +1075,7 @@ static tEplKernel getMaxPdoSize(BYTE nodeId_p, BOOL fTxPdo_p,
                            &maxPdoSize, &obdSize);
     if (ret != kEplSuccessful)
     {   // other fatal error occurred
-        *pAbortCode_p = EPL_SDOAC_GENERAL_ERROR;
+        *pAbortCode_p = SDO_AC_GENERAL_ERROR;
     }
     else
     {
@@ -1148,14 +1148,14 @@ static tEplKernel checkPdoValidity(UINT mappParamIndex_p, UINT32* pAbortCode_p)
         ret = obd_readEntry(mappParamIndex_p, 0x00, &mappObjectCount, &obdSize);
         if (ret != kEplSuccessful)
         {   // other fatal error occurred
-            *pAbortCode_p = EPL_SDOAC_GEN_INTERNAL_INCOMPATIBILITY;
+            *pAbortCode_p = SDO_AC_GEN_INTERNAL_INCOMPATIBILITY;
         }
         else
         {
             // entry read successfully
             if (mappObjectCount != 0)
             {   // PDO in OD is still valid
-                *pAbortCode_p = EPL_SDOAC_GEN_PARAM_INCOMPATIBILITY;
+                *pAbortCode_p = SDO_AC_GEN_PARAM_INCOMPATIBILITY;
                 ret = kEplPdoConfWhileEnabled;
             }
         }
@@ -1209,7 +1209,7 @@ static tEplKernel checkAndSetObjectMapping(QWORD objectMapping_p,
 
     if ((bitOffset & 0x7) != 0x0)
     {   // bit mapping is not supported
-        *pAbortCode_p = EPL_SDOAC_GENERAL_ERROR;
+        *pAbortCode_p = SDO_AC_GENERAL_ERROR;
         ret = kEplPdoGranularityMismatch;
         goto Exit;
     }
@@ -1217,7 +1217,7 @@ static tEplKernel checkAndSetObjectMapping(QWORD objectMapping_p,
     ret = obd_getType(index, subIndex, &obdType);
     if (ret != kEplSuccessful)
     {   // entry doesn't exist
-        *pAbortCode_p = EPL_SDOAC_OBJECT_NOT_EXIST;
+        *pAbortCode_p = SDO_AC_OBJECT_NOT_EXIST;
         ret = kEplPdoVarNotFound;
         goto Exit;
     }
@@ -1225,7 +1225,7 @@ static tEplKernel checkAndSetObjectMapping(QWORD objectMapping_p,
     if (((bitSize & 0x7) != 0x0) &&
         ((bitSize != 1) || (obdType != kObdTypeBool)))
     {   // bit mapping is not supported, except for BOOLEAN objects on byte boundaries
-        *pAbortCode_p = EPL_SDOAC_GENERAL_ERROR;
+        *pAbortCode_p = SDO_AC_GENERAL_ERROR;
         ret = kEplPdoGranularityMismatch;
         goto Exit;
     }
@@ -1234,21 +1234,21 @@ static tEplKernel checkAndSetObjectMapping(QWORD objectMapping_p,
     ret = obd_getAccessType(index, subIndex, &accessType);
     if (ret != kEplSuccessful)
     {   // entry doesn't exist
-        *pAbortCode_p = EPL_SDOAC_OBJECT_NOT_EXIST;
+        *pAbortCode_p = SDO_AC_OBJECT_NOT_EXIST;
         ret = kEplPdoVarNotFound;
         goto Exit;
     }
 
     if ((accessType & kObdAccPdo) == 0)
     {   // object is not mappable
-        *pAbortCode_p = EPL_SDOAC_OBJECT_NOT_MAPPABLE;
+        *pAbortCode_p = SDO_AC_OBJECT_NOT_MAPPABLE;
         ret = kEplPdoVarNotMappable;
         goto Exit;
     }
 
     if ((accessType & neededAccessType_p) == 0)
     {   // object is not writeable (RPDO) or readable (TPDO) respectively
-        *pAbortCode_p = EPL_SDOAC_OBJECT_NOT_MAPPABLE;
+        *pAbortCode_p = SDO_AC_OBJECT_NOT_MAPPABLE;
         ret = kEplPdoVarNotMappable;
         goto Exit;
     }
@@ -1265,7 +1265,7 @@ static tEplKernel checkAndSetObjectMapping(QWORD objectMapping_p,
     obdSize = obd_getDataSize(index, subIndex);
     if (obdSize < byteSize)
     {   // object does not exist or has smaller size
-        *pAbortCode_p = EPL_SDOAC_GENERAL_ERROR;
+        *pAbortCode_p = SDO_AC_GENERAL_ERROR;
         ret = kEplPdoSizeMismatch;
         // todo really don't want to exit here?
     }
@@ -1273,7 +1273,7 @@ static tEplKernel checkAndSetObjectMapping(QWORD objectMapping_p,
     ret = obd_isNumerical(index, subIndex, &fNumerical);
     if (ret != kEplSuccessful)
     {   // entry doesn't exist
-        *pAbortCode_p = EPL_SDOAC_OBJECT_NOT_EXIST;
+        *pAbortCode_p = SDO_AC_OBJECT_NOT_EXIST;
         goto Exit;
     }
 
@@ -1281,7 +1281,7 @@ static tEplKernel checkAndSetObjectMapping(QWORD objectMapping_p,
     {
         // object is numerical,
         // therefore size has to fit, but it does not.
-        *pAbortCode_p = EPL_SDOAC_GENERAL_ERROR;
+        *pAbortCode_p = SDO_AC_GENERAL_ERROR;
         ret = kEplPdoVarNotFound;
         goto Exit;
     }
@@ -1289,7 +1289,7 @@ static tEplKernel checkAndSetObjectMapping(QWORD objectMapping_p,
     pVar = obd_getObjectDataPtr(index, subIndex);
     if (pVar == NULL)
     {   // entry doesn't exist
-        *pAbortCode_p = EPL_SDOAC_OBJECT_NOT_EXIST;
+        *pAbortCode_p = SDO_AC_OBJECT_NOT_EXIST;
         ret = kEplPdoVarNotFound;
         goto Exit;
     }
@@ -1351,7 +1351,7 @@ static tEplKernel setupMappingObjects(tPdoMappObject* pMappObject_p,
                                &obdSize);
         if (ret != kEplSuccessful)
         {   // other fatal error occurred
-            *pAbortCode_p = EPL_SDOAC_GENERAL_ERROR;
+            *pAbortCode_p = SDO_AC_GENERAL_ERROR;
             goto Exit;
         }
 
@@ -1374,7 +1374,7 @@ static tEplKernel setupMappingObjects(tPdoMappObject* pMappObject_p,
 
         if (curPdoSize > maxPdoSize_p)
         {   // mapping exceeds object size
-            *pAbortCode_p = EPL_SDOAC_PDO_LENGTH_EXCEEDED;
+            *pAbortCode_p = SDO_AC_PDO_LENGTH_EXCEEDED;
             ret = kEplPdoLengthExceeded;
             goto Exit;
         }
