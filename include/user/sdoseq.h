@@ -46,7 +46,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <user/sdoudp.h>
 #include <user/sdoasnd.h>
 #include <event.h>
-#include <user/EplTimeru.h>
+#include <user/timeru.h>
 
 //------------------------------------------------------------------------------
 // const defines

@@ -55,7 +55,7 @@
 ****************************************************************************/
 
 #include "EplInc.h"
-#include "user/EplTimeru.h"
+#include "user/timeru.h"
 
 #include <semLib.h>
 #include <taskLib.h>
