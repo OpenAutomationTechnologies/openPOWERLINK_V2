@@ -41,7 +41,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include "user/nmtmnu.h"
-#include "user/EplTimeru.h"
+#include "user/timeru.h"
 #include "user/identu.h"
 #include "user/statusu.h"
 #include "user/dllucal.h"

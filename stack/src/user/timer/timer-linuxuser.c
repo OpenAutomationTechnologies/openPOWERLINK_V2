@@ -53,7 +53,7 @@
            any other provision of this License.
 ****************************************************************************/
 
-#include "user/EplTimeru.h"
+#include "user/timeru.h"
 
 #include <stdio.h>
 #include <unistd.h>

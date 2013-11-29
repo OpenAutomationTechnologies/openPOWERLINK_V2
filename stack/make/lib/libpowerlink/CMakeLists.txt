@@ -207,7 +207,7 @@ SET (LIB_USER_HEADERS
      ${USER_INCLUDE_DIR}/sdoseq.h
      ${USER_INCLUDE_DIR}/sdocom.h
      ${USER_INCLUDE_DIR}/statusu.h
-     ${USER_INCLUDE_DIR}/EplTimeru.h
+     ${USER_INCLUDE_DIR}/timeru.h
     )
 
 IF (UNIX)
