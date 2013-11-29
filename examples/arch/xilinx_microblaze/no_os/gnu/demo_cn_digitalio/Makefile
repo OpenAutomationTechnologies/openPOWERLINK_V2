@@ -74,7 +74,7 @@ ${STACK_ROOT}/stack/src/common/debug.c \
 ${STACK_ROOT}/stack/src/common/errstring.c \
 ${STACK_ROOT}/stack/src/common/dll/dllcal-direct.c \
 ${STACK_ROOT}/stack/src/common/event/event.c \
-${STACK_ROOT}/stack/src/common/timer/timer-generic.c \
+${STACK_ROOT}/stack/src/user/timer/timer-generic.c \
 ${STACK_ROOT}/stack/src/kernel/ctrl/ctrlk.c \
 ${STACK_ROOT}/stack/src/kernel/ctrl/ctrlkcal-direct.c \
 ${STACK_ROOT}/stack/src/kernel/dll/dllk.c \

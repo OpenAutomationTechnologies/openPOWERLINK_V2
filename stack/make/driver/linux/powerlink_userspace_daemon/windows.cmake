@@ -37,7 +37,7 @@ SET (DAEMON_ARCH_SOURCES
      ${ARCH_SOURCE_DIR}/windows/trace-windows.c
      ${EDRV_SOURCE_DIR}/edrv-pcap.c
      ${KERNEL_SOURCE_DIR}/pdo/pdokcalsync-null.c # replace with right implementation
-     ${COMMON_SOURCE_DIR}/timer/timer-generic.c
+     ${USER_SOURCE_DIR}/timer/timer-generic.c
      ${LIB_SOURCE_DIR}/sharedbuff/ShbIpc-Win32.c
      ${LIB_SOURCE_DIR}/misc/trace.c
      ${KERNEL_SOURCE_DIR}/event/eventkcal.c
