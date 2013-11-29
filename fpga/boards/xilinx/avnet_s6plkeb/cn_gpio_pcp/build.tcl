@@ -3,11 +3,9 @@
 #      www.br-automation.com
 #
 # Project       : POWERLINK Xilinx Examples
-# Module        : generate Makefile
-# Autor         : mairt
-# Date          : 13.08.2012
+# Module        : XPS batch mode script
 # File          : tcl script
-# contents      : calls save make and exits
+# contents      : Commands for XPS build system initialization
 ################################################################################
 
 save make

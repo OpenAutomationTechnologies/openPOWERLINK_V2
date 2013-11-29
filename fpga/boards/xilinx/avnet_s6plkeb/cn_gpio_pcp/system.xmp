@@ -1,0 +1,37 @@
+#Please do not modify this file by hand
+XmpVersion: 14.7
+VerMgmt: 14.7
+IntStyle: default
+Flow: ise
+MHS File: system.mhs
+Architecture: spartan6
+Device: xc6slx16
+Package: csg324
+SpeedGrade: -3
+UserCmd1:
+UserCmd1Type: 0
+UserCmd2:
+UserCmd2Type: 0
+ClockInfo: USE_UNIQUE_CLOCK_PRIMS=FALSE|GROUPS=(Group1:plb_powerlink_0::clk50,plb_powerlink_0::clk100,pcp::CLK,fit_timer_0::Clk,SRAM256Kx32::RdClk,proc_sys_reset_0::Slowest_sync_clk,),|
+GenSimTB: 0
+SdkExportBmmBit: 1
+SdkExportDir: SDK/SDK_Export
+InsertNoPads: 0
+WarnForEAArch: 1
+HdlLang: VHDL
+SimModel: BEHAVIORAL
+ExternalMemSim: 0
+UcfFile: data/system.ucf
+EnableParTimingError: 1
+ShowLicenseDialog: 1
+BInfo: 
+LockAddr: SRAM256Kx32,C_MEM0_BASEADDR
+LockAddr: plb_powerlink_0,C_MAC_PKT_BASEADDR
+LockAddr: SRAM256Kx32,C_S_AXI_MEM0_BASEADDR
+LockAddr: boot_dlmb_cntlr,C_BASEADDR
+LockAddr: boot_ilmb_cntlr,C_BASEADDR
+LockAddr: pcp_dlmb_cntlr,C_BASEADDR
+LockAddr: pcp_ilmb_cntlr,C_BASEADDR
+Processor: pcp
+ElfImp:
+ElfSim:
