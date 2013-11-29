@@ -1837,7 +1837,7 @@ static tEplKernel doPreop1(tEventNmtStateChange nmtStateChange_p)
         }
         timerArg.m_EventSink = kEplEventSinkNmtMnu;
         timerArg.m_Arg.m_dwVal = 0;
-        ret = EplTimeruModifyTimerMs(&nmtMnuInstance_g.timerHdlNmtState, dwTimeout, timerArg);
+        ret = timeru_modifyTimer(&nmtMnuInstance_g.timerHdlNmtState, dwTimeout, timerArg);
     }
     return ret;
 }
@@ -1894,7 +1894,7 @@ static tEplKernel startBootStep2(void)
             // set NMT state change flag
             pNodeInfo->flags |= NMTMNU_NODE_FLAG_NMT_CMD_ISSUED;
 
-            ret = EplTimeruModifyTimerMs(&pNodeInfo->timerHdlStatReq,
+            ret = timeru_modifyTimer(&pNodeInfo->timerHdlStatReq,
                                          nmtMnuInstance_g.statusRequestDelay, timerArg);
             if (ret != kEplSuccessful)
                 goto Exit;
@@ -1985,7 +1985,7 @@ static tEplKernel nodeBootStep2(UINT nodeId_p, tNmtMnuNodeInfo* pNodeInfo_p)
     {   // start timer
         // when the timer expires the CN must be ReadyToOp
         NMTMNU_SET_FLAGS_TIMERARG_LONGER(pNodeInfo_p, nodeId_p, timerArg);
-        ret = EplTimeruModifyTimerMs(&pNodeInfo_p->timerHdlLonger,
+        ret = timeru_modifyTimer(&pNodeInfo_p->timerHdlLonger,
                                      nmtMnuInstance_g.timeoutReadyToOp, timerArg);
     }
 Exit:
@@ -2078,7 +2078,7 @@ static tEplKernel nodeCheckCom(UINT nodeId_p, tNmtMnuNodeInfo* pNodeInfo_p)
 
         // start timer (when the timer expires the CN must be still ReadyToOp)
         NMTMNU_SET_FLAGS_TIMERARG_LONGER(pNodeInfo_p, nodeId_p, timerArg);
-        ret = EplTimeruModifyTimerMs(&pNodeInfo_p->timerHdlLonger,
+        ret = timeru_modifyTimer(&pNodeInfo_p->timerHdlLonger,
                                      nmtMnuInstance_g.timeoutCheckCom, timerArg);
 
         // update mandatory slave counter, because timer was started
@@ -2217,7 +2217,7 @@ static INT processNodeEventIdentResponse(UINT nodeId_p, tNmtState nodeNmtState_p
 
             NMTMNU_SET_FLAGS_TIMERARG_STATE_MON(pNodeInfo, nodeId_p, timerArg);
 
-            *pRet_p = EplTimeruModifyTimerMs(&pNodeInfo->timerHdlStatReq,
+            *pRet_p = timeru_modifyTimer(&pNodeInfo->timerHdlStatReq,
                                              nmtMnuInstance_g.statusRequestDelay, timerArg);
             if (*pRet_p != kEplSuccessful)
                 return -1;
@@ -2476,7 +2476,7 @@ INT processNodeEventNoIdentResponse(UINT nodeId_p, tNmtState nodeNmtState_p, tNm
                                           ((pNodeInfo->nodeState << 8) | 0x80
                                            | ((pNodeInfo->flags & NMTMNU_NODE_FLAG_COUNT_STATREQ) >> 6)
                                            | ((TimerArg.m_Arg.m_dwVal & NMTMNU_TIMERARG_COUNT_SR) >> 8)));*/
-        *pRet_p = EplTimeruModifyTimerMs(&pNodeInfo->timerHdlStatReq,
+        *pRet_p = timeru_modifyTimer(&pNodeInfo->timerHdlStatReq,
                                      nmtMnuInstance_g.statusRequestDelay, timerArg);
     }
     else
@@ -2547,7 +2547,7 @@ static INT processNodeEventStatusResponse(UINT nodeId_p, tNmtState nodeNmtState_
                                         ((pNodeInfo->nodeState << 8) | 0x80
                                          | ((pNodeInfo->flags & NMTMNU_NODE_FLAG_COUNT_STATREQ) >> 6)
                                          | ((TimerArg.m_Arg.m_dwVal & NMTMNU_TIMERARG_COUNT_SR) >> 8)));*/
-        *pRet_p = EplTimeruModifyTimerMs(&pNodeInfo->timerHdlStatReq,
+        *pRet_p = timeru_modifyTimer(&pNodeInfo->timerHdlStatReq,
                                      nmtMnuInstance_g.statusRequestDelay, timerArg);
     }
     return 0;
@@ -2979,7 +2979,7 @@ static INT processNodeEventNmtCmdSent(UINT nodeId_p, tNmtState nodeNmtState_p, t
         // set NMT state change flag
         pNodeInfo->flags |= NMTMNU_NODE_FLAG_NMT_CMD_ISSUED;
     }
-    *pRet_p = EplTimeruModifyTimerMs(&pNodeInfo->timerHdlStatReq,
+    *pRet_p = timeru_modifyTimer(&pNodeInfo->timerHdlStatReq,
                                  nmtMnuInstance_g.statusRequestDelay, timerArg);
     // finish processing, because NmtState_p is the expected and not the current state
     return -1;
@@ -3189,7 +3189,7 @@ static tEplKernel checkNmtState(UINT nodeId_p, tNmtMnuNodeInfo* pNodeInfo_p,
     else if ((expNmtState == kNmtCsPreOperational2) && (nodeNmtState_p == kNmtCsReadyToOperate))
     {   // CN switched to ReadyToOp
         // delete timer for timeout handling
-        ret = EplTimeruDeleteTimer(&pNodeInfo_p->timerHdlLonger);
+        ret = timeru_deleteTimer(&pNodeInfo_p->timerHdlLonger);
         if (ret != kEplSuccessful)
             goto Exit;
 
@@ -3324,11 +3324,11 @@ static tEplKernel reset(void)
     tEplKernel  ret;
     UINT        index;
 
-    ret = EplTimeruDeleteTimer(&nmtMnuInstance_g.timerHdlNmtState);
+    ret = timeru_deleteTimer(&nmtMnuInstance_g.timerHdlNmtState);
     for (index = 1; index <= tabentries (nmtMnuInstance_g.aNodeInfo); index++)
     {
-        ret = EplTimeruDeleteTimer(&NMTMNU_GET_NODEINFO(index)->timerHdlStatReq);
-        ret = EplTimeruDeleteTimer(&NMTMNU_GET_NODEINFO(index)->timerHdlLonger);
+        ret = timeru_deleteTimer(&NMTMNU_GET_NODEINFO(index)->timerHdlStatReq);
+        ret = timeru_deleteTimer(&NMTMNU_GET_NODEINFO(index)->timerHdlLonger);
     }
 
 #if EPL_NMTMNU_PRES_CHAINING_MN != FALSE

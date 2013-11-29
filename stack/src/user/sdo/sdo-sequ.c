@@ -339,7 +339,7 @@ tEplKernel sdoseq_delInstance(void)
     {
         if (pSdoSeqCon->conHandle != 0)
         {
-            EplTimeruDeleteTimer(&pSdoSeqCon->timerHandle);
+            timeru_deleteTimer(&pSdoSeqCon->timerHandle);
         }
         count++;
         pSdoSeqCon++;
@@ -561,10 +561,10 @@ tEplKernel sdoseq_processEvent(tEplEvent* pEvent_p)
     // check if time is current
     if(timerHdl != pSdoSeqCon->timerHandle)
     {
-        EplTimeruDeleteTimer(&timerHdl);
+        timeru_deleteTimer(&timerHdl);
         return ret;
     }
-    EplTimeruDeleteTimer(&pSdoSeqCon->timerHandle);
+    timeru_deleteTimer(&pSdoSeqCon->timerHandle);
 
     // get indexnumber of control structure
     count = 0;
@@ -627,7 +627,7 @@ tEplKernel sdoseq_deleteCon(tSdoSeqConHdl sdoSeqConHdl_p)
             sdoasnd_deleteCon(pSdoSeqCon->conHandle);
 #endif
         }
-        EplTimeruDeleteTimer(&pSdoSeqCon->timerHandle);
+        timeru_deleteTimer(&pSdoSeqCon->timerHandle);
 
         // cleanup control structure
         EPL_MEMSET(pSdoSeqCon, 0x00, sizeof(tSdoSeqCon));
@@ -721,7 +721,7 @@ static tEplKernel processStateIdle(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sdoSe
             }
             else
             {   // error -> close - delete timer
-                EplTimeruDeleteTimer(&pSdoSeqCon_p->timerHandle);
+                timeru_deleteTimer(&pSdoSeqCon_p->timerHandle);
 
                 if (((pRecvFrame_p->m_le_bRecSeqNumCon & SDO_CON_MASK) != 0x00) ||
                     ((pRecvFrame_p->m_le_bSendSeqNumCon & SDO_CON_MASK) != 0x00))
@@ -807,7 +807,7 @@ static tEplKernel processStateInit1(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sdoS
             {   // error -> Close
                 pSdoSeqCon_p->sdoSeqState = kSdoSeqStateIdle;
 
-                EplTimeruDeleteTimer(&pSdoSeqCon_p->timerHandle);
+                timeru_deleteTimer(&pSdoSeqCon_p->timerHandle);
 
                 if (((pRecvFrame_p->m_le_bRecSeqNumCon & SDO_CON_MASK) != 0x00) ||
                     ((pRecvFrame_p->m_le_bSendSeqNumCon & SDO_CON_MASK) != 0x00))
@@ -918,7 +918,7 @@ static tEplKernel processStateInit2(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sdoS
             {   // error -> Close
                 pSdoSeqCon_p->sdoSeqState = kSdoSeqStateIdle;
 
-                EplTimeruDeleteTimer(&pSdoSeqCon_p->timerHandle);
+                timeru_deleteTimer(&pSdoSeqCon_p->timerHandle);
 
                 if (((pRecvFrame_p->m_le_bRecSeqNumCon & SDO_CON_MASK) != 0x00) ||
                     ((pRecvFrame_p->m_le_bSendSeqNumCon & SDO_CON_MASK) != 0x00))
@@ -1026,7 +1026,7 @@ static tEplKernel processStateInit3(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sdoS
             {   // error -> Close
                 pSdoSeqCon_p->sdoSeqState = kSdoSeqStateIdle;
 
-                EplTimeruDeleteTimer(&pSdoSeqCon_p->timerHandle);
+                timeru_deleteTimer(&pSdoSeqCon_p->timerHandle);
 
                 if (((pRecvFrame_p->m_le_bRecSeqNumCon & SDO_CON_MASK) != 0x00) ||
                     ((pRecvFrame_p->m_le_bSendSeqNumCon & SDO_CON_MASK) != 0x00))
@@ -1139,13 +1139,13 @@ static tEplKernel processStateConnected(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl 
                 // close from other node
                 case 0:
                     pSdoSeqCon_p->sdoSeqState = kSdoSeqStateIdle;   // return to idle
-                    EplTimeruDeleteTimer(&pSdoSeqCon_p->timerHandle);
+                    timeru_deleteTimer(&pSdoSeqCon_p->timerHandle);
                     sdoSeqInstance_l.pfnSdoComConCb(sdoSeqConHdl_p, kAsySdoConStateConClosed);
                     break;
 
                 case 1:
                     pSdoSeqCon_p->sdoSeqState = kSdoSeqStateIdle;   // return to idle
-                    EplTimeruDeleteTimer(&pSdoSeqCon_p->timerHandle);
+                    timeru_deleteTimer(&pSdoSeqCon_p->timerHandle);
                     sdoSeqInstance_l.pfnSdoComConCb(sdoSeqConHdl_p, kAsySdoConStateTransferAbort);
                     // restart immediately with initialization request
                     DEBUG_LVL_25_TRACE("sdoSeq: Reinit immediately\n");
@@ -1234,7 +1234,7 @@ static tEplKernel processStateConnected(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl 
 
             sendFrame(pSdoSeqCon_p, 0, NULL, FALSE);
 
-            EplTimeruDeleteTimer(&pSdoSeqCon_p->timerHandle);
+            timeru_deleteTimer(&pSdoSeqCon_p->timerHandle);
             // call Command Layer Cb is not necessary, because the event came from there
             // sdoSeqInstance_l.pfnSdoComConCb(SdoSeqConHdl, kAsySdoConStateInitError);
             break;
@@ -1324,7 +1324,7 @@ static tEplKernel processStateWaitAck(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sd
             case 0:
                 // return to idle
                 pSdoSeqCon_p->sdoSeqState = kSdoSeqStateIdle;
-                EplTimeruDeleteTimer(&pSdoSeqCon_p->timerHandle);
+                timeru_deleteTimer(&pSdoSeqCon_p->timerHandle);
                 sdoSeqInstance_l.pfnSdoComConCb(sdoSeqConHdl_p, kAsySdoConStateConClosed);
                 break;
 
@@ -1332,7 +1332,7 @@ static tEplKernel processStateWaitAck(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sd
             case 1:
                 // return to idle
                 pSdoSeqCon_p->sdoSeqState = kSdoSeqStateIdle;
-                EplTimeruDeleteTimer(&pSdoSeqCon_p->timerHandle);
+                timeru_deleteTimer(&pSdoSeqCon_p->timerHandle);
                 sdoSeqInstance_l.pfnSdoComConCb(sdoSeqConHdl_p, kAsySdoConStateTransferAbort);
                 // restart immediately with initialization request
                 ret = kEplRetry;
@@ -1928,11 +1928,11 @@ static tEplKernel setTimer(tSdoSeqCon* pSdoSeqCon_p, ULONG timeout_p)
 
     if(pSdoSeqCon_p->timerHandle == 0)
     {   // create new timer
-        ret = EplTimeruSetTimerMs(&pSdoSeqCon_p->timerHandle, timeout_p, timerArg);
+        ret = timeru_setTimer(&pSdoSeqCon_p->timerHandle, timeout_p, timerArg);
     }
     else
     {   // modify existing timer
-        ret = EplTimeruModifyTimerMs(&pSdoSeqCon_p->timerHandle, timeout_p, timerArg);
+        ret = timeru_modifyTimer(&pSdoSeqCon_p->timerHandle, timeout_p, timerArg);
     }
     return ret;
 }
