@@ -34,7 +34,7 @@ message( FATAL_ERROR "libpowerlink_user currently not supported on windows!")
 ADD_DEFINITIONS(-D_CONSOLE -DWPCAP -DHAVE_REMOTE)
 
 SET (LIB_ARCH_SOURCES
-     ${COMMON_SOURCE_DIR}/timer/timer-generic.c
+     ${USER_SOURCE_DIR}/timer/timer-generic.c
      ${LIB_SOURCE_DIR}/sharedbuff/ShbIpc-Win32.c
      ${LIB_SOURCE_DIR}/trace/trace-windows.c
      ${LIB_SOURCE_DIR}/sharedbuff/SharedBuff.c

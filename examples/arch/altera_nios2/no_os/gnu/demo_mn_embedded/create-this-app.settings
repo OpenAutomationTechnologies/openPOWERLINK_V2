@@ -78,7 +78,7 @@ ${STACKROOT_DIR}/stack/src/arch/altera_nios2/target-nios2.c \
 ${STACKROOT_DIR}/stack/src/arch/altera_nios2/lock-dualprocnoos.c \
 ${STACKROOT_DIR}/stack/src/common/dll/dllcal-hostif.c \
 ${STACKROOT_DIR}/stack/src/common/event/event.c \
-${STACKROOT_DIR}/stack/src/common/timer/timer-generic.c \
+${STACKROOT_DIR}/stack/src/user/timer/timer-generic.c \
 ${STACKROOT_DIR}/stack/src/common/debug.c \
 ${STACKROOT_DIR}/stack/src/common/errstring.c \
 ${STACKROOT_DIR}/stack/src/user/api/generic.c \

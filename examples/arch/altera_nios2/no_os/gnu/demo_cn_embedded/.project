@@ -159,9 +159,9 @@
 			<locationURI>COMMON_LOC/event/event.c</locationURI>
 		</link>
 		<link>
-			<name>stack/common/timer-generic.c</name>
+			<name>stack/user/timer-generic.c</name>
 			<type>1</type>
-			<locationURI>COMMON_LOC/timer/timer-generic.c</locationURI>
+			<locationURI>USER_LOC/timer/timer-generic.c</locationURI>
 		</link>
 		<link>
 			<name>stack/kernel/ctrlk.c</name>
