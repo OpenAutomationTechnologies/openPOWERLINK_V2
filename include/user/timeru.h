@@ -90,25 +90,21 @@
 // function prototypes
 //---------------------------------------------------------------------------
 
-tEplKernel PUBLIC EplTimeruInit(void);
+tEplKernel timeru_init(void);
 
-tEplKernel PUBLIC EplTimeruAddInstance(void);
+tEplKernel timeru_addInstance(void);
 
-tEplKernel PUBLIC EplTimeruDelInstance(void);
+tEplKernel timeru_delInstance(void);
 
-tEplKernel PUBLIC EplTimeruProcess(void);
+tEplKernel timeru_process(void);
 
-tEplKernel PUBLIC EplTimeruSetTimerMs(  tEplTimerHdl*   pTimerHdl_p,
-                                        unsigned long   ulTimeMs_p,
-                                        tEplTimerArg    Argument_p);
+tEplKernel timeru_setTimer(tEplTimerHdl* pTimerHdl_p, ULONG timeInMs_p, tEplTimerArg argument_p);
 
-tEplKernel PUBLIC EplTimeruModifyTimerMs(tEplTimerHdl*  pTimerHdl_p,
-                                        unsigned long   ulTimeMs_p,
-                                        tEplTimerArg    Argument_p);
+tEplKernel timeru_modifyTimer(tEplTimerHdl* pTimerHdl_p, ULONG timeInMs_p, tEplTimerArg argument_p);
 
-tEplKernel PUBLIC EplTimeruDeleteTimer( tEplTimerHdl*   pTimerHdl_p);
+tEplKernel timeru_deleteTimer(tEplTimerHdl* pTimerHdl_p);
 
-BOOL PUBLIC EplTimeruIsTimerActive(tEplTimerHdl TimerHdl_p);
+BOOL       timeru_isActive(tEplTimerHdl timerHdl_p);
 
 #endif  // #ifndef _EPLTIMERU_H_
 

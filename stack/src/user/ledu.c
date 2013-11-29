@@ -166,7 +166,7 @@ tEplKernel ledu_exit(void)
 {
     tEplKernel ret = kEplSuccessful;
 
-    ret = EplTimeruDeleteTimer(&leduInstance_g.timerHdlLedBlink);
+    ret = timeru_deleteTimer(&leduInstance_g.timerHdlLedBlink);
     EPL_MEMSET(&leduInstance_g, 0, sizeof(tLeduInstance));
 
     return ret;
@@ -204,7 +204,7 @@ tEplKernel ledu_cbNmtStateChange(tEventNmtStateChange nmtStateChange_p)
             if (leduInstance_g.statusLedMode != kLeduModeOff)
             {   // state changed
                 leduInstance_g.statusLedMode = kLeduModeOff;
-                ret = EplTimeruDeleteTimer(&leduInstance_g.timerHdlLedBlink);
+                ret = timeru_deleteTimer(&leduInstance_g.timerHdlLedBlink);
                 ret = callStateChanged(kLedTypeStatus, FALSE);
             }
             break;
@@ -233,7 +233,7 @@ tEplKernel ledu_cbNmtStateChange(tEventNmtStateChange nmtStateChange_p)
             if (leduInstance_g.statusLedMode != kLeduModeOn)
             {   // state changed
                 leduInstance_g.statusLedMode = kLeduModeOn;
-                ret = EplTimeruDeleteTimer(&leduInstance_g.timerHdlLedBlink);
+                ret = timeru_deleteTimer(&leduInstance_g.timerHdlLedBlink);
                 ret = callStateChanged(kLedTypeStatus, TRUE);
             }
             break;
@@ -398,7 +398,7 @@ tEplKernel ledu_processEvent(tEplEvent* pEvent_p)
             timerArg.m_EventSink = kEplEventSinkLedu;
             leduInstance_g.timerArg++;
             timerArg.m_Arg.m_dwVal = leduInstance_g.timerArg;
-            ret = EplTimeruModifyTimerMs(&leduInstance_g.timerHdlLedBlink, timeout, timerArg);
+            ret = timeru_modifyTimer(&leduInstance_g.timerHdlLedBlink, timeout, timerArg);
 
             // call callback function
             ret = callStateChanged(kLedTypeStatus, fLedOn);
@@ -516,7 +516,7 @@ static tEplKernel changeMode(tLeduMode newMode_p)
         timerArg.m_EventSink = kEplEventSinkLedu;
         leduInstance_g.timerArg++;
         timerArg.m_Arg.m_dwVal = leduInstance_g.timerArg;
-        ret = EplTimeruModifyTimerMs(&leduInstance_g.timerHdlLedBlink,
+        ret = timeru_modifyTimer(&leduInstance_g.timerHdlLedBlink,
                                      timeout,
                                      timerArg);
 

@@ -154,7 +154,7 @@ tEplKernel nmtu_delInstance(void)
     tEplKernel ret = kEplSuccessful;
 
     nmtuInstance_g.pfnNmtChangeCb = NULL;
-    ret = EplTimeruDeleteTimer(&nmtuInstance_g.timerHdl);
+    ret = timeru_deleteTimer(&nmtuInstance_g.timerHdl);
 
     return ret;
 }
@@ -227,7 +227,7 @@ tEplKernel nmtu_processEvent(tEplEvent* pEvent_p)
     {
         // state change of NMT-Module
         case kEplEventTypeNmtStateChange:
-            ret = EplTimeruDeleteTimer(&nmtuInstance_g.timerHdl);
+            ret = timeru_deleteTimer(&nmtuInstance_g.timerHdl);
             pNmtStateChange = (tEventNmtStateChange*)pEvent_p->m_pArg;
             nmtuInstance_g.localNmtState = pNmtStateChange->newNmtState;
 
@@ -686,7 +686,7 @@ static tEplKernel setupNmtTimerEvent(UINT32 timeout_p, tNmtEvent event_p)
         timeout_p = 1;
     timerArg.m_EventSink = kEplEventSinkNmtk;
     timerArg.m_Arg.m_dwVal = (UINT32) event_p;
-    ret = EplTimeruModifyTimerMs(&nmtuInstance_g.timerHdl, (ULONG)timeout_p, timerArg);
+    ret = timeru_modifyTimer(&nmtuInstance_g.timerHdl, (ULONG)timeout_p, timerArg);
     return  ret;
 }
 

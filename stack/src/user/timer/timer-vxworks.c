@@ -139,7 +139,7 @@ static void EplTimeruProcessTask (void);
 //=========================================================================//
 
 //---------------------------------------------------------------------------
-// Function:    EplTimeruInit
+// Function:    timeru_init
 //
 // Description: function init first instance
 //
@@ -147,17 +147,17 @@ static void EplTimeruProcessTask (void);
 //
 // Returns:     tEplKernel  = errorcode
 //---------------------------------------------------------------------------
-tEplKernel PUBLIC EplTimeruInit()
+tEplKernel timeru_init(void)
 {
     tEplKernel  Ret;
 
-    Ret = EplTimeruAddInstance();
+    Ret = timeru_addInstance();
 
 return Ret;
 }
 
 //---------------------------------------------------------------------------
-// Function:    EplTimeruAddInstance
+// Function:    timeru_addInstance
 //
 // Description: function init additional instance
 //
@@ -165,7 +165,7 @@ return Ret;
 //
 // Returns:     tEplKernel  = errorcode
 //---------------------------------------------------------------------------
-tEplKernel PUBLIC EplTimeruAddInstance(void)
+tEplKernel timeru_addInstance(void)
 {
     tEplKernel Ret;
 
@@ -208,7 +208,7 @@ Exit:
 }
 
 //---------------------------------------------------------------------------
-// Function:    EplTimeruDelInstance
+// Function:    timeru_delInstance
 //
 // Description: function deletes instance
 //
@@ -216,7 +216,7 @@ Exit:
 //
 // Returns:     tEplKernel  = errorcode
 //---------------------------------------------------------------------------
-tEplKernel PUBLIC EplTimeruDelInstance(void)
+tEplKernel timeru_delInstance(void)
 {
     tEplKernel          Ret;
     unsigned long       msg;
@@ -253,7 +253,7 @@ tEplKernel PUBLIC EplTimeruDelInstance(void)
 }
 
 //---------------------------------------------------------------------------
-// Function:    EplTimeruProcess
+// Function:    timeru_process
 //
 // Description: This function is called repeatedly from within the main
 //              loop of the application. It checks whether the first timer
@@ -263,25 +263,23 @@ tEplKernel PUBLIC EplTimeruDelInstance(void)
 //
 // Returns:     tEplKernel  = errorcode
 //---------------------------------------------------------------------------
-tEplKernel PUBLIC EplTimeruProcess(void)
+tEplKernel timeru_process(void)
 {
     return kEplSuccessful;
 }
 
 //---------------------------------------------------------------------------
-// Function:    EplTimeruSetTimerMs
+// Function:    timeru_setTimer
 //
 // Description: function creates a timer and returns a handle to the pointer
 //
 // Parameters:  pTimerHdl_p = pointer to a buffer to fill in the handle
 //              ulTimeMs_p  = time for timer in ms
-//              Argument_p  = argument for timer
+//              argument_p  = argument for timer
 //
 // Returns:     tEplKernel  = errorcode
 //---------------------------------------------------------------------------
-tEplKernel PUBLIC EplTimeruSetTimerMs(  tEplTimerHdl*   pTimerHdl_p,
-                                        ULONG           ulTime_p,
-                                        tEplTimerArg    Argument_p)
+tEplKernel timeru_setTimer(tEplTimerHdl* pTimerHdl_p, ULONG ulTime_p, tEplTimerArg argument_p)
 {
     tEplKernel          Ret = kEplSuccessful;
     tEplTimeruData*     pData;
@@ -303,7 +301,7 @@ tEplKernel PUBLIC EplTimeruSetTimerMs(  tEplTimerHdl*   pTimerHdl_p,
         goto Exit;
     }
 
-    EPL_MEMCPY(&pData->m_timerArg, &Argument_p, sizeof(tEplTimerArg));
+    EPL_MEMCPY(&pData->m_timerArg, &argument_p, sizeof(tEplTimerArg));
 
     EplTimeruAddTimer(pData);
 
@@ -318,22 +316,22 @@ tEplKernel PUBLIC EplTimeruSetTimerMs(  tEplTimerHdl*   pTimerHdl_p,
         goto Exit;
     }
 
-    if (ulTime_p >= 1000)
+    if (timeInMs_p >= 1000)
     {
-        RelTime.it_value.tv_sec = (ulTime_p / 1000);
-        RelTime.it_value.tv_nsec = (ulTime_p % 1000) * 1000000;
+        RelTime.it_value.tv_sec = (timeInMs_p / 1000);
+        RelTime.it_value.tv_nsec = (timeInMs_p % 1000) * 1000000;
     }
     else
     {
         RelTime.it_value.tv_sec = 0;
-        RelTime.it_value.tv_nsec = ulTime_p * 1000000;
+        RelTime.it_value.tv_nsec = timeInMs_p * 1000000;
     }
 
     RelTime.it_interval.tv_sec = 0;
     RelTime.it_interval.tv_nsec = 0;
 
-    EPL_DBGLVL_TIMERU_TRACE("%s() Set timer:%08x ulTime_p=%ld\n",
-                             __func__, *pData, ulTime_p);
+    EPL_DBGLVL_TIMERU_TRACE("%s() Set timer:%08x timeInMs_p=%ld\n",
+                             __func__, *pData, timeInMs_p);
 
     if (hrtimer_settime(pData->m_timer, 0, &RelTime, NULL) < 0)
     {
@@ -350,19 +348,17 @@ Exit:
 }
 
 //---------------------------------------------------------------------------
-// Function:    EplTimeruModifyTimerMs
+// Function:    timeru_modifyTimer
 //
 // Description: function changes a timer and returns the corresponding handle
 //
 // Parameters:  pTimerHdl_p = pointer to a buffer to fill in the handle
-//              ulTime_p    = time for timer in ms
-//              Argument_p  = argument for timer
+//              timeInMs_p    = time for timer in ms
+//              argument_p  = argument for timer
 //
 // Returns:     tEplKernel  = errorcode
 //---------------------------------------------------------------------------
-tEplKernel PUBLIC EplTimeruModifyTimerMs(tEplTimerHdl*    pTimerHdl_p,
-                                        ULONG		      ulTime_p,
-                                        tEplTimerArg      Argument_p)
+tEplKernel timeru_modifyTimer(tEplTimerHdl* pTimerHdl_p, ULONG timeInMs_p, tEplTimerArg argument_p)
 {
     tEplKernel          Ret = kEplSuccessful;
     tEplTimeruData*     pData;
@@ -378,24 +374,24 @@ tEplKernel PUBLIC EplTimeruModifyTimerMs(tEplTimerHdl*    pTimerHdl_p,
     // check handle itself, i.e. was the handle initialized before
     if (*pTimerHdl_p == 0)
     {
-        Ret = EplTimeruSetTimerMs(pTimerHdl_p, ulTime_p, Argument_p);
+        Ret = timeru_setTimer(pTimerHdl_p, timeInMs_p, argument_p);
         goto Exit;
     }
     pData = (tEplTimeruData*) *pTimerHdl_p;
 
-    if (ulTime_p >= 1000)
+    if (timeInMs_p >= 1000)
     {
-        RelTime.it_value.tv_sec = (ulTime_p / 1000);
-        RelTime.it_value.tv_nsec = (ulTime_p % 1000) * 1000000;
+        RelTime.it_value.tv_sec = (timeInMs_p / 1000);
+        RelTime.it_value.tv_nsec = (timeInMs_p % 1000) * 1000000;
     }
     else
     {
         RelTime.it_value.tv_sec = 0;
-        RelTime.it_value.tv_nsec = ulTime_p * 1000000;
+        RelTime.it_value.tv_nsec = timeInMs_p * 1000000;
     }
 
-    EPL_DBGLVL_TIMERU_TRACE("%s() Modify timer:%08x ulTime_p=%ld\n",
-                             __func__, *pTimerHdl_p, ulTime_p);
+    EPL_DBGLVL_TIMERU_TRACE("%s() Modify timer:%08x timeInMs_p=%ld\n",
+                             __func__, *pTimerHdl_p, timeInMs_p);
 
     RelTime.it_interval.tv_sec = 0;
     RelTime.it_interval.tv_nsec = 0;
@@ -412,14 +408,14 @@ tEplKernel PUBLIC EplTimeruModifyTimerMs(tEplTimerHdl*    pTimerHdl_p,
     // won't use the new TimerArg and
     // therefore the old timer cannot be distinguished from the new one.
     // But if the new timer is too fast, it may get lost.
-    EPL_MEMCPY(&pData->m_timerArg, &Argument_p, sizeof(tEplTimerArg));
+    EPL_MEMCPY(&pData->m_timerArg, &argument_p, sizeof(tEplTimerArg));
 
 Exit:
     return Ret;
 }
 
 //---------------------------------------------------------------------------
-// Function:    EplTimeruDeleteTimer
+// Function:    timeru_deleteTimer
 //
 // Description: function deletes a timer
 //
@@ -427,7 +423,7 @@ Exit:
 //
 // Returns:     tEplKernel  = errorcode
 //---------------------------------------------------------------------------
-tEplKernel PUBLIC EplTimeruDeleteTimer(tEplTimerHdl* pTimerHdl_p)
+tEplKernel timeru_deleteTimer(tEplTimerHdl* pTimerHdl_p)
 {
     tEplKernel      Ret;
     tEplTimeruData*     pData;

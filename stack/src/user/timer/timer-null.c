@@ -115,7 +115,7 @@
 
 //---------------------------------------------------------------------------
 //
-// Function:    EplTimeruInit
+// Function:    timeru_init
 //
 // Description: function init first instance
 //
@@ -130,18 +130,18 @@
 // State:
 //
 //---------------------------------------------------------------------------
-tEplKernel PUBLIC EplTimeruInit()
+tEplKernel timeru_init(void)
 {
 tEplKernel  Ret;
 
-    Ret = EplTimeruAddInstance();
+    Ret = timeru_addInstance();
 
 return Ret;
 }
 
 //---------------------------------------------------------------------------
 //
-// Function:    EplTimeruAddInstance
+// Function:    timeru_addInstance
 //
 // Description: function init additional instance
 //
@@ -156,7 +156,7 @@ return Ret;
 // State:
 //
 //---------------------------------------------------------------------------
-tEplKernel PUBLIC EplTimeruAddInstance()
+tEplKernel timeru_addInstance(void)
 {
 tEplKernel Ret;
 
@@ -167,7 +167,7 @@ return Ret;
 
 //---------------------------------------------------------------------------
 //
-// Function:    EplTimeruDelInstance
+// Function:    timeru_delInstance
 //
 // Description: function delte instance
 //              -> under Win32 nothing to do
@@ -184,7 +184,7 @@ return Ret;
 // State:
 //
 //---------------------------------------------------------------------------
-tEplKernel PUBLIC EplTimeruDelInstance()
+tEplKernel timeru_delInstance(void)
 {
 tEplKernel  Ret;
 
@@ -196,7 +196,7 @@ tEplKernel  Ret;
 
 //---------------------------------------------------------------------------
 //
-// Function:    EplTimeruProcess
+// Function:    timeru_process
 //
 // Description: This function is called repeatedly from within the main
 //              loop of the application. It checks whether the first timer
@@ -210,7 +210,7 @@ tEplKernel  Ret;
 //
 //---------------------------------------------------------------------------
 
-tEplKernel PUBLIC EplTimeruProcess()
+tEplKernel timeru_process(void)
 {
     return kEplSuccessful;
 }
@@ -218,15 +218,15 @@ tEplKernel PUBLIC EplTimeruProcess()
 
 //---------------------------------------------------------------------------
 //
-// Function:    EplTimeruSetTimerMs
+// Function:    timeru_setTimer
 //
 // Description: function create a timer and return a handle to the pointer
 //
 //
 //
 // Parameters:  pTimerHdl_p = pointer to a buffer to fill in the handle
-//              ulTime_p    = time for timer in ms
-//              Argument_p  = argument for timer
+//              timeInMs_p    = time for timer in ms
+//              argument_p  = argument for timer
 //
 //
 // Returns:     tEplKernel  = errorcode
@@ -235,9 +235,7 @@ tEplKernel PUBLIC EplTimeruProcess()
 // State:
 //
 //---------------------------------------------------------------------------
-tEplKernel PUBLIC EplTimeruSetTimerMs(tEplTimerHdl*     pTimerHdl_p,
-                                        unsigned long   ulTime_p,
-                                        tEplTimerArg    Argument_p)
+tEplKernel timeru_setTimer(tEplTimerHdl* pTimerHdl_p, ULONG timeInMs_p, tEplTimerArg argument_p)
 {
 tEplKernel          Ret;
 
@@ -258,15 +256,15 @@ Exit:
 
  //---------------------------------------------------------------------------
 //
-// Function:    EplTimeruModifyTimerMs
+// Function:    timeru_modifyTimer
 //
 // Description: function change a timer and return a handle to the pointer
 //
 //
 //
 // Parameters:  pTimerHdl_p = pointer to a buffer to fill in the handle
-//              ulTime_p    = time for timer in ms
-//              Argument_p  = argument for timer
+//              timeInMs_p    = time for timer in ms
+//              argument_p  = argument for timer
 //
 //
 // Returns:     tEplKernel  = errorcode
@@ -275,9 +273,7 @@ Exit:
 // State:
 //
 //---------------------------------------------------------------------------
-tEplKernel PUBLIC EplTimeruModifyTimerMs(tEplTimerHdl*     pTimerHdl_p,
-                                        unsigned long     ulTime_p,
-                                        tEplTimerArg      Argument_p)
+tEplKernel timeru_modifyTimer(tEplTimerHdl* pTimerHdl_p, unsigned long timeInMs_p, tEplTimerArg argument_p)
 {
 tEplKernel          Ret;
 
@@ -297,7 +293,7 @@ Exit:
 
  //---------------------------------------------------------------------------
 //
-// Function:    EplTimeruDeleteTimer
+// Function:    timeru_deleteTimer
 //
 // Description: function delte a timer
 //
@@ -312,7 +308,7 @@ Exit:
 // State:
 //
 //---------------------------------------------------------------------------
-tEplKernel PUBLIC EplTimeruDeleteTimer(tEplTimerHdl*     pTimerHdl_p)
+tEplKernel timeru_deleteTimer(tEplTimerHdl* pTimerHdl_p)
 {
 tEplKernel  Ret;
 

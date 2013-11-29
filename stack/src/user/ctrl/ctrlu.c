@@ -293,7 +293,7 @@ tEplKernel ctrlu_initStack(tEplApiInitParam * pInitParam_p)
         goto Exit;
 
     TRACE ("Initialize Timeru module...\n");
-    if ((ret = EplTimeruInit()) != kEplSuccessful)
+    if ((ret = timeru_init()) != kEplSuccessful)
         goto Exit;
 
     TRACE ("initialize error handler user module...\n");
@@ -434,8 +434,8 @@ tEplKernel ctrlu_shutdownStack(void)
     ret = errhndu_exit();
     TRACE("errhndu_exit():  0x%X\n", ret);
 
-    ret = EplTimeruDelInstance();
-    TRACE("EplTimeruDelInstance():  0x%X\n", ret);
+    ret = timeru_delInstance();
+    TRACE("timeru_delInstance():  0x%X\n", ret);
 
     ret = ctrlucal_executeCmd(kCtrlCleanupStack);
     TRACE("shoutdown kernel modules():  0x%X\n", ret);
@@ -481,7 +481,7 @@ tShbError  ShbError;
     if(Ret != kEplSuccessful)
         goto Exit;
 
-    Ret = EplTimeruProcess();
+    Ret = timeru_process();
 
 Exit:
     return Ret;
