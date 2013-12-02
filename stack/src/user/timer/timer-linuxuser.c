@@ -1,59 +1,47 @@
-/****************************************************************************
-  File:         EplTimeruLinuxUser.c
+/**
+********************************************************************************
+\file   timer-linuxuser.c
 
-  (c) Bernecker + Rainer Ges.m.b.H.,  B&R Strasse 1, 5142 Eggelsberg, Austria
-      www.br-automation.com
+\brief  Implementation of user timer module for Linux userspace
 
-  (c) SYSTEC electronic GmbH, D-07973 Greiz, August-Bebel-Str. 29
-      www.systec-electronic.com
+This file contains the implementation of the user timer module for Linux
+userspace. This implementation uses the posix timer interface.
 
-  Project:      openPOWERLINK
+\ingroup module_timeru
+*******************************************************************************/
 
-  Description:  Linux Pthread based user space implementation of
-                EPL user timer module
+/*------------------------------------------------------------------------------
+Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2013, SYSTEC electronic GmbH
+All rights reserved.
 
-  License:
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+    * Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above copyright
+      notice, this list of conditions and the following disclaimer in the
+      documentation and/or other materials provided with the distribution.
+    * Neither the name of the copyright holders nor the
+      names of its contributors may be used to endorse or promote products
+      derived from this software without specific prior written permission.
 
-    Redistribution and use in source and binary forms, with or without
-    modification, are permitted provided that the following conditions
-    are met:
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL COPYRIGHT HOLDERS BE LIABLE FOR ANY
+DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+------------------------------------------------------------------------------*/
 
-    1. Redistributions of source code must retain the above copyright
-       notice, this list of conditions and the following disclaimer.
-
-    2. Redistributions in binary form must reproduce the above copyright
-       notice, this list of conditions and the following disclaimer in the
-       documentation and/or other materials provided with the distribution.
-
-    3. Neither the name of Bernecker + Rainer Ges.m.b.H nor the names of its
-       contributors may be used to endorse or promote products derived
-       from this software without prior written permission. For written
-       permission, please contact office@br-automation.com.
-
-    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-    LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-    FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-    COPYRIGHT HOLDERS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-    INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-    BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-    LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-    CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-    LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-    ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-    POSSIBILITY OF SUCH DAMAGE.
-
-    Severability Clause:
-
-        If a provision of this License is or becomes illegal, invalid or
-        unenforceable in any jurisdiction, that shall not affect:
-        1. the validity or enforceability in that jurisdiction of any other
-           provision of this License; or
-        2. the validity or enforceability in other jurisdictions of that or
-           any other provision of this License.
-****************************************************************************/
-
-#include "user/timeru.h"
+//------------------------------------------------------------------------------
+// includes
+//------------------------------------------------------------------------------
+#include <user/timeru.h>
 
 #include <stdio.h>
 #include <unistd.h>
@@ -64,332 +52,314 @@
 
 #include <signal.h>
 
-/***************************************************************************/
-/*                                                                         */
-/*          G L O B A L   D E F I N I T I O N S                            */
-/*                                                                         */
-/***************************************************************************/
-//---------------------------------------------------------------------------
+//============================================================================//
+//            G L O B A L   D E F I N I T I O N S                             //
+//============================================================================//
+
+//------------------------------------------------------------------------------
 // const defines
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+// module global vars
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// global function prototypes
+//------------------------------------------------------------------------------
+
+//============================================================================//
+//            P R I V A T E   D E F I N I T I O N S                           //
+//============================================================================//
+
+//------------------------------------------------------------------------------
+// const defines
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
 // local types
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+typedef struct sTimeruData tTimeruData;
 
-typedef struct EplTimeruData tEplTimeruData;
-
-struct EplTimeruData
+struct sTimeruData
 {
-    timer_t             m_Timer;
-    tEplTimerArg        TimerArgument;
-    tEplTimeruData      *m_pNextTimer;
-    tEplTimeruData      *m_pPrevTimer;
+    timer_t             timer;
+    tEplTimerArg        timerArgument;
+    tTimeruData         *pNextTimer;
+    tTimeruData         *pPrevTimer;
 };
 
 typedef struct
 {
-    pthread_t           m_hProcessThread;
-    pthread_mutex_t     m_Mutex;
-    tEplTimeruData      *m_pFirstTimer;
-    tEplTimeruData      *m_pLastTimer;
-    tEplTimeruData      *m_pCurrentTimer;
-} tEplTimeruInstance;
+    pthread_t           processThread;
+    pthread_mutex_t     mutex;
+    tTimeruData*        pFirstTimer;
+    tTimeruData*        pLastTimer;
+    tTimeruData*        pCurrentTimer;
+} tTimeruInstance;
 
-//---------------------------------------------------------------------------
-// module global vars
-//---------------------------------------------------------------------------
-static tEplTimeruInstance EplTimeruInstance_g;
+//------------------------------------------------------------------------------
+// local vars
+//------------------------------------------------------------------------------
+static tTimeruInstance timeruInstance_g;
 
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // local function prototypes
-//---------------------------------------------------------------------------
-static void PUBLIC EplTimeruCbMs(ULONG ulParameter_p);
-static void * EplTimeruProcessThread(void *pArgument_p);
-static void EplTimeruLinuxUserAddTimer(tEplTimeruData *pData_p);
-static void EplTimeruLinuxUserRemoveTimer(tEplTimeruData *pData_p);
-static void EplTimeruResetTimerList(void);
-static tEplTimeruData * EplTimeruGetNextTimer(void);
+//------------------------------------------------------------------------------
+static void cbTimer(ULONG parameter_p);
+static void* processThread(void *pArgument_p);
+static void addTimer(tTimeruData *pData_p);
+static void removeTimer(tTimeruData *pData_p);
+static void resetTimerList(void);
+static tTimeruData* getNextTimer(void);
 
-/***************************************************************************/
-/*                                                                         */
-/*     C L A S S  <Epl Userspace-Timermodule for Linux User Space>         */
-/*                                                                         */
-/***************************************************************************/
-//
-// Description: Epl Userspace-Timermodule for Linux User Space
-//
-/***************************************************************************/
+//============================================================================//
+//            P U B L I C   F U N C T I O N S                                 //
+//============================================================================//
 
-//=========================================================================//
-//                                                                         //
-//          P U B L I C   F U N C T I O N S                                //
-//                                                                         //
-//=========================================================================//
+//------------------------------------------------------------------------------
+/**
+\brief  Initialize user timers
 
-//---------------------------------------------------------------------------
-// Function:    timeru_init
-//
-// Description: function inits first instance
-//
-// Parameters:  void
-//
-// Returns:     tEplKernel  = errorcode
-//---------------------------------------------------------------------------
+The function initializes the user timer module.
+
+\return The function returns a tEplKernel error code.
+
+\ingroup module_timeru
+*/
+//------------------------------------------------------------------------------
 tEplKernel timeru_init(void)
 {
-    tEplKernel  Ret;
-
-    Ret = timeru_addInstance();
-
-    return Ret;
+    return timeru_addInstance();
 }
 
-//---------------------------------------------------------------------------
-// Function:    timeru_addInstance
-//
-// Description: function inits additional instance
-//
-// Parameters:  void
-//
-// Returns:     tEplKernel  = errorcode
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+/**
+\brief  Add user timer instance
+
+The function adds a user timer instance.
+
+\return The function returns a tEplKernel error code.
+
+\ingroup module_timeru
+*/
+//------------------------------------------------------------------------------
 tEplKernel timeru_addInstance(void)
 {
-    tEplKernel                  Ret;
     struct sched_param          schedParam;
-    INT                         iRetVal;
+    INT                         retVal;
 
     // reset instance structure
-    EplTimeruInstance_g.m_hProcessThread = 0;
-    EplTimeruInstance_g.m_pFirstTimer = NULL;
-    EplTimeruInstance_g.m_pLastTimer = NULL;
+    timeruInstance_g.processThread = 0;
+    timeruInstance_g.pFirstTimer = NULL;
+    timeruInstance_g.pLastTimer = NULL;
 
-    if (pthread_mutex_init(&EplTimeruInstance_g.m_Mutex, NULL) != 0)
+    if (pthread_mutex_init(&timeruInstance_g.mutex, NULL) != 0)
     {
         EPL_DBGLVL_ERROR_TRACE("%s() couldn't init mutex!\n", __func__);
-        Ret = kEplNoResource;
-        goto Exit;
+        return kEplNoResource;
     }
 
-    if ((iRetVal = pthread_create(&EplTimeruInstance_g.m_hProcessThread, NULL,
-                       EplTimeruProcessThread,  &EplTimeruInstance_g)) != 0)
+    if ((retVal = pthread_create(&timeruInstance_g.processThread, NULL,
+                                 processThread,  &timeruInstance_g)) != 0)
     {
         EPL_DBGLVL_ERROR_TRACE("%s() couldn't create timer thread! (%d)\n",
-                                __func__, iRetVal);
-        Ret = kEplNoResource;
-        pthread_mutex_destroy(&EplTimeruInstance_g.m_Mutex);
-        goto Exit;
+                                __func__, retVal);
+        pthread_mutex_destroy(&timeruInstance_g.mutex);
+        return kEplNoResource;
     }
 
     schedParam.__sched_priority = EPL_THREAD_PRIORITY_LOW;
-    if (pthread_setschedparam(EplTimeruInstance_g.m_hProcessThread, SCHED_RR,
+    if (pthread_setschedparam(timeruInstance_g.processThread, SCHED_RR,
                               &schedParam) != 0)
     {
         EPL_DBGLVL_ERROR_TRACE("%s() couldn't set thread scheduling parameters!\n",
                                 __func__);
     }
 
-    Ret = kEplSuccessful;
-
-Exit:
-    return Ret;
+    return kEplSuccessful;
 }
 
-//---------------------------------------------------------------------------
-// Function:    timeru_delInstance
-//
-// Description: function deletes instance
-//
-// Parameters:  void
-//
-// Returns:     tEplKernel  = errorcode
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+/**
+\brief  Delete user timer instance
+
+The function deletes a user timer instance.
+
+\return The function returns a tEplKernel error code.
+
+\ingroup module_timeru
+*/
+//------------------------------------------------------------------------------
 tEplKernel timeru_delInstance(void)
 {
-    tEplKernel          Ret;
-    tEplTimeruData*     pTimer;
-
-    Ret = kEplSuccessful;
+    tTimeruData*     pTimer;
 
     /* cancel thread */
-    pthread_cancel(EplTimeruInstance_g.m_hProcessThread);
+    pthread_cancel(timeruInstance_g.processThread);
     EPL_DBGLVL_TIMERU_TRACE("%s() Waiting for thread to exit...\n", __func__);
 
     /* wait for thread to terminate */
-    pthread_join(EplTimeruInstance_g.m_hProcessThread, NULL);
+    pthread_join(timeruInstance_g.processThread, NULL);
     EPL_DBGLVL_TIMERU_TRACE("%s()Thread exited\n", __func__);
 
     /* free up timer list */
-    EplTimeruResetTimerList();
-    while ((pTimer = EplTimeruGetNextTimer()) != NULL)
+    resetTimerList();
+    while ((pTimer = getNextTimer()) != NULL)
     {
-        EplTimeruLinuxUserRemoveTimer(pTimer);
+        removeTimer(pTimer);
         EPL_FREE(pTimer);
     }
 
-    pthread_mutex_destroy(&EplTimeruInstance_g.m_Mutex);
+    pthread_mutex_destroy(&timeruInstance_g.mutex);
 
-    EplTimeruInstance_g.m_pFirstTimer = NULL;
-    EplTimeruInstance_g.m_pLastTimer = NULL;
+    timeruInstance_g.pFirstTimer = NULL;
+    timeruInstance_g.pLastTimer = NULL;
 
-    return Ret;
+    return kEplSuccessful;
 }
 
-//---------------------------------------------------------------------------
-// Function:    timeru_process
-//
-// Description: This function is called repeatedly from within the main
-//              loop of the application. It checks whether the first timer
-//              entry has been elapsed.
-//
-//              We don't need it because we are using threads!
-//
-// Parameters:  none
-//
-// Returns:     tEplKernel  = errorcode
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+/**
+\brief  User timer process function
 
+This function must be called repeatedly from within the application. It checks
+whether a timer has expired.
+
+\note The function is not used in the Linux userspace implementation!
+
+\return The function returns a tEplKernel error code.
+
+\ingroup module_timeru
+*/
+//------------------------------------------------------------------------------
 tEplKernel timeru_process(void)
 {
     return kEplSuccessful;
 }
 
-//---------------------------------------------------------------------------
-// Function:    timeru_setTimer
-//
-// Description: function creates a timer and returns the corresponding handle
-//
-// Parameters:  pTimerHdl_p = pointer to a buffer to fill in the handle
-//              timeInMs_p    = time for timer in ms
-//              argument_p  = argument for timer
-//
-// Returns:     tEplKernel  = errorcode
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+/**
+\brief  Create and set a timer
+
+This function creates a timer, sets up the timeout and saves the
+corresponding timer handle.
+
+\param  pTimerHdl_p     Pointer to store the timer handle.
+\param  timeInMs_p      Timeout in milliseconds.
+\param  argument_p      User definable argument for timer.
+
+\return The function returns a tEplKernel error code.
+
+\ingroup module_timeru
+*/
+//------------------------------------------------------------------------------
 tEplKernel timeru_setTimer(tEplTimerHdl* pTimerHdl_p, ULONG timeInMs_p, tEplTimerArg argument_p)
 {
-    tEplKernel          Ret = kEplSuccessful;
-    tEplTimeruData*     pData;
-    struct itimerspec   RelTime;
-    struct itimerspec   CurTime;
-    struct sigevent sev;
+    tTimeruData*        pData;
+    struct itimerspec   relTime;
+    struct itimerspec   curTime;
+    struct sigevent     sev;
 
-    // check pointer to handle
     if(pTimerHdl_p == NULL)
-    {
-        Ret = kEplTimerInvalidHandle;
-        goto Exit;
-    }
+        return kEplTimerInvalidHandle;
 
-    pData = (tEplTimeruData*) EPL_MALLOC(sizeof (tEplTimeruData));
+    pData = (tTimeruData*) EPL_MALLOC(sizeof (tTimeruData));
     if (pData == NULL)
-    {
-        Ret = kEplNoResource;
-        goto Exit;
-    }
+        return kEplNoResource;
 
-    EPL_MEMCPY(&pData->TimerArgument, &argument_p, sizeof(tEplTimerArg));
+    EPL_MEMCPY(&pData->timerArgument, &argument_p, sizeof(tEplTimerArg));
 
-    EplTimeruLinuxUserAddTimer(pData);
+    addTimer(pData);
 
     sev.sigev_notify = SIGEV_SIGNAL;
     sev.sigev_signo = SIGRTMIN;
-    sev.sigev_value.sival_ptr = &pData->m_Timer;
-    if (timer_create(CLOCK_MONOTONIC, &sev, &pData->m_Timer) == -1)
+    sev.sigev_value.sival_ptr = &pData->timer;
+    if (timer_create(CLOCK_MONOTONIC, &sev, &pData->timer) == -1)
     {
         EPL_DBGLVL_ERROR_TRACE("%s() Error creating timer!\n", __func__);
         EPL_FREE(pData);
-        Ret = kEplNoResource;
-        goto Exit;
+        return kEplNoResource;
     }
 
     if (timeInMs_p >= 1000)
     {
-        RelTime.it_value.tv_sec = (timeInMs_p / 1000);
-        RelTime.it_value.tv_nsec = (timeInMs_p % 1000) * 1000000;
+        relTime.it_value.tv_sec = (timeInMs_p / 1000);
+        relTime.it_value.tv_nsec = (timeInMs_p % 1000) * 1000000;
     }
     else
     {
-        RelTime.it_value.tv_sec = 0;
-        RelTime.it_value.tv_nsec = timeInMs_p * 1000000;
+        relTime.it_value.tv_sec = 0;
+        relTime.it_value.tv_nsec = timeInMs_p * 1000000;
     }
 
-    /*
-    EPL_DBGLVL_TIMERU_TRACE("%s() Set timer: %p, timeInMs_p=%ld\n",
-                             __func__, (void *)pData, timeInMs_p);
-    */
+    /*EPL_DBGLVL_TIMERU_TRACE("%s() Set timer: %p, timeInMs_p=%ld\n",
+                             __func__, (void *)pData, timeInMs_p); */
 
-    RelTime.it_interval.tv_sec = 0;
-    RelTime.it_interval.tv_nsec = 0;
+    relTime.it_interval.tv_sec = 0;
+    relTime.it_interval.tv_nsec = 0;
 
-    if (timer_settime(pData->m_Timer, 0, &RelTime, &CurTime) < 0)
+    if (timer_settime(pData->timer, 0, &relTime, &curTime) < 0)
     {
         EPL_DBGLVL_ERROR_TRACE("%s() Error timer_settime!\n", __func__);
-        Ret = kEplTimerNoTimerCreated;
-        goto Exit;
+        return kEplTimerNoTimerCreated;
     }
 
     *pTimerHdl_p = (tEplTimerHdl) pData;
-
-Exit:
-    return Ret;
+    return kEplSuccessful;
 }
 
-//---------------------------------------------------------------------------
-// Function:    timeru_modifyTimer
-//
-// Description: function changes a timer and returns the corresponding handle
-//
-// Parameters:  pTimerHdl_p = pointer to a buffer to fill in the handle
-//              timeInMs_p    = time for timer in ms
-//              argument_p  = argument for timer
-//
-// Returns:     tEplKernel  = errorcode
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+/**
+\brief  Modifies an existing timer
+
+This function modifies an existing timer. If the timer was not yet created
+it creates the timer and stores the new timer handle at \p pTimerHdl_p.
+
+\param  pTimerHdl_p     Pointer to store the timer handle.
+\param  timeInMs_p      Timeout in milliseconds.
+\param  argument_p      User definable argument for timer.
+
+\return The function returns a tEplKernel error code.
+
+\ingroup module_timeru
+*/
+//------------------------------------------------------------------------------
 tEplKernel timeru_modifyTimer(tEplTimerHdl* pTimerHdl_p, ULONG timeInMs_p, tEplTimerArg argument_p)
 {
-    tEplKernel          Ret = kEplSuccessful;
-    tEplTimeruData*     pData;
-    struct itimerspec   RelTime, CurTime;
+    tTimeruData*        pData;
+    struct itimerspec   relTime, curTime;
 
-    // check pointer to handle
     if(pTimerHdl_p == NULL)
-    {
-        Ret = kEplTimerInvalidHandle;
-        goto Exit;
-    }
+        return kEplTimerInvalidHandle;
 
     // check handle itself, i.e. was the handle initialized before
     if (*pTimerHdl_p == 0)
     {
-        Ret = timeru_setTimer(pTimerHdl_p, timeInMs_p, argument_p);
-        goto Exit;
+        return timeru_setTimer(pTimerHdl_p, timeInMs_p, argument_p);
     }
-    pData = (tEplTimeruData*) *pTimerHdl_p;
+    pData = (tTimeruData*) *pTimerHdl_p;
 
     if (timeInMs_p >= 1000)
     {
-        RelTime.it_value.tv_sec = (timeInMs_p / 1000);
-        RelTime.it_value.tv_nsec = (timeInMs_p % 1000) * 1000000;
+        relTime.it_value.tv_sec = (timeInMs_p / 1000);
+        relTime.it_value.tv_nsec = (timeInMs_p % 1000) * 1000000;
     }
     else
     {
-        RelTime.it_value.tv_sec = 0;
-        RelTime.it_value.tv_nsec = timeInMs_p * 1000000;
+        relTime.it_value.tv_sec = 0;
+        relTime.it_value.tv_nsec = timeInMs_p * 1000000;
     }
 
-    /*
-    EPL_DBGLVL_TIMERU_TRACE("%s() Modify timer:%08x timeInMs_p=%ld\n",
-                             __func__, *pTimerHdl_p, timeInMs_p);
-    */
+    /* EPL_DBGLVL_TIMERU_TRACE("%s() Modify timer:%08x timeInMs_p=%ld\n",
+                             __func__, *pTimerHdl_p, timeInMs_p); */
 
-    RelTime.it_interval.tv_sec = 0;
-    RelTime.it_interval.tv_nsec = 0;
-    if (timer_settime(pData->m_Timer, 0, &RelTime, &CurTime) != 0)
+    relTime.it_interval.tv_sec = 0;
+    relTime.it_interval.tv_nsec = 0;
+    if (timer_settime(pData->timer, 0, &relTime, &curTime) != 0)
     {
         EPL_DBGLVL_ERROR_TRACE("%s() Error timer_settime!\n", __func__);
-        Ret = kEplTimerNoTimerCreated;
-        goto Exit;
+        return kEplTimerNoTimerCreated;
     }
 
     // copy the TimerArg after the timer is restarted,
@@ -397,120 +367,113 @@ tEplKernel timeru_modifyTimer(tEplTimerHdl* pTimerHdl_p, ULONG timeInMs_p, tEplT
     // won't use the new TimerArg and
     // therefore the old timer cannot be distinguished from the new one.
     // But if the new timer is too fast, it may get lost.
-    EPL_MEMCPY(&pData->TimerArgument, &argument_p, sizeof(tEplTimerArg));
+    EPL_MEMCPY(&pData->timerArgument, &argument_p, sizeof(tEplTimerArg));
 
-Exit:
-    return Ret;
+    return kEplSuccessful;
 }
 
-//---------------------------------------------------------------------------
-// Function:    timeru_deleteTimer
-//
-// Description: function deletes a timer
-//
-// Parameters:  pTimerHdl_p = pointer to a buffer to fill in the handle
-//
-// Returns:     tEplKernel  = errorcode
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+/**
+\brief  Delete a timer
+
+This function deletes an existing timer.
+
+\param  pTimerHdl_p     Pointer to timer handle of timer to delete.
+
+\return The function returns a tEplKernel error code.
+\retval kEplTimerInvalidHandle  If an invalid timer handle was specified.
+\retval kEplSuccessful          If the timer is deleted.
+
+\ingroup module_timeru
+*/
+//------------------------------------------------------------------------------
 tEplKernel timeru_deleteTimer(tEplTimerHdl* pTimerHdl_p)
 {
-    tEplKernel          Ret = kEplSuccessful;
-    tEplTimeruData*     pData;
+    tTimeruData*        pData;
 
-    // check pointer to handle
     if(pTimerHdl_p == NULL)
-    {
-        Ret = kEplTimerInvalidHandle;
-        goto Exit;
-    }
+        return kEplTimerInvalidHandle;
 
     // check handle itself, i.e. was the handle initialized before
     if (*pTimerHdl_p == 0)
     {
-        Ret = kEplSuccessful;
-        goto Exit;
+        return kEplSuccessful;
     }
-    pData = (tEplTimeruData*) *pTimerHdl_p;
+    pData = (tTimeruData*) *pTimerHdl_p;
 
-    timer_delete (pData->m_Timer);
-    EplTimeruLinuxUserRemoveTimer(pData);
+    timer_delete (pData->timer);
+    removeTimer(pData);
     EPL_FREE(pData);
 
     // uninitialize handle
     *pTimerHdl_p = 0;
-
-Exit:
-    return Ret;
+    return kEplSuccessful;
 
 }
 
-//---------------------------------------------------------------------------
-// Function:    timeru_isActive
-//
-// Description: checks if the timer referenced by the handle is currently
-//              active.
-//
-// Parameters:  TimerHdl_p  = handle of the timer to check
-//
-// Returns:     BOOL        = TRUE, if active;
-//                            FALSE, otherwise
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+/**
+\brief  Check for an active timer
+
+This function checks if a timer is active (is running).
+
+\param  timerHdl_p     Handle of timer to check.
+
+\return The function returns TRUE if the timer is active, otherwise FALSE.
+
+\ingroup module_timeru
+*/
+//------------------------------------------------------------------------------
 BOOL timeru_isActive(tEplTimerHdl timerHdl_p)
 {
-    BOOL                fActive = TRUE;
-    tEplTimeruData*     pData;
+    tTimeruData*        pData;
     struct itimerspec   remaining;
 
     // check handle itself, i.e. was the handle initialized before
     if (timerHdl_p == 0)
     {   // timer was not created yet, so it is not active
-        goto Exit;
+        return FALSE;
     }
-    pData = (tEplTimeruData*) timerHdl_p;
+    pData = (tTimeruData*) timerHdl_p;
 
     // check if timer is running
-    timer_gettime(pData->m_Timer, &remaining);
+    timer_gettime(pData->timer, &remaining);
 
-    if ((remaining.it_value.tv_sec == 0) &&
-        (remaining.it_value.tv_nsec == 0))
+    if ((remaining.it_value.tv_sec == 0) && (remaining.it_value.tv_nsec == 0))
     {
-        fActive = FALSE;
+        return FALSE;
     }
     else
     {
-        fActive = TRUE;
+        return TRUE;
     }
-Exit:
-    return fActive;
 }
 
-//=========================================================================//
-//                                                                         //
-//          P R I V A T E   F U N C T I O N S                              //
-//                                                                         //
-//=========================================================================//
+//============================================================================//
+//            P R I V A T E   F U N C T I O N S                               //
+//============================================================================//
+/// \name Private Functions
+/// \{
 
-//---------------------------------------------------------------------------
-// Function:    EplTimeruProcessThread()
-//
-// Description: Main function of the user timer thread.
-//
-//              EplTimeruProcessThread() waits until the expiration
-//              of a user timer is signaled. It reads the pointer
-//              to the timer information structure from the signaling info
-//              and calls the corresponding callback function.
-//
-// Parameters:  pParm_p *       = thread parameter (unused!)
-//
-// Return:      void *          = return value is specified by the pthread
-//                                interface but is not used!
-//---------------------------------------------------------------------------
-static void * EplTimeruProcessThread(void *pArgument_p __attribute((unused)))
+//------------------------------------------------------------------------------
+/**
+\brief  Timer thread function
+
+This function implements the timer thread function which will be started as
+thread and is responsible for processing expired timers.
+
+\param  pArgument_p     Thread argument. Not used!
+
+\return The function returns a thread exit value (always NULL)
+*/
+//------------------------------------------------------------------------------
+static void* processThread(void *pArgument_p)
 {
-    int             iRet;
-    tEplTimeruData  *pTimer;
+    tTimeruData*    pTimer;
     sigset_t        awaitedSignal;
     siginfo_t       signalInfo;
+
+    UNUSED_PARAMETER(pArgument_p);
 
     EPL_DBGLVL_TIMERU_TRACE("%s() ThreadId:%d\n", __func__, syscall(SYS_gettid));
 
@@ -521,11 +484,11 @@ static void * EplTimeruProcessThread(void *pArgument_p __attribute((unused)))
     /* loop forever until thread will be canceled */
     while (1)
     {
-        if ((iRet = sigwaitinfo(&awaitedSignal, &signalInfo)) > 0)
+        if (sigwaitinfo(&awaitedSignal, &signalInfo) > 0)
         {
-            pTimer = (tEplTimeruData *)signalInfo.si_value.sival_ptr;
+            pTimer = (tTimeruData *)signalInfo.si_value.sival_ptr;
             /* call callback function of timer */
-            EplTimeruCbMs((unsigned long)pTimer);
+            cbTimer((ULONG)pTimer);
         }
     }
 
@@ -533,145 +496,145 @@ static void * EplTimeruProcessThread(void *pArgument_p __attribute((unused)))
     return NULL;
 }
 
-//---------------------------------------------------------------------------
-// Function:    EplTimeruCbMs
-//
-// Description: function to process timer
-//
-//
-//
-// Parameters:  lpParameter = pointer to structur of type tEplTimeruData
-//
-//
-// Returns:     (none)
-//---------------------------------------------------------------------------
-static void PUBLIC EplTimeruCbMs(ULONG ulParameter_p)
-{
-    tEplTimeruData*     pData;
-    tEplEvent           EplEvent;
-    tEplTimerEventArg   TimerEventArg;
+//------------------------------------------------------------------------------
+/**
+\brief  Timer callback function
 
-    pData = (tEplTimeruData*) ulParameter_p;
+This function is registered if a timer is started and therefore will be called
+by the timer when it expires.
+
+\param  parameter_p     The user defined parameter supplied when starting the
+                        timer.
+*/
+//------------------------------------------------------------------------------
+static void cbTimer(ULONG parameter_p)
+{
+    tTimeruData*        pData;
+    tEplEvent           event;
+    tEplTimerEventArg   timerEventArg;
+
+    pData = (tTimeruData*) parameter_p;
 
     // call event function
-    TimerEventArg.m_TimerHdl = (tEplTimerHdl)pData;
-    EPL_MEMCPY(&TimerEventArg.m_Arg, &pData->TimerArgument.m_Arg,
-               sizeof (TimerEventArg.m_Arg));
+    timerEventArg.m_TimerHdl = (tEplTimerHdl)pData;
+    EPL_MEMCPY(&timerEventArg.m_Arg, &pData->timerArgument.m_Arg,
+               sizeof(timerEventArg.m_Arg));
 
-    EplEvent.m_EventSink = pData->TimerArgument.m_EventSink;
-    EplEvent.m_EventType = kEplEventTypeTimer;
-    EPL_MEMSET(&EplEvent.m_NetTime, 0x00, sizeof(tEplNetTime));
-    EplEvent.m_pArg = &TimerEventArg;
-    EplEvent.m_uiSize = sizeof(TimerEventArg);
+    event.m_EventSink = pData->timerArgument.m_EventSink;
+    event.m_EventType = kEplEventTypeTimer;
+    EPL_MEMSET(&event.m_NetTime, 0x00, sizeof(tEplNetTime));
+    event.m_pArg = &timerEventArg;
+    event.m_uiSize = sizeof(timerEventArg);
 
-    eventu_postEvent(&EplEvent);
+    eventu_postEvent(&event);
 }
 
 //------------------------------------------------------------------------------
-// Function:    EplTimeruLinuxUserAddTimer
-//
-// Description: Adds a user timer into the timer list
-//
-// Parameters:  pData_p =               pointer to the timer structure
-//
-// Return:      N/A
+/**
+\brief  Add a timer to the timer list
+
+This function adds a new timer to the timer list.
+
+\param  pData_p         Pointer to the timer structure.
+*/
 //------------------------------------------------------------------------------
-static void EplTimeruLinuxUserAddTimer(tEplTimeruData *pData_p)
+static void addTimer(tTimeruData *pData_p)
 {
-    tEplTimeruData              *pTimerData;
+    tTimeruData          *pTimerData;
 
-    pthread_mutex_lock(&EplTimeruInstance_g.m_Mutex);
+    pthread_mutex_lock(&timeruInstance_g.mutex);
 
-    if (EplTimeruInstance_g.m_pFirstTimer == NULL)
+    if (timeruInstance_g.pFirstTimer == NULL)
     {
-        EplTimeruInstance_g.m_pFirstTimer = pData_p;
-        EplTimeruInstance_g.m_pLastTimer = pData_p;
+        timeruInstance_g.pFirstTimer = pData_p;
+        timeruInstance_g.pLastTimer = pData_p;
 
-        pData_p->m_pPrevTimer = NULL;
-        pData_p->m_pNextTimer = NULL;
+        pData_p->pPrevTimer = NULL;
+        pData_p->pNextTimer = NULL;
     }
     else
     {
-        pTimerData = EplTimeruInstance_g.m_pLastTimer;
-        pTimerData->m_pNextTimer = pData_p;
-        pData_p->m_pPrevTimer = pTimerData;
-        pData_p->m_pNextTimer = NULL;
-        EplTimeruInstance_g.m_pLastTimer = pData_p;
+        pTimerData = timeruInstance_g.pLastTimer;
+        pTimerData->pNextTimer = pData_p;
+        pData_p->pPrevTimer = pTimerData;
+        pData_p->pNextTimer = NULL;
+        timeruInstance_g.pLastTimer = pData_p;
     }
 
-    pthread_mutex_unlock(&EplTimeruInstance_g.m_Mutex);
+    pthread_mutex_unlock(&timeruInstance_g.mutex);
 }
 
 //------------------------------------------------------------------------------
-// Function:    EplTimeruLinuxUserRemoveTimer
-//
-// Description: Remove a user timer from the timer list
-//
-// Parameters:  pData_p =               pointer to timer structure
-//
-// Return:      N/A
+/**
+\brief  Remove a timer from the timer list
+
+This function removes a new timer from the timer list.
+
+\param  pData_p         Pointer to the timer structure.
+*/
 //------------------------------------------------------------------------------
-static void EplTimeruLinuxUserRemoveTimer(tEplTimeruData *pData_p)
+static void removeTimer(tTimeruData *pData_p)
 {
-    tEplTimeruData              *pTimerData;
+    tTimeruData          *pTimerData;
 
-    pthread_mutex_lock(&EplTimeruInstance_g.m_Mutex);
+    pthread_mutex_lock(&timeruInstance_g.mutex);
 
-    if (pData_p->m_pPrevTimer == NULL)          // first one
+    if (pData_p->pPrevTimer == NULL)          // first one
     {
-        EplTimeruInstance_g.m_pFirstTimer = pData_p->m_pNextTimer;
-        pTimerData = pData_p->m_pNextTimer;
+        timeruInstance_g.pFirstTimer = pData_p->pNextTimer;
+        pTimerData = pData_p->pNextTimer;
         if (pTimerData != NULL)
         {
-            pTimerData->m_pPrevTimer = NULL;
+            pTimerData->pPrevTimer = NULL;
         }
     }
-    else if (pData_p->m_pNextTimer == NULL)     // last one
+    else if (pData_p->pNextTimer == NULL)     // last one
     {
-        EplTimeruInstance_g.m_pLastTimer = pData_p->m_pPrevTimer;
-        pTimerData = pData_p->m_pPrevTimer;
-        pTimerData->m_pNextTimer = NULL;
+        timeruInstance_g.pLastTimer = pData_p->pPrevTimer;
+        pTimerData = pData_p->pPrevTimer;
+        pTimerData->pNextTimer = NULL;
     }
     else
     {
-        pData_p->m_pPrevTimer->m_pNextTimer = pData_p->m_pNextTimer;
-        pData_p->m_pNextTimer->m_pPrevTimer = pData_p->m_pPrevTimer;
+        pData_p->pPrevTimer->pNextTimer = pData_p->pNextTimer;
+        pData_p->pNextTimer->pPrevTimer = pData_p->pPrevTimer;
     }
 
-    pthread_mutex_unlock(&EplTimeruInstance_g.m_Mutex);
+    pthread_mutex_unlock(&timeruInstance_g.mutex);
 }
 
 //------------------------------------------------------------------------------
-// Function:    EplTimeruResetTimerList
-//
-// Description: Reset the timer list pointer
-//
-// Parameters:  N/A
-//
-// Return:      N/A
+/**
+\brief  Reset the timer list
+
+This function resets the timer list.
+*/
 //------------------------------------------------------------------------------
-static void EplTimeruResetTimerList(void)
+static void resetTimerList(void)
 {
-    EplTimeruInstance_g.m_pCurrentTimer = EplTimeruInstance_g.m_pFirstTimer;
+    timeruInstance_g.pCurrentTimer = timeruInstance_g.pFirstTimer;
 }
 
 //------------------------------------------------------------------------------
-// Function:    EplTimeruGetNextTimer
-//
-// Description: Get the next timer from the timer list
-//
-// Parameters:  N/A
-//
-// Return:      returns pointer to the timer structure
-//------------------------------------------------------------------------------
-static tEplTimeruData * EplTimeruGetNextTimer(void)
-{
-    tEplTimeruData *pTimer;
+/**
+\brief  Get next timer from the list
 
-    pTimer = EplTimeruInstance_g.m_pCurrentTimer;
+This function gets the next timer from the timer list.
+
+\return     The function returns a pointer to the next timer in the timer list.
+*/
+//------------------------------------------------------------------------------
+static tTimeruData* getNextTimer(void)
+{
+    tTimeruData*    pTimer;
+
+    pTimer = timeruInstance_g.pCurrentTimer;
     if (pTimer != NULL)
     {
-        EplTimeruInstance_g.m_pCurrentTimer = pTimer->m_pNextTimer;
+        timeruInstance_g.pCurrentTimer = pTimer->pNextTimer;
     }
     return pTimer;
 }
+
+///\}
+
