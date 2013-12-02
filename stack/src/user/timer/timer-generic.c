@@ -1,723 +1,597 @@
-/****************************************************************************
+/**
+********************************************************************************
+\file   timer-generic.c
 
-  (c) SYSTEC electronic GmbH, D-07973 Greiz, August-Bebel-Str. 29
-      www.systec-electronic.com
+\brief  Implementation of user timer module using a generic timer list
 
-  Project:      openPOWERLINK
+This file contains an implementation of the user timer module which uses a
+generic timer list. It is used for Windows and non OS targets.
 
-  Description:  source file for Epl Userspace-Timermodule
-                Implementation for use without any operating system
+\ingroup module_timeru
+*******************************************************************************/
 
-  License:
+/*------------------------------------------------------------------------------
+Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2013, SYSTEC electronic GmbH
+All rights reserved.
 
-    Redistribution and use in source and binary forms, with or without
-    modification, are permitted provided that the following conditions
-    are met:
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+    * Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above copyright
+      notice, this list of conditions and the following disclaimer in the
+      documentation and/or other materials provided with the distribution.
+    * Neither the name of the copyright holders nor the
+      names of its contributors may be used to endorse or promote products
+      derived from this software without specific prior written permission.
 
-    1. Redistributions of source code must retain the above copyright
-       notice, this list of conditions and the following disclaimer.
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL COPYRIGHT HOLDERS BE LIABLE FOR ANY
+DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+------------------------------------------------------------------------------*/
 
-    2. Redistributions in binary form must reproduce the above copyright
-       notice, this list of conditions and the following disclaimer in the
-       documentation and/or other materials provided with the distribution.
+//------------------------------------------------------------------------------
+// includes
+//------------------------------------------------------------------------------
+#include <user/timeru.h>
+#include <EplTarget.h>
 
-    3. Neither the name of SYSTEC electronic GmbH nor the names of its
-       contributors may be used to endorse or promote products derived
-       from this software without prior written permission. For written
-       permission, please contact info@systec-electronic.com.
+//============================================================================//
+//            G L O B A L   D E F I N I T I O N S                             //
+//============================================================================//
 
-    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-    LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-    FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-    COPYRIGHT HOLDERS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-    INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-    BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-    LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-    CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-    LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-    ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-    POSSIBILITY OF SUCH DAMAGE.
-
-    Severability Clause:
-
-        If a provision of this License is or becomes illegal, invalid or
-        unenforceable in any jurisdiction, that shall not affect:
-        1. the validity or enforceability in that jurisdiction of any other
-           provision of this License; or
-        2. the validity or enforceability in other jurisdictions of that or
-           any other provision of this License.
-
-  -------------------------------------------------------------------------
-
-                $RCSfile$
-
-                $Author$
-
-                $Revision$  $Date$
-
-                $State$
-
-                Build Environment:
-                    Altera Nios2 GCC V3.4.6
-                    Microsoft Visual C 2005/2008
-
-  -------------------------------------------------------------------------
-
-  Revision History:
-
-  2009/08/31 m.u.:   start of the implementation
-
-****************************************************************************/
-
-#include "user/timeru.h"
-#include "EplTarget.h"
-
-
-/***************************************************************************/
-/*                                                                         */
-/*                                                                         */
-/*          G L O B A L   D E F I N I T I O N S                            */
-/*                                                                         */
-/*                                                                         */
-/***************************************************************************/
-
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // const defines
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// module global vars
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// global function prototypes
+//------------------------------------------------------------------------------
+
+//============================================================================//
+//            P R I V A T E   D E F I N I T I O N S                           //
+//============================================================================//
+
+//------------------------------------------------------------------------------
+// const defines
+//------------------------------------------------------------------------------
 
 #define TIMERU_TIMER_LIST   0
 #define TIMERU_FREE_LIST    1
 
 #if (TARGET_SYSTEM == _WIN32_ || TARGET_SYSTEM == _WINCE_ )
-    #define TIMERU_EVENT_SHUTDOWN   0   // smaller index has higher priority
-    #define TIMERU_EVENT_WAKEUP     1
+#define TIMERU_EVENT_SHUTDOWN   0   // smaller index has higher priority
+#define TIMERU_EVENT_WAKEUP     1
 #endif
 
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // local types
-//---------------------------------------------------------------------------
-
+//------------------------------------------------------------------------------
 typedef struct _tTimerEntry
 {
-    struct _tTimerEntry* m_pNext;       // this must be the first element
-    DWORD           m_dwTimeoutMs;      // timeout in [ms]
-    tEplTimerArg    m_TimerArg;
-
+    struct _tTimerEntry*    pNext;            // this must be the first element
+    DWORD                   timeoutInMs;      // timeout in [ms]
+    tEplTimerArg            timerArg;
 } tTimerEntry;
 
 typedef struct
 {
-    tTimerEntry*        m_pEntries;         // pointer to array of all timer entries
-    tTimerEntry*        m_pTimerListFirst;
-    tTimerEntry*        m_pFreeListFirst;
-    DWORD               m_dwStartTimeMs;    // start time when the first timeout in list is based on
+    tTimerEntry*            pEntries;         // pointer to array of all timer entries
+    tTimerEntry*            pTimerListFirst;
+    tTimerEntry*            pFreeListFirst;
+    UINT32                  startTimeInMs;    // start time when the first timeout in list is based on
 
-    unsigned int        m_uiFreeEntries;
-    unsigned int        m_uiMinFreeEntries; // minimum number of free entries
-                                            // used to check if EPL_TIMERU_MAX_ENTRIES is large enough 
+    UINT                    freeEntries;
+    UINT                    minFreeEntries;   // minimum number of free entries
+                                              // used to check if EPL_TIMERU_MAX_ENTRIES is large enough
 #if (TARGET_SYSTEM == _WIN32_ || TARGET_SYSTEM == _WINCE_ )
-    CRITICAL_SECTION    m_aCriticalSections[2];
-    HANDLE              m_hProcessThread;
-    HANDLE              m_ahEvents[2];      // WakeUp and ShutDown event handles
+    CRITICAL_SECTION        aCriticalSections[2];
+    HANDLE                  hProcessThread;
+    HANDLE                  ahEvents[2];      // WakeUp and ShutDown event handles
 #endif
+} tTimeruInstance;
 
-} tEplTimeruInstance;
+//------------------------------------------------------------------------------
+// local vars
+//------------------------------------------------------------------------------
+static tTimeruInstance timeruInstance_l;
 
-//---------------------------------------------------------------------------
-// module global vars
-//---------------------------------------------------------------------------
-
-static tEplTimeruInstance EplTimeruInstance_g;
-
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // local function prototypes
-//---------------------------------------------------------------------------
-
-static void  EplTimeruEnterCriticalSection (int nType_p);
-static void  EplTimeruLeaveCriticalSection (int nType_p);
-static DWORD EplTimeruGetTickCountMs (void);
+//------------------------------------------------------------------------------
+static void  enterCriticalSection(int nType_p);
+static void  leaveCriticalSection(int nType_p);
+static UINT32 getTickCount (void);
 
 #if (TARGET_SYSTEM == _WIN32_ || TARGET_SYSTEM == _WINCE_ )
-static DWORD WINAPI EplTimeruProcessThread (LPVOID lpParameter);
+static DWORD WINAPI processThread (LPVOID parameter_p);
 #endif
 
+//============================================================================//
+//            P U B L I C   F U N C T I O N S                                 //
+//============================================================================//
 
-/***************************************************************************/
-/*                                                                         */
-/*                                                                         */
-/*          C L A S S  <Epl Userspace-Timermodule NoOS>                    */
-/*                                                                         */
-/*                                                                         */
-/***************************************************************************/
-//
-// Description: Epl Userspace-Timermodule Implementation for use without
-//              any operating system
-//
-/***************************************************************************/
+//------------------------------------------------------------------------------
+/**
+\brief  Initialize user timers
 
-//=========================================================================//
-//                                                                         //
-//          P U B L I C   F U N C T I O N S                                //
-//                                                                         //
-//=========================================================================//
+The function initializes the user timer module.
 
-//---------------------------------------------------------------------------
-//
-// Function:    timeru_init
-//
-// Description: function init first instance
-//
-// Parameters:
-//
-// Returns:     tEplKernel  = errorcode
-//
-// State:
-//
-//---------------------------------------------------------------------------
+\return The function returns a tEplKernel error code.
 
+\ingroup module_timeru
+*/
+//------------------------------------------------------------------------------
 tEplKernel timeru_init(void)
 {
-tEplKernel  Ret;
-
-    Ret = timeru_addInstance();
-
-return Ret;
+    return timeru_addInstance();
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Add user timer instance
 
+The function adds a user timer instance.
 
-//---------------------------------------------------------------------------
-//
-// Function:    timeru_addInstance
-//
-// Description: function init additional instance
-//
-// Parameters:
-//
-// Returns:     tEplKernel  = errorcode
-//
-// State:
-//
-//---------------------------------------------------------------------------
+\return The function returns a tEplKernel error code.
 
+\ingroup module_timeru
+*/
+//------------------------------------------------------------------------------
 tEplKernel timeru_addInstance(void)
 {
-int nIdx;
-tEplKernel Ret;
-
-    Ret = kEplSuccessful;
+    int             nIdx;
 
     // reset instance structure
-    EPL_MEMSET(&EplTimeruInstance_g, 0, sizeof (EplTimeruInstance_g));
+    EPL_MEMSET(&timeruInstance_l, 0, sizeof (timeruInstance_l));
 
-    EplTimeruInstance_g.m_pEntries = EPL_MALLOC(sizeof (tTimerEntry) * EPL_TIMERU_MAX_ENTRIES);
-    if (EplTimeruInstance_g.m_pEntries == NULL)
-    {   // allocating of timer entries failed
-        Ret = kEplNoResource;
-        goto Exit;
-    }
+    timeruInstance_l.pEntries = EPL_MALLOC(sizeof (tTimerEntry) * EPL_TIMERU_MAX_ENTRIES);
+    if (timeruInstance_l.pEntries == NULL)
+        return kEplNoResource;
 
-    EplTimeruInstance_g.m_pTimerListFirst = NULL;
+    timeruInstance_l.pTimerListFirst = NULL;
 
     // fill free timer list
     for (nIdx = 0; nIdx < EPL_TIMERU_MAX_ENTRIES-1; nIdx++)
     {
-        EplTimeruInstance_g.m_pEntries[nIdx].m_pNext = &EplTimeruInstance_g.m_pEntries[nIdx+1];
+        timeruInstance_l.pEntries[nIdx].pNext = &timeruInstance_l.pEntries[nIdx+1];
     }
-    EplTimeruInstance_g.m_pEntries[EPL_TIMERU_MAX_ENTRIES-1].m_pNext = NULL;
+    timeruInstance_l.pEntries[EPL_TIMERU_MAX_ENTRIES-1].pNext = NULL;
 
-    EplTimeruInstance_g.m_pFreeListFirst = EplTimeruInstance_g.m_pEntries;
-    EplTimeruInstance_g.m_uiFreeEntries = EPL_TIMERU_MAX_ENTRIES;
-    EplTimeruInstance_g.m_uiMinFreeEntries = EPL_TIMERU_MAX_ENTRIES;
+    timeruInstance_l.pFreeListFirst = timeruInstance_l.pEntries;
+    timeruInstance_l.freeEntries = EPL_TIMERU_MAX_ENTRIES;
+    timeruInstance_l.minFreeEntries = EPL_TIMERU_MAX_ENTRIES;
 
-    // set start time to a value which is in any case less or equal than EplTimeruGetTickCountMs()
+    // set start time to a value which is in any case less or equal than getTickCount()
     // -> the only solution = 0
-    EplTimeruInstance_g.m_dwStartTimeMs = 0;
+    timeruInstance_l.startTimeInMs = 0;
 
 #if (TARGET_SYSTEM == _WIN32_ || TARGET_SYSTEM == _WINCE_ )
-    InitializeCriticalSection(&EplTimeruInstance_g.m_aCriticalSections[TIMERU_TIMER_LIST]);
-    InitializeCriticalSection(&EplTimeruInstance_g.m_aCriticalSections[TIMERU_FREE_LIST]);
+    InitializeCriticalSection(&timeruInstance_l.aCriticalSections[TIMERU_TIMER_LIST]);
+    InitializeCriticalSection(&timeruInstance_l.aCriticalSections[TIMERU_FREE_LIST]);
 
-    EplTimeruInstance_g.m_ahEvents[TIMERU_EVENT_WAKEUP]   = CreateEvent(NULL, FALSE, FALSE, NULL);
-    EplTimeruInstance_g.m_ahEvents[TIMERU_EVENT_SHUTDOWN] = CreateEvent(NULL, FALSE, FALSE, NULL);
-    if (EplTimeruInstance_g.m_ahEvents[TIMERU_EVENT_WAKEUP] == NULL
-        || EplTimeruInstance_g.m_ahEvents[TIMERU_EVENT_SHUTDOWN] == NULL)
+    timeruInstance_l.ahEvents[TIMERU_EVENT_WAKEUP]   = CreateEvent(NULL, FALSE, FALSE, NULL);
+    timeruInstance_l.ahEvents[TIMERU_EVENT_SHUTDOWN] = CreateEvent(NULL, FALSE, FALSE, NULL);
+    if (timeruInstance_l.ahEvents[TIMERU_EVENT_WAKEUP] == NULL ||
+        timeruInstance_l.ahEvents[TIMERU_EVENT_SHUTDOWN] == NULL)
     {
-        Ret = kEplTimerThreadError;
-        goto Exit;
+        return kEplTimerThreadError;
     }
 
-    EplTimeruInstance_g.m_hProcessThread = CreateThread(NULL, 0,
-                                                        EplTimeruProcessThread,
-                                                        NULL, 0, NULL);
-    if (EplTimeruInstance_g.m_hProcessThread == NULL)
-    {
-        Ret = kEplTimerThreadError;
-        goto Exit;
-    }
+    timeruInstance_l.hProcessThread = CreateThread(NULL, 0, processThread, NULL, 0, NULL);
+    if (timeruInstance_l.hProcessThread == NULL)
+        return kEplTimerThreadError;
 #endif
 
-Exit:
-    return Ret;
+    return kEplSuccessful;
 
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Delete user timer instance
 
+The function deletes a user timer instance.
 
-//---------------------------------------------------------------------------
-//
-// Function:    timeru_delInstance
-//
-// Description: function deletes instance
-//
-// Parameters:
-//
-// Returns:     tEplKernel  = errorcode
-//
-// State:
-//
-//---------------------------------------------------------------------------
+\return The function returns a tEplKernel error code.
 
+\ingroup module_timeru
+*/
+//------------------------------------------------------------------------------
 tEplKernel timeru_delInstance(void)
 {
-tEplKernel  Ret;
-
-    Ret = kEplSuccessful;
-
 #if (TARGET_SYSTEM == _WIN32_ || TARGET_SYSTEM == _WINCE_ )
-    SetEvent( EplTimeruInstance_g.m_ahEvents[TIMERU_EVENT_SHUTDOWN] );
+    SetEvent(timeruInstance_l.ahEvents[TIMERU_EVENT_SHUTDOWN]);
 
-    WaitForSingleObject( EplTimeruInstance_g.m_hProcessThread, INFINITE );
+    WaitForSingleObject(timeruInstance_l.hProcessThread, INFINITE);
 
-    CloseHandle( EplTimeruInstance_g.m_hProcessThread );
-    CloseHandle( EplTimeruInstance_g.m_ahEvents[TIMERU_EVENT_SHUTDOWN] );
-    CloseHandle( EplTimeruInstance_g.m_ahEvents[TIMERU_EVENT_WAKEUP] );
+    CloseHandle(timeruInstance_l.hProcessThread);
+    CloseHandle(timeruInstance_l.ahEvents[TIMERU_EVENT_SHUTDOWN]);
+    CloseHandle(timeruInstance_l.ahEvents[TIMERU_EVENT_WAKEUP]);
 
-    DeleteCriticalSection( &EplTimeruInstance_g.m_aCriticalSections[TIMERU_TIMER_LIST] );
-    DeleteCriticalSection( &EplTimeruInstance_g.m_aCriticalSections[TIMERU_FREE_LIST] );
+    DeleteCriticalSection(&timeruInstance_l.aCriticalSections[TIMERU_TIMER_LIST]);
+    DeleteCriticalSection(&timeruInstance_l.aCriticalSections[TIMERU_FREE_LIST]);
 #endif
 
-    EPL_FREE(EplTimeruInstance_g.m_pEntries);
+    EPL_FREE(timeruInstance_l.pEntries);
 
-    EplTimeruInstance_g.m_pEntries = NULL;
-    EplTimeruInstance_g.m_pFreeListFirst = NULL;
-    EplTimeruInstance_g.m_pTimerListFirst = NULL;
-    EplTimeruInstance_g.m_uiFreeEntries = 0;
+    timeruInstance_l.pEntries = NULL;
+    timeruInstance_l.pFreeListFirst = NULL;
+    timeruInstance_l.pTimerListFirst = NULL;
+    timeruInstance_l.freeEntries = 0;
 
-    return Ret;
+    return kEplSuccessful;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  User timer process function
 
+This function must be called repeatedly from within the application. It checks
+whether a timer has expired.
 
-//---------------------------------------------------------------------------
-//
-// Function:    timeru_process
-//
-// Description: This function is called repeatedly from within the main
-//              loop of the application. It checks whether the first timer
-//              entry has been elapsed.
-//
-// Parameters:  none
-//
-// Returns:     tEplKernel  = errorcode
-//
-// State:
-//
-//---------------------------------------------------------------------------
+\return The function returns a tEplKernel error code.
 
+\ingroup module_timeru
+*/
+//------------------------------------------------------------------------------
 tEplKernel timeru_process(void)
 {
-tTimerEntry*        pTimerEntry;
-DWORD               dwTimeoutMs;
-tEplEvent           EplEvent;
-tEplTimerEventArg   TimerEventArg;
-tEplKernel          Ret;
+    tTimerEntry*        pTimerEntry;
+    UINT32              timeoutInMs;
+    tEplEvent           event;
+    tEplTimerEventArg   timerEventArg;
+    tEplKernel          ret = kEplSuccessful;
 
-
-    Ret      = kEplSuccessful;
-
-    EplTimeruEnterCriticalSection(TIMERU_TIMER_LIST);
+    enterCriticalSection(TIMERU_TIMER_LIST);
     // calculate elapsed time since start time
-    dwTimeoutMs = EplTimeruGetTickCountMs() - EplTimeruInstance_g.m_dwStartTimeMs;
+    timeoutInMs = getTickCount() - timeruInstance_l.startTimeInMs;
 
     // observe first timer entry in timer list
-    pTimerEntry = EplTimeruInstance_g.m_pTimerListFirst;
+    pTimerEntry = timeruInstance_l.pTimerListFirst;
     if (pTimerEntry != NULL)
     {
-        if (dwTimeoutMs >= pTimerEntry->m_dwTimeoutMs)
-        {   // timeout elapsed
-            // remove entry from timer list
-            EplTimeruInstance_g.m_pTimerListFirst = pTimerEntry->m_pNext;
-
+        if (timeoutInMs >= pTimerEntry->timeoutInMs)
+        {   // timeout elapsed - remove entry from timer list
+            timeruInstance_l.pTimerListFirst = pTimerEntry->pNext;
             // adjust start time
-            EplTimeruInstance_g.m_dwStartTimeMs += pTimerEntry->m_dwTimeoutMs;
+            timeruInstance_l.startTimeInMs += pTimerEntry->timeoutInMs;
         }
         else
         {
             pTimerEntry = NULL;
         }
     }
-    EplTimeruLeaveCriticalSection(TIMERU_TIMER_LIST);
+    leaveCriticalSection(TIMERU_TIMER_LIST);
 
     if (pTimerEntry != NULL)
     {
         // call event function
-        TimerEventArg.m_TimerHdl = (tEplTimerHdl) pTimerEntry;
-        EPL_MEMCPY(&TimerEventArg.m_Arg, &pTimerEntry->m_TimerArg.m_Arg, sizeof (TimerEventArg.m_Arg));
-    
-        EplEvent.m_EventSink = pTimerEntry->m_TimerArg.m_EventSink;
-        EplEvent.m_EventType = kEplEventTypeTimer;
-        EPL_MEMSET(&EplEvent.m_NetTime, 0x00, sizeof(tEplNetTime));
-        EplEvent.m_pArg = &TimerEventArg;
-        EplEvent.m_uiSize = sizeof(TimerEventArg);
+        timerEventArg.m_TimerHdl = (tEplTimerHdl) pTimerEntry;
+        EPL_MEMCPY(&timerEventArg.m_Arg, &pTimerEntry->timerArg.m_Arg, sizeof(timerEventArg.m_Arg));
 
-        Ret = eventu_postEvent(&EplEvent);
+        event.m_EventSink = pTimerEntry->timerArg.m_EventSink;
+        event.m_EventType = kEplEventTypeTimer;
+        EPL_MEMSET(&event.m_NetTime, 0x00, sizeof(tEplNetTime));
+        event.m_pArg = &timerEventArg;
+        event.m_uiSize = sizeof(timerEventArg);
+
+        ret = eventu_postEvent(&event);
     }
 
-    return Ret;
+    return ret;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Create and set a timer
 
+This function creates a timer, sets up the timeout and saves the
+corresponding timer handle.
 
-//---------------------------------------------------------------------------
-//
-// Function:    timeru_setTimer
-//
-// Description: function creates a timer and returns a handle to the pointer
-//
-// Parameters:  pTimerHdl_p = pointer to a buffer to fill in the handle
-//              timeInMs_p  = time for timer in ms
-//              argument_p  = argument for timer
-//
-// Returns:     tEplKernel  = errorcode
-//
-// State:
-//
-//---------------------------------------------------------------------------
+\param  pTimerHdl_p     Pointer to store the timer handle.
+\param  timeInMs_p      Timeout in milliseconds.
+\param  argument_p      User definable argument for timer.
 
+\return The function returns a tEplKernel error code.
+
+\ingroup module_timeru
+*/
+//------------------------------------------------------------------------------
 tEplKernel timeru_setTimer(tEplTimerHdl* pTimerHdl_p, ULONG timeInMs_p, tEplTimerArg argument_p)
 {
-tTimerEntry*    pNewEntry;
-tTimerEntry**   ppEntry;
-tEplKernel      Ret;
-
-
-    Ret = kEplSuccessful;
+    tTimerEntry*    pNewEntry;
+    tTimerEntry**   ppEntry;
 
     // check pointer to handle
     if(pTimerHdl_p == NULL)
-    {
-        Ret = kEplTimerInvalidHandle;
-        goto Exit;
-    }
+        return kEplTimerInvalidHandle;
 
     // fetch entry from free timer list
-    EplTimeruEnterCriticalSection(TIMERU_FREE_LIST);
-    pNewEntry = EplTimeruInstance_g.m_pFreeListFirst;
+    enterCriticalSection(TIMERU_FREE_LIST);
+    pNewEntry = timeruInstance_l.pFreeListFirst;
     if (pNewEntry != NULL)
     {
-        EplTimeruInstance_g.m_pFreeListFirst = pNewEntry->m_pNext;
-        EplTimeruInstance_g.m_uiFreeEntries--;
-        if (EplTimeruInstance_g.m_uiMinFreeEntries > EplTimeruInstance_g.m_uiFreeEntries)
+        timeruInstance_l.pFreeListFirst = pNewEntry->pNext;
+        timeruInstance_l.freeEntries--;
+        if (timeruInstance_l.minFreeEntries > timeruInstance_l.freeEntries)
         {
-            EplTimeruInstance_g.m_uiMinFreeEntries = EplTimeruInstance_g.m_uiFreeEntries;
+            timeruInstance_l.minFreeEntries = timeruInstance_l.freeEntries;
         }
     }
-    EplTimeruLeaveCriticalSection(TIMERU_FREE_LIST);
+    leaveCriticalSection(TIMERU_FREE_LIST);
 
     if (pNewEntry == NULL)
     {   // sorry, no free entry
-        Ret = kEplTimerNoTimerCreated;
-        goto Exit;
+        return kEplTimerNoTimerCreated;
     }
 
     *pTimerHdl_p = (tEplTimerHdl) pNewEntry;
-    EPL_MEMCPY(&pNewEntry->m_TimerArg, &argument_p, sizeof(tEplTimerArg));
+    EPL_MEMCPY(&pNewEntry->timerArg, &argument_p, sizeof(tEplTimerArg));
 
     // insert timer entry in timer list
-    EplTimeruEnterCriticalSection(TIMERU_TIMER_LIST);
-
+    enterCriticalSection(TIMERU_TIMER_LIST);
     // calculate timeout based on start time
-    pNewEntry->m_dwTimeoutMs = (EplTimeruGetTickCountMs() - EplTimeruInstance_g.m_dwStartTimeMs) + timeInMs_p;
+    pNewEntry->timeoutInMs = (getTickCount() - timeruInstance_l.startTimeInMs) + timeInMs_p;
 
-    ppEntry = &EplTimeruInstance_g.m_pTimerListFirst;
+    ppEntry = &timeruInstance_l.pTimerListFirst;
     while (*ppEntry != NULL)
     {
-        if ((*ppEntry)->m_dwTimeoutMs > pNewEntry->m_dwTimeoutMs)
+        if ((*ppEntry)->timeoutInMs > pNewEntry->timeoutInMs)
         {
-            (*ppEntry)->m_dwTimeoutMs -= pNewEntry->m_dwTimeoutMs;
+            (*ppEntry)->timeoutInMs -= pNewEntry->timeoutInMs;
             break;
         }
-        pNewEntry->m_dwTimeoutMs -= (*ppEntry)->m_dwTimeoutMs;
-        ppEntry = &(*ppEntry)->m_pNext;
+        pNewEntry->timeoutInMs -= (*ppEntry)->timeoutInMs;
+        ppEntry = &(*ppEntry)->pNext;
     }
     // insert before **ppEntry
-    pNewEntry->m_pNext = *ppEntry;
+    pNewEntry->pNext = *ppEntry;
     *ppEntry = pNewEntry;
-    EplTimeruLeaveCriticalSection(TIMERU_TIMER_LIST);
+    leaveCriticalSection(TIMERU_TIMER_LIST);
 
 #if (TARGET_SYSTEM == _WIN32_ || TARGET_SYSTEM == _WINCE_ )
-	if (ppEntry == &EplTimeruInstance_g.m_pTimerListFirst)
+    if (ppEntry == &timeruInstance_l.pTimerListFirst)
     {
-        SetEvent( EplTimeruInstance_g.m_ahEvents[TIMERU_EVENT_WAKEUP] );
+        SetEvent(timeruInstance_l.ahEvents[TIMERU_EVENT_WAKEUP]);
     }
 #endif
 
-Exit:
-    return Ret;
-
+    return kEplSuccessful;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Modifies an existing timer
 
+This function modifies an existing timer. If the timer was not yet created
+it creates the timer and stores the new timer handle at \p pTimerHdl_p.
 
-//---------------------------------------------------------------------------
-//
-// Function:    timeru_modifyTimer
-//
-// Description: function changes a timer and returns the corresponding handle
-//
-// Parameters:  pTimerHdl_p = pointer to a buffer to fill in the handle
-//              ulTime_p    = time for timer in ms
-//              argument_p  = argument for timer
-//
-// Returns:     tEplKernel  = errorcode
-//
-// State:
-//
-//---------------------------------------------------------------------------
+\param  pTimerHdl_p     Pointer to store the timer handle.
+\param  timeInMs_p      Timeout in milliseconds.
+\param  argument_p      User definable argument for timer.
 
+\return The function returns a tEplKernel error code.
+
+\ingroup module_timeru
+*/
+//------------------------------------------------------------------------------
 tEplKernel timeru_modifyTimer(tEplTimerHdl* pTimerHdl_p, ULONG timeInMs_p, tEplTimerArg argument_p)
 {
-tEplKernel      Ret;
+    tEplKernel      ret;
 
-    Ret = timeru_deleteTimer(pTimerHdl_p);
-    if (Ret != kEplSuccessful)
-    {
-        goto Exit;
-    }
+    ret = timeru_deleteTimer(pTimerHdl_p);
+    if (ret != kEplSuccessful)
+        return ret;
 
-    Ret = timeru_setTimer(pTimerHdl_p, timeInMs_p, argument_p);
-
-Exit:
-    return Ret;
+    ret = timeru_setTimer(pTimerHdl_p, timeInMs_p, argument_p);
+    return ret;
 
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Delete a timer
 
+This function deletes an existing timer.
 
-//---------------------------------------------------------------------------
-//
-// Function:    timeru_deleteTimer
-//
-// Description: function deletes a timer
-//
-// Parameters:  pTimerHdl_p = pointer to a buffer to fill in the handle
-//
-// Returns:     tEplKernel  = errorcode
-//
-// State:
-//
-//---------------------------------------------------------------------------
+\param  pTimerHdl_p     Pointer to timer handle of timer to delete.
 
+\return The function returns a tEplKernel error code.
+\retval kEplTimerInvalidHandle  If an invalid timer handle was specified.
+\retval kEplSuccessful          If the timer is deleted.
+
+\ingroup module_timeru
+*/
+//------------------------------------------------------------------------------
 tEplKernel timeru_deleteTimer(tEplTimerHdl* pTimerHdl_p)
 {
-tTimerEntry*    pTimerEntry;
-tTimerEntry**   ppEntry;
-tEplKernel      Ret;
-
-
-    Ret         = kEplSuccessful;
+    tTimerEntry*    pTimerEntry;
+    tTimerEntry**   ppEntry;
 
     // check pointer to handle
     if(pTimerHdl_p == NULL)
-    {
-        Ret = kEplTimerInvalidHandle;
-        goto Exit;
-    }
+        return kEplTimerInvalidHandle;
 
     // check handle itself, i.e. was the handle initialized before
     if (*pTimerHdl_p == 0)
-    {
-        Ret = kEplSuccessful;
-        goto Exit;
-    }
+        return kEplSuccessful;
 
     pTimerEntry = (tTimerEntry*) *pTimerHdl_p;
 
     // remove timer entry from timer list
-    EplTimeruEnterCriticalSection(TIMERU_TIMER_LIST);
-    ppEntry = &EplTimeruInstance_g.m_pTimerListFirst;
+    enterCriticalSection(TIMERU_TIMER_LIST);
+    ppEntry = &timeruInstance_l.pTimerListFirst;
     while (*ppEntry != NULL)
     {
         if (*ppEntry == pTimerEntry)
         {
-            *ppEntry = pTimerEntry->m_pNext;
+            *ppEntry = pTimerEntry->pNext;
             if (*ppEntry != NULL)
             {
-                (*ppEntry)->m_dwTimeoutMs += pTimerEntry->m_dwTimeoutMs;
+                (*ppEntry)->timeoutInMs += pTimerEntry->timeoutInMs;
             }
             break;
         }
-            
-        ppEntry = &(*ppEntry)->m_pNext;
+
+        ppEntry = &(*ppEntry)->pNext;
     }
-    EplTimeruLeaveCriticalSection(TIMERU_TIMER_LIST);
+    leaveCriticalSection(TIMERU_TIMER_LIST);
 
     // insert in free list
-    EplTimeruEnterCriticalSection(TIMERU_FREE_LIST);
-    pTimerEntry->m_pNext = EplTimeruInstance_g.m_pFreeListFirst;
-    EplTimeruInstance_g.m_pFreeListFirst = pTimerEntry;
-    EplTimeruInstance_g.m_uiFreeEntries++;
-    EplTimeruLeaveCriticalSection(TIMERU_FREE_LIST);
+    enterCriticalSection(TIMERU_FREE_LIST);
+    pTimerEntry->pNext = timeruInstance_l.pFreeListFirst;
+    timeruInstance_l.pFreeListFirst = pTimerEntry;
+    timeruInstance_l.freeEntries++;
+    leaveCriticalSection(TIMERU_FREE_LIST);
 
     // set handle invalid
     *pTimerHdl_p = 0;
-    
-Exit:
-    return Ret;
+    return kEplSuccessful;
 
 }
 
+//============================================================================//
+//            P R I V A T E   F U N C T I O N S                               //
+//============================================================================//
+/// \name Private Functions
+/// \{
 
+//------------------------------------------------------------------------------
+/**
+\brief  Get timer tick
 
-//---------------------------------------------------------------------------
-//
-// Function:    EplTimeruGetMinFreeEntries
-//
-// Description: returns the minimum number of free entries
-//              since this instance has been added
-//
-// Parameters:  none
-//
-// Returns:     unsigned int            = minimum number of free timer entries
-//
-// State:
-//
-//---------------------------------------------------------------------------
+This function returns the timer tick count.
 
-unsigned int PUBLIC EplTimeruGetMinFreeEntries(void)
+\return The function returns the tick count in milliseconds.
+*/
+//------------------------------------------------------------------------------
+static UINT32 getTickCount (void)
 {
-    return (EplTimeruInstance_g.m_uiMinFreeEntries);
-}
-
-
-
-//=========================================================================//
-//                                                                         //
-//          P R I V A T E   F U N C T I O N S                              //
-//                                                                         //
-//=========================================================================//
-
-//---------------------------------------------------------------------------
-//  EplTimeruGetTickCountMs
-//---------------------------------------------------------------------------
-
-static DWORD EplTimeruGetTickCountMs (void)
-{
-DWORD	TickCountMs;
+    UINT32    tickCountInMs;
 
 #if (TARGET_SYSTEM == _WIN32_ || TARGET_SYSTEM == _WINCE_ )
-	TickCountMs = GetTickCount();
+    tickCountInMs = GetTickCount();
 #else
-    TickCountMs = EplTgtGetTickCountMs();
+    tickCountInMs = EplTgtGetTickCountMs();
 #endif
 
-	return TickCountMs;
+    return tickCountInMs;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Enter critical section
 
-//---------------------------------------------------------------------------
-//  EplTimeruEnterCriticalSection
-//---------------------------------------------------------------------------
+This function enters a critical section of the timer module.
 
-static void EplTimeruEnterCriticalSection (int nType_p)
+\param  nType_p         Type of critical section to enter.
+*/
+//------------------------------------------------------------------------------
+static void enterCriticalSection (int nType_p)
 {
 #if (TARGET_SYSTEM == _NO_OS_)
-    #if EPL_USE_SHAREDBUFF == FALSE
-        EplTgtEnableGlobalInterrupt(FALSE);
-    #endif
+    EplTgtEnableGlobalInterrupt(FALSE);
 #elif (TARGET_SYSTEM == _WIN32_ || TARGET_SYSTEM == _WINCE_ )
-    EnterCriticalSection(&EplTimeruInstance_g.m_aCriticalSections[nType_p]);
+    EnterCriticalSection(&timeruInstance_l.aCriticalSections[nType_p]);
 #endif
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Leave critical section
 
-//---------------------------------------------------------------------------
-//  EplTimeruLeaveCriticalSection
-//---------------------------------------------------------------------------
+This function leaves a critical section of the timer module.
 
-static void EplTimeruLeaveCriticalSection (int nType_p)
+\param  nType_p         Type of critical section to leave.
+*/
+//------------------------------------------------------------------------------
+static void leaveCriticalSection (int nType_p)
 {
 #if (TARGET_SYSTEM == _NO_OS_)
-    #if EPL_USE_SHAREDBUFF == FALSE
-        EplTgtEnableGlobalInterrupt(TRUE);
-    #endif
+    EplTgtEnableGlobalInterrupt(TRUE);
 #elif (TARGET_SYSTEM == _WIN32_ || TARGET_SYSTEM == _WINCE_ )
-    LeaveCriticalSection(&EplTimeruInstance_g.m_aCriticalSections[nType_p]);
+    LeaveCriticalSection(&timeruInstance_l.aCriticalSections[nType_p]);
 #endif
 }
-
 
 #if (TARGET_SYSTEM == _WIN32_ || TARGET_SYSTEM == _WINCE_ )
+//------------------------------------------------------------------------------
+/**
+\brief  Timer thread function
 
-//---------------------------------------------------------------------------
-//  Thread for processing the timer list when using an operating system
-//---------------------------------------------------------------------------
+This function implements the thread which is handling the timer events on
+Windows.
 
-static DWORD WINAPI EplTimeruProcessThread (LPVOID lpParameter)
+\param  parameter_p         Thread function parameter (not used)
+
+\return The function returns the thread error code.
+*/
+//------------------------------------------------------------------------------
+static DWORD WINAPI processThread (LPVOID parameter_p)
 {
-tTimerEntry*	pTimerEntry;
-DWORD			dwTimeoutMs;
-DWORD           dwWaitResult;
-tEplKernel		Ret;
+    tTimerEntry*    pTimerEntry;
+    UINT32          timeoutInMs;
+    UINT32          waitResult;
+    tEplKernel      ret;
 
-    UNUSED_PARAMETER(lpParameter);
+    UNUSED_PARAMETER(parameter_p);
+
     for (;;)
     {
-        Ret = timeru_process();
-        if (Ret != kEplSuccessful)
+        ret = timeru_process();
+        if (ret != kEplSuccessful)
         {
             // Error
         }
-        
+
         // calculate time until the next timer event
-        EplTimeruEnterCriticalSection(TIMERU_TIMER_LIST);
-        pTimerEntry = EplTimeruInstance_g.m_pTimerListFirst;
+        enterCriticalSection(TIMERU_TIMER_LIST);
+        pTimerEntry = timeruInstance_l.pTimerListFirst;
         if (pTimerEntry == NULL)
         {   // timer list is empty
-            dwTimeoutMs = INFINITE;
+            timeoutInMs = INFINITE;
         }
         else
         {
-            dwTimeoutMs = EplTimeruGetTickCountMs() - EplTimeruInstance_g.m_dwStartTimeMs;
-            if (dwTimeoutMs > pTimerEntry->m_dwTimeoutMs)
+            timeoutInMs = getTickCount() - timeruInstance_l.startTimeInMs;
+            if (timeoutInMs > pTimerEntry->timeoutInMs)
             {   // timeout elapsed
-                dwTimeoutMs = 0;
+                timeoutInMs = 0;
             }
             else
             {   // adjust timeout with elapsed time since start time
-                dwTimeoutMs = pTimerEntry->m_dwTimeoutMs - dwTimeoutMs;
+                timeoutInMs = pTimerEntry->timeoutInMs - timeoutInMs;
             }
         }
-        EplTimeruLeaveCriticalSection(TIMERU_TIMER_LIST);
-        
-        dwWaitResult = WaitForMultipleObjects(2, EplTimeruInstance_g.m_ahEvents, FALSE, dwTimeoutMs);
-        switch (dwWaitResult)
+        leaveCriticalSection(TIMERU_TIMER_LIST);
+
+        waitResult = WaitForMultipleObjects(2, timeruInstance_l.ahEvents, FALSE, timeoutInMs);
+        switch (waitResult)
         {
             case (WAIT_OBJECT_0 + TIMERU_EVENT_SHUTDOWN):
-            {
                 goto Exit;
-            }
+                break;
+
             case (WAIT_OBJECT_0 + TIMERU_EVENT_WAKEUP):
             case WAIT_TIMEOUT:
-            {
                 break;
-            }
+
             default:
-            {
                 // Error
-            }
+                break;
         }
     }
 
@@ -727,6 +601,5 @@ Exit:
 
 #endif
 
-
-// EOF
+///\}
 
