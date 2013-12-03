@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   target-microblaze.c
+\file   xilinx_microblaze/target-microblaze.c
 
 \brief  target specific functions for Microblaze without OS
 
@@ -42,8 +42,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #include <Epl.h>
 
-#include "usleep-microblaze.h"
-#include "timer-microblaze.h"
+#include "usleep.h"
+#include "systemtimer.h"
 
 #include <xparameters.h>
 #include <xintc.h>         // interrupt controller
