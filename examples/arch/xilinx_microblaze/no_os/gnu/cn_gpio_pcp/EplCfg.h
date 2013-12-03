@@ -1,75 +1,45 @@
-/****************************************************************************
-  (c) SYSTEC electronic GmbH, D-07973 Greiz, August-Bebel-Str. 29
-      www.systec-electronic.com
-  (c) Bernecker + Rainer Industrie-Elektronik Ges.m.b.H.
-      A-5142 Eggelsberg, B&R Strasse 1
-      www.br-automation.com
+/**
+********************************************************************************
+\file   EplCfg.h
 
-  Project:      openPOWERLINK
+\brief  configuration file
 
-  Description:  configuration file
+This header file configures the POWERLINK node.
 
-  License:
+*******************************************************************************/
 
-    Redistribution and use in source and binary forms, with or without
-    modification, are permitted provided that the following conditions
-    are met:
+/*------------------------------------------------------------------------------
+Copyright (c) 2012, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+All rights reserved.
 
-    1. Redistributions of source code must retain the above copyright
-       notice, this list of conditions and the following disclaimer.
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+    * Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above copyright
+      notice, this list of conditions and the following disclaimer in the
+      documentation and/or other materials provided with the distribution.
+    * Neither the name of the copyright holders nor the
+      names of its contributors may be used to endorse or promote products
+      derived from this software without specific prior written permission.
 
-    2. Redistributions in binary form must reproduce the above copyright
-       notice, this list of conditions and the following disclaimer in the
-       documentation and/or other materials provided with the distribution.
-
-    3. Neither the name of SYSTEC electronic GmbH nor the names of its
-       contributors may be used to endorse or promote products derived
-       from this software without prior written permission. For written
-       permission, please contact info@systec-electronic.com.
-
-    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-    LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-    FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-    COPYRIGHT HOLDERS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-    INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-    BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-    LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-    CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-    LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-    ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-    POSSIBILITY OF SUCH DAMAGE.
-
-    Severability Clause:
-
-        If a provision of this License is or becomes illegal, invalid or
-        unenforceable in any jurisdiction, that shall not affect:
-        1. the validity or enforceability in that jurisdiction of any other
-           provision of this License; or
-        2. the validity or enforceability in other jurisdictions of that or
-           any other provision of this License.
-
-  -------------------------------------------------------------------------
-
-                $RCSfile$
-
-                $Author$
-
-                $Revision$  $Date$
-
-                $State$
-
-                Build Environment:
-                    GCC V3.4
-
-****************************************************************************/
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL COPYRIGHT HOLDERS BE LIABLE FOR ANY
+DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+------------------------------------------------------------------------------*/
 
 
 #ifndef _EPLCFG_H_
 #define _EPLCFG_H_
 
 #include "EplInc.h"
-
 
 
 // =========================================================================
@@ -94,7 +64,7 @@
 
 // determine event queue implementation
 // -> internal and u2k queues: direct call
-// -> k2u queue: shared buffer
+// -> k2u queue: circular buffer
 #define EPL_EVENT_K2U_QUEUE             EPL_QUEUE_CIRCBUF
 #define EPL_EVENT_U2K_QUEUE             EPL_QUEUE_DIRECT
 #define EPL_EVENT_KINT_QUEUE            EPL_QUEUE_DIRECT
@@ -107,10 +77,10 @@
 #define BENCHMARK_MODULES       0xEE800043L
 #endif
 
-// Default defug level:
+// Default debug level:
 // Only debug traces of these modules will be compiled which flags are set in define DEF_DEBUG_LVL.
 #ifndef DEF_DEBUG_LVL
-#define DEF_DEBUG_LVL           0//0x40000000L //0xEC000000L
+#define DEF_DEBUG_LVL           0x40000000L //0xEC000000L
 #endif
 //   EPL_DBGLVL_OBD         =   0x00000004L
 // * EPL_DBGLVL_ASSERT      =   0x20000000L
@@ -135,8 +105,6 @@
                                 | EPL_MODULE_LEDU \
                                 )
 
-/*                                | EPL_MODULE_PDOU \ */
-
 
 
 
@@ -153,7 +121,7 @@
 //#define EDRV_EARLY_RX_INT               TRUE
 
 // enables setting of several port pins for benchmarking purposes
-#define EDRV_BENCHMARK                  TRUE
+#define EDRV_BENCHMARK                  FALSE
 //#define EDRV_BENCHMARK                  TRUE // MCF_GPIO_PODR_PCIBR
 
 // Call Tx handler (i.e. EplDllCbFrameTransmitted()) already if DMA has finished,
@@ -173,9 +141,8 @@
 // + SoC + SoA + MN PRes + NmtCmd + ASnd + IdentRes + StatusRes.
 //#define EDRV_MAX_TX_BUFFERS             5
 
-#define EDRV_AUTO_RESPONSE_DELAY         TRUE
-
-#define EPL_DLL_PRES_CHAINING_CN        TRUE
+// openMAC supports auto-response delay
+#define EDRV_AUTO_RESPONSE_DELAY        TRUE
 
 
 // =========================================================================
@@ -193,13 +160,16 @@
 //#define EPL_DLL_PRES_READY_AFTER_SOA    TRUE
 
 // maximum count of Rx filter entries for PRes frames
-#define EPL_DLL_PRES_FILTER_COUNT   3
+#define EPL_DLL_PRES_FILTER_COUNT       3
 
 
 #define EPL_DLL_PROCESS_SYNC        EPL_DLL_PROCESS_SYNC_ON_TIMER
 
 // negative time shift of isochronous task in relation to SoC
 #define EPL_DLL_SOC_SYNC_SHIFT_US       150
+
+// CN supports PRes Chaining
+#define EPL_DLL_PRES_CHAINING_CN        TRUE
 
 // Disable deferred release of rx-buffers until Edrv for openMAC supports it
 #define EPL_DLL_DISABLE_DEFERRED_RXFRAME_RELEASE    TRUE
@@ -219,7 +189,6 @@
 // callback function (called event kObdEvWrStringDomain)
 //#define CONFIG_OBD_USE_STRING_DOMAIN_IN_RAM    FALSE
 #define CONFIG_OBD_USE_STRING_DOMAIN_IN_RAM    TRUE
-
 
 // =========================================================================
 // Timer module specific defines
