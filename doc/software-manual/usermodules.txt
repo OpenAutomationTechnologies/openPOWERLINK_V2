@@ -317,3 +317,16 @@ macros. These macros are located in obdmacro.h.
 \ingroup user_layer
 */
 //------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+/**
+\defgroup module_timeru timeru
+
+\brief User timer module
+
+The user timer module provides timers which can be used by the user layer
+modules like the NMT module for time triggered tasks.
+
+\ingroup user_layer
+*/
+//------------------------------------------------------------------------------
