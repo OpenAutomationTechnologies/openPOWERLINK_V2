@@ -46,6 +46,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <kernel/dllk.h>
 #include <kernel/dllkcal.h>
+#include <kernel/dllkfilter.h>
 #include <kernel/eventk.h>
 #include <kernel/errhndk.h>
 #include <nmt.h>
@@ -131,29 +132,6 @@ void  TgtDbgPostTraceValue (DWORD dwTraceValue_p);
                                     // on MN: 7 + MaxPReq of regular CNs + 1 Diag + 1 Router
 #else
   #define DLLK_TXFRAME_COUNT        (DLLK_TXFRAME_PRES + 2)
-#endif
-
-
-#define DLLK_FILTER_PREQ                0
-#define DLLK_FILTER_SOA_IDREQ           1
-#define DLLK_FILTER_SOA_STATREQ         2
-#define DLLK_FILTER_SOA_NMTREQ          3
-#if EPL_DLL_PRES_CHAINING_CN != FALSE
-  #define DLLK_FILTER_SOA_SYNCREQ       4
-  #define DLLK_FILTER_SOA_NONEPL        5
-#else
-  #define DLLK_FILTER_SOA_NONEPL        4
-#endif
-
-#define DLLK_FILTER_SOA                 (DLLK_FILTER_SOA_NONEPL + 1)
-#define DLLK_FILTER_SOC                 (DLLK_FILTER_SOA + 1)
-#define DLLK_FILTER_ASND                (DLLK_FILTER_SOC + 1)
-#define DLLK_FILTER_PRES                (DLLK_FILTER_ASND + 1)
-
-#if EPL_DLL_PRES_FILTER_COUNT < 0
-  #define DLLK_FILTER_COUNT             (DLLK_FILTER_PRES + 1)
-#else
-  #define DLLK_FILTER_COUNT             (DLLK_FILTER_PRES + EPL_DLL_PRES_FILTER_COUNT)
 #endif
 
 #define DLLK_SOAREQ_COUNT               3
