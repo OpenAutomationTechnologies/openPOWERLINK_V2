@@ -129,9 +129,10 @@ $(USER_DIR)/sdo/sdo-asndu.c \
 $(USER_DIR)/sdo/sdo-sequ.c \
 $(USER_DIR)/sdo/sdo-comu.c \
 $(USER_DIR)/ledu.c \
-$(TARGET_DIR)/timer-microblaze.c \
-$(TARGET_DIR)/usleep-microblaze.c \
-$(TARGET_DIR)/target-microblaze.c
+$(TARGET_DIR)/systemtimer.c \
+$(TARGET_DIR)/usleep.c \
+$(TARGET_DIR)/target-microblaze.c \
+$(TARGET_DIR)/lock-localnoos.c
 
 LIBRARIES = libxil.a
 

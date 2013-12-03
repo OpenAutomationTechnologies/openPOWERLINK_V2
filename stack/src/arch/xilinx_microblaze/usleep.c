@@ -1,10 +1,12 @@
 /**
 ********************************************************************************
-\file   timer-microblaze.c
+\file   xilinx_microblaze/usleep.c
 
-\brief  Implement system timer by using a periodic millisecond counter
+\brief  Inexact usleep implementation for Microblaze
 
-Initialize the system timer and count the milliseconds
+Waits an amount of microseconds. This implementation is without a hardware timer
+and therefore only an approximation. It is recommended to put the sleep function
+into BRAM blocks to increase the accuracy.
 
 \ingroup module_target
 *******************************************************************************/
@@ -40,11 +42,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 
-#include "timer-microblaze.h"
+#include "usleep.h"
 
-#include <xintc.h>           //interrupt controller higher level
-#include <mb_interface.h>
-#include <xparameters.h>
+#include "xil_types.h"
+#include "xparameters.h"
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -70,6 +71,16 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // const defines
 //------------------------------------------------------------------------------
 
+#ifdef XPAR_MICROBLAZE_CORE_CLOCK_FREQ_HZ
+    #define CPU_SPEED_TICKS XPAR_MICROBLAZE_CORE_CLOCK_FREQ_HZ
+#else
+    #error "There is no CPU speed available! Please check xparameters.h"
+#endif
+
+#define CPU_SPEED_MHZ (CPU_SPEED_TICKS/1000000)     ///< CPU speed in Mhz
+
+#define SMALL_LOOP_SPEED (10 * (CPU_SPEED_MHZ/50))  ///< The small loop always takes 1us -> it is adjusted to need 10 iterations with 50Mhz
+
 //------------------------------------------------------------------------------
 // local types
 //------------------------------------------------------------------------------
@@ -78,13 +89,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // local vars
 //------------------------------------------------------------------------------
 
-static UINT32 msCount_l = 0;
-
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
 
-static void irqHandler (void* pArg_p);
+void usleep(u32 usecs_p) __attribute__((section(".local_memory")));
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -92,36 +101,30 @@ static void irqHandler (void* pArg_p);
 
 //------------------------------------------------------------------------------
 /**
-\brief    Initialize system timer
+\brief    Sleep until limit of micro seconds is reached
+
+\param  usecs_p                Count of micro seconds to sleep
 
 \ingroup module_target
 */
 //------------------------------------------------------------------------------
-void timer_init(void)
+void usleep(u32 usecs_p)
 {
+    u16 smallLoop = SMALL_LOOP_SPEED;
 
-    //register fit interrupt handler
-    XIntc_RegisterHandler(XPAR_PCP_INTC_BASEADDR, XPAR_PCP_INTC_FIT_TIMER_0_INTERRUPT_INTR,
-            (XInterruptHandler)irqHandler, 0);
-
-    //enable the fit interrupt
-    XIntc_EnableIntr(XPAR_PCP_INTC_BASEADDR, XPAR_FIT_TIMER_0_INTERRUPT_MASK);
-}
-
-
-
-//------------------------------------------------------------------------------
-/**
-\brief    Get current timer in ms
-
-\return The timer in ms
-
-\ingroup module_target
-*/
-//------------------------------------------------------------------------------
-UINT32 timer_getMSCount(void)
-{
-    return msCount_l;
+    asm
+    (
+      "       addik r11, r0, 1         \n\t"    // fill r11 with decrement value
+      "outerLoop: rsub %0, r11, %0     \n\t"
+      "innerLoop: rsub %1, r11, %1     \n\t"    //1 cycle
+      "       nop                      \n\t"    //1 cycle
+      "       bnei %1, innerLoop       \n\t"    //3 cycles
+      "       add %1, r0, %2           \n\t"
+      "       bnei %0, outerLoop       \n\t"
+          : /* no output registers */
+          : "r"(usecs_p), "r"(smallLoop), "r"(smallLoop)
+          : "r11"
+    );
 }
 
 //============================================================================//
@@ -130,19 +133,5 @@ UINT32 timer_getMSCount(void)
 
 /// \name Private Functions
 /// \{
-
-//------------------------------------------------------------------------------
-/**
-\brief    User timer interrupt handler
-
-\param pArg_p       Interrupt handler argument
-
-\ingroup module_target
-*/
-//------------------------------------------------------------------------------
-static void irqHandler (void* pArg_p)
-{
-    msCount_l++;
-}
 
 ///\}
