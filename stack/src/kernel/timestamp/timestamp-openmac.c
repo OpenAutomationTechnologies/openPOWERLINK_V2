@@ -66,7 +66,7 @@
 ****************************************************************************/
 
 #include "EplInc.h"
-#include "timestamp_openmac.h"
+#include <openmac.h>
 
 #include "omethlib.h"
 
@@ -126,8 +126,8 @@ DWORD PUBLIC EplTgtTimeStampTimeDiffNs (tEplTgtTimeStamp* pTimeStampPredecessor_
 {
 DWORD dwTimeDiffTicks;
 
-    dwTimeDiffTicks = pTimeStampSuccessor_p->m_dwTimeStamp
-                      - pTimeStampPredecessor_p->m_dwTimeStamp;
+    dwTimeDiffTicks = pTimeStampSuccessor_p->timeStamp
+                      - pTimeStampPredecessor_p->timeStamp;
 
     return OMETH_TICKS_2_NS(dwTimeDiffTicks);
 
@@ -152,7 +152,7 @@ tEplTgtTimeStamp* PUBLIC EplTgtTimeStampAlloc (void)
 {
 tEplTgtTimeStamp* pTimeStamp;
 
-    pTimeStamp = malloc(sizeof (struct _tEplTgtTimeStamp));
+    pTimeStamp = malloc(sizeof(tEplTgtTimeStamp));
 
     return pTimeStamp;
 
@@ -202,7 +202,7 @@ void PUBLIC EplTgtTimeStampCopy (tEplTgtTimeStamp* pTimeStampDest_p,
                                  tEplTgtTimeStamp* pTimeStampSrc_p)
 {
 
-    memcpy(pTimeStampDest_p, pTimeStampSrc_p, sizeof(struct _tEplTgtTimeStamp));
+    memcpy(pTimeStampDest_p, pTimeStampSrc_p, sizeof(tEplTgtTimeStamp));
 
 }
 

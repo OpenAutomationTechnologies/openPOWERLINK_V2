@@ -1,173 +1,81 @@
-/****************************************************************************
+/**
+********************************************************************************
+\file   hrtimersync-openmac.c
 
-  (c) SYSTEC electronic GmbH, D-07973 Greiz, August-Bebel-Str. 29
-      www.systec-electronic.com
-  (c) Bernecker + Rainer Industrie-Elektronik Ges.m.b.H.
-      A-5142 Eggelsberg, B&R Strasse 1
-      www.br-automation.com
+\brief  Implementation of openMAC synchronization timer module
 
+This file contains the implementation of the openMAC synchronization timer module.
 
-  Project:      openPOWERLINK
+\ingroup module_hrtimer
+*******************************************************************************/
 
-  Description:  Implementation of synchronization timer module
+/*------------------------------------------------------------------------------
+Copyright (c) 2013, SYSTEC electronic GmbH
+Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+All rights reserved.
 
-  License:
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+    * Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above copyright
+      notice, this list of conditions and the following disclaimer in the
+      documentation and/or other materials provided with the distribution.
+    * Neither the name of the copyright holders nor the
+      names of its contributors may be used to endorse or promote products
+      derived from this software without specific prior written permission.
 
-    Redistribution and use in source and binary forms, with or without
-    modification, are permitted provided that the following conditions
-    are met:
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL COPYRIGHT HOLDERS BE LIABLE FOR ANY
+DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+------------------------------------------------------------------------------*/
 
-    1. Redistributions of source code must retain the above copyright
-       notice, this list of conditions and the following disclaimer.
+//------------------------------------------------------------------------------
+// includes
+//------------------------------------------------------------------------------
+#include <global.h>
+#include <Epl.h>
 
-    2. Redistributions in binary form must reproduce the above copyright
-       notice, this list of conditions and the following disclaimer in the
-       documentation and/or other materials provided with the distribution.
+#include <kernel/EplTimerSynck.h>
+#include <openmac.h>
+#include <omethlib.h>
 
-    3. Neither the name of SYSTEC electronic GmbH nor the names of its
-       contributors may be used to endorse or promote products derived
-       from this software without prior written permission. For written
-       permission, please contact info@systec-electronic.com.
+#include <Benchmark.h>
 
-    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-    LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-    FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-    COPYRIGHT HOLDERS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-    INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-    BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-    LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-    CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-    LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-    ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-    POSSIBILITY OF SUCH DAMAGE.
+//============================================================================//
+//            G L O B A L   D E F I N I T I O N S                             //
+//============================================================================//
 
-    Severability Clause:
-
-        If a provision of this License is or becomes illegal, invalid or
-        unenforceable in any jurisdiction, that shall not affect:
-        1. the validity or enforceability in that jurisdiction of any other
-           provision of this License; or
-        2. the validity or enforceability in other jurisdictions of that or
-           any other provision of this License.
-
-  -------------------------------------------------------------------------
-                $RCSfile$
-
-                $Author$
-
-                $Revision$  $Date$
-
-                $State$
-
-                Build Environment:
-                    GCC V3.4
-
-****************************************************************************/
-
-#include "EplInc.h"
-#include "kernel/EplTimerSynck.h"
-#include "timestamp_openmac.h"
-#include "Benchmark.h"
-
-#include "omethlib.h"
-#ifdef __NIOS2__
-#include "system.h"
-#include <sys/alt_irq.h>
-#include <alt_types.h>
-#include <io.h>
-#elif defined(__MICROBLAZE__)
-#include "xparameters.h"
-#include "xil_io.h"
-#include "xintc_l.h"
-#else
-#error
-#endif
-
-#ifdef __NIOS2__
-#define TSYN_RD32(base, offset)            IORD_32DIRECT(base, offset)
-#define TSYN_WR32(base, offset, write)    IOWR_32DIRECT(base, offset, write)
-#elif defined(__MICROBLAZE__)
-#define TSYN_RD32(base, offset)            Xil_In32((base+offset))
-#define TSYN_WR32(base, offset, write)    Xil_Out32((base+offset), write)
-#else
-#error "Configuration unknown!"
-#endif
-
-
-/***************************************************************************/
-/*                                                                         */
-/*                                                                         */
-/*          G L O B A L   D E F I N I T I O N S                            */
-/*                                                                         */
-/*                                                                         */
-/***************************************************************************/
-
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // const defines
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
 #ifndef EPL_TIMER_SYNC_SECOND_LOSS_OF_SYNC
 #define EPL_TIMER_SYNC_SECOND_LOSS_OF_SYNC      FALSE
 #endif
 
-//--- set the system's base addresses ---
-#if defined(__NIOS2__)
+//------------------------------------------------------------------------------
+// module global vars
+//------------------------------------------------------------------------------
 
-//POWERLINK IP-Core in "pcp_0" subsystem
-#if defined(PCP_0_POWERLINK_0_MAC_REG_BASE)
-#include "edrv-openmac_qsys.h"
+//------------------------------------------------------------------------------
+// global function prototypes
+//------------------------------------------------------------------------------
 
-//POWERLINK IP-Core in SOPC
-#elif defined(POWERLINK_0_MAC_REG_BASE)
-#include "edrv-openmac_sopc.h"
+//============================================================================//
+//            P R I V A T E   D E F I N I T I O N S                           //
+//============================================================================//
 
-#else
-#error "POWERLINK IP-Core is not found in Nios II (sub-)system!"
-#endif
-
-#elif defined(__MICROBLAZE__)
-
-//POWERLINK IP-Core with PLB
-#if defined(POWERLINK_USES_PLB_BUS)
-#include "edrv-openmac_plb.h"
-
-#elif defined(POWERLINK_USES_AXI_BUS)
-#include "edrv-openmac_axi.h"
-
-#else
-#error "POWERLINK IP-Core is not found in Microblaze system!"
-#endif
-
-#else
-#error "Configuration unknown!"
-#endif
-
-
-/***************************************************************************/
-/*                                                                         */
-/*                                                                         */
-/*          C L A S S  EplTimerSynck                                       */
-/*                                                                         */
-/*                                                                         */
-/***************************************************************************/
-//
-// Description: timer sync module implementation for openMAC
-//
-//
-/***************************************************************************/
-
-
-//=========================================================================//
-//                                                                         //
-//          P R I V A T E   D E F I N I T I O N S                          //
-//                                                                         //
-//=========================================================================//
-
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // const defines
-//---------------------------------------------------------------------------
-
+//------------------------------------------------------------------------------
 #define TIMER_HDL_SYNC          0
 #define TIMER_HDL_LOSSOFSYNC    1
 #define TIMER_HDL_INVALID       0xFF
@@ -184,778 +92,696 @@
 #define PROPORTIONAL_FRACTION_SHIFT 3
 #define PROPORTIONAL_FRACTION       (1 << PROPORTIONAL_FRACTION_SHIFT)
 
+#define TIMER_DRV_MIN_TIME_DIFF     500
 
-
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // local types
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+typedef struct
+{
+    UINT32  absoluteTime;
+    BOOL    fEnable;
+} tTimerInfo;
 
 typedef struct
 {
-    DWORD   m_dwAbsoluteTime;
-    BOOL    m_fEnabled;
-
-} tEplTimerSynckTimerInfo;
-
-typedef struct
-{
-//    DWORD                       m_dwAdvanceShiftUs;
-//    DWORD                       m_dwCycleLenUs;
-    tEplTimerSynckCbSync        m_pfnCbSync;
-    DWORD                       m_dwLossOfSyncToleranceNs;
-    tEplTimerSynckCbLossOfSync  m_pfnCbLossOfSync;
-    DWORD                       m_dwLossOfSyncTimeout;
+    tEplTimerSynckCbSync        pfnSyncCb;
+    UINT32                      lossOfSyncToleranceNs;
+    tEplTimerSynckCbLossOfSync  pfnLossOfSyncCb;
+    UINT32                      lossOfSyncTimeout;
 #if (EPL_TIMER_SYNC_SECOND_LOSS_OF_SYNC != FALSE)
-    DWORD                       m_dwLossOfSyncTolerance2Ns;
-    tEplTimerSynckCbLossOfSync  m_pfnCbLossOfSync2;
-    DWORD                       m_dwLossOfSyncTimeout2;
+    UINT32                      lossOfSyncTolerance2Ns;
+    tEplTimerSynckCbLossOfSync  pfnLossOfSync2Cb;
+    UINT32                      lossOfSyncTimeout2;
 #endif
-
     // EplTimerSynckCtrl specific
-    BOOL                        m_fRunning;
-    DWORD                       m_adwActualTimeDiff[TIMEDIFF_COUNT];
-    unsigned int                m_uiActualTimeDiffNextIndex;
-    DWORD                       m_dwMeanTimeDiff;
-    DWORD                       m_dwConfiguredTimeDiff;
-    DWORD                       m_dwAdvanceShift;
-    DWORD                       m_dwRejectThreshold;
-    DWORD                       m_dwTargetSyncTime;
-    DWORD                       m_dwPreviousSyncTime;
-
+    BOOL                        fRun;
+    UINT32                      aActualTimeDiff[TIMEDIFF_COUNT];
+    UINT                        actualTimeDiffNextIndex;
+    UINT32                      meanTimeDiff;
+    UINT32                      configuredTimeDiff;
+    UINT32                      advanceShift;
+    UINT32                      rejectThreshold;
+    UINT32                      targetSyncTime;
+    UINT32                      previousSyncTime;
     // EplTimerSynckDrv specific
-    tEplTimerSynckTimerInfo     m_aTimerInfo[TIMER_COUNT];
-    unsigned int                m_uiActiveTimerHdl;
+    tTimerInfo                  aTimerInfo[TIMER_COUNT];
+    UINT                        activeTimerHdl;
+#ifdef TIMER_USE_EXT_SYNC_INT
+    BOOL                        fExtSyncEnable;
+    UINT32                      syncIntCycle;
+#endif //TIMER_USE_EXT_SYNC_INT
+} tTimerInstance;
 
-#ifdef EPL_TIMER_USE_COMPARE_PDI_INT
-    WORD                        m_wCompareTogPdiIntEnabled;
-    WORD                        m_wSyncIntCycle;
-#endif //EPL_TIMER_USE_COMPARE_PDI_INT
-} tEplTimerSynckInstance;
-
-
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // local vars
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+static tTimerInstance   instance_l;
 
-static tEplTimerSynckInstance   EplTimerSynckInstance_l;
-
-
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // local function prototypes
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+static tEplKernel ctrlDoSyncAdjustment(UINT32 timeStamp_p);
+static void  ctrlSetConfiguredTimeDiff(UINT32 configuredTimeDiff_p);
+static void  ctrlUpdateLossOfSyncTolerance(void);
+static UINT32 ctrlGetNextAbsoluteTime(UINT timerHdl_p, UINT32 currentTime_p);
 
-static tEplKernel EplTimerSynckCtrlDoSyncAdjustment (DWORD dwTimeStamp_p);
-static void  EplTimerSynckCtrlSetConfiguredTimeDiff (DWORD dwConfiguredTimeDiff_p);
-static void  EplTimerSynckCtrlUpdateLossOfSyncTolerance (void);
-static DWORD EplTimerSynckCtrlGetNextAbsoluteTime   (unsigned int uiTimerHdl_p, DWORD dwCurrentTime_p);
+#ifdef TIMER_USE_EXT_SYNC_INT
+static void drvCalcExtSyncIrqValue(void);
+#endif //TIMER_USE_EXT_SYNC_INT
 
-static inline void  EplTimerSynckDrvCompareInterruptEnable  (void);
+static void drvInterruptHandler(void* pArg_p);
 
-static inline void  EplTimerSynckDrvCompareInterruptDisable (void);
+static UINT drvFindShortestTimer(void);
+static void drvConfigureShortestTimer(void);
+static void ctrlAddActualTimeDiff(UINT32 actualTimeDiff_p);
+static void ctrlCalcMeanTimeDiff(void);
+static void ctrlUpdateRejectThreshold(void);
 
-static inline void  EplTimerSynckDrvSetCompareValue         (DWORD dwVal);
+static tEplKernel drvModifyTimerAbs(UINT timerHdl_p, UINT32 absoluteTime_p);
 
-static inline DWORD EplTimerSynckDrvGetTimeValue            (void);
+static tEplKernel drvModifyTimerRel(UINT timerHdl_p, INT timeAdjustment_p,
+        UINT32* pAbsoluteTime_p, BOOL* pfAbsoluteTimeAlreadySet_p);
 
-#ifdef EPL_TIMER_USE_COMPARE_PDI_INT
-static inline void  EplTimerSynckDrvCompareTogPdiInterruptEnable  (void);
-static inline void  EplTimerSynckDrvCompareTogPdiInterruptDisable  (void);
-static inline void  EplTimerSynckDrvSetCompareTogPdiValue         (DWORD dwVal);
-static void EplTimerSynckDrvCalcCompareTogPdiValue (void);
-#endif //EPL_TIMER_USE_COMPARE_PDI_INT
+static tEplKernel drvDeleteTimer(UINT timerHdl_p);
 
-static void EplTimerSynckDrvInterruptHandler (void* pArg_p
-#ifndef ALT_ENHANCED_INTERRUPT_API_PRESENT
-        , DWORD dwInt_p
-#endif
-        );
+//============================================================================//
+//            P U B L I C   F U N C T I O N S                                 //
+//============================================================================//
 
-static tEplKernel EplTimerSynckDrvModifyTimerAbs(unsigned int uiTimerHdl_p,
-                                                 DWORD        dwAbsoluteTime_p);
+//------------------------------------------------------------------------------
+/**
+\brief  Synchronization timer module initialization
 
-static tEplKernel EplTimerSynckDrvModifyTimerRel(unsigned int uiTimerHdl_p,
-                                                 int          iTimeAdjustment_p,
-                                                 DWORD*       pdwAbsoluteTime_p,
-                                                 BOOL*        pfAbsoluteTimeAlreadySet_p);
+This function initializes the Synchronization timer module.
 
-static tEplKernel EplTimerSynckDrvDeleteTimer(unsigned int uiTimerHdl_p);
+\return The function returns a tEplKernel error code.
 
-
-//=========================================================================//
-//                                                                         //
-//          P U B L I C   F U N C T I O N S                                //
-//                                                                         //
-//=========================================================================//
-
-
-//---------------------------------------------------------------------------
-//
-// Function:    EplTimerSynckAddInstance()
-//
-// Description: initializes the synchronization timer module.
-//
-// Parameters:  void
-//
-// Return:      tEplKernel      = error code
-//
-// State:       not tested
-//
-//---------------------------------------------------------------------------
-
-tEplKernel PUBLIC EplTimerSynckAddInstance (void)
+\ingroup module_hrtimer
+*/
+//------------------------------------------------------------------------------
+tEplKernel EplTimerSynckAddInstance (void)
 {
-tEplKernel      Ret = kEplSuccessful;
+    tEplKernel ret = kEplSuccessful;
 
+    EPL_MEMSET(&instance_l, 0, sizeof (instance_l));
 
-    EPL_MEMSET(&EplTimerSynckInstance_l, 0, sizeof (EplTimerSynckInstance_l));
+    openmac_timerIrqDisable(HWTIMER_SYNC);
+    openmac_timerSetCompareValue(HWTIMER_SYNC, 0);
+#ifdef TIMER_USE_EXT_SYNC_INT
+    openmac_timerIrqDisable(HWTIMER_EXT_SYNC);
+    openmac_timerSetCompareValue(HWTIMER_EXT_SYNC, 0);
+#endif //TIMER_USE_EXT_SYNC_INT
 
-    EplTimerSynckDrvCompareInterruptDisable();
-    EplTimerSynckDrvSetCompareValue( 0 );
-#ifdef EPL_TIMER_USE_COMPARE_PDI_INT
-    EplTimerSynckDrvCompareTogPdiInterruptDisable();
-    EplTimerSynckDrvSetCompareTogPdiValue( 0 );
-#endif //EPL_TIMER_USE_COMPARE_PDI_INT
+    ret = openmac_isrReg(kOpenmacIrqSync, drvInterruptHandler, NULL);
 
-#ifdef __NIOS2__
-    if (alt_ic_isr_register(EPL_TIMER_SYNC_IRQ_IC_ID, EPL_TIMER_SYNC_IRQ,
-                EplTimerSynckDrvInterruptHandler, NULL, NULL))
-    {
-        Ret = kEplNoResource;
-    }
-#elif defined(__MICROBLAZE__)
-    {
-        DWORD curIntEn = TSYN_RD32(EPL_TIMER_INTC_BASE, XIN_IER_OFFSET);
+    return ret;
+}
 
-        XIntc_RegisterHandler(EPL_TIMER_INTC_BASE, EPL_TIMER_SYNC_IRQ,
-                (XInterruptHandler)EplTimerSynckDrvInterruptHandler, (void*)NULL);
-        XIntc_EnableIntr(EPL_TIMER_INTC_BASE, EPL_TIMER_SYNC_IRQ_MASK | curIntEn);
-    }
-#else
-#error"Configuration unknown!"
-#endif
+//------------------------------------------------------------------------------
+/**
+\brief  Synchronization timer delete module
 
-    return Ret;
+This function deletes the Synchronization timer module.
+
+\return The function returns a tEplKernel error code.
+
+\ingroup module_hrtimer
+*/
+//------------------------------------------------------------------------------
+tEplKernel EplTimerSynckDelInstance (void)
+{
+    tEplKernel ret = kEplSuccessful;
+
+    openmac_timerIrqDisable(HWTIMER_SYNC);
+    openmac_timerSetCompareValue(HWTIMER_SYNC, 0);
+#ifdef TIMER_USE_EXT_SYNC_INT
+    openmac_timerIrqDisable(HWTIMER_EXT_SYNC);
+    openmac_timerSetCompareValue(HWTIMER_EXT_SYNC, 0);
+#endif //TIMER_USE_EXT_SYNC_INT
+
+    openmac_isrReg(kOpenmacIrqSync, NULL, NULL);
+
+    EPL_MEMSET(&instance_l, 0, sizeof (instance_l));
+
+    return ret;
 
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Synchronization timer register synchronization handler
 
+This function registers the synchronization handler callback.
 
-//---------------------------------------------------------------------------
-//
-// Function:    EplTimerSynckDelInstance()
-//
-// Description: shuts down the synchronization timer module.
-//
-// Parameters:  void
-//
-// Return:      tEplKernel      = error code
-//
-// State:       not tested
-//
-//---------------------------------------------------------------------------
+\param  pfnSyncCb_p     Synchronization callback
 
-tEplKernel PUBLIC EplTimerSynckDelInstance (void)
+\return The function returns a tEplKernel error code.
+
+\ingroup module_hrtimer
+*/
+//------------------------------------------------------------------------------
+tEplKernel EplTimerSynckRegSyncHandler (tEplTimerSynckCbSync pfnSyncCb_p)
 {
-tEplKernel      Ret = kEplSuccessful;
+    tEplKernel ret = kEplSuccessful;
 
+    instance_l.pfnSyncCb = pfnSyncCb_p;
 
-    EplTimerSynckDrvCompareInterruptDisable();
-    EplTimerSynckDrvSetCompareValue( 0 );
-#ifdef EPL_TIMER_USE_COMPARE_PDI_INT
-    EplTimerSynckDrvCompareTogPdiInterruptDisable();
-    EplTimerSynckDrvSetCompareTogPdiValue( 0 );
-#endif //EPL_TIMER_USE_COMPARE_PDI_INT
-
-#ifdef __NIOS2__
-    alt_ic_isr_register(EPL_TIMER_SYNC_IRQ_IC_ID, EPL_TIMER_SYNC_IRQ,
-            NULL, NULL, NULL);
-#elif defined(__MICROBLAZE__)
-    XIntc_RegisterHandler(EPL_TIMER_INTC_BASE, EPL_TIMER_SYNC_IRQ,
-            (XInterruptHandler)NULL, (void*)NULL);
-#else
-#error "Configuration unknown!"
-#endif
-    EPL_MEMSET(&EplTimerSynckInstance_l, 0, sizeof (EplTimerSynckInstance_l));
-
-    return Ret;
-
+    return ret;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Synchronization timer register loss of synchronization handler
 
+This function registers the loss of synchronization handler callback.
 
-//---------------------------------------------------------------------------
-//
-// Function:    EplTimerSynckRegSyncHandler()
-//
-// Description: registers handler for synchronized periodic call back
-//
-// Parameters:  pfnTimerSynckCbSync_p   = pointer to callback function,
-//                                        which will be called in interrupt context.
-//
-// Return:      tEplKernel      = error code
-//
-// State:       not tested
-//
-//---------------------------------------------------------------------------
+\param  pfnLossOfSyncCb_p   Loss of synchronization callback
 
-tEplKernel PUBLIC EplTimerSynckRegSyncHandler (tEplTimerSynckCbSync pfnTimerSynckCbSync_p)
+\return The function returns a tEplKernel error code.
+
+\ingroup module_hrtimer
+*/
+//------------------------------------------------------------------------------
+tEplKernel EplTimerSynckRegLossOfSyncHandler (tEplTimerSynckCbLossOfSync pfnLossOfSyncCb_p)
 {
-tEplKernel      Ret = kEplSuccessful;
+    tEplKernel ret = kEplSuccessful;
 
+    instance_l.pfnLossOfSyncCb = pfnLossOfSyncCb_p;
 
-    EplTimerSynckInstance_l.m_pfnCbSync = pfnTimerSynckCbSync_p;
-
-    return Ret;
-
+    return ret;
 }
-
-
-
-//---------------------------------------------------------------------------
-//
-// Function:    EplTimerSynckRegLossOfSyncHandler()
-//
-// Description: registers handler for loss of sync
-//
-// Parameters:  pfnTimerSynckCbSync_p   = pointer to callback function
-//
-// Return:      tEplKernel      = error code
-//
-// State:       not tested
-//
-//---------------------------------------------------------------------------
-
-tEplKernel PUBLIC EplTimerSynckRegLossOfSyncHandler (tEplTimerSynckCbLossOfSync pfnTimerSynckCbLossOfSync_p)
-{
-tEplKernel      Ret = kEplSuccessful;
-
-
-    EplTimerSynckInstance_l.m_pfnCbLossOfSync = pfnTimerSynckCbLossOfSync_p;
-
-    return Ret;
-
-}
-
 
 #if (EPL_TIMER_SYNC_SECOND_LOSS_OF_SYNC != FALSE)
+//------------------------------------------------------------------------------
+/**
+\brief  Synchronization timer register second synchronization handler
 
-//---------------------------------------------------------------------------
-//
-// Function:    EplTimerSynckRegLossOfSyncHandler2()
-//
-// Description: registers handler for second loss of sync (needed for PResFallBackTimeout)
-//
-// Parameters:  pfnTimerSynckCbSync2_p  = pointer to callback function
-//
-// Return:      tEplKernel      = error code
-//
-// State:       not tested
-//
-//---------------------------------------------------------------------------
+This function registers the second synchronization handler callback.
 
-tEplKernel PUBLIC EplTimerSynckRegLossOfSyncHandler2 (tEplTimerSynckCbLossOfSync pfnTimerSynckCbLossOfSync2_p)
+\param  pfnLossOfSync2Cb_p  Second synchronization callback
+
+\return The function returns a tEplKernel error code.
+
+\ingroup module_hrtimer
+*/
+//------------------------------------------------------------------------------
+tEplKernel EplTimerSynckRegLossOfSyncHandler2 (tEplTimerSynckCbLossOfSync pfnLossOfSync2Cb_p)
 {
-tEplKernel      Ret = kEplSuccessful;
+    tEplKernel ret = kEplSuccessful;
 
+    instance_l.pfnLossOfSync2Cb = pfnLossOfSync2Cb_p;
 
-    EplTimerSynckInstance_l.m_pfnCbLossOfSync2 = pfnTimerSynckCbLossOfSync2_p;
-
-    return Ret;
-
+    return ret;
 }
-
 #endif
 
+//------------------------------------------------------------------------------
+/**
+\brief  Synchronization timer shift setter
 
-//---------------------------------------------------------------------------
-//
-// Function:    EplTimerSynckSetSyncShiftUs()
-//
-// Description:
-//
-// Parameters:
-//
-// Return:      tEplKernel      = error code
-//
-// State:       not tested
-//
-//---------------------------------------------------------------------------
+This function sets the negative time shift.
 
-tEplKernel PUBLIC EplTimerSynckSetSyncShiftUs (DWORD dwAdvanceShiftUs_p)
+\param  advanceShiftUs_p    Time shift [us]
+
+\return The function returns a tEplKernel error code.
+
+\ingroup module_hrtimer
+*/
+//------------------------------------------------------------------------------
+tEplKernel EplTimerSynckSetSyncShiftUs (DWORD advanceShiftUs_p)
 {
-tEplKernel      Ret = kEplSuccessful;
+    tEplKernel ret = kEplSuccessful;
 
+    instance_l.advanceShift = OMETH_US_2_TICKS(advanceShiftUs_p);
 
-//    EplTimerSynckInstance_l.m_dwAdvanceShiftUs = dwAdvanceShiftUs_p;
-    EplTimerSynckInstance_l.m_dwAdvanceShift = OMETH_US_2_TICKS(dwAdvanceShiftUs_p);
-
-    return Ret;
-
+    return ret;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Synchronization timer cycle time
 
+This function sets the cycle time.
 
-//---------------------------------------------------------------------------
-//
-// Function:    EplTimerSynckSetCycleLenUs()
-//
-// Description:
-//
-// Parameters:
-//
-// Return:      tEplKernel      = error code
-//
-// State:       not tested
-//
-//---------------------------------------------------------------------------
+\param  cycleLenUs_p    Cycle time [us]
 
-tEplKernel PUBLIC EplTimerSynckSetCycleLenUs (DWORD dwCycleLenUs_p)
+\return The function returns a tEplKernel error code.
+
+\ingroup module_hrtimer
+*/
+//------------------------------------------------------------------------------
+tEplKernel EplTimerSynckSetCycleLenUs (DWORD cycleLenUs_p)
 {
-tEplKernel      Ret = kEplSuccessful;
+    tEplKernel ret = kEplSuccessful;
 
-    EplTimerSynckCtrlSetConfiguredTimeDiff(OMETH_US_2_TICKS(dwCycleLenUs_p));
+    ctrlSetConfiguredTimeDiff(OMETH_US_2_TICKS(cycleLenUs_p));
 
-    return Ret;
-
+    return ret;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Synchronization timer loss of synchronization setter
 
+This function sets the loss of synchronization tolerance.
 
-//---------------------------------------------------------------------------
-//
-// Function:    EplTimerSynckSetLossOfSyncToleranceNs()
-//
-// Description:
-//
-// Parameters:
-//
-// Return:      tEplKernel      = error code
-//
-// State:       not tested
-//
-//---------------------------------------------------------------------------
+\param  lossOfSyncToleranceNs_p Loss of sync tolerance [ns]
 
-tEplKernel PUBLIC EplTimerSynckSetLossOfSyncToleranceNs (DWORD dwLossOfSyncToleranceNs_p)
+\return The function returns a tEplKernel error code.
+
+\ingroup module_hrtimer
+*/
+//------------------------------------------------------------------------------
+tEplKernel EplTimerSynckSetLossOfSyncToleranceNs (DWORD lossOfSyncToleranceNs_p)
 {
-tEplKernel      Ret = kEplSuccessful;
+    tEplKernel ret = kEplSuccessful;
 
+    instance_l.lossOfSyncToleranceNs = lossOfSyncToleranceNs_p;
 
-    EplTimerSynckInstance_l.m_dwLossOfSyncToleranceNs = dwLossOfSyncToleranceNs_p;
+    ctrlUpdateLossOfSyncTolerance();
 
-    EplTimerSynckCtrlUpdateLossOfSyncTolerance();
-
-    return Ret;
-
+    return ret;
 }
-
 
 #if (EPL_TIMER_SYNC_SECOND_LOSS_OF_SYNC != FALSE)
+//------------------------------------------------------------------------------
+/**
+\brief  Synchronization timer second loss of synchronization setter
 
-//---------------------------------------------------------------------------
-//
-// Function:    EplTimerSynckSetLossOfSyncTolerance2Ns()
-//
-// Description:
-//
-// Parameters:
-//
-// Return:      tEplKernel      = error code
-//
-// State:       not tested
-//
-//---------------------------------------------------------------------------
+This function sets the loss of synchronization tolerance.
 
-tEplKernel PUBLIC EplTimerSynckSetLossOfSyncTolerance2Ns (DWORD dwLossOfSyncTolerance2Ns_p)
+\param  lossOfSyncTolerance2Ns_p    Second loss of sync tolerance [ns]
+
+\return The function returns a tEplKernel error code.
+
+\ingroup module_hrtimer
+*/
+//------------------------------------------------------------------------------
+tEplKernel EplTimerSynckSetLossOfSyncTolerance2Ns (DWORD lossOfSyncTolerance2Ns_p)
 {
-tEplKernel      Ret = kEplSuccessful;
+    tEplKernel ret = kEplSuccessful;
 
+    instance_l.lossOfSyncTolerance2Ns = lossOfSyncTolerance2Ns_p;
 
-    EplTimerSynckInstance_l.m_dwLossOfSyncTolerance2Ns = dwLossOfSyncTolerance2Ns_p;
-
-    if (dwLossOfSyncTolerance2Ns_p > 0)
+    if (lossOfSyncTolerance2Ns_p > 0)
     {
-        EplTimerSynckInstance_l.m_dwLossOfSyncTimeout2 = EplTimerSynckInstance_l.m_dwConfiguredTimeDiff
-                + OMETH_NS_2_TICKS(EplTimerSynckInstance_l.m_dwLossOfSyncTolerance2Ns);
+        instance_l.lossOfSyncTimeout2 = instance_l.configuredTimeDiff
+                + OMETH_NS_2_TICKS(instance_l.lossOfSyncTolerance2Ns);
     }
     else
     {
-        EplTimerSynckInstance_l.m_dwLossOfSyncTimeout2 = 0;
+        instance_l.lossOfSyncTimeout2 = 0;
     }
 
-    return Ret;
-
+    return ret;
 }
 
 #endif
+//------------------------------------------------------------------------------
+/**
+\brief  Synchronization timer trigger setter
 
+This function sets the synchronization time trigger at a specific time stamp.
 
-//---------------------------------------------------------------------------
-//
-// Function:    EplTimerSynckTriggerAtTimeStamp()
-//
-// Description:
-//
-// Parameters:  void
-//
-// Return:      tEplKernel      = error code
-//
-// State:       not tested
-//
-//---------------------------------------------------------------------------
+\param  pTimeStamp_p    Time stamp when the sync module should trigger
 
-tEplKernel PUBLIC EplTimerSynckTriggerAtTimeStamp(tEplTgtTimeStamp* pTimeStamp_p)
+\return The function returns a tEplKernel error code.
+
+\ingroup module_hrtimer
+*/
+//------------------------------------------------------------------------------
+tEplKernel EplTimerSynckTriggerAtTimeStamp(tEplTgtTimeStamp* pTimeStamp_p)
 {
-tEplKernel      Ret = kEplSuccessful;
+    tEplKernel ret = kEplSuccessful;
 
-    Ret = EplTimerSynckDrvModifyTimerAbs(TIMER_HDL_LOSSOFSYNC,
-                                      (pTimeStamp_p->m_dwTimeStamp + EplTimerSynckInstance_l.m_dwLossOfSyncTimeout));
-    if (Ret != kEplSuccessful)
+    ret = drvModifyTimerAbs(TIMER_HDL_LOSSOFSYNC,
+                                      (pTimeStamp_p->timeStamp + instance_l.lossOfSyncTimeout));
+    if (ret != kEplSuccessful)
     {
         goto Exit;
     }
 
 #if (EPL_TIMER_SYNC_SECOND_LOSS_OF_SYNC != FALSE)
-    if (EplTimerSynckInstance_l.m_dwLossOfSyncTimeout2 > 0)
+    if (instance_l.lossOfSyncTimeout2 > 0)
     {
-        Ret = EplTimerSynckDrvModifyTimerAbs(TIMER_HDL_LOSSOFSYNC2,
-                                          (pTimeStamp_p->m_dwTimeStamp + EplTimerSynckInstance_l.m_dwLossOfSyncTimeout2));
-        if (Ret != kEplSuccessful)
+        ret = drvModifyTimerAbs(TIMER_HDL_LOSSOFSYNC2,
+                                          (pTimeStamp_p->timeStamp + instance_l.lossOfSyncTimeout2));
+        if (ret != kEplSuccessful)
         {
             goto Exit;
         }
     }
 #endif
 
-    Ret = EplTimerSynckCtrlDoSyncAdjustment(pTimeStamp_p->m_dwTimeStamp);
+    ret = ctrlDoSyncAdjustment(pTimeStamp_p->timeStamp);
 
 Exit:
-    return Ret;
-
+    return ret;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Stop Synchronization timer module
 
+This function stops the module.
 
-//---------------------------------------------------------------------------
-//
-// Function:    EplTimerSynckStopSync()
-//
-// Description:
-//
-// Parameters:  void
-//
-// Return:      tEplKernel      = error code
-//
-// State:       not tested
-//
-//---------------------------------------------------------------------------
+\return The function returns a tEplKernel error code.
 
-tEplKernel PUBLIC EplTimerSynckStopSync (void)
+\ingroup module_hrtimer
+*/
+//------------------------------------------------------------------------------
+tEplKernel EplTimerSynckStopSync (void)
 {
-tEplKernel      Ret = kEplSuccessful;
+    tEplKernel ret = kEplSuccessful;
 
-    EplTimerSynckInstance_l.m_fRunning = FALSE;
+    instance_l.fRun = FALSE;
 
-    Ret = EplTimerSynckDrvDeleteTimer(TIMER_HDL_SYNC);
-    Ret = EplTimerSynckDrvDeleteTimer(TIMER_HDL_LOSSOFSYNC);
+    ret = drvDeleteTimer(TIMER_HDL_SYNC);
+    ret = drvDeleteTimer(TIMER_HDL_LOSSOFSYNC);
 #if (EPL_TIMER_SYNC_SECOND_LOSS_OF_SYNC != FALSE)
-    Ret = EplTimerSynckDrvDeleteTimer(TIMER_HDL_LOSSOFSYNC2);
+    ret = drvDeleteTimer(TIMER_HDL_LOSSOFSYNC2);
 #endif
 
-    return Ret;
+    return ret;
 }
 
 
-#ifdef EPL_TIMER_USE_COMPARE_PDI_INT
-//---------------------------------------------------------------------------
-//
-// Function:    EplTimerSynckCompareTogPdiIntEnable()
-//
-// Description: This function enables the compare pdi interrupt externally
-//
-// Parameters:  void
-//
-// Return:      void
-//
-//---------------------------------------------------------------------------
-void PUBLIC EplTimerSynckCompareTogPdiIntEnable (DWORD wSyncIntCycle_p)
-{
-    EplTimerSynckInstance_l.m_wCompareTogPdiIntEnabled = TRUE;
-    EplTimerSynckInstance_l.m_wSyncIntCycle = wSyncIntCycle_p;
+#ifdef TIMER_USE_EXT_SYNC_INT
+//------------------------------------------------------------------------------
+/**
+\brief  Enable second sync interrupt
 
-    EplTimerSynckDrvCompareTogPdiInterruptEnable();
+This function enables the external sync interrupt of 2nd CMP timer
+
+\param  syncIntCycle_p      Trigger external sync int every nth cycle
+\param  pulseWidthNs_p      Pulse width of external sync int.
+                            If 0 external sync int is just toggled.
+
+\return The function returns a tEplKernel error code.
+
+\ingroup module_hrtimer
+*/
+//------------------------------------------------------------------------------
+void EplTimerSynckExtSyncIrqEnable (DWORD syncIntCycle_p, UINT32 pulseWidthNs_p)
+{
+    instance_l.fExtSyncEnable = TRUE;
+    instance_l.syncIntCycle = syncIntCycle_p;
+
+    openmac_timerIrqEnable(HWTIMER_EXT_SYNC, pulseWidthNs_p);
 }
 
-//---------------------------------------------------------------------------
-//
-// Function:    EplTimerSynckCompareTogPdiIntDisable()
-//
-// Description: This function disables the compare pdi interrupt externally
-//
-// Parameters:  void
-//
-// Return:      void
-//
-//---------------------------------------------------------------------------
-void PUBLIC EplTimerSynckCompareTogPdiIntDisable (void)
-{
-    EplTimerSynckInstance_l.m_wCompareTogPdiIntEnabled = FALSE;
-    EplTimerSynckInstance_l.m_wSyncIntCycle = 0;
+//------------------------------------------------------------------------------
+/**
+\brief  Disable second sync interrupt
 
-    EplTimerSynckDrvCompareTogPdiInterruptDisable();
+This function disables the external sync interrupt of 2nd CMP timer
+
+\return The function returns a tEplKernel error code.
+
+\ingroup module_hrtimer
+*/
+//------------------------------------------------------------------------------
+void EplTimerSynckExtSyncIrqDisable (void)
+{
+    instance_l.fExtSyncEnable = FALSE;
+    instance_l.syncIntCycle = 0;
+
+    openmac_timerIrqDisable(HWTIMER_EXT_SYNC);
 }
-#endif //EPL_TIMER_USE_COMPARE_PDI_INT
+#endif //TIMER_USE_EXT_SYNC_INT
 
-//=========================================================================//
-//                                                                         //
-//          P R I V A T E   F U N C T I O N S                              //
-//                                                                         //
-//=========================================================================//
+//============================================================================//
+//            P R I V A T E   F U N C T I O N S                               //
+//============================================================================//
+/// \name Private Functions
+/// \{
 
+//------------------------------------------------------------------------------
+/**
+\brief  Adjust the synchronization
 
-/***************************************************************************/
-/*                                                                         */
-/*                                                                         */
-/*          S U B C L A S S  EplTimerSynckCtrl                             */
-/*                                                                         */
-/*                                                                         */
-/***************************************************************************/
-//
-// Description: closed loop control implementation
-//
-/***************************************************************************/
+This function adjusts the synchronization mechanism with a filter.
 
-static void  EplTimerSynckCtrlAddActualTimeDiff     (DWORD dwActualTimeDiff_p);
-static void  EplTimerSynckCtrlCalcMeanTimeDiff      (void);
-static void  EplTimerSynckCtrlUpdateRejectThreshold (void);
+\param  timeStamp_p     New sync time stamp
 
-
-static tEplKernel EplTimerSynckCtrlDoSyncAdjustment (DWORD dwTimeStamp_p)
+\return The function returns a tEplKernel error code.
+*/
+//------------------------------------------------------------------------------
+static tEplKernel ctrlDoSyncAdjustment (UINT32 timeStamp_p)
 {
-tEplKernel      Ret = kEplSuccessful;
-DWORD           dwActualTimeDiff;
-int             iDeviation;
-BOOL            fCurrentSyncModified = FALSE;
+    tEplKernel  ret = kEplSuccessful;
+    UINT32      actualTimeDiff;
+    INT         deviation;
+    BOOL        fCurrentSyncModified = FALSE;
 
-    dwTimeStamp_p -= EplTimerSynckInstance_l.m_dwAdvanceShift;
+    timeStamp_p -= instance_l.advanceShift;
 
-    if (EplTimerSynckInstance_l.m_fRunning != FALSE)
+    if (instance_l.fRun != FALSE)
     {
-        dwActualTimeDiff = dwTimeStamp_p - EplTimerSynckInstance_l.m_dwPreviousSyncTime;
+        actualTimeDiff = timeStamp_p - instance_l.previousSyncTime;
 
-        EplTimerSynckCtrlAddActualTimeDiff(dwActualTimeDiff);
+        ctrlAddActualTimeDiff(actualTimeDiff);
 
-        iDeviation = dwTimeStamp_p - EplTimerSynckInstance_l.m_dwTargetSyncTime;
+        deviation = timeStamp_p - instance_l.targetSyncTime;
 
-        iDeviation = iDeviation >> PROPORTIONAL_FRACTION_SHIFT;
+        deviation = deviation >> PROPORTIONAL_FRACTION_SHIFT;
 
-        Ret = EplTimerSynckDrvModifyTimerRel(TIMER_HDL_SYNC, iDeviation, &EplTimerSynckInstance_l.m_dwTargetSyncTime, &fCurrentSyncModified);
+        ret = drvModifyTimerRel(TIMER_HDL_SYNC, deviation, &instance_l.targetSyncTime, &fCurrentSyncModified);
 
         if (fCurrentSyncModified != FALSE)
         {   // set target to next sync
-            EplTimerSynckInstance_l.m_dwTargetSyncTime += EplTimerSynckInstance_l.m_dwMeanTimeDiff;
+            instance_l.targetSyncTime += instance_l.meanTimeDiff;
         }
     }
     else
     {   // first trigger
-        EplTimerSynckInstance_l.m_dwTargetSyncTime = dwTimeStamp_p + EplTimerSynckInstance_l.m_dwMeanTimeDiff;
-        EplTimerSynckInstance_l.m_fRunning = TRUE;
+        instance_l.targetSyncTime = timeStamp_p + instance_l.meanTimeDiff;
+        instance_l.fRun = TRUE;
 
-        Ret = EplTimerSynckDrvModifyTimerAbs(TIMER_HDL_SYNC, EplTimerSynckInstance_l.m_dwTargetSyncTime);
+        ret = drvModifyTimerAbs(TIMER_HDL_SYNC, instance_l.targetSyncTime);
     }
 
-    EplTimerSynckInstance_l.m_dwPreviousSyncTime = dwTimeStamp_p;
+    instance_l.previousSyncTime = timeStamp_p;
 
-    return Ret;
+    return ret;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Add actual time difference
 
-static void EplTimerSynckCtrlAddActualTimeDiff (DWORD dwActualTimeDiff_p)
+This function adds the actual time difference for the next synchronization.
+
+\param  actualTimeDiff_p    Actual time difference
+*/
+//------------------------------------------------------------------------------
+static void ctrlAddActualTimeDiff (UINT32 actualTimeDiff_p)
 {
-
     // always add small TimeDiff values
     // reject TimeDiff values which are too large
-    if (dwActualTimeDiff_p < EplTimerSynckInstance_l.m_dwRejectThreshold)
+    if (actualTimeDiff_p < instance_l.rejectThreshold)
     {
-        EplTimerSynckInstance_l.m_adwActualTimeDiff[EplTimerSynckInstance_l.m_uiActualTimeDiffNextIndex]
-            = dwActualTimeDiff_p;
-        EplTimerSynckInstance_l.m_uiActualTimeDiffNextIndex++;
-        EplTimerSynckInstance_l.m_uiActualTimeDiffNextIndex &= (TIMEDIFF_COUNT - 1);
+        instance_l.aActualTimeDiff[instance_l.actualTimeDiffNextIndex]
+            = actualTimeDiff_p;
+        instance_l.actualTimeDiffNextIndex++;
+        instance_l.actualTimeDiffNextIndex &= (TIMEDIFF_COUNT - 1);
 
-        EplTimerSynckCtrlCalcMeanTimeDiff();
+        ctrlCalcMeanTimeDiff();
     }
     else
     {   // adjust target sync time, because of Loss of Sync
-        for (; dwActualTimeDiff_p >= EplTimerSynckInstance_l.m_dwRejectThreshold;
-             dwActualTimeDiff_p -= EplTimerSynckInstance_l.m_dwMeanTimeDiff,
-             EplTimerSynckInstance_l.m_dwTargetSyncTime += EplTimerSynckInstance_l.m_dwMeanTimeDiff)
+        for (; actualTimeDiff_p >= instance_l.rejectThreshold;
+             actualTimeDiff_p -= instance_l.meanTimeDiff,
+             instance_l.targetSyncTime += instance_l.meanTimeDiff)
         {
         }
     }
-
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Calculate mean time difference
 
-
-static void EplTimerSynckCtrlCalcMeanTimeDiff (void)
+This function calculates the average of the time differences (filter).
+*/
+//------------------------------------------------------------------------------
+static void ctrlCalcMeanTimeDiff (void)
 {
-int     nIdx;
-DWORD   dwTimeDiffSum;
+    INT     i;
+    UINT32  timeDiffSum;
 
-    dwTimeDiffSum = 0;
+    timeDiffSum = 0;
 
-    for (nIdx=0; nIdx < TIMEDIFF_COUNT; nIdx++)
+    for (i=0; i < TIMEDIFF_COUNT; i++)
     {
-        dwTimeDiffSum += EplTimerSynckInstance_l.m_adwActualTimeDiff[nIdx];
+        timeDiffSum += instance_l.aActualTimeDiff[i];
     }
 
-    EplTimerSynckInstance_l.m_dwMeanTimeDiff = dwTimeDiffSum >> TIMEDIFF_COUNT_SHIFT;
-
+    instance_l.meanTimeDiff = timeDiffSum >> TIMEDIFF_COUNT_SHIFT;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Set configured time difference
 
+This function sets the configured time difference.
 
-static void EplTimerSynckCtrlSetConfiguredTimeDiff (DWORD dwConfiguredTimeDiff_p)
+\param  configuredTimeDiff_p    Configured time difference
+*/
+//------------------------------------------------------------------------------
+static void ctrlSetConfiguredTimeDiff (UINT32 configuredTimeDiff_p)
 {
-int     nIdx;
+    INT i;
 
-    EplTimerSynckInstance_l.m_dwConfiguredTimeDiff = dwConfiguredTimeDiff_p;
+    instance_l.configuredTimeDiff = configuredTimeDiff_p;
 
-    for (nIdx=0; nIdx < TIMEDIFF_COUNT; nIdx++)
+    for (i=0; i < TIMEDIFF_COUNT; i++)
     {
-        EplTimerSynckInstance_l.m_adwActualTimeDiff[nIdx] = dwConfiguredTimeDiff_p;
+        instance_l.aActualTimeDiff[i] = configuredTimeDiff_p;
     }
 
-    EplTimerSynckInstance_l.m_dwMeanTimeDiff = dwConfiguredTimeDiff_p;
+    instance_l.meanTimeDiff = configuredTimeDiff_p;
 
-    EplTimerSynckCtrlUpdateRejectThreshold();
-
+    ctrlUpdateRejectThreshold();
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Update loss of sync tolerance
 
-
-static void EplTimerSynckCtrlUpdateLossOfSyncTolerance (void)
+This function updates the loss of sync tolerance.
+*/
+//------------------------------------------------------------------------------
+static void ctrlUpdateLossOfSyncTolerance (void)
 {
-    EplTimerSynckCtrlUpdateRejectThreshold();
+    ctrlUpdateRejectThreshold();
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Update reject threshold
 
-
-static void EplTimerSynckCtrlUpdateRejectThreshold (void)
+This function updates the reject threshold
+*/
+//------------------------------------------------------------------------------
+static void ctrlUpdateRejectThreshold (void)
 {
-DWORD   dwLossOfSyncTolerance;
-DWORD   dwMaxRejectThreshold;
+    UINT32  lossOfSyncTolerance;
+    UINT32  maxRejectThreshold;
 
-    dwLossOfSyncTolerance = OMETH_NS_2_TICKS(EplTimerSynckInstance_l.m_dwLossOfSyncToleranceNs);
-    dwMaxRejectThreshold  = EplTimerSynckInstance_l.m_dwConfiguredTimeDiff >> 1;  // half of cycle length
+    lossOfSyncTolerance = OMETH_NS_2_TICKS(instance_l.lossOfSyncToleranceNs);
+    maxRejectThreshold  = instance_l.configuredTimeDiff >> 1;  // half of cycle length
 
-    EplTimerSynckInstance_l.m_dwRejectThreshold = EplTimerSynckInstance_l.m_dwConfiguredTimeDiff;
+    instance_l.rejectThreshold = instance_l.configuredTimeDiff;
 
-    if (dwLossOfSyncTolerance > dwMaxRejectThreshold)
+    if (lossOfSyncTolerance > maxRejectThreshold)
     {
-        EplTimerSynckInstance_l.m_dwRejectThreshold += dwMaxRejectThreshold;
+        instance_l.rejectThreshold += maxRejectThreshold;
     }
     else
     {
-        EplTimerSynckInstance_l.m_dwRejectThreshold += dwLossOfSyncTolerance;
+        instance_l.rejectThreshold += lossOfSyncTolerance;
     }
 
-    EplTimerSynckInstance_l.m_dwLossOfSyncTimeout = EplTimerSynckInstance_l.m_dwConfiguredTimeDiff + dwLossOfSyncTolerance;
+    instance_l.lossOfSyncTimeout = instance_l.configuredTimeDiff + lossOfSyncTolerance;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Get next absolute time for synchronization
 
+This function returns the absolute time stamp for the next time synchronization.
 
-static DWORD EplTimerSynckCtrlGetNextAbsoluteTime (unsigned int uiTimerHdl_p, DWORD dwCurrentTime_p)
+\param  timerHdl_p          Timer handle
+\param  currentTime_p       Current time
+
+\return Next absolute time value.
+*/
+//------------------------------------------------------------------------------
+static UINT32 ctrlGetNextAbsoluteTime (UINT timerHdl_p, UINT32 currentTime_p)
 {
-DWORD   dwNextAbsoluteTime;
+    UINT32 nextAbsoluteTime;
 
-    switch (uiTimerHdl_p)
+    switch (timerHdl_p)
     {
         case TIMER_HDL_SYNC:
-        {
-            dwNextAbsoluteTime = dwCurrentTime_p + EplTimerSynckInstance_l.m_dwMeanTimeDiff;
+            nextAbsoluteTime = currentTime_p + instance_l.meanTimeDiff;
             break;
-        }
 
         case TIMER_HDL_LOSSOFSYNC:
-        {
-            dwNextAbsoluteTime = dwCurrentTime_p + EplTimerSynckInstance_l.m_dwConfiguredTimeDiff;
+            nextAbsoluteTime = currentTime_p + instance_l.configuredTimeDiff;
             break;
-        }
 
         default:
-        {
-            dwNextAbsoluteTime = 0;
+            nextAbsoluteTime = 0;
             break;
-        }
     }
 
-    return dwNextAbsoluteTime;
-
+    return nextAbsoluteTime;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Modify absolute timer
 
+This function modifies the timer's absolute timer value.
 
+\param  timerHdl_p      Timer handle
+\param  absoluteTime_p  Absolute time value
 
-/***************************************************************************/
-/*                                                                         */
-/*                                                                         */
-/*          S U B C L A S S  EplTimerSynckDrv                              */
-/*                                                                         */
-/*                                                                         */
-/***************************************************************************/
-//
-// Description: timer driver implementation
-//
-/***************************************************************************/
-
-#define TIMER_DRV_MIN_TIME_DIFF     500
-
-static inline unsigned int EplTimerSynckDrvFindShortestTimer(void);
-
-static void EplTimerSynckDrvConfigureShortestTimer();
-
-
-
-static tEplKernel EplTimerSynckDrvModifyTimerAbs(unsigned int uiTimerHdl_p,
-                                              DWORD        dwAbsoluteTime_p)
+\return The function returns a tEplKernel error code.
+*/
+//------------------------------------------------------------------------------
+static tEplKernel drvModifyTimerAbs(UINT timerHdl_p, UINT32 absoluteTime_p)
 {
-tEplKernel                  Ret = kEplSuccessful;
-tEplTimerSynckTimerInfo*    pTimerInfo;
+    tEplKernel  ret = kEplSuccessful;
+    tTimerInfo* pTimerInfo;
 
-    if (uiTimerHdl_p >= TIMER_COUNT)
+    if (timerHdl_p >= TIMER_COUNT)
     {
-        Ret = kEplTimerInvalidHandle;
+        ret = kEplTimerInvalidHandle;
         goto Exit;
     }
 
-    pTimerInfo = &EplTimerSynckInstance_l.m_aTimerInfo[uiTimerHdl_p];
-    pTimerInfo->m_dwAbsoluteTime = dwAbsoluteTime_p;
-    pTimerInfo->m_fEnabled = TRUE;
+    pTimerInfo = &instance_l.aTimerInfo[timerHdl_p];
+    pTimerInfo->absoluteTime = absoluteTime_p;
+    pTimerInfo->fEnable = TRUE;
 
-    EplTimerSynckDrvConfigureShortestTimer();
+    drvConfigureShortestTimer();
 
 Exit:
-    return Ret;
-
+    return ret;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Modify relative timer
 
-static tEplKernel EplTimerSynckDrvModifyTimerRel(unsigned int uiTimerHdl_p,
-                                                 int          iTimeAdjustment_p,
-                                                 DWORD*       pdwAbsoluteTime_p,
-                                                 BOOL*        pfAbsoluteTimeAlreadySet_p)
+This function modifies the timer's realtive timer value.
+
+\param  timerHdl_p                  Timer handle
+\param  timeAdjustment_p            Relative time adjustment
+\param  pAbsoluteTime_p             Pointer to the timer's absolute time
+\param  pfAbsoluteTimeAlreadySet_p  Some weird flag
+
+\return The function returns a tEplKernel error code.
+*/
+//------------------------------------------------------------------------------
+static tEplKernel drvModifyTimerRel(UINT timerHdl_p, INT timeAdjustment_p,
+        UINT32* pAbsoluteTime_p, BOOL* pfAbsoluteTimeAlreadySet_p)
 {
-tEplKernel                  Ret = kEplSuccessful;
-tEplTimerSynckTimerInfo*    pTimerInfo;
+    tEplKernel  ret = kEplSuccessful;
+    tTimerInfo* pTimerInfo;
 
-    if (uiTimerHdl_p >= TIMER_COUNT)
+    if (timerHdl_p >= TIMER_COUNT)
     {
-        Ret = kEplTimerInvalidHandle;
+        ret = kEplTimerInvalidHandle;
         goto Exit;
     }
 
-    pTimerInfo = &EplTimerSynckInstance_l.m_aTimerInfo[uiTimerHdl_p];
-    if (pTimerInfo->m_dwAbsoluteTime == *pdwAbsoluteTime_p)
+    pTimerInfo = &instance_l.aTimerInfo[timerHdl_p];
+    if (pTimerInfo->absoluteTime == *pAbsoluteTime_p)
     {
         *pfAbsoluteTimeAlreadySet_p = TRUE;
     }
@@ -964,263 +790,239 @@ tEplTimerSynckTimerInfo*    pTimerInfo;
         *pfAbsoluteTimeAlreadySet_p = FALSE;
     }
 
-    pTimerInfo->m_dwAbsoluteTime += iTimeAdjustment_p;
+    pTimerInfo->absoluteTime += timeAdjustment_p;
 
-    *pdwAbsoluteTime_p = pTimerInfo->m_dwAbsoluteTime;
-    pTimerInfo->m_fEnabled = TRUE;
+    *pAbsoluteTime_p = pTimerInfo->absoluteTime;
+    pTimerInfo->fEnable = TRUE;
 
-    EplTimerSynckDrvConfigureShortestTimer();
+    drvConfigureShortestTimer();
 
 Exit:
-    return Ret;
-
+    return ret;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Delete sync timer
 
+This function deletes the timer handle.
 
-static tEplKernel EplTimerSynckDrvDeleteTimer(unsigned int uiTimerHdl_p)
+\param  timerHdl_p  Timer handle
+
+\return The function returns a tEplKernel error code.
+*/
+//------------------------------------------------------------------------------
+static tEplKernel drvDeleteTimer(UINT timerHdl_p)
 {
-tEplKernel                  Ret = kEplSuccessful;
-tEplTimerSynckTimerInfo*    pTimerInfo;
+    tEplKernel  ret = kEplSuccessful;
+    tTimerInfo* pTimerInfo;
 
-    if (uiTimerHdl_p >= TIMER_COUNT)
+    if (timerHdl_p >= TIMER_COUNT)
     {
-        Ret = kEplTimerInvalidHandle;
+        ret = kEplTimerInvalidHandle;
         goto Exit;
     }
 
-    pTimerInfo = &EplTimerSynckInstance_l.m_aTimerInfo[uiTimerHdl_p];
-    pTimerInfo->m_fEnabled = FALSE;
+    pTimerInfo = &instance_l.aTimerInfo[timerHdl_p];
+    pTimerInfo->fEnable = FALSE;
 
-    EplTimerSynckDrvConfigureShortestTimer();
+    drvConfigureShortestTimer();
 
 Exit:
-    return Ret;
-
+    return ret;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Find shortest due timer
 
-static inline unsigned int EplTimerSynckDrvFindShortestTimer(void)
+This function searches for the next timer that shall trigger the interrupt.
+
+\return The function returns the next due timer handle.
+*/
+//------------------------------------------------------------------------------
+static UINT drvFindShortestTimer(void)
 {
-unsigned int                uiTargetTimerHdl;
-unsigned int                uiCurrentTimerHdl;
-tEplTimerSynckTimerInfo*    pTimerInfo;
-DWORD                       dwAbsoluteTime = 0;
+    UINT        targetTimerHdl;
+    UINT        currentTimerHdl;
+    tTimerInfo* pTimerInfo;
+    UINT32      absoluteTime = 0;
 
-    uiTargetTimerHdl = TIMER_HDL_INVALID;
+    targetTimerHdl = TIMER_HDL_INVALID;
 
-    for (pTimerInfo = &EplTimerSynckInstance_l.m_aTimerInfo[0],
-         uiCurrentTimerHdl = 0;
-         uiCurrentTimerHdl < TIMER_COUNT;
-         pTimerInfo++, uiCurrentTimerHdl++)
+    for (pTimerInfo = &instance_l.aTimerInfo[0],
+         currentTimerHdl = 0;
+         currentTimerHdl < TIMER_COUNT;
+         pTimerInfo++, currentTimerHdl++)
     {
-        if (pTimerInfo->m_fEnabled != FALSE)
+        if (pTimerInfo->fEnable != FALSE)
         {
-            if ((uiTargetTimerHdl == TIMER_HDL_INVALID)
-                || ((long)(pTimerInfo->m_dwAbsoluteTime - dwAbsoluteTime) < 0))
+            if ((targetTimerHdl == TIMER_HDL_INVALID) ||
+                ((LONG)(pTimerInfo->absoluteTime - absoluteTime) < 0))
             {
-                dwAbsoluteTime = pTimerInfo->m_dwAbsoluteTime;
-                uiTargetTimerHdl = (unsigned int)(pTimerInfo - &EplTimerSynckInstance_l.m_aTimerInfo[0]);
+                absoluteTime = pTimerInfo->absoluteTime;
+                targetTimerHdl = (UINT)(pTimerInfo - &instance_l.aTimerInfo[0]);
             }
         }
     }
 
-    return uiTargetTimerHdl;
+    return targetTimerHdl;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Configure shortest due timer
 
-static void EplTimerSynckDrvConfigureShortestTimer(void)
+This function configures the next due timer.
+*/
+//------------------------------------------------------------------------------
+static void drvConfigureShortestTimer(void)
 {
-unsigned int                uiNextTimerHdl;
-tEplTimerSynckTimerInfo*    pTimerInfo;
-DWORD                       dwTargetAbsoluteTime;
-DWORD                       dwCurrentTime;
+    UINT        nextTimerHdl;
+    tTimerInfo* pTimerInfo;
+    UINT32      targetAbsoluteTime;
+    UINT32      currentTime;
 
-    EplTimerSynckDrvCompareInterruptDisable();
+    openmac_timerIrqDisable(HWTIMER_SYNC);
 
-    uiNextTimerHdl = EplTimerSynckDrvFindShortestTimer();
-    if (uiNextTimerHdl != TIMER_HDL_INVALID)
+    nextTimerHdl = drvFindShortestTimer();
+    if (nextTimerHdl != TIMER_HDL_INVALID)
     {
-        pTimerInfo = &EplTimerSynckInstance_l.m_aTimerInfo[uiNextTimerHdl];
+        pTimerInfo = &instance_l.aTimerInfo[nextTimerHdl];
 
-        EplTimerSynckInstance_l.m_uiActiveTimerHdl = uiNextTimerHdl;
-        dwTargetAbsoluteTime = pTimerInfo->m_dwAbsoluteTime;
+        instance_l.activeTimerHdl = nextTimerHdl;
+        targetAbsoluteTime = pTimerInfo->absoluteTime;
 
-        dwCurrentTime = EplTimerSynckDrvGetTimeValue();
-        if ((long)(dwTargetAbsoluteTime - dwCurrentTime) < TIMER_DRV_MIN_TIME_DIFF)
+        currentTime = openmac_timerGetTimeValue(HWTIMER_SYNC);
+        if ((LONG)(targetAbsoluteTime - currentTime) < TIMER_DRV_MIN_TIME_DIFF)
         {
-            dwTargetAbsoluteTime = dwCurrentTime + TIMER_DRV_MIN_TIME_DIFF;
+            targetAbsoluteTime = currentTime + TIMER_DRV_MIN_TIME_DIFF;
         }
 
-        EplTimerSynckDrvSetCompareValue(dwTargetAbsoluteTime);
+        openmac_timerSetCompareValue(HWTIMER_SYNC, targetAbsoluteTime);
 
         // enable timer
-        EplTimerSynckDrvCompareInterruptEnable();
+        openmac_timerIrqEnable(HWTIMER_SYNC, 0);
     }
     else
     {
-        EplTimerSynckDrvSetCompareValue(0);
+        openmac_timerSetCompareValue(HWTIMER_SYNC, 0);
 
-        EplTimerSynckInstance_l.m_uiActiveTimerHdl = TIMER_HDL_INVALID;
+        instance_l.activeTimerHdl = TIMER_HDL_INVALID;
     }
 }
 
+#ifdef TIMER_USE_EXT_SYNC_INT
+//------------------------------------------------------------------------------
+/**
+\brief  Calculate external sync irq value
 
-//---------------------------------------------------------------------------
-// const defines
-//---------------------------------------------------------------------------
-
-#define TIMERCMP_REG_OFF_CTRL                       4
-#define TIMERCMP_REG_OFF_CTRL_COMPARE_PDI          12
-#define TIMERCMP_REG_OFF_CMP_VAL                    0
-#define TIMERCMP_REG_OFF_CMP_VAL_COMPARE_PDI        8
-#define TIMERCMP_REG_OFF_STATUS                     4
-#define TIMERCMP_REG_OFF_TIME_VAL                   0
-
-
-static inline void EplTimerSynckDrvCompareInterruptDisable (void)
+This function calculates the external sync timer value triggering the interrupt.
+*/
+//------------------------------------------------------------------------------
+static void drvCalcExtSyncIrqValue (void)
 {
-    TSYN_WR32( EPL_TIMER_SYNC_BASE, TIMERCMP_REG_OFF_CTRL, 0 );
-}
+    tTimerInfo*     pTimerInfo;
+    UINT32          targetAbsoluteTime;
+    static UINT32   cycleCnt = 0;
 
-
-
-static inline void EplTimerSynckDrvCompareInterruptEnable (void)
-{
-    TSYN_WR32( EPL_TIMER_SYNC_BASE, TIMERCMP_REG_OFF_CTRL, 1 );
-
-}
-
-static inline void EplTimerSynckDrvSetCompareValue (DWORD dwVal)
-{
-    TSYN_WR32( EPL_TIMER_SYNC_BASE, TIMERCMP_REG_OFF_CMP_VAL, dwVal );
-}
-
-static inline DWORD EplTimerSynckDrvGetTimeValue (void)
-{
-    return TSYN_RD32( EPL_TIMER_SYNC_BASE, TIMERCMP_REG_OFF_TIME_VAL );
-}
-
-#ifdef EPL_TIMER_USE_COMPARE_PDI_INT
-static inline void EplTimerSynckDrvCompareTogPdiInterruptDisable (void)
-{
-    TSYN_WR32( EPL_TIMER_SYNC_BASE, TIMERCMP_REG_OFF_CTRL_COMPARE_PDI, 0 );
-}
-
-static inline void EplTimerSynckDrvCompareTogPdiInterruptEnable (void)
-{
-    TSYN_WR32( EPL_TIMER_SYNC_BASE, TIMERCMP_REG_OFF_CTRL_COMPARE_PDI, 1 );
-
-}
-
-static inline void EplTimerSynckDrvSetCompareTogPdiValue (DWORD dwVal)
-{
-    TSYN_WR32( EPL_TIMER_SYNC_BASE, TIMERCMP_REG_OFF_CMP_VAL_COMPARE_PDI, dwVal );
-}
-
-static void EplTimerSynckDrvCalcCompareTogPdiValue (void)
-{
-    tEplTimerSynckTimerInfo*    pTimerInfo;
-    DWORD                       dwTargetAbsoluteTime;
-    static WORD                 wCycleCnt = 0;
-
-    if ((++wCycleCnt == EplTimerSynckInstance_l.m_wSyncIntCycle))
+    if ((++cycleCnt == instance_l.syncIntCycle))
     {
         // get absolute time from sync timer
-        pTimerInfo = &EplTimerSynckInstance_l.m_aTimerInfo[TIMER_HDL_SYNC];
-        dwTargetAbsoluteTime = pTimerInfo->m_dwAbsoluteTime;
+        pTimerInfo = &instance_l.aTimerInfo[TIMER_HDL_SYNC];
+        targetAbsoluteTime = pTimerInfo->absoluteTime;
 
-        EplTimerSynckDrvSetCompareTogPdiValue( dwTargetAbsoluteTime -
-                EplTimerSynckInstance_l.m_dwConfiguredTimeDiff +    // minus one cycle
-                EplTimerSynckInstance_l.m_dwAdvanceShift);      // plus sync shift
-        wCycleCnt = 0;
+        openmac_timerSetCompareValue(HWTIMER_EXT_SYNC,
+                targetAbsoluteTime -
+                instance_l.meanTimeDiff +    // minus one cycle
+                instance_l.advanceShift);      // plus sync shift
+        cycleCnt = 0;
     }
-    else if (wCycleCnt > EplTimerSynckInstance_l.m_wSyncIntCycle)
+    else if (cycleCnt > instance_l.syncIntCycle)
     {
-         wCycleCnt = 0;
+         cycleCnt = 0;
     }
 }
-#endif //EPL_TIMER_USE_COMPARE_PDI_INT
+#endif //TIMER_USE_EXT_SYNC_INT
 
+//------------------------------------------------------------------------------
+/**
+\brief  Interrupt handler
 
-static void EplTimerSynckDrvInterruptHandler (void* pArg_p
-#ifndef ALT_ENHANCED_INTERRUPT_API_PRESENT
-        , DWORD dwInt_p
-#endif
-        )
+This function is invoked by the openMAC HW sync timer interrupt.
+*/
+//------------------------------------------------------------------------------
+static void drvInterruptHandler(void* pArg_p)
 {
-unsigned int                uiTimerHdl;
-tEplTimerSynckTimerInfo*    pTimerInfo;
-unsigned int                uiNextTimerHdl;
+    UINT        timerHdl;
+    UINT        nextTimerHdl;
+    tTimerInfo* pTimerInfo;
 
     BENCHMARK_MOD_24_SET(4);
 
-    uiTimerHdl = EplTimerSynckInstance_l.m_uiActiveTimerHdl;
-    if (uiTimerHdl < TIMER_COUNT)
+    timerHdl = instance_l.activeTimerHdl;
+    if (timerHdl < TIMER_COUNT)
     {
-        pTimerInfo = &EplTimerSynckInstance_l.m_aTimerInfo[uiTimerHdl];
-        pTimerInfo->m_dwAbsoluteTime = EplTimerSynckCtrlGetNextAbsoluteTime(uiTimerHdl, pTimerInfo->m_dwAbsoluteTime);
+        pTimerInfo = &instance_l.aTimerInfo[timerHdl];
+        pTimerInfo->absoluteTime = ctrlGetNextAbsoluteTime(timerHdl, pTimerInfo->absoluteTime);
 
         // execute the sync if it will elapse in a very short moment
         // to give the sync event the highest priority.
-        uiNextTimerHdl = EplTimerSynckDrvFindShortestTimer();
-        if ((uiNextTimerHdl != uiTimerHdl)
-            && (uiNextTimerHdl == TIMER_HDL_SYNC))
+        nextTimerHdl = drvFindShortestTimer();
+        if ((nextTimerHdl != timerHdl) &&
+            (nextTimerHdl == TIMER_HDL_SYNC))
         {
-            pTimerInfo = &EplTimerSynckInstance_l.m_aTimerInfo[uiTimerHdl];
+            pTimerInfo = &instance_l.aTimerInfo[timerHdl];
 
-            if ((pTimerInfo->m_fEnabled != FALSE)
-                && ((long)(pTimerInfo->m_dwAbsoluteTime - EplTimerSynckDrvGetTimeValue()) < TIMER_DRV_MIN_TIME_DIFF))
+            if ((pTimerInfo->fEnable != FALSE) &&
+                ((LONG)(pTimerInfo->absoluteTime - openmac_timerGetTimeValue(HWTIMER_SYNC)) < TIMER_DRV_MIN_TIME_DIFF))
             {
-                pTimerInfo->m_dwAbsoluteTime = EplTimerSynckCtrlGetNextAbsoluteTime(uiNextTimerHdl, pTimerInfo->m_dwAbsoluteTime);
+                pTimerInfo->absoluteTime = ctrlGetNextAbsoluteTime(nextTimerHdl, pTimerInfo->absoluteTime);
 
-                if (EplTimerSynckInstance_l.m_pfnCbSync != NULL)
+                if (instance_l.pfnSyncCb != NULL)
                 {
-                    EplTimerSynckInstance_l.m_pfnCbSync();
+                    instance_l.pfnSyncCb();
                 }
             }
         }
 
-        switch (uiTimerHdl)
+        switch (timerHdl)
         {
             case TIMER_HDL_SYNC:
             {
-                #ifdef EPL_TIMER_USE_COMPARE_PDI_INT
+                #ifdef TIMER_USE_EXT_SYNC_INT
                     BENCHMARK_MOD_24_SET(0);
-                    if(EplTimerSynckInstance_l.m_wCompareTogPdiIntEnabled == TRUE)
+                    if(instance_l.fExtSyncEnable != FALSE)
                     {
-                        EplTimerSynckDrvCalcCompareTogPdiValue();
+                        drvCalcExtSyncIrqValue();
                     }
                     BENCHMARK_MOD_24_RESET(0);
-                #endif //EPL_TIMER_USE_COMPARE_PDI_INT
+                #endif //TIMER_USE_EXT_SYNC_INT
 
-                if (EplTimerSynckInstance_l.m_pfnCbSync != NULL)
+                if (instance_l.pfnSyncCb != NULL)
                 {
-                    EplTimerSynckInstance_l.m_pfnCbSync();
+                    instance_l.pfnSyncCb();
                 }
                 break;
             }
-
             case TIMER_HDL_LOSSOFSYNC:
             {
-                if (EplTimerSynckInstance_l.m_pfnCbLossOfSync != NULL)
+                if (instance_l.pfnLossOfSyncCb != NULL)
                 {
-                    EplTimerSynckInstance_l.m_pfnCbLossOfSync();
+                    instance_l.pfnLossOfSyncCb();
                 }
                 break;
             }
-
 #if (EPL_TIMER_SYNC_SECOND_LOSS_OF_SYNC != FALSE)
             case TIMER_HDL_LOSSOFSYNC2:
             {
-                if (EplTimerSynckInstance_l.m_pfnCbLossOfSync2 != NULL)
+                if (instance_l.pfnLossOfSync2Cb != NULL)
                 {
-                    EplTimerSynckInstance_l.m_pfnCbLossOfSync2();
+                    instance_l.pfnLossOfSync2Cb();
                 }
                 break;
             }
 #endif
-
             default:
             {
                 break;
@@ -1228,10 +1030,9 @@ unsigned int                uiNextTimerHdl;
         }
     }
 
-    EplTimerSynckDrvConfigureShortestTimer();
+    drvConfigureShortestTimer();
 
     BENCHMARK_MOD_24_RESET(4);
-    return;
-
 }
 
+///\}

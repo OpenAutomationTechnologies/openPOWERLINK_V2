@@ -260,6 +260,10 @@
     #define OPLK_ATOMIC_INIT(ignore)    ((void)0)
 #endif
 
+#ifndef TIME_STAMP_T
+    #define TIME_STAMP_T                UINT32
+#endif
+
 #define EPL_TGT_INTMASK_ETH     0x0001  // ethernet interrupt
 #define EPL_TGT_INTMASK_DMA     0x0002  // DMA interrupt
 
@@ -267,6 +271,9 @@
 // typedef
 //---------------------------------------------------------------------------
 
+typedef struct {
+    TIME_STAMP_T timeStamp;
+} tEplTgtTimeStamp;
 
 //---------------------------------------------------------------------------
 // function prototypes
