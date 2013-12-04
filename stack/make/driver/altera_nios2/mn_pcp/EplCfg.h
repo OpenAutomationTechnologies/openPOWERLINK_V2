@@ -129,7 +129,7 @@ The Data Link Layer (DLL) defines determine the POWERLINK DLL module.
     ///< support PRes packet ready after SoA (EDRV_FAST_TXFRAMES necessary)
 #define EPL_DLL_PRES_FILTER_COUNT           3
     ///< max. supported PRes packet filters (for specific nodes)
-#define EPL_DLL_DISABLE_DEFERRED_RXFRAME_RELEASE    TRUE
+#define DLL_DEFERRED_RXFRAME_RELEASE_ISOCHRONOUS    FALSE
     ///< disable deferred RX frames if Edrv does not support it
 #define EPL_DLL_PRES_CHAINING_MN            TRUE
     ///< support PRes-Chaining (PRC) for MN

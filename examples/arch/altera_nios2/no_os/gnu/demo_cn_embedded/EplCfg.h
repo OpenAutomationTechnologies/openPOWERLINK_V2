@@ -163,7 +163,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define EPL_DLL_PRES_CHAINING_CN        TRUE
 
 // Disable deferred release of rx-buffers until Edrv for openMAC supports it
-#define EPL_DLL_DISABLE_DEFERRED_RXFRAME_RELEASE    TRUE
+#define DLL_DEFERRED_RXFRAME_RELEASE_ISOCHRONOUS    FALSE
 
 
 // Asynchronous transmit buffer for NMT frames in bytes

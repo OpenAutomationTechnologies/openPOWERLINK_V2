@@ -194,7 +194,7 @@
 
 #if (CONFIG_EDRV == 8139) || (CONFIG_EDRV == 8255)
 // Disable deferred release of rx-buffers until Edrv8139/Edrv8255x supports it
-#define EPL_DLL_DISABLE_DEFERRED_RXFRAME_RELEASE    TRUE
+#define DLL_DEFERRED_RXFRAME_RELEASE_ISOCHRONOUS    FALSE
 #endif
 
 // =========================================================================

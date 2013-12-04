@@ -457,7 +457,7 @@ tEplKernel dllk_setAsndServiceIdFilter(tDllAsndServiceId serviceId_p,
 }
 
 
-#if EPL_DLL_DISABLE_DEFERRED_RXFRAME_RELEASE == FALSE
+#if DLL_DEFERRED_RXFRAME_RELEASE_ISOCHRONOUS != FALSE || DLL_DEFERRED_RXFRAME_RELEASE_ASYNCHRONOUS != FALSE
 //------------------------------------------------------------------------------
 /**
 \brief  Release RX buffer frame in Edrv
