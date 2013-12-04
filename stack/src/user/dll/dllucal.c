@@ -99,7 +99,7 @@ static tDlluCalInstance     instance_l;
 
 static tEplKernel SetAsndServiceIdFilter(tDllAsndServiceId ServiceId_p,
                                          tDllAsndFilter Filter_p);
-
+static tEplKernel HandleRxAsndFrame(tFrameInfo* pFrameInfo_p);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -189,7 +189,7 @@ tEplKernel dllucal_exit(void)
 
 The function processes an asynchronous frame event
 
-\param  pEvent_p				Event to process
+\param  pEvent_p               Event to process
 
 \return The function returns a tEplKernel error code.
 
@@ -198,38 +198,26 @@ The function processes an asynchronous frame event
 //------------------------------------------------------------------------------
 tEplKernel dllucal_process(tEplEvent * pEvent_p)
 {
-    tEplKernel      ret = kEplSuccessful;
-    tEplMsgType     msgType;
-    UINT            asndServiceId;
-    tFrameInfo      frameInfo;
+    tEplKernel   ret = kEplSuccessful;
+    tFrameInfo   *pFrameInfo = NULL;
 
     if (pEvent_p->m_EventType == kEplEventTypeAsndRx)
     {
-        frameInfo.pFrame = (tEplFrame*) pEvent_p->m_pArg;
-        frameInfo.frameSize = pEvent_p->m_uiSize;
+#if DLL_DEFERRED_RXFRAME_RELEASE_ASYNCHRONOUS == FALSE
+        tFrameInfo   FrameInfo;
 
-        msgType = (tEplMsgType)AmiGetByteFromLe(&frameInfo.pFrame->m_le_bMessageType);
-        if (msgType != kEplMsgTypeAsnd)
-        {
-            ret = kEplInvalidOperation;
-            goto Exit;
-        }
+        FrameInfo.pFrame = (tEplFrame*) pEvent_p->m_pArg;
+        FrameInfo.frameSize = pEvent_p->m_uiSize;
+        pFrameInfo = &FrameInfo;
+#else
+        pFrameInfo = (tFrameInfo*) pEvent_p->m_pArg;
+#endif
 
-        asndServiceId = (UINT) AmiGetByteFromLe(&frameInfo.pFrame->m_Data.m_Asnd.m_le_bServiceId);
-        if (asndServiceId < DLL_MAX_ASND_SERVICE_ID)
-        {   // ASnd service ID is valid
-            if (instance_l.apfnDlluCbAsnd[asndServiceId] != NULL)
-            {   // handler was registered
-                ret = instance_l.apfnDlluCbAsnd[asndServiceId](&frameInfo);
-            }
-        }
+        ret = HandleRxAsndFrame(pFrameInfo);
     }
     else
-    {
         ret = kEplInvalidEvent;
-    }
 
-Exit:
     return ret;
 }
 
@@ -583,3 +571,57 @@ static tEplKernel SetAsndServiceIdFilter(tDllAsndServiceId serviceId_p,
     return ret;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Forward Asnd frame to desired user space module
+
+\param  pFrameInfo_p             Pointer to the frame information structure
+
+\return The function returns a tEplKernel error code.
+*/
+//------------------------------------------------------------------------------
+static tEplKernel HandleRxAsndFrame(tFrameInfo *pFrameInfo_p)
+{
+    tEplMsgType     msgType;
+    unsigned int    asndServiceId;
+    tEplKernel      ret = kEplSuccessful;
+#if DLL_DEFERRED_RXFRAME_RELEASE_ASYNCHRONOUS != FALSE
+    tEplKernel      eventRet;
+    tEplEvent       event;
+#endif
+
+    msgType = (tEplMsgType)AmiGetByteFromLe(&pFrameInfo_p->pFrame->m_le_bMessageType);
+    if (msgType != kEplMsgTypeAsnd)
+    {
+        ret = kEplInvalidOperation;
+        goto Exit;
+    }
+
+    asndServiceId = (unsigned int) AmiGetByteFromLe(&pFrameInfo_p->pFrame->m_Data.m_Asnd.m_le_bServiceId);
+    if (asndServiceId < DLL_MAX_ASND_SERVICE_ID)
+    {   // ASnd service ID is valid
+        if (instance_l.apfnDlluCbAsnd[asndServiceId] != NULL)
+        {   // handler was registered
+            ret = instance_l.apfnDlluCbAsnd[asndServiceId](pFrameInfo_p);
+        }
+    }
+
+Exit:
+#if DLL_DEFERRED_RXFRAME_RELEASE_ASYNCHRONOUS != FALSE
+    // call free function for Asnd frame
+    event.m_EventSink = kEplEventSinkDllkCal;
+    event.m_EventType = kEplEventTypeReleaseRxFrame;
+    event.m_uiSize    = sizeof(tFrameInfo);
+    event.m_pArg      = pFrameInfo_p;
+
+    eventRet = eventu_postEvent(&event);
+
+    if(eventRet != kEplSuccessful)
+    {
+        // Event post error is returned
+        ret = eventRet;
+    }
+#endif
+
+    return ret;
+}

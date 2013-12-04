@@ -85,7 +85,7 @@ static tEplKernel processReceivedPres(tFrameInfo* pFrameInfo_p, tNmtState nmtSta
 static tEplKernel processReceivedSoc(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtState_p);
 static tEplKernel processReceivedSoa(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtState_p);
 static tEplKernel processReceivedAsnd(tFrameInfo* pFrameInfo_p, tEdrvRxBuffer* pRxBuffer_p,
-                                      tNmtState nmtState_p);
+                                      tNmtState nmtState_p, tEdrvReleaseRxBuffer* pReleaseRxBuffer_p);
 static tEplKernel forwardRpdo(tFrameInfo * pFrameInfo_p);
 
 //============================================================================//
@@ -230,7 +230,7 @@ tEdrvReleaseRxBuffer dllk_processFrameReceived(tEdrvRxBuffer * pRxBuffer_p)
 
         case kEplMsgTypeAsnd:
             nmtEvent = kNmtEventDllCeAsnd;
-            ret = processReceivedAsnd(&frameInfo, pRxBuffer_p, nmtState);
+            ret = processReceivedAsnd(&frameInfo, pRxBuffer_p, nmtState, &releaseRxBuffer);
             if (ret != kEplSuccessful)
                 goto Exit;
             break;
@@ -2063,12 +2063,15 @@ The function processes a received ASnd frame.
 \param  pFrameInfo_p        Pointer to frame information.
 \param  pRxBuffer_p         Pointer to RxBuffer structure of received frame.
 \param  nmtState_p          NMT state of the local node.
+\param  pReleaseRxBuffer_p  Pointer to buffer release flag. The function must
+                            set this flag to determine if the RxBuffer could be
+                            released immediately.
 
 \return The function returns a tEplKernel error code.
 */
 //------------------------------------------------------------------------------
 static tEplKernel processReceivedAsnd(tFrameInfo* pFrameInfo_p, tEdrvRxBuffer* pRxBuffer_p,
-                                      tNmtState nmtState_p)
+                                      tNmtState nmtState_p, tEdrvReleaseRxBuffer* pReleaseRxBuffer_p)
 {
     tEplKernel      ret = kEplSuccessful;
     tEplFrame*      pFrame;
@@ -2186,7 +2189,12 @@ static tEplKernel processReceivedAsnd(tFrameInfo* pFrameInfo_p, tEdrvRxBuffer* p
         {   // ASnd service ID is registered
             // forward frame via async receive FIFO to userspace
             ret = dllkcal_asyncFrameReceived(pFrameInfo_p);
-            if (ret != kEplSuccessful)
+            if(ret == kEplReject)
+            {
+                *pReleaseRxBuffer_p = kEdrvReleaseRxBufferLater;
+                ret = kEplSuccessful;
+            }
+            else if (ret != kEplSuccessful)
                 goto Exit;
         }
         else if (dllkInstance_g.aAsndFilter[asndServiceId] == kDllAsndFilterLocal)
@@ -2197,7 +2205,12 @@ static tEplKernel processReceivedAsnd(tFrameInfo* pFrameInfo_p, tEdrvRxBuffer* p
             {   // ASnd frame is intended for us
                 // forward frame via async receive FIFO to userspace
                 ret = dllkcal_asyncFrameReceived(pFrameInfo_p);
-                if (ret != kEplSuccessful)
+                if(ret == kEplReject)
+                {
+                    *pReleaseRxBuffer_p = kEdrvReleaseRxBufferLater;
+                    ret = kEplSuccessful;
+                }
+                else if (ret != kEplSuccessful)
                     goto Exit;
             }
         }
