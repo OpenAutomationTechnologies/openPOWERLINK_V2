@@ -42,6 +42,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #include <global.h>
 #include <Epl.h>
+#include <kernel/dllkfilter.h>
 
 #include <edrv.h>
 #include <openmac.h>
@@ -141,6 +142,9 @@ typedef struct
     tEdrv2ndTxQueue     txQueue[EDRV_MAX_TX_BUF2];
     INT                 txQueueWriteIndex;
     INT                 txQueueReadIndex;
+#endif
+#if DLL_DEFERRED_RXFRAME_RELEASE_ASYNCHRONOUS != FALSE
+    OMETH_HOOK_H        pRxAsndHookInst;
 #endif
 } tEdrvInstance;
 
@@ -242,6 +246,17 @@ tEplKernel EdrvInit(tEdrvInitParam* pEdrvInitParam_p)
         ret = kEplNoResource;
         goto Exit;
     }
+
+#if DLL_DEFERRED_RXFRAME_RELEASE_ASYNCHRONOUS != FALSE
+    // initialize Rx hook for Asnd frames with pending allowed
+    instance_l.pRxAsndHookInst = omethHookCreate(instance_l.pMacInst, EdrvRxHook, EDRV_ASND_DEFFERRED_RX_BUFFERS);
+    if(instance_l.pRxAsndHookInst == NULL)
+    {
+        DEBUG_LVL_ERROR_TRACE("%s() Rx hook creation for Asnd frames failed!\n", __func__);
+        ret = kEplNoResource;
+        goto Exit;
+    }
+#endif
 
     ret = initRxFilters();
     if(ret != kEplSuccessful)
@@ -847,6 +862,35 @@ tEplKernel EdrvTxMsgStart(tEdrvTxBuffer* pBuffer_p)
     return kEplSuccessful;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Release Rx buffer
+
+This function releases a late release Rx buffer.
+
+\param  pRxBuffer_p     Rx buffer to be released
+
+\return The function returns a tEplKernel error code.
+
+\ingroup module_edrv
+*/
+//------------------------------------------------------------------------------
+tEplKernel  EdrvReleaseRxBuffer (tEdrvRxBuffer* pRxBuffer_p)
+{
+    tEplKernel          ret = kEplSuccessful;
+    ometh_packet_typ*   pPacket = NULL;
+
+    pPacket = GET_TYPE_BASE(ometh_packet_typ, data, pRxBuffer_p->m_pbBuffer);
+    pPacket->length = pRxBuffer_p->m_uiRxMsgLen;
+
+    if(pPacket->length != 0)
+        omethPacketFree(pPacket);
+    else
+        ret = kEplEdrvInvalidRxBuf;
+
+    return ret;
+}
+
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
 //============================================================================//
@@ -908,10 +952,11 @@ This function initializes all Rx filters and disables them.
 //------------------------------------------------------------------------------
 static tEplKernel initRxFilters(void)
 {
-    tEplKernel  ret = kEplSuccessful;
-    INT         i;
-    UINT8       aMask[31];
-    UINT8       aValue[31];
+    tEplKernel      ret = kEplSuccessful;
+    INT             i;
+    UINT8           aMask[31];
+    UINT8           aValue[31];
+    OMETH_HOOK_H    pHook;
 
     // initialize the filters, so that they won't match any normal Ethernet frame
     EPL_MEMSET(aMask, 0, sizeof(aMask));
@@ -920,9 +965,23 @@ static tEplKernel initRxFilters(void)
 
     for (i = 0; i < EDRV_MAX_FILTERS; i++)
     {
-        instance_l.apRxFilterInst[i] = omethFilterCreate(instance_l.pRxHookInst, (void*) i, aMask, aValue);
+        // Assign filters to corresponding hooks
+        switch(i)
+        {
+#if DLL_DEFERRED_RXFRAME_RELEASE_ASYNCHRONOUS != FALSE
+            case DLLK_FILTER_ASND:
+                pHook = instance_l.pRxAsndHookInst;
+                break;
+#endif
+            default:
+                pHook = instance_l.pRxHookInst;
+                break;
+        }
+
+        instance_l.apRxFilterInst[i] = omethFilterCreate(pHook, (void*) i, aMask, aValue);
         if (instance_l.apRxFilterInst[i] == 0)
         {
+            DEBUG_LVL_ERROR_TRACE("%s() Creating filter %d failed\n", __func__, i);
             ret = kEplNoResource;
             goto Exit;
         }
@@ -1131,15 +1190,19 @@ This function is called by omethlib in Rx interrupt context.
 \param  pPacket_p   Received packet
 \param  pFct_p      Function pointer to free function
 
-\return The function returns a tEplKernel error code.
+\return The function returns an Rx buffer release command.
+\retval 0           Packet buffer \p pPacket_p is deferred
+\retval -1          Packet buffer \p pPacket_p can be freed immediately
 */
 //------------------------------------------------------------------------------
 static INT EdrvRxHook(void* pArg_p, ometh_packet_typ* pPacket_p, OMETH_BUF_FREE_FCT* pfnFree_p)
 {
-    tEdrvRxBuffer       rxBuffer;
-    tEplTgtTimeStamp    timeStamp;
+    INT                     ret;
+    tEdrvRxBuffer           rxBuffer;
+    tEdrvReleaseRxBuffer    releaseRxBuffer;
+    tEplTgtTimeStamp        timeStamp;
 #if EDRV_MAX_AUTO_RESPONSES > 0
-    UINT                txRespIndex = (UINT)pArg_p;
+    UINT                    txRespIndex = (UINT)pArg_p;
 #endif
     UNUSED_PARAMETER(pfnFree_p);
 
@@ -1153,7 +1216,13 @@ static INT EdrvRxHook(void* pArg_p, ometh_packet_typ* pPacket_p, OMETH_BUF_FREE_
     // memory range.
     openmac_invalidateDataCache((UINT8*)pPacket_p, pPacket_p->length);
 
-    instance_l.initParam.m_pfnRxHandler(&rxBuffer); //pass frame to Powerlink Stack
+    releaseRxBuffer = instance_l.initParam.m_pfnRxHandler(&rxBuffer); //pass frame to Powerlink Stack
+
+    if(releaseRxBuffer == kEdrvReleaseRxBufferLater)
+        ret = 0; // Packet is deferred, openMAC may not use this buffer!
+    else
+        ret = -1; // Packet processing is done, returns to openMAC again
+
 #if EDRV_MAX_AUTO_RESPONSES > 0
     if (instance_l.apTxBuffer[txRespIndex] != NULL)
     {   // filter with auto-response frame triggered
@@ -1167,7 +1236,7 @@ static INT EdrvRxHook(void* pArg_p, ometh_packet_typ* pPacket_p, OMETH_BUF_FREE_
     }
 #endif
 
-    return 0;
+    return ret;
 }
 
 ///\}

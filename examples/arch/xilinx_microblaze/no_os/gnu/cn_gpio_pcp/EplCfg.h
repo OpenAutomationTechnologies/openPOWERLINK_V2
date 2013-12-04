@@ -125,6 +125,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // openMAC supports auto-response
 #define EDRV_AUTO_RESPONSE              TRUE
 
+#define EDRV_ASND_DEFFERRED_RX_BUFFERS  6   ///< Number of deferred Rx buffers
 
 // increase the number of Tx buffers, because we are master
 // and need one Tx buffer for each PReq and CN
@@ -161,9 +162,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // CN supports PRes Chaining
 #define EPL_DLL_PRES_CHAINING_CN        TRUE
 
-// Disable deferred release of rx-buffers until Edrv for openMAC supports it
+// Disable isochronous late release
 #define DLL_DEFERRED_RXFRAME_RELEASE_ISOCHRONOUS    FALSE
 
+// Enable late release for asynchronous frames being processed in background
+#define DLL_DEFERRED_RXFRAME_RELEASE_ASYNCHRONOUS   TRUE
 
 // Asynchronous transmit buffer for NMT frames in bytes
 #define DLLCAL_BUFFER_SIZE_TX_NMT           4096
