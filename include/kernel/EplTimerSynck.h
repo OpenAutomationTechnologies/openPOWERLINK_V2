@@ -113,5 +113,8 @@ tEplKernel PUBLIC EplTimerSynckTriggerAtTimeStamp(tEplTgtTimeStamp* pTimeStamp_p
 
 tEplKernel PUBLIC EplTimerSynckStopSync(void);
 
+void PUBLIC EplTimerSynckExtSyncIrqEnable (DWORD wSyncIntCycle_p,
+                                                DWORD dwPulseWidthNs_p);
+void PUBLIC EplTimerSynckExtSyncIrqDisable (void);
 
 #endif  // #ifndef _EPLTIMERSYNCK_H_
