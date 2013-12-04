@@ -1645,7 +1645,7 @@ static tEplKernel receiveCb(tSdoConHdl conHdl_p, tAsySdoSeq* pSdoSeqData_p,
         EnterCriticalSection(sdoSeqInstance_l.pCriticalSectionReceive);
 #endif
 
-        EPL_DBGLVL_SDO_TRACE("Handle: 0x%x , First Databyte 0x%x\n", ConHdl_p, ((BYTE*)pSdoSeqData_p)[0]);
+        EPL_DBGLVL_SDO_TRACE("Handle: 0x%x , First Databyte 0x%x\n", conHdl_p, ((BYTE*)pSdoSeqData_p)[0]);
 
         // search control structure for this connection
         pSdoSeqCon = &sdoSeqInstance_l.aSdoSeqCon[count];
