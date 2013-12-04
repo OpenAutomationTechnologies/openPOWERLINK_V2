@@ -130,7 +130,7 @@
 //#define EDRV_USED_ETH_CTRL                    1
 
 // Disable deferred release of rx-buffers
-#define EPL_DLL_DISABLE_DEFERRED_RXFRAME_RELEASE    TRUE
+#define DLL_DEFERRED_RXFRAME_RELEASE_ISOCHRONOUS    FALSE
 
 #define EDRV_USE_DIAGNOSTICS                    TRUE
 #define EDRV_CYCLIC_USE_DIAGNOSTICS             FALSE

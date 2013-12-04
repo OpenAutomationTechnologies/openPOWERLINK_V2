@@ -131,7 +131,7 @@ tEplKernel dllk_setAsndServiceIdFilter(tDllAsndServiceId ServiceId_p, tDllAsndFi
 void       dllk_regRpdoHandler(tDllkCbProcessRpdo pfnDllkCbProcessRpdo_p);
 void       dllk_regTpdoHandler(tDllkCbProcessTpdo pfnDllkCbProcessTpdo_p);
 tEplSyncCb dllk_regSyncHandler(tEplSyncCb pfnCbSync_p);
-#if EPL_DLL_DISABLE_DEFERRED_RXFRAME_RELEASE == FALSE
+#if DLL_DEFERRED_RXFRAME_RELEASE_ISOCHRONOUS != FALSE || DLL_DEFERRED_RXFRAME_RELEASE_ASYNCHRONOUS != FALSE
 tEplKernel dllk_releaseRxFrame(tEplFrame* pFrame_p, UINT uiFrameSize_p);
 #endif
 

@@ -224,7 +224,7 @@
 #endif
 
 // Disable deferred release of rx-buffers until EdrvPcap supports it
-#define EPL_DLL_DISABLE_DEFERRED_RXFRAME_RELEASE    TRUE
+#define DLL_DEFERRED_RXFRAME_RELEASE_ISOCHRONOUS    FALSE
 
 
 // =========================================================================

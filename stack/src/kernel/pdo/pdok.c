@@ -467,7 +467,7 @@ tEplKernel pdok_processRxPdo(tEplFrame* pFrame_p, UINT frameSize_p)
     }
 
 Exit:
-#if EPL_DLL_DISABLE_DEFERRED_RXFRAME_RELEASE == FALSE
+#if DLL_DEFERRED_RXFRAME_RELEASE_ISOCHRONOUS != FALSE
     dllk_releaseRxFrame(pFrame_p, frameSize_p);
     // $$$ return value?
 #endif
