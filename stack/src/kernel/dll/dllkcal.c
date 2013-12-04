@@ -296,6 +296,10 @@ tEplKernel dllkcal_process(tEplEvent* pEvent_p)
     tDllNodeOpParam*            pNodeOpParam;
 #endif
 
+#if DLL_DEFERRED_RXFRAME_RELEASE_ISOCHRONOUS != FALSE || DLL_DEFERRED_RXFRAME_RELEASE_ASYNCHRONOUS != FALSE
+    tFrameInfo* pFrameInfo;
+#endif
+
     switch (pEvent_p->m_EventType)
     {
         case kEplEventTypeDllkServFilter:
@@ -346,6 +350,13 @@ tEplKernel dllkcal_process(tEplEvent* pEvent_p)
             }
             ret = dllk_config(pConfigParam);
             break;
+
+#if DLL_DEFERRED_RXFRAME_RELEASE_ISOCHRONOUS != FALSE || DLL_DEFERRED_RXFRAME_RELEASE_ASYNCHRONOUS != FALSE
+        case kEplEventTypeReleaseRxFrame:
+            pFrameInfo = (tFrameInfo*)pEvent_p->m_pArg;
+            ret = dllk_releaseRxFrame(pFrameInfo->pFrame, pFrameInfo->frameSize);
+            break;
+#endif
 
         default:
             ret = kEplInvalidEvent;
@@ -473,8 +484,13 @@ tEplKernel dllkcal_asyncFrameReceived(tFrameInfo* pFrameInfo_p)
 
     event.m_EventSink = kEplEventSinkDlluCal;
     event.m_EventType = kEplEventTypeAsndRx;
+#if DLL_DEFERRED_RXFRAME_RELEASE_ASYNCHRONOUS == FALSE
     event.m_pArg = pFrameInfo_p->pFrame;
     event.m_uiSize = pFrameInfo_p->frameSize;
+#else
+    event.m_pArg = pFrameInfo_p;
+    event.m_uiSize = sizeof(tFrameInfo);
+#endif
 
     ret = eventk_postEvent(&event);
     if (ret != kEplSuccessful)
@@ -484,6 +500,9 @@ tEplKernel dllkcal_asyncFrameReceived(tFrameInfo* pFrameInfo_p)
     else
     {
         instance_l.statistics.maxRxFrameCount++;
+#if DLL_DEFERRED_RXFRAME_RELEASE_ASYNCHRONOUS != FALSE
+        ret = kEplReject; // Signalizes dllk to release buffer later
+#endif
     }
 
     return ret;
