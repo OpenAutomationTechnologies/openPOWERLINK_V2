@@ -780,7 +780,7 @@ begin
         -----------------------------------------------------------------------
         inst_openmacTimer.clk       <= iClk;
         inst_openmacTimer.rst       <= iRst;
-        inst_openmacTimer.write     <= iMacTimer_write;
+        inst_openmacTimer.write     <= iMacTimer_write and iMacTimer_chipselect;
         inst_openmacTimer.address   <= iMacTimer_address(inst_openmacTimer.address'range);
         inst_openmacTimer.writedata <= iMacTimer_writedata;
 
