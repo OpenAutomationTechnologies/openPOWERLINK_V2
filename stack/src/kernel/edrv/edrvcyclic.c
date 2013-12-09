@@ -44,6 +44,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <EplInc.h>
 #include <edrv.h>
 #include <kernel/EplTimerHighResk.h>
+#include <target.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -439,7 +440,7 @@ static tEplKernel timerHdlCycleCb(tEplTimerEventArg* pEventArg_p)
     }
 
 #if EDRV_CYCLIC_USE_DIAGNOSTICS != FALSE
-    startNewCycleTimeStamp = EplTgtGetTimeStampNs();
+    startNewCycleTimeStamp = target_getCurrentTimestamp();
 #endif
 
     if (edrvcyclicInstance_l.ppTxBufferList[edrvcyclicInstance_l.curTxBufferEntry] != NULL)
@@ -583,7 +584,7 @@ static tEplKernel timerHdlSlotCb(tEplTimerEventArg* pEventArg_p)
     }
 
 #if EDRV_CYCLIC_USE_DIAGNOSTICS != FALSE
-    edrvcyclicInstance_l.lastSlotTimeStamp = EplTgtGetTimeStampNs();
+    edrvcyclicInstance_l.lastSlotTimeStamp = target_getCurrentTimestamp();
 #endif
 
     pTxBuffer = edrvcyclicInstance_l.ppTxBufferList[edrvcyclicInstance_l.curTxBufferEntry];
