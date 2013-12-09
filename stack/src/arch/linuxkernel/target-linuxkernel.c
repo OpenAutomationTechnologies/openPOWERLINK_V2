@@ -1,11 +1,12 @@
 /**
 ********************************************************************************
-\file   target.h
+\file   target-linuxkernel.c
 
-\brief  Definitions for target module
+\brief  Target specific functions for Linux kernel
 
-This file contains the definitions for the target modules.
+The file implements target specific functions used in the openPOWERLINK stack.
 
+\ingroup module_target
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
@@ -35,41 +36,31 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_target_H_
-#define _INC_target_H_
-
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
 #include <EplInc.h>
+#include <linux/hrtimer.h>
+
+//============================================================================//
+//            P U B L I C   F U N C T I O N S                                 //
+//============================================================================//
 
 //------------------------------------------------------------------------------
-// const defines
+/**
+\brief  Get current timestamp
+
+The function returns the current timestamp in nanoseconds.
+
+\return The function returns the timestamp in nanoseconds
+*/
 //------------------------------------------------------------------------------
+ULONGLONG target_getCurrentTimestamp(void)
+{
+    ULONGLONG  timeStamp;
 
-//------------------------------------------------------------------------------
-// typedef
-//------------------------------------------------------------------------------
-
-
-//------------------------------------------------------------------------------
-// function prototypes
-//------------------------------------------------------------------------------
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-tEplKernel target_init(void);
-tEplKernel target_cleanup(void);
-void       target_msleep(UINT32 milliSeconds_p);
-tEplKernel target_setIpAdrs(char* ifName_p, UINT32 ipAddress_p, UINT32 subnetMask_p, UINT16 mtu_p);
-tEplKernel target_setDefaultGateway(UINT32 defaultGateway_p);
-ULONGLONG  target_getCurrentTimestamp(void);
-
-#ifdef __cplusplus
+    timeStamp = ktime_to_ns(ktime_get());
+    return timeStamp;
 }
-#endif
 
-#endif /* _INC_ctrl_H_ */
 
