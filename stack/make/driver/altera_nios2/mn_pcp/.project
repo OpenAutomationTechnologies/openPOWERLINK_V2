@@ -234,9 +234,9 @@
 			<locationURI>OPLK_LOC/libs/omethlib/omethlib.c</locationURI>
 		</link>
 		<link>
-			<name>omethlib_phycfg_generic.c</name>
+			<name>omethlib_phycfg_ink.c</name>
 			<type>1</type>
-			<locationURI>OPLK_LOC/libs/omethlib/omethlib_phycfg_generic.c</locationURI>
+			<locationURI>OPLK_LOC/libs/omethlib/omethlib_phycfg_ink.c</locationURI>
 		</link>
 		<link>
 			<name>omethlibint.c</name>

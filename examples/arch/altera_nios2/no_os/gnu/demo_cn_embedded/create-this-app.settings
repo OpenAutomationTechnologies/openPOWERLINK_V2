@@ -71,7 +71,7 @@ SRCFILES="\
 ${STACKROOT_DIR}/libs/ami/amiarm.c \
 ${STACKROOT_DIR}/libs/omethlib/omethlib.c \
 ${STACKROOT_DIR}/libs/omethlib/omethlibint.c \
-${STACKROOT_DIR}/libs/omethlib/omethlib_phycfg_generic.c \
+${STACKROOT_DIR}/libs/omethlib/omethlib_phycfg_ink.c \
 ${STACKROOT_DIR}/libs/circbuf/circbuffer.c \
 ${STACKROOT_DIR}/libs/circbuf/circbuf-noos.c \
 ${STACKROOT_DIR}/libs/trace/trace-printf.c \
