@@ -1,4 +1,4 @@
-<?xml	version="1.0"	encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
 	<name>demo_cn_embedded</name>
 	<comment></comment>
@@ -119,9 +119,9 @@
 			<locationURI>STACK_LOC/libs/omethlib/omethlib.c</locationURI>
 		</link>
 		<link>
-			<name>libs/omethlib_phycfg_generic.c</name>
+			<name>libs/omethlib_phycfg_ink.c</name>
 			<type>1</type>
-			<locationURI>STACK_LOC/libs/omethlib/omethlib_phycfg_generic.c</locationURI>
+			<locationURI>STACK_LOC/libs/omethlib/omethlib_phycfg_ink.c</locationURI>
 		</link>
 		<link>
 			<name>libs/omethlibint.c</name>
