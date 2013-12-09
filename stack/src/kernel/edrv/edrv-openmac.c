@@ -876,7 +876,7 @@ static ometh_config_typ getMacConfig(UINT adapter_p)
     config.mode = 0
             | OMETH_MODE_HALFDUPLEX         // Half-duplex
             | OMETH_MODE_100MBIT            // 100 Mbps
-            //TODO: Add this line after fix for INK board... | OMETH_MODE_DIS_AUTO_NEG       // Disable Phy auto-negotiation
+            | OMETH_MODE_DIS_AUTO_NEG       // Disable Phy auto-negotiation
             ;
 
     config.rxBuffers = EDRV_MAX_RX_BUFFERS;
