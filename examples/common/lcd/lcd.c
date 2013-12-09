@@ -183,21 +183,27 @@ void lcd_printNmtState(tNmtState nmtState_p)
             lcdl_printText(aStrNmtState_l[2]);
             break;
         case kNmtCsNotActive:
+        case kNmtMsNotActive:
             lcdl_printText(aStrNmtState_l[3]);
             break;
-        case kNmtCsBasicEthernet :
+        case kNmtCsBasicEthernet:
+        case kNmtMsBasicEthernet:
             lcdl_printText(aStrNmtState_l[4]);
             break;
         case kNmtCsPreOperational1:
+        case kNmtMsPreOperational1:
             lcdl_printText(aStrNmtState_l[5]);
             break;
         case kNmtCsPreOperational2:
+        case kNmtMsPreOperational2:
             lcdl_printText(aStrNmtState_l[6]);
             break;
         case kNmtCsReadyToOperate:
+        case kNmtMsReadyToOperate:
             lcdl_printText(aStrNmtState_l[7]);
             break;
         case kNmtCsOperational:
+        case kNmtMsOperational:
             lcdl_printText(aStrNmtState_l[8]);
             break;
         case kNmtCsStopped:
