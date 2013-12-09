@@ -842,6 +842,15 @@ static OMETH_H        omethCreateInt
             {
                 omethPhyWrite(hEth, i, 0x1B, PHY_SMSC_REG1B_NOAUTOMDIX);
             }
+
+            // Marvell phy requires sw reset (Note: phy link will be lost!)
+            if(phyId == MARVELL_88E1111_PHY_ID)
+            {
+                // Get reg0 and set bit 15
+                omethPhyRead(hEth, i, 0, &readData);
+                data = readData | PHY_REG0_RESET;
+                omethPhyWrite(hEth, i, 0, data);
+            }
         }
         else
         {
@@ -863,6 +872,15 @@ static OMETH_H        omethCreateInt
             {
                 // enable and restart auto negotiation (reg 0)
                 omethPhyWrite(hEth, i, 0, PHY_REG0_AUTONEG_ENABLE | PHY_REG0_AUTONEG_RESTART);
+
+                // Marvell phy requires sw reset (Note: phy link will be lost!)
+                if(phyId == MARVELL_88E1111_PHY_ID)
+                {
+                    // Get reg0 and set bit 15
+                    omethPhyRead(hEth, i, 0, &readData);
+                    data = readData | PHY_REG0_RESET;
+                    omethPhyWrite(hEth, i, 0, data);
+                }
             }
         }
     }
