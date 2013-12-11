@@ -45,33 +45,17 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // const defines
 //------------------------------------------------------------------------------
 /*
-#ifndef EPL_DLLCAL_BUFFER_ID_RX
-#define EPL_DLLCAL_BUFFER_ID_RX    "EplSblDllCalRx"
-#endif
-
 #ifndef EPL_DLLCAL_BUFFER_SIZE_RX
 #define EPL_DLLCAL_BUFFER_SIZE_RX  32767
 #endif
 */
 
-#ifndef DLLCAL_BUFFER_ID_TX_NMT
-#define DLLCAL_BUFFER_ID_TX_NMT     "EplSblDllCalTxNmt"
-#endif
-
 #ifndef DLLCAL_BUFFER_SIZE_TX_NMT
 #define DLLCAL_BUFFER_SIZE_TX_NMT   32767
 #endif
 
-#ifndef DLLCAL_BUFFER_ID_TX_GEN
-#define DLLCAL_BUFFER_ID_TX_GEN     "EplSblDllCalTxGen"
-#endif
-
 #ifndef DLLCAL_BUFFER_SIZE_TX_GEN
 #define DLLCAL_BUFFER_SIZE_TX_GEN   32767
-#endif
-
-#ifndef DLLCAL_BUFFER_ID_TX_SYNC
-#define DLLCAL_BUFFER_ID_TX_SYNC    "EplSblDllCalTxSync"
 #endif
 
 #ifndef DLLCAL_BUFFER_SIZE_TX_SYNC
@@ -82,9 +66,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #if (CONFIG_DLLCAL_QUEUE == EPL_QUEUE_DIRECT)
 #define GET_DLLKCAL_INTERFACE dllcaldirect_getInterface
 #define GET_DLLUCAL_INTERFACE dllcaldirect_getInterface
-#elif (CONFIG_DLLCAL_QUEUE == EPL_QUEUE_SHB)
-#define GET_DLLKCAL_INTERFACE dllcalshb_getInterface
-#define GET_DLLUCAL_INTERFACE dllcalshb_getInterface
 #elif (CONFIG_DLLCAL_QUEUE == EPL_QUEUE_HOSTINTERFACE)
 #define GET_DLLKCAL_INTERFACE dllcalhostif_getInterface
 #define GET_DLLUCAL_INTERFACE dllcalhostif_getInterface

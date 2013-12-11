@@ -458,9 +458,6 @@ simpler conditional statements.
 #define EPL_DBGLVL_EVENTU               DEBUG_LVL_28        // 0x08000000
 #define EPL_DBGLVL_EVENTU_TRACE        DEBUG_LVL_28_TRACE
 
-// SharedBuff
-#define EPL_DBGLVL_SHB                  DEBUG_LVL_29        // 0x10000000
-#define EPL_DBGLVL_SHB_TRACE           DEBUG_LVL_29_TRACE
 
 #define EPL_DBGLVL_ASSERT               DEBUG_LVL_ASSERT    // 0x20000000L
 #define EPL_DBGLVL_ASSERT_TRACE        DEBUG_LVL_ASSERT_TRACE

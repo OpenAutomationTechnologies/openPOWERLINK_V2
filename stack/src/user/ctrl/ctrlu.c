@@ -70,10 +70,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <kernel/pdok.h>
 #endif
 
-#if EPL_USE_SHAREDBUFF != FALSE
-#include <SharedBuff.h>
-#endif
-
 #if (CONFIG_OBD_USE_LOAD_CONCISEDCF != FALSE)
 #include <obdcdc.h>
 #endif
@@ -172,23 +168,11 @@ The function initializes the user control module.
 //------------------------------------------------------------------------------
 tEplKernel ctrlu_init(void)
 {
-#if EPL_USE_SHAREDBUFF != FALSE
-    tShbError           shbError;
-#endif
     tEplKernel          ret;
 
     TRACE ("Initialize ctrl module ...\n");
 
     ctrlInstance_l.lastHeartbeat = 0;
-
-#if EPL_USE_SHAREDBUFF != FALSE
-    shbError = ShbInit();
-    if (shbError != kShbOk)
-    {
-        EPL_DBGLVL_ERROR_TRACE ("Could not initialize Shared Buffer\n");
-        return kEplNoResource;
-    }
-#endif
 
     if ((ret = ctrlucal_init()) != kEplSuccessful)
     {
@@ -204,9 +188,6 @@ tEplKernel ctrlu_init(void)
     return kEplSuccessful;
 
 Exit:
-#if EPL_USE_SHAREDBUFF != FALSE
-    ShbExit();
-#endif
     return ret;
 }
 
@@ -224,10 +205,6 @@ The function cleans up the user control module.
 void ctrlu_exit(void)
 {
     ctrlucal_exit();
-
-#if EPL_USE_SHAREDBUFF != FALSE
-    ShbExit();
-#endif
 }
 
 //------------------------------------------------------------------------------
@@ -463,17 +440,7 @@ stack.
 //------------------------------------------------------------------------------
 tEplKernel ctrlu_processStack(void)
 {
-tEplKernel Ret = kEplSuccessful;
-#if EPL_USE_SHAREDBUFF != FALSE
-tShbError  ShbError;
-
-    ShbError = ShbProcess();
-    if (ShbError != kShbOk)
-    {
-        Ret = kEplInvalidOperation;
-        goto Exit;
-    }
-#endif
+    tEplKernel Ret = kEplSuccessful;
 
     eventucal_process();
 

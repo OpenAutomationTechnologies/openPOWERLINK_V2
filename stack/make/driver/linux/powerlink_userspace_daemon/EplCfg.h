@@ -97,7 +97,6 @@
 #endif
 
 #define CONFIG_DLLCAL_QUEUE                 EPL_QUEUE_CIRCBUF
-#define  EPL_USE_SHAREDBUFF                 FALSE
 
 // Default debug level:
 // Only debug traces of these modules will be compiled which flags are set in define DEF_DEBUG_LVL.

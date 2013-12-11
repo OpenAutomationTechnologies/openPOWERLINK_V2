@@ -65,10 +65,8 @@
 
 #ifdef CONFIG_USE_KERNEL_MODULE
 #define CONFIG_DLLCAL_QUEUE                 EPL_QUEUE_IOCTL
-#define EPL_USE_SHAREDBUFF                  FALSE
 #else
 #define CONFIG_DLLCAL_QUEUE                 EPL_QUEUE_CIRCBUF
-#define EPL_USE_SHAREDBUFF                  FALSE
 #endif
 
 // =========================================================================
@@ -87,9 +85,6 @@
 // necessary value is not available EPL stack has to
 // be adapted and tested.
 #define TARGET_HARDWARE                 TGTHW_PC_WRAPP
-
-// use no FIFOs, make direct calls
-//#define EPL_USE_SHAREDBUFF   FALSE
 
 #ifndef BENCHMARK_MODULES
 #define BENCHMARK_MODULES               0 //0xEE800042L
