@@ -291,17 +291,8 @@
 #define EPL_VETH_NAME       "plk"   // name of net device in Linux
 #endif
 
-#ifndef EPL_USE_SHAREDBUFF
-#define EPL_USE_SHAREDBUFF                  TRUE
-#endif
-
 #ifndef CONFIG_DLLCAL_QUEUE
 #define CONFIG_DLLCAL_QUEUE                 EPL_QUEUE_SHB
-#endif
-
-#if (CONFIG_DLLCAL_QUEUE == EPL_QUEUE_SHB)
-#undef EPL_USE_SHAREDBUFF
-#define EPL_USE_SHAREDBUFF                  TRUE
 #endif
 
 // rough approximation of max. number of timer entries for module EplTimeruGeneric

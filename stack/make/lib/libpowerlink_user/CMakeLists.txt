@@ -130,8 +130,6 @@ SET (LIB_HEADERS
      ${POWERLINK_INCLUDE_DIR}/errhnd.h
      ${POWERLINK_INCLUDE_DIR}/ctrl.h
      ${POWERLINK_INCLUDE_DIR}/ctrlcal.h
-     ${LIB_SOURCE_DIR}/sharedbuff/SharedBuff.h
-     ${LIB_SOURCE_DIR}/sharedbuff/ShbIpc.h
      )
 
 #

@@ -97,12 +97,7 @@ The queue defines determine the stack's queues.
     ///< user-internal queue implementation
 #define CONFIG_DLLCAL_QUEUE                 EPL_QUEUE_HOSTINTERFACE
     ///< DLLCAL queue implementation
-#define EPL_USE_SHAREDBUFF                  FALSE
-    ///< disable shared buffer
 /**@}*/
-
-// Workaround: Specify any queue other than shb to disable shared buffer
-#define EPL_EVENT_KINT_QUEUE                EPL_QUEUE_DIRECT
 
 /**
 \name Data Link Layer defines

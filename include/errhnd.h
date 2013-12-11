@@ -48,7 +48,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#define ERRHND_SHB_ID   "shberrhnd"                     ///< ID for shared buffer implementation
 
 //------------------------------------------------------------------------------
 // typedef

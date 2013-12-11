@@ -148,11 +148,6 @@
         #define PRINTF(...)
     #endif // !NDEBUG
 
-    #if EPL_USE_SHAREDBUFF != FALSE
-        #define EplTgtGetTickCountMs        ShbTgtGetTickCountMs
-        #define EplTgtEnableGlobalInterrupt ShbTgtEnableGlobalInterrupt
-    #endif
-
     #if (DEV_SYSTEM == _DEV_NIOS2_)
         /* NOTE:
          * Nios II does not support atomic instructions, hence, pseudo atomic

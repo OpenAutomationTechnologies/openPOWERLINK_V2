@@ -69,9 +69,6 @@
 // be adapted and tested.
 #define TARGET_HARDWARE                 TGTHW_PC_WRAPP
 
-// use no FIFOs, make direct calls
-//#define EPL_USE_SHAREDBUFF   FALSE
-
 #ifndef BENCHMARK_MODULES
 #define BENCHMARK_MODULES               0 //0xEE800042L
 #endif
@@ -131,7 +128,6 @@
 #endif // CONFIG_MN
 
 #define CONFIG_DLLCAL_QUEUE                 EPL_QUEUE_CIRCBUF
-#define EPL_USE_SHAREDBUFF                  FALSE
 
 // =========================================================================
 // EPL ethernet driver (Edrv) specific defines

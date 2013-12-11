@@ -59,9 +59,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // be adapted and tested.
 //#define TARGET_HARDWARE                 TGTHW_PC_WRAPP
 
-// don't use shared buff any more
-#define EPL_USE_SHAREDBUFF   FALSE
-
 // determine event queue implementation
 // -> internal and u2k queues: direct call
 // -> k2u queue: circular buffer
