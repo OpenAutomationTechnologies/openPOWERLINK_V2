@@ -150,7 +150,7 @@ This function initializes the Cyclic Ethernet driver.
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-tEplKernel EdrvCyclicInit(void)
+tEplKernel edrvcyclic_init(void)
 {
     // clear instance structure
     EPL_MEMSET(&instance_l, 0, sizeof (instance_l));
@@ -169,7 +169,7 @@ This function shuts down the Cyclic Ethernet driver.
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-tEplKernel EdrvCyclicShutdown(void)
+tEplKernel edrvcyclic_shutdown(void)
 {
     if (instance_l.apTxBufferList != NULL)
     {
@@ -194,7 +194,7 @@ This function sets the maximum number of Tx buffer list entries.
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-tEplKernel EdrvCyclicSetMaxTxBufferListSize(UINT maxListEntries_p)
+tEplKernel edrvcyclic_setMaxTxBufferListSize(UINT maxListEntries_p)
 {
     tEplKernel ret = kEplSuccessful;
 
@@ -235,7 +235,7 @@ This function is called the exchange the Tx buffer list to be processed next.
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-tEplKernel EdrvCyclicSetNextTxBufferList(tEdrvTxBuffer** apTxBuffer_p, UINT txBufferCount_p)
+tEplKernel edrvcyclic_setNextTxBufferList(tEdrvTxBuffer** apTxBuffer_p, UINT txBufferCount_p)
 {
     tEplKernel  ret = kEplSuccessful;
     UINT        nextTxBufferList;
@@ -281,7 +281,7 @@ This function sets the POWERLINK cycle time.
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-tEplKernel EdrvCyclicSetCycleLenUs (UINT32 cycleLengthUs_p)
+tEplKernel edrvcyclic_setCycleTime (UINT32 cycleLengthUs_p)
 {
     instance_l.cycleLengthUs = cycleLengthUs_p;
 
@@ -299,7 +299,7 @@ This function starts the cyclic Ethernet driver module.
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-tEplKernel EdrvCyclicStartCycle (void)
+tEplKernel edrvcyclic_startCycle (void)
 {
     tEplKernel  ret = kEplSuccessful;
     INT         i;
@@ -346,7 +346,7 @@ This function stops the cyclic Ethernet driver module.
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-tEplKernel EdrvCyclicStopCycle (void)
+tEplKernel edrvcyclic_stopCycle (void)
 {
     return EplTimerHighReskDeleteTimer(&instance_l.timerHdlCycle);
 }
@@ -364,7 +364,7 @@ This function registers the sync callback handler from the dllk.
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-tEplKernel EdrvCyclicRegSyncHandler (tEdrvCyclicCbSync pfnCbSync_p)
+tEplKernel edrvcyclic_regSyncHandler (tEdrvCyclicCbSync pfnCbSync_p)
 {
     instance_l.pfnSyncCb = pfnCbSync_p;
 
@@ -384,7 +384,7 @@ This function registers the error callback handler from the dllk.
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-tEplKernel EdrvCyclicRegErrorHandler (tEdrvCyclicCbError pfnCbError_p)
+tEplKernel edrvcyclic_regErrorHandler (tEdrvCyclicCbError pfnCbError_p)
 {
     instance_l.pfnErrorCb = pfnCbError_p;
 
@@ -589,13 +589,13 @@ static tEplKernel processTxBufferList(void)
     {
         //compare TX buffer time offset with next offset (considers IPG and last packet length)
         //note: otherwise openMAC is confused if time-trig TX starts within other time-trig TX!
-        if(fFirstPkt == FALSE && nextOffsetNs > pTxBuffer->m_dwTimeOffsetNs)
+        if(fFirstPkt == FALSE && nextOffsetNs > pTxBuffer->timeOffsetNs)
         {
             absoluteTime += OMETH_NS_2_TICKS(nextOffsetNs); //accumulate offset
         }
         else
         {
-            absoluteTime += OMETH_NS_2_TICKS(pTxBuffer->m_dwTimeOffsetNs); //accumulate offset
+            absoluteTime += OMETH_NS_2_TICKS(pTxBuffer->timeOffsetNs); //accumulate offset
         }
 
         fFirstPkt = FALSE; //first packet is surely out...
@@ -608,23 +608,23 @@ static tEplKernel processTxBufferList(void)
             goto CycleDone;
         }
 
-        //pTxBuffer->m_dwTimeOffsetNs = absoluteTime | 1; //lowest bit enables time triggered send
+        //pTxBuffer->timeOffsetNs = absoluteTime | 1; //lowest bit enables time triggered send
         //set the absolute TX start time, and OR the lowest bit to give Edrv a hint
-        pTxBuffer->m_dwTimeOffsetAbsTk = absoluteTime | 1; //lowest bit enables time triggered send
+        pTxBuffer->timeOffsetAbs = absoluteTime | 1; //lowest bit enables time triggered send
 
-        ret = EdrvSendTxMsg(pTxBuffer);
+        ret = edrv_sendTxBuffer(pTxBuffer);
         if (ret != kEplSuccessful)
         {
             goto Exit;
         }
 
         //set the absolute TX start time to zero
-        // -> If the TX buffer is reused as manual TX, EdrvSendTxMsg is not confused!
-        pTxBuffer->m_dwTimeOffsetAbsTk = 0;
+        // -> If the TX buffer is reused as manual TX, edrv_sendTxBuffer is not confused!
+        pTxBuffer->timeOffsetAbs = 0;
 
         //calculate the length of the sent packet, add IPG and thus know the next earliest TX time
         {
-            UINT32 udwLength = pTxBuffer->m_uiTxMsgLen;
+            UINT32 udwLength = pTxBuffer->txFrameSize;
 
             //consider padding!
             if( udwLength < 60UL )
@@ -633,7 +633,7 @@ static tEplKernel processTxBufferList(void)
             }
 
             // ( pre + header + payload + padding + crc ) * 80ns/byte + 960ns = next TX time
-            nextOffsetNs = EDRVCYC_BYTETIME_NS * (EDRVCYC_PREAMB_SIZE + ETH_CRC_SIZE + udwLength) + EDRVCYC_IPG_NS;
+            nextOffsetNs = EDRVCYC_BYTETIME_NS * (EDRVCYC_PREAMB_SIZE + EDRV_ETH_CRC_SIZE + udwLength) + EDRVCYC_IPG_NS;
         }
 
         //switch to next TX buffer

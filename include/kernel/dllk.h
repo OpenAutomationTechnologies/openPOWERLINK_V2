@@ -78,7 +78,7 @@ struct _tDllkNodeInfo
     tNmtState                   nmtState;
     ULONG                       dllErrorEvents;
     UINT32                      presTimeoutNs;          // object 0x1F92: NMT_MNCNPResTimeout_AU32
-    struct _tEdrvTxBuffer*      pPreqTxBuffer;
+    struct sEdrvTxBuffer*       pPreqTxBuffer;
     struct _tDllkNodeInfo*      pNextNodeInfo;
 #endif
 

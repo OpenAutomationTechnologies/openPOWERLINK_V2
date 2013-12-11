@@ -104,9 +104,9 @@
 // Buffer handling:
 // All buffers are created statically (i.e. at compile time resp. at
 // initialisation via kmalloc() ) and not dynamically on request (i.e. via
-// EdrvAllocTxMsgBuffer().
-// EdrvAllocTxMsgBuffer() searches for an unused buffer which is large enough.
-// EdrvInit() may allocate some buffers with sizes less than maximum frame
+// edrv_allocTxBuffer().
+// edrv_allocTxBuffer() searches for an unused buffer which is large enough.
+// edrv_init() may allocate some buffers with sizes less than maximum frame
 // size (i.e. 1514 bytes), e.g. for SoC, SoA, StatusResponse, IdentResponse,
 // NMT requests / commands. The less the size of the buffer the less the
 // number of the buffer.
@@ -464,7 +464,7 @@ static struct pci_driver EdrvDriver = {
 
 //---------------------------------------------------------------------------
 //
-// Function:    EdrvInit
+// Function:    edrv_init
 //
 // Description: function for init of the Ethernet controller
 //
@@ -476,7 +476,7 @@ static struct pci_driver EdrvDriver = {
 // State:
 //
 //---------------------------------------------------------------------------
-tEplKernel EdrvInit(tEdrvInitParam * pEdrvInitParam_p)
+tEplKernel edrv_init(tEdrvInitParam * pEdrvInitParam_p)
 {
 tEplKernel  Ret;
 int         iResult;
@@ -509,18 +509,18 @@ int         iIndex;
     if (EdrvInstance_l.m_pPciDev == NULL)
     {
         printk("%s m_pPciDev=NULL\n", __FUNCTION__);
-        Ret = EdrvShutdown();
+        Ret = edrv_shutdown();
         Ret = kEplNoResource;
         goto Exit;
     }
 
     // local MAC address might have been changed in EdrvInitOne
-    EPL_MEMCPY(pEdrvInitParam_p->m_abMyMacAddr, EdrvInstance_l.m_InitParam.m_abMyMacAddr, 6);
+    EPL_MEMCPY(pEdrvInitParam_p->aMacAddr, EdrvInstance_l.m_InitParam.aMacAddr, 6);
 
     printk("%s local MAC = ", __FUNCTION__);
     for (iIndex = 0; iIndex < 6; iIndex++)
     {
-        printk("%02X ", (unsigned int)pEdrvInitParam_p->m_abMyMacAddr[iIndex]);
+        printk("%02X ", (unsigned int)pEdrvInitParam_p->aMacAddr[iIndex]);
     }
     printk("\n");
 
@@ -532,7 +532,7 @@ Exit:
 
 //---------------------------------------------------------------------------
 //
-// Function:    EdrvShutdown
+// Function:    edrv_shutdown
 //
 // Description: Shutdown the Ethernet controller
 //
@@ -543,7 +543,7 @@ Exit:
 // State:
 //
 //---------------------------------------------------------------------------
-tEplKernel EdrvShutdown(void)
+tEplKernel edrv_shutdown(void)
 {
 
     // unregister PCI driver
@@ -556,7 +556,7 @@ tEplKernel EdrvShutdown(void)
 
 //---------------------------------------------------------------------------
 //
-// Function:    EdrvDefineRxMacAddrEntry
+// Function:    edrv_setRxMulticastMacAddr
 //
 // Description: Set a multicast entry into the Ethernet controller
 //
@@ -567,7 +567,7 @@ tEplKernel EdrvShutdown(void)
 // State:
 //
 //---------------------------------------------------------------------------
-tEplKernel EdrvDefineRxMacAddrEntry (BYTE * pbMacAddr_p)
+tEplKernel edrv_setRxMulticastMacAddr (BYTE * pbMacAddr_p)
 {
 tEplKernel  Ret = kEplSuccessful;
 DWORD       dwData;
@@ -614,7 +614,7 @@ Exit:
 
 //---------------------------------------------------------------------------
 //
-// Function:    EdrvUndefineRxMacAddrEntry
+// Function:    edrv_clearRxMulticastMacAddr
 //
 // Description: Reset a multicast entry in the Ethernet controller
 //
@@ -625,7 +625,7 @@ Exit:
 // State:
 //
 //---------------------------------------------------------------------------
-tEplKernel EdrvUndefineRxMacAddrEntry (BYTE * pbMacAddr_p)
+tEplKernel edrv_clearRxMulticastMacAddr (BYTE * pbMacAddr_p)
 {
 tEplKernel  Ret = kEplSuccessful;
 DWORD       dwData;
@@ -660,7 +660,7 @@ DWORD       dwAddrHigh;
     return Ret;
 }
 
-tEplKernel EdrvChangeFilter(tEdrvFilter*    pFilter_p,
+tEplKernel edrv_changeRxFilter(tEdrvFilter*    pFilter_p,
                             unsigned int    uiCount_p,
                             unsigned int    uiEntryChanged_p,
                             unsigned int    uiChangeFlags_p)
@@ -673,7 +673,7 @@ tEplKernel      Ret = kEplSuccessful;
 
 //---------------------------------------------------------------------------
 //
-// Function:    EdrvAllocTxMsgBuffer
+// Function:    edrv_allocTxBuffer
 //
 // Description: Register a Tx-Buffer
 //
@@ -685,12 +685,12 @@ tEplKernel      Ret = kEplSuccessful;
 // State:
 //
 //---------------------------------------------------------------------------
-tEplKernel EdrvAllocTxMsgBuffer       (tEdrvTxBuffer * pBuffer_p)
+tEplKernel edrv_allocTxBuffer       (tEdrvTxBuffer * pBuffer_p)
 {
 tEplKernel Ret = kEplSuccessful;
-DWORD i;
+UINT i;
 
-    if (pBuffer_p->m_uiMaxBufferLen > EDRV_MAX_FRAME_SIZE)
+    if (pBuffer_p->maxBufferSize > EDRV_MAX_FRAME_SIZE)
     {
         Ret = kEplEdrvNoFreeBufEntry;
         goto Exit;
@@ -710,9 +710,9 @@ DWORD i;
         {
             // free channel found
             EdrvInstance_l.m_afTxBufUsed[i] = TRUE;
-            pBuffer_p->m_BufferNumber.m_dwVal = i;
-            pBuffer_p->m_pbBuffer = EdrvInstance_l.m_pbTxBuf + (i * EDRV_MAX_FRAME_SIZE);
-            pBuffer_p->m_uiMaxBufferLen = EDRV_MAX_FRAME_SIZE;
+            pBuffer_p->txBufferNumber.value = i;
+            pBuffer_p->pBuffer = EdrvInstance_l.m_pbTxBuf + (i * EDRV_MAX_FRAME_SIZE);
+            pBuffer_p->maxBufferSize = EDRV_MAX_FRAME_SIZE;
             break;
         }
     }
@@ -730,7 +730,7 @@ Exit:
 
 //---------------------------------------------------------------------------
 //
-// Function:    EdrvReleaseTxMsgBuffer
+// Function:    edrv_freeTxBuffer
 //
 // Description: Register a Tx-Buffer
 //
@@ -741,11 +741,11 @@ Exit:
 // State:
 //
 //---------------------------------------------------------------------------
-tEplKernel EdrvReleaseTxMsgBuffer     (tEdrvTxBuffer * pBuffer_p)
+tEplKernel edrv_freeTxBuffer     (tEdrvTxBuffer * pBuffer_p)
 {
 unsigned int uiBufferNumber;
 
-    uiBufferNumber = pBuffer_p->m_BufferNumber.m_dwVal;
+    uiBufferNumber = pBuffer_p->txBufferNumber.value;
 
     if (uiBufferNumber < EDRV_MAX_TX_BUFFERS)
     {
@@ -759,7 +759,7 @@ unsigned int uiBufferNumber;
 
 //---------------------------------------------------------------------------
 //
-// Function:    EdrvSendTxMsg
+// Function:    edrv_sendTxBuffer
 //
 // Description: immediately starts the transmission of the buffer
 //
@@ -770,13 +770,13 @@ unsigned int uiBufferNumber;
 // State:
 //
 //---------------------------------------------------------------------------
-tEplKernel EdrvSendTxMsg              (tEdrvTxBuffer * pTxBuffer_p)
+tEplKernel edrv_sendTxBuffer              (tEdrvTxBuffer * pTxBuffer_p)
 {
 tEplKernel      Ret = kEplSuccessful;
 unsigned int    uiBufferNumber;
 tEdrvTxDesc*    pTxDesc;
 
-    uiBufferNumber = pTxBuffer_p->m_BufferNumber.m_dwVal;
+    uiBufferNumber = pTxBuffer_p->txBufferNumber.value;
 
     if ((uiBufferNumber >= EDRV_MAX_TX_BUFFERS)
         || (EdrvInstance_l.m_afTxBufUsed[uiBufferNumber] == FALSE))
@@ -800,7 +800,7 @@ tEdrvTxDesc*    pTxDesc;
     pTxDesc = &EdrvInstance_l.m_pTxDesc[EdrvInstance_l.m_uiTailTxDesc];
     pTxDesc->m_le_qwBufferAddr = EdrvInstance_l.m_pTxBufDma + (uiBufferNumber * EDRV_MAX_FRAME_SIZE);
     pTxDesc->m_le_dwStatus = 0;
-    pTxDesc->m_le_dwLengthCmd = ((DWORD) pTxBuffer_p->m_uiTxMsgLen) | EDRV_TX_DESC_CMD_DEF;
+    pTxDesc->m_le_dwLengthCmd = ((DWORD) pTxBuffer_p->txFrameSize) | EDRV_TX_DESC_CMD_DEF;
 
     // increment Tx descriptor queue tail pointer
     EdrvInstance_l.m_uiTailTxDesc = (EdrvInstance_l.m_uiTailTxDesc + 1) & EDRV_TX_DESC_MASK;
@@ -815,7 +815,7 @@ Exit:
 #if 0
 //---------------------------------------------------------------------------
 //
-// Function:    EdrvTxMsgReady
+// Function:    edrv_setTxBufferReady
 //
 // Description: starts copying the buffer to the ethernet controller's FIFO
 //
@@ -826,7 +826,7 @@ Exit:
 // State:
 //
 //---------------------------------------------------------------------------
-tEplKernel EdrvTxMsgReady              (tEdrvTxBuffer * pBuffer_p)
+tEplKernel edrv_setTxBufferReady              (tEdrvTxBuffer * pBuffer_p)
 {
 tEplKernel Ret = kEplSuccessful;
 unsigned int uiBufferNumber;
@@ -839,7 +839,7 @@ Exit:
 
 //---------------------------------------------------------------------------
 //
-// Function:    EdrvTxMsgStart
+// Function:    edrv_startTxBuffer
 //
 // Description: starts transmission of the ethernet controller's FIFO
 //
@@ -850,7 +850,7 @@ Exit:
 // State:
 //
 //---------------------------------------------------------------------------
-tEplKernel EdrvTxMsgStart              (tEdrvTxBuffer * pBuffer_p)
+tEplKernel edrv_startTxBuffer              (tEdrvTxBuffer * pBuffer_p)
 {
 tEplKernel Ret = kEplSuccessful;
 
@@ -886,7 +886,7 @@ static void EdrvReinitRx(void)
 #if EDRV_USE_DIAGNOSTICS != FALSE
 //---------------------------------------------------------------------------
 //
-// Function:    EdrvGetDiagnostics
+// Function:    edrv_getDiagnostics
 //
 // Description: Print diagnostic information to buffer
 //
@@ -899,7 +899,7 @@ static void EdrvReinitRx(void)
 //
 //---------------------------------------------------------------------------
 
-int EdrvGetDiagnostics(char* pszBuffer_p, int iSize_p)
+int edrv_getDiagnostics(char* pszBuffer_p, int iSize_p)
 {
 tEdrvTxDesc*    pTxDesc;
 DWORD           dwTxStatus;
@@ -1084,7 +1084,7 @@ int             iUsedSize = 0;
 
 //---------------------------------------------------------------------------
 //
-// Function:    EdrvReleaseRxBuffer
+// Function:    edrv_releaseRxBuffer
 //
 // Description: Release a RxBuffer to the Edrv
 //
@@ -1096,7 +1096,7 @@ int             iUsedSize = 0;
 //
 //---------------------------------------------------------------------------
 
-tEplKernel EdrvReleaseRxBuffer(tEdrvRxBuffer* pRxBuffer_p)
+tEplKernel edrv_releaseRxBuffer(tEdrvRxBuffer* pRxBuffer_p)
 {
 tEplKernel EplRet = kEplEdrvInvalidRxBuf;
 
@@ -1105,7 +1105,7 @@ tEplKernel EplRet = kEplEdrvInvalidRxBuf;
     unsigned long   ulFlags;
 
         spin_lock_irqsave(&EdrvInstance_l.m_SpinLockRxBufRelease, ulFlags);
-        EdrvInstance_l.m_apbRxBufFree[++EdrvInstance_l.m_iRxBufFreeTop] = pRxBuffer_p->m_pbBuffer;
+        EdrvInstance_l.m_apbRxBufFree[++EdrvInstance_l.m_iRxBufFreeTop] = pRxBuffer_p->pBuffer;
         spin_unlock_irqrestore(&EdrvInstance_l.m_SpinLockRxBufRelease, ulFlags);
 
         EplRet = kEplSuccessful;
@@ -1229,14 +1229,14 @@ int             iHandled;
                     {   // Packet is OK
                     BYTE**  ppbRxBufInDesc;
 
-                        RxBuffer.m_BufferInFrame = kEdrvBufferLastInFrame;
+                        RxBuffer.bufferInFrame = kEdrvBufferLastInFrame;
 
                         // Get length of received packet
                         // m_le_wLength does not contain CRC as EDRV_REGDW_RCTL_SECRC is set
-                        RxBuffer.m_uiRxMsgLen = AmiGetWordFromLe(&pRxDesc->m_le_wLength);
+                        RxBuffer.rxFrameSize = AmiGetWordFromLe(&pRxDesc->m_le_wLength);
 
                         ppbRxBufInDesc = &EdrvInstance_l.m_apbRxBufInDesc[EdrvInstance_l.m_uiHeadRxDesc];
-                        RxBuffer.m_pbBuffer = *ppbRxBufInDesc;
+                        RxBuffer.pBuffer = *ppbRxBufInDesc;
 
                         EDRV_COUNT_RX;
 
@@ -1245,7 +1245,7 @@ int             iHandled;
                                                     EDRV_RX_BUFFER_SIZE, PCI_DMA_FROMDEVICE);
 
                         // Call Rx handler of Data link layer
-                        RetReleaseRxBuffer = EdrvInstance_l.m_InitParam.m_pfnRxHandler(&RxBuffer);
+                        RetReleaseRxBuffer = EdrvInstance_l.m_InitParam.pfnRxHandler(&RxBuffer);
                         if (RetReleaseRxBuffer == kEdrvReleaseRxBufferLater)
                         {
                             if (EdrvInstance_l.m_iRxBufFreeTop >= 0)
@@ -1343,9 +1343,9 @@ int             iHandled;
                 if (pTxBuffer != NULL)
                 {
                     // Call Tx handler of Data link layer
-                    if (pTxBuffer->m_pfnTxHandler != NULL)
+                    if (pTxBuffer->pfnTxHandler != NULL)
                     {
-                        pTxBuffer->m_pfnTxHandler(pTxBuffer);
+                        pTxBuffer->pfnTxHandler(pTxBuffer);
                     }
                 }
                 else
@@ -1680,36 +1680,36 @@ unsigned int    nRxBuffer;
 
     // check if user specified a MAC address
     //printk("%s check specified MAC address\n", __FUNCTION__);
-    if ((EdrvInstance_l.m_InitParam.m_abMyMacAddr[0] != 0) ||
-        (EdrvInstance_l.m_InitParam.m_abMyMacAddr[1] != 0) ||
-        (EdrvInstance_l.m_InitParam.m_abMyMacAddr[2] != 0) ||
-        (EdrvInstance_l.m_InitParam.m_abMyMacAddr[3] != 0) ||
-        (EdrvInstance_l.m_InitParam.m_abMyMacAddr[4] != 0) ||
-        (EdrvInstance_l.m_InitParam.m_abMyMacAddr[5] != 0)  )
+    if ((EdrvInstance_l.m_InitParam.aMacAddr[0] != 0) ||
+        (EdrvInstance_l.m_InitParam.aMacAddr[1] != 0) ||
+        (EdrvInstance_l.m_InitParam.aMacAddr[2] != 0) ||
+        (EdrvInstance_l.m_InitParam.aMacAddr[3] != 0) ||
+        (EdrvInstance_l.m_InitParam.aMacAddr[4] != 0) ||
+        (EdrvInstance_l.m_InitParam.aMacAddr[5] != 0)  )
     {   // write specified MAC address to controller
         dwTemp = 0;
         EDRV_REGDW_WRITE(EDRV_REGDW_RAH(0), dwTemp); // disable Entry
-        dwTemp |= EdrvInstance_l.m_InitParam.m_abMyMacAddr[0] <<  0;
-        dwTemp |= EdrvInstance_l.m_InitParam.m_abMyMacAddr[1] <<  8;
-        dwTemp |= EdrvInstance_l.m_InitParam.m_abMyMacAddr[2] << 16;
-        dwTemp |= EdrvInstance_l.m_InitParam.m_abMyMacAddr[3] << 24;
+        dwTemp |= EdrvInstance_l.m_InitParam.aMacAddr[0] <<  0;
+        dwTemp |= EdrvInstance_l.m_InitParam.aMacAddr[1] <<  8;
+        dwTemp |= EdrvInstance_l.m_InitParam.aMacAddr[2] << 16;
+        dwTemp |= EdrvInstance_l.m_InitParam.aMacAddr[3] << 24;
         EDRV_REGDW_WRITE(EDRV_REGDW_RAL(0), dwTemp);
         dwTemp = 0;
-        dwTemp |= EdrvInstance_l.m_InitParam.m_abMyMacAddr[4] <<  0;
-        dwTemp |= EdrvInstance_l.m_InitParam.m_abMyMacAddr[5] <<  8;
+        dwTemp |= EdrvInstance_l.m_InitParam.aMacAddr[4] <<  0;
+        dwTemp |= EdrvInstance_l.m_InitParam.aMacAddr[5] <<  8;
         dwTemp |= EDRV_REGDW_RAH_AV;
         EDRV_REGDW_WRITE(EDRV_REGDW_RAH(0), dwTemp);
     }
     else
     {   // read MAC address from controller
         dwTemp = EDRV_REGDW_READ(EDRV_REGDW_RAL(0));
-        EdrvInstance_l.m_InitParam.m_abMyMacAddr[0] = (dwTemp >>  0) & 0xFF;
-        EdrvInstance_l.m_InitParam.m_abMyMacAddr[1] = (dwTemp >>  8) & 0xFF;
-        EdrvInstance_l.m_InitParam.m_abMyMacAddr[2] = (dwTemp >> 16) & 0xFF;
-        EdrvInstance_l.m_InitParam.m_abMyMacAddr[3] = (dwTemp >> 24) & 0xFF;
+        EdrvInstance_l.m_InitParam.aMacAddr[0] = (dwTemp >>  0) & 0xFF;
+        EdrvInstance_l.m_InitParam.aMacAddr[1] = (dwTemp >>  8) & 0xFF;
+        EdrvInstance_l.m_InitParam.aMacAddr[2] = (dwTemp >> 16) & 0xFF;
+        EdrvInstance_l.m_InitParam.aMacAddr[3] = (dwTemp >> 24) & 0xFF;
         dwTemp = EDRV_REGDW_READ(EDRV_REGDW_RAH(0));
-        EdrvInstance_l.m_InitParam.m_abMyMacAddr[4] = (dwTemp >>  0) & 0xFF;
-        EdrvInstance_l.m_InitParam.m_abMyMacAddr[5] = (dwTemp >>  8) & 0xFF;
+        EdrvInstance_l.m_InitParam.aMacAddr[4] = (dwTemp >>  0) & 0xFF;
+        EdrvInstance_l.m_InitParam.aMacAddr[5] = (dwTemp >>  8) & 0xFF;
     }
 
     // initialize Multicast Table Array to 0
