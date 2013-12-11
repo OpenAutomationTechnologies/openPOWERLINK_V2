@@ -8,7 +8,7 @@ This file contains the object dictionary definition for the generic communicatio
 area from 0x1B00 - 0x1FFF.
 *******************************************************************************/
 
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
+#if defined(CONFIG_INCLUDE_NMT_MN)
         // Object 1C00h: DLL_MNCRCError_REC
         OBD_BEGIN_INDEX_RAM(0x1C00, 0x04, errhndu_cbObdAccess)
             OBD_SUBINDEX_RAM_VAR(0x1C00, 0x00, kObdTypeUInt8, kObdAccConst, tObdUnsigned8, NumberOfEntries, 0x03)
@@ -64,7 +64,7 @@ area from 0x1B00 - 0x1FFF.
             OBD_SUBINDEX_RAM_VAR(0x1C14, 0x00, kObdTypeUInt32, kObdAccSRW, tObdUnsigned32, LossOfSocTolerance, 100000)
         OBD_END_INDEX(0x1C14)
 
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_VETH)) != 0)
+#if defined(CONFIG_INCLUDE_VETH)
         // Object 1E40h: NWL_IpAddrTable_0h_REC
         OBD_BEGIN_INDEX_RAM(0x1E40, 0x06, ctrlu_cbObdAccess)
             OBD_SUBINDEX_RAM_VAR(0x1E40, 0x00, kObdTypeUInt8, kObdAccConst, tObdUnsigned8, NumberOfEntries, 0x05)
@@ -76,13 +76,13 @@ area from 0x1B00 - 0x1FFF.
         OBD_END_INDEX(0x1E40)
 #endif
 
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_CFM)) != 0)
+#if defined(CONFIG_INCLUDE_CFM)
         OBD_RAM_INDEX_RAM_VARARRAY_NOINIT(0x1F22, EPL_NMT_MAX_NODE_ID, cfmu_cbObdAccess, kObdTypeDomain, kObdAccSRW, Domain, CFM_ConciseDcfList_ADOM)
         OBD_RAM_INDEX_RAM_ARRAY(0x1F26, EPL_NMT_MAX_NODE_ID, NULL, kObdTypeUInt32, kObdAccSRW, tObdUnsigned32, CFM_ExpConfDateList_AU32, 0)
         OBD_RAM_INDEX_RAM_ARRAY(0x1F27, EPL_NMT_MAX_NODE_ID, NULL, kObdTypeUInt32, kObdAccSRW, tObdUnsigned32, CFM_ExpConfTimeList_AU32, 0)
 #endif
 
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
+#if defined(CONFIG_INCLUDE_NMT_MN)
         // Object 1F80h: NMT_StartUp_U32
         OBD_BEGIN_INDEX_RAM(0x1F80, 0x01, NULL)
             OBD_SUBINDEX_RAM_VAR(0x1F80, 0x00, kObdTypeUInt32, kObdAccSRW, tObdUnsigned32, NMT_StartUp_U32, 0x00)
@@ -104,7 +104,7 @@ area from 0x1B00 - 0x1FFF.
             OBD_SUBINDEX_RAM_VAR(0x1F83, 0x00, kObdTypeUInt8, kObdAccConst, tObdUnsigned8, NMT_EPLVersion_U8, 0x20)
         OBD_END_INDEX(0x1F83)
 
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
+#if defined(CONFIG_INCLUDE_NMT_MN)
         // Object 1F84h: NMT_MNDeviceTypeIdList_AU32
         OBD_RAM_INDEX_RAM_ARRAY(0x1F84, 254, NULL, kObdTypeUInt32, kObdAccSRW, tObdUnsigned32, NMT_MNDeviceTypeIdList_AU32, 0)
 
@@ -139,7 +139,7 @@ area from 0x1B00 - 0x1FFF.
         OBD_RAM_INDEX_RAM_ARRAY(0x1F8D, EPL_NMT_MAX_NODE_ID, NULL, kObdTypeUInt16, kObdAccSRW, tObdUnsigned16, NMT_PResPayloadLimitList_AU16, 36)
 #endif
 
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
+#if defined(CONFIG_INCLUDE_NMT_MN)
         // Object 1F8Eh: NMT_MNNodeCurrState_AU8
         OBD_RAM_INDEX_RAM_ARRAY(0x1F8E, 254, NULL, kObdTypeUInt8, kObdAccR, tObdUnsigned8, NMT_MNNodeCurrState_AU8, 0x1C)
 
@@ -188,7 +188,7 @@ area from 0x1B00 - 0x1FFF.
             OBD_SUBINDEX_RAM_VAR(0x1F99, 0x00, kObdTypeUInt32, kObdAccSRW, tObdUnsigned32, NMT_CNBasicEthernetTimeout_U32, 5000000)  // in [us]
         OBD_END_INDEX(0x1F99)
 
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_VETH)) != 0)
+#if defined(CONFIG_INCLUDE_VETH)
         // Object 1F9Ah: NMT_HostName_VS
         OBD_BEGIN_INDEX_RAM(0x1F9A, 0x01, NULL)
            OBD_SUBINDEX_RAM_VSTRING(0x1F9A, 0x00, kObdAccR, host_name, 33, "")
@@ -200,7 +200,7 @@ area from 0x1B00 - 0x1FFF.
             OBD_SUBINDEX_RAM_VAR(0x1F9E, 0x00, kObdTypeUInt8, kObdAccRW, tObdUnsigned8, NMT_ResetCmd_U8, 0xFF)
         OBD_END_INDEX(0x1F9E)
 
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
+#if defined(CONFIG_INCLUDE_NMT_MN)
         // Object 1F9Fh: NMT_RequestCmd_REC
         OBD_BEGIN_INDEX_RAM(0x1F9F, 0x04, ctrlu_cbObdAccess)
             OBD_SUBINDEX_RAM_VAR(0x1F9F, 0x00, kObdTypeUInt8, kObdAccConst, tObdUnsigned8, NumberOfEntries, 0x03)

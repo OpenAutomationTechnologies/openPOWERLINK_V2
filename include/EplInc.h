@@ -103,29 +103,6 @@
 
 #endif
 
-// defines for module integration
-// possible other include file needed
-// These constants defines modules which can be included in the Epl application.
-// Use this constants for define EPL_MODULE_INTEGRATION in file EplCfg.h.
-#define EPL_MODULE_PDOK        0x00000002L // PDO kernel part module
-#define EPL_MODULE_NMT_MN      0x00000004L // NMT MN module
-#define EPL_MODULE_SDOS        0x00000008L // SDO Server module
-#define EPL_MODULE_SDOC        0x00000010L // SDO Client module
-#define EPL_MODULE_SDO_ASND    0x00000020L // SDO over Asnd module
-#define EPL_MODULE_SDO_UDP     0x00000040L // SDO over UDP module
-#define EPL_MODULE_SDO_PDO     0x00000080L // SDO in PDO module
-#define EPL_MODULE_NMT_CN      0x00000100L // NMT CN module
-#define EPL_MODULE_NMTU        0x00000200L // NMT user part module
-#define EPL_MODULE_NMTK        0x00000400L // NMT kernel part module
-#define EPL_MODULE_DLLK        0x00000800L // DLL kernel part module
-#define EPL_MODULE_DLLU        0x00001000L // DLL user part module
-#define EPL_MODULE_OBD         0x00002000L // OBD user part module
-#define EPL_MODULE_CFM         0x00004000L // Configuration Manager module
-#define EPL_MODULE_VETH        0x00008000L // virtual ethernet driver module
-#define EPL_MODULE_PDOU        0x00010000L // PDO user part module
-#define EPL_MODULE_LEDU        0x00020000L // LED user part module
-#define EPL_MODULE_GW309ASCII  0x00040000L // ASCII Gateway according to CiA309 part 3
-
 // define for event queue implementation
 // These constants determine the implementation of the event queues
 // Use this constants for EPL_***_QUEUE constants
@@ -184,69 +161,6 @@ typedef union
 // macros
 // -------------------------------------------------------------------------
 
-/*
-Create macros which determine which module should be inlcuded. The macros are
-created depending on the macro EPL_MODULE_INTEGRATION.
-
-All conditional in the code which contain references to EPL_MODULE_INTEGRATION
-should be replaced by the following macros. Using this macro results in
-simpler conditional statements.
-*/
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOK)) != 0)
-#define CONFIG_INCLUDE_PDOK
-#endif
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
-#define CONFIG_INCLUDE_NMT_MN
-#endif
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_CN)) != 0)
-#define CONFIG_INCLUDE_NMT_CN
-#endif
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOS)) != 0)
-#define CONFIG_INCLUDE_SDOS
-#endif
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDOC)) != 0)
-#define CONFIG_INCLUDE_SDOC
-#endif
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDO_ASND)) != 0)
-#define CONFIG_INCLUDE_SDO_ASND
-#endif
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDO_UDP)) != 0)
-#define CONFIG_INCLUDE_SDO_UDP
-#endif
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDO_PDO)) != 0)
-#define CONFIG_INCLUDE_SDO_PDO
-#endif
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMTU)) != 0)
-#define CONFIG_INCLUDE_NMTU
-#endif
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMTK)) != 0)
-#define CONFIG_INCLUDE_NMTK
-#endif
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLK)) != 0)
-#define CONFIG_INCLUDE_DLLK
-#endif
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLU)) != 0)
-#define CONFIG_INCLUDE_DLLU
-#endif
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_OBD)) != 0)
-#define CONFIG_INCLUDE_OBD
-#endif
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_CFM)) != 0)
-#define CONFIG_INCLUDE_CFM
-#endif
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_VETH)) != 0)
-#define CONFIG_INCLUDE_VETH
-#endif
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOU)) != 0)
-#define CONFIG_INCLUDE_PDOU
-#endif
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_LEDU)) != 0)
-#define CONFIG_INCLUDE_LEDU
-#endif
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_GW309ASCII)) != 0)
-#define CONFIG_INCLUDE_GW309ASCII
-#endif
-
 #define EPL_SPEC_VERSION                    0x20    // Ethernet POWERLINK V 2.0
 #define EPL_STACK_VERSION(ver,rev,rel)      (((((DWORD)(ver)) & 0xFF)<<24)|((((DWORD)(rev))&0xFF)<<16)|(((DWORD)(rel))&0xFFFF))
 #define EPL_OBJ1018_VERSION(ver,rev,rel)    ((((DWORD)(ver))<<16) |(((DWORD)(rev))&0xFFFF))
@@ -274,7 +188,7 @@ simpler conditional statements.
 
 // generate EPL NMT_FeatureFlags_U32
 #ifndef EPL_DEF_FEATURE_ISOCHR
-    #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLK)) != 0)
+    #if defined(CONFIG_INCLUDE_DLLK)
         #define EPL_DEF_FEATURE_ISOCHR          (EPL_FEATURE_ISOCHR)
     #else
         #define EPL_DEF_FEATURE_ISOCHR          0
@@ -282,7 +196,7 @@ simpler conditional statements.
 #endif
 
 #ifndef EPL_DEF_FEATURE_SDO_ASND
-    #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDO_ASND)) != 0)
+    #if defined(CONFIG_INCLUDE_SDO_ASND)
         #define EPL_DEF_FEATURE_SDO_ASND        (EPL_FEATURE_SDO_ASND)
     #else
         #define EPL_DEF_FEATURE_SDO_ASND        0
@@ -290,7 +204,7 @@ simpler conditional statements.
 #endif
 
 #ifndef EPL_DEF_FEATURE_SDO_UDP
-    #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDO_UDP)) != 0)
+    #if defined(CONFIG_INCLUDE_SDO_UDP)
         #define EPL_DEF_FEATURE_SDO_UDP         (EPL_FEATURE_SDO_UDP)
     #else
         #define EPL_DEF_FEATURE_SDO_UDP         0
@@ -298,7 +212,7 @@ simpler conditional statements.
 #endif
 
 #ifndef EPL_DEF_FEATURE_SDO_PDO
-    #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_SDO_PDO)) != 0)
+    #if defined(CONFIG_INCLUDE_SDO_PDO)
         #define EPL_DEF_FEATURE_SDO_PDO         (EPL_FEATURE_SDO_PDO)
     #else
         #define EPL_DEF_FEATURE_SDO_PDO         0
@@ -306,7 +220,7 @@ simpler conditional statements.
 #endif
 
 #ifndef EPL_DEF_FEATURE_PDO_DYN
-    #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOU)) != 0)
+    #if defined(CONFIG_INCLUDE_PDOU)
         #define EPL_DEF_FEATURE_PDO_DYN         (EPL_FEATURE_PDO_DYN)
     #else
         #define EPL_DEF_FEATURE_PDO_DYN         0
@@ -314,7 +228,7 @@ simpler conditional statements.
 #endif
 
 #ifndef EPL_DEF_FEATURE_CFM
-    #if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_CFM)) != 0)
+    #if defined(CONFIG_INCLUDE_CFM)
         #define EPL_DEF_FEATURE_CFM           (EPL_FEATURE_CFM)
     #else
         #define EPL_DEF_FEATURE_CFM           0

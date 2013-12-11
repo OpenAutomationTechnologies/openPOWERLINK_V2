@@ -89,7 +89,7 @@ The following structure defines the instance variable of the user PDO module.
 typedef struct
 {
     BYTE                    aPdoIdToChannelIdRx[(PDOU_PDO_ID_MASK + 1)]; ///< RXPDO to channel ID conversion table
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
+#if defined(CONFIG_INCLUDE_NMT_MN)
     // only MN supports multiple TPDOS where indexing is necessary
     BYTE                    aPdoIdToChannelIdTx[(PDOU_PDO_ID_MASK + 1)]; ///< TXPDO to channel ID conversion table
 #endif
@@ -557,7 +557,7 @@ static tEplKernel setupTxPdoChannelTables(
 
     channelCount = 0;
 
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
+#if defined(CONFIG_INCLUDE_NMT_MN)
     EPL_MEMSET(pdouInstance_g.aPdoIdToChannelIdTx, 0,
                sizeof (pdouInstance_g.aPdoIdToChannelIdTx));
 #endif
@@ -585,7 +585,7 @@ static tEplKernel setupTxPdoChannelTables(
                 if (channelCount > EPL_D_PDO_TPDOChannels_U16)
                     return kEplPdoTooManyTxPdos;
 
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
+#if defined(CONFIG_INCLUDE_NMT_MN)
                 pdouInstance_g.aPdoIdToChannelIdTx[pdoId] = (BYTE) channelCount - 1;
 #endif
                 abChannelIdToPdoIdTx_p[channelCount - 1] = (BYTE) pdoId;
@@ -1106,7 +1106,7 @@ static tEplKernel getPdoChannelId(UINT pdoId_p, BOOL fTxPdo_p, UINT *pChannelId_
     if (fTxPdo_p)
     {
         // TPDO mapping parameter accessed
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
+#if defined(CONFIG_INCLUDE_NMT_MN)
         *pChannelId_p = pdouInstance_g.aPdoIdToChannelIdTx[pdoId_p];
 #else
         *pChannelId_p = 0;

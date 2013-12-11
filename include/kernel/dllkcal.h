@@ -91,7 +91,7 @@ tEplKernel dllkcal_getStatistics(tDllkCalStatistics** ppStatistics);
 
 tEplKernel dllkcal_process(tEplEvent* pEvent_p);
 
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
+#if defined(CONFIG_INCLUDE_NMT_MN)
 
 tEplKernel dllkcal_clearAsyncQueues(void);
 
@@ -104,7 +104,7 @@ tEplKernel dllkcal_getSoaRequest(tDllReqServiceId* pReqServiceId_p,
 tEplKernel dllkcal_setAsyncPendingRequests(UINT nodeId_p, tDllAsyncReqPriority asyncReqPrio_p,
                                            UINT count_p);
 
-#endif //(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
+#endif
 
 
 #ifdef __cplusplus

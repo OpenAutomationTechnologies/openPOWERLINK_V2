@@ -65,7 +65,7 @@ typedef struct
     tErrorObject        cnLossSoc;                                        // object 0x1C0B
     tErrorObject        cnLossPreq;                                       // object 0x1C0D
     tErrorObject        cnCrcErr;                                         // object 0x1C0F
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
+#if defined(CONFIG_INCLUDE_NMT_MN)
     tErrorObject        mnCrcErr;                                         // object 0x1C00
     tErrorObject        mnCycTimeExceed;                                  // object 0x1C02
     tErrorObject        aMnCnLossPres[NUM_DLL_MNCN_LOSSPRES_OBJS];        // objects 0x1C07,0x1C08,0x1C09

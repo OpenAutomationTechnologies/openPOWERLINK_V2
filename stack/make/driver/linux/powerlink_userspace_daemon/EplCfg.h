@@ -106,17 +106,21 @@
 #endif
 
 #ifdef CONFIG_MN
-#define EPL_MODULE_INTEGRATION (EPL_MODULE_DLLK \
-                                | EPL_MODULE_PDOK \
-                                | EPL_MODULE_NMTK \
-                                | EPL_MODULE_NMT_MN \
-                                | EPL_MODULE_VETH)
+
+#define CONFIG_INCLUDE_PDOK
+#define CONFIG_INCLUDE_NMT_MN
+#define CONFIG_INCLUDE_DLLK
+#define CONFIG_INCLUDE_NMTK
+#define CONFIG_INCLUDE_VETH
+
 #else
-#define EPL_MODULE_INTEGRATION (EPL_MODULE_DLLK \
-                                | EPL_MODULE_PDOK \
-                                | EPL_MODULE_NMTK \
-                                | EPL_MODULE_NMT_CN \
-                                | EPL_MODULE_VETH)
+
+#define CONFIG_INCLUDE_PDOK
+#define CONFIG_INCLUDE_DLLK
+#define CONFIG_INCLUDE_NMT_CN
+#define CONFIG_INCLUDE_NMTK
+#define CONFIG_INCLUDE_VETH
+
 #endif
 
 // =========================================================================

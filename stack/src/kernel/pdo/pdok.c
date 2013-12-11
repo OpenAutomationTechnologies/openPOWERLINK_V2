@@ -48,7 +48,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <Benchmark.h>
 
 
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLK)) == 0)
+#if !defined(CONFIG_INCLUDE_DLLK)
     #error 'ERROR: Missing DLLk-Modul!'
 #endif
 

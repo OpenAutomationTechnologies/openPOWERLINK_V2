@@ -58,20 +58,20 @@ The generic defines are valid for the whole openPOWERLINK stack.
     ///< data type support higher 32 bit
 #define EPL_MAX_INSTANCES                   1
     ///< number of EPL instances
-#define EPL_MODULE_INTEGRATION              (0 \
-                                            | EPL_MODULE_OBD \
-                                            | EPL_MODULE_PDOU \
-                                            | EPL_MODULE_SDOS \
-                                            | EPL_MODULE_SDOC \
-                                            | EPL_MODULE_SDO_ASND \
-                                            | EPL_MODULE_DLLU \
-                                            | EPL_MODULE_NMT_MN \
-                                            | EPL_MODULE_NMT_CN \
-                                            | EPL_MODULE_NMTU \
-                                            | EPL_MODULE_LEDU \
-                                            | EPL_MODULE_CFM \
-                                            )
-    ///< integrate modules to stack
+
+// These macros define all modules which are included
+#define CONFIG_INCLUDE_OBD
+#define CONFIG_INCLUDE_PDOU
+#define CONFIG_INCLUDE_NMT_MN
+#define CONFIG_INCLUDE_SDOS
+#define CONFIG_INCLUDE_SDOC
+#define CONFIG_INCLUDE_SDO_ASND
+#define CONFIG_INCLUDE_DLLU
+#define CONFIG_INCLUDE_NMT_CN
+#define CONFIG_INCLUDE_NMTU
+#define CONFIG_INCLUDE_LEDU
+#define CONFIG_INCLUDE_CFM
+
 #ifndef BENCHMARK_MODULES
 #define BENCHMARK_MODULES                   (0 \
                                             | BENCHMARK_MOD_32 \

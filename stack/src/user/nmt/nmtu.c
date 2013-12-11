@@ -454,7 +454,7 @@ static BOOL processGeneralStateChange(tNmtState newNmtState_p, tEplKernel* pRet_
             //check node ID if not should be master or slave
             if (nodeId == EPL_C_ADR_MN_DEF_NODE_ID)
             {   // node shall be MN
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
+#if defined(CONFIG_INCLUDE_NMT_MN)
                 ret = nmtu_postNmtEvent(kNmtEventEnterMsNotActive);
 #else
                 TRACE("EplNmtuProcess(): no MN functionality implemented\n");

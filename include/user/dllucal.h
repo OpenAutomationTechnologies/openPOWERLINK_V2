@@ -86,7 +86,7 @@ tEplKernel dllucal_deleteNode(tDllNodeOpParam* pNodeOpParam_p);
 
 #endif
 
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
+#if defined(CONFIG_INCLUDE_NMT_MN)
 
 tEplKernel dllucal_issueRequest(tDllReqServiceId Service_p, unsigned int uiNodeId_p, BYTE bSoaFlag1_p);
 

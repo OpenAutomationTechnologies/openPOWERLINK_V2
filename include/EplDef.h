@@ -135,7 +135,7 @@
 #define EPL_DLL_PRES_CHAINING_MN        FALSE
 #else
 // disable PRC MN support if NMT MN module is not activated
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) == 0)
+#if !defined(CONFIG_INCLUDE_NMT_MN)
 #undef EPL_DLL_PRES_CHAINING_MN
 #define EPL_DLL_PRES_CHAINING_MN        FALSE
 #endif
@@ -146,7 +146,7 @@
 #define EPL_DLL_DISABLE_DEFERRED_RXFRAME_RELEASE   FALSE
 #endif
 
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0 )
+#if defined(CONFIG_INCLUDE_NMT_MN)
     // MN should support generic Asnd frames, thus the maximum ID
     // is set to a large value
     #define EPL_C_DLL_MAX_ASND_SERVICE_IDS  253
@@ -193,7 +193,7 @@
 #endif
 
 #ifndef EPL_D_PDO_TPDOChannels_U16
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
+#if defined(CONFIG_INCLUDE_NMT_MN)
 #define EPL_D_PDO_TPDOChannels_U16  256     // number of supported TPDO channels
 #else
 #define EPL_D_PDO_TPDOChannels_U16  1       // number of supported TPDO channels
@@ -213,7 +213,7 @@
 #endif
 
 #ifndef EPL_DLL_PRES_FILTER_COUNT
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
+#if defined(CONFIG_INCLUDE_NMT_MN)
 #define EPL_DLL_PRES_FILTER_COUNT   -1   // maximum count of Rx filter entries for PRes frames
 #else
 #define EPL_DLL_PRES_FILTER_COUNT   0    // maximum count of Rx filter entries for PRes frames
@@ -221,8 +221,7 @@
 #endif
 
 #ifndef EPL_NMT_MAX_NODE_ID
-#if ((((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0) \
-     || (EPL_DLL_PRES_FILTER_COUNT != 0))
+#if defined(CONFIG_INCLUDE_NMT_MN) || (EPL_DLL_PRES_FILTER_COUNT != 0)
 #define EPL_NMT_MAX_NODE_ID         254  // maximum node-ID with MN or cross-traffic support
 #else
 #define EPL_NMT_MAX_NODE_ID         0    // maximum node-ID with MN or cross-traffic support
@@ -297,7 +296,7 @@
 
 // rough approximation of max. number of timer entries for module EplTimeruGeneric
 #ifndef EPL_TIMERU_MAX_ENTRIES
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
+#if defined(CONFIG_INCLUDE_NMT_MN)
 #define EPL_TIMERU_MAX_ENTRIES          (EPL_NMT_MAX_NODE_ID * 3)   // 3 timers for each node
 #else
 #define EPL_TIMERU_MAX_ENTRIES          7   // LED module 1 + NMT module 1 + SDO sequence layer 5
