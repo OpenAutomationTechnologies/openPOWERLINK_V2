@@ -266,7 +266,7 @@ static tEplKernel processNmtMsPreop1(tNmtState nmtState_p, tNmtEvent nmtEvent_p,
     if (dllkInstance_g.dllState != kDllMsNonCyclic)
     {   // stop cycle timer
 
-        ret = EdrvCyclicStopCycle();
+        ret = edrvcyclic_stopCycle();
         if (ret != kEplSuccessful)
             return ret;
 
@@ -349,7 +349,7 @@ static tEplKernel processNmtMsFullCycle(tNmtState nmtState_p, tNmtEvent nmtEvent
                     if (ret != kEplSuccessful)
                         return ret;
 
-                    if ((ret = EdrvCyclicStartCycle())  != kEplSuccessful)
+                    if ((ret = edrvcyclic_startCycle())  != kEplSuccessful)
                         return ret;
 
                     dllkInstance_g.dllState = kDllMsWaitSocTrig;

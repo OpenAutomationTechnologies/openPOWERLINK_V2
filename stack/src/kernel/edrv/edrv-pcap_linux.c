@@ -210,7 +210,7 @@ static int getLinkStatus(const char *ifName)
 }
 
 //---------------------------------------------------------------------------
-// Function:    EdrvInit
+// Function:    edrv_init
 //
 // Description: function for init of the Ethernet controller
 //
@@ -219,7 +219,7 @@ static int getLinkStatus(const char *ifName)
 // Returns:     Errorcode           = kEplSuccessful
 //                                  = kEplNoResource
 //---------------------------------------------------------------------------
-tEplKernel EdrvInit(tEdrvInitParam *pEdrvInitParam_p)
+tEplKernel edrv_init(tEdrvInitParam *pEdrvInitParam_p)
 {
     tEplKernel                  Ret;
     char                        sErr_Msg[PCAP_ERRBUF_SIZE];
@@ -230,7 +230,7 @@ tEplKernel EdrvInit(tEdrvInitParam *pEdrvInitParam_p)
     // clear instance structure
     EPL_MEMSET(&EdrvInstance_l, 0, sizeof (EdrvInstance_l));
 
-    if (pEdrvInitParam_p->m_HwParam.m_pszDevName == NULL)
+    if (pEdrvInitParam_p->hwParam.m_pszDevName == NULL)
     {
         Ret = kEplEdrvInitError;
         goto Exit;
@@ -239,22 +239,22 @@ tEplKernel EdrvInit(tEdrvInitParam *pEdrvInitParam_p)
     /* if no MAC address was specified read MAC address of used
      * ethernet interface
      */
-    if ((pEdrvInitParam_p->m_abMyMacAddr[0] == 0) &&
-        (pEdrvInitParam_p->m_abMyMacAddr[1] == 0) &&
-        (pEdrvInitParam_p->m_abMyMacAddr[2] == 0) &&
-        (pEdrvInitParam_p->m_abMyMacAddr[3] == 0) &&
-        (pEdrvInitParam_p->m_abMyMacAddr[4] == 0) &&
-        (pEdrvInitParam_p->m_abMyMacAddr[5] == 0)  )
+    if ((pEdrvInitParam_p->aMacAddr[0] == 0) &&
+        (pEdrvInitParam_p->aMacAddr[1] == 0) &&
+        (pEdrvInitParam_p->aMacAddr[2] == 0) &&
+        (pEdrvInitParam_p->aMacAddr[3] == 0) &&
+        (pEdrvInitParam_p->aMacAddr[4] == 0) &&
+        (pEdrvInitParam_p->aMacAddr[5] == 0)  )
     {   // read MAC address from controller
-        getMacAdrs(pEdrvInitParam_p->m_HwParam.m_pszDevName,
-                   pEdrvInitParam_p->m_abMyMacAddr);
+        getMacAdrs(pEdrvInitParam_p->hwParam.m_pszDevName,
+                   pEdrvInitParam_p->aMacAddr);
     }
 
     // save the init data (with updated MAC address)
     EdrvInstance_l.m_initParam = *pEdrvInitParam_p;
 
     EdrvInstance_l.m_pPcap = pcap_open_live (
-                        EdrvInstance_l.m_initParam.m_HwParam.m_pszDevName,
+                        EdrvInstance_l.m_initParam.hwParam.m_pszDevName,
                         65535,  // snaplen
                         1,      // promiscuous mode
                         1,      // milli seconds read timeout
@@ -313,7 +313,7 @@ Exit:
 }
 
 //---------------------------------------------------------------------------
-// Function:    EdrvShutdown
+// Function:    edrv_shutdown
 //
 // Description: Shutdown the Ethernet controller
 //
@@ -321,7 +321,7 @@ Exit:
 //
 // Returns:     Errorcode   = kEplSuccessful
 //---------------------------------------------------------------------------
-tEplKernel EdrvShutdown( void )
+tEplKernel edrv_shutdown( void )
 {
     // signal shutdown to the thread
     //pthread_cancel(EdrvInstance_l.m_hThread);
@@ -341,7 +341,7 @@ tEplKernel EdrvShutdown( void )
 }
 
 //---------------------------------------------------------------------------
-// Function:    EdrvSendTxMsg
+// Function:    edrv_sendTxBuffer
 //
 // Description: immediately starts the transmission of the buffer
 //
@@ -349,26 +349,26 @@ tEplKernel EdrvShutdown( void )
 //
 // Returns:     Errorcode   = kEplSuccessful
 //---------------------------------------------------------------------------
-tEplKernel EdrvSendTxMsg(tEdrvTxBuffer *pBuffer_p)
+tEplKernel edrv_sendTxBuffer(tEdrvTxBuffer *pBuffer_p)
 {
     tEplKernel  Ret = kEplSuccessful;
     INT         iRet;
 
     FTRACE_MARKER("%s", __func__);
 
-    if (pBuffer_p->m_BufferNumber.m_pVal != NULL)
+    if (pBuffer_p->txBufferNumber.pArg != NULL)
     {
         Ret = kEplInvalidOperation;
         goto Exit;
     }
 
-    if (getLinkStatus(EdrvInstance_l.m_initParam.m_HwParam.m_pszDevName) == FALSE)
+    if (getLinkStatus(EdrvInstance_l.m_initParam.hwParam.m_pszDevName) == FALSE)
     {
         /* there's no link! We pretend that packet is sent and immediately call
          * tx handler! Otherwise the stack would hang! */
-        if (pBuffer_p->m_pfnTxHandler != NULL)
+        if (pBuffer_p->pfnTxHandler != NULL)
         {
-            pBuffer_p->m_pfnTxHandler(pBuffer_p);
+            pBuffer_p->pfnTxHandler(pBuffer_p);
         }
     }
     else
@@ -381,13 +381,13 @@ tEplKernel EdrvSendTxMsg(tEdrvTxBuffer *pBuffer_p)
         }
         else
         {
-            EdrvInstance_l.m_pTransmittedTxBufferLastEntry->m_BufferNumber.m_pVal = pBuffer_p;
+            EdrvInstance_l.m_pTransmittedTxBufferLastEntry->txBufferNumber.pArg = pBuffer_p;
             EdrvInstance_l.m_pTransmittedTxBufferLastEntry = pBuffer_p;
         }
         pthread_mutex_unlock(&EdrvInstance_l.m_mutex);
 
-        iRet = pcap_sendpacket(EdrvInstance_l.m_pPcap, pBuffer_p->m_pbBuffer,
-                               (int) pBuffer_p->m_uiTxMsgLen);
+        iRet = pcap_sendpacket(EdrvInstance_l.m_pPcap, pBuffer_p->pBuffer,
+                               (int) pBuffer_p->txFrameSize);
         if  (iRet != 0)
         {
             EPL_DBGLVL_EDRV_TRACE("%s() pcap_sendpacket returned %d (%s)\n",
@@ -401,7 +401,7 @@ Exit:
 }
 
 //---------------------------------------------------------------------------
-// Function:    EdrvAllocTxMsgBuffer
+// Function:    edrv_allocTxBuffer
 //
 // Description: Register a Tx-Buffer
 //
@@ -410,32 +410,32 @@ Exit:
 // Returns:     Errorcode   = kEplSuccessful
 //                          = kEplEdrvNoFreeBufEntry
 //---------------------------------------------------------------------------
-tEplKernel EdrvAllocTxMsgBuffer(tEdrvTxBuffer * pBuffer_p)
+tEplKernel edrv_allocTxBuffer(tEdrvTxBuffer * pBuffer_p)
 {
     tEplKernel Ret = kEplSuccessful;
 
-    if (pBuffer_p->m_uiMaxBufferLen > EDRV_MAX_FRAME_SIZE)
+    if (pBuffer_p->maxBufferSize > EDRV_MAX_FRAME_SIZE)
     {
         Ret = kEplEdrvNoFreeBufEntry;
         goto Exit;
     }
 
     // allocate buffer with malloc
-    pBuffer_p->m_pbBuffer = EPL_MALLOC(pBuffer_p->m_uiMaxBufferLen);
-    if (pBuffer_p->m_pbBuffer == NULL)
+    pBuffer_p->pBuffer = EPL_MALLOC(pBuffer_p->maxBufferSize);
+    if (pBuffer_p->pBuffer == NULL)
     {
         Ret = kEplEdrvNoFreeBufEntry;
         goto Exit;
     }
 
-    pBuffer_p->m_BufferNumber.m_pVal = NULL;
+    pBuffer_p->txBufferNumber.pArg = NULL;
 
 Exit:
     return Ret;
 }
 
 //---------------------------------------------------------------------------
-// Function:    EdrvReleaseTxMsgBuffer
+// Function:    edrv_freeTxBuffer
 //
 // Description: Register a Tx-Buffer
 //
@@ -443,12 +443,12 @@ Exit:
 //
 // Returns:     Errorcode   = kEplSuccessful
 //---------------------------------------------------------------------------
-tEplKernel EdrvReleaseTxMsgBuffer(tEdrvTxBuffer * pBuffer_p)
+tEplKernel edrv_freeTxBuffer(tEdrvTxBuffer * pBuffer_p)
 {
-    BYTE*   pbBuffer = pBuffer_p->m_pbBuffer;
+    BYTE*   pbBuffer = pBuffer_p->pBuffer;
 
     // mark buffer as free, before actually freeing it
-    pBuffer_p->m_pbBuffer = NULL;
+    pBuffer_p->pBuffer = NULL;
 
     EPL_FREE(pbBuffer);
 
@@ -456,7 +456,7 @@ tEplKernel EdrvReleaseTxMsgBuffer(tEdrvTxBuffer * pBuffer_p)
 }
 
 //---------------------------------------------------------------------------
-// Function:    EdrvChangeFilter
+// Function:    edrv_changeRxFilter
 //
 // Description: Change all rx-filters or one specific rx-filter
 //              of the openMAC
@@ -481,7 +481,7 @@ tEplKernel EdrvReleaseTxMsgBuffer(tEdrvTxBuffer * pBuffer_p)
 // Returns:     Errorcode           = kEplSuccessful
 //                                  = kEplEdrvInvalidParam
 //---------------------------------------------------------------------------
-tEplKernel EdrvChangeFilter(tEdrvFilter*    pFilter_p __attribute__((unused)),
+tEplKernel edrv_changeRxFilter(tEdrvFilter*    pFilter_p __attribute__((unused)),
                             unsigned int    uiCount_p __attribute__((unused)),
                             unsigned int    uiEntryChanged_p __attribute__((unused)),
                             unsigned int    uiChangeFlags_p __attribute__((unused)))
@@ -491,7 +491,7 @@ tEplKernel EdrvChangeFilter(tEdrvFilter*    pFilter_p __attribute__((unused)),
 
 //---------------------------------------------------------------------------
 //
-// Function:    EdrvUndefineRxMacAddrEntry
+// Function:    edrv_clearRxMulticastMacAddr
 //
 // Description: Reset a multicast entry in the Ethernet controller
 //
@@ -499,14 +499,14 @@ tEplKernel EdrvChangeFilter(tEdrvFilter*    pFilter_p __attribute__((unused)),
 //
 // Returns:     Errorcode       = kEplSuccessful
 //---------------------------------------------------------------------------
-tEplKernel EdrvUndefineRxMacAddrEntry (BYTE * pbMacAddr_p __attribute__((unused)))
+tEplKernel edrv_clearRxMulticastMacAddr (BYTE * pbMacAddr_p __attribute__((unused)))
 {
     return kEplSuccessful;
 }
 
 //---------------------------------------------------------------------------
 //
-// Function:    EdrvDefineRxMacAddrEntry
+// Function:    edrv_setRxMulticastMacAddr
 //
 // Description: Set a multicast entry into the Ethernet controller
 //
@@ -514,7 +514,7 @@ tEplKernel EdrvUndefineRxMacAddrEntry (BYTE * pbMacAddr_p __attribute__((unused)
 //
 // Returns:     Errorcode       = kEplSuccessful
 //---------------------------------------------------------------------------
-tEplKernel EdrvDefineRxMacAddrEntry (BYTE * pbMacAddr_p __attribute__((unused)))
+tEplKernel edrv_setRxMulticastMacAddr (BYTE * pbMacAddr_p __attribute__((unused)))
 {
     return kEplSuccessful;
 }
@@ -539,14 +539,14 @@ static void EdrvPacketHandler(u_char *pUser_p,
     tEdrvInstance*  pInstance = (tEdrvInstance*) pUser_p;
     tEdrvRxBuffer   RxBuffer;
 
-    if (memcmp (pkt_data + 6, pInstance->m_initParam.m_abMyMacAddr, 6 ) != 0)
+    if (memcmp (pkt_data + 6, pInstance->m_initParam.aMacAddr, 6 ) != 0)
     {   // filter out self generated traffic
-        RxBuffer.m_BufferInFrame    = kEdrvBufferLastInFrame;
-        RxBuffer.m_uiRxMsgLen       = header->caplen;
-        RxBuffer.m_pbBuffer         = (BYTE*) pkt_data;
+        RxBuffer.bufferInFrame    = kEdrvBufferLastInFrame;
+        RxBuffer.rxFrameSize       = header->caplen;
+        RxBuffer.pBuffer         = (BYTE*) pkt_data;
 
         FTRACE_MARKER("%s RX", __func__);
-        pInstance->m_initParam.m_pfnRxHandler(&RxBuffer);
+        pInstance->m_initParam.pfnRxHandler(&RxBuffer);
     }
     else
     {   // self generated traffic
@@ -556,24 +556,24 @@ static void EdrvPacketHandler(u_char *pUser_p,
         {
             tEdrvTxBuffer* pTxBuffer = pInstance->m_pTransmittedTxBufferFirstEntry;
 
-            if (pTxBuffer->m_pbBuffer != NULL)
+            if (pTxBuffer->pBuffer != NULL)
             {
-                if (memcmp(pkt_data, pTxBuffer->m_pbBuffer, 6) == 0)
+                if (memcmp(pkt_data, pTxBuffer->pBuffer, 6) == 0)
                 {
                     pthread_mutex_lock(&pInstance->m_mutex);
                     pInstance->m_pTransmittedTxBufferFirstEntry =
-                        pInstance->m_pTransmittedTxBufferFirstEntry->m_BufferNumber.m_pVal;
+                        pInstance->m_pTransmittedTxBufferFirstEntry->txBufferNumber.pArg;
                     if (pInstance->m_pTransmittedTxBufferFirstEntry == NULL)
                     {
                         pInstance->m_pTransmittedTxBufferLastEntry = NULL;
                     }
                     pthread_mutex_unlock(&pInstance->m_mutex);
 
-                    pTxBuffer->m_BufferNumber.m_pVal = NULL;
+                    pTxBuffer->txBufferNumber.pArg = NULL;
 
-                    if (pTxBuffer->m_pfnTxHandler != NULL)
+                    if (pTxBuffer->pfnTxHandler != NULL)
                     {
-                        pTxBuffer->m_pfnTxHandler(pTxBuffer);
+                        pTxBuffer->pfnTxHandler(pTxBuffer);
                     }
                 }
                 else
@@ -588,12 +588,12 @@ static void EdrvPacketHandler(u_char *pUser_p,
                         (UINT)pkt_data[5]);
                     TRACE("   current TxB %p: DstMAC=%02X%02X%02X%02X%02X%02X\n",
                         (void *)pTxBuffer,
-                        (UINT)pTxBuffer->m_pbBuffer[0],
-                        (UINT)pTxBuffer->m_pbBuffer[1],
-                        (UINT)pTxBuffer->m_pbBuffer[2],
-                        (UINT)pTxBuffer->m_pbBuffer[3],
-                        (UINT)pTxBuffer->m_pbBuffer[4],
-                        (UINT)pTxBuffer->m_pbBuffer[5]);
+                        (UINT)pTxBuffer->pBuffer[0],
+                        (UINT)pTxBuffer->pBuffer[1],
+                        (UINT)pTxBuffer->pBuffer[2],
+                        (UINT)pTxBuffer->pBuffer[3],
+                        (UINT)pTxBuffer->pBuffer[4],
+                        (UINT)pTxBuffer->pBuffer[5]);
                 }
             }
         }
@@ -628,7 +628,7 @@ static void * EdrvWorkerThread(void *pArgument_p)
     EPL_DBGLVL_EDRV_TRACE("%s(): ThreadId:%ld\n", __func__, syscall(SYS_gettid));
 
     pInstance->m_pPcapThread =
-        pcap_open_live (pInstance->m_initParam.m_HwParam.m_pszDevName,
+        pcap_open_live (pInstance->m_initParam.hwParam.m_pszDevName,
                            65535,  // snaplen
                            1,      // promiscuous mode
                            1,      // milli seconds read timeout

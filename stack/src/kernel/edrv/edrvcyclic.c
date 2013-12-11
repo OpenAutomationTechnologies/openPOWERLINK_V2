@@ -196,7 +196,7 @@ static tEdrvCyclicInstance EdrvCyclicInstance_l;
 
 //---------------------------------------------------------------------------
 //
-// Function:    EdrvCyclicInit
+// Function:    edrvcyclic_init
 //
 // Description: initialize EdrvCyclic module
 //
@@ -209,7 +209,7 @@ static tEdrvCyclicInstance EdrvCyclicInstance_l;
 //
 //---------------------------------------------------------------------------
 
-tEplKernel EdrvCyclicInit()
+tEplKernel edrvcyclic_init()
 {
 tEplKernel  Ret;
 
@@ -219,9 +219,9 @@ tEplKernel  Ret;
     EPL_MEMSET(&EdrvCyclicInstance_l, 0, sizeof (EdrvCyclicInstance_l));
 
 #if EDRV_CYCLIC_USE_DIAGNOSTICS != FALSE
-    EdrvCyclicInstance_l.m_Diag.m_dwCycleTimeMin        = 0xFFFFFFFF;
-    EdrvCyclicInstance_l.m_Diag.m_dwUsedCycleTimeMin    = 0xFFFFFFFF;
-    EdrvCyclicInstance_l.m_Diag.m_dwSpareCycleTimeMin   = 0xFFFFFFFF;
+    EdrvCyclicInstance_l.m_Diag.cycleTimeMin        = 0xFFFFFFFF;
+    EdrvCyclicInstance_l.m_Diag.usedCycleTimeMin    = 0xFFFFFFFF;
+    EdrvCyclicInstance_l.m_Diag.spareCycleTimeMin   = 0xFFFFFFFF;
 #endif
 
 //Exit:
@@ -232,7 +232,7 @@ tEplKernel  Ret;
 
 //---------------------------------------------------------------------------
 //
-// Function:    EdrvCyclicShutdown
+// Function:    edrvcyclic_shutdown
 //
 // Description: Shutdown EdrvCyclic module
 //
@@ -244,7 +244,7 @@ tEplKernel  Ret;
 //
 //---------------------------------------------------------------------------
 
-tEplKernel EdrvCyclicShutdown(void)
+tEplKernel edrvcyclic_shutdown(void)
 {
     if (EdrvCyclicInstance_l.m_paTxBufferList != NULL)
     {
@@ -259,7 +259,7 @@ tEplKernel EdrvCyclicShutdown(void)
 
 //---------------------------------------------------------------------------
 //
-// Function:    EdrvCyclicSetMaxTxBufferListSize
+// Function:    edrvcyclic_setMaxTxBufferListSize
 //
 // Description: Sets the maximum number of TxBuffer list entries.
 //
@@ -271,7 +271,7 @@ tEplKernel EdrvCyclicShutdown(void)
 //
 //---------------------------------------------------------------------------
 
-tEplKernel EdrvCyclicSetMaxTxBufferListSize(unsigned int uiMaxListSize_p)
+tEplKernel edrvcyclic_setMaxTxBufferListSize(unsigned int uiMaxListSize_p)
 {
 tEplKernel  Ret = kEplSuccessful;
 
@@ -301,7 +301,7 @@ tEplKernel  Ret = kEplSuccessful;
 
 //---------------------------------------------------------------------------
 //
-// Function:    EdrvCyclicSetNextTxBufferList
+// Function:    edrvcyclic_setNextTxBufferList
 //
 // Description: Sets the next TxBuffer list.
 //
@@ -314,7 +314,7 @@ tEplKernel  Ret = kEplSuccessful;
 //
 //---------------------------------------------------------------------------
 
-tEplKernel EdrvCyclicSetNextTxBufferList(tEdrvTxBuffer** apTxBuffer_p, unsigned int uiTxBufferCount_p)
+tEplKernel edrvcyclic_setNextTxBufferList(tEdrvTxBuffer** apTxBuffer_p, unsigned int uiTxBufferCount_p)
 {
 tEplKernel  Ret = kEplSuccessful;
 unsigned int    uiNextTxBufferList;
@@ -351,7 +351,7 @@ Exit:
 
 //---------------------------------------------------------------------------
 //
-// Function:    EdrvCyclicSetCycleLenUs()
+// Function:    edrvcyclic_setCycleTime()
 //
 // Description:
 //
@@ -363,7 +363,7 @@ Exit:
 //
 //---------------------------------------------------------------------------
 
-tEplKernel EdrvCyclicSetCycleLenUs (DWORD dwCycleLenUs_p)
+tEplKernel edrvcyclic_setCycleTime (UINT32 dwCycleLenUs_p)
 {
 tEplKernel      Ret = kEplSuccessful;
 
@@ -376,7 +376,7 @@ tEplKernel      Ret = kEplSuccessful;
 
 //---------------------------------------------------------------------------
 //
-// Function:    EdrvCyclicStartCycle()
+// Function:    edrvcyclic_startCycle()
 //
 // Description:
 //
@@ -388,7 +388,7 @@ tEplKernel      Ret = kEplSuccessful;
 //
 //---------------------------------------------------------------------------
 
-tEplKernel EdrvCyclicStartCycle (void)
+tEplKernel edrvcyclic_startCycle (void)
 {
 tEplKernel      Ret = kEplSuccessful;
 
@@ -422,7 +422,7 @@ Exit:
 
 //---------------------------------------------------------------------------
 //
-// Function:    EdrvCyclicStopCycle()
+// Function:    edrvcyclic_stopCycle()
 //
 // Description:
 //
@@ -434,7 +434,7 @@ Exit:
 //
 //---------------------------------------------------------------------------
 
-tEplKernel EdrvCyclicStopCycle (void)
+tEplKernel edrvcyclic_stopCycle (void)
 {
 tEplKernel      Ret = kEplSuccessful;
 
@@ -452,7 +452,7 @@ tEplKernel      Ret = kEplSuccessful;
 
 //---------------------------------------------------------------------------
 //
-// Function:    EdrvCyclicRegSyncHandler()
+// Function:    edrvcyclic_regSyncHandler()
 //
 // Description: registers handler for synchronized periodic call back
 //
@@ -465,7 +465,7 @@ tEplKernel      Ret = kEplSuccessful;
 //
 //---------------------------------------------------------------------------
 
-tEplKernel EdrvCyclicRegSyncHandler (tEdrvCyclicCbSync pfnCbSync_p)
+tEplKernel edrvcyclic_regSyncHandler (tEdrvCyclicCbSync pfnCbSync_p)
 {
 tEplKernel      Ret = kEplSuccessful;
 
@@ -480,7 +480,7 @@ tEplKernel      Ret = kEplSuccessful;
 
 //---------------------------------------------------------------------------
 //
-// Function:    EdrvCyclicRegErrorHandler()
+// Function:    edrvcyclic_regErrorHandler()
 //
 // Description: registers handler for error events
 //
@@ -493,7 +493,7 @@ tEplKernel      Ret = kEplSuccessful;
 //
 //---------------------------------------------------------------------------
 
-tEplKernel EdrvCyclicRegErrorHandler (tEdrvCyclicCbError pfnCbError_p)
+tEplKernel edrvcyclic_regErrorHandler (tEdrvCyclicCbError pfnCbError_p)
 {
 tEplKernel      Ret = kEplSuccessful;
 
@@ -508,7 +508,7 @@ tEplKernel      Ret = kEplSuccessful;
 #if EDRV_CYCLIC_USE_DIAGNOSTICS != FALSE
 //---------------------------------------------------------------------------
 //
-// Function:    EdrvCyclicGetDiagnostics()
+// Function:    edrvcyclic_getDiagnostics()
 //
 // Description: Returns diagnostic information
 //
@@ -521,7 +521,7 @@ tEplKernel      Ret = kEplSuccessful;
 //
 //---------------------------------------------------------------------------
 
-tEplKernel EdrvCyclicGetDiagnostics(tEdrvCyclicDiagnostics** ppDiagnostics_p)
+tEplKernel edrvcyclic_getDiagnostics(tEdrvCyclicDiagnostics** ppDiagnostics_p)
 {
     *ppDiagnostics_p = &EdrvCyclicInstance_l.m_Diag;
 
@@ -608,13 +608,13 @@ unsigned long long ullStartNewCycleTimeStamp;
     {
         // calculate time diffs of previous cycle
         dwCycleTime      = (DWORD) (ullStartNewCycleTimeStamp - EdrvCyclicInstance_l.m_ullStartCycleTimeStamp);
-        if (EdrvCyclicInstance_l.m_Diag.m_dwCycleTimeMin > dwCycleTime)
+        if (EdrvCyclicInstance_l.m_Diag.cycleTimeMin > dwCycleTime)
         {
-            EdrvCyclicInstance_l.m_Diag.m_dwCycleTimeMin = dwCycleTime;
+            EdrvCyclicInstance_l.m_Diag.cycleTimeMin = dwCycleTime;
         }
-        if (EdrvCyclicInstance_l.m_Diag.m_dwCycleTimeMax < dwCycleTime)
+        if (EdrvCyclicInstance_l.m_Diag.cycleTimeMax < dwCycleTime)
         {
-            EdrvCyclicInstance_l.m_Diag.m_dwCycleTimeMax = dwCycleTime;
+            EdrvCyclicInstance_l.m_Diag.cycleTimeMax = dwCycleTime;
         }
 
         if (EdrvCyclicInstance_l.m_ullLastSlotTimeStamp != 0)
@@ -622,21 +622,21 @@ unsigned long long ullStartNewCycleTimeStamp;
             dwUsedCycleTime  = (DWORD) (EdrvCyclicInstance_l.m_ullLastSlotTimeStamp - EdrvCyclicInstance_l.m_ullStartCycleTimeStamp);
             dwSpareCycleTime = (DWORD) (ullStartNewCycleTimeStamp - EdrvCyclicInstance_l.m_ullLastSlotTimeStamp);
 
-            if (EdrvCyclicInstance_l.m_Diag.m_dwUsedCycleTimeMin > dwUsedCycleTime)
+            if (EdrvCyclicInstance_l.m_Diag.usedCycleTimeMin > dwUsedCycleTime)
             {
-                EdrvCyclicInstance_l.m_Diag.m_dwUsedCycleTimeMin = dwUsedCycleTime;
+                EdrvCyclicInstance_l.m_Diag.usedCycleTimeMin = dwUsedCycleTime;
             }
-            if (EdrvCyclicInstance_l.m_Diag.m_dwUsedCycleTimeMax < dwUsedCycleTime)
+            if (EdrvCyclicInstance_l.m_Diag.usedCycleTimeMax < dwUsedCycleTime)
             {
-                EdrvCyclicInstance_l.m_Diag.m_dwUsedCycleTimeMax = dwUsedCycleTime;
+                EdrvCyclicInstance_l.m_Diag.usedCycleTimeMax = dwUsedCycleTime;
             }
-            if (EdrvCyclicInstance_l.m_Diag.m_dwSpareCycleTimeMin > dwSpareCycleTime)
+            if (EdrvCyclicInstance_l.m_Diag.spareCycleTimeMin > dwSpareCycleTime)
             {
-                EdrvCyclicInstance_l.m_Diag.m_dwSpareCycleTimeMin = dwSpareCycleTime;
+                EdrvCyclicInstance_l.m_Diag.spareCycleTimeMin = dwSpareCycleTime;
             }
-            if (EdrvCyclicInstance_l.m_Diag.m_dwSpareCycleTimeMax < dwSpareCycleTime)
+            if (EdrvCyclicInstance_l.m_Diag.spareCycleTimeMax < dwSpareCycleTime)
             {
-                EdrvCyclicInstance_l.m_Diag.m_dwSpareCycleTimeMax = dwSpareCycleTime;
+                EdrvCyclicInstance_l.m_Diag.spareCycleTimeMax = dwSpareCycleTime;
             }
         }
         else
@@ -645,27 +645,27 @@ unsigned long long ullStartNewCycleTimeStamp;
             dwSpareCycleTime = dwCycleTime;
         }
 
-        EdrvCyclicInstance_l.m_Diag.m_ullCycleTimeMeanSum      += dwCycleTime;
-        EdrvCyclicInstance_l.m_Diag.m_ullUsedCycleTimeMeanSum  += dwUsedCycleTime;
-        EdrvCyclicInstance_l.m_Diag.m_ullSpareCycleTimeMeanSum += dwSpareCycleTime;
-        EdrvCyclicInstance_l.m_Diag.m_ullCycleCount++;
+        EdrvCyclicInstance_l.m_Diag.cycleTimeMeanSum      += dwCycleTime;
+        EdrvCyclicInstance_l.m_Diag.usedCycleTimeMeanSum  += dwUsedCycleTime;
+        EdrvCyclicInstance_l.m_Diag.spareCycleTimeMeanSum += dwSpareCycleTime;
+        EdrvCyclicInstance_l.m_Diag.cycleCount++;
 
         // sample previous cycle if deviations exceed threshold
-        if (    (EdrvCyclicInstance_l.m_Diag.m_uiSampleNum == 0) /* sample first cycle for start time */
+        if (    (EdrvCyclicInstance_l.m_Diag.sampleNum == 0) /* sample first cycle for start time */
                 || (abs(dwCycleTime - EdrvCyclicInstance_l.m_dwCycleLenUs * 1000) > EDRV_CYCLIC_SAMPLE_TH_CYCLE_TIME_DIFF_US * 1000)
                 || (dwSpareCycleTime < EDRV_CYCLIC_SAMPLE_TH_SPARE_TIME_US * 1000))
         {
         unsigned int uiSampleNo = EdrvCyclicInstance_l.m_uiSampleNo;
 
-            EdrvCyclicInstance_l.m_Diag.m_aullSampleTimeStamp[uiSampleNo] = EdrvCyclicInstance_l.m_ullStartCycleTimeStamp;
-            EdrvCyclicInstance_l.m_Diag.m_adwCycleTime[uiSampleNo]       = dwCycleTime;
-            EdrvCyclicInstance_l.m_Diag.m_adwUsedCycleTime[uiSampleNo]   = dwUsedCycleTime;
-            EdrvCyclicInstance_l.m_Diag.m_adwSpareCycleTime[uiSampleNo]  = dwSpareCycleTime;
+            EdrvCyclicInstance_l.m_Diag.aSampleTimeStamp[uiSampleNo] = EdrvCyclicInstance_l.m_ullStartCycleTimeStamp;
+            EdrvCyclicInstance_l.m_Diag.aCycleTime[uiSampleNo]       = dwCycleTime;
+            EdrvCyclicInstance_l.m_Diag.aUsedCycleTime[uiSampleNo]   = dwUsedCycleTime;
+            EdrvCyclicInstance_l.m_Diag.aSpareCycleTime[uiSampleNo]  = dwSpareCycleTime;
 
-            EdrvCyclicInstance_l.m_Diag.m_uiSampleNum++;
-            if (EdrvCyclicInstance_l.m_Diag.m_uiSampleBufferedNum != EDRV_CYCLIC_SAMPLE_NUM)
+            EdrvCyclicInstance_l.m_Diag.sampleNum++;
+            if (EdrvCyclicInstance_l.m_Diag.sampleBufferedNum != EDRV_CYCLIC_SAMPLE_NUM)
             {
-                EdrvCyclicInstance_l.m_Diag.m_uiSampleBufferedNum++;
+                EdrvCyclicInstance_l.m_Diag.sampleBufferedNum++;
             }
 
             EdrvCyclicInstance_l.m_uiSampleNo++;
@@ -723,7 +723,7 @@ tEdrvTxBuffer*  pTxBuffer = NULL;
 #endif
 
     pTxBuffer = EdrvCyclicInstance_l.m_paTxBufferList[EdrvCyclicInstance_l.m_uiCurTxBufferEntry];
-    Ret = EdrvSendTxMsg(pTxBuffer);
+    Ret = edrv_sendTxBuffer(pTxBuffer);
     if (Ret != kEplSuccessful)
     {
         goto Exit;
@@ -767,9 +767,9 @@ tEdrvTxBuffer*  pTxBuffer;
 
     while ((pTxBuffer = EdrvCyclicInstance_l.m_paTxBufferList[EdrvCyclicInstance_l.m_uiCurTxBufferEntry]) != NULL)
     {
-        if (pTxBuffer->m_dwTimeOffsetNs == 0)
+        if (pTxBuffer->timeOffsetNs == 0)
         {
-            Ret = EdrvSendTxMsg(pTxBuffer);
+            Ret = edrv_sendTxBuffer(pTxBuffer);
             if (Ret != kEplSuccessful)
             {
                 goto Exit;
@@ -778,7 +778,7 @@ tEdrvTxBuffer*  pTxBuffer;
         else
         {
             Ret = EplTimerHighReskModifyTimerNs(&EdrvCyclicInstance_l.m_TimerHdlSlot,
-                pTxBuffer->m_dwTimeOffsetNs,
+                pTxBuffer->timeOffsetNs,
                 EdrvCyclicCbTimerSlot,
                 0L,
                 FALSE);

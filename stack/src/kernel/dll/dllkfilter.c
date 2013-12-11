@@ -102,9 +102,9 @@ The function sets up an ASnd filter in the Edrv filter structure.
 //------------------------------------------------------------------------------
 void dllk_setupAsndFilter(tEdrvFilter* pFilter_p)
 {
-    AmiSetQword48ToBe(&pFilter_p->m_abFilterValue[0], EPL_C_DLL_MULTICAST_ASND);
-    AmiSetQword48ToBe(&pFilter_p->m_abFilterMask[0],  EPL_DLL_MACADDR_MASK);
-    pFilter_p->m_fEnable = TRUE;
+    AmiSetQword48ToBe(&pFilter_p->aFilterValue[0], EPL_C_DLL_MULTICAST_ASND);
+    AmiSetQword48ToBe(&pFilter_p->aFilterMask[0],  EPL_DLL_MACADDR_MASK);
+    pFilter_p->fEnable = TRUE;
 }
 
 //------------------------------------------------------------------------------
@@ -120,9 +120,9 @@ The function sets up an SoC filter in the Edrv filter structure.
 //------------------------------------------------------------------------------
 void dllk_setupSocFilter(tEdrvFilter* pFilter_p)
 {
-    AmiSetQword48ToBe(&pFilter_p->m_abFilterValue[0], EPL_C_DLL_MULTICAST_SOC);
-    AmiSetQword48ToBe(&pFilter_p->m_abFilterMask[0], EPL_DLL_MACADDR_MASK);
-    pFilter_p->m_fEnable = TRUE;
+    AmiSetQword48ToBe(&pFilter_p->aFilterValue[0], EPL_C_DLL_MULTICAST_SOC);
+    AmiSetQword48ToBe(&pFilter_p->aFilterMask[0], EPL_DLL_MACADDR_MASK);
+    pFilter_p->fEnable = TRUE;
 }
 
 //------------------------------------------------------------------------------
@@ -138,9 +138,9 @@ The function sets up an SoA filter in the Edrv filter structure.
 //------------------------------------------------------------------------------
 void dllk_setupSoaFilter(tEdrvFilter* pFilter_p)
 {
-    AmiSetQword48ToBe(&pFilter_p->m_abFilterValue[0], EPL_C_DLL_MULTICAST_SOA);
-    AmiSetQword48ToBe(&pFilter_p->m_abFilterMask[0], EPL_DLL_MACADDR_MASK);
-    pFilter_p->m_fEnable = TRUE;
+    AmiSetQword48ToBe(&pFilter_p->aFilterValue[0], EPL_C_DLL_MULTICAST_SOA);
+    AmiSetQword48ToBe(&pFilter_p->aFilterMask[0], EPL_DLL_MACADDR_MASK);
+    pFilter_p->fEnable = TRUE;
 }
 
 //------------------------------------------------------------------------------
@@ -158,18 +158,18 @@ The function sets up an IdentReq SoA filter in the Edrv filter structure.
 //------------------------------------------------------------------------------
 void dllk_setupSoaIdentReqFilter(tEdrvFilter* pFilter_p, UINT nodeId_p, tEdrvTxBuffer *pBuffer_p)
 {
-    AmiSetQword48ToBe   (&pFilter_p->m_abFilterValue[0],    EPL_C_DLL_MULTICAST_SOA);
-    AmiSetQword48ToBe   (&pFilter_p->m_abFilterMask[0],     EPL_DLL_MACADDR_MASK);
-    AmiSetWordToBe      (&pFilter_p->m_abFilterValue[12],   EPL_C_DLL_ETHERTYPE_EPL);
-    AmiSetWordToBe      (&pFilter_p->m_abFilterMask[12],    0xFFFF);
-    AmiSetByteToBe      (&pFilter_p->m_abFilterValue[14],   kEplMsgTypeSoa);
-    AmiSetByteToBe      (&pFilter_p->m_abFilterMask[14],    0xFF);
-    AmiSetByteToBe      (&pFilter_p->m_abFilterValue[20],   kDllReqServiceIdent);
-    AmiSetByteToBe      (&pFilter_p->m_abFilterMask[20],    0xFF);
-    AmiSetByteToBe      (&pFilter_p->m_abFilterValue[21],   (UINT8)nodeId_p);
-    AmiSetByteToBe      (&pFilter_p->m_abFilterMask[21],    0xFF);
-    pFilter_p->m_pTxBuffer = pBuffer_p;
-    pFilter_p->m_fEnable = FALSE;
+    AmiSetQword48ToBe   (&pFilter_p->aFilterValue[0],    EPL_C_DLL_MULTICAST_SOA);
+    AmiSetQword48ToBe   (&pFilter_p->aFilterMask[0],     EPL_DLL_MACADDR_MASK);
+    AmiSetWordToBe      (&pFilter_p->aFilterValue[12],   EPL_C_DLL_ETHERTYPE_EPL);
+    AmiSetWordToBe      (&pFilter_p->aFilterMask[12],    0xFFFF);
+    AmiSetByteToBe      (&pFilter_p->aFilterValue[14],   kEplMsgTypeSoa);
+    AmiSetByteToBe      (&pFilter_p->aFilterMask[14],    0xFF);
+    AmiSetByteToBe      (&pFilter_p->aFilterValue[20],   kDllReqServiceIdent);
+    AmiSetByteToBe      (&pFilter_p->aFilterMask[20],    0xFF);
+    AmiSetByteToBe      (&pFilter_p->aFilterValue[21],   (UINT8)nodeId_p);
+    AmiSetByteToBe      (&pFilter_p->aFilterMask[21],    0xFF);
+    pFilter_p->pTxBuffer = pBuffer_p;
+    pFilter_p->fEnable = FALSE;
 }
 
 //------------------------------------------------------------------------------
@@ -187,18 +187,18 @@ The function sets up an StatusReq SoA filter in the Edrv filter structure.
 //------------------------------------------------------------------------------
 void dllk_setupSoaStatusReqFilter(tEdrvFilter* pFilter_p, UINT nodeId_p, tEdrvTxBuffer *pBuffer_p)
 {
-    AmiSetQword48ToBe   (&pFilter_p->m_abFilterValue[0],    EPL_C_DLL_MULTICAST_SOA);
-    AmiSetQword48ToBe   (&pFilter_p->m_abFilterMask[0],     EPL_DLL_MACADDR_MASK);
-    AmiSetWordToBe      (&pFilter_p->m_abFilterValue[12],   EPL_C_DLL_ETHERTYPE_EPL);
-    AmiSetWordToBe      (&pFilter_p->m_abFilterMask[12],    0xFFFF);
-    AmiSetByteToBe      (&pFilter_p->m_abFilterValue[14],   kEplMsgTypeSoa);
-    AmiSetByteToBe      (&pFilter_p->m_abFilterMask[14],    0xFF);
-    AmiSetByteToBe      (&pFilter_p->m_abFilterValue[20],   kDllReqServiceStatus);
-    AmiSetByteToBe      (&pFilter_p->m_abFilterMask[20],    0xFF);
-    AmiSetByteToBe      (&pFilter_p->m_abFilterValue[21],   (UINT8)nodeId_p);
-    AmiSetByteToBe      (&pFilter_p->m_abFilterMask[21],    0xFF);
-    pFilter_p->m_pTxBuffer = pBuffer_p;
-    pFilter_p->m_fEnable = FALSE;
+    AmiSetQword48ToBe   (&pFilter_p->aFilterValue[0],    EPL_C_DLL_MULTICAST_SOA);
+    AmiSetQword48ToBe   (&pFilter_p->aFilterMask[0],     EPL_DLL_MACADDR_MASK);
+    AmiSetWordToBe      (&pFilter_p->aFilterValue[12],   EPL_C_DLL_ETHERTYPE_EPL);
+    AmiSetWordToBe      (&pFilter_p->aFilterMask[12],    0xFFFF);
+    AmiSetByteToBe      (&pFilter_p->aFilterValue[14],   kEplMsgTypeSoa);
+    AmiSetByteToBe      (&pFilter_p->aFilterMask[14],    0xFF);
+    AmiSetByteToBe      (&pFilter_p->aFilterValue[20],   kDllReqServiceStatus);
+    AmiSetByteToBe      (&pFilter_p->aFilterMask[20],    0xFF);
+    AmiSetByteToBe      (&pFilter_p->aFilterValue[21],   (UINT8)nodeId_p);
+    AmiSetByteToBe      (&pFilter_p->aFilterMask[21],    0xFF);
+    pFilter_p->pTxBuffer = pBuffer_p;
+    pFilter_p->fEnable = FALSE;
 }
 
 //------------------------------------------------------------------------------
@@ -216,18 +216,18 @@ The function sets up an NmtReq SoA filter in the Edrv filter structure.
 //------------------------------------------------------------------------------
 void dllk_setupSoaNmtReqFilter(tEdrvFilter* pFilter_p, UINT nodeId_p, tEdrvTxBuffer *pBuffer_p)
 {
-    AmiSetQword48ToBe   (&pFilter_p->m_abFilterValue[0],    EPL_C_DLL_MULTICAST_SOA);
-    AmiSetQword48ToBe   (&pFilter_p->m_abFilterMask[0],     EPL_DLL_MACADDR_MASK);
-    AmiSetWordToBe      (&pFilter_p->m_abFilterValue[12],   EPL_C_DLL_ETHERTYPE_EPL);
-    AmiSetWordToBe      (&pFilter_p->m_abFilterMask[12],    0xFFFF);
-    AmiSetByteToBe      (&pFilter_p->m_abFilterValue[14],   kEplMsgTypeSoa);
-    AmiSetByteToBe      (&pFilter_p->m_abFilterMask[14],    0xFF);
-    AmiSetByteToBe      (&pFilter_p->m_abFilterValue[20],   kDllReqServiceNmtRequest);
-    AmiSetByteToBe      (&pFilter_p->m_abFilterMask[20],    0xFF);
-    AmiSetByteToBe      (&pFilter_p->m_abFilterValue[21],   (UINT8)nodeId_p);
-    AmiSetByteToBe      (&pFilter_p->m_abFilterMask[21],    0xFF);
-    pFilter_p->m_pTxBuffer = pBuffer_p;
-    pFilter_p->m_fEnable = FALSE;
+    AmiSetQword48ToBe   (&pFilter_p->aFilterValue[0],    EPL_C_DLL_MULTICAST_SOA);
+    AmiSetQword48ToBe   (&pFilter_p->aFilterMask[0],     EPL_DLL_MACADDR_MASK);
+    AmiSetWordToBe      (&pFilter_p->aFilterValue[12],   EPL_C_DLL_ETHERTYPE_EPL);
+    AmiSetWordToBe      (&pFilter_p->aFilterMask[12],    0xFFFF);
+    AmiSetByteToBe      (&pFilter_p->aFilterValue[14],   kEplMsgTypeSoa);
+    AmiSetByteToBe      (&pFilter_p->aFilterMask[14],    0xFF);
+    AmiSetByteToBe      (&pFilter_p->aFilterValue[20],   kDllReqServiceNmtRequest);
+    AmiSetByteToBe      (&pFilter_p->aFilterMask[20],    0xFF);
+    AmiSetByteToBe      (&pFilter_p->aFilterValue[21],   (UINT8)nodeId_p);
+    AmiSetByteToBe      (&pFilter_p->aFilterMask[21],    0xFF);
+    pFilter_p->pTxBuffer = pBuffer_p;
+    pFilter_p->fEnable = FALSE;
 }
 
 
@@ -247,18 +247,18 @@ The function sets up an SyncReq SoA filter in the Edrv filter structure.
 //------------------------------------------------------------------------------
 void dllk_setupSoaSyncReqFilter(tEdrvFilter* pFilter_p, UINT nodeId_p, tEdrvTxBuffer *pBuffer_p)
 {
-    AmiSetQword48ToBe   (&pFilter_p->m_abFilterValue[0],    EPL_C_DLL_MULTICAST_SOA);
-    AmiSetQword48ToBe   (&pFilter_p->m_abFilterMask[0],     EPL_DLL_MACADDR_MASK);
-    AmiSetWordToBe      (&pFilter_p->m_abFilterValue[12],   EPL_C_DLL_ETHERTYPE_EPL);
-    AmiSetWordToBe      (&pFilter_p->m_abFilterMask[12],    0xFFFF);
-    AmiSetByteToBe      (&pFilter_p->m_abFilterValue[14],   kEplMsgTypeSoa);
-    AmiSetByteToBe      (&pFilter_p->m_abFilterMask[14],    0xFF);
-    AmiSetByteToBe      (&pFilter_p->m_abFilterValue[20],   kDllReqServiceSync);
-    AmiSetByteToBe      (&pFilter_p->m_abFilterMask[20],    0xFF);
-    AmiSetByteToBe      (&pFilter_p->m_abFilterValue[21],   (UINT8)nodeId_p);
-    AmiSetByteToBe      (&pFilter_p->m_abFilterMask[21],    0xFF);
-    pFilter_p->m_pTxBuffer = pBuffer_p;
-    pFilter_p->m_fEnable = FALSE;
+    AmiSetQword48ToBe   (&pFilter_p->aFilterValue[0],    EPL_C_DLL_MULTICAST_SOA);
+    AmiSetQword48ToBe   (&pFilter_p->aFilterMask[0],     EPL_DLL_MACADDR_MASK);
+    AmiSetWordToBe      (&pFilter_p->aFilterValue[12],   EPL_C_DLL_ETHERTYPE_EPL);
+    AmiSetWordToBe      (&pFilter_p->aFilterMask[12],    0xFFFF);
+    AmiSetByteToBe      (&pFilter_p->aFilterValue[14],   kEplMsgTypeSoa);
+    AmiSetByteToBe      (&pFilter_p->aFilterMask[14],    0xFF);
+    AmiSetByteToBe      (&pFilter_p->aFilterValue[20],   kDllReqServiceSync);
+    AmiSetByteToBe      (&pFilter_p->aFilterMask[20],    0xFF);
+    AmiSetByteToBe      (&pFilter_p->aFilterValue[21],   (UINT8)nodeId_p);
+    AmiSetByteToBe      (&pFilter_p->aFilterMask[21],    0xFF);
+    pFilter_p->pTxBuffer = pBuffer_p;
+    pFilter_p->fEnable = FALSE;
 }
 #endif
 
@@ -277,18 +277,18 @@ The function sets up an Unspecific SoA filter in the Edrv filter structure.
 //------------------------------------------------------------------------------
 void dllk_setupSoaUnspecReqFilter(tEdrvFilter* pFilter_p, UINT nodeId_p, tEdrvTxBuffer *pBuffer_p)
 {
-    AmiSetQword48ToBe   (&pFilter_p->m_abFilterValue[0],    EPL_C_DLL_MULTICAST_SOA);
-    AmiSetQword48ToBe   (&pFilter_p->m_abFilterMask[0],     EPL_DLL_MACADDR_MASK);
-    AmiSetWordToBe      (&pFilter_p->m_abFilterValue[12],   EPL_C_DLL_ETHERTYPE_EPL);
-    AmiSetWordToBe      (&pFilter_p->m_abFilterMask[12],    0xFFFF);
-    AmiSetByteToBe      (&pFilter_p->m_abFilterValue[14],   kEplMsgTypeSoa);
-    AmiSetByteToBe      (&pFilter_p->m_abFilterMask[14],    0xFF);
-    AmiSetByteToBe      (&pFilter_p->m_abFilterValue[20],   kDllReqServiceUnspecified);
-    AmiSetByteToBe      (&pFilter_p->m_abFilterMask[20],    0xFF);
-    AmiSetByteToBe      (&pFilter_p->m_abFilterValue[21],   (UINT8)nodeId_p);
-    AmiSetByteToBe      (&pFilter_p->m_abFilterMask[21],    0xFF);
-    pFilter_p->m_pTxBuffer = pBuffer_p;
-    pFilter_p->m_fEnable = FALSE;
+    AmiSetQword48ToBe   (&pFilter_p->aFilterValue[0],    EPL_C_DLL_MULTICAST_SOA);
+    AmiSetQword48ToBe   (&pFilter_p->aFilterMask[0],     EPL_DLL_MACADDR_MASK);
+    AmiSetWordToBe      (&pFilter_p->aFilterValue[12],   EPL_C_DLL_ETHERTYPE_EPL);
+    AmiSetWordToBe      (&pFilter_p->aFilterMask[12],    0xFFFF);
+    AmiSetByteToBe      (&pFilter_p->aFilterValue[14],   kEplMsgTypeSoa);
+    AmiSetByteToBe      (&pFilter_p->aFilterMask[14],    0xFF);
+    AmiSetByteToBe      (&pFilter_p->aFilterValue[20],   kDllReqServiceUnspecified);
+    AmiSetByteToBe      (&pFilter_p->aFilterMask[20],    0xFF);
+    AmiSetByteToBe      (&pFilter_p->aFilterValue[21],   (UINT8)nodeId_p);
+    AmiSetByteToBe      (&pFilter_p->aFilterMask[21],    0xFF);
+    pFilter_p->pTxBuffer = pBuffer_p;
+    pFilter_p->fEnable = FALSE;
 }
 
 //------------------------------------------------------------------------------
@@ -305,13 +305,13 @@ The function sets up a PRes filter in the Edrv filter structure.
 //------------------------------------------------------------------------------
 void dllk_setupPresFilter(tEdrvFilter* pFilter_p, BOOL fEnable_p)
 {
-    AmiSetQword48ToBe   (&pFilter_p->m_abFilterValue[0],    EPL_C_DLL_MULTICAST_PRES);
-    AmiSetQword48ToBe   (&pFilter_p->m_abFilterMask[0],     EPL_DLL_MACADDR_MASK);
-    AmiSetWordToBe      (&pFilter_p->m_abFilterValue[12],   EPL_C_DLL_ETHERTYPE_EPL);
-    AmiSetWordToBe      (&pFilter_p->m_abFilterMask[12],    0xFFFF);
-    AmiSetByteToBe      (&pFilter_p->m_abFilterValue[14],   kEplMsgTypePres);
-    AmiSetByteToBe      (&pFilter_p->m_abFilterMask[14],    0xFF);
-    pFilter_p->m_fEnable = fEnable_p;
+    AmiSetQword48ToBe   (&pFilter_p->aFilterValue[0],    EPL_C_DLL_MULTICAST_PRES);
+    AmiSetQword48ToBe   (&pFilter_p->aFilterMask[0],     EPL_DLL_MACADDR_MASK);
+    AmiSetWordToBe      (&pFilter_p->aFilterValue[12],   EPL_C_DLL_ETHERTYPE_EPL);
+    AmiSetWordToBe      (&pFilter_p->aFilterMask[12],    0xFFFF);
+    AmiSetByteToBe      (&pFilter_p->aFilterValue[14],   kEplMsgTypePres);
+    AmiSetByteToBe      (&pFilter_p->aFilterMask[14],    0xFF);
+    pFilter_p->fEnable = fEnable_p;
 }
 
 //------------------------------------------------------------------------------
@@ -330,18 +330,18 @@ The function sets up an PReq filter in the Edrv filter structure.
 //------------------------------------------------------------------------------
 void dllk_setupPreqFilter(tEdrvFilter* pFilter_p, UINT nodeId_p, tEdrvTxBuffer *pBuffer_p, UINT8* pMacAdrs_p)
 {
-    EPL_MEMCPY(&pFilter_p->m_abFilterValue[0], pMacAdrs_p, 6);
-    AmiSetQword48ToBe   (&pFilter_p->m_abFilterMask[0],     EPL_DLL_MACADDR_MASK);
-    AmiSetWordToBe      (&pFilter_p->m_abFilterValue[12],   EPL_C_DLL_ETHERTYPE_EPL);
-    AmiSetWordToBe      (&pFilter_p->m_abFilterMask[12],    0xFFFF);
-    AmiSetByteToBe      (&pFilter_p->m_abFilterValue[14],   kEplMsgTypePreq);
-    AmiSetByteToBe      (&pFilter_p->m_abFilterMask[14],    0xFF);
-    AmiSetByteToBe      (&pFilter_p->m_abFilterValue[15],   (UINT8)nodeId_p);
-    AmiSetByteToBe      (&pFilter_p->m_abFilterMask[15],    0xFF);
-    AmiSetByteToBe      (&pFilter_p->m_abFilterValue[16],   EPL_C_ADR_MN_DEF_NODE_ID);
-    AmiSetByteToBe      (&pFilter_p->m_abFilterMask[16],    0xFF);
-    pFilter_p->m_pTxBuffer = pBuffer_p;
-    pFilter_p->m_fEnable = FALSE;
+    EPL_MEMCPY(&pFilter_p->aFilterValue[0], pMacAdrs_p, 6);
+    AmiSetQword48ToBe   (&pFilter_p->aFilterMask[0],     EPL_DLL_MACADDR_MASK);
+    AmiSetWordToBe      (&pFilter_p->aFilterValue[12],   EPL_C_DLL_ETHERTYPE_EPL);
+    AmiSetWordToBe      (&pFilter_p->aFilterMask[12],    0xFFFF);
+    AmiSetByteToBe      (&pFilter_p->aFilterValue[14],   kEplMsgTypePreq);
+    AmiSetByteToBe      (&pFilter_p->aFilterMask[14],    0xFF);
+    AmiSetByteToBe      (&pFilter_p->aFilterValue[15],   (UINT8)nodeId_p);
+    AmiSetByteToBe      (&pFilter_p->aFilterMask[15],    0xFF);
+    AmiSetByteToBe      (&pFilter_p->aFilterValue[16],   EPL_C_ADR_MN_DEF_NODE_ID);
+    AmiSetByteToBe      (&pFilter_p->aFilterMask[16],    0xFF);
+    pFilter_p->pTxBuffer = pBuffer_p;
+    pFilter_p->fEnable = FALSE;
 }
 
 #if EPL_NMT_MAX_NODE_ID > 0
@@ -388,8 +388,8 @@ tEplKernel dllk_addNodeFilter(tDllkNodeInfo* pIntNodeInfo_p, tDllNodeOpType node
             if (dllkInstance_g.usedPresFilterCount == 1)
             {
                 // enable PRes Rx filter
-                dllkInstance_g.aFilter[DLLK_FILTER_PRES].m_fEnable = TRUE;
-                ret = EdrvChangeFilter(dllkInstance_g.aFilter, DLLK_FILTER_COUNT,
+                dllkInstance_g.aFilter[DLLK_FILTER_PRES].fEnable = TRUE;
+                ret = edrv_changeRxFilter(dllkInstance_g.aFilter, DLLK_FILTER_COUNT,
                                        DLLK_FILTER_PRES, EDRV_FILTER_CHANGE_STATE);
                 if (ret != kEplSuccessful)
                     goto Exit;
@@ -399,13 +399,13 @@ tEplKernel dllk_addNodeFilter(tDllkNodeInfo* pIntNodeInfo_p, tDllNodeOpType node
             UINT        handle;
             for (handle = DLLK_FILTER_PRES; handle < DLLK_FILTER_COUNT; handle++)
             {
-                if (AmiGetByteFromLe(&dllkInstance_g.aFilter[handle].m_abFilterValue[16]) == EPL_C_ADR_INVALID)
+                if (AmiGetByteFromLe(&dllkInstance_g.aFilter[handle].aFilterValue[16]) == EPL_C_ADR_INVALID)
                 {
-                    AmiSetByteToBe(&dllkInstance_g.aFilter[handle].m_abFilterValue[16],
+                    AmiSetByteToBe(&dllkInstance_g.aFilter[handle].aFilterValue[16],
                                    pIntNodeInfo_p->nodeId);
-                    dllkInstance_g.aFilter[handle].m_fEnable = TRUE;
+                    dllkInstance_g.aFilter[handle].fEnable = TRUE;
 
-                    ret = EdrvChangeFilter(dllkInstance_g.aFilter, DLLK_FILTER_COUNT,
+                    ret = edrv_changeRxFilter(dllkInstance_g.aFilter, DLLK_FILTER_COUNT,
                                            handle, (EDRV_FILTER_CHANGE_STATE | EDRV_FILTER_CHANGE_VALUE));
                     if (ret != kEplSuccessful)
                         goto Exit;
@@ -468,8 +468,8 @@ tEplKernel dllk_deleteNodeFilter(tDllkNodeInfo* pIntNodeInfo_p, tDllNodeOpType n
             if (dllkInstance_g.usedPresFilterCount == 0)
             {
                 // disable PRes Rx filter
-                dllkInstance_g.aFilter[DLLK_FILTER_PRES].m_fEnable = FALSE;
-                ret = EdrvChangeFilter(dllkInstance_g.aFilter, DLLK_FILTER_COUNT,
+                dllkInstance_g.aFilter[DLLK_FILTER_PRES].fEnable = FALSE;
+                ret = edrv_changeRxFilter(dllkInstance_g.aFilter, DLLK_FILTER_COUNT,
                                        DLLK_FILTER_PRES, EDRV_FILTER_CHANGE_STATE);
                 if (ret != kEplSuccessful)
                     goto Exit;
@@ -480,13 +480,13 @@ tEplKernel dllk_deleteNodeFilter(tDllkNodeInfo* pIntNodeInfo_p, tDllNodeOpType n
 
             for (handle = DLLK_FILTER_PRES; handle < DLLK_FILTER_COUNT; handle++)
             {
-                if (AmiGetByteFromLe(&dllkInstance_g.aFilter[handle].m_abFilterValue[16]) ==
+                if (AmiGetByteFromLe(&dllkInstance_g.aFilter[handle].aFilterValue[16]) ==
                                                 pIntNodeInfo_p->nodeId)
                 {
-                    AmiSetByteToBe(&dllkInstance_g.aFilter[handle].m_abFilterValue[16], EPL_C_ADR_INVALID);
-                    dllkInstance_g.aFilter[handle].m_fEnable = FALSE;
+                    AmiSetByteToBe(&dllkInstance_g.aFilter[handle].aFilterValue[16], EPL_C_ADR_INVALID);
+                    dllkInstance_g.aFilter[handle].fEnable = FALSE;
 
-                    ret = EdrvChangeFilter(dllkInstance_g.aFilter, DLLK_FILTER_COUNT,
+                    ret = edrv_changeRxFilter(dllkInstance_g.aFilter, DLLK_FILTER_COUNT,
                                            handle, EDRV_FILTER_CHANGE_STATE);
                     if (ret != kEplSuccessful)
                         goto Exit;

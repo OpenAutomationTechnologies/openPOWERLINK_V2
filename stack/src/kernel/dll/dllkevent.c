@@ -364,23 +364,23 @@ static tEplKernel processNmtStateChange(tNmtState newNmtState_p, tNmtState oldNm
             // enable IdentRes and StatusRes
 #if (EDRV_AUTO_RESPONSE != FALSE)
             // enable corresponding Rx filter
-            dllkInstance_g.aFilter[DLLK_FILTER_SOA_STATREQ].m_fEnable = TRUE;
-            ret = EdrvChangeFilter(dllkInstance_g.aFilter, DLLK_FILTER_COUNT,
+            dllkInstance_g.aFilter[DLLK_FILTER_SOA_STATREQ].fEnable = TRUE;
+            ret = edrv_changeRxFilter(dllkInstance_g.aFilter, DLLK_FILTER_COUNT,
                                    DLLK_FILTER_SOA_STATREQ, EDRV_FILTER_CHANGE_STATE);
             if (ret != kEplSuccessful)
                 return ret;
 
             // enable corresponding Rx filter
-            dllkInstance_g.aFilter[DLLK_FILTER_SOA_IDREQ].m_fEnable = TRUE;
-            ret = EdrvChangeFilter(dllkInstance_g.aFilter, DLLK_FILTER_COUNT,
+            dllkInstance_g.aFilter[DLLK_FILTER_SOA_IDREQ].fEnable = TRUE;
+            ret = edrv_changeRxFilter(dllkInstance_g.aFilter, DLLK_FILTER_COUNT,
                                    DLLK_FILTER_SOA_IDREQ, EDRV_FILTER_CHANGE_STATE);
             if (ret != kEplSuccessful)
                 return ret;
 
 #if EPL_DLL_PRES_CHAINING_CN != FALSE
             // enable SyncReq Rx filter
-            dllkInstance_g.aFilter[DLLK_FILTER_SOA_SYNCREQ].m_fEnable = TRUE;
-            ret = EdrvChangeFilter(dllkInstance_g.aFilter, DLLK_FILTER_COUNT,
+            dllkInstance_g.aFilter[DLLK_FILTER_SOA_SYNCREQ].fEnable = TRUE;
+            ret = edrv_changeRxFilter(dllkInstance_g.aFilter, DLLK_FILTER_COUNT,
                                    DLLK_FILTER_SOA_SYNCREQ, EDRV_FILTER_CHANGE_STATE);
             if (ret != kEplSuccessful)
                 return ret;
@@ -401,9 +401,9 @@ static tEplKernel processNmtStateChange(tNmtState newNmtState_p, tNmtState oldNm
             // enable PRes (for sudden changes to PreOp2)
 #if (EDRV_AUTO_RESPONSE != FALSE)
             // enable corresponding Rx filter
-            dllkInstance_g.aFilter[DLLK_FILTER_PREQ].m_fEnable = TRUE;
-            dllkInstance_g.aFilter[DLLK_FILTER_PREQ].m_pTxBuffer = &dllkInstance_g.pTxBuffer[DLLK_TXFRAME_PRES];
-            ret = EdrvChangeFilter(dllkInstance_g.aFilter, DLLK_FILTER_COUNT,
+            dllkInstance_g.aFilter[DLLK_FILTER_PREQ].fEnable = TRUE;
+            dllkInstance_g.aFilter[DLLK_FILTER_PREQ].pTxBuffer = &dllkInstance_g.pTxBuffer[DLLK_TXFRAME_PRES];
+            ret = edrv_changeRxFilter(dllkInstance_g.aFilter, DLLK_FILTER_COUNT,
                                    DLLK_FILTER_PREQ, EDRV_FILTER_CHANGE_STATE | EDRV_FILTER_CHANGE_AUTO_RESPONSE);
             if (ret != kEplSuccessful)
                 return ret;
@@ -418,9 +418,9 @@ static tEplKernel processNmtStateChange(tNmtState newNmtState_p, tNmtState oldNm
             // enable PRes (necessary if coming from Stopped)
 #if (EDRV_AUTO_RESPONSE != FALSE)
             // enable corresponding Rx filter
-            dllkInstance_g.aFilter[DLLK_FILTER_PREQ].m_fEnable = TRUE;
-            dllkInstance_g.aFilter[DLLK_FILTER_PREQ].m_pTxBuffer = &dllkInstance_g.pTxBuffer[DLLK_TXFRAME_PRES];
-            ret = EdrvChangeFilter(dllkInstance_g.aFilter, DLLK_FILTER_COUNT,
+            dllkInstance_g.aFilter[DLLK_FILTER_PREQ].fEnable = TRUE;
+            dllkInstance_g.aFilter[DLLK_FILTER_PREQ].pTxBuffer = &dllkInstance_g.pTxBuffer[DLLK_TXFRAME_PRES];
+            ret = edrv_changeRxFilter(dllkInstance_g.aFilter, DLLK_FILTER_COUNT,
                                    DLLK_FILTER_PREQ, EDRV_FILTER_CHANGE_STATE | EDRV_FILTER_CHANGE_AUTO_RESPONSE);
             if (ret != kEplSuccessful)
                 return ret;
@@ -438,7 +438,7 @@ static tEplKernel processNmtStateChange(tNmtState newNmtState_p, tNmtState oldNm
             if ((ret = controlPdokcalSync(FALSE)) != kEplSuccessful)
                 return ret;
 
-            ret = EdrvCyclicStopCycle();
+            ret = edrvcyclic_stopCycle();
             if (ret != kEplSuccessful)
                 return ret;
 
@@ -488,8 +488,8 @@ static tEplKernel processNmtStateChange(tNmtState newNmtState_p, tNmtState oldNm
 
 #if (EDRV_AUTO_RESPONSE != FALSE)
             // disable auto-response for PRes filter
-            dllkInstance_g.aFilter[DLLK_FILTER_PREQ].m_pTxBuffer = NULL;
-            ret = EdrvChangeFilter(dllkInstance_g.aFilter, DLLK_FILTER_COUNT,
+            dllkInstance_g.aFilter[DLLK_FILTER_PREQ].pTxBuffer = NULL;
+            ret = edrv_changeRxFilter(dllkInstance_g.aFilter, DLLK_FILTER_COUNT,
                                    DLLK_FILTER_PREQ, EDRV_FILTER_CHANGE_AUTO_RESPONSE);
             if (ret != kEplSuccessful)
                 return ret;
@@ -618,31 +618,31 @@ static tEplKernel processFillTx(tDllAsyncReqPriority asyncReqPriority_p, tNmtSta
         break;
     }
 
-    if (pTxBuffer->m_pbBuffer != NULL)
+    if (pTxBuffer->pBuffer != NULL)
     {   // NmtRequest or non-EPL frame does exist
         // check if frame is empty and not being filled
-        if (pTxBuffer->m_uiTxMsgLen == DLLK_BUFLEN_EMPTY)
+        if (pTxBuffer->txFrameSize == DLLK_BUFLEN_EMPTY)
         {
-            pTxBuffer->m_uiTxMsgLen = DLLK_BUFLEN_FILLING;      // mark Tx buffer as filling is in process
-            frameSize = pTxBuffer->m_uiMaxBufferLen;            // set max buffer size as input parameter
+            pTxBuffer->txFrameSize = DLLK_BUFLEN_FILLING;      // mark Tx buffer as filling is in process
+            frameSize = pTxBuffer->maxBufferSize;            // set max buffer size as input parameter
 
             // copy frame from shared loop buffer to Tx buffer
-            ret = dllkcal_getAsyncTxFrame(pTxBuffer->m_pbBuffer, &frameSize, asyncReqPriority_p);
+            ret = dllkcal_getAsyncTxFrame(pTxBuffer->pBuffer, &frameSize, asyncReqPriority_p);
             if (ret == kEplSuccessful)
             {
-                pTxFrame = (tEplFrame *) pTxBuffer->m_pbBuffer;
+                pTxFrame = (tEplFrame *) pTxBuffer->pBuffer;
                 ret = dllk_checkFrame(pTxFrame, frameSize);
 
-                pTxBuffer->m_uiTxMsgLen = frameSize;    // set buffer valid
+                pTxBuffer->txFrameSize = frameSize;    // set buffer valid
 
 #if (EDRV_AUTO_RESPONSE != FALSE)
                 if ((nmtState_p & (NMT_TYPE_MASK | NMT_SUPERSTATE_MASK)) == (NMT_TYPE_CS | NMT_CS_PLKMODE))
                 {
-                    ret = EdrvUpdateTxMsgBuffer(pTxBuffer);
+                    ret = edrv_updateTxBuffer(pTxBuffer);
 
                     // enable corresponding Rx filter
-                    dllkInstance_g.aFilter[filterEntry].m_fEnable = TRUE;
-                    ret = EdrvChangeFilter(dllkInstance_g.aFilter, DLLK_FILTER_COUNT,
+                    dllkInstance_g.aFilter[filterEntry].fEnable = TRUE;
+                    ret = edrv_changeRxFilter(dllkInstance_g.aFilter, DLLK_FILTER_COUNT,
                                            filterEntry, EDRV_FILTER_CHANGE_STATE);
                     if (ret != kEplSuccessful)
                         goto Exit;
@@ -652,14 +652,14 @@ static tEplKernel processFillTx(tDllAsyncReqPriority asyncReqPriority_p, tNmtSta
             else if (ret == kEplDllAsyncTxBufferEmpty)
             {   // empty Tx buffer is not a real problem so just ignore it
                 ret = kEplSuccessful;
-                pTxBuffer->m_uiTxMsgLen = DLLK_BUFLEN_EMPTY;    // mark Tx buffer as empty
+                pTxBuffer->txFrameSize = DLLK_BUFLEN_EMPTY;    // mark Tx buffer as empty
 
 #if (EDRV_AUTO_RESPONSE != FALSE)
                 if ((nmtState_p & (NMT_TYPE_MASK | NMT_SUPERSTATE_MASK)) == (NMT_TYPE_CS | NMT_CS_PLKMODE))
                 {
                     // disable corresponding Rx filter
-                    dllkInstance_g.aFilter[filterEntry].m_fEnable = FALSE;
-                    ret = EdrvChangeFilter(dllkInstance_g.aFilter, DLLK_FILTER_COUNT,
+                    dllkInstance_g.aFilter[filterEntry].fEnable = FALSE;
+                    ret = edrv_changeRxFilter(dllkInstance_g.aFilter, DLLK_FILTER_COUNT,
                                            filterEntry, EDRV_FILTER_CHANGE_STATE);
                     if (ret != kEplSuccessful)
                         goto Exit;
@@ -677,22 +677,22 @@ static tEplKernel processFillTx(tDllAsyncReqPriority asyncReqPriority_p, tNmtSta
     {   // send frame immediately
         if (pTxFrame != NULL)
         {   // frame is present - padding is done by Edrv or ethernet controller
-            ret = EdrvSendTxMsg(pTxBuffer);
+            ret = edrv_sendTxBuffer(pTxBuffer);
         }
         else
         {   // no frame moved to TxBuffer
 
             // check if TxBuffers contain unsent frames
             if (dllkInstance_g.pTxBuffer[DLLK_TXFRAME_NMTREQ +
-                                         dllkInstance_g.curTxBufferOffsetNmtReq].m_uiTxMsgLen > DLLK_BUFLEN_EMPTY)
+                                         dllkInstance_g.curTxBufferOffsetNmtReq].txFrameSize > DLLK_BUFLEN_EMPTY)
             {   // NMT request Tx buffer contains a frame
-                ret = EdrvSendTxMsg(&dllkInstance_g.pTxBuffer[DLLK_TXFRAME_NMTREQ +
+                ret = edrv_sendTxBuffer(&dllkInstance_g.pTxBuffer[DLLK_TXFRAME_NMTREQ +
                                                               dllkInstance_g.curTxBufferOffsetNmtReq]);
             }
             else if (dllkInstance_g.pTxBuffer[DLLK_TXFRAME_NONEPL +
-                                              dllkInstance_g.curTxBufferOffsetNonEpl].m_uiTxMsgLen > DLLK_BUFLEN_EMPTY)
+                                              dllkInstance_g.curTxBufferOffsetNonEpl].txFrameSize > DLLK_BUFLEN_EMPTY)
             {   // non-EPL Tx buffer contains a frame
-                ret = EdrvSendTxMsg(&dllkInstance_g.pTxBuffer[DLLK_TXFRAME_NONEPL +
+                ret = edrv_sendTxBuffer(&dllkInstance_g.pTxBuffer[DLLK_TXFRAME_NONEPL +
                                                               dllkInstance_g.curTxBufferOffsetNonEpl]);
             }
             if (ret == kEplInvalidOperation)
@@ -709,7 +709,7 @@ static tEplKernel processFillTx(tDllAsyncReqPriority asyncReqPriority_p, tNmtSta
         if (asyncReqPriority_p == kDllAsyncReqPrioNmt)
         {   // non-empty FIFO with hightest priority is for NMT requests
             if (dllkInstance_g.pTxBuffer[DLLK_TXFRAME_NMTREQ +
-                                         dllkInstance_g.curTxBufferOffsetNmtReq].m_uiTxMsgLen > DLLK_BUFLEN_EMPTY)
+                                         dllkInstance_g.curTxBufferOffsetNmtReq].txFrameSize > DLLK_BUFLEN_EMPTY)
             {   // NMT request Tx buffer contains a frame
                 // add one more frame
                 frameCount++;
@@ -718,14 +718,14 @@ static tEplKernel processFillTx(tDllAsyncReqPriority asyncReqPriority_p, tNmtSta
         else
         {   // non-empty FIFO with highest priority is for generic frames
             if (dllkInstance_g.pTxBuffer[DLLK_TXFRAME_NMTREQ +
-                                         dllkInstance_g.curTxBufferOffsetNmtReq].m_uiTxMsgLen > DLLK_BUFLEN_EMPTY)
+                                         dllkInstance_g.curTxBufferOffsetNmtReq].txFrameSize > DLLK_BUFLEN_EMPTY)
             {   // NMT request Tx buffer contains a frame
                 // use NMT request FIFO, because of higher priority
                 frameCount = 1;
                 asyncReqPriority_p = kDllAsyncReqPrioNmt;
             }
             else if (dllkInstance_g.pTxBuffer[DLLK_TXFRAME_NONEPL +
-                                              dllkInstance_g.curTxBufferOffsetNonEpl].m_uiTxMsgLen > DLLK_BUFLEN_EMPTY)
+                                              dllkInstance_g.curTxBufferOffsetNonEpl].txFrameSize > DLLK_BUFLEN_EMPTY)
             {   // non-EPL Tx buffer contains a frame
                 // use NMT request FIFO, because of higher priority
                 // add one more frame
@@ -775,7 +775,7 @@ static tEplKernel processCycleFinish(tNmtState nmtState_p)
             dllkInstance_g.curTxBufferOffsetIdentRes ^= 1;
             pTxBuffer = &dllkInstance_g.pTxBuffer[DLLK_TXFRAME_IDENTRES +
                                                   dllkInstance_g.curTxBufferOffsetIdentRes];
-            if (pTxBuffer->m_pbBuffer != NULL)
+            if (pTxBuffer->pBuffer != NULL)
             {   // IdentRes does exist
                 if ((ret = dllk_updateFrameIdentRes(pTxBuffer, nmtState_p)) != kEplSuccessful)
                     return ret;
@@ -786,7 +786,7 @@ static tEplKernel processCycleFinish(tNmtState nmtState_p)
             dllkInstance_g.curTxBufferOffsetStatusRes ^= 1;
             pTxBuffer = &dllkInstance_g.pTxBuffer[DLLK_TXFRAME_STATUSRES +
                                                   dllkInstance_g.curTxBufferOffsetStatusRes];
-            if (pTxBuffer->m_pbBuffer != NULL)
+            if (pTxBuffer->pBuffer != NULL)
             {   // StatusRes does exist
                 if ((ret = dllk_updateFrameStatusRes(pTxBuffer, nmtState_p)) != kEplSuccessful)
                     return ret;
@@ -882,15 +882,15 @@ static tEplKernel processSyncCn(tNmtState nmtState_p, BOOL fReadyFlag_p)
 
     // local node is CN, update only the PRes
     pTxBuffer = &dllkInstance_g.pTxBuffer[DLLK_TXFRAME_PRES + nextTxBufferOffset];
-    if (pTxBuffer->m_pbBuffer != NULL)
+    if (pTxBuffer->pBuffer != NULL)
     {   // PRes does exist
-        pTxFrame = (tEplFrame *) pTxBuffer->m_pbBuffer;
+        pTxFrame = (tEplFrame *) pTxBuffer->pBuffer;
 
         if (nmtState_p != kNmtCsOperational)
             fReadyFlag_p = FALSE;
 
         FrameInfo.pFrame = pTxFrame;
-        FrameInfo.frameSize = pTxBuffer->m_uiTxMsgLen;
+        FrameInfo.frameSize = pTxBuffer->txFrameSize;
         ret = dllk_processTpdo(&FrameInfo, fReadyFlag_p);
         if (ret != kEplSuccessful)
             return ret;
@@ -931,8 +931,8 @@ static tEplKernel processSyncMn(tNmtState nmtState_p, BOOL fReadyFlag_p)
     UINT                nextTxBufferOffset = dllkInstance_g.curTxBufferOffsetCycle ^ 1;
 
     pTxBuffer = &dllkInstance_g.pTxBuffer[DLLK_TXFRAME_SOC + nextTxBufferOffset];
-    pTxBuffer->m_dwTimeOffsetNs = nextTimeOffsetNs;
-    pTxFrame = (tEplFrame *)pTxBuffer->m_pbBuffer;
+    pTxBuffer->timeOffsetNs = nextTimeOffsetNs;
+    pTxFrame = (tEplFrame *)pTxBuffer->pBuffer;
 
     // Set SoC relative time
     AmiSetQword64ToLe( &pTxFrame->m_Data.m_Soc.m_le_RelativeTime, dllkInstance_g.relativeTime);
@@ -954,7 +954,7 @@ static tEplKernel processSyncMn(tNmtState nmtState_p, BOOL fReadyFlag_p)
     dllkInstance_g.ppTxBufferList[index] = NULL;
     index++;
 
-    ret = EdrvCyclicSetNextTxBufferList(dllkInstance_g.ppTxBufferList, index);
+    ret = edrvcyclic_setNextTxBufferList(dllkInstance_g.ppTxBufferList, index);
 
     return ret;
 }
@@ -982,10 +982,10 @@ static tEplKernel processPresReady(tNmtState nmtState_p)
     {
         // Does PRes exist?
         if (dllkInstance_g.pTxBuffer[DLLK_TXFRAME_PRES +
-                                     dllkInstance_g.curTxBufferOffsetCycle].m_pbBuffer != NULL)
+                                     dllkInstance_g.curTxBufferOffsetCycle].pBuffer != NULL)
         {   // PRes does exist
             pTxFrame = (tEplFrame *) dllkInstance_g.pTxBuffer[DLLK_TXFRAME_PRES +
-                                                              dllkInstance_g.curTxBufferOffsetCycle].m_pbBuffer;
+                                                              dllkInstance_g.curTxBufferOffsetCycle].pBuffer;
             // update frame (NMT state, RD, RS, PR, MS, EN flags)
             if (nmtState_p < kNmtCsPreOperational2)
             {   // NMT state is not PreOp2, ReadyToOp or Op
@@ -1001,7 +1001,7 @@ static tEplKernel processPresReady(tNmtState nmtState_p)
             }
             // $$$ make function that updates Pres, StatusRes
             // mark PRes frame as ready for transmission
-            ret = EdrvTxMsgReady(&dllkInstance_g.pTxBuffer[DLLK_TXFRAME_PRES +
+            ret = edrv_setTxBufferReady(&dllkInstance_g.pTxBuffer[DLLK_TXFRAME_PRES +
                                                            dllkInstance_g.curTxBufferOffsetCycle]);
         }
     }
