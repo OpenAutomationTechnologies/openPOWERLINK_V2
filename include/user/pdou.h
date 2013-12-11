@@ -63,7 +63,7 @@ tEplKernel pdou_init(tEplSyncCb pfnSyncCb_p);
 
 tEplKernel pdou_exit(void);
 
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOU)) != 0)
+#if defined(CONFIG_INCLUDE_PDOU)
 EPLDLLEXPORT tEplKernel PUBLIC pdou_cbObdAccess(tObdCbParam MEM* pParam_p);
 #else
 #define pdou_cbObdAccess        NULL

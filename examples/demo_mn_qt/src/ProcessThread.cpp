@@ -53,7 +53,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 ProcessThread    *pProcessThread_g;
 
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_CFM)) == 0)
+#if !defined(CONFIG_INCLUDE_CFM)
 // Configuration Manager is not available,
 // so store local CycleLen for configuration of remote CNs
 static DWORD        cycleLen_g;
@@ -306,7 +306,7 @@ tEplKernel ProcessThread::processEvent(tEplApiEventType EventType_p,
             ret = processCfmResultEvent(EventType_p, pEventArg_p, pUserArg_p);
             break;
 
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_CFM)) == 0)
+#if !defined(CONFIG_INCLUDE_CFM)
         // Configuration Manager is not available,
         // so process SDO events
         case kEplApiEventSdo:
@@ -343,7 +343,7 @@ tEplKernel ProcessThread::processStateChangeEvent(tEplApiEventType EventType_p,
 {
     tEplKernel                  ret = kEplSuccessful;
     tEventNmtStateChange*       pNmtStateChange = &pEventArg_p->m_NmtStateChange;
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_CFM)) == 0)
+#if !defined(CONFIG_INCLUDE_CFM)
     UINT                        varLen;
 #endif
     const char                  *string;
@@ -375,7 +375,7 @@ tEplKernel ProcessThread::processStateChangeEvent(tEplApiEventType EventType_p,
             break;
 
         case kNmtGsResetCommunication:
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_CFM)) == 0)
+#if !defined(CONFIG_INCLUDE_CFM)
             ret = setDefaultNodeAssignment();
 #endif
             pProcessThread_g->sigEplStatus(1);
@@ -386,7 +386,7 @@ tEplKernel ProcessThread::processStateChangeEvent(tEplApiEventType EventType_p,
             break;
 
         case kNmtGsResetConfiguration:
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_CFM)) == 0)
+#if !defined(CONFIG_INCLUDE_CFM)
         // Configuration Manager is not available,
         // so fetch object 0x1006 NMT_CycleLen_U32 from local OD
         // (in little endian byte order)
@@ -560,7 +560,7 @@ tEplKernel ProcessThread::processNodeEvent(tEplApiEventType EventType_p,
     switch (pEventArg_p->m_Node.m_NodeEvent)
     {
         case kNmtNodeEventCheckConf:
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_CFM)) == 0)
+#if !defined(CONFIG_INCLUDE_CFM)
             // Configuration Manager is not available,
             // so configure CycleLen (object 0x1006) on CN
             tSdoComConHdl SdoComConHdl;

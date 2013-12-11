@@ -26,7 +26,7 @@ OBD_BEGIN ()
             OBD_SUBINDEX_RAM_VAR(0x1401, 0x02, kObdTypeUInt8, kObdAccRW, tObdUnsigned8, MappingVersion_U8, 0x00)
         OBD_END_INDEX(0x1401)
 
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
+#if defined(CONFIG_INCLUDE_NMT_MN)
         // additional RxPDOs if master is enabled
 
         // Object 1402h: PDO_RxCommParam_02h_REC
@@ -58,7 +58,7 @@ OBD_BEGIN ()
 
         // Object 1601h: PDO_RxMappParam_01h_AU64
         OBD_BEGIN_INDEX_RAM(0x1601, 0x03, pdou_CbObdAccess)
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
+#if defined(CONFIG_INCLUDE_NMT_MN)
             // enable this RxPDO if master is enabled
             OBD_SUBINDEX_RAM_VAR(0x1601, 0x00, kObdTypeUInt8, kObdAccRW, tObdUnsigned8, NumberOfEntries, 0x01)
 #else
@@ -69,7 +69,7 @@ OBD_BEGIN ()
             OBD_SUBINDEX_RAM_VAR(0x1601, 0x02, kObdTypeUInt64, kObdAccRW, tObdUnsigned64, ObjectMapping, 0x00)
         OBD_END_INDEX(0x1601)
 
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
+#if defined(CONFIG_INCLUDE_NMT_MN)
         // additional RxPDOs if master is enabled
 
         // Object 1602h: PDO_RxMappParam_02h_AU64
@@ -93,7 +93,7 @@ OBD_BEGIN ()
             OBD_SUBINDEX_RAM_VAR(0x1800, 0x02, kObdTypeUInt8, kObdAccRW, tObdUnsigned8, MappingVersion_U8, 0x00)
         OBD_END_INDEX(0x1800)
 
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
+#if defined(CONFIG_INCLUDE_NMT_MN)
         // additional TxPDOs if master is enabled
 
         // Object 1801h: PDO_TxCommParam_01h_REC
@@ -130,7 +130,7 @@ OBD_BEGIN ()
             OBD_SUBINDEX_RAM_VAR(0x1A00, 0x02, kObdTypeUInt64, kObdAccRW, tObdUnsigned64, ObjectMapping, 0x00)
         OBD_END_INDEX(0x1A00)
 
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
+#if defined(CONFIG_INCLUDE_NMT_MN)
         // additional TxPDOs if master is enabled
 
         // Object 1A01h: PDO_TxMappParam_01h_AU64
@@ -184,7 +184,7 @@ OBD_BEGIN ()
 #endif
 
 #if (!((EPL_API_PROCESS_IMAGE_SIZE_IN > 0) || (EPL_API_PROCESS_IMAGE_SIZE_OUT > 0))) \
-    && (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
+    && defined(CONFIG_INCLUDE_NMT_MN)
         // process image is not enabled but master is enabled
 
         // output variables of master

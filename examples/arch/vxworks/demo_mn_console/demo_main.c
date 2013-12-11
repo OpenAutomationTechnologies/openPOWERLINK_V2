@@ -110,14 +110,14 @@
 
 CONST BYTE abMacAddr[] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_CFM)) == 0)
+#if !defined(CONFIG_INCLUDE_CFM)
 static DWORD    dw_le_CycleLen_g;
 #endif
 
 static UINT uiNodeId_g = EPL_C_ADR_INVALID;
 static char* pszCdcFilename_g = CONFIG_OBD_DEF_CONCISEDCF_FILENAME;
 
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_CFM)) != 0)
+#if defined(CONFIG_INCLUDE_CFM)
 static UINT uiCycleLen_g = 0;
 #else
 static UINT uiCycleLen_g = CYCLE_LEN;
@@ -464,7 +464,7 @@ tEplKernel          EplRet = kEplSuccessful;
 
                 case kNmtGsResetCommunication:
                 {
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_CFM)) == 0)
+#if !defined(CONFIG_INCLUDE_CFM)
                 DWORD   dwNodeAssignment;
 
                     // configure OD for MN in state ResetComm after reseting the OD
@@ -491,7 +491,7 @@ tEplKernel          EplRet = kEplSuccessful;
 
                 case kNmtGsResetConfiguration:
                 {
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_CFM)) != 0)
+#if defined(CONFIG_INCLUDE_CFM)
                     if (uiCycleLen_g != 0)
                     {
                         EplRet = oplk_writeLocalObject(0x1006, 0x00,
@@ -666,7 +666,7 @@ tEplKernel          EplRet = kEplSuccessful;
             break;
         }
 
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_CFM)) != 0)
+#if defined(CONFIG_INCLUDE_CFM)
         case kEplApiEventCfmProgress:
         {
             PRINTF("%s(Node=0x%X, CFM-Progress: Object 0x%X/%u, ",

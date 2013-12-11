@@ -133,20 +133,20 @@ static tEplKernel processUserEvent(tEplEvent* pEplEvent_p);
 static tEplKernel cbCnCheckEvent(tNmtEvent NmtEvent_p);
 static tEplKernel cbNmtStateChange(tEventNmtStateChange nmtStateChange_p);
 
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
+#if defined(CONFIG_INCLUDE_NMT_MN)
 static tEplKernel cbNodeEvent(UINT nodeId_p, tNmtNodeEvent nodeEvent_p,
                                     tNmtState nmtState_p, UINT16 errorCode_p,
                                     BOOL fMandatory_p);
-#endif // (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
+#endif
 
 static tEplKernel cbBootEvent(tNmtBootEvent BootEvent_p, tNmtState NmtState_p,
                                     UINT16 errorCode_p);
 
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_LEDU)) != 0)
+#if defined(CONFIG_INCLUDE_LEDU)
 static tEplKernel cbLedStateChange(tLedType LedType_p, BOOL fOn_p);
 #endif
 
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_CFM)) != 0)
+#if defined(CONFIG_INCLUDE_CFM)
 static tEplKernel cbCfmEventCnProgress(tCfmEventCnProgress* pEventCnProgress_p);
 static tEplKernel cbCfmEventCnResult(unsigned int uiNodeId_p, tNmtNodeCommand NodeCommand_p);
 #endif
@@ -596,7 +596,7 @@ tEplKernel ctrlu_cbObdAccess(tObdCbParam MEM* pParam_p)
                 // check value range
                 switch ((tNmtCommand)nmtCommand)
                 {
-#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMTU)) != 0)
+#if defined(CONFIG_INCLUDE_NMTU)
                     case kNmtCmdResetNode:
                         ret = nmtu_postNmtEvent(kNmtEventResetNode);
                         break;
@@ -625,7 +625,7 @@ tEplKernel ctrlu_cbObdAccess(tObdCbParam MEM* pParam_p)
             }
             break;
 
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
+#if defined(CONFIG_INCLUDE_NMT_MN)
         case 0x1F9F:    // NMT_RequestCmd_REC
             if ((pParam_p->obdEvent == kObdEvPostWrite) &&
                 (pParam_p->subIndex == 1) &&
@@ -674,7 +674,7 @@ tEplKernel ctrlu_cbObdAccess(tObdCbParam MEM* pParam_p)
                 *((UINT8*)pParam_p->pArg) = 0;
             }
             break;
-#endif // (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
+#endif
 
         default:
             break;
@@ -955,7 +955,7 @@ static tEplKernel cbNmtStateChange(tEventNmtStateChange nmtStateChange_p)
             break;
     }
 
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_LEDU)) != 0)
+#if defined(CONFIG_INCLUDE_LEDU)
     // forward event to Led module
     ret = ledu_cbNmtStateChange(nmtStateChange_p);
     if (ret != kEplSuccessful)

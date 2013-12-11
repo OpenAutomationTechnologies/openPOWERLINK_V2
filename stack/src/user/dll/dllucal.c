@@ -78,8 +78,7 @@ typedef struct
     tEplDlluCbAsnd           apfnDlluCbAsnd[DLL_MAX_ASND_SERVICE_ID];
     tDllCalQueueInstance     dllCalQueueTxNmt;          ///< Dll Cal Queue instance for NMT priority
     tDllCalQueueInstance     dllCalQueueTxGen;          ///< Dll Cal Queue instance for Generic priority
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0) \
-    && (EPL_DLL_PRES_CHAINING_MN != FALSE)
+#if defined(CONFIG_INCLUDE_NMT_MN)  && (EPL_DLL_PRES_CHAINING_MN != FALSE)
     tDllCalQueueInstance     dllCalQueueTxSync;         ///< Dll Cal Queue instance for Sync Request
     tDllCalFuncIntf*         pTxSyncFuncs;
 #endif
@@ -384,7 +383,7 @@ Exit:
     return ret;
 }
 
-#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
+#if defined(CONFIG_INCLUDE_NMT_MN)
 //------------------------------------------------------------------------------
 /**
 \brief  Issue a StatusRequest or IdentRequest

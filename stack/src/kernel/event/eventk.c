@@ -49,7 +49,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <kernel/errhndk.h>
 #include <Benchmark.h>
 
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_PDOK)) != 0)
+#if defined(CONFIG_INCLUDE_PDOK)
 #include <kernel/pdok.h>
 #include <kernel/pdokcal.h>
 #endif
@@ -87,7 +87,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLK)) != 0)
+#if defined(CONFIG_INCLUDE_DLLK)
 static tEplKernel handleNmtEventinDll(tEplEvent* pEvent_p);
 #endif
 

@@ -61,7 +61,7 @@ OBD_BEGIN ()
             OBD_SUBINDEX_RAM_VAR(0x1401, 0x02, kObdTypeUInt8, kObdAccRW, tObdUnsigned8, MappingVersion_U8, 0x00)
         OBD_END_INDEX(0x1401)
 
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
+#if defined(CONFIG_INCLUDE_NMT_MN)
         // additional RxPDOs if master is enabled
 
         // Object 1402h: PDO_RxCommParam_02h_REC
@@ -470,7 +470,7 @@ OBD_BEGIN ()
             OBD_SUBINDEX_RAM_VAR(0x1601, 0x40, kObdTypeUInt64, kObdAccRW, tObdUnsigned64, ObjectMapping, 0x0000000000000000LL)
         OBD_END_INDEX(0x1601)
 
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
+#if defined(CONFIG_INCLUDE_NMT_MN)
         // additional RxPDOs if master is enabled
 
         // Object 1602h: PDO_RxMappParam_02h_AU64
@@ -3104,7 +3104,7 @@ OBD_BEGIN ()
             OBD_SUBINDEX_RAM_VAR(0x1800, 0x02, kObdTypeUInt8, kObdAccRW, tObdUnsigned8, MappingVersion_U8, 0x00)
         OBD_END_INDEX(0x1800)
 
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
+#if defined(CONFIG_INCLUDE_NMT_MN)
         // additional TxPDOs if master is enabled
 
         // Object 1801h: PDO_TxCommParam_01h_REC
@@ -3451,7 +3451,7 @@ OBD_BEGIN ()
             OBD_SUBINDEX_RAM_VAR(0x1A00, 0x40, kObdTypeUInt64, kObdAccRW, tObdUnsigned64, ObjectMapping, 0x0000000000000000LL)
         OBD_END_INDEX(0x1A00)
 
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
+#if defined(CONFIG_INCLUDE_NMT_MN)
         // additional TxPDOs if master is enabled
 
         // Object 1A01h: PDO_TxMappParam_01h_AU64

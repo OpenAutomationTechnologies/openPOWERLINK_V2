@@ -111,58 +111,57 @@
 //#define EPL_DBGLVL_ERROR                DEBUG_LVL_ERROR     // 0x40000000L
 //#define EPL_DBGLVL_ALWAYS               DEBUG_LVL_ALWAYS    // 0x80000000L
 
-// EPL_MODULE_INTEGRATION defines all modules which are included in
-// EPL application. Please add or delete modules for your application.
-
+// These macros define all modules which are included
 #ifdef CONFIG_MN
 
 #if (TARGET_SYSTEM == _LINUX_)
-#define EPL_MODULE_INTEGRATION (EPL_MODULE_OBD \
-                               | EPL_MODULE_PDOK \
-                               | EPL_MODULE_PDOU \
-                               | EPL_MODULE_SDOS \
-                               | EPL_MODULE_SDOC \
-                               | EPL_MODULE_SDO_ASND \
-                               | EPL_MODULE_SDO_UDP \
-                               | EPL_MODULE_VETH \
-                               | EPL_MODULE_NMT_CN \
-                               | EPL_MODULE_NMTU \
-                               | EPL_MODULE_NMTK \
-                               | EPL_MODULE_DLLK \
-                               | EPL_MODULE_DLLU \
-                               | EPL_MODULE_CFM \
-                               | EPL_MODULE_NMT_MN)
+
+#define CONFIG_INCLUDE_OBD
+#define CONFIG_INCLUDE_PDOU
+#define CONFIG_INCLUDE_PDOK
+#define CONFIG_INCLUDE_NMT_MN
+#define CONFIG_INCLUDE_SDOS
+#define CONFIG_INCLUDE_SDOC
+#define CONFIG_INCLUDE_SDO_ASND
+#define CONFIG_INCLUDE_SDO_UDP
+#define CONFIG_INCLUDE_DLLK
+#define CONFIG_INCLUDE_DLLU
+#define CONFIG_INCLUDE_NMT_CN
+#define CONFIG_INCLUDE_NMTK
+#define CONFIG_INCLUDE_NMTU
+#define CONFIG_INCLUDE_VETH
+#define CONFIG_INCLUDE_CFM
 
 #elif (TARGET_SYSTEM == _WIN32_)
-#define EPL_MODULE_INTEGRATION (EPL_MODULE_OBD \
-                               | EPL_MODULE_PDOK \
-                               | EPL_MODULE_PDOU \
-                               | EPL_MODULE_SDOS \
-                               | EPL_MODULE_SDOC \
-                               | EPL_MODULE_SDO_ASND \
-                               | EPL_MODULE_NMT_CN \
-                               | EPL_MODULE_NMTU \
-                               | EPL_MODULE_NMTK \
-                               | EPL_MODULE_DLLK \
-                               | EPL_MODULE_DLLU \
-                               | EPL_MODULE_CFM \
-                               | EPL_MODULE_NMT_MN)
-//                               | EPL_MODULE_VETH
+
+#define CONFIG_INCLUDE_OBD
+#define CONFIG_INCLUDE_PDOU
+#define CONFIG_INCLUDE_PDOK
+#define CONFIG_INCLUDE_NMT_MN
+#define CONFIG_INCLUDE_SDOS
+#define CONFIG_INCLUDE_SDOC
+#define CONFIG_INCLUDE_SDO_ASND
+#define CONFIG_INCLUDE_DLLK
+#define CONFIG_INCLUDE_DLLU
+#define CONFIG_INCLUDE_NMT_CN
+#define CONFIG_INCLUDE_NMTK
+#define CONFIG_INCLUDE_NMTU
+#define CONFIG_INCLUDE_CFM
+
 #endif
 
 #else // CONFIG_MN
-
-#define EPL_MODULE_INTEGRATION (EPL_MODULE_OBD \
-                               | EPL_MODULE_PDOK \
-                               | EPL_MODULE_PDOU \
-                               | EPL_MODULE_SDOS \
-                               | EPL_MODULE_SDOC \
-                               | EPL_MODULE_SDO_ASND \
-                               | EPL_MODULE_NMT_CN \
-                               | EPL_MODULE_NMTU \
-                               | EPL_MODULE_NMTK \
-                               | EPL_MODULE_DLLK \
-                               | EPL_MODULE_DLLU)
+#define CONFIG_INCLUDE_OBD
+#define CONFIG_INCLUDE_PDOU
+#define CONFIG_INCLUDE_PDOK
+#define CONFIG_INCLUDE_SDOS
+#define CONFIG_INCLUDE_SDOC
+#define CONFIG_INCLUDE_SDO_ASND
+#define CONFIG_INCLUDE_DLLK
+#define CONFIG_INCLUDE_DLLU
+#define CONFIG_INCLUDE_NMT_CN
+#define CONFIG_INCLUDE_NMTK
+#define CONFIG_INCLUDE_NMTU
 
 #endif // CONFIG_MN
 

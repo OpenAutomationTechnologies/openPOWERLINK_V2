@@ -624,7 +624,7 @@ tEplKernel nmtmnu_sendNmtCommandEx(UINT nodeId_p, tNmtCommand nmtCommand_p,
     frameInfo.frameSize = sizeof(aBuffer);
 
     // send NMT-Request
-#if(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_DLLU)) != 0)
+#if defined(CONFIG_INCLUDE_DLLU)
     ret = dllucal_sendAsyncFrame(&frameInfo, kDllAsyncReqPrioNmt);
     if (ret != kEplSuccessful)
     {

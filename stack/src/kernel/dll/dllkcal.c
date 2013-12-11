@@ -93,14 +93,13 @@ typedef struct
     tDllCalFuncIntf*        pTxNmtFuncs;
     tDllCalFuncIntf*        pTxGenFuncs;
 
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0) \
-    && (EPL_DLL_PRES_CHAINING_MN != FALSE)
+#if defined(CONFIG_INCLUDE_NMT_MN) && (EPL_DLL_PRES_CHAINING_MN != FALSE)
     tDllCalQueueInstance    dllCalQueueTxSync;      ///< Dll Cal Queue instance for Sync Request
     tDllCalFuncIntf*        pTxSyncFuncs;
 #endif
     tDllkCalStatistics      statistics;
 
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
+#if defined(CONFIG_INCLUDE_NMT_MN)
     // IdentRequest queue with CN node IDs
 
     tCircBufInstance*       pQueueIdentReq;
@@ -126,7 +125,7 @@ static tDllkCalInstance     instance_l;
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
+#if defined(CONFIG_INCLUDE_NMT_MN)
 static BOOL getCnGenRequest(tDllReqServiceId* pReqServiceId_p, UINT* pNodeId_p);
 static BOOL getCnNmtRequest(tDllReqServiceId* pReqServiceId_p, UINT* pNodeId_p);
 static BOOL getMnGenNmtRequest(tDllReqServiceId* pReqServiceId_p, UINT* pNodeId_p);
@@ -288,7 +287,7 @@ tEplKernel dllkcal_process(tEplEvent* pEvent_p)
     tDllIdentParam*             pIdentParam;
     tDllConfigParam*            pConfigParam;
 
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
+#if defined(CONFIG_INCLUDE_NMT_MN)
     tDllCalIssueRequest*        pIssueReq;
 #endif
 
@@ -305,7 +304,7 @@ tEplKernel dllkcal_process(tEplEvent* pEvent_p)
                                                 pServFilter->filter);
             break;
 
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
+#if defined(CONFIG_INCLUDE_NMT_MN)
         case kEplEventTypeDllkIssueReq:
             pIssueReq = (tDllCalIssueRequest*) pEvent_p->m_pArg;
             ret = dllkcal_issueRequest(pIssueReq->service, pIssueReq->nodeId,
@@ -629,7 +628,7 @@ The function clears the asynchronous transmit queues.
 \ingroup module_dllkcal
 */
 //------------------------------------------------------------------------------
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
+#if defined(CONFIG_INCLUDE_NMT_MN)
 tEplKernel dllkcal_clearAsyncQueues(void)
 {
     tEplKernel  ret = kEplSuccessful;
@@ -682,7 +681,7 @@ tEplKernel dllkcal_getStatistics(tDllkCalStatistics** ppStatistics)
 }
 
 
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
+#if defined(CONFIG_INCLUDE_NMT_MN)
 //------------------------------------------------------------------------------
 /**
 \brief	Issue a StatusRequest or IdentRequest
@@ -875,13 +874,13 @@ tEplKernel dllkcal_setAsyncPendingRequests(UINT nodeId_p,
 
     return ret;
 }
-#endif //(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
+#endif
 
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
 //============================================================================//
 
-#if (((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
+#if defined(CONFIG_INCLUDE_NMT_MN)
 //------------------------------------------------------------------------------
 /**
 \brief	Get CN Generic request
@@ -1177,4 +1176,4 @@ static BOOL getMnSyncRequest(tDllReqServiceId* pReqServiceId_p, UINT* pNodeId_p,
 }
 #endif
 
-#endif //(((EPL_MODULE_INTEGRATION) & (EPL_MODULE_NMT_MN)) != 0)
+#endif
