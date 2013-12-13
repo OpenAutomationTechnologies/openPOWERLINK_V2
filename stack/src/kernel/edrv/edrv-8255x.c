@@ -1,50 +1,11 @@
-/****************************************************************************
+/**
+********************************************************************************
+\file   edrv-8255x.c
 
-Copyright (c) 2011 Kalycito Infotech Private Limited
+\brief  Implementation of Ethernet driver for Intel 8255x
 
-Project: openPOWERLINK
-
-Description: Ethernet driver for Intel 8255x 10/100 Fast Ethernet Controller.
-
-License:
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions
-are met:
-
-1. Redistributions of source code must retain the above copyright
-notice, this list of conditions and the following disclaimer.
-
-2. Redistributions in binary form must reproduce the above copyright
-notice, this list of conditions and the following disclaimer in the
-documentation and/or other materials provided with the distribution.
-
-3. Neither the name of Kalycito Infotech nor the names of its
-contributors may be used to endorse or promote products derived
-from this software without prior written permission. For written
-permission, please contact info@kalycito.com.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-COPYRIGHT HOLDERS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-POSSIBILITY OF SUCH DAMAGE.
-
-Severability Clause:
-
-If a provision of this License is or becomes illegal, invalid or
-unenforceable in any jurisdiction, that shall not affect:
-1. the validity or enforceability in that jurisdiction of any other
-provision of this License; or
-2. the validity or enforceability in other jurisdictions of that or
-any other provision of this License.
+This file contains the implementation of the Ethernet driver for
+Intel 8255x 10/100 Fast Ethernet Controller
 
 Based on
 1. ife_gem.c: Intel 8255x 10/100 Ethernet Controller driver for Solaris
@@ -52,44 +13,75 @@ by Masayuki Murayama.
 2. Intel 8255x 10/100 Mbps Ethernet Controller Family Open Source Software
 Developer Manual.
 
-****************************************************************************/
+\ingroup module_edrv
+*******************************************************************************/
 
-/*
-* ife_gem.c: Intel 8255x 10/100 ethernet controler driver for Solaris
-*
-* Copyright (c) 2003-2008 Masayuki Murayama. All rights reserved.
-*
-* Redistribution and use in source and binary forms, with or without
-* modification, are permitted provided that the following conditions are met:
-*
-* 1. Redistributions of source code must retain the above copyright notice,
-* this list of conditions and the following disclaimer.
-*
-* 2. Redistributions in binary form must reproduce the above copyright notice,
-* this list of conditions and the following disclaimer in the documentation
-* and/or other materials provided with the distribution.
-*
-* 3. Neither the name of the author nor the names of its contributors may be
-* used to endorse or promote products derived from this software without
-* specific prior written permission.
-*
-* THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-* "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-* LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-* FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-* COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-* INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-* BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
-* OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
-* AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-* OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
-* OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
-* DAMAGE.
-*/
+/*------------------------------------------------------------------------------
+Copyright (c) 2013, Kalycito Infotech Private Limited
+All rights reserved.
 
-#include "global.h"
-#include "EplInc.h"
-#include "edrv.h"
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+    * Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above copyright
+      notice, this list of conditions and the following disclaimer in the
+      documentation and/or other materials provided with the distribution.
+    * Neither the name of the copyright holders nor the
+      names of its contributors may be used to endorse or promote products
+      derived from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL COPYRIGHT HOLDERS BE LIABLE FOR ANY
+DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+------------------------------------------------------------------------------*/
+
+/*------------------------------------------------------------------------------
+ife_gem.c: Intel 8255x 10/100 Ethernet controller driver for Solaris
+
+Copyright (c) 2003-2008 Masayuki Murayama. All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+1. Redistributions of source code must retain the above copyright notice,
+this list of conditions and the following disclaimer.
+
+2. Redistributions in binary form must reproduce the above copyright notice,
+this list of conditions and the following disclaimer in the documentation
+and/or other materials provided with the distribution.
+
+3. Neither the name of the author nor the names of its contributors may be
+used to endorse or promote products derived from this software without
+specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
+OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
+AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
+OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
+DAMAGE.
+------------------------------------------------------------------------------*/
+
+//------------------------------------------------------------------------------
+// includes
+//------------------------------------------------------------------------------
+#include <global.h>
+#include <EplInc.h>
+#include <edrv.h>
 
 #include <linux/module.h>
 #include <linux/kernel.h>
@@ -110,17 +102,42 @@ Developer Manual.
 #include <linux/semaphore.h>
 #endif
 
-/***************************************************************************/
-/* */
-/* */
-/* G L O B A L D E F I N I T I O N S */
-/* */
-/* */
-/***************************************************************************/
-//---------------------------------------------------------------------------
-// const defines
-//---------------------------------------------------------------------------
+//============================================================================//
+//            G L O B A L   D E F I N I T I O N S                             //
+//============================================================================//
 
+//------------------------------------------------------------------------------
+// const defines
+//------------------------------------------------------------------------------
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,19)
+#error "Linux Kernel versions older 2.6.19 are not supported by this driver!"
+#endif
+
+//------------------------------------------------------------------------------
+// module global vars
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// global function prototypes
+//------------------------------------------------------------------------------
+// TracePoint support for realtime-debugging
+#ifdef _DBG_TRACE_POINTS_
+    void PUBLIC TgtDbgSignalTracePoint (UINT8 tracePointNumber_p);
+    void PUBLIC TgtDbgPostTraceValue (UINT32 traceValue_p);
+#define TGT_DBG_SIGNAL_TRACE_POINT(p) TgtDbgSignalTracePoint(p)
+#define TGT_DBG_POST_TRACE_VALUE(v) TgtDbgPostTraceValue(v)
+#else
+#define TGT_DBG_SIGNAL_TRACE_POINT(p)
+#define TGT_DBG_POST_TRACE_VALUE(v)
+#endif
+
+//============================================================================//
+//            P R I V A T E   D E F I N I T I O N S                           //
+//============================================================================//
+
+//------------------------------------------------------------------------------
+// const defines
+//------------------------------------------------------------------------------
 #ifndef EDRV_MAX_TX_BUFFERS
 #define EDRV_MAX_TX_BUFFERS 42
 #endif
@@ -254,168 +271,147 @@ Developer Manual.
 #define RX_BUFFER_REQUIRED_SIZE 1518
 // maximum number of RX descriptors
 #define MAX_RFDS 16
-// command mode to EdrvMulticastCmd()
+// command mode to multicastCmd()
 #define MULTICAST_ADDR_ADD 0 /* to add multicast address */
 #define MULTICAST_ADDR_REM 1 /* to remove multicast address */
 #define DELAY_CLEAR_INT 5
 #define DELAY_SYS_TX_CLK 10
 // custom hash defines - end
 
-//Global Structure Definition
-struct cb
-{
-    volatile UINT m_uiCmdStat;
-    volatile UINT m_uiLink;
-};
+#define EDRV_COUNT_SEND             TGT_DBG_SIGNAL_TRACE_POINT(2)
+#define EDRV_COUNT_TIMEOUT          TGT_DBG_SIGNAL_TRACE_POINT(3)
+#define EDRV_COUNT_PCI_ERR          TGT_DBG_SIGNAL_TRACE_POINT(4)
+#define EDRV_COUNT_TX               TGT_DBG_SIGNAL_TRACE_POINT(5)
+#define EDRV_COUNT_RX               TGT_DBG_SIGNAL_TRACE_POINT(6)
+#define EDRV_COUNT_LATECOLLISION    TGT_DBG_SIGNAL_TRACE_POINT(10)
+#define EDRV_COUNT_TX_COL_RL        TGT_DBG_SIGNAL_TRACE_POINT(11)
+#define EDRV_COUNT_TX_FUN           TGT_DBG_SIGNAL_TRACE_POINT(12)
+#define EDRV_COUNT_TX_TEST          TGT_DBG_SIGNAL_TRACE_POINT(13)
+#define EDRV_COUNT_RX_ERR_CRC       TGT_DBG_SIGNAL_TRACE_POINT(14)
+#define EDRV_COUNT_RX_ERR_MULT      TGT_DBG_SIGNAL_TRACE_POINT(15)
+#define EDRV_COUNT_RX_ERR_SEQ       TGT_DBG_SIGNAL_TRACE_POINT(16)
+#define EDRV_COUNT_RX_ERR_OTHER     TGT_DBG_SIGNAL_TRACE_POINT(17)
+#define EDRV_COUNT_RX_ORUN          TGT_DBG_SIGNAL_TRACE_POINT(18)
 
-/* Transmit command block */
-struct tcb
-{
-    volatile UINT m_uiTcbTbdPtr; /* tbd array address */
-    volatile UINT m_uiTcbCtrl;
-};
+#define EDRV_TRACE_CAPR(x)      TGT_DBG_POST_TRACE_VALUE(((x) & 0x0000FFFF) | 0x06000000)
+#define EDRV_TRACE_RX_CRC(x)    TGT_DBG_POST_TRACE_VALUE(((x) & 0x0000FFFF) | 0x0E000000)
+#define EDRV_TRACE_RX_ERR(x)    TGT_DBG_POST_TRACE_VALUE(((x) & 0x0000FFFF) | 0x0F000000)
+#define EDRV_TRACE_RX_PUN(x)    TGT_DBG_POST_TRACE_VALUE(((x) & 0x0000FFFF) | 0x11000000)
+#define EDRV_TRACE(x)           TGT_DBG_POST_TRACE_VALUE(((x) & 0xFFFF0000) | 0x0000FEC0)
 
-struct tbd
-{
-    volatile UINT m_uiTbdAddr;
-#define TBD_ADDR_NULL 0xffffffff
-    volatile UINT m_uiTbdSize;
-#define TBD_EL 0x00010000
-};
-
-struct rfd
-{
-    volatile UINT m_uiCmdStat;
-    volatile UINT m_uiLink;
-    volatile UINT :32; //Reserved
-    volatile UINT m_uiSize;
-};
-
+//------------------------------------------------------------------------------
+// local types
+//------------------------------------------------------------------------------
 /* command block */
 typedef struct
 {
-    volatile UINT m_uiStatCommand;
-    volatile UINT m_uiLinkAddr;
-    volatile UINT m_uiValue1;
-    volatile UINT m_uiValue2;
-    volatile UINT m_uiValue3;
-    volatile UINT m_uiValue4;
-    volatile UINT m_uiValue5;
-    volatile UINT m_uiValue6;
-}cbstruct;
-
-// custom vars - end
-
-// TracePoint support for realtime-debugging
-#ifdef _DBG_TRACE_POINTS_
-    void PUBLIC TgtDbgSignalTracePoint (BYTE bTracePointNumber_p);
-    void PUBLIC TgtDbgPostTraceValue (DWORD dwTraceValue_p);
-#define TGT_DBG_SIGNAL_TRACE_POINT(p) TgtDbgSignalTracePoint(p)
-#define TGT_DBG_POST_TRACE_VALUE(v) TgtDbgPostTraceValue(v)
-#else
-#define TGT_DBG_SIGNAL_TRACE_POINT(p)
-#define TGT_DBG_POST_TRACE_VALUE(v)
-#endif
-
-#define EDRV_COUNT_SEND TGT_DBG_SIGNAL_TRACE_POINT(2)
-#define EDRV_COUNT_TIMEOUT TGT_DBG_SIGNAL_TRACE_POINT(3)
-#define EDRV_COUNT_PCI_ERR TGT_DBG_SIGNAL_TRACE_POINT(4)
-#define EDRV_COUNT_TX TGT_DBG_SIGNAL_TRACE_POINT(5)
-#define EDRV_COUNT_RX TGT_DBG_SIGNAL_TRACE_POINT(6)
-#define EDRV_COUNT_LATECOLLISION TGT_DBG_SIGNAL_TRACE_POINT(10)
-#define EDRV_COUNT_TX_COL_RL TGT_DBG_SIGNAL_TRACE_POINT(11)
-#define EDRV_COUNT_TX_FUN TGT_DBG_SIGNAL_TRACE_POINT(12)
-#define EDRV_COUNT_TX_TEST TGT_DBG_SIGNAL_TRACE_POINT(13)
-#define EDRV_COUNT_RX_ERR_CRC TGT_DBG_SIGNAL_TRACE_POINT(14)
-#define EDRV_COUNT_RX_ERR_MULT TGT_DBG_SIGNAL_TRACE_POINT(15)
-#define EDRV_COUNT_RX_ERR_SEQ TGT_DBG_SIGNAL_TRACE_POINT(16)
-#define EDRV_COUNT_RX_ERR_OTHER TGT_DBG_SIGNAL_TRACE_POINT(17)
-#define EDRV_COUNT_RX_ORUN TGT_DBG_SIGNAL_TRACE_POINT(18)
-
-#define EDRV_TRACE_CAPR(x) TGT_DBG_POST_TRACE_VALUE(((x) & 0xFFFF) | 0x06000000)
-#define EDRV_TRACE_RX_CRC(x) TGT_DBG_POST_TRACE_VALUE(((x) & 0xFFFF) | 0x0E000000)
-#define EDRV_TRACE_RX_ERR(x) TGT_DBG_POST_TRACE_VALUE(((x) & 0xFFFF) | 0x0F000000)
-#define EDRV_TRACE_RX_PUN(x) TGT_DBG_POST_TRACE_VALUE(((x) & 0xFFFF) | 0x11000000)
-#define EDRV_TRACE(x) TGT_DBG_POST_TRACE_VALUE(((x) & 0xFFFF0000) | 0x0000FEC0)
-
-//---------------------------------------------------------------------------
-// local types
-//---------------------------------------------------------------------------
+    volatile UINT   stateCmd;
+    volatile UINT   linkAddr;
+    volatile UINT   value1;
+    volatile UINT   value2;
+    volatile UINT   value3;
+    volatile UINT   value4;
+    volatile UINT   value5;
+    volatile UINT   value6;
+} tCommandBlock;
 
 // Private structure
 typedef struct
 {
-    struct pci_dev* m_pPciDev; // pointer to PCI device structure
-    void* m_pIoAddr; // pointer to register space of Ethernet controller
+    struct pci_dev* pPciDev; // pointer to PCI device structure
+    void*           pIoAddr; // pointer to register space of Ethernet controller
 
-    BYTE* m_apbRxBufInDesc[EDRV_MAX_RX_DESCS];
+    UINT8*          apRxBufInDesc[EDRV_MAX_RX_DESCS];
                                         // Stack of free rx buffers
                                         // +1 additional place if ReleaseRxBuffer is called
                                         // before return of RxHandler (multi processor)
-    BYTE* m_apbRxBufFree[EDRV_MAX_RX_BUFFERS - EDRV_MAX_RX_DESCS + 1];
-    int m_iRxBufFreeTop;
-    spinlock_t m_SpinLockTx;
-    int m_iPageAllocations;
+    UINT8*          apRxBufFree[EDRV_MAX_RX_BUFFERS - EDRV_MAX_RX_DESCS + 1];
+    int             rxBufFreeTop;
+    spinlock_t      spinLockTx;
+    int             pageAllocations;
 
-    BYTE* m_pbTxBuf; // pointer to Tx buffer
-    dma_addr_t m_pTxBufDma;
-    tEdrvTxBuffer* m_apTxBuffer[EDRV_MAX_TX_DESCS];
-    BOOL m_afTxBufUsed[EDRV_MAX_TX_BUFFERS];
+    UINT8*          pTxBuf; // pointer to Tx buffer
+    dma_addr_t      pTxBufDma;
+    tEdrvTxBuffer*  apTxBuffer[EDRV_MAX_TX_DESCS];
+    BOOL            afTxBufUsed[EDRV_MAX_TX_BUFFERS];
 
-    UINT m_uiHeadTxDesc;
-    UINT m_uiTailTxDesc;
-    UINT m_uiHeadRxDesc;
-    UINT m_uiTailRxDesc;
+    UINT            headTxDesc;
+    UINT            tailTxDesc;
+    UINT            headRxDesc;
+    UINT            tailRxDesc;
 
-    tEdrvInitParam m_InitParam;
+    tEdrvInitParam  initParam;
 
     // variable used to store EEPROM address bits
-    UINT m_uiEepromAddrBits;
+    UINT            eepromAddrBits;
 
-    BYTE *m_pCbVirtAdd;
-    BYTE *m_pRfdVirtAdd;
+    UINT8*          pCbVirtAdd;
+    UINT8*          pRfdVirtAdd;
 
-    dma_addr_t m_CbDmaHandle;
-    dma_addr_t m_RfdDmaAdd;
+    dma_addr_t      cbDmaHandle;
+    dma_addr_t      rfdDmaAdd;
 
     // array to store virtual address of pTxBuffer
-    volatile ULONG m_ulaCbVirtAddrBuf[MAX_CBS];
+    volatile ULONG  aCbVirtAddrBuf[MAX_CBS];
     // array to store dma mapped address of pTxBuffer->m_pBuffer
-    volatile ULONG m_ulaCbDmaAddrBuf[MAX_CBS];
+    volatile ULONG  aCbDmaAddrBuf[MAX_CBS];
 
-    WORD m_wMulticastAddrByteCnt;
-
-
+    UINT16           multicastAddrByteCnt;
 } tEdrvInstance;
 
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // local function prototypes
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+static irqreturn_t edrvIrqHandler (INT irqNum_p, void* ppDevInstData_p);
+static tEplKernel individualAddressCmd(UINT opcode_p, UINT count_p);
+static tEplKernel configureCmd(UINT opcode_p, UINT count_p);
+static tEplKernel multicastCmd(UINT opcode_p, UINT count_p, UINT8* pMacAddr_p, UINT mode_p);
+static tEplKernel transmitCmd(UINT opcode_p, UINT count_p);
 
-// custom function prototypes
-tEplKernel EdrvIndividualAddressCmd(UINT uiOpcode_p, UINT uiCount_p);
-tEplKernel EdrvConfigureCmd(UINT uiOpcode_p, UINT uiCount_p);
-tEplKernel EdrvMulticastCmd(UINT uiOpcode_p, UINT uiCount_p, BYTE *pbMacAddr_p,
-                                 UINT uiMode_p);
-tEplKernel EdrvTransmitCmd(UINT uiOpcode_p, UINT uiCount_p);
+static void eepromDelay(void);
+static void checkEepromSize(void);
+static UINT16 readEeprom(UINT addr_p);
+static tEplKernel cmdDescWrite(UINT opcode_p, UINT count_p);
+static tEplKernel rxDescWrite(INT count_p);
+static BOOL issueScbcmd(UINT16 cmd_p, UINT arg_p, UINT opcode_p);
 
-void EdrvIfeEepromDelay(void);
-static void EdrvIfeCheckEepromSize(void);
-static WORD EdrvIfeReadEeprom(UINT uiAddr_p);
-tEplKernel EdrvIfeCmdDescWrite(UINT uiOpcode_p, UINT uiCount_p);
-tEplKernel EdrvIfeRxDescWrite(INT iCount_p);
+static INT initOnePciDev(struct pci_dev* pPciDev_p, const struct pci_device_id* pId_p);
+static void removeOnePciDev(struct pci_dev* pPciDev_p);
 
-static INT EdrvInitOne(struct pci_dev *pPciDev_p,
-                       const struct pci_device_id *pId_p);
+//------------------------------------------------------------------------------
+// local vars
+//------------------------------------------------------------------------------
+struct sCmdBlock
+{
+    volatile UINT cmdStat;
+    volatile UINT link;
+};
 
-static void EdrvRemoveOne(struct pci_dev *pPciDev_p);
+/* Transmit command block */
+struct sTxCmdBlock
+{
+    volatile UINT tcbTbdPtr; /* sTxDescCmdBlock array address */
+    volatile UINT tcbCtrl;
+};
 
-//---------------------------------------------------------------------------
-// module global vars
-//---------------------------------------------------------------------------
+struct sTxDescCmdBlock
+{
+    volatile UINT tbdAddr;
+#define TBD_ADDR_NULL 0xffffffff
+    volatile UINT tbdSize;
+#define TBD_EL 0x00010000
+};
+
+struct sRxDescCmdBlock
+{
+    volatile UINT cmdStat;
+    volatile UINT link;
+    volatile UINT :32; //Reserved
+    volatile UINT size;
+};
+
 // buffers and buffer descriptors and pointers
-
-static struct pci_device_id aEdrvPciTbl[] = {
+static struct pci_device_id aEdrvPciTbl_l[] = {
     {0x8086, 0x1091, PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0},
     {0x8086, 0x1092, PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0},
     {0x8086, 0x1093, PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0},
@@ -425,421 +421,387 @@ static struct pci_device_id aEdrvPciTbl[] = {
     {0x8086, 0x1229, PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0}, // Intel Corporation 82557/8/9/0/1 Ethernet Pro 100
     {0,}
 };
-MODULE_DEVICE_TABLE (pci, aEdrvPciTbl);
+MODULE_DEVICE_TABLE (pci, aEdrvPciTbl_l);
 
-static tEdrvInstance EdrvInstance_l;
+static tEdrvInstance edrvInstance_l;
 
-static struct pci_driver EdrvDriver = {
+static struct pci_driver edrvDriver_l = {
     .name = DRV_NAME,
-    .id_table = aEdrvPciTbl,
-    .probe = EdrvInitOne,
-    .remove = EdrvRemoveOne,
+    .id_table = aEdrvPciTbl_l,
+    .probe = initOnePciDev,
+    .remove = removeOnePciDev,
 };
 
-//---------------------------------------------------------------------------
-//
-// Function: edrv_init
-//
-// Description: function for init of the Ethernet controller
-//
-// Parameters: pEdrvInitParam_p = pointer to struct including the init-parameters
-//
-// Returns: Errorcode = kEplSuccessful
-// = kEplNoResource
-//
-// State:
-//
-//---------------------------------------------------------------------------
-tEplKernel edrv_init(tEdrvInitParam * pEdrvInitParam_p)
-{
-tEplKernel Ret;
-INT iResult;
-INT iIndex;
+//============================================================================//
+//            P U B L I C   F U N C T I O N S                                 //
+//============================================================================//
 
-    Ret = kEplSuccessful;
+//------------------------------------------------------------------------------
+/**
+\brief  Ethernet driver initialization
+
+This function initializes the Ethernet driver.
+
+\param  pEdrvInitParam_p    Edrv initialization parameters
+
+\return The function returns a tEplKernel error code.
+
+\ingroup module_edrv
+*/
+//------------------------------------------------------------------------------
+tEplKernel edrv_init(tEdrvInitParam* pEdrvInitParam_p)
+{
+    tEplKernel  ret = kEplSuccessful;
+    INT         result;
+    INT         i;
 
     // clear instance structure
-    EPL_MEMSET(&EdrvInstance_l, 0, sizeof (EdrvInstance_l));
+    EPL_MEMSET(&edrvInstance_l, 0, sizeof (edrvInstance_l));
 
     // save the init data
-    EdrvInstance_l.m_InitParam = *pEdrvInitParam_p;
+    edrvInstance_l.initParam = *pEdrvInitParam_p;
 
     // clear driver structure
-    EPL_MEMSET(&EdrvDriver, 0, sizeof (EdrvDriver));
-    EdrvDriver.name = DRV_NAME,
-    EdrvDriver.id_table = aEdrvPciTbl,
-    EdrvDriver.probe = EdrvInitOne,
-    EdrvDriver.remove = EdrvRemoveOne,
+    EPL_MEMSET(&edrvDriver_l, 0, sizeof (edrvDriver_l));
+    edrvDriver_l.name = DRV_NAME,
+    edrvDriver_l.id_table = aEdrvPciTbl_l,
+    edrvDriver_l.probe = initOnePciDev,
+    edrvDriver_l.remove = removeOnePciDev,
 
     // register PCI driver
-    iResult = pci_register_driver (&EdrvDriver);
-    if (iResult != 0)
+    result = pci_register_driver (&edrvDriver_l);
+    if (result != 0)
     {
-        printk("%s pci_register_driver failed with %d\n", __FUNCTION__, iResult);
-        Ret = kEplNoResource;
+        printk("%s pci_register_driver failed with %d\n", __FUNCTION__, result);
+        ret = kEplNoResource;
         goto Exit;
     }
 
-    if (EdrvInstance_l.m_pPciDev == NULL)
+    if (edrvInstance_l.pPciDev == NULL)
     {
-        printk("%s m_pPciDev=NULL\n", __FUNCTION__);
-        Ret = edrv_shutdown();
-        Ret = kEplNoResource;
+        printk("%s pPciDev=NULL\n", __FUNCTION__);
+        ret = edrv_shutdown();
+        ret = kEplNoResource;
         goto Exit;
     }
 
-    // local MAC address might have been changed in EdrvInitOne
-    EPL_MEMCPY(pEdrvInitParam_p->aMacAddr, EdrvInstance_l.m_InitParam.aMacAddr, 6);
+    // local MAC address might have been changed in initOnePciDev
+    EPL_MEMCPY(pEdrvInitParam_p->aMacAddr, edrvInstance_l.initParam.aMacAddr, 6);
 
     printk("%s local MAC = ", __FUNCTION__);
-    for (iIndex = 0; iIndex < 6; iIndex++)
+    for (i = 0; i < 6; i++)
     {
-        printk("%02X ", (UINT)pEdrvInitParam_p->aMacAddr[iIndex]);
+        printk("%02X ", (UINT)pEdrvInitParam_p->aMacAddr[i]);
     }
     printk("\n");
 
 Exit:
-    return Ret;
+    return ret;
 }
 
-//---------------------------------------------------------------------------
-//
-// Function: edrv_shutdown
-//
-// Description: Shutdown the Ethernet controller
-//
-// Parameters: void
-//
-// Returns: Errorcode = kEplSuccessful
-//
-// State:
-//
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+/**
+\brief  Ethernet driver shutdown
+
+This function shuts down the Ethernet driver.
+
+\return The function returns a tEplKernel error code.
+
+\ingroup module_edrv
+*/
+//------------------------------------------------------------------------------
 tEplKernel edrv_shutdown(void)
 {
     // unregister PCI driver
     printk("%s calling pci_unregister_driver()\n", __FUNCTION__);
-    pci_unregister_driver (&EdrvDriver);
+    pci_unregister_driver (&edrvDriver_l);
 
     return kEplSuccessful;
 }
 
-//---------------------------------------------------------------------------
-//
-// Function: edrv_setRxMulticastMacAddr
-//
-// Description: Set a multicast entry into the Ethernet controller
-//
-// Parameters: pbMacAddr_p = pointer to multicast entry to set
-//
-// Returns: Errorcode = kEplSuccessful
-//
-// State:
-//
-//---------------------------------------------------------------------------
-tEplKernel edrv_setRxMulticastMacAddr (BYTE * pbMacAddr_p)
+//------------------------------------------------------------------------------
+/**
+\brief  Set multicast address entry
+
+This function sets a multicast entry into the Ethernet controller.
+
+\param  pMacAddr_p  Multicast address
+
+\return The function returns a tEplKernel error code.
+
+\ingroup module_edrv
+*/
+//------------------------------------------------------------------------------
+tEplKernel edrv_setRxMulticastMacAddr(UINT8* pMacAddr_p)
 {
-tEplKernel Ret = kEplSuccessful;
-struct cb *pCb;
-BYTE *pbCnt;
-int iCbCnt = 0;
-static BOOL fIsFirstEntry = FALSE;
+    tEplKernel          ret = kEplSuccessful;
+    struct sCmdBlock*   pCb;
+    UINT8*              pCnt;
+    int                 cbCnt = 0;
+    static BOOL         fIsFirstEntry = FALSE;
 
     if(unlikely(FALSE == fIsFirstEntry))
     {
         fIsFirstEntry = TRUE;
         //pointer to the Command Block specified by the count value
-        pCb = (struct cb *)(EdrvInstance_l.m_pCbVirtAdd + (CB_REQUIRED_SIZE * iCbCnt));
+        pCb = (struct sCmdBlock *)(edrvInstance_l.pCbVirtAdd + (CB_REQUIRED_SIZE * cbCnt));
 
         //set the byte count (number of mac addresses * 6 bytes per mac address)
         //in the corresponding section of the descriptor to zero
-        EdrvInstance_l.m_wMulticastAddrByteCnt = 0;
-        pbCnt = (BYTE *)&pCb[1];
-        *(WORD *)pbCnt = EdrvInstance_l.m_wMulticastAddrByteCnt;
+        edrvInstance_l.multicastAddrByteCnt = 0;
+        pCnt = (UINT8 *)&pCb[1];
+        *(UINT16 *)pCnt = edrvInstance_l.multicastAddrByteCnt;
     }
 
-    Ret = EdrvMulticastCmd(OP_MULTICAST, iCbCnt, pbMacAddr_p, MULTICAST_ADDR_ADD);
+    ret = multicastCmd(OP_MULTICAST, cbCnt, pMacAddr_p, MULTICAST_ADDR_ADD);
 
-    return Ret;
+    return ret;
 }
 
-//---------------------------------------------------------------------------
-//
-// Function: edrv_clearRxMulticastMacAddr
-//
-// Description: Reset a multicast entry in the Ethernet controller
-//
-// Parameters: pbMacAddr_p = pointer to multicast entry to reset
-//
-// Returns: Errorcode = kEplSuccessful
-//
-// State:
-//
-//---------------------------------------------------------------------------
-tEplKernel edrv_clearRxMulticastMacAddr (BYTE * pbMacAddr_p)
+//------------------------------------------------------------------------------
+/**
+\brief  Clear multicast address entry
+
+This function removes the multicast entry from the Ethernet controller.
+
+\param  pMacAddr_p  Multicast address
+
+\return The function returns a tEplKernel error code.
+
+\ingroup module_edrv
+*/
+//------------------------------------------------------------------------------
+tEplKernel edrv_clearRxMulticastMacAddr(UINT8* pMacAddr_p)
 {
-tEplKernel Ret = kEplSuccessful;
+    tEplKernel ret = kEplSuccessful;
 
-    Ret = EdrvMulticastCmd(OP_MULTICAST, 0, pbMacAddr_p, MULTICAST_ADDR_REM);
+    ret = multicastCmd(OP_MULTICAST, 0, pMacAddr_p, MULTICAST_ADDR_REM);
 
-    return Ret;
+    return ret;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Change Rx filter setup
 
-tEplKernel edrv_changeRxFilter(tEdrvFilter* pFilter_p,
-                            UINT uiCount_p,
-                            UINT uiEntryChanged_p,
-                            UINT uiChangeFlags_p)
+This function changes the Rx filter setup. The parameter entryChanged_p
+selects the Rx filter entry that shall be changed and \p changeFlags_p determines
+the property.
+If \p entryChanged_p is equal or larger count_p all Rx filters shall be changed.
+
+\note Rx filters are not supported by this driver!
+
+\param  pFilter_p           Base pointer of Rx filter array
+\param  count_p             Number of Rx filter array entries
+\param  entryChanged_p      Index of Rx filter entry that shall be changed
+\param  changeFlags_p       Bit mask that selects the changing Rx filter property
+
+\return The function returns a tEplKernel error code.
+
+\ingroup module_edrv
+*/
+//------------------------------------------------------------------------------
+tEplKernel edrv_changeRxFilter(tEdrvFilter* pFilter_p, UINT count_p,
+                                UINT entryChanged_p, UINT changeFlags_p)
 {
-tEplKernel Ret = kEplSuccessful;
+    UNUSED_PARAMETER(pFilter_p);
+    UNUSED_PARAMETER(count_p);
+    UNUSED_PARAMETER(entryChanged_p);
+    UNUSED_PARAMETER(changeFlags_p);
 
-    return Ret;
+    return kEplSuccessful;
 }
 
-//---------------------------------------------------------------------------
-//
-// Function: edrv_allocTxBuffer
-//
-// Description: Register a Tx-Buffer
-//
-// Parameters: pBuffer_p = pointer to Buffer structure
-//
-// Returns: Errorcode = kEplSuccessful
-// = kEplEdrvNoFreeBufEntry
-//
-// State:
-//
-//---------------------------------------------------------------------------
-tEplKernel edrv_allocTxBuffer (tEdrvTxBuffer * pBuffer_p)
+//------------------------------------------------------------------------------
+/**
+\brief  Allocate Tx buffer
+
+This function allocates a Tx buffer.
+
+\param  pBuffer_p           Tx buffer descriptor
+
+\return The function returns a tEplKernel error code.
+
+\ingroup module_edrv
+*/
+//------------------------------------------------------------------------------
+tEplKernel edrv_allocTxBuffer(tEdrvTxBuffer* pBuffer_p)
 {
-tEplKernel Ret = kEplSuccessful;
-UINT i;
+    tEplKernel  ret = kEplSuccessful;
+    UINT        i;
 
     if (pBuffer_p->maxBufferSize > EDRV_MAX_FRAME_SIZE)
     {
-        Ret = kEplEdrvNoFreeBufEntry;
+        ret = kEplEdrvNoFreeBufEntry;
         goto Exit;
     }
 
-    if (EdrvInstance_l.m_pbTxBuf == NULL)
+    if (edrvInstance_l.pTxBuf == NULL)
     {
         printk("%s Tx buffers currently not allocated\n", __FUNCTION__);
-        Ret = kEplEdrvNoFreeBufEntry;
+        ret = kEplEdrvNoFreeBufEntry;
         goto Exit;
     }
 
     // search a free Tx buffer with appropriate size
     for (i = 0; i < EDRV_MAX_TX_BUFFERS; i++)
     {
-        if (EdrvInstance_l.m_afTxBufUsed[i] == FALSE)
+        if (edrvInstance_l.afTxBufUsed[i] == FALSE)
         {
             // free channel found
-            EdrvInstance_l.m_afTxBufUsed[i] = TRUE;
+            edrvInstance_l.afTxBufUsed[i] = TRUE;
             pBuffer_p->txBufferNumber.value = i;
-            pBuffer_p->pBuffer = EdrvInstance_l.m_pbTxBuf + (i * EDRV_MAX_FRAME_SIZE);
+            pBuffer_p->pBuffer = edrvInstance_l.pTxBuf + (i * EDRV_MAX_FRAME_SIZE);
             pBuffer_p->maxBufferSize = EDRV_MAX_FRAME_SIZE;
             break;
         }
     }
     if (i >= EDRV_MAX_TX_BUFFERS)
     {
-        Ret = kEplEdrvNoFreeBufEntry;
+        ret = kEplEdrvNoFreeBufEntry;
         goto Exit;
     }
 
 Exit:
-    return Ret;
+    return ret;
 
 }
 
-//---------------------------------------------------------------------------
-//
-// Function: edrv_freeTxBuffer
-//
-// Description: Register a Tx-Buffer
-//
-// Parameters: pBuffer_p = pointer to Buffer structure
-//
-// Returns: Errorcode = kEplSuccessful
-//
-// State:
-//
-//---------------------------------------------------------------------------
-tEplKernel edrv_freeTxBuffer (tEdrvTxBuffer * pBuffer_p)
+//------------------------------------------------------------------------------
+/**
+\brief  Free Tx buffer
+
+This function releases the Tx buffer.
+
+\param  pBuffer_p           Tx buffer descriptor
+
+\return The function returns a tEplKernel error code.
+
+\ingroup module_edrv
+*/
+//------------------------------------------------------------------------------
+tEplKernel edrv_freeTxBuffer(tEdrvTxBuffer* pBuffer_p)
 {
-UINT uiBufferNumber;
+    UINT bufferNumber;
 
-    uiBufferNumber = pBuffer_p->txBufferNumber.value;
+    bufferNumber = pBuffer_p->txBufferNumber.value;
 
-    if (uiBufferNumber < EDRV_MAX_TX_BUFFERS)
+    if (bufferNumber < EDRV_MAX_TX_BUFFERS)
     {
-        EdrvInstance_l.m_afTxBufUsed[uiBufferNumber] = FALSE;
+        edrvInstance_l.afTxBufUsed[bufferNumber] = FALSE;
     }
 
     return kEplSuccessful;
-
 }
 
-//---------------------------------------------------------------------------
-//
-// Function: EdrvIfeIssueScbcmd
-//
-// Description: issues the scb command for the CU or RU as required
-//
-// Parameters: wCmd_p - command to be issued to the CU or RU
-// uiArg_p - address to be written to the genptr register
-// uiOpcode_p - the opcode used while issuing this command
-//
-// Returns: (int) = error code
-//
-// State:
-//
-//---------------------------------------------------------------------------
-static bool EdrvIfeIssueScbcmd(WORD wCmd_p, UINT uiArg_p, UINT uiOpcode_p)
+//------------------------------------------------------------------------------
+/**
+\brief  Send Tx buffer
+
+This function sends the Tx buffer.
+
+\param  pBuffer_p           Tx buffer descriptor
+
+\return The function returns a tEplKernel error code.
+
+\ingroup module_edrv
+*/
+//------------------------------------------------------------------------------
+tEplKernel edrv_sendTxBuffer(tEdrvTxBuffer* pBuffer_p)
 {
-WORD wStat = 0;
-static INT iCuStatusFirstTime = 0;
-static WORD wPrevCmd = 0;
+    tEplKernel          ret = kEplSuccessful;
+    struct sCmdBlock*   pCmdBlock;
 
-    // this code section used for waiting till the previous cmd has been accepted
-    while (ioread8(EdrvInstance_l.m_pIoAddr + SCBCMD) & (SC_CUC | SC_RUC));
-
-    if(OP_TX == uiOpcode_p)
+    if (((edrvInstance_l.tailTxDesc + 1) % MAX_CBS) == edrvInstance_l.headTxDesc)
     {
-        wStat = ioread16(EdrvInstance_l.m_pIoAddr + SCBSTAT);
-        while((wStat & SS_CNA) == 0 && (iCuStatusFirstTime == 1))
-        {
-            wStat = ioread16(EdrvInstance_l.m_pIoAddr + SCBSTAT);
-        }
-        if(iCuStatusFirstTime < 1 )
-        {
-            iCuStatusFirstTime++;
-        }
-    }
-
-    switch (wCmd_p)
-    {
-        case SC_CUC_START:
-        case SC_CUC_LOADSDMP:
-        case SC_CUC_LOADBASE:
-        case SC_RUC_START:
-        case SC_RUC_LOADHDS:
-        case SC_RUC_LOADBASE:
-            iowrite32(uiArg_p, EdrvInstance_l.m_pIoAddr + GENPTR);
-            break;
-    }
-    iowrite16(SS_CNA, EdrvInstance_l.m_pIoAddr + SCBSTAT);
-    iowrite8(wCmd_p, EdrvInstance_l.m_pIoAddr + SCBCMD);
-
-    wPrevCmd = wCmd_p;
-
-    return TRUE;
-}
-
-//---------------------------------------------------------------------------
-//
-// Function: edrv_sendTxBuffer
-//
-// Description: immediately starts the transmission of the buffer
-//
-// Parameters: pBuffer_p = buffer descriptor to transmit
-//
-// Returns: Errorcode = kEplSuccessful
-//
-// State:
-//
-//---------------------------------------------------------------------------
-tEplKernel edrv_sendTxBuffer (tEdrvTxBuffer * pTxBuffer_p)
-{
-tEplKernel Ret = kEplSuccessful;
-struct cb *cbp;
-
-    if (((EdrvInstance_l.m_uiTailTxDesc + 1) % MAX_CBS) == EdrvInstance_l.m_uiHeadTxDesc)
-    {
-        Ret = kEplEdrvNoFreeTxDesc;
+        ret = kEplEdrvNoFreeTxDesc;
             goto Exit;
     }
 
-    cbp = (struct cb *)((EdrvInstance_l.m_pCbVirtAdd) + (CB_REQUIRED_SIZE * EdrvInstance_l.m_uiTailTxDesc));
+    pCmdBlock = (struct sCmdBlock *)((edrvInstance_l.pCbVirtAdd) + (CB_REQUIRED_SIZE * edrvInstance_l.tailTxDesc));
 
     // array to store virtual address of pTxBuffer
-    EdrvInstance_l.m_ulaCbVirtAddrBuf[EdrvInstance_l.m_uiTailTxDesc] = (ULONG)pTxBuffer_p;
+    edrvInstance_l.aCbVirtAddrBuf[edrvInstance_l.tailTxDesc] = (ULONG)pBuffer_p;
 
-    // array to store dma mapped address of data pointed by pTxBuffer_p->pBuffer
-    EdrvInstance_l.m_ulaCbDmaAddrBuf[EdrvInstance_l.m_uiTailTxDesc] = pci_map_single(EdrvInstance_l.m_pPciDev, pTxBuffer_p->pBuffer,
-                                                pTxBuffer_p->txFrameSize, PCI_DMA_TODEVICE);
+    // array to store dma mapped address of data pointed by pBuffer_p->pBuffer
+    edrvInstance_l.aCbDmaAddrBuf[edrvInstance_l.tailTxDesc] = pci_map_single(edrvInstance_l.pPciDev, pBuffer_p->pBuffer,
+                                                pBuffer_p->txFrameSize, PCI_DMA_TODEVICE);
 
 
 
     // fill the TXCB descriptor with the relevant data
 
     // increment Tx descriptor queue tail pointer
-    EdrvInstance_l.m_uiTailTxDesc = ((EdrvInstance_l.m_uiTailTxDesc + 1) % MAX_CBS);
+    edrvInstance_l.tailTxDesc = ((edrvInstance_l.tailTxDesc + 1) % MAX_CBS);
 
-    if(0 == EdrvInstance_l.m_uiTailTxDesc)
+    if(0 == edrvInstance_l.tailTxDesc)
     {
-        EdrvIfeCmdDescWrite(OP_TX, (MAX_CBS-1));
-        EdrvIfeIssueScbcmd(SC_CUC_START, (EdrvInstance_l.m_CbDmaHandle) + (CB_REQUIRED_SIZE * (MAX_CBS-1)),OP_TX);
+        cmdDescWrite(OP_TX, (MAX_CBS-1));
+        issueScbcmd(SC_CUC_START, (edrvInstance_l.cbDmaHandle) + (CB_REQUIRED_SIZE * (MAX_CBS-1)),OP_TX);
     }
     else
     {
-    EdrvIfeCmdDescWrite(OP_TX, (EdrvInstance_l.m_uiTailTxDesc - 1));
-    EdrvIfeIssueScbcmd(SC_CUC_START, EdrvInstance_l.m_CbDmaHandle + (CB_REQUIRED_SIZE * (EdrvInstance_l.m_uiTailTxDesc - 1)),OP_TX);
+    cmdDescWrite(OP_TX, (edrvInstance_l.tailTxDesc - 1));
+    issueScbcmd(SC_CUC_START, edrvInstance_l.cbDmaHandle + (CB_REQUIRED_SIZE * (edrvInstance_l.tailTxDesc - 1)),OP_TX);
     }
 
     Exit:
-        return Ret;
+        return ret;
 }
 
-//---------------------------------------------------------------------------
-//
-// Function: EdrvInterruptHandler
-//
-// Description: interrupt handler
-//
-// Parameters: void
-//
-// Returns: void
-//
-// State:
-//
-//---------------------------------------------------------------------------
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,19)
-static irqreturn_t TgtEthIsr (INT nIrqNum_p, void* ppDevInstData_p)
-#else
-static INT TgtEthIsr (INT nIrqNum_p, void* ppDevInstData_p, struct pt_regs* ptRegs_p)
-#endif
+//============================================================================//
+//            P R I V A T E   F U N C T I O N S                               //
+//============================================================================//
+/// \name Private Functions
+/// \{
+
+//------------------------------------------------------------------------------
+/**
+\brief  Ethernet driver interrupt handler
+
+This function is the interrupt service routine for the Ethernet driver.
+
+\param  irqNum_p            IRQ number
+\param  ppDevInstData_p     Pointer to private data provided by request_irq
+
+\return The function returns an IRQ handled code.
+*/
+//------------------------------------------------------------------------------
+static irqreturn_t edrvIrqHandler (INT irqNum_p, void* ppDevInstData_p)
 {
-INT iHandled;
-WORD wStat;
-struct cb *cbp;
-UINT uiCmdStat;
-struct rfd *rfdp;
-tEdrvTxBuffer* pTxBuffer = NULL;
-tEdrvTxBuffer* pDmaBuffer = NULL;
+    INT                     handled;
+    UINT16                  state;
+    struct sCmdBlock*       pCmdBlock;
+    UINT                    cmdState;
+    struct sRxDescCmdBlock* pRxDescCmdBlock;
+    tEdrvTxBuffer*          pTxBuffer = NULL;
+    tEdrvTxBuffer*          pDmaBuffer = NULL;
 
-    iHandled = IRQ_HANDLED;
-    wStat = ioread16(EdrvInstance_l.m_pIoAddr + SCBSTAT);
+    UNUSED_PARAMETER(irqNum_p);
+    UNUSED_PARAMETER(ppDevInstData_p);
 
-    if(((wStat & 0xFF00) == 0x0000) || ((wStat & 0xFF00) == 0xFF00))
+    handled = IRQ_HANDLED;
+    state = ioread16(edrvInstance_l.pIoAddr + SCBSTAT);
+
+    if(((state & 0xFF00) == 0x0000) || ((state & 0xFF00) == 0xFF00))
     {
-        iHandled = IRQ_NONE;
+        handled = IRQ_NONE;
         goto Exit;
     }
 
     /* clear interrupt */
-    iowrite16((wStat & 0xDF00), EdrvInstance_l.m_pIoAddr + SCBSTAT);
+    iowrite16((state & 0xDF00), edrvInstance_l.pIoAddr + SCBSTAT);
 
     // open if(TX/RX interrupt)
-    if ((wStat & SS_CX) | (wStat & (SS_FR | SS_RNR)))
+    if ((state & SS_CX) | (state & (SS_FR | SS_RNR)))
     {
-        if (EdrvInstance_l.m_pbTxBuf == NULL)
+        if (edrvInstance_l.pTxBuf == NULL)
         {
             printk("%s Tx buffers currently not allocated\n", __FUNCTION__);
             goto Exit;
         }
 
-        if (wStat & SS_RNR)
+        if (state & SS_RNR)
         {
             printk("RU not ready\n");
         }
@@ -847,14 +809,14 @@ tEdrvTxBuffer* pDmaBuffer = NULL;
         do
         {
             // Process receive descriptors
-            rfdp = (struct rfd *)((EdrvInstance_l.m_pRfdVirtAdd) + (RFD_REQUIRED_SIZE * EdrvInstance_l.m_uiHeadRxDesc));
+            pRxDescCmdBlock = (struct sRxDescCmdBlock *)((edrvInstance_l.pRfdVirtAdd) + (RFD_REQUIRED_SIZE * edrvInstance_l.headRxDesc));
 
-            while (rfdp->m_uiCmdStat & CS_C)
+            while (pRxDescCmdBlock->cmdStat & CS_C)
             { // Rx frame available
                 tEdrvRxBuffer RxBuffer;
                 tEdrvReleaseRxBuffer RetReleaseRxBuffer;
 
-                if (((rfdp->m_uiSize & RFD_EOF) != 0) && ((rfdp->m_uiSize & RFD_F) != 0))
+                if (((pRxDescCmdBlock->size & RFD_EOF) != 0) && ((pRxDescCmdBlock->size & RFD_F) != 0))
                 { // Descriptor is valid
                     // Packet is OK
 
@@ -863,52 +825,52 @@ tEdrvTxBuffer* pDmaBuffer = NULL;
                     // Get length of received packet
                     // In the default configuration for 82559 CRC is not transferred into host memory
                     // so we can use the RX byte count from the RFD as it is
-                    RxBuffer.rxFrameSize = (rfdp->m_uiSize) & RFD_COUNT;
+                    RxBuffer.rxFrameSize = (pRxDescCmdBlock->size) & RFD_COUNT;
 
-                    RxBuffer.pBuffer = ((EdrvInstance_l.m_pRfdVirtAdd + (RFD_REQUIRED_SIZE * EdrvInstance_l.m_uiHeadRxDesc))+(sizeof(struct rfd)));
+                    RxBuffer.pBuffer = ((edrvInstance_l.pRfdVirtAdd + (RFD_REQUIRED_SIZE * edrvInstance_l.headRxDesc))+(sizeof(struct sRxDescCmdBlock)));
 
                     // Call Rx handler of Data link layer
 
-                    RetReleaseRxBuffer = EdrvInstance_l.m_InitParam.pfnRxHandler(&RxBuffer);
+                    RetReleaseRxBuffer = edrvInstance_l.initParam.pfnRxHandler(&RxBuffer);
                 }// closing Descriptor is valid
 
                 // clean the status bits of the currently handled descriptor
                 // so that it is available for use the next time
-                EdrvIfeRxDescWrite(EdrvInstance_l.m_uiHeadRxDesc);
-                EdrvInstance_l.m_uiHeadRxDesc = ((EdrvInstance_l.m_uiHeadRxDesc + 1) % MAX_RFDS);
-                rfdp = (struct rfd *)((EdrvInstance_l.m_pRfdVirtAdd) + (RFD_REQUIRED_SIZE * EdrvInstance_l.m_uiTailRxDesc));
-                rfdp->m_uiCmdStat = 0x00000000;
-                if (0 == EdrvInstance_l.m_uiHeadRxDesc)
+                rxDescWrite(edrvInstance_l.headRxDesc);
+                edrvInstance_l.headRxDesc = ((edrvInstance_l.headRxDesc + 1) % MAX_RFDS);
+                pRxDescCmdBlock = (struct sRxDescCmdBlock *)((edrvInstance_l.pRfdVirtAdd) + (RFD_REQUIRED_SIZE * edrvInstance_l.tailRxDesc));
+                pRxDescCmdBlock->cmdStat = 0x00000000;
+                if (0 == edrvInstance_l.headRxDesc)
                 {
-                    EdrvInstance_l.m_uiTailRxDesc = MAX_RFDS - 1;
+                    edrvInstance_l.tailRxDesc = MAX_RFDS - 1;
                 }
                 else
                 {
-                    EdrvInstance_l.m_uiTailRxDesc = EdrvInstance_l.m_uiHeadRxDesc - 1;
+                    edrvInstance_l.tailRxDesc = edrvInstance_l.headRxDesc - 1;
                 }
-                rfdp = (struct rfd *)((EdrvInstance_l.m_pRfdVirtAdd) + (RFD_REQUIRED_SIZE * EdrvInstance_l.m_uiTailRxDesc));
-                rfdp->m_uiCmdStat = CS_S;
-                rfdp = (struct rfd *)(EdrvInstance_l.m_pRfdVirtAdd + (RFD_REQUIRED_SIZE * EdrvInstance_l.m_uiHeadRxDesc));
+                pRxDescCmdBlock = (struct sRxDescCmdBlock *)((edrvInstance_l.pRfdVirtAdd) + (RFD_REQUIRED_SIZE * edrvInstance_l.tailRxDesc));
+                pRxDescCmdBlock->cmdStat = CS_S;
+                pRxDescCmdBlock = (struct sRxDescCmdBlock *)(edrvInstance_l.pRfdVirtAdd + (RFD_REQUIRED_SIZE * edrvInstance_l.headRxDesc));
             }// closing RX while loop
 
-            cbp = (struct cb *)((EdrvInstance_l.m_pCbVirtAdd) + (CB_REQUIRED_SIZE * EdrvInstance_l.m_uiHeadTxDesc));
+            pCmdBlock = (struct sCmdBlock *)((edrvInstance_l.pCbVirtAdd) + (CB_REQUIRED_SIZE * edrvInstance_l.headTxDesc));
 
-            if(cbp->m_uiCmdStat & CS_C)
+            if(pCmdBlock->cmdStat & CS_C)
             {
-                uiCmdStat = cbp->m_uiCmdStat;
+                cmdState = pCmdBlock->cmdStat;
                 // clear the status bits of the current CB
-                cbp->m_uiCmdStat &= 0XFFFF0000;
+                pCmdBlock->cmdStat &= 0XFFFF0000;
 
                 // retrieve the address of the pTxBuffer pointer
                 // that was received in edrv_sendTxBuffer
-                pTxBuffer = (tEdrvTxBuffer *)EdrvInstance_l.m_ulaCbVirtAddrBuf[EdrvInstance_l.m_uiHeadTxDesc];
+                pTxBuffer = (tEdrvTxBuffer *)edrvInstance_l.aCbVirtAddrBuf[edrvInstance_l.headTxDesc];
 
-                pDmaBuffer = (tEdrvTxBuffer *)EdrvInstance_l.m_ulaCbDmaAddrBuf[EdrvInstance_l.m_uiHeadTxDesc];
+                pDmaBuffer = (tEdrvTxBuffer *)edrvInstance_l.aCbDmaAddrBuf[edrvInstance_l.headTxDesc];
 
-                EdrvInstance_l.m_ulaCbVirtAddrBuf[EdrvInstance_l.m_uiHeadTxDesc] = 0;
+                edrvInstance_l.aCbVirtAddrBuf[edrvInstance_l.headTxDesc] = 0;
 
                 // Increment Tx descriptor queue head pointer
-                EdrvInstance_l.m_uiHeadTxDesc = ((EdrvInstance_l.m_uiHeadTxDesc + 1) % MAX_CBS);
+                edrvInstance_l.headTxDesc = ((edrvInstance_l.headTxDesc + 1) % MAX_CBS);
 
                 if(NULL != pDmaBuffer)
                 {
@@ -916,8 +878,8 @@ tEdrvTxBuffer* pDmaBuffer = NULL;
                     // pTxBuffer_p->pBuffer pointer
                     // that was received in edrv_sendTxBuffer
                     // so that the mapping can be correspondingly unmapped
-                    pci_unmap_single(EdrvInstance_l.m_pPciDev,
-                                     (dma_addr_t) EdrvInstance_l.m_ulaCbDmaAddrBuf[EdrvInstance_l.m_uiHeadTxDesc],
+                    pci_unmap_single(edrvInstance_l.pPciDev,
+                                     (dma_addr_t) edrvInstance_l.aCbDmaAddrBuf[edrvInstance_l.headTxDesc],
                                      pTxBuffer->txFrameSize, PCI_DMA_TODEVICE);
                 }
 
@@ -939,267 +901,103 @@ tEdrvTxBuffer* pDmaBuffer = NULL;
             {
                     break;
             }
-        }while (EdrvInstance_l.m_uiHeadTxDesc != EdrvInstance_l.m_uiTailTxDesc);
+        }while (edrvInstance_l.headTxDesc != edrvInstance_l.tailTxDesc);
 
     }// close if(TX/RX interrupt)
 
 Exit:
-    return iHandled;
+    return handled;
 }
 
-//---------------------------------------------------------------------------
-//
-// Function: EdrvIfeEepromDelay
-//
-// Description: To give a delay before successive operations
-//
-// Parameters: void
-//
-// Returns: void
-//
-//
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+/**
+\brief  Issue individual address command
 
-//jba: Is this always reliable on different processors?
+This function issues an individual address command to insert the MAC address.
 
-/* 2 reads required for 66MHz operation */
-void EdrvIfeEepromDelay(void)
+\param  opcode_p    Opcode to be filled in the command block
+\param  count_p     Count value indicating which command block is to be filled
+
+\return The function returns a tEplKernel error code.
+*/
+//------------------------------------------------------------------------------
+static tEplKernel individualAddressCmd(UINT opcode_p, UINT count_p)
 {
-    ioread8(EdrvInstance_l.m_pIoAddr + EECTRL);
-    ioread8(EdrvInstance_l.m_pIoAddr + EECTRL);
-}
-
-//---------------------------------------------------------------------------
-//
-// Function: EdrvIfeCheckEepromSize
-//
-// Description: To check the size
-//
-// Parameters: void
-//
-// Returns: void
-//
-//---------------------------------------------------------------------------
-static void EdrvIfeCheckEepromSize(void)
-{
-INT iLoopCount;
-BYTE bChipSelect;
-BYTE bDi;
-
-    /* enable eeprom interface register */
-    bChipSelect = EC_EECS;
-
-    iowrite8(bChipSelect, EdrvInstance_l.m_pIoAddr + EECTRL);
-
-    /* output eeprom command */
-    for (iLoopCount = 4; iLoopCount >= 0; iLoopCount--)
-    {
-        bDi = ((EEPROM_READ_CMD >> iLoopCount) & 1) << EC_EEDI_SHIFT;
-
-        iowrite8(bChipSelect | bDi,EdrvInstance_l.m_pIoAddr + EECTRL);
-
-        iowrite8(bChipSelect | bDi | EC_EESK, EdrvInstance_l.m_pIoAddr + EECTRL);
-        EdrvIfeEepromDelay();
-
-
-        iowrite8(bChipSelect | bDi, EdrvInstance_l.m_pIoAddr + EECTRL);
-        EdrvIfeEepromDelay();
-    }
-
-    /* How many address bits required until eeprom responds with 0 */
-    iLoopCount = 0;
-    do {
-        iowrite8(bChipSelect, EdrvInstance_l.m_pIoAddr + EECTRL);
-
-        iowrite8(bChipSelect | EC_EESK, EdrvInstance_l.m_pIoAddr + EECTRL);
-        EdrvIfeEepromDelay();
-
-        iowrite8(bChipSelect, EdrvInstance_l.m_pIoAddr + EECTRL);
-        EdrvIfeEepromDelay();
-        iLoopCount++;
-    } while ((ioread8(EdrvInstance_l.m_pIoAddr + EECTRL) & EC_EEDO) && iLoopCount < 8 );
-    /* save the result */
-
-    EdrvInstance_l.m_uiEepromAddrBits = iLoopCount;
-
-    /* read 16bits of data to terminate the sequence */
-    for (iLoopCount = 16; iLoopCount > 0; iLoopCount--)
-    {
-        iowrite8(bChipSelect | EC_EESK, EdrvInstance_l.m_pIoAddr + EECTRL);
-        EdrvIfeEepromDelay();
-
-        iowrite8(bChipSelect, EdrvInstance_l.m_pIoAddr + EECTRL);
-        EdrvIfeEepromDelay();
-    }
-
-    /* De-activate the EEPROM */
-
-    iowrite8(0, EdrvInstance_l.m_pIoAddr + EECTRL);
-}
-
-//---------------------------------------------------------------------------
-//
-// Function: EdrvIfeReadEeprom
-//
-// Description: To read the EEPROM for the MAC address
-//
-// Parameters: uiAddr_p = Address from which MAC has to be read
-//
-// Returns: MAC address
-//
-//---------------------------------------------------------------------------
-static WORD EdrvIfeReadEeprom(UINT uiAddr_p)
-{
-INT iLoopCount;
-UINT uiCmd;
-BYTE bChipSelect;
-BYTE bDi;
-WORD wRet;
-
-    if (uiAddr_p >= (1 << EdrvInstance_l.m_uiEepromAddrBits))
-    {
-        return (0);
-    }
-
-    /* make command bits */
-    uiCmd = (EEPROM_READ_CMD << EdrvInstance_l.m_uiEepromAddrBits) | uiAddr_p;
-
-    /* enable eeprom interface register */
-    bChipSelect = EC_EECS;
-
-    iowrite8(bChipSelect , EdrvInstance_l.m_pIoAddr + EECTRL);
-
-    EdrvIfeEepromDelay();
-
-    /* output eeprom command */
-    for (iLoopCount = 4 + EdrvInstance_l.m_uiEepromAddrBits; iLoopCount >= 0; iLoopCount--)
-    {
-        bDi = ((uiCmd >> iLoopCount) & 1) << EC_EEDI_SHIFT;
-
-        iowrite8(bChipSelect | bDi, EdrvInstance_l.m_pIoAddr + EECTRL);
-        iowrite8(bChipSelect | bDi | EC_EESK, EdrvInstance_l.m_pIoAddr + EECTRL);
-        EdrvIfeEepromDelay();
-
-        iowrite8(bChipSelect | bDi, EdrvInstance_l.m_pIoAddr + EECTRL);
-        EdrvIfeEepromDelay();
-    }
-
-    /* get returned value */
-    wRet = 0;
-    for (iLoopCount = 16; iLoopCount > 0; iLoopCount--)
-    {
-        /* get 1 bit */
-        iowrite8(bChipSelect | EC_EESK, EdrvInstance_l.m_pIoAddr + EECTRL);
-        EdrvIfeEepromDelay();
-
-        wRet = (wRet << 1)
-              | ((ioread8(EdrvInstance_l.m_pIoAddr + EECTRL) >> EC_EEDO_SHIFT) & 1);
-
-        iowrite8(bChipSelect, EdrvInstance_l.m_pIoAddr + EECTRL);
-        EdrvIfeEepromDelay();
-    }
-
-    /* Terminate the EEPROM access. */
-
-    iowrite8(0, EdrvInstance_l.m_pIoAddr + EECTRL);
-    EdrvIfeEepromDelay();
-
-    return (wRet);
-}
-
-//---------------------------------------------------------------------------
-//
-// Function: EdrvIndividualAddressCmd
-//
-// Description: To insert the MAC address
-//
-// Parameters: uiOpcode_p = opcode to be filled in the Command Block
-// uiCount_p = count value which indicates which Command Block is to
-// be filled
-//
-// Returns: Ret = kEplSuccessful
-//
-//---------------------------------------------------------------------------
-tEplKernel EdrvIndividualAddressCmd(UINT uiOpcode_p, UINT uiCount_p)
-{
-cbstruct *cbstructp;
-tEplKernel Ret = kEplSuccessful;
+    tEplKernel      ret = kEplSuccessful;
+    tCommandBlock*  pCmdBlock;
 
     //pointer to the Command Block specified by the count value
-    cbstructp = (cbstruct *)(EdrvInstance_l.m_pCbVirtAdd + (CB_REQUIRED_SIZE * uiCount_p));
+    pCmdBlock = (tCommandBlock *)(edrvInstance_l.pCbVirtAdd + (CB_REQUIRED_SIZE * count_p));
 
     //fill the individual address command to be executed
-    cbstructp->m_uiStatCommand = CS_EL | (uiOpcode_p<<CS_OP_SHIFT); //0x80010000
+    pCmdBlock->stateCmd = CS_EL | (opcode_p<<CS_OP_SHIFT); //0x80010000
 
     //The MAC address bytes used below have been read from the EEPROM
 
     //MAC ADDRESS (BYTE4<<24) | (BYTE3<<16) | (BYTE2<<8) | (BYTE1<<0)
-    cbstructp->m_uiValue1 = EdrvInstance_l.m_InitParam.aMacAddr[0] |
-                            EdrvInstance_l.m_InitParam.aMacAddr[1] << 8 |
-                            EdrvInstance_l.m_InitParam.aMacAddr[2] << 16 |
-                            EdrvInstance_l.m_InitParam.aMacAddr[3] << 24;
+    pCmdBlock->value1 = edrvInstance_l.initParam.aMacAddr[0] |
+                            edrvInstance_l.initParam.aMacAddr[1] << 8 |
+                            edrvInstance_l.initParam.aMacAddr[2] << 16 |
+                            edrvInstance_l.initParam.aMacAddr[3] << 24;
 
     //MAC ADDRESS (BYTE6<<8) | (BYTE5<<0)
-    cbstructp->m_uiValue2 = EdrvInstance_l.m_InitParam.aMacAddr[4] |
-                                            EdrvInstance_l.m_InitParam.aMacAddr[5] << 8;
+    pCmdBlock->value2 = edrvInstance_l.initParam.aMacAddr[4] |
+                                            edrvInstance_l.initParam.aMacAddr[5] << 8;
 
     //start command issued to execute the individual address setup
-    EdrvIfeIssueScbcmd(SC_CUC_START, EdrvInstance_l.m_CbDmaHandle, OP_ADDRSETUP);
+    issueScbcmd(SC_CUC_START, edrvInstance_l.cbDmaHandle, OP_ADDRSETUP);
 
     //wait for command to complete successfully
-    while((cbstructp->m_uiStatCommand & CS_C)==0);
-    //printk("CmdStat Value : %x\n",cbstructp->m_uiStatCommand);
-    if(cbstructp->m_uiStatCommand & CS_OK)
+    while((pCmdBlock->stateCmd & CS_C)==0);
+
+    if(pCmdBlock->stateCmd & CS_OK)
     {
-        //printk("Individual Address Setup command successful\n");
-        Ret = kEplSuccessful;
+        ret = kEplSuccessful;
     }
     else
     {
-        //printk("Individual Address Setup command unsuccessful\n");
-        Ret = kEplEdrvInitError;
+        ret = kEplEdrvInitError;
     }
 
-    return Ret;
+    return ret;
 }
 
-//---------------------------------------------------------------------------
-//
-// Function: EdrvConfigureCmd
-//
-// Description: To configure the Ethernet Controller
-//
-// Parameters: opcode = opcode to be filled in the Command Block
-// count = count value which indicates which Command Block is to
-// be filled
-//
-// Returns: Ret = kEplSuccessful
-//
-//---------------------------------------------------------------------------
-tEplKernel EdrvConfigureCmd(UINT uiOpcode_p, UINT uiCount_p)
-{
-cbstruct *cbstructp;
-tEplKernel Ret = kEplSuccessful;
+//------------------------------------------------------------------------------
+/**
+\brief  Issue configure command
 
-    //pointer to the Command Block specified by the uiCount_p value
-    cbstructp = (cbstruct *)(EdrvInstance_l.m_pCbVirtAdd + (CB_REQUIRED_SIZE * uiCount_p));
+This function issues a configure command to the Ethernet controller.
+
+\param  opcode_p    Opcode to be filled in the command block
+\param  count_p     Count value indicating which command block is to be filled
+
+\return The function returns a tEplKernel error code.
+*/
+//------------------------------------------------------------------------------
+static tEplKernel configureCmd(UINT opcode_p, UINT count_p)
+{
+    tEplKernel      ret = kEplSuccessful;
+    tCommandBlock*  pCmdBlock;
+
+    //pointer to the Command Block specified by the count_p value
+    pCmdBlock = (tCommandBlock *)(edrvInstance_l.pCbVirtAdd + (CB_REQUIRED_SIZE * count_p));
 
     //fill the configure command to be executed
-    cbstructp->m_uiStatCommand = CS_EL | (uiOpcode_p << CS_OP_SHIFT); //0x80020000
+    pCmdBlock->stateCmd = CS_EL | (opcode_p << CS_OP_SHIFT); //0x80020000
 
     //(Byte3<<24) | (Byte2<<16) | (Byte1<<8) | (Byte0<<0)
     //Byte0 - Byte Count of 16 bytes used in this configuration
     //Byte1 - Default Value
     //Byte2 - Default Value
     //Byte3 - Default Value
-    cbstructp->m_uiValue1 = (0X00<<24) | (0X00<<16) | (0X08<<8) | (0X10<<0); //0x00000810
+    pCmdBlock->value1 = (0X00<<24) | (0X00<<16) | (0X08<<8) | (0X10<<0); //0x00000810
 
     //Byte4 - Default Value
     //Byte5 - Default Value
     //Byte6 - Default Value for 82559
     //Byte7 - Default Value for 82559
     //(Byte7<<24) | (Byte6<<16) | (Byte5<<8) | (Byte4<<0)
-    cbstructp->m_uiValue2 = (0X00<<24) | (0X30<<16) | (0X00<<8) | (0X00<<0); //0x00300000
+    pCmdBlock->value2 = (0X00<<24) | (0X30<<16) | (0X00<<8) | (0X00<<0); //0x00300000
 
     //Byte8 - Bit0 set for 82559, Bit0 cleared to enable link operation, Rest of the
     // bits are default values for 82559
@@ -1208,14 +1006,14 @@ tEplKernel Ret = kEplSuccessful;
     // disabled, other bits default for 82559
     //Byte11 - Default value for 82559
     //(Byte11<<24) | (Byte10<<16) | (Byte9<<8) | (Byte8<<0)
-    cbstructp->m_uiValue3 = (0X00<<24) | (0X2E<<16) | (0X00<<8) | (0X01<<0); //0x002E0001
+    pCmdBlock->value3 = (0X00<<24) | (0X2E<<16) | (0X00<<8) | (0X01<<0); //0x002E0001
 
     //Byte12 - Interframe spacing - default value, other bits default value for 82559
     //Byte13 - Default Value for 82559
     //Byte14 - Default Value for 82559
     //Byte15 - Bit0 cleared to disable promiscuous mode, other bits default value for 82559
     //(Byte15<<24) | (Byte14<<16) | (Byte13<<8) | (Byte12<<0)
-    cbstructp->m_uiValue4 = (0XC8<<24) | (0XF2<<16) | (0X00<<8) | (0X61<<0); //0xC8F20061
+    pCmdBlock->value4 = (0XC8<<24) | (0XF2<<16) | (0X00<<8) | (0X61<<0); //0xC8F20061
 
     //NOTE: the following configuration bytes not yet configured
     //Byte16 - Default Value
@@ -1223,377 +1021,565 @@ tEplKernel Ret = kEplSuccessful;
     //Byte18 - Default Value
     //Byte19 - Default Value
     //(Byte19<<24) | (Byte18<<16) | (Byte17<<8) | (Byte16<<0)
-    //cbstructp->m_uiValue5 = (0X80<<24) | (0XF2<<16) | (0X40<<8) | (0X00<<0); //
+    //pCmdBlock->value5 = (0X80<<24) | (0XF2<<16) | (0X40<<8) | (0X00<<0); //
 
     //Byte20 - Defaut Value
     //Byte21 - Default Value
     //Byte22 - Zero Padding
     //Byte23 - Zero Padding
     //(Byte23<<24) | (Byte22<<16) | (Byte21<<8) | (Byte20<<0)
-    //cbstructp->m_uiValue6 = (0X00<<24) | (0X00<<16) | (0X05<<8) | (0X3F<<0); //
+    //pCmdBlock->value6 = (0X00<<24) | (0X00<<16) | (0X05<<8) | (0X3F<<0); //
 
     //start command issued to configure the device as per the configuration byte values
-    EdrvIfeIssueScbcmd(SC_CUC_START, EdrvInstance_l.m_CbDmaHandle, OP_CONFIGURE);
+    issueScbcmd(SC_CUC_START, edrvInstance_l.cbDmaHandle, OP_CONFIGURE);
 
     //wait for command to complete successfully
-    while((cbstructp->m_uiStatCommand & CS_C) == 0);
+    while((pCmdBlock->stateCmd & CS_C) == 0);
 
-    if(cbstructp->m_uiStatCommand & CS_OK)
+    if(pCmdBlock->stateCmd & CS_OK)
     {
-        Ret = kEplSuccessful;
+        ret = kEplSuccessful;
     }
     else
     {
-        Ret = kEplEdrvInitError;
+        ret = kEplEdrvInitError;
     }
 
-    return Ret;
+    return ret;
 }
 
-//---------------------------------------------------------------------------
-//
-// Function: EdrvMulticastCmd
-//
-// Description: To fill the Multicast Command Block
-//
-// Parameters: uiOpcode_p = opcode to be filled in the Command Block
-// uiCount_p = count value which indicates which Command
-// Block is to be filled
-// pbMacAddr_p = pointer to the multicast address to be filled
-// uiMode_p = index variable used for the position of the
-// multicast address in the command block
-//
-// Returns: Ret = kEplSuccessful
-//
-//---------------------------------------------------------------------------
-tEplKernel EdrvMulticastCmd(UINT uiOpcode_p, UINT uiCount_p, BYTE *pbMacAddr_p,
-                            UINT uiMode_p)
-{
-struct cb *cbp;
-BYTE *bp;
-WORD *pwByteCount;
-WORD wMulticastAddrCnt;
-WORD wMulticastAddrLoop;
-UINT uiMemCmpref = 0;
-tEplKernel Ret = kEplSuccessful;
+//------------------------------------------------------------------------------
+/**
+\brief  Issue multicast command
 
-    //pointer to the Command Block specified by the uiCount_p value
-    cbp = (struct cb *)(EdrvInstance_l.m_pCbVirtAdd + (CB_REQUIRED_SIZE * uiCount_p));
+This function issues a multicast command to the Ethernet controller.
+
+\param  opcode_p    Opcode to be filled in the command block
+\param  count_p     Count value indicating which command block is to be filled
+\param  pMacAddr_p  Pointer to the multicast MAC address to be filled
+\param  mode_p      Index variable used for the position of the multicast MAC address
+                    in the command block
+
+\return The function returns a tEplKernel error code.
+*/
+//------------------------------------------------------------------------------
+static tEplKernel multicastCmd(UINT opcode_p, UINT count_p, UINT8* pMacAddr_p, UINT mode_p)
+{
+    tEplKernel          ret = kEplSuccessful;
+    struct sCmdBlock*   pCmdBlock;
+    UINT8*              pByte;
+    UINT16*             pByteCount;
+    UINT16              multicastAddrCnt;
+    UINT16              multicastAddrLoop;
+    UINT                memCmpref = 0;
+
+    //pointer to the Command Block specified by the count_p value
+    pCmdBlock = (struct sCmdBlock *)(edrvInstance_l.pCbVirtAdd + (CB_REQUIRED_SIZE * count_p));
 
     //fill the multicast command to be executed
-    cbp->m_uiCmdStat = CS_EL | (uiOpcode_p << CS_OP_SHIFT); //0x80030000
+    pCmdBlock->cmdStat = CS_EL | (opcode_p << CS_OP_SHIFT); //0x80030000
 
-    bp = (BYTE *)&cbp[1];
-    //point the address where the byte uiCount_p for multicast entries to be stored
-    pwByteCount = (WORD *)bp;
-    wMulticastAddrCnt = EdrvInstance_l.m_wMulticastAddrByteCnt;
+    pByte = (UINT8 *)&pCmdBlock[1];
+    //point the address where the byte count_p for multicast entries to be stored
+    pByteCount = (UINT16 *)pByte;
+    multicastAddrCnt = edrvInstance_l.multicastAddrByteCnt;
     //move the pointr to first multicast entry
-    bp += (sizeof (WORD));
+    pByte += (sizeof (UINT16));
 
-    if(MULTICAST_ADDR_ADD == uiMode_p)
+    if(MULTICAST_ADDR_ADD == mode_p)
     {
         //fill the byte count (number of mac addresses * 6 bytes per mac address)
         //in the corresponding section of the descriptor
         //according to the u32Index value
-        EdrvInstance_l.m_wMulticastAddrByteCnt += MAC_ADDRESS_LEN;
-        *pwByteCount = EdrvInstance_l.m_wMulticastAddrByteCnt;
+        edrvInstance_l.multicastAddrByteCnt += MAC_ADDRESS_LEN;
+        *pByteCount = edrvInstance_l.multicastAddrByteCnt;
 
         //fill the multicast entry in the corresponding section of
         //the descriptor according to the u32Index value
-        bp += wMulticastAddrCnt;
-        EPL_MEMCPY(bp, pbMacAddr_p, MAC_ADDRESS_LEN);
+        pByte += multicastAddrCnt;
+        EPL_MEMCPY(pByte, pMacAddr_p, MAC_ADDRESS_LEN);
     }
-    else if(MULTICAST_ADDR_REM == uiMode_p)
+    else if(MULTICAST_ADDR_REM == mode_p)
     {
         //find the byte count (number of mac addresses * 6 bytes per mac address)
         //in the corresponding section of the descriptor
 
         // search for the mac address to be removed from multicast address
-        for(wMulticastAddrLoop = 0; wMulticastAddrLoop < wMulticastAddrCnt ; wMulticastAddrLoop += MAC_ADDRESS_LEN)
+        for(multicastAddrLoop = 0; multicastAddrLoop < multicastAddrCnt ; multicastAddrLoop += MAC_ADDRESS_LEN)
         {
-            if(0 == EPL_MEMCMP(bp, pbMacAddr_p, MAC_ADDRESS_LEN))
+            if(0 == EPL_MEMCMP(pByte, pMacAddr_p, MAC_ADDRESS_LEN))
             {
                 // entry found reduce the count and remove that entry from the descriptor
-                EdrvInstance_l.m_wMulticastAddrByteCnt -= MAC_ADDRESS_LEN;
-                *pwByteCount = EdrvInstance_l.m_wMulticastAddrByteCnt;
+                edrvInstance_l.multicastAddrByteCnt -= MAC_ADDRESS_LEN;
+                *pByteCount = edrvInstance_l.multicastAddrByteCnt;
 
-                if( 0 != ( wMulticastAddrCnt - (wMulticastAddrLoop + MAC_ADDRESS_LEN) ))
-                    EPL_MEMCPY(bp, bp+MAC_ADDRESS_LEN, ( wMulticastAddrCnt - (wMulticastAddrLoop + MAC_ADDRESS_LEN) ) );
+                if( 0 != ( multicastAddrCnt - (multicastAddrLoop + MAC_ADDRESS_LEN) ))
+                    EPL_MEMCPY(pByte, pByte+MAC_ADDRESS_LEN, ( multicastAddrCnt - (multicastAddrLoop + MAC_ADDRESS_LEN) ) );
 
-                    uiMemCmpref = 1;
+                    memCmpref = 1;
 
                 break;
             }
             else
             {
-                uiMemCmpref = 0;
+                memCmpref = 0;
             }
-            bp += MAC_ADDRESS_LEN;
+            pByte += MAC_ADDRESS_LEN;
         }
 
-        if(0 == uiMemCmpref)
+        if(0 == memCmpref)
         {
-                Ret = kEplSuccessful;
+                ret = kEplSuccessful;
                 goto Exit;
         }
     }
     else
     {
-        printk("%s(): Unknown mode:%d \n", __FUNCTION__, uiMode_p);
+        printk("%s(): Unknown mode:%d \n", __FUNCTION__, mode_p);
         goto Exit;
     }
 
     //start command issued to set the multicast address
-    EdrvIfeIssueScbcmd(SC_CUC_START, EdrvInstance_l.m_CbDmaHandle, uiOpcode_p);
+    issueScbcmd(SC_CUC_START, edrvInstance_l.cbDmaHandle, opcode_p);
 
     //wait for command to complete successfully
-    while((cbp->m_uiCmdStat & CS_C)==0);
+    while((pCmdBlock->cmdStat & CS_C)==0);
 
-    if(cbp->m_uiCmdStat & CS_OK)
+    if(pCmdBlock->cmdStat & CS_OK)
     {
-        Ret = kEplSuccessful;
+        ret = kEplSuccessful;
     }
     else
     {
-        Ret = kEplEdrvInitError;
+        ret = kEplEdrvInitError;
     }
 
 Exit:
-    return Ret;
+    return ret;
 }
 
-//---------------------------------------------------------------------------
-//
-// Function: EdrvTransmitCmd
-//
-// Description: To fill the Transmit Command Block
-//
-// Parameters: opcode to be filled in the Command Block
-// count value which indicates which Command Block is to be filled
-//
-// Returns: Ret = kEplSuccessful
-//
-//---------------------------------------------------------------------------
-tEplKernel EdrvTransmitCmd(UINT uiOpcode_p, UINT uiCount_p)
+//------------------------------------------------------------------------------
+/**
+\brief  Issue transmit command
+
+This function issues a transmit command to the Ethernet controller
+
+\param  opcode_p    Opcode to be filled in the command block
+\param  count_p     Count value indicating which command block is to be filled
+
+\return The function returns a tEplKernel error code.
+*/
+//------------------------------------------------------------------------------
+static tEplKernel transmitCmd(UINT opcode_p, UINT count_p)
 {
-UINT tmp0;
-tEplKernel Ret = kEplSuccessful;
-struct cb *cbp;
-struct tcb *tcbp;
-struct tbd *tbdp;
-UINT cbp_dma;
-BYTE *bp;
-tEdrvTxBuffer *pTxBuffer;
+    tEplKernel              ret = kEplSuccessful;
+    struct sCmdBlock*       pCmdBlock = NULL;
+    struct sTxCmdBlock*     pTxCmdBlock;
+    struct sTxDescCmdBlock* pTxDescCmdBlock;
+    UINT                    cbpDma = 0; //FIXME: Give me a meaningful name, now!
+    UINT8*                  pByte = NULL;
+    tEdrvTxBuffer*          pTxBuffer = NULL;
+    UINT                    temp;
 
-    bp = NULL;
-    cbp = NULL;
-    cbp_dma = 0;
-    pTxBuffer = NULL;
-
-    pTxBuffer = (tEdrvTxBuffer *)EdrvInstance_l.m_ulaCbVirtAddrBuf[uiCount_p];
-    //pointer to the Command Block specified by the uiCount_p value
-    cbp = (struct cb *)(EdrvInstance_l.m_pCbVirtAdd + (CB_REQUIRED_SIZE * uiCount_p));
+    pTxBuffer = (tEdrvTxBuffer *)edrvInstance_l.aCbVirtAddrBuf[count_p];
+    //pointer to the Command Block specified by the count_p value
+    pCmdBlock = (struct sCmdBlock *)(edrvInstance_l.pCbVirtAdd + (CB_REQUIRED_SIZE * count_p));
     //physical address corresponding to the virtual address of the Command Block specified above
-    cbp_dma = (EdrvInstance_l.m_CbDmaHandle + (CB_REQUIRED_SIZE * uiCount_p));
+    cbpDma = (edrvInstance_l.cbDmaHandle + (CB_REQUIRED_SIZE * count_p));
 
-    bp = (BYTE *)&cbp[1];
+    pByte = (UINT8 *)&pCmdBlock[1];
 
-
-    tcbp = (struct tcb *)bp;
-    tbdp = (struct tbd *)&tcbp[1];
+    pTxCmdBlock = (struct sTxCmdBlock *)pByte;
+    pTxDescCmdBlock = (struct sTxDescCmdBlock *)&pTxCmdBlock[1];
     //fill the length of the buffer to be transmitted and indicate that it is the end of the frame
-    tbdp->m_uiTbdSize = TBD_EL | (pTxBuffer->txFrameSize);
+    pTxDescCmdBlock->tbdSize = TBD_EL | (pTxBuffer->txFrameSize);
     //fill the physical address of the buffer to be transmitted
-    tbdp->m_uiTbdAddr = EdrvInstance_l.m_ulaCbDmaAddrBuf[uiCount_p];
+    pTxDescCmdBlock->tbdAddr = edrvInstance_l.aCbDmaAddrBuf[count_p];
     //fill the status bits and the end of frame indication bit in the TCB Control section
-    tcbp->m_uiTcbCtrl = (0X01<<TCB_TBDNUM_SHIFT)
+    pTxCmdBlock->tcbCtrl = (0X01<<TCB_TBDNUM_SHIFT)
                         | (0X01<<TCB_TXTHR_SHIFT)
                         | TCB_EOF; //0x01018000
 
     //fill in the physical address of the buffer descriptor in the TX descriptor's TCB address section
-    tmp0 = cbp_dma +
-            sizeof (struct cb) + sizeof (struct tcb);
-    tcbp->m_uiTcbTbdPtr = tmp0;
+    temp = cbpDma + sizeof (struct sCmdBlock) + sizeof (struct sTxCmdBlock);
+    pTxCmdBlock->tcbTbdPtr = temp;
 
     /* make command block */
-    tmp0 = uiOpcode_p << CS_OP_SHIFT;
+    temp = opcode_p << CS_OP_SHIFT;
 
     //set the interrupt bit in the command
-    tmp0 |= CS_I;
+    temp |= CS_I;
     //configure for flexible mode
-    tmp0 |= CS_SF_;
+    temp |= CS_SF_;
 
     // set the suspend bit in the command
-    tmp0 |= CS_S;
+    temp |= CS_S;
 
-    cbp->m_uiCmdStat = tmp0;
+    pCmdBlock->cmdStat = temp;
 
-    return Ret;
+    return ret;
 }
 
-//---------------------------------------------------------------------------
-//
-// Function: EdrvIfeCmdDescWrite
-//
-// Description: To fill the TX descriptors
-//
-// Parameters: uiOpcode_p = Opcode value that indicates the command to be
-// executed.
-// uiCount_p = Count value that indicates the descriptor number
-//
-// Returns: Ret = kEplSuccessful
-//
-//---------------------------------------------------------------------------
-tEplKernel EdrvIfeCmdDescWrite(UINT uiOpcode_p, UINT uiCount_p)
-{
-tEplKernel Ret = kEplSuccessful;
+//------------------------------------------------------------------------------
+/**
+\brief  EEPROM delay
 
-    switch (uiOpcode_p)
+This function inserts a delay before successive operations to the EEPROM.
+*/
+//------------------------------------------------------------------------------
+static void eepromDelay(void)
+{
+    //jba: Is this always reliable on different processors?
+    /* 2 reads required for 66MHz operation */
+    ioread8(edrvInstance_l.pIoAddr + EECTRL);
+    ioread8(edrvInstance_l.pIoAddr + EECTRL);
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Check EEPROM size
+
+This function verifies the EEPROM's size.
+*/
+//------------------------------------------------------------------------------
+static void checkEepromSize(void)
+{
+    INT     loopCount;
+    UINT8    chipselect;
+    UINT8    di; //FIXME: Give me a meaningful name, now!
+
+    /* enable eeprom interface register */
+    chipselect = EC_EECS;
+
+    iowrite8(chipselect, edrvInstance_l.pIoAddr + EECTRL);
+
+    /* output eeprom command */
+    for (loopCount = 4; loopCount >= 0; loopCount--)
+    {
+        di = ((EEPROM_READ_CMD >> loopCount) & 1) << EC_EEDI_SHIFT;
+
+        iowrite8(chipselect | di,edrvInstance_l.pIoAddr + EECTRL);
+
+        iowrite8(chipselect | di | EC_EESK, edrvInstance_l.pIoAddr + EECTRL);
+        eepromDelay();
+
+
+        iowrite8(chipselect | di, edrvInstance_l.pIoAddr + EECTRL);
+        eepromDelay();
+    }
+
+    /* How many address bits required until eeprom responds with 0 */
+    loopCount = 0;
+    do {
+        iowrite8(chipselect, edrvInstance_l.pIoAddr + EECTRL);
+
+        iowrite8(chipselect | EC_EESK, edrvInstance_l.pIoAddr + EECTRL);
+        eepromDelay();
+
+        iowrite8(chipselect, edrvInstance_l.pIoAddr + EECTRL);
+        eepromDelay();
+        loopCount++;
+    } while ((ioread8(edrvInstance_l.pIoAddr + EECTRL) & EC_EEDO) && loopCount < 8 );
+    /* save the result */
+
+    edrvInstance_l.eepromAddrBits = loopCount;
+
+    /* read 16bits of data to terminate the sequence */
+    for (loopCount = 16; loopCount > 0; loopCount--)
+    {
+        iowrite8(chipselect | EC_EESK, edrvInstance_l.pIoAddr + EECTRL);
+        eepromDelay();
+
+        iowrite8(chipselect, edrvInstance_l.pIoAddr + EECTRL);
+        eepromDelay();
+    }
+
+    /* De-activate the EEPROM */
+
+    iowrite8(0, edrvInstance_l.pIoAddr + EECTRL);
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Get MAC address from EEPROM
+
+This function obtains the MAC address from the EEPROM.
+
+\param  addr_p  Address from which the MAC address has to be read
+
+\return The function returns the MAC address.
+*/
+//------------------------------------------------------------------------------
+static UINT16 readEeprom(UINT addr_p)
+{
+    UINT16  ret;
+    INT     loopCount;
+    UINT    cmd;
+    UINT8   chipselect;
+    UINT8   di; //FIXME: Give me a meaningful name, now!
+
+    if (addr_p >= (1 << edrvInstance_l.eepromAddrBits))
+    {
+        return (0);
+    }
+
+    /* make command bits */
+    cmd = (EEPROM_READ_CMD << edrvInstance_l.eepromAddrBits) | addr_p;
+
+    /* enable eeprom interface register */
+    chipselect = EC_EECS;
+
+    iowrite8(chipselect , edrvInstance_l.pIoAddr + EECTRL);
+
+    eepromDelay();
+
+    /* output eeprom command */
+    for (loopCount = 4 + edrvInstance_l.eepromAddrBits; loopCount >= 0; loopCount--)
+    {
+        di = ((cmd >> loopCount) & 1) << EC_EEDI_SHIFT;
+
+        iowrite8(chipselect | di, edrvInstance_l.pIoAddr + EECTRL);
+        iowrite8(chipselect | di | EC_EESK, edrvInstance_l.pIoAddr + EECTRL);
+        eepromDelay();
+
+        iowrite8(chipselect | di, edrvInstance_l.pIoAddr + EECTRL);
+        eepromDelay();
+    }
+
+    /* get returned value */
+    ret = 0;
+    for (loopCount = 16; loopCount > 0; loopCount--)
+    {
+        /* get 1 bit */
+        iowrite8(chipselect | EC_EESK, edrvInstance_l.pIoAddr + EECTRL);
+        eepromDelay();
+
+        ret = (ret << 1)
+              | ((ioread8(edrvInstance_l.pIoAddr + EECTRL) >> EC_EEDO_SHIFT) & 1);
+
+        iowrite8(chipselect, edrvInstance_l.pIoAddr + EECTRL);
+        eepromDelay();
+    }
+
+    /* Terminate the EEPROM access. */
+
+    iowrite8(0, edrvInstance_l.pIoAddr + EECTRL);
+    eepromDelay();
+
+    return (ret);
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Write Tx descriptors
+
+This function issues a command to write to the Tx descriptors.
+
+\param  opcode_p    Opcode value indicating the command to be executed
+\param  count_p     Count value indicating which the descriptor number
+
+\return The function returns a tEplKernel error code.
+*/
+//------------------------------------------------------------------------------
+static tEplKernel cmdDescWrite(UINT opcode_p, UINT count_p)
+{
+    tEplKernel ret = kEplSuccessful;
+
+    switch (opcode_p)
     {
         case OP_NOP: /* 0 */
             break;
 
         case OP_ADDRSETUP: /* 1 */
-            Ret = EdrvIndividualAddressCmd(uiOpcode_p, uiCount_p);
+            ret = individualAddressCmd(opcode_p, count_p);
             break;
 
         case OP_CONFIGURE: /* 2 */
-            Ret = EdrvConfigureCmd(uiOpcode_p, uiCount_p);
+            ret = configureCmd(opcode_p, count_p);
             break;
 
         case OP_MULTICAST: /* 3 */
             break;
 
         case OP_TX: /* 4 */
-            Ret = EdrvTransmitCmd(uiOpcode_p, uiCount_p);
+            ret = transmitCmd(opcode_p, count_p);
             break;
 
         default:
             break;
     }
-    return Ret;
+    return ret;
 }
 
-//---------------------------------------------------------------------------
-//
-// Function: ife_rx_desc_write
-//
-// Description: Used to clear status bits of the used RX descriptor
-//
-// Parameters: iCount_p = count which indicates which RX descriptor's status
-// bits are to be cleared
-//
-// Returns: Ret = kEplSuccessful
-//
-//---------------------------------------------------------------------------
-tEplKernel EdrvIfeRxDescWrite(INT iCount_p)
+//------------------------------------------------------------------------------
+/**
+\brief  Write Rx descriptors
+
+This function issues a command writing to the Rx descriptors.
+
+\param  count_p Count value indicating which Rx descriptor's status bits are cleared
+
+\return The function returns a tEplKernel error code.
+*/
+//------------------------------------------------------------------------------
+static tEplKernel rxDescWrite(INT count_p)
 {
-struct rfd *rfd;
-tEplKernel Ret = kEplSuccessful;
+    struct sRxDescCmdBlock* pRxDescCmdBlock;
+    tEplKernel              ret = kEplSuccessful;
 
     //select the virtual address of the RX descriptor whose status bits are to be cleared
-    rfd = (struct rfd *)((EdrvInstance_l.m_pRfdVirtAdd) + (RFD_REQUIRED_SIZE * iCount_p));
+    pRxDescCmdBlock = (struct sRxDescCmdBlock *)((edrvInstance_l.pRfdVirtAdd) + (RFD_REQUIRED_SIZE * count_p));
 
     //clear the status bits of the selected RX descriptor
-    rfd->m_uiCmdStat = 0x00000000;
+    pRxDescCmdBlock->cmdStat = 0x00000000;
 
     //clear the status bits in the Size field of the RX descriptor
-    rfd->m_uiSize = (((RFD_REQUIRED_SIZE - sizeof (struct rfd)))
+    pRxDescCmdBlock->size = (((RFD_REQUIRED_SIZE - sizeof (struct sRxDescCmdBlock)))
                    << RFD_SIZE_SHIFT) & RFD_SIZE;
 
-    return Ret;
+    return ret;
 }
 
-//---------------------------------------------------------------------------
-//
-// Function: EdrvInitOne
-//
-// Description: initializes one PCI device
-//
-// Parameters: pPciDev_p = pointer to corresponding PCI device structure
-// pId_p = PCI device ID
-//
-// Returns: (int) = error code
-//
-// State:
-//
-//-----------------------------EdrvInstance_l.m_pIoAddr----------------------------------------------
+//------------------------------------------------------------------------------
+/**
+\brief  Issues a SCB command
 
-static INT EdrvInitOne(struct pci_dev *pPciDev_p, const struct pci_device_id *pId_p)
+This function issues a SCB command for the CU or RU as required.
+
+\param  cmd_p       Command to be issued to the CU oir RU
+\param  arg_p       Address to be written to the GENPTR register
+\param  opcode_p    Opcode used while issuing the command
+
+\return The function returns TRUE.
+*/
+//------------------------------------------------------------------------------
+static BOOL issueScbcmd(UINT16 cmd_p, UINT arg_p, UINT opcode_p)
 {
-INT iResult = 0;
-DWORD dwTemp;
-INT iLoop;
-struct cb *cbp;
-struct rfd *rfdp;
-WORD val;
-BYTE bTemp;
-WORD wTemp;
-UINT uiTemp;
-tEplKernel Ret = kEplSuccessful;
+    UINT16          state = 0;
+    static INT      curStatusFirstTime = 0;
+    static UINT16   prevCmd = 0;
 
-    if (EdrvInstance_l.m_pPciDev != NULL)
+    // this code section used for waiting till the previous cmd has been accepted
+    while (ioread8(edrvInstance_l.pIoAddr + SCBCMD) & (SC_CUC | SC_RUC));
+
+    if(OP_TX == opcode_p)
+    {
+        state = ioread16(edrvInstance_l.pIoAddr + SCBSTAT);
+        while((state & SS_CNA) == 0 && (curStatusFirstTime == 1))
+        {
+            state = ioread16(edrvInstance_l.pIoAddr + SCBSTAT);
+        }
+        if(curStatusFirstTime < 1 )
+        {
+            curStatusFirstTime++;
+        }
+    }
+
+    switch (cmd_p)
+    {
+        case SC_CUC_START:
+        case SC_CUC_LOADSDMP:
+        case SC_CUC_LOADBASE:
+        case SC_RUC_START:
+        case SC_RUC_LOADHDS:
+        case SC_RUC_LOADBASE:
+            iowrite32(arg_p, edrvInstance_l.pIoAddr + GENPTR);
+            break;
+    }
+    iowrite16(SS_CNA, edrvInstance_l.pIoAddr + SCBSTAT);
+    iowrite8(cmd_p, edrvInstance_l.pIoAddr + SCBCMD);
+
+    prevCmd = cmd_p;
+
+    return TRUE;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Initialize one PCI device
+
+This function initializes one PCI device.
+
+\param  pPciDev_p   Pointer to corresponding PCI device structure
+\param  pId_p       PCI device ID
+
+\return The function returns an integer error code.
+\retval 0           Successful
+\retval Otherwise   Error
+*/
+//------------------------------------------------------------------------------
+static INT initOnePciDev(struct pci_dev* pPciDev_p, const struct pci_device_id* pId_p)
+{
+    tEplKernel              ret = kEplSuccessful;
+    INT                     result = 0;
+    INT                     loopCount;
+    struct sCmdBlock*       pCmdBlock;
+    struct sRxDescCmdBlock* pRxDescCmdBlock;
+    UINT16                  value; //FIXME: Give me a meaningful name, now!
+    UINT32                  dwordTemp; //FIXME: Give me a meaningful name, now!
+    UINT8                   byteTemp; //FIXME: Give me a meaningful name, now!
+    UINT16                  wordTemp; //FIXME: Give me a meaningful name, now!
+    UINT                    temp; //FIXME: Give me a meaningful name, now!
+
+    if (edrvInstance_l.pPciDev != NULL)
     { // Edrv is already connected to a PCI device
         printk("%s device %s discarded\n", __FUNCTION__, pci_name(pPciDev_p));
-        iResult = -ENODEV;
+        result = -ENODEV;
         goto Exit;
     }
 
     // enable device
     printk("%s enable device\n", __FUNCTION__);
-    iResult = pci_enable_device(pPciDev_p);
-    if (iResult != 0)
+    result = pci_enable_device(pPciDev_p);
+    if (result != 0)
     {
         goto Exit;
     }
 
-    wTemp = 0;
-    pci_read_config_word(pPciDev_p, PCI_VENDOR_ID, &wTemp);
-    printk("Vendor ID : %d\n",wTemp);
+    wordTemp = 0;
+    pci_read_config_word(pPciDev_p, PCI_VENDOR_ID, &wordTemp);
+    printk("Vendor ID : %d\n",wordTemp);
 
-    wTemp = 0;
-    pci_read_config_word(pPciDev_p, PCI_DEVICE_ID, &wTemp);
-    printk("Device ID : %d\n",wTemp);
+    wordTemp = 0;
+    pci_read_config_word(pPciDev_p, PCI_DEVICE_ID, &wordTemp);
+    printk("Device ID : %d\n",wordTemp);
 
-    bTemp = 0;
-    pci_read_config_byte(pPciDev_p, PCI_REVISION_ID, &bTemp);
-    printk("Revision ID : %d\n",bTemp);
+    byteTemp = 0;
+    pci_read_config_byte(pPciDev_p, PCI_REVISION_ID, &byteTemp);
+    printk("Revision ID : %d\n",byteTemp);
 
-    EdrvInstance_l.m_pPciDev = pPciDev_p;
+    edrvInstance_l.pPciDev = pPciDev_p;
 
-    if (EdrvInstance_l.m_pPciDev == NULL)
+    if (edrvInstance_l.pPciDev == NULL)
     {
         printk("%s pPciDev==NULL\n", __FUNCTION__);
         goto ExitFail;
     }
 
-    //printk("%s request regions\n", __FUNCTION__);
-    iResult = pci_request_regions(pPciDev_p, DRV_NAME);
-    if (iResult != 0)
+    result = pci_request_regions(pPciDev_p, DRV_NAME);
+    if (result != 0)
     {
         goto ExitFail;
     }
 
-    //printk("%s ioremap\n", __FUNCTION__);
-    EdrvInstance_l.m_pIoAddr = ioremap(pci_resource_start(pPciDev_p, 0), pci_resource_len(pPciDev_p, 0));
-    if (EdrvInstance_l.m_pIoAddr == NULL)
+    edrvInstance_l.pIoAddr = ioremap(pci_resource_start(pPciDev_p, 0), pci_resource_len(pPciDev_p, 0));
+    if (edrvInstance_l.pIoAddr == NULL)
     { // remap of controller's register space failed
-        iResult = -EIO;
+        result = -EIO;
         goto ExitFail;
     }
 
     // enable PCI busmaster
-    //printk("%s enable busmaster\n", __FUNCTION__);
     pci_set_master (pPciDev_p);
 
     // reset chip code - start
-    /* clear pended interrupts */
-    uiTemp = ioread16(EdrvInstance_l.m_pIoAddr + SCBSTAT);
+    /* clear pending interrupts */
+    temp = ioread16(edrvInstance_l.pIoAddr + SCBSTAT);
     udelay(DELAY_CLEAR_INT);
-    iowrite16(uiTemp, EdrvInstance_l.m_pIoAddr + SCBSTAT);
+    iowrite16(temp, edrvInstance_l.pIoAddr + SCBSTAT);
 
     /* write a reset command into PORT register */
-    iowrite32(PORT_SOFTRESET, EdrvInstance_l.m_pIoAddr + PORT);
+    iowrite32(PORT_SOFTRESET, edrvInstance_l.pIoAddr + PORT);
 
     /* wait 10 system clocks and 5 transmit clocks (10uS) */
     udelay(DELAY_SYS_TX_CLK);
@@ -1602,105 +1588,104 @@ tEplKernel Ret = kEplSuccessful;
     // lp->cuc_active = B_FALSE;
 
     /* mask interrupt */
-    iowrite8(SC_M >> 8, EdrvInstance_l.m_pIoAddr + SCBCMD + 1);
+    iowrite8(SC_M >> 8, edrvInstance_l.pIoAddr + SCBCMD + 1);
     // reset chip code - end
 
     // init chip code start
     /* disable early Rx Int */
-    iowrite8(0, EdrvInstance_l.m_pIoAddr + EARLYRXINT);
+    iowrite8(0, edrvInstance_l.pIoAddr + EARLYRXINT);
 
     /* disable flow control */
-    iowrite8(0, EdrvInstance_l.m_pIoAddr + FCTRL);
+    iowrite8(0, edrvInstance_l.pIoAddr + FCTRL);
 
     // issue commands to scb to load the cu and ru base addresses - start
-     EdrvIfeIssueScbcmd(SC_CUC_LOADBASE, 0, 0);
-     EdrvIfeIssueScbcmd(SC_RUC_LOADBASE, 0, 0);
+     issueScbcmd(SC_CUC_LOADBASE, 0, 0);
+     issueScbcmd(SC_RUC_LOADBASE, 0, 0);
 
-     iResult = pci_set_dma_mask(pPciDev_p, DMA_BIT_MASK(32));
-     if (iResult != 0)
+     result = pci_set_dma_mask(pPciDev_p, DMA_BIT_MASK(32));
+     if (result != 0)
      {
-         //printk(KERN_WARNING "Edrv8255x: No suitable DMA available.\n");
-         iResult = -ENOMEM;
+         result = -ENOMEM;
          goto ExitFail;
      }
 
-     EdrvInstance_l.m_pCbVirtAdd = pci_alloc_consistent(pPciDev_p, CB_REQUIRED_SIZE * MAX_CBS, &(EdrvInstance_l.m_CbDmaHandle));
-    if (EdrvInstance_l.m_pCbVirtAdd == NULL)
+     edrvInstance_l.pCbVirtAdd = pci_alloc_consistent(pPciDev_p, CB_REQUIRED_SIZE * MAX_CBS, &(edrvInstance_l.cbDmaHandle));
+    if (edrvInstance_l.pCbVirtAdd == NULL)
     {
-        iResult = -ENOMEM;
+        result = -ENOMEM;
         goto ExitFail;
     }
 
     // fill CBs for which memory has been allocated - start
-    for(iLoop = 0; iLoop < MAX_CBS; iLoop++)
+    for(loopCount = 0; loopCount < MAX_CBS; loopCount++)
     {
-        cbp = (struct cb *)((EdrvInstance_l.m_pCbVirtAdd) + (CB_REQUIRED_SIZE * iLoop));
-        if(iLoop == (MAX_CBS-1))
+        pCmdBlock = (struct sCmdBlock *)((edrvInstance_l.pCbVirtAdd) + (CB_REQUIRED_SIZE * loopCount));
+        if(loopCount == (MAX_CBS-1))
         {
-            cbp->m_uiCmdStat = 0x00000000;
-            cbp->m_uiLink = EdrvInstance_l.m_CbDmaHandle;
+            pCmdBlock->cmdStat = 0x00000000;
+            pCmdBlock->link = edrvInstance_l.cbDmaHandle;
         }
         else
         {
-            cbp->m_uiCmdStat = 0x00000000;
-            cbp->m_uiLink = EdrvInstance_l.m_CbDmaHandle + (CB_REQUIRED_SIZE * (iLoop+1));
+            pCmdBlock->cmdStat = 0x00000000;
+            pCmdBlock->link = edrvInstance_l.cbDmaHandle + (CB_REQUIRED_SIZE * (loopCount+1));
         }
     }
     // fill CBs for which memory has been allocated - end
 
     // allocate memory for RFDs - start
-    EdrvInstance_l.m_pRfdVirtAdd = pci_alloc_consistent(pPciDev_p, RFD_REQUIRED_SIZE * MAX_RFDS, &(EdrvInstance_l.m_RfdDmaAdd));
-    if (EdrvInstance_l.m_pRfdVirtAdd == NULL)
+    edrvInstance_l.pRfdVirtAdd = pci_alloc_consistent(pPciDev_p, RFD_REQUIRED_SIZE * MAX_RFDS, &(edrvInstance_l.rfdDmaAdd));
+    if (edrvInstance_l.pRfdVirtAdd == NULL)
     {
-        iResult = -ENOMEM;
+        result = -ENOMEM;
         goto ExitFail;
     }
     // allocate memory for RFDs - end
 
     // fill RFDs for which memory has been allocated - start
-    for(iLoop = 0; iLoop < MAX_RFDS; iLoop++)
+    for(loopCount = 0; loopCount < MAX_RFDS; loopCount++)
     {
-        rfdp = (struct rfd *)((EdrvInstance_l.m_pRfdVirtAdd) + (RFD_REQUIRED_SIZE * iLoop));
-        if(iLoop == (MAX_RFDS-1))
+        pRxDescCmdBlock = (struct sRxDescCmdBlock *)((edrvInstance_l.pRfdVirtAdd) + (RFD_REQUIRED_SIZE * loopCount));
+        if(loopCount == (MAX_RFDS-1))
         {
-            rfdp->m_uiCmdStat = 0x00000000;
-            rfdp->m_uiSize = (((RFD_REQUIRED_SIZE - sizeof (struct rfd)))
+            pRxDescCmdBlock->cmdStat = 0x00000000;
+            pRxDescCmdBlock->size = (((RFD_REQUIRED_SIZE - sizeof (struct sRxDescCmdBlock)))
                                                                             << RFD_SIZE_SHIFT) & RFD_SIZE;
-            rfdp->m_uiLink = EdrvInstance_l.m_RfdDmaAdd;
+            pRxDescCmdBlock->link = edrvInstance_l.rfdDmaAdd;
         }
         else
         {
-            rfdp->m_uiCmdStat = 0x00000000;
-            rfdp->m_uiSize = (((RFD_REQUIRED_SIZE - sizeof (struct rfd)))
+            pRxDescCmdBlock->cmdStat = 0x00000000;
+            pRxDescCmdBlock->size = (((RFD_REQUIRED_SIZE - sizeof (struct sRxDescCmdBlock)))
                             << RFD_SIZE_SHIFT) & RFD_SIZE;
-            rfdp->m_uiLink = EdrvInstance_l.m_RfdDmaAdd + (RFD_REQUIRED_SIZE * (iLoop+1));
+            pRxDescCmdBlock->link = edrvInstance_l.rfdDmaAdd + (RFD_REQUIRED_SIZE * (loopCount+1));
         }
     }
 
     // fill RFDs for which memory has been allocated - end
 
-    Ret = EdrvIfeCmdDescWrite(OP_ADDRSETUP, 0);
-    if(Ret != kEplSuccessful)
+    ret = cmdDescWrite(OP_ADDRSETUP, 0);
+    if(ret != kEplSuccessful)
     {
-        iResult = -EIO;
+        result = -EIO;
         goto Exit;
     }
-    Ret = EdrvIfeCmdDescWrite(OP_CONFIGURE, 0);
-    if(Ret != kEplSuccessful)
+    ret = cmdDescWrite(OP_CONFIGURE, 0);
+    if(ret != kEplSuccessful)
     {
-        iResult = -EIO;
+        result = -EIO;
         goto Exit;
     }
 
     //acknowledge pended interrupts and clear interrupt mask
-    uiTemp = ioread16(EdrvInstance_l.m_pIoAddr + SCBSTAT);
+    temp = ioread16(edrvInstance_l.pIoAddr + SCBSTAT);
     udelay(5);
-    iowrite16(uiTemp, EdrvInstance_l.m_pIoAddr + SCBSTAT);
-    iowrite8(0x2C, EdrvInstance_l.m_pIoAddr + SCBCMD + 1);
+    iowrite16(temp, edrvInstance_l.pIoAddr + SCBSTAT);
+    iowrite8(0x2C, edrvInstance_l.pIoAddr + SCBCMD + 1);
 
     // install interrupt handler
-    iResult = request_irq(pPciDev_p->irq, TgtEthIsr, IRQF_SHARED, DRV_NAME, pPciDev_p);
-    if (iResult != 0)
+    result = request_irq(pPciDev_p->irq, edrvIrqHandler, IRQF_SHARED, DRV_NAME, pPciDev_p);
+    if (result != 0)
     {
         goto ExitFail;
     }
@@ -1708,96 +1693,90 @@ tEplKernel Ret = kEplSuccessful;
     // allocate buffers
     printk("%s allocate buffers\n", __FUNCTION__);
     // allocate tx-buffers
-    EdrvInstance_l.m_pbTxBuf = pci_alloc_consistent(pPciDev_p, EDRV_TX_BUFFER_SIZE,
-                    &EdrvInstance_l.m_pTxBufDma);
-    if (EdrvInstance_l.m_pbTxBuf == NULL)
+    edrvInstance_l.pTxBuf = pci_alloc_consistent(pPciDev_p, EDRV_TX_BUFFER_SIZE,
+                    &edrvInstance_l.pTxBufDma);
+    if (edrvInstance_l.pTxBuf == NULL)
     {
-       iResult = -ENOMEM;
+        result = -ENOMEM;
         goto ExitFail;
     }
 
 
      // check if user specified a MAC address
-    //printk("%s check specified MAC address\n", __FUNCTION__);
-    if ((EdrvInstance_l.m_InitParam.aMacAddr[0] != 0) ||
-        (EdrvInstance_l.m_InitParam.aMacAddr[1] != 0) ||
-        (EdrvInstance_l.m_InitParam.aMacAddr[2] != 0) ||
-        (EdrvInstance_l.m_InitParam.aMacAddr[3] != 0) ||
-        (EdrvInstance_l.m_InitParam.aMacAddr[4] != 0) ||
-        (EdrvInstance_l.m_InitParam.aMacAddr[5] != 0) )
+    if ((edrvInstance_l.initParam.aMacAddr[0] != 0) ||
+        (edrvInstance_l.initParam.aMacAddr[1] != 0) ||
+        (edrvInstance_l.initParam.aMacAddr[2] != 0) ||
+        (edrvInstance_l.initParam.aMacAddr[3] != 0) ||
+        (edrvInstance_l.initParam.aMacAddr[4] != 0) ||
+        (edrvInstance_l.initParam.aMacAddr[5] != 0) )
     { // write specified MAC address to controller
-        dwTemp = 0;
+        dwordTemp = 0;
 
-        dwTemp |= EdrvInstance_l.m_InitParam.aMacAddr[0] << 0;
-        dwTemp |= EdrvInstance_l.m_InitParam.aMacAddr[1] << 8;
-        dwTemp |= EdrvInstance_l.m_InitParam.aMacAddr[2] << 16;
-        dwTemp |= EdrvInstance_l.m_InitParam.aMacAddr[3] << 24;
-        dwTemp = 0;
-        dwTemp |= EdrvInstance_l.m_InitParam.aMacAddr[4] << 0;
-        dwTemp |= EdrvInstance_l.m_InitParam.aMacAddr[5] << 8;
-     // dwTemp |= EDRV_REGDW_RAH_AV;
+        dwordTemp |= edrvInstance_l.initParam.aMacAddr[0] << 0;
+        dwordTemp |= edrvInstance_l.initParam.aMacAddr[1] << 8;
+        dwordTemp |= edrvInstance_l.initParam.aMacAddr[2] << 16;
+        dwordTemp |= edrvInstance_l.initParam.aMacAddr[3] << 24;
+        dwordTemp = 0;
+        dwordTemp |= edrvInstance_l.initParam.aMacAddr[4] << 0;
+        dwordTemp |= edrvInstance_l.initParam.aMacAddr[5] << 8;
+     // dwordTemp |= EDRV_REGDW_RAH_AV;
 
     }
     else
     //Read from EEPROM
     {
-        EdrvIfeCheckEepromSize();
+        checkEepromSize();
 
-        for (iLoop = 0; iLoop < 6; iLoop += 2)
+        for (loopCount = 0; loopCount < 6; loopCount += 2)
         {
-            val = EdrvIfeReadEeprom(iLoop/2);
-            EdrvInstance_l.m_InitParam.aMacAddr[iLoop] = (BYTE)val;
-            EdrvInstance_l.m_InitParam.aMacAddr[iLoop+1] = (BYTE)(val >> 8);
-            //printk("mac address : %x %x\n",(BYTE)val,(BYTE)(val >> 8));
+            value = readEeprom(loopCount/2);
+            edrvInstance_l.initParam.aMacAddr[loopCount] = (UINT8)value;
+            edrvInstance_l.initParam.aMacAddr[loopCount+1] = (UINT8)(value >> 8);
         }
     }
 
-    EdrvInstance_l.m_uiHeadRxDesc = 0;
-    EdrvInstance_l.m_uiTailRxDesc = MAX_RFDS-1;
-    rfdp = (struct rfd *)((EdrvInstance_l.m_pRfdVirtAdd) + (RFD_REQUIRED_SIZE * EdrvInstance_l.m_uiTailRxDesc));
-    rfdp->m_uiCmdStat = CS_S;
+    edrvInstance_l.headRxDesc = 0;
+    edrvInstance_l.tailRxDesc = MAX_RFDS-1;
+    pRxDescCmdBlock = (struct sRxDescCmdBlock *)((edrvInstance_l.pRfdVirtAdd) + (RFD_REQUIRED_SIZE * edrvInstance_l.tailRxDesc));
+    pRxDescCmdBlock->cmdStat = CS_S;
 
     //Enable the receiver
-    EdrvIfeIssueScbcmd(SC_RUC_START, EdrvInstance_l.m_RfdDmaAdd, 0);
+    issueScbcmd(SC_RUC_START, edrvInstance_l.rfdDmaAdd, 0);
 
     goto Exit;
 
 ExitFail:
-    EdrvRemoveOne(pPciDev_p);
+    removeOnePciDev(pPciDev_p);
 
 Exit:
-    printk("%s finished with %d\n", __FUNCTION__, iResult);
-    return iResult;
+    printk("%s finished with %d\n", __FUNCTION__, result);
+    return result;
 }
 
-//---------------------------------------------------------------------------
-//
-// Function: EdrvRemoveOne
-//
-// Description: shuts down one PCI device
-//
-// Parameters: pPciDev_p = pointer to corresponding PCI device structure
-//
-// Returns: (void)
-//
-// State:
-//
-//---------------------------------------------------------------------------
-static void EdrvRemoveOne(struct pci_dev *pPciDev_p)
+//------------------------------------------------------------------------------
+/**
+\brief  Remove one PCI device
+
+This function removes one PCI device.
+
+\param  pPciDev_p     Pointer to corresponding PCI device structure
+*/
+//------------------------------------------------------------------------------
+static void removeOnePciDev(struct pci_dev* pPciDev_p)
 {
-    if (EdrvInstance_l.m_pPciDev != pPciDev_p)
+    if (edrvInstance_l.pPciDev != pPciDev_p)
     { // trying to remove unknown device
-        BUG_ON(EdrvInstance_l.m_pPciDev != pPciDev_p);
+        BUG_ON(edrvInstance_l.pPciDev != pPciDev_p);
         goto Exit;
     }
 
-    if (EdrvInstance_l.m_pIoAddr != NULL)
+    if (edrvInstance_l.pIoAddr != NULL)
     {
         // disable interrupts
-        iowrite8(SC_M >> 8, EdrvInstance_l.m_pIoAddr + SCBCMD + 1);
+        iowrite8(SC_M >> 8, edrvInstance_l.pIoAddr + SCBCMD + 1);
 
         // disable the receiver
-        EdrvIfeIssueScbcmd(SC_RUC_ABORT, 0, 0);
+        issueScbcmd(SC_RUC_ABORT, 0, 0);
     }
 
      // remove interrupt handler
@@ -1805,32 +1784,32 @@ static void EdrvRemoveOne(struct pci_dev *pPciDev_p)
 
     // free buffers
 
-    if(EdrvInstance_l.m_pCbVirtAdd != NULL)
+    if(edrvInstance_l.pCbVirtAdd != NULL)
     {
-        pci_free_consistent(pPciDev_p, CB_REQUIRED_SIZE * MAX_CBS, EdrvInstance_l.m_pCbVirtAdd, EdrvInstance_l.m_CbDmaHandle);
-        EdrvInstance_l.m_pCbVirtAdd = NULL;
+        pci_free_consistent(pPciDev_p, CB_REQUIRED_SIZE * MAX_CBS, edrvInstance_l.pCbVirtAdd, edrvInstance_l.cbDmaHandle);
+        edrvInstance_l.pCbVirtAdd = NULL;
     }
 
-    // rfd memory free in edrvremoveone - start
-    if(EdrvInstance_l.m_pRfdVirtAdd != NULL)
+    // sRxDescCmdBlock memory free in edrvremoveone - start
+    if(edrvInstance_l.pRfdVirtAdd != NULL)
     {
-        pci_free_consistent(pPciDev_p, RFD_REQUIRED_SIZE * MAX_RFDS, EdrvInstance_l.m_pRfdVirtAdd, EdrvInstance_l.m_RfdDmaAdd);
-        EdrvInstance_l.m_pRfdVirtAdd = NULL;
+        pci_free_consistent(pPciDev_p, RFD_REQUIRED_SIZE * MAX_RFDS, edrvInstance_l.pRfdVirtAdd, edrvInstance_l.rfdDmaAdd);
+        edrvInstance_l.pRfdVirtAdd = NULL;
     }
-    // rfd memory free in edrvremoveone - end
+    // sRxDescCmdBlock memory free in edrvremoveone - end
 
-    if (EdrvInstance_l.m_pbTxBuf != NULL)
+    if (edrvInstance_l.pTxBuf != NULL)
     {
         pci_free_consistent(pPciDev_p, EDRV_TX_BUFFER_SIZE,
-                                 EdrvInstance_l.m_pbTxBuf, EdrvInstance_l.m_pTxBufDma);
-        EdrvInstance_l.m_pbTxBuf = NULL;
+                                 edrvInstance_l.pTxBuf, edrvInstance_l.pTxBufDma);
+        edrvInstance_l.pTxBuf = NULL;
     }
 
     // unmap controller's register space
-    if (EdrvInstance_l.m_pIoAddr != NULL)
+    if (edrvInstance_l.pIoAddr != NULL)
     {
-        iounmap(EdrvInstance_l.m_pIoAddr);
-        EdrvInstance_l.m_pIoAddr = NULL;
+        iounmap(edrvInstance_l.pIoAddr);
+        edrvInstance_l.pIoAddr = NULL;
     }
 
     // disable the PCI device
@@ -1839,8 +1818,10 @@ static void EdrvRemoveOne(struct pci_dev *pPciDev_p)
     // release memory regions
     pci_release_regions(pPciDev_p);
 
-    EdrvInstance_l.m_pPciDev = NULL;
+    edrvInstance_l.pPciDev = NULL;
 
 Exit:
     return;
 }
+
+///\}
