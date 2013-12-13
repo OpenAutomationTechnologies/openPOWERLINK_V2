@@ -1,97 +1,76 @@
-/****************************************************************************
+/**
+********************************************************************************
+\file   edrvcyclic.c
 
-  (c) SYSTEC electronic GmbH, D-07973 Greiz, August-Bebel-Str. 29
-      www.systec-electronic.com
+\brief  Implementation of cyclic Ethernet driver
 
-  Project:      openPOWERLINK
+This file contains the general implementation of the cyclic Ethernet driver.
+It implements time-triggered transmission of frames necessary for MN.
 
-  Description:  Part of Ethernet driver to implement time-triggered transmission.
-                It is necessary to implement Managing Nodes.
+\ingroup module_edrv
+*******************************************************************************/
 
-  License:
+/*------------------------------------------------------------------------------
+Copyright (c) 2013, SYSTEC electronic GmbH
+Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+All rights reserved.
 
-    Redistribution and use in source and binary forms, with or without
-    modification, are permitted provided that the following conditions
-    are met:
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+    * Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above copyright
+      notice, this list of conditions and the following disclaimer in the
+      documentation and/or other materials provided with the distribution.
+    * Neither the name of the copyright holders nor the
+      names of its contributors may be used to endorse or promote products
+      derived from this software without specific prior written permission.
 
-    1. Redistributions of source code must retain the above copyright
-       notice, this list of conditions and the following disclaimer.
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL COPYRIGHT HOLDERS BE LIABLE FOR ANY
+DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+------------------------------------------------------------------------------*/
 
-    2. Redistributions in binary form must reproduce the above copyright
-       notice, this list of conditions and the following disclaimer in the
-       documentation and/or other materials provided with the distribution.
+//------------------------------------------------------------------------------
+// includes
+//------------------------------------------------------------------------------
+#include <EplInc.h>
+#include <edrv.h>
+#include <kernel/EplTimerHighResk.h>
 
-    3. Neither the name of SYSTEC electronic GmbH nor the names of its
-       contributors may be used to endorse or promote products derived
-       from this software without prior written permission. For written
-       permission, please contact info@systec-electronic.com.
+//============================================================================//
+//            G L O B A L   D E F I N I T I O N S                             //
+//============================================================================//
 
-    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-    LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-    FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-    COPYRIGHT HOLDERS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-    INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-    BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-    LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-    CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-    LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-    ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-    POSSIBILITY OF SUCH DAMAGE.
+//------------------------------------------------------------------------------
+// const defines
+//------------------------------------------------------------------------------
 
-    Severability Clause:
+//------------------------------------------------------------------------------
+// module global vars
+//------------------------------------------------------------------------------
 
-        If a provision of this License is or becomes illegal, invalid or
-        unenforceable in any jurisdiction, that shall not affect:
-        1. the validity or enforceability in that jurisdiction of any other
-           provision of this License; or
-        2. the validity or enforceability in other jurisdictions of that or
-           any other provision of this License.
+//------------------------------------------------------------------------------
+// global function prototypes
+//------------------------------------------------------------------------------
 
-  -------------------------------------------------------------------------
+//============================================================================//
+//            P R I V A T E   D E F I N I T I O N S                           //
+//============================================================================//
 
-                $RCSfile$
-
-                $Author$
-
-                $Revision$  $Date$
-
-                $State$
-
-                Build Environment:
-                Dev C++ and GNU-Compiler for m68k
-
-  -------------------------------------------------------------------------
-
-  Revision History:
-
-  2010/03/18 d.k.:   start of implementation
-
-****************************************************************************/
-
-#include "EplInc.h"
-#include "edrv.h"
-#include "kernel/EplTimerHighResk.h"
-
-
+//------------------------------------------------------------------------------
+// const defines
+//------------------------------------------------------------------------------
 #if EPL_TIMER_USE_HIGHRES == FALSE
 #error "EdrvCyclic needs EPL_TIMER_USE_HIGHRES = TRUE"
 #endif
-
-
-
-/***************************************************************************/
-/*                                                                         */
-/*                                                                         */
-/*          G L O B A L   D E F I N I T I O N S                            */
-/*                                                                         */
-/*                                                                         */
-/***************************************************************************/
-
-
-//---------------------------------------------------------------------------
-// const defines
-//---------------------------------------------------------------------------
 
 #if EDRV_CYCLIC_USE_DIAGNOSTICS != FALSE
 #ifndef EDRV_CYCLIC_SAMPLE_TH_CYCLE_TIME_DIFF_US
@@ -103,700 +82,579 @@
 #endif
 #endif
 
-
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // local types
-//---------------------------------------------------------------------------
-
+//------------------------------------------------------------------------------
 typedef struct
 {
-    tEdrvTxBuffer**     m_paTxBufferList;
-//    unsigned int        m_uiCurTxBufferCount;
-    unsigned int        m_uiMaxTxBufferCount;
-    unsigned int        m_uiCurTxBufferList;
-    unsigned int        m_uiCurTxBufferEntry;
-    DWORD               m_dwCycleLenUs;
-    tEplTimerHdl        m_TimerHdlCycle;
-    tEplTimerHdl        m_TimerHdlSlot;
-    tEdrvCyclicCbSync   m_pfnCbSync;
-    tEdrvCyclicCbError  m_pfnCbError;
-
+    tEdrvTxBuffer**         ppTxBufferList;
+    UINT                    maxTxBufferCount;
+    UINT                    curTxBufferList;
+    UINT                    curTxBufferEntry;
+    UINT32                  cycleTimeUs;
+    tEplTimerHdl            timerHdlCycle;
+    tEplTimerHdl            timerHdlSlot;
+    tEdrvCyclicCbSync       pfnSyncCb;
+    tEdrvCyclicCbError      pfnErrorCb;
 #if EDRV_CYCLIC_USE_DIAGNOSTICS != FALSE
-    unsigned int        m_uiSampleNo;
-    unsigned long long  m_ullStartCycleTimeStamp;
-    unsigned long long  m_ullLastSlotTimeStamp;
-
-    tEdrvCyclicDiagnostics m_Diag;
+    UINT                    sampleCount;
+    ULONGLONG               startCycleTimeStamp;
+    ULONGLONG               lastSlotTimeStamp;
+    tEdrvCyclicDiagnostics  diagnostics;
 #endif
+} tEdrvcyclicInstance;
 
-} tEdrvCyclicInstance;
-
-
-
-//---------------------------------------------------------------------------
-// local function prototypes
-//---------------------------------------------------------------------------
-
-
-static tEplKernel PUBLIC EdrvCyclicCbTimerCycle(tEplTimerEventArg* pEventArg_p);
-
-static tEplKernel PUBLIC EdrvCyclicCbTimerSlot(tEplTimerEventArg* pEventArg_p);
-
-static tEplKernel EdrvCyclicProcessTxBufferList(void);
-
-
-
-//---------------------------------------------------------------------------
-// module global vars
-//---------------------------------------------------------------------------
-
-static tEdrvCyclicInstance EdrvCyclicInstance_l;
-
-
-
-
-/***************************************************************************/
-/*                                                                         */
-/*                                                                         */
-/*          C L A S S  <EdrvCyclic>                                        */
-/*                                                                         */
-/*                                                                         */
-/***************************************************************************/
-//
-// Description:
-//
-//
-/***************************************************************************/
-
-
-//=========================================================================//
-//                                                                         //
-//          P R I V A T E   D E F I N I T I O N S                          //
-//                                                                         //
-//=========================================================================//
-
-//---------------------------------------------------------------------------
-// const defines
-//---------------------------------------------------------------------------
-
-//---------------------------------------------------------------------------
-// local types
-//---------------------------------------------------------------------------
-
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // local vars
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+static tEdrvcyclicInstance edrvcyclicInstance_l;
 
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // local function prototypes
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+static tEplKernel timerHdlCycleCb(tEplTimerEventArg* pEventArg_p);
+static tEplKernel timerHdlSlotCb(tEplTimerEventArg* pEventArg_p);
+static tEplKernel processTxBufferList(void);
 
+//============================================================================//
+//            P U B L I C   F U N C T I O N S                                 //
+//============================================================================//
 
+//------------------------------------------------------------------------------
+/**
+\brief  Cyclic Ethernet driver initialization
 
+This function initializes the cyclic Ethernet driver.
 
-//---------------------------------------------------------------------------
-//
-// Function:    edrvcyclic_init
-//
-// Description: initialize EdrvCyclic module
-//
-// Parameters:  void
-//
-// Returns:     Errorcode           = kEplSuccessful
-//                                  = kEplNoResource
-//
-// State:
-//
-//---------------------------------------------------------------------------
+\return The function returns a tEplKernel error code.
 
-tEplKernel edrvcyclic_init()
+\ingroup module_edrv
+*/
+//------------------------------------------------------------------------------
+tEplKernel edrvcyclic_init(void)
 {
-tEplKernel  Ret;
-
-    Ret = kEplSuccessful;
-
     // clear instance structure
-    EPL_MEMSET(&EdrvCyclicInstance_l, 0, sizeof (EdrvCyclicInstance_l));
+    EPL_MEMSET(&edrvcyclicInstance_l, 0, sizeof (edrvcyclicInstance_l));
 
 #if EDRV_CYCLIC_USE_DIAGNOSTICS != FALSE
-    EdrvCyclicInstance_l.m_Diag.cycleTimeMin        = 0xFFFFFFFF;
-    EdrvCyclicInstance_l.m_Diag.usedCycleTimeMin    = 0xFFFFFFFF;
-    EdrvCyclicInstance_l.m_Diag.spareCycleTimeMin   = 0xFFFFFFFF;
+    edrvcyclicInstance_l.diagnostics.cycleTimeMin        = 0xFFFFFFFF;
+    edrvcyclicInstance_l.diagnostics.usedCycleTimeMin    = 0xFFFFFFFF;
+    edrvcyclicInstance_l.diagnostics.spareCycleTimeMin   = 0xFFFFFFFF;
 #endif
 
-//Exit:
-    return Ret;
-
+    return kEplSuccessful;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Cyclic Ethernet driver shutdown
 
-//---------------------------------------------------------------------------
-//
-// Function:    edrvcyclic_shutdown
-//
-// Description: Shutdown EdrvCyclic module
-//
-// Parameters:  void
-//
-// Returns:     Errorcode   = kEplSuccessful
-//
-// State:
-//
-//---------------------------------------------------------------------------
+This function shuts down the cyclic Ethernet driver.
 
+\return The function returns a tEplKernel error code.
+
+\ingroup module_edrv
+*/
+//------------------------------------------------------------------------------
 tEplKernel edrvcyclic_shutdown(void)
 {
-    if (EdrvCyclicInstance_l.m_paTxBufferList != NULL)
+    if (edrvcyclicInstance_l.ppTxBufferList != NULL)
     {
-        EPL_FREE(EdrvCyclicInstance_l.m_paTxBufferList);
-        EdrvCyclicInstance_l.m_paTxBufferList = NULL;
-        EdrvCyclicInstance_l.m_uiMaxTxBufferCount = 0;
+        EPL_FREE(edrvcyclicInstance_l.ppTxBufferList);
+        edrvcyclicInstance_l.ppTxBufferList = NULL;
+        edrvcyclicInstance_l.maxTxBufferCount = 0;
     }
 
     return kEplSuccessful;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Set maximum size of Tx buffer list
 
-//---------------------------------------------------------------------------
-//
-// Function:    edrvcyclic_setMaxTxBufferListSize
-//
-// Description: Sets the maximum number of TxBuffer list entries.
-//
-// Parameters:  uiMaxListSize_p = maximum number of TxBuffer list entries.
-//
-// Returns:     Errorcode       = kEplSuccessful
-//
-// State:
-//
-//---------------------------------------------------------------------------
+This function determines the maxmimum size of the cyclic Tx buffer list.
 
-tEplKernel edrvcyclic_setMaxTxBufferListSize(unsigned int uiMaxListSize_p)
+\param  maxListSize_p   Maximum Tx buffer list size
+
+\return The function returns a tEplKernel error code.
+
+\ingroup module_edrv
+*/
+//------------------------------------------------------------------------------
+tEplKernel edrvcyclic_setMaxTxBufferListSize(UINT maxListSize_p)
 {
-tEplKernel  Ret = kEplSuccessful;
+    tEplKernel ret = kEplSuccessful;
 
-    if (EdrvCyclicInstance_l.m_uiMaxTxBufferCount != uiMaxListSize_p)
+    if (edrvcyclicInstance_l.maxTxBufferCount != maxListSize_p)
     {
-        EdrvCyclicInstance_l.m_uiMaxTxBufferCount = uiMaxListSize_p;
-        if (EdrvCyclicInstance_l.m_paTxBufferList != NULL)
+        edrvcyclicInstance_l.maxTxBufferCount = maxListSize_p;
+        if (edrvcyclicInstance_l.ppTxBufferList != NULL)
         {
-            EPL_FREE(EdrvCyclicInstance_l.m_paTxBufferList);
-            EdrvCyclicInstance_l.m_paTxBufferList = NULL;
+            EPL_FREE(edrvcyclicInstance_l.ppTxBufferList);
+            edrvcyclicInstance_l.ppTxBufferList = NULL;
         }
 
-        EdrvCyclicInstance_l.m_paTxBufferList = EPL_MALLOC(sizeof (*EdrvCyclicInstance_l.m_paTxBufferList) * uiMaxListSize_p * 2);
-        if (EdrvCyclicInstance_l.m_paTxBufferList == NULL)
+        edrvcyclicInstance_l.ppTxBufferList = EPL_MALLOC(sizeof (*edrvcyclicInstance_l.ppTxBufferList) * maxListSize_p * 2);
+        if (edrvcyclicInstance_l.ppTxBufferList == NULL)
         {
-            Ret = kEplEdrvNoFreeBufEntry;
+            ret = kEplEdrvNoFreeBufEntry;
         }
 
-        EdrvCyclicInstance_l.m_uiCurTxBufferList = 0;
+        edrvcyclicInstance_l.curTxBufferList = 0;
 
-        EPL_MEMSET(EdrvCyclicInstance_l.m_paTxBufferList, 0, sizeof (*EdrvCyclicInstance_l.m_paTxBufferList) * uiMaxListSize_p * 2);
+        EPL_MEMSET(edrvcyclicInstance_l.ppTxBufferList, 0, sizeof (*edrvcyclicInstance_l.ppTxBufferList) * maxListSize_p * 2);
     }
 
-    return Ret;
+    return ret;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Set next Tx buffer list
 
-//---------------------------------------------------------------------------
-//
-// Function:    edrvcyclic_setNextTxBufferList
-//
-// Description: Sets the next TxBuffer list.
-//
-// Parameters:  apTxBuffer_p
-//              uiTxBufferCount_p
-//
-// Returns:     Errorcode       = kEplSuccessful
-//
-// State:
-//
-//---------------------------------------------------------------------------
+This function forwards the next cycle Tx buffer list to the cyclic Edrv.
 
-tEplKernel edrvcyclic_setNextTxBufferList(tEdrvTxBuffer** apTxBuffer_p, unsigned int uiTxBufferCount_p)
+\param  ppTxBuffer_p        Pointer to next cycle Tx buffer list
+\param  txBufferCount_p     Tx buffer list count
+
+\return The function returns a tEplKernel error code.
+
+\ingroup module_edrv
+*/
+//------------------------------------------------------------------------------
+tEplKernel edrvcyclic_setNextTxBufferList(tEdrvTxBuffer** ppTxBuffer_p, UINT txBufferCount_p)
 {
-tEplKernel  Ret = kEplSuccessful;
-unsigned int    uiNextTxBufferList;
+    tEplKernel  ret = kEplSuccessful;
+    UINT        nextTxBufferList;
 
-    uiNextTxBufferList = EdrvCyclicInstance_l.m_uiCurTxBufferList ^ EdrvCyclicInstance_l.m_uiMaxTxBufferCount;
+    nextTxBufferList = edrvcyclicInstance_l.curTxBufferList ^ edrvcyclicInstance_l.maxTxBufferCount;
 
     // check if next list is free
-    if (EdrvCyclicInstance_l.m_paTxBufferList[uiNextTxBufferList] != NULL)
+    if (edrvcyclicInstance_l.ppTxBufferList[nextTxBufferList] != NULL)
     {
-        Ret = kEplEdrvNextTxListNotEmpty;
+        ret = kEplEdrvNextTxListNotEmpty;
         goto Exit;
     }
 
-    if ((uiTxBufferCount_p == 0)
-        || (uiTxBufferCount_p > EdrvCyclicInstance_l.m_uiMaxTxBufferCount))
+    if ((txBufferCount_p == 0) || (txBufferCount_p > edrvcyclicInstance_l.maxTxBufferCount))
     {
-        Ret = kEplEdrvInvalidParam;
+        ret = kEplEdrvInvalidParam;
         goto Exit;
     }
 
     // check if last entry in list equals a NULL pointer
-    if (apTxBuffer_p[uiTxBufferCount_p - 1] != NULL)
+    if (ppTxBuffer_p[txBufferCount_p - 1] != NULL)
     {
-        Ret = kEplEdrvInvalidParam;
+        ret = kEplEdrvInvalidParam;
         goto Exit;
     }
 
-    EPL_MEMCPY(&EdrvCyclicInstance_l.m_paTxBufferList[uiNextTxBufferList], apTxBuffer_p, sizeof (*apTxBuffer_p) * uiTxBufferCount_p);
+    EPL_MEMCPY(&edrvcyclicInstance_l.ppTxBufferList[nextTxBufferList], ppTxBuffer_p,
+                sizeof (*ppTxBuffer_p) * txBufferCount_p);
 
 Exit:
-    return Ret;
+    return ret;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Set cycle time
 
-//---------------------------------------------------------------------------
-//
-// Function:    edrvcyclic_setCycleTime()
-//
-// Description:
-//
-// Parameters:
-//
-// Return:      tEplKernel      = error code
-//
-// State:       not tested
-//
-//---------------------------------------------------------------------------
+This function sets the cycle time controlled by the cyclic Edrv.
 
-tEplKernel edrvcyclic_setCycleTime (UINT32 dwCycleLenUs_p)
+\param  cycleTimeUs_p   Cycle time [us]
+
+\return The function returns a tEplKernel error code.
+
+\ingroup module_edrv
+*/
+//------------------------------------------------------------------------------
+tEplKernel edrvcyclic_setCycleTime(UINT32 cycleTimeUs_p)
 {
-tEplKernel      Ret = kEplSuccessful;
+    edrvcyclicInstance_l.cycleTimeUs = cycleTimeUs_p;
 
-    EdrvCyclicInstance_l.m_dwCycleLenUs = dwCycleLenUs_p;
-
-    return Ret;
-
+    return kEplSuccessful;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Start cycle
 
-//---------------------------------------------------------------------------
-//
-// Function:    edrvcyclic_startCycle()
-//
-// Description:
-//
-// Parameters:
-//
-// Return:      tEplKernel      = error code
-//
-// State:       not tested
-//
-//---------------------------------------------------------------------------
+This function starts the cycles.
 
-tEplKernel edrvcyclic_startCycle (void)
+\return The function returns a tEplKernel error code.
+
+\ingroup module_edrv
+*/
+//------------------------------------------------------------------------------
+tEplKernel edrvcyclic_startCycle(void)
 {
-tEplKernel      Ret = kEplSuccessful;
+    tEplKernel ret = kEplSuccessful;
 
-    if (EdrvCyclicInstance_l.m_dwCycleLenUs == 0)
+    if (edrvcyclicInstance_l.cycleTimeUs == 0)
     {
-        Ret = kEplEdrvInvalidCycleLen;
+        ret = kEplEdrvInvalidCycleLen;
         goto Exit;
     }
 
     // clear Tx buffer list
-    EdrvCyclicInstance_l.m_uiCurTxBufferList = 0;
-    EdrvCyclicInstance_l.m_uiCurTxBufferEntry = 0;
-    EPL_MEMSET(EdrvCyclicInstance_l.m_paTxBufferList, 0,
-        sizeof (*EdrvCyclicInstance_l.m_paTxBufferList) * EdrvCyclicInstance_l.m_uiMaxTxBufferCount * 2);
+    edrvcyclicInstance_l.curTxBufferList = 0;
+    edrvcyclicInstance_l.curTxBufferEntry = 0;
+    EPL_MEMSET(edrvcyclicInstance_l.ppTxBufferList, 0,
+        sizeof (*edrvcyclicInstance_l.ppTxBufferList) * edrvcyclicInstance_l.maxTxBufferCount * 2);
 
-    Ret = EplTimerHighReskModifyTimerNs(&EdrvCyclicInstance_l.m_TimerHdlCycle,
-        EdrvCyclicInstance_l.m_dwCycleLenUs * 1000ULL,
-        EdrvCyclicCbTimerCycle,
+    ret = EplTimerHighReskModifyTimerNs(&edrvcyclicInstance_l.timerHdlCycle,
+        edrvcyclicInstance_l.cycleTimeUs * 1000ULL,
+        timerHdlCycleCb,
         0L,
         TRUE);
 
 #if EDRV_CYCLIC_USE_DIAGNOSTICS != FALSE
-    EdrvCyclicInstance_l.m_ullLastSlotTimeStamp = 0;
+    edrvcyclicInstance_l.lastSlotTimeStamp = 0;
 #endif
 
 Exit:
-    return Ret;
-
+    return ret;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Stop cycle
 
-//---------------------------------------------------------------------------
-//
-// Function:    edrvcyclic_stopCycle()
-//
-// Description:
-//
-// Parameters:
-//
-// Return:      tEplKernel      = error code
-//
-// State:       not tested
-//
-//---------------------------------------------------------------------------
+This function stops the cycles.
 
-tEplKernel edrvcyclic_stopCycle (void)
+\return The function returns a tEplKernel error code.
+
+\ingroup module_edrv
+*/
+//------------------------------------------------------------------------------
+tEplKernel edrvcyclic_stopCycle(void)
 {
-tEplKernel      Ret = kEplSuccessful;
+    tEplKernel ret = kEplSuccessful;
 
-    Ret = EplTimerHighReskDeleteTimer(&EdrvCyclicInstance_l.m_TimerHdlCycle);
-    Ret = EplTimerHighReskDeleteTimer(&EdrvCyclicInstance_l.m_TimerHdlSlot);
+    ret = EplTimerHighReskDeleteTimer(&edrvcyclicInstance_l.timerHdlCycle);
+    ret = EplTimerHighReskDeleteTimer(&edrvcyclicInstance_l.timerHdlSlot);
 
 #if EDRV_CYCLIC_USE_DIAGNOSTICS != FALSE
-    EdrvCyclicInstance_l.m_ullStartCycleTimeStamp = 0;
+    edrvcyclicInstance_l.startCycleTimeStamp = 0;
 #endif
 
-    return Ret;
-
+    return ret;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Register synchronization callback
 
-//---------------------------------------------------------------------------
-//
-// Function:    edrvcyclic_regSyncHandler()
-//
-// Description: registers handler for synchronized periodic call back
-//
-// Parameters:  pfnTimerSynckCbSync_p   = pointer to callback function,
-//                                        which will be called in interrupt context.
-//
-// Return:      tEplKernel      = error code
-//
-// State:       not tested
-//
-//---------------------------------------------------------------------------
+This function registers the synchronization callback.
 
-tEplKernel edrvcyclic_regSyncHandler (tEdrvCyclicCbSync pfnCbSync_p)
+\param  pfnCbSync_p     Function pointer called at the configured synchronisation point
+
+\return The function returns a tEplKernel error code.
+
+\ingroup module_edrv
+*/
+//------------------------------------------------------------------------------
+tEplKernel edrvcyclic_regSyncHandler(tEdrvCyclicCbSync pfnCbSync_p)
 {
-tEplKernel      Ret = kEplSuccessful;
+    edrvcyclicInstance_l.pfnSyncCb = pfnCbSync_p;
 
-
-    EdrvCyclicInstance_l.m_pfnCbSync = pfnCbSync_p;
-
-    return Ret;
-
+    return kEplSuccessful;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Register error callback
 
+This function registers the error callback.
 
-//---------------------------------------------------------------------------
-//
-// Function:    edrvcyclic_regErrorHandler()
-//
-// Description: registers handler for error events
-//
-// Parameters:  pfnTimerSynckCbSync_p   = pointer to callback function,
-//                                        which will be called in interrupt context.
-//
-// Return:      tEplKernel      = error code
-//
-// State:       not tested
-//
-//---------------------------------------------------------------------------
+\param  pfnCbError_p    Function pointer called in case of a cycle processing error
 
-tEplKernel edrvcyclic_regErrorHandler (tEdrvCyclicCbError pfnCbError_p)
+\return The function returns a tEplKernel error code.
+
+\ingroup module_edrv
+*/
+//------------------------------------------------------------------------------
+tEplKernel edrvcyclic_regErrorHandler(tEdrvCyclicCbError pfnCbError_p)
 {
-tEplKernel      Ret = kEplSuccessful;
+    edrvcyclicInstance_l.pfnErrorCb = pfnCbError_p;
 
-
-    EdrvCyclicInstance_l.m_pfnCbError = pfnCbError_p;
-
-    return Ret;
-
+    return kEplSuccessful;
 }
 
 
 #if EDRV_CYCLIC_USE_DIAGNOSTICS != FALSE
-//---------------------------------------------------------------------------
-//
-// Function:    edrvcyclic_getDiagnostics()
-//
-// Description: Returns diagnostic information
-//
-// Parameters:  ppDiagnostics_p     = OUT Pointer to pointer to diagnostic info
-//
-// Returns:     tEplKernel          = Error code
-//
-//
-// State:       not tested
-//
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+/**
+\brief  Obtain diagnostic information
 
+This function returns diagnostic information provided by the cyclic Edrv.
+
+\param  ppDiagnostics_p     Pointer to store the pointer to the diagnostic information
+
+\return The function returns a tEplKernel error code.
+
+\ingroup module_edrv
+*/
+//------------------------------------------------------------------------------
 tEplKernel edrvcyclic_getDiagnostics(tEdrvCyclicDiagnostics** ppDiagnostics_p)
 {
-    *ppDiagnostics_p = &EdrvCyclicInstance_l.m_Diag;
+    *ppDiagnostics_p = &edrvcyclicInstance_l.diagnostics;
 
     return kEplSuccessful;
 }
 #endif
 
+//============================================================================//
+//            P R I V A T E   F U N C T I O N S                               //
+//============================================================================//
+/// \name Private Functions
+/// \{
 
+//------------------------------------------------------------------------------
+/**
+\brief  Cycle timer callback
 
-//=========================================================================//
-//                                                                         //
-//          P R I V A T E   F U N C T I O N S                              //
-//                                                                         //
-//=========================================================================//
+This function is called by the timer module. It starts the next cycle.
 
+\param  pEventArg_p     Timer event argument
 
-//---------------------------------------------------------------------------
-//
-// Function:    EdrvCyclicCbTimerCycle()
-//
-// Description: called by timer module. It starts the next cycle.
-//
-// Parameters:  pEventArg_p             = timer event argument
-//
-// Returns:     tEplKernel              = error code
-//
-//
-// State:
-//
-//---------------------------------------------------------------------------
-
-static tEplKernel PUBLIC EdrvCyclicCbTimerCycle(tEplTimerEventArg* pEventArg_p)
+\return The function returns a tEplKernel error code.
+*/
+//------------------------------------------------------------------------------
+static tEplKernel timerHdlCycleCb(tEplTimerEventArg* pEventArg_p)
 {
-tEplKernel      Ret = kEplSuccessful;
-
+    tEplKernel      ret = kEplSuccessful;
 #if EDRV_CYCLIC_USE_DIAGNOSTICS != FALSE
-DWORD           dwCycleTime;
-DWORD           dwUsedCycleTime;
-DWORD           dwSpareCycleTime;
-unsigned long long ullStartNewCycleTimeStamp;
+    UINT32          cycleTime;
+    UINT32          usedCycleTime;
+    UINT32          spareCycleTime;
+    ULONGLONG       startNewCycleTimeStamp;
 #endif
 
-    if (pEventArg_p->m_TimerHdl != EdrvCyclicInstance_l.m_TimerHdlCycle)
+    if (pEventArg_p->m_TimerHdl != edrvcyclicInstance_l.timerHdlCycle)
     {   // zombie callback
         // just exit
         goto Exit;
     }
 
 #if EDRV_CYCLIC_USE_DIAGNOSTICS != FALSE
-    ullStartNewCycleTimeStamp = EplTgtGetTimeStampNs();
+    startNewCycleTimeStamp = EplTgtGetTimeStampNs();
 #endif
 
-    if (EdrvCyclicInstance_l.m_paTxBufferList[EdrvCyclicInstance_l.m_uiCurTxBufferEntry] != NULL)
+    if (edrvcyclicInstance_l.ppTxBufferList[edrvcyclicInstance_l.curTxBufferEntry] != NULL)
     {
-        Ret = kEplEdrvTxListNotFinishedYet;
+        ret = kEplEdrvTxListNotFinishedYet;
         goto Exit;
     }
 
-    EdrvCyclicInstance_l.m_paTxBufferList[EdrvCyclicInstance_l.m_uiCurTxBufferList] = NULL;
+    edrvcyclicInstance_l.ppTxBufferList[edrvcyclicInstance_l.curTxBufferList] = NULL;
 
     // enter new cycle -> switch Tx buffer list
-    EdrvCyclicInstance_l.m_uiCurTxBufferList ^= EdrvCyclicInstance_l.m_uiMaxTxBufferCount;
-    EdrvCyclicInstance_l.m_uiCurTxBufferEntry = EdrvCyclicInstance_l.m_uiCurTxBufferList;
+    edrvcyclicInstance_l.curTxBufferList ^= edrvcyclicInstance_l.maxTxBufferCount;
+    edrvcyclicInstance_l.curTxBufferEntry = edrvcyclicInstance_l.curTxBufferList;
 
-    if (EdrvCyclicInstance_l.m_paTxBufferList[EdrvCyclicInstance_l.m_uiCurTxBufferEntry] == NULL)
+    if (edrvcyclicInstance_l.ppTxBufferList[edrvcyclicInstance_l.curTxBufferEntry] == NULL)
     {
-        Ret = kEplEdrvCurTxListEmpty;
+        ret = kEplEdrvCurTxListEmpty;
         goto Exit;
     }
 
-    Ret = EdrvCyclicProcessTxBufferList();
-    if (Ret != kEplSuccessful)
+    ret = processTxBufferList();
+    if (ret != kEplSuccessful)
     {
         goto Exit;
     }
 
-    if (EdrvCyclicInstance_l.m_pfnCbSync != NULL)
+    if (edrvcyclicInstance_l.pfnSyncCb != NULL)
     {
-        Ret = EdrvCyclicInstance_l.m_pfnCbSync();
+        ret = edrvcyclicInstance_l.pfnSyncCb();
     }
 
 #if EDRV_CYCLIC_USE_DIAGNOSTICS != FALSE
-    if (EdrvCyclicInstance_l.m_ullStartCycleTimeStamp != 0)
+    if (edrvcyclicInstance_l.startCycleTimeStamp != 0)
     {
         // calculate time diffs of previous cycle
-        dwCycleTime      = (DWORD) (ullStartNewCycleTimeStamp - EdrvCyclicInstance_l.m_ullStartCycleTimeStamp);
-        if (EdrvCyclicInstance_l.m_Diag.cycleTimeMin > dwCycleTime)
+        cycleTime      = (UINT32) (startNewCycleTimeStamp - edrvcyclicInstance_l.startCycleTimeStamp);
+        if (edrvcyclicInstance_l.diagnostics.cycleTimeMin > cycleTime)
         {
-            EdrvCyclicInstance_l.m_Diag.cycleTimeMin = dwCycleTime;
+            edrvcyclicInstance_l.diagnostics.cycleTimeMin = cycleTime;
         }
-        if (EdrvCyclicInstance_l.m_Diag.cycleTimeMax < dwCycleTime)
+        if (edrvcyclicInstance_l.diagnostics.cycleTimeMax < cycleTime)
         {
-            EdrvCyclicInstance_l.m_Diag.cycleTimeMax = dwCycleTime;
+            edrvcyclicInstance_l.diagnostics.cycleTimeMax = cycleTime;
         }
 
-        if (EdrvCyclicInstance_l.m_ullLastSlotTimeStamp != 0)
+        if (edrvcyclicInstance_l.lastSlotTimeStamp != 0)
         {
-            dwUsedCycleTime  = (DWORD) (EdrvCyclicInstance_l.m_ullLastSlotTimeStamp - EdrvCyclicInstance_l.m_ullStartCycleTimeStamp);
-            dwSpareCycleTime = (DWORD) (ullStartNewCycleTimeStamp - EdrvCyclicInstance_l.m_ullLastSlotTimeStamp);
+            usedCycleTime  = (UINT32) (edrvcyclicInstance_l.lastSlotTimeStamp - edrvcyclicInstance_l.startCycleTimeStamp);
+            spareCycleTime = (UINT32) (startNewCycleTimeStamp - edrvcyclicInstance_l.lastSlotTimeStamp);
 
-            if (EdrvCyclicInstance_l.m_Diag.usedCycleTimeMin > dwUsedCycleTime)
+            if (edrvcyclicInstance_l.diagnostics.usedCycleTimeMin > usedCycleTime)
             {
-                EdrvCyclicInstance_l.m_Diag.usedCycleTimeMin = dwUsedCycleTime;
+                edrvcyclicInstance_l.diagnostics.usedCycleTimeMin = usedCycleTime;
             }
-            if (EdrvCyclicInstance_l.m_Diag.usedCycleTimeMax < dwUsedCycleTime)
+            if (edrvcyclicInstance_l.diagnostics.usedCycleTimeMax < usedCycleTime)
             {
-                EdrvCyclicInstance_l.m_Diag.usedCycleTimeMax = dwUsedCycleTime;
+                edrvcyclicInstance_l.diagnostics.usedCycleTimeMax = usedCycleTime;
             }
-            if (EdrvCyclicInstance_l.m_Diag.spareCycleTimeMin > dwSpareCycleTime)
+            if (edrvcyclicInstance_l.diagnostics.spareCycleTimeMin > spareCycleTime)
             {
-                EdrvCyclicInstance_l.m_Diag.spareCycleTimeMin = dwSpareCycleTime;
+                edrvcyclicInstance_l.diagnostics.spareCycleTimeMin = spareCycleTime;
             }
-            if (EdrvCyclicInstance_l.m_Diag.spareCycleTimeMax < dwSpareCycleTime)
+            if (edrvcyclicInstance_l.diagnostics.spareCycleTimeMax < spareCycleTime)
             {
-                EdrvCyclicInstance_l.m_Diag.spareCycleTimeMax = dwSpareCycleTime;
+                edrvcyclicInstance_l.diagnostics.spareCycleTimeMax = spareCycleTime;
             }
         }
         else
         {
-            dwUsedCycleTime = 0;
-            dwSpareCycleTime = dwCycleTime;
+            usedCycleTime = 0;
+            spareCycleTime = cycleTime;
         }
 
-        EdrvCyclicInstance_l.m_Diag.cycleTimeMeanSum      += dwCycleTime;
-        EdrvCyclicInstance_l.m_Diag.usedCycleTimeMeanSum  += dwUsedCycleTime;
-        EdrvCyclicInstance_l.m_Diag.spareCycleTimeMeanSum += dwSpareCycleTime;
-        EdrvCyclicInstance_l.m_Diag.cycleCount++;
+        edrvcyclicInstance_l.diagnostics.cycleTimeMeanSum      += cycleTime;
+        edrvcyclicInstance_l.diagnostics.usedCycleTimeMeanSum  += usedCycleTime;
+        edrvcyclicInstance_l.diagnostics.spareCycleTimeMeanSum += spareCycleTime;
+        edrvcyclicInstance_l.diagnostics.cycleCount++;
 
         // sample previous cycle if deviations exceed threshold
-        if (    (EdrvCyclicInstance_l.m_Diag.sampleNum == 0) /* sample first cycle for start time */
-                || (abs(dwCycleTime - EdrvCyclicInstance_l.m_dwCycleLenUs * 1000) > EDRV_CYCLIC_SAMPLE_TH_CYCLE_TIME_DIFF_US * 1000)
-                || (dwSpareCycleTime < EDRV_CYCLIC_SAMPLE_TH_SPARE_TIME_US * 1000))
+        if (    (edrvcyclicInstance_l.diagnostics.sampleNum == 0) || /* sample first cycle for start time */
+                (abs(cycleTime - edrvcyclicInstance_l.cycleTimeUs * 1000) > EDRV_CYCLIC_SAMPLE_TH_CYCLE_TIME_DIFF_US * 1000) ||
+                (spareCycleTime < EDRV_CYCLIC_SAMPLE_TH_SPARE_TIME_US * 1000))
         {
-        unsigned int uiSampleNo = EdrvCyclicInstance_l.m_uiSampleNo;
+        UINT uiSampleNo = edrvcyclicInstance_l.sampleCount;
 
-            EdrvCyclicInstance_l.m_Diag.aSampleTimeStamp[uiSampleNo] = EdrvCyclicInstance_l.m_ullStartCycleTimeStamp;
-            EdrvCyclicInstance_l.m_Diag.aCycleTime[uiSampleNo]       = dwCycleTime;
-            EdrvCyclicInstance_l.m_Diag.aUsedCycleTime[uiSampleNo]   = dwUsedCycleTime;
-            EdrvCyclicInstance_l.m_Diag.aSpareCycleTime[uiSampleNo]  = dwSpareCycleTime;
+            edrvcyclicInstance_l.diagnostics.aSampleTimeStamp[uiSampleNo] = edrvcyclicInstance_l.startCycleTimeStamp;
+            edrvcyclicInstance_l.diagnostics.aCycleTime[uiSampleNo]       = cycleTime;
+            edrvcyclicInstance_l.diagnostics.aUsedCycleTime[uiSampleNo]   = usedCycleTime;
+            edrvcyclicInstance_l.diagnostics.aSpareCycleTime[uiSampleNo]  = spareCycleTime;
 
-            EdrvCyclicInstance_l.m_Diag.sampleNum++;
-            if (EdrvCyclicInstance_l.m_Diag.sampleBufferedNum != EDRV_CYCLIC_SAMPLE_NUM)
+            edrvcyclicInstance_l.diagnostics.sampleNum++;
+            if (edrvcyclicInstance_l.diagnostics.sampleBufferedNum != EDRV_CYCLIC_SAMPLE_NUM)
             {
-                EdrvCyclicInstance_l.m_Diag.sampleBufferedNum++;
+                edrvcyclicInstance_l.diagnostics.sampleBufferedNum++;
             }
 
-            EdrvCyclicInstance_l.m_uiSampleNo++;
-            if (EdrvCyclicInstance_l.m_uiSampleNo == EDRV_CYCLIC_SAMPLE_NUM)
+            edrvcyclicInstance_l.sampleCount++;
+            if (edrvcyclicInstance_l.sampleCount == EDRV_CYCLIC_SAMPLE_NUM)
             {
-                EdrvCyclicInstance_l.m_uiSampleNo = 1;
+                edrvcyclicInstance_l.sampleCount = 1;
             }
         }
     }
 
-    EdrvCyclicInstance_l.m_ullStartCycleTimeStamp = ullStartNewCycleTimeStamp;
-    EdrvCyclicInstance_l.m_ullLastSlotTimeStamp = 0;
+    edrvcyclicInstance_l.startCycleTimeStamp = startNewCycleTimeStamp;
+    edrvcyclicInstance_l.lastSlotTimeStamp = 0;
 #endif
 
 Exit:
-    if (Ret != kEplSuccessful)
+    if (ret != kEplSuccessful)
     {
-        if (EdrvCyclicInstance_l.m_pfnCbError != NULL)
+        if (edrvcyclicInstance_l.pfnErrorCb != NULL)
         {
-            Ret = EdrvCyclicInstance_l.m_pfnCbError(Ret, NULL);
+            ret = edrvcyclicInstance_l.pfnErrorCb(ret, NULL);
         }
     }
-    return Ret;
+    return ret;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Slot timer callback
 
-//---------------------------------------------------------------------------
-//
-// Function:    EdrvCyclicCbTimerSlot()
-//
-// Description: called by timer module. It triggers the transmission of the next frame.
-//
-// Parameters:  pEventArg_p             = timer event argument
-//
-// Returns:     tEplKernel              = error code
-//
-//
-// State:
-//
-//---------------------------------------------------------------------------
+This function is called by the timer module. It triggers the transmission of the
+next frame.
 
-static tEplKernel PUBLIC EdrvCyclicCbTimerSlot(tEplTimerEventArg* pEventArg_p)
+\param  pEventArg_p     Timer event argument
+
+\return The function returns a tEplKernel error code.
+*/
+//------------------------------------------------------------------------------
+static tEplKernel timerHdlSlotCb(tEplTimerEventArg* pEventArg_p)
 {
-tEplKernel      Ret = kEplSuccessful;
-tEdrvTxBuffer*  pTxBuffer = NULL;
+    tEplKernel      ret = kEplSuccessful;
+    tEdrvTxBuffer*  pTxBuffer = NULL;
 
-    if (pEventArg_p->m_TimerHdl != EdrvCyclicInstance_l.m_TimerHdlSlot)
+    if (pEventArg_p->m_TimerHdl != edrvcyclicInstance_l.timerHdlSlot)
     {   // zombie callback
         // just exit
         goto Exit;
     }
 
 #if EDRV_CYCLIC_USE_DIAGNOSTICS != FALSE
-    EdrvCyclicInstance_l.m_ullLastSlotTimeStamp = EplTgtGetTimeStampNs();
+    edrvcyclicInstance_l.lastSlotTimeStamp = EplTgtGetTimeStampNs();
 #endif
 
-    pTxBuffer = EdrvCyclicInstance_l.m_paTxBufferList[EdrvCyclicInstance_l.m_uiCurTxBufferEntry];
-    Ret = edrv_sendTxBuffer(pTxBuffer);
-    if (Ret != kEplSuccessful)
+    pTxBuffer = edrvcyclicInstance_l.ppTxBufferList[edrvcyclicInstance_l.curTxBufferEntry];
+    ret = edrv_sendTxBuffer(pTxBuffer);
+    if (ret != kEplSuccessful)
     {
         goto Exit;
     }
 
-    EdrvCyclicInstance_l.m_uiCurTxBufferEntry++;
+    edrvcyclicInstance_l.curTxBufferEntry++;
 
-    Ret = EdrvCyclicProcessTxBufferList();
+    ret = processTxBufferList();
 
 Exit:
-    if (Ret != kEplSuccessful)
+    if (ret != kEplSuccessful)
     {
-        if (EdrvCyclicInstance_l.m_pfnCbError != NULL)
+        if (edrvcyclicInstance_l.pfnErrorCb != NULL)
         {
-            Ret = EdrvCyclicInstance_l.m_pfnCbError(Ret, pTxBuffer);
+            ret = edrvcyclicInstance_l.pfnErrorCb(ret, pTxBuffer);
         }
     }
-    return Ret;
+    return ret;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Process cycle Tx buffer list
 
-//---------------------------------------------------------------------------
-//
-// Function:    EdrvCyclicProcessTxBufferList()
-//
-// Description: processes the Tx buffer list.
-//
-// Parameters:  void
-//
-// Returns:     tEplKernel              = error code
-//
-//
-// State:
-//
-//---------------------------------------------------------------------------
+This function processes the cycle Tx buffer list provided by dllk.
 
-static tEplKernel EdrvCyclicProcessTxBufferList(void)
+\return The function returns a tEplKernel error code.
+*/
+//------------------------------------------------------------------------------
+static tEplKernel processTxBufferList(void)
 {
-tEplKernel      Ret = kEplSuccessful;
-tEdrvTxBuffer*  pTxBuffer;
+    tEplKernel      ret = kEplSuccessful;
+    tEdrvTxBuffer*  pTxBuffer;
 
-    while ((pTxBuffer = EdrvCyclicInstance_l.m_paTxBufferList[EdrvCyclicInstance_l.m_uiCurTxBufferEntry]) != NULL)
+    while ((pTxBuffer = edrvcyclicInstance_l.ppTxBufferList[edrvcyclicInstance_l.curTxBufferEntry]) != NULL)
     {
         if (pTxBuffer->timeOffsetNs == 0)
         {
-            Ret = edrv_sendTxBuffer(pTxBuffer);
-            if (Ret != kEplSuccessful)
+            ret = edrv_sendTxBuffer(pTxBuffer);
+            if (ret != kEplSuccessful)
             {
                 goto Exit;
             }
         }
         else
         {
-            Ret = EplTimerHighReskModifyTimerNs(&EdrvCyclicInstance_l.m_TimerHdlSlot,
+            ret = EplTimerHighReskModifyTimerNs(&edrvcyclicInstance_l.timerHdlSlot,
                 pTxBuffer->timeOffsetNs,
-                EdrvCyclicCbTimerSlot,
+                timerHdlSlotCb,
                 0L,
                 FALSE);
 
             break;
         }
 
-        EdrvCyclicInstance_l.m_uiCurTxBufferEntry++;
+        edrvcyclicInstance_l.curTxBufferEntry++;
     }
 
 Exit:
-    if (Ret != kEplSuccessful)
+    if (ret != kEplSuccessful)
     {
-        if (EdrvCyclicInstance_l.m_pfnCbError != NULL)
+        if (edrvcyclicInstance_l.pfnErrorCb != NULL)
         {
-            Ret = EdrvCyclicInstance_l.m_pfnCbError(Ret, pTxBuffer);
+            ret = edrvcyclicInstance_l.pfnErrorCb(ret, pTxBuffer);
         }
     }
-    return Ret;
+    return ret;
 }
 
+///\}
