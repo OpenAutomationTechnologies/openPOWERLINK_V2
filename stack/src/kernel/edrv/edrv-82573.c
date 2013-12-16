@@ -1,77 +1,59 @@
-/****************************************************************************
+/**
+********************************************************************************
+\file   edrv-82573.c
 
-  (c) SYSTEC electronic GmbH, D-07973 Greiz, August-Bebel-Str. 29
-      www.systec-electronic.com
+\brief  Implementation of Ethernet driver for Intel 82573
 
-  Project:      openPOWERLINK
+This file contains the implementation of the Ethernet driver for
+Intel 82573 Gigabit Ethernet Controller and compatible devices.
 
-  Description:  Ethernet driver for Intel 82573 Gigabit Ethernet Controller
-                and compatible.
+Buffer handling:
+All buffers are created statically (i.e. at compile time resp. at
+initialisation via kmalloc() ) and not dynamically on request (i.e. via
+edrv_allocTxBuffer().
+edrv_allocTxBuffer() searches for an unused buffer which is large enough.
+edrv_init() may allocate some buffers with sizes less than maximum frame
+size (i.e. 1514 bytes), e.g. for SoC, SoA, StatusResponse, IdentResponse,
+NMT requests / commands. The less the size of the buffer the less the
+number of the buffer.
 
-  License:
+\ingroup module_edrv
+*******************************************************************************/
 
-    Redistribution and use in source and binary forms, with or without
-    modification, are permitted provided that the following conditions
-    are met:
+/*------------------------------------------------------------------------------
+Copyright (c) 2013, SYSTEC electronic GmbH
+Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+All rights reserved.
 
-    1. Redistributions of source code must retain the above copyright
-       notice, this list of conditions and the following disclaimer.
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+    * Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above copyright
+      notice, this list of conditions and the following disclaimer in the
+      documentation and/or other materials provided with the distribution.
+    * Neither the name of the copyright holders nor the
+      names of its contributors may be used to endorse or promote products
+      derived from this software without specific prior written permission.
 
-    2. Redistributions in binary form must reproduce the above copyright
-       notice, this list of conditions and the following disclaimer in the
-       documentation and/or other materials provided with the distribution.
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL COPYRIGHT HOLDERS BE LIABLE FOR ANY
+DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+------------------------------------------------------------------------------*/
 
-    3. Neither the name of SYSTEC electronic GmbH nor the names of its
-       contributors may be used to endorse or promote products derived
-       from this software without prior written permission. For written
-       permission, please contact info@systec-electronic.com.
-
-    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-    LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-    FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-    COPYRIGHT HOLDERS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-    INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-    BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-    LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-    CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-    LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-    ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-    POSSIBILITY OF SUCH DAMAGE.
-
-    Severability Clause:
-
-        If a provision of this License is or becomes illegal, invalid or
-        unenforceable in any jurisdiction, that shall not affect:
-        1. the validity or enforceability in that jurisdiction of any other
-           provision of this License; or
-        2. the validity or enforceability in other jurisdictions of that or
-           any other provision of this License.
-
-  -------------------------------------------------------------------------
-
-                $RCSfile$
-
-                $Author$
-
-                $Revision$  $Date$
-
-                $State$
-
-                Build Environment:
-                Dev C++ and GNU-Compiler for m68k
-
-  -------------------------------------------------------------------------
-
-  Revision History:
-
-  2009/12/08 m.u.:   start of implementation
-
-****************************************************************************/
-
-#include "global.h"
-#include "EplInc.h"
-#include "edrv.h"
+//------------------------------------------------------------------------------
+// includes
+//------------------------------------------------------------------------------
+#include <global.h>
+#include <EplInc.h>
+#include <edrv.h>
 
 #include <linux/module.h>
 #include <linux/kernel.h>
@@ -92,30 +74,32 @@
 #include <linux/semaphore.h>
 #endif
 
+//============================================================================//
+//            G L O B A L   D E F I N I T I O N S                             //
+//============================================================================//
 
-/***************************************************************************/
-/*                                                                         */
-/*                                                                         */
-/*          G L O B A L   D E F I N I T I O N S                            */
-/*                                                                         */
-/*                                                                         */
-/***************************************************************************/
-
-// Buffer handling:
-// All buffers are created statically (i.e. at compile time resp. at
-// initialisation via kmalloc() ) and not dynamically on request (i.e. via
-// edrv_allocTxBuffer().
-// edrv_allocTxBuffer() searches for an unused buffer which is large enough.
-// edrv_init() may allocate some buffers with sizes less than maximum frame
-// size (i.e. 1514 bytes), e.g. for SoC, SoA, StatusResponse, IdentResponse,
-// NMT requests / commands. The less the size of the buffer the less the
-// number of the buffer.
-
-
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // const defines
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,19)
+#error "Linux Kernel versions older 2.6.19 are not supported by this driver!"
+#endif
 
+//------------------------------------------------------------------------------
+// module global vars
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// global function prototypes
+//------------------------------------------------------------------------------
+
+//============================================================================//
+//            P R I V A T E   D E F I N I T I O N S                           //
+//============================================================================//
+
+//------------------------------------------------------------------------------
+// const defines
+//------------------------------------------------------------------------------
 #ifndef EDRV_MAX_TX_BUFFERS
 #define EDRV_MAX_TX_BUFFERS     42
 #endif
@@ -242,14 +226,14 @@
                                | EDRV_REGDW_RCTL_SECRC \
                                | EDRV_REGDW_RCTL_BSIZE_2048)
 
-#define EDRV_REGDW_TDBAL        0x03800     // Transmit Descriptor Base Adress Low
-#define EDRV_REGDW_TDBAH        0x03804     // Transmit Descriptor Base Adress High
+#define EDRV_REGDW_TDBAL        0x03800     // Transmit Descriptor Base Address Low
+#define EDRV_REGDW_TDBAH        0x03804     // Transmit Descriptor Base Address High
 #define EDRV_REGDW_TDLEN        0x03808     // Transmit Descriptor Length
 #define EDRV_REGDW_TDH          0x03810     // Transmit Descriptor Head
 #define EDRV_REGDW_TDT          0x03818     // Transmit Descriptor Tail
 
-#define EDRV_REGDW_RDBAL0       0x02800     // Receive Descriptor Base Adress Low
-#define EDRV_REGDW_RDBAH0       0x02804     // Receive Descriptor Base Adress High
+#define EDRV_REGDW_RDBAL0       0x02800     // Receive Descriptor Base Address Low
+#define EDRV_REGDW_RDBAH0       0x02804     // Receive Descriptor Base Address High
 #define EDRV_REGDW_RDLEN0       0x02808     // Receive Descriptor Length
 #define EDRV_REGDW_RDH0         0x02810     // Receive Descriptor Head
 #define EDRV_REGDW_RDT0         0x02818     // Receive Descriptor Tail
@@ -277,8 +261,8 @@
 #define EDRV_RXERR_OTHER        0xE2        // Other Error
 
 
-#define EDRV_REGDW_WRITE(dwReg, dwVal)  writel(dwVal, EdrvInstance_l.m_pIoAddr + dwReg)
-#define EDRV_REGDW_READ(dwReg)          readl(EdrvInstance_l.m_pIoAddr + dwReg)
+#define EDRV_REGDW_WRITE(dwReg, dwVal)  writel(dwVal, edrvInstance_l.pIoAddr + dwReg)
+#define EDRV_REGDW_READ(dwReg)          readl(edrvInstance_l.pIoAddr + dwReg)
 
 
 #define EDRV_SAMPLE_NUM         10000
@@ -286,8 +270,8 @@
 
 // TracePoint support for realtime-debugging
 #ifdef _DBG_TRACE_POINTS_
-    void  PUBLIC  TgtDbgSignalTracePoint (BYTE bTracePointNumber_p);
-    void  PUBLIC  TgtDbgPostTraceValue (DWORD dwTraceValue_p);
+    void  PUBLIC  TgtDbgSignalTracePoint (UINT8 bTracePointNumber_p);
+    void  PUBLIC  TgtDbgPostTraceValue (UINT32 dwTraceValue_p);
     #define TGT_DBG_SIGNAL_TRACE_POINT(p)   TgtDbgSignalTracePoint(p)
     #define TGT_DBG_POST_TRACE_VALUE(v)     TgtDbgPostTraceValue(v)
 #else
@@ -316,90 +300,84 @@
 #define EDRV_TRACE_RX_PUN(x)            TGT_DBG_POST_TRACE_VALUE(((x) & 0xFFFF) | 0x11000000)
 #define EDRV_TRACE(x)                   TGT_DBG_POST_TRACE_VALUE(((x) & 0xFFFF0000) | 0x0000FEC0)
 
+#define EDRV_DIAG_HISTORY_COUNT     14
 
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // local types
-//---------------------------------------------------------------------------
-
+//------------------------------------------------------------------------------
 typedef struct
 {
-    QWORD               m_le_qwBufferAddr;
-    DWORD               m_le_dwLengthCmd;
-    DWORD               m_le_dwStatus;
-
+    UINT64  bufferAddr_le;
+    UINT32  lengthCmd_le;
+    UINT32  status_le;
 } tEdrvTxDesc;
 
 typedef struct
 {
-    QWORD               m_le_qwBufferAddr;
-    WORD                m_le_wLength;
-    WORD                m_le_wChecksum;
-    BYTE                m_bStatus;
-    BYTE                m_bError;
-    WORD                m_le_wReserved;
-
+    UINT64  bufferAddr_le;
+    UINT16  length_le;
+    UINT16  checksum_le;
+    UINT8   status;
+    UINT8   error;
+    UINT16  reserved_le;
 } tEdrvRxDesc;
-
 
 // Private structure
 typedef struct
 {
-    struct pci_dev*     m_pPciDev;      // pointer to PCI device structure
-    void*               m_pIoAddr;      // pointer to register space of Ethernet controller
+    struct pci_dev*     pPciDev;      // pointer to PCI device structure
+    void*               pIoAddr;      // pointer to register space of Ethernet controller
 
-    tEdrvRxDesc*        m_pRxDesc;      // pointer to Rx descriptors
-    dma_addr_t          m_pRxDescDma;   // dma pointer to Rx descriptors
-    BYTE*               m_apbRxBufInDesc[EDRV_MAX_RX_DESCS];
+    tEdrvRxDesc*        pRxDesc;      // pointer to Rx descriptors
+    dma_addr_t          pRxDescDma;   // dma pointer to Rx descriptors
+    UINT8*              apRxBufInDesc[EDRV_MAX_RX_DESCS];
                                         // Stack of free rx buffers
                                         // +1 additional place if ReleaseRxBuffer is called
                                         // before return of RxHandler (multi processor)
-    BYTE*               m_apbRxBufFree[EDRV_MAX_RX_BUFFERS - EDRV_MAX_RX_DESCS + 1];
-    int                 m_iRxBufFreeTop;
-    spinlock_t          m_SpinLockRxBufRelease;
-    int                 m_iPageAllocations;
+    UINT8*              apRxBufFree[EDRV_MAX_RX_BUFFERS - EDRV_MAX_RX_DESCS + 1];
+    INT                 rxBufFreeTop;
+    spinlock_t          spinLockRxBufRelease;
+    INT                 pageAllocations;
 
-    BYTE*               m_pbTxBuf;      // pointer to Tx buffer
-    dma_addr_t          m_pTxBufDma;
-    tEdrvTxDesc*        m_pTxDesc;      // pointer to Tx descriptors
-    tEdrvTxBuffer*      m_apTxBuffer[EDRV_MAX_TX_DESCS];
-    dma_addr_t          m_pTxDescDma;
-    BOOL                m_afTxBufUsed[EDRV_MAX_TX_BUFFERS];
+    UINT8*              pTxBuf;      // pointer to Tx buffer
+    dma_addr_t          pTxBufDma;
+    tEdrvTxDesc*        pTxDesc;      // pointer to Tx descriptors
+    tEdrvTxBuffer*      apTxBuffer[EDRV_MAX_TX_DESCS];
+    dma_addr_t          pTxDescDma;
+    BOOL                afTxBufUsed[EDRV_MAX_TX_BUFFERS];
 
-    unsigned int        m_uiHeadTxDesc;
-    unsigned int        m_uiTailTxDesc;
-    unsigned int        m_uiHeadRxDesc;
-    unsigned int        m_uiTailRxDesc;
+    UINT                headTxDesc;
+    UINT                tailTxDesc;
+    UINT                headRxDesc;
+    UINT                tailRxDesc;
 
-    tEdrvInitParam      m_InitParam;
+    tEdrvInitParam      initParam;
 
 #if EDRV_USE_DIAGNOSTICS != FALSE
-    unsigned long long  m_ullInterruptCount;
-    int                 m_iRxBufFreeMin;
-    unsigned int        m_uiRxCount[EDRV_SAMPLE_NUM];
-    unsigned int        m_uiTxCount[EDRV_SAMPLE_NUM];
-    unsigned int        m_uiPos;
+    ULONGLONG           interruptCount;
+    INT                 rxBufFreeMin;
+    UINT                rxCount[EDRV_SAMPLE_NUM];
+    UINT                txCount[EDRV_SAMPLE_NUM];
+    UINT                pos;
 #endif
-
 } tEdrvInstance;
 
-
-
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // local function prototypes
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,19)
+static irqreturn_t edrvIrqHandler (INT irqNum_p, void* ppDevInstData_p);
+#else
+static INT edrvIrqHandler (INT irqNum_p, void* ppDevInstData_p, struct pt_regs* ptRegs_p);
+#endif
+static INT initOnePciDev(struct pci_dev *pPciDev_p, const struct pci_device_id *pId_p);
+static void removeOnePciDev(struct pci_dev *pPciDev_p);
 
-static int EdrvInitOne(struct pci_dev *pPciDev,
-                       const struct pci_device_id *pId);
-
-static void EdrvRemoveOne(struct pci_dev *pPciDev);
-
-
-//---------------------------------------------------------------------------
-// module global vars
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+// local vars
+//------------------------------------------------------------------------------
 // buffers and buffer descriptors and pointers
-
-static struct pci_device_id aEdrvPciTbl[] = {
+static struct pci_device_id aEdrvPciTbl_l[] = {
     {0x8086, 0x109a, PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0},  // 82573L
     {0x8086, 0x1501, PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0},  // 82567V
     {0x8086, 0x150c, PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0},  // 82583V
@@ -407,887 +385,803 @@ static struct pci_device_id aEdrvPciTbl[] = {
     {0x8086, 0x10d3, PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0},  // 82574L
     {0,}
 };
-MODULE_DEVICE_TABLE (pci, aEdrvPciTbl);
+MODULE_DEVICE_TABLE (pci, aEdrvPciTbl_l);
 
+static tEdrvInstance edrvInstance_l;
 
-static tEdrvInstance EdrvInstance_l;
-
-
-static struct pci_driver EdrvDriver = {
+static struct pci_driver edrvDriver_l = {
     .name         = DRV_NAME,
-    .id_table     = aEdrvPciTbl,
-    .probe        = EdrvInitOne,
-    .remove       = EdrvRemoveOne,
+    .id_table     = aEdrvPciTbl_l,
+    .probe        = initOnePciDev,
+    .remove       = removeOnePciDev,
 };
 
+//============================================================================//
+//            P U B L I C   F U N C T I O N S                                 //
+//============================================================================//
 
+//------------------------------------------------------------------------------
+/**
+\brief  Ethernet driver initialization
 
+This function initializes the Ethernet driver.
 
-/***************************************************************************/
-/*                                                                         */
-/*                                                                         */
-/*          C L A S S  <edrv>                                              */
-/*                                                                         */
-/*                                                                         */
-/***************************************************************************/
-//
-// Description:
-//
-//
-/***************************************************************************/
+\param  pEdrvInitParam_p    Edrv initialization parameters
 
+\return The function returns a tEplKernel error code.
 
-//=========================================================================//
-//                                                                         //
-//          P R I V A T E   D E F I N I T I O N S                          //
-//                                                                         //
-//=========================================================================//
-
-//---------------------------------------------------------------------------
-// const defines
-//---------------------------------------------------------------------------
-
-//---------------------------------------------------------------------------
-// local types
-//---------------------------------------------------------------------------
-
-//---------------------------------------------------------------------------
-// local vars
-//---------------------------------------------------------------------------
-
-//---------------------------------------------------------------------------
-// local function prototypes
-//---------------------------------------------------------------------------
-
-
-
-
-//---------------------------------------------------------------------------
-//
-// Function:    edrv_init
-//
-// Description: function for init of the Ethernet controller
-//
-// Parameters:  pEdrvInitParam_p    = pointer to struct including the init-parameters
-//
-// Returns:     Errorcode           = kEplSuccessful
-//                                  = kEplNoResource
-//
-// State:
-//
-//---------------------------------------------------------------------------
-tEplKernel edrv_init(tEdrvInitParam * pEdrvInitParam_p)
+\ingroup module_edrv
+*/
+//------------------------------------------------------------------------------
+tEplKernel edrv_init(tEdrvInitParam* pEdrvInitParam_p)
 {
-tEplKernel  Ret;
-int         iResult;
-int         iIndex;
-
-    Ret = kEplSuccessful;
+    tEplKernel  ret = kEplSuccessful;
+    INT         result;
+    INT         i;
 
     // clear instance structure
-    EPL_MEMSET(&EdrvInstance_l, 0, sizeof (EdrvInstance_l));
+    EPL_MEMSET(&edrvInstance_l, 0, sizeof (edrvInstance_l));
 
     // save the init data
-    EdrvInstance_l.m_InitParam = *pEdrvInitParam_p;
+    edrvInstance_l.initParam = *pEdrvInitParam_p;
 
     // clear driver structure
-    EPL_MEMSET(&EdrvDriver, 0, sizeof (EdrvDriver));
-    EdrvDriver.name         = DRV_NAME,
-    EdrvDriver.id_table     = aEdrvPciTbl,
-    EdrvDriver.probe        = EdrvInitOne,
-    EdrvDriver.remove       = EdrvRemoveOne,
+    EPL_MEMSET(&edrvDriver_l, 0, sizeof (edrvDriver_l));
+    edrvDriver_l.name         = DRV_NAME,
+    edrvDriver_l.id_table     = aEdrvPciTbl_l,
+    edrvDriver_l.probe        = initOnePciDev,
+    edrvDriver_l.remove       = removeOnePciDev,
 
     // register PCI driver
-    iResult = pci_register_driver (&EdrvDriver);
-    if (iResult != 0)
+    result = pci_register_driver (&edrvDriver_l);
+    if (result != 0)
     {
-        printk("%s pci_register_driver failed with %d\n", __FUNCTION__, iResult);
-        Ret = kEplNoResource;
+        printk("%s pci_register_driver failed with %d\n", __FUNCTION__, result);
+        ret = kEplNoResource;
         goto Exit;
     }
 
-    if (EdrvInstance_l.m_pPciDev == NULL)
+    if (edrvInstance_l.pPciDev == NULL)
     {
-        printk("%s m_pPciDev=NULL\n", __FUNCTION__);
-        Ret = edrv_shutdown();
-        Ret = kEplNoResource;
+        printk("%s pPciDev=NULL\n", __FUNCTION__);
+        ret = edrv_shutdown();
+        ret = kEplNoResource;
         goto Exit;
     }
 
-    // local MAC address might have been changed in EdrvInitOne
-    EPL_MEMCPY(pEdrvInitParam_p->aMacAddr, EdrvInstance_l.m_InitParam.aMacAddr, 6);
+    // local MAC address might have been changed in initOnePciDev
+    EPL_MEMCPY(pEdrvInitParam_p->aMacAddr, edrvInstance_l.initParam.aMacAddr, 6);
 
     printk("%s local MAC = ", __FUNCTION__);
-    for (iIndex = 0; iIndex < 6; iIndex++)
+    for (i = 0; i < 6; i++)
     {
-        printk("%02X ", (unsigned int)pEdrvInitParam_p->aMacAddr[iIndex]);
+        printk("%02X ", (UINT)pEdrvInitParam_p->aMacAddr[i]);
     }
     printk("\n");
 
 Exit:
-    return Ret;
-
+    return ret;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Ethernet driver shutdown
 
-//---------------------------------------------------------------------------
-//
-// Function:    edrv_shutdown
-//
-// Description: Shutdown the Ethernet controller
-//
-// Parameters:  void
-//
-// Returns:     Errorcode   = kEplSuccessful
-//
-// State:
-//
-//---------------------------------------------------------------------------
+This function shuts down the Ethernet driver.
+
+\return The function returns a tEplKernel error code.
+
+\ingroup module_edrv
+*/
+//------------------------------------------------------------------------------
 tEplKernel edrv_shutdown(void)
 {
-
     // unregister PCI driver
     printk("%s calling pci_unregister_driver()\n", __FUNCTION__);
-    pci_unregister_driver (&EdrvDriver);
+    pci_unregister_driver (&edrvDriver_l);
 
     return kEplSuccessful;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Set multicast address entry
 
-//---------------------------------------------------------------------------
-//
-// Function:    edrv_setRxMulticastMacAddr
-//
-// Description: Set a multicast entry into the Ethernet controller
-//
-// Parameters:  pbMacAddr_p     = pointer to multicast entry to set
-//
-// Returns:     Errorcode       = kEplSuccessful
-//
-// State:
-//
-//---------------------------------------------------------------------------
-tEplKernel edrv_setRxMulticastMacAddr (BYTE * pbMacAddr_p)
+This function sets a multicast entry into the Ethernet controller.
+
+\param  pMacAddr_p  Multicast address
+
+\return The function returns a tEplKernel error code.
+
+\ingroup module_edrv
+*/
+//------------------------------------------------------------------------------
+tEplKernel edrv_setRxMulticastMacAddr(UINT8* pMacAddr_p)
 {
-tEplKernel  Ret = kEplSuccessful;
-DWORD       dwData;
-int         iIndex;
+    tEplKernel  ret = kEplSuccessful;
+    UINT32      data;
+    INT         i;
 
     // entry 0 is used for local MAC address
 
-    for (iIndex = 1; iIndex < 16; iIndex++)
+    for (i = 1; i < 16; i++)
     {
-        dwData = EDRV_REGDW_READ(EDRV_REGDW_RAH(iIndex));
-        if ((dwData & EDRV_REGDW_RAH_AV) == 0)
+        data = EDRV_REGDW_READ(EDRV_REGDW_RAH(i));
+        if ((data & EDRV_REGDW_RAH_AV) == 0)
         {   // free MAC address entry
             break;
         }
     }
 
-    if (iIndex == 16)
+    if (i == 16)
     {   // no free entry found
         printk("%s Implementation of Multicast Table Array support required\n", __FUNCTION__);
-        Ret = kEplEdrvInitError;
+        ret = kEplEdrvInitError;
         goto Exit;
     }
     else
-    {   
+    {
         // write MAC address to free entry
-        dwData = 0;
-        dwData |= pbMacAddr_p[0] <<  0;
-        dwData |= pbMacAddr_p[1] <<  8;
-        dwData |= pbMacAddr_p[2] << 16;
-        dwData |= pbMacAddr_p[3] << 24;
-        EDRV_REGDW_WRITE(EDRV_REGDW_RAL(iIndex), dwData);
-        dwData = 0;
-        dwData |= pbMacAddr_p[4] <<  0;
-        dwData |= pbMacAddr_p[5] <<  8;
-        dwData |= EDRV_REGDW_RAH_AV;
-        EDRV_REGDW_WRITE(EDRV_REGDW_RAH(iIndex), dwData);
+        data = 0;
+        data |= pMacAddr_p[0] <<  0;
+        data |= pMacAddr_p[1] <<  8;
+        data |= pMacAddr_p[2] << 16;
+        data |= pMacAddr_p[3] << 24;
+        EDRV_REGDW_WRITE(EDRV_REGDW_RAL(i), data);
+        data = 0;
+        data |= pMacAddr_p[4] <<  0;
+        data |= pMacAddr_p[5] <<  8;
+        data |= EDRV_REGDW_RAH_AV;
+        EDRV_REGDW_WRITE(EDRV_REGDW_RAH(i), data);
     }
 
 Exit:
 
-    return Ret;
+    return ret;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Clear multicast address entry
 
-//---------------------------------------------------------------------------
-//
-// Function:    edrv_clearRxMulticastMacAddr
-//
-// Description: Reset a multicast entry in the Ethernet controller
-//
-// Parameters:  pbMacAddr_p     = pointer to multicast entry to reset
-//
-// Returns:     Errorcode       = kEplSuccessful
-//
-// State:
-//
-//---------------------------------------------------------------------------
-tEplKernel edrv_clearRxMulticastMacAddr (BYTE * pbMacAddr_p)
+This function removes the multicast entry from the Ethernet controller.
+
+\param  pMacAddr_p  Multicast address
+
+\return The function returns a tEplKernel error code.
+
+\ingroup module_edrv
+*/
+//------------------------------------------------------------------------------
+tEplKernel edrv_clearRxMulticastMacAddr(UINT8* pMacAddr_p)
 {
-tEplKernel  Ret = kEplSuccessful;
-DWORD       dwData;
-int         iIndex;
-DWORD       dwAddrLow;
-DWORD       dwAddrHigh;
+    tEplKernel  ret = kEplSuccessful;
+    UINT32      data;
+    INT         i;
+    UINT32      addrLow;
+    UINT32      addrHigh;
 
-    dwAddrLow   = 0;
-    dwAddrLow  |= pbMacAddr_p[0] <<  0;
-    dwAddrLow  |= pbMacAddr_p[1] <<  8;
-    dwAddrLow  |= pbMacAddr_p[2] << 16;
-    dwAddrLow  |= pbMacAddr_p[3] << 24;
-    dwAddrHigh  = 0;
-    dwAddrHigh |= pbMacAddr_p[4] <<  0;
-    dwAddrHigh |= pbMacAddr_p[5] <<  8;
-    dwAddrHigh |= EDRV_REGDW_RAH_AV;
+    addrLow   = 0;
+    addrLow  |= pMacAddr_p[0] <<  0;
+    addrLow  |= pMacAddr_p[1] <<  8;
+    addrLow  |= pMacAddr_p[2] << 16;
+    addrLow  |= pMacAddr_p[3] << 24;
+    addrHigh  = 0;
+    addrHigh |= pMacAddr_p[4] <<  0;
+    addrHigh |= pMacAddr_p[5] <<  8;
+    addrHigh |= EDRV_REGDW_RAH_AV;
 
-    for (iIndex = 1; iIndex < 16; iIndex++)
+    for (i = 1; i < 16; i++)
     {
-        dwData = EDRV_REGDW_READ(EDRV_REGDW_RAH(iIndex));
-        if ((dwData & (EDRV_REGDW_RAH_AV | 0xFFFF)) == dwAddrHigh)
+        data = EDRV_REGDW_READ(EDRV_REGDW_RAH(i));
+        if ((data & (EDRV_REGDW_RAH_AV | 0xFFFF)) == addrHigh)
         {
-            dwData = EDRV_REGDW_READ(EDRV_REGDW_RAL(iIndex));
-            if (dwData == dwAddrLow)
+            data = EDRV_REGDW_READ(EDRV_REGDW_RAL(i));
+            if (data == addrLow)
             {   // set address valid bit to invalid
-                EDRV_REGDW_WRITE(EDRV_REGDW_RAH(iIndex), 0);
+                EDRV_REGDW_WRITE(EDRV_REGDW_RAH(i), 0);
                 break;
             }
         }
     }
 
-    return Ret;
+    return ret;
 }
 
-tEplKernel edrv_changeRxFilter(tEdrvFilter*    pFilter_p,
-                            unsigned int    uiCount_p,
-                            unsigned int    uiEntryChanged_p,
-                            unsigned int    uiChangeFlags_p)
-{
-tEplKernel      Ret = kEplSuccessful;
+//------------------------------------------------------------------------------
+/**
+\brief  Change Rx filter setup
 
-    return Ret;
+This function changes the Rx filter setup. The parameter entryChanged_p
+selects the Rx filter entry that shall be changed and \p changeFlags_p determines
+the property.
+If \p entryChanged_p is equal or larger count_p all Rx filters shall be changed.
+
+\note Rx filters are not supported by this driver!
+
+\param  pFilter_p           Base pointer of Rx filter array
+\param  count_p             Number of Rx filter array entries
+\param  entryChanged_p      Index of Rx filter entry that shall be changed
+\param  changeFlags_p       Bit mask that selects the changing Rx filter property
+
+\return The function returns a tEplKernel error code.
+
+\ingroup module_edrv
+*/
+//------------------------------------------------------------------------------
+tEplKernel edrv_changeRxFilter(tEdrvFilter* pFilter_p, UINT count_p,
+                                UINT entryChanged_p, UINT changeFlags_p)
+{
+    UNUSED_PARAMETER(pFilter_p);
+    UNUSED_PARAMETER(count_p);
+    UNUSED_PARAMETER(entryChanged_p);
+    UNUSED_PARAMETER(changeFlags_p);
+
+    return kEplSuccessful;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Allocate Tx buffer
 
-//---------------------------------------------------------------------------
-//
-// Function:    edrv_allocTxBuffer
-//
-// Description: Register a Tx-Buffer
-//
-// Parameters:  pBuffer_p   = pointer to Buffer structure
-//
-// Returns:     Errorcode   = kEplSuccessful
-//                          = kEplEdrvNoFreeBufEntry
-//
-// State:
-//
-//---------------------------------------------------------------------------
-tEplKernel edrv_allocTxBuffer       (tEdrvTxBuffer * pBuffer_p)
+This function allocates a Tx buffer.
+
+\param  pBuffer_p           Tx buffer descriptor
+
+\return The function returns a tEplKernel error code.
+
+\ingroup module_edrv
+*/
+//------------------------------------------------------------------------------
+tEplKernel edrv_allocTxBuffer(tEdrvTxBuffer* pBuffer_p)
 {
-tEplKernel Ret = kEplSuccessful;
-UINT i;
+    tEplKernel  ret = kEplSuccessful;
+    UINT        i;
 
     if (pBuffer_p->maxBufferSize > EDRV_MAX_FRAME_SIZE)
     {
-        Ret = kEplEdrvNoFreeBufEntry;
+        ret = kEplEdrvNoFreeBufEntry;
         goto Exit;
     }
 
-    if (EdrvInstance_l.m_pbTxBuf == NULL)
+    if (edrvInstance_l.pTxBuf == NULL)
     {
         printk("%s Tx buffers currently not allocated\n", __FUNCTION__);
-        Ret = kEplEdrvNoFreeBufEntry;
+        ret = kEplEdrvNoFreeBufEntry;
         goto Exit;
     }
 
     // search a free Tx buffer with appropriate size
     for (i = 0; i < EDRV_MAX_TX_BUFFERS; i++)
     {
-        if (EdrvInstance_l.m_afTxBufUsed[i] == FALSE)
+        if (edrvInstance_l.afTxBufUsed[i] == FALSE)
         {
             // free channel found
-            EdrvInstance_l.m_afTxBufUsed[i] = TRUE;
+            edrvInstance_l.afTxBufUsed[i] = TRUE;
             pBuffer_p->txBufferNumber.value = i;
-            pBuffer_p->pBuffer = EdrvInstance_l.m_pbTxBuf + (i * EDRV_MAX_FRAME_SIZE);
+            pBuffer_p->pBuffer = edrvInstance_l.pTxBuf + (i * EDRV_MAX_FRAME_SIZE);
             pBuffer_p->maxBufferSize = EDRV_MAX_FRAME_SIZE;
             break;
         }
     }
     if (i >= EDRV_MAX_TX_BUFFERS)
     {
-        Ret = kEplEdrvNoFreeBufEntry;
+        ret = kEplEdrvNoFreeBufEntry;
         goto Exit;
     }
 
 Exit:
-    return Ret;
-
+    return ret;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Free Tx buffer
 
-//---------------------------------------------------------------------------
-//
-// Function:    edrv_freeTxBuffer
-//
-// Description: Register a Tx-Buffer
-//
-// Parameters:  pBuffer_p   = pointer to Buffer structure
-//
-// Returns:     Errorcode   = kEplSuccessful
-//
-// State:
-//
-//---------------------------------------------------------------------------
-tEplKernel edrv_freeTxBuffer     (tEdrvTxBuffer * pBuffer_p)
+This function releases the Tx buffer.
+
+\param  pBuffer_p           Tx buffer descriptor
+
+\return The function returns a tEplKernel error code.
+
+\ingroup module_edrv
+*/
+//------------------------------------------------------------------------------
+tEplKernel edrv_freeTxBuffer(tEdrvTxBuffer* pBuffer_p)
 {
-unsigned int uiBufferNumber;
+    UINT bufferNumber;
 
-    uiBufferNumber = pBuffer_p->txBufferNumber.value;
+    bufferNumber = pBuffer_p->txBufferNumber.value;
 
-    if (uiBufferNumber < EDRV_MAX_TX_BUFFERS)
+    if (bufferNumber < EDRV_MAX_TX_BUFFERS)
     {
-        EdrvInstance_l.m_afTxBufUsed[uiBufferNumber] = FALSE;
+        edrvInstance_l.afTxBufUsed[bufferNumber] = FALSE;
     }
 
     return kEplSuccessful;
-
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Send Tx buffer
 
-//---------------------------------------------------------------------------
-//
-// Function:    edrv_sendTxBuffer
-//
-// Description: immediately starts the transmission of the buffer
-//
-// Parameters:  pBuffer_p   = buffer descriptor to transmit
-//
-// Returns:     Errorcode   = kEplSuccessful
-//
-// State:
-//
-//---------------------------------------------------------------------------
-tEplKernel edrv_sendTxBuffer              (tEdrvTxBuffer * pTxBuffer_p)
+This function sends the Tx buffer.
+
+\param  pBuffer_p           Tx buffer descriptor
+
+\return The function returns a tEplKernel error code.
+
+\ingroup module_edrv
+*/
+//------------------------------------------------------------------------------
+tEplKernel edrv_sendTxBuffer(tEdrvTxBuffer* pBuffer_p)
 {
-tEplKernel      Ret = kEplSuccessful;
-unsigned int    uiBufferNumber;
-tEdrvTxDesc*    pTxDesc;
+    tEplKernel      ret = kEplSuccessful;
+    UINT            bufferNumber;
+    tEdrvTxDesc*    pTxDesc;
 
-    uiBufferNumber = pTxBuffer_p->txBufferNumber.value;
+    bufferNumber = pBuffer_p->txBufferNumber.value;
 
-    if ((uiBufferNumber >= EDRV_MAX_TX_BUFFERS)
-        || (EdrvInstance_l.m_afTxBufUsed[uiBufferNumber] == FALSE))
+    if ((bufferNumber >= EDRV_MAX_TX_BUFFERS) ||
+        (edrvInstance_l.afTxBufUsed[bufferNumber] == FALSE))
     {
-        Ret = kEplEdrvBufNotExisting;
+        ret = kEplEdrvBufNotExisting;
         goto Exit;
     }
 
     // one descriptor has to be left empty for distinction between full and empty
-    if (((EdrvInstance_l.m_uiTailTxDesc + 1) & EDRV_TX_DESC_MASK) == EdrvInstance_l.m_uiHeadTxDesc)
+    if (((edrvInstance_l.tailTxDesc + 1) & EDRV_TX_DESC_MASK) == edrvInstance_l.headTxDesc)
     {
-        Ret = kEplEdrvNoFreeTxDesc;
+        ret = kEplEdrvNoFreeTxDesc;
         goto Exit;
     }
 
     EDRV_COUNT_SEND;
 
     // save pointer to buffer structure for TxHandler
-    EdrvInstance_l.m_apTxBuffer[EdrvInstance_l.m_uiTailTxDesc] = pTxBuffer_p;
+    edrvInstance_l.apTxBuffer[edrvInstance_l.tailTxDesc] = pBuffer_p;
 
-    pTxDesc = &EdrvInstance_l.m_pTxDesc[EdrvInstance_l.m_uiTailTxDesc];
-    pTxDesc->m_le_qwBufferAddr = EdrvInstance_l.m_pTxBufDma + (uiBufferNumber * EDRV_MAX_FRAME_SIZE);
-    pTxDesc->m_le_dwStatus = 0;
-    pTxDesc->m_le_dwLengthCmd = ((DWORD) pTxBuffer_p->txFrameSize) | EDRV_TX_DESC_CMD_DEF;
+    pTxDesc = &edrvInstance_l.pTxDesc[edrvInstance_l.tailTxDesc];
+    pTxDesc->bufferAddr_le = edrvInstance_l.pTxBufDma + (bufferNumber * EDRV_MAX_FRAME_SIZE);
+    pTxDesc->status_le = 0;
+    pTxDesc->lengthCmd_le = ((UINT32) pBuffer_p->txFrameSize) | EDRV_TX_DESC_CMD_DEF;
 
     // increment Tx descriptor queue tail pointer
-    EdrvInstance_l.m_uiTailTxDesc = (EdrvInstance_l.m_uiTailTxDesc + 1) & EDRV_TX_DESC_MASK;
+    edrvInstance_l.tailTxDesc = (edrvInstance_l.tailTxDesc + 1) & EDRV_TX_DESC_MASK;
 
     // start transmission
-    EDRV_REGDW_WRITE(EDRV_REGDW_TDT, EdrvInstance_l.m_uiTailTxDesc);
+    EDRV_REGDW_WRITE(EDRV_REGDW_TDT, edrvInstance_l.tailTxDesc);
 
 Exit:
-    return Ret;
+    return ret;
 }
 
-#if 0
-//---------------------------------------------------------------------------
-//
-// Function:    edrv_setTxBufferReady
-//
-// Description: starts copying the buffer to the ethernet controller's FIFO
-//
-// Parameters:  pbBuffer_p - bufferdescriptor to transmit
-//
-// Returns:     Errorcode - kEplSuccessful
-//
-// State:
-//
-//---------------------------------------------------------------------------
-tEplKernel edrv_setTxBufferReady              (tEdrvTxBuffer * pBuffer_p)
+//------------------------------------------------------------------------------
+/**
+\brief  Set Tx buffer ready
+
+This function sets the Tx buffer buffer ready for transmission.
+
+\param  pBuffer_p   Tx buffer buffer descriptor
+
+\return The function returns a tEplKernel error code.
+
+\ingroup module_edrv
+*/
+//------------------------------------------------------------------------------
+tEplKernel edrv_setTxBufferReady(tEdrvTxBuffer* pBuffer_p)
 {
-tEplKernel Ret = kEplSuccessful;
-unsigned int uiBufferNumber;
+    UNUSED_PARAMETER(pBuffer_p);
 
-
-Exit:
-    return Ret;
+    return kEplSuccessful;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Start ready Tx buffer
 
-//---------------------------------------------------------------------------
-//
-// Function:    edrv_startTxBuffer
-//
-// Description: starts transmission of the ethernet controller's FIFO
-//
-// Parameters:  pbBuffer_p - bufferdescriptor to transmit
-//
-// Returns:     Errorcode - kEplSuccessful
-//
-// State:
-//
-//---------------------------------------------------------------------------
-tEplKernel edrv_startTxBuffer              (tEdrvTxBuffer * pBuffer_p)
+This function sends the Tx buffer marked as ready.
+
+\param  pBuffer_p   Tx buffer buffer descriptor
+
+\return The function returns a tEplKernel error code.
+
+\ingroup module_edrv
+*/
+//------------------------------------------------------------------------------
+tEplKernel edrv_startTxBuffer(tEdrvTxBuffer* pBuffer_p)
 {
-tEplKernel Ret = kEplSuccessful;
+    UNUSED_PARAMETER(pBuffer_p);
 
-
-
-    return Ret;
+    return kEplSuccessful;
 }
-#endif
-
-
-
-//---------------------------------------------------------------------------
-//
-// Function:    EdrvReinitRx
-//
-// Description: reinitialize the Rx process, because of error
-//
-// Parameters:  void
-//
-// Returns:     void
-//
-// State:
-//
-//---------------------------------------------------------------------------
-#if 0
-static void EdrvReinitRx(void)
-{
-}
-#endif
-
-
 
 #if EDRV_USE_DIAGNOSTICS != FALSE
-//---------------------------------------------------------------------------
-//
-// Function:    edrv_getDiagnostics
-//
-// Description: Print diagnostic information to buffer
-//
-// Parameters:  pszBuffer_p     = Pointer to buffer
-//              iSize_p         = Size of buffer
-//
-// Returns:     Number of printed characters
-//
-// State:
-//
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+/**
+\brief  Get Edrv module diagnostics
 
-int edrv_getDiagnostics(char* pszBuffer_p, int iSize_p)
+This function returns the Edrv diagnostics to a provided buffer.
+
+\param  pBuffer_p   Pointer to buffer filled with diagnostics.
+\param  size_p      Size of buffer
+
+\return The function returns a tEplKernel error code.
+
+\ingroup module_edrv
+*/
+//------------------------------------------------------------------------------
+INT edrv_getDiagnostics(char* pBuffer_p, INT size_p)
 {
-tEdrvTxDesc*    pTxDesc;
-DWORD           dwTxStatus;
-int             iUsedSize = 0;
+    tEdrvTxDesc*    pTxDesc;
+    UINT32          txStatus;
+    INT             usedSize = 0;
 
-    iUsedSize += snprintf (pszBuffer_p + iUsedSize, iSize_p - iUsedSize,
+    usedSize += snprintf (pBuffer_p + usedSize, size_p - usedSize,
                        "\nEdrv Diagnostic Information\n");
 
-    iUsedSize += snprintf (pszBuffer_p + iUsedSize, iSize_p - iUsedSize,
+    usedSize += snprintf (pBuffer_p + usedSize, size_p - usedSize,
                        "Head: %u (%lu)",
-                       EdrvInstance_l.m_uiHeadTxDesc,
-                       (unsigned long) EDRV_REGDW_READ(EDRV_REGDW_TDH));
+                       edrvInstance_l.headTxDesc,
+                       (ULONG) EDRV_REGDW_READ(EDRV_REGDW_TDH));
 
-    pTxDesc = &EdrvInstance_l.m_pTxDesc[EdrvInstance_l.m_uiHeadTxDesc];
-    dwTxStatus = pTxDesc->m_le_dwStatus;
+    pTxDesc = &edrvInstance_l.pTxDesc[edrvInstance_l.headTxDesc];
+    txStatus = pTxDesc->status_le;
 
-    iUsedSize += snprintf (pszBuffer_p + iUsedSize, iSize_p - iUsedSize,
-                       "      Headstatus: %lX\n", (unsigned long) dwTxStatus);
+    usedSize += snprintf (pBuffer_p + usedSize, size_p - usedSize,
+                       "      Headstatus: %lX\n", (ULONG) txStatus);
 
-    iUsedSize += snprintf (pszBuffer_p + iUsedSize, iSize_p - iUsedSize,
+    usedSize += snprintf (pBuffer_p + usedSize, size_p - usedSize,
                        "Tail: %u (%lu)\n",
-                       EdrvInstance_l.m_uiTailTxDesc,
-                       (unsigned long) EDRV_REGDW_READ(EDRV_REGDW_TDT));
+                       edrvInstance_l.tailTxDesc,
+                       (ULONG) EDRV_REGDW_READ(EDRV_REGDW_TDT));
 
-    iUsedSize += snprintf (pszBuffer_p + iUsedSize, iSize_p - iUsedSize,
+    usedSize += snprintf (pBuffer_p + usedSize, size_p - usedSize,
                        "Free RxBuffers: %d (Min: %d)\n",
-                       EdrvInstance_l.m_iRxBufFreeTop + 1,
-                       EdrvInstance_l.m_iRxBufFreeMin);
+                       edrvInstance_l.rxBufFreeTop + 1,
+                       edrvInstance_l.rxBufFreeMin);
 
-#if 0
-    for (iIndex = 0; iIndex < 16; iIndex++)
+#if 0 //FIXME: Use some fancy way to enable this block.
+    for (i = 0; i < 16; i++)
     {
-        iUsedSize += snprintf (pszBuffer_p + iUsedSize, iSize_p - iUsedSize,
+        usedSize += snprintf (pBuffer_p + usedSize, size_p - usedSize,
                            "RAH[%2u] RAL[%2u]: 0x%08lX 0x%08lX\n",
-                           iIndex, iIndex,
-                           (unsigned long) EDRV_REGDW_READ(EDRV_REGDW_RAH(iIndex)),
-                           (unsigned long) EDRV_REGDW_READ(EDRV_REGDW_RAL(iIndex)));
+                           i, i,
+                           (ULONG) EDRV_REGDW_READ(EDRV_REGDW_RAH(i)),
+                           (ULONG) EDRV_REGDW_READ(EDRV_REGDW_RAL(i)));
     }
 
-    iUsedSize += snprintf (pszBuffer_p + iUsedSize, iSize_p - iUsedSize,
+    usedSize += snprintf (pBuffer_p + usedSize, size_p - usedSize,
                        "Status Register:                     0x%08lX\n",
-                       (unsigned long) EDRV_REGDW_READ(EDRV_REGDW_STATUS));
+                       (ULONG) EDRV_REGDW_READ(EDRV_REGDW_STATUS));
 
-    iUsedSize += snprintf (pszBuffer_p + iUsedSize, iSize_p - iUsedSize,
+    usedSize += snprintf (pBuffer_p + usedSize, size_p - usedSize,
                        "Interrupt Mask Set/Read Register:    0x%08lX\n",
-                       (unsigned long) EDRV_REGDW_READ(EDRV_REGDW_IMS));
+                       (ULONG) EDRV_REGDW_READ(EDRV_REGDW_IMS));
 
-    iUsedSize += snprintf (pszBuffer_p + iUsedSize, iSize_p - iUsedSize,
+    usedSize += snprintf (pBuffer_p + usedSize, size_p - usedSize,
                        "Receive Control Register:            0x%08lX\n",
-                       (unsigned long) EDRV_REGDW_READ(EDRV_REGDW_RCTL));
+                       (ULONG) EDRV_REGDW_READ(EDRV_REGDW_RCTL));
 
-    iUsedSize += snprintf (pszBuffer_p + iUsedSize, iSize_p - iUsedSize,
+    usedSize += snprintf (pBuffer_p + usedSize, size_p - usedSize,
                        "Receive Descripter Control Register: 0x%08lX\n",
-                       (unsigned long) EDRV_REGDW_READ(EDRV_REGDW_RXDCTL));
+                       (ULONG) EDRV_REGDW_READ(EDRV_REGDW_RXDCTL));
 
-    iUsedSize += snprintf (pszBuffer_p + iUsedSize, iSize_p - iUsedSize,
+    usedSize += snprintf (pBuffer_p + usedSize, size_p - usedSize,
                        "Receive Descripter Lenght Register:  0x%08lX\n",
-                       (unsigned long) EDRV_REGDW_READ(EDRV_REGDW_RDLEN0));
+                       (ULONG) EDRV_REGDW_READ(EDRV_REGDW_RDLEN0));
 
-    iUsedSize += snprintf (pszBuffer_p + iUsedSize, iSize_p - iUsedSize,
+    usedSize += snprintf (pBuffer_p + usedSize, size_p - usedSize,
                        "Receive Descripter Head Register:    0x%08lX (%u)\n",
-                       (unsigned long) EDRV_REGDW_READ(EDRV_REGDW_RDH0),
-                       EdrvInstance_l.m_uiHeadRxDesc);
+                       (ULONG) EDRV_REGDW_READ(EDRV_REGDW_RDH0),
+                       edrvInstance_l.headRxDesc);
 
-    iUsedSize += snprintf (pszBuffer_p + iUsedSize, iSize_p - iUsedSize,
+    usedSize += snprintf (pBuffer_p + usedSize, size_p - usedSize,
                        "Receive Descripter Tail Register:    0x%08lX (%u)\n",
-                       (unsigned long) EDRV_REGDW_READ(EDRV_REGDW_RDT0),
-                       EdrvInstance_l.m_uiTailRxDesc);
+                       (ULONG) EDRV_REGDW_READ(EDRV_REGDW_RDT0),
+                       edrvInstance_l.tailRxDesc);
 #endif
 
-    iUsedSize += snprintf (pszBuffer_p + iUsedSize, iSize_p - iUsedSize,
+    usedSize += snprintf (pBuffer_p + usedSize, size_p - usedSize,
                        "Edrv Interrupts:                     %llu\n",
-                       EdrvInstance_l.m_ullInterruptCount);
+                       edrvInstance_l.interruptCount);
 
-    iUsedSize += snprintf (pszBuffer_p + iUsedSize, iSize_p - iUsedSize,
+    usedSize += snprintf (pBuffer_p + usedSize, size_p - usedSize,
                        "CRC Error Count:                     %lu\n",
-                       (unsigned long) EDRV_REGDW_READ(EDRV_REGDW_CRCERRS));
+                       (ULONG) EDRV_REGDW_READ(EDRV_REGDW_CRCERRS));
 
-    iUsedSize += snprintf (pszBuffer_p + iUsedSize, iSize_p - iUsedSize,
+    usedSize += snprintf (pBuffer_p + usedSize, size_p - usedSize,
                        "Late Collision Count:                %lu\n",
-                       (unsigned long) EDRV_REGDW_READ(EDRV_REGDW_LATECOL));
+                       (ULONG) EDRV_REGDW_READ(EDRV_REGDW_LATECOL));
 
-    iUsedSize += snprintf (pszBuffer_p + iUsedSize, iSize_p - iUsedSize,
+    usedSize += snprintf (pBuffer_p + usedSize, size_p - usedSize,
                        "Collision Count:                     %lu\n",
-                       (unsigned long) EDRV_REGDW_READ(EDRV_REGDW_COLC));
+                       (ULONG) EDRV_REGDW_READ(EDRV_REGDW_COLC));
 
-    iUsedSize += snprintf (pszBuffer_p + iUsedSize, iSize_p - iUsedSize,
+    usedSize += snprintf (pBuffer_p + usedSize, size_p - usedSize,
                        "Sequence Error Count:                %lu\n",
-                       (unsigned long) EDRV_REGDW_READ(EDRV_REGDW_SEC));
+                       (ULONG) EDRV_REGDW_READ(EDRV_REGDW_SEC));
 
-    iUsedSize += snprintf (pszBuffer_p + iUsedSize, iSize_p - iUsedSize,
+    usedSize += snprintf (pBuffer_p + usedSize, size_p - usedSize,
                        "Receive Length Error Count:          %lu\n",
-                       (unsigned long) EDRV_REGDW_READ(EDRV_REGDW_RLEC));
+                       (ULONG) EDRV_REGDW_READ(EDRV_REGDW_RLEC));
 
     {
-    const unsigned int  kuiHistNum = 14;
+        UINT    rxCountMean = 0;
+        UINT    txCountMean = 0;
+        UINT    aHistoryRx[EDRV_DIAG_HISTORY_COUNT];
+        UINT    aHistoryTx[EDRV_DIAG_HISTORY_COUNT];
+        UINT    historyRxMax;
+        UINT    historyTxMax;
+        INT     i;
 
-    unsigned int    uiRxCountMean;
-    unsigned int    uiTxCountMean;
-    unsigned int    auiHistRx[kuiHistNum];
-    unsigned int    auiHistTx[kuiHistNum];
-    unsigned int    uiHistRxMax;
-    unsigned int    uiHistTxMax;
-    int             nIdx;
-
-        uiRxCountMean = 0;
-        uiTxCountMean = 0;
-        for (nIdx=0; nIdx < EDRV_SAMPLE_NUM; nIdx++)
+        for (i=0; i < EDRV_SAMPLE_NUM; i++)
         {
-            uiRxCountMean += EdrvInstance_l.m_uiRxCount[nIdx] * 100;
-            uiTxCountMean += EdrvInstance_l.m_uiTxCount[nIdx] * 100;
+            rxCountMean += edrvInstance_l.rxCount[i] * 100;
+            txCountMean += edrvInstance_l.txCount[i] * 100;
         }
-                
-        uiRxCountMean /= EDRV_SAMPLE_NUM;
-        uiTxCountMean /= EDRV_SAMPLE_NUM;
 
-        iUsedSize += snprintf (pszBuffer_p + iUsedSize, iSize_p - iUsedSize,
+        rxCountMean /= EDRV_SAMPLE_NUM;
+        txCountMean /= EDRV_SAMPLE_NUM;
+
+        usedSize += snprintf (pBuffer_p + usedSize, size_p - usedSize,
                            "Rx/Int %u.%02u / Tx/Int %u.%02u\n",
-                            uiRxCountMean/100, uiRxCountMean%100,
-                            uiTxCountMean/100, uiTxCountMean%100);
+                            rxCountMean/100, rxCountMean%100,
+                            txCountMean/100, txCountMean%100);
 
-        uiHistRxMax = 0;
-        uiHistTxMax = 0;
-        for (nIdx = 0; nIdx < kuiHistNum; nIdx++)
+        historyRxMax = 0;
+        historyTxMax = 0;
+        for (i = 0; i < EDRV_DIAG_HISTORY_COUNT; i++)
         {
-            auiHistRx[nIdx] = 0;
-            auiHistTx[nIdx] = 0;
+            aHistoryRx[i] = 0;
+            aHistoryTx[i] = 0;
         }
 
-        for (nIdx = 0; nIdx < EDRV_SAMPLE_NUM; nIdx++)
+        for (i = 0; i < EDRV_SAMPLE_NUM; i++)
         {
-            if (EdrvInstance_l.m_uiRxCount[nIdx] < kuiHistNum)
+            if (edrvInstance_l.rxCount[i] < EDRV_DIAG_HISTORY_COUNT)
             {
-                auiHistRx[EdrvInstance_l.m_uiRxCount[nIdx]]++;
+                aHistoryRx[edrvInstance_l.rxCount[i]]++;
             }
-            else if (EdrvInstance_l.m_uiRxCount[nIdx] > uiHistRxMax)
+            else if (edrvInstance_l.rxCount[i] > historyRxMax)
             {
-                uiHistRxMax = EdrvInstance_l.m_uiRxCount[nIdx];
+                historyRxMax = edrvInstance_l.rxCount[i];
             }
 
-            if (EdrvInstance_l.m_uiTxCount[nIdx] < kuiHistNum)
+            if (edrvInstance_l.txCount[i] < EDRV_DIAG_HISTORY_COUNT)
             {
-                auiHistTx[EdrvInstance_l.m_uiTxCount[nIdx]]++;
+                aHistoryTx[edrvInstance_l.txCount[i]]++;
             }
-            else if (EdrvInstance_l.m_uiTxCount[nIdx] > uiHistTxMax)
+            else if (edrvInstance_l.txCount[i] > historyTxMax)
             {
-                uiHistTxMax = EdrvInstance_l.m_uiTxCount[nIdx];
+                historyTxMax = edrvInstance_l.txCount[i];
             }
-        }
-        
-        if (uiHistRxMax > 0)
-        {
-            iUsedSize += snprintf (pszBuffer_p + iUsedSize, iSize_p - iUsedSize,
-                               "MaxRx %3u\n", uiHistRxMax);
         }
 
-        if (uiHistTxMax > 0)
+        if (historyRxMax > 0)
         {
-            iUsedSize += snprintf (pszBuffer_p + iUsedSize, iSize_p - iUsedSize,
-                               "MaxTx %3u\n", uiHistTxMax);
+            usedSize += snprintf (pBuffer_p + usedSize, size_p - usedSize,
+                               "MaxRx %3u\n", historyRxMax);
         }
 
-        for (nIdx = kuiHistNum-1; nIdx >= 0; nIdx--)
+        if (historyTxMax > 0)
         {
-            if ((auiHistRx[nIdx] != 0) || (auiHistTx[nIdx] != 0))
+            usedSize += snprintf (pBuffer_p + usedSize, size_p - usedSize,
+                               "MaxTx %3u\n", historyTxMax);
+        }
+
+        for (i = EDRV_DIAG_HISTORY_COUNT-1; i >= 0; i--)
+        {
+            if ((aHistoryRx[i] != 0) || (aHistoryTx[i] != 0))
             {
-                iUsedSize += snprintf (pszBuffer_p + iUsedSize, iSize_p - iUsedSize,
+                usedSize += snprintf (pBuffer_p + usedSize, size_p - usedSize,
                                    "Hist  %3u  %5u  %5u\n",
-                                    nIdx, auiHistRx[nIdx], auiHistTx[nIdx]);
+                                    i, aHistoryRx[i], aHistoryTx[i]);
             }
         }
     }
 
-    iUsedSize += snprintf (pszBuffer_p + iUsedSize, iSize_p - iUsedSize,
+    usedSize += snprintf (pBuffer_p + usedSize, size_p - usedSize,
                        "\n");
 
-    return iUsedSize;
+    return usedSize;
 }
 #endif
 
+//------------------------------------------------------------------------------
+/**
+\brief  Release Rx buffer
 
+This function releases a late release Rx buffer.
 
-//---------------------------------------------------------------------------
-//
-// Function:    edrv_releaseRxBuffer
-//
-// Description: Release a RxBuffer to the Edrv
-//
-// Parameters:  pbRxBuffer_p    = Pointer to buffer
-//
-// Returns:     None
-//
-// State:
-//
-//---------------------------------------------------------------------------
+\param  pRxBuffer_p     Rx buffer to be released
 
+\return The function returns a tEplKernel error code.
+
+\ingroup module_edrv
+*/
+//------------------------------------------------------------------------------
 tEplKernel edrv_releaseRxBuffer(tEdrvRxBuffer* pRxBuffer_p)
 {
-tEplKernel EplRet = kEplEdrvInvalidRxBuf;
+    tEplKernel ret = kEplEdrvInvalidRxBuf;
 
-    if (EdrvInstance_l.m_iRxBufFreeTop < (EDRV_MAX_RX_BUFFERS-1))
+    if (edrvInstance_l.rxBufFreeTop < (EDRV_MAX_RX_BUFFERS-1))
     {
-    unsigned long   ulFlags;
+        ULONG flags;
 
-        spin_lock_irqsave(&EdrvInstance_l.m_SpinLockRxBufRelease, ulFlags);
-        EdrvInstance_l.m_apbRxBufFree[++EdrvInstance_l.m_iRxBufFreeTop] = pRxBuffer_p->pBuffer;
-        spin_unlock_irqrestore(&EdrvInstance_l.m_SpinLockRxBufRelease, ulFlags);
+        spin_lock_irqsave(&edrvInstance_l.spinLockRxBufRelease, flags);
+        edrvInstance_l.apRxBufFree[++edrvInstance_l.rxBufFreeTop] = pRxBuffer_p->pBuffer;
+        spin_unlock_irqrestore(&edrvInstance_l.spinLockRxBufRelease, flags);
 
-        EplRet = kEplSuccessful;
+        ret = kEplSuccessful;
     }
 
-    return EplRet; 
+    return ret;
 }
 
+//============================================================================//
+//            P R I V A T E   F U N C T I O N S                               //
+//============================================================================//
+/// \name Private Functions
+/// \{
 
+//------------------------------------------------------------------------------
+/**
+\brief  Ethernet driver interrupt handler
 
-//---------------------------------------------------------------------------
-//
-// Function:     EdrvInterruptHandler
-//
-// Description:  interrupt handler
-//
-// Parameters:   void
-//
-// Returns:      void
-//
-// State:
-//
-//---------------------------------------------------------------------------
-#if 0
-void EdrvInterruptHandler (void)
+This function is the interrupt service routine for the Ethernet driver.
+
+\param  irqNum_p            IRQ number
+\param  ppDevInstData_p     Pointer to private data provided by request_irq
+
+\return The function returns an IRQ handled code.
+*/
+//------------------------------------------------------------------------------
+static irqreturn_t edrvIrqHandler (INT irqNum_p, void* ppDevInstData_p)
 {
-}
-#endif
-
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,19)
-static irqreturn_t TgtEthIsr (int nIrqNum_p, void* ppDevInstData_p)
-#else
-static int TgtEthIsr (int nIrqNum_p, void* ppDevInstData_p, struct pt_regs* ptRegs_p)
-#endif
-{
-DWORD           dwStatus;
-int             iHandled;
-
-    iHandled = IRQ_HANDLED;
-
-//    EdrvInterruptHandler();
+    UINT32  status;
+    INT     handled = IRQ_HANDLED;
 
     // Read the interrupt status
-    dwStatus = EDRV_REGDW_READ(EDRV_REGDW_ICR);
+    status = EDRV_REGDW_READ(EDRV_REGDW_ICR);
 
-    if ((dwStatus & EDRV_REGDW_INT_MASK_DEF) == 0)
+    if ((status & EDRV_REGDW_INT_MASK_DEF) == 0)
     {
-        iHandled = IRQ_NONE;
+        handled = IRQ_NONE;
         EDRV_COUNT_PCI_ERR;
         goto Exit;
     }
 
-    if ((dwStatus & EDRV_REGDW_INT_INT_ASSERTED) == 0)
+    if ((status & EDRV_REGDW_INT_INT_ASSERTED) == 0)
     {   // Manual acknowledge required
-        EDRV_REGDW_WRITE(EDRV_REGDW_ICR, dwStatus);
+        EDRV_REGDW_WRITE(EDRV_REGDW_ICR, status);
     }
-        
+
 #if EDRV_USE_DIAGNOSTICS != FALSE
-    EdrvInstance_l.m_ullInterruptCount++;
-    EdrvInstance_l.m_uiRxCount[EdrvInstance_l.m_uiPos] = 0;
-    EdrvInstance_l.m_uiTxCount[EdrvInstance_l.m_uiPos] = 0;
+    edrvInstance_l.interruptCount++;
+    edrvInstance_l.rxCount[edrvInstance_l.pos] = 0;
+    edrvInstance_l.txCount[edrvInstance_l.pos] = 0;
 #endif
 
     // Receive or/and transmit interrupt
     // Handling of Rx has priority
-    if ((dwStatus & (EDRV_REGDW_INT_RXT0 | EDRV_REGDW_INT_SRPD | EDRV_REGDW_INT_RXDMT0 | // Receive interrupt
+    if ((status & (EDRV_REGDW_INT_RXT0 | EDRV_REGDW_INT_SRPD | EDRV_REGDW_INT_RXDMT0 | // Receive interrupt
                      EDRV_REGDW_INT_TXDW)) != 0)                                         // Transmit interrupt
     {
-    unsigned int   uiHeadRxDescOrg;
+        UINT headRxDescOrg;
 
-        if (EdrvInstance_l.m_pbTxBuf == NULL)
+        if (edrvInstance_l.pTxBuf == NULL)
         {
             printk("%s Tx buffers currently not allocated\n", __FUNCTION__);
             goto Exit;
         }
 
-        uiHeadRxDescOrg = EdrvInstance_l.m_uiHeadRxDesc;
+        headRxDescOrg = edrvInstance_l.headRxDesc;
 
         do
         {
-        tEdrvRxDesc*    pRxDesc;
-        tEdrvTxDesc*    pTxDesc;
+            tEdrvRxDesc*    pRxDesc;
+            tEdrvTxDesc*    pTxDesc;
 
             // Process receive descriptors
-            pRxDesc = &EdrvInstance_l.m_pRxDesc[EdrvInstance_l.m_uiHeadRxDesc];
+            pRxDesc = &edrvInstance_l.pRxDesc[edrvInstance_l.headRxDesc];
 
-            while (pRxDesc->m_bStatus != 0)
+            while (pRxDesc->status != 0)
             {   // Rx frame available
-            tEdrvRxBuffer           RxBuffer;
-            tEdrvReleaseRxBuffer    RetReleaseRxBuffer;
-            BYTE                    bRxStatus;
-            BYTE                    bRxError;
+                tEdrvRxBuffer           rxBuffer;
+                tEdrvReleaseRxBuffer    retReleaseRxBuffer;
+                UINT8                   rxStatus;
+                UINT8                   rxError;
 
 #if EDRV_USE_DIAGNOSTICS != FALSE
-                EdrvInstance_l.m_uiRxCount[EdrvInstance_l.m_uiPos]++;
+                edrvInstance_l.rxCount[edrvInstance_l.pos]++;
 #endif
 
-                bRxStatus = pRxDesc->m_bStatus;
-                bRxError  = pRxDesc->m_bError;
+                rxStatus = pRxDesc->status;
+                rxError  = pRxDesc->error;
 
-                if ((bRxStatus & EDRV_RXSTAT_DD) != 0)
+                if ((rxStatus & EDRV_RXSTAT_DD) != 0)
                 {   // Descriptor is valid
 
-                    if ((bRxStatus & EDRV_RXSTAT_EOP) == 0)
+                    if ((rxStatus & EDRV_RXSTAT_EOP) == 0)
                     {   // Multiple descriptors used for one packet
                         EDRV_COUNT_RX_ERR_MULT;
                     }
-                    else if ((bRxError & EDRV_RXERR_CE) != 0)
+                    else if ((rxError & EDRV_RXERR_CE) != 0)
                     {   // CRC error
                         EDRV_COUNT_RX_ERR_CRC;
                     }
-                    else if ((bRxError & EDRV_RXERR_SEQ) != 0)
+                    else if ((rxError & EDRV_RXERR_SEQ) != 0)
                     {   // Packet sequence error
                         EDRV_COUNT_RX_ERR_SEQ;
                     }
-                    else if ((bRxError & EDRV_RXERR_OTHER) != 0)
+                    else if ((rxError & EDRV_RXERR_OTHER) != 0)
                     {   // Other error
                         EDRV_COUNT_RX_ERR_OTHER;
                     }
                     else
                     {   // Packet is OK
-                    BYTE**  ppbRxBufInDesc;
+                        UINT8**  ppRxBufInDesc;
 
-                        RxBuffer.bufferInFrame = kEdrvBufferLastInFrame;
+                        rxBuffer.bufferInFrame = kEdrvBufferLastInFrame;
 
                         // Get length of received packet
-                        // m_le_wLength does not contain CRC as EDRV_REGDW_RCTL_SECRC is set
-                        RxBuffer.rxFrameSize = AmiGetWordFromLe(&pRxDesc->m_le_wLength);
+                        // length_le does not contain CRC as EDRV_REGDW_RCTL_SECRC is set
+                        rxBuffer.rxFrameSize = AmiGetWordFromLe(&pRxDesc->length_le);
 
-                        ppbRxBufInDesc = &EdrvInstance_l.m_apbRxBufInDesc[EdrvInstance_l.m_uiHeadRxDesc];
-                        RxBuffer.pBuffer = *ppbRxBufInDesc;
+                        ppRxBufInDesc = &edrvInstance_l.apRxBufInDesc[edrvInstance_l.headRxDesc];
+                        rxBuffer.pBuffer = *ppRxBufInDesc;
 
                         EDRV_COUNT_RX;
 
-                        pci_dma_sync_single_for_cpu(EdrvInstance_l.m_pPciDev,
-                                                    (dma_addr_t) AmiGetQword64FromLe(&pRxDesc->m_le_qwBufferAddr),
+                        pci_dma_sync_single_for_cpu(edrvInstance_l.pPciDev,
+                                                    (dma_addr_t) AmiGetQword64FromLe(&pRxDesc->bufferAddr_le),
                                                     EDRV_RX_BUFFER_SIZE, PCI_DMA_FROMDEVICE);
 
                         // Call Rx handler of Data link layer
-                        RetReleaseRxBuffer = EdrvInstance_l.m_InitParam.pfnRxHandler(&RxBuffer);
-                        if (RetReleaseRxBuffer == kEdrvReleaseRxBufferLater)
+                        retReleaseRxBuffer = edrvInstance_l.initParam.pfnRxHandler(&rxBuffer);
+                        if (retReleaseRxBuffer == kEdrvReleaseRxBufferLater)
                         {
-                            if (EdrvInstance_l.m_iRxBufFreeTop >= 0)
+                            if (edrvInstance_l.rxBufFreeTop >= 0)
                             {
-                            dma_addr_t      DmaAddr;
-                            BYTE*           pbRxBufInDescPrev;
-                            unsigned long   ulFlags;
+                                dma_addr_t  dmaAddr;
+                                UINT8*      pRxBufInDescPrev;
+                                ULONG       flags;
 
 #if EDRV_USE_DIAGNOSTICS != FALSE
-                                if (EdrvInstance_l.m_iRxBufFreeTop < EdrvInstance_l.m_iRxBufFreeMin)
+                                if (edrvInstance_l.rxBufFreeTop < edrvInstance_l.rxBufFreeMin)
                                 {
-                                    EdrvInstance_l.m_iRxBufFreeMin = EdrvInstance_l.m_iRxBufFreeTop;
+                                    edrvInstance_l.rxBufFreeMin = edrvInstance_l.rxBufFreeTop;
                                 }
 #endif
-                                pbRxBufInDescPrev = *ppbRxBufInDesc;
+                                pRxBufInDescPrev = *ppRxBufInDesc;
 
-                                spin_lock_irqsave(&EdrvInstance_l.m_SpinLockRxBufRelease, ulFlags);
-                                *ppbRxBufInDesc = EdrvInstance_l.m_apbRxBufFree[EdrvInstance_l.m_iRxBufFreeTop--];
-                                spin_unlock_irqrestore(&EdrvInstance_l.m_SpinLockRxBufRelease, ulFlags);
+                                spin_lock_irqsave(&edrvInstance_l.spinLockRxBufRelease, flags);
+                                *ppRxBufInDesc = edrvInstance_l.apRxBufFree[edrvInstance_l.rxBufFreeTop--];
+                                spin_unlock_irqrestore(&edrvInstance_l.spinLockRxBufRelease, flags);
 
-                                if (*ppbRxBufInDesc != pbRxBufInDescPrev)
+                                if (*ppRxBufInDesc != pRxBufInDescPrev)
                                 {
-                                    pci_unmap_single(EdrvInstance_l.m_pPciDev,
-                                                     (dma_addr_t) AmiGetQword64FromLe(&pRxDesc->m_le_qwBufferAddr),
+                                    pci_unmap_single(edrvInstance_l.pPciDev,
+                                                     (dma_addr_t) AmiGetQword64FromLe(&pRxDesc->bufferAddr_le),
                                                      EDRV_RX_BUFFER_SIZE, PCI_DMA_FROMDEVICE);
 
-                                    DmaAddr = pci_map_single(EdrvInstance_l.m_pPciDev, (void*) *ppbRxBufInDesc,
+                                    dmaAddr = pci_map_single(edrvInstance_l.pPciDev, (void*) *ppRxBufInDesc,
                                                              EDRV_RX_BUFFER_SIZE, PCI_DMA_FROMDEVICE);
-                                    if (pci_dma_mapping_error(EdrvInstance_l.m_pPciDev, DmaAddr))
+                                    if (pci_dma_mapping_error(edrvInstance_l.pPciDev, dmaAddr))
                                     {
                                         printk("%s DMA mapping error\n", __FUNCTION__);
                                         // $$$ Signal dma mapping error
                                     }
 
-                                    AmiSetQword64ToLe(&pRxDesc->m_le_qwBufferAddr, (QWORD) DmaAddr);
+                                    AmiSetQword64ToLe(&pRxDesc->bufferAddr_le, (UINT64) dmaAddr);
                                 }
                             }
                             else
                             {
                                 // $$$ How to signal no free RxBuffers left?
 #if EDRV_USE_DIAGNOSTICS != FALSE
-                                EdrvInstance_l.m_iRxBufFreeMin = -1;
+                                edrvInstance_l.rxBufFreeMin = -1;
 #endif
                             }
                         }
@@ -1298,40 +1192,40 @@ int             iHandled;
                     EDRV_COUNT_RX_ERR_OTHER;
                 }
 
-                pRxDesc->m_bStatus = 0;
+                pRxDesc->status = 0;
 
-                EdrvInstance_l.m_uiHeadRxDesc = (EdrvInstance_l.m_uiHeadRxDesc + 1) & EDRV_RX_DESC_MASK;
-                pRxDesc = &EdrvInstance_l.m_pRxDesc[EdrvInstance_l.m_uiHeadRxDesc];
+                edrvInstance_l.headRxDesc = (edrvInstance_l.headRxDesc + 1) & EDRV_RX_DESC_MASK;
+                pRxDesc = &edrvInstance_l.pRxDesc[edrvInstance_l.headRxDesc];
             }
 
             // Process one transmit descriptor
-            pTxDesc = &EdrvInstance_l.m_pTxDesc[EdrvInstance_l.m_uiHeadTxDesc];
+            pTxDesc = &edrvInstance_l.pTxDesc[edrvInstance_l.headTxDesc];
 
-            if ((pTxDesc->m_le_dwStatus & EDRV_TX_DESC_STATUS_DD) != 0)
+            if ((pTxDesc->status_le & EDRV_TX_DESC_STATUS_DD) != 0)
             {   // Transmit finished
-            tEdrvTxBuffer*  pTxBuffer;
-            DWORD           dwTxStatus;
+                tEdrvTxBuffer*  pTxBuffer;
+                UINT32          txStatus;
 
 #if EDRV_USE_DIAGNOSTICS != FALSE
-                EdrvInstance_l.m_uiTxCount[EdrvInstance_l.m_uiPos]++;
+                edrvInstance_l.txCount[edrvInstance_l.pos]++;
 #endif
 
-                dwTxStatus = pTxDesc->m_le_dwStatus;
+                txStatus = pTxDesc->status_le;
 
                 // Delete DD flag
-                pTxDesc->m_le_dwStatus = 0;
+                pTxDesc->status_le = 0;
 
-                pTxBuffer = EdrvInstance_l.m_apTxBuffer[EdrvInstance_l.m_uiHeadTxDesc];
-                EdrvInstance_l.m_apTxBuffer[EdrvInstance_l.m_uiHeadTxDesc] = NULL;
+                pTxBuffer = edrvInstance_l.apTxBuffer[edrvInstance_l.headTxDesc];
+                edrvInstance_l.apTxBuffer[edrvInstance_l.headTxDesc] = NULL;
 
                 // Increment Tx descriptor queue head pointer
-                EdrvInstance_l.m_uiHeadTxDesc = (EdrvInstance_l.m_uiHeadTxDesc + 1) & EDRV_TX_DESC_MASK;
+                edrvInstance_l.headTxDesc = (edrvInstance_l.headTxDesc + 1) & EDRV_TX_DESC_MASK;
 
-                if ((dwTxStatus & EDRV_TX_DESC_STATUS_EC) != 0)
+                if ((txStatus & EDRV_TX_DESC_STATUS_EC) != 0)
                 {
                     EDRV_COUNT_TX_COL_RL;
                 }
-                else if ((dwTxStatus & EDRV_TX_DESC_STATUS_LC) != 0)
+                else if ((txStatus & EDRV_TX_DESC_STATUS_LC) != 0)
                 {
                     EDRV_COUNT_LATECOLLISION;
                 }
@@ -1358,132 +1252,126 @@ int             iHandled;
                 break;
             }
 
-            if (pRxDesc->m_bStatus != 0)
+            if (pRxDesc->status != 0)
             {
                 EDRV_COUNT_TX_TEST;
             }
         }
-        while (EdrvInstance_l.m_uiHeadTxDesc != EdrvInstance_l.m_uiTailTxDesc);
+        while (edrvInstance_l.headTxDesc != edrvInstance_l.tailTxDesc);
 
-        if (EdrvInstance_l.m_uiHeadRxDesc != uiHeadRxDescOrg)
+        if (edrvInstance_l.headRxDesc != headRxDescOrg)
         {
             // Release receive descriptors
-            if (EdrvInstance_l.m_uiHeadRxDesc == 0)
+            if (edrvInstance_l.headRxDesc == 0)
             {
-                EdrvInstance_l.m_uiTailRxDesc = EDRV_MAX_RX_DESCS - 1;
+                edrvInstance_l.tailRxDesc = EDRV_MAX_RX_DESCS - 1;
             }
             else
             {
-                EdrvInstance_l.m_uiTailRxDesc = EdrvInstance_l.m_uiHeadRxDesc - 1;
+                edrvInstance_l.tailRxDesc = edrvInstance_l.headRxDesc - 1;
             }
 
-            EDRV_REGDW_WRITE(EDRV_REGDW_RDT0, EdrvInstance_l.m_uiTailRxDesc);
+            EDRV_REGDW_WRITE(EDRV_REGDW_RDT0, edrvInstance_l.tailRxDesc);
         }
     }
 
-    if ((dwStatus & (EDRV_REGDW_INT_RXSEQ | EDRV_REGDW_INT_RXO)) != 0)
+    if ((status & (EDRV_REGDW_INT_RXSEQ | EDRV_REGDW_INT_RXO)) != 0)
     {   // Receive error interrupt
 
-        if ((dwStatus & (EDRV_REGDW_INT_RXSEQ)) != 0)
+        if ((status & (EDRV_REGDW_INT_RXSEQ)) != 0)
         {   // Ethernet frame sequencing error
             EDRV_COUNT_RX_ERR_SEQ;
         }
 
-        if ((dwStatus & (EDRV_REGDW_INT_RXO)) != 0)
+        if ((status & (EDRV_REGDW_INT_RXO)) != 0)
         {   // Receive queue overrun
             EDRV_COUNT_RX_ORUN;
         }
     }
 
 #if EDRV_USE_DIAGNOSTICS != FALSE
-    EdrvInstance_l.m_uiPos++;
-    if (EdrvInstance_l.m_uiPos == EDRV_SAMPLE_NUM)
+    edrvInstance_l.pos++;
+    if (edrvInstance_l.pos == EDRV_SAMPLE_NUM)
     {
-        EdrvInstance_l.m_uiPos = 0;
+        edrvInstance_l.pos = 0;
     }
 #endif
 
 Exit:
-    return iHandled;
+    return handled;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Initialize one PCI device
 
-//---------------------------------------------------------------------------
-//
-// Function:    EdrvInitOne
-//
-// Description: initializes one PCI device
-//
-// Parameters:  pPciDev             = pointer to corresponding PCI device structure
-//              pId                 = PCI device ID
-//
-// Returns:     (int)               = error code
-//
-// State:
-//
-//---------------------------------------------------------------------------
+This function initializes one PCI device.
 
-static int EdrvInitOne(struct pci_dev *pPciDev,
-                       const struct pci_device_id *pId)
+\param  pPciDev_p   Pointer to corresponding PCI device structure
+\param  pId_p       PCI device ID
+
+\return The function returns an integer error code.
+\retval 0           Successful
+\retval Otherwise   Error
+*/
+//------------------------------------------------------------------------------
+static INT initOnePciDev(struct pci_dev* pPciDev_p, const struct pci_device_id* pId_p)
 {
-int             iResult = 0;
-DWORD           dwTemp;
-QWORD           qwDescAddress;
-int             iIndex;
-unsigned int    uiOrder;
-unsigned int    uiRxBuffersInAllocation;
-unsigned int    nRxBuffer;
+    INT     result = 0;
+    UINT32  temp;
+    UINT64  descAddress;
+    INT     i;
+    UINT    order;
+    UINT    rxBuffersInAllocation;
+    UINT    rxBuffer;
 
-    if (EdrvInstance_l.m_pPciDev != NULL)
+    if (edrvInstance_l.pPciDev != NULL)
     {   // Edrv is already connected to a PCI device
-        printk("%s device %s discarded\n", __FUNCTION__, pci_name(pPciDev));
-        iResult = -ENODEV;
+        printk("%s device %s discarded\n", __FUNCTION__, pci_name(pPciDev_p));
+        result = -ENODEV;
         goto Exit;
     }
 
     // enable device
     printk("%s enable device\n", __FUNCTION__);
-    iResult = pci_enable_device(pPciDev);
-    if (iResult != 0)
+    result = pci_enable_device(pPciDev_p);
+    if (result != 0)
     {
         goto Exit;
     }
 
-    EdrvInstance_l.m_pPciDev = pPciDev;
+    edrvInstance_l.pPciDev = pPciDev_p;
 
-    if (EdrvInstance_l.m_pPciDev == NULL)
+    if (edrvInstance_l.pPciDev == NULL)
     {
-        printk("%s pPciDev==NULL\n", __FUNCTION__);
+        printk("%s pPciDev_p==NULL\n", __FUNCTION__);
     }
 
-    //printk("%s request regions\n", __FUNCTION__);
-    iResult = pci_request_regions(pPciDev, DRV_NAME);
-    if (iResult != 0)
+    result = pci_request_regions(pPciDev_p, DRV_NAME);
+    if (result != 0)
     {
         goto ExitFail;
     }
 
-    //printk("%s ioremap\n", __FUNCTION__);
-    EdrvInstance_l.m_pIoAddr = ioremap (pci_resource_start(pPciDev, 0), pci_resource_len(pPciDev, 0));
-    if (EdrvInstance_l.m_pIoAddr == NULL)
+    edrvInstance_l.pIoAddr = ioremap (pci_resource_start(pPciDev_p, 0), pci_resource_len(pPciDev_p, 0));
+    if (edrvInstance_l.pIoAddr == NULL)
     {   // remap of controller's register space failed
-        iResult = -EIO;
+        result = -EIO;
         goto ExitFail;
     }
 
-    spin_lock_init(&EdrvInstance_l.m_SpinLockRxBufRelease);
+    spin_lock_init(&edrvInstance_l.spinLockRxBufRelease);
 
     // enable PCI busmaster
-    //printk("%s enable busmaster\n", __FUNCTION__);
-    pci_set_master (pPciDev);
+    pci_set_master (pPciDev_p);
 
     // disable GIO Master accesses
-    dwTemp = EDRV_REGDW_READ(EDRV_REGDW_CTRL);
-    dwTemp |= EDRV_REGDW_CTRL_MST_DIS;
-    EDRV_REGDW_WRITE(EDRV_REGDW_CTRL, dwTemp);
+    temp = EDRV_REGDW_READ(EDRV_REGDW_CTRL);
+    temp |= EDRV_REGDW_CTRL_MST_DIS;
+    EDRV_REGDW_WRITE(EDRV_REGDW_CTRL, temp);
 
     // wait until master is disabled
-    for (iIndex = EDRV_MASTER_DISABLE_TIMEOUT; iIndex > 0; iIndex--)
+    for (i = EDRV_MASTER_DISABLE_TIMEOUT; i > 0; i--)
     {
         if ((EDRV_REGDW_READ(EDRV_REGDW_STATUS) & EDRV_REGDW_STATUS_MST_EN) == 0)
         {
@@ -1492,23 +1380,21 @@ unsigned int    nRxBuffer;
 
         msleep(1);
     }
-    if (iIndex == 0)
+    if (i == 0)
     {
-        iResult = -EIO;
+        result = -EIO;
         goto ExitFail;
     }
 
     // disable interrupts
-    //printk("%s disable interrupts\n", __FUNCTION__);
     EDRV_REGDW_WRITE(EDRV_REGDW_IMC, EDRV_REGDW_INT_MASK_ALL);
 
     // reset controller
-    //printk("%s reset controller\n", __FUNCTION__);
-    dwTemp |= EDRV_REGDW_CTRL_RST;
-    EDRV_REGDW_WRITE(EDRV_REGDW_CTRL, dwTemp);
+    temp |= EDRV_REGDW_CTRL_RST;
+    EDRV_REGDW_WRITE(EDRV_REGDW_CTRL, temp);
 
     // wait until reset has finished and configuration from EEPROM was read
-    for (iIndex = EDRV_AUTO_READ_DONE_TIMEOUT; iIndex > 0; iIndex--)
+    for (i = EDRV_AUTO_READ_DONE_TIMEOUT; i > 0; i--)
     {
         if ((EDRV_REGDW_READ(EDRV_REGDW_EEC) & EDRV_REGDW_EEC_AUTO_RD) != 0)
         {
@@ -1517,48 +1403,46 @@ unsigned int    nRxBuffer;
 
         msleep(1);
     }
-    if (iIndex == 0)
+    if (i == 0)
     {
-        iResult = -EIO;
+        result = -EIO;
         goto ExitFail;
     }
 
     // disable interrupts
-    //printk("%s disable interrupts\n", __FUNCTION__);
     EDRV_REGDW_WRITE(EDRV_REGDW_IMC, EDRV_REGDW_INT_MASK_ALL);
-    dwTemp = EDRV_REGDW_READ(EDRV_REGDW_ICR);
+    temp = EDRV_REGDW_READ(EDRV_REGDW_ICR);
 
     // set global configuration
-    //printk("%s set global configuration\n", __FUNCTION__);
     EDRV_REGDW_WRITE(EDRV_REGDW_CTRL, EDRV_REGDW_CTRL_DEF);
 
     // PHY reset by software
     // 1. Obtain the Software/Firmware semaphore (SWSM.SWESMBI). Set it to 1b.
-    dwTemp = EDRV_REGDW_READ(EDRV_REGDW_SWSM);
-    dwTemp |= EDRV_REGDW_SWSM_SWESMBI;
-    EDRV_REGDW_WRITE(EDRV_REGDW_SWSM, dwTemp);
+    temp = EDRV_REGDW_READ(EDRV_REGDW_SWSM);
+    temp |= EDRV_REGDW_SWSM_SWESMBI;
+    EDRV_REGDW_WRITE(EDRV_REGDW_SWSM, temp);
     // 2. Drive PHY reset (CTRL.PHY_RST, write 1b, wait 100 us, and then write 0b).
-    dwTemp = EDRV_REGDW_READ(EDRV_REGDW_CTRL);
-    dwTemp |= EDRV_REGDW_CTRL_PHY_RST;
-    EDRV_REGDW_WRITE(EDRV_REGDW_CTRL, dwTemp);
+    temp = EDRV_REGDW_READ(EDRV_REGDW_CTRL);
+    temp |= EDRV_REGDW_CTRL_PHY_RST;
+    EDRV_REGDW_WRITE(EDRV_REGDW_CTRL, temp);
     msleep(1);
-    dwTemp &= ~EDRV_REGDW_CTRL_PHY_RST;
-    EDRV_REGDW_WRITE(EDRV_REGDW_CTRL, dwTemp);
+    temp &= ~EDRV_REGDW_CTRL_PHY_RST;
+    EDRV_REGDW_WRITE(EDRV_REGDW_CTRL, temp);
     // 3. Delay 10 ms
     msleep(10);
     // 4. Start configuring the PHY.
 
     // 5. Release the Software/Firmware semaphore
-    dwTemp = EDRV_REGDW_READ(EDRV_REGDW_SWSM);
-    dwTemp &= ~EDRV_REGDW_SWSM_SWESMBI;
-    EDRV_REGDW_WRITE(EDRV_REGDW_SWSM, dwTemp);
+    temp = EDRV_REGDW_READ(EDRV_REGDW_SWSM);
+    temp &= ~EDRV_REGDW_SWSM_SWESMBI;
+    EDRV_REGDW_WRITE(EDRV_REGDW_SWSM, temp);
 
     // Clear statistical registers
-    dwTemp = EDRV_REGDW_READ(EDRV_REGDW_CRCERRS);
-    dwTemp = EDRV_REGDW_READ(EDRV_REGDW_LATECOL);
-    dwTemp = EDRV_REGDW_READ(EDRV_REGDW_COLC);
-    dwTemp = EDRV_REGDW_READ(EDRV_REGDW_SEC);
-    dwTemp = EDRV_REGDW_READ(EDRV_REGDW_RLEC);
+    temp = EDRV_REGDW_READ(EDRV_REGDW_CRCERRS);
+    temp = EDRV_REGDW_READ(EDRV_REGDW_LATECOL);
+    temp = EDRV_REGDW_READ(EDRV_REGDW_COLC);
+    temp = EDRV_REGDW_READ(EDRV_REGDW_SEC);
+    temp = EDRV_REGDW_READ(EDRV_REGDW_RLEC);
 
     // set TIPG
     EDRV_REGDW_WRITE(EDRV_REGDW_TIPG, EDRV_REGDW_TIPG_DEF);
@@ -1573,60 +1457,57 @@ unsigned int    nRxBuffer;
     // setup 4: 64us inter-interrupt interval (abort with error)
     //EDRV_REGDW_WRITE(EDRV_REGDW_ITR, 250);
     // setup 5: 10,2us interrupt delay after packet reception
-    //          102,4us max. delay 
+    //          102,4us max. delay
     //          no throttling for packet transmission
     //EDRV_REGDW_WRITE(EDRV_REGDW_RDTR, 10);
     //EDRV_REGDW_WRITE(EDRV_REGDW_RADV, 100);
 
-    // Enable Message Signaled Interrupt
-    //printk("%s Enable MSI\n", __FUNCTION__);
-    iResult = pci_enable_msi(pPciDev);
-    if (iResult != 0)
+    // Enable Message Signalled Interrupt
+    result = pci_enable_msi(pPciDev_p);
+    if (result != 0)
     {
         printk("%s Could not enable MSI\n", __FUNCTION__);
     }
 
     // install interrupt handler
-    //printk("%s install interrupt handler\n", __FUNCTION__);
-    iResult = request_irq(pPciDev->irq, TgtEthIsr, IRQF_SHARED, DRV_NAME, pPciDev);
-    if (iResult != 0)
+    result = request_irq(pPciDev_p->irq, edrvIrqHandler, IRQF_SHARED, DRV_NAME, pPciDev_p);
+    if (result != 0)
     {
         goto ExitFail;
     }
 
     // allocate buffers
-    iResult = pci_set_dma_mask(pPciDev, DMA_BIT_MASK(32));
-    if (iResult != 0)
+    result = pci_set_dma_mask(pPciDev_p, DMA_BIT_MASK(32));
+    if (result != 0)
     {
         printk(KERN_WARNING "Edrv82573: No suitable DMA available.\n");
         goto ExitFail;
     }
 
-    //printk("%s allocate buffers\n", __FUNCTION__);
     // allocate tx-buffers
-    EdrvInstance_l.m_pbTxBuf = pci_alloc_consistent(pPciDev, EDRV_TX_BUFFER_SIZE,
-                     &EdrvInstance_l.m_pTxBufDma);
-    if (EdrvInstance_l.m_pbTxBuf == NULL)
+    edrvInstance_l.pTxBuf = pci_alloc_consistent(pPciDev_p, EDRV_TX_BUFFER_SIZE,
+                     &edrvInstance_l.pTxBufDma);
+    if (edrvInstance_l.pTxBuf == NULL)
     {
-        iResult = -ENOMEM;
+        result = -ENOMEM;
         goto ExitFail;
     }
 
     // allocate tx-descriptors
-    EdrvInstance_l.m_pTxDesc = pci_alloc_consistent(pPciDev, EDRV_TX_DESCS_SIZE,
-                     &EdrvInstance_l.m_pTxDescDma);
-    if (EdrvInstance_l.m_pTxDesc == NULL)
+    edrvInstance_l.pTxDesc = pci_alloc_consistent(pPciDev_p, EDRV_TX_DESCS_SIZE,
+                     &edrvInstance_l.pTxDescDma);
+    if (edrvInstance_l.pTxDesc == NULL)
     {
-        iResult = -ENOMEM;
+        result = -ENOMEM;
         goto ExitFail;
     }
 
     // allocate rx-descriptors
-    EdrvInstance_l.m_pRxDesc = pci_alloc_consistent(pPciDev, EDRV_RX_DESCS_SIZE,
-                     &EdrvInstance_l.m_pRxDescDma);
-    if (EdrvInstance_l.m_pRxDesc == NULL)
+    edrvInstance_l.pRxDesc = pci_alloc_consistent(pPciDev_p, EDRV_RX_DESCS_SIZE,
+                     &edrvInstance_l.pRxDescDma);
+    if (edrvInstance_l.pRxDesc == NULL)
     {
-        iResult = -ENOMEM;
+        result = -ENOMEM;
         goto ExitFail;
     }
 
@@ -1634,147 +1515,141 @@ unsigned int    nRxBuffer;
     // allocate rx-buffers
     if ((EDRV_RX_BUFFER_SIZE_SHIFT - PAGE_SHIFT) >= 0)
     {   // rx-buffer is larger than or equal to page size
-        uiOrder = EDRV_RX_BUFFER_SIZE_SHIFT - PAGE_SHIFT;
-        uiRxBuffersInAllocation = 1;
+        order = EDRV_RX_BUFFER_SIZE_SHIFT - PAGE_SHIFT;
+        rxBuffersInAllocation = 1;
     }
     else
     {   // Multiple rx-buffers fit into one page
-        uiOrder = 0;
-        uiRxBuffersInAllocation = 1 << (PAGE_SHIFT - EDRV_RX_BUFFER_SIZE_SHIFT);
+        order = 0;
+        rxBuffersInAllocation = 1 << (PAGE_SHIFT - EDRV_RX_BUFFER_SIZE_SHIFT);
     }
 
-    for (nRxBuffer = 0; nRxBuffer < EDRV_MAX_RX_BUFFERS; )
+    for (rxBuffer = 0; rxBuffer < EDRV_MAX_RX_BUFFERS; )
     {
-    unsigned long   ulBufferPointer;
-    unsigned int    nInAlloc;
+        ULONG   bufferPointer;
+        UINT    inAlloc;
 
-        ulBufferPointer = __get_free_pages(GFP_KERNEL, uiOrder);
-        if (ulBufferPointer == 0)
+        bufferPointer = __get_free_pages(GFP_KERNEL, order);
+        if (bufferPointer == 0)
         {
-            iResult = -ENOMEM;
+            result = -ENOMEM;
             goto ExitFail;
         }
-        EdrvInstance_l.m_iPageAllocations++;
+        edrvInstance_l.pageAllocations++;
 
-        for (nInAlloc = 0; nInAlloc < uiRxBuffersInAllocation; nInAlloc++)
+        for (inAlloc = 0; inAlloc < rxBuffersInAllocation; inAlloc++)
         {
-            if (nRxBuffer < EDRV_MAX_RX_DESCS)
+            if (rxBuffer < EDRV_MAX_RX_DESCS)
             {   // Insert rx-buffer in rx-descriptor
-                EdrvInstance_l.m_apbRxBufInDesc[nRxBuffer] = (BYTE*) ulBufferPointer;
+                edrvInstance_l.apRxBufInDesc[rxBuffer] = (UINT8*) bufferPointer;
             }
             else
             {   // Insert rx-buffer in free-rx-buffer stack
-                EdrvInstance_l.m_apbRxBufFree[nRxBuffer - EDRV_MAX_RX_DESCS] = (BYTE*) ulBufferPointer;
+                edrvInstance_l.apRxBufFree[rxBuffer - EDRV_MAX_RX_DESCS] = (UINT8*) bufferPointer;
             }
 
-            nRxBuffer++;
-            ulBufferPointer += EDRV_RX_BUFFER_SIZE;
+            rxBuffer++;
+            bufferPointer += EDRV_RX_BUFFER_SIZE;
         }
     }
 
-    EdrvInstance_l.m_iRxBufFreeTop = EDRV_MAX_RX_BUFFERS - EDRV_MAX_RX_DESCS - 1;
+    edrvInstance_l.rxBufFreeTop = EDRV_MAX_RX_BUFFERS - EDRV_MAX_RX_DESCS - 1;
 #if EDRV_USE_DIAGNOSTICS != FALSE
-    EdrvInstance_l.m_iRxBufFreeMin = EDRV_MAX_RX_BUFFERS - EDRV_MAX_RX_DESCS;
+    edrvInstance_l.rxBufFreeMin = EDRV_MAX_RX_BUFFERS - EDRV_MAX_RX_DESCS;
 #endif
 
 
     // check if user specified a MAC address
-    //printk("%s check specified MAC address\n", __FUNCTION__);
-    if ((EdrvInstance_l.m_InitParam.aMacAddr[0] != 0) ||
-        (EdrvInstance_l.m_InitParam.aMacAddr[1] != 0) ||
-        (EdrvInstance_l.m_InitParam.aMacAddr[2] != 0) ||
-        (EdrvInstance_l.m_InitParam.aMacAddr[3] != 0) ||
-        (EdrvInstance_l.m_InitParam.aMacAddr[4] != 0) ||
-        (EdrvInstance_l.m_InitParam.aMacAddr[5] != 0)  )
+    if ((edrvInstance_l.initParam.aMacAddr[0] != 0) ||
+        (edrvInstance_l.initParam.aMacAddr[1] != 0) ||
+        (edrvInstance_l.initParam.aMacAddr[2] != 0) ||
+        (edrvInstance_l.initParam.aMacAddr[3] != 0) ||
+        (edrvInstance_l.initParam.aMacAddr[4] != 0) ||
+        (edrvInstance_l.initParam.aMacAddr[5] != 0)  )
     {   // write specified MAC address to controller
-        dwTemp = 0;
-        EDRV_REGDW_WRITE(EDRV_REGDW_RAH(0), dwTemp); // disable Entry
-        dwTemp |= EdrvInstance_l.m_InitParam.aMacAddr[0] <<  0;
-        dwTemp |= EdrvInstance_l.m_InitParam.aMacAddr[1] <<  8;
-        dwTemp |= EdrvInstance_l.m_InitParam.aMacAddr[2] << 16;
-        dwTemp |= EdrvInstance_l.m_InitParam.aMacAddr[3] << 24;
-        EDRV_REGDW_WRITE(EDRV_REGDW_RAL(0), dwTemp);
-        dwTemp = 0;
-        dwTemp |= EdrvInstance_l.m_InitParam.aMacAddr[4] <<  0;
-        dwTemp |= EdrvInstance_l.m_InitParam.aMacAddr[5] <<  8;
-        dwTemp |= EDRV_REGDW_RAH_AV;
-        EDRV_REGDW_WRITE(EDRV_REGDW_RAH(0), dwTemp);
+        temp = 0;
+        EDRV_REGDW_WRITE(EDRV_REGDW_RAH(0), temp); // disable Entry
+        temp |= edrvInstance_l.initParam.aMacAddr[0] <<  0;
+        temp |= edrvInstance_l.initParam.aMacAddr[1] <<  8;
+        temp |= edrvInstance_l.initParam.aMacAddr[2] << 16;
+        temp |= edrvInstance_l.initParam.aMacAddr[3] << 24;
+        EDRV_REGDW_WRITE(EDRV_REGDW_RAL(0), temp);
+        temp = 0;
+        temp |= edrvInstance_l.initParam.aMacAddr[4] <<  0;
+        temp |= edrvInstance_l.initParam.aMacAddr[5] <<  8;
+        temp |= EDRV_REGDW_RAH_AV;
+        EDRV_REGDW_WRITE(EDRV_REGDW_RAH(0), temp);
     }
     else
     {   // read MAC address from controller
-        dwTemp = EDRV_REGDW_READ(EDRV_REGDW_RAL(0));
-        EdrvInstance_l.m_InitParam.aMacAddr[0] = (dwTemp >>  0) & 0xFF;
-        EdrvInstance_l.m_InitParam.aMacAddr[1] = (dwTemp >>  8) & 0xFF;
-        EdrvInstance_l.m_InitParam.aMacAddr[2] = (dwTemp >> 16) & 0xFF;
-        EdrvInstance_l.m_InitParam.aMacAddr[3] = (dwTemp >> 24) & 0xFF;
-        dwTemp = EDRV_REGDW_READ(EDRV_REGDW_RAH(0));
-        EdrvInstance_l.m_InitParam.aMacAddr[4] = (dwTemp >>  0) & 0xFF;
-        EdrvInstance_l.m_InitParam.aMacAddr[5] = (dwTemp >>  8) & 0xFF;
+        temp = EDRV_REGDW_READ(EDRV_REGDW_RAL(0));
+        edrvInstance_l.initParam.aMacAddr[0] = (temp >>  0) & 0xFF;
+        edrvInstance_l.initParam.aMacAddr[1] = (temp >>  8) & 0xFF;
+        edrvInstance_l.initParam.aMacAddr[2] = (temp >> 16) & 0xFF;
+        edrvInstance_l.initParam.aMacAddr[3] = (temp >> 24) & 0xFF;
+        temp = EDRV_REGDW_READ(EDRV_REGDW_RAH(0));
+        edrvInstance_l.initParam.aMacAddr[4] = (temp >>  0) & 0xFF;
+        edrvInstance_l.initParam.aMacAddr[5] = (temp >>  8) & 0xFF;
     }
 
     // initialize Multicast Table Array to 0
-    for (iIndex = 0; iIndex < 128; iIndex++)
+    for (i = 0; i < 128; i++)
     {
-        EDRV_REGDW_WRITE(EDRV_REGDW_MTA(iIndex), 0);
+        EDRV_REGDW_WRITE(EDRV_REGDW_MTA(i), 0);
     }
 
     // initialize Rx descriptors
-    //printk("%s initialize Rx descriptors\n", __FUNCTION__);
-    for (iIndex = 0; iIndex < EDRV_MAX_RX_DESCS; iIndex++)
+    for (i = 0; i < EDRV_MAX_RX_DESCS; i++)
     {
-    dma_addr_t  DmaAddr;
+        dma_addr_t  dmaAddr;
 
         // get dma streaming
-        DmaAddr = pci_map_single(EdrvInstance_l.m_pPciDev, (void*) EdrvInstance_l.m_apbRxBufInDesc[iIndex],
+        dmaAddr = pci_map_single(edrvInstance_l.pPciDev, (void*) edrvInstance_l.apRxBufInDesc[i],
                                  EDRV_RX_BUFFER_SIZE, PCI_DMA_FROMDEVICE);
-        if (pci_dma_mapping_error(EdrvInstance_l.m_pPciDev, DmaAddr))
+        if (pci_dma_mapping_error(edrvInstance_l.pPciDev, dmaAddr))
         {
-            iResult = -ENOMEM;
+            result = -ENOMEM;
             goto ExitFail;
         }
 
-        AmiSetQword64ToLe(&EdrvInstance_l.m_pRxDesc[iIndex].m_le_qwBufferAddr, (QWORD) DmaAddr);
-        EdrvInstance_l.m_pRxDesc[iIndex].m_bStatus = 0;
+        AmiSetQword64ToLe(&edrvInstance_l.pRxDesc[i].bufferAddr_le, (UINT64) dmaAddr);
+        edrvInstance_l.pRxDesc[i].status = 0;
     }
 
     EDRV_REGDW_WRITE(EDRV_REGDW_RXDCTL, EDRV_REGDW_RXDCTL_DEF);
     // Rx buffer size is set to 2048 by default
     // Rx descriptor typ is set to legacy by default
-    qwDescAddress = EdrvInstance_l.m_pRxDescDma;
-    EDRV_REGDW_WRITE(EDRV_REGDW_RDBAL0, (qwDescAddress & 0xFFFFFFFF));
-    EDRV_REGDW_WRITE(EDRV_REGDW_RDBAH0, (qwDescAddress >> 32));
+    descAddress = edrvInstance_l.pRxDescDma;
+    EDRV_REGDW_WRITE(EDRV_REGDW_RDBAL0, (descAddress & 0xFFFFFFFF));
+    EDRV_REGDW_WRITE(EDRV_REGDW_RDBAH0, (descAddress >> 32));
     EDRV_REGDW_WRITE(EDRV_REGDW_RDLEN0, EDRV_RX_DESCS_SIZE);
-    EdrvInstance_l.m_uiHeadRxDesc = 0;
+    edrvInstance_l.headRxDesc = 0;
     EDRV_REGDW_WRITE(EDRV_REGDW_RDH0, 0);
-    EdrvInstance_l.m_uiTailRxDesc = EDRV_MAX_RX_DESCS - 1;
+    edrvInstance_l.tailRxDesc = EDRV_MAX_RX_DESCS - 1;
     EDRV_REGDW_WRITE(EDRV_REGDW_RDT0, EDRV_MAX_RX_DESCS - 1);
 
     // enable receiver
-    //printk("%s set Rx conf register\n", __FUNCTION__);
     EDRV_REGDW_WRITE(EDRV_REGDW_RCTL, EDRV_REGDW_RCTL_DEF);
 
     // initialize Tx descriptors
-    //printk("%s initialize Tx descriptors\n", __FUNCTION__);
-    EPL_MEMSET(EdrvInstance_l.m_apTxBuffer, 0, sizeof (EdrvInstance_l.m_apTxBuffer));
+    EPL_MEMSET(edrvInstance_l.apTxBuffer, 0, sizeof (edrvInstance_l.apTxBuffer));
     EDRV_REGDW_WRITE(EDRV_REGDW_TXDCTL, EDRV_REGDW_TXDCTL_DEF);
-    qwDescAddress = EdrvInstance_l.m_pTxDescDma;
-    EDRV_REGDW_WRITE(EDRV_REGDW_TDBAL, (qwDescAddress & 0xFFFFFFFF));
-    EDRV_REGDW_WRITE(EDRV_REGDW_TDBAH, (qwDescAddress >> 32));
+    descAddress = edrvInstance_l.pTxDescDma;
+    EDRV_REGDW_WRITE(EDRV_REGDW_TDBAL, (descAddress & 0xFFFFFFFF));
+    EDRV_REGDW_WRITE(EDRV_REGDW_TDBAH, (descAddress >> 32));
     EDRV_REGDW_WRITE(EDRV_REGDW_TDLEN, EDRV_TX_DESCS_SIZE);
     EDRV_REGDW_WRITE(EDRV_REGDW_TDH, 0);
     EDRV_REGDW_WRITE(EDRV_REGDW_TDT, 0);
 
     // enable transmitter
-    //printk("%s set Tx conf register\n", __FUNCTION__);
     EDRV_REGDW_WRITE(EDRV_REGDW_TCTL, EDRV_REGDW_TCTL_DEF);
 
     // enable interrupts
-    //printk("%s enable interrupts\n", __FUNCTION__);
     EDRV_REGDW_WRITE(EDRV_REGDW_IMS, EDRV_REGDW_INT_MASK_DEF);
 
     // wait until link is up
     printk("%s waiting for link up...\n", __FUNCTION__);
-    for (iIndex = EDRV_LINK_UP_TIMEOUT; iIndex > 0; iIndex -= 100)
+    for (i = EDRV_LINK_UP_TIMEOUT; i > 0; i -= 100)
     {
         if ((EDRV_REGDW_READ(EDRV_REGDW_STATUS) & EDRV_REGDW_STATUS_LU) != 0)
         {
@@ -1783,177 +1658,148 @@ unsigned int    nRxBuffer;
 
         msleep(100);
     }
-    if (iIndex == 0)
+    if (i == 0)
     {
-        iResult = -EIO;
+        result = -EIO;
         goto ExitFail;
     }
 
     goto Exit;
 
 ExitFail:
-    EdrvRemoveOne(pPciDev);
+    removeOnePciDev(pPciDev_p);
 
 Exit:
-    printk("%s finished with %d\n", __FUNCTION__, iResult);
-    return iResult;
+    printk("%s finished with %d\n", __FUNCTION__, result);
+    return result;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Remove one PCI device
 
-//---------------------------------------------------------------------------
-//
-// Function:    EdrvRemoveOne
-//
-// Description: shuts down one PCI device
-//
-// Parameters:  pPciDev             = pointer to corresponding PCI device structure
-//
-// Returns:     (void)
-//
-// State:
-//
-//---------------------------------------------------------------------------
+This function removes one PCI device.
 
-static void EdrvRemoveOne(struct pci_dev *pPciDev)
+\param  pPciDev_p     Pointer to corresponding PCI device structure
+*/
+//------------------------------------------------------------------------------
+static void removeOnePciDev(struct pci_dev *pPciDev_p)
 {
-DWORD           dwTemp;
-unsigned int    uiOrder;
-unsigned long   ulBufferPointer;
-unsigned int    nRxBuffer;
+    UINT32  temp;
+    UINT    order;
+    ULONG   bufferPointer;
+    UINT    rxBuffer;
 
-    if (EdrvInstance_l.m_pPciDev != pPciDev)
+    if (edrvInstance_l.pPciDev != pPciDev_p)
     {   // trying to remove unknown device
-        BUG_ON(EdrvInstance_l.m_pPciDev != pPciDev);
+        BUG_ON(edrvInstance_l.pPciDev != pPciDev_p);
         goto Exit;
     }
 
-    if (EdrvInstance_l.m_pIoAddr != NULL)
+    if (edrvInstance_l.pIoAddr != NULL)
     {
         // disable interrupts
         EDRV_REGDW_WRITE(EDRV_REGDW_IMC, EDRV_REGDW_INT_MASK_ALL);
-        dwTemp = EDRV_REGDW_READ(EDRV_REGDW_ICR);
+        temp = EDRV_REGDW_READ(EDRV_REGDW_ICR);
 
         // disable transmitter and receiver
         EDRV_REGDW_WRITE(EDRV_REGDW_TCTL, 0);
     }
 
     // remove interrupt handler
-    free_irq(pPciDev->irq, pPciDev);
+    free_irq(pPciDev_p->irq, pPciDev_p);
 
-    // Disable Message Signaled Interrupt
-    //printk("%s Disable MSI\n", __FUNCTION__);
-    pci_disable_msi(pPciDev);
+    // Disable Message Signalled Interrupt
+    pci_disable_msi(pPciDev_p);
 
     // free buffers
-    if (EdrvInstance_l.m_pbTxBuf != NULL)
+    if (edrvInstance_l.pTxBuf != NULL)
     {
-        pci_free_consistent(pPciDev, EDRV_TX_BUFFER_SIZE,
-                     EdrvInstance_l.m_pbTxBuf, EdrvInstance_l.m_pTxBufDma);
-        EdrvInstance_l.m_pbTxBuf = NULL;
+        pci_free_consistent(pPciDev_p, EDRV_TX_BUFFER_SIZE,
+                     edrvInstance_l.pTxBuf, edrvInstance_l.pTxBufDma);
+        edrvInstance_l.pTxBuf = NULL;
     }
 
-    if (EdrvInstance_l.m_pTxDesc != NULL)
+    if (edrvInstance_l.pTxDesc != NULL)
     {
-        pci_free_consistent(pPciDev, EDRV_TX_DESCS_SIZE,
-                     EdrvInstance_l.m_pTxDesc, EdrvInstance_l.m_pTxDescDma);
-        EdrvInstance_l.m_pTxDesc = NULL;
+        pci_free_consistent(pPciDev_p, EDRV_TX_DESCS_SIZE,
+                     edrvInstance_l.pTxDesc, edrvInstance_l.pTxDescDma);
+        edrvInstance_l.pTxDesc = NULL;
     }
 
     if ((EDRV_RX_BUFFER_SIZE_SHIFT - PAGE_SHIFT) >= 0)
     {   // rx-buffer is larger than or equal to page size
-        uiOrder = EDRV_RX_BUFFER_SIZE_SHIFT - PAGE_SHIFT;
+        order = EDRV_RX_BUFFER_SIZE_SHIFT - PAGE_SHIFT;
     }
     else
     {   // Multiple rx-buffers fit into one page
-        uiOrder = 0;
+        order = 0;
     }
 
-    for (nRxBuffer = 0; nRxBuffer < EDRV_MAX_RX_DESCS; nRxBuffer++)
+    for (rxBuffer = 0; rxBuffer < EDRV_MAX_RX_DESCS; rxBuffer++)
     {
-        pci_unmap_single(EdrvInstance_l.m_pPciDev,
-                         (dma_addr_t) AmiGetQword64FromLe(&EdrvInstance_l.m_pRxDesc[nRxBuffer].m_le_qwBufferAddr),
+        pci_unmap_single(edrvInstance_l.pPciDev,
+                         (dma_addr_t) AmiGetQword64FromLe(&edrvInstance_l.pRxDesc[rxBuffer].bufferAddr_le),
                          EDRV_RX_BUFFER_SIZE, PCI_DMA_FROMDEVICE);
 
-        ulBufferPointer = (unsigned long) EdrvInstance_l.m_apbRxBufInDesc[nRxBuffer];
+        bufferPointer = (ULONG) edrvInstance_l.apRxBufInDesc[rxBuffer];
 
-        if ((uiOrder == 0) && ((ulBufferPointer & ((1UL << PAGE_SHIFT)-1)) == 0))
+        if ((order == 0) && ((bufferPointer & ((1UL << PAGE_SHIFT)-1)) == 0))
         {
-            free_pages(ulBufferPointer, uiOrder);
-            EdrvInstance_l.m_iPageAllocations--;
+            free_pages(bufferPointer, order);
+            edrvInstance_l.pageAllocations--;
         }
     }
 
-    if (EdrvInstance_l.m_iRxBufFreeTop < EDRV_MAX_RX_BUFFERS-EDRV_MAX_RX_DESCS-1)
+    if (edrvInstance_l.rxBufFreeTop < EDRV_MAX_RX_BUFFERS-EDRV_MAX_RX_DESCS-1)
     {
-        printk("%s %d rx-buffers were lost\n", __FUNCTION__, EdrvInstance_l.m_iRxBufFreeTop);
+        printk("%s %d rx-buffers were lost\n", __FUNCTION__, edrvInstance_l.rxBufFreeTop);
     }
 
-    for (; EdrvInstance_l.m_iRxBufFreeTop >= 0; EdrvInstance_l.m_iRxBufFreeTop--)
+    for (; edrvInstance_l.rxBufFreeTop >= 0; edrvInstance_l.rxBufFreeTop--)
     {
-        ulBufferPointer = (unsigned long) EdrvInstance_l.m_apbRxBufFree[EdrvInstance_l.m_iRxBufFreeTop];
+        bufferPointer = (ULONG) edrvInstance_l.apRxBufFree[edrvInstance_l.rxBufFreeTop];
 
-        if ((uiOrder == 0) && ((ulBufferPointer & ((1UL << PAGE_SHIFT)-1)) == 0))
+        if ((order == 0) && ((bufferPointer & ((1UL << PAGE_SHIFT)-1)) == 0))
         {
-            free_pages(ulBufferPointer, uiOrder);
-            EdrvInstance_l.m_iPageAllocations--;
+            free_pages(bufferPointer, order);
+            edrvInstance_l.pageAllocations--;
         }
     }
 
-    if (EdrvInstance_l.m_iPageAllocations > 0)
+    if (edrvInstance_l.pageAllocations > 0)
     {
-        printk("%s Less pages freed than allocated (%d)\n", __FUNCTION__, EdrvInstance_l.m_iPageAllocations);
+        printk("%s Less pages freed than allocated (%d)\n", __FUNCTION__, edrvInstance_l.pageAllocations);
     }
-    else if (EdrvInstance_l.m_iPageAllocations < 0)
+    else if (edrvInstance_l.pageAllocations < 0)
     {
-        printk("%s Attempted to free more pages than allocated (%d)\n", __FUNCTION__, (EdrvInstance_l.m_iPageAllocations * -1));
+        printk("%s Attempted to free more pages than allocated (%d)\n", __FUNCTION__, (edrvInstance_l.pageAllocations * -1));
     }
 
-    if (EdrvInstance_l.m_pRxDesc != NULL)
+    if (edrvInstance_l.pRxDesc != NULL)
     {
-        pci_free_consistent(pPciDev, EDRV_RX_DESCS_SIZE,
-                     EdrvInstance_l.m_pRxDesc, EdrvInstance_l.m_pRxDescDma);
-        EdrvInstance_l.m_pRxDesc = NULL;
+        pci_free_consistent(pPciDev_p, EDRV_RX_DESCS_SIZE,
+                     edrvInstance_l.pRxDesc, edrvInstance_l.pRxDescDma);
+        edrvInstance_l.pRxDesc = NULL;
     }
 
     // unmap controller's register space
-    if (EdrvInstance_l.m_pIoAddr != NULL)
+    if (edrvInstance_l.pIoAddr != NULL)
     {
-        iounmap(EdrvInstance_l.m_pIoAddr);
-        EdrvInstance_l.m_pIoAddr = NULL;
+        iounmap(edrvInstance_l.pIoAddr);
+        edrvInstance_l.pIoAddr = NULL;
     }
 
     // disable the PCI device
-    pci_disable_device(pPciDev);
+    pci_disable_device(pPciDev_p);
 
     // release memory regions
-    pci_release_regions(pPciDev);
+    pci_release_regions(pPciDev_p);
 
-    EdrvInstance_l.m_pPciDev = NULL;
+    edrvInstance_l.pPciDev = NULL;
 
 Exit:
     return;
 }
 
-
-//---------------------------------------------------------------------------
-//
-// Function:    EdrvCalcHash
-//
-// Description: function calculates the entry for the hash-table from MAC
-//              address
-//
-//
-// Parameters:  pbMAC_p - pointer to MAC address
-//
-// Returns:     hash value
-//
-// State:       at the moment, only perfect filters are used
-//
-//---------------------------------------------------------------------------
-
-#if 0
-static BYTE EdrvCalcHash (BYTE * pbMAC_p)
-{
-}
-#endif
-
+///\}
