@@ -103,10 +103,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // local types
 //------------------------------------------------------------------------------
 #ifdef EDRV_2NDTXQUEUE
-typedef struct _tEdrv2ndTxQueue
+typedef struct
 {
-    tEdrvTxBuffer*      m_pBuffer;
-    UINT32               dwAbsTk;
+    tEdrvTxBuffer*  pBuffer;
+    UINT32          timeOffsetAbs;
 }tEdrv2ndTxQueue;
 #endif
 
@@ -151,7 +151,7 @@ typedef struct
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
-static tEdrvInstance instance_l;
+static tEdrvInstance edrvInstance_l;
 
 //------------------------------------------------------------------------------
 // local function prototypes
@@ -164,9 +164,9 @@ static void freeTxMsgBufferIntern(tEdrvTxBuffer* pBuffer_p);
 #endif
 
 // RX Hook function
-static INT EdrvRxHook(void* pArg_p, ometh_packet_typ* pPacket_p, OMETH_BUF_FREE_FCT* pfnFree_p) SECTION_EDRVOPENMAC_RX_HOOK;
-static void EdrvCbSendAck(ometh_packet_typ* pPacket_p, void* pArg_p, ULONG time_p);
-static void EdrvIrqHandler(void* pArg_p) SECTION_EDRVOPENMAC_IRQ_HDL;
+static INT rxHook(void* pArg_p, ometh_packet_typ* pPacket_p, OMETH_BUF_FREE_FCT* pfnFree_p) SECTION_EDRVOPENMAC_RX_HOOK;
+static void txAckCb(ometh_packet_typ* pPacket_p, void* pArg_p, ULONG time_p);
+static void irqHandler(void* pArg_p) SECTION_EDRVOPENMAC_IRQ_HDL;
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -190,16 +190,16 @@ tEplKernel edrv_init(tEdrvInitParam* pEdrvInitParam_p)
     tEplKernel  ret = kEplSuccessful;
     INT         i;
 
-    DEBUG_LVL_01_TRACE("*** %s ***\n", __func__);
-    DEBUG_LVL_01_TRACE(" PHY_NUM = %d\n", OPENMAC_PHYCNT);
-    DEBUG_LVL_01_TRACE(" MAX_RX_BUFFERS = %d\n", EDRV_MAX_RX_BUFFERS);
-    DEBUG_LVL_01_TRACE(" PKTLOCTX = %d\n", OPENMAC_PKTLOCTX);
-    DEBUG_LVL_01_TRACE(" PKTLOCRX = %d\n", OPENMAC_PKTLOCRX);
-    DEBUG_LVL_01_TRACE(" PKTBUFSIZE = %d byte\n", OPENMAC_PKTBUFSIZE);
+    EPL_DBGLVL_EDRV_TRACE("*** %s ***\n", __func__);
+    EPL_DBGLVL_EDRV_TRACE(" PHY_NUM = %d\n", OPENMAC_PHYCNT);
+    EPL_DBGLVL_EDRV_TRACE(" MAX_RX_BUFFERS = %d\n", EDRV_MAX_RX_BUFFERS);
+    EPL_DBGLVL_EDRV_TRACE(" PKTLOCTX = %d\n", OPENMAC_PKTLOCTX);
+    EPL_DBGLVL_EDRV_TRACE(" PKTLOCRX = %d\n", OPENMAC_PKTLOCRX);
+    EPL_DBGLVL_EDRV_TRACE(" PKTBUFSIZE = %d byte\n", OPENMAC_PKTBUFSIZE);
 
-    EPL_MEMSET(&instance_l, 0, sizeof(instance_l));
+    EPL_MEMSET(&edrvInstance_l, 0, sizeof(edrvInstance_l));
 
-    instance_l.initParam = *pEdrvInitParam_p;
+    edrvInstance_l.initParam = *pEdrvInitParam_p;
 
     // The phys are reset by the initial hw state
     //  If sw comes here again, no phy reset is done!
@@ -211,11 +211,11 @@ tEplKernel edrv_init(tEdrvInitParam* pEdrvInitParam_p)
 
     omethInit();
 
-    instance_l.macConf = getMacConfig(0);
+    edrvInstance_l.macConf = getMacConfig(0);
 
-    instance_l.pMacInst = omethCreate(&instance_l.macConf);
+    edrvInstance_l.pMacInst = omethCreate(&edrvInstance_l.macConf);
 
-    if (instance_l.pMacInst == NULL)
+    if (edrvInstance_l.pMacInst == NULL)
     {
         ret = kEplNoResource;
         DEBUG_LVL_ERROR_TRACE("%s() omethCreate failed\n", __func__);
@@ -225,14 +225,14 @@ tEplKernel edrv_init(tEdrvInitParam* pEdrvInitParam_p)
     //verify phy management
     for(i=0; i<OPENMAC_PHYCNT; i++)
     {
-        instance_l.apPhyInst[i] = omethPhyInfo(instance_l.pMacInst, i);
-        if(instance_l.apPhyInst[i] != 0)
+        edrvInstance_l.apPhyInst[i] = omethPhyInfo(edrvInstance_l.pMacInst, i);
+        if(edrvInstance_l.apPhyInst[i] != 0)
         {
-            instance_l.phyInstCount++;
+            edrvInstance_l.phyInstCount++;
         }
     }
 
-    if(instance_l.phyInstCount != OPENMAC_PHYCNT)
+    if(edrvInstance_l.phyInstCount != OPENMAC_PHYCNT)
     {
         DEBUG_LVL_ERROR_TRACE("%s() Not all phy are found as configured (%d)!\n", __func__, OPENMAC_PHYCNT);
         ret = kEplNoResource;
@@ -240,8 +240,8 @@ tEplKernel edrv_init(tEdrvInitParam* pEdrvInitParam_p)
     }
 
     // initialize RX hook
-    instance_l.pRxHookInst = omethHookCreate(instance_l.pMacInst, EdrvRxHook, 0); //last argument max. pending
-    if (instance_l.pRxHookInst == NULL)
+    edrvInstance_l.pRxHookInst = omethHookCreate(edrvInstance_l.pMacInst, rxHook, 0); //last argument max. pending
+    if (edrvInstance_l.pRxHookInst == NULL)
     {
         ret = kEplNoResource;
         goto Exit;
@@ -249,8 +249,8 @@ tEplKernel edrv_init(tEdrvInitParam* pEdrvInitParam_p)
 
 #if DLL_DEFERRED_RXFRAME_RELEASE_ASYNCHRONOUS != FALSE
     // initialize Rx hook for Asnd frames with pending allowed
-    instance_l.pRxAsndHookInst = omethHookCreate(instance_l.pMacInst, EdrvRxHook, EDRV_ASND_DEFFERRED_RX_BUFFERS);
-    if(instance_l.pRxAsndHookInst == NULL)
+    edrvInstance_l.pRxAsndHookInst = omethHookCreate(edrvInstance_l.pMacInst, rxHook, EDRV_ASND_DEFFERRED_RX_BUFFERS);
+    if(edrvInstance_l.pRxAsndHookInst == NULL)
     {
         DEBUG_LVL_ERROR_TRACE("%s() Rx hook creation for Asnd frames failed!\n", __func__);
         ret = kEplNoResource;
@@ -265,17 +265,17 @@ tEplKernel edrv_init(tEdrvInitParam* pEdrvInitParam_p)
     //moved following lines here, since omethHookCreate may change tx buffer base!
 #if (OPENMAC_PKTLOCRX == OPENMAC_PKTBUF_LOCAL && OPENMAC_PKTLOCTX == OPENMAC_PKTBUF_LOCAL)
     //get rx/tx buffer base
-    instance_l.pRxBufferBase = omethGetRxBufBase(instance_l.pMacInst);
-    instance_l.pTxBufferBase = omethGetTxBufBase(instance_l.pMacInst);
+    edrvInstance_l.pRxBufferBase = omethGetRxBufBase(edrvInstance_l.pMacInst);
+    edrvInstance_l.pTxBufferBase = omethGetTxBufBase(edrvInstance_l.pMacInst);
 #elif OPENMAC_PKTLOCTX == OPENMAC_PKTBUF_LOCAL
     //get tx buffer base
-    instance_l.pTxBufferBase = openmac_memUncached((void*)OPENMAC_PKT_BASE, OPENMAC_PKT_SPAN);
+    edrvInstance_l.pTxBufferBase = openmac_memUncached((void*)OPENMAC_PKT_BASE, OPENMAC_PKT_SPAN);
 #endif
 
-    omethStart(instance_l.pMacInst, TRUE);
-    DEBUG_LVL_01_TRACE(" OPENMAC started\n");
+    omethStart(edrvInstance_l.pMacInst, TRUE);
+    EPL_DBGLVL_EDRV_TRACE(" OPENMAC started\n");
 
-    ret = openmac_isrReg(kOpenmacIrqTxRx, EdrvIrqHandler, (void*)instance_l.pMacInst);
+    ret = openmac_isrReg(kOpenmacIrqTxRx, irqHandler, (void*)edrvInstance_l.pMacInst);
 
     if(ret != kEplSuccessful)
         goto Exit;
@@ -300,7 +300,7 @@ This function shuts down the Ethernet driver.
 //------------------------------------------------------------------------------
 tEplKernel edrv_shutdown(void)
 {
-    omethStop(instance_l.pMacInst);
+    omethStop(edrvInstance_l.pMacInst);
 
     openmac_isrReg(kOpenmacIrqTxRx, NULL, NULL);
 
@@ -309,7 +309,7 @@ tEplKernel edrv_shutdown(void)
     {
         ometh_stat_typ *pMacStat = NULL;
 
-        pMacStat = omethStatistics(instance_l.pMacInst);
+        pMacStat = omethStatistics(edrvInstance_l.pMacInst);
 
         if( pMacStat == NULL )
         {
@@ -317,24 +317,24 @@ tEplKernel edrv_shutdown(void)
         }
         else
         {
-            DEBUG_LVL_ERROR_TRACE(" --- omethStatistics ---\n");
-            DEBUG_LVL_ERROR_TRACE(" ----  RX           ----\n");
-            DEBUG_LVL_ERROR_TRACE("  CRC ERROR = %i\n", (INT)pMacStat->rxCrcError);
-            DEBUG_LVL_ERROR_TRACE("  HOOK DISABLED = %i\n", (INT)pMacStat->rxHookDisabled);
-            DEBUG_LVL_ERROR_TRACE("  HOOK OVERFLOW = %i\n", (INT)pMacStat->rxHookOverflow);
-            DEBUG_LVL_ERROR_TRACE("  LOST = %i\n", (INT)pMacStat->rxLost);
-            DEBUG_LVL_ERROR_TRACE("  OK = %i\n", (INT)pMacStat->rxOk);
-            DEBUG_LVL_ERROR_TRACE("  OVERSIZE = %i\n", (INT)pMacStat->rxOversize);
-            DEBUG_LVL_ERROR_TRACE(" ----  TX           ----\n");
-            DEBUG_LVL_ERROR_TRACE("  COLLISION = %i\n", (INT)pMacStat->txCollision);
-            DEBUG_LVL_ERROR_TRACE("  DONE = %i\n", (INT)pMacStat->txDone[0]);
-            DEBUG_LVL_ERROR_TRACE("  SPURIOUS IRQ = %i\n", (INT)pMacStat->txSpuriousInt);
+            EPL_DBGLVL_EDRV_TRACE(" --- omethStatistics ---\n");
+            EPL_DBGLVL_EDRV_TRACE(" ----  RX           ----\n");
+            EPL_DBGLVL_EDRV_TRACE("  CRC ERROR = %i\n", (INT)pMacStat->rxCrcError);
+            EPL_DBGLVL_EDRV_TRACE("  HOOK DISABLED = %i\n", (INT)pMacStat->rxHookDisabled);
+            EPL_DBGLVL_EDRV_TRACE("  HOOK OVERFLOW = %i\n", (INT)pMacStat->rxHookOverflow);
+            EPL_DBGLVL_EDRV_TRACE("  LOST = %i\n", (INT)pMacStat->rxLost);
+            EPL_DBGLVL_EDRV_TRACE("  OK = %i\n", (INT)pMacStat->rxOk);
+            EPL_DBGLVL_EDRV_TRACE("  OVERSIZE = %i\n", (INT)pMacStat->rxOversize);
+            EPL_DBGLVL_EDRV_TRACE(" ----  TX           ----\n");
+            EPL_DBGLVL_EDRV_TRACE("  COLLISION = %i\n", (INT)pMacStat->txCollision);
+            EPL_DBGLVL_EDRV_TRACE("  DONE = %i\n", (INT)pMacStat->txDone[0]);
+            EPL_DBGLVL_EDRV_TRACE("  SPURIOUS IRQ = %i\n", (INT)pMacStat->txSpuriousInt);
         }
-        DEBUG_LVL_01_TRACE("\n");
+        EPL_DBGLVL_EDRV_TRACE("\n");
     }
 
 #if OPENMAC_DMAOBSERV != 0
-    if( instance_l.fDmaError == TRUE )
+    if( edrvInstance_l.fDmaError == TRUE )
     {
         //if you see this openMAC DMA is connected to slow memory!
         // -> use embedded memory or 10 nsec SRAM!!!
@@ -342,22 +342,22 @@ tEplKernel edrv_shutdown(void)
     }
 #endif
 
-    if (omethDestroy(instance_l.pMacInst) != 0) {
+    if (omethDestroy(edrvInstance_l.pMacInst) != 0) {
         DEBUG_LVL_ERROR_TRACE("%s() Edrv Shutdown failed\n", __func__);
         return kEplNoResource;
     }
-    DEBUG_LVL_01_TRACE("Edrv Shutdown done\n");
+    EPL_DBGLVL_EDRV_TRACE("Edrv Shutdown done\n");
 
     return kEplSuccessful;
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief  Allocate Tx message buffer
+\brief  Allocate Tx buffer
 
-This function allocates a Tx message buffer.
+This function allocates a Tx buffer.
 
-\param  pBuffer_p           Tx message buffer descriptor
+\param  pBuffer_p           Tx buffer descriptor
 
 \return The function returns a tEplKernel error code.
 
@@ -384,7 +384,7 @@ tEplKernel edrv_allocTxBuffer(tEdrvTxBuffer* pBuffer_p)
 #if (OPENMAC_PKTLOCTX == OPENMAC_PKTBUF_LOCAL)
     pPacket = allocTxMsgBufferIntern(pBuffer_p);
 #else
-    DEBUG_LVL_01_TRACE("%s() allocate %i bytes\n", __func__, (INT)(pBuffer_p->maxBufferSize + sizeof(pPacket->length)));
+    EPL_DBGLVL_EDRV_TRACE("%s() allocate %i bytes\n", __func__, (INT)(pBuffer_p->maxBufferSize + sizeof(pPacket->length)));
     pPacket = (ometh_packet_typ*)openmac_uncachedMalloc(pBuffer_p->maxBufferSize + sizeof(pPacket->length));
 #endif
 
@@ -407,11 +407,11 @@ Exit:
 
 //------------------------------------------------------------------------------
 /**
-\brief  Release Tx message buffer
+\brief  Free Tx buffer
 
-This function releases the Tx message buffer.
+This function releases the Tx buffer.
 
-\param  pBuffer_p           Tx message buffer descriptor
+\param  pBuffer_p           Tx buffer descriptor
 
 \return The function returns a tEplKernel error code.
 
@@ -428,7 +428,7 @@ tEplKernel edrv_freeTxBuffer(tEdrvTxBuffer* pBuffer_p)
     if (pBuffer_p->txBufferNumber.value < EDRV_MAX_AUTO_RESPONSES)
     {
         // disable auto-response
-        omethResponseDisable(instance_l.apRxFilterInst[pBuffer_p->txBufferNumber.value]);
+        omethResponseDisable(edrvInstance_l.apRxFilterInst[pBuffer_p->txBufferNumber.value]);
     }
 
     if (pBuffer_p->pBuffer == NULL)
@@ -453,11 +453,11 @@ Exit:
 
 //------------------------------------------------------------------------------
 /**
-\brief  Update Tx message buffer
+\brief  Update Tx buffer
 
-This function updates the Tx message buffer for use with auto-response filter.
+This function updates the Tx buffer for use with auto-response filter.
 
-\param  pBuffer_p           Tx message buffer descriptor
+\param  pBuffer_p           Tx buffer descriptor
 
 \return The function returns a tEplKernel error code.
 
@@ -484,9 +484,9 @@ tEplKernel edrv_updateTxBuffer(tEdrvTxBuffer* pBuffer_p)
     openmac_flushDataCache((UINT8*)pPacket, pPacket->length);
 
     // Update autoresponse buffer
-    instance_l.apTxBuffer[pBuffer_p->txBufferNumber.value] = pBuffer_p;
+    edrvInstance_l.apTxBuffer[pBuffer_p->txBufferNumber.value] = pBuffer_p;
 
-    pPacket = omethResponseSet(instance_l.apRxFilterInst[pBuffer_p->txBufferNumber.value], pPacket);
+    pPacket = omethResponseSet(edrvInstance_l.apRxFilterInst[pBuffer_p->txBufferNumber.value], pPacket);
     if (pPacket == OMETH_INVALID_PACKET)
     {
         ret = kEplNoResource;
@@ -503,11 +503,11 @@ Exit:
 
 //------------------------------------------------------------------------------
 /**
-\brief  Send Tx message
+\brief  Send Tx buffer
 
-This function sends the Tx message.
+This function sends the Tx buffer.
 
-\param  pBuffer_p           Tx message buffer descriptor
+\param  pBuffer_p           Tx buffer descriptor
 
 \return The function returns a tEplKernel error code.
 
@@ -527,14 +527,14 @@ tEplKernel edrv_sendTxBuffer(tEdrvTxBuffer* pBuffer_p)
     if( (pBuffer_p->timeOffsetAbs & 1) == 1)
     {
         //free tx descriptors available
-        txLength = omethTransmitTime(instance_l.pMacInst, pPacket,
-                        EdrvCbSendAck, pBuffer_p, pBuffer_p->timeOffsetAbs);
+        txLength = omethTransmitTime(edrvInstance_l.pMacInst, pPacket,
+                        txAckCb, pBuffer_p, pBuffer_p->timeOffsetAbs);
 
         if( txLength == 0 )
         {
 #ifdef EDRV_2NDTXQUEUE
             //time triggered sent failed => move to 2nd tx queue
-            if( (instance_l.txQueueWriteIndex - instance_l.txQueueReadIndex) >= EDRV_MAX_TX_BUF2)
+            if( (edrvInstance_l.txQueueWriteIndex - edrvInstance_l.txQueueReadIndex) >= EDRV_MAX_TX_BUF2)
             {
                 DEBUG_LVL_ERROR_TRACE("%s() Edrv 2nd TX queue is full\n", __func__);
                 ret = kEplEdrvNoFreeBufEntry;
@@ -542,11 +542,11 @@ tEplKernel edrv_sendTxBuffer(tEdrvTxBuffer* pBuffer_p)
             }
             else
             {
-                tEdrv2ndTxQueue *pTxqueue = &instance_l.txQueue[instance_l.txQueueWriteIndex & (EDRV_MAX_TX_BUF2-1)];
-                pTxqueue->m_pBuffer = pBuffer_p;
-                pTxqueue->dwAbsTk = pBuffer_p->timeOffsetAbs;
+                tEdrv2ndTxQueue *pTxqueue = &edrvInstance_l.txQueue[edrvInstance_l.txQueueWriteIndex & (EDRV_MAX_TX_BUF2-1)];
+                pTxqueue->pBuffer = pBuffer_p;
+                pTxqueue->timeOffsetAbs = pBuffer_p->timeOffsetAbs;
 
-                instance_l.txQueueWriteIndex++;
+                edrvInstance_l.txQueueWriteIndex++;
                 ret = kEplSuccessful;
                 goto Exit; //packet will be sent!
             }
@@ -560,15 +560,15 @@ tEplKernel edrv_sendTxBuffer(tEdrvTxBuffer* pBuffer_p)
     else
     {
 #endif
-        txLength = omethTransmitArg(instance_l.pMacInst, pPacket,
-                            EdrvCbSendAck, pBuffer_p);
+        txLength = omethTransmitArg(edrvInstance_l.pMacInst, pPacket,
+                            txAckCb, pBuffer_p);
 #if EDRV_TIME_TRIG_TX != FALSE
     }
 #endif
 
     if (txLength > 0)
     {
-        instance_l.txPacketSent++;
+        edrvInstance_l.txPacketSent++;
         ret = kEplSuccessful;
     }
     else
@@ -592,9 +592,9 @@ Exit:
 \brief  Change Rx filter setup
 
 This function changes the Rx filter setup. The parameter entryChanged_p
-selects the Rx filter entry that shall be changed and changeFlags_p determines
+selects the Rx filter entry that shall be changed and \p changeFlags_p determines
 the property.
-If entryChanged_p is equal or larger count_p all Rx filters shall be changed.
+If entryChanged_p is equal or larger \p count_p all Rx filters shall be changed.
 
 \param  pFilter_p           Base pointer of Rx filter array
 \param  count_p             Number of Rx filter array entries
@@ -626,8 +626,8 @@ tEplKernel edrv_changeRxFilter(tEdrvFilter* pFilter_p, UINT count_p,
         // at first, disable all filters in openMAC
         for (entry = 0; entry < EDRV_MAX_FILTERS; entry++)
         {
-            omethFilterDisable(instance_l.apRxFilterInst[entry]);
-            omethResponseDisable(instance_l.apRxFilterInst[entry]);
+            omethFilterDisable(edrvInstance_l.apRxFilterInst[entry]);
+            omethResponseDisable(edrvInstance_l.apRxFilterInst[entry]);
         }
 
         for (entry = 0; entry < count_p; entry++)
@@ -635,11 +635,11 @@ tEplKernel edrv_changeRxFilter(tEdrvFilter* pFilter_p, UINT count_p,
             // set filter value and mask
             for (index = 0; index < sizeof (pFilter_p->aFilterValue); index++)
             {
-                omethFilterSetByteValue(instance_l.apRxFilterInst[entry],
+                omethFilterSetByteValue(edrvInstance_l.apRxFilterInst[entry],
                                         index,
                                         pFilter_p[entry].aFilterValue[index]);
 
-                omethFilterSetByteMask(instance_l.apRxFilterInst[entry],
+                omethFilterSetByteMask(edrvInstance_l.apRxFilterInst[entry],
                                        index,
                                        pFilter_p[entry].aFilterMask[index]);
             }
@@ -647,13 +647,13 @@ tEplKernel edrv_changeRxFilter(tEdrvFilter* pFilter_p, UINT count_p,
             // set auto response
             if (pFilter_p[entry].pTxBuffer != NULL)
             {
-                instance_l.apTxBuffer[entry] = pFilter_p[entry].pTxBuffer;
+                edrvInstance_l.apTxBuffer[entry] = pFilter_p[entry].pTxBuffer;
 
                 // set buffer number of TxBuffer to filter entry
                 pFilter_p[entry].pTxBuffer[0].txBufferNumber.value = entry;
                 pFilter_p[entry].pTxBuffer[1].txBufferNumber.value = entry;
                 edrv_updateTxBuffer(pFilter_p[entry].pTxBuffer);
-                omethResponseEnable(instance_l.apRxFilterInst[entry]);
+                omethResponseEnable(edrvInstance_l.apRxFilterInst[entry]);
 
 #if EDRV_AUTO_RESPONSE_DELAY != FALSE
                 {
@@ -664,7 +664,7 @@ tEplKernel edrv_changeRxFilter(tEdrvFilter* pFilter_p, UINT count_p,
                     if (delayNs == 0)
                     {   // no auto-response delay is set
                         // send frame immediately after IFG
-                        omethResponseTime(instance_l.apRxFilterInst[entry], 0);
+                        omethResponseTime(edrvInstance_l.apRxFilterInst[entry], 0);
                     }
                     else
                     {   // auto-response delay is set
@@ -675,7 +675,7 @@ tEplKernel edrv_changeRxFilter(tEdrvFilter* pFilter_p, UINT count_p,
                             delayNs = EPL_C_DLL_T_IFG;
                         }
                         delayAfterIfgNs = delayNs - EPL_C_DLL_T_IFG;
-                        omethResponseTime(instance_l.apRxFilterInst[entry],
+                        omethResponseTime(edrvInstance_l.apRxFilterInst[entry],
                                           OMETH_NS_2_TICKS(delayAfterIfgNs));
                     }
                 }
@@ -685,7 +685,7 @@ tEplKernel edrv_changeRxFilter(tEdrvFilter* pFilter_p, UINT count_p,
 
             if (pFilter_p[entry].fEnable != FALSE)
             {   // enable the filter
-                omethFilterEnable(instance_l.apRxFilterInst[entry]);
+                omethFilterEnable(edrvInstance_l.apRxFilterInst[entry]);
             }
         }
     }
@@ -701,13 +701,13 @@ tEplKernel edrv_changeRxFilter(tEdrvFilter* pFilter_p, UINT count_p,
             || (pFilter_p[entryChanged_p].fEnable == FALSE))
         {
             // disable this filter entry
-            omethFilterDisable(instance_l.apRxFilterInst[entryChanged_p]);
+            omethFilterDisable(edrvInstance_l.apRxFilterInst[entryChanged_p]);
 
             if ((changeFlags_p & EDRV_FILTER_CHANGE_VALUE) != 0)
             {   // filter value has changed
                 for (index = 0; index < sizeof (pFilter_p->aFilterValue); index++)
                 {
-                    omethFilterSetByteValue(instance_l.apRxFilterInst[entryChanged_p],
+                    omethFilterSetByteValue(edrvInstance_l.apRxFilterInst[entryChanged_p],
                                             index,
                                             pFilter_p[entryChanged_p].aFilterValue[index]);
                 }
@@ -717,7 +717,7 @@ tEplKernel edrv_changeRxFilter(tEdrvFilter* pFilter_p, UINT count_p,
             {   // filter mask has changed
                 for (index = 0; index < sizeof (pFilter_p->aFilterMask); index++)
                 {
-                    omethFilterSetByteMask(instance_l.apRxFilterInst[entryChanged_p],
+                    omethFilterSetByteMask(edrvInstance_l.apRxFilterInst[entryChanged_p],
                                            index,
                                            pFilter_p[entryChanged_p].aFilterMask[index]);
                 }
@@ -731,11 +731,11 @@ tEplKernel edrv_changeRxFilter(tEdrvFilter* pFilter_p, UINT count_p,
                     pFilter_p[entryChanged_p].pTxBuffer[0].txBufferNumber.value = entryChanged_p;
                     pFilter_p[entryChanged_p].pTxBuffer[1].txBufferNumber.value = entryChanged_p;
                     edrv_updateTxBuffer(pFilter_p[entryChanged_p].pTxBuffer);
-                    omethResponseEnable(instance_l.apRxFilterInst[entryChanged_p]);
+                    omethResponseEnable(edrvInstance_l.apRxFilterInst[entryChanged_p]);
                 }
                 else
                 {   // auto-response disable
-                    omethResponseDisable(instance_l.apRxFilterInst[entryChanged_p]);
+                    omethResponseDisable(edrvInstance_l.apRxFilterInst[entryChanged_p]);
                 }
             }
 
@@ -754,7 +754,7 @@ tEplKernel edrv_changeRxFilter(tEdrvFilter* pFilter_p, UINT count_p,
                 if (delayNs == 0)
                 {   // no auto-response delay is set
                     // send frame immediately after IFG
-                    omethResponseTime(instance_l.apRxFilterInst[entryChanged_p], 0);
+                    omethResponseTime(edrvInstance_l.apRxFilterInst[entryChanged_p], 0);
                 }
                 else
                 {   // auto-response delay is set
@@ -765,7 +765,7 @@ tEplKernel edrv_changeRxFilter(tEdrvFilter* pFilter_p, UINT count_p,
                         delayNs = EPL_C_DLL_T_IFG;
                     }
                     delayAfterIfgNs = delayNs - EPL_C_DLL_T_IFG;
-                    omethResponseTime(instance_l.apRxFilterInst[entryChanged_p],
+                    omethResponseTime(edrvInstance_l.apRxFilterInst[entryChanged_p],
                                       OMETH_NS_2_TICKS(delayAfterIfgNs));
                 }
             }
@@ -774,7 +774,7 @@ tEplKernel edrv_changeRxFilter(tEdrvFilter* pFilter_p, UINT count_p,
 
         if (pFilter_p[entryChanged_p].fEnable != FALSE)
         {   // enable the filter
-            omethFilterEnable(instance_l.apRxFilterInst[entryChanged_p]);
+            omethFilterEnable(edrvInstance_l.apRxFilterInst[entryChanged_p]);
         }
     }
 
@@ -784,7 +784,7 @@ Exit:
 
 //------------------------------------------------------------------------------
 /**
-\brief  Define multicast address entry
+\brief  Set multicast address entry
 
 This function sets a multicast entry into the Ethernet controller.
 
@@ -804,7 +804,7 @@ tEplKernel edrv_setRxMulticastMacAddr(UINT8* pMacAddr_p)
 
 //------------------------------------------------------------------------------
 /**
-\brief  Undefine multicast address entry
+\brief  Clear multicast address entry
 
 This function removes the multicast entry from the Ethernet controller.
 
@@ -824,11 +824,11 @@ tEplKernel edrv_clearRxMulticastMacAddr(UINT8* pMacAddr_p)
 
 //------------------------------------------------------------------------------
 /**
-\brief  Set Tx message ready
+\brief  Set Tx buffer ready
 
-This function sets the Tx message buffer ready for transmission.
+This function sets the Tx buffer buffer ready for transmission.
 
-\param  pBuffer_p   Tx message buffer descriptor
+\param  pBuffer_p   Tx buffer buffer descriptor
 
 \return The function returns a tEplKernel error code.
 
@@ -844,11 +844,11 @@ tEplKernel edrv_setTxBufferReady(tEdrvTxBuffer* pBuffer_p)
 
 //------------------------------------------------------------------------------
 /**
-\brief  Send ready Tx message
+\brief  Start ready Tx buffer
 
-This function sends the Tx message marked as ready.
+This function sends the Tx buffer marked as ready.
 
-\param  pBuffer_p   Tx message buffer descriptor
+\param  pBuffer_p   Tx buffer buffer descriptor
 
 \return The function returns a tEplKernel error code.
 
@@ -952,10 +952,10 @@ This function initializes all Rx filters and disables them.
 //------------------------------------------------------------------------------
 static tEplKernel initRxFilters(void)
 {
-    tEplKernel  ret = kEplSuccessful;
-    INT         i;
-    UINT8       aMask[31];
-    UINT8       aValue[31];
+    tEplKernel      ret = kEplSuccessful;
+    INT             i;
+    UINT8           aMask[31];
+    UINT8           aValue[31];
     OMETH_HOOK_H    pHook;
 
     // initialize the filters, so that they won't match any normal Ethernet frame
@@ -970,35 +970,35 @@ static tEplKernel initRxFilters(void)
         {
 #if DLL_DEFERRED_RXFRAME_RELEASE_ASYNCHRONOUS != FALSE
             case DLLK_FILTER_ASND:
-                pHook = instance_l.pRxAsndHookInst;
+                pHook = edrvInstance_l.pRxAsndHookInst;
                 break;
 #endif
             default:
-                pHook = instance_l.pRxHookInst;
+                pHook = edrvInstance_l.pRxHookInst;
                 break;
         }
 
-        instance_l.apRxFilterInst[i] = omethFilterCreate(pHook, (void*) i, aMask, aValue);
-        if (instance_l.apRxFilterInst[i] == 0)
+        edrvInstance_l.apRxFilterInst[i] = omethFilterCreate(pHook, (void*) i, aMask, aValue);
+        if (edrvInstance_l.apRxFilterInst[i] == 0)
         {
             DEBUG_LVL_ERROR_TRACE("%s() Creating filter %d failed\n", __func__, i);
             ret = kEplNoResource;
             goto Exit;
         }
 
-        omethFilterDisable(instance_l.apRxFilterInst[i]);
+        omethFilterDisable(edrvInstance_l.apRxFilterInst[i]);
 
         if (i < EDRV_MAX_AUTO_RESPONSES)
         {
             // initialize the auto response for each filter ...
-            if (omethResponseInit(instance_l.apRxFilterInst[i]) != 0)
+            if (omethResponseInit(edrvInstance_l.apRxFilterInst[i]) != 0)
             {
                 ret = kEplNoResource;
                 goto Exit;
             }
 
             // ... but disable it
-            omethResponseDisable(instance_l.apRxFilterInst[i]);
+            omethResponseDisable(edrvInstance_l.apRxFilterInst[i]);
         }
     }
 
@@ -1013,7 +1013,7 @@ Exit:
 
 This function allocates local memory for the Tx buffer descriptor pBuffer_p.
 
-\param  pBuffer_p       Tx message buffer descriptor
+\param  pBuffer_p       Tx buffer descriptor
 
 \return The function returns the allocated packet buffer's descriptor.
 */
@@ -1025,10 +1025,10 @@ static ometh_packet_typ* allocTxMsgBufferIntern(tEdrvTxBuffer* pBuffer_p)
     void*               pBufferBase = openmac_memUncached((void*)OPENMAC_PKT_BASE, OPENMAC_PKT_SPAN);
 
     // Initialize if no buffer is allocated
-    if(instance_l.txBufferCount == 0)
+    if(edrvInstance_l.txBufferCount == 0)
     {
-        instance_l.pNextBufferBase = instance_l.pTxBufferBase;
-        instance_l.usedMemorySpace = 0;
+        edrvInstance_l.pNextBufferBase = edrvInstance_l.pTxBufferBase;
+        edrvInstance_l.usedMemorySpace = 0;
     }
 
     // Get buffer size from descriptor and add packet length
@@ -1039,16 +1039,16 @@ static ometh_packet_typ* allocTxMsgBufferIntern(tEdrvTxBuffer* pBuffer_p)
     bufferSize &= 0xFFFFFFFCU;
 
     // Check for enough memory space
-    if(bufferSize > OPENMAC_PKTBUFSIZE - instance_l.usedMemorySpace)
+    if(bufferSize > OPENMAC_PKTBUFSIZE - edrvInstance_l.usedMemorySpace)
     {
         DEBUG_LVL_ERROR_TRACE("%s() Out of local memory\n", __func__);
         return NULL;
     }
 
-    pPacket = (ometh_packet_typ*)instance_l.pNextBufferBase;
+    pPacket = (ometh_packet_typ*)edrvInstance_l.pNextBufferBase;
 
     // Return if the requested buffer is not within the memory range
-    if(!(instance_l.pTxBufferBase <= (void*)pPacket && (void*)pPacket < pBufferBase + OPENMAC_PKTBUFSIZE))
+    if(!(edrvInstance_l.pTxBufferBase <= (void*)pPacket && (void*)pPacket < pBufferBase + OPENMAC_PKTBUFSIZE))
     {
         DEBUG_LVL_ERROR_TRACE("%s() Out of local memory\n", __func__);
         return NULL;
@@ -1058,14 +1058,14 @@ static ometh_packet_typ* allocTxMsgBufferIntern(tEdrvTxBuffer* pBuffer_p)
     EPL_MEMSET((void*)pPacket, 0, bufferSize);
 
     // Calculate next buffer address for next allocation
-    instance_l.pNextBufferBase = (((void*)pPacket) + bufferSize);
+    edrvInstance_l.pNextBufferBase = (((void*)pPacket) + bufferSize);
 
     // New buffer added
-    instance_l.txBufferCount++;
-    instance_l.usedMemorySpace += bufferSize;
+    edrvInstance_l.txBufferCount++;
+    edrvInstance_l.usedMemorySpace += bufferSize;
 
-    DEBUG_LVL_01_TRACE("%s() Add buffer @ 0x%08X with size %4d byte ", __func__, pPacket, bufferSize);
-    DEBUG_LVL_01_TRACE("(Used memory %4d byte %2d buffers)\n", instance_l.usedMemorySpace, instance_l.txBufferCount);
+    EPL_DBGLVL_EDRV_TRACE("%s() Add buffer @ 0x%08X with size %4d byte ", __func__, pPacket, bufferSize);
+    EPL_DBGLVL_EDRV_TRACE("(Used memory %4d byte %2d buffers)\n", edrvInstance_l.usedMemorySpace, edrvInstance_l.txBufferCount);
 
     return pPacket;
 }
@@ -1090,11 +1090,11 @@ static void freeTxMsgBufferIntern(tEdrvTxBuffer* pBuffer_p)
     bufferSize &= 0xFFFFFFFCU;
 
     // Free the buffer from local memory
-    instance_l.txBufferCount--;
-    instance_l.usedMemorySpace -= bufferSize;
+    edrvInstance_l.txBufferCount--;
+    edrvInstance_l.usedMemorySpace -= bufferSize;
 
-    DEBUG_LVL_01_TRACE("%s() Remove buffer with size %4d byte ", __func__, bufferSize);
-    DEBUG_LVL_01_TRACE("(Used memory %4d byte %2d buffers)\n", instance_l.usedMemorySpace, instance_l.txBufferCount);
+    EPL_DBGLVL_EDRV_TRACE("%s() Remove buffer with size %4d byte ", __func__, bufferSize);
+    EPL_DBGLVL_EDRV_TRACE("(Used memory %4d byte %2d buffers)\n", edrvInstance_l.usedMemorySpace, edrvInstance_l.txBufferCount);
 }
 #endif /* OPENMAC_PKTLOCTX == OPENMAC_PKTBUF_LOCAL */
 
@@ -1107,14 +1107,14 @@ This function is invoked by the Ethernet controller interrupt.
 \param  pArg_p  Interrupt service routine argument
 */
 //------------------------------------------------------------------------------
-static void EdrvIrqHandler (void* pArg_p)
+static void irqHandler (void* pArg_p)
 {
 #if OPENMAC_DMAOBSERV != 0
     UINT16 dmaObservVal = openmac_getDmaObserver(0);
     //read DMA observer feature
     if( dmaObservVal != 0 )
     {
-        instance_l.fDmaError = TRUE;
+        edrvInstance_l.fDmaError = TRUE;
         BENCHMARK_MOD_01_TOGGLE(7);
         DEBUG_LVL_ERROR_TRACE("%s() DMA observer recognized overflow! (%X)\n", __func__, dmaObservVal);
 
@@ -1124,27 +1124,27 @@ static void EdrvIrqHandler (void* pArg_p)
 
 #if (defined(EDRV_2NDTXQUEUE) && (EDRV_TIME_TRIG_TX != FALSE))
     //observe additional TX queue and send packet if necessary
-    while( (instance_l.txQueueWriteIndex - instance_l.txQueueReadIndex) &&
-        (omethTransmitPending(instance_l.pMacInst) < 16U) )
+    while( (edrvInstance_l.txQueueWriteIndex - edrvInstance_l.txQueueReadIndex) &&
+        (omethTransmitPending(edrvInstance_l.pMacInst) < 16U) )
     {
         tEdrvTxBuffer*      pBuffer_p;
         ometh_packet_typ*   pPacket;
         ULONG               txLength = 0U;
-        tEdrv2ndTxQueue*    pTxqueue = &instance_l.txQueue[instance_l.txQueueReadIndex & (EDRV_MAX_TX_BUF2-1)];
-        pBuffer_p = pTxqueue->m_pBuffer;
+        tEdrv2ndTxQueue*    pTxqueue = &edrvInstance_l.txQueue[edrvInstance_l.txQueueReadIndex & (EDRV_MAX_TX_BUF2-1)];
+        pBuffer_p = pTxqueue->pBuffer;
 
         pPacket = GET_TYPE_BASE(ometh_packet_typ, data, pBuffer_p->pBuffer);
 
         pPacket->length = pBuffer_p->txFrameSize;
 
         //offset is the openMAC time tick (no conversion needed)
-        txLength = omethTransmitTime(instance_l.pMacInst, pPacket,
-                        EdrvCbSendAck, pBuffer_p, pTxqueue->dwAbsTk);
+        txLength = omethTransmitTime(edrvInstance_l.pMacInst, pPacket,
+                        txAckCb, pBuffer_p, pTxqueue->timeOffsetAbs);
 
         if( txLength > 0 )
         {
-            instance_l.txQueueReadIndex++;
-            instance_l.txPacketSent++;
+            edrvInstance_l.txQueueReadIndex++;
+            edrvInstance_l.txPacketSent++;
         }
         else
         {
@@ -1158,7 +1158,7 @@ static void EdrvIrqHandler (void* pArg_p)
 
 //------------------------------------------------------------------------------
 /**
-\brief  Tx message sent call back
+\brief  Tx buffer sent call back
 
 This function is called by omethlib in Tx interrupt context.
 
@@ -1167,14 +1167,14 @@ This function is called by omethlib in Tx interrupt context.
 \param  time_p      Tx time stamp
 */
 //------------------------------------------------------------------------------
-static void EdrvCbSendAck(ometh_packet_typ *pPacket_p, void *pArg_p, ULONG time_p)
+static void txAckCb(ometh_packet_typ *pPacket_p, void *pArg_p, ULONG time_p)
 {
     tEdrvTxBuffer* pTxBuffer = pArg_p;
 
     UNUSED_PARAMETER(pPacket_p);
     UNUSED_PARAMETER(time_p);
 
-    instance_l.txPacketFreed++;
+    edrvInstance_l.txPacketFreed++;
 
     if(pArg_p != NULL && pTxBuffer->pfnTxHandler != NULL)
         pTxBuffer->pfnTxHandler(pTxBuffer);
@@ -1182,7 +1182,7 @@ static void EdrvCbSendAck(ometh_packet_typ *pPacket_p, void *pArg_p, ULONG time_
 
 //------------------------------------------------------------------------------
 /**
-\brief  Rx message hook call back
+\brief  Rx buffer hook call back
 
 This function is called by omethlib in Rx interrupt context.
 
@@ -1195,14 +1195,14 @@ This function is called by omethlib in Rx interrupt context.
 \retval -1          Packet buffer \p pPacket_p can be freed immediately
 */
 //------------------------------------------------------------------------------
-static INT EdrvRxHook(void* pArg_p, ometh_packet_typ* pPacket_p, OMETH_BUF_FREE_FCT* pfnFree_p)
+static INT rxHook(void* pArg_p, ometh_packet_typ* pPacket_p, OMETH_BUF_FREE_FCT* pfnFree_p)
 {
     INT                     ret;
-    tEdrvRxBuffer       rxBuffer;
+    tEdrvRxBuffer           rxBuffer;
     tEdrvReleaseRxBuffer    releaseRxBuffer;
-    tEplTgtTimeStamp    timeStamp;
+    tEplTgtTimeStamp        timeStamp;
 #if EDRV_MAX_AUTO_RESPONSES > 0
-    UINT                txRespIndex = (UINT)pArg_p;
+    UINT                    txRespIndex = (UINT)pArg_p;
 #endif
     UNUSED_PARAMETER(pfnFree_p);
 
@@ -1216,7 +1216,7 @@ static INT EdrvRxHook(void* pArg_p, ometh_packet_typ* pPacket_p, OMETH_BUF_FREE_
     // memory range.
     openmac_invalidateDataCache((UINT8*)pPacket_p, pPacket_p->length);
 
-    releaseRxBuffer = instance_l.initParam.pfnRxHandler(&rxBuffer); //pass frame to Powerlink Stack
+    releaseRxBuffer = edrvInstance_l.initParam.pfnRxHandler(&rxBuffer); //pass frame to Powerlink Stack
 
     if(releaseRxBuffer == kEdrvReleaseRxBufferLater)
         ret = 0; // Packet is deferred, openMAC may not use this buffer!
@@ -1224,13 +1224,13 @@ static INT EdrvRxHook(void* pArg_p, ometh_packet_typ* pPacket_p, OMETH_BUF_FREE_
         ret = -1; // Packet processing is done, returns to openMAC again
 
 #if EDRV_MAX_AUTO_RESPONSES > 0
-    if (instance_l.apTxBuffer[txRespIndex] != NULL)
+    if (edrvInstance_l.apTxBuffer[txRespIndex] != NULL)
     {   // filter with auto-response frame triggered
         BENCHMARK_MOD_01_SET(5);
         // call Tx handler function from DLL
-        if (instance_l.apTxBuffer[txRespIndex]->pfnTxHandler != NULL)
+        if (edrvInstance_l.apTxBuffer[txRespIndex]->pfnTxHandler != NULL)
         {
-            instance_l.apTxBuffer[txRespIndex]->pfnTxHandler(instance_l.apTxBuffer[txRespIndex]);
+            edrvInstance_l.apTxBuffer[txRespIndex]->pfnTxHandler(edrvInstance_l.apTxBuffer[txRespIndex]);
         }
         BENCHMARK_MOD_01_RESET(5);
     }
