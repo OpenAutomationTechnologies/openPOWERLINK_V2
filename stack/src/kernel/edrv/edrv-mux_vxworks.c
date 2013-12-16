@@ -1,57 +1,45 @@
-/****************************************************************************
-  File:         EdrvMuxVxWorks.c
+/**
+********************************************************************************
+\file   edrv-mux_vxworks.c
 
-  (c) Bernecker + Rainer Industrie-Elektronik Ges.m.b.H.
-      B&R Strasse 1, A-5142 Eggelsberg, Austria
-      www.br-automation.com
+\brief  Implementation of VxWorks MUX Ethernet driver
 
-  Project:      openPOWERLINK
+This file contains the implementation of the VxWorks MUX Ethernet driver.
 
-  Description:  VxWorks MUX implementation of openPOWERLINK Edrv module
+\ingroup module_edrv
+*******************************************************************************/
 
-  License:
+/*------------------------------------------------------------------------------
+Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+All rights reserved.
 
-    Redistribution and use in source and binary forms, with or without
-    modification, are permitted provided that the following conditions
-    are met:
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+    * Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above copyright
+      notice, this list of conditions and the following disclaimer in the
+      documentation and/or other materials provided with the distribution.
+    * Neither the name of the copyright holders nor the
+      names of its contributors may be used to endorse or promote products
+      derived from this software without specific prior written permission.
 
-    1. Redistributions of source code must retain the above copyright
-       notice, this list of conditions and the following disclaimer.
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL COPYRIGHT HOLDERS BE LIABLE FOR ANY
+DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+------------------------------------------------------------------------------*/
 
-    2. Redistributions in binary form must reproduce the above copyright
-       notice, this list of conditions and the following disclaimer in the
-       documentation and/or other materials provided with the distribution.
-
-    3. Neither the name of the copyright holders nor the names of
-       its contributors may be used to endorse or promote products derived
-       from this software without prior written permission. For written
-       permission, please contact office@br-automation.com.
-
-    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-    LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-    FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-    COPYRIGHT HOLDERS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-    INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-    BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-    LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-    CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-    LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-    ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-    POSSIBILITY OF SUCH DAMAGE.
-
-    Severability Clause:
-
-        If a provision of this License is or becomes illegal, invalid or
-        unenforceable in any jurisdiction, that shall not affect:
-        1. the validity or enforceability in that jurisdiction of any other
-           provision of this License; or
-        2. the validity or enforceability in other jurisdictions of that or
-           any other provision of this License.
-
-****************************************************************************/
-
-#include "edrv.h"
+//------------------------------------------------------------------------------
+// includes
+//------------------------------------------------------------------------------
+#include <edrv.h>
 
 #include <unistd.h>
 #include <vxWorks.h>
@@ -77,309 +65,104 @@
 #include "hrtimerLib.h"
 #endif
 
-/***************************************************************************/
-/*                                                                         */
-/*                                                                         */
-/*          G L O B A L   D E F I N I T I O N S                            */
-/*                                                                         */
-/*                                                                         */
-/***************************************************************************/
-//---------------------------------------------------------------------------
+//============================================================================//
+//            G L O B A L   D E F I N I T I O N S                             //
+//============================================================================//
+
+//------------------------------------------------------------------------------
 // const defines
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
-//---------------------------------------------------------------------------
-// module global types
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+// module global vars
+//------------------------------------------------------------------------------
 
-//---------------------------------------------------------------------------
-// local vars
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+// global function prototypes
+//------------------------------------------------------------------------------
 
-//---------------------------------------------------------------------------
-// local function prototypes
-//---------------------------------------------------------------------------
+//============================================================================//
+//            P R I V A T E   D E F I N I T I O N S                           //
+//============================================================================//
 
-/***************************************************************************/
-/*                                                                         */
-/*                                                                         */
-/*          C L A S S  <edrv>                                              */
-/*                                                                         */
-/*                                                                         */
-/***************************************************************************/
-//
-// Description:
-//
-//
-/***************************************************************************/
-
-//=========================================================================//
-//                                                                         //
-//          P R I V A T E   D E F I N I T I O N S                          //
-//                                                                         //
-//=========================================================================//
-
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // const defines
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 #define EDRV_MAX_FRAME_SIZE     0x600
 
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // local types
-//---------------------------------------------------------------------------
-
+//------------------------------------------------------------------------------
 // Private structure
 typedef struct
 {
-    tEdrvInitParam      m_initParam;
-    tEdrvTxBuffer*      m_pTransmittedTxBufferLastEntry;
-    tEdrvTxBuffer*      m_pTransmittedTxBufferFirstEntry;
-    SEM_ID              m_mutex;
-    SEM_ID              m_syncSem;
+    tEdrvInitParam      initParam;
+    tEdrvTxBuffer*      pTransmittedTxBufferLastEntry;
+    tEdrvTxBuffer*      pTransmittedTxBufferFirstEntry;
+    SEM_ID              mutex;
+    SEM_ID              syncSem;
 
-    NET_POOL_ID         m_dataPoolId;
-    PROTO_COOKIE        m_pCookie;
-    int                 m_txTaskId;
-    SEM_ID              m_txWakeupSem;
-    BOOL                m_fStopTxTask;
+    NET_POOL_ID         dataPoolId;
+    PROTO_COOKIE        pCookie;
+    INT                 txTaskId;
+    SEM_ID              txWakeupSem;
+    BOOL                fStopTxTask;
 
 #if EDRV_USE_DIAGNOSTICS != FALSE
-    struct timespec     m_txSendTime;
-    struct timespec     m_txCbTime;
-    struct timespec     m_maxTxLatency;
+    struct timespec     txSendTime;
+    struct timespec     txCbTime;
+    struct timespec     maxTxLatency;
 #endif
 
 } tEdrvInstance;
 
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // local vars
-//---------------------------------------------------------------------------
-static tEdrvInstance EdrvInstance_l;
+//------------------------------------------------------------------------------
+static tEdrvInstance edrvInstance_l;
 
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // local function prototypes
-//---------------------------------------------------------------------------
-static BOOL EdrvPacketHandler (void * pCookie, long  type, M_BLK_ID pPkt,
-                               LL_HDR_INFO *pLLHInfo, void *netCallbackId);
-static int EdrvTxTask (int iArg_p);
+//------------------------------------------------------------------------------
+static BOOL packetHandler(void* pCookie_p, LONG type_p, M_BLK_ID pPkt_p,
+                                LL_HDR_INFO* pLLHInfo_p, void* pNetCallbackId_p);
+static STATUS muxShutdown(void* pCookie_p, void* pNetCallbackId_p);
+static STATUS muxRestart(void* pEnd_p, void* pNetCallbackId_p);
+static void muxError(END_OBJ* pEnd_p, END_ERR* pError_p, void* pNetCallbackId_p);
+static INT txTask(INT iArg_p);
+static void getMacAddr(PROTO_COOKIE pCookie_p, char* pIfName, UINT8* pMacAddr_p);
 
+//============================================================================//
+//            P U B L I C   F U N C T I O N S                                 //
+//============================================================================//
 
-//=========================================================================//
-//                                                                         //
-//          P R I V A T E   F U N C T I O N S                              //
-//                                                                         //
-//=========================================================================//
+//------------------------------------------------------------------------------
+/**
+\brief  Ethernet driver initialization
 
-//---------------------------------------------------------------------------
-//
-// Function:    EdrvPacketHandler
-//
-// Description: Receive Callback function of MUX interface
-//
-// Parameters:  pCookie     =
-//              type        =
-//              pPkt        =
-//              pLLHinfo    =
-//              netCallbackId =
-//
-// Returns:     BOOL
-//---------------------------------------------------------------------------
-static BOOL EdrvPacketHandler (void * pCookie, long  type, M_BLK_ID pPkt,
-                               LL_HDR_INFO *pLLHInfo, void *netCallbackId)
+This function initializes the Ethernet driver.
+
+\param  pEdrvInitParam_p    Edrv initialization parameters
+
+\return The function returns a tEplKernel error code.
+
+\ingroup module_edrv
+*/
+//------------------------------------------------------------------------------
+tEplKernel edrv_init(tEdrvInitParam* pEdrvInitParam_p)
 {
-    tEdrvInstance*  pInstance = (tEdrvInstance*) netCallbackId;
-    tEdrvRxBuffer   RxBuffer;
-    char            pBuf[EDRV_MAX_MTU];
+    tEplKernel      ret;
+    NETBUF_CFG      bufCfgData;
+    NETBUF_CL_DESC  clDescTblData;
 
-    if (memcmp(pPkt->mBlkHdr.mData + pLLHInfo->srcAddrOffset,
-               pInstance->m_initParam.aMacAddr, 6 ) != 0)
-    {
-        RxBuffer.bufferInFrame    = kEdrvBufferLastInFrame;
-        RxBuffer.rxFrameSize = netMblkToBufCopy(pPkt, pBuf, NULL);
-        RxBuffer.pBuffer = (unsigned char*)pBuf;
-
-        pInstance->m_initParam.pfnRxHandler(&RxBuffer);
-        netMblkClChainFree(pPkt);
-    }
-    else
-    {   // self generated traffic
-        EPL_DBGLVL_EDRV_TRACE ("%s() self generated traffic!\n", __func__);
-    }
-    return TRUE;
-}
-
-
-//---------------------------------------------------------------------------
-// Function:            EdrvMuxShutdown
-//
-// Description:         Shutdown callback function of MUX interface
-//
-// Parameters:
-//
-// Returns:             STATUS
-//---------------------------------------------------------------------------
-static STATUS EdrvMuxShutdown (void *pCookie, void *netCallbackId)
-{
-    EPL_DBGLVL_EDRV_TRACE("EdrvMuxShutdown()\n");
-    return OK;
-}
-
-//---------------------------------------------------------------------------
-// Function:            EdrvMuxRestart
-//
-// Description:         Restart callback function of MUX interface
-//
-// Parameters:
-//
-// Returns:             STATUS
-//---------------------------------------------------------------------------
-static STATUS EdrvMuxRestart (void *pEnd, void *netCallbackId)
-{
-    EPL_DBGLVL_EDRV_TRACE("EdrvMuxRestart()\n");
-    return OK;
-}
-
-//---------------------------------------------------------------------------
-// Function:            EdrvMuxError
-//
-// Description:         Error callback function of MUX interface
-//
-// Parameters:
-//
-// Returns:             void
-//---------------------------------------------------------------------------
-static void EdrvMuxError(END_OBJ *pEnd, END_ERR *pError, void * netCallbackId)
-{
-    EPL_DBGLVL_EDRV_TRACE("EdrvMuxError()\n");
-}
-
-//---------------------------------------------------------------------------
-//
-// Function:    EdrvTxTask
-//
-// Description: Transmit callback task.
-//
-// Parameters:  iArg_p          = Task argument. Contains instance pointer.
-//
-// Returns:     int
-//---------------------------------------------------------------------------
-static int EdrvTxTask (int iArg_p)
-{
-    tEdrvInstance*      pInstance = (tEdrvInstance*) iArg_p;
-    STATUS              result;
-#if EDRV_USE_DIAGNOSTICS != FALSE
-    struct timespec      txLatency;
-#endif
-
-    while (TRUE)
-    {
-        result = semTake(pInstance->m_txWakeupSem, WAIT_FOREVER);
-        if (pInstance->m_fStopTxTask)
-        {
-            break;
-        }
-
-#if EDRV_USE_DIAGNOSTICS != FALSE
-        hrtimer_clock_gettime(0, &EdrvInstance_l.m_txCbTime);
-        txLatency = hrtimer_subTimespec(EdrvInstance_l.m_txCbTime,
-                                         EdrvInstance_l.m_txSendTime);
-        if (hrtimer_compareTimespec(&txLatency, &EdrvInstance_l.m_maxTxLatency) > 0)
-        {
-            EdrvInstance_l.m_maxTxLatency = txLatency;
-        }
-#endif
-
-        if (result == OK)
-        {
-            if (pInstance->m_pTransmittedTxBufferFirstEntry != NULL)
-            {
-                tEdrvTxBuffer* pTxBuffer = pInstance->m_pTransmittedTxBufferFirstEntry;
-
-                if (pTxBuffer->pBuffer != NULL)
-                {
-                    semTake(pInstance->m_mutex, WAIT_FOREVER);
-                    pInstance->m_pTransmittedTxBufferFirstEntry =
-                        pInstance->m_pTransmittedTxBufferFirstEntry->txBufferNumber.pArg;
-                    if (pInstance->m_pTransmittedTxBufferFirstEntry == NULL)
-                    {
-                        pInstance->m_pTransmittedTxBufferLastEntry = NULL;
-                    }
-                    semGive(pInstance->m_mutex);
-
-                    pTxBuffer->txBufferNumber.pArg = NULL;
-
-                    if (pTxBuffer->pfnTxHandler != NULL)
-                    {
-                        pTxBuffer->pfnTxHandler(pTxBuffer);
-                    }
-                }
-                else
-                {
-                    logMsg("%s() pTxBuffer->pBuffer == NULL\n",
-                           (int)__func__, 0, 0, 0, 0, 0);
-                }
-            }
-            else
-            {
-                logMsg("%s() m_pTransmittedTxBufferFirstEntry == NULL\n",
-                       (int)__func__, 0, 0, 0, 0, 0);
-            }
-        }
-    }
-
-    return 0;
-}
-
-//---------------------------------------------------------------------------
-// Function:            EdrvGetMacAdrs
-//
-// Description:         get mac address of interface
-//
-// Parameters:          pCookie = Pointer to MUX interface
-//                      ifName = Device name of ethernet interface
-//                      macAdrs = Pointer to store MAC address
-//
-// Returns:             void
-//---------------------------------------------------------------------------
-static void EdrvGetMacAdrs(PROTO_COOKIE pCookie, char *ifName, BYTE *macAdrs)
-{
-    char      data[6];
-
-    muxIoctl(pCookie, EIOCGADDR, data);
-    EPL_MEMCPY(macAdrs, data, 6);
-}
-
-
-//=========================================================================//
-//                                                                         //
-//          P U B L I C    F U N C T I O N S                               //
-//                                                                         //
-//=========================================================================//
-
-//---------------------------------------------------------------------------
-// Function:    edrv_init
-//
-// Description: function for init of the Ethernet controller
-//
-// Parameters:  pEdrvInitParam_p    = pointer to struct including the init-parameters
-//
-// Returns:     Errorcode           = kEplSuccessful
-//                                  = kEplNoResource
-//---------------------------------------------------------------------------
-tEplKernel edrv_init(tEdrvInitParam *pEdrvInitParam_p)
-{
-    tEplKernel                  Ret;
-    NETBUF_CFG                    bufCfgData;
-    NETBUF_CL_DESC                clDescTblData;
-
-    Ret = kEplSuccessful;
+    ret = kEplSuccessful;
 
     // clear instance structure
-    EPL_MEMSET(&EdrvInstance_l, 0, sizeof (EdrvInstance_l));
+    EPL_MEMSET(&edrvInstance_l, 0, sizeof (edrvInstance_l));
 
     if (pEdrvInitParam_p->hwParam.m_pszDevName == NULL)
     {
-        Ret = kEplEdrvInitError;
+        ret = kEplEdrvInitError;
         goto Exit;
     }
 
@@ -398,9 +181,9 @@ tEplKernel edrv_init(tEdrvInitParam *pEdrvInitParam_p)
     bufCfgData.clDescTblNumEnt = 1;
     bufCfgData.pClDescTbl = &clDescTblData;
 
-    if ((EdrvInstance_l.m_dataPoolId = netPoolCreate(&bufCfgData, NULL)) == NULL)
+    if ((edrvInstance_l.dataPoolId = netPoolCreate(&bufCfgData, NULL)) == NULL)
     {
-        Ret = kEplEdrvInitError;
+        ret = kEplEdrvInitError;
         goto Exit;
     }
 
@@ -408,15 +191,15 @@ tEplKernel edrv_init(tEdrvInitParam *pEdrvInitParam_p)
                            pEdrvInitParam_p->hwParam.m_pszDevName,
                            pEdrvInitParam_p->hwParam.m_uiDevNumber);
     /* Binding to Mux Device */
-    if ((EdrvInstance_l.m_pCookie =
+    if ((edrvInstance_l.pCookie =
                muxBind(pEdrvInitParam_p->hwParam.m_pszDevName,
                        pEdrvInitParam_p->hwParam.m_uiDevNumber,
-                       EdrvPacketHandler, EdrvMuxShutdown, EdrvMuxRestart,
-                       EdrvMuxError,
-                       MUX_PROTO_PROMISC, "POWERLINK", &EdrvInstance_l)) == NULL)
+                       packetHandler, muxShutdown, muxRestart,
+                       muxError,
+                       MUX_PROTO_PROMISC, "POWERLINK", &edrvInstance_l)) == NULL)
     {
-        Ret = kEplEdrvInitError;
-        netPoolRelease(EdrvInstance_l.m_dataPoolId, NET_REL_IN_CONTEXT);
+        ret = kEplEdrvInitError;
+        netPoolRelease(edrvInstance_l.dataPoolId, NET_REL_IN_CONTEXT);
         goto Exit;
     }
 
@@ -430,143 +213,149 @@ tEplKernel edrv_init(tEdrvInitParam *pEdrvInitParam_p)
         (pEdrvInitParam_p->aMacAddr[4] == 0) &&
         (pEdrvInitParam_p->aMacAddr[5] == 0)  )
     {   // read MAC address from controller
-        EdrvGetMacAdrs(EdrvInstance_l.m_pCookie,
+        getMacAddr(edrvInstance_l.pCookie,
                        pEdrvInitParam_p->hwParam.m_pszDevName,
                        pEdrvInitParam_p->aMacAddr);
     }
 
     // save the init data (with updated MAC address)
-    EdrvInstance_l.m_initParam = *pEdrvInitParam_p;
+    edrvInstance_l.initParam = *pEdrvInitParam_p;
 
 
-    if ((EdrvInstance_l.m_mutex =
+    if ((edrvInstance_l.mutex =
                     semMCreate(SEM_Q_PRIORITY | SEM_INVERSION_SAFE)) == NULL)
     {
         EPL_DBGLVL_ERROR_TRACE("%s() couldn't init mutex\n", __func__);
-        Ret = kEplEdrvInitError;
-        muxUnbind(EdrvInstance_l.m_pCookie, MUX_PROTO_PROMISC,
-                  (FUNCPTR)EdrvPacketHandler);
-        netPoolRelease(EdrvInstance_l.m_dataPoolId, NET_REL_IN_CONTEXT);
+        ret = kEplEdrvInitError;
+        muxUnbind(edrvInstance_l.pCookie, MUX_PROTO_PROMISC,
+                  (FUNCPTR)packetHandler);
+        netPoolRelease(edrvInstance_l.dataPoolId, NET_REL_IN_CONTEXT);
         goto Exit;
     }
 
-    if ((EdrvInstance_l.m_syncSem = semBCreate(SEM_Q_FIFO, SEM_EMPTY)) == NULL)
+    if ((edrvInstance_l.syncSem = semBCreate(SEM_Q_FIFO, SEM_EMPTY)) == NULL)
     {
         EPL_DBGLVL_ERROR_TRACE("%s() couldn't init semaphore\n", __func__);
-        Ret = kEplEdrvInitError;
-        muxUnbind(EdrvInstance_l.m_pCookie, MUX_PROTO_PROMISC,
-                  (FUNCPTR)EdrvPacketHandler);
-        netPoolRelease(EdrvInstance_l.m_dataPoolId, NET_REL_IN_CONTEXT);
-        semDelete(EdrvInstance_l.m_mutex);
+        ret = kEplEdrvInitError;
+        muxUnbind(edrvInstance_l.pCookie, MUX_PROTO_PROMISC,
+                  (FUNCPTR)packetHandler);
+        netPoolRelease(edrvInstance_l.dataPoolId, NET_REL_IN_CONTEXT);
+        semDelete(edrvInstance_l.mutex);
         goto Exit;
     }
 
-    if ((EdrvInstance_l.m_txWakeupSem = semCCreate(SEM_Q_FIFO, 0)) == NULL)
+    if ((edrvInstance_l.txWakeupSem = semCCreate(SEM_Q_FIFO, 0)) == NULL)
     {
         EPL_DBGLVL_ERROR_TRACE("%s() couldn't init semaphore\n", __func__);
-        Ret = kEplEdrvInitError;
-        muxUnbind(EdrvInstance_l.m_pCookie, MUX_PROTO_PROMISC,
-                  (FUNCPTR)EdrvPacketHandler);
-        netPoolRelease(EdrvInstance_l.m_dataPoolId, NET_REL_IN_CONTEXT);
-        semDelete(EdrvInstance_l.m_mutex);
-        semDelete(EdrvInstance_l.m_syncSem);
+        ret = kEplEdrvInitError;
+        muxUnbind(edrvInstance_l.pCookie, MUX_PROTO_PROMISC,
+                  (FUNCPTR)packetHandler);
+        netPoolRelease(edrvInstance_l.dataPoolId, NET_REL_IN_CONTEXT);
+        semDelete(edrvInstance_l.mutex);
+        semDelete(edrvInstance_l.syncSem);
         goto Exit;
     }
 
     /* create TX handler task */
-    EdrvInstance_l.m_fStopTxTask = FALSE;
-    if ((EdrvInstance_l.m_txTaskId = taskSpawn("tTxHandler",
+    edrvInstance_l.fStopTxTask = FALSE;
+    if ((edrvInstance_l.txTaskId = taskSpawn("tTxHandler",
                                              EPL_TASK_PRIORITY_NETTX,
                                              0,
                                              EPL_TASK_STACK_SIZE,
-                                             EdrvTxTask,
-                                             (int)&EdrvInstance_l,
+                                             txTask,
+                                             (INT)&edrvInstance_l,
                                              0, 0, 0, 0, 0, 0, 0, 0, 0))
                                 == ERROR)
     {
         EPL_DBGLVL_ERROR_TRACE ("%s() Couldn't create TX handler task!\n",
                                  __func__);
-        muxUnbind(EdrvInstance_l.m_pCookie, MUX_PROTO_PROMISC,
-                  (FUNCPTR)EdrvPacketHandler);
-        netPoolRelease(EdrvInstance_l.m_dataPoolId, NET_REL_IN_CONTEXT);
-        semDelete(EdrvInstance_l.m_mutex);
-        semDelete(EdrvInstance_l.m_syncSem);
+        muxUnbind(edrvInstance_l.pCookie, MUX_PROTO_PROMISC,
+                  (FUNCPTR)packetHandler);
+        netPoolRelease(edrvInstance_l.dataPoolId, NET_REL_IN_CONTEXT);
+        semDelete(edrvInstance_l.mutex);
+        semDelete(edrvInstance_l.syncSem);
         goto Exit;
     }
 
 Exit:
-    return Ret;
+    return ret;
 }
 
-//---------------------------------------------------------------------------
-// Function:    edrv_shutdown
-//
-// Description: Shutdown the Ethernet controller
-//
-// Parameters:  void
-//
-// Returns:     Errorcode   = kEplSuccessful
-//---------------------------------------------------------------------------
-tEplKernel edrv_shutdown( void )
+//------------------------------------------------------------------------------
+/**
+\brief  Ethernet driver shutdown
+
+This function shuts down the Ethernet driver.
+
+\return The function returns a tEplKernel error code.
+
+\ingroup module_edrv
+*/
+//------------------------------------------------------------------------------
+tEplKernel edrv_shutdown(void)
 {
     // signal shutdown to the thread
-    muxUnbind(EdrvInstance_l.m_pCookie, MUX_PROTO_PROMISC,
-              (FUNCPTR)EdrvPacketHandler);
+    muxUnbind(edrvInstance_l.pCookie, MUX_PROTO_PROMISC,
+              (FUNCPTR)packetHandler);
 
     /* stop TX handler task */
-    EdrvInstance_l.m_fStopTxTask = TRUE;
-    semGive (EdrvInstance_l.m_txWakeupSem);
+    edrvInstance_l.fStopTxTask = TRUE;
+    semGive (edrvInstance_l.txWakeupSem);
     taskDelay (sysClkRateGet() / 10);
 
-    netPoolRelease(EdrvInstance_l.m_dataPoolId, NET_REL_IN_CONTEXT);
+    netPoolRelease(edrvInstance_l.dataPoolId, NET_REL_IN_CONTEXT);
 
-    semDelete(EdrvInstance_l.m_mutex);
-    semDelete(EdrvInstance_l.m_syncSem);
-    semDelete(EdrvInstance_l.m_txWakeupSem);
+    semDelete(edrvInstance_l.mutex);
+    semDelete(edrvInstance_l.syncSem);
+    semDelete(edrvInstance_l.txWakeupSem);
 
     // clear instance structure
-    EPL_MEMSET(&EdrvInstance_l, 0, sizeof (EdrvInstance_l));
+    EPL_MEMSET(&edrvInstance_l, 0, sizeof (edrvInstance_l));
 
     return kEplSuccessful; //assuming no problems with closing the handle
 }
 
-//---------------------------------------------------------------------------
-// Function:    edrv_sendTxBuffer
-//
-// Description: immediately starts the transmission of the buffer
-//
-// Parameters:  pBuffer_p   = buffer descriptor to transmit
-//
-// Returns:     Errorcode   = kEplSuccessful
-//---------------------------------------------------------------------------
-tEplKernel edrv_sendTxBuffer(tEdrvTxBuffer *pBuffer_p)
+//------------------------------------------------------------------------------
+/**
+\brief  Send Tx buffer
+
+This function sends the Tx buffer.
+
+\param  pBuffer_p           Tx buffer descriptor
+
+\return The function returns a tEplKernel error code.
+
+\ingroup module_edrv
+*/
+//------------------------------------------------------------------------------
+tEplKernel edrv_sendTxBuffer(tEdrvTxBuffer* pBuffer_p)
 {
-    tEplKernel          Ret = kEplSuccessful;
-    INT                 iRet;
-    M_BLK_ID            pPacket;
+    tEplKernel  ret = kEplSuccessful;
+    INT         muxRet;
+    M_BLK_ID    pPacket;
 
     if (pBuffer_p->txBufferNumber.pArg != NULL)
     {
-        Ret = kEplInvalidOperation;
+        ret = kEplInvalidOperation;
         goto Exit;
     }
 
-    semTake(EdrvInstance_l.m_mutex, WAIT_FOREVER);
-    if (EdrvInstance_l.m_pTransmittedTxBufferLastEntry == NULL)
+    semTake(edrvInstance_l.mutex, WAIT_FOREVER);
+    if (edrvInstance_l.pTransmittedTxBufferLastEntry == NULL)
     {
-        EdrvInstance_l.m_pTransmittedTxBufferLastEntry =
-            EdrvInstance_l.m_pTransmittedTxBufferFirstEntry = pBuffer_p;
+        edrvInstance_l.pTransmittedTxBufferLastEntry =
+            edrvInstance_l.pTransmittedTxBufferFirstEntry = pBuffer_p;
     }
     else
     {
-        EdrvInstance_l.m_pTransmittedTxBufferLastEntry->txBufferNumber.pArg =
+        edrvInstance_l.pTransmittedTxBufferLastEntry->txBufferNumber.pArg =
                                                                      pBuffer_p;
-        EdrvInstance_l.m_pTransmittedTxBufferLastEntry = pBuffer_p;
+        edrvInstance_l.pTransmittedTxBufferLastEntry = pBuffer_p;
     }
-    semGive(EdrvInstance_l.m_mutex);
+    semGive(edrvInstance_l.mutex);
 
     /* generate packet */
-    if ((pPacket = netTupleGet (EdrvInstance_l.m_dataPoolId, EDRV_MAX_MTU,
+    if ((pPacket = netTupleGet (edrvInstance_l.dataPoolId, EDRV_MAX_MTU,
                                 M_WAIT, MT_HEADER, TRUE)) == NULL)
     {
         EPL_DBGLVL_ERROR_TRACE("%s() Couldn't get tuple!\n", __func__);
@@ -576,43 +365,46 @@ tEplKernel edrv_sendTxBuffer(tEdrvTxBuffer *pBuffer_p)
     memcpy(pPacket->mBlkHdr.mData, pBuffer_p->pBuffer, pBuffer_p->txFrameSize);
     pPacket->mBlkHdr.mLen = pBuffer_p->txFrameSize;
     /* send packet out */
-    if ((iRet = muxSend(EdrvInstance_l.m_pCookie, pPacket)) != OK)
+    if ((muxRet = muxSend(edrvInstance_l.pCookie, pPacket)) != OK)
     {
-        EPL_DBGLVL_ERROR_TRACE("%s() muxSend returned %d\n", __func__, iRet);
-        /* as muxSend was not successfull we still own the packet and have to
+        EPL_DBGLVL_ERROR_TRACE("%s() muxSend returned %d\n", __func__, muxRet);
+        /* as muxSend was not successful we still own the packet and have to
          * free it! */
         netMblkClChainFree(pPacket);
-        Ret = kEplInvalidOperation;
+        ret = kEplInvalidOperation;
     }
 
 #if EDRV_USE_DIAGNOSTICS != FALSE
-     hrtimer_clock_gettime(0, &EdrvInstance_l.m_txSendTime);
+     hrtimer_clock_gettime(0, &edrvInstance_l.txSendTime);
 #endif
 
     /* wakeup TX Send Task */
-    semGive(EdrvInstance_l.m_txWakeupSem);
+    semGive(edrvInstance_l.txWakeupSem);
 
 Exit:
-    return Ret;
+    return ret;
 }
 
-//---------------------------------------------------------------------------
-// Function:    edrv_allocTxBuffer
-//
-// Description: Register a Tx-Buffer
-//
-// Parameters:  pBuffer_p   = pointer to Buffer structure
-//
-// Returns:     Errorcode   = kEplSuccessful
-//                          = kEplEdrvNoFreeBufEntry
-//---------------------------------------------------------------------------
-tEplKernel edrv_allocTxBuffer(tEdrvTxBuffer * pBuffer_p)
+//------------------------------------------------------------------------------
+/**
+\brief  Allocate Tx buffer
+
+This function allocates a Tx buffer.
+
+\param  pBuffer_p           Tx buffer descriptor
+
+\return The function returns a tEplKernel error code.
+
+\ingroup module_edrv
+*/
+//------------------------------------------------------------------------------
+tEplKernel edrv_allocTxBuffer(tEdrvTxBuffer* pBuffer_p)
 {
-    tEplKernel Ret = kEplSuccessful;
+    tEplKernel ret = kEplSuccessful;
 
     if (pBuffer_p->maxBufferSize > EDRV_MAX_FRAME_SIZE)
     {
-        Ret = kEplEdrvNoFreeBufEntry;
+        ret = kEplEdrvNoFreeBufEntry;
         goto Exit;
     }
 
@@ -620,104 +412,112 @@ tEplKernel edrv_allocTxBuffer(tEdrvTxBuffer * pBuffer_p)
     pBuffer_p->pBuffer = EPL_MALLOC(pBuffer_p->maxBufferSize);
     if (pBuffer_p->pBuffer == NULL)
     {
-        Ret = kEplEdrvNoFreeBufEntry;
+        ret = kEplEdrvNoFreeBufEntry;
         goto Exit;
     }
 
     pBuffer_p->txBufferNumber.pArg = NULL;
 
 Exit:
-    return Ret;
+    return ret;
 }
 
-//---------------------------------------------------------------------------
-// Function:    edrv_freeTxBuffer
-//
-// Description: Register a Tx-Buffer
-//
-// Parameters:  pBuffer_p   = pointer to Buffer structure
-//
-// Returns:     Errorcode   = kEplSuccessful
-//---------------------------------------------------------------------------
-tEplKernel edrv_freeTxBuffer(tEdrvTxBuffer * pBuffer_p)
+//------------------------------------------------------------------------------
+/**
+\brief  Free Tx buffer
+
+This function releases the Tx buffer.
+
+\param  pBuffer_p           Tx buffer descriptor
+
+\return The function returns a tEplKernel error code.
+
+\ingroup module_edrv
+*/
+//------------------------------------------------------------------------------
+tEplKernel edrv_freeTxBuffer(tEdrvTxBuffer* pBuffer_p)
 {
-    BYTE*   pbBuffer = pBuffer_p->pBuffer;
+    UINT8* pBuffer = pBuffer_p->pBuffer;
 
     // mark buffer as free, before actually freeing it
     pBuffer_p->pBuffer = NULL;
 
-    EPL_FREE(pbBuffer);
+    EPL_FREE(pBuffer);
 
     return kEplSuccessful;
 }
 
-//---------------------------------------------------------------------------
-// Function:    edrv_changeRxFilter
-//
-// Description: Change all rx-filters or one specific rx-filter
-//              of the openMAC
-//
-// Parameters:  pFilter_p           = pointer to array of filter entries
-//              uiCount_p           = number of filters in array
-//              uiEntryChanged_p    = selects one specific filter which is
-//                                    to be changed. If value is equal to
-//                                    or larger than uiCount_p, all entries
-//                                    are selected.
-//              uiChangeFlags_p     = If one specific entry is selected,
-//                                    these flag bits show which filter
-//                                    properties have been changed.
-//                                    available flags:
-//                                      EDRV_FILTER_CHANGE_MASK
-//                                      EDRV_FILTER_CHANGE_VALUE
-//                                      EDRV_FILTER_CHANGE_STATE
-//                                      EDRV_FILTER_CHANGE_AUTO_RESPONSE
-//                                    if auto-response delay is supported:
-//                                      EDRV_FILTER_CHANGE_AUTO_RESPONSE_DELAY
-//
-// Returns:     Errorcode           = kEplSuccessful
-//                                  = kEplEdrvInvalidParam
-//---------------------------------------------------------------------------
-tEplKernel edrv_changeRxFilter(tEdrvFilter*    pFilter_p __attribute__((unused)),
-                            unsigned int    uiCount_p __attribute__((unused)),
-                            unsigned int    uiEntryChanged_p __attribute__((unused)),
-                            unsigned int    uiChangeFlags_p __attribute__((unused)))
+//------------------------------------------------------------------------------
+/**
+\brief  Change Rx filter setup
+
+This function changes the Rx filter setup. The parameter entryChanged_p
+selects the Rx filter entry that shall be changed and \p changeFlags_p determines
+the property.
+If \p entryChanged_p is equal or larger count_p all Rx filters shall be changed.
+
+\note Rx filters are not supported by this driver!
+
+\param  pFilter_p           Base pointer of Rx filter array
+\param  count_p             Number of Rx filter array entries
+\param  entryChanged_p      Index of Rx filter entry that shall be changed
+\param  changeFlags_p       Bit mask that selects the changing Rx filter property
+
+\return The function returns a tEplKernel error code.
+
+\ingroup module_edrv
+*/
+//------------------------------------------------------------------------------
+tEplKernel edrv_changeRxFilter(tEdrvFilter* pFilter_p, UINT count_p,
+                                UINT entryChanged_p, UINT changeFlags_p)
 {
+    UNUSED_PARAMETER(pFilter_p);
+    UNUSED_PARAMETER(count_p);
+    UNUSED_PARAMETER(entryChanged_p);
+    UNUSED_PARAMETER(changeFlags_p);
+
     return kEplSuccessful;
 }
 
-//---------------------------------------------------------------------------
-//
-// Function:    edrv_clearRxMulticastMacAddr
-//
-// Description: Reset a multicast entry in the Ethernet controller
-//
-// Parameters:  pbMacAddr_p     = pointer to multicast entry to reset
-//
-// Returns:     Errorcode       = kEplSuccessful
-//---------------------------------------------------------------------------
-tEplKernel edrv_clearRxMulticastMacAddr (BYTE * pbMacAddr_p)
+//------------------------------------------------------------------------------
+/**
+\brief  Clear multicast address entry
+
+This function removes the multicast entry from the Ethernet controller.
+
+\param  pMacAddr_p  Multicast address
+
+\return The function returns a tEplKernel error code.
+
+\ingroup module_edrv
+*/
+//------------------------------------------------------------------------------
+tEplKernel edrv_clearRxMulticastMacAddr(UINT8* pMacAddr_p)
 {
-    if (muxMCastAddrDel(EdrvInstance_l.m_pCookie, (char *)pbMacAddr_p) != OK)
+    if (muxMCastAddrDel(edrvInstance_l.pCookie, (char *)pMacAddr_p) != OK)
     {
-        EPL_DBGLVL_EDRV_TRACE("error adding multicast addresses\n");
+        EPL_DBGLVL_EDRV_TRACE("error clearing multicast addresses\n");
         return kEplEdrvInitError;
     }
     return kEplSuccessful;
 }
 
-//---------------------------------------------------------------------------
-//
-// Function:    edrv_setRxMulticastMacAddr
-//
-// Description: Set a multicast entry into the Ethernet controller
-//
-// Parameters:  pbMacAddr_p     = pointer to multicast entry to set
-//
-// Returns:     Errorcode       = kEplSuccessful
-//---------------------------------------------------------------------------
-tEplKernel edrv_setRxMulticastMacAddr (BYTE * pbMacAddr_p)
+//------------------------------------------------------------------------------
+/**
+\brief  Set multicast address entry
+
+This function sets a multicast entry into the Ethernet controller.
+
+\param  pMacAddr_p  Multicast address
+
+\return The function returns a tEplKernel error code.
+
+\ingroup module_edrv
+*/
+//------------------------------------------------------------------------------
+tEplKernel edrv_setRxMulticastMacAddr(UINT8* pMacAddr_p)
 {
-    if (muxMCastAddrAdd(EdrvInstance_l.m_pCookie, (char *)pbMacAddr_p) != OK)
+    if (muxMCastAddrAdd(edrvInstance_l.pCookie, (char *)pMacAddr_p) != OK)
     {
         EPL_DBGLVL_EDRV_TRACE("error adding multicast addresses\n");
         return kEplEdrvInitError;
@@ -726,19 +526,229 @@ tEplKernel edrv_setRxMulticastMacAddr (BYTE * pbMacAddr_p)
 }
 
 #if EDRV_USE_DIAGNOSTICS != FALSE
-//---------------------------------------------------------------------------
-//
-// Function:    EdrvShow
-//
-// Description: Show Edrv information
-//
-// Parameters:  NONE
-//
-// Returns:     void
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+/**
+\brief  Show Ethernet driver information
+
+This function shows the Ethernet driver information.
+
+\ingroup module_edrv
+*/
+//------------------------------------------------------------------------------
 void EdrvShow(void)
 {
-    printf ("Max Tx Callback Latency: %ld ns\n",
-            EdrvInstance_l.m_maxTxLatency.tv_nsec);
+    printf("Max Tx Callback Latency: %ld ns\n",
+            edrvInstance_l.maxTxLatency.tv_nsec);
 }
 #endif
+
+//============================================================================//
+//            P R I V A T E   F U N C T I O N S                               //
+//============================================================================//
+/// \name Private Functions
+/// \{
+
+//------------------------------------------------------------------------------
+/**
+\brief  Edrv packet handler
+
+This function is the packet handler forwarding the frames to the dllk.
+
+\param  pCookie_p           Pointer to MUX interface
+\param  type_p              Network service type of the packet
+\param  pPkt_p              M_BLK tuple chain of the packet
+\param  pLLHInfo_p          Pointer to link level header structure
+\param  pNetCallbackId_p    Handle installed at bind time
+
+\return The function returns a BOOL.
+*/
+//------------------------------------------------------------------------------
+static BOOL packetHandler(void* pCookie_p, LONG type_p, M_BLK_ID pPkt_p,
+                                LL_HDR_INFO* pLLHInfo_p, void* pNetCallbackId_p)
+{
+    tEdrvInstance*  pInstance = (tEdrvInstance*) pNetCallbackId_p;
+    tEdrvRxBuffer   rxBuffer;
+    char            aBuffer[EDRV_MAX_MTU];
+
+    UNUSED_PARAMETER(pCookie_p);
+    UNUSED_PARAMETER(type_p);
+
+    if (memcmp(pPkt_p->mBlkHdr.mData + pLLHInfo_p->srcAddrOffset,
+               pInstance->initParam.aMacAddr, 6 ) != 0)
+    {
+        rxBuffer.bufferInFrame    = kEdrvBufferLastInFrame;
+        rxBuffer.rxFrameSize = netMblkToBufCopy(pPkt_p, aBuffer, NULL);
+        rxBuffer.pBuffer = (unsigned char*)aBuffer;
+
+        pInstance->initParam.pfnRxHandler(&rxBuffer);
+        netMblkClChainFree(pPkt_p);
+    }
+    else
+    {   // self generated traffic
+        EPL_DBGLVL_EDRV_TRACE ("%s() self generated traffic!\n", __func__);
+    }
+    return TRUE;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Shutdown Edrv MUX
+
+This function shuts down the Edrv MUX.
+
+\param  pCookie_p           Pointer to MUX interface
+\param  pNetCallbackId_p    Handle installed at bind time
+
+\return The function returns a STATUS error code.
+*/
+//------------------------------------------------------------------------------
+static STATUS muxShutdown(void* pCookie_p, void* pNetCallbackId_p)
+{
+    UNUSED_PARAMETER(pCookie_p);
+    UNUSED_PARAMETER(pNetCallbackId_p);
+
+    EPL_DBGLVL_EDRV_TRACE("muxShutdown()\n");
+    return OK;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Restart Edrv MUX
+
+This function restarts the Edrv MUX.
+
+\param  pEnd_p              END_OBJ passed to the MUX by the driver
+\param  pNetCallbackId_p    Handle installed at bind time
+
+\return The function returns a STATUS error code.
+*/
+//------------------------------------------------------------------------------
+static STATUS muxRestart(void* pEnd_p, void* pNetCallbackId_p)
+{
+    UNUSED_PARAMETER(pEnd_p);
+    UNUSED_PARAMETER(pNetCallbackId_p);
+
+    EPL_DBGLVL_EDRV_TRACE("muxRestart()\n");
+    return OK;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Edrv MUX error callback
+
+This is the error callback function of the Edrv MUX.
+
+\param  pEnd_p              END_OBJ passed to the MUX by the driver
+\param  pError_p            Pointer to structure containing the error
+\param  pNetCallbackId_p    Handle installed at bind time
+*/
+//------------------------------------------------------------------------------
+static void muxError(END_OBJ* pEnd_p, END_ERR* pError_p, void* pNetCallbackId_p)
+{
+    UNUSED_PARAMETER(pEnd_p);
+    UNUSED_PARAMETER(pError_p);
+    UNUSED_PARAMETER(pNetCallbackId_p);
+
+    EPL_DBGLVL_EDRV_TRACE("muxError()\n");
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Transmit callback task
+
+This is transmit callback task.
+
+\param  arg_p   Task argument contains the instance pointer
+
+\return The function returns 0.
+*/
+//------------------------------------------------------------------------------
+static INT txTask(INT arg_p)
+{
+    tEdrvInstance*  pInstance = (tEdrvInstance*) arg_p;
+    STATUS          result;
+#if EDRV_USE_DIAGNOSTICS != FALSE
+    struct timespec txLatency;
+#endif
+
+    while (TRUE)
+    {
+        result = semTake(pInstance->txWakeupSem, WAIT_FOREVER);
+        if (pInstance->fStopTxTask)
+        {
+            break;
+        }
+
+#if EDRV_USE_DIAGNOSTICS != FALSE
+        hrtimer_clock_gettime(0, &edrvInstance_l.txCbTime);
+        txLatency = hrtimer_subTimespec(edrvInstance_l.txCbTime,
+                                         edrvInstance_l.txSendTime);
+        if (hrtimer_compareTimespec(&txLatency, &edrvInstance_l.maxTxLatency) > 0)
+        {
+            edrvInstance_l.maxTxLatency = txLatency;
+        }
+#endif
+
+        if (result == OK)
+        {
+            if (pInstance->pTransmittedTxBufferFirstEntry != NULL)
+            {
+                tEdrvTxBuffer* pTxBuffer = pInstance->pTransmittedTxBufferFirstEntry;
+
+                if (pTxBuffer->pBuffer != NULL)
+                {
+                    semTake(pInstance->mutex, WAIT_FOREVER);
+                    pInstance->pTransmittedTxBufferFirstEntry =
+                        pInstance->pTransmittedTxBufferFirstEntry->txBufferNumber.pArg;
+                    if (pInstance->pTransmittedTxBufferFirstEntry == NULL)
+                    {
+                        pInstance->pTransmittedTxBufferLastEntry = NULL;
+                    }
+                    semGive(pInstance->mutex);
+
+                    pTxBuffer->txBufferNumber.pArg = NULL;
+
+                    if (pTxBuffer->pfnTxHandler != NULL)
+                    {
+                        pTxBuffer->pfnTxHandler(pTxBuffer);
+                    }
+                }
+                else
+                {
+                    logMsg("%s() pTxBuffer->pBuffer == NULL\n",
+                           (INT)__func__, 0, 0, 0, 0, 0);
+                }
+            }
+            else
+            {
+                logMsg("%s() pTransmittedTxBufferFirstEntry == NULL\n",
+                       (INT)__func__, 0, 0, 0, 0, 0);
+            }
+        }
+    }
+
+    return 0;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Get Edrv MAC address
+
+This function gets the interface's MAC address.
+
+\param  pCookie_p   Pointer to MUX interface
+\param  pIfName_p   Ethernet interface device name
+\param  pMacAddr_p  Pointer to store MAC address
+*/
+//------------------------------------------------------------------------------
+static void getMacAddr(PROTO_COOKIE pCookie_p, char* pIfName_p, UINT8* pMacAddr_p)
+{
+    char aData[6];
+
+    UNUSED_PARAMETER(pIfName_p);
+
+    muxIoctl(pCookie_p, EIOCGADDR, aData);
+    EPL_MEMCPY(pMacAddr_p, aData, 6);
+}
+
+///\}
