@@ -1188,7 +1188,7 @@ This function is called by omethlib in Rx interrupt context.
 
 \param  pArg_p      User specific argument holding the Tx response index
 \param  pPacket_p   Received packet
-\param  pFct_p      Function pointer to free function
+\param  pfnFree_p   Function pointer to free function
 
 \return The function returns an Rx buffer release command.
 \retval 0           Packet buffer \p pPacket_p is deferred

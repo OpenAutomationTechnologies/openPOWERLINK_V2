@@ -665,7 +665,7 @@ Exit:
 This function processes a cycle time violation. It skips the Tx packets of the
 current cycle and sets up the timer handle for the next cycle.
 
-\param  pEventArg_p     Timer event argument
+\param  nextTimerIrqNs_p    Irq time of next cycle [ns]
 
 \return The function returns the allocated packet buffer's descriptor.
 */

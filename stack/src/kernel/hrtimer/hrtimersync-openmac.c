@@ -950,6 +950,8 @@ static void drvCalcExtSyncIrqValue (void)
 \brief  Interrupt handler
 
 This function is invoked by the openMAC HW sync timer interrupt.
+
+\param  pArg_p  Interrupt service routine argument
 */
 //------------------------------------------------------------------------------
 static void drvInterruptHandler(void* pArg_p)
