@@ -725,8 +725,8 @@ tEplKernel edrv_startTxBuffer(tEdrvTxBuffer* pBuffer_p)
 
 This function is the interrupt service routine for the Ethernet driver.
 
-\param  irqNum_p        FIXME
-\param  ppDevInstData_p FIXME
+\param  irqNum_p            IRQ number
+\param  ppDevInstData_p     Pointer to private data provided by request_irq
 
 \return The function returns an IRQ handled code.
 */
@@ -1031,9 +1031,9 @@ static INT initOnePciDev(struct pci_dev* pPciDev_p, const struct pci_device_id* 
 
     // check hardware version, i.e. chip ID
     temp = EDRV_REGDW_READ(EDRV_REGDW_TCR);
-    if (((temp & EDRV_REGDW_TCR_VER_MASK) != EDRV_REGDW_TCR_VER_C) && 
-        ((temp & EDRV_REGDW_TCR_VER_MASK) != EDRV_REGDW_TCR_VER_D) && 
-        ((temp & EDRV_REGDW_TCR_VER_MASK) != EDRV_REGDW_TCR_VER_B) && 
+    if (((temp & EDRV_REGDW_TCR_VER_MASK) != EDRV_REGDW_TCR_VER_C) &&
+        ((temp & EDRV_REGDW_TCR_VER_MASK) != EDRV_REGDW_TCR_VER_D) &&
+        ((temp & EDRV_REGDW_TCR_VER_MASK) != EDRV_REGDW_TCR_VER_B) &&
         ((temp & EDRV_REGDW_TCR_VER_MASK) != EDRV_REGDW_TCR_VER_CP))
     {   // unsupported chip
         printk("%s Unsupported chip! TCR = 0x%08lX\n", __FUNCTION__, (ULONG) temp);
@@ -1149,7 +1149,7 @@ static void removeOnePciDev(struct pci_dev* pPciDev_p)
     if (edrvInstance_l.pPciDev != pPciDev_p)
     {   // trying to remove unknown device
         BUG_ON(edrvInstance_l.pPciDev != pPciDev_p);
-        goto Exit;
+        return;
     }
 
     // disable transmitter and receiver
@@ -1190,8 +1190,6 @@ static void removeOnePciDev(struct pci_dev* pPciDev_p)
     pci_release_regions(pPciDev_p);
 
     edrvInstance_l.pPciDev = NULL;
-
-Exit:
 }
 
 //------------------------------------------------------------------------------
