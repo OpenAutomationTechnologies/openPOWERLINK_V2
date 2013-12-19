@@ -778,7 +778,6 @@ DLL module.
                                 EPL_C_ADR_INVALID is stored if request is self
                                 addressed.
 \param  pSoaPayload_p           Pointer to SoA payload.
-\param  PARAMETER
 
 \return The function returns a tEplKernel error code.
 
