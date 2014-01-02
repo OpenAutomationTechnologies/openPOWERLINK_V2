@@ -12,9 +12,9 @@ VERSION = 0.4
 
 include makefile.settings
 
-APP_DIR_ARCH=$(STACK_ROOT)/examples/arch/xilinx_microblaze/no_os/gnu/cn_gpio_pcp
-APP_DIR_GEN=$(STACK_ROOT)/examples/demo_cn_embedded
-APP_DIR_COM=$(STACK_ROOT)/examples/common
+APP_DIR_ARCH=$(STACK_ROOT)/apps/arch/xilinx_microblaze/no_os/gnu/cn_gpio_pcp
+APP_DIR_GEN=$(STACK_ROOT)/apps/demo_cn_embedded
+APP_DIR_COM=$(STACK_ROOT)/apps/common
 
 OBJDICT_DIR=$(STACK_ROOT)/objdicts/cia401_cn
 

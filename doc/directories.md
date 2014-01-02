@@ -11,7 +11,7 @@ Directory                     | Description
 ----------------------------- | -----------------------------------------------
 cmake                         | Files for the CMake build tool
 doc                           | Documentation of the openPOWERLINK stack
-examples                      | Demo applications for evaluating the openPOWERLINK stack
+apps                          | Demo applications for evaluating the openPOWERLINK stack
 fpga                          | FPGA specific stuff like IP cores and VHDL code
 include                       | Include files needed for applications which link to the openPOWERLINK stack
 contrib                       | Additional libraries used by the openPOWERLINK stack

@@ -125,7 +125,7 @@ tool openCONFIGURATOR should be used. The tool is available as SourceForge
 project. [http://sourceforge.net/projects/openconf/](http://sourceforge.net/projects/openconf/)
 
 The openCONFIGURATOR projects used by the demo examples are found in the
-directory: *examples/openCONFIGURATOR_projects*.
+directory: *apps/openCONFIGURATOR_projects*.
 
 openCONFIGURATOR creates two file which are used by the openPOWERLINK stack
 and application:
