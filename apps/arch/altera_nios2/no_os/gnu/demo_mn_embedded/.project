@@ -314,34 +314,34 @@
 			<locationURI>USER_LOC/ledu.c</locationURI>
 		</link>
 		<link>
-			<name>examples/common/lcd/lcd.c</name>
+			<name>apps/common/lcd/lcd.c</name>
 			<type>1</type>
-			<locationURI>STACK_LOC/examples/common/lcd/lcd.c</locationURI>
+			<locationURI>STACK_LOC/apps/common/lcd/lcd.c</locationURI>
 		</link>
 		<link>
-			<name>examples/common/lcd/lcdl-16207.c</name>
+			<name>apps/common/lcd/lcdl-16207.c</name>
 			<type>1</type>
-			<locationURI>STACK_LOC/examples/common/lcd/lcdl-16207.c</locationURI>
+			<locationURI>STACK_LOC/apps/common/lcd/lcdl-16207.c</locationURI>
 		</link>
 		<link>
-			<name>examples/common/gpio/gpio-nios2.c</name>
+			<name>apps/common/gpio/gpio-nios2.c</name>
 			<type>1</type>
-			<locationURI>STACK_LOC/examples/common/gpio/gpio-nios2.c</locationURI>
+			<locationURI>STACK_LOC/apps/common/gpio/gpio-nios2.c</locationURI>
 		</link>
 		<link>
-			<name>examples/app.c</name>
+			<name>apps/app.c</name>
 			<type>1</type>
-			<locationURI>STACK_LOC/examples/demo_mn_embedded/app.c</locationURI>
+			<locationURI>STACK_LOC/apps/demo_mn_embedded/app.c</locationURI>
 		</link>
 		<link>
-			<name>examples/event-mn.c</name>
+			<name>apps/event-mn.c</name>
 			<type>1</type>
-			<locationURI>STACK_LOC/examples/demo_mn_embedded/event-mn.c</locationURI>
+			<locationURI>STACK_LOC/apps/demo_mn_embedded/event-mn.c</locationURI>
 		</link>
 		<link>
-			<name>examples/main.c</name>
+			<name>apps/main.c</name>
 			<type>1</type>
-			<locationURI>STACK_LOC/examples/demo_mn_embedded/main.c</locationURI>
+			<locationURI>STACK_LOC/apps/demo_mn_embedded/main.c</locationURI>
 		</link>
 	</linkedResources>
 	<variableList>

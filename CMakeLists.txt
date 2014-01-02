@@ -87,8 +87,8 @@ SET(LIB_SOURCE_DIR ${CMAKE_SOURCE_DIR}/contrib)
 
 SET(OBJDICT_DIR ${CMAKE_SOURCE_DIR}/objdicts)
 
-SET (DEMO_DIR ${CMAKE_SOURCE_DIR}/examples)
-SET (DEMO_COMMON_DIR ${CMAKE_SOURCE_DIR}/examples/common)
+SET (DEMO_DIR ${CMAKE_SOURCE_DIR}/apps)
+SET (DEMO_COMMON_DIR ${CMAKE_SOURCE_DIR}/apps/common)
 
 SET(POWERLINK_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/include)
 SET(USER_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/include/user)
@@ -122,17 +122,17 @@ ENDIF (WIN32)
 ###############################################################################
 # Add subdirectory of MN console demo application
 IF (CFG_DEMO_MN_CONSOLE)
-    ADD_SUBDIRECTORY(examples/demo_mn_console)
+    ADD_SUBDIRECTORY(apps/demo_mn_console)
 ENDIF (CFG_DEMO_MN_CONSOLE)
 
 # Add subdirectory of MN QT demo application
 IF (CFG_DEMO_MN_QT)
-    ADD_SUBDIRECTORY(examples/demo_mn_qt)
+    ADD_SUBDIRECTORY(apps/demo_mn_qt)
 ENDIF (CFG_DEMO_MN_QT)
 
 # Add subdirectory of CN console demo application
 IF (CFG_DEMO_CN_CONSOLE)
-    ADD_SUBDIRECTORY(examples/demo_cn_console)
+    ADD_SUBDIRECTORY(apps/demo_cn_console)
 ENDIF (CFG_DEMO_CN_CONSOLE)
 
 ###############################################################################

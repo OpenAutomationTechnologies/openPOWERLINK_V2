@@ -60,9 +60,9 @@ ${STACKROOT_DIR}/contrib/hostif \
 ${STACKROOT_DIR}/objdicts/CiA302-4_MN \
 ${STACKROOT_DIR}/stack/src/arch/altera_nios2 \
 ${STACKROOT_DIR}/stack/src \
-${STACKROOT_DIR}/examples/demo_mn_embedded \
-${STACKROOT_DIR}/examples/common/gpio \
-${STACKROOT_DIR}/examples/common/lcd \
+${STACKROOT_DIR}/apps/demo_mn_embedded \
+${STACKROOT_DIR}/apps/common/gpio \
+${STACKROOT_DIR}/apps/common/lcd \
 "
 
 ##################################
@@ -111,10 +111,10 @@ ${STACKROOT_DIR}/stack/src/user/sdo/sdo-sequ.c \
 ${STACKROOT_DIR}/stack/src/user/sdo/sdo-comu.c \
 ${STACKROOT_DIR}/stack/src/user/cfmu.c \
 ${STACKROOT_DIR}/stack/src/user/ledu.c \
-${STACKROOT_DIR}/examples/common/lcd/lcd.c \
-${STACKROOT_DIR}/examples/common/lcd/lcdl-16207.c \
-${STACKROOT_DIR}/examples/common/gpio/gpio-nios2.c \
-${STACKROOT_DIR}/examples/demo_mn_embedded/app.c \
-${STACKROOT_DIR}/examples/demo_mn_embedded/event-mn.c \
-${STACKROOT_DIR}/examples/demo_mn_embedded/main.c \
+${STACKROOT_DIR}/apps/common/lcd/lcd.c \
+${STACKROOT_DIR}/apps/common/lcd/lcdl-16207.c \
+${STACKROOT_DIR}/apps/common/gpio/gpio-nios2.c \
+${STACKROOT_DIR}/apps/demo_mn_embedded/app.c \
+${STACKROOT_DIR}/apps/demo_mn_embedded/event-mn.c \
+${STACKROOT_DIR}/apps/demo_mn_embedded/main.c \
 "

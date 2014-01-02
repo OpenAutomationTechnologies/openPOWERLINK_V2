@@ -404,19 +404,19 @@
 			<locationURI>STACK_LOC/objdicts/CiA401_CN</locationURI>
 		</link>
 		<link>
-			<name>examples/common/gpio</name>
+			<name>apps/common/gpio</name>
 			<type>2</type>
-			<locationURI>STACK_LOC/examples/common/gpio</locationURI>
+			<locationURI>STACK_LOC/apps/common/gpio</locationURI>
 		</link>
 		<link>
-			<name>examples/common/lcd</name>
+			<name>apps/common/lcd</name>
 			<type>2</type>
-			<locationURI>STACK_LOC/examples/common/lcd</locationURI>
+			<locationURI>STACK_LOC/apps/common/lcd</locationURI>
 		</link>
 		<link>
-			<name>examples</name>
+			<name>apps</name>
 			<type>2</type>
-			<locationURI>STACK_LOC/examples/demo_cn_embedded</locationURI>
+			<locationURI>STACK_LOC/apps/demo_cn_embedded</locationURI>
 		</link>
 	</linkedResources>
 	<variableList>

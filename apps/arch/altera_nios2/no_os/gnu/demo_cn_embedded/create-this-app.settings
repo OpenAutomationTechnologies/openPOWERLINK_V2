@@ -55,8 +55,8 @@ BSP_DIR=./bsp
 ##################################
 # Include path
 INCLUDES=". \
-${STACKROOT_DIR}/examples/common/gpio \
-${STACKROOT_DIR}/examples/common/lcd \
+${STACKROOT_DIR}/apps/common/gpio \
+${STACKROOT_DIR}/apps/common/lcd \
 ${STACKROOT_DIR}/include \
 ${STACKROOT_DIR}/contrib/omethlib \
 ${STACKROOT_DIR}/contrib/circbuf \
@@ -130,10 +130,10 @@ ${STACKROOT_DIR}/stack/src/user/sdo/sdo-asndu.c \
 ${STACKROOT_DIR}/stack/src/user/sdo/sdo-sequ.c \
 ${STACKROOT_DIR}/stack/src/user/sdo/sdo-comu.c \
 ${STACKROOT_DIR}/stack/src/user/ledu.c \
-${STACKROOT_DIR}/examples/common/lcd/lcd.c \
-${STACKROOT_DIR}/examples/common/lcd/lcdl-16207.c \
-${STACKROOT_DIR}/examples/common/gpio/gpio-nios2.c \
-${STACKROOT_DIR}/examples/demo_cn_embedded/app.c \
-${STACKROOT_DIR}/examples/demo_cn_embedded/event-cn.c \
-${STACKROOT_DIR}/examples/demo_cn_embedded/main.c \
+${STACKROOT_DIR}/apps/common/lcd/lcd.c \
+${STACKROOT_DIR}/apps/common/lcd/lcdl-16207.c \
+${STACKROOT_DIR}/apps/common/gpio/gpio-nios2.c \
+${STACKROOT_DIR}/apps/demo_cn_embedded/app.c \
+${STACKROOT_DIR}/apps/demo_cn_embedded/event-cn.c \
+${STACKROOT_DIR}/apps/demo_cn_embedded/main.c \
 "
