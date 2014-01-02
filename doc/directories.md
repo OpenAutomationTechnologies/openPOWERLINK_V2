@@ -14,7 +14,7 @@ doc                           | Documentation of the openPOWERLINK stack
 examples                      | Demo applications for evaluating the openPOWERLINK stack
 fpga                          | FPGA specific stuff like IP cores and VHDL code
 include                       | Include files needed for applications which link to the openPOWERLINK stack
-libs                          | Additional libraries used by the openPOWERLINK stack
+contrib                       | Additional libraries used by the openPOWERLINK stack
 stack                         | The actual openPOWERLINK stack
 staging                       | Unstable, unclean and untested source code
 tools                         | Miscelaneous tools and utilities

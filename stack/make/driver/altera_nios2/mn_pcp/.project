@@ -101,12 +101,12 @@
 		<link>
 			<name>amiarm.c</name>
 			<type>1</type>
-			<locationURI>OPLK_LOC/libs/ami/amiarm.c</locationURI>
+			<locationURI>OPLK_LOC/contrib/ami/amiarm.c</locationURI>
 		</link>
 		<link>
 			<name>trace-printf.c</name>
 			<type>1</type>
-			<locationURI>OPLK_LOC/libs/trace/trace-printf.c</locationURI>
+			<locationURI>OPLK_LOC/contrib/trace/trace-printf.c</locationURI>
 		</link>
 		<link>
 			<name>ctrlk.c</name>
@@ -201,12 +201,12 @@
 		<link>
 			<name>hostiflib.c</name>
 			<type>1</type>
-			<locationURI>OPLK_LOC/libs/hostif/hostiflib.c</locationURI>
+			<locationURI>OPLK_LOC/contrib/hostif/hostiflib.c</locationURI>
 		</link>
 		<link>
 			<name>hostiflib_l.c</name>
 			<type>1</type>
-			<locationURI>OPLK_LOC/libs/hostif/hostiflib_l.c</locationURI>
+			<locationURI>OPLK_LOC/contrib/hostif/hostiflib_l.c</locationURI>
 		</link>
 		<link>
 			<name>hrtimer-openmac.c</name>
@@ -216,12 +216,12 @@
 		<link>
 			<name>lfqueue.c</name>
 			<type>1</type>
-			<locationURI>OPLK_LOC/libs/hostif/lfqueue.c</locationURI>
+			<locationURI>OPLK_LOC/contrib/hostif/lfqueue.c</locationURI>
 		</link>
 		<link>
 			<name>linmem.c</name>
 			<type>1</type>
-			<locationURI>OPLK_LOC/libs/hostif/linmem.c</locationURI>
+			<locationURI>OPLK_LOC/contrib/hostif/linmem.c</locationURI>
 		</link>
 		<link>
 			<name>nmtk.c</name>
@@ -231,27 +231,27 @@
 		<link>
 			<name>omethlib.c</name>
 			<type>1</type>
-			<locationURI>OPLK_LOC/libs/omethlib/omethlib.c</locationURI>
+			<locationURI>OPLK_LOC/contrib/omethlib/omethlib.c</locationURI>
 		</link>
 		<link>
 			<name>omethlib_phycfg_ink.c</name>
 			<type>1</type>
-			<locationURI>OPLK_LOC/libs/omethlib/omethlib_phycfg_ink.c</locationURI>
+			<locationURI>OPLK_LOC/contrib/omethlib/omethlib_phycfg_ink.c</locationURI>
 		</link>
 		<link>
 			<name>omethlibint.c</name>
 			<type>1</type>
-			<locationURI>OPLK_LOC/libs/omethlib/omethlibint.c</locationURI>
+			<locationURI>OPLK_LOC/contrib/omethlib/omethlibint.c</locationURI>
 		</link>
 		<link>
 			<name>circbuffer.c</name>
 			<type>1</type>
-			<locationURI>OPLK_LOC/libs/circbuf/circbuffer.c</locationURI>
+			<locationURI>OPLK_LOC/contrib/circbuf/circbuffer.c</locationURI>
 		</link>
 		<link>
 			<name>circbuf-noos.c</name>
 			<type>1</type>
-			<locationURI>OPLK_LOC/libs/circbuf/circbuf-noos.c</locationURI>
+			<locationURI>OPLK_LOC/contrib/circbuf/circbuf-noos.c</locationURI>
 		</link>
 		<link>
 			<name>pdok.c</name>

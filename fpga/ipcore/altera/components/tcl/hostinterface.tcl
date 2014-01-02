@@ -7,7 +7,7 @@ set listSizeCmacro [list "SIZE_DYNBUF0" "SIZE_DYNBUF1" "SIZE_ERRORCOUNTER" "SIZE
 set listBaseCmacro [list "BASE_DYNBUF0" "BASE_DYNBUF1" "BASE_ERRORCOUNTER" "BASE_TXNMTQ" "BASE_TXGENQ" "BASE_TXSYNCQ" "BASE_TXVETHQ" "BASE_RXVETHQ" "BASE_K2UQ" "BASE_U2KQ" "BASE_TPDO" "BASE_RPDO"]
 
 proc generationCallback { instName tgtDir bspDir } {
-    set LIB_HOSTIF_path "$::OPLK_path/libs/hostif"
+    set LIB_HOSTIF_path "$::OPLK_path/contrib/hostif"
 
     puts ""
     puts "***********************************************************"

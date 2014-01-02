@@ -292,17 +292,17 @@
 		<link>
 			<name>SharedBuff.c</name>
 			<type>1</type>
-			<location>OPENPOWERLINK_DIR/libs/sharedbuff/SharedBuff.c</location>
+			<location>OPENPOWERLINK_DIR/contrib/sharedbuff/SharedBuff.c</location>
 		</link>
 		<link>
 			<name>ShbIpc-VxWorks.c</name>
 			<type>1</type>
-			<location>OPENPOWERLINK_DIR/libs/sharedbuff/ShbIpc-VxWorks.c</location>
+			<location>OPENPOWERLINK_DIR/contrib/sharedbuff/ShbIpc-VxWorks.c</location>
 		</link>
 		<link>
 			<name>amix86.c</name>
 			<type>1</type>
-			<location>OPENPOWERLINK_DIR/libs/ami/amix86.c</location>
+			<location>OPENPOWERLINK_DIR/contrib/ami/amix86.c</location>
 		</link>
 		<link>
 			<name>debug.c</name>
@@ -312,17 +312,17 @@
 		<link>
 			<name>hpetTimer.c</name>
 			<type>1</type>
-			<location>OPENPOWERLINK_DIR/libs/timer/vxworks-hrtimer/hpetTimer.c</location>
+			<location>OPENPOWERLINK_DIR/contrib/timer/vxworks-hrtimer/hpetTimer.c</location>
 		</link>
 		<link>
 			<name>hrtimer.c</name>
 			<type>1</type>
-			<location>OPENPOWERLINK_DIR/libs/timer/vxworks-hrtimer/hrtimer.c</location>
+			<location>OPENPOWERLINK_DIR/contrib/timer/vxworks-hrtimer/hrtimer.c</location>
 		</link>
 		<link>
 			<name>hrtimerLib.c</name>
 			<type>1</type>
-			<location>OPENPOWERLINK_DIR/libs/timer/vxworks-hrtimer/hrtimerLib.c</location>
+			<location>OPENPOWERLINK_DIR/contrib/timer/vxworks-hrtimer/hrtimerLib.c</location>
 		</link>
 	</linkedResources>
 </projectDescription>

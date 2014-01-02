@@ -202,8 +202,8 @@
 									<listOptionValue builtIn="false" value="../../../../../../../include"/>
 									<listOptionValue builtIn="false" value="../../../../../../../examples/common/lcd"/>
 									<listOptionValue builtIn="false" value="../../../../../../../examples/common/gpio"/>
-									<listOptionValue builtIn="false" value="../../../../../../../libs"/>
-									<listOptionValue builtIn="false" value="../../../../../../../libs/hostif"/>
+									<listOptionValue builtIn="false" value="../../../../../../../contrib"/>
+									<listOptionValue builtIn="false" value="../../../../../../../contrib/hostif"/>
 									<listOptionValue builtIn="false" value="../../../../../../../objdicts/CiA302-4_MN"/>
 									<listOptionValue builtIn="false" value="../../../../../../../stack/src"/>
 									<listOptionValue builtIn="false" value=".././"/>

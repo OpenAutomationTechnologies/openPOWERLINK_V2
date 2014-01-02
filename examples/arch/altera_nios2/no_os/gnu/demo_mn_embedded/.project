@@ -99,34 +99,34 @@
 	</natures>
 	<linkedResources>
 		<link>
-			<name>libs/amiarm.c</name>
+			<name>contrib/amiarm.c</name>
 			<type>1</type>
-			<locationURI>STACK_LOC/libs/ami/amiarm.c</locationURI>
+			<locationURI>STACK_LOC/contrib/ami/amiarm.c</locationURI>
 		</link>
 		<link>
-			<name>libs/hostiflib.c</name>
+			<name>contrib/hostiflib.c</name>
 			<type>1</type>
-			<locationURI>STACK_LOC/libs/hostif/hostiflib.c</locationURI>
+			<locationURI>STACK_LOC/contrib/hostif/hostiflib.c</locationURI>
 		</link>
 		<link>
-			<name>libs/hostiflib_l.c</name>
+			<name>contrib/hostiflib_l.c</name>
 			<type>1</type>
-			<locationURI>STACK_LOC/libs/hostif/hostiflib_l.c</locationURI>
+			<locationURI>STACK_LOC/contrib/hostif/hostiflib_l.c</locationURI>
 		</link>
 		<link>
-			<name>libs/lfqueue.c</name>
+			<name>contrib/lfqueue.c</name>
 			<type>1</type>
-			<locationURI>STACK_LOC/libs/hostif/lfqueue.c</locationURI>
+			<locationURI>STACK_LOC/contrib/hostif/lfqueue.c</locationURI>
 		</link>
 		<link>
-			<name>libs/linmem.c</name>
+			<name>contrib/linmem.c</name>
 			<type>1</type>
-			<locationURI>STACK_LOC/libs/hostif/linmem.c</locationURI>
+			<locationURI>STACK_LOC/contrib/hostif/linmem.c</locationURI>
 		</link>
 		<link>
-			<name>libs/trace-printf.c</name>
+			<name>contrib/trace-printf.c</name>
 			<type>1</type>
-			<locationURI>STACK_LOC/libs/trace/trace-printf.c</locationURI>
+			<locationURI>STACK_LOC/contrib/trace/trace-printf.c</locationURI>
 		</link>
 		<link>
 			<name>stack/arch/altera_nios2/target-nios2.c</name>

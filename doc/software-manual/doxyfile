@@ -680,8 +680,8 @@ WARN_LOGFILE           =
 INPUT                  = ../../stack/src \
                          ../../include \
                          ../../objdicts \
-                         ../../libs/circbuf \
-                         ../../libs/hostif \
+                         ../../contrib/circbuf \
+                         ../../contrib/hostif \
                          calmodules.txt \
                          usermodules.txt \
                          kernelmodules.txt \
@@ -1603,7 +1603,7 @@ SEARCH_INCLUDES        = YES
 # the preprocessor.
 
 INCLUDE_PATH           = ../../stack/make/lib/libpowerlink \
-                         ../../libs \
+                         ../../contrib \
                          ../../include \
                          ../../objdicts/CiA302-4_MN
 

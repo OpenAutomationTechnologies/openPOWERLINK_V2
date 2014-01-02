@@ -127,39 +127,39 @@
 			<locationURI>STACK_LOC/objdicts/generic</locationURI>
 		</link>
 		<link>
-			<name>libs/amiarm.c</name>
+			<name>contrib/amiarm.c</name>
 			<type>1</type>
-			<locationURI>STACK_LOC/libs/ami/amiarm.c</locationURI>
+			<locationURI>STACK_LOC/contrib/ami/amiarm.c</locationURI>
 		</link>
 		<link>
-			<name>libs/circbuf-noos.c</name>
+			<name>contrib/circbuf-noos.c</name>
 			<type>1</type>
-			<locationURI>STACK_LOC/libs/circbuf/circbuf-noos.c</locationURI>
+			<locationURI>STACK_LOC/contrib/circbuf/circbuf-noos.c</locationURI>
 		</link>
 		<link>
-			<name>libs/circbuffer.c</name>
+			<name>contrib/circbuffer.c</name>
 			<type>1</type>
-			<locationURI>STACK_LOC/libs/circbuf/circbuffer.c</locationURI>
+			<locationURI>STACK_LOC/contrib/circbuf/circbuffer.c</locationURI>
 		</link>
 		<link>
-			<name>libs/omethlib.c</name>
+			<name>contrib/omethlib.c</name>
 			<type>1</type>
-			<locationURI>STACK_LOC/libs/omethlib/omethlib.c</locationURI>
+			<locationURI>STACK_LOC/contrib/omethlib/omethlib.c</locationURI>
 		</link>
 		<link>
-			<name>libs/omethlib_phycfg_generic.c</name>
+			<name>contrib/omethlib_phycfg_generic.c</name>
 			<type>1</type>
-			<locationURI>STACK_LOC/libs/omethlib/omethlib_phycfg_generic.c</locationURI>
+			<locationURI>STACK_LOC/contrib/omethlib/omethlib_phycfg_generic.c</locationURI>
 		</link>
 		<link>
-			<name>libs/omethlibint.c</name>
+			<name>contrib/omethlibint.c</name>
 			<type>1</type>
-			<locationURI>STACK_LOC/libs/omethlib/omethlibint.c</locationURI>
+			<locationURI>STACK_LOC/contrib/omethlib/omethlibint.c</locationURI>
 		</link>
 		<link>
-			<name>libs/trace-printf.c</name>
+			<name>contrib/trace-printf.c</name>
 			<type>1</type>
-			<locationURI>STACK_LOC/libs/trace/trace-printf.c</locationURI>
+			<locationURI>STACK_LOC/contrib/trace/trace-printf.c</locationURI>
 		</link>
 		<link>
 			<name>stack/arch/xilinx_microblaze</name>

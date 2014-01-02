@@ -18,7 +18,7 @@ APP_DIR_COM=$(STACK_ROOT)/examples/common
 
 OBJDICT_DIR=$(STACK_ROOT)/objdicts/cia401_cn
 
-LIBS_DIR=$(STACK_ROOT)/libs
+LIBS_DIR=$(STACK_ROOT)/contrib
 KERNEL_DIR=$(STACK_ROOT)/stack/src/kernel
 USER_DIR=$(STACK_ROOT)/stack/src/user
 COMMON_DIR=$(STACK_ROOT)/stack/src/common
@@ -162,10 +162,10 @@ endif
 # set endian according to bus interface
 ifeq ($(BUS_INTERFACE),axi)
 	PROC_FEATURES+= -mlittle-endian
-	SRCFILES+= $(STACK_ROOT)/libs/ami/amiarm.c
+	SRCFILES+= $(STACK_ROOT)/contrib/ami/amiarm.c
 else
 	PROC_FEATURES+= -mbig-endian
-	SRCFILES+= $(STACK_ROOT)/libs/ami/amibe.c
+	SRCFILES+= $(STACK_ROOT)/contrib/ami/amibe.c
 endif
 
 ###################################
