@@ -56,7 +56,7 @@ SOPC_DIR=${STACKROOT_DIR}/fpga/boards/altera/TERASIC_DE2-115/mn_par_host/
 # Include path
 INCLUDES="\
 ${STACKROOT_DIR}/include \
-${STACKROOT_DIR}/libs/hostif \
+${STACKROOT_DIR}/contrib/hostif \
 ${STACKROOT_DIR}/objdicts/CiA302-4_MN \
 ${STACKROOT_DIR}/stack/src/arch/altera_nios2 \
 ${STACKROOT_DIR}/stack/src \
@@ -68,12 +68,12 @@ ${STACKROOT_DIR}/examples/common/lcd \
 ##################################
 # Source files
 SRCFILES="\
-${STACKROOT_DIR}/libs/ami/amiarm.c \
-${STACKROOT_DIR}/libs/hostif/hostiflib.c \
-${STACKROOT_DIR}/libs/hostif/hostiflib_l.c \
-${STACKROOT_DIR}/libs/hostif/lfqueue.c \
-${STACKROOT_DIR}/libs/hostif/linmem.c \
-${STACKROOT_DIR}/libs/trace/trace-printf.c \
+${STACKROOT_DIR}/contrib/ami/amiarm.c \
+${STACKROOT_DIR}/contrib/hostif/hostiflib.c \
+${STACKROOT_DIR}/contrib/hostif/hostiflib_l.c \
+${STACKROOT_DIR}/contrib/hostif/lfqueue.c \
+${STACKROOT_DIR}/contrib/hostif/linmem.c \
+${STACKROOT_DIR}/contrib/trace/trace-printf.c \
 ${STACKROOT_DIR}/stack/src/arch/altera_nios2/target-nios2.c \
 ${STACKROOT_DIR}/stack/src/arch/altera_nios2/lock-dualprocnoos.c \
 ${STACKROOT_DIR}/stack/src/common/dll/dllcal-hostif.c \

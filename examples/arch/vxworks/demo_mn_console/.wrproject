@@ -13,11 +13,11 @@
             <stringAttribute key="BLD::Info|GlobalMacro|PROJECT_TYPE" value="DKM"/>
             <listAttribute key="BLD::Info|Incl|PENTIUM4gnu">
                 <stringAttribute value="-I$(WIND_BASE)/target/h/wrn/coreip"/>
-                <stringAttribute value="-I$(PRJ_ROOT_DIR)/../../../../libs/timer/vxworks-hrtimer"/>
+                <stringAttribute value="-I$(PRJ_ROOT_DIR)/../../../../contrib/timer/vxworks-hrtimer"/>
                 <stringAttribute value="-I$(PRJ_ROOT_DIR)/../../../../objdicts/CiA302-4_MN"/>
                 <stringAttribute value="-I$(PRJ_ROOT_DIR)"/>
                 <stringAttribute value="-I$(PRJ_ROOT_DIR)/../../../../include"/>
-                <stringAttribute value="-I$(PRJ_ROOT_DIR)/../../../../libs/sharedbuff"/>
+                <stringAttribute value="-I$(PRJ_ROOT_DIR)/../../../../contrib/sharedbuff"/>
                 <stringAttribute value="-I$(PRJ_ROOT_DIR)/../../../../stack/src"/>
                 <stringAttribute value="-I$(WIND_BASE)/target/h"/>
             </listAttribute>

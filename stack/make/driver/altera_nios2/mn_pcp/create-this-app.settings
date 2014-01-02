@@ -61,9 +61,9 @@ BSP_DIR=./bsp
 # Include path
 INCLUDES=". \
 ${STACKROOT_DIR}/include \
-${STACKROOT_DIR}/libs/omethlib \
-${STACKROOT_DIR}/libs/hostif \
-${STACKROOT_DIR}/libs/circbuf \
+${STACKROOT_DIR}/contrib/omethlib \
+${STACKROOT_DIR}/contrib/hostif \
+${STACKROOT_DIR}/contrib/circbuf \
 ${STACKROOT_DIR}/stack/include/target \
 ${STACKROOT_DIR}/stack/src/arch/altera_nios2 \
 ${STACKROOT_DIR}/stack/src"
@@ -72,17 +72,17 @@ ${STACKROOT_DIR}/stack/src"
 # Source files
 SRCFILES="\
 daemon.c \
-${STACKROOT_DIR}/libs/ami/amiarm.c \
-${STACKROOT_DIR}/libs/hostif/hostiflib.c \
-${STACKROOT_DIR}/libs/hostif/hostiflib_l.c \
-${STACKROOT_DIR}/libs/hostif/lfqueue.c \
-${STACKROOT_DIR}/libs/hostif/linmem.c \
-${STACKROOT_DIR}/libs/omethlib/omethlib.c \
-${STACKROOT_DIR}/libs/omethlib/omethlibint.c \
-${STACKROOT_DIR}/libs/omethlib/omethlib_phycfg_ink.c \
-${STACKROOT_DIR}/libs/circbuf/circbuffer.c \
-${STACKROOT_DIR}/libs/circbuf/circbuf-noos.c \
-${STACKROOT_DIR}/libs/trace/trace-printf.c \
+${STACKROOT_DIR}/contrib/ami/amiarm.c \
+${STACKROOT_DIR}/contrib/hostif/hostiflib.c \
+${STACKROOT_DIR}/contrib/hostif/hostiflib_l.c \
+${STACKROOT_DIR}/contrib/hostif/lfqueue.c \
+${STACKROOT_DIR}/contrib/hostif/linmem.c \
+${STACKROOT_DIR}/contrib/omethlib/omethlib.c \
+${STACKROOT_DIR}/contrib/omethlib/omethlibint.c \
+${STACKROOT_DIR}/contrib/omethlib/omethlib_phycfg_ink.c \
+${STACKROOT_DIR}/contrib/circbuf/circbuffer.c \
+${STACKROOT_DIR}/contrib/circbuf/circbuf-noos.c \
+${STACKROOT_DIR}/contrib/trace/trace-printf.c \
 ${STACKROOT_DIR}/stack/src/arch/altera_nios2/openmac-nios2.c \
 ${STACKROOT_DIR}/stack/src/arch/altera_nios2/target-nios2.c \
 ${STACKROOT_DIR}/stack/src/arch/altera_nios2/lock-dualprocnoos.c \
