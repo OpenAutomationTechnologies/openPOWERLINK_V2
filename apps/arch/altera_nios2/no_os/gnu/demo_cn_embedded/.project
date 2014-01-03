@@ -104,14 +104,14 @@
 			<locationURI>STACK_LOC/contrib/ami/amiarm.c</locationURI>
 		</link>
 		<link>
-			<name>contrib/circbuf-noos.c</name>
+			<name>stack/common/circbuf-noos.c</name>
 			<type>1</type>
-			<locationURI>STACK_LOC/contrib/circbuf/circbuf-noos.c</locationURI>
+			<locationURI>COMMON_LOC/circbuf/circbuf-noos.c</locationURI>
 		</link>
 		<link>
-			<name>contrib/circbuffer.c</name>
+			<name>stack/common/circbuffer.c</name>
 			<type>1</type>
-			<locationURI>STACK_LOC/contrib/circbuf/circbuffer.c</locationURI>
+			<locationURI>COMMON_LOC/circbuf/circbuffer.c</locationURI>
 		</link>
 		<link>
 			<name>contrib/omethlib.c</name>

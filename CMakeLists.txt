@@ -102,7 +102,7 @@ INCLUDE_DIRECTORIES (
     ${POWERLINK_INCLUDE_DIR}
     ${POWERLINK_SOURCE_DIR}
     ${LIB_SOURCE_DIR}/sharedbuff
-    ${LIB_SOURCE_DIR}/circbuf
+    ${COMMON_SOURCE_DIR}/circbuf
     ${LIB_SOURCE_DIR}/ami
     ${LIB_SOURCE_DIR}
 )
