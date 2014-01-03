@@ -93,9 +93,9 @@ ELSE(CFG_KERNEL_STACK_DIRECTLINK)
     ADD_SUBDIRECTORY(stack/make/lib/libpowerlink_user)
 
     IF (CFG_KERNEL_STACK_USERSPACE_DAEMON)
-        ADD_SUBDIRECTORY(stack/make/driver/linux/powerlink_userspace_daemon)
+        ADD_SUBDIRECTORY(drivers/linux/powerlink_userspace_daemon)
     ELSEIF (CFG_KERNEL_STACK_KERNEL_MODULE)
-        ADD_SUBDIRECTORY(stack/make/driver/linux/powerlink_kernel_module)
+        ADD_SUBDIRECTORY(drivers/linux/powerlink_kernel_module)
     ENDIF(CFG_KERNEL_STACK_USERSPACE_DAEMON)
 
 ENDIF (CFG_KERNEL_STACK_DIRECTLINK)
