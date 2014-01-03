@@ -1,4 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <library>
-    <path path="../../../../ipcore/**/*"/>
+    <path path="../../../../ipcore/altera/components.ipx" />
     <path path="../../../../ipcore/altera/qsys/mn_host.qsys"/>
+    <path path="../ipcore/multiplexedAdbus_hw.tcl"/>
 </library>

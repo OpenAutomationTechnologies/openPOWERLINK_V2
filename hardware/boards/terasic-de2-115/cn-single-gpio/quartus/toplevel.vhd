@@ -103,7 +103,7 @@ end toplevel;
 
 architecture rtl of toplevel is
 
-    component cn_directIO is
+    component cnSingleGpio is
         port (
             clk25_clk                                       : in    std_logic                     := 'X';
             clk50_clk                                       : in    std_logic                     := 'X';
@@ -150,7 +150,7 @@ architecture rtl of toplevel is
             -- KEY
             key_pio_export                                  : in    std_logic_vector(3 downto 0)  := (others => 'X')
         );
-    end component cn_directIO;
+    end component cnSingleGpio;
 
     -- PLL component
     component pll
@@ -187,7 +187,7 @@ begin
 
     LEDG        <= "000000" & plk_status_error;
 
-    inst : component cn_directIO
+    inst : component cnSingleGpio
         port map (
             clk25_clk                                       => clk25,
             clk50_clk                                       => clk50,

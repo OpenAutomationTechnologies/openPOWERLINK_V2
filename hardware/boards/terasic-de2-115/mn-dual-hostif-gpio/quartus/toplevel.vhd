@@ -102,7 +102,7 @@ end toplevel;
 
 architecture rtl of toplevel is
 
-    component mn_dual_nios2 is
+    component mnDualHostifGpio is
         port (
             clk25_clk                           : in    std_logic;
             clk50_clk                           : in    std_logic                     := 'X';
@@ -147,7 +147,7 @@ architecture rtl of toplevel is
             lcd_RS                              : out   std_logic;
             lcd_RW                              : out   std_logic
         );
-    end component mn_dual_nios2;
+    end component mnDualHostifGpio;
 
     -- PLL component
     component pll
@@ -180,7 +180,7 @@ begin
 
     SDRAM_CLK <= clk100_p;
 
-    inst : component mn_dual_nios2
+    inst : component mnDualHostifGpio
         port map (
             clk25_clk                           => clk25,
             clk50_clk                           => clk50,

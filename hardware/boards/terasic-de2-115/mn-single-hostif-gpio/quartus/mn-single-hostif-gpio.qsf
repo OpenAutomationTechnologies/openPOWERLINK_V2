@@ -1,0 +1,194 @@
+# ------------------------------------------------------------------------------
+#
+#     (c) B&R, 2013
+#
+#     Redistribution and use in source and binary forms, with or without
+#     modification, are permitted provided that the following conditions
+#     are met:
+#
+#     1. Redistributions of source code must retain the above copyright
+#        notice, this list of conditions and the following disclaimer.
+#
+#     2. Redistributions in binary form must reproduce the above copyright
+#        notice, this list of conditions and the following disclaimer in the
+#        documentation and/or other materials provided with the distribution.
+#
+#     3. Neither the name of B&R nor the names of its
+#        contributors may be used to endorse or promote products derived
+#        from this software without prior written permission. For written
+#        permission, please contact office@br-automation.com
+#
+#     THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+#     "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+#     LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+#     FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+#     COPYRIGHT HOLDERS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+#     INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+#     BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+#     LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+#     CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+#     LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+#     ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+#     POSSIBILITY OF SUCH DAMAGE.
+#
+# ------------------------------------------------------------------------------
+
+# Project settings
+set_global_assignment -name ORIGINAL_QUARTUS_VERSION    "13.0 SP1"
+set_global_assignment -name PROJECT_CREATION_TIME_DATE  "08:00:00  December 20, 2013"
+set_global_assignment -name LAST_QUARTUS_VERSION        "13.0 SP1"
+
+# Device settings
+set_global_assignment -name FAMILY                      "Cyclone IV E"
+set_global_assignment -name DEVICE                      "EP4CE115F29C7"
+set_global_assignment -name STRATIX_DEVICE_IO_STANDARD  "3.3-V LVTTL"
+set_global_assignment -name MIN_CORE_JUNCTION_TEMP      0
+set_global_assignment -name MAX_CORE_JUNCTION_TEMP      85
+
+# Compilation flow settings
+set_global_assignment -name ERROR_CHECK_FREQUENCY_DIVISOR   1
+set_global_assignment -name OPTIMIZE_HOLD_TIMING            "ALL PATHS"
+set_global_assignment -name OPTIMIZE_MULTI_CORNER_TIMING    ON
+set_global_assignment -name TIMEQUEST_MULTICORNER_ANALYSIS  ON
+set_global_assignment -name SYNCHRONIZER_IDENTIFICATION     AUTO
+set_global_assignment -name TIMEQUEST_DO_CCPP_REMOVAL       ON
+set_global_assignment -name USE_CONFIGURATION_DEVICE        ON
+set_global_assignment -name SMART_RECOMPILE                 ON
+set_global_assignment -name CRC_ERROR_OPEN_DRAIN            OFF
+set_global_assignment -name OUTPUT_IO_TIMING_NEAR_END_VMEAS "HALF VCCIO" -rise
+set_global_assignment -name OUTPUT_IO_TIMING_NEAR_END_VMEAS "HALF VCCIO" -fall
+set_global_assignment -name OUTPUT_IO_TIMING_FAR_END_VMEAS  "HALF SIGNAL SWING" -rise
+set_global_assignment -name OUTPUT_IO_TIMING_FAR_END_VMEAS  "HALF SIGNAL SWING" -fall
+set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE   -section_id Top
+set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT_AND_ROUTING -section_id Top
+set_global_assignment -name PARTITION_COLOR 16764057        -section_id Top
+set_global_assignment -name POWER_PRESET_COOLING_SOLUTION   "23 MM HEAT SINK WITH 200 LFPM AIRFLOW"
+set_global_assignment -name POWER_BOARD_THERMAL_MODEL       "NONE (CONSERVATIVE)"
+
+# EPCS dedicated path
+set_global_assignment -name CYCLONEII_RESERVE_NCEO_AFTER_CONFIGURATION  "USE AS REGULAR IO"
+set_global_assignment -name RESERVE_DATA0_AFTER_CONFIGURATION           "USE AS REGULAR IO"
+set_global_assignment -name RESERVE_DATA1_AFTER_CONFIGURATION           "USE AS REGULAR IO"
+set_global_assignment -name RESERVE_FLASH_NCE_AFTER_CONFIGURATION       "USE AS REGULAR IO"
+set_global_assignment -name RESERVE_DCLK_AFTER_CONFIGURATION            "USE AS REGULAR IO"
+
+# Design settings
+set_global_assignment -name TOP_LEVEL_ENTITY    toplevel
+set_global_assignment -name SDC_FILE            mnSingleHostifGpio.sdc
+set_global_assignment -name VHDL_FILE           toplevel.vhd
+set_global_assignment -name QIP_FILE            ../../common/ipcore/pll.qip
+set_global_assignment -name QIP_FILE            mnSingleHostifGpio/synthesis/mnSingleHostifGpio.qip
+
+# pin assignments
+set_location_assignment PIN_Y2      -to EXT_CLK
+
+set_location_assignment PIN_N7      -to EPCS_DATA0
+set_location_assignment PIN_P3      -to EPCS_DCLK
+set_location_assignment PIN_E2      -to EPCS_SCE
+set_location_assignment PIN_F4      -to EPCS_SDO
+
+set_location_assignment PIN_E22     -to LEDG[1]
+set_location_assignment PIN_E21     -to LEDG[0]
+
+set_location_assignment PIN_L5      -to LCD_ON
+set_location_assignment PIN_L6      -to LCD_BLON
+set_location_assignment PIN_M5      -to LCD_DQ[7]
+set_location_assignment PIN_M3      -to LCD_DQ[6]
+set_location_assignment PIN_K2      -to LCD_DQ[5]
+set_location_assignment PIN_K1      -to LCD_DQ[4]
+set_location_assignment PIN_K7      -to LCD_DQ[3]
+set_location_assignment PIN_L2      -to LCD_DQ[2]
+set_location_assignment PIN_L1      -to LCD_DQ[1]
+set_location_assignment PIN_L3      -to LCD_DQ[0]
+set_location_assignment PIN_L4      -to LCD_E
+set_location_assignment PIN_M2      -to LCD_RS
+set_location_assignment PIN_M1      -to LCD_RW
+
+set_location_assignment PIN_Y7      -to SDRAM_ADDR[12]
+set_location_assignment PIN_AA5     -to SDRAM_ADDR[11]
+set_location_assignment PIN_R5      -to SDRAM_ADDR[10]
+set_location_assignment PIN_Y6      -to SDRAM_ADDR[9]
+set_location_assignment PIN_Y5      -to SDRAM_ADDR[8]
+set_location_assignment PIN_AA7     -to SDRAM_ADDR[7]
+set_location_assignment PIN_W7      -to SDRAM_ADDR[6]
+set_location_assignment PIN_W8      -to SDRAM_ADDR[5]
+set_location_assignment PIN_V5      -to SDRAM_ADDR[4]
+set_location_assignment PIN_P1      -to SDRAM_ADDR[3]
+set_location_assignment PIN_U8      -to SDRAM_ADDR[2]
+set_location_assignment PIN_V8      -to SDRAM_ADDR[1]
+set_location_assignment PIN_R6      -to SDRAM_ADDR[0]
+set_location_assignment PIN_R4      -to SDRAM_BA[1]
+set_location_assignment PIN_U7      -to SDRAM_BA[0]
+set_location_assignment PIN_V7      -to SDRAM_CAS_n
+set_location_assignment PIN_AA6     -to SDRAM_CKE
+set_location_assignment PIN_AE5     -to SDRAM_CLK
+set_location_assignment PIN_T4      -to SDRAM_CS_n
+set_location_assignment PIN_U1      -to SDRAM_DQ[31]
+set_location_assignment PIN_U4      -to SDRAM_DQ[30]
+set_location_assignment PIN_T3      -to SDRAM_DQ[29]
+set_location_assignment PIN_R3      -to SDRAM_DQ[28]
+set_location_assignment PIN_R2      -to SDRAM_DQ[27]
+set_location_assignment PIN_R1      -to SDRAM_DQ[26]
+set_location_assignment PIN_R7      -to SDRAM_DQ[25]
+set_location_assignment PIN_U5      -to SDRAM_DQ[24]
+set_location_assignment PIN_L7      -to SDRAM_DQ[23]
+set_location_assignment PIN_M7      -to SDRAM_DQ[22]
+set_location_assignment PIN_M4      -to SDRAM_DQ[21]
+set_location_assignment PIN_N4      -to SDRAM_DQ[20]
+set_location_assignment PIN_N3      -to SDRAM_DQ[19]
+set_location_assignment PIN_P2      -to SDRAM_DQ[18]
+set_location_assignment PIN_L8      -to SDRAM_DQ[17]
+set_location_assignment PIN_M8      -to SDRAM_DQ[16]
+set_location_assignment PIN_AC2     -to SDRAM_DQ[15]
+set_location_assignment PIN_AB3     -to SDRAM_DQ[14]
+set_location_assignment PIN_AC1     -to SDRAM_DQ[13]
+set_location_assignment PIN_AB2     -to SDRAM_DQ[12]
+set_location_assignment PIN_AA3     -to SDRAM_DQ[11]
+set_location_assignment PIN_AB1     -to SDRAM_DQ[10]
+set_location_assignment PIN_Y4      -to SDRAM_DQ[9]
+set_location_assignment PIN_Y3      -to SDRAM_DQ[8]
+set_location_assignment PIN_U3      -to SDRAM_DQ[7]
+set_location_assignment PIN_V1      -to SDRAM_DQ[6]
+set_location_assignment PIN_V2      -to SDRAM_DQ[5]
+set_location_assignment PIN_V3      -to SDRAM_DQ[4]
+set_location_assignment PIN_W1      -to SDRAM_DQ[3]
+set_location_assignment PIN_V4      -to SDRAM_DQ[2]
+set_location_assignment PIN_W2      -to SDRAM_DQ[1]
+set_location_assignment PIN_W3      -to SDRAM_DQ[0]
+set_location_assignment PIN_N8      -to SDRAM_DQM[3]
+set_location_assignment PIN_K8      -to SDRAM_DQM[2]
+set_location_assignment PIN_W4      -to SDRAM_DQM[1]
+set_location_assignment PIN_U2      -to SDRAM_DQM[0]
+set_location_assignment PIN_U6      -to SDRAM_RAS_n
+set_location_assignment PIN_V6      -to SDRAM_WE_n
+
+set_location_assignment PIN_AG23    -to HOSTIF_CS_n
+set_location_assignment PIN_AH26    -to HOSTIF_RD_n
+set_location_assignment PIN_AF20    -to HOSTIF_WR_n
+set_location_assignment PIN_AE20    -to HOSTIF_ALE_n
+set_location_assignment PIN_AH23    -to HOSTIF_ACK_n
+set_location_assignment PIN_AG26    -to HOSTIF_IRQ_n
+set_location_assignment PIN_AF25    -to HOSTIF_BE[0]
+set_location_assignment PIN_AC22    -to HOSTIF_BE[1]
+set_location_assignment PIN_AB22    -to HOSTIF_AD[0]
+set_location_assignment PIN_AC15    -to HOSTIF_AD[1]
+set_location_assignment PIN_AB21    -to HOSTIF_AD[2]
+set_location_assignment PIN_Y17     -to HOSTIF_AD[3]
+set_location_assignment PIN_AC21    -to HOSTIF_AD[4]
+set_location_assignment PIN_Y16     -to HOSTIF_AD[5]
+set_location_assignment PIN_AD21    -to HOSTIF_AD[6]
+set_location_assignment PIN_AE16    -to HOSTIF_AD[7]
+set_location_assignment PIN_AD15    -to HOSTIF_AD[8]
+set_location_assignment PIN_AE15    -to HOSTIF_AD[9]
+set_location_assignment PIN_AC19    -to HOSTIF_AD[10]
+set_location_assignment PIN_AF16    -to HOSTIF_AD[11]
+set_location_assignment PIN_AD19    -to HOSTIF_AD[12]
+set_location_assignment PIN_AF15    -to HOSTIF_AD[13]
+set_location_assignment PIN_AF24    -to HOSTIF_AD[14]
+set_location_assignment PIN_AE21    -to HOSTIF_AD[15]
+
+set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to HOSTIF_IRQ_n
+set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to HOSTIF_ACK_n
+
+# Other assignments
+set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
