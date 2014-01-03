@@ -87,7 +87,7 @@ end toplevel;
 
 architecture rtl of toplevel is
 
-    component mn_par_host is
+    component mnSingleHostifGpio is
         port (
             clk25_clk                           : in    std_logic;
             clk50_clk                           : in    std_logic                     := 'X';
@@ -122,7 +122,7 @@ architecture rtl of toplevel is
             lcd_RS                              : out   std_logic;
             lcd_RW                              : out   std_logic
         );
-    end component mn_par_host;
+    end component mnSingleHostifGpio;
 
     -- PLL component
     component pll
@@ -163,7 +163,7 @@ begin
     hostifAck       <= not HOSTIF_ACK_n;
     hostifIrq       <= not HOSTIF_IRQ_n;
 
-    inst : component mn_par_host
+    inst : component mnSingleHostifGpio
         port map (
             clk25_clk                       => clk25,
             clk50_clk                       => clk50,

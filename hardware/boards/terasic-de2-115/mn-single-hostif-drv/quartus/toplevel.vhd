@@ -87,7 +87,7 @@ end toplevel;
 
 architecture rtl of toplevel is
 
-    component mn_par_pcp is
+    component mnSingleHostifDrv is
         port (
             clk25_clk                                   : in    std_logic;
             clk50_clk                                   : in    std_logic                     := 'X';
@@ -125,7 +125,7 @@ architecture rtl of toplevel is
             hostinterface_0_parhost_byteenable          : in    std_logic_vector(1 downto 0)  := (others => 'X');
             hostinterface_0_parhost_addressData         : inout std_logic_vector(15 downto 0) := (others => 'X')
         );
-    end component mn_par_pcp;
+    end component mnSingleHostifDrv;
 
     -- PLL component
     component pll
@@ -167,7 +167,7 @@ begin
     parHost_read                <= not HOSTIF_RD_n;
     parHost_addressLatchEnable  <= not HOSTIF_ALE_n;
 
-    inst : component mn_par_pcp
+    inst : component mnSingleHostifDrv
         port map (
             clk25_clk                                   => clk25,
             clk50_clk                                   => clk50,
