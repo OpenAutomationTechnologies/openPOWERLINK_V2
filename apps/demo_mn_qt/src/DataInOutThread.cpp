@@ -41,8 +41,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <QThread>
 #include <QString>
 
-#include <user/pdoucal.h>
-
 #include "Api.h"
 
 //------------------------------------------------------------------------------

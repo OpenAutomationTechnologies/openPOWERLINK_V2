@@ -49,7 +49,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <system/system.h>
 #include <EplTarget.h>
 #include <console/console.h>
-#include <user/pdoucal.h>
 #include <limits.h>
 
 //============================================================================//

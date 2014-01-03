@@ -61,6 +61,7 @@ BSP_DIR=./bsp
 # Include path
 INCLUDES=". \
 ${STACKROOT_DIR}/include \
+${STACKROOT_DIR}/stack/include \
 ${STACKROOT_DIR}/contrib/omethlib \
 ${STACKROOT_DIR}/contrib/hostif \
 ${STACKROOT_DIR}/stack/src/common/circbuf \
