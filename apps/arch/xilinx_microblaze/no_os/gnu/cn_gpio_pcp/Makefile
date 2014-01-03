@@ -24,7 +24,7 @@ USER_DIR=$(STACK_ROOT)/stack/src/user
 COMMON_DIR=$(STACK_ROOT)/stack/src/common
 TARGET_DIR=$(STACK_ROOT)/stack/src/arch/xilinx_microblaze
 
-IP_CORE_REPO=$(STACK_ROOT)/fpga/ipcore/xilinx
+IP_CORE_REPO=$(STACK_ROOT)/hardware/ipcore/xilinx
 
 HW_SPEC=$(XPS_DIR)/SDK/SDK_Export/hw
 BSP_PATH=$(APP_DIR_ARCH)

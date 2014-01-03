@@ -26,7 +26,7 @@ DEF_DEBUG_LVL=0xEC000000L
 
 ##################################
 # FPGA download cable
-DOWNLOAD_CABLE="USB-Blaster [USB-0]"
+#DOWNLOAD_CABLE="USB-Blaster [USB-0]"
 
 ##################################
 # Name of M9K for tightly-coupled memory
@@ -49,8 +49,8 @@ BSP_DIR=./bsp
 
 ##################################
 # Relative path to SOPC file
-#SOPC_DIR=${STACKROOT_DIR}/fpga/boards/altera/TERASIC_DE2-115/mn_dual_nios2/
-SOPC_DIR=${STACKROOT_DIR}/fpga/boards/altera/TERASIC_DE2-115/mn_par_host/
+SOPC_DIR=${STACKROOT_DIR}/hardware/boards/terasic-de2-115/mn-dual-hostif-gpio/quartus
+#SOPC_DIR=${STACKROOT_DIR}/hardware/boards/terasic-de2-115/mn-single-hostif-gpio/quartus
 
 ##################################
 # Include path
