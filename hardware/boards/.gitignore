@@ -1,0 +1,37 @@
+# Gitignore for boards
+
+# Altera Quartus with Qsys
+## Dirs
+.qsys_edit/
+db/
+incremental_db/
+## Files
+*.bak
+*.bsf
+*.cmp
+*.done
+*.html
+*.jdi
+*.pin
+*.qws
+*.rpt
+*.smsg
+*.sof
+*.sopcinfo
+*.summary
+*.pof
+*.txt
+
+# Xilinx Platform Studio
+## Dirs
+__xps/
+bootloops/
+hdl/
+implementation/
+pcores/
+SDK/
+synthesis/
+## Files
+*.log
+*.opt
+*.make

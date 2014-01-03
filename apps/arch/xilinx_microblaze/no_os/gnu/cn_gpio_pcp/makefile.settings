@@ -14,7 +14,7 @@ STACK_ROOT=../../../../../..
 
 ##################################
 #Path to the XPS project
-XPS_DIR=$(STACK_ROOT)/fpga/boards/xilinx/avnet_s6plkeb/cn_gpio_pcp
+XPS_DIR=$(STACK_ROOT)/hardware/boards/avnet-s6plkeb/cn-single-gpio/xps
 
 
 ##################################

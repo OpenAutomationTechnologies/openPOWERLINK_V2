@@ -45,8 +45,7 @@ PLK_NODE_IS=CONFIG_CN
 
 ##################################
 # Relative path to SOPC file
-SOPC_DIR=${STACKROOT_DIR}/fpga/boards/altera/TERASIC_DE2-115/cn_directIO/
-#SOPC_DIR=${STACKROOT_DIR}/fpga/boards/altera/SYSTEC_ECUcore-EP3C/design_nios2_directIO
+SOPC_DIR=${STACKROOT_DIR}/hardware/boards/terasic-de2-115/cn-single-gpio/quartus
 
 ##################################
 # Relative path to bsp
