@@ -58,6 +58,7 @@ INCLUDES=". \
 ${STACKROOT_DIR}/apps/common/gpio \
 ${STACKROOT_DIR}/apps/common/lcd \
 ${STACKROOT_DIR}/include \
+${STACKROOT_DIR}/stack/include \
 ${STACKROOT_DIR}/contrib/omethlib \
 ${STACKROOT_DIR}/stack/src/common/circbuf \
 ${STACKROOT_DIR}/stack/include/target \

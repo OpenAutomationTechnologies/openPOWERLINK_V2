@@ -56,6 +56,7 @@ SOPC_DIR=${STACKROOT_DIR}/fpga/boards/altera/TERASIC_DE2-115/mn_par_host/
 # Include path
 INCLUDES="\
 ${STACKROOT_DIR}/include \
+${STACKROOT_DIR}/stack/include \
 ${STACKROOT_DIR}/contrib/hostif \
 ${STACKROOT_DIR}/objdicts/CiA302-4_MN \
 ${STACKROOT_DIR}/stack/src/arch/altera_nios2 \

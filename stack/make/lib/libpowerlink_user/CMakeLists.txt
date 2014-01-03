@@ -180,13 +180,15 @@ INCLUDE_DIRECTORIES(
     .
     ${OBJDICT_DIR}/${OBJDICT}
     ${POWERLINK_SOURCE_DIR}
+    ${POWERLINK_INCLUDE_DIR}
+    ${STACK_INCLUDE_DIR}
 )
 
 #
 # Define library source code
 #
 ADD_LIBRARY(powerlink_user ${LIB_TYPE} ${LIB_SOURCES} ${LIB_ARCH_SOURCES}
-                           ${LIB_USER_SOURCES} ${LIB_HEADERS} ${LIB_USER_HEADERS})
+                           ${LIB_USER_SOURCES})
 
 TARGET_LINK_LIBRARIES(powerlink_user ${ARCH_LIBRARIES})
 
