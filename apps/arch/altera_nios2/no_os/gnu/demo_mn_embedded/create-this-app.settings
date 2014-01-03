@@ -57,7 +57,7 @@ SOPC_DIR=${STACKROOT_DIR}/hardware/boards/terasic-de2-115/mn-dual-hostif-gpio/qu
 INCLUDES="\
 ${STACKROOT_DIR}/include \
 ${STACKROOT_DIR}/stack/include \
-${STACKROOT_DIR}/contrib/hostif \
+${STACKROOT_DIR}/hardware/ipcore/drivers/hostinterface \
 ${STACKROOT_DIR}/objdicts/CiA302-4_MN \
 ${STACKROOT_DIR}/stack/src/arch/altera_nios2 \
 ${STACKROOT_DIR}/stack/src \
@@ -70,10 +70,10 @@ ${STACKROOT_DIR}/apps/common/lcd \
 # Source files
 SRCFILES="\
 ${STACKROOT_DIR}/contrib/ami/amiarm.c \
-${STACKROOT_DIR}/contrib/hostif/hostiflib.c \
-${STACKROOT_DIR}/contrib/hostif/hostiflib_l.c \
-${STACKROOT_DIR}/contrib/hostif/lfqueue.c \
-${STACKROOT_DIR}/contrib/hostif/linmem.c \
+${STACKROOT_DIR}/hardware/ipcore/drivers/hostinterface/hostiflib.c \
+${STACKROOT_DIR}/hardware/ipcore/drivers/hostinterface/hostiflib_l.c \
+${STACKROOT_DIR}/hardware/ipcore/drivers/hostinterface/lfqueue.c \
+${STACKROOT_DIR}/hardware/ipcore/drivers/hostinterface/linmem.c \
 ${STACKROOT_DIR}/contrib/trace/trace-printf.c \
 ${STACKROOT_DIR}/stack/src/arch/altera_nios2/target-nios2.c \
 ${STACKROOT_DIR}/stack/src/arch/altera_nios2/lock-dualprocnoos.c \
