@@ -188,7 +188,6 @@ SET (LIB_KERNEL_HEADERS
 #
 SET (LIB_USER_HEADERS
      ${LIB_HEADERS_USER}
-     ${USER_INCLUDE_DIR}/EplDllu.h
      ${USER_INCLUDE_DIR}/dllucal.h
      ${USER_INCLUDE_DIR}/eventu.h
      ${USER_INCLUDE_DIR}/eventucal.h
