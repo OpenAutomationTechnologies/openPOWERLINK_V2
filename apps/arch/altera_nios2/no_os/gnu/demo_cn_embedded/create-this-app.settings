@@ -58,7 +58,7 @@ ${STACKROOT_DIR}/apps/common/gpio \
 ${STACKROOT_DIR}/apps/common/lcd \
 ${STACKROOT_DIR}/include \
 ${STACKROOT_DIR}/stack/include \
-${STACKROOT_DIR}/contrib/omethlib \
+${STACKROOT_DIR}/hardware/ipcore/drivers/openmac \
 ${STACKROOT_DIR}/stack/src/common/circbuf \
 ${STACKROOT_DIR}/stack/include/target \
 ${STACKROOT_DIR}/objdicts/CiA401_CN \
@@ -69,9 +69,9 @@ ${STACKROOT_DIR}/stack/src"
 # Source files
 SRCFILES="\
 ${STACKROOT_DIR}/contrib/ami/amiarm.c \
-${STACKROOT_DIR}/contrib/omethlib/omethlib.c \
-${STACKROOT_DIR}/contrib/omethlib/omethlibint.c \
-${STACKROOT_DIR}/contrib/omethlib/omethlib_phycfg_ink.c \
+${STACKROOT_DIR}/hardware/ipcore/drivers/openmac/omethlib.c \
+${STACKROOT_DIR}/hardware/ipcore/drivers/openmac/omethlibint.c \
+${STACKROOT_DIR}/hardware/ipcore/drivers/openmac/omethlib_phycfg_ink.c \
 ${STACKROOT_DIR}/stack/src/common/circbuf/circbuffer.c \
 ${STACKROOT_DIR}/stack/src/common/circbuf/circbuf-noos.c \
 ${STACKROOT_DIR}/contrib/trace/trace-printf.c \

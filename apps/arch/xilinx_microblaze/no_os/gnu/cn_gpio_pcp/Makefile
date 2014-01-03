@@ -25,6 +25,7 @@ COMMON_DIR=$(STACK_ROOT)/stack/src/common
 TARGET_DIR=$(STACK_ROOT)/stack/src/arch/xilinx_microblaze
 
 IP_CORE_REPO=$(STACK_ROOT)/hardware/ipcore/xilinx
+IP_CORE_DRV=$(STACK_ROOT)/hardware/ipcore/drivers
 
 HW_SPEC=$(XPS_DIR)/SDK/SDK_Export/hw
 BSP_PATH=$(APP_DIR_ARCH)
@@ -51,7 +52,7 @@ UBLAZE_SLEEP= usleep
 ##################################
 # Include directory
 INCLUDES=-I$(STACK_ROOT)/include \
--I$(LIBS_DIR)/omethlib \
+-I$(IP_CORE_DRV)/openmac \
 -I$(STACK_ROOT)/stack/src/common/circbuf \
 -I$(STACK_ROOT)/objdicts/cia401_cn \
 -I$(STACK_ROOT)/stack/include/target \
@@ -71,9 +72,9 @@ $(APP_DIR_GEN)/app.c \
 $(APP_DIR_COM)/lcd/lcd.c \
 $(APP_DIR_COM)/lcd/lcdl-null.c \
 $(APP_DIR_COM)/gpio/gpio-microblaze.c \
-$(LIBS_DIR)/omethlib/omethlib.c \
-$(LIBS_DIR)/omethlib/omethlibint.c \
-$(LIBS_DIR)/omethlib/omethlib_phycfg_generic.c \
+$(IP_CORE_DRV)/openmac/omethlib.c \
+$(IP_CORE_DRV)/openmac/omethlibint.c \
+$(IP_CORE_DRV)/openmac/omethlib_phycfg_generic.c \
 $(COMMON_DIR)/circbuf/circbuffer.c \
 $(COMMON_DIR)/circbuf/circbuf-noos.c \
 $(LIBS_DIR)/trace/trace-printf.c \

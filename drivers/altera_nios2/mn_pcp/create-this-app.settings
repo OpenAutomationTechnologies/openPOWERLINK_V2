@@ -62,8 +62,8 @@ BSP_DIR=./bsp
 INCLUDES=". \
 ${STACKROOT_DIR}/include \
 ${STACKROOT_DIR}/stack/include \
-${STACKROOT_DIR}/contrib/omethlib \
-${STACKROOT_DIR}/contrib/hostif \
+${STACKROOT_DIR}/hardware/ipcore/drivers/openmac \
+${STACKROOT_DIR}/hardware/ipcore/drivers/hostinterface \
 ${STACKROOT_DIR}/stack/src/common/circbuf \
 ${STACKROOT_DIR}/stack/include/target \
 ${STACKROOT_DIR}/stack/src/arch/altera_nios2 \
@@ -74,13 +74,13 @@ ${STACKROOT_DIR}/stack/src"
 SRCFILES="\
 daemon.c \
 ${STACKROOT_DIR}/contrib/ami/amiarm.c \
-${STACKROOT_DIR}/contrib/hostif/hostiflib.c \
-${STACKROOT_DIR}/contrib/hostif/hostiflib_l.c \
-${STACKROOT_DIR}/contrib/hostif/lfqueue.c \
-${STACKROOT_DIR}/contrib/hostif/linmem.c \
-${STACKROOT_DIR}/contrib/omethlib/omethlib.c \
-${STACKROOT_DIR}/contrib/omethlib/omethlibint.c \
-${STACKROOT_DIR}/contrib/omethlib/omethlib_phycfg_ink.c \
+${STACKROOT_DIR}/hardware/ipcore/drivers/hostinterface/hostiflib.c \
+${STACKROOT_DIR}/hardware/ipcore/drivers/hostinterface/hostiflib_l.c \
+${STACKROOT_DIR}/hardware/ipcore/drivers/hostinterface/lfqueue.c \
+${STACKROOT_DIR}/hardware/ipcore/drivers/hostinterface/linmem.c \
+${STACKROOT_DIR}/hardware/ipcore/drivers/openmac/omethlib.c \
+${STACKROOT_DIR}/hardware/ipcore/drivers/openmac/omethlibint.c \
+${STACKROOT_DIR}/hardware/ipcore/drivers/openmac/omethlib_phycfg_ink.c \
 ${STACKROOT_DIR}/stack/src/common/circbuf/circbuffer.c \
 ${STACKROOT_DIR}/stack/src/common/circbuf/circbuf-noos.c \
 ${STACKROOT_DIR}/contrib/trace/trace-printf.c \
