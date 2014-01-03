@@ -70,7 +70,7 @@ SET (LIB_SOURCES
      ${USER_SOURCE_DIR}/obd/obdcreate.c
      ${COMMON_SOURCE_DIR}/event/event.c
      ${LIB_SOURCE_DIR}/ami/amix86.c
-     ${LIB_SOURCE_DIR}/circbuf/circbuffer.c
+     ${COMMON_SOURCE_DIR}/circbuf/circbuffer.c
      )
 
 #

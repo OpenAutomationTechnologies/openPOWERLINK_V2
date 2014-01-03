@@ -70,7 +70,7 @@ SET (LIB_SOURCES
      ${USER_SOURCE_DIR}/obd/obdcreate.c
      ${COMMON_SOURCE_DIR}/event/event.c
      ${LIB_SOURCE_DIR}/ami/amix86.c
-     ${LIB_SOURCE_DIR}/circbuf/circbuffer.c
+     ${COMMON_SOURCE_DIR}/circbuf/circbuffer.c
      ${EDRV_SOURCE_DIR}/edrvcyclic.c
      )
 
@@ -160,8 +160,8 @@ SET (LIB_HEADERS
      ${POWERLINK_INCLUDE_DIR}/errhnd.h
      ${POWERLINK_INCLUDE_DIR}/ctrl.h
      ${POWERLINK_INCLUDE_DIR}/ctrlcal.h
-     ${LIB_SOURCE_DIR}/circbuf/circbuffer.h
-     ${LIB_SOURCE_DIR}/circbuf/circbuf-arch.h
+     ${COMMON_SOURCE_DIR}/circbuf/circbuffer.h
+     ${COMMON_SOURCE_DIR}/circbuf/circbuf-arch.h
      )
 
 #

@@ -52,7 +52,7 @@ UBLAZE_SLEEP= usleep
 # Include directory
 INCLUDES=-I$(STACK_ROOT)/include \
 -I$(LIBS_DIR)/omethlib \
--I$(LIBS_DIR)/circbuf \
+-I$(STACK_ROOT)/stack/src/common/circbuf \
 -I$(STACK_ROOT)/objdicts/cia401_cn \
 -I$(STACK_ROOT)/stack/include/target \
 -I$(STACK_ROOT)/stack/src \
@@ -74,8 +74,8 @@ $(APP_DIR_COM)/gpio/gpio-microblaze.c \
 $(LIBS_DIR)/omethlib/omethlib.c \
 $(LIBS_DIR)/omethlib/omethlibint.c \
 $(LIBS_DIR)/omethlib/omethlib_phycfg_generic.c \
-$(LIBS_DIR)/circbuf/circbuffer.c \
-$(LIBS_DIR)/circbuf/circbuf-noos.c \
+$(COMMON_DIR)/circbuf/circbuffer.c \
+$(COMMON_DIR)/circbuf/circbuf-noos.c \
 $(LIBS_DIR)/trace/trace-printf.c \
 $(COMMON_DIR)/debug.c \
 $(COMMON_DIR)/errstring.c \

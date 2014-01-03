@@ -203,7 +203,7 @@
 									<listOptionValue builtIn="false" value="../../../../../../../apps/common/lcd"/>
 									<listOptionValue builtIn="false" value="../../../../../../../include"/>
 									<listOptionValue builtIn="false" value="../../../../../../../contrib/omethlib"/>
-									<listOptionValue builtIn="false" value="../../../../../../../contrib/circbuf"/>
+									<listOptionValue builtIn="false" value="../../../../../../../stack/src/common/circbuf"/>
 									<listOptionValue builtIn="false" value="../../../../../../../stack/include/target"/>
 									<listOptionValue builtIn="false" value="../../../../../../../objdicts/CiA401_CN"/>
 									<listOptionValue builtIn="false" value="../../../../../../../stack/src/arch/altera_nios2"/>

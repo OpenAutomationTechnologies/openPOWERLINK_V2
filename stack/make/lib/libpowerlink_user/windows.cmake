@@ -38,7 +38,7 @@ SET (LIB_ARCH_SOURCES
      ${LIB_SOURCE_DIR}/sharedbuff/ShbIpc-Win32.c
      ${LIB_SOURCE_DIR}/trace/trace-windows.c
      ${LIB_SOURCE_DIR}/sharedbuff/SharedBuff.c
-     ${LIB_SOURCE_DIR}/circbuf/circbuf-win32shm.c
+     ${COMMON_SOURCE_DIR}/circbuf/circbuf-win32shm.c
      ${COMMON_SOURCE_DIR}/dll/dllcal-shb.c
      ${USER_SOURCE_DIR}/ctrl/ctrlucal-mem.c
      ${USER_SOURCE_DIR}/event/eventucal-shb.c

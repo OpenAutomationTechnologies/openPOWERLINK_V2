@@ -32,7 +32,7 @@
 ADD_DEFINITIONS(-Wall -Wextra -pedantic -std=c99 -pthread -D_GNU_SOURCE -D_POSIX_C_SOURCE=200112L
                 -fno-strict-aliasing)
 
-SET(LIB_ARCH_SOURCES 
+SET(LIB_ARCH_SOURCES
      ${USER_SOURCE_DIR}/sdo/sdo-udpu.c
      ${USER_SOURCE_DIR}/timer/timer-linuxuser.c
      ${ARCH_SOURCE_DIR}/linux/ftrace-debug.c
@@ -54,7 +54,7 @@ SET (LIB_ARCH_SOURCES
 ELSE (CFG_KERNEL_STACK_KERNEL_MODULE)
 SET (LIB_ARCH_SOURCES
      ${LIB_ARCH_SOURCES}
-     ${LIB_SOURCE_DIR}/circbuf/circbuf-posixshm.c
+     ${COMMON_SOURCE_DIR}/circbuf/circbuf-posixshm.c
      ${USER_SOURCE_DIR}/pdo/pdoucalmem-posixshm.c
      ${USER_SOURCE_DIR}/pdo/pdoucalsync-bsdsem.c
      ${USER_SOURCE_DIR}/dll/dllucal-circbuf.c

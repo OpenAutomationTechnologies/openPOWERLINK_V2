@@ -246,12 +246,12 @@
 		<link>
 			<name>circbuffer.c</name>
 			<type>1</type>
-			<locationURI>OPLK_LOC/contrib/circbuf/circbuffer.c</locationURI>
+			<locationURI>OPLK_LOC/stack/src/common/circbuf/circbuffer.c</locationURI>
 		</link>
 		<link>
 			<name>circbuf-noos.c</name>
 			<type>1</type>
-			<locationURI>OPLK_LOC/contrib/circbuf/circbuf-noos.c</locationURI>
+			<locationURI>OPLK_LOC/stack/src/common/circbuf/circbuf-noos.c</locationURI>
 		</link>
 		<link>
 			<name>pdok.c</name>
