@@ -156,6 +156,23 @@ BOOL system_getTermSignalState(void)
     return FALSE;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief Sleep for the specified number of milliseconds
+
+The function makes the calling thread sleep until the number of specified
+milliseconds have elapsed.
+
+\param  milliSeconds_p      Number of milliseconds to sleep
+
+\ingroup module_target
+*/
+//------------------------------------------------------------------------------
+void msleep(unsigned int milliSeconds_p)
+{
+    Sleep(milliSeconds_p);
+}
+
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
 //============================================================================//

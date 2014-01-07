@@ -53,6 +53,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <pthread.h>
 #include <semaphore.h>
 #include <linux/errno.h>
+#include <target.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //

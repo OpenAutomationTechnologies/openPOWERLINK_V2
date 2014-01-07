@@ -63,6 +63,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <ctrl.h>
 #include <obd.h>
+#include <target.h>
 
 #include <user/ctrlucal.h>
 

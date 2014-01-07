@@ -48,6 +48,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <sdoabortcodes.h>
 #include <obd.h>
 #include <pdo.h>
+#include <target.h>
 
 #if !defined(CONFIG_INCLUDE_OBD)
 #error "PDOu module needs module OBD!"

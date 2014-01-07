@@ -344,7 +344,7 @@ static void loopMain(void)
         }
 
 #if defined(CONFIG_USE_SYNCTHREAD) || defined(CONFIG_KERNELSTACK_DIRECTLINK)
-        target_msleep(100);
+        msleep(100);
 #else
         processSync();
 #endif
