@@ -2,9 +2,9 @@
 ********************************************************************************
 \file   system-linux.c
 
-\brief  Sytem specific functions for Linux
+\brief  System specific functions for Linux
 
-The file implements the system specific funtions for Linux used by the
+The file implements the system specific functions for Linux used by the
 openPOWERLINK demo applications.
 
 \ingroup module_app_common
@@ -141,9 +141,6 @@ int initSystem(void)
     (void) sigaction(SIGTERM, &new_action, NULL);    // Generic signal used to cause program termination.
     (void) sigaction(SIGQUIT, &new_action, NULL);    // Terminate because of abnormal condition
 
-    /* Initialize target specific stuff */
-    target_init();
-
 #ifdef SET_CPU_AFFINITY
     {
         /* binds all openPOWERLINK threads to the second CPU core */
@@ -264,6 +261,53 @@ void system_handleTermSignal(int signum)
 
         default:        // All other signals are ignored by this handler
                         break;
+    }
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief Sleep for the specified number of milliseconds
+
+The function makes the calling thread sleep until the number of specified
+milliseconds have elapsed.
+
+\param  milliSeconds_p      Number of milliseconds to sleep
+
+\ingroup module_target
+*/
+//------------------------------------------------------------------------------
+void msleep(unsigned int milliSeconds_p)
+{
+    struct  timeval timeout;
+    fd_set          readFds;
+    int             maxFd;
+    int             selectRetVal;
+    unsigned int    seconds;
+    unsigned int    microSeconds;
+
+    // initialize file descriptor set
+    maxFd = 0 + 1;
+    FD_ZERO(&readFds);
+
+    // Calculate timeout values
+    seconds = milliSeconds_p / 1000;
+    microSeconds = (milliSeconds_p - (seconds * 1000)) * 1000;
+
+    // initialize timeout value
+    timeout.tv_sec = seconds;
+    timeout.tv_usec = microSeconds;
+
+    selectRetVal = select(maxFd, &readFds, NULL, NULL, &timeout);
+    switch (selectRetVal)
+    {
+        case 0:     // select timeout occurred, no packet received
+            break;
+
+        case -1:    // select error occurred
+            break;
+
+        default:    // packet available for receive
+            break;
     }
 }
 

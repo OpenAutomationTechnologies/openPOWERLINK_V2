@@ -54,6 +54,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <user/cfmu.h>
 #include <user/ctrlu.h>
 
+#include <target.h>
+
 #if (CONFIG_OBD_USE_LOAD_CONCISEDCF != FALSE)
 #include "obdcdc.h"
 #endif
@@ -126,8 +128,13 @@ tEplKernel oplk_init(tEplApiInitParam* pInitParam_p)
 {
     tEplKernel          ret;
 
+    target_init();
+
     if ((ret = ctrlu_init()) != kEplSuccessful)
+    {
+        target_cleanup();
         return ret;
+    }
 
     return ctrlu_initStack(pInitParam_p);
 }
@@ -152,6 +159,7 @@ tEplKernel oplk_shutdown(void)
 
     ret = ctrlu_shutdownStack();
     ctrlu_exit();
+    target_cleanup();
 
     return ret;
 }

@@ -1,19 +1,17 @@
 /**
 ********************************************************************************
-\file   pdoucalmem-local.c
+\file   system-microblaze.c
 
-\brief  PDO user CAL shared-memory module using local memory
+\brief  System specific functions for Microblaze
 
-This file contains an implementation for the user PDO CAL shared-memroy module
-which uses local allocated memory. The shared memory is used to transfer PDO data
-between user and kernel layer. This implementation is used if user and kernel
-layer run in the same domain and can both access the local memory.
+The file implements the system specific functions for microblaze used by the
+openPOWERLINK demo applications.
 
-\ingroup module_pdoucal
+\ingroup module_app_common
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2012, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -42,11 +40,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <EplInc.h>
 
-#include <pdo.h>
-#include <user/ctrlucal.h>
-#include <target.h>
+#include "usleep.h"
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -55,11 +50,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
+#define TGTCONIO_MS_IN_US(x)    (x*1000U)
 
 //------------------------------------------------------------------------------
 // module global vars
 //------------------------------------------------------------------------------
-extern BYTE*           pdokcalmem_pPdo_g;
 
 //------------------------------------------------------------------------------
 // global function prototypes
@@ -91,88 +86,19 @@ extern BYTE*           pdokcalmem_pPdo_g;
 
 //------------------------------------------------------------------------------
 /**
-\brief  Open PDO shared memory
+\brief Sleep for the specified number of milliseconds
 
-The function performs all actions needed to setup the shared memory at
-starting of the stack.
+The function makes the calling thread sleep until the number of specified
+milliseconds have elapsed.
 
-For the local memory implementation nothing needs to be done.
+\param  milliSecond_p       Number of milliseconds to sleep
 
-\return The function returns a tEplKernel error code.
-
-\ingroup module_pdokcal
+\ingroup module_target
 */
 //------------------------------------------------------------------------------
-tEplKernel pdoucal_openMem(void)
+void msleep (unsigned int milliSecond_p)
 {
-    return kEplSuccessful;
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief  Close PDO shared memory
-
-The function performs all actions needed to cleanup the shared memory at
-shutdown.
-
-For the local memory implementation nothing needs to be done.
-
-\return The function returns a tEplKernel error code.
-
-\ingroup module_pdokcal
-*/
-//------------------------------------------------------------------------------
-tEplKernel pdoucal_closeMem(void)
-{
-    return kEplSuccessful;
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief  Allocate PDO shared memory
-
-The function allocates shared memory for the kernel needed to transfer the PDOs.
-
-\param  memSize_p               Size of PDO memory
-\param  ppPdoMem_p              Pointer to store the PDO memory pointer.
-
-\return The function returns a tEplKernel error code.
-
-\ingroup module_pdokcal
-*/
-//------------------------------------------------------------------------------
-tEplKernel pdoucal_allocateMem(size_t memSize_p, BYTE** ppPdoMem_p)
-{
-    UNUSED_PARAMETER(memSize_p);
-
-    /* be sure kernel memory is allocated! */
-    while(pdokcalmem_pPdo_g == NULL)
-        target_msleep(1);
-    *ppPdoMem_p = pdokcalmem_pPdo_g;
-    return kEplSuccessful;
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief  Free PDO shared memory
-
-The function frees shared memory which was allocated in the kernel layer for
-transfering the PDOs.
-
-\param  pMem_p                  Pointer to the shared memory segment.
-\param  memSize_p               Size of PDO memory
-
-\return The function returns a tEplKernel error code.
-
-\ingroup module_pdokcal
-*/
-//------------------------------------------------------------------------------
-tEplKernel pdoucal_freeMem(BYTE* pMem_p, size_t memSize_p)
-{
-    UNUSED_PARAMETER(pMem_p);
-    UNUSED_PARAMETER(memSize_p);
-
-    return kEplSuccessful;
+    usleep(TGTCONIO_MS_IN_US(milliSecond_p));
 }
 
 //============================================================================//
@@ -180,7 +106,6 @@ tEplKernel pdoucal_freeMem(BYTE* pMem_p, size_t memSize_p)
 //============================================================================//
 /// \name Private Functions
 /// \{
-
 
 
 ///\}

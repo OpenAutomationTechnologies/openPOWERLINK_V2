@@ -1,14 +1,15 @@
 /**
 ********************************************************************************
-\file   main.cpp
+\file   target.h
 
-\brief  Main module of the QT MN demo application
+\brief  Definitions for target module
 
-The file contains the main source code of the QT MN demo application
+This file contains the definitions for the target modules.
+
 *******************************************************************************/
+
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
-Copyright (c) 2013, SYSTEC electronic GmbH
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -34,72 +35,40 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
+#ifndef _INC_target_H_
+#define _INC_target_H_
+
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <QApplication>
-
-#include "MainWindow.h"
-
-//============================================================================//
-//            G L O B A L   D E F I N I T I O N S                             //
-//============================================================================//
+#include <EplInc.h>
 
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
-// module global vars
+// typedef
 //------------------------------------------------------------------------------
 
-//------------------------------------------------------------------------------
-// global function prototypes
-//------------------------------------------------------------------------------
-
-//============================================================================//
-//            P R I V A T E   D E F I N I T I O N S                           //
-//============================================================================//
 
 //------------------------------------------------------------------------------
-// const defines
+// function prototypes
 //------------------------------------------------------------------------------
 
-//------------------------------------------------------------------------------
-// local types
-//------------------------------------------------------------------------------
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-//------------------------------------------------------------------------------
-// local vars
-//------------------------------------------------------------------------------
+tEplKernel target_init(void);
+tEplKernel target_cleanup(void);
+void       target_msleep(UINT32 milliSeconds_p);
+tEplKernel target_setIpAdrs(char* ifName_p, UINT32 ipAddress_p, UINT32 subnetMask_p, UINT16 mtu_p);
+tEplKernel target_setDefaultGateway(UINT32 defaultGateway_p);
 
-//============================================================================//
-//            P U B L I C    F U N C T I O N S                                //
-//============================================================================//
-
-//------------------------------------------------------------------------------
-/**
-\brief  main function
-
-main function of the QT demo application
-
-\param  argc            number of command line arguments
-\param  argv            pointer to command line argument strings
-
-\return application return value
-*/
-//------------------------------------------------------------------------------
-int main(int argc, char *argv[])
-{
-    MainWindow   *pMainWindow;
-    QApplication *pApp;
-
-    pApp        = new QApplication(argc, argv);
-    pMainWindow = new MainWindow;
-    pMainWindow->show();
-
-    return pApp->exec();
+#ifdef __cplusplus
 }
+#endif
 
-
+#endif /* _INC_ctrl_H_ */
 

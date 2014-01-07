@@ -125,7 +125,6 @@ int main (void)
     const UINT8 aMacAddr[] = {MAC_ADDR};
     UINT8       nodeid;
 
-    target_init();
     lcd_init();
 
     // get node ID from input
@@ -163,7 +162,6 @@ int main (void)
 Exit:
     shutdownPowerlink(&instance_l);
     shutdownApp();
-    target_cleanup();
 
     return 0;
 }
