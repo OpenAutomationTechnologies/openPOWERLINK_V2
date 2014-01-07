@@ -446,11 +446,7 @@ static BOOL processGeneralStateChange(tNmtState newNmtState_p, tEplKernel* pRet_
 #endif // EPL_NMT_MAX_NODE_ID > 0
 
             // get node ID from OD
-#if defined(CONFIG_INCLUDE_OBD)
             nodeId = obd_getNodeId();
-#else
-            nodeId = 0;
-#endif
             //check node ID if not should be master or slave
             if (nodeId == EPL_C_ADR_MN_DEF_NODE_ID)
             {   // node shall be MN
@@ -505,11 +501,7 @@ static BOOL processMnStateChange(tNmtState newNmtState_p, tEplKernel* pRet_p)
             // create timer to switch automatically to BasicEthernet/PreOp1 if no other MN active in network
             // check NMT_StartUp_U32.Bit13
             obdSize = sizeof(startUp);
-#if defined(CONFIG_INCLUDE_OBD)
             ret = obd_readEntry(0x1F80, 0x00, &startUp,&obdSize);
-#else
-            ret = kEplObdIndexNotExist;
-#endif
             if(ret != kEplSuccessful)
                 break;
 
@@ -524,11 +516,7 @@ static BOOL processMnStateChange(tNmtState newNmtState_p, tEplKernel* pRet_p)
 
             // read NMT_BootTime_REC.MNWaitNotAct_U32 from OD
             obdSize = sizeof(waitTime);
-#if defined(CONFIG_INCLUDE_OBD)
             ret = obd_readEntry(0x1F89, 0x01, &waitTime, &obdSize);
-#else
-            ret = kEplObdIndexNotExist;
-#endif
             if (ret != kEplSuccessful)
                 break;
 
@@ -542,14 +530,12 @@ static BOOL processMnStateChange(tNmtState newNmtState_p, tEplKernel* pRet_p)
 
             // read NMT_BootTime_REC.MNWaitPreOp1_U32 from OD
             obdSize = sizeof(waitTime);
-#if defined(CONFIG_INCLUDE_OBD)
             ret = obd_readEntry(0x1F89, 0x03, &waitTime, &obdSize);
             if(ret != kEplSuccessful)
             {
                 // ignore error, because this timeout is optional
                 waitTime = 0;
             }
-#endif
             if (waitTime == 0)
             {   // delay is deactivated, immediately post timer event
                 ret = nmtu_postNmtEvent(kNmtEventTimerMsPreOp2);
@@ -614,11 +600,7 @@ static BOOL processCnStateChange(tNmtState newNmtState_p, tEplKernel* pRet_p)
             // create timer to switch automatically to BasicEthernet if no MN available in network
             // read NMT_CNBasicEthernetTimeout_U32 from OD
             obdSize = sizeof(basicEthernetTimeout);
-#if defined(CONFIG_INCLUDE_OBD)
             ret = obd_readEntry(0x1F99, 0x00, &basicEthernetTimeout, &obdSize);
-#else
-            ret = kEplObdIndexNotExist;
-#endif
             if (ret != kEplSuccessful)
                 break;
 

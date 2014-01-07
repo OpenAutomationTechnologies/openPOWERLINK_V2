@@ -89,7 +89,6 @@
 // These macros define all modules which are included
 #ifdef CONFIG_MN
 
-#define CONFIG_INCLUDE_OBD
 #define CONFIG_INCLUDE_PDOU
 #define CONFIG_INCLUDE_PDOK
 #define CONFIG_INCLUDE_NMT_MN
@@ -109,7 +108,6 @@
 
 #else
 
-#define CONFIG_INCLUDE_OBD
 #define CONFIG_INCLUDE_PDOU
 #define CONFIG_INCLUDE_PDOK
 #define CONFIG_INCLUDE_SDOS

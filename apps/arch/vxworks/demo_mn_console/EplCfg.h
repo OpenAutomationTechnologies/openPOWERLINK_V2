@@ -95,7 +95,6 @@
 // * EPL_DBGLVL_ALWAYS      =   0x80000000L
 
 // These macros define all modules which are included
-#define CONFIG_INCLUDE_OBD
 #define CONFIG_INCLUDE_PDOU
 #define CONFIG_INCLUDE_PDOK
 #define CONFIG_INCLUDE_NMT_MN

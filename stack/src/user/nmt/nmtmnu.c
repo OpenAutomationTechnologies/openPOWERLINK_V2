@@ -54,10 +54,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #if defined(CONFIG_INCLUDE_NMT_MN)
 
-#if !defined(CONFIG_INCLUDE_OBD)
-#error "NmtMnu module needs module OBD!"
-#endif
-
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
 //============================================================================//
