@@ -59,7 +59,7 @@ The generic defines are valid for the whole openPOWERLINK stack.
     ///< number of EPL instances
 
 // These macros define all modules which are included
-#define CONFIG_INCLUDE_PDOK
+#define CONFIG_INCLUDE_PDO
 #define CONFIG_INCLUDE_NMT_MN
 #define CONFIG_INCLUDE_SDOS
 #define CONFIG_INCLUDE_SDOC
