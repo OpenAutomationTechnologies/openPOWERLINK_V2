@@ -1368,7 +1368,7 @@ static tEplKernel processReceivedPreq(tFrameInfo* pFrameInfo_p, tNmtState nmtSta
                                   (bFlag1 & (EPL_FRAME_FLAG1_EA | EPL_FRAME_FLAG1_MS));     // set EA and MS flag
 
         // inform PDO module
-#if defined(CONFIG_INCLUDE_PDOK)
+#if defined(CONFIG_INCLUDE_PDO)
         if (nmtState_p >= kNmtCsReadyToOperate)
         {   // inform PDO module only in ReadyToOp and Op
             if (nmtState_p != kNmtCsOperational)
@@ -1596,7 +1596,7 @@ static tEplKernel processReceivedPres(tFrameInfo* pFrameInfo_p, tNmtState nmtSta
     }
 
     // inform PDO module
-#if defined(CONFIG_INCLUDE_PDOK)
+#if defined(CONFIG_INCLUDE_PDO)
     if (( nmtState_p != kNmtCsPreOperational2) && (nmtState_p != kNmtMsPreOperational2))
     {   // inform PDO module only in ReadyToOp and Op
         // compare real frame size and PDO size?

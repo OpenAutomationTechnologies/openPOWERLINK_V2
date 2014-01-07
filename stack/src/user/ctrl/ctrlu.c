@@ -284,7 +284,7 @@ tEplKernel ctrlu_initStack(tEplApiInitParam * pInitParam_p)
         goto Exit;
     }
 
-#if defined(CONFIG_INCLUDE_PDOU)
+#if defined(CONFIG_INCLUDE_PDO)
     TRACE ("Initialize Pdou module...\n");
     ret = pdou_init(ctrlInstance_l.initParam.m_pfnCbSync);
     if (ret != kEplSuccessful)
@@ -387,7 +387,7 @@ tEplKernel ctrlu_shutdownStack(void)
     ret = nmtu_delInstance();
     TRACE("nmtu_delInstance():    0x%X\n", ret);
 
-#if defined(CONFIG_INCLUDE_PDOU)
+#if defined(CONFIG_INCLUDE_PDO)
     ret = pdou_exit();
     TRACE("pdou_exit():    0x%X\n", ret);
 #endif
@@ -939,7 +939,7 @@ static tEplKernel cbNmtStateChange(tEventNmtStateChange nmtStateChange_p)
         return ret;
 #endif
 
-#if defined(CONFIG_INCLUDE_PDOU)
+#if defined(CONFIG_INCLUDE_PDO)
     // forward event to Pdou module
     ret = pdou_cbNmtStateChange(nmtStateChange_p);
     if (ret != kEplSuccessful)

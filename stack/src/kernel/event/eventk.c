@@ -49,7 +49,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <kernel/errhndk.h>
 #include <Benchmark.h>
 
-#if defined(CONFIG_INCLUDE_PDOK)
+#if defined(CONFIG_INCLUDE_PDO)
 #include <kernel/pdok.h>
 #include <kernel/pdokcal.h>
 #endif
@@ -106,7 +106,7 @@ static tEventDispatchEntry eventDispatchTbl_l[] =
     { kEplEventSinkDllk,        kEplEventSourceDllk,        dllk_process },
     { kEplEventSinkDllkCal,     kEplEventSourceDllk,        dllkcal_process },
     { kEplEventSinkErrk,        kEplEventSourceErrk,        errhndk_process },
-#if defined(CONFIG_INCLUDE_PDOK)
+#if defined(CONFIG_INCLUDE_PDO)
     { kEplEventSinkPdokCal,     kEplEventSourcePdok,        pdokcal_process },
 #endif
     { kEplEventSinkInvalid,     kEplEventSourceInvalid,     NULL }

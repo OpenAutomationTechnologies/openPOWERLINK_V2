@@ -354,7 +354,7 @@ static tEplKernel initStack(void)
     if ((ret = dllkcal_init()) != kEplSuccessful)
         return ret;
 
-#if defined(CONFIG_INCLUDE_PDOK)
+#if defined(CONFIG_INCLUDE_PDO)
     if ((ret = pdok_init()) != kEplSuccessful)
         return ret;
 #endif
@@ -386,7 +386,7 @@ static tEplKernel shutdownStack(void)
     veth_delInstance();
 #endif
 
-#if defined(CONFIG_INCLUDE_PDOK)
+#if defined(CONFIG_INCLUDE_PDO)
     pdok_exit();
 #endif
 

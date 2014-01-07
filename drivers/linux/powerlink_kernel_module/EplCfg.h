@@ -89,8 +89,7 @@
 // These macros define all modules which are included
 #ifdef CONFIG_MN
 
-#define CONFIG_INCLUDE_PDOU
-#define CONFIG_INCLUDE_PDOK
+#define CONFIG_INCLUDE_PDO
 #define CONFIG_INCLUDE_NMT_MN
 #define CONFIG_INCLUDE_SDOS
 #define CONFIG_INCLUDE_SDOC
@@ -103,8 +102,7 @@
 
 #else
 
-#define CONFIG_INCLUDE_PDOU
-#define CONFIG_INCLUDE_PDOK
+#define CONFIG_INCLUDE_PDO
 #define CONFIG_INCLUDE_SDOS
 #define CONFIG_INCLUDE_SDOC
 #define CONFIG_INCLUDE_SDO_ASND

@@ -188,7 +188,7 @@ typedef union
 
 // generate EPL NMT_FeatureFlags_U32
 #ifndef EPL_DEF_FEATURE_ISOCHR
-    #if defined(CONFIG_INCLUDE_PDOU)
+    #if defined(CONFIG_INCLUDE_PDO)
         #define EPL_DEF_FEATURE_ISOCHR          (EPL_FEATURE_ISOCHR)
     #else
         #define EPL_DEF_FEATURE_ISOCHR          0
@@ -220,7 +220,7 @@ typedef union
 #endif
 
 #ifndef EPL_DEF_FEATURE_PDO_DYN
-    #if defined(CONFIG_INCLUDE_PDOU)
+    #if defined(CONFIG_INCLUDE_PDO)
         #define EPL_DEF_FEATURE_PDO_DYN         (EPL_FEATURE_PDO_DYN)
     #else
         #define EPL_DEF_FEATURE_PDO_DYN         0
