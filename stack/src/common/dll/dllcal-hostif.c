@@ -172,11 +172,14 @@ static tEplKernel addInstance(tDllCalQueueInstance *ppDllCalQueue_p,
     pDllCalInstance->dllCalQueue = dllCalQueue_p;
 
     // get host interface instance
-    //FIXME: Find other way to get the host interface instance (omit dependency)
-#ifdef CONFIG_INCLUDE_DLLU
-    pHifInstance = hostif_getInstance(kHostifProcHost);
-#elif defined(CONFIG_INCLUDE_DLLK)
+#if defined(CONFIG_HOSTIF_PCP)
+
+#if  (CONFIG_HOSTIF_PCP == TRUE)
     pHifInstance = hostif_getInstance(kHostifProcPcp);
+#else
+    pHifInstance = hostif_getInstance(kHostifProcHost);
+#endif
+
 #else
     pHifInstance = NULL;
 #endif
