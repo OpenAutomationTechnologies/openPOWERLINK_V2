@@ -46,10 +46,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #error 'ERROR: At least SDO Server or SDO Client should be activate!'
 #endif
 
-#if defined(CONFIG_INCLUDE_SDOS) && !defined(CONFIG_INCLUDE_OBD)
-#error 'ERROR: SDO Server needs OBD module!'
-#endif
-
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
 //============================================================================//

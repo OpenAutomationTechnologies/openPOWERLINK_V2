@@ -51,10 +51,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <user/sdocom.h>
 #include <user/nmtu.h>
 
-#if !defined(CONFIG_INCLUDE_OBD)
-#error "CFM module needs openPOWERLINK module OBD!"
-#endif
-
 #if !defined(CONFIG_INCLUDE_SDOC)
 #error "CFM module needs openPOWERLINK module SDO client!"
 #endif

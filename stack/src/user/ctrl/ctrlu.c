@@ -784,7 +784,6 @@ static tEplKernel initObd(tEplApiInitParam* pInitParam_p)
 
     UNUSED_PARAMETER(pInitParam_p);
 
-#if defined(CONFIG_INCLUDE_OBD)
     TRACE ("Initialize OBD module...\n");
     ret = obd_initObd(&ObdInitParam);
     if (ret != kEplSuccessful)
@@ -798,7 +797,6 @@ static tEplKernel initObd(tEplApiInitParam* pInitParam_p)
     ret = obdcdc_init();
 #endif
 
-#endif
     return ret;
 }
 

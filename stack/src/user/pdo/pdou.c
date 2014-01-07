@@ -50,10 +50,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <pdo.h>
 #include <target.h>
 
-#if !defined(CONFIG_INCLUDE_OBD)
-#error "PDOu module needs module OBD!"
-#endif
-
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
 //============================================================================//
