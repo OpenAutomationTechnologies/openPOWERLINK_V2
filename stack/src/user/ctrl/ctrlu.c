@@ -67,10 +67,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <user/ctrlucal.h>
 
-#if defined(CONFIG_INCLUDE_PDOK)
-#include <kernel/pdok.h>
-#endif
-
 #if (CONFIG_OBD_USE_LOAD_CONCISEDCF != FALSE)
 #include <obdcdc.h>
 #endif
