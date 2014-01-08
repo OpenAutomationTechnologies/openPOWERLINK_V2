@@ -626,7 +626,7 @@ tEplKernel ctrlu_cbObdAccess(tObdCbParam MEM* pParam_p)
                 if (ret != kEplSuccessful)
                 {
                     pParam_p->abortCode = SDO_AC_GENERAL_ERROR;
-                    goto Exit;
+                    break;
                 }
 
                 obdSize = sizeof (cmdTarget);
@@ -634,7 +634,7 @@ tEplKernel ctrlu_cbObdAccess(tObdCbParam MEM* pParam_p)
                 if (ret != kEplSuccessful)
                 {
                     pParam_p->abortCode = SDO_AC_GENERAL_ERROR;
-                    goto Exit;
+                    break;
                 }
 
                 nmtState = nmtu_getNmtState();
@@ -665,7 +665,6 @@ tEplKernel ctrlu_cbObdAccess(tObdCbParam MEM* pParam_p)
             break;
     }
 
-Exit:
     return ret;
 }
 
