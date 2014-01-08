@@ -62,7 +62,7 @@ lib axi_openmac_v1_00_a ../../../../../../common/openmac/src/phyActGen-rtl-ea vh
 lib axi_openmac_v1_00_a ../../../../../../common/openmac/src/phyMgmt-rtl-ea vhdl
 lib axi_openmac_v1_00_a ../../../../../../common/openmac/src/convRmiiToMii-rtl-ea vhdl
 lib axi_openmac_v1_00_a ../../../../../../common/openmac/src/mmSlaveConv-rtl-ea vhdl
-lib axi_openmac_v1_00_a ../../../../../../common/openmac/src/openMAC vhdl
+lib axi_openmac_v1_00_a ../../../../../../common/openmac/src/openmac-rtl-ea vhdl
 lib axi_openmac_v1_00_a ../../../../../../common/openmac/src/openmacTop-rtl-ea vhdl
 lib axi_openmac_v1_00_a ../../../../../../xilinx/lib/src/dpRam-rtl-a vhdl
 lib axi_openmac_v1_00_a ../../../../../../xilinx/lib/src/dpRamSplx-rtl-a vhdl

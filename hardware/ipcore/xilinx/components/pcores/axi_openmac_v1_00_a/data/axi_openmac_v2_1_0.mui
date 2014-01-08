@@ -50,21 +50,24 @@
     <widget id="gui_phyType">
         <key>gui_phyType</key>
         <label>Phy(s) interface type</label>
-        <tip></tip>
+        <tip>Select the Phy(s) Media Independent Interface type.
+        Note that RMII is recommended since no extra resources are necessary!</tip>
     </widget>
     '>
     <!ENTITY gui_phyCount '
     <widget id="gui_phyCount">
         <key>gui_phyCount</key>
         <label>Number of Phys</label>
-        <tip></tip>
+        <tip>Set the number of connected Phys.</tip>
     </widget>
     '>
     <!ENTITY gui_extraSmi '
     <widget id="gui_extraSmi">
         <key>gui_extraSmi</key>
         <label>Extra SMI ports</label>
-        <tip></tip>
+        <tip>Set this option to TRUE if every connected Phy is connected via
+        an extra SMI connection. If all connected Phys share the same SMI,
+        set the option to FALSE.</tip>
     </widget>
     '>
 
@@ -73,42 +76,55 @@
     <widget id="gui_txBufLoc">
         <key>gui_txBufLoc</key>
         <label>Tx Buffer Location</label>
-        <tip></tip>
+        <tip>Select the Tx buffer location to LOCAL or EXTERNAL.
+        The LOCAL configuration allocates the Tx buffers in BRAM resources -
+        this configuration is preferred if the external memory is having a
+        dynamic access latency.
+        The EXTERNAL configuration inserts an AXI master to fetch Tx frames from
+        external memory - this configuration requires a fast memory connection.</tip>
     </widget>
     '>
     <!ENTITY gui_txBufSize '
     <widget id="gui_txBufSize">
         <key>gui_txBufSize</key>
-        <label>Tx Buffer Size</label>
-        <tip></tip>
+        <label>Tx Buffer Size [KiB]</label>
+        <tip>Set the LOCAL Tx buffer size in KiB.
+        Note that this setting affects the BRAM resource utilization!</tip>
     </widget>
     '>
     <!ENTITY gui_txBurstSize '
     <widget id="gui_txBurstSize">
         <key>gui_txBurstSize</key>
-        <label>Tx Burst Size</label>
-        <tip></tip>
+        <label>Tx Burst Size [WORD]</label>
+        <tip>Set the number of words transferred in each burst
+        if the Tx buffer location is EXTERNAL.</tip>
     </widget>
     '>
     <!ENTITY gui_rxBufLoc '
     <widget id="gui_rxBufLoc">
         <key>gui_rxBufLoc</key>
         <label>Rx Buffer Location</label>
-        <tip></tip>
+        <tip>Select the Rx buffer location to LOCAL or EXTERNAL.
+        The LOCAL configuration allocates the Rx buffers in BRAM resources -
+        this configuration is preferred if enough BRAM resources are available.
+        The EXTERNAL configuration inserts an AXI master to transfer Rx frames to
+        external memory - this configuration is preferred to save BRAM resources.</tip>
     </widget>
     '>
     <!ENTITY gui_rxBufSize '
     <widget id="gui_rxBufSize">
         <key>gui_rxBufSize</key>
-        <label>Rx Buffer Size</label>
-        <tip></tip>
+        <label>Rx Buffer Size [KiB]</label>
+        <tip>Set the LOCAL Rx buffer size in KiB.
+        Note that this setting affects the BRAM resource utilization!</tip>
     </widget>
     '>
     <!ENTITY gui_rxBurstSize '
     <widget id="gui_rxBurstSize">
         <key>gui_rxBurstSize</key>
-        <label>Rx Burst Size</label>
-        <tip></tip>
+        <label>Rx Burst Size [WORD]</label>
+        <tip>Set the number of words transferred in each burst
+        if the Rx buffer location is EXTERNAL.</tip>
     </widget>
     '>
 
@@ -117,21 +133,26 @@
     <widget id="gui_tmrCount">
         <key>gui_tmrCount</key>
         <label>Number of Hardware Timers</label>
-        <tip></tip>
+        <tip>Set the number of hardware timers for interrupt or pulse generation.
+        Timer 1 generates an interrupt and
+        optional timer 2 can be used to generate a pulse.</tip>
     </widget>
     '>
     <!ENTITY gui_tmrPulseEn '
     <widget id="gui_tmrPulseEn">
         <key>gui_tmrPulseEn</key>
         <label>Timer Pulse Width Control</label>
-        <tip></tip>
+        <tip>Enable the timer pulse with control of timer 2. Otherwise the
+        generated signal will toggle.</tip>
     </widget>
     '>
     <!ENTITY gui_tmrPulseWdt '
     <widget id="gui_tmrPulseWdt">
         <key>gui_tmrPulseWdt</key>
         <label>Timer Pulse Width register width</label>
-        <tip></tip>
+        <tip>Determine the timer 2 pulse width control register width.
+        Example: Generate a pulse of 1 us (fclk=50 MHz) requires 1 us * 50 MHz = 50 ticks.
+        To generate 50 ticks a width of log2(50) ~ 6 is needed.</tip>
     </widget>
     '>
 
@@ -140,7 +161,8 @@
     <widget id="gui_actEn">
         <key>gui_actEn</key>
         <label>Packet activity LED</label>
-        <tip></tip>
+        <tip>Use the MAC RMII signals to generate an activity signal.
+        It can be used to drive LEDs.</tip>
     </widget>
     '>
 

@@ -58,10 +58,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #endif
 
-//---------------------------------------------------------
-// include section header file with null macros
-#include <section-default.h>
-
 #ifndef HOSTIF_INLINE
 #define HOSTIF_INLINE
 #endif
@@ -86,6 +82,10 @@ set to those provided by stdint.h.
 
 #ifndef UINT32
 #define UINT32              uint32_t
+#endif
+
+#ifndef UINT
+#define UINT                unsigned int
 #endif
 
 #ifndef BOOL

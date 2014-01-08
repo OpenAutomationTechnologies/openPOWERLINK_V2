@@ -127,15 +127,41 @@ qsysUtil::addGuiParam  gui_phyType     NATURAL 1       "Phy(s) interface type"  
 qsysUtil::addGuiParam  gui_phyCount    NATURAL 1       "Number of Phys"                    ""          "1:15"
 qsysUtil::addGuiParam  gui_extraSmi    BOOLEAN FALSE   "Extra SMI ports"                   ""          ""
 qsysUtil::addGuiParam  gui_txBufLoc    NATURAL 1       "Tx Buffer Location"                ""          "${cPktBufLocal}:Local ${cPktBufExtern}:External"
-qsysUtil::addGuiParam  gui_txBufSize   NATURAL 1       "Tx Buffer Size"                    Kilobytes   "1:32"
-qsysUtil::addGuiParam  gui_txBurstSize NATURAL 1       "Tx Dma Burst Size"                 Words       "1 4 8 16 32 64"
+qsysUtil::addGuiParam  gui_txBufSize   NATURAL 1       "Tx Buffer Size"                    "KiB"       "1:32"
+qsysUtil::addGuiParam  gui_txBurstSize NATURAL 1       "Tx Dma Burst Size"                 "Word"      "1 4 8 16 32 64"
 qsysUtil::addGuiParam  gui_rxBufLoc    NATURAL 1       "Rx Buffer Location"                ""          "${cPktBufLocal}:Local ${cPktBufExtern}:External"
-qsysUtil::addGuiParam  gui_rxBufSize   NATURAL 1       "Rx Buffer Size"                    Kilobytes   "1:32"
-qsysUtil::addGuiParam  gui_rxBurstSize NATURAL 1       "Rx Dma Burst Size"                 Words       "1 4 8 16 32 64"
+qsysUtil::addGuiParam  gui_rxBufSize   NATURAL 1       "Rx Buffer Size"                    "KiB"       "1:32"
+qsysUtil::addGuiParam  gui_rxBurstSize NATURAL 1       "Rx Dma Burst Size"                 "Word"      "1 4 8 16 32 64"
 qsysUtil::addGuiParam  gui_tmrCount    NATURAL 1       "Number of Hardware Timers"         ""          "1:2"
 qsysUtil::addGuiParam  gui_tmrPulseEn  BOOLEAN FALSE   "Timer Pulse Width Control"         ""          ""
 qsysUtil::addGuiParam  gui_tmrPulseWdt NATURAL 10      "Timer Pulse Width register width"  ""          "1:31"
 qsysUtil::addGuiParam  gui_actEn       BOOLEAN FALSE   "Packet activity LED"               ""          ""
+qsysUtil::addGuiParam  gui_sdcEn       BOOLEAN TRUE    "Automatic timing constraints"      ""          ""
+
+set_parameter_property gui_phyType     DESCRIPTION     "Select the Phy(s) Media Independent Interface type. Note that RMII is recommended since no extra resources are necessary!"
+set_parameter_property gui_phyCount    DESCRIPTION     "Set the number of connected Phys."
+set_parameter_property gui_extraSmi    DESCRIPTION     "Set this option to TRUE if every connected Phy is connected via an extra SMI connection.
+                                                        If all connected Phys share the same SMI, set the option to FALSE."
+set_parameter_property gui_txBufLoc    DESCRIPTION     "Select the Tx buffer location to LOCAL or EXTERNAL. The LOCAL configuration allocates the Tx buffers in BRAM resources -
+                                                        this configuration is preferred if the external memory is having a dynamic access latency.
+                                                        The EXTERNAL configuration inserts an AXI master to fetch Tx frames from external memory -
+                                                        this configuration requires a fast memory connection."
+set_parameter_property gui_txBufSize   DESCRIPTION     "Set the LOCAL Tx buffer size in KiB. Note that this setting affects the BRAM resource utilization!"
+set_parameter_property gui_txBurstSize DESCRIPTION     "Set the number of words transferred in each burst if the Tx buffer location is EXTERNAL."
+set_parameter_property gui_rxBufLoc    DESCRIPTION     "Select the Rx buffer location to LOCAL or EXTERNAL. The LOCAL configuration allocates the Rx buffers in BRAM resources -
+                                                        this configuration is preferred if enough BRAM resources are available.
+                                                        The EXTERNAL configuration inserts an AXI master to transfer Rx frames to external memory -
+                                                        this configuration is preferred to save BRAM resources."
+set_parameter_property gui_rxBufSize   DESCRIPTION     "Set the LOCAL Rx buffer size in KiB. Note that this setting affects the BRAM resource utilization!"
+set_parameter_property gui_rxBurstSize DESCRIPTION     "Set the number of words transferred in each burst if the Rx buffer location is EXTERNAL."
+set_parameter_property gui_tmrCount    DESCRIPTION     "Set the number of hardware timers for interrupt or pulse generation.
+                                                        Timer 1 generates an interrupt and optional timer 2 can be used to generate a pulse."
+set_parameter_property gui_tmrPulseEn  DESCRIPTION     "Enable the timer pulse with control of timer 2. Otherwise the generated signal will toggle."
+set_parameter_property gui_tmrPulseWdt DESCRIPTION     "Determine the timer 2 pulse width control register width.
+                                                        Example: Generate a pulse of 1 us (fclk=50 MHz) requires 1 us * 50 MHz = 50 ticks.
+                                                        To generate 50 ticks a width of log2(50) ~ 6 is needed."
+set_parameter_property gui_actEn       DESCRIPTION     "Use the MAC RMII signals to generate an activity signal. It can be used to drive LEDs."
+set_parameter_property gui_sdcEn       DESCRIPTION     "Use automatic timing constraints."
 
 # -----------------------------------------------------------------------------
 # GUI configuration
@@ -161,6 +187,7 @@ add_display_item        $gui_nameTimer  gui_tmrPulseEn  PARAMETER
 add_display_item        $gui_nameTimer  gui_tmrPulseWdt PARAMETER
 
 add_display_item        $gui_nameOthers gui_actEn       PARAMETER
+add_display_item        $gui_nameOthers gui_sdcEn       PARAMETER
 
 # -----------------------------------------------------------------------------
 # callbacks
@@ -220,7 +247,7 @@ proc fileset_callback { entityName } {
     add_fileset_file "phyActGen-rtl-ea.vhd"           VHDL PATH "${dir_common}/${path_openmac}/phyActGen-rtl-ea.vhd"
     add_fileset_file "phyMgmt-rtl-ea.vhd"             VHDL PATH "${dir_common}/${path_openmac}/phyMgmt-rtl-ea.vhd"
     add_fileset_file "convRmiiToMii-rtl-ea.vhd"       VHDL PATH "${dir_common}/${path_openmac}/convRmiiToMii-rtl-ea.vhd"
-    add_fileset_file "openMAC.vhd"                    VHDL PATH "${dir_common}/${path_openmac}/openMAC.vhd"
+    add_fileset_file "openmac-rtl-ea.vhd"             VHDL PATH "${dir_common}/${path_openmac}/openmac-rtl-ea.vhd"
     add_fileset_file "openmacTop-rtl-ea.vhd"          VHDL PATH "${dir_common}/${path_openmac}/openmacTop-rtl-ea.vhd"
     add_fileset_file "dpRam-rtl-a.vhd"                VHDL PATH "${dir_altera}/${path_lib}/dpRam-rtl-a.vhd"
     add_fileset_file "dpRamSplx-rtl-a.vhd"            VHDL PATH "${dir_altera}/${path_lib}/dpRamSplx-rtl-a.vhd"
@@ -228,15 +255,20 @@ proc fileset_callback { entityName } {
     add_fileset_file "alteraOpenmacTop-rtl-ea.vhd"    VHDL PATH "${dir_altera}/${path_openmac}/alteraOpenmacTop-rtl-ea.vhd"
 
     set phyType     [get_parameter_value gui_phyType]
+    set sdcEn       [get_parameter_value gui_sdcEn]
 
-    if { ${phyType} == ${::cPhyPortRmii} } {
-        # RMII
-        add_fileset_file "${entityName}/openmacTop-rmii.sdc" SDC PATH "sdc/openmacTop-rmii.sdc"
+    if { $sdcEn } {
+        if { ${phyType} == ${::cPhyPortRmii} } {
+            # RMII
+        add_fileset_file "openmacTop-rmii.sdc" SDC PATH "sdc/openmacTop-rmii.sdc"
     } elseif { ${phyType} == ${::cPhyPortMii} } {
         # MII
-        add_fileset_file "${entityName}/openmacTop-mii.sdc" SDC PATH "sdc/openmacTop-mii.sdc"
+        add_fileset_file "openmacTop-mii.sdc" SDC PATH "sdc/openmacTop-mii.sdc"
+        } else {
+            send_message WARNING "Phy interface unknown. No timing constrains file generated!"
+        }
     } else {
-        send_message WARNING "Phy interface unknown. No timing constrains file generated!"
+        send_message INFO "No timing constrains are set."
     }
 }
 

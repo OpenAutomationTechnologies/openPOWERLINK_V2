@@ -158,16 +158,8 @@ The dynamic buffer's address registers seen from the Pcp side.
 */
 typedef struct sScDynBufPcp
 {
-    volatile UINT32     errorCounterAddr; ///< base of error counters
-    volatile UINT32     txNmtQAddr; ///< base of Tx NMT queue
-    volatile UINT32     txGenQAddr; ///< base of Tx generic queue
-    volatile UINT32     txSyncQAddr; ///< base of Tx sync queue
-    volatile UINT32     txVethQAddr; ///< base of Tx Virtual Ethernet queue
-    volatile UINT32     rxVethQAddr; ///< base of Rx Virtual Ethernet queue
-    volatile UINT32     K2UQAddr;   ///< base of Kernel-to-User queue
-    volatile UINT32     U2KQAddr;   ///< base of User-to-Kernel queue
-    volatile UINT32     tpdoAddr;   ///< base of Tpdo buffers
-    volatile UINT32     rpdoAddr;   ///< base of Rpdo buffers
+    volatile UINT32     aBuf[HOSTIF_BUF_COUNT];
+        ///< base address array of buffers
 } tScDynBufPcp;
 
 /**
@@ -694,9 +686,10 @@ void hostif_writeDynBufHost (UINT8 *pHostifScBase_p, UINT8 num_p, UINT32 addr_p)
 
 //------------------------------------------------------------------------------
 /**
-\brief  Read dynamic buffer for Error Counter (Pcp only)
+\brief  Read buffer (Pcp only)
 
 \param  pHostifScBase_p     base address of Status/Control registers
+\param  num_p               determines the addressed buffer
 
 \return The function returns the dynamic buffer address. Note that the returned
 address is limited by the address width of the bridge master.
@@ -704,332 +697,27 @@ address is limited by the address width of the bridge master.
 \ingroup module_hostiflib
 */
 //------------------------------------------------------------------------------
-UINT32 hostif_readDynBufPcpErrCnt (UINT8 *pHostifScBase_p)
+UINT32 hostif_readBufPcp (UINT8 *pHostifScBase_p, UINT8 num_p)
 {
     return HOSTIF_RD32(pHostifScBase_p + HOSTIF_SC_DYNB_OFFS,
-            offsetof(tScDynB, Pcp.errorCounterAddr));
+            offsetof(tScDynB, Pcp.aBuf[num_p]));
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief  Write dynamic buffer for Error Counter (Pcp only)
+\brief  Write dynamic buffer (Pcp only)
 
 \param  pHostifScBase_p     base address of Status/Control registers
-\param  addr_p            address to be written
+\param  num_p               determines the addressed buffer
+\param  addr_p              address to be written
 
 \ingroup module_hostiflib
 */
 //------------------------------------------------------------------------------
-void hostif_writeDynBufPcpErrCnt (UINT8 *pHostifScBase_p, UINT32 addr_p)
+void hostif_writeBufPcp (UINT8 *pHostifScBase_p, UINT8 num_p, UINT32 addr_p)
 {
     HOSTIF_WR32(pHostifScBase_p + HOSTIF_SC_DYNB_OFFS,
-            offsetof(tScDynB, Pcp.errorCounterAddr), addr_p);
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief  Read dynamic buffer for Tx Nmt queue (Pcp only)
-
-\param  pHostifScBase_p     base address of Status/Control registers
-
-\return The function returns the dynamic buffer address. Note that the returned
-address is limited by the address width of the bridge master.
-
-\ingroup module_hostiflib
-*/
-//------------------------------------------------------------------------------
-UINT32 hostif_readDynBufPcpTxNmtQ (UINT8 *pHostifScBase_p)
-{
-    return HOSTIF_RD32(pHostifScBase_p + HOSTIF_SC_DYNB_OFFS,
-            offsetof(tScDynB, Pcp.txNmtQAddr));
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief  Write dynamic buffer for Tx Generic queue (Pcp only)
-
-\param  pHostifScBase_p     base address of Status/Control registers
-\param  addr_p            address to be written
-
-\ingroup module_hostiflib
-*/
-//------------------------------------------------------------------------------
-void hostif_writeDynBufPcpTxNmtQ (UINT8 *pHostifScBase_p, UINT32 addr_p)
-{
-    HOSTIF_WR32(pHostifScBase_p + HOSTIF_SC_DYNB_OFFS,
-            offsetof(tScDynB, Pcp.txNmtQAddr), addr_p);
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief  Read dynamic buffer for Tx Generic queue (Pcp only)
-
-\param  pHostifScBase_p     base address of Status/Control registers
-
-\return The function returns the dynamic buffer address. Note that the returned
-address is limited by the address width of the bridge master.
-
-\ingroup module_hostiflib
-*/
-//------------------------------------------------------------------------------
-UINT32 hostif_readDynBufPcpTxGenQ (UINT8 *pHostifScBase_p)
-{
-    return HOSTIF_RD32(pHostifScBase_p + HOSTIF_SC_DYNB_OFFS,
-            offsetof(tScDynB, Pcp.txGenQAddr));
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief  Write dynamic buffer for Tx Generic queue (Pcp only)
-
-\param  pHostifScBase_p     base address of Status/Control registers
-\param  addr_p            address to be written
-
-\ingroup module_hostiflib
-*/
-//------------------------------------------------------------------------------
-void hostif_writeDynBufPcpTxGenQ (UINT8 *pHostifScBase_p, UINT32 addr_p)
-{
-    HOSTIF_WR32(pHostifScBase_p + HOSTIF_SC_DYNB_OFFS,
-            offsetof(tScDynB, Pcp.txGenQAddr), addr_p);
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief  Read dynamic buffer for Tx Sync queue (Pcp only)
-
-\param  pHostifScBase_p     base address of Status/Control registers
-
-\return The function returns the dynamic buffer address. Note that the returned
-address is limited by the address width of the bridge master.
-
-\ingroup module_hostiflib
-*/
-//------------------------------------------------------------------------------
-UINT32 hostif_readDynBufPcpTxSyncQ (UINT8 *pHostifScBase_p)
-{
-    return HOSTIF_RD32(pHostifScBase_p + HOSTIF_SC_DYNB_OFFS,
-            offsetof(tScDynB, Pcp.txSyncQAddr));
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief  Write dynamic buffer for Tx Sync queue (Pcp only)
-
-\param  pHostifScBase_p     base address of Status/Control registers
-\param  addr_p            address to be written
-
-\ingroup module_hostiflib
-*/
-//------------------------------------------------------------------------------
-void hostif_writeDynBufPcpTxSyncQ (UINT8 *pHostifScBase_p, UINT32 addr_p)
-{
-    HOSTIF_WR32(pHostifScBase_p + HOSTIF_SC_DYNB_OFFS,
-            offsetof(tScDynB, Pcp.txSyncQAddr), addr_p);
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief  Read dynamic buffer for Tx Virtual Ethernet queue (Pcp only)
-
-\param  pHostifScBase_p     base address of Status/Control registers
-
-\return The function returns the dynamic buffer address. Note that the returned
-address is limited by the address width of the bridge master.
-
-\ingroup module_hostiflib
-*/
-//------------------------------------------------------------------------------
-UINT32 hostif_readDynBufPcpTxVethQ (UINT8 *pHostifScBase_p)
-{
-    return HOSTIF_RD32(pHostifScBase_p + HOSTIF_SC_DYNB_OFFS,
-            offsetof(tScDynB, Pcp.txVethQAddr));
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief  Write  dynamic buffer for Tx Virtual Ethernet queue (Pcp only)
-
-\param  pHostifScBase_p     base address of Status/Control registers
-\param  addr_p            address to be written
-
-\ingroup module_hostiflib
-*/
-//------------------------------------------------------------------------------
-void hostif_writeDynBufPcpTxVethQ (UINT8 *pHostifScBase_p, UINT32 addr_p)
-{
-    HOSTIF_WR32(pHostifScBase_p + HOSTIF_SC_DYNB_OFFS,
-            offsetof(tScDynB, Pcp.txVethQAddr), addr_p);
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief  Read dynamic buffer for Rx Virtual Ethernet queue (Pcp only)
-
-\param  pHostifScBase_p     base address of Status/Control registers
-
-\return The function returns the dynamic buffer address. Note that the returned
-address is limited by the address width of the bridge master.
-
-\ingroup module_hostiflib
-*/
-//------------------------------------------------------------------------------
-UINT32 hostif_readDynBufPcpRxVethQ (UINT8 *pHostifScBase_p)
-{
-    return HOSTIF_RD32(pHostifScBase_p + HOSTIF_SC_DYNB_OFFS,
-            offsetof(tScDynB, Pcp.rxVethQAddr));
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief  Write dynamic buffer for Rx Virtual Ethernet queue (Pcp only)
-
-\param  pHostifScBase_p     base address of Status/Control registers
-\param  addr_p            address to be written
-
-\ingroup module_hostiflib
-*/
-//------------------------------------------------------------------------------
-void hostif_writeDynBufPcpRxVethQ (UINT8 *pHostifScBase_p, UINT32 addr_p)
-{
-    HOSTIF_WR32(pHostifScBase_p + HOSTIF_SC_DYNB_OFFS,
-            offsetof(tScDynB, Pcp.rxVethQAddr), addr_p);
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief  Read dynamic buffer for Kernel-to-User queue (Pcp only)
-
-\param  pHostifScBase_p     base address of Status/Control registers
-
-\return The function returns the dynamic buffer address. Note that the returned
-address is limited by the address width of the bridge master.
-
-\ingroup module_hostiflib
-*/
-//------------------------------------------------------------------------------
-UINT32 hostif_readDynBufPcpK2UQ (UINT8 *pHostifScBase_p)
-{
-    return HOSTIF_RD32(pHostifScBase_p + HOSTIF_SC_DYNB_OFFS,
-            offsetof(tScDynB, Pcp.K2UQAddr));
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief  Write dynamic buffer for Kernel-to-User queue (Pcp only)
-
-\param  pHostifScBase_p     base address of Status/Control registers
-\param  addr_p            address to be written
-
-\ingroup module_hostiflib
-*/
-//------------------------------------------------------------------------------
-void hostif_writeDynBufPcpK2UQ (UINT8 *pHostifScBase_p, UINT32 addr_p)
-{
-    HOSTIF_WR32(pHostifScBase_p + HOSTIF_SC_DYNB_OFFS,
-            offsetof(tScDynB, Pcp.K2UQAddr), addr_p);
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief  Read dynamic buffer for User-to-Kernel queue (Pcp only)
-
-\param  pHostifScBase_p     base address of Status/Control registers
-
-\return The function returns the dynamic buffer address. Note that the returned
-address is limited by the address width of the bridge master.
-
-\ingroup module_hostiflib
-*/
-//------------------------------------------------------------------------------
-UINT32 hostif_readDynBufPcpU2KQ (UINT8 *pHostifScBase_p)
-{
-    return HOSTIF_RD32(pHostifScBase_p + HOSTIF_SC_DYNB_OFFS,
-            offsetof(tScDynB, Pcp.U2KQAddr));
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief  Write dynamic buffer for User-to-Kernel queue (Pcp only)
-
-\param  pHostifScBase_p     base address of Status/Control registers
-\param  addr_p            address to be written
-
-\ingroup module_hostiflib
-*/
-//------------------------------------------------------------------------------
-void hostif_writeDynBufPcpU2KQ (UINT8 *pHostifScBase_p, UINT32 addr_p)
-{
-    HOSTIF_WR32(pHostifScBase_p + HOSTIF_SC_DYNB_OFFS,
-            offsetof(tScDynB, Pcp.U2KQAddr), addr_p);
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief  Read dynamic buffer for Tpdo buffer (Pcp only)
-
-\param  pHostifScBase_p     base address of Status/Control registers
-
-\return The function returns the dynamic buffer address. Note that the returned
-address is limited by the address width of the bridge master.
-
-\ingroup module_hostiflib
-*/
-//------------------------------------------------------------------------------
-UINT32 hostif_readDynBufPcpTpdo (UINT8 *pHostifScBase_p)
-{
-    return HOSTIF_RD32(pHostifScBase_p + HOSTIF_SC_DYNB_OFFS,
-            offsetof(tScDynB, Pcp.tpdoAddr));
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief  Write dynamic buffer for Tpdo buffer (Pcp only)
-
-\param  pHostifScBase_p     base address of Status/Control registers
-\param  addr_p            address to be written
-
-\ingroup module_hostiflib
-*/
-//------------------------------------------------------------------------------
-void hostif_writeDynBufPcpTpdo (UINT8 *pHostifScBase_p, UINT32 addr_p)
-{
-    HOSTIF_WR32(pHostifScBase_p + HOSTIF_SC_DYNB_OFFS,
-            offsetof(tScDynB, Pcp.tpdoAddr), addr_p);
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief  Read dynamic buffer for Rpdo buffer (Pcp only)
-
-\param  pHostifScBase_p     base address of Status/Control registers
-
-\return The function returns the dynamic buffer address. Note that the returned
-address is limited by the address width of the bridge master.
-
-\ingroup module_hostiflib
-*/
-//------------------------------------------------------------------------------
-UINT32 hostif_readDynBufPcpRpdo (UINT8 *pHostifScBase_p)
-{
-    return HOSTIF_RD32(pHostifScBase_p + HOSTIF_SC_DYNB_OFFS,
-            offsetof(tScDynB, Pcp.rpdoAddr));
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief  Write dynamic buffer for Rpdo buffer (Pcp only)
-
-\param  pHostifScBase_p     base address of Status/Control registers
-\param  addr_p            address to be written
-
-\ingroup module_hostiflib
-*/
-//------------------------------------------------------------------------------
-void hostif_writeDynBufPcpRpdo (UINT8 *pHostifScBase_p, UINT32 addr_p)
-{
-    HOSTIF_WR32(pHostifScBase_p + HOSTIF_SC_DYNB_OFFS,
-            offsetof(tScDynB, Pcp.rpdoAddr), addr_p);
+            offsetof(tScDynB, Pcp.aBuf[num_p]), addr_p);
 }
 
 //============================================================================//

@@ -50,6 +50,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define HOSTIF_IRQ_MASTER_ENABLE  0x0001    ///< enabled the irq master
 
 #define HOSTIF_DYNBUF_COUNT       2 ///< number of supported dynamic buffers
+#define HOSTIF_BUF_COUNT          10 ///< number of supported buffers
+
+#define HOSTIF_STCTRL_SPAN        2048 ///< size of status control register
 
 //------------------------------------------------------------------------------
 // typedef
@@ -94,29 +97,11 @@ void hostif_setIrq (UINT8 *pHostifScBase_p, UINT16 val_p);
 UINT16 hostif_readSyncConfig (UINT8 *pHostifScBase_p);
 void hostif_writeSyncConfig (UINT8 *pHostifScBase_p, UINT16 val_p);
 
-UINT32 hostif_readDynBufHost (UINT8 *pHostifScBase_p, UINT8 num);
-void hostif_writeDynBufHost (UINT8 *pHostifScBase_p, UINT8 num, UINT32 addr_p);
+UINT32 hostif_readDynBufHost (UINT8 *pHostifScBase_p, UINT8 num_p);
+void hostif_writeDynBufHost (UINT8 *pHostifScBase_p, UINT8 num_p, UINT32 addr_p);
 
-UINT32 hostif_readDynBufPcpErrCnt (UINT8 *pHostifScBase_p);
-void hostif_writeDynBufPcpErrCnt (UINT8 *pHostifScBase_p, UINT32 addr_p);
-UINT32 hostif_readDynBufPcpTxNmtQ (UINT8 *pHostifScBase_p);
-void hostif_writeDynBufPcpTxNmtQ (UINT8 *pHostifScBase_p, UINT32 addr_p);
-UINT32 hostif_readDynBufPcpTxGenQ (UINT8 *pHostifScBase_p);
-void hostif_writeDynBufPcpTxGenQ (UINT8 *pHostifScBase_p, UINT32 addr_p);
-UINT32 hostif_readDynBufPcpTxSyncQ (UINT8 *pHostifScBase_p);
-void hostif_writeDynBufPcpTxSyncQ (UINT8 *pHostifScBase_p, UINT32 addr_p);
-UINT32 hostif_readDynBufPcpTxVethQ (UINT8 *pHostifScBase_p);
-void hostif_writeDynBufPcpTxVethQ (UINT8 *pHostifScBase_p, UINT32 addr_p);
-UINT32 hostif_readDynBufPcpRxVethQ (UINT8 *pHostifScBase_p);
-void hostif_writeDynBufPcpRxVethQ (UINT8 *pHostifScBase_p, UINT32 addr_p);
-UINT32 hostif_readDynBufPcpK2UQ (UINT8 *pHostifScBase_p);
-void hostif_writeDynBufPcpK2UQ (UINT8 *pHostifScBase_p, UINT32 addr_p);
-UINT32 hostif_readDynBufPcpU2KQ (UINT8 *pHostifScBase_p);
-void hostif_writeDynBufPcpU2KQ (UINT8 *pHostifScBase_p, UINT32 addr_p);
-UINT32 hostif_readDynBufPcpTpdo (UINT8 *pHostifScBase_p);
-void hostif_writeDynBufPcpTpdo (UINT8 *pHostifScBase_p, UINT32 addr_p);
-UINT32 hostif_readDynBufPcpRpdo (UINT8 *pHostifScBase_p);
-void hostif_writeDynBufPcpRpdo (UINT8 *pHostifScBase_p, UINT32 addr_p);
+UINT32 hostif_readBufPcp (UINT8 *pHostifScBase_p, UINT8 num_p);
+void hostif_writeBufPcp (UINT8 *pHostifScBase_p, UINT8 num_p, UINT32 addr_p);
 
 #ifdef __cplusplus
 }

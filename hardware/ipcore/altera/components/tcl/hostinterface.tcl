@@ -7,7 +7,7 @@ set listSizeCmacro [list "SIZE_DYNBUF0" "SIZE_DYNBUF1" "SIZE_ERRORCOUNTER" "SIZE
 set listBaseCmacro [list "BASE_DYNBUF0" "BASE_DYNBUF1" "BASE_ERRORCOUNTER" "BASE_TXNMTQ" "BASE_TXGENQ" "BASE_TXSYNCQ" "BASE_TXVETHQ" "BASE_RXVETHQ" "BASE_K2UQ" "BASE_U2KQ" "BASE_TPDO" "BASE_RPDO"]
 
 proc generationCallback { instName tgtDir bspDir } {
-    set LIB_HOSTIF_path "$::OPLK_path/hardware/ipcore/drivers/hostinterface"
+    set LIB_HOSTIF_path $tgtDir
 
     puts ""
     puts "***********************************************************"
@@ -16,7 +16,7 @@ proc generationCallback { instName tgtDir bspDir } {
     puts ""
 
     set headerFile "hostiflib-mem.h"
-    puts "  -> generate $headerFile file"
+    puts "  -> generate $LIB_HOSTIF_path/$headerFile file"
     createHostifMemFile "$LIB_HOSTIF_path/$headerFile"
 
     puts "***********************************************************"
@@ -47,6 +47,36 @@ proc createHostifMemFile { fileName } {
     writeFile_string $headerFile "\n"
     writeFile_string $headerFile "/* SIZE */\n"
     writeFile_list_cmacro $headerFile $::listSizeCmacro
+
+    writeFile_string $headerFile "\n"
+    writeFile_string $headerFile "/* INIT VECTOR */\n"
+
+    # Write initialization vector
+    writeFile_string $headerFile "#define HOSTIF_INIT_VEC { \\"
+    writeFile_string $headerFile "\n"
+
+    # Get number of buffer, to know the vector length
+    set numOfBuf [llength $::listBaseCmacro]
+
+    set cnt 0
+    foreach off_name $::listBaseCmacro siz_name $::listSizeCmacro {
+        set tmpString "                        "
+        set tmpString "${tmpString}{ HOSTIF_${off_name}, HOSTIF_${siz_name} }"
+
+        incr cnt
+
+        if { $cnt < $numOfBuf } {
+            set tmpString "${tmpString}, "
+        }
+
+        set tmpString "${tmpString} \\"
+
+        writeFile_string $headerFile $tmpString
+        writeFile_string $headerFile "\n"
+    }
+
+    writeFile_string $headerFile "                      }"
+
     writeFile_string $headerFile "\n"
     writeFile_string $headerFile "#endif\n"
     writeFile_close $headerFile
