@@ -44,8 +44,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "user/nmtcnu.h"
 #include "user/dllucal.h"
 
-#if defined(CONFIG_INCLUDE_NMT_CN)
-
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
 //============================================================================//
@@ -505,6 +503,4 @@ static BOOL checkNodeIdList(UINT8* pbNmtCommandDate_p)
 }
 
 ///\}
-
-#endif // #if defined(CONFIG_INCLUDE_NMT_CN)
 
