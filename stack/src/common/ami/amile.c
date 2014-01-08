@@ -1,1020 +1,794 @@
-/****************************************************************************
+/**
+********************************************************************************
+\file   amile.c
 
-  (c) SYSTEC electronic GmbH, D-07973 Greiz, August-Bebel-Str. 29
-      www.systec-electronic.com
+\brief  Generic implementation of the Abstract Memory Interface (ami)
 
-  Project:      openPOWERLINK
+This file implements the AMI interface in little endian for architectures
+where access to unaligned addresses is not possible. (This implementation
+always copies bytewise)
 
-  Description:  Abstract Memory Interface for ARM processors
+\ingroup module_ami
+*******************************************************************************/
 
-  License:
+/*------------------------------------------------------------------------------
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2013, SYSTEC electronic GmbH
+All rights reserved.
 
-    Redistribution and use in source and binary forms, with or without
-    modification, are permitted provided that the following conditions
-    are met:
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+    * Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above copyright
+      notice, this list of conditions and the following disclaimer in the
+      documentation and/or other materials provided with the distribution.
+    * Neither the name of the copyright holders nor the
+      names of its contributors may be used to endorse or promote products
+      derived from this software without specific prior written permission.
 
-    1. Redistributions of source code must retain the above copyright
-       notice, this list of conditions and the following disclaimer.
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL COPYRIGHT HOLDERS BE LIABLE FOR ANY
+DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+------------------------------------------------------------------------------*/
 
-    2. Redistributions in binary form must reproduce the above copyright
-       notice, this list of conditions and the following disclaimer in the
-       documentation and/or other materials provided with the distribution.
+//------------------------------------------------------------------------------
+// includes
+//------------------------------------------------------------------------------
+#include <ami.h>
 
-    3. Neither the name of SYSTEC electronic GmbH nor the names of its
-       contributors may be used to endorse or promote products derived
-       from this software without prior written permission. For written
-       permission, please contact info@systec-electronic.com.
+//============================================================================//
+//            G L O B A L   D E F I N I T I O N S                             //
+//============================================================================//
 
-    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-    LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-    FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-    COPYRIGHT HOLDERS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-    INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-    BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-    LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-    CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-    LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-    ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-    POSSIBILITY OF SUCH DAMAGE.
+//------------------------------------------------------------------------------
+// const defines
+//------------------------------------------------------------------------------
 
-    Severability Clause:
+//------------------------------------------------------------------------------
+// module global vars
+//------------------------------------------------------------------------------
 
-        If a provision of this License is or becomes illegal, invalid or
-        unenforceable in any jurisdiction, that shall not affect:
-        1. the validity or enforceability in that jurisdiction of any other
-           provision of this License; or
-        2. the validity or enforceability in other jurisdictions of that or
-           any other provision of this License.
-
-  -------------------------------------------------------------------------
-
-                $RCSfile$
-
-                $Author$
-
-                $Revision$  $Date$
-
-                $State$
-
-                Build Environment:
-                    ...
-
-  -------------------------------------------------------------------------
-
-  Revision History:
-
-  r.s.: first implemetation
-
-  2008-11-07  d.k.: duplicate functions for little endian and big endian
-
-****************************************************************************/
-
-//#include "global.h"
-//#include "EplAmi.h"
-#include "EplInc.h"
-
-#if (!defined(EPL_AMI_INLINED)) || defined(INLINE_ENABLED)
+//------------------------------------------------------------------------------
+// global function prototypes
+//------------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//  Typdefinitionen
-//---------------------------------------------------------------------------
+//============================================================================//
+//            P R I V A T E   D E F I N I T I O N S                           //
+//============================================================================//
 
+//------------------------------------------------------------------------------
+// const defines
+//------------------------------------------------------------------------------
 
-typedef struct
-{
-   DWORD  m_dwDword;
+//------------------------------------------------------------------------------
+// local types
+//------------------------------------------------------------------------------
 
-} tdwStruct;
+//------------------------------------------------------------------------------
+// local function prototypes
+//------------------------------------------------------------------------------
 
-typedef struct
-{
-   QWORD  m_qwQword;
+//------------------------------------------------------------------------------
+// local vars
+//------------------------------------------------------------------------------
 
-} tqwStruct;
+//============================================================================//
+//            P U B L I C   F U N C T I O N S                                 //
+//============================================================================//
 
-typedef union
-{
-    DWORD   m_dwValue;
-    BYTE    m_abValue[4];
+//------------------------------------------------------------------------------
+/**
+\brief    Set Uint16 to big endian
 
-} tSplittDword;
+Sets a 16 bit value to a buffer in big endian
 
-typedef union
-{
-    QWORD   m_qwValue;
-    BYTE    m_abValue[8];
+\param[out] pAddr_p         Pointer to the destination buffer
+\param[in]  uint16Val_p       The source value to convert
 
-} tSplittQword;
-
-#define AMI_LOBYTE(val)                     (BYTE) (val      )
-#define AMI_HIBYTE(val)                     (BYTE) (val >>  8)
-#define AMI_LOWORD(val)                     (WORD) (val      )
-#define AMI_HIWORD(val)                     (WORD) (val >> 16)
-
-#define AMI_READ_BYTE(val,ptr)              (val) =                          *(BYTE FAR*) (ptr)
-#define AMI_READ_WORD(val,ptr)              (val) =                (WORD)  (*((BYTE FAR*) (ptr) + 1));\
-                                            (val) = ((val) << 8) | (WORD)  (*((BYTE FAR*) (ptr) + 0));
-#define AMI_READ_DWORD(val,ptr)             (val) =                (DWORD) (*((BYTE FAR*) (ptr) + 3));\
-                                            (val) = ((val) << 8) | (DWORD) (*((BYTE FAR*) (ptr) + 2));\
-                                            (val) = ((val) << 8) | (DWORD) (*((BYTE FAR*) (ptr) + 1));\
-                                            (val) = ((val) << 8) | (DWORD) (*((BYTE FAR*) (ptr) + 0));
-
-#define AMI_WRITE_BYTE(ptr,val)               *(BYTE FAR*) (ptr)       =                        (val)
-#define AMI_WRITE_WORD(ptr,val)             (*((BYTE FAR*) (ptr) + 0)) =             AMI_LOBYTE (val);\
-                                            (*((BYTE FAR*) (ptr) + 1)) =             AMI_HIBYTE (val);
-#define AMI_WRITE_DWORD(ptr,val)            (*((BYTE FAR*) (ptr) + 0)) = AMI_LOBYTE (AMI_LOWORD (val));\
-                                            (*((BYTE FAR*) (ptr) + 1)) = AMI_HIBYTE (AMI_LOWORD (val));\
-                                            (*((BYTE FAR*) (ptr) + 2)) = AMI_LOBYTE (AMI_HIWORD (val));\
-                                            (*((BYTE FAR*) (ptr) + 3)) = AMI_HIBYTE (AMI_HIWORD (val));
-
-
-//=========================================================================//
-//                                                                         //
-//          P U B L I C   F U N C T I O N S                                //
-//                                                                         //
-//=========================================================================//
-
-//---------------------------------------------------------------------------
-//
-// Function:    AmiSetXXXToBe()
-//
-// Description: writes the specified value to the absolute address in
-//              big endian
-//
-// Parameters:  pAddr_p                 = absolute address
-//              xXXXVal_p               = value
-//
-// Returns:     (none)
-//
-// State:
-//
-//---------------------------------------------------------------------------
-
-//------------< write BYTE in big endian >--------------------------
-/*
-void  PUBLIC  AmiSetByteToBe (void FAR* pAddr_p, BYTE bByteVal_p)
-{
-
-   *(BYTE FAR*)pAddr_p = bByteVal_p;
-
-}
+\ingroup module_ami
 */
-
-
-
-//------------< write WORD in big endian >--------------------------
-
-INLINE_FUNCTION void  PUBLIC  AmiSetWordToBe (void FAR* pAddr_p, WORD wWordVal_p)
+//------------------------------------------------------------------------------
+void AmiSetWordToBe(void* pAddr_p, UINT16 uint16Val_p)
 {
-    (*((BYTE FAR*) (pAddr_p) + 0)) = AMI_HIBYTE (wWordVal_p);
-    (*((BYTE FAR*) (pAddr_p) + 1)) = AMI_LOBYTE (wWordVal_p);
+    ((UINT8 *) pAddr_p)[1] = ((UINT8 *) &uint16Val_p)[0];
+    ((UINT8 *) pAddr_p)[0] = ((UINT8 *) &uint16Val_p)[1];
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief    Set Uint16 to little endian
 
+Sets a 16 bit value to a buffer in little endian
 
-//------------< write DWORD in big endian >-------------------------
+\param[in]  pAddr_p         Pointer to the destination buffer
+\param[out] uint16Val_p     The source value to convert
 
-INLINE_FUNCTION void  PUBLIC  AmiSetDwordToBe (void FAR* pAddr_p, DWORD dwDwordVal_p)
-{
-    (*((BYTE FAR*) (pAddr_p) + 0)) = AMI_HIBYTE (AMI_HIWORD (dwDwordVal_p));
-    (*((BYTE FAR*) (pAddr_p) + 1)) = AMI_LOBYTE (AMI_HIWORD (dwDwordVal_p));
-    (*((BYTE FAR*) (pAddr_p) + 2)) = AMI_HIBYTE (AMI_LOWORD (dwDwordVal_p));
-    (*((BYTE FAR*) (pAddr_p) + 3)) = AMI_LOBYTE (AMI_LOWORD (dwDwordVal_p));
-}
-
-
-
-
-//---------------------------------------------------------------------------
-//
-// Function:    AmiSetXXXToLe()
-//
-// Description: writes the specified value to the absolute address in
-//              little endian
-//
-// Parameters:  pAddr_p                 = absolute address
-//              xXXXVal_p               = value
-//
-// Returns:     (none)
-//
-// State:
-//
-//---------------------------------------------------------------------------
-
-//------------< write BYTE in little endian >--------------------------
-/*
-void  PUBLIC  AmiSetByteToLe (void FAR* pAddr_p, BYTE bByteVal_p)
-{
-
-// Diese Funktion dient zum Schreiben eines Bytes auf der angegebenen
-// absoluten Adresse. Die Funktionen der Gruppe <AmiSetxxx> werden verwendet,
-// um Daten zum Austausch mit anderen Systemen im Intel-Format abzulegen.
-
-
-   AMI_WRITE_BYTE (pAddr_p, bByteVal_p);
-
-}
+\ingroup module_ami
 */
-
-
-
-//------------< write WORD in little endian >--------------------------
-
-INLINE_FUNCTION void  PUBLIC  AmiSetWordToLe (void FAR* pAddr_p, WORD wWordVal_p)
+//------------------------------------------------------------------------------
+void AmiSetWordToLe(void* pAddr_p, UINT16 uint16Val_p)
 {
-
-// Diese Funktion dient zum Schreiben eines Words auf der angegebenen
-// absoluten Adresse. Die Funktionen der Gruppe <AmiSetxxx> werden verwendet,
-// um Daten zum Austausch mit anderen Systemen im Intel-Format abzulegen.
-
-
-   AMI_WRITE_WORD (pAddr_p, wWordVal_p);
-
+    ((UINT8 *) pAddr_p)[0] = ((UINT8 *) &uint16Val_p)[0];
+    ((UINT8 *) pAddr_p)[1] = ((UINT8 *) &uint16Val_p)[1];
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief    Get Uint16 from big endian
 
+Reads a 16 bit value from a buffer in big endian
 
+\param[in]  pAddr_p         Pointer to the source buffer
 
-//------------< write DWORD in little endian >-------------------------
+\return UINT16
+\retval Value       The data in platform endian
 
-INLINE_FUNCTION void  PUBLIC  AmiSetDwordToLe (void FAR* pAddr_p, DWORD dwDwordVal_p)
-{
-
-// Diese Funktion dient zum Schreiben eines Dwords auf der angegebenen
-// absoluten Adresse. Die Funktionen der Gruppe <AmiSetxxx> werden verwendet,
-// um Daten zum Austausch mit anderen Systemen im Intel-Format abzulegen.
-
-
-   AMI_WRITE_DWORD (pAddr_p, dwDwordVal_p);
-
-}
-
-
-
-
-//---------------------------------------------------------------------------
-//
-// Function:    AmiGetXXXFromBe()
-//
-// Description: reads the specified value from the absolute address in
-//              big endian
-//
-// Parameters:  pAddr_p                 = absolute address
-//
-// Returns:     XXX                     = value
-//
-// State:
-//
-//---------------------------------------------------------------------------
-
-//------------< read BYTE in big endian >---------------------------
-/*
-BYTE  PUBLIC  AmiGetByteFromBe (void FAR* pAddr_p)
-{
-
-   return ( *(BYTE FAR*)pAddr_p );
-
-}
+\ingroup module_ami
 */
-
-
-
-//------------< read WORD in big endian >---------------------------
-
-INLINE_FUNCTION WORD  PUBLIC  AmiGetWordFromBe (void FAR* pAddr_p)
+//------------------------------------------------------------------------------
+UINT16 AmiGetWordFromBe(void* pAddr_p)
 {
-WORD wValue;
+    UINT16 val;
 
-    (wValue) =                   (WORD)  (*((BYTE FAR*) (pAddr_p) + 0));
-    (wValue) = ((wValue) << 8) | (WORD)  (*((BYTE FAR*) (pAddr_p) + 1));
+    ((UINT8 *) &val)[1] = ((UINT8 *) pAddr_p)[0];
+    ((UINT8 *) &val)[0] = ((UINT8 *) pAddr_p)[1];
 
-    return ( wValue );
+    return val;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief    Get Uint16 from little endian
 
+Reads a 16 bit value from a buffer in little endian
 
+\param[in]  pAddr_p         Pointer to the source buffer
 
-//------------< read DWORD in big endian >--------------------------
+\return UINT16
+\retval Value       The data in platform endian
 
-INLINE_FUNCTION DWORD  PUBLIC  AmiGetDwordFromBe (void FAR* pAddr_p)
-{
-DWORD dwValue;
-
-    (dwValue) =                    (DWORD) (*((BYTE FAR*) (pAddr_p) + 0));\
-    (dwValue) = ((dwValue) << 8) | (DWORD) (*((BYTE FAR*) (pAddr_p) + 1));\
-    (dwValue) = ((dwValue) << 8) | (DWORD) (*((BYTE FAR*) (pAddr_p) + 2));\
-    (dwValue) = ((dwValue) << 8) | (DWORD) (*((BYTE FAR*) (pAddr_p) + 3));
-
-    return ( dwValue );
-
-}
-
-
-//---------------------------------------------------------------------------
-//
-// Function:    AmiGetXXXFromLe()
-//
-// Description: reads the specified value from the absolute address in
-//              little endian
-//
-// Parameters:  pAddr_p                 = absolute address
-//
-// Returns:     XXX                     = value
-//
-// State:
-//
-//---------------------------------------------------------------------------
-
-//------------< read BYTE in little endian >---------------------------
-/*
-BYTE  PUBLIC  AmiGetByteFromLe (void FAR* pAddr_p)
-{
-
-// Diese Funktion dient zum Lesen eines Bytes von der angegebenen absoluten
-// Adresse. Die Funktionen der Gruppe <AmiGetxxx> werden verwendet, um Daten,
-// die mit einem anderen System ausgetauscht wurden und im Intel-Format abge-
-// legt sind, zu lesen.
-
-
-BYTE bValue;
-
-    AMI_READ_BYTE (bValue, pAddr_p);
-
-    return ( bValue );
-
-}
+\ingroup module_ami
 */
-
-
-
-//------------< read WORD in little endian >---------------------------
-
-INLINE_FUNCTION WORD  PUBLIC  AmiGetWordFromLe (void FAR* pAddr_p)
+//------------------------------------------------------------------------------
+UINT16 AmiGetWordFromLe(void* pAddr_p)
 {
+    UINT16 val;
 
-// Diese Funktion dient zum Lesen eines Words von der angegebenen absoluten
-// Adresse. Die Funktionen der Gruppe <AmiGetxxx> werden verwendet, um Daten,
-// die mit einem anderen System ausgetauscht wurden und im Intel-Format abge-
-// legt sind, zu lesen.
+    ((UINT8 *) &val)[0] = ((UINT8 *) pAddr_p)[0];
+    ((UINT8 *) &val)[1] = ((UINT8 *) pAddr_p)[1];
 
-
-WORD wValue;
-
-    AMI_READ_WORD (wValue, pAddr_p);
-
-    return ( wValue );
-
+    return val;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief    Set Uint24 to big endian
 
+Sets a 24 bit value to a buffer in big endian
 
+\param[out] pAddr_p         Pointer to the destination buffer
+\param[in]  uint32Val_p     The source value to convert
 
-//------------< read DWORD in little endian >--------------------------
-
-INLINE_FUNCTION DWORD  PUBLIC  AmiGetDwordFromLe (void FAR* pAddr_p)
+\ingroup module_ami
+*/
+//------------------------------------------------------------------------------
+void AmiSetDword24ToBe(void* pAddr_p, UINT32 uint32Val_p)
 {
-
-// Diese Funktion dient zum Lesen eines Dwords von der angegebenen absoluten
-// Adresse. Die Funktionen der Gruppe <AmiGetxxx> werden verwendet, um Daten,
-// die mit einem anderen System ausgetauscht wurden und im Intel-Format abge-
-// legt sind, zu lesen.
-
-
-DWORD dwValue;
-
-    AMI_READ_DWORD (dwValue, pAddr_p);
-
-    return ( dwValue );
-
+    ((UINT8 *) pAddr_p)[2] = ((UINT8 *) &uint32Val_p)[0];
+    ((UINT8 *) pAddr_p)[1] = ((UINT8 *) &uint32Val_p)[1];
+    ((UINT8 *) pAddr_p)[0] = ((UINT8 *) &uint32Val_p)[2];
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief    Set Uint24 to little endian
 
-//---------------------------------------------------------------------------
-//
-// Function:    AmiSetDword24ToBe()
-//
-// Description: sets a 24 bit value to a buffer in big endian
-//
-// Parameters:  pAddr_p         = pointer to destination buffer
-//              dwDwordVal_p    = value to set
-//
-// Return:      void
-//
-// State:       not tested
-//
-//---------------------------------------------------------------------------
+Sets a 24 bit value to a buffer in little endian
 
-INLINE_FUNCTION void PUBLIC AmiSetDword24ToBe (void FAR* pAddr_p, DWORD dwDwordVal_p)
+\param[in]  pAddr_p         Pointer to the destination buffer
+\param[out] uint32Val_p     The source value to convert
+
+\ingroup module_ami
+*/
+//------------------------------------------------------------------------------
+void AmiSetDword24ToLe(void* pAddr_p, UINT32 uint32Val_p)
 {
-tSplittDword dwValue;
-
-    dwValue.m_dwValue = dwDwordVal_p;
-
-    ((BYTE FAR*) pAddr_p)[0] = dwValue.m_abValue[0];
-    ((BYTE FAR*) pAddr_p)[1] = dwValue.m_abValue[1];
-    ((BYTE FAR*) pAddr_p)[2] = dwValue.m_abValue[2];
-
+    ((UINT8 *) pAddr_p)[0] = ((UINT8 *) &uint32Val_p)[0];
+    ((UINT8 *) pAddr_p)[1] = ((UINT8 *) &uint32Val_p)[1];
+    ((UINT8 *) pAddr_p)[2] = ((UINT8 *) &uint32Val_p)[2];
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief    Get Uint24 from big endian
 
-//---------------------------------------------------------------------------
-//
-// Function:    AmiSetDword24ToLe()
-//
-// Description: sets a 24 bit value to a buffer in little endian
-//
-// Parameters:  pAddr_p         = pointer to destination buffer
-//              dwDwordVal_p    = value to set
-//
-// Return:      void
-//
-// State:       not tested
-//
-//---------------------------------------------------------------------------
+Reads a 24 bit value from a buffer in big endian
 
-INLINE_FUNCTION void PUBLIC AmiSetDword24ToLe (void FAR* pAddr_p, DWORD dwDwordVal_p)
+\param[in]  pAddr_p         Pointer to the source buffer
+
+\return UINT32
+\retval Value       The data in platform endian
+
+\ingroup module_ami
+*/
+//------------------------------------------------------------------------------
+UINT32 AmiGetDword24FromBe(void* pAddr_p)
 {
+    UINT32 val = 0;
 
-    ((BYTE FAR*) pAddr_p)[0] = ((BYTE FAR*) &dwDwordVal_p)[0];
-    ((BYTE FAR*) pAddr_p)[1] = ((BYTE FAR*) &dwDwordVal_p)[1];
-    ((BYTE FAR*) pAddr_p)[2] = ((BYTE FAR*) &dwDwordVal_p)[2];
+    ((UINT8 *) &val)[0] = ((UINT8 *) pAddr_p)[2];
+    ((UINT8 *) &val)[1] = ((UINT8 *) pAddr_p)[1];
+    ((UINT8 *) &val)[2] = ((UINT8 *) pAddr_p)[0];
 
+    return val;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief    Get Uint24 from little endian
 
-//---------------------------------------------------------------------------
-//
-// Function:    AmiGetDword24()
-//
-// Description: reads a 24 bit value from a buffer
-//
-// Parameters:  pAddr_p         = pointer to source buffer
-//
-// Return:      DWORD           = read value
-//
-// State:       not tested
-//
-//---------------------------------------------------------------------------
+Reads a 24 bit value from a buffer in little endian
 
-INLINE_FUNCTION DWORD PUBLIC AmiGetDword24FromBe (void FAR* pAddr_p)
+\param[in]  pAddr_p         Pointer to the source buffer
+
+\return UINT32
+\retval Value       The data in platform endian
+
+\ingroup module_ami
+*/
+//------------------------------------------------------------------------------
+UINT32 AmiGetDword24FromLe(void* pAddr_p)
 {
+    UINT32 val = 0;
 
-tdwStruct      dwStruct;
+    ((UINT8 *) &val)[0] = ((UINT8 *) pAddr_p)[0];
+    ((UINT8 *) &val)[1] = ((UINT8 *) pAddr_p)[1];
+    ((UINT8 *) &val)[2] = ((UINT8 *) pAddr_p)[2];
 
-    dwStruct.m_dwDword  = AmiGetDwordFromBe (pAddr_p);
-    dwStruct.m_dwDword >>= 8;
-
-    return ( dwStruct.m_dwDword );
-
+    return val;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief    Set Uint32 to big endian
 
-//---------------------------------------------------------------------------
-//
-// Function:    AmiGetDword24FromLe()
-//
-// Description: reads a 24 bit value from a buffer in little endian
-//
-// Parameters:  pAddr_p         = pointer to source buffer
-//
-// Return:      DWORD           = read value
-//
-// State:       not tested
-//
-//---------------------------------------------------------------------------
+Sets a 32 bit value to a buffer in big endian
 
-INLINE_FUNCTION DWORD PUBLIC AmiGetDword24FromLe (void FAR* pAddr_p)
+\param[out] pAddr_p         Pointer to the destination buffer
+\param[in]  uint32Val_p     The source value to convert
+
+\ingroup module_ami
+*/
+//------------------------------------------------------------------------------
+void AmiSetDwordToBe(void* pAddr_p, UINT32 uint32Val_p)
 {
-
-tdwStruct      dwStruct;
-
-    dwStruct.m_dwDword  = AmiGetDwordFromLe (pAddr_p);
-    dwStruct.m_dwDword &= 0x00FFFFFF;
-
-    return ( dwStruct.m_dwDword );
-
+    ((UINT8 *) pAddr_p)[3] = ((UINT8 *) &uint32Val_p)[0];
+    ((UINT8 *) pAddr_p)[2] = ((UINT8 *) &uint32Val_p)[1];
+    ((UINT8 *) pAddr_p)[1] = ((UINT8 *) &uint32Val_p)[2];
+    ((UINT8 *) pAddr_p)[0] = ((UINT8 *) &uint32Val_p)[3];
 }
 
-//#ifdef USE_VAR64
+//------------------------------------------------------------------------------
+/**
+\brief    Set Uint32 to little endian
 
-//---------------------------------------------------------------------------
-//
-// Function:    AmiSetQword64ToBe()
-//
-// Description: sets a 64 bit value to a buffer in big endian
-//
-// Parameters:  pAddr_p         = pointer to destination buffer
-//              qwQwordVal_p    = quadruple word value
-//
-// Return:      void
-//
-// State:       not tested
-//
-//---------------------------------------------------------------------------
+Sets a 32 bit value to a buffer in little endian
 
-INLINE_FUNCTION void PUBLIC AmiSetQword64ToBe (void FAR* pAddr_p, QWORD qwQwordVal_p)
+\param[out] pAddr_p         Pointer to the destination buffer
+\param[in]  uint32Val_p     The source value to convert
+
+\ingroup module_ami
+*/
+//------------------------------------------------------------------------------
+void AmiSetDwordToLe(void* pAddr_p, UINT32 uint32Val_p)
 {
-
-    ((BYTE FAR*) pAddr_p)[0] = ((BYTE FAR*) &qwQwordVal_p)[7];
-    ((BYTE FAR*) pAddr_p)[1] = ((BYTE FAR*) &qwQwordVal_p)[6];
-    ((BYTE FAR*) pAddr_p)[2] = ((BYTE FAR*) &qwQwordVal_p)[5];
-    ((BYTE FAR*) pAddr_p)[3] = ((BYTE FAR*) &qwQwordVal_p)[4];
-    ((BYTE FAR*) pAddr_p)[4] = ((BYTE FAR*) &qwQwordVal_p)[3];
-    ((BYTE FAR*) pAddr_p)[5] = ((BYTE FAR*) &qwQwordVal_p)[2];
-    ((BYTE FAR*) pAddr_p)[6] = ((BYTE FAR*) &qwQwordVal_p)[1];
-    ((BYTE FAR*) pAddr_p)[7] = ((BYTE FAR*) &qwQwordVal_p)[0];
-
+    ((UINT8 *) pAddr_p)[0] = ((UINT8 *) &uint32Val_p)[0];
+    ((UINT8 *) pAddr_p)[1] = ((UINT8 *) &uint32Val_p)[1];
+    ((UINT8 *) pAddr_p)[2] = ((UINT8 *) &uint32Val_p)[2];
+    ((UINT8 *) pAddr_p)[3] = ((UINT8 *) &uint32Val_p)[3];
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief    Get Uint32 from big endian
 
-//---------------------------------------------------------------------------
-//
-// Function:    AmiSetQword64ToLe()
-//
-// Description: sets a 64 bit value to a buffer in little endian
-//
-// Parameters:  pAddr_p         = pointer to destination buffer
-//              qwQwordVal_p    = quadruple word value
-//
-// Return:      void
-//
-// State:       not tested
-//
-//---------------------------------------------------------------------------
+Reads a 32 bit value from a buffer in big endian
 
-INLINE_FUNCTION void PUBLIC AmiSetQword64ToLe (void FAR* pAddr_p, QWORD qwQwordVal_p)
+\param[in]  pAddr_p         Pointer to the source buffer
+
+\return UINT32
+\retval Value       The data in platform endian
+
+\ingroup module_ami
+*/
+//------------------------------------------------------------------------------
+UINT32 AmiGetDwordFromBe(void* pAddr_p)
 {
-tSplittQword    qwValue;
+    UINT32 val;
 
-    qwValue.m_qwValue = qwQwordVal_p;
+    ((UINT8 *) &val)[3] = ((UINT8 *) pAddr_p)[0];
+    ((UINT8 *) &val)[2] = ((UINT8 *) pAddr_p)[1];
+    ((UINT8 *) &val)[1] = ((UINT8 *) pAddr_p)[2];
+    ((UINT8 *) &val)[0] = ((UINT8 *) pAddr_p)[3];
 
-    ((BYTE*) pAddr_p)[0] = qwValue.m_abValue[0];
-    ((BYTE*) pAddr_p)[1] = qwValue.m_abValue[1];
-    ((BYTE*) pAddr_p)[2] = qwValue.m_abValue[2];
-    ((BYTE*) pAddr_p)[3] = qwValue.m_abValue[3];
-    ((BYTE*) pAddr_p)[4] = qwValue.m_abValue[4];
-    ((BYTE*) pAddr_p)[5] = qwValue.m_abValue[5];
-    ((BYTE*) pAddr_p)[6] = qwValue.m_abValue[6];
-    ((BYTE*) pAddr_p)[7] = qwValue.m_abValue[7];
-
+    return val;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief    Get Uint32 from little endian
 
-//---------------------------------------------------------------------------
-//
-// Function:    AmiGetQword64FromBe()
-//
-// Description: reads a 64 bit value from a buffer in big endian
-//
-// Parameters:  pAddr_p         = pointer to source buffer
-//
-// Return:      void
-//
-// State:       not tested
-//
-//---------------------------------------------------------------------------
+Reads a 32 bit value from a buffer in little endian
 
-INLINE_FUNCTION QWORD PUBLIC AmiGetQword64FromBe (void FAR* pAddr_p)
+\param[in]  pAddr_p         Pointer to the source buffer
+
+\return UINT32
+\retval Value       The data in platform endian
+
+\ingroup module_ami
+*/
+//------------------------------------------------------------------------------
+UINT32 AmiGetDwordFromLe(void* pAddr_p)
 {
+    UINT32 val;
 
-tqwStruct      qwStruct;
+    ((UINT8 *) &val)[0] = ((UINT8 *) pAddr_p)[0];
+    ((UINT8 *) &val)[1] = ((UINT8 *) pAddr_p)[1];
+    ((UINT8 *) &val)[2] = ((UINT8 *) pAddr_p)[2];
+    ((UINT8 *) &val)[3] = ((UINT8 *) pAddr_p)[3];
 
-    ((BYTE FAR*) &qwStruct.m_qwQword)[0] = ((BYTE FAR*) pAddr_p)[7];
-    ((BYTE FAR*) &qwStruct.m_qwQword)[1] = ((BYTE FAR*) pAddr_p)[6];
-    ((BYTE FAR*) &qwStruct.m_qwQword)[2] = ((BYTE FAR*) pAddr_p)[5];
-    ((BYTE FAR*) &qwStruct.m_qwQword)[3] = ((BYTE FAR*) pAddr_p)[4];
-    ((BYTE FAR*) &qwStruct.m_qwQword)[4] = ((BYTE FAR*) pAddr_p)[3];
-    ((BYTE FAR*) &qwStruct.m_qwQword)[5] = ((BYTE FAR*) pAddr_p)[2];
-    ((BYTE FAR*) &qwStruct.m_qwQword)[6] = ((BYTE FAR*) pAddr_p)[1];
-    ((BYTE FAR*) &qwStruct.m_qwQword)[7] = ((BYTE FAR*) pAddr_p)[0];
-
-    return ( qwStruct.m_qwQword );
-
+    return val;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief    Set Uint40 to big endian
 
-//---------------------------------------------------------------------------
-//
-// Function:    AmiGetQword64FromLe()
-//
-// Description: reads a 64 bit value from a buffer in little endian
-//
-// Parameters:  pAddr_p         = pointer to source buffer
-//
-// Return:      void
-//
-// State:       not tested
-//
-//---------------------------------------------------------------------------
+Sets a 40 bit value to a buffer in big endian
 
-INLINE_FUNCTION QWORD PUBLIC AmiGetQword64FromLe (void FAR* pAddr_p)
+\param[out] pAddr_p         Pointer to the destination buffer
+\param[in]  uint64Val_p     The source value to convert
+
+\ingroup module_ami
+*/
+//------------------------------------------------------------------------------
+void AmiSetQword40ToBe(void* pAddr_p, UINT64 uint64Val_p)
 {
-tSplittQword    qwValue;
-
-    qwValue.m_abValue[0] = ((BYTE*) pAddr_p)[0];
-    qwValue.m_abValue[1] = ((BYTE*) pAddr_p)[1];
-    qwValue.m_abValue[2] = ((BYTE*) pAddr_p)[2];
-    qwValue.m_abValue[3] = ((BYTE*) pAddr_p)[3];
-    qwValue.m_abValue[4] = ((BYTE*) pAddr_p)[4];
-    qwValue.m_abValue[5] = ((BYTE*) pAddr_p)[5];
-    qwValue.m_abValue[6] = ((BYTE*) pAddr_p)[6];
-    qwValue.m_abValue[7] = ((BYTE*) pAddr_p)[7];
-
-    return (QWORD) qwValue.m_qwValue;
+    ((UINT8 *) pAddr_p)[0] = ((UINT8 *) &uint64Val_p)[4];
+    ((UINT8 *) pAddr_p)[1] = ((UINT8 *) &uint64Val_p)[3];
+    ((UINT8 *) pAddr_p)[2] = ((UINT8 *) &uint64Val_p)[2];
+    ((UINT8 *) pAddr_p)[3] = ((UINT8 *) &uint64Val_p)[1];
+    ((UINT8 *) pAddr_p)[4] = ((UINT8 *) &uint64Val_p)[0];
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief    Set Uint40 to little endian
 
-//---------------------------------------------------------------------------
-//
-// Function:    AmiSetQword40ToBe()
-//
-// Description: sets a 40 bit value to a buffer in big endian
-//
-// Parameters:  pAddr_p         = pointer to destination buffer
-//              qwQwordVal_p    = quadruple word value
-//
-// Return:      void
-//
-// State:       not tested
-//
-//---------------------------------------------------------------------------
+Sets a 40 bit value to a buffer in little endian
 
-INLINE_FUNCTION void PUBLIC AmiSetQword40ToBe (void FAR* pAddr_p, QWORD qwQwordVal_p)
+\param[out] pAddr_p         Pointer to the destination buffer
+\param[in]  uint64Val_p     The source value to convert
+
+\ingroup module_ami
+*/
+//------------------------------------------------------------------------------
+void AmiSetQword40ToLe(void* pAddr_p, UINT64 uint64Val_p)
 {
-
-    ((BYTE FAR*) pAddr_p)[0] = ((BYTE FAR*) &qwQwordVal_p)[4];
-    ((BYTE FAR*) pAddr_p)[1] = ((BYTE FAR*) &qwQwordVal_p)[3];
-    ((BYTE FAR*) pAddr_p)[2] = ((BYTE FAR*) &qwQwordVal_p)[2];
-    ((BYTE FAR*) pAddr_p)[3] = ((BYTE FAR*) &qwQwordVal_p)[1];
-    ((BYTE FAR*) pAddr_p)[4] = ((BYTE FAR*) &qwQwordVal_p)[0];
-
+    ((UINT8 *) pAddr_p)[0] = ((UINT8 *) &uint64Val_p)[0];
+    ((UINT8 *) pAddr_p)[1] = ((UINT8 *) &uint64Val_p)[1];
+    ((UINT8 *) pAddr_p)[2] = ((UINT8 *) &uint64Val_p)[2];
+    ((UINT8 *) pAddr_p)[3] = ((UINT8 *) &uint64Val_p)[3];
+    ((UINT8 *) pAddr_p)[4] = ((UINT8 *) &uint64Val_p)[4];
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief    Get Uint40 from big endian
 
-//---------------------------------------------------------------------------
-//
-// Function:    AmiSetQword40ToLe()
-//
-// Description: sets a 40 bit value to a buffer in little endian
-//
-// Parameters:  pAddr_p         = pointer to destination buffer
-//              qwQwordVal_p    = quadruple word value
-//
-// Return:      void
-//
-// State:       not tested
-//
-//---------------------------------------------------------------------------
+Reads a 40 bit value from a buffer in big endian
 
-INLINE_FUNCTION void PUBLIC AmiSetQword40ToLe (void FAR* pAddr_p, QWORD qwQwordVal_p)
+\param[in]  pAddr_p         Pointer to the source buffer
+
+\return UINT64
+\retval Value       The data in platform endian
+
+\ingroup module_ami
+*/
+//------------------------------------------------------------------------------
+UINT64 AmiGetQword40FromBe(void* pAddr_p)
 {
-tSplittQword qwValue;
+    UINT64 val = 0;
 
-    qwValue.m_qwValue = qwQwordVal_p;
+    ((UINT8 *) &val)[0] = ((UINT8 *) pAddr_p)[4];
+    ((UINT8 *) &val)[1] = ((UINT8 *) pAddr_p)[3];
+    ((UINT8 *) &val)[2] = ((UINT8 *) pAddr_p)[2];
+    ((UINT8 *) &val)[3] = ((UINT8 *) pAddr_p)[1];
+    ((UINT8 *) &val)[4] = ((UINT8 *) pAddr_p)[0];
 
-    ((BYTE*) pAddr_p)[0] = qwValue.m_abValue[0];
-    ((BYTE*) pAddr_p)[1] = qwValue.m_abValue[1];
-    ((BYTE*) pAddr_p)[2] = qwValue.m_abValue[2];
-    ((BYTE*) pAddr_p)[3] = qwValue.m_abValue[3];
-    ((BYTE*) pAddr_p)[4] = qwValue.m_abValue[4];
-
+    return val;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief    Get Uint40 from little endian
 
-//---------------------------------------------------------------------------
-//
-// Function:    AmiGetQword40FromBe()
-//
-// Description: reads a 40 bit value from a buffer in big endian
-//
-// Parameters:  pAddr_p         = pointer to source buffer
-//
-// Return:      QWORD
-//
-// State:       not tested
-//
-//---------------------------------------------------------------------------
+Reads a 40 bit value from a buffer in little endian
 
-INLINE_FUNCTION QWORD PUBLIC AmiGetQword40FromBe (void FAR* pAddr_p)
+\param[in]  pAddr_p         Pointer to the source buffer
+
+\return UINT64
+\retval Value       The data in platform endian
+
+\ingroup module_ami
+*/
+//------------------------------------------------------------------------------
+UINT64 AmiGetQword40FromLe(void* pAddr_p)
 {
+    UINT64 val = 0;
 
-tqwStruct      qwStruct;
+    ((UINT8 *) &val)[0] = ((UINT8 *) pAddr_p)[0];
+    ((UINT8 *) &val)[1] = ((UINT8 *) pAddr_p)[1];
+    ((UINT8 *) &val)[2] = ((UINT8 *) pAddr_p)[2];
+    ((UINT8 *) &val)[3] = ((UINT8 *) pAddr_p)[3];
+    ((UINT8 *) &val)[4] = ((UINT8 *) pAddr_p)[4];
 
-    qwStruct.m_qwQword  = AmiGetQword64FromBe (pAddr_p);
-    qwStruct.m_qwQword >>= 24;
-
-    return ( qwStruct.m_qwQword );
-
+    return val;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief    Set Uint48 to big endian
 
-//---------------------------------------------------------------------------
-//
-// Function:    AmiGetQword40FromLe()
-//
-// Description: reads a 40 bit value from a buffer in little endian
-//
-// Parameters:  pAddr_p         = pointer to source buffer
-//
-// Return:      QWORD
-//
-// State:       not tested
-//
-//---------------------------------------------------------------------------
+Sets a 48 bit value to a buffer in big endian
 
-INLINE_FUNCTION QWORD PUBLIC AmiGetQword40FromLe (void FAR* pAddr_p)
+\param[out] pAddr_p         Pointer to the destination buffer
+\param[in]  uint64Val_p     The source value to convert
+
+\ingroup module_ami
+*/
+//------------------------------------------------------------------------------
+void AmiSetQword48ToBe(void* pAddr_p, UINT64 uint64Val_p)
 {
-
-QWORD      qwValue;
-
-    qwValue  = AmiGetQword64FromLe (pAddr_p);
-    qwValue &= 0x000000FFFFFFFFFFLL;
-
-    return ( qwValue );
-
+    ((UINT8 *) pAddr_p)[0] = ((UINT8 *) &uint64Val_p)[5];
+    ((UINT8 *) pAddr_p)[1] = ((UINT8 *) &uint64Val_p)[4];
+    ((UINT8 *) pAddr_p)[2] = ((UINT8 *) &uint64Val_p)[3];
+    ((UINT8 *) pAddr_p)[3] = ((UINT8 *) &uint64Val_p)[2];
+    ((UINT8 *) pAddr_p)[4] = ((UINT8 *) &uint64Val_p)[1];
+    ((UINT8 *) pAddr_p)[5] = ((UINT8 *) &uint64Val_p)[0];
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief    Set Uint48 to little endian
 
-//---------------------------------------------------------------------------
-//
-// Function:    AmiSetQword48ToBe()
-//
-// Description: sets a 48 bit value to a buffer in big endian
-//
-// Parameters:  pAddr_p         = pointer to destination buffer
-//              qwQwordVal_p    = quadruple word value
-//
-// Return:      void
-//
-// State:       not tested
-//
-//---------------------------------------------------------------------------
+Sets a 48 bit value to a buffer in little endian
 
-INLINE_FUNCTION void PUBLIC AmiSetQword48ToBe (void FAR* pAddr_p, QWORD qwQwordVal_p)
+\param[out] pAddr_p         Pointer to the destination buffer
+\param[in]  uint64Val_p     The source value to convert
+
+\ingroup module_ami
+*/
+//------------------------------------------------------------------------------
+void AmiSetQword48ToLe(void* pAddr_p, UINT64 uint64Val_p)
 {
-
-    ((BYTE FAR*) pAddr_p)[0] = ((BYTE FAR*) &qwQwordVal_p)[5];
-    ((BYTE FAR*) pAddr_p)[1] = ((BYTE FAR*) &qwQwordVal_p)[4];
-    ((BYTE FAR*) pAddr_p)[2] = ((BYTE FAR*) &qwQwordVal_p)[3];
-    ((BYTE FAR*) pAddr_p)[3] = ((BYTE FAR*) &qwQwordVal_p)[2];
-    ((BYTE FAR*) pAddr_p)[4] = ((BYTE FAR*) &qwQwordVal_p)[1];
-    ((BYTE FAR*) pAddr_p)[5] = ((BYTE FAR*) &qwQwordVal_p)[0];
-
+    ((UINT8 *) pAddr_p)[0] = ((UINT8 *) &uint64Val_p)[0];
+    ((UINT8 *) pAddr_p)[1] = ((UINT8 *) &uint64Val_p)[1];
+    ((UINT8 *) pAddr_p)[2] = ((UINT8 *) &uint64Val_p)[2];
+    ((UINT8 *) pAddr_p)[3] = ((UINT8 *) &uint64Val_p)[3];
+    ((UINT8 *) pAddr_p)[4] = ((UINT8 *) &uint64Val_p)[4];
+    ((UINT8 *) pAddr_p)[5] = ((UINT8 *) &uint64Val_p)[5];
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief    Get Uint48 from big endian
 
-//---------------------------------------------------------------------------
-//
-// Function:    AmiSetQword48ToLe()
-//
-// Description: sets a 48 bit value to a buffer in little endian
-//
-// Parameters:  pAddr_p         = pointer to destination buffer
-//              qwQwordVal_p    = quadruple word value
-//
-// Return:      void
-//
-// State:       not tested
-//
-//---------------------------------------------------------------------------
+Reads a 48 bit value from a buffer in big endian
 
-INLINE_FUNCTION void PUBLIC AmiSetQword48ToLe (void FAR* pAddr_p, QWORD qwQwordVal_p)
+\param[in]  pAddr_p         Pointer to the source buffer
+
+\return UINT64
+\retval Value       The data in platform endian
+
+\ingroup module_ami
+*/
+//------------------------------------------------------------------------------
+UINT64 AmiGetQword48FromBe(void* pAddr_p)
 {
-tSplittQword qwValue;
+    UINT64 val = 0;
 
-    qwValue.m_qwValue = qwQwordVal_p;
+    ((UINT8 *) &val)[0] = ((UINT8 *) pAddr_p)[5];
+    ((UINT8 *) &val)[1] = ((UINT8 *) pAddr_p)[4];
+    ((UINT8 *) &val)[2] = ((UINT8 *) pAddr_p)[3];
+    ((UINT8 *) &val)[3] = ((UINT8 *) pAddr_p)[2];
+    ((UINT8 *) &val)[4] = ((UINT8 *) pAddr_p)[1];
+    ((UINT8 *) &val)[5] = ((UINT8 *) pAddr_p)[0];
 
-    ((BYTE*) pAddr_p)[0] = qwValue.m_abValue[0];
-    ((BYTE*) pAddr_p)[1] = qwValue.m_abValue[1];
-    ((BYTE*) pAddr_p)[2] = qwValue.m_abValue[2];
-    ((BYTE*) pAddr_p)[3] = qwValue.m_abValue[3];
-    ((BYTE*) pAddr_p)[4] = qwValue.m_abValue[4];
-    ((BYTE*) pAddr_p)[5] = qwValue.m_abValue[5];
-
+    return val;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief    Get Uint48 from little endian
 
-//---------------------------------------------------------------------------
-//
-// Function:    AmiGetQword48FromBe()
-//
-// Description: reads a 48 bit value from a buffer in big endian
-//
-// Parameters:  pAddr_p         = pointer to source buffer
-//
-// Return:      QWORD
-//
-// State:       not tested
-//
-//---------------------------------------------------------------------------
+Reads a 48 bit value from a buffer in little endian
 
-INLINE_FUNCTION QWORD PUBLIC AmiGetQword48FromBe (void FAR* pAddr_p)
+\param[in]  pAddr_p         Pointer to the source buffer
+
+\return UINT64
+\retval Value       The data in platform endian
+
+\ingroup module_ami
+*/
+//------------------------------------------------------------------------------
+UINT64 AmiGetQword48FromLe(void* pAddr_p)
 {
+    UINT64 val = 0;
 
-tqwStruct      qwStruct;
+    ((UINT8 *) &val)[0] = ((UINT8 *) pAddr_p)[0];
+    ((UINT8 *) &val)[1] = ((UINT8 *) pAddr_p)[1];
+    ((UINT8 *) &val)[2] = ((UINT8 *) pAddr_p)[2];
+    ((UINT8 *) &val)[3] = ((UINT8 *) pAddr_p)[3];
+    ((UINT8 *) &val)[4] = ((UINT8 *) pAddr_p)[4];
+    ((UINT8 *) &val)[5] = ((UINT8 *) pAddr_p)[5];
 
-    qwStruct.m_qwQword  = AmiGetQword64FromBe (pAddr_p);
-    qwStruct.m_qwQword >>= 16;
-
-    return ( qwStruct.m_qwQword );
-
+    return val;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief    Set Uint56 to big endian
 
-//---------------------------------------------------------------------------
-//
-// Function:    AmiGetQword48FromLe()
-//
-// Description: reads a 48 bit value from a buffer in little endian
-//
-// Parameters:  pAddr_p         = pointer to source buffer
-//
-// Return:      QWORD
-//
-// State:       not tested
-//
-//---------------------------------------------------------------------------
+Sets a 56 bit value to a buffer in big endian
 
-INLINE_FUNCTION QWORD PUBLIC AmiGetQword48FromLe (void FAR* pAddr_p)
+\param[out] pAddr_p         Pointer to the destination buffer
+\param[in]  uint64Val_p     The source value to convert
+
+\ingroup module_ami
+*/
+//------------------------------------------------------------------------------
+void AmiSetQword56ToBe(void* pAddr_p, UINT64 uint64Val_p)
 {
-
-QWORD      qwValue;
-
-    qwValue  = AmiGetQword64FromLe (pAddr_p);
-    qwValue &= 0x0000FFFFFFFFFFFFLL;
-
-    return ( qwValue );
-
+    ((UINT8 *) pAddr_p)[0] = ((UINT8 *) &uint64Val_p)[6];
+    ((UINT8 *) pAddr_p)[1] = ((UINT8 *) &uint64Val_p)[5];
+    ((UINT8 *) pAddr_p)[2] = ((UINT8 *) &uint64Val_p)[4];
+    ((UINT8 *) pAddr_p)[3] = ((UINT8 *) &uint64Val_p)[3];
+    ((UINT8 *) pAddr_p)[4] = ((UINT8 *) &uint64Val_p)[2];
+    ((UINT8 *) pAddr_p)[5] = ((UINT8 *) &uint64Val_p)[1];
+    ((UINT8 *) pAddr_p)[6] = ((UINT8 *) &uint64Val_p)[0];
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief    Set Uint56 to little endian
 
-//---------------------------------------------------------------------------
-//
-// Function:    AmiSetQword56ToBe()
-//
-// Description: sets a 56 bit value to a buffer in big endian
-//
-// Parameters:  pAddr_p         = pointer to destination buffer
-//              qwQwordVal_p    = quadruple word value
-//
-// Return:      void
-//
-// State:       not tested
-//
-//---------------------------------------------------------------------------
+Sets a 56 bit value to a buffer in little endian
 
-INLINE_FUNCTION void PUBLIC AmiSetQword56ToBe (void FAR* pAddr_p, QWORD qwQwordVal_p)
+\param[out] pAddr_p         Pointer to the destination buffer
+\param[in]  uint64Val_p     The source value to convert
+
+\ingroup module_ami
+*/
+//------------------------------------------------------------------------------
+void AmiSetQword56ToLe(void* pAddr_p, UINT64 uint64Val_p)
 {
-
-    ((BYTE FAR*) pAddr_p)[0] = ((BYTE FAR*) &qwQwordVal_p)[6];
-    ((BYTE FAR*) pAddr_p)[1] = ((BYTE FAR*) &qwQwordVal_p)[5];
-    ((BYTE FAR*) pAddr_p)[2] = ((BYTE FAR*) &qwQwordVal_p)[4];
-    ((BYTE FAR*) pAddr_p)[3] = ((BYTE FAR*) &qwQwordVal_p)[3];
-    ((BYTE FAR*) pAddr_p)[4] = ((BYTE FAR*) &qwQwordVal_p)[2];
-    ((BYTE FAR*) pAddr_p)[5] = ((BYTE FAR*) &qwQwordVal_p)[1];
-    ((BYTE FAR*) pAddr_p)[6] = ((BYTE FAR*) &qwQwordVal_p)[0];
-
+    ((UINT8 *) pAddr_p)[0] = ((UINT8 *) &uint64Val_p)[0];
+    ((UINT8 *) pAddr_p)[1] = ((UINT8 *) &uint64Val_p)[1];
+    ((UINT8 *) pAddr_p)[2] = ((UINT8 *) &uint64Val_p)[2];
+    ((UINT8 *) pAddr_p)[3] = ((UINT8 *) &uint64Val_p)[3];
+    ((UINT8 *) pAddr_p)[4] = ((UINT8 *) &uint64Val_p)[4];
+    ((UINT8 *) pAddr_p)[5] = ((UINT8 *) &uint64Val_p)[5];
+    ((UINT8 *) pAddr_p)[6] = ((UINT8 *) &uint64Val_p)[6];
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief    Get Uint56 from big endian
 
-//---------------------------------------------------------------------------
-//
-// Function:    AmiSetQword56ToLe()
-//
-// Description: sets a 56 bit value to a buffer in little endian
-//
-// Parameters:  pAddr_p         = pointer to destination buffer
-//              qwQwordVal_p    = quadruple word value
-//
-// Return:      void
-//
-// State:       not tested
-//
-//---------------------------------------------------------------------------
+Reads a 56 bit value from a buffer in big endian
 
-INLINE_FUNCTION void PUBLIC AmiSetQword56ToLe (void FAR* pAddr_p, QWORD qwQwordVal_p)
+\param[in]  pAddr_p         Pointer to the source buffer
+
+\return UINT64
+\retval Value       The data in platform endian
+
+\ingroup module_ami
+*/
+//------------------------------------------------------------------------------
+UINT64 AmiGetQword56FromBe(void* pAddr_p)
 {
-tSplittQword qwValue;
+    UINT64 val = 0;
 
-    qwValue.m_qwValue = qwQwordVal_p;
+    ((UINT8 *) &val)[0] = ((UINT8 *) pAddr_p)[6];
+    ((UINT8 *) &val)[1] = ((UINT8 *) pAddr_p)[5];
+    ((UINT8 *) &val)[2] = ((UINT8 *) pAddr_p)[4];
+    ((UINT8 *) &val)[3] = ((UINT8 *) pAddr_p)[3];
+    ((UINT8 *) &val)[4] = ((UINT8 *) pAddr_p)[2];
+    ((UINT8 *) &val)[5] = ((UINT8 *) pAddr_p)[1];
+    ((UINT8 *) &val)[6] = ((UINT8 *) pAddr_p)[0];
 
-    ((BYTE*) pAddr_p)[0] = qwValue.m_abValue[0];
-    ((BYTE*) pAddr_p)[1] = qwValue.m_abValue[1];
-    ((BYTE*) pAddr_p)[2] = qwValue.m_abValue[2];
-    ((BYTE*) pAddr_p)[3] = qwValue.m_abValue[3];
-    ((BYTE*) pAddr_p)[4] = qwValue.m_abValue[4];
-    ((BYTE*) pAddr_p)[5] = qwValue.m_abValue[5];
-    ((BYTE*) pAddr_p)[6] = qwValue.m_abValue[6];
-
+    return val;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief    Get Uint56 from little endian
 
-//---------------------------------------------------------------------------
-//
-// Function:    AmiGetQword56FromBe()
-//
-// Description: reads a 56 bit value from a buffer in big endian
-//
-// Parameters:  pAddr_p         = pointer to source buffer
-//
-// Return:      QWORD
-//
-// State:       not tested
-//
-//---------------------------------------------------------------------------
+Reads a 56 bit value from a buffer in little endian
 
-INLINE_FUNCTION QWORD PUBLIC AmiGetQword56FromBe (void FAR* pAddr_p)
+\param[in]  pAddr_p         Pointer to the source buffer
+
+\return UINT64
+\retval Value       The data in platform endian
+
+\ingroup module_ami
+*/
+//------------------------------------------------------------------------------
+UINT64 AmiGetQword56FromLe(void* pAddr_p)
 {
+    UINT64 val = 0;
 
-tqwStruct      qwStruct;
+    ((UINT8 *) &val)[0] = ((UINT8 *) pAddr_p)[0];
+    ((UINT8 *) &val)[1] = ((UINT8 *) pAddr_p)[1];
+    ((UINT8 *) &val)[2] = ((UINT8 *) pAddr_p)[2];
+    ((UINT8 *) &val)[3] = ((UINT8 *) pAddr_p)[3];
+    ((UINT8 *) &val)[4] = ((UINT8 *) pAddr_p)[4];
+    ((UINT8 *) &val)[5] = ((UINT8 *) pAddr_p)[5];
+    ((UINT8 *) &val)[6] = ((UINT8 *) pAddr_p)[6];
 
-    qwStruct.m_qwQword  = AmiGetQword64FromBe (pAddr_p);
-    qwStruct.m_qwQword >>= 8;
-
-    return ( qwStruct.m_qwQword );
-
+    return val;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief    Set Uint64 to big endian
 
-//---------------------------------------------------------------------------
-//
-// Function:    AmiGetQword56FromLe()
-//
-// Description: reads a 56 bit value from a buffer in little endian
-//
-// Parameters:  pAddr_p         = pointer to source buffer
-//
-// Return:      QWORD
-//
-// State:       not tested
-//
-//---------------------------------------------------------------------------
+Sets a 64 bit value to a buffer in big endian
 
-INLINE_FUNCTION QWORD PUBLIC AmiGetQword56FromLe (void FAR* pAddr_p)
+\param[out] pAddr_p         Pointer to the destination buffer
+\param[in]  uint64Val_p     The source value to convert
+
+\ingroup module_ami
+*/
+//------------------------------------------------------------------------------
+void AmiSetQword64ToBe(void* pAddr_p, UINT64 uint64Val_p)
 {
-
-QWORD      qwValue;
-
-    qwValue  = AmiGetQword64FromLe (pAddr_p);
-    qwValue &= 0x00FFFFFFFFFFFFFFLL;
-
-    return ( qwValue );
-
+    ((UINT8 *) pAddr_p)[0] = ((UINT8 *) &uint64Val_p)[7];
+    ((UINT8 *) pAddr_p)[1] = ((UINT8 *) &uint64Val_p)[6];
+    ((UINT8 *) pAddr_p)[2] = ((UINT8 *) &uint64Val_p)[5];
+    ((UINT8 *) pAddr_p)[3] = ((UINT8 *) &uint64Val_p)[4];
+    ((UINT8 *) pAddr_p)[4] = ((UINT8 *) &uint64Val_p)[3];
+    ((UINT8 *) pAddr_p)[5] = ((UINT8 *) &uint64Val_p)[2];
+    ((UINT8 *) pAddr_p)[6] = ((UINT8 *) &uint64Val_p)[1];
+    ((UINT8 *) pAddr_p)[7] = ((UINT8 *) &uint64Val_p)[0];
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief    Set Uint64 to little endian
 
-//---------------------------------------------------------------------------
-//
-// Function:    AmiSetTimeOfDay()
-//
-// Description: sets a TIME_OF_DAY (CANopen) value to a buffer
-//
-// Parameters:  pAddr_p         = pointer to destination buffer
-//              pTimeOfDay_p    = pointer to struct TIME_OF_DAY
-//
-// Return:      void
-//
-// State:       not tested
-//
-//---------------------------------------------------------------------------
+Sets a 64 bit value to a buffer in little endian
 
-INLINE_FUNCTION void PUBLIC AmiSetTimeOfDay (void FAR* pAddr_p, tTimeOfDay FAR* pTimeOfDay_p)
+\param[out] pAddr_p         Pointer to the destination buffer
+\param[in]  uint64Val_p     The source value to convert
+
+\ingroup module_ami
+*/
+//------------------------------------------------------------------------------
+void AmiSetQword64ToLe(void* pAddr_p, UINT64 uint64Val_p)
 {
-
-    AmiSetDwordToLe (((BYTE FAR*) pAddr_p),     pTimeOfDay_p->m_dwMs & 0x0FFFFFFF);
-    AmiSetWordToLe  (((BYTE FAR*) pAddr_p) + 4, pTimeOfDay_p->m_wDays);
-
+    ((UINT8 *) pAddr_p)[0] = ((UINT8 *) &uint64Val_p)[0];
+    ((UINT8 *) pAddr_p)[1] = ((UINT8 *) &uint64Val_p)[1];
+    ((UINT8 *) pAddr_p)[2] = ((UINT8 *) &uint64Val_p)[2];
+    ((UINT8 *) pAddr_p)[3] = ((UINT8 *) &uint64Val_p)[3];
+    ((UINT8 *) pAddr_p)[4] = ((UINT8 *) &uint64Val_p)[4];
+    ((UINT8 *) pAddr_p)[5] = ((UINT8 *) &uint64Val_p)[5];
+    ((UINT8 *) pAddr_p)[6] = ((UINT8 *) &uint64Val_p)[6];
+    ((UINT8 *) pAddr_p)[7] = ((UINT8 *) &uint64Val_p)[7];
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief    Get Uint64 from big endian
 
-//---------------------------------------------------------------------------
-//
-// Function:    AmiGetTimeOfDay()
-//
-// Description: reads a TIME_OF_DAY (CANopen) value from a buffer
-//
-// Parameters:  pAddr_p         = pointer to source buffer
-//              pTimeOfDay_p    = pointer to struct TIME_OF_DAY
-//
-// Return:      void
-//
-// State:       not tested
-//
-//---------------------------------------------------------------------------
+Reads a 64 bit value from a buffer in big endian
 
-INLINE_FUNCTION void PUBLIC AmiGetTimeOfDay (void FAR* pAddr_p, tTimeOfDay FAR* pTimeOfDay_p)
+\param[in]  pAddr_p         Pointer to the source buffer
+
+\return UINT64
+\retval Value       The data in platform endian
+
+\ingroup module_ami
+*/
+//------------------------------------------------------------------------------
+UINT64 AmiGetQword64FromBe(void* pAddr_p)
 {
+    UINT64 val;
 
-    pTimeOfDay_p->m_dwMs  = AmiGetDwordFromLe (((BYTE FAR*) pAddr_p)) & 0x0FFFFFFF;
-    pTimeOfDay_p->m_wDays = AmiGetWordFromLe  (((BYTE FAR*) pAddr_p) + 4);
+    ((UINT8 *) &val)[0] = ((UINT8 *) pAddr_p)[7];
+    ((UINT8 *) &val)[1] = ((UINT8 *) pAddr_p)[6];
+    ((UINT8 *) &val)[2] = ((UINT8 *) pAddr_p)[5];
+    ((UINT8 *) &val)[3] = ((UINT8 *) pAddr_p)[4];
+    ((UINT8 *) &val)[4] = ((UINT8 *) pAddr_p)[3];
+    ((UINT8 *) &val)[5] = ((UINT8 *) pAddr_p)[2];
+    ((UINT8 *) &val)[6] = ((UINT8 *) pAddr_p)[1];
+    ((UINT8 *) &val)[7] = ((UINT8 *) pAddr_p)[0];
 
+    return val;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief    Get Uint64 from little endian
 
-#endif
+Reads a 64 bit value from a buffer in little endian
 
+\param[in]  pAddr_p         Pointer to the source buffer
 
-// EOF
+\return UINT64
+\retval Value       The data in platform endian
 
+\ingroup module_ami
+*/
+//------------------------------------------------------------------------------
+UINT64 AmiGetQword64FromLe(void* pAddr_p)
+{
+    UINT64 val;
+
+    ((UINT8 *) &val)[0] = ((UINT8 *) pAddr_p)[0];
+    ((UINT8 *) &val)[1] = ((UINT8 *) pAddr_p)[1];
+    ((UINT8 *) &val)[2] = ((UINT8 *) pAddr_p)[2];
+    ((UINT8 *) &val)[3] = ((UINT8 *) pAddr_p)[3];
+    ((UINT8 *) &val)[4] = ((UINT8 *) pAddr_p)[4];
+    ((UINT8 *) &val)[5] = ((UINT8 *) pAddr_p)[5];
+    ((UINT8 *) &val)[6] = ((UINT8 *) pAddr_p)[6];
+    ((UINT8 *) &val)[7] = ((UINT8 *) pAddr_p)[7];
+
+    return val;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief    Set time of day
+
+Sets the time of day (canOPEN timestamp) to memory in little endian
+
+\param[out] pAddr_p         Pointer to the destination buffer
+\param[in]  pTimeOfDay_p    Pointer to the source memory to convert
+
+\ingroup module_ami
+*/
+//------------------------------------------------------------------------------
+void AmiSetTimeOfDay(void* pAddr_p, tTimeOfDay* pTimeOfDay_p)
+{
+    AmiSetDwordToLe(((UINT8 *) pAddr_p), pTimeOfDay_p->m_dwMs & 0x0FFFFFFF);
+    AmiSetWordToLe(((UINT8 *) pAddr_p) + 4, pTimeOfDay_p->m_wDays);
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief    Get time of day
+
+Get the time of day (canOPEN timestamp) from memory in little endian
+
+\param[in]  pAddr_p         Pointer to the source memory to convert
+\param[out] pTimeOfDay_p    Pointer to the destination buffer
+
+\ingroup module_ami
+*/
+//------------------------------------------------------------------------------
+void AmiGetTimeOfDay (void* pAddr_p, tTimeOfDay* pTimeOfDay_p)
+{
+    pTimeOfDay_p->m_dwMs  = AmiGetDwordFromLe(((UINT8 *) pAddr_p)) & 0x0FFFFFFF;
+    pTimeOfDay_p->m_wDays = AmiGetWordFromLe(((UINT8 *) pAddr_p) + 4);
+}
