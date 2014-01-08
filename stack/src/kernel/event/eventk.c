@@ -101,11 +101,7 @@ event sinks.
 */
 static tEventDispatchEntry eventDispatchTbl_l[] =
 {
-#if defined(CONFIG_INCLUDE_NMTK)
     { kEplEventSinkNmtk,        kEplEventSourceNmtk,        nmtk_process },
-#else
-    { kEplEventSinkNmtk,        kEplEventSourceNmtk,        NULL },
-#endif
     { kEplEventSinkNmtk,        kEplEventSourceDllk,        handleNmtEventinDll },
     { kEplEventSinkDllk,        kEplEventSourceDllk,        dllk_process },
     { kEplEventSinkDllkCal,     kEplEventSourceDllk,        dllkcal_process },

@@ -333,10 +333,8 @@ static tEplKernel initStack(void)
     if ((ret = eventk_init()) != kEplSuccessful)
         return ret;
 
-#if defined(CONFIG_INCLUDE_NMTK)
     if ((ret = nmtk_init()) != kEplSuccessful)
         return ret;
-#endif
 
     EPL_MEMCPY(dllkInitParam.aLocalMac, instance_l.initParam.aMacAddress, 6);
     dllkInitParam.hwParam.m_pszDevName = instance_l.initParam.szEthDevName;
@@ -392,9 +390,7 @@ static tEplKernel shutdownStack(void)
     pdok_exit();
 #endif
 
-#if defined(CONFIG_INCLUDE_NMTK)
     nmtk_delInstance();
-#endif
 
     dllk_delInstance();
 
