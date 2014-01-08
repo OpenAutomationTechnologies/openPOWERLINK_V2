@@ -87,9 +87,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-#if defined(CONFIG_INCLUDE_DLLK)
 static tEplKernel handleNmtEventinDll(tEplEvent* pEvent_p);
-#endif
 
 //------------------------------------------------------------------------------
 // local vars
@@ -108,15 +106,10 @@ static tEventDispatchEntry eventDispatchTbl_l[] =
 #else
     { kEplEventSinkNmtk,        kEplEventSourceNmtk,        NULL },
 #endif
-#if defined(CONFIG_INCLUDE_DLLK)
     { kEplEventSinkNmtk,        kEplEventSourceDllk,        handleNmtEventinDll },
     { kEplEventSinkDllk,        kEplEventSourceDllk,        dllk_process },
     { kEplEventSinkDllkCal,     kEplEventSourceDllk,        dllkcal_process },
     { kEplEventSinkErrk,        kEplEventSourceErrk,        errhndk_process },
-#else
-    { kEplEventSinkDllk,        kEplEventSourceDllk,        NULL },
-    { kEplEventSinkDllkCal,     kEplEventSourceDllk,        NULL },
-#endif
 #if defined(CONFIG_INCLUDE_PDOK)
     { kEplEventSinkPdokCal,     kEplEventSourcePdok,        pdokcal_process },
 #endif
@@ -339,8 +332,6 @@ tEplKernel eventk_postError (tEplEventSource eventSource_p, tEplKernel eplError_
 /// \name Private Functions
 /// \{
 
-
-#ifdef CONFIG_INCLUDE_DLLK
 //------------------------------------------------------------------------------
 /**
 \brief  Handle NMT event in DLL
@@ -373,6 +364,5 @@ static tEplKernel handleNmtEventinDll(tEplEvent* pEvent_p)
 
     return ret;
 }
-#endif
 
 /// \}

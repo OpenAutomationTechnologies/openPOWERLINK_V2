@@ -338,7 +338,6 @@ static tEplKernel initStack(void)
         return ret;
 #endif
 
-#if defined(CONFIG_INCLUDE_DLLK)
     EPL_MEMCPY(dllkInitParam.aLocalMac, instance_l.initParam.aMacAddress, 6);
     dllkInitParam.hwParam.m_pszDevName = instance_l.initParam.szEthDevName;
     dllkInitParam.hwParam.m_uiDevNumber = instance_l.initParam.ethDevNumber;
@@ -356,7 +355,6 @@ static tEplKernel initStack(void)
     // initialize EplDllkCal module
     if ((ret = dllkcal_init()) != kEplSuccessful)
         return ret;
-#endif
 
 #if defined(CONFIG_INCLUDE_PDOK)
     if ((ret = pdok_init()) != kEplSuccessful)
@@ -398,11 +396,9 @@ static tEplKernel shutdownStack(void)
     nmtk_delInstance();
 #endif
 
-#if defined(CONFIG_INCLUDE_DLLK)
     dllk_delInstance();
 
     dllkcal_exit();
-#endif
 
     eventk_exit();
     errhndk_exit();

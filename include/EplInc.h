@@ -188,7 +188,7 @@ typedef union
 
 // generate EPL NMT_FeatureFlags_U32
 #ifndef EPL_DEF_FEATURE_ISOCHR
-    #if defined(CONFIG_INCLUDE_DLLK)
+    #if defined(CONFIG_INCLUDE_PDOU)
         #define EPL_DEF_FEATURE_ISOCHR          (EPL_FEATURE_ISOCHR)
     #else
         #define EPL_DEF_FEATURE_ISOCHR          0

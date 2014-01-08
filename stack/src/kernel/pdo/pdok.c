@@ -47,12 +47,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <kernel/dllk.h>
 #include <Benchmark.h>
 
-
-#if !defined(CONFIG_INCLUDE_DLLK)
-    #error 'ERROR: Missing DLLk-Modul!'
-#endif
-
-
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
 //============================================================================//
