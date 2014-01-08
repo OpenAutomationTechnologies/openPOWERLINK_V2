@@ -387,10 +387,8 @@ tEplKernel ctrlu_shutdownStack(void)
 
 #endif
 
-#if defined(CONFIG_INCLUDE_NMT_CN)
     ret = nmtcnu_delInstance();
     TRACE("EplNmtCnuDelInstance():  0x%X\n", ret);
-#endif
 
 #if defined(CONFIG_INCLUDE_NMTU)
     ret = nmtu_delInstance();
@@ -703,7 +701,6 @@ static tEplKernel initNmtu(tEplApiInitParam* pInitParam_p)
     tEplKernel      Ret = kEplSuccessful;
 
     // initialize EplNmtCnu module
-#if defined(CONFIG_INCLUDE_NMT_CN)
     TRACE ("Initialize NMT_CN module...\n");
     Ret = nmtcnu_addInstance(pInitParam_p->m_uiNodeId);
     if (Ret != kEplSuccessful)
@@ -712,9 +709,6 @@ static tEplKernel initNmtu(tEplApiInitParam* pInitParam_p)
     Ret = nmtcnu_registerCheckEventCb(cbCnCheckEvent);
     if (Ret != kEplSuccessful)
         goto Exit;
-#else
-    UNUSED_PARAMETER(pApiInstance_p);
-#endif
 
     // initialize EplNmtu module
 #if defined(CONFIG_INCLUDE_NMTU)

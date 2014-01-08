@@ -62,15 +62,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 extern "C" {
 #endif
 
-#if defined(CONFIG_INCLUDE_NMT_CN)
-
 tEplKernel nmtcnu_init(UINT nodeId_p);
 tEplKernel nmtcnu_addInstance(UINT nodeId_p);
 tEplKernel nmtcnu_delInstance(void);
 tEplKernel nmtcnu_sendNmtRequest (UINT nodeId_p, tNmtCommand  nmtCommand_p);
 tEplKernel nmtcnu_registerCheckEventCb(tNmtuCheckEventCallback pfnEplNmtCheckEventCb_p);
-
-#endif // #if defined(CONFIG_INCLUDE_NMT_CN)
 
 #ifdef __cplusplus
 }
