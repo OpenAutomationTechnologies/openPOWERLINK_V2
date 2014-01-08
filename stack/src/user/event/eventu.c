@@ -124,9 +124,7 @@ static tEventDispatchEntry eventDispatchTbl_l[] =
 #else
     { kEplEventSinkLedu,        kEplEventSourceLedu,        NULL },
 #endif
-#if defined (CONFIG_INCLUDE_DLLU)
     { kEplEventSinkDlluCal,     kEplEventSourceDllu,        dllucal_process },
-#endif
     { kEplEventSinkErru,        kEplEventSourceErru,        NULL },
     { kEplEventSinkApi,         kEplEventSourceEplApi,      callApiEventCb },
     { kEplEventSinkInvalid,     kEplEventSourceInvalid,     NULL }

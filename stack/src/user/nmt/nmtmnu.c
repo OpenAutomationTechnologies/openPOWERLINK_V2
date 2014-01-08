@@ -620,13 +620,11 @@ tEplKernel nmtmnu_sendNmtCommandEx(UINT nodeId_p, tNmtCommand nmtCommand_p,
     frameInfo.frameSize = sizeof(aBuffer);
 
     // send NMT-Request
-#if defined(CONFIG_INCLUDE_DLLU)
     ret = dllucal_sendAsyncFrame(&frameInfo, kDllAsyncReqPrioNmt);
     if (ret != kEplSuccessful)
     {
         goto Exit;
     }
-#endif
 
     EPL_DBGLVL_NMTMN_TRACE("NMTCmd(%02X->%02X)\n", NmtCommand_p, nodeId_p);
 
