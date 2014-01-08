@@ -281,14 +281,12 @@ tEplKernel ctrlu_initStack(tEplApiInitParam * pInitParam_p)
         goto Exit;
     }
 
-#if defined(CONFIG_INCLUDE_DLLU)
     TRACE ("Initialize DlluCal module...\n");
     ret = dllucal_init();
     if (ret != kEplSuccessful)
     {
         goto Exit;
     }
-#endif
 
 #if defined(CONFIG_INCLUDE_PDOU)
     TRACE ("Initialize Pdou module...\n");
@@ -404,10 +402,8 @@ tEplKernel ctrlu_shutdownStack(void)
     TRACE("pdou_exit():    0x%X\n", ret);
 #endif
 
-#if defined(CONFIG_INCLUDE_DLLU)
     ret = dllucal_exit();
     TRACE("dllucal_exit(): 0x%X\n", ret);
-#endif
 
     ret = errhndu_exit();
     TRACE("errhndu_exit():  0x%X\n", ret);

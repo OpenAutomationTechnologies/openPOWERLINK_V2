@@ -147,9 +147,7 @@ tEplKernel sdoasnd_addInstance(tSequLayerReceiveCb pfnReceiveCb_p)
         ret = kEplSdoUdpMissCb;
     }
 
-#if defined(CONFIG_INCLUDE_DLLU)
     ret = dllucal_regAsndService(kDllAsndSdo, sdoAsndCb, kDllAsndFilterLocal);
-#endif
 
     return ret;
 }
@@ -169,9 +167,7 @@ tEplKernel sdoasnd_delInstance(void)
 {
     tEplKernel  ret = kEplSuccessful;
 
-#if defined(CONFIG_INCLUDE_DLLU)
     ret = dllucal_regAsndService(kDllAsndSdo, NULL, kDllAsndFilterNone);
-#endif
 
     return ret;
 }
@@ -280,13 +276,11 @@ tEplKernel sdoasnd_sendData(tSdoConHdl sdoConHandle_p, tEplFrame* pSrcData_p, UI
     frameInfo.frameSize = dataSize_p;
     frameInfo.pFrame = pSrcData_p;
 
-#if defined(CONFIG_INCLUDE_DLLU)
     ret = dllucal_sendAsyncFrame(&frameInfo, kDllAsyncReqPrioGeneric);
     if (ret == kEplDllAsyncTxBufferFull)
     {   // ignore TxBufferFull errors
         ret = kEplSuccessful;
     }
-#endif
 
     return ret;
 }

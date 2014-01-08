@@ -136,9 +136,7 @@ tEplKernel nmtcnu_addInstance(UINT nodeId_p)
     nmtCnuInstance_g.nodeId = nodeId_p;
 
     // register callback-function for NMT-commands
-#if defined(CONFIG_INCLUDE_DLLU)
     ret = dllucal_regAsndService(kDllAsndNmtCommand, commandCb, kDllAsndFilterLocal);
-#endif
 
     return ret;
 }
@@ -158,10 +156,8 @@ tEplKernel nmtcnu_delInstance(void)
 {
     tEplKernel ret = kEplSuccessful;
 
-#if defined(CONFIG_INCLUDE_DLLU)
     // deregister callback function from DLL
     ret = dllucal_regAsndService(kDllAsndNmtCommand, NULL, kDllAsndFilterNone);
-#endif
 
     return ret;
 }
@@ -206,9 +202,7 @@ tEplKernel nmtcnu_sendNmtRequest(UINT nodeId_p, tNmtCommand nmtCommand_p)
     nmtRequestFrameInfo.frameSize = EPL_C_DLL_MINSIZE_NMTREQ; // sizeof(nmtRequestFrame);
 
     // send NMT-Request
-#if defined(CONFIG_INCLUDE_DLLU)
     ret = dllucal_sendAsyncFrame(&nmtRequestFrameInfo, kDllAsyncReqPrioNmt);
-#endif
 
     return ret;
 }
