@@ -178,8 +178,11 @@ tEplKernel target_setIpAdrs(char* ifName_p, UINT32 ipAddress_p, UINT32 subnetMas
     /* call ifconfig to configure the virtual network interface */
     sprintf (command, "/sbin/ifconfig %s %s netmask %s mtu %s",
              ifName_p, sBufferIp, sBufferMask, sBufferMtu);
-    iRet = system(command);
-    TRACE("ifconfig %s %s returned %d\n", ifName_p, sBufferIp, iRet);
+    if ((iRet = system(command)) < 0)
+    {
+        TRACE("ifconfig %s %s returned %d\n", ifName_p, sBufferIp, iRet);
+        return kEplNoResource;
+    }
 
     return ret;
 }
@@ -218,8 +221,11 @@ tEplKernel target_setDefaultGateway(UINT32 defaultGateway_p)
 
         /* call route to configure the default gateway */
         sprintf (command, "route add default gw %s", sBuffer);
-        iRet = system(command);
-        TRACE("route add default gw %s returned %d\n", sBuffer, iRet);
+        if ((iRet = system(command)) < 0)
+        {
+            TRACE("route add default gw %s returned %d\n", sBuffer, iRet);
+            return kEplNoResource;
+        }
     }
     return ret;
 }

@@ -751,6 +751,9 @@ tEplKernel oplk_triggerMnStateChange(UINT nodeId_p, tNmtNodeCommand nodeCommand_
 #if defined(CONFIG_INCLUDE_NMT_MN)
     return nmtmnu_triggerStateChange(nodeId_p, nodeCommand_p);
 #else
+    UNUSED_PARAMETER(nodeId_p);
+    UNUSED_PARAMETER(nodeCommand_p);
+
     return kEplApiInvalidParam;
 #endif
 }
@@ -776,6 +779,9 @@ tEplKernel oplk_setCdcBuffer(BYTE* pCdc_p, UINT cdcSize_p)
     obdcdc_setBuffer(pCdc_p, cdcSize_p);
     return kEplSuccessful;
 #else
+    UNUSED_PARAMETER(pCdc_p);
+    UNUSED_PARAMETER(cdcSize_p);
+
     return kEplApiInvalidParam;
 #endif
 }
@@ -801,6 +807,8 @@ tEplKernel oplk_setCdcFilename(char* pCdcFilename_p)
     obdcdc_setFilename(pCdcFilename_p);
     return kEplSuccessful;
 #else
+    UNUSED_PARAMETER(pCdcFilename_p);
+
     return kEplApiInvalidParam;
 #endif
 }
@@ -878,6 +886,10 @@ tEplKernel oplk_getIdentResponse(UINT nodeId_p, tEplIdentResponse** ppIdentRespo
 #if defined(CONFIG_INCLUDE_NMT_MN)
     return identu_getIdentResponse(nodeId_p, ppIdentResponse_p);
 #else
+
+    UNUSED_PARAMETER(nodeId_p);
+    UNUSED_PARAMETER(ppIdentResponse_p);
+
     return kEplApiInvalidParam;
 #endif
 }

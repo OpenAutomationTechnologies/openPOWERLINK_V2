@@ -152,7 +152,9 @@ The function allocates shared memory for the kernel needed to transfer the PDOs.
 tEplKernel pdokcal_allocateMem(size_t memSize_p, BYTE** ppPdoMem_p)
 {
     TRACE ("%s()\n", __func__);
-    ftruncate(fd_l, memSize_p);
+    if (ftruncate(fd_l, memSize_p) < 0)
+        return kEplNoResource;
+
     *ppPdoMem_p = mmap(NULL, memSize_p, PROT_READ | PROT_WRITE, MAP_SHARED, fd_l, 0);
     if (*ppPdoMem_p == MAP_FAILED)
     {
