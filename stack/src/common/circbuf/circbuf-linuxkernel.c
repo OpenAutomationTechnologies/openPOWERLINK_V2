@@ -44,11 +44,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <Epl.h>
-#include <global.h>
-#include <EplTarget.h>
+#include <EplInc.h>
 
-#include "circbuffer.h"
+#include "circbuf-arch.h"
+
 #include <linux/slab.h>
 #include <linux/sched.h>
 #include <linux/wait.h>
