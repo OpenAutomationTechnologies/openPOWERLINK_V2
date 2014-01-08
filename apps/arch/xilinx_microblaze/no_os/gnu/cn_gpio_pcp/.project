@@ -127,9 +127,9 @@
 			<locationURI>STACK_LOC/objdicts/generic</locationURI>
 		</link>
 		<link>
-			<name>contrib/amiarm.c</name>
+			<name>stack/common/amile.c</name>
 			<type>1</type>
-			<locationURI>STACK_LOC/contrib/ami/amiarm.c</locationURI>
+			<locationURI>COMMON_LOC/ami/amile.c</locationURI>
 		</link>
 		<link>
 			<name>stack/common/circbuf-noos.c</name>

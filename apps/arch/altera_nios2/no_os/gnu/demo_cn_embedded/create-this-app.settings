@@ -68,7 +68,7 @@ ${STACKROOT_DIR}/stack/src"
 ##################################
 # Source files
 SRCFILES="\
-${STACKROOT_DIR}/contrib/ami/amiarm.c \
+${STACKROOT_DIR}/stack/src/common/ami/amile.c \
 ${STACKROOT_DIR}/hardware/ipcore/drivers/openmac/omethlib.c \
 ${STACKROOT_DIR}/hardware/ipcore/drivers/openmac/omethlibint.c \
 ${STACKROOT_DIR}/hardware/ipcore/drivers/openmac/omethlib_phycfg_ink.c \

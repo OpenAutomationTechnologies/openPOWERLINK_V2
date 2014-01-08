@@ -73,7 +73,7 @@ ${STACKROOT_DIR}/stack/src"
 # Source files
 SRCFILES="\
 daemon.c \
-${STACKROOT_DIR}/contrib/ami/amiarm.c \
+${STACKROOT_DIR}/stack/src/common/ami/amile.c \
 ${STACKROOT_DIR}/hardware/ipcore/drivers/hostinterface/hostiflib.c \
 ${STACKROOT_DIR}/hardware/ipcore/drivers/hostinterface/hostiflib_l.c \
 ${STACKROOT_DIR}/hardware/ipcore/drivers/hostinterface/lfqueue.c \

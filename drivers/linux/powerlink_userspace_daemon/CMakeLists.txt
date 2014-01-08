@@ -50,7 +50,7 @@ SET (DAEMON_MAIN_SOURCES
 SET (DAEMON_COMMON_SOURCES
      ${COMMON_SOURCE_DIR}/debug.c
      ${COMMON_SOURCE_DIR}/event/event.c
-     ${LIB_SOURCE_DIR}/ami/amix86.c
+     ${COMMON_SOURCE_DIR}/ami/amix86.c
      ${COMMON_SOURCE_DIR}/circbuf/circbuffer.c
      ${EDRV_SOURCE_DIR}/edrvcyclic.c
      )
@@ -80,7 +80,7 @@ SET (DAEMON_HEADERS
      ${POWERLINK_INCLUDE_DIR}/Debug.h
      ${POWERLINK_INCLUDE_DIR}/edrv.h
      ${POWERLINK_INCLUDE_DIR}/Epl.h
-     ${POWERLINK_INCLUDE_DIR}/EplAmi.h
+     ${POWERLINK_INCLUDE_DIR}/ami.h
      ${POWERLINK_INCLUDE_DIR}/cfm.h
      ${POWERLINK_INCLUDE_DIR}/EplDef.h
      ${POWERLINK_INCLUDE_DIR}/dll.h

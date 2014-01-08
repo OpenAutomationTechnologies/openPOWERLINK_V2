@@ -71,7 +71,7 @@
 ****************************************************************************/
 
 //#include "global.h"
-//#include "EplAmi.h"
+//#include "ami.h"
 #include "EplInc.h"
 
 #if (!defined(EPL_AMI_INLINED)) || defined(INLINE_ENABLED)
