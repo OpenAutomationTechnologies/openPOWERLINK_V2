@@ -48,6 +48,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 
 #include <user/eventucal.h>
+#include <target.h>
 
 #include <pthread.h>
 
