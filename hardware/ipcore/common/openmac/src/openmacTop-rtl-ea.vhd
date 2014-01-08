@@ -291,7 +291,7 @@ architecture rtl of openmacTop is
         dma_writedata       : std_logic_vector(15 downto 0);
         dma_readdata        : std_logic_vector(15 downto 0);
         rmii                : tRmii;
-        hubRx               : std_logic_vector(1 downto 0);
+        hubRxPort           : std_logic_vector(1 downto 0);
         macTime             : std_logic_vector(cMacTimeWidth-1 downto 0);
     end record;
 
@@ -749,10 +749,10 @@ begin
         inst_openmac.rmii.rx <= inst_openhub.tx(cHubIntPort);
 
         -- Clip the hub receive port to two bits
-        inst_openmac.hubRx <= std_logic_vector(
+        inst_openmac.hubRxPort <= std_logic_vector(
             resize(
                 to_unsigned(inst_openhub.receivePort, logDualis(cPhyPortHigh)),
-            inst_openmac.hubRx'length)
+            inst_openmac.hubRxPort'length)
         );
 
         -- Assign interrupts to irq Table
@@ -968,43 +968,42 @@ begin
     --! The openMAC core instance implements the MAC-layer.
     --! All features are enabled to provide time-triggered packet Tx and
     --! dynamic response delay.
-    THEOPENMAC : entity work.openMAC
+    THEOPENMAC : entity work.openmac
         generic map (
-            HighAdr     => gDmaAddrWidth-1,
-            Timer       => TRUE,
-            TxSyncOn    => TRUE,
-            TxDel       => TRUE,
-            Simulate    => FALSE
+            gDmaHighAddr    => gDmaAddrWidth-1,
+            gTimerEnable    => TRUE,
+            gTimerTrigTx    => TRUE,
+            gAutoTxDel      => TRUE
         )
         port map (
-            Rst                 => inst_openmac.rst,
-            Clk                 => inst_openmac.clk,
-            s_nWr               => inst_openmac.nReg_write,
-            Sel_Ram             => inst_openmac.reg_selectRam,
-            Sel_Cont            => inst_openmac.reg_selectCont,
-            S_nBe               => inst_openmac.nReg_byteenable,
-            S_Adr               => inst_openmac.reg_address,
-            S_Din               => inst_openmac.reg_writedata,
-            S_Dout              => inst_openmac.reg_readdata,
-            nTx_Int             => inst_openmac.nTxInterrupt,
-            nRx_Int             => inst_openmac.nRxInterrupt,
-            nTx_BegInt          => open, --unused interrupt
-            Dma_Rd_Done         => inst_openmac.dma_readDone,
-            Dma_Wr_Done         => inst_openmac.dma_writeDone,
-            Dma_Req             => inst_openmac.dma_request,
-            Dma_Rw              => inst_openmac.nDma_write,
-            Dma_Ack             => inst_openmac.dma_acknowledge,
-            Dma_Req_Overflow    => inst_openmac.dma_requestOverflow,
-            Dma_Rd_Len          => inst_openmac.dma_readLength,
-            Dma_Addr            => inst_openmac.dma_address,
-            Dma_Dout            => inst_openmac.dma_writedata,
-            Dma_Din             => inst_openmac.dma_readdata,
-            rRx_Dat             => inst_openmac.rmii.rx.data,
-            rCrs_Dv             => inst_openmac.rmii.rx.enable,
-            rTx_Dat             => inst_openmac.rmii.tx.data,
-            rTx_En              => inst_openmac.rmii.tx.enable,
-            Hub_Rx              => inst_openmac.hubRx,
-            Mac_Zeit            => inst_openmac.macTime
+            iRst            => inst_openmac.rst,
+            iClk            => inst_openmac.clk,
+            inWrite         => inst_openmac.nReg_write,
+            iSelectRam      => inst_openmac.reg_selectRam,
+            iSelectCont     => inst_openmac.reg_selectCont,
+            inByteenable    => inst_openmac.nReg_byteenable,
+            iAddress        => inst_openmac.reg_address,
+            iWritedata      => inst_openmac.reg_writedata,
+            oReaddata       => inst_openmac.reg_readdata,
+            onTxIrq         => inst_openmac.nTxInterrupt,
+            onRxIrq         => inst_openmac.nRxInterrupt,
+            onTxBegIrq      => open, --unused interrupt
+            oDmaReadDone    => inst_openmac.dma_readDone,
+            oDmaWriteDone   => inst_openmac.dma_writeDone,
+            oDmaReq         => inst_openmac.dma_request,
+            onDmaWrite      => inst_openmac.nDma_write,
+            iDmaAck         => inst_openmac.dma_acknowledge,
+            oDmaReqOverflow => inst_openmac.dma_requestOverflow,
+            oDmaReadLength  => inst_openmac.dma_readLength,
+            oDmaAddress     => inst_openmac.dma_address,
+            oDmaWritedata   => inst_openmac.dma_writedata,
+            iDmaReaddata    => inst_openmac.dma_readdata,
+            iRxData         => inst_openmac.rmii.rx.data,
+            iRxDv           => inst_openmac.rmii.rx.enable,
+            oTxData         => inst_openmac.rmii.tx.data,
+            oTxEn           => inst_openmac.rmii.tx.enable,
+            iHubRxPort      => inst_openmac.hubRxPort,
+            oMacTime        => inst_openmac.macTime
         );
 
     --! The phy management core is an SMI master to communication with the

@@ -51,6 +51,7 @@ use work.openmacPkg.all;
 
 entity openhub is
     generic (
+        --! Number of ports
         gPortCount   :   integer := 3
     );
     port (

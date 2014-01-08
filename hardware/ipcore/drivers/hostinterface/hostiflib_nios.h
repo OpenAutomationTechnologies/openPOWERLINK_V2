@@ -48,41 +48,18 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <io.h>
 #include <system.h>
 
-// include section header file for special functions in
-// tightly-coupled memory
-#include <section-nios2.h>
-
-// include generated header file for memory structure and version filed
-#include "hostiflib-mem.h"
-
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-
-#if defined(HOSTINTERFACE_0_BASE)
-
-#define HOSTIF_PCP_BASE             HOSTINTERFACE_0_BASE
-#define HOSTIF_HOST_BASE            HOSTINTERFACE_0_BASE
-
-#define HOSTIF_IRQ_IC_ID            0 //FIXME: obtain from system.h
-#define HOSTIF_IRQ                  0 //FIXME: obtain from system.h
-
-#elif (defined(PCP_0_HOSTINTERFACE_0_PCP_BASE) && \
-       defined(PCP_0_HOSTINTERFACE_0_HOST_BASE))
-/* If one Nios II does Pcp and Host (makes no sense, but why not?) */
-#define HOSTIF_PCP_BASE             PCP_0_HOSTINTERFACE_0_PCP_BASE
-#define HOSTIF_HOST_BASE            PCP_0_HOSTINTERFACE_0_HOST_BASE
-
+// Get hostinterface base address from system.h
+#if defined(__HOSTINTERFACE)
+#define HOSTIF_BASE                 HOSTINTERFACE_0_BASE
 #else
-
-#warning "Host Interface base is assumed! Set the correct address!"
-
-#define HOSTIF_PCP_BASE             0x10000000
-#define HOSTIF_HOST_BASE            0x10000000
-#define HOSTIF_IRQ_IC_ID            0
-#define HOSTIF_IRQ                  0
-
+#define HOSTIF_BASE                 0x10000000 //FIXME: Use multiplex ipcore base here
 #endif
+
+#define HOSTIF_IRQ_IC_ID            0   ///< Irq Controller Id
+#define HOSTIF_IRQ                  0   ///< Irq Id
 
 /// borrowed from alt_remap_uncached.c
 #ifdef NIOS2_MMU_PRESENT

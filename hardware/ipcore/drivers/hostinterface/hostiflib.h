@@ -44,15 +44,25 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include "hostiflib_target.h"
+#include "hostiflib_l.h"
+
+#ifndef CONFIG_HOSTIF_PCP
+#error "Define CONFIG_HOSTIF_PCP to TRUE if this is PCP, otherwise FALSE!"
+#endif
+
+#if CONFIG_HOSTIF_PCP != FALSE
+#include <hostiflib-mem.h> // Only Pcp has access to the ipcore settings
+#else
+/* This is the host interface version for host. */
+#define HOSTIF_VERSION_MAJOR    1
+#define HOSTIF_VERSION_MINOR    0
+#define HOSTIF_VERSION_REVISION 0
+#endif
 
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#if HOSTIF_SIZE_DYNBUF0 < HOSTIF_SIZE_DYNBUF1
-#define HOSTIF_DYNBUF_MAXSIZE   HOSTIF_SIZE_DYNBUF0
-#else
-#define HOSTIF_DYNBUF_MAXSIZE   HOSTIF_SIZE_DYNBUF1
-#endif
+#define HOSTIF_USER_INIT_PAR_SIZE   1024    ///< User specific initialization size
 
 //------------------------------------------------------------------------------
 // typedef
@@ -62,19 +72,15 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 typedef enum eHostifReturn
 {
-    kHostifSuccessful     = 0x0000,       ///< no error / successful run
-    kHostifNoResource     = 0x0001,       ///< resource could not be created
-    kHostifInvalidParameter = 0x0002,     ///< function parameter invalid
-    kHostifWrongProcInst  = 0x0003,       ///< Processor instance wrong
-    kHostifWrongMagic     = 0x0010,       ///< magic word invalid
-    kHostifWrongVersion   = 0x0011,       ///< hw/sw version mismatch
-    kHostifHwWriteError   = 0x0012,       ///< write to hw failed
-    kHostifBridgeDisabled = 0x0013,       ///< bridge is disabled
-    kHostifBufferOverflow = 0x0020,       ///< buffer size overflow
-    kHostifBufferEmpty    = 0x0021,       ///< buffer is empty
-    kHostifBufferError    = 0x0023,       ///< buffer is faulty
+    kHostifSuccessful       = 0x0000,   ///< no error / successful run
+    kHostifNoResource       = 0x0001,   ///< resource could not be created
+    kHostifInvalidParameter = 0x0002,   ///< function parameter invalid
+    kHostifWrongMagic       = 0x0010,   ///< magic word invalid
+    kHostifWrongVersion     = 0x0011,   ///< hw/sw version mismatch
+    kHostifHwWriteError     = 0x0012,   ///< write to hw failed
+    kHostifBridgeDisabled   = 0x0013,   ///< bridge is disabled
 
-    kHostifUnspecError    = 0xFFFF        ///< unspecified error
+    kHostifUnspecError      = 0xFFFF    ///< unspecified error
 } tHostifReturn;
 
 /**
@@ -97,18 +103,6 @@ typedef UINT16 tHostifState;
 The error/return code has to be defined by higher layers
 */
 typedef UINT16 tHostifError;
-
-/**
-\brief Processor instance
-
-The processor instance determines if the caller is the Pcp or the Host.
-*/
-typedef enum eHostifProcInstance
-{
-    kHostifProcPcp        = 0,            ///< instance on PCP
-    kHostifProcHost       = 1,            ///< instance on Host
-
-} tHostifProcInstance;
 
 /**
 \brief Interrupt source
@@ -135,34 +129,39 @@ typedef void (*tHostifIrqCb) (void *pArg_p);
 /**
 \brief Instance Id
 
-The instance ids for the resources for the Host.
-*/
-typedef enum eHostifDynInstanceId
-{
-    kHostifDynInstIdDynBufRxVeth = 0,     ///< dynamic buffer for RX Veth Queue
-    kHostifDynInstIdDynBufK2U,            ///< dynamic buffer for K2U Queue
-    kHostifDynInstIdLast                  ///< last instance id
-} tHostifDynInstanceId;
-
-/**
-\brief Instance Id
-
 The instance ids for the resources.
 */
 typedef enum eHostifInstanceId
 {
-    kHostifInstIdErrCount = 0,            ///< error counters
-    kHostifInstIdTxNmtQueue,              ///< NMT TX queue
-    kHostifInstIdTxGenQueue,              ///< generic TX queue
-    kHostifInstIdTxSyncQueue,             ///< sync TX queue
-    kHostifInstIdTxVethQueue,             ///< VEth TX queue
-    kHostifInstIdRxVethQueue,             ///< VEth RX queue
-    kHostifInstIdK2UQueue,                ///< K2U Queue
-    kHostifInstIdU2KQueue,                ///< U2K Queue
-    kHostifInstIdTpdo,                    ///< Tpdo
-    kHostifInstIdRpdo,                    ///< Rpdo
-    kHostifInstIdLast                     ///< last instance id
+#if CONFIG_HOSTIF_PCP != FALSE
+    kHostifInstIdErrCount = 0,  ///< error counters
+#else
+    /* Dynamic buffer instances have id 0 to HOSTIF_DYNBUF_COUNT */
+    kHostifInstIdErrCount = HOSTIF_DYNBUF_COUNT, ///< error counters
+#endif
+    kHostifInstIdTxNmtQueue,    ///< NMT TX queue
+    kHostifInstIdTxGenQueue,    ///< generic TX queue
+    kHostifInstIdTxSyncQueue,   ///< sync TX queue
+    kHostifInstIdTxVethQueue,   ///< VEth TX queue
+    kHostifInstIdRxVethQueue,   ///< VEth RX queue
+    kHostifInstIdK2UQueue,      ///< K2U Queue
+    kHostifInstIdU2KQueue,      ///< U2K Queue
+    kHostifInstIdTpdo,          ///< Tpdo
+    kHostifInstIdRpdo,          ///< Rpdo
+    kHostifInstIdLast           ///< last instance id
 } tHostifInstanceId;
+
+/**
+\brief Host interface version
+
+Used to obtain hardware/software mismatch
+*/
+typedef struct sHostifVersion
+{
+    UINT8   revision;   ///< Revision field
+    UINT8   minor;      ///< Minor field
+    UINT8   major;      ///< Major field
+} tHostifVersion;
 
 /**
 \brief Driver instance configuration
@@ -171,32 +170,10 @@ Configures the driver instance.
 */
 typedef struct sHostifConfig
 {
-    tHostifProcInstance   ProcInstance; ///< Processor instance (Pcp/Host)
-
+    UINT8*          pBase;          ///< Base address to host interface hardware
+    UINT            instanceNum;    ///< Number that identifies the hostif instance
+    tHostifVersion  version;        ///< Host interface version
 } tHostifConfig;
-
-/**
-\brief Function type definition for queue callback
-
-This function callback is invoked by the hostif_process if the corresponding queue
-is not empty.
-*/
-typedef void (*tQueueCb) (void *pArg_p);
-
-/**
-\brief Hostiflib queue instance
-*/
-typedef void* tHostifQueueInstance;
-
-/**
-\brief Hostiflib linmem instance
-*/
-typedef void* tHostifLimInstance;
-
-/**
-\brief Hostiflib dynamic buffer instance (for host only)
-*/
-typedef void* tHostifDynBufsas;
 
 /**
 \brief Driver Instance
@@ -211,11 +188,9 @@ typedef void* tHostifInstance;
 extern "C" {
 #endif
 
-tHostifReturn hostif_create (tHostifConfig *pConfig_p, tHostifInstance *ppInstance_p);
+tHostifReturn hostif_create (tHostifConfig* pConfig_p, tHostifInstance* ppInstance_p);
 tHostifReturn hostif_delete (tHostifInstance pInstance_p);
-tHostifInstance hostif_getInstance (tHostifProcInstance Instance_p);
-
-tHostifReturn hostif_process (tHostifInstance pInstance_p);
+tHostifInstance hostif_getInstance (UINT Instance_p);
 
 tHostifReturn hostif_irqRegHdl (tHostifInstance pInstance_p,
         tHostifIrqSrc irqSrc_p, tHostifIrqCb pfnCb_p);
@@ -224,45 +199,23 @@ tHostifReturn hostif_irqSourceEnable (tHostifInstance pInstance_p,
 tHostifReturn hostif_irqMasterEnable (tHostifInstance pInstance_p,
         BOOL fEnable_p);
 
-tHostifReturn hostif_setBootBase (tHostifInstance pInstance_p, UINT32 base_p);
-tHostifReturn hostif_getBootBase (tHostifInstance pInstance_p, UINT32 *pBase_p);
-tHostifReturn hostif_setInitBase (tHostifInstance pInstance_p, UINT32 base_p);
-tHostifReturn hostif_getInitBase (tHostifInstance pInstance_p, UINT32 *pBase_p);
 tHostifReturn hostif_setCommand (tHostifInstance pInstance_p, tHostifCommand cmd_p);
-tHostifReturn hostif_getCommand (tHostifInstance pInstance_p, tHostifCommand *pCmd_p);
+tHostifReturn hostif_getCommand (tHostifInstance pInstance_p, tHostifCommand* pCmd_p);
 tHostifReturn hostif_setState (tHostifInstance pInstance_p, tHostifState sta_p);
-tHostifReturn hostif_getState (tHostifInstance pInstance_p, tHostifState *pSta_p);
+tHostifReturn hostif_getState (tHostifInstance pInstance_p, tHostifState* pSta_p);
 tHostifReturn hostif_setError (tHostifInstance pInstance_p, tHostifError err_p);
-tHostifReturn hostif_getError (tHostifInstance pInstance_p, tHostifError *pErr_p);
+tHostifReturn hostif_getError (tHostifInstance pInstance_p, tHostifError* pErr_p);
 tHostifReturn hostif_setHeartbeat (tHostifInstance pInstance_p, UINT16 heartbeat_p);
-tHostifReturn hostif_getHeartbeat (tHostifInstance pInstance_p, UINT16 *pHeartbeat_p);
+tHostifReturn hostif_getHeartbeat (tHostifInstance pInstance_p, UINT16* pHeartbeat_p);
 
 tHostifReturn hostif_dynBufAcquire (tHostifInstance pInstance_p, UINT32 pcpBaseAddr_p,
-        UINT8 **ppDynBufBase_p);
-tHostifReturn hostif_dynBufFree (tHostifInstance pInstance_p, UINT32 pcpBaseAddr_p);
+        tHostifInstanceId* pInstId_p, UINT8** ppBufBase_p);
+tHostifReturn hostif_dynBufFree (tHostifInstance pInstance_p, tHostifInstanceId instId_p);
 
-tHostifReturn hostif_queueCreate (tHostifInstance pInstance_p,
-        tHostifInstanceId InstanceId_p, tHostifQueueInstance *ppQueueInstance_p);
-tHostifReturn hostif_queueDelete (tHostifQueueInstance pQueueInstance_p);
-tHostifReturn hostif_queueCallback (tHostifQueueInstance pQueueInstance_p,
-        tQueueCb pfnQueueCb_p, void *pArg_p);
-tHostifReturn hostif_queueReset (tHostifQueueInstance pQueueInstance_p);
-tHostifReturn hostif_queueGetEntryCount (tHostifQueueInstance pQueueInstance_p,
-        UINT16 *pEntryCount_p);
-tHostifReturn hostif_queueInsert (tHostifQueueInstance pQueueInstance_p,
-        UINT8 *pData_p, UINT16 size_p);
-tHostifReturn hostif_queueExtract (tHostifQueueInstance pQueueInstance_p,
-        UINT8 *pData_p, UINT16 *pSize_p);
+tHostifReturn hostif_getBuf (tHostifInstance pInstance_p, tHostifInstanceId instId_p,
+        UINT8** ppBufBase_p, UINT* pBufSize_p);
 
-tHostifReturn hostif_limCreate (tHostifInstance pInstance_p,
-        tHostifInstanceId InstanceId_p, tHostifLimInstance *ppLimInstance_p);
-tHostifReturn hostif_limDelete (tHostifLimInstance pLimInstance_p);
-tHostifReturn hostif_limWrite (tHostifLimInstance pLimInstance_p,
-        UINT16 offset_p, UINT8 *pSrc_p, UINT16 size_p);
-tHostifReturn hostif_limRead (tHostifLimInstance pLimInstance_p,
-        UINT8 *pDst_p, UINT16 offset_p, UINT16 size_p);
-tHostifReturn hostif_limGetBuffer (tHostifLimInstance pLimInstance_p,
-        UINT8 **ppBase_p, UINT16 *pSpan_p);
+tHostifReturn hostif_getInitParam (tHostifInstance pInstance_p, UINT8** ppBase_p);
 
 #ifdef __cplusplus
 }

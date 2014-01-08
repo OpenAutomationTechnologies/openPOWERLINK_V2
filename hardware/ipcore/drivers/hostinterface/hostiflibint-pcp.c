@@ -1,10 +1,10 @@
 /**
 ********************************************************************************
-\file   hostiflib.c
+\file   hostiflibint-pcp.c
 
-\brief  Host Interface Library - High Level Driver Implementation
+\brief  Host Interface Library - High Level Driver Implementation for Pcp
 
-The file contains the high level driver for the host interface library.
+The file contains the high level driver for the host interface library for Pcp.
 
 \ingroup module_hostiflib
 *******************************************************************************/
@@ -54,7 +54,6 @@ modules.
 #include "hostiflib_target.h"
 #include "hostiflibint.h"
 
-#include <stdlib.h>
 #include <string.h>
 
 //============================================================================//
@@ -88,22 +87,11 @@ modules.
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
-/**
-\brief Instance array
-
-This array holds all Host Interface instances available.
-*/
-static tHostif *paHostifInstance_l[HOSTIF_INSTANCE_COUNT] =
-{
-    NULL
-};
 
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-/* Local functions for Pcp and Host */
-static void freePtr(void *p);
-static tHostifReturn checkMagic (UINT8* pBase_p);
+static tHostifReturn controlBridge (tHostif *pHostif_p, BOOL fEnable_p);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -111,203 +99,159 @@ static tHostifReturn checkMagic (UINT8* pBase_p);
 
 //------------------------------------------------------------------------------
 /**
-\brief  Create a host interface instance
+\brief  Create a host interface instance for Pcp
 
-This function creates a host interface instance, and initializes it depending
-on the pConfig_p parameters.
+This function creates the Pcp-specific host interface instance.
 
-\param  pConfig_p               The caller provides the configuration
-                                parameters with this pointer.
-\param  ppInstance_p            The function returns with this double-pointer
-                                the created instance pointer. (return)
+\param  pHostif_p               The host interface instance for Pcp.
 
 \return The function returns a tHostifReturn error code.
 \retval kHostifSuccessful       The host interface is configured successfully
                                 with the provided parameters.
-\retval kHostifInvalidParameter The caller has provided incorrect parameters.
 \retval kHostifNoResource       Heap allocation was impossible or to many
                                 instances are present.
-\retval kHostifWrongMagic       Can't find a valid host interface (invalid
-                                magic).
-\retval kHostifWrongVersion     The version fields in hardware mismatches those
-                                in software.
 
 \ingroup module_hostiflib
 */
 //------------------------------------------------------------------------------
-tHostifReturn hostif_create (tHostifConfig *pConfig_p, tHostifInstance *ppInstance_p)
+tHostifReturn hostif_createInt (tHostif* pHostif_p)
 {
     tHostifReturn   ret = kHostifSuccessful;
-    tHostif*        pHostif = NULL;
-    UINT8*          pBase_p = NULL;
-    int i;
+    tHostifBufDesc  aInitVec[] = HOSTIF_INIT_VEC;
+    int             i;
 
-    if(pConfig_p == NULL || ppInstance_p == NULL)
-    {
-        ret = kHostifInvalidParameter;
-        goto Exit;
-    }
+    // Allocate init parameter memory
+    pHostif_p->pInitParam = (tHostifInitParam*)HOSTIF_UNCACHED_MALLOC(sizeof(tHostifInitParam));
 
-    pBase_p = HOSTIF_MAKE_NONCACHEABLE(pConfig_p->pBase);
-
-    // check magic
-    ret = checkMagic(pBase_p);
-
-    if(ret != kHostifSuccessful)
-    {
-        goto Exit;
-    }
-
-    // check version
-    ret = hostif_checkVersion(pBase_p, &pConfig_p->version);
-
-    if(ret != kHostifSuccessful)
-    {
-        goto Exit;
-    }
-
-    // create instance
-    pHostif = (tHostif*)malloc(sizeof(tHostif));
-
-    if(pHostif == NULL)
+    if(pHostif_p->pInitParam == NULL)
     {
         ret = kHostifNoResource;
         goto Exit;
     }
 
-    memset(pHostif, 0, sizeof(tHostif));
+    memset(pHostif_p->pInitParam, 0, sizeof(tHostifInitParam));
 
-    // initialize instance
-    pHostif->config = *pConfig_p;
+    // Initialize init parameter memory
+    pHostif_p->pInitParam->initMemLength = HOSTIF_DYNBUF_COUNT + HOSTIF_BUF_COUNT;
+    memcpy(pHostif_p->pInitParam->aInitMem, aInitVec, sizeof(aInitVec));
 
-    // store hostif base
-    pHostif->pBase = HOSTIF_MAKE_NONCACHEABLE(pHostif->config.pBase);
+    // Now set init parameter address to hostif
+    hostif_writeInitBase(pHostif_p->pBase, (UINT32)pHostif_p->pInitParam);
 
-    // store instance in array
-    for(i=0; i<HOSTIF_INSTANCE_COUNT; i++)
+    // Write span of buffers into buf map table, malloc them and write to hostif
+    for(i=0; i<kHostifInstIdLast; i++)
     {
-        if(paHostifInstance_l[i] == NULL)
+        pHostif_p->aBufMap[i].span = aInitVec[i + HOSTIF_DYNBUF_COUNT].span;
+        pHostif_p->aBufMap[i].pBase = (UINT8*)HOSTIF_UNCACHED_MALLOC(pHostif_p->aBufMap[i].span);
+
+        if(pHostif_p->aBufMap[i].pBase == NULL)
         {
-            // free entry found
-            paHostifInstance_l[i] = pHostif;
-
-            break;
+            ret = kHostifNoResource;
+            goto Exit;
         }
+
+        hostif_writeBufPcp(pHostif_p->pBase, i, (UINT32)pHostif_p->aBufMap[i].pBase);
     }
 
-    if(i == HOSTIF_INSTANCE_COUNT)
+    // since everything is fine, activate bridge
+    ret = controlBridge(pHostif_p, TRUE);
+
+    if(ret != kHostifSuccessful)
     {
-        ret = kHostifNoResource;
         goto Exit;
     }
-
-    if((ret = hostif_createInt(pHostif)) != kHostifSuccessful)
-    {
-        goto Exit;
-    }
-
-    // return instance pointer
-    *ppInstance_p = pHostif;
 
 Exit:
-    if(ret != kHostifSuccessful)
-    {
-        hostif_delete(pHostif);
-    }
-
     return ret;
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief  Delete host interface instance
+\brief  Delete host interface instance for Pcp
 
 This function deletes a host interface instance.
 
-\param  pInstance_p             The host interface instance that should be
+\param  pHostif_p               The host interface instance that should be
                                 deleted
 
 \return The function returns a tHostifReturn error code.
-\retval kHostifSuccessful       The host interface is deleted successfully.
-\retval kHostifInvalidParameter The caller has provided incorrect parameters.
-\retval kHostifHwWriteError     Deactivation of hardware is faulty.
 
 \ingroup module_hostiflib
 */
 //------------------------------------------------------------------------------
-tHostifReturn hostif_delete (tHostifInstance pInstance_p)
+tHostifReturn hostif_deleteInt (tHostif* pHostif_p)
 {
-    tHostifReturn ret = kHostifSuccessful;
-    tHostif *pHostif = (tHostif*)pInstance_p;
-    int i;
+    tHostifReturn   ret = kHostifSuccessful;
+    int             i;
 
-    if(pInstance_p == NULL)
+    // deactivate bridge (ignore ret)
+    ret = controlBridge(pHostif_p, FALSE);
+
+    // Free init parameter
+    if(pHostif_p->pInitParam != NULL)
     {
-        ret = kHostifInvalidParameter;
-        goto Exit;
+        HOSTIF_UNCACHED_FREE(pHostif_p->pInitParam);
     }
 
-    if((ret = hostif_deleteInt(pHostif)) != kHostifSuccessful)
-    {
-        goto Exit;
-    }
+    hostif_writeInitBase(pHostif_p->pBase, (UINT32)NULL);
 
-    // delete instance in instance array
-    for(i=0; i<HOSTIF_INSTANCE_COUNT; i++)
+    // Free buffers
+    for(i=0; i<kHostifInstIdLast; i++)
     {
-        if(pHostif == paHostifInstance_l[i])
+        if(pHostif_p->aBufMap[i].pBase != NULL)
         {
-            paHostifInstance_l[i] = NULL;
-
-            break;
+            HOSTIF_UNCACHED_FREE(pHostif_p->aBufMap[i].pBase);
         }
+
+        hostif_writeBufPcp(pHostif_p->pBase, i, (UINT32)NULL);
     }
 
-    freePtr(pHostif);
-
-Exit:
     return ret;
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief  Returns the instance of the given processor instance
+\brief  Check version of ipcore
 
-If the instance is not found NULL is returned.
+This function reads and verifies the version from the host interface.
 
-\param  Instance_p              Processor instance
+\param  pBase_p         Base address to host interface hardware
+\param  pSwVersion_p    Pointer to version provided by sw
 
-\return The function returns an host interface instance.
-\retval NULL                    Host interface instance not found
-
-\ingroup module_hostiflib
+\return The function returns a tHostifReturn error code.
 */
 //------------------------------------------------------------------------------
-tHostifInstance hostif_getInstance (UINT Instance_p)
+tHostifReturn hostif_checkVersion (UINT8* pBase_p, tHostifVersion* pSwVersion_p)
 {
-    tHostifInstance pHostif = NULL;
-    int i;
+    tHostifReturn       ret = kHostifSuccessful;
+    UINT32              versionField = hostif_readVersion(pBase_p);
+    tHostifHwVersion*   pHwVersion = (tHostifHwVersion*)&versionField;
 
-    // search through array and return the matching one
-    for(i=0; i<HOSTIF_INSTANCE_COUNT; i++)
-    {
-        if(paHostifInstance_l[i]->config.instanceNum == Instance_p)
-        {
-            pHostif = (tHostifInstance)paHostifInstance_l[i];
+    if(pHwVersion->cnt != HOSTIF_VERSION_COUNT)
+        ret = kHostifWrongVersion;
 
-            break;
-        }
-    }
+    /* Check Revision, Minor and Major */
+    if(pHwVersion->version.revision != pSwVersion_p->revision)
+        ret = kHostifWrongVersion;
 
-    return pHostif;
+    if(pHwVersion->version.minor != pSwVersion_p->minor)
+        ret = kHostifWrongVersion;
+
+    if(pHwVersion->version.major != pSwVersion_p->major)
+        ret = kHostifWrongVersion;
+
+    return ret;
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief  This function sets a command to the host interface
+\brief  This function enables an irq source
+
+This function enables an irq source from the Pcp side.
 
 \param  pInstance_p             host interface instance
-\param  cmd_p                   command
+\param  irqSrc_p                irq source to be controlled
+\param  fEnable_p               enable the irq source (TRUE)
 
 \return The function returns a tHostifReturn error code.
 \retval kHostifSuccessful       The process function exit without errors.
@@ -316,18 +260,29 @@ tHostifInstance hostif_getInstance (UINT Instance_p)
 \ingroup module_hostiflib
 */
 //------------------------------------------------------------------------------
-tHostifReturn hostif_setCommand (tHostifInstance pInstance_p, tHostifCommand cmd_p)
+tHostifReturn hostif_irqSourceEnable (tHostifInstance pInstance_p,
+        tHostifIrqSrc irqSrc_p, BOOL fEnable_p)
 {
     tHostifReturn ret = kHostifSuccessful;
     tHostif *pHostif = (tHostif*)pInstance_p;
+    UINT16 irqEnableVal;
 
-    if(pInstance_p == NULL)
+    if(pInstance_p == NULL || irqSrc_p >= kHostifIrqSrcLast)
     {
         ret = kHostifInvalidParameter;
         goto Exit;
     }
 
-    hostif_writeCommand(pHostif->pBase, cmd_p);
+    // get irq source enable from hw
+    irqEnableVal = hostif_readIrqEnable(pHostif->pBase);
+
+    if(fEnable_p != FALSE)
+        irqEnableVal |= (1 << irqSrc_p);
+    else
+        irqEnableVal &= ~(1 << irqSrc_p);
+
+    // write irq source enable back to hw
+    hostif_writeIrqEnable(pHostif->pBase, irqEnableVal);
 
 Exit:
     return ret;
@@ -335,43 +290,12 @@ Exit:
 
 //------------------------------------------------------------------------------
 /**
-\brief  This function gets a command from the host interface
-
-\param  pInstance_p             host interface instance
-\param  pCmd_p                  command
-
-\return The function returns a tHostifReturn error code.
-\retval kHostifSuccessful       The process function exit without errors.
-\retval kHostifInvalidParameter The caller has provided incorrect parameters.
-
-\ingroup module_hostiflib
-*/
-//------------------------------------------------------------------------------
-tHostifReturn hostif_getCommand (tHostifInstance pInstance_p, tHostifCommand *pCmd_p)
-{
-    tHostifReturn ret = kHostifSuccessful;
-    tHostif *pHostif = (tHostif*)pInstance_p;
-
-    if(pInstance_p == NULL || pCmd_p == NULL)
-    {
-        ret = kHostifInvalidParameter;
-        goto Exit;
-    }
-
-    *pCmd_p = hostif_readCommand(pHostif->pBase);
-
-Exit:
-    return ret;
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief  This function sets an error/return to the host interface
+\brief  This function sets a state to the host interface
 
 Note that only the Pcp is allowed to write to this register!
 
 \param  pInstance_p             host interface instance
-\param  err_p                   error/return code
+\param  sta_p                   state
 
 \return The function returns a tHostifReturn error code.
 \retval kHostifSuccessful       The process function exit without errors.
@@ -380,7 +304,7 @@ Note that only the Pcp is allowed to write to this register!
 \ingroup module_hostiflib
 */
 //------------------------------------------------------------------------------
-tHostifReturn hostif_setError (tHostifInstance pInstance_p, tHostifError err_p)
+tHostifReturn hostif_setState (tHostifInstance pInstance_p, tHostifState sta_p)
 {
     tHostifReturn ret = kHostifSuccessful;
     tHostif *pHostif = (tHostif*)pInstance_p;
@@ -391,7 +315,7 @@ tHostifReturn hostif_setError (tHostifInstance pInstance_p, tHostifError err_p)
         goto Exit;
     }
 
-    hostif_writeReturn(pHostif->pBase, err_p);
+    hostif_writeState(pHostif->pBase, sta_p);
 
 Exit:
     return ret;
@@ -399,14 +323,46 @@ Exit:
 
 //------------------------------------------------------------------------------
 /**
-\brief  This function returns the instance buffer
+\brief  This function sets the heart beat value to the host interface
 
-This function gets the buffer base and size of the addressed instance.
+Note that only the Pcp is allowed to write to this register!
 
 \param  pInstance_p             Host interface instance
-\param  instId_p                Addressed instance
+\param  heartbeat_p             Heart beat value
+
+\return The function returns a tHostifReturn error code.
+\retval kHostifSuccessful       The process function exit without errors.
+\retval kHostifInvalidParameter The caller has provided incorrect parameters.
+\retval kHostifWrongProcInst    The caller processor instance is not allowed.
+
+\ingroup module_hostiflib
+*/
+//------------------------------------------------------------------------------
+tHostifReturn hostif_setHeartbeat (tHostifInstance pInstance_p, UINT16 heartbeat_p)
+{
+    tHostifReturn ret = kHostifSuccessful;
+    tHostif *pHostif = (tHostif*)pInstance_p;
+
+    if(pInstance_p == NULL)
+    {
+        ret = kHostifInvalidParameter;
+        goto Exit;
+    }
+
+    hostif_writeHeartbeat(pHostif->pBase, heartbeat_p);
+
+Exit:
+    return ret;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  This function returns the initialization parameters reference
+
+This function returns the user part of the initialization parameters.
+
+\param  pInstance_p             Host interface instance
 \param  ppBufBase_p             Returned buffer base address
-\param  pBufSize_p              Returned buffer size
 
 \return The function returns a tHostifReturn error code.
 \retval kHostifSuccessful       Dynamic buffer freed
@@ -415,21 +371,18 @@ This function gets the buffer base and size of the addressed instance.
 \ingroup module_hostiflib
 */
 //------------------------------------------------------------------------------
-tHostifReturn hostif_getBuf (tHostifInstance pInstance_p, tHostifInstanceId instId_p,
-        UINT8** ppBufBase_p, UINT* pBufSize_p)
+tHostifReturn hostif_getInitParam (tHostifInstance pInstance_p, UINT8** ppBase_p)
 {
-    tHostifReturn ret = kHostifSuccessful;
-    tHostif *pHostif = (tHostif*)pInstance_p;
+    tHostifReturn   ret = kHostifSuccessful;
+    tHostif*        pHostif = (tHostif*)pInstance_p;
 
-    if(pInstance_p == NULL || ppBufBase_p == NULL || pBufSize_p == NULL ||
-            !(instId_p < kHostifInstIdLast))
+    if(pInstance_p == NULL || ppBase_p == NULL)
     {
         ret = kHostifInvalidParameter;
         goto Exit;
     }
 
-    *ppBufBase_p = pHostif->aBufMap[instId_p].pBase;
-    *pBufSize_p = pHostif->aBufMap[instId_p].span;
+    *ppBase_p = pHostif->pInitParam->aUser;
 
 Exit:
     return ret;
@@ -441,34 +394,43 @@ Exit:
 
 //------------------------------------------------------------------------------
 /**
-\brief  Free pointers which are not NULL
+\brief  Turn on/off the host interface bridge
 
-The function frees a pointer if it isn't NULL.
+This function turns on or off the bridge logic from Pcp side.
+This refuses the host accessing the Pcp-memory space in case of an uninitialized
+host interface.
+The function writes the specific enable pattern to hardware and reads it back
+again.
 
-\param  p                       Pointer to be freed
-*/
-//------------------------------------------------------------------------------
-static void freePtr(void *p)
-{
-    if(p != NULL)
-        free(p);
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief  Check magic word of ipcore
-
-This function reads and verifies the magic word from the host interface.
-
-\param  pBase_p     Base address to host interface hardware
+\param  pHostif_p               Host interface instance
+\param  fEnable_p               Enable the bridge with TRUE
 
 \return The function returns a tHostifReturn error code.
 */
 //------------------------------------------------------------------------------
-static tHostifReturn checkMagic(UINT8* pBase_p)
+static tHostifReturn controlBridge (tHostif *pHostif_p, BOOL fEnable_p)
 {
-    if(hostif_readMagic(pBase_p) == HOSTIF_MAGIC)
-        return kHostifSuccessful;
-    else
-        return kHostifWrongMagic;
+    tHostifReturn ret = kHostifSuccessful;
+    UINT16 dst = 0;
+    UINT16 src;
+
+    if(fEnable_p != FALSE)
+    {
+        dst = HOSTIF_BRIDGE_ENABLE;
+    }
+
+    // set value to hw
+    hostif_writeBridgeEnable(pHostif_p->pBase, dst);
+
+    // read back value from hw and check if write was successful
+    src = hostif_readBridgeEnable(pHostif_p->pBase);
+
+    if((src & HOSTIF_BRIDGE_ENABLE) != dst)
+    {
+        ret = kHostifHwWriteError;
+        goto Exit;
+    }
+
+Exit:
+    return ret;
 }

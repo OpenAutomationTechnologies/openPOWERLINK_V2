@@ -1,11 +1,10 @@
 /**
 ********************************************************************************
-\file   linmem.h
+\file   hostiflibint.h
 
-\brief  This is the interface description of a linear memory buffer.
+\brief  Host Interface Library - Internal Driver Header
 
-The linear memory buffer module enables a shared memory region for multiple
-processes. Note that there is no data corruption protection provided.
+This is the internal driver header.
 
 *******************************************************************************/
 
@@ -36,50 +35,81 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_LINMEM_H_
-#define _INC_LINMEM_H_
+#ifndef _INC_HOSTIFLIBINT_H_
+#define _INC_HOSTIFLIBINT_H_
 
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include "hostiflib_target.h"
 
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
+#define HOSTIF_MAGIC              0x504C4B00  ///< Host Interface Magic
 
+#define HOSTIF_INSTANCE_COUNT       2   ///< number of supported instances
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
 /**
-\brief Linear memory instance return type
+\brief Version field in Status/Control - Information
 
-The interface provides a specific error code.
+Used to obtain hardware/software mismatch
 */
-typedef enum eLimReturn
+typedef struct sHostifHwVersion
 {
-    kLimSuccessful          = 0x0,
-    kLimInvalidParameter    = 0x1,
-    kLimInvalidInstance     = 0x2,
-    kLimNoResource          = 0x3,
-    kLimAlignment           = 0x4,
-    kLimOverflow            = 0x5,
-
-} tLimReturn;
+    UINT8           cnt;        ///< Counting field
+    tHostifVersion  version;    ///< Version field
+} tHostifHwVersion;
 
 /**
-\brief Linear memory instance configuration
+\brief Buffer descriptor structure
 
-The linear memory creation is directed by the parameters in this structure.
+This structure is used to store the buffer descriptors
 */
-typedef struct sLimConfig
+typedef struct sHostifBufDesc
 {
-    BOOL            fAllocHeap;
-    UINT8           *pBase;
-    UINT16          span;
-} tLimConfig;
+    UINT32  offset;     ///< Buffer offset within hostif
+    UINT    span;       ///< Buffer span [byte]
+} tHostifBufDesc;
 
-typedef void* tLimInstance;
+/**
+\brief Buffer map structure
+
+This structure is used to store the buffer base address and size.
+*/
+typedef struct sHostifBufMap
+{
+    UINT8*  pBase;  ///< Buffer base address
+    UINT    span;   ///< Buffer span [byte]
+} tHostifBufMap;
+
+/**
+\brief Initialization Parameter structure
+
+This structure is used to forward the initialization from Pcp to host.
+*/
+typedef struct sHostifInitParam
+{
+    UINT32          initMemLength; ///< Length of aInitMem
+    tHostifBufDesc  aInitMem[HOSTIF_DYNBUF_COUNT + HOSTIF_BUF_COUNT]; ///< Memory map from hostiflib-mem.h
+    UINT8           aUser[HOSTIF_USER_INIT_PAR_SIZE]; ///< Space for higher layers
+} tHostifInitParam;
+
+/**
+\brief Host Interface Instance
+
+Holds the configuration passed to the instance at creation.
+*/
+typedef struct sHostif
+{
+    tHostifConfig       config; ///< copy of configuration
+    UINT8*              pBase;  ///< base address of host interface
+    tHostifIrqCb        apfnIrqCb[kHostifIrqSrcLast]; ///< table that stores the irq callbacks
+    tHostifBufMap       aBufMap[kHostifInstIdLast]; ///< Table storing buffer mapping
+    tHostifInitParam*   pInitParam; ///< Initialization parameter
+    UINT8*              apDynBuf[HOSTIF_DYNBUF_COUNT];
+} tHostif;
 
 //------------------------------------------------------------------------------
 // function prototypes
@@ -89,19 +119,12 @@ typedef void* tLimInstance;
 extern "C" {
 #endif
 
-tLimReturn lim_create (tLimConfig *pConfig, tLimInstance *ppInstance_p);
-tLimReturn lim_delete (tLimInstance pInstance_p);
-
-tLimReturn lim_getBase (tLimInstance pInstance_p, UINT8 **ppBase_p);
-tLimReturn lim_getSpan (tLimInstance pInstance_p, UINT16 *pSpan_p);
-
-tLimReturn lim_write (tLimInstance pInstance_p, UINT16 offset_p,
-        UINT8 *pSrc_p, UINT16 size_p);
-tLimReturn lim_read (tLimInstance pInstance_p, UINT16 offset_p,
-        UINT8 *pDst_p, UINT16 size_p);
+tHostifReturn hostif_createInt (tHostif* pHostif_p);
+tHostifReturn hostif_deleteInt (tHostif* pHostif_p);
+tHostifReturn hostif_checkVersion (UINT8* pBase_p, tHostifVersion* pSwVersion_p);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* _INC_LINMEM_H_ */
+#endif /* _INC_HOSTIFLIBINT_H_ */

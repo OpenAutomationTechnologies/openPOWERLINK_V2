@@ -1,0 +1,36 @@
+Revision {#revision}
+========
+
+- [TASK] Set ipcore versions to 1.0.0
+- [FEATURE] Split hostiflib into Pcp and Host specific
+- [TASK] Cleanup host interface driver
+- [FIX] Set correct path for testbenches using bus master
+- [TASK] Revise simulation handling
+- [TASK] Update host interface driver
+- [FIX] Make driver sw independent
+- [TASK] Rename ipcore drivers directory
+- [TASK] Add revision to host interface documentation
+- [TASK] Relocate host interface documentation
+- [FIX] Fix max and min function of global.vhd
+- [FIX] Add register to edge detector to cut combinational path
+- [FIX] Fix single port RAM model
+- [FIX] Add enable port to DPRAM library components
+- [TASK] Cleanup of Altera host interface toplevel
+- [TASK] Rework host interface bridge instance
+- [TASK] Exchange revised component library in host interface
+- [TASK] Cleanup of hostinterface vhdl sources
+- [TASK] Revise magic bridge for resource optimization and testbench
+- [FIX] Adapt stimuli files for revised bus master
+- [TASK] Add Modelsim simulation do-script for host interface
+- [TASK] Add Modelsim simulation do-script for parallel host interface
+- [TASK] Source file cleanup
+- [FIX] HOSTIF: Dynamic buffer address write works with 16 bit host interface
+- [FEATURE] HOSTIF: Add asynchronous (de-)multiplexed parallel interface
+- [FIX] HOSTIF: Output of interrupt generator is registered
+- [TASK] HOSTIF: Cleanup source code according to coding styles
+- [FEATURE] HOSTIF: Add heart beat register
+- [FIX] HOSTIF: combined external and internal sync assignments
+- [FIX] change sync source irq generation
+- [TASK] remove gpio and add separate irq source enable
+- [FIX] irq master enable assignment from host side
+- [TASK] repo cleanup
