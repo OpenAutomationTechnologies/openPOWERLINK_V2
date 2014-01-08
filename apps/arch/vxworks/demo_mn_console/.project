@@ -302,7 +302,7 @@
 		<link>
 			<name>amix86.c</name>
 			<type>1</type>
-			<location>OPENPOWERLINK_DIR/contrib/ami/amix86.c</location>
+			<location>OPENPOWERLINK_DIR/stack/src/common/ami/amix86.c</location>
 		</link>
 		<link>
 			<name>debug.c</name>

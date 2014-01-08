@@ -164,10 +164,10 @@ endif
 # set endian according to bus interface
 ifeq ($(BUS_INTERFACE),axi)
 	PROC_FEATURES+= -mlittle-endian
-	SRCFILES+= $(STACK_ROOT)/contrib/ami/amiarm.c
+	SRCFILES+= $(COMMON_DIR)/ami/amile.c
 else
 	PROC_FEATURES+= -mbig-endian
-	SRCFILES+= $(STACK_ROOT)/contrib/ami/amibe.c
+	SRCFILES+= $(COMMON_DIR)/ami/amibe.c
 endif
 
 ###################################

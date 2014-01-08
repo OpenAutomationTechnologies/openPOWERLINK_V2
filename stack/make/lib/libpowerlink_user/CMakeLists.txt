@@ -69,7 +69,7 @@ SET (LIB_SOURCES
      ${USER_SOURCE_DIR}/obd/obd.c
      ${USER_SOURCE_DIR}/obd/obdcreate.c
      ${COMMON_SOURCE_DIR}/event/event.c
-     ${LIB_SOURCE_DIR}/ami/amix86.c
+     ${COMMON_SOURCE_DIR}/ami/amix86.c
      ${COMMON_SOURCE_DIR}/circbuf/circbuffer.c
      )
 
@@ -107,7 +107,7 @@ SET (LIB_HEADERS
      ${POWERLINK_INCLUDE_DIR}/Debug.h
      ${POWERLINK_INCLUDE_DIR}/edrv.h
      ${POWERLINK_INCLUDE_DIR}/Epl.h
-     ${POWERLINK_INCLUDE_DIR}/EplAmi.h
+     ${POWERLINK_INCLUDE_DIR}/ami.h
      ${POWERLINK_INCLUDE_DIR}/cfm.h
      ${POWERLINK_INCLUDE_DIR}/EplDef.h
      ${POWERLINK_INCLUDE_DIR}/dll.h

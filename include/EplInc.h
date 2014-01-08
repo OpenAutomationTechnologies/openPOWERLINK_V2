@@ -155,7 +155,7 @@ typedef union
 
 #include "EplTarget.h"  // target specific functions and definitions
 
-#include "EplAmi.h"
+#include "ami.h"
 
 // -------------------------------------------------------------------------
 // macros

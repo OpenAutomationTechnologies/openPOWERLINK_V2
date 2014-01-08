@@ -99,9 +99,9 @@
 	</natures>
 	<linkedResources>
 		<link>
-			<name>amiarm.c</name>
+			<name>amile.c</name>
 			<type>1</type>
-			<locationURI>OPLK_LOC/contrib/ami/amiarm.c</locationURI>
+			<locationURI>OPLK_LOC/stack/src/common/ami/amile.c</locationURI>
 		</link>
 		<link>
 			<name>trace-printf.c</name>
