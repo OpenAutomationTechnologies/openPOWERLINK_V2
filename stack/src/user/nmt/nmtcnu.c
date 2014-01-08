@@ -438,9 +438,7 @@ static tEplKernel commandCb(tFrameInfo* pFrameInfo_p)
                 return ret;
             }
         }
-#if defined(CONFIG_INCLUDE_NMTU)
         ret = nmtu_postNmtEvent(nmtEvent);
-#endif
     }
 
     return ret;
