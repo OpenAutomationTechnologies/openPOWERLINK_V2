@@ -110,9 +110,7 @@ event sinks.
 */
 static tEventDispatchEntry eventDispatchTbl_l[] =
 {
-#if defined (CONFIG_INCLUDE_NMTU)
     { kEplEventSinkNmtu,        kEplEventSourceNmtu,        nmtu_processEvent },
-#endif
 #if defined (CONFIG_INCLUDE_NMT_MN)
     { kEplEventSinkNmtMnu,      kEplEventSourceNmtMnu,      nmtmnu_processEvent },
 #endif

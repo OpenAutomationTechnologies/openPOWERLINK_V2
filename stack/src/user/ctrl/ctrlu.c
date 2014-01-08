@@ -297,10 +297,8 @@ tEplKernel ctrlu_initStack(tEplApiInitParam * pInitParam_p)
     }
 #endif
 
-#if defined(CONFIG_INCLUDE_NMTU)
     if ((ret = initNmtu(&ctrlInstance_l.initParam)) != kEplSuccessful)
         goto Exit;
-#endif
 
 #if defined(CONFIG_INCLUDE_LEDU)
     ret = ledu_init(cbLedStateChange);
@@ -390,10 +388,8 @@ tEplKernel ctrlu_shutdownStack(void)
     ret = nmtcnu_delInstance();
     TRACE("EplNmtCnuDelInstance():  0x%X\n", ret);
 
-#if defined(CONFIG_INCLUDE_NMTU)
     ret = nmtu_delInstance();
     TRACE("nmtu_delInstance():    0x%X\n", ret);
-#endif
 
 #if defined(CONFIG_INCLUDE_PDOU)
     ret = pdou_exit();
@@ -591,7 +587,6 @@ tEplKernel ctrlu_cbObdAccess(tObdCbParam MEM* pParam_p)
                 // check value range
                 switch ((tNmtCommand)nmtCommand)
                 {
-#if defined(CONFIG_INCLUDE_NMTU)
                     case kNmtCmdResetNode:
                         ret = nmtu_postNmtEvent(kNmtEventResetNode);
                         break;
@@ -607,7 +602,6 @@ tEplKernel ctrlu_cbObdAccess(tObdCbParam MEM* pParam_p)
                     case kNmtCmdSwReset:
                         ret = nmtu_postNmtEvent(kNmtEventSwReset);
                         break;
-#endif
 
                     case kNmtCmdInvalidService:
                         break;
@@ -711,7 +705,6 @@ static tEplKernel initNmtu(tEplApiInitParam* pInitParam_p)
         goto Exit;
 
     // initialize EplNmtu module
-#if defined(CONFIG_INCLUDE_NMTU)
     TRACE ("Initialize NMTu module...\n");
     Ret = nmtu_init();
     if (Ret != kEplSuccessful)
@@ -721,7 +714,6 @@ static tEplKernel initNmtu(tEplApiInitParam* pInitParam_p)
     Ret = nmtu_registerStateChangeCb(cbNmtStateChange);
     if (Ret != kEplSuccessful)
         goto Exit;
-#endif
 
 #if defined(CONFIG_INCLUDE_NMT_MN)
     // initialize EplNmtMnu module

@@ -105,8 +105,6 @@ typedef tEplKernel (*tNmtuCheckEventCallback) (tNmtEvent  NmtEvent_p);
 // function prototypes
 //------------------------------------------------------------------------------
 
-#if defined(CONFIG_INCLUDE_NMTU)
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -122,8 +120,6 @@ tEplKernel      nmtu_registerStateChangeCb(tNmtuStateChangeCallback pfnNmtStateC
 #ifdef __cplusplus
 }
 #endif
-
-#endif // #if defined(CONFIG_INCLUDE_NMTU)
 
 #endif  // #ifndef _INC_nmtu_H_
 

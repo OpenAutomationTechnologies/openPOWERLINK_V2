@@ -184,9 +184,7 @@ tEplKernel oplk_execNmtCommand(tNmtEvent nmtEvent_p)
 {
     tEplKernel      ret = kEplSuccessful;
 
-#if defined(CONFIG_INCLUDE_NMTU)
     ret = nmtu_postNmtEvent(nmtEvent_p);
-#endif
     return ret;
 }
 
