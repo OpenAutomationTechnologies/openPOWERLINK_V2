@@ -183,15 +183,6 @@ This function provides processing time for the CAL module.
 //------------------------------------------------------------------------------
 tEplKernel ctrlkcal_process (void)
 {
-    tHostifReturn hifRet;
-
-    hifRet = hostif_process(instance_l.hifInstance);
-    if(hifRet != kHostifSuccessful)
-    {
-        EPL_DBGLVL_ERROR_TRACE ("Could not initialize Host Interface (0x%X)\n", hifRet);
-        return kEplInvalidOperation;
-    }
-
     return kEplSuccessful;
 }
 

@@ -217,7 +217,10 @@ This function will be called by the systems process function.
 //------------------------------------------------------------------------------
 void eventucal_process(void)
 {
-    //TODO jz move event queue processing from ctrl module
+    if (eventucal_getEventCountHostif(kEventQueueK2U) > 0)
+    {
+        eventucal_processEventHostif(kEventQueueK2U);
+    }
 }
 
 //============================================================================//

@@ -49,6 +49,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <kernel/dllkcal.h>
 #include <kernel/pdokcal.h>
 #include <kernel/pdok.h>
+#include <kernel/eventkcal.h>
 
 #include <ctrl.h>
 #include <kernel/ctrlk.h>
@@ -193,6 +194,8 @@ BOOL ctrlk_process(void)
             ctrlkcal_setStatus(status);
         }
     }
+
+    eventkcal_process();
 
     ret = ctrlkcal_process();
     if(ret != kEplSuccessful)

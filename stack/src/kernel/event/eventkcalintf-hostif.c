@@ -87,7 +87,6 @@ static tHostifQueueInstance     instance_l[kEventQueueNum];
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static void rxSignalHandlerCb(void* pArg_p) SECTION_EVENTKCAL_HOSTIF_RXHDL;
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -142,16 +141,6 @@ tEplKernel eventkcal_initQueueHostif(tEventQueue eventQueue_p)
             if(hifRet != kHostifSuccessful)
             {
                 EPL_DBGLVL_ERROR_TRACE("%s() couldn't create queue instance (%d)\n",
-                        __func__, hifRet);
-                return kEplNoResource;
-            }
-
-            //Assign queue callback
-            hifRet = hostif_queueCallback(instance_l[eventQueue_p],
-                    rxSignalHandlerCb, (void*)eventQueue_p);
-            if(hifRet != kHostifSuccessful)
-            {
-                EPL_DBGLVL_ERROR_TRACE("%s() couldn't assign queue callback (%d)\n",
                         __func__, hifRet);
                 return kEplNoResource;
             }
@@ -375,21 +364,6 @@ tEplKernel eventkcal_setSignalingHostif(tEventQueue eventQueue_p, VOIDFUNCPTR pf
 //============================================================================//
 /// \name Private Functions
 /// \{
-
-//------------------------------------------------------------------------------
-/**
-\brief  Event handler callback function
-
-This function implements the callback function which should be called when
-receiving an event.
-
-\param  pArg_p                  EventQueue this event was received.
-*/
-//------------------------------------------------------------------------------
-static void rxSignalHandlerCb(void* pArg_p)
-{
-    eventkcal_processEventHostif((tEventQueue)pArg_p);
-}
 
 /// \}
 
