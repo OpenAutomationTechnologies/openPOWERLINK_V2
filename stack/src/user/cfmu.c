@@ -339,7 +339,7 @@ tEplKernel cfmu_processNodeEvent(UINT nodeId_p, tNmtNodeEvent nodeEvent_p)
         return pNodeInfo->eventCnProgress.error;
     }
 
-    pNodeInfo->entriesRemaining = AmiGetDwordFromLe(pNodeInfo->pDataConciseDcf);
+    pNodeInfo->entriesRemaining = ami_getUint32Le(pNodeInfo->pDataConciseDcf);
     pNodeInfo->pDataConciseDcf += sizeof(UINT32);
     pNodeInfo->bytesRemaining -= sizeof(UINT32);
     pNodeInfo->eventCnProgress.bytesDownloaded += sizeof(UINT32);
@@ -395,8 +395,8 @@ tEplKernel cfmu_processNodeEvent(UINT nodeId_p, tNmtNodeEvent nodeEvent_p)
 
     if ((pNodeInfo->entriesRemaining == 0) ||
         ((nodeEvent_p != kNmtNodeEventUpdateConf) && (fDoUpdate == FALSE) &&
-         ((AmiGetDwordFromLe(&pIdentResponse->m_le_dwVerifyConfigurationDate) == expConfDate) &&
-          (AmiGetDwordFromLe(&pIdentResponse->m_le_dwVerifyConfigurationTime) == expConfTime))))
+         ((ami_getUint32Le(&pIdentResponse->m_le_dwVerifyConfigurationDate) == expConfDate) &&
+          (ami_getUint32Le(&pIdentResponse->m_le_dwVerifyConfigurationTime) == expConfTime))))
     {
         pNodeInfo->cfmState = kCfmStateIdle;
 
@@ -423,12 +423,12 @@ tEplKernel cfmu_processNodeEvent(UINT nodeId_p, tNmtNodeEvent nodeEvent_p)
         pNodeInfo->cfmState = kCfmStateWaitRestore;
 
         pNodeInfo->eventCnProgress.totalNumberOfBytes += sizeof(leSignature);
-        AmiSetDwordToLe(&leSignature, 0x64616F6C);
+        ami_setUint32Le(&leSignature, 0x64616F6C);
         //Restore Default Parameters
         EPL_DBGLVL_CFM_TRACE("CN%x - Cfg Mismatch | MN Expects: %lx-%lx ", nodeId_p, expConfDate, expConfTime);
         EPL_DBGLVL_CFM_TRACE("CN Has: %lx-%lx. Restoring Default...\n",
-                             AmiGetDwordFromLe(&pIdentResponse->m_le_dwVerifyConfigurationDate),
-                             AmiGetDwordFromLe(&pIdentResponse->m_le_dwVerifyConfigurationTime));
+                             ami_getUint32Le(&pIdentResponse->m_le_dwVerifyConfigurationDate),
+                             ami_getUint32Le(&pIdentResponse->m_le_dwVerifyConfigurationTime));
 
         pNodeInfo->eventCnProgress.objectIndex = 0x1011;
         pNodeInfo->eventCnProgress.objectSubIndex = 0x01;
@@ -789,9 +789,9 @@ static tEplKernel downloadObject(tCfmNodeInfo* pNodeInfo_p)
         }
 
         // fetch next item from ConciseDCF
-        pNodeInfo_p->eventCnProgress.objectIndex = AmiGetWordFromLe(&pNodeInfo_p->pDataConciseDcf[EPL_CDC_OFFSET_INDEX]);
-        pNodeInfo_p->eventCnProgress.objectSubIndex = AmiGetByteFromLe(&pNodeInfo_p->pDataConciseDcf[EPL_CDC_OFFSET_SUBINDEX]);
-        pNodeInfo_p->curDataSize = (UINT) AmiGetDwordFromLe(&pNodeInfo_p->pDataConciseDcf[EPL_CDC_OFFSET_SIZE]);
+        pNodeInfo_p->eventCnProgress.objectIndex = ami_getUint16Le(&pNodeInfo_p->pDataConciseDcf[EPL_CDC_OFFSET_INDEX]);
+        pNodeInfo_p->eventCnProgress.objectSubIndex = ami_getUint8Le(&pNodeInfo_p->pDataConciseDcf[EPL_CDC_OFFSET_SUBINDEX]);
+        pNodeInfo_p->curDataSize = (UINT) ami_getUint32Le(&pNodeInfo_p->pDataConciseDcf[EPL_CDC_OFFSET_SIZE]);
         pNodeInfo_p->pDataConciseDcf += EPL_CDC_OFFSET_DATA;
         pNodeInfo_p->bytesRemaining -= EPL_CDC_OFFSET_DATA;
         pNodeInfo_p->eventCnProgress.bytesDownloaded += EPL_CDC_OFFSET_DATA;
@@ -817,7 +817,7 @@ static tEplKernel downloadObject(tCfmNodeInfo* pNodeInfo_p)
         {
             // store configuration into non-volatile memory
             pNodeInfo_p->cfmState = kCfmStateWaitStore;
-            AmiSetDwordToLe(&leSignature, 0x65766173);
+            ami_setUint32Le(&leSignature, 0x65766173);
             pNodeInfo_p->eventCnProgress.objectIndex = 0x1010;
             pNodeInfo_p->eventCnProgress.objectSubIndex = 0x01;
             ret = sdoWriteObject(pNodeInfo_p, &leSignature, sizeof (leSignature));

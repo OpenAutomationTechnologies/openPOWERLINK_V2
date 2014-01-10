@@ -827,50 +827,50 @@ tEplKernel obd_readEntryToLe (UINT index_p, UINT subIndex_p, void* pDstData_p,
         case kObdTypeBool:
         case kObdTypeInt8:
         case kObdTypeUInt8:
-            AmiSetByteToLe(pDstData_p, *((UINT8*)pSrcData));
+            ami_setUint8Le(pDstData_p, *((UINT8*)pSrcData));
             break;
 
         case kObdTypeInt16:
         case kObdTypeUInt16:
-            AmiSetWordToLe(pDstData_p, *((UINT16*)pSrcData));
+            ami_setUint16Le(pDstData_p, *((UINT16*)pSrcData));
             break;
 
         case kObdTypeInt24:
         case kObdTypeUInt24:
-            AmiSetDword24ToLe(pDstData_p, *((UINT32*)pSrcData));
+            ami_setUint24Le(pDstData_p, *((UINT32*)pSrcData));
             break;
 
         case kObdTypeInt32:
         case kObdTypeUInt32:
         case kObdTypeReal32:
-            AmiSetDwordToLe(pDstData_p, *((UINT32*)pSrcData));
+            ami_setUint32Le(pDstData_p, *((UINT32*)pSrcData));
             break;
 
         case kObdTypeInt40:
         case kObdTypeUInt40:
-            AmiSetQword40ToLe(pDstData_p, *((UINT64*)pSrcData));
+            ami_setUint40Le(pDstData_p, *((UINT64*)pSrcData));
             break;
 
         case kObdTypeInt48:
         case kObdTypeUInt48:
-            AmiSetQword48ToLe(pDstData_p, *((UINT64*)pSrcData));
+            ami_setUint48Le(pDstData_p, *((UINT64*)pSrcData));
             break;
 
         case kObdTypeInt56:
         case kObdTypeUInt56:
-            AmiSetQword56ToLe(pDstData_p, *((UINT64*)pSrcData));
+            ami_setUint56Le(pDstData_p, *((UINT64*)pSrcData));
             break;
 
         case kObdTypeInt64:
         case kObdTypeUInt64:
         case kObdTypeReal64:
-            AmiSetQword64ToLe(pDstData_p, *((UINT64*)pSrcData));
+            ami_setUint64Le(pDstData_p, *((UINT64*)pSrcData));
             break;
 
         // time of day
         case kObdTypeTimeOfDay:
         case kObdTypeTimeDiff:
-            AmiSetTimeOfDay(pDstData_p, ((tTimeOfDay*)pSrcData));
+            ami_setTimeOfDay(pDstData_p, ((tTimeOfDay*)pSrcData));
             break;
     }
 
@@ -925,49 +925,49 @@ tEplKernel obd_writeEntryFromLe (UINT index_p, UINT subIndex_p, void* pSrcData_p
         case kObdTypeBool:
         case kObdTypeInt8:
         case kObdTypeUInt8:
-            *((UINT8*)pBuffer) = AmiGetByteFromLe(pSrcData_p);
+            *((UINT8*)pBuffer) = ami_getUint8Le(pSrcData_p);
             break;
 
         case kObdTypeInt16:
         case kObdTypeUInt16:
-            *((UINT16*)pBuffer) = AmiGetWordFromLe(pSrcData_p);
+            *((UINT16*)pBuffer) = ami_getUint16Le(pSrcData_p);
             break;
 
         case kObdTypeInt24:
         case kObdTypeUInt24:
-            *((UINT32*)pBuffer) = AmiGetDword24FromLe(pSrcData_p);
+            *((UINT32*)pBuffer) = ami_getUint24Le(pSrcData_p);
             break;
 
         case kObdTypeInt32:
         case kObdTypeUInt32:
         case kObdTypeReal32:
-            *((UINT32*)pBuffer) = AmiGetDwordFromLe(pSrcData_p);
+            *((UINT32*)pBuffer) = ami_getUint32Le(pSrcData_p);
             break;
 
         case kObdTypeInt40:
         case kObdTypeUInt40:
-            *((UINT64*)pBuffer) = AmiGetQword40FromLe(pSrcData_p);
+            *((UINT64*)pBuffer) = ami_getUint40Le(pSrcData_p);
             break;
 
         case kObdTypeInt48:
         case kObdTypeUInt48:
-            *((UINT64*)pBuffer) = AmiGetQword48FromLe(pSrcData_p);
+            *((UINT64*)pBuffer) = ami_getUint48Le(pSrcData_p);
             break;
 
         case kObdTypeInt56:
         case kObdTypeUInt56:
-            *((UINT64*)pBuffer) = AmiGetQword56FromLe(pSrcData_p);
+            *((UINT64*)pBuffer) = ami_getUint56Le(pSrcData_p);
             break;
 
         case kObdTypeInt64:
         case kObdTypeUInt64:
         case kObdTypeReal64:
-            *((UINT64*)pBuffer) = AmiGetQword64FromLe(pSrcData_p);
+            *((UINT64*)pBuffer) = ami_getUint64Le(pSrcData_p);
             break;
 
         case kObdTypeTimeOfDay:
         case kObdTypeTimeDiff:
-            AmiGetTimeOfDay(pBuffer, ((tTimeOfDay*)pSrcData_p));
+            ami_getTimeOfDay(pBuffer, ((tTimeOfDay*)pSrcData_p));
             break;
 
         default:

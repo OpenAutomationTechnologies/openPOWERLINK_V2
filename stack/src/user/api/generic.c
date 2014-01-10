@@ -645,9 +645,9 @@ tEplKernel oplk_sendAsndFrame(UINT8 dstNodeId_p, tEplAsndFrame *pAsndFrame_p,
     EPL_MEMCPY(&frameInfo.pFrame->m_Data.m_Asnd, pAsndFrame_p, asndSize_p);
 
     // Fill in additional data (SrcNodeId is filled by DLL if it is set to 0)
-    AmiSetByteToLe(&frameInfo.pFrame->m_le_bMessageType, (UINT8) kEplMsgTypeAsnd);
-    AmiSetByteToLe(&frameInfo.pFrame->m_le_bDstNodeId, (UINT8) dstNodeId_p );
-    AmiSetByteToLe(&frameInfo.pFrame->m_le_bSrcNodeId, (UINT8) 0);
+    ami_setUint8Le(&frameInfo.pFrame->m_le_bMessageType, (UINT8) kEplMsgTypeAsnd);
+    ami_setUint8Le(&frameInfo.pFrame->m_le_bDstNodeId, (UINT8) dstNodeId_p );
+    ami_setUint8Le(&frameInfo.pFrame->m_le_bSrcNodeId, (UINT8) 0);
 
     // Request frame transmission
     ret = dllucal_sendAsyncFrame(&frameInfo, kDllAsyncReqPrioGeneric);

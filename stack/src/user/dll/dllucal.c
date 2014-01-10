@@ -590,14 +590,14 @@ static tEplKernel HandleRxAsndFrame(tFrameInfo *pFrameInfo_p)
     tEplEvent       event;
 #endif
 
-    msgType = (tEplMsgType)AmiGetByteFromLe(&pFrameInfo_p->pFrame->m_le_bMessageType);
+    msgType = (tEplMsgType)ami_getUint8Le(&pFrameInfo_p->pFrame->m_le_bMessageType);
     if (msgType != kEplMsgTypeAsnd)
     {
         ret = kEplInvalidOperation;
         goto Exit;
     }
 
-    asndServiceId = (unsigned int) AmiGetByteFromLe(&pFrameInfo_p->pFrame->m_Data.m_Asnd.m_le_bServiceId);
+    asndServiceId = (unsigned int) ami_getUint8Le(&pFrameInfo_p->pFrame->m_Data.m_Asnd.m_le_bServiceId);
     if (asndServiceId < DLL_MAX_ASND_SERVICE_ID)
     {   // ASnd service ID is valid
         if (instance_l.apfnDlluCbAsnd[asndServiceId] != NULL)

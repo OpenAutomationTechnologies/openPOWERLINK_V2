@@ -707,8 +707,8 @@ static tEplKernel processStateIdle(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sdoSe
                ((pRecvFrame_p->m_le_bSendSeqNumCon & SDO_CON_MASK) == 0x01))
             {
                 // save sequence numbers
-                pSdoSeqCon_p->recvSeqNum = AmiGetByteFromLe(&pRecvFrame_p->m_le_bRecSeqNumCon);
-                pSdoSeqCon_p->sendSeqNum = AmiGetByteFromLe(&pRecvFrame_p->m_le_bSendSeqNumCon);
+                pSdoSeqCon_p->recvSeqNum = ami_getUint8Le(&pRecvFrame_p->m_le_bRecSeqNumCon);
+                pSdoSeqCon_p->sendSeqNum = ami_getUint8Le(&pRecvFrame_p->m_le_bSendSeqNumCon);
                 // create answer and send answer, set rcon to 1 (in send direction own scon)
                 pSdoSeqCon_p->recvSeqNum++;
                 ret = sendFrame(pSdoSeqCon_p, 0, NULL, FALSE);
@@ -726,8 +726,8 @@ static tEplKernel processStateIdle(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sdoSe
                 if (((pRecvFrame_p->m_le_bRecSeqNumCon & SDO_CON_MASK) != 0x00) ||
                     ((pRecvFrame_p->m_le_bSendSeqNumCon & SDO_CON_MASK) != 0x00))
                 {   // d.k. only answer with close message if the message sent was not a close message
-                    pSdoSeqCon_p->recvSeqNum = AmiGetByteFromLe(&pRecvFrame_p->m_le_bRecSeqNumCon);
-                    pSdoSeqCon_p->sendSeqNum = AmiGetByteFromLe(&pRecvFrame_p->m_le_bSendSeqNumCon);
+                    pSdoSeqCon_p->recvSeqNum = ami_getUint8Le(&pRecvFrame_p->m_le_bRecSeqNumCon);
+                    pSdoSeqCon_p->sendSeqNum = ami_getUint8Le(&pRecvFrame_p->m_le_bSendSeqNumCon);
                     // set rcon and scon to 0
                     pSdoSeqCon_p->sendSeqNum &= SEQ_NUM_MASK;
                     pSdoSeqCon_p->recvSeqNum &= SEQ_NUM_MASK;
@@ -773,8 +773,8 @@ static tEplKernel processStateInit1(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sdoS
             if(((pRecvFrame_p->m_le_bRecSeqNumCon & SDO_CON_MASK) == 0x01) &&
                ((pRecvFrame_p->m_le_bSendSeqNumCon & SDO_CON_MASK) == 0x01))
             {   // create answer own scon = 2 - save sequence numbers
-                pSdoSeqCon_p->recvSeqNum = AmiGetByteFromLe(&pRecvFrame_p->m_le_bRecSeqNumCon);
-                pSdoSeqCon_p->sendSeqNum = AmiGetByteFromLe(&pRecvFrame_p->m_le_bSendSeqNumCon);
+                pSdoSeqCon_p->recvSeqNum = ami_getUint8Le(&pRecvFrame_p->m_le_bRecSeqNumCon);
+                pSdoSeqCon_p->sendSeqNum = ami_getUint8Le(&pRecvFrame_p->m_le_bSendSeqNumCon);
 
                 pSdoSeqCon_p->recvSeqNum++;
                 ret = sendFrame(pSdoSeqCon_p, 0, NULL, FALSE);
@@ -791,8 +791,8 @@ static tEplKernel processStateInit1(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sdoS
                     ((pRecvFrame_p->m_le_bSendSeqNumCon & SDO_CON_MASK) == 0x01))
             {
                 // save sequence numbers
-                pSdoSeqCon_p->recvSeqNum = AmiGetByteFromLe(&pRecvFrame_p->m_le_bRecSeqNumCon);
-                pSdoSeqCon_p->sendSeqNum = AmiGetByteFromLe(&pRecvFrame_p->m_le_bSendSeqNumCon);
+                pSdoSeqCon_p->recvSeqNum = ami_getUint8Le(&pRecvFrame_p->m_le_bRecSeqNumCon);
+                pSdoSeqCon_p->sendSeqNum = ami_getUint8Le(&pRecvFrame_p->m_le_bSendSeqNumCon);
                 // create answer and send answer - set rcon to 1 (in send direction own scon)
                 pSdoSeqCon_p->recvSeqNum++;
                 ret = sendFrame(pSdoSeqCon_p, 0, NULL, FALSE);
@@ -813,8 +813,8 @@ static tEplKernel processStateInit1(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sdoS
                     ((pRecvFrame_p->m_le_bSendSeqNumCon & SDO_CON_MASK) != 0x00))
                 {   // d.k. only answer with close message if the message sent was not a close message
                     // save sequence numbers
-                    pSdoSeqCon_p->recvSeqNum = AmiGetByteFromLe(&pRecvFrame_p->m_le_bRecSeqNumCon);
-                    pSdoSeqCon_p->sendSeqNum = AmiGetByteFromLe(&pRecvFrame_p->m_le_bSendSeqNumCon);
+                    pSdoSeqCon_p->recvSeqNum = ami_getUint8Le(&pRecvFrame_p->m_le_bRecSeqNumCon);
+                    pSdoSeqCon_p->sendSeqNum = ami_getUint8Le(&pRecvFrame_p->m_le_bSendSeqNumCon);
                     // set rcon and scon to 0
                     pSdoSeqCon_p->sendSeqNum &= SEQ_NUM_MASK;
                     pSdoSeqCon_p->recvSeqNum &= SEQ_NUM_MASK;
@@ -877,8 +877,8 @@ static tEplKernel processStateInit2(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sdoS
             if(((pRecvFrame_p->m_le_bRecSeqNumCon & SDO_CON_MASK) == 0x01) &&
                ((pRecvFrame_p->m_le_bSendSeqNumCon & SDO_CON_MASK) == 0x02))
             {   // create answer own rcon = 2 - save sequence numbers
-                pSdoSeqCon_p->recvSeqNum = AmiGetByteFromLe(&pRecvFrame_p->m_le_bRecSeqNumCon);
-                pSdoSeqCon_p->sendSeqNum = AmiGetByteFromLe(&pRecvFrame_p->m_le_bSendSeqNumCon);
+                pSdoSeqCon_p->recvSeqNum = ami_getUint8Le(&pRecvFrame_p->m_le_bRecSeqNumCon);
+                pSdoSeqCon_p->sendSeqNum = ami_getUint8Le(&pRecvFrame_p->m_le_bSendSeqNumCon);
 
                 pSdoSeqCon_p->recvSeqNum++;
                 ret = sendFrame(pSdoSeqCon_p, 0, NULL, FALSE);
@@ -901,8 +901,8 @@ static tEplKernel processStateInit2(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sdoS
             else if(((pRecvFrame_p->m_le_bRecSeqNumCon & SDO_CON_MASK) == 0x01) &&
                     ((pRecvFrame_p->m_le_bSendSeqNumCon & SDO_CON_MASK) == 0x01))
             {
-                pSdoSeqCon_p->recvSeqNum = AmiGetByteFromLe(&pRecvFrame_p->m_le_bRecSeqNumCon);
-                pSdoSeqCon_p->sendSeqNum = AmiGetByteFromLe(&pRecvFrame_p->m_le_bSendSeqNumCon);
+                pSdoSeqCon_p->recvSeqNum = ami_getUint8Le(&pRecvFrame_p->m_le_bRecSeqNumCon);
+                pSdoSeqCon_p->sendSeqNum = ami_getUint8Le(&pRecvFrame_p->m_le_bSendSeqNumCon);
                 // create answer and send answer - set rcon to 1 (in send direction own scon)
                 pSdoSeqCon_p->recvSeqNum++;
                 ret = sendFrame(pSdoSeqCon_p, 0, NULL, FALSE);
@@ -924,8 +924,8 @@ static tEplKernel processStateInit2(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sdoS
                     ((pRecvFrame_p->m_le_bSendSeqNumCon & SDO_CON_MASK) != 0x00))
                 {   // d.k. only answer with close message if the message sent was not a close message
                     // save sequence numbers
-                    pSdoSeqCon_p->recvSeqNum = AmiGetByteFromLe(&pRecvFrame_p->m_le_bRecSeqNumCon);
-                    pSdoSeqCon_p->sendSeqNum = AmiGetByteFromLe(&pRecvFrame_p->m_le_bSendSeqNumCon);
+                    pSdoSeqCon_p->recvSeqNum = ami_getUint8Le(&pRecvFrame_p->m_le_bRecSeqNumCon);
+                    pSdoSeqCon_p->sendSeqNum = ami_getUint8Le(&pRecvFrame_p->m_le_bSendSeqNumCon);
                     // set rcon and scon to 0
                     pSdoSeqCon_p->sendSeqNum &= SEQ_NUM_MASK;
                     pSdoSeqCon_p->recvSeqNum &= SEQ_NUM_MASK;
@@ -984,8 +984,8 @@ static tEplKernel processStateInit3(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sdoS
             if(((pRecvFrame_p->m_le_bRecSeqNumCon & SDO_CON_MASK) == 0x02) &&
                ((pRecvFrame_p->m_le_bSendSeqNumCon & SDO_CON_MASK) == 0x02))
             {
-                pSdoSeqCon_p->recvSeqNum = AmiGetByteFromLe(&pRecvFrame_p->m_le_bRecSeqNumCon);
-                pSdoSeqCon_p->sendSeqNum = AmiGetByteFromLe(&pRecvFrame_p->m_le_bSendSeqNumCon);
+                pSdoSeqCon_p->recvSeqNum = ami_getUint8Le(&pRecvFrame_p->m_le_bRecSeqNumCon);
+                pSdoSeqCon_p->sendSeqNum = ami_getUint8Le(&pRecvFrame_p->m_le_bSendSeqNumCon);
 
                 pSdoSeqCon_p->sdoSeqState = kSdoSeqStateConnected;
 
@@ -1002,8 +1002,8 @@ static tEplKernel processStateInit3(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sdoS
             else if(((pRecvFrame_p->m_le_bRecSeqNumCon & SDO_CON_MASK) == 0x01) &&
                     ((pRecvFrame_p->m_le_bSendSeqNumCon & SDO_CON_MASK) == 0x02))
             {   // create answer own rcon = 2 - save sequence numbers
-                pSdoSeqCon_p->recvSeqNum = AmiGetByteFromLe(&pRecvFrame_p->m_le_bRecSeqNumCon);
-                pSdoSeqCon_p->sendSeqNum = AmiGetByteFromLe(&pRecvFrame_p->m_le_bSendSeqNumCon);
+                pSdoSeqCon_p->recvSeqNum = ami_getUint8Le(&pRecvFrame_p->m_le_bRecSeqNumCon);
+                pSdoSeqCon_p->sendSeqNum = ami_getUint8Le(&pRecvFrame_p->m_le_bSendSeqNumCon);
 
                 pSdoSeqCon_p->recvSeqNum++;
 
@@ -1032,8 +1032,8 @@ static tEplKernel processStateInit3(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sdoS
                     ((pRecvFrame_p->m_le_bSendSeqNumCon & SDO_CON_MASK) != 0x00))
                 {   // d.k. only answer with close message if the message sent was not a close message
                     // save sequence numbers
-                    pSdoSeqCon_p->recvSeqNum = AmiGetByteFromLe(&pRecvFrame_p->m_le_bRecSeqNumCon);
-                    pSdoSeqCon_p->sendSeqNum = AmiGetByteFromLe(&pRecvFrame_p->m_le_bSendSeqNumCon);
+                    pSdoSeqCon_p->recvSeqNum = ami_getUint8Le(&pRecvFrame_p->m_le_bRecSeqNumCon);
+                    pSdoSeqCon_p->sendSeqNum = ami_getUint8Le(&pRecvFrame_p->m_le_bSendSeqNumCon);
                     // set rcon and scon to 0
                     pSdoSeqCon_p->sendSeqNum &= SEQ_NUM_MASK;
                     pSdoSeqCon_p->recvSeqNum &= SEQ_NUM_MASK;
@@ -1130,7 +1130,7 @@ static tEplKernel processStateConnected(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl 
 
         // frame received
         case kSdoSeqEventFrameRec:
-            sendSeqNumCon = AmiGetByteFromLe(&pRecvFrame_p->m_le_bSendSeqNumCon);
+            sendSeqNumCon = ami_getUint8Le(&pRecvFrame_p->m_le_bSendSeqNumCon);
 
             ret = setTimer(pSdoSeqCon_p, sdoSeqInstance_l.sdoSeqTimeout);
 
@@ -1156,7 +1156,7 @@ static tEplKernel processStateConnected(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl 
                 case 3:
                 // normal frame
                 case 2:
-                    if ((AmiGetByteFromLe(&pRecvFrame_p->m_le_bRecSeqNumCon) & SDO_CON_MASK) == 3)
+                    if ((ami_getUint8Le(&pRecvFrame_p->m_le_bRecSeqNumCon) & SDO_CON_MASK) == 3)
                     {
                         // TRACE("sdoseq: error response received\n");
 
@@ -1256,8 +1256,8 @@ static tEplKernel processStateConnected(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl 
                 if ((pFrame != NULL) && (frameSize != 0))
                 {
                     // set ack request in scon
-                    AmiSetByteToLe(&pFrame->m_Data.m_Asnd.m_Payload.m_SdoSequenceFrame.m_le_bSendSeqNumCon,
-                                   AmiGetByteFromLe( &pFrame->m_Data.m_Asnd.m_Payload.m_SdoSequenceFrame.m_le_bSendSeqNumCon) | 0x03);
+                    ami_setUint8Le(&pFrame->m_Data.m_Asnd.m_Payload.m_SdoSequenceFrame.m_le_bSendSeqNumCon,
+                                   ami_getUint8Le( &pFrame->m_Data.m_Asnd.m_Payload.m_SdoSequenceFrame.m_le_bSendSeqNumCon) | 0x03);
 
                     ret = sendToLowerLayer(pSdoSeqCon_p, frameSize, pFrame);
                     if (ret != kEplSuccessful)
@@ -1360,8 +1360,8 @@ static tEplKernel processStateWaitAck(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sd
                 if(pRecvFrame_p->m_le_bRecSeqNumCon == pSdoSeqCon_p->recvSeqNum )
                 {   // ack request -> send ack
                     // save sequence numbers
-                    pSdoSeqCon_p->recvSeqNum = AmiGetByteFromLe(&pRecvFrame_p->m_le_bRecSeqNumCon);
-                    pSdoSeqCon_p->sendSeqNum = AmiGetByteFromLe(&pRecvFrame_p->m_le_bSendSeqNumCon);
+                    pSdoSeqCon_p->recvSeqNum = ami_getUint8Le(&pRecvFrame_p->m_le_bRecSeqNumCon);
+                    pSdoSeqCon_p->sendSeqNum = ami_getUint8Le(&pRecvFrame_p->m_le_bSendSeqNumCon);
                     // create answer own rcon = 2
                     pSdoSeqCon_p->recvSeqNum--;
                     // check if ack or data-frame
@@ -1542,10 +1542,10 @@ static tEplKernel sendFrame(tSdoSeqCon* pSdoSeqCon_p, UINT dataSize_p,
     }
 
     // filling header informations
-    AmiSetByteToLe( &pFrame->m_Data.m_Asnd.m_le_bServiceId, 0x05);
-    AmiSetByteToLe( &pFrame->m_Data.m_Asnd.m_Payload.m_SdoSequenceFrame.m_le_abReserved,0x00);
-    AmiSetByteToLe( &pFrame->m_Data.m_Asnd.m_Payload.m_SdoSequenceFrame.m_le_bRecSeqNumCon, pSdoSeqCon_p->sendSeqNum);
-    AmiSetByteToLe( &pFrame->m_Data.m_Asnd.m_Payload.m_SdoSequenceFrame.m_le_bSendSeqNumCon, pSdoSeqCon_p->recvSeqNum);
+    ami_setUint8Le( &pFrame->m_Data.m_Asnd.m_le_bServiceId, 0x05);
+    ami_setUint8Le( &pFrame->m_Data.m_Asnd.m_Payload.m_SdoSequenceFrame.m_le_abReserved,0x00);
+    ami_setUint8Le( &pFrame->m_Data.m_Asnd.m_Payload.m_SdoSequenceFrame.m_le_bRecSeqNumCon, pSdoSeqCon_p->sendSeqNum);
+    ami_setUint8Le( &pFrame->m_Data.m_Asnd.m_Payload.m_SdoSequenceFrame.m_le_bSendSeqNumCon, pSdoSeqCon_p->recvSeqNum);
     dataSize_p += SDO_SEQ_HEADER_SIZE;
 
     ret = sendToLowerLayer(pSdoSeqCon_p, dataSize_p, pFrame);
@@ -1684,7 +1684,7 @@ static tEplKernel receiveCb(tSdoConHdl conHdl_p, tAsySdoSeq* pSdoSeqData_p,
         }
 
         // call history ack function
-        ret = deleteAckedFrameFromHistory(pSdoSeqCon, (AmiGetByteFromLe(&pSdoSeqData_p->m_le_bRecSeqNumCon) & SEQ_NUM_MASK));
+        ret = deleteAckedFrameFromHistory(pSdoSeqCon, (ami_getUint8Le(&pSdoSeqData_p->m_le_bRecSeqNumCon) & SEQ_NUM_MASK));
 
 #if defined(WIN32) || defined(_WIN32)
         LeaveCriticalSection(sdoSeqInstance_l.pCriticalSectionReceive);

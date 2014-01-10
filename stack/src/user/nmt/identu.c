@@ -336,7 +336,7 @@ static tEplKernel identu_cbIdentResponse(tFrameInfo* pFrameInfo_p)
     UINT                    index;
     tIdentuCbResponse       pfnCbResponse;
 
-    nodeId = AmiGetByteFromLe(&pFrameInfo_p->pFrame->m_le_bSrcNodeId);
+    nodeId = ami_getUint8Le(&pFrameInfo_p->pFrame->m_le_bSrcNodeId);
     index = nodeId - 1;
 
     if (index < tabentries(instance_g.apfnCbResponse))

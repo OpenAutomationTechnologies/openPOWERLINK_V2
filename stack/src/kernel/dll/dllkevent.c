@@ -935,7 +935,7 @@ static tEplKernel processSyncMn(tNmtState nmtState_p, BOOL fReadyFlag_p)
     pTxFrame = (tEplFrame *)pTxBuffer->pBuffer;
 
     // Set SoC relative time
-    AmiSetQword64ToLe( &pTxFrame->m_Data.m_Soc.m_le_RelativeTime, dllkInstance_g.relativeTime);
+    ami_setUint64Le( &pTxFrame->m_Data.m_Soc.m_le_RelativeTime, dllkInstance_g.relativeTime);
     dllkInstance_g.relativeTime += dllkInstance_g.dllConfigParam.cycleLen;
 
     if (dllkInstance_g.ppTxBufferList == NULL)
@@ -992,12 +992,12 @@ static tEplKernel processPresReady(tNmtState nmtState_p)
                 // fake NMT state PreOp2, because PRes will be sent only in PreOp2 or greater
                 nmtState_p = kNmtCsPreOperational2;
             }
-            AmiSetByteToLe(&pTxFrame->m_Data.m_Pres.m_le_bNmtStatus, (UINT8) nmtState_p);
-            AmiSetByteToLe(&pTxFrame->m_Data.m_Pres.m_le_bFlag2, dllkInstance_g.flag2);
+            ami_setUint8Le(&pTxFrame->m_Data.m_Pres.m_le_bNmtStatus, (UINT8) nmtState_p);
+            ami_setUint8Le(&pTxFrame->m_Data.m_Pres.m_le_bFlag2, dllkInstance_g.flag2);
             if (nmtState_p != kNmtCsOperational)
             {   // mark PDO as invalid in all NMT state but Op
                 // $$$ reset only RD flag; set other flags appropriately
-                AmiSetByteToLe(&pTxFrame->m_Data.m_Pres.m_le_bFlag1, 0);
+                ami_setUint8Le(&pTxFrame->m_Data.m_Pres.m_le_bFlag1, 0);
             }
             // $$$ make function that updates Pres, StatusRes
             // mark PRes frame as ready for transmission

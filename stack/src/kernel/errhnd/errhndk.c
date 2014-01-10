@@ -997,7 +997,7 @@ static tEplKernel generateHistoryEntryNodeId(UINT16 errorCode_p,
 
     historyEntry.m_wErrorCode = errorCode_p;
     historyEntry.m_TimeStamp = netTime_p;
-    AmiSetByteToLe(&historyEntry.m_abAddInfo[0], (BYTE)nodeId_p);
+    ami_setUint8Le(&historyEntry.m_abAddInfo[0], (BYTE)nodeId_p);
 
     ret = postHistoryEntryEvent(&historyEntry);
     return ret;
@@ -1031,7 +1031,7 @@ static tEplKernel generateHistoryEntryWithError(UINT16 errorCode_p,
 
     historyEntry.m_wErrorCode = errorCode_p;
     historyEntry.m_TimeStamp = netTime_p;
-    AmiSetWordToLe(&historyEntry.m_abAddInfo[0], (UINT16)eplError_p);
+    ami_setUint16Le(&historyEntry.m_abAddInfo[0], (UINT16)eplError_p);
 
     ret = postHistoryEntryEvent(&historyEntry);
     return ret;

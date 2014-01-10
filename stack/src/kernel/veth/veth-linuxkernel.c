@@ -368,7 +368,7 @@ static tEplKernel veth_receiveFrame(tFrameInfo * pFrameInfo_p)
 
     netif_rx(pSkb);         // call netif_rx with skb
 
-    EPL_DBGLVL_VETH_TRACE("veth_receiveFrame: SrcMAC=0x%llx\n", AmiGetQword48FromBe(pFrameInfo_p->pFrame->m_be_abSrcMac));
+    EPL_DBGLVL_VETH_TRACE("veth_receiveFrame: SrcMAC=0x%llx\n", ami_getUint48Be(pFrameInfo_p->pFrame->m_be_abSrcMac));
 
     // update receive statistics
     pStats->rx_packets++;

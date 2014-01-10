@@ -48,11 +48,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 
 // Conversion macros for datatype UINT8 (saves code size)
-#define AmiSetByteToBe(pAddr_p, uint8Val_p) {*(UINT8 *)(pAddr_p) = (uint8Val_p);}
-#define AmiSetByteToLe(pAddr_p, uint8Val_p) {*(UINT8 *)(pAddr_p) = (uint8Val_p);}
+#define ami_setUint8Be(pAddr_p, uint8Val_p) {*(UINT8 *)(pAddr_p) = (uint8Val_p);}
+#define ami_setUint8Le(pAddr_p, uint8Val_p) {*(UINT8 *)(pAddr_p) = (uint8Val_p);}
 
-#define AmiGetByteFromBe(pAddr_p) (*(UINT8 *)(pAddr_p))
-#define AmiGetByteFromLe(pAddr_p) (*(UINT8 *)(pAddr_p))
+#define ami_getUint8Be(pAddr_p) (*(UINT8 *)(pAddr_p))
+#define ami_getUint8Le(pAddr_p) (*(UINT8 *)(pAddr_p))
 
 //------------------------------------------------------------------------------
 // typedef
@@ -67,57 +67,57 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 // Conversion functions for datatype WORD
-void AmiSetWordToBe(void* pAddr_p, UINT16 uint16Val_p);
-void AmiSetWordToLe(void* pAddr_p, UINT16 uint16Val_p);
+void ami_setUint16Be(void* pAddr_p, UINT16 uint16Val_p);
+void ami_setUint16Le(void* pAddr_p, UINT16 uint16Val_p);
 
-UINT16 AmiGetWordFromBe(void* pAddr_p);
-UINT16 AmiGetWordFromLe(void* pAddr_p);
+UINT16 ami_getUint16Be(void* pAddr_p);
+UINT16 ami_getUint16Le(void* pAddr_p);
 
 // Conversion functions for datatype DWORD24
-void AmiSetDword24ToBe(void* pAddr_p, UINT32 uint32Val_p);
-void AmiSetDword24ToLe(void* pAddr_p, UINT32 uint32Val_p);
+void ami_setUint24Be(void* pAddr_p, UINT32 uint32Val_p);
+void ami_setUint24Le(void* pAddr_p, UINT32 uint32Val_p);
 
-UINT32 AmiGetDword24FromBe(void* pAddr_p);
-UINT32 AmiGetDword24FromLe(void* pAddr_p);
+UINT32 ami_getUint24Be(void* pAddr_p);
+UINT32 ami_getUint24Le(void* pAddr_p);
 
 // Conversion functions for datatype DWORD
-void AmiSetDwordToBe(void* pAddr_p, UINT32 uint32Val_p);
-void AmiSetDwordToLe(void* pAddr_p, UINT32 uint32Val_p);
+void ami_setUint32Be(void* pAddr_p, UINT32 uint32Val_p);
+void ami_setUint32Le(void* pAddr_p, UINT32 uint32Val_p);
 
-UINT32 AmiGetDwordFromBe(void* pAddr_p);
-UINT32 AmiGetDwordFromLe(void* pAddr_p);
+UINT32 ami_getUint32Be(void* pAddr_p);
+UINT32 ami_getUint32Le(void* pAddr_p);
 
 // Conversion functions for datatype QWORD40
-void AmiSetQword40ToBe(void* pAddr_p, UINT64 uint64Val_p);
-void AmiSetQword40ToLe(void* pAddr_p, UINT64 uint64Val_p);
+void ami_setUint40Be(void* pAddr_p, UINT64 uint64Val_p);
+void ami_setUint40Le(void* pAddr_p, UINT64 uint64Val_p);
 
-UINT64 AmiGetQword40FromBe(void* pAddr_p);
-UINT64 AmiGetQword40FromLe(void* pAddr_p);
+UINT64 ami_getUint40Be(void* pAddr_p);
+UINT64 ami_getUint40Le(void* pAddr_p);
 
 // Conversion functions for datatype QWORD48
-void AmiSetQword48ToBe(void* pAddr_p, UINT64 uint64Val_p);
-void AmiSetQword48ToLe(void* pAddr_p, UINT64 uint64Val_p);
+void ami_setUint48Be(void* pAddr_p, UINT64 uint64Val_p);
+void ami_setUint48Le(void* pAddr_p, UINT64 uint64Val_p);
 
-UINT64 AmiGetQword48FromBe(void* pAddr_p);
-UINT64 AmiGetQword48FromLe(void* pAddr_p);
+UINT64 ami_getUint48Be(void* pAddr_p);
+UINT64 ami_getUint48Le(void* pAddr_p);
 
 // Conversion functions for datatype QWORD56
-void AmiSetQword56ToBe(void* pAddr_p, UINT64 uint64Val_p);
-void AmiSetQword56ToLe(void* pAddr_p, UINT64 uint64Val_p);
+void ami_setUint56Be(void* pAddr_p, UINT64 uint64Val_p);
+void ami_setUint56Le(void* pAddr_p, UINT64 uint64Val_p);
 
-UINT64 AmiGetQword56FromBe(void* pAddr_p);
-UINT64 AmiGetQword56FromLe(void* pAddr_p);
+UINT64 ami_getUint56Be(void* pAddr_p);
+UINT64 ami_getUint56Le(void* pAddr_p);
 
 // Conversion functions for datatype QWORD
-void AmiSetQword64ToBe(void* pAddr_p, UINT64 uint64Val_p);
-void AmiSetQword64ToLe(void* pAddr_p, UINT64 uint64Val_p);
+void ami_setUint64Be(void* pAddr_p, UINT64 uint64Val_p);
+void ami_setUint64Le(void* pAddr_p, UINT64 uint64Val_p);
 
-UINT64 AmiGetQword64FromBe(void* pAddr_p);
-UINT64 AmiGetQword64FromLe(void* pAddr_p);
+UINT64 ami_getUint64Be(void* pAddr_p);
+UINT64 ami_getUint64Le(void* pAddr_p);
 
 // Conversion functions for type tTimeOfDay
-void AmiSetTimeOfDay(void* pAddr_p, tTimeOfDay* pTimeOfDay_p);
-void AmiGetTimeOfDay(void* pAddr_p, tTimeOfDay* pTimeOfDay_p);
+void ami_setTimeOfDay(void* pAddr_p, tTimeOfDay* pTimeOfDay_p);
+void ami_getTimeOfDay(void* pAddr_p, tTimeOfDay* pTimeOfDay_p);
 
 #ifdef __cplusplus
     }
