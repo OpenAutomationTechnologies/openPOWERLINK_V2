@@ -47,6 +47,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <edrv.h>
 #include <openmac.h>
 #include <omethlib.h>
+#include <target.h>
 
 #include <Benchmark.h>
 #include <Debug.h>

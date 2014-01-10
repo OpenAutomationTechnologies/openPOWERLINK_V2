@@ -300,7 +300,7 @@ static tEplKernel getDataBlock (tDllCalQueueInstance pDllCalQueue_p,
     tCircBufError           error;
     tDllCalCircBufInstance* pDllCalCircBufInstance =
                                             (tDllCalCircBufInstance*)pDllCalQueue_p;
-    ULONG                   actualDataSize;
+    size_t                  actualDataSize;
 
     if(pDllCalCircBufInstance == NULL)
     {
