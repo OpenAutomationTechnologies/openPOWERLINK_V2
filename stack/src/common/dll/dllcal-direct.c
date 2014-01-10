@@ -204,7 +204,7 @@ static tEplKernel addInstance (tDllCalQueueInstance *ppDllCalQueue_p,
         else
         {
             //insert new instance at tail of linked list
-            pSearch->pNext = (struct tDllCalDirectInstance*)pDllCalDirectInstance;
+            pSearch->pNext = (tDllCalDirectInstance*)pDllCalDirectInstance;
         }
 
         //set new instance next to NULL
