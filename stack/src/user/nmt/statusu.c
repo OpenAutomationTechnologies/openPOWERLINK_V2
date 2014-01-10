@@ -259,7 +259,7 @@ static tEplKernel statusu_cbStatusResponse(tFrameInfo * pFrameInfo_p)
     UINT                index;
     tStatusuCbResponse  pfnCbResponse;
 
-    nodeId = AmiGetByteFromLe(&pFrameInfo_p->pFrame->m_le_bSrcNodeId);
+    nodeId = ami_getUint8Le(&pFrameInfo_p->pFrame->m_le_bSrcNodeId);
     index = nodeId - 1;
 
     if (index < tabentries (instance_g.apfnCbResponse))

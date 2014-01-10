@@ -398,14 +398,14 @@ tEplKernel pdok_processRxPdo(tEplFrame* pFrame_p, UINT frameSize_p)
     UINT                channelId;
 
     // check if received RPDO is valid
-    frameData = AmiGetByteFromLe(&pFrame_p->m_Data.m_Pres.m_le_bFlag1);
+    frameData = ami_getUint8Le(&pFrame_p->m_Data.m_Pres.m_le_bFlag1);
     if ((frameData & EPL_FRAME_FLAG1_RD) == 0)
     {   // RPDO invalid
         goto Exit;
     }
 
     // retrieve EPL message type
-    msgType = AmiGetByteFromLe(&pFrame_p->m_le_bMessageType);
+    msgType = ami_getUint8Le(&pFrame_p->m_le_bMessageType);
     if (msgType == kEplMsgTypePreq)
     {   // RPDO is PReq frame
         nodeId = PDO_PREQ_NODE_ID;  // 0x00
@@ -413,7 +413,7 @@ tEplKernel pdok_processRxPdo(tEplFrame* pFrame_p, UINT frameSize_p)
     else
     {   // RPDO is PRes frame
         // retrieve node ID
-        nodeId = AmiGetByteFromLe(&pFrame_p->m_le_bSrcNodeId);
+        nodeId = ami_getUint8Le(&pFrame_p->m_le_bSrcNodeId);
     }
 
     if (pdokInstance_g.fRunning)
@@ -429,7 +429,7 @@ tEplKernel pdok_processRxPdo(tEplFrame* pFrame_p, UINT frameSize_p)
             }
 
             // retrieve PDO version from frame
-            frameData = AmiGetByteFromLe(&pFrame_p->m_Data.m_Pres.m_le_bPdoVersion);
+            frameData = ami_getUint8Le(&pFrame_p->m_Data.m_Pres.m_le_bPdoVersion);
             if ((pPdoChannel->mappingVersion & EPL_VERSION_MAIN) != (frameData & EPL_VERSION_MAIN))
             {   // PDO versions do not match
                 // $$$ raise PDO error
@@ -585,11 +585,11 @@ static tEplKernel copyTxPdo(tEplFrame* pFrame_p, UINT frameSize_p, BOOL fReadyFl
     UINT                channelId;
 
     // set TPDO invalid, so that only fully processed TPDOs are sent as valid
-    flag1 = AmiGetByteFromLe(&pFrame_p->m_Data.m_Pres.m_le_bFlag1);
-    AmiSetByteToLe(&pFrame_p->m_Data.m_Pres.m_le_bFlag1, (flag1 & ~EPL_FRAME_FLAG1_RD));
+    flag1 = ami_getUint8Le(&pFrame_p->m_Data.m_Pres.m_le_bFlag1);
+    ami_setUint8Le(&pFrame_p->m_Data.m_Pres.m_le_bFlag1, (flag1 & ~EPL_FRAME_FLAG1_RD));
 
     // retrieve EPL message type
-    msgType = AmiGetByteFromLe(&pFrame_p->m_le_bMessageType);
+    msgType = ami_getUint8Le(&pFrame_p->m_le_bMessageType);
     if (msgType == kEplMsgTypePres)
     {   // TPDO is PRes frame
         nodeId = PDO_PRES_NODE_ID;  // 0x00
@@ -597,7 +597,7 @@ static tEplKernel copyTxPdo(tEplFrame* pFrame_p, UINT frameSize_p, BOOL fReadyFl
     else
     {   // TPDO is PReq frame
         // retrieve node ID
-        nodeId = AmiGetByteFromLe(&pFrame_p->m_le_bDstNodeId);
+        nodeId = ami_getUint8Le(&pFrame_p->m_le_bDstNodeId);
     }
 
     if (pdokInstance_g.fRunning)
@@ -625,18 +625,18 @@ static tEplKernel copyTxPdo(tEplFrame* pFrame_p, UINT frameSize_p, BOOL fReadyFl
             */
 
             // set PDO version in frame
-            AmiSetByteToLe(&pFrame_p->m_Data.m_Pres.m_le_bPdoVersion, pPdoChannel->mappingVersion);
+            ami_setUint8Le(&pFrame_p->m_Data.m_Pres.m_le_bPdoVersion, pPdoChannel->mappingVersion);
 
             pdokcal_readTxPdo(channelId, &pFrame_p->m_Data.m_Pres.m_le_abPayload[0],
                               pPdoChannel->pdoSize);
 
             // set PDO size in frame
-            AmiSetWordToLe(&pFrame_p->m_Data.m_Pres.m_le_wSize, pPdoChannel->pdoSize);
+            ami_setUint16Le(&pFrame_p->m_Data.m_Pres.m_le_wSize, pPdoChannel->pdoSize);
 
             if (fReadyFlag_p != FALSE)
             {
                 // set TPDO valid
-                AmiSetByteToLe(&pFrame_p->m_Data.m_Pres.m_le_bFlag1, (flag1 | EPL_FRAME_FLAG1_RD));
+                ami_setUint8Le(&pFrame_p->m_Data.m_Pres.m_le_bFlag1, (flag1 | EPL_FRAME_FLAG1_RD));
             }
 
             // processing finished successfully
@@ -645,12 +645,12 @@ static tEplKernel copyTxPdo(tEplFrame* pFrame_p, UINT frameSize_p, BOOL fReadyFl
     }
 
     // set PDO size in frame to zero, because no TPDO mapped
-    AmiSetWordToLe(&pFrame_p->m_Data.m_Pres.m_le_wSize, 0);
+    ami_setUint16Le(&pFrame_p->m_Data.m_Pres.m_le_wSize, 0);
 
     if (fReadyFlag_p != FALSE)
     {
         // set TPDO valid even if TPDO size is 0
-        AmiSetByteToLe(&pFrame_p->m_Data.m_Pres.m_le_bFlag1, (flag1 | EPL_FRAME_FLAG1_RD));
+        ami_setUint8Le(&pFrame_p->m_Data.m_Pres.m_le_bFlag1, (flag1 | EPL_FRAME_FLAG1_RD));
     }
 
 Exit:

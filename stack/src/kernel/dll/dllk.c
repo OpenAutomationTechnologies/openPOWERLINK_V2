@@ -1189,13 +1189,13 @@ tEplKernel dllk_setupLocalNode(tNmtState nmtState_p)
                                  &dllkInstance_g.pTxBuffer[DLLK_TXFRAME_NONEPL]);
 
     // register multicast MACs in ethernet driver
-    AmiSetQword48ToBe(&aMulticastMac[0], EPL_C_DLL_MULTICAST_SOC);
+    ami_setUint48Be(&aMulticastMac[0], EPL_C_DLL_MULTICAST_SOC);
     ret = edrv_setRxMulticastMacAddr(aMulticastMac);
-    AmiSetQword48ToBe(&aMulticastMac[0], EPL_C_DLL_MULTICAST_SOA);
+    ami_setUint48Be(&aMulticastMac[0], EPL_C_DLL_MULTICAST_SOA);
     ret = edrv_setRxMulticastMacAddr(aMulticastMac);
-    AmiSetQword48ToBe(&aMulticastMac[0], EPL_C_DLL_MULTICAST_PRES);
+    ami_setUint48Be(&aMulticastMac[0], EPL_C_DLL_MULTICAST_PRES);
     ret = edrv_setRxMulticastMacAddr(aMulticastMac);
-    AmiSetQword48ToBe(&aMulticastMac[0], EPL_C_DLL_MULTICAST_ASND);
+    ami_setUint48Be(&aMulticastMac[0], EPL_C_DLL_MULTICAST_ASND);
     ret = edrv_setRxMulticastMacAddr(aMulticastMac);
 
 #if defined(CONFIG_INCLUDE_NMT_MN)
@@ -1348,7 +1348,7 @@ tEplKernel dllk_setupLocalNodeCn(void)
     for (handle = DLLK_FILTER_PRES; handle < DLLK_FILTER_COUNT; handle++)
     {
         dllk_setupPresFilter(&dllkInstance_g.aFilter[handle], FALSE);
-        AmiSetByteToBe(&dllkInstance_g.aFilter[handle].aFilterMask[16], 0xFF);
+        ami_setUint8Be(&dllkInstance_g.aFilter[handle].aFilterMask[16], 0xFF);
     }
 
     handle = DLLK_FILTER_PRES;
@@ -1359,7 +1359,7 @@ tEplKernel dllk_setupLocalNodeCn(void)
     {
         if ((pIntNodeInfo->presFilterFlags & (DLLK_FILTER_FLAG_PDO | DLLK_FILTER_FLAG_HB)) != 0)
         {
-            AmiSetByteToBe(&dllkInstance_g.aFilter[handle].aFilterValue[16],
+            ami_setUint8Be(&dllkInstance_g.aFilter[handle].aFilterValue[16],
                            pIntNodeInfo->nodeId);
             dllkInstance_g.aFilter[handle].fEnable = TRUE;
             handle++;
@@ -1511,13 +1511,13 @@ tEplKernel dllk_cleanupLocalNode(tNmtState oldNmtState_p)
 #endif
 
     // deregister multicast MACs in ethernet driver
-    AmiSetQword48ToBe(&aMulticastMac[0], EPL_C_DLL_MULTICAST_SOC);
+    ami_setUint48Be(&aMulticastMac[0], EPL_C_DLL_MULTICAST_SOC);
     ret = edrv_clearRxMulticastMacAddr(aMulticastMac);
-    AmiSetQword48ToBe(&aMulticastMac[0], EPL_C_DLL_MULTICAST_SOA);
+    ami_setUint48Be(&aMulticastMac[0], EPL_C_DLL_MULTICAST_SOA);
     ret = edrv_clearRxMulticastMacAddr(aMulticastMac);
-    AmiSetQword48ToBe(&aMulticastMac[0], EPL_C_DLL_MULTICAST_PRES);
+    ami_setUint48Be(&aMulticastMac[0], EPL_C_DLL_MULTICAST_PRES);
     ret = edrv_clearRxMulticastMacAddr(aMulticastMac);
-    AmiSetQword48ToBe(&aMulticastMac[0], EPL_C_DLL_MULTICAST_ASND);
+    ami_setUint48Be(&aMulticastMac[0], EPL_C_DLL_MULTICAST_ASND);
     ret = edrv_clearRxMulticastMacAddr(aMulticastMac);
 
     return ret;
@@ -1620,13 +1620,13 @@ tEplKernel dllk_addNodeIsochronous(tDllkNodeInfo* pIntNodeInfo_p)
             // set up destination MAC address
             EPL_MEMCPY(pTxFrame->m_be_abDstMac, pIntNodeInfo_p->aMacAddr, 6);
             // set destination node-ID in PReq
-            AmiSetByteToLe(&pTxFrame->m_le_bDstNodeId, (UINT8)pIntNodeInfo_p->nodeId);
+            ami_setUint8Le(&pTxFrame->m_le_bDstNodeId, (UINT8)pIntNodeInfo_p->nodeId);
             // do the same for second frame buffer
             pTxFrame = (tEplFrame *) pIntNodeInfo_p->pPreqTxBuffer[1].pBuffer;
             // set up destination MAC address
             EPL_MEMCPY(pTxFrame->m_be_abDstMac, pIntNodeInfo_p->aMacAddr, 6);
             // set destination node-ID in PReq
-            AmiSetByteToLe(&pTxFrame->m_le_bDstNodeId, (UINT8) pIntNodeInfo_p->nodeId);
+            ami_setUint8Le(&pTxFrame->m_le_bDstNodeId, (UINT8) pIntNodeInfo_p->nodeId);
 
             event.m_EventSink = kEplEventSinkNmtMnu;
             event.m_EventType = kEplEventTypeNmtMnuNodeAdded;
@@ -1707,14 +1707,14 @@ tEplKernel dllk_deleteNodeIsochronous(tDllkNodeInfo* pIntNodeInfo_p)
         if (pTxFrame != NULL)
         {   // frame does exist
             // update frame (disable RD in Flag1)
-            AmiSetByteToLe(&pTxFrame->m_Data.m_Preq.m_le_bFlag1, 0);
+            ami_setUint8Le(&pTxFrame->m_Data.m_Preq.m_le_bFlag1, 0);
         }
 
         pTxFrame = (tEplFrame *) pIntNodeInfo_p->pPreqTxBuffer[1].pBuffer;
         if (pTxFrame != NULL)
         {   // frame does exist
             // update frame (disable RD in Flag1)
-            AmiSetByteToLe(&pTxFrame->m_Data.m_Preq.m_le_bFlag1, 0);
+            ami_setUint8Le(&pTxFrame->m_Data.m_Preq.m_le_bFlag1, 0);
         }
     }
     return ret;
@@ -1739,11 +1739,11 @@ tEplKernel dllk_presChainingEnable (void)
     if (dllkInstance_g.fPrcEnabled == FALSE)
     {
         // relocate PReq filter to PResMN
-        AmiSetQword48ToBe(&dllkInstance_g.aFilter[DLLK_FILTER_PREQ].aFilterValue[0],
+        ami_setUint48Be(&dllkInstance_g.aFilter[DLLK_FILTER_PREQ].aFilterValue[0],
                           EPL_C_DLL_MULTICAST_PRES);
-        AmiSetByteToBe(&dllkInstance_g.aFilter[DLLK_FILTER_PREQ].aFilterValue[14],
+        ami_setUint8Be(&dllkInstance_g.aFilter[DLLK_FILTER_PREQ].aFilterValue[14],
                        kEplMsgTypePres);
-        AmiSetByteToBe(&dllkInstance_g.aFilter[DLLK_FILTER_PREQ].aFilterValue[15],
+        ami_setUint8Be(&dllkInstance_g.aFilter[DLLK_FILTER_PREQ].aFilterValue[15],
                        EPL_C_ADR_BROADCAST); // Set Destination Node ID to C_ADR_BROADCAST
 
         dllkInstance_g.pTxBuffer[DLLK_TXFRAME_PRES].timeOffsetNs = dllkInstance_g.prcPResTimeFirst;
@@ -1756,8 +1756,8 @@ tEplKernel dllk_presChainingEnable (void)
         dllkInstance_g.fPrcEnabled = TRUE;
         pTxFrameSyncRes = (tEplFrame *) dllkInstance_g.pTxBuffer[DLLK_TXFRAME_SYNCRES].pBuffer;
 
-        AmiSetDwordToLe(&pTxFrameSyncRes->m_Data.m_Asnd.m_Payload.m_SyncResponse.m_le_dwSyncStatus,
-                        AmiGetDwordFromLe(&pTxFrameSyncRes->m_Data.m_Asnd.m_Payload.m_SyncResponse.m_le_dwSyncStatus)
+        ami_setUint32Le(&pTxFrameSyncRes->m_Data.m_Asnd.m_Payload.m_SyncResponse.m_le_dwSyncStatus,
+                        ami_getUint32Le(&pTxFrameSyncRes->m_Data.m_Asnd.m_Payload.m_SyncResponse.m_le_dwSyncStatus)
                         | EPL_SYNC_PRES_MODE_SET);
         // update SyncRes Tx buffer in Edrv
         Ret = edrv_updateTxBuffer(&dllkInstance_g.pTxBuffer[DLLK_TXFRAME_SYNCRES]);
@@ -1789,9 +1789,9 @@ tEplKernel dllk_presChainingDisable (void)
     {   // relocate PReq filter from PResMN to PReq
         EPL_MEMCPY(&dllkInstance_g.aFilter[DLLK_FILTER_PREQ].aFilterValue[0],
                    &dllkInstance_g.aLocalMac[0], 6);
-        AmiSetByteToBe(&dllkInstance_g.aFilter[DLLK_FILTER_PREQ].aFilterValue[14],
+        ami_setUint8Be(&dllkInstance_g.aFilter[DLLK_FILTER_PREQ].aFilterValue[14],
                        kEplMsgTypePreq);
-        AmiSetByteToBe(&dllkInstance_g.aFilter[DLLK_FILTER_PREQ].aFilterMask[15],
+        ami_setUint8Be(&dllkInstance_g.aFilter[DLLK_FILTER_PREQ].aFilterMask[15],
                        (BYTE) dllkInstance_g.dllConfigParam.nodeId); // Set Dst Node ID
 
         // disable auto-response delay
@@ -1806,8 +1806,8 @@ tEplKernel dllk_presChainingDisable (void)
 
         pTxFrameSyncRes = (tEplFrame *) dllkInstance_g.pTxBuffer[DLLK_TXFRAME_SYNCRES].pBuffer;
 
-        AmiSetDwordToLe(&pTxFrameSyncRes->m_Data.m_Asnd.m_Payload.m_SyncResponse.m_le_dwSyncStatus,
-                        AmiGetDwordFromLe(&pTxFrameSyncRes->m_Data.m_Asnd.m_Payload.m_SyncResponse.m_le_dwSyncStatus)
+        ami_setUint32Le(&pTxFrameSyncRes->m_Data.m_Asnd.m_Payload.m_SyncResponse.m_le_dwSyncStatus,
+                        ami_getUint32Le(&pTxFrameSyncRes->m_Data.m_Asnd.m_Payload.m_SyncResponse.m_le_dwSyncStatus)
                         & ~EPL_SYNC_PRES_MODE_SET);
         // update SyncRes Tx buffer in Edrv
         ret = edrv_updateTxBuffer(&dllkInstance_g.pTxBuffer[DLLK_TXFRAME_SYNCRES]);
@@ -1997,9 +1997,9 @@ tEplKernel dllk_setupAsyncPhase(tNmtState nmtState_p, UINT nextTxBufferOffset_p,
                 dllkInstance_g.ppTxBufferList[soaIndex]->pBuffer;
 
             //reset invitation
-            AmiSetByteToLe(&pTxFrame->m_Data.m_Soa.m_le_bReqServiceId,
+            ami_setUint8Le(&pTxFrame->m_Data.m_Soa.m_le_bReqServiceId,
                     kDllReqServiceNo);
-            AmiSetByteToLe(&pTxFrame->m_Data.m_Soa.m_le_bReqServiceTarget,
+            ami_setUint8Le(&pTxFrame->m_Data.m_Soa.m_le_bReqServiceTarget,
                     EPL_C_ADR_INVALID);
         }
         else
@@ -2069,7 +2069,7 @@ tEplKernel dllk_setupSyncPhase(tNmtState nmtState_p, BOOL fReadyFlag_p,
 
             // $$$ d.k. set EPL_FRAME_FLAG1_MS if necessary
             // update frame (Flag1)
-            AmiSetByteToLe(&pTxFrame->m_Data.m_Preq.m_le_bFlag1, flag1);
+            ami_setUint8Le(&pTxFrame->m_Data.m_Preq.m_le_bFlag1, flag1);
 
             // process TPDO
             FrameInfo.pFrame = pTxFrame;
@@ -2085,7 +2085,7 @@ tEplKernel dllk_setupSyncPhase(tNmtState nmtState_p, BOOL fReadyFlag_p,
             if (pTxBuffer == &dllkInstance_g.pTxBuffer[DLLK_TXFRAME_PRES + nextTxBufferOffset_p])
             {   // PRes of MN will be sent
                 // update NMT state
-                AmiSetByteToLe(&pTxFrame->m_Data.m_Pres.m_le_bNmtStatus, (BYTE) nmtState_p);
+                ami_setUint8Le(&pTxFrame->m_Data.m_Pres.m_le_bNmtStatus, (BYTE) nmtState_p);
 
 #if EPL_DLL_PRES_CHAINING_MN != FALSE
                 *pNextTimeOffsetNs_p = pIntNodeInfo->presTimeoutNs;

@@ -251,7 +251,7 @@ static tEplKernel syncu_cbSyncResponse(tFrameInfo * pFrameInfo_p)
 
     ret = kEplSuccessful;
 
-    nodeId = AmiGetByteFromLe(&pFrameInfo_p->pFrame->m_le_bSrcNodeId);
+    nodeId = ami_getUint8Le(&pFrameInfo_p->pFrame->m_le_bSrcNodeId);
     index  = nodeId - 1;
 
     if (index < tabentries (syncuInstance_g.apfnCbResponse))

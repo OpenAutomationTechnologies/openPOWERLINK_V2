@@ -395,7 +395,7 @@ static tEplKernel processCdc(tObdCdcInfo* pCdcInfo_p)
     if ((ret = loadNextBuffer(pCdcInfo_p, sizeof(UINT32)))  != kEplSuccessful)
         return ret;
 
-    entriesRemaining = AmiGetDwordFromLe(pCdcInfo_p->pCurBuffer);
+    entriesRemaining = ami_getUint32Le(pCdcInfo_p->pCurBuffer);
 
     if (entriesRemaining == 0)
     {
@@ -408,9 +408,9 @@ static tEplKernel processCdc(tObdCdcInfo* pCdcInfo_p)
         if ((ret = loadNextBuffer(pCdcInfo_p, EPL_CDC_OFFSET_DATA))  != kEplSuccessful)
             return ret;
 
-        objectIndex = AmiGetWordFromLe(&pCdcInfo_p->pCurBuffer[EPL_CDC_OFFSET_INDEX]);
-        objectSubIndex = AmiGetByteFromLe(&pCdcInfo_p->pCurBuffer[EPL_CDC_OFFSET_SUBINDEX]);
-        curDataSize = (size_t)AmiGetDwordFromLe(&pCdcInfo_p->pCurBuffer[EPL_CDC_OFFSET_SIZE]);
+        objectIndex = ami_getUint16Le(&pCdcInfo_p->pCurBuffer[EPL_CDC_OFFSET_INDEX]);
+        objectSubIndex = ami_getUint8Le(&pCdcInfo_p->pCurBuffer[EPL_CDC_OFFSET_SUBINDEX]);
+        curDataSize = (size_t)ami_getUint32Le(&pCdcInfo_p->pCurBuffer[EPL_CDC_OFFSET_SIZE]);
 
         EPL_DBGLVL_OBD_TRACE("%s: Reading object 0x%04X/%u with size %u from CDC\n",
                              __func__, objectIndex, objectSubIndex, curDataSize);

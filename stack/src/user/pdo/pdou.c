@@ -1457,57 +1457,57 @@ static tEplKernel copyVarToPdo(BYTE* pPayload_p, tPdoMappObject* pMappObject_p)
         case kObdTypeBool:
         case kObdTypeInt8:
         case kObdTypeUInt8:
-            AmiSetByteToLe(pPayload_p, *((BYTE*)pVar));
+            ami_setUint8Le(pPayload_p, *((BYTE*)pVar));
             break;
 
         // 16 bit values
         case kObdTypeInt16:
         case kObdTypeUInt16:
-            AmiSetWordToLe(pPayload_p, *((WORD*)pVar));
+            ami_setUint16Le(pPayload_p, *((WORD*)pVar));
             break;
 
         // 24 bit values
         case kObdTypeInt24:
         case kObdTypeUInt24:
-            AmiSetDword24ToLe(pPayload_p, *((DWORD*)pVar));
+            ami_setUint24Le(pPayload_p, *((DWORD*)pVar));
             break;
 
         // 32 bit values
         case kObdTypeInt32:
         case kObdTypeUInt32:
         case kObdTypeReal32:
-            AmiSetDwordToLe(pPayload_p, *((DWORD*)pVar));
+            ami_setUint32Le(pPayload_p, *((DWORD*)pVar));
             break;
 
         // 40 bit values
         case kObdTypeInt40:
         case kObdTypeUInt40:
-            AmiSetQword40ToLe(pPayload_p, *((QWORD*)pVar));
+            ami_setUint40Le(pPayload_p, *((QWORD*)pVar));
             break;
 
         // 48 bit values
         case kObdTypeInt48:
         case kObdTypeUInt48:
-            AmiSetQword48ToLe(pPayload_p, *((QWORD*)pVar));
+            ami_setUint48Le(pPayload_p, *((QWORD*)pVar));
             break;
 
         // 56 bit values
         case kObdTypeInt56:
         case kObdTypeUInt56:
-            AmiSetQword56ToLe(pPayload_p, *((QWORD*)pVar));
+            ami_setUint56Le(pPayload_p, *((QWORD*)pVar));
             break;
 
         // 64 bit values
         case kObdTypeInt64:
         case kObdTypeUInt64:
         case kObdTypeReal64:
-            AmiSetQword64ToLe(pPayload_p, *((QWORD*)pVar));
+            ami_setUint64Le(pPayload_p, *((QWORD*)pVar));
             break;
 
         // time of day
         case kObdTypeTimeOfDay:
         case kObdTypeTimeDiff:
-            AmiSetTimeOfDay(pPayload_p, ((tTimeOfDay*)pVar));
+            ami_setTimeOfDay(pPayload_p, ((tTimeOfDay*)pVar));
             break;
     }
 
@@ -1555,57 +1555,57 @@ static tEplKernel copyVarFromPdo(BYTE* pPayload_p, tPdoMappObject* pMappObject_p
         case kObdTypeBool:
         case kObdTypeInt8:
         case kObdTypeUInt8:
-            *((BYTE*)pVar) = AmiGetByteFromLe(pPayload_p);
+            *((BYTE*)pVar) = ami_getUint8Le(pPayload_p);
             break;
 
         // 16 bit values
         case kObdTypeInt16:
         case kObdTypeUInt16:
-            *((WORD*)pVar) = AmiGetWordFromLe(pPayload_p);
+            *((WORD*)pVar) = ami_getUint16Le(pPayload_p);
             break;
 
         // 24 bit values
         case kObdTypeInt24:
         case kObdTypeUInt24:
-            *((DWORD*)pVar) = AmiGetDword24FromLe(pPayload_p);
+            *((DWORD*)pVar) = ami_getUint24Le(pPayload_p);
             break;
 
         // 32 bit values
         case kObdTypeInt32:
         case kObdTypeUInt32:
         case kObdTypeReal32:
-            *((DWORD*)pVar) = AmiGetDwordFromLe(pPayload_p);
+            *((DWORD*)pVar) = ami_getUint32Le(pPayload_p);
             break;
 
         // 40 bit values
         case kObdTypeInt40:
         case kObdTypeUInt40:
-            *((QWORD*)pVar) = AmiGetQword40FromLe(pPayload_p);
+            *((QWORD*)pVar) = ami_getUint40Le(pPayload_p);
             break;
 
         // 48 bit values
         case kObdTypeInt48:
         case kObdTypeUInt48:
-            *((QWORD*)pVar) = AmiGetQword48FromLe(pPayload_p);
+            *((QWORD*)pVar) = ami_getUint48Le(pPayload_p);
             break;
 
         // 56 bit values
         case kObdTypeInt56:
         case kObdTypeUInt56:
-            *((QWORD*)pVar) = AmiGetQword56FromLe(pPayload_p);
+            *((QWORD*)pVar) = ami_getUint56Le(pPayload_p);
             break;
 
         // 64 bit values
         case kObdTypeInt64:
         case kObdTypeUInt64:
         case kObdTypeReal64:
-            *((QWORD*)pVar) = AmiGetQword64FromLe(pPayload_p);
+            *((QWORD*)pVar) = ami_getUint64Le(pPayload_p);
             break;
 
         // time of day
         case kObdTypeTimeOfDay:
         case kObdTypeTimeDiff:
-            AmiGetTimeOfDay(pVar, ((tTimeOfDay*)pPayload_p));
+            ami_getTimeOfDay(pVar, ((tTimeOfDay*)pPayload_p));
             break;
     }
     return Ret;

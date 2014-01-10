@@ -606,9 +606,9 @@ tEplKernel nmtmnu_sendNmtCommandEx(UINT nodeId_p, tNmtCommand nmtCommand_p,
     // build frame
     pFrame = (tEplFrame*) aBuffer;
     EPL_MEMSET(pFrame, 0x00, sizeof(aBuffer));
-    AmiSetByteToLe(&pFrame->m_le_bDstNodeId, (UINT8) nodeId_p);
-    AmiSetByteToLe(&pFrame->m_Data.m_Asnd.m_le_bServiceId, (UINT8) kDllAsndNmtCommand);
-    AmiSetByteToLe(&pFrame->m_Data.m_Asnd.m_Payload.m_NmtCommandService.m_le_bNmtCommandId,
+    ami_setUint8Le(&pFrame->m_le_bDstNodeId, (UINT8) nodeId_p);
+    ami_setUint8Le(&pFrame->m_Data.m_Asnd.m_le_bServiceId, (UINT8) kDllAsndNmtCommand);
+    ami_setUint8Le(&pFrame->m_Data.m_Asnd.m_Payload.m_NmtCommandService.m_le_bNmtCommandId,
         (UINT8)nmtCommand_p);
     if ((pNmtCommandData_p != NULL) && (uiDataSize_p > 0))
     {   // copy command data to frame
@@ -1175,8 +1175,8 @@ tEplKernel nmtmnu_processEvent(tEplEvent* pEvent_p)
                     break;
                 }
 
-                uiNodeId = AmiGetByteFromLe(&pFrame->m_le_bDstNodeId);
-                NmtCommand = (tNmtCommand) AmiGetByteFromLe(&pFrame->m_Data.m_Asnd.m_Payload.m_NmtCommandService.m_le_bNmtCommandId);
+                uiNodeId = ami_getUint8Le(&pFrame->m_le_bDstNodeId);
+                NmtCommand = (tNmtCommand) ami_getUint8Le(&pFrame->m_Data.m_Asnd.m_Payload.m_NmtCommandService.m_le_bNmtCommandId);
 
                 switch (NmtCommand)
                 {
@@ -1418,12 +1418,12 @@ static tEplKernel cbNmtRequest(tFrameInfo * pFrameInfo_p)
         return kEplNmtInvalidFramePointer;
 
     pNmtRequestService = &pFrameInfo_p->pFrame->m_Data.m_Asnd.m_Payload.m_NmtRequestService;
-    nmtCommand = (tNmtCommand)AmiGetByteFromLe(&pNmtRequestService->m_le_bNmtCommandId);
-    targetNodeId = AmiGetByteFromLe(&pNmtRequestService->m_le_bTargetNodeId);
+    nmtCommand = (tNmtCommand)ami_getUint8Le(&pNmtRequestService->m_le_bNmtCommandId);
+    targetNodeId = ami_getUint8Le(&pNmtRequestService->m_le_bTargetNodeId);
     ret = nmtmnu_requestNmtCommand(targetNodeId, nmtCommand);
     if (ret != kEplSuccessful)
     {   // error -> reply with kNmtCmdInvalidService
-        sourceNodeId = AmiGetByteFromLe(&pFrameInfo_p->pFrame->m_le_bSrcNodeId);
+        sourceNodeId = ami_getUint8Le(&pFrameInfo_p->pFrame->m_le_bSrcNodeId);
         ret = nmtmnu_sendNmtCommand(sourceNodeId, kNmtCmdInvalidService);
     }
     return ret;
@@ -1458,7 +1458,7 @@ static tEplKernel PUBLIC cbIdentResponse(UINT nodeId_p, tEplIdentResponse* pIden
     else
     {   // node answered IdentRequest
         errorCode = EPL_E_NO_ERROR;
-        nmtState = (tNmtState)(AmiGetByteFromLe(&pIdentResponse_p->m_le_bNmtStatus) | NMT_TYPE_CS);
+        nmtState = (tNmtState)(ami_getUint8Le(&pIdentResponse_p->m_le_bNmtStatus) | NMT_TYPE_CS);
 
         // check IdentResponse $$$ move to ProcessIntern, because this function may be called also if CN
 
@@ -1470,7 +1470,7 @@ static tEplKernel PUBLIC cbIdentResponse(UINT nodeId_p, tEplIdentResponse* pIden
 
         if (dwDevType != 0L)
         {   // actually compare it with DeviceType from IdentResponse
-            if (AmiGetDwordFromLe(&pIdentResponse_p->m_le_dwDeviceType) != dwDevType)
+            if (ami_getUint32Le(&pIdentResponse_p->m_le_dwDeviceType) != dwDevType)
             {   // wrong DeviceType
                 nmtState = kNmtCsNotActive;
                 errorCode = EPL_E_NMT_BPO1_DEVICE_TYPE;
@@ -1508,7 +1508,7 @@ static tEplKernel PUBLIC cbStatusResponse(UINT nodeId_p, tEplStatusResponse* pSt
     else
     {   // node answered StatusRequest
         ret = processInternalEvent(nodeId_p,
-                                   (tNmtState)(AmiGetByteFromLe(&pStatusResponse_p->m_le_bNmtStatus) | NMT_TYPE_CS),
+                                   (tNmtState)(ami_getUint8Le(&pStatusResponse_p->m_le_bNmtStatus) | NMT_TYPE_CS),
                                    EPL_E_NO_ERROR, kNmtMnuIntNodeEventStatusResponse);
     }
     return ret;
@@ -3263,7 +3263,7 @@ static tEplKernel checkNmtState(UINT nodeId_p, tNmtMnuNodeInfo* pNodeInfo_p,
 
         // reset CN
         // store error code in NMT command data for diagnostic purpose
-        AmiSetWordToLe(&beErrorCode, errorCode_p);
+        ami_setUint16Le(&beErrorCode, errorCode_p);
         ret = nmtmnu_sendNmtCommandEx(nodeId_p, kNmtCmdResetNode, &beErrorCode, sizeof (beErrorCode));
         if (ret == kEplSuccessful)
             ret = kEplReject;
@@ -3740,7 +3740,7 @@ static tEplKernel PUBLIC prcCbSyncResMeasure(
     }
 
     nodeIdPredNode = prcFindPredecessorNode(nodeId_p);
-    syncNodeNumber = AmiGetDwordFromLe(&pSyncResponse_p->m_le_dwSyncNodeNumber);
+    syncNodeNumber = ami_getUint32Le(&pSyncResponse_p->m_le_dwSyncNodeNumber);
 
     if (syncNodeNumber != nodeIdPredNode)
     {   // SyncNodeNumber does not match predecessor node
@@ -3748,7 +3748,7 @@ static tEplKernel PUBLIC prcCbSyncResMeasure(
         goto Exit;
     }
 
-    pNodeInfo->relPropagationDelayNs = AmiGetDwordFromLe(&pSyncResponse_p->m_le_dwSyncDelay);
+    pNodeInfo->relPropagationDelayNs = ami_getUint32Le(&pSyncResponse_p->m_le_dwSyncDelay);
 
     // If a previous SyncRes frame was not usable,
     // the Sync Error flag is cleared as this one is OK
@@ -4096,7 +4096,7 @@ static tEplKernel prcCbSyncResVerify(UINT nodeId_p, tEplSyncResponse* pSyncRespo
         goto Exit;
     }
 
-    pResTimeFirstNs = AmiGetDwordFromLe(&pSyncResponse_p->m_le_dwPResTimeFirst);
+    pResTimeFirstNs = ami_getUint32Le(&pSyncResponse_p->m_le_dwPResTimeFirst);
 
     if (pResTimeFirstNs != pNodeInfo->pResTimeFirstNs)
     {   // Configuration of PRes Response Time was not successful

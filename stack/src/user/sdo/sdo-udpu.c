@@ -436,9 +436,9 @@ tEplKernel sdoudp_sendData(tSdoConHdl sdoConHandle_p, tEplFrame* pSrcData_p, UIN
     if(array >= SDO_MAX_CONNECTION_UDP)
         return kEplSdoUdpInvalidHdl;
 
-    AmiSetByteToLe(&pSrcData_p->m_le_bMessageType, 0x06);   // set message type SDO
-    AmiSetByteToLe(&pSrcData_p->m_le_bDstNodeId, 0x00);     // target node id (for Udp = 0)
-    AmiSetByteToLe(&pSrcData_p->m_le_bSrcNodeId, 0x00);     // set source-nodeid (for Udp = 0)
+    ami_setUint8Le(&pSrcData_p->m_le_bMessageType, 0x06);   // set message type SDO
+    ami_setUint8Le(&pSrcData_p->m_le_bDstNodeId, 0x00);     // target node id (for Udp = 0)
+    ami_setUint8Le(&pSrcData_p->m_le_bSrcNodeId, 0x00);     // set source-nodeid (for Udp = 0)
     dataSize_p += ASND_HEADER_SIZE;                         // calc size
 
     addr.sin_family = AF_INET;

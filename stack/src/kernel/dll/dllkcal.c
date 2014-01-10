@@ -1142,7 +1142,7 @@ static BOOL getMnSyncRequest(tDllReqServiceId* pReqServiceId_p, UINT* pNodeId_p,
 
         if (syncReqSize > memberoffs(tDllSyncRequest, syncControl))
         {
-            AmiSetDwordToLe(&pSoaPayload_p->m_SyncRequest.m_le_dwSyncControl,
+            ami_setUint32Le(&pSoaPayload_p->m_SyncRequest.m_le_dwSyncControl,
                             syncRequest.syncControl);
             if ((syncRequest.syncControl & EPL_SYNC_PRES_MODE_SET) != 0)
             {
@@ -1167,12 +1167,12 @@ static BOOL getMnSyncRequest(tDllReqServiceId* pReqServiceId_p, UINT* pNodeId_p,
         }
         if (syncReqSize > memberoffs(tDllSyncRequest, pResTimeFirst))
         {
-            AmiSetDwordToLe(&pSoaPayload_p->m_SyncRequest.m_le_dwPResTimeFirst,
+            ami_setUint32Le(&pSoaPayload_p->m_SyncRequest.m_le_dwPResTimeFirst,
                             syncRequest.pResTimeFirst);
         }
         if (syncReqSize > memberoffs(tDllSyncRequest, pResFallBackTimeout))
         {
-            AmiSetDwordToLe(&pSoaPayload_p->m_SyncRequest.m_le_dwPResFallBackTimeout,
+            ami_setUint32Le(&pSoaPayload_p->m_SyncRequest.m_le_dwPResFallBackTimeout,
                             syncRequest.pResFallBackTimeout);
         }
 

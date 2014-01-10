@@ -96,7 +96,7 @@ Sets a 16 bit value to a buffer in big endian
 \ingroup module_ami
 */
 //------------------------------------------------------------------------------
-void AmiSetWordToBe(void* pAddr_p, UINT16 uint16Val_p)
+void ami_setUint16Be(void* pAddr_p, UINT16 uint16Val_p)
 {
     ((UINT8 *) pAddr_p)[1] = ((UINT8 *) &uint16Val_p)[0];
     ((UINT8 *) pAddr_p)[0] = ((UINT8 *) &uint16Val_p)[1];
@@ -114,7 +114,7 @@ Sets a 16 bit value to a buffer in little endian
 \ingroup module_ami
 */
 //------------------------------------------------------------------------------
-void AmiSetWordToLe(void* pAddr_p, UINT16 uint16Val_p)
+void ami_setUint16Le(void* pAddr_p, UINT16 uint16Val_p)
 {
     UINT16* pVal = (UINT16 *)pAddr_p;
 
@@ -135,7 +135,7 @@ Reads a 16 bit value from a buffer in big endian
 \ingroup module_ami
 */
 //------------------------------------------------------------------------------
-UINT16 AmiGetWordFromBe(void* pAddr_p)
+UINT16 ami_getUint16Be(void* pAddr_p)
 {
     UINT16 val;
 
@@ -159,7 +159,7 @@ Reads a 16 bit value from a buffer in little endian
 \ingroup module_ami
 */
 //------------------------------------------------------------------------------
-UINT16 AmiGetWordFromLe(void* pAddr_p)
+UINT16 ami_getUint16Le(void* pAddr_p)
 {
     UINT16* pVal = (UINT16 *)pAddr_p;
 
@@ -178,7 +178,7 @@ Sets a 24 bit value to a buffer in big endian
 \ingroup module_ami
 */
 //------------------------------------------------------------------------------
-void AmiSetDword24ToBe(void* pAddr_p, UINT32 uint32Val_p)
+void ami_setUint24Be(void* pAddr_p, UINT32 uint32Val_p)
 {
     ((UINT8 *) pAddr_p)[0] = ((UINT8 *) &uint32Val_p)[2];
     ((UINT8 *) pAddr_p)[1] = ((UINT8 *) &uint32Val_p)[1];
@@ -197,7 +197,7 @@ Sets a 24 bit value to a buffer in little endian
 \ingroup module_ami
 */
 //------------------------------------------------------------------------------
-void AmiSetDword24ToLe(void* pAddr_p, UINT32 uint32Val_p)
+void ami_setUint24Le(void* pAddr_p, UINT32 uint32Val_p)
 {
     ((UINT16 *) pAddr_p)[0] = ((UINT16 *) &uint32Val_p)[0];
     ((UINT8 *) pAddr_p)[2] = ((UINT8 *) &uint32Val_p)[2];
@@ -217,7 +217,7 @@ Reads a 24 bit value from a buffer in big endian
 \ingroup module_ami
 */
 //------------------------------------------------------------------------------
-UINT32 AmiGetDword24FromBe(void* pAddr_p)
+UINT32 ami_getUint24Be(void* pAddr_p)
 {
     UINT32 val = 0;
 
@@ -242,7 +242,7 @@ Reads a 24 bit value from a buffer in little endian
 \ingroup module_ami
 */
 //------------------------------------------------------------------------------
-UINT32 AmiGetDword24FromLe(void* pAddr_p)
+UINT32 ami_getUint24Le(void* pAddr_p)
 {
     UINT32* pVal = (UINT32*)pAddr_p;
 
@@ -263,7 +263,7 @@ Sets a 32 bit value to a buffer in big endian
 \ingroup module_ami
 */
 //------------------------------------------------------------------------------
-void AmiSetDwordToBe(void* pAddr_p, UINT32 uint32Val_p)
+void ami_setUint32Be(void* pAddr_p, UINT32 uint32Val_p)
 {
     ((UINT8 *) pAddr_p)[0] = ((UINT8 *) &uint32Val_p)[3];
     ((UINT8 *) pAddr_p)[1] = ((UINT8 *) &uint32Val_p)[2];
@@ -283,7 +283,7 @@ Sets a 32 bit value to a buffer in little endian
 \ingroup module_ami
 */
 //------------------------------------------------------------------------------
-void AmiSetDwordToLe(void* pAddr_p, UINT32 uint32Val_p)
+void ami_setUint32Le(void* pAddr_p, UINT32 uint32Val_p)
 {
     UINT32* pVal = (UINT32 *)pAddr_p;
 
@@ -304,7 +304,7 @@ Reads a 32 bit value from a buffer in big endian
 \ingroup module_ami
 */
 //------------------------------------------------------------------------------
-UINT32 AmiGetDwordFromBe(void* pAddr_p)
+UINT32 ami_getUint32Be(void* pAddr_p)
 {
     UINT32 val;
 
@@ -330,7 +330,7 @@ Reads a 32 bit value from a buffer in little endian
 \ingroup module_ami
 */
 //------------------------------------------------------------------------------
-UINT32 AmiGetDwordFromLe(void* pAddr_p)
+UINT32 ami_getUint32Le(void* pAddr_p)
 {
     UINT32* pVal = (UINT32 *)pAddr_p;
 
@@ -349,7 +349,7 @@ Sets a 40 bit value to a buffer in big endian
 \ingroup module_ami
 */
 //------------------------------------------------------------------------------
-void AmiSetQword40ToBe(void* pAddr_p, UINT64 uint64Val_p)
+void ami_setUint40Be(void* pAddr_p, UINT64 uint64Val_p)
 {
     ((UINT8 *) pAddr_p)[0] = ((UINT8 *) &uint64Val_p)[4];
     ((UINT8 *) pAddr_p)[1] = ((UINT8 *) &uint64Val_p)[3];
@@ -370,7 +370,7 @@ Sets a 40 bit value to a buffer in little endian
 \ingroup module_ami
 */
 //------------------------------------------------------------------------------
-void AmiSetQword40ToLe(void* pAddr_p, UINT64 uint64Val_p)
+void ami_setUint40Le(void* pAddr_p, UINT64 uint64Val_p)
 {
     ((UINT32 *) pAddr_p)[0] = ((UINT32 *) &uint64Val_p)[0];
     ((UINT8  *) pAddr_p)[4] = ((UINT8  *) &uint64Val_p)[4];
@@ -390,7 +390,7 @@ Reads a 40 bit value from a buffer in big endian
 \ingroup module_ami
 */
 //------------------------------------------------------------------------------
-UINT64 AmiGetQword40FromBe(void* pAddr_p)
+UINT64 ami_getUint40Be(void* pAddr_p)
 {
     UINT64 val = 0;
 
@@ -417,7 +417,7 @@ Reads a 40 bit value from a buffer in little endian
 \ingroup module_ami
 */
 //------------------------------------------------------------------------------
-UINT64 AmiGetQword40FromLe(void* pAddr_p)
+UINT64 ami_getUint40Le(void* pAddr_p)
 {
     UINT64* pVal = (UINT64*)pAddr_p;
 
@@ -438,7 +438,7 @@ Sets a 48 bit value to a buffer in big endian
 \ingroup module_ami
 */
 //------------------------------------------------------------------------------
-void AmiSetQword48ToBe(void* pAddr_p, UINT64 uint64Val_p)
+void ami_setUint48Be(void* pAddr_p, UINT64 uint64Val_p)
 {
     ((UINT8 *) pAddr_p)[0] = ((UINT8 *) &uint64Val_p)[5];
     ((UINT8 *) pAddr_p)[1] = ((UINT8 *) &uint64Val_p)[4];
@@ -460,7 +460,7 @@ Sets a 48 bit value to a buffer in little endian
 \ingroup module_ami
 */
 //------------------------------------------------------------------------------
-void AmiSetQword48ToLe(void* pAddr_p, UINT64 uint64Val_p)
+void ami_setUint48Le(void* pAddr_p, UINT64 uint64Val_p)
 {
     ((UINT32 *) pAddr_p)[0] = ((UINT32 *) &uint64Val_p)[0];
     ((UINT16 *) pAddr_p)[2] = ((UINT16 *) &uint64Val_p)[2];
@@ -480,7 +480,7 @@ Reads a 48 bit value from a buffer in big endian
 \ingroup module_ami
 */
 //------------------------------------------------------------------------------
-UINT64 AmiGetQword48FromBe(void* pAddr_p)
+UINT64 ami_getUint48Be(void* pAddr_p)
 {
     UINT64 val = 0;
 
@@ -508,7 +508,7 @@ Reads a 48 bit value from a buffer in little endian
 \ingroup module_ami
 */
 //------------------------------------------------------------------------------
-UINT64 AmiGetQword48FromLe(void* pAddr_p)
+UINT64 ami_getUint48Le(void* pAddr_p)
 {
     UINT64* pVal = (UINT64*) pAddr_p;
 
@@ -529,7 +529,7 @@ Sets a 56 bit value to a buffer in big endian
 \ingroup module_ami
 */
 //------------------------------------------------------------------------------
-void AmiSetQword56ToBe(void* pAddr_p, UINT64 uint64Val_p)
+void ami_setUint56Be(void* pAddr_p, UINT64 uint64Val_p)
 {
     ((UINT8 *) pAddr_p)[0] = ((UINT8 *) &uint64Val_p)[6];
     ((UINT8 *) pAddr_p)[1] = ((UINT8 *) &uint64Val_p)[5];
@@ -552,7 +552,7 @@ Sets a 56 bit value to a buffer in little endian
 \ingroup module_ami
 */
 //------------------------------------------------------------------------------
-void AmiSetQword56ToLe(void* pAddr_p, UINT64 uint64Val_p)
+void ami_setUint56Le(void* pAddr_p, UINT64 uint64Val_p)
 {
     ((UINT32 *) pAddr_p)[0] = ((UINT32 *) &uint64Val_p)[0];
     ((UINT16 *) pAddr_p)[2] = ((UINT16 *) &uint64Val_p)[2];
@@ -573,7 +573,7 @@ Reads a 56 bit value from a buffer in big endian
 \ingroup module_ami
 */
 //------------------------------------------------------------------------------
-UINT64 AmiGetQword56FromBe(void* pAddr_p)
+UINT64 ami_getUint56Be(void* pAddr_p)
 {
     UINT64 val = 0;
 
@@ -602,7 +602,7 @@ Reads a 56 bit value from a buffer in little endian
 \ingroup module_ami
 */
 //------------------------------------------------------------------------------
-UINT64 AmiGetQword56FromLe(void* pAddr_p)
+UINT64 ami_getUint56Le(void* pAddr_p)
 {
     UINT64* pVal = (UINT64*) pAddr_p;
 
@@ -623,7 +623,7 @@ Sets a 64 bit value to a buffer in big endian
 \ingroup module_ami
 */
 //------------------------------------------------------------------------------
-void AmiSetQword64ToBe(void* pAddr_p, UINT64 uint64Val_p)
+void ami_setUint64Be(void* pAddr_p, UINT64 uint64Val_p)
 {
     ((UINT8 *) pAddr_p)[0] = ((UINT8 *) &uint64Val_p)[7];
     ((UINT8 *) pAddr_p)[1] = ((UINT8 *) &uint64Val_p)[6];
@@ -647,7 +647,7 @@ Sets a 64 bit value to a buffer in little endian
 \ingroup module_ami
 */
 //------------------------------------------------------------------------------
-void AmiSetQword64ToLe(void* pAddr_p, UINT64 uint64Val_p)
+void ami_setUint64Le(void* pAddr_p, UINT64 uint64Val_p)
 {
     UINT64* pVal = (UINT64*) pAddr_p;
 
@@ -668,7 +668,7 @@ Reads a 64 bit value from a buffer in big endian
 \ingroup module_ami
 */
 //------------------------------------------------------------------------------
-UINT64 AmiGetQword64FromBe(void* pAddr_p)
+UINT64 ami_getUint64Be(void* pAddr_p)
 {
     UINT64 val;
 
@@ -698,7 +698,7 @@ Reads a 64 bit value from a buffer in little endian
 \ingroup module_ami
 */
 //------------------------------------------------------------------------------
-UINT64 AmiGetQword64FromLe(void* pAddr_p)
+UINT64 ami_getUint64Le(void* pAddr_p)
 {
     UINT64* pVal = (UINT64*) pAddr_p;
 
@@ -717,10 +717,10 @@ Sets the time of day (canOPEN timestamp) to memory in little endian
 \ingroup module_ami
 */
 //------------------------------------------------------------------------------
-void AmiSetTimeOfDay(void* pAddr_p, tTimeOfDay* pTimeOfDay_p)
+void ami_setTimeOfDay(void* pAddr_p, tTimeOfDay* pTimeOfDay_p)
 {
-    AmiSetDwordToLe(((UINT8 *) pAddr_p), pTimeOfDay_p->m_dwMs & 0x0FFFFFFF);
-    AmiSetWordToLe(((UINT8 *) pAddr_p) + 4, pTimeOfDay_p->m_wDays);
+    ami_setUint32Le(((UINT8 *) pAddr_p), pTimeOfDay_p->m_dwMs & 0x0FFFFFFF);
+    ami_setUint16Le(((UINT8 *) pAddr_p) + 4, pTimeOfDay_p->m_wDays);
 }
 
 //------------------------------------------------------------------------------
@@ -735,8 +735,8 @@ Get the time of day (canOPEN timestamp) from memory in little endian
 \ingroup module_ami
 */
 //------------------------------------------------------------------------------
-void AmiGetTimeOfDay(void* pAddr_p, tTimeOfDay* pTimeOfDay_p)
+void ami_getTimeOfDay(void* pAddr_p, tTimeOfDay* pTimeOfDay_p)
 {
-    pTimeOfDay_p->m_dwMs = AmiGetDwordFromLe(((UINT8 *) pAddr_p)) & 0x0FFFFFFF;
-    pTimeOfDay_p->m_wDays = AmiGetWordFromLe(((UINT8 *) pAddr_p) + 4);
+    pTimeOfDay_p->m_dwMs = ami_getUint32Le(((UINT8 *) pAddr_p)) & 0x0FFFFFFF;
+    pTimeOfDay_p->m_wDays = ami_getUint16Le(((UINT8 *) pAddr_p) + 4);
 }

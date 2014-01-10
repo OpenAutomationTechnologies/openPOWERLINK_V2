@@ -1127,7 +1127,7 @@ static irqreturn_t edrvIrqHandler (INT irqNum_p, void* ppDevInstData_p)
 
                         // Get length of received packet
                         // length_le does not contain CRC as EDRV_REGDW_RCTL_SECRC is set
-                        rxBuffer.rxFrameSize = AmiGetWordFromLe(&pRxDesc->length_le);
+                        rxBuffer.rxFrameSize = ami_getUint16Le(&pRxDesc->length_le);
 
                         ppRxBufInDesc = &edrvInstance_l.apRxBufInDesc[edrvInstance_l.headRxDesc];
                         rxBuffer.pBuffer = *ppRxBufInDesc;
@@ -1135,7 +1135,7 @@ static irqreturn_t edrvIrqHandler (INT irqNum_p, void* ppDevInstData_p)
                         EDRV_COUNT_RX;
 
                         pci_dma_sync_single_for_cpu(edrvInstance_l.pPciDev,
-                                                    (dma_addr_t) AmiGetQword64FromLe(&pRxDesc->bufferAddr_le),
+                                                    (dma_addr_t) ami_getUint64Le(&pRxDesc->bufferAddr_le),
                                                     EDRV_RX_BUFFER_SIZE, PCI_DMA_FROMDEVICE);
 
                         // Call Rx handler of Data link layer
@@ -1163,7 +1163,7 @@ static irqreturn_t edrvIrqHandler (INT irqNum_p, void* ppDevInstData_p)
                                 if (*ppRxBufInDesc != pRxBufInDescPrev)
                                 {
                                     pci_unmap_single(edrvInstance_l.pPciDev,
-                                                     (dma_addr_t) AmiGetQword64FromLe(&pRxDesc->bufferAddr_le),
+                                                     (dma_addr_t) ami_getUint64Le(&pRxDesc->bufferAddr_le),
                                                      EDRV_RX_BUFFER_SIZE, PCI_DMA_FROMDEVICE);
 
                                     dmaAddr = pci_map_single(edrvInstance_l.pPciDev, (void*) *ppRxBufInDesc,
@@ -1174,7 +1174,7 @@ static irqreturn_t edrvIrqHandler (INT irqNum_p, void* ppDevInstData_p)
                                         // $$$ Signal dma mapping error
                                     }
 
-                                    AmiSetQword64ToLe(&pRxDesc->bufferAddr_le, (UINT64) dmaAddr);
+                                    ami_setUint64Le(&pRxDesc->bufferAddr_le, (UINT64) dmaAddr);
                                 }
                             }
                             else
@@ -1612,7 +1612,7 @@ static INT initOnePciDev(struct pci_dev* pPciDev_p, const struct pci_device_id* 
             goto ExitFail;
         }
 
-        AmiSetQword64ToLe(&edrvInstance_l.pRxDesc[i].bufferAddr_le, (UINT64) dmaAddr);
+        ami_setUint64Le(&edrvInstance_l.pRxDesc[i].bufferAddr_le, (UINT64) dmaAddr);
         edrvInstance_l.pRxDesc[i].status = 0;
     }
 
@@ -1739,7 +1739,7 @@ static void removeOnePciDev(struct pci_dev *pPciDev_p)
     for (rxBuffer = 0; rxBuffer < EDRV_MAX_RX_DESCS; rxBuffer++)
     {
         pci_unmap_single(edrvInstance_l.pPciDev,
-                         (dma_addr_t) AmiGetQword64FromLe(&edrvInstance_l.pRxDesc[rxBuffer].bufferAddr_le),
+                         (dma_addr_t) ami_getUint64Le(&edrvInstance_l.pRxDesc[rxBuffer].bufferAddr_le),
                          EDRV_RX_BUFFER_SIZE, PCI_DMA_FROMDEVICE);
 
         bufferPointer = (ULONG) edrvInstance_l.apRxBufInDesc[rxBuffer];

@@ -185,13 +185,13 @@ tEplKernel nmtcnu_sendNmtRequest(UINT nodeId_p, tNmtCommand nmtCommand_p)
     // build frame
     EPL_MEMSET(&nmtRequestFrame.m_be_abDstMac[0], 0x00, sizeof(nmtRequestFrame.m_be_abDstMac)); // set by DLL
     EPL_MEMSET(&nmtRequestFrame.m_be_abSrcMac[0], 0x00, sizeof(nmtRequestFrame.m_be_abSrcMac)); // set by DLL
-    AmiSetWordToBe(&nmtRequestFrame.m_be_wEtherType, EPL_C_DLL_ETHERTYPE_EPL);
-    AmiSetByteToLe(&nmtRequestFrame.m_le_bDstNodeId, (BYTE) EPL_C_ADR_MN_DEF_NODE_ID); // node id of the MN
-    AmiSetByteToLe(&nmtRequestFrame.m_le_bMessageType, (BYTE)kEplMsgTypeAsnd);
-    AmiSetByteToLe(&nmtRequestFrame.m_Data.m_Asnd.m_le_bServiceId, (BYTE) kDllAsndNmtRequest);
-    AmiSetByteToLe(&nmtRequestFrame.m_Data.m_Asnd.m_Payload.m_NmtRequestService.m_le_bNmtCommandId,
+    ami_setUint16Be(&nmtRequestFrame.m_be_wEtherType, EPL_C_DLL_ETHERTYPE_EPL);
+    ami_setUint8Le(&nmtRequestFrame.m_le_bDstNodeId, (BYTE) EPL_C_ADR_MN_DEF_NODE_ID); // node id of the MN
+    ami_setUint8Le(&nmtRequestFrame.m_le_bMessageType, (BYTE)kEplMsgTypeAsnd);
+    ami_setUint8Le(&nmtRequestFrame.m_Data.m_Asnd.m_le_bServiceId, (BYTE) kDllAsndNmtRequest);
+    ami_setUint8Le(&nmtRequestFrame.m_Data.m_Asnd.m_Payload.m_NmtRequestService.m_le_bNmtCommandId,
         (BYTE)nmtCommand_p);
-    AmiSetByteToLe(&nmtRequestFrame.m_Data.m_Asnd.m_Payload.m_NmtRequestService.m_le_bTargetNodeId,
+    ami_setUint8Le(&nmtRequestFrame.m_Data.m_Asnd.m_Payload.m_NmtRequestService.m_le_bTargetNodeId,
         (BYTE)nodeId_p); // target for the nmt command
     EPL_MEMSET(&nmtRequestFrame.m_Data.m_Asnd.m_Payload.m_NmtRequestService.m_le_abNmtCommandData[0], 0x00, sizeof(nmtRequestFrame.m_Data.m_Asnd.m_Payload.m_NmtRequestService.m_le_abNmtCommandData));
 
@@ -461,7 +461,7 @@ static tNmtCommand getNmtCommand(tFrameInfo* pFrameInfo_p)
     tEplNmtCommandService*  pNmtCommandService;
 
     pNmtCommandService = &pFrameInfo_p->pFrame->m_Data.m_Asnd.m_Payload.m_NmtCommandService;
-    nmtCommand = (tNmtCommand)AmiGetByteFromLe(&pNmtCommandService->m_le_bNmtCommandId);
+    nmtCommand = (tNmtCommand)ami_getUint8Le(&pNmtCommandService->m_le_bNmtCommandId);
 
     return nmtCommand;
 }
@@ -491,7 +491,7 @@ static BOOL checkNodeIdList(UINT8* pbNmtCommandDate_p)
     // get bitoffset
     bitOffset = (UINT8) nmtCnuInstance_g.nodeId % 8;
 
-    nodeListByte = AmiGetByteFromLe(&pbNmtCommandDate_p[byteOffset]);
+    nodeListByte = ami_getUint8Le(&pbNmtCommandDate_p[byteOffset]);
     if((nodeListByte & bitOffset) == 0)
         fNodeIdInList = FALSE;
     else

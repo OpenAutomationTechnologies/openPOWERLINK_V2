@@ -266,9 +266,9 @@ tEplKernel sdoasnd_sendData(tSdoConHdl sdoConHandle_p, tEplFrame* pSrcData_p, UI
 
     // fillout Asnd header
     // own node id not needed -> filled by DLL
-    AmiSetByteToLe(&pSrcData_p->m_le_bMessageType, (BYTE)kEplMsgTypeAsnd);  // ASnd == 0x06
-    AmiSetByteToLe(&pSrcData_p->m_le_bDstNodeId, (BYTE)sdoAsndInstance_l.aSdoAsndConnection[array]);
-    AmiSetByteToLe(&pSrcData_p->m_le_bSrcNodeId, 0x00);                     // set source-nodeid (filled by DLL 0)
+    ami_setUint8Le(&pSrcData_p->m_le_bMessageType, (BYTE)kEplMsgTypeAsnd);  // ASnd == 0x06
+    ami_setUint8Le(&pSrcData_p->m_le_bDstNodeId, (BYTE)sdoAsndInstance_l.aSdoAsndConnection[array]);
+    ami_setUint8Le(&pSrcData_p->m_le_bSrcNodeId, 0x00);                     // set source-nodeid (filled by DLL 0)
     // calc size (add Ethernet and ASnd header size)
     dataSize_p += (UINT32) ((UINT8*)&pSrcData_p->m_Data.m_Asnd.m_Payload.m_SdoSequenceFrame - (UINT8*)pSrcData_p);
 
@@ -344,7 +344,7 @@ tEplKernel sdoAsndCb(tFrameInfo* pFrameInfo_p)
     tEplFrame*      pFrame;
 
     pFrame = pFrameInfo_p->pFrame;
-    nodeId = AmiGetByteFromLe(&pFrame->m_le_bSrcNodeId);
+    nodeId = ami_getUint8Le(&pFrame->m_le_bSrcNodeId);
 
     // search corresponding entry in control structure
     count = 0;
