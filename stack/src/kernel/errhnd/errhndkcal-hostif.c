@@ -80,7 +80,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
-static tHostifLimInstance pLimInstance_l;
 static tErrHndObjects *pErrHnd_l;
 
 //------------------------------------------------------------------------------
@@ -104,33 +103,25 @@ The function initializes the user layer CAL module of the error handler.
 //------------------------------------------------------------------------------
 tEplKernel errhndkcal_init (void)
 {
-    tHostifInstance pHostifInstance = hostif_getInstance(kHostifProcPcp);
-    tEplKernel Ret = kEplSuccessful;
-    tHostifReturn hostifRet;
-    UINT8 *pBase;
-    UINT16 span;
+    tHostifInstance pHostifInstance = hostif_getInstance(0);
+    tEplKernel      ret = kEplSuccessful;
+    tHostifReturn   hifRet;
+    UINT8*          pBase;
+    UINT            span;
 
     if(pHostifInstance == NULL)
     {
-        Ret = kEplNoResource;
+        ret = kEplNoResource;
         goto Exit;
     }
 
-    hostifRet = hostif_limCreate(pHostifInstance, kHostifInstIdErrCount,
-                                &pLimInstance_l);
+    hifRet = hostif_getBuf(pHostifInstance, kHostifInstIdErrCount, &pBase, &span);
 
-    if(Ret != kHostifSuccessful)
+    if(hifRet != kHostifSuccessful)
     {
-        Ret = kEplNoResource;
-        goto Exit;
-    }
-
-    /// get error counter buffer
-    hostifRet = hostif_limGetBuffer(pLimInstance_l, &pBase, &span);
-
-    if(Ret != kHostifSuccessful)
-    {
-        Ret = kEplNoResource;
+        EPL_DBGLVL_ERROR_TRACE("%s() Could not get buffer from host interface (%d)\n",
+                __func__, hifRet);
+        ret = kEplNoResource;
         goto Exit;
     }
 
@@ -138,14 +129,14 @@ tEplKernel errhndkcal_init (void)
     {
         EPL_DBGLVL_ERROR_TRACE("%s: Error Handler Object Buffer too small\n",
                 __func__);
-        Ret = kEplNoResource;
+        ret = kEplNoResource;
         goto Exit;
     }
 
     pErrHnd_l = (tErrHndObjects*)pBase;
 
 Exit:
-    return Ret;
+    return ret;
 }
 
 //------------------------------------------------------------------------------
@@ -158,8 +149,6 @@ CAL module of the error handler.
 //------------------------------------------------------------------------------
 void errhndkcal_exit (void)
 {
-    hostif_limDelete(pLimInstance_l);
-
     pErrHnd_l = NULL;
 }
 

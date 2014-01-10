@@ -75,9 +75,9 @@ SRCFILES="\
 daemon.c \
 ${STACKROOT_DIR}/stack/src/common/ami/amile.c \
 ${STACKROOT_DIR}/hardware/ipcore/drivers/hostinterface/hostiflib.c \
+${STACKROOT_DIR}/hardware/ipcore/drivers/hostinterface/hostiflibint-pcp.c \
 ${STACKROOT_DIR}/hardware/ipcore/drivers/hostinterface/hostiflib_l.c \
 ${STACKROOT_DIR}/hardware/ipcore/drivers/hostinterface/lfqueue.c \
-${STACKROOT_DIR}/hardware/ipcore/drivers/hostinterface/linmem.c \
 ${STACKROOT_DIR}/hardware/ipcore/drivers/openmac/omethlib.c \
 ${STACKROOT_DIR}/hardware/ipcore/drivers/openmac/omethlibint.c \
 ${STACKROOT_DIR}/hardware/ipcore/drivers/openmac/omethlib_phycfg_ink.c \

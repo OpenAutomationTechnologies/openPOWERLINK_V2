@@ -42,6 +42,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #include <dllcal.h>
 #include <hostiflib.h>
+#include <lfqueue.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -80,7 +81,7 @@ queues.
 typedef struct
 {
     tDllCalQueue            dllCalQueue; ///< DLL CAL queue
-    tHostifQueueInstance    pQueueInstance; ///< host interface queue instance
+    tQueueInstance          pQueueInstance; ///< host interface queue instance
 } tDllCalHifInstance;
 
 //------------------------------------------------------------------------------
@@ -159,6 +160,10 @@ static tEplKernel addInstance(tDllCalQueueInstance *ppDllCalQueue_p,
     tDllCalHifInstance*         pDllCalInstance;
     tHostifInstance             pHifInstance;
     tHostifInstanceId           hifInstanceId;
+    UINT8*                      pBufBase = NULL;
+    UINT                        bufSize;
+    tQueueConfig                lfqConfig;
+    tQueueReturn                lfqRet;
 
     pDllCalInstance = (tDllCalHifInstance *) EPL_MALLOC(sizeof(tDllCalHifInstance));
 
@@ -174,11 +179,12 @@ static tEplKernel addInstance(tDllCalQueueInstance *ppDllCalQueue_p,
     // get host interface instance
 #if defined(CONFIG_HOSTIF_PCP)
 
-#if  (CONFIG_HOSTIF_PCP == TRUE)
-    pHifInstance = hostif_getInstance(kHostifProcPcp);
+#if (CONFIG_HOSTIF_PCP != FALSE)
+    lfqConfig.queueRole = kQueueConsumer;
 #else
-    pHifInstance = hostif_getInstance(kHostifProcHost);
+    lfqConfig.queueRole = kQueueProducer;
 #endif
+    pHifInstance = hostif_getInstance(0);
 
 #else
     pHifInstance = NULL;
@@ -210,11 +216,26 @@ static tEplKernel addInstance(tDllCalQueueInstance *ppDllCalQueue_p,
             goto Exit;
     }
 
-    hifRet = hostif_queueCreate(pHifInstance, hifInstanceId,
-            &pDllCalInstance->pQueueInstance);
+    hifRet = hostif_getBuf(pHifInstance, hifInstanceId, &pBufBase, &bufSize);
 
     if(hifRet != kHostifSuccessful)
     {
+        EPL_DBGLVL_ERROR_TRACE("%s() Could not get buffer from host interface (%d)\n",
+                __func__, hifRet);
+        ret = kEplNoResource;
+        goto Exit;
+    }
+
+    lfqConfig.fAllocHeap = FALSE; // malloc done in hostif
+    lfqConfig.pBase = pBufBase;
+    lfqConfig.span = (UINT16)bufSize;
+
+    lfqRet = lfq_create(&lfqConfig, &pDllCalInstance->pQueueInstance);
+
+    if(lfqRet != kQueueSuccessful)
+    {
+        EPL_DBGLVL_ERROR_TRACE("%s() Queue create failed (%d)\n",
+                __func__, lfqRet);
         ret = kEplNoResource;
         goto Exit;
     }
@@ -240,11 +261,11 @@ Delete the host interface queue instance.
 //------------------------------------------------------------------------------
 static tEplKernel delInstance(tDllCalQueueInstance pDllCalQueue_p)
 {
-    tHostifReturn           hifRet;
+    tQueueReturn            lfqRet;
     tDllCalHifInstance*     pDllCalInstance = (tDllCalHifInstance*)pDllCalQueue_p;
 
-    hifRet = hostif_queueDelete(pDllCalInstance->pQueueInstance);
-    if(hifRet != kHostifSuccessful)
+    lfqRet = lfq_delete(pDllCalInstance->pQueueInstance);
+    if(lfqRet != kQueueSuccessful)
     {
         return kEplNoResource;
     }
@@ -276,7 +297,7 @@ static tEplKernel insertDataBlock (tDllCalQueueInstance pDllCalQueue_p,
                                    BYTE *pData_p, UINT *pDataSize_p)
 {
     tEplKernel                  ret = kEplSuccessful;
-    tHostifReturn               hifRet;
+    tQueueReturn                lfqRet;
     tDllCalHifInstance*         pDllCalInstance = (tDllCalHifInstance*)pDllCalQueue_p;
 
     if(pDllCalInstance == NULL)
@@ -285,21 +306,20 @@ static tEplKernel insertDataBlock (tDllCalQueueInstance pDllCalQueue_p,
         goto Exit;
     }
 
-    hifRet = hostif_queueInsert(pDllCalInstance->pQueueInstance, pData_p, *pDataSize_p);
+    lfqRet = lfq_entryEnqueue(pDllCalInstance->pQueueInstance, pData_p, *pDataSize_p);
 
     // error handling
-    switch (hifRet)
+    switch (lfqRet)
     {
-        case kHostifSuccessful:
+        case kQueueSuccessful:
             break;
 
-        case kHostifBufferOverflow:
+        case kQueueFull:
             ret = kEplDllAsyncTxBufferFull;
             break;
 
-        case kHostifInvalidParameter:
-        case kHostifBridgeDisabled:
         default:
+            EPL_DBGLVL_ERROR_TRACE("%s() Insert queue failed (0x%X)\n", __func__, lfqRet);
             ret = kEplNoResource;
             break;
     }
@@ -329,7 +349,7 @@ static tEplKernel getDataBlock (tDllCalQueueInstance pDllCalQueue_p,
                                 BYTE *pData_p, UINT *pDataSize_p)
 {
     tEplKernel              ret = kEplSuccessful;
-    tHostifReturn           hifRet;
+    tQueueReturn            lfqRet;
     tDllCalHifInstance*     pDllCalInstance = (tDllCalHifInstance*)pDllCalQueue_p;
     WORD                    actualDataSize = (WORD)*pDataSize_p;
 
@@ -339,15 +359,16 @@ static tEplKernel getDataBlock (tDllCalQueueInstance pDllCalQueue_p,
         goto Exit;
     }
 
-    hifRet = hostif_queueExtract(pDllCalInstance->pQueueInstance, pData_p, &actualDataSize);
-    if(hifRet != kHostifSuccessful)
+    lfqRet = lfq_entryDequeue(pDllCalInstance->pQueueInstance, pData_p, &actualDataSize);
+    if(lfqRet != kQueueSuccessful)
     {
-        if(hifRet == kHostifBufferEmpty)
+        if(lfqRet == kQueueEmpty)
         {
             ret = kEplDllAsyncTxBufferEmpty;
         }
         else
         {
+            EPL_DBGLVL_ERROR_TRACE("%s() Extract queue failed (0x%X)\n", __func__, lfqRet);
             ret = kEplNoResource;
         }
 
@@ -378,7 +399,7 @@ static tEplKernel getDataBlockCount(tDllCalQueueInstance pDllCalQueue_p,
                                     ULONG* pDataBlockCount_p)
 {
     tEplKernel              ret = kEplSuccessful;
-    tHostifReturn           hifRet;
+    tQueueReturn            lfqRet;
     tDllCalHifInstance*     pDllCalInstance = (tDllCalHifInstance*)pDllCalQueue_p;
     WORD                    dataBlockCount;
 
@@ -388,12 +409,13 @@ static tEplKernel getDataBlockCount(tDllCalQueueInstance pDllCalQueue_p,
         goto Exit;
     }
 
-    hifRet = hostif_queueGetEntryCount(pDllCalInstance->pQueueInstance, &dataBlockCount);
+    lfqRet = lfq_getEntryCount(pDllCalInstance->pQueueInstance, &dataBlockCount);
 
     *pDataBlockCount_p = (ULONG)dataBlockCount;
 
-    if(hifRet != kHostifSuccessful)
+    if(lfqRet != kQueueSuccessful)
     {
+        EPL_DBGLVL_ERROR_TRACE("%s() Getting queue count failed (0x%X)\n", __func__, lfqRet);
         ret = kEplNoResource;
     }
 
@@ -419,7 +441,7 @@ static tEplKernel resetDataBlockQueue(tDllCalQueueInstance pDllCalQueue_p,
                                            ULONG timeOutMs_p)
 {
     tEplKernel              ret = kEplSuccessful;
-    tHostifReturn           hifRet;
+    tQueueReturn            lfqRet;
     tDllCalHifInstance*     pDllCalInstance = (tDllCalHifInstance*)pDllCalQueue_p;
 
     UNUSED_PARAMETER(timeOutMs_p);
@@ -430,9 +452,10 @@ static tEplKernel resetDataBlockQueue(tDllCalQueueInstance pDllCalQueue_p,
         goto Exit;
     }
 
-    hifRet = hostif_queueReset(pDllCalInstance->pQueueInstance);
-    if(hifRet != kHostifSuccessful)
+    lfqRet = lfq_reset(pDllCalInstance->pQueueInstance);
+    if(lfqRet != kQueueSuccessful)
     {
+        EPL_DBGLVL_ERROR_TRACE("%s() Resetting queue failed (0x%X)\n", __func__, lfqRet);
         ret = kEplNoResource;
     }
 

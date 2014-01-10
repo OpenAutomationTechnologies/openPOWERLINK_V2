@@ -102,7 +102,7 @@ The function initializes the kernel PDO CAL sync module.
 //------------------------------------------------------------------------------
 tEplKernel pdokcal_initSync(void)
 {
-    pHifInstance_l = hostif_getInstance(kHostifProcPcp);
+    pHifInstance_l = hostif_getInstance(0);
 
     if(pHifInstance_l == NULL)
     {

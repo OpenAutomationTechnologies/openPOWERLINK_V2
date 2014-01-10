@@ -104,7 +104,7 @@ The function initializes the PDO user CAL sync module
 tEplKernel pdoucal_initSync(tEplSyncCb pfnSyncCb_p)
 {
     tHostifReturn hifRet;
-    tHostifInstance pHifInstance = hostif_getInstance(kHostifProcHost);
+    tHostifInstance pHifInstance = hostif_getInstance(0);
 
     if(pHifInstance == NULL)
     {
@@ -134,7 +134,7 @@ The function cleans up the PDO user CAL sync module
 void pdoucal_exitSync(void)
 {
     tHostifReturn hifRet;
-    tHostifInstance pHifInstance = hostif_getInstance(kHostifProcHost);
+    tHostifInstance pHifInstance = hostif_getInstance(0);
 
     if(pHifInstance == NULL)
     {

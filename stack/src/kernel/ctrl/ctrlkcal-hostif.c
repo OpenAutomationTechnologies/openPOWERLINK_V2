@@ -55,6 +55,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
+#ifndef HOSTIF_BASE
+#error "Host interface base address not set!"
+#endif
 
 //------------------------------------------------------------------------------
 // module global vars
@@ -71,7 +74,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#define CTRL_HOSTIF_INITPARAM_SIZE  HOSTIF_DYNBUF_MAXSIZE
+#define CTRL_HOSTIF_INITPARAM_SIZE  HOSTIF_USER_INIT_PAR_SIZE
 
 //------------------------------------------------------------------------------
 // local types
@@ -116,20 +119,18 @@ tEplKernel ctrlkcal_init (void)
     EPL_MEMSET(&instance_l, 0, sizeof(instance_l));
 
     EPL_MEMSET(&hifConfig, 0, sizeof(hifConfig));
-    hifConfig.ProcInstance = kHostifProcPcp;
+
+    hifConfig.instanceNum = 0;
+    hifConfig.pBase = (UINT8*)HOSTIF_BASE;
+    hifConfig.version.revision = HOSTIF_VERSION_REVISION;
+    hifConfig.version.minor = HOSTIF_VERSION_MINOR;
+    hifConfig.version.major = HOSTIF_VERSION_MAJOR;
+
     hifRet = hostif_create(&hifConfig, &instance_l.hifInstance);
     if(hifRet != kHostifSuccessful)
         goto Cleanup;
 
-    //prepare initialization parameter memory space for MMU access from host
-    instance_l.pInitParamBase = (UINT8*)HOSTIF_UNCACHED_MALLOC(CTRL_HOSTIF_INITPARAM_SIZE);
-    if(instance_l.pInitParamBase == NULL)
-    {
-        EPL_DBGLVL_ERROR_TRACE ("Could not allocate memory for parameter initialization!\n");
-        goto Cleanup;
-    }
-
-    hifRet = hostif_setInitBase(instance_l.hifInstance, (UINT32)instance_l.pInitParamBase);
+    hifRet = hostif_getInitParam(instance_l.hifInstance, &instance_l.pInitParamBase);
     if(hifRet != kHostifSuccessful)
         goto Cleanup;
 
@@ -158,11 +159,6 @@ void ctrlkcal_exit (void)
 {
     tHostifReturn hifRet;
 
-    // invalidate init base
-    hostif_setInitBase(instance_l.hifInstance, 0);
-
-    // free init memory
-    HOSTIF_UNCACHED_FREE(instance_l.pInitParamBase);
     instance_l.pInitParamBase = NULL;
 
     hifRet = hostif_delete(instance_l.hifInstance);
