@@ -83,6 +83,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 static tHostifLimInstance pLimInstance_l;
 static tErrHndObjects *pLocalObjects_l; ///< pointer to user error objects
+static UINT8*           pHostifMem_l; ///< pointer to hostinterface memory
 
 //------------------------------------------------------------------------------
 // local function prototypes
@@ -147,6 +148,8 @@ tEplKernel errhnducal_init (tErrHndObjects *pLocalObjects_p)
         goto Exit;
     }
 
+    pHostifMem_l = pBase;
+
     pLocalObjects_l = pLocalObjects_p;
 
 Exit:
@@ -165,6 +168,7 @@ CAL module of the error handler.
 //------------------------------------------------------------------------------
 void errhnducal_exit (void)
 {
+    pHostifMem_l = NULL;
     hostif_limDelete(pLimInstance_l);
 }
 
@@ -191,7 +195,8 @@ tEplKernel errhnducal_writeErrorObject(UINT index_p, UINT subIndex_p, UINT32 *pP
 
     offset = (char *)pParam_p - (char *)pLocalObjects_l;
 
-    hostif_limWrite(pLimInstance_l, offset, (UINT8*)pParam_p, sizeof(UINT32));
+    memcpy(pHostifMem_l + offset, (UINT8*)pParam_p, sizeof(UINT32));
+
     return kEplSuccessful;
 }
 
@@ -217,7 +222,9 @@ tEplKernel errhnducal_readErrorObject(UINT index_p, UINT subIndex_p, UINT32 * pP
     UNUSED_PARAMETER(subIndex_p);
 
     offset = (char *)pParam_p - (char *)pLocalObjects_l;
-    hostif_limRead(pLimInstance_l, (UINT8*)pParam_p, offset, sizeof(UINT32));
+
+    memcpy((UINT8*)pParam_p, pHostifMem_l + offset, sizeof(UINT32));
+
     return kEplSuccessful;
 }
 
