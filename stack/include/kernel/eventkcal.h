@@ -69,6 +69,7 @@ tEplKernel eventkcal_exit (void);
 tEplKernel eventkcal_postUserEvent (tEplEvent *pEvent_p) SECTION_EVENTKCAL_POST;
 tEplKernel eventkcal_postKernelEvent (tEplEvent *pEvent_p) SECTION_EVENTKCAL_POST;
 tEplKernel eventkcal_rxHandler (tEplEvent *pEvent_p);
+void       eventkcal_process(void);
 
 /* functions used in eventkcal-linuxkernel.c */
 int        eventkcal_postEventFromUser (unsigned long arg);
