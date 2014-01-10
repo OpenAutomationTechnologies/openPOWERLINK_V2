@@ -46,6 +46,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <kernel/eventkcalintf.h>
 
 #include <hostiflib.h>
+#include <lfqueue.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -82,7 +83,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
-static tHostifQueueInstance     instance_l[kEventQueueNum];
+static tQueueInstance   instance_l[kEventQueueNum];
 
 //------------------------------------------------------------------------------
 // local function prototypes
@@ -112,6 +113,11 @@ tEplKernel eventkcal_initQueueHostif(tEventQueue eventQueue_p)
 {
     tHostifInstance         pHifInstance;
     tHostifReturn           hifRet;
+    tHostifInstanceId       hifInstanceId;
+    UINT8*                  pBufBase = NULL;
+    UINT                    bufSize;
+    tQueueConfig            lfqConfig;
+    tQueueReturn            lfqRet;
 
     if (eventQueue_p > kEventQueueNum)
         return kEplInvalidInstanceParam;
@@ -119,35 +125,45 @@ tEplKernel eventkcal_initQueueHostif(tEventQueue eventQueue_p)
     if (instance_l[eventQueue_p] != NULL)
         return kEplNoResource;
 
-    pHifInstance = hostif_getInstance(kHostifProcPcp);
+    if((pHifInstance = hostif_getInstance(0)) == NULL)
+        return kEplNoResource;
 
     switch(eventQueue_p)
     {
         case kEventQueueK2U:
-            hifRet = hostif_queueCreate(pHifInstance, kHostifInstIdK2UQueue,
-                                        &instance_l[eventQueue_p]);
-            if(hifRet != kHostifSuccessful)
-            {
-                EPL_DBGLVL_ERROR_TRACE("%s() couldn't create queue instance (%d)\n",
-                        __func__, hifRet);
-
-                return kEplNoResource;
-            }
+            hifInstanceId = kHostifInstIdK2UQueue;
+            lfqConfig.queueRole = kQueueProducer;
             break;
 
         case kEventQueueU2K:
-            hifRet = hostif_queueCreate(pHifInstance, kHostifInstIdU2KQueue,
-                                        &instance_l[eventQueue_p]);
-            if(hifRet != kHostifSuccessful)
-            {
-                EPL_DBGLVL_ERROR_TRACE("%s() couldn't create queue instance (%d)\n",
-                        __func__, hifRet);
-                return kEplNoResource;
-            }
+            hifInstanceId = kHostifInstIdU2KQueue;
+            lfqConfig.queueRole = kQueueConsumer;
             break;
 
         default:
             return kEplInvalidInstanceParam;
+    }
+
+    hifRet = hostif_getBuf(pHifInstance, hifInstanceId, &pBufBase, &bufSize);
+
+    if(hifRet != kHostifSuccessful)
+    {
+        EPL_DBGLVL_ERROR_TRACE("%s() Could not get buffer from host interface (%d)\n",
+                __func__, hifRet);
+        return kEplNoResource;
+    }
+
+    lfqConfig.fAllocHeap = FALSE; // malloc done in hostif
+    lfqConfig.pBase = pBufBase;
+    lfqConfig.span = (UINT16)bufSize;
+
+    lfqRet = lfq_create(&lfqConfig, &instance_l[eventQueue_p]);
+
+    if(lfqRet != kQueueSuccessful)
+    {
+        EPL_DBGLVL_ERROR_TRACE("%s() Queue create failed (%d)\n",
+                __func__, lfqRet);
+        return kEplNoResource;
     }
 
     return kEplSuccessful;
@@ -181,7 +197,7 @@ tEplKernel eventkcal_exitQueueHostif (tEventQueue eventQueue_p)
     {
         case kEventQueueU2K:
         case kEventQueueK2U:
-            hostif_queueDelete(instance_l[eventQueue_p]);
+            lfq_delete(instance_l[eventQueue_p]);
             break;
 
         default:
@@ -213,7 +229,7 @@ This function posts an event to the specified host interface queue.
 tEplKernel eventkcal_postEventHostif (tEventQueue eventQueue_p, tEplEvent *pEvent_p)
 {
     tEplKernel          ret = kEplSuccessful;
-    tHostifReturn       hifRet;
+    tQueueReturn        lfqRet;
     DWORD               aPostBuffer[(sizeof(tEplEvent) + EPL_MAX_EVENT_ARG_SIZE)/4];
     BYTE*               pPostBuffer = (BYTE*)aPostBuffer;
     ULONG               dataSize;
@@ -238,9 +254,10 @@ tEplKernel eventkcal_postEventHostif (tEventQueue eventQueue_p, tEplEvent *pEven
         dataSize += pEvent_p->m_uiSize;
     }
 
-    hifRet = hostif_queueInsert(instance_l[eventQueue_p], pPostBuffer, dataSize);
-    if(hifRet != kHostifSuccessful)
+    lfqRet = lfq_entryEnqueue(instance_l[eventQueue_p], pPostBuffer, dataSize);
+    if(lfqRet != kQueueSuccessful)
     {
+        EPL_DBGLVL_ERROR_TRACE("%s() Setting event to queue failed (0x%X)\n", __func__, lfqRet);
         ret = kEplEventPostError;
         goto Exit;
     }
@@ -268,7 +285,7 @@ by calling the event handlers process function.
 tEplKernel eventkcal_processEventHostif(tEventQueue eventQueue_p)
 {
     tEplKernel          ret = kEplSuccessful;
-    tHostifReturn       hifRet;
+    tQueueReturn        lfqRet;
     tEplEvent*          pEplEvent;
     WORD                dataSize = sizeof(tEplEvent) + EPL_MAX_EVENT_ARG_SIZE;
     DWORD               aRxBuffer[(sizeof(tEplEvent) + EPL_MAX_EVENT_ARG_SIZE)/4];
@@ -280,11 +297,12 @@ tEplKernel eventkcal_processEventHostif(tEventQueue eventQueue_p)
     if (instance_l[eventQueue_p] == NULL)
         return kEplInvalidInstanceParam;
 
-    hifRet = hostif_queueExtract(instance_l[eventQueue_p], pRxBuffer, &dataSize);
-    if(hifRet != kHostifSuccessful)
+    lfqRet = lfq_entryDequeue(instance_l[eventQueue_p], pRxBuffer, &dataSize);
+    if(lfqRet != kQueueSuccessful)
     {
+        EPL_DBGLVL_ERROR_TRACE("%s() Getting event from queue failed (0x%X)\n", __func__, lfqRet);
         eventk_postError(kEplEventSourceEventk, kEplEventReadError,
-                         sizeof (hifRet), &hifRet);
+                         sizeof (lfqRet), &lfqRet);
         goto Exit;
     }
 
@@ -325,7 +343,7 @@ UINT eventkcal_getEventCountHostif(tEventQueue eventQueue_p)
     if (instance_l[eventQueue_p] == NULL)
         return 0;
 
-    hostif_queueGetEntryCount (instance_l[eventQueue_p], &count);
+    lfq_getEntryCount(instance_l[eventQueue_p], &count);
 
     return count;
 }
@@ -354,7 +372,7 @@ tEplKernel eventkcal_setSignalingHostif(tEventQueue eventQueue_p, VOIDFUNCPTR pf
     if (instance_l[eventQueue_p] == NULL)
         return kEplInvalidInstanceParam;
 
-    //TODO jz Implement async/event signaling in host interface
+    //jz Implement async/event signaling in host interface
 
     return kEplSuccessful;
 }

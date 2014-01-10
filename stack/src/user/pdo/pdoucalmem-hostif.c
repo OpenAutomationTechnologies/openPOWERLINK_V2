@@ -78,9 +78,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 typedef struct
 {
-    tHostifLimInstance      pInstance;
-    BYTE*                   pBase;
-    WORD                    span;
+    UINT8*  pBase;
+    UINT    span;
 } tLimInstance;
 
 //------------------------------------------------------------------------------
@@ -111,30 +110,21 @@ starting of the stack.
 tEplKernel pdoucal_openMem(void)
 {
     tHostifReturn hifret;
-    tHostifInstance pInstance = hostif_getInstance(kHostifProcHost);
+    tHostifInstance pInstance = hostif_getInstance(0);
 
     if(pInstance == NULL)
     {
-        EPL_DBGLVL_ERROR_TRACE("%s() couldn't get Host hostif instance\n",
+        EPL_DBGLVL_ERROR_TRACE("%s() couldn't get Pcp hostif instance\n",
                 __func__);
         return kEplNoResource;
     }
 
-    //FIXME jz abuse rpdo buffer for rpdo and tpdo! Merge also in ipcore!
-    //create host interface linear memory instance
-    hifret = hostif_limCreate(pInstance, kHostifInstIdRpdo, &limPdo_l.pInstance);
-    if(hifret != kHostifSuccessful)
-    {
-        EPL_DBGLVL_ERROR_TRACE("%s() couldn't allocate Pdo buffer (%d)\n",
-                __func__, hifret);
-        return kEplNoResource;
-    }
+    //jz abuse rpdo buffer for rpdo and tpdo! Merge also in ipcore!
+    hifret = hostif_getBuf(pInstance, kHostifInstIdRpdo, &limPdo_l.pBase, &limPdo_l.span);
 
-    //get base address and span of linear memory
-    hifret = hostif_limGetBuffer(limPdo_l.pInstance, &limPdo_l.pBase, &limPdo_l.span);
     if(hifret != kHostifSuccessful)
     {
-        EPL_DBGLVL_ERROR_TRACE("%s() couldn't get Pdo buffer details (%d)\n",
+        EPL_DBGLVL_ERROR_TRACE("%s() Could not get buffer from host interface (%d)\n",
                 __func__, hifret);
         return kEplNoResource;
     }
@@ -156,17 +146,6 @@ shutdown.
 //------------------------------------------------------------------------------
 tEplKernel pdoucal_closeMem(void)
 {
-    tHostifReturn hifret;
-
-    hifret = hostif_limDelete(limPdo_l.pInstance);
-
-    if(hifret != kHostifSuccessful)
-    {
-        EPL_DBGLVL_ERROR_TRACE("%s() Pdo buffer release failed (%d)\n",
-                __func__, hifret);
-        return kEplNoResource;
-    }
-
     EPL_MEMSET(&limPdo_l, 0, sizeof(limPdo_l));
 
     return kEplSuccessful;

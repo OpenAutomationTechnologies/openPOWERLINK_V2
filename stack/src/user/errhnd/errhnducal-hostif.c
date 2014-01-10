@@ -81,8 +81,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
-static tHostifLimInstance pLimInstance_l;
-static tErrHndObjects *pLocalObjects_l; ///< pointer to user error objects
+static tErrHndObjects*  pLocalObjects_l; ///< pointer to user error objects
 static UINT8*           pHostifMem_l; ///< pointer to hostinterface memory
 
 //------------------------------------------------------------------------------
@@ -110,11 +109,11 @@ The function initializes the user layer CAL module of the error handler.
 //------------------------------------------------------------------------------
 tEplKernel errhnducal_init (tErrHndObjects *pLocalObjects_p)
 {
-    tHostifInstance pHostifInstance = hostif_getInstance(kHostifProcHost);
-    tEplKernel Ret = kEplSuccessful;
-    tHostifReturn hostifRet;
-    UINT8 *pBase;
-    UINT16 span;
+    tHostifInstance pHostifInstance = hostif_getInstance(0);
+    tEplKernel      Ret = kEplSuccessful;
+    tHostifReturn   hostifRet;
+    UINT8*          pBase;
+    UINT            span;
 
     if(pHostifInstance == NULL)
     {
@@ -122,17 +121,8 @@ tEplKernel errhnducal_init (tErrHndObjects *pLocalObjects_p)
         goto Exit;
     }
 
-    hostifRet = hostif_limCreate(pHostifInstance, kHostifInstIdErrCount,
-                                &pLimInstance_l);
-
-    if(hostifRet != kHostifSuccessful)
-    {
-        Ret = kEplNoResource;
-        goto Exit;
-    }
-
     // get linear buffer and check span
-    hostifRet = hostif_limGetBuffer(pLimInstance_l, &pBase, &span);
+    hostifRet = hostif_getBuf(pHostifInstance, kHostifInstIdErrCount, &pBase, &span);
 
     if(Ret != kHostifSuccessful)
     {
@@ -169,7 +159,6 @@ CAL module of the error handler.
 void errhnducal_exit (void)
 {
     pHostifMem_l = NULL;
-    hostif_limDelete(pLimInstance_l);
 }
 
 //------------------------------------------------------------------------------
