@@ -69,7 +69,7 @@ Steps 1-5 can be carried out by calling `$ ./create-this-fpga` in a "Nios II Com
 5. Start the compilation in the Quartus II window via menu *Processing* -> *Start Compilation*.
 6. Open "Nios II Command Shell"
 7. There are two software designs available in the openPOWERLINK subdirectory \n
-   `stack/make/driver/altera_nios2/mn_pcp` (for the Pcp) and \n
+   `drivers/altera_nios2/mn_pcp` (for the Pcp) and \n
    `apps/arch/altera_nios2/no_os/gnu/demo_mn_embedded (for the host)`. \n
    Change to each of the directories and open the create-this-app.settings file.
    Make sure that the SOPC_DIR variable is set to the board design of your choice. \n
@@ -106,11 +106,11 @@ Requirement: Steps in the previous section *How to build the binary* are complet
 
 1. Start the Nios II Software Build Tools for Eclipse
 2. Select menu *File -> Import...*
-3. Select the import source *General* -> *Existing Projects into Workspace*
+3. Select the import source *Nios II Software Build Tools Project* -> *Import Nios II Software Build Tools Project*
 4. Browse to `apps/arch/altera_nios2/no_os/gnu/demo_mn_embedded` (via the button *Browse...*)
-5. Press the button *Finish*.
-6. Browse to `stack/make/driver/altera_nios2/mn_pcp` (via the button *Browse...*)
-7. Press the button *Finish*.
+5. Set the project name to `demo_mn_embedded`.
+6. Press the button *Finish*.
+7. Repeat steps 2-6 with path `drivers/altera_nios2/mn_pcp` and project name `mn_pcp`.
 
 # How to write the program to local flash {#sect_altera-mn_flash}
 
