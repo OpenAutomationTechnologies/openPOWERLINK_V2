@@ -106,9 +106,10 @@ Requirement: Steps in the previous section "How to build the binary" are
 completed.
 1. Start the Nios II Software Build Tools for Eclipse
 2. Select menu *File -> Import...*
-3. Select the import source *General* -> *Existing Projects into Workspace*
+3. Select the import source *Nios II Software Build Tools Project* -> *Import Nios II Software Build Tools Project*
 4. Browse to `apps/arch/altera_nios2/no_os/gnu/demo_cn_embedded` (via the button *Browse...*)
-5. Press the button *Finish*.
+5. Set the project name to `demo_cn_embedded`.
+6. Press the button *Finish*.
 
 # How to write the program to local flash  {#sect_altera-cn_flash}
 

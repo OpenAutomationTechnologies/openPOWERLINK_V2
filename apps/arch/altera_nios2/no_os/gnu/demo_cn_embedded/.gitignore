@@ -10,6 +10,4 @@ generated_app.sh
 flash_programmer.sh
 *.flash
 mem_init
-!.project
-!.cproject
 
