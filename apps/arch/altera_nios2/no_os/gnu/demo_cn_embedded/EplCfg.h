@@ -39,7 +39,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _EPLCFG_H_
 #define _EPLCFG_H_
 
-#include "EplInc.h"
 
 
 
