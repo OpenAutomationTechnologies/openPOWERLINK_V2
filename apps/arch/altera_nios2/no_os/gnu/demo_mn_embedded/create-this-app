@@ -97,7 +97,7 @@ do
   shift
 done
 
-CFLAGS="-D${DBG_MODE} -DDEF_DEBUG_LVL=${DEF_DEBUG_LVL}"
+CFLAGS="-D${DBG_MODE} -DDEF_DEBUG_LVL=${DEF_DEBUG_LVL} -DCONFIG_HOSTIF_PCP=FALSE"
 
 #workaround for global pointer error
 APP_CFLAGS_DEFINED_SYMBOLS="-G4"
