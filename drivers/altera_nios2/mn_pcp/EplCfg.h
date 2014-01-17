@@ -78,13 +78,6 @@ The generic defines are valid for the whole openPOWERLINK stack.
 #endif
 /**@}*/
 
-/*
- * Configure which hostinterface part to use
- * if it is true its compiled for PCP (Kernel)
- * if it is FALSE its compiled for Host (User)
- * */
-#define CONFIG_HOSTIF_PCP                  TRUE
-
 /**
 \name Queue defines
 The queue defines determine the stack's queues.
