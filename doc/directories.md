@@ -40,7 +40,6 @@ The __libs__ directory contains libraries used by the openPOWERLINK stack.
 
 Directory                     | Description
 ----------------------------- | -----------------------------------------------
-ami                           | Abstract Memory Interface - Handles Endian conversion
 circbuf                       | Circular buffer library
 console                       | Utilities for console input and output
 getopt                        | Command line parser
