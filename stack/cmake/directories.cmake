@@ -1,8 +1,8 @@
 ################################################################################
 #
-# Windows CMake configuration for openPOWERLINK stack library
+# Directory list for stack cmake build system
 #
-# Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+# Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -28,43 +28,20 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ################################################################################
 
-ADD_DEFINITIONS(-D_CONSOLE -DWPCAP -DHAVE_REMOTE -D_CRT_SECURE_NO_WARNINGS)
+# Source directories
+SET(STACK_SOURCE_DIR ${OPLK_BASE_DIR}/stack/src)
+SET(USER_SOURCE_DIR ${OPLK_BASE_DIR}/stack/src/user)
+SET(KERNEL_SOURCE_DIR ${OPLK_BASE_DIR}/stack/src/kernel)
+SET(COMMON_SOURCE_DIR ${OPLK_BASE_DIR}/stack/src/common)
+SET(ARCH_SOURCE_DIR ${OPLK_BASE_DIR}/stack/src/arch)
+SET(EDRV_SOURCE_DIR ${OPLK_BASE_DIR}/stack/src/kernel/edrv)
+SET(CONTRIB_SOURCE_DIR ${OPLK_BASE_DIR}/contrib)
 
-#
-# Set type of library
-#
-IF(CFG_X86_WINDOWS_DLL)
-    SET(LIB_TYPE "SHARED")
-ELSE(CFG_X86_WINDOWS_DLL)
-    SET(LIB_TYPE "STATIC")
-ENDIF(CFG_X86_WINDOWS_DLL)
+# Include file directories
+SET(OPLK_INCLUDE_DIR ${OPLK_BASE_DIR}/include)
+SET(STACK_INCLUDE_DIR ${OPLK_BASE_DIR}/stack/include)
+SET(USER_STACK_INCLUDE_DIR ${OPLK_BASE_DIR}/stack/include/user)
+SET(KERNEL_STACK_INCLUDE_DIR ${OPLK_BASE_DIR}/stack/include/kernel)
 
-SET (LIB_ARCH_SOURCES
-     ${LIB_ARCH_SOURCES}
-     ${EDRV_SOURCE_DIR}/edrv-pcap.c
-     ${USER_SOURCE_DIR}/timer/timer-generic.c
-     ${COMMON_SOURCE_DIR}/circbuf/circbuf-win32.c
-     ${LIB_SOURCE_DIR}/trace/trace-windows.c
-     ${ARCH_SOURCE_DIR}/windows/target-windows.c
-     ${USER_SOURCE_DIR}/event/eventucal-win32.c
-     ${USER_SOURCE_DIR}/event/eventucalintf-circbuf.c
-     ${KERNEL_SOURCE_DIR}/event/eventkcal-win32.c
-     ${KERNEL_SOURCE_DIR}/event/eventkcalintf-circbuf.c
-     )
-
-INCLUDE_DIRECTORIES(${INCLUDE_DIRECTORIES}
-                    ${LIB_SOURCE_DIR}/pcap/windows/WpdPack/Include
-                    )
-
-#
-# Library include directories
-#
-IF (CMAKE_CL_64)
-    LINK_DIRECTORIES(${LIB_SOURCE_DIR}/pcap/windows/WpdPack/Lib/x64)
-ELSE (CMAKE_CL_64)
-    LINK_DIRECTORIES(${LIB_SOURCE_DIR}/pcap/windows/WpdPack/Lib)
-ENDIF (CMAKE_CL_64)
-
-SET (ARCH_LIBRARIES wpcap iphlpapi)
-
-
+# Other directories
+SET(OBJDICT_DIR ${OPLK_BASE_DIR}/objdicts)

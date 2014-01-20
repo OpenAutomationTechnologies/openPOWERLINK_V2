@@ -1,8 +1,8 @@
 ################################################################################
 #
-# Linux CMake configuration for openPOWERLINK user stack library
+# CMake file for openPOWERLINK Linux userspace driver library
 #
-# Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+# Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -28,42 +28,45 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ################################################################################
 
+# Set library name
+SET(LIB_NAME "oplkmndrv-pcap")
+MESSAGE(STATUS "Configuring ${LIB_NAME}")
 
+# set general sources of POWERLINK library
+SET (LIB_SOURCES
+     ${KERNEL_SOURCES}
+     ${CTRL_KCAL_POSIXMEM_SOURCES}
+     ${DLL_KCAL_CIRCBUF_SOURCES}
+     ${ERRHND_KCAL_LOCAL_SOURCES}
+     ${EVENT_KCAL_LINUXUSER_SOURCES}
+     ${PDO_KCAL_POSIXMEM_SOURCES}
+     ${HARDWARE_DRIVER_LINUXUSER_SOURCES}
+     ${COMMON_SOURCES}
+     ${COMMON_LINUXUSER_SOURCES}
+     ${TARGET_LINUX_SOURCES}
+     ${CIRCBUF_POSIX_SOURCES}
+     )
+
+IF(CMAKE_SYSTEM_PROCESSOR MATCHES "x86*")
+    SET(LIB_SOURCES ${LIB_SOURCES} ${ARCH_X86_SOURCES})
+ELSE(CMAKE_SYSTEM_PROCESSOR MATCHES "x86*")
+    MESSAGE(FATAL_ERROR "Unsupported CMAKE_SYSTEM_PROCESSOR ${CMAKE_SYSTEM_PROCESSOR}")
+ENDIF(CMAKE_SYSTEM_PROCESSOR MATCHES "x86*")
+
+# Configure compile definitions
+ADD_DEFINITIONS(-DCONFIG_MN)
 ADD_DEFINITIONS(-Wall -Wextra -pedantic -std=c99 -pthread -D_GNU_SOURCE -D_POSIX_C_SOURCE=200112L
                 -fno-strict-aliasing)
 
-SET(LIB_ARCH_SOURCES
-     ${USER_SOURCE_DIR}/sdo/sdo-udpu.c
-     ${USER_SOURCE_DIR}/timer/timer-linuxuser.c
-     ${ARCH_SOURCE_DIR}/linux/ftrace-debug.c
-     ${ARCH_SOURCE_DIR}/linux/target-linux.c
-     ${LIB_SOURCE_DIR}/trace/trace-printf.c
-     )
+# Additional include directories
+INCLUDE_DIRECTORIES(
+    .
+    ${OBJDICT_DIR}/${OBJDICT}
+    )
 
-IF (CFG_KERNEL_STACK_KERNEL_MODULE)
-ADD_DEFINITIONS(-DCONFIG_USE_KERNEL_MODULE)
-SET (LIB_ARCH_SOURCES
-     ${LIB_ARCH_SOURCES}
-     ${USER_SOURCE_DIR}/pdo/pdoucalsync-ioctl.c
-     ${USER_SOURCE_DIR}/pdo/pdoucalmem-linuxmmap.c
-     ${USER_SOURCE_DIR}/dll/dllucal-ioctl.c
-     ${USER_SOURCE_DIR}/ctrl/ctrlucal-ioctl.c
-     ${USER_SOURCE_DIR}/event/eventucal-linuxioctl.c
-     ${USER_SOURCE_DIR}/errhnd/errhnducal-ioctl.c
-     )
-ELSE (CFG_KERNEL_STACK_KERNEL_MODULE)
-SET (LIB_ARCH_SOURCES
-     ${LIB_ARCH_SOURCES}
-     ${COMMON_SOURCE_DIR}/circbuf/circbuf-posixshm.c
-     ${USER_SOURCE_DIR}/pdo/pdoucalmem-posixshm.c
-     ${USER_SOURCE_DIR}/pdo/pdoucalsync-bsdsem.c
-     ${USER_SOURCE_DIR}/dll/dllucal-circbuf.c
-     ${USER_SOURCE_DIR}/ctrl/ctrlucal-mem.c
-     ${COMMON_SOURCE_DIR}/ctrl/ctrlcal-posixshm.c
-     ${USER_SOURCE_DIR}/event/eventucal-linux.c
-     ${USER_SOURCE_DIR}/event/eventucalintf-circbuf.c
-     ${USER_SOURCE_DIR}/errhnd/errhnducal-posixshm.c
-     )
-ENDIF(CFG_KERNEL_STACK_KERNEL_MODULE)
-
-
+# Define library and installation rules
+ADD_LIBRARY(${LIB_NAME} ${LIB_TYPE} ${LIB_SOURCES})
+TARGET_LINK_LIBRARIES(${LIB_NAME} ${ARCH_LIBRARIES})
+SET_PROPERTY(TARGET ${LIB_NAME} PROPERTY COMPILE_DEFINITIONS_DEBUG DEBUG;DEF_DEBUG_LVL=${CFG_DEBUG_LVL})
+SET_PROPERTY(TARGET ${LIB_NAME} PROPERTY DEBUG_POSTFIX "_d")
+INSTALL(TARGETS ${LIB_NAME} ARCHIVE DESTINATION lib/${SYSTEM_DIR_NAME}/${CMAKE_SYSTEM_PROCESSOR})

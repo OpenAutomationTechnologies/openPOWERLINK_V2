@@ -1,6 +1,6 @@
 ################################################################################
 #
-# Windows CMake configuration for openPOWERLINK user stack library
+# CMake file of openPOWERLINK application CN library with kernelspace interface
 #
 # Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 # All rights reserved.
@@ -28,58 +28,48 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ################################################################################
 
-message( FATAL_ERROR "libpowerlink_user currently not supported on windows!")
+# Set library name
+SET(LIB_NAME "oplkcnapp-kernelintf")
+MESSAGE(STATUS "Configuring ${LIB_NAME}")
 
-# additional compiler flags
-ADD_DEFINITIONS(-D_CONSOLE -DWPCAP -DHAVE_REMOTE)
+# Select object dictionary
+SET(OBJDICT CiA401_CN)
 
-SET (LIB_ARCH_SOURCES
-     ${USER_SOURCE_DIR}/timer/timer-generic.c
-     ${LIB_SOURCE_DIR}/sharedbuff/ShbIpc-Win32.c
-     ${LIB_SOURCE_DIR}/trace/trace-windows.c
-     ${LIB_SOURCE_DIR}/sharedbuff/SharedBuff.c
-     ${COMMON_SOURCE_DIR}/circbuf/circbuf-win32shm.c
-     ${COMMON_SOURCE_DIR}/dll/dllcal-shb.c
-     ${USER_SOURCE_DIR}/ctrl/ctrlucal-mem.c
-     ${USER_SOURCE_DIR}/event/eventucal-shb.c
-     ${USER_SOURCE_DIR}/errhnd/errhnducal-shb.c
-     ${COMMON_SOURCE_DIR}/ctrl/ctrlcal-shb.c
-     ${COMMON_SOURCE_DIR}/event/eventcal-shb.c
-     ${USER_SOURCE_DIR}/pdo/pdoucal-shb.c
-     ${USER_SOURCE_DIR}/pdo/pdoucalsync-null.c # replace by correct version
+# set sources of POWERLINK library
+SET (LIB_SOURCES
+     ${USER_SOURCES}
+     ${CTRL_UCAL_LINUXIOCTL_SOURCES}
+     ${DLL_UCAL_LINUXIOCTL_SOURCES}
+     ${ERRHND_UCAL_LINUXIOCTL_SOURCES}
+     ${EVENT_UCAL_LINUXIOCTL_SOURCES}
+     ${PDO_UCAL_LINUXMMAPIOCTL_SOURCES}
+     ${USER_TIMER_LINUXUSER_SOURCES}
+     ${COMMON_SOURCES}
+     ${COMMON_LINUXUSER_SOURCES}
+     ${TARGET_LINUX_SOURCES}
+     ${CIRCBUF_POSIX_SOURCES}
      )
 
-#
-# Set type of library
-#
-IF(CFG_X86_WINDOWS_DLL)
-    SET(LIB_TYPE "SHARED")
-ELSE(CFG_X86_WINDOWS_DLL)
-    SET(LIB_TYPE "STATIC")
-ENDIF(CFG_X86_WINDOWS_DLL)
+IF(CMAKE_SYSTEM_PROCESSOR MATCHES "x86*")
+    SET(LIB_SOURCES ${LIB_SOURCES} ${ARCH_X86_SOURCES})
+ELSE(CMAKE_SYSTEM_PROCESSOR MATCHES "x86*")
+    MESSAGE(FATAL_ERROR "Unsupported CMAKE_SYSTEM_PROCESSOR ${CMAKE_SYSTEM_PROCESSOR}")
+ENDIF(CMAKE_SYSTEM_PROCESSOR MATCHES "x86*")
 
-IF (CMAKE_CL_64)
-    LINK_DIRECTORIES(${LIB_SOURCE_DIR}/pcap/windows/WpdPack/Lib/x64)
-ELSE (CMAKE_CL_64)
-    LINK_DIRECTORIES(${LIB_SOURCE_DIR}/pcap/windows/WpdPack/Lib)
-ENDIF (CMAKE_CL_64)
 
-#
-# Source include directories
-#
-INCLUDE_DIRECTORIES(${LIB_SOURCE_DIR}/pcap/windows/WpdPack/Include)
+# Configure compile definitions
+ADD_DEFINITIONS(-Wall -Wextra -pedantic -std=c99 -pthread -D_GNU_SOURCE -D_POSIX_C_SOURCE=200112L
+                -fno-strict-aliasing)
 
-IF (CMAKE_CL_64)
-    LINK_DIRECTORIES(${LIB_SOURCE_DIR}/pcap/windows/WpdPack/Lib/x64)
-ELSE (CMAKE_CL_64)
-    LINK_DIRECTORIES(${LIB_SOURCE_DIR}/pcap/windows/WpdPack/Lib)
-ENDIF (CMAKE_CL_64)
+# Additional include directories
+INCLUDE_DIRECTORIES(
+    .
+    ${OBJDICT_DIR}/${OBJDICT}
+    )
 
-SET(ARCH_LIBRARIES wpcap iphlpapi)
-
-#
-# Installation
-#
-IF (CFG_X86_WINDOWS_DLL)
-    INSTALL(TARGETS powerlink_user RUNTIME DESTINATION bin)
-ENDIF (CFG_X86_WINDOWS_DLL)
+# Define library and installation rules
+ADD_LIBRARY(${LIB_NAME} ${LIB_TYPE} ${LIB_SOURCES})
+TARGET_LINK_LIBRARIES(${LIB_NAME} ${ARCH_LIBRARIES})
+SET_PROPERTY(TARGET ${LIB_NAME} PROPERTY COMPILE_DEFINITIONS_DEBUG DEBUG;DEF_DEBUG_LVL=${CFG_DEBUG_LVL})
+SET_PROPERTY(TARGET ${LIB_NAME} PROPERTY DEBUG_POSTFIX "_d")
+INSTALL(TARGETS ${LIB_NAME} ARCHIVE DESTINATION lib/${SYSTEM_DIR_NAME}/${CMAKE_SYSTEM_PROCESSOR})
