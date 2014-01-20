@@ -45,10 +45,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <unistd.h>
 #include <pthread.h>
 #include <errno.h>
+#include <signal.h>
+#include <sched.h>
 
-#include <Epl.h>
+#include <EplInc.h>
 #include <kernel/ctrlk.h>
 #include <console/console.h>
+#include <target.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
