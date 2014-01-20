@@ -1,8 +1,8 @@
 ################################################################################
 #
-# Linux definitions for console MN demo application
+# Linux definitions for demo_mn_qt application
 #
-# Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+# Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -28,12 +28,22 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ################################################################################
 
-# set architecture specific libraries
-IF (CFG_KERNEL_STACK_DIRECTLINK OR CFG_KERNEL_STACK_USERSPACE_DAEMON)
-    SET (ARCH_LIBRARIES ${ARCH_LIBRARIES} pcap)
-ENDIF (CFG_KERNEL_STACK_DIRECTLINK OR CFG_KERNEL_STACK_USERSPACE_DAEMON)
+################################################################################
+# Set architecture specific definitions
 
-SET (ARCH_LIBRARIES ${ARCH_LIBRARIES} pthread rt)
+################################################################################
+# Set architecture specific sources and include directories
 
-INSTALL(PROGRAMS ${TOOLS_DIR}/linux/set_prio DESTINATION bin)
+################################################################################
+# Set architecture specific libraries
+
+IF(CFG_KERNEL_STACK_DIRECTLINK OR CFG_KERNEL_STACK_USERSPACE_DAEMON)
+    SET(ARCH_LIBRARIES ${ARCH_LIBRARIES} pcap)
+ENDIF()
+SET(ARCH_LIBRARIES ${ARCH_LIBRARIES} pthread rt)
+
+################################################################################
+# Set architecture specific installation files
+
+INSTALL(PROGRAMS ${TOOLS_DIR}/linux/set_prio DESTINATION ${CMAKE_PROJECT_NAME})
 
