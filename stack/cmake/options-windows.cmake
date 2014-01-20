@@ -1,8 +1,8 @@
 ################################################################################
 #
-# Linux CMake configuration for openPOWERLINK stack library
+# CMake options for openPOWERLINK stack on Windows
 #
-# Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+# Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -28,23 +28,22 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ################################################################################
 
-ADD_DEFINITIONS(-Wall -Wextra -pedantic -std=c99 -pthread -D_GNU_SOURCE
-                -D_POSIX_C_SOURCE=200112L -fno-strict-aliasing)
+MESSAGE(STATUS "Adding CMake configuration options for Windows")
 
-SET (LIB_ARCH_SOURCES
-     ${LIB_ARCH_SOURCES}
-     ${EDRV_SOURCE_DIR}/edrv-pcap_linux.c
-     ${USER_SOURCE_DIR}/sdo/sdo-udpu.c
-     ${USER_SOURCE_DIR}/timer/timer-linuxuser.c
-     ${KERNEL_SOURCE_DIR}/hrtimer/hrtimer-posix.c
-     ${COMMON_SOURCE_DIR}/circbuf/circbuf-posixshm.c
-     ${ARCH_SOURCE_DIR}/linux/ftrace-debug.c
-     ${ARCH_SOURCE_DIR}/linux/target-linux.c
-     ${LIB_SOURCE_DIR}/trace/trace-printf.c
-     ${USER_SOURCE_DIR}/event/eventucal-linux.c
-     ${USER_SOURCE_DIR}/event/eventucalintf-circbuf.c
-     ${KERNEL_SOURCE_DIR}/event/eventkcal-linux.c
-     ${KERNEL_SOURCE_DIR}/event/eventkcalintf-circbuf.c
-     ${KERNEL_SOURCE_DIR}/veth/veth-linuxuser.c
-     )
+OPTION(CFG_COMPILE_LIB_MN           "Compile openPOWERLINK MN library" ON)
+OPTION(CFG_COMPILE_LIB_CN           "Compile openPOWERLINK CN library" ON)
+
+OPTION(CFG_WINDOWS_DLL              "Build openPOWERLINK library as DLL" OFF)
+
+# MN libraries
+IF(CFG_COMPILE_LIB_MN)
+    ADD_SUBDIRECTORY(proj/windows/liboplkmn)
+ENDIF()
+
+# CN libraries
+IF(CFG_COMPILE_LIB_CN)
+    ADD_SUBDIRECTORY(proj/windows/liboplkcn)
+ENDIF()
+
+
 
