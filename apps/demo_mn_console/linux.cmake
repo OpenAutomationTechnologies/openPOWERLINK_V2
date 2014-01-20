@@ -1,8 +1,8 @@
 ################################################################################
 #
-# Linux definitions for console MN demo application
+# Linux definitions for demo_mn_console application
 #
-# Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+# Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -28,20 +28,30 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ################################################################################
 
-ADD_DEFINITIONS(-Wall -Wextra -pedantic -std=c99 -pthread -D_GNU_SOURCE -D_POSIX_C_SOURCE=200112L)
+################################################################################
+# Set architecture specific definitions
 
-# set sources for linux
+ADD_DEFINITIONS(-Wall -Wextra -pedantic -std=c99 -pthread -D_GNU_SOURCE
+                -D_POSIX_C_SOURCE=200112L)
+
+################################################################################
+# Set architecture specific sources and include directories
+
 SET (DEMO_ARCH_SOURCES
-     ${DEMO_COMMON_DIR}/system/system-linux.c
-     ${LIB_SOURCE_DIR}/console/console-linux.c
+     ${COMMON_SOURCE_DIR}/system/system-linux.c
+     ${CONTRIB_SOURCE_DIR}/console/console-linux.c
      )
 
-# set architecture specific libraries
+################################################################################
+# Set architecture specific libraries
+
 IF (CFG_KERNEL_STACK_DIRECTLINK OR CFG_KERNEL_STACK_USERSPACE_DAEMON)
     SET (ARCH_LIBRARIES ${ARCH_LIBRARIES} pcap)
 ENDIF (CFG_KERNEL_STACK_DIRECTLINK OR CFG_KERNEL_STACK_USERSPACE_DAEMON)
-
 SET (ARCH_LIBRARIES ${ARCH_LIBRARIES} pthread rt)
 
-INSTALL(PROGRAMS ${TOOLS_DIR}/linux/set_prio DESTINATION bin)
+################################################################################
+# Set architecture specific installation files
+
+INSTALL(PROGRAMS ${TOOLS_DIR}/linux/set_prio DESTINATION ${CMAKE_PROJECT_NAME})
 

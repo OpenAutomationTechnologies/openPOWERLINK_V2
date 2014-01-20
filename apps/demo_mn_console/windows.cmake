@@ -2,7 +2,7 @@
 #
 # Windows definitions for console demo application
 #
-# Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+# Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -28,24 +28,33 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ################################################################################
 
-ADD_DEFINITIONS(-D_CONSOLE -DWPCAP -DHAVE_REMOTE  -D_CRT_SECURE_NO_WARNINGS)
+################################################################################
+# Set architecture specific definitions
+
+ADD_DEFINITIONS(-D_CONSOLE -DWPCAP -DHAVE_REMOTE -D_CRT_SECURE_NO_WARNINGS)
+
+################################################################################
+# Set architecture specific sources and include directories
 
 SET (DEMO_ARCH_SOURCES
      ${DEMO_ARCHSOURCES}
-     ${DEMO_COMMON_DIR}/system/system-windows.c
-     ${LIB_SOURCE_DIR}/console/console-windows.c
-
+     ${COMMON_SOURCE_DIR}/system/system-windows.c
+     ${CONTRIB_SOURCE_DIR}/console/console-windows.c
      )
 
-INCLUDE_DIRECTORIES(${LIB_SOURCE_DIR}/pcap/windows/WpdPack/Include)
+INCLUDE_DIRECTORIES(${CONTRIB_SOURCE_DIR}/pcap/windows/WpdPack/Include)
 
-IF (CMAKE_CL_64)
-    LINK_DIRECTORIES(${LIB_SOURCE_DIR}/pcap/windows/WpdPack/Lib/x64)
-ELSE (CMAKE_CL_64)
-    LINK_DIRECTORIES(${LIB_SOURCE_DIR}/pcap/windows/WpdPack/Lib)
-ENDIF (CMAKE_CL_64)
+################################################################################
+# Set architecture specific libraries
 
-# set architecture specific libraries
-SET (ARCH_LIBRARIES wpcap iphlpapi)
+IF(CMAKE_CL_64)
+    LINK_DIRECTORIES(${CONTRIB_SOURCE_DIR}/pcap/windows/WpdPack/Lib/x64)
+ELSE ()
+    LINK_DIRECTORIES(${CONTRIB_SOURCE_DIR}/pcap/windows/WpdPack/Lib)
+ENDIF()
 
+SET(ARCH_LIBRARIES wpcap iphlpapi)
+
+################################################################################
+# Set architecture specific installation files
 
