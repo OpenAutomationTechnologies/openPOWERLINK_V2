@@ -1,11 +1,9 @@
 ################################################################################
 #
-# \file CMakeLists.txt
-#
-# \brief cmake file for openPOWERLINK kernel stack (Linux kernel module)
+# CMake file for openPOWERLINK kernel stack (Linux kernel module)
 #
 # Copyright (c) 2013, SYSTEC electronik GmbH
-# Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+# Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -32,41 +30,100 @@
 #
 ################################################################################
 
+PROJECT (oplkdrv_kernelmodule_edrv C)
+
+IF(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    CMAKE_MINIMUM_REQUIRED (VERSION 2.8.0)
+ELSE()
+    MESSAGE(FATAL_ERROR "Unsupported system ${CMAKE_SYSTEM_NAME} for this project!")
+ENDIF()
+
+MESSAGE(STATUS "CMAKE_SYSTEM_NAME is ${CMAKE_SYSTEM_NAME}")
+MESSAGE(STATUS "CMAKE_SYSTEM_PROCESSOR is ${CMAKE_SYSTEM_PROCESSOR}")
+
+STRING(TOLOWER "${CMAKE_SYSTEM_NAME}" SYSTEM_DIR_NAME)
+
+################################################################################
+# Configuration options
+
+IF(NOT CMAKE_BUILD_TYPE)
+  SET(CMAKE_BUILD_TYPE Release CACHE STRING
+      "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel."
+      FORCE)
+ENDIF()
+
+OPTION (CFG_OPLK_MN "Compile openPOWERLINK MN (Otherwise CN)" ON)
+
+SET(CFG_DEBUG_LVL "0xEC000000L" CACHE STRING "Debug Level for debug output")
+
+SET(CFG_KERNEL_DIR "" CACHE PATH
+        "Select the kernel directory to be used, if not specified, system kernel dir will be used!")
+
+SET(CFG_POWERLINK_EDRV "82573" CACHE STRING
+        "Valid drivers are 8139, 82573, 8255x, Fec")
+SET_PROPERTY(CACHE CFG_POWERLINK_EDRV PROPERTY STRINGS 8139 82573 8255x Fec)
+
+################################################################################
+# Set global directories
+################################################################################
+SET(OPLK_ROOT_DIR ${CMAKE_SOURCE_DIR}/../../..)
+SET(CONTRIB_SOURCE_DIR ${OPLK_ROOT_DIR}/contrib)
+SET(STACK_SOURCE_DIR ${OPLK_ROOT_DIR}/stack/src)
+SET(COMMON_SOURCE_DIR ${OPLK_ROOT_DIR}/stack/src/common)
+SET(KERNEL_SOURCE_DIR ${OPLK_ROOT_DIR}/stack/src/kernel)
+SET(EDRV_SOURCE_DIR ${OPLK_ROOT_DIR}/stack/src/kernel/edrv)
+SET(OPLK_INCLUDE_DIR ${OPLK_ROOT_DIR}/include)
+SET(STACK_INCLUDE_DIR ${OPLK_ROOT_DIR}/stack/include)
+SET(TOOLS_DIR ${OPLK_ROOT_DIR}/tools)
+
+IF(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+  SET(CMAKE_INSTALL_PREFIX
+    ${OPLK_ROOT_DIR}/bin/${SYSTEM_DIR_NAME}/${CMAKE_SYSTEM_PROCESSOR}/
+    CACHE PATH "openPOWERLINK kernel driver install prefix" FORCE
+    )
+ENDIF()
+
+################################################################################
 #
 # Configure depending selected ethernet driver
 #
 IF(CFG_POWERLINK_EDRV STREQUAL "8139")
 
-    SET(MODULE_NAME "powerlink8139")
+    SET(MODULE_NAME "oplk8139")
     SET(MODULE_DEFS "${MODULE_DEFS} -DCONFIG_EDRV=8139")
     SET(MODULE_SOURCE_FILES ${MODULE_SOURCE_FILES} ${EDRV_SOURCE_DIR}/edrv-8139.c)
 
 ELSEIF(CFG_POWERLINK_EDRV STREQUAL "82573")
 
-    SET(MODULE_NAME "powerlink82573")
+    SET(MODULE_NAME "oplk82573")
     SET(MODULE_DEFS "${MODULE_DEFS} -DCONFIG_EDRV=82573")
     SET(MODULE_SOURCE_FILES ${MODULE_SOURCE_FILES} ${EDRV_SOURCE_DIR}/edrv-82573.c)
 
 ELSEIF(CFG_POWERLINK_EDRV STREQUAL "8255x")
 
-    SET(MODULE_NAME "powerlink8255x")
+    SET(MODULE_NAME "oplk8255x")
     SET(MODULE_DEFS "${MODULE_DEFS} -DCONFIG_EDRV=8255")
     SET(MODULE_SOURCE_FILES ${MODULE_SOURCE_FILES} ${EDRV_SOURCE_DIR}/edrv-8255x.c)
 
-ELSE(CFG_POWERLINK_EDRV STREQUAL "8139")
+ELSE()
 
     message(FATAL_ERROR
             "No valid ethernet driver (8139, 82573, 8255x) was specified in CFG_POWERLINK_EDRV")
 
-ENDIF(CFG_POWERLINK_EDRV STREQUAL "8139")
+ENDIF()
 
+###############################################################################
 #
 # Configure depending selected mode
 #
-IF(CFG_POWERLINK_MN)
-    SET(MODULE_DEFS "${MODULE_DEFS} -DCONFIG_CFM -DCONFIG_OPENCONFIGURATOR_MAPPING -DCONFIG_MN")
-ENDIF(CFG_POWERLINK_MN)
+IF(CFG_OPLK_MN)
+    SET(MODULE_DEFS "${MODULE_DEFS} -DCONFIG_MN")
+    SET(MODULE_NAME "${MODULE_NAME}mn")
+ELSE()
+    SET(MODULE_NAME "${MODULE_NAME}cn")
+ENDIF()
 
+###############################################################################
 #
 # specifiy standard definitions
 #
@@ -74,18 +131,21 @@ IF(CMAKE_BUILD_TYPE STREQUAL Debug OR CMAKE_BUILD_TYPE STREQUAL DEBUG)
     SET(MODULE_DEFS "${MODULE_DEFS} -D_DEBUG")
     #SET(MODULE_DEFS "${MODULE_DEFS} -D_DBG_TRACE_POINTS_")
     SET(MODULE_DEFS "${MODULE_DEFS} -DDEF_DEBUG_LVL=${CFG_DEBUG_LVL}")
-ENDIF(CMAKE_BUILD_TYPE STREQUAL Debug OR CMAKE_BUILD_TYPE STREQUAL DEBUG)
+ENDIF()
 
+###############################################################################
 #
 # specifiy standard include directories
 #
-SET(MODULE_INCLUDES "${MODULE_INCLUDES} -I${CMAKE_CURRENT_SOURCE_DIR}")
-SET(MODULE_INCLUDES "${MODULE_INCLUDES} -I${POWERLINK_INCLUDE_DIR}")
+
+SET(MODULE_INCLUDES "${MODULE_INCLUDES} -I${CMAKE_SOURCE_DIR}")
+SET(MODULE_INCLUDES "${MODULE_INCLUDES} -I${OPLK_INCLUDE_DIR}")
 SET(MODULE_INCLUDES "${MODULE_INCLUDES} -I${STACK_INCLUDE_DIR}")
+SET(MODULE_INCLUDES "${MODULE_INCLUDES} -I${STACK_SOURCE_DIR}")
 SET(MODULE_INCLUDES "${MODULE_INCLUDES} -I${COMMON_SOURCE_DIR}/circbuf")
-SET(MODULE_INCLUDES "${MODULE_INCLUDES} -I${POWERLINK_SOURCE_DIR}")
 SET(MODULE_INCLUDES "${MODULE_INCLUDES} -I${KERNEL_SOURCE_DIR}/errhnd")
 SET(MODULE_INCLUDES "${MODULE_INCLUDES} -I${KERNEL_SOURCE_DIR}/dll")
+SET(MODULE_INCLUDES "${MODULE_INCLUDES} -I${STACK_INCLUDE_DIR}/target")
 SET(MODULE_INCLUDES "${MODULE_INCLUDES} -I${STACK_INCLUDE_DIR}/target/linux")
 
 #
@@ -93,8 +153,8 @@ SET(MODULE_INCLUDES "${MODULE_INCLUDES} -I${STACK_INCLUDE_DIR}/target/linux")
 #
 SET(MODULE_SOURCE_FILES
     ${MODULE_SOURCE_FILES}
-    ${CMAKE_CURRENT_SOURCE_DIR}/main.c
-    ${LIB_SOURCE_DIR}/trace/trace-printk.c
+    ${CMAKE_SOURCE_DIR}/main.c
+    ${CONTRIB_SOURCE_DIR}/trace/trace-printk.c
     ${EDRV_SOURCE_DIR}/edrvcyclic.c
     ${KERNEL_SOURCE_DIR}/ctrl/ctrlk.c
     ${KERNEL_SOURCE_DIR}/ctrl/ctrlkcal-linuxkernel.c
@@ -122,36 +182,25 @@ SET(MODULE_SOURCE_FILES
     ${COMMON_SOURCE_DIR}/circbuf/circbuffer.c
     ${COMMON_SOURCE_DIR}/circbuf/circbuf-linuxkernel.c
     ${COMMON_SOURCE_DIR}/debug.c
-)
+    )
 
-IF (CMAKE_SYSTEM_PROCESSOR STREQUAL x86)
+IF(CMAKE_SYSTEM_PROCESSOR MATCHES x86*)
     SET(MODULE_SOURCE_FILES ${MODULE_SOURCE_FILES} ${COMMON_SOURCE_DIR}/ami/amix86.c)
-
-ELSEIF (CMAKE_SYSTEM_PROCESSOR STREQUAL arm OR CMAKE_SYSTEM_PROCESSOR STREQUAL armv7l)
-   SET(MODULE_SOURCE_FILES ${MODULE_SOURCE_FILES} ${COMMON_SOURCE_DIR}/ami/amile.c)
-
-ELSEIF (   CMAKE_SYSTEM_PROCESSOR STREQUAL i686 OR CMAKE_SYSTEM_PROCESSOR STREQUAL x86_64)
-    SET(MODULE_SOURCE_FILES ${MODULE_SOURCE_FILES} ${COMMON_SOURCE_DIR}/ami/amix86.c)
-
-ELSE (CMAKE_SYSTEM_PROCESSOR STREQUAL x86)
+ELSE()
     MESSAGE(FATAL_ERROR
             "ami: CMAKE_SYSTEM_PROCESSOR is set to ${CMAKE_SYSTEM_PROCESSOR}. Valid targets are (x86, x86_64, arm, armv7l, i686).")
-ENDIF (CMAKE_SYSTEM_PROCESSOR STREQUAL x86)
+ENDIF()
 
-SET(MODULE_FILE
-    ${MODULE_NAME}.ko
-)
-
-SET(MODULE_OUTPUT_DIR
-    ${CMAKE_CURRENT_BINARY_DIR}
-)
+SET(MODULE_FILE ${MODULE_NAME}.ko)
+SET(MODULE_OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR})
 
 IF (CFG_KERNEL_DIR STREQUAL "")
     SET(KERNEL_DIR "/lib/modules/${CMAKE_SYSTEM_VERSION}/build")
-ELSE(CFG_KERNEL_DIR STREQUAL "")
+ELSE()
     SET(KERNEL_DIR ${CFG_KERNEL_DIR})
-ENDIF (CFG_KERNEL_DIR STREQUAL "")
+ENDIF()
 
+# Link source files to do an out-of-source build
 FOREACH(MODULE_SOURCE_FILE ${MODULE_SOURCE_FILES})
     GET_FILENAME_COMPONENT(MODULE_SOURCE_FILENAME ${MODULE_SOURCE_FILE} NAME)
     GET_FILENAME_COMPONENT(MODULE_SOURCE_BASENAME ${MODULE_SOURCE_FILE} NAME_WE)
@@ -161,20 +210,20 @@ FOREACH(MODULE_SOURCE_FILE ${MODULE_SOURCE_FILES})
                        )
     SET(MODULE_OBJS "${MODULE_OBJS} src/${MODULE_SOURCE_BASENAME}.o")
     SET(MODULE_LINKED_SOURCE_FILES ${MODULE_LINKED_SOURCE_FILES} ${MODULE_OUTPUT_DIR}/src/${MODULE_SOURCE_FILENAME})
-ENDFOREACH(MODULE_SOURCE_FILE)
+ENDFOREACH()
 
 CONFIGURE_FILE(${TOOLS_DIR}/linux/Kbuild.in ${MODULE_OUTPUT_DIR}/Kbuild)
 
 IF(CMAKE_CROSSCOMPILING)
     IF(DEFINED MAKE_KERNEL_ARCH)
         SET(MAKE_KERNEL_CROSSCOMPILING_PARAMS ARCH=${MAKE_KERNEL_ARCH})
-    ENDIF(DEFINED MAKE_KERNEL_ARCH)
+    ENDIF()
 
     IF(DEFINED MAKE_KERNEL_CROSS_COMPILE)
         SET(MAKE_KERNEL_CROSSCOMPILING_PARAMS
                 ${MAKE_KERNEL_CROSSCOMPILING_PARAMS} CROSS_COMPILE=${MAKE_KERNEL_CROSS_COMPILE})
-    ENDIF(DEFINED MAKE_KERNEL_CROSS_COMPILE)
-ENDIF(CMAKE_CROSSCOMPILING)
+    ENDIF()
+ENDIF()
 
 ADD_CUSTOM_COMMAND(
     OUTPUT ${MODULE_OUTPUT_DIR}/${MODULE_FILE}
@@ -196,9 +245,11 @@ ADD_CUSTOM_TARGET(
     #COMMAND ${CMAKE_COMMAND} -E remove_directory ${MODULE_OUTPUT_DIR}/src
     )
 
+################################################################################
 # add installation rules
-INSTALL(FILES ${MODULE_OUTPUT_DIR}/${MODULE_NAME}.ko DESTINATION bin)
-INSTALL(FILES ${TOOLS_DIR}/linux/50-openPOWERLINK.rules DESTINATION bin)
-INSTALL(PROGRAMS ${TOOLS_DIR}/linux/plkload DESTINATION bin)
-INSTALL(PROGRAMS ${TOOLS_DIR}/linux/plkunload DESTINATION bin)
-INSTALL(PROGRAMS ${TOOLS_DIR}/linux/devices.txt DESTINATION bin)
+
+INSTALL(FILES ${MODULE_OUTPUT_DIR}/${MODULE_NAME}.ko DESTINATION ${CMAKE_PROJECT_NAME})
+INSTALL(FILES ${TOOLS_DIR}/linux/50-openPOWERLINK.rules DESTINATION ${CMAKE_PROJECT_NAME})
+INSTALL(PROGRAMS ${TOOLS_DIR}/linux/plkload DESTINATION ${CMAKE_PROJECT_NAME})
+INSTALL(PROGRAMS ${TOOLS_DIR}/linux/plkunload DESTINATION ${CMAKE_PROJECT_NAME})
+INSTALL(PROGRAMS ${TOOLS_DIR}/linux/devices.txt DESTINATION ${CMAKE_PROJECT_NAME})
