@@ -84,17 +84,17 @@
 		<link>
 			<name>app.c</name>
 			<type>1</type>
-			<locationURI>STACK_LOC/apps/demo_cn_embedded/app.c</locationURI>
+			<locationURI>STACK_LOC/apps/demo_cn_embedded/src/app.c</locationURI>
 		</link>
 		<link>
 			<name>event-cn.c</name>
 			<type>1</type>
-			<locationURI>STACK_LOC/apps/demo_cn_embedded/event-cn.c</locationURI>
+			<locationURI>STACK_LOC/apps/demo_cn_embedded/src/event-cn.c</locationURI>
 		</link>
 		<link>
 			<name>gpio-microblaze.c</name>
 			<type>1</type>
-			<locationURI>STACK_LOC/apps/common/gpio/gpio-microblaze.c</locationURI>
+			<locationURI>STACK_LOC/apps/common/src/gpio/gpio-microblaze.c</locationURI>
 		</link>
 		<link>
 			<name>include</name>
@@ -104,17 +104,17 @@
 		<link>
 			<name>lcd.c</name>
 			<type>1</type>
-			<locationURI>STACK_LOC/apps/common/lcd/lcd.c</locationURI>
+			<locationURI>STACK_LOC/apps/common/src/lcd/lcd.c</locationURI>
 		</link>
 		<link>
 			<name>lcdl-null.c</name>
 			<type>1</type>
-			<locationURI>STACK_LOC/apps/common/lcd/lcdl-null.c</locationURI>
+			<locationURI>STACK_LOC/apps/common/src/lcd/lcdl-null.c</locationURI>
 		</link>
 		<link>
 			<name>main.c</name>
 			<type>1</type>
-			<locationURI>STACK_LOC/apps/demo_cn_embedded/main.c</locationURI>
+			<locationURI>STACK_LOC/apps/demo_cn_embedded/src/main.c</locationURI>
 		</link>
 		<link>
 			<name>objdicts/cia401_cn</name>

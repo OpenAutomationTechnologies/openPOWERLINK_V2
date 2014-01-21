@@ -10,7 +10,7 @@
 
 ##################################
 #Path to the openPOWERLINK root directory
-STACK_ROOT=../../../../../..
+STACK_ROOT=../../../..
 
 ##################################
 #Path to the XPS project
