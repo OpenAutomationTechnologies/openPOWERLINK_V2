@@ -3,7 +3,16 @@
   <navindex>
     <tab type="mainpage" visible="yes" title=""/>
     <tab type="user" url="\ref page_powerlink" title="Ethernet POWERLINK"/>
+    <tab type="user" url="\ref page_openconfig" title="openCONFIGURATOR"/>
     <tab type="usergroup" title="openPOWERLINK Stack" url="\ref page_openpowerlink">
+      <tab type="user" url="\ref page_directories" title="Directory Structure"/>
+      <tab type="user" url="\ref page_components" title="Components"/>
+      <tab type="usergroup" title="Building">
+        <tab type="user" url="\ref page_build" title="Building openPOWERLINK"/>
+        <tab type="user" url="\ref page_build_stack" title="Building Stack Libraries"/>
+        <tab type="user" url="\ref page_build_drivers" title="Building Drivers"/>
+        <tab type="user" url="\ref page_build_demos" title="Building Demo Applications"/>
+      </tab>
       <tab type="usergroup" title="Supported Platforms" url="\ref page_platforms">
           <tab type="user" url="\ref page_platform_linux" title="Linux"/>
           <tab type="user" url="\ref page_platform_windows" title="Windows"/>
@@ -12,13 +21,8 @@
           <tab type="user" url="\ref page_platform_altera-mn" title="Altera(MN)"/>
           <tab type="user" url="\ref page_platform_altera-cn" title="Altera(CN)"/>
       </tab>
-      <tab type="user" url="\ref page_demos" title="Demo Applications"/>
-      <tab type="usergroup" title="Building" url="\ref page_build">
-        <tab type="user" url="\ref page_cmake" title="Building with CMAKE"/>
-      </tab>
     </tab>
     <tab type="usergroup" title="Software Manual">
-      <tab type="user" url="\ref page_directories" title="Directory Structure"/>
       <tab type="user" url="\ref page_software-architecture" title="Software Architecture"/>
       <tab type="modules" visible="yes" title="" intro=""/>
       <tab type="namespaces" visible="no" title="">

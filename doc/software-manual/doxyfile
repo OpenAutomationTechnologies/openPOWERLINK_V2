@@ -690,13 +690,16 @@ INPUT                  = ../../stack/src \
                          ../openpowerlink.md \
                          ../platforms.md \
                          ../software-architecture.md \
-                         ../cmake.md \
+                         ../components.md \
                          ../build.md \
-                         ../demos.md \
+                         ../build-stack.md \
+                         ../build-drivers.md \
+                         ../build-demos.md \
                          ../porting-guide.md \
                          ../coding-guide.md \
                          ../directories.md \
                          ../glossary.md \
+                         ../openconfigurator.md \
                          ../supported-platforms/linux.md \
                          ../supported-platforms/vxworks.md \
                          ../supported-platforms/altera-mn.md \
@@ -1601,7 +1604,7 @@ SEARCH_INCLUDES        = YES
 # contain include files that are not input files but should be processed by
 # the preprocessor.
 
-INCLUDE_PATH           = ../../stack/make/lib/libpowerlink \
+INCLUDE_PATH           = ../../stack/proj/linux/liboplkmn \
                          ../../contrib \
                          ../../include \
                          ../../objdicts/CiA302-4_MN

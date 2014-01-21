@@ -12,6 +12,5 @@ and run openPOWERLINK on your desired platform.
 - \ref page_platform_xilinx
 
 If your platform is not supported, please follow the
-[openPOWERLINK Porting Guide](\ref page_porting-guide) for information on how to port
-openPOWERLINK to your platform.
-
+[openPOWERLINK Porting Guide](\ref page_porting-guide) for information on how
+to port openPOWERLINK to your platform.
