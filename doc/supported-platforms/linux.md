@@ -9,7 +9,7 @@ This file contains documentation for the openPOWERLINK stack on Linux.
 
 # Requirements {#sect_linux_require}
 
-## POWERLINK network {#sect_linux_plknet}
+## POWERLINK Network {#sect_linux_plknet}
 
 - POWERLINK network with controlled nodes (CN)
   * openPOWERLINK controlled nodes, e.g. Altera-based FPGA evaluation boards
@@ -17,34 +17,14 @@ This file contains documentation for the openPOWERLINK stack on Linux.
   * other POWERLINK controlled nodes
 
 ## Network Controller {#sect_linux_controller}
+
 One of the following network controllers is required to run openPOWERLINK on
 Linux.
 
-- Network controller card with Intel 82573L (or compatible) 1GBit Ethernet chip  
-  For example:
-  - B&R APC 810 Industrial PC on-board network chip (tested)
-
-- Network controller card with Realtek RTL8139 Rev C or D chip  
-    For example:
-    - PCI network cards:
-      * Zyxel FN312 (tested)
-      * Netgear FA311 v2 Rev-D1 (tested)
-      * D-Link DFE-528TX
-      * LevelOne FNC-0109TX
-      * Typhoon Speednet Card 10/100 PCI (P/N 70035)
-      * Longshine LCS-8038TX-R7
-    - Cardbus network cards (PCMCIA):
-      * Longshine LCS-8539TXR
-      * Micronet SP160T V3
-      * Micronet SP160TA V3
-
-- Network controller card with Intel 8255x 100MBit Ethernet chip  
-    For example:
-    - B&R APC 620 Industrial PC on-board network chip (tested)
-    - Intel Pro 100 82557/8/9/1 Ethernet Interface card (tested)
-
-- Standard Linux network controller through libpcap library  
-    (for user-space stack version)
+- Network controller card with Intel 82573L (or compatible) 1GBit Ethernet chip
+- Network controller card with Realtek RTL8139 Rev C or D chip
+- Network controller card with Intel 8255x 100MBit Ethernet chip
+- Standard Linux network controller through libpcap library (for user-space stack version)
 
 ## Linux Kernel {#sect_linux_kernel}
 - Linux kernel version 2.6.23 or later with CONFIG_HIGH_RES_TIMERS enabled
@@ -56,27 +36,27 @@ Linux.
 
 ### Real-Time Kernel
 
-For best performance and minimal jitter on the POWERLINK cycle a real-time
+For best performance and minimal jitter on the POWERLINK cycle, a real-time
 Linux kernel is recommended. The RT-Preempt patch maintaind by Ingo Molnar
 provides the necessary real-time extensions (https://rt.wiki.kernel.org).
 
 Additional information on the Linux realtime kernel can be found on the
 OSADL home page (http://www.osadl.org).
 
-**Thread Priorities**  
+**Thread Priorities**
 If using a real-time kernel, the real-time priorities of the necessary
 threads must be adjusted for deterministic POWERLINK behaviour.
-If you are using the kernel based stack, the plkload script coming along
+If you are using the kernel-based stack, the plkload script coming along
 with the stack automatically carries out the required priority changes.
-For the userspace stack, a script setting the prioritiess provided in
-tools/Linux/set_prio. It increases the priorities of the high resolution
+For the userspace stack, a script setting the priorities is provided in
+`tools/linux/set_prio`. It increases the priorities of the high resolution
 timer softirq thread (only on 2.6 kernels) and of the Ethernet IRQ thread.
 
 **Kernel 3.x**  
-The behaviour of a 3.X real-time kernel changed. Split softirq threads
-are no longer available but there is a patch which implements split softirq
-locks. If you are using a 3.X real-time kernel you should ensure that this
-patch is included.
+The behaviour of a 3.X real-time kernel differs to previous kernel version.
+Split softirq threads are no longer available, although there is a patch which
+implements split softirq locks. If you are using a 3.X real-time kernel you
+should ensure that this patch is included.
 
 For example: A current Linux version at writing of this document which
 includes the patch is v3.6.11.4-rt36.
@@ -87,8 +67,8 @@ behaviour on a _multicore_ processor:
 * Ensure that the following configuration options are set for your
   real-time kernel:
 
-      CONFIG_RT_GROUP_SCHED is not set  
-      CONFIG_RCU_BOOST=y  
+      CONFIG_RT_GROUP_SCHED is not set
+      CONFIG_RCU_BOOST=y
       CONFIG_RCU_BOOST_PRIO=99
 
 * Isolate the second core of the multi-core processor to be used
@@ -96,7 +76,7 @@ behaviour on a _multicore_ processor:
   `isolcpus=1`
 
 * Set the default interrupt affinity to all other cores, e.g. for a
-  dual-core system to core 0 by setting the kernel-commandline parameter
+  dual-core system to core 0 by setting the kernel commandline parameter
   `irqaffinity=0`
 
 * Disable IRQ balancing by disable irqbalance. This depends on your
@@ -106,243 +86,175 @@ behaviour on a _multicore_ processor:
 
 ### CMake
 For building the openPOWERLINK stack and demo applications the Open Source
-cross-platform build tool CMake is used ([http://www.cmake.org]). CMake
+cross-platform build tool CMake is used (<http://www.cmake.org>). CMake
 version V2.8 or higher is required.
 
-For a detailed description of the cmake options look at the [cmake documentation](\ref page_cmake).
+For a detailed description of CMake look at the
+[cmake section](\ref sect_build_cmake).
 
-### libpcap library
+### libpcap Library
+
 In order to use the userspace POWERLINK stack the libpcap library is needed
 to access the Ethernet interface.
 
-### QT4 development tools
+### QT4 Development Tools
+
 If you want to build the QT demo application the QT4 development tools must
-be installed on the system.
+be installed on the system (<http://qt.digia.com/>).
 
 ### openCONFIGURATOR
-For configuration of your POWERLINK network the Open Source configuration
-tool openCONFIGURATOR should be used. The tool is available as SourceForge
-project. [http://sourceforge.net/projects/openconf/](http://sourceforge.net/projects/openconf/)
 
-The openCONFIGURATOR projects used by the demo examples are found in the
-directory: *apps/openCONFIGURATOR_projects*.
-
-openCONFIGURATOR creates two file which are used by the openPOWERLINK stack
-and application:
-
-* `xap.h`  
-  The header file contains the structure definition for your
-  process image. It depends on the available data field of the
-  CNs used in your configuration.
-
-* `mnobd.cdc`  
-  This file is used to configure the MN stack. It includes all
-  configuration data of the CNs and the network mapping
-  information. CN configuration is handled by the configuration
-  manager (CFM) module of the MN.
+The tool [openCONFIGURATOR](\ref page_openconfig) is needed to generate the
+network configuration for your application.
 
 
-# openPOWERLINK Stack {#sect_linux_stack}
+# openPOWERLINK Stack Components {#sect_linux_components}
 
-The openPOWERLINK stack is divided in a user- and a kernel part. Whereas in
-previous versions the whole stack runs in the same domain, the current stack
-could run in different domains. On a Linux x86 system the following configurations
-are possible:
+The following section contains a description of the
+[openPOWERLINK components](\ref page_components) available on a Linux system.
 
-- Direct Link to Application  
-  The kernel part is directly linked to the user part and application into a
-  single executable. The stack uses the libpcap library for accessing the
-  ethernet device.
+## Stack Libraries
 
-- Linux Userspace Daemon  
-  The kernel part is compiled as a separate process (daemon) which runs in
-  userspace. The stack uses the libpcap library for accessing the ethernet
-  device.
+The openPOWERLINK stack is divided into a user and a kernel part. On a Linux
+system the following configurations are possible:
 
-- Linux Kernel Module  
+- __Direct Link to Application__
+
+  The kernel part is directly linked to the user part and application (complete
+  library) into a single executable. The stack uses the libpcap library for
+  accessing the ethernet device.
+
+  _Libraries:_
+  - `stack/proj/linux/liboplkmn` (liboplkmn.a)
+  - `stack/proj/linux/liboplkcn` (liboplkcn.a)
+
+- __Linux Userspace Daemon__
+
+  The application is linked to an application library which contains the
+  interface to a Linux userspace openPOWERLINK driver. The kernel part is
+  compiled as a separate process (daemon) which runs in Linux userspace.
+  The stack uses the libpcap library for accessing the Ethernet device.
+
+  _Libraries:_
+  - `stack/proj/linux/liboplkmnapp-userintf` (libmnapp-userintf.a)
+  - `stack/proj/linux/liboplkcnapp-userintf` (libcnapp-userintf.a)
+
+- __Linux Kernel Module__
+
+  The application is linked to an application library which contains
+  the interface to a Linux kernelspace openPOWERLINK driver.
   The kernel part is compiled as a Linux kernel module. The kernel module
-  could be configured to use one of the available openPOWERLINK ethernet
-  drivers.
+  can be configured to use one of the available openPOWERLINK Ethernet drivers.
 
-## openPOWERLINK kernel stack {#sect_linux_kernel_stack}
+  _Libraries:_
+  - `stack/proj/linux/liboplkmnapp-kernelintf` (liboplkmnapp-kernelintf.a)
+  - `stack/proj/linux/liboplkcnapp-kernelintf` (liboplkcnapp-kernelintf.a)
 
-### Direct Link to Application
+## Drivers
 
-If the openPOWERLINK stack is configured to be directly linked to the application
-there is no need of a separate stack daemon. The whole stack is compiled into
-the library libpowerlink.a. This library has to be linked by your application.
-
-### Linux Userspace Daemon
+### Linux Userspace Daemon ussing PCAP
 
 The kernel part of the stack is compiled as a separate userspace process. It
 uses the libpcap library for accessing the network interface and is therefore
-totally independant of the used network card and driver. Due to the usage of
-libpcap for accessing the ethernet device it cannot reach the performance
-of the kernel space stack!
+totally independant of the used network card and driver.
 
-The Linux userspace daemon is located in: `stack/make/driver/linux/powerlink_userspace_daemon`
+__NOTE:__ Due to the use of libpcap for accessing the Ethernet device, the
+solution cannot reach the performance of the kernel space variant.
+
+The driver is located in: `drivers/linux/drv_daemon_pcap`
 
 ### Linux Kernel Module
 
-The openPOWERLINK stack may be implemented as Linux kernel module. This
+The openPOWERLINK kernel part may be implemented as Linux kernel module. This
 solution provides the best performance, but is limited to the available
-openPOWERLINK network drivers.
+openPOWERLINK network card drivers.
 
-The linux kernel module is located in: `stack/make/driver/linux/powerlink_kernel_module`
+The driver is located in: `drivers/linux/drv_kernelmod_edrv`
 
-## openPOWERLINK stack library {#sect_linux_stacklib}
+## Demo Applications
 
-### openPOWERLINK stack library - complete stack
+The following demo application are provided on Linux:
 
-The openPOWERLINK stack library contains the whole openPOWERLINK stack. If you
-want to create an openPOWERLINK application which contains the stack in a
-single executable you only need to link your application to the openPOWERLINK
-stack library libpowerlink.a.
+* [demo_mn_console](\ref sect_components_demo_mn_console)
+* [demo_cn_console](\ref sect_components_demo_cn_console)
+* [demo_mn_qt](\ref sect_components_demo_mn_qt)
 
-In this case you are using the libpcap library to access the ethernet device.
+## Tools
 
-The openPOWERLINK stack library is located in: `stack/make/lib/libpowerlink`
-
-
-### openPOWERLINK user part library - user part of stack
-
-If you are using a separated kernel stack (either user space daemon or kernel
-module) you need to link your application to the user part stack library
-(libpowerlink_user.a). Depending on the used kernel stack daemon it uses libpcap
-or a special openPOWERLINK ethernet driver to access the ethernet interface.
-
-The openPOWERLINK user part stack library is located in: `stack/make/lib/libpowerlink_user`
-
-# Tools {#sect_linux_tools}
-
-There are some shellscripts used for loading POWERLINK modules, setting
+There are some shell scripts used for loading POWERLINK modules, setting
 thread priorities etc.
 
 These tools are located in: `tools/linux`
 
-
-# Demo applications {#sect_linux_demos}
-
-There are several [demo applications](\ref page_demos) available. The POWERLINK
-demo applications are able to visualize the digital inputs of POWERLINK controlled
-nodes and are driving a running light on the CNs digital outputs.
-
 # Building {#sect_linux_build}
 
-## CMake
-For building openPOWERLINK on Linux the build utility [CMake](\ref page_cmake)
-is used. 
+For building openPOWERLINK on Linux refer to the
+[generic build instructions](\ref page_build).
 
-## Build Instructions
+# Running openPOWERLINK {#sect_linux_running}
 
-Follow the steps below to build the stack and demo applications:
+## Starting the Kernel Module
 
-* Creating the build directory
-  To separate the build files from the source code, a separate directory shall
-  be created, e.g. a directory called 'build' in the openPOWERLINK root:
-
-      > cd openPOWERLINK
-      > mkdir build
-
-* Entering the build directory and executing cmake
-  CMake has to be executed in the build directory with the path to the
-  source directory as parameter.
-
-      > cd build
-      > cmake-gui .. (cmake -i .., ccmake ..)
-
-  If using the cmake-gui, the build options are selected in the GUI. After
-  setting the desired options press _Configure_. New options might appear
-  according to the current selection. New options will be marked in _red_.
-  Further configuration settings may be changed and accepted by pressing
-  _Configure_ again. If there are no red-marked options, _Generate_ writes
-  the build files (Unix Makefiles).
-  
-* Building
-  No you can build all necessary software modules by calling
-  
-      > make
-
-* Installation
-  To install the compiled files to a single directory, type:
-
-      > make install
-
-  The target files will be installed in the configured installation
-  directory (Default:bin). There, the stack and demos can be started.
-
-
-# Running POWERLINK {#sect_linux_running}
-
-## Starting the kernel module
-
-To start the POWERLINK kernel modules, the scripts plkload and plkunload are
-used. The scripts will be installed in the installation directory. Additionally
-to inserting the kernel module the plkload script adjust priorities and unbinds
-the network device from the standard driver. This allows the usage of the Ethernet
-card by openPOWERLINK.
+To start the POWERLINK kernel modules, the scripts `plkload` and `plkunload`
+are used. The scripts will be installed in the installation directory.
+Additionally to inserting the kernel module, the plkload script adjusts
+priorities and unbinds the network device from the standard driver. This allows
+the exclusive use of the Ethernet card by openPOWERLINK.
 
 It is recommended to use this script to start openPOWERLINK!
 
 For example:
 Start the kernel stack using the Intel 82573 network controller:
 
-    > cd bin
-    > sudo ./plkload powerlink82573.ko
+    > cd <kernel_module_installation_dir>
+    > sudo ./plkload oplkmn82573.ko
 
 To unload the kernel module:
-    > cd bin
-    > sudo ./plkunload powerlink82573.ko
 
-## Starting the userspace daemon
+    > cd <kernel_module_installation_dir>
+    > sudo ./plkunload oplkmn82573.ko
+
+## Starting the Userspace Daemon
 
 If the stack is configured to use the Linux userspace daemon, you must start it
-before starting your application. The userspace daemon is started by the following
-command:
+before starting your application. The userspace daemon is started by the
+following command:
 
-    > cd bin
-    > sudo ./powerlink_mn_daemon
+    > cd <userspace_daemon_installation_dir>
+    > sudo ./oplkmnd_pcap
 
-## Starting the demo application
-
-### Demo uses separate kernel stack daemon
+## Starting the Demo Application
 
 If the demo application is configured to use a seperately compiled kernel stack
-you have to ensure that the kernel stack daemon is running before you start your
-application. Then you could start it by:
+you have to ensure that the kernel stack daemon (kernel driver module) is
+running before you start your application. If the demo application is linked
+with the complete openPOWERLINK stack, you can directly start it:
 
-    > cd bin
+    > cd <demo_installation_dir>
     > sudo ./demo_mn_qt
 
-### Demo is directly linked with the kernel stack
+## Adjusting Priority of Ethernet Thread
 
-If the demo application is  linked with the complete openPOWERLINK stack, you
-could directly start it:
-
-    > cd bin
-    > sudo ./demo_mn_qt
-
-If you are using a real-time kernel you should adjust thread priorities using
-the delivered script _set_prio_ before starting the application. To be able to
-increase the priority of the right ethernet interrupt thread, you have to
-specifcy the used ethernet interface. For example:
+If you are using a PCAP Ethernet driver on a real-time kernel you should adjust
+thread priorities using the delivered script `set_prio` before starting the
+application. To be able to increase the priority of the right Ethernet interrupt
+thread, you have to specifcy the used Ethernet interface. For example:
 
     > cd bin
     > sudo ./set_prio eth1
 
-
 # Troubleshooting {#sect_linux_trouble}
 
-## Linux userspace stack
+## Linux User Space Stack
 
-- The userspace based application doesn't find a network interface
+- The userspace based application does not find a network interface
 
   Be sure that the pcap library is installed and you are running the demo
   as root.
 
-## Linux kernelspace stack
+## Linux Kernel Space Stack
 
 - Linux kernel space: Check the kernel log
-      $ dmesg
 
+      $ dmesg
 

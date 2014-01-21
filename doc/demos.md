@@ -3,6 +3,16 @@ openPOWERLINK Demo applications {#page_demos}
 
 [TOC]
 
+# Introduction
+The openPOWERLINK stack distribution contains a set of demo applications which
+show how the openPOWERLINK stack is used by an application.
+
+## Building demo applications
+To build a demo application the necessary openPOWERLINK libraries must be
+available.
+
+## Available demo applications
+
 # Console MN demo {#sect_demos_mnconsole}
 
 This demo implements a POWERLINK MN with CFM. It is realized as console
