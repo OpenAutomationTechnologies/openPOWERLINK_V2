@@ -40,7 +40,7 @@ QSYS_SUB_CPU=cpu_1
 ##################################
 # Relative path to openPOWERLINK root directory
 # (Is converted to absolute)
-STACKROOT_REL_DIR=../../../../../..
+STACKROOT_REL_DIR=../../../..
 STACKROOT_DIR=`readlink -n -f ${STACKROOT_REL_DIR}`
 
 ##################################
@@ -61,9 +61,9 @@ ${STACKROOT_DIR}/hardware/ipcore/drivers/hostinterface \
 ${STACKROOT_DIR}/objdicts/CiA302-4_MN \
 ${STACKROOT_DIR}/stack/src/arch/altera_nios2 \
 ${STACKROOT_DIR}/stack/src \
-${STACKROOT_DIR}/apps/demo_mn_embedded \
-${STACKROOT_DIR}/apps/common/gpio \
-${STACKROOT_DIR}/apps/common/lcd \
+${STACKROOT_DIR}/apps/demo_mn_embedded/src \
+${STACKROOT_DIR}/apps/common/src/gpio \
+${STACKROOT_DIR}/apps/common/src/lcd \
 "
 
 ##################################
@@ -112,10 +112,10 @@ ${STACKROOT_DIR}/stack/src/user/sdo/sdo-sequ.c \
 ${STACKROOT_DIR}/stack/src/user/sdo/sdo-comu.c \
 ${STACKROOT_DIR}/stack/src/user/cfmu.c \
 ${STACKROOT_DIR}/stack/src/user/ledu.c \
-${STACKROOT_DIR}/apps/common/lcd/lcd.c \
-${STACKROOT_DIR}/apps/common/lcd/lcdl-16207.c \
-${STACKROOT_DIR}/apps/common/gpio/gpio-nios2.c \
-${STACKROOT_DIR}/apps/demo_mn_embedded/app.c \
-${STACKROOT_DIR}/apps/demo_mn_embedded/event-mn.c \
-${STACKROOT_DIR}/apps/demo_mn_embedded/main.c \
+${STACKROOT_DIR}/apps/common/src/lcd/lcd.c \
+${STACKROOT_DIR}/apps/common/src/lcd/lcdl-16207.c \
+${STACKROOT_DIR}/apps/common/src/gpio/gpio-nios2.c \
+${STACKROOT_DIR}/apps/demo_mn_embedded/src/app.c \
+${STACKROOT_DIR}/apps/demo_mn_embedded/src/event-mn.c \
+${STACKROOT_DIR}/apps/demo_mn_embedded/src/main.c \
 "
