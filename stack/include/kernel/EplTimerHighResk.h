@@ -82,7 +82,6 @@
 // typedef
 //---------------------------------------------------------------------------
 
-
 //---------------------------------------------------------------------------
 // function prototypes
 //---------------------------------------------------------------------------
@@ -101,6 +100,8 @@ tEplKernel PUBLIC EplTimerHighReskModifyTimerNs(tEplTimerHdl*     pTimerHdl_p,
 
 tEplKernel PUBLIC EplTimerHighReskDeleteTimer(tEplTimerHdl*     pTimerHdl_p);
 
+UINT32 PUBLIC timestamp_calcTimeDiff(tEplTgtTimeStamp* pTimeStampPrevious_p,
+                                     tEplTgtTimeStamp* pTimeStampCurrent_p);
 #endif  // #ifndef _EPLTIMERHIGHRESK_H_
 
 

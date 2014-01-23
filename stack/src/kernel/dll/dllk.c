@@ -174,10 +174,6 @@ tEplKernel dllk_addInstance(tDllkInitParam* pInitParam_p)
         return ret;
 #endif
 
-#if EPL_DLL_PRES_CHAINING_CN != FALSE
-    dllkInstance_g.pSyncReqPrevTimeStamp = EplTgtTimeStampAlloc();
-#endif
-
     return ret;
 }
 
@@ -211,9 +207,6 @@ tEplKernel dllk_delInstance(void)
     ret = EplTimerHighReskDelInstance();
 #endif
 
-#if EPL_DLL_PRES_CHAINING_CN != FALSE
-    EplTgtTimeStampFree(dllkInstance_g.pSyncReqPrevTimeStamp);
-#endif
     ret = edrv_shutdown();
     return ret;
 }

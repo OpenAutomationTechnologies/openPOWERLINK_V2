@@ -105,7 +105,7 @@ $(KERNEL_DIR)/pdo/pdokcal.c \
 $(KERNEL_DIR)/pdo/pdokcalmem-local.c \
 $(KERNEL_DIR)/pdo/pdokcalsync-null.c \
 $(KERNEL_DIR)/pdo/pdokcal-triplebufshm.c \
-$(KERNEL_DIR)/timestamp/timestamp-openmac.c \
+$(KERNEL_DIR)/hrtimer/timestamp-openmac.c \
 $(USER_DIR)/timer/timer-generic.c \
 $(USER_DIR)/api/generic.c \
 $(USER_DIR)/api/processimage.c \

@@ -112,5 +112,5 @@ ${STACKROOT_DIR}/stack/src/kernel/pdo/pdokcal.c \
 ${STACKROOT_DIR}/stack/src/kernel/pdo/pdokcal-triplebufshm.c \
 ${STACKROOT_DIR}/stack/src/kernel/pdo/pdokcalmem-hostif.c \
 ${STACKROOT_DIR}/stack/src/kernel/pdo/pdokcalsync-hostif.c \
-${STACKROOT_DIR}/stack/src/kernel/timestamp/timestamp-openmac.c \
+${STACKROOT_DIR}/stack/src/kernel/hrtimer/timestamp-openmac.c \
 "

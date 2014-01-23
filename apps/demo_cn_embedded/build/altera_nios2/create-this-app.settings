@@ -105,7 +105,7 @@ ${STACKROOT_DIR}/stack/src/kernel/pdo/pdokcal.c \
 ${STACKROOT_DIR}/stack/src/kernel/pdo/pdokcalmem-local.c \
 ${STACKROOT_DIR}/stack/src/kernel/pdo/pdokcalsync-null.c \
 ${STACKROOT_DIR}/stack/src/kernel/pdo/pdokcal-triplebufshm.c \
-${STACKROOT_DIR}/stack/src/kernel/timestamp/timestamp-openmac.c \
+${STACKROOT_DIR}/stack/src/kernel/hrtimer/timestamp-openmac.c \
 ${STACKROOT_DIR}/stack/src/user/api/generic.c \
 ${STACKROOT_DIR}/stack/src/user/api/processimage.c \
 ${STACKROOT_DIR}/stack/src/user/ctrl/ctrlu.c \
