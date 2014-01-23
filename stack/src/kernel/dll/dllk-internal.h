@@ -214,7 +214,7 @@ typedef struct
 
 #if EPL_DLL_PRES_CHAINING_CN != FALSE
     UINT                    syncReqPrevNodeId;
-    tEplTgtTimeStamp*       pSyncReqPrevTimeStamp;
+    tEplTgtTimeStamp        syncReqPrevTimeStamp;
     BOOL                    fPrcEnabled;
     UINT32                  prcPResTimeFirst;
     UINT32                  prcPResFallBackTimeout;

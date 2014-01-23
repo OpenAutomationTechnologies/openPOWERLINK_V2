@@ -294,14 +294,6 @@ void PUBLIC TgtFreeEthIsr(void);
 void PUBLIC TgtEnableEthInterrupt0(BYTE fEnable_p, unsigned int uiInterruptMask_p);
 void PUBLIC TgtEnableEthInterrupt1(BYTE fEnable_p, unsigned int uiInterruptMask_p);
 
-// functions for target specific time stamps
-DWORD PUBLIC EplTgtTimeStampTimeDiffNs (tEplTgtTimeStamp* pTimeStampPredecessor_p,
-                                        tEplTgtTimeStamp* pTimeStampSuccessor_p);
-void  PUBLIC EplTgtTimeStampCopy       (tEplTgtTimeStamp* pTimeStampDest_p,
-                                        tEplTgtTimeStamp* pTimeStampSrc_p);
-void  PUBLIC EplTgtTimeStampFree       (tEplTgtTimeStamp* pTimeStamp_p);
-tEplTgtTimeStamp* PUBLIC EplTgtTimeStampAlloc (void);
-
 #ifdef __cplusplus
 }  // extern "C"
 #endif

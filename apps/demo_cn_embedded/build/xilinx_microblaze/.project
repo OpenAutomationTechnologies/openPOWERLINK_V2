@@ -304,7 +304,7 @@
 		<link>
 			<name>stack/kernel/timestamp-openmac.c</name>
 			<type>1</type>
-			<locationURI>KERNEL_LOC/timestamp/timestamp-openmac.c</locationURI>
+			<locationURI>KERNEL_LOC/hrtimer/timestamp-openmac.c</locationURI>
 		</link>
 		<link>
 			<name>stack/user/ctrlu.c</name>

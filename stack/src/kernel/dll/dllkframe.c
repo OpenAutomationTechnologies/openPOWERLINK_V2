@@ -2034,7 +2034,7 @@ static tEplKernel processReceivedSoa(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtSt
         if (reqServiceId == kDllReqServiceSync)
         {   // SyncRequest -> store node ID and TimeStamp
             dllkInstance_g.syncReqPrevNodeId = nodeId;
-            EplTgtTimeStampCopy(dllkInstance_g.pSyncReqPrevTimeStamp, pRxBuffer_p->rxTimeStamp);
+            dllkInstance_g.syncReqPrevTimeStamp = *pRxBuffer_p->rxTimeStamp;
         }
     }
 #endif
@@ -2159,10 +2159,10 @@ static tEplKernel processReceivedAsnd(tFrameInfo* pFrameInfo_p, tEdrvRxBuffer* p
             if (nodeId == dllkInstance_g.syncReqPrevNodeId)
             {
                 UINT32      syncDelayNs;
-                syncDelayNs = EplTgtTimeStampTimeDiffNs(dllkInstance_g.pSyncReqPrevTimeStamp,
-                                                        pRxBuffer_p->rxTimeStamp) -
-                                                        // Transmission time for SyncReq frame
-                                                        (EPL_C_DLL_T_MIN_FRAME + EPL_C_DLL_T_PREAMBLE);
+                syncDelayNs = timestamp_calcTimeDiff(&dllkInstance_g.syncReqPrevTimeStamp,
+                                                     pRxBuffer_p->rxTimeStamp) -
+                                                     // Transmission time for SyncReq frame
+                                                     (EPL_C_DLL_T_MIN_FRAME + EPL_C_DLL_T_PREAMBLE);
 
                 // update SyncRes frame (SyncDelay and SyncNodeNumber)
                 ami_setUint32Le(&pTxFrameSyncRes->m_Data.m_Asnd.m_Payload.m_SyncResponse.m_le_dwSyncDelay, syncDelayNs);
