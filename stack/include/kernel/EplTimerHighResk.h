@@ -86,22 +86,23 @@
 // function prototypes
 //---------------------------------------------------------------------------
 
-tEplKernel PUBLIC EplTimerHighReskInit(void);
+tEplKernel PUBLIC hrestimer_init(void);
 
-tEplKernel PUBLIC EplTimerHighReskAddInstance(void);
+tEplKernel PUBLIC hrestimer_addInstance(void);
 
-tEplKernel PUBLIC EplTimerHighReskDelInstance(void);
+tEplKernel PUBLIC hrestimer_delInstance(void);
 
-tEplKernel PUBLIC EplTimerHighReskModifyTimerNs(tEplTimerHdl*     pTimerHdl_p,
+tEplKernel PUBLIC hrestimer_modifyTimer(tEplTimerHdl*     pTimerHdl_p,
                                     unsigned long long  ullTimeNs_p,
                                     tEplTimerkCallback  pfnCallback_p,
                                     unsigned long       ulArgument_p,
                                     BOOL                fContinuously_p) SECTION_HRTIMER_MODTIMER;
 
-tEplKernel PUBLIC EplTimerHighReskDeleteTimer(tEplTimerHdl*     pTimerHdl_p);
+tEplKernel PUBLIC hrestimer_deleteTimer(tEplTimerHdl*     pTimerHdl_p);
 
 UINT32 PUBLIC timestamp_calcTimeDiff(tEplTgtTimeStamp* pTimeStampPrevious_p,
                                      tEplTgtTimeStamp* pTimeStampCurrent_p);
+
 #endif  // #ifndef _EPLTIMERHIGHRESK_H_
 
 

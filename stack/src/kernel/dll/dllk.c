@@ -109,7 +109,7 @@ tEplKernel dllk_addInstance(tDllkInitParam* pInitParam_p)
 
     //jba able to work without hresk?
 #if EPL_TIMER_USE_HIGHRES != FALSE
-    if ((ret = EplTimerHighReskInit()) != kEplSuccessful)
+    if ((ret = hrestimer_init()) != kEplSuccessful)
         return ret;
 #endif
 
@@ -204,7 +204,7 @@ tEplKernel dllk_delInstance(void)
 #endif
 
 #if EPL_TIMER_USE_HIGHRES != FALSE
-    ret = EplTimerHighReskDelInstance();
+    ret = hrestimer_delInstance();
 #endif
 
     ret = edrv_shutdown();
@@ -977,7 +977,7 @@ tEplKernel dllk_cbCnTimer(tEplTimerEventArg* pEventArg_p)
         goto Exit;
 
     // restart the timer to detect further loss of SoC
-    ret = EplTimerHighReskModifyTimerNs(&dllkInstance_g.timerHdlCycle,
+    ret = hrestimer_modifyTimer(&dllkInstance_g.timerHdlCycle,
                dllkInstance_g.dllConfigParam.cycleLen, dllk_cbCnTimer, 0L, FALSE);
     if (ret != kEplSuccessful)
         goto Exit;
@@ -1418,7 +1418,7 @@ tEplKernel dllk_cleanupLocalNode(tNmtState oldNmtState_p)
 
     // delete timer
 #if EPL_TIMER_USE_HIGHRES != FALSE
-    if ((ret = EplTimerHighReskDeleteTimer(&dllkInstance_g.timerHdlCycle)) != kEplSuccessful)
+    if ((ret = hrestimer_deleteTimer(&dllkInstance_g.timerHdlCycle)) != kEplSuccessful)
         return ret;
 #endif
 

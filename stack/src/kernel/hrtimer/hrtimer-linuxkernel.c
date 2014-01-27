@@ -165,7 +165,7 @@ enum hrtimer_restart EplTimerHighReskCallback (struct hrtimer* pTimer_p);
 
 //---------------------------------------------------------------------------
 //
-// Function:    EplTimerHighReskInit()
+// Function:    hrestimer_init()
 //
 // Description: initializes the high resolution timer module.
 //
@@ -177,11 +177,11 @@ enum hrtimer_restart EplTimerHighReskCallback (struct hrtimer* pTimer_p);
 //
 //---------------------------------------------------------------------------
 
-tEplKernel PUBLIC EplTimerHighReskInit(void)
+tEplKernel PUBLIC hrestimer_init(void)
 {
 tEplKernel  Ret;
 
-    Ret = EplTimerHighReskAddInstance();
+    Ret = hrestimer_addInstance();
 
     return Ret;
 
@@ -190,7 +190,7 @@ tEplKernel  Ret;
 
 //---------------------------------------------------------------------------
 //
-// Function:    EplTimerHighReskAddInstance()
+// Function:    hrestimer_addInstance()
 //
 // Description: initializes the high resolution timer module.
 //
@@ -202,7 +202,7 @@ tEplKernel  Ret;
 //
 //---------------------------------------------------------------------------
 
-tEplKernel PUBLIC EplTimerHighReskAddInstance(void)
+tEplKernel PUBLIC hrestimer_addInstance(void)
 {
 tEplKernel                   Ret;
 unsigned int                 uiIndex;
@@ -247,7 +247,7 @@ unsigned int                 uiIndex;
 
 //---------------------------------------------------------------------------
 //
-// Function:    EplTimerHighReskDelInstance()
+// Function:    hrestimer_delInstance()
 //
 // Description: shuts down the high resolution timer module.
 //
@@ -259,7 +259,7 @@ unsigned int                 uiIndex;
 //
 //---------------------------------------------------------------------------
 
-tEplKernel PUBLIC EplTimerHighReskDelInstance(void)
+tEplKernel PUBLIC hrestimer_delInstance(void)
 {
 tEplTimerHighReskTimerInfo*  pTimerInfo;
 tEplKernel                   Ret;
@@ -287,7 +287,7 @@ unsigned int                 uiIndex;
 
 //---------------------------------------------------------------------------
 //
-// Function:    EplTimerHighReskModifyTimerNs()
+// Function:    hrestimer_modifyTimer()
 //
 // Description: modifies the timeout of the timer with the specified handle.
 //              If the handle the pointer points to is zero, the timer must
@@ -315,7 +315,7 @@ unsigned int                 uiIndex;
 //
 //---------------------------------------------------------------------------
 
-tEplKernel PUBLIC EplTimerHighReskModifyTimerNs(tEplTimerHdl*     pTimerHdl_p,
+tEplKernel PUBLIC hrestimer_modifyTimer(tEplTimerHdl*     pTimerHdl_p,
                                     unsigned long long  ullTimeNs_p,
                                     tEplTimerkCallback  pfnCallback_p,
                                     unsigned long       ulArgument_p,
@@ -415,7 +415,7 @@ Exit:
 
 //---------------------------------------------------------------------------
 //
-// Function:    EplTimerHighReskDeleteTimer()
+// Function:    hrestimer_deleteTimer()
 //
 // Description: deletes the timer with the specified handle. Afterward the
 //              handle is set to zero.
@@ -428,7 +428,7 @@ Exit:
 //
 //---------------------------------------------------------------------------
 
-tEplKernel PUBLIC EplTimerHighReskDeleteTimer(tEplTimerHdl* pTimerHdl_p)
+tEplKernel PUBLIC hrestimer_deleteTimer(tEplTimerHdl* pTimerHdl_p)
 {
 tEplKernel                  Ret = kEplSuccessful;
 unsigned int                uiIndex;

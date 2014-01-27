@@ -333,7 +333,7 @@ static tEplKernel processNmtStateChange(tNmtState newNmtState_p, tNmtState oldNm
         // node processes only async frames
         case kNmtCsPreOperational1:
 #if EPL_TIMER_USE_HIGHRES != FALSE
-            if ((ret = EplTimerHighReskDeleteTimer(&dllkInstance_g.timerHdlCycle)) != kEplSuccessful)
+            if ((ret = hrestimer_deleteTimer(&dllkInstance_g.timerHdlCycle)) != kEplSuccessful)
                 return ret;
 #endif
             /// deactivate sync generation
@@ -430,7 +430,7 @@ static tEplKernel processNmtStateChange(tNmtState newNmtState_p, tNmtState oldNm
 #if defined (CONFIG_INCLUDE_NMT_MN)
         case kNmtMsPreOperational1:
 #if EPL_TIMER_USE_HIGHRES != FALSE
-            ret = EplTimerHighReskDeleteTimer(&dllkInstance_g.timerHdlCycle);
+            ret = hrestimer_deleteTimer(&dllkInstance_g.timerHdlCycle);
             if (ret != kEplSuccessful)
                 return ret;
 #endif
@@ -1057,7 +1057,7 @@ static tEplKernel processStartReducedCycle(void)
 #if EPL_TIMER_USE_HIGHRES != FALSE
     if (dllkInstance_g.dllConfigParam.asyncSlotTimeout != 0)
     {
-        ret = EplTimerHighReskModifyTimerNs(&dllkInstance_g.timerHdlCycle,
+        ret = hrestimer_modifyTimer(&dllkInstance_g.timerHdlCycle,
                                             dllkInstance_g.dllConfigParam.asyncSlotTimeout,
                                             dllk_cbMnTimerCycle, 0L, FALSE);
     }

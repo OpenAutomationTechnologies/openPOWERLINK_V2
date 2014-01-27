@@ -136,7 +136,7 @@ static tEplTimerHighReskInstance    EplTimerHighReskInstance_l;
 //=========================================================================//
 
 //---------------------------------------------------------------------------
-// Function:    EplTimerHighReskInit()
+// Function:    hrestimer_init()
 //
 // Description: initializes the high resolution timer module.
 //
@@ -144,17 +144,17 @@ static tEplTimerHighReskInstance    EplTimerHighReskInstance_l;
 //
 // Return:      tEplKernel      = error code
 //---------------------------------------------------------------------------
-tEplKernel PUBLIC EplTimerHighReskInit(void)
+tEplKernel PUBLIC hrestimer_init(void)
 {
     tEplKernel  Ret;
 
-    Ret = EplTimerHighReskAddInstance();
+    Ret = hrestimer_addInstance();
 
     return Ret;
 }
 
 //---------------------------------------------------------------------------
-// Function:    EplTimerHighReskAddInstance()
+// Function:    hrestimer_addInstance()
 //
 // Description: initializes the high resolution timer module.
 //
@@ -162,7 +162,7 @@ tEplKernel PUBLIC EplTimerHighReskInit(void)
 //
 // Return:      tEplKernel      = error code
 //---------------------------------------------------------------------------
-tEplKernel PUBLIC EplTimerHighReskAddInstance(void)
+tEplKernel PUBLIC hrestimer_addInstance(void)
 {
     tEplKernel                   Ret;
     UINT                         uiIndex;
@@ -195,7 +195,7 @@ Exit:
 }
 
 //---------------------------------------------------------------------------
-// Function:    EplTimerHighReskDelInstance()
+// Function:    hrestimer_delInstance()
 //
 // Description: shuts down the high resolution timer module.
 //
@@ -203,7 +203,7 @@ Exit:
 //
 // Return:      tEplKernel      = error code
 //---------------------------------------------------------------------------
-tEplKernel PUBLIC EplTimerHighReskDelInstance(void)
+tEplKernel PUBLIC hrestimer_delInstance(void)
 {
     tEplTimerHighReskTimerInfo* pTimerInfo;
     tEplKernel                  Ret;
@@ -223,7 +223,7 @@ tEplKernel PUBLIC EplTimerHighReskDelInstance(void)
 }
 
 //---------------------------------------------------------------------------
-// Function:    EplTimerHighReskModifyTimerNs()
+// Function:    hrestimer_modifyTimer()
 //
 // Description: modifies the timeout of the timer with the specified handle.
 //              If the handle the pointer points to is zero, the timer must
@@ -241,7 +241,7 @@ tEplKernel PUBLIC EplTimerHighReskDelInstance(void)
 //
 // Return:      tEplKernel      = error code
 //---------------------------------------------------------------------------
-tEplKernel PUBLIC EplTimerHighReskModifyTimerNs(tEplTimerHdl*     pTimerHdl_p,
+tEplKernel PUBLIC hrestimer_modifyTimer(tEplTimerHdl*     pTimerHdl_p,
                                     ULONGLONG           ullTimeNs_p,
                                     tEplTimerkCallback  pfnCallback_p,
                                     ULONG               ulArgument_p,
@@ -354,7 +354,7 @@ tEplKernel PUBLIC EplTimerHighReskModifyTimerNs(tEplTimerHdl*     pTimerHdl_p,
         RelTime.it_interval.tv_sec = 0;
     }
 #if 0
-    EPL_DBGLVL_TIMERH_TRACE("EplTimerHighReskModifyTimerNs() timer=%lx ",
+    EPL_DBGLVL_TIMERH_TRACE("hrestimer_modifyTimer() timer=%lx ",
             pTimerInfo->m_EventArg.m_TimerHdl);
     EPL_DBGLVL_TIMERH_TRACE("        timeout=%ld:%ld/%ld:%ld\n",
            RelTime.it_value.tv_sec, RelTime.it_value.tv_nsec,
@@ -368,7 +368,7 @@ Exit:
 }
 
 //---------------------------------------------------------------------------
-// Function:    EplTimerHighReskDeleteTimer()
+// Function:    hrestimer_deleteTimer()
 //
 // Description: deletes the timer with the specified handle. Afterward the
 //              handle is set to zero.
@@ -379,7 +379,7 @@ Exit:
 //
 // State:       not tested
 //---------------------------------------------------------------------------
-tEplKernel PUBLIC EplTimerHighReskDeleteTimer(tEplTimerHdl* pTimerHdl_p)
+tEplKernel PUBLIC hrestimer_deleteTimer(tEplTimerHdl* pTimerHdl_p)
 {
     tEplKernel                  Ret = kEplSuccessful;
     UINT                        uiIndex;

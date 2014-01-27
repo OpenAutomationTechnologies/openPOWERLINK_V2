@@ -326,7 +326,7 @@ tEplKernel edrvcyclic_startCycle(void)
     instance_l.currentTxBufferEntry = 0;
     EPL_MEMSET(instance_l.apTxBufferList, 0, sizeof (*instance_l.apTxBufferList) * instance_l.maxTxBufferCount * 2);
 
-    ret = EplTimerHighReskModifyTimerNs(&instance_l.timerHdlCycle,
+    ret = hrestimer_modifyTimer(&instance_l.timerHdlCycle,
             instance_l.cycleLengthUs * 1000ULL, timerHdlCycleCb, 0L, FALSE);
 
     //the next cycle value is not valid!
@@ -349,7 +349,7 @@ This function stops the cycles.
 //------------------------------------------------------------------------------
 tEplKernel edrvcyclic_stopCycle(void)
 {
-    return EplTimerHighReskDeleteTimer(&instance_l.timerHdlCycle);
+    return hrestimer_deleteTimer(&instance_l.timerHdlCycle);
 }
 
 //------------------------------------------------------------------------------
@@ -642,12 +642,12 @@ static tEplKernel processTxBufferList(void)
     }
 
     //set up next timer interrupt
-    ret = EplTimerHighReskModifyTimerNs(&instance_l.timerHdlCycle, nextTimerIrqNs,
+    ret = hrestimer_modifyTimer(&instance_l.timerHdlCycle, nextTimerIrqNs,
             timerHdlCycleCb, 0L, FALSE);
 
     if(ret != kEplSuccessful)
     {
-        PRINTF("%s: EplTimerHighReskModifyTimerNs ret=0x%X\n", __func__, ret);
+        PRINTF("%s: hrestimer_modifyTimer ret=0x%X\n", __func__, ret);
         goto Exit;
     }
 
@@ -676,12 +676,12 @@ static tEplKernel processCycleViolation(UINT32 nextTimerIrqNs_p)
     tEplKernel ret;
 
     //set up next timer interrupt
-    ret = EplTimerHighReskModifyTimerNs(&instance_l.timerHdlCycle, nextTimerIrqNs_p,
+    ret = hrestimer_modifyTimer(&instance_l.timerHdlCycle, nextTimerIrqNs_p,
             timerHdlCycleCb, 0L, FALSE);
 
     if (ret != kEplSuccessful)
     {
-        PRINTF("%s: EplTimerHighReskModifyTimerNs ret=0x%X\n", __func__, ret);
+        PRINTF("%s: hrestimer_modifyTimer ret=0x%X\n", __func__, ret);
         goto Exit;
     }
 

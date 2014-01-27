@@ -304,7 +304,7 @@ tEplKernel edrvcyclic_startCycle(void)
     EPL_MEMSET(edrvcyclicInstance_l.ppTxBufferList, 0,
         sizeof (*edrvcyclicInstance_l.ppTxBufferList) * edrvcyclicInstance_l.maxTxBufferCount * 2);
 
-    ret = EplTimerHighReskModifyTimerNs(&edrvcyclicInstance_l.timerHdlCycle,
+    ret = hrestimer_modifyTimer(&edrvcyclicInstance_l.timerHdlCycle,
         edrvcyclicInstance_l.cycleTimeUs * 1000ULL,
         timerHdlCycleCb,
         0L,
@@ -333,8 +333,8 @@ tEplKernel edrvcyclic_stopCycle(void)
 {
     tEplKernel ret = kEplSuccessful;
 
-    ret = EplTimerHighReskDeleteTimer(&edrvcyclicInstance_l.timerHdlCycle);
-    ret = EplTimerHighReskDeleteTimer(&edrvcyclicInstance_l.timerHdlSlot);
+    ret = hrestimer_deleteTimer(&edrvcyclicInstance_l.timerHdlCycle);
+    ret = hrestimer_deleteTimer(&edrvcyclicInstance_l.timerHdlSlot);
 
 #if EDRV_CYCLIC_USE_DIAGNOSTICS != FALSE
     edrvcyclicInstance_l.startCycleTimeStamp = 0;
@@ -635,7 +635,7 @@ static tEplKernel processTxBufferList(void)
         }
         else
         {
-            ret = EplTimerHighReskModifyTimerNs(&edrvcyclicInstance_l.timerHdlSlot,
+            ret = hrestimer_modifyTimer(&edrvcyclicInstance_l.timerHdlSlot,
                 pTxBuffer->timeOffsetNs,
                 timerHdlSlotCb,
                 0L,
