@@ -119,9 +119,9 @@ This function initializes the high-resolution timer module.
 \ingroup module_hrtimer
 */
 //------------------------------------------------------------------------------
-tEplKernel EplTimerHighReskInit(void)
+tEplKernel hrestimer_init(void)
 {
-    return EplTimerHighReskAddInstance();
+    return hrestimer_addInstance();
 }
 
 //------------------------------------------------------------------------------
@@ -135,7 +135,7 @@ This function adds a high-resolution timer module instance.
 \ingroup module_hrtimer
 */
 //------------------------------------------------------------------------------
-tEplKernel EplTimerHighReskAddInstance(void)
+tEplKernel hrestimer_addInstance(void)
 {
     tEplKernel ret = kEplSuccessful;
 
@@ -160,7 +160,7 @@ This function deletes the high-resolution timer module instance.
 \ingroup module_hrtimer
 */
 //------------------------------------------------------------------------------
-tEplKernel EplTimerHighReskDelInstance(void)
+tEplKernel hrestimer_delInstance(void)
 {
     tEplKernel ret = kEplSuccessful;
 
@@ -199,7 +199,7 @@ returned by this function. If these are unequal, the call can be discarded.
 \ingroup module_hrtimer
 */
 //------------------------------------------------------------------------------
-tEplKernel EplTimerHighReskModifyTimerNs(tEplTimerHdl* pTimerHdl_p,
+tEplKernel hrestimer_modifyTimer(tEplTimerHdl* pTimerHdl_p,
         ULONGLONG timeNs_p, tEplTimerkCallback pfnCb_p,
         ULONG arg_p, BOOL fContinuously_p)
 {
@@ -297,7 +297,7 @@ is set to zero.
 \ingroup module_hrtimer
 */
 //------------------------------------------------------------------------------
-tEplKernel EplTimerHighReskDeleteTimer(tEplTimerHdl* pTimerHdl_p)
+tEplKernel hrestimer_deleteTimer(tEplTimerHdl* pTimerHdl_p)
 {
     tEplKernel  ret = kEplSuccessful;
     UINT        index;

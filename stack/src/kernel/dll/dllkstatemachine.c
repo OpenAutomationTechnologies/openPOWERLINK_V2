@@ -345,7 +345,7 @@ static tEplKernel processNmtMsFullCycle(tNmtState nmtState_p, tNmtEvent nmtEvent
                 case kDllMsNonCyclic:
                     // start continuous cycle timer
                     // ASndTimeout is checked on next SoC Tx callback function
-                    ret = EplTimerHighReskDeleteTimer(&dllkInstance_g.timerHdlCycle);
+                    ret = hrestimer_deleteTimer(&dllkInstance_g.timerHdlCycle);
                     if (ret != kEplSuccessful)
                         return ret;
 

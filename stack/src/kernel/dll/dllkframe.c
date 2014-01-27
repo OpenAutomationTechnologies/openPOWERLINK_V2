@@ -568,7 +568,7 @@ void dllk_processTransmittedSoa(tEdrvTxBuffer * pTxBuffer_p)
     if ((dllkInstance_g.dllState == kDllMsNonCyclic) &&
         (dllkInstance_g.dllConfigParam.asyncSlotTimeout != 0))
     {
-        ret = EplTimerHighReskModifyTimerNs(&dllkInstance_g.timerHdlCycle,
+        ret = hrestimer_modifyTimer(&dllkInstance_g.timerHdlCycle,
                                             dllkInstance_g.dllConfigParam.asyncSlotTimeout,
                                             dllk_cbMnTimerCycle, 0L, FALSE);
         if (ret != kEplSuccessful)
@@ -1741,7 +1741,7 @@ static tEplKernel processReceivedSoc(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtSt
 #if EPL_TIMER_USE_HIGHRES != FALSE
     if (dllkInstance_g.frameTimeout != 0)
     {
-        EplTimerHighReskModifyTimerNs(&dllkInstance_g.timerHdlCycle, dllkInstance_g.frameTimeout,
+        hrestimer_modifyTimer(&dllkInstance_g.timerHdlCycle, dllkInstance_g.frameTimeout,
                                       dllk_cbCnTimer, 0L, FALSE);
     }
 #endif
