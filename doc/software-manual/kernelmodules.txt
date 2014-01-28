@@ -126,3 +126,41 @@ Ethernet packets will be transfered in the asynchronous phase of POWERLINK.
 \ingroup kernel_layer
 */
 //------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+/**
+\defgroup module_hrestimer hrestimer
+
+\brief High-resolution timer module
+
+The high-resolution timer module provides several functions for timers with
+high precision needed by the openPOWERLINK stack for timing the POWERLINKC cycle.
+
+\ingroup kernel_layer
+*/
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+/**
+\defgroup module_synctimer synctimer
+
+\brief Synchronisation timer module
+
+The synchronisation timer module provides functions for synchronisation of a CN
+to the POWERLINK cycle.
+
+\ingroup kernel_layer
+*/
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+/**
+\defgroup module_timestamp timestamp
+
+\brief Timestamp module
+
+The timestamp module provides some helper functions for handling timestamps.
+
+\ingroup kernel_layer
+*/
+//------------------------------------------------------------------------------
