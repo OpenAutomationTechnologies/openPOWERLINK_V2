@@ -1,120 +1,85 @@
-/****************************************************************************
+/**
+********************************************************************************
+\file   synctimer.h
 
-  (c) SYSTEC electronic GmbH, D-07973 Greiz, August-Bebel-Str. 29
-      www.systec-electronic.com
+\brief  Definitions for synchronization timer module
 
-  Project:      openPOWERLINK
+This file contains the definitions for the synchronization timer module.
 
-  Description:  include file for EPL timer synchronization module
+*******************************************************************************/
 
-  License:
+/*------------------------------------------------------------------------------
+Copyright (c) 2013, SYSTEC electronic GmbH
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+All rights reserved.
 
-    Redistribution and use in source and binary forms, with or without
-    modification, are permitted provided that the following conditions
-    are met:
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+    * Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above copyright
+      notice, this list of conditions and the following disclaimer in the
+      documentation and/or other materials provided with the distribution.
+    * Neither the name of the copyright holders nor the
+      names of its contributors may be used to endorse or promote products
+      derived from this software without specific prior written permission.
 
-    1. Redistributions of source code must retain the above copyright
-       notice, this list of conditions and the following disclaimer.
-
-    2. Redistributions in binary form must reproduce the above copyright
-       notice, this list of conditions and the following disclaimer in the
-       documentation and/or other materials provided with the distribution.
-
-    3. Neither the name of SYSTEC electronic GmbH nor the names of its
-       contributors may be used to endorse or promote products derived
-       from this software without prior written permission. For written
-       permission, please contact info@systec-electronic.com.
-
-    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-    LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-    FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-    COPYRIGHT HOLDERS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-    INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-    BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-    LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-    CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-    LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-    ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-    POSSIBILITY OF SUCH DAMAGE.
-
-    Severability Clause:
-
-        If a provision of this License is or becomes illegal, invalid or
-        unenforceable in any jurisdiction, that shall not affect:
-        1. the validity or enforceability in that jurisdiction of any other
-           provision of this License; or
-        2. the validity or enforceability in other jurisdictions of that or
-           any other provision of this License.
-
-  -------------------------------------------------------------------------
-
-                $RCSfile$
-
-                $Author$
-
-                $Revision$  $Date$
-
-                $State$
-
-                Build Environment:
-                    GCC V3.4
-
-  -------------------------------------------------------------------------
-
-  Revision History:
-
-  2009/09/24 m.u.:   start of the implementation
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL COPYRIGHT HOLDERS BE LIABLE FOR ANY
+DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+------------------------------------------------------------------------------*/
 
 
-****************************************************************************/
+#ifndef _INC_synctimer_H_
+#define _INC_synctimer_H_
 
-#ifndef _EPLTIMERSYNCK_H_
-#define _EPLTIMERSYNCK_H_
+//------------------------------------------------------------------------------
+// includes
+//------------------------------------------------------------------------------
 
-#include "EplInc.h"
+#include <EplInc.h>
 
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // const defines
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // typedef
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+typedef tEplKernel (*tSyncTimerCbSync) (void);
+typedef tEplKernel (*tSyncTimerCbLossOfSync) (void);
 
-
-typedef tEplKernel (* tEplTimerSynckCbSync) (void);
-typedef tEplKernel (* tEplTimerSynckCbLossOfSync) (void);
-
-
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // function prototypes
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
-tEplKernel PUBLIC EplTimerSynckAddInstance(void);
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-tEplKernel PUBLIC EplTimerSynckDelInstance(void);
+tEplKernel synctimer_addInstance(void);
+tEplKernel synctimer_delInstance(void);
+tEplKernel synctimer_registerHandler(tSyncTimerCbSync pfnTimerSynckCbSync_p);
+tEplKernel synctimer_registerLossOfSyncHandler(tSyncTimerCbLossOfSync pfnTimerSynckCbLossOfSync_p);
+tEplKernel synctimer_registerLossOfSyncHandler2(tSyncTimerCbLossOfSync pfnTimerSynckCbLossOfSync2_p);
+tEplKernel synctimer_setSyncShift(UINT32 advanceShift_p);
+tEplKernel synctimer_setCycleLen(UINT32 cycleLen_p);
+tEplKernel synctimer_setLossOfSyncTolerance(UINT32 lossOfSyncTolerance_p);
+tEplKernel synctimer_setLossOfSyncTolerance2(UINT32 lossOfSyncTolerance2_p);
+tEplKernel synctimer_syncTriggerAtTimeStamp(tEplTgtTimeStamp* pTimeStamp_p);
+tEplKernel synctimer_stopSync(void);
+void       synctimer_enableExtSyncIrq(UINT32 syncIntCycle_p, UINT32 pulseWidth_p);
+void       synctimer_disableExtSyncIrq(void);
 
-tEplKernel PUBLIC EplTimerSynckRegSyncHandler(tEplTimerSynckCbSync pfnTimerSynckCbSync_p);
+#ifdef __cplusplus
+}
+#endif
 
-tEplKernel PUBLIC EplTimerSynckRegLossOfSyncHandler(tEplTimerSynckCbLossOfSync pfnTimerSynckCbLossOfSync_p);
-
-tEplKernel PUBLIC EplTimerSynckRegLossOfSyncHandler2(tEplTimerSynckCbLossOfSync pfnTimerSynckCbLossOfSync2_p);
-
-tEplKernel PUBLIC EplTimerSynckSetSyncShiftUs(DWORD dwAdvanceShiftUs_p);
-
-tEplKernel PUBLIC EplTimerSynckSetCycleLenUs(DWORD dwCycleLenUs_p);
-
-tEplKernel PUBLIC EplTimerSynckSetLossOfSyncToleranceNs(DWORD dwLossOfSyncToleranceNs_p);
-
-tEplKernel PUBLIC EplTimerSynckSetLossOfSyncTolerance2Ns(DWORD dwLossOfSyncTolerance2Ns_p);
-
-tEplKernel PUBLIC EplTimerSynckTriggerAtTimeStamp(tEplTgtTimeStamp* pTimeStamp_p);
-
-tEplKernel PUBLIC EplTimerSynckStopSync(void);
-
-void PUBLIC EplTimerSynckExtSyncIrqEnable (DWORD wSyncIntCycle_p,
-                                                DWORD dwPulseWidthNs_p);
-void PUBLIC EplTimerSynckExtSyncIrqDisable (void);
-
-#endif  // #ifndef _EPLTIMERSYNCK_H_
+#endif /* _INC_synctimer_H_ */

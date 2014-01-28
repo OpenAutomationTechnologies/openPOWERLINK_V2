@@ -6,7 +6,7 @@
 
 This file contains the implementation of the openMAC synchronization timer module.
 
-\ingroup module_hrtimer
+\ingroup module_synctimer
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
@@ -105,13 +105,13 @@ typedef struct
 
 typedef struct
 {
-    tEplTimerSynckCbSync        pfnSyncCb;
-    UINT32                      lossOfSyncToleranceNs;
-    tEplTimerSynckCbLossOfSync  pfnLossOfSyncCb;
+    tSyncTimerCbSync            pfnSyncCb;
+    UINT32                      lossOfSyncTolerance;
+    tSyncTimerCbLossOfSync      pfnLossOfSyncCb;
     UINT32                      lossOfSyncTimeout;
 #if (EPL_TIMER_SYNC_SECOND_LOSS_OF_SYNC != FALSE)
-    UINT32                      lossOfSyncTolerance2Ns;
-    tEplTimerSynckCbLossOfSync  pfnLossOfSync2Cb;
+    UINT32                      lossOfSyncTolerance2;
+    tSyncTimerCbLossOfSync      pfnLossOfSync2Cb;
     UINT32                      lossOfSyncTimeout2;
 #endif
     // EplTimerSynckCtrl specific
@@ -161,7 +161,7 @@ static void ctrlUpdateRejectThreshold(void);
 static tEplKernel drvModifyTimerAbs(UINT timerHdl_p, UINT32 absoluteTime_p);
 
 static tEplKernel drvModifyTimerRel(UINT timerHdl_p, INT timeAdjustment_p,
-        UINT32* pAbsoluteTime_p, BOOL* pfAbsoluteTimeAlreadySet_p);
+                                    UINT32* pAbsoluteTime_p, BOOL* pfAbsoluteTimeAlreadySet_p);
 
 static tEplKernel drvDeleteTimer(UINT timerHdl_p);
 
@@ -177,10 +177,10 @@ This function initializes the Synchronization timer module.
 
 \return The function returns a tEplKernel error code.
 
-\ingroup module_hrtimer
+\ingroup module_synctimer
 */
 //------------------------------------------------------------------------------
-tEplKernel EplTimerSynckAddInstance (void)
+tEplKernel synctimer_addInstance(void)
 {
     tEplKernel ret = kEplSuccessful;
 
@@ -206,10 +206,10 @@ This function deletes the Synchronization timer module.
 
 \return The function returns a tEplKernel error code.
 
-\ingroup module_hrtimer
+\ingroup module_synctimer
 */
 //------------------------------------------------------------------------------
-tEplKernel EplTimerSynckDelInstance (void)
+tEplKernel synctimer_delInstance(void)
 {
     tEplKernel ret = kEplSuccessful;
 
@@ -238,10 +238,10 @@ This function registers the synchronization handler callback.
 
 \return The function returns a tEplKernel error code.
 
-\ingroup module_hrtimer
+\ingroup module_synctimer
 */
 //------------------------------------------------------------------------------
-tEplKernel EplTimerSynckRegSyncHandler (tEplTimerSynckCbSync pfnSyncCb_p)
+tEplKernel synctimer_registerHandler(tSyncTimerCbSync pfnSyncCb_p)
 {
     tEplKernel ret = kEplSuccessful;
 
@@ -260,10 +260,10 @@ This function registers the loss of synchronization handler callback.
 
 \return The function returns a tEplKernel error code.
 
-\ingroup module_hrtimer
+\ingroup module_synctimer
 */
 //------------------------------------------------------------------------------
-tEplKernel EplTimerSynckRegLossOfSyncHandler (tEplTimerSynckCbLossOfSync pfnLossOfSyncCb_p)
+tEplKernel synctimer_registerLossOfSyncHandler(tSyncTimerCbLossOfSync pfnLossOfSyncCb_p)
 {
     tEplKernel ret = kEplSuccessful;
 
@@ -283,10 +283,10 @@ This function registers the second synchronization handler callback.
 
 \return The function returns a tEplKernel error code.
 
-\ingroup module_hrtimer
+\ingroup module_synctimer
 */
 //------------------------------------------------------------------------------
-tEplKernel EplTimerSynckRegLossOfSyncHandler2 (tEplTimerSynckCbLossOfSync pfnLossOfSync2Cb_p)
+tEplKernel synctimer_registerLossOfSyncHandler2(tSyncTimerCbLossOfSync pfnLossOfSync2Cb_p)
 {
     tEplKernel ret = kEplSuccessful;
 
@@ -302,18 +302,18 @@ tEplKernel EplTimerSynckRegLossOfSyncHandler2 (tEplTimerSynckCbLossOfSync pfnLos
 
 This function sets the negative time shift.
 
-\param  advanceShiftUs_p    Time shift [us]
+\param  advanceShift_p      Time shift in microseconds
 
 \return The function returns a tEplKernel error code.
 
-\ingroup module_hrtimer
+\ingroup module_synctimer
 */
 //------------------------------------------------------------------------------
-tEplKernel EplTimerSynckSetSyncShiftUs (DWORD advanceShiftUs_p)
+tEplKernel synctimer_setSyncShift(UINT32 advanceShift_p)
 {
     tEplKernel ret = kEplSuccessful;
 
-    instance_l.advanceShift = OMETH_US_2_TICKS(advanceShiftUs_p);
+    instance_l.advanceShift = OMETH_US_2_TICKS(advanceShift_p);
 
     return ret;
 }
@@ -324,18 +324,18 @@ tEplKernel EplTimerSynckSetSyncShiftUs (DWORD advanceShiftUs_p)
 
 This function sets the cycle time.
 
-\param  cycleLenUs_p    Cycle time [us]
+\param  cycleLen_p      Cycle time in mircroseconds
 
 \return The function returns a tEplKernel error code.
 
-\ingroup module_hrtimer
+\ingroup module_synctimer
 */
 //------------------------------------------------------------------------------
-tEplKernel EplTimerSynckSetCycleLenUs (DWORD cycleLenUs_p)
+tEplKernel synctimer_setCycleLen(UINT32 cycleLen_p)
 {
     tEplKernel ret = kEplSuccessful;
 
-    ctrlSetConfiguredTimeDiff(OMETH_US_2_TICKS(cycleLenUs_p));
+    ctrlSetConfiguredTimeDiff(OMETH_US_2_TICKS(cycleLen_p));
 
     return ret;
 }
@@ -346,18 +346,18 @@ tEplKernel EplTimerSynckSetCycleLenUs (DWORD cycleLenUs_p)
 
 This function sets the loss of synchronization tolerance.
 
-\param  lossOfSyncToleranceNs_p Loss of sync tolerance [ns]
+\param  lossOfSyncTolerance_p   Loss of sync tolerance in nanoseconds
 
 \return The function returns a tEplKernel error code.
 
-\ingroup module_hrtimer
+\ingroup module_synctimer
 */
 //------------------------------------------------------------------------------
-tEplKernel EplTimerSynckSetLossOfSyncToleranceNs (DWORD lossOfSyncToleranceNs_p)
+tEplKernel synctimer_setLossOfSyncTolerance(UINT32 lossOfSyncTolerance_p)
 {
     tEplKernel ret = kEplSuccessful;
 
-    instance_l.lossOfSyncToleranceNs = lossOfSyncToleranceNs_p;
+    instance_l.lossOfSyncTolerance = lossOfSyncTolerance_p;
 
     ctrlUpdateLossOfSyncTolerance();
 
@@ -371,23 +371,23 @@ tEplKernel EplTimerSynckSetLossOfSyncToleranceNs (DWORD lossOfSyncToleranceNs_p)
 
 This function sets the loss of synchronization tolerance.
 
-\param  lossOfSyncTolerance2Ns_p    Second loss of sync tolerance [ns]
+\param  lossOfSyncTolerance2_p      Second loss of sync tolerance in nanoseconds
 
 \return The function returns a tEplKernel error code.
 
-\ingroup module_hrtimer
+\ingroup module_synctimer
 */
 //------------------------------------------------------------------------------
-tEplKernel EplTimerSynckSetLossOfSyncTolerance2Ns (DWORD lossOfSyncTolerance2Ns_p)
+tEplKernel synctimer_setLossOfSyncTolerance2(UINT32 lossOfSyncTolerance2_p)
 {
     tEplKernel ret = kEplSuccessful;
 
-    instance_l.lossOfSyncTolerance2Ns = lossOfSyncTolerance2Ns_p;
+    instance_l.lossOfSyncTolerance2 = lossOfSyncTolerance2_p;
 
-    if (lossOfSyncTolerance2Ns_p > 0)
+    if (lossOfSyncTolerance2_p > 0)
     {
         instance_l.lossOfSyncTimeout2 = instance_l.configuredTimeDiff
-                + OMETH_NS_2_TICKS(instance_l.lossOfSyncTolerance2Ns);
+                + OMETH_NS_2_TICKS(instance_l.lossOfSyncTolerance2);
     }
     else
     {
@@ -408,10 +408,10 @@ This function sets the synchronization time trigger at a specific time stamp.
 
 \return The function returns a tEplKernel error code.
 
-\ingroup module_hrtimer
+\ingroup module_synctimer
 */
 //------------------------------------------------------------------------------
-tEplKernel EplTimerSynckTriggerAtTimeStamp(tEplTgtTimeStamp* pTimeStamp_p)
+tEplKernel synctimer_syncTriggerAtTimeStamp(tEplTgtTimeStamp* pTimeStamp_p)
 {
     tEplKernel ret = kEplSuccessful;
 
@@ -448,10 +448,10 @@ This function stops the module.
 
 \return The function returns a tEplKernel error code.
 
-\ingroup module_hrtimer
+\ingroup module_synctimer
 */
 //------------------------------------------------------------------------------
-tEplKernel EplTimerSynckStopSync (void)
+tEplKernel synctimer_stopSync(void)
 {
     tEplKernel ret = kEplSuccessful;
 
@@ -475,20 +475,20 @@ tEplKernel EplTimerSynckStopSync (void)
 This function enables the external sync interrupt of 2nd CMP timer
 
 \param  syncIntCycle_p      Trigger external sync int every nth cycle
-\param  pulseWidthNs_p      Pulse width of external sync int.
+\param  pulseWidth_p        Pulse width of external sync interrupt in nanoseconds.
                             If 0 external sync int is just toggled.
 
 \return The function returns a tEplKernel error code.
 
-\ingroup module_hrtimer
+\ingroup module_synctimer
 */
 //------------------------------------------------------------------------------
-void EplTimerSynckExtSyncIrqEnable (DWORD syncIntCycle_p, UINT32 pulseWidthNs_p)
+void synctimer_enableExtSyncIrq(UINT32 syncIntCycle_p, UINT32 pulseWidth_p)
 {
     instance_l.fExtSyncEnable = TRUE;
     instance_l.syncIntCycle = syncIntCycle_p;
 
-    openmac_timerIrqEnable(HWTIMER_EXT_SYNC, pulseWidthNs_p);
+    openmac_timerIrqEnable(HWTIMER_EXT_SYNC, pulseWidth_p);
 }
 
 //------------------------------------------------------------------------------
@@ -499,10 +499,10 @@ This function disables the external sync interrupt of 2nd CMP timer
 
 \return The function returns a tEplKernel error code.
 
-\ingroup module_hrtimer
+\ingroup module_synctimer
 */
 //------------------------------------------------------------------------------
-void EplTimerSynckExtSyncIrqDisable (void)
+void synctimer_disableExtSyncIrq(void)
 {
     instance_l.fExtSyncEnable = FALSE;
     instance_l.syncIntCycle = 0;
@@ -528,7 +528,7 @@ This function adjusts the synchronization mechanism with a filter.
 \return The function returns a tEplKernel error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel ctrlDoSyncAdjustment (UINT32 timeStamp_p)
+static tEplKernel ctrlDoSyncAdjustment(UINT32 timeStamp_p)
 {
     tEplKernel  ret = kEplSuccessful;
     UINT32      actualTimeDiff;
@@ -576,7 +576,7 @@ This function adds the actual time difference for the next synchronization.
 \param  actualTimeDiff_p    Actual time difference
 */
 //------------------------------------------------------------------------------
-static void ctrlAddActualTimeDiff (UINT32 actualTimeDiff_p)
+static void ctrlAddActualTimeDiff(UINT32 actualTimeDiff_p)
 {
     // always add small TimeDiff values
     // reject TimeDiff values which are too large
@@ -606,7 +606,7 @@ static void ctrlAddActualTimeDiff (UINT32 actualTimeDiff_p)
 This function calculates the average of the time differences (filter).
 */
 //------------------------------------------------------------------------------
-static void ctrlCalcMeanTimeDiff (void)
+static void ctrlCalcMeanTimeDiff(void)
 {
     INT     i;
     UINT32  timeDiffSum;
@@ -630,7 +630,7 @@ This function sets the configured time difference.
 \param  configuredTimeDiff_p    Configured time difference
 */
 //------------------------------------------------------------------------------
-static void ctrlSetConfiguredTimeDiff (UINT32 configuredTimeDiff_p)
+static void ctrlSetConfiguredTimeDiff(UINT32 configuredTimeDiff_p)
 {
     INT i;
 
@@ -653,7 +653,7 @@ static void ctrlSetConfiguredTimeDiff (UINT32 configuredTimeDiff_p)
 This function updates the loss of sync tolerance.
 */
 //------------------------------------------------------------------------------
-static void ctrlUpdateLossOfSyncTolerance (void)
+static void ctrlUpdateLossOfSyncTolerance(void)
 {
     ctrlUpdateRejectThreshold();
 }
@@ -665,12 +665,12 @@ static void ctrlUpdateLossOfSyncTolerance (void)
 This function updates the reject threshold
 */
 //------------------------------------------------------------------------------
-static void ctrlUpdateRejectThreshold (void)
+static void ctrlUpdateRejectThreshold(void)
 {
     UINT32  lossOfSyncTolerance;
     UINT32  maxRejectThreshold;
 
-    lossOfSyncTolerance = OMETH_NS_2_TICKS(instance_l.lossOfSyncToleranceNs);
+    lossOfSyncTolerance = OMETH_NS_2_TICKS(instance_l.lossOfSyncTolerance);
     maxRejectThreshold  = instance_l.configuredTimeDiff >> 1;  // half of cycle length
 
     instance_l.rejectThreshold = instance_l.configuredTimeDiff;
@@ -699,7 +699,7 @@ This function returns the absolute time stamp for the next time synchronization.
 \return Next absolute time value.
 */
 //------------------------------------------------------------------------------
-static UINT32 ctrlGetNextAbsoluteTime (UINT timerHdl_p, UINT32 currentTime_p)
+static UINT32 ctrlGetNextAbsoluteTime(UINT timerHdl_p, UINT32 currentTime_p)
 {
     UINT32 nextAbsoluteTime;
 
@@ -920,7 +920,7 @@ static void drvConfigureShortestTimer(void)
 This function calculates the external sync timer value triggering the interrupt.
 */
 //------------------------------------------------------------------------------
-static void drvCalcExtSyncIrqValue (void)
+static void drvCalcExtSyncIrqValue(void)
 {
     tTimerInfo*     pTimerInfo;
     UINT32          targetAbsoluteTime;

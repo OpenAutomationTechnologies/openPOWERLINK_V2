@@ -114,21 +114,21 @@ tEplKernel dllk_addInstance(tDllkInitParam* pInitParam_p)
 #endif
 
 #if (EPL_DLL_PROCESS_SYNC == EPL_DLL_PROCESS_SYNC_ON_TIMER)
-    if ((ret = EplTimerSynckAddInstance()) != kEplSuccessful)
+    if ((ret = synctimer_addInstance()) != kEplSuccessful)
         return ret;
 
-    if ((ret = EplTimerSynckRegSyncHandler(dllk_cbCnTimerSync)) != kEplSuccessful)
+    if ((ret = synctimer_registerHandler(dllk_cbCnTimerSync)) != kEplSuccessful)
         return ret;
 
-    if ((ret = EplTimerSynckRegLossOfSyncHandler(dllk_cbCnLossOfSync)) != kEplSuccessful)
+    if ((ret = synctimer_registerLossOfSyncHandler(dllk_cbCnLossOfSync)) != kEplSuccessful)
         return ret;
 
 #if EPL_DLL_PRES_CHAINING_CN != FALSE
-    if ((ret = EplTimerSynckRegLossOfSyncHandler2(dllk_cbCnPresFallbackTimeout)) != kEplSuccessful)
+    if ((ret = synctimer_registerLossOfSyncHandler2(dllk_cbCnPresFallbackTimeout)) != kEplSuccessful)
         return ret;
 #endif
 
-   if ((ret = EplTimerSynckSetSyncShiftUs(EPL_DLL_SOC_SYNC_SHIFT_US)) != kEplSuccessful)
+   if ((ret = synctimer_setSyncShift(EPL_DLL_SOC_SYNC_SHIFT_US)) != kEplSuccessful)
        return ret;
 #endif
 
@@ -200,7 +200,7 @@ tEplKernel dllk_delInstance(void)
 #endif
 
 #if (EPL_DLL_PROCESS_SYNC == EPL_DLL_PROCESS_SYNC_ON_TIMER)
-    ret = EplTimerSynckDelInstance();
+    ret = synctimer_delInstance();
 #endif
 
 #if EPL_TIMER_USE_HIGHRES != FALSE
@@ -238,7 +238,7 @@ tEplKernel dllk_config(tDllConfigParam * pDllConfigParam_p)
         dllkInstance_g.dllConfigParam.lossOfFrameTolerance = pDllConfigParam_p->lossOfFrameTolerance;
 
 #if (EPL_DLL_PROCESS_SYNC == EPL_DLL_PROCESS_SYNC_ON_TIMER)
-        ret = EplTimerSynckSetLossOfSyncToleranceNs(pDllConfigParam_p->lossOfFrameTolerance);
+        ret = synctimer_setLossOfSyncTolerance(pDllConfigParam_p->lossOfFrameTolerance);
 #endif
     }
     else
@@ -1364,11 +1364,11 @@ tEplKernel dllk_setupLocalNodeCn(void)
 #endif
 
 #if (EPL_DLL_PROCESS_SYNC == EPL_DLL_PROCESS_SYNC_ON_TIMER)
-    ret = EplTimerSynckSetCycleLenUs(dllkInstance_g.dllConfigParam.cycleLen);
+    ret = synctimer_setCycleLen(dllkInstance_g.dllConfigParam.cycleLen);
     if (ret != kEplSuccessful)
         return ret;
 
-    ret = EplTimerSynckSetLossOfSyncToleranceNs(dllkInstance_g.dllConfigParam.lossOfFrameTolerance);
+    ret = synctimer_setLossOfSyncTolerance(dllkInstance_g.dllConfigParam.lossOfFrameTolerance);
     if (ret != kEplSuccessful)
         return ret;
 #endif
@@ -1431,7 +1431,7 @@ tEplKernel dllk_cleanupLocalNode(tNmtState oldNmtState_p)
 #endif
 
 #if (EPL_DLL_PROCESS_SYNC == EPL_DLL_PROCESS_SYNC_ON_TIMER)
-    if ((ret = EplTimerSynckStopSync()) != kEplSuccessful)
+    if ((ret = synctimer_stopSync()) != kEplSuccessful)
         return ret;
 #endif
 
@@ -1758,7 +1758,7 @@ tEplKernel dllk_presChainingEnable (void)
             return Ret;
 
 #if (EPL_DLL_PROCESS_SYNC == EPL_DLL_PROCESS_SYNC_ON_TIMER)
-        Ret = EplTimerSynckSetLossOfSyncTolerance2Ns(dllkInstance_g.prcPResFallBackTimeout);
+        Ret = synctimer_setLossOfSyncTolerance2(dllkInstance_g.prcPResFallBackTimeout);
 #endif
     }
     return Ret;
@@ -1808,7 +1808,7 @@ tEplKernel dllk_presChainingDisable (void)
             return ret;
 
 #if (EPL_DLL_PROCESS_SYNC == EPL_DLL_PROCESS_SYNC_ON_TIMER)
-        ret = EplTimerSynckSetLossOfSyncTolerance2Ns(0);
+        ret = synctimer_setLossOfSyncTolerance2(0);
 #endif
     }
     return ret;

@@ -341,7 +341,7 @@ static tEplKernel processNmtStateChange(tNmtState newNmtState_p, tNmtState oldNm
                 return ret;
 
 #if (EPL_DLL_PROCESS_SYNC == EPL_DLL_PROCESS_SYNC_ON_TIMER)
-            if ((ret = EplTimerSynckStopSync()) != kEplSuccessful)
+            if ((ret = synctimer_stopSync()) != kEplSuccessful)
                 return ret;
 #endif
 
