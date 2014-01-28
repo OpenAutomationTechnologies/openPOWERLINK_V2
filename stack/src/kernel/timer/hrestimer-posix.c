@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   hrtimer-posix.c
+\file   hrestimer-posix.c
 
 \brief  High-resolution timer module for Linux using Posix timer functions
 

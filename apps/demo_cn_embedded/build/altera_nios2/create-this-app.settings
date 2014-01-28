@@ -98,14 +98,14 @@ ${STACKROOT_DIR}/stack/src/kernel/errhnd/errhndkcal-local.c \
 ${STACKROOT_DIR}/stack/src/kernel/event/eventk.c \
 ${STACKROOT_DIR}/stack/src/kernel/event/eventkcalintf-circbuf.c \
 ${STACKROOT_DIR}/stack/src/kernel/event/eventkcal-nooscircbuf.c \
-${STACKROOT_DIR}/stack/src/kernel/hrtimer/hrtimersync-openmac.c \
+${STACKROOT_DIR}/stack/src/kernel/timer/synctimer-openmac.c \
 ${STACKROOT_DIR}/stack/src/kernel/nmt/nmtk.c \
 ${STACKROOT_DIR}/stack/src/kernel/pdo/pdok.c \
 ${STACKROOT_DIR}/stack/src/kernel/pdo/pdokcal.c \
 ${STACKROOT_DIR}/stack/src/kernel/pdo/pdokcalmem-local.c \
 ${STACKROOT_DIR}/stack/src/kernel/pdo/pdokcalsync-null.c \
 ${STACKROOT_DIR}/stack/src/kernel/pdo/pdokcal-triplebufshm.c \
-${STACKROOT_DIR}/stack/src/kernel/hrtimer/timestamp-openmac.c \
+${STACKROOT_DIR}/stack/src/kernel/timer/timestamp-openmac.c \
 ${STACKROOT_DIR}/stack/src/user/api/generic.c \
 ${STACKROOT_DIR}/stack/src/user/api/processimage.c \
 ${STACKROOT_DIR}/stack/src/user/ctrl/ctrlu.c \

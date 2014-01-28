@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   hrtimer-posix_clocknanosleep.c
+\file   hrestimer-posix_clocknanosleep.c
 
 \brief  High-resolution timer module for Linux using Posix clock_nanosleep
 

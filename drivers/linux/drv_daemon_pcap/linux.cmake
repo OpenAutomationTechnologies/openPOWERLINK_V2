@@ -39,7 +39,7 @@ SET (DAEMON_ARCH_SOURCES
      ${EDRV_SOURCE_DIR}/edrv-pcap_linux.c
      ${KERNEL_SOURCE_DIR}/pdo/pdokcalmem-posixshm.c
      ${KERNEL_SOURCE_DIR}/pdo/pdokcalsync-bsdsem.c
-     ${KERNEL_SOURCE_DIR}/hrtimer/hrtimer-posix.c
+     ${KERNEL_SOURCE_DIR}/timer/hrestimer-posix.c
      ${ARCH_SOURCE_DIR}/linux/ftrace-debug.c
      ${KERNEL_SOURCE_DIR}/event/eventkcal-linux.c
      ${KERNEL_SOURCE_DIR}/event/eventkcalintf-circbuf.c
