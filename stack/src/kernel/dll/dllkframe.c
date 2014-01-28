@@ -1724,7 +1724,7 @@ static tEplKernel processReceivedSoc(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtSt
         if ((ret = dllk_postEvent(kEplEventTypeSync)) != kEplSuccessful)
             return ret;
 #elif (EPL_DLL_PROCESS_SYNC == EPL_DLL_PROCESS_SYNC_ON_TIMER)
-        ret = EplTimerSynckTriggerAtTimeStamp(pRxBuffer_p->rxTimeStamp);
+        ret = synctimer_syncTriggerAtTimeStamp(pRxBuffer_p->rxTimeStamp);
         if (ret != kEplSuccessful)
             return ret;
 #endif
@@ -1952,7 +1952,7 @@ static tEplKernel processReceivedSoa(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtSt
 #if (EPL_DLL_PROCESS_SYNC == EPL_DLL_PROCESS_SYNC_ON_TIMER)
                     if (dllkInstance_g.fPrcEnabled != FALSE)
                     {
-                        ret = EplTimerSynckSetLossOfSyncTolerance2Ns(dllkInstance_g.prcPResFallBackTimeout);
+                        ret = synctimer_setLossOfSyncTolerance2(dllkInstance_g.prcPResFallBackTimeout);
                     }
 #endif
                 }
