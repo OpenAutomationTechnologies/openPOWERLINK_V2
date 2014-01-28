@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   hrtimer-linuxkernel.c
+\file   hrestimer-linuxkernel.c
 
 \brief  High-resolution timer module for Linux kernelspace
 

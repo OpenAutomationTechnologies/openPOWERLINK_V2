@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   hrtimer-openmac.c
+\file   hrestimer-openmac.c
 
 \brief  Implementation of openMAC high-resolution timer module
 

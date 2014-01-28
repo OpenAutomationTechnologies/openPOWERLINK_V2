@@ -98,14 +98,14 @@ $(KERNEL_DIR)/errhnd/errhndkcal-local.c \
 $(KERNEL_DIR)/event/eventk.c \
 $(KERNEL_DIR)/event/eventkcalintf-circbuf.c \
 $(KERNEL_DIR)/event/eventkcal-nooscircbuf.c \
-$(KERNEL_DIR)/hrtimer/hrtimersync-openmac.c \
+$(KERNEL_DIR)/timer/synctimer-openmac.c \
 $(KERNEL_DIR)/nmt/nmtk.c \
 $(KERNEL_DIR)/pdo/pdok.c \
 $(KERNEL_DIR)/pdo/pdokcal.c \
 $(KERNEL_DIR)/pdo/pdokcalmem-local.c \
 $(KERNEL_DIR)/pdo/pdokcalsync-null.c \
 $(KERNEL_DIR)/pdo/pdokcal-triplebufshm.c \
-$(KERNEL_DIR)/hrtimer/timestamp-openmac.c \
+$(KERNEL_DIR)/timer/timestamp-openmac.c \
 $(USER_DIR)/timer/timer-generic.c \
 $(USER_DIR)/api/generic.c \
 $(USER_DIR)/api/processimage.c \

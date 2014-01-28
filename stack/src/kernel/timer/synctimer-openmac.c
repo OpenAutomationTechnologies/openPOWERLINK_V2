@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   hrtimersync-openmac.c
+\file   synctimer-openmac.c
 
 \brief  Implementation of openMAC synchronization timer module
 

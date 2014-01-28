@@ -269,7 +269,7 @@ SET(PDO_KCAL_LINUXKERNEL_SOURCES
 
 SET(HARDWARE_DRIVER_LINUXUSER_SOURCES
     ${KERNEL_SOURCE_DIR}/veth/veth-linuxuser.c
-    ${KERNEL_SOURCE_DIR}/hrtimer/hrtimer-posix.c
+    ${KERNEL_SOURCE_DIR}/timer/hrestimer-posix.c
     ${EDRV_SOURCE_DIR}/edrvcyclic.c
     ${EDRV_SOURCE_DIR}/edrv-pcap_linux.c
     )
@@ -281,7 +281,7 @@ SET(HARDWARE_DRIVER_WINDOWS_SOURCES
 
 SET(HARDWARE_DRIVER_LINUXKERNEL_SOURCES
      ${KERNEL_SOURCE_DIR}/veth/veth-linuxkernel.c
-     ${KERNEL_SOURCE_DIR}/hrtimer/hrtimer-linuxkernel.c
+     ${KERNEL_SOURCE_DIR}/timer/hrestimer-linuxkernel.c
      ${EDRV_SOURCE_DIR}/edrvcyclic.c
      )
 

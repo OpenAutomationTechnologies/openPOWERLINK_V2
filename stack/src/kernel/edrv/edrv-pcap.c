@@ -833,7 +833,7 @@ NTSETTIMERRESOLUTION NtSetTimerResolution;
 
 //---------------------------------------------------------------------------
 //
-// Function:    hrtimer_init()
+// Function:    hrestimer_init()
 //
 // Description: initializes the high resolution timer module.
 //

@@ -267,9 +267,9 @@
 			<locationURI>KERNEL_LOC/event/eventkcalintf-circbuf.c</locationURI>
 		</link>
 		<link>
-			<name>stack/kernel/hrtimersync-openmac.c</name>
+			<name>stack/kernel/synctimer-openmac.c</name>
 			<type>1</type>
-			<locationURI>KERNEL_LOC/hrtimer/hrtimersync-openmac.c</locationURI>
+			<locationURI>KERNEL_LOC/timer/synctimer-openmac.c</locationURI>
 		</link>
 		<link>
 			<name>stack/kernel/nmtk.c</name>
@@ -304,7 +304,7 @@
 		<link>
 			<name>stack/kernel/timestamp-openmac.c</name>
 			<type>1</type>
-			<locationURI>KERNEL_LOC/hrtimer/timestamp-openmac.c</locationURI>
+			<locationURI>KERNEL_LOC/timer/timestamp-openmac.c</locationURI>
 		</link>
 		<link>
 			<name>stack/user/ctrlu.c</name>

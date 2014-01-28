@@ -178,7 +178,7 @@ SET(MODULE_SOURCE_FILES
     ${KERNEL_SOURCE_DIR}/errhnd/errhndk.c
     ${KERNEL_SOURCE_DIR}/errhnd/errhndkcal-local.c
     ${KERNEL_SOURCE_DIR}/veth/veth-linuxkernel.c
-    ${KERNEL_SOURCE_DIR}/hrtimer/hrtimer-linuxkernel.c
+    ${KERNEL_SOURCE_DIR}/timer/hrestimer-linuxkernel.c
     ${COMMON_SOURCE_DIR}/circbuf/circbuffer.c
     ${COMMON_SOURCE_DIR}/circbuf/circbuf-linuxkernel.c
     ${COMMON_SOURCE_DIR}/debug.c
