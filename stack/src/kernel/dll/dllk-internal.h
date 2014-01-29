@@ -54,7 +54,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <Benchmark.h>
 
 #if EPL_TIMER_USE_HIGHRES != FALSE
-#include "kernel/EplTimerHighResk.h"
+#include <kernel/hrestimer.h>
 #endif
 
 #include "kernel/dllktgt.h"

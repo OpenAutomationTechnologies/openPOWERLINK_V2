@@ -71,7 +71,7 @@
 ****************************************************************************/
 
 #include "EplInc.h"
-#include "kernel/EplTimerHighResk.h"
+#include "kernel/hrestimer.h"
 #include "Benchmark.h"
 
 //#include <linux/config.h>

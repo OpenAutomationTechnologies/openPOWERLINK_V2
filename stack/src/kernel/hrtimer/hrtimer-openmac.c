@@ -43,7 +43,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <global.h>
 #include <Epl.h>
 
-#include <kernel/EplTimerHighResk.h>
+#include <kernel/hrestimer.h>
 #include <openmac.h>
 #include <omethlib.h>
 
