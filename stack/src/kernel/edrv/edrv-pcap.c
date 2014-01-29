@@ -55,7 +55,7 @@
 #include <iphlpapi.h>
 #include <string.h>
 
-#include "kernel/EplTimerHighResk.h"
+#include <kernel/hrestimer.h>
 
 
 

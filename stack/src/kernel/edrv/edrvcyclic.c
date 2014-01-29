@@ -43,7 +43,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #include <EplInc.h>
 #include <edrv.h>
-#include <kernel/EplTimerHighResk.h>
+#include <kernel/hrestimer.h>
 #include <target.h>
 
 //============================================================================//
