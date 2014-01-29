@@ -202,7 +202,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define PHY_REG1F_OP_100FULL       6
 
 //-------------------- mii interface type --------------------
-volatile typedef struct
+typedef volatile struct
 {
     union
     {
@@ -599,7 +599,7 @@ static OMETH_H        omethCreateInt
     }
 
     // response IPG is defined, calculate value and write to descriptor
-    if(i != ~0)
+    if(i != (unsigned long)~0)
     {
         // calculate value for ipg-register (80 ns offset, 20ns resolution)
         if(i > 80)    i = (i-80)/20;
@@ -665,7 +665,7 @@ static OMETH_H        omethCreateInt
     memset(hEth->config.pRamBase, 0, len);            // reset DPR
 
     //----------------- set all tx descriptor pointers in info structure ----------
-    for(i=1;i != -1;i--)    // process first [1] and then [0]
+    for(i=1;i != (unsigned long)-1;i--)    // process first [1] and then [0]
     {
         pTxInfo = hEth->pTxFree[i] = hEth->pTxNext[i] = hEth->pTxInfo[i];
         if(pTxInfo == 0) continue;
@@ -771,7 +771,7 @@ static OMETH_H        omethCreateInt
 
         pFilterList->pFilterData->pFilterWriteOnly = pFilter->b;
 
-        if(i < (hEth->nbFilter - hEth->nbFilterX))    // normal filter
+        if(i < (unsigned long)(hEth->nbFilter - hEth->nbFilterX))    // normal filter
         {
             pFilterList->pFilterData->len        = OMETH_FILTER_LEN;
             pFilterList->pFilterData->pCommand    = &pFilter->command;

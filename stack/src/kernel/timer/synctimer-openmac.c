@@ -962,6 +962,8 @@ static void drvInterruptHandler(void* pArg_p)
 
     BENCHMARK_MOD_24_SET(4);
 
+    UNUSED_PARAMETER(pArg_p);
+
     timerHdl = instance_l.activeTimerHdl;
     if (timerHdl < TIMER_COUNT)
     {
