@@ -6,7 +6,7 @@
 
 This file contains functions for handling openMAC timestamps.
 
-\ingroup module_eventk
+\ingroup module_timestamp
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
@@ -94,7 +94,8 @@ the result in nanoseconds.
 \param  pTimeStampCurrent_p     Current timestamp
 
 \return The function returns the time difference in nanoseconds.
-\ingroup module_hrtimer
+
+\ingroup module_timestamp
 */
 //------------------------------------------------------------------------------
 UINT32 timestamp_calcTimeDiff(tEplTgtTimeStamp* pTimeStampPrevious_p,
