@@ -1,78 +1,50 @@
-/*******************************************************************************
+/**
+********************************************************************************
+\file   hrtimer-posix_clocknanosleep.c
 
-  File:         EplTimerHighReskposixClockNanosleep.c
+\brief  High-resolution timer module for Linux using Posix clock_nanosleep
 
-  (c) Bernecker + Rainer Industrie-Elektronik Ges.m.b.H.
-      B&R Strasse 1, 5142 Eggelsberg, Austria
-      www.br-automation.com
+This module is the target specific implementation of the high-resolution
+timer module for Linux userspace. It uses Posix clock_nanosleep function for its
+implementation.
 
-  (c) SYSTEC electronic GmbH, D-07973 Greiz, August-Bebel-Str. 29
-      www.systec-electronic.com
-
-  Project:      openPOWERLINK
-
-  Author:       Josef Baumgartner
-
-  Description:  Linux user space implementation of high resolution timers
-                using clock_nanosleep
-
-  TimerHighReskLinuxUser.c contains the high-resolution timer implementation
-  for Linux user space using the clock_nanosleep function and pthreads.
-
-  For each timer a own thread will be created. A timer will be started by
-  initializing its timer structure and wake up the thread through a semaphore.
-  The thread reads the timer information and sleeps by calling clock_nanosleep()
-  until the timeout is reached. Then the registered callback function is
-  called.
-
-  License:
-
-    Redistribution and use in source and binary forms, with or without
-    modification, are permitted provided that the following conditions
-    are met:
-
-    1. Redistributions of source code must retain the above copyright
-       notice, this list of conditions and the following disclaimer.
-
-    2. Redistributions in binary form must reproduce the above copyright
-       notice, this list of conditions and the following disclaimer in the
-       documentation and/or other materials provided with the distribution.
-
-    3. Neither the name of copyright holders nor the names of its
-       contributors may be used to endorse or promote products derived
-       from this software without prior written permission. For written
-       permission, please contact office@br-automation.com.
-
-    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-    LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-    FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-    COPYRIGHT HOLDERS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-    INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-    BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-    LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-    CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-    LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-    ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-    POSSIBILITY OF SUCH DAMAGE.
-
-    Severability Clause:
-
-        If a provision of this License is or becomes illegal, invalid or
-        unenforceable in any jurisdiction, that shall not affect:
-        1. the validity or enforceability in that jurisdiction of any other
-           provision of this License; or
-        2. the validity or enforceability in other jurisdictions of that or
-           any other provision of this License.
-
+\ingroup module_hrestimer
 *******************************************************************************/
 
-//=========================================================================//
-// Includes                                                                //
-//=========================================================================//
-#include "EplInc.h"
-#include "kernel/hrestimer.h"
-#include "Benchmark.h"
+/*------------------------------------------------------------------------------
+Copyright (c) 2012, SYSTEC electronic GmbH
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+    * Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above copyright
+      notice, this list of conditions and the following disclaimer in the
+      documentation and/or other materials provided with the distribution.
+    * Neither the name of the copyright holders nor the
+      names of its contributors may be used to endorse or promote products
+      derived from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL COPYRIGHT HOLDERS BE LIABLE FOR ANY
+DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+------------------------------------------------------------------------------*/
+
+//------------------------------------------------------------------------------
+// includes
+//------------------------------------------------------------------------------
+#include <EplInc.h>
+#include <kernel/hrestimer.h>
+#include <Benchmark.h>
 
 #include <signal.h>
 #include <semaphore.h>
@@ -82,9 +54,13 @@
 #include <pthread.h>
 #include <sys/syscall.h>
 
-//=========================================================================//
-// Definitions                                                             //
-//=========================================================================//
+//============================================================================//
+//            G L O B A L   D E F I N I T I O N S                             //
+//============================================================================//
+
+//------------------------------------------------------------------------------
+// const defines
+//------------------------------------------------------------------------------
 #undef  HIGH_RESK_TIMER_LATENCY_DEBUG   ///< enable/disable latency debugging
 
 #define TIMER_COUNT           2         ///< number of high-resolution timers
@@ -98,408 +74,388 @@
 #define HDL_INIT(Idx)         ((Idx + 1) << TIMERHDL_SHIFT)
 #define HDL_INC(Hdl)          (((Hdl + 1) & TIMERHDL_MASK) | (Hdl & ~TIMERHDL_MASK))
 
-//=========================================================================//
-// Type definitions                                                             //
-//=========================================================================//
+//------------------------------------------------------------------------------
+// module global vars
+//------------------------------------------------------------------------------
 
-/*******************************************************************************
-* \brief       high-resolution timer information structure
-*
-* tEplTimerHighReskTimerInfo defines the structure which contains all
-* necessary information for a high-resolution timer.
-*******************************************************************************/
+//------------------------------------------------------------------------------
+// global function prototypes
+//------------------------------------------------------------------------------
+
+//============================================================================//
+//          P R I V A T E   D E F I N I T I O N S                             //
+//============================================================================//
+
+//------------------------------------------------------------------------------
+// const defines
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// local types
+//------------------------------------------------------------------------------
+
+/**
+\brief  High-resolution timer information structure
+
+The structure contains all necessary information for a high-resolution timer.
+*/
 typedef struct
 {
-    tEplTimerEventArg   m_EventArg;
-    tEplTimerkCallback  m_pfnCallback;          ///< pointer to timer callback function
-    struct timespec     m_startTime;            ///< timestamp of timer start
-    ULONGLONG           m_ullTime;              ///< timer period in nanoseconds
-    pthread_t           m_timerThread;          ///< handle of timer thread
-    sem_t               m_syncSem;              ///< thread synchronisation semaphore
-    BOOL                m_fTerminate;           ///< thread termination flag
-    BOOL                m_fContinuously;        ///< flag determines if timer will be restarted continuously
+    tEplTimerEventArg   eventArg;           ///< Event argument
+    tEplTimerkCallback  pfnCallback;        ///< Pointer to timer callback function
+    struct timespec     startTime;          ///< Timestamp of timer start
+    ULONGLONG           time;               ///< Timer period in nanoseconds
+    pthread_t           timerThreadId;      ///< Handle of timer thread
+    sem_t               syncSem;            ///< Thread synchronisation semaphore
+    BOOL                fTerminate;         ///< Thread termination flag
+    BOOL                fContinue;          ///< Flag determines if timer will be restarted continuously
 #ifdef HIGH_RESK_TIMER_LATENCY_DEBUG
     /* additional variables for latency debugging */
-    LONG                m_maxLatency;           ///< minimum measured timer latency
-    LONG                m_minLatency;           ///< maximum measured timer latency
+    LONG                maxLatency;         ///< Minimum measured timer latency
+    LONG                minLatency;         ///< Maximum measured timer latency
 #endif
-} tEplTimerHighReskTimerInfo;
+} tHresTimerInfo;
 
+/**
+\brief  High-resolution timer instance
 
-/*******************************************************************************
-* \brief       high-resolution timer instance
-*
-* tEplTimerHighReskInstance contains all data of a high-resolution timer
-* instance.
-*******************************************************************************/
+The structure defines a high-resolution timer module instance.
+*/
 typedef struct
 {
-    tEplTimerHighReskTimerInfo  m_aTimerInfo[TIMER_COUNT];
-} tEplTimerHighReskInstance;
+    tHresTimerInfo  aTimerInfo[TIMER_COUNT];    ///< Array with timer information for a set of timers
+} tHresTimerInstance;
 
 //------------------------------------------------------------------------------
-// local vars
+// module local vars
 //------------------------------------------------------------------------------
-static tEplTimerHighReskInstance    EplTimerHighReskInstance_l;
+static tHresTimerInstance    hresTimerInstance_l;
 
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static void * EplTimerHighReskProcessThread(void *pArgument_p);
-static inline void timespec_add (struct timespec *time1_p,
-                                 unsigned long long ullTime_p, struct timespec *result_p);
+static void* timerThread(void *pArgument_p);
+static inline void timespec_add (struct timespec *time1_p, ULONGLONG time_p,
+                                 struct timespec *result_p);
 
 #ifdef HIGH_RESK_TIMER_LATENCY_DEBUG
-static inline void timespec_sub (struct timespec *time1_p,
-                                 struct timespec *time2_p, struct timespec *result_p);
+static inline void timespec_sub (struct timespec *time1_p, struct timespec *time2_p,
+                                 struct timespec *result_p);
 #endif
 
-//=========================================================================//
-//                                                                         //
-//          P U B L I C   F U N C T I O N S                                //
-//                                                                         //
-//=========================================================================//
 
-//---------------------------------------------------------------------------
-// Function:    hrestimer_init()
-//
-// Description: initializes the high resolution timer module.
-//
-// Parameters:  void
-//
-// Return:      tEplKernel      = error code
-//---------------------------------------------------------------------------
-tEplKernel PUBLIC hrestimer_init(void)
+//============================================================================//
+//            P U B L I C   F U N C T I O N S                                 //
+//============================================================================//
+
+//------------------------------------------------------------------------------
+/**
+\brief    Initialize high-resolution timer module
+
+The function initializes the high-resolution timer module
+
+\return Returns a tEplKernel error code.
+
+\ingroup module_hrestimer
+*/
+//------------------------------------------------------------------------------
+tEplKernel hrestimer_init(void)
 {
-    tEplKernel  Ret;
-
-    Ret = hrestimer_addInstance();
-
-    return Ret;
+    return hrestimer_addInstance();
 }
 
-//---------------------------------------------------------------------------
-// Function:    hrestimer_addInstance()
-//
-// Description: initializes the high resolution timer module.
-//
-// Parameters:  void
-//
-// Return:      tEplKernel      = error code
-//---------------------------------------------------------------------------
-tEplKernel PUBLIC hrestimer_addInstance(void)
+//------------------------------------------------------------------------------
+/**
+\brief    Add instance of high-resolution timer module
+
+The function adds an instance of the high-resolution timer module.
+
+\return Returns a tEplKernel error code.
+
+\ingroup module_hrestimer
+*/
+//------------------------------------------------------------------------------
+tEplKernel hrestimer_addInstance(void)
 {
-    tEplKernel                   Ret;
-    UINT                         uiIndex;
-    struct sched_param           schedParam;
-    tEplTimerHighReskTimerInfo*  pTimerInfo;
+    tEplKernel                  ret = kEplSuccessful;
+    UINT                        index;
+    struct sched_param          schedParam;
+    tHresTimerInfo*             pTimerInfo;
 
-    Ret = kEplSuccessful;
-
-    EPL_MEMSET(&EplTimerHighReskInstance_l, 0, sizeof (EplTimerHighReskInstance_l));
+    EPL_MEMSET(&hresTimerInstance_l, 0, sizeof (hresTimerInstance_l));
 
     /* Initialize timer threads for all usable timers. */
-    for (uiIndex = 0; uiIndex < TIMER_COUNT; uiIndex++)
+    for (index = 0; index < TIMER_COUNT; index++)
     {
-        pTimerInfo = &EplTimerHighReskInstance_l.m_aTimerInfo[uiIndex];
-        pTimerInfo->m_fTerminate = FALSE;
+        pTimerInfo = &hresTimerInstance_l.aTimerInfo[index];
+        pTimerInfo->fTerminate = FALSE;
 
 #ifdef HIGH_RESK_TIMER_LATENCY_DEBUG
-        pTimerInfo->m_maxLatency = 0;
-        pTimerInfo->m_minLatency = 999999999;
+        pTimerInfo->maxLatency = 0;
+        pTimerInfo->minLatency = 999999999;
 #endif
 
-        if (sem_init(&pTimerInfo->m_syncSem, 0, 0) != 0)
+        if (sem_init(&pTimerInfo->syncSem, 0, 0) != 0)
         {
             EPL_DBGLVL_ERROR_TRACE("%s() Couldn't init semaphore!\n", __func__);
-            Ret = kEplNoResource;
-            goto Exit;
+            return kEplNoResource;
         }
 
-        if (pthread_create(&pTimerInfo->m_timerThread, NULL, EplTimerHighReskProcessThread,
-                           (void *)uiIndex) != 0)
+        if (pthread_create(&pTimerInfo->timerThreadId, NULL, timerThread, pTimerInfo) != 0)
         {
-            Ret = kEplNoResource;
-            sem_destroy(&pTimerInfo->m_syncSem);
-            goto Exit;
+            sem_destroy(&pTimerInfo->syncSem);
+            return kEplNoResource;
         }
 
         schedParam.__sched_priority = EPL_THREAD_PRIORITY_HIGH;
-        if (pthread_setschedparam(pTimerInfo->m_timerThread, SCHED_FIFO, &schedParam) != 0)
+        if (pthread_setschedparam(pTimerInfo->timerThreadId, SCHED_FIFO, &schedParam) != 0)
         {
             EPL_DBGLVL_ERROR_TRACE("%s() Couldn't set thread scheduling parameters!\n", __func__);
-            Ret = kEplNoResource;
-            sem_destroy(&pTimerInfo->m_syncSem);
-            pthread_cancel(pTimerInfo->m_timerThread);
-            goto Exit;
+            sem_destroy(&pTimerInfo->syncSem);
+            pthread_cancel(pTimerInfo->timerThreadId);
+            return kEplNoResource;
         }
     }
 
-Exit:
-    return Ret;
+    return ret;
 }
 
-//---------------------------------------------------------------------------
-// Function:    hrestimer_delInstance()
-//
-// Description: shuts down the high resolution timer module.
-//
-// Parameters:  void
-//
-// Return:      tEplKernel      = error code
-//---------------------------------------------------------------------------
-tEplKernel PUBLIC hrestimer_delInstance(void)
+//------------------------------------------------------------------------------
+/**
+\brief    Delete instance of high-resolution timer module
+
+The function deletes an instance of the high-resolution timer module.
+
+\return Returns a tEplKernel error code.
+
+\ingroup module_hrestimer
+*/
+//------------------------------------------------------------------------------
+tEplKernel hrestimer_delInstance(void)
 {
-    tEplTimerHighReskTimerInfo* pTimerInfo;
-    tEplKernel                  Ret;
-    UINT                        uiIndex;
+    tHresTimerInfo*         pTimerInfo;
+    tEplKernel              ret = kEplSuccessful;
+    UINT                    index;
 
-    Ret = kEplSuccessful;
-
-    for (uiIndex = 0; uiIndex < TIMER_COUNT; uiIndex++)
+    for (index = 0; index < TIMER_COUNT; index++)
     {
-        pTimerInfo = &EplTimerHighReskInstance_l.m_aTimerInfo[uiIndex];
+        pTimerInfo = &hresTimerInstance_l.aTimerInfo[index];
 
-        pTimerInfo->m_EventArg.m_TimerHdl = 0;
+        pTimerInfo->eventArg.m_TimerHdl = 0;
 
         /* send exit signal to thread */
-        pTimerInfo->m_fContinuously = 0;
-        pTimerInfo->m_fTerminate = TRUE;
-        sem_post(&pTimerInfo->m_syncSem);
+        pTimerInfo->fContinue = 0;
+        pTimerInfo->fTerminate = TRUE;
+        sem_post(&pTimerInfo->syncSem);
 
         /* wait until thread terminates */
-        pthread_join(pTimerInfo->m_timerThread, NULL);
+        pthread_join(pTimerInfo->timerThreadId, NULL);
 
         /* clean up */
-        pTimerInfo->m_pfnCallback = NULL;
-        sem_destroy(&pTimerInfo->m_syncSem);
+        pTimerInfo->pfnCallback = NULL;
+        sem_destroy(&pTimerInfo->syncSem);
     }
 
-    return Ret;
+    return ret;
 }
 
-//---------------------------------------------------------------------------
-// Function:    hrestimer_modifyTimer()
-//
-// Description: modifies the timeout of the timer with the specified handle.
-//              If the handle the pointer points to is zero, the timer must
-//              be created first.
-//              If it is not possible to stop the old timer,
-//              this function always assures that the old timer does not
-//              trigger the callback function with the same handle as the new
-//              timer. That means the callback function must check the passed
-//              handle with the one returned by this function. If these are
-//              unequal, the call can be discarded.
-//
-// Parameters:  pTimerHdl_p     = pointer to timer handle
-//              ullTimeNs_p     = relative timeout in [ns]
-//              pfnCallback_p   = callback function, which is called mutual
-//                                exclusive with the Edrv callback functions
-//                                (Rx and Tx).
-//              ulArgument_p    = user-specific argument
-//              fContinuously_p = if TRUE, callback function will be called
-//                                continuously;
-//                                otherwise, it is a oneshot timer.
-//
-// Return:      tEplKernel      = error code
-//---------------------------------------------------------------------------
-tEplKernel PUBLIC hrestimer_modifyTimer(tEplTimerHdl*     pTimerHdl_p,
-                                    ULONGLONG           ullTimeNs_p,
-                                    tEplTimerkCallback  pfnCallback_p,
-                                    ULONG               ulArgument_p,
-                                    BOOL                fContinuously_p)
+//------------------------------------------------------------------------------
+/**
+\brief    Modify a high-resolution timer
+
+The function modifies the timeout of the timer with the specified handle.
+If the handle, the pointer points to, is zero, the timer must be created first.
+If it is not possible to stop the old timer, this function always assures that
+the old timer does not trigger the callback function with the same handle as
+the new timer. That means the callback function must check the passed handle
+with the one returned by this function. If these are unequal, the call can be
+discarded.
+
+\param  pTimerHdl_p     Pointer to timer handle.
+\param  time_p          Relative timeout in [ns].
+\param  pfnCallback_p   Callback function, which is called when timer expires.
+                        (The function is called mutual exclusive with the Edrv
+                        callback functions (Rx and Tx)).
+\param  argument_p      User-specific argument
+\param  fContinue_p     If TRUE, callback function will be called continuously.
+                        Otherwise, it is a one-shot timer.
+
+\return Returns a tEplKernel error code.
+
+\ingroup module_hrestimer
+*/
+//------------------------------------------------------------------------------
+tEplKernel hrestimer_modifyTimer(tEplTimerHdl* pTimerHdl_p, ULONGLONG time_p,
+                                 tEplTimerkCallback pfnCallback_p, ULONG argument_p,
+                                 BOOL fContinue_p)
 {
-    tEplKernel                   Ret;
-    UINT                         uiIndex;
-    tEplTimerHighReskTimerInfo*  pTimerInfo;
+    tEplKernel              ret = kEplSuccessful;
+    UINT                    index;
+    tHresTimerInfo*         pTimerInfo;
 
-    /*
     EPL_DBGLVL_TIMERH_TRACE("%s() pTimerHdl_p=%08x/%08x\n",
-      __func__, (unsigned int)pTimerHdl_p,(unsigned int)*pTimerHdl_p);
-    */
+                            __func__, (unsigned int)pTimerHdl_p,(unsigned int)*pTimerHdl_p);
 
-    Ret = kEplSuccessful;
-
-    // check pointer to handle
     if(pTimerHdl_p == NULL)
-    {
-        Ret = kEplTimerInvalidHandle;
-        goto Exit;
-    }
+        return kEplTimerInvalidHandle;
 
     if (*pTimerHdl_p == 0)
     {   // no timer created yet
         // search free timer info structure
-        pTimerInfo = &EplTimerHighReskInstance_l.m_aTimerInfo[0];
-        for (uiIndex = 0; uiIndex < TIMER_COUNT; uiIndex++, pTimerInfo++)
+        pTimerInfo = &hresTimerInstance_l.aTimerInfo[0];
+        for (index = 0; index < TIMER_COUNT; index++, pTimerInfo++)
         {
-            if (pTimerInfo->m_EventArg.m_TimerHdl == 0)
+            if (pTimerInfo->eventArg.m_TimerHdl == 0)
             {   // free structure found
                 break;
             }
         }
-        if (uiIndex >= TIMER_COUNT)
+        if (index >= TIMER_COUNT)
         {   // no free structure found
-            Ret = kEplTimerNoTimerCreated;
-            goto Exit;
+            return kEplTimerNoTimerCreated;
         }
 
-        pTimerInfo->m_EventArg.m_TimerHdl = HDL_INIT(uiIndex);
+        pTimerInfo->eventArg.m_TimerHdl = HDL_INIT(index);
     }
     else
     {
-        uiIndex = HDL_TO_IDX(*pTimerHdl_p);
-        if (uiIndex >= TIMER_COUNT)
+        index = HDL_TO_IDX(*pTimerHdl_p);
+        if (index >= TIMER_COUNT)
         {   // invalid handle
-            Ret = kEplTimerInvalidHandle;
-            goto Exit;
+            return kEplTimerInvalidHandle;
         }
 
-        pTimerInfo = &EplTimerHighReskInstance_l.m_aTimerInfo[uiIndex];
+        pTimerInfo = &hresTimerInstance_l.aTimerInfo[index];
     }
 
     // increase too small time values
-    if (fContinuously_p != FALSE)
+    if (fContinue_p != FALSE)
     {
-        if (ullTimeNs_p < TIMER_MIN_VAL_CYCLE)
-        {
-            ullTimeNs_p = TIMER_MIN_VAL_CYCLE;
-        }
+        if (time_p < TIMER_MIN_VAL_CYCLE)
+            time_p = TIMER_MIN_VAL_CYCLE;
     }
     else
     {
-        if (ullTimeNs_p < TIMER_MIN_VAL_SINGLE)
-        {
-            ullTimeNs_p = TIMER_MIN_VAL_SINGLE;
-        }
+        if (time_p < TIMER_MIN_VAL_SINGLE)
+            time_p = TIMER_MIN_VAL_SINGLE;
     }
 
-    /*
-     * increment timer handle
+    /* increment timer handle
      * (if timer expires right after this statement, the user
-     * would detect an unknown timer handle and discard it)
-     */
-    pTimerInfo->m_EventArg.m_TimerHdl = HDL_INC(pTimerInfo->m_EventArg.m_TimerHdl);
-    *pTimerHdl_p = pTimerInfo->m_EventArg.m_TimerHdl;
+     * would detect an unknown timer handle and discard it) */
+    pTimerInfo->eventArg.m_TimerHdl = HDL_INC(pTimerInfo->eventArg.m_TimerHdl);
+    *pTimerHdl_p = pTimerInfo->eventArg.m_TimerHdl;
 
     /* initialize timer info */
-    pTimerInfo->m_EventArg.m_Arg.m_dwVal = ulArgument_p;
-    pTimerInfo->m_pfnCallback      = pfnCallback_p;
-    pTimerInfo->m_fContinuously    = fContinuously_p;
-    pTimerInfo->m_ullTime          = ullTimeNs_p;
+    pTimerInfo->eventArg.m_Arg.m_dwVal = argument_p;
+    pTimerInfo->pfnCallback      = pfnCallback_p;
+    pTimerInfo->fContinue    = fContinue_p;
+    pTimerInfo->time          = time_p;
 
-    clock_gettime(CLOCK_MONOTONIC, &pTimerInfo->m_startTime);  // get current time
+    clock_gettime(CLOCK_MONOTONIC, &pTimerInfo->startTime);  // get current time
+    sem_post(&pTimerInfo->syncSem); /* signal timer start to thread */
 
-    /* signal timer start to thread */
-    sem_post(&pTimerInfo->m_syncSem);
-
-Exit:
-    return Ret;
+    return ret;
 }
 
-//---------------------------------------------------------------------------
-// Function:    hrestimer_deleteTimer()
-//
-// Description: deletes the timer with the specified handle. Afterward the
-//              handle is set to zero.
-//
-// Parameters:  pTimerHdl_p     = pointer to timer handle
-//
-// Return:      tEplKernel      = error code
-//
-// State:       not tested
-//---------------------------------------------------------------------------
-tEplKernel PUBLIC hrestimer_deleteTimer(tEplTimerHdl* pTimerHdl_p)
+//------------------------------------------------------------------------------
+/**
+\brief    Delete a high-resolution timer
+
+The function deletes an created high-resolution timer. The timer is specified
+by its timer handle. After deleting the handle is reset to zero.
+
+\param  pTimerHdl_p     Pointer to timer handle.
+
+\return Returns a tEplKernel error code.
+
+\ingroup module_hrestimer
+*/
+//------------------------------------------------------------------------------
+tEplKernel hrestimer_deleteTimer(tEplTimerHdl* pTimerHdl_p)
 {
-    tEplKernel                  Ret = kEplSuccessful;
-    unsigned int                uiIndex;
-    tEplTimerHighReskTimerInfo* pTimerInfo;
+    tEplKernel              ret = kEplSuccessful;
+    UINT                    index;
+    tHresTimerInfo*         pTimerInfo;
 
     // check pointer to handle
     if(pTimerHdl_p == NULL)
-    {
-        Ret = kEplTimerInvalidHandle;
-        goto Exit;
-    }
+        return kEplTimerInvalidHandle;
 
     if (*pTimerHdl_p == 0)
     {   // no timer created yet
-        goto Exit;
+        return ret;
     }
     else
     {
-        uiIndex = HDL_TO_IDX(*pTimerHdl_p);
-        if (uiIndex >= TIMER_COUNT)
+        index = HDL_TO_IDX(*pTimerHdl_p);
+        if (index >= TIMER_COUNT)
         {   // invalid handle
-            Ret = kEplTimerInvalidHandle;
-            goto Exit;
+            return kEplTimerInvalidHandle;
         }
-        pTimerInfo = &EplTimerHighReskInstance_l.m_aTimerInfo[uiIndex];
-        if (pTimerInfo->m_EventArg.m_TimerHdl != *pTimerHdl_p)
+        pTimerInfo = &hresTimerInstance_l.aTimerInfo[index];
+        if (pTimerInfo->eventArg.m_TimerHdl != *pTimerHdl_p)
         {   // invalid handle
-            goto Exit;
+            return ret;
         }
     }
 
-    pTimerInfo->m_fContinuously = FALSE;
+    pTimerInfo->fContinue = FALSE;
     *pTimerHdl_p = 0;
-    pTimerInfo->m_EventArg.m_TimerHdl = 0;
-    pTimerInfo->m_pfnCallback = NULL;
+    pTimerInfo->eventArg.m_TimerHdl = 0;
+    pTimerInfo->pfnCallback = NULL;
 
-Exit:
-    return Ret;
+    return ret;
 }
 
-//=========================================================================//
-//                                                                         //
-//          P R I V A T E   F U N C T I O N S                              //
-//                                                                         //
-//=========================================================================//
+//============================================================================//
+//            P R I V A T E   F U N C T I O N S                               //
+//============================================================================//
+/// \name Private Functions
+/// \{
 
-//---------------------------------------------------------------------------
-// Function:    EplTimerHighReskProcessThread()
-//
-// Description: Main function of the high-resolution timer thread.
-//
-//              EplTimerHighReskProcessThread() waits for a timer start
-//              signal. When it is received it reads the high-resolution
-//              timer information structure and calculates the timeout value.
-//              It sleeps by calling clock_nanosleep() until the timeout is
-//              reached. When the timeout is reached the callback function
-//              registered in the timer info structure is called. If the
-//              flag m_fContinuously is set the thread loops until the
-//              timer is deleted.
-//
-// Parameters:  pArgument_p *   = pointer to timer info structure
-//
-// Return:      void *          = return value is specified by the pthread
-//                                interface but is not used!
-//---------------------------------------------------------------------------
-static void * EplTimerHighReskProcessThread(void *pArgument_p)
+//------------------------------------------------------------------------------
+/**
+\brief    Timer thread function
+
+The function provides the main function of the timer thread. It waits for a
+timer start signal. When it is received it reads the high-resolution timer
+information structure and calculates the timeout value. It sleeps by calling
+clock_nanosleep() until the timeout is reached. When the timeout is reached
+the callback function registered in the timer info structure is called. If the
+flag m_fContinue is set the thread loops until the timer is deleted.
+
+\param  pArgument_p     Thread parameter. It contains the Pointer to the timer
+                        info structure.
+
+\return Returns a void* as specified by the pthread interface but it is not used!
+*/
+//------------------------------------------------------------------------------
+static void* timerThread(void *pArgument_p)
 {
-    INT                                 iRet;
-    tEplTimerHighReskTimerInfo          *pTimerInfo;
-    struct timespec                     startTime, curTime, timeout;
-    ULONGLONG                           ullPeriod;
-    tEplTimerHdl                        timerHdl;
+    INT                         iRet;
+    tHresTimerInfo*             pTimerInfo;
+    struct timespec             startTime, timeout;
+    ULONGLONG                   period;
+    tEplTimerHdl                timerHdl;
 #ifdef HIGH_RESK_TIMER_LATENCY_DEBUG
-    struct timespec                     debugtime;
+    struct timespec             debugtime, curTime;
 #endif
 
     EPL_DBGLVL_TIMERH_TRACE("%s(): ThreadId:%ld\n", __func__, syscall(SYS_gettid));
     EPL_DBGLVL_TIMERH_TRACE("%s(): timer:%lx\n", __func__, (unsigned long)pArgument_p);
 
     /* thread parameter contains the address of the timer information structure */
-    pTimerInfo = &EplTimerHighReskInstance_l.m_aTimerInfo[(int)pArgument_p];
+    pTimerInfo = (tHresTimerInfo*)pArgument_p;
 
     /* loop forever until thread will be canceled */
     while (1)
     {
         /* wait for semaphore which signals a timer start */
-        sem_wait(&pTimerInfo->m_syncSem);
+        sem_wait(&pTimerInfo->syncSem);
 
         /* check if thread should terminate */
-        if (pTimerInfo->m_fTerminate)
+        if (pTimerInfo->fTerminate)
         {
             EPL_DBGLVL_TIMERH_TRACE("%s() Exiting signal received!\n", __func__);
             break;
@@ -507,12 +463,12 @@ static void * EplTimerHighReskProcessThread(void *pArgument_p)
         else
         {
             /* save timer information into local variables */
-            startTime = pTimerInfo->m_startTime;
-            timerHdl = pTimerInfo->m_EventArg.m_TimerHdl;
-            ullPeriod = pTimerInfo->m_ullTime;
+            startTime = pTimerInfo->startTime;
+            timerHdl = pTimerInfo->eventArg.m_TimerHdl;
+            period = pTimerInfo->time;
 
             /* calculate the timeout value for the timer cycle */
-            timespec_add(&startTime, ullPeriod, &timeout);
+            timespec_add(&startTime, period, &timeout);
 
 #ifdef HIGH_RESK_TIMER_LATENCY_DEBUG
             clock_gettime(CLOCK_MONOTONIC, &curTime);
@@ -528,76 +484,74 @@ static void * EplTimerHighReskProcessThread(void *pArgument_p)
                     /* todo how to signal that timeout wasn't correct? */
                 }
                 FTRACE_MARKER("HighReskTimer(%d) expired (%d ns)",
-                              (int)pArgument_p, ullPeriod);
+                              (int)pArgument_p, period);
 
 #ifdef HIGH_RESK_TIMER_LATENCY_DEBUG
                 clock_gettime(CLOCK_MONOTONIC, &curTime);
                 timespec_sub(&timeout, &curTime, &debugtime);
                 FTRACE_MARKER("%s latency=%ld:%ld", __func__, debugtime.tv_sec,
                               debugtime.tv_nsec);
-                if (debugtime.tv_nsec > pTimerInfo->m_maxLatency)
+                if (debugtime.tv_nsec > pTimerInfo->maxLatency)
                 {
                     EPL_DBGLVL_TIMERH_TRACE("%s() Timer elapsed: max latency=%ld ns\n",
                                              __func__, debugtime.tv_nsec);
-                    pTimerInfo->m_maxLatency = debugtime.tv_nsec;
+                    pTimerInfo->maxLatency = debugtime.tv_nsec;
                 }
-                if (timeout.tv_nsec < pTimerInfo->m_minLatency)
+                if (timeout.tv_nsec < pTimerInfo->minLatency)
                 {
                     EPL_DBGLVL_TIMERH_TRACE("%s() Timer elapsed: min latency=%ld ns\n",
                                              __func__, debugtime.tv_nsec);
-                    pTimerInfo->m_minLatency = debugtime.tv_nsec;
+                    pTimerInfo->minLatency = debugtime.tv_nsec;
                 }
 #endif
 
                 /* check if timer handle is valid */
-                if (timerHdl == pTimerInfo->m_EventArg.m_TimerHdl)
+                if (timerHdl == pTimerInfo->eventArg.m_TimerHdl)
                 {
                     /* call callback function */
-                    if (pTimerInfo->m_pfnCallback != NULL)
+                    if (pTimerInfo->pfnCallback != NULL)
                     {
-                        pTimerInfo->m_pfnCallback(&pTimerInfo->m_EventArg);
+                        pTimerInfo->pfnCallback(&pTimerInfo->eventArg);
                     }
                 }
 
                 /* check if timer handle is still valid. Could be modified in callback! */
-                if (timerHdl == pTimerInfo->m_EventArg.m_TimerHdl)
+                if (timerHdl == pTimerInfo->eventArg.m_TimerHdl)
                 {
-                    if (pTimerInfo->m_fContinuously)
+                    if (pTimerInfo->fContinue)
                     {
                         /* calculate timeout value for next timer cycle */
-                        timespec_add(&timeout, ullPeriod, &timeout);
+                        timespec_add(&timeout, period, &timeout);
                     }
                 }
-            } while ((pTimerInfo->m_fContinuously) &&
-                     (timerHdl == pTimerInfo->m_EventArg.m_TimerHdl));
+            } while ((pTimerInfo->fContinue) &&
+                     (timerHdl == pTimerInfo->eventArg.m_TimerHdl));
         }
     }
     return NULL;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief    Add offset to timespec value
 
-//---------------------------------------------------------------------------
-// Function:    timespec_add()
-//
-// Description: add an offset to a timespec value
-//
-// Parameters:  time1_p *       = pointer to time where offset should be
-//                                added to
-//              ullTime_p       = time offset in nanoseconds
-//              result_p *      = pointer to store result of time calculation
-//
-// Return:      void            = N/A
-//---------------------------------------------------------------------------
-static inline void timespec_add (struct timespec *time1_p, unsigned long long ullTime_p,
-                             struct timespec *result_p)
+The function adds an time offset in nanoseconds to a timespec value.
+
+\param  time1_p     Pointer to timespec to which the offset should be added.
+\param  offset_p    Offset in nanoseconds to add.
+\param  result_p    Pointer to store the result of the calculation.
+*/
+//------------------------------------------------------------------------------
+static inline void timespec_add (struct timespec *time1_p, ULONGLONG offset_p,
+                                 struct timespec *result_p)
 {
     result_p->tv_sec = time1_p->tv_sec;
-    if (ullTime_p >= 1000000000L)
+    if (offset_p >= 1000000000L)
     {
         result_p->tv_sec++;
-        ullTime_p = ullTime_p % 1000000000L;
+        offset_p = offset_p % 1000000000L;
     }
-    result_p->tv_nsec = time1_p->tv_nsec + ullTime_p;
+    result_p->tv_nsec = time1_p->tv_nsec + offset_p;
     if (result_p->tv_nsec >= 1000000000L)
     {
         result_p->tv_sec++;
@@ -606,17 +560,18 @@ static inline void timespec_add (struct timespec *time1_p, unsigned long long ul
 }
 
 #ifdef HIGH_RESK_TIMER_LATENCY_DEBUG
-//---------------------------------------------------------------------------
-// Function:    timespec_sub()
-//
-// Description: subtrace too timespec values
-//
-// Parameters:  time1_p *       = pointer to first time value
-//              time2_p *       = pointer to time value which will be substracted
-//              result_p *      = pointer to store result of time calculation
-//
-// Return:      void            = N/A
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+/**
+\brief    Subtract two timespec values
+
+The function subtracts two timespec values.
+
+\param  time1_p     Pointer to first timespec value, from which to substract the
+                    second one.
+\param  time2_p     Pointer to second timespec value which will be substracted.
+\param  result_p    Pointer to store the result of the calculation.
+*/
+//------------------------------------------------------------------------------
 static inline void timespec_sub (struct timespec *time1_p, struct timespec *time2_p,
                                  struct timespec *result_p)
 {
@@ -632,3 +587,5 @@ static inline void timespec_sub (struct timespec *time1_p, struct timespec *time
     }
 }
 #endif
+
+/// \}
