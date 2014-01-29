@@ -61,8 +61,8 @@ SET(CFG_KERNEL_DIR "" CACHE PATH
         "Select the kernel directory to be used, if not specified, system kernel dir will be used!")
 
 SET(CFG_POWERLINK_EDRV "82573" CACHE STRING
-        "Valid drivers are 8139, 82573, 8255x, Fec")
-SET_PROPERTY(CACHE CFG_POWERLINK_EDRV PROPERTY STRINGS 8139 82573 8255x Fec)
+        "Valid drivers are 8139, 82573, 8255x")
+SET_PROPERTY(CACHE CFG_POWERLINK_EDRV PROPERTY STRINGS 8139 82573 8255x)
 
 ################################################################################
 # Set global directories
