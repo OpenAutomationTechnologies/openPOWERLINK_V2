@@ -6,7 +6,7 @@
 
 This file contains the implementation of the openMAC high-resolution timer module.
 
-\ingroup module_hrtimer
+\ingroup module_hrestimer
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
@@ -40,13 +40,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <global.h>
-#include <Epl.h>
-
+#include <EplInc.h>
 #include <kernel/hrestimer.h>
 #include <openmac.h>
 #include <omethlib.h>
-
 #include <Benchmark.h>
 
 //============================================================================//
@@ -81,17 +78,26 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local types
 //------------------------------------------------------------------------------
+
+/**
+\brief  High-resolution timer information structure
+
+The structure contains all necessary information for a high-resolution timer.
+*/
 typedef struct
 {
     tEplTimerEventArg    eventArg;
     tEplTimerkCallback   pfnCb;
-
 } tTimerInfo;
 
+/**
+\brief  High-resolution timer instance
+
+The structure defines a high-resolution timer module instance.
+*/
 typedef struct
 {
-    tTimerInfo  timerInfo;
-
+    tTimerInfo          timerInfo;
 } tTimerInstance;
 
 //------------------------------------------------------------------------------
@@ -116,7 +122,7 @@ This function initializes the high-resolution timer module.
 
 \return The function returns a tEplKernel error code.
 
-\ingroup module_hrtimer
+\ingroup module_hrestimer
 */
 //------------------------------------------------------------------------------
 tEplKernel hrestimer_init(void)
@@ -126,13 +132,13 @@ tEplKernel hrestimer_init(void)
 
 //------------------------------------------------------------------------------
 /**
-\brief  Add high-resolution timer instance
+\brief  Add instance of high-resolution timer module
 
-This function adds a high-resolution timer module instance.
+The function adds an instance of the high-resolution timer module.
 
 \return The function returns a tEplKernel error code.
 
-\ingroup module_hrtimer
+\ingroup module_hrestimer
 */
 //------------------------------------------------------------------------------
 tEplKernel hrestimer_addInstance(void)
@@ -151,13 +157,13 @@ tEplKernel hrestimer_addInstance(void)
 
 //------------------------------------------------------------------------------
 /**
-\brief  Delete high-resolution timer instance
+\brief    Delete instance of high-resolution timer module
 
-This function deletes the high-resolution timer module instance.
+The function deletes an instance of the high-resolution timer module.
 
 \return The function returns a tEplKernel error code.
 
-\ingroup module_hrtimer
+\ingroup module_hrestimer
 */
 //------------------------------------------------------------------------------
 tEplKernel hrestimer_delInstance(void)
@@ -176,32 +182,33 @@ tEplKernel hrestimer_delInstance(void)
 
 //------------------------------------------------------------------------------
 /**
-\brief  Modify high-resolution timer instance timeout
+\brief    Modify a high-resolution timer
 
-This function modifies the timer handles timeout.
-If the handle the pointer points to is zero, the timer must be created first.
-If it is not possible to stop the old timer, this function always assures
-that the old timer does not trigger the callback function with the same handle
-as the new timer.
-That means the callback function must check the passed handle with the one
-returned by this function. If these are unequal, the call can be discarded.
+The function modifies the timeout of the timer with the specified handle.
+If the handle, the pointer points to, is zero, the timer must be created first.
+If it is not possible to stop the old timer, this function always assures that
+the old timer does not trigger the callback function with the same handle as
+the new timer. That means the callback function must check the passed handle
+with the one returned by this function. If these are unequal, the call can be
+discarded.
 
-\param  pTimerHdl_p     Pointer to timer handle
-\param  timeNs_p        Relative timeout in [ns]
-\param  pfnCb_p         Callback function, which is called mutual exclusive
-                        with the Edrv callback functions (Rx and Tx).
-\param  arg_p           User-specific argument
-\param  fContinuously_p If TRUE, callback function will be called continuously,
-                        otherwise, it is a oneshot timer.
+\param  pTimerHdl_p     Pointer to timer handle.
+\param  time_p          Relative timeout in [ns].
+\param  pfnCallback_p   Callback function, which is called when timer expires.
+                        (The function is called mutual exclusive with the Edrv
+                        callback functions (Rx and Tx)).
+\param  argument_p      User-specific argument
+\param  fContinue_p     If TRUE, callback function will be called continuously.
+                        Otherwise, it is a one-shot timer.
 
-\return The function returns a tEplKernel error code.
+\return Returns a tEplKernel error code.
 
-\ingroup module_hrtimer
+\ingroup module_hrestimer
 */
 //------------------------------------------------------------------------------
-tEplKernel hrestimer_modifyTimer(tEplTimerHdl* pTimerHdl_p,
-        ULONGLONG timeNs_p, tEplTimerkCallback pfnCb_p,
-        ULONG arg_p, BOOL fContinuously_p)
+tEplKernel hrestimer_modifyTimer(tEplTimerHdl* pTimerHdl_p, ULONGLONG time_p,
+                                 tEplTimerkCallback pfnCallback_p, ULONG argument_p,
+                                 BOOL fContinue_p)
 {
     tEplKernel  ret = kEplSuccessful;
     UINT        index;
@@ -216,7 +223,7 @@ tEplKernel hrestimer_modifyTimer(tEplTimerHdl* pTimerHdl_p,
         goto Exit;
     }
 
-    if (fContinuously_p != FALSE)
+    if (fContinue_p != FALSE)
     {
         ret = kEplTimerNoTimerCreated;
         goto Exit;
@@ -253,17 +260,17 @@ tEplKernel hrestimer_modifyTimer(tEplTimerHdl* pTimerHdl_p,
 
     *pTimerHdl_p = pTimerInfo->eventArg.m_TimerHdl;
 
-    pTimerInfo->eventArg.m_Arg.m_dwVal = arg_p;
-    pTimerInfo->pfnCb = pfnCb_p;
+    pTimerInfo->eventArg.m_Arg.m_dwVal = argument_p;
+    pTimerInfo->pfnCb = pfnCallback_p;
 
     // calculate counter
-    if (timeNs_p > 0xFFFFFFFF)
+    if (time_p > 0xFFFFFFFF)
     {   // time is too large, so decrease it to the maximum time
         timeNs = 0xFFFFFFFF;
     }
     else
     {
-        timeNs = (UINT32) timeNs_p;
+        timeNs = (UINT32) time_p;
     }
 
     if (timeNs < 10000)
@@ -285,16 +292,16 @@ Exit:
 
 //------------------------------------------------------------------------------
 /**
-\brief  Delete high-resolution timer instance timeout
+\brief    Delete a high-resolution timer
 
-This function deletes the timer with the specified handle. Afterwards the handle
-is set to zero.
+The function deletes an created high-resolution timer. The timer is specified
+by its timer handle. After deleting the handle is reset to zero.
 
 \param  pTimerHdl_p     Pointer to timer handle
 
 \return The function returns a tEplKernel error code.
 
-\ingroup module_hrtimer
+\ingroup module_hrestimer
 */
 //------------------------------------------------------------------------------
 tEplKernel hrestimer_deleteTimer(tEplTimerHdl* pTimerHdl_p)
