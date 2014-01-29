@@ -150,7 +150,7 @@ tEplKernel hrestimer_init(void)
 /**
 \brief    Add instance of high-resolution timer module
 
-The function adds an instance of the high-resolution timer module
+The function adds an instance of the high-resolution timer module.
 
 \return Returns a tEplKernel error code.
 
@@ -203,7 +203,7 @@ tEplKernel hrestimer_addInstance(void)
 /**
 \brief    Delete instance of high-resolution timer module
 
-The function deletes an instance of the high-resolution timer module
+The function deletes an instance of the high-resolution timer module.
 
 \return Returns a tEplKernel error code.
 

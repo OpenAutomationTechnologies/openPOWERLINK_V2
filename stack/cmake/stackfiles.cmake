@@ -417,7 +417,7 @@ SET(KERNEL_HEADERS
     ${USER_STACK_INCLUDE_DIR}/dllkfilter.h
     ${USER_STACK_INCLUDE_DIR}/dllktgt.h
     ${USER_STACK_INCLUDE_DIR}/hrestimer.h
-    ${USER_STACK_INCLUDE_DIR}/EplTimerSynck.h
+    ${USER_STACK_INCLUDE_DIR}/synctimer.h
     ${USER_STACK_INCLUDE_DIR}/errhndk.h
     ${USER_STACK_INCLUDE_DIR}/eventk.h
     ${USER_STACK_INCLUDE_DIR}/eventkcal.h
