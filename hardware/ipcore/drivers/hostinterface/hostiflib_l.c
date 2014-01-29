@@ -132,9 +132,9 @@ typedef struct sScSync
     volatile UINT16     irqMasterEnable; ///< enable master irq
     union
     {
-        volatile UINT16 irqSet;      ///< set irq (Pcp)
-        volatile UINT16 irqAck;      ///< acknowledge irq (Host)
-    };
+        volatile UINT16 set;      ///< set irq (Pcp)
+        volatile UINT16 ack;      ///< acknowledge irq (Host)
+    } irq;
     volatile UINT32     RESERVED0;  ///< reserved
     volatile UINT16     syncConfig;  ///< synchronization configuration
     volatile UINT16     RESERVED1;   ///< reserved
@@ -596,7 +596,7 @@ void hostif_writeIrqMasterEnable (UINT8 *pHostifScBase_p, UINT16 val_p)
 void hostif_ackIrq (UINT8 *pHostifScBase_p, UINT16 val_p)
 {
     HOSTIF_WR16(pHostifScBase_p + HOSTIF_SC_SYNC_OFFS,
-            offsetof(tScSync, irqAck), val_p);
+            offsetof(tScSync, irq.ack), val_p);
 }
 
 //------------------------------------------------------------------------------
@@ -612,7 +612,7 @@ void hostif_ackIrq (UINT8 *pHostifScBase_p, UINT16 val_p)
 void hostif_setIrq (UINT8 *pHostifScBase_p, UINT16 val_p)
 {
     HOSTIF_WR16(pHostifScBase_p + HOSTIF_SC_SYNC_OFFS,
-            offsetof(tScSync, irqSet), val_p);
+            offsetof(tScSync, irq.set), val_p);
 }
 
 //------------------------------------------------------------------------------

@@ -42,6 +42,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #include "lock.h"
 
+#include <EplInc.h>
+
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
 //============================================================================//
@@ -97,6 +99,8 @@ This function initializes the lock instance.
 //------------------------------------------------------------------------------
 int target_initLock (LOCK_T *pLock_p)
 {
+    UNUSED_PARAMETER(pLock_p);
+
     return 0;
 }
 

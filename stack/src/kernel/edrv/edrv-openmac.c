@@ -1022,7 +1022,7 @@ This function allocates local memory for the Tx buffer descriptor pBuffer_p.
 static ometh_packet_typ* allocTxMsgBufferIntern(tEdrvTxBuffer* pBuffer_p)
 {
     ometh_packet_typ*   pPacket;
-    INT                 bufferSize;
+    UINT                bufferSize;
     void*               pBufferBase = openmac_memUncached((void*)OPENMAC_PKT_BASE, OPENMAC_PKT_SPAN);
 
     // Initialize if no buffer is allocated
@@ -1049,7 +1049,7 @@ static ometh_packet_typ* allocTxMsgBufferIntern(tEdrvTxBuffer* pBuffer_p)
     pPacket = (ometh_packet_typ*)edrvInstance_l.pNextBufferBase;
 
     // Return if the requested buffer is not within the memory range
-    if(!(edrvInstance_l.pTxBufferBase <= (void*)pPacket && (void*)pPacket < pBufferBase + OPENMAC_PKTBUFSIZE))
+    if(!(edrvInstance_l.pTxBufferBase <= (void*)pPacket && (void*)pPacket < (void*)((UINT32)pBufferBase + OPENMAC_PKTBUFSIZE)))
     {
         DEBUG_LVL_ERROR_TRACE("%s() Out of local memory\n", __func__);
         return NULL;
@@ -1059,7 +1059,7 @@ static ometh_packet_typ* allocTxMsgBufferIntern(tEdrvTxBuffer* pBuffer_p)
     EPL_MEMSET((void*)pPacket, 0, bufferSize);
 
     // Calculate next buffer address for next allocation
-    edrvInstance_l.pNextBufferBase = (((void*)pPacket) + bufferSize);
+    edrvInstance_l.pNextBufferBase = (void*)((UINT32)pPacket + bufferSize);
 
     // New buffer added
     edrvInstance_l.txBufferCount++;

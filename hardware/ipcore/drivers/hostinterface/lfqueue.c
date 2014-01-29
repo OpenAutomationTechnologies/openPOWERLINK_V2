@@ -128,10 +128,10 @@ typedef union Indices
 {
     struct
     {
-        tIndex          write;        ///< write index
-        tIndex          read;         ///< read index
-    };
-    tBothIndices        bothIndices;  ///< combined indices
+        tIndex      write;        ///< write index
+        tIndex      read;         ///< read index
+    } ind;
+    tBothIndices    bothIndices;  ///< combined indices
 } tIndices;
 
 /**
@@ -582,7 +582,7 @@ tQueueReturn lfq_entryEnqueue (tQueueInstance pInstance_p,
     writeData(pQueue, pData_p, entryPayloadSize);
 
     /// new element is written
-    pQueue->local.entryIndices.write += 1;
+    pQueue->local.entryIndices.ind.write += 1;
 
     /// the new indices are written to hw only if the queue is still operational
     if(getHwQueueState(pQueue) != kQueueStateOperational)
@@ -653,7 +653,7 @@ tQueueReturn lfq_entryDequeue (tQueueInstance pInstance_p,
     readData(pQueue, pData_p, size);
 
     /// element is read
-    pQueue->local.entryIndices.read += 1;
+    pQueue->local.entryIndices.ind.read += 1;
 
     setHwQueueRead(pQueue);
 
@@ -701,14 +701,14 @@ static void getHwQueueBufferHeader (tQueue *pQueue_p)
             HOSTIF_RD32(pQueue_p->pQueueBuffer,
                     offsetof(tQueueBuffer, header.entryIndices));
 
-    pQueue_p->local.usedSpace = pQueue_p->local.spaceIndices.write -
-            pQueue_p->local.spaceIndices.read;
+    pQueue_p->local.usedSpace = pQueue_p->local.spaceIndices.ind.write -
+            pQueue_p->local.spaceIndices.ind.read;
 
     pQueue_p->local.freeSpace =
             pQueue_p->maxEntries -pQueue_p->local.usedSpace;
 
-    pQueue_p->local.usedEntries = pQueue_p->local.entryIndices.write -
-            pQueue_p->local.entryIndices.read;
+    pQueue_p->local.usedEntries = pQueue_p->local.entryIndices.ind.write -
+            pQueue_p->local.entryIndices.ind.read;
 }
 
 //------------------------------------------------------------------------------
@@ -752,12 +752,12 @@ This function writes the local write indices to the shared memory.
 static void setHwQueueWrite (tQueue *pQueue_p)
 {
     HOSTIF_WR16(pQueue_p->pQueueBuffer,
-            offsetof(tQueueBuffer, header.spaceIndices.set.write),
-            pQueue_p->local.spaceIndices.write);
+            offsetof(tQueueBuffer, header.spaceIndices.set.ind.write),
+            pQueue_p->local.spaceIndices.ind.write);
 
     HOSTIF_WR16(pQueue_p->pQueueBuffer,
-            offsetof(tQueueBuffer, header.entryIndices.set.write),
-            pQueue_p->local.entryIndices.write);
+            offsetof(tQueueBuffer, header.entryIndices.set.ind.write),
+            pQueue_p->local.entryIndices.ind.write);
 }
 
 //------------------------------------------------------------------------------
@@ -772,12 +772,12 @@ This function writes the local read indices to the shared memory.
 static void setHwQueueRead (tQueue *pQueue_p)
 {
     HOSTIF_WR16(pQueue_p->pQueueBuffer,
-            offsetof(tQueueBuffer, header.spaceIndices.set.read),
-            pQueue_p->local.spaceIndices.read);
+            offsetof(tQueueBuffer, header.spaceIndices.set.ind.read),
+            pQueue_p->local.spaceIndices.ind.read);
 
     HOSTIF_WR16(pQueue_p->pQueueBuffer,
-            offsetof(tQueueBuffer, header.entryIndices.set.read),
-            pQueue_p->local.entryIndices.read);
+            offsetof(tQueueBuffer, header.entryIndices.set.ind.read),
+            pQueue_p->local.entryIndices.ind.read);
 }
 
 //------------------------------------------------------------------------------
@@ -895,11 +895,11 @@ static BOOL checkQueueEmpty (tQueue *pQueue_p)
 static void writeHeader (tQueue *pQueue_p, tEntryHeader *pHeader_p)
 {
     UINT16 offset = getOffsetInCirBuffer(pQueue_p,
-            pQueue_p->local.spaceIndices.write);
+            pQueue_p->local.spaceIndices.ind.write);
 
     writeCirMemory(pQueue_p, offset, (UINT8*)pHeader_p, sizeof(tEntryHeader));
 
-    pQueue_p->local.spaceIndices.write += sizeof(tEntryHeader) /
+    pQueue_p->local.spaceIndices.ind.write += sizeof(tEntryHeader) /
             ENTRY_MIN_SIZE;
 }
 
@@ -915,11 +915,11 @@ static void writeHeader (tQueue *pQueue_p, tEntryHeader *pHeader_p)
 static void writeData (tQueue *pQueue_p, UINT8 *pData_p, UINT16 size_p)
 {
     UINT16 offset = getOffsetInCirBuffer(pQueue_p,
-            pQueue_p->local.spaceIndices.write);
+            pQueue_p->local.spaceIndices.ind.write);
 
     writeCirMemory(pQueue_p, offset, pData_p, size_p);
 
-    pQueue_p->local.spaceIndices.write += size_p / ENTRY_MIN_SIZE;
+    pQueue_p->local.spaceIndices.ind.write += size_p / ENTRY_MIN_SIZE;
 }
 
 //------------------------------------------------------------------------------
@@ -969,11 +969,11 @@ static void writeCirMemory (tQueue *pQueue_p, UINT16 offset_p,
 static void readHeader (tQueue *pQueue_p, tEntryHeader *pHeader_p)
 {
     UINT16 offset = getOffsetInCirBuffer(pQueue_p,
-            pQueue_p->local.spaceIndices.read);
+            pQueue_p->local.spaceIndices.ind.read);
 
     readCirMemory(pQueue_p, offset, (UINT8*)pHeader_p, sizeof(tEntryHeader));
 
-    pQueue_p->local.spaceIndices.read += sizeof(tEntryHeader) /
+    pQueue_p->local.spaceIndices.ind.read += sizeof(tEntryHeader) /
             ENTRY_MIN_SIZE;
 }
 
@@ -990,11 +990,11 @@ static void readHeader (tQueue *pQueue_p, tEntryHeader *pHeader_p)
 static void readData (tQueue *pQueue_p, UINT8 *pData_p, UINT16 size_p)
 {
     UINT16 offset = getOffsetInCirBuffer(pQueue_p,
-            pQueue_p->local.spaceIndices.read);
+            pQueue_p->local.spaceIndices.ind.read);
 
     readCirMemory(pQueue_p, offset, pData_p, size_p);
 
-    pQueue_p->local.spaceIndices.read += size_p / ENTRY_MIN_SIZE;
+    pQueue_p->local.spaceIndices.ind.read += size_p / ENTRY_MIN_SIZE;
 }
 
 //------------------------------------------------------------------------------

@@ -69,6 +69,8 @@ int                     omethPhyCfgUser
 {
     int iRet = 0;
 
+    (void)(hEth);
+
     //-------------------------------------------------------------------------
     // Add your instructions below this line
 /*

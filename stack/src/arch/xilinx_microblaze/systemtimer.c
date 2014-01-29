@@ -142,6 +142,8 @@ UINT32 timer_getMSCount(void)
 //------------------------------------------------------------------------------
 static void irqHandler (void* pArg_p)
 {
+    UNUSED_PARAMETER(pArg_p);
+
     msCount_l++;
 }
 

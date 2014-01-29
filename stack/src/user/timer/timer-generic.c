@@ -504,6 +504,8 @@ This function enters a critical section of the timer module.
 static void enterCriticalSection (int nType_p)
 {
 #if (TARGET_SYSTEM == _NO_OS_)
+    UNUSED_PARAMETER(nType_p);
+
     target_enableGlobalInterrupt(FALSE);
 #elif (TARGET_SYSTEM == _WIN32_ || TARGET_SYSTEM == _WINCE_ )
     EnterCriticalSection(&timeruInstance_l.aCriticalSections[nType_p]);
@@ -522,6 +524,8 @@ This function leaves a critical section of the timer module.
 static void leaveCriticalSection (int nType_p)
 {
 #if (TARGET_SYSTEM == _NO_OS_)
+    UNUSED_PARAMETER(nType_p);
+
     target_enableGlobalInterrupt(TRUE);
 #elif (TARGET_SYSTEM == _WIN32_ || TARGET_SYSTEM == _WINCE_ )
     LeaveCriticalSection(&timeruInstance_l.aCriticalSections[nType_p]);
