@@ -77,6 +77,11 @@
 // const defines
 //---------------------------------------------------------------------------
 
+#define EPL_SPEC_VERSION                    0x20    // Ethernet POWERLINK V 2.0
+#define EPL_STACK_VERSION(ver,rev,rel)      (((((DWORD)(ver)) & 0xFF)<<24)|((((DWORD)(rev))&0xFF)<<16)|(((DWORD)(rel))&0xFFFF))
+#define EPL_OBJ1018_VERSION(ver,rev,rel)    ((((DWORD)(ver))<<16) |(((DWORD)(rev))&0xFFFF))
+#define EPL_STRING_VERSION(ver,rev,rel,bld)     "V" #ver "." #rev "." #rel "-" #bld
+
 #define EPL_C_ADR_BROADCAST         0xFF // EPL broadcast address
 #define EPL_C_ADR_DIAG_DEF_NODE_ID  0xFD // EPL default address of diagnostic device
 #define EPL_C_ADR_DUMMY_NODE_ID     0xFC // EPL dummy node address
