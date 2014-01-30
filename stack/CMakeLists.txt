@@ -40,9 +40,13 @@ ENDIF()
 MESSAGE(STATUS "CMAKE_SYSTEM_NAME is ${CMAKE_SYSTEM_NAME}")
 MESSAGE(STATUS "CMAKE_SYSTEM_PROCESSOR is ${CMAKE_SYSTEM_PROCESSOR}")
 
+STRING(TOLOWER "${CMAKE_SYSTEM_NAME}" SYSTEM_NAME_DIR)
+STRING(TOLOWER "${CMAKE_SYSTEM_PROCESSOR}" SYSTEM_PROCESSOR_DIR)
+
 IF(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
   SET(CMAKE_INSTALL_PREFIX
-    ${CMAKE_SOURCE_DIR}/.. CACHE PATH "openPOWERLINK install prefix" FORCE
+    ${CMAKE_SOURCE_DIR}/lib/${SYSTEM_NAME_DIR}/${SYSTEM_PROCESSOR_DIR}
+    CACHE PATH "openPOWERLINK library install prefix" FORCE
     )
 ENDIF()
 
@@ -72,8 +76,6 @@ ELSE()
     SET(LIB_BUILD_TYPE_EXT "")
 ENDIF()
 
-STRING(TOLOWER "${CMAKE_SYSTEM_NAME}" SYSTEM_DIR_NAME)
-
 ################################################################################
 # Set global definitions
 ################################################################################
@@ -94,7 +96,6 @@ INCLUDE_DIRECTORIES (
 ################################################################################
 # Libraries
 ################################################################################
-#ADD_SUBDIRECTORY(${CMAKE_SOURCE_DIR}/../libs/circbuf ${CMAKE_BINARY_DIR}/libs/circbuf)
 IF(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     INCLUDE(cmake/options-linux.cmake)
 ELSEIF(CMAKE_SYSTEM_NAME STREQUAL "Windows")
