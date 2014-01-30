@@ -50,6 +50,14 @@ SET(COMMON_LINUXKERNEL_SOURCES
     ${CONTRIB_SOURCE_DIR}/trace/trace-printk.c
     )
 
+SET(COMMON_NOOS_SOURCES
+    ${CONTRIB_SOURCE_DIR}/trace/trace-printf.c
+    )
+
+SET(COMMON_CAL_DIRECT_SOURCES
+    ${COMMON_SOURCE_DIR}/dll/dllcal-direct.c
+    )
+
 ################################################################################
 # Application library (User) sources
 ################################################################################
@@ -88,6 +96,7 @@ SET(USER_SOURCES
     ${USER_SOURCE_DIR}/sdo/sdo-udpu.c
     ${USER_SOURCE_DIR}/errhnd/errhndu.c
     ${USER_SOURCE_DIR}/ctrl/ctrlu.c
+    ${USER_SOURCE_DIR}/ledu.c
     )
 
 ################################################################################
@@ -149,6 +158,10 @@ SET(EVENT_UCAL_WINDOWS_SOURCES
     ${USER_SOURCE_DIR}/event/eventucalintf-circbuf.c
     )
 
+SET(EVENT_UCAL_NOOSKERNEL_SOURCES
+    ${USER_SOURCE_DIR}/event/eventucalintf-circbuf.c
+    ${USER_SOURCE_DIR}/event/eventucal-nooscircbuf.c
+    )
 
 ################################################################################
 # User PDO CAL sources
@@ -246,6 +259,11 @@ SET(EVENT_KCAL_LINUXKERNEL_SOURCES
     ${KERNEL_SOURCE_DIR}/event/eventkcalintf-circbuf.c
     )
 
+SET(EVENT_KCAL_NOOSKERNEL_SOURCES
+    ${KERNEL_SOURCE_DIR}/event/eventkcalintf-circbuf.c
+    ${KERNEL_SOURCE_DIR}/event/eventkcal-nooscircbuf.c
+    )
+
 ################################################################################
 # Kernel PDO CAL sources
 
@@ -285,6 +303,15 @@ SET(HARDWARE_DRIVER_LINUXKERNEL_SOURCES
      ${EDRV_SOURCE_DIR}/edrvcyclic.c
      )
 
+SET(HARDWARE_DRIVER_OPENMAC_SOURCES
+     ${KERNEL_SOURCE_DIR}/timer/timestamp-openmac.c
+     ${KERNEL_SOURCE_DIR}/edrv/edrv-openmac.c
+     )
+
+SET(HARDWARE_DRIVER_OPENMAC_CN_SOURCES
+     ${KERNEL_SOURCE_DIR}/timer/synctimer-openmac.c
+     )
+
 ################################################################################
 # User timer sources
 
@@ -294,6 +321,10 @@ SET(USER_TIMER_LINUXUSER_SOURCES
     )
 
 SET(USER_TIMER_WINDOWS_SOURCES
+    ${USER_SOURCE_DIR}/timer/timer-generic.c
+    )
+
+SET(USER_TIMER_GENERIC_SOURCES
     ${USER_SOURCE_DIR}/timer/timer-generic.c
     )
 
@@ -316,6 +347,11 @@ SET(CIRCBUF_LINUXKERNEL_SOURCES
     ${COMMON_SOURCE_DIR}/circbuf/circbuf-linuxkernel.c
     )
 
+SET(CIRCBUF_NOOS_SOURCES
+    ${COMMON_SOURCE_DIR}/circbuf/circbuffer.c
+    ${COMMON_SOURCE_DIR}/circbuf/circbuf-noos.c
+    )
+
 ################################################################################
 # Target system specific sources
 ################################################################################
@@ -328,12 +364,24 @@ SET(TARGET_LINUX_SOURCES
     ${ARCH_SOURCE_DIR}/linux/target-linux.c
     )
 
+SET(TARGET_MICROBLAZE_SOURCES
+    ${ARCH_SOURCE_DIR}/xilinx_microblaze/lock-localnoos.c
+    ${ARCH_SOURCE_DIR}/xilinx_microblaze/systemtimer.c
+    ${ARCH_SOURCE_DIR}/xilinx_microblaze/usleep.c
+    ${ARCH_SOURCE_DIR}/xilinx_microblaze/target-microblaze.c
+    ${ARCH_SOURCE_DIR}/xilinx_microblaze/openmac-microblaze.c
+    )
+
 ################################################################################
 # Architecture specific sources
 ################################################################################
 
 SET(ARCH_X86_SOURCES
     ${COMMON_SOURCE_DIR}/ami/amix86.c
+    )
+
+SET(ARCH_LE_SOURCES
+    ${COMMON_SOURCE_DIR}/ami/amile.c
     )
 
 ################################################################################

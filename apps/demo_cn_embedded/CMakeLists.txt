@@ -1,6 +1,6 @@
 ################################################################################
 #
-# Main CMake file for openPOWERLINK stack libraries
+# CMake file of CiA 401 CN embedded demo application
 #
 # Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 # All rights reserved.
@@ -28,78 +28,80 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ################################################################################
 
-PROJECT (openPOWERLINK C)
+################################################################################
+# Setup project and generic options
+
+PROJECT(demo_cn_embedded C)
+MESSAGE(STATUS "Configuring ${PROJECT_NAME}")
 
 IF(CMAKE_SYSTEM_NAME STREQUAL "Windows")
     # ensure working support of VS.NET 2010
     CMAKE_MINIMUM_REQUIRED (VERSION 2.8.4)
-ELSEIF(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+ELSE ()
     CMAKE_MINIMUM_REQUIRED (VERSION 2.8.0)
 ENDIF()
 
-MESSAGE(STATUS "CMAKE_SYSTEM_NAME is ${CMAKE_SYSTEM_NAME}")
-MESSAGE(STATUS "CMAKE_SYSTEM_PROCESSOR is ${CMAKE_SYSTEM_PROCESSOR}")
+INCLUDE(../common/cmake/options.cmake)
 
-STRING(TOLOWER "${CMAKE_SYSTEM_NAME}" SYSTEM_NAME_DIR)
-STRING(TOLOWER "${CMAKE_SYSTEM_PROCESSOR}" SYSTEM_PROCESSOR_DIR)
+################################################################################
+# Setup project files and definitions
 
-IF(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-  SET(CMAKE_INSTALL_PREFIX
-    ${CMAKE_SOURCE_DIR}/lib/${SYSTEM_NAME_DIR}/${SYSTEM_PROCESSOR_DIR}
-    CACHE PATH "openPOWERLINK library install prefix" FORCE
+SET(OBJDICT CiA401_CN)              # Set object dictionary to use
+FIND_OPLK_LIBRARY("cn")
+
+# Set generic sources and include directories for this demo
+SET(DEMO_SOURCES
+    ${DEMO_SOURCE_DIR}/main.c
+    ${DEMO_SOURCE_DIR}/app.c
+    ${DEMO_SOURCE_DIR}/event-cn.c
+    ${COMMON_SOURCE_DIR}/lcd/lcd.c
     )
-ENDIF()
 
-# include cmake modules
-INCLUDE(CMakeDependentOption)
+INCLUDE_DIRECTORIES(
+                    ${DEMO_SOURCE_DIR}
+                    ${COMMON_SOURCE_DIR}/lcd
+                   )
 
 ################################################################################
-# Set options
-################################################################################
+# Setup the architecture specific definitions
 
-SET(CMAKE_CONFIGURATION_TYPES "Debug;Release" CACHE INTERNAL "Available Build Configurations" FORCE)
-
-IF(NOT CMAKE_GENERATOR MATCHES "Visual Studio")
-    IF(NOT CMAKE_BUILD_TYPE)
-      SET(CMAKE_BUILD_TYPE Release CACHE STRING
-          "Choose the type of build, options are: None Debug Release"
-          FORCE)
-    ENDIF()
-ENDIF()
-
-SET(CFG_DEBUG_LVL "0xEC000000L" CACHE STRING "Debug Level for debug output")
-
-STRING(TOUPPER "${CMAKE_BUILD_TYPE}" LIB_BUILD_TYPE)
-IF("${LIB_BUILD_TYPE}" STREQUAL "DEBUG")
-    SET(LIB_BUILD_TYPE_EXT "_d")
+IF(CMAKE_SYSTEM_NAME STREQUAL "Generic" AND CMAKE_SYSTEM_PROCESSOR STREQUAL "Microblaze")
+    include(microblaze.cmake)
 ELSE()
-    SET(LIB_BUILD_TYPE_EXT "")
+    MESSAGE(FATAL_ERROR "System ${CMAKE_SYSTEM_NAME} with processor ${CMAKE_SYSTEM_PROCESSOR} is not supported!")
+ENDIF()
+
+SET(DEMO_NAME "${PROJECT_NAME}${ARCH_EXE_SUFFIX}")
+
+################################################################################
+# Setup compile definitions depending on configuration
+
+IF(CFG_KERNEL_STACK_DIRECTLINK)
+    ADD_DEFINITIONS(-DCONFIG_KERNELSTACK_DIRECTLINK)
+ENDIF(CFG_KERNEL_STACK_DIRECTLINK)
+
+################################################################################
+# Set the executable
+ADD_EXECUTABLE(${DEMO_NAME} ${DEMO_SOURCES} ${DEMO_ARCH_SOURCES})
+SET_PROPERTY(TARGET ${DEMO_NAME}
+             PROPERTY COMPILE_DEFINITIONS_DEBUG DEBUG;DEF_DEBUG_LVL=${CFG_DEBUG_LVL})
+
+SET_PROPERTY(TARGET ${DEMO_NAME}
+             PROPERTY LINK_FLAGS ${ARCH_LINKER_FLAGS})
+
+################################################################################
+# Libraries to link
+
+TARGET_LINK_LIBRARIES(${DEMO_NAME} optimized ${OPLKLIB} debug ${OPLKLIB_DEBUG})
+TARGET_LINK_LIBRARIES(${DEMO_NAME} ${ARCH_LIBRARIES})
+
+################################################################################
+# Post Build targets
+IF(CMAKE_SYSTEM_NAME STREQUAL "Generic" AND CMAKE_SYSTEM_PROCESSOR STREQUAL "Microblaze")
+    INCLUDE(../common/cmake/post-microblaze.cmake)
 ENDIF()
 
 ################################################################################
-# Set global definitions
-################################################################################
+# Installation rules
 
-SET(OPLK_BASE_DIR ${CMAKE_SOURCE_DIR}/..)
-
-INCLUDE(cmake/directories.cmake)
-INCLUDE(cmake/stackfiles.cmake)
-
-# set global include directories
-INCLUDE_DIRECTORIES (
-    ${OPLK_INCLUDE_DIR}
-    ${STACK_INCLUDE_DIR}
-    ${STACK_SOURCE_DIR}
-    ${CONTRIB_SOURCE_DIR}
-)
-
-################################################################################
-# Libraries
-################################################################################
-IF(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-    INCLUDE(cmake/options-linux.cmake)
-ELSEIF(CMAKE_SYSTEM_NAME STREQUAL "Windows")
-    INCLUDE(cmake/options-windows.cmake)
-ELSEIF((CMAKE_SYSTEM_NAME STREQUAL "Generic") AND (CMAKE_SYSTEM_PROCESSOR STREQUAL "Microblaze"))
-    INCLUDE(cmake/options-microblaze.cmake)
-ENDIF()
+INSTALL(TARGETS ${DEMO_NAME} RUNTIME DESTINATION ${CFG_DEMO_BOARD_NAME}/${CFG_DEMO_NAME})

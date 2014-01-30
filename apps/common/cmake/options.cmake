@@ -41,6 +41,7 @@ SET(COMMON_SOURCE_DIR ${CMAKE_SOURCE_DIR}/../common/src)
 SET(CONTRIB_SOURCE_DIR ${OPLK_ROOT_DIR}/contrib)
 SET(OPLK_INCLUDE_DIR ${OPLK_ROOT_DIR}/include)
 SET(TOOLS_DIR ${OPLK_ROOT_DIR}/tools)
+SET(BOARDS_DIR ${OPLK_ROOT_DIR}/hardware/boards)
 
 ################################################################################
 # Include CMake Modules
@@ -89,5 +90,7 @@ IF(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     INCLUDE(configure-linux)
 ELSEIF(CMAKE_SYSTEM_NAME STREQUAL "Windows")
     INCLUDE(configure-windows)
+ELSEIF(CMAKE_SYSTEM_NAME STREQUAL "Generic" AND CMAKE_SYSTEM_PROCESSOR STREQUAL "Microblaze")
+    INCLUDE(configure-microblaze)
 ENDIF()
 

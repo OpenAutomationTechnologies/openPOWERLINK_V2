@@ -1,6 +1,6 @@
 ################################################################################
 #
-# Directory list for stack cmake build system
+# CMake settings file for cn-single-gpio demo on avnet-s6plkeb
 #
 # Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 # All rights reserved.
@@ -28,21 +28,46 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ################################################################################
 
-# Source directories
-SET(STACK_SOURCE_DIR ${OPLK_BASE_DIR}/stack/src)
-SET(USER_SOURCE_DIR ${OPLK_BASE_DIR}/stack/src/user)
-SET(KERNEL_SOURCE_DIR ${OPLK_BASE_DIR}/stack/src/kernel)
-SET(COMMON_SOURCE_DIR ${OPLK_BASE_DIR}/stack/src/common)
-SET(ARCH_SOURCE_DIR ${OPLK_BASE_DIR}/stack/src/arch)
-SET(EDRV_SOURCE_DIR ${OPLK_BASE_DIR}/stack/src/kernel/edrv)
-SET(CONTRIB_SOURCE_DIR ${OPLK_BASE_DIR}/contrib)
+#################################################################################
+# D E M O   I D E N T I F I C A T I O N
 
-# Include file directories
-SET(OPLK_INCLUDE_DIR ${OPLK_BASE_DIR}/include)
-SET(STACK_INCLUDE_DIR ${OPLK_BASE_DIR}/stack/include)
-SET(USER_STACK_INCLUDE_DIR ${OPLK_BASE_DIR}/stack/include/user)
-SET(KERNEL_STACK_INCLUDE_DIR ${OPLK_BASE_DIR}/stack/include/kernel)
+# Name of the demo
+SET(CFG_DEMO_NAME "cn-single-gpio")
 
-# Other directories
-SET(OBJDICT_DIR ${OPLK_BASE_DIR}/objdicts)
-SET(TOOLS_DIR ${OPLK_BASE_DIR}/tools)
+# Board of the demo
+SET(CFG_DEMO_BOARD_NAME "avnet-s6plkeb")
+
+# Bus system used in the demo
+SET(CFG_DEMO_BUS_SYSTEM "axi")
+
+# Pcp's tightly coupled instruction memory name
+SET(CFG_PCP_TCIMEM_NAME pcp_ilmb_cntlr)
+
+#################################################################################
+# P R O C E S S O R   F E A T U R E S
+
+# Name of the POWERLINK processor
+SET(CFG_PCP_NAME pcp)
+
+# Version of the Microblaze instance
+SET(CFG_CPU_VERSION "v8.50.c")
+
+# Microblaze has enabled multiplier
+OPTION(CFG_MICROBLAZE_HW_MULT "Microblaze has enabled hardware multiplier" OFF)
+MARK_AS_ADVANCED(CFG_MICROBLAZE_HW_MULT)
+
+# Microblaze has enabled divider
+OPTION(CFG_MICROBLAZE_HW_DIV "Microblaze has enabled hardware divider" OFF)
+MARK_AS_ADVANCED(CFG_MICROBLAZE_HW_DIV)
+
+# Microblaze has enabled pattern compare
+OPTION(CFG_MICROBLAZE_PAT_COMP "Microblaze has enabled pattern compare" OFF)
+MARK_AS_ADVANCED(CFG_MICROBLAZE_PAT_COMP)
+
+# Microblaze has enabled the barrel shifter
+OPTION(CFG_MICROBLAZE_BARREL_SHIFT "Microblaze has enabled the barrel shifter" OFF)
+MARK_AS_ADVANCED(CFG_MICROBLAZE_BARREL_SHIFT)
+
+# Microblaze has enabled the byte swapping instruction
+OPTION(CFG_MICROBLAZE_REORDER "Microblaze has enabled the byte swapping instruction" OFF)
+MARK_AS_ADVANCED(CFG_MICROBLAZE_REORDER)

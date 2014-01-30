@@ -1,6 +1,6 @@
 ################################################################################
 #
-# Directory list for stack cmake build system
+# Microblaze configuration options for openPOWERLINK stack
 #
 # Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 # All rights reserved.
@@ -28,21 +28,34 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ################################################################################
 
-# Source directories
-SET(STACK_SOURCE_DIR ${OPLK_BASE_DIR}/stack/src)
-SET(USER_SOURCE_DIR ${OPLK_BASE_DIR}/stack/src/user)
-SET(KERNEL_SOURCE_DIR ${OPLK_BASE_DIR}/stack/src/kernel)
-SET(COMMON_SOURCE_DIR ${OPLK_BASE_DIR}/stack/src/common)
-SET(ARCH_SOURCE_DIR ${OPLK_BASE_DIR}/stack/src/arch)
-SET(EDRV_SOURCE_DIR ${OPLK_BASE_DIR}/stack/src/kernel/edrv)
-SET(CONTRIB_SOURCE_DIR ${OPLK_BASE_DIR}/contrib)
+################################################################################
+# Handle includes
+SET(CMAKE_MODULE_PATH "${OPLK_ROOT_DIR}/cmake" ${CMAKE_MODULE_PATH})
+INCLUDE(global-microblaze)
+INCLUDE(geneclipsefilelist)
+INCLUDE(geneclipseincludelist)
 
-# Include file directories
-SET(OPLK_INCLUDE_DIR ${OPLK_BASE_DIR}/include)
-SET(STACK_INCLUDE_DIR ${OPLK_BASE_DIR}/stack/include)
-SET(USER_STACK_INCLUDE_DIR ${OPLK_BASE_DIR}/stack/include/user)
-SET(KERNEL_STACK_INCLUDE_DIR ${OPLK_BASE_DIR}/stack/include/kernel)
+################################################################################
+# Path to the hardware library folder of your board example
+SET(CFG_HW_LIB_DIR ${OPLK_ROOT_DIR}/hardware/lib/${SYSTEM_NAME_DIR}/${SYSTEM_PROCESSOR_DIR}/avnet-s6plkeb/cn-single-gpio
+        CACHE PATH "Path to the hardware library folder of your demo application")
 
-# Other directories
-SET(OBJDICT_DIR ${OPLK_BASE_DIR}/objdicts)
-SET(TOOLS_DIR ${OPLK_BASE_DIR}/tools)
+# Include demo specific settings file
+IF(EXISTS "${CFG_HW_LIB_DIR}/settings.cmake")
+    INCLUDE(${CFG_HW_LIB_DIR}/settings.cmake)
+ELSE()
+    MESSAGE(FATAL_ERROR "Settings file (settings.cmake) in folder ${CFG_HW_LIB_DIR} does not exist!")
+ENDIF()
+
+################################################################################
+# Set variables
+SET(ARCH_EXE_SUFFIX ".elf")
+SET(ARCH_INSTALL_POSTFIX ${CFG_DEMO_BOARD_NAME}/${CFG_DEMO_NAME})
+SET(XIL_TOOLS_DIR ${TOOLS_DIR}/xilinx-microblaze)
+
+################################################################################
+# Stack configuration
+################################################################################
+SET(CFG_KERNEL_STACK_DIRECTLINK ON CACHE INTERNAL
+    "Link kernel stack directly into application (Single process solution)")
+UNSET(CFG_KERNEL_STACK_USERSPACE_DAEMON CACHE)
