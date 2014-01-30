@@ -175,6 +175,15 @@
 #define EPL_CDC_OFFSET_SIZE         3
 #define EPL_CDC_OFFSET_DATA         7
 
+// define for event queue implementation
+// These constants determine the implementation of the event queues
+// Use this constants for EPL_***_QUEUE constants
+#define EPL_QUEUE_DIRECT              1
+#define EPL_QUEUE_SHB                 2
+#define EPL_QUEUE_HOSTINTERFACE       3   //use special host interface
+#define EPL_QUEUE_IOCTL               4
+#define EPL_QUEUE_CIRCBUF             5
+
 
 // Default configuration
 // ======================
