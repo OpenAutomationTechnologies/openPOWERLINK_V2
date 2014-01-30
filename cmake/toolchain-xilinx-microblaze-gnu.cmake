@@ -1,6 +1,6 @@
 ################################################################################
 #
-# Directory list for stack cmake build system
+# CMake target configuration file for Xilinx Microblaze
 #
 # Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 # All rights reserved.
@@ -28,21 +28,22 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ################################################################################
 
-# Source directories
-SET(STACK_SOURCE_DIR ${OPLK_BASE_DIR}/stack/src)
-SET(USER_SOURCE_DIR ${OPLK_BASE_DIR}/stack/src/user)
-SET(KERNEL_SOURCE_DIR ${OPLK_BASE_DIR}/stack/src/kernel)
-SET(COMMON_SOURCE_DIR ${OPLK_BASE_DIR}/stack/src/common)
-SET(ARCH_SOURCE_DIR ${OPLK_BASE_DIR}/stack/src/arch)
-SET(EDRV_SOURCE_DIR ${OPLK_BASE_DIR}/stack/src/kernel/edrv)
-SET(CONTRIB_SOURCE_DIR ${OPLK_BASE_DIR}/contrib)
+################################################################################
+# Name of the target platform
+SET(CMAKE_SYSTEM Xilinx-Microblaze)
+SET(CMAKE_SYSTEM_NAME Generic)
+SET(CMAKE_SYSTEM_PROCESSOR Microblaze)
 
-# Include file directories
-SET(OPLK_INCLUDE_DIR ${OPLK_BASE_DIR}/include)
-SET(STACK_INCLUDE_DIR ${OPLK_BASE_DIR}/stack/include)
-SET(USER_STACK_INCLUDE_DIR ${OPLK_BASE_DIR}/stack/include/user)
-SET(KERNEL_STACK_INCLUDE_DIR ${OPLK_BASE_DIR}/stack/include/kernel)
+# Version of the system
+SET(CMAKE_SYSTEM_VERSION 1)
 
-# Other directories
-SET(OBJDICT_DIR ${OPLK_BASE_DIR}/objdicts)
-SET(TOOLS_DIR ${OPLK_BASE_DIR}/tools)
+# specify the cross compiler
+SET(CMAKE_C_COMPILER mb-gcc)
+SET(CMAKE_CXX_COMPILER mb-g++)
+SET(CMAKE_ASM-ATT_COMPILER mb-as)
+
+# search for programs in the build host directories
+SET(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
+# for libraries and headers in the target directories
+SET(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
+SET(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)

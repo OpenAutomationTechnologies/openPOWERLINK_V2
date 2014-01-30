@@ -1,6 +1,7 @@
 ################################################################################
 #
-# Directory list for stack cmake build system
+# CMake macro for generating a include list suitable for a SDK eclipse .cproject
+# file
 #
 # Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 # All rights reserved.
@@ -27,22 +28,14 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ################################################################################
+MACRO(GEN_ECLIPSE_INCLUDE_LIST IN_INC_LIST RES_SRC_LIST)
 
-# Source directories
-SET(STACK_SOURCE_DIR ${OPLK_BASE_DIR}/stack/src)
-SET(USER_SOURCE_DIR ${OPLK_BASE_DIR}/stack/src/user)
-SET(KERNEL_SOURCE_DIR ${OPLK_BASE_DIR}/stack/src/kernel)
-SET(COMMON_SOURCE_DIR ${OPLK_BASE_DIR}/stack/src/common)
-SET(ARCH_SOURCE_DIR ${OPLK_BASE_DIR}/stack/src/arch)
-SET(EDRV_SOURCE_DIR ${OPLK_BASE_DIR}/stack/src/kernel/edrv)
-SET(CONTRIB_SOURCE_DIR ${OPLK_BASE_DIR}/contrib)
+    SET(TMP_RESULT "")
 
-# Include file directories
-SET(OPLK_INCLUDE_DIR ${OPLK_BASE_DIR}/include)
-SET(STACK_INCLUDE_DIR ${OPLK_BASE_DIR}/stack/include)
-SET(USER_STACK_INCLUDE_DIR ${OPLK_BASE_DIR}/stack/include/user)
-SET(KERNEL_STACK_INCLUDE_DIR ${OPLK_BASE_DIR}/stack/include/kernel)
+    FOREACH(INC_PATH IN ITEMS ${IN_INC_LIST})
+        SET(TMP_RESULT "${TMP_RESULT}\t\t\t\t\t\t\t\t\t<listOptionValue builtIn=\"false\" value=\"${INC_PATH}\"/>\r")
+    ENDFOREACH()
 
-# Other directories
-SET(OBJDICT_DIR ${OPLK_BASE_DIR}/objdicts)
-SET(TOOLS_DIR ${OPLK_BASE_DIR}/tools)
+    # Add to result list
+    SET(${RES_SRC_LIST} ${TMP_RESULT})
+ENDMACRO()

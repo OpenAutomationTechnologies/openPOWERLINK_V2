@@ -1,8 +1,0 @@
-*.elf*
-*.size
-*.srec
-*.map
-libgen.log
-**/*
-!.project
-!.cproject

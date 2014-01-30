@@ -8,6 +8,7 @@ incremental_db/
 ## Files
 *.bak
 *.bsf
+*.chg
 *.cmp
 *.done
 *.html
@@ -35,3 +36,5 @@ synthesis/
 *.log
 *.opt
 *.make
+*.filters
+*.gui

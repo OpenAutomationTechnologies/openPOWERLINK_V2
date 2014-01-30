@@ -1,6 +1,6 @@
 ################################################################################
 #
-# Directory list for stack cmake build system
+# CMake macro for installing the bsp for Microblaze
 #
 # Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 # All rights reserved.
@@ -28,21 +28,34 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ################################################################################
 
-# Source directories
-SET(STACK_SOURCE_DIR ${OPLK_BASE_DIR}/stack/src)
-SET(USER_SOURCE_DIR ${OPLK_BASE_DIR}/stack/src/user)
-SET(KERNEL_SOURCE_DIR ${OPLK_BASE_DIR}/stack/src/kernel)
-SET(COMMON_SOURCE_DIR ${OPLK_BASE_DIR}/stack/src/common)
-SET(ARCH_SOURCE_DIR ${OPLK_BASE_DIR}/stack/src/arch)
-SET(EDRV_SOURCE_DIR ${OPLK_BASE_DIR}/stack/src/kernel/edrv)
-SET(CONTRIB_SOURCE_DIR ${OPLK_BASE_DIR}/contrib)
+MACRO(INSTALL_BSP BSP_SOURCE_DIR BSP_TARGET_DIR BSP_CPU_NAME)
+    GET_FILENAME_COMPONENT(BSP_TARGET_NAME ${BSP_SOURCE_DIR} NAME )
+    SET(BSP_CPU_NAME ${BSP_CPU_NAME})
 
-# Include file directories
-SET(OPLK_INCLUDE_DIR ${OPLK_BASE_DIR}/include)
-SET(STACK_INCLUDE_DIR ${OPLK_BASE_DIR}/stack/include)
-SET(USER_STACK_INCLUDE_DIR ${OPLK_BASE_DIR}/stack/include/user)
-SET(KERNEL_STACK_INCLUDE_DIR ${OPLK_BASE_DIR}/stack/include/kernel)
+    # Copy hardware platform eclipse project file
+    CONFIGURE_FILE(${ARCH_TOOLS_DIR}/eclipse/bspcproject.in ${BSP_SOURCE_DIR} COPY_ONLY)
+    CONFIGURE_FILE(${ARCH_TOOLS_DIR}/eclipse/bspproject.in ${BSP_SOURCE_DIR} COPY_ONLY)
+    CONFIGURE_FILE(${ARCH_TOOLS_DIR}/eclipse/bspsdkproject.in ${BSP_SOURCE_DIR} @ONLY)
+    CONFIGURE_FILE(${ARCH_TOOLS_DIR}/eclipse/bsplibgen.options.in ${BSP_SOURCE_DIR} @ONLY)
 
-# Other directories
-SET(OBJDICT_DIR ${OPLK_BASE_DIR}/objdicts)
-SET(TOOLS_DIR ${OPLK_BASE_DIR}/tools)
+    INSTALL(DIRECTORY ${BSP_SOURCE_DIR}
+            DESTINATION ${BSP_TARGET_DIR}
+            PATTERN "*.in" EXCLUDE
+           )
+
+    INSTALL(FILES ${BSP_SOURCE_DIR}/bspcproject.in
+            DESTINATION ${BSP_TARGET_DIR}/${BSP_TARGET_NAME} RENAME .cproject
+           )
+    INSTALL(FILES ${BSP_SOURCE_DIR}/bspproject.in
+            DESTINATION ${BSP_TARGET_DIR}/${BSP_TARGET_NAME} RENAME .project
+           )
+    INSTALL(FILES ${BSP_SOURCE_DIR}/bspsdkproject.in
+            DESTINATION ${BSP_TARGET_DIR}/${BSP_TARGET_NAME} RENAME .sdkproject
+           )
+    INSTALL(FILES ${BSP_SOURCE_DIR}/bsplibgen.options.in
+            DESTINATION ${BSP_TARGET_DIR}/${BSP_TARGET_NAME} RENAME libgen.options
+           )
+    INSTALL(FILES ${ARCH_TOOLS_DIR}/eclipse/bspmakefile.in
+            DESTINATION ${BSP_TARGET_DIR}/${BSP_TARGET_NAME} RENAME Makefile
+           )
+ENDMACRO()

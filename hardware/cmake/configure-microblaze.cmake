@@ -1,6 +1,6 @@
 ################################################################################
 #
-# Directory list for stack cmake build system
+# CMake boards configuration file for Microblaze platform
 #
 # Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 # All rights reserved.
@@ -28,21 +28,38 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ################################################################################
 
-# Source directories
-SET(STACK_SOURCE_DIR ${OPLK_BASE_DIR}/stack/src)
-SET(USER_SOURCE_DIR ${OPLK_BASE_DIR}/stack/src/user)
-SET(KERNEL_SOURCE_DIR ${OPLK_BASE_DIR}/stack/src/kernel)
-SET(COMMON_SOURCE_DIR ${OPLK_BASE_DIR}/stack/src/common)
-SET(ARCH_SOURCE_DIR ${OPLK_BASE_DIR}/stack/src/arch)
-SET(EDRV_SOURCE_DIR ${OPLK_BASE_DIR}/stack/src/kernel/edrv)
-SET(CONTRIB_SOURCE_DIR ${OPLK_BASE_DIR}/contrib)
+################################################################################
+# Handle includes
+SET(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/microblaze" ${CMAKE_MODULE_PATH})
+SET(CMAKE_MODULE_PATH "${OPLK_BASE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 
-# Include file directories
-SET(OPLK_INCLUDE_DIR ${OPLK_BASE_DIR}/include)
-SET(STACK_INCLUDE_DIR ${OPLK_BASE_DIR}/stack/include)
-SET(USER_STACK_INCLUDE_DIR ${OPLK_BASE_DIR}/stack/include/user)
-SET(KERNEL_STACK_INCLUDE_DIR ${OPLK_BASE_DIR}/stack/include/kernel)
+INCLUDE(global-microblaze)
+INCLUDE(geneclipsefilelist)
+INCLUDE(geneclipseincludelist)
 
-# Other directories
-SET(OBJDICT_DIR ${OPLK_BASE_DIR}/objdicts)
-SET(TOOLS_DIR ${OPLK_BASE_DIR}/tools)
+################################################################################
+# U S E R    O P T I O N S
+
+# Assemble path to all boards with Xilinx demos
+SET(BOARD_DIRS ${PROJECT_SOURCE_DIR}/boards/avnet-s6plkeb)
+
+################################################################################
+# Find the Xilinx toolchain
+UNSET(XIL_LIBGEN CACHE)
+FIND_PROGRAM(XIL_LIBGEN NAMES libgen
+    PATHS
+    ${XIL_ISE_ROOT}/EDK/bin
+    DOC "Xilinx board support package generation tool"
+)
+
+UNSET(XIL_XPS CACHE)
+FIND_PROGRAM(XIL_XPS NAMES xps
+    PATHS
+    ${XIL_ISE_ROOT}/EDK/bin
+    DOC "Xilinx Platform Studio"
+)
+
+################################################################################
+# Set path to system folders
+SET(ARCH_IPCORE_REPO ${PROJECT_SOURCE_DIR}/ipcore/xilinx)
+SET(ARCH_TOOLS_DIR ${OPLK_BASE_DIR}/tools/xilinx-microblaze)

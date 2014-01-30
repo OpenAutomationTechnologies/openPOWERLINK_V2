@@ -1,6 +1,6 @@
 ################################################################################
 #
-# Directory list for stack cmake build system
+# Connects to mb, download the elf file and set Microblaze to run
 #
 # Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 # All rights reserved.
@@ -28,21 +28,30 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ################################################################################
 
-# Source directories
-SET(STACK_SOURCE_DIR ${OPLK_BASE_DIR}/stack/src)
-SET(USER_SOURCE_DIR ${OPLK_BASE_DIR}/stack/src/user)
-SET(KERNEL_SOURCE_DIR ${OPLK_BASE_DIR}/stack/src/kernel)
-SET(COMMON_SOURCE_DIR ${OPLK_BASE_DIR}/stack/src/common)
-SET(ARCH_SOURCE_DIR ${OPLK_BASE_DIR}/stack/src/arch)
-SET(EDRV_SOURCE_DIR ${OPLK_BASE_DIR}/stack/src/kernel/edrv)
-SET(CONTRIB_SOURCE_DIR ${OPLK_BASE_DIR}/contrib)
+if { $argc != 2 } {
+    #Exit on error
+    puts "ERROR: Invalid download script parameters!"
+    exit 1;
+}
 
-# Include file directories
-SET(OPLK_INCLUDE_DIR ${OPLK_BASE_DIR}/include)
-SET(STACK_INCLUDE_DIR ${OPLK_BASE_DIR}/stack/include)
-SET(USER_STACK_INCLUDE_DIR ${OPLK_BASE_DIR}/stack/include/user)
-SET(KERNEL_STACK_INCLUDE_DIR ${OPLK_BASE_DIR}/stack/include/kernel)
+set enVerify [lindex $argv 1]
 
-# Other directories
-SET(OBJDICT_DIR ${OPLK_BASE_DIR}/objdicts)
-SET(TOOLS_DIR ${OPLK_BASE_DIR}/tools)
+# Establish connection to debug module
+connect mb mdm
+
+# Read name of executeable from script arguments
+set executeable "[lindex $argv 0]"
+dow $executeable
+
+if { $enVerify } {
+    puts "INFO: Verify elf download. This can take a few minutes!"
+    elf_verify
+}
+
+# Reset system before run
+debugconfig -reset_on_run system enable
+
+run
+
+disconnect 0
+exit;

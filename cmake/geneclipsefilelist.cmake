@@ -1,6 +1,7 @@
 ################################################################################
 #
-# Directory list for stack cmake build system
+# CMake macro for generating a file list suitable for a eclipse .project file
+# file
 #
 # Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 # All rights reserved.
@@ -27,22 +28,19 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ################################################################################
+MACRO(GEN_ECLIPSE_FILE_LIST IN_SRC_LIST FOLDER_PREFIX RES_SRC_LIST)
 
-# Source directories
-SET(STACK_SOURCE_DIR ${OPLK_BASE_DIR}/stack/src)
-SET(USER_SOURCE_DIR ${OPLK_BASE_DIR}/stack/src/user)
-SET(KERNEL_SOURCE_DIR ${OPLK_BASE_DIR}/stack/src/kernel)
-SET(COMMON_SOURCE_DIR ${OPLK_BASE_DIR}/stack/src/common)
-SET(ARCH_SOURCE_DIR ${OPLK_BASE_DIR}/stack/src/arch)
-SET(EDRV_SOURCE_DIR ${OPLK_BASE_DIR}/stack/src/kernel/edrv)
-SET(CONTRIB_SOURCE_DIR ${OPLK_BASE_DIR}/contrib)
+    SET(TMP_RESULT "")
 
-# Include file directories
-SET(OPLK_INCLUDE_DIR ${OPLK_BASE_DIR}/include)
-SET(STACK_INCLUDE_DIR ${OPLK_BASE_DIR}/stack/include)
-SET(USER_STACK_INCLUDE_DIR ${OPLK_BASE_DIR}/stack/include/user)
-SET(KERNEL_STACK_INCLUDE_DIR ${OPLK_BASE_DIR}/stack/include/kernel)
+    FOREACH(SRC_FILE IN ITEMS ${IN_SRC_LIST})
+        GET_FILENAME_COMPONENT(SRC_NAME ${SRC_FILE} NAME)
+        IF("${FOLDER_PREFIX}" STREQUAL "")
+            SET(TMP_RESULT "${TMP_RESULT}\t\t<link>\r\t\t\t<name>${SRC_NAME}</name>\r\t\t\t<type>1</type>\r\t\t\t<location>${SRC_FILE}</location>\r\t\t</link>\r")
+        ELSE()
+            SET(TMP_RESULT "${TMP_RESULT}\t\t<link>\r\t\t\t<name>${FOLDER_PREFIX}/${SRC_NAME}</name>\r\t\t\t<type>1</type>\r\t\t\t<location>${SRC_FILE}</location>\r\t\t</link>\r")
+        ENDIF("${FOLDER_PREFIX}" STREQUAL "")
+    ENDFOREACH()
 
-# Other directories
-SET(OBJDICT_DIR ${OPLK_BASE_DIR}/objdicts)
-SET(TOOLS_DIR ${OPLK_BASE_DIR}/tools)
+    # Add to result list
+    SET(${RES_SRC_LIST} ${TMP_RESULT})
+ENDMACRO()

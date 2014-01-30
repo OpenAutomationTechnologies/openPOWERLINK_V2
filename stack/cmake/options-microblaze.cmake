@@ -1,6 +1,6 @@
 ################################################################################
 #
-# Directory list for stack cmake build system
+# CMake options for openPOWERLINK stack on Xilinx/Microblaze
 #
 # Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 # All rights reserved.
@@ -28,21 +28,31 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ################################################################################
 
-# Source directories
-SET(STACK_SOURCE_DIR ${OPLK_BASE_DIR}/stack/src)
-SET(USER_SOURCE_DIR ${OPLK_BASE_DIR}/stack/src/user)
-SET(KERNEL_SOURCE_DIR ${OPLK_BASE_DIR}/stack/src/kernel)
-SET(COMMON_SOURCE_DIR ${OPLK_BASE_DIR}/stack/src/common)
-SET(ARCH_SOURCE_DIR ${OPLK_BASE_DIR}/stack/src/arch)
-SET(EDRV_SOURCE_DIR ${OPLK_BASE_DIR}/stack/src/kernel/edrv)
-SET(CONTRIB_SOURCE_DIR ${OPLK_BASE_DIR}/contrib)
+MESSAGE(STATUS "Adding CMake configuration options for Microblaze")
 
-# Include file directories
-SET(OPLK_INCLUDE_DIR ${OPLK_BASE_DIR}/include)
-SET(STACK_INCLUDE_DIR ${OPLK_BASE_DIR}/stack/include)
-SET(USER_STACK_INCLUDE_DIR ${OPLK_BASE_DIR}/stack/include/user)
-SET(KERNEL_STACK_INCLUDE_DIR ${OPLK_BASE_DIR}/stack/include/kernel)
+################################################################################
+# Handle includes
+SET(CMAKE_MODULE_PATH "${OPLK_BASE_DIR}/cmake" ${CMAKE_MODULE_PATH})
+INCLUDE(global-microblaze)
+INCLUDE(geneclipsefilelist)
+INCLUDE(geneclipseincludelist)
 
-# Other directories
-SET(OBJDICT_DIR ${OPLK_BASE_DIR}/objdicts)
-SET(TOOLS_DIR ${OPLK_BASE_DIR}/tools)
+################################################################################
+# Set Paths
+SET(XIL_HW_LIB_DIR ${OPLK_BASE_DIR}/hardware/lib/${SYSTEM_NAME_DIR}/${SYSTEM_PROCESSOR_DIR})
+SET(XIL_TOOLS_DIR ${TOOLS_DIR}/xilinx-microblaze)
+
+################################################################################
+# Add libraries
+OPTION(CFG_COMPILE_LIB_CN                      "Compile openPOWERLINK CN library" ON)
+
+# CN libraries
+IF(CFG_COMPILE_LIB_CN)
+    # Path to the hardware library folder of your board example
+    SET( CFG_COMPILE_LIB_CN_HW_LIB_DIR ${XIL_HW_LIB_DIR}/avnet-s6plkeb/cn-single-gpio
+            CACHE PATH "Path to the hardware library folder for the single processor CN library")
+
+    ADD_SUBDIRECTORY(proj/generic/liboplkcn)
+ELSE()
+    UNSET(CFG_COMPILE_LIB_CN_HW_PATH CACHE)
+ENDIF()

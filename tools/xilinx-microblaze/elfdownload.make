@@ -1,6 +1,6 @@
 ################################################################################
 #
-# Directory list for stack cmake build system
+# Download program application Makefile
 #
 # Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 # All rights reserved.
@@ -28,21 +28,49 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ################################################################################
 
-# Source directories
-SET(STACK_SOURCE_DIR ${OPLK_BASE_DIR}/stack/src)
-SET(USER_SOURCE_DIR ${OPLK_BASE_DIR}/stack/src/user)
-SET(KERNEL_SOURCE_DIR ${OPLK_BASE_DIR}/stack/src/kernel)
-SET(COMMON_SOURCE_DIR ${OPLK_BASE_DIR}/stack/src/common)
-SET(ARCH_SOURCE_DIR ${OPLK_BASE_DIR}/stack/src/arch)
-SET(EDRV_SOURCE_DIR ${OPLK_BASE_DIR}/stack/src/kernel/edrv)
-SET(CONTRIB_SOURCE_DIR ${OPLK_BASE_DIR}/contrib)
+VERSION = 0.1
 
-# Include file directories
-SET(OPLK_INCLUDE_DIR ${OPLK_BASE_DIR}/include)
-SET(STACK_INCLUDE_DIR ${OPLK_BASE_DIR}/stack/include)
-SET(USER_STACK_INCLUDE_DIR ${OPLK_BASE_DIR}/stack/include/user)
-SET(KERNEL_STACK_INCLUDE_DIR ${OPLK_BASE_DIR}/stack/include/kernel)
+####################################################
+# U S E R   O P T I O N S
+####################################################
+VERIFY_ELF=false
 
-# Other directories
-SET(OBJDICT_DIR ${OPLK_BASE_DIR}/objdicts)
-SET(TOOLS_DIR ${OPLK_BASE_DIR}/tools)
+####################################################
+# S E T T I N G S
+####################################################
+XMD=xmd
+XMD_SCRIPT=xmd-downloadelf.tcl
+IMPACT=impact
+IMPACT_SCRIPT=download.cmd
+
+ELF_NAME= $(wildcard *.elf)
+
+.PHONY: header
+header:
+	@echo ""
+	@echo "================================================================================"
+	@echo " Download the bitstream and executeable to target!"
+	@echo "================================================================================"
+	@echo ""
+	@echo " Copyright (c) 2014 B&R"
+	@echo " Version $(VERSION)"
+	@echo "================================================================================"
+	@echo ""
+	@echo "Write 'make all' to download the bitstream and the .elf file"
+	@echo ""
+	@echo "Write 'make download-bits' to download the bitstream to the target"
+	@echo "Write 'make download-elf' to download the .elf file to the target"
+
+.PHONY: all
+all: download-bits download-elf
+
+####################################################
+# D O W N L O A D
+####################################################
+.PHONY: download-bits
+download-bits:
+	$(IMPACT) -batch $(IMPACT_SCRIPT)
+
+.PHONY: download-elf
+download-elf:
+	$(XMD) -hw system.xml -tcl $(XMD_SCRIPT) $(ELF_NAME) $(VERIFY_ELF)

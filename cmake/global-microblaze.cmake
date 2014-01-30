@@ -1,6 +1,6 @@
 ################################################################################
 #
-# Directory list for stack cmake build system
+# CMake global settings file for target Xilinx Microblaze
 #
 # Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 # All rights reserved.
@@ -28,21 +28,42 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ################################################################################
 
-# Source directories
-SET(STACK_SOURCE_DIR ${OPLK_BASE_DIR}/stack/src)
-SET(USER_SOURCE_DIR ${OPLK_BASE_DIR}/stack/src/user)
-SET(KERNEL_SOURCE_DIR ${OPLK_BASE_DIR}/stack/src/kernel)
-SET(COMMON_SOURCE_DIR ${OPLK_BASE_DIR}/stack/src/common)
-SET(ARCH_SOURCE_DIR ${OPLK_BASE_DIR}/stack/src/arch)
-SET(EDRV_SOURCE_DIR ${OPLK_BASE_DIR}/stack/src/kernel/edrv)
-SET(CONTRIB_SOURCE_DIR ${OPLK_BASE_DIR}/contrib)
+###############################################################################
+# Handle Microblaze settings
+IF(CFG_DEMO_BUS_SYSTEM MATCHES plb)
+    SET(XIL_CFLAGS "${XIL_CFLAGS} -mbig-endian")
+    SET(XIL_PLAT_ENDIAN -mbig-endian)
+ELSE()
+    SET(XIL_CFLAGS "${XIL_CFLAGS} -mlittle-endian")
+    SET(XIL_PLAT_ENDIAN -mlittle-endian)
+ENDIF()
 
-# Include file directories
-SET(OPLK_INCLUDE_DIR ${OPLK_BASE_DIR}/include)
-SET(STACK_INCLUDE_DIR ${OPLK_BASE_DIR}/stack/include)
-SET(USER_STACK_INCLUDE_DIR ${OPLK_BASE_DIR}/stack/include/user)
-SET(KERNEL_STACK_INCLUDE_DIR ${OPLK_BASE_DIR}/stack/include/kernel)
+IF(CFG_MICROBLAZE_HW_MULT)
+    SET(XIL_CFLAGS "${XIL_CFLAGS} -mno-xl-soft-mul")
+ELSE()
+    SET(XIL_CFLAGS "${XIL_CFLAGS} -mxl-soft-mul")
+ENDIF()
 
-# Other directories
-SET(OBJDICT_DIR ${OPLK_BASE_DIR}/objdicts)
-SET(TOOLS_DIR ${OPLK_BASE_DIR}/tools)
+IF(CFG_MICROBLAZE_HW_DIV)
+    SET(XIL_CFLAGS "${XIL_CFLAGS} -mno-xl-soft-div")
+ELSE(CFG_MICROBLAZE_HW_DIV)
+    SET(XIL_CFLAGS "${XIL_CFLAGS} -mxl-soft-div")
+ENDIF(CFG_MICROBLAZE_HW_DIV)
+
+IF(CFG_MICROBLAZE_PAT_COMP)
+    SET(XIL_CFLAGS "${XIL_CFLAGS} -mxl-pattern-compare")
+ELSE()
+    SET(XIL_CFLAGS "${XIL_CFLAGS} -mno-xl-pattern-compare")
+ENDIF()
+
+IF(CFG_MICROBLAZE_BARREL_SHIFT)
+    SET(XIL_CFLAGS "${XIL_CFLAGS} -mxl-barrel-shift")
+ELSE ()
+    SET(XIL_CFLAGS "${XIL_CFLAGS} -mno-xl-barrel-shift")
+ENDIF()
+
+IF (CFG_MICROBLAZE_REORDER)
+    SET(XIL_CFLAGS "${XIL_CFLAGS} -mxl-reorder")
+ELSE ()
+    SET(XIL_CFLAGS "${XIL_CFLAGS} -mno-xl-reorder")
+ENDIF()
