@@ -112,7 +112,7 @@ void usleep(u32 usecs_p)
 {
     u16 smallLoop = SMALL_LOOP_SPEED;
 
-    asm
+    __asm
     (
       "       addik r11, r0, 1         \n\t"    // fill r11 with decrement value
       "outerLoop: rsub %0, r11, %0     \n\t"
