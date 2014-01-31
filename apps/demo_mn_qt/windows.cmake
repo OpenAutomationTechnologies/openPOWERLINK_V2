@@ -56,6 +56,19 @@ SET(ARCH_LIBRARIES ${ARCH_LIBRARIES} wpcap iphlpapi)
 
 ################################################################################
 # Set architecture specific installation files
+IF(NOT (${OPLKDLL} STREQUAL "OPLKDLL-NOTFOUND"))
+    INSTALL(FILES ${OPLKDLL}
+            DESTINATION ${CMAKE_PROJECT_NAME}
+            CONFIGURATIONS "Release"
+            )
+ENDIF()
+
+IF(NOT (${OPLKDLL_DEBUG} STREQUAL "OPLKDLL_DEBUG-NOTFOUND"))
+    INSTALL(FILES ${OPLKDLL_DEBUG}
+            DESTINATION ${CMAKE_PROJECT_NAME}
+            CONFIGURATIONS "Debug"
+            )
+ENDIF()
 
 INSTALL(FILES ${QT_BINARY_DIR}/QtCore4.dll DESTINATION ${CMAKE_PROJECT_NAME})
 INSTALL(FILES ${QT_BINARY_DIR}/QtGui4.dll DESTINATION ${CMAKE_PROJECT_NAME})
