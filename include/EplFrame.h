@@ -429,7 +429,7 @@ typedef enum
     kEplMsgTypePres   = 0x04,
     kEplMsgTypeSoa    = 0x05,
     kEplMsgTypeAsnd   = 0x06,
-
+    kEplMsgTypeAInv   = 0x0D,
 } tEplMsgType;
 
 

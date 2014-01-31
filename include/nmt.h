@@ -124,8 +124,9 @@ typedef enum
     kNmtEventDllCePreq              =   0x08,
     kNmtEventDllCePres              =   0x09,
     kNmtEventDllCeSoa               =   0x0A,
-    kNmtEventDllCeAsnd              =   0x0B,
-    kNmtEventDllCeFrameTimeout      =   0x0C,
+    kNmtEventDllCeAInv              =   0x0B,
+    kNmtEventDllCeAsnd              =   0x0C,
+    kNmtEventDllCeFrameTimeout      =   0x0D,
 
     // Events triggered by NMT-Commands
     kNmtEventSwReset                =   0x10,   ///< NMT_GT1, NMT_GT2, NMT_GT8
