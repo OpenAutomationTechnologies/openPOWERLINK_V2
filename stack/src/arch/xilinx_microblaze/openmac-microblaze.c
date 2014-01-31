@@ -43,7 +43,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <global.h>
 #include <Epl.h>
 
-#include <openmac.h>
+#include <target/openmac.h>
 
 #include <xparameters.h>
 #include <xintc_l.h>

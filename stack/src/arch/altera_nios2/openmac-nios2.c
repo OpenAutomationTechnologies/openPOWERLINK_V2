@@ -52,7 +52,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <io.h>
 #include <unistd.h>
 
-#include <openmac.h>
+#include <target/openmac.h>
 
 
 //============================================================================//

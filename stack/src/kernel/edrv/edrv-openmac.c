@@ -45,7 +45,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <kernel/dllkfilter.h>
 
 #include <edrv.h>
-#include <openmac.h>
+#include <target/openmac.h>
 #include <omethlib.h>
 #include <target.h>
 

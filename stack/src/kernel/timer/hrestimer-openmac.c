@@ -42,7 +42,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #include <EplInc.h>
 #include <kernel/hrestimer.h>
-#include <openmac.h>
+#include <target/openmac.h>
 #include <omethlib.h>
 #include <Benchmark.h>
 
