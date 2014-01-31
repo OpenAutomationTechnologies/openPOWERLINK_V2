@@ -44,7 +44,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <Epl.h>
 
 #include <kernel/synctimer.h>
-#include <openmac.h>
+#include <target/openmac.h>
 #include <omethlib.h>
 
 #include <Benchmark.h>

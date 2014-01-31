@@ -60,7 +60,6 @@ ${STACKROOT_DIR}/include \
 ${STACKROOT_DIR}/stack/include \
 ${STACKROOT_DIR}/hardware/ipcore/drivers/openmac \
 ${STACKROOT_DIR}/stack/src/common/circbuf \
-${STACKROOT_DIR}/stack/include/target \
 ${STACKROOT_DIR}/objdicts/CiA401_CN \
 ${STACKROOT_DIR}/stack/src/arch/altera_nios2 \
 ${STACKROOT_DIR}/stack/src"

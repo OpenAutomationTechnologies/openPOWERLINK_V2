@@ -57,7 +57,6 @@ INCLUDES=-I$(STACK_ROOT)/include \
 -I$(STACK_ROOT)/objdicts/cia401_cn \
 -I$(STACK_ROOT)/stack/src \
 -I$(STACK_ROOT)/stack/include \
--I$(STACK_ROOT)/stack/include/target \
 -I$(STACK_ROOT)/stack/src/arch/xilinx_microblaze \
 -I$(PROCESSOR_NAME)/include \
 -I$(APP_DIR_ARCH) \
