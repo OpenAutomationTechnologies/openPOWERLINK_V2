@@ -137,12 +137,13 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------------*/
 
-#include "omethlib.h"
-#include "omethlibint.h"
-#include "omethlib_phycfg.h"
+#include <omethlib.h>
+#include <omethlib_target.h>       // target specific defines (BIG/LITTLE endian)
 #include <string.h>                // used functions: memcpy, memset
 #include <stdlib.h>                // used functions: calloc
-#include "omethlib_target.h"       // target specific defines (BIG/LITTLE endian)
+
+#include "omethlibint.h"
+#include "omethlib_phycfg.h"
 
 
 // check if target-specific defines are ok

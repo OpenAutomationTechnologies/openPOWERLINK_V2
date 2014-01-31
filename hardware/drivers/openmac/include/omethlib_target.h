@@ -79,7 +79,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #elif defined(__MICROBLAZE__)
 
-#include "xparameters.h"
+#include <xparameters.h>
 
 #ifndef XPAR_MICROBLAZE_ENDIANNESS
     #error "XPAR_MICROBLAZE_ENDIANNESS not defined in xparameters.h!"
