@@ -433,6 +433,21 @@ static tEplKernel processCsFullCycleDllWaitPreq(tNmtState nmtState_p, tNmtEvent 
             dllkInstance_g.dllState = kDllCsWaitSoc;
             break;
 
+#if defined(CONFIG_INCLUDE_MASND)
+            case kNmtEventDllCeAInv:
+                // check if multiplexed and PReq should have been received in this cycle
+                // and if >= NMT_CS_READY_TO_OPERATE
+                if ((dllkInstance_g.cycleCount == 0)  &&
+                    (nmtState_p >= kNmtCsReadyToOperate))
+                {
+                    pDllEvent_p->m_ulDllErrorEvents |= EPL_DLL_ERR_CN_LOSS_PREQ | EPL_DLL_ERR_CN_LOSS_SOA;
+                }
+
+                // enter DLL_CS_WAIT_SOC
+                dllkInstance_g.dllState = kDllCsWaitSoc;
+                break;
+#endif
+
         case kNmtEventDllCeSoa:
             // check if multiplexed and PReq should have been received in this cycle
             // and if >= NMT_CS_READY_TO_OPERATE
@@ -681,7 +696,9 @@ static tEplKernel processCsStoppedDllWaitSoc(tNmtState nmtState_p, tNmtEvent nmt
             // report DLL_CEV_LOSS_SOC
             pDllEvent_p->m_ulDllErrorEvents |= EPL_DLL_ERR_CN_LOSS_SOC;
             //fall through
-
+#if defined(CONFIG_INCLUDE_MASND)
+        case kNmtEventDllCeAInv:
+#endif
         case kNmtEventDllCeAsnd:
         default:
             // remain in this state
@@ -715,6 +732,12 @@ static tEplKernel processCsStoppedDllWaitSoa(tNmtState nmtState_p, tNmtEvent nmt
             // report DLL_CEV_LOSS_SOC and DLL_CEV_LOSS_SOA
             pDllEvent_p->m_ulDllErrorEvents |= EPL_DLL_ERR_CN_LOSS_SOA | EPL_DLL_ERR_CN_LOSS_SOC;
             // fall through
+
+#if defined(CONFIG_INCLUDE_MASND)
+        case kNmtEventDllCeAInv:
+            //  report EPL_DLL_ERR_CN_LOSS_SOA
+            pDllEvent_p->m_ulDllErrorEvents |= EPL_DLL_ERR_CN_LOSS_SOA;
+#endif
 
         case kNmtEventDllCeSoa:
             // enter DLL_CS_WAIT_SOC

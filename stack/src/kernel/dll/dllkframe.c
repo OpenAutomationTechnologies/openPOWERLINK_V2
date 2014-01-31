@@ -221,6 +221,15 @@ tEdrvReleaseRxBuffer dllk_processFrameReceived(tEdrvRxBuffer * pRxBuffer_p)
                 goto Exit;
             break;
 
+#if defined(CONFIG_INCLUDE_MASND)
+        case kEplMsgTypeAInv:
+            nmtEvent = kNmtEventDllCeAInv;
+            ret = processReceivedSoa(pRxBuffer_p, nmtState);
+            if (ret != kEplSuccessful)
+                goto Exit;
+            break;
+#endif
+
         case kEplMsgTypeSoa:
             nmtEvent = kNmtEventDllCeSoa;
             ret = processReceivedSoa(pRxBuffer_p, nmtState);
@@ -245,7 +254,7 @@ tEdrvReleaseRxBuffer dllk_processFrameReceived(tEdrvRxBuffer * pRxBuffer_p)
         if (ret != kEplSuccessful)
             goto Exit;
 
-        if ((nmtEvent != kNmtEventDllCeAsnd) &&
+        if (((nmtEvent != kNmtEventDllCeAsnd) && (nmtEvent != kNmtEventDllCeAInv)) &&
             ((nmtState <= kNmtCsPreOperational1) || (nmtEvent != kNmtEventDllCePres)))
         {   // NMT state machine is not interested in ASnd frames and PRes frames when not CsNotActive or CsPreOp1
             // inform NMT module
