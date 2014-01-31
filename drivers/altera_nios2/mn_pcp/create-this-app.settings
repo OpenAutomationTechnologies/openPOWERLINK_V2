@@ -62,8 +62,10 @@ BSP_DIR=./bsp
 INCLUDES=". \
 ${STACKROOT_DIR}/include \
 ${STACKROOT_DIR}/stack/include \
-${STACKROOT_DIR}/hardware/ipcore/drivers/openmac \
-${STACKROOT_DIR}/hardware/ipcore/drivers/hostinterface \
+${STACKROOT_DIR}/hardware/drivers/openmac/include \
+${STACKROOT_DIR}/hardware/drivers/openmac/src \
+${STACKROOT_DIR}/hardware/drivers/hostinterface/include \
+${STACKROOT_DIR}/hardware/drivers/hostinterface/src \
 ${STACKROOT_DIR}/stack/src/common/circbuf \
 ${STACKROOT_DIR}/stack/src/arch/altera_nios2 \
 ${STACKROOT_DIR}/stack/src"
@@ -73,13 +75,13 @@ ${STACKROOT_DIR}/stack/src"
 SRCFILES="\
 daemon.c \
 ${STACKROOT_DIR}/stack/src/common/ami/amile.c \
-${STACKROOT_DIR}/hardware/ipcore/drivers/hostinterface/hostiflib.c \
-${STACKROOT_DIR}/hardware/ipcore/drivers/hostinterface/hostiflibint-pcp.c \
-${STACKROOT_DIR}/hardware/ipcore/drivers/hostinterface/hostiflib_l.c \
-${STACKROOT_DIR}/hardware/ipcore/drivers/hostinterface/lfqueue.c \
-${STACKROOT_DIR}/hardware/ipcore/drivers/openmac/omethlib.c \
-${STACKROOT_DIR}/hardware/ipcore/drivers/openmac/omethlibint.c \
-${STACKROOT_DIR}/hardware/ipcore/drivers/openmac/omethlib_phycfg_ink.c \
+${STACKROOT_DIR}/hardware/drivers/hostinterface/src/hostiflib.c \
+${STACKROOT_DIR}/hardware/drivers/hostinterface/src/hostiflibint-pcp.c \
+${STACKROOT_DIR}/hardware/drivers/hostinterface/src/hostiflib_l.c \
+${STACKROOT_DIR}/hardware/drivers/hostinterface/src/lfqueue.c \
+${STACKROOT_DIR}/hardware/drivers/openmac/src/omethlib.c \
+${STACKROOT_DIR}/hardware/drivers/openmac/src/omethlibint.c \
+${STACKROOT_DIR}/hardware/boards/terasic-de2-115/common/drivers/openmac/omethlib_phycfg.c \
 ${STACKROOT_DIR}/stack/src/common/circbuf/circbuffer.c \
 ${STACKROOT_DIR}/stack/src/common/circbuf/circbuf-noos.c \
 ${STACKROOT_DIR}/contrib/trace/trace-printf.c \
