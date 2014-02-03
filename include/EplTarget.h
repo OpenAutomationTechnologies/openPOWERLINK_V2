@@ -283,7 +283,7 @@ extern "C" {
 //void  PUBLIC EplTgtTimerInit(void);
 //void PUBLIC TgtGetNetTime(tEplNetTime * pNetTime_p);
 
-DWORD PUBLIC EplTgtGetTickCountMs(void);
+
 
 
 unsigned long long PUBLIC EplTgtGetTimeStampNs(void);

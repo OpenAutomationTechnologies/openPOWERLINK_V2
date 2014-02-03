@@ -486,7 +486,7 @@ static UINT32 getTickCount (void)
 #if (TARGET_SYSTEM == _WIN32_ || TARGET_SYSTEM == _WINCE_ )
     tickCountInMs = GetTickCount();
 #else
-    tickCountInMs = EplTgtGetTickCountMs();
+    tickCountInMs = target_getTickCount();
 #endif
 
     return tickCountInMs;
