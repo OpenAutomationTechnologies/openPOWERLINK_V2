@@ -45,6 +45,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #include <EplInc.h>
 #include <Epl.h>
+#include <target.h>
 
 #include <kernel/eventkcal.h>
 #include <kernel/eventkcalintf.h>
@@ -175,11 +176,11 @@ tEplKernel eventkcal_postKernelEvent (tEplEvent *pEvent_p)
 {
     tEplKernel      ret = kEplSuccessful;
 
-    EplTgtEnableGlobalInterrupt(FALSE);
+    target_enableGlobalInterrupt(FALSE);
 
     ret = eventk_process(pEvent_p);
 
-    EplTgtEnableGlobalInterrupt(TRUE);
+    target_enableGlobalInterrupt(TRUE);
 
     return ret;
 }
