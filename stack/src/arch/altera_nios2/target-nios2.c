@@ -91,21 +91,20 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /**
 \brief    returns current system tick
 
-This function returns the currect system tick determined by the system timer.
+This function returns the current system tick determined by the system timer.
 
-\return system tick
-\retval DWORD
+\return Returns the system tick in milliseconds
 
 \ingroup module_target
 */
 //------------------------------------------------------------------------------
-DWORD PUBLIC EplTgtGetTickCountMs (void)
+UINT32 target_getTickCount (void)
 {
-    DWORD dwTicks;
+    UINT32 ticks;
 
-    dwTicks = alt_nticks();
+    ticks = alt_nticks();
 
-    return dwTicks;
+    return ticks;
 }
 
 //------------------------------------------------------------------------------

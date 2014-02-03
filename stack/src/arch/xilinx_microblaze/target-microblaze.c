@@ -98,13 +98,12 @@ static void disableInterruptMaster(void);
 
 This function returns the current system tick determined by the system timer.
 
-\return DWORD
-\retval Timer   The current timer in milliseconds
+\return Returns the system tick in milliseconds
 
 \ingroup module_target
 */
 //------------------------------------------------------------------------------
-UINT32 PUBLIC EplTgtGetTickCountMs (void)
+UINT32 target_getTickCount(void)
 {
     UINT32 ticks;
 
