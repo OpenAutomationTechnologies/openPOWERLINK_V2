@@ -284,7 +284,7 @@ extern "C" {
 //void PUBLIC TgtGetNetTime(tEplNetTime * pNetTime_p);
 
 DWORD PUBLIC EplTgtGetTickCountMs(void);
-void PUBLIC EplTgtEnableGlobalInterrupt(BYTE fEnable_p);
+
 
 unsigned long long PUBLIC EplTgtGetTimeStampNs(void);
 

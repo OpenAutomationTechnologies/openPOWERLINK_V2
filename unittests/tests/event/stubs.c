@@ -82,7 +82,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //            P U B L I C   F U N C T I O N S                                 //
 //============================================================================//
 
-void  EplTgtEnableGlobalInterrupt(BYTE fEnable_p)
+void  target_enableGlobalInterrupt(BYTE fEnable_p)
 {
     UNUSED_PARAMETER(fEnable_p);
 }

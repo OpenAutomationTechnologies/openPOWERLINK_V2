@@ -120,7 +120,7 @@ This function enabels/disables global interrupts.
 \ingroup module_target
 */
 //------------------------------------------------------------------------------
-void PUBLIC EplTgtEnableGlobalInterrupt (BYTE fEnable_p)
+void target_enableGlobalInterrupt (BYTE fEnable_p)
 {
 static alt_irq_context  irq_context = 0;
 static int              iLockCount = 0;

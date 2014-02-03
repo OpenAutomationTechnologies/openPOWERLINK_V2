@@ -46,6 +46,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <EplInc.h>
+#include <target.h>
 
 #include "circbuf-arch.h"
 
@@ -228,7 +229,7 @@ The function enters a locked section of the circular buffer.
 void circbuf_lock(tCircBufInstance* pInstance_p)
 {
     UNUSED_PARAMETER(pInstance_p);
-    EplTgtEnableGlobalInterrupt(FALSE);
+    target_enableGlobalInterrupt(FALSE);
 }
 
 //------------------------------------------------------------------------------
@@ -245,7 +246,7 @@ The function leaves a locked section of the circular buffer.
 void circbuf_unlock(tCircBufInstance* pInstance_p)
 {
     UNUSED_PARAMETER(pInstance_p);
-    EplTgtEnableGlobalInterrupt(TRUE);
+    target_enableGlobalInterrupt(TRUE);
 }
 
 //============================================================================//

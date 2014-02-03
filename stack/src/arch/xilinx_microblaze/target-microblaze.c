@@ -125,7 +125,7 @@ This function enables/disables global interrupts.
 \ingroup module_target
 */
 //------------------------------------------------------------------------------
-void PUBLIC EplTgtEnableGlobalInterrupt (UINT8 fEnable_p)
+void target_enableGlobalInterrupt (UINT8 fEnable_p)
 {
     static INT lockCount = 0;
 

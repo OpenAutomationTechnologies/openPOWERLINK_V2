@@ -45,6 +45,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #include <EplInc.h>
 #include <Epl.h>
+#include <target.h>
 #include <user/eventu.h>
 #include <user/eventucal.h>
 #include <user/eventucalintf.h>
@@ -182,11 +183,11 @@ tEplKernel eventucal_postKernelEvent (tEplEvent *pEvent_p)
                    EplGetEventSinkStr(pEvent_p->m_EventSink), pEvent_p->m_EventSink,
                    pEvent_p->m_uiSize);*/
 
-    EplTgtEnableGlobalInterrupt(FALSE);
+    target_enableGlobalInterrupt(FALSE);
 
     ret = eventk_process(pEvent_p);
 
-    EplTgtEnableGlobalInterrupt(TRUE);
+    target_enableGlobalInterrupt(TRUE);
 
     return ret;
 }

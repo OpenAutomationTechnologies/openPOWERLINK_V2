@@ -66,6 +66,7 @@ void       target_msleep(UINT32 milliSeconds_p);
 tEplKernel target_setIpAdrs(char* ifName_p, UINT32 ipAddress_p, UINT32 subnetMask_p, UINT16 mtu_p);
 tEplKernel target_setDefaultGateway(UINT32 defaultGateway_p);
 ULONGLONG  target_getCurrentTimestamp(void);
+void       target_enableGlobalInterrupt(BYTE fEnable_p);
 
 #ifdef __cplusplus
 }
