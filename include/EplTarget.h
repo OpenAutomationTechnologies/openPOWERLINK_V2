@@ -278,22 +278,6 @@ typedef struct {
 extern "C" {
 #endif
 
-// currently no Timer functions are needed by EPL stack
-// so they are not implemented yet
-//void  PUBLIC EplTgtTimerInit(void);
-//void PUBLIC TgtGetNetTime(tEplNetTime * pNetTime_p);
-
-
-
-
-unsigned long long PUBLIC EplTgtGetTimeStampNs(void);
-
-// functions for ethernet driver
-tEplKernel PUBLIC TgtInitEthIsr(void);
-void PUBLIC TgtFreeEthIsr(void);
-void PUBLIC TgtEnableEthInterrupt0(BYTE fEnable_p, unsigned int uiInterruptMask_p);
-void PUBLIC TgtEnableEthInterrupt1(BYTE fEnable_p, unsigned int uiInterruptMask_p);
-
 #ifdef __cplusplus
 }  // extern "C"
 #endif
