@@ -118,7 +118,7 @@
 
 #include "EplDef.h"     // EPL configuration file (default configuration)
 #include "Debug.h"      // debug definitions
-#include "ftraceDebug.h"
+#include "ftracedebug.h"
 
 #include "EplErrDef.h"  // EPL error codes for API functions
 
