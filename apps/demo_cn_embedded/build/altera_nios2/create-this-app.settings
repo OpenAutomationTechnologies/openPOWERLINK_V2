@@ -134,6 +134,6 @@ ${STACKROOT_DIR}/apps/common/src/lcd/lcd.c \
 ${STACKROOT_DIR}/apps/common/src/lcd/lcdl-16207.c \
 ${STACKROOT_DIR}/apps/common/src/gpio/gpio-nios2.c \
 ${STACKROOT_DIR}/apps/demo_cn_embedded/src/app.c \
-${STACKROOT_DIR}/apps/demo_cn_embedded/src/event-cn.c \
+${STACKROOT_DIR}/apps/demo_cn_embedded/src/event.c \
 ${STACKROOT_DIR}/apps/demo_cn_embedded/src/main.c \
 "
