@@ -42,7 +42,7 @@ SET(COMMON_WINDOWS_SOURCES
     )
 
 SET(COMMON_LINUXUSER_SOURCES
-    ${ARCH_SOURCE_DIR}/linux/ftrace-debug.c
+    ${ARCH_SOURCE_DIR}/linux/ftracedebug.c
     ${CONTRIB_SOURCE_DIR}/trace/trace-printf.c
     )
 
@@ -356,7 +356,7 @@ SET(OPLK_HEADERS
     ${OPLK_INCLUDE_DIR}/EplTimer.h
     ${OPLK_INCLUDE_DIR}/EplVersion.h
     ${OPLK_INCLUDE_DIR}/event.h
-    ${OPLK_INCLUDE_DIR}/ftraceDebug.h
+    ${OPLK_INCLUDE_DIR}/ftracedebug.h
     ${OPLK_INCLUDE_DIR}/global.h
     ${OPLK_INCLUDE_DIR}/led.h
     ${OPLK_INCLUDE_DIR}/nmt.h
