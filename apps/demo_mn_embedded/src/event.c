@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   event-mn.c
+\file   event.c
 
 \brief  MN Application event handler
 

@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   event-cn.c
+\file   event.c
 
 \brief  CN Application event handler
 
