@@ -117,7 +117,7 @@
 #include <oplk/global.h>     // global definitions
 
 #include <oplk/EplDef.h>     // EPL configuration file (default configuration)
-#include <oplk/Debug.h>      // debug definitions
+#include <oplk/debug.h>      // debug definitions
 #include <oplk/ftracedebug.h>
 
 #include <oplk/EplErrDef.h>  // EPL error codes for API functions
