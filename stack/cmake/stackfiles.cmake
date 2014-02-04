@@ -432,48 +432,47 @@ SET(STACK_HEADERS
     )
 
 SET(USER_HEADERS
-    ${USER_STACK_INCLUDE_DIR}/cfmu.h
-    ${USER_STACK_INCLUDE_DIR}/ctrlu.h
-    ${USER_STACK_INCLUDE_DIR}/ctrlucal.h
-    ${USER_STACK_INCLUDE_DIR}/dllucal.h
-    ${USER_STACK_INCLUDE_DIR}/errhndu.h
-    ${USER_STACK_INCLUDE_DIR}/eventu.h
-    ${USER_STACK_INCLUDE_DIR}/eventucal.h
-    ${USER_STACK_INCLUDE_DIR}/eventucalintf.h
-    ${USER_STACK_INCLUDE_DIR}/identu.h
-    ${USER_STACK_INCLUDE_DIR}/ledu.h
-    ${USER_STACK_INCLUDE_DIR}/nmtcnu.h
-    ${USER_STACK_INCLUDE_DIR}/nmtmnu.h
-    ${USER_STACK_INCLUDE_DIR}/nmtu.h
-    ${USER_STACK_INCLUDE_DIR}/pdou.h
-    ${USER_STACK_INCLUDE_DIR}/pdoucal.h
-    ${USER_STACK_INCLUDE_DIR}/sdoasnd.h
-    ${USER_STACK_INCLUDE_DIR}/sdocom.h
-    ${USER_STACK_INCLUDE_DIR}/sdoseq.h
-    ${USER_STACK_INCLUDE_DIR}/sdoudp.h
-    ${USER_STACK_INCLUDE_DIR}/statusu.h
-    ${USER_STACK_INCLUDE_DIR}/syncu.h
-    ${USER_STACK_INCLUDE_DIR}/timeru.h
+    ${STACK_INCLUDE_DIR}/user/cfmu.h
+    ${STACK_INCLUDE_DIR}/user/ctrlu.h
+    ${STACK_INCLUDE_DIR}/user/ctrlucal.h
+    ${STACK_INCLUDE_DIR}/user/dllucal.h
+    ${STACK_INCLUDE_DIR}/user/errhndu.h
+    ${STACK_INCLUDE_DIR}/user/eventu.h
+    ${STACK_INCLUDE_DIR}/user/eventucal.h
+    ${STACK_INCLUDE_DIR}/user/eventucalintf.h
+    ${STACK_INCLUDE_DIR}/user/identu.h
+    ${STACK_INCLUDE_DIR}/user/ledu.h
+    ${STACK_INCLUDE_DIR}/user/nmtcnu.h
+    ${STACK_INCLUDE_DIR}/user/nmtmnu.h
+    ${STACK_INCLUDE_DIR}/user/nmtu.h
+    ${STACK_INCLUDE_DIR}/user/pdou.h
+    ${STACK_INCLUDE_DIR}/user/pdoucal.h
+    ${STACK_INCLUDE_DIR}/user/sdoasnd.h
+    ${STACK_INCLUDE_DIR}/user/sdocom.h
+    ${STACK_INCLUDE_DIR}/user/sdoseq.h
+    ${STACK_INCLUDE_DIR}/user/sdoudp.h
+    ${STACK_INCLUDE_DIR}/user/statusu.h
+    ${STACK_INCLUDE_DIR}/user/syncu.h
+    ${STACK_INCLUDE_DIR}/user/timeru.h
     )
 
 SET(KERNEL_HEADERS
-    ${USER_STACK_INCLUDE_DIR}/cfmu.h
-    ${USER_STACK_INCLUDE_DIR}/ctrlk.h
-    ${USER_STACK_INCLUDE_DIR}/ctrlkcal.h
-    ${USER_STACK_INCLUDE_DIR}/dllk.h
-    ${USER_STACK_INCLUDE_DIR}/dllkcal.h
-    ${USER_STACK_INCLUDE_DIR}/dllkfilter.h
-    ${USER_STACK_INCLUDE_DIR}/dllktgt.h
-    ${USER_STACK_INCLUDE_DIR}/hrestimer.h
-    ${USER_STACK_INCLUDE_DIR}/synctimer.h
-    ${USER_STACK_INCLUDE_DIR}/errhndk.h
-    ${USER_STACK_INCLUDE_DIR}/eventk.h
-    ${USER_STACK_INCLUDE_DIR}/eventkcal.h
-    ${USER_STACK_INCLUDE_DIR}/eventkcalintf.h
-    ${USER_STACK_INCLUDE_DIR}/nmtk.h
-    ${USER_STACK_INCLUDE_DIR}/pdok.h
-    ${USER_STACK_INCLUDE_DIR}/pdokcal.h
-    ${USER_STACK_INCLUDE_DIR}/veth.h
+    ${STACK_INCLUDE_DIR}/kernel/ctrlk.h
+    ${STACK_INCLUDE_DIR}/kernel/ctrlkcal.h
+    ${STACK_INCLUDE_DIR}/kernel/dllk.h
+    ${STACK_INCLUDE_DIR}/kernel/dllkcal.h
+    ${STACK_INCLUDE_DIR}/kernel/dllkfilter.h
+    ${STACK_INCLUDE_DIR}/kernel/dllktgt.h
+    ${STACK_INCLUDE_DIR}/kernel/hrestimer.h
+    ${STACK_INCLUDE_DIR}/kernel/synctimer.h
+    ${STACK_INCLUDE_DIR}/kernel/errhndk.h
+    ${STACK_INCLUDE_DIR}/kernel/eventk.h
+    ${STACK_INCLUDE_DIR}/kernel/eventkcal.h
+    ${STACK_INCLUDE_DIR}/kernel/eventkcalintf.h
+    ${STACK_INCLUDE_DIR}/kernel/nmtk.h
+    ${STACK_INCLUDE_DIR}/kernel/pdok.h
+    ${STACK_INCLUDE_DIR}/kernel/pdokcal.h
+    ${STACK_INCLUDE_DIR}/kernel/veth.h
     )
 
 SET(OBJDICT_HEADERS
