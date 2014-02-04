@@ -1,80 +1,111 @@
-/****************************************************************************
+/**
+********************************************************************************
+\file   errordefs.h
 
-  (c) SYSTEC electronic GmbH, D-07973 Greiz, August-Bebel-Str. 29
-      www.systec-electronic.com
+\brief  openPOWERLINK error definitions
 
-  Project:      openPOWERLINK
+Definitions of return values and errors.
+*******************************************************************************/
 
-  Description:  definitions for all EPL-function return codes
+/*------------------------------------------------------------------------------
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2013, SYSTEC electronic GmbH
+All rights reserved.
 
-  License:
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+    * Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above copyright
+      notice, this list of conditions and the following disclaimer in the
+      documentation and/or other materials provided with the distribution.
+    * Neither the name of the copyright holders nor the
+      names of its contributors may be used to endorse or promote products
+      derived from this software without specific prior written permission.
 
-    Redistribution and use in source and binary forms, with or without
-    modification, are permitted provided that the following conditions
-    are met:
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL COPYRIGHT HOLDERS BE LIABLE FOR ANY
+DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+------------------------------------------------------------------------------*/
 
-    1. Redistributions of source code must retain the above copyright
-       notice, this list of conditions and the following disclaimer.
+#ifndef _INC_oplk_errordefs_H_
+#define _INC_oplk_errordefs_H_
 
-    2. Redistributions in binary form must reproduce the above copyright
-       notice, this list of conditions and the following disclaimer in the
-       documentation and/or other materials provided with the distribution.
+//------------------------------------------------------------------------------
+// includes
+//------------------------------------------------------------------------------
 
-    3. Neither the name of SYSTEC electronic GmbH nor the names of its
-       contributors may be used to endorse or promote products derived
-       from this software without prior written permission. For written
-       permission, please contact info@systec-electronic.com.
+//------------------------------------------------------------------------------
+// const defines
+//------------------------------------------------------------------------------
 
-    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-    LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-    FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-    COPYRIGHT HOLDERS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-    INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-    BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-    LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-    CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-    LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-    ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-    POSSIBILITY OF SUCH DAMAGE.
+//------------------------------------------------------------------------------
+// Emergency error codes
+#define EPL_E_NO_ERROR                          0x0000
+// 0xFxxx manufacturer specific error codes
+#define EPL_E_NMT_NO_IDENT_RES                  0xF001
+#define EPL_E_NMT_NO_STATUS_RES                 0xF002
 
-    Severability Clause:
+// 0x816x HW errors
+#define EPL_E_DLL_BAD_PHYS_MODE                 0x8161
+#define EPL_E_DLL_COLLISION                     0x8162
+#define EPL_E_DLL_COLLISION_TH                  0x8163
+#define EPL_E_DLL_CRC_TH                        0x8164
+#define EPL_E_DLL_LOSS_OF_LINK                  0x8165
+#define EPL_E_DLL_MAC_BUFFER                    0x8166
+// 0x82xx Protocol errors
+#define EPL_E_DLL_ADDRESS_CONFLICT              0x8201
+#define EPL_E_DLL_MULTIPLE_MN                   0x8202
+// 0x821x Frame size errors
+#define EPL_E_PDO_SHORT_RX                      0x8210
+#define EPL_E_PDO_MAP_VERS                      0x8211
+#define EPL_E_NMT_ASND_MTU_DIF                  0x8212
+#define EPL_E_NMT_ASND_MTU_LIM                  0x8213
+#define EPL_E_NMT_ASND_TX_LIM                   0x8214
+// 0x823x Timing errors
+#define EPL_E_NMT_CYCLE_LEN                     0x8231
+#define EPL_E_DLL_CYCLE_EXCEED                  0x8232
+#define EPL_E_DLL_CYCLE_EXCEED_TH               0x8233
+#define EPL_E_NMT_IDLE_LIM                      0x8234
+#define EPL_E_DLL_JITTER_TH                     0x8235
+#define EPL_E_DLL_LATE_PRES_TH                  0x8236
+#define EPL_E_NMT_PREQ_CN                       0x8237
+#define EPL_E_NMT_PREQ_LIM                      0x8238
+#define EPL_E_NMT_PRES_CN                       0x8239
+#define EPL_E_NMT_PRES_RX_LIM                   0x823A
+#define EPL_E_NMT_PRES_TX_LIM                   0x823B
+// 0x824x Frame errors
+#define EPL_E_DLL_INVALID_FORMAT                0x8241
+#define EPL_E_DLL_LOSS_PREQ_TH                  0x8242
+#define EPL_E_DLL_LOSS_PRES_TH                  0x8243
+#define EPL_E_DLL_LOSS_SOA_TH                   0x8244
+#define EPL_E_DLL_LOSS_SOC_TH                   0x8245
+// 0x84xx BootUp Errors
+#define EPL_E_NMT_BA1                           0x8410  // other MN in MsNotActive active
+#define EPL_E_NMT_BA1_NO_MN_SUPPORT             0x8411  // MN is not supported
+#define EPL_E_NMT_BPO1                          0x8420  // mandatory CN was not found or failed in BootStep1
+#define EPL_E_NMT_BPO1_GET_IDENT                0x8421  // IdentRes was not received
+#define EPL_E_NMT_BPO1_DEVICE_TYPE              0x8422  // wrong device type
+#define EPL_E_NMT_BPO1_VENDOR_ID                0x8423  // wrong vendor ID
+#define EPL_E_NMT_BPO1_PRODUCT_CODE             0x8424  // wrong product code
+#define EPL_E_NMT_BPO1_REVISION_NO              0x8425  // wrong revision number
+#define EPL_E_NMT_BPO1_SERIAL_NO                0x8426  // wrong serial number
+#define EPL_E_NMT_BPO1_CF_VERIFY                0x8428  // verification of configuration failed
+#define EPL_E_NMT_BPO2                          0x8430  // mandatory CN failed in BootStep2
+#define EPL_E_NMT_BRO                           0x8440  // CheckCommunication failed for mandatory CN
+#define EPL_E_NMT_WRONG_STATE                   0x8480  // mandatory CN has wrong NMT state
 
-        If a provision of this License is or becomes illegal, invalid or
-        unenforceable in any jurisdiction, that shall not affect:
-        1. the validity or enforceability in that jurisdiction of any other
-           provision of this License; or
-        2. the validity or enforceability in other jurisdictions of that or
-           any other provision of this License.
 
-  -------------------------------------------------------------------------
-
-                $RCSfile$
-
-                $Author$
-
-                $Revision$  $Date$
-
-                $State$
-
-                Build Environment:
-                    all
-
-  -------------------------------------------------------------------------
-
-  Revision History:
-
-  2005/12/05 -as:   start of the implementation, version 1.00
-
-****************************************************************************/
-
-#ifndef _EPL_ERRORDEF_H_
-#define _EPL_ERRORDEF_H_
-
-
-//---------------------------------------------------------------------------
-// return codes
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+// typedef
+//------------------------------------------------------------------------------
 
 typedef enum
 {
@@ -134,8 +165,6 @@ typedef enum
     kEplObdInvalidDcf           = 0x003C,       // device configuration file (CDC) is not valid
     kEplObdOutOfMemory          = 0x003D,       // out of memory
     kEplObdNoConfigData         = 0x003E,       // no configuration data present (CDC is empty)
-//    kEplObdIllegalFloat         = 0x003B,       // illegal float variable
-//    kEplObdWrongOdBuilderKey    = 0x003F,       // OD was generated with demo version of tool ODBuilder
 
     // area for NMT module 0x0040 - 0x004F
     kEplNmtUnknownCommand       = 0x0040,       // unknown NMT command
@@ -146,8 +175,7 @@ typedef enum
     kEplNmtSyncReqRejected      = 0x0045,       // SyncReq could not be issued
 
     // area for SDO/UDP module 0x0050 - 0x005F
-    kEplSdoUdpMissCb            = 0x0050,       // missing callback-function pointer during inti of
-                                                // module
+    kEplSdoUdpMissCb            = 0x0050,       // missing callback-function pointer during init of module
     kEplSdoUdpNoSocket          = 0x0051,       // error during init of socket
     kEplSdoUdpSocketError       = 0x0052,       // error during usage of socket
     kEplSdoUdpThreadError       = 0x0053,       // error during start of listen thread
@@ -173,8 +201,7 @@ typedef enum
     kEplSdoComNoFreeHandle      = 0x0071,       // no free handle for connection
     kEplSdoComInvalidServiceType= 0x0072,       // invalid SDO service type specified
     kEplSdoComInvalidHandle     = 0x0073,       // handle invalid
-    kEplSdoComInvalidSendType   = 0x0074,       // the stated to of frame to send is
-                                                // not possible
+    kEplSdoComInvalidSendType   = 0x0074,       // the stated to of frame to send is not possible
     kEplSdoComNotResponsible    = 0x0075,       // internal error: command layer handle is
                                                 // not responsible for this event from sequence layer
     kEplSdoComHandleExists      = 0x0076,       // handle to same node already exists
@@ -202,16 +229,10 @@ typedef enum
     kEplPdoLengthExceeded       = 0x00B1,       // length of PDO mapping exceeds the current payload limit
     kEplPdoGranularityMismatch  = 0x00B2,       // configured PDO granularity is not equal to supported granularity
     kEplPdoInitError            = 0x00B3,       // error during initialisation of PDO module
-//    kEplPdoErrorPdoEncode       = 0x00B4,       // error during encoding a PDO
-//    kEplPdoErrorPdoDecode       = 0x00B5,       // error during decoding a PDO
-//    kEplPdoErrorSend            = 0x00B6,       // error during sending a PDO
     kEplPdoConfWhileEnabled     = 0x00B7,       // PDO configuration cannot be changed while it is enabled
     kEplPdoErrorMapp            = 0x00B8,       // invalid PDO mapping
     kEplPdoVarNotFound          = 0x00B9,       // the referenced object in a PDO mapping does not exist
     kEplPdoVarNotMappable       = 0x00BA,       // the referenced object in a PDO mapping is not mappable
-//    kEplPdoErrorEmcyPdoLen      = 0x00BA,       // the length of a received PDO is unequal to the expected value
-//    kEplPdoWriteConstObject     = 0x00BB,       // constant object can not be written
-                                                // (only TxType, Inhibit-, Event Time for CANopen Kit)
     kEplPdoSizeMismatch         = 0x00BC,       // bit size of object mapping is larger than the object size
     kEplPdoTooManyTxPdos        = 0x00BD,       // there exits more than one TPDO on CN
     kEplPdoInvalidObjIndex      = 0x00BE,       // invalid object index used for PDO mapping or communication parameter
@@ -244,13 +265,6 @@ typedef enum
 
     // area until 0x07FF is reserved
     // area for user application from 0x0800 to 0x7FFF
-
 } tEplKernel;
 
-
-#endif
-//EOF
-
-// Die letzte Zeile muﬂ unbedingt eine leere Zeile sein, weil manche Compiler
-// damit ein Problem haben, wenn das nicht so ist (z.B. GNU oder Borland C++ Builder).
-
+#endif /* _INC_oplk_errordefs_H_ */
