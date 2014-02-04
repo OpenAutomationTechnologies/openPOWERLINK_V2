@@ -51,7 +51,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <kernel/errhndk.h>
 #include <oplk/nmt.h>
 #include <common/edrv.h>
-#include <oplk/Benchmark.h>
+#include <oplk/benchmark.h>
 
 #if EPL_TIMER_USE_HIGHRES != FALSE
 #include <kernel/hrestimer.h>

@@ -64,7 +64,7 @@
 //=========================================================================//
 #include <oplk/EplInc.h>
 #include "kernel/hrestimer.h"
-#include <oplk/Benchmark.h>
+#include <oplk/benchmark.h>
 
 #include <time.h>
 #include <unistd.h>

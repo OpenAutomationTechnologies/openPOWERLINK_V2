@@ -44,7 +44,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #include <oplk/EplInc.h>
 #include <kernel/hrestimer.h>
-#include <oplk/Benchmark.h>
+#include <oplk/benchmark.h>
 
 #include <signal.h>
 #include <semaphore.h>
