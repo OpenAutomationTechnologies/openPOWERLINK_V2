@@ -398,7 +398,7 @@ SET(OPLK_HEADERS
     ${STACK_INCLUDE_DIR}/oplk/EplDef.h
     ${STACK_INCLUDE_DIR}/oplk/EplErrDef.h
     ${STACK_INCLUDE_DIR}/oplk/EplErrStr.h
-    ${STACK_INCLUDE_DIR}/oplk/EplFrame.h
+    ${STACK_INCLUDE_DIR}/oplk/frame.h
     ${STACK_INCLUDE_DIR}/oplk/EplInc.h
     ${STACK_INCLUDE_DIR}/oplk/EplTarget.h
     ${STACK_INCLUDE_DIR}/oplk/EplTimer.h
