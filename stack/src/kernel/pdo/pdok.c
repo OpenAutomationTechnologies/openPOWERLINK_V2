@@ -45,7 +45,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "kernel/eventk.h"
 #include <oplk/obd.h>
 #include <kernel/dllk.h>
-#include <oplk/Benchmark.h>
+#include <oplk/benchmark.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //

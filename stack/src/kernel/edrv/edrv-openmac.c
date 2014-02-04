@@ -49,7 +49,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <omethlib.h>
 #include <common/target.h>
 
-#include <oplk/Benchmark.h>
+#include <oplk/benchmark.h>
 #include <oplk/Debug.h>
 
 //============================================================================//

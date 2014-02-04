@@ -47,7 +47,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <kernel/dllk.h>
 #include <kernel/dllkcal.h>
 #include <kernel/errhndk.h>
-#include <oplk/Benchmark.h>
+#include <oplk/benchmark.h>
 
 #if defined(CONFIG_INCLUDE_PDO)
 #include <kernel/pdok.h>

@@ -49,7 +49,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <target/openmac.h>
 #include <omethlib.h>
 
-#include <oplk/Benchmark.h>
+#include <oplk/benchmark.h>
 #include <oplk/Debug.h>
 
 //============================================================================//

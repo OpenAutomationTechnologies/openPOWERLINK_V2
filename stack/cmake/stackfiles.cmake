@@ -390,7 +390,7 @@ SET(ARCH_LE_SOURCES
 
 SET(OPLK_HEADERS
     ${STACK_INCLUDE_DIR}/oplk/ami.h
-    ${STACK_INCLUDE_DIR}/oplk/Benchmark.h
+    ${STACK_INCLUDE_DIR}/oplk/benchmark.h
     ${STACK_INCLUDE_DIR}/oplk/cfm.h
     ${STACK_INCLUDE_DIR}/oplk/Debug.h
     ${STACK_INCLUDE_DIR}/oplk/dll.h
