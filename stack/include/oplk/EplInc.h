@@ -108,7 +108,7 @@
 
 #include <oplk/global.h>     // global definitions
 
-#include <oplk/EplDef.h>     // EPL configuration file (default configuration)
+#include <oplk/oplkdefs.h>     // EPL configuration file (default configuration)
 #include <oplk/debug.h>      // debug definitions
 #include <oplk/ftracedebug.h>
 
