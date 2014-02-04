@@ -50,7 +50,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <common/target.h>
 
 #include <oplk/benchmark.h>
-#include <oplk/Debug.h>
+#include <oplk/debug.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
