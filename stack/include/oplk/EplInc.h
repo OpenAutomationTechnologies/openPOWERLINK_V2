@@ -111,8 +111,7 @@
 #include <oplk/oplkdefs.h>     // EPL configuration file (default configuration)
 #include <oplk/debug.h>      // debug definitions
 #include <oplk/ftracedebug.h>
-
-#include <oplk/EplErrDef.h>  // EPL error codes for API functions
+#include <oplk/errordefs.h>  // EPL error codes for API functions
 
 //---------------------------------------------------------------------------
 // typedef
