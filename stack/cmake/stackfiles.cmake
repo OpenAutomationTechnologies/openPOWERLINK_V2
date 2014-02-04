@@ -402,7 +402,7 @@ SET(OPLK_HEADERS
     ${STACK_INCLUDE_DIR}/oplk/EplInc.h
     ${STACK_INCLUDE_DIR}/oplk/EplTarget.h
     ${STACK_INCLUDE_DIR}/oplk/EplTimer.h
-    ${STACK_INCLUDE_DIR}/oplk/EplVersion.h
+    ${STACK_INCLUDE_DIR}/oplk/version.h
     ${STACK_INCLUDE_DIR}/oplk/event.h
     ${STACK_INCLUDE_DIR}/oplk/ftracedebug.h
     ${STACK_INCLUDE_DIR}/oplk/global.h

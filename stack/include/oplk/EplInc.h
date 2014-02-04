@@ -166,7 +166,7 @@ typedef union
 #define EPL_OBJ1018_VERSION(ver,rev,rel)    ((((DWORD)(ver))<<16) |(((DWORD)(rev))&0xFFFF))
 #define EPL_STRING_VERSION(ver,rev,rel,bld)     "V" #ver "." #rev "." #rel "-" #bld
 
-#include <oplk/EplVersion.h>
+#include <oplk/version.h>
 
 #include <oplk/featureflags.h>
 
