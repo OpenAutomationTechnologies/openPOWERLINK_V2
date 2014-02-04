@@ -38,7 +38,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define _INC_pdok_H_
 
 #include <common/pdo.h>
-#include <oplk/EplFrame.h>
+#include <oplk/frame.h>
 #include <oplk/dll.h>
 
 //---------------------------------------------------------------------------
