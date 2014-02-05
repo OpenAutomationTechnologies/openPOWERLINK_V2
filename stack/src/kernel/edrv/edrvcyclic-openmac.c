@@ -417,7 +417,7 @@ static tOplkError timerHdlCycleCb(tTimerEventArg* pEventArg_p)
     UINT32      filterAccumulate;
     INT         i;
 
-    if (pEventArg_p->m_TimerHdl != instance_l.timerHdlCycle)
+    if (pEventArg_p->timerHdl != instance_l.timerHdlCycle)
     {   // zombie callback
         // just exit
         goto Exit;

@@ -794,7 +794,7 @@ tOplkError dllk_cbMnTimerCycle(tTimerEventArg* pEventArg_p)
     TGT_DLLK_ENTER_CRITICAL_SECTION();
 
 #if EPL_TIMER_USE_HIGHRES != FALSE
-    if (pEventArg_p->m_TimerHdl != dllkInstance_g.timerHdlCycle)
+    if (pEventArg_p->timerHdl != dllkInstance_g.timerHdlCycle)
     {   // zombie callback - just exit
         goto Exit;
     }
@@ -964,7 +964,7 @@ tOplkError dllk_cbCnTimer(tTimerEventArg* pEventArg_p)
 
     TGT_DLLK_ENTER_CRITICAL_SECTION();
 
-    if (pEventArg_p->m_TimerHdl != dllkInstance_g.timerHdlCycle)
+    if (pEventArg_p->timerHdl != dllkInstance_g.timerHdlCycle)
     {   // zombie callback - just exit
         goto Exit;
     }
