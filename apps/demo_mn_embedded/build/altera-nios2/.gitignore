@@ -1,3 +1,5 @@
+bsp*/
+lib*/
 Makefile
 *.elf
 *orig
