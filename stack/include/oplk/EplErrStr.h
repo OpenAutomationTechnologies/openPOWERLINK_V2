@@ -27,7 +27,7 @@
 
 
 /* openPOWERLINK  ( in alphabetically order) */
-#include "EplErrDef.h"
+#include <oplk/EplErrDef.h>
 
 /*----------------------------------------------------------------------------
  * Macros

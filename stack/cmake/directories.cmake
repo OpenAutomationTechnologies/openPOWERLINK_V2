@@ -38,10 +38,7 @@ SET(EDRV_SOURCE_DIR ${OPLK_BASE_DIR}/stack/src/kernel/edrv)
 SET(CONTRIB_SOURCE_DIR ${OPLK_BASE_DIR}/contrib)
 
 # Include file directories
-SET(OPLK_INCLUDE_DIR ${OPLK_BASE_DIR}/include)
 SET(STACK_INCLUDE_DIR ${OPLK_BASE_DIR}/stack/include)
-SET(USER_STACK_INCLUDE_DIR ${OPLK_BASE_DIR}/stack/include/user)
-SET(KERNEL_STACK_INCLUDE_DIR ${OPLK_BASE_DIR}/stack/include/kernel)
 
 # Other directories
 SET(OBJDICT_DIR ${OPLK_BASE_DIR}/objdicts)

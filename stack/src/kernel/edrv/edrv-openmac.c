@@ -40,8 +40,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <global.h>
-#include <Epl.h>
+#include <oplk/global.h>
+#include <oplk/Epl.h>
 #include <kernel/dllkfilter.h>
 
 #include <common/edrv.h>
@@ -49,8 +49,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <omethlib.h>
 #include <common/target.h>
 
-#include <Benchmark.h>
-#include <Debug.h>
+#include <oplk/Benchmark.h>
+#include <oplk/Debug.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //

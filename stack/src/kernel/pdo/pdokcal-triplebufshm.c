@@ -47,7 +47,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <EplInc.h>
+#include <oplk/EplInc.h>
 #include <common/pdo.h>
 #include <kernel/pdokcal.h>
 

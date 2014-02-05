@@ -72,12 +72,12 @@
 #ifndef _EPL_API_H_
 #define _EPL_API_H_
 
-#include "EplInc.h"
-#include <sdo.h>
-#include "obd.h"
-#include "led.h"
-#include "cfm.h"
-#include "event.h"
+#include <oplk/EplInc.h>
+#include <oplk/sdo.h>
+#include <oplk/obd.h>
+#include <oplk/led.h>
+#include <oplk/cfm.h>
+#include <oplk/event.h>
 
 #include <stddef.h>
 

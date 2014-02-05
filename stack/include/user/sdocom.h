@@ -41,9 +41,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <sdo.h>
-#include <obd.h>
-#include <sdoabortcodes.h>
+#include <oplk/sdo.h>
+#include <oplk/obd.h>
+#include <oplk/sdoabortcodes.h>
 #include <user/sdoseq.h>
 
 //------------------------------------------------------------------------------

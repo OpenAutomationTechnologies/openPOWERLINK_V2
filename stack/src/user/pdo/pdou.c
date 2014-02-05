@@ -40,13 +40,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <Epl.h>
-#include <EplInc.h>
+#include <oplk/Epl.h>
+#include <oplk/EplInc.h>
 #include <user/pdoucal.h>
 #include <user/pdou.h>
 
-#include <sdoabortcodes.h>
-#include <obd.h>
+#include <oplk/sdoabortcodes.h>
+#include <oplk/obd.h>
 #include <common/pdo.h>
 #include <common/target.h>
 

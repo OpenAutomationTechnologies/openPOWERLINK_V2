@@ -43,7 +43,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <stddef.h>
 #include <limits.h>
 
-#include <Epl.h>
+#include <oplk/Epl.h>
 
 #include <user/pdoucal.h>
 #include <user/dllucal.h>
@@ -57,7 +57,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <common/target.h>
 
 #if (CONFIG_OBD_USE_LOAD_CONCISEDCF != FALSE)
-#include "obdcdc.h"
+#include <oplk/obdcdc.h>
 #endif
 
 //============================================================================//

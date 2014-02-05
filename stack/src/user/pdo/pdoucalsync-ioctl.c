@@ -45,12 +45,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <sys/ioctl.h>
 #include <time.h>
 
-#include <EplInc.h>
+#include <oplk/EplInc.h>
 #include <common/pdo.h>
 #include <user/pdoucal.h>
 #include <user/ctrlucal.h>
 
-#include <powerlink-module.h>
+#include <oplk/powerlink-module.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //

@@ -39,7 +39,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _INC_eplcfg_H_
 #define _INC_eplcfg_H_
 
-#include "global.h"
+#include <oplk/global.h>
 
 //==============================================================================
 // generic defines which for whole EPL Stack

@@ -40,11 +40,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <EplInc.h>
+#include <oplk/EplInc.h>
 #include <kernel/hrestimer.h>
 #include <target/openmac.h>
 #include <omethlib.h>
-#include <Benchmark.h>
+#include <oplk/Benchmark.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //

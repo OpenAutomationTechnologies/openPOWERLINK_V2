@@ -50,8 +50,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <global.h>
-#include <EplInc.h>
+#include <oplk/global.h>
+#include <oplk/EplInc.h>
 #include <common/edrv.h>
 
 #include <linux/module.h>

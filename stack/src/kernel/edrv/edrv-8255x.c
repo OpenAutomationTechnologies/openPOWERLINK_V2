@@ -79,8 +79,8 @@ DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <global.h>
-#include <EplInc.h>
+#include <oplk/global.h>
+#include <oplk/EplInc.h>
 #include <common/edrv.h>
 
 #include <linux/module.h>

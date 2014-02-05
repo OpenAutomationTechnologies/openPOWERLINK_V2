@@ -43,8 +43,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <EplInc.h>
-#include <Epl.h>
+#include <oplk/EplInc.h>
+#include <oplk/Epl.h>
 
 #include <user/eventu.h>
 #include <user/eventucal.h>

@@ -114,13 +114,13 @@
 
 #include "EplCfg.h"     // EPL configuration file (configuration from application)
 
-#include "global.h"     // global definitions
+#include <oplk/global.h>     // global definitions
 
-#include "EplDef.h"     // EPL configuration file (default configuration)
-#include "Debug.h"      // debug definitions
-#include "ftracedebug.h"
+#include <oplk/EplDef.h>     // EPL configuration file (default configuration)
+#include <oplk/Debug.h>      // debug definitions
+#include <oplk/ftracedebug.h>
 
-#include "EplErrDef.h"  // EPL error codes for API functions
+#include <oplk/EplErrDef.h>  // EPL error codes for API functions
 
 //---------------------------------------------------------------------------
 // typedef
@@ -153,9 +153,9 @@ typedef union
 } tEplUserArg;
 
 
-#include "EplTarget.h"  // target specific functions and definitions
+#include <oplk/EplTarget.h>  // target specific functions and definitions
 
-#include "ami.h"
+#include <oplk/ami.h>
 
 // -------------------------------------------------------------------------
 // macros
@@ -166,7 +166,7 @@ typedef union
 #define EPL_OBJ1018_VERSION(ver,rev,rel)    ((((DWORD)(ver))<<16) |(((DWORD)(rev))&0xFFFF))
 #define EPL_STRING_VERSION(ver,rev,rel,bld)     "V" #ver "." #rev "." #rel "-" #bld
 
-#include "EplVersion.h"
+#include <oplk/EplVersion.h>
 
 // defines for EPL FeatureFlags
 #define EPL_FEATURE_ISOCHR          0x00000001

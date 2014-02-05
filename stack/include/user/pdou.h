@@ -41,7 +41,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <common/pdo.h>
-#include <nmt.h>
+#include <oplk/nmt.h>
 
 //------------------------------------------------------------------------------
 // const defines

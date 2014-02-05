@@ -40,8 +40,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <global.h>
-#include <Epl.h>
+#include <oplk/global.h>
+#include <oplk/Epl.h>
 
 #include <system.h>
 

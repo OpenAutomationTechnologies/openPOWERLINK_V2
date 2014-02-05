@@ -60,8 +60,7 @@ MESSAGE(STATUS "Configuring ${EXE_NAME}")
 SET(OPLK_ROOT_DIR ${CMAKE_SOURCE_DIR}/../../..)
 SET(DRV_SOURCE_DIR ${CMAKE_SOURCE_DIR})
 SET(CONTRIB_SOURCE_DIR ${OPLK_ROOT_DIR}/contrib)
-SET(OPLK_INCLUDE_DIR ${OPLK_ROOT_DIR}/include)
-SET(STACK_INCLUDE_DIR ${OPLK_ROOT_DIR}/stack/include)
+SET(OPLK_INCLUDE_DIR ${OPLK_ROOT_DIR}/stack/include)
 SET(TOOLS_DIR ${OPLK_ROOT_DIR}/tools)
 
 ###############################################################################
@@ -127,7 +126,6 @@ SET(DRV_SOURCES
 
 INCLUDE_DIRECTORIES(
     ${OPLK_INCLUDE_DIR}
-    ${STACK_INCLUDE_DIR}
     ${CONTRIB_SOURCE_DIR}
     )
 

@@ -48,7 +48,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <signal.h>
 #include <sched.h>
 
-#include <EplInc.h>
+#include <oplk/EplInc.h>
 #include <kernel/ctrlk.h>
 #include <console/console.h>
 #include <common/target.h>

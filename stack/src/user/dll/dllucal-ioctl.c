@@ -42,7 +42,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #include <common/dllcal.h>
 #include <user/ctrlucal.h>
-#include <powerlink-module.h>
+#include <oplk/powerlink-module.h>
 
 #include <sys/ioctl.h>
 

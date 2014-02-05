@@ -38,8 +38,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define _INC_pdok_H_
 
 #include <common/pdo.h>
-#include <EplFrame.h>
-#include <dll.h>
+#include <oplk/EplFrame.h>
+#include <oplk/dll.h>
 
 //---------------------------------------------------------------------------
 // const defines

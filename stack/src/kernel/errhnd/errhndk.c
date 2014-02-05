@@ -42,9 +42,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <nmt.h>
-#include <Benchmark.h>
-#include <obd.h>
+#include <oplk/nmt.h>
+#include <oplk/Benchmark.h>
+#include <oplk/obd.h>
 #include <kernel/eventk.h>
 #include <kernel/dllk.h>
 

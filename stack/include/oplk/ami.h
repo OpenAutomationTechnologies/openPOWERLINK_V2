@@ -1,14 +1,13 @@
 /**
 ********************************************************************************
-\file   cfm.h
+\file   ami.h
 
-\brief  General include file for configuration file manager (CFM)
+\brief  Definitions for the abstract memory interface (ami)
 
-This file contains global definitions for the CFM module.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -35,51 +34,94 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_cfm_H_
-#define _INC_cfm_H_
+#ifndef _INC_ami_H_
+#define _INC_ami_H_
 
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <EplInc.h>
-#include <obd.h>
+
+#include <oplk/EplInc.h>
 
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
 
+// Conversion macros for datatype UINT8 (saves code size)
+#define ami_setUint8Be(pAddr_p, uint8Val_p) {*(UINT8 *)(pAddr_p) = (uint8Val_p);}
+#define ami_setUint8Le(pAddr_p, uint8Val_p) {*(UINT8 *)(pAddr_p) = (uint8Val_p);}
+
+#define ami_getUint8Be(pAddr_p) (*(UINT8 *)(pAddr_p))
+#define ami_getUint8Le(pAddr_p) (*(UINT8 *)(pAddr_p))
+
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
-
-/**
-* \brief Structure for CFM CN progress event
-*
-* This structure contains all information of the CFMs CN progress event.
-*/
-typedef struct
-{
-    UINT                nodeId;                 ///< Node ID of the CN
-    UINT                objectIndex;            ///< Index of object to be written
-    UINT                objectSubIndex;         ///< Subindex of object to be written
-    UINT32              sdoAbortCode;           ///< SDO abort code
-    tEplKernel          error;                  ///< Error which occured
-    UINT32              totalNumberOfBytes;     ///< Total number of bytes to transfer
-    UINT32              bytesDownloaded;        ///< Number of already downloaded bytes
-} tCfmEventCnProgress;
 
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
 
 #ifdef __cplusplus
-extern "C" {
+    extern "C" {
 #endif
 
-tEplKernel  cfmu_cbObdAccess(tObdCbParam MEM* pParam_p);
+// Conversion functions for datatype WORD
+void ami_setUint16Be(void* pAddr_p, UINT16 uint16Val_p);
+void ami_setUint16Le(void* pAddr_p, UINT16 uint16Val_p);
+
+UINT16 ami_getUint16Be(void* pAddr_p);
+UINT16 ami_getUint16Le(void* pAddr_p);
+
+// Conversion functions for datatype DWORD24
+void ami_setUint24Be(void* pAddr_p, UINT32 uint32Val_p);
+void ami_setUint24Le(void* pAddr_p, UINT32 uint32Val_p);
+
+UINT32 ami_getUint24Be(void* pAddr_p);
+UINT32 ami_getUint24Le(void* pAddr_p);
+
+// Conversion functions for datatype DWORD
+void ami_setUint32Be(void* pAddr_p, UINT32 uint32Val_p);
+void ami_setUint32Le(void* pAddr_p, UINT32 uint32Val_p);
+
+UINT32 ami_getUint32Be(void* pAddr_p);
+UINT32 ami_getUint32Le(void* pAddr_p);
+
+// Conversion functions for datatype QWORD40
+void ami_setUint40Be(void* pAddr_p, UINT64 uint64Val_p);
+void ami_setUint40Le(void* pAddr_p, UINT64 uint64Val_p);
+
+UINT64 ami_getUint40Be(void* pAddr_p);
+UINT64 ami_getUint40Le(void* pAddr_p);
+
+// Conversion functions for datatype QWORD48
+void ami_setUint48Be(void* pAddr_p, UINT64 uint64Val_p);
+void ami_setUint48Le(void* pAddr_p, UINT64 uint64Val_p);
+
+UINT64 ami_getUint48Be(void* pAddr_p);
+UINT64 ami_getUint48Le(void* pAddr_p);
+
+// Conversion functions for datatype QWORD56
+void ami_setUint56Be(void* pAddr_p, UINT64 uint64Val_p);
+void ami_setUint56Le(void* pAddr_p, UINT64 uint64Val_p);
+
+UINT64 ami_getUint56Be(void* pAddr_p);
+UINT64 ami_getUint56Le(void* pAddr_p);
+
+// Conversion functions for datatype QWORD
+void ami_setUint64Be(void* pAddr_p, UINT64 uint64Val_p);
+void ami_setUint64Le(void* pAddr_p, UINT64 uint64Val_p);
+
+UINT64 ami_getUint64Be(void* pAddr_p);
+UINT64 ami_getUint64Le(void* pAddr_p);
+
+// Conversion functions for type tTimeOfDay
+void ami_setTimeOfDay(void* pAddr_p, tTimeOfDay* pTimeOfDay_p);
+void ami_getTimeOfDay(void* pAddr_p, tTimeOfDay* pTimeOfDay_p);
 
 #ifdef __cplusplus
-}
+    }
 #endif
 
-#endif /* _INC_cfm_H_ */
+
+#endif /* _INC_ami_H_ */

@@ -40,14 +40,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <global.h>
-#include <Epl.h>
+#include <oplk/global.h>
+#include <oplk/Epl.h>
 
 #include <kernel/synctimer.h>
 #include <target/openmac.h>
 #include <omethlib.h>
 
-#include <Benchmark.h>
+#include <oplk/Benchmark.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //

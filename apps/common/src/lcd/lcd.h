@@ -41,8 +41,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <Epl.h>
-#include <global.h>
+#include <oplk/Epl.h>
+#include <oplk/global.h>
 
 //------------------------------------------------------------------------------
 // const defines
